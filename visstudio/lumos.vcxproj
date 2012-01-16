@@ -1,0 +1,221 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{3546E8AC-901F-4611-8C20-0BF16609F212}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>lumos</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions> _CRT_SECURE_NO_WARNINGS;UFO_WIN32_SDL;WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>sdlmain.lib;sdl.lib; opengl32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\engine\camera.cpp" />
+    <ClCompile Include="..\engine\engine.cpp" />
+    <ClCompile Include="..\engine\fixedgeom.cpp" />
+    <ClCompile Include="..\engine\gpustatemanager.cpp" />
+    <ClCompile Include="..\engine\loosequadtree.cpp" />
+    <ClCompile Include="..\engine\map.cpp" />
+    <ClCompile Include="..\engine\model.cpp" />
+    <ClCompile Include="..\engine\particle.cpp" />
+    <ClCompile Include="..\engine\particleeffect.cpp" />
+    <ClCompile Include="..\engine\renderqueue.cpp" />
+    <ClCompile Include="..\engine\screenport.cpp" />
+    <ClCompile Include="..\engine\serialize.cpp" />
+    <ClCompile Include="..\engine\settings.cpp" />
+    <ClCompile Include="..\engine\surface.cpp" />
+    <ClCompile Include="..\engine\text.cpp" />
+    <ClCompile Include="..\engine\texture.cpp" />
+    <ClCompile Include="..\engine\tga.cpp" />
+    <ClCompile Include="..\engine\ufoutil.cpp" />
+    <ClCompile Include="..\engine\uirendering.cpp" />
+    <ClCompile Include="..\game\lumosgame.cpp" />
+    <ClCompile Include="..\gamui\gamui.cpp" />
+    <ClCompile Include="..\grinliz\glcontainer.cpp" />
+    <ClCompile Include="..\grinliz\gldebug.cpp" />
+    <ClCompile Include="..\grinliz\gldynamic.cpp" />
+    <ClCompile Include="..\grinliz\glfixed.cpp" />
+    <ClCompile Include="..\grinliz\glgeometry.cpp" />
+    <ClCompile Include="..\grinliz\glmatrix.cpp" />
+    <ClCompile Include="..\grinliz\glmemorypool.cpp" />
+    <ClCompile Include="..\grinliz\glperformance.cpp" />
+    <ClCompile Include="..\grinliz\glprime.cpp" />
+    <ClCompile Include="..\grinliz\glrandom.cpp" />
+    <ClCompile Include="..\grinliz\glstringutil.cpp" />
+    <ClCompile Include="..\grinliz\glutil.cpp" />
+    <ClCompile Include="..\grinliz\glvector.cpp" />
+    <ClCompile Include="..\micropather\micropather.cpp" />
+    <ClCompile Include="..\shared\gamedbreader.cpp" />
+    <ClCompile Include="..\shared\gamedbwriter.cpp" />
+    <ClCompile Include="..\shared\glmap.cpp" />
+    <ClCompile Include="..\tinyxml\tinystr.cpp" />
+    <ClCompile Include="..\tinyxml\tinyxml.cpp" />
+    <ClCompile Include="..\tinyxml\tinyxmlerror.cpp" />
+    <ClCompile Include="..\tinyxml\tinyxmlparser.cpp" />
+    <ClCompile Include="..\win32\audio.cpp" />
+    <ClCompile Include="..\win32\framebuffer.cpp" />
+    <ClCompile Include="..\win32\glew.c" />
+    <ClCompile Include="..\win32\main.cpp" />
+    <ClCompile Include="..\xegame\cgame.cpp" />
+    <ClCompile Include="..\xegame\game.cpp" />
+    <ClCompile Include="..\xegame\scene.cpp" />
+    <ClCompile Include="..\xegame\ufosound.cpp" />
+    <ClCompile Include="..\zlib\adler32.c" />
+    <ClCompile Include="..\zlib\compress.c" />
+    <ClCompile Include="..\zlib\crc32.c" />
+    <ClCompile Include="..\zlib\deflate.c" />
+    <ClCompile Include="..\zlib\gzio.c" />
+    <ClCompile Include="..\zlib\infback.c" />
+    <ClCompile Include="..\zlib\inffast.c" />
+    <ClCompile Include="..\zlib\inflate.c" />
+    <ClCompile Include="..\zlib\inftrees.c" />
+    <ClCompile Include="..\zlib\trees.c" />
+    <ClCompile Include="..\zlib\uncompr.c" />
+    <ClCompile Include="..\zlib\zutil.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\engine\camera.h" />
+    <ClInclude Include="..\engine\engine.h" />
+    <ClInclude Include="..\engine\enginelimits.h" />
+    <ClInclude Include="..\engine\fixedgeom.h" />
+    <ClInclude Include="..\engine\gpustatemanager.h" />
+    <ClInclude Include="..\engine\loosequadtree.h" />
+    <ClInclude Include="..\engine\map.h" />
+    <ClInclude Include="..\engine\model.h" />
+    <ClInclude Include="..\engine\particle.h" />
+    <ClInclude Include="..\engine\particleeffect.h" />
+    <ClInclude Include="..\engine\platformgl.h" />
+    <ClInclude Include="..\engine\renderqueue.h" />
+    <ClInclude Include="..\engine\screenport.h" />
+    <ClInclude Include="..\engine\serialize.h" />
+    <ClInclude Include="..\engine\settings.h" />
+    <ClInclude Include="..\engine\surface.h" />
+    <ClInclude Include="..\engine\text.h" />
+    <ClInclude Include="..\engine\texture.h" />
+    <ClInclude Include="..\engine\tga.h" />
+    <ClInclude Include="..\engine\ufoutil.h" />
+    <ClInclude Include="..\engine\uirendering.h" />
+    <ClInclude Include="..\engine\vertex.h" />
+    <ClInclude Include="..\game\lumosgame.h" />
+    <ClInclude Include="..\gamui\gamui.h" />
+    <ClInclude Include="..\grinliz\glbitarray.h" />
+    <ClInclude Include="..\grinliz\glcolor.h" />
+    <ClInclude Include="..\grinliz\glcontainer.h" />
+    <ClInclude Include="..\grinliz\gldebug.h" />
+    <ClInclude Include="..\grinliz\gldynamic.h" />
+    <ClInclude Include="..\grinliz\glfixed.h" />
+    <ClInclude Include="..\grinliz\glgeometry.h" />
+    <ClInclude Include="..\grinliz\glinnercircle.h" />
+    <ClInclude Include="..\grinliz\glmath.h" />
+    <ClInclude Include="..\grinliz\glmatrix.h" />
+    <ClInclude Include="..\grinliz\glmemorypool.h" />
+    <ClInclude Include="..\grinliz\glperformance.h" />
+    <ClInclude Include="..\grinliz\glprime.h" />
+    <ClInclude Include="..\grinliz\glpublisher.h" />
+    <ClInclude Include="..\grinliz\glrandom.h" />
+    <ClInclude Include="..\grinliz\glrectangle.h" />
+    <ClInclude Include="..\grinliz\glstringutil.h" />
+    <ClInclude Include="..\grinliz\gltypes.h" />
+    <ClInclude Include="..\grinliz\glutil.h" />
+    <ClInclude Include="..\grinliz\glvector.h" />
+    <ClInclude Include="..\micropather\micropather.h" />
+    <ClInclude Include="..\shared\gamedb.h" />
+    <ClInclude Include="..\shared\gamedbreader.h" />
+    <ClInclude Include="..\shared\gamedbwriter.h" />
+    <ClInclude Include="..\shared\glmap.h" />
+    <ClInclude Include="..\tinyxml\tinystr.h" />
+    <ClInclude Include="..\tinyxml\tinyxml.h" />
+    <ClInclude Include="..\win32\audio.h" />
+    <ClInclude Include="..\win32\framebuffer.h" />
+    <ClInclude Include="..\win32\glew.h" />
+    <ClInclude Include="..\win32\wglew.h" />
+    <ClInclude Include="..\xegame\cgame.h" />
+    <ClInclude Include="..\xegame\game.h" />
+    <ClInclude Include="..\xegame\scene.h" />
+    <ClInclude Include="..\xegame\ufosound.h" />
+    <ClInclude Include="..\zlib\crc32.h" />
+    <ClInclude Include="..\zlib\deflate.h" />
+    <ClInclude Include="..\zlib\inffast.h" />
+    <ClInclude Include="..\zlib\inffixed.h" />
+    <ClInclude Include="..\zlib\inflate.h" />
+    <ClInclude Include="..\zlib\inftrees.h" />
+    <ClInclude Include="..\zlib\trees.h" />
+    <ClInclude Include="..\zlib\zconf.h" />
+    <ClInclude Include="..\zlib\zconf.in.h" />
+    <ClInclude Include="..\zlib\zlib.h" />
+    <ClInclude Include="..\zlib\zutil.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\engine\sources.mk" />
+    <None Include="..\grinliz\sources.mk" />
+    <None Include="..\xegame\sources.mk" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

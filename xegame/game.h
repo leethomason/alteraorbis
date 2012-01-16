@@ -1,0 +1,209 @@
+/*
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+#ifndef UFOATTACK_GAME_INCLUDED
+#define UFOATTACK_GAME_INCLUDED
+
+#include "../grinliz/gldebug.h"
+#include "../grinliz/gltypes.h"
+#include "../grinliz/glperformance.h"
+
+#include "../engine/surface.h"
+#include "../engine/texture.h"
+#include "../engine/model.h"
+#include "../engine/uirendering.h"
+#include "../engine/ufoutil.h"
+#include "../engine/screenport.h"
+
+#include "../tinyxml/tinyxml.h"
+#include "../shared/gamedbreader.h"
+#include "../gamui/gamui.h"
+
+#include "cgame.h"
+
+#include <limits.h>
+
+class ParticleSystem;
+class Scene;
+class SceneData;
+class ISceneResult;
+class ItemDef;
+class TiXmlDocument;
+class Stats;
+class Unit;
+class Research;
+
+enum SavePathMode {
+	SAVEPATH_READ,
+	SAVEPATH_WRITE
+};
+
+
+/*
+*/
+
+class Game : public ITextureCreator 
+{
+public:
+	Game( int width, int height, int rotation, const char* savepath );
+	virtual ~Game();
+
+	void DeviceLoss();
+	void Resize( int width, int height, int rotation );
+	void DoTick( U32 msec );
+
+	void Tap( int action, int x, int y );
+	void Zoom( int style, float distance );
+	void Rotate( float degreesFromStart );
+	void CancelInput();
+
+	// 0 is always the title screen.
+	// query for the sub-scene id
+	virtual int LoadSceneID() = 0;
+	virtual Scene* CreateScene( int id, SceneData* data ) = 0;
+	
+	// debugging / testing / mapmaker
+	void MouseMove( int x, int y );
+	void HandleHotKeyMask( int mask );
+
+	void RotateSelection( int delta );
+	void DeleteAtSelection();
+	void DeltaCurrentMapItem( int d );
+
+	void PushScene( int sceneID, SceneData* data );
+	void PopScene( int result = INT_MAX );
+	void PopAllAndLoad( int slot );
+
+	enum { MAX_SCENES = 1000 };
+	bool IsScenePushed() const		{ return sceneQueued.sceneID != MAX_SCENES; }
+
+	U32 CurrentTime() const	{ return currentTime; }
+	U32 DeltaTime() const	{ return currentTime-previousTime; }
+
+	void SuppressText( bool suppress )	{ suppressText = suppress; }
+	bool IsTextSuppressed() const		{ return suppressText; }
+
+	void SetDebugLevel( int level )		{ debugLevel = (level%4); }
+	int GetDebugLevel() const			{ return debugLevel; }
+
+	FILE* GameSavePath( SavePathMode mode, int slot ) const;
+	bool HasSaveFile( int slot ) const;
+	void DeleteSaveFile( int slot );
+	void SavePathTimeStamp(int slot, grinliz::GLString* stamp );
+	int LoadSlot() const				{ return loadSlot; }
+
+	void Load( const TiXmlDocument& doc );
+	void Save( int slot, bool saveGeo, bool saveTac );
+
+	bool PopSound( int* database, int* offset, int* size );
+
+	const Research* GetResearch();
+	const gamedb::Reader* GetDatabase()	{ return database0; }
+
+	enum {
+		ATOM_TEXT, ATOM_TEXT_D,
+		ATOM_GREEN_BUTTON_UP, ATOM_GREEN_BUTTON_UP_D, ATOM_GREEN_BUTTON_DOWN, ATOM_GREEN_BUTTON_DOWN_D,
+		ATOM_BLUE_BUTTON_UP, ATOM_BLUE_BUTTON_UP_D, ATOM_BLUE_BUTTON_DOWN, ATOM_BLUE_BUTTON_DOWN_D,
+		ATOM_RED_BUTTON_UP, ATOM_RED_BUTTON_UP_D, ATOM_RED_BUTTON_DOWN, ATOM_RED_BUTTON_DOWN_D,
+		ATOM_BLUE_TAB_BUTTON_UP, ATOM_BLUE_TAB_BUTTON_UP_D, ATOM_BLUE_TAB_BUTTON_DOWN, ATOM_BLUE_TAB_BUTTON_DOWN_D,
+
+		ATOM_COUNT
+	};
+	const gamui::RenderAtom& GetRenderAtom( int id );
+	enum {
+		GREEN_BUTTON,
+		BLUE_BUTTON,
+		BLUE_TAB_BUTTON,
+		RED_BUTTON,
+		LOOK_COUNT
+	};
+	const gamui::ButtonLook& GetButtonLook( int id );
+
+	// For creating some required textures:
+	virtual void CreateTexture( Texture* t ) = 0;
+
+	struct Palette
+	{
+		const char* name;
+		int dx;
+		int dy;
+		CArray< grinliz::Color4U8, 128 > colors;
+	};
+	const Palette* GetPalette( const char* name ) const;
+	grinliz::Color4U8 MainPaletteColor( int x, int y );
+
+private:
+	// Color palettes
+	CDynArray< Palette > palettes;
+	const Palette* mainPalette;
+
+	Screenport screenport;
+	Surface surface;	// general purpose memory buffer for handling images
+
+	void PushPopScene();
+
+	bool scenePopQueued;
+	int loadSlot;
+
+	void Init();
+	void LoadTextures()						{}
+	void LoadModels()						{}
+	void LoadModel( const char* name )		{}
+	void LoadItemResources()				{}
+	void LoadAtoms()						{}
+	void LoadPalettes()						{}
+
+	int currentFrame;
+	U32 markFrameTime;
+	U32 frameCountsSinceMark;
+	float framesPerSecond;
+	int debugLevel;
+	bool suppressText;
+
+	ModelLoader* modelLoader;
+	gamedb::Reader* database0;		// the basic, complete database
+
+	struct SceneNode {
+		Scene*			scene;
+		int				sceneID;
+		SceneData*		data;
+		int				result;
+
+		SceneNode() : scene( 0 ), sceneID( MAX_SCENES ), data( 0 ), result( INT_MIN )	{}
+
+		void Free();
+		void SendResult();
+	};
+	void CreateSceneLower( const SceneNode& in, SceneNode* node );
+	SceneNode sceneQueued;
+	CStack<SceneNode> sceneStack;
+
+	U32 currentTime;
+	U32 previousTime;
+	bool isDragging;
+
+	int rotTestStart;
+	int rotTestCount;
+	grinliz::GLString savePath;
+	CDynArray< char > resourceBuf;
+
+	gamui::RenderAtom renderAtoms[ATOM_COUNT];
+	gamui::ButtonLook buttonLooks[LOOK_COUNT];
+};
+
+
+
+
+#endif
