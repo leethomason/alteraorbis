@@ -153,6 +153,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\engine\sources.mk" />
+    <ClCompile Include="..\scenes\titlescene.cpp">
+      <FileType>Document</FileType>
+    </ClCompile>
     <None Include="..\xegame\sources.mk" />
   </ItemGroup>
   <ItemGroup>

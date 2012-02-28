@@ -23,11 +23,13 @@
 #include "../engine/particle.h"
 #include "../engine/gpustatemanager.h"
 #include "../engine/renderqueue.h"
+#include "../engine/shadermanager.h"
 
 #include "../grinliz/glmatrix.h"
 #include "../grinliz/glutil.h"
 #include "../grinliz/glperformance.h"
 #include "../grinliz/glstringutil.h"
+
 #include "../tinyxml/tinyxml.h"
 #include "../version.h"
 
@@ -120,12 +122,12 @@ Game::~Game()
 	sceneStack.Pop();
 
 	UFOText::Destroy();
-	//SettingsManager::Destroy();
 	SoundManager::Destroy();
 	ParticleSystem::Destroy();
 	ModelResourceManager::Destroy();
 	ImageManager::Destroy();
 	TextureManager::Destroy();
+	delete ShaderManager::Instance();
 	delete database0;
 }
 
@@ -603,6 +605,7 @@ void Game::DeviceLoss()
 {
 	TextureManager::Instance()->DeviceLoss();
 	ModelResourceManager::Instance()->DeviceLoss();
+	ShaderManager::Instance()->DeviceLoss();
 	GPUShader::ResetState();
 }
 

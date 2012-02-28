@@ -70,6 +70,7 @@ public:
 
 	virtual void SceneResult( int sceneID, int result )			{}
 	virtual void ChildActivated( int childID, Scene* childScene, SceneData* data )		{}
+	Game* GetGame() { return game; }
 
 	// Rendering
 	enum {
@@ -79,6 +80,7 @@ public:
 
 	virtual int RenderPass( grinliz::Rectangle2I* clip3D, grinliz::Rectangle2I* clip2D ) = 0;
 
+	//// ------- public interface  below this line needs eval ---- //
 	void RenderGamui2D()	{ gamui2D.Render(); }
 	void RenderGamui3D()	{ gamui3D.Render(); }
 
@@ -90,8 +92,6 @@ public:
 	// Put in debugging output into the 3D stream, or other
 	// scene specific 3D elements
 	virtual void Draw3D()										{}
-
-	Game* GetGame() { return game; }
 
 protected:
 
