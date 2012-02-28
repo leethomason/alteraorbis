@@ -22,6 +22,7 @@ public:
 
 private:
 	gamui::TextLabel label;
+	gamui::Image background;
 };
 
 #endif // TITLESCENE_INCLUDED

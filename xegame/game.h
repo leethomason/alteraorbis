@@ -107,6 +107,7 @@ public:
 	bool PopSound( int* database, int* offset, int* size );
 
 	const gamedb::Reader* GetDatabase()	{ return database0; }
+	const Screenport& GetScreenport() const { return screenport; }
 
 	enum {
 		ATOM_TEXT, ATOM_TEXT_D,

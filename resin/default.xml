@@ -1,6 +1,7 @@
 <resource>
   
   <!-- Icon and UI -->
+  <texture filename="title.png" />
   <texture filename="icons.png" dither="false"/>
   <texture filename="iconDeco.png" dither="false" />
 
