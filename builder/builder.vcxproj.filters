@@ -1,0 +1,76 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Source Files\shared">
+      <UniqueIdentifier>{5ccbbf7a-d5f5-4bdf-975f-acf0fe7e0e74}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\importers">
+      <UniqueIdentifier>{8c851356-eff0-4430-81a0-2da7e4bc0f51}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="builder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dither.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modelbuilder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\shared\gamedbreader.cpp">
+      <Filter>Source Files\shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\shared\gamedbwriter.cpp">
+      <Filter>Source Files\shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\shared\glmap.cpp">
+      <Filter>Source Files\shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\importers\ac3d.c">
+      <Filter>Source Files\importers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\importers\import.cpp">
+      <Filter>Source Files\importers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\importers\off.cpp">
+      <Filter>Source Files\importers</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="builder.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dither.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="modelbuilder.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\shared\gamedb.h">
+      <Filter>Source Files\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\shared\gamedbreader.h">
+      <Filter>Source Files\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\shared\gamedbwriter.h">
+      <Filter>Source Files\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\shared\glmap.h">
+      <Filter>Source Files\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\importers\ac3d.h">
+      <Filter>Source Files\importers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\importers\import.h">
+      <Filter>Source Files\importers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\importers\off.h">
+      <Filter>Source Files\importers</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
