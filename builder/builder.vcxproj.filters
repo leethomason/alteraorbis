@@ -73,4 +73,9 @@
       <Filter>Source Files\importers</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\resin\default.xml">
+      <Filter>Source Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>

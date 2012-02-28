@@ -42,8 +42,11 @@ using namespace gamui;
 
 extern long memNewCount;
 
+/* Layout size:
+   640x480. 8 buttons high, each button: 60 pixels.
+*/
 Game::Game( int width, int height, int rotation, const char* path ) :
-	screenport( width, height, rotation ),
+	screenport( width, height, rotation, 480 ),
 	markFrameTime( 0 ),
 	frameCountsSinceMark( 0 ),
 	framesPerSecond( 0 ),

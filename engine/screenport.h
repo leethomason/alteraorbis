@@ -51,8 +51,7 @@ struct Frustum
 class Screenport
 {
 public:
-	Screenport( int screenWidth, int screenHeight, int rotation ); 
-	//Screenport( const Screenport& other );
+	Screenport( int width, int height, int rotation, int virtualHeight ); 
 
 	void Resize( int w, int h, int r );
 	float UIAspectRatio()		{ return UIHeight() / UIWidth(); }
@@ -111,6 +110,7 @@ private:
 	int rotation;		
 	float screenWidth; 
 	float screenHeight;		// if rotation==0, 320
+	float virtualHeight;	// used to be 320. Used for UI layout.
 
 	float physicalWidth;
 	float physicalHeight;

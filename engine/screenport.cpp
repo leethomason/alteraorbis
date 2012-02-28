@@ -24,8 +24,9 @@
 using namespace grinliz;
 
 
-Screenport::Screenport( int w, int h, int r )
+Screenport::Screenport( int w, int h, int r, int virtualHeight )
 {
+	this->virtualHeight = (float)virtualHeight;
 	Resize( w, h, r );
 	uiMode = false;
 	clipInUI2D = Rectangle2F( 0, 0, UIWidth(), UIHeight() );
@@ -53,11 +54,11 @@ void Screenport::Resize( int w, int h, int r )
 	// Try #3.
 
 	if ( (rotation&1) == 0 ) {
-		screenHeight = 320.0f;
+		screenHeight = virtualHeight;
 		screenWidth = screenHeight * physicalWidth / physicalHeight;
 	}
 	else {
-		screenWidth  = 320.0f;
+		screenWidth  = virtualHeight;
 		screenHeight = screenWidth * physicalHeight / physicalWidth;
 	}
 
