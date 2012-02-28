@@ -12,6 +12,8 @@ TitleScene::TitleScene( LumosGame* game ) : Scene( game )
 	label.Init( &gamui2D );
 	label.SetText( "Hello Lumos" );
 
+//	RenderAtom batom = game->CreateRenderAtom( "title" );
+
 	TextureManager* tm = TextureManager::Instance();
 	RenderAtom batom( (const void*)UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, 
 					  tm->GetTexture( "title" ),
