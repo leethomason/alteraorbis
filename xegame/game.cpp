@@ -50,8 +50,6 @@ Game::Game( int width, int height, int rotation, const char* path ) :
 	previousTime( 0 ),
 	isDragging( false )
 {
-	//GLRELASSERT( 0 );
-
 	savePath = path;
 	char c = savePath[savePath.size()-1];
 	if ( c != '\\' && c != '/' ) {	
@@ -63,9 +61,6 @@ Game::Game( int width, int height, int rotation, const char* path ) :
 	}	
 	
 	Init();
-
-	PushScene( 0, 0 );
-	PushPopScene();
 }
 
 
@@ -294,6 +289,17 @@ void Game::CreateSceneLower( const SceneNode& in, SceneNode* node )
 }
 
 
+void Game::LoadAtoms()
+{
+	TextureManager* tm = TextureManager::Instance();
+
+	renderAtoms[ATOM_TEXT].Init(   (const void*)UIRenderer::RENDERSTATE_UI_TEXT, 
+		                           (const void*)tm->GetTexture( "font" ), 0, 0, 1, 1 );
+	renderAtoms[ATOM_TEXT_D].Init( (const void*)UIRenderer::RENDERSTATE_UI_TEXT_DISABLED, 
+		                           (const void*)tm->GetTexture( "font" ), 0, 0, 1, 1 );
+}	
+
+
 const gamui::RenderAtom& Game::GetRenderAtom( int id )
 {
 	GLASSERT( id >= 0 && id < ATOM_COUNT );
@@ -302,11 +308,13 @@ const gamui::RenderAtom& Game::GetRenderAtom( int id )
 }
 
 
+/*
 const gamui::ButtonLook& Game::GetButtonLook( int id )
 {
 	GLASSERT( id >= 0 && id < LOOK_COUNT );
 	return buttonLooks[id];
 }
+*/
 
 
 void Game::Load( const TiXmlDocument& doc )
@@ -444,6 +452,8 @@ void Game::DoTick( U32 _currentTime )
 		scene->DoTick( currentTime, deltaTime );
 
 		Rectangle2I clip2D, clip3D;
+		clip2D.SetInvalid();
+		clip3D.SetInvalid();
 		int renderPass = scene->RenderPass( &clip3D, &clip2D );
 		GLASSERT( renderPass );
 	

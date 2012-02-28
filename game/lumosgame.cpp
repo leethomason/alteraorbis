@@ -1,12 +1,17 @@
 #include "lumosgame.h"
 
+#include "../scenes/titlescene.h"
+
 using namespace grinliz;
 using namespace gamui;
 
 
 
-LumosGame::LumosGame(  int width, int height, int rotation, const char* savepath ) : Game( width, height, rotation, savepath )
+LumosGame::LumosGame(  int width, int height, int rotation, const char* savepath ) 
+	: Game( width, height, rotation, savepath )
 {
+	PushScene( SCENE_TITLE, 0 );
+	PushPopScene();
 }
 
 
@@ -16,8 +21,18 @@ LumosGame::~LumosGame()
 
 Scene* LumosGame::CreateScene( int id, SceneData* data )
 {
-	GLASSERT( 0 );
-	return 0;
+	Scene* scene = 0;
+
+	switch ( id ) {
+	case SCENE_TITLE:
+		scene = new TitleScene( this );
+		break;
+
+	default:
+		GLASSERT( 0 );
+		break;
+	}
+	return scene;
 }
 
 

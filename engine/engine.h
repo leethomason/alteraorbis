@@ -22,7 +22,6 @@
 #include "../grinliz/glrectangle.h"
 #include "../grinliz/glmatrix.h"
 #include "../grinliz/glbitarray.h"
-#include "../grinliz/glcolor.h"
 
 #include "map.h"
 #include "camera.h"
@@ -106,6 +105,7 @@ public:
 	void SetZoom( float zoom );
 
 	const Screenport& GetScreenport() { return *screenport; }
+	Screenport* GetScreenportMutable() { return screenport; }
 	void RestrictCamera();
 
 	static bool mapMakerMode;

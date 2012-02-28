@@ -192,8 +192,10 @@ bool Reader::Init( int id, const char* filename, int _offset )
 {
 	databaseID = id;
 	fp = fopen( filename, "rb" );
-	if ( !fp )
+	if ( !fp ) {
+		GLASSERT( 0 );
 		return false;
+	}
 
 	offset = _offset;
 	fseek( fp, 0, SEEK_END );

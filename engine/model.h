@@ -47,8 +47,7 @@ struct ModelAtom
 
 	void Bind( GPUShader* shader ) const;
 	void BindPlanarShadow( GPUShader* shader ) const;	// I gave up trying to make this general.
-	void LowerBind( GPUShader* shader, const GPUShader::Stream& stream ) const;
-	//void AddIndices( CDynArray<U16>* index ) const;
+	void LowerBind( GPUShader* shader, const GPUStream& stream ) const;
 
 	// A note on the memory model: the index and vertices are stored
 	// in continuous memory to cut down on allocation overhead. But

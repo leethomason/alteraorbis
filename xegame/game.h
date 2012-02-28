@@ -92,9 +92,6 @@ public:
 	U32 CurrentTime() const	{ return currentTime; }
 	U32 DeltaTime() const	{ return currentTime-previousTime; }
 
-	void SuppressText( bool suppress )	{ suppressText = suppress; }
-	bool IsTextSuppressed() const		{ return suppressText; }
-
 	void SetDebugLevel( int level )		{ debugLevel = (level%4); }
 	int GetDebugLevel() const			{ return debugLevel; }
 
@@ -109,20 +106,19 @@ public:
 
 	bool PopSound( int* database, int* offset, int* size );
 
-	const Research* GetResearch();
 	const gamedb::Reader* GetDatabase()	{ return database0; }
 
 	enum {
 		ATOM_TEXT, ATOM_TEXT_D,
-		ATOM_GREEN_BUTTON_UP, ATOM_GREEN_BUTTON_UP_D, ATOM_GREEN_BUTTON_DOWN, ATOM_GREEN_BUTTON_DOWN_D,
-		ATOM_BLUE_BUTTON_UP, ATOM_BLUE_BUTTON_UP_D, ATOM_BLUE_BUTTON_DOWN, ATOM_BLUE_BUTTON_DOWN_D,
-		ATOM_RED_BUTTON_UP, ATOM_RED_BUTTON_UP_D, ATOM_RED_BUTTON_DOWN, ATOM_RED_BUTTON_DOWN_D,
-		ATOM_BLUE_TAB_BUTTON_UP, ATOM_BLUE_TAB_BUTTON_UP_D, ATOM_BLUE_TAB_BUTTON_DOWN, ATOM_BLUE_TAB_BUTTON_DOWN_D,
+	//	ATOM_GREEN_BUTTON_UP, ATOM_GREEN_BUTTON_UP_D, ATOM_GREEN_BUTTON_DOWN, ATOM_GREEN_BUTTON_DOWN_D,
+	//	ATOM_BLUE_BUTTON_UP, ATOM_BLUE_BUTTON_UP_D, ATOM_BLUE_BUTTON_DOWN, ATOM_BLUE_BUTTON_DOWN_D,
+	//	ATOM_RED_BUTTON_UP, ATOM_RED_BUTTON_UP_D, ATOM_RED_BUTTON_DOWN, ATOM_RED_BUTTON_DOWN_D,
+	//	ATOM_BLUE_TAB_BUTTON_UP, ATOM_BLUE_TAB_BUTTON_UP_D, ATOM_BLUE_TAB_BUTTON_DOWN, ATOM_BLUE_TAB_BUTTON_DOWN_D,
 
 		ATOM_COUNT
 	};
 	const gamui::RenderAtom& GetRenderAtom( int id );
-	enum {
+/*	enum {
 		GREEN_BUTTON,
 		BLUE_BUTTON,
 		BLUE_TAB_BUTTON,
@@ -130,7 +126,7 @@ public:
 		LOOK_COUNT
 	};
 	const gamui::ButtonLook& GetButtonLook( int id );
-
+*/
 	// For creating some required textures:
 	virtual void CreateTexture( Texture* t ) = 0;
 
@@ -144,6 +140,9 @@ public:
 	const Palette* GetPalette( const char* name ) const;
 	grinliz::Color4U8 MainPaletteColor( int x, int y );
 
+protected:
+	void PushPopScene();
+
 private:
 	// Color palettes
 	CDynArray< Palette > palettes;
@@ -152,7 +151,6 @@ private:
 	Screenport screenport;
 	Surface surface;	// general purpose memory buffer for handling images
 
-	void PushPopScene();
 
 	bool scenePopQueued;
 	int loadSlot;
@@ -162,7 +160,7 @@ private:
 	void LoadModels()						{}
 	void LoadModel( const char* name )		{}
 	void LoadItemResources()				{}
-	void LoadAtoms()						{}
+	void LoadAtoms();
 	void LoadPalettes()						{}
 
 	int currentFrame;
@@ -200,7 +198,7 @@ private:
 	CDynArray< char > resourceBuf;
 
 	gamui::RenderAtom renderAtoms[ATOM_COUNT];
-	gamui::ButtonLook buttonLooks[LOOK_COUNT];
+	//gamui::ButtonLook buttonLooks[LOOK_COUNT];
 };
 
 

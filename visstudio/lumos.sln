@@ -2,6 +2,16 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual C++ Express 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lumos", "lumos.vcxproj", "{3546E8AC-901F-4611-8C20-0BF16609F212}"
+	ProjectSection(ProjectDependencies) = postProject
+		{28433181-007B-4BF5-AECC-CC52F97E69A1} = {28433181-007B-4BF5-AECC-CC52F97E69A1}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "builder", "..\builder\builder.vcxproj", "{D4967C2E-E183-4379-91ED-911DBF72DDF9}"
+	ProjectSection(ProjectDependencies) = postProject
+		{28433181-007B-4BF5-AECC-CC52F97E69A1} = {28433181-007B-4BF5-AECC-CC52F97E69A1}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "winlib", "..\winlib\winlib.vcxproj", "{28433181-007B-4BF5-AECC-CC52F97E69A1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,6 +23,14 @@ Global
 		{3546E8AC-901F-4611-8C20-0BF16609F212}.Debug|Win32.Build.0 = Debug|Win32
 		{3546E8AC-901F-4611-8C20-0BF16609F212}.Release|Win32.ActiveCfg = Release|Win32
 		{3546E8AC-901F-4611-8C20-0BF16609F212}.Release|Win32.Build.0 = Release|Win32
+		{D4967C2E-E183-4379-91ED-911DBF72DDF9}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D4967C2E-E183-4379-91ED-911DBF72DDF9}.Debug|Win32.Build.0 = Debug|Win32
+		{D4967C2E-E183-4379-91ED-911DBF72DDF9}.Release|Win32.ActiveCfg = Release|Win32
+		{D4967C2E-E183-4379-91ED-911DBF72DDF9}.Release|Win32.Build.0 = Release|Win32
+		{28433181-007B-4BF5-AECC-CC52F97E69A1}.Debug|Win32.ActiveCfg = Debug|Win32
+		{28433181-007B-4BF5-AECC-CC52F97E69A1}.Debug|Win32.Build.0 = Debug|Win32
+		{28433181-007B-4BF5-AECC-CC52F97E69A1}.Release|Win32.ActiveCfg = Release|Win32
+		{28433181-007B-4BF5-AECC-CC52F97E69A1}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

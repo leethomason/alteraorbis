@@ -11,29 +11,23 @@
     <Filter Include="Source Files\gamui">
       <UniqueIdentifier>{324634ed-241a-4f10-9440-fc2ffb081853}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\grinliz">
-      <UniqueIdentifier>{bf0bd899-4646-4164-983c-f0490413ba70}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\micropather">
       <UniqueIdentifier>{4f208592-73d6-48ea-997d-05b072ee6d8d}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\shared">
       <UniqueIdentifier>{1148b9be-c8b8-4172-a37e-dbbc9d316802}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\tinyxml">
-      <UniqueIdentifier>{fc730187-7c0b-4d0e-b0e1-4a3530615557}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\win32">
       <UniqueIdentifier>{25d1e444-beb5-41f7-bd0e-a53c85c59213}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\zlib">
-      <UniqueIdentifier>{696bce8f-b426-48b2-b47f-967ea9d80c95}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\xegame">
       <UniqueIdentifier>{42eb0f34-2990-45ef-9215-7ef6456a9169}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\game">
       <UniqueIdentifier>{8567be50-d4cd-4cdc-b6c3-cab9c3757a11}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\scenes">
+      <UniqueIdentifier>{9c76746e-04f0-4a23-b0d7-3bf308958b3d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -94,45 +88,6 @@
     <ClCompile Include="..\engine\uirendering.cpp">
       <Filter>Source Files\engine</Filter>
     </ClCompile>
-    <ClCompile Include="..\grinliz\glcontainer.cpp">
-      <Filter>Source Files\grinliz</Filter>
-    </ClCompile>
-    <ClCompile Include="..\grinliz\gldebug.cpp">
-      <Filter>Source Files\grinliz</Filter>
-    </ClCompile>
-    <ClCompile Include="..\grinliz\gldynamic.cpp">
-      <Filter>Source Files\grinliz</Filter>
-    </ClCompile>
-    <ClCompile Include="..\grinliz\glfixed.cpp">
-      <Filter>Source Files\grinliz</Filter>
-    </ClCompile>
-    <ClCompile Include="..\grinliz\glgeometry.cpp">
-      <Filter>Source Files\grinliz</Filter>
-    </ClCompile>
-    <ClCompile Include="..\grinliz\glmatrix.cpp">
-      <Filter>Source Files\grinliz</Filter>
-    </ClCompile>
-    <ClCompile Include="..\grinliz\glmemorypool.cpp">
-      <Filter>Source Files\grinliz</Filter>
-    </ClCompile>
-    <ClCompile Include="..\grinliz\glperformance.cpp">
-      <Filter>Source Files\grinliz</Filter>
-    </ClCompile>
-    <ClCompile Include="..\grinliz\glprime.cpp">
-      <Filter>Source Files\grinliz</Filter>
-    </ClCompile>
-    <ClCompile Include="..\grinliz\glrandom.cpp">
-      <Filter>Source Files\grinliz</Filter>
-    </ClCompile>
-    <ClCompile Include="..\grinliz\glstringutil.cpp">
-      <Filter>Source Files\grinliz</Filter>
-    </ClCompile>
-    <ClCompile Include="..\grinliz\glutil.cpp">
-      <Filter>Source Files\grinliz</Filter>
-    </ClCompile>
-    <ClCompile Include="..\grinliz\glvector.cpp">
-      <Filter>Source Files\grinliz</Filter>
-    </ClCompile>
     <ClCompile Include="..\xegame\cgame.cpp">
       <Filter>Source Files\xegame</Filter>
     </ClCompile>
@@ -160,18 +115,6 @@
     <ClCompile Include="..\shared\glmap.cpp">
       <Filter>Source Files\shared</Filter>
     </ClCompile>
-    <ClCompile Include="..\tinyxml\tinystr.cpp">
-      <Filter>Source Files\tinyxml</Filter>
-    </ClCompile>
-    <ClCompile Include="..\tinyxml\tinyxml.cpp">
-      <Filter>Source Files\tinyxml</Filter>
-    </ClCompile>
-    <ClCompile Include="..\tinyxml\tinyxmlerror.cpp">
-      <Filter>Source Files\tinyxml</Filter>
-    </ClCompile>
-    <ClCompile Include="..\tinyxml\tinyxmlparser.cpp">
-      <Filter>Source Files\tinyxml</Filter>
-    </ClCompile>
     <ClCompile Include="..\win32\audio.cpp">
       <Filter>Source Files\win32</Filter>
     </ClCompile>
@@ -184,44 +127,11 @@
     <ClCompile Include="..\win32\main.cpp">
       <Filter>Source Files\win32</Filter>
     </ClCompile>
-    <ClCompile Include="..\zlib\adler32.c">
-      <Filter>Source Files\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\zlib\compress.c">
-      <Filter>Source Files\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\zlib\crc32.c">
-      <Filter>Source Files\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\zlib\deflate.c">
-      <Filter>Source Files\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\zlib\gzio.c">
-      <Filter>Source Files\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\zlib\infback.c">
-      <Filter>Source Files\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\zlib\inffast.c">
-      <Filter>Source Files\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\zlib\inflate.c">
-      <Filter>Source Files\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\zlib\inftrees.c">
-      <Filter>Source Files\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\zlib\trees.c">
-      <Filter>Source Files\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\zlib\uncompr.c">
-      <Filter>Source Files\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\zlib\zutil.c">
-      <Filter>Source Files\zlib</Filter>
-    </ClCompile>
     <ClCompile Include="..\micropather\micropather.cpp">
       <Filter>Source Files\micropather</Filter>
+    </ClCompile>
+    <ClCompile Include="..\engine\shadermanager.cpp">
+      <Filter>Source Files\engine</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -291,66 +201,6 @@
     <ClInclude Include="..\engine\vertex.h">
       <Filter>Source Files\engine</Filter>
     </ClInclude>
-    <ClInclude Include="..\grinliz\glbitarray.h">
-      <Filter>Source Files\grinliz</Filter>
-    </ClInclude>
-    <ClInclude Include="..\grinliz\glcolor.h">
-      <Filter>Source Files\grinliz</Filter>
-    </ClInclude>
-    <ClInclude Include="..\grinliz\glcontainer.h">
-      <Filter>Source Files\grinliz</Filter>
-    </ClInclude>
-    <ClInclude Include="..\grinliz\gldebug.h">
-      <Filter>Source Files\grinliz</Filter>
-    </ClInclude>
-    <ClInclude Include="..\grinliz\gldynamic.h">
-      <Filter>Source Files\grinliz</Filter>
-    </ClInclude>
-    <ClInclude Include="..\grinliz\glfixed.h">
-      <Filter>Source Files\grinliz</Filter>
-    </ClInclude>
-    <ClInclude Include="..\grinliz\glgeometry.h">
-      <Filter>Source Files\grinliz</Filter>
-    </ClInclude>
-    <ClInclude Include="..\grinliz\glinnercircle.h">
-      <Filter>Source Files\grinliz</Filter>
-    </ClInclude>
-    <ClInclude Include="..\grinliz\glmath.h">
-      <Filter>Source Files\grinliz</Filter>
-    </ClInclude>
-    <ClInclude Include="..\grinliz\glmatrix.h">
-      <Filter>Source Files\grinliz</Filter>
-    </ClInclude>
-    <ClInclude Include="..\grinliz\glmemorypool.h">
-      <Filter>Source Files\grinliz</Filter>
-    </ClInclude>
-    <ClInclude Include="..\grinliz\glperformance.h">
-      <Filter>Source Files\grinliz</Filter>
-    </ClInclude>
-    <ClInclude Include="..\grinliz\glprime.h">
-      <Filter>Source Files\grinliz</Filter>
-    </ClInclude>
-    <ClInclude Include="..\grinliz\glpublisher.h">
-      <Filter>Source Files\grinliz</Filter>
-    </ClInclude>
-    <ClInclude Include="..\grinliz\glrandom.h">
-      <Filter>Source Files\grinliz</Filter>
-    </ClInclude>
-    <ClInclude Include="..\grinliz\glrectangle.h">
-      <Filter>Source Files\grinliz</Filter>
-    </ClInclude>
-    <ClInclude Include="..\grinliz\glstringutil.h">
-      <Filter>Source Files\grinliz</Filter>
-    </ClInclude>
-    <ClInclude Include="..\grinliz\gltypes.h">
-      <Filter>Source Files\grinliz</Filter>
-    </ClInclude>
-    <ClInclude Include="..\grinliz\glutil.h">
-      <Filter>Source Files\grinliz</Filter>
-    </ClInclude>
-    <ClInclude Include="..\grinliz\glvector.h">
-      <Filter>Source Files\grinliz</Filter>
-    </ClInclude>
     <ClInclude Include="..\xegame\cgame.h">
       <Filter>Source Files\xegame</Filter>
     </ClInclude>
@@ -381,12 +231,6 @@
     <ClInclude Include="..\shared\glmap.h">
       <Filter>Source Files\shared</Filter>
     </ClInclude>
-    <ClInclude Include="..\tinyxml\tinystr.h">
-      <Filter>Source Files\tinyxml</Filter>
-    </ClInclude>
-    <ClInclude Include="..\tinyxml\tinyxml.h">
-      <Filter>Source Files\tinyxml</Filter>
-    </ClInclude>
     <ClInclude Include="..\win32\audio.h">
       <Filter>Source Files\win32</Filter>
     </ClInclude>
@@ -399,49 +243,19 @@
     <ClInclude Include="..\win32\wglew.h">
       <Filter>Source Files\win32</Filter>
     </ClInclude>
-    <ClInclude Include="..\zlib\crc32.h">
-      <Filter>Source Files\zlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\zlib\deflate.h">
-      <Filter>Source Files\zlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\zlib\inffast.h">
-      <Filter>Source Files\zlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\zlib\inffixed.h">
-      <Filter>Source Files\zlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\zlib\inflate.h">
-      <Filter>Source Files\zlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\zlib\inftrees.h">
-      <Filter>Source Files\zlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\zlib\trees.h">
-      <Filter>Source Files\zlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\zlib\zconf.h">
-      <Filter>Source Files\zlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\zlib\zconf.in.h">
-      <Filter>Source Files\zlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\zlib\zlib.h">
-      <Filter>Source Files\zlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\zlib\zutil.h">
-      <Filter>Source Files\zlib</Filter>
-    </ClInclude>
     <ClInclude Include="..\micropather\micropather.h">
       <Filter>Source Files\micropather</Filter>
+    </ClInclude>
+    <ClInclude Include="..\engine\shadermanager.h">
+      <Filter>Source Files\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\scenes\titlescene.h">
+      <Filter>Source Files\scenes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\engine\sources.mk">
       <Filter>Source Files\engine</Filter>
-    </None>
-    <None Include="..\grinliz\sources.mk">
-      <Filter>Source Files\grinliz</Filter>
     </None>
     <None Include="..\xegame\sources.mk">
       <Filter>Source Files\xegame</Filter>

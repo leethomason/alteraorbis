@@ -5,7 +5,13 @@
 #include "../gamui/gamui.h"	// for auto setting up gamui stream
 #include "../grinliz/glperformance.h"
 
+#if XENOENGINE_OPENGL == 2
+#include "shadermanager.h"
+#endif
+
 using namespace grinliz;
+
+int GPUShader::matrixDepth[3];
 
 /*static*/ GPUVertexBuffer GPUVertexBuffer::Create( const Vertex* vertex, int nVertex )
 {
@@ -126,26 +132,29 @@ void MatrixStack::Multiply( const grinliz::Matrix4& m )
 /*static*/ uint32_t GPUShader::uid = 0;
 /*static*/ GPUShader::MatrixType GPUShader::matrixMode = MODELVIEW_MATRIX;
 /*static*/ MatrixStack GPUShader::textureStack[2];
+#if XENOENGINE_OPENGL == 2
+/*static*/ MatrixStack GPUShader::mvStack;
+/*static*/ MatrixStack GPUShader::projStack;
+#endif
 /*static*/ bool GPUShader::textureXFormInUse[2] = { false, false };
-
 /*static*/ int GPUShader::vboSupport = 0;
-/*static*/ //GPUShader::TexParam GPUShader::texParam = { 0, 0, 0, 0 };
 
-//static 
-bool GPUShader::SupportsVBOs()
+/*static*/ bool GPUShader::SupportsVBOs()
 {
+#ifdef EL_USE_VBO
 	if ( vboSupport == 0 ) {
 		const char* extensions = (const char*)glGetString( GL_EXTENSIONS );
 		const char* vbo = strstr( extensions, "ARB_vertex_buffer_object" );
 		vboSupport = (vbo) ? 1 : -1;
 	}
 	return (vboSupport > 0);
-	//return false;
+#else
+	return false;
+#endif
 }
 
 
-//static 
-void GPUShader::ResetState()
+/*static */ void GPUShader::ResetState()
 {
 	GPUShader state;
 	current = state;
@@ -165,8 +174,8 @@ void GPUShader::ResetState()
 	// Client state
 	glDisableClientState( GL_VERTEX_ARRAY );
 	glDisableClientState( GL_NORMAL_ARRAY );
-	glDisableClientState( GL_TEXTURE_COORD_ARRAY );
 	glDisableClientState( GL_COLOR_ARRAY );
+	glDisableClientState( GL_TEXTURE_COORD_ARRAY );
 
 	// Blend/Alpha
 	glDisable( GL_BLEND );
@@ -199,13 +208,16 @@ void GPUShader::ResetState()
 
 void GPUShader::SetTextureXForm( int unit )
 {
-	if ( !textureStack[unit].Empty() || textureXFormInUse[unit] ) 
+	if ( textureStack[unit].NumMatrix()>1 || textureXFormInUse[unit] ) 
 	{
+#if XENOENGINE_OPENGL == 1
 		glMatrixMode( GL_TEXTURE );
 		glLoadMatrixf( textureStack[unit].Top().x );
 		glMatrixMode( matrixMode == MODELVIEW_MATRIX ? GL_MODELVIEW : GL_PROJECTION );
-		textureXFormInUse[unit] = !textureStack[unit].Empty();
+#endif
+		textureXFormInUse[unit] = textureStack[unit].NumMatrix()>1;
 	}
+	CHECK_GL_ERROR;
 }
 
 
@@ -216,6 +228,7 @@ void GPUShader::SetState( const GPUShader& ns )
 	CHECK_GL_ERROR;
 	GLASSERT( ns.stream.stride > 0 );
 
+#if XENOENGINE_OPENGL == 1
 	// Texture1
 	if ( ns.stream.HasTexture1() || current.stream.HasTexture1() ) {
 
@@ -329,14 +342,111 @@ void GPUShader::SetState( const GPUShader& ns )
 	}
 	CHECK_GL_ERROR;
 
-	// Blend
-	if ( ns.blend && !current.blend ) {
-		glEnable( GL_BLEND );
+	// Lighting
+	if ( ns.HasLighting(0,0,0) && !current.HasLighting(0,0,0) ) {
+		glEnable( GL_LIGHTING );
+		glEnable ( GL_COLOR_MATERIAL );
+		// The call below isn't supported on all the mobile chipsets:
+		//glColorMaterial ( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE ) 
+		//GLOUTPUT(( "Lighting on.\n" ));
 	}
-	else if ( !ns.blend && current.blend ) {
-		glDisable( GL_BLEND );
+	else if ( !ns.HasLighting(0,0,0) && current.HasLighting(0,0,0) ) {
+		glDisable( GL_LIGHTING );
+		//GLOUTPUT(( "Lighting off.\n" ));
 	}
 
+	// color
+	if ( ns.color != current.color ) {
+		glColor4f( ns.color.r, ns.color.g, ns.color.b, ns.color.a );
+	}
+
+#elif XENOENGINE_OPENGL == 2
+	ShaderManager* shadman =	 ShaderManager::Instance();
+
+	int flags = 0;
+	flags |= ( ns.HasTexture0() ) ? ShaderManager::TEXTURE0 : 0;
+	flags |= (textureStack[0].NumMatrix()>1 || textureXFormInUse[0]) ? ShaderManager::TEXTURE0_TRANSFORM : 0;
+	flags |= (ns.HasTexture0() && (ns.texture0->Format() == Texture::ALPHA )) ? ShaderManager::TEXTURE0_ALPHA_ONLY : 0;
+	flags |= (ns.stream.nTexture0 == 3 ) ? ShaderManager::TEXTURE0_3COMP : 0;
+
+	flags |= ( ns.HasTexture1() ) ? ShaderManager::TEXTURE1 : 0;
+	flags |= (textureStack[1].NumMatrix()>1 || textureXFormInUse[1]) ? ShaderManager::TEXTURE1_TRANSFORM : 0;
+	flags |= (ns.HasTexture1() && (ns.texture1->Format() == Texture::ALPHA )) ? ShaderManager::TEXTURE1_ALPHA_ONLY : 0;
+	flags |= (ns.stream.nTexture1 == 3 ) ? ShaderManager::TEXTURE1_3COMP : 0;
+
+	flags |= ns.stream.HasColor() ? ShaderManager::COLORS : 0;
+	flags |= ( ns.color.r != 1.f || ns.color.g != 1.f || ns.color.b != 1.f || ns.color.a != 1.f ) ? ShaderManager::COLOR_MULTIPLIER : 0;
+	flags |= ns.HasLighting( 0, 0, 0 ) ? ShaderManager::LIGHTING_DIFFUSE : 0;
+
+	shadman->ActivateShader( flags );
+	shadman->ClearStream();
+	Matrix4 mvp;
+	const Matrix4& mv = ns.TopMatrix( GPUShader::MODELVIEW_MATRIX );
+	MultMatrix4( ns.TopMatrix( GPUShader::PROJECTION_MATRIX ), mv, &mvp );
+
+	// NOTE: the normal matrix can be used because the game doesn't support scaling.
+	shadman->SetUniform( ShaderManager::U_MVP_MAT, mvp );
+
+	// Texture1
+	glActiveTexture( GL_TEXTURE1 );
+
+	if (  ns.stream.HasTexture1() ) {
+		glBindTexture( GL_TEXTURE_2D, ns.texture1->GLID() );
+		shadman->SetTexture( 1, ns.texture1 );
+		shadman->SetStreamData( ShaderManager::A_TEXTURE1, ns.stream.nTexture1, GL_FLOAT, ns.stream.stride, PTR( ns.streamPtr, ns.stream.texture1Offset ) );
+		if ( flags & ShaderManager::TEXTURE1_TRANSFORM ) {
+			shadman->SetUniform( ShaderManager::U_TEXTURE1_MAT, textureStack[1].Top() );
+		}
+	}
+	CHECK_GL_ERROR;
+
+	// Texture0
+	glActiveTexture( GL_TEXTURE0 );
+
+	if (  ns.stream.HasTexture0() ) {
+		glBindTexture( GL_TEXTURE_2D, ns.texture0->GLID() );
+		shadman->SetTexture( 0, ns.texture0 );
+		shadman->SetStreamData( ShaderManager::A_TEXTURE0, ns.stream.nTexture0, GL_FLOAT, ns.stream.stride, PTR( ns.streamPtr, ns.stream.texture0Offset ) );
+		if ( flags & ShaderManager::TEXTURE0_TRANSFORM ) {
+			shadman->SetUniform( ShaderManager::U_TEXTURE0_MAT, textureStack[0].Top() );
+		}
+	}
+	CHECK_GL_ERROR;
+
+	// vertex
+	if ( ns.stream.HasPos() ) {
+		shadman->SetStreamData( ShaderManager::A_POS, ns.stream.nPos, GL_FLOAT, ns.stream.stride, PTR( ns.streamPtr, ns.stream.posOffset ) );	 
+	}
+
+	// color
+	if ( ns.stream.HasColor() ) {
+		GLASSERT( ns.stream.nColor == 4 );
+		shadman->SetStreamData( ShaderManager::A_COLOR, 4, GL_FLOAT, ns.stream.stride, PTR( ns.streamPtr, ns.stream.colorOffset ) );	 
+	}
+
+	// lighting 
+	if ( flags & ShaderManager::LIGHTING_DIFFUSE ) {
+		Vector4F dirWC, d, a;
+		ns.HasLighting( &dirWC, &a, &d );
+
+		Vector4F dirEye = GPUShader::ViewMatrix() * dirWC;
+		GLASSERT( Equal( dirEye.Length(), 1.f, 0.01f ));
+		Vector3F dirEye3 = { dirEye.x, dirEye.y, dirEye.z };
+
+		shadman->SetUniform( ShaderManager::U_NORMAL_MAT, mv );
+		shadman->SetUniform( ShaderManager::U_LIGHT_DIR, dirEye3 );
+		shadman->SetUniform( ShaderManager::U_AMBIENT, a );
+		shadman->SetUniform( ShaderManager::U_DIFFUSE, d );
+		shadman->SetStreamData( ShaderManager::A_NORMAL, 3, GL_FLOAT, ns.stream.stride, PTR( ns.streamPtr, ns.stream.normalOffset ) );	 
+	}
+
+	// color multiplier
+	if ( flags & ShaderManager::COLOR_MULTIPLIER ) {
+		shadman->SetUniform( ShaderManager::U_COLOR_MULT, ns.color );
+	}
+#endif
+
+/*
 	// Alpha Test
 	if ( ns.alphaTest && !current.alphaTest ) {
 		glEnable( GL_ALPHA_TEST );
@@ -344,18 +454,14 @@ void GPUShader::SetState( const GPUShader& ns )
 	else if ( !ns.alphaTest && current.alphaTest ) {
 		glDisable( GL_ALPHA_TEST );
 	}
+*/
 
-	// Lighting
-	if ( ns.lighting && !current.lighting ) {
-		glEnable( GL_LIGHTING );
-		glEnable ( GL_COLOR_MATERIAL );
-		// The call below isn't supported on all the mobile chipsets:
-		//glColorMaterial ( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE ) 
-		//GLOUTPUT(( "Lighting on.\n" ));
+	// Blend
+	if ( ns.blend && !current.blend ) {
+		glEnable( GL_BLEND );
 	}
-	else if ( !ns.lighting && current.lighting ) {
-		glDisable( GL_LIGHTING );
-		//GLOUTPUT(( "Lighting off.\n" ));
+	else if ( !ns.blend && current.blend ) {
+		glDisable( GL_BLEND );
 	}
 
 	// Depth Write
@@ -374,15 +480,10 @@ void GPUShader::SetState( const GPUShader& ns )
 		glDisable( GL_DEPTH_TEST );
 	}
 
-	// color
-	if ( ns.color != current.color ) {
-		glColor4f( ns.color.r, ns.color.g, ns.color.b, ns.color.a );
-	}
-
 	current = ns;
 	CHECK_GL_ERROR;
 
-#if defined( USING_GL ) && defined( DEBUG )
+#if (XENOENGINE_OPENGL == 1 ) && defined( USING_GL ) && defined( DEBUG )
 #	define ASSERT_SAME( x, y ) if ( x ) { GLASSERT( y ); } else { GLASSERT( !(y) ); }
 
 	void* ptr = 0;
@@ -431,7 +532,7 @@ void GPUShader::SetState( const GPUShader& ns )
 	GLboolean lightingIsEnabled = glIsEnabled( GL_LIGHTING );
 	ASSERT_SAME( current.blend, blendIsEnabled );
 	ASSERT_SAME( current.alphaTest, alphaTestIsEnabled );
-	ASSERT_SAME( current.lighting, lightingIsEnabled );
+	ASSERT_SAME( current.HasLighting(0,0,0), lightingIsEnabled );
 
 	GLboolean param;
 	glGetBooleanv( GL_DEPTH_WRITEMASK, &param );
@@ -494,15 +595,17 @@ void GPUShader::Clear()
 	}
 	Matrix4 view2D = r*t;
 
-	glMatrixMode(GL_PROJECTION);
+#if XENOENGINE_OPENGL == 1
+	SwitchMatrixMode( PROJECTION_MATRIX );
 	glLoadIdentity();				// projection
+	glOrthofX( 0, screenWidth, screenHeight, 0, -100, 100 );	// go with helping the driver.
+#else
+	Matrix4 ortho;
+	ortho.SetOrtho( 0, (float)screenWidth, (float)screenHeight, 0, -100.f, 100.f );
+	SetMatrix( PROJECTION_MATRIX, ortho );
+#endif
 
-	// Set the ortho matrix, help the driver
-	glOrthofX( 0, screenWidth, screenHeight, 0, -100, 100 );
-	
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();				// model
-	glMultMatrixf( view2D.x );
+	SetMatrix( MODELVIEW_MATRIX, view2D );
 	CHECK_GL_ERROR;
 }
 
@@ -513,12 +616,18 @@ void GPUShader::Clear()
 													 int rotation)
 {
 	// Give the driver hints:
+#if XENOENGINE_OPENGL == 1
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glFrustumfX( left, right, bottom, top, near, far );
 	glRotatef( (float)(-rotation), 0, 0, 1 );
-	
 	glMatrixMode(GL_MODELVIEW);	
+#else
+	GLASSERT( rotation == 0 );
+	Matrix4 perspective;
+	perspective.SetFrustum( left, right, bottom, top, near, far );
+	SetMatrix( PROJECTION_MATRIX, perspective );
+#endif
 	CHECK_GL_ERROR;
 }
 
@@ -527,7 +636,12 @@ void GPUShader::Clear()
 {
 	glMatrixMode(GL_MODELVIEW);
 	// In normalized coordinates.
+#if XENOENGINE_OPENGL == 1
 	glLoadMatrixf( camera.x );
+#elif XENOENGINE_OPENGL == 2
+	GLASSERT( mvStack.NumMatrix() == 1 );
+	mvStack.Set( camera );
+#endif
 	CHECK_GL_ERROR;
 }
 
@@ -564,24 +678,19 @@ void GPUShader::Draw()
 
 	if ( indexPtr ) {
 	
-#ifdef EL_USE_VBO
 		if ( vertexBuffer ) {
 			glBindBufferX( GL_ARRAY_BUFFER, vertexBuffer );
 		}
-#endif
 		SetState( *this );
 
 		GLASSERT( !indexBuffer );
 		glDrawElements( GL_TRIANGLES, nIndex, GL_UNSIGNED_SHORT, indexPtr );
 
-#ifdef EL_USE_VBO
 		if ( vertexBuffer ) {
 			glBindBufferX( GL_ARRAY_BUFFER, 0 );
 		}
-#endif
 	}
 	else {
-#ifdef EL_USE_VBO
 		GLASSERT( vertexBuffer );
 		GLASSERT( indexBuffer );
 		GLASSERT( stream.stride == sizeof(Vertex) );	// Just a current limitation that only Vertex structs go in a VBO. Could be fixed.
@@ -594,10 +703,7 @@ void GPUShader::Draw()
 		glBindBufferX( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
 		SetState( *this );
 
-#if defined( _MSC_VER )
-		//GLASSERT( glIsBuffer( vertexBuffer ) );
-		//GLASSERT( glIsBuffer( indexBuffer ) );
-		
+#if defined( _MSC_VER ) && (XENOENGINE_OPENGL == 1)
 		GLASSERT( glIsEnabled( GL_VERTEX_ARRAY ) );
 		GLASSERT( !glIsEnabled( GL_COLOR_ARRAY ) );
 		GLASSERT( !glIsEnabled( GL_INDEX_ARRAY ) );
@@ -607,27 +713,9 @@ void GPUShader::Draw()
 
 		glBindBufferX( GL_ARRAY_BUFFER, 0 );
 		glBindBufferX( GL_ELEMENT_ARRAY_BUFFER, 0 );
-#else	
-		GLASSERT( 0 );
-#endif
 	}
 	CHECK_GL_ERROR;
 }
-
-/*
-void GPUShader::Draw( int index, const int* elements ) 
-{
-	CHECK_GL_ERROR;
-	SetState( *this );
-
-	GLASSERT( index % 3 == 0 );
-	trianglesDrawn += index / 3;
-	++drawCalls;
-
-	glDrawElements( GL_TRIANGLES, index, GL_UNSIGNED_INT, elements );
-	CHECK_GL_ERROR;
-}
-*/
 
 
 void GPUShader::Debug_DrawQuad( const grinliz::Vector3F p0, const grinliz::Vector3F p1 )
@@ -640,7 +728,7 @@ void GPUShader::Debug_DrawQuad( const grinliz::Vector3F p0, const grinliz::Vecto
 		{ p0.x, p1.y, p1.z },
 	};
 	static const U16 index[6] = { 0, 2, 1, 0, 3, 2 };
-	GPUShader::Stream stream;
+	GPUStream stream;
 	stream.stride = sizeof(grinliz::Vector3F);
 	stream.nPos = 3;
 	stream.posOffset = 0;
@@ -654,7 +742,7 @@ void GPUShader::Debug_DrawQuad( const grinliz::Vector3F p0, const grinliz::Vecto
 
 void GPUShader::SwitchMatrixMode( MatrixType type )
 {
-#if defined( USING_GL ) && defined( DEBUG )
+#if defined( USING_GL ) && defined( DEBUG ) && (XENOENGINE_OPENGL == 1 )
 	{
 		int testMode = 0;
 		glGetIntegerv( GL_MATRIX_MODE, &testMode );
@@ -667,11 +755,9 @@ void GPUShader::SwitchMatrixMode( MatrixType type )
 	}
 #endif
 
+#if XENOENGINE_OPENGL == 1
 	if ( matrixMode != type ) {
 		switch ( type ) {
-		//case TEXTURE_MATRIX:
-		//	glMatrixMode( GL_TEXTURE );
-		//	break;
 		case MODELVIEW_MATRIX:
 			glMatrixMode( GL_MODELVIEW );
 			break;
@@ -683,6 +769,7 @@ void GPUShader::SwitchMatrixMode( MatrixType type )
 			return;
 		}
 	}
+#endif
 	matrixMode = type;
 	CHECK_GL_ERROR;
 }
@@ -693,10 +780,19 @@ void GPUShader::PushMatrix( MatrixType type )
 	SwitchMatrixMode( type );
 
 	switch( type ) {
+#if XENOENGINE_OPENGL == 1
 	case MODELVIEW_MATRIX:
 	case PROJECTION_MATRIX:
 		glPushMatrix();
 		break;
+#elif XENOENGINE_OPENGL == 2
+	case MODELVIEW_MATRIX:
+		mvStack.Push();
+		break;
+	case PROJECTION_MATRIX:
+		projStack.Push();
+		break;
+#endif
 	default:
 		GLASSERT( 0 );
 		return;
@@ -723,15 +819,23 @@ void GPUShader::MultMatrix( MatrixType type, const grinliz::Matrix4& m )
 	SwitchMatrixMode( type );
 
 	switch( type ) {
+#if XENOENGINE_OPENGL == 1
 	case MODELVIEW_MATRIX:
 	case PROJECTION_MATRIX:
 		glMultMatrixf( m.x );
 		break;
+#elif XENOENGINE_OPENGL == 2
+	case MODELVIEW_MATRIX:
+		mvStack.Multiply( m );
+		break;
+	case PROJECTION_MATRIX:
+		projStack.Multiply( m );
+		break;
+#endif
 	default:
 		GLASSERT( 0 );
 		return;
 	}	
-
 	CHECK_GL_ERROR;
 }
 
@@ -742,11 +846,20 @@ void GPUShader::PopMatrix( MatrixType type )
 
 	SwitchMatrixMode( type );
 	GLASSERT( matrixDepth[(int)type] > 0 );
-		switch( type ) {
+	switch( type ) {
+#if XENOENGINE_OPENGL == 1
 	case MODELVIEW_MATRIX:
 	case PROJECTION_MATRIX:
 		glPopMatrix();
 		break;
+#elif XENOENGINE_OPENGL == 2
+	case MODELVIEW_MATRIX:
+		mvStack.Pop();
+		break;
+	case PROJECTION_MATRIX:
+		projStack.Pop();
+		break;
+#endif
 	default:
 		GLASSERT( 0 );
 		return;
@@ -757,6 +870,51 @@ void GPUShader::PopMatrix( MatrixType type )
 	CHECK_GL_ERROR;
 }
 
+
+void GPUShader::SetMatrix( MatrixType type, const Matrix4& m )
+{
+	CHECK_GL_ERROR;
+
+	SwitchMatrixMode( type );
+	GLASSERT( matrixDepth[(int)type] == 0 );
+
+#if XENOENGINE_OPENGL == 1
+	glLoadMatrixf( m.x );
+#else
+	if ( type == PROJECTION_MATRIX ) {
+		GLASSERT( projStack.NumMatrix() == 1 );
+		projStack.Set( m ); 
+	}
+	else if ( type == MODELVIEW_MATRIX ) {
+		GLASSERT( mvStack.NumMatrix() == 1 );
+		mvStack.Set( m );
+	}
+#endif
+}
+
+
+#if XENOENGINE_OPENGL == 2
+const grinliz::Matrix4& GPUShader::TopMatrix( MatrixType type )
+{
+	if ( type == MODELVIEW_MATRIX ) {
+		return mvStack.Top();
+	}
+	return projStack.Top();
+}
+
+
+const grinliz::Matrix4& GPUShader::TopTextureMatrix( int unit )
+{
+	GLASSERT( unit >= 0 && unit < 2 );
+	return textureStack[unit].Top();
+}
+
+const grinliz::Matrix4& GPUShader::ViewMatrix()
+{
+	return mvStack.Bottom();
+}
+
+#endif
 
 void GPUShader::PushTextureMatrix( int mask )
 {
@@ -778,13 +936,13 @@ void GPUShader::PopTextureMatrix( int mask )
 }
 
 
-void GPUShader::Stream::Clear()
+void GPUStream::Clear()
 {
 	memset( this, 0, sizeof(*this) );
 }
 
 
-GPUShader::Stream::Stream( const Vertex* vertex )
+GPUStream::GPUStream( const Vertex* vertex )
 {
 	Clear();
 
@@ -798,7 +956,7 @@ GPUShader::Stream::Stream( const Vertex* vertex )
 }
 
 
-GPUShader::Stream::Stream( GamuiType )
+GPUStream::GPUStream( GamuiType )
 {
 	Clear();
 	stride = sizeof( gamui::Gamui::Vertex );
@@ -809,7 +967,7 @@ GPUShader::Stream::Stream( GamuiType )
 }
 
 
-GPUShader::Stream::Stream( const PTVertex2* vertex )
+GPUStream::GPUStream( const PTVertex2* vertex )
 {
 	Clear();
 	stride = sizeof( PTVertex2 );
@@ -832,13 +990,12 @@ CompositingShader::CompositingShader( bool _blend )
 int LightShader::locked = 0;
 
 
-LightShader::LightShader( const Color4F& ambient, const grinliz::Vector4F& direction, const Color4F& diffuse, bool alphaTest, bool blend )
+LightShader::LightShader( const Color4F& ambient, const grinliz::Vector4F& direction, const Color4F& diffuse, bool blend )
 {
 	GLASSERT( !(blend && alphaTest ) );	// technically fine, probably not intended behavior.
 
-	this->alphaTest = alphaTest;
+	//this->alphaTest = alphaTest;
 	this->blend = blend;
-	this->lighting = true;
 	this->ambient = ambient;
 	this->direction = direction;
 	this->diffuse = diffuse;
@@ -858,6 +1015,7 @@ LightShader::~LightShader()
 
 void LightShader::SetLightParams() const
 {
+#if XENOENGINE_OPENGL == 1
 	static const float white[4]	= { 1.0f, 1.0f, 1.0f, 1.0f };
 	static const float black[4]	= { 0.0f, 0.0f, 0.0f, 1.0f };
 
@@ -875,6 +1033,7 @@ void LightShader::SetLightParams() const
 	glMaterialfv( GL_FRONT_AND_BACK, GL_AMBIENT,  white );
 	glMaterialfv( GL_FRONT_AND_BACK, GL_DIFFUSE,  white );
 	CHECK_GL_ERROR;
+#endif
 }
 
 /* static */ int PointParticleShader::particleSupport = 0;

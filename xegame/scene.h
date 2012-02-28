@@ -44,27 +44,6 @@ public:
 
 
 /**
-
-	Saving/Loading Notes
-	- A scene is self-saving, and has it's own save file (simpler)
-	- Game.Save() saves the current top scene, if that scene CanSave()
-	
-	For XenoWar:
-	- GeoScene and BattleScene CanSave()
-	
-	Geo		Tac
-	yes		no		geo scene
-	yes		yes		geo game, but in tactical scene. geo loads, then pushes BattleScene. When ChildActivated, loads Battlescene
-	no		yes		fast battle game
-	no		no		no game in progress
-
-	Actions:
-	Geo -> Tac
-		- geo: saves geo.xml
-		- geo: creates tac.xml
-	Tac-> Geo
-		- geo: saves geo.xml
-		- geo: deletes tac.xml
 */
 class Scene
 {
@@ -98,12 +77,7 @@ public:
 		RENDER_3D = 0x02,
 	};
 
-	virtual int RenderPass( grinliz::Rectangle2I* clip3D, grinliz::Rectangle2I* clip2D )	
-	{ 
-		clip3D->SetInvalid(); 
-		clip2D->SetInvalid(); 
-		return 0; 
-	}
+	virtual int RenderPass( grinliz::Rectangle2I* clip3D, grinliz::Rectangle2I* clip2D ) = 0;
 
 	void RenderGamui2D()	{ gamui2D.Render(); }
 	void RenderGamui3D()	{ gamui3D.Render(); }

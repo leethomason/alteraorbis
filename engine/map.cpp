@@ -377,7 +377,7 @@ void Map::BeginTexture( const void* textureHandle )
 
 void Map::Render( const void* renderState, const void* textureHandle, int nIndex, const uint16_t* index, int nVertex, const gamui::Gamui::Vertex* vertex )
 {
-	GPUShader::Stream stream( GPUShader::Stream::kGamuiType );
+	GPUStream stream( GPUStream::kGamuiType );
 	gamuiShader.SetStream( stream, vertex, nIndex, index );
 
 	gamuiShader.Draw();

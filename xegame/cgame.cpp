@@ -19,7 +19,7 @@
 
 
 #if defined( UFO_WIN32_SDL )
-static const char* winResourcePath = "./res/uforesource.db";
+static const char* winResourcePath = "./res/lumos.db";
 #endif
 
 #ifdef UFO_IPHONE
