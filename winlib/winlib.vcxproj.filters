@@ -8,11 +8,11 @@
     <Filter Include="Source Files\zlib">
       <UniqueIdentifier>{a4065814-77d8-4ce4-95de-08859e0bb785}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\tinyxml">
-      <UniqueIdentifier>{582bc43d-8509-4b82-b204-2b27d16b841f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\grinliz">
       <UniqueIdentifier>{bc8292dc-e7d8-4f6d-81c4-cdb2689626eb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\tinyxml2">
+      <UniqueIdentifier>{582bc43d-8509-4b82-b204-2b27d16b841f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -58,18 +58,6 @@
     <ClCompile Include="..\zlib\zutil.c">
       <Filter>Source Files\zlib</Filter>
     </ClCompile>
-    <ClCompile Include="..\tinyxml\tinystr.cpp">
-      <Filter>Source Files\tinyxml</Filter>
-    </ClCompile>
-    <ClCompile Include="..\tinyxml\tinyxml.cpp">
-      <Filter>Source Files\tinyxml</Filter>
-    </ClCompile>
-    <ClCompile Include="..\tinyxml\tinyxmlerror.cpp">
-      <Filter>Source Files\tinyxml</Filter>
-    </ClCompile>
-    <ClCompile Include="..\tinyxml\tinyxmlparser.cpp">
-      <Filter>Source Files\tinyxml</Filter>
-    </ClCompile>
     <ClCompile Include="..\grinliz\glcontainer.cpp">
       <Filter>Source Files\grinliz</Filter>
     </ClCompile>
@@ -109,6 +97,9 @@
     <ClCompile Include="..\grinliz\glvector.cpp">
       <Filter>Source Files\grinliz</Filter>
     </ClCompile>
+    <ClCompile Include="..\tinyxml2\tinyxml2.cpp">
+      <Filter>Source Files\tinyxml2</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\zlib\crc32.h">
@@ -143,12 +134,6 @@
     </ClInclude>
     <ClInclude Include="..\zlib\zutil.h">
       <Filter>Source Files\zlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\tinyxml\tinystr.h">
-      <Filter>Source Files\tinyxml</Filter>
-    </ClInclude>
-    <ClInclude Include="..\tinyxml\tinyxml.h">
-      <Filter>Source Files\tinyxml</Filter>
     </ClInclude>
     <ClInclude Include="..\grinliz\glbitarray.h">
       <Filter>Source Files\grinliz</Filter>
@@ -209,6 +194,9 @@
     </ClInclude>
     <ClInclude Include="..\grinliz\glvector.h">
       <Filter>Source Files\grinliz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\tinyxml2\tinyxml2.h">
+      <Filter>Source Files\tinyxml2</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -30,7 +30,7 @@
 #include "../grinliz/glperformance.h"
 #include "../grinliz/glstringutil.h"
 
-#include "../tinyxml/tinyxml.h"
+#include "../tinyxml2/tinyxml2.h"
 #include "../version.h"
 
 #include "ufosound.h"
@@ -39,6 +39,7 @@
 
 using namespace grinliz;
 using namespace gamui;
+using namespace tinyxml2;
 
 extern long memNewCount;
 
@@ -270,7 +271,7 @@ void Game::PushPopScene()
 		{
 			FILE* fp = GameSavePath( SAVEPATH_READ, loadSlot );
 			if ( fp ) {
-				TiXmlDocument doc;
+				XMLDocument doc;
 				doc.LoadFile( fp );
 				//GLASSERT( !doc.Error() );
 				if ( !doc.Error() ) {
@@ -322,16 +323,16 @@ const gamui::ButtonLook& Game::GetButtonLook( int id )
 */
 
 
-void Game::Load( const TiXmlDocument& doc )
+void Game::Load( const XMLDocument& doc )
 {
 	ParticleSystem::Instance()->Clear();
 
 	// Already pushed the BattleScene. Note that the
 	// BOTTOM of the stack loads. (BattleScene or GeoScene).
 	// A GeoScene will in turn load a BattleScene.
-	const TiXmlElement* game = doc.RootElement();
+	const XMLElement* game = doc.RootElement();
 	GLASSERT( StrEqual( game->Value(), "Game" ) );
-	const TiXmlElement* scene = game->FirstChildElement();
+	const XMLElement* scene = game->FirstChildElement();
 	sceneStack.Top()->scene->Load( scene );
 }
 
@@ -390,9 +391,10 @@ void Game::Save( int slot, bool saveGeo, bool saveTac )
 			FILE* fp = GameSavePath( SAVEPATH_WRITE, slot );
 			GLASSERT( fp );
 			if ( fp ) {
-				XMLUtil::OpenElement( fp, 0, "Game" );
-				XMLUtil::Attribute( fp, "version", VERSION );
-				XMLUtil::Attribute( fp, "sceneID", node->sceneID );
+				XMLPrinter printer( fp );
+				printer.OpenElement( "Game" );
+				printer.PushAttribute( "version", VERSION );
+				printer.PushAttribute( "sceneID", node->sceneID );
 
 				// Somewhat scary c code to get the current time.
 				char buf[40];
@@ -405,12 +407,9 @@ void Game::Save( int slot, bool saveGeo, bool saveTac )
 				StrNCpy( buf, atime, 40 );
 				buf[ strlen(buf)-1 ] = 0;	// remove trailing newline.
 
-				XMLUtil::Attribute( fp, "timestamp", buf );
-				XMLUtil::SealElement( fp );
-
-				node->scene->Save( fp, 1 );
-	
-				XMLUtil::CloseElement( fp, 0, "Game" );
+				printer.PushAttribute( "timestamp", buf );
+				node->scene->Save( &printer );
+				printer.CloseElement( "Game" );
 
 				fclose( fp );
 				break;

@@ -1,2 +1,13 @@
 - move Engine to Scene
 - streamline render atom creation
+- work out atom usage
+- create dialog scene
+	- standard layout
+	- automatic callback
+	- drag / drop
+- move engine to correct place
+- draw dude on map
+	- with shader
+	- clean up opengl = 2
+
+X convert to tinyxml2

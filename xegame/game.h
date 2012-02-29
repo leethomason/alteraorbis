@@ -27,7 +27,7 @@
 #include "../engine/ufoutil.h"
 #include "../engine/screenport.h"
 
-#include "../tinyxml/tinyxml.h"
+#include "../tinyxml2/tinyxml2.h"
 #include "../shared/gamedbreader.h"
 #include "../gamui/gamui.h"
 
@@ -101,7 +101,7 @@ public:
 	void SavePathTimeStamp(int slot, grinliz::GLString* stamp );
 	int LoadSlot() const				{ return loadSlot; }
 
-	void Load( const TiXmlDocument& doc );
+	void Load( const tinyxml2::XMLDocument& doc );
 	void Save( int slot, bool saveGeo, bool saveTac );
 
 	bool PopSound( int* database, int* offset, int* size );
