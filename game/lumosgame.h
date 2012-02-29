@@ -19,7 +19,8 @@ public:
 
 	enum {
 		SCENE_TITLE,
-		SCENE_GAME,
+		SCENE_DIALOG,
+		SCENE_GAME
 	};
 
 	virtual int LoadSceneID()								{ return SCENE_GAME; }

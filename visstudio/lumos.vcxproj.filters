@@ -136,6 +136,9 @@
     <ClCompile Include="..\scenes\titlescene.cpp">
       <Filter>Source Files\scenes</Filter>
     </ClCompile>
+    <ClCompile Include="..\scenes\dialogscene.cpp">
+      <Filter>Source Files\scenes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\camera.h">
@@ -253,6 +256,9 @@
       <Filter>Source Files\engine</Filter>
     </ClInclude>
     <ClInclude Include="..\scenes\titlescene.h">
+      <Filter>Source Files\scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\scenes\dialogscene.h">
       <Filter>Source Files\scenes</Filter>
     </ClInclude>
   </ItemGroup>

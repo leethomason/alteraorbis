@@ -1,5 +1,5 @@
-#ifndef TITLESCENE_INCLUDED
-#define TITLESCENE_INCLUDED
+#ifndef DIALOGSCENE_INCLUDED
+#define DIALOGSCENE_INCLUDED
 
 #include "../xegame/scene.h"
 #include "../gamui/gamui.h"
@@ -7,11 +7,11 @@
 class LumosGame;
 
 
-class TitleScene : public Scene
+class DialogScene : public Scene
 {
 public:
-	TitleScene( LumosGame* game );
-	virtual ~TitleScene() {}
+	DialogScene( LumosGame* game );
+	virtual ~DialogScene() {}
 
 	virtual int RenderPass( grinliz::Rectangle2I* clip3D, grinliz::Rectangle2I* clip2D )
 	{
@@ -27,10 +27,7 @@ public:
 
 private:
 	LumosGame* lumosGame;
-	gamui::TextLabel label;
-	gamui::Image background;
-	gamui::PushButton okay, cancel;
-	gamui::PushButton dialog;
+	gamui::PushButton okay;
 };
 
-#endif // TITLESCENE_INCLUDED
+#endif // DIALOGSCENE_INCLUDED

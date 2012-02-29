@@ -1,6 +1,7 @@
 #include "lumosgame.h"
 
 #include "../scenes/titlescene.h"
+#include "../scenes/dialogscene.h"
 
 using namespace grinliz;
 using namespace gamui;
@@ -45,9 +46,8 @@ Scene* LumosGame::CreateScene( int id, SceneData* data )
 	Scene* scene = 0;
 
 	switch ( id ) {
-	case SCENE_TITLE:
-		scene = new TitleScene( this );
-		break;
+	case SCENE_TITLE:		scene = new TitleScene( this );				break;
+	case SCENE_DIALOG:		scene = new DialogScene( this );			break;
 
 	default:
 		GLASSERT( 0 );
