@@ -886,7 +886,7 @@ class LayoutCalculator
 {
 public:
 	LayoutCalculator( float screenWidth, float screenHeight );
-	~LayoutCalculator();
+	~LayoutCalculator()	{}
 
 	void SetSize( float width, float height )	{ this->width = width; this->height = height; }
 	void SetGutter( float gutter )				{ this->gutter = gutter; }
@@ -901,6 +901,9 @@ public:
 		PosAbs( (UIItem*) label, x, y ); 
 		useTextOffset = false;
 	}
+
+	float Width() const { return width; }
+	float Height() const { return height; }
 
 private:
 	float screenWidth;

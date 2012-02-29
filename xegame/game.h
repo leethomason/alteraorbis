@@ -57,7 +57,7 @@ enum SavePathMode {
 class Game : public ITextureCreator 
 {
 public:
-	Game( int width, int height, int rotation, const char* savepath );
+	Game( int width, int height, int rotation, int uiHeight, const char* savepath );
 	virtual ~Game();
 
 	void DeviceLoss();
@@ -111,15 +111,12 @@ public:
 
 	enum {
 		ATOM_TEXT, ATOM_TEXT_D,
-	//	ATOM_GREEN_BUTTON_UP, ATOM_GREEN_BUTTON_UP_D, ATOM_GREEN_BUTTON_DOWN, ATOM_GREEN_BUTTON_DOWN_D,
-	//	ATOM_BLUE_BUTTON_UP, ATOM_BLUE_BUTTON_UP_D, ATOM_BLUE_BUTTON_DOWN, ATOM_BLUE_BUTTON_DOWN_D,
-	//	ATOM_RED_BUTTON_UP, ATOM_RED_BUTTON_UP_D, ATOM_RED_BUTTON_DOWN, ATOM_RED_BUTTON_DOWN_D,
-	//	ATOM_BLUE_TAB_BUTTON_UP, ATOM_BLUE_TAB_BUTTON_UP_D, ATOM_BLUE_TAB_BUTTON_DOWN, ATOM_BLUE_TAB_BUTTON_DOWN_D,
-
 		ATOM_COUNT
 	};
 	const gamui::RenderAtom& GetRenderAtom( int id );
-/*	enum {
+	gamui::RenderAtom CreateRenderAtom( int uiRendering, const char* assetName, float x0=0, float y0=0, float x1=1, float y1=1 );
+	
+	/*	enum {
 		GREEN_BUTTON,
 		BLUE_BUTTON,
 		BLUE_TAB_BUTTON,

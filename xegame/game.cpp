@@ -43,11 +43,8 @@ using namespace tinyxml2;
 
 extern long memNewCount;
 
-/* Layout size:
-   640x480. 8 buttons high, each button: 60 pixels.
-*/
-Game::Game( int width, int height, int rotation, const char* path ) :
-	screenport( width, height, rotation, 480 ),
+Game::Game( int width, int height, int rotation, int uiHeight, const char* path ) :
+	screenport( width, height, rotation, uiHeight ),
 	markFrameTime( 0 ),
 	frameCountsSinceMark( 0 ),
 	framesPerSecond( 0 ),
@@ -312,6 +309,17 @@ const gamui::RenderAtom& Game::GetRenderAtom( int id )
 	GLASSERT( renderAtoms[id].textureHandle );
 	return renderAtoms[id];
 }
+
+
+RenderAtom Game::CreateRenderAtom( int uiRendering, const char* assetName, float x0, float y0, float x1, float y1 )
+{
+	GLASSERT( uiRendering >= 0 && uiRendering < UIRenderer::RENDERSTATE_COUNT );
+	TextureManager* tm = TextureManager::Instance();
+	return RenderAtom(	(const void*)uiRendering,
+						tm->GetTexture( assetName ),
+						x0, y0, x1, y1 );
+}
+
 
 
 /*

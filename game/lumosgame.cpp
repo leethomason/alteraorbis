@@ -8,8 +8,10 @@ using namespace gamui;
 
 
 LumosGame::LumosGame(  int width, int height, int rotation, const char* savepath ) 
-	: Game( width, height, rotation, savepath )
+	: Game( width, height, rotation, 480, savepath )
 {
+	InitButtonLooks();
+
 	PushScene( SCENE_TITLE, 0 );
 	PushPopScene();
 }
@@ -17,6 +19,26 @@ LumosGame::LumosGame(  int width, int height, int rotation, const char* savepath
 
 LumosGame::~LumosGame()
 {}
+
+
+void LumosGame::InitButtonLooks()
+{
+	TextureManager* tm = TextureManager::Instance();
+
+	RenderAtom blueUp(	(const void*)UIRenderer::RENDERSTATE_UI_NORMAL, 
+						(const void*)tm->GetTexture( "icons" ), 
+						0.125f, 0, 0.250f, 0.250f );
+	RenderAtom blueUpD = blueUp;
+	blueUpD.renderState = (const void*) UIRenderer::RENDERSTATE_UI_DISABLED;
+
+	RenderAtom blueDown((const void*)UIRenderer::RENDERSTATE_UI_NORMAL, 
+						(const void*)tm->GetTexture( "icons" ), 
+						0.125f, 0.250f, 0.250f, 0.500f );
+	RenderAtom blueDownD = blueDown;
+	blueDownD.renderState = (const void*) UIRenderer::RENDERSTATE_UI_DISABLED;
+
+	buttonLookArr[ BUTTON_LOOK_STD ].Init( blueUp, blueUpD, blueDown, blueDownD );
+}
 
 
 Scene* LumosGame::CreateScene( int id, SceneData* data )
@@ -136,3 +158,51 @@ RenderAtom LumosGame::CalcPaletteAtom( int c0, int c1, int blend, bool enabled )
 	UIRenderer::SetAtomCoordFromPixel( c.x, c.y, c.x, c.y, 300, 300, &atom );
 	return atom;
 }
+
+
+/*
+	640x480 mininum screen.
+
+	6 buttons
+	size = 70 pixels
+	spacing = 10 pixels
+	gutter = 10 pixels
+*/
+gamui::LayoutCalculator LumosGame::DefaultLayout()
+{
+	const Screenport& port = GetScreenport();
+	LayoutCalculator layout( port.UIWidth(), port.UIHeight() );
+	layout.SetGutter( 10.0f );
+	layout.SetSize( 70.0f, 70.0f );
+	layout.SetSpacing( 10.0f );
+	return layout;
+}
+
+
+void LumosGame::InitStd( gamui::Gamui* g, gamui::PushButton* okay, gamui::PushButton* cancel )
+{
+	const ButtonLook& stdBL = GetButtonLook( LumosGame::BUTTON_LOOK_STD );
+	gamui::LayoutCalculator layout = DefaultLayout();
+
+	if ( okay ) {
+		okay->Init( g, stdBL );
+		okay->SetSize( layout.Width(), layout.Height() );
+	}
+	if ( cancel ) {
+		cancel->Init( g, stdBL );
+		cancel->SetSize( layout.Width(), layout.Height() );
+	}
+}
+
+
+void LumosGame::PositionStd( gamui::PushButton* okay, gamui::PushButton* cancel )
+{
+	gamui::LayoutCalculator layout = DefaultLayout();
+
+	if ( okay )
+		layout.PosAbs( okay, LumosGame::OKAY_X, -1 );
+	
+	if ( cancel )
+		layout.PosAbs( cancel, LumosGame::CANCEL_X, -1 );
+}
+

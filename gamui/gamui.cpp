@@ -1552,11 +1552,6 @@ LayoutCalculator::LayoutCalculator( float w, float h )
 }
 
 
-LayoutCalculator::~LayoutCalculator()
-{
-}
-
-
 void LayoutCalculator::PosAbs( UIItem* item, int _x, int _y )
 {
 	float pos[2] = { 0, 0 };

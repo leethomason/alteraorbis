@@ -21,8 +21,10 @@ public:
 
 
 private:
+	LumosGame* lumosGame;
 	gamui::TextLabel label;
 	gamui::Image background;
+	gamui::PushButton okay, cancel;
 };
 
 #endif // TITLESCENE_INCLUDED
