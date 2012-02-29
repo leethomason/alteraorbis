@@ -11,7 +11,6 @@ LumosGame::LumosGame(  int width, int height, int rotation, const char* savepath
 	: Game( width, height, rotation, 480, savepath )
 {
 	InitButtonLooks();
-
 	PushScene( SCENE_TITLE, 0 );
 	PushPopScene();
 }
@@ -187,10 +186,14 @@ void LumosGame::InitStd( gamui::Gamui* g, gamui::PushButton* okay, gamui::PushBu
 	if ( okay ) {
 		okay->Init( g, stdBL );
 		okay->SetSize( layout.Width(), layout.Height() );
+		//okay->SetText( "okay" );
+		okay->SetDeco( CalcDecoAtom( DECO_OKAY, true ), CalcDecoAtom( DECO_OKAY, false ) );
 	}
 	if ( cancel ) {
 		cancel->Init( g, stdBL );
 		cancel->SetSize( layout.Width(), layout.Height() );
+		//cancel->SetText( "cancel" );
+		cancel->SetDeco( CalcDecoAtom( DECO_CANCEL, true ), CalcDecoAtom( DECO_CANCEL, false ) );
 	}
 }
 

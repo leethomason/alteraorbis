@@ -77,10 +77,15 @@ public:
 	// Rendering
 	enum {
 		RENDER_2D = 0x01,
-		RENDER_3D = 0x02,
+		RENDER_3D = 0x02
 	};
-
 	virtual int RenderPass( grinliz::Rectangle2I* clip3D, grinliz::Rectangle2I* clip2D ) = 0;
+
+	// Utility
+	void ProcessTap( int action, const grinliz::Vector2F& screen, const grinliz::Ray& world );
+	virtual void ItemTapped( const gamui::UIItem* item )				{}
+	virtual gamui::RenderAtom DragStart( const gamui::UIItem* item )	{ gamui::RenderAtom atom; return atom; }	// null atom
+	virtual void DragEnd( const gamui::UIItem* item )					{}
 
 	//// ------- public interface  below this line needs eval ---- //
 	void RenderGamui2D()	{ gamui2D.Render(); }

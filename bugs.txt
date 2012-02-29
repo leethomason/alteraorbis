@@ -1,8 +1,8 @@
-- streamline render atom creation
-- work out atom usage
+X streamline render atom creation
+X work out atom usage
 - create dialog scene
-	- standard layout
-	- automatic callback
+	X standard layout
+	X automatic callback
 	- drag / drop
 - move Engine to Scene / move engine to correct place
 - draw dude on map

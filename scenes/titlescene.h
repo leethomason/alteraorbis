@@ -19,6 +19,11 @@ public:
 	}
 	virtual void Resize();
 
+	virtual void Tap(	int action, const grinliz::Vector2F& screen, const grinliz::Ray& world )				
+	{
+		ProcessTap( action, screen, world );
+	}
+	virtual void ItemTapped( const gamui::UIItem* item );
 
 private:
 	LumosGame* lumosGame;

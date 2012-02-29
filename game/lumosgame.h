@@ -26,6 +26,10 @@ public:
 	virtual Scene* CreateScene( int id, SceneData* data );
 	virtual void CreateTexture( Texture* t )				{ GLASSERT( 0 ); }
 
+	enum {
+		DECO_OKAY = 15,
+		DECO_CANCEL = 22
+	};
 	static gamui::RenderAtom CalcDecoAtom( int id, bool enabled=true );
 	static gamui::RenderAtom CalcParticleAtom( int id, bool enabled=true );
 	static gamui::RenderAtom CalcIconAtom( int id, bool enabled=true );

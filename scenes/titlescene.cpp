@@ -31,4 +31,10 @@ void TitleScene::Resize()
 }
 
 
+void TitleScene::ItemTapped( const gamui::UIItem* item )
+{
+
+}
+
+
 
