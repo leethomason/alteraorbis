@@ -154,7 +154,7 @@ void DebugDelete( void* mem, bool arrayType )
 		// array allocation of class types: uses array form.
 		// so an array destructor is meaningless - could go either way.
 		// can detect array destructor of single construct...
-		GLASSERT( head->arrayType == arrayType || !head->arrayType );
+		//GLASSERT( head->arrayType == arrayType || !head->arrayType );
 
 		if ( head->prev )
 			head->prev->next = head->next;

@@ -27,6 +27,9 @@ Scene::Scene( Game* _game )
 	gamui3D.Init( &uiRenderer, game->GetRenderAtom( Game::ATOM_TEXT ), game->GetRenderAtom( Game::ATOM_TEXT_D ), &uiRenderer );
 	gamui2D.SetTextHeight( 24 );
 	gamui3D.SetTextHeight( 24 );
+	
+	RenderAtom nullAtom;
+	dragImage.Init( &gamui2D, nullAtom, true );
 }
 
 
@@ -35,17 +38,45 @@ void Scene::ProcessTap( int action, const grinliz::Vector2F& screen, const grinl
 	grinliz::Vector2F ui;
 	game->GetScreenport().ViewToUI( screen, &ui );
 
+	// Callbacks:
+	//		ItemTapped
+	//		DragStart
+	//		DragEnd
+
 	const UIItem* uiItem = 0;
 	if ( action == GAME_TAP_DOWN ) {
 		gamui2D.TapDown( ui.x, ui.y );
+		dragStarted = false;
 		return;
+	}
+	else if ( action == GAME_TAP_MOVE ) {
+		if ( !dragStarted ) {
+			if ( gamui2D.TapCaptured() ) {
+				dragStarted = true;
+				RenderAtom atom = DragStart( gamui2D.TapCaptured() );
+				dragImage.SetAtom( atom );
+			}
+		}
+		dragImage.SetCenterPos( ui.x, ui.y );
 	}
 	else if ( action == GAME_TAP_CANCEL ) {
 		gamui2D.TapCancel();
+		dragImage.SetAtom( RenderAtom() );
+		dragStarted = false;
 		return;
 	}
 	else if ( action == GAME_TAP_UP ) {
+		const UIItem* dragStart = gamui2D.TapCaptured();
 		uiItem = gamui2D.TapUp( ui.x, ui.y );
+		
+		if ( dragStarted ) {
+			dragStarted = false;
+			const UIItem* start = 0;
+			const UIItem* end   = 0;
+			gamui2D.GetDragPair( &start, &end ); 
+			this->DragEnd( start, end );
+			dragImage.SetAtom( RenderAtom() );
+		}
 	}
 
 	if ( uiItem ) {

@@ -161,19 +161,16 @@ RenderAtom LumosGame::CalcPaletteAtom( int c0, int c1, int blend, bool enabled )
 
 /*
 	640x480 mininum screen.
-
 	6 buttons
-	size = 70 pixels
-	spacing = 10 pixels
-	gutter = 10 pixels
+	80 pixels / per
 */
 gamui::LayoutCalculator LumosGame::DefaultLayout()
 {
 	const Screenport& port = GetScreenport();
 	LayoutCalculator layout( port.UIWidth(), port.UIHeight() );
 	layout.SetGutter( 10.0f );
-	layout.SetSize( 70.0f, 70.0f );
-	layout.SetSpacing( 10.0f );
+	layout.SetSize( 75.0f, 75.0f );
+	layout.SetSpacing( 5.0f );
 	return layout;
 }
 

@@ -24,10 +24,15 @@ public:
 		ProcessTap( action, screen, world );
 	}
 	virtual void ItemTapped( const gamui::UIItem* item );
+	virtual gamui::RenderAtom DragStart( const gamui::UIItem* item );
+	virtual void DragEnd( const gamui::UIItem* start, const gamui::UIItem* end );
 
 private:
+	enum { NUM_ITEMS = 4 };
+
 	LumosGame* lumosGame;
 	gamui::PushButton okay;
+	gamui::PushButton itemArr[NUM_ITEMS];
 };
 
 #endif // DIALOGSCENE_INCLUDED

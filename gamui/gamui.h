@@ -653,6 +653,7 @@ public:
 	bool Up() const		{ return m_up; }
 	bool Down() const	{ return !m_up; }
 	void SetDeco( const RenderAtom& atom, const RenderAtom& atomD )			{ m_atoms[DECO] = atom; m_atoms[DECO_D] = atomD; SetState(); Modify(); }
+	void GetDeco( RenderAtom* atom, RenderAtom* atomD )						{ if ( atom ) *atom = m_atoms[DECO]; if ( atomD ) *atomD = m_atoms[DECO_D]; }
 	void SetDecoRotationY( float degrees )									{ m_deco.SetRotationY( degrees ); }
 
 	void SetText( const char* text );
