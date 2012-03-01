@@ -141,7 +141,7 @@ Engine::Engine( Screenport* port, const gamedb::Reader* database )
 		initZoomDistance( 0 ),
 		map( 0 )
 {
-	spaceTree = new SpaceTree( -0.1f, 3.0f, 64	 );	// fixme: map size hardcoded
+	spaceTree = new SpaceTree( -0.1f, 3.0f, 64 );	// fixme: map size hardcoded
 	renderQueue = new RenderQueue();
 
 	lightDirection.Set( EL_LIGHT_X, EL_LIGHT_Y, EL_LIGHT_Z );

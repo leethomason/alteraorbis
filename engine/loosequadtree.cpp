@@ -257,7 +257,7 @@ void SpaceTree::Update( Model* model )
 SpaceTree::Node* SpaceTree::GetNode( int depth, int x, int z )
 {
 	GLASSERT( depth >=0 && depth < DEPTH );
-	int size = size >> depth;
+	int size = this->size >> depth;
 	int nx = x / size;
 	int nz = z / size;
 

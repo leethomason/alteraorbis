@@ -20,6 +20,7 @@ public:
 	enum {
 		SCENE_TITLE,
 		SCENE_DIALOG,
+		SCENE_RENDERTEST,
 		SCENE_GAME
 	};
 

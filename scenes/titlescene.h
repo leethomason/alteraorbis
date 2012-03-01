@@ -30,7 +30,7 @@ private:
 	gamui::TextLabel label;
 	gamui::Image background;
 	gamui::PushButton okay, cancel;
-	gamui::PushButton dialog;
+	gamui::PushButton dialog, renderTest;
 };
 
 #endif // TITLESCENE_INCLUDED

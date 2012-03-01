@@ -2,10 +2,10 @@
 
 #include "../scenes/titlescene.h"
 #include "../scenes/dialogscene.h"
+#include "../scenes/rendertestscene.h"
 
 using namespace grinliz;
 using namespace gamui;
-
 
 
 LumosGame::LumosGame(  int width, int height, int rotation, const char* savepath ) 
@@ -48,6 +48,7 @@ Scene* LumosGame::CreateScene( int id, SceneData* data )
 	switch ( id ) {
 	case SCENE_TITLE:		scene = new TitleScene( this );				break;
 	case SCENE_DIALOG:		scene = new DialogScene( this );			break;
+	case SCENE_RENDERTEST:	scene = new RenderTestScene( this );		break;
 
 	default:
 		GLASSERT( 0 );

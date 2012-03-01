@@ -108,6 +108,7 @@ public:
 
 	const gamedb::Reader* GetDatabase()	{ return database0; }
 	const Screenport& GetScreenport() const { return screenport; }
+	Screenport* GetScreenportMutable() { return &screenport; }
 
 	enum {
 		ATOM_TEXT, ATOM_TEXT_D,
