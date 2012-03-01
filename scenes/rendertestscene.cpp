@@ -7,6 +7,7 @@ RenderTestScene::RenderTestScene( LumosGame* game ) : Scene( game ), lumosGame( 
 	
 	const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( "maleMarine" );
 	model = engine->AllocModel( res );
+	engine->CameraLookAt( 0, 0, 10 );
 
 	lumosGame->InitStd( &gamui2D, &okay, 0 );
 }
@@ -32,3 +33,8 @@ void RenderTestScene::ItemTapped( const gamui::UIItem* item )
 	}
 }
 
+
+void RenderTestScene::Draw3D()
+{
+	engine->Draw();
+}

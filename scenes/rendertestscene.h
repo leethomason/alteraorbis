@@ -23,6 +23,8 @@ public:
 	virtual void Tap( int action, const grinliz::Vector2F& screen, const grinliz::Ray& world )	{ ProcessTap( action, screen, world ); }
 	virtual void ItemTapped( const gamui::UIItem* item );
 
+	virtual void Draw3D();
+
 private:
 	enum { NUM_ITEMS = 4 };
 

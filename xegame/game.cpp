@@ -95,7 +95,6 @@ void Game::Init()
 	LoadTextures();
 	modelLoader = new ModelLoader();
 	LoadModels();
-	LoadItemResources();
 	LoadAtoms();
 	LoadPalettes();
 
@@ -130,6 +129,53 @@ Game::~Game()
 	TextureManager::Destroy();
 	delete ShaderManager::Instance();
 	delete database0;
+}
+
+
+void Game::LoadTextures()
+{
+	TextureManager* texman = TextureManager::Instance();
+	texman->CreateTexture( "white", 2, 2, Surface::RGB16, Texture::PARAM_NONE, this );
+}
+
+
+void Game::CreateTexture( Texture* t )
+{
+	if ( StrEqual( t->Name(), "white" ) ) {
+		U16 pixels[4] = { 0xffff, 0xffff, 0xffff, 0xffff };
+		GLASSERT( t->Format() == Surface::RGB16 );
+		t->Upload( pixels, 8 );
+	}
+	else {
+		GLASSERT( 0 );
+	}
+}
+
+
+void Game::LoadModel( const char* name )
+{
+	GLASSERT( modelLoader );
+
+	const gamedb::Item* item = database0->Root()->Child( "models" )->Child( name );
+	GLASSERT( item );
+
+	ModelResource* res = new ModelResource();
+	modelLoader->Load( item, res );
+	ModelResourceManager::Instance()->AddModelResource( res );
+}
+
+
+void Game::LoadModels()
+{
+	// Run through the database, and load all the models.
+	const gamedb::Item* parent = database0->Root()->Child( "models" );
+	GLASSERT( parent );
+
+	for( int i=0; i<parent->NumChildren(); ++i )
+	{
+		const gamedb::Item* node = parent->Child( i );
+		LoadModel( node->Name() );
+	}
 }
 
 
@@ -303,6 +349,30 @@ void Game::LoadAtoms()
 }	
 
 
+void Game::LoadPalettes()
+{
+	const gamedb::Item* parent = database0->Root()->Child( "data" )->Child( "palettes" );
+	for( int i=0; i<parent->NumChildren(); ++i ) {
+		const gamedb::Item* child = parent->Child( i );
+		child = database0->ChainItem( child );
+
+		Palette* p = 0;
+		if ( palettes.Size() <= i ) 
+			p = palettes.Push();
+		else
+			p = &palettes[i];
+		p->name = child->Name();
+		p->dx = child->GetInt( "dx" );
+		p->dy = child->GetInt( "dy" );
+		p->colors.Clear();
+		GLASSERT( (int)p->colors.Capacity() >= p->dx*p->dy );
+		p->colors.PushArr( p->dx*p->dy );
+		GLASSERT( child->GetDataSize( "colors" ) == (int)(p->dx*p->dy*sizeof(Color4U8)) );
+		child->GetData( "colors", (void*)p->colors.Mem(), p->dx*p->dy*sizeof(Color4U8) );
+	}
+}
+
+
 const gamui::RenderAtom& Game::GetRenderAtom( int id )
 {
 	GLASSERT( id >= 0 && id < ATOM_COUNT );
@@ -319,16 +389,6 @@ RenderAtom Game::CreateRenderAtom( int uiRendering, const char* assetName, float
 						tm->GetTexture( assetName ),
 						x0, y0, x1, y1 );
 }
-
-
-
-/*
-const gamui::ButtonLook& Game::GetButtonLook( int id )
-{
-	GLASSERT( id >= 0 && id < LOOK_COUNT );
-	return buttonLooks[id];
-}
-*/
 
 
 void Game::Load( const XMLDocument& doc )
