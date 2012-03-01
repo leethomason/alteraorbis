@@ -48,7 +48,7 @@ Game::Game( int width, int height, int rotation, int uiHeight, const char* path 
 	markFrameTime( 0 ),
 	frameCountsSinceMark( 0 ),
 	framesPerSecond( 0 ),
-	debugLevel( 0 ),
+	debugLevel( 1 ),
 	suppressText( false ),
 	previousTime( 0 ),
 	isDragging( false )
@@ -559,7 +559,7 @@ void Game::DoTick( U32 _currentTime )
 //		SoundManager::Instance()->PlayQueuedSounds();
 	}
 
-	const int Y = 305;
+	const int Y = 0;
 	#ifndef GRINLIZ_DEBUG_MEM
 	const int memNewCount = 0;
 	#endif
@@ -567,14 +567,11 @@ void Game::DoTick( U32 _currentTime )
 	if ( !suppressText ) {
 		UFOText* ufoText = UFOText::Instance();
 		if ( debugLevel >= 1 ) {
-			ufoText->Draw(	0,  Y, "#%d %5.1ffps vbo=%d ps=%d", 
+			ufoText->Draw(	0,  Y, "#%d %5.1ffps vbo=%d ps=%d %4.1fK/f %3ddc/f", 
 							VERSION, 
 							framesPerSecond, 
 							GPUShader::SupportsVBOs() ? 1 : 0,
-							PointParticleShader::IsSupported() ? 1 : 0 );
-		}
-		if ( debugLevel >= 2 ) {
-			ufoText->Draw(	0,  Y-15, "%4.1fK/f %3ddc/f", 
+							PointParticleShader::IsSupported() ? 1 : 0,
 							(float)GPUShader::TrianglesDrawn()/1000.0f,
 							GPUShader::DrawCalls() );
 		}

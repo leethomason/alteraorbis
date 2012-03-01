@@ -4,9 +4,9 @@ X create dialog scene
 	X standard layout
 	X automatic callback
 	X drag / drop
-- move Engine to Scene / move engine to correct place
-- draw dude on map
-	- with shader
-	- clean up opengl = 2
+X move Engine to Scene / move engine to correct place
+X draw dude on map
+	X with shader
+	X clean up opengl = 2. wait. plenty of time later if it is annoying.
 
 X convert to tinyxml2
