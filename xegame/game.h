@@ -155,12 +155,11 @@ private:
 	int loadSlot;
 
 	void Init();
-	void LoadTextures()						{}
-	void LoadModels()						{}
-	void LoadModel( const char* name )		{}
-	void LoadItemResources()				{}
+	void LoadTextures();
+	void LoadModels();
+	void LoadModel( const char* name );
 	void LoadAtoms();
-	void LoadPalettes()						{}
+	void LoadPalettes();
 
 	int currentFrame;
 	U32 markFrameTime;

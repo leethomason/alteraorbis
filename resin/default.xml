@@ -7,6 +7,9 @@
 
   <!-- Model textures -->
   <texture filename="palette.png" />
+  <texture filename="charSwatch.png" width="128" height="8" />
+  <texture filename="characters.png" />
+  <texture filename="treetextures.png" />
 
   <!-- UI elements -->
   <texture filename="intro.png" width="64" height="64" />

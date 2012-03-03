@@ -18,6 +18,8 @@
 
 
 #define XENOENGINE_OPENGL 2
+//#define XENOENGINE_INSTANCING
+
 
 enum HitTestMethod 
 {
@@ -40,7 +42,11 @@ enum {
 	EL_NIGHT_BLUE_U8		= 255,
 	EL_MAP_SIZE				= 64,		// maximum size.
 	EL_MAP_MAX_PATH			= 12,		// longest path anything can travel in one turn. Used to limit display memory.
-	EL_MAP_TEXTURE_SIZE		= 512
+	EL_MAP_TEXTURE_SIZE		= 512,
+
+	// performance tuning
+	EL_MAX_INSTANCE			= 16,		// Max instances used. Impacts # of uniforms.
+	EL_TUNE_INSTANCE_MEM	= 8*1024	// Max memory per model.
 };
 
 static const float EL_NIGHT_RED		= ( (float)EL_NIGHT_RED_U8/255.f );

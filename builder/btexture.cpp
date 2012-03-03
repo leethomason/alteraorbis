@@ -25,7 +25,9 @@ BTexture::BTexture()
 	  targetWidth( 0 ),
 	  targetHeight( 0 ),
 	  format( RGBA16 ),
-	  surface( 0 )
+	  surface( 0 ),
+	  pixelBuffer16( 0 ),
+	  pixelBuffer8( 0 )
 {
 }
 
@@ -35,6 +37,8 @@ BTexture::~BTexture()
 	if ( surface ) {
 		SDL_FreeSurface( surface );
 	}
+	delete [] pixelBuffer16;
+	delete [] pixelBuffer8;
 }
 
 
@@ -76,6 +80,22 @@ bool BTexture::Load()
 	else {
 		ExitError( "Texture", pathName.c_str(), assetName.c_str(), "Textures must be power of 2 dimension." );
 	}
+
+	if (    surface->format->BitsPerPixel == 24
+		 || surface->format->BitsPerPixel == 32 )	
+	{
+		if ( surface->format->Amask )
+			format = RGBA16;
+		else 
+			format = RGB16;
+	}
+	else if ( surface->format->BitsPerPixel == 8 ) {
+		format = ALPHA;
+	}
+	else {
+		GLASSERT( 0 );
+	}
+
 
 	printf( "%s Loaded: '%s' bpp=%d", 
 			isImage ? "Image" : "Texture",
@@ -136,9 +156,11 @@ bool BTexture::ToBuffer()
 	switch( surface->format->BitsPerPixel ) {
 		case 32:
 			printf( "  RGBA memory=%dk\n", (surface->w * surface->h * 2)/1024 );
+			pixelBuffer16 = new U16[ surface->w * surface->h ];
 
 			// Bottom up!
 			if ( !dither ) {
+				U16* b = pixelBuffer16;
 				for( int j=surface->h-1; j>=0; --j ) {
 					for( int i=0; i<surface->w; ++i ) {
 						Color4U8 c = GetPixel( surface, i, j );
@@ -149,22 +171,22 @@ bool BTexture::ToBuffer()
 								| ( ( c.b>>4 ) << 4)
 								| ( ( c.a>>4 ) << 0 );
 
-						pixelBuffer16.push_back(p);
+						*b++ = p;
 					}
 				}
 			}
 			else {
-				pixelBuffer16.resize( surface->w*surface->h );
-				pixelBuffer16.reserve( surface->w*surface->h );
-				OrderedDitherTo16( surface, RGBA16, true, &pixelBuffer16[0] );
+				OrderedDitherTo16( surface, RGBA16, true, pixelBuffer16 );
 			}
 			break;
 
 		case 24:
 			printf( "  RGB memory=%dk\n", (surface->w * surface->h * 2)/1024 );
+			pixelBuffer16 = new U16[ surface->w * surface->h ];
 
 			// Bottom up!
 			if ( !dither ) {
+				U16* b = pixelBuffer16;
 				for( int j=surface->h-1; j>=0; --j ) {
 					for( int i=0; i<surface->w; ++i ) {
 						Color4U8 c = GetPixel( surface, i, j );
@@ -174,27 +196,28 @@ bool BTexture::ToBuffer()
 								| ( ( c.g>>2 ) << 5 )
 								| ( ( c.b>>3 ) );
 
-						pixelBuffer16.push_back(p);
+						*b++ = p;
 					}
 				}
 			}
 			else {
-				pixelBuffer16.resize( surface->w*surface->h );
-				pixelBuffer16.reserve( surface->w*surface->h );
-				OrderedDitherTo16( surface, RGB16, true, &pixelBuffer16[0] );
+				OrderedDitherTo16( surface, RGB16, true, pixelBuffer16 );
 			}
 			break;
 
 		case 8:
+			{
 			printf( "  Alpha memory=%dk\n", (surface->w * surface->h * 1)/1024 );
+			pixelBuffer8 = new U8[ surface->w * surface->h ];
+			U8* b = pixelBuffer8;
 
 			// Bottom up!
 			for( int j=surface->h-1; j>=0; --j ) {
 				for( int i=0; i<surface->w; ++i ) {
 				    U8 *p = (U8 *)surface->pixels + j*surface->pitch + i;
-					//SDL_RWwrite( fp, p, 1, 1 );
-					pixelBuffer8.push_back(*p);
+					*b++ = *p;
 				}
+			}
 			}
 			break;
 
@@ -210,11 +233,11 @@ void BTexture::InsertTextureToDB( gamedb::WItem* parent )
 {
 	gamedb::WItem* witem = parent->CreateChild( assetName.c_str() );
 
-	if ( pixelBuffer16.size() ) {
-		witem->SetData( "pixels", &pixelBuffer16[0], TextureMem() );
+	if ( format == RGBA16 || format == RGB16 ) {
+		witem->SetData( "pixels", pixelBuffer16, TextureMem() );
 	}
-	else if ( pixelBuffer8.size() ) {
-		witem->SetData( "pixels", &pixelBuffer8[0], TextureMem() );
+	else if ( format == ALPHA ) {
+		witem->SetData( "pixels", pixelBuffer8, TextureMem() );
 	}
 	else {
 		GLASSERT( 0 );

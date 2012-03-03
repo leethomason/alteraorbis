@@ -15,7 +15,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "../engine/enginelimits.h"
 
 #include "SDL.h"
 #if defined(__APPLE__)	// OSX, not iphone
@@ -23,23 +22,25 @@
 #endif
 #include "SDL_loadso.h"
 
+#include <string>
+#include <vector>
+
+
 #include "../grinliz/gldebug.h"
 #include "../grinliz/gltypes.h"
 #include "../grinliz/glcolor.h"
 #include "../grinliz/gldynamic.h"
 #include "../grinliz/glutil.h"
 #include "../grinliz/glstringutil.h"
-#include "../grinliz/glstringutil.h"
 
 #include "../engine/enginelimits.h"
+#include "../engine/model.h"
 #include "../engine/serialize.h"
 
-#include <string>
-#include <vector>
-
 #include "../tinyxml2/tinyxml2.h"
-#include "../importers/import.h"
 #include "../shared/gamedbwriter.h"
+#include "../importers/import.h"
+
 #include "../version.h"
 
 #include "modelbuilder.h"
@@ -103,10 +104,10 @@ void WriteFloat( SDL_RWops* ctx, float f )
 
 
 
-void ModelHeader::Set(	const char* name, int nGroups, int nTotalVertices, int nTotalIndices,
+void ModelHeader::Set(	const char* name, int nAtoms, int nTotalVertices, int nTotalIndices,
 						const grinliz::Rectangle3F& bounds )
 {
-	GLASSERT( nGroups > 0 && nGroups < EL_MAX_MODEL_GROUPS );
+	GLASSERT( nAtoms > 0 && nAtoms < EL_MAX_MODEL_GROUPS );
 	GLASSERT( nTotalVertices > 0 && nTotalVertices < EL_MAX_VERTEX_IN_MODEL );
 	GLASSERT( EL_MAX_VERTEX_IN_MODEL <= 0xffff );
 	GLASSERT( nTotalIndices > 0 && nTotalIndices < EL_MAX_INDEX_IN_MODEL );
@@ -116,7 +117,7 @@ void ModelHeader::Set(	const char* name, int nGroups, int nTotalVertices, int nT
 	this->name.ClearBuf();
 	this->name = name;
 	this->flags = 0;
-	this->nGroups = nGroups;
+	this->nAtoms = nAtoms;
 	this->nTotalVertices = nTotalVertices;
 	this->nTotalIndices = nTotalIndices;
 	this->bounds = bounds;
@@ -132,7 +133,7 @@ void ModelHeader::Save( gamedb::WItem* parent )
 	node->SetInt( "nTotalVertices", nTotalVertices );
 	node->SetInt( "nTotalIndices", nTotalIndices );
 	node->SetInt( "flags", flags );
-	node->SetInt( "nGroups", nGroups );
+	node->SetInt( "nGroups", nAtoms );
 
 	gamedb::WItem* boundNode = node->CreateChild( "bounds" );
 	boundNode->SetFloat( "min.x", bounds.min.x );

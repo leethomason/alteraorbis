@@ -35,7 +35,7 @@
 
 using namespace grinliz;
 using namespace micropather;
-
+using namespace tinyxml2;
 
 const float DIAGONAL_COST = 1.414f;
 
@@ -89,17 +89,16 @@ Map::~Map()
 }
 
 
-void Map::Save( FILE* fp, int depth )
+void Map::Save( XMLPrinter* printer )
 {
-	XMLUtil::OpenElement( fp, depth, "Map" );
-	XMLUtil::Attribute( fp, "sizeX", width );
-	XMLUtil::Attribute( fp, "sizeY", height );
-	XMLUtil::SealElement( fp );
-	XMLUtil::CloseElement( fp, depth, "Map" );
+	printer->OpenElement( "Map" );
+	printer->PushAttribute( "sizeX", width );
+	printer->PushAttribute( "sizeY", height );
+	printer->CloseElement();
 }
 
 
-void Map::Load( const TiXmlElement* mapElement )
+void Map::Load( const XMLElement* mapElement )
 {
 	GLASSERT( mapElement );
 }

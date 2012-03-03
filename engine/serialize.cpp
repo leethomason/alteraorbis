@@ -17,7 +17,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include "serialize.h"
+
 #include "../grinliz/glstringutil.h"
+#include "model.h"
 
 using namespace grinliz;
 
@@ -29,7 +31,7 @@ void ModelHeader::Load( const gamedb::Item* item )
 	nTotalVertices = header->GetInt( "nTotalVertices" );
 	nTotalIndices = header->GetInt( "nTotalIndices" );
 	flags = header->GetInt( "flags" );
-	nGroups = header->GetInt( "nGroups" );
+	nAtoms = header->GetInt( "nGroups" );
 
 	bounds.Zero();
 	const gamedb::Item* boundsItem = header->Child( "bounds" );
@@ -68,6 +70,7 @@ void ModelGroup::Load( const gamedb::Item* item )
 }
 
 
+/*
 void XMLUtil::OpenElement( FILE* fp, int depth, const char* value )
 {
 	Space( fp, depth );
@@ -129,3 +132,4 @@ void XMLUtil::Space( FILE* fp, int depth )
 
 	fprintf( fp, "%s", &space[LEN] - depth*SPACES );
 }
+*/

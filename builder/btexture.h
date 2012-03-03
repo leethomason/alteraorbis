@@ -21,8 +21,9 @@ public:
 	void InsertTextureToDB( gamedb::WItem* parent );
 
 	int TextureMem() const {
-		if ( !pixelBuffer16.empty() ) return pixelBuffer16.size() * 2;
-		if ( !pixelBuffer8.empty() )  return pixelBuffer8.size();
+		if ( format == RGB16 || format == RGBA16 ) return (surface->w * surface->h * 2);
+		if ( format == ALPHA )  return (surface->w * surface->h);
+		GLASSERT( 0 );
 		return 0;
 	}
 
@@ -45,8 +46,8 @@ public:
 	int format;
 
 	SDL_Surface* surface;
-	std::vector<U16> pixelBuffer16;	// RGBA16, RGB16
-	std::vector<U8>  pixelBuffer8;	// ALPHA
+	U16* pixelBuffer16;	// RGBA16, RGB16
+	U8*  pixelBuffer8;	// ALPHA
 };
 
 

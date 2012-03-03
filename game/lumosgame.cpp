@@ -12,6 +12,7 @@ LumosGame::LumosGame(  int width, int height, int rotation, const char* savepath
 	: Game( width, height, rotation, 480, savepath )
 {
 	InitButtonLooks();
+
 	PushScene( SCENE_TITLE, 0 );
 	PushPopScene();
 }
