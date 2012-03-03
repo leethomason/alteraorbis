@@ -37,10 +37,13 @@ class GPUShader;
 struct ModelAtom 
 {
 	Texture* texture;
-#ifdef EL_USE_VBO
+#	ifdef EL_USE_VBO
 	mutable GPUVertexBuffer vertexBuffer;		// created on demand, hence 'mutable'
 	mutable GPUIndexBuffer  indexBuffer;
-#endif
+#	ifdef XENOENGINE_INSTANCING
+	mutable GPUInstanceBuffer instanceBuffer;
+#	endif
+#	endif
 
 	U32 nVertex;
 	U32 nIndex;
@@ -56,6 +59,9 @@ struct ModelAtom
 	//
 	const U16* index;		// points back to ModelResource memory.
 	const Vertex* vertex;	// points back to ModelResource memory.
+#	ifdef XENOENGINE_INSTANCING
+	const U8* instance;
+#	endif
 };
 
 
@@ -108,6 +114,7 @@ public:
 	int						instances;		// # of times the model is repeated.
 	U16*					allIndex;		// memory store for vertices and indices. Used for hit-testing.
 	Vertex*					allVertex;
+	U8*						allInstance;	// this can be null, if not instancing, or this resource isn't instanced.
 
 	ModelAtom atom[EL_MAX_MODEL_GROUPS];
 };

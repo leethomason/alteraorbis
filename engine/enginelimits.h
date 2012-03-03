@@ -18,7 +18,7 @@
 
 
 #define XENOENGINE_OPENGL 2
-//#define XENOENGINE_INSTANCING
+#define XENOENGINE_INSTANCING
 
 
 enum HitTestMethod 

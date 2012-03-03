@@ -88,6 +88,44 @@ void GPUIndexBuffer::Destroy()
 }
 
 
+/*static*/ GPUInstanceBuffer GPUInstanceBuffer::Create( const uint8_t* data, int nData )
+{
+	GPUInstanceBuffer buffer;
+
+	if ( GPUShader::SupportsVBOs() ) {
+		U32 dataSize  = nData;
+		glGenBuffersX( 1, (GLuint*) &buffer.id );
+		glBindBufferX( GL_ARRAY_BUFFER, buffer.id );
+		// if vertex is null this will just allocate
+		glBufferDataX( GL_ARRAY_BUFFER, dataSize, data, data ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW );
+		glBindBufferX( GL_ARRAY_BUFFER, 0 );
+		CHECK_GL_ERROR;
+	}
+	return buffer;
+}
+
+
+void GPUInstanceBuffer::Upload( const uint8_t* data, int count, int start )
+{
+	GLASSERT( GPUShader::SupportsVBOs() );
+	glBindBufferX( GL_ARRAY_BUFFER, id );
+	// target, offset, size, data
+	glBufferSubDataX( GL_ARRAY_BUFFER, start*sizeof(uint8_t), count*sizeof(uint8_t), data );
+	CHECK_GL_ERROR;
+	glBindBufferX( GL_ARRAY_BUFFER, 0 );
+	CHECK_GL_ERROR;
+}
+
+
+void GPUInstanceBuffer::Destroy() 
+{
+	if ( id ) {
+		glDeleteBuffersX( 1, (GLuint*) &id );
+		id = 0;
+	}
+}
+
+
 MatrixStack::MatrixStack() : index( 0 )
 {
 	stack[0].SetIdentity();

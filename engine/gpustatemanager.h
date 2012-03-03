@@ -78,6 +78,17 @@ public:
 };
 
 
+class GPUInstanceBuffer : public GPUBuffer
+{
+public:
+	static GPUInstanceBuffer Create( const uint8_t* index, int nIndex );
+	void Upload( const uint8_t* data, int size, int start );
+
+	GPUInstanceBuffer() : GPUBuffer() {}
+	void Destroy();
+};
+
+
 struct GPUStream {
 	// WARNING: Clear/init calls memset(0) on structure. Need to change
 	// if this gets a vtable

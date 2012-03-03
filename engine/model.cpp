@@ -33,13 +33,16 @@ void ModelResource::Free()
 #ifdef EL_USE_VBO
 		atom[i].vertexBuffer.Destroy();
 		atom[i].indexBuffer.Destroy();
+#ifdef XENOENGINE_INSTANCING
+		atom[i].instanceBuffer.Destroy();
+#endif
 #endif
 		memset( &atom[i], 0, sizeof( ModelAtom ) );
 	}
 	delete [] allVertex;
 	delete [] allIndex;
+	delete [] allInstance;
 }
-
 
 
 void ModelResource::DeviceLoss()
@@ -94,10 +97,10 @@ void ModelLoader::Load( const gamedb::Item* item, ModelResource* res )
 	res->header.Load( item );
 
 	res->instances = 1;
-#	if XENOENGINE_INSTANCING
+#	ifdef XENOENGINE_INSTANCING
 	res->instances = EL_TUNE_INSTANCE_MEM / sizeof( Vertex );
 	if ( res->instances > EL_MAX_INSTANCE ) 
-		res->instance = EL_MAX_INSTANCE;
+		res->instances = EL_MAX_INSTANCE;
 	if ( res->instances < 1 )
 		res->instances = 1;		// big model.
 #	endif
@@ -116,6 +119,7 @@ void ModelLoader::Load( const gamedb::Item* item, ModelResource* res )
 
 	res->allVertex = new Vertex[ res->header.nTotalVertices * res->instances ];
 	res->allIndex  = new U16[ res->header.nTotalIndices * res->instances ];
+	res->allInstance = 0;
 
 	int vOffset = 0;
 	int iOffset = 0;
@@ -133,14 +137,46 @@ void ModelLoader::Load( const gamedb::Item* item, ModelResource* res )
 			vOffset += res->atom[i].nVertex;
 		}
 	}
-	/*
 	else {
 		const gamedb::Reader* reader = gamedb::Reader::GetContext( item );
-		const void* mem = reader->AccessData( item, "vertex" );
-		for( int i=0; i<res->instances; ++i ) {
-			memcpy( res->allVertex + 
+		res->allInstance = new U8[res->header.nTotalVertices * res->instances];
+
+		U8* pInstance = res->allInstance;
+		Vertex* pVertex = res->allVertex;
+		U16* pIndex = res->allIndex;
+
+		const Vertex* vmem = (const Vertex*) reader->AccessData( item, "vertex" );
+		for( int a=0; a<res->header.nAtoms; ++a ) {
+			res->atom[a].vertex = pVertex;
+			for( int i=0; i<res->instances; ++i ) {
+				memcpy( pVertex, vmem, sizeof(Vertex)*res->atom[a].nVertex );
+				pVertex += res->atom[a].nVertex;
+			}
+			vmem += res->atom[a].nVertex;
 		}
-	*/
+		GLASSERT( pVertex == res->allVertex + res->header.nTotalVertices * res->instances );
+
+		const U16* imem = (const U16*) reader->AccessData( item, "index" );
+		for( int a=0; a<res->header.nAtoms; ++a ) {
+			res->atom[a].index = pIndex;
+			for( int i=0; i<res->instances; ++i ) {
+				memcpy( pIndex, imem, sizeof(U16)*res->atom[a].nIndex );
+				pIndex += res->atom[a].nIndex;
+			}
+			imem += res->atom[a].nIndex;
+		}
+		GLASSERT( pIndex == res->allIndex + res->header.nTotalIndices * res->instances );
+
+		for( int a=0; a<res->header.nAtoms; ++a ) {
+			res->atom[a].instance = pInstance;
+			for( int i=0; i<res->instances; ++i ) {
+				for( unsigned j=0; j<res->atom[a].nVertex; ++j ) {
+					*pInstance++ = i;
+				}
+			}
+		}
+		GLASSERT( pInstance == res->allInstance + res->header.nTotalVertices * res->instances );
+	}
 }
 
 
@@ -376,6 +412,9 @@ void ModelAtom::LowerBind( GPUShader* shader, const GPUStream& stream ) const
 
 		vertexBuffer = GPUVertexBuffer::Create( vertex, nVertex );
 		indexBuffer  = GPUIndexBuffer::Create(  index,  nIndex );
+#ifdef XENOENGINE_INSTANCING
+		instanceBuffer = GPUInstanceBuffer::Create( instance, nVertex );
+#endif
 	}
 
 	if ( vertexBuffer.IsValid() && indexBuffer.IsValid() ) 
