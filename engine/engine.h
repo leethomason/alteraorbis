@@ -38,6 +38,18 @@ class RenderQueue;
 	Blend		disabled
 */
 
+/*
+	Renderer
+
+	Assets
+		- texture atlasing in builder. (Atlased textures can't be repeated.)
+		- alpha: transparency or emmissive
+		- 
+
+	Renderer
+		- shadows, glow, colors
+		
+*/
 
 class Engine
 {

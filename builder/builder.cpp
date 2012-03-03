@@ -26,24 +26,25 @@
 #include "../grinliz/gldebug.h"
 #include "../grinliz/gltypes.h"
 #include "../grinliz/glcolor.h"
+#include "../grinliz/gldynamic.h"
+#include "../grinliz/glutil.h"
+#include "../grinliz/glstringutil.h"
+#include "../grinliz/glstringutil.h"
+
 #include "../engine/enginelimits.h"
+#include "../engine/serialize.h"
 
 #include <string>
 #include <vector>
 
-#include "../grinliz/gldynamic.h"
-#include "../grinliz/glutil.h"
-#include "../grinliz/glstringutil.h"
 #include "../tinyxml2/tinyxml2.h"
+#include "../importers/import.h"
+#include "../shared/gamedbwriter.h"
+#include "../version.h"
 
 #include "modelbuilder.h"
-#include "../engine/serialize.h"
-#include "../importers/import.h"
-
-#include "../shared/gamedbwriter.h"
-#include "../grinliz/glstringutil.h"
+#include "btexture.h"
 #include "dither.h"
-#include "../version.h"
 
 using namespace std;
 using namespace grinliz;
@@ -51,9 +52,6 @@ using namespace tinyxml2;
 
 typedef SDL_Surface* (SDLCALL * PFN_IMG_LOAD) (const char *file);
 PFN_IMG_LOAD libIMG_Load;
-
-vector<U16> pixelBuffer16;
-vector<U8> pixelBuffer8;
 
 string inputDirectory;
 string inputFullPath;
@@ -64,19 +62,6 @@ int totalTextureMem = 0;
 int totalDataMem = 0;
 
 gamedb::Writer* writer;
-
-
-const int GLYPH_CX = 16;
-const int GLYPH_CY = 8;
-const int GLYPH_WIDTH = 256 / GLYPH_CX;
-const int GLYPH_HEIGHT = 128 / GLYPH_CY;
-
-struct GlyphMetric
-{
-	U16 offset;
-	U16 width;
-};
-GlyphMetric gGlyphMetric[GLYPH_CX*GLYPH_CY];
 
 
 void ExitError( const char* tag, 
@@ -92,30 +77,6 @@ void ExitError( const char* tag,
 	exit( 1 );
 }
 
-
-void InsertTextureToDB( const char* name, 
-						const char* format, 
-						bool isImage, 
-						bool metrics, 
-						int width, 
-						int height, 
-						const void* pixels, 
-						int sizeInBytes,
-						bool noMip )
-{
-	gamedb::WItem* witem = writer->Root()->FetchChild( "textures" )->CreateChild( name );
-
-	witem->SetData( "pixels", pixels, sizeInBytes );
-	if ( metrics ) {
-		witem->SetData( "metrics", gGlyphMetric, sizeof( GlyphMetric )*GLYPH_CX*GLYPH_CY );
-	}
-
-	witem->SetString( "format", format );
-	witem->SetBool( "isImage", isImage );
-	witem->SetInt( "width", width );
-	witem->SetInt( "height", height );
-	witem->SetBool( "noMip", noMip );
-}
 
 
 void LoadLibrary()
@@ -497,11 +458,6 @@ void ProcessModel( XMLElement* model )
 	int startVertex = 0;
 	Vector3F origin = { 0, 0, 0 };
 
-	//string filename;
-	//model->QueryStringAttribute( "filename", &filename );
-	//tring modelName;
-	//model->QueryStringAttribute( "modelName", &modelName );
-
 	GLString pathName, assetName, extension;
 	ParseNames( model, &assetName, &pathName, &extension );
 
@@ -513,17 +469,6 @@ void ProcessModel( XMLElement* model )
 		usingSubModels = true;
 	}
 	
-	//GLString fullIn = inputPath.c_str(); 
-	//fullIn += filename.c_str();
-	//
-	//GLString base, name, extension;
-	//grinliz::StrSplitFilename( fullIn, &base, &name, &extension );
-
-	// If the model name is specified, it is one model in a lineup.
-	// Instead of the filename, use the specified model name.
-	//if ( !modelName.empty() )
-	//	name = modelName.c_str();
-
 	printf( "Model '%s'", assetName.c_str() );
 
 	ModelBuilder* builder = new ModelBuilder();
@@ -647,7 +592,7 @@ void ProcessModel( XMLElement* model )
 	delete builder;
 }
 
-
+#if 0
 bool BarIsBlack( SDL_Surface* surface, int x, int y0, int y1 )
 {
 	bool black = true;
@@ -664,7 +609,7 @@ bool BarIsBlack( SDL_Surface* surface, int x, int y0, int y1 )
 	}
 	return black;
 }
-
+#endif
 
 #if 0
 void CalcFontWidths( SDL_Surface* surface )
@@ -699,37 +644,8 @@ void CalcFontWidths( SDL_Surface* surface )
 #endif
 
 
-SDL_Surface* CreateScaledSurface( int w, int h, SDL_Surface* surface )
-{
-	int sx = surface->w / w;
-	int sy = surface->h / h;
 
-	GLASSERT( sx > 0 && sy > 0 );
-	SDL_Surface* newSurf = SDL_CreateRGBSurface( 0, w, h, surface->format->BitsPerPixel, surface->format->Rmask, surface->format->Gmask, surface->format->Bmask, surface->format->Amask );
-
-	for( int y=0; y<h; ++y ) {
-		for( int x=0; x<w; ++x ) {
-			int r32=0, g32=0, b32=0, a32=0;
-			
-			int xSrc = x*sx;
-			int ySrc = y*sy;
-			for( int j=0; j<sy; ++j ) {
-				for( int i=0; i<sx; ++i ) {
-					Color4U8 c = GetPixel( surface, xSrc+i, ySrc+j );
-					r32 += c.r;
-					g32 += c.g;
-					b32 += c.b;
-					a32 += c.a;
-				}
-			}
-			Color4U8 c = { r32/(sx*sy), g32/(sx*sy), b32/(sx*sy), a32/(sx*sy) };
-			PutPixel( newSurf, x, y, c );
-		}
-	}
-	return newSurf;
-}
-
-
+#if 0
 void BlitTexture( const XMLElement* element, SDL_Surface* target )
 {
 	int sx=0, sy=0, sw=0, sh=0, tx=0, ty=0, tw=target->w, th=target->h;
@@ -788,64 +704,22 @@ void BlitTexture( const XMLElement* element, SDL_Surface* target )
 	}
 	SDL_FreeSurface( surface );
 }
+#endif
 
 
 void ProcessTexture( XMLElement* texture )
 {
-	bool isImage = false;
-	if ( StrEqual( texture->Value(), "image" )) {
-		isImage = true;
-		printf( "Image" );
-	}
-	else {
-		printf( "Texture" );
-	}
+	BTexture btexture;
+	btexture.ParseTag( texture );
 
-	bool dither = true;
-	bool nomip = false;
-	if ( StrEqual( texture->Attribute( "dither" ), "false" ) ) {
-		dither = false;
-	}
-	if ( StrEqual( texture->Attribute( "noMip" ), "true" ) ) {
-		nomip = true;
-	}
-	int width = 0;
-	int height = 0;
-	texture->QueryIntAttribute( "width", &width );
-	texture->QueryIntAttribute( "height", &height );
-	
 	GLString pathName, assetName;
 	ParseNames( texture, &assetName, &pathName, 0 );
+	btexture.SetNames( assetName, pathName );
 
-	SDL_Surface* surface = libIMG_Load( pathName.c_str() );
-	if ( !surface ) {
-		ExitError( "Texture", pathName.c_str(), assetName.c_str(), "Could not load asset file." );
-	}
-	else {
-		if (    isImage
-			 || ( surface->w == 384 && surface->h == 384 )			// weird exception (battleship and base)
-			 || ( IsPowerOf2( surface->w ) && IsPowerOf2( surface-> h ) ) )
-		{
-			// no problem.
-		}
-		else {
-			printf( "ERROR: width=%d height=%d\n", surface->w, surface->h );
-			ExitError( "Texture", pathName.c_str(), assetName.c_str(), "Textures must be power of 2 dimension." );
-		}
-		printf( "  Loaded: '%s' bpp=%d", 
-				assetName.c_str(),
-				surface->format->BitsPerPixel );
-	}
+	btexture.Load();
+	btexture.Scale();
 
-	if ( width && height ) {
-		SDL_Surface* old = surface;
-		surface = CreateScaledSurface( width, height, surface );
-		SDL_FreeSurface( old );
-
-		printf( " Scaled" );
-	}
-	printf( " w=%d h=%d", surface->w, surface->h );
-
+	/*
 	// run through child tags.
 	// interpolate in
 	bool sub=false;
@@ -859,89 +733,10 @@ void ProcessTexture( XMLElement* texture )
 	if ( sub ) {
 		SDL_SaveBMP( surface, "comp.bmp" );
 	}
+	*/
 
-	pixelBuffer16.resize(0);
-	pixelBuffer8.resize(0);
-
-	switch( surface->format->BitsPerPixel ) {
-		case 32:
-			printf( "  RGBA memory=%dk\n", (surface->w * surface->h * 2)/1024 );
-			totalTextureMem += (surface->w * surface->h * 2);
-
-			// Bottom up!
-			if ( !dither ) {
-				for( int j=surface->h-1; j>=0; --j ) {
-					for( int i=0; i<surface->w; ++i ) {
-						Color4U8 c = GetPixel( surface, i, j );
-
-						U16 p =
-								  ( ( c.r>>4 ) << 12 )
-								| ( ( c.g>>4 ) << 8 )
-								| ( ( c.b>>4 ) << 4)
-								| ( ( c.a>>4 ) << 0 );
-
-						pixelBuffer16.push_back(p);
-					}
-				}
-			}
-			else {
-				pixelBuffer16.resize( surface->w*surface->h );
-				pixelBuffer16.reserve( surface->w*surface->h );
-				OrderedDitherTo16( surface, RGBA16, true, &pixelBuffer16[0] );
-			}
-			InsertTextureToDB( assetName.c_str(), "RGBA16", isImage, false, surface->w, surface->h, &pixelBuffer16[0], pixelBuffer16.size()*2, nomip );
-			break;
-
-		case 24:
-			printf( "  RGB memory=%dk\n", (surface->w * surface->h * 2)/1024 );
-			totalTextureMem += (surface->w * surface->h * 2);
-
-			// Bottom up!
-			if ( !dither ) {
-				for( int j=surface->h-1; j>=0; --j ) {
-					for( int i=0; i<surface->w; ++i ) {
-						Color4U8 c = GetPixel( surface, i, j );
-
-						U16 p = 
-								  ( ( c.r>>3 ) << 11 )
-								| ( ( c.g>>2 ) << 5 )
-								| ( ( c.b>>3 ) );
-
-						pixelBuffer16.push_back(p);
-					}
-				}
-			}
-			else {
-				pixelBuffer16.resize( surface->w*surface->h );
-				pixelBuffer16.reserve( surface->w*surface->h );
-				OrderedDitherTo16( surface, RGB16, true, &pixelBuffer16[0] );
-			}
-			InsertTextureToDB( assetName.c_str(), "RGB16", isImage, false, surface->w, surface->h, &pixelBuffer16[0], pixelBuffer16.size()*2, nomip );
-			break;
-
-		case 8:
-			printf( "  Alpha memory=%dk\n", (surface->w * surface->h * 1)/1024 );
-			totalTextureMem += (surface->w * surface->h * 1);
-
-			// Bottom up!
-			for( int j=surface->h-1; j>=0; --j ) {
-				for( int i=0; i<surface->w; ++i ) {
-				    U8 *p = (U8 *)surface->pixels + j*surface->pitch + i;
-					//SDL_RWwrite( fp, p, 1, 1 );
-					pixelBuffer8.push_back(*p);
-				}
-			}
-			InsertTextureToDB( assetName.c_str(), "ALPHA", isImage, false, surface->w, surface->h, &pixelBuffer8[0], pixelBuffer8.size(), nomip );
-			break;
-
-		default:
-			ExitError( "Texture", pathName.c_str(), assetName.c_str(), "Unsupported bit depth.\n" );
-			break;
-	}
-
-	if ( surface ) { 
-		SDL_FreeSurface( surface );
-	}
+	btexture.ToBuffer();
+	btexture.InsertTextureToDB( writer->Root()->FetchChild( "textures" ) );
 }
 
 
@@ -1112,6 +907,7 @@ int main( int argc, char* argv[] )
 	printf( "Opening, path: '%s' filename: '%s'\n", inputDirectory.c_str(), inputFullPath.c_str() );
 	
 	// Test:
+	/*
 	{
 		string testInput = inputDirectory + "Lenna.png";
 		SDL_Surface* surface = libIMG_Load( testInput.c_str() );
@@ -1149,6 +945,7 @@ int main( int argc, char* argv[] )
 			SDL_FreeSurface( surface );
 		}
 	}
+	*/
 
 	XMLDocument xmlDoc;
 	xmlDoc.LoadFile( inputFullPath.c_str() );
@@ -1189,6 +986,9 @@ int main( int argc, char* argv[] )
 		else if ( StrEqual( child->Value(), "font" )) {
 			ProcessFont( child );
 		}
+//		else if ( StrEqual( child->Value(), "atlas" )) {
+//			ProcessAtlas( child );
+//		}
 		else {
 			printf( "Unrecognized element: %s\n", child->Value() );
 		}
