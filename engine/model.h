@@ -59,11 +59,39 @@ struct ModelAtom
 };
 
 
+struct ModelHeader
+{
+	// flags
+	enum {
+		RESOURCE_NO_SHADOW	= 0x08,		// model casts no shadow
+	};
+	bool NoShadow() const			{ return (flags&RESOURCE_NO_SHADOW) ? true : false; }
+
+	grinliz::CStr<EL_FILE_STRING_LEN>	name;
+	U16						nTotalVertices;		// in all atoms
+	U16						nTotalIndices;
+	U16						flags;
+	U16						nAtoms;
+	grinliz::Rectangle3F	bounds;
+	grinliz::Vector3F		trigger;			// location for gun
+	float					eye;				// location model "looks from"
+	float					target;				// height of chest shot
+
+	void Set( const char* name, int nGroups, int nTotalVertices, int nTotalIndices,
+			  const grinliz::Rectangle3F& bounds );
+
+	void Load(	const gamedb::Item* );	// database connection
+	void Save(	gamedb::WItem* parent );	// database connection
+};
+
+
 class ModelResource
 {
 public:
 	ModelResource()		{ memset( &header, 0, sizeof( header ) ); }
 	~ModelResource()	{ Free(); }
+
+	const grinliz::Rectangle3F& AABB() const	{ return header.bounds; }
 
 	void Free();
 	void DeviceLoss();
@@ -77,10 +105,9 @@ public:
 	ModelHeader header;						// loaded
 
 	grinliz::Rectangle3F	hitBounds;		// for picking - a bounds approximation
+	int						instances;		// # of times the model is repeated.
 	U16*					allIndex;		// memory store for vertices and indices. Used for hit-testing.
 	Vertex*					allVertex;
-
-	const grinliz::Rectangle3F& AABB() const	{ return header.bounds; }
 
 	ModelAtom atom[EL_MAX_MODEL_GROUPS];
 };
@@ -130,6 +157,7 @@ public:
 	void Load( const gamedb::Item*, ModelResource* res );
 
 private:
+	void LoadAtom( const gamedb::Item* item, int index, ModelResource* res );
 };
 
 

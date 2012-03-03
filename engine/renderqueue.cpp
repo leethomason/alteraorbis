@@ -131,7 +131,7 @@ void RenderQueue::Add( Model* model, const ModelAtom* atom, GPUShader* shader, c
 	
 	item->atomIndex = -1;
 	const ModelResource* resource = model->GetResource();
-	for( int i=0; i<resource->header.nGroups; ++i ) {
+	for( int i=0; i<resource->header.nAtoms; ++i ) {
 		if ( &resource->atom[i] == atom ) {
 			item->atomIndex = i;
 			break;

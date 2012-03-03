@@ -43,32 +43,8 @@ struct ModelGroup
 };
 
 
-struct ModelHeader
-{
-	// flags
-	enum {
-		RESOURCE_NO_SHADOW	= 0x08,		// model casts no shadow
-	};
-	bool NoShadow() const			{ return (flags&RESOURCE_NO_SHADOW) ? true : false; }
 
-	grinliz::CStr<EL_FILE_STRING_LEN>	name;
-	U16						nTotalVertices;		// in all groups
-	U16						nTotalIndices;
-	U16						flags;
-	U16						nGroups;
-	grinliz::Rectangle3F	bounds;
-	grinliz::Vector3F		trigger;			// location for gun
-	float					eye;				// location model "looks from"
-	float					target;				// height of chest shot
-
-	void Set( const char* name, int nGroups, int nTotalVertices, int nTotalIndices,
-			  const grinliz::Rectangle3F& bounds );
-
-	void Load(	const gamedb::Item* );	// database connection
-	void Save(	gamedb::WItem* parent );	// database connection
-};
-
-
+/*
 class XMLUtil
 {
 public:
@@ -87,5 +63,6 @@ public:
 private:
 	static void Space( FILE* fp, int depth );
 };
+*/
 
 #endif // UFOATTACK_SERIALIZE_INCLUDED

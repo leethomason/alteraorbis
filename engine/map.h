@@ -31,6 +31,8 @@
 
 #include "../gamui/gamui.h"
 
+#include "../tinyxml2/tinyxml2.h"
+
 #include "vertex.h"
 #include "enginelimits.h"
 #include "serialize.h"
@@ -39,12 +41,12 @@
 #include "texture.h"
 #include "gpustatemanager.h"
 
+
 class Model;
 class ModelResource;
 class SpaceTree;
 class RenderQueue;
 class ParticleSystem;
-class TiXmlElement;
 class Map;
 
 
@@ -166,11 +168,8 @@ public:
 	virtual void BeginTexture( const void* textureHandle );
 	virtual void Render( const void* renderState, const void* textureHandle, int nIndex, const uint16_t* index, int nVertex, const gamui::Gamui::Vertex* vertex );
 
-//	Texture* BackgroundTexture()	{ return backgroundTexture; }
-//	Texture* LightMapTexture()		{ return lightMapTex; }
-	
-	void Save( FILE* fp, int depth );
-	void Load( const TiXmlElement* mapNode );
+	void Save( tinyxml2::XMLPrinter*  );
+	void Load( const tinyxml2::XMLElement* mapNode );
 
 
 protected:

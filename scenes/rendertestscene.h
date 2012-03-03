@@ -26,13 +26,14 @@ public:
 	virtual void Draw3D();
 
 private:
-	enum { NUM_ITEMS = 4 };
+	enum { NUM_ITEMS = 4,
+		   NUM_MODELS = 8 };
 
 	LumosGame* lumosGame;
 	gamui::PushButton okay;
 
 	Engine* engine;
-	Model*  model;
+	Model*  model[NUM_MODELS];
 };
 
 #endif // RENDERTESTSCENE_INCLUDED

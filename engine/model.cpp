@@ -29,7 +29,7 @@ using namespace grinliz;
 
 void ModelResource::Free()
 {
-	for( unsigned i=0; i<header.nGroups; ++i ) {
+	for( unsigned i=0; i<header.nAtoms; ++i ) {
 #ifdef EL_USE_VBO
 		atom[i].vertexBuffer.Destroy();
 		atom[i].indexBuffer.Destroy();
@@ -45,7 +45,7 @@ void ModelResource::Free()
 void ModelResource::DeviceLoss()
 {
 #ifdef EL_USE_VBO
-	for( unsigned i=0; i<header.nGroups; ++i ) {
+	for( unsigned i=0; i<header.nAtoms; ++i ) {
 		atom[i].vertexBuffer.Destroy();
 		atom[i].indexBuffer.Destroy();
 	}
@@ -63,7 +63,7 @@ int ModelResource::Intersect(	const grinliz::Vector3F& point,
 		float close2 = FLT_MAX;
 		Vector3F test;
 
-		for( unsigned i=0; i<header.nGroups; ++i ) {
+		for( unsigned i=0; i<header.nAtoms; ++i ) {
 			for( unsigned j=0; j<atom[i].nIndex; j+=3 ) {
 				int r = IntersectRayTri( point, dir, 
 										 atom[i].vertex[ atom[i].index[j+0] ].pos,
@@ -93,55 +93,75 @@ void ModelLoader::Load( const gamedb::Item* item, ModelResource* res )
 {
 	res->header.Load( item );
 
-	res->allVertex = new Vertex[ res->header.nTotalVertices ];
-	res->allIndex  = new U16[ res->header.nTotalIndices ];
-
-	item->GetData( "vertex", res->allVertex, res->header.nTotalVertices*sizeof(Vertex) );
-	item->GetData( "index", res->allIndex, res->header.nTotalIndices*sizeof(U16) );
+	res->instances = 1;
+#	if XENOENGINE_INSTANCING
+	res->instances = EL_TUNE_INSTANCE_MEM / sizeof( Vertex );
+	if ( res->instances > EL_MAX_INSTANCE ) 
+		res->instance = EL_MAX_INSTANCE;
+	if ( res->instances < 1 )
+		res->instances = 1;		// big model.
+#	endif
 
 	// compute the hit testing AABB
 	float ave = grinliz::Max( res->header.bounds.SizeX(), res->header.bounds.SizeZ() )*0.5f;
-	//float ave = Max( res->header.bounds.SizeX(), res->header.bounds.SizeZ() );
 	res->hitBounds.min.Set( -ave, res->header.bounds.min.y, -ave );
 	res->hitBounds.max.Set( ave, res->header.bounds.max.y, ave );
 
-	//GLOUTPUT(( "Load Model: %s\n", res->header.name.c_str() ));
-
-	GLASSERT( res->header.nGroups < 10 );
-	for( U32 i=0; i<res->header.nGroups; ++i )
+	for( U32 i=0; i<res->header.nAtoms; ++i )
 	{
 		const gamedb::Item* groupItem = item->Child( i );
-
-		ModelGroup group;
-		group.Load( groupItem );
-
-		const char* textureName = group.textureName.c_str();
-		if ( !textureName[0] ) {
-			textureName = "white";
-		}
-
-		GLString base, texname, extension;
-		StrSplitFilename( GLString( textureName ), &base, &texname, &extension );
-		Texture* t = TextureManager::Instance()->GetTexture( texname.c_str() );
-
-		GLASSERT( t );                       
-		res->atom[i].texture = t;
-		res->atom[i].nVertex = group.nVertex;
-		res->atom[i].nIndex = group.nIndex;
-
+		LoadAtom( groupItem, i, res );
 		//GLOUTPUT(( "  '%s' vertices=%d tris=%d\n", textureName, (int)res->atom[i].nVertex, (int)(res->atom[i].nIndex/3) ));
 	}
 
+	res->allVertex = new Vertex[ res->header.nTotalVertices * res->instances ];
+	res->allIndex  = new U16[ res->header.nTotalIndices * res->instances ];
+
 	int vOffset = 0;
 	int iOffset = 0;
-	for( U32 i=0; i<res->header.nGroups; ++i )
-	{
-		res->atom[i].index  = res->allIndex+iOffset;
-		res->atom[i].vertex = res->allVertex+vOffset;
 
-		iOffset += res->atom[i].nIndex;
-		vOffset += res->atom[i].nVertex;
+	if ( res->instances == 1 ) {
+		item->GetData( "vertex", res->allVertex, res->header.nTotalVertices*sizeof(Vertex) );
+		item->GetData( "index",  res->allIndex,  res->header.nTotalIndices*sizeof(U16) );
+
+		for( U32 i=0; i<res->header.nAtoms; ++i )
+		{
+			res->atom[i].index  = res->allIndex+iOffset;
+			res->atom[i].vertex = res->allVertex+vOffset;
+
+			iOffset += res->atom[i].nIndex;
+			vOffset += res->atom[i].nVertex;
+		}
 	}
+	/*
+	else {
+		const gamedb::Reader* reader = gamedb::Reader::GetContext( item );
+		const void* mem = reader->AccessData( item, "vertex" );
+		for( int i=0; i<res->instances; ++i ) {
+			memcpy( res->allVertex + 
+		}
+	*/
+}
+
+
+void ModelLoader::LoadAtom( const gamedb::Item* item, int i, ModelResource* res )
+{	
+	ModelGroup group;
+	group.Load( item );
+
+	const char* textureName = group.textureName.c_str();
+	if ( !textureName[0] ) {
+		textureName = "white";
+	}
+
+	GLString base, texname, extension;
+	StrSplitFilename( GLString( textureName ), &base, &texname, &extension );
+	Texture* t = TextureManager::Instance()->GetTexture( texname.c_str() );
+
+	GLASSERT( t );                       
+	res->atom[i].texture = t;
+	res->atom[i].nVertex = group.nVertex;
+	res->atom[i].nIndex = group.nIndex;
 }
 
 
@@ -250,7 +270,7 @@ void Model::SetSkin( int gender, int armor, int appearance )
 	//float tHeadY = float( gender ) / 2.0f;	// always 0! Models have correct Y xform for head.
 	float tArmor = float( armor ) / 16.0f;
 
-	GLASSERT( resource->header.nGroups == 2 );
+	GLASSERT( resource->header.nAtoms == 2 );
 
 	if ( StrEqual( resource->atom[0].texture->Name(), "characters" ) ) {
 		SetTexXForm( 0, 1, 1, tHeadX, 0 );
@@ -336,7 +356,7 @@ void Model::Queue( RenderQueue* queue, GPUShader* opaque, GPUShader* transparent
 
 	Texture* overrideTexture = textureReplace ? textureReplace : setTexture;		// 'overrideTexture' is usually null
 
-	for( U32 i=0; i<resource->header.nGroups; ++i ) 
+	for( U32 i=0; i<resource->header.nAtoms; ++i ) 
 	{
 		Texture* t = overrideTexture ? overrideTexture : resource->atom[i].texture;	// 't' is never null. This is just used to pass the correct shader through.
 		queue->Add( this,									// reference back
