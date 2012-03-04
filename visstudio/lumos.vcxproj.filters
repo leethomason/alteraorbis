@@ -109,9 +109,6 @@
     <ClCompile Include="..\shared\gamedbreader.cpp">
       <Filter>Source Files\shared</Filter>
     </ClCompile>
-    <ClCompile Include="..\shared\gamedbwriter.cpp">
-      <Filter>Source Files\shared</Filter>
-    </ClCompile>
     <ClCompile Include="..\shared\glmap.cpp">
       <Filter>Source Files\shared</Filter>
     </ClCompile>
@@ -232,9 +229,6 @@
       <Filter>Source Files\shared</Filter>
     </ClInclude>
     <ClInclude Include="..\shared\gamedbreader.h">
-      <Filter>Source Files\shared</Filter>
-    </ClInclude>
-    <ClInclude Include="..\shared\gamedbwriter.h">
       <Filter>Source Files\shared</Filter>
     </ClInclude>
     <ClInclude Include="..\shared\glmap.h">

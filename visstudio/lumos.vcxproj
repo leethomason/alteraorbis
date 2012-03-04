@@ -101,7 +101,6 @@
     <ClCompile Include="..\scenes\dialogscene.cpp" />
     <ClCompile Include="..\scenes\rendertestscene.cpp" />
     <ClCompile Include="..\shared\gamedbreader.cpp" />
-    <ClCompile Include="..\shared\gamedbwriter.cpp" />
     <ClCompile Include="..\shared\glmap.cpp" />
     <ClCompile Include="..\win32\audio.cpp" />
     <ClCompile Include="..\win32\framebuffer.cpp" />
@@ -144,7 +143,6 @@
     <ClInclude Include="..\scenes\titlescene.h" />
     <ClInclude Include="..\shared\gamedb.h" />
     <ClInclude Include="..\shared\gamedbreader.h" />
-    <ClInclude Include="..\shared\gamedbwriter.h" />
     <ClInclude Include="..\shared\glmap.h" />
     <ClInclude Include="..\win32\audio.h" />
     <ClInclude Include="..\win32\framebuffer.h" />

@@ -548,21 +548,6 @@ int Model::IntersectRay(	const Vector3F& _origin,
 }
 
 
-
-/*
-void Model::AddIndices( CDynArray<U16>* indexArr, int atomIndex ) const
-{
-	U16* dst = indexArr->PushArr( resource->atom[atomIndex].nIndex );
-	const U16* src = resource->atom[atomIndex].index;
-
-	for( int n=resource->atom[atomIndex].nIndex; n; --n, ++src, ++dst ) {
-		*dst = *src + cacheStart[atomIndex];
-	}
-}
-*/
-
-
-
 void ModelResourceManager::AddModelResource( ModelResource* res )
 {
 	modelResArr.Push( res );

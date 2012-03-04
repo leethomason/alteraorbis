@@ -81,6 +81,8 @@
     <ClCompile Include="..\shared\gamedbreader.cpp" />
     <ClCompile Include="..\shared\gamedbwriter.cpp" />
     <ClCompile Include="..\shared\glmap.cpp" />
+    <ClCompile Include="atlas.cpp" />
+    <ClCompile Include="btexture.cpp" />
     <ClCompile Include="builder.cpp" />
     <ClCompile Include="dither.cpp" />
     <ClCompile Include="modelbuilder.cpp" />
@@ -93,6 +95,8 @@
     <ClInclude Include="..\shared\gamedbreader.h" />
     <ClInclude Include="..\shared\gamedbwriter.h" />
     <ClInclude Include="..\shared\glmap.h" />
+    <ClInclude Include="atlas.h" />
+    <ClInclude Include="btexture.h" />
     <ClInclude Include="builder.h" />
     <ClInclude Include="dither.h" />
     <ClInclude Include="modelbuilder.h" />

@@ -21,5 +21,10 @@
 grinliz::Color4U8 GetPixel( const SDL_Surface *surface, int x, int y);
 void PutPixel(SDL_Surface *surface, int x, int y, const grinliz::Color4U8& pixel);
 
+class Builder
+{
+
+
+};
 
 #endif // UFO_BUILDER_INCLUDED

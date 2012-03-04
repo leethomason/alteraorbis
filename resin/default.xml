@@ -19,6 +19,11 @@
   <texture filename="particleQuad.png" />
   <texture filename="particleSparkle.png" />
 
+  <atlas>
+    <texture filename="testgradient.png" />
+    <texture filename="testsquare.png" />
+    <texture filename="testwrap.png" />
+  </atlas>
   
   <!-- Tactical Sprite models are centered at (0,0,0) -->
   <model filename="chess_characters.ac" modelName="maleMarine"   origin="-1 0 0" shading="flat" polyRemoval="pre" trigger="-1.35 1.00 0.0" eye="1.81" target="1.15"/>
