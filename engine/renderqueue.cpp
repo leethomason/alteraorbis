@@ -181,7 +181,7 @@ void RenderQueue::Submit( GPUShader* overRideShader, int mode, int required, int
 			const ModelAtom* atom = itemArr[start]->atom;
 
 #			ifdef XENOENGINE_INSTANCING
-			if ( atom->instance ) {
+/*			if ( atom-> ) {
 				atom->Bind( shader );
 
 				for( int k=start; k<end; k += EL_MAX_INSTANCE ) {
@@ -192,6 +192,7 @@ void RenderQueue::Submit( GPUShader* overRideShader, int mode, int required, int
 					shader->Draw( delta );
 				}
 			}
+			*/
 #			endif
 			{
 				atom->Bind( shader );
@@ -199,7 +200,7 @@ void RenderQueue::Submit( GPUShader* overRideShader, int mode, int required, int
 					Model* model = itemArr[k]->model;
 					shader->PushMatrix( GPUShader::MODELVIEW_MATRIX );
 					shader->MultMatrix( GPUShader::MODELVIEW_MATRIX, model->XForm() );
-					shader->Draw( 1 );
+					shader->Draw();
 					shader->PopMatrix( GPUShader::MODELVIEW_MATRIX );
 				}
 			}

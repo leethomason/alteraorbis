@@ -58,7 +58,7 @@ class GPUVertexBuffer : public GPUBuffer
 {
 public:
 	// a null value for vertex will create an empty buffer
-	static GPUVertexBuffer Create( const Vertex* vertex, int nVertex );
+	static GPUVertexBuffer Create( const void* vertex, int size, int nVertex );
 	//void Upload( const Vertex* data, int size, int start );
 
 	GPUVertexBuffer() : GPUBuffer() {}
@@ -113,6 +113,8 @@ struct GPUStream {
 				nColor( 0 ), colorOffset( 0 ) {}
 
 	GPUStream( const Vertex* vertex );
+	GPUStream( const InstVertex* vertex );
+
 	enum GamuiType { kGamuiType };
 	GPUStream( GamuiType );
 	GPUStream( const PTVertex2* vertex );
@@ -200,11 +202,6 @@ public:
 		this->indexBuffer = 0;
 	}
 
-
-	void SetInstanceStream( const GPUInstanceBuffer& instance );
-	void SetInstanceStream( const void* instance );
-
-
 	void SetTexture0( Texture* tex ) { texture0 = tex; }
 	bool HasTexture0() const { return texture0 != 0; }
 	bool HasLighting( grinliz::Vector4F* dir, grinliz::Vector4F* ambient, grinliz::Vector4F* diffuse ) const { 
@@ -243,13 +240,11 @@ public:
 	static void MultTextureMatrix( int mask, const grinliz::Matrix4& m );
 	static void PopTextureMatrix( int mask );
 
-#if XENOENGINE_OPENGL == 2
 	static const grinliz::Matrix4& TopMatrix( MatrixType type );
 	static const grinliz::Matrix4& TopTextureMatrix( int unit );
 	static const grinliz::Matrix4& ViewMatrix();
-#endif
 
-	void Draw( int nInstances=0 );
+	void Draw();
 
 	void Debug_DrawQuad( const grinliz::Vector3F p0, const grinliz::Vector3F p1 );
 
@@ -292,10 +287,8 @@ private:
 	// not so much on TEXTURE. Use our own texture stack, one for each texture unit.
 	static MatrixStack textureStack[2];
 	static bool textureXFormInUse[2];
-#if (XENOENGINE_OPENGL == 2)
 	static MatrixStack mvStack;			// FIXME: check opengl preserves it's matrix stack in programmable mode, and delete this
 	static MatrixStack projStack;
-#endif
 
 	static void SetTextureXForm( int unit );
 
@@ -357,9 +350,6 @@ public:
 	~LightShader();
 	
 protected:
-	void SetLightParams() const;
-
-	static int locked;
 };
 
 

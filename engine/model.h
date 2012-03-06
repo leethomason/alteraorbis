@@ -36,7 +36,6 @@ class GPUShader;
 /*
 	v0 v1 v2 v0 v1 v2									vertex (3 points x 2 instances)
 	i0 i1 i2 i0 i0 i0 i0+3 i1+3 i2+3 i0+3 i0+3 i0+3		index (2 triangle x 2 instances)
-	0  0  0  1  1  1									instance
 
 	vertex size *= nInstance
 	index size *= nInstance
@@ -46,31 +45,40 @@ class GPUShader;
 // The smallest draw unit: texture, vertex, index.
 struct ModelAtom 
 {
+	void Init() {
+		texture = 0;
+		nVertex = nIndex = 0;
+		index = 0;
+		vertex = 0;
+		instances = 0;
+	}
+
+	void Free() {
+		DeviceLoss();
+		delete [] index;
+		delete [] vertex;
+		Init();
+	}
+
+	void DeviceLoss() {
+		vertexBuffer.Destroy();
+		indexBuffer.Destroy();
+	}
+
 	Texture* texture;
 #	ifdef EL_USE_VBO
 	mutable GPUVertexBuffer vertexBuffer;		// created on demand, hence 'mutable'
 	mutable GPUIndexBuffer  indexBuffer;
-#	ifdef XENOENGINE_INSTANCING
-	mutable GPUInstanceBuffer instanceBuffer;
 #	endif
-#	endif
-
-	U32 nVertex;
-	U32 nIndex;
-	U32 nInstance;		// if 1, doesn't instance, just use standard render
 
 	void Bind( GPUShader* shader ) const;
 
-	// A note on the memory model: the index and vertices are stored
-	// in continuous memory to cut down on allocation overhead. But
-	// that is an allocation trick. The 'index' and 'vertex' pointers
-	// work as if the buffers we allocated normally.
-	//
-	const U16* index;		// points back to ModelResource memory.
-	const Vertex* vertex;	// points back to ModelResource memory.
-#	ifdef XENOENGINE_INSTANCING
-	const U8* instance;
-#	endif
+	U32 nVertex;
+	U32 nIndex;
+	U32 instances;
+
+	U16* index;
+	InstVertex* vertex;
 };
 
 
@@ -120,10 +128,9 @@ public:
 	ModelHeader header;						// loaded
 
 	grinliz::Rectangle3F	hitBounds;		// for picking - a bounds approximation
-	int						instances;		// # of times the model is repeated.
-	U16*					allIndex;		// memory store for vertices and indices. Used for hit-testing.
-	Vertex*					allVertex;
-	U8*						allInstance;	// this can be null, if not instancing, or this resource isn't instanced.
+//	int						instances;		// # of times the model is repeated.
+//	U16*					allIndex;		// memory store for vertices and indices. Used for hit-testing.
+//	Vertex*					allVertex;
 
 	ModelAtom atom[EL_MAX_MODEL_GROUPS];
 };
@@ -174,6 +181,8 @@ public:
 
 private:
 	void LoadAtom( const gamedb::Item* item, int index, ModelResource* res );
+	CDynArray<Vertex> vBuffer;
+	CDynArray<U16> iBuffer;
 };
 
 

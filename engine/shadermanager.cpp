@@ -2,7 +2,6 @@
 #include "platformgl.h"
 #include "texture.h"
 
-#if XENOENGINE_OPENGL == 2
 #include "shaders.inc"
 
 using namespace grinliz;
@@ -254,5 +253,4 @@ void ShaderManager::DeleteProgram( Shader* shader )
 	CHECK_GL_ERROR;
 }
 
-#endif
 	

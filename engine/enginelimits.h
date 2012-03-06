@@ -17,7 +17,6 @@
 #define ENGINELIMITS_INCLUDED
 
 
-#define XENOENGINE_OPENGL 2
 #define XENOENGINE_INSTANCING
 #define EL_USE_VBO			// Use VBOs: a good thing, everywhere but the original iPhone
 

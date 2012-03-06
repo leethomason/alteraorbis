@@ -30,32 +30,16 @@ using namespace grinliz;
 void ModelResource::Free()
 {
 	for( unsigned i=0; i<header.nAtoms; ++i ) {
-#ifdef EL_USE_VBO
-		atom[i].vertexBuffer.Destroy();
-		atom[i].indexBuffer.Destroy();
-#ifdef XENOENGINE_INSTANCING
-		atom[i].instanceBuffer.Destroy();
-#endif
-#endif
-		memset( &atom[i], 0, sizeof( ModelAtom ) );
+		atom[i].Free();
 	}
-	delete [] allVertex;
-	delete [] allIndex;
-	delete [] allInstance;
 }
 
 
 void ModelResource::DeviceLoss()
 {
-#ifdef EL_USE_VBO
 	for( unsigned i=0; i<header.nAtoms; ++i ) {
-		atom[i].vertexBuffer.Destroy();
-		atom[i].indexBuffer.Destroy();
-#ifdef XENOENGINE_INSTANCING
-		atom[i].instanceBuffer.Destroy();
-#endif
+		atom[i].DeviceLoss();
 	}
-#endif
 }
 
 
@@ -99,13 +83,13 @@ void ModelLoader::Load( const gamedb::Item* item, ModelResource* res )
 {
 	res->header.Load( item );
 
-	res->instances = 1;
+	int instances = 1;
 #	ifdef XENOENGINE_INSTANCING
-	res->instances = EL_TUNE_INSTANCE_MEM / sizeof( Vertex );
-	if ( res->instances > EL_MAX_INSTANCE ) 
-		res->instances = EL_MAX_INSTANCE;
-	if ( res->instances < 1 )
-		res->instances = 1;		// big model.
+	instances = EL_TUNE_INSTANCE_MEM / sizeof( InstVertex );
+	if ( instances > EL_MAX_INSTANCE ) 
+		instances = EL_MAX_INSTANCE;
+	if ( instances < 1 )
+		instances = 1;		// big model.
 #	endif
 
 	// compute the hit testing AABB
@@ -118,75 +102,40 @@ void ModelLoader::Load( const gamedb::Item* item, ModelResource* res )
 		const gamedb::Item* groupItem = item->Child( i );
 		LoadAtom( groupItem, i, res );
 		//GLOUTPUT(( "  '%s' vertices=%d tris=%d\n", textureName, (int)res->atom[i].nVertex, (int)(res->atom[i].nIndex/3) ));
-		res->atom[i].nInstance = res->instances;
 	}
 
-	res->allVertex = new Vertex[ res->header.nTotalVertices * res->instances ];
-	res->allIndex  = new U16[ res->header.nTotalIndices * res->instances ];
-	res->allInstance = 0;
+	vBuffer.Clear();	
+	vBuffer.PushArr( res->header.nTotalVertices );
+	iBuffer.Clear();
+	iBuffer.PushArr( res->header.nTotalIndices );
 
-	int vOffset = 0;
+	item->GetData( "vertex", vBuffer.Mem(), res->header.nTotalVertices*sizeof(Vertex) );
+	item->GetData( "index",  iBuffer.Mem(), res->header.nTotalIndices*sizeof(U16) );
+
 	int iOffset = 0;
+	int vOffset = 0;
 
-	if ( res->instances == 1 ) {
-		item->GetData( "vertex", res->allVertex, res->header.nTotalVertices*sizeof(Vertex) );
-		item->GetData( "index",  res->allIndex,  res->header.nTotalIndices*sizeof(U16) );
-
-		for( U32 i=0; i<res->header.nAtoms; ++i )
-		{
-			res->atom[i].index  = res->allIndex+iOffset;
-			res->atom[i].vertex = res->allVertex+vOffset;
-
-			iOffset += res->atom[i].nIndex;
-			vOffset += res->atom[i].nVertex;
-		}
-	}
-	else {
-		const gamedb::Reader* reader = gamedb::Reader::GetContext( item );
-		res->allInstance = new U8[res->header.nTotalVertices * res->instances];
-
-		Vertex* pVertex = res->allVertex;
-		U16* pIndex = res->allIndex;
-		U8* pInstance = res->allInstance;
-
-		// Vertex is straight multiple copies.
-		const Vertex* vmem = (const Vertex*) reader->AccessData( item, "vertex" );
-		for( int a=0; a<res->header.nAtoms; ++a ) {
-			res->atom[a].vertex = pVertex;
-			for( int i=0; i<res->instances; ++i ) {
-				memcpy( pVertex, vmem, sizeof(Vertex)*res->atom[a].nVertex );
-				pVertex += res->atom[a].nVertex;
-			}
-			vmem += res->atom[a].nVertex;
-		}
-		GLASSERT( pVertex == res->allVertex + res->header.nTotalVertices * res->instances );
-
-		// Index is a copy and an offset.
-		const U16* imem = (const U16*) reader->AccessData( item, "index" );
-		for( int a=0; a<res->header.nAtoms; ++a ) {
-			res->atom[a].index = pIndex;
-			for( int i=0; i<res->instances; ++i ) {
-				memcpy( pIndex, imem, sizeof(U16)*res->atom[a].nIndex );
-				for( unsigned k=0; k<res->atom[a].nIndex; ++k ) {
-					// Add offset for indices.
-					*pIndex += i * (res->atom[a].nIndex);
-					++pIndex;
-				}
+	for( U32 i=0; i<res->header.nAtoms; ++i )
+	{
+		ModelAtom* atom = &res->atom[i];
+		atom->instances = instances;
+		
+		atom->vertex = new InstVertex[ atom->nVertex * instances ];
+		for( int inst=0; inst<instances; ++inst ) {
+			for( unsigned j=0; j<atom->nVertex; ++j ) {
+				atom->vertex[j+inst*atom->nVertex].From( vBuffer[j+vOffset] );
+				atom->vertex[j+inst*atom->nVertex].instanceID = inst;
 			}
 		}
-		GLASSERT( pIndex == res->allIndex + res->header.nTotalIndices * res->instances );
-
-#		ifdef XENOENGINE_INSTANCING
-			for( int a=0; a<res->header.nAtoms; ++a ) {
-				res->atom[a].instance = pInstance;
-				for( int i=0; i<res->instances; ++i ) {
-					for( unsigned j=0; j<res->atom[a].nVertex; ++j ) {
-						*pInstance++ = i;
-					}
-				}
+		
+		atom->index  = new U16[atom->nIndex * instances ];
+		for( int inst=0; inst<instances; ++inst ) {
+			for( unsigned j=0; j<atom->nIndex; ++j ) {
+				atom->index[j+inst*atom->nIndex] = iBuffer[j+iOffset] + inst*atom->nVertex;
 			}
-#		endif
-		GLASSERT( pInstance == res->allInstance + res->header.nTotalVertices * res->instances );
+		}
+		vOffset += atom->nVertex;
+		iOffset += atom->nIndex;
 	}
 }
 
@@ -205,7 +154,8 @@ void ModelLoader::LoadAtom( const gamedb::Item* item, int i, ModelResource* res 
 	StrSplitFilename( GLString( textureName ), &base, &texname, &extension );
 	Texture* t = TextureManager::Instance()->GetTexture( texname.c_str() );
 
-	GLASSERT( t );                       
+	GLASSERT( t );        
+	res->atom[i].Init();
 	res->atom[i].texture = t;
 	res->atom[i].nVertex = group.nVertex;
 	res->atom[i].nIndex = group.nIndex;
@@ -418,28 +368,17 @@ void ModelAtom::Bind( GPUShader* shader ) const
 	if ( GPUShader::SupportsVBOs() && !vertexBuffer.IsValid() ) {
 		GLASSERT( !indexBuffer.IsValid() );
 
-		vertexBuffer = GPUVertexBuffer::Create( vertex, nVertex*nInstance );
-		indexBuffer  = GPUIndexBuffer::Create(  index,  nIndex*nInstance );
-#ifdef XENOENGINE_INSTANCING
-		if ( nInstance > 1 ) {
-			instanceBuffer = GPUInstanceBuffer::Create( instance, nVertex*nInstance );
-		}
-#endif
+		vertexBuffer = GPUVertexBuffer::Create( vertex, sizeof(*vertex), nVertex*instances );
+		indexBuffer  = GPUIndexBuffer::Create(  index,  nIndex*instances );
 	}
 
 	if ( vertexBuffer.IsValid() && indexBuffer.IsValid() ) {
 		shader->SetStream( stream, vertexBuffer, nIndex, indexBuffer );
-#ifdef XENOENGINE_INSTANCING
-		if ( instanceBuffer.IsValid() ) {
-			shader->SetInstanceStream( instanceBuffer );
-		}
-#endif
 	}
 	else
 #endif
 	{
 		shader->SetStream( stream, vertex, nIndex, index );
-		shader->SetInstanceStream( instance );
 	}
 }
 

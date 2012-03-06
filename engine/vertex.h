@@ -57,6 +57,29 @@ struct Vertex
 };
 
 
+struct InstVertex
+{
+	enum {
+		POS_OFFSET = 0,
+		NORMAL_OFFSET = 12,
+		TEXTURE_OFFSET = 24,
+		INSTANCE_OFFSET = 36
+	};
+
+	void From( const Vertex& rhs ) {
+		this->pos = rhs.pos;
+		this->normal = rhs.normal;
+		this->tex = rhs.tex;
+		instanceID = 0;
+	}
+
+	grinliz::Vector3F	pos;
+	grinliz::Vector3F	normal;
+	grinliz::Vector2F	tex;
+	int					instanceID;	// 8 bits is fine, but this structure should be 32 bit-aligned
+};
+	
+
 struct PTVertex
 {
 	enum {

@@ -13,7 +13,6 @@
 class Texture;
 class Stream;
 
-#if XENOENGINE_OPENGL == 2
 class ShaderManager
 {
 public:
@@ -112,7 +111,5 @@ private:
 
 	void AppendFlag( grinliz::GLString* str, const char* flag, int set );
 };
-#endif
-
 
 #endif //  XENOENGINE_SHADERMANAGER_INCLUDED
