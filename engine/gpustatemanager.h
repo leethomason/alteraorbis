@@ -59,7 +59,7 @@ class GPUVertexBuffer : public GPUBuffer
 public:
 	// a null value for vertex will create an empty buffer
 	static GPUVertexBuffer Create( const Vertex* vertex, int nVertex );
-	void Upload( const Vertex* data, int size, int start );
+	//void Upload( const Vertex* data, int size, int start );
 
 	GPUVertexBuffer() : GPUBuffer() {}
 	void Destroy();
@@ -71,7 +71,7 @@ class GPUIndexBuffer : public GPUBuffer
 {
 public:
 	static GPUIndexBuffer Create( const uint16_t* index, int nIndex );
-	void Upload( const uint16_t* data, int size, int start );
+	//void Upload( const uint16_t* data, int size, int start );
 
 	GPUIndexBuffer() : GPUBuffer() {}
 	void Destroy();
@@ -82,7 +82,7 @@ class GPUInstanceBuffer : public GPUBuffer
 {
 public:
 	static GPUInstanceBuffer Create( const uint8_t* index, int nIndex );
-	void Upload( const uint8_t* data, int size, int start );
+	//void Upload( const uint8_t* data, int size, int start );
 
 	GPUInstanceBuffer() : GPUBuffer() {}
 	void Destroy();
@@ -155,7 +155,6 @@ public:
 	static void SetCameraTransform( const grinliz::Matrix4& camera );
 	static void SetScissor( int x, int y, int w, int h );
 	
-
 	void SetStream( const GPUStream& stream, const void* ptr, int nIndex, const uint16_t* indices ) 
 	{
 		GLASSERT( stream.stride > 0 );
@@ -202,6 +201,10 @@ public:
 	}
 
 
+	void SetInstanceStream( const GPUInstanceBuffer& instance );
+	void SetInstanceStream( const void* instance );
+
+
 	void SetTexture0( Texture* tex ) { texture0 = tex; }
 	bool HasTexture0() const { return texture0 != 0; }
 	bool HasLighting( grinliz::Vector4F* dir, grinliz::Vector4F* ambient, grinliz::Vector4F* diffuse ) const { 
@@ -223,6 +226,11 @@ public:
 		SetColor( c );
 	}
 
+	void InstanceMatrix( int i, const grinliz::Matrix4& mat ) { 
+		GLASSERT( i >= 0 && i < EL_MAX_INSTANCE );
+		instanceMatrix[i] = mat; 
+	}
+
 	static void PushMatrix( MatrixType type );
 	static void SetMatrix( MatrixType type, const grinliz::Matrix4& m );
 	static void MultMatrix( MatrixType type, const grinliz::Matrix4& m );
@@ -241,7 +249,7 @@ public:
 	static const grinliz::Matrix4& ViewMatrix();
 #endif
 
-	void Draw();
+	void Draw( int nInstances=0 );
 
 	void Debug_DrawQuad( const grinliz::Vector3F p0, const grinliz::Vector3F p1 );
 
@@ -295,6 +303,7 @@ protected:
 	static int trianglesDrawn;
 	static int drawCalls;
 	static uint32_t uid;
+	static int			matrixDepth[3];
 
 	static const void* PTR( const void* base, int offset ) {
 		return (const void*)((const U8*)base + offset);
@@ -316,12 +325,12 @@ protected:
 	bool		depthWrite;
 	bool		depthTest;
 
-	grinliz::Color4F		color;
-	static int			matrixDepth[3];
-
+	grinliz::Color4F	color;
 	grinliz::Color4F	ambient;
 	grinliz::Vector4F	direction;
 	grinliz::Color4F	diffuse;
+
+	grinliz::Matrix4	instanceMatrix[EL_MAX_INSTANCE];
 };
 
 

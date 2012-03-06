@@ -51,6 +51,9 @@ void ModelResource::DeviceLoss()
 	for( unsigned i=0; i<header.nAtoms; ++i ) {
 		atom[i].vertexBuffer.Destroy();
 		atom[i].indexBuffer.Destroy();
+#ifdef XENOENGINE_INSTANCING
+		atom[i].instanceBuffer.Destroy();
+#endif
 	}
 #endif
 }
@@ -115,6 +118,7 @@ void ModelLoader::Load( const gamedb::Item* item, ModelResource* res )
 		const gamedb::Item* groupItem = item->Child( i );
 		LoadAtom( groupItem, i, res );
 		//GLOUTPUT(( "  '%s' vertices=%d tris=%d\n", textureName, (int)res->atom[i].nVertex, (int)(res->atom[i].nIndex/3) ));
+		res->atom[i].nInstance = res->instances;
 	}
 
 	res->allVertex = new Vertex[ res->header.nTotalVertices * res->instances ];
@@ -141,10 +145,11 @@ void ModelLoader::Load( const gamedb::Item* item, ModelResource* res )
 		const gamedb::Reader* reader = gamedb::Reader::GetContext( item );
 		res->allInstance = new U8[res->header.nTotalVertices * res->instances];
 
-		U8* pInstance = res->allInstance;
 		Vertex* pVertex = res->allVertex;
 		U16* pIndex = res->allIndex;
+		U8* pInstance = res->allInstance;
 
+		// Vertex is straight multiple copies.
 		const Vertex* vmem = (const Vertex*) reader->AccessData( item, "vertex" );
 		for( int a=0; a<res->header.nAtoms; ++a ) {
 			res->atom[a].vertex = pVertex;
@@ -156,25 +161,31 @@ void ModelLoader::Load( const gamedb::Item* item, ModelResource* res )
 		}
 		GLASSERT( pVertex == res->allVertex + res->header.nTotalVertices * res->instances );
 
+		// Index is a copy and an offset.
 		const U16* imem = (const U16*) reader->AccessData( item, "index" );
 		for( int a=0; a<res->header.nAtoms; ++a ) {
 			res->atom[a].index = pIndex;
 			for( int i=0; i<res->instances; ++i ) {
 				memcpy( pIndex, imem, sizeof(U16)*res->atom[a].nIndex );
-				pIndex += res->atom[a].nIndex;
-			}
-			imem += res->atom[a].nIndex;
-		}
-		GLASSERT( pIndex == res->allIndex + res->header.nTotalIndices * res->instances );
-
-		for( int a=0; a<res->header.nAtoms; ++a ) {
-			res->atom[a].instance = pInstance;
-			for( int i=0; i<res->instances; ++i ) {
-				for( unsigned j=0; j<res->atom[a].nVertex; ++j ) {
-					*pInstance++ = i;
+				for( unsigned k=0; k<res->atom[a].nIndex; ++k ) {
+					// Add offset for indices.
+					*pIndex += i * (res->atom[a].nIndex);
+					++pIndex;
 				}
 			}
 		}
+		GLASSERT( pIndex == res->allIndex + res->header.nTotalIndices * res->instances );
+
+#		ifdef XENOENGINE_INSTANCING
+			for( int a=0; a<res->header.nAtoms; ++a ) {
+				res->atom[a].instance = pInstance;
+				for( int i=0; i<res->instances; ++i ) {
+					for( unsigned j=0; j<res->atom[a].nVertex; ++j ) {
+						*pInstance++ = i;
+					}
+				}
+			}
+#		endif
 		GLASSERT( pInstance == res->allInstance + res->header.nTotalVertices * res->instances );
 	}
 }
@@ -236,12 +247,6 @@ void Model::Init( const ModelResource* resource, SpaceTree* tree )
 	if ( resource && (resource->header.flags & ModelHeader::RESOURCE_NO_SHADOW ) ) {
 		flags |= MODEL_NO_SHADOW;
 	}
-
-	/*
-	for( int i=0; i<EL_MAX_MODEL_GROUPS; ++i ) {
-		cacheStart[i] = CACHE_UNINITIALIZED;
-	}
-	*/
 }
 
 
@@ -291,7 +296,7 @@ bool Model::HasTextureXForm( int i ) const
 	return false;
 }
 
-
+/*
 void Model::SetSkin( int gender, int armor, int appearance )
 {
 	// Very particular code. For a model, expects there to be
@@ -320,8 +325,9 @@ void Model::SetSkin( int gender, int armor, int appearance )
 		GLASSERT( 0 );
 	}
 }
+*/
 
-
+/*
 void Model::SetTexXForm( int id, float a, float d, float x, float y )
 {
 	GLASSERT( id >= 0 && id < EL_MAX_MODEL_GROUPS );
@@ -337,7 +343,7 @@ void Model::SetTexXForm( int id, float a, float d, float x, float y )
 		auxTexture->m[id].m24 = y;
 	}
 }
-
+*/
 
 void Model::CalcHitAABB( Rectangle3F* aabb ) const
 {
@@ -404,39 +410,41 @@ void Model::Queue( RenderQueue* queue, GPUShader* opaque, GPUShader* transparent
 }
 
 
-void ModelAtom::LowerBind( GPUShader* shader, const GPUStream& stream ) const
+void ModelAtom::Bind( GPUShader* shader ) const
 {
+	GPUStream stream( vertex );
+
 #ifdef EL_USE_VBO
 	if ( GPUShader::SupportsVBOs() && !vertexBuffer.IsValid() ) {
 		GLASSERT( !indexBuffer.IsValid() );
 
-		vertexBuffer = GPUVertexBuffer::Create( vertex, nVertex );
-		indexBuffer  = GPUIndexBuffer::Create(  index,  nIndex );
+		vertexBuffer = GPUVertexBuffer::Create( vertex, nVertex*nInstance );
+		indexBuffer  = GPUIndexBuffer::Create(  index,  nIndex*nInstance );
 #ifdef XENOENGINE_INSTANCING
-		instanceBuffer = GPUInstanceBuffer::Create( instance, nVertex );
+		if ( nInstance > 1 ) {
+			instanceBuffer = GPUInstanceBuffer::Create( instance, nVertex*nInstance );
+		}
 #endif
 	}
 
-	if ( vertexBuffer.IsValid() && indexBuffer.IsValid() ) 
+	if ( vertexBuffer.IsValid() && indexBuffer.IsValid() ) {
 		shader->SetStream( stream, vertexBuffer, nIndex, indexBuffer );
+#ifdef XENOENGINE_INSTANCING
+		if ( instanceBuffer.IsValid() ) {
+			shader->SetInstanceStream( instanceBuffer );
+		}
+#endif
+	}
 	else
 #endif
+	{
 		shader->SetStream( stream, vertex, nIndex, index );
-}
-
-
-void ModelAtom::Bind( GPUShader* shader ) const
-{
-	GPUStream stream( vertex );
-	// Handle light map, if we have one:
-	if ( shader->HasTexture1() ) {
-		stream.texture1Offset = Vertex::POS_OFFSET;
-		stream.nTexture1 = 3;
+		shader->SetInstanceStream( instance );
 	}
-	LowerBind( shader, stream );
 }
 
 
+/*
 void ModelAtom::BindPlanarShadow( GPUShader* shader ) const
 {
 	GPUStream stream;
@@ -450,6 +458,7 @@ void ModelAtom::BindPlanarShadow( GPUShader* shader ) const
 
 	LowerBind( shader, stream );
 }
+*/
 
 
 const grinliz::Rectangle3F& Model::AABB() const

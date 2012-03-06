@@ -48,7 +48,7 @@ RenderQueue::State* RenderQueue::FindState( const State& state )
 
 	while (low <= high) {
 		mid = low + (high - low) / 2;
-		int compare = Compare( statePool[mid], state );
+		int compare = CompareState( statePool[mid], state );
 
 		if (compare > 0) {
 			high = mid - 1;
@@ -75,7 +75,7 @@ RenderQueue::State* RenderQueue::FindState( const State& state )
 	}
 	else {
 		while (    insert < nState
-			    && Compare( statePool[insert], state ) < 0 ) 
+			    && CompareState( statePool[insert], state ) < 0 ) 
 		{
 			++insert;
 		}
@@ -93,7 +93,7 @@ RenderQueue::State* RenderQueue::FindState( const State& state )
 #ifdef DEBUG
 	for( int i=0; i<nState-1; ++i ) {
 		//GLOUTPUT(( " %d:%d:%x", statePool[i].state.flags, statePool[i].state.textureID, statePool[i].state.atom ));
-		GLASSERT( Compare( statePool[i], statePool[i+1] ) < 0 );
+		GLASSERT( CompareState( statePool[i], statePool[i+1] ) < 0 );
 	}
 	//GLOUTPUT(( "\n" ));
 #endif
@@ -121,7 +121,8 @@ void RenderQueue::Add( Model* model, const ModelAtom* atom, GPUShader* shader, c
 	item->model = model;
 	item->atom = atom;
 	
-	item->atomIndex = -1;
+
+/*	item->atomIndex = -1;
 	const ModelResource* resource = model->GetResource();
 	for( int i=0; i<resource->header.nAtoms; ++i ) {
 		if ( &resource->atom[i] == atom ) {
@@ -130,8 +131,8 @@ void RenderQueue::Add( Model* model, const ModelAtom* atom, GPUShader* shader, c
 		}
 	}
 	GLASSERT( item->atomIndex >= 0 );
-
-	item->textureXForm = textureXForm;
+*/
+//	item->textureXForm = textureXForm;
 	item->next  = state->root;
 	state->root = item;
 }
@@ -142,9 +143,13 @@ void RenderQueue::Submit( GPUShader* overRideShader, int mode, int required, int
 	GRINLIZ_PERFTRACK
 
 	for( int i=0; i<nState; ++i ) {
-		indexBuf.Clear();
 		GPUShader* shader = overRideShader ? overRideShader : statePool[i].shader;
+		if ( !overRideShader ) {
+			shader->SetTexture0( statePool[i].texture );
+		}
 
+		// Filter out all the items for this RenderState
+		itemArr.Clear();
 		for( Item* item = statePool[i].root; item; item=item->next ) 
 		{
 			Model* model = item->model;
@@ -153,59 +158,52 @@ void RenderQueue::Submit( GPUShader* overRideShader, int mode, int required, int
 			if (    ( (required & modelFlags) == required)
 				 && ( (excluded & modelFlags) == 0 ) )
 			{
-				//GRINLIZ_PERFTRACK_NAME( "Submit Inner" )
-				if ( !overRideShader ) {
-					//GLASSERT( statePool[i].texture == item->atom->texture );
-					shader->SetTexture0( statePool[i].texture );
-				}
+				itemArr.Push( item );
+			}
+		}
 
-				Model* model = item->model;
-				GLASSERT( model );
+		// For this RenderState, we now have all the items to be drawn.
+		// We now want to group the items by RenderAtom, so that the 
+		// Atoms which are instanced can be rendered together.
+		qsort( itemArr.Mem(), itemArr.Size(), sizeof(Item*), CompareAtom );
 
-				if ( mode & MODE_PLANAR_SHADOW ) {
-					GLASSERT( shader );
-					item->atom->BindPlanarShadow( shader );
+		int start = 0;
+		int end = 0;
 
-					// Push the xform matrix to the texture and the model view.
-					shader->PushTextureMatrix( 3 );
-					shader->MultTextureMatrix( 3, model->XForm() );
+		while( start < itemArr.Size() ) {
+			// Get a range;
+			end = start + 1;
+			while(    end < itemArr.Size() 
+				   && itemArr[end]->atom == itemArr[start]->atom ) {
+				++end;
+			}
 
-					shader->PushMatrix( GPUShader::MODELVIEW_MATRIX );
-					shader->MultMatrix( GPUShader::MODELVIEW_MATRIX, model->XForm() );
+			const ModelAtom* atom = itemArr[start]->atom;
 
-					shader->Draw();
+#			ifdef XENOENGINE_INSTANCING
+			if ( atom->instance ) {
+				atom->Bind( shader, true );
 
-					// Unravel all that.
-					shader->PopTextureMatrix( 3 );
-					shader->PopMatrix( GPUShader::MODELVIEW_MATRIX );
-				}
-				else {
-					item->atom->Bind( shader );
-
-					shader->PushMatrix( GPUShader::MODELVIEW_MATRIX );
-					shader->MultMatrix( GPUShader::MODELVIEW_MATRIX, model->XForm() );
-
-					if ( item->textureXForm ) {
-						shader->PushTextureMatrix( 1 );
-						shader->MultTextureMatrix( 1, *item->textureXForm );
+				for( int k=start; k<end; k += EL_MAX_INSTANCE ) {
+					int delta = Min( end - k, (int)EL_MAX_INSTANCE );
+					for( int m=0; m<delta; ++m ) {
+						shader->InstanceMatrix( m, itemArr[k+m]->model->XForm() );
 					}
-					
-					if ( shader->HasTexture1() ) {
-						shader->PushTextureMatrix( 2 );
-						shader->MultTextureMatrix( 2, model->XForm() );
-					}
-
-					shader->Draw();
-
-					shader->PopMatrix( GPUShader::MODELVIEW_MATRIX );
-					if ( item->textureXForm ) {
-						shader->PopTextureMatrix( 1 );
-					}
-					if (  shader->HasTexture1() ) {
-						shader->PopTextureMatrix( 2 );
-					}
+					shader->Draw( delta );
 				}
 			}
+#			endif
+			{
+				atom->Bind( shader, false );
+				for( int k=start; k<end; ++k ) {
+					Model* model = itemArr[k]->model;
+					shader->PushMatrix( GPUShader::MODELVIEW_MATRIX );
+					shader->MultMatrix( GPUShader::MODELVIEW_MATRIX, model->XForm() );
+					shader->Draw( 0 );
+					shader->PopMatrix( GPUShader::MODELVIEW_MATRIX );
+				}
+			}
+			start = end;
 		}
 	}
 }

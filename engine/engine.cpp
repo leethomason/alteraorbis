@@ -28,6 +28,10 @@
 #include "texture.h"
 #include "particle.h"
 
+/*
+	Xenoengine-2 has a cleaned up render queue. The sorting of items probably makes the engine
+	faster even when not instancing. Cleaning up code makes the underlying algorithm clearer.
+*/
 
 using namespace grinliz;
 

@@ -48,6 +48,10 @@ class RenderQueue;
 
 	Renderer
 		- shadows, glow, colors
+
+		Shadows
+			- shadow casting models rendered to stencil buffer.
+			- background plane can be multi-pass, checked against stencil
 		
 */
 

@@ -33,6 +33,16 @@ class SpaceTree;
 class RenderQueue;
 class GPUShader;
 
+/*
+	v0 v1 v2 v0 v1 v2									vertex (3 points x 2 instances)
+	i0 i1 i2 i0 i0 i0 i0+3 i1+3 i2+3 i0+3 i0+3 i0+3		index (2 triangle x 2 instances)
+	0  0  0  1  1  1									instance
+
+	vertex size *= nInstance
+	index size *= nInstance
+	instance size = index size * nInstance
+*/
+
 // The smallest draw unit: texture, vertex, index.
 struct ModelAtom 
 {
@@ -47,10 +57,9 @@ struct ModelAtom
 
 	U32 nVertex;
 	U32 nIndex;
+	U32 nInstance;		// if 1, doesn't instance, just use standard render
 
 	void Bind( GPUShader* shader ) const;
-	void BindPlanarShadow( GPUShader* shader ) const;	// I gave up trying to make this general.
-	void LowerBind( GPUShader* shader, const GPUStream& stream ) const;
 
 	// A note on the memory model: the index and vertices are stored
 	// in continuous memory to cut down on allocation overhead. But
@@ -214,9 +223,9 @@ public:
 	float GetRotation( int axis=1 ) const			{ return rot[axis]; }
 	
 	// Set the skin texture (which is a special texture xform)
-	void SetSkin(int gender, int armor, int appearance);
+	//void SetSkin(int gender, int armor, int appearance);
 	// Set the texture xform for rendering tricks
-	void SetTexXForm( int index, float a=1.0f, float d=1.0f, float x=0.0f, float y=0.0f );
+	//void SetTexXForm( int index, float a=1.0f, float d=1.0f, float x=0.0f, float y=0.0f );
 
 	// Set the texture.
 	void SetTexture( Texture* t )	{ setTexture = t; }
