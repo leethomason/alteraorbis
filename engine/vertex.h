@@ -76,7 +76,7 @@ struct InstVertex
 	grinliz::Vector3F	pos;
 	grinliz::Vector3F	normal;
 	grinliz::Vector2F	tex;
-	int					instanceID;	// 8 bits is fine, but this structure should be 32 bit-aligned
+	float				instanceID;	// 8 bits is fine, but this structure should be 32 bit-aligned
 };
 	
 

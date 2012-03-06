@@ -259,7 +259,7 @@ void GPUShader::SetState( const GPUShader& ns )
 	CHECK_GL_ERROR;
 	GLASSERT( ns.stream.stride > 0 );
 
-	ShaderManager* shadman =	 ShaderManager::Instance();
+	ShaderManager* shadman = ShaderManager::Instance();
 
 	int flags = 0;
 	flags |= ( ns.HasTexture0() ) ? ShaderManager::TEXTURE0 : 0;
@@ -276,14 +276,31 @@ void GPUShader::SetState( const GPUShader& ns )
 	flags |= ( ns.color.r != 1.f || ns.color.g != 1.f || ns.color.b != 1.f || ns.color.a != 1.f ) ? ShaderManager::COLOR_MULTIPLIER : 0;
 	flags |= ns.HasLighting( 0, 0, 0 ) ? ShaderManager::LIGHTING_DIFFUSE : 0;
 
+	flags |= ns.instancing ? ShaderManager::INSTANCE : 0;
+
+	if ( flags & ShaderManager::INSTANCE) {
+		int debug=1;
+	}
+
 	shadman->ActivateShader( flags );
 	shadman->ClearStream();
-	Matrix4 mvp;
-	const Matrix4& mv = ns.TopMatrix( GPUShader::MODELVIEW_MATRIX );
-	MultMatrix4( ns.TopMatrix( GPUShader::PROJECTION_MATRIX ), mv, &mvp );
 
-	// NOTE: the normal matrix can be used because the game doesn't support scaling.
-	shadman->SetUniform( ShaderManager::U_MVP_MAT, mvp );
+	const Matrix4& mv = ns.TopMatrix( GPUShader::MODELVIEW_MATRIX );
+
+	if ( flags & ShaderManager::INSTANCE ) {
+		Matrix4 vp;
+		MultMatrix4( ns.TopMatrix( GPUShader::PROJECTION_MATRIX ), ns.ViewMatrix(), &vp );
+		shadman->SetUniform( ShaderManager::U_MVP_MAT, vp );
+		shadman->SetUniformArray( ShaderManager::U_M_MAT_ARR, EL_MAX_INSTANCE, ns.instanceMatrix );
+		GLASSERT( ns.stream.instanceIDOffset > 0 );
+		// fixme: switch back to int
+		shadman->SetStreamData( ShaderManager::A_INSTANCE_ID, 1, GL_FLOAT, ns.stream.stride, PTR( ns.streamPtr, ns.stream.instanceIDOffset ) );
+	}
+	else {
+		Matrix4 mvp;
+		MultMatrix4( ns.TopMatrix( GPUShader::PROJECTION_MATRIX ), mv, &mvp );
+		shadman->SetUniform( ShaderManager::U_MVP_MAT, mvp );
+	}
 
 	// Texture1
 	glActiveTexture( GL_TEXTURE1 );
@@ -331,6 +348,7 @@ void GPUShader::SetState( const GPUShader& ns )
 		GLASSERT( Equal( dirEye.Length(), 1.f, 0.01f ));
 		Vector3F dirEye3 = { dirEye.x, dirEye.y, dirEye.z };
 
+		// NOTE: the normal matrix can be used because the game doesn't support scaling.
 		shadman->SetUniform( ShaderManager::U_NORMAL_MAT, mv );
 		shadman->SetUniform( ShaderManager::U_LIGHT_DIR, dirEye3 );
 		shadman->SetUniform( ShaderManager::U_AMBIENT, a );
@@ -462,14 +480,20 @@ GPUShader::~GPUShader()
 }
 
 
-void GPUShader::Draw()
+void GPUShader::Draw( int instances )
 {
 	GRINLIZ_PERFTRACK
+
 	if ( nIndex == 0 )
 		return;
+
+	bool useInstancing = instances > 0;
+	if ( instances == 0 ) instances = 1;
+	this->SetInstancing( useInstancing );
+
 	GLASSERT( nIndex % 3 == 0 );
 
-	trianglesDrawn += nIndex / 3;
+	trianglesDrawn += instances * nIndex / 3;
 	++drawCalls;
 
 	if ( indexPtr ) {	
@@ -479,7 +503,7 @@ void GPUShader::Draw()
 		SetState( *this );
 
 		GLASSERT( !indexBuffer );
-		glDrawElements( GL_TRIANGLES, nIndex, GL_UNSIGNED_SHORT, indexPtr );
+		glDrawElements( GL_TRIANGLES, nIndex*instances, GL_UNSIGNED_SHORT, indexPtr );
 
 		if ( vertexBuffer ) {
 			glBindBufferX( GL_ARRAY_BUFFER, 0 );
@@ -497,7 +521,7 @@ void GPUShader::Draw()
 		glBindBufferX( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
 		SetState( *this );
 
-		glDrawElements( GL_TRIANGLES, nIndex, GL_UNSIGNED_SHORT, 0 );
+		glDrawElements( GL_TRIANGLES, nIndex*instances, GL_UNSIGNED_SHORT, 0 );
 
 		glBindBufferX( GL_ARRAY_BUFFER, 0 );
 		glBindBufferX( GL_ELEMENT_ARRAY_BUFFER, 0 );
@@ -695,11 +719,12 @@ GPUStream::GPUStream( const InstVertex* vertex )
 
 	stride = sizeof( *vertex );
 	nPos = 3;
-	posOffset = Vertex::POS_OFFSET;
+	posOffset = InstVertex::POS_OFFSET;
 	nNormal = 3;
-	normalOffset = Vertex::NORMAL_OFFSET;
+	normalOffset = InstVertex::NORMAL_OFFSET;
 	nTexture0 = 2;
-	texture0Offset = Vertex::TEXTURE_OFFSET;
+	texture0Offset = InstVertex::TEXTURE_OFFSET;
+	instanceIDOffset = InstVertex::INSTANCE_OFFSET;
 }
 
 

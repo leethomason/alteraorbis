@@ -104,13 +104,14 @@ struct GPUStream {
 	int normalOffset;
 	int nColor;
 	int colorOffset;
+	int instanceIDOffset;
 
 	GPUStream() :  stride( 0 ),
 				nPos( 0 ), posOffset( 0 ), 
 				nTexture0( 0 ), texture0Offset( 0 ),
 				nTexture1( 0 ), texture1Offset( 0 ), 
 				nNormal( 0 ), normalOffset( 0 ),
-				nColor( 0 ), colorOffset( 0 ) {}
+				nColor( 0 ), colorOffset( 0 ), instanceIDOffset( 0 ) {}
 
 	GPUStream( const Vertex* vertex );
 	GPUStream( const InstVertex* vertex );
@@ -223,6 +224,7 @@ public:
 		SetColor( c );
 	}
 
+	void SetInstancing( bool value ) { instancing = value; }
 	void InstanceMatrix( int i, const grinliz::Matrix4& mat ) { 
 		GLASSERT( i >= 0 && i < EL_MAX_INSTANCE );
 		instanceMatrix[i] = mat; 
@@ -244,7 +246,7 @@ public:
 	static const grinliz::Matrix4& TopTextureMatrix( int unit );
 	static const grinliz::Matrix4& ViewMatrix();
 
-	void Draw();
+	void Draw( int instances=0 );
 
 	void Debug_DrawQuad( const grinliz::Vector3F p0, const grinliz::Vector3F p1 );
 
@@ -265,6 +267,7 @@ protected:
 	GPUShader() : texture0( 0 ), texture1( 0 ), 
 				 streamPtr( 0 ), nIndex( 0 ), indexPtr( 0 ),
 				 vertexBuffer( 0 ), indexBuffer( 0 ),
+				 instancing( false ),
 				 blend( false ), alphaTest( 0 ),
 				 depthWrite( true ), depthTest( true )
 	{
@@ -305,12 +308,13 @@ protected:
 	Texture* texture0;
 	Texture* texture1;
 
-	GPUStream stream;
-	const void* streamPtr;
-	int nIndex;
+	GPUStream		stream;
+	const void*		streamPtr;
+	int				nIndex;
 	const uint16_t* indexPtr;
-	U32 vertexBuffer;
-	U32 indexBuffer;
+	U32				vertexBuffer;
+	U32				indexBuffer;
+	bool			instancing;
 
 	bool		blend;
 	bool		alphaTest;

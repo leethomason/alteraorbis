@@ -50,6 +50,7 @@ public:
 		A_POS,
 		A_NORMAL,
 		A_COLOR,
+		A_INSTANCE_ID,
 		MAX_ATTRIBUTE
 	};
 	void ClearStream();
@@ -57,7 +58,9 @@ public:
 
 	// Warning: must match gUniformName
 	enum {
-		U_MVP_MAT,
+		U_MVP_MAT,		
+		U_M_MAT_ARR,	// array for instancing
+
 		U_NORMAL_MAT,
 		U_TEXTURE0_MAT,
 		U_TEXTURE1_MAT,
@@ -77,6 +80,7 @@ public:
 	void SetUniform( int id, const grinliz::Vector4F& vector );
 	void SetUniform( int id, const grinliz::Vector3F& vector );
 
+	void SetUniformArray( int id, int count, const grinliz::Matrix4* mat );
 
 private:
 	static ShaderManager* instance;

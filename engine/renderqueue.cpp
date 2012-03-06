@@ -174,25 +174,26 @@ void RenderQueue::Submit( GPUShader* overRideShader, int mode, int required, int
 			// Get a range;
 			end = start + 1;
 			while(    end < itemArr.Size() 
-				   && itemArr[end]->atom == itemArr[start]->atom ) {
+#				   ifdef XENOENGINE_INSTANCING
+				   && end - start < EL_MAX_INSTANCE
+#				   endif
+				   && itemArr[end]->atom == itemArr[start]->atom ) 
+			{
 				++end;
 			}
+			int delta = end - start;
 
 			const ModelAtom* atom = itemArr[start]->atom;
 
 #			ifdef XENOENGINE_INSTANCING
-/*			if ( atom-> ) {
+			if ( atom->instances > 1 && delta > 1 ) {
 				atom->Bind( shader );
 
-				for( int k=start; k<end; k += EL_MAX_INSTANCE ) {
-					int delta = Min( end - k, (int)EL_MAX_INSTANCE );
-					for( int m=0; m<delta; ++m ) {
-						shader->InstanceMatrix( m, itemArr[k+m]->model->XForm() );
-					}
-					shader->Draw( delta );
+				for( int k=0; k<delta; ++k ) {
+					shader->InstanceMatrix( k, itemArr[start+k]->model->XForm() );
 				}
-			}
-			*/
+				shader->Draw( delta );
+			} else
 #			endif
 			{
 				atom->Bind( shader );

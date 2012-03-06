@@ -14,13 +14,15 @@ static const char* gAttributeName[ShaderManager::MAX_ATTRIBUTE] =
 	"a_uv1",
 	"a_pos",
 	"a_normal",
-	"a_color"
+	"a_color",
+	"a_instanceID"
 };
 
 
 static const char* gUniformName[ShaderManager::MAX_UNIFORM] = 
 {
 	"u_mvpMatrix",
+	"u_mMatrix",
 	"u_normalMatrix",
 	"u_texMat0",
 	"u_texMat1",
@@ -135,6 +137,16 @@ void ShaderManager::SetUniform( int id, const grinliz::Vector3F& value )
 }
 
 
+void ShaderManager::SetUniformArray( int id, int count, const grinliz::Matrix4* mat )
+{
+	CHECK_GL_ERROR;
+	int loc = active->GetUniformLocation( id );
+	GLASSERT( loc >= 0 );
+	glUniformMatrix4fv( loc, count, false, mat->x );
+	CHECK_GL_ERROR;
+}
+
+
 void ShaderManager::SetTexture( int index, Texture* texture )
 {
 	char name[9] = "texture0";
@@ -206,6 +218,7 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 	AppendFlag( &header, "COLORS",				flags & COLORS );
 	AppendFlag( &header, "COLOR_MULTIPLIER",	flags & COLOR_MULTIPLIER );
 	AppendFlag( &header, "LIGHTING_DIFFUSE",	flags & LIGHTING_DIFFUSE );	
+	AppendFlag( &header, "INSTANCE",			flags & INSTANCE );
 
 	const char* vertexSrc[2] = { header.c_str(), fixedpipe_vert };
 	glShaderSource( shader->vertexProg, 2, vertexSrc, 0 );
