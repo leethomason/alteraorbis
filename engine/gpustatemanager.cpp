@@ -434,7 +434,7 @@ void GPUShader::SetState( const GPUShader& ns )
 		shadman->SetStreamData( ShaderManager::A_TEXTURE1, ns.stream.nTexture1, GL_FLOAT, ns.stream.stride, PTR( ns.streamPtr, ns.stream.texture1Offset ) );
 		if ( flags & ShaderManager::TEXTURE1_TRANSFORM ) {
 			shadman->SetUniform( ShaderManager::U_TEXTURE1_MAT, textureStack[1].Top() );
-		}
+		}	
 	}
 	CHECK_GL_ERROR;
 
@@ -704,25 +704,24 @@ GPUShader::~GPUShader()
 }
 
 
-void GPUShader::Draw()
+void GPUShader::Draw( int nInstance )
 {
 	GRINLIZ_PERFTRACK
 	if ( nIndex == 0 )
 		return;
 	GLASSERT( nIndex % 3 == 0 );
 
-	trianglesDrawn += nIndex / 3;
+	trianglesDrawn += nInstance * nIndex / 3;
 	++drawCalls;
 
-	if ( indexPtr ) {
-	
+	if ( indexPtr ) {	
 		if ( vertexBuffer ) {
 			glBindBufferX( GL_ARRAY_BUFFER, vertexBuffer );
 		}
 		SetState( *this );
 
 		GLASSERT( !indexBuffer );
-		glDrawElements( GL_TRIANGLES, nIndex, GL_UNSIGNED_SHORT, indexPtr );
+		glDrawElements( GL_TRIANGLES, nIndex*nInstance, GL_UNSIGNED_SHORT, indexPtr );
 
 		if ( vertexBuffer ) {
 			glBindBufferX( GL_ARRAY_BUFFER, 0 );
@@ -747,7 +746,7 @@ void GPUShader::Draw()
 		GLASSERT( !glIsEnabled( GL_INDEX_ARRAY ) );
 		GLASSERT( glIsEnabled( GL_TEXTURE_COORD_ARRAY ) );
 #endif
-		glDrawElements( GL_TRIANGLES, nIndex, GL_UNSIGNED_SHORT, 0 );
+		glDrawElements( GL_TRIANGLES, nIndex*nInstance, GL_UNSIGNED_SHORT, 0 );
 
 		glBindBufferX( GL_ARRAY_BUFFER, 0 );
 		glBindBufferX( GL_ELEMENT_ARRAY_BUFFER, 0 );
