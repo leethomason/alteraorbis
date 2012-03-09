@@ -97,9 +97,8 @@ void main() {
 	v_color = color;
 	#if INSTANCE == 0 
 		gl_Position = u_mvpMatrix * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );
-	#elif INSTANCE == 1
-		int id = int(a_instanceID);
-		gl_Position = (u_mvpMatrix * u_mMatrix[0]) * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );
+	#else
+		gl_Position = (u_mvpMatrix * u_mMatrix[int(a_instanceID)]) * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );
 	#endif
 }
 

@@ -63,7 +63,7 @@ struct InstVertex
 		POS_OFFSET = 0,
 		NORMAL_OFFSET = 12,
 		TEXTURE_OFFSET = 24,
-		INSTANCE_OFFSET = 36
+		INSTANCE_OFFSET = 32
 	};
 
 	void From( const Vertex& rhs ) {

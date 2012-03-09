@@ -85,9 +85,8 @@ static const char* fixedpipe_vert = {
     "	v_color = color;\n"
     "	#if INSTANCE == 0 \n"
     "		gl_Position = u_mvpMatrix * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );\n"
-    "	#elif INSTANCE == 1\n"
-    "		int id = int(a_instanceID);\n"
-    "		gl_Position = (u_mvpMatrix * u_mMatrix[0]) * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );\n"
+    "	#else\n"
+    "		gl_Position = (u_mvpMatrix * u_mMatrix[int(a_instanceID)]) * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );\n"
     "	#endif\n"
     "}\n"
 };
