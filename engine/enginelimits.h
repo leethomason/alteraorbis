@@ -45,7 +45,7 @@ enum {
 	EL_MAP_TEXTURE_SIZE		= 512,
 
 	// performance tuning
-	EL_MAX_INSTANCE			= 8,		// Max instances used. Impacts # of uniforms.
+	EL_MAX_INSTANCE			= 16,		// Max instances used. Impacts # of uniforms.
 	EL_TUNE_INSTANCE_MEM	= 8*1024	// Max memory per model.
 };
 

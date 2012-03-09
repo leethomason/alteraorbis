@@ -294,7 +294,7 @@ void GPUShader::SetState( const GPUShader& ns )
 		shadman->SetUniformArray( ShaderManager::U_M_MAT_ARR, EL_MAX_INSTANCE, ns.instanceMatrix );
 		GLASSERT( ns.stream.instanceIDOffset > 0 );
 		// fixme: switch back to int
-		shadman->SetStreamData( ShaderManager::A_INSTANCE_ID, 1, GL_FLOAT, ns.stream.stride, PTR( ns.streamPtr, ns.stream.instanceIDOffset ) );
+		shadman->SetStreamData( ShaderManager::A_INSTANCE_ID, 1, GL_INT, ns.stream.stride, PTR( ns.streamPtr, ns.stream.instanceIDOffset ) );
 	}
 	else {
 		Matrix4 mvp;

@@ -3,7 +3,7 @@ uniform mat4 	u_mvpMatrix;		// model-view-projection.
 									// although the model is identity in the instancing case.
 
 #if INSTANCE == 1
-	uniform mat4 	u_mMatrix[16];
+	uniform mat4 	u_mMatrix[EL_MAX_INSTANCE];
 	attribute float a_instanceID;
 #endif
 

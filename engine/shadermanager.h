@@ -114,6 +114,7 @@ private:
 	void DeleteProgram( Shader* );
 
 	void AppendFlag( grinliz::GLString* str, const char* flag, int set );
+	void AppendConst( grinliz::GLString* str, const char* name, int value );
 };
 
 #endif //  XENOENGINE_SHADERMANAGER_INCLUDED

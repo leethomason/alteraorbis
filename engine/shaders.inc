@@ -2,7 +2,7 @@ static const char* fixedpipe_vert = {
     "uniform mat4 	u_mvpMatrix;		// model-view-projection.\n"
     "									// although the model is identity in the instancing case.\n"
     "#if INSTANCE == 1\n"
-    "	uniform mat4 	u_mMatrix[16];\n"
+    "	uniform mat4 	u_mMatrix[EL_MAX_INSTANCE];\n"
     "	attribute float a_instanceID;\n"
     "#endif\n"
     "#if COLOR_MULTIPLIER == 1\n"
