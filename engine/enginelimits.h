@@ -17,8 +17,8 @@
 #define ENGINELIMITS_INCLUDED
 
 
-#define XENOENGINE_OPENGL 2
-//#define XENOENGINE_INSTANCING
+#define XENOENGINE_INSTANCING
+#define EL_USE_VBO			// Use VBOs: a good thing, everywhere but the original iPhone
 
 
 enum HitTestMethod 
@@ -76,6 +76,5 @@ static const float GAME_ZOOM_MAX = 5.0f;
 //#define EL_SHOW_ALL_UNITS
 
 // --- Performance -- //
-#define EL_USE_VBO			// Use VBOs: a good thing, everywhere but the original iPhone
 
 #endif

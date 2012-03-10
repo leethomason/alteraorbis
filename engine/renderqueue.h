@@ -53,9 +53,9 @@ public:
 				const grinliz::Matrix4* textureXForm,
 				Texture* replaceAllTextures );
 
-	enum {
-		MODE_PLANAR_SHADOW				= 0x01,		// Do all the fancy tricks to create planar shadows.
-	};
+	//enum {
+	//	MODE_PLANAR_SHADOW				= 0x01,		// Do all the fancy tricks to create planar shadows.
+	//};
 
 	/* If a shader is passed it, it will override the shader set by the Add. */
 	void Submit( GPUShader* shader, int mode, int required, int excluded );
@@ -66,8 +66,6 @@ private:
 	struct Item {
 		Model*					model;
 		const ModelAtom*		atom;
-		int						atomIndex;
-		const grinliz::Matrix4*	textureXForm;
 		Item*					next;
 	};
 
@@ -77,7 +75,7 @@ private:
 		Item*				root;
 	};
 
-	static int Compare( const State& s0, const State& s1 ) 
+	static int CompareState( const State& s0, const State& s1 ) 
 	{
 		if ( s0.shader == s1.shader ) {
 			if ( s0.texture == s1.texture )
@@ -90,7 +88,12 @@ private:
 		return s0.shader->SortOrder() - s1.shader->SortOrder();
 	}
 
-	//void CacheAtom( Model* model, int atomIndex );
+	static int CompareAtom( const void* vi0, const void* vi1 ) 
+	{
+		const Item** i0 = (const Item**)vi0;
+		const Item** i1 = (const Item**)vi1;
+		return (int)((*i0)->atom) - (int)((*i1)->atom);
+	}
 
 	State* FindState( const State& state );
 
@@ -103,6 +106,7 @@ private:
 
 	CDynArray<Vertex> vertexBuf;
 	CDynArray<U16>    indexBuf;
+	CDynArray<Item*>  itemArr;
 
 	State statePool[MAX_STATE];
 	Item itemPool[MAX_ITEMS];

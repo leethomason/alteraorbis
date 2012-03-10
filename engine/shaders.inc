@@ -1,5 +1,10 @@
 static const char* fixedpipe_vert = {
-    "uniform mat4 u_mvpMatrix;		// model-view-projection\n"
+    "uniform mat4 	u_mvpMatrix;		// model-view-projection.\n"
+    "									// although the model is identity in the instancing case.\n"
+    "#if INSTANCE == 1\n"
+    "	uniform mat4 	u_mMatrix[EL_MAX_INSTANCE];\n"
+    "	attribute float a_instanceID;\n"
+    "#endif\n"
     "#if COLOR_MULTIPLIER == 1\n"
     "	uniform vec4 u_colorMult;		\n"
     "#endif\n"
@@ -78,7 +83,11 @@ static const char* fixedpipe_vert = {
     "		#endif\n"
     "	#endif\n"
     "	v_color = color;\n"
-    "	gl_Position = u_mvpMatrix * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );\n"
+    "	#if INSTANCE == 0 \n"
+    "		gl_Position = u_mvpMatrix * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );\n"
+    "	#else\n"
+    "		gl_Position = (u_mvpMatrix * u_mMatrix[int(a_instanceID)]) * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );\n"
+    "	#endif\n"
     "}\n"
 };
 static const char* fixedpipe_frag = {

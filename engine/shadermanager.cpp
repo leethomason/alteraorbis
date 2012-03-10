@@ -2,7 +2,6 @@
 #include "platformgl.h"
 #include "texture.h"
 
-#if XENOENGINE_OPENGL == 2
 #include "shaders.inc"
 
 using namespace grinliz;
@@ -15,13 +14,15 @@ static const char* gAttributeName[ShaderManager::MAX_ATTRIBUTE] =
 	"a_uv1",
 	"a_pos",
 	"a_normal",
-	"a_color"
+	"a_color",
+	"a_instanceID"
 };
 
 
 static const char* gUniformName[ShaderManager::MAX_UNIFORM] = 
 {
 	"u_mvpMatrix",
+	"u_mMatrix",
 	"u_normalMatrix",
 	"u_texMat0",
 	"u_texMat1",
@@ -136,6 +137,16 @@ void ShaderManager::SetUniform( int id, const grinliz::Vector3F& value )
 }
 
 
+void ShaderManager::SetUniformArray( int id, int count, const grinliz::Matrix4* mat )
+{
+	CHECK_GL_ERROR;
+	int loc = active->GetUniformLocation( id );
+	GLASSERT( loc >= 0 );
+	glUniformMatrix4fv( loc, count, false, mat->x );
+	CHECK_GL_ERROR;
+}
+
+
 void ShaderManager::SetTexture( int index, Texture* texture )
 {
 	char name[9] = "texture0";
@@ -158,6 +169,14 @@ void ShaderManager::AppendFlag( GLString* str, const char* flag, int set )
 	else {
 		str->append( "0\n" );
 	}
+}
+
+
+void ShaderManager::AppendConst( grinliz::GLString* str, const char* name, int value )
+{
+	char buf[100];
+	SNPrintf( buf, 100, "#define %s %d\n", name, value );
+	str->append( buf );
 }
 
 
@@ -207,6 +226,9 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 	AppendFlag( &header, "COLORS",				flags & COLORS );
 	AppendFlag( &header, "COLOR_MULTIPLIER",	flags & COLOR_MULTIPLIER );
 	AppendFlag( &header, "LIGHTING_DIFFUSE",	flags & LIGHTING_DIFFUSE );	
+	AppendFlag( &header, "INSTANCE",			flags & INSTANCE );
+
+	AppendConst( &header, "EL_MAX_INSTANCE", EL_MAX_INSTANCE );
 
 	const char* vertexSrc[2] = { header.c_str(), fixedpipe_vert };
 	glShaderSource( shader->vertexProg, 2, vertexSrc, 0 );
@@ -254,5 +276,4 @@ void ShaderManager::DeleteProgram( Shader* shader )
 	CHECK_GL_ERROR;
 }
 
-#endif
 	

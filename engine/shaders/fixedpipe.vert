@@ -1,5 +1,11 @@
 
-uniform mat4 u_mvpMatrix;		// model-view-projection
+uniform mat4 	u_mvpMatrix;		// model-view-projection.
+									// although the model is identity in the instancing case.
+
+#if INSTANCE == 1
+	uniform mat4 	u_mMatrix[EL_MAX_INSTANCE];
+	attribute float a_instanceID;
+#endif
 
 #if COLOR_MULTIPLIER == 1
 	uniform vec4 u_colorMult;		
@@ -89,6 +95,10 @@ void main() {
 	#endif
 
 	v_color = color;
-	gl_Position = u_mvpMatrix * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );
+	#if INSTANCE == 0 
+		gl_Position = u_mvpMatrix * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );
+	#else
+		gl_Position = (u_mvpMatrix * u_mMatrix[int(a_instanceID)]) * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );
+	#endif
 }
 

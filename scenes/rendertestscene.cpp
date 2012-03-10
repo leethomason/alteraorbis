@@ -11,7 +11,7 @@ RenderTestScene::RenderTestScene( LumosGame* game ) : Scene( game ), lumosGame( 
 		model[i]->SetPos( 0, 0, (float)i );
 		model[i]->SetRotation( (float)(-i*10) );
 	}
-	engine->CameraLookAt( 0, (float)(NUM_MODELS/2), 10 );
+	engine->CameraLookAt( 0, (float)(NUM_MODELS/2), 12 );
 
 	lumosGame->InitStd( &gamui2D, &okay, 0 );
 }

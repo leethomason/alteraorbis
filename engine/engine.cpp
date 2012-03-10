@@ -28,6 +28,10 @@
 #include "texture.h"
 #include "particle.h"
 
+/*
+	Xenoengine-2 has a cleaned up render queue. The sorting of items probably makes the engine
+	faster even when not instancing. Cleaning up code makes the underlying algorithm clearer.
+*/
 
 using namespace grinliz;
 
@@ -38,16 +42,8 @@ using namespace grinliz;
 
 Engine::Engine( Screenport* port, const gamedb::Reader* database ) 
 	:	
-		// GL1 uses a different ligting model than the shaders. (3 ambient terms.) 
-		// This tweaks the defaults so they look the same, rather
-		// than try to replicate the GL1 model.
-#if XENOENGINE_OPENGL == 1
-		AMBIENT( 0.3f ),
-		DIFFUSE( 0.8f ),
-#else
 		AMBIENT( 0.5f ),
 		DIFFUSE( 0.6f ),
-#endif
 		DIFFUSE_SHADOW( 0.2f ),
 		screenport( port ),
 		initZoomDistance( 0 ),

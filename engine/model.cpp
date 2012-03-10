@@ -30,26 +30,16 @@ using namespace grinliz;
 void ModelResource::Free()
 {
 	for( unsigned i=0; i<header.nAtoms; ++i ) {
-#ifdef EL_USE_VBO
-		atom[i].vertexBuffer.Destroy();
-		atom[i].indexBuffer.Destroy();
-#endif
-		memset( &atom[i], 0, sizeof( ModelAtom ) );
+		atom[i].Free();
 	}
-	delete [] allVertex;
-	delete [] allIndex;
 }
-
 
 
 void ModelResource::DeviceLoss()
 {
-#ifdef EL_USE_VBO
 	for( unsigned i=0; i<header.nAtoms; ++i ) {
-		atom[i].vertexBuffer.Destroy();
-		atom[i].indexBuffer.Destroy();
+		atom[i].DeviceLoss();
 	}
-#endif
 }
 
 
@@ -93,13 +83,13 @@ void ModelLoader::Load( const gamedb::Item* item, ModelResource* res )
 {
 	res->header.Load( item );
 
-	res->instances = 1;
-#	if XENOENGINE_INSTANCING
-	res->instances = EL_TUNE_INSTANCE_MEM / sizeof( Vertex );
-	if ( res->instances > EL_MAX_INSTANCE ) 
-		res->instance = EL_MAX_INSTANCE;
-	if ( res->instances < 1 )
-		res->instances = 1;		// big model.
+	int instances = 1;
+#	ifdef XENOENGINE_INSTANCING
+	instances = EL_TUNE_INSTANCE_MEM / sizeof( InstVertex );
+	if ( instances > EL_MAX_INSTANCE ) 
+		instances = EL_MAX_INSTANCE;
+	if ( instances < 1 )
+		instances = 1;		// big model.
 #	endif
 
 	// compute the hit testing AABB
@@ -114,33 +104,39 @@ void ModelLoader::Load( const gamedb::Item* item, ModelResource* res )
 		//GLOUTPUT(( "  '%s' vertices=%d tris=%d\n", textureName, (int)res->atom[i].nVertex, (int)(res->atom[i].nIndex/3) ));
 	}
 
-	res->allVertex = new Vertex[ res->header.nTotalVertices * res->instances ];
-	res->allIndex  = new U16[ res->header.nTotalIndices * res->instances ];
+	vBuffer.Clear();	
+	vBuffer.PushArr( res->header.nTotalVertices );
+	iBuffer.Clear();
+	iBuffer.PushArr( res->header.nTotalIndices );
 
-	int vOffset = 0;
+	item->GetData( "vertex", vBuffer.Mem(), res->header.nTotalVertices*sizeof(Vertex) );
+	item->GetData( "index",  iBuffer.Mem(), res->header.nTotalIndices*sizeof(U16) );
+
 	int iOffset = 0;
+	int vOffset = 0;
 
-	if ( res->instances == 1 ) {
-		item->GetData( "vertex", res->allVertex, res->header.nTotalVertices*sizeof(Vertex) );
-		item->GetData( "index",  res->allIndex,  res->header.nTotalIndices*sizeof(U16) );
-
-		for( U32 i=0; i<res->header.nAtoms; ++i )
-		{
-			res->atom[i].index  = res->allIndex+iOffset;
-			res->atom[i].vertex = res->allVertex+vOffset;
-
-			iOffset += res->atom[i].nIndex;
-			vOffset += res->atom[i].nVertex;
+	for( U32 i=0; i<res->header.nAtoms; ++i )
+	{
+		ModelAtom* atom = &res->atom[i];
+		atom->instances = instances;
+		
+		atom->vertex = new InstVertex[ atom->nVertex * instances ];
+		for( int inst=0; inst<instances; ++inst ) {
+			for( unsigned j=0; j<atom->nVertex; ++j ) {
+				atom->vertex[j+inst*atom->nVertex].From( vBuffer[j+vOffset] );
+				atom->vertex[j+inst*atom->nVertex].instanceID = inst;
+			}
 		}
+		
+		atom->index  = new U16[atom->nIndex * instances ];
+		for( int inst=0; inst<instances; ++inst ) {
+			for( unsigned j=0; j<atom->nIndex; ++j ) {
+				atom->index[j+inst*atom->nIndex] = iBuffer[j+iOffset] + inst*atom->nVertex;
+			}
+		}
+		vOffset += atom->nVertex;
+		iOffset += atom->nIndex;
 	}
-	/*
-	else {
-		const gamedb::Reader* reader = gamedb::Reader::GetContext( item );
-		const void* mem = reader->AccessData( item, "vertex" );
-		for( int i=0; i<res->instances; ++i ) {
-			memcpy( res->allVertex + 
-		}
-	*/
 }
 
 
@@ -158,7 +154,8 @@ void ModelLoader::LoadAtom( const gamedb::Item* item, int i, ModelResource* res 
 	StrSplitFilename( GLString( textureName ), &base, &texname, &extension );
 	Texture* t = TextureManager::Instance()->GetTexture( texname.c_str() );
 
-	GLASSERT( t );                       
+	GLASSERT( t );        
+	res->atom[i].Init();
 	res->atom[i].texture = t;
 	res->atom[i].nVertex = group.nVertex;
 	res->atom[i].nIndex = group.nIndex;
@@ -200,12 +197,6 @@ void Model::Init( const ModelResource* resource, SpaceTree* tree )
 	if ( resource && (resource->header.flags & ModelHeader::RESOURCE_NO_SHADOW ) ) {
 		flags |= MODEL_NO_SHADOW;
 	}
-
-	/*
-	for( int i=0; i<EL_MAX_MODEL_GROUPS; ++i ) {
-		cacheStart[i] = CACHE_UNINITIALIZED;
-	}
-	*/
 }
 
 
@@ -255,7 +246,7 @@ bool Model::HasTextureXForm( int i ) const
 	return false;
 }
 
-
+/*
 void Model::SetSkin( int gender, int armor, int appearance )
 {
 	// Very particular code. For a model, expects there to be
@@ -284,8 +275,9 @@ void Model::SetSkin( int gender, int armor, int appearance )
 		GLASSERT( 0 );
 	}
 }
+*/
 
-
+/*
 void Model::SetTexXForm( int id, float a, float d, float x, float y )
 {
 	GLASSERT( id >= 0 && id < EL_MAX_MODEL_GROUPS );
@@ -301,7 +293,7 @@ void Model::SetTexXForm( int id, float a, float d, float x, float y )
 		auxTexture->m[id].m24 = y;
 	}
 }
-
+*/
 
 void Model::CalcHitAABB( Rectangle3F* aabb ) const
 {
@@ -368,36 +360,30 @@ void Model::Queue( RenderQueue* queue, GPUShader* opaque, GPUShader* transparent
 }
 
 
-void ModelAtom::LowerBind( GPUShader* shader, const GPUStream& stream ) const
+void ModelAtom::Bind( GPUShader* shader ) const
 {
+	GPUStream stream( vertex );
+
 #ifdef EL_USE_VBO
 	if ( GPUShader::SupportsVBOs() && !vertexBuffer.IsValid() ) {
 		GLASSERT( !indexBuffer.IsValid() );
 
-		vertexBuffer = GPUVertexBuffer::Create( vertex, nVertex );
-		indexBuffer  = GPUIndexBuffer::Create(  index,  nIndex );
+		vertexBuffer = GPUVertexBuffer::Create( vertex, sizeof(*vertex), nVertex*instances );
+		indexBuffer  = GPUIndexBuffer::Create(  index,  nIndex*instances );
 	}
 
-	if ( vertexBuffer.IsValid() && indexBuffer.IsValid() ) 
+	if ( vertexBuffer.IsValid() && indexBuffer.IsValid() ) {
 		shader->SetStream( stream, vertexBuffer, nIndex, indexBuffer );
+	}
 	else
 #endif
+	{
 		shader->SetStream( stream, vertex, nIndex, index );
-}
-
-
-void ModelAtom::Bind( GPUShader* shader ) const
-{
-	GPUStream stream( vertex );
-	// Handle light map, if we have one:
-	if ( shader->HasTexture1() ) {
-		stream.texture1Offset = Vertex::POS_OFFSET;
-		stream.nTexture1 = 3;
 	}
-	LowerBind( shader, stream );
 }
 
 
+/*
 void ModelAtom::BindPlanarShadow( GPUShader* shader ) const
 {
 	GPUStream stream;
@@ -411,6 +397,7 @@ void ModelAtom::BindPlanarShadow( GPUShader* shader ) const
 
 	LowerBind( shader, stream );
 }
+*/
 
 
 const grinliz::Rectangle3F& Model::AABB() const

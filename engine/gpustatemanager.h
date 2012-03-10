@@ -58,8 +58,8 @@ class GPUVertexBuffer : public GPUBuffer
 {
 public:
 	// a null value for vertex will create an empty buffer
-	static GPUVertexBuffer Create( const Vertex* vertex, int nVertex );
-	void Upload( const Vertex* data, int size, int start );
+	static GPUVertexBuffer Create( const void* vertex, int size, int nVertex );
+	//void Upload( const Vertex* data, int size, int start );
 
 	GPUVertexBuffer() : GPUBuffer() {}
 	void Destroy();
@@ -71,9 +71,20 @@ class GPUIndexBuffer : public GPUBuffer
 {
 public:
 	static GPUIndexBuffer Create( const uint16_t* index, int nIndex );
-	void Upload( const uint16_t* data, int size, int start );
+	//void Upload( const uint16_t* data, int size, int start );
 
 	GPUIndexBuffer() : GPUBuffer() {}
+	void Destroy();
+};
+
+
+class GPUInstanceBuffer : public GPUBuffer
+{
+public:
+	static GPUInstanceBuffer Create( const uint8_t* index, int nIndex );
+	//void Upload( const uint8_t* data, int size, int start );
+
+	GPUInstanceBuffer() : GPUBuffer() {}
 	void Destroy();
 };
 
@@ -93,15 +104,18 @@ struct GPUStream {
 	int normalOffset;
 	int nColor;
 	int colorOffset;
+	int instanceIDOffset;
 
 	GPUStream() :  stride( 0 ),
 				nPos( 0 ), posOffset( 0 ), 
 				nTexture0( 0 ), texture0Offset( 0 ),
 				nTexture1( 0 ), texture1Offset( 0 ), 
 				nNormal( 0 ), normalOffset( 0 ),
-				nColor( 0 ), colorOffset( 0 ) {}
+				nColor( 0 ), colorOffset( 0 ), instanceIDOffset( 0 ) {}
 
 	GPUStream( const Vertex* vertex );
+	GPUStream( const InstVertex* vertex );
+
 	enum GamuiType { kGamuiType };
 	GPUStream( GamuiType );
 	GPUStream( const PTVertex2* vertex );
@@ -144,7 +158,6 @@ public:
 	static void SetCameraTransform( const grinliz::Matrix4& camera );
 	static void SetScissor( int x, int y, int w, int h );
 	
-
 	void SetStream( const GPUStream& stream, const void* ptr, int nIndex, const uint16_t* indices ) 
 	{
 		GLASSERT( stream.stride > 0 );
@@ -190,7 +203,6 @@ public:
 		this->indexBuffer = 0;
 	}
 
-
 	void SetTexture0( Texture* tex ) { texture0 = tex; }
 	bool HasTexture0() const { return texture0 != 0; }
 	bool HasLighting( grinliz::Vector4F* dir, grinliz::Vector4F* ambient, grinliz::Vector4F* diffuse ) const { 
@@ -212,6 +224,12 @@ public:
 		SetColor( c );
 	}
 
+	void SetInstancing( bool value ) { instancing = value; }
+	void InstanceMatrix( int i, const grinliz::Matrix4& mat ) { 
+		GLASSERT( i >= 0 && i < EL_MAX_INSTANCE );
+		instanceMatrix[i] = mat; 
+	}
+
 	static void PushMatrix( MatrixType type );
 	static void SetMatrix( MatrixType type, const grinliz::Matrix4& m );
 	static void MultMatrix( MatrixType type, const grinliz::Matrix4& m );
@@ -224,13 +242,11 @@ public:
 	static void MultTextureMatrix( int mask, const grinliz::Matrix4& m );
 	static void PopTextureMatrix( int mask );
 
-#if XENOENGINE_OPENGL == 2
 	static const grinliz::Matrix4& TopMatrix( MatrixType type );
 	static const grinliz::Matrix4& TopTextureMatrix( int unit );
 	static const grinliz::Matrix4& ViewMatrix();
-#endif
 
-	void Draw();
+	void Draw( int instances=0 );
 
 	void Debug_DrawQuad( const grinliz::Vector3F p0, const grinliz::Vector3F p1 );
 
@@ -251,6 +267,7 @@ protected:
 	GPUShader() : texture0( 0 ), texture1( 0 ), 
 				 streamPtr( 0 ), nIndex( 0 ), indexPtr( 0 ),
 				 vertexBuffer( 0 ), indexBuffer( 0 ),
+				 instancing( false ),
 				 blend( false ), alphaTest( 0 ),
 				 depthWrite( true ), depthTest( true )
 	{
@@ -273,10 +290,8 @@ private:
 	// not so much on TEXTURE. Use our own texture stack, one for each texture unit.
 	static MatrixStack textureStack[2];
 	static bool textureXFormInUse[2];
-#if (XENOENGINE_OPENGL == 2)
 	static MatrixStack mvStack;			// FIXME: check opengl preserves it's matrix stack in programmable mode, and delete this
 	static MatrixStack projStack;
-#endif
 
 	static void SetTextureXForm( int unit );
 
@@ -284,6 +299,7 @@ protected:
 	static int trianglesDrawn;
 	static int drawCalls;
 	static uint32_t uid;
+	static int			matrixDepth[3];
 
 	static const void* PTR( const void* base, int offset ) {
 		return (const void*)((const U8*)base + offset);
@@ -292,12 +308,13 @@ protected:
 	Texture* texture0;
 	Texture* texture1;
 
-	GPUStream stream;
-	const void* streamPtr;
-	int nIndex;
+	GPUStream		stream;
+	const void*		streamPtr;
+	int				nIndex;
 	const uint16_t* indexPtr;
-	U32 vertexBuffer;
-	U32 indexBuffer;
+	U32				vertexBuffer;
+	U32				indexBuffer;
+	bool			instancing;
 
 	bool		blend;
 	bool		alphaTest;
@@ -305,12 +322,12 @@ protected:
 	bool		depthWrite;
 	bool		depthTest;
 
-	grinliz::Color4F		color;
-	static int			matrixDepth[3];
-
+	grinliz::Color4F	color;
 	grinliz::Color4F	ambient;
 	grinliz::Vector4F	direction;
 	grinliz::Color4F	diffuse;
+
+	grinliz::Matrix4	instanceMatrix[EL_MAX_INSTANCE];
 };
 
 
@@ -337,9 +354,6 @@ public:
 	~LightShader();
 	
 protected:
-	void SetLightParams() const;
-
-	static int locked;
 };
 
 

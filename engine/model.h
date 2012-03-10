@@ -33,29 +33,52 @@ class SpaceTree;
 class RenderQueue;
 class GPUShader;
 
+/*
+	v0 v1 v2 v0 v1 v2									vertex (3 points x 2 instances)
+	i0 i1 i2 i0 i0 i0 i0+3 i1+3 i2+3 i0+3 i0+3 i0+3		index (2 triangle x 2 instances)
+
+	vertex size *= nInstance
+	index size *= nInstance
+	instance size = index size * nInstance
+*/
+
 // The smallest draw unit: texture, vertex, index.
 struct ModelAtom 
 {
+	void Init() {
+		texture = 0;
+		nVertex = nIndex = 0;
+		index = 0;
+		vertex = 0;
+		instances = 0;
+	}
+
+	void Free() {
+		DeviceLoss();
+		delete [] index;
+		delete [] vertex;
+		Init();
+	}
+
+	void DeviceLoss() {
+		vertexBuffer.Destroy();
+		indexBuffer.Destroy();
+	}
+
 	Texture* texture;
-#ifdef EL_USE_VBO
+#	ifdef EL_USE_VBO
 	mutable GPUVertexBuffer vertexBuffer;		// created on demand, hence 'mutable'
 	mutable GPUIndexBuffer  indexBuffer;
-#endif
+#	endif
+
+	void Bind( GPUShader* shader ) const;
 
 	U32 nVertex;
 	U32 nIndex;
+	U32 instances;
 
-	void Bind( GPUShader* shader ) const;
-	void BindPlanarShadow( GPUShader* shader ) const;	// I gave up trying to make this general.
-	void LowerBind( GPUShader* shader, const GPUStream& stream ) const;
-
-	// A note on the memory model: the index and vertices are stored
-	// in continuous memory to cut down on allocation overhead. But
-	// that is an allocation trick. The 'index' and 'vertex' pointers
-	// work as if the buffers we allocated normally.
-	//
-	const U16* index;		// points back to ModelResource memory.
-	const Vertex* vertex;	// points back to ModelResource memory.
+	U16* index;
+	InstVertex* vertex;
 };
 
 
@@ -105,9 +128,9 @@ public:
 	ModelHeader header;						// loaded
 
 	grinliz::Rectangle3F	hitBounds;		// for picking - a bounds approximation
-	int						instances;		// # of times the model is repeated.
-	U16*					allIndex;		// memory store for vertices and indices. Used for hit-testing.
-	Vertex*					allVertex;
+//	int						instances;		// # of times the model is repeated.
+//	U16*					allIndex;		// memory store for vertices and indices. Used for hit-testing.
+//	Vertex*					allVertex;
 
 	ModelAtom atom[EL_MAX_MODEL_GROUPS];
 };
@@ -158,6 +181,8 @@ public:
 
 private:
 	void LoadAtom( const gamedb::Item* item, int index, ModelResource* res );
+	CDynArray<Vertex> vBuffer;
+	CDynArray<U16> iBuffer;
 };
 
 
@@ -207,9 +232,9 @@ public:
 	float GetRotation( int axis=1 ) const			{ return rot[axis]; }
 	
 	// Set the skin texture (which is a special texture xform)
-	void SetSkin(int gender, int armor, int appearance);
+	//void SetSkin(int gender, int armor, int appearance);
 	// Set the texture xform for rendering tricks
-	void SetTexXForm( int index, float a=1.0f, float d=1.0f, float x=0.0f, float y=0.0f );
+	//void SetTexXForm( int index, float a=1.0f, float d=1.0f, float x=0.0f, float y=0.0f );
 
 	// Set the texture.
 	void SetTexture( Texture* t )	{ setTexture = t; }
