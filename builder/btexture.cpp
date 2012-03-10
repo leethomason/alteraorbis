@@ -24,6 +24,8 @@ BTexture::BTexture()
 	  noMip( false ),
 	  targetWidth( 0 ),
 	  targetHeight( 0 ),
+	  atlasX( 0 ),
+	  atlasY( 0 ),
 	  format( RGBA16 ),
 	  surface( 0 ),
 	  pixelBuffer16( 0 ),
@@ -102,6 +104,25 @@ bool BTexture::Load()
 			assetName.c_str(),
 			surface->format->BitsPerPixel );
 	return true;
+}
+
+
+void BTexture::Create( int w, int h, int format )
+{
+	this->targetWidth = w;
+	this->targetHeight = h;
+	this->format = format;
+
+	GLASSERT( !surface );
+	if ( format == RGBA16 ) {
+		surface = SDL_CreateRGBSurface( 0, w, h, 32, 0xff000000, 0x00ff0000, 0x0000ff00, 0x000000ff );
+	}
+	else if ( format == RGB16 ) {
+		surface = SDL_CreateRGBSurface( 0, w, h, 32, 0xff000000, 0x00ff0000, 0x0000ff00, 0 );
+	}
+	else if ( format == ALPHA ) {
+		surface = SDL_CreateRGBSurface( 0, w, h, 8, 0, 0, 0, 0xff );
+	}
 }
 
 

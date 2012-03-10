@@ -25,7 +25,6 @@
 #include <string>
 #include <vector>
 
-
 #include "../grinliz/gldebug.h"
 #include "../grinliz/gltypes.h"
 #include "../grinliz/glcolor.h"
@@ -46,6 +45,7 @@
 #include "modelbuilder.h"
 #include "btexture.h"
 #include "dither.h"
+#include "atlas.h"
 
 using namespace std;
 using namespace grinliz;
@@ -720,24 +720,39 @@ void ProcessTexture( XMLElement* texture )
 	btexture.Load();
 	btexture.Scale();
 
-	/*
-	// run through child tags.
-	// interpolate in
-	bool sub=false;
-	for( XMLElement* blit=texture->FirstChildElement( "blit" );
-		 blit;
-		 blit=blit->NextSiblingElement( "blit" ) ) 
-	{
-		BlitTexture( blit, surface );
-		sub = true;
-	}
-	if ( sub ) {
-		SDL_SaveBMP( surface, "comp.bmp" );
-	}
-	*/
-
 	btexture.ToBuffer();
 	btexture.InsertTextureToDB( writer->Root()->FetchChild( "textures" ) );
+}
+
+
+void ProcessAtlas( XMLElement* atlasElement )
+{
+	static const int MAX = 40;	// increase as needed
+	BTexture btextureArr[MAX];
+	int index=0;
+
+	for( const XMLElement* texture = atlasElement->FirstChildElement( "texture" );
+		 texture;
+		 texture = texture->NextSiblingElement( "texture" ))
+	{
+		GLASSERT( index < MAX );
+		if ( index >= MAX ) {
+			ExitError( "Atlas", 0, 0, "Atlas limit exceeded." );
+		}
+		btextureArr[index].ParseTag( texture );
+
+		GLString pathName, assetName;
+		ParseNames( texture, &assetName, &pathName, 0 );
+		btextureArr[index].SetNames( assetName, pathName );
+
+		btextureArr[index].Load();
+		btextureArr[index].Scale();
+		++index;
+	}
+	int maxWidth = 1024;
+	atlasElement->QueryIntAttribute( "width", &maxWidth );
+	Atlas atlas;
+	atlas.Generate( btextureArr, index, maxWidth );
 }
 
 
@@ -987,9 +1002,9 @@ int main( int argc, char* argv[] )
 		else if ( StrEqual( child->Value(), "font" )) {
 			ProcessFont( child );
 		}
-//		else if ( StrEqual( child->Value(), "atlas" )) {
-//			ProcessAtlas( child );
-//		}
+		else if ( StrEqual( child->Value(), "atlas" )) {
+			ProcessAtlas( child );
+		}
 		else {
 			printf( "Unrecognized element: %s\n", child->Value() );
 		}

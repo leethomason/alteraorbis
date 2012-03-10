@@ -13,12 +13,15 @@ public:
 	BTexture();
 	~BTexture();
 
+	// -- The "do in order" block.
 	bool ParseTag( const tinyxml2::XMLElement* element );
 	void SetNames( const grinliz::GLString& asset, const grinliz::GLString& path )	{ this->assetName = asset; this->pathName = path; }
-	bool Load();		// do the load
+	bool Load();		// do the load (can use create instad)
 	bool Scale();		// scale, if targetW/H not asset W/H
 	bool ToBuffer();	// dither, flip, process, etc. to memory buffer
 	void InsertTextureToDB( gamedb::WItem* parent );
+	// ---- normal functions follow.
+	void Create( int w, int h, int format );
 
 	int TextureMem() const {
 		if ( format == RGB16 || format == RGBA16 ) return (surface->w * surface->h * 2);
@@ -26,6 +29,7 @@ public:
 		GLASSERT( 0 );
 		return 0;
 	}
+	int PixelSize() const { return surface->w * surface->h; }
 
 	static SDL_Surface* BTexture::CreateScaledSurface( int w, int h, SDL_Surface* surface );
 
@@ -37,6 +41,8 @@ public:
 	bool noMip;
 	int targetWidth;
 	int targetHeight;
+	int atlasX;
+	int atlasY;
 
 	enum {
 		RGBA16,		// 4444		2
