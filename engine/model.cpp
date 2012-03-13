@@ -246,54 +246,6 @@ bool Model::HasTextureXForm( int i ) const
 	return false;
 }
 
-/*
-void Model::SetSkin( int gender, int armor, int appearance )
-{
-	// Very particular code. For a model, expects there to be
-	// 2 textures: 'characters' and 'charSwatch'. The 'characters'
-	// sets the head/skin texture and the 'charSwatch' the armor.
-
-	GLASSERT( gender < 2 );
-	GLASSERT( armor < 4 );
-	GLASSERT( appearance < 16 );
-
-	float tHeadX = float( appearance ) / 16.0f;
-	//float tHeadY = float( gender ) / 2.0f;	// always 0! Models have correct Y xform for head.
-	float tArmor = float( armor ) / 16.0f;
-
-	GLASSERT( resource->header.nAtoms == 2 );
-
-	if ( StrEqual( resource->atom[0].texture->Name(), "characters" ) ) {
-		SetTexXForm( 0, 1, 1, tHeadX, 0 );
-		SetTexXForm( 1, 1, 1, tArmor, 0 );
-	}
-	else if ( StrEqual( resource->atom[1].texture->Name(), "characters" ) ) {
-		SetTexXForm( 1, 1, 1, tHeadX, 0 );
-		SetTexXForm( 0, 1, 1, tArmor, 0 );
-	}
-	else {
-		GLASSERT( 0 );
-	}
-}
-*/
-
-/*
-void Model::SetTexXForm( int id, float a, float d, float x, float y )
-{
-	GLASSERT( id >= 0 && id < EL_MAX_MODEL_GROUPS );
-	if ( !auxTexture ) {
-		auxTexture = ModelResourceManager::Instance()->Alloc();
-		auxTexture->Init();
-	}
-
-	if ( a!=1.0f || d!=1.0f || x!=0.0f || y!=0.0f ){
-		auxTexture->m[id].m11 = a;
-		auxTexture->m[id].m22 = d;
-		auxTexture->m[id].m14 = x;
-		auxTexture->m[id].m24 = y;
-	}
-}
-*/
 
 void Model::CalcHitAABB( Rectangle3F* aabb ) const
 {

@@ -241,7 +241,9 @@ void Engine::Draw()
 	Plane planes[6];
 	CalcFrustumPlanes( planes );
 
-	Model* modelRoot = spaceTree->Query( planes, 6, 0, Model::MODEL_INVISIBLE, false );
+	int exclude = Model::MODEL_INVISIBLE;
+	exclude |= enableMeta ? 0 : Model::MODEL_METADATA;
+	Model* modelRoot = spaceTree->Query( planes, 6, 0, exclude, false );
 	
 	Color4F ambient, diffuse;
 	Vector4F dir;
@@ -258,33 +260,13 @@ void Engine::Draw()
 		mapBounds = map->Bounds();
 	}
 
+
 	// ------------ Process the models into the render queue -----------
 	{
 		GLASSERT( renderQueue->Empty() );
 
 		for( Model* model=modelRoot; model; model=model->next ) {
-			if ( model->IsFlagSet( Model::MODEL_METADATA ) && !enableMeta )
-				continue;
-
-			if ( model->IsFlagSet(  Model::MODEL_OWNED_BY_MAP ) ) {
-				model->Queue(	renderQueue, 
-								&mapItemShader,
-								&mapBlendItemShader,
-								0 );
-			}
-			else {
-				Vector3F pos = model->AABB().Center();
-				int x = LRintf( pos.x - 0.5f );
-				int y = LRintf( pos.z - 0.5f );
-
-#ifdef EL_SHOW_ALL_UNITS
-				{
-#else
-				if ( mapBounds.Contains( x, y ) ) {
-#endif
-					model->Queue( renderQueue, &lightShader, &blendLightShader, 0 );
-				}
-			}
+			model->Queue( renderQueue, &lightShader, &blendLightShader, 0 );
 		}
 	}
 
@@ -293,6 +275,8 @@ void Engine::Draw()
 //	Color4F color;
 
 	if ( map ) {
+		map->Draw3D();
+
 		// If the map is enabled, we draw the basic map plane lighted. Then draw the model shadows.
 		// The shadows are the tricky part: one matrix is used to transform the vertices to the ground
 		// plane, and the other matrix is used to transform the vertices to texture coordinates.
@@ -341,17 +325,7 @@ void Engine::Draw()
 	// -------- Models ---------- //
 #ifdef ENGINE_RENDER_MODELS
 	{
-		if ( map ) {
-//			mapItemShader.SetTexture1( iMap->LightFogMapTexture() );
-//			mapBlendItemShader.SetTexture1( iMap->LightFogMapTexture() );
-			
-			//PushLightSwizzleMatrix( &mapItemShader );
-
-			renderQueue->Submit( 0, 0, Model::MODEL_OWNED_BY_MAP, 0 );
-			lightShader.PopTextureMatrix( 2 );
-		}
-		// Render everything NOT in the map.
-		renderQueue->Submit( 0, 0, 0, Model::MODEL_OWNED_BY_MAP );
+		renderQueue->Submit( 0, 0, 0, 0 );
 	}
 #endif
 

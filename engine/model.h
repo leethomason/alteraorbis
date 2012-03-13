@@ -199,8 +199,8 @@ public:
 
 	enum {
 		MODEL_SELECTABLE			= 0x01,
-		MODEL_HIDDEN_FROM_TREE		= 0x02,
-		MODEL_OWNED_BY_MAP			= 0x04,
+		//MODEL_HIDDEN_FROM_TREE		= 0x02,
+		//MODEL_OWNED_BY_MAP		= 0x04,
 		MODEL_NO_SHADOW				= 0x08,
 		MODEL_INVISIBLE				= 0x10,
 		MODEL_METADATA				= 0x80,		// mapmaker data that isn't displayed in-game
@@ -215,11 +215,6 @@ public:
 	void SetFlag( int f )			{ flags |= f; }
 	void ClearFlag( int f )			{ flags &= (~f); }
 	int Flags()	const				{ return flags; }
-
-	// Can this be put in a render cache? Yes if owned by the
-	// rarely-changing map.
-	// FIXME: also not cacheable if contains any alpha texture
-	bool Cacheable() const			{ return IsFlagSet( MODEL_OWNED_BY_MAP ) != 0; };
 
 	const grinliz::Vector3F& Pos() const			{ return pos; }
 	void SetPos( const grinliz::Vector3F& pos );

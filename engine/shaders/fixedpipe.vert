@@ -3,12 +3,12 @@ uniform mat4 	u_mvpMatrix;		// model-view-projection.
 									// although the model is identity in the instancing case.
 
 #if INSTANCE == 1
-	uniform mat4 	u_mMatrix[EL_MAX_INSTANCE];
-	attribute float a_instanceID;
+	uniform mat4 	u_mMatrix[EL_MAX_INSTANCE];		// Each instance gets its own transform. Burns up uniforms; this can't be huge.
+	attribute float a_instanceID;					// Index into the transformation.
 #endif
 
 #if COLOR_MULTIPLIER == 1
-	uniform vec4 u_colorMult;		
+	uniform vec4 u_colorMult;		// Overall Color, if specified.
 #endif
 
 attribute vec3 a_pos;			// vertex position
@@ -48,6 +48,10 @@ attribute vec3 a_pos;			// vertex position
 	uniform vec4 u_diffuse;			// diffuse light
 
 	attribute vec3 a_normal;		// vertex normal
+#endif
+
+#if SHADOW_TRANSFORM == 1
+	uniform mat4 u_shadowMatrix;	// translates points to ground plane.
 #endif
 
 varying vec4 v_color;
@@ -95,10 +99,21 @@ void main() {
 	#endif
 
 	v_color = color;
-	#if INSTANCE == 0 
-		gl_Position = u_mvpMatrix * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );
-	#else
-		gl_Position = (u_mvpMatrix * u_mMatrix[int(a_instanceID)]) * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );
+	
+	#if SHADOW_TRANSFORM
+		// In the shadow case, transform down to the ground plane first. (yes, old school planar shadows)
+		#if INSTANCE == 0			
+			#error SHADOW_TRANSFORM requires INSTANCING
+		#else
+			vec4 pos = u_shadowMatrix * (u_mMatrix[int(a_instanceID) * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 ));
+		#endif
+		gl_Position = u_mvpMatrix * pos;
+	#else	
+		#if INSTANCE == 0 
+			gl_Position = u_mvpMatrix * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );
+		#else
+			gl_Position = (u_mvpMatrix * u_mMatrix[int(a_instanceID)]) * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );
+		#endif
 	#endif
 }
 

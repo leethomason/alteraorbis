@@ -284,7 +284,7 @@ Model* SpaceTree::Query( const Plane* planes, int nPlanes, int required, int exc
 	spheresComputed = 0;
 	modelsFound = 0;
 	requiredFlags = required;
-	excludedFlags = excluded | Model::MODEL_HIDDEN_FROM_TREE;
+	excludedFlags = excluded;
 	this->debug = debug;
 
 #ifdef DEBUG
@@ -498,7 +498,7 @@ Model* SpaceTree::QueryRay( const Vector3F& _origin,
 	nodesVisited = 0;
 	modelsFound = 0;
 	requiredFlags = required;
-	excludedFlags = excluded | Model::MODEL_HIDDEN_FROM_TREE;
+	excludedFlags = excluded;
 	++queryID;
 
 	Vector3F dummy;

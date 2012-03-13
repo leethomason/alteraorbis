@@ -158,13 +158,13 @@ public:
 	static void SetCameraTransform( const grinliz::Matrix4& camera );
 	static void SetScissor( int x, int y, int w, int h );
 	
-	void SetStream( const GPUStream& stream, const void* ptr, int nIndex, const uint16_t* indices ) 
+	void SetStream( const GPUStream& stream, const void* vertex, int nIndex, const uint16_t* indices ) 
 	{
 		GLASSERT( stream.stride > 0 );
 		GLASSERT( nIndex % 3 == 0 );
 
 		this->stream = stream;
-		this->streamPtr = ptr;
+		this->streamPtr = vertex;
 		this->indexPtr = indices;
 		this->nIndex = nIndex;
 		this->vertexBuffer = 0;
@@ -282,7 +282,6 @@ protected:
 private:
 
 	static void SwitchMatrixMode( MatrixType type );	
-	static GPUShader		current;
 	static MatrixType		matrixMode;		// Note this is static and global!
 	static int vboSupport;
 
@@ -290,8 +289,12 @@ private:
 	// not so much on TEXTURE. Use our own texture stack, one for each texture unit.
 	static MatrixStack textureStack[2];
 	static bool textureXFormInUse[2];
-	static MatrixStack mvStack;			// FIXME: check opengl preserves it's matrix stack in programmable mode, and delete this
+	static MatrixStack mvStack;
 	static MatrixStack projStack;
+
+	static bool currentBlend;
+	static bool currentDepthTest;
+	static bool currentDepthWrite;
 
 	static void SetTextureXForm( int unit );
 

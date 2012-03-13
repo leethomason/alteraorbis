@@ -164,16 +164,18 @@ void MatrixStack::Multiply( const grinliz::Matrix4& m )
 }
 
 
-/*static*/ GPUShader GPUShader::current;
-/*static*/ int GPUShader::trianglesDrawn = 0;
-/*static*/ int GPUShader::drawCalls = 0;
-/*static*/ uint32_t GPUShader::uid = 0;
+/*static*/ int			GPUShader::trianglesDrawn = 0;
+/*static*/ int			GPUShader::drawCalls = 0;
+/*static*/ uint32_t		GPUShader::uid = 0;
 /*static*/ GPUShader::MatrixType GPUShader::matrixMode = MODELVIEW_MATRIX;
-/*static*/ MatrixStack GPUShader::textureStack[2];
-/*static*/ MatrixStack GPUShader::mvStack;
-/*static*/ MatrixStack GPUShader::projStack;
-/*static*/ bool GPUShader::textureXFormInUse[2] = { false, false };
-/*static*/ int GPUShader::vboSupport = 0;
+/*static*/ MatrixStack	GPUShader::textureStack[2];
+/*static*/ MatrixStack	GPUShader::mvStack;
+/*static*/ MatrixStack	GPUShader::projStack;
+/*static*/ bool			GPUShader::textureXFormInUse[2] = { false, false };
+/*static*/ int			GPUShader::vboSupport = 0;
+/*static*/ bool			GPUShader::currentBlend = false;
+/*static*/ bool			GPUShader::currentDepthWrite = true;
+/*static*/ bool			GPUShader::currentDepthTest = true;
 
 /*static*/ bool GPUShader::SupportsVBOs()
 {
@@ -192,9 +194,6 @@ void MatrixStack::Multiply( const grinliz::Matrix4& m )
 
 /*static */ void GPUShader::ResetState()
 {
-	GPUShader state;
-	current = state;
-
 	// Texture unit 1
 	glActiveTexture( GL_TEXTURE1 );
 	glClientActiveTexture( GL_TEXTURE1 );
@@ -237,6 +236,10 @@ void MatrixStack::Multiply( const grinliz::Matrix4& m )
 	// General config:
 	glCullFace( GL_BACK );
 	glEnable( GL_CULL_FACE );
+
+	currentBlend = false;
+	currentDepthTest = true;
+	currentDepthWrite = true;
 
 	CHECK_GL_ERROR;
 }
@@ -362,30 +365,34 @@ void GPUShader::SetState( const GPUShader& ns )
 	}
 
 	// Blend
-	if ( ns.blend && !current.blend ) {
+	if ( ns.blend && !currentBlend ) {
 		glEnable( GL_BLEND );
+		currentBlend = true;
 	}
-	else if ( !ns.blend && current.blend ) {
+	else if ( !ns.blend && currentBlend ) {
 		glDisable( GL_BLEND );
+		currentBlend = false;
 	}
 
 	// Depth Write
-	if ( ns.depthWrite && !current.depthWrite ) {
+	if ( ns.depthWrite && !currentDepthWrite ) {
 		glDepthMask( GL_TRUE );
+		currentDepthWrite = true;
 	}
-	else if ( !ns.depthWrite && current.depthWrite ) {
+	else if ( !ns.depthWrite && currentDepthWrite ) {
 		glDepthMask( GL_FALSE );
+		currentDepthWrite = false;
 	}
 
 	// Depth test
-	if ( ns.depthTest && !current.depthTest ) {
+	if ( ns.depthTest && !currentDepthTest ) {
 		glEnable( GL_DEPTH_TEST );
+		currentDepthTest = true;
 	}
-	else if ( !ns.depthTest && current.depthTest ) {
+	else if ( !ns.depthTest && currentDepthTest ) {
 		glDisable( GL_DEPTH_TEST );
+		currentDepthTest = false;
 	}
-
-	current = ns;
 	CHECK_GL_ERROR;
 }
 
