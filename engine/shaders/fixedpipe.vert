@@ -50,10 +50,6 @@ attribute vec3 a_pos;			// vertex position
 	attribute vec3 a_normal;		// vertex normal
 #endif
 
-#if SHADOW_TRANSFORM == 1
-	uniform mat4 u_shadowMatrix;	// translates points to ground plane.
-#endif
-
 varying vec4 v_color;
 
 void main() {
@@ -100,20 +96,10 @@ void main() {
 
 	v_color = color;
 	
-	#if SHADOW_TRANSFORM
-		// In the shadow case, transform down to the ground plane first. (yes, old school planar shadows)
-		#if INSTANCE == 0			
-			#error SHADOW_TRANSFORM requires INSTANCING
-		#else
-			vec4 pos = u_shadowMatrix * (u_mMatrix[int(a_instanceID) * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 ));
-		#endif
-		gl_Position = u_mvpMatrix * pos;
-	#else	
-		#if INSTANCE == 0 
-			gl_Position = u_mvpMatrix * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );
-		#else
-			gl_Position = (u_mvpMatrix * u_mMatrix[int(a_instanceID)]) * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );
-		#endif
+	#if INSTANCE == 0 
+		gl_Position = u_mvpMatrix * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );
+	#else
+		gl_Position = (u_mvpMatrix * u_mMatrix[int(a_instanceID)]) * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );
 	#endif
 }
 

@@ -53,12 +53,12 @@ public:
 				const grinliz::Matrix4* textureXForm,
 				Texture* replaceAllTextures );
 
-	//enum {
-	//	MODE_PLANAR_SHADOW				= 0x01,		// Do all the fancy tricks to create planar shadows.
-	//};
-
 	/* If a shader is passed it, it will override the shader set by the Add. */
-	void Submit( GPUShader* shader, int mode, int required, int excluded );
+	void Submit(	GPUShader* shader, 
+					int required, 
+					int excluded,
+					const grinliz::Matrix4* xform );	// Additional transformation applied to model matrix,
+														// usually the shadow matrix.
 	bool Empty() { return nState == 0 && nItem == 0; }
 	void Clear() { nState = 0; nItem = 0; }
 

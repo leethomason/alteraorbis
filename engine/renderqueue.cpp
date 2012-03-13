@@ -121,12 +121,12 @@ void RenderQueue::Add( Model* model, const ModelAtom* atom, GPUShader* shader, c
 	item->model = model;
 	item->atom = atom;
 	
-s	item->next  = state->root;
+	item->next  = state->root;
 	state->root = item;
 }
 
 
-void RenderQueue::Submit( GPUShader* overRideShader, int mode, int required, int excluded )
+void RenderQueue::Submit( GPUShader* overRideShader, int required, int excluded, const Matrix4* xform )
 {
 	GRINLIZ_PERFTRACK
 
@@ -178,7 +178,12 @@ void RenderQueue::Submit( GPUShader* overRideShader, int mode, int required, int
 				atom->Bind( shader );
 
 				for( int k=0; k<delta; ++k ) {
-					shader->InstanceMatrix( k, itemArr[start+k]->model->XForm() );
+					if ( xform ) {
+						shader->InstanceMatrix( k, (*xform) * itemArr[start+k]->model->XForm() );
+					}
+					else {
+						shader->InstanceMatrix( k, itemArr[start+k]->model->XForm() );
+					}
 				}
 				shader->Draw( delta );
 			} else
@@ -189,6 +194,9 @@ void RenderQueue::Submit( GPUShader* overRideShader, int mode, int required, int
 					Model* model = itemArr[k]->model;
 					shader->PushMatrix( GPUShader::MODELVIEW_MATRIX );
 					shader->MultMatrix( GPUShader::MODELVIEW_MATRIX, model->XForm() );
+					if ( xform ) {
+						shader->MultMatrix( GPUShader::MODELVIEW_MATRIX, *xform );
+					}
 					shader->Draw();
 					shader->PopMatrix( GPUShader::MODELVIEW_MATRIX );
 				}

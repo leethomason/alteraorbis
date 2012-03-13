@@ -250,10 +250,6 @@ void Engine::Draw()
 	CalcLights( DAY_TIME, &ambient, &dir, &diffuse );
 
 	LightShader lightShader( ambient, dir, diffuse, false );
-	LightShader blendLightShader( ambient, dir, diffuse, true );	// Some tiles use alpha - for instance the "splat" image
-
-	LightShader mapItemShader( ambient, dir, diffuse, false );
-	LightShader mapBlendItemShader( ambient, dir, diffuse, true );
 
 	Rectangle2I mapBounds( 0, 0, EL_MAP_SIZE-1, EL_MAP_SIZE-1 );
 	if ( map ) {
@@ -266,7 +262,7 @@ void Engine::Draw()
 		GLASSERT( renderQueue->Empty() );
 
 		for( Model* model=modelRoot; model; model=model->next ) {
-			model->Queue( renderQueue, &lightShader, &blendLightShader, 0 );
+			model->Queue( renderQueue, &lightShader, 0, 0 );
 		}
 	}
 
@@ -293,27 +289,20 @@ void Engine::Draw()
 		if ( camera.PosWC().y > SHADOW_START_HEIGHT ) {
 			shadowAmount = 1.0f - ( camera.PosWC().y - SHADOW_START_HEIGHT ) / ( SHADOW_END_HEIGHT - SHADOW_START_HEIGHT );
 		}
-#if 0 //ENGINE_RENDER_SHADOWS
+#ifdef ENGINE_RENDER_SHADOWS
 		if ( shadowAmount > 0.0f ) {
-			CompositingShader shadowShader;
-			shadowShader.SetTexture0( map->BackgroundTexture() );
-			shadowShader.SetTexture1( map->LightMapTexture() );
+			FlatShader shadowShader;
+			shadowShader.SetColor( 1, 0, 0 );
 
-			// The shadow matrix pushes in a depth. Its the depth<0 that allows the GL_LESS
-			// test for the shadow write, below.
-			PushShadowSwizzleMatrix( &shadowShader );
-
-			// Just computes how dark the shadow is.
-			LightGroundPlane( map->DayTime() ? DAY_TIME : NIGHT_TIME, IN_SHADOW, shadowAmount, &color );
-			shadowShader.SetColor( color );
+			Matrix4 shadowMatrix;
+			shadowMatrix.m12 = -lightDirection.x/lightDirection.y;
+			shadowMatrix.m22 = 0.0f;
+			shadowMatrix.m32 = -lightDirection.z/lightDirection.y;
 
 			renderQueue->Submit(	&shadowShader,
-									RenderQueue::MODE_PLANAR_SHADOW,
 									0,
-									Model::MODEL_NO_SHADOW );
-
-			shadowShader.PopMatrix( GPUShader::MODELVIEW_MATRIX );
-			shadowShader.PopTextureMatrix( 3 );
+									Model::MODEL_NO_SHADOW,
+									&shadowMatrix );
 		}
 #endif
 

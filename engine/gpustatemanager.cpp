@@ -308,7 +308,7 @@ void GPUShader::SetState( const GPUShader& ns )
 	// Texture1
 	glActiveTexture( GL_TEXTURE1 );
 
-	if (  ns.stream.HasTexture1() ) {
+	if (  ns.HasTexture1() ) {
 		glBindTexture( GL_TEXTURE_2D, ns.texture1->GLID() );
 		shadman->SetTexture( 1, ns.texture1 );
 		shadman->SetStreamData( ShaderManager::A_TEXTURE1, ns.stream.nTexture1, GL_FLOAT, ns.stream.stride, PTR( ns.streamPtr, ns.stream.texture1Offset ) );
@@ -321,7 +321,7 @@ void GPUShader::SetState( const GPUShader& ns )
 	// Texture0
 	glActiveTexture( GL_TEXTURE0 );
 
-	if (  ns.stream.HasTexture0() ) {
+	if (  ns.HasTexture0() ) {
 		glBindTexture( GL_TEXTURE_2D, ns.texture0->GLID() );
 		shadman->SetTexture( 0, ns.texture0 );
 		shadman->SetStreamData( ShaderManager::A_TEXTURE0, ns.stream.nTexture0, GL_FLOAT, ns.stream.stride, PTR( ns.streamPtr, ns.stream.texture0Offset ) );
