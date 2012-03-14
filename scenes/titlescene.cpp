@@ -23,9 +23,13 @@ TitleScene::TitleScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 	dialog.SetText( "dialog" );
 	dialog.SetSize( layout.Width(), layout.Height() );
 
-	renderTest.Init( &gamui2D, lumosGame->GetButtonLook( LumosGame::BUTTON_LOOK_STD ) );
-	renderTest.SetText( "render" );
-	renderTest.SetSize( layout.Width(), layout.Height() );
+	renderTest0.Init( &gamui2D, lumosGame->GetButtonLook( LumosGame::BUTTON_LOOK_STD ) );
+	renderTest0.SetText( "render0" );
+	renderTest0.SetSize( layout.Width(), layout.Height() );
+
+	renderTest1.Init( &gamui2D, lumosGame->GetButtonLook( LumosGame::BUTTON_LOOK_STD ) );
+	renderTest1.SetText( "render1" );
+	renderTest1.SetSize( layout.Width(), layout.Height() );
 }
 
 
@@ -40,8 +44,9 @@ void TitleScene::Resize()
 	lumosGame->PositionStd( &okay, &cancel );
 
 	LayoutCalculator layout = lumosGame->DefaultLayout();
-	layout.PosAbs( &dialog, 0, 1 );
-	layout.PosAbs( &renderTest, 1, 1 );
+	layout.PosAbs( &dialog,			0, 1 );
+	layout.PosAbs( &renderTest0,	1, 1 );
+	layout.PosAbs( &renderTest1,	2, 1 );
 }
 
 
@@ -50,8 +55,11 @@ void TitleScene::ItemTapped( const gamui::UIItem* item )
 	if ( item == &dialog ) {
 		game->PushScene( LumosGame::SCENE_DIALOG, 0 );
 	}
-	else if ( item == &renderTest ) {
+	else if ( item == &renderTest0 ) {
 		game->PushScene( LumosGame::SCENE_RENDERTEST, new RenderTestSceneData( 0 ) );
+	}
+	else if ( item == &renderTest1 ) {
+		game->PushScene( LumosGame::SCENE_RENDERTEST, new RenderTestSceneData( 1 ) );
 	}
 }
 

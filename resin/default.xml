@@ -42,8 +42,8 @@
   <model filename="alltree.ac" modelName="cactus2"  origin="12 0 0"  shading="smooth" polyRemoval="pre" />
   <model filename="alltree.ac" modelName="stump"    origin="0 0 2"  shading="smooth" polyRemoval="pre" />
 
-  <model filename="teststructures.ac" modelName="testStruct0"  origin="0 0 -1"  shading="flat" polyRemoval="pre" />
-  <model filename="teststructures.ac" modelName="testStruct1"  origin="2 0 -1"  shading="flat" polyRemoval="pre" />
+  <model filename="teststructures.ac" modelName="testStruct0"  origin="0 0 0"  shading="flat" polyRemoval="pre" />
+  <model filename="teststructures.ac" modelName="testStruct1"  origin="2 0 0"  shading="flat" polyRemoval="pre" />
 
 
   <font assetName="font" filename="font_0.png" noMip="true">

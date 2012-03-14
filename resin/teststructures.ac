@@ -4,7 +4,7 @@ OBJECT world
 kids 2
 OBJECT poly
 name "testStruct1"
-loc 2.5 1 -0.5
+loc 2.5 1 0.5
 texture "testgradient.png"
 crease 45.000000
 numvert 9
@@ -80,7 +80,7 @@ refs 4
 kids 0
 OBJECT group
 name "testStruct0"
-loc 0.5 1.025 -0.508334
+loc 0.5 1.025 0.491666
 kids 2
 OBJECT poly
 name "box"

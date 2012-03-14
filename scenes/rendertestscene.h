@@ -38,6 +38,7 @@ private:
 		   NUM_MODELS = 8 };
 
 	void SetupTest0();
+	void SetupTest1();
 
 	int testID;
 	LumosGame* lumosGame;
