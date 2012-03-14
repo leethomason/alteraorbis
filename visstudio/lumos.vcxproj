@@ -109,6 +109,7 @@
     <ClCompile Include="..\xegame\cgame.cpp" />
     <ClCompile Include="..\xegame\game.cpp" />
     <ClCompile Include="..\xegame\scene.cpp" />
+    <ClCompile Include="..\xegame\testmap.cpp" />
     <ClCompile Include="..\xegame\ufosound.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -151,6 +152,7 @@
     <ClInclude Include="..\xegame\cgame.h" />
     <ClInclude Include="..\xegame\game.h" />
     <ClInclude Include="..\xegame\scene.h" />
+    <ClInclude Include="..\xegame\testmap.h" />
     <ClInclude Include="..\xegame\ufosound.h" />
   </ItemGroup>
   <ItemGroup>

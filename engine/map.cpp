@@ -34,52 +34,17 @@
 #include "../grinliz/glperformance.h"
 
 using namespace grinliz;
-using namespace micropather;
 using namespace tinyxml2;
 
 const float DIAGONAL_COST = 1.414f;
 
 
-/*
-const ModelResource* MapItemDef::GetModelResource() const
+
+Map::Map( int w, int h )
 {
-	if ( !resource )
-		return 0;
 
-	ModelResourceManager* resman = ModelResourceManager::Instance();
-	return resman->GetModelResource( resource );
-}
-
-
-const ModelResource* MapItemDef::GetOpenResource() const 
-{
-	if ( !resourceOpen )
-		return 0;
-
-	ModelResourceManager* resman = ModelResourceManager::Instance();
-	return resman->GetModelResource( resourceOpen );
-}
-
-
-const ModelResource* MapItemDef::GetDestroyedResource() const
-{
-	if ( !resourceDestroyed )
-		return 0;
-
-	ModelResourceManager* resman = ModelResourceManager::Instance();
-	return resman->GetModelResource( resourceDestroyed );
-}
-*/
-
-
-Map::Map( SpaceTree* tree )
-{
-//	microPather = new MicroPather(	this,			// graph interface
-//									SIZE*SIZE,		// max possible states (+1)
-//									6 );			// max adjacent states
-
-	this->tree = tree;
-	width = height = 64;
+	width = w;
+	height = h;
 	GLOUTPUT(( "Map created. %dK\n", sizeof( *this )/1024 ));
 }
 
@@ -312,13 +277,6 @@ void Map::QuadTree::MarkVisible( const grinliz::BitArray<Map::SIZE, Map::SIZE, 1
 	}
 }
 */
-
-
-
-void Map::CreateTexture( Texture* t )
-{
-	GLASSERT( 0 );
-}
 
 
 void Map::BeginRender()

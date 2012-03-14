@@ -4,6 +4,7 @@
 #include "../xegame/scene.h"
 #include "../gamui/gamui.h"
 #include "../engine/engine.h"
+#include "../xegame/testmap.h"
 
 class LumosGame;
 
@@ -46,6 +47,7 @@ private:
 
 	Engine* engine;
 	Model*  model[NUM_MODELS];
+	TestMap* testMap;
 };
 
 #endif // RENDERTESTSCENE_INCLUDED

@@ -4,9 +4,13 @@
 RenderTestScene::RenderTestScene( LumosGame* game, const RenderTestSceneData* data ) : Scene( game ), lumosGame( game )
 {
 	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase() );
+
 	for( int i=0; i<NUM_MODELS; ++i )
 		model[i] = 0;
 
+	testMap = new TestMap( 4, 4 );
+	engine->SetMap( testMap );
+	
 	switch( data->id ) {
 	case 0:
 		SetupTest0();
@@ -27,6 +31,7 @@ RenderTestScene::~RenderTestScene()
 	for( int i=0; i<NUM_MODELS; ++i ) {
 		engine->FreeModel( model[i] );
 	}
+	delete testMap;
 	delete engine;
 }
 

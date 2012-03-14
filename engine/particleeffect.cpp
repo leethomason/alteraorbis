@@ -16,6 +16,8 @@
 #include "particleeffect.h"
 #include "particle.h"
 #include "camera.h"
+#include "texture.h"
+
 using namespace grinliz;
 
 

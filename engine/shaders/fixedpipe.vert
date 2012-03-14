@@ -3,12 +3,12 @@ uniform mat4 	u_mvpMatrix;		// model-view-projection.
 									// although the model is identity in the instancing case.
 
 #if INSTANCE == 1
-	uniform mat4 	u_mMatrix[EL_MAX_INSTANCE];
-	attribute float a_instanceID;
+	uniform mat4 	u_mMatrix[EL_MAX_INSTANCE];		// Each instance gets its own transform. Burns up uniforms; this can't be huge.
+	attribute float a_instanceID;					// Index into the transformation.
 #endif
 
 #if COLOR_MULTIPLIER == 1
-	uniform vec4 u_colorMult;		
+	uniform vec4 u_colorMult;		// Overall Color, if specified.
 #endif
 
 attribute vec3 a_pos;			// vertex position
@@ -95,6 +95,7 @@ void main() {
 	#endif
 
 	v_color = color;
+	
 	#if INSTANCE == 0 
 		gl_Position = u_mvpMatrix * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );
 	#else

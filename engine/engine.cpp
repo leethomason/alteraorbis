@@ -241,50 +241,28 @@ void Engine::Draw()
 	Plane planes[6];
 	CalcFrustumPlanes( planes );
 
-	Model* modelRoot = spaceTree->Query( planes, 6, 0, Model::MODEL_INVISIBLE, false );
+	int exclude = Model::MODEL_INVISIBLE;
+	exclude |= enableMeta ? 0 : Model::MODEL_METADATA;
+	Model* modelRoot = spaceTree->Query( planes, 6, 0, exclude, false );
 	
 	Color4F ambient, diffuse;
 	Vector4F dir;
 	CalcLights( DAY_TIME, &ambient, &dir, &diffuse );
 
 	LightShader lightShader( ambient, dir, diffuse, false );
-	LightShader blendLightShader( ambient, dir, diffuse, true );	// Some tiles use alpha - for instance the "splat" image
-
-	LightShader mapItemShader( ambient, dir, diffuse, false );
-	LightShader mapBlendItemShader( ambient, dir, diffuse, true );
 
 	Rectangle2I mapBounds( 0, 0, EL_MAP_SIZE-1, EL_MAP_SIZE-1 );
 	if ( map ) {
 		mapBounds = map->Bounds();
 	}
 
+
 	// ------------ Process the models into the render queue -----------
 	{
 		GLASSERT( renderQueue->Empty() );
 
 		for( Model* model=modelRoot; model; model=model->next ) {
-			if ( model->IsFlagSet( Model::MODEL_METADATA ) && !enableMeta )
-				continue;
-
-			if ( model->IsFlagSet(  Model::MODEL_OWNED_BY_MAP ) ) {
-				model->Queue(	renderQueue, 
-								&mapItemShader,
-								&mapBlendItemShader,
-								0 );
-			}
-			else {
-				Vector3F pos = model->AABB().Center();
-				int x = LRintf( pos.x - 0.5f );
-				int y = LRintf( pos.z - 0.5f );
-
-#ifdef EL_SHOW_ALL_UNITS
-				{
-#else
-				if ( mapBounds.Contains( x, y ) ) {
-#endif
-					model->Queue( renderQueue, &lightShader, &blendLightShader, 0 );
-				}
-			}
+			model->Queue( renderQueue, &lightShader, 0, 0 );
 		}
 	}
 
@@ -293,6 +271,8 @@ void Engine::Draw()
 //	Color4F color;
 
 	if ( map ) {
+		map->Draw3D();
+
 		// If the map is enabled, we draw the basic map plane lighted. Then draw the model shadows.
 		// The shadows are the tricky part: one matrix is used to transform the vertices to the ground
 		// plane, and the other matrix is used to transform the vertices to texture coordinates.
@@ -309,27 +289,20 @@ void Engine::Draw()
 		if ( camera.PosWC().y > SHADOW_START_HEIGHT ) {
 			shadowAmount = 1.0f - ( camera.PosWC().y - SHADOW_START_HEIGHT ) / ( SHADOW_END_HEIGHT - SHADOW_START_HEIGHT );
 		}
-#if 0 //ENGINE_RENDER_SHADOWS
+#ifdef ENGINE_RENDER_SHADOWS
 		if ( shadowAmount > 0.0f ) {
-			CompositingShader shadowShader;
-			shadowShader.SetTexture0( map->BackgroundTexture() );
-			shadowShader.SetTexture1( map->LightMapTexture() );
+			FlatShader shadowShader;
+			shadowShader.SetColor( 1, 0, 0 );
 
-			// The shadow matrix pushes in a depth. Its the depth<0 that allows the GL_LESS
-			// test for the shadow write, below.
-			PushShadowSwizzleMatrix( &shadowShader );
-
-			// Just computes how dark the shadow is.
-			LightGroundPlane( map->DayTime() ? DAY_TIME : NIGHT_TIME, IN_SHADOW, shadowAmount, &color );
-			shadowShader.SetColor( color );
+			Matrix4 shadowMatrix;
+			shadowMatrix.m12 = -lightDirection.x/lightDirection.y;
+			shadowMatrix.m22 = 0.0f;
+			shadowMatrix.m32 = -lightDirection.z/lightDirection.y;
 
 			renderQueue->Submit(	&shadowShader,
-									RenderQueue::MODE_PLANAR_SHADOW,
 									0,
-									Model::MODEL_NO_SHADOW );
-
-			shadowShader.PopMatrix( GPUShader::MODELVIEW_MATRIX );
-			shadowShader.PopTextureMatrix( 3 );
+									Model::MODEL_NO_SHADOW,
+									&shadowMatrix );
 		}
 #endif
 
@@ -341,17 +314,7 @@ void Engine::Draw()
 	// -------- Models ---------- //
 #ifdef ENGINE_RENDER_MODELS
 	{
-		if ( map ) {
-//			mapItemShader.SetTexture1( iMap->LightFogMapTexture() );
-//			mapBlendItemShader.SetTexture1( iMap->LightFogMapTexture() );
-			
-			//PushLightSwizzleMatrix( &mapItemShader );
-
-			renderQueue->Submit( 0, 0, Model::MODEL_OWNED_BY_MAP, 0 );
-			lightShader.PopTextureMatrix( 2 );
-		}
-		// Render everything NOT in the map.
-		renderQueue->Submit( 0, 0, 0, Model::MODEL_OWNED_BY_MAP );
+		renderQueue->Submit( 0, 0, 0, 0 );
 	}
 #endif
 
