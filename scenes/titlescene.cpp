@@ -1,4 +1,5 @@
 #include "titlescene.h"
+#include "rendertestscene.h"
 
 #include "../engine/uirendering.h"
 #include "../engine/texture.h"
@@ -50,7 +51,7 @@ void TitleScene::ItemTapped( const gamui::UIItem* item )
 		game->PushScene( LumosGame::SCENE_DIALOG, 0 );
 	}
 	else if ( item == &renderTest ) {
-		game->PushScene( LumosGame::SCENE_RENDERTEST, 0 );
+		game->PushScene( LumosGame::SCENE_RENDERTEST, new RenderTestSceneData( 0 ) );
 	}
 }
 

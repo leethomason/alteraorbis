@@ -49,7 +49,7 @@ Scene* LumosGame::CreateScene( int id, SceneData* data )
 	switch ( id ) {
 	case SCENE_TITLE:		scene = new TitleScene( this );				break;
 	case SCENE_DIALOG:		scene = new DialogScene( this );			break;
-	case SCENE_RENDERTEST:	scene = new RenderTestScene( this );		break;
+	case SCENE_RENDERTEST:	scene = new RenderTestScene( this, (const RenderTestSceneData*)data );	break;
 
 	default:
 		GLASSERT( 0 );

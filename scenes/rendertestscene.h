@@ -8,10 +8,18 @@
 class LumosGame;
 
 
+class RenderTestSceneData : public SceneData
+{
+public:
+	RenderTestSceneData( int _id ) : id( _id ) {}
+	int id;
+};
+
+
 class RenderTestScene : public Scene
 {
 public:
-	RenderTestScene( LumosGame* game );
+	RenderTestScene( LumosGame* game, const RenderTestSceneData* data );
 	virtual ~RenderTestScene();
 
 	virtual int RenderPass( grinliz::Rectangle2I* clip3D, grinliz::Rectangle2I* clip2D )
@@ -29,6 +37,9 @@ private:
 	enum { NUM_ITEMS = 4,
 		   NUM_MODELS = 8 };
 
+	void SetupTest0();
+
+	int testID;
 	LumosGame* lumosGame;
 	gamui::PushButton okay;
 

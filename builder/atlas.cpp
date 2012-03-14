@@ -21,7 +21,7 @@ SDL_Surface* Atlas::Generate( BTexture* array, int nTexture, int maxWidth )
 	stack.resize( maxWidth );
 
 	for( int i=0; i<nTexture; ++i ) {
-		Tex tex( &array[i] );
+		Tex tex( &array[i], array[i].assetName );
 		textures.push_back( tex );
 	}
 	sort( textures.begin(), textures.end(), TexSorter );
@@ -77,7 +77,35 @@ SDL_Surface* Atlas::Generate( BTexture* array, int nTexture, int maxWidth )
 		SDL_Rect src = { 0, 0, textures[i].src->surface->w, textures[i].src->surface->w };
 		SDL_Rect dst = { textures[i].src->atlasX, textures[i].src->atlasY, textures[i].src->surface->w, textures[i].src->surface->w };
 		SDL_BlitSurface( textures[i].src->surface, &src, btexture.surface, &dst );
-		SDL_SaveBMP( btexture.surface, "atlas.bmp" );
+
+		textures[i].x = textures[i].src->atlasX;
+		textures[i].y = textures[i].src->atlasY;
+		textures[i].cx = textures[i].src->surface->w;
+		textures[i].cy = textures[i].src->surface->h;
+		textures[i].src = 0;	// invalid after this call.
 	}
+	SDL_SaveBMP( btexture.surface, "atlas.bmp" );
 	return 0;
 }
+
+
+bool Atlas::Map( const char* assetName, const grinliz::Vector2F& in, grinliz::Vector2F* out )
+{
+	for( unsigned i=0; i<textures.size(); ++i ) {
+		if ( textures[i].assetName == assetName ) {
+
+			int atlasCX = btexture.surface->w;
+			int atlasCY = btexture.surface->h;
+			int atlasX = textures[i].x;
+			int atlasY = textures[i].y;
+			int texCX = textures[i].cx;
+			int texCY = textures[i].cy;
+
+			out->x = ( (float)atlasX + in.x*(float)texCX ) / (float)atlasCX;
+			out->y = ( (float)atlasY + in.y*(float)texCY ) / (float)atlasCY;
+			return true;
+		}
+	}
+	return false;
+}
+
