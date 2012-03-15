@@ -270,28 +270,17 @@ void Engine::Draw()
 //	Color4F color;
 
 	if ( map ) {
-		map->Draw3D();
 
-		// If the map is enabled, we draw the basic map plane lighted. Then draw the model shadows.
-		// The shadows are the tricky part: one matrix is used to transform the vertices to the ground
-		// plane, and the other matrix is used to transform the vertices to texture coordinates.
-		// Shaders make this much, much, much easier.
-
-		// -------- Ground plane lighted -------- //
-
-		// -------- Shadow casters/ground plane ---------- //
-		// Set up the planar projection matrix, with a little z offset
-		// to help with z resolution fighting.
-		const float SHADOW_START_HEIGHT = 80.0f;
-		const float SHADOW_END_HEIGHT   = SHADOW_START_HEIGHT + 5.0f;
+		// Draw shadows to stencil buffer.
 		float shadowAmount = 1.0f;
-		if ( camera.PosWC().y > SHADOW_START_HEIGHT ) {
-			shadowAmount = 1.0f - ( camera.PosWC().y - SHADOW_START_HEIGHT ) / ( SHADOW_END_HEIGHT - SHADOW_START_HEIGHT );
-		}
 #ifdef ENGINE_RENDER_SHADOWS
 		if ( shadowAmount > 0.0f ) {
 			FlatShader shadowShader;
-			shadowShader.SetColor( 1, 0, 0 );
+			shadowShader.SetStencilMode( GPUShader::STENCIL_WRITE );
+			shadowShader.SetDepthTest( false );	// flat plane. 1st pass.
+			shadowShader.SetDepthWrite( false );
+			//shadowShader.SetColorWrite( false );
+			shadowShader.SetColor( 1, 0, 0 );	// testing
 
 			Matrix4 shadowMatrix;
 			shadowMatrix.m12 = -lightDirection.x/lightDirection.y;
@@ -302,8 +291,13 @@ void Engine::Draw()
 									0,
 									Model::MODEL_NO_SHADOW,
 									&shadowMatrix );
+
+			Color3F shadow = { 0, 1, 0 };
+			map->Draw3D( shadow, GPUShader::STENCIL_SET );
 		}
 #endif
+		Color3F lighted = { 0, 0, 1 };
+		map->Draw3D( lighted, GPUShader::STENCIL_CLEAR );
 
 #ifdef ENGINE_RENDER_MAP
 		map->DrawOverlay();

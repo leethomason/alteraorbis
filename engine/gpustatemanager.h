@@ -146,8 +146,8 @@ public:
 	enum StencilMode {
 		STENCIL_OFF,		// ignore stencil
 		STENCIL_WRITE,		// draw commands write to stencil
-		STENCIL_PASS,		// draw if stencil pass
-		STENCIL_FAIL		// draw if stencil fail
+		STENCIL_SET,		// draw if stencil is set
+		STENCIL_CLEAR		// draw if stencil is clear
 	};
 
 	static void ResetState();
@@ -238,6 +238,9 @@ public:
 	}
 
 	void SetStencilMode( StencilMode value ) { stencilMode = value; }
+	void SetDepthWrite( bool value ) { depthWrite = value; }
+	void SetDepthTest( bool value ) { depthTest = value; }
+	void SetColorWrite( bool value ) { colorWrite = value; }
 
 	static void PushMatrix( MatrixType type );
 	static void SetMatrix( MatrixType type, const grinliz::Matrix4& m );
@@ -278,6 +281,7 @@ protected:
 				 instancing( false ),
 				 blend( false ),
 				 depthWrite( true ), depthTest( true ),
+				 colorWrite( true ),
 				 stencilMode( STENCIL_OFF )
 	{
 		color.Set( 1, 1, 1, 1 );
@@ -304,6 +308,7 @@ private:
 	static bool currentBlend;
 	static bool currentDepthTest;
 	static bool currentDepthWrite;
+	static bool currentColorWrite;
 	static StencilMode currentStencilMode;
 
 	static void SetTextureXForm( int unit );
@@ -332,6 +337,7 @@ protected:
 	bool	blend;
 	bool	depthWrite;
 	bool	depthTest;
+	bool	colorWrite;
 	StencilMode	stencilMode;
 
 	grinliz::Color4F	color;

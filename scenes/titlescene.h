@@ -27,10 +27,12 @@ public:
 
 private:
 	LumosGame* lumosGame;
-	gamui::TextLabel label;
-	gamui::Image background;
-	gamui::PushButton okay, cancel;
-	gamui::PushButton dialog, renderTest;
+	gamui::TextLabel	label;
+	gamui::Image		background;
+	gamui::PushButton	okay, cancel;
+	gamui::PushButton	dialog,
+						renderTest0,
+						renderTest1;
 };
 
 #endif // TITLESCENE_INCLUDED

@@ -64,6 +64,9 @@ int totalDataMem = 0;
 
 gamedb::Writer* writer;
 
+static const int MAX_ATLAS = 4;
+Atlas atlasArr[MAX_ATLAS];
+
 
 void ExitError( const char* tag, 
 				const char* pathName,
@@ -751,8 +754,22 @@ void ProcessAtlas( XMLElement* atlasElement )
 	}
 	int maxWidth = 1024;
 	atlasElement->QueryIntAttribute( "width", &maxWidth );
-	Atlas atlas;
-	atlas.Generate( btextureArr, index, maxWidth );
+
+	int it = 0;
+	for( it=0; it<MAX_ATLAS; ++it ) {
+		if ( !atlasArr[it].btexture.surface ) {
+			break;
+		}
+	}
+	if ( it == MAX_ATLAS ) {
+		ExitError( "Atlas", 0, 0, "Out of atlases." );
+	}
+	atlasArr[it].Generate( btextureArr, index, maxWidth );
+
+	GLString name = "atlas";
+	name += (char)('0' + it);
+
+	atlasArr[index].btexture.SetNames( name, "" );
 }
 
 

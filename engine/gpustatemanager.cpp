@@ -176,6 +176,7 @@ void MatrixStack::Multiply( const grinliz::Matrix4& m )
 /*static*/ bool			GPUShader::currentBlend = false;
 /*static*/ bool			GPUShader::currentDepthWrite = true;
 /*static*/ bool			GPUShader::currentDepthTest = true;
+/*static*/ bool			GPUShader::currentColorWrite = true;
 /*static*/ GPUShader::StencilMode GPUShader::currentStencilMode = STENCIL_OFF;
 
 /*static*/ bool GPUShader::SupportsVBOs()
@@ -227,10 +228,13 @@ void MatrixStack::Multiply( const grinliz::Matrix4& m )
 	glEnable( GL_DEPTH_TEST );
 	glDepthFunc( GL_LEQUAL );
 
+	glColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE );
+
 	// Stencil
 	glDisable( GL_STENCIL_TEST );
 	glStencilMask( GL_FALSE );
 	glStencilFunc( GL_ALWAYS, 0xff, 0xff );
+	glStencilOp( GL_KEEP, GL_KEEP, GL_KEEP );
 
 	// Matrix
 	glMatrixMode( GL_MODELVIEW );
@@ -246,6 +250,7 @@ void MatrixStack::Multiply( const grinliz::Matrix4& m )
 	currentBlend = false;
 	currentDepthTest = true;
 	currentDepthWrite = true;
+	currentColorWrite = true;
 	currentStencilMode = STENCIL_OFF;
 
 	CHECK_GL_ERROR;
@@ -401,29 +406,42 @@ void GPUShader::SetState( const GPUShader& ns )
 		currentDepthTest = false;
 	}
 
-	if ( ns.stencilMode == currentStencilMode ) {
+	// Color test
+	if ( ns.colorWrite && !currentColorWrite ) {
+		glColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE );
+		currentColorWrite = true;
+	}
+	else if ( !ns.colorWrite && currentColorWrite ) {
+		glColorMask( GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE );
+		currentColorWrite = false;
+	}
+
+	if ( ns.stencilMode != currentStencilMode ) {
 		currentStencilMode = ns.stencilMode;
 		switch( ns.stencilMode ) {
 		case STENCIL_OFF:
 			glDisable( GL_STENCIL_TEST );
 			glStencilMask( GL_FALSE );
 			glStencilFunc( GL_NEVER, 0, 0 );
+			glStencilOp( GL_KEEP, GL_KEEP, GL_KEEP );
 			break;
 		case STENCIL_WRITE:
 			glDisable( GL_STENCIL_TEST );
 			glStencilMask( GL_TRUE );
 			glStencilFunc( GL_ALWAYS, 0xff, 0xff );
-			glStencilOp( GL_KEEP, GL_KEEP, GL_REPLACE );
+			glStencilOp( GL_REPLACE, GL_REPLACE, GL_REPLACE );
 			break;
-		case STENCIL_PASS:
+		case STENCIL_SET:
 			glEnable( GL_STENCIL_TEST );
 			glStencilMask( GL_FALSE );
 			glStencilFunc( GL_EQUAL, 0xff, 0xff );
+			glStencilOp( GL_KEEP, GL_KEEP, GL_KEEP );
 			break;
-		case STENCIL_FAIL:
+		case STENCIL_CLEAR:
 			glEnable( GL_STENCIL_TEST );
 			glStencilMask( GL_FALSE );
 			glStencilFunc( GL_NOTEQUAL, 0xff, 0xff );
+			glStencilOp( GL_KEEP, GL_KEEP, GL_KEEP );
 			break;
 		}
 	}
