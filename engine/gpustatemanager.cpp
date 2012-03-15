@@ -176,6 +176,7 @@ void MatrixStack::Multiply( const grinliz::Matrix4& m )
 /*static*/ bool			GPUShader::currentBlend = false;
 /*static*/ bool			GPUShader::currentDepthWrite = true;
 /*static*/ bool			GPUShader::currentDepthTest = true;
+/*static*/ GPUShader::StencilMode GPUShader::currentStencilMode = STENCIL_OFF;
 
 /*static*/ bool GPUShader::SupportsVBOs()
 {
@@ -226,6 +227,11 @@ void MatrixStack::Multiply( const grinliz::Matrix4& m )
 	glEnable( GL_DEPTH_TEST );
 	glDepthFunc( GL_LEQUAL );
 
+	// Stencil
+	glDisable( GL_STENCIL_TEST );
+	glStencilMask( GL_FALSE );
+	glStencilFunc( GL_ALWAYS, 0xff, 0xff );
+
 	// Matrix
 	glMatrixMode( GL_MODELVIEW );
 	matrixMode = MODELVIEW_MATRIX;
@@ -240,6 +246,7 @@ void MatrixStack::Multiply( const grinliz::Matrix4& m )
 	currentBlend = false;
 	currentDepthTest = true;
 	currentDepthWrite = true;
+	currentStencilMode = STENCIL_OFF;
 
 	CHECK_GL_ERROR;
 }
@@ -393,13 +400,40 @@ void GPUShader::SetState( const GPUShader& ns )
 		glDisable( GL_DEPTH_TEST );
 		currentDepthTest = false;
 	}
+
+	if ( ns.stencilMode == currentStencilMode ) {
+		currentStencilMode = ns.stencilMode;
+		switch( ns.stencilMode ) {
+		case STENCIL_OFF:
+			glDisable( GL_STENCIL_TEST );
+			glStencilMask( GL_FALSE );
+			glStencilFunc( GL_NEVER, 0, 0 );
+			break;
+		case STENCIL_WRITE:
+			glDisable( GL_STENCIL_TEST );
+			glStencilMask( GL_TRUE );
+			glStencilFunc( GL_ALWAYS, 0xff, 0xff );
+			glStencilOp( GL_KEEP, GL_KEEP, GL_REPLACE );
+			break;
+		case STENCIL_PASS:
+			glEnable( GL_STENCIL_TEST );
+			glStencilMask( GL_FALSE );
+			glStencilFunc( GL_EQUAL, 0xff, 0xff );
+			break;
+		case STENCIL_FAIL:
+			glEnable( GL_STENCIL_TEST );
+			glStencilMask( GL_FALSE );
+			glStencilFunc( GL_NOTEQUAL, 0xff, 0xff );
+			break;
+		}
+	}
 	CHECK_GL_ERROR;
 }
 
 
 void GPUShader::Clear()
 {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
 }
 
 #if 0
@@ -768,8 +802,6 @@ CompositingShader::CompositingShader( bool _blend )
 
 LightShader::LightShader( const Color4F& ambient, const grinliz::Vector4F& direction, const Color4F& diffuse, bool blend )
 {
-	GLASSERT( !(blend && alphaTest ) );	// technically fine, probably not intended behavior.
-
 	//this->alphaTest = alphaTest;
 	this->blend = blend;
 	this->ambient = ambient;

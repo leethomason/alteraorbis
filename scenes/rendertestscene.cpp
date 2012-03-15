@@ -4,7 +4,7 @@
 RenderTestScene::RenderTestScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 {
 	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase() );
-	testMap = new TestMap( 4, 4 );
+	testMap = new TestMap( 8, 8 );
 	engine->SetMap( testMap );
 	
 	const ModelResource* res0 = ModelResourceManager::Instance()->GetModelResource( "femaleMarine" );
@@ -15,7 +15,7 @@ RenderTestScene::RenderTestScene( LumosGame* game ) : Scene( game ), lumosGame( 
 
 	for( int i=1; i<NUM_MODELS; ++i ) {
 		model[i] = engine->AllocModel( res1 );
-		model[i]->SetPos( 0, 0, (float)i );
+		model[i]->SetPos( (float)i * 0.5f, 0, (float)i );
 		model[i]->SetRotation( (float)(-i*10) );
 	}
 	engine->CameraLookAt( 0, (float)(NUM_MODELS/2), 12 );

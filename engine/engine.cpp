@@ -52,8 +52,7 @@ Engine::Engine( Screenport* port, const gamedb::Reader* database )
 	spaceTree = new SpaceTree( -0.1f, 3.0f, 64 );	// fixme: map size hardcoded
 	renderQueue = new RenderQueue();
 
-	lightDirection.Set( EL_LIGHT_X, EL_LIGHT_Y, EL_LIGHT_Z );
-	lightDirection.Normalize();
+	SetLightDirection( 0 );
 	enableMeta = mapMakerMode;
 }
 
@@ -147,7 +146,7 @@ void Engine::MoveCameraXZ( float x, float z, Vector3F* calc )
 
 void Engine::SetLightDirection( const grinliz::Vector3F* dir ) 
 {
-	lightDirection.Set( EL_LIGHT_X, EL_LIGHT_Y, EL_LIGHT_Z );
+	lightDirection.Set( 2.0f, 3.0f, 1.0f );
 	if ( dir ) {
 		lightDirection = *dir;
 	}
@@ -166,7 +165,7 @@ void Engine::FreeModel( Model* model )
 	spaceTree->FreeModel( model );
 }
 
-
+/*
 void Engine::PushShadowSwizzleMatrix( GPUShader* shader )
 {
 	// A shadow matrix for a flat y=0 plane! heck yeah!
@@ -190,7 +189,7 @@ void Engine::PushShadowSwizzleMatrix( GPUShader* shader )
 	shader->PushMatrix( GPUShader::MODELVIEW_MATRIX );
 	shader->MultMatrix( GPUShader::MODELVIEW_MATRIX, shadowMatrix );
 }
-
+*/
 
 /*
 void Engine::PushLightSwizzleMatrix( GPUShader* shader )
