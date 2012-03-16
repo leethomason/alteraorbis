@@ -254,6 +254,10 @@ void MatrixStack::Multiply( const grinliz::Matrix4& m )
 	currentStencilMode = STENCIL_OFF;
 
 	CHECK_GL_ERROR;
+
+#ifdef DEBUG
+	// fixme: get the # of stencil buffer bits to check. fallback if 0?
+#endif
 }
 
 
@@ -426,22 +430,25 @@ void GPUShader::SetState( const GPUShader& ns )
 			glStencilOp( GL_KEEP, GL_KEEP, GL_KEEP );
 			break;
 		case STENCIL_WRITE:
-			glDisable( GL_STENCIL_TEST );
+			glEnable( GL_STENCIL_TEST );	// this does need to be on.
 			glStencilMask( GL_TRUE );
-			glStencilFunc( GL_ALWAYS, 0xff, 0xff );
+			glStencilFunc( GL_ALWAYS, 1, 1 );
 			glStencilOp( GL_REPLACE, GL_REPLACE, GL_REPLACE );
 			break;
 		case STENCIL_SET:
 			glEnable( GL_STENCIL_TEST );
 			glStencilMask( GL_FALSE );
-			glStencilFunc( GL_EQUAL, 0xff, 0xff );
+			glStencilFunc( GL_EQUAL, 1, 1 );
 			glStencilOp( GL_KEEP, GL_KEEP, GL_KEEP );
 			break;
 		case STENCIL_CLEAR:
 			glEnable( GL_STENCIL_TEST );
 			glStencilMask( GL_FALSE );
-			glStencilFunc( GL_NOTEQUAL, 0xff, 0xff );
+			glStencilFunc( GL_NOTEQUAL, 1, 1 );
 			glStencilOp( GL_KEEP, GL_KEEP, GL_KEEP );
+			break;
+		default:
+			GLASSERT( 0 );
 			break;
 		}
 	}
@@ -451,6 +458,7 @@ void GPUShader::SetState( const GPUShader& ns )
 
 void GPUShader::Clear()
 {
+	glClearStencil( 0 );
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
 }
 

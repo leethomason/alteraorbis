@@ -267,10 +267,7 @@ void Engine::Draw()
 
 
 	// ----------- Render Passess ---------- //
-//	Color4F color;
-
 	if ( map ) {
-
 		// Draw shadows to stencil buffer.
 		float shadowAmount = 1.0f;
 #ifdef ENGINE_RENDER_SHADOWS
@@ -279,7 +276,7 @@ void Engine::Draw()
 			shadowShader.SetStencilMode( GPUShader::STENCIL_WRITE );
 			shadowShader.SetDepthTest( false );	// flat plane. 1st pass.
 			shadowShader.SetDepthWrite( false );
-			//shadowShader.SetColorWrite( false );
+			shadowShader.SetColorWrite( false );
 			shadowShader.SetColor( 1, 0, 0 );	// testing
 
 			Matrix4 shadowMatrix;

@@ -169,6 +169,7 @@ int main( int argc, char **argv )
 	SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 8);
 	SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 8);
 	SDL_GL_SetAttribute( SDL_GL_ALPHA_SIZE, 8);
+	SDL_GL_SetAttribute( SDL_GL_STENCIL_SIZE, 8);
 
 	if ( multisample ) {
 		SDL_GL_SetAttribute( SDL_GL_MULTISAMPLEBUFFERS, 1 );
