@@ -8,7 +8,7 @@ RenderTestScene::RenderTestScene( LumosGame* game, const RenderTestSceneData* da
 	for( int i=0; i<NUM_MODELS; ++i )
 		model[i] = 0;
 
-	testMap = new TestMap( 4, 4 );
+	testMap = new TestMap( 8, 8 );
 	engine->SetMap( testMap );
 	
 	switch( data->id ) {

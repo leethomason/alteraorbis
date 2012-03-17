@@ -228,8 +228,6 @@ void MatrixStack::Multiply( const grinliz::Matrix4& m )
 	glEnable( GL_DEPTH_TEST );
 	glDepthFunc( GL_LEQUAL );
 
-	glColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE );
-
 	// Stencil
 	glDisable( GL_STENCIL_TEST );
 	glStencilMask( GL_FALSE );
@@ -246,6 +244,9 @@ void MatrixStack::Multiply( const grinliz::Matrix4& m )
 	// General config:
 	glCullFace( GL_BACK );
 	glEnable( GL_CULL_FACE );
+
+	glDisable( GL_SCISSOR_TEST );
+	glColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE );
 
 	currentBlend = false;
 	currentDepthTest = true;
@@ -458,8 +459,11 @@ void GPUShader::SetState( const GPUShader& ns )
 
 void GPUShader::Clear()
 {
+	GLASSERT( currentStencilMode == STENCIL_OFF );	// could be fixed, just implemented for 'off'
+	glStencilMask( GL_TRUE );	// Stupid stupid opengl behavior.
 	glClearStencil( 0 );
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
+	glStencilMask( GL_FALSE );
 }
 
 #if 0

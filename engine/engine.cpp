@@ -165,51 +165,6 @@ void Engine::FreeModel( Model* model )
 	spaceTree->FreeModel( model );
 }
 
-/*
-void Engine::PushShadowSwizzleMatrix( GPUShader* shader )
-{
-	// A shadow matrix for a flat y=0 plane! heck yeah!
-	shadowMatrix.m12 = -lightDirection.x/lightDirection.y;
-	shadowMatrix.m22 = 0.0f;
-	shadowMatrix.m32 = -lightDirection.z/lightDirection.y;
-
-	// x'    1/64  0    0    0
-	// y'      0   0  -1/64  -1
-	//     =   0   0    0    0
-	//		
-	Matrix4 swizzle;
-	swizzle.m11 = 1.f/((float)EL_MAP_SIZE);
-	swizzle.m22 = 0;	swizzle.m23 = -1.f/((float)EL_MAP_SIZE);	swizzle.m24 = 1.0f;
-	swizzle.m33 = 0.0f;
-
-	shader->PushTextureMatrix( 3 );
-	shader->MultTextureMatrix( 3, swizzle );
-	shader->MultTextureMatrix( 3, shadowMatrix );
-
-	shader->PushMatrix( GPUShader::MODELVIEW_MATRIX );
-	shader->MultMatrix( GPUShader::MODELVIEW_MATRIX, shadowMatrix );
-}
-*/
-
-/*
-void Engine::PushLightSwizzleMatrix( GPUShader* shader )
-{
-	float w, h, dx, dz;
-	iMap->LightFogMapParam( &w, &h, &dx, &dz );
-
-	Matrix4 swizzle;
-	swizzle.m11 = 1.f/w;
-	swizzle.m22 = 0;	swizzle.m23 = -1.f/h;	swizzle.m24 = 1.0f;
-	swizzle.m33 = 0.0f;
-
-	swizzle.m14 = dx;
-	swizzle.m34 = dz;
-
-	shader->PushTextureMatrix( 2 );
-	shader->MultTextureMatrix( 2, swizzle );
-}
-*/
-
 
 void Engine::Draw()
 {
@@ -246,7 +201,7 @@ void Engine::Draw()
 	
 	Color4F ambient, diffuse;
 	Vector4F dir;
-	CalcLights( DAY_TIME, &ambient, &dir, &diffuse );
+	QueryLights( DAY_TIME, &ambient, &dir, &diffuse );
 
 	LightShader lightShader( ambient, dir, diffuse, false );
 
@@ -270,6 +225,10 @@ void Engine::Draw()
 	if ( map ) {
 		// Draw shadows to stencil buffer.
 		float shadowAmount = 1.0f;
+		Color3F shadow, lighted;
+		static const Vector3F groundNormal = { 0, 1, 0 };
+		CalcLight( DAY_TIME, groundNormal, 1.0f, &lighted, &shadow );
+
 #ifdef ENGINE_RENDER_SHADOWS
 		if ( shadowAmount > 0.0f ) {
 			FlatShader shadowShader;
@@ -289,11 +248,9 @@ void Engine::Draw()
 									Model::MODEL_NO_SHADOW,
 									&shadowMatrix );
 
-			Color3F shadow = { 0, 1, 0 };
 			map->Draw3D( shadow, GPUShader::STENCIL_SET );
 		}
 #endif
-		Color3F lighted = { 0, 0, 1 };
 		map->Draw3D( lighted, GPUShader::STENCIL_CLEAR );
 
 #ifdef ENGINE_RENDER_MAP
@@ -314,10 +271,11 @@ void Engine::Draw()
 }
 
 
-void Engine::CalcLights( DayNight dayNight, Color4F* ambient, Vector4F* dir, Color4F* diffuse )
+void Engine::QueryLights( DayNight dayNight, Color4F* ambient, Vector4F* dir, Color4F* diffuse )
 {
 	ambient->Set( AMBIENT, AMBIENT, AMBIENT, 1.0f );
 	diffuse->Set( DIFFUSE, DIFFUSE, DIFFUSE, 1.0f );
+
 	if ( dayNight == NIGHT_TIME ) {
 		diffuse->r *= EL_NIGHT_RED;
 		diffuse->g *= EL_NIGHT_GREEN;
@@ -327,15 +285,19 @@ void Engine::CalcLights( DayNight dayNight, Color4F* ambient, Vector4F* dir, Col
 }
 
 
-void Engine::LightGroundPlane( DayNight dayNight, ShadowState shadows, float shadowAmount, Color4F* outColor )
+void Engine::CalcLight( DayNight dayNight, const Vector3F& normal, float shadowAmount, Color3F* light, Color3F* shadow )
 {
-	outColor->Set( 1, 1, 1, 1 );
+	Color4F ambient, diffuse;
+	Vector4F dir;
+	QueryLights( dayNight, &ambient, &dir, &diffuse );
+	Vector3F dir3 = { dir.x, dir.y, dir.z };
 
-	if ( shadows == IN_SHADOW ) {
-		float delta = 1.0f - DIFFUSE_SHADOW*shadowAmount;
-		outColor->r *= delta;
-		outColor->g *= delta;
-		outColor->b *= delta;
+	float nDotL = Max( 0.0f, DotProduct( normal, dir3 ) );
+	for( int i=0; i<3; ++i ) {
+		light->X(i)  = ambient.X(i) + diffuse.X(i)*nDotL;
+		shadow->X(i) = ambient.X(i);
+
+		shadow->X(i) = InterpolateUnitX( shadow->X(i), light->X(i), 1.f-shadowAmount ); 
 	}
 }
 
@@ -487,16 +449,3 @@ float Engine::GetZoom()
 							camera.PosWC().y );
 	return z;
 }
-
-
-/*
-void Engine::ResetRenderCache()
-{
-	renderQueue->ResetRenderCache();
-	Model* model = spaceTree->Query( 0, 0, 0, 0 );
-	for( ; model; model = model->next ) {
-		for( int i=0; i<EL_MAX_MODEL_GROUPS; ++i )
-			model->cacheStart[i] = Model::CACHE_UNINITIALIZED;
-	}
-}
-*/

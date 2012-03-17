@@ -517,6 +517,7 @@ void Game::DoTick( U32 _currentTime )
 		if ( deltaTime > 100 )
 			deltaTime = 100;
 
+		
 		GPUShader::ResetState();
 		GPUShader::Clear();
 
