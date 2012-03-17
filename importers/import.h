@@ -20,7 +20,7 @@
 #include <vector>
 
 #include "../engine/vertex.h"
-#include "../ufobuilder/modelbuilder.h"
+#include "../builder/modelbuilder.h"
 
 bool ImportAC3D(	const std::string& filename, 
 					ModelBuilder* builder,

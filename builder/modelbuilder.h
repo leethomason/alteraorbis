@@ -21,6 +21,10 @@
 #include "../grinliz/glrectangle.h"
 #include "../grinliz/glstringutil.h"
 
+class Atlas;
+class AtlasSubTex;
+
+
 struct VertexGroup {
 	VertexGroup() : nVertex( 0 ), nIndex( 0 ) {}
 
@@ -45,7 +49,17 @@ struct VertexStream {
 
 class ModelBuilder {
 public:
-	ModelBuilder() : current( 0 ), nGroup( 0 ), shading( FLAT ), polyRemoval( POLY_NONE )	{}
+	ModelBuilder() :	current( 0 ),
+						polyCulled( 0 ),
+						nGroup( 0 ),
+						shading( FLAT ),
+						polyRemoval( POLY_NONE ),
+						atlasArr( 0 ),
+						nAtlas( 0 ),
+						currentSubTex( 0 )
+	{}
+
+	void SetAtlasPool( const Atlas* atlasArr, int nAtlas ) { this->atlasArr = atlasArr; this->nAtlas = nAtlas; }
 
 	void SetMatrix( const grinliz::Matrix4& mat )		{ matrix = mat; }
 
@@ -83,15 +97,19 @@ private:
 	int current;
 	int polyCulled;
 
+	int nGroup;
+	ShadingType shading;
+	int polyRemoval;
+
+	const Atlas* atlasArr;
+	int nAtlas;
+	const AtlasSubTex* currentSubTex;
+	
 	grinliz::Matrix4 matrix;
 	grinliz::Rectangle3F bounds;
 
 	VertexGroup group[EL_MAX_MODEL_GROUPS];
 	VertexStream stream[EL_MAX_MODEL_GROUPS];
-
-	int nGroup;
-	ShadingType shading;
-	int polyRemoval;
 };
 
 

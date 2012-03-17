@@ -65,6 +65,25 @@ inline bool StrEqual( const char* a, const char* b )
 }
 
 
+inline bool StrEqualUntil( const char* a, const char* b, char until ) 
+{
+	if ( a && b ) {
+		if ( a == b ) 
+			return true;
+		const char* p = a;
+		const char* q = b;
+		while( *p && *q && (*p == *q) ) {
+			++p;
+			++q;
+		}
+		if (    (*p == 0 && *q == 0)				// they both hit null
+             || (*p == until || *q== until ) )		// one or other reached terminator
+			return true;
+	}
+	return false;
+}
+
+
 // Reimplements SAFE strncpy, safely cross-compiler. Always returns a null-terminated string.
 // The strncpy definition is terrifying: not guarenteed to be null terminated.
 void StrNCpy( char* dst, const char* src, size_t bufferSize );

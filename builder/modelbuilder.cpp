@@ -14,6 +14,8 @@
 */
 
 #include "modelbuilder.h"
+#include "atlas.h"
+
 #include "../engine/vertex.h"
 #include "../grinliz/glgeometry.h"
 #include "../grinliz/glstringutil.h"
@@ -22,8 +24,20 @@ using namespace grinliz;
 
 void ModelBuilder::SetTexture( const char* _textureName )
 {
+	GLASSERT( nGroup < EL_MAX_MODEL_GROUPS );
 	CStr< EL_FILE_STRING_LEN >  textureName( _textureName );
 	current = -1;
+
+	// Is this texture in an atlas?
+	currentSubTex = 0;
+	for( int k=0; k<nAtlas; ++k ) {
+		currentSubTex = atlasArr[k].GetSubTex( textureName.c_str() );
+		if ( currentSubTex ) {
+			textureName = atlasArr[k].btexture.assetName.c_str();
+			break;
+		}
+	}
+
 
 	for( int i=0; i<nGroup; ++i ) {
 		if (    ( textureName.empty() && group[i].textureName.empty() )
@@ -62,8 +76,14 @@ void ModelBuilder::AddTri( const Vertex& v0, const Vertex& v1, const Vertex& v2 
 		// tex
 		vX[i].tex = vIn[i].tex;
 
+		// Atlas conversion, if being used.
+		if ( currentSubTex ) {
+			Vector2F in = vX[i].tex;
+			currentSubTex->Map( in, &vX[i].tex );
+		}
+
 		// store for processing
-		stream[current].vertex[ stream[current].nVertex+i ] = vX[i];
+		stream[current].vertex[ stream[current].nVertex+i ]	= vX[i];
 		stream[current].normalProcessed[ stream[current].nVertex+i ] = false;
 	}
 	stream[current].nVertex += 3;
