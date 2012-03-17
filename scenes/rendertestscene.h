@@ -31,6 +31,9 @@ public:
 
 	virtual void Tap( int action, const grinliz::Vector2F& screen, const grinliz::Ray& world )	{ ProcessTap( action, screen, world ); }
 	virtual void ItemTapped( const gamui::UIItem* item );
+	virtual void Zoom( int style, float normal );
+	virtual void Rotate( float degrees );
+	virtual void HandleHotKeyMask( int mask );
 
 	virtual void Draw3D();
 
@@ -44,6 +47,8 @@ private:
 	int testID;
 	LumosGame* lumosGame;
 	gamui::PushButton okay;
+	gamui::PushButton whiteButton;
+	gamui::TextBox textBox;
 
 	Engine* engine;
 	Model*  model[NUM_MODELS];

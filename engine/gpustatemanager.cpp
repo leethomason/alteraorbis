@@ -176,6 +176,8 @@ void MatrixStack::Multiply( const grinliz::Matrix4& m )
 /*static*/ bool			GPUShader::currentBlend = false;
 /*static*/ bool			GPUShader::currentDepthWrite = true;
 /*static*/ bool			GPUShader::currentDepthTest = true;
+/*static*/ bool			GPUShader::currentColorWrite = true;
+/*static*/ GPUShader::StencilMode GPUShader::currentStencilMode = STENCIL_OFF;
 
 /*static*/ bool GPUShader::SupportsVBOs()
 {
@@ -226,6 +228,12 @@ void MatrixStack::Multiply( const grinliz::Matrix4& m )
 	glEnable( GL_DEPTH_TEST );
 	glDepthFunc( GL_LEQUAL );
 
+	// Stencil
+	glDisable( GL_STENCIL_TEST );
+	glStencilMask( GL_FALSE );
+	glStencilFunc( GL_ALWAYS, 0xff, 0xff );
+	glStencilOp( GL_KEEP, GL_KEEP, GL_KEEP );
+
 	// Matrix
 	glMatrixMode( GL_MODELVIEW );
 	matrixMode = MODELVIEW_MATRIX;
@@ -237,11 +245,20 @@ void MatrixStack::Multiply( const grinliz::Matrix4& m )
 	glCullFace( GL_BACK );
 	glEnable( GL_CULL_FACE );
 
+	glDisable( GL_SCISSOR_TEST );
+	glColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE );
+
 	currentBlend = false;
 	currentDepthTest = true;
 	currentDepthWrite = true;
+	currentColorWrite = true;
+	currentStencilMode = STENCIL_OFF;
 
 	CHECK_GL_ERROR;
+
+#ifdef DEBUG
+	// fixme: get the # of stencil buffer bits to check. fallback if 0?
+#endif
 }
 
 
@@ -393,13 +410,60 @@ void GPUShader::SetState( const GPUShader& ns )
 		glDisable( GL_DEPTH_TEST );
 		currentDepthTest = false;
 	}
+
+	// Color test
+	if ( ns.colorWrite && !currentColorWrite ) {
+		glColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE );
+		currentColorWrite = true;
+	}
+	else if ( !ns.colorWrite && currentColorWrite ) {
+		glColorMask( GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE );
+		currentColorWrite = false;
+	}
+
+	if ( ns.stencilMode != currentStencilMode ) {
+		currentStencilMode = ns.stencilMode;
+		switch( ns.stencilMode ) {
+		case STENCIL_OFF:
+			glDisable( GL_STENCIL_TEST );
+			glStencilMask( GL_FALSE );
+			glStencilFunc( GL_NEVER, 0, 0 );
+			glStencilOp( GL_KEEP, GL_KEEP, GL_KEEP );
+			break;
+		case STENCIL_WRITE:
+			glEnable( GL_STENCIL_TEST );	// this does need to be on.
+			glStencilMask( GL_TRUE );
+			glStencilFunc( GL_ALWAYS, 1, 1 );
+			glStencilOp( GL_REPLACE, GL_REPLACE, GL_REPLACE );
+			break;
+		case STENCIL_SET:
+			glEnable( GL_STENCIL_TEST );
+			glStencilMask( GL_FALSE );
+			glStencilFunc( GL_EQUAL, 1, 1 );
+			glStencilOp( GL_KEEP, GL_KEEP, GL_KEEP );
+			break;
+		case STENCIL_CLEAR:
+			glEnable( GL_STENCIL_TEST );
+			glStencilMask( GL_FALSE );
+			glStencilFunc( GL_NOTEQUAL, 1, 1 );
+			glStencilOp( GL_KEEP, GL_KEEP, GL_KEEP );
+			break;
+		default:
+			GLASSERT( 0 );
+			break;
+		}
+	}
 	CHECK_GL_ERROR;
 }
 
 
 void GPUShader::Clear()
 {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	GLASSERT( currentStencilMode == STENCIL_OFF );	// could be fixed, just implemented for 'off'
+	glStencilMask( GL_TRUE );	// Stupid stupid opengl behavior.
+	glClearStencil( 0 );
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
+	glStencilMask( GL_FALSE );
 }
 
 #if 0
@@ -768,8 +832,6 @@ CompositingShader::CompositingShader( bool _blend )
 
 LightShader::LightShader( const Color4F& ambient, const grinliz::Vector4F& direction, const Color4F& diffuse, bool blend )
 {
-	GLASSERT( !(blend && alphaTest ) );	// technically fine, probably not intended behavior.
-
 	//this->alphaTest = alphaTest;
 	this->blend = blend;
 	this->ambient = ambient;

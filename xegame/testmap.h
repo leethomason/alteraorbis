@@ -10,7 +10,7 @@ public:
 	TestMap( int w, int h );
 	~TestMap();
 
-	virtual void Draw3D();
+	virtual void Draw3D(  const grinliz::Color3F& colorMult, GPUShader::StencilMode );
 
 private:
 	grinliz::Vector3F*	vertex;	// 4 vertex quads

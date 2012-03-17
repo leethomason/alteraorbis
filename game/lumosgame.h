@@ -26,7 +26,7 @@ public:
 
 	virtual int LoadSceneID()								{ return SCENE_GAME; }
 	virtual Scene* CreateScene( int id, SceneData* data );
-	virtual void CreateTexture( Texture* t )				{ GLASSERT( 0 ); }
+	virtual void CreateTexture( Texture* t );
 
 	enum {
 		DECO_OKAY = 15,

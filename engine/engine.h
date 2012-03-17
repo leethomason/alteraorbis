@@ -138,8 +138,19 @@ private:
 	};
 
 	void CalcCameraRotation( grinliz::Matrix4* );
-	void CalcLights( DayNight dayNight, grinliz::Color4F* ambient, grinliz::Vector4F* dir, grinliz::Color4F* diffuse );
-	void LightGroundPlane( DayNight dayNight, ShadowState shadows, float shadowAmount, grinliz::Color4F* outColor );
+
+	// Query the light properties at day or night:
+	void QueryLights(	DayNight dayNight, 
+						grinliz::Color4F* ambient, 
+						grinliz::Vector4F* dir, 
+						grinliz::Color4F* diffuse );
+
+	// Calculate the light hitting a point with the given surface normal
+	void CalcLight(	DayNight dayNight,	
+					const grinliz::Vector3F& surfaceNormal,
+					float shadowAmount,				// 1.0: fully in shadow
+					grinliz::Color3F* light, 
+					grinliz::Color3F* shadow  );
 
 	void PushShadowSwizzleMatrix( GPUShader* );
 	void PushLightSwizzleMatrix( GPUShader* );

@@ -143,6 +143,13 @@ public:
 		PROJECTION_MATRIX,
 	};
 
+	enum StencilMode {
+		STENCIL_OFF,		// ignore stencil
+		STENCIL_WRITE,		// draw commands write to stencil
+		STENCIL_SET,		// draw if stencil is set
+		STENCIL_CLEAR		// draw if stencil is clear
+	};
+
 	static void ResetState();
 	static void Clear();
 
@@ -230,6 +237,11 @@ public:
 		instanceMatrix[i] = mat; 
 	}
 
+	void SetStencilMode( StencilMode value ) { stencilMode = value; }
+	void SetDepthWrite( bool value ) { depthWrite = value; }
+	void SetDepthTest( bool value ) { depthTest = value; }
+	void SetColorWrite( bool value ) { colorWrite = value; }
+
 	static void PushMatrix( MatrixType type );
 	static void SetMatrix( MatrixType type, const grinliz::Matrix4& m );
 	static void MultMatrix( MatrixType type, const grinliz::Matrix4& m );
@@ -252,7 +264,6 @@ public:
 
 	int SortOrder()	const { 
 		if ( blend ) return 2;
-		if ( alphaTest ) return 1;
 		return 0;
 	}
 
@@ -268,8 +279,10 @@ protected:
 				 streamPtr( 0 ), nIndex( 0 ), indexPtr( 0 ),
 				 vertexBuffer( 0 ), indexBuffer( 0 ),
 				 instancing( false ),
-				 blend( false ), alphaTest( 0 ),
-				 depthWrite( true ), depthTest( true )
+				 blend( false ),
+				 depthWrite( true ), depthTest( true ),
+				 colorWrite( true ),
+				 stencilMode( STENCIL_OFF )
 	{
 		color.Set( 1, 1, 1, 1 );
 		direction.Set( 0, 0, 0, 0 );
@@ -295,6 +308,8 @@ private:
 	static bool currentBlend;
 	static bool currentDepthTest;
 	static bool currentDepthWrite;
+	static bool currentColorWrite;
+	static StencilMode currentStencilMode;
 
 	static void SetTextureXForm( int unit );
 
@@ -319,11 +334,11 @@ protected:
 	U32				indexBuffer;
 	bool			instancing;
 
-	bool		blend;
-	bool		alphaTest;
-
-	bool		depthWrite;
-	bool		depthTest;
+	bool	blend;
+	bool	depthWrite;
+	bool	depthTest;
+	bool	colorWrite;
+	StencilMode	stencilMode;
 
 	grinliz::Color4F	color;
 	grinliz::Color4F	ambient;

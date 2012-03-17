@@ -169,6 +169,7 @@ int main( int argc, char **argv )
 	SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 8);
 	SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 8);
 	SDL_GL_SetAttribute( SDL_GL_ALPHA_SIZE, 8);
+	SDL_GL_SetAttribute( SDL_GL_STENCIL_SIZE, 8);
 
 	if ( multisample ) {
 		SDL_GL_SetAttribute( SDL_GL_MULTISAMPLEBUFFERS, 1 );
@@ -426,6 +427,7 @@ int main( int argc, char **argv )
 						break;
 						*/
 
+					/*
 					case SDLK_RIGHT:
 						if ( !mapMakerMode ) {
 							if ( sdlMod & (KMOD_RCTRL|KMOD_LCTRL) )
@@ -443,16 +445,10 @@ int main( int argc, char **argv )
 								GameHotKey( game, GAME_HK_PREV_UNIT );
 						}
 						break;
+					*/
 
 					case SDLK_u:
-//						if ( mapMakerMode ) {
-//							((Game*)game)->engine->camera.SetTilt( -90.0f );
-//							((Game*)game)->engine->camera.SetPosWC( 8.f, 90.f, 8.f );
-//							((Game*)game)->engine->camera.SetYRotation( 0.0f );
-//						}
-//						else {
-							GameHotKey( game, GAME_HK_TOGGLE_ROTATION_UI | GAME_HK_TOGGLE_NEXT_UI );
-//						}
+						GameHotKey( game, GAME_HK_TOGGLE_UI );
 						break;
 
 #if 0

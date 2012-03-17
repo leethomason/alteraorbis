@@ -30,7 +30,6 @@ static const char* gUniformName[ShaderManager::MAX_UNIFORM] =
 	"u_lightDir",
 	"u_ambient",
 	"u_diffuse",
-	"u_shadowMatrix"
 };
 
 

@@ -37,7 +37,7 @@ TestMap::~TestMap()
 }
 
 
-void TestMap::Draw3D()
+void TestMap::Draw3D(  const Color3F& colorMult, GPUShader::StencilMode mode )
 {
 	GPUStream stream;
 
@@ -46,6 +46,8 @@ void TestMap::Draw3D()
 	stream.stride = sizeof( Vector3F );
 
 	FlatShader shader;
+	shader.SetColor( colorMult.r, colorMult.g, colorMult.b );
+	shader.SetStencilMode( mode );
 	shader.SetStream( stream, vertex, width*height*6, index );
 	shader.Draw();
 }
