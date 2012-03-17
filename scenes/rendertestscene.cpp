@@ -1,5 +1,8 @@
 #include "rendertestscene.h"
 #include "../game/lumosgame.h"
+#include "../gamui/gamui.h"
+
+using namespace gamui;
 
 RenderTestScene::RenderTestScene( LumosGame* game, const RenderTestSceneData* data ) : Scene( game ), lumosGame( game )
 {
@@ -22,7 +25,12 @@ RenderTestScene::RenderTestScene( LumosGame* game, const RenderTestSceneData* da
 		GLASSERT( 0 );
 		break;
 	};
+	LayoutCalculator layout = lumosGame->DefaultLayout();
+
 	lumosGame->InitStd( &gamui2D, &okay, 0 );
+	whiteButton.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ) );
+	whiteButton.SetSize( layout.Width(), layout.Height() );
+	whiteButton.SetText( "white" );
 }
 
 
@@ -39,6 +47,9 @@ RenderTestScene::~RenderTestScene()
 void RenderTestScene::Resize()
 {
 	lumosGame->PositionStd( &okay, 0 );
+	
+	LayoutCalculator layout = lumosGame->DefaultLayout();
+	layout.PosAbs( &whiteButton, 1, -1 );
 }
 
 
@@ -74,6 +85,14 @@ void RenderTestScene::ItemTapped( const gamui::UIItem* item )
 {
 	if ( item == &okay ) {
 		game->PopScene();
+	}
+	else if ( item == &whiteButton ) {
+		Texture* white = TextureManager::Instance()->GetTexture( "white" );
+		for( int i=0; i<NUM_MODELS; ++i ) {
+			if ( model[i] ) {
+				model[i]->SetTexture( white );
+			}
+		}
 	}
 }
 

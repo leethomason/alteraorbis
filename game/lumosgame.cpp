@@ -59,6 +59,12 @@ Scene* LumosGame::CreateScene( int id, SceneData* data )
 }
 
 
+void LumosGame::CreateTexture( Texture* t )
+{
+	Game::CreateTexture( t );
+}
+
+
 RenderAtom LumosGame::CalcParticleAtom( int id, bool enabled )
 {
 	GLASSERT( id >= 0 && id < 16 );
@@ -185,13 +191,11 @@ void LumosGame::InitStd( gamui::Gamui* g, gamui::PushButton* okay, gamui::PushBu
 	if ( okay ) {
 		okay->Init( g, stdBL );
 		okay->SetSize( layout.Width(), layout.Height() );
-		//okay->SetText( "okay" );
 		okay->SetDeco( CalcDecoAtom( DECO_OKAY, true ), CalcDecoAtom( DECO_OKAY, false ) );
 	}
 	if ( cancel ) {
 		cancel->Init( g, stdBL );
 		cancel->SetSize( layout.Width(), layout.Height() );
-		//cancel->SetText( "cancel" );
 		cancel->SetDeco( CalcDecoAtom( DECO_CANCEL, true ), CalcDecoAtom( DECO_CANCEL, false ) );
 	}
 }

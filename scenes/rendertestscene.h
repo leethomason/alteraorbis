@@ -44,6 +44,7 @@ private:
 	int testID;
 	LumosGame* lumosGame;
 	gamui::PushButton okay;
+	gamui::PushButton whiteButton;
 
 	Engine* engine;
 	Model*  model[NUM_MODELS];
