@@ -31,6 +31,9 @@ RenderTestScene::RenderTestScene( LumosGame* game, const RenderTestSceneData* da
 	whiteButton.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ) );
 	whiteButton.SetSize( layout.Width(), layout.Height() );
 	whiteButton.SetText( "white" );
+
+	textBox.Init( &gamui2D );
+	textBox.SetSize( 400, 100 );
 }
 
 
@@ -50,19 +53,24 @@ void RenderTestScene::Resize()
 	
 	LayoutCalculator layout = lumosGame->DefaultLayout();
 	layout.PosAbs( &whiteButton, 1, -1 );
+
+	textBox.SetPos( okay.X(), okay.Y()-100 );
 }
 
 
 
 void RenderTestScene::SetupTest0()
 {
-	const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( "maleMarine" );
+	const ModelResource* res0 = ModelResourceManager::Instance()->GetModelResource( "femaleMarine" );
+	const ModelResource* res1 = ModelResourceManager::Instance()->GetModelResource( "maleMarine" );
 	for( int i=0; i<NUM_MODELS; ++i ) {
-		model[i] = engine->AllocModel( res );
+		model[i] = engine->AllocModel( i<3 ? res0 : res1 );
 		model[i]->SetPos( 1, 0, (float)i );
 		model[i]->SetRotation( (float)(-i*10) );
 	}
 	engine->CameraLookAt( 0, (float)(NUM_MODELS/2), 12 );
+
+	textBox.SetText( "DC = ( 2fem + 2male ) * ( 1color + 1shadow) + 2map = 10. 'u' disable ui" ); 
 }
 
 
@@ -93,6 +101,36 @@ void RenderTestScene::ItemTapped( const gamui::UIItem* item )
 				model[i]->SetTexture( white );
 			}
 		}
+	}
+}
+
+
+void RenderTestScene::Zoom( int style, float delta )
+{
+	if ( style == GAME_ZOOM_PINCH )
+		engine->SetZoom( engine->GetZoom() *( 1.0f+delta) );
+	else
+		engine->SetZoom( engine->GetZoom() + delta );
+}
+
+
+void RenderTestScene::Rotate( float degrees ) 
+{
+	engine->camera.Orbit( degrees );
+}
+
+
+void RenderTestScene::HandleHotKeyMask( int mask )
+{
+	switch( mask ) {
+	case GAME_HK_TOGGLE_UI:
+		{
+			bool visible = !okay.Visible();
+			okay.SetVisible( visible );
+			whiteButton.SetVisible( visible );
+			textBox.SetVisible( visible );
+		}
+		break;
 	}
 }
 
