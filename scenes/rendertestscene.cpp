@@ -1,6 +1,8 @@
 #include "rendertestscene.h"
 #include "../game/lumosgame.h"
 #include "../gamui/gamui.h"
+#include "../engine/engine.h"
+#include "../xegame/testmap.h"
 
 using namespace gamui;
 

@@ -5,6 +5,7 @@ using namespace grinliz;
 TestMap::TestMap( int w, int h ) : Map( w, h )
 {
 	int size = w*h;
+	color.Set( 1, 1, 1 );
 	vertex = new Vector3F[ size*4 ];
 	index  = new U16[ size*6 ];
 
@@ -46,7 +47,7 @@ void TestMap::Draw3D(  const Color3F& colorMult, GPUShader::StencilMode mode )
 	stream.stride = sizeof( Vector3F );
 
 	FlatShader shader;
-	shader.SetColor( colorMult.r, colorMult.g, colorMult.b );
+	shader.SetColor( colorMult.r*color.r, colorMult.g*color.g, colorMult.b*color.b );
 	shader.SetStencilMode( mode );
 	shader.SetStream( stream, vertex, width*height*6, index );
 	shader.Draw();

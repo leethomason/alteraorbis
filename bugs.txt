@@ -3,6 +3,9 @@
 	- glow
 	- light testing
 
+- main machine:
+	- light model
+	- test models
 - particle test scene
 - world rendering scene
 - navigation scene

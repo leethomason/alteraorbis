@@ -142,6 +142,9 @@
     <ClCompile Include="..\xegame\testmap.cpp">
       <Filter>Source Files\xegame</Filter>
     </ClCompile>
+    <ClCompile Include="..\scenes\particlescene.cpp">
+      <Filter>Source Files\scenes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\camera.h">
@@ -266,6 +269,9 @@
     </ClInclude>
     <ClInclude Include="..\xegame\testmap.h">
       <Filter>Source Files\xegame</Filter>
+    </ClInclude>
+    <ClInclude Include="..\scenes\particlescene.h">
+      <Filter>Source Files\scenes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

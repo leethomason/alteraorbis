@@ -3,11 +3,11 @@
 
 #include "../xegame/scene.h"
 #include "../gamui/gamui.h"
-#include "../engine/engine.h"
-#include "../xegame/testmap.h"
 
 class LumosGame;
-
+class Engine;
+class TestMap;
+class Model;
 
 class RenderTestSceneData : public SceneData
 {

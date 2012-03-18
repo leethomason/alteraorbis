@@ -3,6 +3,7 @@
 #include "../scenes/titlescene.h"
 #include "../scenes/dialogscene.h"
 #include "../scenes/rendertestscene.h"
+#include "../scenes/particlescene.h"
 
 using namespace grinliz;
 using namespace gamui;
@@ -50,6 +51,7 @@ Scene* LumosGame::CreateScene( int id, SceneData* data )
 	case SCENE_TITLE:		scene = new TitleScene( this );				break;
 	case SCENE_DIALOG:		scene = new DialogScene( this );			break;
 	case SCENE_RENDERTEST:	scene = new RenderTestScene( this, (const RenderTestSceneData*)data );	break;
+	case SCENE_PARTICLE:	scene = new ParticleScene( this );			break;
 
 	default:
 		GLASSERT( 0 );
