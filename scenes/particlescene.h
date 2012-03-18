@@ -3,6 +3,8 @@
 
 #include "../xegame/scene.h"
 #include "../gamui/gamui.h"
+#include "../engine/particle.h"
+
 
 class LumosGame;
 class Engine;
@@ -34,6 +36,10 @@ private:
 	gamui::PushButton okay;
 	Engine* engine;
 	TestMap* testMap;
+
+	void Load();
+
+	CDynArray< ParticleDef > particleDefArr;
 };
 
 #endif // PARTICLESCENE_INCLUDED

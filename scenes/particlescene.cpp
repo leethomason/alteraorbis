@@ -2,9 +2,12 @@
 #include "../game/lumosgame.h"
 #include "../engine/engine.h"
 #include "../xegame/testmap.h"
+#include "../tinyxml2/tinyxml2.h"
 
 using namespace gamui;
 using namespace grinliz;
+using namespace tinyxml2;
+
 
 ParticleScene::ParticleScene( LumosGame* game ) : Scene( game )
 {
@@ -15,6 +18,8 @@ ParticleScene::ParticleScene( LumosGame* game ) : Scene( game )
 	testMap->SetColor( c );
 	engine->SetMap( testMap );
 	engine->CameraLookAt( 6, 6, 10 );
+
+	Load();
 }
 
 
@@ -29,6 +34,21 @@ void ParticleScene::Resize()
 {
 	LumosGame* lumosGame = static_cast<LumosGame*>( game );
 	lumosGame->PositionStd( &okay, 0 );
+}
+
+
+void ParticleScene::Load()
+{
+	XMLDocument doc;
+	doc.LoadFile( "particles.xml" );
+
+	// FIXME: switch to safe version.
+	for( const XMLElement* partEle = doc.FirstChildElement( "particles" )->FirstChildElement( "particle" );
+		 partEle;
+		 partEle = partEle->NextSiblingElement( "particle" ) )
+	{
+		GLOUTPUT(( "Particle: %s\n", partEle->Value() ));
+	}
 }
 
 

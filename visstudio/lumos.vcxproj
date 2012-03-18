@@ -162,6 +162,7 @@
     <ClCompile Include="..\scenes\titlescene.cpp">
       <FileType>Document</FileType>
     </ClCompile>
+    <None Include="..\particles.xml" />
     <None Include="..\xegame\sources.mk" />
   </ItemGroup>
   <ItemGroup>

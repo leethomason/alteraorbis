@@ -26,6 +26,7 @@
 class Texture;
 class ParticleEffect;
 
+
 /*	Class to render all sorts of particle effects.
 */
 class ParticleSystem
@@ -183,6 +184,29 @@ private:
 	// When we don't have point sprites:
 	CDynArray<QuadVertex>								vertexBuffer;
 	CDynArray<U16>										indexBuffer;
+};
+
+
+// SHALLOW
+struct ParticleDef
+{
+	grinliz::CStr<16> name;
+
+	enum { ONCE, CONTINUOUS };
+	int time;
+
+	float size;
+	int count;
+	int config;
+	float posFuzz;
+	float velocity;
+	float velocityFuzz;
+
+	grinliz::Color4F color;
+	grinliz::Color4F colorVelocity;
+	grinliz::Color4F colorFuzz;
+
+	void Read( tinyxml2::XMLElement* element );
 };
 
 #endif // UFOTACTICAL_PARTICLE_INCLUDED
