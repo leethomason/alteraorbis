@@ -25,8 +25,18 @@ ParticleScene::ParticleScene( LumosGame* game ) : Scene( game )
 
 ParticleScene::~ParticleScene()
 {
+	Clear();
 	delete engine;
 	delete testMap;
+}
+
+
+void ParticleScene::Clear()
+{
+	for( int i=0; i<buttonArr.Size(); ++i ) {
+		delete buttonArr[i];
+	}
+	buttonArr.Clear();
 }
 
 
@@ -34,11 +44,22 @@ void ParticleScene::Resize()
 {
 	LumosGame* lumosGame = static_cast<LumosGame*>( game );
 	lumosGame->PositionStd( &okay, 0 );
+
+	LayoutCalculator layout = lumosGame->DefaultLayout();
+	for( int i=0; i<buttonArr.Size(); ++i ) {
+		layout.PosAbs( buttonArr[i], i*2, 0 );
+	}
 }
 
 
 void ParticleScene::Load()
 {
+	Clear(); 
+
+	LumosGame* lumosGame = static_cast<LumosGame*>( game );
+	LayoutCalculator layout = lumosGame->DefaultLayout();
+	const ButtonLook& look = lumosGame->GetButtonLook( LumosGame::BUTTON_LOOK_STD );
+
 	XMLDocument doc;
 	doc.LoadFile( "particles.xml" );
 
@@ -47,20 +68,42 @@ void ParticleScene::Load()
 		 partEle;
 		 partEle = partEle->NextSiblingElement( "particle" ) )
 	{
-		GLOUTPUT(( "Particle: %s\n", partEle->Value() ));
+		ParticleDef pd;
+		pd.Load( partEle );
+		particleDefArr.Push( pd );
+
+		Button* button = 0;
+		if ( pd.time == ParticleDef::CONTINUOUS ) {
+			button = new ToggleButton( &gamui2D, look );
+		}
+		else {
+			button = new PushButton( &gamui2D, look );
+		}
+		button->SetSize( layout.Width()*2, layout.Height() );
+		button->SetText( pd.name.c_str() );
+		buttonArr.Push( button );
 	}
+	Resize();
 }
 
 
 void ParticleScene::ItemTapped( const gamui::UIItem* item )
 {
+	GLASSERT( buttonArr.Size() == particleDefArr.Size() );
 	if ( item == &okay ) {
 		game->PopScene();
+	}
+	for( int i=0; i<buttonArr.Size(); ++i ) {
+		if ( buttonArr[i] == item ) {
+			Vector3F pos = { 6.f, 0.f, 6.f };
+			Vector3F normal = { 0, 1, 0 };
+			ParticleSystem::Instance()->EmitPD( particleDefArr[i], pos, normal );
+		}
 	}
 }
 
 
-void ParticleScene::Draw3D()
+void ParticleScene::Draw3D( U32 deltaTime )
 {
-	engine->Draw();
+	engine->Draw( deltaTime );
 }

@@ -137,7 +137,7 @@ void RenderTestScene::HandleHotKeyMask( int mask )
 }
 
 
-void RenderTestScene::Draw3D()
+void RenderTestScene::Draw3D( U32 deltaTime )
 {
-	engine->Draw();
+	engine->Draw( deltaTime );
 }

@@ -534,13 +534,7 @@ void Game::DoTick( U32 _currentTime )
 			GRINLIZ_PERFTRACK_NAME( "Game::DoTick 3D" );
 			screenport.SetPerspective( clip3D.Width() > 0 ? &clip3D : 0 );
 
-			scene->Draw3D();
-/*		
-			const grinliz::Vector3F* eyeDir = engine->camera.EyeDir3();
-			ParticleSystem* particleSystem = ParticleSystem::Instance();
-			particleSystem->Update( deltaTime, currentTime );
-			particleSystem->Draw( eyeDir, engine->GetMap() ? &engine->GetMap()->GetFogOfWar() : 0 );
-*/
+			scene->Draw3D( deltaTime );
 		}
 
 		{

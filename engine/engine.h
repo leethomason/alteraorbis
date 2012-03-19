@@ -67,8 +67,8 @@ public:
 
 	Camera camera;
 
-	// Render everything. Return triangles drawn. (Currently excludes UI and particles in tri-count.)
-	void Draw();
+	// Send everything to the GPU
+	void Draw( U32 deltaTime );
 
 	SpaceTree* GetSpaceTree()	{ return spaceTree; }
 

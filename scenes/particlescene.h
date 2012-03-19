@@ -30,16 +30,18 @@ public:
 	}
 	virtual void ItemTapped( const gamui::UIItem* item );
 
-	virtual void Draw3D();
+	virtual void Draw3D( U32 delatTime );
 
 private:
 	gamui::PushButton okay;
 	Engine* engine;
 	TestMap* testMap;
 
+	void Clear();
 	void Load();
 
 	CDynArray< ParticleDef > particleDefArr;
+	CDynArray< gamui::Button* > buttonArr;
 };
 
 #endif // PARTICLESCENE_INCLUDED

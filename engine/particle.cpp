@@ -135,16 +135,18 @@ void ParticleSystem::Process( CDynArray<Particle>* buffer, float time, unsigned 
 }
 
 
-void ParticleSystem::Update( U32 deltaTime, U32 currentTime )
+void ParticleSystem::Update( U32 deltaTime )
 {
 	GRINLIZ_PERFTRACK
 
+		/*
 	// Process the effects (may change number of particles, etc.
 	for( int i=0; i<effectArr.Size(); ++i ) {
 		if ( !effectArr[i]->Done() ) {
-			effectArr[i]->DoTick( currentTime, deltaTime );
+			effectArr[i]->DoTick( deltaTime );
 		}
 	}
+	*/
 
 	++frame;
 	Cull( (frame&1) ? &pointBuffer : &quadBuffer );	// cull one buffer / frame
@@ -254,6 +256,22 @@ void ParticleSystem::Emit(	int primitive,					// POINT or QUAD
 		p->colorVel = colorVelocityP;
 		p->type = (U8)type;
 	}
+}
+
+
+void ParticleSystem::EmitPD(	const ParticleDef& pd,
+								const grinliz::Vector3F& pos,
+								const grinliz::Vector3F& normal )
+{
+	Vector3F velocity = normal * pd.velocity;
+	EmitPoint(	pd.count,
+				pd.config,
+				pd.color,
+				pd.colorVelocity,
+				pos,
+				pd.posFuzz,
+				velocity,
+				pd.velocityFuzz );
 }
 
 
@@ -665,4 +683,45 @@ void ParticleSystem::DrawQuadParticles( const Vector3F* eyeDir )
 }
 
 
+void ParticleDef::Load( const tinyxml2::XMLElement* ele )
+{
+	name = ele->Attribute( "name" );
+	
+	time = ONCE;
+	if ( ele->Attribute( "time", "continuous" ) ) {
+		time = CONTINUOUS;
+	}
+	size = 1.0f;
+	ele->QueryFloatAttribute( "size", &size );
+	count = 1;
+	ele->QueryIntAttribute( "count", &count );
 
+	config = ParticleSystem::PARTICLE_RAY;
+	if ( ele->Attribute( "config", "sphere" ) ) config = ParticleSystem::PARTICLE_SPHERE;
+	if ( ele->Attribute( "config", "hemi" ) ) config = ParticleSystem::PARTICLE_HEMISPHERE;
+
+	posFuzz = 0;
+	ele->QueryFloatAttribute( "posFuzz", &posFuzz );
+	velocity = 1.0f;
+	ele->QueryFloatAttribute( "velocity", &velocity );
+	velocityFuzz = 0;
+	ele->QueryFloatAttribute( "velocityFuzz", &velocityFuzz );
+
+	color.Set( 1,1,1,1 );
+	colorVelocity.Set( 0, 0, 0, -0.5f );
+	colorFuzz.Set( 0, 0, 0, 0 );
+
+	const tinyxml2::XMLElement* child = 0;
+	child = ele->FirstChildElement( "color" );
+	if ( child ) {
+		LoadColor( child, &color );
+	}
+	child = ele->FirstChildElement( "colorVelocity" );
+	if ( child ) {
+		LoadColor( child, &colorVelocity );
+	}
+	child = ele->FirstChildElement( "colorFuzz" );
+	if ( child ) {
+		LoadColor( child, &colorFuzz );
+	}
+}

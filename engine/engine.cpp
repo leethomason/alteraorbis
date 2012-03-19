@@ -166,7 +166,7 @@ void Engine::FreeModel( Model* model )
 }
 
 
-void Engine::Draw()
+void Engine::Draw( U32 deltaTime )
 {
 	GRINLIZ_PERFTRACK;
 
@@ -268,6 +268,11 @@ void Engine::Draw()
 	if ( map )
 		map->DrawOverlay();
 	renderQueue->Clear();
+
+	const Vector3F* eyeDir = camera.EyeDir3();
+	ParticleSystem* particleSystem = ParticleSystem::Instance();
+	particleSystem->Update( deltaTime );
+	particleSystem->Draw( eyeDir );
 }
 
 

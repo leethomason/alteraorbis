@@ -35,7 +35,7 @@ public:
 	virtual void Rotate( float degrees );
 	virtual void HandleHotKeyMask( int mask );
 
-	virtual void Draw3D();
+	virtual void Draw3D( U32 deltaTime );
 
 private:
 	enum { NUM_ITEMS = 4,

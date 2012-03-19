@@ -70,66 +70,11 @@ void ModelGroup::Load( const gamedb::Item* item )
 }
 
 
-/*
-void XMLUtil::OpenElement( FILE* fp, int depth, const char* value )
+void LoadColor( const tinyxml2::XMLElement* element, grinliz::Color4F* color )
 {
-	Space( fp, depth );
-	fprintf( fp, "<%s ", value );	
+	element->QueryFloatAttribute( "red", &color->r );
+	element->QueryFloatAttribute( "green", &color->g );
+	element->QueryFloatAttribute( "blue", &color->b );
+	element->QueryFloatAttribute( "alpha", &color->a );
 }
 
-
-void XMLUtil::SealElement( FILE* fp ) 
-{
-	fprintf( fp, ">\n" );
-}
-
-void XMLUtil::CloseElement( FILE* fp, int depth, const char* value )
-{
-	Space( fp, depth );
-	fprintf( fp, "</%s>\n", value );
-}
-
-void XMLUtil::SealCloseElement( FILE* fp )
-{
-	fprintf( fp, "/>\n" );
-}
-
-void XMLUtil::Text( FILE* fp, const char* text )
-{
-	fprintf( fp, "%s\n", text );
-}
-
-
-void XMLUtil::Attribute( FILE* fp, const char* name, const char* value )
-{
-	fprintf( fp, "%s=\"%s\" ", name, value );
-}
-
-void XMLUtil::Attribute( FILE* fp, const char* name, int value )
-{
-	fprintf( fp, "%s=\"%d\" ", name, value );
-}
-
-void XMLUtil::Attribute( FILE* fp, const char* name, unsigned value )
-{
-	fprintf( fp, "%s=\"%d\" ", name, value );
-}
-
-void XMLUtil::Attribute( FILE* fp, const char* name, float value )
-{
-	fprintf( fp, "%s=\"%f\" ", name, value );
-}
-
-void XMLUtil::Space( FILE* fp, int depth )
-{
-	static const int LEN = 32;
-	static const int SPACES = 4;
-
-	static const char space[LEN+1] = "                                ";
-
-	if ( depth > LEN / SPACES )
-		depth = LEN / SPACES;
-
-	fprintf( fp, "%s", &space[LEN] - depth*SPACES );
-}
-*/

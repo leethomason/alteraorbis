@@ -23,10 +23,11 @@
 #include <stdio.h>
 #include "../grinliz/gldebug.h"
 #include "../grinliz/gltypes.h"
-#include "../grinliz/glrectangle.h"
-#include "../grinliz/glvector.h"
 #include "../grinliz/glstringutil.h"
+#include "../grinliz/glcolor.h"
+
 #include "../shared/gamedbreader.h"
+#include "../tinyxml2/tinyxml2.h"
 #include "enginelimits.h"
 
 struct SDL_RWops;
@@ -43,26 +44,7 @@ struct ModelGroup
 };
 
 
+void LoadColor( const tinyxml2::XMLElement* element, grinliz::Color4F* color );
 
-/*
-class XMLUtil
-{
-public:
-	static void OpenElement( FILE* fp, int depth, const char* value );
-	static void SealElement( FILE* fp );
-	static void CloseElement( FILE* fp, int depth, const char* value );
-	static void SealCloseElement( FILE* fp );
-
-	static void Text( FILE* fp, const char* text );
-
-	static void Attribute( FILE* fp, const char* name, const char* value );
-	static void Attribute( FILE* fp, const char* name, int value );
-	static void Attribute( FILE* fp, const char* name, unsigned value );
-	static void Attribute( FILE* fp, const char* name, float value );
-
-private:
-	static void Space( FILE* fp, int depth );
-};
-*/
 
 #endif // UFOATTACK_SERIALIZE_INCLUDED

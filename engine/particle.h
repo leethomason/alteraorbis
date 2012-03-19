@@ -25,7 +25,7 @@
 
 class Texture;
 class ParticleEffect;
-
+struct ParticleDef;
 
 /*	Class to render all sorts of particle effects.
 */
@@ -61,6 +61,9 @@ public:
 		PARTICLE_SPHERE,
 	};
 
+	void EmitPD( const ParticleDef& pd,
+				 const grinliz::Vector3F& pos,
+				 const grinliz::Vector3F& normal );
 
 	// Emit N point particles.
 	void EmitPoint(	int count,						// number of particles to create
@@ -95,7 +98,7 @@ public:
 	// Draw a beam. Always for one frame.
 	void EmitBeam( const grinliz::Vector3F& p0, const grinliz::Vector3F& p1, const grinliz::Color4F& color );
 
-	void Update( U32 deltaTime, U32 currentTime );
+	void Update( U32 deltaTime );
 	void Draw( const grinliz::Vector3F* eyeDir );
 	void Clear();
 
@@ -193,11 +196,11 @@ struct ParticleDef
 	grinliz::CStr<16> name;
 
 	enum { ONCE, CONTINUOUS };
-	int time;
+	int time;		// "once" "continuous"
 
 	float size;
 	int count;
-	int config;
+	int config;		// "sphere" "hemi" "ray"
 	float posFuzz;
 	float velocity;
 	float velocityFuzz;
@@ -206,7 +209,7 @@ struct ParticleDef
 	grinliz::Color4F colorVelocity;
 	grinliz::Color4F colorFuzz;
 
-	void Read( tinyxml2::XMLElement* element );
+	void Load( const tinyxml2::XMLElement* element );
 };
 
 #endif // UFOTACTICAL_PARTICLE_INCLUDED
