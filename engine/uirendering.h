@@ -36,7 +36,7 @@ public:
 		RENDERSTATE_COUNT
 	};
 
-	UIRenderer() : shader( true ), textRed( 1 ), textGreen( 1 ), textBlue( 1 ) {}
+	UIRenderer() : shader( GPUShader::BLEND_NORMAL ), textRed( 1 ), textGreen( 1 ), textBlue( 1 ) {}
 
 	void SetTextColor( float r, float g, float b )		{ textRed = r; textGreen = g; textBlue = b; }
 

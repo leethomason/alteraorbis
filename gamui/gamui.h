@@ -641,6 +641,7 @@ struct ButtonLook
 class Button : public UIItem
 {
 public:
+	virtual ~Button()	{}
 
 	virtual float Width() const;
 	virtual float Height() const;
@@ -689,7 +690,6 @@ protected:
 				const RenderAtom& decoDisabled );
 
 	Button();
-	virtual ~Button()	{}
 
 	bool m_up;
 	void SetState();

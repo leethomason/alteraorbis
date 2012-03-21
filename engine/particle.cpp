@@ -18,7 +18,6 @@
 #include "../grinliz/glperformance.h"
 #include "surface.h"
 #include "camera.h"
-#include "particleeffect.h"
 #include "texture.h"
 
 using namespace grinliz;
@@ -42,11 +41,17 @@ using namespace grinliz;
 ParticleSystem* ParticleSystem::instance = 0;
 
 
-ParticleSystem::ParticleSystem()
+ParticleSystem::ParticleSystem() : texture( 0 ), time( 0 ), nParticles( 0 )
 {
-	pointTexture = 0;
-	quadTexture = 0;
-	frame = 0;
+	for( int i=0; i<MAX_PARTICLES; ++i ) {
+		U16* p = &indexBuffer[i*6];
+		*(p+0) = i*4+0;
+		*(p+1) = i*4+1;
+		*(p+2) = i*4+2;
+		*(p+3) = i*4+0;
+		*(p+4) = i*4+2;
+		*(p+5) = i*4+3;
+	}
 }
 
 
@@ -58,105 +63,62 @@ ParticleSystem::~ParticleSystem()
 
 void ParticleSystem::Clear()
 {
-	pointBuffer.Clear();
-	quadBuffer.Clear();
-
-	for( int i=0; i<effectArr.Size(); ++i ) {
-		delete effectArr[i];
-	}
-	effectArr.Clear();
+	nParticles = 0;
 }
 
 
-void ParticleSystem::AddEffect( ParticleEffect* effect )
+void ParticleSystem::Process( U32 delta, const grinliz::Vector3F eyeDir[] )
 {
-	effectArr.Push( effect );
-}
+	time += delta;
+	float deltaF = (float)delta * 0.001f;	// convert to seconds.
+	const Vector3F& up = eyeDir[1];
+	const Vector3F& right = eyeDir[2];
 
+	int i=0;
+	while( i<nParticles ) {
+		ParticleData* pd = &particleData[i];
+		ParticleStream* ps = &vertexBuffer[i*4];
+		
+		Vector4F color = ps->color + pd->colorVel * deltaF;
 
-ParticleEffect* ParticleSystem::EffectFactory( const char* name )
-{
-	for( int i=0; i<effectArr.Size(); ++i ) {
-		if ( effectArr[i]->Done() && strcmp( effectArr[i]->Name(), name ) == 0 ) {
-			ParticleEffect* effect = effectArr[i];
-			effectArr.SwapRemove( i );
-			return effect;
+		if ( color.w <= 0 ) {
+			ParticleStream* end = vertexBuffer + nParticles*4;
+			Swap( ps+0, end-4 );
+			Swap( ps+1, end-3 );
+			Swap( ps+2, end-2 );
+			Swap( ps+3, end-1 );
+			Swap( pd, &particleData[nParticles-1] );
+			nParticles--;
+		}
+		else {
+			pd->pos += pd->velocity * deltaF;
+			const Vector3F pos = pd->pos;
+			const float size = pd->size;
+
+			ps[0].color = color;
+			ps[1].color = color;
+			ps[2].color = color;
+			ps[3].color = color;
+
+			ps[0].pos = pos - up*size - right*size;
+			ps[1].pos = pos - up*size + right*size;
+			ps[2].pos = pos + up*size + right*size;
+			ps[3].pos = pos + up*size - right*size;
+
+			i++;
 		}
 	}
-
-	// If we can't re-use, and there are a few entries, go ahead and
-	// cull the old memory. '20' is the magic random number here.
-	if ( effectArr.Size() > 20 ) {
-		int dc=0;
-		while ( dc < effectArr.Size() ) {
-			if ( effectArr[dc]->Done() ) {
-				delete effectArr[dc];
-				effectArr.SwapRemove( dc );
-			}
-			else {
-				++dc;
-			}
-		}
-	}
-	return 0;
 }
 
 
-void ParticleSystem::Cull( CDynArray<Particle>* buffer )
-{
-	if ( !buffer->Empty() ) {
-		Particle* p = buffer->Mem();
-		Particle* q = buffer->Mem();
-		const Particle* end = buffer->Mem() + buffer->Size();
-
-		while ( q < end ) {
-			*p = *q;
-			q++;
-//			if ( p->age < p->lifetime )
-//				++p;
-			if ( p->color.a > 0.0f )
-				++p;
-		}
-		int size = p - buffer->Mem();
-		if ( size < buffer->Size() )
-			buffer->Trim( size );
-	}
-}
-
-
-void ParticleSystem::Process( CDynArray<Particle>* buffer, float time, unsigned msec )
-{
-	Particle* p = buffer->Mem();
-	const Particle* end = buffer->Mem() + buffer->Size();
-	while ( p < end ) {
-		p->Process( time, msec );
-		++p;
-	}
-}
-
-
-void ParticleSystem::Update( U32 deltaTime, U32 currentTime )
+void ParticleSystem::Update( U32 deltaTime, const grinliz::Vector3F eyeDir[] )
 {
 	GRINLIZ_PERFTRACK
-
-	// Process the effects (may change number of particles, etc.
-	for( int i=0; i<effectArr.Size(); ++i ) {
-		if ( !effectArr[i]->Done() ) {
-			effectArr[i]->DoTick( currentTime, deltaTime );
-		}
-	}
-
-	++frame;
-	Cull( (frame&1) ? &pointBuffer : &quadBuffer );	// cull one buffer / frame
-
-
-	// Process the particles.
-	float sec = (float)deltaTime / 1000.0f;
-	Process( &pointBuffer, sec, deltaTime );
-	Process( &quadBuffer, sec, deltaTime );
+	Process( deltaTime, eyeDir );
 }
 
 
+/*
 void ParticleSystem::EmitBeam( const grinliz::Vector3F& p0, const grinliz::Vector3F& p1, const grinliz::Color4F& color )
 {
 	Beam* beam = beamBuffer.Push();
@@ -164,248 +126,95 @@ void ParticleSystem::EmitBeam( const grinliz::Vector3F& p0, const grinliz::Vecto
 	beam->pos1 = p1;
 	beam->color = color;
 }
+*/
 
 
-void ParticleSystem::Emit(	int primitive,					// POINT or QUAD
-							int type,						// FIRE, SMOKE
-							int count,						// number of particles to create
-							int config,						// PARTICLE_RAY, etc.
-							const Color4F& color,
-							const Color4F& colorVelocity,
-							const grinliz::Vector3F& pos0,	// origin
-							float posFuzz,
-							const grinliz::Vector3F& vel,	// velocity
-							float velFuzz,
-							float halfWidth,
-							float velHalfWidth )
+void ParticleSystem::EmitPD(	const ParticleDef& def,
+								const grinliz::Vector3F& initPos,
+								const grinliz::Vector3F& normal, 
+								const grinliz::Vector3F eyeDir[] )
 {
-	GLASSERT( primitive >= 0 && primitive < NUM_PRIMITIVES );
-	GLASSERT( type >=0 && type < 16 );
-	GLASSERT( config >= 0 && config <= PARTICLE_SPHERE );
-//	GLASSERT( pos0.x >= 0 && pos0.x < (float)EL_MAP_SIZE );
-//	GLASSERT( pos0.y >= 0 && pos0.y < (float)EL_MAP_SIZE );
+	Vector3F velocity = normal * def.velocity;
 
-	Vector3F posP, velP, normal;
-	Color4F colP;
+	static const Vector2F uv[4] = {{0,0},{0.25,0},{0.25,1},{0,1}};	// FIXME: correct number of textures
+	const Vector3F& up = eyeDir[1];
+	const Vector3F& right = eyeDir[2];
 
-	const float len = vel.Length();
-	if ( len > 0.0f ) {
-		normal = vel;
-		normal.Normalize();
-	}
-	else {
-		normal.Set( 0, 1, 0 );
-	}
+	for( int i=0; i<def.count; ++i ) {
+		if ( nParticles < MAX_PARTICLES ) {
+			ParticleData* pd = &particleData[nParticles];
 
-	for( int i=0; i<count; ++i ) {
-		switch (config) {
-			case PARTICLE_RAY:
-				velP = vel;
-				velP.x += velFuzz*(-0.5f + rand.Uniform());
-				velP.y += velFuzz*(-0.5f + rand.Uniform());
-				velP.z += velFuzz*(-0.5f + rand.Uniform());
-				break;
+			// For (hemi) sperical distributions, recompute a random direction.
+			if ( def.config == ParticleSystem::PARTICLE_HEMISPHERE || def.config == ParticleSystem::PARTICLE_SPHERE ) {
+				Vector3F n = { 0, 0, 0 };
+				random.NormalVector3D( &n.x );
 
-			case PARTICLE_HEMISPHERE:
-				rand.NormalVector3D( &velP.x );
-				if ( DotProduct( velP, normal ) < 0.0f ) {
-					velP = -velP;
+				if ( def.config == ParticleSystem::PARTICLE_HEMISPHERE && DotProduct( normal, n ) < 0.f ) {
+					n = -n;
 				}
-				velP.x = velP.x*len + velFuzz*(-0.5f + rand.Uniform());
-				velP.y = velP.y*len + velFuzz*(-0.5f + rand.Uniform());
-				velP.z = velP.z*len + velFuzz*(-0.5f + rand.Uniform());
-				break;
+				velocity = n * def.velocity;
+			}
 
-			case PARTICLE_SPHERE:
-				rand.NormalVector3D( &velP.x );
-				velP.x = velP.x*len + velFuzz*(-0.5f + rand.Uniform());
-				velP.y = velP.y*len + velFuzz*(-0.5f + rand.Uniform());
-				velP.z = velP.z*len + velFuzz*(-0.5f + rand.Uniform());
-				break;
+			pd->colorVel = def.colorVelocity;
 
-			default:
-				GLASSERT( 0 );
-				break;
-		};
+			Vector3F vFuzz;
+			random.NormalVector3D( &vFuzz.x );
+			pd->velocity = velocity + vFuzz*def.velocityFuzz;
 
-		posP.x = Clamp( pos0.x + posFuzz*(-0.5f + rand.Uniform() ), 0.0f, (float)EL_MAP_SIZE-0.1f );
-		posP.y = pos0.y + posFuzz*(-0.5f + rand.Uniform() );
-		posP.z = Clamp( pos0.z + posFuzz*(-0.5f + rand.Uniform() ), 0.0f, (float)EL_MAP_SIZE-0.1f );
+			pd->size = def.size;
+			
+			Vector4F cFuzz = { 0, 0, 0, 0 };
+			random.NormalVector3D( &cFuzz.x );
+			Vector4F color = def.color + cFuzz*def.colorFuzz;
 
-		const float CFUZZ_MUL = 0.90f;
-		const float CFUZZ_ADD = 0.20f;
+			Vector3F pFuzz;
+			random.NormalVector3D( &pFuzz.x );
+			Vector3F pos = initPos + pFuzz*def.posFuzz;
+			pd->pos = pos;
 
-		for( int j=0; j<3; ++j ) {
-			colP.X(j) = color.X(j)*CFUZZ_MUL + rand.Uniform()*CFUZZ_ADD;
-		}
-		colP.a = color.a;	// don't fuzz alpha
+			ParticleStream* ps = &vertexBuffer[nParticles*4];
+			for( int k=0; k<4; ++k ) {
+				ps[k].color = color;
+				ps[k].uv = uv[k];
+			};
+			const float size = def.size;
+			ps[0].pos = pos - up*size - right*size;
+			ps[1].pos = pos - up*size + right*size;
+			ps[2].pos = pos + up*size + right*size;
+			ps[3].pos = pos + up*size - right*size;
 
-		Color4F colorVelocityP = colorVelocity;
-		if ( colorVelocityP.a > -0.1f )
-			colorVelocityP.a = -0.f;	// must fade!
-
-		Particle* p = (primitive==POINT) ? pointBuffer.Push() : quadBuffer.Push();
-
-		p->pos = posP;
-		p->halfWidth = halfWidth;
-		p->velHalfWidth = velHalfWidth;
-		p->color = colP;
-		p->vel = velP;
-		p->colorVel = colorVelocityP;
-		p->type = (U8)type;
-	}
-}
-
-
-void ParticleSystem::EmitPoint(	int count,						
-								int configuration,				
-								const Color4F& color,			
-								const Color4F& colorVelocity,	
-								const grinliz::Vector3F& pos,	
-								float posFuzz,					
-								const grinliz::Vector3F& vel,	
-								float velFuzz )					
-{
-	Emit( POINT, 0, count, configuration, color, colorVelocity, pos, posFuzz, 
-		  vel, velFuzz, 0.0f, 0.0f );
-}
-
-
-void ParticleSystem::EmitQuad(	int type,						
-								const Color4F& color,			
-								const Color4F& colorVelocity,	
-								const grinliz::Vector3F& pos,	
-								float posFuzz,					
-								const grinliz::Vector3F& vel,	
-								float velFuzz,					
-								float halfWidth,
-								float velHalfWidth )			
-{
-	Emit( QUAD, type, 1, 0, color, colorVelocity, pos, posFuzz, vel, velFuzz, 
-		  halfWidth, velHalfWidth );
-}
-
-
-void ParticleSystem::EmitOnePoint(	const Color4F& color, 
-									const Color4F& colorVelocity,
-									const grinliz::Vector3F& pos )
-{
-	grinliz::Vector3F vel = { 0, 0, 0 };
-	Emit( POINT, 0, 1, PARTICLE_RAY, color, colorVelocity, pos, 0, vel, 0, 0, 0 );
-}
-
-
-void ParticleSystem::EmitSmokeAndFlame( U32 delta, const Vector3F& _pos, bool flame )
-{
-	// flame, smoke, particle
-	U32 count[3];
-	const U32 interval[3] = { 500,		// flame
-							  800,		// smoke
-							  200 };	// sparkle
-
-	// If the delta is 200, there is a 200/250 chance of it being in this delta
-	for( int i=0; i<3; ++i ) {
-		count[i] = delta / interval[i];
-		U32 remain = delta - count[i]*interval[i];
-
-		U32 v = rand.Rand() % interval[i];
-		if ( v < remain ) {
-			++count[i];
-		}
-	}
-
-	
-	// Flame
-	if ( flame ) {
-		Vector3F pos = _pos;
-		pos.y += 0.3f;
-
-		const Color4F color		= { 1.0f, 1.0f, 1.0f, 1.0f };
-		const Color4F colorVec	= { 0.0f, -0.1f, -0.1f, -0.4f };
-		Vector3F velocity		= { 0.0f, 1.0f, 0.0f };
-
-		if ( (rand.Rand()>>28)==0 ) {
-			velocity.y = 0.1f;
-		}
-
-		for( U32 i=0; i<count[0]; ++i ) {
-			Emit(	ParticleSystem::QUAD,
-					ParticleSystem::FIRE + rand.Rand( NUM_FIRE ),
-					1,
-					ParticleSystem::PARTICLE_RAY,
-					color,		colorVec,
-					pos,		0.4f,	
-					velocity,	0.3f,
-					0.5f,		0.0f );		
-		}
-	}
-	
-	// Smoke
-	{
-		Vector3F pos = _pos;
-		//pos.y -= 0.5f;	ground plane doesn't have a depth write. Bummer.
-
-		const Color4F color		= { 0.5f, 0.5f, 0.5f, 1.0f };
-		const Color4F colorVec	= { -0.1f, -0.1f, -0.1f, -0.30f };
-		Vector3F velocity		= { 0.0f, 0.8f, 0.0f };
-
-		for( U32 i=0; i<count[1]; ++i ) {
-			Emit(	ParticleSystem::QUAD,
-					ParticleSystem::SMOKE + rand.Rand( NUM_SMOKE ),
-					1,
-					ParticleSystem::PARTICLE_RAY,
-					color,		colorVec,
-					pos,		0.4f,	
-					velocity,	0.2f,
-					0.5f,		0.0f );		
-		}
-	}
-	
-	// Sparkle
-	if ( flame ) {
-		Vector3F pos = _pos;
-
-		const Color4F color		= { 1.0f, 0.3f, 0.1f, 1.0f };
-		const Color4F colorVec	= { 0.0f, -0.1f, -0.1f, -0.18f };
-		Vector3F velocity		= { 0.0f, 1.5f, 0.0f };
-
-		for( U32 i=0; i<count[2]; ++i ) {
-			Emit(	ParticleSystem::POINT,
-					0,
-					1,
-					ParticleSystem::PARTICLE_RAY,
-					color,		colorVec,
-					pos,		0.05f,	
-					velocity,	0.3f,
-					0.5f,		0.0f );		
+			++nParticles;
 		}
 	}
 }
 
 
-void ParticleSystem::Draw( const Vector3F* eyeDir )
+
+void ParticleSystem::Draw()
 {
 	GRINLIZ_PERFTRACK
 
-	if ( !pointTexture ) {
-		pointTexture = TextureManager::Instance()->GetTexture( "particleSparkle" );
-		quadTexture = TextureManager::Instance()->GetTexture( "particleQuad" );
+	if ( !texture ) {
+		texture = TextureManager::Instance()->GetTexture( "particle" );
 	}
+	
+	GPUStream stream;
+	stream.stride = sizeof( ParticleStream );
+	stream.nPos = 3;
+	stream.posOffset = ParticleStream::POS_OFFSET;
+	stream.nTexture0 = 2;
+	stream.texture0Offset = ParticleStream::TEXTURE_OFFSET;
+	stream.nColor = 4;
+	stream.colorOffset = ParticleStream::COLOR_OFFSET;
 
-	//GLOUTPUT(( "Particles point=%d quad=%d\n", pointBuffer.Size(), quadBuffer.Size() ));
-	DrawPointParticles( eyeDir );
-	DrawQuadParticles( eyeDir );
-	DrawBeamParticles( eyeDir );
-	beamBuffer.Clear();
-
-	for( int i=0; i<effectArr.Size(); ++i ) {
-		if ( !effectArr[i]->Done() ) {
-			effectArr[i]->Draw( eyeDir );
-		}
-	}
+	ParticleShader shader;
+	shader.SetTexture0( texture );
+	shader.SetStream( stream, vertexBuffer, 6*nParticles, indexBuffer );
+	shader.Draw(); 
 }
 
 
+/*
 void ParticleSystem::DrawBeamParticles( const Vector3F* eyeDir )
 {
 	if ( beamBuffer.Empty() ) {
@@ -452,7 +261,7 @@ void ParticleSystem::DrawBeamParticles( const Vector3F* eyeDir )
 		CrossProduct( eyeDir[Camera::NORMAL], b.pos1-b.pos0, &n );
 		if ( n.LengthSquared() > 0.0001f )
 			n.Normalize();
-		else
+		else	
 			n = eyeDir[Camera::RIGHT];
 
 		pV[0].pos = b.pos0 - hw*n;
@@ -485,184 +294,48 @@ void ParticleSystem::DrawBeamParticles( const Vector3F* eyeDir )
 		shader.Draw();
 	}
 }
+*/
 
 
-
-void ParticleSystem::DrawPointParticles( const Vector3F* eyeDir )
+void ParticleDef::Load( const tinyxml2::XMLElement* ele )
 {
-	if ( pointBuffer.Empty() )
-		return;
-
-	if ( PointParticleShader::IsSupported() )
-	{
-		PointParticleShader shader;
-
-		GPUStream stream;
-		stream.stride = sizeof(pointBuffer[0]);
-		stream.nPos = 3;
-		stream.posOffset = 0;
-		stream.nColor = 4;
-		stream.colorOffset = 12;
-
-		shader.SetStream( stream, pointBuffer.Mem(), 0, 0 );
-		shader.DrawPoints( pointTexture, 4.f, 0, pointBuffer.Size() );
+	name = ele->Attribute( "name" );
+	
+	time = ONCE;
+	if ( ele->Attribute( "time", "continuous" ) ) {
+		time = CONTINUOUS;
 	}
-	else {
-		// Try to duplicate the above. Draw a bunch of little tetrahedrons so
-		// we don't have to worry about screen space.
-		vertexBuffer.Clear();
-		indexBuffer.Clear();
+	size = 1.0f;
+	ele->QueryFloatAttribute( "size", &size );
+	count = 1;
+	ele->QueryIntAttribute( "count", &count );
 
-		int index = 0;
-		int vertex = 0;
+	config = ParticleSystem::PARTICLE_RAY;
+	if ( ele->Attribute( "config", "sphere" ) ) config = ParticleSystem::PARTICLE_SPHERE;
+	if ( ele->Attribute( "config", "hemi" ) ) config = ParticleSystem::PARTICLE_HEMISPHERE;
 
-		QuadVertex* vBuf = vertexBuffer.PushArr( 4*pointBuffer.Size() );
-		U16* iBuf = indexBuffer.PushArr( 6*pointBuffer.Size() );
+	posFuzz = 0;
+	ele->QueryFloatAttribute( "posFuzz", &posFuzz );
+	velocity = 1.0f;
+	ele->QueryFloatAttribute( "velocity", &velocity );
+	velocityFuzz = 0;
+	ele->QueryFloatAttribute( "velocityFuzz", &velocityFuzz );
 
-		QuadVertex base[4];
-		float SIZE = 0.07f;
-		base[0].pos = -eyeDir[Camera::RIGHT]*SIZE - eyeDir[Camera::UP]*SIZE;
-		base[1].pos =  eyeDir[Camera::RIGHT]*SIZE - eyeDir[Camera::UP]*SIZE;
-		base[2].pos =  eyeDir[Camera::RIGHT]*SIZE + eyeDir[Camera::UP]*SIZE;
-		base[3].pos = -eyeDir[Camera::RIGHT]*SIZE + eyeDir[Camera::UP]*SIZE;
+	color.Set( 1,1,1,1 );
+	colorVelocity.Set( 0, 0, 0, -0.5f );
+	colorFuzz.Set( 0, 0, 0, 0 );
 
-		static const Vector2F tex[4] = {
-			{ 0.0f, 0.0f },
-			{ 1.0f, 0.0f },
-			{ 1.0f, 1.0f },
-			{ 0.0f, 1.0f }
-		};
-
-
-		for( int i=0; i<pointBuffer.Size(); ++i ) 
-		{
-			const Vector3F& pos = pointBuffer[i].pos;
-			const Color4F& color = pointBuffer[i].color;
-
-			// Set up the particle that everything else is derived from:
-			iBuf[index++] = vertex+0;
-			iBuf[index++] = vertex+1;
-			iBuf[index++] = vertex+2;
-
-			iBuf[index++] = vertex+0;
-			iBuf[index++] = vertex+2;
-			iBuf[index++] = vertex+3;
-
-			QuadVertex* pV = vBuf + vertex;
-
-			for( int j=0; j<4; ++j ) {
-				pV->pos = base[j].pos + pos;
-				pV->tex = tex[j];
-				pV->color = color;
-				++pV;
-			}
-			vertex += 4;
-		}
-
-		if ( index ) {
-			QuadParticleShader shader;
-			GPUStream stream;
-			stream.stride = sizeof( vertexBuffer[0] );
-			stream.nPos = 3;
-			stream.posOffset = 0;
-			stream.nTexture0 = 2;
-			stream.texture0Offset = 12;
-			stream.nColor = 4;
-			stream.colorOffset = 20;
-
-			shader.SetStream( stream, vBuf, index, iBuf );
-			shader.SetTexture0( TextureManager::Instance()->GetTexture( "particleSparkle" ) );
-			shader.Draw();
-		}
+	const tinyxml2::XMLElement* child = 0;
+	child = ele->FirstChildElement( "color" );
+	if ( child ) {
+		LoadColor( child, &color );
+	}
+	child = ele->FirstChildElement( "colorVelocity" );
+	if ( child ) {
+		LoadColor( child, &colorVelocity );
+	}
+	child = ele->FirstChildElement( "colorFuzz" );
+	if ( child ) {
+		LoadColor( child, &colorFuzz );
 	}
 }
-
-
-void ParticleSystem::DrawQuadParticles( const Vector3F* eyeDir )
-{
-	if ( quadBuffer.Empty() ) {
-		return;
-	}
-
-	const static float cornerX[] = { -1, 1, 1, -1 };
-	const static float cornerY[] = { -1, -1, 1, 1 };
-
-	static const Vector2F tex[4] = {
-		{ 0.0f, 0.0f },
-		{ 0.25f, 0.0f },
-		{ 0.25f, 0.25f },
-		{ 0.0f, 0.25f }
-	};
-
-	int nIndex = 0;
-	int nVertex = 0;
-
-	vertexBuffer.Clear();
-	indexBuffer.Clear();
-
-	U16* iBuf = indexBuffer.PushArr( 6*quadBuffer.Size() );
-	QuadVertex* vBuf = vertexBuffer.PushArr( 4*quadBuffer.Size() );
-	Rectangle2I bounds;
-	bounds.Set( 0, 0, EL_MAP_SIZE-1, EL_MAP_SIZE-1 );
-
-	for( int i=0; i<quadBuffer.Size(); ++i ) 
-	{
-		const Particle& p = quadBuffer[i];
-
-		const int type	  = p.type;
-		const float tx = 0.25f * (float)(type&0x03);
-		const float ty = 0.25f * (float)(type>>2);
-		
-		//const float size = particleTypeArr[QUAD].size;
-		const Vector3F& pos  = p.pos;
-		Color4F color = p.color;
-
-		static const float FADE_IN = 0.95f;
-		static const float FADE_IN_INV = 1.0f / (1.0f-FADE_IN);
-
-		if ( color.a > FADE_IN ) {
-			color.a = (1.0f - color.a)*FADE_IN_INV;
-		}
-
-		// Set up the particle that everything else is derived from:
-		iBuf[nIndex++] = nVertex+0;
-		iBuf[nIndex++] = nVertex+1;
-		iBuf[nIndex++] = nVertex+2;
-
-		iBuf[nIndex++] = nVertex+0;
-		iBuf[nIndex++] = nVertex+2;
-		iBuf[nIndex++] = nVertex+3;
-
-		QuadVertex* pV = &vBuf[nVertex];
-
-		const float hw = quadBuffer[i].halfWidth;
-
-		for( int j=0; j<4; ++j ) {
-			pV->pos =   pos + ( cornerX[j]*eyeDir[Camera::RIGHT] + cornerY[j]*eyeDir[Camera::UP] ) * hw;
-			pV->tex.Set( tx+tex[j].x, ty+tex[j].y );
-			pV->color = color;
-			++pV;
-		}
-		nVertex += 4;
-	}
-
-	if ( nIndex ) {
-		QuadParticleShader shader;
-		shader.SetTexture0( quadTexture );
-
-		GPUStream stream;
-		stream.stride = sizeof( vertexBuffer[0] );
-		stream.nPos = 3;
-		stream.posOffset = 0;
-		stream.nTexture0 = 2;
-		stream.texture0Offset = 12;
-		stream.nColor = 4;
-		stream.colorOffset = 20;
-
-		shader.SetStream( stream, vBuf, nIndex, iBuf );
-		shader.Draw();
-	}
-}
-
-
-

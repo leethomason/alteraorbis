@@ -24,7 +24,6 @@
 #include "engine.h"
 #include "settings.h"
 
-#include "../engine/particleeffect.h"
 #include "../engine/particle.h"
 
 #include "../tinyxml2/tinyxml2.h"
@@ -303,22 +302,22 @@ void Map::BeginRenderState( const void* renderState )
 		case UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE:
 		case RENDERSTATE_MAP_OPAQUE:
 			gamuiShader.SetColor( 1, 1, 1, 1 );
-			gamuiShader.SetBlend( false );
+			gamuiShader.SetBlend( GPUShader::BLEND_NONE );
 			break;
 
 		case UIRenderer::RENDERSTATE_UI_NORMAL:
 		case RENDERSTATE_MAP_NORMAL:
 			gamuiShader.SetColor( 1.0f, 1.0f, 1.0f, 0.8f );
-			gamuiShader.SetBlend( true );
+			gamuiShader.SetBlend( GPUShader::BLEND_NORMAL );
 			break;
 
 		case RENDERSTATE_MAP_TRANSLUCENT:
 			gamuiShader.SetColor( 1, 1, 1, ALPHA );
-			gamuiShader.SetBlend( true );
+			gamuiShader.SetBlend( GPUShader::BLEND_NORMAL );
 			break;
 		case RENDERSTATE_MAP_MORE_TRANSLUCENT:
 			gamuiShader.SetColor( 1, 1, 1, ALPHA_1 );
-			gamuiShader.SetBlend( true );
+			gamuiShader.SetBlend( GPUShader::BLEND_NORMAL );
 			break;
 		default:
 			GLASSERT( 0 );

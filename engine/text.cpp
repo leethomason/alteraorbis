@@ -259,7 +259,7 @@ void UFOText::TextOut( GPUShader* shader, const char* str, int _x, int _y, int _
 void UFOText::Draw( int x, int y, const char* format, ... )
 {
 	screenport->SetUI( 0 );
-	CompositingShader shader( true );
+	CompositingShader shader( GPUShader::BLEND_NORMAL );
 
     va_list     va;
 	const int	size = 1024;

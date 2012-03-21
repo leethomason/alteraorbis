@@ -166,7 +166,7 @@ void Engine::FreeModel( Model* model )
 }
 
 
-void Engine::Draw()
+void Engine::Draw( U32 deltaTime )
 {
 	GRINLIZ_PERFTRACK;
 
@@ -203,7 +203,7 @@ void Engine::Draw()
 	Vector4F dir;
 	QueryLights( DAY_TIME, &ambient, &dir, &diffuse );
 
-	LightShader lightShader( ambient, dir, diffuse, false );
+	LightShader lightShader( ambient, dir, diffuse );
 
 	Rectangle2I mapBounds( 0, 0, EL_MAP_SIZE-1, EL_MAP_SIZE-1 );
 	if ( map ) {
@@ -268,6 +268,11 @@ void Engine::Draw()
 	if ( map )
 		map->DrawOverlay();
 	renderQueue->Clear();
+
+	const Vector3F* eyeDir = camera.EyeDir3();
+	ParticleSystem* particleSystem = ParticleSystem::Instance();
+	particleSystem->Update( deltaTime, eyeDir );
+	particleSystem->Draw();
 }
 
 

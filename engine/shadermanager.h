@@ -38,6 +38,9 @@ public:
 											// light direction, ambient color, and diffuse color.
 		INSTANCE			= (1<<11),		// Use instancing. Up to 16 uniform matrices contain the model
 											// transform. The instance attribute must be in the vertex data.
+
+		// --- special shaders -- //
+		PARTICLE			= (1<<12),
 	};
 
 	void DeviceLoss();
@@ -45,16 +48,17 @@ public:
 
 	// Warning: must match gAttributeName
 	enum {
-		A_TEXTURE0,
-		A_TEXTURE1,
-		A_POS,
-		A_NORMAL,
-		A_COLOR,
+		A_TEXTURE0,		// 2 or 3 comp
+		A_TEXTURE1,		// 2 or 3 comp
+		A_POS,			// 3 comp
+		A_NORMAL,		// 2 comp
+		A_COLOR,		// 3 comp
 		A_INSTANCE_ID,
 		MAX_ATTRIBUTE
 	};
 	void ClearStream();
 	void SetStreamData( int id, int count, int type, int stride, const void* data );	 
+	void SetParticleStream();
 
 	// Warning: must match gUniformName
 	enum {

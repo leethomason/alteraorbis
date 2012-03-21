@@ -3,7 +3,11 @@
 	- glow
 	- light testing
 
+- main machine:
+	- light model
+	- test models
 - particle test scene
+	- alpha processing for additive blending
 - world rendering scene
 - navigation scene
 - map rendering scene

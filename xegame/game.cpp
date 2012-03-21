@@ -534,13 +534,7 @@ void Game::DoTick( U32 _currentTime )
 			GRINLIZ_PERFTRACK_NAME( "Game::DoTick 3D" );
 			screenport.SetPerspective( clip3D.Width() > 0 ? &clip3D : 0 );
 
-			scene->Draw3D();
-/*		
-			const grinliz::Vector3F* eyeDir = engine->camera.EyeDir3();
-			ParticleSystem* particleSystem = ParticleSystem::Instance();
-			particleSystem->Update( deltaTime, currentTime );
-			particleSystem->Draw( eyeDir, engine->GetMap() ? &engine->GetMap()->GetFogOfWar() : 0 );
-*/
+			scene->Draw3D( deltaTime );
 		}
 
 		{
@@ -568,11 +562,10 @@ void Game::DoTick( U32 _currentTime )
 	if ( !suppressText ) {
 		UFOText* ufoText = UFOText::Instance();
 		if ( debugLevel >= 1 ) {
-			ufoText->Draw(	0,  Y, "#%d %5.1ffps vbo=%d ps=%d %4.1fK/f %3ddc/f", 
+			ufoText->Draw(	0,  Y, "#%d %5.1ffps vbo=%d %4.1fK/f %3ddc/f", 
 							VERSION, 
 							framesPerSecond, 
 							GPUShader::SupportsVBOs() ? 1 : 0,
-							PointParticleShader::IsSupported() ? 1 : 0,
 							(float)GPUShader::TrianglesDrawn()/1000.0f,
 							GPUShader::DrawCalls() );
 		}

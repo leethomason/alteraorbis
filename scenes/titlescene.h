@@ -30,9 +30,15 @@ private:
 	gamui::TextLabel	label;
 	gamui::Image		background;
 	gamui::PushButton	okay, cancel;
-	gamui::PushButton	dialog,
-						renderTest0,
-						renderTest1;
+
+	enum { 
+		TEST_DIALOG,
+		TEST_RENDER_0,
+		TEST_RENDER_1,
+		TEST_PARTICLE,
+		NUM_TESTS
+	};
+	gamui::PushButton	testScene[NUM_TESTS];
 };
 
 #endif // TITLESCENE_INCLUDED

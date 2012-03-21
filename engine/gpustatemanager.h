@@ -14,10 +14,7 @@
 
 
 class Texture;
-
-namespace grinliz {
-	class Matrix4;
-};
+class Particle;
 
 class MatrixStack
 {
@@ -90,8 +87,6 @@ public:
 
 
 struct GPUStream {
-	// WARNING: Clear/init calls memset(0) on structure. Need to change
-	// if this gets a vtable
 	// Defines float sized components.
 	int stride;
 	int nPos;		
@@ -148,6 +143,12 @@ public:
 		STENCIL_WRITE,		// draw commands write to stencil
 		STENCIL_SET,		// draw if stencil is set
 		STENCIL_CLEAR		// draw if stencil is clear
+	};
+
+	enum BlendMode {
+		BLEND_NONE,			// opaque
+		BLEND_NORMAL,		// normal but not good...
+		BLEND_ADD			// additive blending
 	};
 
 	static void ResetState();
@@ -263,7 +264,8 @@ public:
 	void Debug_DrawQuad( const grinliz::Vector3F p0, const grinliz::Vector3F p1 );
 
 	int SortOrder()	const { 
-		if ( blend ) return 2;
+		if ( blend == BLEND_NORMAL ) return 2;
+		if ( blend == BLEND_ADD ) return 1;
 		return 0;
 	}
 
@@ -279,7 +281,7 @@ protected:
 				 streamPtr( 0 ), nIndex( 0 ), indexPtr( 0 ),
 				 vertexBuffer( 0 ), indexBuffer( 0 ),
 				 instancing( false ),
-				 blend( false ),
+				 blend( BLEND_NONE ),
 				 depthWrite( true ), depthTest( true ),
 				 colorWrite( true ),
 				 stencilMode( STENCIL_OFF )
@@ -305,7 +307,7 @@ private:
 	static MatrixStack mvStack;
 	static MatrixStack projStack;
 
-	static bool currentBlend;
+	static BlendMode currentBlend;
 	static bool currentDepthTest;
 	static bool currentDepthWrite;
 	static bool currentColorWrite;
@@ -334,7 +336,7 @@ protected:
 	U32				indexBuffer;
 	bool			instancing;
 
-	bool	blend;
+	BlendMode	blend;
 	bool	depthWrite;
 	bool	depthTest;
 	bool	colorWrite;
@@ -359,8 +361,8 @@ public:
 			- texture0 and texture1 (light map compositing)
 		Blend support
 	*/
-	CompositingShader( bool blend=false );
-	void SetBlend( bool _blend )				{ this->blend = _blend; }
+	CompositingShader( BlendMode blend=BLEND_NONE );
+	void SetBlend( BlendMode _blend )				{ this->blend = _blend; }
 };
 
 
@@ -368,7 +370,7 @@ class LightShader : public GPUShader
 {
 public:
 	/** Texture or color. Writes & tests z. Enables lighting. */
-	LightShader( const grinliz::Color4F& ambient, const grinliz::Vector4F& direction, const grinliz::Color4F& diffuse, bool blend );
+	LightShader( const grinliz::Color4F& ambient, const grinliz::Vector4F& direction, const grinliz::Color4F& diffuse, BlendMode blend = BLEND_NONE );
 	~LightShader();
 	
 protected:
@@ -382,23 +384,15 @@ public:
 };
 
 
-class PointParticleShader : public GPUShader
-{
-private:
-	static int particleSupport;
-public:
-	static bool IsSupported();
-
-	PointParticleShader();
-	// Does not support VBOs and ignores the index binding.
-	void DrawPoints( Texture* texture, float pointSize, int start, int count );
-};
-
-
-class QuadParticleShader : public GPUShader
+class ParticleShader : public GPUShader
 {
 public:
-	QuadParticleShader();
-};
+	ParticleShader() : GPUShader() 
+	{
+		depthWrite = false;
+		depthTest = true;
+		blend = BLEND_ADD;
+	}
 
+};
 #endif

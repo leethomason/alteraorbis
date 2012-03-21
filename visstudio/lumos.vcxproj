@@ -83,7 +83,6 @@
     <ClCompile Include="..\engine\map.cpp" />
     <ClCompile Include="..\engine\model.cpp" />
     <ClCompile Include="..\engine\particle.cpp" />
-    <ClCompile Include="..\engine\particleeffect.cpp" />
     <ClCompile Include="..\engine\renderqueue.cpp" />
     <ClCompile Include="..\engine\screenport.cpp" />
     <ClCompile Include="..\engine\serialize.cpp" />
@@ -99,6 +98,7 @@
     <ClCompile Include="..\gamui\gamui.cpp" />
     <ClCompile Include="..\micropather\micropather.cpp" />
     <ClCompile Include="..\scenes\dialogscene.cpp" />
+    <ClCompile Include="..\scenes\particlescene.cpp" />
     <ClCompile Include="..\scenes\rendertestscene.cpp" />
     <ClCompile Include="..\shared\gamedbreader.cpp" />
     <ClCompile Include="..\shared\glmap.cpp" />
@@ -122,7 +122,6 @@
     <ClInclude Include="..\engine\map.h" />
     <ClInclude Include="..\engine\model.h" />
     <ClInclude Include="..\engine\particle.h" />
-    <ClInclude Include="..\engine\particleeffect.h" />
     <ClInclude Include="..\engine\platformgl.h" />
     <ClInclude Include="..\engine\renderqueue.h" />
     <ClInclude Include="..\engine\screenport.h" />
@@ -140,6 +139,7 @@
     <ClInclude Include="..\gamui\gamui.h" />
     <ClInclude Include="..\micropather\micropather.h" />
     <ClInclude Include="..\scenes\dialogscene.h" />
+    <ClInclude Include="..\scenes\particlescene.h" />
     <ClInclude Include="..\scenes\rendertestscene.h" />
     <ClInclude Include="..\scenes\titlescene.h" />
     <ClInclude Include="..\shared\gamedb.h" />
@@ -160,6 +160,9 @@
     <ClCompile Include="..\scenes\titlescene.cpp">
       <FileType>Document</FileType>
     </ClCompile>
+    <None Include="..\particles.xml">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="..\xegame\sources.mk" />
   </ItemGroup>
   <ItemGroup>
