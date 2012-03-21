@@ -22,6 +22,7 @@ BTexture::BTexture()
 	: isImage( false ),
 	  dither( false ),
 	  noMip( false ),
+	  doPreMult( false ),
 	  targetWidth( 0 ),
 	  targetHeight( 0 ),
 	  atlasX( 0 ),
@@ -62,7 +63,7 @@ bool BTexture::ParseTag( const tinyxml2::XMLElement* element )
 	element->QueryBoolAttribute( "noMip", &noMip );
 	element->QueryIntAttribute( "width", &targetWidth );
 	element->QueryIntAttribute( "height", &targetHeight );
-
+	element->QueryBoolAttribute( "premult", &doPreMult );
 	return true;
 }
 
@@ -178,6 +179,19 @@ bool BTexture::ToBuffer()
 		case 32:
 			printf( "  RGBA memory=%dk\n", (surface->w * surface->h * 2)/1024 );
 			pixelBuffer16 = new U16[ surface->w * surface->h ];
+
+			if ( doPreMult ) {
+				for( int j=0; j<surface->h; ++j ) {
+					for ( int i=0; i<surface->w; ++i ) {
+						Color4U8 c = GetPixel( surface, i, j );
+						c.r = c.r*c.a/255;
+						c.g = c.g*c.a/255;
+						c.b = c.b*c.a/255;
+						PutPixel( surface, i, j, c );
+					}
+				}
+
+			}
 
 			// Bottom up!
 			if ( !dither ) {

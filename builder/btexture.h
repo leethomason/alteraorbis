@@ -39,6 +39,7 @@ public:
 	bool isImage;
 	bool dither;
 	bool noMip;
+	bool doPreMult;
 	int targetWidth;
 	int targetHeight;
 	int atlasX;

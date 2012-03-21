@@ -16,7 +16,7 @@
   <palette assetName="mainPalette" filename="palette.png" dx="12" dy="6" sx="0.5" sy="0.5" />
   
   <!-- Particles -->
-  <texture filename="particle.png" />
+  <texture filename="particle.png" premult="true"/>
 
 <!--  <atlas width="256">
     <texture filename="testgradient.png" />

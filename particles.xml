@@ -8,5 +8,12 @@
     <color red="1" green="0" blue="0" alpha="1.5"/>
     <colorVelocity alpha="-1.4" />
   </particle>
-  
+
+  <particle name="embers"
+            time="continuous" size="0.05" count="5" config="ray"
+            posFuzz="0.0" velocity="1.2" velocityFuzz="0.1" >
+    <color red="1" green="0" blue="0" alpha="1.5"/>
+    <colorVelocity alpha="-0.4" />
+  </particle>
+
 </particles>
