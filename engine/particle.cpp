@@ -135,6 +135,7 @@ void ParticleSystem::EmitPD(	const ParticleDef& def,
 								const grinliz::Vector3F eyeDir[] )
 {
 	Vector3F velocity = normal * def.velocity;
+
 	static const Vector2F uv[4] = {{0,0},{0.25,0},{0.25,1},{0,1}};	// FIXME: correct number of textures
 	const Vector3F& up = eyeDir[1];
 	const Vector3F& right = eyeDir[2];
@@ -142,6 +143,18 @@ void ParticleSystem::EmitPD(	const ParticleDef& def,
 	for( int i=0; i<def.count; ++i ) {
 		if ( nParticles < MAX_PARTICLES ) {
 			ParticleData* pd = &particleData[nParticles];
+
+			// For (hemi) sperical distributions, recompute a random direction.
+			if ( def.config == ParticleSystem::PARTICLE_HEMISPHERE || def.config == ParticleSystem::PARTICLE_SPHERE ) {
+				Vector3F n = { 0, 0, 0 };
+				random.NormalVector3D( &n.x );
+
+				if ( def.config == ParticleSystem::PARTICLE_HEMISPHERE && DotProduct( normal, n ) < 0.f ) {
+					n = -n;
+				}
+				velocity = n * def.velocity;
+			}
+
 			pd->colorVel = def.colorVelocity;
 
 			Vector3F vFuzz;

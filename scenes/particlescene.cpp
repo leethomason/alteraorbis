@@ -87,6 +87,24 @@ void ParticleScene::Load()
 }
 
 
+void ParticleScene::Rescan( ParticleDef* def )
+{
+	XMLDocument doc;
+	doc.LoadFile( "particles.xml" );
+
+	// FIXME: switch to safe version.
+	for( const XMLElement* partEle = doc.FirstChildElement( "particles" )->FirstChildElement( "particle" );
+		 partEle;
+		 partEle = partEle->NextSiblingElement( "particle" ) )
+	{
+		if ( partEle->Attribute( "name", def->name.c_str() ) ) {
+			def->Load( partEle );
+			break;
+		}
+	}
+}
+
+
 void ParticleScene::ItemTapped( const gamui::UIItem* item )
 {
 	GLASSERT( buttonArr.Size() == particleDefArr.Size() );
@@ -95,9 +113,12 @@ void ParticleScene::ItemTapped( const gamui::UIItem* item )
 	}
 	for( int i=0; i<buttonArr.Size(); ++i ) {
 		if ( buttonArr[i] == item ) {
+			ParticleDef* def = &particleDefArr[i];
+			Rescan( def );
+
 			Vector3F pos = { 6.f, 0.f, 6.f };
 			Vector3F normal = { 0, 1, 0 };
-			ParticleSystem::Instance()->EmitPD( particleDefArr[i], pos, normal, engine->camera.EyeDir3() );
+			ParticleSystem::Instance()->EmitPD( *def, pos, normal, engine->camera.EyeDir3() );
 		}
 	}
 }

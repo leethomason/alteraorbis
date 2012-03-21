@@ -3,10 +3,10 @@
 <particles>
 
   <particle name="boltImpact" 
-            time="once" size="0.1" count="40" config="hemi" 
-            posFuzz="0.0" velocity="1.4" velocityFuzz="0.1" >
-    <color red="1" green="0" blue="0" />
-    <colorVelocity alpha="-0.4" />
+            time="once" size="0.05" count="40" config="hemi" 
+            posFuzz="0.0" velocity="2.2" velocityFuzz="0.1" >
+    <color red="1" green="0" blue="0" alpha="1.5"/>
+    <colorVelocity alpha="-1.4" />
   </particle>
   
 </particles>

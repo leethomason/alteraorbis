@@ -33,6 +33,8 @@ public:
 	virtual void Draw3D( U32 delatTime );
 
 private:
+	void Rescan( ParticleDef* def );
+
 	gamui::PushButton okay;
 	Engine* engine;
 	TestMap* testMap;
