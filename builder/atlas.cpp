@@ -6,6 +6,11 @@ using namespace std;
 using namespace grinliz;
 
 
+extern void ExitError( const char* tag, 
+				const char* pathName,
+				const char* assetName,
+				const char* message );
+
 Atlas::Atlas()
 {
 }
@@ -21,6 +26,9 @@ SDL_Surface* Atlas::Generate( BTexture* array, int nTexture, int maxWidth )
 	stack.resize( maxWidth );
 
 	for( int i=0; i<nTexture; ++i ) {
+		if ( array[i].format != array[0].format ) {
+			ExitError( "Atlas", 0, 0, "mis matched texture formats" );
+		}
 		AtlasSubTex tex( &array[i], array[i].assetName );
 		subTexArr.push_back( tex );
 	}
@@ -67,7 +75,6 @@ SDL_Surface* Atlas::Generate( BTexture* array, int nTexture, int maxWidth )
 
 	btexture.Create( maxWidth, maxY, array[0].format );
 
-
 	for( unsigned i=0; i<subTexArr.size(); ++i ) {
 		SDL_Rect src = { 0, 0, subTexArr[i].src->surface->w, subTexArr[i].src->surface->w };
 		SDL_Rect dst = { subTexArr[i].src->atlasX, subTexArr[i].src->atlasY, subTexArr[i].src->surface->w, subTexArr[i].src->surface->w };
@@ -112,7 +119,17 @@ const AtlasSubTex* Atlas::GetSubTex( const char* assetName ) const
 
 void AtlasSubTex::Map( const grinliz::Vector2F& in, grinliz::Vector2F* out ) const
 {
-	out->x = ( (float)x + in.x*(float)cx ) / (float)atlasCX;
-	out->y = ( (float)y + in.y*(float)cy ) / (float)atlasCY;
+	GLASSERT( in.x >= -0.01f && in.x <= 1.01f );
+	GLASSERT( in.y >= -0.01f && in.y <= 1.01f );
+
+	float inx = Clamp( in.x, 0.0f, 1.0f );
+	float iny = Clamp( in.y, 0.0f, 1.0f );
+
+	out->x = ( (float)x + inx*(float)cx ) / (float)atlasCX;
+	// Annoying coordinate flipping.
+	out->y = ( (float)(atlasCY-y-cy) + iny*(float)cy ) / (float)atlasCY;
+	
+	GLASSERT( out->x >= -0.0f && out->x <= 1.0f );
+	GLASSERT( out->y >= -0.0f && out->y <= 1.0f );
 }
 

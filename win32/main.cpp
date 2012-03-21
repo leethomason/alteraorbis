@@ -458,19 +458,13 @@ int main( int argc, char **argv )
 							((Game*)game)->engine->CameraIso( cameraIso, true, (float)((Game*)game)->engine->GetMap()->Width(), (float)((Game*)game)->engine->GetMap()->Height() );
 						}
 						break;
-
+#endif
 					case SDLK_s:
-						if ( mapMakerMode ) {
-							((Game*)game)->SuppressText( true );
-						}
 						GameDoTick( game, SDL_GetTicks() );
 						SDL_GL_SwapBuffers();
-						if ( mapMakerMode ) {
-							((Game*)game)->SuppressText( false );
-						}
 						ScreenCapture( "cap" );
 						break;
-
+#if 0
 					case SDLK_l:
 						if ( mapMakerMode ) {
 							const Surface* lightmap = ((Game*)game)->engine->GetMap()->GetLightMap();

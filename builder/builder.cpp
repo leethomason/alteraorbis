@@ -765,6 +765,9 @@ void ProcessAtlas( XMLElement* atlasElement )
 	atlasArr[it].btexture.SetNames( name, "" );
 
 	atlasArr[it].Generate( btextureArr, index, maxWidth );
+	atlasArr[it].btexture.dither = true;
+	atlasArr[it].btexture.ToBuffer();
+	atlasArr[it].btexture.InsertTextureToDB(  writer->Root()->FetchChild( "textures" ) );
 }
 
 
