@@ -78,7 +78,7 @@ struct Color4
 	}
 
 	friend Color4<T> operator*( Color4<T> head, T scalar ) { Color4<T> r = { head.r*scalar, head.g*scalar, head.b*scalar, head.a*scalar }; return r; }
-
+	friend Color4<T> operator+( Color4<T> a, Color4<T> b ) { Color4<T> r = { a.r+b.r, a.g+b.g, a.b+b.b, a.a+b.a }; return r; }
 };
 
 typedef Color4<float> Color4F;

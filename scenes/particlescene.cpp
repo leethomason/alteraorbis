@@ -97,7 +97,7 @@ void ParticleScene::ItemTapped( const gamui::UIItem* item )
 		if ( buttonArr[i] == item ) {
 			Vector3F pos = { 6.f, 0.f, 6.f };
 			Vector3F normal = { 0, 1, 0 };
-			ParticleSystem::Instance()->EmitPD( particleDefArr[i], pos, normal );
+			ParticleSystem::Instance()->EmitPD( particleDefArr[i], pos, normal, engine->camera.EyeDir3() );
 		}
 	}
 }

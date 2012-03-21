@@ -1,10 +1,13 @@
+
+
 #include "gpustatemanager.h"
-#include "platformgl.h"
 #include "texture.h"
 #include "enginelimits.h"
 #include "../gamui/gamui.h"	// for auto setting up gamui stream
 #include "../grinliz/glperformance.h"
 #include "shadermanager.h"
+
+#include "platformgl.h"
 
 using namespace grinliz;
 
@@ -173,7 +176,7 @@ void MatrixStack::Multiply( const grinliz::Matrix4& m )
 /*static*/ MatrixStack	GPUShader::projStack;
 /*static*/ bool			GPUShader::textureXFormInUse[2] = { false, false };
 /*static*/ int			GPUShader::vboSupport = 0;
-/*static*/ bool			GPUShader::currentBlend = false;
+/*static*/ GPUShader::BlendMode	GPUShader::currentBlend = BLEND_NONE;
 /*static*/ bool			GPUShader::currentDepthWrite = true;
 /*static*/ bool			GPUShader::currentDepthTest = true;
 /*static*/ bool			GPUShader::currentColorWrite = true;
@@ -248,7 +251,7 @@ void MatrixStack::Multiply( const grinliz::Matrix4& m )
 	glDisable( GL_SCISSOR_TEST );
 	glColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE );
 
-	currentBlend = false;
+	currentBlend = BLEND_NONE;
 	currentDepthTest = true;
 	currentDepthWrite = true;
 	currentColorWrite = true;
@@ -313,7 +316,6 @@ void GPUShader::SetState( const GPUShader& ns )
 		shadman->SetUniform( ShaderManager::U_MVP_MAT, vp );
 		shadman->SetUniformArray( ShaderManager::U_M_MAT_ARR, EL_MAX_INSTANCE, ns.instanceMatrix );
 		GLASSERT( ns.stream.instanceIDOffset > 0 );
-		// fixme: switch back to int
 		shadman->SetStreamData( ShaderManager::A_INSTANCE_ID, 1, GL_INT, ns.stream.stride, PTR( ns.streamPtr, ns.stream.instanceIDOffset ) );
 	}
 	else {
@@ -382,13 +384,21 @@ void GPUShader::SetState( const GPUShader& ns )
 	}
 
 	// Blend
-	if ( ns.blend && !currentBlend ) {
-		glEnable( GL_BLEND );
-		currentBlend = true;
-	}
-	else if ( !ns.blend && currentBlend ) {
-		glDisable( GL_BLEND );
-		currentBlend = false;
+	if ( ns.blend != currentBlend ) {
+		currentBlend = ns.blend;
+		switch( ns.blend ) {
+		case BLEND_NONE:
+			glDisable( GL_BLEND );
+			break;
+		case BLEND_NORMAL:
+			glEnable( GL_BLEND );
+			glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+			break;
+		case BLEND_ADD:
+			glEnable( GL_BLEND );
+			glBlendFunc( GL_SRC_ALPHA, GL_ONE );
+			break;
+		}
 	}
 
 	// Depth Write
@@ -822,7 +832,7 @@ GPUStream::GPUStream( const PTVertex2* vertex )
 }
 
 
-CompositingShader::CompositingShader( bool _blend )
+CompositingShader::CompositingShader( BlendMode _blend )
 {
 	blend = _blend;
 	depthWrite = false;
@@ -830,9 +840,8 @@ CompositingShader::CompositingShader( bool _blend )
 }
 
 
-LightShader::LightShader( const Color4F& ambient, const grinliz::Vector4F& direction, const Color4F& diffuse, bool blend )
+LightShader::LightShader( const Color4F& ambient, const grinliz::Vector4F& direction, const Color4F& diffuse, BlendMode blend )
 {
-	//this->alphaTest = alphaTest;
 	this->blend = blend;
 	this->ambient = ambient;
 	this->direction = direction;
@@ -844,74 +853,38 @@ LightShader::~LightShader()
 {
 }
 
-
-/* static */ int PointParticleShader::particleSupport = 0;
-
-/*static*/ bool PointParticleShader::IsSupported()
+/*
+void ParticleShader::DrawPoints(  Texture* texture,
+								  const Matrix4& mvp, const Vector4F& up, const Vector4F& right, float time,
+								  int nParticles, const Particle* particlePtr, const U16* indexPtr )
 {
-	if ( particleSupport == 0 ) {
-		const char* extensions = (const char*)glGetString( GL_EXTENSIONS );
-		const char* sprite = strstr( extensions, "point_sprite" );
-		particleSupport = (sprite) ? 1 : -1;
-	}
-	return ( particleSupport > 0);
-}
-
-
-PointParticleShader::PointParticleShader()
-{
-	this->depthTest = true;
-	this->depthWrite = false;
-	this->blend = true;
-}
-
-
-void PointParticleShader::DrawPoints( Texture* texture, float pointSize, int start, int count )
-{
-	#ifdef USING_GL	
-		glEnable(GL_POINT_SPRITE);
-		glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
-	#else
-		glEnable(GL_POINT_SPRITE_OES);
-		glTexEnvx(GL_POINT_SPRITE_OES, GL_COORD_REPLACE_OES, GL_TRUE);
-	#endif
-	CHECK_GL_ERROR;
-
 	GLASSERT( texture0 == 0 );
 	GLASSERT( texture1 == 0 );
 	
 	// Will disable the texture units:
 	SetState( *this );
 
+	ShaderManager* shadman = ShaderManager::Instance();
+	shadman->ActivateShader( ShaderManager::PARTICLE );
+	shadman->ClearStream();
+
 	// Which is a big cheat because we need to bind a texture without texture coordinates.
 	glEnable( GL_TEXTURE_2D );
 	glBindTexture( GL_TEXTURE_2D, texture->GLID() );
-
-	glPointSize( pointSize );
+		
+	shadman->SetTexture( 0, texture );
+	shadman->SetParticleStream();
+	shadman->SetParticleUniform( mvp, up, right, time );
 	CHECK_GL_ERROR;
 
-	glDrawArrays( GL_POINTS, start, count );
+	glBindBufferX( GL_ARRAY_BUFFER, particlePtr );
+	glDrawElements( GL_TRIANGLES, nParticles*6, GL_UNSIGNED_SHORT, indexPtr );
 	CHECK_GL_ERROR;
+	glBindBufferX( GL_ARRAY_BUFFER, 0 );
 
-	#ifdef USING_GL	
-		glDisable(GL_POINT_SPRITE);
-	#else
-		glDisable(GL_POINT_SPRITE_OES);
-	#endif
-
-	// Clear the texture thing back up.
-	glDisable( GL_TEXTURE_2D );
 	glBindTexture( GL_TEXTURE_2D, 0 );
 		
 	drawCalls++;
-	trianglesDrawn += count;
+	trianglesDrawn += nParticles*2;
 }
-
-
-QuadParticleShader::QuadParticleShader()
-{
-	this->depthTest = true;
-	this->depthWrite = false;
-	this->blend = true;
-}
-
+*/

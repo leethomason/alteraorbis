@@ -83,7 +83,6 @@
     <ClCompile Include="..\engine\map.cpp" />
     <ClCompile Include="..\engine\model.cpp" />
     <ClCompile Include="..\engine\particle.cpp" />
-    <ClCompile Include="..\engine\particleeffect.cpp" />
     <ClCompile Include="..\engine\renderqueue.cpp" />
     <ClCompile Include="..\engine\screenport.cpp" />
     <ClCompile Include="..\engine\serialize.cpp" />
@@ -123,7 +122,6 @@
     <ClInclude Include="..\engine\map.h" />
     <ClInclude Include="..\engine\model.h" />
     <ClInclude Include="..\engine\particle.h" />
-    <ClInclude Include="..\engine\particleeffect.h" />
     <ClInclude Include="..\engine\platformgl.h" />
     <ClInclude Include="..\engine\renderqueue.h" />
     <ClInclude Include="..\engine\screenport.h" />
@@ -162,7 +160,9 @@
     <ClCompile Include="..\scenes\titlescene.cpp">
       <FileType>Document</FileType>
     </ClCompile>
-    <None Include="..\particles.xml" />
+    <None Include="..\particles.xml">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="..\xegame\sources.mk" />
   </ItemGroup>
   <ItemGroup>

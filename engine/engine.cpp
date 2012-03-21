@@ -203,7 +203,7 @@ void Engine::Draw( U32 deltaTime )
 	Vector4F dir;
 	QueryLights( DAY_TIME, &ambient, &dir, &diffuse );
 
-	LightShader lightShader( ambient, dir, diffuse, false );
+	LightShader lightShader( ambient, dir, diffuse );
 
 	Rectangle2I mapBounds( 0, 0, EL_MAP_SIZE-1, EL_MAP_SIZE-1 );
 	if ( map ) {
@@ -271,8 +271,8 @@ void Engine::Draw( U32 deltaTime )
 
 	const Vector3F* eyeDir = camera.EyeDir3();
 	ParticleSystem* particleSystem = ParticleSystem::Instance();
-	particleSystem->Update( deltaTime );
-	particleSystem->Draw( eyeDir );
+	particleSystem->Update( deltaTime, eyeDir );
+	particleSystem->Draw();
 }
 
 

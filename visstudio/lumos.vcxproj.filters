@@ -55,9 +55,6 @@
     <ClCompile Include="..\engine\particle.cpp">
       <Filter>Source Files\engine</Filter>
     </ClCompile>
-    <ClCompile Include="..\engine\particleeffect.cpp">
-      <Filter>Source Files\engine</Filter>
-    </ClCompile>
     <ClCompile Include="..\engine\renderqueue.cpp">
       <Filter>Source Files\engine</Filter>
     </ClCompile>
@@ -172,9 +169,6 @@
       <Filter>Source Files\engine</Filter>
     </ClInclude>
     <ClInclude Include="..\engine\particle.h">
-      <Filter>Source Files\engine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\engine\particleeffect.h">
       <Filter>Source Files\engine</Filter>
     </ClInclude>
     <ClInclude Include="..\engine\platformgl.h">

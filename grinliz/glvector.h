@@ -385,6 +385,7 @@ struct Vector4
 	
 	friend Vector4<T> operator*( const Vector4<T>& head, T scalar ) { Vector4<T> r = head; r.Multiply( scalar ); return r; }
 	friend Vector4<T> operator*( T scalar, const Vector4<T>& head ) { Vector4<T> r = head; r.Multiply( scalar ); return r; }
+	friend Vector4<T> operator*( const Vector4<T>&a, const Vector4<T>& b ) { Vector4<T> r = { a.x*b.x, a.y*b.y, a.z*b.z, a.w*b.w }; return r; }
 
 	Vector4<T> operator-() const {
 		Vector4<T> vec = { -x, -y, -z, -w };

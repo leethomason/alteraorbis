@@ -24,8 +24,52 @@
 #include "map.h"
 
 class Texture;
-class ParticleEffect;
 struct ParticleDef;
+
+
+// Full GPU system. Cool. Probably fast. But shader hell.
+/*
+struct Particle
+{
+	float				time;			// start time, in seconds
+	grinliz::Color4F	color;			// start color
+	grinliz::Color4F	colorVel;		// units / second added to color. particle dead when a<=0
+	grinliz::Vector3F	origin;			// where this particle started in WC		
+	grinliz::Vector2F	uv;				// texture coordinates of this vertex
+	grinliz::Vector2F	offset;			// offset from the origin (-0.5,-0.5) - (0.5,0.5)
+	grinliz::Vector3F	velocity;		// units / second added to origin
+	float				size;			// size of the particle
+};
+*/
+
+
+// Mixed system. *much* simpler.
+// CPU part.
+struct ParticleData
+{
+	grinliz::Vector4F	colorVel;		// units / second added to color. particle dead when a<=0
+	grinliz::Vector3F	velocity;		// units / second added to origin
+	float				size;			// size of the particle
+	grinliz::Vector3F	pos;
+	// do we need this on the shader? Easy to do, but bandwidth vs. cpu clock tradeoff
+	//grinliz::Vector2F	offset;			// offset from pos; size*0.5,0.5 offset
+};
+
+
+// GPU part.
+struct ParticleStream
+{
+	enum {
+		COLOR_OFFSET	= 0,
+		POS_OFFSET		= 16,
+		TEXTURE_OFFSET	= 28
+	};
+
+	grinliz::Vector4F	color;			// current color
+	grinliz::Vector3F	pos;			// position in WC	
+	grinliz::Vector2F	uv;				// texture coordinates of this vertex
+};
+
 
 /*	Class to render all sorts of particle effects.
 */
@@ -39,20 +83,9 @@ public:
 
 	// Texture particles. Location in texture follows.
 	enum {
-		FIRE			= 0,
-		NUM_FIRE		= 2,
-		SMOKE			= 4,
-		NUM_SMOKE		= 2,
-
-		BEAM			= 2,
-		CIRCLE			= 11,
-		RING			= 12,
-	};
-
-	enum {
-		POINT,
-		QUAD,
-		NUM_PRIMITIVES
+		BASIC			= 0,
+		SMOKE_0			= 1,
+		SMOKE_1			= 2,
 	};
 
 	enum {
@@ -63,7 +96,8 @@ public:
 
 	void EmitPD( const ParticleDef& pd,
 				 const grinliz::Vector3F& pos,
-				 const grinliz::Vector3F& normal );
+				 const grinliz::Vector3F& normal,
+				 const grinliz::Vector3F eyeDir[]);
 
 	// Emit N point particles.
 	void EmitPoint(	int count,						// number of particles to create
@@ -75,36 +109,9 @@ public:
 					const grinliz::Vector3F& vel,	// velocity
 					float velFuzz );					// fuzz in the velocity
 
-	// Emit one quad particle.
-	void EmitQuad(	int type,						// FIRE, SMOKE
-					const grinliz::Color4F& color,			// color of the particle
-					const grinliz::Color4F& colorVelocity,	// change in color / second
-					const grinliz::Vector3F& pos,	// origin
-					float posFuzz,					// fuzz in the position
-					const grinliz::Vector3F& vel,	// velocity
-					float velFuzz,					// fuzz in the velocity
-					float halfWidth,				// 1/2 size of the particle
-					float velHalfWidth );				// rate of change of the 1/2 size
-
-	// Simple call to emit a point at a location.
-	void EmitOnePoint(	const grinliz::Color4F& color, 
-						const grinliz::Color4F& colorVelocity,
-						const grinliz::Vector3F& pos );
-
-	// Emits a compound flame system for this frame of animation.
-	void EmitFlame( U32 delta, const grinliz::Vector3F& pos )	{ EmitSmokeAndFlame( delta, pos, true ); }
-	void EmitSmoke( U32 delta, const grinliz::Vector3F& pos )	{ EmitSmokeAndFlame( delta, pos, false ); }
-
-	// Draw a beam. Always for one frame.
-	void EmitBeam( const grinliz::Vector3F& p0, const grinliz::Vector3F& p1, const grinliz::Color4F& color );
-
-	void Update( U32 deltaTime );
-	void Draw( const grinliz::Vector3F* eyeDir );
+	void Update( U32 deltaTime, const grinliz::Vector3F eyeDir[] );
+	void Draw();
 	void Clear();
-
-	void AddEffect( ParticleEffect* effect );
-	// Not a "real" factory - can return 0. But re-uses when possible.
-	ParticleEffect* EffectFactory( const char* name );
 
 private:
 	ParticleSystem();
@@ -112,81 +119,20 @@ private:
 
 	static ParticleSystem* instance;
 
-	struct Particle
-	{
-		// streamed to GL
-		grinliz::Vector3F	pos;		
-		grinliz::Color4F				color;
+	void Process( unsigned msec, const grinliz::Vector3F eyeDir[] );
 
-		// extra data
-		grinliz::Vector3F vel;			// units / second
-		grinliz::Color4F  colorVel;		// units / second
-		float			  halfWidth;	// for rays and quads
-		float			  velHalfWidth;	// for quads
-		U8				  type;	
-
-		void Process( float sec, unsigned msec ) {
-			pos			+= vel*sec;
-			color.r		= color.r + colorVel.r*sec;
-			color.g		= color.g + colorVel.g*sec;
-			color.b		= color.b + colorVel.b*sec;
-			color.a		= color.a + colorVel.a*sec;
-			halfWidth	+= velHalfWidth*sec;
-		}
+	enum {
+		MAX_PARTICLES = 2000	// don't want to re-allocate vertex buffers
 	};
 
-	struct QuadVertex
-	{
-		grinliz::Vector3F	pos;
-		grinliz::Vector2F	tex;
-		grinliz::Color4F	color;
-	};
-
-	struct Beam
-	{
-		grinliz::Vector3F	pos0;
-		grinliz::Vector3F   pos1;
-		grinliz::Color4F	color;	
-	};
-
-	// General do-all for emmitting all kinds of particles (except decals.)
-	void Emit(	int primitive,					// POINT or QUAD
-				int type,						// FIRE, SMOKE, BEAM (location in the texture)
-				int count,						// number of particles to create
-				int configuration,				// PARTICLE_RAY, QUAD_BEAM, etc.
-				const grinliz::Color4F& color,			// color of the particle
-				const grinliz::Color4F& colorVelocity,	// change in color / second
-				const grinliz::Vector3F& pos0,	// origin
-				float posFuzz,					// fuzz in the position
-				const grinliz::Vector3F& vel,	// velocity
-				float velFuzz,					// fuzz in the velocity
-				float halfWidth,				// half width of beams and quads
-				float velHalfWidth );			// rate of change of the width
-
-	void DrawPointParticles( const grinliz::Vector3F* eyeDir );
-	void DrawQuadParticles( const grinliz::Vector3F* eyeDir );
-	void DrawBeamParticles( const grinliz::Vector3F* eyeDir );
-	void EmitSmokeAndFlame( U32 delta, const grinliz::Vector3F& pos, bool flame );
-	void RemoveOldParticles( int primitive );
-	int NumParticles( int type ) { return type == POINT ? pointBuffer.Size() : quadBuffer.Size(); };
+	grinliz::Random random;
+	Texture* texture;
+	U32 time;
 	
-	void Cull( CDynArray<Particle>* );
-	void Process( CDynArray<Particle>*, float time, unsigned msec );
-
-	grinliz::Random rand;
-
-	Texture* quadTexture;
-	Texture* pointTexture;
-	int frame;
-
-	CDynArray<ParticleEffect*>							effectArr;
-	CDynArray<Particle>									pointBuffer;
-	CDynArray<Particle>									quadBuffer;
-	CDynArray<Beam>										beamBuffer;
-
-	// When we don't have point sprites:
-	CDynArray<QuadVertex>								vertexBuffer;
-	CDynArray<U16>										indexBuffer;
+	int nParticles;
+	ParticleData	particleData[MAX_PARTICLES];
+	ParticleStream	vertexBuffer[MAX_PARTICLES*4];
+	U16				indexBuffer[MAX_PARTICLES*6];
 };
 
 
@@ -205,9 +151,10 @@ struct ParticleDef
 	float velocity;
 	float velocityFuzz;
 
-	grinliz::Color4F color;
-	grinliz::Color4F colorVelocity;
-	grinliz::Color4F colorFuzz;
+	// fixme: add vbos
+	grinliz::Vector4F color;
+	grinliz::Vector4F colorVelocity;
+	grinliz::Vector4F colorFuzz;
 
 	void Load( const tinyxml2::XMLElement* element );
 };
