@@ -23,6 +23,7 @@ BTexture::BTexture()
 	  dither( false ),
 	  noMip( false ),
 	  doPreMult( false ),
+	  invert( true ),
 	  targetWidth( 0 ),
 	  targetHeight( 0 ),
 	  atlasX( 0 ),
@@ -119,7 +120,7 @@ void BTexture::Create( int w, int h, int format )
 		surface = SDL_CreateRGBSurface( 0, w, h, 32, 0xff000000, 0x00ff0000, 0x0000ff00, 0x000000ff );
 	}
 	else if ( format == RGB16 ) {
-		surface = SDL_CreateRGBSurface( 0, w, h, 32, 0xff000000, 0x00ff0000, 0x0000ff00, 0 );
+		surface = SDL_CreateRGBSurface( 0, w, h, 24, 0xff0000, 0x00ff00, 0x0000ff, 0 );
 	}
 	else if ( format == ALPHA ) {
 		surface = SDL_CreateRGBSurface( 0, w, h, 8, 0, 0, 0, 0xff );
@@ -196,7 +197,11 @@ bool BTexture::ToBuffer()
 			// Bottom up!
 			if ( !dither ) {
 				U16* b = pixelBuffer16;
-				for( int j=surface->h-1; j>=0; --j ) {
+				int start = invert ? surface->h-1 : 0;
+				int end =   invert ? -1 : surface->h;
+				int bias =  invert ? -1 : 1;
+
+				for( int j=start; j != end; j+= bias ) {
 					for( int i=0; i<surface->w; ++i ) {
 						Color4U8 c = GetPixel( surface, i, j );
 
@@ -211,7 +216,7 @@ bool BTexture::ToBuffer()
 				}
 			}
 			else {
-				OrderedDitherTo16( surface, RGBA16, true, pixelBuffer16 );
+				OrderedDitherTo16( surface, RGBA16, invert, pixelBuffer16 );
 			}
 			break;
 
@@ -222,7 +227,11 @@ bool BTexture::ToBuffer()
 			// Bottom up!
 			if ( !dither ) {
 				U16* b = pixelBuffer16;
-				for( int j=surface->h-1; j>=0; --j ) {
+				int start = invert ? surface->h-1 : 0;
+				int end =   invert ? -1 : surface->h;
+				int bias =  invert ? -1 : 1;
+
+				for( int j=start; j != end; j+= bias ) {
 					for( int i=0; i<surface->w; ++i ) {
 						Color4U8 c = GetPixel( surface, i, j );
 
@@ -236,7 +245,7 @@ bool BTexture::ToBuffer()
 				}
 			}
 			else {
-				OrderedDitherTo16( surface, RGB16, true, pixelBuffer16 );
+				OrderedDitherTo16( surface, RGB16, invert, pixelBuffer16 );
 			}
 			break;
 
@@ -247,7 +256,11 @@ bool BTexture::ToBuffer()
 			U8* b = pixelBuffer8;
 
 			// Bottom up!
-			for( int j=surface->h-1; j>=0; --j ) {
+			int start = invert ? surface->h-1 : 0;
+			int end =   invert ? -1 : surface->h;
+			int bias =  invert ? -1 : 1;
+
+			for( int j=start; j != end; j+= bias ) {
 				for( int i=0; i<surface->w; ++i ) {
 				    U8 *p = (U8 *)surface->pixels + j*surface->pitch + i;
 					*b++ = *p;

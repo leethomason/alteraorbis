@@ -40,6 +40,7 @@ public:
 	bool dither;
 	bool noMip;
 	bool doPreMult;
+	bool invert;
 	int targetWidth;
 	int targetHeight;
 	int atlasX;

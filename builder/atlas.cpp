@@ -6,6 +6,11 @@ using namespace std;
 using namespace grinliz;
 
 
+extern void ExitError( const char* tag, 
+				const char* pathName,
+				const char* assetName,
+				const char* message );
+
 Atlas::Atlas()
 {
 }
@@ -21,16 +26,19 @@ SDL_Surface* Atlas::Generate( BTexture* array, int nTexture, int maxWidth )
 	stack.resize( maxWidth );
 
 	for( int i=0; i<nTexture; ++i ) {
-		Tex tex( &array[i], array[i].assetName );
-		textures.push_back( tex );
+		if ( array[i].format != array[0].format ) {
+			ExitError( "Atlas", 0, 0, "mis matched texture formats" );
+		}
+		AtlasSubTex tex( &array[i], array[i].assetName );
+		subTexArr.push_back( tex );
 	}
-	sort( textures.begin(), textures.end(), TexSorter );
+	sort( subTexArr.begin(), subTexArr.end(), TexSorter );
 
-	for( unsigned i=0; i<textures.size(); ++i ) {
+	for( unsigned i=0; i<subTexArr.size(); ++i ) {
 		// Could patch up mip-mapping too. Until then:
 		// 32x32 texture can only fall on 32 boundaries, etc.
 
-		SDL_Surface* surface = textures[i].src->surface;
+		SDL_Surface* surface = subTexArr[i].src->surface;
 		int cx = surface->w;
 		int cy = surface->h;
 		GLASSERT( IsPowerOf2( cx ) );
@@ -50,8 +58,8 @@ SDL_Surface* Atlas::Generate( BTexture* array, int nTexture, int maxWidth )
 		// adjust bestY for actual start:
 		bestY = ((bestY+cy-1)/cy)*cy;
 
-		textures[i].src->atlasX = bestX;
-		textures[i].src->atlasY = bestY;
+		subTexArr[i].src->atlasX = bestX;
+		subTexArr[i].src->atlasY = bestY;
 
 		// write back to the stack:
 		for( int x=bestX; x < bestX+cx; ++x ) {
@@ -67,45 +75,61 @@ SDL_Surface* Atlas::Generate( BTexture* array, int nTexture, int maxWidth )
 
 	btexture.Create( maxWidth, maxY, array[0].format );
 
-	for( unsigned i=0; i<textures.size(); ++i ) {
-		printf( "-- %20s size=%d x=%d y=%d cx=%d cy=%d\n", 
-			    textures[i].src->assetName.c_str(), 
-				textures[i].src->PixelSize(), 
-				textures[i].src->atlasX, textures[i].src->atlasY, 
-				textures[i].src->surface->w, textures[i].src->surface->h );
+	for( unsigned i=0; i<subTexArr.size(); ++i ) {
+		SDL_Rect src = { 0, 0, subTexArr[i].src->surface->w, subTexArr[i].src->surface->w };
+		SDL_Rect dst = { subTexArr[i].src->atlasX, subTexArr[i].src->atlasY, subTexArr[i].src->surface->w, subTexArr[i].src->surface->w };
+		SDL_BlitSurface( subTexArr[i].src->surface, &src, btexture.surface, &dst );
 
-		SDL_Rect src = { 0, 0, textures[i].src->surface->w, textures[i].src->surface->w };
-		SDL_Rect dst = { textures[i].src->atlasX, textures[i].src->atlasY, textures[i].src->surface->w, textures[i].src->surface->w };
-		SDL_BlitSurface( textures[i].src->surface, &src, btexture.surface, &dst );
-
-		textures[i].x = textures[i].src->atlasX;
-		textures[i].y = textures[i].src->atlasY;
-		textures[i].cx = textures[i].src->surface->w;
-		textures[i].cy = textures[i].src->surface->h;
-		textures[i].src = 0;	// invalid after this call.
+		subTexArr[i].x  = subTexArr[i].src->atlasX;
+		subTexArr[i].y  = subTexArr[i].src->atlasY;
+		subTexArr[i].cx = subTexArr[i].src->surface->w;
+		subTexArr[i].cy = subTexArr[i].src->surface->h;
+		subTexArr[i].atlasCX = maxWidth;
+		subTexArr[i].atlasCY = maxY;
+		subTexArr[i].src = 0;	// invalid after this call.
 	}
+
+	printf( "Atlas: '%s' %dx%d\n", btexture.assetName.c_str(), btexture.surface->w, btexture.surface->h );
+	for( unsigned i=0; i<subTexArr.size(); ++i ) {
+		printf( "  %20s x=%d y=%d cx=%d cy=%d\n", 
+				subTexArr[i].assetName.c_str(),
+				subTexArr[i].x,
+				subTexArr[i].y,
+				subTexArr[i].cx, 
+				subTexArr[i].cy );
+	}
+
 	SDL_SaveBMP( btexture.surface, "atlas.bmp" );
 	return 0;
 }
 
 
-bool Atlas::Map( const char* assetName, const grinliz::Vector2F& in, grinliz::Vector2F* out )
+const AtlasSubTex* Atlas::GetSubTex( const char* assetName ) const
 {
-	for( unsigned i=0; i<textures.size(); ++i ) {
-		if ( textures[i].assetName == assetName ) {
-
-			int atlasCX = btexture.surface->w;
-			int atlasCY = btexture.surface->h;
-			int atlasX = textures[i].x;
-			int atlasY = textures[i].y;
-			int texCX = textures[i].cx;
-			int texCY = textures[i].cy;
-
-			out->x = ( (float)atlasX + in.x*(float)texCX ) / (float)atlasCX;
-			out->y = ( (float)atlasY + in.y*(float)texCY ) / (float)atlasCY;
-			return true;
+	// Only have to match until '.'
+	for( unsigned i=0; i<subTexArr.size(); ++i ) {
+		if ( StrEqualUntil( subTexArr[i].assetName.c_str(), assetName, '.' )) {
+			return &subTexArr[i];
 		}
 	}
-	return false;
+	return 0;
+}
+
+
+
+void AtlasSubTex::Map( const grinliz::Vector2F& in, grinliz::Vector2F* out ) const
+{
+	GLASSERT( in.x >= -0.01f && in.x <= 1.01f );
+	GLASSERT( in.y >= -0.01f && in.y <= 1.01f );
+
+	float inx = Clamp( in.x, 0.0f, 1.0f );
+	float iny = Clamp( in.y, 0.0f, 1.0f );
+
+	out->x = ( (float)x + inx*(float)cx ) / (float)atlasCX;
+	// Annoying coordinate flipping.
+	out->y = ( (float)(atlasCY-y-cy) + iny*(float)cy ) / (float)atlasCY;
+	
+	GLASSERT( out->x >= -0.0f && out->x <= 1.0f );
+	GLASSERT( out->y >= -0.0f && out->y <= 1.0f );
 }
 

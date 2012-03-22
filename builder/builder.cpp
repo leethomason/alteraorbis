@@ -100,12 +100,6 @@ void LoadLibrary()
 
 
 
-void WriteFloat( SDL_RWops* ctx, float f )
-{
-	SDL_RWwrite( ctx, &f, sizeof(float), 1 );
-}
-
-
 
 void ModelHeader::Set(	const char* name, int nAtoms, int nTotalVertices, int nTotalIndices,
 						const grinliz::Rectangle3F& bounds )
@@ -476,6 +470,7 @@ void ProcessModel( XMLElement* model )
 	printf( "Model '%s'", assetName.c_str() );
 
 	ModelBuilder* builder = new ModelBuilder();
+	builder->SetAtlasPool( atlasArr, MAX_ATLAS );
 	builder->SetShading( ModelBuilder::FLAT );
 
 	if ( grinliz::StrEqual( model->Attribute( "shading" ), "smooth" ) ) {
@@ -764,12 +759,15 @@ void ProcessAtlas( XMLElement* atlasElement )
 	if ( it == MAX_ATLAS ) {
 		ExitError( "Atlas", 0, 0, "Out of atlases." );
 	}
-	atlasArr[it].Generate( btextureArr, index, maxWidth );
 
 	GLString name = "atlas";
 	name += (char)('0' + it);
+	atlasArr[it].btexture.SetNames( name, "" );
 
-	atlasArr[index].btexture.SetNames( name, "" );
+	atlasArr[it].Generate( btextureArr, index, maxWidth );
+	atlasArr[it].btexture.dither = true;
+	atlasArr[it].btexture.ToBuffer();
+	atlasArr[it].btexture.InsertTextureToDB(  writer->Root()->FetchChild( "textures" ) );
 }
 
 

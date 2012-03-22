@@ -18,14 +18,19 @@
   <!-- Particles -->
   <texture filename="particle.png" />
 
-<!--  <atlas width="256">
+  <!--  
+  <atlas width="256">
     <texture filename="testgradient.png" />
     <texture filename="testsquare.png" />
     <texture filename="testwrap.png" />
-  </atlas> -->
+  </atlas>
+  -->
   <texture filename="testgradient.png" />
   <texture filename="testsquare.png" />
   <texture filename="testwrap.png" />
+
+  <model filename="teststructures.ac" modelName="testStruct0"  origin="0 0 0"  shading="flat" polyRemoval="pre" />
+  <model filename="teststructures.ac" modelName="testStruct1"  origin="2 0 0"  shading="flat" polyRemoval="pre" />
 
   <!-- Tactical Sprite models are centered at (0,0,0) -->
   <model filename="chess_characters.ac" modelName="maleMarine"   origin="-1 0 0" shading="flat" polyRemoval="pre" trigger="-1.35 1.00 0.0" eye="1.81" target="1.15"/>
@@ -41,9 +46,6 @@
   <model filename="alltree.ac" modelName="cactus1"  origin="10 0 0"  shading="smooth" polyRemoval="pre" />
   <model filename="alltree.ac" modelName="cactus2"  origin="12 0 0"  shading="smooth" polyRemoval="pre" />
   <model filename="alltree.ac" modelName="stump"    origin="0 0 2"  shading="smooth" polyRemoval="pre" />
-
-  <model filename="teststructures.ac" modelName="testStruct0"  origin="0 0 0"  shading="flat" polyRemoval="pre" />
-  <model filename="teststructures.ac" modelName="testStruct1"  origin="2 0 0"  shading="flat" polyRemoval="pre" />
 
   <font assetName="font" filename="font_0.png" noMip="true">
     <info face="Tahoma" size="28" bold="0" italic="0" charset="" unicode="1" stretchH="100" smooth="1" aa="1" padding="2,2,2,2" spacing="1,1" outline="0"/>
