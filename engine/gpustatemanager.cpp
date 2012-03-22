@@ -300,6 +300,7 @@ void GPUShader::SetState( const GPUShader& ns )
 	flags |= ns.HasLighting( 0, 0, 0 ) ? ShaderManager::LIGHTING_DIFFUSE : 0;
 
 	flags |= ns.instancing ? ShaderManager::INSTANCE : 0;
+	flags |= ns.premult ? ShaderManager::PREMULT : 0;
 
 	if ( flags & ShaderManager::INSTANCE) {
 		int debug=1;
@@ -396,7 +397,7 @@ void GPUShader::SetState( const GPUShader& ns )
 			break;
 		case BLEND_ADD:
 			glEnable( GL_BLEND );
-			glBlendFunc( GL_SRC_ALPHA, GL_ONE );
+			glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
 			break;
 		}
 	}

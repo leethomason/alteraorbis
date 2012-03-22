@@ -87,7 +87,7 @@ void ParticleScene::Load()
 }
 
 
-void ParticleScene::Rescan( ParticleDef* def )
+void ParticleScene::Rescan()
 {
 	XMLDocument doc;
 	doc.LoadFile( "particles.xml" );
@@ -97,9 +97,11 @@ void ParticleScene::Rescan( ParticleDef* def )
 		 partEle;
 		 partEle = partEle->NextSiblingElement( "particle" ) )
 	{
-		if ( partEle->Attribute( "name", def->name.c_str() ) ) {
-			def->Load( partEle );
-			break;
+		const char* name = partEle->Attribute( "name" );
+		for( int i=0; i<particleDefArr.Size(); ++i ) {
+			if ( particleDefArr[i].name == name ) {
+				particleDefArr[i].Load( partEle );
+			}
 		}
 	}
 }
@@ -114,11 +116,27 @@ void ParticleScene::ItemTapped( const gamui::UIItem* item )
 	for( int i=0; i<buttonArr.Size(); ++i ) {
 		if ( buttonArr[i] == item ) {
 			ParticleDef* def = &particleDefArr[i];
-			Rescan( def );
+			Rescan();
 
+			if ( buttonArr[i]->ToPushButton() ) {
+				Vector3F pos = { 6.f, 0.f, 6.f };
+				Vector3F normal = { 0, 1, 0 };
+				ParticleSystem::Instance()->EmitPD( *def, pos, normal, engine->camera.EyeDir3(), 0 );
+			}
+		}
+	}
+}
+
+
+void ParticleScene::DoTick( U32 deltaTime )
+{
+	for( int i=0; i<buttonArr.Size(); ++i ) {
+		ToggleButton* toggle = buttonArr[i]->ToToggleButton();
+		if ( toggle && toggle->Down() ) {
 			Vector3F pos = { 6.f, 0.f, 6.f };
 			Vector3F normal = { 0, 1, 0 };
-			ParticleSystem::Instance()->EmitPD( *def, pos, normal, engine->camera.EyeDir3() );
+			ParticleDef* def = &particleDefArr[i];
+			ParticleSystem::Instance()->EmitPD( *def, pos, normal, engine->camera.EyeDir3(), deltaTime );
 		}
 	}
 }

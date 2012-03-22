@@ -49,6 +49,8 @@ class IGamuiText;
 class UIItem;
 class ToggleButton;
 class TextLabel;
+class PushButton;
+class ToggleButton;
 
 
 template < class T > 
@@ -673,6 +675,8 @@ public:
 	virtual bool DoLayout();
 	virtual void Queue( CDynArray< uint16_t > *index, CDynArray< Gamui::Vertex > *vertex );
 
+	virtual PushButton* ToPushButton() { return 0; }
+	virtual ToggleButton* ToToggleButton() { return 0; }
 
 protected:
 
@@ -766,6 +770,7 @@ public:
 
 	virtual bool CanHandleTap()											{ return true; }
 	virtual bool HandleTap( TapAction action, float x, float y );
+	virtual PushButton* ToPushButton() { return this; }
 };
 
 
@@ -823,6 +828,7 @@ public:
 	void SetDown()								{ m_up = false; SetState(); ProcessToggleGroup(); }
 
 	virtual void Clear();
+	virtual ToggleButton* ToToggleButton() { return this; }
 
 private:
 	void ProcessToggleGroup();

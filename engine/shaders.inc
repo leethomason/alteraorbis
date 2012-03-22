@@ -118,6 +118,9 @@ static const char* fixedpipe_frag = {
     "			color *= texture2D( texture1, v_uv1 );\n"
     "		#endif\n"
     "	#endif\n"
+    "	#if PREMULT == 1\n"
+    "		color = vec4( color.r*color.a, color.g*color.a, color.b*color.a, color.a );\n"
+    "	#endif\n"
     "	gl_FragColor = color;\n"
     "}\n"
 };

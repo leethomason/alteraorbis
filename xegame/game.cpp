@@ -522,7 +522,7 @@ void Game::DoTick( U32 _currentTime )
 		GPUShader::Clear();
 
 		Scene* scene = sceneStack.Top()->scene;
-		scene->DoTick( currentTime, deltaTime );
+		scene->DoTick( deltaTime );
 
 		Rectangle2I clip2D, clip3D;
 		clip2D.SetInvalid();
@@ -562,12 +562,13 @@ void Game::DoTick( U32 _currentTime )
 	if ( !suppressText ) {
 		UFOText* ufoText = UFOText::Instance();
 		if ( debugLevel >= 1 ) {
-			ufoText->Draw(	0,  Y, "#%d %5.1ffps vbo=%d %4.1fK/f %3ddc/f", 
+			ufoText->Draw(	0,  Y, "#%d %5.1ffps vbo=%d %4.1fK/f %3ddc/f nPart=%d", 
 							VERSION, 
 							framesPerSecond, 
 							GPUShader::SupportsVBOs() ? 1 : 0,
 							(float)GPUShader::TrianglesDrawn()/1000.0f,
-							GPUShader::DrawCalls() );
+							GPUShader::DrawCalls(),
+							ParticleSystem::Instance()->NumParticles() );
 		}
 	}
 #endif

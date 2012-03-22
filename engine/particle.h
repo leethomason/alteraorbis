@@ -48,6 +48,7 @@ struct Particle
 struct ParticleData
 {
 	grinliz::Vector4F	colorVel;		// units / second added to color. particle dead when a<=0
+	grinliz::Vector4F	colorVel1;
 	grinliz::Vector3F	velocity;		// units / second added to origin
 	float				size;			// size of the particle
 	grinliz::Vector3F	pos;
@@ -97,21 +98,13 @@ public:
 	void EmitPD( const ParticleDef& pd,
 				 const grinliz::Vector3F& pos,
 				 const grinliz::Vector3F& normal,
-				 const grinliz::Vector3F eyeDir[]);
-
-	// Emit N point particles.
-	void EmitPoint(	int count,						// number of particles to create
-					int configuration,				// PARTICLE_RAY, etc.
-					const grinliz::Color4F& color,			// color of the particle
-					const grinliz::Color4F& colorVelocity,	// change in color / second
-					const grinliz::Vector3F& pos,	// origin
-					float posFuzz,					// fuzz in the position
-					const grinliz::Vector3F& vel,	// velocity
-					float velFuzz );					// fuzz in the velocity
+				 const grinliz::Vector3F eyeDir[],
+				 U32 deltaTime );					// needed for pd.config == continuous
 
 	void Update( U32 deltaTime, const grinliz::Vector3F eyeDir[] );
 	void Draw();
 	void Clear();
+	int NumParticles() const { return nParticles; }
 
 private:
 	ParticleSystem();
@@ -147,13 +140,15 @@ struct ParticleDef
 	float size;
 	int count;
 	int config;		// "sphere" "hemi" "ray"
+	int texMin, texMax;	// min and max texture index
 	float posFuzz;
 	float velocity;
 	float velocityFuzz;
 
 	// fixme: add vbos
 	grinliz::Vector4F color;
-	grinliz::Vector4F colorVelocity;
+	grinliz::Vector4F colorVelocity0;
+	grinliz::Vector4F colorVelocity1;
 	grinliz::Vector4F colorFuzz;
 
 	void Load( const tinyxml2::XMLElement* element );

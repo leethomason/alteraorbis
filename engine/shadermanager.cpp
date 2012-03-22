@@ -227,8 +227,10 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 	AppendFlag( &header, "COLOR_MULTIPLIER",	flags & COLOR_MULTIPLIER );
 	AppendFlag( &header, "LIGHTING_DIFFUSE",	flags & LIGHTING_DIFFUSE );	
 	AppendFlag( &header, "INSTANCE",			flags & INSTANCE );
+	AppendFlag( &header, "PREMULT",				flags & PREMULT );
 
 	AppendConst( &header, "EL_MAX_INSTANCE", EL_MAX_INSTANCE );
+	GLOUTPUT(( "header\n%s\n", header.c_str() ));
 
 	const char* vertexSrc[2] = { header.c_str(), fixedpipe_vert };
 	glShaderSource( shader->vertexProg, 2, vertexSrc, 0 );

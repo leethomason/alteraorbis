@@ -7,14 +7,6 @@ uniform mat4 	u_mvpMatrix;		// model-view-projection.
 	attribute float a_instanceID;					// Index into the transformation.
 #endif
 
-//#if OFFSET == 1
-//	// Offset is used to support particles. The position is transformed by an
-//	// 'up' and 'right' uniform.
-//	uniform vec4 	u_up;		// the up vector for the offset
-//	uniform vec4 	u_right;	// the right vector for the offset
-//	attribute vec2	a_offset;	// amount of up and right to apply
-//#endif
-
 #if COLOR_MULTIPLIER == 1
 	uniform vec4 u_colorMult;		// Overall Color, if specified.
 #endif
@@ -104,20 +96,10 @@ void main() {
 
 	v_color = color;
 	
-//	#if OFFSET == 1
-//		vec4 offset = u_up * a_offset.x + u_right * a_offset.y;
-//		vec4 pos = a_pos + offset;
-//		#if INSTANCE == 0 
-//			gl_Position = u_mvpMatrix * vec4( pos.x, pos.y, pos.z, 1.0 );
-//		#else
-//			gl_Position = (u_mvpMatrix * u_mMatrix[int(a_instanceID)]) * vec4( pos.x, pos.y, pos.z, 1.0 );
-//		#endif
-//	#else
-		#if INSTANCE == 0 
-			gl_Position = u_mvpMatrix * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );
-		#else
-			gl_Position = (u_mvpMatrix * u_mMatrix[int(a_instanceID)]) * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );
-		#endif
-//	#endif
+	#if INSTANCE == 0 
+		gl_Position = u_mvpMatrix * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );
+	#else
+		gl_Position = (u_mvpMatrix * u_mMatrix[int(a_instanceID)]) * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );
+	#endif
 }
 

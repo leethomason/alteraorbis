@@ -281,6 +281,7 @@ protected:
 				 streamPtr( 0 ), nIndex( 0 ), indexPtr( 0 ),
 				 vertexBuffer( 0 ), indexBuffer( 0 ),
 				 instancing( false ),
+				 premult( false ),
 				 blend( BLEND_NONE ),
 				 depthWrite( true ), depthTest( true ),
 				 colorWrite( true ),
@@ -335,6 +336,7 @@ protected:
 	U32				vertexBuffer;
 	U32				indexBuffer;
 	bool			instancing;
+	bool			premult;
 
 	BlendMode	blend;
 	bool	depthWrite;
@@ -391,6 +393,7 @@ public:
 	{
 		depthWrite = false;
 		depthTest = true;
+		premult = true;
 		blend = BLEND_ADD;
 	}
 

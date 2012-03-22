@@ -81,6 +81,11 @@ void ParticleSystem::Process( U32 delta, const grinliz::Vector3F eyeDir[] )
 		
 		Vector4F color = ps->color + pd->colorVel * deltaF;
 
+		if ( color.w > 1 ) {
+			GLASSERT( pd->colorVel1.w < 0.f );
+			color.w = 1.f;
+			pd->colorVel = pd->colorVel1;
+		}
 		if ( color.w <= 0 ) {
 			ParticleStream* end = vertexBuffer + nParticles*4;
 			Swap( ps+0, end-4 );
@@ -132,15 +137,26 @@ void ParticleSystem::EmitBeam( const grinliz::Vector3F& p0, const grinliz::Vecto
 void ParticleSystem::EmitPD(	const ParticleDef& def,
 								const grinliz::Vector3F& initPos,
 								const grinliz::Vector3F& normal, 
-								const grinliz::Vector3F eyeDir[] )
+								const grinliz::Vector3F eyeDir[],
+								U32 deltaTime )
 {
 	Vector3F velocity = normal * def.velocity;
 
-	static const Vector2F uv[4] = {{0,0},{0.25,0},{0.25,1},{0,1}};	// FIXME: correct number of textures
+	static const Vector2F uv[4] = {{0,0},{0.25,0},{0.25,1},{0,1}};
+	static const float TEXTURE_SIZE = 4;
 	const Vector3F& up = eyeDir[1];
 	const Vector3F& right = eyeDir[2];
+	int count = def.count;
 
-	for( int i=0; i<def.count; ++i ) {
+	if ( def.time == ParticleDef::CONTINUOUS ) {
+		float nParticles = (float)def.count * (float)deltaTime * 0.001f;
+		count = (int) floorf( nParticles );
+		nParticles -= floorf( nParticles );
+		if ( random.Uniform() <= nParticles )
+			++count;
+	}
+
+	for( int i=0; i<count; ++i ) {
 		if ( nParticles < MAX_PARTICLES ) {
 			ParticleData* pd = &particleData[nParticles];
 
@@ -155,7 +171,8 @@ void ParticleSystem::EmitPD(	const ParticleDef& def,
 				velocity = n * def.velocity;
 			}
 
-			pd->colorVel = def.colorVelocity;
+			pd->colorVel = def.colorVelocity0;
+			pd->colorVel1 = def.colorVelocity1;
 
 			Vector3F vFuzz;
 			random.NormalVector3D( &vFuzz.x );
@@ -172,10 +189,14 @@ void ParticleSystem::EmitPD(	const ParticleDef& def,
 			Vector3F pos = initPos + pFuzz*def.posFuzz;
 			pd->pos = pos;
 
+			int texOffset = (def.texMax > def.texMin) ? random.Rand( def.texMax - def.texMin ) : 0;
+			float uOffset = (float)(def.texMin + texOffset) / TEXTURE_SIZE;
+
 			ParticleStream* ps = &vertexBuffer[nParticles*4];
 			for( int k=0; k<4; ++k ) {
 				ps[k].color = color;
 				ps[k].uv = uv[k];
+				ps[k].uv.x += uOffset;
 			};
 			const float size = def.size;
 			ps[0].pos = pos - up*size - right*size;
@@ -309,6 +330,10 @@ void ParticleDef::Load( const tinyxml2::XMLElement* ele )
 	ele->QueryFloatAttribute( "size", &size );
 	count = 1;
 	ele->QueryIntAttribute( "count", &count );
+	
+	texMin = texMax = 0;
+	ele->QueryIntAttribute( "texMin", &texMin );
+	ele->QueryIntAttribute( "texMax", &texMax );
 
 	config = ParticleSystem::PARTICLE_RAY;
 	if ( ele->Attribute( "config", "sphere" ) ) config = ParticleSystem::PARTICLE_SPHERE;
@@ -322,7 +347,8 @@ void ParticleDef::Load( const tinyxml2::XMLElement* ele )
 	ele->QueryFloatAttribute( "velocityFuzz", &velocityFuzz );
 
 	color.Set( 1,1,1,1 );
-	colorVelocity.Set( 0, 0, 0, -0.5f );
+	colorVelocity0.Set( 0, 0, 0, -0.5f );
+	colorVelocity1.Set( 0, 0, 0, -0.5f );
 	colorFuzz.Set( 0, 0, 0, 0 );
 
 	const tinyxml2::XMLElement* child = 0;
@@ -332,7 +358,11 @@ void ParticleDef::Load( const tinyxml2::XMLElement* ele )
 	}
 	child = ele->FirstChildElement( "colorVelocity" );
 	if ( child ) {
-		LoadColor( child, &colorVelocity );
+		LoadColor( child, &colorVelocity0 );
+		child = child->NextSiblingElement( "colorVelocity" );
+		if ( child ) {
+			LoadColor( child, &colorVelocity1 );
+		}
 	}
 	child = ele->FirstChildElement( "colorFuzz" );
 	if ( child ) {

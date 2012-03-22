@@ -30,10 +30,11 @@ public:
 	}
 	virtual void ItemTapped( const gamui::UIItem* item );
 
+	virtual void DoTick( U32 deltaTime );
 	virtual void Draw3D( U32 delatTime );
 
 private:
-	void Rescan( ParticleDef* def );
+	void Rescan();
 
 	gamui::PushButton okay;
 	Engine* engine;

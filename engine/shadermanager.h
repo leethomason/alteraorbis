@@ -38,9 +38,7 @@ public:
 											// light direction, ambient color, and diffuse color.
 		INSTANCE			= (1<<11),		// Use instancing. Up to 16 uniform matrices contain the model
 											// transform. The instance attribute must be in the vertex data.
-
-		// --- special shaders -- //
-		PARTICLE			= (1<<12),
+		PREMULT				= (1<<12),		// convert to pre-multiplied in the fragment shader
 	};
 
 	void DeviceLoss();

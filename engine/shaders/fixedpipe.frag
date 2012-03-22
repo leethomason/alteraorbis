@@ -27,6 +27,9 @@ void main()
 			color *= texture2D( texture1, v_uv1 );
 		#endif
 	#endif
+	#if PREMULT == 1
+		color = vec4( color.r*color.a, color.g*color.a, color.b*color.a, color.a );
+	#endif
 	gl_FragColor = color;
 }
 
