@@ -41,73 +41,23 @@ distribution.
 using namespace grinliz;
 using namespace std;
 
-PerformanceData* Performance::map[ GL_MAX_PROFILE_ITEM ];
-PerformanceData Performance::sample[ GL_MAX_PROFILE_ITEM ];
-int Performance::numMap = 0;
-int Performance::callDepth = 0;
+Performance::Sample* Performance::samples = 0;
+int Performance::nSamples = 0;
+PerfData Performance::perfData;
+int Performance::nPerfData = 0;
 
 
-PerformanceData::PerformanceData( const char* _name ) : name( _name )
-{ 
-	Clear();
-	Performance::map[ Performance::numMap ] = this;
-	id = Performance::numMap;
-	++Performance::numMap;
-}
-
-
-void PerformanceData::Clear()
+void Performance::Process()
 {
-	functionCalls= 0;
-	functionTime = 0;
-	functionTopTime = 0;
-	normalTime = 0.f;
-}
+	// Processing is rather tricky.
+	// It's a map of a map...etc.
+	nPerfData = 0;
+	root = perfRoot = perfData;
+
+	for( int i=0; i<nSamples; ++i ) {
+		Sample* s = &samples[i];
 
 
-///////////////////////////////////////////////////////
-
-
-/* static */ void Performance::Clear()
-{
-	for( int i=0; i<numMap; ++i ) {
-		map[i]->Clear();
-		sample[i].Clear();
 	}
-}
-
-
-/*static*/ void Performance::SampleData()
-{
-	TimeUnit total = 0;
-	for( int i=0; i<numMap; ++i ) {
-		total += map[i]->functionTopTime;
-	}
-
-	for( int i=0; i<numMap; ++i ) {
-		sample[i] = *map[i];
-		map[i]->Clear();
-
-		sample[i].normalTime = 0.f;
-		if ( total ) {
-			sample[i].normalTime = (float)((double)sample[i].functionTime / (double)total);
-		}
-	}
-}
-
-
-
-
-void Performance::Dump( FILE* fp, const char* desc )
-{
-	fprintf( fp, "                                                    calls     time\n" );
-	for( int i=0; i<numMap; ++i )
-	{
-		fprintf( fp, "%48s %10d %.1f%%\n",
-				sample[i].name,
-				(int)sample[i].functionCalls,
-				sample[i].normalTime );
-	}
-
 }
 

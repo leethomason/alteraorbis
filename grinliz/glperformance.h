@@ -97,7 +97,7 @@ namespace grinliz {
 #endif
 
 namespace grinliz {
-#if 0
+
 class QuickProfile
 {
 public:
@@ -114,85 +114,69 @@ private:
 	TimeUnit startTime;
 	const char* name;
 };
-#endif
 
-const int GL_MAX_PROFILE_ITEM = 60;	// Max functions that can be profiled.
 
-// Static - there is only one of these for a given function.
-struct PerformanceData
+static const int GL_MAX_SAMPLES = 10*1000;
+static const int GL_MAX_PERFDATA = 100;
+
+struct PerfData
 {
-	PerformanceData( const char* name );
-	PerformanceData() : name( 0 ), id( 0 ), functionCalls( 0 ), functionTime( 0 ), functionTopTime( 0 ), normalTime( 0 ) {}
-
 	const char* name;
-	int id;
-	U32			functionCalls;
-	TimeUnit	functionTime;
-	TimeUnit	functionTopTime;
-	float normalTime;
+	int			depth;
+	TimeUnit	inclusiveTU;
+	double		inclusiveMSec;
 
-	void Clear();
+	TimeUnit	start;
+	enum { MAX_CHILDREN = 10 };
+	PerfData* child[MAX_CHILDREN];
 };
 
 
 /**
-	Used to automatically track performance of blocks of code. Should
-	be used to measure code that is blocked out like this:
-
-	@verbatim
-	#ifdef L3PERF
-	static PerformanceData data( "L3TerrainMesh_Stream" );
-	Performance perf( &data );
-	#endif
-	@endverbatim
 */
 class Performance
 {
-	friend struct PerformanceData;
   public:
 
-	Performance( PerformanceData* _data )	{
-		this->data = _data;
-
-		++data->functionCalls;
-		start = FastTime();
-		++callDepth;
-	}
-
-	~Performance()
-	{
-		TimeUnit end = FastTime();
-		GLASSERT( end >= start );
-		data->functionTime += ( end - start );
-		--callDepth;
-		if ( callDepth == 0 ) {
-			data->functionTopTime += (end - start);
+	static void Push( const char* name, bool enter )	{ 
+		if ( nSamples < GL_MAX_SAMPLES ) {
+			samples[nSamples++].Set( name, enter, FastTime() );
 		}
 	}
+	static void Free()		{ delete samples[]; samples = 0; nSamples = 0; }
+	static void Clear()		{ nSamples = 0; }
+	static void Process();
 
-	/// Write the results of performance testing to a file.
-    static void Dump( FILE* fp, const char* desc );
-	/// Reset the profiling data.
-	static void Clear();
-
-	static void SampleData();
-	static int NumData()								{ return numMap; }
-	static const PerformanceData& GetData( int i )		{ GLASSERT( i >= 0 && i < numMap ); return sample[i]; }
+	static PerfData* perfRoot;
 
   protected:
-	static PerformanceData* map[ GL_MAX_PROFILE_ITEM ];
-	static PerformanceData  sample[ GL_MAX_PROFILE_ITEM ];
-	static int numMap;
-	static int callDepth;
-	static TimeUnit totalTime;
+	struct Sample
+	{
+		const char* name;
+		bool		entry;
+		TimeUnit	time;
 
-	PerformanceData* data;
-	TimeUnit start;
+		void Set( const char* _name, bool _enter, TimeUnit _time ) { name = _name; entry = _enter; time = _time; }
+	};
+	static Sample* samples;
+	static int nSamples;
+
+	static PerfData perfData[GL_MAX_PERFDATA];
+	static int nPerfData;
 };
 
+
+struct PerformanceData
+{
+	PerformanceData( const char* _name ) : name( _name ) { Performance::Push( name, true ); }
+	~PerformanceData()									 { Performance::Push( name, false ); }
+	const char* name;
+};
+
+
 #ifdef GRINLIZ_PROFILE
-	#define GRINLIZ_PERFTRACK static grinliz::PerformanceData data( __FUNCTION__ ); grinliz::Performance perf( &data );
-	#define GRINLIZ_PERFTRACK_NAME( x ) static grinliz::PerformanceData data( x ); grinliz::Performance perf( &data );
+	#define GRINLIZ_PERFTRACK PerformanceData data( __FUNCTION__ );
+	#define GRINLIZ_PERFTRACK_NAME( x ) PerformanceData data( x );
 #else
 	#define GRINLIZ_PERFTRACK			{}
 	#define GRINLIZ_PERFTRACK_NAME( x )	{}
