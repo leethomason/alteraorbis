@@ -1,13 +1,14 @@
 - instance scene
 	x shadows
 	- glow
-	- light testing
+	- hemispherical lighting
 
-- main machine:
-	- light model
-	- test models
-- particle test scene
-	- alpha processing for additive blending
+X desktop (art):
+	X light model
+	X test models
+X particle test scene
+	X alpha processing for additive blending
+	- particle groups (ex: fire)
 - world rendering scene
 - navigation scene
 - map rendering scene

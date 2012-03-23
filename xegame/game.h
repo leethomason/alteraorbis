@@ -94,6 +94,8 @@ public:
 
 	void SetDebugLevel( int level )		{ debugLevel = (level%4); }
 	int GetDebugLevel() const			{ return debugLevel; }
+	void SetPerfLevel( int level )		{ perfLevel = (level%2); }
+	int GetPerfLevel() const			{ return perfLevel; }
 
 	FILE* GameSavePath( SavePathMode mode, int slot ) const;
 	bool HasSaveFile( int slot ) const;
@@ -166,6 +168,7 @@ private:
 	U32 frameCountsSinceMark;
 	float framesPerSecond;
 	int debugLevel;
+	int perfLevel;
 	bool suppressText;
 
 	ModelLoader* modelLoader;

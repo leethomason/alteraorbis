@@ -13,9 +13,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "particle.h"
+
 #include "../grinliz/glgeometry.h"
 #include "../grinliz/glperformance.h"
+
+#include "particle.h"
 #include "surface.h"
 #include "camera.h"
 #include "texture.h"
@@ -69,15 +71,27 @@ void ParticleSystem::Clear()
 
 void ParticleSystem::Process( U32 delta, const grinliz::Vector3F eyeDir[] )
 {
+	GRINLIZ_PERFTRACK
+
 	time += delta;
 	float deltaF = (float)delta * 0.001f;	// convert to seconds.
 	const Vector3F& up = eyeDir[1];
 	const Vector3F& right = eyeDir[2];
 
-	int i=0;
-	while( i<nParticles ) {
-		ParticleData* pd = &particleData[i];
-		ParticleStream* ps = &vertexBuffer[i*4];
+	ParticleData*   pd = particleData;
+	ParticleStream* ps = vertexBuffer;
+	ParticleData*	end = particleData + nParticles;
+	ParticleData*   srcPD = particleData;
+	ParticleStream* srcPS = vertexBuffer;
+
+	// FIXME: need to optimize this loop to do better with the copy situation.
+
+	while( srcPD < end ) {
+		*pd = *srcPD;
+		ps[0] = srcPS[0];
+		ps[1] = srcPS[1];
+		ps[2] = srcPS[2];
+		ps[3] = srcPS[3];
 		
 		Vector4F color = ps->color + pd->colorVel * deltaF;
 
@@ -87,15 +101,10 @@ void ParticleSystem::Process( U32 delta, const grinliz::Vector3F eyeDir[] )
 			pd->colorVel = pd->colorVel1;
 		}
 		if ( color.w <= 0 ) {
-			ParticleStream* end = vertexBuffer + nParticles*4;
-			Swap( ps+0, end-4 );
-			Swap( ps+1, end-3 );
-			Swap( ps+2, end-2 );
-			Swap( ps+3, end-1 );
-			Swap( pd, &particleData[nParticles-1] );
 			nParticles--;
 		}
 		else {
+
 			pd->pos += pd->velocity * deltaF;
 			const Vector3F pos = pd->pos;
 			const float size = pd->size;
@@ -110,8 +119,11 @@ void ParticleSystem::Process( U32 delta, const grinliz::Vector3F eyeDir[] )
 			ps[2].pos = pos + up*size + right*size;
 			ps[3].pos = pos + up*size - right*size;
 
-			i++;
+			pd++;
+			ps += 4;
 		}
+		srcPD++;
+		srcPS += 4;
 	}
 }
 
@@ -171,6 +183,9 @@ void ParticleSystem::EmitPD(	const ParticleDef& def,
 				velocity = n * def.velocity;
 			}
 
+			// There is potentially both an increasing alpha
+			// and decreasing alpha velocity.
+			GLASSERT( def.colorVelocity0.w < 0 || def.colorVelocity1.w < 0 );
 			pd->colorVel = def.colorVelocity0;
 			pd->colorVel1 = def.colorVelocity1;
 

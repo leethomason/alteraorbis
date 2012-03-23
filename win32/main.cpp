@@ -451,27 +451,16 @@ int main( int argc, char **argv )
 						GameHotKey( game, GAME_HK_TOGGLE_UI );
 						break;
 
-#if 0
-					case SDLK_o:
-						if ( mapMakerMode ) {
-							cameraIso = !cameraIso;
-							((Game*)game)->engine->CameraIso( cameraIso, true, (float)((Game*)game)->engine->GetMap()->Width(), (float)((Game*)game)->engine->GetMap()->Height() );
-						}
-						break;
-#endif
 					case SDLK_s:
 						GameDoTick( game, SDL_GetTicks() );
 						SDL_GL_SwapBuffers();
 						ScreenCapture( "cap" );
 						break;
-#if 0
-					case SDLK_l:
-						if ( mapMakerMode ) {
-							const Surface* lightmap = ((Game*)game)->engine->GetMap()->GetLightMap();
-							SaveLightMap( lightmap );
-						}
+
+					case SDLK_p:
+						GameHotKey( game, GAME_HK_TOGGLE_PERF );
 						break;
-#endif
+
 					case SDLK_d:
 						GameHotKey( game, GAME_HK_TOGGLE_DEBUG_TEXT );
 						break;

@@ -49,6 +49,7 @@ Game::Game( int width, int height, int rotation, int uiHeight, const char* path 
 	frameCountsSinceMark( 0 ),
 	framesPerSecond( 0 ),
 	debugLevel( 1 ),
+	perfLevel( 0 ),
 	suppressText( false ),
 	previousTime( 0 ),
 	isDragging( false )
@@ -554,13 +555,14 @@ void Game::DoTick( U32 _currentTime )
 //		SoundManager::Instance()->PlayQueuedSounds();
 	}
 
-	const int Y = 0;
+	int Y = 0;
+	int space = 16;
 	#ifndef GRINLIZ_DEBUG_MEM
 	const int memNewCount = 0;
 	#endif
 #if 1
+	UFOText* ufoText = UFOText::Instance();
 	if ( !suppressText ) {
-		UFOText* ufoText = UFOText::Instance();
 		if ( debugLevel >= 1 ) {
 			ufoText->Draw(	0,  Y, "#%d %5.1ffps vbo=%d %4.1fK/f %3ddc/f nPart=%d", 
 							VERSION, 
@@ -571,8 +573,8 @@ void Game::DoTick( U32 _currentTime )
 							ParticleSystem::Instance()->NumParticles() );
 		}
 	}
+	Y += space;
 #endif
-	GPUShader::ResetTriCount();
 
 #ifdef EL_SHOW_MODELS
 	int k=0;
@@ -587,19 +589,22 @@ void Game::DoTick( U32 _currentTime )
 #endif
 
 #ifdef GRINLIZ_PROFILE
-	const int SAMPLE = 8;
-	if ( (currentFrame & (SAMPLE-1)) == 0 ) {
-		Performance::SampleData();
-	}
-	for( int i=0; i<Performance::NumData(); ++i ) {
-		const PerformanceData& data = Performance::GetData( i );
+	if ( GetPerfLevel() ) {
+		const int SAMPLE = 8;
+		if ( (currentFrame & (SAMPLE-1)) == 0 ) {
+			Performance::SampleData();
+		}
+		for( int i=0; i<Performance::NumData(); ++i ) {
+			const PerformanceData& data = Performance::GetData( i );
 
-		UFOText::Draw( 60,  20+i*12, "%s", data.name );
-		UFOText::Draw( 300, 20+i*12, "%.3f", data.normalTime );
-		UFOText::Draw( 380, 20+i*12, "%d", data.functionCalls/SAMPLE );
+			ufoText->Draw( 60,  20+i*12, "%s", data.name );
+			ufoText->Draw( 300, 20+i*12, "%.3f", data.normalTime );
+			ufoText->Draw( 380, 20+i*12, "%d", data.functionCalls/SAMPLE );
+		}
 	}
 #endif
 
+	GPUShader::ResetTriCount();
 	previousTime = currentTime;
 	++currentFrame;
 
@@ -659,6 +664,9 @@ void Game::HandleHotKeyMask( int mask )
 	sceneStack.Top()->scene->HandleHotKeyMask( mask );
 	if ( mask & GAME_HK_TOGGLE_DEBUG_TEXT ) {
 		SetDebugLevel( GetDebugLevel() + 1 );
+	}
+	if ( mask & GAME_HK_TOGGLE_PERF ) {
+		SetPerfLevel( GetPerfLevel() + 1 );
 	}
 }
 
