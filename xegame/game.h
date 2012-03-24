@@ -54,7 +54,7 @@ enum SavePathMode {
 /*
 */
 
-class Game : public ITextureCreator 
+class Game : public ITextureCreator, public grinliz::IPerformancePrinter 
 {
 public:
 	Game( int width, int height, int rotation, int uiHeight, const char* savepath );
@@ -141,10 +141,13 @@ public:
 	const Palette* GetPalette( const char* name ) const;
 	grinliz::Color4U8 MainPaletteColor( int x, int y );
 
+	virtual void PrintPerf( int depth, const grinliz::PerfData& data );
+
 protected:
 	void PushPopScene();
 
 private:
+
 	// Color palettes
 	CDynArray< Palette > palettes;
 	const Palette* mainPalette;
@@ -170,6 +173,7 @@ private:
 	int debugLevel;
 	int perfLevel;
 	bool suppressText;
+	int perfY;
 
 	ModelLoader* modelLoader;
 	gamedb::Reader* database0;		// the basic, complete database

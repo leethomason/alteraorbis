@@ -41,33 +41,12 @@ distribution.
 #include <stdio.h>
 
 
-#if defined(_MSC_VER) && defined(_M_IX86)
+#if defined(_MSC_VER)
 namespace grinliz {
 	typedef U64 TimeUnit;
 
-	inline U64 FastTime()
-	{
-		union 
-		{
-			U64 result;
-			struct
-			{
-				U32 lo;
-				U32 hi;
-			} split;
-		} u;
-		u.result = 0;
-
-		_asm {
-			//pushad;	// don't need - aren't using "emit"
-			cpuid;		// force all previous instructions to complete - else out of order execution can confuse things
-			rdtsc;
-			mov u.split.hi, edx;
-			mov u.split.lo, eax;
-			//popad;
-		}				
-		return u.result;
-	}
+	U64 FastTime();
+	U64 FastFrequency();
 }
 
 #elif defined(__GNUC__) && defined(__i386__) 
@@ -122,13 +101,21 @@ static const int GL_MAX_PERFDATA = 100;
 struct PerfData
 {
 	const char* name;
-	int			depth;
 	TimeUnit	inclusiveTU;
 	double		inclusiveMSec;
 
 	TimeUnit	start;
 	enum { MAX_CHILDREN = 10 };
+
+	PerfData* parent;
 	PerfData* child[MAX_CHILDREN];
+};
+
+
+class IPerformancePrinter
+{
+public:
+	virtual void PrintPerf( int depth, const PerfData& data ) = 0;
 };
 
 
@@ -139,17 +126,20 @@ class Performance
   public:
 
 	static void Push( const char* name, bool enter )	{ 
+		if ( !samples ) {
+			samples = new Sample[GL_MAX_SAMPLES];
+		}
 		if ( nSamples < GL_MAX_SAMPLES ) {
 			samples[nSamples++].Set( name, enter, FastTime() );
 		}
 	}
-	static void Free()		{ delete samples[]; samples = 0; nSamples = 0; }
-	static void Clear()		{ nSamples = 0; }
+	static void Free()		{ delete [] samples; samples = 0; nSamples = 0; delete [] perfData; perfData = 0; nPerfData = 0; }
+	static void EndFrame();
 	static void Process();
-
-	static PerfData* perfRoot;
+	static void Walk( IPerformancePrinter* printer ) { WalkRec( -1, perfData, printer ); }
 
   protected:
+	static void WalkRec( int depth, const PerfData* data, IPerformancePrinter* );
 	struct Sample
 	{
 		const char* name;
@@ -161,22 +151,23 @@ class Performance
 	static Sample* samples;
 	static int nSamples;
 
-	static PerfData perfData[GL_MAX_PERFDATA];
+	static PerfData* perfData;
 	static int nPerfData;
+	static PerfData* root;
 };
 
 
-struct PerformanceData
+struct PerformanceTracker
 {
-	PerformanceData( const char* _name ) : name( _name ) { Performance::Push( name, true ); }
-	~PerformanceData()									 { Performance::Push( name, false ); }
+	PerformanceTracker( const char* _name ) : name( _name ) { Performance::Push( name, true ); }
+	~PerformanceTracker()									{ Performance::Push( name, false ); }
 	const char* name;
 };
 
 
 #ifdef GRINLIZ_PROFILE
-	#define GRINLIZ_PERFTRACK PerformanceData data( __FUNCTION__ );
-	#define GRINLIZ_PERFTRACK_NAME( x ) PerformanceData data( x );
+	#define GRINLIZ_PERFTRACK PerformanceTracker data( __FUNCTION__ );
+	#define GRINLIZ_PERFTRACK_NAME( x ) PerformanceTracker data( x );
 #else
 	#define GRINLIZ_PERFTRACK			{}
 	#define GRINLIZ_PERFTRACK_NAME( x )	{}

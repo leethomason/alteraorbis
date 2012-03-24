@@ -130,6 +130,7 @@ Game::~Game()
 	TextureManager::Destroy();
 	delete ShaderManager::Instance();
 	delete database0;
+	Performance::Free();
 }
 
 
@@ -488,6 +489,15 @@ void Game::Save( int slot, bool saveGeo, bool saveTac )
 }
 
 
+void Game::PrintPerf( int depth, const PerfData& data )
+{
+	UFOText* ufoText = UFOText::Instance();
+	ufoText->Draw( 350 + 15*depth, perfY, "%s", data.name );
+	ufoText->Draw( 550, perfY, "%.2f", data.inclusiveMSec );
+	perfY += 20;
+}
+
+
 void Game::DoTick( U32 _currentTime )
 {
 	{
@@ -589,8 +599,12 @@ void Game::DoTick( U32 _currentTime )
 #endif
 
 #ifdef GRINLIZ_PROFILE
+
 	if ( GetPerfLevel() ) {
-		const int SAMPLE = 8;
+		Performance::Process();
+		perfY = 0;
+		Performance::Walk( this );
+/*		const int SAMPLE = 8;
 		if ( (currentFrame & (SAMPLE-1)) == 0 ) {
 			Performance::SampleData();
 		}
@@ -600,8 +614,9 @@ void Game::DoTick( U32 _currentTime )
 			ufoText->Draw( 60,  20+i*12, "%s", data.name );
 			ufoText->Draw( 300, 20+i*12, "%.3f", data.normalTime );
 			ufoText->Draw( 380, 20+i*12, "%d", data.functionCalls/SAMPLE );
-		}
+		}*/
 	}
+	Performance::EndFrame();
 #endif
 
 	GPUShader::ResetTriCount();
