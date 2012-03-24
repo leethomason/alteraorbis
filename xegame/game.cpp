@@ -479,7 +479,7 @@ void Game::Save( int slot, bool saveGeo, bool saveTac )
 
 				printer.PushAttribute( "timestamp", buf );
 				node->scene->Save( &printer );
-				printer.CloseElement( "Game" );
+				printer.CloseElement();
 
 				fclose( fp );
 				break;

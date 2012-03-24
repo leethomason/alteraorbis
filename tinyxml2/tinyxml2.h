@@ -24,11 +24,20 @@ distribution.
 #ifndef TINYXML2_INCLUDED
 #define TINYXML2_INCLUDED
 
-
+#if 1
+	#include <cctype>
+	#include <climits>
+	#include <cstdio>
+	#include <cstring>
+#else
+	// Not completely sure all the interesting systems
+	// can handle the new headers; can switch this if
+	// there is an include problem.
 #include <limits.h>
 #include <ctype.h>
 #include <stdio.h>
-#include <memory.h>
+	#include <memory.h>		// Needed by mac.
+#endif
 
 /* 
    TODO: add 'lastAttribute' for faster parsing.
@@ -47,7 +56,7 @@ distribution.
 
 #if defined(DEBUG)
         #if defined(_MSC_VER)
-                #define TIXMLASSERT( x )           if ( !(x)) { _asm { int 3 } } //if ( !(x)) WinDebugBreak()
+                #define TIXMLASSERT( x )           if ( !(x)) { __debugbreak(); } //if ( !(x)) WinDebugBreak()
         #elif defined (ANDROID_NDK)
                 #include <android/log.h>
                 #define TIXMLASSERT( x )           if ( !(x)) { __android_log_assert( "assert", "grinliz", "ASSERT in '%s' at %d.", __FILE__, __LINE__ ); }
@@ -84,6 +93,9 @@ distribution.
 	#define TIXML_SSCANF   sscanf
 #endif
 
+static const int TIXML2_MAJOR_VERSION = 0;
+static const int TIXML2_MINOR_VERSION = 9;
+static const int TIXML2_PATCH_VERSION = 1;
 
 namespace tinyxml2
 {
@@ -112,17 +124,19 @@ public:
 		NEEDS_NEWLINE_NORMALIZATION		= 0x02,
 
 		TEXT_ELEMENT		= NEEDS_ENTITY_PROCESSING | NEEDS_NEWLINE_NORMALIZATION,
+		TEXT_ELEMENT_LEAVE_ENTITIES		= NEEDS_NEWLINE_NORMALIZATION,
 		ATTRIBUTE_NAME		= 0,
 		ATTRIBUTE_VALUE		= NEEDS_ENTITY_PROCESSING | NEEDS_NEWLINE_NORMALIZATION,
-		COMMENT				= NEEDS_NEWLINE_NORMALIZATION,
+		ATTRIBUTE_VALUE_LEAVE_ENTITIES		= NEEDS_NEWLINE_NORMALIZATION,
+		COMMENT				= NEEDS_NEWLINE_NORMALIZATION
 	};
 
 	StrPair() : flags( 0 ), start( 0 ), end( 0 ) {}
 	~StrPair();
 
-	void Set( char* start, char* end, int flags ) {
+	void Set( char* _start, char* _end, int _flags ) {
 		Reset();
-		this->start = start; this->end = end; this->flags = flags | NEEDS_FLUSH;
+		this->start = _start; this->end = _end; this->flags = _flags | NEEDS_FLUSH;
 	}
 	const char* GetStr();
 	bool Empty() const { return start == end; }
@@ -375,7 +389,7 @@ public:
 		}
 		return false;
 	}
-	inline static int IsUTF8Continuation( unsigned char p ) { return p & 0x80; }
+	inline static int IsUTF8Continuation( const char p ) { return p & 0x80; }
 	inline static int IsAlphaNum( unsigned char anyByte )	{ return ( anyByte < 128 ) ? isalnum( anyByte ) : 1; }
 	inline static int IsAlpha( unsigned char anyByte )		{ return ( anyByte < 128 ) ? isalpha( anyByte ) : 1; }
 
@@ -466,7 +480,7 @@ public:
 	    element with the specified name.
 	*/
 	const XMLElement* FirstChildElement( const char* value=0 ) const;
-	XMLElement* FirstChildElement( const char* value=0 )	{ return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->FirstChildElement( value )); }
+	XMLElement* FirstChildElement( const char* _value=0 )	{ return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->FirstChildElement( _value )); }
 
 	/// Get the last child node, or null if none exists.
 	const XMLNode*	LastChild() const						{ return lastChild; }
@@ -476,7 +490,7 @@ public:
 	    element with the specified name.
 	*/
 	const XMLElement* LastChildElement( const char* value=0 ) const;
-	XMLElement* LastChildElement( const char* value=0 )	{ return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->LastChildElement(value) ); }
+	XMLElement* LastChildElement( const char* _value=0 )	{ return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->LastChildElement(_value) ); }
 	
 	/// Get the previous (left) sibling node of this node.
 	const XMLNode*	PreviousSibling() const					{ return prev; }
@@ -484,7 +498,7 @@ public:
 
 	/// Get the previous (left) sibling element of this node, with an opitionally supplied name.
 	const XMLElement*	PreviousSiblingElement( const char* value=0 ) const ;
-	XMLElement*	PreviousSiblingElement( const char* value=0 ) { return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->PreviousSiblingElement( value ) ); }
+	XMLElement*	PreviousSiblingElement( const char* _value=0 ) { return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->PreviousSiblingElement( _value ) ); }
 	
 	/// Get the next (right) sibling node of this node.
 	const XMLNode*	NextSibling() const						{ return next; }
@@ -492,7 +506,7 @@ public:
 		
 	/// Get the next (right) sibling element of this node, with an opitionally supplied name.
 	const XMLElement*	NextSiblingElement( const char* value=0 ) const;
- 	XMLElement*	NextSiblingElement( const char* value=0 )	{ return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->NextSiblingElement( value ) ); }
+ 	XMLElement*	NextSiblingElement( const char* _value=0 )	{ return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->NextSiblingElement( _value ) ); }
 
 	/**
 		Add a child node as the last (right) child.
@@ -610,7 +624,7 @@ public:
 	virtual const XMLText*	ToText() const	{ return this; }
 
 	/// Declare whether this should be CDATA or standard text.
-	void SetCData( bool isCData )			{ this->isCData = isCData; }
+	void SetCData( bool _isCData )			{ this->isCData = _isCData; }
 	/// Returns true if this is a CDATA text element.
 	bool CData() const						{ return isCData; }
 
@@ -718,22 +732,23 @@ enum {
 	XML_NO_ERROR = 0,
 	XML_SUCCESS = 0,
 
-	NO_ATTRIBUTE,
-	WRONG_ATTRIBUTE_TYPE,
+	XML_NO_ATTRIBUTE,
+	XML_WRONG_ATTRIBUTE_TYPE,
 
-	ERROR_FILE_NOT_FOUND,
-	ERROR_ELEMENT_MISMATCH,
-	ERROR_PARSING_ELEMENT,
-	ERROR_PARSING_ATTRIBUTE,
-	ERROR_IDENTIFYING_TAG,
-	ERROR_PARSING_TEXT,
-	ERROR_PARSING_CDATA,
-	ERROR_PARSING_COMMENT,
-	ERROR_PARSING_DECLARATION,
-	ERROR_PARSING_UNKNOWN,
-	ERROR_EMPTY_DOCUMENT,
-	ERROR_MISMATCHED_ELEMENT,
-	ERROR_PARSING
+	XML_ERROR_FILE_NOT_FOUND,
+	XML_ERROR_FILE_COULD_NOT_BE_OPENED,
+	XML_ERROR_ELEMENT_MISMATCH,
+	XML_ERROR_PARSING_ELEMENT,
+	XML_ERROR_PARSING_ATTRIBUTE,
+	XML_ERROR_IDENTIFYING_TAG,
+	XML_ERROR_PARSING_TEXT,
+	XML_ERROR_PARSING_CDATA,
+	XML_ERROR_PARSING_COMMENT,
+	XML_ERROR_PARSING_DECLARATION,
+	XML_ERROR_PARSING_UNKNOWN,
+	XML_ERROR_EMPTY_DOCUMENT,
+	XML_ERROR_MISMATCHED_ELEMENT,
+	XML_ERROR_PARSING
 };
 
 
@@ -767,7 +782,7 @@ public:
 
 	/** QueryIntAttribute interprets the attribute as an integer, and returns the value
 		in the provided paremeter. The function will return XML_NO_ERROR on success,
-		and WRONG_ATTRIBUTE_TYPE if the conversion is not successful.
+		and XML_WRONG_ATTRIBUTE_TYPE if the conversion is not successful.
 	*/
 	int QueryIntValue( int* value ) const;
 	/// See QueryIntAttribute
@@ -801,7 +816,7 @@ private:
 	void operator=( const XMLAttribute& );	// not supported
 	void SetName( const char* name );
 
-	char* ParseDeep( char* p );
+	char* ParseDeep( char* p, bool processEntities );
 
 	mutable StrPair name;
 	mutable StrPair value;
@@ -864,8 +879,8 @@ public:
 	float	 FloatAttribute( const char* name ) const	{ float f=0;	QueryFloatAttribute( name, &f );		return f; }
 
 	/** Given an attribute name, QueryIntAttribute() returns 
-		XML_NO_ERROR, WRONG_ATTRIBUTE_TYPE if the conversion
-		can't be performed, or NO_ATTRIBUTE if the attribute
+		XML_NO_ERROR, XML_WRONG_ATTRIBUTE_TYPE if the conversion
+		can't be performed, or XML_NO_ATTRIBUTE if the attribute
 		doesn't exist. If successful, the result of the conversion
 		will be written to 'value'. If not successful, nothing will
 		be written to 'value'. This allows you to provide default
@@ -876,15 +891,15 @@ public:
 		QueryIntAttribute( "foo", &value );		// if "foo" isn't found, value will still be 10
 		@endverbatim
 	*/
-	int QueryIntAttribute( const char* name, int* value ) const					{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return NO_ATTRIBUTE; return a->QueryIntValue( value ); } 
+	int QueryIntAttribute( const char* name, int* value ) const					{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return XML_NO_ATTRIBUTE; return a->QueryIntValue( value ); } 
 	/// See QueryIntAttribute()
-	int QueryUnsignedAttribute( const char* name, unsigned int* value ) const	{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return NO_ATTRIBUTE; return a->QueryUnsignedValue( value ); }
+	int QueryUnsignedAttribute( const char* name, unsigned int* value ) const	{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return XML_NO_ATTRIBUTE; return a->QueryUnsignedValue( value ); }
 	/// See QueryIntAttribute()
-	int QueryBoolAttribute( const char* name, bool* value ) const				{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return NO_ATTRIBUTE; return a->QueryBoolValue( value ); }
+	int QueryBoolAttribute( const char* name, bool* value ) const				{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return XML_NO_ATTRIBUTE; return a->QueryBoolValue( value ); }
 	/// See QueryIntAttribute()
-	int QueryDoubleAttribute( const char* name, double* value ) const			{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return NO_ATTRIBUTE; return a->QueryDoubleValue( value ); }
+	int QueryDoubleAttribute( const char* name, double* value ) const			{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return XML_NO_ATTRIBUTE; return a->QueryDoubleValue( value ); }
 	/// See QueryIntAttribute()
-	int QueryFloatAttribute( const char* name, float* value ) const				{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return NO_ATTRIBUTE; return a->QueryFloatValue( value ); }
+	int QueryFloatAttribute( const char* name, float* value ) const				{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return XML_NO_ATTRIBUTE; return a->QueryFloatValue( value ); }
 
 	/// Sets the named attribute to value.
 	void SetAttribute( const char* name, const char* value )	{ XMLAttribute* a = FindOrCreateAttribute( name ); a->SetAttribute( value ); }
@@ -974,7 +989,7 @@ class XMLDocument : public XMLNode
 	friend class XMLElement;
 public:
 	/// constructor
-	XMLDocument(); 
+	XMLDocument( bool processEntities = true ); 
 	~XMLDocument();
 
 	virtual XMLDocument* ToDocument()				{ return this; }
@@ -1005,6 +1020,11 @@ public:
 	*/
 	void SaveFile( const char* filename );
 
+	bool ProcessEntities() const						{ return processEntities; }
+
+	/**
+		Returns true if this document has a leading Byte Order Mark of UTF8.
+	*/
 	bool HasBOM() const { return writeBOM; }
 
 	/** Return the root element of DOM. Equivalent to FirstChildElement().
@@ -1083,8 +1103,8 @@ public:
 	// internal
 	char* Identify( char* p, XMLNode** node );
 
-	virtual XMLNode* ShallowClone( XMLDocument* ) const	{ return 0; }
-	virtual bool ShallowEqual( const XMLNode* ) const	{ return false; }
+	virtual XMLNode* ShallowClone( XMLDocument* /*document*/ ) const	{ return 0; }
+	virtual bool ShallowEqual( const XMLNode* /*compare*/ ) const	{ return false; }
 
 private:
 	XMLDocument( const XMLDocument& );	// not supported
@@ -1092,6 +1112,7 @@ private:
 	void InitDocument();
 
 	bool writeBOM;
+	bool processEntities;
 	int errorID;
 	const char* errorStr1;
 	const char* errorStr2;
@@ -1169,8 +1190,8 @@ public:
 	void PushAttribute( const char* name, unsigned value );
 	void PushAttribute( const char* name, bool value );
 	void PushAttribute( const char* name, double value );
-	/// If streaming, close the Element. The name is optional, and only used for error checking.
-	void CloseElement( const char* name=0 );
+	/// If streaming, close the Element.
+	void CloseElement();
 
 	/// Add a text node.
 	void PushText( const char* text, bool cdata=false );
@@ -1208,6 +1229,7 @@ private:
 	FILE* fp;
 	int depth;
 	int textDepth;
+	bool processEntities;
 
 	enum {
 		ENTITY_RANGE = 64,
@@ -1221,7 +1243,7 @@ private:
 };
 
 
-};	// tinyxml2
+}	// tinyxml2
 
 
 
