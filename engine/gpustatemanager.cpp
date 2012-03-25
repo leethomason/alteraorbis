@@ -278,7 +278,7 @@ void GPUShader::SetTextureXForm( int unit )
 //static 
 void GPUShader::SetState( const GPUShader& ns )
 {
-	GRINLIZ_PERFTRACK
+	//GRINLIZ_PERFTRACK
 	CHECK_GL_ERROR;
 	GLASSERT( ns.stream.stride > 0 );
 

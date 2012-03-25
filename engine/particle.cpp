@@ -71,6 +71,7 @@ void ParticleSystem::Clear()
 
 void ParticleSystem::Process( U32 delta, const grinliz::Vector3F eyeDir[] )
 {
+	// 8.4 ms (debug) in process. 0.8 in release (wow.)
 	GRINLIZ_PERFTRACK
 
 	time += delta;
@@ -84,40 +85,40 @@ void ParticleSystem::Process( U32 delta, const grinliz::Vector3F eyeDir[] )
 	ParticleData*   srcPD = particleData;
 	ParticleStream* srcPS = vertexBuffer;
 
-	// FIXME: need to optimize this loop to do better with the copy situation.
-
 	while( srcPD < end ) {
-		*pd = *srcPD;
-		ps[0] = srcPS[0];
-		ps[1] = srcPS[1];
-		ps[2] = srcPS[2];
-		ps[3] = srcPS[3];
-		
-		Vector4F color = ps->color + pd->colorVel * deltaF;
 
-		if ( color.w > 1 ) {
-			GLASSERT( pd->colorVel1.w < 0.f );
-			color.w = 1.f;
-			pd->colorVel = pd->colorVel1;
-		}
+		*pd = *srcPD;
+		Vector4F color = srcPS->color + pd->colorVel * deltaF;
+
 		if ( color.w <= 0 ) {
 			nParticles--;
 		}
-		else {
+		else { 
+			if ( color.w > 1 ) {
+				GLASSERT( pd->colorVel1.w < 0.f );
+				color.w = 1.f;
+				pd->colorVel = pd->colorVel1;
+			}
 
 			pd->pos += pd->velocity * deltaF;
 			const Vector3F pos = pd->pos;
 			const float size = pd->size;
 
 			ps[0].color = color;
-			ps[1].color = color;
-			ps[2].color = color;
-			ps[3].color = color;
-
 			ps[0].pos = pos - up*size - right*size;
+			ps[0].uv = srcPS[0].uv;
+
+			ps[1].color = color;
 			ps[1].pos = pos - up*size + right*size;
+			ps[1].uv = srcPS[1].uv;
+
+			ps[2].color = color;
 			ps[2].pos = pos + up*size + right*size;
+			ps[2].uv = srcPS[2].uv;
+
+			ps[3].color = color;
 			ps[3].pos = pos + up*size - right*size;
+			ps[3].uv = srcPS[3].uv;
 
 			pd++;
 			ps += 4;
@@ -130,7 +131,7 @@ void ParticleSystem::Process( U32 delta, const grinliz::Vector3F eyeDir[] )
 
 void ParticleSystem::Update( U32 deltaTime, const grinliz::Vector3F eyeDir[] )
 {
-	GRINLIZ_PERFTRACK
+	//GRINLIZ_PERFTRACK
 	Process( deltaTime, eyeDir );
 }
 
@@ -204,7 +205,7 @@ void ParticleSystem::EmitPD(	const ParticleDef& def,
 			Vector3F pos = initPos + pFuzz*def.posFuzz;
 			pd->pos = pos;
 
-			int texOffset = (def.texMax > def.texMin) ? random.Rand( def.texMax - def.texMin ) : 0;
+			int texOffset = (def.texMax > def.texMin) ? random.Rand( def.texMax - def.texMin + 1 ) : 0;
 			float uOffset = (float)(def.texMin + texOffset) / TEXTURE_SIZE;
 
 			ParticleStream* ps = &vertexBuffer[nParticles*4];

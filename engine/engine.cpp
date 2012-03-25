@@ -385,7 +385,7 @@ void Engine::CalcFrustumPlanes( grinliz::Plane* planes )
 
 Model* Engine::IntersectModel( const grinliz::Ray& ray, HitTestMethod method, int required, int exclude, const Model* ignore[], Vector3F* intersection )
 {
-	GRINLIZ_PERFTRACK
+	//GRINLIZ_PERFTRACK
 
 	Model* model = spaceTree->QueryRay(	ray.origin, ray.direction, 
 										required, exclude, ignore,

@@ -276,7 +276,7 @@ SpaceTree::Node* SpaceTree::GetNode( int depth, int x, int z )
 
 Model* SpaceTree::Query( const Plane* planes, int nPlanes, int required, int excluded, bool debug )
 {
-	GRINLIZ_PERFTRACK
+	//GRINLIZ_PERFTRACK
 	
 	modelRoot = 0;
 	nodesVisited = 0;

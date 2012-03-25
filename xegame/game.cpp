@@ -491,9 +491,12 @@ void Game::Save( int slot, bool saveGeo, bool saveTac )
 
 void Game::PrintPerf( int depth, const PerfData& data )
 {
+	static const int X = 350;
+	static const int Y = 200;
+
 	UFOText* ufoText = UFOText::Instance();
-	ufoText->Draw( 350 + 15*depth, perfY, "%s", data.name );
-	ufoText->Draw( 550, perfY, "%.2f", data.inclusiveMSec );
+	ufoText->Draw( X + 15*depth, Y+perfY, "%s", data.name );
+	ufoText->Draw( X+200,		 Y+perfY, "%.2f  %d", data.inclusiveMSec, data.callCount );
 	perfY += 20;
 }
 

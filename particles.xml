@@ -32,4 +32,12 @@
     <colorVelocity red="-0.1" green="0.6" blue="0" alpha="-0.5" />
   </particle>
 
+  <particle name="performance"
+            time="continuous" size="0.1" count="1200" config="ray"
+            posFuzz="0.5" velocity="1.0" velocityFuzz="0.5" >
+    <color red="0" green="0" blue="1" alpha="0.1"/>
+    <colorVelocity red="0" green="0" blue="0" alpha="1.5" />
+    <colorVelocity red="0" green="0" blue="0" alpha="-0.5" />
+  </particle>
+
 </particles>

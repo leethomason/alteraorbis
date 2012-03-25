@@ -52,8 +52,6 @@ struct ParticleData
 	grinliz::Vector3F	velocity;		// units / second added to origin
 	float				size;			// size of the particle
 	grinliz::Vector3F	pos;
-	// do we need this on the shader? Easy to do, but bandwidth vs. cpu clock tradeoff
-	//grinliz::Vector2F	offset;			// offset from pos; size*0.5,0.5 offset
 };
 
 
@@ -126,6 +124,7 @@ private:
 	ParticleData	particleData[MAX_PARTICLES];
 	ParticleStream	vertexBuffer[MAX_PARTICLES*4];
 	U16				indexBuffer[MAX_PARTICLES*6];
+	// fixme: use vbos
 };
 
 
@@ -145,7 +144,6 @@ struct ParticleDef
 	float velocity;
 	float velocityFuzz;
 
-	// fixme: add vbos
 	grinliz::Vector4F color;
 	grinliz::Vector4F colorVelocity0;
 	grinliz::Vector4F colorVelocity1;
