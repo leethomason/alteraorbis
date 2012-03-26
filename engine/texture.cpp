@@ -49,11 +49,6 @@ void TextureManager::DeviceLoss()
 
 	for( unsigned i=0; i<gpuMemArr.Size(); ++i ) {
 		if ( gpuMemArr[i].glID ) {
-
-
-//#if defined( UFO_WIN32_SDL ) && defined( DEBUG )
-//			GLASSERT( glIsTexture( gpuMemArr[i].glID ) == GL_TRUE );
-//#endif
 			glDeleteTextures( 1, (const GLuint*) &gpuMemArr[i].glID );
 		}
 	}
@@ -116,10 +111,13 @@ Texture* TextureManager::GetTexture( const char* name, bool reload )
 			int h = item->GetInt( "height" );
 			const char* fstr = item->GetString( "format" );
 			int format = Surface::QueryFormat( fstr );
-			Texture::Param flags = Texture::PARAM_NONE;
+			int flags = Texture::PARAM_NONE;
 
 			if ( item->GetBool( "noMip" )) {
 				flags = Texture::PARAM_LINEAR;
+			}
+			if ( item->GetBool( "emissive" )) {
+				flags |= Texture::PARAM_EMISSIVE;
 			}
 
 			if ( reload ) {
@@ -139,7 +137,7 @@ Texture* TextureManager::GetTexture( const char* name, bool reload )
 }
 
 
-Texture* TextureManager::CreateTexture( const char* name, int w, int h, int format, Texture::Param flags, ITextureCreator* creator )
+Texture* TextureManager::CreateTexture( const char* name, int w, int h, int format, int flags, ITextureCreator* creator )
 {
 	GLASSERT( !map.Query( name, 0 ) );
 	GLASSERT( w > 1 );	// some drivers don't like size=1 textures
@@ -255,7 +253,7 @@ const GPUMem* TextureManager::AllocGPUMemory(	int w, int h, int format, int flag
 }
 
 
-void Texture::Set( const char* p_name, int p_w, int p_h, int p_format, Param p_flags )
+void Texture::Set( const char* p_name, int p_w, int p_h, int p_format, int p_flags )
 {
 	name = p_name;
 	w = p_w;

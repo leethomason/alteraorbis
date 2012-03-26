@@ -206,6 +206,7 @@ void Engine::Draw( U32 deltaTime )
 	LightShader lightShader( ambient, dir, diffuse );
 	LightShader emissiveLightShader( ambient, dir, diffuse );
 	emissiveLightShader.SetEmissive( true );
+	LightShader blendShader( ambient, dir, diffuse, GPUShader::BLEND_NORMAL );
 
 	Rectangle2I mapBounds( 0, 0, EL_MAP_SIZE-1, EL_MAP_SIZE-1 );
 	if ( map ) {
@@ -218,7 +219,7 @@ void Engine::Draw( U32 deltaTime )
 		GLASSERT( renderQueue->Empty() );
 
 		for( Model* model=modelRoot; model; model=model->next ) {
-			model->Queue( renderQueue, &lightShader, &emissiveLightShader );
+			model->Queue( renderQueue, &lightShader, &blendShader, &emissiveLightShader );
 		}
 	}
 

@@ -195,18 +195,13 @@ public:
 	void Init( const ModelResource* resource, SpaceTree* tree );
 	void Free();
 
-	void Queue( RenderQueue* queue, GPUShader* opaque, GPUShader* transparent );
+	void Queue( RenderQueue* queue, GPUShader* opaque, GPUShader* transparent, GPUShader* emmissive );
 
 	enum {
 		MODEL_SELECTABLE			= 0x01,
-		//MODEL_HIDDEN_FROM_TREE		= 0x02,
-		//MODEL_OWNED_BY_MAP		= 0x04,
 		MODEL_NO_SHADOW				= 0x08,
 		MODEL_INVISIBLE				= 0x10,
 		MODEL_METADATA				= 0x80,		// mapmaker data that isn't displayed in-game
-
-		// RESERVED!
-		// MODEL_local				= 0x00010000 and higher.
 
 		MODEL_TEXTURE_MATS			= 2
 	};
@@ -226,11 +221,6 @@ public:
 	void SetRotation( float rot, int axis=1 );
 	float GetRotation( int axis=1 ) const			{ return rot[axis]; }
 	
-	// Set the skin texture (which is a special texture xform)
-	//void SetSkin(int gender, int armor, int appearance);
-	// Set the texture xform for rendering tricks
-	//void SetTexXForm( int index, float a=1.0f, float d=1.0f, float x=0.0f, float y=0.0f );
-
 	// Set the texture.
 	void SetTexture( Texture* t )	{ setTexture = t; }
 
