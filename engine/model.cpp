@@ -293,21 +293,18 @@ void Model::CalcTargetSize( float* width, float* height ) const
 }
 
 
-void Model::Queue( RenderQueue* queue, GPUShader* opaque, GPUShader* transparent, Texture* textureReplace )
+void Model::Queue( RenderQueue* queue, GPUShader* opaque, GPUShader* transparent )
 {
 	if ( flags & MODEL_INVISIBLE )
 		return;
 
-	Texture* overrideTexture = textureReplace ? textureReplace : setTexture;		// 'overrideTexture' is usually null
-
 	for( U32 i=0; i<resource->header.nAtoms; ++i ) 
 	{
-		Texture* t = overrideTexture ? overrideTexture : resource->atom[i].texture;	// 't' is never null. This is just used to pass the correct shader through.
+		Texture* t = resource->atom[i].texture;
 		queue->Add( this,									// reference back
 					&resource->atom[i],						// model atom to render
 					t->Alpha() ? transparent : opaque,		// select the shader
-					( auxTexture && HasTextureXForm(i) ) ? &auxTexture->m[i] : 0,	// texture transform, if this has it.
-					overrideTexture );
+					( auxTexture && HasTextureXForm(i) ) ? &auxTexture->m[i] : 0 );	// texture transform, if this has it.
 	}
 }
 

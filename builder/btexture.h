@@ -15,7 +15,14 @@ public:
 
 	// -- The "do in order" block.
 	bool ParseTag( const tinyxml2::XMLElement* element );
-	void SetNames( const grinliz::GLString& asset, const grinliz::GLString& path )	{ this->assetName = asset; this->pathName = path; }
+	void SetNames(	const grinliz::GLString& asset, 
+					const grinliz::GLString& path,
+					const grinliz::GLString& path2)	
+	{ 
+		this->assetName = asset; 
+		this->pathName = path; 
+		this->alphaPathName = path2;
+	}
 	bool Load();		// do the load (can use create instad)
 	bool Scale();		// scale, if targetW/H not asset W/H
 	bool ToBuffer();	// dither, flip, process, etc. to memory buffer
@@ -34,6 +41,8 @@ public:
 	static SDL_Surface* BTexture::CreateScaledSurface( int w, int h, SDL_Surface* surface );
 
 	grinliz::GLString pathName;
+	grinliz::GLString alphaPathName;
+
 	grinliz::GLString assetName;
 
 	bool isImage;
@@ -41,6 +50,7 @@ public:
 	bool noMip;
 	bool doPreMult;
 	bool invert;
+	bool emissive;	// if set, the alpha channel is emissiveness, not transparency
 	int targetWidth;
 	int targetHeight;
 	int atlasX;

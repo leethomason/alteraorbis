@@ -231,6 +231,7 @@ public:
 		grinliz::Color4F c = { (float)color.r*INV, (float)color.g*INV, (float)color.b*INV, (float)color.a*INV };
 		SetColor( c );
 	}
+	void SetEmissive( bool em ) { emissive = em; }
 
 	void SetInstancing( bool value ) { instancing = value; }
 	void InstanceMatrix( int i, const grinliz::Matrix4& mat ) { 
@@ -282,6 +283,7 @@ protected:
 				 vertexBuffer( 0 ), indexBuffer( 0 ),
 				 instancing( false ),
 				 premult( false ),
+				 emissive( false ),
 				 blend( BLEND_NONE ),
 				 depthWrite( true ), depthTest( true ),
 				 colorWrite( true ),
@@ -337,6 +339,7 @@ protected:
 	U32				indexBuffer;
 	bool			instancing;
 	bool			premult;
+	bool			emissive;		// interpret alpha as emissive
 
 	BlendMode	blend;
 	bool	depthWrite;

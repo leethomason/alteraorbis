@@ -195,7 +195,7 @@ public:
 	void Init( const ModelResource* resource, SpaceTree* tree );
 	void Free();
 
-	void Queue( RenderQueue* queue, GPUShader* opaque, GPUShader* transparent, Texture* replaceAllTextures );
+	void Queue( RenderQueue* queue, GPUShader* opaque, GPUShader* transparent );
 
 	enum {
 		MODEL_SELECTABLE			= 0x01,

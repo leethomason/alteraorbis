@@ -102,14 +102,14 @@ RenderQueue::State* RenderQueue::FindState( const State& state )
 }
 
 
-void RenderQueue::Add( Model* model, const ModelAtom* atom, GPUShader* shader, const grinliz::Matrix4* textureXForm, Texture* replaceAllTextures )
+void RenderQueue::Add( Model* model, const ModelAtom* atom, GPUShader* shader, const grinliz::Matrix4* textureXForm )
 {
 	if ( nItem == MAX_ITEMS ) {
 		GLASSERT( 0 );
 		return;
 	}
 
-	State s0 = { shader, replaceAllTextures ? replaceAllTextures : atom->texture, 0 };
+	State s0 = { shader, atom->texture, 0 };
 
 	State* state = FindState( s0 );
 	if ( !state ) {
@@ -132,6 +132,7 @@ void RenderQueue::Submit( GPUShader* overRideShader, int required, int excluded,
 
 	for( int i=0; i<nState; ++i ) {
 		GPUShader* shader = overRideShader ? overRideShader : statePool[i].shader;
+		GLASSERT( shader );
 		if ( !overRideShader ) {
 			shader->SetTexture0( statePool[i].texture );
 		}

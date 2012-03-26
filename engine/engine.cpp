@@ -204,6 +204,8 @@ void Engine::Draw( U32 deltaTime )
 	QueryLights( DAY_TIME, &ambient, &dir, &diffuse );
 
 	LightShader lightShader( ambient, dir, diffuse );
+	LightShader emissiveLightShader( ambient, dir, diffuse );
+	emissiveLightShader.SetEmissive( true );
 
 	Rectangle2I mapBounds( 0, 0, EL_MAP_SIZE-1, EL_MAP_SIZE-1 );
 	if ( map ) {
@@ -216,7 +218,7 @@ void Engine::Draw( U32 deltaTime )
 		GLASSERT( renderQueue->Empty() );
 
 		for( Model* model=modelRoot; model; model=model->next ) {
-			model->Queue( renderQueue, &lightShader, 0, 0 );
+			model->Queue( renderQueue, &lightShader, &emissiveLightShader );
 		}
 	}
 

@@ -63,8 +63,8 @@ void RenderTestScene::Resize()
 
 void RenderTestScene::SetupTest0()
 {
-	const ModelResource* res0 = ModelResourceManager::Instance()->GetModelResource( "femaleMarine" );
-	const ModelResource* res1 = ModelResourceManager::Instance()->GetModelResource( "maleMarine" );
+	const ModelResource* res0 = ModelResourceManager::Instance()->GetModelResource( "humanFemale" );
+	const ModelResource* res1 = ModelResourceManager::Instance()->GetModelResource( "humanMale" );
 	for( int i=0; i<NUM_MODELS; ++i ) {
 		model[i] = engine->AllocModel( i<3 ? res0 : res1 );
 		model[i]->SetPos( 1, 0, (float)i );

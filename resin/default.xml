@@ -1,5 +1,5 @@
 <resource>
-  
+
   <!-- Icon and UI -->
   <texture filename="title.png" />
   <texture filename="icons.png" dither="false"/>
@@ -10,6 +10,10 @@
   <texture filename="charSwatch.png" width="128" height="8" />
   <texture filename="characters.png" />
   <texture filename="treetextures.png" />
+  <!-- note this makes textures and materials the same thing, to have the emissive
+       behavior defined like this. That's okay for now.
+  -->
+  <texture filename="emchartest.png" filename2="emchartest_em.png" emissive="true"/>
 
   <!-- UI elements -->
   <texture filename="intro.png" width="64" height="64" />
@@ -33,6 +37,9 @@
   <model filename="teststructures.ac" modelName="testStruct1"  origin="2 0 0"  shading="flat" polyRemoval="pre" />
 
   <!-- Tactical Sprite models are centered at (0,0,0) -->
+  <model filename="human.ac" modelName="humanFemale" origin="1 0 0" shading="flat" polyRemoval="pre" />
+  <model filename="human.ac" modelName="humanMale"   origin="0 0 0" shading="flat" polyRemoval="pre" />
+  
   <model filename="chess_characters.ac" modelName="maleMarine"   origin="-1 0 0" shading="flat" polyRemoval="pre" trigger="-1.35 1.00 0.0" eye="1.81" target="1.15"/>
   <model filename="chess_characters.ac" modelName="femaleMarine" origin="-2 0 0" shading="flat" polyRemoval="pre" trigger="-2.25 1.00 0.0" eye="1.75" target="1.25"/>
   <model filename="chess_characters.ac" modelName="maleCiv"      origin="-3 0 0" shading="flat" polyRemoval="pre"                          eye="1.65" target="1.20"/>

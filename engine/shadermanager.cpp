@@ -228,6 +228,7 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 	AppendFlag( &header, "LIGHTING_DIFFUSE",	flags & LIGHTING_DIFFUSE );	
 	AppendFlag( &header, "INSTANCE",			flags & INSTANCE );
 	AppendFlag( &header, "PREMULT",				flags & PREMULT );
+	AppendFlag( &header, "EMISSIVE",			flags & EMISSIVE );
 
 	AppendConst( &header, "EL_MAX_INSTANCE", EL_MAX_INSTANCE );
 	GLOUTPUT(( "header\n%s\n", header.c_str() ));

@@ -16,7 +16,13 @@ void main()
 	#if TEXTURE0 == 1
 		#if TEXTURE0_ALPHA_ONLY == 1
 			color.a *= texture2D( texture0, v_uv0).a;
-		#else 
+		#elif EMISSIVE == 1
+			// Basically, the alpha color is used to
+			// modulate the incoming fragment color, which
+			// is the result of lighting.
+			vec4 texColor = texture2D( texture0, v_uv0 );
+			color = mix( color, vec4(1,1,1,1), texColor.a ) * texColor;
+		#else
 			color *= texture2D( texture0, v_uv0 );
 		#endif
 	#endif

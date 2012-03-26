@@ -50,8 +50,7 @@ public:
 	void Add(	Model* model,					// Can be chaned: billboard rotation will be set.
 				const ModelAtom* atom, 
 				GPUShader* shader,
-				const grinliz::Matrix4* textureXForm,
-				Texture* replaceAllTextures );
+				const grinliz::Matrix4* textureXForm );
 
 	/* If a shader is passed it, it will override the shader set by the Add. */
 	void Submit(	GPUShader* shader, 

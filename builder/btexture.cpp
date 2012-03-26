@@ -24,6 +24,7 @@ BTexture::BTexture()
 	  noMip( false ),
 	  doPreMult( false ),
 	  invert( true ),
+	  emissive( false ),
 	  targetWidth( 0 ),
 	  targetHeight( 0 ),
 	  atlasX( 0 ),
@@ -65,15 +66,42 @@ bool BTexture::ParseTag( const tinyxml2::XMLElement* element )
 	element->QueryIntAttribute( "width", &targetWidth );
 	element->QueryIntAttribute( "height", &targetHeight );
 	element->QueryBoolAttribute( "premult", &doPreMult );
+	element->QueryBoolAttribute( "emissive", &emissive );
+
 	return true;
 }
 
 
 bool BTexture::Load()
 {
-	surface = libIMG_Load( pathName.c_str() );
-	if ( !surface ) {
-		ExitError( "Texture", pathName.c_str(), assetName.c_str(), "Failed to load surface." );
+	if ( alphaPathName.size() == 0 ) {
+		surface = libIMG_Load( pathName.c_str() );
+		if ( !surface ) {
+			ExitError( "Texture", pathName.c_str(), assetName.c_str(), "Failed to load surface." );
+		}
+	}
+	else {
+		// Seperate color and alpha textures
+		SDL_Surface* rgb = libIMG_Load( pathName.c_str() );
+		SDL_Surface* alpha = libIMG_Load( alphaPathName.c_str() );
+		if ( !rgb ) {
+			ExitError( "Texture", pathName.c_str(), assetName.c_str(), "Failed to load RGB surface." );
+		}
+		if ( !alpha ) {
+			ExitError( "Texture", alphaPathName.c_str(), assetName.c_str(), "Failed to load Alpha surface." );
+		}
+		if ( rgb->w != alpha->w || rgb->h != alpha->h ) {
+			ExitError( "Texture", pathName.c_str(), assetName.c_str(), "RGB and Alpha textures are different sizes." );
+		}
+		surface = SDL_CreateRGBSurface( 0, rgb->w, rgb->h, 32, 0xff000000, 0x00ff0000, 0x0000ff00, 0x000000ff );
+		for( int y=0; y<rgb->h; ++y ) {
+			for( int x=0; x<rgb->w; ++x ) {
+				Color4U8 rgbC = GetPixel( rgb, x, y );
+				Color4U8 alphaC = GetPixel( alpha, x, y );
+				Color4U8 c = { rgbC.r, rgbC.g, rgbC.b, alphaC.r };
+				PutPixel( surface, x, y, c );
+			}
+		}
 	}
 
 	if (    isImage
@@ -302,4 +330,5 @@ void BTexture::InsertTextureToDB( gamedb::WItem* parent )
 	witem->SetInt( "width", surface->w );
 	witem->SetInt( "height", surface->h );
 	witem->SetBool( "noMip", noMip );
+	witem->SetBool( "emissive", emissive );
 }

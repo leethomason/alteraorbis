@@ -39,6 +39,7 @@ public:
 		INSTANCE			= (1<<11),		// Use instancing. Up to 16 uniform matrices contain the model
 											// transform. The instance attribute must be in the vertex data.
 		PREMULT				= (1<<12),		// convert to pre-multiplied in the fragment shader
+		EMISSIVE			= (1<<13),		// interpret the alpha channel as emission.
 	};
 
 	void DeviceLoss();
