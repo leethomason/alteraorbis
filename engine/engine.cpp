@@ -47,13 +47,13 @@ Engine::Engine( Screenport* port, const gamedb::Reader* database )
 		DIFFUSE_SHADOW( 0.2f ),
 		screenport( port ),
 		initZoomDistance( 0 ),
+		hemiLighting( false ),
 		map( 0 )
 {
 	spaceTree = new SpaceTree( -0.1f, 3.0f, 64 );	// fixme: map size hardcoded
 	renderQueue = new RenderQueue();
 
 	SetLightDirection( 0 );
-	enableMeta = mapMakerMode;
 }
 
 
@@ -63,8 +63,6 @@ Engine::~Engine()
 	delete spaceTree;
 }
 
-
-bool Engine::mapMakerMode = false;
 
 
 void Engine::CameraIso( bool normal, bool sizeToWidth, float width, float height )
@@ -196,7 +194,6 @@ void Engine::Draw( U32 deltaTime )
 	CalcFrustumPlanes( planes );
 
 	int exclude = Model::MODEL_INVISIBLE;
-	exclude |= enableMeta ? 0 : Model::MODEL_METADATA;
 	Model* modelRoot = spaceTree->Query( planes, 6, 0, exclude, false );
 	
 	Color4F ambient, diffuse;
@@ -206,7 +203,13 @@ void Engine::Draw( U32 deltaTime )
 	LightShader lightShader( ambient, dir, diffuse );
 	LightShader emissiveLightShader( ambient, dir, diffuse );
 	emissiveLightShader.SetEmissive( true );
-	LightShader blendShader( ambient, dir, diffuse, GPUShader::BLEND_NORMAL );
+	//LightShader blendShader( ambient, dir, diffuse, GPUShader::BLEND_NORMAL );
+
+	if ( hemiLighting ) {
+		lightShader.SetHemisphericalLighting( true );
+		emissiveLightShader.SetHemisphericalLighting( true );
+		//blendShader.SetHemisphericalLighting( true );
+	}
 
 	Rectangle2I mapBounds( 0, 0, EL_MAP_SIZE-1, EL_MAP_SIZE-1 );
 	if ( map ) {
@@ -219,7 +222,7 @@ void Engine::Draw( U32 deltaTime )
 		GLASSERT( renderQueue->Empty() );
 
 		for( Model* model=modelRoot; model; model=model->next ) {
-			model->Queue( renderQueue, &lightShader, &blendShader, &emissiveLightShader );
+			model->Queue( renderQueue, &lightShader, 0, &emissiveLightShader );
 		}
 	}
 
@@ -281,9 +284,14 @@ void Engine::Draw( U32 deltaTime )
 
 void Engine::QueryLights( DayNight dayNight, Color4F* ambient, Vector4F* dir, Color4F* diffuse )
 {
-	ambient->Set( AMBIENT, AMBIENT, AMBIENT, 1.0f );
-	diffuse->Set( DIFFUSE, DIFFUSE, DIFFUSE, 1.0f );
-
+	if ( hemiLighting ) {
+		ambient->Set( 0.3f, 0.3f, 0.4f, 1.0f );
+		diffuse->Set( 1.0f, 1.0f, 1.0f, 1.0f );
+	}
+	else {
+		ambient->Set( AMBIENT, AMBIENT, AMBIENT, 1.0f );	// 0.5
+		diffuse->Set( DIFFUSE, DIFFUSE, DIFFUSE, 1.0f );	// 0.6
+	}
 	if ( dayNight == NIGHT_TIME ) {
 		diffuse->r *= EL_NIGHT_RED;
 		diffuse->g *= EL_NIGHT_GREEN;
@@ -302,9 +310,14 @@ void Engine::CalcLight( DayNight dayNight, const Vector3F& normal, float shadowA
 
 	float nDotL = Max( 0.0f, DotProduct( normal, dir3 ) );
 	for( int i=0; i<3; ++i ) {
-		light->X(i)  = ambient.X(i) + diffuse.X(i)*nDotL;
-		shadow->X(i) = ambient.X(i);
-
+		if ( hemiLighting ) {
+			light->X(i)  = InterpolateUnitX( ambient.X(i), diffuse.X(i), (nDotL+1.0f)*0.5f );
+			shadow->X(i) = ambient.X(i); 
+		}
+		else {
+			light->X(i)  = ambient.X(i) + diffuse.X(i)*nDotL;
+			shadow->X(i) = ambient.X(i);
+		}
 		shadow->X(i) = InterpolateUnitX( shadow->X(i), light->X(i), 1.f-shadowAmount ); 
 	}
 }
@@ -427,8 +440,6 @@ void Engine::RestrictCamera()
 
 void Engine::SetZoom( float z )
 {
-//	float startY = camera.PosWC().y;
-
 	z = Clamp( z, GAME_ZOOM_MIN, GAME_ZOOM_MAX );
 	float d = Interpolate(	GAME_ZOOM_MIN, EL_CAMERA_MIN,
 							GAME_ZOOM_MAX, EL_CAMERA_MAX,

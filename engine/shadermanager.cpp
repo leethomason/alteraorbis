@@ -158,13 +158,15 @@ void ShaderManager::SetTexture( int index, Texture* texture )
 }
 
 
-void ShaderManager::AppendFlag( GLString* str, const char* flag, int set )
+void ShaderManager::AppendFlag( GLString* str, const char* flag, int set, int value )
 {
 	str->append( "#define " );
 	str->append( flag );
 	str->append( " " );
 	if ( set ) {
-		str->append( "1\n" );
+		char buf[] = "1\n";
+		buf[0] = '0' + value;
+		str->append( buf );
 	}
 	else {
 		str->append( "0\n" );
@@ -225,12 +227,19 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 	
 	AppendFlag( &header, "COLORS",				flags & COLORS );
 	AppendFlag( &header, "COLOR_MULTIPLIER",	flags & COLOR_MULTIPLIER );
-	AppendFlag( &header, "LIGHTING_DIFFUSE",	flags & LIGHTING_DIFFUSE );	
 	AppendFlag( &header, "INSTANCE",			flags & INSTANCE );
 	AppendFlag( &header, "PREMULT",				flags & PREMULT );
 	AppendFlag( &header, "EMISSIVE",			flags & EMISSIVE );
 
+	if ( flags & LIGHTING_DIFFUSE )
+		AppendFlag( &header, "LIGHTING_DIFFUSE", 1, 1 );
+	else if ( flags & LIGHTING_HEMI )
+		AppendFlag( &header, "LIGHTING_DIFFUSE", 1, 2 );
+	else 
+		AppendFlag( &header, "LIGHTING_DIFFUSE", 0, 0 );
+
 	AppendConst( &header, "EL_MAX_INSTANCE", EL_MAX_INSTANCE );
+
 	GLOUTPUT(( "header\n%s\n", header.c_str() ));
 
 	const char* vertexSrc[2] = { header.c_str(), fixedpipe_vert };

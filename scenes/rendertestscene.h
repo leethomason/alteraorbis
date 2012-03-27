@@ -48,6 +48,7 @@ private:
 	LumosGame* lumosGame;
 	gamui::PushButton okay;
 	gamui::PushButton whiteButton;
+	gamui::ToggleButton hemiButton;
 	gamui::TextBox textBox;
 
 	Engine* engine;

@@ -42,9 +42,8 @@ class RenderQueue;
 	Renderer
 
 	Assets
-		- texture atlasing in builder. (Atlased textures can't be repeated.)
+		- TBD: texture atlasing in builder. (Atlased textures can't be repeated.)
 		- alpha: transparency or emmissive
-		- 
 
 	Renderer
 		- shadows, glow, colors
@@ -52,6 +51,7 @@ class RenderQueue;
 		Shadows
 			- shadow casting models rendered to stencil buffer.
 			- background plane can be multi-pass, checked against stencil
+
 		
 */
 
@@ -84,6 +84,7 @@ public:
 
 	// Direction from world TO sun. (y is positive). If null, sets the default.
 	void SetLightDirection( const grinliz::Vector3F* lightDir );
+	void SetLightModel( bool hemisphere )	{ hemiLighting = hemisphere; }
 
 	Model* AllocModel( const ModelResource* );
 	void FreeModel( Model* );
@@ -92,10 +93,6 @@ public:
 	Map* GetMap()						{ return map; }
 
 	const RenderQueue* GetRenderQueue()	{ return renderQueue; }
-
-	// Only matters for MapMaker. Game never renders the metadata.
-	void EnableMetadata( bool enable )	{ enableMeta = enable; }
-	bool IsMetadataEnabled()			{ return enableMeta; }
 
 	bool RayFromViewToYPlane( const grinliz::Vector2F& view,
 							  const grinliz::Matrix4& modelViewProjectionInverse, 
@@ -123,8 +120,6 @@ public:
 	const Screenport& GetScreenport() { return *screenport; }
 	Screenport* GetScreenportMutable() { return screenport; }
 	void RestrictCamera();
-
-	static bool mapMakerMode;
 
 private:
 	enum ShadowState {
@@ -158,7 +153,7 @@ private:
 	Screenport* screenport;
 	float	initZoom;
 	int		initZoomDistance;
-	bool	enableMeta;
+	bool	hemiLighting;
 	
 	Map*	map;
 

@@ -297,7 +297,13 @@ void GPUShader::SetState( const GPUShader& ns )
 
 	flags |= ns.stream.HasColor() ? ShaderManager::COLORS : 0;
 	flags |= ( ns.color.r != 1.f || ns.color.g != 1.f || ns.color.b != 1.f || ns.color.a != 1.f ) ? ShaderManager::COLOR_MULTIPLIER : 0;
-	flags |= ns.HasLighting( 0, 0, 0 ) ? ShaderManager::LIGHTING_DIFFUSE : 0;
+	
+	if ( ns.HasLighting( 0, 0, 0 )) {
+		if ( ns.hemisphericalLighting )
+			flags |= ShaderManager::LIGHTING_HEMI;
+		else
+			flags |= ShaderManager::LIGHTING_DIFFUSE;
+	}
 
 	flags |= ns.instancing ? ShaderManager::INSTANCE : 0;
 	flags |= ns.premult ? ShaderManager::PREMULT : 0;
@@ -364,7 +370,7 @@ void GPUShader::SetState( const GPUShader& ns )
 	}
 
 	// lighting 
-	if ( flags & ShaderManager::LIGHTING_DIFFUSE ) {
+	if ( flags & (ShaderManager::LIGHTING_DIFFUSE | ShaderManager::LIGHTING_HEMI) ) {
 		Vector4F dirWC, d, a;
 		ns.HasLighting( &dirWC, &a, &d );
 

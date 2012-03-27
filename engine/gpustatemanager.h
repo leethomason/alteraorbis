@@ -231,7 +231,8 @@ public:
 		grinliz::Color4F c = { (float)color.r*INV, (float)color.g*INV, (float)color.b*INV, (float)color.a*INV };
 		SetColor( c );
 	}
-	void SetEmissive( bool em ) { emissive = em; }
+	void SetEmissive( bool em )					{ emissive = em; }
+	void SetHemisphericalLighting( bool hemi )	{ hemisphericalLighting = hemi; }
 
 	void SetInstancing( bool value ) { instancing = value; }
 	void InstanceMatrix( int i, const grinliz::Matrix4& mat ) { 
@@ -287,7 +288,8 @@ protected:
 				 blend( BLEND_NONE ),
 				 depthWrite( true ), depthTest( true ),
 				 colorWrite( true ),
-				 stencilMode( STENCIL_OFF )
+				 stencilMode( STENCIL_OFF ),
+				 hemisphericalLighting( false )
 	{
 		color.Set( 1, 1, 1, 1 );
 		direction.Set( 0, 0, 0, 0 );
@@ -342,11 +344,12 @@ protected:
 	bool			emissive;		// interpret alpha as emissive
 
 	BlendMode	blend;
-	bool	depthWrite;
-	bool	depthTest;
-	bool	colorWrite;
+	bool		depthWrite;
+	bool		depthTest;
+	bool		colorWrite;
 	StencilMode	stencilMode;
 
+	bool				hemisphericalLighting;
 	grinliz::Color4F	color;
 	grinliz::Color4F	ambient;
 	grinliz::Vector4F	direction;
@@ -375,7 +378,10 @@ class LightShader : public GPUShader
 {
 public:
 	/** Texture or color. Writes & tests z. Enables lighting. */
-	LightShader( const grinliz::Color4F& ambient, const grinliz::Vector4F& direction, const grinliz::Color4F& diffuse, BlendMode blend = BLEND_NONE );
+	LightShader( const grinliz::Color4F& ambient, 
+		         const grinliz::Vector4F& direction, 
+				 const grinliz::Color4F& diffuse, 
+				 BlendMode blend = BLEND_NONE );
 	~LightShader();
 	
 protected:

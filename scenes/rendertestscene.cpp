@@ -34,6 +34,10 @@ RenderTestScene::RenderTestScene( LumosGame* game, const RenderTestSceneData* da
 	whiteButton.SetSize( layout.Width(), layout.Height() );
 	whiteButton.SetText( "white" );
 
+	hemiButton.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
+	hemiButton.SetSize( layout.Width(), layout.Height() );
+	hemiButton.SetText( "hemisph" );
+
 	textBox.Init( &gamui2D );
 	textBox.SetSize( 400, 100 );
 }
@@ -55,6 +59,7 @@ void RenderTestScene::Resize()
 	
 	LayoutCalculator layout = lumosGame->DefaultLayout();
 	layout.PosAbs( &whiteButton, 1, -1 );
+	layout.PosAbs( &hemiButton, 2, -1 );
 
 	textBox.SetPos( okay.X(), okay.Y()-100 );
 }
@@ -103,6 +108,10 @@ void RenderTestScene::ItemTapped( const gamui::UIItem* item )
 				model[i]->SetTexture( white );
 			}
 		}
+	}
+	else if ( item == &hemiButton ) {
+		GLOUTPUT(( "Set light model: %s\n", hemiButton.Down() ? "down" : "up" ));
+		engine->SetLightModel( hemiButton.Down() );
 	}
 }
 
