@@ -28,6 +28,7 @@
 #include "enginelimits.h"
 #include "model.h"
 #include "screenport.h"
+#include "lighting.h"
 
 class RenderQueue;
 
@@ -61,11 +62,8 @@ public:
 	Engine( Screenport* screenport, const gamedb::Reader* database );
 	~Engine();
 
-	const float AMBIENT;
-	const float DIFFUSE;
-	const float DIFFUSE_SHADOW;
-
-	Camera camera;
+	Camera	 camera;
+	Lighting lighting;
 
 	// Send everything to the GPU
 	void Draw( U32 deltaTime );
@@ -81,10 +79,6 @@ public:
 
 	void CameraLookingAt( grinliz::Vector3F* at );
 	void CameraLookAt( float x, float z, float heightOfCamera, float yRotation=-45.0f, float tilt=-50.0f );
-
-	// Direction from world TO sun. (y is positive). If null, sets the default.
-	void SetLightDirection( const grinliz::Vector3F* lightDir );
-	void SetLightModel( bool hemisphere )	{ hemiLighting = hemisphere; }
 
 	Model* AllocModel( const ModelResource* );
 	void FreeModel( Model* );
@@ -134,18 +128,6 @@ private:
 
 	void CalcCameraRotation( grinliz::Matrix4* );
 
-	// Query the light properties at day or night:
-	void QueryLights(	DayNight dayNight, 
-						grinliz::Color4F* ambient, 
-						grinliz::Vector4F* dir, 
-						grinliz::Color4F* diffuse );
-
-	// Calculate the light hitting a point with the given surface normal
-	void CalcLight(	DayNight dayNight,	
-					const grinliz::Vector3F& surfaceNormal,
-					float shadowAmount,				// 1.0: fully in shadow
-					grinliz::Color3F* light, 
-					grinliz::Color3F* shadow  );
 
 	void PushShadowSwizzleMatrix( GPUShader* );
 	void PushLightSwizzleMatrix( GPUShader* );

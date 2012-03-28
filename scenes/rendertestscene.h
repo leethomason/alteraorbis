@@ -44,11 +44,14 @@ private:
 	void SetupTest0();
 	void SetupTest1();
 
+	void LoadLighting();
+
 	int testID;
 	LumosGame* lumosGame;
 	gamui::PushButton okay;
 	gamui::PushButton whiteButton;
 	gamui::ToggleButton hemiButton;
+	gamui::PushButton refreshButton;
 	gamui::TextBox textBox;
 
 	Engine* engine;

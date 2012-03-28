@@ -42,9 +42,6 @@ using namespace grinliz;
 
 Engine::Engine( Screenport* port, const gamedb::Reader* database ) 
 	:	
-		AMBIENT( 0.5f ),
-		DIFFUSE( 0.6f ),
-		DIFFUSE_SHADOW( 0.2f ),
 		screenport( port ),
 		initZoomDistance( 0 ),
 		hemiLighting( false ),
@@ -52,8 +49,6 @@ Engine::Engine( Screenport* port, const gamedb::Reader* database )
 {
 	spaceTree = new SpaceTree( -0.1f, 3.0f, 64 );	// fixme: map size hardcoded
 	renderQueue = new RenderQueue();
-
-	SetLightDirection( 0 );
 }
 
 
@@ -142,14 +137,6 @@ void Engine::MoveCameraXZ( float x, float z, Vector3F* calc )
 }
 
 
-void Engine::SetLightDirection( const grinliz::Vector3F* dir ) 
-{
-	lightDirection.Set( 2.0f, 3.0f, 1.0f );
-	if ( dir ) {
-		lightDirection = *dir;
-	}
-	lightDirection.Normalize();
-}
 
 Model* Engine::AllocModel( const ModelResource* resource )
 {
@@ -198,7 +185,7 @@ void Engine::Draw( U32 deltaTime )
 	
 	Color4F ambient, diffuse;
 	Vector4F dir;
-	QueryLights( DAY_TIME, &ambient, &dir, &diffuse );
+	lighting.Query( &ambient, &dir, &diffuse );
 
 	LightShader lightShader( ambient, dir, diffuse );
 	LightShader emissiveLightShader( ambient, dir, diffuse );
@@ -233,7 +220,7 @@ void Engine::Draw( U32 deltaTime )
 		float shadowAmount = 1.0f;
 		Color3F shadow, lighted;
 		static const Vector3F groundNormal = { 0, 1, 0 };
-		CalcLight( DAY_TIME, groundNormal, 1.0f, &lighted, &shadow );
+		lighting.CalcLight( groundNormal, 1.0f, &lighted, &shadow );
 
 #ifdef ENGINE_RENDER_SHADOWS
 		if ( shadowAmount > 0.0f ) {
@@ -279,47 +266,6 @@ void Engine::Draw( U32 deltaTime )
 	ParticleSystem* particleSystem = ParticleSystem::Instance();
 	particleSystem->Update( deltaTime, eyeDir );
 	particleSystem->Draw();
-}
-
-
-void Engine::QueryLights( DayNight dayNight, Color4F* ambient, Vector4F* dir, Color4F* diffuse )
-{
-	if ( hemiLighting ) {
-		ambient->Set( 0.3f, 0.3f, 0.4f, 1.0f );
-		diffuse->Set( 1.0f, 1.0f, 1.0f, 1.0f );
-	}
-	else {
-		ambient->Set( AMBIENT, AMBIENT, AMBIENT, 1.0f );	// 0.5
-		diffuse->Set( DIFFUSE, DIFFUSE, DIFFUSE, 1.0f );	// 0.6
-	}
-	if ( dayNight == NIGHT_TIME ) {
-		diffuse->r *= EL_NIGHT_RED;
-		diffuse->g *= EL_NIGHT_GREEN;
-		diffuse->b *= EL_NIGHT_BLUE;
-	}
-	dir->Set( lightDirection.x, lightDirection.y, lightDirection.z, 0 );	// '0' in last term is parallel
-}
-
-
-void Engine::CalcLight( DayNight dayNight, const Vector3F& normal, float shadowAmount, Color3F* light, Color3F* shadow )
-{
-	Color4F ambient, diffuse;
-	Vector4F dir;
-	QueryLights( dayNight, &ambient, &dir, &diffuse );
-	Vector3F dir3 = { dir.x, dir.y, dir.z };
-
-	float nDotL = Max( 0.0f, DotProduct( normal, dir3 ) );
-	for( int i=0; i<3; ++i ) {
-		if ( hemiLighting ) {
-			light->X(i)  = InterpolateUnitX( ambient.X(i), diffuse.X(i), (nDotL+1.0f)*0.5f );
-			shadow->X(i) = ambient.X(i); 
-		}
-		else {
-			light->X(i)  = ambient.X(i) + diffuse.X(i)*nDotL;
-			shadow->X(i) = ambient.X(i);
-		}
-		shadow->X(i) = InterpolateUnitX( shadow->X(i), light->X(i), 1.f-shadowAmount ); 
-	}
 }
 
 

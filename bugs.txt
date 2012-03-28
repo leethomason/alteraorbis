@@ -1,8 +1,7 @@
 - instance scene
 	x shadows
 	- glow
-	- hemispherical lighting
-
+	x hemispherical lighting
 X desktop (art):
 	X light model
 	X test models

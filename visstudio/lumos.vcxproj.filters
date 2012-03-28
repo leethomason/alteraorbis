@@ -142,6 +142,9 @@
     <ClCompile Include="..\scenes\particlescene.cpp">
       <Filter>Source Files\scenes</Filter>
     </ClCompile>
+    <ClCompile Include="..\engine\lighting.cpp">
+      <Filter>Source Files\engine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\camera.h">
@@ -266,6 +269,9 @@
     </ClInclude>
     <ClInclude Include="..\scenes\particlescene.h">
       <Filter>Source Files\scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\engine\lighting.h">
+      <Filter>Source Files\engine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -80,6 +80,7 @@
     <ClCompile Include="..\engine\engine.cpp" />
     <ClCompile Include="..\engine\fixedgeom.cpp" />
     <ClCompile Include="..\engine\gpustatemanager.cpp" />
+    <ClCompile Include="..\engine\lighting.cpp" />
     <ClCompile Include="..\engine\loosequadtree.cpp" />
     <ClCompile Include="..\engine\map.cpp" />
     <ClCompile Include="..\engine\model.cpp" />
@@ -119,6 +120,7 @@
     <ClInclude Include="..\engine\enginelimits.h" />
     <ClInclude Include="..\engine\fixedgeom.h" />
     <ClInclude Include="..\engine\gpustatemanager.h" />
+    <ClInclude Include="..\engine\lighting.h" />
     <ClInclude Include="..\engine\loosequadtree.h" />
     <ClInclude Include="..\engine\map.h" />
     <ClInclude Include="..\engine\model.h" />

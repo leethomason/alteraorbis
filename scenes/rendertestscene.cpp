@@ -5,6 +5,7 @@
 #include "../xegame/testmap.h"
 
 using namespace gamui;
+using namespace tinyxml2;
 
 RenderTestScene::RenderTestScene( LumosGame* game, const RenderTestSceneData* data ) : Scene( game ), lumosGame( game )
 {
@@ -38,6 +39,10 @@ RenderTestScene::RenderTestScene( LumosGame* game, const RenderTestSceneData* da
 	hemiButton.SetSize( layout.Width(), layout.Height() );
 	hemiButton.SetText( "hemisph" );
 
+	refreshButton.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
+	refreshButton.SetSize( layout.Width(), layout.Height() );
+	refreshButton.SetText( "refresh" );
+
 	textBox.Init( &gamui2D );
 	textBox.SetSize( 400, 100 );
 }
@@ -60,6 +65,7 @@ void RenderTestScene::Resize()
 	LayoutCalculator layout = lumosGame->DefaultLayout();
 	layout.PosAbs( &whiteButton, 1, -1 );
 	layout.PosAbs( &hemiButton, 2, -1 );
+	layout.PosAbs( &refreshButton, 3, -1 );
 
 	textBox.SetPos( okay.X(), okay.Y()-100 );
 }
@@ -111,7 +117,27 @@ void RenderTestScene::ItemTapped( const gamui::UIItem* item )
 	}
 	else if ( item == &hemiButton ) {
 		GLOUTPUT(( "Set light model: %s\n", hemiButton.Down() ? "down" : "up" ));
-		engine->SetLightModel( hemiButton.Down() );
+		engine->lighting.hemispheric = hemiButton.Down();
+		LoadLighting();
+	}
+	else if ( item == &refreshButton ) {
+		LoadLighting();
+	}
+}
+
+
+void RenderTestScene::LoadLighting()
+{
+	XMLDocument doc;
+	doc.LoadFile( "./resin/lighting.xml" );
+
+	if ( engine->lighting.hemispheric ) {
+		const XMLElement* ele = doc.FirstChildElement( "lighting" )->FirstChildElement( "hemispherical" );
+		engine->lighting.Load( ele );
+	}
+	else {
+		const XMLElement* ele = doc.FirstChildElement( "lighting" )->FirstChildElement( "lambert" );
+		engine->lighting.Load( ele );
 	}
 }
 

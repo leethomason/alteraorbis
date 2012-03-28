@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<lighting>
+  <lambert>
+    <diffuse red="0.7" green="0.7" blue="0.7"/>
+    <ambient red="0.3" green="0.3" blue="0.3"/>
+    <shadow red="0.3" green="0.3" blue="0.3"/>
+  </lambert>
+
+  <hemispherical>
+    <diffuse red="0.9" green="0.9" blue="0.9"/>
+    <ambient red="0.2" green="0.2" blue="0.3"/>
+    <shadow red="0.3" green="0.3" blue="0.3"/>
+  </hemispherical>
+
+</lighting>
