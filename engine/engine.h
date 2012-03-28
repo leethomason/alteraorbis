@@ -31,6 +31,7 @@
 #include "lighting.h"
 
 class RenderQueue;
+class RenderTarget;
 
 /*
 	Standard state:
@@ -135,12 +136,12 @@ private:
 	Screenport* screenport;
 	float	initZoom;
 	int		initZoomDistance;
-	bool	hemiLighting;
 	
 	Map*	map;
 
 	SpaceTree* spaceTree;
 	RenderQueue* renderQueue;
+	RenderTarget* renderTarget;
 
 	grinliz::Vector3F lightDirection;
 	grinliz::Matrix4  shadowMatrix;

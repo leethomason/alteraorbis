@@ -86,6 +86,7 @@
     <ClCompile Include="..\engine\model.cpp" />
     <ClCompile Include="..\engine\particle.cpp" />
     <ClCompile Include="..\engine\renderqueue.cpp" />
+    <ClCompile Include="..\engine\rendertarget.cpp" />
     <ClCompile Include="..\engine\screenport.cpp" />
     <ClCompile Include="..\engine\serialize.cpp" />
     <ClCompile Include="..\engine\settings.cpp" />
@@ -127,6 +128,7 @@
     <ClInclude Include="..\engine\particle.h" />
     <ClInclude Include="..\engine\platformgl.h" />
     <ClInclude Include="..\engine\renderqueue.h" />
+    <ClInclude Include="..\engine\rendertarget.h" />
     <ClInclude Include="..\engine\screenport.h" />
     <ClInclude Include="..\engine\serialize.h" />
     <ClInclude Include="..\engine\settings.h" />

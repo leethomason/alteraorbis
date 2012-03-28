@@ -27,6 +27,7 @@
 #include "surface.h"
 #include "texture.h"
 #include "particle.h"
+#include "rendertarget.h"
 
 /*
 	Xenoengine-2 has a cleaned up render queue. The sorting of items probably makes the engine
@@ -44,11 +45,11 @@ Engine::Engine( Screenport* port, const gamedb::Reader* database )
 	:	
 		screenport( port ),
 		initZoomDistance( 0 ),
-		hemiLighting( false ),
 		map( 0 )
 {
 	spaceTree = new SpaceTree( -0.1f, 3.0f, 64 );	// fixme: map size hardcoded
 	renderQueue = new RenderQueue();
+	renderTarget = 0;
 }
 
 
@@ -56,6 +57,7 @@ Engine::~Engine()
 {
 	delete renderQueue;
 	delete spaceTree;
+	delete renderTarget;
 }
 
 
@@ -154,6 +156,7 @@ void Engine::FreeModel( Model* model )
 void Engine::Draw( U32 deltaTime )
 {
 	GRINLIZ_PERFTRACK;
+	bool glow = true;
 
 	// -------- Camera & Frustum -------- //
 	screenport->SetView( camera.ViewMatrix() );	// Draw the camera
@@ -192,7 +195,7 @@ void Engine::Draw( U32 deltaTime )
 	emissiveLightShader.SetEmissive( true );
 	//LightShader blendShader( ambient, dir, diffuse, GPUShader::BLEND_NORMAL );
 
-	if ( hemiLighting ) {
+	if ( lighting.hemispheric ) {
 		lightShader.SetHemisphericalLighting( true );
 		emissiveLightShader.SetHemisphericalLighting( true );
 		//blendShader.SetHemisphericalLighting( true );
@@ -215,6 +218,18 @@ void Engine::Draw( U32 deltaTime )
 
 
 	// ----------- Render Passess ---------- //
+	if ( glow ) {
+		/*
+		// FIXME: handle context shift
+		if ( !renderTarget ) {
+			renderTarget = new RenderTarget( screenport->UIWidth()/2, screenport->UIHeight()/2, true );
+		}
+		renderTarget->SetActive( true );
+		renderQueue->Submit( 0, 0, 0, 0 );
+		renderTarget->SetActive( false );
+		*/
+	}
+
 	if ( map ) {
 		// Draw shadows to stencil buffer.
 		float shadowAmount = 1.0f;

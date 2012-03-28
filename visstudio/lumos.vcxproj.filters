@@ -145,6 +145,9 @@
     <ClCompile Include="..\engine\lighting.cpp">
       <Filter>Source Files\engine</Filter>
     </ClCompile>
+    <ClCompile Include="..\engine\rendertarget.cpp">
+      <Filter>Source Files\engine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\camera.h">
@@ -271,6 +274,9 @@
       <Filter>Source Files\scenes</Filter>
     </ClInclude>
     <ClInclude Include="..\engine\lighting.h">
+      <Filter>Source Files\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\engine\rendertarget.h">
       <Filter>Source Files\engine</Filter>
     </ClInclude>
   </ItemGroup>
