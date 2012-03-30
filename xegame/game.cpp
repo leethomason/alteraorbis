@@ -546,8 +546,8 @@ void Game::DoTick( U32 _currentTime )
 	
 		if ( renderPass & Scene::RENDER_3D ) {
 			GRINLIZ_PERFTRACK_NAME( "Game::DoTick 3D" );
-			screenport.SetPerspective( clip3D.Width() > 0 ? &clip3D : 0 );
 
+			screenport.SetPerspective( clip3D.Width() > 0 ? &clip3D : 0 );
 			scene->Draw3D( deltaTime );
 		}
 

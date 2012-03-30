@@ -36,9 +36,15 @@ Screenport::Screenport( int w, int h, int r, int virtualHeight )
 
 void Screenport::Resize( int w, int h, int r )
 {
-	physicalWidth  = (float)w;
-	physicalHeight = (float)h;
-	rotation =	r;
+	if ( w > 0 && h > 0 ) {
+		physicalWidth  = (float)w;
+		physicalHeight = (float)h;
+		rotation =	r;
+	}
+	else {
+		w = (int)physicalWidth;
+		h = (int)physicalHeight;
+	}
 	GLASSERT( rotation >= 0 && rotation < 4 );
 
 	GPUShader::SetViewport( w, h );
@@ -62,7 +68,7 @@ void Screenport::Resize( int w, int h, int r )
 		screenHeight = screenWidth * physicalHeight / physicalWidth;
 	}
 
-	GLOUTPUT(( "Screenport::Resize physical=(%.1f,%.1f) view=(%.1f,%.1f) rotation=%d\n", physicalWidth, physicalHeight, screenWidth, screenHeight, r ));
+	//GLOUTPUT(( "Screenport::Resize physical=(%.1f,%.1f) view=(%.1f,%.1f) rotation=%d\n", physicalWidth, physicalHeight, screenWidth, screenHeight, r ));
 }
 
 

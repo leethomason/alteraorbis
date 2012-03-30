@@ -619,24 +619,24 @@ void GPUShader::Draw( int instances )
 }
 
 
-void GPUShader::Debug_DrawQuad( const grinliz::Vector3F p0, const grinliz::Vector3F p1 )
+void GPUShader::DrawQuad( const grinliz::Vector3F p0, const grinliz::Vector3F p1 )
 {
-#ifdef DEBUG
-	grinliz::Vector3F pos[4] = { 
-		{ p0.x, p0.y, p0.z },
-		{ p1.x, p0.y, p0.z },
-		{ p1.x, p1.y, p1.z },
-		{ p0.x, p1.y, p1.z },
+	PTVertex pos[4] = { 
+		{ { p0.x, p0.y, p0.z }, { 0, 0 } },
+		{ { p1.x, p0.y, p0.z }, { 1, 0 } },
+		{ { p1.x, p1.y, p1.z }, { 1, 1 } },
+		{ { p0.x, p1.y, p1.z }, { 0, 1 } },
 	};
 	static const U16 index[6] = { 0, 2, 1, 0, 3, 2 };
 	GPUStream stream;
 	stream.stride = sizeof(grinliz::Vector3F);
 	stream.nPos = 3;
-	stream.posOffset = 0;
+	stream.posOffset = PTVertex::POS_OFFSET;
+	stream.nTexture0 = 2;
+	stream.texture0Offset = PTVertex::TEXTURE_OFFSET;
 
 	SetStream( stream, pos, 6, index );
 	Draw();
-#endif
 }
 
 

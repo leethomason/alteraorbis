@@ -1,37 +1,88 @@
 #include "rendertarget.h"
 #include "platformgl.h"
+#include "engine.h"
 
 RenderTarget::RenderTarget( int width, int height, bool depthBuffer )
 {
-/*	
-	glGenFramebuffers(1, fb, 0);
-	glGenRenderbuffers(1, depthRb, 0); // the depth buffer
-	glGenTextures(1, renderTex, 0);
+	CHECK_GL_ERROR;
 
-// generate texture
-GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, renderTex[0]);
+	screenport = 0;
+	savedScreenport = 0;
 
-// parameters - we have to make sure we clamp the textures to the edges
-GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S,
-		GLES20.GL_CLAMP_TO_EDGE);
-GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T,
-		GLES20.GL_CLAMP_TO_EDGE);
-GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER,
-		GLES20.GL_LINEAR);
-GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER,
-		GLES20.GL_LINEAR);
+	glGenFramebuffers(1, &frameBufferID );
+	glGenRenderbuffers(1, &depthBufferID ); // the depth buffer
+	glGenTextures(1, &renderTextureID );
 
-// create it
-// create an empty intbuffer first
-int[] buf = new int[texW * texH];
-texBuffer = ByteBuffer.allocateDirect(buf.length
-		* FLOAT_SIZE_BYTES).order(ByteOrder.nativeOrder()).asIntBuffer();;
+	glBindTexture( GL_TEXTURE_2D, renderTextureID );
 
-// generate the textures
-GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGB, texW, texH, 0, GLES20.GL_RGB, GLES20.GL_UNSIGNED_SHORT_5_6_5, texBuffer);
+	// Texture params. Be sure to clamp and turn filtering to not use mips.
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-// create render buffer and bind 16-bit depth buffer
-GLES20.glBindRenderbuffer(GLES20.GL_RENDERBUFFER, depthRb[0]);
-GLES20.glRenderbufferStorage(GLES20.GL_RENDERBUFFER, GLES20.GL_DEPTH_COMPONENT16, texW, texH);
-*/
+	// generate the textures
+	glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, 0 );
+
+	// create 16 bit depth buffer
+	glBindRenderbuffer( GL_RENDERBUFFER, depthBufferID );
+	glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, width, height );
+
+	glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+	CHECK_GL_ERROR;
+
+	gpuMem.w = width;
+	gpuMem.h = height;
+	gpuMem.format = Texture::RGB16;
+	gpuMem.flags = Texture::PARAM_LINEAR;
+	gpuMem.item = 0;
+	gpuMem.inUse = true;
+	gpuMem.glID = renderTextureID;
+
+	texture.w = width;
+	texture.h = height;
+	texture.format = Texture::RGB16;
+	texture.flags = Texture::PARAM_LINEAR;
+	texture.creator = 0;
+	texture.item = 0;
+	texture.gpuMem = &gpuMem;
+}
+
+
+RenderTarget::~RenderTarget()
+{
+	// fixme GL memory
+	delete screenport;
+}
+
+
+void RenderTarget::SetActive( bool active, Engine* engine )
+{
+
+	if ( active ) {
+		if ( !screenport ) {
+			screenport = new Screenport( gpuMem.w, gpuMem.h, 0, gpuMem.h );
+		}
+		savedScreenport = engine->GetScreenportMutable();
+		engine->SetScreenport( screenport );
+		screenport->Resize( gpuMem.w, gpuMem.h, 0 );
+		screenport->SetPerspective( 0 );
+
+		glBindFramebuffer( GL_FRAMEBUFFER, frameBufferID );
+		glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderTextureID, 0);
+		glFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBufferID );
+
+#ifdef DEBUG
+		int status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+		GLASSERT( status == GL_FRAMEBUFFER_COMPLETE);
+#endif
+
+		glClearColor(.0f, .0f, .0f, 1.0f);
+		glClear( GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+	}
+	else {
+		engine->SetScreenport( savedScreenport );
+		savedScreenport->Resize( 0, 0, 0 );
+		glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+	}
 }

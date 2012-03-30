@@ -112,19 +112,16 @@ public:
 	float GetZoom();
 	void SetZoom( float zoom );
 
+	void SetScreenport( Screenport* port ) { screenport = port; }
 	const Screenport& GetScreenport() { return *screenport; }
 	Screenport* GetScreenportMutable() { return screenport; }
 	void RestrictCamera();
 
+	Texture* GetRenderTargetTexture();
 private:
 	enum ShadowState {
 		IN_SHADOW,
 		OPEN_LIGHT
-	};
-
-	enum DayNight {
-		DAY_TIME,
-		NIGHT_TIME
 	};
 
 	void CalcCameraRotation( grinliz::Matrix4* );

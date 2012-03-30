@@ -21,6 +21,7 @@ public:
 class Texture
 {
 	friend class TextureManager;
+	friend class RenderTarget;
 public:
 	enum { MAX_TEXTURE_NAME = 24 };
 

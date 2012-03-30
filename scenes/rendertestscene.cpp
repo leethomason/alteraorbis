@@ -45,6 +45,10 @@ RenderTestScene::RenderTestScene( LumosGame* game, const RenderTestSceneData* da
 
 	textBox.Init( &gamui2D );
 	textBox.SetSize( 400, 100 );
+
+	RenderAtom nullAtom;
+	rtImage.Init( &gamui2D, nullAtom, true );
+	rtImage.SetSize( 400.f, 200.f );
 }
 
 
@@ -175,4 +179,7 @@ void RenderTestScene::HandleHotKeyMask( int mask )
 void RenderTestScene::Draw3D( U32 deltaTime )
 {
 	engine->Draw( deltaTime );
+	
+	RenderAtom atom( (const void*)UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, (const void*)engine->GetRenderTargetTexture(), 0, 0, 1, 1 );
+	rtImage.SetAtom( atom );
 }

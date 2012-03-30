@@ -219,15 +219,13 @@ void Engine::Draw( U32 deltaTime )
 
 	// ----------- Render Passess ---------- //
 	if ( glow ) {
-		/*
 		// FIXME: handle context shift
 		if ( !renderTarget ) {
-			renderTarget = new RenderTarget( screenport->UIWidth()/2, screenport->UIHeight()/2, true );
+			renderTarget = new RenderTarget( screenport->PhysicalWidth(), screenport->PhysicalHeight(), true );
 		}
-		renderTarget->SetActive( true );
+		renderTarget->SetActive( true, this );
 		renderQueue->Submit( 0, 0, 0, 0 );
-		renderTarget->SetActive( false );
-		*/
+		renderTarget->SetActive( false, this );
 	}
 
 	if ( map ) {
@@ -428,4 +426,10 @@ float Engine::GetZoom()
 							EL_CAMERA_MAX, GAME_ZOOM_MAX,
 							camera.PosWC().y );
 	return z;
+}
+
+
+Texture* Engine::GetRenderTargetTexture() 
+{ 
+	return renderTarget ? renderTarget->GetTexture() : 0; 
 }

@@ -53,6 +53,7 @@ private:
 	gamui::ToggleButton hemiButton;
 	gamui::PushButton refreshButton;
 	gamui::TextBox textBox;
+	gamui::Image rtImage;
 
 	Engine* engine;
 	Model*  model[NUM_MODELS];

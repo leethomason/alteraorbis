@@ -98,6 +98,9 @@ public:
 
 	float UIWidth() const									{ return (rotation&1) ? screenHeight : screenWidth; }
 	float UIHeight() const									{ return (rotation&1) ? screenWidth : screenHeight; }
+	int PhysicalWidth() const								{ return (int)physicalWidth; }
+	int PhysicalHeight() const								{ return (int)physicalHeight; }
+
 	const grinliz::Rectangle2F& UIBoundsClipped3D() const	{ return clipInUI3D; }
 	const grinliz::Rectangle2F& UIBoundsClipped2D() const	{ return clipInUI2D; }
 
