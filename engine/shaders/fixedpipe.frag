@@ -21,9 +21,14 @@ void main()
 			// modulate the incoming fragment color, which
 			// is the result of lighting.
 			vec4 texColor = texture2D( texture0, v_uv0 );
-			color = mix( color, vec4(1,1,1,1), texColor.a ) * texColor;
-			#if EMISSIVE_EXCLUSIVE == 1
-				color *= sign( texColor.a-0.1 );
+			#if EMISSIVE_EXCLUSIVE == 0
+				// In 'normal'emissive mode, the incoming color (lighting)
+				// is mixed out as the emissiveness increases.
+				color = mix( color, vec4(1,1,1,1), texColor.a ) * texColor;
+			#elif EMISSIVE_EXCLUSIVE == 1
+				// In 'exclusive' mode, everything is black, and mixed
+				// to the emmissive color.
+				color = mix( vec4(0,0,0,1), texColor, texColor.a );
 			#endif
 		#else
 			color *= texture2D( texture0, v_uv0 );
