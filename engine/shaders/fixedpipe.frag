@@ -22,6 +22,9 @@ void main()
 			// is the result of lighting.
 			vec4 texColor = texture2D( texture0, v_uv0 );
 			color = mix( color, vec4(1,1,1,1), texColor.a ) * texColor;
+			#if EMISSIVE_EXCLUSIVE == 1
+				color *= sign( texColor.a-0.1 );
+			#endif
 		#else
 			color *= texture2D( texture0, v_uv0 );
 		#endif

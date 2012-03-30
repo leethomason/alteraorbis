@@ -308,6 +308,7 @@ void GPUShader::SetState( const GPUShader& ns )
 	flags |= ns.instancing ? ShaderManager::INSTANCE : 0;
 	flags |= ns.premult ? ShaderManager::PREMULT : 0;
 	flags |= ns.emissive ? ShaderManager::EMISSIVE : 0;
+	flags |= ns.emissiveExclusive ? ShaderManager::EMISSIVE_EXCLUSIVE : 0;
 
 	if ( flags & ShaderManager::INSTANCE) {
 		int debug=1;

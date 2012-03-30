@@ -232,6 +232,7 @@ public:
 		SetColor( c );
 	}
 	void SetEmissive( bool em )					{ emissive = em; }
+	void SetEmissiveExclusive( bool ee )		{ emissiveExclusive = ee; }
 	void SetHemisphericalLighting( bool hemi )	{ hemisphericalLighting = hemi; }
 
 	void SetInstancing( bool value ) { instancing = value; }
@@ -285,6 +286,7 @@ protected:
 				 instancing( false ),
 				 premult( false ),
 				 emissive( false ),
+				 emissiveExclusive( false ),
 				 blend( BLEND_NONE ),
 				 depthWrite( true ), depthTest( true ),
 				 colorWrite( true ),
@@ -342,6 +344,7 @@ protected:
 	bool			instancing;
 	bool			premult;
 	bool			emissive;		// interpret alpha as emissive
+	bool			emissiveExclusive;
 
 	BlendMode	blend;
 	bool		depthWrite;

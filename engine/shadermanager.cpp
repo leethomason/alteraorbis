@@ -230,6 +230,7 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 	AppendFlag( &header, "INSTANCE",			flags & INSTANCE );
 	AppendFlag( &header, "PREMULT",				flags & PREMULT );
 	AppendFlag( &header, "EMISSIVE",			flags & EMISSIVE );
+	AppendFlag( &header, "EMISSIVE_EXCLUSIVE",	flags & EMISSIVE_EXCLUSIVE );
 
 	if ( flags & LIGHTING_DIFFUSE )
 		AppendFlag( &header, "LIGHTING_DIFFUSE", 1, 1 );

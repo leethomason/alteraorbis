@@ -42,6 +42,7 @@ public:
 											// transform. The instance attribute must be in the vertex data.
 		PREMULT				= (1<<13),		// convert to pre-multiplied in the fragment shader
 		EMISSIVE			= (1<<14),		// interpret the alpha channel as emission.
+		EMISSIVE_EXCLUSIVE  = (1<<15),		// everything not emissive is black
 	};
 
 	void DeviceLoss();

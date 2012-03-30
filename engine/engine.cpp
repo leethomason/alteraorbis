@@ -224,7 +224,11 @@ void Engine::Draw( U32 deltaTime )
 			renderTarget = new RenderTarget( screenport->PhysicalWidth(), screenport->PhysicalHeight(), true );
 		}
 		renderTarget->SetActive( true, this );
+		lightShader.SetEmissiveExclusive( true );
+		emissiveLightShader.SetEmissiveExclusive( true );
 		renderQueue->Submit( 0, 0, 0, 0 );
+		lightShader.SetEmissiveExclusive( false );
+		emissiveLightShader.SetEmissiveExclusive( false );
 		renderTarget->SetActive( false, this );
 	}
 
