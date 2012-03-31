@@ -16,8 +16,10 @@ public:
 	RenderTarget( int width, int height, bool depthBuffer );
 	~RenderTarget();
 
+	// Sets this active, initializes and resizes the screenport.
 	void SetActive( bool active, Engine* engine );
 	Texture* GetTexture() { return &texture; }
+	Screenport* screenport;
 
 	int Width() const	{ return gpuMem.w; };
 	int Height() const	{ return gpuMem.h; }
@@ -29,7 +31,6 @@ private:
 
 	GPUMem gpuMem;
 	Texture texture;
-	Screenport* screenport;
 	Screenport* savedScreenport;
 };
 

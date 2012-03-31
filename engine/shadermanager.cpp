@@ -216,15 +216,17 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 
 	header = "";
 	AppendFlag( &header, "TEXTURE0",			flags & TEXTURE0 );
-	AppendFlag( &header, "TEXTURE0_ALPHA_ONLY",	flags & TEXTURE0_ALPHA_ONLY );
-	AppendFlag( &header, "TEXTURE0_TRANSFORM",	flags & TEXTURE0_TRANSFORM );
-	AppendFlag( &header, "TEXTURE0_3COMP",		flags & TEXTURE0_3COMP );
-	
+	if ( flags & TEXTURE0 ) {
+		AppendFlag( &header, "TEXTURE0_ALPHA_ONLY",	flags & TEXTURE0_ALPHA_ONLY );
+		AppendFlag( &header, "TEXTURE0_TRANSFORM",	flags & TEXTURE0_TRANSFORM );
+		AppendFlag( &header, "TEXTURE0_3COMP",		flags & TEXTURE0_3COMP );
+	}
 	AppendFlag( &header, "TEXTURE1",			flags & TEXTURE1 );
-	AppendFlag( &header, "TEXTURE1_ALPHA_ONLY",	flags & TEXTURE1_ALPHA_ONLY );
-	AppendFlag( &header, "TEXTURE1_TRANSFORM",	flags & TEXTURE1_TRANSFORM );
-	AppendFlag( &header, "TEXTURE1_3COMP",		flags & TEXTURE1_3COMP );
-	
+	if ( flags & TEXTURE1 ) {
+		AppendFlag( &header, "TEXTURE1_ALPHA_ONLY",	flags & TEXTURE1_ALPHA_ONLY );
+		AppendFlag( &header, "TEXTURE1_TRANSFORM",	flags & TEXTURE1_TRANSFORM );
+		AppendFlag( &header, "TEXTURE1_3COMP",		flags & TEXTURE1_3COMP );
+	}
 	AppendFlag( &header, "COLORS",				flags & COLORS );
 	AppendFlag( &header, "COLOR_MULTIPLIER",	flags & COLOR_MULTIPLIER );
 	AppendFlag( &header, "INSTANCE",			flags & INSTANCE );
@@ -238,6 +240,10 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 		AppendFlag( &header, "LIGHTING_DIFFUSE", 1, 2 );
 	else 
 		AppendFlag( &header, "LIGHTING_DIFFUSE", 0, 0 );
+
+	if ( flags & BLUR ) {
+		AppendFlag( &header, "BLUR_Y", flags & BLUR_Y );
+	}
 
 	AppendConst( &header, "EL_MAX_INSTANCE", EL_MAX_INSTANCE );
 

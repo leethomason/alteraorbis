@@ -66,7 +66,6 @@ void RenderTarget::SetActive( bool active, Engine* engine )
 		savedScreenport = engine->GetScreenportMutable();
 		engine->SetScreenport( screenport );
 		screenport->Resize( gpuMem.w, gpuMem.h, 0 );
-		screenport->SetPerspective( 0 );
 
 		glBindFramebuffer( GL_FRAMEBUFFER, frameBufferID );
 		glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderTextureID, 0);

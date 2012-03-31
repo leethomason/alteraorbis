@@ -3,9 +3,11 @@
 #include "../gamui/gamui.h"
 #include "../engine/engine.h"
 #include "../xegame/testmap.h"
+#include "../grinliz/glcolor.h"
 
 using namespace gamui;
 using namespace tinyxml2;
+using namespace grinliz;
 
 RenderTestScene::RenderTestScene( LumosGame* game, const RenderTestSceneData* data ) : Scene( game ), lumosGame( game )
 {
@@ -15,7 +17,11 @@ RenderTestScene::RenderTestScene( LumosGame* game, const RenderTestSceneData* da
 		model[i] = 0;
 
 	testMap = new TestMap( 8, 8 );
+	Color3F c = { 0.5f, 0.5f, 0.5f };
+	testMap->SetColor( c );
+
 	engine->SetMap( testMap );
+	engine->SetGlow( true );
 	
 	switch( data->id ) {
 	case 0:
@@ -83,7 +89,7 @@ void RenderTestScene::SetupTest0()
 	for( int i=0; i<NUM_MODELS; ++i ) {
 		model[i] = engine->AllocModel( i<3 ? res0 : res1 );
 		model[i]->SetPos( 1, 0, (float)i );
-		model[i]->SetRotation( (float)(-i*10) );
+		model[i]->SetRotation( (float)(-i*30) );
 	}
 	engine->CameraLookAt( 0, (float)(NUM_MODELS/2), 12 );
 
@@ -112,12 +118,15 @@ void RenderTestScene::ItemTapped( const gamui::UIItem* item )
 		game->PopScene();
 	}
 	else if ( item == &whiteButton ) {
+#if 0
 		Texture* white = TextureManager::Instance()->GetTexture( "white" );
 		for( int i=0; i<NUM_MODELS; ++i ) {
 			if ( model[i] ) {
 				model[i]->SetTexture( white );
 			}
 		}
+#endif
+		engine->SetGlow( !engine->GetGlow() );
 	}
 	else if ( item == &hemiButton ) {
 		GLOUTPUT(( "Set light model: %s\n", hemiButton.Down() ? "down" : "up" ));
@@ -180,6 +189,6 @@ void RenderTestScene::Draw3D( U32 deltaTime )
 {
 	engine->Draw( deltaTime );
 	
-	RenderAtom atom( (const void*)UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, (const void*)engine->GetRenderTargetTexture(), 0, 0, 1, 1 );
-	rtImage.SetAtom( atom );
+//	RenderAtom atom( (const void*)UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, (const void*)engine->GetRenderTargetTexture(), 0, 0, 1, 1 );
+//	rtImage.SetAtom( atom );
 }

@@ -117,7 +117,10 @@ public:
 	Screenport* GetScreenportMutable() { return screenport; }
 	void RestrictCamera();
 
-	Texture* GetRenderTargetTexture();
+	Texture* GetRenderTargetTexture( int id=0 );
+	void SetGlow( bool b ) { glow = b; }
+	bool GetGlow() const { return glow; }
+
 private:
 	enum ShadowState {
 		IN_SHADOW,
@@ -126,19 +129,27 @@ private:
 
 	void CalcCameraRotation( grinliz::Matrix4* );
 
-
+	void Blur();
 	void PushShadowSwizzleMatrix( GPUShader* );
 	void PushLightSwizzleMatrix( GPUShader* );
 
 	Screenport* screenport;
 	float	initZoom;
 	int		initZoomDistance;
+	bool	glow;
 	
 	Map*	map;
 
 	SpaceTree* spaceTree;
 	RenderQueue* renderQueue;
-	RenderTarget* renderTarget;
+
+	enum {
+		RT_LIGHTS,
+		RT_BLUR_X,
+		RT_BLUR_Y,
+		RT_COUNT
+	};
+	RenderTarget* renderTarget[RT_COUNT];
 
 	grinliz::Vector3F lightDirection;
 	grinliz::Matrix4  shadowMatrix;

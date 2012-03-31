@@ -46,6 +46,7 @@ public:
 
 		// Switch to different shader:
 		BLUR				= (1<<16),
+		BLUR_Y				= (1<<17),
 	};
 
 	void DeviceLoss();

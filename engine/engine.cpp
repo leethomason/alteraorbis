@@ -46,11 +46,13 @@ Engine::Engine( Screenport* port, const gamedb::Reader* database )
 	:	
 		screenport( port ),
 		initZoomDistance( 0 ),
+		glow( false ),
 		map( 0 )
 {
 	spaceTree = new SpaceTree( -0.1f, 3.0f, 64 );	// fixme: map size hardcoded
 	renderQueue = new RenderQueue();
-	renderTarget = 0;
+	for( int i=0; i<RT_COUNT; ++i )
+		renderTarget[i] = 0;
 }
 
 
@@ -58,7 +60,8 @@ Engine::~Engine()
 {
 	delete renderQueue;
 	delete spaceTree;
-	delete renderTarget;
+	for( int i=0; i<RT_COUNT; ++i )
+		delete renderTarget[i];
 }
 
 
@@ -157,7 +160,6 @@ void Engine::FreeModel( Model* model )
 void Engine::Draw( U32 deltaTime )
 {
 	GRINLIZ_PERFTRACK;
-	bool glow = true;
 
 	// -------- Camera & Frustum -------- //
 	screenport->SetView( camera.ViewMatrix() );	// Draw the camera
@@ -219,10 +221,11 @@ void Engine::Draw( U32 deltaTime )
 	// ----------- Render Passess ---------- //
 	if ( glow ) {
 		// FIXME: handle context shift
-		if ( !renderTarget ) {
-			renderTarget = new RenderTarget( screenport->PhysicalWidth(), screenport->PhysicalHeight(), true );
+		if ( !renderTarget[RT_LIGHTS] ) {
+			renderTarget[RT_LIGHTS] = new RenderTarget( screenport->PhysicalWidth(), screenport->PhysicalHeight(), true );
 		}
-		renderTarget->SetActive( true, this );
+		renderTarget[RT_LIGHTS]->SetActive( true, this );
+		renderTarget[RT_LIGHTS]->screenport->SetPerspective( 0 );
 		lightShader.SetShaderFlag( ShaderManager::EMISSIVE_EXCLUSIVE );
 		emissiveLightShader.SetShaderFlag( ShaderManager::EMISSIVE_EXCLUSIVE );
 
@@ -230,7 +233,7 @@ void Engine::Draw( U32 deltaTime )
 		
 		lightShader.ClearShaderFlag( ShaderManager::EMISSIVE_EXCLUSIVE );
 		emissiveLightShader.ClearShaderFlag( ShaderManager::EMISSIVE_EXCLUSIVE );
-		renderTarget->SetActive( false, this );
+		renderTarget[RT_LIGHTS]->SetActive( false, this );
 	}
 
 	if ( map ) {
@@ -281,11 +284,13 @@ void Engine::Draw( U32 deltaTime )
 	renderQueue->Clear();
 
 	if ( glow ) {
+		Blur();
+
 		// FIXME: here and in RenderTarget actually deal with possibly having a clip rect.
 		screenport->SetUI( 0 );
 
 		CompositingShader shader( GPUShader::BLEND_ADD );
-		shader.SetTexture0( renderTarget->GetTexture() );
+		shader.SetTexture0( renderTarget[RT_BLUR_Y]->GetTexture() );
 		//shader.SetShaderFlag( ShaderManager::PREMULT );
 		// fixme: change intensity of add with this value:
 		shader.SetColor( 1, 1, 1, 0 );
@@ -299,6 +304,45 @@ void Engine::Draw( U32 deltaTime )
 	ParticleSystem* particleSystem = ParticleSystem::Instance();
 	particleSystem->Update( deltaTime, eyeDir );
 	particleSystem->Draw();
+}
+
+
+void Engine::Blur()
+{
+	if ( !renderTarget[RT_BLUR_X] ) {
+		renderTarget[RT_BLUR_X] = new RenderTarget( screenport->PhysicalWidth(), screenport->PhysicalHeight(), false );
+	}
+	if ( !renderTarget[RT_BLUR_Y] ) {
+		renderTarget[RT_BLUR_Y] = new RenderTarget( screenport->PhysicalWidth(), screenport->PhysicalHeight(), false );
+	}
+
+	// --- x ---- //
+	renderTarget[RT_BLUR_X]->SetActive( true, this );
+	renderTarget[RT_BLUR_X]->screenport->SetUI( 0 );
+
+	{
+		FlatShader shader;
+		shader.SetTexture0( renderTarget[RT_LIGHTS]->GetTexture() );
+		shader.SetShaderFlag( ShaderManager::BLUR );
+		Vector3F p0 = { 0, screenport->UIHeight(), 0 };
+		Vector3F p1 = { screenport->UIWidth(), 0, 0 };
+		shader.DrawQuad( p0, p1 );
+	}
+	renderTarget[RT_BLUR_X]->SetActive( false, this );
+
+	// --- y ---- //
+	renderTarget[RT_BLUR_Y]->SetActive( true, this );
+	renderTarget[RT_BLUR_Y]->screenport->SetUI( 0 );
+	{
+		FlatShader shader;
+		shader.SetTexture0( renderTarget[RT_BLUR_X]->GetTexture() );
+		shader.SetShaderFlag( ShaderManager::BLUR );
+		shader.SetShaderFlag( ShaderManager::BLUR_Y );
+		Vector3F p0 = { 0, screenport->UIHeight(), 0 };
+		Vector3F p1 = { screenport->UIWidth(), 0, 0 };
+		shader.DrawQuad( p0, p1 );
+	}
+	renderTarget[RT_BLUR_Y]->SetActive( false, this );
 }
 
 
@@ -449,7 +493,8 @@ float Engine::GetZoom()
 }
 
 
-Texture* Engine::GetRenderTargetTexture() 
+Texture* Engine::GetRenderTargetTexture( int i ) 
 { 
-	return renderTarget ? renderTarget->GetTexture() : 0; 
+	GLASSERT( i >= 0 && i < RT_COUNT );
+	return renderTarget[i] ? renderTarget[i]->GetTexture() : 0; 
 }
