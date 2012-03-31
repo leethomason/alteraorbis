@@ -243,7 +243,13 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 
 	GLOUTPUT(( "header\n%s\n", header.c_str() ));
 
-	const char* vertexSrc[2] = { header.c_str(), fixedpipe_vert };
+	const char* vertexSrc[2]   = { header.c_str(), fixedpipe_vert };
+	const char* fragmentSrc[2] = { header.c_str(), fixedpipe_frag };
+	if ( flags & BLUR ) {
+		vertexSrc[1]   = blur_vert;
+		fragmentSrc[1] = blur_frag;
+	}
+
 	glShaderSource( shader->vertexProg, 2, vertexSrc, 0 );
 	glCompileShader( shader->vertexProg );
 	glGetShaderInfoLog( shader->vertexProg, LEN, &outLen, buf );
@@ -252,7 +258,6 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 	}
 	CHECK_GL_ERROR;
 
-	const char* fragmentSrc[2] = { header.c_str(), fixedpipe_frag };
 	glShaderSource( shader->fragmentProg, 2, fragmentSrc, 0 );
 	glCompileShader( shader->fragmentProg );
 	glGetShaderInfoLog( shader->fragmentProg, LEN, &outLen, buf );

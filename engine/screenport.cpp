@@ -91,8 +91,6 @@ void Screenport::SetUI( const Rectangle2I* clip )
 	CleanScissor( scissor, &clean );
 	GPUShader::SetScissor(  clean.min.x, clean.min.y, clean.Width(), clean.Height() );
 
-	//view2D.SetIdentity();
-	
 	projection2D.SetIdentity();
 	projection2D.SetOrtho( 0, screenWidth, screenHeight, 0, -1, 1 );
 	GPUShader::SetOrthoTransform( (int)screenWidth, (int)screenHeight, Rotation()*90 );

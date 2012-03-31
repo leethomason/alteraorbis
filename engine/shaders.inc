@@ -150,3 +150,29 @@ static const char* fixedpipe_frag = {
     "	gl_FragColor = color;\n"
     "}\n"
 };
+static const char* blur_vert = {
+    "uniform mat4 	u_mvpMatrix;		// model-view-projection.\n"
+    "attribute vec3  a_pos;				// vertex position\n"
+    "attribute vec2  a_uv0;\n"
+    "varying vec2    v_uv0;\n"
+    "void main()\n"
+    "{\n"
+    "	v_uv0 = a_uv0;	\n"
+    "	gl_Position = u_mvpMatrix * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );\n"
+    "}\n"
+};
+static const char* blur_frag = {
+    "uniform sampler2D texture0;\n"
+    "varying vec2 v_uv0;\n"
+    "#define NUM_SAMPLES=9;\n"
+    "float offset[NUM_SAMPLES] = [ -0.08, -0.06, -0.04, -0.02, 0,   0.02, 0.04, 0.06, 0.08 ]; \n"
+    "float weight[NUM_SAMPLES] = [  0.01,  0.02,  0.04,  0.08, 0.1, 0.08, 0.04, 0.02, 0.01 ];\n"
+    "void main()\n"
+    "{\n"
+    "	vec4 color = vec4( 0, 0, 0, 0 );\n"
+    "	for( int i=0; i<NUM_SAMPLES; ++i ) {\n"
+    "		color += texture2D( texture0, vec2( v_uv0.x+offset[i], v_uv0.y )) * weight[i];\n"
+    "	}\n"
+    "	gl_FragColor = color;	\n"
+    "}\n"
+};

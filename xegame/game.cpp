@@ -565,7 +565,6 @@ void Game::DoTick( U32 _currentTime )
 				scene->RenderGamui2D();
 			}
 		}
-//		SoundManager::Instance()->PlayQueuedSounds();
 	}
 
 	int Y = 0;

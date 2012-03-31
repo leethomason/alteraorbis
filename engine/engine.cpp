@@ -21,6 +21,7 @@
 #include "../grinliz/glperformance.h"
 
 #include "gpustatemanager.h"
+#include "shadermanager.h"
 #include "engine.h"
 #include "loosequadtree.h"
 #include "renderQueue.h"
@@ -192,13 +193,11 @@ void Engine::Draw( U32 deltaTime )
 
 	LightShader lightShader( ambient, dir, diffuse );
 	LightShader emissiveLightShader( ambient, dir, diffuse );
-	emissiveLightShader.SetEmissive( true );
-	//LightShader blendShader( ambient, dir, diffuse, GPUShader::BLEND_NORMAL );
+	emissiveLightShader.SetShaderFlag( ShaderManager::EMISSIVE );
 
 	if ( lighting.hemispheric ) {
-		lightShader.SetHemisphericalLighting( true );
-		emissiveLightShader.SetHemisphericalLighting( true );
-		//blendShader.SetHemisphericalLighting( true );
+		lightShader.SetShaderFlag( ShaderManager::LIGHTING_HEMI );
+		emissiveLightShader.SetShaderFlag( ShaderManager::LIGHTING_HEMI );
 	}
 
 	Rectangle2I mapBounds( 0, 0, EL_MAP_SIZE-1, EL_MAP_SIZE-1 );
@@ -224,13 +223,13 @@ void Engine::Draw( U32 deltaTime )
 			renderTarget = new RenderTarget( screenport->PhysicalWidth(), screenport->PhysicalHeight(), true );
 		}
 		renderTarget->SetActive( true, this );
-		lightShader.SetEmissiveExclusive( true );
-		emissiveLightShader.SetEmissiveExclusive( true );
+		lightShader.SetShaderFlag( ShaderManager::EMISSIVE_EXCLUSIVE );
+		emissiveLightShader.SetShaderFlag( ShaderManager::EMISSIVE_EXCLUSIVE );
 
 		renderQueue->Submit( 0, 0, 0, 0 );
 		
-		lightShader.SetEmissiveExclusive( false );
-		emissiveLightShader.SetEmissiveExclusive( false );
+		lightShader.ClearShaderFlag( ShaderManager::EMISSIVE_EXCLUSIVE );
+		emissiveLightShader.ClearShaderFlag( ShaderManager::EMISSIVE_EXCLUSIVE );
 		renderTarget->SetActive( false, this );
 	}
 
@@ -281,6 +280,21 @@ void Engine::Draw( U32 deltaTime )
 		map->DrawOverlay();
 	renderQueue->Clear();
 
+	if ( glow ) {
+		// FIXME: here and in RenderTarget actually deal with possibly having a clip rect.
+		screenport->SetUI( 0 );
+
+		CompositingShader shader( GPUShader::BLEND_ADD );
+		shader.SetTexture0( renderTarget->GetTexture() );
+		//shader.SetShaderFlag( ShaderManager::PREMULT );
+		// fixme: change intensity of add with this value:
+		shader.SetColor( 1, 1, 1, 0 );
+		Vector3F p0 = { 0, screenport->UIHeight(), 0 };
+		Vector3F p1 = { screenport->UIWidth(), 0, 0 };
+		shader.DrawQuad( p0, p1 );
+
+		screenport->SetPerspective( 0 );
+	}
 	const Vector3F* eyeDir = camera.EyeDir3();
 	ParticleSystem* particleSystem = ParticleSystem::Instance();
 	particleSystem->Update( deltaTime, eyeDir );

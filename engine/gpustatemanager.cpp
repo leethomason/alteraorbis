@@ -305,14 +305,11 @@ void GPUShader::SetState( const GPUShader& ns )
 			flags |= ShaderManager::LIGHTING_DIFFUSE;
 	}
 
-	flags |= ns.instancing ? ShaderManager::INSTANCE : 0;
-	flags |= ns.premult ? ShaderManager::PREMULT : 0;
-	flags |= ns.emissive ? ShaderManager::EMISSIVE : 0;
-	flags |= ns.emissiveExclusive ? ShaderManager::EMISSIVE_EXCLUSIVE : 0;
-
-	if ( flags & ShaderManager::INSTANCE) {
-		int debug=1;
-	}
+//	flags |= ns.instancing ? ShaderManager::INSTANCE : 0;
+//	flags |= ns.premult ? ShaderManager::PREMULT : 0;
+//	flags |= ns.emissive ? ShaderManager::EMISSIVE : 0;
+//	flags |= ns.emissiveExclusive ? ShaderManager::EMISSIVE_EXCLUSIVE : 0;
+	flags |= ns.shaderFlags;
 
 	shadman->ActivateShader( flags );
 	shadman->ClearStream();
@@ -579,8 +576,9 @@ void GPUShader::Draw( int instances )
 
 	bool useInstancing = instances > 0;
 	if ( instances == 0 ) instances = 1;
-	this->SetInstancing( useInstancing );
-
+	if ( useInstancing ) {
+		SetShaderFlag( ShaderManager::INSTANCE );
+	}
 	GLASSERT( nIndex % 3 == 0 );
 
 	trianglesDrawn += instances * nIndex / 3;
@@ -628,9 +626,10 @@ void GPUShader::DrawQuad( const grinliz::Vector3F p0, const grinliz::Vector3F p1
 		{ { p1.x, p1.y, p1.z }, { 1, 1 } },
 		{ { p0.x, p1.y, p1.z }, { 0, 1 } },
 	};
-	static const U16 index[6] = { 0, 2, 1, 0, 3, 2 };
+	static const U16 index[6] = { 0, 1, 2, 0, 2, 3 };
+
 	GPUStream stream;
-	stream.stride = sizeof(grinliz::Vector3F);
+	stream.stride = sizeof(PTVertex);
 	stream.nPos = 3;
 	stream.posOffset = PTVertex::POS_OFFSET;
 	stream.nTexture0 = 2;
@@ -861,6 +860,17 @@ LightShader::LightShader( const Color4F& ambient, const grinliz::Vector4F& direc
 LightShader::~LightShader()
 {
 }
+
+
+ParticleShader::ParticleShader() : GPUShader() 
+{
+	depthWrite = false;
+	depthTest = true;
+	//premult = true;
+	SetShaderFlag( ShaderManager::PREMULT );
+	blend = BLEND_ADD;
+}
+
 
 /*
 void ParticleShader::DrawPoints(  Texture* texture,

@@ -231,11 +231,11 @@ public:
 		grinliz::Color4F c = { (float)color.r*INV, (float)color.g*INV, (float)color.b*INV, (float)color.a*INV };
 		SetColor( c );
 	}
-	void SetEmissive( bool em )					{ emissive = em; }
-	void SetEmissiveExclusive( bool ee )		{ emissiveExclusive = ee; }
-	void SetHemisphericalLighting( bool hemi )	{ hemisphericalLighting = hemi; }
 
-	void SetInstancing( bool value ) { instancing = value; }
+	// Set any of the flags (that are boolean) from ShaderManager
+	void SetShaderFlag( int flag )				{ shaderFlags |= flag; }
+	void ClearShaderFlag( int flag )			{ shaderFlags &= (~flag); }
+
 	void InstanceMatrix( int i, const grinliz::Matrix4& mat ) { 
 		GLASSERT( i >= 0 && i < EL_MAX_INSTANCE );
 		instanceMatrix[i] = mat; 
@@ -283,10 +283,11 @@ protected:
 	GPUShader() : texture0( 0 ), texture1( 0 ), 
 				 streamPtr( 0 ), nIndex( 0 ), indexPtr( 0 ),
 				 vertexBuffer( 0 ), indexBuffer( 0 ),
-				 instancing( false ),
-				 premult( false ),
-				 emissive( false ),
-				 emissiveExclusive( false ),
+				 shaderFlags( 0 ),
+				 //instancing( false ),
+				 //premult( false ),
+				 //emissive( false ),
+				 //emissiveExclusive( false ),
 				 blend( BLEND_NONE ),
 				 depthWrite( true ), depthTest( true ),
 				 colorWrite( true ),
@@ -341,10 +342,11 @@ protected:
 	const uint16_t* indexPtr;
 	U32				vertexBuffer;
 	U32				indexBuffer;
-	bool			instancing;
-	bool			premult;
-	bool			emissive;		// interpret alpha as emissive
-	bool			emissiveExclusive;
+	int				shaderFlags;
+//	bool			instancing;
+//	bool			premult;
+//	bool			emissive;		// interpret alpha as emissive
+//	bool			emissiveExclusive;
 
 	BlendMode	blend;
 	bool		depthWrite;
@@ -401,13 +403,6 @@ public:
 class ParticleShader : public GPUShader
 {
 public:
-	ParticleShader() : GPUShader() 
-	{
-		depthWrite = false;
-		depthTest = true;
-		premult = true;
-		blend = BLEND_ADD;
-	}
-
+	ParticleShader();
 };
 #endif
