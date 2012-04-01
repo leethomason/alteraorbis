@@ -194,7 +194,7 @@ void ShaderManager::ActivateShader( int flags )
 
 ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 {
-	static const int LEN = 200;
+	static const int LEN = 1000;
 	char buf[LEN];
 	int outLen = 0;
 
