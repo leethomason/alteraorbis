@@ -305,10 +305,6 @@ void GPUShader::SetState( const GPUShader& ns )
 			flags |= ShaderManager::LIGHTING_DIFFUSE;
 	}
 
-//	flags |= ns.instancing ? ShaderManager::INSTANCE : 0;
-//	flags |= ns.premult ? ShaderManager::PREMULT : 0;
-//	flags |= ns.emissive ? ShaderManager::EMISSIVE : 0;
-//	flags |= ns.emissiveExclusive ? ShaderManager::EMISSIVE_EXCLUSIVE : 0;
 	flags |= ns.shaderFlags;
 
 	shadman->ActivateShader( flags );
@@ -395,7 +391,7 @@ void GPUShader::SetState( const GPUShader& ns )
 		switch( ns.blend ) {
 		case BLEND_NONE:
 			glDisable( GL_BLEND );
-			break;
+				break;
 		case BLEND_NORMAL:
 			glEnable( GL_BLEND );
 			glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );

@@ -37,13 +37,9 @@ RenderTestScene::RenderTestScene( LumosGame* game, const RenderTestSceneData* da
 	LayoutCalculator layout = lumosGame->DefaultLayout();
 
 	lumosGame->InitStd( &gamui2D, &okay, 0 );
-	whiteButton.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ) );
-	whiteButton.SetSize( layout.Width(), layout.Height() );
-	whiteButton.SetText( "white" );
-
-	hemiButton.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
-	hemiButton.SetSize( layout.Width(), layout.Height() );
-	hemiButton.SetText( "hemisph" );
+	glowButton.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ) );
+	glowButton.SetSize( layout.Width(), layout.Height() );
+	glowButton.SetText( "glow" );
 
 	refreshButton.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
 	refreshButton.SetSize( layout.Width(), layout.Height() );
@@ -73,9 +69,8 @@ void RenderTestScene::Resize()
 	lumosGame->PositionStd( &okay, 0 );
 	
 	LayoutCalculator layout = lumosGame->DefaultLayout();
-	layout.PosAbs( &whiteButton, 1, -1 );
-	layout.PosAbs( &hemiButton, 2, -1 );
-	layout.PosAbs( &refreshButton, 3, -1 );
+	layout.PosAbs( &glowButton, 1, -1 );
+	layout.PosAbs( &refreshButton, 2, -1 );
 
 	textBox.SetPos( okay.X(), okay.Y()-100 );
 }
@@ -93,7 +88,7 @@ void RenderTestScene::SetupTest0()
 	}
 	engine->CameraLookAt( 0, (float)(NUM_MODELS/2), 12 );
 
-	textBox.SetText( "DC = ( 2fem + 2male ) * ( 1color + 1shadow) + 2map = 10. 'u' disable ui" ); 
+	textBox.SetText( "DC = ( 1fem + 1male ) * ( 1color + 1shadow) + 2map = 6`. 'u' disable ui" ); 
 }
 
 
@@ -117,7 +112,7 @@ void RenderTestScene::ItemTapped( const gamui::UIItem* item )
 	if ( item == &okay ) {
 		game->PopScene();
 	}
-	else if ( item == &whiteButton ) {
+	else if ( item == &glowButton ) {
 #if 0
 		Texture* white = TextureManager::Instance()->GetTexture( "white" );
 		for( int i=0; i<NUM_MODELS; ++i ) {
@@ -127,11 +122,6 @@ void RenderTestScene::ItemTapped( const gamui::UIItem* item )
 		}
 #endif
 		engine->SetGlow( !engine->GetGlow() );
-	}
-	else if ( item == &hemiButton ) {
-		GLOUTPUT(( "Set light model: %s\n", hemiButton.Down() ? "down" : "up" ));
-		engine->lighting.hemispheric = hemiButton.Down();
-		LoadLighting();
 	}
 	else if ( item == &refreshButton ) {
 		LoadLighting();
@@ -144,14 +134,18 @@ void RenderTestScene::LoadLighting()
 	XMLDocument doc;
 	doc.LoadFile( "./resin/lighting.xml" );
 
-	if ( engine->lighting.hemispheric ) {
-		const XMLElement* ele = doc.FirstChildElement( "lighting" )->FirstChildElement( "hemispherical" );
-		engine->lighting.Load( ele );
+	// fixme: switch to handles
+
+	const XMLElement* lightingEle = doc.FirstChildElement( "lighting" );
+	const XMLElement* mapEle = lightingEle->FirstChildElement( "map" );
+
+	if ( mapEle ) {
+		Color3F mapColor;
+		LoadColor( mapEle, &mapColor );
+		testMap->SetColor( mapColor );
 	}
-	else {
-		const XMLElement* ele = doc.FirstChildElement( "lighting" )->FirstChildElement( "lambert" );
-		engine->lighting.Load( ele );
-	}
+
+	engine->lighting.Load( lightingEle );
 }
 
 
@@ -177,7 +171,8 @@ void RenderTestScene::HandleHotKeyMask( int mask )
 		{
 			bool visible = !okay.Visible();
 			okay.SetVisible( visible );
-			whiteButton.SetVisible( visible );
+			glowButton.SetVisible( visible );
+			refreshButton.SetVisible( visible );
 			textBox.SetVisible( visible );
 		}
 		break;
@@ -189,6 +184,6 @@ void RenderTestScene::Draw3D( U32 deltaTime )
 {
 	engine->Draw( deltaTime );
 	
-//	RenderAtom atom( (const void*)UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, (const void*)engine->GetRenderTargetTexture(), 0, 0, 1, 1 );
-//	rtImage.SetAtom( atom );
+	//RenderAtom atom( (const void*)UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, (const void*)engine->GetRenderTargetTexture(2), 0.25f, 0.25f, 0.75f, 0.75f );
+	//rtImage.SetAtom( atom );
 }

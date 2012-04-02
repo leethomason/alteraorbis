@@ -9,10 +9,15 @@ def writeTaps( useY ):
 		r = float( i ) / float(len(row)-1) - 0.5
 		offset = r * radius * 2.0;
 		weight = float( row[i] ) / float( sum )
+		op = "+"
+		if ( offset < 0 ):
+			op = "-";
+			offset = -offset;
+		
 		if useY == 0:
-			file.write( "color += texture2D( texture0, v_uv0 + vec2( " + str( round(offset, 5)) + " , 0.0 ) ) * " + str( round(weight, 5)) + ";\n")
+			file.write( "color += texture2D( texture0, v_uv0 " + op + " vec2( " + str( round(offset, 5)) + " , 0.0 ) ) * " + str( round(weight, 5)) + ";\n")
 		else:
-			file.write( "color += texture2D( texture0, v_uv0 + vec2( 0.0, " + str( round(offset, 5)) + " )) * " + str( round(weight, 5)) + ";\n")
+			file.write( "color += texture2D( texture0, v_uv0 " + op + " vec2( 0.0, " + str( round(offset, 5)) + " )) * " + str( round(weight, 5)) + ";\n")
 		
 radius = float( sys.argv[1] )
 

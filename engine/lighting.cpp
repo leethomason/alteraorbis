@@ -51,18 +51,32 @@ void Lighting::CalcLight( const Vector3F& normal, float shadowAmount, Color3F* l
 
 void Lighting::Load( const tinyxml2::XMLElement* ele )
 {
+	hemispheric = false;
+	if ( ele->Attribute( "mode", "hemi" ) ) {
+		hemispheric = true;
+	}
+
+	const tinyxml2::XMLElement* modeEle = ele->FirstChildElement( hemispheric ? "hemispherical" : "lambert" );
+
 	const tinyxml2::XMLElement* child = 0;
-	child = ele->FirstChildElement( "ambient" );
+	child = modeEle->FirstChildElement( "ambient" );
 	if ( child ) {
 		LoadColor( child, &ambient );
 	}
-	child = ele->FirstChildElement( "diffuse" );
+	child = modeEle->FirstChildElement( "diffuse" );
 	if ( child ) {
 		LoadColor( child, &diffuse );
 	}
-	child = ele->FirstChildElement( "shadow" );
+	child = modeEle->FirstChildElement( "shadow" );
 	if ( child ) {
 		LoadColor( child, &shadow );
+	}
+
+
+	child = ele->FirstChildElement( "direction" );
+	if ( child ) {
+		LoadVector( child, &direction );
+		direction.Normalize();
 	}
 }
 

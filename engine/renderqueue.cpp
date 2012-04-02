@@ -194,10 +194,10 @@ void RenderQueue::Submit( GPUShader* overRideShader, int required, int excluded,
 				for( int k=start; k<end; ++k ) {
 					Model* model = itemArr[k]->model;
 					shader->PushMatrix( GPUShader::MODELVIEW_MATRIX );
-					shader->MultMatrix( GPUShader::MODELVIEW_MATRIX, model->XForm() );
 					if ( xform ) {
 						shader->MultMatrix( GPUShader::MODELVIEW_MATRIX, *xform );
 					}
+					shader->MultMatrix( GPUShader::MODELVIEW_MATRIX, model->XForm() );
 					shader->Draw();
 					shader->PopMatrix( GPUShader::MODELVIEW_MATRIX );
 				}

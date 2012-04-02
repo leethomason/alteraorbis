@@ -253,9 +253,9 @@ void Engine::Draw( U32 deltaTime )
 			shadowShader.SetColor( 1, 0, 0 );	// testing
 
 			Matrix4 shadowMatrix;
-			shadowMatrix.m12 = -lightDirection.x/lightDirection.y;
+			shadowMatrix.m12 = -lighting.direction.x/lighting.direction.y;
 			shadowMatrix.m22 = 0.0f;
-			shadowMatrix.m32 = -lightDirection.z/lightDirection.y;
+			shadowMatrix.m32 = -lighting.direction.z/lighting.direction.y;
 
 			renderQueue->Submit(	&shadowShader,
 									0,

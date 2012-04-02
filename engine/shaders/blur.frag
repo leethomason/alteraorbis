@@ -7,11 +7,11 @@ vec4 color=vec4(0.0, 0.0, 0.0, 0.0 );
 
 #if BLUR_Y == 0
 
-color += texture2D( texture0, v_uv0 + vec2( -0.01 , 0.0 ) ) * 0.00979;
-color += texture2D( texture0, v_uv0 + vec2( -0.00778 , 0.0 ) ) * 0.02336;
-color += texture2D( texture0, v_uv0 + vec2( -0.00556 , 0.0 ) ) * 0.08978;
-color += texture2D( texture0, v_uv0 + vec2( -0.00333 , 0.0 ) ) * 0.1616;
-color += texture2D( texture0, v_uv0 + vec2( -0.00111 , 0.0 ) ) * 0.21547;
+color += texture2D( texture0, v_uv0 - vec2( 0.01 , 0.0 ) ) * 0.00979;
+color += texture2D( texture0, v_uv0 - vec2( 0.00778 , 0.0 ) ) * 0.02336;
+color += texture2D( texture0, v_uv0 - vec2( 0.00556 , 0.0 ) ) * 0.08978;
+color += texture2D( texture0, v_uv0 - vec2( 0.00333 , 0.0 ) ) * 0.1616;
+color += texture2D( texture0, v_uv0 - vec2( 0.00111 , 0.0 ) ) * 0.21547;
 color += texture2D( texture0, v_uv0 + vec2( 0.00111 , 0.0 ) ) * 0.21547;
 color += texture2D( texture0, v_uv0 + vec2( 0.00333 , 0.0 ) ) * 0.1616;
 color += texture2D( texture0, v_uv0 + vec2( 0.00556 , 0.0 ) ) * 0.08978;
@@ -20,11 +20,11 @@ color += texture2D( texture0, v_uv0 + vec2( 0.01 , 0.0 ) ) * 0.00979;
 
 #else
 
-color += texture2D( texture0, v_uv0 + vec2( 0.0, -0.01 )) * 0.00979;
-color += texture2D( texture0, v_uv0 + vec2( 0.0, -0.00778 )) * 0.02336;
-color += texture2D( texture0, v_uv0 + vec2( 0.0, -0.00556 )) * 0.08978;
-color += texture2D( texture0, v_uv0 + vec2( 0.0, -0.00333 )) * 0.1616;
-color += texture2D( texture0, v_uv0 + vec2( 0.0, -0.00111 )) * 0.21547;
+color += texture2D( texture0, v_uv0 - vec2( 0.0, 0.01 )) * 0.00979;
+color += texture2D( texture0, v_uv0 - vec2( 0.0, 0.00778 )) * 0.02336;
+color += texture2D( texture0, v_uv0 - vec2( 0.0, 0.00556 )) * 0.08978;
+color += texture2D( texture0, v_uv0 - vec2( 0.0, 0.00333 )) * 0.1616;
+color += texture2D( texture0, v_uv0 - vec2( 0.0, 0.00111 )) * 0.21547;
 color += texture2D( texture0, v_uv0 + vec2( 0.0, 0.00111 )) * 0.21547;
 color += texture2D( texture0, v_uv0 + vec2( 0.0, 0.00333 )) * 0.1616;
 color += texture2D( texture0, v_uv0 + vec2( 0.0, 0.00556 )) * 0.08978;

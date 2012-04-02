@@ -151,7 +151,6 @@ private:
 	};
 	RenderTarget* renderTarget[RT_COUNT];
 
-	grinliz::Vector3F lightDirection;
 	grinliz::Matrix4  shadowMatrix;
 };
 

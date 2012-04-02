@@ -1,5 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<lighting>
+<lighting mode="hemi">
+  <map red="0.5" green="0.5" blue="0.5"/>
+  <direction x="-2" y="3" z="-1.5" />
+  
   <lambert>
     <diffuse red="0.7" green="0.7" blue="0.7"/>
     <ambient red="0.3" green="0.3" blue="0.3"/>
@@ -8,7 +11,7 @@
 
   <hemispherical>
     <diffuse red="0.9" green="0.9" blue="0.9"/>
-    <ambient red="0.2" green="0.2" blue="0.3"/>
+    <ambient red="0.3" green="0.3" blue="0.3"/>
     <shadow red="0.3" green="0.3" blue="0.3"/>
   </hemispherical>
 
