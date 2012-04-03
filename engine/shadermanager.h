@@ -13,6 +13,12 @@
 class Texture;
 class Stream;
 
+class IDeviceLossHandler
+{
+public:
+	virtual void DeviceLoss() = 0;
+};
+
 class ShaderManager
 {
 public:
@@ -50,6 +56,9 @@ public:
 	};
 
 	void DeviceLoss();
+	void AddDeviceLossHandler( IDeviceLossHandler* handler );
+	void RemoveDeviceLossHandler( IDeviceLossHandler* handler );
+
 	void ActivateShader( int flags );
 
 	// Warning: must match gAttributeName
@@ -117,6 +126,7 @@ private:
 		int GetUniformLocation( int uniform );
 	};
 
+	CDynArray< IDeviceLossHandler* > deviceLossHandlers;
 	CDynArray< Shader > shaderArr;
 	grinliz::GLString header;
 	Shader* active;

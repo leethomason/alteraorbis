@@ -51,7 +51,11 @@ RenderTarget::RenderTarget( int width, int height, bool depthBuffer )
 
 RenderTarget::~RenderTarget()
 {
-	// fixme GL memory
+	CHECK_GL_ERROR;
+	glDeleteRenderbuffers( 1, &depthBufferID );
+	glDeleteTextures( 1, &renderTextureID );
+	glDeleteFramebuffers( 1, &frameBufferID );
+	CHECK_GL_ERROR;
 	delete screenport;
 }
 

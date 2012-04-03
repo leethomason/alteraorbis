@@ -79,6 +79,28 @@ void ShaderManager::DeviceLoss()
 	active = 0;
 	activeStreams.Clear();
 	shaderArr.Clear();
+
+	for( int i=0; i<deviceLossHandlers.Size(); ++i ) {
+		deviceLossHandlers[i]->DeviceLoss();
+	}
+}
+
+
+void ShaderManager::AddDeviceLossHandler( IDeviceLossHandler* handler )
+{
+	deviceLossHandlers.Push( handler );
+}
+
+
+void ShaderManager::RemoveDeviceLossHandler( IDeviceLossHandler* handler )
+{
+	for( int i=0; i<deviceLossHandlers.Size(); ++i ) {
+		if ( deviceLossHandlers[i] == handler ) {
+			deviceLossHandlers.SwapRemove( i );
+			return;
+		}
+	}
+	GLASSERT( 0 );
 }
 
 

@@ -18,6 +18,7 @@ public:
 	virtual void CreateTexture( Texture* t ) = 0;
 };
 
+
 class Texture
 {
 	friend class TextureManager;

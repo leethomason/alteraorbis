@@ -29,6 +29,7 @@
 #include "model.h"
 #include "screenport.h"
 #include "lighting.h"
+#include "shadermanager.h"
 
 class RenderQueue;
 class RenderTarget;
@@ -57,11 +58,11 @@ class RenderTarget;
 		
 */
 
-class Engine
+class Engine : public IDeviceLossHandler
 {
 public:
 	Engine( Screenport* screenport, const gamedb::Reader* database );
-	~Engine();
+	virtual ~Engine();
 
 	Camera	 camera;
 	Lighting lighting;
@@ -121,6 +122,8 @@ public:
 	void SetGlow( bool b ) { glow = b; }
 	bool GetGlow() const { return glow; }
 
+	virtual void DeviceLoss();
+
 private:
 	enum ShadowState {
 		IN_SHADOW,
@@ -139,7 +142,6 @@ private:
 	bool	glow;
 	
 	Map*	map;
-
 	SpaceTree* spaceTree;
 	RenderQueue* renderQueue;
 
@@ -150,8 +152,6 @@ private:
 		RT_COUNT
 	};
 	RenderTarget* renderTarget[RT_COUNT];
-
-	grinliz::Matrix4  shadowMatrix;
 };
 
 #endif // UFOATTACK_ENGINE_INCLUDED

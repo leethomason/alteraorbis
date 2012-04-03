@@ -31,7 +31,7 @@
 #include "rendertarget.h"
 
 /*
-	Xenoengine-2 has a cleaned up render queue. The sorting of items probably makes the engine
+	XenoEngine-2 has a cleaned up render queue. The sorting of items probably makes the engine
 	faster even when not instancing. Cleaning up code makes the underlying algorithm clearer.
 */
 
@@ -53,17 +53,27 @@ Engine::Engine( Screenport* port, const gamedb::Reader* database )
 	renderQueue = new RenderQueue();
 	for( int i=0; i<RT_COUNT; ++i )
 		renderTarget[i] = 0;
+	ShaderManager::Instance()->AddDeviceLossHandler( this );
 }
 
 
 Engine::~Engine()
 {
+	ShaderManager::Instance()->RemoveDeviceLossHandler( this );
 	delete renderQueue;
 	delete spaceTree;
 	for( int i=0; i<RT_COUNT; ++i )
 		delete renderTarget[i];
 }
 
+
+void Engine::DeviceLoss()
+{
+	for( int i=0; i<RT_COUNT; ++i ) {
+		delete renderTarget[i];
+		renderTarget[i] = 0;
+	}
+}
 
 
 void Engine::CameraIso( bool normal, bool sizeToWidth, float width, float height )
@@ -283,6 +293,7 @@ void Engine::Draw( U32 deltaTime )
 		map->DrawOverlay();
 	renderQueue->Clear();
 
+	// --------- Composite Glow -------- //
 	if ( glow ) {
 		Blur();
 
@@ -291,7 +302,6 @@ void Engine::Draw( U32 deltaTime )
 
 		CompositingShader shader( GPUShader::BLEND_ADD );
 		shader.SetTexture0( renderTarget[RT_BLUR_Y]->GetTexture() );
-		//shader.SetShaderFlag( ShaderManager::PREMULT );
 		shader.SetColor( lighting.glow.r, lighting.glow.g, lighting.glow.b, 0 );
 		Vector3F p0 = { 0, screenport->UIHeight(), 0 };
 		Vector3F p1 = { screenport->UIWidth(), 0, 0 };
@@ -299,6 +309,8 @@ void Engine::Draw( U32 deltaTime )
 
 		screenport->SetPerspective( 0 );
 	}
+
+	// ------ Particle system ------------- //
 	const Vector3F* eyeDir = camera.EyeDir3();
 	ParticleSystem* particleSystem = ParticleSystem::Instance();
 	particleSystem->Update( deltaTime, eyeDir );
