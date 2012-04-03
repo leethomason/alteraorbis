@@ -30,6 +30,7 @@ static const char* gUniformName[ShaderManager::MAX_UNIFORM] =
 	"u_lightDir",
 	"u_ambient",
 	"u_diffuse",
+	"u_radius"
 };
 
 
@@ -105,6 +106,15 @@ void ShaderManager::SetStreamData( int id, int size, int type, int stride, const
 	CHECK_GL_ERROR;
 
 	activeStreams.Push( loc );
+}
+
+
+void ShaderManager::SetUniform( int id, float value )
+{
+	int loc = active->GetUniformLocation( id );
+	GLASSERT( loc >= 0 );
+	glUniform1f( loc, value );
+	CHECK_GL_ERROR;
 }
 
 

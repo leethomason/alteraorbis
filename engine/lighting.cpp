@@ -14,6 +14,8 @@ Lighting::Lighting()
 	direction.Set( 2.0f, 3.0f, 1.0f );
 	direction.Normalize();
 	hemispheric = false;
+	glow.Set( 1, 1, 1 );
+	glowRadius = 0.01f;
 }
 
 
@@ -77,6 +79,11 @@ void Lighting::Load( const tinyxml2::XMLElement* ele )
 	if ( child ) {
 		LoadVector( child, &direction );
 		direction.Normalize();
+	}
+	child = ele->FirstChildElement( "glow" );
+	if ( child ) {
+		LoadColor( child, &glow );
+		child->QueryFloatAttribute( "radius", &glowRadius );
 	}
 }
 

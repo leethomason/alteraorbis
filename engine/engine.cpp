@@ -292,8 +292,7 @@ void Engine::Draw( U32 deltaTime )
 		CompositingShader shader( GPUShader::BLEND_ADD );
 		shader.SetTexture0( renderTarget[RT_BLUR_Y]->GetTexture() );
 		//shader.SetShaderFlag( ShaderManager::PREMULT );
-		// fixme: change intensity of add with this value:
-		shader.SetColor( 1, 1, 1, 0 );
+		shader.SetColor( lighting.glow.r, lighting.glow.g, lighting.glow.b, 0 );
 		Vector3F p0 = { 0, screenport->UIHeight(), 0 };
 		Vector3F p1 = { screenport->UIWidth(), 0, 0 };
 		shader.DrawQuad( p0, p1 );
@@ -324,6 +323,7 @@ void Engine::Blur()
 		FlatShader shader;
 		shader.SetTexture0( renderTarget[RT_LIGHTS]->GetTexture() );
 		shader.SetShaderFlag( ShaderManager::BLUR );
+		shader.SetRadius( lighting.glowRadius );
 		Vector3F p0 = { 0, screenport->UIHeight(), 0 };
 		Vector3F p1 = { screenport->UIWidth(), 0, 0 };
 		shader.DrawQuad( p0, p1 );
@@ -337,6 +337,7 @@ void Engine::Blur()
 		FlatShader shader;
 		shader.SetTexture0( renderTarget[RT_BLUR_X]->GetTexture() );
 		shader.SetShaderFlag( ShaderManager::BLUR );
+		shader.SetRadius( lighting.glowRadius );
 		shader.SetShaderFlag( ShaderManager::BLUR_Y );
 		Vector3F p0 = { 0, screenport->UIHeight(), 0 };
 		Vector3F p1 = { screenport->UIWidth(), 0, 0 };

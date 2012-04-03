@@ -231,6 +231,7 @@ public:
 		grinliz::Color4F c = { (float)color.r*INV, (float)color.g*INV, (float)color.b*INV, (float)color.a*INV };
 		SetColor( c );
 	}
+	void SetRadius( float r ) { radius = r; }
 
 	// Set any of the flags (that are boolean) from ShaderManager
 	void SetShaderFlag( int flag )				{ shaderFlags |= flag; }
@@ -284,10 +285,7 @@ protected:
 				 streamPtr( 0 ), nIndex( 0 ), indexPtr( 0 ),
 				 vertexBuffer( 0 ), indexBuffer( 0 ),
 				 shaderFlags( 0 ),
-				 //instancing( false ),
-				 //premult( false ),
-				 //emissive( false ),
-				 //emissiveExclusive( false ),
+				 radius( 1.0f ),
 				 blend( BLEND_NONE ),
 				 depthWrite( true ), depthTest( true ),
 				 colorWrite( true ),
@@ -343,10 +341,7 @@ protected:
 	U32				vertexBuffer;
 	U32				indexBuffer;
 	int				shaderFlags;
-//	bool			instancing;
-//	bool			premult;
-//	bool			emissive;		// interpret alpha as emissive
-//	bool			emissiveExclusive;
+	float			radius;
 
 	BlendMode	blend;
 	bool		depthWrite;

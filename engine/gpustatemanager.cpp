@@ -380,6 +380,10 @@ void GPUShader::SetState( const GPUShader& ns )
 		shadman->SetStreamData( ShaderManager::A_NORMAL, 3, GL_FLOAT, ns.stream.stride, PTR( ns.streamPtr, ns.stream.normalOffset ) );	 
 	}
 
+	if ( flags & ShaderManager::BLUR ) {
+		shadman->SetUniform( ShaderManager::U_RADIUS, ns.radius );
+	}
+
 	// color multiplier
 	if ( flags & ShaderManager::COLOR_MULTIPLIER ) {
 		shadman->SetUniform( ShaderManager::U_COLOR_MULT, ns.color );

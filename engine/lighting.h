@@ -15,6 +15,10 @@ public:
 	grinliz::Color3F	shadow;			// color of stuff in shadow (which is only flat planes)
 	grinliz::Vector3F	direction;		// normal vector
 	bool hemispheric;
+	grinliz::Color3F	glow;			// additive glow multiplier
+	// FIXME: glowRadius can be bound into the shader, and removes
+	// a decent amount of multiplies. Consider removing this.
+	float				glowRadius;		// the glow radius, in texture coordinates [0,1]
 
 	// Direction from world TO sun. (y is positive). If null, sets the default.
 	void SetLightDirection( const grinliz::Vector3F* lightDir );

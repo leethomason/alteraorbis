@@ -45,7 +45,7 @@ public:
 		EMISSIVE_EXCLUSIVE  = (1<<15),		// everything not emissive is black
 
 		// Switch to different shader:
-		BLUR				= (1<<16),
+		BLUR				= (1<<16),		// requires u_radius
 		BLUR_Y				= (1<<17),
 	};
 
@@ -78,6 +78,7 @@ public:
 		U_LIGHT_DIR,
 		U_AMBIENT,
 		U_DIFFUSE,
+		U_RADIUS,
 		MAX_UNIFORM
 	};
 
@@ -89,6 +90,7 @@ public:
 	}
 	void SetUniform( int id, const grinliz::Vector4F& vector );
 	void SetUniform( int id, const grinliz::Vector3F& vector );
+	void SetUniform( int id, float value );
 
 	void SetUniformArray( int id, int count, const grinliz::Matrix4* mat );
 
