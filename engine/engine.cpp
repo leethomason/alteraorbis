@@ -230,7 +230,6 @@ void Engine::Draw( U32 deltaTime )
 
 	// ----------- Render Passess ---------- //
 	if ( glow ) {
-		// FIXME: handle context shift
 		if ( !renderTarget[RT_LIGHTS] ) {
 			renderTarget[RT_LIGHTS] = new RenderTarget( screenport->PhysicalWidth(), screenport->PhysicalHeight(), true );
 		}
