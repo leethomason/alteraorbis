@@ -59,21 +59,22 @@ void Lighting::Load( const tinyxml2::XMLElement* ele )
 	}
 
 	const tinyxml2::XMLElement* modeEle = ele->FirstChildElement( hemispheric ? "hemispherical" : "lambert" );
-
 	const tinyxml2::XMLElement* child = 0;
-	child = modeEle->FirstChildElement( "ambient" );
-	if ( child ) {
-		LoadColor( child, &ambient );
-	}
-	child = modeEle->FirstChildElement( "diffuse" );
-	if ( child ) {
-		LoadColor( child, &diffuse );
-	}
-	child = modeEle->FirstChildElement( "shadow" );
-	if ( child ) {
-		LoadColor( child, &shadow );
-	}
 
+	if ( modeEle ) {
+		child = modeEle->FirstChildElement( "ambient" );
+		if ( child ) {
+			LoadColor( child, &ambient );
+		}
+		child = modeEle->FirstChildElement( "diffuse" );
+		if ( child ) {
+			LoadColor( child, &diffuse );
+		}
+		child = modeEle->FirstChildElement( "shadow" );
+		if ( child ) {
+			LoadColor( child, &shadow );
+		}
+	}
 
 	child = ele->FirstChildElement( "direction" );
 	if ( child ) {

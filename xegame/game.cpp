@@ -401,9 +401,12 @@ void Game::Load( const XMLDocument& doc )
 	// BOTTOM of the stack loads. (BattleScene or GeoScene).
 	// A GeoScene will in turn load a BattleScene.
 	const XMLElement* game = doc.RootElement();
-	GLASSERT( StrEqual( game->Value(), "Game" ) );
-	const XMLElement* scene = game->FirstChildElement();
-	sceneStack.Top()->scene->Load( scene );
+	GLASSERT( game );
+	if ( game ) {
+		GLASSERT( StrEqual( game->Value(), "Game" ) );
+		const XMLElement* scene = game->FirstChildElement();
+		sceneStack.Top()->scene->Load( scene );
+	}
 }
 
 
@@ -479,7 +482,7 @@ void Game::Save( int slot, bool saveGeo, bool saveTac )
 
 				printer.PushAttribute( "timestamp", buf );
 				node->scene->Save( &printer );
-				printer.CloseElement( "Game" );
+				printer.CloseElement();
 
 				fclose( fp );
 				break;
