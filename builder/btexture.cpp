@@ -128,11 +128,15 @@ bool BTexture::Load()
 		GLASSERT( 0 );
 	}
 
+	if ( emissive && format != RGBA16 ) {
+		ExitError( "Texture", pathName.c_str(), assetName.c_str(), "Emmisive only supported on RGBA." );
+	}
 
-	printf( "%s Loaded: '%s' bpp=%d", 
+	printf( "%s Loaded: '%s' bpp=%d em=%d", 
 			isImage ? "Image" : "Texture",
 			assetName.c_str(),
-			surface->format->BitsPerPixel );
+			surface->format->BitsPerPixel,
+			emissive ? 1 : 0 );
 	return true;
 }
 

@@ -203,7 +203,8 @@ void Engine::Draw( U32 deltaTime )
 	Vector4F dir;
 	lighting.Query( &ambient, &dir, &diffuse );
 
-	LightShader lightShader( ambient, dir, diffuse );
+	LightShader _lightShader( ambient, dir, diffuse );
+	GPUShader lightShader = _lightShader;	// the sub-classes are causing problems here. Need a base type later.
 	LightShader emissiveLightShader( ambient, dir, diffuse );
 	emissiveLightShader.SetShaderFlag( ShaderManager::EMISSIVE );
 
@@ -235,12 +236,21 @@ void Engine::Draw( U32 deltaTime )
 		}
 		renderTarget[RT_LIGHTS]->SetActive( true, this );
 		renderTarget[RT_LIGHTS]->screenport->SetPerspective( 0 );
-		lightShader.SetShaderFlag( ShaderManager::EMISSIVE_EXCLUSIVE );
+
+		// Tweak the shaders for glow-only rendering.
+		// Make the light shader flat black:
+		GPUShader savedLightShader = lightShader;
+		FlatShader flatShader;
+		flatShader.SetColor( 0, 0, 0 );
+		lightShader = flatShader;
+
+		// And throw the emissive shader to exclusive:
 		emissiveLightShader.SetShaderFlag( ShaderManager::EMISSIVE_EXCLUSIVE );
 
 		renderQueue->Submit( 0, 0, 0, 0 );
 		
-		lightShader.ClearShaderFlag( ShaderManager::EMISSIVE_EXCLUSIVE );
+		// recove the shader settings
+		lightShader = savedLightShader;
 		emissiveLightShader.ClearShaderFlag( ShaderManager::EMISSIVE_EXCLUSIVE );
 		renderTarget[RT_LIGHTS]->SetActive( false, this );
 	}

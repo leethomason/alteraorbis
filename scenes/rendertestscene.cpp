@@ -51,6 +51,8 @@ RenderTestScene::RenderTestScene( LumosGame* game, const RenderTestSceneData* da
 	RenderAtom nullAtom;
 	rtImage.Init( &gamui2D, nullAtom, true );
 	rtImage.SetSize( 400.f, 200.f );
+
+	LoadLighting();
 }
 
 
