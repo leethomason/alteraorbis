@@ -550,7 +550,7 @@ void Game::DoTick( U32 _currentTime )
 		if ( renderPass & Scene::RENDER_3D ) {
 			GRINLIZ_PERFTRACK_NAME( "Game::DoTick 3D" );
 
-			screenport.SetPerspective( clip3D.Width() > 0 ? &clip3D : 0 );
+			screenport.SetPerspective();
 			scene->Draw3D( deltaTime );
 		}
 
@@ -558,12 +558,12 @@ void Game::DoTick( U32 _currentTime )
 			GRINLIZ_PERFTRACK_NAME( "Game::DoTick UI" );
 
 			// UI Pass
-			screenport.SetUI( clip2D.IsValid() ? &clip2D : 0 ); 
+			screenport.SetUI(); 
 			if ( renderPass & Scene::RENDER_3D ) {
 				scene->RenderGamui3D();
 			}
 			if ( renderPass & Scene::RENDER_2D ) {
-				screenport.SetUI( clip2D.IsValid() ? &clip2D : 0 );
+				screenport.SetUI();
 				scene->DrawHUD();
 				scene->RenderGamui2D();
 			}

@@ -29,8 +29,8 @@ Screenport::Screenport( int w, int h, int r, int virtualHeight )
 	this->virtualHeight = (float)virtualHeight;
 	Resize( w, h, r );
 	uiMode = false;
-	clipInUI2D = Rectangle2F( 0, 0, UIWidth(), UIHeight() );
-	clipInUI3D = Rectangle2F( 0, 0, UIWidth(), UIHeight() );
+//	clipInUI2D = Rectangle2F( 0, 0, UIWidth(), UIHeight() );
+//	clipInUI3D = Rectangle2F( 0, 0, UIWidth(), UIHeight() );
 }
 
 
@@ -72,24 +72,24 @@ void Screenport::Resize( int w, int h, int r )
 }
 
 
-void Screenport::SetUI( const Rectangle2I* clip )	
+void Screenport::SetUI()	
 {
-	if ( clip && clip->Area() > 1 ) {
-		clipInUI2D = Rectangle2F( (float)clip->min.x, (float)clip->min.y, (float)clip->max.x, (float)clip->max.y );
-	}
-	else {
-		clipInUI2D = Rectangle2F( 0, 0, UIWidth(), UIHeight() );
-	}
-	GLASSERT( clipInUI2D.IsValid() );
-	GLASSERT( clipInUI2D.min.x >= 0 && clipInUI2D.max.x <= UIWidth() );
-	GLASSERT( clipInUI2D.min.y >= 0 && clipInUI2D.max.y <= UIHeight() );
+//	if ( clip && clip->Area() > 1 ) {
+//		clipInUI2D = Rectangle2F( (float)clip->min.x, (float)clip->min.y, (float)clip->max.x, (float)clip->max.y );
+//	}
+//	else {
+//		clipInUI2D = Rectangle2F( 0, 0, UIWidth(), UIHeight() );
+//	}
+//	GLASSERT( clipInUI2D.IsValid() );
+//	GLASSERT( clipInUI2D.min.x >= 0 && clipInUI2D.max.x <= UIWidth() );
+//	GLASSERT( clipInUI2D.min.y >= 0 && clipInUI2D.max.y <= UIHeight() );
 
-	Rectangle2F scissor;
-	UIToWindow( clipInUI2D, &scissor );
+//	Rectangle2F scissor;
+//	UIToWindow( clipInUI2D, &scissor );
 
-	Rectangle2I clean;
-	CleanScissor( scissor, &clean );
-	GPUShader::SetScissor(  clean.min.x, clean.min.y, clean.Width(), clean.Height() );
+//	Rectangle2I clean;
+//	CleanScissor( scissor, &clean );
+//	GPUShader::SetScissor(  clean.min.x, clean.min.y, clean.Width(), clean.Height() );
 
 	projection2D.SetIdentity();
 	projection2D.SetOrtho( 0, screenWidth, screenHeight, 0, -1, 1 );
@@ -106,26 +106,26 @@ void Screenport::SetView( const Matrix4& _view )
 }
 
 
-void Screenport::SetPerspective( const grinliz::Rectangle2I* clip )
+void Screenport::SetPerspective()
 {
 	uiMode = false;
 
-	if ( clip && clip->Area() > 1 ) {
-		clipInUI3D = Rectangle2F( (float)clip->min.x, (float)clip->min.y, (float)clip->max.x, (float)clip->max.y );
-	}
-	else {
-		clipInUI3D = Rectangle2F( 0, 0, UIWidth(), UIHeight() );
-	}
-	GLASSERT( clipInUI3D.IsValid() );
-	GLASSERT( clipInUI3D.min.x >= 0 && clipInUI3D.max.x <= UIWidth() );
-	GLASSERT( clipInUI3D.min.y >= 0 && clipInUI3D.max.y <= UIHeight() );
+//	if ( clip && clip->Area() > 1 ) {
+//		clipInUI3D = Rectangle2F( (float)clip->min.x, (float)clip->min.y, (float)clip->max.x, (float)clip->max.y );
+//	}
+//	else {
+//		clipInUI3D = Rectangle2F( 0, 0, UIWidth(), UIHeight() );
+//	}
+//	GLASSERT( clipInUI3D.IsValid() );
+//	GLASSERT( clipInUI3D.min.x >= 0 && clipInUI3D.max.x <= UIWidth() );
+//	GLASSERT( clipInUI3D.min.y >= 0 && clipInUI3D.max.y <= UIHeight() );
 	
-	Rectangle2F scissor;
-	UIToWindow( clipInUI3D,  &scissor );
-
-	Rectangle2I clean;
-	CleanScissor( scissor, &clean );
-	GPUShader::SetScissor(  clean.min.x, clean.min.y, clean.Width(), clean.Height() );
+//	Rectangle2F scissor;
+//	UIToWindow( clipInUI3D,  &scissor );
+//
+//	Rectangle2I clean;
+//	CleanScissor( scissor, &clean );
+//	GPUShader::SetScissor(  clean.min.x, clean.min.y, clean.Width(), clean.Height() );
 
 	GLASSERT( uiMode == false );
 	GLASSERT( EL_NEAR > 0.0f );
@@ -145,7 +145,8 @@ void Screenport::SetPerspective( const grinliz::Rectangle2I* clip )
 	// Also, the 3D camera applies the rotation.
 	
 	if ( Rotation() & 1 ) {
-		float ratio = (float)clipInUI3D.Height() / (float)clipInUI3D.Width();
+//		float ratio = (float)clipInUI3D.Height() / (float)clipInUI3D.Width();
+		float ratio = physicalHeight / physicalWidth;
 		
 		// frustum is in original screen coordinates.
 		frustum.top		=  halfLongSide;
@@ -157,7 +158,8 @@ void Screenport::SetPerspective( const grinliz::Rectangle2I* clip )
 	else {
 		// Since FOV is specified as the 1/2 width, the ratio
 		// is the height/width (different than gluPerspective)
-		float ratio = (float)clipInUI3D.Height() / (float)clipInUI3D.Width();
+//		float ratio = (float)clipInUI3D.Height() / (float)clipInUI3D.Width();
+		float ratio = physicalHeight / physicalWidth;
 
 		frustum.top		= ratio * halfLongSide;
 		frustum.bottom	= -frustum.top;

@@ -235,7 +235,7 @@ void Engine::Draw( U32 deltaTime )
 			renderTarget[RT_LIGHTS] = new RenderTarget( screenport->PhysicalWidth(), screenport->PhysicalHeight(), true );
 		}
 		renderTarget[RT_LIGHTS]->SetActive( true, this );
-		renderTarget[RT_LIGHTS]->screenport->SetPerspective( 0 );
+		renderTarget[RT_LIGHTS]->screenport->SetPerspective();
 
 		// Tweak the shaders for glow-only rendering.
 		// Make the light shader flat black:
@@ -306,8 +306,7 @@ void Engine::Draw( U32 deltaTime )
 	if ( glow ) {
 		Blur();
 
-		// FIXME: here and in RenderTarget actually deal with possibly having a clip rect.
-		screenport->SetUI( 0 );
+		screenport->SetUI();
 
 		CompositingShader shader( GPUShader::BLEND_ADD );
 		shader.SetTexture0( renderTarget[RT_BLUR_Y]->GetTexture() );
@@ -316,7 +315,7 @@ void Engine::Draw( U32 deltaTime )
 		Vector3F p1 = { screenport->UIWidth(), 0, 0 };
 		shader.DrawQuad( p0, p1 );
 
-		screenport->SetPerspective( 0 );
+		screenport->SetPerspective();
 	}
 
 	// ------ Particle system ------------- //
@@ -338,7 +337,7 @@ void Engine::Blur()
 
 	// --- x ---- //
 	renderTarget[RT_BLUR_X]->SetActive( true, this );
-	renderTarget[RT_BLUR_X]->screenport->SetUI( 0 );
+	renderTarget[RT_BLUR_X]->screenport->SetUI();
 
 	{
 		FlatShader shader;
@@ -353,7 +352,7 @@ void Engine::Blur()
 
 	// --- y ---- //
 	renderTarget[RT_BLUR_Y]->SetActive( true, this );
-	renderTarget[RT_BLUR_Y]->screenport->SetUI( 0 );
+	renderTarget[RT_BLUR_Y]->screenport->SetUI();
 	{
 		FlatShader shader;
 		shader.SetTexture0( renderTarget[RT_BLUR_X]->GetTexture() );
