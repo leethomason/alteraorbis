@@ -1,8 +1,12 @@
+- navigation scene
+	- map with pathing
+	- chits & components
+	- ground flocking motion
+
 X particle test scene
 	X alpha processing for additive blending
 	- particle groups (ex: fire)
 - world rendering scene
-- navigation scene
 - map rendering scene
 - combat test scene
 - chits, components

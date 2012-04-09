@@ -136,8 +136,6 @@ void RenderTestScene::LoadLighting()
 	XMLDocument doc;
 	doc.LoadFile( "./resin/lighting.xml" );
 
-	// fixme: switch to handles
-
 	const XMLElement* lightingEle = doc.FirstChildElement( "lighting" );
 	const XMLElement* mapEle = lightingEle->FirstChildElement( "map" );
 
