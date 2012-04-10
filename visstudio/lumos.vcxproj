@@ -98,6 +98,7 @@
     <ClCompile Include="..\engine\ufoutil.cpp" />
     <ClCompile Include="..\engine\uirendering.cpp" />
     <ClCompile Include="..\game\lumosgame.cpp" />
+    <ClCompile Include="..\game\worldmap.cpp" />
     <ClCompile Include="..\gamui\gamui.cpp" />
     <ClCompile Include="..\micropather\micropather.cpp" />
     <ClCompile Include="..\scenes\dialogscene.cpp" />
@@ -142,6 +143,7 @@
     <ClInclude Include="..\engine\uirendering.h" />
     <ClInclude Include="..\engine\vertex.h" />
     <ClInclude Include="..\game\lumosgame.h" />
+    <ClInclude Include="..\game\worldmap.h" />
     <ClInclude Include="..\gamui\gamui.h" />
     <ClInclude Include="..\micropather\micropather.h" />
     <ClInclude Include="..\scenes\dialogscene.h" />

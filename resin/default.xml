@@ -14,6 +14,8 @@
        behavior defined like this. That's okay for now.
   -->
   <texture filename="emchartest.png" filename2="emchartest_em.png" emissive="true"/>
+  <texture filename="map_land.png" />
+  <texture filename="map_water.png" />
 
   <!-- UI elements -->
   <texture filename="intro.png" width="64" height="64" />

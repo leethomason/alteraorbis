@@ -36,7 +36,7 @@ SpaceTree::SpaceTree( float yMin, float yMax, int size )
 	queryID = 0;
 
 	InitNode();
-	memset( &shelf, 0, sizeof(Node) );
+	//memset( &shelf, 0, sizeof(Node) );
 }
 
 
@@ -143,6 +143,7 @@ void SpaceTree::FreeModel( Model* model )
 }
 
 
+/*
 void SpaceTree::ShelveModel( bool shelve, Model* model )
 {
 	Item* item = (Item*)model;	// cast depends on model being first in the structure.
@@ -178,6 +179,7 @@ void SpaceTree::ShelveAll( bool shelve )
 		}
 	}
 }
+*/
 
 
 // Based on this idea:
@@ -214,9 +216,6 @@ void SpaceTree::Update( Model* model )
 {
 	// Unlink if currently in tree.
 	Item* item = (Item*)model;	// cast depends on model being first in the structure.
-
-	if ( item->node == &shelf )
-		return;	// no effect when items are on the shelf.
 
 	if ( item->node ) 
 		item->node->Remove( item );
@@ -370,8 +369,6 @@ void SpaceTree::Dump( Node* node )
 #endif
 
 
-
-
 void SpaceTree::QueryPlanesRec(	const Plane* planes, int nPlanes, int intersection, const Node* node, U32 positive )
 {
 	#define IS_POSITIVE( pos, i ) ( pos & (1<<i) )
@@ -384,7 +381,6 @@ void SpaceTree::QueryPlanesRec(	const Plane* planes, int nPlanes, int intersecti
 	else if ( intersection == grinliz::INTERSECT ) 
 	{
 		const Rectangle3F& aabb = node->looseAABB;
-		
 		int nPositive = 0;
 
 		for( int i=0; i<nPlanes; ++i ) {
