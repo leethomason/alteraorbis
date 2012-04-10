@@ -73,6 +73,7 @@ void WorldMap::Tessellate()
 			pv[1].tex.Set( 0, 1 );
 
 			int w = 1;
+			++i;
 			while( i<width && ((grid[INDEX(i,j)]&LAND) == layer) ) {
 				++i;
 				++w;
