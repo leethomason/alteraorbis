@@ -19,11 +19,10 @@ public:
 	}
 
 	virtual void Resize();
+	void Zoom( int style, float delta );
+	void Rotate( float degrees );
 
-	virtual void Tap( int action, const grinliz::Vector2F& screen, const grinliz::Ray& world )				
-	{
-		ProcessTap( action, screen, world );
-	}
+	virtual void Tap( int action, const grinliz::Vector2F& screen, const grinliz::Ray& world );
 	virtual void ItemTapped( const gamui::UIItem* item );
 	virtual void Draw3D( U32 deltaTime );
 
@@ -31,6 +30,11 @@ private:
 	gamui::PushButton okay;
 	Engine* engine;
 	WorldMap* map;
+
+	grinliz::Matrix4 dragMVPI;
+	grinliz::Vector3F dragStart3D, dragEnd3D;
+	grinliz::Vector3F dragStartCameraWC;
+
 };
 
 
