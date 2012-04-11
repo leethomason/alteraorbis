@@ -230,6 +230,9 @@ void ParticleSystem::Draw()
 {
 	GRINLIZ_PERFTRACK
 
+	if ( nParticles == 0 ) {
+		return;
+	}
 	if ( !texture ) {
 		texture = TextureManager::Instance()->GetTexture( "particle" );
 	}

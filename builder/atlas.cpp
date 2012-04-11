@@ -125,9 +125,9 @@ void AtlasSubTex::Map( const grinliz::Vector2F& in, grinliz::Vector2F* out ) con
 	float inx = Clamp( in.x, 0.0f, 1.0f );
 	float iny = Clamp( in.y, 0.0f, 1.0f );
 
+
 	out->x = ( (float)x + inx*(float)cx ) / (float)atlasCX;
-	// Annoying coordinate flipping.
-	out->y = ( (float)(atlasCY-y-cy) + iny*(float)cy ) / (float)atlasCY;
+	out->y = ( (float)y + iny*(float)cy ) / (float)atlasCY;
 	
 	GLASSERT( out->x >= -0.0f && out->x <= 1.0f );
 	GLASSERT( out->y >= -0.0f && out->y <= 1.0f );
