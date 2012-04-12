@@ -5,14 +5,28 @@
 #include "../grinliz/glgeometry.h"
 
 using namespace grinliz;
+using namespace gamui;
+
+// Draw calls as a proxy for world subdivision:
+// 20+20 blocks:
+// 249 -> 407 -> 535
 
 NavTestScene::NavTestScene( LumosGame* game ) : Scene( game )
 {
 	game->InitStd( &gamui2D, &okay, 0 );
-	
+
+	LayoutCalculator layout = game->DefaultLayout();
+	block.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
+	block.SetSize( layout.Width(), layout.Height() );
+	block.SetText( "block" );
+
+	block20.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
+	block20.SetSize( layout.Width(), layout.Height() );
+	block20.SetText( "block20" );
+
 	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase() );
 	
-	map = new WorldMap( 20, 20 );
+	map = new WorldMap( 32, 32 );
 	map->InitCircle();
 
 	engine->SetMap( map );
@@ -32,6 +46,9 @@ void NavTestScene::Resize()
 {
 	LumosGame* lumosGame = static_cast<LumosGame*>( game );
 	lumosGame->PositionStd( &okay, 0 );
+	LayoutCalculator layout = lumosGame->DefaultLayout();
+	layout.PosAbs( &block, 1, -1 );
+	layout.PosAbs( &block20, 2, -1 );
 }
 
 
@@ -88,8 +105,26 @@ void NavTestScene::Tap( int action, const grinliz::Vector2F& view, const grinliz
 
 void NavTestScene::ItemTapped( const gamui::UIItem* item )
 {
+	int makeBlocks = 0;
+
 	if ( item == &okay ) {
 		game->PopScene();
+	}
+	else if ( item == &block ) {
+		makeBlocks = 1;
+	}
+	else if ( item == &block20 ) {
+		makeBlocks = 20;
+	}
+
+	while ( makeBlocks ) {
+		Rectangle2I b = map->Bounds();
+		int x = random.Rand( b.Width() );
+		int y = random.Rand( b.Height() );
+		if ( map->IsLand( x, y ) && !map->IsBlockSet( x, y ) ) {
+			map->SetBlock( x, y );
+			--makeBlocks;
+		}
 	}
 }
 

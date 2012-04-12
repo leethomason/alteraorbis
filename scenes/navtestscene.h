@@ -2,6 +2,7 @@
 #define NAVTESTSCENE_INCLUDED
 
 #include "../xegame/scene.h"
+#include "../grinliz/glrandom.h"
 
 class LumosGame;
 class Engine;
@@ -13,10 +14,7 @@ public:
 	NavTestScene( LumosGame* game );
 	~NavTestScene();
 
-	virtual int RenderPass( grinliz::Rectangle2I* clip3D, grinliz::Rectangle2I* clip2D )
-	{
-		return RENDER_2D | RENDER_3D;	
-	}
+	virtual int RenderPass( grinliz::Rectangle2I* clip3D, grinliz::Rectangle2I* clip2D ) { return RENDER_2D | RENDER_3D; }
 
 	virtual void Resize();
 	void Zoom( int style, float delta );
@@ -27,14 +25,16 @@ public:
 	virtual void Draw3D( U32 deltaTime );
 
 private:
-	gamui::PushButton okay;
+	gamui::PushButton okay,
+					  block,
+					  block20;
 	Engine* engine;
 	WorldMap* map;
+	grinliz::Random random;
 
 	grinliz::Matrix4 dragMVPI;
 	grinliz::Vector3F dragStart3D, dragEnd3D;
 	grinliz::Vector3F dragStartCameraWC;
-
 };
 
 

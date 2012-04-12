@@ -37,6 +37,7 @@ bool Scene::ProcessTap( int action, const grinliz::Vector2F& screen, const grinl
 {
 	grinliz::Vector2F ui;
 	game->GetScreenport().ViewToUI( screen, &ui );
+	bool tapCaptured = (gamui2D.TapCaptured() != 0);
 
 	// Callbacks:
 	//		ItemTapped
@@ -63,7 +64,7 @@ bool Scene::ProcessTap( int action, const grinliz::Vector2F& screen, const grinl
 		gamui2D.TapCancel();
 		dragImage.SetAtom( RenderAtom() );
 		dragStarted = false;
-		return gamui2D.TapCaptured() != 0;
+		return tapCaptured;		// whether it was captured.
 	}
 	else if ( action == GAME_TAP_UP ) {
 		const UIItem* dragStart = gamui2D.TapCaptured();
@@ -82,5 +83,5 @@ bool Scene::ProcessTap( int action, const grinliz::Vector2F& screen, const grinl
 	if ( uiItem ) {
 		ItemTapped( uiItem );
 	}
-	return gamui2D.TapCaptured() != 0;	// also useful as a general "we are processing the tap" flag
+	return tapCaptured;
 }
