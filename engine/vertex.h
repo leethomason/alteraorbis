@@ -91,6 +91,7 @@ struct PTVertex
 	grinliz::Vector2F	tex;
 };
 
+
 struct PTVertex2
 {
 	enum {
@@ -101,5 +102,6 @@ struct PTVertex2
 	grinliz::Vector2F	pos;
 	grinliz::Vector2F	tex;
 };
+
 
 #endif //  UFOATTACK_VERTEX_INCLUDED

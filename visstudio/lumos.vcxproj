@@ -65,13 +65,14 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GRINLIZ_PROFILE; _CRT_SECURE_NO_WARNINGS;UFO_WIN32_SDL;WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>sdlmain.lib;sdl.lib; opengl32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -79,11 +80,13 @@
     <ClCompile Include="..\engine\engine.cpp" />
     <ClCompile Include="..\engine\fixedgeom.cpp" />
     <ClCompile Include="..\engine\gpustatemanager.cpp" />
+    <ClCompile Include="..\engine\lighting.cpp" />
     <ClCompile Include="..\engine\loosequadtree.cpp" />
     <ClCompile Include="..\engine\map.cpp" />
     <ClCompile Include="..\engine\model.cpp" />
     <ClCompile Include="..\engine\particle.cpp" />
     <ClCompile Include="..\engine\renderqueue.cpp" />
+    <ClCompile Include="..\engine\rendertarget.cpp" />
     <ClCompile Include="..\engine\screenport.cpp" />
     <ClCompile Include="..\engine\serialize.cpp" />
     <ClCompile Include="..\engine\settings.cpp" />
@@ -95,9 +98,11 @@
     <ClCompile Include="..\engine\ufoutil.cpp" />
     <ClCompile Include="..\engine\uirendering.cpp" />
     <ClCompile Include="..\game\lumosgame.cpp" />
+    <ClCompile Include="..\game\worldmap.cpp" />
     <ClCompile Include="..\gamui\gamui.cpp" />
     <ClCompile Include="..\micropather\micropather.cpp" />
     <ClCompile Include="..\scenes\dialogscene.cpp" />
+    <ClCompile Include="..\scenes\navtestscene.cpp" />
     <ClCompile Include="..\scenes\particlescene.cpp" />
     <ClCompile Include="..\scenes\rendertestscene.cpp" />
     <ClCompile Include="..\shared\gamedbreader.cpp" />
@@ -118,12 +123,14 @@
     <ClInclude Include="..\engine\enginelimits.h" />
     <ClInclude Include="..\engine\fixedgeom.h" />
     <ClInclude Include="..\engine\gpustatemanager.h" />
+    <ClInclude Include="..\engine\lighting.h" />
     <ClInclude Include="..\engine\loosequadtree.h" />
     <ClInclude Include="..\engine\map.h" />
     <ClInclude Include="..\engine\model.h" />
     <ClInclude Include="..\engine\particle.h" />
     <ClInclude Include="..\engine\platformgl.h" />
     <ClInclude Include="..\engine\renderqueue.h" />
+    <ClInclude Include="..\engine\rendertarget.h" />
     <ClInclude Include="..\engine\screenport.h" />
     <ClInclude Include="..\engine\serialize.h" />
     <ClInclude Include="..\engine\settings.h" />
@@ -136,9 +143,11 @@
     <ClInclude Include="..\engine\uirendering.h" />
     <ClInclude Include="..\engine\vertex.h" />
     <ClInclude Include="..\game\lumosgame.h" />
+    <ClInclude Include="..\game\worldmap.h" />
     <ClInclude Include="..\gamui\gamui.h" />
     <ClInclude Include="..\micropather\micropather.h" />
     <ClInclude Include="..\scenes\dialogscene.h" />
+    <ClInclude Include="..\scenes\navtestscene.h" />
     <ClInclude Include="..\scenes\particlescene.h" />
     <ClInclude Include="..\scenes\rendertestscene.h" />
     <ClInclude Include="..\scenes\titlescene.h" />

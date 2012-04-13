@@ -30,6 +30,7 @@ static const char* gUniformName[ShaderManager::MAX_UNIFORM] =
 	"u_lightDir",
 	"u_ambient",
 	"u_diffuse",
+	"u_radius"
 };
 
 
@@ -78,6 +79,28 @@ void ShaderManager::DeviceLoss()
 	active = 0;
 	activeStreams.Clear();
 	shaderArr.Clear();
+
+	for( int i=0; i<deviceLossHandlers.Size(); ++i ) {
+		deviceLossHandlers[i]->DeviceLoss();
+	}
+}
+
+
+void ShaderManager::AddDeviceLossHandler( IDeviceLossHandler* handler )
+{
+	deviceLossHandlers.Push( handler );
+}
+
+
+void ShaderManager::RemoveDeviceLossHandler( IDeviceLossHandler* handler )
+{
+	for( int i=0; i<deviceLossHandlers.Size(); ++i ) {
+		if ( deviceLossHandlers[i] == handler ) {
+			deviceLossHandlers.SwapRemove( i );
+			return;
+		}
+	}
+	GLASSERT( 0 );
 }
 
 
@@ -105,6 +128,15 @@ void ShaderManager::SetStreamData( int id, int size, int type, int stride, const
 	CHECK_GL_ERROR;
 
 	activeStreams.Push( loc );
+}
+
+
+void ShaderManager::SetUniform( int id, float value )
+{
+	int loc = active->GetUniformLocation( id );
+	GLASSERT( loc >= 0 );
+	glUniform1f( loc, value );
+	CHECK_GL_ERROR;
 }
 
 
@@ -158,13 +190,15 @@ void ShaderManager::SetTexture( int index, Texture* texture )
 }
 
 
-void ShaderManager::AppendFlag( GLString* str, const char* flag, int set )
+void ShaderManager::AppendFlag( GLString* str, const char* flag, int set, int value )
 {
 	str->append( "#define " );
 	str->append( flag );
 	str->append( " " );
 	if ( set ) {
-		str->append( "1\n" );
+		char buf[] = "1\n";
+		buf[0] = '0' + value;
+		str->append( buf );
 	}
 	else {
 		str->append( "0\n" );
@@ -192,7 +226,7 @@ void ShaderManager::ActivateShader( int flags )
 
 ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 {
-	static const int LEN = 200;
+	static const int LEN = 1000;
 	char buf[LEN];
 	int outLen = 0;
 
@@ -214,25 +248,46 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 
 	header = "";
 	AppendFlag( &header, "TEXTURE0",			flags & TEXTURE0 );
-	AppendFlag( &header, "TEXTURE0_ALPHA_ONLY",	flags & TEXTURE0_ALPHA_ONLY );
-	AppendFlag( &header, "TEXTURE0_TRANSFORM",	flags & TEXTURE0_TRANSFORM );
-	AppendFlag( &header, "TEXTURE0_3COMP",		flags & TEXTURE0_3COMP );
-	
+	if ( flags & TEXTURE0 ) {
+		AppendFlag( &header, "TEXTURE0_ALPHA_ONLY",	flags & TEXTURE0_ALPHA_ONLY );
+		AppendFlag( &header, "TEXTURE0_TRANSFORM",	flags & TEXTURE0_TRANSFORM );
+		AppendFlag( &header, "TEXTURE0_3COMP",		flags & TEXTURE0_3COMP );
+	}
 	AppendFlag( &header, "TEXTURE1",			flags & TEXTURE1 );
-	AppendFlag( &header, "TEXTURE1_ALPHA_ONLY",	flags & TEXTURE1_ALPHA_ONLY );
-	AppendFlag( &header, "TEXTURE1_TRANSFORM",	flags & TEXTURE1_TRANSFORM );
-	AppendFlag( &header, "TEXTURE1_3COMP",		flags & TEXTURE1_3COMP );
-	
+	if ( flags & TEXTURE1 ) {
+		AppendFlag( &header, "TEXTURE1_ALPHA_ONLY",	flags & TEXTURE1_ALPHA_ONLY );
+		AppendFlag( &header, "TEXTURE1_TRANSFORM",	flags & TEXTURE1_TRANSFORM );
+		AppendFlag( &header, "TEXTURE1_3COMP",		flags & TEXTURE1_3COMP );
+	}
 	AppendFlag( &header, "COLORS",				flags & COLORS );
 	AppendFlag( &header, "COLOR_MULTIPLIER",	flags & COLOR_MULTIPLIER );
-	AppendFlag( &header, "LIGHTING_DIFFUSE",	flags & LIGHTING_DIFFUSE );	
 	AppendFlag( &header, "INSTANCE",			flags & INSTANCE );
 	AppendFlag( &header, "PREMULT",				flags & PREMULT );
+	AppendFlag( &header, "EMISSIVE",			flags & EMISSIVE );
+	AppendFlag( &header, "EMISSIVE_EXCLUSIVE",	flags & EMISSIVE_EXCLUSIVE );
+
+	if ( flags & LIGHTING_DIFFUSE )
+		AppendFlag( &header, "LIGHTING_DIFFUSE", 1, 1 );
+	else if ( flags & LIGHTING_HEMI )
+		AppendFlag( &header, "LIGHTING_DIFFUSE", 1, 2 );
+	else 
+		AppendFlag( &header, "LIGHTING_DIFFUSE", 0, 0 );
+
+	if ( flags & BLUR ) {
+		AppendFlag( &header, "BLUR_Y", flags & BLUR_Y );
+	}
 
 	AppendConst( &header, "EL_MAX_INSTANCE", EL_MAX_INSTANCE );
+
 	GLOUTPUT(( "header\n%s\n", header.c_str() ));
 
-	const char* vertexSrc[2] = { header.c_str(), fixedpipe_vert };
+	const char* vertexSrc[2]   = { header.c_str(), fixedpipe_vert };
+	const char* fragmentSrc[2] = { header.c_str(), fixedpipe_frag };
+	if ( flags & BLUR ) {
+		vertexSrc[1]   = blur_vert;
+		fragmentSrc[1] = blur_frag;
+	}
+
 	glShaderSource( shader->vertexProg, 2, vertexSrc, 0 );
 	glCompileShader( shader->vertexProg );
 	glGetShaderInfoLog( shader->vertexProg, LEN, &outLen, buf );
@@ -241,7 +296,6 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 	}
 	CHECK_GL_ERROR;
 
-	const char* fragmentSrc[2] = { header.c_str(), fixedpipe_frag };
 	glShaderSource( shader->fragmentProg, 2, fragmentSrc, 0 );
 	glCompileShader( shader->fragmentProg );
 	glGetShaderInfoLog( shader->fragmentProg, LEN, &outLen, buf );

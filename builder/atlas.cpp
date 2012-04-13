@@ -76,8 +76,8 @@ SDL_Surface* Atlas::Generate( BTexture* array, int nTexture, int maxWidth )
 	btexture.Create( maxWidth, maxY, array[0].format );
 
 	for( unsigned i=0; i<subTexArr.size(); ++i ) {
-		SDL_Rect src = { 0, 0, subTexArr[i].src->surface->w, subTexArr[i].src->surface->w };
-		SDL_Rect dst = { subTexArr[i].src->atlasX, subTexArr[i].src->atlasY, subTexArr[i].src->surface->w, subTexArr[i].src->surface->w };
+		SDL_Rect src = { 0, 0, subTexArr[i].src->surface->w, subTexArr[i].src->surface->h };
+		SDL_Rect dst = { subTexArr[i].src->atlasX, subTexArr[i].src->atlasY, subTexArr[i].src->surface->w, subTexArr[i].src->surface->h };
 		SDL_BlitSurface( subTexArr[i].src->surface, &src, btexture.surface, &dst );
 
 		subTexArr[i].x  = subTexArr[i].src->atlasX;
@@ -127,8 +127,9 @@ void AtlasSubTex::Map( const grinliz::Vector2F& in, grinliz::Vector2F* out ) con
 
 
 	out->x = ( (float)x + inx*(float)cx ) / (float)atlasCX;
-	out->y = ( (float)y + iny*(float)cy ) / (float)atlasCY;
-	
+	//out->y = 1.f - ( (float)y + iny*(float)cy ) / (float)atlasCY;
+	out->y = (1.0f-(float)(y+cy)/(float)atlasCY) + iny*(float)cy / (float)atlasCY;
+
 	GLASSERT( out->x >= -0.0f && out->x <= 1.0f );
 	GLASSERT( out->y >= -0.0f && out->y <= 1.0f );
 }

@@ -49,9 +49,6 @@ enum {
 	EL_TUNE_INSTANCE_MEM	= 8*1024	// Max memory per model.
 };
 
-static const float EL_NIGHT_RED		= ( (float)EL_NIGHT_RED_U8/255.f );
-static const float EL_NIGHT_GREEN	= ( (float)EL_NIGHT_GREEN_U8/255.f );
-static const float EL_NIGHT_BLUE	= ( (float)EL_NIGHT_BLUE_U8/255.f );
 
 static const float EL_FOV  = 40.0f;
 static const float EL_NEAR = 2.0f;

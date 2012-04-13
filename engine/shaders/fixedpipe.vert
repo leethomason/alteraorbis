@@ -11,7 +11,7 @@ uniform mat4 	u_mvpMatrix;		// model-view-projection.
 	uniform vec4 u_colorMult;		// Overall Color, if specified.
 #endif
 
-attribute vec3 a_pos;			// vertex position
+attribute vec3 a_pos;				// vertex position
 
 #if COLORS == 1
 	attribute vec3 a_color;			// vertex color
@@ -41,7 +41,7 @@ attribute vec3 a_pos;			// vertex position
 	varying vec2 v_uv1;
 #endif
 
-#if LIGHTING_DIFFUSE == 1
+#if LIGHTING_DIFFUSE > 0
 	uniform mat4 u_normalMatrix;	// normal transformation
 	uniform vec3 u_lightDir;		// light direction, eye space (x,y,z,0)
 	uniform vec4 u_ambient;			// ambient light. ambient+diffuse = 1
@@ -63,11 +63,27 @@ void main() {
 		color *= a_color;
 	#endif
 
-	#if LIGHTING_DIFFUSE == 1
-		vec3 normal = normalize( ( u_normalMatrix * vec4( a_normal.x, a_normal.y, a_normal.z, 0 ) ).xyz );
-		float nDotL = max( dot( normal, u_lightDir ), 0.0 );
-		vec4 light = u_ambient + u_diffuse * nDotL;
-		
+	#if LIGHTING_DIFFUSE  > 0
+		#if INSTANCE == 0 
+			vec3 normal = normalize( ( u_normalMatrix * vec4( a_normal.x, a_normal.y, a_normal.z, 0 ) ).xyz );
+		#else
+			vec3 normal = normalize( (( u_normalMatrix * u_mMatrix[int(a_instanceID)]) * vec4( a_normal.x, a_normal.y, a_normal.z, 0 ) ).xyz );
+		#endif
+
+		#if LIGHTING_DIFFUSE == 1
+			// Lambert lighting with ambient term.
+			// fixme: not clear we need to normalize
+			float nDotL = max( dot( normal, u_lightDir ), 0.0 );
+			vec4 light = u_ambient + u_diffuse * nDotL;
+		#elif LIGHTING_DIFFUSE == 2
+			// Hemispherical lighting. The 'u_diffuse' is used for the main light,
+			// and 'u_ambient' for the key light, just so as not to introduce new variables.
+			// fixme: not clear we need to normalize
+			float nDotL = dot( normal, u_lightDir );
+			vec4 light = mix( u_ambient, u_diffuse, (nDotL + 1.0)*0.5 );
+		#else	
+			#error light not defined
+		#endif
 		color *= light;
 	#endif
 	
@@ -102,4 +118,3 @@ void main() {
 		gl_Position = (u_mvpMatrix * u_mMatrix[int(a_instanceID)]) * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );
 	#endif
 }
-

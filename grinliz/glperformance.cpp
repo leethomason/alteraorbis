@@ -52,7 +52,7 @@ U64 grinliz::FastFrequency()
 {
 	U64 f;
 	QueryPerformanceFrequency( (LARGE_INTEGER*) &f );
-	return f/1000;
+	return f;
 }
 #endif
 
@@ -112,6 +112,7 @@ void Performance::Process()
 			root = root->child[c];
 			root->name = s->name;
 			root->start = s->time;
+			root->callCount++;
 		}
 		else {
 			GLASSERT( StrEqual( root->name, s->name ) );
@@ -120,7 +121,7 @@ void Performance::Process()
 		}
 	}
 
-	double freq = 1./(double)FastFrequency();
+	double freq = 1000./(double)FastFrequency();
 	for( int i=0; i<nPerfData; ++i ) {
 		PerfData* pd = perfData+i;
 		pd->inclusiveMSec = (double)(pd->inclusiveTU) * freq;

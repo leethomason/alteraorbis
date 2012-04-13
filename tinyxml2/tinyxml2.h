@@ -29,15 +29,17 @@ distribution.
 	#include <climits>
 	#include <cstdio>
 	#include <cstring>
+	#include <cstdarg>
 #else
 	// Not completely sure all the interesting systems
 	// can handle the new headers; can switch this if
 	// there is an include problem.
-#include <limits.h>
-#include <ctype.h>
-#include <stdio.h>
+	#include <limits.h>
+	#include <ctype.h>
+	#include <stdio.h>
 	#include <memory.h>		// Needed by mac.
 #endif
+
 
 /* 
    TODO: add 'lastAttribute' for faster parsing.
@@ -69,33 +71,33 @@ distribution.
 #endif
 
 
-// Deprecated library function hell. Compilers want to use the
-// new safe versions. This probably doesn't fully address the problem,
-// but it gets closer. There are too many compilers for me to fully
-// test. If you get compilation troubles, undefine TIXML_SAFE
-
 #if defined(_MSC_VER) && (_MSC_VER >= 1400 )
 	// Microsoft visual studio, version 2005 and higher.
-	#define TIXML_SNPRINTF _snprintf_s
+	/*int _snprintf_s(
+	   char *buffer,
+	   size_t sizeOfBuffer,
+	   size_t count,	
+	   const char *format [,
+		  argument] ... 
+	);*/
+	inline int TIXML_SNPRINTF( char* buffer, size_t size, const char* format, ... ) {
+	    va_list va;
+		va_start( va, format );
+		int result = vsnprintf_s( buffer, size, _TRUNCATE, format, va );
+	    va_end( va );
+		return result;
+	}
 	#define TIXML_SSCANF   sscanf_s
-#elif defined(_MSC_VER) && (_MSC_VER >= 1200 )
-	// Microsoft visual studio, version 6 and higher.
-	//#pragma message( "Using _sn* functions." )
-	#define TIXML_SNPRINTF _snprintf
-	#define TIXML_SSCANF   sscanf
-#elif defined(__GNUC__) && (__GNUC__ >= 3 )
+#else
 	// GCC version 3 and higher
 	//#warning( "Using sn* functions." )
-	#define TIXML_SNPRINTF snprintf
-	#define TIXML_SSCANF   sscanf
-#else
 	#define TIXML_SNPRINTF snprintf
 	#define TIXML_SSCANF   sscanf
 #endif
 
 static const int TIXML2_MAJOR_VERSION = 0;
 static const int TIXML2_MINOR_VERSION = 9;
-static const int TIXML2_PATCH_VERSION = 1;
+static const int TIXML2_PATCH_VERSION = 4;
 
 namespace tinyxml2
 {
@@ -141,7 +143,7 @@ public:
 	const char* GetStr();
 	bool Empty() const { return start == end; }
 
-	void SetInternedStr( const char* str ) { Reset(); this->start = (char*) str; }
+	void SetInternedStr( const char* str ) { Reset(); this->start = const_cast<char*>(str); }
 	void SetStr( const char* str, int flags=0 );
 
 	char* ParseText( char* in, const char* endTag, int strFlags );
@@ -405,7 +407,7 @@ public:
 	XML Document Object Model (DOM), except XMLAttributes.
 	Nodes have siblings, a parent, and children which can
 	be navigated. A node is always in a XMLDocument.
-	The type of a TiXmlNode can be queried, and it can 
+	The type of a XMLNode can be queried, and it can 
 	be cast to its more defined type.
 
 	An XMLDocument allocates memory for all its Nodes.
@@ -844,11 +846,16 @@ public:
 	virtual bool Accept( XMLVisitor* visitor ) const;
 
 	/** Given an attribute name, Attribute() returns the value
-		for the attribute of that name, or null if none exists.
-		
-		'value' is normally null. However, if specified, the attribute
-		will only be returned if the 'name' and 'value' match. This
-		allow you to write code:
+		for the attribute of that name, or null if none 
+		exists. For example:
+
+		@verbatim
+		const char* value = ele->Attribute( "foo" );
+		@endverbatim
+
+		The 'value' parameter is normally null. However, if specified, 
+		the attribute will only be returned if the 'name' and 'value' 
+		match. This allow you to write code:
 
 		@verbatim
 		if ( ele->Attribute( "foo", "bar" ) ) callFooIsBar();
@@ -891,26 +898,26 @@ public:
 		QueryIntAttribute( "foo", &value );		// if "foo" isn't found, value will still be 10
 		@endverbatim
 	*/
-	int QueryIntAttribute( const char* name, int* value ) const					{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return XML_NO_ATTRIBUTE; return a->QueryIntValue( value ); } 
+	int QueryIntAttribute( const char* name, int* _value ) const					{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return XML_NO_ATTRIBUTE; return a->QueryIntValue( _value ); } 
 	/// See QueryIntAttribute()
-	int QueryUnsignedAttribute( const char* name, unsigned int* value ) const	{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return XML_NO_ATTRIBUTE; return a->QueryUnsignedValue( value ); }
+	int QueryUnsignedAttribute( const char* name, unsigned int* _value ) const	{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return XML_NO_ATTRIBUTE; return a->QueryUnsignedValue( _value ); }
 	/// See QueryIntAttribute()
-	int QueryBoolAttribute( const char* name, bool* value ) const				{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return XML_NO_ATTRIBUTE; return a->QueryBoolValue( value ); }
+	int QueryBoolAttribute( const char* name, bool* _value ) const				{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return XML_NO_ATTRIBUTE; return a->QueryBoolValue( _value ); }
 	/// See QueryIntAttribute()
-	int QueryDoubleAttribute( const char* name, double* value ) const			{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return XML_NO_ATTRIBUTE; return a->QueryDoubleValue( value ); }
+	int QueryDoubleAttribute( const char* name, double* _value ) const			{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return XML_NO_ATTRIBUTE; return a->QueryDoubleValue( _value ); }
 	/// See QueryIntAttribute()
-	int QueryFloatAttribute( const char* name, float* value ) const				{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return XML_NO_ATTRIBUTE; return a->QueryFloatValue( value ); }
+	int QueryFloatAttribute( const char* name, float* _value ) const				{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return XML_NO_ATTRIBUTE; return a->QueryFloatValue( _value ); }
 
 	/// Sets the named attribute to value.
-	void SetAttribute( const char* name, const char* value )	{ XMLAttribute* a = FindOrCreateAttribute( name ); a->SetAttribute( value ); }
+	void SetAttribute( const char* name, const char* _value )	{ XMLAttribute* a = FindOrCreateAttribute( name ); a->SetAttribute( _value ); }
 	/// Sets the named attribute to value.
-	void SetAttribute( const char* name, int value )			{ XMLAttribute* a = FindOrCreateAttribute( name ); a->SetAttribute( value ); }
+	void SetAttribute( const char* name, int _value )			{ XMLAttribute* a = FindOrCreateAttribute( name ); a->SetAttribute( _value ); }
 	/// Sets the named attribute to value.
-	void SetAttribute( const char* name, unsigned value )		{ XMLAttribute* a = FindOrCreateAttribute( name ); a->SetAttribute( value ); }
+	void SetAttribute( const char* name, unsigned _value )		{ XMLAttribute* a = FindOrCreateAttribute( name ); a->SetAttribute( _value ); }
 	/// Sets the named attribute to value.
-	void SetAttribute( const char* name, bool value )			{ XMLAttribute* a = FindOrCreateAttribute( name ); a->SetAttribute( value ); }
+	void SetAttribute( const char* name, bool _value )			{ XMLAttribute* a = FindOrCreateAttribute( name ); a->SetAttribute( _value ); }
 	/// Sets the named attribute to value.
-	void SetAttribute( const char* name, double value )			{ XMLAttribute* a = FindOrCreateAttribute( name ); a->SetAttribute( value ); }
+	void SetAttribute( const char* name, double _value )			{ XMLAttribute* a = FindOrCreateAttribute( name ); a->SetAttribute( _value ); }
 
 	/**
 		Delete an attribute.
@@ -1125,6 +1132,139 @@ private:
 };
 
 
+/**
+	A XMLHandle is a class that wraps a node pointer with null checks; this is
+	an incredibly useful thing. Note that XMLHandle is not part of the TinyXML
+	DOM structure. It is a separate utility class.
+
+	Take an example:
+	@verbatim
+	<Document>
+		<Element attributeA = "valueA">
+			<Child attributeB = "value1" />
+			<Child attributeB = "value2" />
+		</Element>
+	<Document>
+	@endverbatim
+
+	Assuming you want the value of "attributeB" in the 2nd "Child" element, it's very 
+	easy to write a *lot* of code that looks like:
+
+	@verbatim
+	XMLElement* root = document.FirstChildElement( "Document" );
+	if ( root )
+	{
+		XMLElement* element = root->FirstChildElement( "Element" );
+		if ( element )
+		{
+			XMLElement* child = element->FirstChildElement( "Child" );
+			if ( child )
+			{
+				XMLElement* child2 = child->NextSiblingElement( "Child" );
+				if ( child2 )
+				{
+					// Finally do something useful.
+	@endverbatim
+
+	And that doesn't even cover "else" cases. XMLHandle addresses the verbosity
+	of such code. A XMLHandle checks for null pointers so it is perfectly safe 
+	and correct to use:
+
+	@verbatim
+	XMLHandle docHandle( &document );
+	XMLElement* child2 = docHandle.FirstChild( "Document" ).FirstChild( "Element" ).FirstChild().NextSibling().ToElement();
+	if ( child2 )
+	{
+		// do something useful
+	@endverbatim
+
+	Which is MUCH more concise and useful.
+
+	It is also safe to copy handles - internally they are nothing more than node pointers.
+	@verbatim
+	XMLHandle handleCopy = handle;
+	@endverbatim
+
+	See also XMLConstHandle, which is the same as XMLHandle, but operates on const objects.
+*/
+class XMLHandle
+{
+public:
+	/// Create a handle from any node (at any depth of the tree.) This can be a null pointer.
+	XMLHandle( XMLNode* _node )												{ node = _node; }
+	/// Create a handle from a node.
+	XMLHandle( XMLNode& _node )												{ node = &_node; }
+	/// Copy constructor
+	XMLHandle( const XMLHandle& ref )										{ node = ref.node; }
+	/// Assignment
+	XMLHandle operator=( const XMLHandle& ref )								{ node = ref.node; return *this; }
+
+	/// Get the first child of this handle.
+	XMLHandle FirstChild() 													{ return XMLHandle( node ? node->FirstChild() : 0 ); }
+	/// Get the first child element of this handle.
+	XMLHandle FirstChildElement( const char* value=0 )						{ return XMLHandle( node ? node->FirstChildElement( value ) : 0 ); }
+	/// Get the last child of this handle.
+	XMLHandle LastChild()													{ return XMLHandle( node ? node->LastChild() : 0 ); }
+	/// Get the last child element of this handle.
+	XMLHandle LastChildElement( const char* _value=0 )						{ return XMLHandle( node ? node->LastChildElement( _value ) : 0 ); }
+	/// Get the previous sibling of this handle.
+	XMLHandle PreviousSibling()												{ return XMLHandle( node ? node->PreviousSibling() : 0 ); }
+	/// Get the previous sibling element of this handle.
+	XMLHandle PreviousSiblingElement( const char* _value=0 )				{ return XMLHandle( node ? node->PreviousSiblingElement( _value ) : 0 ); }
+	/// Get the next sibling of this handle.
+	XMLHandle NextSibling()													{ return XMLHandle( node ? node->NextSibling() : 0 ); }		
+	/// Get the next sibling element of this handle.
+	XMLHandle NextSiblingElement( const char* _value=0 )					{ return XMLHandle( node ? node->NextSiblingElement( _value ) : 0 ); }
+
+	/// Safe cast to XMLNode. This can return null.
+	XMLNode* ToNode()							{ return node; } 
+	/// Safe cast to XMLElement. This can return null.
+	XMLElement* ToElement() 					{ return ( ( node && node->ToElement() ) ? node->ToElement() : 0 ); }
+	/// Safe cast to XMLText. This can return null.
+	XMLText* ToText() 							{ return ( ( node && node->ToText() ) ? node->ToText() : 0 ); }
+	/// Safe cast to XMLUnknown. This can return null.
+	XMLUnknown* ToUnknown() 					{ return ( ( node && node->ToUnknown() ) ? node->ToUnknown() : 0 ); }
+	/// Safe cast to XMLDeclaration. This can return null.
+	XMLDeclaration* ToDeclaration() 			{ return ( ( node && node->ToDeclaration() ) ? node->ToDeclaration() : 0 ); }
+
+private:
+	XMLNode* node;
+};
+
+
+/**
+	A variant of the XMLHandle class for working with const XMLNodes and Documents. It is the
+	same in all regards, except for the 'const' qualifiers. See XMLHandle for API.
+*/
+class XMLConstHandle
+{
+public:
+	XMLConstHandle( const XMLNode* _node )											{ node = _node; }
+	XMLConstHandle( const XMLNode& _node )											{ node = &_node; }
+	XMLConstHandle( const XMLConstHandle& ref )										{ node = ref.node; }
+
+	XMLConstHandle operator=( const XMLConstHandle& ref )							{ node = ref.node; return *this; }
+
+	const XMLConstHandle FirstChild() const											{ return XMLConstHandle( node ? node->FirstChild() : 0 ); }
+	const XMLConstHandle FirstChildElement( const char* value=0 ) const				{ return XMLConstHandle( node ? node->FirstChildElement( value ) : 0 ); }
+	const XMLConstHandle LastChild()	const										{ return XMLConstHandle( node ? node->LastChild() : 0 ); }
+	const XMLConstHandle LastChildElement( const char* _value=0 ) const				{ return XMLConstHandle( node ? node->LastChildElement( _value ) : 0 ); }
+	const XMLConstHandle PreviousSibling() const									{ return XMLConstHandle( node ? node->PreviousSibling() : 0 ); }
+	const XMLConstHandle PreviousSiblingElement( const char* _value=0 ) const		{ return XMLConstHandle( node ? node->PreviousSiblingElement( _value ) : 0 ); }
+	const XMLConstHandle NextSibling() const										{ return XMLConstHandle( node ? node->NextSibling() : 0 ); }
+	const XMLConstHandle NextSiblingElement( const char* _value=0 ) const			{ return XMLConstHandle( node ? node->NextSiblingElement( _value ) : 0 ); }
+
+
+	const XMLNode* ToNode() const				{ return node; } 
+	const XMLElement* ToElement() const			{ return ( ( node && node->ToElement() ) ? node->ToElement() : 0 ); }
+	const XMLText* ToText() const				{ return ( ( node && node->ToText() ) ? node->ToText() : 0 ); }
+	const XMLUnknown* ToUnknown() const			{ return ( ( node && node->ToUnknown() ) ? node->ToUnknown() : 0 ); }
+	const XMLDeclaration* ToDeclaration() const	{ return ( ( node && node->ToDeclaration() ) ? node->ToDeclaration() : 0 ); }
+
+private:
+	const XMLNode* node;
+};
+
 
 /**
 	Printing functionality. The XMLPrinter gives you more
@@ -1244,7 +1384,6 @@ private:
 
 
 }	// tinyxml2
-
 
 
 #endif // TINYXML2_INCLUDED

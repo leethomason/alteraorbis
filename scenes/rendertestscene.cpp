@@ -3,8 +3,11 @@
 #include "../gamui/gamui.h"
 #include "../engine/engine.h"
 #include "../xegame/testmap.h"
+#include "../grinliz/glcolor.h"
 
 using namespace gamui;
+using namespace tinyxml2;
+using namespace grinliz;
 
 RenderTestScene::RenderTestScene( LumosGame* game, const RenderTestSceneData* data ) : Scene( game ), lumosGame( game )
 {
@@ -14,7 +17,11 @@ RenderTestScene::RenderTestScene( LumosGame* game, const RenderTestSceneData* da
 		model[i] = 0;
 
 	testMap = new TestMap( 8, 8 );
+	Color3F c = { 0.5f, 0.5f, 0.5f };
+	testMap->SetColor( c );
+
 	engine->SetMap( testMap );
+	engine->SetGlow( true );
 	
 	switch( data->id ) {
 	case 0:
@@ -30,12 +37,22 @@ RenderTestScene::RenderTestScene( LumosGame* game, const RenderTestSceneData* da
 	LayoutCalculator layout = lumosGame->DefaultLayout();
 
 	lumosGame->InitStd( &gamui2D, &okay, 0 );
-	whiteButton.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ) );
-	whiteButton.SetSize( layout.Width(), layout.Height() );
-	whiteButton.SetText( "white" );
+	glowButton.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ) );
+	glowButton.SetSize( layout.Width(), layout.Height() );
+	glowButton.SetText( "glow" );
+
+	refreshButton.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
+	refreshButton.SetSize( layout.Width(), layout.Height() );
+	refreshButton.SetText( "refresh" );
 
 	textBox.Init( &gamui2D );
 	textBox.SetSize( 400, 100 );
+
+	RenderAtom nullAtom;
+	rtImage.Init( &gamui2D, nullAtom, true );
+	rtImage.SetSize( 400.f, 200.f );
+
+	LoadLighting();
 }
 
 
@@ -54,7 +71,8 @@ void RenderTestScene::Resize()
 	lumosGame->PositionStd( &okay, 0 );
 	
 	LayoutCalculator layout = lumosGame->DefaultLayout();
-	layout.PosAbs( &whiteButton, 1, -1 );
+	layout.PosAbs( &glowButton, 1, -1 );
+	layout.PosAbs( &refreshButton, 2, -1 );
 
 	textBox.SetPos( okay.X(), okay.Y()-100 );
 }
@@ -63,16 +81,16 @@ void RenderTestScene::Resize()
 
 void RenderTestScene::SetupTest0()
 {
-	const ModelResource* res0 = ModelResourceManager::Instance()->GetModelResource( "femaleMarine" );
-	const ModelResource* res1 = ModelResourceManager::Instance()->GetModelResource( "maleMarine" );
+	const ModelResource* res0 = ModelResourceManager::Instance()->GetModelResource( "humanFemale" );
+	const ModelResource* res1 = ModelResourceManager::Instance()->GetModelResource( "humanMale" );
 	for( int i=0; i<NUM_MODELS; ++i ) {
 		model[i] = engine->AllocModel( i<3 ? res0 : res1 );
 		model[i]->SetPos( 1, 0, (float)i );
-		model[i]->SetRotation( (float)(-i*10) );
+		model[i]->SetRotation( (float)(-i*30) );
 	}
 	engine->CameraLookAt( 0, (float)(NUM_MODELS/2), 12 );
 
-	textBox.SetText( "DC = ( 2fem + 2male ) * ( 1color + 1shadow) + 2map = 10. 'u' disable ui" ); 
+	textBox.SetText( "DC = ( 1fem + 1male ) * ( 1color + 1shadow) + 2map = 6`. 'u' disable ui" ); 
 }
 
 
@@ -96,14 +114,38 @@ void RenderTestScene::ItemTapped( const gamui::UIItem* item )
 	if ( item == &okay ) {
 		game->PopScene();
 	}
-	else if ( item == &whiteButton ) {
+	else if ( item == &glowButton ) {
+#if 0
 		Texture* white = TextureManager::Instance()->GetTexture( "white" );
 		for( int i=0; i<NUM_MODELS; ++i ) {
 			if ( model[i] ) {
 				model[i]->SetTexture( white );
 			}
 		}
+#endif
+		engine->SetGlow( !engine->GetGlow() );
 	}
+	else if ( item == &refreshButton ) {
+		LoadLighting();
+	}
+}
+
+
+void RenderTestScene::LoadLighting()
+{
+	XMLDocument doc;
+	doc.LoadFile( "./resin/lighting.xml" );
+
+	const XMLElement* lightingEle = doc.FirstChildElement( "lighting" );
+	const XMLElement* mapEle = lightingEle->FirstChildElement( "map" );
+
+	if ( mapEle ) {
+		Color3F mapColor;
+		LoadColor( mapEle, &mapColor );
+		testMap->SetColor( mapColor );
+	}
+
+	engine->lighting.Load( lightingEle );
 }
 
 
@@ -129,7 +171,8 @@ void RenderTestScene::HandleHotKeyMask( int mask )
 		{
 			bool visible = !okay.Visible();
 			okay.SetVisible( visible );
-			whiteButton.SetVisible( visible );
+			glowButton.SetVisible( visible );
+			refreshButton.SetVisible( visible );
 			textBox.SetVisible( visible );
 		}
 		break;
@@ -140,4 +183,7 @@ void RenderTestScene::HandleHotKeyMask( int mask )
 void RenderTestScene::Draw3D( U32 deltaTime )
 {
 	engine->Draw( deltaTime );
+	
+	//RenderAtom atom( (const void*)UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, (const void*)engine->GetRenderTargetTexture(2), 0.25f, 0.25f, 0.75f, 0.75f );
+	//rtImage.SetAtom( atom );
 }

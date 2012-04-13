@@ -103,6 +103,7 @@ struct PerfData
 	const char* name;
 	TimeUnit	inclusiveTU;
 	double		inclusiveMSec;
+	int			callCount;
 
 	TimeUnit	start;
 	enum { MAX_CHILDREN = 10 };

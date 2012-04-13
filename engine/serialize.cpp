@@ -79,10 +79,26 @@ void LoadColor( const tinyxml2::XMLElement* element, grinliz::Color4F* color )
 }
 
 
+void LoadColor( const tinyxml2::XMLElement* element, grinliz::Color3F* color )
+{
+	element->QueryFloatAttribute( "red", &color->r );
+	element->QueryFloatAttribute( "green", &color->g );
+	element->QueryFloatAttribute( "blue", &color->b );
+}
+
+
 void LoadColor( const tinyxml2::XMLElement* element, grinliz::Vector4F* color )
 {
 	element->QueryFloatAttribute( "red", &color->x );
 	element->QueryFloatAttribute( "green", &color->y );
 	element->QueryFloatAttribute( "blue", &color->z );
 	element->QueryFloatAttribute( "alpha", &color->w );
+}
+
+
+void LoadVector( const tinyxml2::XMLElement* element, grinliz::Vector3F* vec )
+{
+	element->QueryFloatAttribute( "x", &vec->x );
+	element->QueryFloatAttribute( "y", &vec->y );
+	element->QueryFloatAttribute( "z", &vec->z );
 }

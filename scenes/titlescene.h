@@ -29,13 +29,13 @@ private:
 	LumosGame* lumosGame;
 	gamui::TextLabel	label;
 	gamui::Image		background;
-	gamui::PushButton	okay, cancel;
 
 	enum { 
 		TEST_DIALOG,
 		TEST_RENDER_0,
 		TEST_RENDER_1,
 		TEST_PARTICLE,
+		TEST_NAV,
 		NUM_TESTS
 	};
 	gamui::PushButton	testScene[NUM_TESTS];

@@ -231,8 +231,12 @@ public:
 		grinliz::Color4F c = { (float)color.r*INV, (float)color.g*INV, (float)color.b*INV, (float)color.a*INV };
 		SetColor( c );
 	}
+	void SetRadius( float r ) { radius = r; }
 
-	void SetInstancing( bool value ) { instancing = value; }
+	// Set any of the flags (that are boolean) from ShaderManager
+	void SetShaderFlag( int flag )				{ shaderFlags |= flag; }
+	void ClearShaderFlag( int flag )			{ shaderFlags &= (~flag); }
+
 	void InstanceMatrix( int i, const grinliz::Matrix4& mat ) { 
 		GLASSERT( i >= 0 && i < EL_MAX_INSTANCE );
 		instanceMatrix[i] = mat; 
@@ -261,7 +265,7 @@ public:
 
 	void Draw( int instances=0 );
 
-	void Debug_DrawQuad( const grinliz::Vector3F p0, const grinliz::Vector3F p1 );
+	void DrawQuad( const grinliz::Vector3F p0, const grinliz::Vector3F p1 );
 
 	int SortOrder()	const { 
 		if ( blend == BLEND_NORMAL ) return 2;
@@ -280,12 +284,13 @@ protected:
 	GPUShader() : texture0( 0 ), texture1( 0 ), 
 				 streamPtr( 0 ), nIndex( 0 ), indexPtr( 0 ),
 				 vertexBuffer( 0 ), indexBuffer( 0 ),
-				 instancing( false ),
-				 premult( false ),
+				 shaderFlags( 0 ),
+				 radius( 1.0f ),
 				 blend( BLEND_NONE ),
 				 depthWrite( true ), depthTest( true ),
 				 colorWrite( true ),
-				 stencilMode( STENCIL_OFF )
+				 stencilMode( STENCIL_OFF ),
+				 hemisphericalLighting( false )
 	{
 		color.Set( 1, 1, 1, 1 );
 		direction.Set( 0, 0, 0, 0 );
@@ -335,15 +340,16 @@ protected:
 	const uint16_t* indexPtr;
 	U32				vertexBuffer;
 	U32				indexBuffer;
-	bool			instancing;
-	bool			premult;
+	int				shaderFlags;
+	float			radius;
 
 	BlendMode	blend;
-	bool	depthWrite;
-	bool	depthTest;
-	bool	colorWrite;
+	bool		depthWrite;
+	bool		depthTest;
+	bool		colorWrite;
 	StencilMode	stencilMode;
 
+	bool				hemisphericalLighting;
 	grinliz::Color4F	color;
 	grinliz::Color4F	ambient;
 	grinliz::Vector4F	direction;
@@ -372,7 +378,10 @@ class LightShader : public GPUShader
 {
 public:
 	/** Texture or color. Writes & tests z. Enables lighting. */
-	LightShader( const grinliz::Color4F& ambient, const grinliz::Vector4F& direction, const grinliz::Color4F& diffuse, BlendMode blend = BLEND_NONE );
+	LightShader( const grinliz::Color4F& ambient, 
+		         const grinliz::Vector4F& direction, 
+				 const grinliz::Color4F& diffuse, 
+				 BlendMode blend = BLEND_NONE );
 	~LightShader();
 	
 protected:
@@ -389,13 +398,6 @@ public:
 class ParticleShader : public GPUShader
 {
 public:
-	ParticleShader() : GPUShader() 
-	{
-		depthWrite = false;
-		depthTest = true;
-		premult = true;
-		blend = BLEND_ADD;
-	}
-
+	ParticleShader();
 };
 #endif

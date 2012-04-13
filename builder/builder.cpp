@@ -243,10 +243,11 @@ void AssignIf( STRING& a, const XMLElement* element, const char* attribute ) {
 }
 
 
-void ParseNames( const XMLElement* element, GLString* _assetName, GLString* _fullPath, GLString* _extension )
+void ParseNames( const XMLElement* element, GLString* _assetName, GLString* _fullPath, GLString* _extension, GLString* _fullPath2=0 )
 {
-	string filename;
+	string filename, filename2;
 	AssignIf( filename, element, "filename" );
+	AssignIf( filename2, element, "filename2" );
 
 	string assetName;
 	AssignIf( assetName, element, "modelName" );
@@ -254,6 +255,12 @@ void ParseNames( const XMLElement* element, GLString* _assetName, GLString* _ful
 
 	GLString fullIn = inputDirectory.c_str();
 	fullIn += filename.c_str();	
+
+	GLString fullIn2;
+	if ( filename2.size() > 0 ) {
+		fullIn2 = inputDirectory.c_str();
+		fullIn2 += filename2.c_str();
+	}
 
 	GLString base, name, extension;
 	grinliz::StrSplitFilename( fullIn, &base, &name, &extension );
@@ -267,6 +274,9 @@ void ParseNames( const XMLElement* element, GLString* _assetName, GLString* _ful
 		*_fullPath = fullIn;
 	if ( _extension )
 		*_extension = extension;
+	if ( _fullPath2 ) {
+		*_fullPath2 = fullIn2;
+	}
 }
 
 
@@ -711,9 +721,9 @@ void ProcessTexture( XMLElement* texture )
 	BTexture btexture;
 	btexture.ParseTag( texture );
 
-	GLString pathName, assetName;
-	ParseNames( texture, &assetName, &pathName, 0 );
-	btexture.SetNames( assetName, pathName );
+	GLString pathName, assetName, pathName2;
+	ParseNames( texture, &assetName, &pathName, 0, &pathName2 );
+	btexture.SetNames( assetName, pathName, pathName2 );
 
 	btexture.Load();
 	btexture.Scale();
@@ -741,7 +751,7 @@ void ProcessAtlas( XMLElement* atlasElement )
 
 		GLString pathName, assetName;
 		ParseNames( texture, &assetName, &pathName, 0 );
-		btextureArr[index].SetNames( assetName, pathName );
+		btextureArr[index].SetNames( assetName, pathName, "" );
 
 		btextureArr[index].Load();
 		btextureArr[index].Scale();
@@ -762,7 +772,7 @@ void ProcessAtlas( XMLElement* atlasElement )
 
 	GLString name = "atlas";
 	name += (char)('0' + it);
-	atlasArr[it].btexture.SetNames( name, "" );
+	atlasArr[it].btexture.SetNames( name, "", "" );
 
 	atlasArr[it].Generate( btextureArr, index, maxWidth );
 	atlasArr[it].btexture.dither = true;

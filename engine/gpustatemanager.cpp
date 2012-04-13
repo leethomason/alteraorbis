@@ -278,7 +278,7 @@ void GPUShader::SetTextureXForm( int unit )
 //static 
 void GPUShader::SetState( const GPUShader& ns )
 {
-	GRINLIZ_PERFTRACK
+	//GRINLIZ_PERFTRACK
 	CHECK_GL_ERROR;
 	GLASSERT( ns.stream.stride > 0 );
 
@@ -297,14 +297,15 @@ void GPUShader::SetState( const GPUShader& ns )
 
 	flags |= ns.stream.HasColor() ? ShaderManager::COLORS : 0;
 	flags |= ( ns.color.r != 1.f || ns.color.g != 1.f || ns.color.b != 1.f || ns.color.a != 1.f ) ? ShaderManager::COLOR_MULTIPLIER : 0;
-	flags |= ns.HasLighting( 0, 0, 0 ) ? ShaderManager::LIGHTING_DIFFUSE : 0;
-
-	flags |= ns.instancing ? ShaderManager::INSTANCE : 0;
-	flags |= ns.premult ? ShaderManager::PREMULT : 0;
-
-	if ( flags & ShaderManager::INSTANCE) {
-		int debug=1;
+	
+	if ( ns.HasLighting( 0, 0, 0 )) {
+		if ( ns.hemisphericalLighting )
+			flags |= ShaderManager::LIGHTING_HEMI;
+		else
+			flags |= ShaderManager::LIGHTING_DIFFUSE;
 	}
+
+	flags |= ns.shaderFlags;
 
 	shadman->ActivateShader( flags );
 	shadman->ClearStream();
@@ -363,7 +364,7 @@ void GPUShader::SetState( const GPUShader& ns )
 	}
 
 	// lighting 
-	if ( flags & ShaderManager::LIGHTING_DIFFUSE ) {
+	if ( flags & (ShaderManager::LIGHTING_DIFFUSE | ShaderManager::LIGHTING_HEMI) ) {
 		Vector4F dirWC, d, a;
 		ns.HasLighting( &dirWC, &a, &d );
 
@@ -379,6 +380,10 @@ void GPUShader::SetState( const GPUShader& ns )
 		shadman->SetStreamData( ShaderManager::A_NORMAL, 3, GL_FLOAT, ns.stream.stride, PTR( ns.streamPtr, ns.stream.normalOffset ) );	 
 	}
 
+	if ( flags & ShaderManager::BLUR ) {
+		shadman->SetUniform( ShaderManager::U_RADIUS, ns.radius );
+	}
+
 	// color multiplier
 	if ( flags & ShaderManager::COLOR_MULTIPLIER ) {
 		shadman->SetUniform( ShaderManager::U_COLOR_MULT, ns.color );
@@ -390,7 +395,7 @@ void GPUShader::SetState( const GPUShader& ns )
 		switch( ns.blend ) {
 		case BLEND_NONE:
 			glDisable( GL_BLEND );
-			break;
+				break;
 		case BLEND_NORMAL:
 			glEnable( GL_BLEND );
 			glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
@@ -571,8 +576,9 @@ void GPUShader::Draw( int instances )
 
 	bool useInstancing = instances > 0;
 	if ( instances == 0 ) instances = 1;
-	this->SetInstancing( useInstancing );
-
+	if ( useInstancing ) {
+		SetShaderFlag( ShaderManager::INSTANCE );
+	}
 	GLASSERT( nIndex % 3 == 0 );
 
 	trianglesDrawn += instances * nIndex / 3;
@@ -612,24 +618,25 @@ void GPUShader::Draw( int instances )
 }
 
 
-void GPUShader::Debug_DrawQuad( const grinliz::Vector3F p0, const grinliz::Vector3F p1 )
+void GPUShader::DrawQuad( const grinliz::Vector3F p0, const grinliz::Vector3F p1 )
 {
-#ifdef DEBUG
-	grinliz::Vector3F pos[4] = { 
-		{ p0.x, p0.y, p0.z },
-		{ p1.x, p0.y, p0.z },
-		{ p1.x, p1.y, p1.z },
-		{ p0.x, p1.y, p1.z },
+	PTVertex pos[4] = { 
+		{ { p0.x, p0.y, p0.z }, { 0, 0 } },
+		{ { p1.x, p0.y, p0.z }, { 1, 0 } },
+		{ { p1.x, p1.y, p1.z }, { 1, 1 } },
+		{ { p0.x, p1.y, p1.z }, { 0, 1 } },
 	};
-	static const U16 index[6] = { 0, 2, 1, 0, 3, 2 };
+	static const U16 index[6] = { 0, 1, 2, 0, 2, 3 };
+
 	GPUStream stream;
-	stream.stride = sizeof(grinliz::Vector3F);
+	stream.stride = sizeof(PTVertex);
 	stream.nPos = 3;
-	stream.posOffset = 0;
+	stream.posOffset = PTVertex::POS_OFFSET;
+	stream.nTexture0 = 2;
+	stream.texture0Offset = PTVertex::TEXTURE_OFFSET;
 
 	SetStream( stream, pos, 6, index );
 	Draw();
-#endif
 }
 
 
@@ -853,6 +860,17 @@ LightShader::LightShader( const Color4F& ambient, const grinliz::Vector4F& direc
 LightShader::~LightShader()
 {
 }
+
+
+ParticleShader::ParticleShader() : GPUShader() 
+{
+	depthWrite = false;
+	depthTest = true;
+	//premult = true;
+	SetShaderFlag( ShaderManager::PREMULT );
+	blend = BLEND_ADD;
+}
+
 
 /*
 void ParticleShader::DrawPoints(  Texture* texture,

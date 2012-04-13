@@ -21,15 +21,17 @@
 #include "../grinliz/glperformance.h"
 
 #include "gpustatemanager.h"
+#include "shadermanager.h"
 #include "engine.h"
 #include "loosequadtree.h"
 #include "renderQueue.h"
 #include "surface.h"
 #include "texture.h"
 #include "particle.h"
+#include "rendertarget.h"
 
 /*
-	Xenoengine-2 has a cleaned up render queue. The sorting of items probably makes the engine
+	XenoEngine-2 has a cleaned up render queue. The sorting of items probably makes the engine
 	faster even when not instancing. Cleaning up code makes the underlying algorithm clearer.
 */
 
@@ -42,29 +44,36 @@ using namespace grinliz;
 
 Engine::Engine( Screenport* port, const gamedb::Reader* database ) 
 	:	
-		AMBIENT( 0.5f ),
-		DIFFUSE( 0.6f ),
-		DIFFUSE_SHADOW( 0.2f ),
 		screenport( port ),
 		initZoomDistance( 0 ),
+		glow( false ),
 		map( 0 )
 {
 	spaceTree = new SpaceTree( -0.1f, 3.0f, 64 );	// fixme: map size hardcoded
 	renderQueue = new RenderQueue();
-
-	SetLightDirection( 0 );
-	enableMeta = mapMakerMode;
+	for( int i=0; i<RT_COUNT; ++i )
+		renderTarget[i] = 0;
+	ShaderManager::Instance()->AddDeviceLossHandler( this );
 }
 
 
 Engine::~Engine()
 {
+	ShaderManager::Instance()->RemoveDeviceLossHandler( this );
 	delete renderQueue;
 	delete spaceTree;
+	for( int i=0; i<RT_COUNT; ++i )
+		delete renderTarget[i];
 }
 
 
-bool Engine::mapMakerMode = false;
+void Engine::DeviceLoss()
+{
+	for( int i=0; i<RT_COUNT; ++i ) {
+		delete renderTarget[i];
+		renderTarget[i] = 0;
+	}
+}
 
 
 void Engine::CameraIso( bool normal, bool sizeToWidth, float width, float height )
@@ -144,14 +153,6 @@ void Engine::MoveCameraXZ( float x, float z, Vector3F* calc )
 }
 
 
-void Engine::SetLightDirection( const grinliz::Vector3F* dir ) 
-{
-	lightDirection.Set( 2.0f, 3.0f, 1.0f );
-	if ( dir ) {
-		lightDirection = *dir;
-	}
-	lightDirection.Normalize();
-}
 
 Model* Engine::AllocModel( const ModelResource* resource )
 {
@@ -196,14 +197,21 @@ void Engine::Draw( U32 deltaTime )
 	CalcFrustumPlanes( planes );
 
 	int exclude = Model::MODEL_INVISIBLE;
-	exclude |= enableMeta ? 0 : Model::MODEL_METADATA;
 	Model* modelRoot = spaceTree->Query( planes, 6, 0, exclude, false );
 	
 	Color4F ambient, diffuse;
 	Vector4F dir;
-	QueryLights( DAY_TIME, &ambient, &dir, &diffuse );
+	lighting.Query( &ambient, &dir, &diffuse );
 
-	LightShader lightShader( ambient, dir, diffuse );
+	LightShader _lightShader( ambient, dir, diffuse );
+	GPUShader lightShader = _lightShader;	// the sub-classes are causing problems here. Need a base type later.
+	LightShader emissiveLightShader( ambient, dir, diffuse );
+	emissiveLightShader.SetShaderFlag( ShaderManager::EMISSIVE );
+
+	if ( lighting.hemispheric ) {
+		lightShader.SetShaderFlag( ShaderManager::LIGHTING_HEMI );
+		emissiveLightShader.SetShaderFlag( ShaderManager::LIGHTING_HEMI );
+	}
 
 	Rectangle2I mapBounds( 0, 0, EL_MAP_SIZE-1, EL_MAP_SIZE-1 );
 	if ( map ) {
@@ -216,18 +224,43 @@ void Engine::Draw( U32 deltaTime )
 		GLASSERT( renderQueue->Empty() );
 
 		for( Model* model=modelRoot; model; model=model->next ) {
-			model->Queue( renderQueue, &lightShader, 0, 0 );
+			model->Queue( renderQueue, &lightShader, 0, &emissiveLightShader );
 		}
 	}
 
 
 	// ----------- Render Passess ---------- //
+	if ( glow ) {
+		if ( !renderTarget[RT_LIGHTS] ) {
+			renderTarget[RT_LIGHTS] = new RenderTarget( screenport->PhysicalWidth(), screenport->PhysicalHeight(), true );
+		}
+		renderTarget[RT_LIGHTS]->SetActive( true, this );
+		renderTarget[RT_LIGHTS]->screenport->SetPerspective();
+
+		// Tweak the shaders for glow-only rendering.
+		// Make the light shader flat black:
+		GPUShader savedLightShader = lightShader;
+		FlatShader flatShader;
+		flatShader.SetColor( 0, 0, 0 );
+		lightShader = flatShader;
+
+		// And throw the emissive shader to exclusive:
+		emissiveLightShader.SetShaderFlag( ShaderManager::EMISSIVE_EXCLUSIVE );
+
+		renderQueue->Submit( 0, 0, 0, 0 );
+		
+		// recove the shader settings
+		lightShader = savedLightShader;
+		emissiveLightShader.ClearShaderFlag( ShaderManager::EMISSIVE_EXCLUSIVE );
+		renderTarget[RT_LIGHTS]->SetActive( false, this );
+	}
+
 	if ( map ) {
 		// Draw shadows to stencil buffer.
 		float shadowAmount = 1.0f;
 		Color3F shadow, lighted;
 		static const Vector3F groundNormal = { 0, 1, 0 };
-		CalcLight( DAY_TIME, groundNormal, 1.0f, &lighted, &shadow );
+		lighting.CalcLight( groundNormal, 1.0f, &lighted, &shadow );
 
 #ifdef ENGINE_RENDER_SHADOWS
 		if ( shadowAmount > 0.0f ) {
@@ -239,9 +272,9 @@ void Engine::Draw( U32 deltaTime )
 			shadowShader.SetColor( 1, 0, 0 );	// testing
 
 			Matrix4 shadowMatrix;
-			shadowMatrix.m12 = -lightDirection.x/lightDirection.y;
+			shadowMatrix.m12 = -lighting.direction.x/lighting.direction.y;
 			shadowMatrix.m22 = 0.0f;
-			shadowMatrix.m32 = -lightDirection.z/lightDirection.y;
+			shadowMatrix.m32 = -lighting.direction.z/lighting.direction.y;
 
 			renderQueue->Submit(	&shadowShader,
 									0,
@@ -269,6 +302,23 @@ void Engine::Draw( U32 deltaTime )
 		map->DrawOverlay();
 	renderQueue->Clear();
 
+	// --------- Composite Glow -------- //
+	if ( glow ) {
+		Blur();
+
+		screenport->SetUI();
+
+		CompositingShader shader( GPUShader::BLEND_ADD );
+		shader.SetTexture0( renderTarget[RT_BLUR_Y]->GetTexture() );
+		shader.SetColor( lighting.glow.r, lighting.glow.g, lighting.glow.b, 0 );
+		Vector3F p0 = { 0, screenport->UIHeight(), 0 };
+		Vector3F p1 = { screenport->UIWidth(), 0, 0 };
+		shader.DrawQuad( p0, p1 );
+
+		screenport->SetPerspective();
+	}
+
+	// ------ Particle system ------------- //
 	const Vector3F* eyeDir = camera.EyeDir3();
 	ParticleSystem* particleSystem = ParticleSystem::Instance();
 	particleSystem->Update( deltaTime, eyeDir );
@@ -276,34 +326,44 @@ void Engine::Draw( U32 deltaTime )
 }
 
 
-void Engine::QueryLights( DayNight dayNight, Color4F* ambient, Vector4F* dir, Color4F* diffuse )
+void Engine::Blur()
 {
-	ambient->Set( AMBIENT, AMBIENT, AMBIENT, 1.0f );
-	diffuse->Set( DIFFUSE, DIFFUSE, DIFFUSE, 1.0f );
-
-	if ( dayNight == NIGHT_TIME ) {
-		diffuse->r *= EL_NIGHT_RED;
-		diffuse->g *= EL_NIGHT_GREEN;
-		diffuse->b *= EL_NIGHT_BLUE;
+	if ( !renderTarget[RT_BLUR_X] ) {
+		renderTarget[RT_BLUR_X] = new RenderTarget( screenport->PhysicalWidth(), screenport->PhysicalHeight(), false );
 	}
-	dir->Set( lightDirection.x, lightDirection.y, lightDirection.z, 0 );	// '0' in last term is parallel
-}
-
-
-void Engine::CalcLight( DayNight dayNight, const Vector3F& normal, float shadowAmount, Color3F* light, Color3F* shadow )
-{
-	Color4F ambient, diffuse;
-	Vector4F dir;
-	QueryLights( dayNight, &ambient, &dir, &diffuse );
-	Vector3F dir3 = { dir.x, dir.y, dir.z };
-
-	float nDotL = Max( 0.0f, DotProduct( normal, dir3 ) );
-	for( int i=0; i<3; ++i ) {
-		light->X(i)  = ambient.X(i) + diffuse.X(i)*nDotL;
-		shadow->X(i) = ambient.X(i);
-
-		shadow->X(i) = InterpolateUnitX( shadow->X(i), light->X(i), 1.f-shadowAmount ); 
+	if ( !renderTarget[RT_BLUR_Y] ) {
+		renderTarget[RT_BLUR_Y] = new RenderTarget( screenport->PhysicalWidth(), screenport->PhysicalHeight(), false );
 	}
+
+	// --- x ---- //
+	renderTarget[RT_BLUR_X]->SetActive( true, this );
+	renderTarget[RT_BLUR_X]->screenport->SetUI();
+
+	{
+		FlatShader shader;
+		shader.SetTexture0( renderTarget[RT_LIGHTS]->GetTexture() );
+		shader.SetShaderFlag( ShaderManager::BLUR );
+		shader.SetRadius( lighting.glowRadius );
+		Vector3F p0 = { 0, screenport->UIHeight(), 0 };
+		Vector3F p1 = { screenport->UIWidth(), 0, 0 };
+		shader.DrawQuad( p0, p1 );
+	}
+	renderTarget[RT_BLUR_X]->SetActive( false, this );
+
+	// --- y ---- //
+	renderTarget[RT_BLUR_Y]->SetActive( true, this );
+	renderTarget[RT_BLUR_Y]->screenport->SetUI();
+	{
+		FlatShader shader;
+		shader.SetTexture0( renderTarget[RT_BLUR_X]->GetTexture() );
+		shader.SetShaderFlag( ShaderManager::BLUR );
+		shader.SetRadius( lighting.glowRadius );
+		shader.SetShaderFlag( ShaderManager::BLUR_Y );
+		Vector3F p0 = { 0, screenport->UIHeight(), 0 };
+		Vector3F p1 = { screenport->UIWidth(), 0, 0 };
+		shader.DrawQuad( p0, p1 );
+	}
+	renderTarget[RT_BLUR_Y]->SetActive( false, this );
 }
 
 
@@ -385,7 +445,7 @@ void Engine::CalcFrustumPlanes( grinliz::Plane* planes )
 
 Model* Engine::IntersectModel( const grinliz::Ray& ray, HitTestMethod method, int required, int exclude, const Model* ignore[], Vector3F* intersection )
 {
-	GRINLIZ_PERFTRACK
+	//GRINLIZ_PERFTRACK
 
 	Model* model = spaceTree->QueryRay(	ray.origin, ray.direction, 
 										required, exclude, ignore,
@@ -424,8 +484,6 @@ void Engine::RestrictCamera()
 
 void Engine::SetZoom( float z )
 {
-//	float startY = camera.PosWC().y;
-
 	z = Clamp( z, GAME_ZOOM_MIN, GAME_ZOOM_MAX );
 	float d = Interpolate(	GAME_ZOOM_MIN, EL_CAMERA_MIN,
 							GAME_ZOOM_MAX, EL_CAMERA_MAX,
@@ -453,4 +511,11 @@ float Engine::GetZoom()
 							EL_CAMERA_MAX, GAME_ZOOM_MAX,
 							camera.PosWC().y );
 	return z;
+}
+
+
+Texture* Engine::GetRenderTargetTexture( int i ) 
+{ 
+	GLASSERT( i >= 0 && i < RT_COUNT );
+	return renderTarget[i] ? renderTarget[i]->GetTexture() : 0; 
 }

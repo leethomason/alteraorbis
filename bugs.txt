@@ -1,20 +1,23 @@
-- instance scene
-	x shadows
-	- glow
-	- hemispherical lighting
+- navigation scene
+	- map with pathing
+	- chits & components
+	- ground flocking motion
 
-X desktop (art):
-	X light model
-	X test models
 X particle test scene
 	X alpha processing for additive blending
 	- particle groups (ex: fire)
 - world rendering scene
-- navigation scene
 - map rendering scene
 - combat test scene
 - chits, components
 
+x instance scene
+	x shadows
+	x glow
+	x hemispherical lighting
+X desktop (art):
+	X light model
+	X test models
 X streamline render atom creation
 X work out atom usage
 X create dialog scene

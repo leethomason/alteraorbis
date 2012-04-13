@@ -102,14 +102,14 @@ RenderQueue::State* RenderQueue::FindState( const State& state )
 }
 
 
-void RenderQueue::Add( Model* model, const ModelAtom* atom, GPUShader* shader, const grinliz::Matrix4* textureXForm, Texture* replaceAllTextures )
+void RenderQueue::Add( Model* model, const ModelAtom* atom, GPUShader* shader, const grinliz::Matrix4* textureXForm )
 {
 	if ( nItem == MAX_ITEMS ) {
 		GLASSERT( 0 );
 		return;
 	}
 
-	State s0 = { shader, replaceAllTextures ? replaceAllTextures : atom->texture, 0 };
+	State s0 = { shader, atom->texture, 0 };
 
 	State* state = FindState( s0 );
 	if ( !state ) {
@@ -132,6 +132,7 @@ void RenderQueue::Submit( GPUShader* overRideShader, int required, int excluded,
 
 	for( int i=0; i<nState; ++i ) {
 		GPUShader* shader = overRideShader ? overRideShader : statePool[i].shader;
+		GLASSERT( shader );
 		if ( !overRideShader ) {
 			shader->SetTexture0( statePool[i].texture );
 		}
@@ -162,9 +163,9 @@ void RenderQueue::Submit( GPUShader* overRideShader, int required, int excluded,
 			// Get a range;
 			end = start + 1;
 			while(    end < itemArr.Size() 
-#				   ifdef XENOENGINE_INSTANCING
+				   #ifdef XENOENGINE_INSTANCING
 				   && end - start < EL_MAX_INSTANCE
-#				   endif
+				   #endif
 				   && itemArr[end]->atom == itemArr[start]->atom ) 
 			{
 				++end;
@@ -173,7 +174,7 @@ void RenderQueue::Submit( GPUShader* overRideShader, int required, int excluded,
 
 			const ModelAtom* atom = itemArr[start]->atom;
 
-#			ifdef XENOENGINE_INSTANCING
+			#ifdef XENOENGINE_INSTANCING
 			if ( atom->instances > 1 && delta > 1 ) {
 				atom->Bind( shader );
 
@@ -187,16 +188,16 @@ void RenderQueue::Submit( GPUShader* overRideShader, int required, int excluded,
 				}
 				shader->Draw( delta );
 			} else
-#			endif
+			#endif
 			{
 				atom->Bind( shader );
 				for( int k=start; k<end; ++k ) {
 					Model* model = itemArr[k]->model;
 					shader->PushMatrix( GPUShader::MODELVIEW_MATRIX );
-					shader->MultMatrix( GPUShader::MODELVIEW_MATRIX, model->XForm() );
 					if ( xform ) {
 						shader->MultMatrix( GPUShader::MODELVIEW_MATRIX, *xform );
 					}
+					shader->MultMatrix( GPUShader::MODELVIEW_MATRIX, model->XForm() );
 					shader->Draw();
 					shader->PopMatrix( GPUShader::MODELVIEW_MATRIX );
 				}

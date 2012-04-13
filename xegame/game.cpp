@@ -401,9 +401,12 @@ void Game::Load( const XMLDocument& doc )
 	// BOTTOM of the stack loads. (BattleScene or GeoScene).
 	// A GeoScene will in turn load a BattleScene.
 	const XMLElement* game = doc.RootElement();
-	GLASSERT( StrEqual( game->Value(), "Game" ) );
-	const XMLElement* scene = game->FirstChildElement();
-	sceneStack.Top()->scene->Load( scene );
+	GLASSERT( game );
+	if ( game ) {
+		GLASSERT( StrEqual( game->Value(), "Game" ) );
+		const XMLElement* scene = game->FirstChildElement();
+		sceneStack.Top()->scene->Load( scene );
+	}
 }
 
 
@@ -491,9 +494,12 @@ void Game::Save( int slot, bool saveGeo, bool saveTac )
 
 void Game::PrintPerf( int depth, const PerfData& data )
 {
+	static const int X = 350;
+	static const int Y = 200;
+
 	UFOText* ufoText = UFOText::Instance();
-	ufoText->Draw( 350 + 15*depth, perfY, "%s", data.name );
-	ufoText->Draw( 550, perfY, "%.2f", data.inclusiveMSec );
+	ufoText->Draw( X + 15*depth, Y+perfY, "%s", data.name );
+	ufoText->Draw( X+200,		 Y+perfY, "%.2f  %d", data.inclusiveMSec, data.callCount );
 	perfY += 20;
 }
 
@@ -543,8 +549,8 @@ void Game::DoTick( U32 _currentTime )
 	
 		if ( renderPass & Scene::RENDER_3D ) {
 			GRINLIZ_PERFTRACK_NAME( "Game::DoTick 3D" );
-			screenport.SetPerspective( clip3D.Width() > 0 ? &clip3D : 0 );
 
+			screenport.SetPerspective();
 			scene->Draw3D( deltaTime );
 		}
 
@@ -552,17 +558,16 @@ void Game::DoTick( U32 _currentTime )
 			GRINLIZ_PERFTRACK_NAME( "Game::DoTick UI" );
 
 			// UI Pass
-			screenport.SetUI( clip2D.IsValid() ? &clip2D : 0 ); 
+			screenport.SetUI(); 
 			if ( renderPass & Scene::RENDER_3D ) {
 				scene->RenderGamui3D();
 			}
 			if ( renderPass & Scene::RENDER_2D ) {
-				screenport.SetUI( clip2D.IsValid() ? &clip2D : 0 );
+				screenport.SetUI();
 				scene->DrawHUD();
 				scene->RenderGamui2D();
 			}
 		}
-//		SoundManager::Instance()->PlayQueuedSounds();
 	}
 
 	int Y = 0;

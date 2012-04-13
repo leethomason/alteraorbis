@@ -28,8 +28,11 @@
 #include "enginelimits.h"
 #include "model.h"
 #include "screenport.h"
+#include "lighting.h"
+#include "shadermanager.h"
 
 class RenderQueue;
+class RenderTarget;
 
 /*
 	Standard state:
@@ -42,9 +45,8 @@ class RenderQueue;
 	Renderer
 
 	Assets
-		- texture atlasing in builder. (Atlased textures can't be repeated.)
+		- TBD: texture atlasing in builder. (Atlased textures can't be repeated.)
 		- alpha: transparency or emmissive
-		- 
 
 	Renderer
 		- shadows, glow, colors
@@ -52,20 +54,18 @@ class RenderQueue;
 		Shadows
 			- shadow casting models rendered to stencil buffer.
 			- background plane can be multi-pass, checked against stencil
+
 		
 */
 
-class Engine
+class Engine : public IDeviceLossHandler
 {
 public:
 	Engine( Screenport* screenport, const gamedb::Reader* database );
-	~Engine();
+	virtual ~Engine();
 
-	const float AMBIENT;
-	const float DIFFUSE;
-	const float DIFFUSE_SHADOW;
-
-	Camera camera;
+	Camera	 camera;
+	Lighting lighting;
 
 	// Send everything to the GPU
 	void Draw( U32 deltaTime );
@@ -82,9 +82,6 @@ public:
 	void CameraLookingAt( grinliz::Vector3F* at );
 	void CameraLookAt( float x, float z, float heightOfCamera, float yRotation=-45.0f, float tilt=-50.0f );
 
-	// Direction from world TO sun. (y is positive). If null, sets the default.
-	void SetLightDirection( const grinliz::Vector3F* lightDir );
-
 	Model* AllocModel( const ModelResource* );
 	void FreeModel( Model* );
 
@@ -92,10 +89,6 @@ public:
 	Map* GetMap()						{ return map; }
 
 	const RenderQueue* GetRenderQueue()	{ return renderQueue; }
-
-	// Only matters for MapMaker. Game never renders the metadata.
-	void EnableMetadata( bool enable )	{ enableMeta = enable; }
-	bool IsMetadataEnabled()			{ return enableMeta; }
 
 	bool RayFromViewToYPlane( const grinliz::Vector2F& view,
 							  const grinliz::Matrix4& modelViewProjectionInverse, 
@@ -120,11 +113,16 @@ public:
 	float GetZoom();
 	void SetZoom( float zoom );
 
+	void SetScreenport( Screenport* port ) { screenport = port; }
 	const Screenport& GetScreenport() { return *screenport; }
 	Screenport* GetScreenportMutable() { return screenport; }
 	void RestrictCamera();
 
-	static bool mapMakerMode;
+	Texture* GetRenderTargetTexture( int id=0 );
+	void SetGlow( bool b ) { glow = b; }
+	bool GetGlow() const { return glow; }
+
+	virtual void DeviceLoss();
 
 private:
 	enum ShadowState {
@@ -132,41 +130,28 @@ private:
 		OPEN_LIGHT
 	};
 
-	enum DayNight {
-		DAY_TIME,
-		NIGHT_TIME
-	};
-
 	void CalcCameraRotation( grinliz::Matrix4* );
 
-	// Query the light properties at day or night:
-	void QueryLights(	DayNight dayNight, 
-						grinliz::Color4F* ambient, 
-						grinliz::Vector4F* dir, 
-						grinliz::Color4F* diffuse );
-
-	// Calculate the light hitting a point with the given surface normal
-	void CalcLight(	DayNight dayNight,	
-					const grinliz::Vector3F& surfaceNormal,
-					float shadowAmount,				// 1.0: fully in shadow
-					grinliz::Color3F* light, 
-					grinliz::Color3F* shadow  );
-
+	void Blur();
 	void PushShadowSwizzleMatrix( GPUShader* );
 	void PushLightSwizzleMatrix( GPUShader* );
 
 	Screenport* screenport;
 	float	initZoom;
 	int		initZoomDistance;
-	bool	enableMeta;
+	bool	glow;
 	
 	Map*	map;
-
 	SpaceTree* spaceTree;
 	RenderQueue* renderQueue;
 
-	grinliz::Vector3F lightDirection;
-	grinliz::Matrix4  shadowMatrix;
+	enum {
+		RT_LIGHTS,
+		RT_BLUR_X,
+		RT_BLUR_Y,
+		RT_COUNT
+	};
+	RenderTarget* renderTarget[RT_COUNT];
 };
 
 #endif // UFOATTACK_ENGINE_INCLUDED

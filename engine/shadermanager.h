@@ -13,6 +13,12 @@
 class Texture;
 class Stream;
 
+class IDeviceLossHandler
+{
+public:
+	virtual void DeviceLoss() = 0;
+};
+
 class ShaderManager
 {
 public:
@@ -36,12 +42,23 @@ public:
 		COLOR_MULTIPLIER	= (1<<9),		// Global color multiplier.
 		LIGHTING_DIFFUSE	= (1<<10),		// Diffuse lighting. Requires per vertex normals, 
 											// light direction, ambient color, and diffuse color.
-		INSTANCE			= (1<<11),		// Use instancing. Up to 16 uniform matrices contain the model
+		LIGHTING_HEMI		= (1<<11),		// Hemisperical lighting. Like diffuse, but uses a 
+											// different light model.
+		INSTANCE			= (1<<12),		// Use instancing. Up to 16 uniform matrices contain the model
 											// transform. The instance attribute must be in the vertex data.
-		PREMULT				= (1<<12),		// convert to pre-multiplied in the fragment shader
+		PREMULT				= (1<<13),		// convert to pre-multiplied in the fragment shader
+		EMISSIVE			= (1<<14),		// interpret the alpha channel as emission.
+		EMISSIVE_EXCLUSIVE  = (1<<15),		// everything not emissive is black
+
+		// Switch to different shader:
+		BLUR				= (1<<16),		// requires u_radius
+		BLUR_Y				= (1<<17),
 	};
 
 	void DeviceLoss();
+	void AddDeviceLossHandler( IDeviceLossHandler* handler );
+	void RemoveDeviceLossHandler( IDeviceLossHandler* handler );
+
 	void ActivateShader( int flags );
 
 	// Warning: must match gAttributeName
@@ -70,6 +87,7 @@ public:
 		U_LIGHT_DIR,
 		U_AMBIENT,
 		U_DIFFUSE,
+		U_RADIUS,
 		MAX_UNIFORM
 	};
 
@@ -81,6 +99,7 @@ public:
 	}
 	void SetUniform( int id, const grinliz::Vector4F& vector );
 	void SetUniform( int id, const grinliz::Vector3F& vector );
+	void SetUniform( int id, float value );
 
 	void SetUniformArray( int id, int count, const grinliz::Matrix4* mat );
 
@@ -107,6 +126,7 @@ private:
 		int GetUniformLocation( int uniform );
 	};
 
+	CDynArray< IDeviceLossHandler* > deviceLossHandlers;
 	CDynArray< Shader > shaderArr;
 	grinliz::GLString header;
 	Shader* active;
@@ -115,7 +135,7 @@ private:
 	Shader* CreateProgram( int flag );
 	void DeleteProgram( Shader* );
 
-	void AppendFlag( grinliz::GLString* str, const char* flag, int set );
+	void AppendFlag( grinliz::GLString* str, const char* flag, int set, int value=1 );
 	void AppendConst( grinliz::GLString* str, const char* name, int value );
 };
 

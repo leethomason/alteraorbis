@@ -77,10 +77,12 @@ public:
 	// UI: origin in lower left, oriented with device.
 	// Sets both the MODELVIEW and the PROJECTION for UI coordinates. (The view is not set.)
 	// The clip is interpreted as the location where the UI can be.
-	void SetUI( const grinliz::Rectangle2I* clipInUI );
+	// FIXME: render to texture uses weird coordinates. Once clip is cleaned up (or removed)
+	// it would be nice to be able to have a lower left origin.
+	void SetUI();
 
 	// Set the perspective PROJECTION.
-	void SetPerspective( const grinliz::Rectangle2I* clipInUI );
+	void SetPerspective();
 
 	// Set the MODELVIEW from the camera.
 	void SetView( const grinliz::Matrix4& view );
@@ -98,8 +100,11 @@ public:
 
 	float UIWidth() const									{ return (rotation&1) ? screenHeight : screenWidth; }
 	float UIHeight() const									{ return (rotation&1) ? screenWidth : screenHeight; }
-	const grinliz::Rectangle2F& UIBoundsClipped3D() const	{ return clipInUI3D; }
-	const grinliz::Rectangle2F& UIBoundsClipped2D() const	{ return clipInUI2D; }
+	int PhysicalWidth() const								{ return (int)physicalWidth; }
+	int PhysicalHeight() const								{ return (int)physicalHeight; }
+
+	const grinliz::Rectangle2F UIBoundsClipped3D() const	{ grinliz::Rectangle2F r; r.Set( 0,0,UIWidth(),UIHeight() ); return r; }
+	const grinliz::Rectangle2F UIBoundsClipped2D() const	{ grinliz::Rectangle2F r; r.Set( 0,0,UIWidth(),UIHeight() ); return r; }
 
 	bool UIMode() const										{ return uiMode; }
 
@@ -116,7 +121,7 @@ private:
 	float physicalHeight;
 
 	bool uiMode;
-	grinliz::Rectangle2F clipInUI2D, clipInUI3D;
+	//grinliz::Rectangle2F clipInUI2D, clipInUI3D;
 	Frustum frustum;
 	grinliz::Matrix4 projection2D;
 	grinliz::Matrix4 projection3D, view3D;

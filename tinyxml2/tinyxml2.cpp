@@ -24,17 +24,16 @@ distribution.
 #include "tinyxml2.h"
 
 #if 1
-	#include <cstdarg>
 	#include <cstdio>
 	#include <cstdlib>
 	#include <new>
 #else
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <ctype.h>
-#include <new>
-#include <stdarg.h>
+	#include <string.h>
+	#include <stdlib.h>
+	#include <stdio.h>
+	#include <ctype.h>
+	#include <new>
+	#include <stdarg.h>
 #endif
 
 using namespace tinyxml2;
@@ -139,7 +138,6 @@ char* StrPair::ParseName( char* p )
 {
 	char* start = p;
 
-	start = p;
 	if ( !start || !(*start) ) {
 		return 0;
 	}
@@ -999,7 +997,7 @@ void XMLAttribute::SetAttribute( const char* v )
 void XMLAttribute::SetAttribute( int v )
 {
 	char buf[BUF_SIZE];
-	TIXML_SNPRINTF( buf, BUF_SIZE-1, "%d", v );	
+	TIXML_SNPRINTF( buf, BUF_SIZE, "%d", v );	
 	value.SetStr( buf );
 }
 
@@ -1007,7 +1005,7 @@ void XMLAttribute::SetAttribute( int v )
 void XMLAttribute::SetAttribute( unsigned v )
 {
 	char buf[BUF_SIZE];
-	TIXML_SNPRINTF( buf, BUF_SIZE-1, "%u", v );	
+	TIXML_SNPRINTF( buf, BUF_SIZE, "%u", v );	
 	value.SetStr( buf );
 }
 
@@ -1015,21 +1013,21 @@ void XMLAttribute::SetAttribute( unsigned v )
 void XMLAttribute::SetAttribute( bool v )
 {
 	char buf[BUF_SIZE];
-	TIXML_SNPRINTF( buf, BUF_SIZE-1, "%d", v ? 1 : 0 );	
+	TIXML_SNPRINTF( buf, BUF_SIZE, "%d", v ? 1 : 0 );	
 	value.SetStr( buf );
 }
 
 void XMLAttribute::SetAttribute( double v )
 {
 	char buf[BUF_SIZE];
-	TIXML_SNPRINTF( buf, BUF_SIZE-1, "%f", v );	
+	TIXML_SNPRINTF( buf, BUF_SIZE, "%f", v );	
 	value.SetStr( buf );
 }
 
 void XMLAttribute::SetAttribute( float v )
 {
 	char buf[BUF_SIZE];
-	TIXML_SNPRINTF( buf, BUF_SIZE-1, "%f", v );	
+	TIXML_SNPRINTF( buf, BUF_SIZE, "%f", v );	
 	value.SetStr( buf );
 }
 
@@ -1420,10 +1418,10 @@ void XMLDocument::SaveFile( const char* filename )
 #pragma warning ( pop )
 #endif
 	if ( fp ) {
-	XMLPrinter stream( fp );
-	Print( &stream );
-	fclose( fp );
-}
+		XMLPrinter stream( fp );
+		Print( &stream );
+		fclose( fp );
+	}
 	else {
 		SetError( XML_ERROR_FILE_COULD_NOT_BE_OPENED, filename, 0 );
 	}
@@ -1482,11 +1480,9 @@ void XMLDocument::PrintError() const
 		
 		if ( errorStr1 ) {
 			TIXML_SNPRINTF( buf1, LEN, "%s", errorStr1 );
-			buf1[LEN-1] = 0;
 		}
 		if ( errorStr2 ) {
 			TIXML_SNPRINTF( buf2, LEN, "%s", errorStr2 );
-			buf2[LEN-1] = 0;
 		}
 
 		printf( "XMLDocument error id=%d str1=%s str2=%s\n",
@@ -1535,10 +1531,10 @@ void XMLPrinter::Print( const char* format, ... )
 			int len = -1;
 			int expand = 1000;
 			while ( len < 0 ) {
-				len = vsnprintf_s( accumulator.Mem(), accumulator.Capacity(), accumulator.Capacity()-1, format, va );
+				len = vsnprintf_s( accumulator.Mem(), accumulator.Capacity(), _TRUNCATE, format, va );
 				if ( len < 0 ) {
-					accumulator.PushArr( expand );
 					expand *= 3/2;
+					accumulator.PushArr( expand );
 				}
 			}
 			char* p = buffer.PushArr( len ) - 1;
@@ -1571,28 +1567,28 @@ void XMLPrinter::PrintString( const char* p, bool restricted )
 	const bool* flag = restricted ? restrictedEntityFlag : entityFlag;
 
 	if ( processEntities ) {
-	while ( *q ) {
-		// Remember, char is sometimes signed. (How many times has that bitten me?)
-		if ( *q > 0 && *q < ENTITY_RANGE ) {
-			// Check for entities. If one is found, flush
-			// the stream up until the entity, write the 
-			// entity, and keep looking.
-			if ( flag[*q] ) {
-				while ( p < q ) {
-					Print( "%c", *p );
+		while ( *q ) {
+			// Remember, char is sometimes signed. (How many times has that bitten me?)
+			if ( *q > 0 && *q < ENTITY_RANGE ) {
+				// Check for entities. If one is found, flush
+				// the stream up until the entity, write the 
+				// entity, and keep looking.
+				if ( flag[(unsigned)(*q)] ) {
+					while ( p < q ) {
+						Print( "%c", *p );
+						++p;
+					}
+					for( int i=0; i<NUM_ENTITIES; ++i ) {
+						if ( entities[i].value == *q ) {
+							Print( "&%s;", entities[i].pattern );
+							break;
+						}
+					}
 					++p;
 				}
-				for( int i=0; i<NUM_ENTITIES; ++i ) {
-					if ( entities[i].value == *q ) {
-						Print( "&%s;", entities[i].pattern );
-						break;
-					}
-				}
-				++p;
 			}
+			++q;
 		}
-		++q;
-	}
 	}
 	// Flush the remaining string. This will be the entire
 	// string if an entity wasn't found.
@@ -1645,7 +1641,7 @@ void XMLPrinter::PushAttribute( const char* name, const char* value )
 void XMLPrinter::PushAttribute( const char* name, int v )
 {
 	char buf[BUF_SIZE];
-	TIXML_SNPRINTF( buf, BUF_SIZE-1, "%d", v );	
+	TIXML_SNPRINTF( buf, BUF_SIZE, "%d", v );	
 	PushAttribute( name, buf );
 }
 
@@ -1653,7 +1649,7 @@ void XMLPrinter::PushAttribute( const char* name, int v )
 void XMLPrinter::PushAttribute( const char* name, unsigned v )
 {
 	char buf[BUF_SIZE];
-	TIXML_SNPRINTF( buf, BUF_SIZE-1, "%u", v );	
+	TIXML_SNPRINTF( buf, BUF_SIZE, "%u", v );	
 	PushAttribute( name, buf );
 }
 
@@ -1661,7 +1657,7 @@ void XMLPrinter::PushAttribute( const char* name, unsigned v )
 void XMLPrinter::PushAttribute( const char* name, bool v )
 {
 	char buf[BUF_SIZE];
-	TIXML_SNPRINTF( buf, BUF_SIZE-1, "%d", v ? 1 : 0 );	
+	TIXML_SNPRINTF( buf, BUF_SIZE, "%d", v ? 1 : 0 );	
 	PushAttribute( name, buf );
 }
 
@@ -1669,7 +1665,7 @@ void XMLPrinter::PushAttribute( const char* name, bool v )
 void XMLPrinter::PushAttribute( const char* name, double v )
 {
 	char buf[BUF_SIZE];
-	TIXML_SNPRINTF( buf, BUF_SIZE-1, "%f", v );	
+	TIXML_SNPRINTF( buf, BUF_SIZE, "%f", v );	
 	PushAttribute( name, buf );
 }
 
