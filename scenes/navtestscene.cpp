@@ -9,7 +9,11 @@ using namespace gamui;
 
 // Draw calls as a proxy for world subdivision:
 // 20+20 blocks:
-// 249 -> 407 -> 535
+// quad division: 249 -> 407 -> 535
+// block growing:  79 -> 135 -> 173
+//  32x32          41 ->  97 -> 137
+// Wow. Sticking with the growing block algorithm.
+// Need to tune size on real map. (Note that the 32vs16 is approaching the same value.)
 
 NavTestScene::NavTestScene( LumosGame* game ) : Scene( game )
 {
@@ -71,34 +75,7 @@ void NavTestScene::Tap( int action, const grinliz::Vector2F& view, const grinliz
 {
 	bool uiHasTap = ProcessTap( action, view, world );
 	if ( !uiHasTap ) {
-		Ray ray;
-		
-		switch( action )
-		{
-			case GAME_TAP_DOWN:
-			{
-				game->GetScreenport().ViewProjectionInverse3D( &dragMVPI );
-				engine->RayFromViewToYPlane( view, dragMVPI, &ray, &dragStart3D );
-				dragStartCameraWC = engine->camera.PosWC();
-				dragEnd3D = dragStart3D;
-				break;
-			}
-
-			case GAME_TAP_MOVE:
-			case GAME_TAP_UP:
-			{
-				Vector3F drag;
-				engine->RayFromViewToYPlane( view, dragMVPI, &ray, &drag );
-
-				Vector3F delta = drag - dragStart3D;
-				delta.y = 0;
-				drag.y = 0;
-				dragEnd3D = drag;
-
-				engine->camera.SetPosWC( dragStartCameraWC - delta );
-				break;
-			}
-		}
+		Process3DTap( action, view, world, engine );
 	}
 }
 

@@ -32,8 +32,8 @@ public:
 	void ClearBlock( int x, int y )	{ grinliz::Rectangle2I pos; pos.Set( x, y, x, y ); SetBlock( pos ); }
 	void ClearBlock( const grinliz::Rectangle2I& pos );
 
-	bool IsBlockSet( int x, int y ) { return (grid[INDEX(x,y)] & BLOCK) != 0; }
-	bool IsLand( int x, int y )		{ return (grid[INDEX(x,y)] & LAND) != 0; }
+	bool IsBlockSet( int x, int y ) { return grid[INDEX(x,y)].isBlock != 0; }
+	bool IsLand( int x, int y )		{ return grid[INDEX(x,y)].isLand != 0; }
 
 	// ---- Map ---- //
 	virtual void Draw3D(  const grinliz::Color3F& colorMult, GPUShader::StencilMode );
@@ -63,46 +63,43 @@ private:
 
 
 	enum {
-		LAND		= 0x01,		// tessellator depends on this being one; if not, fix tess
-		BLOCK		= 0x02,
-		LOW_MASK    = LAND | BLOCK,
-		DEPTH_MASK  = 0x1c,
-		DEPTH_SHIFT = 2,
-
-		ZONE_SIZE	= 16,
+		TRUE = 1,
+		FALSE = 0,
+		ZONE_SIZE	= 16,		// adjust size of bit fields to be big enough to represent this
 		ZONE_SIZE2  = ZONE_SIZE*ZONE_SIZE,
-		ZONE_DEPTHS = 5
 	};
-	static int GridPassable( U8 g ) {
-		return (g & LOW_MASK) == LAND;
-	}
-	static int GridSetDepth( U8 g, int depth ) {
-		GLASSERT( depth >= 0 && depth < ZONE_DEPTHS );
-		return (g & LOW_MASK) | (depth<<DEPTH_SHIFT);
-	}
-	static void ZoneGet( int x, int y, int g, int* zx, int* zy, int* size ) {
-		if ( !GridPassable( g ) ) {
-			*zx = x; *zy = y; *size = 0;
-		}
-		else {
-			int depth = (g&DEPTH_MASK)>>DEPTH_SHIFT;
-			*size = ZoneDepthToSize( depth );
-			int s = *size - 1;
-			*zx = x & (~s);
-			*zy = y & (~s);
-		}
-	}
 
-	// 16-8-4-2-1 
-	static int ZoneDepthToSize( int depth ) {
-		GLASSERT( depth >= 0 && depth < ZONE_DEPTHS );
-		return ZONE_SIZE >> depth;
-	}
+	// FIXME: many sites claim bitfields defeat the optimizer,
+	// and it may be possible to pack into 16 bits. Makes for
+	// way cleaner code though.
+	struct Grid {
+		U32 isLand			: 1;
+		U32 isBlock			: 1;
+		U32 isPathInit		: 1;	// true if the sub-zone is computed
+		U32 deltaXOrigin	: 4;	// interpreted as negative
+		U32 deltaYOrigin	: 4;
+		U32 sizeX			: 5;
+		U32 sizeY			: 5;
 
-	// 2 bits flags.
-	// 3 bits depth.
-	// 2 bits pad.
-	U8* grid;		// pathing info.
+		bool IsPassable()	{ return isLand == TRUE && isBlock == FALSE; }
+		void SetPathOrigin( int dx, int dy, int sizex, int sizey ) {
+			GLASSERT( dx >= 0 && dx < ZONE_SIZE );
+			GLASSERT( dy >= 0 && dy < ZONE_SIZE );
+			GLASSERT( sizex > 0 && sizex <= ZONE_SIZE );
+			GLASSERT( sizey > 0 && sizey <= ZONE_SIZE );
+			GLASSERT( IsPassable() );
+			deltaXOrigin = dx;
+			deltaYOrigin = dy;
+			sizeX = sizex;
+			sizeY = sizey;
+			isPathInit = true;
+		}
+	};
+
+	bool JointPassable( int x0, int y0, int x1, int y1 );
+	bool RectPassable( int x0, int y0, int x1, int y1 );
+
+	Grid* grid;		// pathing info.
 	U8* zoneInit;	// flag whether this zone is valid.
 
 	enum {

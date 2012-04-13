@@ -1,3 +1,5 @@
+- paritle textures "popping in" on Lama
+
 - navigation scene
 	- map with pathing
 	- chits & components

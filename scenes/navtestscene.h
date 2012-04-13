@@ -31,10 +31,6 @@ private:
 	Engine* engine;
 	WorldMap* map;
 	grinliz::Random random;
-
-	grinliz::Matrix4 dragMVPI;
-	grinliz::Vector3F dragStart3D, dragEnd3D;
-	grinliz::Vector3F dragStartCameraWC;
 };
 
 

@@ -60,7 +60,7 @@ void main() {
 	#endif
 	
 	#if COLORS == 1
-		color *= a_color;
+		color *= vec4( a_color.xyz, 1 );
 	#endif
 
 	#if LIGHTING_DIFFUSE  > 0

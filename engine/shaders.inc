@@ -50,7 +50,7 @@ static const char* fixedpipe_vert = {
     "	#endif\n"
     "	\n"
     "	#if COLORS == 1\n"
-    "		color *= a_color;\n"
+    "		color *= vec4( a_color.xyz, 1 );\n"
     "	#endif\n"
     "	#if LIGHTING_DIFFUSE  > 0\n"
     "		#if INSTANCE == 0 \n"

@@ -9,9 +9,10 @@ WorldMap::WorldMap( int width, int height ) : Map( width, height )
 	GLASSERT( width % ZONE_SIZE == 0 );
 	GLASSERT( height % ZONE_SIZE == 0 );
 
-	grid = new U8[width*height];
+	GLASSERT( sizeof(Grid) == 4 );
+	grid = new Grid[width*height];
 	zoneInit = new U8[width*height/ZONE_SIZE2];
-	memset( grid, 0, width*height*sizeof(*grid) );
+	memset( grid, 0, width*height*sizeof(Grid) );
 	memset( zoneInit, 0, sizeof(*zoneInit)*width*height/ZONE_SIZE2 );
 
 	texture[0] = TextureManager::Instance()->GetTexture( "map_water" );
@@ -28,7 +29,7 @@ WorldMap::~WorldMap()
 
 void WorldMap::InitCircle()
 {
-	memset( grid, 0, width*height*sizeof(*grid) );
+	memset( grid, 0, width*height*sizeof(Grid) );
 	memset( zoneInit, 0, sizeof(*zoneInit)*width*height/ZONE_SIZE2 );
 
 	const int R = Min( width, height )/2;
@@ -41,7 +42,7 @@ void WorldMap::InitCircle()
 			int r2 = (x-cx)*(x-cx) + (y-cy)*(y-cy);
 			if ( r2 < R2 ) {
 				int i = INDEX( x, y );
-				grid[i] = LAND;
+				grid[i].isLand = TRUE;
 			}
 		}
 	}
@@ -63,7 +64,7 @@ void WorldMap::Tessellate()
 	for( int j=0; j<height; ++j ) {
 		int i=0;
 		while ( i < width ) {
-			int layer = ( grid[INDEX(i,j)] & LAND );
+			int layer = grid[INDEX(i,j)].isLand;
 
 			U16* pi = index[layer].PushArr( 6 );
 			int base = vertex[layer].Size();
@@ -82,7 +83,7 @@ void WorldMap::Tessellate()
 
 			int w = 1;
 			++i;
-			while( i<width && ((grid[INDEX(i,j)]&LAND) == layer) ) {
+			while( i<width && grid[INDEX(i,j)].isLand == layer ) {
 				++i;
 				++w;
 			}
@@ -101,8 +102,8 @@ void WorldMap::SetBlock( const grinliz::Rectangle2I& pos )
 	for( int y=pos.min.y; y<=pos.max.y; ++y ) {
 		for( int x=pos.min.x; x<=pos.max.x; ++x ) {
 			int i = INDEX( x, y );
-			GLASSERT( (grid[i] & BLOCK) == 0 );
-			grid[i] |= BLOCK;
+			GLASSERT( grid[i].isBlock == FALSE );
+			grid[i].isBlock = TRUE;
 			zoneInit[ZDEX( x, y )] = 0;
 			GLOUTPUT(( "Block (%d,%d) index=%d zone=%d set\n", x, y, i, ZDEX(x,y) ));
 		}
@@ -115,50 +116,103 @@ void WorldMap::ClearBlock( const grinliz::Rectangle2I& pos )
 	for( int y=pos.min.y; y<=pos.max.y; ++y ) {
 		for( int x=pos.min.x; x<=pos.max.x; ++x ) {
 			int i = INDEX( x, y );
-			GLASSERT( grid[i] & BLOCK );
-			grid[i] &= ~BLOCK;
+			GLASSERT( grid[i].isBlock );
+			grid[i].isBlock = FALSE;
 			zoneInit[ZDEX( x, y )] = 0;
 		}
 	}
 }
 
 
-void WorldMap::CalcZoneRec( int x, int y, int depth )
+bool WorldMap::JointPassable( int x0, int y0, int x1, int y1 )
 {
-	int size = ZoneDepthToSize( depth );
-	for( int j=y; j<y+size; ++j ) {
-		for( int i=x; i<x+size; ++i ) {
-			if ( !GridPassable( grid[INDEX(i,j)] )) {
-				if ( depth < ZONE_DEPTHS-1 ) {
-					CalcZoneRec( x,        y,        depth+1 );
-					CalcZoneRec( x+size/2, y,        depth+1 );
-					CalcZoneRec( x,        y+size/2, depth+1 );
-					CalcZoneRec( x+size/2, y+size/2, depth+1 );
-				}
-				return;
-			}
-		}
+	for( int x=x0; x<=x1; ++x ) {
+		if ( !grid[INDEX(x,y1)].IsPassable() || grid[INDEX(x,y1)].isPathInit )
+			return false;
 	}
-	// get here then we checked all the zones.
-	GLASSERT( depth < ZONE_DEPTHS );
-	for( int j=y; j<y+size; ++j ) {
-		for( int i=x; i<x+size; ++i ) {
-			int index = INDEX(i,j);
-			grid[index] = GridSetDepth( grid[index], depth );
-		}
+	for( int y=y0; y<y1; ++y ) {
+		if ( !grid[INDEX(x1,y)].IsPassable() || grid[INDEX(x1,y)].isPathInit )
+			return false;
 	}
+	return true;
 }
 
 
-void WorldMap::CalcZone( int x, int y )
+bool WorldMap::RectPassable( int x0, int y0, int x1, int y1 )
 {
-	x = x & (~15);
-	y = y & (~15);
+	for( int y=y0; y<=y1; ++y ) {
+		for( int x=x0; x<=x1; ++x ) {
+			if ( !grid[INDEX(x,y)].IsPassable() || grid[INDEX(x,y)].isPathInit )
+				return false;
+		}
+	}
+	return true;
+}
 
-	if ( zoneInit[ZDEX(x,y)] == 0 ) {
-		GLOUTPUT(( "CalcZone (%d,%d) %d\n", x, y, ZDEX(x,y) ));
-		CalcZoneRec( x, y, 0 );
-		zoneInit[ZDEX(x,y)] = 1;
+
+void WorldMap::CalcZone( int zx, int zy )
+{
+	zx = zx & (~(ZONE_SIZE-1));
+	zy = zy & (~(ZONE_SIZE-1));
+
+	if ( zoneInit[ZDEX(zx,zy)] == 0 ) {
+		GLOUTPUT(( "CalcZone (%d,%d) %d\n", zx, zy, ZDEX(zx,zy) ));
+		zoneInit[ZDEX(zx,zy)] = 1;
+
+		for( int y=zy; y<zy+ZONE_SIZE; ++y ) {
+			for( int x=zx; x<zx+ZONE_SIZE; ++x ) {
+				grid[INDEX(x,y)].isPathInit = FALSE;
+			}
+		}
+
+		int xEnd = zx + ZONE_SIZE;
+		int yEnd = zy + ZONE_SIZE;
+
+		for( int y=zy; y<yEnd; ++y ) {
+			for( int x=zx; x<xEnd; ++x ) {
+
+				int index = INDEX(x,y);
+				if ( !grid[index].IsPassable() )
+					continue;
+				if ( grid[index].isPathInit )
+					continue;
+
+				// Expand the square.
+				int size=1;
+				while( x+size < xEnd && y+size < yEnd && JointPassable( x, y, x+size, y+size ) ) {
+					++size;
+				}
+				// How far could we go on the x axis?
+				int xSize = size;
+				while(    x+xSize < xEnd 
+					   //&& ( xSize <= size*2 )
+					   && RectPassable( x+xSize, y, x+xSize, y+size-1 ) ) {
+					++xSize;
+				}
+				// How far on the y axis?
+				int ySize = size;
+				while(    y+ySize < yEnd 
+					  // && (ySize <= size*2 )
+					   && RectPassable( x, y+ySize, x+size-1, y+ySize ) ) {
+					++ySize;
+				}
+
+				if ( ySize > xSize ) {
+					xSize = size;
+				}
+				else {
+					ySize = size;
+				}
+
+				//GLOUTPUT(( "sub-zone (%d,%d) size=(%d,%d)\n", x, y, xSize, ySize ));
+				for( int j=y; j<y+ySize; ++j ) {
+					for( int i=x; i<x+xSize; ++i ) {
+						GLASSERT( !grid[INDEX(i,j)].isPathInit );
+						grid[ INDEX( i, j ) ].SetPathOrigin( i-x, j-y, xSize, ySize );
+					}
+				}
+			}
+		}
 	}
 }
 
@@ -174,12 +228,15 @@ void WorldMap::DrawZones()
 				CalcZone( i, j );
 			}
 
-			int x, y, size;
 			static const float offset = 0.2f;
-			ZoneGet( i, j, grid[INDEX(i,j)], &x, &y, &size );
-			if ( size > 0 && x == i && y == j ) {
-				Vector3F p0 = { (float)x+offset, 0.1f, (float)y+offset };
-				Vector3F p1 = { (float)(x+size)-offset, 0.1f, (float)(y+size)-offset };
+			Grid g = grid[INDEX(i,j)];
+			
+			if ( g.IsPassable() && g.isPathInit && g.deltaXOrigin == 0 && g.deltaYOrigin == 0 ) {
+				int xSize = g.sizeX;
+				int ySize = g.sizeY;
+
+				Vector3F p0 = { (float)i+offset, 0.1f, (float)j+offset };
+				Vector3F p1 = { (float)(i+xSize)-offset, 0.1f, (float)(j+ySize)-offset };
 				debug.DrawQuad( p0, p1, false );
 			}
 		}

@@ -16,6 +16,7 @@
 #include "game.h"
 #include "scene.h"
 #include "../grinliz/glstringutil.h"
+#include "../engine/engine.h"			// used for 3D dragging; Scene should *not* have an engine.
 
 using namespace grinliz;
 using namespace gamui;
@@ -85,3 +86,37 @@ bool Scene::ProcessTap( int action, const grinliz::Vector2F& screen, const grinl
 	}
 	return tapCaptured;
 }
+
+
+void Scene::Process3DTap( int action, const grinliz::Vector2F& view, const grinliz::Ray& world, Engine* engine )
+{
+	Ray ray;
+		
+	switch( action )
+	{
+		case GAME_TAP_DOWN:
+		{
+			game->GetScreenport().ViewProjectionInverse3D( &dragData3D.mvpi );
+			engine->RayFromViewToYPlane( view, dragData3D.mvpi, &ray, &dragData3D.start3D );
+			dragData3D.startCameraWC = engine->camera.PosWC();
+			dragData3D.end3D = dragData3D.start3D;
+			break;
+		}
+
+		case GAME_TAP_MOVE:
+		case GAME_TAP_UP:
+		{
+			Vector3F drag;
+			engine->RayFromViewToYPlane( view, dragData3D.mvpi, &ray, &drag );
+
+			Vector3F delta = drag - dragData3D.start3D;
+			delta.y = 0;
+			drag.y = 0;
+			dragData3D.end3D = drag;
+
+			engine->camera.SetPosWC( dragData3D.startCameraWC - delta );
+			break;
+		}
+	}
+}
+

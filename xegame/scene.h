@@ -31,6 +31,7 @@
 class Game;
 class TiXmlElement;
 class Unit;
+class Engine;
 
 #ifdef _MSC_VER
 #pragma warning ( push )
@@ -42,6 +43,13 @@ class SceneData
 public:
 	SceneData()				{}
 	virtual ~SceneData()	{}
+};
+
+
+struct DragData {
+	grinliz::Matrix4  mvpi;
+	grinliz::Vector3F start3D, end3D;
+	grinliz::Vector3F startCameraWC;
 };
 
 
@@ -86,8 +94,12 @@ public:
 	virtual void Draw3D( U32 deltaTime )						{}
 
 	// Utility
-	// Returns true if the UI (gamui) is handling the event.
+	
+	// Call to send mouse events to gamui. Returns true if the UI (gamui) is handling the event.
 	bool ProcessTap( int action, const grinliz::Vector2F& screen, const grinliz::Ray& world );
+	// Call to handle 3D events
+	void Process3DTap( int action, const grinliz::Vector2F& screen, const grinliz::Ray& world, Engine* engine );
+
 	virtual void ItemTapped( const gamui::UIItem* item )							{}
 	virtual gamui::RenderAtom DragStart( const gamui::UIItem* item )				{ gamui::RenderAtom atom; return atom; }	// null atom
 	virtual void DragEnd( const gamui::UIItem* start, const gamui::UIItem* end )	{}
@@ -107,7 +119,11 @@ protected:
 	gamui::Gamui	gamui2D, gamui3D;
 	gamui::Image	dragImage;
 	bool			dragStarted;
+
+	DragData		dragData3D;
 };
+
+
 
 
 #ifdef _MSC_VER

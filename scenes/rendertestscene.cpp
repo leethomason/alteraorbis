@@ -109,6 +109,15 @@ void RenderTestScene::SetupTest1()
 }
 
 
+void RenderTestScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::Ray& world )
+{
+	bool uiHasTap = ProcessTap( action, view, world );
+	if ( !uiHasTap ) {
+		Process3DTap( action, view, world, engine );
+	}
+}
+
+
 void RenderTestScene::ItemTapped( const gamui::UIItem* item )
 {
 	if ( item == &okay ) {
