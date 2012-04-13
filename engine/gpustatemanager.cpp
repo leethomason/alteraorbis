@@ -618,7 +618,7 @@ void GPUShader::Draw( int instances )
 }
 
 
-void GPUShader::DrawQuad( const grinliz::Vector3F p0, const grinliz::Vector3F p1 )
+void GPUShader::DrawQuad( const grinliz::Vector3F p0, const grinliz::Vector3F p1, bool positive, bool outline )
 {
 	PTVertex pos[4] = { 
 		{ { p0.x, p0.y, p0.z }, { 0, 0 } },
@@ -626,7 +626,9 @@ void GPUShader::DrawQuad( const grinliz::Vector3F p0, const grinliz::Vector3F p1
 		{ { p1.x, p1.y, p1.z }, { 1, 1 } },
 		{ { p0.x, p1.y, p1.z }, { 0, 1 } },
 	};
-	static const U16 index[6] = { 0, 1, 2, 0, 2, 3 };
+	static const U16 indexPos[6] = { 0, 1, 2, 0, 2, 3 };
+	static const U16 indexNeg[6] = { 0, 2, 1, 0, 3, 2 };
+	const U16* index = positive ? indexPos : indexNeg;
 
 	GPUStream stream;
 	stream.stride = sizeof(PTVertex);

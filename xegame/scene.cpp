@@ -33,10 +33,11 @@ Scene::Scene( Game* _game )
 }
 
 
-void Scene::ProcessTap( int action, const grinliz::Vector2F& screen, const grinliz::Ray& world )
+bool Scene::ProcessTap( int action, const grinliz::Vector2F& screen, const grinliz::Ray& world )
 {
 	grinliz::Vector2F ui;
 	game->GetScreenport().ViewToUI( screen, &ui );
+	bool tapCaptured = (gamui2D.TapCaptured() != 0);
 
 	// Callbacks:
 	//		ItemTapped
@@ -47,7 +48,7 @@ void Scene::ProcessTap( int action, const grinliz::Vector2F& screen, const grinl
 	if ( action == GAME_TAP_DOWN ) {
 		gamui2D.TapDown( ui.x, ui.y );
 		dragStarted = false;
-		return;
+		return gamui2D.TapCaptured() != 0;
 	}
 	else if ( action == GAME_TAP_MOVE ) {
 		if ( !dragStarted ) {
@@ -63,7 +64,7 @@ void Scene::ProcessTap( int action, const grinliz::Vector2F& screen, const grinl
 		gamui2D.TapCancel();
 		dragImage.SetAtom( RenderAtom() );
 		dragStarted = false;
-		return;
+		return tapCaptured;		// whether it was captured.
 	}
 	else if ( action == GAME_TAP_UP ) {
 		const UIItem* dragStart = gamui2D.TapCaptured();
@@ -82,4 +83,5 @@ void Scene::ProcessTap( int action, const grinliz::Vector2F& screen, const grinl
 	if ( uiItem ) {
 		ItemTapped( uiItem );
 	}
+	return tapCaptured;
 }

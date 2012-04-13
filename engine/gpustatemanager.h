@@ -265,7 +265,7 @@ public:
 
 	void Draw( int instances=0 );
 
-	void DrawQuad( const grinliz::Vector3F p0, const grinliz::Vector3F p1 );
+	void DrawQuad( const grinliz::Vector3F p0, const grinliz::Vector3F p1, bool positiveWinding=true, bool outline=false );
 
 	int SortOrder()	const { 
 		if ( blend == BLEND_NORMAL ) return 2;

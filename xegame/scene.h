@@ -86,7 +86,8 @@ public:
 	virtual void Draw3D( U32 deltaTime )						{}
 
 	// Utility
-	void ProcessTap( int action, const grinliz::Vector2F& screen, const grinliz::Ray& world );
+	// Returns true if the UI (gamui) is handling the event.
+	bool ProcessTap( int action, const grinliz::Vector2F& screen, const grinliz::Ray& world );
 	virtual void ItemTapped( const gamui::UIItem* item )							{}
 	virtual gamui::RenderAtom DragStart( const gamui::UIItem* item )				{ gamui::RenderAtom atom; return atom; }	// null atom
 	virtual void DragEnd( const gamui::UIItem* start, const gamui::UIItem* end )	{}
