@@ -28,9 +28,12 @@ private:
 	gamui::PushButton okay,
 					  block,
 					  block20;
+	gamui::TextLabel  textLabel;
+
 	Engine* engine;
 	WorldMap* map;
 	grinliz::Random random;
+	grinliz::Vector3F tapMark;
 };
 
 

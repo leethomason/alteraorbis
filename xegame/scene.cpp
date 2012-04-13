@@ -88,9 +88,10 @@ bool Scene::ProcessTap( int action, const grinliz::Vector2F& screen, const grinl
 }
 
 
-void Scene::Process3DTap( int action, const grinliz::Vector2F& view, const grinliz::Ray& world, Engine* engine )
+bool Scene::Process3DTap( int action, const grinliz::Vector2F& view, const grinliz::Ray& world, Engine* engine )
 {
 	Ray ray;
+	bool result = false;
 		
 	switch( action )
 	{
@@ -100,6 +101,7 @@ void Scene::Process3DTap( int action, const grinliz::Vector2F& view, const grinl
 			engine->RayFromViewToYPlane( view, dragData3D.mvpi, &ray, &dragData3D.start3D );
 			dragData3D.startCameraWC = engine->camera.PosWC();
 			dragData3D.end3D = dragData3D.start3D;
+			dragData3D.start2D = dragData3D.end2D = view;
 			break;
 		}
 
@@ -108,15 +110,23 @@ void Scene::Process3DTap( int action, const grinliz::Vector2F& view, const grinl
 		{
 			Vector3F drag;
 			engine->RayFromViewToYPlane( view, dragData3D.mvpi, &ray, &drag );
+			dragData3D.end2D = view;
 
 			Vector3F delta = drag - dragData3D.start3D;
 			delta.y = 0;
 			drag.y = 0;
 			dragData3D.end3D = drag;
 
+			if ( action == GAME_TAP_UP ) {
+				Vector2F vDelta = dragData3D.start2D - dragData3D.end2D;
+				if ( vDelta.Length() < 10.f )
+					result = true;
+			}
+
 			engine->camera.SetPosWC( dragData3D.startCameraWC - delta );
 			break;
 		}
 	}
+	return result;
 }
 

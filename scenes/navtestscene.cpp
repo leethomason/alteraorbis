@@ -28,6 +28,8 @@ NavTestScene::NavTestScene( LumosGame* game ) : Scene( game )
 	block20.SetSize( layout.Width(), layout.Height() );
 	block20.SetText( "block20" );
 
+	textLabel.Init( &gamui2D );
+
 	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase() );
 	
 	map = new WorldMap( 32, 32 );
@@ -35,6 +37,7 @@ NavTestScene::NavTestScene( LumosGame* game ) : Scene( game )
 
 	engine->SetMap( map );
 	engine->CameraLookAt( 10, 10, 40 );
+	tapMark.Zero();
 }
 
 
@@ -53,6 +56,7 @@ void NavTestScene::Resize()
 	LayoutCalculator layout = lumosGame->DefaultLayout();
 	layout.PosAbs( &block, 1, -1 );
 	layout.PosAbs( &block20, 2, -1 );
+	layout.PosAbs( &textLabel, 0, -2 );
 }
 
 
@@ -75,7 +79,18 @@ void NavTestScene::Tap( int action, const grinliz::Vector2F& view, const grinliz
 {
 	bool uiHasTap = ProcessTap( action, view, world );
 	if ( !uiHasTap ) {
-		Process3DTap( action, view, world, engine );
+		int tap = Process3DTap( action, view, world, engine );
+		if ( tap ) {
+			Matrix4 mvpi;
+			Ray ray;
+			game->GetScreenport().ViewProjectionInverse3D( &mvpi );
+			engine->RayFromViewToYPlane( view, mvpi, &ray, &tapMark );
+			tapMark.y += 0.1f;
+
+			char buf[40];
+			SNPrintf( buf, 40, "xz = %.1f,%.1f", tapMark.x, tapMark.z );
+			textLabel.SetText( buf );
+		}
 	}
 }
 
@@ -109,4 +124,9 @@ void NavTestScene::ItemTapped( const gamui::UIItem* item )
 void NavTestScene::Draw3D( U32 deltaTime )
 {
 	engine->Draw( deltaTime );
+
+	FlatShader flat;
+	flat.SetColor( 1, 0, 0 );
+	Vector3F delta = { 0.2f, 0, 0.2f };
+	flat.DrawQuad( tapMark-delta, tapMark+delta, false );
 }

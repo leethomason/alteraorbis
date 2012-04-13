@@ -255,6 +255,7 @@ void WorldMap::Draw3D(  const grinliz::Color3F& colorMult, GPUShader::StencilMod
 	stream.texture0Offset = PTVertex::TEXTURE_OFFSET;
 	stream.nTexture0 = 2;
 
+	// Real code to draw the map:
 	FlatShader shader;
 	shader.SetColor( colorMult.r, colorMult.g, colorMult.b );
 	shader.SetStencilMode( mode );
@@ -263,6 +264,18 @@ void WorldMap::Draw3D(  const grinliz::Color3F& colorMult, GPUShader::StencilMod
 		shader.SetTexture0( texture[i] );
 		shader.Draw();
 	}
+
+	// Debugging pathing zones:
 	DrawZones();
+	// Debugging coordinate system:
+	Vector3F origin = { 0, 0.1f, 0 };
+	Vector3F xaxis = { 5, 0, 0 };
+	Vector3F zaxis = { 0, 0.1f, 5 };
+
+	FlatShader debug;
+	debug.SetColor( 1, 0, 0, 1 );
+	debug.DrawArrow( origin, xaxis, false );
+	debug.SetColor( 0, 0, 1, 1 );
+	debug.DrawArrow( origin, zaxis, false );
 }
 

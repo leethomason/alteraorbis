@@ -6,6 +6,7 @@
 #include "../gamui/gamui.h"	// for auto setting up gamui stream
 #include "../grinliz/glperformance.h"
 #include "shadermanager.h"
+#include "../grinliz/glgeometry.h"
 
 #include "platformgl.h"
 
@@ -618,7 +619,7 @@ void GPUShader::Draw( int instances )
 }
 
 
-void GPUShader::DrawQuad( const grinliz::Vector3F p0, const grinliz::Vector3F p1, bool positive, bool outline )
+void GPUShader::DrawQuad( const grinliz::Vector3F p0, const grinliz::Vector3F p1, bool positive )
 {
 	PTVertex pos[4] = { 
 		{ { p0.x, p0.y, p0.z }, { 0, 0 } },
@@ -630,6 +631,35 @@ void GPUShader::DrawQuad( const grinliz::Vector3F p0, const grinliz::Vector3F p1
 	static const U16 indexNeg[6] = { 0, 2, 1, 0, 3, 2 };
 	const U16* index = positive ? indexPos : indexNeg;
 
+	DebugDraw( pos, 6, index );
+}
+
+
+void GPUShader::DrawArrow( const grinliz::Vector3F p0, const grinliz::Vector3F p1, bool positive )
+{
+	const Vector3F UP = { 0, 1, 0 };
+	Vector3F normal; 
+	CrossProduct( UP, p1-p0, &normal );
+	if ( normal.Length() > 0.001f ) {
+		normal.Normalize();
+		normal = normal * 0.4f;
+
+		PTVertex pos[4] = { 
+			{ p0-normal, { 0, 0 } },
+			{ p0+normal, { 1, 0 } },
+			{ p1, { 1, 1 } },
+		};
+		static const U16 indexPos[6] = { 0, 1, 2 };
+		static const U16 indexNeg[6] = { 0, 2, 1 };
+		const U16* index = positive ? indexPos : indexNeg;
+
+		DebugDraw( pos, 3, index );
+	}
+}
+
+
+void GPUShader::DebugDraw( const PTVertex* v, int nIndex, const U16* index )
+{
 	GPUStream stream;
 	stream.stride = sizeof(PTVertex);
 	stream.nPos = 3;
@@ -637,10 +667,9 @@ void GPUShader::DrawQuad( const grinliz::Vector3F p0, const grinliz::Vector3F p1
 	stream.nTexture0 = 2;
 	stream.texture0Offset = PTVertex::TEXTURE_OFFSET;
 
-	SetStream( stream, pos, 6, index );
+	SetStream( stream, v, nIndex, index );
 	Draw();
 }
-
 
 
 void GPUShader::SwitchMatrixMode( MatrixType type )
@@ -873,39 +902,3 @@ ParticleShader::ParticleShader() : GPUShader()
 	blend = BLEND_ADD;
 }
 
-
-/*
-void ParticleShader::DrawPoints(  Texture* texture,
-								  const Matrix4& mvp, const Vector4F& up, const Vector4F& right, float time,
-								  int nParticles, const Particle* particlePtr, const U16* indexPtr )
-{
-	GLASSERT( texture0 == 0 );
-	GLASSERT( texture1 == 0 );
-	
-	// Will disable the texture units:
-	SetState( *this );
-
-	ShaderManager* shadman = ShaderManager::Instance();
-	shadman->ActivateShader( ShaderManager::PARTICLE );
-	shadman->ClearStream();
-
-	// Which is a big cheat because we need to bind a texture without texture coordinates.
-	glEnable( GL_TEXTURE_2D );
-	glBindTexture( GL_TEXTURE_2D, texture->GLID() );
-		
-	shadman->SetTexture( 0, texture );
-	shadman->SetParticleStream();
-	shadman->SetParticleUniform( mvp, up, right, time );
-	CHECK_GL_ERROR;
-
-	glBindBufferX( GL_ARRAY_BUFFER, particlePtr );
-	glDrawElements( GL_TRIANGLES, nParticles*6, GL_UNSIGNED_SHORT, indexPtr );
-	CHECK_GL_ERROR;
-	glBindBufferX( GL_ARRAY_BUFFER, 0 );
-
-	glBindTexture( GL_TEXTURE_2D, 0 );
-		
-	drawCalls++;
-	trianglesDrawn += nParticles*2;
-}
-*/

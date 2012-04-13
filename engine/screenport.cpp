@@ -245,14 +245,15 @@ bool Screenport::ViewToWorld( const grinliz::Vector2F& v, const grinliz::Matrix4
 	if ( out0.w == 0.0f ) {
 		return false;
 	}
-	ray->origin.x = out0.x / out0.w;
-	ray->origin.y = out0.y / out0.w;
-	ray->origin.z = out0.z / out0.w;
+	if ( ray ) {
+		ray->origin.x = out0.x / out0.w;
+		ray->origin.y = out0.y / out0.w;
+		ray->origin.z = out0.z / out0.w;
 
-	ray->direction.x = out1.x / out1.w - ray->origin.x;
-	ray->direction.y = out1.y / out1.w - ray->origin.y;
-	ray->direction.z = out1.z / out1.w - ray->origin.z;
-
+		ray->direction.x = out1.x / out1.w - ray->origin.x;
+		ray->direction.y = out1.y / out1.w - ray->origin.y;
+		ray->direction.z = out1.z / out1.w - ray->origin.z;
+	}
 	return true;
 }
 

@@ -49,6 +49,7 @@ public:
 struct DragData {
 	grinliz::Matrix4  mvpi;
 	grinliz::Vector3F start3D, end3D;
+	grinliz::Vector2F start2D, end2D;
 	grinliz::Vector3F startCameraWC;
 };
 
@@ -97,8 +98,8 @@ public:
 	
 	// Call to send mouse events to gamui. Returns true if the UI (gamui) is handling the event.
 	bool ProcessTap( int action, const grinliz::Vector2F& screen, const grinliz::Ray& world );
-	// Call to handle 3D events
-	void Process3DTap( int action, const grinliz::Vector2F& screen, const grinliz::Ray& world, Engine* engine );
+	// Call to handle 3D events. Returns true if an actual tap (on the y=0 plane) occurs.
+	bool Process3DTap( int action, const grinliz::Vector2F& screen, const grinliz::Ray& world, Engine* engine );
 
 	virtual void ItemTapped( const gamui::UIItem* item )							{}
 	virtual gamui::RenderAtom DragStart( const gamui::UIItem* item )				{ gamui::RenderAtom atom; return atom; }	// null atom

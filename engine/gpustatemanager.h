@@ -265,7 +265,8 @@ public:
 
 	void Draw( int instances=0 );
 
-	void DrawQuad( const grinliz::Vector3F p0, const grinliz::Vector3F p1, bool positiveWinding=true, bool outline=false );
+	void DrawQuad( const grinliz::Vector3F p0, const grinliz::Vector3F p1, bool positiveWinding=true );
+	void DrawArrow( const grinliz::Vector3F p0, const grinliz::Vector3F p1, bool positiveWinding=true );
 
 	int SortOrder()	const { 
 		if ( blend == BLEND_NORMAL ) return 2;
@@ -299,6 +300,7 @@ protected:
 	}
 
 	static void SetState( const GPUShader& );
+	void DebugDraw( const PTVertex* v, int nIndex, const U16* index );
 
 private:
 
