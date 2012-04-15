@@ -90,6 +90,8 @@ void NavTestScene::Tap( int action, const grinliz::Vector2F& view, const grinliz
 			char buf[40];
 			SNPrintf( buf, 40, "xz = %.1f,%.1f", tapMark.x, tapMark.z );
 			textLabel.SetText( buf );
+
+			map->ShowAdjacent( tapMark.x, tapMark.z );
 		}
 	}
 }

@@ -18,8 +18,8 @@ class Texture;
 	doesn't change after the Init...() is called.) Could be
 	further optimized to use regions.
 */
-class WorldMap : public Map 
-	             //public micropather::Graph
+class WorldMap : public Map, 
+	             public micropather::Graph
 {
 public:
 	WorldMap( int width, int height );
@@ -39,9 +39,12 @@ public:
 	virtual void Draw3D(  const grinliz::Color3F& colorMult, GPUShader::StencilMode );
 
 	// ---- MicroPather ---- //
-//	virtual float LeastCostEstimate( void* stateStart, void* stateEnd );
-//	virtual void AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > *adjacent );
-//	virtual void  PrintStateInfo( void* state );
+	virtual float LeastCostEstimate( void* stateStart, void* stateEnd );
+	virtual void AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > *adjacent );
+	virtual void  PrintStateInfo( void* state );
+
+	// --- Debugging -- //
+	void ShowAdjacent( float x, float y );
 
 private:
 	int INDEX( int x, int y ) const { 
@@ -54,13 +57,13 @@ private:
 		y /= ZONE_SIZE;
 		return (y*width/ZONE_SIZE) + x; 
 	} 
+
 	void Tessellate();
 	void CalcZone( int x, int y );
 	void CalcZoneRec( int x, int y, int depth );
 	
 	// Debugging
 	void DrawZones();
-
 
 	enum {
 		TRUE = 1,
@@ -80,6 +83,8 @@ private:
 		U32 deltaYOrigin	: 4;
 		U32 sizeX			: 5;
 		U32 sizeY			: 5;
+		U32 debug_origin	: 1;
+		U32 debug_adjacent	: 1;
 
 		bool IsPassable()	{ return isLand == TRUE && isBlock == FALSE; }
 		void SetPathOrigin( int dx, int dy, int sizex, int sizey ) {
@@ -96,11 +101,34 @@ private:
 		}
 	};
 
+	// Returns the location of the sub-zone, (-1,-1) for DNE
+	grinliz::Vector2I GetSubZone( int x, int y ) {
+		Grid g = grid[INDEX(x,y)];
+		grinliz::Vector2I v = { -1, -1 };
+		if ( g.IsPassable() ) {
+			v.Set( x-g.deltaXOrigin, y-g.deltaYOrigin );
+		}
+		return v;
+	}
+
+	void* ToState( int x, int y ) {
+		GLASSERT( x >= 0 && x < width && y >= 0 && y < height );
+		GLASSERT( grid[INDEX(x,y)].deltaXOrigin == 0 && grid[INDEX(x,y)].deltaYOrigin == 0 );
+		return reinterpret_cast<void*>( x | (y<<16) );
+	}
+	Grid ToGrid( void* state, int* x, int *y ) {
+		int v32 = reinterpret_cast<int>( state );
+		*x = v32 & 0xffff;
+		*y = (v32 & 0xffff0000)>>16;
+		return grid[INDEX(*x,*y)];
+	}
+
 	bool JointPassable( int x0, int y0, int x1, int y1 );
 	bool RectPassable( int x0, int y0, int x1, int y1 );
 
 	Grid* grid;		// pathing info.
 	U8* zoneInit;	// flag whether this zone is valid.
+	micropather::MicroPather *pather;
 
 	enum {
 		LOWER_TYPES = 2		// land or water

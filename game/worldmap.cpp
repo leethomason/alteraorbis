@@ -17,6 +17,7 @@ WorldMap::WorldMap( int width, int height ) : Map( width, height )
 
 	texture[0] = TextureManager::Instance()->GetTexture( "map_water" );
 	texture[1] = TextureManager::Instance()->GetTexture( "map_land" );
+	pather = new micropather::MicroPather( this );
 }
 
 
@@ -24,6 +25,7 @@ WorldMap::~WorldMap()
 {
 	delete [] grid;
 	delete [] zoneInit;
+	delete pather;
 }
 
 
@@ -108,6 +110,7 @@ void WorldMap::SetBlock( const grinliz::Rectangle2I& pos )
 			GLOUTPUT(( "Block (%d,%d) index=%d zone=%d set\n", x, y, i, ZDEX(x,y) ));
 		}
 	}
+	pather->Reset();
 }
 
 
@@ -121,6 +124,7 @@ void WorldMap::ClearBlock( const grinliz::Rectangle2I& pos )
 			zoneInit[ZDEX( x, y )] = 0;
 		}
 	}
+	pather->Reset();
 }
 
 
@@ -197,6 +201,7 @@ void WorldMap::CalcZone( int zx, int zy )
 					++ySize;
 				}
 
+				// Choose the better of the x or y axis
 				if ( ySize > xSize ) {
 					xSize = size;
 				}
@@ -205,6 +210,7 @@ void WorldMap::CalcZone( int zx, int zy )
 				}
 
 				//GLOUTPUT(( "sub-zone (%d,%d) size=(%d,%d)\n", x, y, xSize, ySize ));
+				// Write the changes back
 				for( int j=y; j<y+ySize; ++j ) {
 					for( int i=x; i<x+xSize; ++i ) {
 						GLASSERT( !grid[INDEX(i,j)].isPathInit );
@@ -217,10 +223,99 @@ void WorldMap::CalcZone( int zx, int zy )
 }
 
 
+float WorldMap::LeastCostEstimate( void* stateStart, void* stateEnd )
+{
+	int startX, startY, endX, endY;
+
+	Grid gStart = ToGrid( stateStart, &startX, &startY );
+	Grid gEnd =   ToGrid( stateEnd, &endX, &endY );
+
+	Vector2F start = { (float)startX + (float)gStart.sizeX * 0.5f,
+	                   (float)startY + (float)gStart.sizeY * 0.5f };
+	Vector2F end   = { (float)endX + (float)gEnd.sizeX * 0.5f,
+					   (float)endY + (float)gEnd.sizeY * 0.5f };
+	return (end-start).Length();
+}
+
+
+void WorldMap::AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > *adjacent )
+{
+	int startX, startY;
+	Grid gStart = ToGrid( state, &startX, &startY );
+	Vector2F start = { (float)startX + (float)gStart.sizeX * 0.5f,
+	                   (float)startY + (float)gStart.sizeY * 0.5f };
+
+	Rectangle2I bounds = this->Bounds();
+	Vector2I currentSubZone = { -1, -1 };
+
+	Vector2I adj[ZONE_SIZE*4+4];
+	int num=0;
+
+	for( int x=startX; x < startX+(int)gStart.sizeX; ++x )		{ adj[num++].Set( x, startY-1 ); }
+	for( int y=startY; y < startY+(int)gStart.sizeY; ++y )		{ adj[num++].Set( startX+gStart.sizeX, y ); }
+	for( int x=startX+(int)gStart.sizeX-1; x >= startX; --x )	{ adj[num++].Set( x, startY+gStart.sizeY ); }
+	for( int y=startY+(int)gStart.sizeY-1; y >= startY; --y )	{ adj[num++].Set( startX-1, y ); }
+
+	for( int i=0; i<num; ++i ) {
+		int x = adj[i].x;
+		int y = adj[i].y;
+
+		if ( bounds.Contains( x, y ) ) {
+			Vector2I subV = GetSubZone( x, y );
+			if ( subV.x >= 0 && subV != currentSubZone ) {
+				Grid g = grid[INDEX(subV.x,subV.y)];
+				Vector2F end = { (float)subV.x + (float)g.sizeX * 0.5f,
+								 (float)subV.y + (float)g.sizeY * 0.5f };
+				float cost = (end-start).Length();
+				
+				micropather::StateCost sc = { ToState( subV.x, subV.y ), cost };
+				adjacent->push_back( sc );
+				currentSubZone = subV;
+			}
+		}
+	}
+}
+
+
+void WorldMap::PrintStateInfo( void* state )
+{
+	int startX, startY;
+	Grid gStart = ToGrid( state, &startX, &startY );
+	GLOUTPUT(( "(%d,%d) ", startX, startY ));	
+}
+
+
+void WorldMap::ShowAdjacent( float _x, float _y )
+{
+	int x = (int)_x;
+	int y = (int)_y;
+	for( int i=0; i<width*height; ++i ) {
+		grid[i].debug_adjacent = 0;
+		grid[i].debug_origin = 0;
+	}
+	if ( grid[INDEX(x,y)].IsPassable() ) {
+		Vector2I sub = GetSubZone( x, y );
+		grid[INDEX(sub.x,sub.y)].debug_origin = TRUE;
+
+		MP_VECTOR< micropather::StateCost > adjacent;
+		AdjacentCost( ToState( sub.x, sub.y ), &adjacent );
+		for( unsigned i=0; i<adjacent.size(); ++i ) {
+			Vector2I a;
+			ToGrid( adjacent[i].state, &a.x, &a.y );
+			grid[INDEX(a.x,a.y)].debug_adjacent = TRUE;
+		}
+	}
+}
+
+
 void WorldMap::DrawZones()
 {
 	CompositingShader debug( GPUShader::BLEND_NORMAL );
 	debug.SetColor( 1, 1, 1, 0.5f );
+	CompositingShader debugOrigin( GPUShader::BLEND_NORMAL );
+	debugOrigin.SetColor( 1, 0, 0, 0.5f );
+	CompositingShader debugAdjacent( GPUShader::BLEND_NORMAL );
+	debugAdjacent.SetColor( 1, 1, 0, 0.5f );
 
 	for( int j=0; j<height; ++j ) {
 		for( int i=0; i<width; ++i ) {
@@ -237,7 +332,16 @@ void WorldMap::DrawZones()
 
 				Vector3F p0 = { (float)i+offset, 0.1f, (float)j+offset };
 				Vector3F p1 = { (float)(i+xSize)-offset, 0.1f, (float)(j+ySize)-offset };
-				debug.DrawQuad( p0, p1, false );
+
+				if ( g.debug_origin ) {
+					debugOrigin.DrawQuad( p0, p1, false );
+				}
+				else if ( g.debug_adjacent ) {
+					debugAdjacent.DrawQuad( p0, p1, false );
+				}
+				else {
+					debug.DrawQuad( p0, p1, false );
+				}
 			}
 		}
 	}
