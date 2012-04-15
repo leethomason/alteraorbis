@@ -251,10 +251,33 @@ void WorldMap::AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > *a
 	Vector2I adj[ZONE_SIZE*4+4];
 	int num=0;
 
-	for( int x=startX; x < startX+(int)gStart.sizeX; ++x )		{ adj[num++].Set( x, startY-1 ); }
-	for( int y=startY; y < startY+(int)gStart.sizeY; ++y )		{ adj[num++].Set( startX+gStart.sizeX, y ); }
+	int dx = (int)gStart.sizeX;
+	int dy = (int)gStart.sizeY;
+
+	for( int x=startX; x < startX+dx; ++x )		{ adj[num++].Set( x, startY-1 ); }
+	if (    bounds.Contains( startX+dx, startY-1 )
+		 && grid[INDEX(startX+dx-1, startY-1)].IsPassable()
+		 && grid[INDEX(startX+dx,   startY-1)].IsPassable()
+		 && grid[INDEX(startX+dx,   startY)].IsPassable() )
+		{ adj[num++].Set( startX+dx, startY-1 ); }
+	for( int y=startY; y < startY+dy; ++y )		{ adj[num++].Set( startX+gStart.sizeX, y ); }
+	if (    bounds.Contains( startX+dx, startY+dy )
+		 && grid[INDEX(startX+dx,   startY+dy-1)].IsPassable()
+		 && grid[INDEX(startX+dx,   startY+dy)].IsPassable()
+		 && grid[INDEX(startX+dx-1, startY+dy)].IsPassable() )
+		{ adj[num++].Set( startX+dx, startY+dy ); }
 	for( int x=startX+(int)gStart.sizeX-1; x >= startX; --x )	{ adj[num++].Set( x, startY+gStart.sizeY ); }
+	if (    bounds.Contains( startX-1, startY+dy )
+		 && grid[INDEX(startX,   startY+dy)].IsPassable()
+		 && grid[INDEX(startX-1, startY+dy)].IsPassable()
+		 && grid[INDEX(startX-1, startY+dy-1)].IsPassable() )
+		{ adj[num++].Set( startX-1, startY+dy ); }
 	for( int y=startY+(int)gStart.sizeY-1; y >= startY; --y )	{ adj[num++].Set( startX-1, y ); }
+	if (    bounds.Contains( startX-1, startY-1 )
+		 && grid[INDEX(startX-1, startY)].IsPassable()
+		 && grid[INDEX(startX-1, startY-1)].IsPassable()
+		 && grid[INDEX(startX,   startY-1)].IsPassable() )
+		{ adj[num++].Set( startX-1, startY-1 ); }
 
 	for( int i=0; i<num; ++i ) {
 		int x = adj[i].x;
