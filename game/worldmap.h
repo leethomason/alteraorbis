@@ -65,6 +65,7 @@ private:
 	
 	int Solve( const grinliz::Vector2I& subZoneStart, const grinliz::Vector2I& subZoneEnd );
 	void DrawZones();	// debugging
+	void ClearDebugDrawing();
 
 	enum {
 		TRUE = 1,

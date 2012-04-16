@@ -339,9 +339,34 @@ int WorldMap::Solve( const grinliz::Vector2I& subZoneStart, const grinliz::Vecto
 }
 
 
+void WorldMap::ClearDebugDrawing()
+{
+	for( int i=0; i<width*height; ++i ) {
+		grid[i].debug_adjacent = 0;
+		grid[i].debug_origin = 0;
+		grid[i].debug_path = 0;
+	}
+}
+
+
 void WorldMap::ShowZonePath( float x0, float y0, float x1, float y1 )
 {
-	//int result = Solve(
+	ClearDebugDrawing();
+	
+	Vector2I start = GetSubZone( (int)x0, (int)y0 );
+	Vector2I end   = GetSubZone( (int)x1, (int)y1 );
+	
+	if ( start.x >= 0 && end.x >= 0 ) {
+		int result = Solve( start, end );
+		if ( result == micropather::MicroPather::SOLVED ) {
+			for( unsigned i=0; i<pathVector.size(); ++i ) {
+				void* vp = pathVector[i];
+				int x, y;
+				ToGrid( vp, &x, &y );
+				grid[INDEX(x,y)].debug_path = TRUE;
+			}
+		}
+	}
 }
 
 
@@ -349,10 +374,8 @@ void WorldMap::ShowAdjacent( float _x, float _y )
 {
 	int x = (int)_x;
 	int y = (int)_y;
-	for( int i=0; i<width*height; ++i ) {
-		grid[i].debug_adjacent = 0;
-		grid[i].debug_origin = 0;
-	}
+	ClearDebugDrawing();
+
 	if ( grid[INDEX(x,y)].IsPassable() ) {
 		Vector2I sub = GetSubZone( x, y );
 		grid[INDEX(sub.x,sub.y)].debug_origin = TRUE;
@@ -376,6 +399,8 @@ void WorldMap::DrawZones()
 	debugOrigin.SetColor( 1, 0, 0, 0.5f );
 	CompositingShader debugAdjacent( GPUShader::BLEND_NORMAL );
 	debugAdjacent.SetColor( 1, 1, 0, 0.5f );
+	CompositingShader debugPath( GPUShader::BLEND_NORMAL );
+	debugPath.SetColor( 0.5f, 0.5f, 1, 0.5f );
 
 	for( int j=0; j<height; ++j ) {
 		for( int i=0; i<width; ++i ) {
@@ -398,6 +423,9 @@ void WorldMap::DrawZones()
 				}
 				else if ( g.debug_adjacent ) {
 					debugAdjacent.DrawQuad( p0, p1, false );
+				}
+				else if ( g.debug_path ) {
+					debugPath.DrawQuad( p0, p1, false );
 				}
 				else {
 					debug.DrawQuad( p0, p1, false );

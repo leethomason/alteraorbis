@@ -95,6 +95,8 @@ void NavTestScene::Tap( int action, const grinliz::Vector2F& view, const grinliz
 	if ( !uiHasTap ) {
 		int tap = Process3DTap( action, view, world, engine );
 		if ( tap ) {
+			Vector3F oldMark = tapMark;
+
 			Matrix4 mvpi;
 			Ray ray;
 			game->GetScreenport().ViewProjectionInverse3D( &mvpi );
@@ -107,6 +109,8 @@ void NavTestScene::Tap( int action, const grinliz::Vector2F& view, const grinliz
 
 			if ( showAdjacent.Down() )
 				map->ShowAdjacent( tapMark.x, tapMark.z );
+			else if ( showZonePath.Down() )
+				map->ShowZonePath( oldMark.x, oldMark.z, tapMark.x, tapMark.z );
 		}
 	}
 }
