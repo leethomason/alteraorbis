@@ -46,6 +46,7 @@ public:
 	// --- Debugging -- //
 	void ShowAdjacent( float x, float y );
 	void ShowZonePath( float x0, float y0, float x1, float y1 );
+	int NumSubZones() const;
 
 private:
 	int INDEX( int x, int y ) const { 
@@ -90,7 +91,8 @@ private:
 		U32 debug_adjacent	: 1;
 		U32 debug_path		: 1;
 
-		bool IsPassable()	{ return isLand == TRUE && isBlock == FALSE; }
+		bool IsPassable() const			{ return isLand == TRUE && isBlock == FALSE; }
+		bool IsSubZoneOrigin() const	{ return IsPassable() && deltaXOrigin == 0 && deltaYOrigin == 0; }
 		void SetPathOrigin( int dx, int dy, int sizex, int sizey ) {
 			GLASSERT( dx >= 0 && dx < ZONE_SIZE );
 			GLASSERT( dy >= 0 && dy < ZONE_SIZE );

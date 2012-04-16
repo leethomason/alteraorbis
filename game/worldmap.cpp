@@ -243,6 +243,17 @@ void WorldMap::CalcZone( int zx, int zy )
 }
 
 
+int WorldMap::NumSubZones() const
+{
+	int nSubZone = 0;
+	for( int i=0; i<width*height; ++i ) {
+		if ( grid[i].IsSubZoneOrigin() )
+			++nSubZone;
+	}
+	return nSubZone;
+}
+
+
 float WorldMap::LeastCostEstimate( void* stateStart, void* stateEnd )
 {
 	int startX, startY, endX, endY;
@@ -411,7 +422,7 @@ void WorldMap::DrawZones()
 			static const float offset = 0.2f;
 			Grid g = grid[INDEX(i,j)];
 			
-			if ( g.IsPassable() && g.isPathInit && g.deltaXOrigin == 0 && g.deltaYOrigin == 0 ) {
+			if ( g.IsSubZoneOrigin() ) {
 				int xSize = g.sizeX;
 				int ySize = g.sizeY;
 
@@ -457,17 +468,19 @@ void WorldMap::Draw3D(  const grinliz::Color3F& colorMult, GPUShader::StencilMod
 		shader.Draw();
 	}
 
-	// Debugging pathing zones:
-	DrawZones();
-	// Debugging coordinate system:
-	Vector3F origin = { 0, 0.1f, 0 };
-	Vector3F xaxis = { 5, 0, 0 };
-	Vector3F zaxis = { 0, 0.1f, 5 };
+	if ( mode == GPUShader::STENCIL_CLEAR ) {
+		// Debugging pathing zones:
+		DrawZones();
+		// Debugging coordinate system:
+		Vector3F origin = { 0, 0.1f, 0 };
+		Vector3F xaxis = { 5, 0, 0 };
+		Vector3F zaxis = { 0, 0.1f, 5 };
 
-	FlatShader debug;
-	debug.SetColor( 1, 0, 0, 1 );
-	debug.DrawArrow( origin, xaxis, false );
-	debug.SetColor( 0, 0, 1, 1 );
-	debug.DrawArrow( origin, zaxis, false );
+		FlatShader debug;
+		debug.SetColor( 1, 0, 0, 1 );
+		debug.DrawArrow( origin, xaxis, false );
+		debug.SetColor( 0, 0, 1, 1 );
+		debug.DrawArrow( origin, zaxis, false );
+	}
 }
 
