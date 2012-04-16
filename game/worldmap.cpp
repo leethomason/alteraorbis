@@ -171,50 +171,68 @@ void WorldMap::CalcZone( int zx, int zy )
 
 		int xEnd = zx + ZONE_SIZE;
 		int yEnd = zy + ZONE_SIZE;
+		static const int NUM_PASS = 2;	// 1 or 2
 
-		for( int y=zy; y<yEnd; ++y ) {
-			for( int x=zx; x<xEnd; ++x ) {
+		// 178 dc using grow-from-origin
+		// 190 dc using 2-pass, but looks much better. (grow square always better,
+		// the question is the 2-pass approach)
+		for( int pass=0; pass<NUM_PASS; ++pass ) {
+			for( int y=zy; y<yEnd; ++y ) {
+				for( int x=zx; x<xEnd; ++x ) {
 
-				int index = INDEX(x,y);
-				if ( !grid[index].IsPassable() )
-					continue;
-				if ( grid[index].isPathInit )
-					continue;
+					int index = INDEX(x,y);
+					if ( !grid[index].IsPassable() )
+						continue;
+					if ( grid[index].isPathInit )
+						continue;
 
-				// Expand the square.
-				int size=1;
-				while( x+size < xEnd && y+size < yEnd && JointPassable( x, y, x+size, y+size ) ) {
-					++size;
-				}
-				// How far could we go on the x axis?
-				int xSize = size;
-				while(    x+xSize < xEnd 
-					   //&& ( xSize <= size*2 )
-					   && RectPassable( x+xSize, y, x+xSize, y+size-1 ) ) {
-					++xSize;
-				}
-				// How far on the y axis?
-				int ySize = size;
-				while(    y+ySize < yEnd 
-					  // && (ySize <= size*2 )
-					   && RectPassable( x, y+ySize, x+size-1, y+ySize ) ) {
-					++ySize;
-				}
+					bool maybeNegX = true,
+						 maybePosX = true,
+						 maybeNegY = true,
+						 maybePosY = true;
+					int x0, y0, x1, y1;
+					x0 = x1 = x;
+					y0 = y1 = y;
 
-				// Choose the better of the x or y axis
-				if ( ySize > xSize ) {
-					xSize = size;
-				}
-				else {
-					ySize = size;
-				}
+					while( maybeNegX || maybePosX || maybeNegY || maybePosY ) {
+						if ( maybeNegX ) {
+							if ( x0-1 >= zx && RectPassable( x0-1, y0, x0-1, y1 ) )
+								--x0;
+							else
+								maybeNegX = false;
+						}
+						if ( maybeNegY ) {
+							if ( y0-1 >= zy && RectPassable( x0, y0-1, x1, y0-1 ) )
+								--y0;
+							else
+								maybeNegY = false;
+						}
+						if ( maybePosX ) {
+							if ( (x1+1 < zx+ZONE_SIZE) && RectPassable( x1+1, y0, x1+1, y1 ) )
+								++x1;
+							else
+								maybePosX = false;
+						}
+						if ( maybePosY ) {
+							if ( (y1+1 < zy+ZONE_SIZE) && RectPassable( x0, y1+1, x1, y1+1 ) )
+								++y1;
+							else
+								maybePosY = false;
+						}
+					}
+					int dx = x1-x0+1;
+					int dy = y1-y0+1;
+					int area = dx*dy;
+					if ( pass == NUM_PASS-2 ) {
+						if ( /*area < 17 ||*/ (dx >= dy*2) || (dy >= dx*2) )
+							continue;
+					}
 
-				//GLOUTPUT(( "sub-zone (%d,%d) size=(%d,%d)\n", x, y, xSize, ySize ));
-				// Write the changes back
-				for( int j=y; j<y+ySize; ++j ) {
-					for( int i=x; i<x+xSize; ++i ) {
-						GLASSERT( !grid[INDEX(i,j)].isPathInit );
-						grid[ INDEX( i, j ) ].SetPathOrigin( i-x, j-y, xSize, ySize );
+					for( int j=y0; j<=y1; ++j ) {
+						for( int i=x0; i<=x1; ++i ) {
+							GLASSERT( !grid[INDEX(i,j)].isPathInit );
+							grid[ INDEX( i, j ) ].SetPathOrigin( i-x0, j-y0, dx, dy );
+						}
 					}
 				}
 			}
@@ -305,6 +323,23 @@ void WorldMap::PrintStateInfo( void* state )
 	int startX, startY;
 	Grid gStart = ToGrid( state, &startX, &startY );
 	GLOUTPUT(( "(%d,%d) ", startX, startY ));	
+}
+
+
+int WorldMap::Solve( const grinliz::Vector2I& subZoneStart, const grinliz::Vector2I& subZoneEnd )
+{
+	void* start = ToState( subZoneStart.x, subZoneStart.y );
+	void* end   = ToState( subZoneEnd.x, subZoneEnd.y );
+
+	float totalCost = 0;
+	int result = pather->Solve( start, end, &pathVector, &totalCost );
+	return result;
+}
+
+
+void WorldMap::ShowZonePath( float x0, float y0, float x1, float y1 )
+{
+	//int result = Solve(
 }
 
 

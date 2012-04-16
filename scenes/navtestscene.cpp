@@ -14,7 +14,7 @@ using namespace gamui;
 //  32x32          41 ->  97 -> 137
 // Wow. Sticking with the growing block algorithm.
 // Need to tune size on real map. (Note that the 32vs16 is approaching the same value.)
-
+// 
 NavTestScene::NavTestScene( LumosGame* game ) : Scene( game )
 {
 	game->InitStd( &gamui2D, &okay, 0 );
@@ -27,6 +27,16 @@ NavTestScene::NavTestScene( LumosGame* game ) : Scene( game )
 	block20.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
 	block20.SetSize( layout.Width(), layout.Height() );
 	block20.SetText( "block20" );
+
+	showAdjacent.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
+	showAdjacent.SetSize( layout.Width(), layout.Height() );
+	showAdjacent.SetText( "Adjacent" );
+
+	showZonePath.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
+	showZonePath.SetSize( layout.Width(), layout.Height() );
+	showZonePath.SetText( "ZonePath" );
+
+	showAdjacent.AddToToggleGroup( &showZonePath );
 
 	textLabel.Init( &gamui2D );
 
@@ -56,7 +66,11 @@ void NavTestScene::Resize()
 	LayoutCalculator layout = lumosGame->DefaultLayout();
 	layout.PosAbs( &block, 1, -1 );
 	layout.PosAbs( &block20, 2, -1 );
-	layout.PosAbs( &textLabel, 0, -2 );
+
+	layout.PosAbs( &showAdjacent, 0, -2 );
+	layout.PosAbs( &showZonePath, 1, -2 );
+
+	layout.PosAbs( &textLabel, 0, -3 );
 }
 
 
@@ -91,7 +105,8 @@ void NavTestScene::Tap( int action, const grinliz::Vector2F& view, const grinliz
 			SNPrintf( buf, 40, "xz = %.1f,%.1f", tapMark.x, tapMark.z );
 			textLabel.SetText( buf );
 
-			map->ShowAdjacent( tapMark.x, tapMark.z );
+			if ( showAdjacent.Down() )
+				map->ShowAdjacent( tapMark.x, tapMark.z );
 		}
 	}
 }

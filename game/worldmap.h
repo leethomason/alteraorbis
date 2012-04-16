@@ -45,6 +45,7 @@ public:
 
 	// --- Debugging -- //
 	void ShowAdjacent( float x, float y );
+	void ShowZonePath( float x0, float y0, float x1, float y1 );
 
 private:
 	int INDEX( int x, int y ) const { 
@@ -62,8 +63,8 @@ private:
 	void CalcZone( int x, int y );
 	void CalcZoneRec( int x, int y, int depth );
 	
-	// Debugging
-	void DrawZones();
+	int Solve( const grinliz::Vector2I& subZoneStart, const grinliz::Vector2I& subZoneEnd );
+	void DrawZones();	// debugging
 
 	enum {
 		TRUE = 1,
@@ -83,8 +84,10 @@ private:
 		U32 deltaYOrigin	: 4;
 		U32 sizeX			: 5;
 		U32 sizeY			: 5;
+
 		U32 debug_origin	: 1;
 		U32 debug_adjacent	: 1;
+		U32 debug_path		: 1;
 
 		bool IsPassable()	{ return isLand == TRUE && isBlock == FALSE; }
 		void SetPathOrigin( int dx, int dy, int sizex, int sizey ) {
@@ -129,6 +132,8 @@ private:
 	Grid* grid;		// pathing info.
 	U8* zoneInit;	// flag whether this zone is valid.
 	micropather::MicroPather *pather;
+
+	MP_VECTOR< void* > pathVector;
 
 	enum {
 		LOWER_TYPES = 2		// land or water
