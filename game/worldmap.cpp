@@ -223,8 +223,10 @@ void WorldMap::CalcZone( int zx, int zy )
 					int dx = x1-x0+1;
 					int dy = y1-y0+1;
 					int area = dx*dy;
+					// If the 2nd pass of a 2 pass algorithm,
+					// filter out things that aren't square enough.
 					if ( pass == NUM_PASS-2 ) {
-						if ( /*area < 17 ||*/ (dx >= dy*2) || (dy >= dx*2) )
+						if ( (dx > dy*2) || (dy > dx*2) )
 							continue;
 					}
 
