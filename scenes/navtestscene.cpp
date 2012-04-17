@@ -30,11 +30,12 @@ NavTestScene::NavTestScene( LumosGame* game ) : Scene( game )
 
 	showAdjacent.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
 	showAdjacent.SetSize( layout.Width(), layout.Height() );
-	showAdjacent.SetText( "Adjacent" );
+	showAdjacent.SetText( "Adj" );
 
 	showZonePath.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
 	showZonePath.SetSize( layout.Width(), layout.Height() );
-	showZonePath.SetText( "ZonePath" );
+	showZonePath.SetText( "Region" );
+	showZonePath.SetText2( "Path" );
 
 	showAdjacent.AddToToggleGroup( &showZonePath );
 
@@ -107,10 +108,13 @@ void NavTestScene::Tap( int action, const grinliz::Vector2F& view, const grinliz
 			SNPrintf( buf, 40, "xz = %.1f,%.1f nSubZ=%d", tapMark.x, tapMark.z, map->NumSubZones() );
 			textLabel.SetText( buf );
 
-			if ( showAdjacent.Down() )
-				map->ShowAdjacent( tapMark.x, tapMark.z );
-			else if ( showZonePath.Down() )
-				map->ShowZonePath( oldMark.x, oldMark.z, tapMark.x, tapMark.z );
+			if ( showAdjacent.Down() ) {
+				map->ShowAdjacentRegions( tapMark.x, tapMark.z );
+			}
+			else if ( showZonePath.Down() ) {
+				map->ShowRegionPath( oldMark.x, oldMark.z, tapMark.x, tapMark.z );
+				map->ShowVectorPath( oldMark.x, oldMark.z, tapMark.x, tapMark.z );
+			}
 		}
 	}
 }

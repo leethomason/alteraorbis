@@ -1,6 +1,7 @@
 #include "worldmap.h"
 #include "../grinliz/glutil.h"
 #include "../engine/texture.h"
+#include "../engine/ufoutil.h"
 
 using namespace grinliz;
 
@@ -18,6 +19,8 @@ WorldMap::WorldMap( int width, int height ) : Map( width, height )
 	texture[0] = TextureManager::Instance()->GetTexture( "map_water" );
 	texture[1] = TextureManager::Instance()->GetTexture( "map_land" );
 	pather = new micropather::MicroPather( this );
+
+	showVectorPath = false;
 }
 
 
@@ -345,8 +348,55 @@ int WorldMap::Solve( const grinliz::Vector2I& subZoneStart, const grinliz::Vecto
 	void* end   = ToState( subZoneEnd.x, subZoneEnd.y );
 
 	float totalCost = 0;
-	int result = pather->Solve( start, end, &pathVector, &totalCost );
+	int result = pather->Solve( start, end, &pathRegions, &totalCost );
 	return result;
+}
+
+
+// Returns true if there is a straight line path between the start and end.
+bool WorldMap::GridPath( const grinliz::Vector2F& _start, const grinliz::Vector2F& _end )
+{
+	Vector2I start = { LRintf( _start.x ), LRintf( _start.y ) };
+	Vector2I end   = { LRintf( _end.x ), LRintf( _end.y ) };
+	if ( start == end ) 
+		return true;
+
+	if ( !grid[INDEX(start)].IsPassable() )
+		return false;
+	Vector2I current = start;
+
+	LineWalk line( start.x, start.y, end.x, end.y );
+	while ( line.CurrentStep() <= line.NumSteps() ) {
+
+		if ( !grid[INDEX(line.X(),line.Y())].IsPassable() )
+			return false;
+		if ( line.X() != current.x && line.Y() != current.y ) {
+			// diagonal has to pass in both ways.
+			if ( !grid[INDEX(line.X(), current.y)].IsPassable() )
+				return false;
+			if ( !grid[INDEX(current.x, line.Y())].IsPassable() )
+				return false;
+		}
+		current.Set( line.X(), line.Y() );
+		line.Step(); 
+	}
+	return true;
+}
+
+
+bool WorldMap::CalcPath(	const grinliz::Vector2F& start, 
+							const grinliz::Vector2F& end, 
+							CDynArray<grinliz::Vector2F> *path )
+{
+	path->Clear();
+	path->Push( start );
+	bool okay = GridPath( start, end );
+	if ( okay ) {
+		path->Push( end );
+		return true;
+	}
+	path->Clear();
+	return false;
 }
 
 
@@ -357,10 +407,21 @@ void WorldMap::ClearDebugDrawing()
 		grid[i].debug_origin = 0;
 		grid[i].debug_path = 0;
 	}
+	showVectorPath = false;
 }
 
 
-void WorldMap::ShowZonePath( float x0, float y0, float x1, float y1 )
+void WorldMap::ShowVectorPath( float x0, float y0, float x1, float y1 )
+{
+	debugPathVector.Clear();
+	showVectorPath = true;
+	Vector2F start = { x0, y0 };
+	Vector2F end   = { x1, y1 };
+	CalcPath( start, end, &debugPathVector );
+}
+
+
+void WorldMap::ShowRegionPath( float x0, float y0, float x1, float y1 )
 {
 	ClearDebugDrawing();
 	
@@ -370,8 +431,8 @@ void WorldMap::ShowZonePath( float x0, float y0, float x1, float y1 )
 	if ( start.x >= 0 && end.x >= 0 ) {
 		int result = Solve( start, end );
 		if ( result == micropather::MicroPather::SOLVED ) {
-			for( unsigned i=0; i<pathVector.size(); ++i ) {
-				void* vp = pathVector[i];
+			for( unsigned i=0; i<pathRegions.size(); ++i ) {
+				void* vp = pathRegions[i];
 				int x, y;
 				ToGrid( vp, &x, &y );
 				grid[INDEX(x,y)].debug_path = TRUE;
@@ -381,7 +442,7 @@ void WorldMap::ShowZonePath( float x0, float y0, float x1, float y1 )
 }
 
 
-void WorldMap::ShowAdjacent( float _x, float _y )
+void WorldMap::ShowAdjacentRegions( float _x, float _y )
 {
 	int x = (int)_x;
 	int y = (int)_y;
@@ -481,6 +542,14 @@ void WorldMap::Draw3D(  const grinliz::Color3F& colorMult, GPUShader::StencilMod
 		debug.DrawArrow( origin, xaxis, false );
 		debug.SetColor( 0, 0, 1, 1 );
 		debug.DrawArrow( origin, zaxis, false );
+		if ( showVectorPath ) {
+			debug.SetColor( 1, 0, 0, 1 );
+			for( int i=0; i<debugPathVector.Size()-1; ++i ) {
+				Vector3F tail = { debugPathVector[i].x, 0.2f, debugPathVector[i].y };
+				Vector3F head = { debugPathVector[i+1].x, 0.2f, debugPathVector[i+1].y };
+				debug.DrawArrow( tail, head, false );
+			}
+		}
 	}
 }
 
