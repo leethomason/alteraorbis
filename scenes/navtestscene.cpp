@@ -3,6 +3,7 @@
 #include "../engine/engine.h"
 #include "../game/worldmap.h"
 #include "../grinliz/glgeometry.h"
+#include "../engine/ufoutil.h"
 
 using namespace grinliz;
 using namespace gamui;
@@ -113,7 +114,10 @@ void NavTestScene::Tap( int action, const grinliz::Vector2F& view, const grinliz
 			}
 			else if ( showZonePath.Down() ) {
 				map->ShowRegionPath( oldMark.x, oldMark.z, tapMark.x, tapMark.z );
-				map->ShowVectorPath( oldMark.x, oldMark.z, tapMark.x, tapMark.z );
+				Vector2F start = { oldMark.x, oldMark.z };
+				Vector2F end   = { tapMark.x, tapMark.z };
+				::CDynArray< Vector2F > path;
+				map->CalcPath( start, end, &path, true );
 			}
 		}
 	}

@@ -38,7 +38,8 @@ public:
 	// Call the pather; return true if successful.
 	bool CalcPath(	const grinliz::Vector2F& start, 
 					const grinliz::Vector2F& end, 
-					CDynArray<grinliz::Vector2F> *path );
+					CDynArray<grinliz::Vector2F> *path,
+					bool showDebugging = false );
 
 	// ---- Map ---- //
 	virtual void Draw3D(  const grinliz::Color3F& colorMult, GPUShader::StencilMode );
@@ -51,7 +52,6 @@ public:
 	// --- Debugging -- //
 	void ShowAdjacentRegions( float x, float y );
 	void ShowRegionPath( float x0, float y0, float x1, float y1 );
-	void ShowVectorPath( float x0, float y0, float x1, float y1 );
 	int NumSubZones() const;
 
 private:
@@ -151,7 +151,6 @@ private:
 	Grid* grid;		// pathing info.
 	U8* zoneInit;	// flag whether this zone is valid.
 	micropather::MicroPather *pather;
-	bool showVectorPath;	// debugging
 
 	MP_VECTOR< void* >				pathRegions;
 	CDynArray< grinliz::Vector2F >	debugPathVector;
