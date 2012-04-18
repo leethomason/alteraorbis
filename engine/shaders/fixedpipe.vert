@@ -14,7 +14,7 @@ uniform mat4 	u_mvpMatrix;		// model-view-projection.
 attribute vec3 a_pos;				// vertex position
 
 #if COLORS == 1
-	attribute vec3 a_color;			// vertex color
+	attribute vec4 a_color;			// vertex color
 #endif
 
 #if TEXTURE0 == 1
@@ -60,7 +60,7 @@ void main() {
 	#endif
 	
 	#if COLORS == 1
-		color *= vec4( a_color.xyz, 1 );
+		color *= a_color;
 	#endif
 
 	#if LIGHTING_DIFFUSE  > 0

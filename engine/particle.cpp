@@ -21,6 +21,7 @@
 #include "surface.h"
 #include "camera.h"
 #include "texture.h"
+#include "shadermanager.h"
 
 using namespace grinliz;
 
@@ -249,6 +250,7 @@ void ParticleSystem::Draw()
 
 	ParticleShader shader;
 	shader.SetTexture0( texture );
+
 	shader.SetStream( stream, vertexBuffer, 6*nParticles, indexBuffer );
 	shader.Draw(); 
 }
