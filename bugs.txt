@@ -1,4 +1,5 @@
-- paritle textures "popping in" on Lama
+
+- paritcle textures "popping in"
 
 - navigation scene
 	- map with pathing
@@ -8,10 +9,16 @@
 X particle test scene
 	X alpha processing for additive blending
 	- particle groups (ex: fire)
-- world rendering scene
-- map rendering scene
+
 - combat test scene
 - chits, components
+
+- feature: Animation
+	- figure out animation needs (standing, walking, sidestep, shooting, etc.)
+	- define skelatal animation export
+	- modify shaders
+	- blend animations
+
 
 x instance scene
 	x shadows

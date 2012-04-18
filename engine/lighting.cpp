@@ -36,15 +36,15 @@ void Lighting::CalcLight( const Vector3F& normal, float shadowAmount, Color3F* l
 	if ( hemispheric ) {
 		float nDotL = DotProduct( normal, direction );
 		for( int i=0; i<3; ++i ) {
-			light->X(i)  = InterpolateUnitX( ambient.X(i), diffuse.X(i), (nDotL+1.f)*0.5f );
-			shadowResult->X(i) = InterpolateUnitX( shadow.X(i), light->X(i), 1.f-shadowAmount ); 
+			light->X(i)  = Lerp( ambient.X(i), diffuse.X(i), (nDotL+1.f)*0.5f );
+			shadowResult->X(i) = Lerp( shadow.X(i), light->X(i), 1.f-shadowAmount ); 
 		}
 	}
 	else {
 		float nDotL = Max( 0.0f, DotProduct( normal, direction ) );
 		for( int i=0; i<3; ++i ) {
 			light->X(i)  = ambient.X(i) + diffuse.X(i)*nDotL;
-			shadowResult->X(i) = InterpolateUnitX( shadow.X(i), light->X(i), 1.f-shadowAmount ); 
+			shadowResult->X(i) = Lerp( shadow.X(i), light->X(i), 1.f-shadowAmount ); 
 		}
 	}
 }
