@@ -402,4 +402,5 @@ class ParticleShader : public GPUShader
 public:
 	ParticleShader();
 };
+
 #endif

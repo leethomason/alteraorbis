@@ -897,8 +897,8 @@ ParticleShader::ParticleShader() : GPUShader()
 {
 	depthWrite = false;
 	depthTest = true;
-	//premult = true;
 	SetShaderFlag( ShaderManager::PREMULT );
 	blend = BLEND_ADD;
+	//blend = BLEND_NORMAL;
 }
 

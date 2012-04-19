@@ -39,8 +39,8 @@
   <model filename="teststructures.ac" modelName="testStruct1"  origin="2 0 0"  shading="flat" polyRemoval="pre" />
 
   <!-- Tactical Sprite models are centered at (0,0,0) -->
-  <model filename="human.ac" modelName="humanFemale" origin="1 0 0" shading="flat" polyRemoval="pre" />
-  <model filename="human.ac" modelName="humanMale"   origin="0 0 0" shading="flat" polyRemoval="pre" />
+  <model filename="human.ac" modelName="humanFemale" origin="1 0 0" shading="crease" polyRemoval="pre" />
+  <model filename="human.ac" modelName="humanMale"   origin="0 0 0" shading="crease" polyRemoval="pre" />
   
   <model filename="chess_characters.ac" modelName="maleMarine"   origin="-1 0 0" shading="flat" polyRemoval="pre" trigger="-1.35 1.00 0.0" eye="1.81" target="1.15"/>
   <model filename="chess_characters.ac" modelName="femaleMarine" origin="-2 0 0" shading="flat" polyRemoval="pre" trigger="-2.25 1.00 0.0" eye="1.75" target="1.25"/>

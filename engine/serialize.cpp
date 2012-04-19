@@ -70,29 +70,40 @@ void ModelGroup::Load( const gamedb::Item* item )
 }
 
 
+void LoadColorBase( const tinyxml2::XMLElement* element, float* r, float* g, float* b, float* a )
+{
+	if ( element->Attribute( "gray" ) ) {
+		float gray = 1.f;
+		element->QueryFloatAttribute( "gray", &gray );
+		if ( r ) *r = gray;
+		if ( g ) *g = gray;
+		if ( b ) *b = gray;
+		if ( a ) *a = 1.0f;
+	}
+	else {
+		if ( r ) element->QueryFloatAttribute( "red", r );
+		if ( g ) element->QueryFloatAttribute( "green", g );
+		if ( b ) element->QueryFloatAttribute( "blue", b );
+	}
+	if ( a ) element->QueryFloatAttribute( "alpha", a );
+}
+
+
 void LoadColor( const tinyxml2::XMLElement* element, grinliz::Color4F* color )
 {
-	element->QueryFloatAttribute( "red", &color->r );
-	element->QueryFloatAttribute( "green", &color->g );
-	element->QueryFloatAttribute( "blue", &color->b );
-	element->QueryFloatAttribute( "alpha", &color->a );
+	LoadColorBase( element, &color->r, &color->g, &color->b, &color->a );
 }
 
 
 void LoadColor( const tinyxml2::XMLElement* element, grinliz::Color3F* color )
 {
-	element->QueryFloatAttribute( "red", &color->r );
-	element->QueryFloatAttribute( "green", &color->g );
-	element->QueryFloatAttribute( "blue", &color->b );
+	LoadColorBase( element, &color->r, &color->g, &color->b, 0 );
 }
 
 
 void LoadColor( const tinyxml2::XMLElement* element, grinliz::Vector4F* color )
 {
-	element->QueryFloatAttribute( "red", &color->x );
-	element->QueryFloatAttribute( "green", &color->y );
-	element->QueryFloatAttribute( "blue", &color->z );
-	element->QueryFloatAttribute( "alpha", &color->w );
+	LoadColorBase( element, &color->x, &color->y, &color->z, &color->w );
 }
 
 

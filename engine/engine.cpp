@@ -40,6 +40,7 @@ using namespace grinliz;
 #define ENGINE_RENDER_MODELS
 #define ENGINE_RENDER_SHADOWS
 #define ENGINE_RENDER_MAP
+//#define ENGINE_DEBUG_GLOW
 
 
 Engine::Engine( Screenport* port, const gamedb::Reader* database ) 
@@ -308,7 +309,11 @@ void Engine::Draw( U32 deltaTime )
 
 		screenport->SetUI();
 
+#ifdef ENGINE_DEBUG_GLOW
+		CompositingShader shader( GPUShader::BLEND_NONE );
+#else
 		CompositingShader shader( GPUShader::BLEND_ADD );
+#endif
 		shader.SetTexture0( renderTarget[RT_BLUR_Y]->GetTexture() );
 		shader.SetColor( lighting.glow.r, lighting.glow.g, lighting.glow.b, 0 );
 		Vector3F p0 = { 0, screenport->UIHeight(), 0 };

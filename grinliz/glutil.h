@@ -106,26 +106,29 @@ template <class A, class B> inline B Interpolate( A x0, B q0, A x1, B q1, A x )
 	return q0 + static_cast<B>( x - x0 ) * ( q1 - q0 ) / static_cast<B>( x1 - x0 );
 }
 
-/// Smooth (hermite) interpolation.
-template< class T > inline T HermiteInterpolate( T x0, T x1, T x )
-{
-	const T k0 = static_cast< T >( 0 );
-	const T k1 = static_cast< T >( 1 );
-	const T k2 = static_cast< T >( 2 );
-	const T k3 = static_cast< T >( 3 );
 
-	T t = Clamp(( x - x0) / (x1 - x0), k0, k1 );
-	return t * t * (k3 - k2 * t);
+// More useful versions of the "HermiteInterpolate" and "InterpolateUnitX"
+inline float Lerp( float x0, float x1, float t )
+{
+	return  x0 + (x1-x0)*t;
 }
 
-/// Template for linear interpolation of points at unit distance.
-template <class T> inline T InterpolateUnitX( T q0, T q1, T x )
-{
-	GLASSERT( x >= (T)0.0 );
-	GLASSERT( x <= (T)1.0 );
 
-	return q0*( static_cast<T>(1.0) - x ) + q1*x;
+// Cubic fade (hermite)
+// Use: Lerp( a, b, Fade3( t ));
+inline float Fade3( float t )
+{
+	return t*t*(3.0f-2.0f*t);
 }
+
+
+// Fade with a 5th order polynomial
+// Use: Lerp( a, b, Fade5( t ));
+inline float Fade5( float t )
+{ 
+	return t*t*t*(t*(t*6.f - 15.f) + 10.f); 
+}
+
 
 /** Template function for linear interpolation between 4 points, at x=0, x=1, y=0, and y=1.
 */
@@ -263,84 +266,6 @@ class Flag
 	T store;
 };	
 
-/*	A strange class: it creates bitmaps used for collision detection. Given
-	an unsigned something, this is a utility class to pack bits...starting
-	with the highest bit.
-*/
-/*
-template < class T >
-class HighBitWriter 
-{
-  public:
-	enum
-	{
-		MAXBIT = ( sizeof(T)*8-1 ),
-		NUMBIT = ( sizeof(T)*8 ),
-		ALLSET = T( -1 )
-	};
-
-	HighBitWriter( T* _data ) : data( _data ), bitPos( MAXBIT )	{}
-
-	void Skip()
-	{
-		if ( bitPos == 0 )
-		{
-			++data;
-			bitPos = MAXBIT;
-		}
-		else
-		{
-			--bitPos;
-		}
-	}
-
-	void Skip_N( unsigned n )
-	{
-		bitPos -= n % NUMBIT;
-		if ( bitPos < 0 )
-		{
-			bitPos += NUMBIT;
-			++data;
-		}
-		data += n / NUMBIT;
-	}
-	
-	void Push_1()	
-	{
-		*data |= ( 1 << bitPos );
-		Skip();
-	}
-
-	void Push_1N( unsigned n )
-	{
-		// Push bits to T boundary
-		while( n && bitPos != MAXBIT )
-		{
-			Push_1();
-			--n;
-		}
-
-		// Write Full T size
-		while( n >= NUMBIT )
-		{
-			*data = ALLSET;
-			++data;
-			n -= NUMBIT;
-		}
-
-		// Write the remainder
-		while ( n )
-		{
-			Push_1();
-			--n;
-		}
-	}
-
-  private:
-	T*	data;
-	int bitPos;
-};
-*/
 
 };	// namespace grinliz
 
