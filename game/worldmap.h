@@ -18,8 +18,8 @@ class Texture;
 	doesn't change after the Init...() is called.) Could be
 	further optimized to use regions.
 */
-class WorldMap : public Map 
-	             //public micropather::Graph
+class WorldMap : public Map, 
+	             public micropather::Graph
 {
 public:
 	WorldMap( int width, int height );
@@ -34,33 +34,55 @@ public:
 
 	bool IsBlockSet( int x, int y ) { return grid[INDEX(x,y)].isBlock != 0; }
 	bool IsLand( int x, int y )		{ return grid[INDEX(x,y)].isLand != 0; }
+	
+	// Call the pather; return true if successful.
+	bool CalcPath(	const grinliz::Vector2F& start, 
+					const grinliz::Vector2F& end, 
+					CDynArray<grinliz::Vector2F> *path );
 
 	// ---- Map ---- //
 	virtual void Draw3D(  const grinliz::Color3F& colorMult, GPUShader::StencilMode );
 
 	// ---- MicroPather ---- //
-//	virtual float LeastCostEstimate( void* stateStart, void* stateEnd );
-//	virtual void AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > *adjacent );
-//	virtual void  PrintStateInfo( void* state );
+	virtual float LeastCostEstimate( void* stateStart, void* stateEnd );
+	virtual void AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > *adjacent );
+	virtual void  PrintStateInfo( void* state );
+
+	// --- Debugging -- //
+	void ShowAdjacentRegions( float x, float y );
+	void ShowRegionPath( float x0, float y0, float x1, float y1 );
+	void ShowVectorPath( float x0, float y0, float x1, float y1 );
+	int NumSubZones() const;
 
 private:
 	int INDEX( int x, int y ) const { 
 		GLASSERT( x >= 0 && x < width ); GLASSERT( y >= 0 && y < height ); 
 		return y*width + x; 
 	}
+	int INDEX( grinliz::Vector2I v ) const { return INDEX( v.x, v.y ); }
+
 	int ZDEX( int x, int y ) const { 
 		GLASSERT( x >= 0 && x < width ); GLASSERT( y >= 0 && y < height );
 		x /= ZONE_SIZE;
 		y /= ZONE_SIZE;
 		return (y*width/ZONE_SIZE) + x; 
 	} 
+
 	void Tessellate();
 	void CalcZone( int x, int y );
-	void CalcZoneRec( int x, int y, int depth );
-	
-	// Debugging
-	void DrawZones();
 
+	// The solver has 3 components:
+	//	Vector path:	the final result, a collection of points that form connected vector
+	//					line segments.
+	//	Grid path:		intermediate; a path checked by a step walk between points on the grid
+	//  Region path:	the micropather computed region
+
+	// Call the region solver. Put the result in the pathVector
+	int Solve( const grinliz::Vector2I& subZoneStart, const grinliz::Vector2I& subZoneEnd );
+	bool GridPath( const grinliz::Vector2F& start, const grinliz::Vector2F& end );
+
+	void DrawZones();			// debugging
+	void ClearDebugDrawing();	// debugging
 
 	enum {
 		TRUE = 1,
@@ -81,7 +103,12 @@ private:
 		U32 sizeX			: 5;
 		U32 sizeY			: 5;
 
-		bool IsPassable()	{ return isLand == TRUE && isBlock == FALSE; }
+		U32 debug_origin	: 1;
+		U32 debug_adjacent	: 1;
+		U32 debug_path		: 1;
+
+		bool IsPassable() const			{ return isLand == TRUE && isBlock == FALSE; }
+		bool IsSubZoneOrigin() const	{ return IsPassable() && deltaXOrigin == 0 && deltaYOrigin == 0; }
 		void SetPathOrigin( int dx, int dy, int sizex, int sizey ) {
 			GLASSERT( dx >= 0 && dx < ZONE_SIZE );
 			GLASSERT( dy >= 0 && dy < ZONE_SIZE );
@@ -96,11 +123,38 @@ private:
 		}
 	};
 
+	// Returns the location of the sub-zone, (-1,-1) for DNE
+	grinliz::Vector2I GetSubZone( int x, int y ) {
+		Grid g = grid[INDEX(x,y)];
+		grinliz::Vector2I v = { -1, -1 };
+		if ( g.IsPassable() ) {
+			v.Set( x-g.deltaXOrigin, y-g.deltaYOrigin );
+		}
+		return v;
+	}
+
+	void* ToState( int x, int y ) {
+		GLASSERT( x >= 0 && x < width && y >= 0 && y < height );
+		GLASSERT( grid[INDEX(x,y)].deltaXOrigin == 0 && grid[INDEX(x,y)].deltaYOrigin == 0 );
+		return reinterpret_cast<void*>( x | (y<<16) );
+	}
+	Grid ToGrid( void* state, int* x, int *y ) {
+		int v32 = reinterpret_cast<int>( state );
+		*x = v32 & 0xffff;
+		*y = (v32 & 0xffff0000)>>16;
+		return grid[INDEX(*x,*y)];
+	}
+
 	bool JointPassable( int x0, int y0, int x1, int y1 );
 	bool RectPassable( int x0, int y0, int x1, int y1 );
 
 	Grid* grid;		// pathing info.
 	U8* zoneInit;	// flag whether this zone is valid.
+	micropather::MicroPather *pather;
+	bool showVectorPath;	// debugging
+
+	MP_VECTOR< void* >				pathRegions;
+	CDynArray< grinliz::Vector2F >	debugPathVector;
 
 	enum {
 		LOWER_TYPES = 2		// land or water

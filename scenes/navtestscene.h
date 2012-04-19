@@ -29,6 +29,8 @@ private:
 					  block,
 					  block20;
 	gamui::TextLabel  textLabel;
+	gamui::ToggleButton showAdjacent, 
+		                showZonePath;
 
 	Engine* engine;
 	WorldMap* map;
