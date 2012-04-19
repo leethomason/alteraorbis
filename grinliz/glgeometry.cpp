@@ -1231,19 +1231,23 @@ float grinliz::PointBetweenPoints( const Vector3F& p0, const Vector3F& p1, const
 
 int grinliz::ClosestPointOnLine( const Vector2F& p1, 
 								 const Vector2F& p2, 
-								 const Vector2F& p3, 
+								 const Vector2F& test, 
 								 Vector2F* intersection, 
 								 bool clampToSegments )
 {
-	float len = (p2-p1).Length();
-	if ( len < EPSILON )
+	Vector2F A = test - p1;
+	Vector2F u = p2 - p1;
+	if ( u.LengthSquared() < EPSILON*EPSILON ) {
 		return REJECT;
-	float u = ( (p3.x-p1.x)*(p2.x-p1.x) + (p3.y-p1.y)*(p2.y-p1.y) ) / (p2-p1).Length();
+	}
 
-	if ( clampToSegments )
-		u = Clamp( u, 0.f, 1.f );
-
-	*intersection = p1 + (p2-p1)*u;
+	u.Normalize();
+	float len = DotProduct( A, u );
+	if ( clampToSegments ) {
+		float maxLen = (p2-p1).Length();
+		len = Clamp( len, 0.f, maxLen );
+	}
+	*intersection = p1 + len*u;
 	return INTERSECT;
 }
 

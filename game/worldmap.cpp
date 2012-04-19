@@ -421,6 +421,8 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 			Vector2F from = start;
 			path->Push( start );
 			okay = true;
+
+			// Walk each of the regions, and connect them with vectors.
 			for( unsigned i=0; i<pathRegions.size()-1; ++i ) {
 				Vector2I vA, vB;
 				Grid gA = ToGrid( pathRegions[i], &vA.x, &vA.y );
@@ -432,7 +434,7 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 				bA.DoIntersection( bB );
 
 				Vector2F v = bA.min;
-				if ( bA.Area() > 0.0f ) {
+				if ( bA.min != bA.max ) {
 					int result = ClosestPointOnLine( bA.min, bA.max, from, &v, true );
 					GLASSERT( result == INTERSECT );
 					if ( result == REJECT ) {
