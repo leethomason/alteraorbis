@@ -2,6 +2,7 @@
 #include "../grinliz/glutil.h"
 #include "../engine/texture.h"
 #include "../engine/ufoutil.h"
+#include "../grinliz/glgeometry.h"
 
 using namespace grinliz;
 
@@ -244,11 +245,11 @@ void WorldMap::CalcZone( int zx, int zy )
 }
 
 
-int WorldMap::NumSubZones() const
+int WorldMap::NumRegions() const
 {
 	int nSubZone = 0;
 	for( int i=0; i<width*height; ++i ) {
-		if ( grid[i].IsSubZoneOrigin() )
+		if ( grid[i].IsRegionOrigin() )
 			++nSubZone;
 	}
 	return nSubZone;
@@ -316,7 +317,7 @@ void WorldMap::AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > *a
 		int y = adj[i].y;
 
 		if ( bounds.Contains( x, y ) ) {
-			Vector2I subV = GetSubZone( x, y );
+			Vector2I subV = GetRegion( x, y );
 			if ( subV.x >= 0 && subV != currentSubZone ) {
 				Grid g = grid[INDEX(subV.x,subV.y)];
 				Vector2F end = { (float)subV.x + (float)g.sizeX * 0.5f,
@@ -340,7 +341,7 @@ void WorldMap::PrintStateInfo( void* state )
 }
 
 
-int WorldMap::Solve( const grinliz::Vector2I& subZoneStart, const grinliz::Vector2I& subZoneEnd )
+int WorldMap::RegionSolve( const grinliz::Vector2I& subZoneStart, const grinliz::Vector2I& subZoneEnd )
 {
 	void* start = ToState( subZoneStart.x, subZoneStart.y );
 	void* end   = ToState( subZoneEnd.x, subZoneEnd.y );
@@ -389,10 +390,61 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 {
 	debugPathVector.Clear();
 	path->Clear();
-	path->Push( start );
-	bool okay = GridPath( start, end );
-	if ( okay ) {
+	bool okay = false;
+
+	Vector2I regionStart = GetRegion( (int)start.x, (int)start.y );
+	Vector2I regionEnd   = GetRegion( (int)end.x,   (int)end.y );
+
+	// Check for bad pathing coordinates.
+	if ( regionStart.x < 0 || regionEnd.x < 0 )
+		return false;
+
+	if ( regionStart == regionEnd ) {
+		okay = true;
+		path->Push( start );
 		path->Push( end );
+	}
+
+	// Try a straight line ray cast
+	if ( !okay ) {
+		okay = GridPath( start, end );
+		if ( okay ) {
+			path->Push( start );
+			path->Push( end );
+		}
+	}
+
+	// Use the region solver.
+	if ( !okay ) {
+		int result = RegionSolve( regionStart, regionEnd );
+		if ( result == micropather::MicroPather::SOLVED ) {
+			Vector2F from = start;
+			path->Push( start );
+			okay = true;
+			for( unsigned i=0; i<pathRegions.size()-1; ++i ) {
+				Vector2I vA, vB;
+				Grid gA = ToGrid( pathRegions[i], &vA.x, &vA.y );
+				Grid gB = ToGrid( pathRegions[i+1], &vB.x, &vB.y );
+
+				Rectangle2F bA, bB;
+				gA.CalcBounds( (float)vA.x, (float)vA.y, &bA );
+				gB.CalcBounds( (float)vB.x, (float)vB.y, &bB );
+				bA.DoIntersection( bB );
+
+				Vector2F v = bA.min;
+				if ( bA.Area() > 0.0f ) {
+					int result = ClosestPointOnLine( bA.min, bA.max, from, &v, true );
+					GLASSERT( result == INTERSECT );
+					if ( result == REJECT ) {
+						okay = false;
+						break;
+					}
+				}
+				path->Push( v );
+				from = v;
+			}
+			path->Push( end );
+		}
 	}
 
 	if ( okay ) {
@@ -423,11 +475,11 @@ void WorldMap::ShowRegionPath( float x0, float y0, float x1, float y1 )
 {
 	ClearDebugDrawing();
 	
-	Vector2I start = GetSubZone( (int)x0, (int)y0 );
-	Vector2I end   = GetSubZone( (int)x1, (int)y1 );
+	Vector2I start = GetRegion( (int)x0, (int)y0 );
+	Vector2I end   = GetRegion( (int)x1, (int)y1 );
 	
 	if ( start.x >= 0 && end.x >= 0 ) {
-		int result = Solve( start, end );
+		int result = RegionSolve( start, end );
 		if ( result == micropather::MicroPather::SOLVED ) {
 			for( unsigned i=0; i<pathRegions.size(); ++i ) {
 				void* vp = pathRegions[i];
@@ -447,7 +499,7 @@ void WorldMap::ShowAdjacentRegions( float _x, float _y )
 	ClearDebugDrawing();
 
 	if ( grid[INDEX(x,y)].IsPassable() ) {
-		Vector2I sub = GetSubZone( x, y );
+		Vector2I sub = GetRegion( x, y );
 		grid[INDEX(sub.x,sub.y)].debug_origin = TRUE;
 
 		MP_VECTOR< micropather::StateCost > adjacent;
@@ -481,7 +533,7 @@ void WorldMap::DrawZones()
 			static const float offset = 0.2f;
 			Grid g = grid[INDEX(i,j)];
 			
-			if ( g.IsSubZoneOrigin() ) {
+			if ( g.IsRegionOrigin() ) {
 				int xSize = g.sizeX;
 				int ySize = g.sizeY;
 

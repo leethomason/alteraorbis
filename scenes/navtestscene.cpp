@@ -106,7 +106,7 @@ void NavTestScene::Tap( int action, const grinliz::Vector2F& view, const grinliz
 			tapMark.y += 0.1f;
 
 			char buf[40];
-			SNPrintf( buf, 40, "xz = %.1f,%.1f nSubZ=%d", tapMark.x, tapMark.z, map->NumSubZones() );
+			SNPrintf( buf, 40, "xz = %.1f,%.1f nSubZ=%d", tapMark.x, tapMark.z, map->NumRegions() );
 			textLabel.SetText( buf );
 
 			if ( showAdjacent.Down() ) {

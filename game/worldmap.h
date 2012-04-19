@@ -52,7 +52,7 @@ public:
 	// --- Debugging -- //
 	void ShowAdjacentRegions( float x, float y );
 	void ShowRegionPath( float x0, float y0, float x1, float y1 );
-	int NumSubZones() const;
+	int NumRegions() const;
 
 private:
 	int INDEX( int x, int y ) const { 
@@ -78,7 +78,7 @@ private:
 	//  Region path:	the micropather computed region
 
 	// Call the region solver. Put the result in the pathVector
-	int Solve( const grinliz::Vector2I& subZoneStart, const grinliz::Vector2I& subZoneEnd );
+	int  RegionSolve( const grinliz::Vector2I& subZoneStart, const grinliz::Vector2I& subZoneEnd );
 	bool GridPath( const grinliz::Vector2F& start, const grinliz::Vector2F& end );
 
 	void DrawZones();			// debugging
@@ -108,7 +108,7 @@ private:
 		U32 debug_path		: 1;
 
 		bool IsPassable() const			{ return isLand == TRUE && isBlock == FALSE; }
-		bool IsSubZoneOrigin() const	{ return IsPassable() && deltaXOrigin == 0 && deltaYOrigin == 0; }
+		bool IsRegionOrigin() const		{ return IsPassable() && deltaXOrigin == 0 && deltaYOrigin == 0; }
 		void SetPathOrigin( int dx, int dy, int sizex, int sizey ) {
 			GLASSERT( dx >= 0 && dx < ZONE_SIZE );
 			GLASSERT( dy >= 0 && dy < ZONE_SIZE );
@@ -121,10 +121,13 @@ private:
 			sizeY = sizey;
 			isPathInit = true;
 		}
+		void CalcBounds( float x, float y, grinliz::Rectangle2F* b ) {
+			b->Set( x, y, x+(float)sizeX, y+(float)sizeY );
+		}
 	};
 
 	// Returns the location of the sub-zone, (-1,-1) for DNE
-	grinliz::Vector2I GetSubZone( int x, int y ) {
+	grinliz::Vector2I GetRegion( int x, int y ) {
 		Grid g = grid[INDEX(x,y)];
 		grinliz::Vector2I v = { -1, -1 };
 		if ( g.IsPassable() ) {

@@ -1229,6 +1229,24 @@ float grinliz::PointBetweenPoints( const Vector3F& p0, const Vector3F& p1, const
 }
 
 
+int grinliz::ClosestPointOnLine( const Vector2F& p1, 
+								 const Vector2F& p2, 
+								 const Vector2F& p3, 
+								 Vector2F* intersection, 
+								 bool clampToSegments )
+{
+	float len = (p2-p1).Length();
+	if ( len < EPSILON )
+		return REJECT;
+	float u = ( (p3.x-p1.x)*(p2.x-p1.x) + (p3.y-p1.y)*(p2.y-p1.y) ) / (p2-p1).Length();
+
+	if ( clampToSegments )
+		u = Clamp( u, 0.f, 1.f );
+
+	*intersection = p1 + (p2-p1)*u;
+	return INTERSECT;
+}
+
 /*
 int grinliz::IntersectionRayAABB(	const Ray& ray,
 									const Rectangle3F& aabb,

@@ -517,6 +517,13 @@ int PointInPolygon( const Vector2F& p, const Vector2F* vertex, int numVertex );
 */
 float PointBetweenPoints( const Vector3F& p0, const Vector3F& p1, const Vector3F& pi );
 
+/** Returns the closest point on a line.
+	The line is defined from p0 and p1.
+	The point is p2.
+	@return REJECT or INTERSECT
+*/
+int ClosestPointOnLine( const Vector2F& p0, const Vector2F& p1, const Vector2F& p2, Vector2F* intersection, bool clampToSegments );
+
 /**
     Intersection of 3 planes is a point. Returns INTERSECT if there is such
 	a point, or REJECT if planes are parallel.
