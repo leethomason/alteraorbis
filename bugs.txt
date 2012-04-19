@@ -1,6 +1,3 @@
-
-X particle textures "popping in" (fix: was incorrectly passing 3 components in the attributes)
-
 - navigation scene
 	X map with pathing
 	- chits & components
@@ -20,6 +17,7 @@ X particle test scene
 	- blend animations
 
 
+X particle textures "popping in" (fix: was incorrectly passing 3 components in the attributes)
 x instance scene
 	x shadows
 	x glow
