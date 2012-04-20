@@ -154,6 +154,12 @@
     <ClCompile Include="..\game\worldmap.cpp">
       <Filter>Source Files\game</Filter>
     </ClCompile>
+    <ClCompile Include="..\xegame\chit.cpp">
+      <Filter>Source Files\xegame</Filter>
+    </ClCompile>
+    <ClCompile Include="..\xegame\chitbag.cpp">
+      <Filter>Source Files\xegame</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\camera.h">
@@ -290,6 +296,21 @@
     </ClInclude>
     <ClInclude Include="..\game\worldmap.h">
       <Filter>Source Files\game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xegame\chit.h">
+      <Filter>Source Files\xegame</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xegame\component.h">
+      <Filter>Source Files\xegame</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xegame\spatialcomponent.h">
+      <Filter>Source Files\xegame</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xegame\rendercomponent.h">
+      <Filter>Source Files\xegame</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xegame\chitbag.h">
+      <Filter>Source Files\xegame</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

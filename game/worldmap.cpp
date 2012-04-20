@@ -362,21 +362,22 @@ bool WorldMap::GridPath( const grinliz::Vector2F& _start, const grinliz::Vector2
 
 	if ( !grid[INDEX(start)].IsPassable() )
 		return false;
-	Vector2I current = start;
 
 	LineWalk line( start.x, start.y, end.x, end.y );
 	while ( line.CurrentStep() <= line.NumSteps() ) {
 
-		if ( !grid[INDEX(line.X(),line.Y())].IsPassable() )
+		Vector2I p = line.P();
+		Vector2I q = line.Q();
+
+		if ( !grid[INDEX(q.x,q.y)].IsPassable() )
 			return false;
-		if ( line.X() != current.x && line.Y() != current.y ) {
+		if ( q.x != p.x && q.y != p.y ) {
 			// diagonal has to pass in both ways.
-			if ( !grid[INDEX(line.X(), current.y)].IsPassable() )
+			if ( !grid[INDEX(p.x,q.y)].IsPassable() )
 				return false;
-			if ( !grid[INDEX(current.x, line.Y())].IsPassable() )
+			if ( !grid[INDEX(p.y,q.x)].IsPassable() )
 				return false;
 		}
-		current.Set( line.X(), line.Y() );
 		line.Step(); 
 	}
 	return true;

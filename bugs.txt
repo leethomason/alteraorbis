@@ -3,6 +3,8 @@
 	- chits & components
 	- ground flocking motion
 
+- move particle system to engine
+
 X particle test scene
 	X alpha processing for additive blending
 	- particle groups (ex: fire)

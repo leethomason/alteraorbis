@@ -112,6 +112,8 @@
     <ClCompile Include="..\win32\glew.c" />
     <ClCompile Include="..\win32\main.cpp" />
     <ClCompile Include="..\xegame\cgame.cpp" />
+    <ClCompile Include="..\xegame\chit.cpp" />
+    <ClCompile Include="..\xegame\chitbag.cpp" />
     <ClCompile Include="..\xegame\game.cpp" />
     <ClCompile Include="..\xegame\scene.cpp" />
     <ClCompile Include="..\xegame\testmap.cpp" />
@@ -159,8 +161,13 @@
     <ClInclude Include="..\win32\glew.h" />
     <ClInclude Include="..\win32\wglew.h" />
     <ClInclude Include="..\xegame\cgame.h" />
+    <ClInclude Include="..\xegame\chit.h" />
+    <ClInclude Include="..\xegame\chitbag.h" />
+    <ClInclude Include="..\xegame\component.h" />
     <ClInclude Include="..\xegame\game.h" />
+    <ClInclude Include="..\xegame\rendercomponent.h" />
     <ClInclude Include="..\xegame\scene.h" />
+    <ClInclude Include="..\xegame\spatialcomponent.h" />
     <ClInclude Include="..\xegame\testmap.h" />
     <ClInclude Include="..\xegame\ufosound.h" />
   </ItemGroup>
