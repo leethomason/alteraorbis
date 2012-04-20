@@ -1,6 +1,9 @@
 #include "chitbag.h"
 #include "chit.h"
 
+#include "spatialcomponent.h"
+#include "rendercomponent.h"
+
 ChitBag::ChitBag()
 {
 }
@@ -8,8 +11,15 @@ ChitBag::ChitBag()
 
 ChitBag::~ChitBag()
 {
+	DeleteAll();
+}
+
+
+void ChitBag::DeleteAll()
+{
 	for( int i=0; i<chits.Size(); ++i ) {
 		delete chits[i];
+		chits[i] = 0;
 	}
 }
 
@@ -41,4 +51,15 @@ void ChitBag::DoTick( U32 delta )
 			chits[i]->DoTick( delta );
 		}
 	}
+}
+
+
+
+Chit* ChitBag::CreateTestChit( Engine* engine, const char* assetName )
+{
+	Chit* chit = new Chit();
+	chit->Add( new SpatialComponent() );
+	chit->Add( new RenderComponent( engine, assetName ) );
+	this->AddChit( chit );
+	return chit;
 }

@@ -1,12 +1,17 @@
 #include "navtestscene.h"
-#include "../game/lumosgame.h"
-#include "../engine/engine.h"
-#include "../game/worldmap.h"
+
 #include "../grinliz/glgeometry.h"
+
+#include "../engine/engine.h"
 #include "../engine/ufoutil.h"
+
+#include "../game/lumosgame.h"
+#include "../game/worldmap.h"
+
 
 using namespace grinliz;
 using namespace gamui;
+
 
 // Draw calls as a proxy for world subdivision:
 // 20+20 blocks:
@@ -50,11 +55,14 @@ NavTestScene::NavTestScene( LumosGame* game ) : Scene( game )
 	engine->SetMap( map );
 	engine->CameraLookAt( 10, 10, 40 );
 	tapMark.Zero();
+
+	Chit* chit = chitBag.CreateTestChit( engine, "humanFemale" );
 }
 
 
 NavTestScene::~NavTestScene()
 {
+	chitBag.DeleteAll();
 	engine->SetMap( 0 );
 	delete map;
 	delete engine;

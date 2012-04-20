@@ -160,6 +160,9 @@
     <ClCompile Include="..\xegame\chitbag.cpp">
       <Filter>Source Files\xegame</Filter>
     </ClCompile>
+    <ClCompile Include="..\xegame\rendercomponent.cpp">
+      <Filter>Source Files\xegame</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\camera.h">

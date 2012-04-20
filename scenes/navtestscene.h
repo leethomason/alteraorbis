@@ -3,6 +3,7 @@
 
 #include "../xegame/scene.h"
 #include "../grinliz/glrandom.h"
+#include "../xegame/chitbag.h"
 
 class LumosGame;
 class Engine;
@@ -36,6 +37,8 @@ private:
 	WorldMap* map;
 	grinliz::Random random;
 	grinliz::Vector3F tapMark;
+
+	ChitBag chitBag;
 };
 
 

@@ -3,12 +3,25 @@
 
 #include "component.h"
 
+class Engine;
+class ModelResource;
+class Model;
+
 class RenderComponent : public Component
 {
 public:
-	RenderComponent();
+	RenderComponent( Engine* engine, const char* asset );	// spacetree probably  sufficient, but 'engine' easier to keep track of
 	virtual ~RenderComponent();
 
+	virtual RenderComponent*	ToRender()		{ return this; }
+
+	virtual void OnAdd( Chit* chit );
+	virtual void OnRemove();
+
+private:
+	Engine* engine;
+	const ModelResource* resource;
+	Model* model;
 };
 
 #endif // RENDER_COMPONENT_INCLUDED

@@ -4,6 +4,7 @@
 	- ground flocking motion
 
 - move particle system to engine
+- memory pool everything in the chit/component system
 
 X particle test scene
 	X alpha processing for additive blending

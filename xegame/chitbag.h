@@ -6,6 +6,7 @@
 #include "../engine/ufoutil.h"
 
 class Chit;
+class Engine;
 
 
 class ChitBag
@@ -13,11 +14,14 @@ class ChitBag
 public:
 	ChitBag();
 	~ChitBag();
+	void DeleteAll();
 
 	void AddChit( Chit* );
 	void RemoveChit( Chit* );
 
 	void DoTick( U32 delta );
+
+	Chit* CreateTestChit( Engine* engine, const char* assetName );
 
 private:
 	CDynArray<Chit*> chits;
