@@ -1,6 +1,7 @@
 - navigation scene
 	X map with pathing
-	- chits & components
+	X chits & components
+	- debugging components for showing collision/vectors
 	- ground flocking motion
 
 - move particle system to engine

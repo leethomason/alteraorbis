@@ -5,6 +5,8 @@
 #include "../grinliz/gltypes.h"
 #include "../grinliz/gldebug.h"
 
+#include "../SimpleLib/SimpleLib.h"
+
 class Component;
 class SpatialComponent;
 class RenderComponent;
@@ -17,6 +19,8 @@ class ChitBag;
 class Chit
 {
 public:
+	Simple::CChain<Chit> m_Chain;
+
 	Chit();
 	~Chit();
 

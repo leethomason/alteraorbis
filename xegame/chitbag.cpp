@@ -20,7 +20,7 @@ ChitBag::~ChitBag()
 
 void ChitBag::DeleteAll()
 {
-	chits.RemoveAll();	// calls delete
+	chits.RemoveAll();	// calles delete, since the list is set with "owned"
 }
 
 
@@ -33,7 +33,6 @@ void ChitBag::AddChit( Chit* chit )
 
 void ChitBag::RemoveChit( Chit* chit ) 
 {
-	GLASSERT( chits.Find( chit ) >= 0 );
 	chits.Detach( chit );
 	chit->OnRemove();
 }
