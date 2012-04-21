@@ -4,8 +4,11 @@
 #include "spatialcomponent.h"
 #include "rendercomponent.h"
 
+using namespace Simple;
+
 ChitBag::ChitBag()
 {
+	updateList.Resort( 0, false );	// no dupes - turn into a set.
 }
 
 
@@ -17,40 +20,43 @@ ChitBag::~ChitBag()
 
 void ChitBag::DeleteAll()
 {
-	for( int i=0; i<chits.Size(); ++i ) {
-		delete chits[i];
-		chits[i] = 0;
-	}
+	chits.RemoveAll();	// calls delete
 }
 
 
 void ChitBag::AddChit( Chit* chit )
 {
 	chits.Push( chit );
+	chit->OnAdd( this );
 }
 
 
 void ChitBag::RemoveChit( Chit* chit ) 
 {
-	// FIXME: not efficient, but not clear this is a needed function.
-	for( int i=0; i<chits.Size(); ++i ) {
-		if ( chits[i] == chit ) {
-			chits.SwapRemove( i );
-			return;
-		}
-	}
-	GLASSERT( 0 );
+	GLASSERT( chits.Find( chit ) >= 0 );
+	chits.Detach( chit );
+	chit->OnRemove();
+}
+
+
+void ChitBag::RequestUpdate( Chit* chit )
+{
+	updateList.Add( chit );
 }
 
 
 void ChitBag::DoTick( U32 delta )
 {
-	for( int i=0; i<chits.Size(); ++i ) {
+	for( int i=0; i<chits.GetSize(); ++i ) {
 		// FIXME break into 2 lists
 		if ( chits[i]->NeedsTick() ) {
 			chits[i]->DoTick( delta );
 		}
 	}
+	for( int i=0; i<updateList.GetSize(); ++i ) {
+		updateList[i]->DoUpdate();
+	}
+	updateList.RemoveAll();
 }
 
 

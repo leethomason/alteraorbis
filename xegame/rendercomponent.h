@@ -18,6 +18,8 @@ public:
 	virtual void OnAdd( Chit* chit );
 	virtual void OnRemove();
 
+	virtual void DoUpdate();
+
 private:
 	Engine* engine;
 	const ModelResource* resource;

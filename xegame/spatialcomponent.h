@@ -11,7 +11,10 @@ public:
 		position.Zero();
 	}
 
-	virtual SpatialComponent*	ToSpatial()		{ return this; }
+	virtual SpatialComponent*	ToSpatial()			{ return this; }
+
+	void SetPosition( float x, float y, float z )	{ position.Set( x, y, z ); RequestUpdate(); }
+	const grinliz::Vector3F& GetPosition()			{ return position; }
 
 private:
 	grinliz::Vector3F position;

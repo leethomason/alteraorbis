@@ -5,6 +5,9 @@
 #include "../engine/engine.h"
 #include "../engine/ufoutil.h"
 
+#include "../xegame/chit.h"
+#include "../xegame/spatialcomponent.h"
+
 #include "../game/lumosgame.h"
 #include "../game/worldmap.h"
 
@@ -57,6 +60,7 @@ NavTestScene::NavTestScene( LumosGame* game ) : Scene( game )
 	tapMark.Zero();
 
 	Chit* chit = chitBag.CreateTestChit( engine, "humanFemale" );
+	chit->GetSpatialComponent()->SetPosition( 10.0f, 0.0f, 10.0f );
 }
 
 
@@ -155,6 +159,12 @@ void NavTestScene::ItemTapped( const gamui::UIItem* item )
 			--makeBlocks;
 		}
 	}
+}
+
+
+void NavTestScene::DoTick( U32 deltaTime )
+{
+	chitBag.DoTick( deltaTime );
 }
 
 

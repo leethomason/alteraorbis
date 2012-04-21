@@ -114,6 +114,7 @@
     <ClCompile Include="..\xegame\cgame.cpp" />
     <ClCompile Include="..\xegame\chit.cpp" />
     <ClCompile Include="..\xegame\chitbag.cpp" />
+    <ClCompile Include="..\xegame\component.cpp" />
     <ClCompile Include="..\xegame\game.cpp" />
     <ClCompile Include="..\xegame\rendercomponent.cpp" />
     <ClCompile Include="..\xegame\scene.cpp" />

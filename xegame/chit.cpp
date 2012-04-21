@@ -1,10 +1,11 @@
 #include "chit.h"
+#include "chitbag.h"
 #include "component.h"
 #include "spatialcomponent.h"
 #include "rendercomponent.h"
 
 
-Chit::Chit() :	nTickers( 0 )
+Chit::Chit() :	chitBag( 0 ), nTickers( 0 )
 {
 	for( int i=0; i<NUM_SLOTS; ++i ) {
 		slot[i] = 0;
@@ -57,13 +58,33 @@ void Chit::Remove( Component* c )
 }
 
 
+void Chit::RequestUpdate()
+{
+	if ( chitBag ) {
+		chitBag->RequestUpdate( this );
+	}
+}
+
+
+
 void Chit::DoTick( U32 delta )
 {
 	GLASSERT( NeedsTick() );
 	for( int i=0; i<NUM_SLOTS; ++i ) {
-		slot[i]->DoTick( delta );
+		if ( slot[i] ) 
+			slot[i]->DoTick( delta );
 	}
 }
+
+
+void Chit::DoUpdate()
+{
+	for( int i=0; i<NUM_SLOTS; ++i ) {
+		if ( slot[i] ) 
+			slot[i]->DoUpdate();
+	}
+}
+
 
 
 

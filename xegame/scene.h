@@ -90,7 +90,6 @@ public:
 	};
 	virtual int RenderPass( grinliz::Rectangle2I* clip3D, grinliz::Rectangle2I* clip2D ) = 0;
 
-	// Generally call the Engine.Draw()
 	virtual void DoTick( U32 deltaTime )						{}
 	virtual void Draw3D( U32 deltaTime )						{}
 

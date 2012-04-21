@@ -12,8 +12,8 @@ class Chit;
 class Component
 {
 public:
-	virtual void OnAdd( Chit* chit )	{}
-	virtual void OnRemove()				{}
+	virtual void OnAdd( Chit* chit )	{	parentChit = chit; }
+	virtual void OnRemove()				{	parentChit = 0;    }
 
 	virtual SpatialComponent*	ToSpatial()		{ return 0; }
 	virtual RenderComponent*	ToRender()		{ return 0; }
@@ -22,7 +22,11 @@ public:
 
 	// Tick is a regular call; update because of events/change.
 	virtual void DoTick( U32 delta )			{}
-	virtual void Update()						{}
+	virtual void DoUpdate()						{}
+
+protected:
+	void RequestUpdate();
+	Chit* parentChit;
 };
 
 
