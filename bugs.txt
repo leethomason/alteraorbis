@@ -5,6 +5,7 @@
 
 - move particle system to engine
 - memory pool everything in the chit/component system
+- rotation: in spatial component? Matrix or Quat?
 
 X particle test scene
 	X alpha processing for additive blending

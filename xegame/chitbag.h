@@ -30,8 +30,8 @@ public:
 	Chit* CreateTestChit( Engine* engine, const char* assetName );
 
 private:
-	Simple::CVector<Chit*, Simple::SOwnedPtr> chits;
-	Simple::CSortedVector<Chit* > updateList;
+	Simple::CVector<Chit*, Simple::SOwnedPtr> chits;	// list of owned chit pointers.
+	Simple::CSortedVector<Chit*> updateList;			// <set> of chits that need the Update() called.
 };
 
 
