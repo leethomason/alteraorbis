@@ -10,6 +10,8 @@
 class Component;
 class SpatialComponent;
 class RenderComponent;
+class MoveComponent;
+
 class ChitBag;
 
 /* General purpose GameObject.
@@ -34,8 +36,9 @@ public:
 	void DoTick( U32 delta );
 	void DoUpdate();
 
-	SpatialComponent*  GetSpatialComponent()	{ return spatialComponent; }
-	RenderComponent*   GetRenderComponent()		{ return renderComponent; }
+	SpatialComponent*	GetSpatialComponent()	{ return spatialComponent; }
+	MoveComponent*		GetMoveComponent()		{ return moveComponent; }
+	RenderComponent*	GetRenderComponent()	{ return renderComponent; }
 
 	void RequestUpdate();
 
@@ -46,6 +49,7 @@ private:
 
 	enum {
 		SPATIAL,
+		MOVE,
 		RENDER,
 		NUM_SLOTS
 	};
@@ -54,6 +58,7 @@ private:
 		// Update ordering is tricky. Defined by the order of the slots;
 		struct {
 			SpatialComponent*	spatialComponent;
+			MoveComponent*		moveComponent;
 			RenderComponent*	renderComponent;		// should be last
 		};
 		Component*			slot[NUM_SLOTS];

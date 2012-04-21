@@ -7,6 +7,7 @@
 // The primary components:
 class SpatialComponent;
 class RenderComponent;
+class MoveComponent;
 class Chit;
 
 class Component
@@ -16,6 +17,7 @@ public:
 	virtual void OnRemove()				{	parentChit = 0;    }
 
 	virtual SpatialComponent*	ToSpatial()		{ return 0; }
+	virtual MoveComponent*		ToMove()		{ return 0; }
 	virtual RenderComponent*	ToRender()		{ return 0; }
 
 	virtual bool NeedsTick()					{ return false; }
@@ -27,6 +29,14 @@ public:
 protected:
 	void RequestUpdate();
 	Chit* parentChit;
+};
+
+
+// Abstract at the XenoEngine level.
+class MoveComponent : public Component
+{
+public:
+	virtual MoveComponent*		ToMove()		{ return this; }
 };
 
 
