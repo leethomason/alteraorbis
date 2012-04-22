@@ -166,6 +166,9 @@
     <ClCompile Include="..\xegame\component.cpp">
       <Filter>Source Files\xegame</Filter>
     </ClCompile>
+    <ClCompile Include="..\scenes\noisetestscene.cpp">
+      <Filter>Source Files\scenes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\camera.h">
@@ -318,13 +321,13 @@
     <ClInclude Include="..\xegame\chitbag.h">
       <Filter>Source Files\xegame</Filter>
     </ClInclude>
+    <ClInclude Include="..\scenes\noisetestscene.h">
+      <Filter>Source Files\scenes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\engine\sources.mk">
       <Filter>Source Files\engine</Filter>
-    </None>
-    <None Include="..\xegame\sources.mk">
-      <Filter>Source Files\xegame</Filter>
     </None>
     <None Include="..\particles.xml">
       <Filter>Source Files\game</Filter>

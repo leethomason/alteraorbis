@@ -7,9 +7,10 @@
 
   <!-- Model textures -->
   <texture filename="palette.png" />
-  <texture filename="charSwatch.png" width="128" height="8" />
+  <texture filename="charSwatch.png" width="128" height="8" /> 
   <texture filename="characters.png" />
   <texture filename="treetextures.png" />
+  <texture filename="debugging.png" />
   <!-- note this makes textures and materials the same thing, to have the emissive
        behavior defined like this. That's okay for now.
   -->
@@ -29,11 +30,6 @@
     <texture filename="testsquare.png" />
     <texture filename="testwrap.png" />
   </atlas>
-  <!--  
-  <texture filename="testgradient.png" />
-  <texture filename="testsquare.png" />
-  <texture filename="testwrap.png" />
-  -->
 
   <model filename="teststructures.ac" modelName="testStruct0"  origin="0 0 0"  shading="flat" polyRemoval="pre" />
   <model filename="teststructures.ac" modelName="testStruct1"  origin="2 0 0"  shading="flat" polyRemoval="pre" />

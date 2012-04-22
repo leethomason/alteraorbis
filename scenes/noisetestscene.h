@@ -1,5 +1,5 @@
-#ifndef TITLESCENE_INCLUDED
-#define TITLESCENE_INCLUDED
+#ifndef NOISETEST_SCENE_INCLUDED
+#define NOISETEST_SCENE_INCLUDED
 
 #include "../xegame/scene.h"
 #include "../gamui/gamui.h"
@@ -7,11 +7,11 @@
 class LumosGame;
 
 
-class TitleScene : public Scene
+class NoiseTestScene : public Scene
 {
 public:
-	TitleScene( LumosGame* game );
-	virtual ~TitleScene() {}
+	NoiseTestScene( LumosGame* game );
+	virtual ~NoiseTestScene() {}
 
 	virtual int RenderPass( grinliz::Rectangle2I* clip3D, grinliz::Rectangle2I* clip2D )
 	{
@@ -26,20 +26,7 @@ public:
 	virtual void ItemTapped( const gamui::UIItem* item );
 
 private:
-	LumosGame* lumosGame;
-	gamui::TextLabel	label;
-	gamui::Image		background;
-
-	enum { 
-		TEST_DIALOG,
-		TEST_RENDER_0,
-		TEST_RENDER_1,
-		TEST_PARTICLE,
-		TEST_NAV,
-		TEST_NOISE,
-		NUM_TESTS
-	};
-	gamui::PushButton	testScene[NUM_TESTS];
+	gamui::PushButton okay;
 };
 
-#endif // TITLESCENE_INCLUDED
+#endif // NOISETEST_SCENE_INCLUDED

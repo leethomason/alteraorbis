@@ -4,7 +4,6 @@
 	- debugging components for showing collision/vectors
 	- ground flocking motion
 
-- move particle system to engine
 - memory pool everything in the chit/component system
 - rotation: in spatial component? Matrix or Quat?
 
@@ -22,6 +21,7 @@ X particle test scene
 	- blend animations
 
 
+X move particle system to engine
 X particle textures "popping in" (fix: was incorrectly passing 3 components in the attributes)
 x instance scene
 	x shadows
