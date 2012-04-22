@@ -25,7 +25,7 @@
 
 using namespace grinliz;
 
-
+#if 0
 /*static*/ void ParticleSystem::Create()
 {
 	GLASSERT( instance == 0 );
@@ -42,7 +42,7 @@ using namespace grinliz;
 
 
 ParticleSystem* ParticleSystem::instance = 0;
-
+#endif
 
 ParticleSystem::ParticleSystem() : texture( 0 ), time( 0 ), nParticles( 0 )
 {

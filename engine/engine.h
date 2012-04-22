@@ -33,6 +33,7 @@
 
 class RenderQueue;
 class RenderTarget;
+class ParticleSystem;
 
 /*
 	Standard state:
@@ -64,8 +65,9 @@ public:
 	Engine( Screenport* screenport, const gamedb::Reader* database );
 	virtual ~Engine();
 
-	Camera	 camera;
-	Lighting lighting;
+	Camera			camera;
+	Lighting		lighting;
+	ParticleSystem*	particleSystem;
 
 	// Send everything to the GPU
 	void Draw( U32 deltaTime );
