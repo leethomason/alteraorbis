@@ -57,11 +57,12 @@ public:
 	void Upload( const Surface& surface );
 	bool Empty() const			{ return creator == 0 && item == 0 && gpuMem == 0 && name.empty(); }
 
+	int BytesInImage() const	{ return w*h*BytesPerPixel(); }
+	int BytesPerPixel() const	{ return (format == ALPHA) ? 1 : 2; }
+
 	U32 GLID();
 
 private:
-	int BytesInImage() const	{ return w*h*BytesPerPixel(); }
-	int BytesPerPixel() const	{ return (format == ALPHA) ? 1 : 2; }
 	void Set( const char* name, int w, int h, int format, int flags );
 
 	grinliz::CStr< MAX_TEXTURE_NAME > name;

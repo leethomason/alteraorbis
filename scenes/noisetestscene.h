@@ -3,11 +3,13 @@
 
 #include "../xegame/scene.h"
 #include "../gamui/gamui.h"
+#include "../grinliz/glrandom.h"
+#include "../engine/texture.h"
 
 class LumosGame;
 
 
-class NoiseTestScene : public Scene
+class NoiseTestScene : public Scene, public ITextureCreator
 {
 public:
 	NoiseTestScene( LumosGame* game );
@@ -25,8 +27,15 @@ public:
 	}
 	virtual void ItemTapped( const gamui::UIItem* item );
 
+	void CreateTexture( Texture* t );
+
 private:
 	gamui::PushButton okay;
+	gamui::Image noiseImage;
+
+	enum { SIZE = 128 };
+	U16 buffer[SIZE*SIZE];
+	grinliz::Random random;
 };
 
 #endif // NOISETEST_SCENE_INCLUDED

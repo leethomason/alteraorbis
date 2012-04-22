@@ -129,7 +129,7 @@ public:
 	const gamui::ButtonLook& GetButtonLook( int id );
 */
 	// For creating some required textures:
-	virtual void CreateTexture( Texture* t ) = 0;
+	virtual void CreateTexture( Texture* t );
 
 	struct Palette
 	{

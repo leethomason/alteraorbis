@@ -83,7 +83,13 @@ void TextureManager::Reload()
 bool TextureManager::IsTexture( const char* name )
 {
 	const gamedb::Item* item = database->Root()->Child( "textures" )->Child( name );
-	return item != 0;
+	if ( item != 0 )
+		return true;
+	Texture* t = 0;
+	map.Query( name, &t );
+	if ( t )
+		return true;
+	return false;
 }
 
 
