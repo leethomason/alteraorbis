@@ -38,6 +38,7 @@ private:
 	WorldMap* map;
 	grinliz::Random random;
 	grinliz::Vector3F tapMark;
+	Chit* chit;
 
 	ChitBag chitBag;
 };

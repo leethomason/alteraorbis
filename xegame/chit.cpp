@@ -4,8 +4,11 @@
 #include "spatialcomponent.h"
 #include "rendercomponent.h"
 
+#include "../grinliz/glstringutil.h"
 
-Chit::Chit() :	chitBag( 0 ), nTickers( 0 )
+using namespace grinliz;
+
+Chit::Chit( int _id, ChitBag* bag ) :	chitBag( bag ), id( _id ), nTickers( 0 )
 {
 	for( int i=0; i<NUM_SLOTS; ++i ) {
 		slot[i] = 0;
@@ -31,14 +34,30 @@ void Chit::Add( Component* c )
 		slot[SPATIAL] = c;
 		GLASSERT( spatialComponent == c );
 	}
-	if ( c->ToRender() ) {
+	else if ( c->ToRender() ) {
 		GLASSERT( !slot[RENDER] );
 		slot[RENDER] = c;
 		GLASSERT( renderComponent == c );
 	}
+	else if ( c->ToMove() ) {
+		GLASSERT( !slot[MOVE] );
+		slot[MOVE] = c;
+		GLASSERT( moveComponent == c );
+	}
+	else {
+		int i;
+		for( i=GENERAL; i<NUM_SLOTS; ++i ) {
+			if ( slot[i] == 0 ) {
+				slot[i] = c;
+				break;
+			}
+		}
+		GLASSERT( i < NUM_SLOTS );
+	}
 	c->OnAdd( this );
-	if ( c->NeedsTick() )
+	if ( c->NeedsTick() ) {
 		++nTickers;
+	}
 }
 
 
@@ -55,6 +74,17 @@ void Chit::Remove( Component* c )
 		}
 	}
 	GLASSERT( 0 );	// not found
+}
+
+
+Component* Chit::GetComponent( const char* name )
+{
+	for( int i=0; i<NUM_SLOTS; ++i ) {
+		if ( slot[i] && StrEqual( name, slot[i]->Name() ) ) {
+			return slot[i];
+		}
+	}
+	return 0;
 }
 
 

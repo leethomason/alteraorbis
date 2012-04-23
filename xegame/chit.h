@@ -21,14 +21,12 @@ class ChitBag;
 class Chit
 {
 public:
-	Simple::CChain<Chit> m_Chain;
-
-	Chit();
+	// Should always use Create from ChitBag
+	Chit( int id, ChitBag* chitBag );
+	// Should always use Delete from ChitBag
 	~Chit();
 
-	void OnAdd( ChitBag* c )	{ GLASSERT( chitBag == 0 ); chitBag = c; }
-	void OnRemove()				{ GLASSERT( chitBag ); chitBag = 0; }
-
+	int ID() const { return id; }
 	void Add( Component* );
 	void Remove( Component* );
 
@@ -39,19 +37,22 @@ public:
 	SpatialComponent*	GetSpatialComponent()	{ return spatialComponent; }
 	MoveComponent*		GetMoveComponent()		{ return moveComponent; }
 	RenderComponent*	GetRenderComponent()	{ return renderComponent; }
+	Component*			GetComponent( const char* name );
 
 	void RequestUpdate();
 
 private:
 
 	ChitBag* chitBag;
+	int id;
 	int nTickers;	// number of components that need a tick.
 
 	enum {
 		SPATIAL,
 		MOVE,
 		RENDER,
-		NUM_SLOTS
+		GENERAL,
+		NUM_SLOTS = GENERAL+4
 	};
 
 	union {

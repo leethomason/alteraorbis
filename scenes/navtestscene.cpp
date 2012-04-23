@@ -10,6 +10,7 @@
 
 #include "../game/lumosgame.h"
 #include "../game/worldmap.h"
+#include "../game/pathmovecomponent.h"
 
 
 using namespace grinliz;
@@ -59,7 +60,7 @@ NavTestScene::NavTestScene( LumosGame* game ) : Scene( game )
 	engine->CameraLookAt( 10, 10, 40 );
 	tapMark.Zero();
 
-	Chit* chit = chitBag.CreateTestChit( engine, "humanFemale" );
+	chit = chitBag.CreateTestChit( engine, "humanFemale" );
 	chit->GetSpatialComponent()->SetPosition( 10.0f, 0.0f, 10.0f );
 }
 
@@ -131,6 +132,11 @@ void NavTestScene::Tap( int action, const grinliz::Vector2F& view, const grinliz
 				::CDynArray< Vector2F > path;
 				map->CalcPath( start, end, &path, true );
 			}
+
+			Vector2F d = { tapMark.x, tapMark.z };
+			PathMoveComponent* pmc = static_cast<PathMoveComponent*>( chit->GetComponent( "PathMoveComponent" ) );
+			GLASSERT( pmc );
+			pmc->SetDest( d );
 		}
 	}
 }

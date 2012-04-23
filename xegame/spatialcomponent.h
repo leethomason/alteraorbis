@@ -11,6 +11,8 @@ public:
 		position.Zero();
 	}
 
+	const char* Name() const { return "SpatialComponent"; }
+
 	virtual SpatialComponent*	ToSpatial()			{ return this; }
 
 	void SetPosition( float x, float y, float z )	{ position.Set( x, y, z ); RequestUpdate(); }

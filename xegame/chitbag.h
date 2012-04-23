@@ -17,8 +17,8 @@ public:
 	~ChitBag();
 
 	void DeleteAll();
-	void AddChit( Chit* );
-	void RemoveChit( Chit* );
+	Chit* CreateChit();
+	void DeleteChit( Chit* );
 
 	// Calls every chit that has a tick.
 	void DoTick( U32 delta );		
@@ -30,8 +30,11 @@ public:
 	Chit* CreateTestChit( Engine* engine, const char* assetName );
 
 private:
-	Simple::CLinkedList<Chit, Simple::SOwnedPtr> chits;	// list of owned chit pointers.
-	Simple::CSortedVector<Chit*> updateList;				// <set> of chits that need the Update() called.
+	int idPool;
+	Simple::CIndex< int, Chit*, 
+					Simple::SValue, Simple::SOwnedPtr> chits;	// Owned chit pointers. Note that CIndex 
+																// supports fast iteration, which is critical.
+	Simple::CSortedVector<Chit*> updateList;		// <set> of chits that need the Update() called.
 };
 
 

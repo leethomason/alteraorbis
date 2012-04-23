@@ -13,6 +13,8 @@ class Chit;
 class Component
 {
 public:
+	virtual const char* Name() const = 0;
+
 	virtual void OnAdd( Chit* chit )	{	parentChit = chit; }
 	virtual void OnRemove()				{	parentChit = 0;    }
 
@@ -20,6 +22,7 @@ public:
 	virtual MoveComponent*		ToMove()		{ return 0; }
 	virtual RenderComponent*	ToRender()		{ return 0; }
 
+	// fixme: switch to a request/release model?
 	virtual bool NeedsTick()					{ return false; }
 
 	// Tick is a regular call; update because of events/change.

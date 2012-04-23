@@ -24,17 +24,18 @@ void ChitBag::DeleteAll()
 }
 
 
-void ChitBag::AddChit( Chit* chit )
+Chit* ChitBag::CreateChit()
 {
-	chits.Push( chit );
-	chit->OnAdd( this );
+	Chit* chit = new Chit( ++idPool, this );
+	chits.Add( chit->ID(), chit );
+	return chit;
 }
 
 
-void ChitBag::RemoveChit( Chit* chit ) 
+void ChitBag::DeleteChit( Chit* chit ) 
 {
-	chits.Detach( chit );
-	chit->OnRemove();
+	GLASSERT( chits.Find( chit->ID(), chit ));
+	chits.Remove( chit->ID() );
 }
 
 
@@ -47,9 +48,9 @@ void ChitBag::RequestUpdate( Chit* chit )
 void ChitBag::DoTick( U32 delta )
 {
 	for( int i=0; i<chits.GetSize(); ++i ) {
-		// FIXME break into 2 lists
-		if ( chits[i]->NeedsTick() ) {
-			chits[i]->DoTick( delta );
+		Chit* c = chits[i].Value;
+		if ( c->NeedsTick() ) {
+			c->DoTick( delta );
 		}
 	}
 	for( int i=0; i<updateList.GetSize(); ++i ) {
@@ -62,9 +63,8 @@ void ChitBag::DoTick( U32 delta )
 
 Chit* ChitBag::CreateTestChit( Engine* engine, const char* assetName )
 {
-	Chit* chit = new Chit();
+	Chit* chit = CreateChit();
 	chit->Add( new SpatialComponent() );
 	chit->Add( new RenderComponent( engine, assetName ) );
-	this->AddChit( chit );
 	return chit;
 }

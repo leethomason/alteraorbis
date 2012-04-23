@@ -13,6 +13,8 @@ public:
 	RenderComponent( Engine* engine, const char* asset );	// spacetree probably  sufficient, but 'engine' easier to keep track of
 	virtual ~RenderComponent();
 
+	virtual const char* Name() const { return "RenderComponent"; };
+
 	virtual RenderComponent*	ToRender()		{ return this; }
 
 	virtual void OnAdd( Chit* chit );
