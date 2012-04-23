@@ -123,6 +123,11 @@ void NavTestScene::Tap( int action, const grinliz::Vector2F& view, const grinliz
 			SNPrintf( buf, 40, "xz = %.1f,%.1f nSubZ=%d", tapMark.x, tapMark.z, map->NumRegions() );
 			textLabel.SetText( buf );
 
+			Vector2F d = { tapMark.x, tapMark.z };
+			PathMoveComponent* pmc = static_cast<PathMoveComponent*>( chit->GetComponent( "PathMoveComponent" ) );
+			GLASSERT( pmc );
+			pmc->SetDest( d );
+
 			if ( showAdjacent.Down() ) {
 				map->ShowAdjacentRegions( tapMark.x, tapMark.z );
 			}
@@ -134,10 +139,6 @@ void NavTestScene::Tap( int action, const grinliz::Vector2F& view, const grinliz
 				map->CalcPath( start, end, &path, true );
 			}
 
-			Vector2F d = { tapMark.x, tapMark.z };
-			PathMoveComponent* pmc = static_cast<PathMoveComponent*>( chit->GetComponent( "PathMoveComponent" ) );
-			GLASSERT( pmc );
-			pmc->SetDest( d );
 		}
 	}
 }

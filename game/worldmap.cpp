@@ -454,6 +454,17 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 				gB.CalcBounds( (float)vB.x, (float)vB.y, &bB );
 				bA.DoIntersection( bB );
 
+				// Try to avoid the blocks by insetting a little bit.
+				static const float INSET = 0.3f;
+				if ( bA.min.x + 1.0f < bA.max.x ) {
+					bA.min.x += INSET;
+					bA.max.x -= INSET;
+				}
+				if ( bA.min.y + 1.0f < bA.max.y ) {
+					bA.min.y += INSET;
+					bA.max.y -= INSET;
+				}
+
 				Vector2F v = bA.min;
 				if ( bA.min != bA.max ) {
 					int result = ClosestPointOnLine( bA.min, bA.max, from, &v, true );

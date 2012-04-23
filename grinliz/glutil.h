@@ -108,7 +108,8 @@ template <class A, class B> inline B Interpolate( A x0, B q0, A x1, B q1, A x )
 
 
 // More useful versions of the "HermiteInterpolate" and "InterpolateUnitX"
-inline float Lerp( float x0, float x1, float t )
+template <class T>
+inline T Lerp( const T& x0, const T& x1, float t )
 {
 	return  x0 + (x1-x0)*t;
 }
