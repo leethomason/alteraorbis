@@ -181,6 +181,7 @@ public:
 		GLASSERT( size < CAPACITY );
 		vec[size++] = t;
 	}
+
 	T* PushArr( int n ) {
 		GLASSERT( size+n <= CAPACITY );
 		T* rst = &vec[size];
@@ -192,6 +193,7 @@ public:
 		size++;
 		return &vec[size-1];
 	}
+
 	unsigned Size() const	{ return size; }
 	unsigned Capacity() const { return CAPACITY; }
 	

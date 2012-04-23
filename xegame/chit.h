@@ -40,6 +40,7 @@ public:
 	Component*			GetComponent( const char* name );
 
 	void RequestUpdate();
+	ChitBag* GetChitBag() { return chitBag; }
 
 private:
 

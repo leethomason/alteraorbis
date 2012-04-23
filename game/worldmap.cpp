@@ -386,6 +386,26 @@ bool WorldMap::GridPath( const grinliz::Vector2F& _start, const grinliz::Vector2
 
 bool WorldMap::CalcPath(	const grinliz::Vector2F& start, 
 							const grinliz::Vector2F& end, 
+							grinliz::Vector2F *path,
+							int *len,
+							int maxPath,
+							bool debugging )
+{
+	pathCache.Clear();
+	*len = 0;
+	bool result = CalcPath( start, end, &pathCache, debugging );
+	if ( result ) {
+		for( int i=0; i<pathCache.Size() && i < maxPath; ++i ) {
+			path[i] = pathCache[i];
+		}
+		*len = Min( maxPath, pathCache.Size() );
+	}
+	return result;
+}
+
+
+bool WorldMap::CalcPath(	const grinliz::Vector2F& start, 
+							const grinliz::Vector2F& end, 
 							CDynArray<grinliz::Vector2F> *path,
 							bool debugging )
 {

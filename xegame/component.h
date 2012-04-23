@@ -9,6 +9,7 @@ class SpatialComponent;
 class RenderComponent;
 class MoveComponent;
 class Chit;
+class ChitBag;
 
 class Component
 {
@@ -31,6 +32,8 @@ public:
 
 protected:
 	void RequestUpdate();
+	ChitBag* GetChitBag();
+
 	Chit* parentChit;
 };
 

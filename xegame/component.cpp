@@ -8,3 +8,13 @@ void Component::RequestUpdate()
 	}
 }
 
+
+ChitBag* Component::GetChitBag()
+{
+	if ( parentChit ) {
+		return parentChit->GetChitBag();
+	}
+	return 0;
+}
+
+

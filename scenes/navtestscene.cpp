@@ -61,6 +61,7 @@ NavTestScene::NavTestScene( LumosGame* game ) : Scene( game )
 	tapMark.Zero();
 
 	chit = chitBag.CreateTestChit( engine, "humanFemale" );
+	chit->Add( new PathMoveComponent( map ) );
 	chit->GetSpatialComponent()->SetPosition( 10.0f, 0.0f, 10.0f );
 }
 

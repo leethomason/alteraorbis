@@ -40,6 +40,12 @@ public:
 					const grinliz::Vector2F& end, 
 					CDynArray<grinliz::Vector2F> *path,
 					bool showDebugging = false );
+	bool CalcPath(	const grinliz::Vector2F& start, 
+					const grinliz::Vector2F& end, 
+					grinliz::Vector2F *path,
+					int *pathLen,
+					int maxPath,
+					bool showDebugging = false );
 
 	// ---- Map ---- //
 	virtual void Draw3D(  const grinliz::Color3F& colorMult, GPUShader::StencilMode );
@@ -157,6 +163,7 @@ private:
 
 	MP_VECTOR< void* >				pathRegions;
 	CDynArray< grinliz::Vector2F >	debugPathVector;
+	CDynArray< grinliz::Vector2F >	pathCache;
 
 	enum {
 		LOWER_TYPES = 2		// land or water
