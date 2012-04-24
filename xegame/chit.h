@@ -51,9 +51,15 @@ private:
 	enum {
 		SPATIAL,
 		MOVE,
+		GENERAL_0,
+		GENERAL_1,
+		GENERAL_2,
+		GENERAL_3,
 		RENDER,
-		GENERAL,
-		NUM_SLOTS = GENERAL+4
+		NUM_SLOTS,
+
+		GENERAL_START = GENERAL_0,
+		GENERAL_END   = RENDER,
 	};
 
 	union {
@@ -61,6 +67,10 @@ private:
 		struct {
 			SpatialComponent*	spatialComponent;
 			MoveComponent*		moveComponent;
+			Component*			general0;
+			Component*			general1;
+			Component*			general2;
+			Component*			general3;
 			RenderComponent*	renderComponent;		// should be last
 		};
 		Component*			slot[NUM_SLOTS];

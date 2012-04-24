@@ -39,5 +39,6 @@ void RenderComponent::DoUpdate()
 	SpatialComponent* spatial = parentChit->GetSpatialComponent();
 	if ( model && spatial ) {
 		model->SetPos( spatial->GetPosition() );
+		model->SetRotation( spatial->GetYRotation(), 1 );
 	}
 }

@@ -46,7 +46,7 @@ void Chit::Add( Component* c )
 	}
 	else {
 		int i;
-		for( i=GENERAL; i<NUM_SLOTS; ++i ) {
+		for( i=GENERAL_START; i<GENERAL_END; ++i ) {
 			if ( slot[i] == 0 ) {
 				slot[i] = c;
 				break;
