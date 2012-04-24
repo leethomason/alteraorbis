@@ -5,6 +5,7 @@
 #include "../xegame/chitbag.h"
 
 #include <cstring>
+#include <cmath>
 
 using namespace grinliz;
 
@@ -94,7 +95,75 @@ void PathMoveComponent::MoveFirst( U32 delta )
 }
 
 
+void PathMoveComponent::RotationFirst( U32 delta )
+{
+	if ( pos < nPath ) {
+		float travel    = Travel( MOVE_SPEED, delta );
+		float travelRot	= Travel( ROTATION_SPEED, delta );
+
+		Vector2F pos2;
+		float rot;
+		GetPosRot( &pos2, &rot );
+
+		while ( travel > 0 && travelRot > 0 && pos < nPath ) {
+			Vector2F next  = path[pos];
+			Vector2F delta = next - pos2;
+			float    dist = delta.Length();
+			
+			// check for very close & patch.
+			static const float EPS = 0.01f;
+			if ( dist <= EPS ) {
+				travel -= dist;
+				pos2 = next;
+				++pos;
+				continue;
+			}
+
+			float targetRot = NormalizeAngleDegrees( ToDegree( atan2f( delta.x, delta.y )));
+
+			float deltaRot, bias;
+			MinDeltaDegrees( rot, targetRot, &deltaRot, &bias );
+
+			if ( travelRot > deltaRot ) {
+				rot = targetRot;
+				travelRot -= deltaRot;
+			}
+			else {
+				rot += travelRot*bias;
+				rot = NormalizeAngleDegrees( rot );
+				travelRot = 0;
+			}
+
+			// We we don't chase the destination point, line
+			// it up closer
+			float rotationLimit = ROTATION_LIMIT;
+			if ( dist < 1.0f ) {
+				rotationLimit = Lerp( 0.0f, ROTATION_LIMIT, dist );
+			}
+			
+			if ( deltaRot < rotationLimit ) {
+				Vector2F norm = { sinf(ToRadian(rot)), cosf(ToRadian(rot)) };
+
+				if ( dist <= travel ) {
+					travel -= dist;
+					pos2 = next;
+					++pos;
+				}
+				else {
+					pos2 += norm * travel;
+					travel = 0;
+				}
+			}
+		}
+		SetPosRot( pos2, rot );
+	}
+}
+
+
 void PathMoveComponent::DoTick( U32 delta )
 {
-	MoveFirst( delta );
+	if ( rotationFirst )
+		RotationFirst( delta );
+	else
+		MoveFirst( delta );
 }

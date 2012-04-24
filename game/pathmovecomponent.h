@@ -15,7 +15,7 @@ class WorldMap;
 class PathMoveComponent : public MoveComponent
 {
 public:
-	PathMoveComponent( WorldMap* _map ) : map( _map ), nPath( 0 ), pos( 0 ) {}
+	PathMoveComponent( WorldMap* _map ) : map( _map ), nPath( 0 ), pos( 0 ), rotationFirst(true) {}
 	virtual ~PathMoveComponent() {}
 
 	const char* Name() const { return "PathMoveComponent"; }
@@ -26,6 +26,10 @@ public:
 	virtual void DoTick( U32 delta );
 
 	void SetDest( const grinliz::Vector2F& dest );
+	// Set whether rotation is prioritized over movement. (Default
+	// to true.) If false, then motion will happen and the rotation
+	// is set from the motion.
+	void SetRotationFirst( bool r ) { rotationFirst = r; }
 
 private:
 	float Travel( float rate, U32 time ) const {
@@ -42,6 +46,7 @@ private:
 	int nPath;
 	int pos;
 	grinliz::Vector2F dest;
+	bool rotationFirst;
 
 	grinliz::Vector2F path[MAX_MOVE_PATH];
 };

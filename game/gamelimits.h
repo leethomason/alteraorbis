@@ -22,6 +22,8 @@ static const int MAX_MOVE_PATH = MAX_MAP_SIZE/2;	// repath if we need to
 static const float METERS_PER_GRID = 2.0f;
 
 // Debugging values:
-static const float MOVE_SPEED = 2.0f;	// grid/second
+static const float MOVE_SPEED = 2.0f;			// grid/second
+static const float ROTATION_SPEED = 360.f;		// degrees/second
+static const float ROTATION_LIMIT = 45.0f;
 
 #endif // GAMELIMITS_INCLUDED
