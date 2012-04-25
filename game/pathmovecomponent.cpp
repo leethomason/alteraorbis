@@ -34,7 +34,7 @@ void PathMoveComponent::SetDest( const Vector2F& d )
 	nPath = 0;
 	pos = 0;
 
-	bool okay = map->CalcPath( start, dest, path, &nPath, MAX_MOVE_PATH, false ); 
+	bool okay = map->CalcPath( start, dest, path, &nPath, MAX_MOVE_PATH, pathDebugging ); 
 	if ( !okay ) {
 		nPath = pos = 0;
 	}

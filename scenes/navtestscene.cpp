@@ -61,7 +61,9 @@ NavTestScene::NavTestScene( LumosGame* game ) : Scene( game )
 	tapMark.Zero();
 
 	chit = chitBag.CreateTestChit( engine, "humanFemale" );
-	chit->Add( new PathMoveComponent( map ) );
+	PathMoveComponent* pmc = new PathMoveComponent( map );
+	pmc->SetPathDebugging( true );
+	chit->Add( pmc );
 	chit->GetSpatialComponent()->SetPosition( 10.0f, 0.0f, 10.0f );
 }
 
@@ -131,13 +133,13 @@ void NavTestScene::Tap( int action, const grinliz::Vector2F& view, const grinliz
 			if ( showAdjacent.Down() ) {
 				map->ShowAdjacentRegions( tapMark.x, tapMark.z );
 			}
-			else if ( showZonePath.Down() ) {
-				map->ShowRegionPath( oldMark.x, oldMark.z, tapMark.x, tapMark.z );
-				Vector2F start = { oldMark.x, oldMark.z };
-				Vector2F end   = { tapMark.x, tapMark.z };
-				::CDynArray< Vector2F > path;
-				map->CalcPath( start, end, &path, true );
-			}
+//			else if ( showZonePath.Down() ) {
+//				map->ShowRegionPath( oldMark.x, oldMark.z, tapMark.x, tapMark.z );
+//				Vector2F start = { oldMark.x, oldMark.z };
+//				Vector2F end   = { tapMark.x, tapMark.z };
+//				::CDynArray< Vector2F > path;
+//				map->CalcPath( start, end, &path, true );
+//			}
 
 		}
 	}
