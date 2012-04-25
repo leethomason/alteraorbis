@@ -18,6 +18,8 @@
 
 #include "../grinliz/gldebug.h"
 #include "../grinliz/gltypes.h"
+#include "../grinliz/glrandom.h"
+
 #include "enginelimits.h"
 #include "vertex.h"
 #include "gpustatemanager.h"
@@ -50,7 +52,7 @@ public:
 	void Add(	Model* model,					// Can be chaned: billboard rotation will be set.
 				const ModelAtom* atom, 
 				GPUShader* shader,
-				const grinliz::Matrix4* textureXForm );
+				const grinliz::Vector4F& param );
 
 	/* If a shader is passed it, it will override the shader set by the Add. */
 	void Submit(	GPUShader* shader, 
@@ -64,7 +66,8 @@ public:
 private:
 	struct Item {
 		Model*					model;
-		const ModelAtom*		atom;
+		const ModelAtom*		atom;	// note the hash below counts on atom & param being adjacent and contiguous
+		grinliz::Vector4F		param;	// color, texture xForm, etc. Not yet supported. Needs sorting
 		Item*					next;
 	};
 
@@ -89,9 +92,12 @@ private:
 
 	static int CompareAtom( const void* vi0, const void* vi1 ) 
 	{
-		const Item** i0 = (const Item**)vi0;
-		const Item** i1 = (const Item**)vi1;
-		return (int)((*i0)->atom) - (int)((*i1)->atom);
+		const Item* i0 = *((const Item**)vi0);
+		const Item* i1 = *((const Item**)vi1);
+
+		int h0 = (int)grinliz::Random::Hash( &i0->atom, 8 );
+		int h1 = (int)grinliz::Random::Hash( &i1->atom, 8 );
+		return h0 - h1;
 	}
 
 	State* FindState( const State& state );

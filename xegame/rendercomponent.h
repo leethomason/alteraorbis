@@ -13,6 +13,7 @@ public:
 	RenderComponent( Engine* engine, const char* asset );	// spacetree probably  sufficient, but 'engine' easier to keep track of
 	virtual ~RenderComponent();
 
+	// ------ Component functionality: -------
 	virtual const char* Name() const { return "RenderComponent"; };
 
 	virtual RenderComponent*	ToRender()		{ return this; }
@@ -21,6 +22,11 @@ public:
 	virtual void OnRemove();
 
 	virtual void DoUpdate();
+
+	// ------ Additional --------
+	// Radius of the "base" the model stands on. Used to position
+	// the model so it doesn't walk into walls or other models.
+	float RadiusOfBase();
 
 private:
 	Engine* engine;

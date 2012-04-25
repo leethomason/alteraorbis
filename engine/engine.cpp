@@ -210,6 +210,7 @@ void Engine::Draw( U32 deltaTime )
 	GPUShader lightShader = _lightShader;	// the sub-classes are causing problems here. Need a base type later.
 	LightShader emissiveLightShader( ambient, dir, diffuse );
 	emissiveLightShader.SetShaderFlag( ShaderManager::EMISSIVE );
+	LightShader blendShader( ambient, dir, diffuse, GPUShader::BLEND_NORMAL );
 
 	if ( lighting.hemispheric ) {
 		lightShader.SetShaderFlag( ShaderManager::LIGHTING_HEMI );
@@ -227,7 +228,7 @@ void Engine::Draw( U32 deltaTime )
 		GLASSERT( renderQueue->Empty() );
 
 		for( Model* model=modelRoot; model; model=model->next ) {
-			model->Queue( renderQueue, &lightShader, 0, &emissiveLightShader );
+			model->Queue( renderQueue, &lightShader, &blendShader, &emissiveLightShader );
 		}
 	}
 

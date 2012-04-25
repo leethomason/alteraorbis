@@ -5,6 +5,8 @@
 #include "../engine/model.h"
 #include "../engine/engine.h"
 
+using namespace grinliz;
+
 RenderComponent::RenderComponent( Engine* _engine, const char* asset ) : engine( _engine ), model( 0 )
 {
 	resource = ModelResourceManager::Instance()->GetModelResource( asset );
@@ -42,3 +44,15 @@ void RenderComponent::DoUpdate()
 		model->SetRotation( spatial->GetYRotation(), 1 );
 	}
 }
+
+
+float RenderComponent::RadiusOfBase()
+{
+	if ( resource ) {
+		const Rectangle3F b = resource->AABB();
+		float ave = Mean( b.SizeX(), b.SizeZ() );
+		return ave * 0.5f;
+	}
+	return 0;
+}
+

@@ -14,6 +14,8 @@ class ChitBag;
 class Component
 {
 public:
+	Component() : parentChit( 0 )	{}
+	virtual ~Component()			{}
 	virtual const char* Name() const = 0;
 
 	virtual void OnAdd( Chit* chit )	{	parentChit = chit; }

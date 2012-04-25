@@ -102,8 +102,12 @@ RenderQueue::State* RenderQueue::FindState( const State& state )
 }
 
 
-void RenderQueue::Add( Model* model, const ModelAtom* atom, GPUShader* shader, const grinliz::Matrix4* textureXForm )
+void RenderQueue::Add( Model* model, const ModelAtom* atom, GPUShader* shader, const grinliz::Vector4F& param )
 {
+	GLASSERT( model );
+	GLASSERT( atom );
+	GLASSERT( shader );
+
 	if ( nItem == MAX_ITEMS ) {
 		GLASSERT( 0 );
 		return;
@@ -120,6 +124,7 @@ void RenderQueue::Add( Model* model, const ModelAtom* atom, GPUShader* shader, c
 	Item* item = &itemPool[nItem++];
 	item->model = model;
 	item->atom = atom;
+	item->param = param;
 	
 	item->next  = state->root;
 	state->root = item;

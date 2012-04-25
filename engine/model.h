@@ -126,11 +126,7 @@ public:
 
 
 	ModelHeader header;						// loaded
-
 	grinliz::Rectangle3F	hitBounds;		// for picking - a bounds approximation
-//	int						instances;		// # of times the model is repeated.
-//	U16*					allIndex;		// memory store for vertices and indices. Used for hit-testing.
-//	Vertex*					allVertex;
 
 	ModelAtom atom[EL_MAX_MODEL_GROUPS];
 };
@@ -220,9 +216,16 @@ public:
 
 	void SetRotation( float rot, int axis=1 );
 	float GetRotation( int axis=1 ) const			{ return rot[axis]; }
+
+	// WARNING: not really supported. Just for debug rendering. May break:
+	// normals, lighting, bounds, picking, etc. etc.
+	void SetScale( float s );
+	float GetScale() const							{ return debugScale; }
 	
 	// Set the texture.
 	void SetTexture( Texture* t )	{ setTexture = t; }
+	// NOT CURRENTLY SUPPORTED: see RenderQueue::Add
+	void SetTexXForm( int index, float a=1.0f, float d=1.0f, float x=0.0f, float y=0.0f );
 
 	// AABB for user selection (bigger than the true AABB)
 	void CalcHitAABB( grinliz::Rectangle3F* aabb ) const;
@@ -265,10 +268,10 @@ private:
 	const ModelResource* resource;
 	grinliz::Vector3F pos;
 	float rot[3];
+	float debugScale;
 
 	AuxTextureXForm		*auxTexture;	// if allocated, then this has texture xforms. Comes from the ModelResourceManager MemoryPool.
 	Texture				*setTexture;	// changes the texture, based on texBehavior
-
 
 	int flags;
 

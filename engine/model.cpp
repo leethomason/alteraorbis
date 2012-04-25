@@ -184,6 +184,7 @@ void Model::Init( const ModelResource* resource, SpaceTree* tree )
 	this->setTexture = 0;
 	this->auxTexture = 0;
 
+	debugScale = 1.0f;
 	pos.Set( 0, 0, 0 );
 	rot[0] = rot[1] = rot[2] = 0.0f;
 	setTexture = 0;
@@ -220,6 +221,15 @@ void Model::SetPos( const grinliz::Vector3F& pos )
 }
 
 
+void Model::SetScale( float s )
+{
+	if ( debugScale != s ) {
+		debugScale = s;
+		Modify();
+	}
+}
+
+
 void Model::SetRotation( float r, int axis )
 {
 	GLASSERT( axis >= 0 && axis < 3 );
@@ -244,6 +254,23 @@ bool Model::HasTextureXForm( int i ) const
 			return true;
 	}
 	return false;
+}
+
+
+void Model::SetTexXForm( int id, float a, float d, float x, float y )
+{
+	GLASSERT( id >= 0 && id < EL_MAX_MODEL_GROUPS );
+	if ( !auxTexture ) {
+		auxTexture = ModelResourceManager::Instance()->Alloc();
+		auxTexture->Init();
+	}
+
+	if ( a!=1.0f || d!=1.0f || x!=0.0f || y!=0.0f ){
+		auxTexture->m[id].m11 = a;
+		auxTexture->m[id].m22 = d;
+		auxTexture->m[id].m14 = x;
+		auxTexture->m[id].m24 = y;
+	}
 }
 
 
@@ -309,10 +336,11 @@ void Model::Queue( RenderQueue* queue, GPUShader* opaque, GPUShader* transparent
 				shader = transparent;
 		}
 
+		Vector4F none = { 0, 0, 0, 0 };
 		queue->Add( this,									// reference back
 					&resource->atom[i],						// model atom to render
 					shader,								
-					( auxTexture && HasTextureXForm(i) ) ? &auxTexture->m[i] : 0 );	// texture transform, if this has it.
+					none );									// parameter to the shader
 	}
 }
 
@@ -340,23 +368,6 @@ void ModelAtom::Bind( GPUShader* shader ) const
 }
 
 
-/*
-void ModelAtom::BindPlanarShadow( GPUShader* shader ) const
-{
-	GPUStream stream;
-	stream.stride = sizeof( Vertex );
-	stream.nPos = 3;
-	stream.posOffset = Vertex::POS_OFFSET;
-	stream.nTexture0 = 3;
-	stream.texture0Offset = Vertex::POS_OFFSET;
-	stream.nTexture1 = 3;
-	stream.texture1Offset = Vertex::POS_OFFSET;
-
-	LowerBind( shader, stream );
-}
-*/
-
-
 const grinliz::Rectangle3F& Model::AABB() const
 {
 	XForm();	// just makes sure the cache is good.
@@ -371,6 +382,10 @@ const grinliz::Matrix4& Model::XForm() const
 		t.SetTranslation( pos );
 
 		Matrix4 r;
+		if ( debugScale != 1.0 ) {
+			r.SetScale( debugScale );
+		}
+
 		if ( rot[1] != 0.0f ) 
 			r.ConcatRotation( rot[1], 1 );
 		if ( rot[2] != 0.0f )
