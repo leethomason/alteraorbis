@@ -55,11 +55,13 @@ Engine::Engine( Screenport* port, const gamedb::Reader* database )
 	for( int i=0; i<RT_COUNT; ++i )
 		renderTarget[i] = 0;
 	ShaderManager::Instance()->AddDeviceLossHandler( this );
+	particleSystem = new ParticleSystem();
 }
 
 
 Engine::~Engine()
 {
+	delete particleSystem;
 	ShaderManager::Instance()->RemoveDeviceLossHandler( this );
 	delete renderQueue;
 	delete spaceTree;
@@ -325,7 +327,7 @@ void Engine::Draw( U32 deltaTime )
 
 	// ------ Particle system ------------- //
 	const Vector3F* eyeDir = camera.EyeDir3();
-	ParticleSystem* particleSystem = ParticleSystem::Instance();
+	//ParticleSystem* particleSystem = ParticleSystem::Instance();
 	particleSystem->Update( deltaTime, eyeDir );
 	particleSystem->Draw();
 }

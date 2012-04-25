@@ -91,7 +91,7 @@ void Game::Init()
 	TextureManager::Create( database0 );
 	ImageManager::Create( database0 );
 	ModelResourceManager::Create();
-	ParticleSystem::Create();
+//	ParticleSystem::Create();
 
 	LoadTextures();
 	modelLoader = new ModelLoader();
@@ -124,7 +124,7 @@ Game::~Game()
 
 	UFOText::Destroy();
 	SoundManager::Destroy();
-	ParticleSystem::Destroy();
+//	ParticleSystem::Destroy();
 	ModelResourceManager::Destroy();
 	ImageManager::Destroy();
 	TextureManager::Destroy();
@@ -395,7 +395,7 @@ RenderAtom Game::CreateRenderAtom( int uiRendering, const char* assetName, float
 
 void Game::Load( const XMLDocument& doc )
 {
-	ParticleSystem::Instance()->Clear();
+	//ParticleSystem::Instance()->Clear();
 
 	// Already pushed the BattleScene. Note that the
 	// BOTTOM of the stack loads. (BattleScene or GeoScene).
@@ -585,7 +585,7 @@ void Game::DoTick( U32 _currentTime )
 							GPUShader::SupportsVBOs() ? 1 : 0,
 							(float)GPUShader::TrianglesDrawn()/1000.0f,
 							GPUShader::DrawCalls(),
-							ParticleSystem::Instance()->NumParticles() );
+							-1 ); //ParticleSystem::Instance()->NumParticles() );
 		}
 	}
 	Y += space;

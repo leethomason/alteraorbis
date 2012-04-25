@@ -120,7 +120,7 @@ void ParticleScene::ItemTapped( const gamui::UIItem* item )
 			if ( buttonArr[i]->ToPushButton() ) {
 				Vector3F pos = { 6.f, 0.f, 6.f };
 				Vector3F normal = { 0, 1, 0 };
-				ParticleSystem::Instance()->EmitPD( *def, pos, normal, engine->camera.EyeDir3(), 0 );
+				engine->particleSystem->EmitPD( *def, pos, normal, engine->camera.EyeDir3(), 0 );
 			}
 		}
 	}
@@ -135,7 +135,7 @@ void ParticleScene::DoTick( U32 deltaTime )
 			Vector3F pos = { 6.f, 0.f, 6.f };
 			Vector3F normal = { 0, 1, 0 };
 			ParticleDef* def = &particleDefArr[i];
-			ParticleSystem::Instance()->EmitPD( *def, pos, normal, engine->camera.EyeDir3(), deltaTime );
+			engine->particleSystem->EmitPD( *def, pos, normal, engine->camera.EyeDir3(), deltaTime );
 		}
 	}
 }

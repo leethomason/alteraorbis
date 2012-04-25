@@ -5,6 +5,7 @@
 #include "../scenes/rendertestscene.h"
 #include "../scenes/particlescene.h"
 #include "../scenes/navtestscene.h"
+#include "../scenes/noisetestscene.h"
 
 using namespace grinliz;
 using namespace gamui;
@@ -54,6 +55,7 @@ Scene* LumosGame::CreateScene( int id, SceneData* data )
 	case SCENE_RENDERTEST:	scene = new RenderTestScene( this, (const RenderTestSceneData*)data );	break;
 	case SCENE_PARTICLE:	scene = new ParticleScene( this );			break;
 	case SCENE_NAVTEST:		scene = new NavTestScene( this );			break;
+	case SCENE_NOISETEST:	scene = new NoiseTestScene( this );			break;
 
 	default:
 		GLASSERT( 0 );

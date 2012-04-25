@@ -36,6 +36,7 @@ private:
 		TEST_RENDER_1,
 		TEST_PARTICLE,
 		TEST_NAV,
+		TEST_NOISE,
 		NUM_TESTS
 	};
 	gamui::PushButton	testScene[NUM_TESTS];

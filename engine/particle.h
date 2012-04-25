@@ -75,10 +75,13 @@ struct ParticleStream
 class ParticleSystem
 {
 public:
-	static ParticleSystem* Instance()	{ GLASSERT( instance ); return instance; }
+	ParticleSystem();
+	~ParticleSystem();
 
-	static void Create();
-	static void Destroy();
+//	static ParticleSystem* Instance()	{ GLASSERT( instance ); return instance; }
+
+//	static void Create();
+//	static void Destroy();
 
 	// Texture particles. Location in texture follows.
 	enum {
@@ -105,10 +108,8 @@ public:
 	int NumParticles() const { return nParticles; }
 
 private:
-	ParticleSystem();
-	~ParticleSystem();
 
-	static ParticleSystem* instance;
+	//static ParticleSystem* instance;
 
 	void Process( unsigned msec, const grinliz::Vector3F eyeDir[] );
 
