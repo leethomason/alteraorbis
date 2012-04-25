@@ -38,6 +38,10 @@ NavTestScene::NavTestScene( LumosGame* game ) : Scene( game )
 	block20.SetSize( layout.Width(), layout.Height() );
 	block20.SetText( "block20" );
 
+	showOverlay.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
+	showOverlay.SetSize( layout.Width(), layout.Height() );
+	showOverlay.SetText( "Over" );
+
 	showAdjacent.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
 	showAdjacent.SetSize( layout.Width(), layout.Height() );
 	showAdjacent.SetText( "Adj" );
@@ -47,7 +51,7 @@ NavTestScene::NavTestScene( LumosGame* game ) : Scene( game )
 	showZonePath.SetText( "Region" );
 	showZonePath.SetText2( "Path" );
 
-	showAdjacent.AddToToggleGroup( &showZonePath );
+	//showAdjacent.AddToToggleGroup( &showZonePath );
 
 	textLabel.Init( &gamui2D );
 
@@ -62,7 +66,6 @@ NavTestScene::NavTestScene( LumosGame* game ) : Scene( game )
 
 	chit = chitBag.CreateTestChit( engine, "humanFemale" );
 	PathMoveComponent* pmc = new PathMoveComponent( map );
-	pmc->SetPathDebugging( true );
 	chit->Add( pmc );
 	chit->GetSpatialComponent()->SetPosition( 10.0f, 0.0f, 10.0f );
 }
@@ -85,8 +88,9 @@ void NavTestScene::Resize()
 	layout.PosAbs( &block, 1, -1 );
 	layout.PosAbs( &block20, 2, -1 );
 
-	layout.PosAbs( &showAdjacent, 0, -2 );
-	layout.PosAbs( &showZonePath, 1, -2 );
+	layout.PosAbs( &showOverlay,   0, -2 );
+	layout.PosAbs( &showAdjacent, 1, -2 );
+	layout.PosAbs( &showZonePath, 2, -2 );
 
 	layout.PosAbs( &textLabel, 0, -3 );
 }
@@ -158,6 +162,14 @@ void NavTestScene::ItemTapped( const gamui::UIItem* item )
 	}
 	else if ( item == &block20 ) {
 		makeBlocks = 20;
+	}
+	else if ( item == &showZonePath ) {
+		PathMoveComponent* pmc = static_cast<PathMoveComponent*>( chit->GetComponent( "PathMoveComponent" ) );
+		if ( pmc ) 
+			pmc->SetPathDebugging( showZonePath.Down() );
+	}
+	else if ( item == &showOverlay ) {
+		map->ShowRegionOverlay( showOverlay.Down() );
 	}
 
 	while ( makeBlocks ) {

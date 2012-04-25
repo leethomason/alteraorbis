@@ -58,6 +58,7 @@ public:
 	// --- Debugging -- //
 	void ShowAdjacentRegions( float x, float y );
 	void ShowRegionPath( float x0, float y0, float x1, float y1 );
+	void ShowRegionOverlay( bool over ) { debugRegionOverlay = over; }
 	int NumRegions() const;
 
 private:
@@ -96,7 +97,7 @@ private:
 		ZONE_SIZE	= 16,		// adjust size of bit fields to be big enough to represent this
 		ZONE_SIZE2  = ZONE_SIZE*ZONE_SIZE,
 	};
-
+		
 	// FIXME: many sites claim bitfields defeat the optimizer,
 	// and it may be possible to pack into 16 bits. Makes for
 	// way cleaner code though.
@@ -160,6 +161,7 @@ private:
 	Grid* grid;		// pathing info.
 	U8* zoneInit;	// flag whether this zone is valid.
 	micropather::MicroPather *pather;
+	bool debugRegionOverlay;
 
 	MP_VECTOR< void* >				pathRegions;
 	CDynArray< grinliz::Vector2F >	debugPathVector;

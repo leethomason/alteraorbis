@@ -20,6 +20,8 @@ WorldMap::WorldMap( int width, int height ) : Map( width, height )
 	texture[0] = TextureManager::Instance()->GetTexture( "map_water" );
 	texture[1] = TextureManager::Instance()->GetTexture( "map_land" );
 	pather = new micropather::MicroPather( this );
+
+	debugRegionOverlay = false;
 }
 
 
@@ -353,34 +355,25 @@ int WorldMap::RegionSolve( const grinliz::Vector2I& subZoneStart, const grinliz:
 
 
 // Returns true if there is a straight line path between the start and end.
-bool WorldMap::GridPath( const grinliz::Vector2F& _start, const grinliz::Vector2F& _end )
+// This used to be fancy, but getting a line walk to work consistently 
+// is tricky. Now uses a brutally straightforward bounding check.
+bool WorldMap::GridPath( const grinliz::Vector2F& start, const grinliz::Vector2F& end )
 {
-	Vector2I start = { int( _start.x ), int( _start.y ) };
-	Vector2I end   = { int( _end.x ),   int( _end.y ) };
-	if ( start == end ) 
-		return true;
-
-	if ( !grid[INDEX(start)].IsPassable() )
-		return false;
-
-	LineWalk line( start.x, start.y, end.x, end.y );
-	while ( line.CurrentStep() <= line.NumSteps() ) {
-
-		Vector2I p = line.P();
-		Vector2I q = line.Q();
-
-		if ( !grid[INDEX(q.x,q.y)].IsPassable() )
-			return false;
-		if ( q.x != p.x && q.y != p.y ) {
-			// diagonal has to pass in both ways.
-			if ( !grid[INDEX(p.x,q.y)].IsPassable() )
-				return false;
-			if ( !grid[INDEX(p.y,q.x)].IsPassable() )
-				return false;
+	Rectangle2I b;
+	b.FromPair( (int)start.x, (int)start.y, (int)end.x, (int)end.y );
+	
+	// Choose the zone size as a reasonable area.
+	if ( b.Area() < ZONE_SIZE2 ) {
+		for( int j=b.min.y; j<=b.max.y; ++j ) {
+			for( int i=b.min.x; i<=b.max.x; ++i ) {
+				if ( !grid[INDEX(i,j)].IsPassable() ) {
+					return false;
+				}
+			}
 		}
-		line.Step(); 
+		return true;
 	}
-	return true;
+	return false;
 }
 
 
@@ -430,6 +423,7 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 	if ( !okay ) {
 		okay = GridPath( start, end );
 		if ( okay ) {
+			GLOUTPUT(( "Ray succeeded.\n" ));
 			path->Push( start );
 			path->Push( end );
 		}
@@ -439,6 +433,7 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 	if ( !okay ) {
 		int result = RegionSolve( regionStart, regionEnd );
 		if ( result == micropather::MicroPather::SOLVED ) {
+			GLOUTPUT(( "Region succeeded len=%d.\n", pathRegions.size() ));
 			Vector2F from = start;
 			path->Push( start );
 			okay = true;
@@ -613,9 +608,22 @@ void WorldMap::Draw3D(  const grinliz::Color3F& colorMult, GPUShader::StencilMod
 		shader.Draw();
 	}
 
-	if ( mode == GPUShader::STENCIL_CLEAR ) {
-		// Debugging pathing zones:
-		DrawZones();
+	if ( debugRegionOverlay ) {
+		if ( mode == GPUShader::STENCIL_CLEAR ) {
+			// Debugging pathing zones:
+			DrawZones();
+		}
+	}
+	if ( debugPathVector.Size() > 0 ) {
+		FlatShader debug;
+		debug.SetColor( 1, 0, 0, 1 );
+		for( int i=0; i<debugPathVector.Size()-1; ++i ) {
+			Vector3F tail = { debugPathVector[i].x, 0.2f, debugPathVector[i].y };
+			Vector3F head = { debugPathVector[i+1].x, 0.2f, debugPathVector[i+1].y };
+			debug.DrawArrow( tail, head, false );
+		}
+	}
+	{
 		// Debugging coordinate system:
 		Vector3F origin = { 0, 0.1f, 0 };
 		Vector3F xaxis = { 5, 0, 0 };
@@ -626,15 +634,6 @@ void WorldMap::Draw3D(  const grinliz::Color3F& colorMult, GPUShader::StencilMod
 		debug.DrawArrow( origin, xaxis, false );
 		debug.SetColor( 0, 0, 1, 1 );
 		debug.DrawArrow( origin, zaxis, false );
-
-		if ( debugPathVector.Size() > 0 ) {
-			debug.SetColor( 1, 0, 0, 1 );
-			for( int i=0; i<debugPathVector.Size()-1; ++i ) {
-				Vector3F tail = { debugPathVector[i].x, 0.2f, debugPathVector[i].y };
-				Vector3F head = { debugPathVector[i+1].x, 0.2f, debugPathVector[i+1].y };
-				debug.DrawArrow( tail, head, false );
-			}
-		}
 	}
 }
 
