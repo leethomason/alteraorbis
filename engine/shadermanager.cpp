@@ -23,14 +23,15 @@ static const char* gUniformName[ShaderManager::MAX_UNIFORM] =
 {
 	"u_mvpMatrix",
 	"u_mMatrix",
+	"u_paramArr",
+
 	"u_normalMatrix",
-	"u_texMat0",
-	"u_texMat1",
 	"u_colorMult",
 	"u_lightDir",
 	"u_ambient",
 	"u_diffuse",
-	"u_radius"
+	"u_radius",
+	"u_param",
 };
 
 
@@ -51,7 +52,8 @@ int ShaderManager::Shader::GetUniformLocation( int uniform )
 	GLASSERT( uniform >= 0 && uniform < ShaderManager::MAX_UNIFORM );
 
 	if ( uniformLoc[uniform] < 0 ) {
-		uniformLoc[uniform] = glGetUniformLocation( prog, gUniformName[uniform] );
+		const char* name = gUniformName[uniform];
+		uniformLoc[uniform] = glGetUniformLocation( prog, name );
 		GLASSERT( uniformLoc[uniform] >= 0 );
 	}
 	return uniformLoc[uniform];
@@ -179,6 +181,16 @@ void ShaderManager::SetUniformArray( int id, int count, const grinliz::Matrix4* 
 }
 
 
+void ShaderManager::SetUniformArray( int id, int count, const grinliz::Vector4F* v )
+{
+	CHECK_GL_ERROR;
+	int loc = active->GetUniformLocation( id );
+	GLASSERT( loc >= 0 );
+	glUniform4fv( loc, count, &v->x );
+	CHECK_GL_ERROR;
+}
+
+
 void ShaderManager::SetTexture( int index, Texture* texture )
 {
 	char name[9] = "texture0";
@@ -251,13 +263,11 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 	if ( flags & TEXTURE0 ) {
 		AppendFlag( &header, "TEXTURE0_ALPHA_ONLY",	flags & TEXTURE0_ALPHA_ONLY );
 		AppendFlag( &header, "TEXTURE0_TRANSFORM",	flags & TEXTURE0_TRANSFORM );
-		AppendFlag( &header, "TEXTURE0_3COMP",		flags & TEXTURE0_3COMP );
 	}
 	AppendFlag( &header, "TEXTURE1",			flags & TEXTURE1 );
 	if ( flags & TEXTURE1 ) {
 		AppendFlag( &header, "TEXTURE1_ALPHA_ONLY",	flags & TEXTURE1_ALPHA_ONLY );
 		AppendFlag( &header, "TEXTURE1_TRANSFORM",	flags & TEXTURE1_TRANSFORM );
-		AppendFlag( &header, "TEXTURE1_3COMP",		flags & TEXTURE1_3COMP );
 	}
 	AppendFlag( &header, "COLORS",				flags & COLORS );
 	AppendFlag( &header, "COLOR_MULTIPLIER",	flags & COLOR_MULTIPLIER );
@@ -265,6 +275,7 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 	AppendFlag( &header, "PREMULT",				flags & PREMULT );
 	AppendFlag( &header, "EMISSIVE",			flags & EMISSIVE );
 	AppendFlag( &header, "EMISSIVE_EXCLUSIVE",	flags & EMISSIVE_EXCLUSIVE );
+	AppendFlag( &header, "PARAM",				shader->ParamNeeded() );
 
 	if ( flags & LIGHTING_DIFFUSE )
 		AppendFlag( &header, "LIGHTING_DIFFUSE", 1, 1 );

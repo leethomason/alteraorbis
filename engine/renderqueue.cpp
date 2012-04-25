@@ -184,12 +184,14 @@ void RenderQueue::Submit( GPUShader* overRideShader, int required, int excluded,
 				atom->Bind( shader );
 
 				for( int k=0; k<delta; ++k ) {
+					const Item* item = itemArr[start+k];
 					if ( xform ) {
-						shader->InstanceMatrix( k, (*xform) * itemArr[start+k]->model->XForm() );
+						shader->InstanceMatrix( k, (*xform) * item->model->XForm() );
 					}
 					else {
-						shader->InstanceMatrix( k, itemArr[start+k]->model->XForm() );
+						shader->InstanceMatrix( k, item->model->XForm() );
 					}
+					shader->InstanceParam( k, item->param );
 				}
 				shader->Draw( delta );
 			} else
@@ -197,12 +199,14 @@ void RenderQueue::Submit( GPUShader* overRideShader, int required, int excluded,
 			{
 				atom->Bind( shader );
 				for( int k=start; k<end; ++k ) {
-					Model* model = itemArr[k]->model;
+					const Item* item = itemArr[k];
+					Model* model = item->model;
 					shader->PushMatrix( GPUShader::MODELVIEW_MATRIX );
 					if ( xform ) {
 						shader->MultMatrix( GPUShader::MODELVIEW_MATRIX, *xform );
 					}
 					shader->MultMatrix( GPUShader::MODELVIEW_MATRIX, model->XForm() );
+					shader->SetParam( item->param );
 					shader->Draw();
 					shader->PopMatrix( GPUShader::MODELVIEW_MATRIX );
 				}

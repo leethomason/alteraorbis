@@ -4,7 +4,14 @@ uniform mat4 	u_mvpMatrix;		// model-view-projection.
 
 #if INSTANCE == 1
 	uniform mat4 	u_mMatrix[EL_MAX_INSTANCE];		// Each instance gets its own transform. Burns up uniforms; this can't be huge.
+	#if PARAM == 1
+		uniform vec4	u_param[EL_MAX_INSTANCE];	// Arbitrary params, if used. (texture xform, color, etc.)
+	#endif
 	attribute float a_instanceID;					// Index into the transformation.
+#else
+	#if PARAM == 1
+		uniform vec4	u_param;					// Arbitrary params, if used. (texture xform, color, etc.)
+	#endif
 #endif
 
 #if COLOR_MULTIPLIER == 1
@@ -18,26 +25,12 @@ attribute vec3 a_pos;				// vertex position
 #endif
 
 #if TEXTURE0 == 1
-	#if TEXTURE0_TRANSFORM == 1
-		uniform mat4 u_texMat0;
-	#endif	
-	#if TEXTURE0_3COMP == 1
-		attribute vec3 a_uv0;		// note this is vec3 when there is a transform
-	#else
-		attribute vec2 a_uv0;
-	#endif
+	attribute vec2 a_uv0;
 	varying vec2 v_uv0;
 #endif
 
 #if TEXTURE1 == 1
-	#if TEXTURE1_TRANSFORM == 1
-		uniform mat4 u_texMat1;
-	#endif
-	#if TEXTURE1_3COMP == 1
-		attribute vec3 a_uv1;
-	#else
-		attribute vec2 a_uv1;
-	#endif
+	attribute vec2 a_uv1;
 	varying vec2 v_uv1;
 #endif
 
@@ -53,6 +46,16 @@ attribute vec3 a_pos;				// vertex position
 varying vec4 v_color;
 
 void main() {
+
+	#if PARAM == 1
+		// Don't go insane with #if syntax later:
+		#if INSTANCE == 1
+			vec4 param = u_param[int(a_instanceID)];
+		#else
+			vec4 param = u_param;
+		#endif
+	#endif
+
 	#if COLOR_MULTIPLIER == 0
 		vec4 color = vec4( 1,1,1,1 );
 	#elif COLOR_MULTIPLIER == 1
@@ -89,22 +92,14 @@ void main() {
 	
 	#if TEXTURE0 == 1
 		#if TEXTURE0_TRANSFORM == 1
-			#if TEXTURE0_3COMP == 1
-				v_uv0 = ( u_texMat0 * vec4( a_uv0.x, a_uv0.y, a_uv0.z, 1 ) ).xy;
-			#else
-				v_uv0 = ( u_texMat0 * vec4( a_uv0.x, a_uv0.y, 0, 1 ) ).xy;
-			#endif
+			v_uv0 = vec2( a_uv0.x*param.x + param.z, a_uv0.y*param.y + param.w );
 		#else
 			v_uv0 = a_uv0;
 		#endif
 	#endif
 	#if TEXTURE1 == 1
 		#if TEXTURE1_TRANSFORM == 1
-			#if TEXTURE1_3COMP
-				v_uv1 = ( u_texMat1 * vec4( a_uv1.x, a_uv1.y, a_uv1.z, 1 ) ).xy;
-			#else
-				v_uv1 = ( u_texMat1 * vec4( a_uv1.x, a_uv1.y, 0, 1 ) ).xy;
-			#endif
+			v_uv1 = vec2( a_uv1.x*param.x + param.z, a_uv1.y*param.y + param.w );
 		#else
 			v_uv1 = a_uv1;
 		#endif

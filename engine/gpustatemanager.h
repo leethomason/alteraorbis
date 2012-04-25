@@ -241,6 +241,13 @@ public:
 		GLASSERT( i >= 0 && i < EL_MAX_INSTANCE );
 		instanceMatrix[i] = mat; 
 	}
+	void InstanceParam( int i, const grinliz::Vector4F& v ) {
+		GLASSERT( i >= 0 && i < EL_MAX_INSTANCE );
+		instanceParam[i] = v; 
+	}
+	void SetParam( const grinliz::Vector4F& v ) {
+		InstanceParam( 0, v );
+	}
 
 	void SetStencilMode( StencilMode value ) { stencilMode = value; }
 	void SetDepthWrite( bool value ) { depthWrite = value; }
@@ -252,15 +259,7 @@ public:
 	static void MultMatrix( MatrixType type, const grinliz::Matrix4& m );
 	static void PopMatrix( MatrixType type );
 
-	// Special, because there is a texture matrix per texture unit. Painful painful system.
-	// Mask is a bit mask:
-	// 1: unit0, 2: unit1, 3:both units
-	static void PushTextureMatrix( int mask );
-	static void MultTextureMatrix( int mask, const grinliz::Matrix4& m );
-	static void PopTextureMatrix( int mask );
-
 	static const grinliz::Matrix4& TopMatrix( MatrixType type );
-	static const grinliz::Matrix4& TopTextureMatrix( int unit );
 	static const grinliz::Matrix4& ViewMatrix();
 
 	void Draw( int instances=0 );
@@ -297,6 +296,7 @@ protected:
 		direction.Set( 0, 0, 0, 0 );
 		ambient.Set( 0, 0, 0, 0 );
 		diffuse.Set( 0, 0, 0, 0 );
+		memset( instanceParam, 0, sizeof(*instanceParam)*EL_MAX_INSTANCE );
 	}
 
 	static void SetState( const GPUShader& );
@@ -308,10 +308,6 @@ private:
 	static MatrixType		matrixMode;		// Note this is static and global!
 	static int vboSupport;
 
-	// Seem to do okay on MODELVIEW and PERSPECTIVE stacks, but
-	// not so much on TEXTURE. Use our own texture stack, one for each texture unit.
-	static MatrixStack textureStack[2];
-	static bool textureXFormInUse[2];
 	static MatrixStack mvStack;
 	static MatrixStack projStack;
 
@@ -320,8 +316,6 @@ private:
 	static bool currentDepthWrite;
 	static bool currentColorWrite;
 	static StencilMode currentStencilMode;
-
-	static void SetTextureXForm( int unit );
 
 protected:
 	static int trianglesDrawn;
@@ -358,6 +352,7 @@ protected:
 	grinliz::Color4F	diffuse;
 
 	grinliz::Matrix4	instanceMatrix[EL_MAX_INSTANCE];
+	grinliz::Vector4F	instanceParam[EL_MAX_INSTANCE];
 };
 
 

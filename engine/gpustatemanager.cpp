@@ -172,10 +172,8 @@ void MatrixStack::Multiply( const grinliz::Matrix4& m )
 /*static*/ int			GPUShader::drawCalls = 0;
 /*static*/ uint32_t		GPUShader::uid = 0;
 /*static*/ GPUShader::MatrixType GPUShader::matrixMode = MODELVIEW_MATRIX;
-/*static*/ MatrixStack	GPUShader::textureStack[2];
 /*static*/ MatrixStack	GPUShader::mvStack;
 /*static*/ MatrixStack	GPUShader::projStack;
-/*static*/ bool			GPUShader::textureXFormInUse[2] = { false, false };
 /*static*/ int			GPUShader::vboSupport = 0;
 /*static*/ GPUShader::BlendMode	GPUShader::currentBlend = BLEND_NONE;
 /*static*/ bool			GPUShader::currentDepthWrite = true;
@@ -266,16 +264,6 @@ void MatrixStack::Multiply( const grinliz::Matrix4& m )
 }
 
 
-void GPUShader::SetTextureXForm( int unit )
-{
-	if ( textureStack[unit].NumMatrix()>1 || textureXFormInUse[unit] ) 
-	{
-		textureXFormInUse[unit] = textureStack[unit].NumMatrix()>1;
-	}
-	CHECK_GL_ERROR;
-}
-
-
 //static 
 void GPUShader::SetState( const GPUShader& ns )
 {
@@ -287,14 +275,14 @@ void GPUShader::SetState( const GPUShader& ns )
 
 	int flags = 0;
 	flags |= ( ns.HasTexture0() ) ? ShaderManager::TEXTURE0 : 0;
-	flags |= (textureStack[0].NumMatrix()>1 || textureXFormInUse[0]) ? ShaderManager::TEXTURE0_TRANSFORM : 0;
 	flags |= (ns.HasTexture0() && (ns.texture0->Format() == Texture::ALPHA )) ? ShaderManager::TEXTURE0_ALPHA_ONLY : 0;
-	flags |= (ns.stream.nTexture0 == 3 ) ? ShaderManager::TEXTURE0_3COMP : 0;
+//	flags |= (ns.stream.nTexture0 == 3 ) ? ShaderManager::TEXTURE0_3COMP : 0;
+	GLASSERT( !ns.HasTexture0() || ns.stream.nTexture0 == 2 );
 
 	flags |= ( ns.HasTexture1() ) ? ShaderManager::TEXTURE1 : 0;
-	flags |= (textureStack[1].NumMatrix()>1 || textureXFormInUse[1]) ? ShaderManager::TEXTURE1_TRANSFORM : 0;
 	flags |= (ns.HasTexture1() && (ns.texture1->Format() == Texture::ALPHA )) ? ShaderManager::TEXTURE1_ALPHA_ONLY : 0;
-	flags |= (ns.stream.nTexture1 == 3 ) ? ShaderManager::TEXTURE1_3COMP : 0;
+//	flags |= (ns.stream.nTexture1 == 3 ) ? ShaderManager::TEXTURE1_3COMP : 0;
+	GLASSERT( !ns.HasTexture1() || ns.stream.nTexture0 == 2 );
 
 	flags |= ns.stream.HasColor() ? ShaderManager::COLORS : 0;
 	flags |= ( ns.color.r != 1.f || ns.color.g != 1.f || ns.color.b != 1.f || ns.color.a != 1.f ) ? ShaderManager::COLOR_MULTIPLIER : 0;
@@ -306,12 +294,14 @@ void GPUShader::SetState( const GPUShader& ns )
 			flags |= ShaderManager::LIGHTING_DIFFUSE;
 	}
 
-	flags |= ns.shaderFlags;
+	flags |= ns.shaderFlags;	// Includes: TEXTUREx_TRANSFORM, PREMULT, etc.
 
 	shadman->ActivateShader( flags );
 	shadman->ClearStream();
 
 	const Matrix4& mv = ns.TopMatrix( GPUShader::MODELVIEW_MATRIX );
+
+	bool paramNeeded = shadman->ParamNeeded();
 
 	if ( flags & ShaderManager::INSTANCE ) {
 		Matrix4 vp;
@@ -320,11 +310,17 @@ void GPUShader::SetState( const GPUShader& ns )
 		shadman->SetUniformArray( ShaderManager::U_M_MAT_ARR, EL_MAX_INSTANCE, ns.instanceMatrix );
 		GLASSERT( ns.stream.instanceIDOffset > 0 );
 		shadman->SetStreamData( ShaderManager::A_INSTANCE_ID, 1, GL_INT, ns.stream.stride, PTR( ns.streamPtr, ns.stream.instanceIDOffset ) );
+		if ( paramNeeded ) {
+			shadman->SetUniformArray( ShaderManager::U_PARAM_ARR, EL_MAX_INSTANCE, ns.instanceParam );
+		}
 	}
 	else {
 		Matrix4 mvp;
 		MultMatrix4( ns.TopMatrix( GPUShader::PROJECTION_MATRIX ), mv, &mvp );
 		shadman->SetUniform( ShaderManager::U_MVP_MAT, mvp );
+		if ( paramNeeded ) {
+			shadman->SetUniform( ShaderManager::U_PARAM, ns.instanceParam[0] );
+		}
 	}
 
 	// Texture1
@@ -334,9 +330,9 @@ void GPUShader::SetState( const GPUShader& ns )
 		glBindTexture( GL_TEXTURE_2D, ns.texture1->GLID() );
 		shadman->SetTexture( 1, ns.texture1 );
 		shadman->SetStreamData( ShaderManager::A_TEXTURE1, ns.stream.nTexture1, GL_FLOAT, ns.stream.stride, PTR( ns.streamPtr, ns.stream.texture1Offset ) );
-		if ( flags & ShaderManager::TEXTURE1_TRANSFORM ) {
-			shadman->SetUniform( ShaderManager::U_TEXTURE1_MAT, textureStack[1].Top() );
-		}	
+		//if ( flags & ShaderManager::TEXTURE1_TRANSFORM ) {
+		//	shadman->SetUniform( ShaderManager::U_TEXTURE1_MAT, textureStack[1].Top() );
+		//}	
 	}
 	CHECK_GL_ERROR;
 
@@ -347,9 +343,9 @@ void GPUShader::SetState( const GPUShader& ns )
 		glBindTexture( GL_TEXTURE_2D, ns.texture0->GLID() );
 		shadman->SetTexture( 0, ns.texture0 );
 		shadman->SetStreamData( ShaderManager::A_TEXTURE0, ns.stream.nTexture0, GL_FLOAT, ns.stream.stride, PTR( ns.streamPtr, ns.stream.texture0Offset ) );
-		if ( flags & ShaderManager::TEXTURE0_TRANSFORM ) {
-			shadman->SetUniform( ShaderManager::U_TEXTURE0_MAT, textureStack[0].Top() );
-		}
+		//if ( flags & ShaderManager::TEXTURE0_TRANSFORM ) {
+		//	shadman->SetUniform( ShaderManager::U_TEXTURE0_MAT, textureStack[0].Top() );
+		//}
 	}
 	CHECK_GL_ERROR;
 
@@ -781,35 +777,9 @@ const grinliz::Matrix4& GPUShader::TopMatrix( MatrixType type )
 }
 
 
-const grinliz::Matrix4& GPUShader::TopTextureMatrix( int unit )
-{
-	GLASSERT( unit >= 0 && unit < 2 );
-	return textureStack[unit].Top();
-}
-
 const grinliz::Matrix4& GPUShader::ViewMatrix()
 {
 	return mvStack.Bottom();
-}
-
-
-void GPUShader::PushTextureMatrix( int mask )
-{
-	if ( mask & 1 ) textureStack[0].Push();
-	if ( mask & 2 ) textureStack[1].Push();
-}
-
-
-void GPUShader::MultTextureMatrix( int mask, const grinliz::Matrix4& m )
-{
-	if ( mask & 1 ) textureStack[0].Multiply( m );
-	if ( mask & 2 ) textureStack[1].Multiply( m );
-}
-
-void GPUShader::PopTextureMatrix( int mask )
-{
-	if ( mask & 1 ) textureStack[0].Pop();
-	if ( mask & 2 ) textureStack[1].Pop();
 }
 
 

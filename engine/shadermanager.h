@@ -30,13 +30,11 @@ public:
 	enum {
 		TEXTURE0			= (1<<0),		// Texture is in use. Note that the sampling state (linear, nearest) is saved with the texture.
 		TEXTURE0_ALPHA_ONLY = (1<<1),		// Texture is only alpha, which composites differently.
-		TEXTURE0_TRANSFORM	= (1<<2),		// Texture has a texture transform.
-		TEXTURE0_3COMP		= (1<<3),		// Uses 3 components for the texture (for feeding a travsform, usually.)
+		TEXTURE0_TRANSFORM	= (1<<2),		// Texture has a texture transform. *param*
 
 		TEXTURE1			= (1<<4),
 		TEXTURE1_ALPHA_ONLY	= (1<<5),
 		TEXTURE1_TRANSFORM	= (1<<6),
-		TEXTURE1_3COMP		= (1<<7),
 		
 		COLORS				= (1<<8),		// Per-vertex colors.
 		COLOR_MULTIPLIER	= (1<<9),		// Global color multiplier.
@@ -60,6 +58,7 @@ public:
 	void RemoveDeviceLossHandler( IDeviceLossHandler* handler );
 
 	void ActivateShader( int flags );
+	bool ParamNeeded() const { return active->ParamNeeded(); }
 
 	// Warning: must match gAttributeName
 	enum {
@@ -79,15 +78,15 @@ public:
 	enum {
 		U_MVP_MAT,		
 		U_M_MAT_ARR,	// array for instancing
+		U_PARAM_ARR,	// params for instancing
 
 		U_NORMAL_MAT,
-		U_TEXTURE0_MAT,
-		U_TEXTURE1_MAT,
 		U_COLOR_MULT,
 		U_LIGHT_DIR,
 		U_AMBIENT,
 		U_DIFFUSE,
 		U_RADIUS,
+		U_PARAM,
 		MAX_UNIFORM
 	};
 
@@ -102,6 +101,7 @@ public:
 	void SetUniform( int id, float value );
 
 	void SetUniformArray( int id, int count, const grinliz::Matrix4* mat );
+	void SetUniformArray( int id, int count, const grinliz::Vector4F* params );
 
 private:
 	static ShaderManager* instance;
@@ -112,6 +112,9 @@ private:
 			vertexProg = fragmentProg = prog = 0;
 			for( int i=0; i<MAX_ATTRIBUTE; ++i ) attributeLoc[i] = -1;
 			for( int i=0; i<MAX_UNIFORM; ++i ) uniformLoc[i] = -1;
+		}
+		bool ParamNeeded() const { 
+			return (flags & ( ShaderManager::TEXTURE0_TRANSFORM | ShaderManager::TEXTURE1_TRANSFORM )) != 0; 
 		}
 
 		int flags;

@@ -66,7 +66,7 @@ public:
 private:
 	struct Item {
 		Model*					model;
-		const ModelAtom*		atom;	// note the hash below counts on atom & param being adjacent and contiguous
+		const ModelAtom*		atom;	
 		grinliz::Vector4F		param;	// color, texture xForm, etc. Not yet supported. Needs sorting
 		Item*					next;
 	};
@@ -92,12 +92,13 @@ private:
 
 	static int CompareAtom( const void* vi0, const void* vi1 ) 
 	{
-		const Item* i0 = *((const Item**)vi0);
-		const Item* i1 = *((const Item**)vi1);
+		const Item** i0 = (const Item**)vi0;
+        const Item** i1 = (const Item**)vi1;
+        return (int)((*i0)->atom) - (int)((*i1)->atom);
 
-		int h0 = (int)grinliz::Random::Hash( &i0->atom, 8 );
-		int h1 = (int)grinliz::Random::Hash( &i1->atom, 8 );
-		return h0 - h1;
+		//int h0 = (int)grinliz::Random::Hash( &i0->atom, 8 );
+		//int h1 = (int)grinliz::Random::Hash( &i1->atom, 8 );
+		//return h0 - h1;
 	}
 
 	State* FindState( const State& state );
