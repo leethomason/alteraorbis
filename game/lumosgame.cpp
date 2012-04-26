@@ -1,4 +1,5 @@
 #include "lumosgame.h"
+#include "gamelimits.h"
 
 #include "../scenes/titlescene.h"
 #include "../scenes/dialogscene.h"
@@ -216,5 +217,15 @@ void LumosGame::PositionStd( gamui::PushButton* okay, gamui::PushButton* cancel 
 	
 	if ( cancel )
 		layout.PosAbs( cancel, LumosGame::CANCEL_X, -1 );
+}
+
+
+
+float LumosGame::RadiusOfBase( const ModelResource* res )
+{
+	const Rectangle3F& b = res->AABB();
+	float radius = Mean( b.SizeX(), b.SizeZ() )*0.5f;
+	radius = Min( radius, MAX_BASE_RADIUS );
+	return radius;
 }
 

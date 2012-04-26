@@ -46,16 +46,6 @@ void RenderComponent::DoUpdate()
 }
 
 
-float RenderComponent::RadiusOfBase()
-{
-	if ( resource ) {
-		const Rectangle3F b = resource->AABB();
-		float ave = Mean( b.SizeX(), b.SizeZ() );
-		return ave * 0.5f;
-	}
-	return 0;
-}
-
 /*
 void RenderComponent::SetModelFlag( int flag )
 {

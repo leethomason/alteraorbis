@@ -46,6 +46,7 @@ public:
 					int *pathLen,
 					int maxPath,
 					bool showDebugging = false );
+	//void GetBlocks( grinliz::Vector2F
 
 	// ---- Map ---- //
 	virtual void Draw3D(  const grinliz::Color3F& colorMult, GPUShader::StencilMode );

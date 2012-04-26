@@ -1,4 +1,5 @@
 #include "debugpathcomponent.h"
+#include "lumosgame.h"
 
 #include "../engine/engine.h"
 #include "../engine/texture.h"
@@ -8,9 +9,11 @@
 
 using namespace grinliz;
 
-DebugPathComponent::DebugPathComponent( Engine* _engine )
+DebugPathComponent::DebugPathComponent( Engine* _engine, WorldMap* _map, LumosGame* _game )
 {
 	engine = _engine;
+	map = _map;
+	game = _game;
 	resource = ModelResourceManager::Instance()->GetModelResource( "unitPlateCentered" );
 }
 
@@ -47,7 +50,8 @@ void DebugPathComponent::DoTick( U32 delta )
 
 		RenderComponent* render = parentChit->GetRenderComponent();
 		if ( render ) {
-			model->SetScale( render->RadiusOfBase()*2.0f );
+			float radius = game->RadiusOfBase( resource );
+			model->SetScale( radius*2.0f );
 		}
 		model->SetPos( pos );
 		Vector4F color = { 1, 0, 0, 1 };

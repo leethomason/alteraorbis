@@ -55,6 +55,8 @@ public:
 	void InitStd( gamui::Gamui* g, gamui::PushButton* okay, gamui::PushButton* cancel );
 	void PositionStd( gamui::PushButton* okay, gamui::PushButton* cancel );
 
+	float RadiusOfBase( const ModelResource* );
+
 private:
 	void InitButtonLooks();
 

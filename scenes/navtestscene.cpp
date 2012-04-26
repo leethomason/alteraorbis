@@ -68,7 +68,7 @@ NavTestScene::NavTestScene( LumosGame* game ) : Scene( game )
 	chit = chitBag.CreateTestChit( engine, "humanFemale" );
 	PathMoveComponent* pmc = new PathMoveComponent( map );
 	chit->Add( pmc );
-	chit->Add( new DebugPathComponent( engine ) );
+	chit->Add( new DebugPathComponent( engine, map, game ) );
 	chit->GetSpatialComponent()->SetPosition( 10.0f, 0.0f, 10.0f );
 }
 

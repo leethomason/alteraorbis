@@ -4,13 +4,15 @@
 #include "../xegame/component.h"
 
 class Engine;
+class WorldMap;
+class LumosGame;
 class Model;
 class ModelResource;
 
 class DebugPathComponent : public Component
 {
 public:
-	DebugPathComponent( Engine* );
+	DebugPathComponent( Engine*, WorldMap*, LumosGame* );
 	~DebugPathComponent();
 
 	virtual const char* Name() const			{ return "DebugPathComponent"; }
@@ -21,6 +23,9 @@ public:
 
 private:
 	Engine* engine;
+	WorldMap* map;
+	LumosGame* game;
+
 	const ModelResource* resource;
 	Model* model;
 };
