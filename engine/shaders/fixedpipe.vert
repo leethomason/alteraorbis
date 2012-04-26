@@ -5,7 +5,7 @@ uniform mat4 	u_mvpMatrix;		// model-view-projection.
 #if INSTANCE == 1
 	uniform mat4 	u_mMatrix[EL_MAX_INSTANCE];		// Each instance gets its own transform. Burns up uniforms; this can't be huge.
 	#if PARAM == 1
-		uniform vec4	u_param[EL_MAX_INSTANCE];	// Arbitrary params, if used. (texture xform, color, etc.)
+		uniform vec4	u_paramArr[EL_MAX_INSTANCE];	// Arbitrary params, if used. (texture xform, color, etc.)
 	#endif
 	attribute float a_instanceID;					// Index into the transformation.
 #else
@@ -50,7 +50,7 @@ void main() {
 	#if PARAM == 1
 		// Don't go insane with #if syntax later:
 		#if INSTANCE == 1
-			vec4 param = u_param[int(a_instanceID)];
+			vec4 param = u_paramArr[int(a_instanceID)];
 		#else
 			vec4 param = u_param;
 		#endif
