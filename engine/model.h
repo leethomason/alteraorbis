@@ -32,6 +32,7 @@ class Texture;
 class SpaceTree;
 class RenderQueue;
 class GPUShader;
+class EngineShaders;
 
 /*
 	v0 v1 v2 v0 v1 v2									vertex (3 points x 2 instances)
@@ -132,12 +133,6 @@ public:
 };
 
 
-struct AuxTextureXForm {
-	void Init()	{ for( int i=0; i<EL_MAX_MODEL_GROUPS; ++i ) m[i].SetIdentity(); }
-	grinliz::Matrix4 m[EL_MAX_MODEL_GROUPS];
-};
-
-
 class ModelResourceManager
 {
 public:
@@ -150,9 +145,6 @@ public:
 	static void Create();
 	static void Destroy();
 
-	AuxTextureXForm* Alloc()		{ return (AuxTextureXForm*) auxPool.Alloc(); }
-	void Free( AuxTextureXForm* a )	{ auxPool.Free( a ); }
-
 private:
 	enum { 
 		MAX_MODELS = 200	// just pointers
@@ -163,7 +155,6 @@ private:
 	static ModelResourceManager* instance;
 	CArray< ModelResource*, MAX_MODELS > modelResArr;
 	CStringMap<	ModelResource* > map;
-	grinliz::MemoryPool auxPool;
 };
 
 
@@ -191,10 +182,12 @@ public:
 	void Init( const ModelResource* resource, SpaceTree* tree );
 	void Free();
 
-	void Queue( RenderQueue* queue, GPUShader* opaque, GPUShader* transparent, GPUShader* emmissive );
+	void Queue( RenderQueue* queue, EngineShaders* shaders );
 
 	enum {
 		MODEL_SELECTABLE			= 0x01,
+		MODEL_PARAM_IS_TEX_XFORM	= 0x02,
+		//MODEL_PARAM_IS_COLOR_XFORM	= 0x04,
 		MODEL_NO_SHADOW				= 0x08,
 		MODEL_INVISIBLE				= 0x10,
 		MODEL_METADATA				= 0x80,		// mapmaker data that isn't displayed in-game
@@ -224,8 +217,16 @@ public:
 	
 	// Set the texture.
 	void SetTexture( Texture* t )	{ setTexture = t; }
-	// NOT CURRENTLY SUPPORTED: see RenderQueue::Add
-	void SetTexXForm( int index, float a=1.0f, float d=1.0f, float x=0.0f, float y=0.0f );
+	void SetTexXForm( int index, float xScale, float yScale, float dx, float dy ) { 
+		GLASSERT( index >= 0 && index < EL_MAX_MODEL_GROUPS );
+		SetFlag( MODEL_PARAM_IS_TEX_XFORM ); 
+		param[index].Set( xScale, yScale, dx, dy );
+	}
+	bool HasTextureXForm( int index ) const
+	{
+		static const grinliz::Vector4F zero = { 0, 0, 0, 0 };
+		return IsFlagSet( MODEL_PARAM_IS_TEX_XFORM ) && param[index] != zero;
+	}
 
 	// AABB for user selection (bigger than the true AABB)
 	void CalcHitAABB( grinliz::Rectangle3F* aabb ) const;
@@ -253,7 +254,6 @@ public:
 	//grinliz::Rectangle2I mapBoundsCache;
 
 	const grinliz::Matrix4& XForm() const;
-	bool HasTextureXForm( int i ) const;
 
 private:
 	void Modify() 
@@ -270,8 +270,8 @@ private:
 	float rot[3];
 	float debugScale;
 
-	AuxTextureXForm		*auxTexture;	// if allocated, then this has texture xforms. Comes from the ModelResourceManager MemoryPool.
 	Texture				*setTexture;	// changes the texture, based on texBehavior
+	grinliz::Vector4F	param[EL_MAX_MODEL_GROUPS];
 
 	int flags;
 

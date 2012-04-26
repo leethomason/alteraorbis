@@ -279,7 +279,6 @@ public:
 
 	static bool SupportsVBOs();
 
-protected:
 
 	GPUShader() : texture0( 0 ), texture1( 0 ), 
 				 streamPtr( 0 ), nIndex( 0 ), indexPtr( 0 ),
@@ -298,6 +297,8 @@ protected:
 		diffuse.Set( 0, 0, 0, 0 );
 		memset( instanceParam, 0, sizeof(*instanceParam)*EL_MAX_INSTANCE );
 	}
+
+protected:
 
 	static void SetState( const GPUShader& );
 	void DebugDraw( const PTVertex* v, int nIndex, const U16* index );

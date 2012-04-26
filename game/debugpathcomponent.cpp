@@ -47,8 +47,8 @@ void DebugPathComponent::DoTick( U32 delta )
 		if ( render ) {
 			model->SetScale( render->RadiusOfBase()*2.0f );
 		}
-
-		model->SetTexXForm( 0, 0, 0, 0.5f, 0.5f );
+		model->SetFlag( Model::MODEL_NO_SHADOW );
+		model->SetTexXForm( 0, 0.5f, 1, 0, 0 );
 		model->SetPos( pos );
 	}
 }

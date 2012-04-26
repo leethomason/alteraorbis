@@ -17,6 +17,7 @@
 #include "texture.h"
 #include "loosequadtree.h"
 #include "renderQueue.h"
+#include "engineshaders.h"
 
 #include "../grinliz/glvector.h"
 #include "../grinliz/glstringutil.h"
@@ -182,7 +183,6 @@ void Model::Init( const ModelResource* resource, SpaceTree* tree )
 	this->resource = resource; 
 	this->tree = tree;
 	this->setTexture = 0;
-	this->auxTexture = 0;
 
 	debugScale = 1.0f;
 	pos.Set( 0, 0, 0 );
@@ -203,10 +203,6 @@ void Model::Init( const ModelResource* resource, SpaceTree* tree )
 
 void Model::Free()
 {
-	if ( auxTexture ) {
-		ModelResourceManager::Instance()->Free( auxTexture );
-		auxTexture = 0;
-	}
 }
 
 
@@ -241,35 +237,6 @@ void Model::SetRotation( float r, int axis )
 		this->rot[axis] = r;		
 		if ( tree )
 			tree->Update( this );	// call because bound computation changes with rotation
-	}
-}
-
-
-bool Model::HasTextureXForm( int i ) const
-{
-	if ( auxTexture ) {
-		// check for identity
-		Matrix4 identity;
-		if ( auxTexture->m[i] != identity ) 
-			return true;
-	}
-	return false;
-}
-
-
-void Model::SetTexXForm( int id, float a, float d, float x, float y )
-{
-	GLASSERT( id >= 0 && id < EL_MAX_MODEL_GROUPS );
-	if ( !auxTexture ) {
-		auxTexture = ModelResourceManager::Instance()->Alloc();
-		auxTexture->Init();
-	}
-
-	if ( a!=1.0f || d!=1.0f || x!=0.0f || y!=0.0f ){
-		auxTexture->m[id].m11 = a;
-		auxTexture->m[id].m22 = d;
-		auxTexture->m[id].m14 = x;
-		auxTexture->m[id].m24 = y;
 	}
 }
 
@@ -320,7 +287,7 @@ void Model::CalcTargetSize( float* width, float* height ) const
 }
 
 
-void Model::Queue( RenderQueue* queue, GPUShader* opaque, GPUShader* transparent, GPUShader* emissive )
+void Model::Queue( RenderQueue* queue, EngineShaders* engineShaders )
 {
 	if ( flags & MODEL_INVISIBLE )
 		return;
@@ -328,19 +295,24 @@ void Model::Queue( RenderQueue* queue, GPUShader* opaque, GPUShader* transparent
 	for( U32 i=0; i<resource->header.nAtoms; ++i ) 
 	{
 		Texture* t = resource->atom[i].texture;
-		GPUShader* shader = opaque;
+
+		int base = EngineShaders::LIGHT;
 		if ( t->Alpha() ) {
 			if ( t->Emissive() )
-				shader = emissive;
+				base = EngineShaders::EMISSIVE;
 			else
-				shader = transparent;
+				base = EngineShaders::BLEND;
 		}
+		int mod = EngineShaders::NONE;
+		if ( HasTextureXForm(i) ) {
+			mod = EngineShaders::TEXXFORM;
+		}
+		GPUShader* shader = engineShaders->GetShader( base, mod );
 
-		Vector4F none = { 0, 0, 0, 0 };
 		queue->Add( this,									// reference back
 					&resource->atom[i],						// model atom to render
 					shader,								
-					none );									// parameter to the shader
+					param[i] );								// parameter to the shader
 	}
 }
 
@@ -504,8 +476,7 @@ const ModelResource* ModelResourceManager::GetModelResource( const char* name, b
 
 ModelResourceManager* ModelResourceManager::instance = 0;
 
-ModelResourceManager::ModelResourceManager() : 
-	auxPool( "auxTextureXForms", sizeof( AuxTextureXForm ) )
+ModelResourceManager::ModelResourceManager()
 {
 }
 	

@@ -27,6 +27,7 @@ public:
 	// Radius of the "base" the model stands on. Used to position
 	// the model so it doesn't walk into walls or other models.
 	float RadiusOfBase();
+	//void SetModelFlag( int flag );
 
 private:
 	Engine* engine;

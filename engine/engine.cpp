@@ -29,6 +29,8 @@
 #include "texture.h"
 #include "particle.h"
 #include "rendertarget.h"
+#include "engineshaders.h"
+
 
 /*
 	XenoEngine-2 has a cleaned up render queue. The sorting of items probably makes the engine
@@ -56,6 +58,7 @@ Engine::Engine( Screenport* port, const gamedb::Reader* database )
 		renderTarget[i] = 0;
 	ShaderManager::Instance()->AddDeviceLossHandler( this );
 	particleSystem = new ParticleSystem();
+	engineShaders = new EngineShaders();
 }
 
 
@@ -67,6 +70,7 @@ Engine::~Engine()
 	delete spaceTree;
 	for( int i=0; i<RT_COUNT; ++i )
 		delete renderTarget[i];
+	delete engineShaders;
 }
 
 
@@ -206,16 +210,17 @@ void Engine::Draw( U32 deltaTime )
 	Vector4F dir;
 	lighting.Query( &ambient, &dir, &diffuse );
 
-	LightShader _lightShader( ambient, dir, diffuse );
-	GPUShader lightShader = _lightShader;	// the sub-classes are causing problems here. Need a base type later.
-	LightShader emissiveLightShader( ambient, dir, diffuse );
-	emissiveLightShader.SetShaderFlag( ShaderManager::EMISSIVE );
-	LightShader blendShader( ambient, dir, diffuse, GPUShader::BLEND_NORMAL );
+	engineShaders->light    = LightShader( ambient, dir, diffuse );
+	engineShaders->emissive = LightShader( ambient, dir, diffuse );
+	engineShaders->emissive.SetShaderFlag( ShaderManager::EMISSIVE );
+	engineShaders->blend    = LightShader( ambient, dir, diffuse, GPUShader::BLEND_NORMAL );
 
 	if ( lighting.hemispheric ) {
-		lightShader.SetShaderFlag( ShaderManager::LIGHTING_HEMI );
-		emissiveLightShader.SetShaderFlag( ShaderManager::LIGHTING_HEMI );
+		engineShaders->light.SetShaderFlag(    ShaderManager::LIGHTING_HEMI );
+		engineShaders->blend.SetShaderFlag(    ShaderManager::LIGHTING_HEMI );
+		engineShaders->emissive.SetShaderFlag( ShaderManager::LIGHTING_HEMI );
 	}
+	engineShaders->Generate();
 
 	Rectangle2I mapBounds( 0, 0, EL_MAP_SIZE-1, EL_MAP_SIZE-1 );
 	if ( map ) {
@@ -228,7 +233,7 @@ void Engine::Draw( U32 deltaTime )
 		GLASSERT( renderQueue->Empty() );
 
 		for( Model* model=modelRoot; model; model=model->next ) {
-			model->Queue( renderQueue, &lightShader, &blendShader, &emissiveLightShader );
+			model->Queue( renderQueue, engineShaders );
 		}
 	}
 
@@ -243,19 +248,20 @@ void Engine::Draw( U32 deltaTime )
 
 		// Tweak the shaders for glow-only rendering.
 		// Make the light shader flat black:
-		GPUShader savedLightShader = lightShader;
-		FlatShader flatShader;
-		flatShader.SetColor( 0, 0, 0 );
-		lightShader = flatShader;
+		GPUShader savedLightShader = engineShaders->light;
+		engineShaders->light = FlatShader();
+		engineShaders->light.SetColor( 0, 0, 0 );
 
 		// And throw the emissive shader to exclusive:
-		emissiveLightShader.SetShaderFlag( ShaderManager::EMISSIVE_EXCLUSIVE );
+		engineShaders->emissive.SetShaderFlag( ShaderManager::EMISSIVE_EXCLUSIVE );
+		engineShaders->Generate();
 
 		renderQueue->Submit( 0, 0, 0, 0 );
 		
 		// recove the shader settings
-		lightShader = savedLightShader;
-		emissiveLightShader.ClearShaderFlag( ShaderManager::EMISSIVE_EXCLUSIVE );
+		engineShaders->light = savedLightShader;
+		engineShaders->emissive.ClearShaderFlag( ShaderManager::EMISSIVE_EXCLUSIVE );
+		engineShaders->Generate();
 		renderTarget[RT_LIGHTS]->SetActive( false, this );
 	}
 

@@ -78,6 +78,7 @@
   <ItemGroup>
     <ClCompile Include="..\engine\camera.cpp" />
     <ClCompile Include="..\engine\engine.cpp" />
+    <ClCompile Include="..\engine\engineshaders.cpp" />
     <ClCompile Include="..\engine\fixedgeom.cpp" />
     <ClCompile Include="..\engine\gpustatemanager.cpp" />
     <ClCompile Include="..\engine\lighting.cpp" />
@@ -128,6 +129,7 @@
     <ClInclude Include="..\engine\camera.h" />
     <ClInclude Include="..\engine\engine.h" />
     <ClInclude Include="..\engine\enginelimits.h" />
+    <ClInclude Include="..\engine\engineshaders.h" />
     <ClInclude Include="..\engine\fixedgeom.h" />
     <ClInclude Include="..\engine\gpustatemanager.h" />
     <ClInclude Include="..\engine\lighting.h" />

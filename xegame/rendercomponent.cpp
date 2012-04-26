@@ -56,3 +56,11 @@ float RenderComponent::RadiusOfBase()
 	return 0;
 }
 
+/*
+void RenderComponent::SetModelFlag( int flag )
+{
+	if ( model ) {
+		model->SetFlag( flag );
+	}
+}
+*/

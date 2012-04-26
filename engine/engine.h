@@ -34,6 +34,7 @@
 class RenderQueue;
 class RenderTarget;
 class ParticleSystem;
+class EngineShaders;
 
 /*
 	Standard state:
@@ -154,6 +155,8 @@ private:
 		RT_COUNT
 	};
 	RenderTarget* renderTarget[RT_COUNT];
+
+	EngineShaders* engineShaders;
 };
 
 #endif // UFOATTACK_ENGINE_INCLUDED
