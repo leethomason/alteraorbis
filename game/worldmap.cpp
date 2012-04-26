@@ -132,6 +132,67 @@ void WorldMap::ClearBlock( const grinliz::Rectangle2I& pos )
 }
 
 
+bool WorldMap::CalcBlockEffect(	const grinliz::Vector2F& pos,
+								float rad,
+								grinliz::Vector2F* force )
+{
+	Vector2I blockPos = { (int)pos.x, (int)pos.y };
+
+	// Is pos inside a block?
+	if ( !grid[INDEX(blockPos.x,blockPos.y)].IsPassable() ) {
+		// Smallest delta:
+		float dx = pos.x - (float)blockPos.x;
+		float dy = pos.y - (float)blockPos.y;
+		float delta = dx;
+		force->Set( -dx, 0 );
+
+		if ( 1.0f-dx < delta ) {
+			delta = 1.f-dx;
+			force->Set( 1.f-dx, 0 );
+		}
+		if ( dy < delta ) {
+			delta = dy;
+			force->Set( 0, -dy );
+		}
+		if ( 1.f-dy < delta ) {
+			delta = 1.f-dy;
+			force->Set( 0, 1.f-dy );
+		}
+		return true;
+	}
+
+	// could be further optimized by doing a radius-squared check first
+	Rectangle2I b = Bounds();
+	static const Vector2I delta[8] = { {-1,-1}, {0,-1}, {1,-1}, {1,0}, {1,1}, {0,1}, {-1,1}, {-1,0} };
+	for( int i=0; i<8; ++i ) {
+		Vector2I block = blockPos + delta[i];
+		if (    b.Contains(block) 
+			 && !grid[INDEX(block.x,block.y)].IsPassable() ) 
+		{
+			Vector2F c = { (float)block.x+0.5f, (float)block.y+0.5f };	// block center.
+			Vector2F p = pos - c;										// translate pos to origin
+			if ( p.x > fabsf(p.y) && (p.x-rad < 0.5f) ) {				// east quadrant
+				force->Set( 0.5f - (p.x-rad), 0 );
+				return true;
+			}
+			if ( -p.x > fabsf(p.y) && (p.x+rad > -0.5f) ) {				// west quadrant
+				force->Set( -0.5f + (p.x+rad), 0 );
+				return true;
+			}
+			if ( p.y > fabsf(p.x) && (p.y-rad < 0.5f) ) {				// north quadrant
+				force->Set( 0, 0.5f - (p.y-rad) );
+				return true;
+			}
+			if ( -p.y > fabsf(p.x) && (p.y+rad > -0.5f) ) {				// south quadrant
+				force->Set( 0, -0.5f + (p.y+rad) );
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+
 bool WorldMap::JointPassable( int x0, int y0, int x1, int y1 )
 {
 	for( int x=x0; x<=x1; ++x ) {

@@ -1,5 +1,7 @@
 #include "debugpathcomponent.h"
 #include "lumosgame.h"
+#include "worldmap.h"
+#include "gamelimits.h"
 
 #include "../engine/engine.h"
 #include "../engine/texture.h"
@@ -48,13 +50,20 @@ void DebugPathComponent::DoTick( U32 delta )
 		Vector3F pos = spatial->GetPosition();
 		pos.y = 0.01f;
 
+		float radius = MAX_BASE_RADIUS;
 		RenderComponent* render = parentChit->GetRenderComponent();
 		if ( render ) {
-			float radius = game->RadiusOfBase( resource );
+			radius = game->RadiusOfBase( resource );
 			model->SetScale( radius*2.0f );
 		}
 		model->SetPos( pos );
-		Vector4F color = { 1, 0, 0, 1 };
+		Vector4F color = { 0, 1, 0, 1 };
+		Vector2F force;
+		Vector2F pos2 = { pos.x, pos.z };
+		if ( map->CalcBlockEffect( pos2, radius, &force ) ) {
+			color.Set( 1, 0, 0, 1 );
+		}
+
 		model->SetColor( color );
 	}
 }

@@ -46,7 +46,9 @@ public:
 					int *pathLen,
 					int maxPath,
 					bool showDebugging = false );
-	//void GetBlocks( grinliz::Vector2F
+	bool CalcBlockEffect(	const grinliz::Vector2F& pos,
+							float rad,
+							grinliz::Vector2F* force );
 
 	// ---- Map ---- //
 	virtual void Draw3D(  const grinliz::Color3F& colorMult, GPUShader::StencilMode );
