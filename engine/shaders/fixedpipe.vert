@@ -62,6 +62,10 @@ void main() {
 		vec4 color = u_colorMult;
 	#endif
 	
+	#if COLOR_PARAM == 1
+		color *= param;
+	#endif
+	
 	#if COLORS == 1
 		color *= a_color;
 	#endif

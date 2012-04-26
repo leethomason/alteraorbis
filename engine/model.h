@@ -187,7 +187,7 @@ public:
 	enum {
 		MODEL_SELECTABLE			= 0x01,
 		MODEL_PARAM_IS_TEX_XFORM	= 0x02,
-		//MODEL_PARAM_IS_COLOR_XFORM	= 0x04,
+		MODEL_PARAM_IS_COLOR		= 0x04,
 		MODEL_NO_SHADOW				= 0x08,
 		MODEL_INVISIBLE				= 0x10,
 		MODEL_METADATA				= 0x80,		// mapmaker data that isn't displayed in-game
@@ -215,8 +215,7 @@ public:
 	void SetScale( float s );
 	float GetScale() const							{ return debugScale; }
 	
-	// Set the texture.
-	void SetTexture( Texture* t )	{ setTexture = t; }
+	// Note that SetTexXForm is mutually exclusive with SetColor
 	void SetTexXForm( int index, float xScale, float yScale, float dx, float dy ) { 
 		GLASSERT( index >= 0 && index < EL_MAX_MODEL_GROUPS );
 		SetFlag( MODEL_PARAM_IS_TEX_XFORM ); 
@@ -226,6 +225,17 @@ public:
 	{
 		static const grinliz::Vector4F zero = { 0, 0, 0, 0 };
 		return IsFlagSet( MODEL_PARAM_IS_TEX_XFORM ) && param[index] != zero;
+	}
+
+	// Note that SetTexXForm is mutually exclusive with SetColor
+	void SetColor( const grinliz::Vector4F& color ) {
+		SetFlag( MODEL_PARAM_IS_COLOR ); 
+		for( int i=0; i<EL_MAX_MODEL_GROUPS; ++i ) {
+			param[i] = color;
+		}
+	}
+	bool HasColor() const {
+		return IsFlagSet( MODEL_PARAM_IS_COLOR ) != 0;
 	}
 
 	// AABB for user selection (bigger than the true AABB)
@@ -270,7 +280,6 @@ private:
 	float rot[3];
 	float debugScale;
 
-	Texture				*setTexture;	// changes the texture, based on texBehavior
 	grinliz::Vector4F	param[EL_MAX_MODEL_GROUPS];
 
 	int flags;

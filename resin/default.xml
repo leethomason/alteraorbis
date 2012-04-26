@@ -10,9 +10,8 @@
   <texture filename="charSwatch.png" width="128" height="8" /> 
   <texture filename="characters.png" />
   <texture filename="treetextures.png" />
-  <texture filename="debugging.png" />
-  <texture filename="debuggingCircle.png" />
-  <texture filename="debuggingArrow.png" />
+  <texture filename="debugging.png" noMip="true" />
+
   <!-- note this makes textures and materials the same thing, to have the emissive
        behavior defined like this. That's okay for now.
   -->
@@ -36,6 +35,7 @@
   <model filename="teststructures.ac" modelName="testStruct0"  origin="0 0 0"  shading="flat" polyRemoval="pre" />
   <model filename="teststructures.ac" modelName="testStruct1"  origin="2 0 0"  shading="flat" polyRemoval="pre" />
   <model filename="unitPlateCentered.ac" shading="flat" />
+  <model filename="unitPlateArrow.ac" shading="flat" />
   <model filename="unitCube.ac" shading="flat" />
 
   <!-- Tactical Sprite models are centered at (0,0,0) -->

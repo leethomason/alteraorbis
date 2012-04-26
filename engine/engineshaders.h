@@ -13,14 +13,18 @@ public:
 	GPUShader blend;
 	GPUShader emissive;
 
-	// generated if needed:
+	// generated:
 	GPUShader lightTexXForm;
 	GPUShader blendTexXForm;
 	GPUShader emissiveTexXForm;
 
+	GPUShader lightColor;
+	GPUShader blendColor;
+	GPUShader emissiveColor;
+
 	enum {
 		LIGHT, BLEND, EMISSIVE,		// base
-		NONE, TEXXFORM				// mod
+		NONE, TEXXFORM, COLOR		// mod
 	};
 
 	void Generate();

@@ -36,6 +36,7 @@ public:
 		TEXTURE1_ALPHA_ONLY	= (1<<5),
 		TEXTURE1_TRANSFORM	= (1<<6),
 		
+		COLOR_PARAM			= (1<<7),
 		COLORS				= (1<<8),		// Per-vertex colors.
 		COLOR_MULTIPLIER	= (1<<9),		// Global color multiplier.
 		LIGHTING_DIFFUSE	= (1<<10),		// Diffuse lighting. Requires per vertex normals, 
@@ -114,7 +115,7 @@ private:
 			for( int i=0; i<MAX_UNIFORM; ++i ) uniformLoc[i] = -1;
 		}
 		bool ParamNeeded() const { 
-			return (flags & ( ShaderManager::TEXTURE0_TRANSFORM | ShaderManager::TEXTURE1_TRANSFORM )) != 0; 
+			return (flags & ( ShaderManager::TEXTURE0_TRANSFORM | ShaderManager::TEXTURE1_TRANSFORM + ShaderManager::COLOR_PARAM )) != 0; 
 		}
 
 		int flags;

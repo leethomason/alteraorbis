@@ -1,6 +1,7 @@
 #include "debugpathcomponent.h"
 
 #include "../engine/engine.h"
+#include "../engine/texture.h"
 #include "../xegame/chit.h"
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/rendercomponent.h"
@@ -23,6 +24,7 @@ void DebugPathComponent::OnAdd( Chit* chit )
 {
 	Component::OnAdd( chit );
 	model = engine->AllocModel( resource );
+	model->SetFlag( Model::MODEL_NO_SHADOW );
 }
 
 
@@ -47,9 +49,9 @@ void DebugPathComponent::DoTick( U32 delta )
 		if ( render ) {
 			model->SetScale( render->RadiusOfBase()*2.0f );
 		}
-		model->SetFlag( Model::MODEL_NO_SHADOW );
-		model->SetTexXForm( 0, 0.5f, 1, 0, 0 );
 		model->SetPos( pos );
+		Vector4F color = { 1, 0, 0, 1 };
+		model->SetColor( color );
 	}
 }
 

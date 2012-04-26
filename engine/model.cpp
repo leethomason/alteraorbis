@@ -182,12 +182,10 @@ void Model::Init( const ModelResource* resource, SpaceTree* tree )
 {
 	this->resource = resource; 
 	this->tree = tree;
-	this->setTexture = 0;
 
 	debugScale = 1.0f;
 	pos.Set( 0, 0, 0 );
 	rot[0] = rot[1] = rot[2] = 0.0f;
-	setTexture = 0;
 	Modify();
 
 	if ( tree ) {
@@ -306,6 +304,9 @@ void Model::Queue( RenderQueue* queue, EngineShaders* engineShaders )
 		int mod = EngineShaders::NONE;
 		if ( HasTextureXForm(i) ) {
 			mod = EngineShaders::TEXXFORM;
+		}
+		else if ( HasColor() ) {
+			mod = EngineShaders::COLOR;
 		}
 		GPUShader* shader = engineShaders->GetShader( base, mod );
 
