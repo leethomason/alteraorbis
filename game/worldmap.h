@@ -46,9 +46,22 @@ public:
 					int *pathLen,
 					int maxPath,
 					bool showDebugging = false );
-	bool CalcBlockEffect(	const grinliz::Vector2F& pos,
-							float rad,
-							grinliz::Vector2F* force );
+
+	enum BlockResult {
+		NO_EFFECT,
+		FORCE_APPLIED,
+		STUCK
+	};
+
+	// Calculate the effect of walls on 'pos'. Note that
+	// there can be multiple walls, and this takes multiple calls.
+	BlockResult CalcBlockEffect(	const grinliz::Vector2F& pos,
+									float radius,
+									grinliz::Vector2F* force );
+	// Call CalcBlockEffect and return the result.
+	BlockResult ApplyBlockEffect(	const grinliz::Vector2F inPos, 
+									float radius, 
+									grinliz::Vector2F* outPos );
 
 	// ---- Map ---- //
 	virtual void Draw3D(  const grinliz::Color3F& colorMult, GPUShader::StencilMode );

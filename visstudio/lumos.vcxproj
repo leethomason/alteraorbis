@@ -181,6 +181,7 @@
     <ClInclude Include="..\xegame\spatialcomponent.h" />
     <ClInclude Include="..\xegame\testmap.h" />
     <ClInclude Include="..\xegame\ufosound.h" />
+    <ClInclude Include="..\xegame\xegamelimits.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\engine\sources.mk" />

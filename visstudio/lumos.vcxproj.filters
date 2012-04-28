@@ -345,6 +345,9 @@
     <ClInclude Include="..\engine\engineshaders.h">
       <Filter>Source Files\engine</Filter>
     </ClInclude>
+    <ClInclude Include="..\xegame\xegamelimits.h">
+      <Filter>Source Files\xegame</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\engine\sources.mk">

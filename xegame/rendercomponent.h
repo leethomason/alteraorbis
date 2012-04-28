@@ -2,6 +2,7 @@
 #define RENDER_COMPONENT_INCLUDED
 
 #include "component.h"
+#include "../xegame/xegamelimits.h"
 
 class Engine;
 class ModelResource;

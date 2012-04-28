@@ -2,6 +2,7 @@
 #include "worldmap.h"
 
 #include "../xegame/spatialcomponent.h"
+#include "../xegame/rendercomponent.h"
 #include "../xegame/chitbag.h"
 
 #include <cstring>
@@ -14,6 +15,8 @@ void PathMoveComponent::OnAdd( Chit* chit )
 	MoveComponent::OnAdd( chit );
 	nPath = pos = 0;
 	dest.Zero();
+	blockForceApplied = false;
+	isStuck = false;
 }
 
 
@@ -27,12 +30,21 @@ void PathMoveComponent::SetDest( const Vector2F& d )
 {
 	SpatialComponent* spatial = parentChit->GetSpatialComponent();
 	GLASSERT( spatial );
+	RenderComponent* render = parentChit->GetRenderComponent();
+	GLASSERT( render );
+
 	const Vector3F& posVec = spatial->GetPosition();
 
 	Vector2F start = { posVec.x, posVec.z };
 	dest = d;
 	nPath = 0;
 	pos = 0;
+
+	// Make sure the 'dest' is actually a point we can get to.
+	float radius = render->RadiusOfBase();
+	if ( map->ApplyBlockEffect( d, radius, &dest ) ) {
+		GLOUTPUT(( "Dest adjusted. (%.1f,%.1f) -> (%.1f,%.1f)\n", d.x, d.y, dest.x, dest.y ));
+	}
 
 	bool okay = map->CalcPath( start, dest, path, &nPath, MAX_MOVE_PATH, pathDebugging ); 
 	if ( !okay ) {
@@ -52,7 +64,7 @@ void PathMoveComponent::GetPosRot( grinliz::Vector2F* pos, float* rot )
 }
 
 
-void PathMoveComponent::SetPosRot( grinliz::Vector2F& pos, float rot )
+void PathMoveComponent::SetPosRot( const grinliz::Vector2F& pos, float rot )
 {
 	SpatialComponent* spatial = parentChit->GetSpatialComponent();
 	GLASSERT( spatial );
@@ -160,10 +172,31 @@ void PathMoveComponent::RotationFirst( U32 delta )
 }
 
 
+void PathMoveComponent::ApplyBlocks()
+{
+	RenderComponent* render = parentChit->GetRenderComponent();
+
+	Vector2F pos2;
+	float rotation = 0;
+	float radius = render->RadiusOfBase();
+
+	GetPosRot( &pos2, &rotation );
+
+	WorldMap::BlockResult result = map->ApplyBlockEffect( pos2, radius, &pos2 );
+	blockForceApplied = ( result == WorldMap::FORCE_APPLIED );
+	isStuck = ( result == WorldMap::STUCK );
+
+	SetPosRot( pos2, rotation );
+}
+
+
 void PathMoveComponent::DoTick( U32 delta )
 {
-	if ( rotationFirst )
-		RotationFirst( delta );
-	else
-		MoveFirst( delta );
+	if ( pos < nPath ) {
+		if ( rotationFirst )
+			RotationFirst( delta );
+		else
+			MoveFirst( delta );
+		ApplyBlocks();
+	}
 }

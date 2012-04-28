@@ -26,11 +26,17 @@ public:
 	virtual void DoTick( U32 delta );
 
 	void SetDest( const grinliz::Vector2F& dest );
+
 	// Set whether rotation is prioritized over movement. (Default
 	// to true.) If false, then motion will happen and the rotation
 	// is set from the motion.
 	void SetRotationFirst( bool r ) { rotationFirst = r; }
 	void SetPathDebugging( bool d )	{ pathDebugging = d; }
+
+	// Status info
+	int BlockForceApplied() const	{ return blockForceApplied; }
+	bool IsStuck() const			{ return isStuck; }
+	bool IsMoving() const			{ return pos < nPath; }
 
 private:
 	float Travel( float rate, U32 time ) const {
@@ -38,10 +44,14 @@ private:
 	}
 	
 	void GetPosRot( grinliz::Vector2F* pos, float* rot );
-	void SetPosRot( grinliz::Vector2F& pos, float rot );
-	
+	void SetPosRot( const grinliz::Vector2F& pos, float rot );
+
+	// Move, then set rotation from movement.
 	void MoveFirst( U32 delta );
+	// Rotate, then move in that direction.
 	void RotationFirst( U32 delta );
+	// Keep from hitting world objects.
+	void ApplyBlocks();
 
 	WorldMap* map;
 	int nPath;
@@ -49,6 +59,8 @@ private:
 	grinliz::Vector2F dest;
 	bool rotationFirst;
 	bool pathDebugging;
+	bool blockForceApplied;
+	bool isStuck;
 
 	grinliz::Vector2F path[MAX_MOVE_PATH];
 };

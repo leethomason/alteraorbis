@@ -20,7 +20,6 @@ static const int MAX_MAP_SIZE = 1024;
 static const int MAX_MOVE_PATH = MAX_MAP_SIZE/2;	// repath if we need to
 
 static const float METERS_PER_GRID = 2.0f;
-static const float MAX_BASE_RADIUS = 0.4f;	// 80% of a grid unit.
 
 // Debugging values:
 static const float MOVE_SPEED = 2.0f;			// grid/second
