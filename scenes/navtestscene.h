@@ -9,7 +9,7 @@ class LumosGame;
 class Engine;
 class WorldMap;
 
-class NavTestScene : public Scene
+class NavTestScene : public Scene, public IChitListener
 {
 public:
 	NavTestScene( LumosGame* game );
@@ -26,6 +26,8 @@ public:
 	virtual void ItemTapped( const gamui::UIItem* item );
 	virtual void Draw3D( U32 deltaTime );
 
+	virtual void OnChitMsg( Chit* chit, const char* componentName, int id );
+
 private:
 	gamui::PushButton okay,
 					  block,
@@ -33,7 +35,8 @@ private:
 	gamui::TextLabel  textLabel;
 	gamui::ToggleButton showAdjacent, 
 		                showZonePath,
-						showOverlay;
+						showOverlay,
+						toggleBlock;
 
 	Engine* engine;
 	WorldMap* map;

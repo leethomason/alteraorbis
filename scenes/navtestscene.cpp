@@ -43,6 +43,10 @@ NavTestScene::NavTestScene( LumosGame* game ) : Scene( game )
 	showOverlay.SetSize( layout.Width(), layout.Height() );
 	showOverlay.SetText( "Over" );
 
+	toggleBlock.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
+	toggleBlock.SetSize( layout.Width(), layout.Height() );
+	toggleBlock.SetText( "TogBlock" );
+
 	showAdjacent.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
 	showAdjacent.SetSize( layout.Width(), layout.Height() );
 	showAdjacent.SetText( "Adj" );
@@ -51,8 +55,6 @@ NavTestScene::NavTestScene( LumosGame* game ) : Scene( game )
 	showZonePath.SetSize( layout.Width(), layout.Height() );
 	showZonePath.SetText( "Region" );
 	showZonePath.SetText2( "Path" );
-
-	//showAdjacent.AddToToggleGroup( &showZonePath );
 
 	textLabel.Init( &gamui2D );
 
@@ -70,6 +72,7 @@ NavTestScene::NavTestScene( LumosGame* game ) : Scene( game )
 	chit->Add( pmc );
 	chit->Add( new DebugPathComponent( engine, map, game ) );
 	chit->GetSpatialComponent()->SetPosition( 10.0f, 0.0f, 10.0f );
+	chit->AddListener( this );
 }
 
 
@@ -93,6 +96,7 @@ void NavTestScene::Resize()
 	layout.PosAbs( &showOverlay,   0, -2 );
 	layout.PosAbs( &showAdjacent, 1, -2 );
 	layout.PosAbs( &showZonePath, 2, -2 );
+	layout.PosAbs( &toggleBlock, 3, -2 );
 
 	layout.PosAbs( &textLabel, 0, -3 );
 }
@@ -139,14 +143,6 @@ void NavTestScene::Tap( int action, const grinliz::Vector2F& view, const grinliz
 			if ( showAdjacent.Down() ) {
 				map->ShowAdjacentRegions( tapMark.x, tapMark.z );
 			}
-//			else if ( showZonePath.Down() ) {
-//				map->ShowRegionPath( oldMark.x, oldMark.z, tapMark.x, tapMark.z );
-//				Vector2F start = { oldMark.x, oldMark.z };
-//				Vector2F end   = { tapMark.x, tapMark.z };
-//				::CDynArray< Vector2F > path;
-//				map->CalcPath( start, end, &path, true );
-//			}
-
 		}
 	}
 }
@@ -189,6 +185,12 @@ void NavTestScene::ItemTapped( const gamui::UIItem* item )
 void NavTestScene::DoTick( U32 deltaTime )
 {
 	chitBag.DoTick( deltaTime );
+}
+
+
+void NavTestScene::OnChitMsg( Chit* chit, const char* componentName, int id )
+{
+	GLOUTPUT(( "OnChitMsg %s %d\n", componentName, id ));
 }
 
 

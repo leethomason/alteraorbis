@@ -15,6 +15,10 @@ class WorldMap;
 class PathMoveComponent : public MoveComponent
 {
 public:
+	enum {
+		MSG_DESTINATION_REACHED
+	};
+
 	PathMoveComponent( WorldMap* _map ) : map( _map ), nPath( 0 ), pos( 0 ), rotationFirst(true), pathDebugging( false ) {}
 	virtual ~PathMoveComponent() {}
 

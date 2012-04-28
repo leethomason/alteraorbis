@@ -13,6 +13,14 @@ class RenderComponent;
 class MoveComponent;
 
 class ChitBag;
+class Chit;
+
+class IChitListener
+{
+public:
+	virtual void OnChitMsg( Chit* chit, const char* componentName, int id ) = 0;
+};
+
 
 /* General purpose GameObject.
    A class to hold Components.
@@ -42,11 +50,16 @@ public:
 	void RequestUpdate();
 	ChitBag* GetChitBag() { return chitBag; }
 
+	void SendMessage( const char* componentName, int id );
+	void AddListener( IChitListener* listener );
+	void RemoveListener( IChitListener* listener );
+
 private:
 
 	ChitBag* chitBag;
 	int id;
 	int nTickers;	// number of components that need a tick.
+	Simple::CVector<IChitListener*>* listeners;
 
 	enum {
 		SPATIAL,

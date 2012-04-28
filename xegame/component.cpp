@@ -9,6 +9,14 @@ void Component::RequestUpdate()
 }
 
 
+void Component::SendMessage( int id )
+{
+	if ( parentChit ) {
+		parentChit->SendMessage( Name(), id );
+	}
+}
+
+
 ChitBag* Component::GetChitBag()
 {
 	if ( parentChit ) {

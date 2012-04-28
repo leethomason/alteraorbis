@@ -199,5 +199,17 @@ void PathMoveComponent::DoTick( U32 delta )
 		else
 			MoveFirst( delta );
 		ApplyBlocks();
+
+		if ( pos == nPath ) {
+			if ( dest.Equal( path[nPath-1], 0.1f ) ) {
+				// actually reached the end!
+				SendMessage( MSG_DESTINATION_REACHED );
+			}
+			else {
+				// continue path:
+				Vector2F d = dest;
+				SetDest( d );
+			}
+		}
 	}
 }

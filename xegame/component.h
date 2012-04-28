@@ -34,6 +34,8 @@ public:
 
 protected:
 	void RequestUpdate();
+	void SendMessage( int id );
+
 	ChitBag* GetChitBag();
 
 	Chit* parentChit;
