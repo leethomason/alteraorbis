@@ -80,6 +80,7 @@
     <ClCompile Include="..\grinliz\glgeometry.cpp" />
     <ClCompile Include="..\grinliz\glmatrix.cpp" />
     <ClCompile Include="..\grinliz\glmemorypool.cpp" />
+    <ClCompile Include="..\grinliz\glnoise.cpp" />
     <ClCompile Include="..\grinliz\glperformance.cpp" />
     <ClCompile Include="..\grinliz\glprime.cpp" />
     <ClCompile Include="..\grinliz\glrandom.cpp" />
@@ -112,6 +113,7 @@
     <ClInclude Include="..\grinliz\glmath.h" />
     <ClInclude Include="..\grinliz\glmatrix.h" />
     <ClInclude Include="..\grinliz\glmemorypool.h" />
+    <ClInclude Include="..\grinliz\glnoise.h" />
     <ClInclude Include="..\grinliz\glperformance.h" />
     <ClInclude Include="..\grinliz\glprime.h" />
     <ClInclude Include="..\grinliz\glpublisher.h" />

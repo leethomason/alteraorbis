@@ -4,8 +4,11 @@
 
 #include "../engine/uirendering.h"
 #include "../engine/texture.h"
+
 #include "../game/lumosgame.h"
+
 #include "../grinliz/glstringutil.h"
+#include "../grinliz/glnoise.h"
 
 using namespace gamui;
 using namespace grinliz;
@@ -54,8 +57,24 @@ void NoiseTestScene::CreateTexture( Texture* t )
 {
 	if ( StrEqual( t->Name(), "noise" ) ) {
 		
-		for( int i=0; i<SIZE*SIZE; ++i ) {
-			buffer[i] = random.Rand();
+		PerlinNoise noise( 0 );
+		
+		static float BASE0 = 1.f/32.f;
+		static float BASE1 = 1.f/16.f;
+
+		for( int j=0; j<SIZE; ++j ) {
+			for( int i=0; i<SIZE; ++i ) {
+				
+				float n0 = noise.Noise( BASE0*(float)i, BASE0*(float)j, 0.0f );
+				float n1 = noise.Noise( BASE1*(float)i, BASE1*(float)j, 1.0f );
+				float n = n0 + n1*0.5f;
+				n = PerlinNoise::Normalize( n );
+
+				int gray = LRintf( n*255.f );
+				Color4U8 color = { gray, gray, gray, 255 };
+				U16 c = Surface::CalcRGB16( color );
+				buffer[j*SIZE+i] = c;
+			}
 		}
 		t->Upload( buffer, SIZE*SIZE*sizeof(buffer[0]) );
 	}
