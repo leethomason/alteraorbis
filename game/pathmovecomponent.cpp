@@ -176,17 +176,18 @@ void PathMoveComponent::ApplyBlocks()
 {
 	RenderComponent* render = parentChit->GetRenderComponent();
 
-	Vector2F pos2;
+	Vector2F pos2, newPos2;
 	float rotation = 0;
 	float radius = render->RadiusOfBase();
 
 	GetPosRot( &pos2, &rotation );
+	newPos2 = pos2;
 
-	WorldMap::BlockResult result = map->ApplyBlockEffect( pos2, radius, &pos2 );
+	WorldMap::BlockResult result = map->ApplyBlockEffect( pos2, radius, &newPos2 );
 	blockForceApplied = ( result == WorldMap::FORCE_APPLIED );
 	isStuck = ( result == WorldMap::STUCK );
-
-	SetPosRot( pos2, rotation );
+	
+	SetPosRot( newPos2, rotation );
 }
 
 

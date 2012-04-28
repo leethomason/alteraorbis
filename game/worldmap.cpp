@@ -142,37 +142,47 @@ WorldMap::BlockResult WorldMap::CalcBlockEffect(	const grinliz::Vector2F& pos,
 {
 	Vector2I blockPos = { (int)pos.x, (int)pos.y };
 
-	// Is pos inside a block?
-	if ( !grid[INDEX(blockPos.x,blockPos.y)].IsPassable() ) {
-		return STUCK;
-	}
-
 	// could be further optimized by doing a radius-squared check first
 	Rectangle2I b = Bounds();
-	static const Vector2I delta[8] = { {-1,-1}, {0,-1}, {1,-1}, {1,0}, {1,1}, {0,1}, {-1,1}, {-1,0} };
+	static const Vector2I delta[9] = { {0,0}, {-1,-1}, {0,-1}, {1,-1}, {1,0}, {1,1}, {0,1}, {-1,1}, {-1,0} };
 	static const float EPSILON = 0.0001f;
 
-	for( int i=0; i<8; ++i ) {
+	for( int i=0; i<9; ++i ) {
 		Vector2I block = blockPos + delta[i];
 		if (    b.Contains(block) 
 			 && !grid[INDEX(block.x,block.y)].IsPassable() ) 
 		{
+			// Will find the smallest overlap, and apply.
 			Vector2F c = { (float)block.x+0.5f, (float)block.y+0.5f };	// block center.
 			Vector2F p = pos - c;										// translate pos to origin
+			Vector2F n = p; n.Normalize();
+
 			if ( p.x > fabsf(p.y) && (p.x-rad < 0.5f) ) {				// east quadrant
-				force->Set( 0.5f - (p.x-rad) + EPSILON, 0 );
+				//force->Set( 0.5f - (p.x-rad) + EPSILON, 0 );
+				float dx = 0.5f - (p.x-rad) + EPSILON;
+				GLASSERT( dx > 0 );
+				*force = n * (dx/fabsf(n.x));
 				return FORCE_APPLIED;
 			}
 			if ( -p.x > fabsf(p.y) && (p.x+rad > -0.5f) ) {				// west quadrant
-				force->Set( -0.5f- (p.x+rad) - EPSILON, 0 );
+				//force->Set( -0.5f- (p.x+rad) - EPSILON, 0 );
+				float dx = 0.5f + (p.x+rad) + EPSILON;
+				*force = n * (dx/fabsf(n.x));
+				GLASSERT( dx > 0 );
 				return FORCE_APPLIED;
 			}
 			if ( p.y > fabsf(p.x) && (p.y-rad < 0.5f) ) {				// north quadrant
-				force->Set( 0, 0.5f - (p.y-rad) + EPSILON );
+				//force->Set( 0, 0.5f - (p.y-rad) + EPSILON );
+				float dy = 0.5f - (p.y-rad) + EPSILON;
+				*force = n * (dy/fabsf(n.y));
+				GLASSERT( dy > 0 );
 				return FORCE_APPLIED;
 			}
 			if ( -p.y > fabsf(p.x) && (p.y+rad > -0.5f) ) {				// south quadrant
-				force->Set( 0, -0.5f - (p.y+rad) - EPSILON );
+				//force->Set( 0, -0.5f - (p.y+rad) - EPSILON );
+				float dy = 0.5f + (p.y+rad) + EPSILON;
+				*force = n * (dy/fabsf(n.y));
+				GLASSERT( dy > 0 );
 				return FORCE_APPLIED;
 			}
 		}
@@ -181,15 +191,15 @@ WorldMap::BlockResult WorldMap::CalcBlockEffect(	const grinliz::Vector2F& pos,
 }
 
 
-WorldMap::BlockResult WorldMap::ApplyBlockEffect(	const grinliz::Vector2F inPos, 
-										float radius, 
-										grinliz::Vector2F* outPos )
+WorldMap::BlockResult WorldMap::ApplyBlockEffect(	const Vector2F inPos, 
+													float radius, 
+													Vector2F* outPos )
 {
 	*outPos = inPos;
 	Vector2F force = { 0, 0 };
 
 	// Can't think of a case where it's possible to overlap more than 2.
-	// But if this asserts in some strange case, can up the #checks to 3.
+	// But if this asserts in some strange case, can up the # checks to 3.
 	for( int i=0; i<2; ++i ) {
 		BlockResult result = CalcBlockEffect( *outPos, radius, &force );
 		if ( result == STUCK )
