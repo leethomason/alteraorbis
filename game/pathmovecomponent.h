@@ -16,10 +16,11 @@ class PathMoveComponent : public MoveComponent
 {
 public:
 	enum {
-		MSG_DESTINATION_REACHED
+		MSG_DESTINATION_REACHED,
+		MSG_DESTINATION_BLOCKED
 	};
 
-	PathMoveComponent( WorldMap* _map ) : map( _map ), nPath( 0 ), pos( 0 ), rotationFirst(true), pathDebugging( false ) {}
+	PathMoveComponent( WorldMap* _map ) : map( _map ), nPath( 0 ), pathPos( 0 ), rotationFirst(true), pathDebugging( false ) {}
 	virtual ~PathMoveComponent() {}
 
 	const char* Name() const { return "PathMoveComponent"; }
@@ -40,7 +41,7 @@ public:
 	// Status info
 	int BlockForceApplied() const	{ return blockForceApplied; }
 	bool IsStuck() const			{ return isStuck; }
-	bool IsMoving() const			{ return pos < nPath; }
+	bool IsMoving() const			{ return pathPos < nPath; }
 
 private:
 	float Travel( float rate, U32 time ) const {
@@ -49,6 +50,7 @@ private:
 	
 	void GetPosRot( grinliz::Vector2F* pos, float* rot );
 	void SetPosRot( const grinliz::Vector2F& pos, float rot );
+	float GetDistToNext2( const grinliz::Vector2F& currentPos );
 
 	// Move, then set rotation from movement.
 	void MoveFirst( U32 delta );
@@ -58,9 +60,14 @@ private:
 	void ApplyBlocks();
 
 	WorldMap* map;
-	int nPath;
-	int pos;
-	grinliz::Vector2F dest;
+	int nPath;				// size of path
+	int pathPos;			// index of where we are on path
+	int repath;				// counter to see if we are stuck
+	grinliz::Vector2F dest;	// final destination
+
+	grinliz::Vector2F pos2;		// only valid during tick!
+	float    rot;				// only valid during tick!
+
 	bool rotationFirst;
 	bool pathDebugging;
 	bool blockForceApplied;

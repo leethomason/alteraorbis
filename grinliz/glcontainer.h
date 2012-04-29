@@ -82,6 +82,13 @@ public:
 		grinliz::Swap( &mem[i], &mem[size-1] );
 		Pop();
 	}
+	int Find( const T& t ) {
+		for( int i=0; i<size; ++i ) {
+			if ( mem[i] == t )
+				return i;
+		}
+		return -1;
+	}
 
 	int Size() const		{ return size; }
 	void Trim( int sz )		{ GLASSERT( sz <= size );

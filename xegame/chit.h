@@ -4,8 +4,7 @@
 
 #include "../grinliz/gltypes.h"
 #include "../grinliz/gldebug.h"
-
-#include "../SimpleLib/SimpleLib.h"
+#include "../grinliz/glcontainer.h"
 
 class Component;
 class SpatialComponent;
@@ -59,7 +58,7 @@ private:
 	ChitBag* chitBag;
 	int id;
 	int nTickers;	// number of components that need a tick.
-	Simple::CVector<IChitListener*>* listeners;
+	grinliz::CDynArray<IChitListener*, 4> listeners;
 
 	enum {
 		SPATIAL,

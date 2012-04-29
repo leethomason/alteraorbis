@@ -13,7 +13,6 @@ Chit::Chit( int _id, ChitBag* bag ) :	chitBag( bag ), id( _id ), nTickers( 0 )
 	for( int i=0; i<NUM_SLOTS; ++i ) {
 		slot[i] = 0;
 	}
-	listeners = 0;
 }
 
 
@@ -25,7 +24,6 @@ Chit::~Chit()
 			delete slot[i];
 		}
 	}
-	delete listeners;
 }
 
 	
@@ -120,27 +118,23 @@ void Chit::DoUpdate()
 
 void Chit::SendMessage( const char* componentName, int id )
 {
-	if ( !listeners )
-		return;
-	for( int i=0; i<listeners->GetSize(); ++i ) {
-		listeners->GetAt(i)->OnChitMsg( this, componentName, id );
+	for( int i=0; i<listeners.Size(); ++i ) {
+		listeners[i]->OnChitMsg( this, componentName, id );
 	}
 }
 
 
 void Chit::AddListener( IChitListener* listener )
 {
-	if ( !listeners )
-		listeners = new Simple::CVector<IChitListener*>();
-	GLASSERT( listeners->Find( listener ) < 0 );
-	listeners->Push( listener );
+	GLASSERT( listeners.Find( listener ) < 0 );
+	listeners.Push( listener );
 }
 
 
 void Chit::RemoveListener( IChitListener* listener )
 {
-	int i = listeners->Find( listener );
+	int i = listeners.Find( listener );
 	GLASSERT( i >= 0 );
-	listeners->RemoveAt( i );
+	listeners.SwapRemove( i );
 }
 

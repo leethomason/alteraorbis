@@ -29,7 +29,7 @@ public:
 
 	void SetBlock( int x, int y )	{ grinliz::Rectangle2I pos; pos.Set( x, y, x, y ); SetBlock( pos ); }
 	void SetBlock( const grinliz::Rectangle2I& pos );
-	void ClearBlock( int x, int y )	{ grinliz::Rectangle2I pos; pos.Set( x, y, x, y ); SetBlock( pos ); }
+	void ClearBlock( int x, int y )	{ grinliz::Rectangle2I pos; pos.Set( x, y, x, y ); ClearBlock( pos ); }
 	void ClearBlock( const grinliz::Rectangle2I& pos );
 
 	bool IsBlockSet( int x, int y ) { return grid[INDEX(x,y)].isBlock != 0; }

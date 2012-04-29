@@ -42,6 +42,7 @@ NavTestScene::NavTestScene( LumosGame* game ) : Scene( game )
 	showOverlay.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
 	showOverlay.SetSize( layout.Width(), layout.Height() );
 	showOverlay.SetText( "Over" );
+	showOverlay.SetDown();
 
 	toggleBlock.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
 	toggleBlock.SetSize( layout.Width(), layout.Height() );
@@ -62,6 +63,7 @@ NavTestScene::NavTestScene( LumosGame* game ) : Scene( game )
 	
 	map = new WorldMap( 32, 32 );
 	map->InitCircle();
+	map->ShowRegionOverlay( true );
 
 	engine->SetMap( map );
 	engine->CameraLookAt( 10, 10, 40 );
@@ -135,10 +137,20 @@ void NavTestScene::Tap( int action, const grinliz::Vector2F& view, const grinliz
 			SNPrintf( buf, 40, "xz = %.1f,%.1f nSubZ=%d", tapMark.x, tapMark.z, map->NumRegions() );
 			textLabel.SetText( buf );
 
-			Vector2F d = { tapMark.x, tapMark.z };
-			PathMoveComponent* pmc = static_cast<PathMoveComponent*>( chit->GetComponent( "PathMoveComponent" ) );
-			GLASSERT( pmc );
-			pmc->SetDest( d );
+			if ( toggleBlock.Down() ) {
+				Vector2I d = { (int)tapMark.x, (int)tapMark.z };
+				if ( map->IsBlockSet( d.x, d.y ) ) 
+					map->ClearBlock( d.x, d.y );
+				else
+					map->SetBlock( d.x, d.y );
+			}
+			else {
+				// Move to the marked location.
+				Vector2F d = { tapMark.x, tapMark.z };
+				PathMoveComponent* pmc = static_cast<PathMoveComponent*>( chit->GetComponent( "PathMoveComponent" ) );
+				GLASSERT( pmc );
+				pmc->SetDest( d );
+			}
 
 			if ( showAdjacent.Down() ) {
 				map->ShowAdjacentRegions( tapMark.x, tapMark.z );

@@ -209,7 +209,7 @@ WorldMap::BlockResult WorldMap::ApplyBlockEffect(	const Vector2F inPos,
 		if ( result == NO_EFFECT )
 			break;
 	}
-	GLASSERT( CalcBlockEffect( *outPos, radius, &force ) == NO_EFFECT );
+//	GLASSERT( CalcBlockEffect( *outPos, radius, &force ) == NO_EFFECT );
 	return ( *outPos == inPos ) ? NO_EFFECT : FORCE_APPLIED;
 }
 
