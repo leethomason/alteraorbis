@@ -4,6 +4,7 @@
 #include "../grinliz/gldebug.h"
 #include "../grinliz/gltypes.h"
 #include "../grinliz/glstringutil.h"
+#include "../grinliz/glcontainer.h"
 #include "../shared/gamedbreader.h"
 #include "../engine/ufoutil.h"
 #include "../shared/glmap.h"
@@ -143,8 +144,8 @@ private:
 	int cacheReuse;
 	int emptySpace;
 
-	CArray< Texture, MAX_TEXTURES > textureArr;		// textures
-	CArray< GPUMem, MAX_TEXTURES > gpuMemArr;		// references into the GPU mem
+	grinliz::CArray< Texture, MAX_TEXTURES > textureArr;		// textures
+	grinliz::CArray< GPUMem, MAX_TEXTURES > gpuMemArr;		// references into the GPU mem
 	CStringMap<	Texture* > map;
 	CMap< const gamedb::Item*, GPUMem* > gpuMap;
 };

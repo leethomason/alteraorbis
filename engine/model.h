@@ -20,12 +20,12 @@
 #include "../grinliz/gltypes.h"
 #include "../grinliz/glgeometry.h"
 #include "../grinliz/glmemorypool.h"
+#include "../grinliz/glcontainer.h"
 #include "../shared/glmap.h"
 #include "../shared/gamedbreader.h"
 #include "vertex.h"
 #include "enginelimits.h"
 #include "serialize.h"
-#include "ufoutil.h"
 #include "gpustatemanager.h"
 
 class Texture;
@@ -153,7 +153,7 @@ private:
 	~ModelResourceManager();
 
 	static ModelResourceManager* instance;
-	CArray< ModelResource*, MAX_MODELS > modelResArr;
+	grinliz::CArray< ModelResource*, MAX_MODELS > modelResArr;
 	CStringMap<	ModelResource* > map;
 };
 
@@ -168,8 +168,8 @@ public:
 
 private:
 	void LoadAtom( const gamedb::Item* item, int index, ModelResource* res );
-	CDynArray<Vertex> vBuffer;
-	CDynArray<U16> iBuffer;
+	grinliz::CDynArray<Vertex> vBuffer;
+	grinliz::CDynArray<U16> iBuffer;
 };
 
 

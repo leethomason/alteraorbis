@@ -19,12 +19,12 @@
 #include "../grinliz/gldebug.h"
 #include "../grinliz/gltypes.h"
 #include "../grinliz/glperformance.h"
+#include "../grinliz/glcontainer.h"
 
 #include "../engine/surface.h"
 #include "../engine/texture.h"
 #include "../engine/model.h"
 #include "../engine/uirendering.h"
-#include "../engine/ufoutil.h"
 #include "../engine/screenport.h"
 
 #include "../tinyxml2/tinyxml2.h"
@@ -136,7 +136,7 @@ public:
 		const char* name;
 		int dx;
 		int dy;
-		CArray< grinliz::Color4U8, 128 > colors;
+		grinliz::CArray< grinliz::Color4U8, 128 > colors;
 	};
 	const Palette* GetPalette( const char* name ) const;
 	grinliz::Color4U8 MainPaletteColor( int x, int y );
@@ -149,7 +149,7 @@ protected:
 private:
 
 	// Color palettes
-	CDynArray< Palette > palettes;
+	grinliz::CDynArray< Palette > palettes;
 	const Palette* mainPalette;
 
 	Screenport screenport;
@@ -200,10 +200,8 @@ private:
 	int rotTestStart;
 	int rotTestCount;
 	grinliz::GLString savePath;
-	CDynArray< char > resourceBuf;
 
 	gamui::RenderAtom renderAtoms[ATOM_COUNT];
-	//gamui::ButtonLook buttonLooks[LOOK_COUNT];
 };
 
 

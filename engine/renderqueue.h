@@ -19,11 +19,11 @@
 #include "../grinliz/gldebug.h"
 #include "../grinliz/gltypes.h"
 #include "../grinliz/glrandom.h"
+#include "../grinliz/glcontainer.h"
 
 #include "enginelimits.h"
 #include "vertex.h"
 #include "gpustatemanager.h"
-#include "ufoutil.h"
 
 class Model;
 struct ModelAtom;
@@ -110,9 +110,9 @@ private:
 	int vertexCacheSize;
 	int vertexCacheCap;
 
-	CDynArray<Vertex> vertexBuf;
-	CDynArray<U16>    indexBuf;
-	CDynArray<Item*>  itemArr;
+	grinliz::CDynArray<Vertex> vertexBuf;
+	grinliz::CDynArray<U16>    indexBuf;
+	grinliz::CDynArray<Item*>  itemArr;
 
 	State statePool[MAX_STATE];
 	Item itemPool[MAX_ITEMS];

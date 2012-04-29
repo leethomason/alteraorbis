@@ -4,6 +4,7 @@
 #include "../xegame/scene.h"
 #include "../gamui/gamui.h"
 #include "../engine/particle.h"
+#include "../grinliz/glcontainer.h"
 
 
 class LumosGame;
@@ -43,8 +44,8 @@ private:
 	void Clear();
 	void Load();
 
-	CDynArray< ParticleDef > particleDefArr;
-	CDynArray< gamui::Button* > buttonArr;
+	grinliz::CDynArray< ParticleDef > particleDefArr;
+	grinliz::CDynArray< gamui::Button* > buttonArr;
 };
 
 #endif // PARTICLESCENE_INCLUDED

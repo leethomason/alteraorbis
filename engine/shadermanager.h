@@ -6,7 +6,7 @@
 #include "../grinliz/glcolor.h"
 #include "../grinliz/glstringutil.h"
 #include "../grinliz/glmatrix.h"
-#include "ufoutil.h"
+#include "../grinliz/glcontainer.h"
 
 #include "enginelimits.h"
 
@@ -130,11 +130,11 @@ private:
 		int GetUniformLocation( int uniform );
 	};
 
-	CDynArray< IDeviceLossHandler* > deviceLossHandlers;
-	CDynArray< Shader > shaderArr;
+	grinliz::CDynArray< IDeviceLossHandler* > deviceLossHandlers;
+	grinliz::CDynArray< Shader > shaderArr;
 	grinliz::GLString header;
 	Shader* active;
-	CDynArray<int> activeStreams;
+	grinliz::CDynArray<int> activeStreams;
 
 	Shader* CreateProgram( int flag );
 	void DeleteProgram( Shader* );

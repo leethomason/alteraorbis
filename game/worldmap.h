@@ -4,7 +4,7 @@
 #include "../engine/map.h"
 #include "../micropather/micropather.h"
 #include "../grinliz/glrectangle.h"
-#include "../engine/ufoutil.h"
+#include "../grinliz/glcontainer.h"
 
 class Texture;
 
@@ -38,7 +38,7 @@ public:
 	// Call the pather; return true if successful.
 	bool CalcPath(	const grinliz::Vector2F& start, 
 					const grinliz::Vector2F& end, 
-					CDynArray<grinliz::Vector2F> *path,
+					grinliz::CDynArray<grinliz::Vector2F> *path,
 					bool showDebugging = false );
 	bool CalcPath(	const grinliz::Vector2F& start, 
 					const grinliz::Vector2F& end, 
@@ -179,16 +179,16 @@ private:
 	micropather::MicroPather *pather;
 	bool debugRegionOverlay;
 
-	MP_VECTOR< void* >				pathRegions;
-	CDynArray< grinliz::Vector2F >	debugPathVector;
-	CDynArray< grinliz::Vector2F >	pathCache;
+	MP_VECTOR< void* >						pathRegions;
+	grinliz::CDynArray< grinliz::Vector2F >	debugPathVector;
+	grinliz::CDynArray< grinliz::Vector2F >	pathCache;
 
 	enum {
 		LOWER_TYPES = 2		// land or water
 	};
-	Texture*			texture[LOWER_TYPES];
-	CDynArray<PTVertex> vertex[LOWER_TYPES];
-	CDynArray<U16>		index[LOWER_TYPES];
+	Texture*						texture[LOWER_TYPES];
+	grinliz::CDynArray<PTVertex>	vertex[LOWER_TYPES];
+	grinliz::CDynArray<U16>			index[LOWER_TYPES];
 };
 
 #endif // LUMOS_WORLD_MAP_INCLUDED
