@@ -544,6 +544,14 @@ int IntersectRaySphere(	const Sphere& sphere,
 						const Vector3F& origin,
 						const Vector3F& dir );
 
+/** Tests a ray to a sphere.
+	@return REJECT or INTERSECT
+*/
+int IntersectRayCircle(	const Vector2F& center,
+						float radius,
+						const Vector2F& origin,
+						const Vector2F& dir );
+
 };	// namespace grinliz
 
 #endif

@@ -24,6 +24,11 @@ public:
 	void SetYRotation( float yDegrees )				{ yRotation = grinliz::NormalizeAngleDegrees( yDegrees ); }
 	float GetYRotation() const						{ return yRotation; }
 
+	grinliz::Vector3F GetHeading() const;
+
+	grinliz::Vector2F GetPosition2D() const			{ grinliz::Vector2F v = { position.x, position.z }; return v; }
+	grinliz::Vector2F GetHeading2D() const;
+
 private:
 	grinliz::Vector3F	position;
 	float				yRotation;	// [0, 360)

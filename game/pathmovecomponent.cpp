@@ -185,12 +185,39 @@ void PathMoveComponent::AvoidOthers( U32 delta )
 	bounds.Set( pos2.x-PATH_AVOID_DISTANCE, -0.1f, pos2.y-PATH_AVOID_DISTANCE, pos2.x+PATH_AVOID_DISTANCE, 0.1f, pos2.y+PATH_AVOID_DISTANCE );
 	Model* root = spaceTree->Query( bounds, MODEL_USER_AVOIDS, 0 );
 
-	while( root ) {
-		Chit* chit = root->userData;
-		if ( chit && chit != parentChit ) {
-			GLOUTPUT(( "Avoid: id=%d\n", chit->ID() ));
+	if ( root && root->userData != parentChit ) {
+		Vector3F heading = parentChit->GetSpatialComponent()->GetHeading();
+		Vector2F heading2 = { heading.x, heading.z };
+		Vector3F pos3    = parentChit->GetSpatialComponent()->GetPosition();
+		Vector3F avoid = { 0, 0 };
+		static const Vector3F UP = { 0, 1, 0 };
+
+		while( root ) {
+			Chit* chit = root->userData;
+			if ( chit && chit != parentChit ) {
+
+				if ( IntersectRayCircle( chit->GetSpatialComponent()->GetPosition2D(),
+										 chit->GetRenderComponent()->RadiusOfBase(),
+										 pos2, heading2 )
+					== INTERSECT )
+				{
+					Vector3F delta = chit->GetSpatialComponent()->GetPosition() - pos3;
+					Vector3F right;
+					CrossProduct( delta, UP, &right );
+
+					Vector3F cross;
+					CrossProduct( heading, delta, &cross );
+					avoid += ((cross.z >= 0) ? right : -right);
+				}
+			}
+			root = root->next;
 		}
-		root = root->next;
+		avoid.y = 0;	// be sure.
+		if ( avoid.LengthSquared() > 1 )
+			avoid.Normalize();
+		avoid.Multiply( Travel( AVOID_SPEED_FRACTION*MOVE_SPEED, delta ));
+		pos2.x += avoid.x;
+		pos2.y += avoid.z;
 	}
 }
 
