@@ -5,6 +5,8 @@
 #include "../xegame/rendercomponent.h"
 #include "../xegame/chitbag.h"
 
+#include "../engine/loosequadtree.h"
+
 #include <cstring>
 #include <cmath>
 
@@ -172,6 +174,27 @@ void PathMoveComponent::RotationFirst( U32 delta )
 }
 
 
+void PathMoveComponent::AvoidOthers( U32 delta )
+{
+	if ( !spaceTree ) return;
+	RenderComponent* render = parentChit->GetRenderComponent();
+	if ( !render ) return;
+	if ( (render->GetFlags() & MODEL_USER_AVOIDS ) == 0 ) return;
+	
+	Rectangle3F bounds;
+	bounds.Set( pos2.x-PATH_AVOID_DISTANCE, -0.1f, pos2.y-PATH_AVOID_DISTANCE, pos2.x+PATH_AVOID_DISTANCE, 0.1f, pos2.y+PATH_AVOID_DISTANCE );
+	Model* root = spaceTree->Query( bounds, MODEL_USER_AVOIDS, 0 );
+
+	while( root ) {
+		Chit* chit = root->userData;
+		if ( chit && chit != parentChit ) {
+			GLOUTPUT(( "Avoid: id=%d\n", chit->ID() ));
+		}
+		root = root->next;
+	}
+}
+
+
 void PathMoveComponent::ApplyBlocks()
 {
 	RenderComponent* render = parentChit->GetRenderComponent();
@@ -200,6 +223,7 @@ void PathMoveComponent::DoTick( U32 delta )
 		else
 			MoveFirst( delta );
 
+		AvoidOthers( delta );
 		ApplyBlocks();
 		SetPosRot( pos2, rot );
 

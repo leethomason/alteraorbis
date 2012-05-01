@@ -272,6 +272,13 @@ SpaceTree::Node* SpaceTree::GetNode( int depth, int x, int z )
 }
 
 
+Model* SpaceTree::Query( const grinliz::Rectangle3F& rect, int required, int excluded )
+{
+	Plane plane[6];
+	Plane::CreatePlanes( rect, plane );
+	return Query( plane, 6, required, excluded );
+}
+
 
 Model* SpaceTree::Query( const Plane* planes, int nPlanes, int required, int excluded, bool debug )
 {

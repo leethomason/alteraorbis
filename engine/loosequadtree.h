@@ -47,6 +47,10 @@ public:
 	// Returns all the models in the planes.
 	Model* Query( const grinliz::Plane* planes, int nPlanes, int requiredFlags, int excludedFlags, bool debug=false );
 
+	// Returns all the models in the bounds. Can be optimized by looking directly
+	// at the nodes, non-recursive, if needed.
+	Model* Query( const grinliz::Rectangle3F& rect, int required, int excluded );
+
 	// Returns the FIRST model impacted.
 	Model* QueryRay( const grinliz::Vector3F& origin, const grinliz::Vector3F& direction, 
 					 int required, int excluded, const Model** ignore,

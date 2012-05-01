@@ -42,7 +42,9 @@ private:
 	WorldMap* map;
 	grinliz::Random random;
 	grinliz::Vector3F tapMark;
-	Chit* chit;
+
+	enum { NUM_CHITS = 5 };
+	Chit* chit[NUM_CHITS];
 
 	ChitBag chitBag;
 };

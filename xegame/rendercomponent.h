@@ -11,7 +11,8 @@ class Model;
 class RenderComponent : public Component
 {
 public:
-	RenderComponent( Engine* engine, const char* asset );	// spacetree probably  sufficient, but 'engine' easier to keep track of
+	// spacetree probably  sufficient, but 'engine' easier to keep track of
+	RenderComponent( Engine* engine, const char* asset, int flags );
 	virtual ~RenderComponent();
 
 	// ------ Component functionality: -------
@@ -28,12 +29,13 @@ public:
 	// Radius of the "base" the model stands on. Used to position
 	// the model so it doesn't walk into walls or other models.
 	float RadiusOfBase();
-	//void SetModelFlag( int flag );
+	int GetFlags() const { return flags; }
 
 private:
 	Engine* engine;
 	const ModelResource* resource;
 	Model* model;
+	int flags;
 };
 
 #endif // RENDER_COMPONENT_INCLUDED

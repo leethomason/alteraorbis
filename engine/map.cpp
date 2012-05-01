@@ -44,6 +44,8 @@ Map::Map( int w, int h )
 
 	width = w;
 	height = h;
+	GLASSERT( w <= EL_MAX_MAP_SIZE );
+	GLASSERT( h <= EL_MAX_MAP_SIZE );
 	GLOUTPUT(( "Map created. %dK\n", sizeof( *this )/1024 ));
 }
 

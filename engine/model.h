@@ -33,6 +33,7 @@ class SpaceTree;
 class RenderQueue;
 class GPUShader;
 class EngineShaders;
+class Chit;
 
 /*
 	v0 v1 v2 v0 v1 v2									vertex (3 points x 2 instances)
@@ -185,14 +186,16 @@ public:
 	void Queue( RenderQueue* queue, EngineShaders* shaders );
 
 	enum {
-		MODEL_SELECTABLE			= 0x01,
-		MODEL_PARAM_IS_TEX_XFORM	= 0x02,
-		MODEL_PARAM_IS_COLOR		= 0x04,
-		MODEL_NO_SHADOW				= 0x08,
-		MODEL_INVISIBLE				= 0x10,
-		MODEL_METADATA				= 0x80,		// mapmaker data that isn't displayed in-game
+		MODEL_SELECTABLE			= 0x001,
+		MODEL_PARAM_IS_TEX_XFORM	= 0x002,
+		MODEL_PARAM_IS_COLOR		= 0x004,
+		MODEL_NO_SHADOW				= 0x008,
+		MODEL_INVISIBLE				= 0x010,
 
-		MODEL_TEXTURE_MATS			= 2
+		MODEL_USER					= 0x1000		// reserved for user code.
+		
+		//MODEL_METADATA				= 0x80,		// mapmaker data that isn't displayed in-game
+		//MODEL_TEXTURE_MATS			= 2
 	};
 
 	int IsFlagSet( int f ) const	{ return flags & f; }
@@ -258,7 +261,8 @@ public:
 
 	Model* next;			// used by the SpaceTree query
 	Model* next0;			// used by the Engine sub-sorting
-	
+	Chit*  userData;		// really should be void* - but types are nice.
+
 	// Set by the engine. Any xform change will set this
 	// to (-1,-1)-(-1,-1) to then be set by the engine.
 	//grinliz::Rectangle2I mapBoundsCache;

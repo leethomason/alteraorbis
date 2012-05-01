@@ -3,8 +3,10 @@
 
 #include "../grinliz/gldebug.h"
 #include "../grinliz/gltypes.h"
-#include "../engine/ufoutil.h"
+
+#include "../engine/enginelimits.h"
 #include "../SimpleLib/SimpleLib.h"
+
 #include "chit.h"
 
 class Engine;
@@ -26,15 +28,12 @@ public:
 	// Normally called automatically.
 	void RequestUpdate( Chit* );
 
-	// Utility / Loading
-	Chit* CreateTestChit( Engine* engine, const char* assetName );
-
 private:
 	int idPool;
 	Simple::CIndex< int, Chit*, 
 					Simple::SValue, Simple::SOwnedPtr> chits;	// Owned chit pointers. Note that CIndex 
 																// supports fast iteration, which is critical.
-	Simple::CSortedVector<Chit*> updateList;		// <set> of chits that need the Update() called.
+	Simple::CSortedVector<Chit*> updateList;					// <set> of chits that need the Update() called.
 };
 
 

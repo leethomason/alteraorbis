@@ -122,6 +122,7 @@
     <ClCompile Include="..\xegame\game.cpp" />
     <ClCompile Include="..\xegame\rendercomponent.cpp" />
     <ClCompile Include="..\xegame\scene.cpp" />
+    <ClCompile Include="..\xegame\spatialcomponent.cpp" />
     <ClCompile Include="..\xegame\testmap.cpp" />
     <ClCompile Include="..\xegame\ufosound.cpp" />
   </ItemGroup>

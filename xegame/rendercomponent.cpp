@@ -7,9 +7,10 @@
 
 using namespace grinliz;
 
-RenderComponent::RenderComponent( Engine* _engine, const char* asset ) : engine( _engine ), model( 0 )
+RenderComponent::RenderComponent( Engine* _engine, const char* _asset, int _flags ) 
+	: engine( _engine ), model( 0 ), flags( _flags )
 {
-	resource = ModelResourceManager::Instance()->GetModelResource( asset );
+	resource = ModelResourceManager::Instance()->GetModelResource( _asset );
 	GLASSERT( resource );
 }
 
@@ -25,6 +26,8 @@ void RenderComponent::OnAdd( Chit* chit )
 	Component::OnAdd( chit );
 	GLASSERT( model == 0 );
 	model = engine->AllocModel( resource );
+	model->userData = parentChit;
+	model->SetFlag( flags );
 }
 
 
