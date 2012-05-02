@@ -103,6 +103,9 @@
     <ClCompile Include="..\grinliz\glnoise.cpp">
       <Filter>Source Files\grinliz</Filter>
     </ClCompile>
+    <ClCompile Include="..\shared\lodepng.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\zlib\crc32.h">
@@ -203,6 +206,9 @@
     </ClInclude>
     <ClInclude Include="..\grinliz\glnoise.h">
       <Filter>Source Files\grinliz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\shared\lodepng.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

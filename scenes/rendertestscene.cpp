@@ -143,7 +143,7 @@ void RenderTestScene::ItemTapped( const gamui::UIItem* item )
 void RenderTestScene::LoadLighting()
 {
 	XMLDocument doc;
-	doc.LoadFile( "./resin/lighting.xml" );
+	doc.LoadFile( "./res/lighting.xml" );
 
 	const XMLElement* lightingEle = doc.FirstChildElement( "lighting" );
 	const XMLElement* mapEle = lightingEle->FirstChildElement( "map" );

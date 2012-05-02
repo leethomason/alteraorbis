@@ -75,6 +75,7 @@ private:
 	bool rotationFirst;
 	bool pathDebugging;
 	bool blockForceApplied;
+	bool avoidForceApplied;
 	bool isStuck;
 
 	grinliz::Vector2F path[MAX_MOVE_PATH];

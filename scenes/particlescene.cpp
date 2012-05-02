@@ -61,7 +61,7 @@ void ParticleScene::Load()
 	const ButtonLook& look = lumosGame->GetButtonLook( LumosGame::BUTTON_LOOK_STD );
 
 	XMLDocument doc;
-	doc.LoadFile( "./resin/particles.xml" );
+	doc.LoadFile( "./res/particles.xml" );
 
 	// FIXME: switch to safe version.
 	for( const XMLElement* partEle = doc.FirstChildElement( "particles" )->FirstChildElement( "particle" );
@@ -90,7 +90,7 @@ void ParticleScene::Load()
 void ParticleScene::Rescan()
 {
 	XMLDocument doc;
-	doc.LoadFile( "./resin/particles.xml" );
+	doc.LoadFile( "./res/particles.xml" );
 
 	for( const XMLElement* partEle = XMLConstHandle( doc ).FirstChildElement( "particles" ).FirstChildElement( "particle" ).ToElement();
 		 partEle;

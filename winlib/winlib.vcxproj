@@ -87,6 +87,7 @@
     <ClCompile Include="..\grinliz\glstringutil.cpp" />
     <ClCompile Include="..\grinliz\glutil.cpp" />
     <ClCompile Include="..\grinliz\glvector.cpp" />
+    <ClCompile Include="..\shared\lodepng.cpp" />
     <ClCompile Include="..\tinyxml2\tinyxml2.cpp" />
     <ClCompile Include="..\zlib\adler32.c" />
     <ClCompile Include="..\zlib\compress.c" />
@@ -123,6 +124,7 @@
     <ClInclude Include="..\grinliz\gltypes.h" />
     <ClInclude Include="..\grinliz\glutil.h" />
     <ClInclude Include="..\grinliz\glvector.h" />
+    <ClInclude Include="..\shared\lodepng.h" />
     <ClInclude Include="..\tinyxml2\tinyxml2.h" />
     <ClInclude Include="..\zlib\crc32.h" />
     <ClInclude Include="..\zlib\deflate.h" />

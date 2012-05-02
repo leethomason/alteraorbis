@@ -105,6 +105,7 @@
     <ClCompile Include="..\gamui\gamui.cpp" />
     <ClCompile Include="..\micropather\micropather.cpp" />
     <ClCompile Include="..\scenes\dialogscene.cpp" />
+    <ClCompile Include="..\scenes\navtest2scene.cpp" />
     <ClCompile Include="..\scenes\navtestscene.cpp" />
     <ClCompile Include="..\scenes\noisetestscene.cpp" />
     <ClCompile Include="..\scenes\particlescene.cpp" />
@@ -160,6 +161,7 @@
     <ClInclude Include="..\gamui\gamui.h" />
     <ClInclude Include="..\micropather\micropather.h" />
     <ClInclude Include="..\scenes\dialogscene.h" />
+    <ClInclude Include="..\scenes\navtest2scene.h" />
     <ClInclude Include="..\scenes\navtestscene.h" />
     <ClInclude Include="..\scenes\noisetestscene.h" />
     <ClInclude Include="..\scenes\particlescene.h" />

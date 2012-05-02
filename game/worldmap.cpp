@@ -16,10 +16,10 @@ WorldMap::WorldMap( int width, int height ) : Map( width, height )
 	GLASSERT( height % ZONE_SIZE == 0 );
 
 	GLASSERT( sizeof(Grid) == 4 );
-	grid = new Grid[width*height];
-	zoneInit = new U8[width*height/ZONE_SIZE2];
-	memset( grid, 0, width*height*sizeof(Grid) );
-	memset( zoneInit, 0, sizeof(*zoneInit)*width*height/ZONE_SIZE2 );
+	grid = 0;
+	zoneInit = 0;
+	pather = 0;
+	Init( width, height );
 
 	texture[0] = TextureManager::Instance()->GetTexture( "map_water" );
 	texture[1] = TextureManager::Instance()->GetTexture( "map_land" );
@@ -34,6 +34,22 @@ WorldMap::~WorldMap()
 	delete [] grid;
 	delete [] zoneInit;
 	delete pather;
+}
+
+
+void WorldMap::Init( int w, int h )
+{
+	delete [] grid;
+	delete [] zoneInit;
+	if ( pather ) {
+		pather->Reset();
+	}	
+	this->width = w;
+	this->height = h;
+	grid = new Grid[width*height];
+	zoneInit = new U8[width*height/ZONE_SIZE2];
+	memset( grid, 0, width*height*sizeof(Grid) );
+	memset( zoneInit, 0, sizeof(*zoneInit)*width*height/ZONE_SIZE2 );
 }
 
 
@@ -58,6 +74,12 @@ void WorldMap::InitCircle()
 	}
 	Tessellate();
 }
+
+
+void WorldMap::InitPNG( FILE* fp, grinliz::CDynArray<grinliz::Vector2I>* wayPoints )
+{
+}
+
 
 
 void WorldMap::Tessellate()

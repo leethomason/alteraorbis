@@ -18,6 +18,7 @@ void PathMoveComponent::OnAdd( Chit* chit )
 	nPath = pathPos = repath = 0;
 	dest.Zero();
 	blockForceApplied = false;
+	avoidForceApplied = false;
 	isStuck = false;
 }
 
@@ -226,6 +227,8 @@ void PathMoveComponent::AvoidOthers( U32 delta )
 
 void PathMoveComponent::AvoidOthers( U32 delta )
 {
+	avoidForceApplied = false;
+
 	if ( !spaceTree ) return;
 	RenderComponent* render = parentChit->GetRenderComponent();
 	if ( !render ) return;
@@ -241,7 +244,8 @@ void PathMoveComponent::AvoidOthers( U32 delta )
 		Vector3F avoid = { 0, 0 };
 		static const Vector3F UP = { 0, 1, 0 };
 
-		Vector3F destNormal = { path[pathPos].x - pos2.x, 0, path[pathPos].y - pos2.y };
+		Vector3F wayPoint   = { path[pathPos].x, 0, path[pathPos].y };
+		Vector3F destNormal = wayPoint - pos3;
 		destNormal.Normalize();
 
 		while( root ) {
@@ -255,6 +259,21 @@ void PathMoveComponent::AvoidOthers( U32 delta )
 				float r = radius + itRadius;
 
 				if ( d < r ) {
+					avoidForceApplied = true;
+
+					/*
+					// If this is lurking on our path waypoint,
+					// skip the waypoint. (May cause repathing/etc.)
+					// BUG: If this is the dest, we can get stuck
+					if ( (itPos3 - wayPoint).Length() <= r ) {
+						// camped.
+						if ( pathPos < nPath-1 ) {
+							pathPos++;
+							continue;
+						}
+					}
+					*/
+
 					// Move away from the centers so the bases don't overlap.
 					Vector3F normal = pos3 - itPos3;
 					normal.y = 0;
@@ -268,7 +287,7 @@ void PathMoveComponent::AvoidOthers( U32 delta )
 						Vector3F right;
 						CrossProduct( destNormal, UP, &right );
 						avoid += right * (0.5f * (r-d) );
-					}					
+					}	
 				}
 			}
 			root = root->next;
@@ -313,6 +332,7 @@ void PathMoveComponent::DoTick( U32 delta )
 		SetPosRot( pos2, rot );
 
 		// Position set: nothing below can change.
+		// Do we need to repath because we're stuck?
 		if (    blockForceApplied  
 			 && startPathPos == pathPos
 			 && GetDistToNext2( pos2 ) >= distToNext ) 
@@ -331,7 +351,7 @@ void PathMoveComponent::DoTick( U32 delta )
 
 		// Are we at the end of the path data?
 		if ( pathPos == nPath ) {
-			if ( dest.Equal( path[nPath-1], 0.1f ) ) {
+			if ( dest.Equal( path[nPath-1], parentChit->GetRenderComponent()->RadiusOfBase() ) ) {
 				// actually reached the end!
 				SendMessage( MSG_DESTINATION_REACHED );
 			}

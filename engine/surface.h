@@ -45,9 +45,6 @@ public:
 		RGBA16,		// 4444		2
 		RGB16,		// 565		2
 		ALPHA,		// 8		1
-
-//		NO_BLENDING = 0,
-//		ALPHA_ONE_MINUS,	// standard blending: c' = fragment*(1-alpha) + color*alpha
 	};
 
 	static U16 CalcRGB16( grinliz::Color4U8 rgba )

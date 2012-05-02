@@ -26,6 +26,7 @@ public:
 	~WorldMap();
 
 	void InitCircle();
+	void InitPNG( FILE* fp, grinliz::CDynArray<grinliz::Vector2I>* wayPoints );
 
 	void SetBlock( int x, int y )	{ grinliz::Rectangle2I pos; pos.Set( x, y, x, y ); SetBlock( pos ); }
 	void SetBlock( const grinliz::Rectangle2I& pos );
@@ -91,6 +92,7 @@ private:
 		return (y*width/ZONE_SIZE) + x; 
 	} 
 
+	void Init( int w, int h );
 	void Tessellate();
 	void CalcZone( int x, int y );
 
