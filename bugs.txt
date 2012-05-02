@@ -1,19 +1,18 @@
 - navigation scene
 	X map with pathing
 	X chits & components
-	- debugging components for showing collision/vectors
+	X debugging components for showing collision/vectors
 	- ground flocking motion
 
 - memory pool everything in the chit/component system
-- rotation: in spatial component? Matrix or Quat?
 
 X particle test scene
 	X alpha processing for additive blending
 	- particle groups (ex: fire)
 
 - combat test scene
-- chits, components
 
+- ECR: proper rotation support
 - feature: Animation
 	- figure out animation needs (standing, walking, sidestep, shooting, etc.)
 	- define skelatal animation export
@@ -21,6 +20,8 @@ X particle test scene
 	- blend animations
 
 
+X chits, components
+X rotation: in spatial component? Matrix or Quat?
 X move particle system to engine
 X particle textures "popping in" (fix: was incorrectly passing 3 components in the attributes)
 x instance scene
