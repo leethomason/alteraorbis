@@ -27,6 +27,8 @@ enum HitTestMethod
 	TEST_TRI,
 };
 
+// Used for allocated lookup structures.
+static const int EL_MAX_MAP_SIZE = 1024;
 
 enum {
 	EL_MAX_VERTEX_IN_GROUP	= 4096,

@@ -7,6 +7,7 @@
 
 #include "../xegame/chit.h"
 #include "../xegame/spatialcomponent.h"
+#include "../xegame/rendercomponent.h"
 
 #include "../game/lumosgame.h"
 #include "../game/worldmap.h"
@@ -69,12 +70,15 @@ NavTestScene::NavTestScene( LumosGame* game ) : Scene( game )
 	engine->CameraLookAt( 10, 10, 40 );
 	tapMark.Zero();
 
-	chit = chitBag.CreateTestChit( engine, "humanFemale" );
-	PathMoveComponent* pmc = new PathMoveComponent( map );
-	chit->Add( pmc );
-	chit->Add( new DebugPathComponent( engine, map, game ) );
-	chit->GetSpatialComponent()->SetPosition( 10.0f, 0.0f, 10.0f );
-	chit->AddListener( this );
+	for( int i=0; i<NUM_CHITS; ++i ) {
+		chit[i] = chitBag.CreateChit();
+		chit[i]->Add( new SpatialComponent() );
+		chit[i]->Add( new RenderComponent( engine, "humanFemale", MODEL_USER_AVOIDS ) );
+		chit[i]->Add( new PathMoveComponent( map, engine->GetSpaceTree() ) );
+		chit[i]->Add( new DebugPathComponent( engine, map, game ) );
+		chit[i]->GetSpatialComponent()->SetPosition( 10.0f + (float)i*2.f, 0.0f, 10.0f );
+	}
+	chit[0]->AddListener( this );
 }
 
 
@@ -147,7 +151,7 @@ void NavTestScene::Tap( int action, const grinliz::Vector2F& view, const grinliz
 			else {
 				// Move to the marked location.
 				Vector2F d = { tapMark.x, tapMark.z };
-				PathMoveComponent* pmc = static_cast<PathMoveComponent*>( chit->GetComponent( "PathMoveComponent" ) );
+				PathMoveComponent* pmc = static_cast<PathMoveComponent*>( chit[0]->GetComponent( "PathMoveComponent" ) );
 				GLASSERT( pmc );
 				pmc->SetDest( d );
 			}
@@ -174,7 +178,7 @@ void NavTestScene::ItemTapped( const gamui::UIItem* item )
 		makeBlocks = 20;
 	}
 	else if ( item == &showZonePath ) {
-		PathMoveComponent* pmc = static_cast<PathMoveComponent*>( chit->GetComponent( "PathMoveComponent" ) );
+		PathMoveComponent* pmc = static_cast<PathMoveComponent*>( chit[0]->GetComponent( "PathMoveComponent" ) );
 		if ( pmc ) 
 			pmc->SetPathDebugging( showZonePath.Down() );
 	}

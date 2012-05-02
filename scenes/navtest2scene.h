@@ -1,19 +1,19 @@
-#ifndef NAVTESTSCENE_INCLUDED
-#define NAVTESTSCENE_INCLUDED
+#ifndef NAVTEST2_SCENE_INCLUDED
+#define NAVTEST2_SCENE_INCLUDED
 
-#include "../xegame/scene.h"
 #include "../grinliz/glrandom.h"
+#include "../xegame/scene.h"
 #include "../xegame/chitbag.h"
 
 class LumosGame;
 class Engine;
 class WorldMap;
 
-class NavTestScene : public Scene, public IChitListener
+class NavTest2Scene : public Scene, public IChitListener
 {
 public:
-	NavTestScene( LumosGame* game );
-	~NavTestScene();
+	NavTest2Scene( LumosGame* game );
+	~NavTest2Scene();
 
 	virtual int RenderPass( grinliz::Rectangle2I* clip3D, grinliz::Rectangle2I* clip2D ) { return RENDER_2D | RENDER_3D; }
 	virtual void DoTick( U32 deltaTime );
@@ -29,25 +29,15 @@ public:
 	virtual void OnChitMsg( Chit* chit, const char* componentName, int id );
 
 private:
-	gamui::PushButton okay,
-					  block,
-					  block20;
-	gamui::TextLabel  textLabel;
-	gamui::ToggleButton showAdjacent, 
-		                showZonePath,
-						showOverlay,
-						toggleBlock;
+	gamui::PushButton okay;
 
 	Engine* engine;
 	WorldMap* map;
 	grinliz::Random random;
-	grinliz::Vector3F tapMark;
-
-	enum { NUM_CHITS = 5 };
-	Chit* chit[NUM_CHITS];
 
 	ChitBag chitBag;
 };
 
 
-#endif // NAVTESTSCENE_INCLUDED
+
+#endif // NAVTEST2_SCENE_INCLUDED

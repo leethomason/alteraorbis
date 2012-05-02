@@ -5,9 +5,11 @@
 #include "rendercomponent.h"
 
 using namespace Simple;
+using namespace grinliz;
 
 ChitBag::ChitBag()
 {
+	idPool = 0;
 	updateList.Resort( 0, false );	// no dupes - turn into a set.
 }
 
@@ -59,12 +61,3 @@ void ChitBag::DoTick( U32 delta )
 	updateList.RemoveAll();
 }
 
-
-
-Chit* ChitBag::CreateTestChit( Engine* engine, const char* assetName )
-{
-	Chit* chit = CreateChit();
-	chit->Add( new SpatialComponent() );
-	chit->Add( new RenderComponent( engine, assetName ) );
-	return chit;
-}

@@ -5,6 +5,8 @@
 #include "../xegame/rendercomponent.h"
 #include "../xegame/chitbag.h"
 
+#include "../engine/loosequadtree.h"
+
 #include <cstring>
 #include <cmath>
 
@@ -16,6 +18,7 @@ void PathMoveComponent::OnAdd( Chit* chit )
 	nPath = pathPos = repath = 0;
 	dest.Zero();
 	blockForceApplied = false;
+	avoidForceApplied = false;
 	isStuck = false;
 }
 
@@ -172,6 +175,130 @@ void PathMoveComponent::RotationFirst( U32 delta )
 }
 
 
+#if 0
+void PathMoveComponent::AvoidOthers( U32 delta )
+{
+	if ( !spaceTree ) return;
+	RenderComponent* render = parentChit->GetRenderComponent();
+	if ( !render ) return;
+	if ( (render->GetFlags() & MODEL_USER_AVOIDS ) == 0 ) return;
+	
+	Rectangle3F bounds;
+	bounds.Set( pos2.x-PATH_AVOID_DISTANCE, -0.1f, pos2.y-PATH_AVOID_DISTANCE, pos2.x+PATH_AVOID_DISTANCE, 0.1f, pos2.y+PATH_AVOID_DISTANCE );
+	Model* root = spaceTree->Query( bounds, MODEL_USER_AVOIDS, 0 );
+
+	if ( root && root->userData != parentChit ) {
+		Vector3F heading = parentChit->GetSpatialComponent()->GetHeading();
+		Vector2F heading2 = { heading.x, heading.z };
+		Vector3F pos3    = parentChit->GetSpatialComponent()->GetPosition();
+		Vector3F avoid = { 0, 0 };
+		static const Vector3F UP = { 0, 1, 0 };
+
+		while( root ) {
+			Chit* chit = root->userData;
+			if ( chit && chit != parentChit ) {
+
+				if ( IntersectRayCircle( chit->GetSpatialComponent()->GetPosition2D(),
+										 chit->GetRenderComponent()->RadiusOfBase(),
+										 pos2, heading2 )
+					== INTERSECT )
+				{
+					Vector3F delta = chit->GetSpatialComponent()->GetPosition() - pos3;
+					Vector3F right;
+					CrossProduct( delta, UP, &right );
+
+					Vector3F cross;
+					CrossProduct( heading, delta, &cross );
+					avoid += ((cross.z >= 0) ? right : -right);
+				}
+			}
+			root = root->next;
+		}
+		avoid.y = 0;	// be sure.
+		if ( avoid.LengthSquared() > 1 )
+			avoid.Normalize();
+		avoid.Multiply( Travel( AVOID_SPEED_FRACTION*MOVE_SPEED, delta ));
+		pos2.x += avoid.x;
+		pos2.y += avoid.z;
+	}
+}
+#endif
+
+
+void PathMoveComponent::AvoidOthers( U32 delta )
+{
+	avoidForceApplied = false;
+
+	if ( !spaceTree ) return;
+	RenderComponent* render = parentChit->GetRenderComponent();
+	if ( !render ) return;
+	if ( (render->GetFlags() & MODEL_USER_AVOIDS ) == 0 ) return;
+	
+	Rectangle3F bounds;
+	bounds.Set( pos2.x-PATH_AVOID_DISTANCE, -0.1f, pos2.y-PATH_AVOID_DISTANCE, pos2.x+PATH_AVOID_DISTANCE, 0.1f, pos2.y+PATH_AVOID_DISTANCE );
+	Model* root = spaceTree->Query( bounds, MODEL_USER_AVOIDS, 0 );
+
+	if ( root && root->userData != parentChit ) {
+		Vector3F pos3    = { pos2.x, 0, pos2.y };
+		float radius     = parentChit->GetRenderComponent()->RadiusOfBase();
+		Vector3F avoid = { 0, 0 };
+		static const Vector3F UP = { 0, 1, 0 };
+
+		Vector3F wayPoint   = { path[pathPos].x, 0, path[pathPos].y };
+		Vector3F destNormal = wayPoint - pos3;
+		destNormal.Normalize();
+
+		while( root ) {
+			Chit* chit = root->userData;
+			if ( chit && chit != parentChit ) {
+				
+				Vector3F itPos3 = chit->GetSpatialComponent()->GetPosition();
+				float itRadius  = chit->GetRenderComponent()->RadiusOfBase(); 
+
+				float d = (pos3-itPos3).Length();
+				float r = radius + itRadius;
+
+				if ( d < r ) {
+					avoidForceApplied = true;
+
+					/*
+					// If this is lurking on our path waypoint,
+					// skip the waypoint. (May cause repathing/etc.)
+					// BUG: If this is the dest, we can get stuck
+					if ( (itPos3 - wayPoint).Length() <= r ) {
+						// camped.
+						if ( pathPos < nPath-1 ) {
+							pathPos++;
+							continue;
+						}
+					}
+					*/
+
+					// Move away from the centers so the bases don't overlap.
+					Vector3F normal = pos3 - itPos3;
+					normal.y = 0;
+					normal.Normalize();
+					float alignment = DotProduct( -normal, destNormal ); // how "in the way" is this?
+					normal.Multiply( r - d );
+					avoid += normal;
+
+					// Apply a sidestep vector so they don't just push.
+					if ( alignment > 0.7f ) {
+						Vector3F right;
+						CrossProduct( destNormal, UP, &right );
+						avoid += right * (0.5f * (r-d) );
+					}	
+				}
+			}
+			root = root->next;
+		}
+		avoid.y = 0;	// be sure.
+		pos2.x += avoid.x;
+		pos2.y += avoid.z;
+	}
+}
+
+
 void PathMoveComponent::ApplyBlocks()
 {
 	RenderComponent* render = parentChit->GetRenderComponent();
@@ -200,10 +327,12 @@ void PathMoveComponent::DoTick( U32 delta )
 		else
 			MoveFirst( delta );
 
+		AvoidOthers( delta );
 		ApplyBlocks();
 		SetPosRot( pos2, rot );
 
 		// Position set: nothing below can change.
+		// Do we need to repath because we're stuck?
 		if (    blockForceApplied  
 			 && startPathPos == pathPos
 			 && GetDistToNext2( pos2 ) >= distToNext ) 
@@ -222,7 +351,7 @@ void PathMoveComponent::DoTick( U32 delta )
 
 		// Are we at the end of the path data?
 		if ( pathPos == nPath ) {
-			if ( dest.Equal( path[nPath-1], 0.1f ) ) {
+			if ( dest.Equal( path[nPath-1], parentChit->GetRenderComponent()->RadiusOfBase() ) ) {
 				// actually reached the end!
 				SendMessage( MSG_DESTINATION_REACHED );
 			}

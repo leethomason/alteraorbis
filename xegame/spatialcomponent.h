@@ -13,16 +13,21 @@ public:
 		yRotation = 0;
 	}
 
-	const char* Name() const { return "SpatialComponent"; }
+	virtual const char* Name() const { return "SpatialComponent"; }
 
 	virtual SpatialComponent*	ToSpatial()			{ return this; }
 
-	void SetPosition( float x, float y, float z )	{ position.Set( x, y, z ); RequestUpdate(); }
+	void SetPosition( float x, float y, float z );
 	const grinliz::Vector3F& GetPosition() const	{ return position; }
 
 	// yRot=0 is the +z axis
 	void SetYRotation( float yDegrees )				{ yRotation = grinliz::NormalizeAngleDegrees( yDegrees ); }
 	float GetYRotation() const						{ return yRotation; }
+
+	grinliz::Vector3F GetHeading() const;
+
+	grinliz::Vector2F GetPosition2D() const			{ grinliz::Vector2F v = { position.x, position.z }; return v; }
+	grinliz::Vector2F GetHeading2D() const;
 
 private:
 	grinliz::Vector3F	position;

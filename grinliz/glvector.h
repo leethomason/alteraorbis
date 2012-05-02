@@ -62,6 +62,8 @@ struct Vector2
 		y *= scalar;
 	}
 
+	Vector2<T> operator-() const { Vector2<T> vec = { -x, -y }; return vec; }
+
 	friend Vector2<T> operator-( const Vector2<T>& head, const Vector2<T>& tail ) {
 		Vector2<T> vec = {
 			head.x - tail.x,

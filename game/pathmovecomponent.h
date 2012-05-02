@@ -6,10 +6,9 @@
 #include "gamelimits.h"
 
 class WorldMap;
-
+class SpaceTree;
 
 /*	Move along a path.
-	
 	Future note: Pathing should be async and done by message passing.
 */
 class PathMoveComponent : public MoveComponent
@@ -20,7 +19,9 @@ public:
 		MSG_DESTINATION_BLOCKED
 	};
 
-	PathMoveComponent( WorldMap* _map ) : map( _map ), nPath( 0 ), pathPos( 0 ), rotationFirst(true), pathDebugging( false ) {}
+	PathMoveComponent(	WorldMap* _map,				// required; used to avoids blocks when moving. 
+						SpaceTree* _spaceTree )		// optional: will try to avoid collisions with other objects
+		: map( _map ), spaceTree( _spaceTree ), nPath( 0 ), pathPos( 0 ), rotationFirst(true), pathDebugging( false ) {}
 	virtual ~PathMoveComponent() {}
 
 	const char* Name() const { return "PathMoveComponent"; }
@@ -56,10 +57,13 @@ private:
 	void MoveFirst( U32 delta );
 	// Rotate, then move in that direction.
 	void RotationFirst( U32 delta );
+	// Try to avoid walking through others.
+	void AvoidOthers( U32 delta );
 	// Keep from hitting world objects.
 	void ApplyBlocks();
 
-	WorldMap* map;
+	WorldMap*	map;
+	SpaceTree*	spaceTree;
 	int nPath;				// size of path
 	int pathPos;			// index of where we are on path
 	int repath;				// counter to see if we are stuck
@@ -71,6 +75,7 @@ private:
 	bool rotationFirst;
 	bool pathDebugging;
 	bool blockForceApplied;
+	bool avoidForceApplied;
 	bool isStuck;
 
 	grinliz::Vector2F path[MAX_MOVE_PATH];

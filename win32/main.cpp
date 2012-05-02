@@ -247,49 +247,7 @@ int main( int argc, char **argv )
 	int zoomX = 0;
 	int zoomY = 0;
 
-	void* game = 0;
-	bool mapMakerMode = false;
-
-#if 0
-	if ( argc > 3 ) {
-		// -- MapMaker -- //
-		Engine::mapMakerMode = true;
-
-		TileSetDesc desc;
-		desc.set = "FARM";
-		desc.size = 16;
-		desc.type = "TILE";
-		desc.variation = 0;
-
-		if ( argc > 2 ) {
-			desc.set = argv[2];
-			GLASSERT( strlen( desc.set ) == 4 );
-		}
-
-		if ( argc > 3 ) {
-			desc.size = atol( argv[3] );
-			GLASSERT( desc.size == 16 || desc.size == 32 || desc.size == 48 || desc.size == 64 );
-		}
-
-		if ( argc > 4 ) {
-			desc.type = argv[4];
-			GLASSERT( strlen( desc.type ) == 4 );
-		}
-
-		if ( argc > 5 ) {
-			desc.variation = atol( argv[5] );
-			GLASSERT( desc.variation >= 0 && desc.variation < 100 );
-		}
-
-		game = new Game( screenWidth, screenHeight, rotation, ".\\resin\\", desc );
-		mapMakerMode = true;
-	}
-	else 
-#endif
-	{
-		game = NewGame( screenWidth, screenHeight, rotation, ".\\" );
-	}
-
+	void* game = NewGame( screenWidth, screenHeight, rotation, ".\\" );
 
 #if SEND_CRASH_LOGS
 	// Can't call this until after the game is created!

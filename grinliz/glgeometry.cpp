@@ -1634,13 +1634,37 @@ int grinliz::IntersectRaySphere(	const Sphere& sphere,
 			//*t = closest - halfCordLen.Sqrt();
 			return INTERSECT;
 		}
-		/*
-		// haldCordLen *= Dot
-		float det = (sphereR2 - raySphereLen2) + (closest*closest)*DotProduct( dir, dir );
-		if ( det > 0 ) {
+	}
+	return REJECT;
+}
+
+
+int grinliz::IntersectRayCircle(	const Vector2F& center,
+									float radius,
+									const Vector2F& p,
+									const Vector2F& dir )
+{
+	Vector2F raySphere = center - p;
+	float raySphereLen2 = DotProduct( raySphere, raySphere );
+	float sphereR2 = radius*radius;
+
+	if (raySphereLen2 < sphereR2) 
+	{	
+		// Origin is inside the sphere.
+		return INSIDE;
+	} 
+	else 
+	{
+		float closest = DotProduct(raySphere, dir);
+		if (closest < 0) {
+			// Then we are pointing away from the sphere (and we know we aren't inside.)
+			return REJECT;
+		}
+
+		float halfCordLen = (sphereR2 - raySphereLen2) / DotProduct(dir, dir) + (closest*closest);
+		if ( halfCordLen > 0 ) {
 			return INTERSECT;
-		}	
-		*/
+		}
 	}
 	return REJECT;
 }

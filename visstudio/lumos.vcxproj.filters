@@ -178,6 +178,12 @@
     <ClCompile Include="..\engine\engineshaders.cpp">
       <Filter>Source Files\engine</Filter>
     </ClCompile>
+    <ClCompile Include="..\xegame\spatialcomponent.cpp">
+      <Filter>Source Files\xegame</Filter>
+    </ClCompile>
+    <ClCompile Include="..\scenes\navtest2scene.cpp">
+      <Filter>Source Files\scenes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\camera.h">
@@ -347,6 +353,9 @@
     </ClInclude>
     <ClInclude Include="..\xegame\xegamelimits.h">
       <Filter>Source Files\xegame</Filter>
+    </ClInclude>
+    <ClInclude Include="..\scenes\navtest2scene.h">
+      <Filter>Source Files\scenes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

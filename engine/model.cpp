@@ -196,6 +196,7 @@ void Model::Init( const ModelResource* resource, SpaceTree* tree )
 	if ( resource && (resource->header.flags & ModelHeader::RESOURCE_NO_SHADOW ) ) {
 		flags |= MODEL_NO_SHADOW;
 	}
+	userData = 0;
 }
 
 

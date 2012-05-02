@@ -17,7 +17,7 @@ TitleScene::TitleScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 	RenderAtom batom = game->CreateRenderAtom( UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, "title" );
 	background.Init( &gamui2D, batom, false );
 
-	static const char* testSceneName[NUM_TESTS] = { "dialog", "render0", "render1", "particle", "nav", "noise" };
+	static const char* testSceneName[NUM_TESTS] = { "dialog", "render0", "render1", "particle", "nav", "nav2", "noise" };
 
 	for( int i=0; i<NUM_TESTS; ++i ) {
 		testScene[i].Init( &gamui2D, lumosGame->GetButtonLook( LumosGame::BUTTON_LOOK_STD ) );
@@ -37,7 +37,9 @@ void TitleScene::Resize()
 
 	LayoutCalculator layout = lumosGame->DefaultLayout();
 	for( int i=0; i<NUM_TESTS; ++i ) {
-		layout.PosAbs( &testScene[i], i, 1 );
+		int y = i / TESTS_PER_ROW;
+		int x = i - y*TESTS_PER_ROW;
+		layout.PosAbs( &testScene[i], x, y+1 );
 	}
 }
 
@@ -58,6 +60,9 @@ void TitleScene::ItemTapped( const gamui::UIItem* item )
 	}
 	else if ( item == &testScene[TEST_NAV] ) {
 		game->PushScene( LumosGame::SCENE_NAVTEST, 0 );
+	}
+	else if ( item == &testScene[TEST_NAV2] ) {
+		game->PushScene( LumosGame::SCENE_NAVTEST2, 0 );
 	}
 	else if ( item == &testScene[TEST_NOISE] ) {
 		game->PushScene( LumosGame::SCENE_NOISETEST, 0 );
