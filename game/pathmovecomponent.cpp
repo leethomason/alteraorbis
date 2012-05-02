@@ -174,6 +174,7 @@ void PathMoveComponent::RotationFirst( U32 delta )
 }
 
 
+#if 0
 void PathMoveComponent::AvoidOthers( U32 delta )
 {
 	if ( !spaceTree ) return;
@@ -216,6 +217,63 @@ void PathMoveComponent::AvoidOthers( U32 delta )
 		if ( avoid.LengthSquared() > 1 )
 			avoid.Normalize();
 		avoid.Multiply( Travel( AVOID_SPEED_FRACTION*MOVE_SPEED, delta ));
+		pos2.x += avoid.x;
+		pos2.y += avoid.z;
+	}
+}
+#endif
+
+
+void PathMoveComponent::AvoidOthers( U32 delta )
+{
+	if ( !spaceTree ) return;
+	RenderComponent* render = parentChit->GetRenderComponent();
+	if ( !render ) return;
+	if ( (render->GetFlags() & MODEL_USER_AVOIDS ) == 0 ) return;
+	
+	Rectangle3F bounds;
+	bounds.Set( pos2.x-PATH_AVOID_DISTANCE, -0.1f, pos2.y-PATH_AVOID_DISTANCE, pos2.x+PATH_AVOID_DISTANCE, 0.1f, pos2.y+PATH_AVOID_DISTANCE );
+	Model* root = spaceTree->Query( bounds, MODEL_USER_AVOIDS, 0 );
+
+	if ( root && root->userData != parentChit ) {
+		Vector3F pos3    = { pos2.x, 0, pos2.y };
+		float radius     = parentChit->GetRenderComponent()->RadiusOfBase();
+		Vector3F avoid = { 0, 0 };
+		static const Vector3F UP = { 0, 1, 0 };
+
+		Vector3F destNormal = { path[pathPos].x - pos2.x, 0, path[pathPos].y - pos2.y };
+		destNormal.Normalize();
+
+		while( root ) {
+			Chit* chit = root->userData;
+			if ( chit && chit != parentChit ) {
+				
+				Vector3F itPos3 = chit->GetSpatialComponent()->GetPosition();
+				float itRadius  = chit->GetRenderComponent()->RadiusOfBase(); 
+
+				float d = (pos3-itPos3).Length();
+				float r = radius + itRadius;
+
+				if ( d < r ) {
+					// Move away from the centers so the bases don't overlap.
+					Vector3F normal = pos3 - itPos3;
+					normal.y = 0;
+					normal.Normalize();
+					float alignment = DotProduct( -normal, destNormal ); // how "in the way" is this?
+					normal.Multiply( r - d );
+					avoid += normal;
+
+					// Apply a sidestep vector so they don't just push.
+					if ( alignment > 0.7f ) {
+						Vector3F right;
+						CrossProduct( destNormal, UP, &right );
+						avoid += right * (0.5f * (r-d) );
+					}					
+				}
+			}
+			root = root->next;
+		}
+		avoid.y = 0;	// be sure.
 		pos2.x += avoid.x;
 		pos2.y += avoid.z;
 	}

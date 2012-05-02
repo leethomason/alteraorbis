@@ -6,6 +6,7 @@
 
 - memory pool everything in the chit/component system
 - rotation: in spatial component? Matrix or Quat?
+- PathMoveComponent: can get blocked if 'dest' is being squatted by a unit.
 
 X particle test scene
 	X alpha processing for additive blending
