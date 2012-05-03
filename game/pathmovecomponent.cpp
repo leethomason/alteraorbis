@@ -15,7 +15,7 @@ using namespace grinliz;
 void PathMoveComponent::OnAdd( Chit* chit )
 {
 	MoveComponent::OnAdd( chit );
-	nPath = pathPos = repath = 0;
+	nPathPos = pathPos = repath = 0;
 	dest.Zero();
 	blockForceApplied = false;
 	avoidForceApplied = false;
@@ -40,7 +40,7 @@ void PathMoveComponent::SetDest( const Vector2F& d )
 
 	Vector2F start = { posVec.x, posVec.z };
 	dest = d;
-	nPath = 0;
+	nPathPos = 0;
 	pathPos = 0;
 
 	// Make sure the 'dest' is actually a point we can get to.
@@ -49,12 +49,12 @@ void PathMoveComponent::SetDest( const Vector2F& d )
 		GLOUTPUT(( "Dest adjusted. (%.1f,%.1f) -> (%.1f,%.1f)\n", d.x, d.y, dest.x, dest.y ));
 	}
 
-	bool okay = map->CalcPath( start, dest, path, &nPath, MAX_MOVE_PATH, pathDebugging ); 
+	bool okay = map->CalcPath( start, dest, path, &nPathPos, MAX_MOVE_PATH, pathDebugging ); 
 	if ( !okay ) {
-		nPath = pathPos = 0;
+		nPathPos = pathPos = 0;
 		SendMessage( MSG_DESTINATION_BLOCKED );
 	}
-	// If pos < nPath, then pathing happens!
+	// If pos < nPathPos, then pathing happens!
 }
 
 
@@ -87,12 +87,12 @@ float PathMoveComponent::GetDistToNext2( const Vector2F& current )
 
 void PathMoveComponent::MoveFirst( U32 delta )
 {
-	if ( pathPos < nPath ) {
+	if ( pathPos < nPathPos ) {
 
 		float travel = Travel( MOVE_SPEED, delta );
 		Vector2F startingPos2 = pos2;
 
-		while ( travel > 0 && pathPos < nPath ) {
+		while ( travel > 0 && pathPos < nPathPos ) {
 			startingPos2 = pos2;
 
 			float distToNext = (pos2-path[pathPos]).Length();
@@ -117,11 +117,11 @@ void PathMoveComponent::MoveFirst( U32 delta )
 
 void PathMoveComponent::RotationFirst( U32 delta )
 {
-	if ( pathPos < nPath ) {
+	if ( pathPos < nPathPos ) {
 		float travel    = Travel( MOVE_SPEED, delta );
 		float travelRot	= Travel( ROTATION_SPEED, delta );
 
-		while ( travel > 0 && travelRot > 0 && pathPos < nPath ) {
+		while ( travel > 0 && travelRot > 0 && pathPos < nPathPos ) {
 			Vector2F next  = path[pathPos];
 			Vector2F delta = next - pos2;
 			float    dist = delta.Length();
@@ -175,64 +175,15 @@ void PathMoveComponent::RotationFirst( U32 delta )
 }
 
 
-#if 0
-void PathMoveComponent::AvoidOthers( U32 delta )
-{
-	if ( !spaceTree ) return;
-	RenderComponent* render = parentChit->GetRenderComponent();
-	if ( !render ) return;
-	if ( (render->GetFlags() & MODEL_USER_AVOIDS ) == 0 ) return;
-	
-	Rectangle3F bounds;
-	bounds.Set( pos2.x-PATH_AVOID_DISTANCE, -0.1f, pos2.y-PATH_AVOID_DISTANCE, pos2.x+PATH_AVOID_DISTANCE, 0.1f, pos2.y+PATH_AVOID_DISTANCE );
-	Model* root = spaceTree->Query( bounds, MODEL_USER_AVOIDS, 0 );
-
-	if ( root && root->userData != parentChit ) {
-		Vector3F heading = parentChit->GetSpatialComponent()->GetHeading();
-		Vector2F heading2 = { heading.x, heading.z };
-		Vector3F pos3    = parentChit->GetSpatialComponent()->GetPosition();
-		Vector3F avoid = { 0, 0 };
-		static const Vector3F UP = { 0, 1, 0 };
-
-		while( root ) {
-			Chit* chit = root->userData;
-			if ( chit && chit != parentChit ) {
-
-				if ( IntersectRayCircle( chit->GetSpatialComponent()->GetPosition2D(),
-										 chit->GetRenderComponent()->RadiusOfBase(),
-										 pos2, heading2 )
-					== INTERSECT )
-				{
-					Vector3F delta = chit->GetSpatialComponent()->GetPosition() - pos3;
-					Vector3F right;
-					CrossProduct( delta, UP, &right );
-
-					Vector3F cross;
-					CrossProduct( heading, delta, &cross );
-					avoid += ((cross.z >= 0) ? right : -right);
-				}
-			}
-			root = root->next;
-		}
-		avoid.y = 0;	// be sure.
-		if ( avoid.LengthSquared() > 1 )
-			avoid.Normalize();
-		avoid.Multiply( Travel( AVOID_SPEED_FRACTION*MOVE_SPEED, delta ));
-		pos2.x += avoid.x;
-		pos2.y += avoid.z;
-	}
-}
-#endif
-
-
-void PathMoveComponent::AvoidOthers( U32 delta )
+bool PathMoveComponent::AvoidOthers( U32 delta )
 {
 	avoidForceApplied = false;
+	bool squattingDest = false;
 
-	if ( !spaceTree ) return;
+	if ( !spaceTree ) return false;
 	RenderComponent* render = parentChit->GetRenderComponent();
-	if ( !render ) return;
-	if ( (render->GetFlags() & MODEL_USER_AVOIDS ) == 0 ) return;
+	if ( !render ) return false;
+	if ( (render->GetFlags() & MODEL_USER_AVOIDS ) == 0 ) return false;
 	
 	Rectangle3F bounds;
 	bounds.Set( pos2.x-PATH_AVOID_DISTANCE, -0.1f, pos2.y-PATH_AVOID_DISTANCE, pos2.x+PATH_AVOID_DISTANCE, 0.1f, pos2.y+PATH_AVOID_DISTANCE );
@@ -266,20 +217,29 @@ void PathMoveComponent::AvoidOthers( U32 delta )
 					normal.y = 0;
 					normal.Normalize();
 					float alignment = DotProduct( -normal, destNormal ); // how "in the way" is this?
-					// Limit push-back so that the chit will eventually
-					// get to the dest. Keeps dormant chits from squatting
-					// the way points.
-					float magnitude = r - d;
-					magnitude = Min( magnitude, Travel( MOVE_SPEED, delta ) );
-					normal.Multiply( r - d );
-					avoid += normal;
-
-					// Apply a sidestep vector so they don't just push.
-					if ( alignment > 0.7f ) {
-						Vector3F right;
-						CrossProduct( destNormal, UP, &right );
-						avoid += right * (0.5f * (r-d) );
-					}	
+					
+					// Is this guy squatting on our dest?
+					if ( (wayPoint-itPos3).LengthSquared() < r*r ) {
+						// Dang squatter.
+						if ( pathPos < nPathPos-1 ) {
+							++pathPos;	// go around
+						}
+						else {
+							squattingDest = true;
+						}
+					}
+					else {
+						float mag = Min( r-d, Travel( MOVE_SPEED, delta ) ); 
+						normal.Multiply( mag );
+						avoid += normal;
+				
+						// Apply a sidestep vector so they don't just push.
+						if ( alignment > 0.7f ) {
+							Vector3F right;
+							CrossProduct( destNormal, UP, &right );
+							avoid += right * (0.5f*mag );
+						}	
+					}
 				}
 			}
 			root = root->next;
@@ -288,6 +248,7 @@ void PathMoveComponent::AvoidOthers( U32 delta )
 		pos2.x += avoid.x;
 		pos2.y += avoid.z;
 	}
+	return squattingDest;
 }
 
 
@@ -309,7 +270,7 @@ void PathMoveComponent::ApplyBlocks()
 
 void PathMoveComponent::DoTick( U32 delta )
 {
-	if ( pathPos < nPath ) {
+	if ( pathPos < nPathPos ) {
 		GetPosRot( &pos2, &rot );
 		int startPathPos = pathPos;
 		float distToNext = GetDistToNext2( pos2 );
@@ -319,31 +280,37 @@ void PathMoveComponent::DoTick( U32 delta )
 		else
 			MoveFirst( delta );
 
-		AvoidOthers( delta );
+		bool squattingDest = AvoidOthers( delta );
 		ApplyBlocks();
 		SetPosRot( pos2, rot );
 
 		// Position set: nothing below can change.
-		// Do we need to repath because we're stuck?
-		if (    blockForceApplied  
-			 && startPathPos == pathPos
-			 && GetDistToNext2( pos2 ) >= distToNext ) 
-		{ 
-			++repath;
+
+		if ( squattingDest ) {
+			GLASSERT( pathPos == nPathPos-1 );
+			pathPos = nPathPos;
 		}
 		else {
-			repath = 0;
+			// Do we need to repath because we're stuck?
+			if (    blockForceApplied  
+				 && startPathPos == pathPos
+				 && GetDistToNext2( pos2 ) >= distToNext ) 
+			{ 
+				++repath;
+			}
+			else {
+				repath = 0;
+			}
+			if ( repath == 3 ) {
+				GLOUTPUT(( "Repath\n" ));
+				Vector2F d = dest;
+				SetDest( d );
+				repath = 0;
+			}
 		}
-		if ( repath == 3 ) {
-			GLOUTPUT(( "Repath\n" ));
-			Vector2F d = dest;
-			SetDest( d );
-			repath = 0;
-		}
-
 		// Are we at the end of the path data?
-		if ( pathPos == nPath ) {
-			if ( dest.Equal( path[nPath-1], parentChit->GetRenderComponent()->RadiusOfBase() ) ) {
+		if ( pathPos == nPathPos ) {
+			if ( squattingDest || dest.Equal( path[nPathPos-1], parentChit->GetRenderComponent()->RadiusOfBase() ) ) {
 				// actually reached the end!
 				SendMessage( MSG_DESTINATION_REACHED );
 			}

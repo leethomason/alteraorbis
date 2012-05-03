@@ -21,7 +21,7 @@ public:
 
 	PathMoveComponent(	WorldMap* _map,				// required; used to avoids blocks when moving. 
 						SpaceTree* _spaceTree )		// optional: will try to avoid collisions with other objects
-		: map( _map ), spaceTree( _spaceTree ), nPath( 0 ), pathPos( 0 ), rotationFirst(true), pathDebugging( false ) {}
+		: map( _map ), spaceTree( _spaceTree ), nPathPos( 0 ), pathPos( 0 ), rotationFirst(true), pathDebugging( false ) {}
 	virtual ~PathMoveComponent() {}
 
 	const char* Name() const { return "PathMoveComponent"; }
@@ -42,7 +42,7 @@ public:
 	// Status info
 	int BlockForceApplied() const	{ return blockForceApplied; }
 	bool IsStuck() const			{ return isStuck; }
-	bool IsMoving() const			{ return pathPos < nPath; }
+	bool IsMoving() const			{ return pathPos < nPathPos; }
 
 private:
 	float Travel( float rate, U32 time ) const {
@@ -58,13 +58,14 @@ private:
 	// Rotate, then move in that direction.
 	void RotationFirst( U32 delta );
 	// Try to avoid walking through others.
-	void AvoidOthers( U32 delta );
+	// Returns 'true' if the destination is being squatted.
+	bool AvoidOthers( U32 delta );
 	// Keep from hitting world objects.
 	void ApplyBlocks();
 
 	WorldMap*	map;
 	SpaceTree*	spaceTree;
-	int nPath;				// size of path
+	int nPathPos;				// size of path
 	int pathPos;			// index of where we are on path
 	int repath;				// counter to see if we are stuck
 	grinliz::Vector2F dest;	// final destination
@@ -74,7 +75,8 @@ private:
 
 	bool rotationFirst;
 	bool pathDebugging;
-	bool blockForceApplied;
+
+	bool blockForceApplied;		
 	bool avoidForceApplied;
 	bool isStuck;
 
