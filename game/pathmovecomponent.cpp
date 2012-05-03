@@ -261,24 +261,16 @@ void PathMoveComponent::AvoidOthers( U32 delta )
 				if ( d < r ) {
 					avoidForceApplied = true;
 
-					/*
-					// If this is lurking on our path waypoint,
-					// skip the waypoint. (May cause repathing/etc.)
-					// BUG: If this is the dest, we can get stuck
-					if ( (itPos3 - wayPoint).Length() <= r ) {
-						// camped.
-						if ( pathPos < nPath-1 ) {
-							pathPos++;
-							continue;
-						}
-					}
-					*/
-
 					// Move away from the centers so the bases don't overlap.
 					Vector3F normal = pos3 - itPos3;
 					normal.y = 0;
 					normal.Normalize();
 					float alignment = DotProduct( -normal, destNormal ); // how "in the way" is this?
+					// Limit push-back so that the chit will eventually
+					// get to the dest. Keeps dormant chits from squatting
+					// the way points.
+					float magnitude = r - d;
+					magnitude = Min( magnitude, Travel( MOVE_SPEED, delta ) );
 					normal.Multiply( r - d );
 					avoid += normal;
 
