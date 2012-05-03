@@ -173,7 +173,6 @@ private:
 		return grid[INDEX(*x,*y)];
 	}
 
-	bool JointPassable( int x0, int y0, int x1, int y1 );
 	bool RectPassable( int x0, int y0, int x1, int y1 );
 
 	Grid* grid;		// pathing info.

@@ -236,21 +236,6 @@ WorldMap::BlockResult WorldMap::ApplyBlockEffect(	const Vector2F inPos,
 }
 
 
-
-bool WorldMap::JointPassable( int x0, int y0, int x1, int y1 )
-{
-	for( int x=x0; x<=x1; ++x ) {
-		if ( !grid[INDEX(x,y1)].IsPassable() || grid[INDEX(x,y1)].isPathInit )
-			return false;
-	}
-	for( int y=y0; y<y1; ++y ) {
-		if ( !grid[INDEX(x1,y)].IsPassable() || grid[INDEX(x1,y)].isPathInit )
-			return false;
-	}
-	return true;
-}
-
-
 bool WorldMap::RectPassable( int x0, int y0, int x1, int y1 )
 {
 	for( int y=y0; y<=y1; ++y ) {
@@ -458,27 +443,68 @@ int WorldMap::RegionSolve( const grinliz::Vector2I& subZoneStart, const grinliz:
 	return result;
 }
 
-
+// Such a good site, for many years: http://www-cs-students.stanford.edu/~amitp/gameprog.html
+// Specifically this link: http://playtechs.blogspot.com/2007/03/raytracing-on-grid.html
 // Returns true if there is a straight line path between the start and end.
-// This used to be fancy, but getting a line walk to work consistently 
-// is tricky. Now uses a brutally straightforward bounding check.
-bool WorldMap::GridPath( const grinliz::Vector2F& start, const grinliz::Vector2F& end )
+// The line-walk can/should get moved to the utility package. (and the grid lookup replaced with visit() )
+bool WorldMap::GridPath( const grinliz::Vector2F& p0, const grinliz::Vector2F& p1 )
 {
-	Rectangle2I b;
-	b.FromPair( (int)start.x, (int)start.y, (int)end.x, (int)end.y );
-	
-	// Choose the zone size as a reasonable area.
-	if ( b.Area() < ZONE_SIZE2 ) {
-		for( int j=b.min.y; j<=b.max.y; ++j ) {
-			for( int i=b.min.x; i<=b.max.x; ++i ) {
-				if ( !grid[INDEX(i,j)].IsPassable() ) {
-					return false;
-				}
-			}
-		}
-		return true;
+	double dx = fabs(p1.x - p0.x);
+    double dy = fabs(p1.y - p0.y);
+
+    int x = int(floor(p0.x));
+    int y = int(floor(p0.y));
+
+    int n = 1;
+    int x_inc, y_inc;
+    double error;
+
+	// Just do special checks up front:
+	if ( dx == 0 || dy == 0 ) {
+		int x0 = (int)Min( p0.x, p1.x );
+		int y0 = (int)Min( p0.y, p1.y );
+		int x1 = (int)Max( p0.x, p1.x );
+		int y1 = (int)Max( p0.y, p1.y );
+		return RectPassable( x0, y0, x1, y1 );
 	}
-	return false;
+
+    if (p1.x > p0.x) {
+        x_inc = 1;
+        n += int(floor(p1.x)) - x;
+        error = (floor(p0.x) + 1 - p0.x) * dy;
+    }
+    else {
+        x_inc = -1;
+        n += x - int(floor(p1.x));
+        error = (p0.x - floor(p0.x)) * dy;
+    }
+
+    if (p1.y > p0.y) {
+        y_inc = 1;
+        n += int(floor(p1.y)) - y;
+        error -= (floor(p0.y) + 1 - p0.y) * dx;
+    }
+    else {
+        y_inc = -1;
+        n += y - int(floor(p1.y));
+        error -= (p0.y - floor(p0.y)) * dx;
+    }
+
+    for (; n > 0; --n)
+    {
+        if ( !grid[INDEX(x, y)].IsPassable() )
+			return false;
+
+        if (error > 0) {
+            y += y_inc;
+            error -= dx;
+        }
+        else {
+            x += x_inc;
+            error += dy;
+        }
+    }
+	return true;
 }
 
 
