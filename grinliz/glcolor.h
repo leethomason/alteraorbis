@@ -41,6 +41,13 @@ struct Color3
 	void Set( T _r, T _g, T _b )	{ this->r = _r; this->g = _g; this->b = _b; }
 	T X( int i ) const				{ GLASSERT( i>=0 && i<3 ); return *(&r+i); }
 	T& X(int i)						{ GLASSERT( i>=0 && i<3 ); return *(&r+i); }
+
+	bool operator==( const Color3<T>& rh ) const {
+		return r==rh.r && g==rh.g && b==rh.b;
+	}
+	bool operator!=( const Color3<T>& rh ) const {
+		return r!=rh.r || g!=rh.g || b!=rh.b;
+	}
 };
 
 typedef Color3<float> Color3F;

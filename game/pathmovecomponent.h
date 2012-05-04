@@ -80,6 +80,7 @@ private:
 	bool avoidForceApplied;
 	bool isStuck;
 
+
 	grinliz::Vector2F path[MAX_MOVE_PATH];
 };
 

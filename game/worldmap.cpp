@@ -4,6 +4,8 @@
 
 #include "../grinliz/glutil.h"
 #include "../grinliz/glgeometry.h"
+#include "../grinliz/glcolor.h"
+#include "../shared/lodepng.h"
 
 #include "../engine/texture.h"
 #include "../engine/ufoutil.h"
@@ -76,8 +78,50 @@ void WorldMap::InitCircle()
 }
 
 
-void WorldMap::InitPNG( FILE* fp, grinliz::CDynArray<grinliz::Vector2I>* wayPoints )
+bool WorldMap::InitPNG( const char* filename, 
+						grinliz::CDynArray<grinliz::Vector2I>* blocks,
+						grinliz::CDynArray<grinliz::Vector2I>* wayPoints )
 {
+	unsigned char* pixels = 0;
+	unsigned w=0, h=0;
+	static const Color3U8 WHITE = { 255, 255, 255 };
+	static const Color3U8 BLACK = { 0, 0, 0 };
+	static const Color3U8 BLUE  = { 0, 0, 255 };
+	static const Color3U8 RED   = { 255, 0, 0 };
+
+	int error = lodepng_decode24_file( &pixels, &w, &h, filename );
+	GLASSERT( error == 0 );
+	if ( error == 0 ) {
+		Init( w, h );
+		int x = 0;
+		int y = 0;
+		for( unsigned i=0; i<w*h; ++i ) {
+			Color3U8 c = { pixels[i*3+0], pixels[i*3+1], pixels[i*3+2] };
+			Vector2I p = { x, y };
+			if ( c == BLACK ) {
+				grid[i].isLand = 1;
+				blocks->Push( p );
+			}
+			else if ( c == WHITE ) {
+				grid[i].isLand = 1;
+			}
+			else if ( c == BLUE ) {
+				grid[i].isLand = 0;
+			}
+			else if ( c == RED ) {
+				grid[i].isLand = 1;
+				wayPoints->Push( p );
+			}
+			++x;
+			if ( x == w ) {
+				x = 0;
+				++y;
+			}
+		}
+		free( pixels );
+	}
+	Tessellate();
+	return error == 0;
 }
 
 
@@ -317,7 +361,7 @@ void WorldMap::CalcZone( int zx, int zy )
 					int dx = x1-x0+1;
 					int dy = y1-y0+1;
 					int area = dx*dy;
-					// If the 2nd pass of a 2 pass algorithm,
+					// If the 1st pass of a 2 pass algorithm,
 					// filter out things that aren't square enough.
 					if ( pass == NUM_PASS-2 ) {
 						if ( (dx > dy*2) || (dy > dx*2) )
@@ -442,6 +486,7 @@ int WorldMap::RegionSolve( const grinliz::Vector2I& subZoneStart, const grinliz:
 	int result = pather->Solve( start, end, &pathRegions, &totalCost );
 	return result;
 }
+
 
 // Such a good site, for many years: http://www-cs-students.stanford.edu/~amitp/gameprog.html
 // Specifically this link: http://playtechs.blogspot.com/2007/03/raytracing-on-grid.html

@@ -14,7 +14,10 @@ NavTest2Scene::NavTest2Scene( LumosGame* game ) : Scene( game )
 	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase() );
 	
 	map = new WorldMap( 32, 32 );
-	map->InitCircle();
+
+	grinliz::CDynArray<Vector2I> blocks;
+	grinliz::CDynArray<Vector2I> waypoints;
+	map->InitPNG( "./res/testnav.png", &blocks, &waypoints );
 
 	engine->SetMap( map );
 	engine->CameraLookAt( 10, 10, 40 );

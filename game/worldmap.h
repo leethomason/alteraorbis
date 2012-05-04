@@ -26,7 +26,9 @@ public:
 	~WorldMap();
 
 	void InitCircle();
-	void InitPNG( FILE* fp, grinliz::CDynArray<grinliz::Vector2I>* wayPoints );
+	bool InitPNG( const char* filename, 
+				  grinliz::CDynArray<grinliz::Vector2I>* blocks,
+				  grinliz::CDynArray<grinliz::Vector2I>* wayPoints );
 
 	void SetBlock( int x, int y )	{ grinliz::Rectangle2I pos; pos.Set( x, y, x, y ); SetBlock( pos ); }
 	void SetBlock( const grinliz::Rectangle2I& pos );
