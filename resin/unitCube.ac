@@ -4,7 +4,7 @@ OBJECT world
 kids 1
 OBJECT poly
 name "box"
-loc 0.5 0.5 0.5
+loc 0 0.5 0
 texture "palette.png"
 crease 45.000000
 numvert 8

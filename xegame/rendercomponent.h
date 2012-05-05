@@ -12,7 +12,8 @@ class RenderComponent : public Component
 {
 public:
 	// spacetree probably  sufficient, but 'engine' easier to keep track of
-	RenderComponent( Engine* engine, const char* asset, int flags );
+	// flags: MODEL_USER_AVOIDS
+	RenderComponent( Engine* engine, const char* asset, int modelFlags );
 	virtual ~RenderComponent();
 
 	// ------ Component functionality: -------

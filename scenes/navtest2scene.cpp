@@ -1,6 +1,12 @@
 #include "navtest2scene.h"
+
 #include "../game/lumosgame.h"
 #include "../game/worldmap.h"
+#include "../game/mapspatialcomponent.h"
+
+#include "../xegame/chit.h"
+#include "../xegame/rendercomponent.h"
+
 #include "../engine/engine.h"
 
 
@@ -12,27 +18,11 @@ NavTest2Scene::NavTest2Scene( LumosGame* game ) : Scene( game )
 {
 	game->InitStd( &gamui2D, &okay, 0 );
 	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase() );
+	LoadMap();
 	
-	map = new WorldMap( 32, 32 );
-
-	grinliz::CDynArray<Vector2I> blocks;
-	grinliz::CDynArray<Vector2I> waypoints;
-	map->InitPNG( "./res/testnav.png", &blocks, &waypoints );
-
 	engine->SetMap( map );
 	engine->CameraLookAt( 10, 10, 40 );
 
-	/*
-	for( int i=0; i<NUM_CHITS; ++i ) {
-		chit[i] = chitBag.CreateChit();
-		chit[i]->Add( new SpatialComponent() );
-		chit[i]->Add( new RenderComponent( engine, "humanFemale", MODEL_USER_AVOIDS ) );
-		chit[i]->Add( new PathMoveComponent( map, engine->GetSpaceTree() ) );
-		chit[i]->Add( new DebugPathComponent( engine, map, game ) );
-		chit[i]->GetSpatialComponent()->SetPosition( 10.0f + (float)i*2.f, 0.0f, 10.0f );
-	}
-	chit[0]->AddListener( this );
-	*/
 }
 
 
@@ -49,6 +39,38 @@ void NavTest2Scene::Resize()
 {
 	LumosGame* lumosGame = static_cast<LumosGame*>( game );
 	lumosGame->PositionStd( &okay, 0 );
+}
+
+
+void NavTest2Scene::LoadMap()
+{
+	map = new WorldMap( 32, 32 );
+
+	grinliz::CDynArray<Vector2I> blocks;
+	grinliz::CDynArray<Vector2I> waypoints;
+	map->InitPNG( "./res/testnav.png", &blocks, &waypoints );
+
+	for ( int i=0; i<blocks.Size(); ++i ) {
+		Chit* chit = chitBag.NewChit();
+		const Vector2I& v = blocks[i];
+		MapSpatialComponent* msc = new MapSpatialComponent( 1, 1, map );
+		chit->Add( msc );
+		chit->Add( new RenderComponent( engine, "unitCube", 0 ));
+
+		msc->SetMapPosition( v.x, v.y, 0 );
+	}
+
+	/*
+	for( int i=0; i<NUM_CHITS; ++i ) {
+		chit[i] = chitBag.CreateChit();
+		chit[i]->Add( new SpatialComponent() );
+		chit[i]->Add( new RenderComponent( engine, "humanFemale", MODEL_USER_AVOIDS ) );
+		chit[i]->Add( new PathMoveComponent( map, engine->GetSpaceTree() ) );
+		chit[i]->Add( new DebugPathComponent( engine, map, game ) );
+		chit[i]->GetSpatialComponent()->SetPosition( 10.0f + (float)i*2.f, 0.0f, 10.0f );
+	}
+	chit[0]->AddListener( this );
+	*/
 }
 
 

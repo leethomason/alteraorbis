@@ -19,8 +19,8 @@ public:
 	~ChitBag();
 
 	void DeleteAll();
-	Chit* CreateChit();
-	void DeleteChit( Chit* );
+	Chit* NewChit();
+	void  DeleteChit( Chit* );
 
 	// Calls every chit that has a tick.
 	void DoTick( U32 delta );		

@@ -29,6 +29,8 @@ public:
 	virtual void OnChitMsg( Chit* chit, const char* componentName, int id );
 
 private:
+	void LoadMap();
+
 	gamui::PushButton okay;
 
 	Engine* engine;

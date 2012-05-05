@@ -71,7 +71,7 @@ NavTestScene::NavTestScene( LumosGame* game ) : Scene( game )
 	tapMark.Zero();
 
 	for( int i=0; i<NUM_CHITS; ++i ) {
-		chit[i] = chitBag.CreateChit();
+		chit[i] = chitBag.NewChit();
 		chit[i]->Add( new SpatialComponent() );
 		chit[i]->Add( new RenderComponent( engine, "humanFemale", MODEL_USER_AVOIDS ) );
 		chit[i]->Add( new PathMoveComponent( map, engine->GetSpaceTree() ) );

@@ -26,7 +26,7 @@ void ChitBag::DeleteAll()
 }
 
 
-Chit* ChitBag::CreateChit()
+Chit* ChitBag::NewChit()
 {
 	Chit* chit = new Chit( ++idPool, this );
 	chits.Add( chit->ID(), chit );

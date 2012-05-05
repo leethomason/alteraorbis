@@ -100,6 +100,7 @@
     <ClCompile Include="..\engine\uirendering.cpp" />
     <ClCompile Include="..\game\debugpathcomponent.cpp" />
     <ClCompile Include="..\game\lumosgame.cpp" />
+    <ClCompile Include="..\game\mapspatialcomponent.cpp" />
     <ClCompile Include="..\game\pathmovecomponent.cpp" />
     <ClCompile Include="..\game\worldmap.cpp" />
     <ClCompile Include="..\gamui\gamui.cpp" />
@@ -156,6 +157,7 @@
     <ClInclude Include="..\game\debugpathcomponent.h" />
     <ClInclude Include="..\game\gamelimits.h" />
     <ClInclude Include="..\game\lumosgame.h" />
+    <ClInclude Include="..\game\mapspatialcomponent.h" />
     <ClInclude Include="..\game\pathmovecomponent.h" />
     <ClInclude Include="..\game\worldmap.h" />
     <ClInclude Include="..\gamui\gamui.h" />
