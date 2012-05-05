@@ -57,7 +57,9 @@ void NavTest2Scene::LoadMap()
 		chit->Add( msc );
 		chit->Add( new RenderComponent( engine, "unitCube", 0 ));
 
-		msc->SetMapPosition( v.x, v.y, 0 );
+		//msc->SetMapPosition( v.x, v.y, 0 );
+		//GET_COMPONENT( chit, MapSpatialComponent )->SetMapPosition( v.x, v.y, 0 );
+		static_cast<MapSpatialComponent*>( chit->GetComponent( "MapSpatialComponent" ) )->SetMapPosition( v.x, v.y, 0 );
 	}
 
 	/*

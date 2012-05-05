@@ -17,8 +17,10 @@ public:
 	virtual ~RenderComponent();
 
 	// ------ Component functionality: -------
-	virtual const char* Name() const { return "RenderComponent"; };
-
+	virtual Component*          ToComponent( const char* name ) {
+		if ( grinliz::StrEqual( name, "RenderComponent" ) ) return this;
+		return Component::ToComponent( name );
+	}
 	virtual RenderComponent*	ToRender()		{ return this; }
 
 	virtual void OnAdd( Chit* chit );

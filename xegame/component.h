@@ -3,6 +3,7 @@
 
 #include "../grinliz/gltypes.h"
 #include "../grinliz/gldebug.h"
+#include "../grinliz/glstringutil.h"
 
 // The primary components:
 class SpatialComponent;
@@ -16,11 +17,14 @@ class Component
 public:
 	Component() : parentChit( 0 )	{}
 	virtual ~Component()			{}
-	virtual const char* Name() const = 0;
 
 	virtual void OnAdd( Chit* chit )	{	parentChit = chit; }
 	virtual void OnRemove()				{	parentChit = 0;    }
 
+	virtual Component*          ToComponent( const char* name ) {
+		if ( grinliz::StrEqual( name, "Component" ) ) return this;
+		return 0;
+	}
 	virtual SpatialComponent*	ToSpatial()		{ return 0; }
 	virtual MoveComponent*		ToMove()		{ return 0; }
 	virtual RenderComponent*	ToRender()		{ return 0; }
@@ -34,10 +38,10 @@ public:
 
 protected:
 	void RequestUpdate();
-	void SendMessage( int id );
+	void SendMessage( const char* name, int id );
 
 	ChitBag* GetChitBag();
-
+	
 	Chit* parentChit;
 };
 

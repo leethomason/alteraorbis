@@ -1,6 +1,7 @@
 #include "component.h"
 #include "chit.h"
 
+
 void Component::RequestUpdate()
 {
 	if ( parentChit ) {
@@ -9,10 +10,10 @@ void Component::RequestUpdate()
 }
 
 
-void Component::SendMessage( int id )
+void Component::SendMessage( const char* name, int id )
 {
 	if ( parentChit ) {
-		parentChit->SendMessage( Name(), id );
+		parentChit->SendMessage( name, id );
 	}
 }
 

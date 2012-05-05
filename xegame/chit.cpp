@@ -81,7 +81,7 @@ void Chit::Remove( Component* c )
 Component* Chit::GetComponent( const char* name )
 {
 	for( int i=0; i<NUM_SLOTS; ++i ) {
-		if ( slot[i] && StrEqual( name, slot[i]->Name() ) ) {
+		if ( slot[i] && slot[i]->ToComponent( name )) {
 			return slot[i];
 		}
 	}

@@ -24,7 +24,10 @@ public:
 		: map( _map ), spaceTree( _spaceTree ), nPathPos( 0 ), pathPos( 0 ), rotationFirst(true), pathDebugging( false ) {}
 	virtual ~PathMoveComponent() {}
 
-	const char* Name() const { return "PathMoveComponent"; }
+	virtual Component*          ToComponent( const char* name ) {
+		if ( grinliz::StrEqual( name, "PathMoveComponent" ) ) return this;
+		return MoveComponent::ToComponent( name );
+	}
 
 	virtual void OnAdd( Chit* chit );
 	virtual void OnRemove();

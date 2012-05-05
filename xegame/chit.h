@@ -20,6 +20,10 @@ public:
 	virtual void OnChitMsg( Chit* chit, const char* componentName, int id ) = 0;
 };
 
+// MyComponent* mc = GET_COMPONENT( chit, MyComponent );
+//#define GET_COMPONENT( chit, name ) static_cast<name*>( chit->GetComponent( ##name## ) )
+//#define GET_COMPONENT( chit, name ) ((name*)( chit->GetComponent( ##name )))
+
 
 /* General purpose GameObject.
    A class to hold Components.

@@ -52,7 +52,7 @@ void PathMoveComponent::SetDest( const Vector2F& d )
 	bool okay = map->CalcPath( start, dest, path, &nPathPos, MAX_MOVE_PATH, pathDebugging ); 
 	if ( !okay ) {
 		nPathPos = pathPos = 0;
-		SendMessage( MSG_DESTINATION_BLOCKED );
+		SendMessage( "PathMoveComponent", MSG_DESTINATION_BLOCKED );
 	}
 	// If pos < nPathPos, then pathing happens!
 }
@@ -312,7 +312,7 @@ void PathMoveComponent::DoTick( U32 delta )
 		if ( pathPos == nPathPos ) {
 			if ( squattingDest || dest.Equal( path[nPathPos-1], parentChit->GetRenderComponent()->RadiusOfBase() ) ) {
 				// actually reached the end!
-				SendMessage( MSG_DESTINATION_REACHED );
+				SendMessage( "PathMoveComponent", MSG_DESTINATION_REACHED );
 			}
 			else {
 				// continue path:

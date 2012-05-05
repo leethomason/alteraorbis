@@ -13,8 +13,10 @@ public:
 		yRotation = 0;
 	}
 
-	virtual const char* Name() const { return "SpatialComponent"; }
-
+	virtual Component*          ToComponent( const char* name ) {
+		if ( grinliz::StrEqual( name, "SpatialComponent" ) ) return this;
+		return Component::ToComponent( name );
+	}
 	virtual SpatialComponent*	ToSpatial()			{ return this; }
 
 	void SetPosition( float x, float y, float z );

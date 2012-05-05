@@ -15,7 +15,11 @@ public:
 	DebugPathComponent( Engine*, WorldMap*, LumosGame* );
 	~DebugPathComponent();
 
-	virtual const char* Name() const			{ return "DebugPathComponent"; }
+	virtual Component*          ToComponent( const char* name ) {
+		if ( grinliz::StrEqual( name, "DebugPathComponent" ) ) return this;
+		return Component::ToComponent( name );
+	}
+
 	virtual void OnAdd( Chit* chit );
 	virtual void OnRemove();
 	virtual bool NeedsTick()					{ return true; }
