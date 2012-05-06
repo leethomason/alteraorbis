@@ -103,7 +103,7 @@ public:
 private:
 	void EnsureCap( int count ) {
 		if ( count > capacity ) {
-			capacity = CeilPowerOf2( count );
+			capacity = grinliz::Max( CeilPowerOf2( count ), (U32) 16 );
 			if ( mem == cache ) {
 				mem = (T*) malloc( capacity*sizeof(T) );
 				memcpy( mem, cache, size*sizeof(T) );

@@ -35,6 +35,7 @@ public:
 	virtual void DoTick( U32 delta );
 
 	void SetDest( const grinliz::Vector2F& dest );
+	void SetDest( float x, float y )	{ grinliz::Vector2F v = { x, y }; SetDest( v ); }
 
 	// Set whether rotation is prioritized over movement. (Default
 	// to true.) If false, then motion will happen and the rotation

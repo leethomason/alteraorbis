@@ -3,6 +3,9 @@
 #include "../game/lumosgame.h"
 #include "../game/worldmap.h"
 #include "../game/mapspatialcomponent.h"
+#include "../game/gamelimits.h"
+#include "../game/pathmovecomponent.h"
+#include "../game/debugpathcomponent.h"
 
 #include "../xegame/chit.h"
 #include "../xegame/rendercomponent.h"
@@ -47,7 +50,6 @@ void NavTest2Scene::LoadMap()
 	map = new WorldMap( 32, 32 );
 
 	grinliz::CDynArray<Vector2I> blocks;
-	grinliz::CDynArray<Vector2I> waypoints;
 	map->InitPNG( "./res/testnav.png", &blocks, &waypoints );
 
 	for ( int i=0; i<blocks.Size(); ++i ) {
@@ -57,22 +59,29 @@ void NavTest2Scene::LoadMap()
 		chit->Add( msc );
 		chit->Add( new RenderComponent( engine, "unitCube", 0 ));
 
-		//msc->SetMapPosition( v.x, v.y, 0 );
-		//GET_COMPONENT( chit, MapSpatialComponent )->SetMapPosition( v.x, v.y, 0 );
-		static_cast<MapSpatialComponent*>( chit->GetComponent( "MapSpatialComponent" ) )->SetMapPosition( v.x, v.y, 0 );
+		GET_COMPONENT( chit, MapSpatialComponent )->SetMapPosition( v.x, v.y, 0 );
 	}
 
-	/*
-	for( int i=0; i<NUM_CHITS; ++i ) {
-		chit[i] = chitBag.CreateChit();
-		chit[i]->Add( new SpatialComponent() );
-		chit[i]->Add( new RenderComponent( engine, "humanFemale", MODEL_USER_AVOIDS ) );
-		chit[i]->Add( new PathMoveComponent( map, engine->GetSpaceTree() ) );
-		chit[i]->Add( new DebugPathComponent( engine, map, game ) );
-		chit[i]->GetSpatialComponent()->SetPosition( 10.0f + (float)i*2.f, 0.0f, 10.0f );
+	for( int i=0; i<waypoints.Size(); ++i ) {
+		Chit* chit = chitBag.NewChit();
+		chit->Add( new SpatialComponent() );
+		chit->Add( new RenderComponent( engine, "humanFemale", MODEL_USER_AVOIDS ) );
+		chit->Add( new PathMoveComponent( map, engine->GetSpaceTree() ) );
+		chit->Add( new DebugPathComponent( engine, map, static_cast<LumosGame*>(game) ) );
+
+		chit->GetSpatialComponent()->SetPosition( (float)waypoints[i].x+0.5f, 0, (float)waypoints[i].y+0.5f );
+		chit->AddListener( this );
+		OnChitMsg( chit, "PathMoveComponent", PathMoveComponent::MSG_DESTINATION_REACHED );
 	}
-	chit[0]->AddListener( this );
-	*/
+}
+
+
+void NavTest2Scene::OnChitMsg( Chit* chit, const char* componentName, int id )
+{
+	if ( StrEqual( componentName, "PathMoveComponent" ) ) {
+		const Vector2I& dest = waypoints[random.Rand(waypoints.Size())];
+		GET_COMPONENT( chit, PathMoveComponent )->SetDest( (float)dest.x+0.5f, (float)dest.y+0.5f ); 
+	}
 }
 
 
@@ -111,12 +120,6 @@ void NavTest2Scene::ItemTapped( const gamui::UIItem* item )
 void NavTest2Scene::DoTick( U32 deltaTime )
 {
 	chitBag.DoTick( deltaTime );
-}
-
-
-void NavTest2Scene::OnChitMsg( Chit* chit, const char* componentName, int id )
-{
-	GLOUTPUT(( "OnChitMsg %s %d\n", componentName, id ));
 }
 
 

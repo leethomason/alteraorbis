@@ -392,6 +392,7 @@ int WorldMap::NumRegions() const
 }
 
 
+// micropather
 float WorldMap::LeastCostEstimate( void* stateStart, void* stateEnd )
 {
 	int startX, startY, endX, endY;
@@ -407,6 +408,7 @@ float WorldMap::LeastCostEstimate( void* stateStart, void* stateEnd )
 }
 
 
+// micropather
 void WorldMap::AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > *adjacent )
 {
 	int startX, startY;
@@ -469,6 +471,7 @@ void WorldMap::AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > *a
 }
 
 
+// micropather
 void WorldMap::PrintStateInfo( void* state )
 {
 	int startX, startY;
@@ -581,6 +584,15 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 	debugPathVector.Clear();
 	path->Clear();
 	bool okay = false;
+
+	// Flush out regions that aren't valid.
+	for( int j=0; j<height; j+= ZONE_SIZE ) {
+		for( int i=0; i<width; i+=ZONE_SIZE ) {
+			if ( !zoneInit[ZDEX(i,j)] ) {
+				CalcZone( i, j );
+			}
+		}
+	}
 
 	Vector2I regionStart = GetRegion( (int)start.x, (int)start.y );
 	Vector2I regionEnd   = GetRegion( (int)end.x,   (int)end.y );

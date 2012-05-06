@@ -36,6 +36,7 @@ private:
 	Engine* engine;
 	WorldMap* map;
 	grinliz::Random random;
+	grinliz::CDynArray<grinliz::Vector2I> waypoints;
 
 	ChitBag chitBag;
 };
