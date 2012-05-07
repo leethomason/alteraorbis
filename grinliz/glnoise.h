@@ -8,10 +8,20 @@ namespace grinliz {
 class PerlinNoise
 {
 public:
-	// If halfRange, then noise: [0,1], else noise [-1,-1]
 	PerlinNoise( U32 seed );
 	
 	float Noise(float _x, float _y, float _z);
+
+	float AbsNoise( float x, float y, float z ) {
+		float v = Noise( x, y, z );
+		return -1.0f + 2.0f*fabsf( v );
+	}
+	float Noise2( float x, float y, float z ) {
+		float v = Noise( x, y, z );
+		return -1.0f + 2.0f * (v*v);
+	}
+
+	// Convert [-1,1] -> [0,1]
 	static float Normalize( float n ) { return n*0.5f + 0.5f; }
 
 private:
@@ -28,6 +38,13 @@ private:
 
 };
 
+/*
+class NoiseMachine
+{
+public:
+	NoiseMachine( PerlinNoise* noise0, PerlinNoise* noise1 ) { noise0( _
+};
+*/
 
 };
 

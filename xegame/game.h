@@ -172,6 +172,7 @@ private:
 	float framesPerSecond;
 	int debugLevel;
 	int perfLevel;
+	int perfFrameCount;
 	bool suppressText;
 	int perfY;
 

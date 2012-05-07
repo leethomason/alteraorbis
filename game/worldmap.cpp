@@ -181,7 +181,7 @@ void WorldMap::SetBlock( const grinliz::Rectangle2I& pos )
 			GLASSERT( grid[i].isBlock == FALSE );
 			grid[i].isBlock = TRUE;
 			zoneInit[ZDEX( x, y )] = 0;
-			GLOUTPUT(( "Block (%d,%d) index=%d zone=%d set\n", x, y, i, ZDEX(x,y) ));
+			//GLOUTPUT(( "Block (%d,%d) index=%d zone=%d set\n", x, y, i, ZDEX(x,y) ));
 		}
 	}
 	pather->Reset();
@@ -298,7 +298,7 @@ void WorldMap::CalcZone( int zx, int zy )
 	zy = zy & (~(ZONE_SIZE-1));
 
 	if ( zoneInit[ZDEX(zx,zy)] == 0 ) {
-		GLOUTPUT(( "CalcZone (%d,%d) %d\n", zx, zy, ZDEX(zx,zy) ));
+		//GLOUTPUT(( "CalcZone (%d,%d) %d\n", zx, zy, ZDEX(zx,zy) ));
 		zoneInit[ZDEX(zx,zy)] = 1;
 
 		for( int y=zy; y<zy+ZONE_SIZE; ++y ) {
@@ -611,7 +611,7 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 	if ( !okay ) {
 		okay = GridPath( start, end );
 		if ( okay ) {
-			GLOUTPUT(( "Ray succeeded.\n" ));
+			//GLOUTPUT(( "Ray succeeded.\n" ));
 			path->Push( start );
 			path->Push( end );
 		}
@@ -621,7 +621,7 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 	if ( !okay ) {
 		int result = RegionSolve( regionStart, regionEnd );
 		if ( result == micropather::MicroPather::SOLVED ) {
-			GLOUTPUT(( "Region succeeded len=%d.\n", pathRegions.size() ));
+			//GLOUTPUT(( "Region succeeded len=%d.\n", pathRegions.size() ));
 			Vector2F from = start;
 			path->Push( start );
 			okay = true;

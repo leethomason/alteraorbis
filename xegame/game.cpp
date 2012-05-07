@@ -50,6 +50,7 @@ Game::Game( int width, int height, int rotation, int uiHeight, const char* path 
 	framesPerSecond( 0 ),
 	debugLevel( 1 ),
 	perfLevel( 0 ),
+	perfFrameCount( 0 ),
 	suppressText( false ),
 	previousTime( 0 ),
 	isDragging( false )
@@ -499,7 +500,7 @@ void Game::PrintPerf( int depth, const PerfData& data )
 
 	UFOText* ufoText = UFOText::Instance();
 	ufoText->Draw( X + 15*depth, Y+perfY, "%s", data.name );
-	ufoText->Draw( X+200,		 Y+perfY, "%.2f  %d", data.inclusiveMSec, data.callCount );
+	ufoText->Draw( X+240,		 Y+perfY, "%6.2f  %4d", data.inclusiveMSec, data.callCount );
 	perfY += 20;
 }
 
@@ -606,22 +607,14 @@ void Game::DoTick( U32 _currentTime )
 #ifdef GRINLIZ_PROFILE
 
 	if ( GetPerfLevel() ) {
-		Performance::Process();
+		Performance::EndFrame();
+		if ( ++perfFrameCount == 10 ) {
+			perfFrameCount = 0;
+			Performance::Process();
+		}
 		perfY = 0;
 		Performance::Walk( this );
-/*		const int SAMPLE = 8;
-		if ( (currentFrame & (SAMPLE-1)) == 0 ) {
-			Performance::SampleData();
-		}
-		for( int i=0; i<Performance::NumData(); ++i ) {
-			const PerformanceData& data = Performance::GetData( i );
-
-			ufoText->Draw( 60,  20+i*12, "%s", data.name );
-			ufoText->Draw( 300, 20+i*12, "%.3f", data.normalTime );
-			ufoText->Draw( 380, 20+i*12, "%d", data.functionCalls/SAMPLE );
-		}*/
 	}
-	Performance::EndFrame();
 #endif
 
 	GPUShader::ResetTriCount();

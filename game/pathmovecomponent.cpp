@@ -7,6 +7,8 @@
 
 #include "../engine/loosequadtree.h"
 
+#include "../grinliz/glperformance.h"
+
 #include <cstring>
 #include <cmath>
 
@@ -177,6 +179,7 @@ void PathMoveComponent::RotationFirst( U32 delta )
 
 bool PathMoveComponent::AvoidOthers( U32 delta )
 {
+	GRINLIZ_PERFTRACK;
 	static const float PATH_AVOID_DISTANCE = 4.0f;
 
 	avoidForceApplied = false;
@@ -258,6 +261,7 @@ bool PathMoveComponent::AvoidOthers( U32 delta )
 
 void PathMoveComponent::ApplyBlocks()
 {
+	GRINLIZ_PERFTRACK;
 	RenderComponent* render = parentChit->GetRenderComponent();
 
 	Vector2F newPos2 = pos2;
@@ -274,6 +278,8 @@ void PathMoveComponent::ApplyBlocks()
 
 void PathMoveComponent::DoTick( U32 delta )
 {
+	GRINLIZ_PERFTRACK;
+
 	blockForceApplied = false;
 	avoidForceApplied = false;
 
@@ -309,7 +315,7 @@ void PathMoveComponent::DoTick( U32 delta )
 				repath = 0;
 			}
 			if ( repath == 3 ) {
-				GLOUTPUT(( "Repath\n" ));
+				//GLOUTPUT(( "Repath\n" ));
 				Vector2F d = dest;
 				SetDest( d );
 				repath = 0;

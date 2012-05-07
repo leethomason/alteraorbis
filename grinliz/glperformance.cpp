@@ -61,19 +61,7 @@ int Performance::nSamples = 0;
 PerfData* Performance::perfData = 0;
 int Performance::nPerfData = 0;
 PerfData* Performance::root = 0;
-
-
-void Performance::EndFrame()
-{
-	if ( perfData ) {
-		for( int i=0; i<nPerfData; ++i ) {
-			PerfData* p = perfData + i;
-			p->inclusiveTU = 0;
-			p->inclusiveMSec = 0.f;
-		}
-	}
-	nSamples = 0;
-}
+int Performance::framesSampled = 0;
 
 
 void Performance::Process()
@@ -121,11 +109,17 @@ void Performance::Process()
 		}
 	}
 
+	if ( framesSampled < 1 ) framesSampled = 1;
+
 	double freq = 1000./(double)FastFrequency();
+	double scale = 1.0/(double)framesSampled;
 	for( int i=0; i<nPerfData; ++i ) {
 		PerfData* pd = perfData+i;
-		pd->inclusiveMSec = (double)(pd->inclusiveTU) * freq;
+		pd->inclusiveMSec = (double)(pd->inclusiveTU) * freq * scale;
+		pd->callCount /= framesSampled;
 	}
+	framesSampled = 0;
+	nSamples = 0;
 }
 
 
@@ -136,7 +130,7 @@ void Performance::WalkRec( int depth, const PerfData* data, IPerformancePrinter*
 		printer->PrintPerf( depth, *data );
 	}
 	for( int i=0; i<PerfData::MAX_CHILDREN; ++i ) {
-		if ( data->child[i] ) {
+		if ( data && data->child[i] ) {
 			WalkRec(  depth+1, data->child[i], printer );
 		}
 	}

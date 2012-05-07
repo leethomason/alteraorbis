@@ -3,6 +3,7 @@
 
 #include "spatialcomponent.h"
 #include "rendercomponent.h"
+#include "../grinliz/glperformance.h"
 
 using namespace Simple;
 using namespace grinliz;
@@ -49,6 +50,8 @@ void ChitBag::RequestUpdate( Chit* chit )
 
 void ChitBag::DoTick( U32 delta )
 {
+	GRINLIZ_PERFTRACK;
+
 	for( int i=0; i<chits.GetSize(); ++i ) {
 		Chit* c = chits[i].Value;
 		if ( c->NeedsTick() ) {

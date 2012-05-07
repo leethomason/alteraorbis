@@ -135,8 +135,11 @@ class Performance
 		}
 	}
 	static void Free()		{ delete [] samples; samples = 0; nSamples = 0; delete [] perfData; perfData = 0; nPerfData = 0; }
-	static void EndFrame();
+	
+	// Commit the samples:
 	static void Process();
+	static void EndFrame()				{ framesSampled++; }
+	// Print the last "processed()"
 	static void Walk( IPerformancePrinter* printer ) { WalkRec( -1, perfData, printer ); }
 
   protected:
@@ -155,6 +158,7 @@ class Performance
 	static PerfData* perfData;
 	static int nPerfData;
 	static PerfData* root;
+	static int framesSampled;
 };
 
 
