@@ -20,7 +20,6 @@ static const int MAX_MAP_SIZE = 1024;
 static const int MAX_MOVE_PATH = MAX_MAP_SIZE/2;	// repath if we need to
 
 static const float METERS_PER_GRID = 2.0f;
-static const float PATH_AVOID_DISTANCE = 2.0f;
 
 static const int MODEL_USER	= 0x1000;					// from model.h
 static const int MODEL_USER_AVOIDS	= MODEL_USER << 0;	// for finding other models we need to avoid in the space tree

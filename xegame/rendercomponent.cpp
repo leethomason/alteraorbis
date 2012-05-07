@@ -54,7 +54,7 @@ float RenderComponent::RadiusOfBase()
 	float radius = 0;
 	if ( resource ) {
 		const Rectangle3F& b = resource->AABB();
-		radius = Mean( b.SizeX(), b.SizeZ() )*0.5f;
+		radius = Mean( b.SizeX(), b.SizeZ() );
 		radius = Min( radius, MAX_BASE_RADIUS );
 	}
 	return radius;

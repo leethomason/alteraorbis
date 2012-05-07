@@ -55,8 +55,8 @@ void DebugPathComponent::DoTick( U32 delta )
 		float radius = MAX_BASE_RADIUS;
 
 		if ( render ) {
-			model->SetScale( radius*2.0f );
 			radius = render->RadiusOfBase();
+			model->SetScale( radius*2.f );
 		}
 		model->SetPos( pos );
 		Vector4F color = { 0, 1, 0, 1 };
@@ -68,6 +68,8 @@ void DebugPathComponent::DoTick( U32 delta )
 				color.Set( 0, 0, 0, 1 );
 			if ( pmc->BlockForceApplied() )
 				color.Set( 1, 1, 0, 1 );
+			if ( pmc->IsAvoiding() ) 
+				color.z = 1;
 			if ( pmc->IsStuck() )
 				color.Set( 1, 0, 0, 1 );
 		}

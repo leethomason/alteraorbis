@@ -177,6 +177,8 @@ void PathMoveComponent::RotationFirst( U32 delta )
 
 bool PathMoveComponent::AvoidOthers( U32 delta )
 {
+	static const float PATH_AVOID_DISTANCE = 4.0f;
+
 	avoidForceApplied = false;
 	bool squattingDest = false;
 
@@ -186,7 +188,8 @@ bool PathMoveComponent::AvoidOthers( U32 delta )
 	if ( (render->GetFlags() & MODEL_USER_AVOIDS ) == 0 ) return false;
 	
 	Rectangle3F bounds;
-	bounds.Set( pos2.x-PATH_AVOID_DISTANCE, -0.1f, pos2.y-PATH_AVOID_DISTANCE, pos2.x+PATH_AVOID_DISTANCE, 0.1f, pos2.y+PATH_AVOID_DISTANCE );
+	bounds.Set( pos2.x-PATH_AVOID_DISTANCE, -0.1f, pos2.y-PATH_AVOID_DISTANCE, 
+		        pos2.x+PATH_AVOID_DISTANCE, 0.1f,  pos2.y+PATH_AVOID_DISTANCE );
 	Model* root = spaceTree->Query( bounds, MODEL_USER_AVOIDS, 0 );
 
 	if ( root && root->userData != parentChit ) {
@@ -197,7 +200,7 @@ bool PathMoveComponent::AvoidOthers( U32 delta )
 
 		Vector3F wayPoint   = { path[pathPos].x, 0, path[pathPos].y };
 		Vector3F destNormal = wayPoint - pos3;
-		destNormal.Normalize();
+		destNormal.SafeNormalize( 1, 0, 0 );
 
 		while( root ) {
 			Chit* chit = root->userData;
@@ -215,7 +218,7 @@ bool PathMoveComponent::AvoidOthers( U32 delta )
 					// Move away from the centers so the bases don't overlap.
 					Vector3F normal = pos3 - itPos3;
 					normal.y = 0;
-					normal.Normalize();
+					normal.SafeNormalize( -destNormal.x, -destNormal.y, -destNormal.z );
 					float alignment = DotProduct( -normal, destNormal ); // how "in the way" is this?
 					
 					// Is this guy squatting on our dest?
@@ -270,6 +273,9 @@ void PathMoveComponent::ApplyBlocks()
 
 void PathMoveComponent::DoTick( U32 delta )
 {
+	blockForceApplied = false;
+	avoidForceApplied = false;
+
 	if ( pathPos < nPathPos ) {
 		GetPosRot( &pos2, &rot );
 		int startPathPos = pathPos;

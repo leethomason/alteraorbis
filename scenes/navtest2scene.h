@@ -30,6 +30,7 @@ public:
 
 private:
 	void LoadMap();
+	void CreateChit( const grinliz::Vector2I& p );
 
 	gamui::PushButton okay;
 
@@ -37,6 +38,9 @@ private:
 	WorldMap* map;
 	grinliz::Random random;
 	grinliz::CDynArray<grinliz::Vector2I> waypoints;
+	
+	int nChits;
+	int creationTick;
 
 	ChitBag chitBag;
 };

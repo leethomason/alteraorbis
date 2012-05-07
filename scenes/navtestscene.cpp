@@ -78,7 +78,10 @@ NavTestScene::NavTestScene( LumosGame* game ) : Scene( game )
 		chit[i]->Add( new DebugPathComponent( engine, map, game ) );
 		chit[i]->GetSpatialComponent()->SetPosition( 10.0f + (float)i*2.f, 0.0f, 10.0f );
 	}
-	chit[0]->AddListener( this );
+	chit[1]->AddListener( this );
+	// Comment in to get a unit pacing.
+	//GET_COMPONENT( chit[1], PathMoveComponent )->SetDest( 13.f, 10.f );
+
 }
 
 
@@ -206,7 +209,16 @@ void NavTestScene::DoTick( U32 deltaTime )
 
 void NavTestScene::OnChitMsg( Chit* chit, const char* componentName, int id )
 {
-	GLOUTPUT(( "OnChitMsg %s %d\n", componentName, id ));
+//	GLOUTPUT(( "OnChitMsg %s %d\n", componentName, id ));
+	const Vector2F& pos = chit->GetSpatialComponent()->GetPosition2D();
+	static const Vector2F t0 = { 11.f, 10.f };
+	static const Vector2F t1 = { 13.f, 10.f };
+	if ( (pos-t0).LengthSquared() < (pos-t1).LengthSquared() ) {
+		GET_COMPONENT( chit, PathMoveComponent )->SetDest( t1 );
+	}
+	else {
+		GET_COMPONENT( chit, PathMoveComponent )->SetDest( t0 );
+	}
 }
 
 

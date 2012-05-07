@@ -47,6 +47,7 @@ public:
 	int BlockForceApplied() const	{ return blockForceApplied; }
 	bool IsStuck() const			{ return isStuck; }
 	bool IsMoving() const			{ return pathPos < nPathPos; }
+	bool IsAvoiding() const			{ return avoidForceApplied; }
 
 private:
 	float Travel( float rate, U32 time ) const {
@@ -83,7 +84,6 @@ private:
 	bool blockForceApplied;		
 	bool avoidForceApplied;
 	bool isStuck;
-
 
 	grinliz::Vector2F path[MAX_MOVE_PATH];
 };

@@ -288,6 +288,21 @@ struct Vector3
 		#endif
 	}
 
+	void SafeNormalize( T altx, T alty, T altz )	
+	{ 
+		T len = grinliz::Length( x, y, z );
+		if ( len > static_cast<T>(0.00001) ) {
+			T lenInv = static_cast<T>(1) / grinliz::Length( x, y, z );
+			x *= lenInv; 
+			y *= lenInv;
+			z *= lenInv;
+		}
+		else {
+			x = altx; y = alty; z = altz;
+		}
+	}
+
+
 	T Length() const		{ return grinliz::Length( x, y, z ); };
 	T LengthSquared() const { return x*x + y*y + z*z; }
 

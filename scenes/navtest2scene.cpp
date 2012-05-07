@@ -19,13 +19,14 @@ using namespace gamui;
 
 NavTest2Scene::NavTest2Scene( LumosGame* game ) : Scene( game )
 {
+	nChits = 0;
+	creationTick = 0;
 	game->InitStd( &gamui2D, &okay, 0 );
 	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase() );
 	LoadMap();
 	
 	engine->SetMap( map );
-	engine->CameraLookAt( 10, 10, 40 );
-
+	engine->CameraLookAt( (float)map->Width()*0.5f, (float)map->Height()*0.5f, 40 );
 }
 
 
@@ -61,18 +62,24 @@ void NavTest2Scene::LoadMap()
 
 		GET_COMPONENT( chit, MapSpatialComponent )->SetMapPosition( v.x, v.y, 0 );
 	}
-
 	for( int i=0; i<waypoints.Size(); ++i ) {
-		Chit* chit = chitBag.NewChit();
-		chit->Add( new SpatialComponent() );
-		chit->Add( new RenderComponent( engine, "humanFemale", MODEL_USER_AVOIDS ) );
-		chit->Add( new PathMoveComponent( map, engine->GetSpaceTree() ) );
-		chit->Add( new DebugPathComponent( engine, map, static_cast<LumosGame*>(game) ) );
-
-		chit->GetSpatialComponent()->SetPosition( (float)waypoints[i].x+0.5f, 0, (float)waypoints[i].y+0.5f );
-		chit->AddListener( this );
-		OnChitMsg( chit, "PathMoveComponent", PathMoveComponent::MSG_DESTINATION_REACHED );
+		CreateChit( waypoints[i] );
 	}
+}
+
+
+void NavTest2Scene::CreateChit( const Vector2I& p )
+{
+	Chit* chit = chitBag.NewChit();
+	chit->Add( new SpatialComponent() );
+	chit->Add( new RenderComponent( engine, "humanFemale", MODEL_USER_AVOIDS ));
+	chit->Add( new PathMoveComponent( map, engine->GetSpaceTree() ));
+	chit->Add( new DebugPathComponent( engine, map, static_cast<LumosGame*>(game) ));
+
+	chit->GetSpatialComponent()->SetPosition( (float)p.x+0.5f, 0, (float)p.y+0.5f );
+	chit->AddListener( this );
+	OnChitMsg( chit, "PathMoveComponent", PathMoveComponent::MSG_DESTINATION_REACHED );
+	++nChits;
 }
 
 
@@ -120,6 +127,11 @@ void NavTest2Scene::ItemTapped( const gamui::UIItem* item )
 void NavTest2Scene::DoTick( U32 deltaTime )
 {
 	chitBag.DoTick( deltaTime );
+	++creationTick;
+	if ( creationTick == 5 && nChits < 100 ) {
+		CreateChit( waypoints[random.Rand(waypoints.Size()) ] );
+		creationTick = 0;
+	}
 }
 
 
