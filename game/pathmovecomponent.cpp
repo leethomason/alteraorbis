@@ -226,6 +226,7 @@ bool PathMoveComponent::AvoidOthers( U32 delta )
 						// Dang squatter.
 						if ( pathPos < nPathPos-1 ) {
 							++pathPos;	// go around
+							break;		// and stop avoiding since we are changing dest.
 						}
 						else {
 							squattingDest = true;
