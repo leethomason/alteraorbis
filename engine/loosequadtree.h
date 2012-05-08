@@ -26,9 +26,11 @@ struct ModelCache
 };
 
 /*
-	A loose quad tree for culling models. Also stores all the models in the world,
-	and models are allocated and free'd from the Tree.
+	A tree for culling models. Used to be
+	a loose tree. But made "standard" for
+	debugging.
 
+	May need a future tweak.
 */
 class SpaceTree
 {
@@ -78,7 +80,7 @@ private:
 
 	struct Node
 	{
-		grinliz::Rectangle3F looseAABB;
+		grinliz::Rectangle3F aabb;
 
 		int depth;
 		int queryID;
@@ -113,8 +115,8 @@ private:
 	void QueryPlanesRec( const grinliz::Plane* planes, int nPlanes, int intersection, const Node* node, U32 positive );
 	void QueryRectRec( const grinliz::Rectangle3F& rect, const Node* node );
 
+	grinliz::Rectangle3F treeBounds;
 	Model* modelRoot;
-	float yMin, yMax;
 	int size;
 
 	int nodesVisited;
@@ -136,7 +138,6 @@ private:
 
 	Node* GetNode( int depth, int x, int z ); 
 	Node nodeArr[NUM_NODES];
-	//Node shelf;		// special place for allocated, but unused, models.
 };
 
 #endif // LOOSEQUADTREE_INCLUDED

@@ -23,7 +23,7 @@
 using namespace grinliz;
 
 /*
-	Tuning:
+	Tuning: (from Xenowar)
 	Unit tree:  Query checked=153, computed=145 of 341 nodes, models=347 [35,44,40,26,606]
 	Classic:	Query checked=209, computed=209 of 341 nodes, models=361 [1,36,36,51,627]
 	Unit tree has less compution and fewer models, slightly less balanced. 
@@ -32,9 +32,8 @@ using namespace grinliz;
 SpaceTree::SpaceTree( float yMin, float yMax, int size ) 
 	:	modelPool( "SpaceTreeModelPool", sizeof( Item ), EL_ALLOCATED_MODELS*sizeof( Item ), true )
 {
-	this->yMin = yMin;
-	this->yMax = yMax;
 	this->size = Max( (int)CeilPowerOf2( size ), 64 );
+	treeBounds.Set( 0, yMin, 0, (float)size, yMax, (float)size );
 	queryID = 0;
 
 	InitNode();
@@ -59,9 +58,6 @@ void SpaceTree::InitNode()
 			for( int i=0; i<size; i+=nodeSize ) 
 			{
 				Node* node = GetNode( depth, i, j );
-				//node->x = (float)i;
-				//node->z = (float)j;
-				//node->size = (float)nodeSize;
 				node->queryID = 0;
 				node->parent = 0;
 				node->nModels = 0;
@@ -69,29 +65,8 @@ void SpaceTree::InitNode()
 					node->parent = GetNode( depth-1, i, j );
 				}
 
-				/*
-				// looseSize = size*2, "classic" tree.
-				node->looseX = node->x - nodeSize/2;
-				node->looseZ = node->z - nodeSize/2;
-				node->looseSize = nodeSize*2;
-				*/
-				int border = nodeSize / 4;
-				GLASSERT( border > 0 );
-				//node->looseX = node->x - (float)border;
-				//node->looseZ = node->z - (float)border;
-				//node->looseSize = (float)(nodeSize+border*2);
-
-				node->looseAABB.Set( (float)(i-border), yMin, (float)(j-border),
-									 (float)(i+nodeSize+border), yMax, (float)(j+nodeSize+border) );
-
-				/* Seems like a good plan, but isn't. An object that is on the edge of a small node
-				   will be on the edge of a parent node...and goes to the top.
-
-				// Most objects are 1x1. Take advantage of that:
-				node->looseX = node->x - 1;
-				node->looseZ = node->z - 1;
-				node->looseSize = nodeSize+2;
-				*/
+				node->aabb.Set( (float)(i), treeBounds.min.y, (float)(j),
+								(float)(i+nodeSize), treeBounds.max.y, (float)(j+nodeSize) );
 
 				node->depth = depth;
 				node->root = 0;
@@ -145,36 +120,6 @@ void SpaceTree::FreeModel( Model* model )
 
 
 
-// Based on this idea:
-	/* 
-	I've used a scheme which is like an octree, but tweaked to make it
-	easy to move objects.  Basically, I used a fixed level of subdivision
-	and pre-allocated (empty) nodes down to that level.  The main tweak
-	was to make the nodes "loose" by overlapping them -- so a node which
-	in a normal octree would be bounded by an N x N x N cube, I defined as
-	being bounded by a 2N x 2N x 2N cube instead, overlapping with the
-	neighboring nodes.  It's still a hierarchical partitioning scheme,
-	it's just looser than a normal octree.
-
-	I used bounding spheres on the objects.  An object's bounding radius
-	completely determines its grid level, and then the particular node
-	only depends on the object's position.  I did maintain an "empty" flag
-	for each node, since if you do this in 3D, you usually end up with
-	lots of empty nodes.
-
-	So the advantage is that moving an object is fairly quick and doesn't
-	involved any allocation/deallocation.  The main disadvantages are that
-	the bounds are relatively loose, and you need N^3 nodes at the finest
-	subdivision level.  Still, it worked pretty well for me.
-
-	I wrote a longer description of this some time back, probably in
-	rec.games.programmer.  Check DejaNews for more info.
-
-	--
-	Thatcher Ulrich
-	http://world.std.com/~ulrich
-	*/
-
 void SpaceTree::Update( Model* model )
 {
 	// Unlink if currently in tree.
@@ -190,19 +135,14 @@ void SpaceTree::Update( Model* model )
 	Node* node = 0;
 	
 	Rectangle3F bounds = model->AABB();
-
-	// Clamp to tree range.
-	if (bounds.min.y < yMin ) 
-		bounds.min.y = yMin;
-	if (bounds.max.y > yMax )
-		bounds.max.y = yMax;
+	bounds.DoIntersection( treeBounds );
 
 	int x = (int)bounds.min.x;
 	int z = (int)bounds.min.z;
 
 	while( depth > 0 ) {
 		node = GetNode( depth, x, z );
-		if ( node->looseAABB.Contains( bounds ) ) {
+		if ( node->aabb.Contains( bounds ) ) {
 			// fits.
 			item->node = node;
 			break;
@@ -245,7 +185,7 @@ Model* SpaceTree::QueryRect( const grinliz::Rectangle2F& rect, int required, int
 
 	while( depth > 0 ) {
 		node = GetNode( depth, (int)(rect.min.x), (int)(rect.min.y) );
-		if ( node->looseAABB.Contains( bounds ) ) {
+		if ( node->aabb.Contains( bounds ) ) {
 			break;
 		}
 		--depth;
@@ -264,7 +204,7 @@ Model* SpaceTree::QueryRect( const grinliz::Rectangle2F& rect, int required, int
 
 void SpaceTree::QueryRectRec( const grinliz::Rectangle3F& rect, const Node* node )
 {
-	if ( node->looseAABB.Intersect( rect ) ) {
+	if ( node->aabb.Intersect( rect ) ) {
 		for( Item* item=node->root; item; item=item->next ) 
 		{
 			Model* m = &item->model;
@@ -310,21 +250,6 @@ Model* SpaceTree::Query( const Plane* planes, int nPlanes, int required, int exc
 #endif
 
 	QueryPlanesRec( planes, nPlanes, grinliz::INTERSECT, &nodeArr[0], 0 );
-
-	/*
-	if ( debug ) {
-		GLOUTPUT(( "Query visited=%d of %d nodes, comptued planes=%d spheres=%d models=%d [%d,%d,%d,%d,%d]\n", 
-					nodesVisited, NUM_NODES, 
-					planesComputed,
-					spheresComputed,
-					modelsFound,
-					nodeAddedAtDepth[0],
-					nodeAddedAtDepth[1],
-					nodeAddedAtDepth[2],
-					nodeAddedAtDepth[3],
-					nodeAddedAtDepth[4] ));
-	}
-	*/
 	this->debug = false;
 	return modelRoot;
 }
@@ -371,8 +296,8 @@ void SpaceTree::Node::Dump()
 		GLOUTPUT(( "  " ));
 	GLOUTPUT(( "depth=%d nModels=%d (%.1f,%.1f)-(%.1f,%.1f)\n",
 				depth, nModels, 
-				looseAABB.min.x, looseAABB.min.z, 
-				looseAABB.max.x, looseAABB.max.z ));
+				aabb.min.x, aabb.min.z, 
+				aabb.max.x, aabb.max.z ));
 }
 
 
@@ -397,7 +322,7 @@ void SpaceTree::QueryPlanesRec(	const Plane* planes, int nPlanes, int intersecti
 	}
 	else if ( intersection == grinliz::INTERSECT ) 
 	{
-		const Rectangle3F& aabb = node->looseAABB;
+		const Rectangle3F& aabb = node->aabb;
 		int nPositive = 0;
 
 		for( int i=0; i<nPlanes; ++i ) {
@@ -522,9 +447,7 @@ Model* SpaceTree::QueryRay( const Vector3F& _origin,
 	Vector3F dir = _direction;
 	dir.Normalize();
 
-	Rectangle3F aabb;
-	aabb.min.Set( 0, yMin, 0 );
-	aabb.max.Set( (float)size, yMax, (float)size );
+	Rectangle3F aabb = treeBounds;
 
 	// Where does this ray enter and leave the spaceTree?
 	// It enters at 'p0' and leaves at 'p1'

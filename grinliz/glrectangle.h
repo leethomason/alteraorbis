@@ -405,7 +405,7 @@ struct Rectangle3
 	}
 	
 	/// Turn this into the intersection.
-	void DoIntersection( const Rectangle2<T>& rect )
+	void DoIntersection( const Rectangle3<T>& rect )
 	{
 		min.x = grinliz::Max( min.x, rect.min.x );
 		max.x = grinliz::Min( max.x, rect.max.x );
