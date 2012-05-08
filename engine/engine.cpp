@@ -45,14 +45,16 @@ using namespace grinliz;
 //#define ENGINE_DEBUG_GLOW
 
 
-Engine::Engine( Screenport* port, const gamedb::Reader* database ) 
+Engine::Engine( Screenport* port, const gamedb::Reader* database, Map* m ) 
 	:	
 		screenport( port ),
 		initZoomDistance( 0 ),
 		glow( false ),
 		map( 0 )
 {
-	spaceTree = new SpaceTree( -0.1f, 3.0f, 64 );	// fixme: map size hardcoded
+	map = m;
+	spaceTree = new SpaceTree( -0.1f, 2.5f, Max( m->Width(), m->Height() ) );
+
 	renderQueue = new RenderQueue();
 	for( int i=0; i<RT_COUNT; ++i )
 		renderTarget[i] = 0;
@@ -72,6 +74,16 @@ Engine::~Engine()
 		delete renderTarget[i];
 	delete engineShaders;
 }
+
+
+/*
+void Engine::SetMap( Map* m )
+{
+	map = m;
+	delete spaceTree;
+	spaceTree = new SpaceTree( -0.1f, 2.5f, Max( m->Width(), m->Height() ) );
+}
+*/
 
 
 void Engine::DeviceLoss()
@@ -164,6 +176,7 @@ void Engine::MoveCameraXZ( float x, float z, Vector3F* calc )
 Model* Engine::AllocModel( const ModelResource* resource )
 {
 	GLASSERT( resource );
+	GLASSERT( spaceTree );
 	return spaceTree->AllocModel( resource );
 }
 

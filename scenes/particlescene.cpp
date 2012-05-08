@@ -12,11 +12,11 @@ using namespace tinyxml2;
 ParticleScene::ParticleScene( LumosGame* game ) : Scene( game )
 {
 	game->InitStd( &gamui2D, &okay, 0 );
-	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase() );
+
 	testMap = new TestMap( 12, 12 );
+	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase(), testMap );
 	Color3F c = { 0.5f, 0.5f, 0.5f };
 	testMap->SetColor( c );
-	engine->SetMap( testMap );
 	engine->CameraLookAt( 6, 6, 10 );
 
 	Load();

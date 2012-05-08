@@ -14,6 +14,8 @@
 
 using namespace grinliz;
 
+//#define DEBUG_PMC
+
 void PathMoveComponent::OnAdd( Chit* chit )
 {
 	MoveComponent::OnAdd( chit );
@@ -48,7 +50,9 @@ void PathMoveComponent::SetDest( const Vector2F& d )
 	// Make sure the 'dest' is actually a point we can get to.
 	float radius = render->RadiusOfBase();
 	if ( map->ApplyBlockEffect( d, radius, &dest ) ) {
+#ifdef DEBUG_PMC
 		GLOUTPUT(( "Dest adjusted. (%.1f,%.1f) -> (%.1f,%.1f)\n", d.x, d.y, dest.x, dest.y ));
+#endif
 	}
 
 	bool okay = map->CalcPath( start, dest, path, &nPathPos, MAX_MOVE_PATH, pathDebugging ); 
@@ -180,7 +184,7 @@ void PathMoveComponent::RotationFirst( U32 delta )
 bool PathMoveComponent::AvoidOthers( U32 delta )
 {
 	GRINLIZ_PERFTRACK;
-	static const float PATH_AVOID_DISTANCE = 4.0f;
+	static const float PATH_AVOID_DISTANCE = MAX_BASE_RADIUS*2.0f;
 
 	avoidForceApplied = false;
 	bool squattingDest = false;
@@ -190,10 +194,10 @@ bool PathMoveComponent::AvoidOthers( U32 delta )
 	if ( !render ) return false;
 	if ( (render->GetFlags() & MODEL_USER_AVOIDS ) == 0 ) return false;
 	
-	Rectangle3F bounds;
-	bounds.Set( pos2.x-PATH_AVOID_DISTANCE, -0.1f, pos2.y-PATH_AVOID_DISTANCE, 
-		        pos2.x+PATH_AVOID_DISTANCE, 0.1f,  pos2.y+PATH_AVOID_DISTANCE );
-	Model* root = spaceTree->Query( bounds, MODEL_USER_AVOIDS, 0 );
+	Rectangle2F bounds;
+	bounds.Set( pos2.x-PATH_AVOID_DISTANCE, pos2.y-PATH_AVOID_DISTANCE, 
+		        pos2.x+PATH_AVOID_DISTANCE, pos2.y+PATH_AVOID_DISTANCE );
+	Model* root = spaceTree->QueryRect( bounds, MODEL_USER_AVOIDS, 0 );
 
 	if ( root && root->userData != parentChit ) {
 		Vector3F pos3    = { pos2.x, 0, pos2.y };
@@ -225,6 +229,7 @@ bool PathMoveComponent::AvoidOthers( U32 delta )
 					float alignment = DotProduct( -normal, destNormal ); // how "in the way" is this?
 					
 					// Is this guy squatting on our dest?
+					// This check is surprisingly broad, but keeps everyone from "orbiting"
 					if ( (wayPoint-itPos3).LengthSquared() < r*r ) {
 						// Dang squatter.
 						if ( pathPos < nPathPos-1 ) {
@@ -300,7 +305,7 @@ void PathMoveComponent::DoTick( U32 delta )
 		// Position set: nothing below can change.
 
 		if ( squattingDest ) {
-			GLASSERT( pathPos == nPathPos-1 );
+			GLASSERT( pathPos >= nPathPos-1 );
 			pathPos = nPathPos;
 		}
 		else {
@@ -315,7 +320,9 @@ void PathMoveComponent::DoTick( U32 delta )
 				repath = 0;
 			}
 			if ( repath == 3 ) {
-				//GLOUTPUT(( "Repath\n" ));
+#ifdef DEBUG_PMC
+				GLOUTPUT(( "Repath\n" ));
+#endif
 				Vector2F d = dest;
 				SetDest( d );
 				repath = 0;
@@ -323,7 +330,10 @@ void PathMoveComponent::DoTick( U32 delta )
 		}
 		// Are we at the end of the path data?
 		if ( pathPos == nPathPos ) {
-			if ( squattingDest || dest.Equal( path[nPathPos-1], parentChit->GetRenderComponent()->RadiusOfBase() ) ) {
+			if ( squattingDest || dest.Equal( path[nPathPos-1], parentChit->GetRenderComponent()->RadiusOfBase()*0.2f ) ) {
+#ifdef DEBUG_PMC
+				GLOUTPUT(( "Dest reached. squatted=%s\n", squattingDest ? "true" : "false" ));
+#endif
 				// actually reached the end!
 				SendMessage( "PathMoveComponent", MSG_DESTINATION_REACHED );
 			}

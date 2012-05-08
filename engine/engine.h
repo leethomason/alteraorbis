@@ -63,7 +63,7 @@ class EngineShaders;
 class Engine : public IDeviceLossHandler
 {
 public:
-	Engine( Screenport* screenport, const gamedb::Reader* database );
+	Engine( Screenport* screenport, const gamedb::Reader* database, Map* map );
 	virtual ~Engine();
 
 	Camera			camera;
@@ -88,7 +88,7 @@ public:
 	Model* AllocModel( const ModelResource* );
 	void FreeModel( Model* );
 
-	void SetMap( Map* m )				{ map = m;}
+	//void SetMap( Map* m );
 	Map* GetMap()						{ return map; }
 
 	const RenderQueue* GetRenderQueue()	{ return renderQueue; }

@@ -60,13 +60,12 @@ NavTestScene::NavTestScene( LumosGame* game ) : Scene( game )
 
 	textLabel.Init( &gamui2D );
 
-	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase() );
-	
 	map = new WorldMap( 32, 32 );
 	map->InitCircle();
+	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase(), map );
+	
 	map->ShowRegionOverlay( true );
 
-	engine->SetMap( map );
 	engine->CameraLookAt( 10, 10, 40 );
 	tapMark.Zero();
 
@@ -88,9 +87,8 @@ NavTestScene::NavTestScene( LumosGame* game ) : Scene( game )
 NavTestScene::~NavTestScene()
 {
 	chitBag.DeleteAll();
-	engine->SetMap( 0 );
-	delete map;
 	delete engine;
+	delete map;
 }
 
 

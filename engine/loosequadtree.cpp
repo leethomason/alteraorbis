@@ -15,8 +15,11 @@
 
 #include "loosequadtree.h"
 #include "map.h"
-#include "../grinliz/glperformance.h"
 #include "gpustatemanager.h"
+
+#include "../grinliz/glperformance.h"
+#include "../grinliz/glutil.h"
+
 using namespace grinliz;
 
 /*
@@ -31,12 +34,10 @@ SpaceTree::SpaceTree( float yMin, float yMax, int size )
 {
 	this->yMin = yMin;
 	this->yMax = yMax;
-	this->size = size;
-	GLASSERT( grinliz::IsPowerOf2( size ) );
+	this->size = Max( (int)CeilPowerOf2( size ), 64 );
 	queryID = 0;
 
 	InitNode();
-	//memset( &shelf, 0, sizeof(Node) );
 }
 
 
@@ -143,44 +144,6 @@ void SpaceTree::FreeModel( Model* model )
 }
 
 
-/*
-void SpaceTree::ShelveModel( bool shelve, Model* model )
-{
-	Item* item = (Item*)model;	// cast depends on model being first in the structure.
-	GLASSERT( item->node );
-	item->node->Remove( item );
-
-	if ( shelve ) {
-		item->node = &shelf;
-		shelf.Add( item );
-	}
-	else {
-		GLASSERT( item->node );
-		item->node->Remove( item );
-		item->node = 0;
-		Update( model );
-	}
-}
-
-
-void SpaceTree::ShelveAll( bool shelve )
-{
-	if ( shelve ) {
-		Model* root = Query( 0, 0, 0, 0 );
-		while ( root ) {
-			Model* t = root->next;
-			ShelveModel( true, root );
-			root = t;
-		}
-	}
-	else {
-		while( shelf.root ) {
-			ShelveModel( false, (Model*)shelf.root );
-		}
-	}
-}
-*/
-
 
 // Based on this idea:
 	/* 
@@ -272,11 +235,58 @@ SpaceTree::Node* SpaceTree::GetNode( int depth, int x, int z )
 }
 
 
-Model* SpaceTree::Query( const grinliz::Rectangle3F& rect, int required, int excluded )
+Model* SpaceTree::QueryRect( const grinliz::Rectangle2F& rect, int required, int excluded )
 {
-	Plane plane[6];
-	Plane::CreatePlanes( rect, plane );
-	return Query( plane, 6, required, excluded );
+	Rectangle3F bounds;
+	bounds.Set( rect.min.x, 0, rect.min.y, rect.max.x, 0, rect.max.y );
+
+	int depth = DEPTH-1;
+	Node* node = 0;
+
+	while( depth > 0 ) {
+		node = GetNode( depth, (int)(rect.min.x), (int)(rect.min.y) );
+		if ( node->looseAABB.Contains( bounds ) ) {
+			break;
+		}
+		--depth;
+	}
+	GLASSERT( node );
+	modelRoot = 0;
+	nodesVisited = 0;
+	modelsFound = 0;
+	requiredFlags = required;
+	excludedFlags = excluded;
+	QueryRectRec( bounds, node );
+
+	return modelRoot;
+}
+
+
+void SpaceTree::QueryRectRec( const grinliz::Rectangle3F& rect, const Node* node )
+{
+	if ( node->looseAABB.Intersect( rect ) ) {
+		for( Item* item=node->root; item; item=item->next ) 
+		{
+			Model* m = &item->model;
+			const int flags = m->Flags();
+
+			if (    ( (requiredFlags & flags) == requiredFlags)
+				 && ( (excludedFlags & flags) == 0 ) )
+			{	
+				if ( m->AABB().Intersect( rect ) ) {
+					m->next = modelRoot;
+					modelRoot = m;
+					++modelsFound;
+				}
+			}
+		}
+		if ( node->child[0] )  {
+			for( int i=0; i<4; ++i ) {
+				if ( node->child[i]->nModels )
+					QueryRectRec( rect, node->child[i] );
+			}
+		}
+	}
 }
 
 

@@ -110,9 +110,9 @@ void Performance::Process()
 	}
 
 	if ( framesSampled < 1 ) framesSampled = 1;
-
 	double freq = 1000./(double)FastFrequency();
 	double scale = 1.0/(double)framesSampled;
+
 	for( int i=0; i<nPerfData; ++i ) {
 		PerfData* pd = perfData+i;
 		pd->inclusiveMSec = (double)(pd->inclusiveTU) * freq * scale;

@@ -22,20 +22,17 @@ NavTest2Scene::NavTest2Scene( LumosGame* game ) : Scene( game )
 	nChits = 0;
 	creationTick = 0;
 	game->InitStd( &gamui2D, &okay, 0 );
-	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase() );
+	engine = 0;
+
 	LoadMap();
-	
-	engine->SetMap( map );
-	engine->CameraLookAt( (float)map->Width()*0.5f, (float)map->Height()*0.5f, 40 );
 }
 
 
 NavTest2Scene::~NavTest2Scene()
 {
 	chitBag.DeleteAll();
-	engine->SetMap( 0 );
-	delete map;
 	delete engine;
+	delete map;
 }
 
 
@@ -49,6 +46,10 @@ void NavTest2Scene::Resize()
 void NavTest2Scene::LoadMap()
 {
 	map = new WorldMap( 32, 32 );
+
+	delete engine;
+	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase(), map );	
+	engine->CameraLookAt( (float)map->Width()*0.5f, (float)map->Height()*0.5f, 40 );
 
 	grinliz::CDynArray<Vector2I> blocks;
 	map->InitPNG( "./res/testnav.png", &blocks, &waypoints );

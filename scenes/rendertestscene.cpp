@@ -11,16 +11,15 @@ using namespace grinliz;
 
 RenderTestScene::RenderTestScene( LumosGame* game, const RenderTestSceneData* data ) : Scene( game ), lumosGame( game )
 {
-	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase() );
+	testMap = new TestMap( 8, 8 );
+	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase(), testMap );
 
 	for( int i=0; i<NUM_MODELS; ++i )
 		model[i] = 0;
 
-	testMap = new TestMap( 8, 8 );
 	Color3F c = { 0.5f, 0.5f, 0.5f };
 	testMap->SetColor( c );
 
-	engine->SetMap( testMap );
 	engine->SetGlow( true );
 	
 	switch( data->id ) {
