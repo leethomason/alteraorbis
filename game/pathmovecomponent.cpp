@@ -199,7 +199,7 @@ bool PathMoveComponent::AvoidOthers( U32 delta )
 		        pos2.x+PATH_AVOID_DISTANCE, pos2.y+PATH_AVOID_DISTANCE );
 	Model* root = spaceTree->QueryRect( bounds, MODEL_USER_AVOIDS, 0 );
 
-	if ( root && root->userData != parentChit ) {
+	if ( root ) {
 		Vector3F pos3    = { pos2.x, 0, pos2.y };
 		float radius     = parentChit->GetRenderComponent()->RadiusOfBase();
 		Vector3F avoid = { 0, 0 };

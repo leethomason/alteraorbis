@@ -180,23 +180,12 @@ Model* SpaceTree::QueryRect( const grinliz::Rectangle2F& rect, int required, int
 	Rectangle3F bounds;
 	bounds.Set( rect.min.x, 0, rect.min.y, rect.max.x, 0, rect.max.y );
 
-	int depth = DEPTH-1;
-	Node* node = 0;
-
-	while( depth > 0 ) {
-		node = GetNode( depth, (int)(rect.min.x), (int)(rect.min.y) );
-		if ( node->aabb.Contains( bounds ) ) {
-			break;
-		}
-		--depth;
-	}
-	GLASSERT( node );
 	modelRoot = 0;
 	nodesVisited = 0;
 	modelsFound = 0;
 	requiredFlags = required;
 	excludedFlags = excluded;
-	QueryRectRec( bounds, node );
+	QueryRectRec( bounds, nodeArr );
 
 	return modelRoot;
 }
@@ -213,7 +202,8 @@ void SpaceTree::QueryRectRec( const grinliz::Rectangle3F& rect, const Node* node
 			if (    ( (requiredFlags & flags) == requiredFlags)
 				 && ( (excludedFlags & flags) == 0 ) )
 			{	
-				if ( m->AABB().Intersect( rect ) ) {
+				const Rectangle3F& aabb = m->AABB();
+				if ( aabb.Intersect( rect ) ) {
 					m->next = modelRoot;
 					modelRoot = m;
 					++modelsFound;
