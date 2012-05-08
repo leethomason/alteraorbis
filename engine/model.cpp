@@ -227,10 +227,6 @@ void Model::SetPos( const grinliz::Vector3F& pos )
 		Modify();
 		this->pos = pos;	
 		if ( tree ) {
-
-			if ( (int)pos.x == 33 && (int)pos.z == 36 ) {
-				int debug = 1;
-			}
 			tree->Update( this ); 
 		}
 	}
@@ -309,10 +305,6 @@ void Model::CalcTargetSize( float* width, float* height ) const
 
 void Model::Queue( RenderQueue* queue, EngineShaders* engineShaders )
 {
-	if ( (int)pos.x == 33 && (int)pos.z == 36 ) {
-		int debug = 1;
-	}
-
 	if ( flags & MODEL_INVISIBLE )
 		return;
 
