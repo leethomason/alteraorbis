@@ -29,10 +29,10 @@ using namespace grinliz;
 	Unit tree has less compution and fewer models, slightly less balanced. 
 */
 
-SpaceTree::SpaceTree( float yMin, float yMax, int size ) 
+SpaceTree::SpaceTree( float yMin, float yMax, int _size ) 
 	:	modelPool( "SpaceTreeModelPool", sizeof( Item ), EL_ALLOCATED_MODELS*sizeof( Item ), true )
 {
-	this->size = Max( (int)CeilPowerOf2( size ), 64 );
+	size = Max( (int)CeilPowerOf2( _size ), 64 );
 	treeBounds.Set( 0, yMin, 0, (float)size, yMax, (float)size );
 	queryID = 0;
 
@@ -149,8 +149,9 @@ void SpaceTree::Update( Model* model )
 		}
 		--depth;
 	}
-
-	GLASSERT( item->node );
+	if ( !item->node ) {
+		item->node = nodeArr;	// shove at root
+	}
 	item->node->Add( item );
 }
 
@@ -239,6 +240,9 @@ Model* SpaceTree::Query( const Plane* planes, int nPlanes, int required, int exc
 #endif
 
 	QueryPlanesRec( planes, nPlanes, grinliz::INTERSECT, &nodeArr[0], 0 );
+
+
+
 	return modelRoot;
 }
 

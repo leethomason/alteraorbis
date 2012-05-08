@@ -213,6 +213,8 @@ public:
 	void SetRotation( float rot, int axis=1 );
 	float GetRotation( int axis=1 ) const			{ return rot[axis]; }
 
+	void SetPosAndYRotation( const grinliz::Vector3F& pos, float yRot );
+
 	// WARNING: not really supported. Just for debug rendering. May break:
 	// normals, lighting, bounds, picking, etc. etc.
 	void SetScale( float s );

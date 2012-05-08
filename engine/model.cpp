@@ -205,13 +205,34 @@ void Model::Free()
 }
 
 
+void Model::SetPosAndYRotation( const grinliz::Vector3F& pos, float r )
+{
+	while( r < 0 )			{ r += 360.0f; }
+	while( r >= 360 )		{ r -= 360.0f; }
+
+	if ( pos != this->pos || r != this->rot[1] ) {
+		this->pos = pos;
+		this->rot[1] = r;
+		Modify();
+		if ( tree ) {
+			tree->Update( this );
+		}
+	}
+}
+
+
 void Model::SetPos( const grinliz::Vector3F& pos )
 { 
 	if ( pos != this->pos ) {
 		Modify();
 		this->pos = pos;	
-		if ( tree )
+		if ( tree ) {
+
+			if ( (int)pos.x == 33 && (int)pos.z == 36 ) {
+				int debug = 1;
+			}
 			tree->Update( this ); 
+		}
 	}
 }
 
@@ -288,6 +309,10 @@ void Model::CalcTargetSize( float* width, float* height ) const
 
 void Model::Queue( RenderQueue* queue, EngineShaders* engineShaders )
 {
+	if ( (int)pos.x == 33 && (int)pos.z == 36 ) {
+		int debug = 1;
+	}
+
 	if ( flags & MODEL_INVISIBLE )
 		return;
 
