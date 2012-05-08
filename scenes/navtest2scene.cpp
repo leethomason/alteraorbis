@@ -16,6 +16,8 @@
 using namespace grinliz;
 using namespace gamui;
 
+//#define DEBUG_PMC
+
 
 NavTest2Scene::NavTest2Scene( LumosGame* game ) : Scene( game )
 {
@@ -75,7 +77,9 @@ void NavTest2Scene::CreateChit( const Vector2I& p )
 	chit->Add( new SpatialComponent() );
 	chit->Add( new RenderComponent( engine, "humanFemale", MODEL_USER_AVOIDS ));
 	chit->Add( new PathMoveComponent( map, engine->GetSpaceTree() ));
+#ifdef DEBUG_PMC
 	chit->Add( new DebugPathComponent( engine, map, static_cast<LumosGame*>(game) ));
+#endif
 
 	chit->GetSpatialComponent()->SetPosition( (float)p.x+0.5f, 0, (float)p.y+0.5f );
 	chit->AddListener( this );
