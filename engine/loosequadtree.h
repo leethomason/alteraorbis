@@ -47,7 +47,7 @@ public:
 	void   Update( Model* );
 
 	// Returns all the models in the planes.
-	Model* Query( const grinliz::Plane* planes, int nPlanes, int requiredFlags, int excludedFlags, bool debug=false );
+	Model* Query( const grinliz::Plane* planes, int nPlanes, int requiredFlags, int excludedFlags );
 
 	// Returns all the models in the 2D bounds.
 	Model* QueryRect( const grinliz::Rectangle2F& rect, int required, int excluded );
@@ -127,7 +127,6 @@ private:
 	int requiredFlags;
 	int excludedFlags;
 	int queryID;
-	bool debug;
 
 	grinliz::MemoryPool modelPool;
 

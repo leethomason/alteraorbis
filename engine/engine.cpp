@@ -217,7 +217,7 @@ void Engine::Draw( U32 deltaTime )
 	CalcFrustumPlanes( planes );
 
 	int exclude = Model::MODEL_INVISIBLE;
-	Model* modelRoot = spaceTree->Query( planes, 6, 0, exclude, false );
+	Model* modelRoot = spaceTree->Query( planes, 6, 0, exclude );
 	
 	Color4F ambient, diffuse;
 	Vector4F dir;

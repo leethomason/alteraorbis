@@ -220,7 +220,7 @@ void SpaceTree::QueryRectRec( const grinliz::Rectangle3F& rect, const Node* node
 }
 
 
-Model* SpaceTree::Query( const Plane* planes, int nPlanes, int required, int excluded, bool debug )
+Model* SpaceTree::Query( const Plane* planes, int nPlanes, int required, int excluded )
 {
 	//GRINLIZ_PERFTRACK
 	
@@ -231,7 +231,6 @@ Model* SpaceTree::Query( const Plane* planes, int nPlanes, int required, int exc
 	modelsFound = 0;
 	requiredFlags = required;
 	excludedFlags = excluded;
-	this->debug = debug;
 
 #ifdef DEBUG
 	for( int i=0; i<NUM_NODES; ++i ) {
@@ -240,7 +239,6 @@ Model* SpaceTree::Query( const Plane* planes, int nPlanes, int required, int exc
 #endif
 
 	QueryPlanesRec( planes, nPlanes, grinliz::INTERSECT, &nodeArr[0], 0 );
-	this->debug = false;
 	return modelRoot;
 }
 
@@ -304,6 +302,7 @@ void SpaceTree::Dump( Node* node )
 void SpaceTree::QueryPlanesRec(	const Plane* planes, int nPlanes, int intersection, const Node* node, U32 positive )
 {
 	#define IS_POSITIVE( pos, i ) ( pos & (1<<i) )
+	const int allPositive = (1<<nPlanes)-1;
 
 	if ( intersection == grinliz::POSITIVE ) 
 	{
@@ -313,7 +312,6 @@ void SpaceTree::QueryPlanesRec(	const Plane* planes, int nPlanes, int intersecti
 	else if ( intersection == grinliz::INTERSECT ) 
 	{
 		const Rectangle3F& aabb = node->aabb;
-		int nPositive = 0;
 
 		for( int i=0; i<nPlanes; ++i ) {
 			// Assume positive bit is set, check if not. Once we go POSITIVE, we don't need 
@@ -339,10 +337,9 @@ void SpaceTree::QueryPlanesRec(	const Plane* planes, int nPlanes, int intersecti
 
 				// If the aabb is positive of ALL the planes then we are in good shape.
 				positive |= (1<<i);
-				++nPositive;
 			}
 		}
-		if ( nPositive == nPlanes ) {
+		if ( positive == allPositive ) {
 			// All positive is quick:
 			intersection = grinliz::POSITIVE;
 		}
@@ -367,9 +364,7 @@ void SpaceTree::QueryPlanesRec(	const Plane* planes, int nPlanes, int intersecti
 			if (    ( (_requiredFlags & flags) == _requiredFlags)
 				 && ( (_excludedFlags & flags) == 0 ) )
 			{	
-				if ( debug ) {
-					GLOUTPUT(( "%*s[%d] Testing: 0x%x %s", node->depth, " ", node->depth, (int)m, m->GetResource()->header.name.c_str() ));
-				}
+				//GLOUTPUT(( "%*s[%d] Testing: 0x%x %s", node->depth, " ", node->depth, (int)m, m->GetResource()->header.name.c_str() ));
 				if ( intersection == grinliz::INTERSECT ) {
 					const Rectangle3F& aabb = m->AABB();
 					int compare = grinliz::INTERSECT;
@@ -386,15 +381,11 @@ void SpaceTree::QueryPlanesRec(	const Plane* planes, int nPlanes, int intersecti
 						}
 					}
 					if ( compare == grinliz::NEGATIVE ) {
-						if ( debug ) {
-							GLOUTPUT(( "...NEGATIVE\n" ));
-						}
+						//GLOUTPUT(( "...NEGATIVE\n" ));
 						continue;
 					}
 				}
-				if ( debug ) {
-					GLOUTPUT(( "...yes\n" ));
-				}
+				//GLOUTPUT(( "...yes\n" ));
 				
 				m->next = modelRoot;
 				modelRoot = m;
