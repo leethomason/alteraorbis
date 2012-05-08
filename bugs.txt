@@ -2,16 +2,17 @@
 	X map with pathing
 	X chits & components
 	X debugging components for showing collision/vectors
-	- ground flocking motion
-
+	X ground flocking motion
+	- different size units
+- Map Test
+	- full size (1024x1024), 2000 units
+	- 2 continents
+	- bridge
 - memory pool everything in the chit/component system
 - rotation: in spatial component? Matrix or Quat?
-- PathMoveComponent: can get blocked if 'dest' is being squatted by a unit.
-
 X particle test scene
 	X alpha processing for additive blending
 	- particle groups (ex: fire)
-
 - combat test scene
 
 - ECR: proper rotation support
@@ -22,6 +23,7 @@ X particle test scene
 	- blend animations
 
 
+X PathMoveComponent: can get blocked if 'dest' is being squatted by a unit.
 X chits, components
 X rotation: in spatial component? Matrix or Quat?
 X move particle system to engine

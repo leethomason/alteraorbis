@@ -179,7 +179,8 @@ SpaceTree::Node* SpaceTree::GetNode( int depth, int x, int z )
 Model* SpaceTree::QueryRect( const grinliz::Rectangle2F& rect, int required, int excluded )
 {
 	Rectangle3F bounds;
-	bounds.Set( rect.min.x, 0, rect.min.y, rect.max.x, 0, rect.max.y );
+	bounds.Set( rect.min.x, treeBounds.min.y, rect.min.y, 
+		        rect.max.x, treeBounds.max.y, rect.max.y );
 
 	modelRoot = 0;
 	nodesVisited = 0;

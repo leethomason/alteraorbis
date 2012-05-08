@@ -75,7 +75,13 @@ void NavTest2Scene::CreateChit( const Vector2I& p )
 {
 	Chit* chit = chitBag.NewChit();
 	chit->Add( new SpatialComponent() );
-	chit->Add( new RenderComponent( engine, "humanFemale", MODEL_USER_AVOIDS ));
+
+	const char* asset = "humanFemale";
+	if ( random.Rand( 4 ) == 0 ) {
+		asset = "hornet";
+	}
+
+	chit->Add( new RenderComponent( engine, asset, MODEL_USER_AVOIDS ));
 	chit->Add( new PathMoveComponent( map, engine->GetSpaceTree() ));
 #ifdef DEBUG_PMC
 	chit->Add( new DebugPathComponent( engine, map, static_cast<LumosGame*>(game) ));
