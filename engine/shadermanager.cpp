@@ -4,6 +4,9 @@
 
 #include "shaders.inc"
 
+
+//#define DEBUG_OUTPUT
+
 using namespace grinliz;
 
 ShaderManager* ShaderManager::instance = 0;
@@ -291,7 +294,9 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 
 	AppendConst( &header, "EL_MAX_INSTANCE", EL_MAX_INSTANCE );
 
+#ifdef DEBUG_OUTPUT
 	GLOUTPUT(( "header\n%s\n", header.c_str() ));
+#endif
 
 	const char* vertexSrc[2]   = { header.c_str(), fixedpipe_vert };
 	const char* fragmentSrc[2] = { header.c_str(), fixedpipe_frag };
@@ -303,17 +308,21 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 	glShaderSource( shader->vertexProg, 2, vertexSrc, 0 );
 	glCompileShader( shader->vertexProg );
 	glGetShaderInfoLog( shader->vertexProg, LEN, &outLen, buf );
+#ifdef DEBUG_OUTPUT
 	if ( outLen > 0 ) {
 		GLOUTPUT(( "Vertex %d:\n%s\n", flags, buf ));
 	}
+#endif
 	CHECK_GL_ERROR;
 
 	glShaderSource( shader->fragmentProg, 2, fragmentSrc, 0 );
 	glCompileShader( shader->fragmentProg );
 	glGetShaderInfoLog( shader->fragmentProg, LEN, &outLen, buf );
+#ifdef DEBUG_OUTPUT
 	if ( outLen > 0 ) {
 		GLOUTPUT(( "Fragment %d:\n%s\n", flags, buf ));
 	}
+#endif
 	CHECK_GL_ERROR;
 
 	shader->prog = glCreateProgram();
@@ -321,9 +330,11 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 	glAttachShader( shader->prog, shader->fragmentProg );
 	glLinkProgram( shader->prog );
 	glGetProgramInfoLog( shader->prog, LEN, &outLen, buf );
+#ifdef DEBUG_OUTPUT
 	if ( outLen > 0 ) {
 		GLOUTPUT(( "Link %d:\n%s\n", flags, buf ));
 	}
+#endif
 	CHECK_GL_ERROR;
 
 	// glUseProgram

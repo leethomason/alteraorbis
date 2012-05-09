@@ -12,6 +12,9 @@
 
 using namespace grinliz;
 
+// Startup for test world
+// About 15,000 msec.
+
 WorldMap::WorldMap( int width, int height ) : Map( width, height )
 {
 	GLASSERT( width % ZONE_SIZE == 0 );
@@ -84,10 +87,10 @@ bool WorldMap::InitPNG( const char* filename,
 {
 	unsigned char* pixels = 0;
 	unsigned w=0, h=0;
-	static const Color3U8 WHITE = { 255, 255, 255 };
 	static const Color3U8 BLACK = { 0, 0, 0 };
 	static const Color3U8 BLUE  = { 0, 0, 255 };
 	static const Color3U8 RED   = { 255, 0, 0 };
+	GLASSERT( sizeof(Grid) == 4 );
 
 	int error = lodepng_decode24_file( &pixels, &w, &h, filename );
 	GLASSERT( error == 0 );
@@ -95,21 +98,26 @@ bool WorldMap::InitPNG( const char* filename,
 		Init( w, h );
 		int x = 0;
 		int y = 0;
+		int color=0;
 		for( unsigned i=0; i<w*h; ++i ) {
 			Color3U8 c = { pixels[i*3+0], pixels[i*3+1], pixels[i*3+2] };
 			Vector2I p = { x, y };
 			if ( c == BLACK ) {
 				grid[i].isLand = 1;
+				grid[i].color = color;
 				blocks->Push( p );
 			}
-			else if ( c == WHITE ) {
+			else if ( c.r == c.g && c.g == c.b ) {
 				grid[i].isLand = 1;
+				color = c.r;
+				grid[i].color = color;
 			}
 			else if ( c == BLUE ) {
 				grid[i].isLand = 0;
 			}
 			else if ( c == RED ) {
 				grid[i].isLand = 1;
+				grid[i].color = color;
 				wayPoints->Push( p );
 			}
 			++x;
@@ -585,6 +593,17 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 	path->Clear();
 	bool okay = false;
 
+	Vector2I starti = { (int)start.x, (int)start.y };
+	Vector2I endi   = { (int)end.x,   (int)end.y };
+
+	// Check color:
+	U32 c0 = grid[INDEX(starti)].color;
+	U32 c1 = grid[INDEX(endi)].color;
+
+	if ( c0 != c1 ) {
+		return false;
+	}
+
 	// Flush out regions that aren't valid.
 	for( int j=0; j<height; j+= ZONE_SIZE ) {
 		for( int i=0; i<width; i+=ZONE_SIZE ) {
@@ -594,8 +613,8 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 		}
 	}
 
-	Vector2I regionStart = GetRegion( (int)start.x, (int)start.y );
-	Vector2I regionEnd   = GetRegion( (int)end.x,   (int)end.y );
+	Vector2I regionStart = GetRegion( starti.x, starti.y );
+	Vector2I regionEnd   = GetRegion( endi.x, endi.y );
 
 	// Check for bad pathing coordinates.
 	if ( regionStart.x < 0 || regionEnd.x < 0 )

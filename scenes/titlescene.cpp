@@ -30,6 +30,8 @@ TitleScene::TitleScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 		testScene[i].SetText( testSceneName[i] );
 		testScene[i].SetSize( layout.Width(), layout.Height() );
 	}
+	testScene[TEST_NAV_WORLD].SetText(  "Blue" );
+	testScene[TEST_NAV_WORLD].SetText2( "Smoke" );
 }
 
 
@@ -71,7 +73,7 @@ void TitleScene::ItemTapped( const gamui::UIItem* item )
 		game->PushScene( LumosGame::SCENE_NAVTEST2, new NavTest2SceneData( "./res/testnav.png", 100 ) );
 	}
 	else if ( item == &testScene[TEST_NAV_WORLD] ) {
-		game->PushScene( LumosGame::SCENE_NAVTEST2, new NavTest2SceneData( "./res/testnav1024.png", 10 ) );
+		game->PushScene( LumosGame::SCENE_NAVTEST2, new NavTest2SceneData( "./res/testnav1024.png", 5 ) );
 	}
 	else if ( item == &testScene[TEST_NOISE] ) {
 		game->PushScene( LumosGame::SCENE_NOISETEST, 0 );

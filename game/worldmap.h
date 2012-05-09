@@ -130,6 +130,7 @@ private:
 		U32 deltaYOrigin	: 4;
 		U32 sizeX			: 5;
 		U32 sizeY			: 5;
+		U32 color			: 8;	// zone color
 
 		U32 debug_origin	: 1;
 		U32 debug_adjacent	: 1;

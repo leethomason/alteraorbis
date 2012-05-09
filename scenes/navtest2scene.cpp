@@ -12,6 +12,7 @@
 
 #include "../engine/engine.h"
 
+#include <ctime>
 
 using namespace grinliz;
 using namespace gamui;
@@ -30,9 +31,9 @@ NavTest2Scene::NavTest2Scene( LumosGame* game, const NavTest2SceneData* _data ) 
 
 	LoadMap();
 
-	RenderAtom atom;
-	minimap.Init( &gamui2D, atom, false );
-	minimap.SetSize( 200, 200 );
+	//RenderAtom atom;
+	//minimap.Init( &gamui2D, atom, false );
+	//minimap.SetSize( 200, 200 );
 }
 
 
@@ -50,7 +51,7 @@ void NavTest2Scene::Resize()
 	lumosGame->PositionStd( &okay, 0 );
 
 	const Screenport& port = lumosGame->GetScreenport();
-	minimap.SetPos( port.UIWidth()-200, 0 );
+	//minimap.SetPos( port.UIWidth()-200, 0 );
 }
 
 
@@ -76,9 +77,12 @@ void NavTest2Scene::LoadMap()
 
 		GET_COMPONENT( chit, MapSpatialComponent )->SetMapPosition( v.x, v.y, 0 );
 	}
+	clock_t start = clock();
 	for( int i=0; i<waypoints.Size(); ++i ) {
 		CreateChit( waypoints[i] );
 	}
+	clock_t end = clock();
+	GLOUTPUT(( "Create chit startup: %d msec\n", end - start ));
 	engine->CameraLookAt( (float)waypoints[0].x, (float)waypoints[0].y, 40 );
 }
 
@@ -155,10 +159,10 @@ void NavTest2Scene::DoTick( U32 deltaTime )
 		CreateChit( waypoints[random.Rand(waypoints.Size()) ] );
 		creationTick = 0;
 	}
-	RenderAtom atom( (const void*)UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, 
-					 (const void*)engine->GetMiniMapTexture(), 
-					 0, 0, 1, 1 );
-	minimap.SetAtom( atom );
+//	RenderAtom atom( (const void*)UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, 
+//					 (const void*)engine->GetMiniMapTexture(), 
+//					 0, 0, 1, 1 );
+//	minimap.SetAtom( atom );
 }
 
 
