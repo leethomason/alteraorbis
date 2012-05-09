@@ -203,7 +203,6 @@ void RenderQueue::Submit( GPUShader* overRideShader, int required, int excluded,
 				for( int k=start; k<end; ++k ) {
 					const Item* item = itemArr[k];
 					Model* model = item->model;
-					//}
 
 					shader->PushMatrix( GPUShader::MODELVIEW_MATRIX );
 					if ( xform ) {
@@ -211,10 +210,6 @@ void RenderQueue::Submit( GPUShader* overRideShader, int required, int excluded,
 					}
 					shader->MultMatrix( GPUShader::MODELVIEW_MATRIX, model->XForm() );
 					shader->SetParam( item->param );
-					//if ( StrEqual( model->GetResource()->header.name.c_str(), "hornet" ) ) {
-					//	shader->TopMatrix( GPUShader::MODELVIEW_MATRIX ).Dump();
-					//	GLOUTPUT(( "\n" ));
-					//}
 					shader->Draw();
 					shader->PopMatrix( GPUShader::MODELVIEW_MATRIX );
 				}

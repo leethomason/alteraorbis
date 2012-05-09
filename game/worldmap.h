@@ -2,6 +2,7 @@
 #define LUMOS_WORLD_MAP_INCLUDED
 
 #include "../engine/map.h"
+#include "../engine/rendertarget.h"
 #include "../micropather/micropather.h"
 #include "../grinliz/glrectangle.h"
 #include "../grinliz/glcontainer.h"

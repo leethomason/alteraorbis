@@ -60,7 +60,7 @@ class EngineShaders;
 		
 */
 
-class Engine : public IDeviceLossHandler
+class Engine :	public IDeviceLossHandler
 {
 public:
 	Engine( Screenport* screenport, const gamedb::Reader* database, Map* map );
@@ -88,8 +88,8 @@ public:
 	Model* AllocModel( const ModelResource* );
 	void FreeModel( Model* );
 
-	//void SetMap( Map* m );
 	Map* GetMap()						{ return map; }
+	Texture* GetMiniMapTexture();
 
 	const RenderQueue* GetRenderQueue()	{ return renderQueue; }
 
@@ -136,8 +136,9 @@ private:
 	void CalcCameraRotation( grinliz::Matrix4* );
 
 	void Blur();
-	void PushShadowSwizzleMatrix( GPUShader* );
-	void PushLightSwizzleMatrix( GPUShader* );
+//	void PushShadowSwizzleMatrix( GPUShader* );
+//	void PushLightSwizzleMatrix( GPUShader* );
+	void CreateMiniMap();
 
 	Screenport* screenport;
 	float	initZoom;
@@ -155,6 +156,7 @@ private:
 		RT_COUNT
 	};
 	RenderTarget* renderTarget[RT_COUNT];
+	RenderTarget* miniMapRenderTarget;
 
 	EngineShaders* engineShaders;
 };

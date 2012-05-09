@@ -5,6 +5,7 @@
 	- bridge
 - shadows should be part of space-tree bounds
 - memory pool everything in the chit/component system
+- container to support copy semantics
 X particle test scene
 	X alpha processing for additive blending
 	- particle groups (ex: fire)

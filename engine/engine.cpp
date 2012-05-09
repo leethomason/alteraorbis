@@ -61,6 +61,7 @@ Engine::Engine( Screenport* port, const gamedb::Reader* database, Map* m )
 	ShaderManager::Instance()->AddDeviceLossHandler( this );
 	particleSystem = new ParticleSystem();
 	engineShaders = new EngineShaders();
+	miniMapRenderTarget = 0;
 }
 
 
@@ -70,20 +71,11 @@ Engine::~Engine()
 	ShaderManager::Instance()->RemoveDeviceLossHandler( this );
 	delete renderQueue;
 	delete spaceTree;
+	delete miniMapRenderTarget;
 	for( int i=0; i<RT_COUNT; ++i )
 		delete renderTarget[i];
 	delete engineShaders;
 }
-
-
-/*
-void Engine::SetMap( Map* m )
-{
-	map = m;
-	delete spaceTree;
-	spaceTree = new SpaceTree( -0.1f, 2.5f, Max( m->Width(), m->Height() ) );
-}
-*/
 
 
 void Engine::DeviceLoss()
@@ -92,6 +84,8 @@ void Engine::DeviceLoss()
 		delete renderTarget[i];
 		renderTarget[i] = 0;
 	}
+	delete miniMapRenderTarget;
+	miniMapRenderTarget = 0;
 }
 
 
@@ -187,9 +181,52 @@ void Engine::FreeModel( Model* model )
 }
 
 
+void Engine::CreateMiniMap()
+{
+	delete miniMapRenderTarget;
+	miniMapRenderTarget = new RenderTarget( 256, 256, false );
+	miniMapRenderTarget->SetActive( true, this );
+
+	miniMapRenderTarget->screenport->SetPerspective();
+
+	float width  = (float)map->Width();
+	float height = (float)map->Height();
+
+	float theta = ToRadian( 45.f/2.0f );
+	float ratio = 1.0f;
+
+	Camera c;
+	float h = (height/2.f) / (tanf(theta)*ratio);
+	c.SetYRotation( 0 );
+	c.SetTilt( -90.0f );
+	c.SetPosWC( width/2.0f, h, height/2.0f );
+
+	Matrix4 view;
+	miniMapRenderTarget->screenport->SetView( c.ViewMatrix() );
+
+	Color3F color = { 1, 1, 1 };
+	map->Draw3D( color, GPUShader::STENCIL_OFF );
+
+	miniMapRenderTarget->SetActive( false, this );
+}
+
+
+Texture* Engine::GetMiniMapTexture()
+{
+	if ( miniMapRenderTarget ) {
+		return miniMapRenderTarget->GetTexture();
+	}
+	return 0;
+}
+
+
 void Engine::Draw( U32 deltaTime )
 {
 	GRINLIZ_PERFTRACK;
+
+	if ( map && !miniMapRenderTarget ) {
+		CreateMiniMap();
+	}
 
 	// -------- Camera & Frustum -------- //
 	screenport->SetView( camera.ViewMatrix() );	// Draw the camera
