@@ -1,8 +1,10 @@
 #include "titlescene.h"
 #include "rendertestscene.h"
+#include "navtest2scene.h"
 
 #include "../engine/uirendering.h"
 #include "../engine/texture.h"
+
 #include "../game/lumosgame.h"
 
 using namespace gamui;
@@ -17,7 +19,11 @@ TitleScene::TitleScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 	RenderAtom batom = game->CreateRenderAtom( UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, "title" );
 	background.Init( &gamui2D, batom, false );
 
-	static const char* testSceneName[NUM_TESTS] = { "dialog", "render0", "render1", "particle", "nav", "nav2", "noise" };
+	static const char* testSceneName[NUM_TESTS] = { "dialog", 
+													"render0", "render1", 
+													"particle", 
+													"nav", "nav2", "navWorld", 
+													"noise" };
 
 	for( int i=0; i<NUM_TESTS; ++i ) {
 		testScene[i].Init( &gamui2D, lumosGame->GetButtonLook( LumosGame::BUTTON_LOOK_STD ) );
@@ -62,7 +68,10 @@ void TitleScene::ItemTapped( const gamui::UIItem* item )
 		game->PushScene( LumosGame::SCENE_NAVTEST, 0 );
 	}
 	else if ( item == &testScene[TEST_NAV2] ) {
-		game->PushScene( LumosGame::SCENE_NAVTEST2, 0 );
+		game->PushScene( LumosGame::SCENE_NAVTEST2, new NavTest2SceneData( "./res/testnav.png", 100 ) );
+	}
+	else if ( item == &testScene[TEST_NAV_WORLD] ) {
+		game->PushScene( LumosGame::SCENE_NAVTEST2, new NavTest2SceneData( "./res/testnav1024.png", 2 ) );
 	}
 	else if ( item == &testScene[TEST_NOISE] ) {
 		game->PushScene( LumosGame::SCENE_NOISETEST, 0 );

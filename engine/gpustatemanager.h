@@ -319,10 +319,10 @@ private:
 	static StencilMode currentStencilMode;
 
 protected:
-	static int trianglesDrawn;
-	static int drawCalls;
+	static int		trianglesDrawn;
+	static int		drawCalls;
 	static uint32_t uid;
-	static int			matrixDepth[3];
+	static int		matrixDepth[3];
 
 	static const void* PTR( const void* base, int offset ) {
 		return (const void*)((const U8*)base + offset);

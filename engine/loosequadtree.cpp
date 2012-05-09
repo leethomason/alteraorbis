@@ -241,11 +241,9 @@ Model* SpaceTree::Query( const Plane* planes, int nPlanes, int required, int exc
 #endif
 
 	QueryPlanesRec( planes, nPlanes, grinliz::INTERSECT, &nodeArr[0], 0 );
-
-
-
 	return modelRoot;
 }
+
 
 void SpaceTree::Node::Add( Item* item ) 
 {

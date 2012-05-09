@@ -19,12 +19,14 @@ using namespace gamui;
 //#define DEBUG_PMC
 
 
-NavTest2Scene::NavTest2Scene( LumosGame* game ) : Scene( game )
+NavTest2Scene::NavTest2Scene( LumosGame* game, const NavTest2SceneData* _data ) : Scene( game )
 {
 	nChits = 0;
 	creationTick = 0;
 	game->InitStd( &gamui2D, &okay, 0 );
 	engine = 0;
+	map = 0;
+	data = _data;
 
 	LoadMap();
 }
@@ -47,14 +49,16 @@ void NavTest2Scene::Resize()
 
 void NavTest2Scene::LoadMap()
 {
-	map = new WorldMap( 32, 32 );
-
 	delete engine;
-	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase(), map );	
-	engine->CameraLookAt( (float)map->Width()*0.5f, (float)map->Height()*0.5f, 40 );
+	delete map;
 
+	map = new WorldMap( 32, 32 );
 	grinliz::CDynArray<Vector2I> blocks;
-	map->InitPNG( "./res/testnav.png", &blocks, &waypoints );
+	map->InitPNG( data->worldFilename, &blocks, &waypoints );
+
+	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase(), map );	
+	//engine->CameraLookAt( (float)map->Width()*0.5f, (float)map->Height()*0.5f, 40 );
+
 
 	for ( int i=0; i<blocks.Size(); ++i ) {
 		Chit* chit = chitBag.NewChit();
@@ -68,6 +72,7 @@ void NavTest2Scene::LoadMap()
 	for( int i=0; i<waypoints.Size(); ++i ) {
 		CreateChit( waypoints[i] );
 	}
+	engine->CameraLookAt( (float)waypoints[0].x, (float)waypoints[0].y, 40 );
 }
 
 
@@ -89,7 +94,7 @@ void NavTest2Scene::CreateChit( const Vector2I& p )
 
 	chit->GetSpatialComponent()->SetPosition( (float)p.x+0.5f, 0, (float)p.y+0.5f );
 	chit->AddListener( this );
-	OnChitMsg( chit, "PathMoveComponent", PathMoveComponent::MSG_DESTINATION_REACHED );
+	//OnChitMsg( chit, "PathMoveComponent", PathMoveComponent::MSG_DESTINATION_REACHED );
 	++nChits;
 }
 
@@ -139,7 +144,7 @@ void NavTest2Scene::DoTick( U32 deltaTime )
 {
 	chitBag.DoTick( deltaTime );
 	++creationTick;
-	if ( creationTick == 5 && nChits < 100 ) {
+	if ( creationTick == 5 && nChits < data->nChits ) {
 		CreateChit( waypoints[random.Rand(waypoints.Size()) ] );
 		creationTick = 0;
 	}

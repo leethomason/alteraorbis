@@ -57,7 +57,7 @@ Scene* LumosGame::CreateScene( int id, SceneData* data )
 	case SCENE_RENDERTEST:	scene = new RenderTestScene( this, (const RenderTestSceneData*)data );	break;
 	case SCENE_PARTICLE:	scene = new ParticleScene( this );			break;
 	case SCENE_NAVTEST:		scene = new NavTestScene( this );			break;
-	case SCENE_NAVTEST2:	scene = new NavTest2Scene( this );			break;
+	case SCENE_NAVTEST2:	scene = new NavTest2Scene( this, (const NavTest2SceneData*)data );			break;
 	case SCENE_NOISETEST:	scene = new NoiseTestScene( this );			break;
 
 	default:

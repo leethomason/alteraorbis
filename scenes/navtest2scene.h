@@ -9,10 +9,19 @@ class LumosGame;
 class Engine;
 class WorldMap;
 
+class NavTest2SceneData : public SceneData
+{
+public:
+	NavTest2SceneData( const char* _worldFilename, int _nChits ) : worldFilename( _worldFilename ), nChits( _nChits ) {}
+
+	const char* worldFilename;
+	int nChits;
+};
+
 class NavTest2Scene : public Scene, public IChitListener
 {
 public:
-	NavTest2Scene( LumosGame* game );
+	NavTest2Scene( LumosGame* game, const NavTest2SceneData* );
 	~NavTest2Scene();
 
 	virtual int RenderPass( grinliz::Rectangle2I* clip3D, grinliz::Rectangle2I* clip2D ) { return RENDER_2D | RENDER_3D; }
@@ -36,6 +45,8 @@ private:
 
 	Engine* engine;
 	WorldMap* map;
+	const NavTest2SceneData* data;
+
 	grinliz::Random random;
 	grinliz::CDynArray<grinliz::Vector2I> waypoints;
 	

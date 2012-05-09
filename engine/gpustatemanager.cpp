@@ -276,12 +276,10 @@ void GPUShader::SetState( const GPUShader& ns )
 	int flags = 0;
 	flags |= ( ns.HasTexture0() ) ? ShaderManager::TEXTURE0 : 0;
 	flags |= (ns.HasTexture0() && (ns.texture0->Format() == Texture::ALPHA )) ? ShaderManager::TEXTURE0_ALPHA_ONLY : 0;
-//	flags |= (ns.stream.nTexture0 == 3 ) ? ShaderManager::TEXTURE0_3COMP : 0;
 	GLASSERT( !ns.HasTexture0() || ns.stream.nTexture0 == 2 );
 
 	flags |= ( ns.HasTexture1() ) ? ShaderManager::TEXTURE1 : 0;
 	flags |= (ns.HasTexture1() && (ns.texture1->Format() == Texture::ALPHA )) ? ShaderManager::TEXTURE1_ALPHA_ONLY : 0;
-//	flags |= (ns.stream.nTexture1 == 3 ) ? ShaderManager::TEXTURE1_3COMP : 0;
 	GLASSERT( !ns.HasTexture1() || ns.stream.nTexture0 == 2 );
 
 	flags |= ns.stream.HasColor() ? ShaderManager::COLORS : 0;
@@ -575,6 +573,9 @@ void GPUShader::Draw( int instances )
 	if ( instances == 0 ) instances = 1;
 	if ( useInstancing ) {
 		SetShaderFlag( ShaderManager::INSTANCE );
+	}
+	else {
+		ClearShaderFlag( ShaderManager::INSTANCE );
 	}
 	GLASSERT( nIndex % 3 == 0 );
 

@@ -1,19 +1,20 @@
-- navigation scene
-	X map with pathing
-	X chits & components
-	X debugging components for showing collision/vectors
-	X ground flocking motion
-	- different size units
+
 - Map Test
 	- full size (1024x1024), 2000 units
 	- 2 continents
 	- bridge
+- shadows should be part of space-tree bounds
 - memory pool everything in the chit/component system
-- rotation: in spatial component? Matrix or Quat?
 X particle test scene
 	X alpha processing for additive blending
 	- particle groups (ex: fire)
 - combat test scene
+
+
+** LOW PRI **
+- rotation: in spatial component? Matrix or Quat?
+
+** ECR **
 
 - ECR: proper rotation support
 - feature: Animation
@@ -23,7 +24,12 @@ X particle test scene
 	- blend animations
 
 
-X PathMoveComponent: can get blocked if 'dest' is being squatted by a unit.
+X navigation scene
+	X map with pathing
+	X chits & components
+	X debugging components for showing collision/vectors
+	X ground flocking motion
+	X different size unitsX PathMoveComponent: can get blocked if 'dest' is being squatted by a unit.
 X chits, components
 X rotation: in spatial component? Matrix or Quat?
 X move particle system to engine
