@@ -15,6 +15,7 @@ using namespace grinliz;
 // Startup for test world
 // Baseline:				15,000
 // Coloring regions:		 2,300
+// Switch to 'struct Region' 2,000
 
 WorldMap::WorldMap( int width, int height ) : Map( width, height )
 {
@@ -105,7 +106,6 @@ bool WorldMap::InitPNG( const char* filename,
 	static const Color3U8 BLACK = { 0, 0, 0 };
 	static const Color3U8 BLUE  = { 0, 0, 255 };
 	static const Color3U8 RED   = { 255, 0, 0 };
-	GLASSERT( sizeof(Grid) == 4 );
 
 	int error = lodepng_decode24_file( &pixels, &w, &h, filename );
 	GLASSERT( error == 0 );

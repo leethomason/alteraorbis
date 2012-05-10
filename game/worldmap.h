@@ -133,17 +133,20 @@ private:
 			x = _x; y = _y; dx = _dx; dy = _dy;
 		}
 		grinliz::Vector2I OriginI() const {
+			GLASSERT( x >= 0 && y >= 0 && dx > 0 && dy > 0 );
 			grinliz::Vector2I v = { x, y };
 			return v;
 		}
 
 		grinliz::Vector2F CenterF() const {
+			GLASSERT( x >= 0 && y >= 0 && dx > 0 && dy > 0 );
 			grinliz::Vector2F v = { (float)x + (float)dx*0.5f, (float)y + (float)dy*0.5f };
 			return v;
 		}
 
 		void BoundsF( grinliz::Rectangle2F* r ) const {
-			r->Set( (float)x, (float)x, (float)(x+dx), (float)(y+dy) );
+			GLASSERT( x >= 0 && y >= 0 && dx > 0 && dy > 0 );
+			r->Set( (float)x, (float)y, (float)(x+dx), (float)(y+dy) );
 		}
 	};
 	Simple::CPlex<Region> regionPlex;
