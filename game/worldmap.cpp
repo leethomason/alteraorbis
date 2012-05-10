@@ -13,7 +13,8 @@
 using namespace grinliz;
 
 // Startup for test world
-// About 15,000 msec.
+// Baseline:				15,000
+// Coloring regions:		 2,300
 
 WorldMap::WorldMap( int width, int height ) : Map( width, height )
 {
