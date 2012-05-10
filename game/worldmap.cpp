@@ -21,7 +21,6 @@ WorldMap::WorldMap( int width, int height ) : Map( width, height )
 	GLASSERT( width % ZONE_SIZE == 0 );
 	GLASSERT( height % ZONE_SIZE == 0 );
 
-	GLASSERT( sizeof(Grid) == 4 );
 	grid = 0;
 	zoneInit = 0;
 	pather = 0;
@@ -45,6 +44,18 @@ WorldMap::~WorldMap()
 
 void WorldMap::Init( int w, int h )
 {
+	if ( grid ) {
+		// Delete all the regions. Be careful to only
+		// delete from the origin location.
+		for( int j=0; j<height; ++j ) {	
+			for( int i=0; i<width; ++i ) {
+				Region* r = grid[INDEX(i,j)].region;
+				if ( IsRegionOrigin( r, i, j )) {
+					regionPlex.Free( r );
+				}
+			}
+		}
+	}
 	delete [] grid;
 	delete [] zoneInit;
 	if ( pather ) {
@@ -61,6 +72,7 @@ void WorldMap::Init( int w, int h )
 
 void WorldMap::InitCircle()
 {
+	GLASSERT( regionPlex.GetCount() == 0 );
 	memset( grid, 0, width*height*sizeof(Grid) );
 	memset( zoneInit, 0, sizeof(*zoneInit)*width*height/ZONE_SIZE2 );
 
@@ -86,6 +98,8 @@ bool WorldMap::InitPNG( const char* filename,
 						grinliz::CDynArray<grinliz::Vector2I>* blocks,
 						grinliz::CDynArray<grinliz::Vector2I>* wayPoints )
 {
+	GLASSERT( regionPlex.GetCount() == 0 );
+
 	unsigned char* pixels = 0;
 	unsigned w=0, h=0;
 	static const Color3U8 BLACK = { 0, 0, 0 };
@@ -289,11 +303,12 @@ WorldMap::BlockResult WorldMap::ApplyBlockEffect(	const Vector2F inPos,
 }
 
 
-bool WorldMap::RectPassable( int x0, int y0, int x1, int y1 )
+bool WorldMap::RectPassableAndOpen( int x0, int y0, int x1, int y1 )
 {
 	for( int y=y0; y<=y1; ++y ) {
 		for( int x=x0; x<=x1; ++x ) {
-			if ( !grid[INDEX(x,y)].IsPassable() || grid[INDEX(x,y)].isPathInit )
+			if (    !grid[INDEX(x,y)].IsPassable()		// is it passable?
+				 || grid[INDEX(x,y)].region )			// is it already in a region?
 				return false;
 		}
 	}
@@ -310,9 +325,16 @@ void WorldMap::CalcZone( int zx, int zy )
 		//GLOUTPUT(( "CalcZone (%d,%d) %d\n", zx, zy, ZDEX(zx,zy) ));
 		zoneInit[ZDEX(zx,zy)] = 1;
 
+
+		// Free the region memory (which calls the destructor)
+		// and null out all the pointrs to it.
 		for( int y=zy; y<zy+ZONE_SIZE; ++y ) {
 			for( int x=zx; x<zx+ZONE_SIZE; ++x ) {
-				grid[INDEX(x,y)].isPathInit = FALSE;
+				Region* r = grid[INDEX(zx,zy)].region;
+				if ( IsRegionOrigin( r, x, y ) ) {
+					regionPlex.Free( r );
+				}
+				grid[INDEX(x,y)].region = 0;
 			}
 		}
 
@@ -330,7 +352,7 @@ void WorldMap::CalcZone( int zx, int zy )
 					int index = INDEX(x,y);
 					if ( !grid[index].IsPassable() )
 						continue;
-					if ( grid[index].isPathInit )
+					if ( grid[index].region )
 						continue;
 
 					bool maybeNegX = true,
@@ -343,25 +365,25 @@ void WorldMap::CalcZone( int zx, int zy )
 
 					while( maybeNegX || maybePosX || maybeNegY || maybePosY ) {
 						if ( maybeNegX ) {
-							if ( x0-1 >= zx && RectPassable( x0-1, y0, x0-1, y1 ) )
+							if ( x0-1 >= zx && RectPassableAndOpen( x0-1, y0, x0-1, y1 ) )
 								--x0;
 							else
 								maybeNegX = false;
 						}
 						if ( maybeNegY ) {
-							if ( y0-1 >= zy && RectPassable( x0, y0-1, x1, y0-1 ) )
+							if ( y0-1 >= zy && RectPassableAndOpen( x0, y0-1, x1, y0-1 ) )
 								--y0;
 							else
 								maybeNegY = false;
 						}
 						if ( maybePosX ) {
-							if ( (x1+1 < zx+ZONE_SIZE) && RectPassable( x1+1, y0, x1+1, y1 ) )
+							if ( (x1+1 < zx+ZONE_SIZE) && RectPassableAndOpen( x1+1, y0, x1+1, y1 ) )
 								++x1;
 							else
 								maybePosX = false;
 						}
 						if ( maybePosY ) {
-							if ( (y1+1 < zy+ZONE_SIZE) && RectPassable( x0, y1+1, x1, y1+1 ) )
+							if ( (y1+1 < zy+ZONE_SIZE) && RectPassableAndOpen( x0, y1+1, x1, y1+1 ) )
 								++y1;
 							else
 								maybePosY = false;
@@ -370,6 +392,7 @@ void WorldMap::CalcZone( int zx, int zy )
 					int dx = x1-x0+1;
 					int dy = y1-y0+1;
 					int area = dx*dy;
+
 					// If the 1st pass of a 2 pass algorithm,
 					// filter out things that aren't square enough.
 					if ( pass == NUM_PASS-2 ) {
@@ -377,10 +400,16 @@ void WorldMap::CalcZone( int zx, int zy )
 							continue;
 					}
 
-					for( int j=y0; j<=y1; ++j ) {
-						for( int i=x0; i<=x1; ++i ) {
-							GLASSERT( !grid[INDEX(i,j)].isPathInit );
-							grid[ INDEX( i, j ) ].SetPathOrigin( i-x0, j-y0, dx, dy );
+					if ( area > 0 ) {
+						// Actually create a region!
+						Region* r = regionPlex.Alloc();
+						r->Init( x0, y0, x1-x0+1, y1-y0+1 );
+
+						for( int j=y0; j<=y1; ++j ) {
+							for( int i=x0; i<=x1; ++i ) {
+								GLASSERT( !grid[INDEX(i,j)].region );
+								grid[INDEX(i,j)].region	= r;
+							}
 						}
 					}
 				}
@@ -390,6 +419,7 @@ void WorldMap::CalcZone( int zx, int zy )
 }
 
 
+/*
 int WorldMap::NumRegions() const
 {
 	int nSubZone = 0;
@@ -399,20 +429,17 @@ int WorldMap::NumRegions() const
 	}
 	return nSubZone;
 }
+*/
 
 
 // micropather
 float WorldMap::LeastCostEstimate( void* stateStart, void* stateEnd )
 {
-	int startX, startY, endX, endY;
+	Region* rstart = ToGrid( stateStart );
+	Region* rend   = ToGrid( stateEnd );
 
-	Grid gStart = ToGrid( stateStart, &startX, &startY );
-	Grid gEnd =   ToGrid( stateEnd, &endX, &endY );
-
-	Vector2F start = { (float)startX + (float)gStart.sizeX * 0.5f,
-	                   (float)startY + (float)gStart.sizeY * 0.5f };
-	Vector2F end   = { (float)endX + (float)gEnd.sizeX * 0.5f,
-					   (float)endY + (float)gEnd.sizeY * 0.5f };
+	Vector2F start = rstart->CenterF();
+	Vector2F end   = rend->CenterF();
 	return (end-start).Length();
 }
 
@@ -420,62 +447,77 @@ float WorldMap::LeastCostEstimate( void* stateStart, void* stateEnd )
 // micropather
 void WorldMap::AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > *adjacent )
 {
-	int startX, startY;
-	Grid gStart = ToGrid( state, &startX, &startY );
-	Vector2F start = { (float)startX + (float)gStart.sizeX * 0.5f,
-	                   (float)startY + (float)gStart.sizeY * 0.5f };
+	Region* region = ToGrid( state );
+	Vector2F start = region->CenterF();
+	
+	if ( region->adjacent.Empty() ) {
 
-	Rectangle2I bounds = this->Bounds();
-	Vector2I currentSubZone = { -1, -1 };
+		Rectangle2I bounds = this->Bounds();
+		Vector2I currentZone = { -1, -1 };
 
-	Vector2I adj[ZONE_SIZE*4+4];
-	int num=0;
+		int num=0;
+		Vector2I adj[ZONE_SIZE*4+4];
 
-	int dx = (int)gStart.sizeX;
-	int dy = (int)gStart.sizeY;
+		int dx = region->dx;
+		int dy = region->dy;
+		int startX = region->x;
+		int startY = region->y;
 
-	for( int x=startX; x < startX+dx; ++x )		{ adj[num++].Set( x, startY-1 ); }
-	if (    bounds.Contains( startX+dx, startY-1 )
-		 && grid[INDEX(startX+dx-1, startY-1)].IsPassable()
-		 && grid[INDEX(startX+dx,   startY-1)].IsPassable()
-		 && grid[INDEX(startX+dx,   startY)].IsPassable() )
-		{ adj[num++].Set( startX+dx, startY-1 ); }
-	for( int y=startY; y < startY+dy; ++y )		{ adj[num++].Set( startX+gStart.sizeX, y ); }
-	if (    bounds.Contains( startX+dx, startY+dy )
-		 && grid[INDEX(startX+dx,   startY+dy-1)].IsPassable()
-		 && grid[INDEX(startX+dx,   startY+dy)].IsPassable()
-		 && grid[INDEX(startX+dx-1, startY+dy)].IsPassable() )
-		{ adj[num++].Set( startX+dx, startY+dy ); }
-	for( int x=startX+(int)gStart.sizeX-1; x >= startX; --x )	{ adj[num++].Set( x, startY+gStart.sizeY ); }
-	if (    bounds.Contains( startX-1, startY+dy )
-		 && grid[INDEX(startX,   startY+dy)].IsPassable()
-		 && grid[INDEX(startX-1, startY+dy)].IsPassable()
-		 && grid[INDEX(startX-1, startY+dy-1)].IsPassable() )
-		{ adj[num++].Set( startX-1, startY+dy ); }
-	for( int y=startY+(int)gStart.sizeY-1; y >= startY; --y )	{ adj[num++].Set( startX-1, y ); }
-	if (    bounds.Contains( startX-1, startY-1 )
-		 && grid[INDEX(startX-1, startY)].IsPassable()
-		 && grid[INDEX(startX-1, startY-1)].IsPassable()
-		 && grid[INDEX(startX,   startY-1)].IsPassable() )
-		{ adj[num++].Set( startX-1, startY-1 ); }
+		for( int x=startX; x < startX+dx; ++x )		{ adj[num++].Set( x, startY-1 ); }
+		if (    bounds.Contains( startX+dx, startY-1 )
+			 && grid[INDEX(startX+dx-1, startY-1)].IsPassable()
+			 && grid[INDEX(startX+dx,   startY-1)].IsPassable()
+			 && grid[INDEX(startX+dx,   startY)].IsPassable() )
+			{ adj[num++].Set( startX+dx, startY-1 ); }
+		for( int y=startY; y < startY+dy; ++y )		{ adj[num++].Set( startX+dx, y ); }
+		if (    bounds.Contains( startX+dx, startY+dy )
+			 && grid[INDEX(startX+dx,   startY+dy-1)].IsPassable()
+			 && grid[INDEX(startX+dx,   startY+dy)].IsPassable()
+			 && grid[INDEX(startX+dx-1, startY+dy)].IsPassable() )
+			{ adj[num++].Set( startX+dx, startY+dy ); }
+		for( int x=startX+dx-1; x >= startX; --x )	{ adj[num++].Set( x, startY+dy ); }
+		if (    bounds.Contains( startX-1, startY+dy )
+			 && grid[INDEX(startX,   startY+dy)].IsPassable()
+			 && grid[INDEX(startX-1, startY+dy)].IsPassable()
+			 && grid[INDEX(startX-1, startY+dy-1)].IsPassable() )
+			{ adj[num++].Set( startX-1, startY+dy ); }
+		for( int y=startY+dy-1; y >= startY; --y )	{ adj[num++].Set( startX-1, y ); }
+		if (    bounds.Contains( startX-1, startY-1 )
+			 && grid[INDEX(startX-1, startY)].IsPassable()
+			 && grid[INDEX(startX-1, startY-1)].IsPassable()
+			 && grid[INDEX(startX,   startY-1)].IsPassable() )
+			{ adj[num++].Set( startX-1, startY-1 ); }
 
-	for( int i=0; i<num; ++i ) {
-		int x = adj[i].x;
-		int y = adj[i].y;
+		for( int i=0; i<num; ++i ) {
+			int x = adj[i].x;
+			int y = adj[i].y;
 
-		if ( bounds.Contains( x, y ) ) {
-			Vector2I subV = GetRegion( x, y );
-			if ( subV.x >= 0 && subV != currentSubZone ) {
-				Grid g = grid[INDEX(subV.x,subV.y)];
-				Vector2F end = { (float)subV.x + (float)g.sizeX * 0.5f,
-								 (float)subV.y + (float)g.sizeY * 0.5f };
-				float cost = (end-start).Length();
-				
-				micropather::StateCost sc = { ToState( subV.x, subV.y ), cost };
-				adjacent->push_back( sc );
-				currentSubZone = subV;
+			if ( bounds.Contains( x, y ) ) {
+				if ( !zoneInit[ZDEX(x,y)] ) {
+					CalcZone(x,y);
+				}
+
+				Region* other = grid[INDEX(x,y)].region;
+				if ( other ) {
+					// Don't add duplicates. Only add in if the vector is empty
+					// or this is a new region. (They are rectangles, so duplicates
+					// will appear in order.)
+					if (    region->adjacent.Empty() 
+						 || (other != region->adjacent[region->adjacent.Size()-1] )) 
+					{
+						region->adjacent.Push( other );
+					}
+				}
 			}
 		}
+	}
+	for( int i=0; i<region->adjacent.Size(); ++i ) {
+		Region* other = region->adjacent[i];
+		Vector2F end = other->CenterF();
+		float cost = (end-start).Length();
+				
+		micropather::StateCost sc = { other, cost };
+		adjacent->push_back( sc );
 	}
 }
 
@@ -483,17 +525,13 @@ void WorldMap::AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > *a
 // micropather
 void WorldMap::PrintStateInfo( void* state )
 {
-	int startX, startY;
-	Grid gStart = ToGrid( state, &startX, &startY );
-	GLOUTPUT(( "(%d,%d) ", startX, startY ));	
+	Region* region = ToGrid( state );
+	GLOUTPUT(( "(%d,%d) ", region->x, region->y ));	
 }
 
 
-int WorldMap::RegionSolve( const grinliz::Vector2I& subZoneStart, const grinliz::Vector2I& subZoneEnd )
+int WorldMap::RegionSolve( Region* start, Region* end )
 {
-	void* start = ToState( subZoneStart.x, subZoneStart.y );
-	void* end   = ToState( subZoneEnd.x, subZoneEnd.y );
-
 	float totalCost = 0;
 	int result = pather->Solve( start, end, &pathRegions, &totalCost );
 	return result;
@@ -522,7 +560,7 @@ bool WorldMap::GridPath( const grinliz::Vector2F& p0, const grinliz::Vector2F& p
 		int y0 = (int)Min( p0.y, p1.y );
 		int x1 = (int)Max( p0.x, p1.x );
 		int y1 = (int)Max( p0.y, p1.y );
-		return RectPassable( x0, y0, x1, y1 );
+		return RectPassableAndOpen( x0, y0, x1, y1 );
 	}
 
     if (p1.x > p0.x) {
@@ -614,12 +652,11 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 		}
 	}
 
-	Vector2I regionStart = GetRegion( starti.x, starti.y );
-	Vector2I regionEnd   = GetRegion( endi.x, endi.y );
+	Region* regionStart = grid[INDEX(starti)].region;
+	Region* regionEnd   = grid[INDEX(endi)].region;
 
-	// Check for bad pathing coordinates.
-	if ( regionStart.x < 0 || regionEnd.x < 0 )
-		return false;
+	GLASSERT( regionStart );
+	GLASSERT( regionEnd );
 
 	if ( regionStart == regionEnd ) {
 		okay = true;
@@ -648,13 +685,12 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 
 			// Walk each of the regions, and connect them with vectors.
 			for( unsigned i=0; i<pathRegions.size()-1; ++i ) {
-				Vector2I vA, vB;
-				Grid gA = ToGrid( pathRegions[i], &vA.x, &vA.y );
-				Grid gB = ToGrid( pathRegions[i+1], &vB.x, &vB.y );
+				Region* rA = ToGrid( pathRegions[i] );
+				Region* rB = ToGrid( pathRegions[i+1] );
 
 				Rectangle2F bA, bB;
-				gA.CalcBounds( (float)vA.x, (float)vA.y, &bA );
-				gB.CalcBounds( (float)vB.x, (float)vB.y, &bB );
+				rA->BoundsF( &bA );
+				rB->BoundsF( &bB );
 				bA.DoIntersection( bB );
 
 				// Every point on a path needs to be obtainable,
@@ -703,9 +739,12 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 void WorldMap::ClearDebugDrawing()
 {
 	for( int i=0; i<width*height; ++i ) {
-		grid[i].debug_adjacent = 0;
-		grid[i].debug_origin = 0;
-		grid[i].debug_path = 0;
+		Region* r = grid[i].region;
+		if( r ) {
+			r->debug_adjacent = 0;
+			r->debug_origin = 0;
+			r->debug_path = 0;
+		}
 	}
 	debugPathVector.Clear();
 }
@@ -714,18 +753,16 @@ void WorldMap::ClearDebugDrawing()
 void WorldMap::ShowRegionPath( float x0, float y0, float x1, float y1 )
 {
 	ClearDebugDrawing();
+
+	Region* start = grid[INDEX( (int)x0, (int)y0 ) ].region;
+	Region* end   = grid[INDEX( (int)x1, (int)y1 ) ].region;
 	
-	Vector2I start = GetRegion( (int)x0, (int)y0 );
-	Vector2I end   = GetRegion( (int)x1, (int)y1 );
-	
-	if ( start.x >= 0 && end.x >= 0 ) {
+	if ( start && end ) {
 		int result = RegionSolve( start, end );
 		if ( result == micropather::MicroPather::SOLVED ) {
 			for( unsigned i=0; i<pathRegions.size(); ++i ) {
-				void* vp = pathRegions[i];
-				int x, y;
-				ToGrid( vp, &x, &y );
-				grid[INDEX(x,y)].debug_path = TRUE;
+				Region* vp = ToGrid( pathRegions[i] );
+				vp->debug_path = TRUE;
 			}
 		}
 	}
@@ -739,15 +776,12 @@ void WorldMap::ShowAdjacentRegions( float _x, float _y )
 	ClearDebugDrawing();
 
 	if ( grid[INDEX(x,y)].IsPassable() ) {
-		Vector2I sub = GetRegion( x, y );
-		grid[INDEX(sub.x,sub.y)].debug_origin = TRUE;
+		grid[INDEX(x,y)].region->debug_origin = TRUE;
 
 		MP_VECTOR< micropather::StateCost > adjacent;
-		AdjacentCost( ToState( sub.x, sub.y ), &adjacent );
+		AdjacentCost( ToState( x, y ), &adjacent );
 		for( unsigned i=0; i<adjacent.size(); ++i ) {
-			Vector2I a;
-			ToGrid( adjacent[i].state, &a.x, &a.y );
-			grid[INDEX(a.x,a.y)].debug_adjacent = TRUE;
+			ToGrid( adjacent[i].state )->debug_adjacent  = 1;
 		}
 	}
 }
@@ -773,20 +807,20 @@ void WorldMap::DrawZones()
 			static const float offset = 0.2f;
 			Grid g = grid[INDEX(i,j)];
 			
-			if ( g.IsRegionOrigin() ) {
-				int xSize = g.sizeX;
-				int ySize = g.sizeY;
+			if ( g.region && g.region->x == i && g.region->y == j ) {
+				int xSize = g.region->dx;
+				int ySize = g.region->dy;
 
 				Vector3F p0 = { (float)i+offset, 0.1f, (float)j+offset };
 				Vector3F p1 = { (float)(i+xSize)-offset, 0.1f, (float)(j+ySize)-offset };
 
-				if ( g.debug_origin ) {
+				if ( g.region->debug_origin ) {
 					debugOrigin.DrawQuad( p0, p1, false );
 				}
-				else if ( g.debug_adjacent ) {
+				else if ( g.region->debug_adjacent ) {
 					debugAdjacent.DrawQuad( p0, p1, false );
 				}
-				else if ( g.debug_path ) {
+				else if ( g.region->debug_path ) {
 					debugPath.DrawQuad( p0, p1, false );
 				}
 				else {

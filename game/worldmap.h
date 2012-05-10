@@ -6,6 +6,7 @@
 #include "../micropather/micropather.h"
 #include "../grinliz/glrectangle.h"
 #include "../grinliz/glcontainer.h"
+#include "../SimpleLib/SimpleLib.h"
 
 class Texture;
 
@@ -79,7 +80,7 @@ public:
 	void ShowAdjacentRegions( float x, float y );
 	void ShowRegionPath( float x0, float y0, float x1, float y1 );
 	void ShowRegionOverlay( bool over ) { debugRegionOverlay = over; }
-	int NumRegions() const;
+	//int NumRegions() const;
 
 private:
 	int INDEX( int x, int y ) const { 
@@ -99,6 +100,54 @@ private:
 	void Tessellate();
 	void CalcZone( int x, int y );
 
+	void DrawZones();			// debugging
+	void ClearDebugDrawing();	// debugging
+
+	enum {
+		TRUE		= 1,
+		FALSE		= 0,
+		ZONE_SIZE	= 16,		// adjust size of bit fields to be big enough to represent this
+		ZONE_SIZE2  = ZONE_SIZE*ZONE_SIZE,
+	};
+		
+	struct Region
+	{
+		U8 debug_origin		: 1;
+		U8 debug_adjacent	: 1;
+		U8 debug_path		: 1;
+
+		U16 x, y, dx, dy;
+		grinliz::CDynArray< Region*, 8 > adjacent;
+
+		Region() : x(-1), y(-1), dx(-1), dy(-1), debug_origin(0), debug_adjacent(0), debug_path(0) {}
+		~Region() {
+			// Invalidate our neighbors that may have
+			// pointers back to us.
+			for( int i=0; i<adjacent.Size(); ++i ) {
+				adjacent[i]->adjacent.Clear();
+			}
+			adjacent.Clear();
+		}
+
+		void Init( U16 _x, U16 _y, U16 _dx, U16 _dy ) {
+			x = _x; y = _y; dx = _dx; dy = _dy;
+		}
+		grinliz::Vector2I OriginI() const {
+			grinliz::Vector2I v = { x, y };
+			return v;
+		}
+
+		grinliz::Vector2F CenterF() const {
+			grinliz::Vector2F v = { (float)x + (float)dx*0.5f, (float)y + (float)dy*0.5f };
+			return v;
+		}
+
+		void BoundsF( grinliz::Rectangle2F* r ) const {
+			r->Set( (float)x, (float)x, (float)(x+dx), (float)(y+dy) );
+		}
+	};
+	Simple::CPlex<Region> regionPlex;
+
 	// The solver has 3 components:
 	//	Vector path:	the final result, a collection of points that form connected vector
 	//					line segments.
@@ -106,78 +155,34 @@ private:
 	//  Region path:	the micropather computed region
 
 	// Call the region solver. Put the result in the pathVector
-	int  RegionSolve( const grinliz::Vector2I& subZoneStart, const grinliz::Vector2I& subZoneEnd );
+	int  RegionSolve( Region* start, Region* end );
 	bool GridPath( const grinliz::Vector2F& start, const grinliz::Vector2F& end );
 
-	void DrawZones();			// debugging
-	void ClearDebugDrawing();	// debugging
-
-	enum {
-		TRUE = 1,
-		FALSE = 0,
-		ZONE_SIZE	= 16,		// adjust size of bit fields to be big enough to represent this
-		ZONE_SIZE2  = ZONE_SIZE*ZONE_SIZE,
-	};
-		
 	// FIXME: many sites claim bitfields defeat the optimizer,
 	// and it may be possible to pack into 16 bits. Makes for
 	// way cleaner code though.
 	struct Grid {
 		U32 isLand			: 1;
 		U32 isBlock			: 1;
-		U32 isPathInit		: 1;	// true if the sub-zone is computed
-		U32 deltaXOrigin	: 4;	// interpreted as negative
-		U32 deltaYOrigin	: 4;
-		U32 sizeX			: 5;
-		U32 sizeY			: 5;
 		U32 color			: 8;	// zone color
 
-		U32 debug_origin	: 1;
-		U32 debug_adjacent	: 1;
-		U32 debug_path		: 1;
+		Region* region;
 
 		bool IsPassable() const			{ return isLand == TRUE && isBlock == FALSE; }
-		bool IsRegionOrigin() const		{ return IsPassable() && deltaXOrigin == 0 && deltaYOrigin == 0; }
-		void SetPathOrigin( int dx, int dy, int sizex, int sizey ) {
-			GLASSERT( dx >= 0 && dx < ZONE_SIZE );
-			GLASSERT( dy >= 0 && dy < ZONE_SIZE );
-			GLASSERT( sizex > 0 && sizex <= ZONE_SIZE );
-			GLASSERT( sizey > 0 && sizey <= ZONE_SIZE );
-			GLASSERT( IsPassable() );
-			deltaXOrigin = dx;
-			deltaYOrigin = dy;
-			sizeX = sizex;
-			sizeY = sizey;
-			isPathInit = true;
-		}
-		void CalcBounds( float x, float y, grinliz::Rectangle2F* b ) {
-			b->Set( x, y, x+(float)sizeX, y+(float)sizeY );
-		}
 	};
-
-	// Returns the location of the sub-zone, (-1,-1) for DNE
-	grinliz::Vector2I GetRegion( int x, int y ) {
-		Grid g = grid[INDEX(x,y)];
-		grinliz::Vector2I v = { -1, -1 };
-		if ( g.IsPassable() ) {
-			v.Set( x-g.deltaXOrigin, y-g.deltaYOrigin );
-		}
-		return v;
-	}
+	bool IsRegionOrigin( const Region* r, int x, int y ) { return r && r->x == x && r->y ==y; }
 
 	void* ToState( int x, int y ) {
 		GLASSERT( x >= 0 && x < width && y >= 0 && y < height );
-		GLASSERT( grid[INDEX(x,y)].deltaXOrigin == 0 && grid[INDEX(x,y)].deltaYOrigin == 0 );
-		return reinterpret_cast<void*>( x | (y<<16) );
+		Region* r = grid[INDEX(x,y)].region;
+		GLASSERT( r );
+		return r;
 	}
-	Grid ToGrid( void* state, int* x, int *y ) {
-		int v32 = reinterpret_cast<int>( state );
-		*x = v32 & 0xffff;
-		*y = (v32 & 0xffff0000)>>16;
-		return grid[INDEX(*x,*y)];
+	Region* ToGrid( void* state ) {
+		return static_cast<Region*>(state);
 	}
 
-	bool RectPassable( int x0, int y0, int x1, int y1 );
+	bool RectPassableAndOpen( int x0, int y0, int x1, int y1 );
 
 	Grid* grid;		// pathing info.
 	U8* zoneInit;	// flag whether this zone is valid.
