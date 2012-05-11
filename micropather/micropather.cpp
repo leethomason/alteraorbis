@@ -198,6 +198,7 @@ class ClosedSet
 };
 
 
+#if 0
 PathNodePool::PathNodePool( unsigned _allocate, unsigned _typicalAdjacent ) 
 	: firstBlock( 0 ),
 	  blocks( 0 ),
@@ -425,29 +426,30 @@ PathNode* PathNodePool::GetPathNode( unsigned frame, void* _state, float _costFr
 	}
 	return root;
 }
+#endif 
 
 
 void PathNode::Init(	unsigned _frame,
-						void* _state,
 						float _costFromStart, 
 						float _estToGoal, 
 						PathNode* _parent )
 {
-	state = _state;
-	costFromStart = _costFromStart;
-	estToGoal = _estToGoal;
-	CalcTotalCost();
-	parent = _parent;
-	frame = _frame;
-	inOpen = 0;
-	inClosed = 0;
+	if ( _frame == 0 || _frame != frame ) {
+		frame = _frame;
+		costFromStart = _costFromStart;
+		estToGoal = _estToGoal;
+		CalcTotalCost();
+		parent = _parent;
+		inOpen = 0;
+		inClosed = 0;
+	}
 }
 
 MicroPather::MicroPather( Graph* _graph, unsigned allocate, unsigned typicalAdjacent )
-	:	pathNodePool( allocate, typicalAdjacent ),
+	:	//pathNodePool( allocate, typicalAdjacent ),
 		graph( _graph ),
-		frame( 0 ),
-		checksum( 0 )
+		frame( 1 )
+//		checksum( 0 )
 {}
 
 
@@ -458,15 +460,15 @@ MicroPather::~MicroPather()
 	      
 void MicroPather::Reset()
 {
-	pathNodePool.Clear();
-	frame = 0;
-	checksum = 0;
+//	pathNodePool.Clear();
+//	frame = 0;
+//	checksum = 0;
 }
 
 
-void MicroPather::GoalReached( PathNode* node, void* start, void* end, MP_VECTOR< void* > *_path )
+void MicroPather::GoalReached( PathNode* node, PathNode* start, PathNode* end, MP_VECTOR< PathNode* > *_path )
 {
-	MP_VECTOR< void* >& path = *_path;
+	MP_VECTOR< PathNode* >& path = *_path;
 	path.clear();
 
 	// We have reached the goal.
@@ -499,21 +501,18 @@ void MicroPather::GoalReached( PathNode* node, void* start, void* end, MP_VECTOR
 
 		while ( it->parent )
 		{
-			path[count] = it->state;
+			path[count] = it;
 			it = it->parent;
 			--count;
 		}
 	}
 
-	checksum = 0;
 	#ifdef DEBUG_PATH
 	printf( "Path: " );
 	int counter=0;
 	#endif
 	for ( unsigned k=0; k<path.size(); ++k )
 	{
-		checksum += ((MP_UPTR)(path[k])) << (k%8);
-
 		#ifdef DEBUG_PATH
 		graph->PrintStateInfo( path[k] );
 		printf( " " );
@@ -530,71 +529,12 @@ void MicroPather::GoalReached( PathNode* node, void* start, void* end, MP_VECTOR
 	#endif
 }
 
-
-void MicroPather::GetNodeNeighbors( PathNode* node, MP_VECTOR< NodeCost >* pNodeCost )
+/*
+void MicroPather::GetNodeNeighbors( PathNode* node )
 {
-	if ( node->numAdjacent == 0 ) {
-		// it has no neighbors.
-		pNodeCost->resize( 0 );
-	}
-	else if ( node->cacheIndex < 0 )
-	{
-		// Not in the cache. Either the first time or just didn't fit. We don't know
-		// the number of neighbors and need to call back to the client.
-		stateCostVec.resize( 0 );
-		graph->AdjacentCost( node->state, &stateCostVec );
-
-		#ifdef DEBUG
-		{
-			// If this assert fires, you have passed a state
-			// as its own neighbor state. This is impossible --
-			// bad things will happen.
-			for ( unsigned i=0; i<stateCostVec.size(); ++i )
-				MPASSERT( stateCostVec[i].state != node->state );
-		}
-		#endif
-
-		pNodeCost->resize( stateCostVec.size() );
-		node->numAdjacent = stateCostVec.size();
-
-		if ( node->numAdjacent > 0 ) {
-			// Now convert to pathNodes.
-			// Note that the microsoft std library is actually pretty slow.
-			// Move things to temp vars to help.
-			const unsigned stateCostVecSize = stateCostVec.size();
-			const StateCost* stateCostVecPtr = &stateCostVec[0];
-			NodeCost* pNodeCostPtr = &(*pNodeCost)[0];
-
-			for( unsigned i=0; i<stateCostVecSize; ++i ) {
-				void* state = stateCostVecPtr[i].state;
-				pNodeCostPtr[i].cost = stateCostVecPtr[i].cost;
-				pNodeCostPtr[i].node = pathNodePool.GetPathNode( frame, state, FLT_MAX, FLT_MAX, 0 );
-			}
-
-			// Can this be cached?
-			int start = 0;
-			if ( pNodeCost->size() > 0 && pathNodePool.PushCache( pNodeCostPtr, pNodeCost->size(), &start ) ) {
-				node->cacheIndex = start;
-			}
-		}
-	}
-	else {
-		// In the cache!
-		pNodeCost->resize( node->numAdjacent );
-		NodeCost* pNodeCostPtr = &(*pNodeCost)[0];
-		pathNodePool.GetCache( node->cacheIndex, node->numAdjacent, pNodeCostPtr );
-
-		// A node is uninitialized (even if memory is allocated) if it is from a previous frame.
-		// Check for that, and Init() as necessary.
-		for( int i=0; i<node->numAdjacent; ++i ) {
-			PathNode* pNode = pNodeCostPtr[i].node;
-			if ( pNode->frame != frame ) {
-				pNode->Init( frame, pNode->state, FLT_MAX, FLT_MAX, 0 );
-			}
-		}
-	}
+	graph->AdjacentCost( node, &node->adjacent, &node->numAdjacent );
 }
-
+*/
 
 #ifdef DEBUG
 /*
@@ -617,7 +557,7 @@ void MicroPather::DumpStats()
 */
 #endif
 
-
+/*
 void MicroPather::StatesInPool( MP_VECTOR< void* >* stateVec )
 {
  	stateVec->clear();
@@ -636,9 +576,9 @@ void PathNodePool::AllStates( unsigned frame, MP_VECTOR< void* >* stateVec )
     	}    
 	}           
 }   
+*/
 
-
-int MicroPather::Solve( void* startNode, void* endNode, MP_VECTOR< void* >* path, float* cost )
+int MicroPather::Solve( PathNode* startNode, PathNode* endNode, MP_VECTOR< PathNode* >* path, float* cost )
 {
 	// Important to clear() in case the caller doesn't check the return code. There
 	// can easily be a left over path  from a previous call.
@@ -653,30 +593,23 @@ int MicroPather::Solve( void* startNode, void* endNode, MP_VECTOR< void* >* path
 	#endif
 
 	*cost = 0.0f;
+	++frame;
 
 	if ( startNode == endNode )
 		return START_END_SAME;
 
-	++frame;
-
 	OpenQueue open( graph );
 	ClosedSet closed( graph );
 	
-	PathNode* newPathNode = pathNodePool.GetPathNode(	frame, 
-														startNode, 
-														0, 
-														graph->LeastCostEstimate( startNode, endNode ), 
-														0 );
-
-	open.Push( newPathNode );	
+	startNode->Init( frame, 0, graph->LeastCostEstimate( startNode, endNode ), 0 );
+	open.Push( startNode );	
 	stateCostVec.resize(0);
-	nodeCostVec.resize(0);
 
 	while ( !open.Empty() )
 	{
 		PathNode* node = open.Pop();
 		
-		if ( node->state == endNode )
+		if ( node == endNode )
 		{
 			GoalReached( node, startNode, endNode, path );
 			*cost = node->costFromStart;
@@ -690,16 +623,24 @@ int MicroPather::Solve( void* startNode, void* endNode, MP_VECTOR< void* >* path
 			closed.Add( node );
 
 			// We have not reached the goal - add the neighbors.
-			GetNodeNeighbors( node, &nodeCostVec );
+			int nAdjacent = 0;
+			StateCost* pAdjacent = 0;
+			graph->AdjacentCost( node, &pAdjacent, &nAdjacent );
 
-			for( int i=0; i<node->numAdjacent; ++i )
+			for( int i=0; i<nAdjacent; ++i )
 			{
 				// Not actually a neighbor, but useful. Filter out infinite cost.
-				if ( nodeCostVec[i].cost == FLT_MAX ) {
+				if ( pAdjacent[i].cost == FLT_MAX ) {
 					continue;
 				}
-				PathNode* child = nodeCostVec[i].node;
-				float newCost = node->costFromStart + nodeCostVec[i].cost;
+				// Does nothing if the frame is the same.
+				pAdjacent[i].state->Init(	frame, 
+											node->costFromStart+pAdjacent[i].cost, 
+											graph->LeastCostEstimate( pAdjacent[i].state, endNode ),
+											node );
+
+				PathNode* child = pAdjacent[i].state;
+				float newCost = node->costFromStart + pAdjacent[i].cost;
 
 				PathNode* inOpen   = child->inOpen ? child : 0;
 				PathNode* inClosed = child->inClosed ? child : 0;
@@ -712,7 +653,7 @@ int MicroPather::Solve( void* startNode, void* endNode, MP_VECTOR< void* >* path
 					if ( newCost < child->costFromStart ) {
 						child->parent = node;
 						child->costFromStart = newCost;
-						child->estToGoal = graph->LeastCostEstimate( child->state, endNode );
+						child->estToGoal = graph->LeastCostEstimate( child, endNode );
 						child->CalcTotalCost();
 						if ( inOpen ) {
 							open.Update( child );
@@ -722,7 +663,7 @@ int MicroPather::Solve( void* startNode, void* endNode, MP_VECTOR< void* >* path
 				else {
 					child->parent = node;
 					child->costFromStart = newCost;
-					child->estToGoal = graph->LeastCostEstimate( child->state, endNode ),
+					child->estToGoal = graph->LeastCostEstimate( child, endNode ),
 					child->CalcTotalCost();
 					
 					MPASSERT( !child->inOpen && !child->inClosed );
@@ -738,7 +679,7 @@ int MicroPather::Solve( void* startNode, void* endNode, MP_VECTOR< void* >* path
 }	
 
 
-int MicroPather::SolveForNearStates( void* startState, MP_VECTOR< StateCost >* near, float maxCost )
+int MicroPather::SolveForNearStates( PathNode* startState, MP_VECTOR< StateCost >* near, float maxCost )
 {
 	/*	 http://en.wikipedia.org/wiki/Dijkstra%27s_algorithm
 
@@ -767,16 +708,14 @@ int MicroPather::SolveForNearStates( void* startState, MP_VECTOR< StateCost >* n
 	OpenQueue open( graph );			// nodes to look at
 	ClosedSet closed( graph );
 
-	nodeCostVec.resize(0);
 	stateCostVec.resize(0);
 
 	PathNode closedSentinel;
-	closedSentinel.Clear();
-	closedSentinel.Init( frame, 0, FLT_MAX, FLT_MAX, 0 );
+	closedSentinel.Init( frame, FLT_MAX, FLT_MAX, 0 );
 	closedSentinel.next = closedSentinel.prev = &closedSentinel;
 
-	PathNode* newPathNode = pathNodePool.GetPathNode( frame, startState, 0, 0, 0 );
-	open.Push( newPathNode );
+	startState->Init( frame, 0, 0, 0 );
+	open.Push( startState );
 	
 	while ( !open.Empty() )
 	{
@@ -787,15 +726,17 @@ int MicroPather::SolveForNearStates( void* startState, MP_VECTOR< StateCost >* n
 		if ( node->totalCost > maxCost )
 			continue;		// Too far away to ever get here.
 
-		GetNodeNeighbors( node, &nodeCostVec );
+		int numAdjacent = 0;
+		StateCost *pAdjacent = 0;
+		graph->AdjacentCost( node, &pAdjacent, &numAdjacent );
 
-		for( int i=0; i<node->numAdjacent; ++i )
+		for( int i=0; i<numAdjacent; ++i )
 		{
 			MPASSERT( node->costFromStart < FLT_MAX );
-			float newCost = node->costFromStart + nodeCostVec[i].cost;
+			float newCost = node->costFromStart + pAdjacent[i].cost;
 
-			PathNode* inOpen   = nodeCostVec[i].node->inOpen ? nodeCostVec[i].node : 0;
-			PathNode* inClosed = nodeCostVec[i].node->inClosed ? nodeCostVec[i].node : 0;
+			PathNode* inOpen   = pAdjacent[i].state->inOpen   ? pAdjacent[i].state : 0;
+			PathNode* inClosed = pAdjacent[i].state->inClosed ? pAdjacent[i].state : 0;
 			MPASSERT( !( inOpen && inClosed ) );
 			PathNode* inEither = inOpen ? inOpen : inClosed;
 			MPASSERT( inEither != node );
@@ -804,8 +745,8 @@ int MicroPather::SolveForNearStates( void* startState, MP_VECTOR< StateCost >* n
 				continue;	// Do nothing. This path is not better than existing.
 			}
 			// Groovy. We have new information or improved information.
-			PathNode* child = nodeCostVec[i].node;
-			MPASSERT( child->state != newPathNode->state );	// should never re-process the parent.
+			PathNode* child = pAdjacent[i].state;
+			//MPASSERT( child != newPathNode );	// should never re-process the parent.
 
 			child->parent = node;
 			child->costFromStart = newCost;
@@ -826,7 +767,7 @@ int MicroPather::SolveForNearStates( void* startState, MP_VECTOR< StateCost >* n
 		if ( pNode->totalCost <= maxCost ) {
 			StateCost sc;
 			sc.cost = pNode->totalCost;
-			sc.state = pNode->state;
+			sc.state = pNode;
 
 			near->push_back( sc );
 		}

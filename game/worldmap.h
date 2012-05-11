@@ -72,9 +72,9 @@ public:
 	virtual void Draw3D(  const grinliz::Color3F& colorMult, GPUShader::StencilMode );
 
 	// ---- MicroPather ---- //
-	virtual float LeastCostEstimate( void* stateStart, void* stateEnd );
-	virtual void AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > *adjacent );
-	virtual void  PrintStateInfo( void* state );
+	virtual float LeastCostEstimate( micropather::PathNode* stateStart, micropather::PathNode* stateEnd );
+	virtual void AdjacentCost( micropather::PathNode* state, micropather::StateCost** adjacent, int* numAdjacent );
+	virtual void  PrintStateInfo( micropather::PathNode* state );
 
 	// --- Debugging -- //
 	void ShowAdjacentRegions( float x, float y );
@@ -110,21 +110,21 @@ private:
 		ZONE_SIZE2  = ZONE_SIZE*ZONE_SIZE,
 	};
 		
-	struct Region
+	struct Region : public micropather::PathNode
 	{
 		U8 debug_origin		: 1;
 		U8 debug_adjacent	: 1;
 		U8 debug_path		: 1;
 
 		U16 x, y, dx, dy;
-		grinliz::CDynArray< Region*, 8 > adjacent;
+		grinliz::CDynArray< micropather::StateCost, 8 > adjacent;
 
 		Region() : x(-1), y(-1), dx(-1), dy(-1), debug_origin(0), debug_adjacent(0), debug_path(0) {}
 		~Region() {
 			// Invalidate our neighbors that may have
 			// pointers back to us.
 			for( int i=0; i<adjacent.Size(); ++i ) {
-				adjacent[i]->adjacent.Clear();
+				static_cast<Region*>(adjacent[i].state)->adjacent.Clear();
 			}
 			adjacent.Clear();
 		}
@@ -175,13 +175,13 @@ private:
 	};
 	bool IsRegionOrigin( const Region* r, int x, int y ) { return r && r->x == x && r->y ==y; }
 
-	void* ToState( int x, int y ) {
+	micropather::PathNode* ToState( int x, int y ) {
 		GLASSERT( x >= 0 && x < width && y >= 0 && y < height );
 		Region* r = grid[INDEX(x,y)].region;
 		GLASSERT( r );
 		return r;
 	}
-	Region* ToGrid( void* state ) {
+	Region* ToGrid( micropather::PathNode* state ) {
 		return static_cast<Region*>(state);
 	}
 
@@ -192,7 +192,7 @@ private:
 	micropather::MicroPather *pather;
 	bool debugRegionOverlay;
 
-	MP_VECTOR< void* >						pathRegions;
+	MP_VECTOR< micropather::PathNode* >		pathRegions;
 	grinliz::CDynArray< grinliz::Vector2F >	debugPathVector;
 	grinliz::CDynArray< grinliz::Vector2F >	pathCache;
 

@@ -11,11 +11,13 @@
 #include "../engine/ufoutil.h"
 
 using namespace grinliz;
+using namespace micropather;
 
 // Startup for test world
 // Baseline:				15,000
 // Coloring regions:		 2,300
 // Switch to 'struct Region' 2,000
+// Region : public PathNode	 1,600
 
 WorldMap::WorldMap( int width, int height ) : Map( width, height )
 {
@@ -433,7 +435,7 @@ int WorldMap::NumRegions() const
 
 
 // micropather
-float WorldMap::LeastCostEstimate( void* stateStart, void* stateEnd )
+float WorldMap::LeastCostEstimate( PathNode* stateStart, PathNode* stateEnd )
 {
 	Region* rstart = ToGrid( stateStart );
 	Region* rend   = ToGrid( stateEnd );
@@ -445,7 +447,7 @@ float WorldMap::LeastCostEstimate( void* stateStart, void* stateEnd )
 
 
 // micropather
-void WorldMap::AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > *adjacent )
+void WorldMap::AdjacentCost( PathNode* state, micropather::StateCost**adjacent, int *num )
 {
 	Region* region = ToGrid( state );
 	Vector2F start = region->CenterF();
@@ -503,27 +505,24 @@ void WorldMap::AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > *a
 					// or this is a new region. (They are rectangles, so duplicates
 					// will appear in order.)
 					if (    region->adjacent.Empty() 
-						 || (other != region->adjacent[region->adjacent.Size()-1] )) 
+ 						|| (other != region->adjacent[region->adjacent.Size()-1].state )) 
 					{
-						region->adjacent.Push( other );
+						Vector2F end = other->CenterF();
+						float cost = (end-start).Length();
+						micropather::StateCost sc = { other, cost };
+						region->adjacent.Push( sc );
 					}
 				}
 			}
 		}
 	}
-	for( int i=0; i<region->adjacent.Size(); ++i ) {
-		Region* other = region->adjacent[i];
-		Vector2F end = other->CenterF();
-		float cost = (end-start).Length();
-				
-		micropather::StateCost sc = { other, cost };
-		adjacent->push_back( sc );
-	}
+	*adjacent = &region->adjacent[0];
+	*num = region->adjacent.Size();
 }
 
 
 // micropather
-void WorldMap::PrintStateInfo( void* state )
+void WorldMap::PrintStateInfo( PathNode* state )
 {
 	Region* region = ToGrid( state );
 	GLOUTPUT(( "(%d,%d) ", region->x, region->y ));	
@@ -776,12 +775,13 @@ void WorldMap::ShowAdjacentRegions( float _x, float _y )
 	ClearDebugDrawing();
 
 	if ( grid[INDEX(x,y)].IsPassable() ) {
-		grid[INDEX(x,y)].region->debug_origin = TRUE;
-
-		MP_VECTOR< micropather::StateCost > adjacent;
-		AdjacentCost( ToState( x, y ), &adjacent );
-		for( unsigned i=0; i<adjacent.size(); ++i ) {
-			ToGrid( adjacent[i].state )->debug_adjacent  = 1;
+		Region* r = grid[INDEX(x,y)].region;
+		r->debug_origin = TRUE;
+		int n = 0;
+		StateCost* a = 0;
+		AdjacentCost( r, &a, &n );
+		for( int i=0; i<n; ++i ) {
+			ToGrid( r->adjacent[i].state )->debug_adjacent  = 1;
 		}
 	}
 }
