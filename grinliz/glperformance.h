@@ -127,6 +127,9 @@ class Performance
   public:
 
 	static void Push( const char* name, bool enter )	{ 
+		if ( !sampling )
+			return;
+
 		if ( !samples ) {
 			samples = new Sample[GL_MAX_SAMPLES];
 		}
@@ -142,6 +145,9 @@ class Performance
 	// Print the last "processed()"
 	static void Walk( IPerformancePrinter* printer ) { WalkRec( -1, perfData, printer ); }
 
+	static void SetSampling( bool value )	{ sampling = value; }
+	static void ClearSamples()				{ nSamples = 0; }
+
   protected:
 	static void WalkRec( int depth, const PerfData* data, IPerformancePrinter* );
 	struct Sample
@@ -152,6 +158,7 @@ class Performance
 
 		void Set( const char* _name, bool _enter, TimeUnit _time ) { name = _name; entry = _enter; time = _time; }
 	};
+	static bool sampling;
 	static Sample* samples;
 	static int nSamples;
 

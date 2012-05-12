@@ -154,7 +154,7 @@ void NavTestScene::Tap( int action, const grinliz::Vector2F& view, const grinliz
 				Vector2F d = { tapMark.x, tapMark.z };
 				PathMoveComponent* pmc = static_cast<PathMoveComponent*>( chit[0]->GetComponent( "PathMoveComponent" ) );
 				GLASSERT( pmc );
-				pmc->SetDest( d );
+				pmc->QueueDest( d );
 			}
 
 			if ( showAdjacent.Down() ) {
@@ -212,10 +212,10 @@ void NavTestScene::OnChitMsg( Chit* chit, const char* componentName, int id )
 	static const Vector2F t0 = { 11.f, 10.f };
 	static const Vector2F t1 = { 13.f, 10.f };
 	if ( (pos-t0).LengthSquared() < (pos-t1).LengthSquared() ) {
-		GET_COMPONENT( chit, PathMoveComponent )->SetDest( t1 );
+		GET_COMPONENT( chit, PathMoveComponent )->QueueDest( t1 );
 	}
 	else {
-		GET_COMPONENT( chit, PathMoveComponent )->SetDest( t0 );
+		GET_COMPONENT( chit, PathMoveComponent )->QueueDest( t0 );
 	}
 }
 

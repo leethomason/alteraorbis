@@ -24,6 +24,7 @@ void PathMoveComponent::OnAdd( Chit* chit )
 	blockForceApplied = false;
 	avoidForceApplied = false;
 	isStuck = false;
+	queuedDest.Set( -1, -1 );
 }
 
 
@@ -33,8 +34,16 @@ void PathMoveComponent::OnRemove()
 }
 
 
-void PathMoveComponent::SetDest( const Vector2F& d )
+void PathMoveComponent::QueueDest( const grinliz::Vector2F& dest )
 {
+	queuedDest = dest;
+}
+
+
+void PathMoveComponent::ComputeDest( const Vector2F& d )
+{
+	GRINLIZ_PERFTRACK;
+
 	SpatialComponent* spatial = parentChit->GetSpatialComponent();
 	GLASSERT( spatial );
 	RenderComponent* render = parentChit->GetRenderComponent();
@@ -285,6 +294,11 @@ void PathMoveComponent::DoTick( U32 delta )
 {
 	GRINLIZ_PERFTRACK;
 
+	if ( queuedDest.x >= 0 ) {
+		ComputeDest( queuedDest );
+		queuedDest.Set( -1, -1 );
+	}
+
 	blockForceApplied = false;
 	avoidForceApplied = false;
 
@@ -324,7 +338,7 @@ void PathMoveComponent::DoTick( U32 delta )
 				GLOUTPUT(( "Repath\n" ));
 #endif
 				Vector2F d = dest;
-				SetDest( d );
+				QueueDest( d );
 				repath = 0;
 			}
 		}
@@ -340,7 +354,7 @@ void PathMoveComponent::DoTick( U32 delta )
 			else {
 				// continue path:
 				Vector2F d = dest;
-				SetDest( d );
+				QueueDest( d );
 			}
 		}
 	}

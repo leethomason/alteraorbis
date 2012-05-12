@@ -184,15 +184,6 @@ namespace micropather
 	};
 
 
-	class PathNode;
-
-	struct NodeCost
-	{
-		PathNode* node;
-		float cost;
-	};
-
-
 	/*
 		Every state (void*) is represented by a PathNode in MicroPather. There
 		can only be one PathNode for a given state.
@@ -256,6 +247,31 @@ namespace micropather
 	  private:
 
 		void operator=( const PathNode& );
+	};
+
+
+	struct NodeCost
+	{
+		PathNode* node;
+		float cost;
+	};
+
+
+	class PathCache
+	{
+		struct Item {
+			// The key:
+			PathNode* start;
+			PathNode* end;
+
+			// Metadata:
+			PathNode* next;
+			float	  cost;	// from start to next
+		};
+		
+		void Reset();
+		void Add( const MP_VECTOR< PathNode* >& path );
+		int Solve( PathNode* startState, PathNode* endState, MP_VECTOR< PathNode* >* path, float* totalCost );
 	};
 
 

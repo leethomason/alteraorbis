@@ -18,6 +18,7 @@ using namespace micropather;
 // Coloring regions:		 2,300
 // Switch to 'struct Region' 2,000
 // Region : public PathNode	 1,600
+// Bug fix: incorrect recusion   4	yes, 4
 
 WorldMap::WorldMap( int width, int height ) : Map( width, height )
 {

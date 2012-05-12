@@ -78,17 +78,21 @@ void NavTest2Scene::LoadMap()
 		GET_COMPONENT( chit, MapSpatialComponent )->SetMapPosition( v.x, v.y, 0 );
 	}
 	clock_t start = clock();
+	Performance::ClearSamples();
 	for( int i=0; i<waypoints.Size(); ++i ) {
 		CreateChit( waypoints[i] );
 	}
+	Performance::SetSampling( false );
 	clock_t end = clock();
-	GLOUTPUT(( "Create chit startup: %d msec\n", end - start ));
+	GLOUTPUT(( "Create chit startup: %d msec\n", (end - start) ));
 	engine->CameraLookAt( (float)waypoints[0].x, (float)waypoints[0].y, 40 );
 }
 
 
 void NavTest2Scene::CreateChit( const Vector2I& p )
 {
+	GRINLIZ_PERFTRACK;
+
 	Chit* chit = chitBag.NewChit();
 	chit->Add( new SpatialComponent() );
 
@@ -114,7 +118,7 @@ void NavTest2Scene::OnChitMsg( Chit* chit, const char* componentName, int id )
 {
 	if ( StrEqual( componentName, "PathMoveComponent" ) ) {
 		const Vector2I& dest = waypoints[random.Rand(waypoints.Size())];
-		GET_COMPONENT( chit, PathMoveComponent )->SetDest( (float)dest.x+0.5f, (float)dest.y+0.5f ); 
+		GET_COMPONENT( chit, PathMoveComponent )->QueueDest( (float)dest.x+0.5f, (float)dest.y+0.5f ); 
 	}
 }
 

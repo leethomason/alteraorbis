@@ -34,8 +34,8 @@ public:
 	virtual bool NeedsTick()					{ return true; }
 	virtual void DoTick( U32 delta );
 
-	void SetDest( const grinliz::Vector2F& dest );
-	void SetDest( float x, float y )	{ grinliz::Vector2F v = { x, y }; SetDest( v ); }
+	void QueueDest( const grinliz::Vector2F& dest );
+	void QueueDest( float x, float y )	{ grinliz::Vector2F v = { x, y }; QueueDest( v ); }
 
 	// Set whether rotation is prioritized over movement. (Default
 	// to true.) If false, then motion will happen and the rotation
@@ -50,6 +50,7 @@ public:
 	bool IsAvoiding() const			{ return avoidForceApplied; }
 
 private:
+	void ComputeDest( const grinliz::Vector2F& dest );
 	float Travel( float rate, U32 time ) const {
 		return rate * ((float)time) * 0.001f;
 	}
@@ -74,6 +75,7 @@ private:
 	int pathPos;			// index of where we are on path
 	int repath;				// counter to see if we are stuck
 	grinliz::Vector2F dest;	// final destination
+	grinliz::Vector2F queuedDest;
 
 	grinliz::Vector2F pos2;		// only valid during tick!
 	float    rot;				// only valid during tick!

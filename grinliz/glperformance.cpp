@@ -62,6 +62,7 @@ PerfData* Performance::perfData = 0;
 int Performance::nPerfData = 0;
 PerfData* Performance::root = 0;
 int Performance::framesSampled = 0;
+bool Performance::sampling = true;
 
 
 void Performance::Process()
@@ -110,6 +111,7 @@ void Performance::Process()
 	}
 
 	if ( framesSampled < 1 ) framesSampled = 1;
+	if ( !sampling ) framesSampled = 1;
 	double freq = 1000./(double)FastFrequency();
 	double scale = 1.0/(double)framesSampled;
 
@@ -119,7 +121,9 @@ void Performance::Process()
 		pd->callCount /= framesSampled;
 	}
 	framesSampled = 0;
-	nSamples = 0;
+	if ( sampling ) {
+		nSamples = 0;
+	}
 }
 
 
