@@ -1,8 +1,13 @@
+- pathing
+	- perf max record
+	- record path miss in cache
+	- test cache miss 
+	- print cache use
 
 - Map Test
 	- full size (1024x1024), 2000 units
-	- 2 continents
-	- bridge
+	X 2 continents
+	X bridge
 - shadows should be part of space-tree bounds
 - memory pool everything in the chit/component system
 - container to support copy semantics
@@ -20,7 +25,7 @@ X particle test scene
 - ECR: proper rotation support
 - feature: Animation
 	- figure out animation needs (standing, walking, sidestep, shooting, etc.)
-	- define skelatal animation export
+	- define skeletal animation export
 	- modify shaders
 	- blend animations
 

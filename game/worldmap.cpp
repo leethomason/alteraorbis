@@ -19,6 +19,7 @@ using namespace micropather;
 // Switch to 'struct Region' 2,000
 // Region : public PathNode	 1,600
 // Bug fix: incorrect recusion   4	yes, 4
+// 
 
 WorldMap::WorldMap( int width, int height ) : Map( width, height )
 {
@@ -32,7 +33,7 @@ WorldMap::WorldMap( int width, int height ) : Map( width, height )
 
 	texture[0] = TextureManager::Instance()->GetTexture( "map_water" );
 	texture[1] = TextureManager::Instance()->GetTexture( "map_land" );
-	pather = new micropather::MicroPather( this );
+	pather = new micropather::MicroPather( this, 100*1000, true );
 
 	debugRegionOverlay = false;
 }

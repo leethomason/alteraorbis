@@ -259,6 +259,7 @@ namespace micropather
 
 	class PathCache
 	{
+	public:
 		struct Item {
 			// The key:
 			PathNode* start;
@@ -267,11 +268,34 @@ namespace micropather
 			// Metadata:
 			PathNode* next;
 			float	  cost;	// from start to next
+
+			unsigned Hash() const
+			{
+				const unsigned char *p = (const unsigned char *)(&start);
+				unsigned int h = 2166136261U;
+
+				for( unsigned i=0; i<sizeof(PathNode*)*2; ++i, ++p ) {
+					h ^= *p;
+					h *= 16777619;
+				}
+				return h;
+			}
 		};
+
+		PathCache( int itemsToAllocate, bool symmetric );
+		~PathCache();
 		
 		void Reset();
 		void Add( const MP_VECTOR< PathNode* >& path );
 		int Solve( PathNode* startState, PathNode* endState, MP_VECTOR< PathNode* >* path, float* totalCost );
+	private:
+		void AddItem( const Item& item );
+		Item* Find( PathNode* start, PathNode* end );
+		
+		Item*	mem;
+		int		allocated;
+		int		nItems;
+		bool	symmetric;
 	};
 
 
@@ -289,6 +313,9 @@ namespace micropather
 			SOLVED,
 			NO_SOLUTION,
 			START_END_SAME,
+
+			// internal:
+			NOT_CACHED
 		};
 
 		/**
@@ -296,23 +323,8 @@ namespace micropather
 			the Graph callbacks.
 
 			@param graph		The "map" that implements the Graph callbacks.
-			@param allocate		How many states should be internally allocated at a time. This
-								can be hard to get correct. The higher the value, the more memory
-								MicroPather will use.
-								- If you have a small map (a few thousand states?) it may make sense
-								  to pass in the maximum value. This will cache everything, and MicroPather
-								  will only need one main memory allocation. For a chess board, allocate 
-								  would be set to 8x8 (64)
-								- If your map is large, something like 1/4 the number of possible
-								  states is good. For example, Lilith3D normally has about 16,000 
-								  states, so 'allocate' should be about 4000.
-							    - If your state space is huge, use a multiple (5-10x) of the normal
-								  path. "Occasionally" call Reset() to free unused memory.
-			@param typicalAdjacent	Used to determine cache size. The typical number of adjacent states
-									to a given state. (On a chessboard, 8.) Higher values use a little
-									more memory.
 		*/
-		MicroPather( Graph* graph, unsigned allocate = 250, unsigned typicalAdjacent=6 );
+		MicroPather( Graph* graph, unsigned cacheAllocate=1000, bool symmetric=false );
 		~MicroPather();
 
 		/**
@@ -355,6 +367,7 @@ namespace micropather
 
 		unsigned frame;
 		Graph* graph;
+		PathCache pathCache;
 	};
 };	// namespace grinliz
 
