@@ -1,8 +1,8 @@
 - pathing
 	- perf max record
-	- record path miss in cache
-	- test cache miss 
-	- print cache use
+	X record path miss in cache
+	X test cache miss 
+	X print cache use
 
 - Map Test
 	- full size (1024x1024), 2000 units

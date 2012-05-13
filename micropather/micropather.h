@@ -291,6 +291,7 @@ namespace micropather
 		
 		void Reset();
 		void Add( const MP_VECTOR< PathNode* >& path );
+		void AddNoSolution( PathNode* end, PathNode* states[], int count );
 		int Solve( PathNode* startState, PathNode* endState, MP_VECTOR< PathNode* >* path, float* totalCost );
 
 		int AllocatedBytes() const { return allocated * sizeof(Item); }
@@ -374,6 +375,7 @@ namespace micropather
 		void GoalReached( PathNode* node, PathNode* start, PathNode* end, MP_VECTOR< PathNode* > *path );
 
 		MP_VECTOR< StateCost >	stateCostVec;	// local to Solve, but put here to reduce memory allocation
+		MP_VECTOR< PathNode* > tracking;
 
 		unsigned frame;
 		Graph* graph;

@@ -686,6 +686,9 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 	// Use the region solver.
 	if ( !okay ) {
 		int result = RegionSolve( regionStart, regionEnd );
+		//if ( result == micropather::MicroPather::NO_SOLUTION ) {
+		//	GLOUTPUT(( "No solution: (%d,%d)-(%d,%d)\n", starti.x, starti.y, endi.x, endi.y ));
+		//}
 		if ( result == micropather::MicroPather::SOLVED ) {
 			//GLOUTPUT(( "Region succeeded len=%d.\n", pathRegions.size() ));
 			Vector2F from = start;

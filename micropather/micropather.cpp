@@ -163,7 +163,7 @@ void OpenQueue::Update( PathNode* pNode )
 class ClosedSet
 {
   public:
-	ClosedSet( Graph* _graph )		{ this->graph = _graph; }
+	ClosedSet( Graph* _graph, MP_VECTOR<PathNode*>* _tracking=0 ) : graph( _graph ), tracking( _tracking ) {}
 	~ClosedSet()	{}
 
 	void Add( PathNode* pNode )
@@ -178,6 +178,9 @@ class ClosedSet
 		MPASSERT( pNode->inOpen == 0 );
 		#endif
 		pNode->inClosed = 1;
+		if ( tracking ) {
+			tracking->push_back( pNode );
+		}
 	}
 
 	void Remove( PathNode* pNode )
@@ -197,6 +200,7 @@ class ClosedSet
 	ClosedSet( const ClosedSet& );
 	void operator=( const ClosedSet& );
 	Graph* graph;
+	MP_VECTOR<PathNode*>* tracking;
 };
 
 
@@ -367,10 +371,27 @@ void PathCache::Add( const MP_VECTOR< PathNode* >& path )
 }
 
 
-int PathCache::Solve( PathNode* start, PathNode* end, MP_VECTOR< PathNode* >* path, float* totalCost )
+void PathCache::AddNoSolution( PathNode* end, PathNode* states[], int count )
 {
+	for( int i=0; i<count; ++i ) {
+		Item item = { states[i], end, 0, 0 };
+		AddItem( item );
+	}
+}
+
+
+
+int PathCache::Solve( PathNode* _start, PathNode* _end, MP_VECTOR< PathNode* >* path, float* totalCost )
+{
+	PathNode* start = _start;
+	PathNode* end   = _end;
+
 	Item* item = Find( start, end );
 	if ( item ) {
+		if ( item->next == 0 ) {
+			return MicroPather::NO_SOLUTION;
+		}
+
 		path->clear();
 		path->push_back( start );
 		*totalCost = 0;
@@ -385,6 +406,9 @@ int PathCache::Solve( PathNode* start, PathNode* end, MP_VECTOR< PathNode* >* pa
 	if ( symmetric ) {
 		item = Find( end, start );
 		if ( item ) {
+			if ( item->next == 0 ) {
+				return MicroPather::NO_SOLUTION;
+			}
 			path->clear();
 			path->push_back( end );
 			*totalCost = 0;
@@ -433,11 +457,13 @@ void PathCache::AddItem( const Item& item )
 		if ( mem[index].start == 0 ) {
 			mem[index] = item;
 			++nItems;
-			//GLOUTPUT(( "Add: start=%x next=%x end=%x\n", item.start, item.next, item.end ));
+#ifdef DEBUG_CACHING
+			GLOUTPUT(( "Add: start=%x next=%x end=%x\n", item.start, item.next, item.end ));
+#endif
 			break;
 		}
 		else if ( mem[index].KeyEqual( item ) ) {
-			//GLASSERT( mem[index].next == item.next );
+			GLASSERT( (mem[index].next && item.next) || (mem[index].next==0 && item.next == 0) );
 			// do nothing; in cache
 			break;
 		}
@@ -489,14 +515,22 @@ int MicroPather::Solve( PathNode* startNode, PathNode* endNode, MP_VECTOR< PathN
 #ifdef USE_CACHE
 	int cacheResult = pathCache.Solve( startNode, endNode, path, cost );
 	if ( cacheResult == SOLVED || cacheResult == NO_SOLUTION ) {
-		//GLOUTPUT(( "PathCache hit. result=%s\n", cacheResult == SOLVED ? "solved" : "no_solution" ));
+	#ifdef DEBUG_CACHING
+		GLOUTPUT(( "PathCache hit. result=%s\n", cacheResult == SOLVED ? "solved" : "no_solution" ));
+	#endif
 		return cacheResult;
 	}
-	//GLOUTPUT(( "PathCache miss\n" ));
+	#ifdef DEBUG_CACHING
+	GLOUTPUT(( "PathCache miss\n" ));
+	#endif
 #endif
 	OpenQueue open( graph );
+#ifdef USE_CACHE
+	tracking.clear();
+	ClosedSet closed( graph, &tracking );
+#else
 	ClosedSet closed( graph );
-	
+#endif	
 	startNode->Init( frame, 0, graph->LeastCostEstimate( startNode, endNode ), 0 );
 	open.Push( startNode );	
 	stateCostVec.resize(0);
@@ -570,6 +604,9 @@ int MicroPather::Solve( PathNode* startNode, PathNode* endNode, MP_VECTOR< PathN
 	}
 	#ifdef DEBUG_PATH
 	DumpStats();
+	#endif
+	#ifdef USE_CACHE
+	pathCache.AddNoSolution( endNode, &tracking[0], tracking.size() );
 	#endif
 	return NO_SOLUTION;		
 }	
