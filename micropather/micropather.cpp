@@ -35,10 +35,11 @@ distribution.
 //#define DEBUG_PATH
 //#define DEBUG_PATH_DEEP
 //#define TRACK_COLLISION
-
+#define USE_CACHE
 
 #include "micropather.h"
 #include "../grinliz/gldebug.h"
+#include "../grinliz/glutil.h"
 
 using namespace std;
 using namespace micropather;
@@ -275,7 +276,9 @@ void MicroPather::GoalReached( PathNode* node, PathNode* start, PathNode* end, M
 			--count;
 		}
 	}
+#ifdef USE_CACHE
 	pathCache.Add( path );
+#endif
 
 	#ifdef DEBUG_PATH
 	printf( "Path: " );
@@ -299,12 +302,6 @@ void MicroPather::GoalReached( PathNode* node, PathNode* start, PathNode* end, M
 	#endif
 }
 
-/*
-void MicroPather::GetNodeNeighbors( PathNode* node )
-{
-	graph->AdjacentCost( node, &node->adjacent, &node->numAdjacent );
-}
-*/
 
 #ifdef DEBUG
 /*
@@ -326,6 +323,7 @@ void MicroPather::DumpStats()
 }
 */
 #endif
+
 
 PathCache::PathCache( int _allocated, bool _symmetric )
 {
@@ -354,20 +352,15 @@ void PathCache::Reset()
 
 void PathCache::Add( const MP_VECTOR< PathNode* >& path )
 {
-	if ( nItems+(int)path.size() > allocated * 2 / 3 ) {
-		return;
-	}
-
-	PathNode* start = path[0];
-	PathNode* end   = path[path.size()-1];
-
 	for( unsigned i=0; i<path.size()-1; ++i ) {
-		Item item = { path[i], end, path[i+1], path[i+1]->costFromStart - path[i]->costFromStart };
-		AddItem( item );
-	}
-	if ( symmetric ) {
-		for( unsigned i=path.size()-1; i>0; --i ) {
-			Item item = { path[i], start, path[i-1], path[i]->costFromStart - path[i-1]->costFromStart };
+
+		if ( nItems + (int)(path.size()-i) > allocated * 3 / 4 ) {
+			return;
+		}
+
+		for( unsigned j=i+1; j<path.size(); ++j ) {
+			PathNode* end   = path[j];
+			Item item = { path[i], end, path[i+1], path[i+1]->costFromStart - path[i]->costFromStart };
 			AddItem( item );
 		}
 	}
@@ -383,10 +376,30 @@ int PathCache::Solve( PathNode* start, PathNode* end, MP_VECTOR< PathNode* >* pa
 		*totalCost = 0;
 
 		for ( ;start != end; start=item->next, item=Find(start, end) ) {
+			GLASSERT( item );
 			*totalCost += item->cost;
 			path->push_back( item->next );
 		}
 		return MicroPather::SOLVED;
+	}
+	if ( symmetric ) {
+		item = Find( end, start );
+		if ( item ) {
+			path->clear();
+			path->push_back( end );
+			*totalCost = 0;
+
+			for ( ;start != end; end=item->next, item=Find(end, start) ) {
+				GLASSERT( item );
+				*totalCost += item->cost;
+				path->push_back( item->next );
+			}
+			for( unsigned j=0; j<path->size()/2; ++j ) {
+				grinliz::Swap( &(*path)[j], &(*path)[path->size()-1-j] );
+			}
+
+			return MicroPather::SOLVED;
+		}
 	}
 	return MicroPather::NOT_CACHED;
 }
@@ -419,6 +432,12 @@ void PathCache::AddItem( const Item& item )
 	while( true ) {
 		if ( mem[index].start == 0 ) {
 			mem[index] = item;
+			//GLOUTPUT(( "Add: start=%x next=%x end=%x\n", item.start, item.next, item.end ));
+			break;
+		}
+		else if ( mem[index].KeyEqual( item ) ) {
+			//GLASSERT( mem[index].next == item.next );
+			// do nothing; in cache
 			break;
 		}
 		++index;
@@ -466,13 +485,14 @@ int MicroPather::Solve( PathNode* startNode, PathNode* endNode, MP_VECTOR< PathN
 	if ( startNode == endNode )
 		return START_END_SAME;
 
+#ifdef USE_CACHE
 	int cacheResult = pathCache.Solve( startNode, endNode, path, cost );
 	if ( cacheResult == SOLVED || cacheResult == NO_SOLUTION ) {
-		GLOUTPUT(( "PathCache hit. result=%s\n", cacheResult == SOLVED ? "solved" : "no_solution" ));
+		//GLOUTPUT(( "PathCache hit. result=%s\n", cacheResult == SOLVED ? "solved" : "no_solution" ));
 		return cacheResult;
 	}
-	GLOUTPUT(( "PathCache miss\n" ));
-
+	//GLOUTPUT(( "PathCache miss\n" ));
+#endif
 	OpenQueue open( graph );
 	ClosedSet closed( graph );
 	

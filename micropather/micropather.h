@@ -265,6 +265,10 @@ namespace micropather
 			PathNode* start;
 			PathNode* end;
 
+			bool KeyEqual( const Item& item ) {
+				return start == item.start && end == item.end;
+			}
+
 			// Metadata:
 			PathNode* next;
 			float	  cost;	// from start to next

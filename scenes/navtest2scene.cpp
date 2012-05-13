@@ -78,11 +78,11 @@ void NavTest2Scene::LoadMap()
 		GET_COMPONENT( chit, MapSpatialComponent )->SetMapPosition( v.x, v.y, 0 );
 	}
 	clock_t start = clock();
-	Performance::ClearSamples();
+	//Performance::ClearSamples();
 	for( int i=0; i<waypoints.Size(); ++i ) {
 		CreateChit( waypoints[i] );
 	}
-	Performance::SetSampling( false );
+	//Performance::SetSampling( false );
 	clock_t end = clock();
 	GLOUTPUT(( "Create chit startup: %d msec\n", (end - start) ));
 	engine->CameraLookAt( (float)waypoints[0].x, (float)waypoints[0].y, 40 );
