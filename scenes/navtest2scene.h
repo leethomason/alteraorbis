@@ -34,7 +34,7 @@ public:
 	virtual void Tap( int action, const grinliz::Vector2F& screen, const grinliz::Ray& world );
 	virtual void ItemTapped( const gamui::UIItem* item );
 	virtual void Draw3D( U32 deltaTime );
-
+	virtual void DrawDebugText();
 	virtual void OnChitMsg( Chit* chit, const char* componentName, int id );
 
 private:

@@ -11,6 +11,7 @@
 #include "../xegame/rendercomponent.h"
 
 #include "../engine/engine.h"
+#include "../engine/text.h"
 
 #include <ctime>
 
@@ -111,6 +112,14 @@ void NavTest2Scene::CreateChit( const Vector2I& p )
 	chit->AddListener( this );
 	OnChitMsg( chit, "PathMoveComponent", PathMoveComponent::MSG_DESTINATION_REACHED );
 	++nChits;
+}
+
+
+void NavTest2Scene::DrawDebugText()
+{
+	UFOText* ufoText = UFOText::Instance();
+
+	ufoText->Draw( 0, 20, "PathCache=%.3f", map->PatherCache() );	
 }
 
 

@@ -94,7 +94,7 @@ private:
 	const char* name;
 };
 
-
+		
 static const int GL_MAX_SAMPLES = 10*1000;
 static const int GL_MAX_PERFDATA = 100;
 
@@ -104,6 +104,14 @@ struct PerfData
 	TimeUnit	inclusiveTU;
 	double		inclusiveMSec;
 	int			callCount;
+	double		maxInclusiveMSec;
+
+	void Clear() {
+		inclusiveTU = 0;
+		inclusiveMSec = 0;
+		callCount = 0;
+		start = 0;
+	}
 
 	TimeUnit	start;
 	enum { MAX_CHILDREN = 10 };

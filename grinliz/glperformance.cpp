@@ -69,8 +69,12 @@ void Performance::Process()
 {
 	if ( !perfData ) {
 		perfData = new PerfData[ GL_MAX_PERFDATA ];
+		memset( perfData, 0, sizeof(PerfData)*GL_MAX_PERFDATA );
 	}
 	memset( perfData, 0, sizeof(*perfData)*GL_MAX_PERFDATA );
+	//for( int i=0; i<GL_MAX_PERFDATA; ++i ) {
+	//	perfData[i].Clear();
+	//}
 
 	// Processing is rather tricky.
 	// It's a map of a map...etc.

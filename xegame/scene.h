@@ -110,7 +110,7 @@ public:
 
 	// 2D overlay rendering.
 	virtual void DrawHUD()										{}
-
+	virtual void DrawDebugText()								{}
 
 protected:
 

@@ -587,6 +587,7 @@ void Game::DoTick( U32 _currentTime )
 							(float)GPUShader::TrianglesDrawn()/1000.0f,
 							GPUShader::DrawCalls(),
 							-1 ); //ParticleSystem::Instance()->NumParticles() );
+			sceneStack.Top()->scene->DrawDebugText();
 		}
 	}
 	Y += space;

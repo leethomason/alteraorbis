@@ -81,6 +81,7 @@ public:
 	void ShowRegionPath( float x0, float y0, float x1, float y1 );
 	void ShowRegionOverlay( bool over ) { debugRegionOverlay = over; }
 	//int NumRegions() const;
+	float PatherCache();
 
 private:
 	int INDEX( int x, int y ) const { 

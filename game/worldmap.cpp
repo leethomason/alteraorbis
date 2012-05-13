@@ -47,6 +47,14 @@ WorldMap::~WorldMap()
 }
 
 
+float WorldMap::PatherCache()
+{
+	int allocated = pather->PathCacheAllocated();
+	int used = pather->PathCacheUsed();
+	return (float)used / (float)allocated;
+}
+
+
 void WorldMap::Init( int w, int h )
 {
 	if ( grid ) {

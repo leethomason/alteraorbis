@@ -432,6 +432,7 @@ void PathCache::AddItem( const Item& item )
 	while( true ) {
 		if ( mem[index].start == 0 ) {
 			mem[index] = item;
+			++nItems;
 			//GLOUTPUT(( "Add: start=%x next=%x end=%x\n", item.start, item.next, item.end ));
 			break;
 		}
