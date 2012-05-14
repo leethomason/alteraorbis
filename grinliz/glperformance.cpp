@@ -103,6 +103,7 @@ void Performance::Process()
 			GLASSERT( c != PerfData::MAX_CHILDREN );
 			
 			root = root->child[c];
+			GLASSERT( root->name == 0 || StrEqual( root->name, s->name ) );
 			root->name = s->name;
 			root->start = s->time;
 			root->callCount++;

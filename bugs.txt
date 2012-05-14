@@ -1,13 +1,16 @@
-- pathing
-	- perf max record
-	X record path miss in cache
-	X test cache miss 
-	X print cache use
-
-- Map Test
+- record perf max/min. surprisingly hard.
+- Blue Smoke Map Test
 	- full size (1024x1024), 2000 units
 	X 2 continents
 	X bridge
+	- some units get stuck and never move (pathing fails & doesn't re-start?)
+	- need a mini-map
+	- need to get to 2000 faster
+	- filling of path cache: correct?
+	- show region code
+	- profiler max-ing out
+
+
 - shadows should be part of space-tree bounds
 - memory pool everything in the chit/component system
 - container to support copy semantics
@@ -30,6 +33,10 @@ X particle test scene
 	- blend animations
 
 
+X pathing
+	X record path miss in cache
+	X test cache miss 
+	X print cache use
 X navigation scene
 	X map with pathing
 	X chits & components

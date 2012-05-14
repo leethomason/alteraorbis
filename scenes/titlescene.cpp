@@ -73,7 +73,7 @@ void TitleScene::ItemTapped( const gamui::UIItem* item )
 		game->PushScene( LumosGame::SCENE_NAVTEST2, new NavTest2SceneData( "./res/testnav.png", 100 ) );
 	}
 	else if ( item == &testScene[TEST_NAV_WORLD] ) {
-		game->PushScene( LumosGame::SCENE_NAVTEST2, new NavTest2SceneData( "./res/testnav1024.png", 100 ) );
+		game->PushScene( LumosGame::SCENE_NAVTEST2, new NavTest2SceneData( "./res/testnav1024.png", 200 ) );
 	}
 	else if ( item == &testScene[TEST_NOISE] ) {
 		game->PushScene( LumosGame::SCENE_NOISETEST, 0 );

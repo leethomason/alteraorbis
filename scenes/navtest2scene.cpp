@@ -119,7 +119,7 @@ void NavTest2Scene::DrawDebugText()
 {
 	UFOText* ufoText = UFOText::Instance();
 
-	ufoText->Draw( 0, 20, "PathCache=%.3f", map->PatherCache() );	
+	ufoText->Draw( 0, 20, "PathCache=%.3f walkers=%d", map->PatherCache(), nChits );	
 }
 
 
