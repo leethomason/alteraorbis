@@ -5,6 +5,7 @@
 #include "../grinliz/gltypes.h"
 #include "../grinliz/gldebug.h"
 #include "../grinliz/glcontainer.h"
+#include "../grinliz/glstringutil.h"
 
 class Component;
 class SpatialComponent;
@@ -58,6 +59,8 @@ public:
 	void SendMessage( const char* componentName, int id );
 	void AddListener( IChitListener* listener );
 	void RemoveListener( IChitListener* listener );
+
+	void DebugStr( grinliz::GLString* str );
 
 private:
 

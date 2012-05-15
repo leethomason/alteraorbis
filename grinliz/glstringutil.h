@@ -85,7 +85,6 @@ inline bool StrEqualUntil( const char* a, const char* b, char until )
 
 
 // Reimplements SAFE strncpy, safely cross-compiler. Always returns a null-terminated string.
-// The strncpy definition is terrifying: not guarenteed to be null terminated.
 void StrNCpy( char* dst, const char* src, size_t bufferSize );
 int SNPrintf(char *str, size_t size, const char *format, ...);
 
@@ -219,6 +218,8 @@ public:
 
 	unsigned size() const							{ return m_size; }
 	const char* c_str() const						{ return m_buf; }
+
+	void Format( const char* format, ...);
 
 private:
 	void ensureSize( unsigned s );

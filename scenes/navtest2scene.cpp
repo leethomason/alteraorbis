@@ -23,6 +23,9 @@ using namespace gamui;
 
 NavTest2Scene::NavTest2Scene( LumosGame* game, const NavTest2SceneData* _data ) : Scene( game )
 {
+	debugRay.direction.Zero();
+	debugRay.origin.Zero();
+
 	nChits = 0;
 	creationTick = 0;
 	game->InitStd( &gamui2D, &okay, 0 );
@@ -119,15 +122,35 @@ void NavTest2Scene::DrawDebugText()
 {
 	UFOText* ufoText = UFOText::Instance();
 
-	ufoText->Draw( 0, 20, "PathCache=%.3f walkers=%d", map->PatherCache(), nChits );	
+	ufoText->Draw( 0, 16, "PathCache=%.3f walkers=%d", map->PatherCache(), nChits );	
+
+	if ( debugRay.direction.x ) {
+		Model* root = engine->IntersectModel( debugRay, TEST_TRI, 0, 0, 0, 0 );
+		int y = 32;
+		for ( ; root; root=root->next ) {
+			Chit* chit = root->userData;
+			if ( chit ) {
+				GLString str;
+				chit->DebugStr( &str );
+				ufoText->Draw( 0, y, "%s", str.c_str() );
+				y += 16;
+			}
+		}
+	}
 }
 
 
 void NavTest2Scene::OnChitMsg( Chit* chit, const char* componentName, int id )
 {
 	if ( StrEqual( componentName, "PathMoveComponent" ) ) {
+		// Reached or blocked, move to next thing:
 		const Vector2I& dest = waypoints[random.Rand(waypoints.Size())];
-		GET_COMPONENT( chit, PathMoveComponent )->QueueDest( (float)dest.x+0.5f, (float)dest.y+0.5f ); 
+		Vector2F d = { (float)dest.x+0.5f, (float)dest.y+0.5f };
+		//GLOUTPUT(( "OnChitMsg %x dest=%.1f,%.1f\n", chit, d.x, d.y ));
+		GET_COMPONENT( chit, PathMoveComponent )->QueueDest(d); 
+	}
+	else {
+		GLASSERT( 0 );
 	}
 }
 
@@ -183,3 +206,4 @@ void NavTest2Scene::Draw3D( U32 deltaTime )
 {
 	engine->Draw( deltaTime );
 }
+

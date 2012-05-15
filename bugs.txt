@@ -1,16 +1,19 @@
-- record perf max/min. surprisingly hard.
 - Blue Smoke Map Test
 	- full size (1024x1024), 2000 units
-	X 2 continents
-	X bridge
+	- entity debug system: point at chit, get component info
 	- some units get stuck and never move (pathing fails & doesn't re-start?)
+	- fix camera code
 	- need a mini-map
 	- need to get to 2000 faster
-	- filling of path cache: correct?
+	- filling of path cache: correct? why does the cache keep incrementing? what
+	  should the game do when it's full?
 	- show region code
 	- profiler max-ing out
+	- much better test bitmap
+	X 2 continents
+	X bridge
 
-
+- record perf max/min. surprisingly hard.
 - shadows should be part of space-tree bounds
 - memory pool everything in the chit/component system
 - container to support copy semantics

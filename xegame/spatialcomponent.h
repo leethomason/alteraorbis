@@ -18,6 +18,7 @@ public:
 		return Component::ToComponent( name );
 	}
 	virtual SpatialComponent*	ToSpatial()			{ return this; }
+	virtual void DebugStr( grinliz::GLString* str );
 
 	void SetPosition( float x, float y, float z );
 	const grinliz::Vector3F& GetPosition() const	{ return position; }

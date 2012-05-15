@@ -59,3 +59,8 @@ float RenderComponent::RadiusOfBase()
 	return radius;
 }
 
+
+void RenderComponent::DebugStr( GLString* str )
+{
+	str->Format( "[Render]=%s ", resource->header.name.c_str() );
+}

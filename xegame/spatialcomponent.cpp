@@ -5,6 +5,12 @@
 using namespace grinliz;
 
 
+void SpatialComponent::DebugStr( GLString* str )
+{
+	str->Format( "[Spatial]=%.1f,%.1f,%.1f ", position.x, position.y, position.z );
+}
+
+
 void SpatialComponent::SetPosition( float x, float y, float z )
 {
 	position.Set( x, y, z ); 

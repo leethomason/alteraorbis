@@ -28,6 +28,9 @@ public:
 
 	virtual void OnChitMsg( Chit* chit, const char* componentName, int id );
 
+	virtual void DrawDebugText();
+	virtual void MouseMove( const grinliz::Vector2F& view, const grinliz::Ray& world );
+
 private:
 	gamui::PushButton okay,
 					  block,
@@ -42,6 +45,7 @@ private:
 	WorldMap* map;
 	grinliz::Random random;
 	grinliz::Vector3F tapMark;
+	grinliz::Ray debugRay;
 
 	enum { NUM_CHITS = 5 };
 	Chit* chit[NUM_CHITS];

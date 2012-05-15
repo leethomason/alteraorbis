@@ -141,3 +141,19 @@ void Chit::RemoveListener( IChitListener* listener )
 	listeners.SwapRemove( i );
 }
 
+
+void Chit::DebugStr( GLString* str )
+{
+	str->Format( "Chit=%x ", this );
+
+	for( int i=0; i<NUM_SLOTS; ++i ) {
+		if ( slot[i] ) {
+			unsigned size = str->size();
+			slot[i]->DebugStr( str );
+			if ( size == str->size() ) {
+				str->Format( "[] " );
+			}
+		}
+	}
+}
+

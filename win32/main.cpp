@@ -34,6 +34,8 @@
 #define WINDOWS_LEAN_AND_MEAN
 #include <winhttp.h>
 
+//#include "../xegame/game.h"
+
 //#define TEST_ROTATION
 //#define TEST_FULLSPEED
 //#define SEND_CRASH_LOGS
@@ -314,52 +316,10 @@ int main( int argc, char **argv )
 			case SDL_KEYDOWN:
 			{
 				SDLMod sdlMod = SDL_GetModState();
-#if 0
-				if ( mapMakerMode && event.key.keysym.sym >= SDLK_0 && event.key.keysym.sym <= SDLK_9 ) {
-					int index = 0;
-					switch ( event.key.keysym.sym ) {
-					case SDLK_1:	index = 0;	break;
-					case SDLK_2:	index = 1;	break;
-					case SDLK_3:	index = 2;	break;
-					case SDLK_4:	index = 3;	break;
-					case SDLK_5:	index = 4;	break;
-					case SDLK_6:	index = 5;	break;
-					case SDLK_7:	index = 6;	break;
-					case SDLK_8:	index = 7;	break;
-					case SDLK_9:	index = 8;	break;
-					case SDLK_0:	index = 9;	break;
-					};
-
-					const U8* light = ((Game*)game)->engine->GetMap()->DayTime() ? dayLight : nightLight;
-					static const float INV = 1.0f/255.0f;
-
-					U8 r = light[index*3+0];
-					U8 g = light[index*3+1];
-					U8 b = light[index*3+2];
-
-					if ( sdlMod & sdlMod & ( KMOD_LSHIFT | KMOD_RSHIFT ) ) {
-						if ( index < 6 ) {
-							// Average with shade.
-							r = (light[index*3+0] + light[SHADE*3+0]) / 2;
-							g = (light[index*3+1] + light[SHADE*3+1]) / 2;
-							b = (light[index*3+2] + light[SHADE*3+2]) / 2;
-						}
-						else if ( index > 6 ) {
-							// make darker (index 6 is the darkest. SHIFT does nothing.)
-							int m = index-1;
-							r = (light[index*3+0] + light[m*3+0]) / 2;
-							g = (light[index*3+1] + light[m*3+1]) / 2;
-							b = (light[index*3+2] + light[m*3+2]) / 2;
-						}
-					}
-					((Game*)game)->SetLightMap( (float)r * INV, (float)g * INV, (float)b * INV );
-				}
-#endif
 				switch ( event.key.keysym.sym )
 				{
 					case SDLK_ESCAPE:
 						{
-							//int handled = GameHotKey( game, GAME_HK_BACK );
 #ifdef DEBUG
 							// only escape out in debug mode
 							// if ( !handled ) 
@@ -422,61 +382,6 @@ int main( int argc, char **argv )
 					case SDLK_d:
 						GameHotKey( game, GAME_HK_TOGGLE_DEBUG_TEXT );
 						break;
-#if 0
-					case SDLK_DELETE:
-						if ( mapMakerMode )
-							((Game*)game)->DeleteAtSelection(); 
-						break;
-
-					case SDLK_KP9:			
-						if ( mapMakerMode )
-							((Game*)game)->RotateSelection( -1 );			
-						break;
-
-					case SDLK_r:
-					case SDLK_KP7:			
-						if ( mapMakerMode )
-							((Game*)game)->RotateSelection( 1 );			
-						break;
-
-					case SDLK_KP8:			
-						if ( mapMakerMode )
-							((Game*)game)->DeltaCurrentMapItem(16);			
-						break;
-
-					case SDLK_KP5:			
-						if ( mapMakerMode )
-							((Game*)game)->DeltaCurrentMapItem(-16);		
-						break;
-
-					case SDLK_KP6:			
-						if ( mapMakerMode )
-							((Game*)game)->DeltaCurrentMapItem(1); 			
-						break;
-
-					case SDLK_KP4:			
-						if ( mapMakerMode )
-							((Game*)game)->DeltaCurrentMapItem(-1);			
-						break;
-
-					case SDLK_p:
-						//if ( mapMakerMode )
-						{
-							int pathing = (((Game*)game)->ShowingPathing() + 1) % 3;
-							((Game*)game)->ShowPathing( pathing );
-						}
-						break;
-
-					case SDLK_t:
-						if ( mapMakerMode )
-							((Game*)game)->engine->GetMap()->SetDayTime( !((Game*)game)->engine->GetMap()->DayTime() );
-						break;
-
-					case SDLK_m:
-						if ( mapMakerMode )
-							((Game*)game)->engine->EnableMetadata( !((Game*)game)->engine->IsMetadataEnabled() );
-						break;
-#endif
 					default:
 						break;
 				}
@@ -536,9 +441,9 @@ int main( int argc, char **argv )
 					GameZoom( game, GAME_ZOOM_DISTANCE, deltaZoom );
 					GameCameraRotate( game, (float)(zoomX)*0.5f );
 				}
-//				else if ( ( ( state & SDL_BUTTON(1) ) == 0 ) ) {
-//					((Game*)game)->MouseMove( x, y );
-//				}
+				else if ( ( ( state & SDL_BUTTON(1) ) == 0 ) ) {
+					GameTap( game, GAME_TAP_MOVE_UP, x, y );
+				}
 			}
 			break;
 

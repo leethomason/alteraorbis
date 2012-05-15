@@ -28,6 +28,7 @@ public:
 		if ( grinliz::StrEqual( name, "PathMoveComponent" ) ) return this;
 		return MoveComponent::ToComponent( name );
 	}
+	virtual void DebugStr( grinliz::GLString* str );
 
 	virtual void OnAdd( Chit* chit );
 	virtual void OnRemove();
@@ -58,6 +59,10 @@ private:
 	void GetPosRot( grinliz::Vector2F* pos, float* rot );
 	void SetPosRot( const grinliz::Vector2F& pos, float rot );
 	float GetDistToNext2( const grinliz::Vector2F& currentPos );
+	void SetNoPath() {
+		nPathPos = pathPos = repath = 0;
+		dest.Zero();
+	}
 
 	// Move, then set rotation from movement.
 	void MoveFirst( U32 delta );
@@ -72,9 +77,9 @@ private:
 	WorldMap*	map;
 	SpaceTree*	spaceTree;
 	int nPathPos;				// size of path
-	int pathPos;			// index of where we are on path
-	int repath;				// counter to see if we are stuck
-	grinliz::Vector2F dest;	// final destination
+	int pathPos;				// index of where we are on path
+	int repath;					// counter to see if we are stuck
+	grinliz::Vector2F dest;		// final destination
 	grinliz::Vector2F queuedDest;
 
 	grinliz::Vector2F pos2;		// only valid during tick!

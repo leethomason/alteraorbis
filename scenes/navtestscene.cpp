@@ -4,6 +4,7 @@
 
 #include "../engine/engine.h"
 #include "../engine/ufoutil.h"
+#include "../engine/text.h"
 
 #include "../xegame/chit.h"
 #include "../xegame/spatialcomponent.h"
@@ -29,6 +30,9 @@ using namespace gamui;
 // 
 NavTestScene::NavTestScene( LumosGame* game ) : Scene( game )
 {
+	debugRay.direction.Zero();
+	debugRay.origin.Zero();
+
 	game->InitStd( &gamui2D, &okay, 0 );
 
 	LayoutCalculator layout = game->DefaultLayout();
@@ -124,6 +128,12 @@ void NavTestScene::Rotate( float degrees )
 }
 
 
+void NavTestScene::MouseMove( const grinliz::Vector2F& view, const grinliz::Ray& world )
+{
+	debugRay = world;
+}
+
+
 void NavTestScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::Ray& world )				
 {
 	bool uiHasTap = ProcessTap( action, view, world );
@@ -202,6 +212,25 @@ void NavTestScene::ItemTapped( const gamui::UIItem* item )
 void NavTestScene::DoTick( U32 deltaTime )
 {
 	chitBag.DoTick( deltaTime );
+}
+
+
+void NavTestScene::DrawDebugText()
+{
+	UFOText* ufoText = UFOText::Instance();
+	if ( debugRay.direction.x ) {
+		Model* root = engine->IntersectModel( debugRay, TEST_TRI, 0, 0, 0, 0 );
+		int y = 16;
+		for ( ; root; root=root->next ) {
+			Chit* chit = root->userData;
+			if ( chit ) {
+				GLString str;
+				chit->DebugStr( &str );
+				ufoText->Draw( 0, y, "%s", str.c_str() );
+				y += 16;
+			}
+		}
+	}
 }
 
 

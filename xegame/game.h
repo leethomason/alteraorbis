@@ -119,15 +119,6 @@ public:
 	const gamui::RenderAtom& GetRenderAtom( int id );
 	gamui::RenderAtom CreateRenderAtom( int uiRendering, const char* assetName, float x0=0, float y0=0, float x1=1, float y1=1 );
 	
-	/*	enum {
-		GREEN_BUTTON,
-		BLUE_BUTTON,
-		BLUE_TAB_BUTTON,
-		RED_BUTTON,
-		LOOK_COUNT
-	};
-	const gamui::ButtonLook& GetButtonLook( int id );
-*/
 	// For creating some required textures:
 	virtual void CreateTexture( Texture* t );
 

@@ -96,9 +96,9 @@ public:
 	// Utility
 	
 	// Call to send mouse events to gamui. Returns true if the UI (gamui) is handling the event.
-	bool ProcessTap( int action, const grinliz::Vector2F& screen, const grinliz::Ray& world );
+	bool ProcessTap( int action, const grinliz::Vector2F& view, const grinliz::Ray& world );
 	// Call to handle 3D events. Returns true if an actual tap (on the y=0 plane) occurs.
-	bool Process3DTap( int action, const grinliz::Vector2F& screen, const grinliz::Ray& world, Engine* engine );
+	bool Process3DTap( int action, const grinliz::Vector2F& view, const grinliz::Ray& world, Engine* engine );
 
 	virtual void ItemTapped( const gamui::UIItem* item )							{}
 	virtual gamui::RenderAtom DragStart( const gamui::UIItem* item )				{ gamui::RenderAtom atom; return atom; }	// null atom
@@ -111,6 +111,9 @@ public:
 	// 2D overlay rendering.
 	virtual void DrawHUD()										{}
 	virtual void DrawDebugText()								{}
+
+	// Debugging
+	virtual void MouseMove( const grinliz::Vector2F& view, const grinliz::Ray& world )	{}
 
 protected:
 

@@ -19,8 +19,7 @@ using namespace grinliz;
 void PathMoveComponent::OnAdd( Chit* chit )
 {
 	MoveComponent::OnAdd( chit );
-	nPathPos = pathPos = repath = 0;
-	dest.Zero();
+	SetNoPath();
 	blockForceApplied = false;
 	avoidForceApplied = false;
 	isStuck = false;
@@ -34,9 +33,11 @@ void PathMoveComponent::OnRemove()
 }
 
 
-void PathMoveComponent::QueueDest( const grinliz::Vector2F& dest )
+void PathMoveComponent::QueueDest( const grinliz::Vector2F& d )
 {
-	queuedDest = dest;
+	SetNoPath();
+	GLASSERT(  d.x >= 0 && d.y >= 0 );
+	queuedDest = d;
 }
 
 
@@ -66,8 +67,14 @@ void PathMoveComponent::ComputeDest( const Vector2F& d )
 
 	bool okay = map->CalcPath( start, dest, path, &nPathPos, MAX_MOVE_PATH, pathDebugging ); 
 	if ( !okay ) {
-		nPathPos = pathPos = 0;
+		SetNoPath();
 		SendMessage( "PathMoveComponent", MSG_DESTINATION_BLOCKED );
+		GLASSERT( queuedDest.x > 0 );	// DEBUGGING
+	}
+	else {
+		GLASSERT( nPathPos > 0 );
+		GLASSERT( pathPos == 0 );
+		GLASSERT( dest.x >= 0 && dest.y >= 0 );
 	}
 	// If pos < nPathPos, then pathing happens!
 }
@@ -295,8 +302,12 @@ void PathMoveComponent::DoTick( U32 delta )
 	GRINLIZ_PERFTRACK;
 
 	if ( queuedDest.x >= 0 ) {
-		ComputeDest( queuedDest );
-		queuedDest.Set( -1, -1 );
+		pathPos = nPathPos = 0;
+		// Oh the callback is painful. The queuedDest will
+		// get set by the callback from ComputeDest
+		Vector2F q = queuedDest;
+		queuedDest.Set( -1, -1 );	// clear here, so it can be set again
+		ComputeDest( q );
 	}
 
 	blockForceApplied = false;
@@ -337,25 +348,39 @@ void PathMoveComponent::DoTick( U32 delta )
 #ifdef DEBUG_PMC
 				GLOUTPUT(( "Repath\n" ));
 #endif
-				Vector2F d = dest;
-				QueueDest( d );
+				GLASSERT( dest.x >= 0 );
+				QueueDest( dest );
 				repath = 0;
 			}
 		}
 		// Are we at the end of the path data?
-		if ( pathPos == nPathPos ) {
+		if ( nPathPos > 0 && pathPos == nPathPos ) {
 			if ( squattingDest || dest.Equal( path[nPathPos-1], parentChit->GetRenderComponent()->RadiusOfBase()*0.2f ) ) {
 #ifdef DEBUG_PMC
 				GLOUTPUT(( "Dest reached. squatted=%s\n", squattingDest ? "true" : "false" ));
 #endif
 				// actually reached the end!
 				SendMessage( "PathMoveComponent", MSG_DESTINATION_REACHED );
+				SetNoPath();
+				GLASSERT( queuedDest.x > 0 );	// DEBUGGING
 			}
 			else {
 				// continue path:
-				Vector2F d = dest;
-				QueueDest( d );
+				GLASSERT( dest.x >= 0 );
+				QueueDest( dest );
 			}
 		}
+	}
+	GLASSERT( (pathPos < nPathPos ) || queuedDest.x >= 0 );
+}
+
+
+void PathMoveComponent::DebugStr( grinliz::GLString* str )
+{
+	if ( pathPos < nPathPos ) {
+		str->Format( "[PathMove]=%.1f,%.1f ", dest.x, dest.y );
+	}
+	else {
+		str->Format( "[PathMove]=still " );
 	}
 }

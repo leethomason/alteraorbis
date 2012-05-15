@@ -36,6 +36,7 @@ public:
 	virtual void Draw3D( U32 deltaTime );
 	virtual void DrawDebugText();
 	virtual void OnChitMsg( Chit* chit, const char* componentName, int id );
+	virtual void MouseMove( const grinliz::Vector2F& view, const grinliz::Ray& world ) { debugRay = world; }
 
 private:
 	void LoadMap();
@@ -50,6 +51,7 @@ private:
 
 	grinliz::Random random;
 	grinliz::CDynArray<grinliz::Vector2I> waypoints;
+	grinliz::Ray debugRay;
 	
 	int nChits;
 	int creationTick;

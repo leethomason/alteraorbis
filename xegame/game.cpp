@@ -633,8 +633,26 @@ bool Game::PopSound( int* database, int* offset, int* size )
 }
 
 
+void Game::MouseMove( int x, int y )
+{
+	Vector2F window = { (float)x, (float)y };
+	Vector2F view;
+	screenport.WindowToView( window, &view );
+
+	grinliz::Ray world;
+	screenport.ViewToWorld( view, 0, &world );
+
+	sceneStack.Top()->scene->MouseMove( view, world );
+}
+
+
 void Game::Tap( int action, int wx, int wy )
 {
+	if ( action == GAME_TAP_MOVE_UP ) {
+		MouseMove( wx, wy );
+		return;
+	}
+
 	// The tap is in window coordinate - need to convert to view.
 	Vector2F window = { (float)wx, (float)wy };
 	Vector2F view;

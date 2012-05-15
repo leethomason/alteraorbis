@@ -22,6 +22,7 @@ public:
 		return Component::ToComponent( name );
 	}
 	virtual RenderComponent*	ToRender()		{ return this; }
+	virtual void DebugStr( grinliz::GLString* str );
 
 	virtual void OnAdd( Chit* chit );
 	virtual void OnRemove();

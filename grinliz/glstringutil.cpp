@@ -120,6 +120,30 @@ GLString GLString::substr( unsigned pos, unsigned n )
 }
 
 
+void GLString::Format( const char* format, ...) 
+{
+	static const int size = 200;
+	char str[size] = { 0 };	// sleazy, yes.
+    va_list     va;
+
+    //
+    //  format and output the message..
+    //
+    va_start( va, format );
+#ifdef _MSC_VER
+    int result = vsnprintf_s( str, size, _TRUNCATE, format, va );
+#else
+	// Reading the spec, the size does seem correct. The man pages
+	// say it will aways be null terminated (whereas the strcpy is not.)
+	// Pretty nervous about the implementation, so force a null after.
+    int result = vsnprintf( str, size, format, va );
+	str[size-1] = 0;
+#endif
+    va_end( va );
+	this->append( str );
+}
+
+
 void GLString::ensureSize( unsigned s )
 {
 	unsigned ensure = s+1;
