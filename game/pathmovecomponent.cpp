@@ -371,7 +371,7 @@ void PathMoveComponent::DoTick( U32 delta )
 			}
 		}
 	}
-	GLASSERT( (pathPos < nPathPos ) || queuedDest.x >= 0 );
+//	GLASSERT( (pathPos < nPathPos ) || queuedDest.x >= 0 );
 }
 
 

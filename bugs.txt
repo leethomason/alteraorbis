@@ -1,7 +1,7 @@
 - Blue Smoke Map Test
 	- full size (1024x1024), 2000 units
-	- entity debug system: point at chit, get component info
-	- some units get stuck and never move (pathing fails & doesn't re-start?)
+	X entity debug system: point at chit, get component info
+	X some units get stuck and never move (pathing fails & doesn't re-start?)
 	- fix camera code
 	- need a mini-map
 	- need to get to 2000 faster

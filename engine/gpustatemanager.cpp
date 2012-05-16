@@ -556,9 +556,9 @@ void GPUShader::Clear()
 
 GPUShader::~GPUShader()
 {
-	GLASSERT( matrixDepth[0] == 0 );
-	GLASSERT( matrixDepth[1] == 0 );
-	GLASSERT( matrixDepth[2] == 0 );
+	GLASSERT( matrixDepth[0] >= 0 );
+	GLASSERT( matrixDepth[1] >= 0 );
+	GLASSERT( matrixDepth[2] >= 0 );
 }
 
 

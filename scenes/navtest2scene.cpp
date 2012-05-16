@@ -35,9 +35,9 @@ NavTest2Scene::NavTest2Scene( LumosGame* game, const NavTest2SceneData* _data ) 
 
 	LoadMap();
 
-	//RenderAtom atom;
-	//minimap.Init( &gamui2D, atom, false );
-	//minimap.SetSize( 200, 200 );
+	RenderAtom atom;
+	minimap.Init( &gamui2D, atom, false );
+	minimap.SetSize( 200, 200 );
 }
 
 
@@ -55,7 +55,7 @@ void NavTest2Scene::Resize()
 	lumosGame->PositionStd( &okay, 0 );
 
 	const Screenport& port = lumosGame->GetScreenport();
-	//minimap.SetPos( port.UIWidth()-200, 0 );
+	minimap.SetPos( port.UIWidth()-200, 0 );
 }
 
 
@@ -195,10 +195,10 @@ void NavTest2Scene::DoTick( U32 deltaTime )
 		CreateChit( waypoints[random.Rand(waypoints.Size()) ] );
 		creationTick = 0;
 	}
-//	RenderAtom atom( (const void*)UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, 
-//					 (const void*)engine->GetMiniMapTexture(), 
-//					 0, 0, 1, 1 );
-//	minimap.SetAtom( atom );
+	RenderAtom atom( (const void*)UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, 
+					 (const void*)engine->GetMiniMapTexture(), 
+					 0, 0, 1, 1 );
+	minimap.SetAtom( atom );
 }
 
 

@@ -186,26 +186,36 @@ void Engine::CreateMiniMap()
 	delete miniMapRenderTarget;
 	miniMapRenderTarget = new RenderTarget( 256, 256, false );
 	miniMapRenderTarget->SetActive( true, this );
+	
+	Matrix4 view;
 
-	miniMapRenderTarget->screenport->SetPerspective();
-
+	Matrix4 scaleMat;
 	float width  = (float)map->Width();
 	float height = (float)map->Height();
+	float scale = 2.f / Max( width, height );
 
-	float theta = ToRadian( 45.f/2.0f );
-	float ratio = 1.0f;
+	// Apply a scale to the model so that the rendering
+	// doesn't blow out the depth range.
+	float size = Max(width,height)*scale;
+	scaleMat.SetScale( scale );
 
-	Camera c;
-	float h = (height/2.f) / (tanf(theta)*ratio);
-	c.SetYRotation( 0 );
-	c.SetTilt( -90.0f );
-	c.SetPosWC( width/2.0f, h, height/2.0f );
+	float theta = ToRadian( EL_FOV/2.0f );
+	// tan(theta) = size / h
+	// which then implies 1/2 width, hence the 0.5 modifier
+	float h = 0.5f * size / tanf(theta);	
+	Vector3F eye = { size/2, h, size/2 };
+	Vector3F at  = { size/2, 0, size/2 };
+	Vector3F up  = { 1, 0, 0 };
+	view.SetLookAt( eye, at, up );
 
-	Matrix4 view;
-	miniMapRenderTarget->screenport->SetView( c.ViewMatrix() );
-
+	miniMapRenderTarget->screenport->SetPerspective();
+	miniMapRenderTarget->screenport->SetView( view );
+	
 	Color3F color = { 1, 1, 1 };
+	GPUShader::PushMatrix( GPUShader::MODELVIEW_MATRIX );
+	GPUShader::MultMatrix( GPUShader::MODELVIEW_MATRIX, scaleMat );
 	map->Draw3D( color, GPUShader::STENCIL_OFF );
+	GPUShader::PopMatrix( GPUShader::MODELVIEW_MATRIX );
 
 	miniMapRenderTarget->SetActive( false, this );
 }
