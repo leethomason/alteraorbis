@@ -32,14 +32,8 @@ public:
 	Camera();
 	~Camera()	{}
 
-	float GetTilt()	const							{ return tilt; }
-	void SetTilt( float value )						{ tilt = value;	valid = false; }
-	void DeltaTilt( float delta )					{ tilt += delta; valid = false; }
-
-	float GetYRotation() const						{ return yRotation; }
-	void SetYRotation( float value )				{ yRotation = value;  valid = false; }
-	// The rotation used by billboards (about y) to look at he camera.
-	float GetBillboardYRotation() const				{	return yRotation; }
+	// Convert from the old system:
+	void TiltRotationToQuat( float tilt, float yRotation );
 
 	// Move the camera around a center pole. The idea of rotation from the users point of view.
 	void Orbit( float delta );
@@ -70,8 +64,7 @@ private:
 	void CalcWorldXForm();
 	void CalcEyeDir();
 
-	float tilt;
-	float yRotation;
+	grinliz::Quaternion quat;
 	grinliz::Vector3F posWC;
 
 	bool valid;

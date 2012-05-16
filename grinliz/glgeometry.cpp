@@ -665,6 +665,7 @@ void grinliz::TessellateCube(	const Vector3F& center,
 }
 #endif
 
+
 const void Quaternion::ToMatrix( Matrix4* mat ) const
 {
 	GLASSERT( Equal( 1.0f, x*x + y*y + z*z + w*w, 0.0001f ) );
@@ -801,8 +802,10 @@ void Quaternion::Normalize()
 }
 
 
-void Quaternion::Multiply( const Quaternion& a, const Quaternion& b, Quaternion* r )
+void Quaternion::Multiply( const Quaternion& _a, const Quaternion& _b, Quaternion* r )
 {
+	Quaternion a = _a;
+	Quaternion b = _b;
 	r->w = a.w*b.w - a.x*b.x - a.y*b.y - a.z*b.z;
 	r->x = a.w*b.x + a.x*b.w + a.y*b.z + a.z*b.y;
 	r->y = a.w*b.y + a.y*b.w + a.z*b.x + a.x*b.z;

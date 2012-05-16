@@ -22,37 +22,41 @@
 using namespace grinliz;
 
 Camera::Camera() : 
-	tilt( 45.f ), 
-	yRotation( 0.0f ), 
 	valid( false )
 {
 	posWC.Set( 0.f, 0.f, 0.f );
+	TiltRotationToQuat( 45.0f, 0. );
+}
+
+
+void Camera::TiltRotationToQuat( float tilt, float yRotation )
+{
+	Matrix4 rotationY, rotationTilt;
+	rotationY.SetYRotation( yRotation );
+	rotationTilt.SetXRotation( tilt );
+
+	// Done in world: we tilt it down, turn it around y, then move it.
+	Matrix4 m = rotationY * rotationTilt;
+	quat.FromRotationMatrix( m );
 }
 
 
 void Camera::CalcWorldXForm()
 {
 	if ( !valid ) {
-		Matrix4 translation, rotationY, rotationTilt;
-
-		/* Test values:
-		translation.SetTranslation( -5.0f, 5.0f, -5.0f );
-		rotationY.SetYRotation( 225.0f );
-		rotationTilt.SetXRotation( -5.0f );
-		*/
+		Matrix4 translation, rotation;
 
 		translation.SetTranslation( posWC );
-		rotationY.SetYRotation( yRotation );
-		rotationTilt.SetXRotation( tilt );
 
-		// Done in world: we tilt it down, turn it around y, then move it.
-		worldXForm = translation * rotationY * rotationTilt;
+		quat.Normalize();
+		quat.ToMatrix( &rotation );
+
+		worldXForm = translation * rotation;
 		CalcEyeDir();
 
 		// Calc the View Matrix
 		Matrix4 inv, zRot;
 		worldXForm.Invert( &inv );
-		//zRot.SetZRotation( -(float)(viewRotation)*90.0f );
 		viewMatrix = zRot*inv;
 
 		valid = true;
@@ -79,11 +83,27 @@ void Camera::CalcEyeDir()
 
 void Camera::Orbit( float rotation )
 {
-	// Find the rotation point (the pole)
+	// This is kind of a tricky function. We want to rotate around
+	// what the camera is looking at, not the origin of the camera.
+	// It's a useful function, but a pain in the ass.
+
 	EyeDir();			// bring cache current
-	Vector3F pole;
+	Vector3F pole;		// the pole is up; this is the base of the pole, essentially
 	if ( IntersectRayPlane( posWC, eyeDir3[0], 1, 0, &pole ) == INTERSECT ) {
 
+		Vector3F delta = posWC - pole;
+
+		// Append the rotation
+		Matrix4 rotMat, current, m;
+		rotMat.SetYRotation( rotation );
+		quat.ToMatrix( &current );
+		m = rotMat * current;
+		quat.FromRotationMatrix( m );
+
+		// Move the origin to componensate
+		posWC = pole + rotMat * delta;
+
+#if 0
 		Matrix4 r;
 		r.SetYRotation( yRotation + rotation );
 
@@ -96,6 +116,7 @@ void Camera::Orbit( float rotation )
 		posWC = pole + vecPrime;
 
 		yRotation += rotation;
+#endif
 	}
 	valid = false;
 }

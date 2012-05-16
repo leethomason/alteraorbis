@@ -333,9 +333,7 @@ typedef Quad2F< 0, 1 > Quad2Fz;
 
 
 
-/** A quaternion class. Whether these are useful or not is still up to
-	debate, but they are certainly getting more common. Lilith uses
-	them for the camera.
+/** Basic quaternion class, with SLERP.
 */
 class Quaternion
 {
