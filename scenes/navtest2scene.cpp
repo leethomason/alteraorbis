@@ -9,6 +9,7 @@
 
 #include "../xegame/chit.h"
 #include "../xegame/rendercomponent.h"
+#include "../xegame/cameracomponent.h"
 
 #include "../engine/engine.h"
 #include "../engine/text.h"
@@ -174,7 +175,7 @@ void NavTest2Scene::Tap( int action, const grinliz::Vector2F& view, const grinli
 {
 	bool uiHasTap = ProcessTap( action, view, world );
 
-	if ( action == GAME_TAP_DOWN && !uiHasTap ) {
+	if ( action == GAME_TAP_UP && !uiHasTap ) {
 		// Check mini-map
 		grinliz::Vector2F ui;
 		game->GetScreenport().ViewToUI( view, &ui );
@@ -185,6 +186,11 @@ void NavTest2Scene::Tap( int action, const grinliz::Vector2F& view, const grinli
 			float y = (ui.y - minimap.Y())*(float)map->Height() / minimap.Height();
 
 			GLOUTPUT(( "Mini-map %d,%d\n", int(x), int(y) ));
+			Chit* chit = chitBag.NewChit();
+			CameraComponent* cc = new CameraComponent( &engine->camera );
+			chit->Add( cc );
+			Vector3F d = { x, engine->camera.PosWC().y, y };
+			cc->SetPanTo( d );
 		}
 	}
 

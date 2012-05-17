@@ -12,6 +12,7 @@ ChitBag::ChitBag()
 {
 	idPool = 0;
 	updateList.Resort( 0, false );	// no dupes - turn into a set.
+	deleteList.Resort( 0, false );
 }
 
 
@@ -48,6 +49,12 @@ void ChitBag::RequestUpdate( Chit* chit )
 }
 
 
+void ChitBag::QueueDelete( Chit* chit )
+{
+	deleteList.Add( chit );
+}
+
+
 void ChitBag::DoTick( U32 delta )
 {
 	GRINLIZ_PERFTRACK;
@@ -58,9 +65,15 @@ void ChitBag::DoTick( U32 delta )
 			c->DoTick( delta );
 		}
 	}
-	for( int i=0; i<updateList.GetSize(); ++i ) {
-		updateList[i]->DoUpdate();
+	while( !updateList.IsEmpty() ) {
+		int index = updateList.GetSize() - 1;
+		updateList[ index ]->DoUpdate();
+		updateList.RemoveAt( index );
 	}
-	updateList.RemoveAll();
+	for( int i=0; i<deleteList.GetSize(); ++i ) {
+		GLOUTPUT(( "ChitBag queude delete: %s\n", deleteList[i] ));
+		DeleteChit( deleteList[i] );
+	}
+	deleteList.RemoveAll();
 }
 

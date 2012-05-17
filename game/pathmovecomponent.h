@@ -52,9 +52,6 @@ public:
 
 private:
 	void ComputeDest( const grinliz::Vector2F& dest );
-	float Travel( float rate, U32 time ) const {
-		return rate * ((float)time) * 0.001f;
-	}
 	
 	void GetPosRot( grinliz::Vector2F* pos, float* rot );
 	void SetPosRot( const grinliz::Vector2F& pos, float rot );

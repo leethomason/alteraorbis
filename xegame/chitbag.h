@@ -27,6 +27,7 @@ public:
 	// Due to events, changes, etc. a chit may need an update, possibily in addition to, the tick.
 	// Normally called automatically.
 	void RequestUpdate( Chit* );
+	void QueueDelete( Chit* chit );
 
 private:
 	int idPool;
@@ -34,6 +35,7 @@ private:
 					Simple::SValue, Simple::SOwnedPtr> chits;	// Owned chit pointers. Note that CIndex 
 																// supports fast iteration, which is critical.
 	Simple::CSortedVector<Chit*> updateList;					// <set> of chits that need the Update() called.
+	Simple::CSortedVector<Chit*> deleteList;					// <set> of chits that need to be deleted.
 };
 
 

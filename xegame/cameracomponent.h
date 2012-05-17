@@ -5,11 +5,16 @@
 #include "../grinliz/glvector.h"
 #include "../grinliz/glmath.h"
 
+class Camera;
+
 class CameraComponent : public Component
 {
 public:
-	CameraComponent() {
-		mode = DONE;
+	CameraComponent( Camera* _camera ) 
+		:	camera( _camera ),
+			mode( DONE ),
+			speed( 0 )
+	{
 		dest.Zero();
 	}
 
@@ -18,11 +23,13 @@ public:
 		return Component::ToComponent( name );
 	}
 	virtual void DebugStr( grinliz::GLString* str );
-	virtual void DoTick( U32 delta )			{}
+	virtual void DoTick( U32 delta );
+	virtual bool NeedsTick()					{ return true; }
 
-	void SetPanTo( grinliz::Vector3F& dest, float speed = 3.0f );
+	void SetPanTo( grinliz::Vector3F& dest, float speed = 40.0f );
 
 private:
+	Camera* camera;
 	enum {
 		DONE,	// will delete
 		PAN
