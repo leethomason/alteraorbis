@@ -28,7 +28,9 @@ void CameraComponent::DoTick( U32 delta )
 {
 	switch ( mode ) {
 	case DONE:
-		parentChit->GetChitBag()->QueueDelete( parentChit );
+		if ( autoDelete ) {
+			parentChit->GetChitBag()->QueueDelete( parentChit );
+		}
 		break;
 		
 	case PAN:

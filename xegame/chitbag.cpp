@@ -71,7 +71,7 @@ void ChitBag::DoTick( U32 delta )
 		updateList.RemoveAt( index );
 	}
 	for( int i=0; i<deleteList.GetSize(); ++i ) {
-		GLOUTPUT(( "ChitBag queude delete: %s\n", deleteList[i] ));
+		//GLOUTPUT(( "ChitBag queude delete: %x\n", deleteList[i] ));
 		DeleteChit( deleteList[i] );
 	}
 	deleteList.RemoveAll();

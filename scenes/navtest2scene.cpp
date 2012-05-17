@@ -185,12 +185,24 @@ void NavTest2Scene::Tap( int action, const grinliz::Vector2F& view, const grinli
 			float x = (ui.x - minimap.X())*(float)map->Width() / minimap.Width();
 			float y = (ui.y - minimap.Y())*(float)map->Height() / minimap.Height();
 
-			GLOUTPUT(( "Mini-map %d,%d\n", int(x), int(y) ));
+			Vector3F at;
+			Rectangle2I mapBounds = map->Bounds();
+
+			//GLOUTPUT(( "Mini-map %d,%d\n", int(x), int(y) ));
 			Chit* chit = chitBag.NewChit();
 			CameraComponent* cc = new CameraComponent( &engine->camera );
 			chit->Add( cc );
-			Vector3F d = { x, engine->camera.PosWC().y, y };
-			cc->SetPanTo( d );
+			cc->SetAutoDelete( true );
+
+			engine->CameraLookingAt( &at );
+			if ( at.x >= 0 && at.z >= 0 && at.x < (float)mapBounds.max.x && at.z < (float)mapBounds.max.y ) {
+				Vector3F delta = { x-at.x, 0, y-at.z };
+				cc->SetPanTo( engine->camera.PosWC() + delta );
+			}
+			else {
+				Vector3F dest = { x, engine->camera.PosWC().y, y };
+				cc->SetPanTo( dest );
+			}
 		}
 	}
 

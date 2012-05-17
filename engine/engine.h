@@ -82,6 +82,7 @@ public:
 	// is returned.
 	void MoveCameraXZ( float x, float z, grinliz::Vector3F* calc=0 );
 
+	// What the camera is looking at on the y=0 plane.
 	void CameraLookingAt( grinliz::Vector3F* at );
 	void CameraLookAt( float x, float z, float heightOfCamera, float yRotation=-45.0f, float tilt=-50.0f );
 
