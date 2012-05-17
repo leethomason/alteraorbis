@@ -187,6 +187,9 @@
     <ClCompile Include="..\game\mapspatialcomponent.cpp">
       <Filter>Source Files\game</Filter>
     </ClCompile>
+    <ClCompile Include="..\xegame\cameracomponent.cpp">
+      <Filter>Source Files\xegame</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\camera.h">
@@ -362,6 +365,9 @@
     </ClInclude>
     <ClInclude Include="..\game\mapspatialcomponent.h">
       <Filter>Source Files\game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xegame\cameracomponent.h">
+      <Filter>Source Files\xegame</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

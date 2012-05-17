@@ -117,6 +117,7 @@
     <ClCompile Include="..\win32\framebuffer.cpp" />
     <ClCompile Include="..\win32\glew.c" />
     <ClCompile Include="..\win32\main.cpp" />
+    <ClCompile Include="..\xegame\cameracomponent.cpp" />
     <ClCompile Include="..\xegame\cgame.cpp" />
     <ClCompile Include="..\xegame\chit.cpp" />
     <ClCompile Include="..\xegame\chitbag.cpp" />
@@ -176,6 +177,7 @@
     <ClInclude Include="..\win32\framebuffer.h" />
     <ClInclude Include="..\win32\glew.h" />
     <ClInclude Include="..\win32\wglew.h" />
+    <ClInclude Include="..\xegame\cameracomponent.h" />
     <ClInclude Include="..\xegame\cgame.h" />
     <ClInclude Include="..\xegame\chit.h" />
     <ClInclude Include="..\xegame\chitbag.h" />
