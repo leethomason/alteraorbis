@@ -1140,7 +1140,9 @@ Gamui::Gamui()
 		m_nItemsAllocated( 0 ),
 		m_dragStart( 0 ),
 		m_dragEnd( 0 ),
-		m_textHeight( 16 )
+		m_textHeight( 16 ),
+		m_relativeX( 0 ),
+		m_relativeY( 0 )
 {
 }
 
@@ -1211,6 +1213,13 @@ void Gamui::Remove( UIItem* item )
 }
 
 
+void Gamui::GetRelativeTap( float* x, float* y )
+{
+	*x = m_relativeX;
+	*y = m_relativeY;
+}
+
+
 const UIItem* Gamui::Tap( float x, float y )
 {
 	TapDown( x, y );
@@ -1234,6 +1243,8 @@ void Gamui::TapDown( float x, float y )
 		{
 			if ( item->HandleTap( UIItem::TAP_DOWN, x, y ) ) {
 				m_itemTapped = item;
+				m_relativeX = (item->X() - x) / item->Width();
+				m_relativeY = (item->X() - x) / item->Height();
 				break;
 			}
 		}
@@ -1423,12 +1434,6 @@ void Gamui::Layout( UIItem** item, int nItems,
 	for( int j=0; j<cy && c<nItems; ++j ) {
 		float x=originX;
 		for( int i=0; i<cx && c<nItems; ++i ) {
-//			if ( i > 0 && i==(cx-1) ) {
-//				x = originX+tableWidth-item[c]->Width();	// be extra careful with rounding.
-//			}
-//			if ( j > 0 && j==(cy-1) ) {
-//				y = originY+tableHeight-item[c]->Height();	// be extra careful with rounding.
-//			}
 
 			item[c]->SetPos( x, y );
 			x += item[c]->Width();

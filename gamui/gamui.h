@@ -252,11 +252,13 @@ public:
 		* TapDown return the item tapped on. This does not activate anything except capture.
 		* TapUp returns if the item was activated (that is, the up and down item are the same.)
 	*/
-	void TapDown( float x, float y );		
-	const UIItem* TapUp( float x, float y );					///< Used as a pair with TapDown
-	void TapCancel();											///< Cancel a tap (generally in response to the OS)
-	const UIItem* TapCaptured() const { return m_itemTapped; }	///< The item that received the TapDown, while in move.
-	const UIItem* Tap( float x, float y );						///< Used to send events on systems that have a simple tap without up/down symantics.
+	void			TapDown( float x, float y );		
+	const UIItem*	TapUp( float x, float y );						///< Used as a pair with TapDown
+	void			TapCancel();									///< Cancel a tap (generally in response to the OS)
+	const UIItem*	TapCaptured() const { return m_itemTapped; }	///< The item that received the TapDown, while in move.
+	const UIItem*	Tap( float x, float y );						///< Used to send events on systems that have a simple tap without up/down symantics.
+	// Warning: not yet tested
+	void			GetRelativeTap( float* x, float* y );			///< Get the tap location, in item coordinates, of the last tap down. [0,1]
 
 	/** During (or after) a TapUp, this will return the starting object and ending object of the drag. One
 		or both may be null, and it is commonly the same object.
@@ -305,6 +307,7 @@ private:
 	const UIItem*	m_dragStart;
 	const UIItem*	m_dragEnd;
 	float			m_textHeight;
+	float			m_relativeX, m_relativeY;
 
 	struct State {
 		uint16_t	vertexStart;

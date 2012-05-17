@@ -209,7 +209,7 @@ void Engine::CreateMiniMap()
 	float h = 0.5f * size / tanf(theta);	
 	Vector3F eye = { size/2, h, size/2 };
 	Vector3F at  = { size/2, 0, size/2 };
-	Vector3F up  = { 1, 0, 0 };
+	Vector3F up  = { 0, 0, -1 };
 	view.SetLookAt( eye, at, up );
 
 	miniMapRenderTarget->screenport->SetPerspective();

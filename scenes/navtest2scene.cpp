@@ -173,6 +173,21 @@ void NavTest2Scene::Rotate( float degrees )
 void NavTest2Scene::Tap( int action, const grinliz::Vector2F& view, const grinliz::Ray& world )				
 {
 	bool uiHasTap = ProcessTap( action, view, world );
+
+	if ( action == GAME_TAP_DOWN && !uiHasTap ) {
+		// Check mini-map
+		grinliz::Vector2F ui;
+		game->GetScreenport().ViewToUI( view, &ui );
+		if (    ui.x >= minimap.X() && ui.x <= minimap.X()+minimap.Width()
+			 && ui.y >= minimap.Y() && ui.y <= minimap.Y()+minimap.Height() )
+		{
+			float x = (ui.x - minimap.X())*(float)map->Width() / minimap.Width();
+			float y = (ui.y - minimap.Y())*(float)map->Height() / minimap.Height();
+
+			GLOUTPUT(( "Mini-map %d,%d\n", int(x), int(y) ));
+		}
+	}
+
 	if ( !uiHasTap ) {
 		int tap = Process3DTap( action, view, world, engine );
 	}
