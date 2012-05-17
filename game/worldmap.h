@@ -80,8 +80,8 @@ public:
 	void ShowAdjacentRegions( float x, float y );
 	void ShowRegionPath( float x0, float y0, float x1, float y1 );
 	void ShowRegionOverlay( bool over ) { debugRegionOverlay = over; }
-	//int NumRegions() const;
 	float PatherCache();
+	void PatherCacheHitMiss( int* hits, int* miss, float* ratio ) { pather->PathCacheHitMiss( hits, miss, ratio ); }
 
 private:
 	int INDEX( int x, int y ) const { 

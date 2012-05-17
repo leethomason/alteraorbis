@@ -123,7 +123,13 @@ void NavTest2Scene::DrawDebugText()
 {
 	UFOText* ufoText = UFOText::Instance();
 
-	ufoText->Draw( 0, 16, "PathCache=%.3f walkers=%d", map->PatherCache(), nChits );	
+	float ratio;
+	map->PatherCacheHitMiss( 0, 0, &ratio );
+
+	ufoText->Draw( 0, 16, "PathCache=%.3f hit%%=%d walkers=%d", 
+		map->PatherCache(), 
+		(int)(ratio*100.f),
+		nChits );	
 
 	if ( debugRay.direction.x ) {
 		Model* root = engine->IntersectModel( debugRay, TEST_TRI, 0, 0, 0, 0 );

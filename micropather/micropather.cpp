@@ -221,11 +221,9 @@ void PathNode::Init(	unsigned _frame,
 }
 
 MicroPather::MicroPather( Graph* _graph, unsigned allocate, bool symmetric )
-	:	//pathNodePool( allocate, typicalAdjacent ),
-		graph( _graph ),
+	:	graph( _graph ),
 		frame( 1 ),
 		pathCache( allocate, symmetric )
-//		checksum( 0 )
 {}
 
 
@@ -336,6 +334,8 @@ PathCache::PathCache( int _allocated, bool _symmetric )
 	allocated = _allocated;
 	nItems = 0;
 	symmetric = _symmetric;
+	hit = 0;
+	miss = 0;
 }
 
 
@@ -362,11 +362,18 @@ void PathCache::Add( const MP_VECTOR< PathNode* >& path )
 			return;
 		}
 
-		for( unsigned j=i+1; j<path.size(); ++j ) {
+		// example: a->b->c->d
+		// FIXME: huge memory saving to only store 3 paths to 'd'
+		// Can put more in cache with also adding path to b, c, & d
+		// But uses much more memory. Experiment with this commented
+		// in and out and how to set.
+
+		//for( unsigned j=i+1; j<path.size(); ++j ) {
+		int j = path.size()-1;
 			PathNode* end   = path[j];
 			Item item = { path[i], end, path[i+1], path[i+1]->costFromStart - path[i]->costFromStart };
 			AddItem( item );
-		}
+		//}
 	}
 }
 
@@ -389,6 +396,7 @@ int PathCache::Solve( PathNode* _start, PathNode* _end, MP_VECTOR< PathNode* >* 
 	Item* item = Find( start, end );
 	if ( item ) {
 		if ( item->next == 0 ) {
+			++hit;
 			return MicroPather::NO_SOLUTION;
 		}
 
@@ -401,12 +409,14 @@ int PathCache::Solve( PathNode* _start, PathNode* _end, MP_VECTOR< PathNode* >* 
 			*totalCost += item->cost;
 			path->push_back( item->next );
 		}
+		++hit;
 		return MicroPather::SOLVED;
 	}
 	if ( symmetric ) {
 		item = Find( end, start );
 		if ( item ) {
 			if ( item->next == 0 ) {
+				++hit;
 				return MicroPather::NO_SOLUTION;
 			}
 			path->clear();
@@ -421,10 +431,11 @@ int PathCache::Solve( PathNode* _start, PathNode* _end, MP_VECTOR< PathNode* >* 
 			for( unsigned j=0; j<path->size()/2; ++j ) {
 				grinliz::Swap( &(*path)[j], &(*path)[path->size()-1-j] );
 			}
-
+			++hit;
 			return MicroPather::SOLVED;
 		}
 	}
+	++miss;
 	return MicroPather::NOT_CACHED;
 }
 
@@ -488,6 +499,21 @@ PathCache::Item* PathCache::Find( PathNode* start, PathNode* end )
 		++index;
 		if ( index == allocated )
 			index = 0;
+	}
+}
+
+
+void PathCache::HitMiss( int *h, int *m, float* fraction )
+{
+	if ( h ) 
+		*h = hit;
+	if ( m )
+		*m = miss;
+	if ( fraction ) {
+		*fraction = 0;
+		if ( hit + miss ) {
+			*fraction = (float)(hit) / (float)(hit+miss);
+		}
 	}
 }
 

@@ -296,6 +296,7 @@ namespace micropather
 
 		int AllocatedBytes() const { return allocated * sizeof(Item); }
 		int UsedBytes() const { return nItems * sizeof(Item); }
+		void HitMiss( int *hits, int *miss, float* hitsOfTotal );
 
 	private:
 		void AddItem( const Item& item );
@@ -305,6 +306,7 @@ namespace micropather
 		int		allocated;
 		int		nItems;
 		bool	symmetric;
+		int		hit, miss;
 	};
 
 
@@ -364,9 +366,9 @@ namespace micropather
 		void Reset();
 
 		// Debugging function to return all states that were used by the last "solve" 
-		//void StatesInPool( MP_VECTOR< void* >* stateVec );
 		int PathCacheAllocated() const { return pathCache.AllocatedBytes(); }
 		int PathCacheUsed() const      { return pathCache.UsedBytes(); }
+		void PathCacheHitMiss( int *hits, int *miss, float* hitsOfTotal ) { return pathCache.HitMiss( hits, miss, hitsOfTotal ); }
 
 	  private:
 		MicroPather( const MicroPather& );	// undefined and unsupported
