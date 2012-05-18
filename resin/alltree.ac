@@ -4,7 +4,7 @@ OBJECT world
 kids 8
 OBJECT group
 name "tree"
-loc 0.5 1.15 0.5
+loc 0.0367851 1.15 -0.0449587
 kids 2
 OBJECT poly
 name "box"

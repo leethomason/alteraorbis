@@ -43,6 +43,7 @@ private:
 	void CreateChit( const grinliz::Vector2I& p );
 
 	gamui::PushButton okay;
+	gamui::ToggleButton regionButton;
 	gamui::Image minimap;
 
 	Engine* engine;

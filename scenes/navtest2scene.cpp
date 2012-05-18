@@ -39,6 +39,11 @@ NavTest2Scene::NavTest2Scene( LumosGame* game, const NavTest2SceneData* _data ) 
 	RenderAtom atom;
 	minimap.Init( &gamui2D, atom, false );
 	minimap.SetSize( 200, 200 );
+
+	LayoutCalculator layout = game->DefaultLayout();
+	regionButton.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
+	regionButton.SetSize( layout.Width(), layout.Height() );
+	regionButton.SetText( "region" );
 }
 
 
@@ -57,6 +62,8 @@ void NavTest2Scene::Resize()
 
 	const Screenport& port = lumosGame->GetScreenport();
 	minimap.SetPos( port.UIWidth()-200, 0 );
+	LayoutCalculator layout = lumosGame->DefaultLayout();
+	layout.PosAbs( &regionButton, 1, -1 );
 }
 
 
@@ -66,11 +73,10 @@ void NavTest2Scene::LoadMap()
 	delete map;
 
 	map = new WorldMap( 32, 32 );
-	grinliz::CDynArray<Vector2I> blocks;
-	map->InitPNG( data->worldFilename, &blocks, &waypoints );
+	grinliz::CDynArray<Vector2I> blocks, features;
+	map->InitPNG( data->worldFilename, &blocks, &waypoints, &features );
 
 	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase(), map );	
-	//engine->CameraLookAt( (float)map->Width()*0.5f, (float)map->Height()*0.5f, 40 );
 
 
 	for ( int i=0; i<blocks.Size(); ++i ) {
@@ -82,6 +88,16 @@ void NavTest2Scene::LoadMap()
 
 		GET_COMPONENT( chit, MapSpatialComponent )->SetMapPosition( v.x, v.y, 0 );
 	}
+	for( int i=0; i<features.Size(); ++i ) {
+		Chit* chit = chitBag.NewChit();
+		const Vector2I& v = features[i];
+		MapSpatialComponent* msc = new MapSpatialComponent( 1, 1, map );
+		chit->Add( msc );
+		chit->Add( new RenderComponent( engine, "tree", 0 ));
+
+		GET_COMPONENT( chit, MapSpatialComponent )->SetMapPosition( v.x, v.y, 0 );
+	}
+
 	clock_t start = clock();
 	//Performance::ClearSamples();
 	for( int i=0; i<waypoints.Size(); ++i ) {
@@ -222,6 +238,9 @@ void NavTest2Scene::ItemTapped( const gamui::UIItem* item )
 {
 	if ( item == &okay ) {
 		game->PopScene();
+	}
+	else if ( item == &regionButton ) {
+		map->ShowRegionOverlay( regionButton.Down() );
 	}
 }
 

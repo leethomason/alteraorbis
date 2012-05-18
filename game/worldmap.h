@@ -30,7 +30,8 @@ public:
 	void InitCircle();
 	bool InitPNG( const char* filename, 
 				  grinliz::CDynArray<grinliz::Vector2I>* blocks,
-				  grinliz::CDynArray<grinliz::Vector2I>* wayPoints );
+				  grinliz::CDynArray<grinliz::Vector2I>* wayPoints,
+				  grinliz::CDynArray<grinliz::Vector2I>* features );
 
 	void SetBlock( int x, int y )	{ grinliz::Rectangle2I pos; pos.Set( x, y, x, y ); SetBlock( pos ); }
 	void SetBlock( const grinliz::Rectangle2I& pos );

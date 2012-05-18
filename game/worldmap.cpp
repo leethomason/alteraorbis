@@ -109,7 +109,8 @@ void WorldMap::InitCircle()
 
 bool WorldMap::InitPNG( const char* filename, 
 						grinliz::CDynArray<grinliz::Vector2I>* blocks,
-						grinliz::CDynArray<grinliz::Vector2I>* wayPoints )
+						grinliz::CDynArray<grinliz::Vector2I>* wayPoints,
+						grinliz::CDynArray<grinliz::Vector2I>* features )
 {
 	GLASSERT( regionPlex.GetCount() == 0 );
 
@@ -118,6 +119,7 @@ bool WorldMap::InitPNG( const char* filename,
 	static const Color3U8 BLACK = { 0, 0, 0 };
 	static const Color3U8 BLUE  = { 0, 0, 255 };
 	static const Color3U8 RED   = { 255, 0, 0 };
+	static const Color3U8 GREEN = { 0, 255, 0 };
 
 	int error = lodepng_decode24_file( &pixels, &w, &h, filename );
 	GLASSERT( error == 0 );
@@ -146,6 +148,11 @@ bool WorldMap::InitPNG( const char* filename,
 				grid[i].isLand = 1;
 				grid[i].color = color;
 				wayPoints->Push( p );
+			}
+			else if ( c == GREEN ) {
+				grid[i].isLand = 1;
+				grid[i].color = color;
+				features->Push( p );
 			}
 			++x;
 			if ( x == w ) {

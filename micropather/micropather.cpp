@@ -370,10 +370,11 @@ void PathCache::Add( const MP_VECTOR< PathNode* >& path )
 
 		//for( unsigned j=i+1; j<path.size(); ++j ) {
 		int j = path.size()-1;
+		{
 			PathNode* end   = path[j];
 			Item item = { path[i], end, path[i+1], path[i+1]->costFromStart - path[i]->costFromStart };
 			AddItem( item );
-		//}
+		}
 	}
 }
 

@@ -1,13 +1,12 @@
 - Blue Smoke Map Test
 	- full size (1024x1024), 2000 units
+	- need to get to 2000 faster
 	X entity debug system: point at chit, get component info
 	X some units get stuck and never move (pathing fails & doesn't re-start?)
 	X fix camera code
 	X need a mini-map
-	- need to get to 2000 faster
-	X filling of path cache: correct? why does the cache keep incrementing? what
-	  should the game do when it's full?
-	- show region code
+	X filling of path cache: correct? why does the cache keep incrementing? what should the game do when it's full?
+	X show region code
 	- profiler max-ing out
 	- much better test bitmap
 	X 2 continents
