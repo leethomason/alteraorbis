@@ -21,6 +21,9 @@ using namespace gamui;
 
 //#define DEBUG_PMC
 
+//				doTick (debug, profile)
+// 1000 units:	50ms
+// no avoid:	35ms	avoiding: 15ms
 
 NavTest2Scene::NavTest2Scene( LumosGame* game, const NavTest2SceneData* _data ) : Scene( game )
 {
@@ -112,7 +115,7 @@ void NavTest2Scene::LoadMap()
 
 void NavTest2Scene::CreateChit( const Vector2I& p )
 {
-	GRINLIZ_PERFTRACK;
+	//GRINLIZ_PERFTRACK;
 
 	Chit* chit = chitBag.NewChit();
 	chit->Add( new SpatialComponent() );
@@ -249,8 +252,11 @@ void NavTest2Scene::DoTick( U32 deltaTime )
 {
 	chitBag.DoTick( deltaTime );
 	++creationTick;
-	if ( creationTick == 5 && nChits < data->nChits ) {
-		CreateChit( waypoints[random.Rand(waypoints.Size()) ] );
+	
+	if ( creationTick >= 5 && nChits < data->nChits ) {
+		for( int i=0; i<data->nPerCreation; ++i ) {
+			CreateChit( waypoints[random.Rand(waypoints.Size()) ] );
+		}
 		creationTick = 0;
 	}
 	RenderAtom atom( (const void*)UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, 

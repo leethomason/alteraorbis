@@ -133,7 +133,7 @@ void RenderQueue::Add( Model* model, const ModelAtom* atom, GPUShader* shader, c
 
 void RenderQueue::Submit( GPUShader* overRideShader, int required, int excluded, const Matrix4* xform )
 {
-	GRINLIZ_PERFTRACK
+	//GRINLIZ_PERFTRACK
 
 	for( int i=0; i<nState; ++i ) {
 		GPUShader* shader = overRideShader ? overRideShader : statePool[i].shader;

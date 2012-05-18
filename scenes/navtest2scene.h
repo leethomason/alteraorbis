@@ -12,10 +12,11 @@ class WorldMap;
 class NavTest2SceneData : public SceneData
 {
 public:
-	NavTest2SceneData( const char* _worldFilename, int _nChits ) : worldFilename( _worldFilename ), nChits( _nChits ) {}
+	NavTest2SceneData( const char* _worldFilename, int _nChits, int _nPerCreation=1 ) : worldFilename( _worldFilename ), nChits( _nChits ), nPerCreation( _nPerCreation ) {}
 
 	const char* worldFilename;
 	int nChits;
+	int nPerCreation;
 };
 
 class NavTest2Scene : public Scene, public IChitListener

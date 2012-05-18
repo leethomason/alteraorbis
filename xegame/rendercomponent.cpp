@@ -5,6 +5,8 @@
 #include "../engine/model.h"
 #include "../engine/engine.h"
 
+#include "../grinliz/glperformance.h"
+
 using namespace grinliz;
 
 RenderComponent::RenderComponent( Engine* _engine, const char* _asset, int _flags ) 
@@ -41,6 +43,8 @@ void RenderComponent::OnRemove()
 
 void RenderComponent::DoUpdate()
 {
+	GRINLIZ_PERFTRACK;
+
 	SpatialComponent* spatial = parentChit->GetSpatialComponent();
 	if ( model && spatial ) {
 		model->SetPosAndYRotation( spatial->GetPosition(), spatial->GetYRotation() );

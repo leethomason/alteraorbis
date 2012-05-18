@@ -564,7 +564,7 @@ GPUShader::~GPUShader()
 
 void GPUShader::Draw( int instances )
 {
-	GRINLIZ_PERFTRACK
+	//GRINLIZ_PERFTRACK
 
 	if ( nIndex == 0 )
 		return;

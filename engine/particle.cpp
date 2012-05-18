@@ -230,7 +230,7 @@ void ParticleSystem::EmitPD(	const ParticleDef& def,
 
 void ParticleSystem::Draw()
 {
-	GRINLIZ_PERFTRACK
+	//GRINLIZ_PERFTRACK
 
 	if ( nParticles == 0 ) {
 		return;
