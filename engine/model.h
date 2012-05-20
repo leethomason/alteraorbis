@@ -129,6 +129,9 @@ public:
 
 	ModelHeader header;						// loaded
 	grinliz::Rectangle3F	hitBounds;		// for picking - a bounds approximation
+	grinliz::Rectangle3F	invariantBounds;	// build y rotation in, so that bounds can
+												// be generated with simple addition, without
+												// causing the call to Model::XForm 
 
 	ModelAtom atom[EL_MAX_MODEL_GROUPS];
 };
@@ -247,7 +250,16 @@ public:
 	void CalcHitAABB( grinliz::Rectangle3F* aabb ) const;
 
 	// The bounding box
+	// Accurate, but can be expensive to call a lot.
 	const grinliz::Rectangle3F& AABB() const;
+
+	// Bigger bounding box, cheaper call.
+	grinliz::Rectangle3F GetInvariantAABB() const {
+		grinliz::Rectangle3F b = resource->invariantBounds;
+		b.min += pos;
+		b.max += pos;
+		return b;
+	}
 
 	void CalcTrigger( grinliz::Vector3F* trigger, const float* alternateYRotation=0 ) const;
 	void CalcTarget( grinliz::Vector3F* target ) const;

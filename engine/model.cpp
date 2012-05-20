@@ -98,6 +98,12 @@ void ModelLoader::Load( const gamedb::Item* item, ModelResource* res )
 	res->hitBounds.min.Set( -ave, res->header.bounds.min.y, -ave );
 	res->hitBounds.max.Set( ave, res->header.bounds.max.y, ave );
 
+	float greater = grinliz::Max( res->header.bounds.SizeX(), res->header.bounds.SizeZ() );
+	greater *= 1.41f;	// turns 45deg - FIXME: check this on paper
+	greater *= 0.5f;
+	res->invariantBounds.min.Set( -greater, res->header.bounds.min.y, -greater );
+	res->invariantBounds.max.Set( greater, res->header.bounds.max.y, greater );
+
 	for( U32 i=0; i<res->header.nAtoms; ++i )
 	{
 		const gamedb::Item* groupItem = item->Child( i );

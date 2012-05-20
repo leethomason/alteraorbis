@@ -29,6 +29,8 @@ using namespace grinliz;
 	Unit tree has less compution and fewer models, slightly less balanced. 
 */
 
+int SpaceTree::nModelsAtDepth[DEPTH] = { 0 };
+
 SpaceTree::SpaceTree( float yMin, float yMax, int _size ) 
 	:	modelPool( "SpaceTreeModelPool", sizeof( Item ), EL_ALLOCATED_MODELS*sizeof( Item ), true )
 {
@@ -124,12 +126,11 @@ void SpaceTree::Update( Model* model )
 {
 	// Unlink if currently in tree.
 	Item* item = (Item*)model;	// cast depends on model being first in the structure.
-	Rectangle3F bounds = model->AABB();
 
-	// Quick check that we're still good:
-	//if ( item->node && item->node->depth == DEPTH-1 && item->node->aabb.Contains( bounds ) ) {
-	//	return;
-	//}
+	// This call is very expensive. 3ms (approx bounds) to 20ms in debug mode.
+	//Rectangle3F bounds = model->AABB();
+
+	Rectangle3F bounds = model->GetInvariantAABB();
 
 	if ( item->node ) 
 		item->node->Remove( item );
@@ -265,11 +266,13 @@ void SpaceTree::Node::Add( Item* item )
 
 	for( Node* it=this; it; it=it->parent )
 		it->nModels++;
+	SpaceTree::nModelsAtDepth[item->node->depth] += 1;
 }
 
 
 void SpaceTree::Node::Remove( Item* item ) 
 {
+	SpaceTree::nModelsAtDepth[item->node->depth] -= 1;
 	if ( root == item )
 		root = item->next;
 	if ( item->prev )

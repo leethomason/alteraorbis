@@ -134,9 +134,13 @@ private:
 		DEPTH = 5,
 		NUM_NODES = 1+4+16+64+256
 	};
-
 	Node* GetNode( int depth, int x, int z ); 
 	Node nodeArr[NUM_NODES];
+
+public:
+	// hacky debugging info
+	static int nModelsAtDepth[DEPTH];
+
 };
 
 #endif // LOOSEQUADTREE_INCLUDED

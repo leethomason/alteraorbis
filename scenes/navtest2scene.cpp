@@ -13,6 +13,7 @@
 
 #include "../engine/engine.h"
 #include "../engine/text.h"
+#include "../engine/loosequadtree.h"
 
 #include <ctime>
 
@@ -26,7 +27,8 @@ using namespace gamui;
 // using spatial cache:		48ms avoiding 13ms
 // impoved spatial cache:	40-43ms avoiding 7ms
 //									update 13ms
-//
+//  wider bounds, Update massive reduction
+//							34ms	update 3ms
 NavTest2Scene::NavTest2Scene( LumosGame* game, const NavTest2SceneData* _data ) : Scene( game )
 {
 	debugRay.direction.Zero();
@@ -147,10 +149,15 @@ void NavTest2Scene::DrawDebugText()
 	float ratio;
 	map->PatherCacheHitMiss( 0, 0, &ratio );
 
-	ufoText->Draw( 0, 16, "PathCache=%.3f hit%%=%d walkers=%d", 
+	ufoText->Draw( 0, 16, "PathCache=%.3f hit%%=%d walkers=%d [%d %d %d %d %d]", 
 		map->PatherCache(), 
 		(int)(ratio*100.f),
-		nChits );	
+		nChits,
+		SpaceTree::nModelsAtDepth[0], 
+		SpaceTree::nModelsAtDepth[1], 
+		SpaceTree::nModelsAtDepth[2], 
+		SpaceTree::nModelsAtDepth[3], 
+		SpaceTree::nModelsAtDepth[4] );	
 
 	if ( debugRay.direction.x ) {
 		Model* root = engine->IntersectModel( debugRay, TEST_TRI, 0, 0, 0, 0 );
