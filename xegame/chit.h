@@ -62,6 +62,9 @@ public:
 
 	void DebugStr( grinliz::GLString* str );
 
+	// used by the spatial hash:
+	Chit* next;
+
 private:
 
 	ChitBag* chitBag;

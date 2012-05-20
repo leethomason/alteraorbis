@@ -464,18 +464,43 @@ bool Matrix4::SetLookAt( const Vector3F& eye, const Vector3F& center, const Vect
 
 void grinliz::MultMatrix4( const Matrix4& m, const Rectangle3F& in, Rectangle3F* out )
 {
+	// http://www.gamedev.net/topic/349370-transform-aabb-from-local-to-world-space-for-frustum-culling/
+
+	out->Set( m.x[12], m.x[13], m.x[14],
+		      m.x[12], m.x[13], m.x[14] );
+
+	for( int i=0; i<3; ++i ) {
+		for( int j=0; j<3; ++j ) {
+			float av = m.m(i,j) * in.min.X(j);
+			float bv = m.m(i,j) * in.max.X(j);
+			if (av < bv)
+			{
+				out->min.X(i) += av;
+				out->max.X(i) += bv;
+			} else {
+				out->min.X(i) += bv;
+				out->max.X(i) += av;
+			}
+		}
+	}
+#if 0
+	// TEST
 	Vector3F q;
 	Vector3F p = m * in.min;
 
-	out->min = p;
-	out->max = p;
+	Rectangle3F test;
+	test.min = p;
+	test.max = p;
 
 	for( int i=1; i<8; ++i ) {
 		q.Set(	(i&1) ? in.max.x : in.min.x,
 				(i&2) ? in.max.y : in.min.y,
 				(i&4) ? in.max.z : in.min.z );
 		p = m * q;
-		out->DoUnion( p );
+		test.DoUnion( p );
 	}
+
+	GLASSERT( Equal( test, *out, 0.01f ));
+#endif
 }
 

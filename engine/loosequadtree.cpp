@@ -124,6 +124,12 @@ void SpaceTree::Update( Model* model )
 {
 	// Unlink if currently in tree.
 	Item* item = (Item*)model;	// cast depends on model being first in the structure.
+	Rectangle3F bounds = model->AABB();
+
+	// Quick check that we're still good:
+	//if ( item->node && item->node->depth == DEPTH-1 && item->node->aabb.Contains( bounds ) ) {
+	//	return;
+	//}
 
 	if ( item->node ) 
 		item->node->Remove( item );
@@ -134,7 +140,6 @@ void SpaceTree::Update( Model* model )
 	int depth = DEPTH-1;
 	Node* node = 0;
 	
-	Rectangle3F bounds = model->AABB();
 	bounds.DoIntersection( treeBounds );
 
 	int x = (int)bounds.min.x;

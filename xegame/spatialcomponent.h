@@ -8,9 +8,10 @@
 class SpatialComponent : public Component
 {
 public:
-	SpatialComponent() {
+	SpatialComponent( bool _track ) {
 		position.Zero();
 		yRotation = 0;
+		track = _track;
 	}
 
 	virtual Component*          ToComponent( const char* name ) {
@@ -19,6 +20,9 @@ public:
 	}
 	virtual SpatialComponent*	ToSpatial()			{ return this; }
 	virtual void DebugStr( grinliz::GLString* str );
+
+	virtual void OnAdd( Chit* chit );
+	virtual void OnRemove();
 
 	void SetPosition( float x, float y, float z );
 	const grinliz::Vector3F& GetPosition() const	{ return position; }
@@ -35,6 +39,7 @@ public:
 private:
 	grinliz::Vector3F	position;
 	float				yRotation;	// [0, 360)
+	bool				track;
 };
 
 #endif // SPACIAL_COMPONENT_INCLUDED

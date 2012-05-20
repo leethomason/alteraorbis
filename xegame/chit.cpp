@@ -10,6 +10,7 @@ using namespace grinliz;
 
 Chit::Chit( int _id, ChitBag* bag ) :	chitBag( bag ), id( _id ), nTickers( 0 )
 {
+	next = 0;
 	ticking = false;
 	for( int i=0; i<NUM_SLOTS; ++i ) {
 		slot[i] = 0;

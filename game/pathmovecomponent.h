@@ -6,7 +6,6 @@
 #include "gamelimits.h"
 
 class WorldMap;
-class SpaceTree;
 
 /*	Move along a path.
 	Future note: Pathing should be async and done by message passing.
@@ -19,9 +18,8 @@ public:
 		MSG_DESTINATION_BLOCKED
 	};
 
-	PathMoveComponent(	WorldMap* _map,				// required; used to avoids blocks when moving. 
-						SpaceTree* _spaceTree )		// optional: will try to avoid collisions with other objects
-		: map( _map ), spaceTree( _spaceTree ), nPathPos( 0 ), pathPos( 0 ), rotationFirst(true), pathDebugging( false ) {}
+	PathMoveComponent(	WorldMap* _map )				// required; used to avoids blocks when moving. 
+		: map( _map ), nPathPos( 0 ), pathPos( 0 ), rotationFirst(true), pathDebugging( false ) {}
 	virtual ~PathMoveComponent() {}
 
 	virtual Component*          ToComponent( const char* name ) {
@@ -72,7 +70,6 @@ private:
 	void ApplyBlocks();
 
 	WorldMap*	map;
-	SpaceTree*	spaceTree;
 	int nPathPos;				// size of path
 	int pathPos;				// index of where we are on path
 	int repath;					// counter to see if we are stuck

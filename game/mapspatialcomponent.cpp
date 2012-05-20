@@ -3,7 +3,7 @@
 
 using namespace grinliz;
 
-MapSpatialComponent::MapSpatialComponent( int width, int height, WorldMap* _map )
+MapSpatialComponent::MapSpatialComponent( int width, int height, WorldMap* _map ) : SpatialComponent( false )
 {
 	map = _map;
 	mapPos.Set( -1, -1 );

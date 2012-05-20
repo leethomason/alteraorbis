@@ -65,8 +65,8 @@ class Matrix4
 							}
 
 	void Set( int row, int col, float v )	{	x[INDEX(row,col)] = v; }
-	//float& M( int row, int col )			{	return x[INDEX(row,col)]; }
-	//float M(int row, int col ) const		{	return x[INDEX(row,col)]; }
+	float& m( int row, int col )			{	return x[INDEX(row,col)]; }
+	float m(int row, int col ) const		{	return x[INDEX(row,col)]; }
 
 	/// Set the translation terms
 	void SetTranslation( float _x, float _y, float _z )		{	x[12] = _x;	x[13] = _y;	x[14] = _z;	}

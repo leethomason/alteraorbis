@@ -32,6 +32,8 @@ public:
 	// fixme: switch to a request/release model?
 	virtual bool NeedsTick()					{ return false; }
 
+	Chit* ParentChit() { return parentChit; }
+
 	// Tick is a regular call; update because of events/change.
 	virtual void DoTick( U32 delta )			{}
 	virtual void DoUpdate()						{}

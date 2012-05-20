@@ -75,9 +75,9 @@ NavTestScene::NavTestScene( LumosGame* game ) : Scene( game )
 
 	for( int i=0; i<NUM_CHITS; ++i ) {
 		chit[i] = chitBag.NewChit();
-		chit[i]->Add( new SpatialComponent() );
-		chit[i]->Add( new RenderComponent( engine, "humanFemale", MODEL_USER_AVOIDS ) );
-		chit[i]->Add( new PathMoveComponent( map, engine->GetSpaceTree() ) );
+		chit[i]->Add( new SpatialComponent( true ) );
+		chit[i]->Add( new RenderComponent( engine, "humanFemale", 0 ) );
+		chit[i]->Add( new PathMoveComponent( map ) );
 		chit[i]->Add( new DebugPathComponent( engine, map, game ) );
 		chit[i]->GetSpatialComponent()->SetPosition( 10.0f + (float)i*2.f, 0.0f, 10.0f );
 	}

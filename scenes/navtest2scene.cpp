@@ -23,8 +23,10 @@ using namespace gamui;
 
 //				doTick (debug, profile)
 // 1000 units:	50ms
-// no avoid:	35ms	avoiding: 15ms
-
+// using spatial cache:		48ms avoiding 13ms
+// impoved spatial cache:	40-43ms avoiding 7ms
+//									update 13ms
+//
 NavTest2Scene::NavTest2Scene( LumosGame* game, const NavTest2SceneData* _data ) : Scene( game )
 {
 	debugRay.direction.Zero();
@@ -118,15 +120,15 @@ void NavTest2Scene::CreateChit( const Vector2I& p )
 	//GRINLIZ_PERFTRACK;
 
 	Chit* chit = chitBag.NewChit();
-	chit->Add( new SpatialComponent() );
+	chit->Add( new SpatialComponent( true ) );
 
 	const char* asset = "humanFemale";
 	if ( random.Rand( 4 ) == 0 ) {
 		asset = "hornet";
 	}
 
-	chit->Add( new RenderComponent( engine, asset, MODEL_USER_AVOIDS ));
-	chit->Add( new PathMoveComponent( map, engine->GetSpaceTree() ));
+	chit->Add( new RenderComponent( engine, asset, 0 ));
+	chit->Add( new PathMoveComponent( map ));
 #ifdef DEBUG_PMC
 	chit->Add( new DebugPathComponent( engine, map, static_cast<LumosGame*>(game) ));
 #endif

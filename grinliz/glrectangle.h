@@ -437,8 +437,14 @@ struct Rectangle3
 		max.z += i;
 	}
 
-	bool operator==( const Rectangle2<T>& that ) const { return	min == that.min && max == that.max; }
-	bool operator!=( const Rectangle2<T>& that ) const { return	min != that.min || max != that.max; }
+	friend bool Equal( const Rectangle3<T>& a, const Rectangle3<T>& b, float epsilon = 0.001f )
+	{
+		return Equal( a.min, b.min, epsilon ) && Equal( a.max, b.max, epsilon );
+	}
+
+
+	bool operator==( const Rectangle3<T>& that ) const { return	min == that.min && max == that.max; }
+	bool operator!=( const Rectangle3<T>& that ) const { return	min != that.min || max != that.max; }
 };
 
 

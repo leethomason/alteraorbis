@@ -1,7 +1,8 @@
 - Blue Smoke Map Test
 	- full size (1024x1024), 2000 units
 		- faster avoidance
-			- separate avoid queries from spatial queries
+			X separate avoid queries from spatial queries
+			- hash scheme needs work
 		- faster Model::Update
 			- don't re-link if possible on update. model probably is in the same node.
 			- faster AABB calc? are we using normals? should we?

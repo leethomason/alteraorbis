@@ -205,17 +205,16 @@ bool PathMoveComponent::AvoidOthers( U32 delta )
 	avoidForceApplied = false;
 	bool squattingDest = false;
 
-	if ( !spaceTree ) return false;
 	RenderComponent* render = parentChit->GetRenderComponent();
 	if ( !render ) return false;
-	if ( (render->GetFlags() & MODEL_USER_AVOIDS ) == 0 ) return false;
 	
 	Rectangle2F bounds;
 	bounds.Set( pos2.x-PATH_AVOID_DISTANCE, pos2.y-PATH_AVOID_DISTANCE, 
 		        pos2.x+PATH_AVOID_DISTANCE, pos2.y+PATH_AVOID_DISTANCE );
-	Model* root = spaceTree->QueryRect( bounds, MODEL_USER_AVOIDS, 0 );
+	
+	const CDynArray<Chit*,32>& chitArr = GetChitBag()->QuerySpatialHash( bounds );
 
-	if ( root ) {
+	if ( !chitArr.Empty() ) {
 		Vector3F pos3    = { pos2.x, 0, pos2.y };
 		float radius     = parentChit->GetRenderComponent()->RadiusOfBase();
 		Vector3F avoid = { 0, 0 };
@@ -225,8 +224,8 @@ bool PathMoveComponent::AvoidOthers( U32 delta )
 		Vector3F destNormal = wayPoint - pos3;
 		destNormal.SafeNormalize( 1, 0, 0 );
 
-		while( root ) {
-			Chit* chit = root->userData;
+		for( int i=0; i<chitArr.Size(); ++i ) {
+			Chit* chit = chitArr[i];
 			if ( chit && chit != parentChit ) {
 				
 				Vector3F itPos3 = chit->GetSpatialComponent()->GetPosition();
@@ -270,7 +269,6 @@ bool PathMoveComponent::AvoidOthers( U32 delta )
 					}
 				}
 			}
-			root = root->next;
 		}
 		avoid.y = 0;	// be sure.
 		pos2.x += avoid.x;
@@ -362,7 +360,6 @@ void PathMoveComponent::DoTick( U32 delta )
 				// actually reached the end!
 				SendMessage( "PathMoveComponent", MSG_DESTINATION_REACHED );
 				SetNoPath();
-				GLASSERT( queuedDest.x > 0 );	// DEBUGGING
 			}
 			else {
 				// continue path:
