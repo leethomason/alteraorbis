@@ -252,10 +252,56 @@ WorldMap::BlockResult WorldMap::CalcBlockEffect(	const grinliz::Vector2F& pos,
 
 	// could be further optimized by doing a radius-squared check first
 	Rectangle2I b = Bounds();
-	static const Vector2I delta[9] = { {0,0}, {-1,-1}, {0,-1}, {1,-1}, {1,0}, {1,1}, {0,1}, {-1,1}, {-1,0} };
+	//static const Vector2I delta[9] = { {0,0}, {-1,-1}, {0,-1}, {1,-1}, {1,0}, {1,1}, {0,1}, {-1,1}, {-1,0} };
 	static const float EPSILON = 0.0001f;
 
-	for( int i=0; i<9; ++i ) {
+	Vector2I delta[4] = {{ 0, 0 }};
+	int nDelta = 1;
+	static const float MAX_M1 = 1.0f-MAX_BASE_RADIUS;
+
+	float dx = pos.x - (float)blockPos.x;
+	float dy = pos.y - (float)blockPos.y;
+	if ( dx < MAX_BASE_RADIUS ) {
+		if ( dy < MAX_BASE_RADIUS ) {
+			delta[nDelta++].Set( -1,  0 );
+			delta[nDelta++].Set( -1, -1 );	
+			delta[nDelta++].Set(  0, -1 );
+		}
+		else if ( dy > MAX_M1 ) {
+			delta[nDelta++].Set( -1, 0 );	
+			delta[nDelta++].Set( -1, 1 );
+			delta[nDelta++].Set(  0, 1 );
+		}
+		else {
+			delta[nDelta++].Set( -1, 0 );
+		}
+	}
+	else if ( dx > MAX_M1 ) {
+		if ( dy < MAX_BASE_RADIUS ) {
+			delta[nDelta++].Set(  1,  0 );
+			delta[nDelta++].Set(  1, -1 );	
+			delta[nDelta++].Set(  0, -1 );
+		}
+		else if ( dy > MAX_M1 ) {
+			delta[nDelta++].Set(  1, 0 );	
+			delta[nDelta++].Set(  1, 1 );
+			delta[nDelta++].Set(  0, 1 );
+		}
+		else {
+			delta[nDelta++].Set( -1, 0 );
+		}
+	}
+	else {
+		if ( dy < MAX_BASE_RADIUS ) {
+			delta[nDelta++].Set(  0, -1 );
+		}
+		else if ( dy > MAX_M1 ) {
+			delta[nDelta++].Set(  0, 1 );
+		}
+	}
+	GLASSERT( nDelta <= 4 );
+
+	for( int i=0; i<nDelta; ++i ) {
 		Vector2I block = blockPos + delta[i];
 		if (    b.Contains(block) 
 			 && !grid[INDEX(block.x,block.y)].IsPassable() ) 
@@ -302,8 +348,9 @@ WorldMap::BlockResult WorldMap::ApplyBlockEffect(	const Vector2F inPos,
 	*outPos = inPos;
 	Vector2F force = { 0, 0 };
 
-	// Can't think of a case where it's possible to overlap more than 2.
-	// But if this asserts in some strange case, can up the # checks to 3.
+	// Can't think of a case where it's possible to overlap more than 2,
+	// but there probably is. Don't worry about it. Go with fast & 
+	// usually good enough.
 	for( int i=0; i<2; ++i ) {
 		BlockResult result = CalcBlockEffect( *outPos, radius, &force );
 		if ( result == STUCK )
@@ -313,7 +360,6 @@ WorldMap::BlockResult WorldMap::ApplyBlockEffect(	const Vector2F inPos,
 		if ( result == NO_EFFECT )
 			break;
 	}
-//	GLASSERT( CalcBlockEffect( *outPos, radius, &force ) == NO_EFFECT );
 	return ( *outPos == inPos ) ? NO_EFFECT : FORCE_APPLIED;
 }
 
