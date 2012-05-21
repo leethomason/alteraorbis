@@ -21,8 +21,10 @@ void SpatialComponent::SetPosition( float x, float y, float z )
 		parentChit->GetChitBag()->UpdateSpatialHash( parentChit, oldX, oldY, newX, newY );
 	}
 
-	position.Set( x, y, z ); 
-	RequestUpdate();	// Renders triggers off update. May want to reconsider that.
+	if ( x != position.x || y != position.y || z != position.z ) {
+		position.Set( x, y, z ); 
+		RequestUpdate();	// Renders triggers off update. May want to reconsider that.
+	}
 }
 
 

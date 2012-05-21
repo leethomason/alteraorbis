@@ -29,6 +29,9 @@ using namespace gamui;
 //									update 13ms
 //  wider bounds, Update massive reduction
 //							34ms	update 3ms
+//
+// 2000 units
+
 NavTest2Scene::NavTest2Scene( LumosGame* game, const NavTest2SceneData* _data ) : Scene( game )
 {
 	debugRay.direction.Zero();

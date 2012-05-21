@@ -139,6 +139,8 @@ void PathMoveComponent::MoveFirst( U32 delta )
 
 void PathMoveComponent::RotationFirst( U32 delta )
 {
+	GRINLIZ_PERFTRACK;
+
 	if ( pathPos < nPathPos ) {
 		float travel    = Travel( MOVE_SPEED, delta );
 		float travelRot	= Travel( ROTATION_SPEED, delta );
@@ -212,7 +214,7 @@ bool PathMoveComponent::AvoidOthers( U32 delta )
 	bounds.Set( pos2.x-PATH_AVOID_DISTANCE, pos2.y-PATH_AVOID_DISTANCE, 
 		        pos2.x+PATH_AVOID_DISTANCE, pos2.y+PATH_AVOID_DISTANCE );
 	
-	const CDynArray<Chit*,32>& chitArr = GetChitBag()->QuerySpatialHash( bounds );
+	const CDynArray<Chit*,32>& chitArr = GetChitBag()->QuerySpatialHash( bounds, parentChit );
 
 	if ( !chitArr.Empty() ) {
 		Vector3F pos3    = { pos2.x, 0, pos2.y };
@@ -226,47 +228,46 @@ bool PathMoveComponent::AvoidOthers( U32 delta )
 
 		for( int i=0; i<chitArr.Size(); ++i ) {
 			Chit* chit = chitArr[i];
-			if ( chit && chit != parentChit ) {
+			GLASSERT( chit != parentChit );
 				
-				Vector3F itPos3 = chit->GetSpatialComponent()->GetPosition();
-				float itRadius  = chit->GetRenderComponent()->RadiusOfBase(); 
+			Vector3F itPos3 = chit->GetSpatialComponent()->GetPosition();
+			float itRadius  = chit->GetRenderComponent()->RadiusOfBase(); 
 
-				float d = (pos3-itPos3).Length();
-				float r = radius + itRadius;
+			float d = (pos3-itPos3).Length();
+			float r = radius + itRadius;
 
-				if ( d < r ) {
-					avoidForceApplied = true;
+			if ( d < r ) {
+				avoidForceApplied = true;
 
-					// Move away from the centers so the bases don't overlap.
-					Vector3F normal = pos3 - itPos3;
-					normal.y = 0;
-					normal.SafeNormalize( -destNormal.x, -destNormal.y, -destNormal.z );
-					float alignment = DotProduct( -normal, destNormal ); // how "in the way" is this?
+				// Move away from the centers so the bases don't overlap.
+				Vector3F normal = pos3 - itPos3;
+				normal.y = 0;
+				normal.SafeNormalize( -destNormal.x, -destNormal.y, -destNormal.z );
+				float alignment = DotProduct( -normal, destNormal ); // how "in the way" is this?
 					
-					// Is this guy squatting on our dest?
-					// This check is surprisingly broad, but keeps everyone from "orbiting"
-					if ( (wayPoint-itPos3).LengthSquared() < r*r ) {
-						// Dang squatter.
-						if ( pathPos < nPathPos-1 ) {
-							++pathPos;	// go around
-							break;		// and stop avoiding since we are changing dest.
-						}
-						else {
-							squattingDest = true;
-						}
+				// Is this guy squatting on our dest?
+				// This check is surprisingly broad, but keeps everyone from "orbiting"
+				if ( (wayPoint-itPos3).LengthSquared() < r*r ) {
+					// Dang squatter.
+					if ( pathPos < nPathPos-1 ) {
+						++pathPos;	// go around
+						break;		// and stop avoiding since we are changing dest.
 					}
 					else {
-						float mag = Min( r-d, Travel( MOVE_SPEED, delta ) ); 
-						normal.Multiply( mag );
-						avoid += normal;
-				
-						// Apply a sidestep vector so they don't just push.
-						if ( alignment > 0.7f ) {
-							Vector3F right;
-							CrossProduct( destNormal, UP, &right );
-							avoid += right * (0.5f*mag );
-						}	
+						squattingDest = true;
 					}
+				}
+				else {
+					float mag = Min( r-d, Travel( MOVE_SPEED, delta ) ); 
+					normal.Multiply( mag );
+					avoid += normal;
+				
+					// Apply a sidestep vector so they don't just push.
+					if ( alignment > 0.7f ) {
+						Vector3F right;
+						CrossProduct( destNormal, UP, &right );
+						avoid += right * (0.5f*mag );
+					}	
 				}
 			}
 		}
@@ -314,7 +315,7 @@ void PathMoveComponent::DoTick( U32 delta )
 	if ( pathPos < nPathPos ) {
 		GetPosRot( &pos2, &rot );
 		int startPathPos = pathPos;
-		float distToNext = GetDistToNext2( pos2 );
+		float distToNext2 = GetDistToNext2( pos2 );
 
 		if ( rotationFirst )
 			RotationFirst( delta );
@@ -335,7 +336,7 @@ void PathMoveComponent::DoTick( U32 delta )
 			// Do we need to repath because we're stuck?
 			if (    blockForceApplied  
 				 && startPathPos == pathPos
-				 && GetDistToNext2( pos2 ) >= distToNext ) 
+				 && GetDistToNext2( pos2 ) >= distToNext2 ) 
 			{ 
 				++repath;
 			}

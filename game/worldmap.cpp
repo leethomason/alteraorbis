@@ -266,28 +266,24 @@ WorldMap::BlockResult WorldMap::CalcBlockEffect(	const grinliz::Vector2F& pos,
 			Vector2F n = p; n.Normalize();
 
 			if ( p.x > fabsf(p.y) && (p.x-rad < 0.5f) ) {				// east quadrant
-				//force->Set( 0.5f - (p.x-rad) + EPSILON, 0 );
 				float dx = 0.5f - (p.x-rad) + EPSILON;
 				GLASSERT( dx > 0 );
 				*force = n * (dx/fabsf(n.x));
 				return FORCE_APPLIED;
 			}
 			if ( -p.x > fabsf(p.y) && (p.x+rad > -0.5f) ) {				// west quadrant
-				//force->Set( -0.5f- (p.x+rad) - EPSILON, 0 );
 				float dx = 0.5f + (p.x+rad) + EPSILON;
 				*force = n * (dx/fabsf(n.x));
 				GLASSERT( dx > 0 );
 				return FORCE_APPLIED;
 			}
 			if ( p.y > fabsf(p.x) && (p.y-rad < 0.5f) ) {				// north quadrant
-				//force->Set( 0, 0.5f - (p.y-rad) + EPSILON );
 				float dy = 0.5f - (p.y-rad) + EPSILON;
 				*force = n * (dy/fabsf(n.y));
 				GLASSERT( dy > 0 );
 				return FORCE_APPLIED;
 			}
 			if ( -p.y > fabsf(p.x) && (p.y+rad > -0.5f) ) {				// south quadrant
-				//force->Set( 0, -0.5f - (p.y+rad) - EPSILON );
 				float dy = 0.5f + (p.y+rad) + EPSILON;
 				*force = n * (dy/fabsf(n.y));
 				GLASSERT( dy > 0 );

@@ -500,7 +500,7 @@ void Game::PrintPerf( int depth, const PerfData& data )
 
 	UFOText* ufoText = UFOText::Instance();
 	ufoText->Draw( X + 15*depth, Y+perfY, "%s", data.name );
-	ufoText->Draw( X+240,		 Y+perfY, "%6.2f  %4d", data.inclusiveMSec, data.callCount );
+	ufoText->Draw( X+280,		 Y+perfY, "%6.2f  %4d", data.inclusiveMSec, data.callCount );
 	perfY += 20;
 }
 

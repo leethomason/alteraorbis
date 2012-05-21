@@ -132,8 +132,14 @@ struct Rectangle2
 	}
 
 	bool Contains( T x, T y ) const {
-		Vector2<T> p = { x, y };
-		return Contains( p );
+		if (	x >= min.x
+			 && x <= max.x
+			 && y >= min.y
+			 && y <= max.y )
+		{
+			return true;
+		}
+		return false;
 	}
 
 	/// Merge the rect into this.

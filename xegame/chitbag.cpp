@@ -11,7 +11,7 @@ using namespace grinliz;
 ChitBag::ChitBag()
 {
 	idPool = 0;
-	updateList.Resort( 0, false );	// no dupes - turn into a set.
+	//updateList.Resort( 0, false );	// no dupes - turn into a set.
 	deleteList.Resort( 0, false );
 	memset( spatialHash, 0, sizeof(*spatialHash)*SIZE*SIZE );
 }
@@ -46,7 +46,7 @@ void ChitBag::DeleteChit( Chit* chit )
 
 void ChitBag::RequestUpdate( Chit* chit )
 {
-	updateList.Add( chit );
+	updateList.Push( chit );
 }
 
 
@@ -66,10 +66,9 @@ void ChitBag::DoTick( U32 delta )
 			c->DoTick( delta );
 		}
 	}
-	while( !updateList.IsEmpty() ) {
-		int index = updateList.GetSize() - 1;
-		updateList[ index ]->DoUpdate();
-		updateList.RemoveAt( index );
+	while( !updateList.Empty() ) {
+		Chit* c = updateList.Pop();
+		c->DoUpdate();
 	}
 	for( int i=0; i<deleteList.GetSize(); ++i ) {
 		//GLOUTPUT(( "ChitBag queude delete: %x\n", deleteList[i] ));
@@ -125,9 +124,10 @@ void ChitBag::UpdateSpatialHash( Chit* c, int x0, int y0, int x1, int y1 )
 }
 
 
-const CDynArray<Chit*,32>& ChitBag::QuerySpatialHash( const Rectangle2F& rf )
+const CDynArray<Chit*,32>& ChitBag::QuerySpatialHash( const Rectangle2F& rf, const Chit* ignore )
 {
 	Rectangle2I r;
+
 	r.Set( (int)rf.min.x, (int)rf.min.y, (int)ceilf(rf.max.x), (int)ceilf(rf.max.y) );
 	r.min.x >>= SHIFT;
 	r.min.y >>= SHIFT;
@@ -139,9 +139,11 @@ const CDynArray<Chit*,32>& ChitBag::QuerySpatialHash( const Rectangle2F& rf )
 		for( int x=r.min.x; x<=r.max.x; ++x ) {
 			unsigned index = y*SIZE+x;
 			for( Chit* it=spatialHash[ index ]; it; it=it->next ) {
-				const Vector3F& pos = it->GetSpatialComponent()->GetPosition();
-				if ( rf.Contains( pos.x, pos.z ) ) {
-					hashQuery.Push( it );
+				if ( it != ignore ) {
+					const Vector3F& pos = it->GetSpatialComponent()->GetPosition();
+					if ( rf.Contains( pos.x, pos.z ) ) {
+						hashQuery.Push( it );
+					}
 				}
 			}
 		}

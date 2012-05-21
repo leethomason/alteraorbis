@@ -95,7 +95,7 @@ private:
 };
 
 		
-static const int GL_MAX_SAMPLES = 100*1000;
+static const int GL_MAX_SAMPLES = 1000*1000;
 static const int GL_MAX_PERFDATA = 100;
 
 struct PerfData
