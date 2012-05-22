@@ -39,6 +39,7 @@ private:
 		TEST_NAV2,
 		TEST_NAV_WORLD,
 		TEST_NOISE,
+		TEST_BATTLE,
 		NUM_TESTS,
 		TESTS_PER_ROW = 6
 	};

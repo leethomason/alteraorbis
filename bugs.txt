@@ -1,14 +1,14 @@
 - Blue Smoke Map Test
 	- full size (1024x1024), 2000 units
-		- faster avoidance
+		X faster avoidance
 			X separate avoid queries from spatial queries
-			- hash scheme needs work
+			X hash scheme needs work
 		- faster Model::Update
-			- don't re-link if possible on update. model probably is in the same node.
-			- faster AABB calc? are we using normals? should we?
+			X don't re-link if possible on update. model probably is in the same node.
+			X faster AABB calc? are we using normals? should we?
 			- don't update things well outside the rendering area? switch to local rendering?
 			- re-tune tree size
-			- switch to sphere testing. avoid flushing the AABB entirely
+			X switch to sphere testing. avoid flushing the AABB entirely
 	X need to get to 2000 faster
 	X entity debug system: point at chit, get component info
 	X some units get stuck and never move (pathing fails & doesn't re-start?)
@@ -21,6 +21,8 @@
 	X 2 continents
 	X bridge
 
+- cameras only self-delete if they reach destination; should do better. Probably
+  should only be one camera in existence. (BlueSmoke, NavTest2)
 - record perf max/min. surprisingly hard.
 - shadows should be part of space-tree bounds
 - memory pool everything in the chit/component system
