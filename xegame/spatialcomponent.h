@@ -2,12 +2,20 @@
 #define SPACIAL_COMPONENT_INCLUDED
 
 #include "component.h"
+#include "chit.h"
+
 #include "../grinliz/glvector.h"
 #include "../grinliz/glmath.h"
 
 class SpatialComponent : public Component
 {
 public:
+	enum {
+		MSG_SPATIAL_CHANGED		// within a component, order can be relied on.
+								// other components can listen for this, if needed.
+	};
+
+	//  track: should this be tracked in the ChitBag's spatial hash?
 	SpatialComponent( bool _track ) {
 		position.Zero();
 		yRotation = 0;
@@ -25,6 +33,7 @@ public:
 	virtual void OnRemove();
 
 	void SetPosition( float x, float y, float z );
+	void SetPosition( grinliz::Vector3F v ) { SetPosition( v.x, v.y, v.z ); }
 	const grinliz::Vector3F& GetPosition() const	{ return position; }
 
 	// yRot=0 is the +z axis
@@ -36,10 +45,29 @@ public:
 	grinliz::Vector2F GetPosition2D() const			{ grinliz::Vector2F v = { position.x, position.z }; return v; }
 	grinliz::Vector2F GetHeading2D() const;
 
-private:
+protected:
 	grinliz::Vector3F	position;
 	float				yRotation;	// [0, 360)
 	bool				track;
+};
+
+
+class ChildSpatialComponent : public SpatialComponent, public IChitListener
+{
+public:
+	ChildSpatialComponent( bool track ) : SpatialComponent( track ) {}
+	~ChildSpatialComponent() {}
+
+	virtual Component*          ToComponent( const char* name ) {
+		if ( grinliz::StrEqual( name, "ChildSpatialComponent" ) ) return this;
+		return SpatialComponent::ToComponent( name );
+	}
+
+	virtual void DebugStr( grinliz::GLString* str );
+
+//	virtual void OnAdd( Chit* chit );
+//	virtual void OnRemove();
+	virtual void OnChitMsg( Chit* chit, const char* componentName, int id );
 };
 
 #endif // SPACIAL_COMPONENT_INCLUDED

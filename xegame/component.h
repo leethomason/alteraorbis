@@ -49,7 +49,6 @@ protected:
 	}
 
 	ChitBag* GetChitBag();
-	
 	Chit* parentChit;
 };
 

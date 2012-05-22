@@ -24,6 +24,7 @@ void SpatialComponent::SetPosition( float x, float y, float z )
 	if ( x != position.x || y != position.y || z != position.z ) {
 		position.Set( x, y, z ); 
 		RequestUpdate();	// Renders triggers off update. May want to reconsider that.
+		SendMessage( "SpatialComponent", MSG_SPATIAL_CHANGED );
 	}
 }
 
@@ -58,3 +59,23 @@ void SpatialComponent::OnRemove()
 	}
 	Component::OnRemove();
 }
+
+
+
+void ChildSpatialComponent::DebugStr( GLString* str )
+{
+	str->Format( "[ChildSpatial]=%.1f,%.1f,%.1f ", position.x, position.y, position.z );
+}
+
+
+void ChildSpatialComponent::OnChitMsg( Chit* chit, const char* componentName, int id )
+{
+	if ( id == SpatialComponent::MSG_SPATIAL_CHANGED && StrEqual( componentName, "SpatialComponent" ) ) {
+		SpatialComponent* other = chit->GetSpatialComponent();
+		GLASSERT( other );
+
+		this->SetPosition( other->GetPosition() + position );
+		this->SetYRotation( other->GetYRotation() + yRotation );
+	}
+}
+
