@@ -122,6 +122,7 @@ protected:
 	gamui::Gamui	gamui2D, gamui3D;
 	gamui::Image	dragImage;
 	bool			dragStarted;
+	bool			threeDTapDown;
 
 	DragData		dragData3D;
 };

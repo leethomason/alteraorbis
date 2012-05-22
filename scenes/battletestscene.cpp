@@ -59,7 +59,7 @@ void BattleTestScene::LoadMap()
 
 	map = new WorldMap( 32, 32 );
 	grinliz::CDynArray<Vector2I> blocks, features;
-	map->InitPNG( "./res/testarena.png", &blocks, &waypoints, &features );
+	map->InitPNG( "./res/testarena32.png", &blocks, &waypoints, &features );
 
 	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase(), map );	
 
