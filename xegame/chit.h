@@ -18,7 +18,7 @@ class Chit;
 class IChitListener
 {
 public:
-	virtual void OnChitMsg( Chit* chit, const char* componentName, int id ) = 0;
+	virtual void OnChitMsg( Chit* chit, int id ) = 0;
 };
 
 // MyComponent* mc = GET_COMPONENT( chit, MyComponent );
@@ -56,7 +56,7 @@ public:
 	void RequestUpdate();
 	ChitBag* GetChitBag() { return chitBag; }
 
-	void SendMessage( const char* componentName, int id );
+	void SendMessage( int id );
 	void AddListener( IChitListener* listener );
 	void RemoveListener( IChitListener* listener );
 

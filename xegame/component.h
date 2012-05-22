@@ -42,7 +42,7 @@ public:
 
 protected:
 	void RequestUpdate();
-	void SendMessage( const char* name, int id );
+	void SendMessage( int id );
 
 	float Travel( float rate, U32 time ) const {
 		return rate * ((float)time) * 0.001f;

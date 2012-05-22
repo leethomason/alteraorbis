@@ -1,6 +1,7 @@
 #include "spatialcomponent.h"
 #include "chit.h"
 #include "chitbag.h"
+#include "xegamelimits.h"
 
 using namespace grinliz;
 
@@ -24,7 +25,7 @@ void SpatialComponent::SetPosition( float x, float y, float z )
 	if ( x != position.x || y != position.y || z != position.z ) {
 		position.Set( x, y, z ); 
 		RequestUpdate();	// Renders triggers off update. May want to reconsider that.
-		SendMessage( "SpatialComponent", MSG_SPATIAL_CHANGED );
+		SendMessage( SPATIAL_MSG_CHANGED );
 	}
 }
 
@@ -68,9 +69,9 @@ void ChildSpatialComponent::DebugStr( GLString* str )
 }
 
 
-void ChildSpatialComponent::OnChitMsg( Chit* chit, const char* componentName, int id )
+void ChildSpatialComponent::OnChitMsg( Chit* chit, int id )
 {
-	if ( id == SpatialComponent::MSG_SPATIAL_CHANGED && StrEqual( componentName, "SpatialComponent" ) ) {
+	if ( id == SPATIAL_MSG_CHANGED) {
 		SpatialComponent* other = chit->GetSpatialComponent();
 		GLASSERT( other );
 

@@ -36,7 +36,7 @@ public:
 	virtual void ItemTapped( const gamui::UIItem* item );
 	virtual void Draw3D( U32 deltaTime );
 	virtual void DrawDebugText();
-	virtual void OnChitMsg( Chit* chit, const char* componentName, int id );
+	virtual void OnChitMsg( Chit* chit, int id );
 	virtual void MouseMove( const grinliz::Vector2F& view, const grinliz::Ray& world ) { debugRay = world; }
 
 private:

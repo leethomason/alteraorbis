@@ -16,6 +16,8 @@
 #ifndef GAMELIMITS_INCLUDED
 #define GAMELIMITS_INCLUDED
 
+#include "../xegame/xegamelimits.h"
+
 static const int MAX_MAP_SIZE = 1024;
 static const int MAX_MOVE_PATH = MAX_MAP_SIZE/2;	// repath if we need to
 
@@ -28,5 +30,11 @@ static const int MODEL_USER	= 0x1000;					// from model.h
 static const float MOVE_SPEED = 2.0f;			// grid/second
 static const float ROTATION_SPEED = 360.f;		// degrees/second
 static const float ROTATION_LIMIT = 45.0f;
+
+enum {
+	GAME_COMPONENT_MSG = GAME_COMPONENT_MSG_START,
+	PATHMOVE_MSG_DESTINATION_REACHED,
+	PATHMOVE_MSG_DESTINATION_BLOCKED
+};
 
 #endif // GAMELIMITS_INCLUDED

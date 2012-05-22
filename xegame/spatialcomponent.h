@@ -10,11 +10,6 @@
 class SpatialComponent : public Component
 {
 public:
-	enum {
-		MSG_SPATIAL_CHANGED		// within a component, order can be relied on.
-								// other components can listen for this, if needed.
-	};
-
 	//  track: should this be tracked in the ChitBag's spatial hash?
 	SpatialComponent( bool _track ) {
 		position.Zero();
@@ -67,7 +62,7 @@ public:
 
 //	virtual void OnAdd( Chit* chit );
 //	virtual void OnRemove();
-	virtual void OnChitMsg( Chit* chit, const char* componentName, int id );
+	virtual void OnChitMsg( Chit* chit, int id );
 };
 
 #endif // SPACIAL_COMPONENT_INCLUDED

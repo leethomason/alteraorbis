@@ -11,4 +11,12 @@ static const float MAX_BASE_RADIUS = 0.4f;
 // the spatial cache.
 static const int MAX_MAX_SIZE = 1024;
 
+enum {
+	COMPONENT_MSG_NONE,
+	SPATIAL_MSG_CHANGED,
+
+
+	GAME_COMPONENT_MSG_START = 0x100
+};
+
 #endif // XENOENGINE_GAME_LIMITS_INCLUDED

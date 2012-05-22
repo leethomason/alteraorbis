@@ -140,7 +140,7 @@ void NavTest2Scene::CreateChit( const Vector2I& p )
 
 	chit->GetSpatialComponent()->SetPosition( (float)p.x+0.5f, 0, (float)p.y+0.5f );
 	chit->AddListener( this );
-	OnChitMsg( chit, "PathMoveComponent", PathMoveComponent::MSG_DESTINATION_REACHED );
+	OnChitMsg( chit, PATHMOVE_MSG_DESTINATION_REACHED );
 	++nChits;
 }
 
@@ -178,17 +178,14 @@ void NavTest2Scene::DrawDebugText()
 }
 
 
-void NavTest2Scene::OnChitMsg( Chit* chit, const char* componentName, int id )
+void NavTest2Scene::OnChitMsg( Chit* chit, int id )
 {
-	if ( StrEqual( componentName, "PathMoveComponent" ) ) {
+	if ( id == PATHMOVE_MSG_DESTINATION_REACHED || id == PATHMOVE_MSG_DESTINATION_BLOCKED ) {
 		// Reached or blocked, move to next thing:
 		const Vector2I& dest = waypoints[random.Rand(waypoints.Size())];
 		Vector2F d = { (float)dest.x+0.5f, (float)dest.y+0.5f };
 		//GLOUTPUT(( "OnChitMsg %x dest=%.1f,%.1f\n", chit, d.x, d.y ));
 		GET_COMPONENT( chit, PathMoveComponent )->QueueDest(d); 
-	}
-	else {
-		GLASSERT( 0 );
 	}
 }
 

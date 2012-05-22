@@ -10,10 +10,10 @@ void Component::RequestUpdate()
 }
 
 
-void Component::SendMessage( const char* name, int id )
+void Component::SendMessage( int id )
 {
 	if ( parentChit ) {
-		parentChit->SendMessage( name, id );
+		parentChit->SendMessage( id );
 	}
 }
 

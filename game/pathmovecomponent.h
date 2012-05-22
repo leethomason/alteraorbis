@@ -13,10 +13,6 @@ class WorldMap;
 class PathMoveComponent : public MoveComponent
 {
 public:
-	enum {
-		MSG_DESTINATION_REACHED,
-		MSG_DESTINATION_BLOCKED
-	};
 
 	PathMoveComponent(	WorldMap* _map )				// required; used to avoids blocks when moving. 
 		: map( _map ), nPathPos( 0 ), pathPos( 0 ), rotationFirst(true), pathDebugging( false ) {}

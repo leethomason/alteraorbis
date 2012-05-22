@@ -138,7 +138,7 @@ void BattleTestScene::DrawDebugText()
 }
 
 
-void BattleTestScene::OnChitMsg( Chit* chit, const char* componentName, int id )
+void BattleTestScene::OnChitMsg( Chit* chit, int id )
 {
 }
 

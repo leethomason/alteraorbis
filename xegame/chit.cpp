@@ -120,10 +120,10 @@ void Chit::DoUpdate()
 }
 
 
-void Chit::SendMessage( const char* componentName, int id )
+void Chit::SendMessage( int id )
 {
 	for( int i=0; i<listeners.Size(); ++i ) {
-		listeners[i]->OnChitMsg( this, componentName, id );
+		listeners[i]->OnChitMsg( this, id );
 	}
 }
 
