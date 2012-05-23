@@ -24,9 +24,11 @@ public:
 	void DeleteAll();
 	Chit* NewChit();
 	void  DeleteChit( Chit* );
+	Chit* GetChit( int id );
 
 	// Calls every chit that has a tick.
 	void DoTick( U32 delta );		
+
 	// Due to events, changes, etc. a chit may need an update, possibily in addition to, the tick.
 	// Normally called automatically.
 	void RequestUpdate( Chit* );

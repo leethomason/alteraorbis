@@ -120,10 +120,32 @@ void Chit::DoUpdate()
 }
 
 
-void Chit::SendMessage( int id )
+void Chit::SendMessage( int msgID )
 {
 	for( int i=0; i<listeners.Size(); ++i ) {
-		listeners[i]->OnChitMsg( this, id );
+		listeners[i]->OnChitMsg( this, msgID );
+	}
+
+	int i=0;
+	while ( i<cListeners.Size() ) {
+		Chit* target = GetChitBag()->GetChit( cListeners[i].chitID );
+		if ( target == 0 ) {
+			cListeners.SwapRemove(i);
+			continue;
+		}
+		target->CarryMsg( cListeners[i].componentID, this, msgID );
+		++i;
+	}
+}
+
+
+void Chit::CarryMsg( int componentID, Chit* src, int msgID )
+{
+	for( int i=0; i<NUM_SLOTS; ++i ) {
+		if ( slot[i] && slot[i]->ID() == componentID ) {
+			slot[i]->OnChitMsg( src, msgID );
+			break;
+		}
 	}
 }
 
@@ -140,6 +162,32 @@ void Chit::RemoveListener( IChitListener* listener )
 	int i = listeners.Find( listener );
 	GLASSERT( i >= 0 );
 	listeners.SwapRemove( i );
+}
+
+
+void Chit::AddListener( Component* c )
+{
+	CList data;
+	data.chitID = c->ParentChit()->ID();
+	data.componentID = c->ID();
+
+	cListeners.Push( data );
+}
+
+
+void Chit::RemoveListener( Component* c ) 
+{
+	CList data;
+	data.chitID = c->ParentChit()->ID();
+	data.componentID = c->ID();
+
+	for( int i=0; i<cListeners.Size(); ++i ) {
+		if ( cListeners[i].chitID == data.chitID && cListeners[i].componentID == data.componentID ) {
+			cListeners.SwapRemove( i );
+			return;
+		}
+	}
+	GLASSERT( 0 );
 }
 
 

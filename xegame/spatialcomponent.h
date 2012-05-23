@@ -47,11 +47,11 @@ protected:
 };
 
 
-class ChildSpatialComponent : public SpatialComponent, public IChitListener
+class ChildSpatialComponent : public SpatialComponent
 {
 public:
 	ChildSpatialComponent( bool track ) : SpatialComponent( track ) {}
-	~ChildSpatialComponent() {}
+	virtual ~ChildSpatialComponent()	{}
 
 	virtual Component*          ToComponent( const char* name ) {
 		if ( grinliz::StrEqual( name, "ChildSpatialComponent" ) ) return this;
@@ -60,9 +60,9 @@ public:
 
 	virtual void DebugStr( grinliz::GLString* str );
 
-//	virtual void OnAdd( Chit* chit );
-//	virtual void OnRemove();
 	virtual void OnChitMsg( Chit* chit, int id );
+
+private:
 };
 
 #endif // SPACIAL_COMPONENT_INCLUDED

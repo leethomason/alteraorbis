@@ -1,6 +1,7 @@
 #include "component.h"
 #include "chit.h"
 
+int Component::idPool = 1;
 
 void Component::RequestUpdate()
 {

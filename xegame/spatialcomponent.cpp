@@ -62,7 +62,6 @@ void SpatialComponent::OnRemove()
 }
 
 
-
 void ChildSpatialComponent::DebugStr( GLString* str )
 {
 	str->Format( "[ChildSpatial]=%.1f,%.1f,%.1f ", position.x, position.y, position.z );
@@ -79,4 +78,3 @@ void ChildSpatialComponent::OnChitMsg( Chit* chit, int id )
 		this->SetYRotation( other->GetYRotation() + yRotation );
 	}
 }
-

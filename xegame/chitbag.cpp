@@ -44,6 +44,12 @@ void ChitBag::DeleteChit( Chit* chit )
 }
 
 
+Chit* ChitBag::GetChit( int id )
+{
+	return chits.Get( id );
+}
+
+
 void ChitBag::RequestUpdate( Chit* chit )
 {
 	updateList.Push( chit );

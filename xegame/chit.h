@@ -60,18 +60,30 @@ public:
 	void AddListener( IChitListener* listener );
 	void RemoveListener( IChitListener* listener );
 
+	// special versions for components that are weak-ref.
+	void AddListener( Component* c );
+	void RemoveListener( Component* c );
+
 	void DebugStr( grinliz::GLString* str );
 
 	// used by the spatial hash:
 	Chit* next;
 
 private:
+	void CarryMsg( int componentID, Chit* src, int msgID );
 
 	ChitBag* chitBag;
 	int id;
 	int nTickers;	// number of components that need a tick.
 	bool ticking;
-	grinliz::CDynArray<IChitListener*, 4> listeners;
+	grinliz::CDynArray<IChitListener*, 2> listeners;
+
+	struct CList
+	{
+		int chitID;
+		int componentID;
+	};
+	grinliz::CDynArray<CList, 2> cListeners;
 
 	enum {
 		SPATIAL,
