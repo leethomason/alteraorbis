@@ -1,25 +1,15 @@
-- Blue Smoke Map Test
-	- full size (1024x1024), 2000 units
-		X faster avoidance
-			X separate avoid queries from spatial queries
-			X hash scheme needs work
-		- faster Model::Update
-			X don't re-link if possible on update. model probably is in the same node.
-			X faster AABB calc? are we using normals? should we?
-			- don't update things well outside the rendering area? switch to local rendering?
-			- re-tune tree size
-			X switch to sphere testing. avoid flushing the AABB entirely
-	X need to get to 2000 faster
-	X entity debug system: point at chit, get component info
-	X some units get stuck and never move (pathing fails & doesn't re-start?)
-	X fix camera code
-	X need a mini-map
-	X filling of path cache: correct? why does the cache keep incrementing? what should the game do when it's full?
-	X show region code
-	- profiler max-ing out
-	- much better test bitmap
-	X 2 continents
-	X bridge
+- combat test scene
+	- weapons
+		X relative positioning
+		- weapon definition - item question: how is a chit a weapon?
+		- item definition
+	- AI (task AI)
+		- establish friend vs. enemy
+		- basic states
+		- CA to handle friends and enemies
+	- UI
+		- set up different battles
+	- serialization
 
 - cameras only self-delete if they reach destination; should do better. Probably
   should only be one camera in existence. (BlueSmoke, NavTest2)
@@ -30,7 +20,6 @@
 X particle test scene
 	X alpha processing for additive blending
 	- particle groups (ex: fire)
-- combat test scene
 
 
 ** LOW PRI **
@@ -45,6 +34,29 @@ X particle test scene
 	- modify shaders
 	- blend animations
 
+
+X Blue Smoke Map Test
+	X full size (1024x1024), 2000 units
+		X faster avoidance
+			X separate avoid queries from spatial queries
+			X hash scheme needs work
+		X faster Model::Update
+			X don't re-link if possible on update. model probably is in the same node.
+			X faster AABB calc? are we using normals? should we?
+			D don't update things well outside the rendering area? switch to local rendering?
+			D re-tune tree size
+			X switch to sphere testing. avoid flushing the AABB entirely
+	X need to get to 2000 faster
+	X entity debug system: point at chit, get component info
+	X some units get stuck and never move (pathing fails & doesn't re-start?)
+	X fix camera code
+	X need a mini-map
+	X filling of path cache: correct? why does the cache keep incrementing? what should the game do when it's full?
+	X show region code
+	D profiler max-ing out
+	D much better test bitmap
+	X 2 continents
+	X bridge
 
 X pathing
 	X record path miss in cache

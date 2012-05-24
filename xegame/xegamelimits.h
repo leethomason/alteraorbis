@@ -13,8 +13,11 @@ static const int MAX_MAX_SIZE = 1024;
 
 enum {
 	COMPONENT_MSG_NONE,
-	SPATIAL_MSG_CHANGED,
+	
+	// Chits
 
+	// Componets
+	SPATIAL_MSG_CHANGED,		// the position or rotation has changed
 
 	GAME_COMPONENT_MSG_START = 0x100
 };

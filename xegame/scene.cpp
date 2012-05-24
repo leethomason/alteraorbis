@@ -110,25 +110,27 @@ bool Scene::Process3DTap( int action, const grinliz::Vector2F& view, const grinl
 		case GAME_TAP_MOVE:
 		case GAME_TAP_UP:
 		{
-			GLASSERT( threeDTapDown );
-			Vector3F drag;
-			engine->RayFromViewToYPlane( view, dragData3D.mvpi, &ray, &drag );
-			dragData3D.end2D = view;
+			// Not sure how this happens. Why is the check for down needed??
+			if( threeDTapDown ) {
+				Vector3F drag;
+				engine->RayFromViewToYPlane( view, dragData3D.mvpi, &ray, &drag );
+				dragData3D.end2D = view;
 
-			Vector3F delta = drag - dragData3D.start3D;
-			GLASSERT( fabsf( delta.x ) < 1000.f && fabsf( delta.y ) < 1000.0f );
-			delta.y = 0;
-			drag.y = 0;
-			dragData3D.end3D = drag;
+				Vector3F delta = drag - dragData3D.start3D;
+				GLASSERT( fabsf( delta.x ) < 1000.f && fabsf( delta.y ) < 1000.0f );
+				delta.y = 0;
+				drag.y = 0;
+				dragData3D.end3D = drag;
 
-			if ( action == GAME_TAP_UP ) {
-				threeDTapDown = false;
-				Vector2F vDelta = dragData3D.start2D - dragData3D.end2D;
-				if ( vDelta.Length() < 10.f )
-					result = true;
+				if ( action == GAME_TAP_UP ) {
+					threeDTapDown = false;
+					Vector2F vDelta = dragData3D.start2D - dragData3D.end2D;
+					if ( vDelta.Length() < 10.f )
+						result = true;
+				}
+
+				engine->camera.SetPosWC( dragData3D.startCameraWC - delta );
 			}
-
-			engine->camera.SetPosWC( dragData3D.startCameraWC - delta );
 			break;
 		}
 	}

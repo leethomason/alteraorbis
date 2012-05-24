@@ -127,6 +127,7 @@
     <ClCompile Include="..\xegame\chitbag.cpp" />
     <ClCompile Include="..\xegame\component.cpp" />
     <ClCompile Include="..\xegame\game.cpp" />
+    <ClCompile Include="..\xegame\inventorycomponent.cpp" />
     <ClCompile Include="..\xegame\rendercomponent.cpp" />
     <ClCompile Include="..\xegame\scene.cpp" />
     <ClCompile Include="..\xegame\spatialcomponent.cpp" />
@@ -188,6 +189,7 @@
     <ClInclude Include="..\xegame\chitbag.h" />
     <ClInclude Include="..\xegame\component.h" />
     <ClInclude Include="..\xegame\game.h" />
+    <ClInclude Include="..\xegame\inventorycomponent.h" />
     <ClInclude Include="..\xegame\rendercomponent.h" />
     <ClInclude Include="..\xegame\scene.h" />
     <ClInclude Include="..\xegame\spatialcomponent.h" />

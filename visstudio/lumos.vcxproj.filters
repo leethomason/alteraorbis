@@ -193,6 +193,9 @@
     <ClCompile Include="..\scenes\battletestscene.cpp">
       <Filter>Source Files\scenes</Filter>
     </ClCompile>
+    <ClCompile Include="..\xegame\inventorycomponent.cpp">
+      <Filter>Source Files\xegame</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\camera.h">
@@ -374,6 +377,9 @@
     </ClInclude>
     <ClInclude Include="..\scenes\battletestscene.h">
       <Filter>Source Files\scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xegame\inventorycomponent.h">
+      <Filter>Source Files\xegame</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -254,7 +254,7 @@ void Engine::Draw( U32 deltaTime )
 		//	at.x, at.y, at.z ));
 		if ( map ) {
 			Rectangle2I b = map->Bounds();
-			b.Outset( 2 );
+			b.Outset( 20 );
 			if ( !b.Contains( (int)at.x, (int)at.z ) ) {
 				GLASSERT( 0 );	// looking at nothing.
 			}

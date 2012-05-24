@@ -42,9 +42,6 @@ public:
 	void Remove( Component* );
 
 	bool NeedsTick() const		{ return nTickers > 0; }
-	// return if this is current DoTick processing - useful to not send uneeded updates.
-	bool Ticking() const		{ return ticking; }
-
 	void DoTick( U32 delta );
 	void DoUpdate();
 
@@ -75,7 +72,6 @@ private:
 	ChitBag* chitBag;
 	int id;
 	int nTickers;	// number of components that need a tick.
-	bool ticking;
 	grinliz::CDynArray<IChitListener*, 2> listeners;
 
 	struct CList
