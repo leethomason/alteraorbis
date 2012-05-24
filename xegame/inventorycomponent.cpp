@@ -8,14 +8,13 @@ using namespace grinliz;
 
 void InventoryComponent::DebugStr( grinliz::GLString* str )
 {
-	str->Format( "[Inventory] nItems=%d ", inventory.Size() );
+	str->Format( "[Inventory] " );
 }
 
 
 void InventoryComponent::AddToInventory( Chit* itemChit )
 {
-	GLASSERT( inventory.Find( itemChit ) < 0 );
-	inventory.Push( itemChit );
+	inventory.Add( itemChit );
 	itemChit->AddListener( this );
 
 	// Need a relative spatial component. If there is a render
@@ -50,12 +49,10 @@ void InventoryComponent::AddToInventory( Chit* itemChit )
 
 void InventoryComponent::RemoveFromInventory( Chit* itemChit )
 {
-	int index = inventory.Find( itemChit );
-	GLASSERT( index >= 0 );
-	if ( index >= 0 ) {
+	itemChit = inventory.Remove( itemChit );
+	if ( itemChit >= 0 ) {
 		itemChit->RemoveListener( this );
 		itemChit->Remove( itemChit->GetSpatialComponent() );
-		inventory.SwapRemove( index );
 	}
 }
 

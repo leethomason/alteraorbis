@@ -111,5 +111,22 @@ private:
 };
 
 
+class SafeChitList
+{
+public:
+	SafeChitList( ChitBag* bag ) : chitBag( bag ), it( 0 )	{}
+	~SafeChitList()	{}
+
+	Chit* Add( Chit* c );
+	Chit* Remove( Chit* c );
+	Chit* First();
+	Chit* Next();
+
+public:
+	ChitBag* chitBag;
+	int it;
+	grinliz::CDynArray<int> array;
+};
+
 #endif // XENOENGINE_CHIT_INCLUDED
 

@@ -209,3 +209,46 @@ void Chit::DebugStr( GLString* str )
 	}
 }
 
+
+
+Chit* SafeChitList::Add( Chit* c )			
+{
+	int index = array.Find( c->ID() );
+	if ( index < 0 ) {
+		array.Push( c->ID() );
+		return c;
+	}
+	return 0;
+}
+
+
+Chit* SafeChitList::Remove( Chit* c )
+{
+	int index = array.Find( c->ID() );
+	GLASSERT( index >= 0 );
+	if ( index > 0 ) {
+		array.SwapRemove( index );
+		return c;
+	}
+	return 0;
+}
+
+
+Chit* SafeChitList::First()	{ 
+	it = array.Size();
+	return Next();
+}
+
+
+Chit* SafeChitList::Next() {
+	while ( it >= 0 ) {
+		--it;
+		Chit* c = chitBag->GetChit( array[it] );
+		if ( c == 0 ) {
+			array.SwapRemove( it );
+			--it;
+		}
+		return c;
+	}
+	return 0;
+}

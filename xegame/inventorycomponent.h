@@ -2,13 +2,13 @@
 #define INVENTORY_COMPONENT_INCLUDED
 
 #include "component.h"
-
+#include "chit.h"
 #include "../grinliz/glcontainer.h"
 
 class InventoryComponent : public Component
 {
 public:
-	InventoryComponent()			{}
+	InventoryComponent( ChitBag* bag ) : inventory( bag ) {}
 	virtual ~InventoryComponent()	{}
 
 	virtual Component* ToComponent( const char* name ) {
@@ -22,7 +22,7 @@ public:
 	void RemoveFromInventory( Chit* chit );
 
 private:
-	grinliz::CDynArray<Chit*> inventory;
+	SafeChitList inventory;
 
 };
 

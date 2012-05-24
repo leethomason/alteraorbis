@@ -102,7 +102,7 @@ void BattleTestScene::CreateChit( const Vector2I& p )
 	chit->Add( new SpatialComponent( true ) );
 	chit->Add( new RenderComponent( engine, asset, 0 ));
 	chit->Add( new PathMoveComponent( map ));
-	InventoryComponent* inv = new InventoryComponent();
+	InventoryComponent* inv = new InventoryComponent( &chitBag );
 	chit->Add( inv );
 
 #ifdef DEBUG_PMC
