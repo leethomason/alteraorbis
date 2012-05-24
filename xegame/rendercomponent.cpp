@@ -54,6 +54,7 @@ void RenderComponent::DoUpdate()
 
 float RenderComponent::RadiusOfBase()
 {
+	// fixme: cache
 	float radius = 0;
 	if ( resource ) {
 		const Rectangle3F& b = resource->AABB();
@@ -62,6 +63,16 @@ float RenderComponent::RadiusOfBase()
 	}
 	return radius;
 }
+
+
+bool RenderComponent::GetMetaData( const char* name, grinliz::Vector3F* value )
+{
+	if ( resource ) {
+		return resource->GetMetaData( name, value );
+	}
+	return false;
+}
+
 
 
 void RenderComponent::DebugStr( GLString* str )

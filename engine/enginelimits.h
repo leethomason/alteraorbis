@@ -45,6 +45,8 @@ enum {
 	EL_MAP_SIZE				= 64,		// maximum size.
 	EL_MAP_MAX_PATH			= 12,		// longest path anything can travel in one turn. Used to limit display memory.
 	EL_MAP_TEXTURE_SIZE		= 512,
+	EL_METADATA_NAME_LEN	= 16,
+	EL_MAX_METADATA			= 4,
 
 	// performance tuning
 	EL_MAX_INSTANCE			= 16,		// Max instances used. Impacts # of uniforms.

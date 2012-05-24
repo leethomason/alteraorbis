@@ -80,6 +80,20 @@ int ModelResource::Intersect(	const grinliz::Vector3F& point,
 }
 
 
+bool ModelResource::GetMetaData( const char* name, grinliz::Vector3F* value ) const
+{
+	for( int i=0; i<EL_MAX_METADATA; ++i ) {
+		if ( StrEqual( name, header.metaData[i].name.c_str() )) {
+			*value = header.metaData[i].value;
+			return true;
+		}
+	}
+
+	GLASSERT( 0 );	// not found
+	return false;
+}
+
+
 void ModelLoader::Load( const gamedb::Item* item, ModelResource* res )
 {
 	res->header.Load( item );
@@ -271,34 +285,15 @@ void Model::CalcHitAABB( Rectangle3F* aabb ) const
 }
 
 
-void Model::CalcTrigger( grinliz::Vector3F* trigger, const float* rotation ) const
-{
-	if ( rotation ) {
-		Matrix4 t,x;
-		t.SetTranslation( pos );
-
-		Matrix4 r;
-		r.ConcatRotation( *rotation, 1 );
-		if ( rot[2] != 0.0f )
-			r.ConcatRotation( rot[2], 2 );
-		if ( rot[0] != 0.0f )
-			r.ConcatRotation( rot[0], 0 );
-
-		x = t*r;
-		*trigger = x * resource->header.trigger;
-	}
-	else {
-		const Matrix4& xform = XForm();
-		*trigger = xform * resource->header.trigger;
-	}
-}
-
-
-void Model::CalcTarget( grinliz::Vector3F* target ) const
+void Model::CalcMeta( const char* name, grinliz::Vector3F* meta ) const
 {
 	const Matrix4& xform = XForm();
-	Vector3F t = { 0, resource->header.target, 0 };
-	*target = xform * t;
+	Vector3F value = { 0, 0, 0 };
+	resource->GetMetaData( name, &value );
+	Vector4F v4 = { value.x, value.y, value.z, 1 };
+	Vector4F out;
+	out = xform * v4;
+	meta->Set( out.x, out.y, out.z );
 }
 
 

@@ -44,20 +44,16 @@ void ModelHeader::Load( const gamedb::Item* item )
 		bounds.max.z = boundsItem->GetFloat( "max.z" );
 	}
 
-	trigger.Set( 0, 0, 0 );
-	const gamedb::Item* triggerItem = header->Child( "trigger" );
-	if ( triggerItem ) {
-		trigger.x = triggerItem->GetFloat( "x" );
-		trigger.y = triggerItem->GetFloat( "y" );
-		trigger.z = triggerItem->GetFloat( "z" );
-	}
-
-	eye = 0;
-	target = 0;
-	const gamedb::Item* extended = header->Child( "extended" );
-	if ( extended ) {
-		eye = extended->GetFloat( "eye" );
-		target = extended->GetFloat( "target" );
+	memset( metaData, 0, sizeof(MetaData)*EL_MAX_METADATA );
+	const gamedb::Item* metaItem = header->Child( "metaData" );
+	if ( metaItem ) {
+		for( int i=0; i<metaItem->NumChildren(); ++i ) {
+			const gamedb::Item* dataItem = metaItem->Child( i );
+			metaData[i].name = dataItem->Name();
+			metaData[i].value.x = dataItem->GetFloat( "x" );
+			metaData[i].value.y = dataItem->GetFloat( "y" );
+			metaData[i].value.z = dataItem->GetFloat( "z" );
+		}
 	}
 }
 

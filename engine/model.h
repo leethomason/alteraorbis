@@ -86,6 +86,11 @@ struct ModelAtom
 
 struct ModelHeader
 {
+	struct MetaData {
+		grinliz::CStr< EL_METADATA_NAME_LEN > name;
+		grinliz::Vector3F					  value;
+	};
+
 	// flags
 	enum {
 		RESOURCE_NO_SHADOW	= 0x08,		// model casts no shadow
@@ -98,9 +103,7 @@ struct ModelHeader
 	U16						flags;
 	U16						nAtoms;
 	grinliz::Rectangle3F	bounds;
-	grinliz::Vector3F		trigger;			// location for gun
-	float					eye;				// location model "looks from"
-	float					target;				// height of chest shot
+	MetaData				metaData[EL_MAX_METADATA];
 
 	void Set( const char* name, int nGroups, int nTotalVertices, int nTotalIndices,
 			  const grinliz::Rectangle3F& bounds );
@@ -125,6 +128,8 @@ public:
 	int Intersect(	const grinliz::Vector3F& point,
 					const grinliz::Vector3F& dir,
 					grinliz::Vector3F* intersect ) const;
+
+	bool GetMetaData( const char* name, grinliz::Vector3F* value ) const;
 
 
 	ModelHeader header;						// loaded
@@ -261,8 +266,7 @@ public:
 		return b;
 	}
 
-	void CalcTrigger( grinliz::Vector3F* trigger, const float* alternateYRotation=0 ) const;
-	void CalcTarget( grinliz::Vector3F* target ) const;
+	void CalcMeta( const char* name, grinliz::Vector3F* meta ) const;
 	void CalcTargetSize( float* width, float* height ) const;
 
 	// Returns grinliz::INTERSECT or grinliz::REJECT

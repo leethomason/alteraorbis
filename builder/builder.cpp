@@ -118,9 +118,7 @@ void ModelHeader::Set(	const char* name, int nAtoms, int nTotalVertices, int nTo
 	this->nTotalVertices = nTotalVertices;
 	this->nTotalIndices = nTotalIndices;
 	this->bounds = bounds;
-	trigger.Set( 0, 0, 0 );
-	eye = 0;
-	target = 0;
+	memset( metaData, 0, sizeof(MetaData)*EL_MAX_METADATA );
 }
 
 
@@ -140,16 +138,14 @@ void ModelHeader::Save( gamedb::WItem* parent )
 	boundNode->SetFloat( "max.y", bounds.max.y );
 	boundNode->SetFloat( "max.z", bounds.max.z );
 
-	if ( trigger.x != 0.0f || trigger.y != 0.0f || trigger.z != 0.0f ) {
-		gamedb::WItem* triggerNode = node->CreateChild( "trigger" );
-		triggerNode->SetFloat( "x", trigger.x );
-		triggerNode->SetFloat( "y", trigger.y );
-		triggerNode->SetFloat( "z", trigger.z );
-	}
-	if ( eye != 0.0f ||	target != 0.0f ) {
-		gamedb::WItem* extra = node->CreateChild( "extended" );
-		extra->SetFloat( "eye", eye );
-		extra->SetFloat( "target", target );
+	gamedb::WItem* metaNode = node->CreateChild( "metaData" );
+	for( int i=0; i<EL_MAX_METADATA; ++i ) {
+		if ( !metaData[i].name.empty() ) {
+			gamedb::WItem* data = metaNode->CreateChild( metaData[i].name.c_str() );
+			data->SetFloat( "x", metaData[i].value.x );
+			data->SetFloat( "y", metaData[i].value.y );
+			data->SetFloat( "z", metaData[i].value.z );
+		}
 	}
 }
 
@@ -523,17 +519,20 @@ void ProcessModel( XMLElement* model )
 	if ( grinliz::StrEqual( model->Attribute( "shadowCaster" ), "false" ) ) {
 		header.flags |= ModelHeader::RESOURCE_NO_SHADOW;
 	}
-	if ( model->Attribute( "trigger" ) ) {
-		StringToVector( model->Attribute( "trigger" ), &header.trigger );
-		header.trigger -= origin;
-	}
-	if ( model->Attribute( "eye" ) ) {
-		model->QueryFloatAttribute( "eye", &header.eye );
-		header.eye -= origin.y;
-	}
-	if ( model->Attribute( "target" ) ) {
-		model->QueryFloatAttribute( "target", &header.target );
-		header.target -= origin.y;
+
+	int nMeta = 0;
+	const XMLElement* metaEle = model->FirstChildElement( "meta" );
+	if ( metaEle ) {
+
+		for ( const XMLAttribute* att = metaEle->FirstAttribute(); 
+			  att && nMeta < EL_MAX_METADATA; 
+			  att=att->Next(), ++nMeta ) 
+		{
+			header.metaData[nMeta].name = att->Name();
+			Vector3F value = { 0, 0, 0 };
+			StringToVector( att->Value(), &value );
+			header.metaData[nMeta].value = value - origin;
+		}
 	}
 
 	gamedb::WItem* witem = writer->Root()->FetchChild( "models" )->CreateChild( assetName.c_str() );
