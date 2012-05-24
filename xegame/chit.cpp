@@ -133,20 +133,26 @@ void Chit::SendMessage( int msgID )
 			cListeners.SwapRemove(i);
 			continue;
 		}
-		target->CarryMsg( cListeners[i].componentID, this, msgID );
+		bool okay = target->CarryMsg( cListeners[i].componentID, this, msgID );
+		if ( !okay ) {
+			// dead link
+			cListeners.SwapRemove(i);
+			continue;
+		}
 		++i;
 	}
 }
 
 
-void Chit::CarryMsg( int componentID, Chit* src, int msgID )
+bool Chit::CarryMsg( int componentID, Chit* src, int msgID )
 {
 	for( int i=0; i<NUM_SLOTS; ++i ) {
 		if ( slot[i] && slot[i]->ID() == componentID ) {
 			slot[i]->OnChitMsg( src, msgID );
-			break;
+			return true;
 		}
 	}
+	return false;
 }
 
 

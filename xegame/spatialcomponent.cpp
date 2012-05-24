@@ -2,6 +2,7 @@
 #include "chit.h"
 #include "chitbag.h"
 #include "xegamelimits.h"
+#include "../grinliz/glmatrix.h"
 
 using namespace grinliz;
 
@@ -12,9 +13,12 @@ void SpatialComponent::DebugStr( GLString* str )
 }
 
 
-void SpatialComponent::SetPosition( float x, float y, float z )
+void SpatialComponent::SetPosYRot( float x, float y, float z, float _yRot )
 {
-	if ( track ) {
+	float yRot = NormalizeAngleDegrees( _yRot );
+	bool posChange = (x!=position.x) || (y!=position.y) || (z!=position.z);
+
+	if ( posChange && track ) {
 		int oldX = (int)position.x;
 		int oldY = (int)position.z;
 		int newX = (int)x;
@@ -22,9 +26,10 @@ void SpatialComponent::SetPosition( float x, float y, float z )
 		parentChit->GetChitBag()->UpdateSpatialHash( parentChit, oldX, oldY, newX, newY );
 	}
 
-	if ( x != position.x || y != position.y || z != position.z ) {
+	if ( posChange || (yRot != yRotation) ) {
 		position.Set( x, y, z ); 
-		RequestUpdate();	// Renders triggers off update. May want to reconsider that.
+		yRotation = yRot;
+		RequestUpdate();	// Render triggers off update.
 		SendMessage( SPATIAL_MSG_CHANGED );
 	}
 }
@@ -62,19 +67,31 @@ void SpatialComponent::OnRemove()
 }
 
 
-void ChildSpatialComponent::DebugStr( GLString* str )
+void RelativeSpatialComponent::DebugStr( GLString* str )
 {
-	str->Format( "[ChildSpatial]=%.1f,%.1f,%.1f ", position.x, position.y, position.z );
+	str->Format( "[RelativeSpatial]=%.1f,%.1f,%.1f ", position.x, position.y, position.z );
 }
 
 
-void ChildSpatialComponent::OnChitMsg( Chit* chit, int id )
+void RelativeSpatialComponent::OnChitMsg( Chit* chit, int id )
 {
 	if ( id == SPATIAL_MSG_CHANGED) {
 		SpatialComponent* other = chit->GetSpatialComponent();
 		GLASSERT( other );
 
-		this->SetPosition( other->GetPosition() + position );
-		this->SetYRotation( other->GetYRotation() + yRotation );
+		Matrix4 m, r, t;
+		r.SetYRotation(   other->GetYRotation() );
+
+		Vector3F newPos = r * relativePosition;
+
+		this->SetPosYRot( other->GetPosition() + newPos,
+						  other->GetYRotation() + relativeYRotation );
 	}
+}
+
+
+void RelativeSpatialComponent::SetRelativePosYRot( float x, float y, float z, float rot )
+{
+	relativePosition.Set( x, y, z );
+	relativeYRotation = rot;
 }

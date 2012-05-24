@@ -105,9 +105,16 @@ void BattleTestScene::CreateChit( const Vector2I& p )
 	chit->Add( new DebugPathComponent( engine, map, static_cast<LumosGame*>(game) ));
 #endif
 
-	chit->GetSpatialComponent()->SetPosition( (float)p.x+0.5f, 0, (float)p.y+0.5f );
 	//chit->AddListener( this );
 	//OnChitMsg( chit, "PathMoveComponent", PathMoveComponent::MSG_DESTINATION_REACHED );
+
+	Chit* weapon = chitBag.NewChit();
+	weapon->Add( new RelativeSpatialComponent( false ) );
+	weapon->Add( new RenderComponent( engine, "ASLT-1", Model::MODEL_NO_SHADOW ));
+	chit->AddListener( weapon->GetSpatialComponent() );
+
+	weapon->GetSpatialComponent()->ToRelative()->SetRelativePosYRot( 0.15f, 0.52f, 0.0f, 0 );
+	chit->GetSpatialComponent()->SetPosYRot( (float)p.x+0.5f, 0, (float)p.y+0.5f, (float)random.Rand( 360 ) );
 }
 
 

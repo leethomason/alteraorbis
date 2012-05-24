@@ -7,6 +7,8 @@
 #include "../grinliz/glvector.h"
 #include "../grinliz/glmath.h"
 
+class RelativeSpatialComponent;
+
 class SpatialComponent : public Component
 {
 public:
@@ -22,18 +24,23 @@ public:
 		return Component::ToComponent( name );
 	}
 	virtual SpatialComponent*	ToSpatial()			{ return this; }
+	virtual RelativeSpatialComponent* ToRelative()	{ return 0; }
 	virtual void DebugStr( grinliz::GLString* str );
 
 	virtual void OnAdd( Chit* chit );
 	virtual void OnRemove();
 
-	void SetPosition( float x, float y, float z );
-	void SetPosition( grinliz::Vector3F v ) { SetPosition( v.x, v.y, v.z ); }
+	// Position and rotation are absolute (post-transform)
+	void SetPosition( float x, float y, float z )	{ SetPosYRot( x, y, z, yRotation ); }
+	void SetPosition( const grinliz::Vector3F& v )	{ SetPosYRot( v, yRotation ); }	
 	const grinliz::Vector3F& GetPosition() const	{ return position; }
 
 	// yRot=0 is the +z axis
-	void SetYRotation( float yDegrees )				{ yRotation = grinliz::NormalizeAngleDegrees( yDegrees ); }
+	void SetYRotation( float yDegrees )				{ SetPosYRot( position, yDegrees ); }
 	float GetYRotation() const						{ return yRotation; }
+
+	void SetPosYRot( float x, float y, float z, float yRot );
+	void SetPosYRot( const grinliz::Vector3F& v, float yRot ) { SetPosYRot( v.x, v.y, v.z, yRot ); }
 
 	grinliz::Vector3F GetHeading() const;
 
@@ -47,22 +54,30 @@ protected:
 };
 
 
-class ChildSpatialComponent : public SpatialComponent
+class RelativeSpatialComponent : public SpatialComponent
 {
 public:
-	ChildSpatialComponent( bool track ) : SpatialComponent( track ) {}
-	virtual ~ChildSpatialComponent()	{}
+	RelativeSpatialComponent( bool track ) : SpatialComponent( track ) {
+		relativePosition.Zero();
+		relativeYRotation = 0;
+	}
+	virtual ~RelativeSpatialComponent()	{}
 
 	virtual Component*          ToComponent( const char* name ) {
-		if ( grinliz::StrEqual( name, "ChildSpatialComponent" ) ) return this;
+		if ( grinliz::StrEqual( name, "RelativeSpatialComponent" ) ) return this;
 		return SpatialComponent::ToComponent( name );
 	}
+	virtual RelativeSpatialComponent* ToRelative()	{ return this; }
 
 	virtual void DebugStr( grinliz::GLString* str );
-
 	virtual void OnChitMsg( Chit* chit, int id );
 
+	void SetRelativePosYRot( float x, float y, float z, float rot );
+	void SetRelativePosYRot( const grinliz::Vector3F& v, float rot )	{ SetRelativePosYRot( v.x, v.y, v.z, rot ); }
+
 private:
+	grinliz::Vector3F relativePosition;
+	float relativeYRotation;
 };
 
 #endif // SPACIAL_COMPONENT_INCLUDED

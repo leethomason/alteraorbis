@@ -70,7 +70,7 @@ public:
 	Chit* next;
 
 private:
-	void CarryMsg( int componentID, Chit* src, int msgID );
+	bool CarryMsg( int componentID, Chit* src, int msgID );
 
 	ChitBag* chitBag;
 	int id;
