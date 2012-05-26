@@ -15,7 +15,7 @@ public:
 	DebugPathComponent( Engine*, WorldMap*, LumosGame* );
 	~DebugPathComponent();
 
-	virtual Component*          ToComponent( const char* name ) {
+	virtual Component* ToComponent( const char* name ) {
 		if ( grinliz::StrEqual( name, "DebugPathComponent" ) ) return this;
 		return Component::ToComponent( name );
 	}

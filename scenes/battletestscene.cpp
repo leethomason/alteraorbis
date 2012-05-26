@@ -6,10 +6,12 @@
 #include "../game/gamelimits.h"
 #include "../game/pathmovecomponent.h"
 #include "../game/debugpathcomponent.h"
+#include "../game/gameitem.h"
 
 #include "../xegame/chit.h"
 #include "../xegame/rendercomponent.h"
 #include "../xegame/inventorycomponent.h"
+#include "../xegame/itemcomponent.h"
 
 #include "../engine/engine.h"
 #include "../engine/text.h"
@@ -96,12 +98,13 @@ void BattleTestScene::CreateChit( const Vector2I& p )
 	//GRINLIZ_PERFTRACK;
 
 	const char* asset = "humanFemale";
-	Vector3F trigger = { 0, 0, 0 };
 
 	Chit* chit = chitBag.NewChit();
 	chit->Add( new SpatialComponent( true ) );
 	chit->Add( new RenderComponent( engine, asset, 0 ));
 	chit->Add( new PathMoveComponent( map ));
+	//chit->Add( new HealthComponent( 50 ));
+	//chit->Add( new AIComponent( 
 	InventoryComponent* inv = new InventoryComponent( &chitBag );
 	chit->Add( inv );
 
@@ -109,8 +112,11 @@ void BattleTestScene::CreateChit( const Vector2I& p )
 	chit->Add( new DebugPathComponent( engine, map, static_cast<LumosGame*>(game) ));
 #endif
 
+	WeaponItem* weaponItem = new WeaponItem( "ASLT-1", "ASLT-1" );
+
 	Chit* weapon = chitBag.NewChit();
 	weapon->Add( new RenderComponent( engine, "ASLT-1", Model::MODEL_NO_SHADOW ));
+	weapon->Add( new ItemComponent( weaponItem ));
 
 	chit->GetSpatialComponent()->SetPosYRot( (float)p.x+0.5f, 0, (float)p.y+0.5f, (float)random.Rand( 360 ) );
 	inv->AddToInventory( weapon );

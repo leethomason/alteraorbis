@@ -23,9 +23,9 @@ public:
 	virtual void OnAdd( Chit* chit )	{	parentChit = chit; }
 	virtual void OnRemove()				{	parentChit = 0;    }
 
-	virtual Component*          ToComponent( const char* name ) {
+	virtual Component* ToComponent( const char* name ) = 0 {
 		if ( grinliz::StrEqual( name, "Component" ) ) return this;
-		return 0;
+		return Component::ToComponent( name );
 	}
 	virtual SpatialComponent*	ToSpatial()		{ return 0; }
 	virtual MoveComponent*		ToMove()		{ return 0; }

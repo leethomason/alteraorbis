@@ -196,6 +196,9 @@
     <ClCompile Include="..\xegame\inventorycomponent.cpp">
       <Filter>Source Files\xegame</Filter>
     </ClCompile>
+    <ClCompile Include="..\game\aicomponent.cpp">
+      <Filter>Source Files\game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\camera.h">
@@ -380,6 +383,18 @@
     </ClInclude>
     <ClInclude Include="..\xegame\inventorycomponent.h">
       <Filter>Source Files\xegame</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xegame\xeitem.h">
+      <Filter>Source Files\xegame</Filter>
+    </ClInclude>
+    <ClInclude Include="..\game\gameitem.h">
+      <Filter>Source Files\game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xegame\itemcomponent.h">
+      <Filter>Source Files\xegame</Filter>
+    </ClInclude>
+    <ClInclude Include="..\game\aicomponent.h">
+      <Filter>Source Files\game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

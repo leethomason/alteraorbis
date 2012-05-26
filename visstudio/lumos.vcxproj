@@ -101,6 +101,7 @@
     <ClCompile Include="..\engine\tga.cpp" />
     <ClCompile Include="..\engine\ufoutil.cpp" />
     <ClCompile Include="..\engine\uirendering.cpp" />
+    <ClCompile Include="..\game\aicomponent.cpp" />
     <ClCompile Include="..\game\debugpathcomponent.cpp" />
     <ClCompile Include="..\game\lumosgame.cpp" />
     <ClCompile Include="..\game\mapspatialcomponent.cpp" />
@@ -160,7 +161,9 @@
     <ClInclude Include="..\engine\ufoutil.h" />
     <ClInclude Include="..\engine\uirendering.h" />
     <ClInclude Include="..\engine\vertex.h" />
+    <ClInclude Include="..\game\aicomponent.h" />
     <ClInclude Include="..\game\debugpathcomponent.h" />
+    <ClInclude Include="..\game\gameitem.h" />
     <ClInclude Include="..\game\gamelimits.h" />
     <ClInclude Include="..\game\lumosgame.h" />
     <ClInclude Include="..\game\mapspatialcomponent.h" />
@@ -190,12 +193,14 @@
     <ClInclude Include="..\xegame\component.h" />
     <ClInclude Include="..\xegame\game.h" />
     <ClInclude Include="..\xegame\inventorycomponent.h" />
+    <ClInclude Include="..\xegame\itemcomponent.h" />
     <ClInclude Include="..\xegame\rendercomponent.h" />
     <ClInclude Include="..\xegame\scene.h" />
     <ClInclude Include="..\xegame\spatialcomponent.h" />
     <ClInclude Include="..\xegame\testmap.h" />
     <ClInclude Include="..\xegame\ufosound.h" />
     <ClInclude Include="..\xegame\xegamelimits.h" />
+    <ClInclude Include="..\xegame\xeitem.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\engine\sources.mk" />

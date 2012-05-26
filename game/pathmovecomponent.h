@@ -18,7 +18,7 @@ public:
 		: map( _map ), nPathPos( 0 ), pathPos( 0 ), rotationFirst(true), pathDebugging( false ) {}
 	virtual ~PathMoveComponent() {}
 
-	virtual Component*          ToComponent( const char* name ) {
+	virtual Component* ToComponent( const char* name ) {
 		if ( grinliz::StrEqual( name, "PathMoveComponent" ) ) return this;
 		return MoveComponent::ToComponent( name );
 	}

@@ -111,22 +111,24 @@ private:
 };
 
 
+// A list presentation of chits; stores IDs, not pointers,
+// so is safe to deletes.
 class SafeChitList
 {
 public:
 	SafeChitList( ChitBag* bag ) : chitBag( bag ), it( 0 )	{}
 	~SafeChitList()	{}
 
-	Chit* Add( Chit* c );
-	Chit* Remove( Chit* c );
-	Chit* First();
+	Chit* Add( Chit* c );		// returns chit added
+	Chit* Remove( Chit* c );	// returns chit removed or null
+	Chit* First();	
 	Chit* Next();
-
+	
 public:
 	ChitBag* chitBag;
 	int it;
 	grinliz::CDynArray<int> array;
 };
 
-#endif // XENOENGINE_CHIT_INCLUDED
 
+#endif // XENOENGINE_CHIT_INCLUDED
