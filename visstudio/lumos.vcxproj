@@ -103,6 +103,7 @@
     <ClCompile Include="..\engine\uirendering.cpp" />
     <ClCompile Include="..\game\aicomponent.cpp" />
     <ClCompile Include="..\game\debugpathcomponent.cpp" />
+    <ClCompile Include="..\game\gameitem.cpp" />
     <ClCompile Include="..\game\lumosgame.cpp" />
     <ClCompile Include="..\game\mapspatialcomponent.cpp" />
     <ClCompile Include="..\game\pathmovecomponent.cpp" />

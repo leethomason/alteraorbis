@@ -2,6 +2,7 @@
 #include "worldmap.h"
 #include "gamelimits.h"
 #include "pathmovecomponent.h"
+#include "gameitem.h"
 #include "../xegame/chitbag.h"
 #include "../xegame/spatialcomponent.h"
 #include "../grinliz/glrectangle.h"
@@ -57,7 +58,8 @@ void AIComponent::UpdateChitData()
 
 void AIComponent::UpdateCombatInfo( const Rectangle2F* _zone )
 {
-	combatInfoAge = 0;
+	combatInfoAge = (parentChit->ID())%100;	// space out updates in a random yet predictable way
+
 	SpatialComponent* sc = parentChit->GetSpatialComponent();
 	if ( !sc ) return;
 	Vector2F center = sc->GetPosition2D();
@@ -114,6 +116,7 @@ void AIComponent::DoTick( U32 delta )
 	//		Shoot
 	//		Reload
 
+	// Routine update to situational awareness.
 	combatInfoAge += delta;
 	if ( combatInfoAge > UPDATE_COMBAT_INFO ) {
 		UpdateCombatInfo();
@@ -122,6 +125,7 @@ void AIComponent::DoTick( U32 delta )
 		UpdateChitData();
 	}
 
+	// Check for events that change the situation
 	const CDynArray<ChitEvent>& events = GetChitBag()->GetEvents();
 	for( int i=0; i<events.Size(); ++i ) {
 		if(    events[i].id == AI_EVENT_AWARENESS 
@@ -134,6 +138,9 @@ void AIComponent::DoTick( U32 delta )
 	if ( enemyList.Size() > 1 ) {
 		PathMoveComponent* pmc = GET_COMPONENT( parentChit, PathMoveComponent );
 		if ( pmc ) pmc->QueueDest( enemyList[0].chit->GetSpatialComponent()->GetPosition2D() );
+
+		grinliz::CArray<XEItem*, MAX_ACTIVE_ITEMS> activeItems;
+		GameItem::GetActiveItems( parentChit, &activeItems );
 	}
 }
 

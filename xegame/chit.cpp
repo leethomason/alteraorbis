@@ -234,14 +234,14 @@ Chit* SafeChitList::Remove( Chit* c )
 }
 
 
-Chit* SafeChitList::First()	{ 
+Chit* SafeChitList::First() const { 
 	it = array.Size();
 	return Next();
 }
 
 
-Chit* SafeChitList::Next() {
-	while ( it >= 0 ) {
+Chit* SafeChitList::Next() const {
+	while ( it > 0 ) {
 		--it;
 		Chit* c = chitBag->GetChit( array[it] );
 		if ( c == 0 ) {

@@ -21,6 +21,8 @@ public:
 	void AddToInventory( Chit* chit );
 	void RemoveFromInventory( Chit* chit );
 
+	const SafeChitList& GetInventory() const { return inventory; }
+
 private:
 	SafeChitList inventory;
 

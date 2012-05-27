@@ -121,8 +121,8 @@ public:
 
 	Chit* Add( Chit* c );		// returns chit added
 	Chit* Remove( Chit* c );	// returns chit removed or null
-	Chit* First();	
-	Chit* Next();
+	Chit* First() const;	
+	Chit* Next() const;
 
 	// Some or all of the chit pointers may be invalid,
 	// so the structure can only return the approximate size
@@ -130,8 +130,8 @@ public:
 	
 public:
 	ChitBag* chitBag;
-	int it;
-	grinliz::CDynArray<int, 8> array;
+	mutable int it;
+	mutable grinliz::CDynArray<int, 8> array;
 };
 
 

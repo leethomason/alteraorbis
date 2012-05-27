@@ -98,8 +98,6 @@ void BattleTestScene::LoadMap()
 
 	event.data0 = 0;	
 	chitBag.QueueEvent( event );
-	event.data0 = 1;
-	chitBag.QueueEvent( event );
 }
 
 
@@ -121,14 +119,14 @@ void BattleTestScene::CreateChit( const Vector2I& p )
 	chit->Add( new DebugPathComponent( engine, map, static_cast<LumosGame*>(game) ));
 #endif
 
-	WeaponItem* weaponItem = new WeaponItem( "ASLT-1", "ASLT-1" );
+	WeaponItem* gunItem = new WeaponItem( "ASLT-1", "ASLT-1" );
 
-	Chit* weapon = chitBag.NewChit();
-	weapon->Add( new RenderComponent( engine, "ASLT-1", Model::MODEL_NO_SHADOW ));
-	weapon->Add( new ItemComponent( weaponItem ));
+	Chit* gun = chitBag.NewChit();
+	gun->Add( new RenderComponent( engine, "ASLT-1", Model::MODEL_NO_SHADOW ));
+	gun->Add( new ItemComponent( gunItem ));
 
 	chit->GetSpatialComponent()->SetPosYRot( (float)p.x+0.5f, 0, (float)p.y+0.5f, (float)random.Rand( 360 ) );
-	inv->AddToInventory( weapon );
+	inv->AddToInventory( gun );
 }
 
 
