@@ -25,7 +25,7 @@ public:
 
 	virtual Component* ToComponent( const char* name ) = 0 {
 		if ( grinliz::StrEqual( name, "Component" ) ) return this;
-		return Component::ToComponent( name );
+		return 0;
 	}
 	virtual SpatialComponent*	ToSpatial()		{ return 0; }
 	virtual MoveComponent*		ToMove()		{ return 0; }

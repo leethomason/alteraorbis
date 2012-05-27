@@ -153,8 +153,9 @@ public:
 		return &vec[size-1];
 	}
 
-	unsigned Size() const	{ return size; }
-	unsigned Capacity() const { return CAPACITY; }
+	unsigned Size() const		{ return size; }
+	unsigned Capacity() const	{ return CAPACITY; }
+	bool HasCap() const			{ return size < CAPACITY; }
 	
 	void Clear()			{ 
 		#ifdef DEBUG

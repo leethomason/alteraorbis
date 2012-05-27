@@ -18,7 +18,6 @@
 
 #include "../xegame/xegamelimits.h"
 
-static const int MAX_MAP_SIZE = 1024;
 static const int MAX_MOVE_PATH = MAX_MAP_SIZE/2;	// repath if we need to
 
 static const float METERS_PER_GRID = 2.0f;
@@ -33,8 +32,12 @@ static const float ROTATION_LIMIT = 45.0f;
 
 enum {
 	GAME_COMPONENT_MSG = GAME_COMPONENT_MSG_START,
+	
 	PATHMOVE_MSG_DESTINATION_REACHED,
-	PATHMOVE_MSG_DESTINATION_BLOCKED
+	PATHMOVE_MSG_DESTINATION_BLOCKED,
+
+	AI_EVENT_AWARENESS,		// 0: team to receive
+							// bounds of awareness
 };
 
 #endif // GAMELIMITS_INCLUDED

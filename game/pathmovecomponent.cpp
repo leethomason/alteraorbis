@@ -65,7 +65,8 @@ void PathMoveComponent::ComputeDest( const Vector2F& d )
 #endif
 	}
 
-	bool okay = map->CalcPath( start, dest, path, &nPathPos, MAX_MOVE_PATH, pathDebugging ); 
+	float cost=0;
+	bool okay = map->CalcPath( start, dest, path, &nPathPos, MAX_MOVE_PATH, &cost, pathDebugging ); 
 	if ( !okay ) {
 		SetNoPath();
 		SendMessage( PATHMOVE_MSG_DESTINATION_BLOCKED );
@@ -214,7 +215,7 @@ bool PathMoveComponent::AvoidOthers( U32 delta )
 	bounds.Set( pos2.x-PATH_AVOID_DISTANCE, pos2.y-PATH_AVOID_DISTANCE, 
 		        pos2.x+PATH_AVOID_DISTANCE, pos2.y+PATH_AVOID_DISTANCE );
 	
-	const CDynArray<Chit*,32>& chitArr = GetChitBag()->QuerySpatialHash( bounds, parentChit );
+	const CDynArray<Chit*>& chitArr = GetChitBag()->QuerySpatialHash( bounds, parentChit, false );
 
 	if ( !chitArr.Empty() ) {
 		Vector3F pos3    = { pos2.x, 0, pos2.y };

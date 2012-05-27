@@ -95,10 +95,6 @@ private:
 		const Item** i0 = (const Item**)vi0;
         const Item** i1 = (const Item**)vi1;
         return (int)((*i0)->atom) - (int)((*i1)->atom);
-
-		//int h0 = (int)grinliz::Random::Hash( &i0->atom, 8 );
-		//int h1 = (int)grinliz::Random::Hash( &i1->atom, 8 );
-		//return h0 - h1;
 	}
 
 	State* FindState( const State& state );

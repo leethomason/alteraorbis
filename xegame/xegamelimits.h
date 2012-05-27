@@ -9,7 +9,7 @@ static const float MAX_BASE_RADIUS = 0.4f;
 
 // What is the maximum map size? Used to allocate
 // the spatial cache.
-static const int MAX_MAX_SIZE = 1024;
+static const int MAX_MAP_SIZE = 1024;
 
 enum {
 	COMPONENT_MSG_NONE,

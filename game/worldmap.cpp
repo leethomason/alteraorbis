@@ -588,10 +588,9 @@ void WorldMap::PrintStateInfo( PathNode* state )
 }
 
 
-int WorldMap::RegionSolve( Region* start, Region* end )
+int WorldMap::RegionSolve( Region* start, Region* end, float* totalCost )
 {
-	float totalCost = 0;
-	int result = pather->Solve( start, end, &pathRegions, &totalCost );
+	int result = pather->Solve( start, end, &pathRegions, totalCost );
 	return result;
 }
 
@@ -666,16 +665,20 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 							grinliz::Vector2F *path,
 							int *len,
 							int maxPath,
+							float *totalCost,
 							bool debugging )
 {
 	pathCache.Clear();
-	*len = 0;
-	bool result = CalcPath( start, end, &pathCache, debugging );
+	bool result = CalcPath( start, end, &pathCache, totalCost, debugging );
 	if ( result ) {
-		for( int i=0; i<pathCache.Size() && i < maxPath; ++i ) {
-			path[i] = pathCache[i];
+		if ( path ) {
+			for( int i=0; i<pathCache.Size() && i < maxPath; ++i ) {
+				path[i] = pathCache[i];
+			}
 		}
-		*len = Min( maxPath, pathCache.Size() );
+		if ( len ) {
+			*len = Min( maxPath, pathCache.Size() );
+		}
 	}
 	return result;
 }
@@ -684,6 +687,7 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 bool WorldMap::CalcPath(	const grinliz::Vector2F& start, 
 							const grinliz::Vector2F& end, 
 							CDynArray<grinliz::Vector2F> *path,
+							float *totalCost,
 							bool debugging )
 {
 	debugPathVector.Clear();
@@ -720,6 +724,7 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 		okay = true;
 		path->Push( start );
 		path->Push( end );
+		*totalCost = (end-start).Length();
 	}
 
 	// Try a straight line ray cast
@@ -729,12 +734,13 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 			//GLOUTPUT(( "Ray succeeded.\n" ));
 			path->Push( start );
 			path->Push( end );
+			*totalCost = (end-start).Length();
 		}
 	}
 
 	// Use the region solver.
 	if ( !okay ) {
-		int result = RegionSolve( regionStart, regionEnd );
+		int result = RegionSolve( regionStart, regionEnd, totalCost );
 		//if ( result == micropather::MicroPather::NO_SOLUTION ) {
 		//	GLOUTPUT(( "No solution: (%d,%d)-(%d,%d)\n", starti.x, starti.y, endi.x, endi.y ));
 		//}
@@ -819,7 +825,8 @@ void WorldMap::ShowRegionPath( float x0, float y0, float x1, float y1 )
 	Region* end   = grid[INDEX( (int)x1, (int)y1 ) ].region;
 	
 	if ( start && end ) {
-		int result = RegionSolve( start, end );
+		float cost=0;
+		int result = RegionSolve( start, end, &cost );
 		if ( result == micropather::MicroPather::SOLVED ) {
 			for( unsigned i=0; i<pathRegions.size(); ++i ) {
 				Region* vp = ToGrid( pathRegions[i] );

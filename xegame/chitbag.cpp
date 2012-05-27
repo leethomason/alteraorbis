@@ -81,6 +81,7 @@ void ChitBag::DoTick( U32 delta )
 		DeleteChit( deleteList[i] );
 	}
 	deleteList.RemoveAll();
+	events.Clear();
 }
 
 
@@ -130,8 +131,25 @@ void ChitBag::UpdateSpatialHash( Chit* c, int x0, int y0, int x1, int y1 )
 }
 
 
-const CDynArray<Chit*,32>& ChitBag::QuerySpatialHash( const Rectangle2F& rf, const Chit* ignore )
+Vector3F ChitBag::compareOrigin;
+
+int ChitBag::CompareDistance( const void* p0, const void* p1 ) 
 {
+	Chit** c0 = (Chit**)p0;
+	Chit** c1 = (Chit**)p1;
+
+	float d0 = ( (*c0)->GetSpatialComponent()->GetPosition() - compareOrigin).LengthSquared();
+	float d1 = ( (*c1)->GetSpatialComponent()->GetPosition() - compareOrigin).LengthSquared();
+
+	return LRintf(d0 - d1);
+}
+
+
+const CDynArray<Chit*>& ChitBag::QuerySpatialHash( const Rectangle2F& rf, const Chit* ignore, bool distanceSort )
+{
+	Rectangle2I b;
+	b.Set( 0, 0, SIZE-1, SIZE-1 );
+
 	Rectangle2I r;
 
 	r.Set( (int)rf.min.x, (int)rf.min.y, (int)ceilf(rf.max.x), (int)ceilf(rf.max.y) );
@@ -139,6 +157,7 @@ const CDynArray<Chit*,32>& ChitBag::QuerySpatialHash( const Rectangle2F& rf, con
 	r.min.y >>= SHIFT;
 	r.max.x >>= SHIFT;
 	r.max.y >>= SHIFT;
+	r.DoIntersection( b );
 
 	hashQuery.Clear();
 	for( int y=r.min.y; y<=r.max.y; ++y ) {
@@ -154,5 +173,11 @@ const CDynArray<Chit*,32>& ChitBag::QuerySpatialHash( const Rectangle2F& rf, con
 			}
 		}
 	}
+	if ( hashQuery.Size() > 1 && distanceSort ) {
+		Vector2F origin = rf.Center();
+		compareOrigin.Set( origin.x, 0, origin.y );
+		qsort( hashQuery.Mem(), hashQuery.Size(), sizeof(Chit*), CompareDistance ); 
+	}
+
 	return hashQuery;
 }

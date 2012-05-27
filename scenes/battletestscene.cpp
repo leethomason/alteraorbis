@@ -7,6 +7,7 @@
 #include "../game/pathmovecomponent.h"
 #include "../game/debugpathcomponent.h"
 #include "../game/gameitem.h"
+#include "../game/aicomponent.h"
 
 #include "../xegame/chit.h"
 #include "../xegame/rendercomponent.h"
@@ -90,6 +91,15 @@ void BattleTestScene::LoadMap()
 		CreateChit( waypoints[i] );
 	}
 	engine->CameraLookAt( (float)map->Width()/2, (float)map->Height()/2, 45 );
+
+	// Trigger the AI to do something.
+	ChitEvent event( AI_EVENT_AWARENESS );
+	event.bounds.Set( 0, 0, (float)(map->Width()), (float)(map->Height()) );
+
+	event.data0 = 0;	
+	chitBag.QueueEvent( event );
+	event.data0 = 1;
+	chitBag.QueueEvent( event );
 }
 
 
@@ -103,8 +113,7 @@ void BattleTestScene::CreateChit( const Vector2I& p )
 	chit->Add( new SpatialComponent( true ) );
 	chit->Add( new RenderComponent( engine, asset, 0 ));
 	chit->Add( new PathMoveComponent( map ));
-	//chit->Add( new HealthComponent( 50 ));
-	//chit->Add( new AIComponent( 
+	chit->Add( new AIComponent( map, p.x < 16 ? 0 : 1 ));
 	InventoryComponent* inv = new InventoryComponent( &chitBag );
 	chit->Add( inv );
 

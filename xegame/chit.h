@@ -123,11 +123,15 @@ public:
 	Chit* Remove( Chit* c );	// returns chit removed or null
 	Chit* First();	
 	Chit* Next();
+
+	// Some or all of the chit pointers may be invalid,
+	// so the structure can only return the approximate size
+	int ApproxSize() const { return array.Size(); }
 	
 public:
 	ChitBag* chitBag;
 	int it;
-	grinliz::CDynArray<int> array;
+	grinliz::CDynArray<int, 8> array;
 };
 
 

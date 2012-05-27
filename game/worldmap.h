@@ -45,12 +45,14 @@ public:
 	bool CalcPath(	const grinliz::Vector2F& start, 
 					const grinliz::Vector2F& end, 
 					grinliz::CDynArray<grinliz::Vector2F> *path,
+					float* totalCost,
 					bool showDebugging = false );
 	bool CalcPath(	const grinliz::Vector2F& start, 
 					const grinliz::Vector2F& end, 
 					grinliz::Vector2F *path,
 					int *pathLen,
 					int maxPath,
+					float* totalCost,
 					bool showDebugging = false );
 
 	enum BlockResult {
@@ -160,7 +162,7 @@ private:
 	//  Region path:	the micropather computed region
 
 	// Call the region solver. Put the result in the pathVector
-	int  RegionSolve( Region* start, Region* end );
+	int  RegionSolve( Region* start, Region* end, float* totalCost );
 	bool GridPath( const grinliz::Vector2F& start, const grinliz::Vector2F& end );
 
 	// FIXME: many sites claim bitfields defeat the optimizer,
