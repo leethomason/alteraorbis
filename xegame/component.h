@@ -44,7 +44,10 @@ public:
 
 protected:
 	void RequestUpdate();
-	void SendMessage( int id );
+
+	// Send a message to the listeners, and every component
+	// in the chit (which don't need to be listeners.)
+	void SendMessage( int id, bool sendToSiblings=true );
 
 	float Travel( float rate, U32 time ) const {
 		return rate * ((float)time) * 0.001f;

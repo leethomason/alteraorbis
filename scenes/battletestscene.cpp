@@ -6,8 +6,10 @@
 #include "../game/gamelimits.h"
 #include "../game/pathmovecomponent.h"
 #include "../game/debugpathcomponent.h"
+#include "../game/debugstatecomponent.h"
 #include "../game/gameitem.h"
 #include "../game/aicomponent.h"
+#include "../game/healthcomponent.h"
 
 #include "../xegame/chit.h"
 #include "../xegame/rendercomponent.h"
@@ -66,7 +68,7 @@ void BattleTestScene::LoadMap()
 	map->InitPNG( "./res/testarena32.png", &blocks, &waypoints, &features );
 
 	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase(), map );	
-
+	engine->particleSystem->LoadParticleDefs( "./res/particles.xml" );
 
 	for ( int i=0; i<blocks.Size(); ++i ) {
 		Chit* chit = chitBag.NewChit();
@@ -87,9 +89,13 @@ void BattleTestScene::LoadMap()
 		GET_COMPONENT( chit, MapSpatialComponent )->SetMapPosition( v.x, v.y, 0 );
 	}
 
-	for( int i=0; i<waypoints.Size(); ++i ) {
-		CreateChit( waypoints[i] );
-	}
+	//for( int i=0; i<waypoints.Size(); ++i ) {
+	//	CreateChit( waypoints[i] );
+	//}
+	Vector2I unit = { 2, 16 };
+	Vector2I dummy = { 16, 16 };
+	CreateChit( unit );
+	CreateChit( dummy );
 	engine->CameraLookAt( (float)map->Width()/2, (float)map->Height()/2, 45 );
 
 	// Trigger the AI to do something.
@@ -98,6 +104,8 @@ void BattleTestScene::LoadMap()
 
 	event.data0 = 0;	
 	chitBag.QueueEvent( event );
+	event.data0 = 1;	
+	chitBag.QueueEvent( event );
 }
 
 
@@ -105,28 +113,36 @@ void BattleTestScene::CreateChit( const Vector2I& p )
 {
 	//GRINLIZ_PERFTRACK;
 
-	const char* asset = "humanFemale";
+	int team = p.x < 16 ? 0 : 1;
+	const char* asset = team ? "prime" : "humanFemale";
 
 	Chit* chit = chitBag.NewChit();
 	chit->Add( new SpatialComponent( true ) );
 	chit->Add( new RenderComponent( engine, asset, 0 ));
 	chit->Add( new PathMoveComponent( map ));
-	chit->Add( new AIComponent( map, p.x < 16 ? 0 : 1 ));
+	chit->Add( new AIComponent( engine, map, team ));
+	chit->Add( new DebugStateComponent( map ));
+	chit->Add( new HealthComponent());
 	InventoryComponent* inv = new InventoryComponent( &chitBag );
 	chit->Add( inv );
+
+	// Turn the 2nd team into practice dummys
+	GET_COMPONENT( chit, AIComponent )->SetEnabled( team == 0 );
+	chit->GetSpatialComponent()->SetPosYRot( (float)p.x+0.5f, 0, (float)p.y+0.5f, (float)random.Rand( 360 ) );
 
 #ifdef DEBUG_PMC
 	chit->Add( new DebugPathComponent( engine, map, static_cast<LumosGame*>(game) ));
 #endif
 
-	WeaponItem* gunItem = new WeaponItem( "ASLT-1", "ASLT-1" );
+	if ( team == 0 ) {
+		WeaponItem* gunItem = new WeaponItem( "ASLT-1", "ASLT-1" );
 
-	Chit* gun = chitBag.NewChit();
-	gun->Add( new RenderComponent( engine, "ASLT-1", Model::MODEL_NO_SHADOW ));
-	gun->Add( new ItemComponent( gunItem ));
+		Chit* gun = chitBag.NewChit();
+		gun->Add( new RenderComponent( engine, "ASLT-1", Model::MODEL_NO_SHADOW ));
+		gun->Add( new ItemComponent( gunItem ));
 
-	chit->GetSpatialComponent()->SetPosYRot( (float)p.x+0.5f, 0, (float)p.y+0.5f, (float)random.Rand( 360 ) );
-	inv->AddToInventory( gun );
+		inv->AddToInventory( gun );
+	}
 }
 
 

@@ -25,10 +25,12 @@
 #include "../grinliz/gltypes.h"
 #include "../grinliz/glstringutil.h"
 #include "../grinliz/glcolor.h"
+#include "../grinliz/glcontainer.h"
 
 #include "../shared/gamedbreader.h"
 #include "../tinyxml2/tinyxml2.h"
 #include "enginelimits.h"
+#include "particle.h"
 
 struct SDL_RWops;
 
@@ -42,6 +44,8 @@ struct ModelGroup
 	void Set( const char* textureName, int nVertex, int nIndex );
 	void Load( const gamedb::Item* item );
 };
+
+void LoadParticles( grinliz::CDynArray< ParticleDef >* array, const char* path );
 
 void LoadVector( const tinyxml2::XMLElement* element, grinliz::Vector3F* vec );
 void LoadColor( const tinyxml2::XMLElement* element, grinliz::Color3F* color );

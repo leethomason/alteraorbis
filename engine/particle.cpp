@@ -22,6 +22,7 @@
 #include "camera.h"
 #include "texture.h"
 #include "shadermanager.h"
+#include "serialize.h"
 
 using namespace grinliz;
 
@@ -146,6 +147,21 @@ void ParticleSystem::EmitBeam( const grinliz::Vector3F& p0, const grinliz::Vecto
 	beam->color = color;
 }
 */
+
+
+void ParticleSystem::EmitPD(	const char* name,
+								const grinliz::Vector3F& initPos,
+								const grinliz::Vector3F& normal, 
+								const grinliz::Vector3F eyeDir[],
+								U32 deltaTime )
+{
+	for( int i=0; i<particleDefArr.Size(); ++i ) {
+		if ( particleDefArr[i].name == name ) {
+			EmitPD( particleDefArr[i], initPos, normal, eyeDir, deltaTime );
+			break;
+		}
+	}
+}
 
 
 void ParticleSystem::EmitPD(	const ParticleDef& def,
@@ -389,4 +405,10 @@ void ParticleDef::Load( const tinyxml2::XMLElement* ele )
 	if ( child ) {
 		LoadColor( child, &colorFuzz );
 	}
+}
+
+
+void ParticleSystem::LoadParticleDefs( const char* filename )
+{
+	LoadParticles( &particleDefArr, filename );
 }

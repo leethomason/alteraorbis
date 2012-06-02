@@ -19,6 +19,8 @@
 #include "../grinliz/glvector.h"
 #include "../grinliz/glrandom.h"
 #include "../grinliz/glbitarray.h"
+#include "../grinliz/glstringutil.h"
+#include "../grinliz/glcontainer.h"
 #include "vertex.h"
 #include "ufoutil.h"
 #include "map.h"
@@ -70,65 +72,6 @@ struct ParticleStream
 };
 
 
-/*	Class to render all sorts of particle effects.
-*/
-class ParticleSystem
-{
-public:
-	ParticleSystem();
-	~ParticleSystem();
-
-//	static ParticleSystem* Instance()	{ GLASSERT( instance ); return instance; }
-
-//	static void Create();
-//	static void Destroy();
-
-	// Texture particles. Location in texture follows.
-	enum {
-		BASIC			= 0,
-		SMOKE_0			= 1,
-		SMOKE_1			= 2,
-	};
-
-	enum {
-		PARTICLE_RAY,
-		PARTICLE_HEMISPHERE,
-		PARTICLE_SPHERE,
-	};
-
-	void EmitPD( const ParticleDef& pd,
-				 const grinliz::Vector3F& pos,
-				 const grinliz::Vector3F& normal,
-				 const grinliz::Vector3F eyeDir[],
-				 U32 deltaTime );					// needed for pd.config == continuous
-
-	void Update( U32 deltaTime, const grinliz::Vector3F eyeDir[] );
-	void Draw();
-	void Clear();
-	int NumParticles() const { return nParticles; }
-
-private:
-
-	//static ParticleSystem* instance;
-
-	void Process( unsigned msec, const grinliz::Vector3F eyeDir[] );
-
-	enum {
-		MAX_PARTICLES = 2000	// don't want to re-allocate vertex buffers
-	};
-
-	grinliz::Random random;
-	Texture* texture;
-	U32 time;
-	
-	int nParticles;
-	ParticleData	particleData[MAX_PARTICLES];
-	ParticleStream	vertexBuffer[MAX_PARTICLES*4];
-	U16				indexBuffer[MAX_PARTICLES*6];
-	// fixme: use vbos
-};
-
-
 // SHALLOW
 struct ParticleDef
 {
@@ -152,5 +95,65 @@ struct ParticleDef
 
 	void Load( const tinyxml2::XMLElement* element );
 };
+
+
+/*	Class to render all sorts of particle effects.
+*/
+class ParticleSystem
+{
+public:
+	ParticleSystem();
+	~ParticleSystem();
+
+	// Texture particles. Location in texture follows.
+	enum {
+		BASIC			= 0,
+		SMOKE_0			= 1,
+		SMOKE_1			= 2,
+	};
+
+	enum {
+		PARTICLE_RAY,
+		PARTICLE_HEMISPHERE,
+		PARTICLE_SPHERE,
+	};
+
+	void EmitPD(	const ParticleDef& pd,
+					const grinliz::Vector3F& pos,
+					const grinliz::Vector3F& normal,
+					const grinliz::Vector3F eyeDir[],
+					U32 deltaTime );					// needed for pd.config == continuous
+	void EmitPD(	const char* name,
+					const grinliz::Vector3F& initPos,
+					const grinliz::Vector3F& normal, 
+					const grinliz::Vector3F eyeDir[],
+					U32 deltaTime );
+
+	void Update( U32 deltaTime, const grinliz::Vector3F eyeDir[] );
+	void Draw();
+	void Clear();
+	int NumParticles() const { return nParticles; }
+	void LoadParticleDefs( const char* filename );
+
+private:
+
+	void Process( unsigned msec, const grinliz::Vector3F eyeDir[] );
+
+	enum {
+		MAX_PARTICLES = 2000	// don't want to re-allocate vertex buffers
+	};
+
+	grinliz::Random random;
+	Texture* texture;
+	U32 time;
+	
+	int nParticles;
+	grinliz::CDynArray<ParticleDef> particleDefArr;
+	ParticleData	particleData[MAX_PARTICLES];
+	ParticleStream	vertexBuffer[MAX_PARTICLES*4];
+	U16				indexBuffer[MAX_PARTICLES*6];
+	// fixme: use vbos
+};
+
 
 #endif // UFOTACTICAL_PARTICLE_INCLUDED

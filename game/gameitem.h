@@ -6,6 +6,7 @@
 #include "../grinliz/glcontainer.h"
 
 class Chit;
+class WeaponItem;
 
 class GameItem : public XEItem
 {
@@ -16,6 +17,9 @@ public:
 
 	// Depth=0 the chit, depth=1 1st level inventory
 	static void GetActiveItems( Chit* chit, grinliz::CArray<XEItem*, MAX_ACTIVE_ITEMS>* array );
+
+	virtual GameItem* ToGameItem() { return this; }	
+	virtual WeaponItem* ToWeapon() { return 0; }
 
 	int		steel;
 	int		stone;
@@ -31,6 +35,15 @@ public:
 		melee( true ), range( true ), rounds( 5 ), roundsCap(5), rechargeTime(1000) {}
 
 	virtual ~WeaponItem()	{}
+	virtual WeaponItem* ToWeapon() { return this; }
+
+	bool DoMelee( U32 time ) {
+		if ( melee && time >= coolTime ) {
+			coolTime = time + COOLDOWN_TIME;
+			return true;
+		}
+		return false;
+	}
 
 	bool melee;
 	bool range;

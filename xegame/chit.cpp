@@ -117,7 +117,7 @@ void Chit::DoUpdate()
 }
 
 
-void Chit::SendMessage( int msgID )
+void Chit::SendMessage( int msgID, Component* origin )
 {
 	for( int i=0; i<listeners.Size(); ++i ) {
 		listeners[i]->OnChitMsg( this, msgID );
@@ -137,6 +137,14 @@ void Chit::SendMessage( int msgID )
 			continue;
 		}
 		++i;
+	}
+
+	if ( origin ) {
+		for( int i=0; i<NUM_SLOTS; ++i ) {
+			if ( slot[i] && slot[i] != origin ) {
+				slot[i]->OnChitMsg( this, msgID );
+			}
+		}
 	}
 }
 

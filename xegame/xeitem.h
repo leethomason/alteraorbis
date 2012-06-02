@@ -19,11 +19,12 @@ class XEItem
 {
 public:
 	XEItem() : resource(0)	{}
-	XEItem( const char* _name, const char* _resource ) : name( _name ), resource( _resource ) {}
+	XEItem( const char* _name, const char* _resource ) : name( _name ), resource( _resource ), coolTime( 0 ) {}
 	virtual ~XEItem()	{}
 
 	const char* name;
 	const char* resource;
+	U32 coolTime;			// the (absolute) time when this item is next available for use. 
 
 	virtual GameItem* ToGameItem() { return 0; }
 };

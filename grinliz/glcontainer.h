@@ -28,6 +28,7 @@ distribution.
 
 #include "gldebug.h"
 #include "gltypes.h"
+#include "glutil.h"
 
 namespace grinliz
 {
@@ -79,7 +80,8 @@ public:
 	void SwapRemove( int i ) {
 		GLASSERT( i<(int)size );
 		GLASSERT( size > 0 );
-		grinliz::Swap( &mem[i], &mem[size-1] );
+		
+		mem[i] = mem[size-1];
 		Pop();
 	}
 	int Find( const T& t ) {

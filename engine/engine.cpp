@@ -372,8 +372,6 @@ void Engine::Draw( U32 deltaTime )
 	}
 #endif
 
-	if ( map )
-		map->DrawOverlay();
 	renderQueue->Clear();
 
 	// --------- Composite Glow -------- //

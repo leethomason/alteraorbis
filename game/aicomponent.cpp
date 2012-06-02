@@ -3,8 +3,14 @@
 #include "gamelimits.h"
 #include "pathmovecomponent.h"
 #include "gameitem.h"
+
+#include "../engine/engine.h"
+#include "../engine/particle.h"
+
 #include "../xegame/chitbag.h"
 #include "../xegame/spatialcomponent.h"
+#include "../xegame/rendercomponent.h"
+
 #include "../grinliz/glrectangle.h"
 #include <climits>
 
@@ -14,8 +20,10 @@ static const U32	UPDATE_COMBAT_INFO	= 1000;		// how often to update the friend/e
 static const float	COMBAT_INFO_RANGE	= 10.0f;	// range around to scan for friendlies/enemies
 
 
-AIComponent::AIComponent( WorldMap* _map, int _team )
+AIComponent::AIComponent( Engine* _engine, WorldMap* _map, int _team )
 {
+	enabled = true;
+	engine = _engine;
 	map = _map;
 	team = _team;
 	combatInfoAge = 0xffffff;
@@ -108,8 +116,11 @@ void AIComponent::UpdateCombatInfo( const Rectangle2F* _zone )
 }
 
 
-void AIComponent::DoTick( U32 delta )
+void AIComponent::DoTick( U32 deltaTime )
 {
+	if ( !enabled ) 
+		return;
+
 	// Update the info around us.
 	// Then:
 	//		Move: closer, away, strafe
@@ -117,7 +128,7 @@ void AIComponent::DoTick( U32 delta )
 	//		Reload
 
 	// Routine update to situational awareness.
-	combatInfoAge += delta;
+	combatInfoAge += deltaTime;
 	if ( combatInfoAge > UPDATE_COMBAT_INFO ) {
 		UpdateCombatInfo();
 	}
@@ -131,16 +142,62 @@ void AIComponent::DoTick( U32 delta )
 		if(    events[i].id == AI_EVENT_AWARENESS 
 			&& events[i].data0 == team ) 
 		{
+			// FIXME: double call can cause 2 entries for the same unit
 			UpdateCombatInfo( &events[i].bounds );
 		}
 	}
 
-	if ( enemyList.Size() > 1 ) {
+	if ( enemyList.Size() > 0 ) {
+		const ChitData& target = enemyList[0];
+
+		SpatialComponent*  thisSpatial = parentChit->GetSpatialComponent();
+		RenderComponent*   thisRender = parentChit->GetRenderComponent();
+		SpatialComponent*  targetSpatial = target.chit->GetSpatialComponent();
 		PathMoveComponent* pmc = GET_COMPONENT( parentChit, PathMoveComponent );
-		if ( pmc ) pmc->QueueDest( enemyList[0].chit->GetSpatialComponent()->GetPosition2D() );
+		U32 absTime = GetChitBag()->BagTime();
 
 		grinliz::CArray<XEItem*, MAX_ACTIVE_ITEMS> activeItems;
 		GameItem::GetActiveItems( parentChit, &activeItems );
+		// FIXME: choose weapons, etc.
+		XEItem* xeitem = activeItems[0];
+		GameItem* gameItem = xeitem->ToGameItem();
+		WeaponItem* weapon = gameItem->ToWeapon();
+
+		GLASSERT( pmc );
+		GLASSERT( thisSpatial );
+		GLASSERT( targetSpatial );
+		GLASSERT( thisRender );
+
+		static const Vector3F UP = { 0, 1, 0 };
+		const Vector3F* eyeDir = engine->camera.EyeDir3();
+
+		if ( activeItems.Size() > 0 ) {
+			// fixme: use best item for situation
+
+			Vector2F normalToTarget = targetSpatial->GetPosition2D() - thisSpatial->GetPosition2D();
+			normalToTarget.Normalize();
+
+			float dot = DotProduct( thisSpatial->GetPosition2D(), normalToTarget );
+			
+			Vector3F trigger;
+			thisRender->GetMetaData( "trigger", &trigger );
+
+			if (    target.range < MELEE_RANGE ) {
+				if ( dot > MELEE_COS_THETA
+				     && weapon->DoMelee( absTime ) ) 
+				{
+					//GetChitBag()->FireBolt( true, trigger, target.range ); 
+					//Chit* melee = GetChitBag()->NewChit();
+					engine->particleSystem->EmitPD( "melee", targetSpatial->GetPosition(), UP, eyeDir, deltaTime );
+				}
+				// fixme: else queue rotation.
+			}
+			else {
+				if ( pmc ) {
+					pmc->QueueDest( enemyList[0].chit->GetSpatialComponent()->GetPosition2D() );
+				}
+			}
+		}
 	}
 }
 

@@ -11,7 +11,7 @@ using namespace grinliz;
 ChitBag::ChitBag()
 {
 	idPool = 0;
-	//updateList.Resort( 0, false );	// no dupes - turn into a set.
+	bagTime = 0;
 	deleteList.Resort( 0, false );
 	memset( spatialHash, 0, sizeof(*spatialHash)*SIZE*SIZE );
 }
@@ -65,6 +65,7 @@ void ChitBag::QueueDelete( Chit* chit )
 void ChitBag::DoTick( U32 delta )
 {
 	GRINLIZ_PERFTRACK;
+	bagTime += delta;
 
 	for( int i=0; i<chits.GetSize(); ++i ) {
 		Chit* c = chits[i].Value;

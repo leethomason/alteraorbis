@@ -27,6 +27,7 @@
 #include <stdint.h>
 #include <memory.h>
 #include <string.h>
+#include "../grinliz/glcontainer.h"
 
 #if defined( _DEBUG ) || defined( DEBUG )
 #	if defined( _MSC_VER )
@@ -53,6 +54,7 @@ class PushButton;
 class ToggleButton;
 
 
+/*
 template < class T > 
 class CDynArray
 {
@@ -93,7 +95,7 @@ private:
 	unsigned size;
 	unsigned cap;
 };
-
+*/
 
 /**
 	The most basic unit of state. A set of vertices and indices are sent to the GPU with a given RenderAtom, which
@@ -301,9 +303,10 @@ private:
 
 	bool			m_orderChanged;
 	bool			m_modified;
-	UIItem**		m_itemArr;
-	int				m_nItems;
-	int				m_nItemsAllocated;
+	grinliz::CDynArray<UIItem*> m_itemArr;
+	//UIItem**		m_itemArr;
+	//int			m_nItems;
+	//int			m_nItemsAllocated;
 	const UIItem*	m_dragStart;
 	const UIItem*	m_dragEnd;
 	float			m_textHeight;
@@ -318,9 +321,9 @@ private:
 		const void* textureHandle;
 	};
 
-	CDynArray< State >				m_stateBuffer;
-	CDynArray< uint16_t >			m_indexBuffer;
-	CDynArray< Vertex >				m_vertexBuffer;
+	grinliz::CDynArray< State >			m_stateBuffer;
+	grinliz::CDynArray< uint16_t >		m_indexBuffer;
+	grinliz::CDynArray< Vertex >		m_vertexBuffer;
 };
 
 
@@ -415,7 +418,7 @@ public:
 
 	virtual const RenderAtom* GetRenderAtom() const = 0;
 	virtual bool DoLayout() = 0;
-	virtual void Queue( CDynArray< uint16_t > *index, CDynArray< Gamui::Vertex > *vertex ) = 0;
+	virtual void Queue( grinliz::CDynArray< uint16_t > *index, grinliz::CDynArray< Gamui::Vertex > *vertex ) = 0;
 
 	virtual void Clear()	{ m_gamui = 0; }
 
@@ -435,7 +438,7 @@ protected:
 	template <class T> T Min( T a, T b ) const		{ return a<b ? a : b; }
 	template <class T> T Max( T a, T b ) const		{ return a>b ? a : b; }
 	float Mean( float a, float b ) const			{ return (a+b)*0.5f; }
-	static Gamui::Vertex* PushQuad( CDynArray< uint16_t > *index, CDynArray< Gamui::Vertex > *vertex );
+	static Gamui::Vertex* PushQuad( grinliz::CDynArray< uint16_t > *index, grinliz::CDynArray< Gamui::Vertex > *vertex );
 	void Modify()		{ if ( m_gamui ) m_gamui->Modify(); }
 	void OrderChanged()	{ if ( m_gamui ) m_gamui->OrderChanged(); }
 
@@ -476,7 +479,7 @@ public:
 
 	virtual const RenderAtom* GetRenderAtom() const;
 	virtual bool DoLayout();
-	virtual void Queue( CDynArray< uint16_t > *index, CDynArray< Gamui::Vertex > *vertex );
+	virtual void Queue( grinliz::CDynArray< uint16_t > *index, grinliz::CDynArray< Gamui::Vertex > *vertex );
 
 private:
 	void CalcSize( float* width, float* height ) const;
@@ -512,7 +515,7 @@ public:
 
 	virtual const RenderAtom* GetRenderAtom() const;
 	virtual bool DoLayout();
-	virtual void Queue( CDynArray< uint16_t > *index, CDynArray< Gamui::Vertex > *vertex );
+	virtual void Queue( grinliz::CDynArray< uint16_t > *index, grinliz::CDynArray< Gamui::Vertex > *vertex );
 
 private:
 	bool		m_needsLayout;
@@ -550,7 +553,7 @@ public:
 
 	virtual const RenderAtom* GetRenderAtom() const;
 	virtual bool DoLayout();
-	virtual void Queue( CDynArray< uint16_t > *index, CDynArray< Gamui::Vertex > *vertex );
+	virtual void Queue( grinliz::CDynArray< uint16_t > *index, grinliz::CDynArray< Gamui::Vertex > *vertex );
 
 private:
 	RenderAtom m_atom;
@@ -578,7 +581,7 @@ public:
 
 	virtual const RenderAtom* GetRenderAtom() const;
 	virtual bool DoLayout();
-	virtual void Queue( CDynArray< uint16_t > *index, CDynArray< Gamui::Vertex > *vertex );
+	virtual void Queue( grinliz::CDynArray< uint16_t > *index, grinliz::CDynArray< Gamui::Vertex > *vertex );
 
 	virtual int CX() const = 0;
 	virtual int CY() const = 0;
@@ -676,7 +679,7 @@ public:
 
 	virtual const RenderAtom* GetRenderAtom() const;
 	virtual bool DoLayout();
-	virtual void Queue( CDynArray< uint16_t > *index, CDynArray< Gamui::Vertex > *vertex );
+	virtual void Queue( grinliz::CDynArray< uint16_t > *index, grinliz::CDynArray< Gamui::Vertex > *vertex );
 
 	virtual PushButton* ToPushButton() { return 0; }
 	virtual ToggleButton* ToToggleButton() { return 0; }
@@ -879,7 +882,7 @@ public:
 
 	virtual const RenderAtom* GetRenderAtom() const;
 	virtual bool DoLayout();
-	virtual void Queue( CDynArray< uint16_t > *index, CDynArray< Gamui::Vertex > *vertex );
+	virtual void Queue( grinliz::CDynArray< uint16_t > *index, grinliz::CDynArray< Gamui::Vertex > *vertex );
 
 private:
 	enum { MAX_TICKS = 10 };

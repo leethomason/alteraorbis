@@ -202,6 +202,12 @@
     <ClCompile Include="..\game\gameitem.cpp">
       <Filter>Source Files\game</Filter>
     </ClCompile>
+    <ClCompile Include="..\game\debugstatecomponent.cpp">
+      <Filter>Source Files\game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\healthcomponent.cpp">
+      <Filter>Source Files\game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\camera.h">
@@ -397,6 +403,12 @@
       <Filter>Source Files\xegame</Filter>
     </ClInclude>
     <ClInclude Include="..\game\aicomponent.h">
+      <Filter>Source Files\game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\game\debugstatecomponent.h">
+      <Filter>Source Files\game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\game\healthcomponent.h">
       <Filter>Source Files\game</Filter>
     </ClInclude>
   </ItemGroup>

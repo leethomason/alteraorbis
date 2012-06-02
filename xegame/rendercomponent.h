@@ -34,8 +34,8 @@ public:
 	// Radius of the "base" the model stands on. Used to position
 	// the model so it doesn't walk into walls or other models.
 	float RadiusOfBase();
-	int GetFlags() const { return flags; }
-	bool GetMetaData( const char* name, grinliz::Vector3F* value );
+	int   GetFlags() const { return flags; }
+	bool  GetMetaData( const char* name, grinliz::Vector3F* value );
 
 private:
 	Engine* engine;

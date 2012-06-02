@@ -40,4 +40,10 @@
     <colorVelocity red="0" green="0" blue="0" alpha="-0.5" />
   </particle>
 
+  <particle name="melee" size="0.05" count="35" config="hemi"
+            velocity="0.8" velocityFuzz="0.5">
+    <color red="1" green="0" blue="0" alpha="1"/>
+    <colorVelocity red="1" green="0.8" blue="0" alpha="-1.5"/>
+  </particle>
+
 </particles>

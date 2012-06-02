@@ -32,13 +32,15 @@ public:
 	ChitBag();
 	~ChitBag();
 
+	// Chit creation/query
 	void DeleteAll();
 	Chit* NewChit();
 	void  DeleteChit( Chit* );
 	Chit* GetChit( int id );
 
 	// Calls every chit that has a tick.
-	void DoTick( U32 delta );		
+	void DoTick( U32 delta );	
+	U32 BagTime() const { return bagTime; }
 
 	// Due to events, changes, etc. a chit may need an update, possibily in addition to, the tick.
 	// Normally called automatically.
@@ -70,6 +72,7 @@ private:
 	static int CompareDistance( const void* p0, const void* p1 );
 
 	int idPool;
+	U32 bagTime;
 	Simple::CIndex< int, Chit*, 
 					Simple::SValue, Simple::SOwnedPtr> chits;	// Owned chit pointers. Note that CIndex 
 																// supports fast iteration, which is critical.

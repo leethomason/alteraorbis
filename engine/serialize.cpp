@@ -22,6 +22,7 @@
 #include "model.h"
 
 using namespace grinliz;
+using namespace tinyxml2;
 
 void ModelHeader::Load( const gamedb::Item* item )
 {
@@ -63,6 +64,32 @@ void ModelGroup::Load( const gamedb::Item* item )
 	textureName = item->GetString( "textureName" );
 	nVertex = item->GetInt( "nVertex" );
 	nIndex = item->GetInt( "nIndex" );
+}
+
+
+void LoadParticles( grinliz::CDynArray< ParticleDef >* particleDefArr, const char* path )
+{
+	XMLDocument doc;
+	doc.LoadFile( path );
+
+	if ( doc.Error() ) {
+		GLASSERT( 0 );
+		return;
+	}
+	const XMLElement* particlesEle = doc.FirstChildElement( "particles" );
+	if ( !particlesEle ) {
+		GLASSERT( 0 );
+		return;
+	}
+
+	for( const XMLElement* partEle = particlesEle->FirstChildElement( "particle" );
+		 partEle;
+		 partEle = partEle->NextSiblingElement( "particle" ) )
+	{
+		ParticleDef pd;
+		pd.Load( partEle );
+		particleDefArr->Push( pd );
+	}
 }
 
 

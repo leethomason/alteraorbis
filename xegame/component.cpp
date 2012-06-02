@@ -11,10 +11,10 @@ void Component::RequestUpdate()
 }
 
 
-void Component::SendMessage( int id )
+void Component::SendMessage( int id, bool sendToSiblings )
 {
 	if ( parentChit ) {
-		parentChit->SendMessage( id );
+		parentChit->SendMessage( id, sendToSiblings ? this : 0 );
 	}
 }
 

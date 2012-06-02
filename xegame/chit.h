@@ -53,7 +53,9 @@ public:
 	void RequestUpdate();
 	ChitBag* GetChitBag() { return chitBag; }
 
-	void SendMessage( int id );
+	// Send a message to the listeners, and every component
+	// in the chit (which don't need to be listeners.)
+	void SendMessage( int id, Component* origin );
 	void AddListener( IChitListener* listener );
 	void RemoveListener( IChitListener* listener );
 

@@ -25,7 +25,6 @@
 
 #include "vertex.h"
 #include "enginelimits.h"
-#include "serialize.h"
 #include "gpustatemanager.h"
 
 
@@ -41,7 +40,7 @@ public:
 	int Width()  const { return width; }
 	grinliz::Rectangle2I Bounds() const		{	return grinliz::Rectangle2I( 0, 0, width-1, height-1 ); }
 
-	void DrawOverlay()							{}
+	void DrawOverlay();
 	virtual void Draw3D( const grinliz::Color3F& colorMult, GPUShader::StencilMode )	{}
 
 	// IGamuiRenderer
@@ -59,6 +58,8 @@ public:
 
 	void Save( tinyxml2::XMLPrinter*  );
 	void Load( const tinyxml2::XMLElement* mapNode );
+
+	gamui::Gamui overlay;
 
 protected:
 	int width;

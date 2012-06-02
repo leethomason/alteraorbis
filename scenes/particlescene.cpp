@@ -46,8 +46,14 @@ void ParticleScene::Resize()
 	lumosGame->PositionStd( &okay, 0 );
 
 	LayoutCalculator layout = lumosGame->DefaultLayout();
+	int x=0;
+	int y=0;
 	for( int i=0; i<buttonArr.Size(); ++i ) {
-		layout.PosAbs( buttonArr[i], i*2, 0 );
+		layout.PosAbs( buttonArr[i], x*2, y );
+		++x;
+		if ( x == 5 ) {
+			++y; x = 0;
+		}
 	}
 }
 
@@ -60,17 +66,12 @@ void ParticleScene::Load()
 	LayoutCalculator layout = lumosGame->DefaultLayout();
 	const ButtonLook& look = lumosGame->GetButtonLook( LumosGame::BUTTON_LOOK_STD );
 
-	XMLDocument doc;
-	doc.LoadFile( "./res/particles.xml" );
+	particleDefArr.Clear();
+	LoadParticles( &particleDefArr, "./res/particles.xml" );
 
-	// FIXME: switch to safe version.
-	for( const XMLElement* partEle = doc.FirstChildElement( "particles" )->FirstChildElement( "particle" );
-		 partEle;
-		 partEle = partEle->NextSiblingElement( "particle" ) )
+	for( int i=0; i<particleDefArr.Size(); ++i )
 	{
-		ParticleDef pd;
-		pd.Load( partEle );
-		particleDefArr.Push( pd );
+		const ParticleDef& pd = particleDefArr[i];
 
 		Button* button = 0;
 		if ( pd.time == ParticleDef::CONTINUOUS ) {
