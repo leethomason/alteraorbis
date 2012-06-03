@@ -96,7 +96,9 @@ void BattleTestScene::LoadMap()
 	Vector2I dummy = { 16, 16 };
 	CreateChit( unit );
 	CreateChit( dummy );
-	engine->CameraLookAt( (float)map->Width()/2, (float)map->Height()/2, 45 );
+	engine->CameraLookAt( (float)map->Width()/2, (float)map->Height()/2, 
+		                  42.f,		// height
+						  225.f );	// rotattion
 
 	// Trigger the AI to do something.
 	ChitEvent event( AI_EVENT_AWARENESS );

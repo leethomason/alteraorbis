@@ -10,6 +10,7 @@
 	- UI
 		- set up different battles
 	- serialization
+	- hesitation when near melee target (probably squatted destination code kicking in)
 
 - cameras only self-delete if they reach destination; should do better. Probably
   should only be one camera in existence. (BlueSmoke, NavTest2)
