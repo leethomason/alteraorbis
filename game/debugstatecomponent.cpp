@@ -2,6 +2,7 @@
 #include "worldmap.h"
 #include "lumosgame.h"
 #include "healthcomponent.h"
+#include "gamelimits.h"
 
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/chit.h"
@@ -28,17 +29,16 @@ void DebugStateComponent::OnAdd( Chit* chit )
 	map->overlay.Add( &healthBar );
 
 	chit->AddListener( this );
-	if ( chit->GetSpatialComponent() ) {
-		Vector2F pos = chit->GetSpatialComponent()->GetPosition2D() + OFFSET;
-		healthBar.SetPos( pos.x, pos.y );
-	}
+	//if ( chit->GetSpatialComponent() ) {
+	//	Vector2F pos = chit->GetSpatialComponent()->GetPosition2D() + OFFSET;
+	//	healthBar.SetPos( pos.x, pos.y );
+	//}
 	healthBar.SetSize( SIZE_X, SIZE_Y );
 
-	int health = 10;
-	HealthComponent* pHealth = GET_COMPONENT( chit, HealthComponent );
-	if ( pHealth ) {
-		health = pHealth->Health();
-	}
+	//HealthComponent* pHealth = GET_COMPONENT( chit, HealthComponent );
+	//if ( pHealth ) {
+	//	health = pHealth->Health();
+	//}
 	healthBar.SetRange( 0.8f );
 }
 
@@ -55,6 +55,10 @@ void DebugStateComponent::OnChitMsg( Chit* chit, int id )
 	if ( id == SPATIAL_MSG_CHANGED ) {
 		Vector2F pos = chit->GetSpatialComponent()->GetPosition2D() + OFFSET;
 		healthBar.SetPos( pos.x, pos.y );
+	}
+	else if ( id == HEALTH_MSG_CHANGED ) {
+		HealthComponent* pHealth = GET_COMPONENT( chit, HealthComponent );
+		healthBar.SetRange( pHealth->GetHealthFraction() );
 	}
 }
 

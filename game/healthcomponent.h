@@ -6,7 +6,7 @@
 class HealthComponent : public Component
 {
 public:
-	HealthComponent() : health( 100 ) {}
+	HealthComponent() : health( 0xffff ), maxHealth( 0xffff ) {}
 	virtual ~HealthComponent() {}
 
 	virtual Component* ToComponent( const char* name ) {
@@ -17,10 +17,15 @@ public:
 	virtual void DebugStr( grinliz::GLString* str )		{ str->Format( "[Health] hp=%d ", health ); }
 
 	void SetHealth( int h );
-	int  Health() const			{ return health; }
+	void SetHealth( int _health, int _max ) { GLASSERT( _max >= _health ); SetMaxHealth( _max ); SetHealth( _health ); }
+	void SetMaxHealth( int m );
+	int  GetHealth() const			{ return health; }
+	int  GetMaxHealth() const		{ return maxHealth; }
+	float GetHealthFraction() const { return (float)health / (float)maxHealth; }
 
 private:
 	int health;
+	int maxHealth;
 };
 
 

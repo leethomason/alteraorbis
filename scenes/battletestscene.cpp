@@ -131,6 +131,7 @@ void BattleTestScene::CreateChit( const Vector2I& p )
 	// Turn the 2nd team into practice dummys
 	GET_COMPONENT( chit, AIComponent )->SetEnabled( team == 0 );
 	chit->GetSpatialComponent()->SetPosYRot( (float)p.x+0.5f, 0, (float)p.y+0.5f, (float)random.Rand( 360 ) );
+	GET_COMPONENT( chit, HealthComponent )->SetHealth( 100, 100 );
 
 #ifdef DEBUG_PMC
 	chit->Add( new DebugPathComponent( engine, map, static_cast<LumosGame*>(game) ));
