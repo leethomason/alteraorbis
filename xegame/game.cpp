@@ -43,6 +43,8 @@ using namespace tinyxml2;
 
 extern long memNewCount;
 
+const Game::Palette* Game::mainPalette = 0;
+
 Game::Game( int width, int height, int rotation, int uiHeight, const char* path ) :
 	screenport( width, height, rotation, uiHeight ),
 	markFrameTime( 0 ),
@@ -71,7 +73,6 @@ Game::Game( int width, int height, int rotation, int uiHeight, const char* path 
 
 void Game::Init()
 {
-	mainPalette = 0;
 	scenePopQueued = false;
 	loadSlot = 0;
 	currentFrame = 0;
@@ -373,6 +374,7 @@ void Game::LoadPalettes()
 		GLASSERT( child->GetDataSize( "colors" ) == (int)(p->dx*p->dy*sizeof(Color4U8)) );
 		child->GetData( "colors", (void*)p->colors.Mem(), p->dx*p->dy*sizeof(Color4U8) );
 	}
+	mainPalette = GetPalette( "mainPalette" );
 }
 
 
@@ -719,5 +721,14 @@ void Game::Resize( int width, int height, int rotation )
 }
 
 
+const Game::Palette* Game::GetPalette( const char* name ) const
+{
+	for( int i=0; i<palettes.Size(); ++i ) {
+		if ( StrEqual( name, palettes[i].name ) ) {
+			return &palettes[i];
+		}
+	}
+	return 0;
+}
 
 

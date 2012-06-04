@@ -130,18 +130,17 @@ public:
 		grinliz::CArray< grinliz::Color4U8, 128 > colors;
 	};
 	const Palette* GetPalette( const char* name ) const;
-	grinliz::Color4U8 MainPaletteColor( int x, int y );
 
 	virtual void PrintPerf( int depth, const grinliz::PerfData& data );
 
 protected:
 	void PushPopScene();
+	static const Palette* mainPalette;
 
 private:
 
 	// Color palettes
 	grinliz::CDynArray< Palette > palettes;
-	const Palette* mainPalette;
 
 	Screenport screenport;
 	Surface surface;	// general purpose memory buffer for handling images

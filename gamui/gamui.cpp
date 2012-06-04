@@ -1022,25 +1022,22 @@ DigitalBar::DigitalBar() : UIItem( Gamui::LEVEL_FOREGROUND ),
 void DigitalBar::Init(	Gamui* gamui,
 						int nTicks,
 						const RenderAtom& atom0,
-						const RenderAtom& atom1,
-						const RenderAtom& atom2 )
+						const RenderAtom& atom1 )
 {
 	m_gamui = gamui;
 	m_gamui->Add( this );
 
 	GAMUIASSERT( nTicks <= MAX_TICKS );
 	m_nTicks = nTicks;
-	m_t0 = 0;
-	m_t1 = 0;
+	m_t = 0;
 
-	m_atom[0] = atom0;
-	m_atom[1] = atom1;
-	m_atom[2] = atom2;
+	m_atomLower = atom0;
+	m_atomHigher = atom1;
 
 	for( int i=0; i<nTicks; ++i ) {
-		m_image[i].Init( gamui, atom0, true );
+		m_image[i].Init( gamui, m_atomHigher, true );
 	}
-	SetRange( 0, 0 );
+	SetRange( 0 );
 }
 
 
@@ -1052,30 +1049,19 @@ void DigitalBar::SetSize( float w, float h )
 }
 
 
-void DigitalBar::SetRange( float t0, float t1 )
+void DigitalBar::SetRange( float t0 )
 {
-	if ( t0 != m_t0 || t1 != m_t1 ) {
-		if ( t0 < 0 ) t0 = 0;
-		if ( t0 > 1 ) t1 = 1;
-		if ( t1 < 0 ) t1 = 0;
-		if ( t1 > 1 ) t1 = 1;
+	GAMUIASSERT( t0 >= 0 && t0 <= 1 );
+	if ( t0 != m_t ) {
+		m_t = t0;
 
-		t1 = Max( t1, t0 );
+		int index = (int)( m_t * (float)m_nTicks + 0.5f );
 
-		m_t0 = t0;
-		m_t1 = t1;
-
-		int index0 = (int)( t0 * (float)m_nTicks + 0.5f );
-		int index1 = (int)( t1 * (float)m_nTicks + 0.5f );
-
-		for( int i=0; i<index0; ++i ) {
-			m_image[i].SetAtom( m_atom[0] );
+		for( int i=0; i<index; ++i ) {
+			m_image[i].SetAtom( m_atomLower );
 		}
-		for( int i=index0; i<index1; ++i ) {
-			m_image[i].SetAtom( m_atom[1] );
-		}
-		for( int i=index1; i<m_nTicks; ++i ) {
-			m_image[i].SetAtom( m_atom[2] );
+		for( int i=index; i<m_nTicks; ++i ) {
+			m_image[i].SetAtom( m_atomHigher );
 		}
 		Modify();
 	}

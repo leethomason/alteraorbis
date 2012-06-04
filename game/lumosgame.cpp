@@ -144,36 +144,16 @@ RenderAtom LumosGame::CalcDecoAtom( int id, bool enabled )
 	return RenderAtom( (const void*)(enabled ? UIRenderer::RENDERSTATE_UI_DECO : UIRenderer::RENDERSTATE_UI_DECO_DISABLED), (const void*)texture, tx0, ty0, tx1, ty1 );
 }
 
-RenderAtom LumosGame::CalcPaletteAtom( int c0, int c1, int blend, bool enabled )
+RenderAtom LumosGame::CalcPaletteAtom( int x, int y )
 {
+	const Game::Palette* p = mainPalette;
+	float u = ((float)x+0.5f)/(float)p->dx;
+	float v = 1.0f - ((float)y+0.5f)/(float)p->dy;
+
 	Vector2I c = { 0, 0 };
 	Texture* texture = TextureManager::Instance()->GetTexture( "palette" );
 
-	static const int offset[5] = { 75, 125, 175, 225, 275 };
-	static const int subOffset[3] = { 0, -12, 12 };
-
-	if ( blend == PALETTE_NORM ) {
-		if ( c1 > c0 )
-			Swap( &c1, &c0 );
-		c.x = offset[c0];
-		c.y = offset[c1];
-	}
-	else {
-		if ( c0 > c1 )
-			Swap( &c0, &c1 );
-
-		if ( c0 == c1 ) {
-			// first column special:
-			c.x = 25 + subOffset[blend];
-			c.y = offset[c1];
-		}
-		else {
-			c.x = offset[c0] + subOffset[blend];;
-			c.y = offset[c1];
-		}
-	}
-	RenderAtom atom( (const void*)(enabled ? UIRenderer::RENDERSTATE_UI_NORMAL : UIRenderer::RENDERSTATE_UI_DISABLED), (const void*)texture, 0, 0, 0, 0 );
-	UIRenderer::SetAtomCoordFromPixel( c.x, c.y, c.x, c.y, 300, 300, &atom );
+	RenderAtom atom( (const void*)(UIRenderer::RENDERSTATE_UI_NORMAL), (const void*)texture, u, v, u, v );
 	return atom;
 }
 

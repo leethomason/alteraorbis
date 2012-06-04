@@ -854,26 +854,23 @@ public:
 	DigitalBar( Gamui* gamui,
 				int nTicks,
 
-				const RenderAtom& atom0,
-				const RenderAtom& atom1,
-				const RenderAtom& atom2 ) 
+				const RenderAtom& atomLower,		// lit
+				const RenderAtom& atomHigher )		// un-lit
 		: UIItem( Gamui::LEVEL_FOREGROUND ), SPACING( 0.1f )
 	{
-		Init( gamui, nTicks, atom0, atom1, atom2 );
+		Init( gamui, nTicks, atomLower, atomHigher );
 	}
 	virtual ~DigitalBar()		{}
 
 	void Init(	Gamui* gamui, 
 				int nTicks,
-				const RenderAtom& atom0,
-				const RenderAtom& atom1,
-				const RenderAtom& atom2 );
+				const RenderAtom& atomLower,		// lit
+				const RenderAtom& atomHigher );		// un-lit
 
-	void SetRange( float t0, float t1 );
-	void SetRange0( float t0 )				{ SetRange( t0, m_t1 ); }
-	void SetRange1( float t1 )				{ SetRange( m_t0, t1 ); }
-	float GetRange0() const					{ return m_t0; }
-	float GetRange1() const					{ return m_t1; }
+	// t between 0 and 1. The lower atom will be used
+	// below t, the higher atom above
+	void SetRange( float t );
+	float GetRange() const					{ return m_t; }
 
 	virtual float Width() const;
 	virtual float Height() const;
@@ -888,8 +885,9 @@ private:
 	enum { MAX_TICKS = 10 };
 	const float	SPACING;
 	int			m_nTicks;
-	float		m_t0, m_t1;
-	RenderAtom	m_atom[3];
+	float		m_t;
+	RenderAtom	m_atomLower;
+	RenderAtom	m_atomHigher;
 	float		m_width, m_height;
 	Image		m_image[MAX_TICKS];
 };

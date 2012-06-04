@@ -17,10 +17,9 @@ static const Vector2F OFFSET = { -0.5f, -0.5f };
 
 DebugStateComponent::DebugStateComponent( WorldMap* _map ) : map( _map )
 {
-	RenderAtom a0 = LumosGame::CalcPaletteAtom( 2, 1, LumosGame::PALETTE_NORM, true );
-	RenderAtom a1 = LumosGame::CalcPaletteAtom( 4, 1, LumosGame::PALETTE_NORM, true );
-	RenderAtom a2 = LumosGame::CalcPaletteAtom( 6, 1, LumosGame::PALETTE_NORM, true );
-	healthBar.Init( &map->overlay, 10, a0, a1, a2 ); 
+	RenderAtom a1 = LumosGame::CalcPaletteAtom( 1, 3 );
+	RenderAtom a2 = LumosGame::CalcPaletteAtom( 1, 1 );
+	healthBar.Init( &map->overlay, 10, a1, a2 ); 
 }
 
 void DebugStateComponent::OnAdd( Chit* chit )
@@ -40,7 +39,7 @@ void DebugStateComponent::OnAdd( Chit* chit )
 	if ( pHealth ) {
 		health = pHealth->Health();
 	}
-	healthBar.SetRange( (float)health/120.f, (float)1.f );
+	healthBar.SetRange( 0.8f );
 }
 
 

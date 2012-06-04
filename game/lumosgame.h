@@ -41,7 +41,7 @@ public:
 	static gamui::RenderAtom CalcParticleAtom( int id, bool enabled=true );
 	static gamui::RenderAtom CalcIconAtom( int id, bool enabled=true );
 	static gamui::RenderAtom CalcIcon2Atom( int id, bool enabled=true );
-	static gamui::RenderAtom CalcPaletteAtom( int c0, int c1, int blend, bool enable=true );
+	static gamui::RenderAtom CalcPaletteAtom( int x, int y );
 
 	enum {
 		BUTTON_LOOK_STD,
