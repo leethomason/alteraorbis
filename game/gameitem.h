@@ -37,8 +37,15 @@ public:
 	virtual ~WeaponItem()	{}
 	virtual WeaponItem* ToWeapon() { return this; }
 
-	bool DoMelee( U32 time ) {
+	bool CanMelee( U32 time ) {
 		if ( melee && time >= coolTime ) {
+			return true;
+		}
+		return false;
+	}
+
+	bool DoMelee( U32 time ) {
+		if ( CanMelee( time )) {
 			coolTime = time + COOLDOWN_TIME;
 			return true;
 		}

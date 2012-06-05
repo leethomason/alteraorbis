@@ -4,6 +4,8 @@
 #include "pathmovecomponent.h"
 #include "gameitem.h"
 
+#include "../script/battlemechanics.h"
+
 #include "../engine/engine.h"
 #include "../engine/particle.h"
 
@@ -154,7 +156,7 @@ void AIComponent::DoTick( U32 deltaTime )
 		RenderComponent*   thisRender = parentChit->GetRenderComponent();
 		SpatialComponent*  targetSpatial = target.chit->GetSpatialComponent();
 		PathMoveComponent* pmc = GET_COMPONENT( parentChit, PathMoveComponent );
-		U32 absTime = GetChitBag()->BagTime();
+		U32 absTime = GetChitBag()->AbsTime();
 
 		grinliz::CArray<XEItem*, MAX_ACTIVE_ITEMS> activeItems;
 		GameItem::GetActiveItems( parentChit, &activeItems );
@@ -174,21 +176,17 @@ void AIComponent::DoTick( U32 deltaTime )
 		if ( activeItems.Size() > 0 ) {
 			// fixme: use best item for situation
 
-			Vector2F normalToTarget = targetSpatial->GetPosition2D() - thisSpatial->GetPosition2D();
-			normalToTarget.Normalize();
-
-			float dot = DotProduct( thisSpatial->GetPosition2D(), normalToTarget );
-			
-			Vector3F trigger;
-			thisRender->GetMetaData( "trigger", &trigger );
-
-			if (    target.range < MELEE_RANGE ) {
-				if ( dot > MELEE_COS_THETA
-				     && weapon->DoMelee( absTime ) ) 
+			if (    BattleMechanics::InMeleeZone( thisSpatial->GetPosition2D(),
+												  thisSpatial->GetHeading2D(),
+												  targetSpatial->GetPosition2D() ))
+			{
+				if ( weapon->CanMelee( absTime ) )
 				{
 					//GetChitBag()->FireBolt( true, trigger, target.range ); 
 					//Chit* melee = GetChitBag()->NewChit();
-					engine->particleSystem->EmitPD( "melee", targetSpatial->GetPosition(), UP, eyeDir, deltaTime );
+					//engine->particleSystem->EmitPD( "melee", targetSpatial->GetPosition(), UP, eyeDir, deltaTime );
+					BattleMechanics::MeleeAttack( parentChit, weapon );
+																												
 				}
 				// fixme: else queue rotation.
 			}

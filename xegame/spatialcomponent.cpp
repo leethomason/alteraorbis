@@ -30,7 +30,7 @@ void SpatialComponent::SetPosYRot( float x, float y, float z, float _yRot )
 		position.Set( x, y, z ); 
 		yRotation = yRot;
 		RequestUpdate();	// Render triggers off update.
-		SendMessage( SPATIAL_MSG_CHANGED );
+		parentChit->SendMessage( SPATIAL_MSG_CHANGED, this, 0 );
 	}
 }
 

@@ -14,11 +14,12 @@ class MoveComponent;
 
 class ChitBag;
 class Chit;
+class ChitEvent;
 
 class IChitListener
 {
 public:
-	virtual void OnChitMsg( Chit* chit, int id ) = 0;
+	virtual void OnChitMsg( Chit* chit, int id, const ChitEvent* ) = 0;
 };
 
 // MyComponent* mc = GET_COMPONENT( chit, MyComponent );
@@ -53,9 +54,19 @@ public:
 	void RequestUpdate();
 	ChitBag* GetChitBag() { return chitBag; }
 
+	/*
+	enum {
+		LISTENERS  = 0x01,
+		COMPONENTS = 0x02,
+		ALL		   = 0xff
+	};
+	*/
+
 	// Send a message to the listeners, and every component
 	// in the chit (which don't need to be listeners.)
-	void SendMessage( int id, Component* origin );
+	void SendMessage(	int msgID, 
+						Component* exclude,			// useful to not call ourselves. 
+						const ChitEvent* event );	// may be null
 	void AddListener( IChitListener* listener );
 	void RemoveListener( IChitListener* listener );
 
@@ -69,7 +80,7 @@ public:
 	Chit* next;
 
 private:
-	bool CarryMsg( int componentID, Chit* src, int msgID );
+	bool CarryMsg( int componentID, Chit* src, int msgID, const ChitEvent* event );
 
 	ChitBag* chitBag;
 	int id;

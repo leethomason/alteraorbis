@@ -4,27 +4,16 @@
 #include "../grinliz/gldebug.h"
 #include "../grinliz/gltypes.h"
 #include "../grinliz/glrandom.h"
-#include "../grinliz/glrectangle.h"
 
 #include "../engine/enginelimits.h"
 #include "../SimpleLib/SimpleLib.h"
 
 #include "chit.h"
 #include "xegamelimits.h"
+#include "chitevent.h"
 
 class Engine;
 	
-// Shallow
-struct ChitEvent
-{
-	ChitEvent() : id( 0 )	{}
-	ChitEvent( int _id, int _data0=0 ) : id(_id), data0(_data0) { bounds.Zero(); }
-
-	int id;
-	int data0;
-	grinliz::Rectangle2F bounds;
-};
-
 
 class ChitBag
 {
@@ -40,7 +29,7 @@ public:
 
 	// Calls every chit that has a tick.
 	void DoTick( U32 delta );	
-	U32 BagTime() const { return bagTime; }
+	U32 AbsTime() const { return bagTime; }
 
 	// Due to events, changes, etc. a chit may need an update, possibily in addition to, the tick.
 	// Normally called automatically.

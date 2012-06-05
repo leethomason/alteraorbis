@@ -11,12 +11,14 @@ void Component::RequestUpdate()
 }
 
 
+/*
 void Component::SendMessage( int id, bool sendToSiblings )
 {
 	if ( parentChit ) {
 		parentChit->SendMessage( id, sendToSiblings ? this : 0 );
 	}
 }
+*/
 
 
 ChitBag* Component::GetChitBag()

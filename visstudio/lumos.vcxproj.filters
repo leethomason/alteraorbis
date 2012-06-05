@@ -29,6 +29,9 @@
     <Filter Include="Source Files\scenes">
       <UniqueIdentifier>{9c76746e-04f0-4a23-b0d7-3bf308958b3d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\script">
+      <UniqueIdentifier>{78dc7944-9232-4516-bad8-6a208cfdae5b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\engine\camera.cpp">
@@ -207,6 +210,9 @@
     </ClCompile>
     <ClCompile Include="..\game\healthcomponent.cpp">
       <Filter>Source Files\game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\script\battlemechanics.cpp">
+      <Filter>Source Files\script</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -410,6 +416,12 @@
     </ClInclude>
     <ClInclude Include="..\game\healthcomponent.h">
       <Filter>Source Files\game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\script\battlemechanics.h">
+      <Filter>Source Files\script</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xegame\chitevent.h">
+      <Filter>Source Files\xegame</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -119,6 +119,7 @@
     <ClCompile Include="..\scenes\noisetestscene.cpp" />
     <ClCompile Include="..\scenes\particlescene.cpp" />
     <ClCompile Include="..\scenes\rendertestscene.cpp" />
+    <ClCompile Include="..\script\battlemechanics.cpp" />
     <ClCompile Include="..\shared\gamedbreader.cpp" />
     <ClCompile Include="..\shared\glmap.cpp" />
     <ClCompile Include="..\win32\audio.cpp" />
@@ -184,6 +185,7 @@
     <ClInclude Include="..\scenes\particlescene.h" />
     <ClInclude Include="..\scenes\rendertestscene.h" />
     <ClInclude Include="..\scenes\titlescene.h" />
+    <ClInclude Include="..\script\battlemechanics.h" />
     <ClInclude Include="..\shared\gamedb.h" />
     <ClInclude Include="..\shared\gamedbreader.h" />
     <ClInclude Include="..\shared\glmap.h" />
@@ -195,6 +197,7 @@
     <ClInclude Include="..\xegame\cgame.h" />
     <ClInclude Include="..\xegame\chit.h" />
     <ClInclude Include="..\xegame\chitbag.h" />
+    <ClInclude Include="..\xegame\chitevent.h" />
     <ClInclude Include="..\xegame\component.h" />
     <ClInclude Include="..\xegame\game.h" />
     <ClInclude Include="..\xegame\inventorycomponent.h" />

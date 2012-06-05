@@ -140,7 +140,7 @@ void NavTest2Scene::CreateChit( const Vector2I& p )
 
 	chit->GetSpatialComponent()->SetPosition( (float)p.x+0.5f, 0, (float)p.y+0.5f );
 	chit->AddListener( this );
-	OnChitMsg( chit, PATHMOVE_MSG_DESTINATION_REACHED );
+	OnChitMsg( chit, PATHMOVE_MSG_DESTINATION_REACHED, 0 );
 	++nChits;
 }
 
@@ -178,7 +178,7 @@ void NavTest2Scene::DrawDebugText()
 }
 
 
-void NavTest2Scene::OnChitMsg( Chit* chit, int id )
+void NavTest2Scene::OnChitMsg( Chit* chit, int id, const ChitEvent* )
 {
 	if ( id == PATHMOVE_MSG_DESTINATION_REACHED || id == PATHMOVE_MSG_DESTINATION_BLOCKED ) {
 		// Reached or blocked, move to next thing:

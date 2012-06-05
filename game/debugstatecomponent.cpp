@@ -50,7 +50,7 @@ void DebugStateComponent::OnRemove()
 }
 
 
-void DebugStateComponent::OnChitMsg( Chit* chit, int id )
+void DebugStateComponent::OnChitMsg( Chit* chit, int id, const ChitEvent* )
 {
 	if ( id == SPATIAL_MSG_CHANGED ) {
 		Vector2F pos = chit->GetSpatialComponent()->GetPosition2D() + OFFSET;

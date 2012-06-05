@@ -234,7 +234,7 @@ void NavTestScene::DrawDebugText()
 }
 
 
-void NavTestScene::OnChitMsg( Chit* chit, int id )
+void NavTestScene::OnChitMsg( Chit* chit, int id, const ChitEvent* )
 {
 //	GLOUTPUT(( "OnChitMsg %s %d\n", componentName, id ));
 	const Vector2F& pos = chit->GetSpatialComponent()->GetPosition2D();

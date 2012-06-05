@@ -20,7 +20,7 @@ public:
 
 	virtual void OnAdd( Chit* chit );
 	virtual void OnRemove();
-	virtual void OnChitMsg( Chit* chit, int id );
+	virtual void OnChitMsg( Chit* chit, int id, const ChitEvent* );
 
 private:
 	WorldMap* map;

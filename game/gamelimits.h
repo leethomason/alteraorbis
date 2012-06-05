@@ -42,8 +42,10 @@ enum {
 
 	HEALTH_MSG_CHANGED,
 
-	AI_EVENT_AWARENESS,		// 0: team to receive
-							// bounds of awareness
+	AI_EVENT_AWARENESS,		// data0: team to receive bounds of awareness
+
+	EVENT_MELEE_DAMAGE,		// pData0: WeaponItem* 
+							// normal: direction of strike
 };
 
 #endif // GAMELIMITS_INCLUDED
