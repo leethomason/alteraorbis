@@ -3,6 +3,8 @@
 #include "../xegame/chit.h"
 #include "../grinliz/glutil.h"
 
+using namespace grinliz;
+
 
 void HealthComponent::SetHealth( int h )
 {
@@ -21,3 +23,14 @@ void HealthComponent::SetMaxHealth( int h )
 		parentChit->SendMessage( HEALTH_MSG_CHANGED, this, 0 );
 	}
 }
+
+
+void HealthComponent::DeltaHealth( int d )
+{
+	int oldHealth = health;
+	SetHealth( Clamp( health+d, 0, maxHealth ));
+	if ( oldHealth > 0 && health == 0 ) {
+		parentChit->SendMessage( HEALTH_MSG_DESTROYED, this, 0 );
+	}
+}
+

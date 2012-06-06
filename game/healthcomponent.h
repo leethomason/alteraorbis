@@ -22,6 +22,7 @@ public:
 	int  GetHealth() const			{ return health; }
 	int  GetMaxHealth() const		{ return maxHealth; }
 	float GetHealthFraction() const { return (float)health / (float)maxHealth; }
+	void DeltaHealth( int delta );
 
 private:
 	int health;

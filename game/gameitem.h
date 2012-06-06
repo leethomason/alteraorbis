@@ -52,6 +52,10 @@ public:
 		return false;
 	}
 
+	int BaseDamage() {
+		return 20;
+	}
+
 	bool melee;
 	bool range;
 	int	rounds;

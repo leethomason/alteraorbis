@@ -103,6 +103,8 @@ public:
 	T* Mem()				{ return mem; }
 
 private:
+	CDynArray( const CDynArray<T, CACHE>& );	// not allowed. Add a missing '&' in the code.
+
 	void EnsureCap( int count ) {
 		if ( count > capacity ) {
 			capacity = grinliz::Max( CeilPowerOf2( count ), (U32) 16 );
