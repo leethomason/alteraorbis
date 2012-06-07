@@ -24,6 +24,7 @@
 X particle test scene
 	X alpha processing for additive blending
 	- particle groups (ex: fire)
+	- particles that aren't quads (beziers)
 
 
 ** LOW PRI **

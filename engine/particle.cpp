@@ -24,6 +24,8 @@
 #include "shadermanager.h"
 #include "serialize.h"
 
+#include <cfloat>
+
 using namespace grinliz;
 
 #if 0
@@ -104,22 +106,25 @@ void ParticleSystem::Process( U32 delta, const grinliz::Vector3F eyeDir[] )
 
 			pd->pos += pd->velocity * deltaF;
 			const Vector3F pos = pd->pos;
-			const float size = pd->size;
+			const Vector4F size = pd->size;
+
+			if ( size.x != FLT_MAX ) {
+				ps[0].pos = pos - up*size.w - right*size.z;
+				ps[1].pos = pos - up*size.w + right*size.x;
+				ps[2].pos = pos + up*size.y + right*size.x;
+				ps[3].pos = pos + up*size.y - right*size.z;
+			}
 
 			ps[0].color = color;
-			ps[0].pos = pos - up*size - right*size;
 			ps[0].uv = srcPS[0].uv;
 
 			ps[1].color = color;
-			ps[1].pos = pos - up*size + right*size;
 			ps[1].uv = srcPS[1].uv;
 
 			ps[2].color = color;
-			ps[2].pos = pos + up*size + right*size;
 			ps[2].uv = srcPS[2].uv;
 
 			ps[3].color = color;
-			ps[3].pos = pos + up*size - right*size;
 			ps[3].uv = srcPS[3].uv;
 
 			pd++;
@@ -152,12 +157,13 @@ void ParticleSystem::EmitBeam( const grinliz::Vector3F& p0, const grinliz::Vecto
 void ParticleSystem::EmitPD(	const char* name,
 								const grinliz::Vector3F& initPos,
 								const grinliz::Vector3F& normal, 
+								const grinliz::Vector3F& dir, 
 								const grinliz::Vector3F eyeDir[],
 								U32 deltaTime )
 {
 	for( int i=0; i<particleDefArr.Size(); ++i ) {
 		if ( particleDefArr[i].name == name ) {
-			EmitPD( particleDefArr[i], initPos, normal, eyeDir, deltaTime );
+			EmitPD( particleDefArr[i], initPos, normal, dir, eyeDir, deltaTime );
 			break;
 		}
 	}
@@ -167,6 +173,7 @@ void ParticleSystem::EmitPD(	const char* name,
 void ParticleSystem::EmitPD(	const ParticleDef& def,
 								const grinliz::Vector3F& initPos,
 								const grinliz::Vector3F& normal, 
+								const grinliz::Vector3F& dir, 
 								const grinliz::Vector3F eyeDir[],
 								U32 deltaTime )
 {
@@ -231,11 +238,23 @@ void ParticleSystem::EmitPD(	const ParticleDef& def,
 				ps[k].uv = uv[k];
 				ps[k].uv.x += uOffset;
 			};
-			const float size = def.size;
-			ps[0].pos = pos - up*size - right*size;
-			ps[1].pos = pos - up*size + right*size;
-			ps[2].pos = pos + up*size + right*size;
-			ps[3].pos = pos + up*size - right*size;
+			const Vector4F size = def.size;
+
+			if ( def.config == ParticleSystem::PARTICLE_WORLD ) {
+				Vector3F tangent;
+				CrossProduct( normal, dir, &tangent );
+				ps[0].pos = pos - tangent*size.w - dir*size.z;
+				ps[1].pos = pos - tangent*size.y + dir*size.x;
+				ps[2].pos = pos + tangent*size.y + dir*size.x;
+				ps[3].pos = pos + tangent*size.w - dir*size.z;
+				pd->size.x = FLT_MAX;	// mark this as world space.
+			}
+			else {
+				ps[0].pos = pos - up*size.w - right*size.z;
+				ps[1].pos = pos - up*size.w + right*size.x;
+				ps[2].pos = pos + up*size.y + right*size.x;
+				ps[3].pos = pos + up*size.y - right*size.z;
+			}
 
 			++nParticles;
 		}
@@ -363,8 +382,16 @@ void ParticleDef::Load( const tinyxml2::XMLElement* ele )
 	if ( ele->Attribute( "time", "continuous" ) ) {
 		time = CONTINUOUS;
 	}
-	size = 1.0f;
-	ele->QueryFloatAttribute( "size", &size );
+	size.Set( 1, 1, 1, 1 );
+	if ( ele->Attribute( "size" )) {
+		ele->QueryFloatAttribute( "size", &size.x );
+		size.y = size.z = size.w = size.x;
+	}
+	ele->QueryFloatAttribute( "sizePX", &size.x );
+	ele->QueryFloatAttribute( "sizePY", &size.y );
+	ele->QueryFloatAttribute( "sizeNX", &size.z );
+	ele->QueryFloatAttribute( "sizeNY", &size.w );
+
 	count = 1;
 	ele->QueryIntAttribute( "count", &count );
 	
@@ -375,6 +402,7 @@ void ParticleDef::Load( const tinyxml2::XMLElement* ele )
 	config = ParticleSystem::PARTICLE_RAY;
 	if ( ele->Attribute( "config", "sphere" ) ) config = ParticleSystem::PARTICLE_SPHERE;
 	if ( ele->Attribute( "config", "hemi" ) ) config = ParticleSystem::PARTICLE_HEMISPHERE;
+	if ( ele->Attribute( "config", "world" ) ) config = ParticleSystem::PARTICLE_WORLD;
 
 	posFuzz = 0;
 	ele->QueryFloatAttribute( "posFuzz", &posFuzz );

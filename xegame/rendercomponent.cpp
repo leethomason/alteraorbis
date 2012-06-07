@@ -87,8 +87,9 @@ void RenderComponent::OnChitMsg( Chit* chit, int id, const ChitEvent* event )
 	if ( chit == parentChit && id == MSG_CHIT_DESTROYED ) {
 		static const Vector3F UP = { 0, 1, 0 };
 		static const Vector3F DOWN = { 0, -1, 0 };
+		static const Vector3F RIGHT = { 1, 0, 0 };
 		const Vector3F* eyeDir = engine->camera.EyeDir3();
-		engine->particleSystem->EmitPD( "derez", model->AABB().Center(), UP, eyeDir, 0 );
-		engine->particleSystem->EmitPD( "derez", model->AABB().Center(), DOWN, eyeDir, 0 );
+		engine->particleSystem->EmitPD( "derez", model->AABB().Center(), UP, RIGHT, eyeDir, 0 );
+		engine->particleSystem->EmitPD( "derez", model->AABB().Center(), DOWN, RIGHT, eyeDir, 0 );
 	}
 }
