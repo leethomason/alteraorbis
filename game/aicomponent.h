@@ -23,6 +23,7 @@ public:
 	virtual bool NeedsTick()					{ return true; }
 	virtual void DoTick( U32 delta );
 	virtual void DebugStr( grinliz::GLString* str );
+	virtual void OnChitMsg( Chit* chit, int id, const ChitEvent* event );
 
 	// FIXME: A hack; turns off the AI, leaving the "team" but does nothing
 	void SetEnabled( bool _enabled )	{ enabled = _enabled; }

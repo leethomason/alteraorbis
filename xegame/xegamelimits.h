@@ -15,6 +15,7 @@ enum {
 	COMPONENT_MSG_NONE,
 	
 	// Chits
+	MSG_CHIT_DESTROYED,
 
 	// Componets
 	SPATIAL_MSG_CHANGED,		// the position or rotation has changed

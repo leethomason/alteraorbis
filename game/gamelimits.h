@@ -41,7 +41,6 @@ enum {
 	PATHMOVE_MSG_DESTINATION_BLOCKED,
 
 	HEALTH_MSG_CHANGED,
-	HEALTH_MSG_DESTROYED,
 
 	AI_EVENT_AWARENESS,		// data0: team to receive bounds of awareness
 

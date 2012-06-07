@@ -28,6 +28,7 @@ public:
 	virtual void OnRemove();
 	virtual bool NeedsTick()					{ return true; }
 	virtual void DoTick( U32 delta );
+	virtual void OnChitMsg( Chit* chit, int id, const ChitEvent* event );
 
 	void QueueDest( const grinliz::Vector2F& dest );
 	void QueueDest( float x, float y )	{ grinliz::Vector2F v = { x, y }; QueueDest( v ); }

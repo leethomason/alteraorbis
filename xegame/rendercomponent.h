@@ -29,6 +29,7 @@ public:
 	virtual void OnRemove();
 
 	virtual void DoUpdate();
+	virtual void OnChitMsg( Chit* chit, int id, const ChitEvent* event );
 
 	// ------ Additional --------
 	// Radius of the "base" the model stands on. Used to position

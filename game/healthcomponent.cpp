@@ -1,6 +1,7 @@
 #include "healthcomponent.h"
 #include "gamelimits.h"
 #include "../xegame/chit.h"
+#include "../xegame/chitbag.h"
 #include "../grinliz/glutil.h"
 
 using namespace grinliz;
@@ -30,7 +31,8 @@ void HealthComponent::DeltaHealth( int d )
 	int oldHealth = health;
 	SetHealth( Clamp( health+d, 0, maxHealth ));
 	if ( oldHealth > 0 && health == 0 ) {
-		parentChit->SendMessage( HEALTH_MSG_DESTROYED, this, 0 );
+		parentChit->SendMessage( MSG_CHIT_DESTROYED, this, 0 );
+		GetChitBag()->QueueDelete( parentChit );
 	}
 }
 

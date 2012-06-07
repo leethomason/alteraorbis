@@ -4,6 +4,7 @@
 
 #include "../engine/model.h"
 #include "../engine/engine.h"
+#include "../engine/particle.h"
 
 #include "../grinliz/glperformance.h"
 
@@ -78,4 +79,16 @@ bool RenderComponent::GetMetaData( const char* name, grinliz::Vector3F* value )
 void RenderComponent::DebugStr( GLString* str )
 {
 	str->Format( "[Render]=%s ", resource->header.name.c_str() );
+}
+
+
+void RenderComponent::OnChitMsg( Chit* chit, int id, const ChitEvent* event )
+{
+	if ( chit == parentChit && id == MSG_CHIT_DESTROYED ) {
+		static const Vector3F UP = { 0, 1, 0 };
+		static const Vector3F DOWN = { 0, -1, 0 };
+		const Vector3F* eyeDir = engine->camera.EyeDir3();
+		engine->particleSystem->EmitPD( "derez", model->AABB().Center(), UP, eyeDir, 0 );
+		engine->particleSystem->EmitPD( "derez", model->AABB().Center(), DOWN, eyeDir, 0 );
+	}
 }

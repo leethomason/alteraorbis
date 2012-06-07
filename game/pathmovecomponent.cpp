@@ -33,6 +33,12 @@ void PathMoveComponent::OnRemove()
 }
 
 
+
+void PathMoveComponent::OnChitMsg( Chit* chit, int id, const ChitEvent* event )
+{
+}
+
+
 void PathMoveComponent::QueueDest( const grinliz::Vector2F& d )
 {
 	SetNoPath();

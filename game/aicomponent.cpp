@@ -205,3 +205,7 @@ void AIComponent::DebugStr( grinliz::GLString* str )
 	str->Format( "[AI] " );
 }
 
+
+void AIComponent::OnChitMsg( Chit* chit, int id, const ChitEvent* event )
+{
+}
