@@ -14,7 +14,7 @@
 
 using namespace grinliz;
 
-//#define DEBUG_PMC
+#define DEBUG_PMC
 
 void PathMoveComponent::OnAdd( Chit* chit )
 {
@@ -41,13 +41,13 @@ void PathMoveComponent::OnChitMsg( Chit* chit, int id, const ChitEvent* event )
 }
 
 
-void PathMoveComponent::QueueDest( grinliz::Vector2F d, float r, int doNotAvoid )
+void PathMoveComponent::QueueDest( grinliz::Vector2F d, float r /*, int doNotAvoid*/ )
 {
 	GLASSERT(  d.x >= 0 && d.y >= 0 );
 
 	queued.pos = d;
 	queued.rotation = r;
-	queued.doNotAvoid = doNotAvoid;
+//	queued.doNotAvoid = doNotAvoid;
 }
 
 
@@ -74,7 +74,7 @@ void PathMoveComponent::ComputeDest()
 	Vector2F d = dest.pos;
 	if ( map->ApplyBlockEffect( d, radius, &dest.pos ) ) {
 #ifdef DEBUG_PMC
-		GLOUTPUT(( "Dest adjusted. (%.1f,%.1f) -> (%.1f,%.1f)\n", d.x, d.y, dest.x, dest.y ));
+		GLOUTPUT(( "Dest adjusted. (%.1f,%.1f) -> (%.1f,%.1f)\n", d.x, d.y, dest.pos.x, dest.pos.y ));
 #endif
 	}
 
@@ -356,7 +356,7 @@ void PathMoveComponent::DoTick( U32 delta )
 				GLOUTPUT(( "Repath\n" ));
 #endif
 				GLASSERT( dest.pos.x >= 0 );
-				QueueDest( dest.pos, dest.rotation, dest.doNotAvoid );
+				QueueDest( dest.pos, dest.rotation );
 				repath = 0;
 			}
 		}
@@ -373,7 +373,7 @@ void PathMoveComponent::DoTick( U32 delta )
 			else {
 				// continue path:
 				GLASSERT( dest.pos.x >= 0 );
-				QueueDest( dest.pos, dest.rotation, dest.doNotAvoid );
+				QueueDest( dest.pos, dest.rotation );
 			}
 		}
 	}

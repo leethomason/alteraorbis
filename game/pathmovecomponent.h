@@ -31,8 +31,7 @@ public:
 	virtual void OnChitMsg( Chit* chit, int id, const ChitEvent* event );
 
 	void QueueDest( grinliz::Vector2F dest,
-					float rotation = -1.f,				// if specified, the rotation we wish to get to
-					int doNotAvoidChitID = 0 );			// if charging at a chit, we don't want to avoid it
+					float rotation = -1.f );	// if specified, the rotation we wish to get to
 
 	/*
 	// Set whether rotation is prioritized over movement. (Default
@@ -71,11 +70,11 @@ private:
 	void ApplyBlocks();
 
 	struct Dest {
-		void Clear() { pos.Set( -1, -1 ); rotation = -1.f; doNotAvoid = 0; }
+		void Clear() { pos.Set( -1, -1 ); rotation = -1.f; /*doNotAvoid = 0;*/ }
 
 		grinliz::Vector2F	pos;
 		float				rotation;	 // <0 means ignore
-		int					doNotAvoid;
+		//int					doNotAvoid;
 	};
 
 	WorldMap*	map;

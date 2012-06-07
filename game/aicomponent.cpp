@@ -182,8 +182,7 @@ void AIComponent::DoTick( U32 deltaTime )
 			{
 				if ( weapon->CanMelee( absTime ) )
 				{
-					BattleMechanics::MeleeAttack( parentChit, weapon );
-																												
+					BattleMechanics::MeleeAttack( parentChit, weapon );																	
 				}
 				// fixme: else queue rotation.
 			}
