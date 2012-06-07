@@ -35,4 +35,3 @@ void HealthComponent::DeltaHealth( int d )
 		GetChitBag()->QueueDelete( parentChit );
 	}
 }
-

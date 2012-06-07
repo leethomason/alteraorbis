@@ -123,7 +123,8 @@ void BattleTestScene::CreateChit( const Vector2I& p )
 	chit->Add( new RenderComponent( engine, asset, 0 ));
 	chit->Add( new PathMoveComponent( map ));
 	chit->Add( new AIComponent( engine, map, team ));
-	chit->Add( new DebugStateComponent( map ));
+	//chit->Add( new DebugStateComponent( map ));
+	chit->Add( new DebugPathComponent( engine, map, static_cast<LumosGame*>(game) ));
 	chit->Add( new HealthComponent());
 	InventoryComponent* inv = new InventoryComponent( &chitBag );
 	chit->Add( inv );
@@ -132,10 +133,6 @@ void BattleTestScene::CreateChit( const Vector2I& p )
 	GET_COMPONENT( chit, AIComponent )->SetEnabled( team == 0 );
 	chit->GetSpatialComponent()->SetPosYRot( (float)p.x+0.5f, 0, (float)p.y+0.5f, (float)random.Rand( 360 ) );
 	GET_COMPONENT( chit, HealthComponent )->SetHealth( 100, 100 );
-
-#ifdef DEBUG_PMC
-	chit->Add( new DebugPathComponent( engine, map, static_cast<LumosGame*>(game) ));
-#endif
 
 	if ( team == 0 ) {
 		WeaponItem* gunItem = new WeaponItem( "ASLT-1", "ASLT-1" );

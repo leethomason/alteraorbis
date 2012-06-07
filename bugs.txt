@@ -12,6 +12,7 @@
 	- serialization
 	- hesitation when near melee target (probably squatted destination code kicking in)
 	- error in ray-cast: detecting a 'tree' where it shouldn't (near the head of the prime)
+	- add rez and de-rez effect for chits
 
 
 - cameras only self-delete if they reach destination; should do better. Probably

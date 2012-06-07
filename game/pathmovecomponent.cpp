@@ -23,7 +23,9 @@ void PathMoveComponent::OnAdd( Chit* chit )
 	blockForceApplied = false;
 	avoidForceApplied = false;
 	isStuck = false;
-	queuedDest.Set( -1, -1 );
+
+	queued.Clear();
+	dest.Clear();
 }
 
 
@@ -39,15 +41,17 @@ void PathMoveComponent::OnChitMsg( Chit* chit, int id, const ChitEvent* event )
 }
 
 
-void PathMoveComponent::QueueDest( const grinliz::Vector2F& d )
+void PathMoveComponent::QueueDest( grinliz::Vector2F d, float r, int doNotAvoid )
 {
-	SetNoPath();
 	GLASSERT(  d.x >= 0 && d.y >= 0 );
-	queuedDest = d;
+
+	queued.pos = d;
+	queued.rotation = r;
+	queued.doNotAvoid = doNotAvoid;
 }
 
 
-void PathMoveComponent::ComputeDest( const Vector2F& d )
+void PathMoveComponent::ComputeDest()
 {
 	GRINLIZ_PERFTRACK;
 
@@ -56,32 +60,34 @@ void PathMoveComponent::ComputeDest( const Vector2F& d )
 	RenderComponent* render = parentChit->GetRenderComponent();
 	GLASSERT( render );
 
-	const Vector3F& posVec = spatial->GetPosition();
+	const Vector2F& posVec = spatial->GetPosition2D();
 
-	Vector2F start = { posVec.x, posVec.z };
-	dest = d;
+	GLASSERT( queued.pos.x >= 0 && queued.pos.y >= 0 );
+	dest = queued;
+	GLASSERT( dest.pos.x >= 0 && dest.pos.y >= 0 );
+	queued.Clear();
 	nPathPos = 0;
 	pathPos = 0;
 
 	// Make sure the 'dest' is actually a point we can get to.
 	float radius = render->RadiusOfBase();
-	if ( map->ApplyBlockEffect( d, radius, &dest ) ) {
+	Vector2F d = dest.pos;
+	if ( map->ApplyBlockEffect( d, radius, &dest.pos ) ) {
 #ifdef DEBUG_PMC
 		GLOUTPUT(( "Dest adjusted. (%.1f,%.1f) -> (%.1f,%.1f)\n", d.x, d.y, dest.x, dest.y ));
 #endif
 	}
 
 	float cost=0;
-	bool okay = map->CalcPath( start, dest, path, &nPathPos, MAX_MOVE_PATH, &cost, pathDebugging ); 
+	bool okay = map->CalcPath( posVec, dest.pos, path, &nPathPos, MAX_MOVE_PATH, &cost, pathDebugging ); 
 	if ( !okay ) {
 		SetNoPath();
 		parentChit->SendMessage( PATHMOVE_MSG_DESTINATION_BLOCKED, this, 0 ); 
-		GLASSERT( queuedDest.x > 0 );	// DEBUGGING
 	}
 	else {
 		GLASSERT( nPathPos > 0 );
 		GLASSERT( pathPos == 0 );
-		GLASSERT( dest.x >= 0 && dest.y >= 0 );
+		GLASSERT( dest.pos.x >= 0 && dest.pos.y >= 0 );
 	}
 	// If pos < nPathPos, then pathing happens!
 }
@@ -114,6 +120,7 @@ float PathMoveComponent::GetDistToNext2( const Vector2F& current )
 }
 
 
+#if 0
 void PathMoveComponent::MoveFirst( U32 delta )
 {
 	if ( pathPos < nPathPos ) {
@@ -142,6 +149,7 @@ void PathMoveComponent::MoveFirst( U32 delta )
 		}
 	}
 }
+#endif
 
 
 void PathMoveComponent::RotationFirst( U32 delta )
@@ -307,13 +315,9 @@ void PathMoveComponent::DoTick( U32 delta )
 {
 	GRINLIZ_PERFTRACK;
 
-	if ( queuedDest.x >= 0 ) {
-		pathPos = nPathPos = 0;
-		// Oh the callback is painful. The queuedDest will
-		// get set by the callback from ComputeDest
-		Vector2F q = queuedDest;
-		queuedDest.Set( -1, -1 );	// clear here, so it can be set again
-		ComputeDest( q );
+	if ( queued.pos.x >= 0 ) {
+		pathPos = nPathPos = 0;	// clear the old path.
+		ComputeDest();			// ComputeDest can fail, send message, then cause re-queue
 	}
 
 	blockForceApplied = false;
@@ -324,10 +328,7 @@ void PathMoveComponent::DoTick( U32 delta )
 		int startPathPos = pathPos;
 		float distToNext2 = GetDistToNext2( pos2 );
 
-		if ( rotationFirst )
-			RotationFirst( delta );
-		else
-			MoveFirst( delta );
+		RotationFirst( delta );
 
 		bool squattingDest = AvoidOthers( delta );
 		ApplyBlocks();
@@ -354,14 +355,14 @@ void PathMoveComponent::DoTick( U32 delta )
 #ifdef DEBUG_PMC
 				GLOUTPUT(( "Repath\n" ));
 #endif
-				GLASSERT( dest.x >= 0 );
-				QueueDest( dest );
+				GLASSERT( dest.pos.x >= 0 );
+				QueueDest( dest.pos, dest.rotation, dest.doNotAvoid );
 				repath = 0;
 			}
 		}
 		// Are we at the end of the path data?
 		if ( nPathPos > 0 && pathPos == nPathPos ) {
-			if ( squattingDest || dest.Equal( path[nPathPos-1], parentChit->GetRenderComponent()->RadiusOfBase()*0.2f ) ) {
+			if ( squattingDest || dest.pos.Equal( path[nPathPos-1], parentChit->GetRenderComponent()->RadiusOfBase()*0.2f ) ) {
 #ifdef DEBUG_PMC
 				GLOUTPUT(( "Dest reached. squatted=%s\n", squattingDest ? "true" : "false" ));
 #endif
@@ -371,8 +372,8 @@ void PathMoveComponent::DoTick( U32 delta )
 			}
 			else {
 				// continue path:
-				GLASSERT( dest.x >= 0 );
-				QueueDest( dest );
+				GLASSERT( dest.pos.x >= 0 );
+				QueueDest( dest.pos, dest.rotation, dest.doNotAvoid );
 			}
 		}
 	}
@@ -383,7 +384,7 @@ void PathMoveComponent::DoTick( U32 delta )
 void PathMoveComponent::DebugStr( grinliz::GLString* str )
 {
 	if ( pathPos < nPathPos ) {
-		str->Format( "[PathMove]=%.1f,%.1f ", dest.x, dest.y );
+		str->Format( "[PathMove]=%.1f,%.1f ", dest.pos.x, dest.pos.y );
 	}
 	else {
 		str->Format( "[PathMove]=still " );

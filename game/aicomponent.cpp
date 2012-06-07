@@ -182,9 +182,6 @@ void AIComponent::DoTick( U32 deltaTime )
 			{
 				if ( weapon->CanMelee( absTime ) )
 				{
-					//GetChitBag()->FireBolt( true, trigger, target.range ); 
-					//Chit* melee = GetChitBag()->NewChit();
-					//engine->particleSystem->EmitPD( "melee", targetSpatial->GetPosition(), UP, eyeDir, deltaTime );
 					BattleMechanics::MeleeAttack( parentChit, weapon );
 																												
 				}

@@ -15,7 +15,7 @@ class PathMoveComponent : public MoveComponent
 public:
 
 	PathMoveComponent(	WorldMap* _map )				// required; used to avoids blocks when moving. 
-		: map( _map ), nPathPos( 0 ), pathPos( 0 ), rotationFirst(true), pathDebugging( false ) {}
+		: map( _map ), nPathPos( 0 ), pathPos( 0 ), pathDebugging( false ) {}
 	virtual ~PathMoveComponent() {}
 
 	virtual Component* ToComponent( const char* name ) {
@@ -30,13 +30,16 @@ public:
 	virtual void DoTick( U32 delta );
 	virtual void OnChitMsg( Chit* chit, int id, const ChitEvent* event );
 
-	void QueueDest( const grinliz::Vector2F& dest );
-	void QueueDest( float x, float y )	{ grinliz::Vector2F v = { x, y }; QueueDest( v ); }
+	void QueueDest( grinliz::Vector2F dest,
+					float rotation = -1.f,				// if specified, the rotation we wish to get to
+					int doNotAvoidChitID = 0 );			// if charging at a chit, we don't want to avoid it
 
+	/*
 	// Set whether rotation is prioritized over movement. (Default
 	// to true.) If false, then motion will happen and the rotation
 	// is set from the motion.
 	void SetRotationFirst( bool r ) { rotationFirst = r; }
+	*/
 	void SetPathDebugging( bool d )	{ pathDebugging = d; }
 
 	// Status info
@@ -46,14 +49,15 @@ public:
 	bool IsAvoiding() const			{ return avoidForceApplied; }
 
 private:
-	void ComputeDest( const grinliz::Vector2F& dest );
+	// Commit the 'queued' to the 'dest', if possible. 
+	void ComputeDest();
 	
 	void GetPosRot( grinliz::Vector2F* pos, float* rot );
 	void SetPosRot( const grinliz::Vector2F& pos, float rot );
 	float GetDistToNext2( const grinliz::Vector2F& currentPos );
 	void SetNoPath() {
 		nPathPos = pathPos = repath = 0;
-		dest.Zero();
+		dest.Clear();
 	}
 
 	// Move, then set rotation from movement.
@@ -66,17 +70,25 @@ private:
 	// Keep from hitting world objects.
 	void ApplyBlocks();
 
+	struct Dest {
+		void Clear() { pos.Set( -1, -1 ); rotation = -1.f; doNotAvoid = 0; }
+
+		grinliz::Vector2F	pos;
+		float				rotation;	 // <0 means ignore
+		int					doNotAvoid;
+	};
+
 	WorldMap*	map;
 	int nPathPos;				// size of path
 	int pathPos;				// index of where we are on path
 	int repath;					// counter to see if we are stuck
-	grinliz::Vector2F dest;		// final destination
-	grinliz::Vector2F queuedDest;
+
+	Dest queued;	// queued up, 
+	Dest dest;		// in use
 
 	grinliz::Vector2F pos2;		// only valid during tick!
 	float    rot;				// only valid during tick!
 
-	bool rotationFirst;
 	bool pathDebugging;
 
 	bool blockForceApplied;		
