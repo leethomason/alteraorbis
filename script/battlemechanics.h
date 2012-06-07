@@ -7,11 +7,12 @@
 
 class Chit;
 class WeaponItem;
+class Engine;
 
 class BattleMechanics
 {
 public:
-	static void MeleeAttack( Chit* src, WeaponItem* weapon );
+	static void MeleeAttack( Engine* engine, Chit* src, WeaponItem* weapon );
 	static bool InMeleeZone(	const grinliz::Vector2F& origin, 
 								const grinliz::Vector2F& dirNormal, 
 								const grinliz::Vector2F& target );

@@ -7,9 +7,14 @@
 #include "../xegame/chitbag.h"
 #include "../xegame/chit.h"
 #include "../xegame/spatialcomponent.h"
+#include "../xegame/rendercomponent.h"
 
 #include "../grinliz/glvector.h"
 #include "../grinliz/glgeometry.h"
+
+#include "../engine/engine.h"
+#include "../engine/camera.h"
+#include "../engine/particle.h"
 
 using namespace grinliz;
 
@@ -32,7 +37,7 @@ bool BattleMechanics::InMeleeZone( const grinliz::Vector2F& origin,
 }
 
 
-void BattleMechanics::MeleeAttack( Chit* src, WeaponItem* weapon )
+void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, WeaponItem* weapon )
 {
 	ChitBag* chitBag = src->GetChitBag();
 	GLASSERT( chitBag );
@@ -53,6 +58,19 @@ void BattleMechanics::MeleeAttack( Chit* src, WeaponItem* weapon )
 
 	Vector2F srcPos = src->GetSpatialComponent()->GetPosition2D();
 	Vector2F srcNormal = src->GetSpatialComponent()->GetHeading2D();
+
+	if ( engine && src->GetRenderComponent() ) {
+		Vector3F trigger;
+		src->GetRenderComponent()->GetMetaData( "trigger", &trigger );
+		Vector3F srcNormal3 = src->GetSpatialComponent()->GetHeading();
+		trigger = trigger + srcNormal3 * MELEE_RANGE;
+		Vector3F cross;
+		static const Vector3F UP = { 0, 1, 0 };
+		CrossProduct( srcNormal3, UP, &cross );
+
+		engine->particleSystem->EmitPD( "melee", trigger, UP, cross, engine->camera.EyeDir3(), 0 );
+	}
+
 
 	Rectangle2F b;
 	b.min = srcPos; b.max = srcPos;
