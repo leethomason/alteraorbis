@@ -101,6 +101,9 @@ private:
 		GENERAL_1,
 		GENERAL_2,
 		GENERAL_3,
+		GENERAL_4,
+		GENERAL_5,
+		GENERAL_6,	// FIXME: fragile system
 		RENDER,
 		NUM_SLOTS,
 
@@ -117,6 +120,9 @@ private:
 			Component*			general1;
 			Component*			general2;
 			Component*			general3;
+			Component*			general4;
+			Component*			general5;
+			Component*			general6;
 			RenderComponent*	renderComponent;		// should be last
 		};
 		Component*			slot[NUM_SLOTS];

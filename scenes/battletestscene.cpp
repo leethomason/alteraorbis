@@ -122,7 +122,13 @@ void BattleTestScene::CreateChit( const Vector2I& p )
 	chit->Add( new SpatialComponent( true ) );
 	chit->Add( new RenderComponent( engine, asset, 0 ));
 	chit->Add( new PathMoveComponent( map ));
-	chit->Add( new AIComponent( engine, map, team ));
+	if ( team == 0 ) {
+		chit->Add( new AIComponent( engine, map ));
+	}
+	GameItem* item = new GameItem();
+	item->primaryTeam = team;
+	chit->Add( new ItemComponent( item ));
+
 	//chit->Add( new DebugStateComponent( map ));
 	chit->Add( new DebugPathComponent( engine, map, static_cast<LumosGame*>(game) ));
 	chit->Add( new HealthComponent());
@@ -130,7 +136,6 @@ void BattleTestScene::CreateChit( const Vector2I& p )
 	chit->Add( inv );
 
 	// Turn the 2nd team into practice dummys
-	GET_COMPONENT( chit, AIComponent )->SetEnabled( team == 0 );
 	chit->GetSpatialComponent()->SetPosYRot( (float)p.x+0.5f, 0, (float)p.y+0.5f, (float)random.Rand( 360 ) );
 	GET_COMPONENT( chit, HealthComponent )->SetHealth( 100, 100 );
 

@@ -63,7 +63,7 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, WeaponItem* weapon
 		Vector3F trigger;
 		src->GetRenderComponent()->GetMetaData( "trigger", &trigger );
 		Vector3F srcNormal3 = src->GetSpatialComponent()->GetHeading();
-		trigger = trigger + srcNormal3 * MELEE_RANGE;
+		trigger = trigger + srcNormal3 * (0.5f*MELEE_RANGE);
 		Vector3F cross;
 		static const Vector3F UP = { 0, 1, 0 };
 		CrossProduct( srcNormal3, UP, &cross );

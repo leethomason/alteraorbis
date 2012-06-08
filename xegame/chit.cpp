@@ -53,7 +53,7 @@ void Chit::Add( Component* c )
 				break;
 			}
 		}
-		GLASSERT( i < NUM_SLOTS );
+		GLASSERT( i < GENERAL_END );
 	}
 	c->OnAdd( this );
 	if ( c->NeedsTick() ) {

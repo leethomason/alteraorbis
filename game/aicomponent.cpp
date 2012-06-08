@@ -12,6 +12,7 @@
 #include "../xegame/chitbag.h"
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/rendercomponent.h"
+#include "../xegame/itemcomponent.h"
 
 #include "../grinliz/glrectangle.h"
 #include <climits>
@@ -22,12 +23,11 @@ static const U32	UPDATE_COMBAT_INFO	= 1000;		// how often to update the friend/e
 static const float	COMBAT_INFO_RANGE	= 10.0f;	// range around to scan for friendlies/enemies
 
 
-AIComponent::AIComponent( Engine* _engine, WorldMap* _map, int _team )
+AIComponent::AIComponent( Engine* _engine, WorldMap* _map )
 {
 	enabled = true;
 	engine = _engine;
 	map = _map;
-	team = _team;
 	combatInfoAge = 0xffffff;
 }
 
@@ -37,11 +37,16 @@ AIComponent::~AIComponent()
 }
 
 
-int AIComponent::GetTeamStatus( const AIComponent* other )
+int AIComponent::GetTeamStatus( Chit* other )
 {
-	if ( other->team == this->team )
-		return FRIENDLY;
-	return ENEMY;
+	ItemComponent* thisItem  = GET_COMPONENT( parentChit, ItemComponent );
+	ItemComponent* otherItem = GET_COMPONENT( other, ItemComponent );
+	if ( thisItem && otherItem ) {
+		if ( thisItem->GetItem()->ToGameItem()->primaryTeam != otherItem->GetItem()->ToGameItem()->primaryTeam ) {
+			return ENEMY;
+		}
+	}
+	return FRIENDLY;
 }
 
 
@@ -93,26 +98,24 @@ void AIComponent::UpdateCombatInfo( const Rectangle2F* _zone )
 
 	for( int i=0; i<chitArr.Size(); ++i ) {
 		Chit* chit = chitArr[i];
-		AIComponent* ai = GET_COMPONENT( chit, AIComponent );
-		if ( ai ) {
-			int teamStatus = GetTeamStatus( ai );
-			ChitData* cd = 0;
 
-			if ( teamStatus == FRIENDLY && friendList.HasCap() )
-				cd = friendList.Push();
-			else if ( teamStatus == ENEMY && enemyList.HasCap() )
-				cd = enemyList.Push();
+		int teamStatus = GetTeamStatus( chit );
+		ChitData* cd = 0;
 
-			if ( cd ) {
-				Vector2F chitCenter = chit->GetSpatialComponent()->GetPosition2D();
-				float cost = FLT_MAX;
-				map->CalcPath( center, chitCenter, 0, 0, 0, &cost, false );
+		if ( teamStatus == FRIENDLY && friendList.HasCap() )
+			cd = friendList.Push();
+		else if ( teamStatus == ENEMY && enemyList.HasCap() )
+			cd = enemyList.Push();
 
-				cd->chitID = chit->ID();
-				cd->chit   = chit;
-				cd->pathDistance = cost;
-				cd->range = (center-chitCenter).Length();
-			}
+		if ( cd ) {
+			Vector2F chitCenter = chit->GetSpatialComponent()->GetPosition2D();
+			float cost = FLT_MAX;
+			map->CalcPath( center, chitCenter, 0, 0, 0, &cost, false );
+
+			cd->chitID = chit->ID();
+			cd->chit   = chit;
+			cd->pathDistance = cost;
+			cd->range = (center-chitCenter).Length();
 		}
 	}
 }
@@ -140,9 +143,12 @@ void AIComponent::DoTick( U32 deltaTime )
 
 	// Check for events that change the situation
 	const CDynArray<ChitEvent>& events = GetChitBag()->GetEvents();
+	ItemComponent* itemComp = GET_COMPONENT( parentChit, ItemComponent );
+
 	for( int i=0; i<events.Size(); ++i ) {
 		if(    events[i].id == AI_EVENT_AWARENESS 
-			&& events[i].data0 == team ) 
+			&& itemComp
+			&& events[i].data0 == itemComp->GetItem()->ToGameItem()->primaryTeam ) 
 		{
 			// FIXME: double call can cause 2 entries for the same unit
 			UpdateCombatInfo( &events[i].bounds );

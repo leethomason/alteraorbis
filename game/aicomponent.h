@@ -12,7 +12,7 @@ class Engine;
 class AIComponent : public Component
 {
 public:
-	AIComponent( Engine* _engine, WorldMap* _worldMap, int _team );
+	AIComponent( Engine* _engine, WorldMap* _worldMap );
 	virtual ~AIComponent();
 
 	virtual Component* ToComponent( const char* name ) {
@@ -24,9 +24,6 @@ public:
 	virtual void DoTick( U32 delta );
 	virtual void DebugStr( grinliz::GLString* str );
 	virtual void OnChitMsg( Chit* chit, int id, const ChitEvent* event );
-
-	// FIXME: A hack; turns off the AI, leaving the "team" but does nothing
-	void SetEnabled( bool _enabled )	{ enabled = _enabled; }
 
 private:
 	enum {
@@ -40,12 +37,11 @@ private:
 
 	void UpdateCombatInfo( const grinliz::Rectangle2F* _zone=0 );
 	void UpdateChitData();	// brings chit pointers in friend/enemy list up to date			
-	int GetTeamStatus( const AIComponent* other );
+	int GetTeamStatus( Chit* other );
 
 	bool		enabled;
 	Engine*		engine;
 	WorldMap*	map;
-	int			team;
 	U32			combatInfoAge;
 
 	struct ChitData {
