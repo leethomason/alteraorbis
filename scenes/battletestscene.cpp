@@ -89,13 +89,18 @@ void BattleTestScene::LoadMap()
 		GET_COMPONENT( chit, MapSpatialComponent )->SetMapPosition( v.x, v.y, 0 );
 	}
 
-	//for( int i=0; i<waypoints.Size(); ++i ) {
-	//	CreateChit( waypoints[i] );
-	//}
+	/*
+	for( int i=0; i<waypoints.Size(); ++i ) {
+		CreateChit( waypoints[i] );
+	}
+	*/
 	Vector2I unit = { 2, 16 };
 	Vector2I dummy = { 16, 16 };
 	CreateChit( unit );
 	CreateChit( dummy );
+	dummy.Set( 16, 17 );
+	CreateChit( dummy );
+
 	engine->CameraLookAt( (float)map->Width()/2, (float)map->Height()/2, 
 		                  42.f,		// height
 						  225.f );	// rotattion
@@ -115,14 +120,28 @@ void BattleTestScene::CreateChit( const Vector2I& p )
 {
 	//GRINLIZ_PERFTRACK;
 
-	int team = p.x < 16 ? 0 : 1;
-	const char* asset = team ? "prime" : "humanFemale";
+	enum {
+		HUMAN=1,
+		HORNET,
+		DUMMY
+	};
+
+	int team = HUMAN;
+	const char* asset = "humanFemale";
+	if ( p.x > 27 ) {
+		team = HORNET;
+		asset = "hornet";
+	}
+	else if ( p.x > 6 && p.x < 27 ) {
+		team = DUMMY;
+		asset = "prime";
+	}
 
 	Chit* chit = chitBag.NewChit();
 	chit->Add( new SpatialComponent( true ) );
 	chit->Add( new RenderComponent( engine, asset, 0 ));
 	chit->Add( new PathMoveComponent( map ));
-	if ( team == 0 ) {
+	if ( team == HUMAN || team == HORNET ) {
 		chit->Add( new AIComponent( engine, map ));
 	}
 	GameItem* item = new GameItem();
@@ -135,11 +154,10 @@ void BattleTestScene::CreateChit( const Vector2I& p )
 	InventoryComponent* inv = new InventoryComponent( &chitBag );
 	chit->Add( inv );
 
-	// Turn the 2nd team into practice dummys
 	chit->GetSpatialComponent()->SetPosYRot( (float)p.x+0.5f, 0, (float)p.y+0.5f, (float)random.Rand( 360 ) );
 	GET_COMPONENT( chit, HealthComponent )->SetHealth( 100, 100 );
 
-	if ( team == 0 ) {
+	if ( team == HUMAN || team == HORNET ) {
 		WeaponItem* gunItem = new WeaponItem( "ASLT-1", "ASLT-1" );
 
 		Chit* gun = chitBag.NewChit();

@@ -39,7 +39,6 @@ private:
 	void UpdateChitData();	// brings chit pointers in friend/enemy list up to date			
 	int GetTeamStatus( Chit* other );
 
-	bool		enabled;
 	Engine*		engine;
 	WorldMap*	map;
 	U32			combatInfoAge;

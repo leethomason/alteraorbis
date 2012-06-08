@@ -18,7 +18,7 @@ class GameItem;
 class XEItem
 {
 public:
-	XEItem() : resource(0)	{}
+	XEItem() : name(0), resource(0), coolTime(0)	{}
 	XEItem( const char* _name, const char* _resource ) : name( _name ), resource( _resource ), coolTime( 0 ) {}
 	virtual ~XEItem()	{}
 

@@ -25,7 +25,6 @@ static const float	COMBAT_INFO_RANGE	= 10.0f;	// range around to scan for friend
 
 AIComponent::AIComponent( Engine* _engine, WorldMap* _map )
 {
-	enabled = true;
 	engine = _engine;
 	map = _map;
 	combatInfoAge = 0xffffff;
@@ -124,9 +123,6 @@ void AIComponent::UpdateCombatInfo( const Rectangle2F* _zone )
 
 void AIComponent::DoTick( U32 deltaTime )
 {
-	if ( !enabled ) 
-		return;
-
 	// Update the info around us.
 	// Then:
 	//		Move: closer, away, strafe
@@ -163,6 +159,9 @@ void AIComponent::DoTick( U32 deltaTime )
 		RenderComponent*   thisRender = parentChit->GetRenderComponent();
 		SpatialComponent*  targetSpatial = target.chit->GetSpatialComponent();
 		PathMoveComponent* pmc = GET_COMPONENT( parentChit, PathMoveComponent );
+		GLASSERT( pmc );
+		if ( !pmc ) return;
+
 		U32 absTime = GetChitBag()->AbsTime();
 
 		grinliz::CArray<XEItem*, MAX_ACTIVE_ITEMS> activeItems;
@@ -191,12 +190,13 @@ void AIComponent::DoTick( U32 deltaTime )
 				{
 					BattleMechanics::MeleeAttack( engine, parentChit, weapon );																	
 				}
-				// fixme: else queue rotation.
 			}
 			else {
-				if ( pmc ) {
-					pmc->QueueDest( enemyList[0].chit->GetSpatialComponent()->GetPosition2D() );
-				}
+				Vector2F delta = enemyList[0].chit->GetSpatialComponent()->GetPosition2D() - thisSpatial->GetPosition2D();
+				float targetRot = NormalizeAngleDegrees( ToDegree( atan2f( delta.x, delta.y )));
+
+				pmc->QueueDest( enemyList[0].chit->GetSpatialComponent()->GetPosition2D(),
+								targetRot );
 			}
 		}
 	}

@@ -323,7 +323,24 @@ void PathMoveComponent::DoTick( U32 delta )
 	blockForceApplied = false;
 	avoidForceApplied = false;
 
-	if ( pathPos < nPathPos ) {
+	// Apply final rotation.
+	if ( pathPos == nPathPos && dest.rotation >= 0 ) {
+		GetPosRot( &pos2, &rot );
+
+		float deltaRot, bias;
+		MinDeltaDegrees( rot, dest.rotation, &deltaRot, &bias );
+		float travelRot	= Travel( ROTATION_SPEED, delta );
+		if ( deltaRot <= travelRot ) {
+			rot = dest.rotation;
+			dest.rotation = -1.f;
+		}
+		else {
+			rot = NormalizeAngleDegrees( rot + bias*travelRot );
+		}
+
+		SetPosRot( pos2, rot );
+	}
+	else if ( pathPos < nPathPos ) {
 		GetPosRot( &pos2, &rot );
 		int startPathPos = pathPos;
 		float distToNext2 = GetDistToNext2( pos2 );
