@@ -39,6 +39,7 @@ AIComponent::~AIComponent()
 
 int AIComponent::GetTeamStatus( Chit* other )
 {
+	// FIXME: placeholder friend/enemy logic
 	ItemComponent* thisItem  = GET_COMPONENT( parentChit, ItemComponent );
 	ItemComponent* otherItem = GET_COMPONENT( other, ItemComponent );
 	if ( thisItem && otherItem ) {
