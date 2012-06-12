@@ -1,6 +1,16 @@
 - combat test scene
+	- animation/lack of making me crazy. What plan?
+	- particle effect for melee strick not "connected" to character
+	- item definition: one big wad of data? handle "inherited items"?
+	- properly hook up items and such, so that items, health, all be driven correctly
+	- use space tree query for impacted items
+	- data driven item creation
+	- need to check rotation in the path component
+	- buttons to select scenario, load items
+	- load in the correct lighting
+
 	- weapons
-		X relative positioning
+		- relative positioning (implemented, broken again)
 		- weapon definition - item question: how is a chit a weapon?
 		- item definition
 	- AI (task AI)
@@ -9,8 +19,10 @@
 		- CA to handle friends and enemies
 	- UI
 		- set up different battles
+
 	- serialization
 	- hesitation when near melee target (probably squatted destination code kicking in)
+	  (possibly shader kicking in: never scene it happen twice)
 	- error in ray-cast: detecting a 'tree' where it shouldn't (near the head of the prime)
 	- add rez and de-rez effect for chits
 

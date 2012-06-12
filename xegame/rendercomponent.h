@@ -36,7 +36,7 @@ public:
 	// the model so it doesn't walk into walls or other models.
 	float RadiusOfBase();
 	int   GetFlags() const { return flags; }
-	bool  GetMetaData( const char* name, grinliz::Vector3F* value );
+	bool  GetMetaData( const char* name, grinliz::Vector3F* value, bool transformedToWorld );
 
 private:
 	Engine* engine;

@@ -70,7 +70,7 @@ public:
 	virtual RelativeSpatialComponent* ToRelative()	{ return this; }
 
 	virtual void DebugStr( grinliz::GLString* str );
-	virtual void OnChitMsg( Chit* chit, int id );
+	virtual void OnChitMsg( Chit* chit, int id, const ChitEvent* event );
 
 	void SetRelativePosYRot( float x, float y, float z, float rot );
 	void SetRelativePosYRot( const grinliz::Vector3F& v, float rot )	{ SetRelativePosYRot( v.x, v.y, v.z, rot ); }

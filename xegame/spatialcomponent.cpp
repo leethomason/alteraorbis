@@ -73,7 +73,7 @@ void RelativeSpatialComponent::DebugStr( GLString* str )
 }
 
 
-void RelativeSpatialComponent::OnChitMsg( Chit* chit, int id )
+void RelativeSpatialComponent::OnChitMsg( Chit* chit, int id, const ChitEvent* event )
 {
 	if ( id == SPATIAL_MSG_CHANGED) {
 		SpatialComponent* other = chit->GetSpatialComponent();

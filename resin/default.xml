@@ -39,7 +39,8 @@
   <model filename="unitCube.ac" shading="flat" />
 
   <!-- Tactical Sprite models are centered at (0,0,0) -->
-  <model filename="human.ac" modelName="humanFemale" origin="1 0 0" shading="crease" polyRemoval="pre">
+  <model filename="human.ac" modelName="humanFemale" animation="humanFemale" 
+         origin="1 0 0" shading="crease" polyRemoval="pre">
     <meta trigger="1.15 0.52 0" target="1 0.68 0" />
   </model>    
   <model filename="human.ac" modelName="humanMale" origin="0 0 0" shading="crease" polyRemoval="pre" />
@@ -60,7 +61,7 @@
   <model filename="alltree.ac" modelName="cactus2"  origin="12 0 0"  shading="smooth" polyRemoval="pre" />
   <model filename="alltree.ac" modelName="stump"    origin="0 0 2"  shading="smooth" polyRemoval="pre" />
 
-  <model filename="chess_weapons.ac"    modelName="ASLT-1"       origin="-3 0 0"/>
+  <model filename="chess_weapons.ac"    modelName="ASLT-1"       origin="-3 0 0" shadowCaster="false"/>
   <model filename="chess_weapons.ac"    modelName="LR-1"         origin="-4 0 0"/>
   <model filename="chess_weapons.ac"    modelName="CANON-1"      origin="-5 0 0"/>
 

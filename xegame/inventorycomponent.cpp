@@ -27,7 +27,7 @@ void InventoryComponent::AddToInventory( Chit* itemChit )
 
 	Vector3F trigger = { 0, 0, 0 };
 	if ( parentChit->GetRenderComponent() ) {
-		parentChit->GetRenderComponent()->GetMetaData( "trigger", &trigger );
+		parentChit->GetRenderComponent()->GetMetaData( "trigger", &trigger, false );
 	}
 
 	RelativeSpatialComponent* rsc = new RelativeSpatialComponent( false );

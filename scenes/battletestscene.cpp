@@ -161,7 +161,7 @@ void BattleTestScene::CreateChit( const Vector2I& p )
 		WeaponItem* gunItem = new WeaponItem( "ASLT-1", "ASLT-1" );
 
 		Chit* gun = chitBag.NewChit();
-		gun->Add( new RenderComponent( engine, "ASLT-1", Model::MODEL_NO_SHADOW ));
+		gun->Add( new RenderComponent( engine, "ASLT-1", 0 ));
 		gun->Add( new ItemComponent( gunItem ));
 
 		inv->AddToInventory( gun );
