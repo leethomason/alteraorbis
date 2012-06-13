@@ -841,7 +841,7 @@ name "humanFemale"
 loc 1.05843 0.52202 -0.00470953
 kids 10
 OBJECT poly
-name "arm.lower.right"
+name "arm.lower.left"
 loc 0.0817724 0.00957441 0.000974706
 texture "emchartest.png"
 crease 45.000000

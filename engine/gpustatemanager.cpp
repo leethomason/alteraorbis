@@ -307,7 +307,8 @@ void GPUShader::SetState( const GPUShader& ns )
 		shadman->SetUniform( ShaderManager::U_MVP_MAT, vp );
 		shadman->SetUniformArray( ShaderManager::U_M_MAT_ARR, EL_MAX_INSTANCE, ns.instanceMatrix );
 		GLASSERT( ns.stream.instanceIDOffset > 0 );
-		shadman->SetStreamData( ShaderManager::A_INSTANCE_ID, 1, GL_INT, ns.stream.stride, PTR( ns.streamPtr, ns.stream.instanceIDOffset ) );
+		shadman->SetStreamData( ShaderManager::A_INSTANCE_ID, 1, GL_UNSIGNED_SHORT, 
+			                    ns.stream.stride, PTR( ns.streamPtr, ns.stream.instanceIDOffset ) );
 		if ( paramNeeded ) {
 			shadman->SetUniformArray( ShaderManager::U_PARAM_ARR, EL_MAX_INSTANCE, ns.instanceParam );
 		}

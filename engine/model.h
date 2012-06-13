@@ -90,6 +90,10 @@ struct ModelHeader
 		grinliz::CStr< EL_METADATA_NAME_LEN > name;
 		grinliz::Vector3F					  value;
 	};
+	struct BoneDesc {
+		grinliz::CStr< EL_BONE_NAME_LEN > name;
+		int								  id;
+	};
 
 	// flags
 	enum {
@@ -104,11 +108,12 @@ struct ModelHeader
 	U16						nAtoms;
 	grinliz::Rectangle3F	bounds;
 	MetaData				metaData[EL_MAX_METADATA];
+	BoneDesc				boneName[EL_MAX_BONES];		// ordered by name, not ID
 
 	void Set( const char* name, int nGroups, int nTotalVertices, int nTotalIndices,
 			  const grinliz::Rectangle3F& bounds );
 
-	void Load(	const gamedb::Item* );	// database connection
+	void Load(	const gamedb::Item* );		// database connection
 	void Save(	gamedb::WItem* parent );	// database connection
 };
 

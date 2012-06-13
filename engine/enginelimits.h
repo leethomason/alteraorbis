@@ -47,6 +47,8 @@ enum {
 	EL_MAP_TEXTURE_SIZE		= 512,
 	EL_METADATA_NAME_LEN	= 16,
 	EL_MAX_METADATA			= 4,
+	EL_BONE_NAME_LEN		= 32,
+	EL_MAX_BONES			= 12,		// could be 16?
 
 	// performance tuning
 	EL_MAX_INSTANCE			= 16,		// Max instances used. Impacts # of uniforms.

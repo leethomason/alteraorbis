@@ -20,6 +20,7 @@
 #include "../engine/enginelimits.h"
 #include "../grinliz/glrectangle.h"
 #include "../grinliz/glstringutil.h"
+#include "../grinliz/glcontainer.h"
 
 class Atlas;
 class AtlasSubTex;
@@ -56,7 +57,10 @@ public:
 						polyRemoval( POLY_NONE ),
 						atlasArr( 0 ),
 						nAtlas( 0 ),
-						currentSubTex( 0 )
+						currentSubTex( 0 ),
+						depth( -1 ),
+						boneID( -1 ),
+						enableBones( false )
 	{}
 
 	void SetAtlasPool( const Atlas* atlasArr, int nAtlas ) { this->atlasArr = atlasArr; this->nAtlas = nAtlas; }
@@ -80,6 +84,12 @@ public:
 	};
 	void SetPolygonRemoval( int pass )	{	GLASSERT( pass != POLY_POST );	// not yet implemented
 											this->polyRemoval = pass; }
+	
+	void EnableBones( bool enable ) { enableBones = enable; }
+	// Used at this point to create bones for objects. The bone weight
+	// should be in the data file.
+	void PushObjectName( const char* name );
+	void PopObjectName();
 
 	// Add the tri for the current texture.
 	void AddTri( const Vertex& v0, const Vertex& v1, const Vertex& v2 );
@@ -93,6 +103,8 @@ public:
 
 	const grinliz::Rectangle3F& Bounds()		{ return bounds; }
 
+	grinliz::CArray<grinliz::GLString, EL_MAX_BONES> boneNames;
+
 private:
 	int current;
 	int polyCulled;
@@ -104,6 +116,9 @@ private:
 	const Atlas* atlasArr;
 	int nAtlas;
 	const AtlasSubTex* currentSubTex;
+	int depth;
+	int boneID;
+	bool enableBones;
 	
 	grinliz::Matrix4 matrix;
 	grinliz::Rectangle3F bounds;

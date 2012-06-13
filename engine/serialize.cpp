@@ -56,6 +56,16 @@ void ModelHeader::Load( const gamedb::Item* item )
 			metaData[i].value.z = dataItem->GetFloat( "z" );
 		}
 	}
+
+	memset( boneName, 0, sizeof(BoneDesc)*EL_MAX_BONES );
+	const gamedb::Item* boneItem = header->Child( "bones" );
+	if ( boneItem ) {
+		for( int i=0; i<boneItem->NumChildren(); ++i ) {
+			const gamedb::Item* dataItem = boneItem->Child( i );
+			boneName[i].name = dataItem->Name();
+			boneName[i].id = dataItem->GetInt( "id" );
+		}
+	}
 }
 
 

@@ -75,6 +75,8 @@ void ModelBuilder::AddTri( const Vertex& v0, const Vertex& v1, const Vertex& v2 
 		MultMatrix4( matrix, vIn[i].normal, &vX[i].normal, 0.0f );
 		// tex
 		vX[i].tex = vIn[i].tex;
+		// BoneID
+		vX[i].boneID = boneID;
 
 		// Atlas conversion, if being used.
 		if ( currentSubTex ) {
@@ -231,4 +233,20 @@ void ModelBuilder::Flush()
 			bounds.max.z = Max( bounds.max.z, group[i].vertex[j].pos.z );
 		}
 	}
+}
+
+
+void ModelBuilder::PushObjectName( const char* name )
+{
+	++depth;
+	if ( depth == 2 && enableBones ) {
+		boneNames.Push( GLString( name ));
+		++boneID;
+		GLOUTPUT(( "Bone: %s=%d\n", name, boneID ));
+	}
+	if ( !enableBones ) boneID = 0;
+}
+
+void ModelBuilder::PopObjectName() {
+	--depth;
 }

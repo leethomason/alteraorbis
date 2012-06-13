@@ -39,7 +39,7 @@
   <model filename="unitCube.ac" shading="flat" />
 
   <!-- Tactical Sprite models are centered at (0,0,0) -->
-  <model filename="human.ac" modelName="humanFemale" animation="humanFemale" 
+  <model filename="human.ac" modelName="humanFemale" animation="humanFemale"
          origin="1 0 0" shading="crease" polyRemoval="pre">
     <meta trigger="1.15 0.52 0" target="1 0.68 0" />
   </model>    

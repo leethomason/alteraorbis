@@ -147,6 +147,12 @@ void ModelHeader::Save( gamedb::WItem* parent )
 			data->SetFloat( "z", metaData[i].value.z );
 		}
 	}
+
+	gamedb::WItem* boneNode = node->CreateChild( "bones" );
+	for( int i=0; i<EL_MAX_BONES && !boneName[i].name.empty(); ++i ) {
+		gamedb::WItem* data = boneNode->CreateChild( boneName[i].name.c_str() );
+		data->SetInt( "id", boneName[i].id );
+	}
 }
 
 
@@ -479,6 +485,12 @@ void ProcessModel( XMLElement* model )
 	builder->SetAtlasPool( atlasArr, MAX_ATLAS );
 	builder->SetShading( ModelBuilder::FLAT );
 
+	GLString animation = "";
+	if ( model->Attribute( "animation" ) ) {
+		builder->EnableBones( true );
+		animation = model->Attribute( "animation" );
+	}
+
 	if ( grinliz::StrEqual( model->Attribute( "shading" ), "smooth" ) ) {
 		builder->SetShading( ModelBuilder::SMOOTH );
 	}
@@ -494,7 +506,10 @@ void ProcessModel( XMLElement* model )
 	}
 
 	if ( extension == ".ac" ) {
-		ImportAC3D(	std::string( pathName.c_str() ), builder, origin, usingSubModels ? string( assetName.c_str()) : "" );
+		ImportAC3D(	std::string( pathName.c_str() ), 
+			        builder, 
+					origin, 
+					usingSubModels ? string( assetName.c_str()) : "" );
 	}
 	else if ( extension == ".off" ) {
 		ImportOFF( std::string( pathName.c_str() ), builder );
@@ -513,8 +528,13 @@ void ProcessModel( XMLElement* model )
 		printf( " culled=%d", builder->PolyCulled() );
 	}	
 	printf( " groups=%d nVertex=%d nTri=%d\n", builder->NumGroups(), nTotalVertex, nTotalIndex/3 );
+
 	ModelHeader header;
 	header.Set( assetName.c_str(), builder->NumGroups(), nTotalVertex, nTotalIndex, builder->Bounds() );
+	for( unsigned i=0; i<builder->boneNames.Size(); ++i ) {
+		header.boneName[i].name = builder->boneNames[i].c_str();
+		header.boneName[i].id = i;
+	}
 
 	if ( grinliz::StrEqual( model->Attribute( "shadowCaster" ), "false" ) ) {
 		header.flags |= ModelHeader::RESOURCE_NO_SHADOW;

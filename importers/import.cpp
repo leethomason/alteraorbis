@@ -30,6 +30,7 @@ void ProcessAC3D( ACObject* ob, ModelBuilder* builder, const Matrix4& parent, co
 	MultMatrix4( parent, m, &matrix );
 	builder->SetMatrix( matrix );
 	builder->SetTexture( ob->textureName ? ob->textureName : "" );
+	builder->PushObjectName( ob->name );
 
 	Vertex vertex[16];
 
@@ -86,6 +87,7 @@ void ProcessAC3D( ACObject* ob, ModelBuilder* builder, const Matrix4& parent, co
 		    ProcessAC3D(ob->kids[n], builder, matrix, 0 ); 
 		}
 	}
+	builder->PopObjectName();
 }
 
 

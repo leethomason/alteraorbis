@@ -128,7 +128,9 @@ private:
 
 
 
-/* A fixed array class for c-structs.
+/* A fixed array class for any type.
+   Note that the memory stays around and constructors aren't called until
+   the CArray is destroyed.
  */
 template < class T, int CAPACITY >
 class CArray
@@ -161,10 +163,7 @@ public:
 	unsigned Capacity() const	{ return CAPACITY; }
 	bool HasCap() const			{ return size < CAPACITY; }
 	
-	void Clear()			{ 
-		#ifdef DEBUG
-			memset( vec, 0xab, sizeof(T)*CAPACITY );
-		#endif
+	void Clear()	{ 
 		size = 0; 
 	}
 	bool Empty() const		{ return size==0; }

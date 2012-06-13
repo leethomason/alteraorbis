@@ -27,12 +27,15 @@ struct Vertex
 	enum {
 		POS_OFFSET = 0,
 		NORMAL_OFFSET = 12,
-		TEXTURE_OFFSET = 24
+		TEXTURE_OFFSET = 24,
+		BONE_ID_OFFSET = 32
 	};
 
 	grinliz::Vector3F	pos;
 	grinliz::Vector3F	normal;
 	grinliz::Vector2F	tex;
+	U16					boneID;		// 8 bits is fine; needs to be 32 bit aligned structure.
+	U16					_pad;
 
 	bool Equal( const Vertex& v ) const {
 		if (    pos == v.pos 
@@ -63,20 +66,23 @@ struct InstVertex
 		POS_OFFSET = 0,
 		NORMAL_OFFSET = 12,
 		TEXTURE_OFFSET = 24,
-		INSTANCE_OFFSET = 32
+		BONE_ID_OFFSET  = 32,
+		INSTANCE_OFFSET = 34
 	};
 
 	void From( const Vertex& rhs ) {
 		this->pos = rhs.pos;
 		this->normal = rhs.normal;
 		this->tex = rhs.tex;
+		this->boneID = rhs.boneID;
 		instanceID = 0;
 	}
 
 	grinliz::Vector3F	pos;
 	grinliz::Vector3F	normal;
 	grinliz::Vector2F	tex;
-	int					instanceID;	// 8 bits is fine, but this structure should be 32 bit-aligned
+	U16					boneID;
+	U16					instanceID;	// 8 bits is fine, but this structure should be 32 bit-aligned
 };
 	
 
