@@ -16,7 +16,6 @@ public:
 	BattleTestScene( LumosGame* game );
 	~BattleTestScene();
 
-	virtual int RenderPass( grinliz::Rectangle2I* clip3D, grinliz::Rectangle2I* clip2D ) { return RENDER_2D | RENDER_3D; }
 	virtual void DoTick( U32 deltaTime );
 
 	virtual void Resize();

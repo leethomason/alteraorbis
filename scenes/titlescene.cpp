@@ -23,7 +23,7 @@ TitleScene::TitleScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 													"render0", "render1", 
 													"particle", 
 													"nav", "nav2", "navWorld", 
-													"noise", "battle" };
+													"noise", "battle", "animation" };
 
 	for( int i=0; i<NUM_TESTS; ++i ) {
 		testScene[i].Init( &gamui2D, lumosGame->GetButtonLook( LumosGame::BUTTON_LOOK_STD ) );
@@ -80,6 +80,9 @@ void TitleScene::ItemTapped( const gamui::UIItem* item )
 	}
 	else if ( item == &testScene[TEST_BATTLE] ) {
 		game->PushScene( LumosGame::SCENE_BATTLETEST, 0 );
+	}
+	else if ( item == &testScene[TEST_ANIMATION] ) {
+		game->PushScene( LumosGame::SCENE_ANIMATION, 0 );
 	}
 }
 

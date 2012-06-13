@@ -15,10 +15,6 @@ public:
 	NoiseTestScene( LumosGame* game );
 	virtual ~NoiseTestScene() {}
 
-	virtual int RenderPass( grinliz::Rectangle2I* clip3D, grinliz::Rectangle2I* clip2D )
-	{
-		return RENDER_2D;	
-	}
 	virtual void Resize();
 
 	virtual void Tap( int action, const grinliz::Vector2F& screen, const grinliz::Ray& world )				

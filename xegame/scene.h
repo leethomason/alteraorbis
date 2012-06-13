@@ -84,12 +84,6 @@ public:
 	Game* GetGame() { return game; }
 
 	// Rendering
-	enum {
-		RENDER_2D = 0x01,
-		RENDER_3D = 0x02
-	};
-	virtual int RenderPass( grinliz::Rectangle2I* clip3D, grinliz::Rectangle2I* clip2D ) = 0;
-
 	virtual void DoTick( U32 deltaTime )						{}
 	virtual void Draw3D( U32 deltaTime )						{}
 

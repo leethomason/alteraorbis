@@ -9,6 +9,7 @@
 #include "../scenes/navtest2scene.h"
 #include "../scenes/noisetestscene.h"
 #include "../scenes/battletestscene.h"
+#include "../scenes/animationscene.h"
 
 using namespace grinliz;
 using namespace gamui;
@@ -61,6 +62,7 @@ Scene* LumosGame::CreateScene( int id, SceneData* data )
 	case SCENE_NAVTEST2:	scene = new NavTest2Scene( this, (const NavTest2SceneData*)data );			break;
 	case SCENE_NOISETEST:	scene = new NoiseTestScene( this );			break;
 	case SCENE_BATTLETEST:	scene = new BattleTestScene( this );		break;
+	case SCENE_ANIMATION:	scene = new AnimationScene( this );			break;
 
 	default:
 		GLASSERT( 0 );

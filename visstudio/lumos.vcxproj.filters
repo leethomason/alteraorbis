@@ -214,6 +214,9 @@
     <ClCompile Include="..\script\battlemechanics.cpp">
       <Filter>Source Files\script</Filter>
     </ClCompile>
+    <ClCompile Include="..\scenes\animationscene.cpp">
+      <Filter>Source Files\scenes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\camera.h">
@@ -422,6 +425,9 @@
     </ClInclude>
     <ClInclude Include="..\xegame\chitevent.h">
       <Filter>Source Files\xegame</Filter>
+    </ClInclude>
+    <ClInclude Include="..\scenes\animationscene.h">
+      <Filter>Source Files\scenes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

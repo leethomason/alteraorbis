@@ -53,7 +53,10 @@ Engine::Engine( Screenport* port, const gamedb::Reader* database, Map* m )
 		map( 0 )
 {
 	map = m;
-	spaceTree = new SpaceTree( -0.1f, 2.1f, Max( m->Width(), m->Height() ) );
+	if ( map ) 
+		spaceTree = new SpaceTree( -0.1f, 3.1f, Max( m->Width(), m->Height() ) );
+	else
+		spaceTree = new SpaceTree( -0.1f, 3.1f, 64 );
 
 	renderQueue = new RenderQueue();
 	for( int i=0; i<RT_COUNT; ++i )
