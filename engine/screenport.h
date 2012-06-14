@@ -51,12 +51,10 @@ struct Frustum
 class Screenport
 {
 public:
-	Screenport( int width, int height, int rotation, int virtualHeight ); 
+	Screenport( int width, int height, int virtualHeight ); 
 
-	void Resize( int w, int h, int r );
+	void Resize( int w, int h );
 	float UIAspectRatio()		{ return UIHeight() / UIWidth(); }
-
-	int Rotation() const		{ return rotation; }
 
 	void UIToView( const grinliz::Vector2F& in, grinliz::Vector2F* view ) const;
 	void ViewToUI( const grinliz::Vector2F& in, grinliz::Vector2F* ui ) const;
@@ -84,22 +82,25 @@ public:
 	// Set the perspective PROJECTION.
 	void SetPerspective();
 
+	void SetOrthoCamera( bool ortho )								{ orthoCamera = ortho; }
+
 	// Set the MODELVIEW from the camera.
 	void SetView( const grinliz::Matrix4& view );
 	void SetViewMatrices( const grinliz::Matrix4& _view )			{ view3D = _view; }
 
 	const grinliz::Matrix4& ProjectionMatrix3D() const				{ return projection3D; }
 	const grinliz::Matrix4& ViewMatrix3D() const					{ return view3D; }
+
 	void ViewProjection3D( grinliz::Matrix4* vp ) const				{ grinliz::MultMatrix4( projection3D, view3D, vp ); }
 	void ViewProjectionInverse3D( grinliz::Matrix4* vpi ) const		{ grinliz::Matrix4 vp;
 																	  ViewProjection3D( &vp );
 																	  vp.Invert( vpi );
 																	}
 
-	const Frustum&		    GetFrustum()		{ GLASSERT( uiMode == false ); return frustum; }
+	const Frustum&	GetFrustum()		{ GLASSERT( uiMode == false ); return frustum; }
 
-	float UIWidth() const									{ return (rotation&1) ? screenHeight : screenWidth; }
-	float UIHeight() const									{ return (rotation&1) ? screenWidth : screenHeight; }
+	float UIWidth() const									{ return screenWidth; }
+	float UIHeight() const									{ return screenHeight; }
 	int PhysicalWidth() const								{ return (int)physicalWidth; }
 	int PhysicalHeight() const								{ return (int)physicalHeight; }
 
@@ -112,7 +113,6 @@ private:
 	void UIToWindow( const grinliz::Rectangle2F& ui, grinliz::Rectangle2F* clip ) const;
 	void CleanScissor( const grinliz::Rectangle2F& scissor, grinliz::Rectangle2I* clean );
 
-	int rotation;		
 	float screenWidth; 
 	float screenHeight;		// if rotation==0, 320
 	float virtualHeight;	// used to be 320. Used for UI layout.
@@ -121,7 +121,7 @@ private:
 	float physicalHeight;
 
 	bool uiMode;
-	//grinliz::Rectangle2F clipInUI2D, clipInUI3D;
+	bool orthoCamera;
 	Frustum frustum;
 	grinliz::Matrix4 projection2D;
 	grinliz::Matrix4 projection3D, view3D;

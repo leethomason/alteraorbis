@@ -34,6 +34,7 @@ private:
 
 	gamui::PushButton okay;
 	gamui::PushButton boneLeft, boneRight;
+	gamui::ToggleButton ortho;
 	gamui::TextLabel  boneName;
 };
 

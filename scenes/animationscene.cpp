@@ -26,6 +26,9 @@ AnimationScene::AnimationScene( LumosGame* game ) : Scene( game )
 	boneName.Init( &gamui2D );
 	boneName.SetText( "all" );
 
+	ortho.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
+	ortho.SetSize( layout.Width(), layout.Height() );
+	ortho.SetText( "ortho" );
 
 	engine = new Engine( port, game->GetDatabase(), 0 );
 
@@ -85,6 +88,10 @@ void AnimationScene::ItemTapped( const gamui::UIItem* item )
 	else if ( item == &boneLeft ) {
 		--currentBone;
 		if ( currentBone == -2 ) currentBone = EL_MAX_BONES-1;
+	}
+	else if ( item == &ortho ) {
+		Screenport* port = engine->GetScreenportMutable();
+		port->SetOrthoCamera( ortho.Down() );
 	}
 
 	UpdateBoneInfo();

@@ -492,43 +492,20 @@ void GPUShader::Clear()
 }
 
 
-/*static*/ void GPUShader::SetOrthoTransform( int screenWidth, int screenHeight, int rotation )
+/*static*/ void GPUShader::SetOrthoTransform( int screenWidth, int screenHeight )
 {
-	Matrix4 r, t;
-	r.SetZRotation( (float)rotation );
-	
-	// the tricky bit. After rotating the ortho display, move it back on screen.
-	switch (rotation) {
-		case 0:
-			break;
-		case 90:
-			t.SetTranslation( 0, (float)(-screenWidth), 0 );	
-			break;
-			
-		default:
-			GLASSERT( 0 );	// work out...
-			break;
-	}
-	Matrix4 view2D = r*t;
-
 	Matrix4 ortho;
 	ortho.SetOrtho( 0, (float)screenWidth, (float)screenHeight, 0, -100.f, 100.f );
 	SetMatrix( PROJECTION_MATRIX, ortho );
 
-	SetMatrix( MODELVIEW_MATRIX, view2D );
+	Matrix4 identity;
+	SetMatrix( MODELVIEW_MATRIX, identity );
 	CHECK_GL_ERROR;
 }
 
 
-/*static*/ void GPUShader::SetPerspectiveTransform( float left, float right, 
-													 float bottom, float top, 
-													 float near, float far,
-													 int rotation)
+/*static*/ void GPUShader::SetPerspectiveTransform( const grinliz::Matrix4& perspective )
 {
-	// Give the driver hints:
-	GLASSERT( rotation == 0 );
-	Matrix4 perspective;
-	perspective.SetFrustum( left, right, bottom, top, near, far );
 	SetMatrix( PROJECTION_MATRIX, perspective );
 	CHECK_GL_ERROR;
 }

@@ -95,11 +95,8 @@ void Engine::DeviceLoss()
 void Engine::CameraIso( bool normal, bool sizeToWidth, float width, float height )
 {
 	if ( normal ) {
-		//camera.SetYRotation( -45.f );
-		//camera.SetTilt( -50.0f );
 		camera.TiltRotationToQuat( -45.f, -50.f );
 		MoveCameraHome();
-		//camera.SetPosWC( 0, 10, 0 0 );
 	}
 	else {
 		float h = 0;
@@ -112,8 +109,6 @@ void Engine::CameraIso( bool normal, bool sizeToWidth, float width, float height
 		else {
 			h = (height/2) / (tanf(theta)*ratio);
 		}
-		//camera.SetYRotation( 0 );
-		//camera.SetTilt( -90.0f );
 		camera.TiltRotationToQuat( -90.0f, 0 );
 		camera.SetPosWC( width/2.0f, h, height/2.0f );
 	}
@@ -123,8 +118,6 @@ void Engine::CameraIso( bool normal, bool sizeToWidth, float width, float height
 void Engine::MoveCameraHome()
 {
 	camera.SetPosWC( EL_MAP_SIZE/2, 25.0f, EL_MAP_SIZE/2 );
-//	camera.SetYRotation( -45.f );
-//	camera.SetTilt( -50.0f );
 	camera.TiltRotationToQuat( -50.f, -45.f );
 }
 
@@ -132,8 +125,6 @@ void Engine::MoveCameraHome()
 void Engine::CameraLookAt( float x, float z, float heightOfCamera, float yRotation, float tilt )
 {
 	camera.SetPosWC( x, heightOfCamera, z );
-//	camera.SetYRotation( yRotation );
-//	camera.SetTilt( tilt );
 	camera.TiltRotationToQuat( tilt, yRotation );
 
 	Vector3F at;

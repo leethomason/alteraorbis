@@ -46,7 +46,7 @@ extern long memNewCount;
 const Game::Palette* Game::mainPalette = 0;
 
 Game::Game( int width, int height, int rotation, int uiHeight, const char* path ) :
-	screenport( width, height, rotation, uiHeight ),
+	screenport( width, height, uiHeight ),
 	markFrameTime( 0 ),
 	frameCountsSinceMark( 0 ),
 	framesPerSecond( 0 ),
@@ -711,7 +711,7 @@ void Game::DeviceLoss()
 
 void Game::Resize( int width, int height, int rotation ) 
 {
-	screenport.Resize( width, height, rotation );
+	screenport.Resize( width, height );
 	sceneStack.Top()->scene->Resize();
 }
 

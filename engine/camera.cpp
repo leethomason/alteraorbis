@@ -102,21 +102,6 @@ void Camera::Orbit( float rotation )
 
 		// Move the origin to componensate
 		posWC = pole + rotMat * delta;
-
-#if 0
-		Matrix4 r;
-		r.SetYRotation( yRotation + rotation );
-
-		float length = sqrtf( (pole.x-posWC.x)*(pole.x-posWC.x) + (pole.z-posWC.z)*(pole.z-posWC.z) );
-
-		Vector3F vec = { 0.0f, 0.0f, length };
-		Vector3F vecPrime = r * vec;
-		vecPrime.y = posWC.y;
-
-		posWC = pole + vecPrime;
-
-		yRotation += rotation;
-#endif
 	}
 	valid = false;
 }

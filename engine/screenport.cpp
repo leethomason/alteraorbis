@@ -24,28 +24,25 @@
 using namespace grinliz;
 
 
-Screenport::Screenport( int w, int h, int r, int virtualHeight )
+Screenport::Screenport( int w, int h, int virtualHeight )
 {
 	this->virtualHeight = (float)virtualHeight;
-	Resize( w, h, r );
+	Resize( w, h );
 	uiMode = false;
-//	clipInUI2D = Rectangle2F( 0, 0, UIWidth(), UIHeight() );
-//	clipInUI3D = Rectangle2F( 0, 0, UIWidth(), UIHeight() );
+	orthoCamera = false;
 }
 
 
-void Screenport::Resize( int w, int h, int r )
+void Screenport::Resize( int w, int h )
 {
 	if ( w > 0 && h > 0 ) {
 		physicalWidth  = (float)w;
 		physicalHeight = (float)h;
-		rotation =	r;
 	}
 	else {
 		w = (int)physicalWidth;
 		h = (int)physicalHeight;
 	}
-	GLASSERT( rotation >= 0 && rotation < 4 );
 
 	GPUShader::SetViewport( w, h );
 	GPUShader::SetScissor( 0, 0, 0, 0 );
@@ -59,14 +56,8 @@ void Screenport::Resize( int w, int h, int r )
 	//		the background images can be patched up.
 	// Try #3.
 
-	if ( (rotation&1) == 0 ) {
-		screenHeight = virtualHeight;
-		screenWidth = screenHeight * physicalWidth / physicalHeight;
-	}
-	else {
-		screenWidth  = virtualHeight;
-		screenHeight = screenWidth * physicalHeight / physicalWidth;
-	}
+	screenHeight = virtualHeight;
+	screenWidth = screenHeight * physicalWidth / physicalHeight;
 
 	//GLOUTPUT(( "Screenport::Resize physical=(%.1f,%.1f) view=(%.1f,%.1f) rotation=%d\n", physicalWidth, physicalHeight, screenWidth, screenHeight, r ));
 }
@@ -74,26 +65,9 @@ void Screenport::Resize( int w, int h, int r )
 
 void Screenport::SetUI()	
 {
-//	if ( clip && clip->Area() > 1 ) {
-//		clipInUI2D = Rectangle2F( (float)clip->min.x, (float)clip->min.y, (float)clip->max.x, (float)clip->max.y );
-//	}
-//	else {
-//		clipInUI2D = Rectangle2F( 0, 0, UIWidth(), UIHeight() );
-//	}
-//	GLASSERT( clipInUI2D.IsValid() );
-//	GLASSERT( clipInUI2D.min.x >= 0 && clipInUI2D.max.x <= UIWidth() );
-//	GLASSERT( clipInUI2D.min.y >= 0 && clipInUI2D.max.y <= UIHeight() );
-
-//	Rectangle2F scissor;
-//	UIToWindow( clipInUI2D, &scissor );
-
-//	Rectangle2I clean;
-//	CleanScissor( scissor, &clean );
-//	GPUShader::SetScissor(  clean.min.x, clean.min.y, clean.Width(), clean.Height() );
-
 	projection2D.SetIdentity();
 	projection2D.SetOrtho( 0, screenWidth, screenHeight, 0, -1, 1 );
-	GPUShader::SetOrthoTransform( (int)screenWidth, (int)screenHeight, Rotation()*90 );
+	GPUShader::SetOrthoTransform( (int)screenWidth, (int)screenHeight );
 	uiMode = true;
 }
 
@@ -109,23 +83,6 @@ void Screenport::SetView( const Matrix4& _view )
 void Screenport::SetPerspective()
 {
 	uiMode = false;
-
-//	if ( clip && clip->Area() > 1 ) {
-//		clipInUI3D = Rectangle2F( (float)clip->min.x, (float)clip->min.y, (float)clip->max.x, (float)clip->max.y );
-//	}
-//	else {
-//		clipInUI3D = Rectangle2F( 0, 0, UIWidth(), UIHeight() );
-//	}
-//	GLASSERT( clipInUI3D.IsValid() );
-//	GLASSERT( clipInUI3D.min.x >= 0 && clipInUI3D.max.x <= UIWidth() );
-//	GLASSERT( clipInUI3D.min.y >= 0 && clipInUI3D.max.y <= UIHeight() );
-	
-//	Rectangle2F scissor;
-//	UIToWindow( clipInUI3D,  &scissor );
-//
-//	Rectangle2I clean;
-//	CleanScissor( scissor, &clean );
-//	GPUShader::SetScissor(  clean.min.x, clean.min.y, clean.Width(), clean.Height() );
 
 	GLASSERT( uiMode == false );
 	GLASSERT( EL_NEAR > 0.0f );
@@ -144,78 +101,38 @@ void Screenport::SetPerspective()
 
 	// Also, the 3D camera applies the rotation.
 	
-	if ( Rotation() & 1 ) {
-//		float ratio = (float)clipInUI3D.Height() / (float)clipInUI3D.Width();
-		float ratio = physicalHeight / physicalWidth;
-		
-		// frustum is in original screen coordinates.
-		frustum.top		=  halfLongSide;
-		frustum.bottom	= -halfLongSide;
-		
-		frustum.left	= -ratio * halfLongSide;
-		frustum.right	=  ratio * halfLongSide;
+	// Since FOV is specified as the 1/2 width, the ratio
+	// is the height/width (different than gluPerspective)
+	float ratio = physicalHeight / physicalWidth;
+
+	frustum.top		= ratio * halfLongSide;
+	frustum.bottom	= -frustum.top;
+
+	frustum.left	= -halfLongSide;
+	frustum.right	=  halfLongSide;
+	
+	if ( orthoCamera ) {
+		projection3D.SetOrtho( frustum.left*2.f, frustum.right*2.f, frustum.bottom*2.f, frustum.top*2.f, frustum.zNear, frustum.zFar );
+		GPUShader::SetPerspectiveTransform( projection3D );
 	}
 	else {
-		// Since FOV is specified as the 1/2 width, the ratio
-		// is the height/width (different than gluPerspective)
-//		float ratio = (float)clipInUI3D.Height() / (float)clipInUI3D.Width();
-		float ratio = physicalHeight / physicalWidth;
-
-		frustum.top		= ratio * halfLongSide;
-		frustum.bottom	= -frustum.top;
-
-		frustum.left	= -halfLongSide;
-		frustum.right	=  halfLongSide;
+		projection3D.SetFrustum( frustum.left, frustum.right, frustum.bottom, frustum.top, frustum.zNear, frustum.zFar );
+		GPUShader::SetPerspectiveTransform( projection3D );
 	}
-	
-	Matrix4 rot;
-	rot.SetZRotation( (float)(-90 * Rotation()) );
-	
-	// In normalized coordinates.
-	projection3D.SetFrustum( frustum.left, frustum.right, frustum.bottom, frustum.top, frustum.zNear, frustum.zFar );
-	projection3D = projection3D * rot;
-	GPUShader::SetPerspectiveTransform( frustum.left, frustum.right,
-										frustum.bottom, frustum.top,	
-										frustum.zNear, frustum.zFar,
-										(90*Rotation()) );
 }
 
 
 void Screenport::ViewToUI( const grinliz::Vector2F& view, grinliz::Vector2F* ui ) const
 {
-	switch ( rotation ) {
-		case 0:	
-			ui->x = view.x;
-			ui->y = screenHeight-view.y;
-			break;
-
-		case 1:
-			ui->x = screenHeight - view.y;
-			ui->y = screenWidth - view.x;
-			break;
-
-		default:
-			GLASSERT( 0 );
-			break;
-	}
+	ui->x = view.x;
+	ui->y = screenHeight-view.y;
 }
 
 
 void Screenport::UIToView( const grinliz::Vector2F& ui, grinliz::Vector2F* view ) const
 {
-	switch ( rotation ) {
-		case 0:
-			view->x = ui.x;
-			view->y = screenHeight-ui.y;
-			break;
-		case 1:
-			view->x = screenWidth - ui.y;
-			view->y = screenHeight - ui.x;
-			break;
-		default:
-			GLASSERT( 0 );
-			break;
-	}
+	view->x = ui.x;
+	view->y = screenHeight-ui.y;
 }
 
 

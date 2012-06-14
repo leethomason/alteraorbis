@@ -158,11 +158,8 @@ public:
 	// Set the top level state. The engine has top level (root transforms)
 	// for the screen size, scissor, and transform:
 	static void SetViewport( int w, int h );
-	static void SetOrthoTransform( int width, int height, int rotation );
-	static void SetPerspectiveTransform( float left, float right, 
-										 float bottom, float top, 
-										 float near, float far,
-										 int rotation );
+	static void SetOrthoTransform( int width, int height );
+	static void SetPerspectiveTransform( const grinliz::Matrix4& perspective );
 	// The top level V matrix in perspective mode.
 	static void SetCameraTransform( const grinliz::Matrix4& camera );
 	static void SetScissor( int x, int y, int w, int h );
