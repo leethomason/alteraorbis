@@ -236,6 +236,7 @@ public:
 	// Set any of the flags (that are boolean) from ShaderManager
 	void SetShaderFlag( int flag )				{ shaderFlags |= flag; }
 	void ClearShaderFlag( int flag )			{ shaderFlags &= (~flag); }
+	int  ShaderFlags() const					{ return shaderFlags; }
 
 	void InstanceMatrix( int i, const grinliz::Matrix4& mat ) { 
 		GLASSERT( i >= 0 && i < EL_MAX_INSTANCE );

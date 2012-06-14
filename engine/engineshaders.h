@@ -3,32 +3,39 @@
 
 #include "../grinliz/gldebug.h"
 #include "../grinliz/gltypes.h"
+#include "../grinliz/glcontainer.h"
 #include "gpustatemanager.h"
 
 
 class EngineShaders
 {
 public:
+	EngineShaders();
+	~EngineShaders();
+
 	GPUShader light;
 	GPUShader blend;
 	GPUShader emissive;
 
-	// generated:
-	GPUShader lightTexXForm;
-	GPUShader blendTexXForm;
-	GPUShader emissiveTexXForm;
-
-	GPUShader lightColor;
-	GPUShader blendColor;
-	GPUShader emissiveColor;
-
 	enum {
-		LIGHT, BLEND, EMISSIVE,		// base
-		NONE, TEXXFORM, COLOR		// mod
+		LIGHT, BLEND, EMISSIVE		// base
 	};
 
-	void Generate();
-	GPUShader* GetShader( int base, int mod );
+	GPUShader* GetShader( int base, int flags );
+	
+	// Special functions for glow:
+	void SetEmissiveEx();
+	void ClearEmissiveEx();
+
+private:
+	// These things can't move in memory.
+	struct Node {
+		int base;
+		int flags;
+		GPUShader* shader;
+	};
+
+	grinliz::CDynArray<Node> shaderArr;	
 };
 
 #endif // ENGINE_SHADERS_INCLUDED

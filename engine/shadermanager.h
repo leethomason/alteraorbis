@@ -27,16 +27,16 @@ public:
 
 	static ShaderManager* Instance() { if ( !instance ) instance = new ShaderManager(); return instance; }
 
-	enum {
+	enum {				
 		TEXTURE0			= (1<<0),		// Texture is in use. Note that the sampling state (linear, nearest) is saved with the texture.
 		TEXTURE0_ALPHA_ONLY = (1<<1),		// Texture is only alpha, which composites differently.
-		TEXTURE0_TRANSFORM	= (1<<2),		// Texture has a texture transform. *param*
+		TEXTURE0_TRANSFORM	= (1<<2),		// Texture has a texture transform: PARAM
 
 		TEXTURE1			= (1<<4),
 		TEXTURE1_ALPHA_ONLY	= (1<<5),
 		TEXTURE1_TRANSFORM	= (1<<6),
 		
-		COLOR_PARAM			= (1<<7),
+		COLOR_PARAM			= (1<<7),		// Apply per model color. PARAM
 		COLORS				= (1<<8),		// Per-vertex colors.
 		COLOR_MULTIPLIER	= (1<<9),		// Global color multiplier.
 		LIGHTING_DIFFUSE	= (1<<10),		// Diffuse lighting. Requires per vertex normals, 
@@ -48,10 +48,12 @@ public:
 		PREMULT				= (1<<13),		// convert to pre-multiplied in the fragment shader
 		EMISSIVE			= (1<<14),		// interpret the alpha channel as emission.
 		EMISSIVE_EXCLUSIVE  = (1<<15),		// everything not emissive is black
+		BONES				= (1<<16),		// Bones are being used by this shader.
+		BONE_FILTER			= (1<<17),		// Only show one bone. PARAM.x
 
 		// Switch to different shader:
-		BLUR				= (1<<16),		// requires u_radius
-		BLUR_Y				= (1<<17),
+		BLUR				= (1<<18),		// requires u_radius
+		BLUR_Y				= (1<<19),
 	};
 
 	void DeviceLoss();
@@ -68,7 +70,8 @@ public:
 		A_POS,			// 3 comp
 		A_NORMAL,		// 2 comp
 		A_COLOR,		// 3 comp
-		A_INSTANCE_ID,
+		A_INSTANCE_ID,	// int
+		A_BONE_ID,		// int
 		MAX_ATTRIBUTE
 	};
 	void ClearStream();
@@ -115,7 +118,10 @@ private:
 			for( int i=0; i<MAX_UNIFORM; ++i ) uniformLoc[i] = -1;
 		}
 		bool ParamNeeded() const { 
-			return (flags & ( ShaderManager::TEXTURE0_TRANSFORM | ShaderManager::TEXTURE1_TRANSFORM + ShaderManager::COLOR_PARAM )) != 0; 
+			return (flags & (   ShaderManager::TEXTURE0_TRANSFORM 
+				              | ShaderManager::TEXTURE1_TRANSFORM 
+							  | ShaderManager::COLOR_PARAM
+							  | ShaderManager::BONE_FILTER )) != 0; 
 		}
 
 		int flags;

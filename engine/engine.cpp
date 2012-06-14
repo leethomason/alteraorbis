@@ -287,8 +287,7 @@ void Engine::Draw( U32 deltaTime )
 		engineShaders->blend.SetShaderFlag(    ShaderManager::LIGHTING_HEMI );
 		engineShaders->emissive.SetShaderFlag( ShaderManager::LIGHTING_HEMI );
 	}
-	engineShaders->Generate();
-
+	
 	Rectangle2I mapBounds( 0, 0, EL_MAP_SIZE-1, EL_MAP_SIZE-1 );
 	if ( map ) {
 		mapBounds = map->Bounds();
@@ -307,6 +306,10 @@ void Engine::Draw( U32 deltaTime )
 
 	// ----------- Render Passess ---------- //
 	if ( glow ) {
+		// fixme:
+		//		Set 'emissive' model flag on queue
+		//		Run over, set EMEX
+		//		Submit( 0, EMEX, 0 ), Submit( &flatBlack, 0, EMEX )
 		if ( !renderTarget[RT_LIGHTS] ) {
 			renderTarget[RT_LIGHTS] = new RenderTarget( screenport->PhysicalWidth(), screenport->PhysicalHeight(), true );
 		}

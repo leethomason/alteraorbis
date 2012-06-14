@@ -34,6 +34,10 @@ attribute vec3 a_pos;				// vertex position
 	varying vec2 v_uv1;
 #endif
 
+#if BONES == 1
+	attribute int a_boneID;
+#endif
+
 #if LIGHTING_DIFFUSE > 0
 	uniform mat4 u_normalMatrix;	// normal transformation
 	uniform vec3 u_lightDir;		// light direction, eye space (x,y,z,0)
@@ -112,8 +116,14 @@ void main() {
 	v_color = color;
 	
 	#if INSTANCE == 0 
-		gl_Position = u_mvpMatrix * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );
+		vec4 pos = u_mvpMatrix * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );
 	#else
-		gl_Position = (u_mvpMatrix * u_mMatrix[int(a_instanceID)]) * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );
+		vec4 pos = (u_mvpMatrix * u_mMatrix[int(a_instanceID)]) * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );
 	#endif
+	
+	#if BONE_FILTER == 1
+		pos = pos * ( int(param.x) == a_boneID ) ? 1.0 : 0.0;
+	#endif
+	
+	gl_Position = pos;
 }

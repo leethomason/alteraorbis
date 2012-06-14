@@ -18,7 +18,8 @@ static const char* gAttributeName[ShaderManager::MAX_ATTRIBUTE] =
 	"a_pos",
 	"a_normal",
 	"a_color",
-	"a_instanceID"
+	"a_instanceID",
+	"a_boneID",
 };
 
 
@@ -279,6 +280,8 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 	AppendFlag( &header, "PREMULT",				flags & PREMULT );
 	AppendFlag( &header, "EMISSIVE",			flags & EMISSIVE );
 	AppendFlag( &header, "EMISSIVE_EXCLUSIVE",	flags & EMISSIVE_EXCLUSIVE );
+	AppendFlag( &header, "BONES",				flags & BONES );
+	AppendFlag( &header, "BONE_FILTER",			flags & BONE_FILTER );
 	AppendFlag( &header, "PARAM",				shader->ParamNeeded() );
 
 	if ( flags & LIGHTING_DIFFUSE )

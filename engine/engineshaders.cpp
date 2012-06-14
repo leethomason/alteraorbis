@@ -1,6 +1,7 @@
 #include "engineshaders.h"
 #include "shadermanager.h"
 
+/*
 void EngineShaders::Generate()
 {
 	lightTexXForm = light;
@@ -18,35 +19,63 @@ void EngineShaders::Generate()
 	emissiveColor = emissive;
 	emissiveColor.SetShaderFlag( ShaderManager::COLOR_PARAM );
 }
+*/
 
 
-GPUShader* EngineShaders::GetShader( int base, int mod )
+EngineShaders::EngineShaders()
+{
+}
+
+
+EngineShaders::~EngineShaders()
+{
+	for( int i=0; i<shaderArr.Size(); ++i ) {
+		delete shaderArr[i].shader;
+	}
+}
+
+
+GPUShader* EngineShaders::GetShader( int base, int flags )
 {
 	GPUShader* shader = 0;
-	switch( base ) {
-		case LIGHT:
-			shader = &light;
-			if ( mod==TEXXFORM )
-				shader = &lightTexXForm;
-			else if ( mod==COLOR )
-				shader = &lightColor;
-			break;
-		case BLEND:
-			shader = &blend;
-			if ( mod==TEXXFORM )
-				shader = &blendTexXForm;
-			else if ( mod==COLOR )
-				shader = &blendColor;
-			break;
-		case EMISSIVE:
-			shader = &emissive;
-			if ( mod==TEXXFORM )
-				shader = &emissiveTexXForm;
-			else if ( mod==COLOR )
-				shader = &emissiveColor;
-			break;
+	if ( flags == 0 ) {
+		switch( base ) {
+			case LIGHT: return &light;
+			case BLEND: return &blend;
+			default: return &emissive;
+		}
 	}
-	return shader;
+	for( int i=0; i<shaderArr.Size(); ++i ) {
+		const Node& node = shaderArr[i];
+		if ( node.base == base && node.flags == flags ) {
+			return shaderArr[i].shader;
+		}
+	}
+	Node node = { base, flags, new GPUShader() };
+	switch( base ) {
+	case LIGHT:
+		*node.shader = light;
+		break;
+	case BLEND:
+		*node.shader = blend;
+		break;
+	default:
+		*node.shader = emissive;
+		break;
+	}
+	node.shader->SetShaderFlag( flags );
+	shaderArr.Push( node );
+	return node.shader;
+}
+
+
+
+void EngineShaders::SetEmissiveEx()
+{
+	emissive.SetShaderFlag( ShaderManager::EMISSIVE_EXCLUSIVE ); 
+	for( int i=0; i<shaderArr.Size(); ++i ) {
+
+	}
 }
 
 

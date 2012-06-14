@@ -18,6 +18,7 @@
 #include "loosequadtree.h"
 #include "renderQueue.h"
 #include "engineshaders.h"
+#include "shadermanager.h"
 
 #include "../grinliz/glvector.h"
 #include "../grinliz/glstringutil.h"
@@ -320,12 +321,12 @@ void Model::Queue( RenderQueue* queue, EngineShaders* engineShaders )
 			else
 				base = EngineShaders::BLEND;
 		}
-		int mod = EngineShaders::NONE;
+		int mod = 0;
 		if ( HasTextureXForm(i) ) {
-			mod = EngineShaders::TEXXFORM;
+			mod = ShaderManager::TEXTURE0_TRANSFORM;
 		}
 		else if ( HasColor() ) {
-			mod = EngineShaders::COLOR;
+			mod = ShaderManager::COLOR_PARAM;
 		}
 		GPUShader* shader = engineShaders->GetShader( base, mod );
 

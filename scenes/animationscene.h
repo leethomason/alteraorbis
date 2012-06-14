@@ -28,6 +28,8 @@ private:
 	Model* model;
 
 	gamui::PushButton okay;
+	gamui::PushButton boneLeft, boneRight;
+	gamui::TextLabel  boneName;
 };
 
 
