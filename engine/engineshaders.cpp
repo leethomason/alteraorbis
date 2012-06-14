@@ -47,11 +47,11 @@ GPUShader* EngineShaders::GetShader( int base, int flags )
 	}
 	for( int i=0; i<shaderArr.Size(); ++i ) {
 		const Node& node = shaderArr[i];
-		if ( node.base == base && node.shader->ShaderFlags() == flags ) {
+		if ( node.base == base && node.flags == flags ) {
 			return shaderArr[i].shader;
 		}
 	}
-	Node node = { base, new GPUShader() };
+	Node node = { base, flags, new GPUShader() };
 	switch( base ) {
 	case LIGHT:
 		*node.shader = light;

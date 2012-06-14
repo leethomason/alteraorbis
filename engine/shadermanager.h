@@ -48,7 +48,6 @@ public:
 		PREMULT				= (1<<13),		// convert to pre-multiplied in the fragment shader
 		EMISSIVE			= (1<<14),		// interpret the alpha channel as emission. FLAG
 		EMISSIVE_EXCLUSIVE  = (1<<15),		// everything not emissive is black
-		BONES				= (1<<16),		// Bones are being used by this shader.
 		BONE_FILTER			= (1<<17),		// Only show one bone. PARAM.x
 
 		// Switch to different shader:
@@ -62,6 +61,7 @@ public:
 
 	void ActivateShader( int flags );
 	bool ParamNeeded() const { return active->ParamNeeded(); }
+	bool BonesNeeded() const { return active->BonesNeeded(); }
 
 	// Warning: must match gAttributeName
 	enum {
@@ -122,6 +122,9 @@ private:
 				              | ShaderManager::TEXTURE1_TRANSFORM 
 							  | ShaderManager::COLOR_PARAM
 							  | ShaderManager::BONE_FILTER )) != 0; 
+		}
+		bool BonesNeeded() const {
+			return (flags & ShaderManager::BONE_FILTER) != 0;
 		}
 
 		int flags;

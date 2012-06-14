@@ -321,12 +321,16 @@ void Model::Queue( RenderQueue* queue, EngineShaders* engineShaders )
 			else
 				base = EngineShaders::BLEND;
 		}
+
 		int mod = 0;
 		if ( HasTextureXForm(i) ) {
 			mod = ShaderManager::TEXTURE0_TRANSFORM;
 		}
 		else if ( HasColor() ) {
 			mod = ShaderManager::COLOR_PARAM;
+		}
+		else if ( HasBoneFilter() ) {
+			mod = ShaderManager::BONE_FILTER;
 		}
 		GPUShader* shader = engineShaders->GetShader( base, mod );
 

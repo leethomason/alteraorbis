@@ -199,11 +199,13 @@ public:
 	void Queue( RenderQueue* queue, EngineShaders* shaders );
 
 	enum {
-		MODEL_SELECTABLE			= 0x001,
-		MODEL_PARAM_IS_TEX_XFORM	= 0x002,
-		MODEL_PARAM_IS_COLOR		= 0x004,
-		MODEL_NO_SHADOW				= 0x008,
-		MODEL_INVISIBLE				= 0x010,
+		MODEL_SELECTABLE			=  0x001,
+		MODEL_PARAM_IS_TEX_XFORM	=  0x002,
+		MODEL_PARAM_IS_COLOR		=  0x004,
+		MODEL_PARAM_IS_BONE_FILTER	=  0x008,
+		MODEL_PARAM_MASK			= MODEL_PARAM_IS_TEX_XFORM | MODEL_PARAM_IS_COLOR | MODEL_PARAM_IS_BONE_FILTER,
+		MODEL_NO_SHADOW				=  0x100,
+		MODEL_INVISIBLE				=  0x200,
 
 		MODEL_USER					= 0x1000		// reserved for user code.
 		
@@ -233,11 +235,17 @@ public:
 	void SetScale( float s );
 	float GetScale() const							{ return debugScale; }
 	
-	// Note that SetTexXForm is mutually exclusive with SetColor
+	// <PARAMS> Only one can be in use at a time.
+	void ClearParam() {
+		ClearFlag( MODEL_PARAM_MASK );
+		for( int i=0; i<EL_MAX_MODEL_GROUPS; ++i ) {
+			param[i].Zero();
+		}
+	}
+
 	void SetTexXForm( int index, float xScale, float yScale, float dx, float dy ) { 
-		GLASSERT( index >= 0 && index < EL_MAX_MODEL_GROUPS );
-		SetFlag( MODEL_PARAM_IS_TEX_XFORM ); 
-		param[index].Set( xScale, yScale, dx, dy );
+		grinliz::Vector4F v = { xScale, yScale, dx, dy };
+		SetParam( MODEL_PARAM_IS_TEX_XFORM, index, v );
 	}
 	bool HasTextureXForm( int index ) const
 	{
@@ -245,16 +253,21 @@ public:
 		return IsFlagSet( MODEL_PARAM_IS_TEX_XFORM ) && param[index] != zero;
 	}
 
-	// Note that SetTexXForm is mutually exclusive with SetColor
 	void SetColor( const grinliz::Vector4F& color ) {
-		SetFlag( MODEL_PARAM_IS_COLOR ); 
-		for( int i=0; i<EL_MAX_MODEL_GROUPS; ++i ) {
-			param[i] = color;
-		}
+		SetParam( MODEL_PARAM_IS_COLOR, -1, color );
 	}
 	bool HasColor() const {
 		return IsFlagSet( MODEL_PARAM_IS_COLOR ) != 0;
 	}
+
+	void SetBoneFilter( int boneID ) {
+		grinliz::Vector4F v = { (float)boneID, 0, 0, 0 };
+		SetParam( MODEL_PARAM_IS_BONE_FILTER, -1, v );
+	}
+	bool HasBoneFilter() const {
+		return IsFlagSet( MODEL_PARAM_IS_BONE_FILTER ) != 0;
+	}
+	//// </PARAMS>
 
 	// AABB for user selection (bigger than the true AABB)
 	void CalcHitAABB( grinliz::Rectangle3F* aabb ) const;
@@ -293,6 +306,21 @@ public:
 	const grinliz::Matrix4& XForm() const;
 
 private:
+	void SetParam( int flag, int index, const grinliz::Vector4F& v ) {
+		GLASSERT( flag & MODEL_PARAM_MASK );
+		GLASSERT( index >= -1 && index < EL_MAX_MODEL_GROUPS );
+
+		ClearFlag( MODEL_PARAM_MASK );
+		SetFlag( flag ); 
+
+		for( int i=0; i<EL_MAX_MODEL_GROUPS; ++i ) {
+			param[i].Zero();
+			if ( index < 0 || index == i ) {
+				param[i] = v;
+			}
+		}
+	}
+
 	void Modify() 
 	{			
 		xformValid = false; 

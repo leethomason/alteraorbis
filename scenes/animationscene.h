@@ -24,8 +24,13 @@ public:
 	virtual void Draw3D( U32 deltaTime );
 
 private:
+	void UpdateBoneInfo();
+
+
 	Engine* engine;
 	Model* model;
+
+	int currentBone;
 
 	gamui::PushButton okay;
 	gamui::PushButton boneLeft, boneRight;

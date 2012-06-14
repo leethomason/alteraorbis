@@ -31,9 +31,11 @@ private:
 	// These things can't move in memory.
 	struct Node {
 		int base;
+		int flags;		// the shader flags that we set (a subset of all the flags the shader is actually using)
 		GPUShader* shader;
 	};
 
+	// FIXME: switch to HashTable
 	grinliz::CDynArray<Node> shaderArr;	
 };
 

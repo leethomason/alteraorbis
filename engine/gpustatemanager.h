@@ -100,13 +100,14 @@ struct GPUStream {
 	int nColor;
 	int colorOffset;
 	int instanceIDOffset;
+	int boneOffset;
 
 	GPUStream() :  stride( 0 ),
 				nPos( 0 ), posOffset( 0 ), 
 				nTexture0( 0 ), texture0Offset( 0 ),
 				nTexture1( 0 ), texture1Offset( 0 ), 
 				nNormal( 0 ), normalOffset( 0 ),
-				nColor( 0 ), colorOffset( 0 ), instanceIDOffset( 0 ) {}
+				nColor( 0 ), colorOffset( 0 ), instanceIDOffset( 0 ), boneOffset( 0 ) {}
 
 	GPUStream( const Vertex* vertex );
 	GPUStream( const InstVertex* vertex );

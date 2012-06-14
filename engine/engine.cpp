@@ -316,13 +316,11 @@ void Engine::Draw( U32 deltaTime )
 		// Make the light shader flat black:
 		FlatShader black;
 		black.SetColor( 0, 0, 0, 0 );
-		engineShaders->SetEmissiveEx();
 
 		// And throw the emissive shader to exclusive:
 		engineShaders->SetEmissiveEx();
-
 		// Render flat black everything that does NOT emit light:
-		renderQueue->Submit( &black, 0, 0, 0, ShaderManager::EMISSIVE_EXCLUSIVE, 0 );
+		renderQueue->Submit( &black, 0, 0, 0, 0, ShaderManager::EMISSIVE_EXCLUSIVE );
 		// Submit everything that emits light:
 		renderQueue->Submit( 0, 0, 0, 0, ShaderManager::EMISSIVE_EXCLUSIVE, 0 );
 		

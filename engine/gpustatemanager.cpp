@@ -300,6 +300,7 @@ void GPUShader::SetState( const GPUShader& ns )
 	const Matrix4& mv = ns.TopMatrix( GPUShader::MODELVIEW_MATRIX );
 
 	bool paramNeeded = shadman->ParamNeeded();
+	bool bonesNeeded = shadman->BonesNeeded();
 
 	if ( flags & ShaderManager::INSTANCE ) {
 		Matrix4 vp;
@@ -329,9 +330,6 @@ void GPUShader::SetState( const GPUShader& ns )
 		glBindTexture( GL_TEXTURE_2D, ns.texture1->GLID() );
 		shadman->SetTexture( 1, ns.texture1 );
 		shadman->SetStreamData( ShaderManager::A_TEXTURE1, ns.stream.nTexture1, GL_FLOAT, ns.stream.stride, PTR( ns.streamPtr, ns.stream.texture1Offset ) );
-		//if ( flags & ShaderManager::TEXTURE1_TRANSFORM ) {
-		//	shadman->SetUniform( ShaderManager::U_TEXTURE1_MAT, textureStack[1].Top() );
-		//}	
 	}
 	CHECK_GL_ERROR;
 
@@ -342,9 +340,6 @@ void GPUShader::SetState( const GPUShader& ns )
 		glBindTexture( GL_TEXTURE_2D, ns.texture0->GLID() );
 		shadman->SetTexture( 0, ns.texture0 );
 		shadman->SetStreamData( ShaderManager::A_TEXTURE0, ns.stream.nTexture0, GL_FLOAT, ns.stream.stride, PTR( ns.streamPtr, ns.stream.texture0Offset ) );
-		//if ( flags & ShaderManager::TEXTURE0_TRANSFORM ) {
-		//	shadman->SetUniform( ShaderManager::U_TEXTURE0_MAT, textureStack[0].Top() );
-		//}
 	}
 	CHECK_GL_ERROR;
 
@@ -357,6 +352,12 @@ void GPUShader::SetState( const GPUShader& ns )
 	if ( ns.stream.HasColor() ) {
 		GLASSERT( ns.stream.nColor == 4 );
 		shadman->SetStreamData( ShaderManager::A_COLOR, 4, GL_FLOAT, ns.stream.stride, PTR( ns.streamPtr, ns.stream.colorOffset ) );	 
+	}
+
+	// bones
+	if ( bonesNeeded ) {
+		GLASSERT( ns.stream.boneOffset );	// could be zero...but that would be odd.
+		shadman->SetStreamData( ShaderManager::A_BONE_ID, 1, GL_UNSIGNED_SHORT, ns.stream.stride, PTR( ns.streamPtr, ns.stream.boneOffset ) );	 
 	}
 
 	// lighting 
@@ -802,6 +803,7 @@ GPUStream::GPUStream( const Vertex* vertex )
 	normalOffset = Vertex::NORMAL_OFFSET;
 	nTexture0 = 2;
 	texture0Offset = Vertex::TEXTURE_OFFSET;
+	boneOffset = Vertex::BONE_ID_OFFSET;
 }
 
 
@@ -817,6 +819,7 @@ GPUStream::GPUStream( const InstVertex* vertex )
 	nTexture0 = 2;
 	texture0Offset = InstVertex::TEXTURE_OFFSET;
 	instanceIDOffset = InstVertex::INSTANCE_OFFSET;
+	boneOffset = InstVertex::BONE_ID_OFFSET;
 }
 
 

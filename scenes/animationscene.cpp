@@ -4,9 +4,12 @@
 #include "../engine/model.h"
 
 using namespace gamui;
+using namespace grinliz;
 
 AnimationScene::AnimationScene( LumosGame* game ) : Scene( game )
 {
+	currentBone = -1;
+
 	game->InitStd( &gamui2D, &okay, 0 );
 	Screenport* port = game->GetScreenportMutable();
 	
@@ -54,11 +57,36 @@ void AnimationScene::Resize()
 }
 
 
+void AnimationScene::UpdateBoneInfo()
+{
+	if ( currentBone == -1 ) {
+		boneName.SetText( "all" );
+		model->ClearParam();
+	}
+	else {
+		GLString str;
+		str.Format( "%d", currentBone );
+		boneName.SetText( str.c_str() );
+		model->SetBoneFilter( currentBone );
+	}
+}
+
+
 void AnimationScene::ItemTapped( const gamui::UIItem* item )
 {
 	if ( item == &okay ) {
 		game->PopScene();
 	}
+	else if ( item == &boneRight ) {
+		++currentBone;
+		if ( currentBone == EL_MAX_BONES ) currentBone = -1;
+	}
+	else if ( item == &boneLeft ) {
+		--currentBone;
+		if ( currentBone == -2 ) currentBone = EL_MAX_BONES-1;
+	}
+
+	UpdateBoneInfo();
 }
 
 

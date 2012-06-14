@@ -122,7 +122,8 @@ void main() {
 	#endif
 	
 	#if BONE_FILTER == 1
-		pos = pos * ( int(param.x) == a_boneID ) ? 1.0 : 0.0;
+		float mult = ( int(param.x) == a_boneID ) ? 1.0 : 0.0; 
+		pos = pos * mult;
 	#endif
 	
 	gl_Position = pos;
