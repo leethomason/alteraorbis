@@ -1,3 +1,4 @@
+// CAUTION: never use 'int' attributes. They don't work for reasons unknown to me.
 
 uniform mat4 	u_mvpMatrix;		// model-view-projection.
 									// although the model is identity in the instancing case.
@@ -35,7 +36,7 @@ attribute vec3 a_pos;				// vertex position
 #endif
 
 #if BONES == 1
-	attribute int a_boneID;
+	attribute float a_boneID;
 #endif
 
 #if LIGHTING_DIFFUSE > 0
@@ -122,7 +123,7 @@ void main() {
 	#endif
 	
 	#if BONE_FILTER == 1
-		float mult = ( int(param.x) == a_boneID ) ? 1.0 : 0.0; 
+		float mult = ( param.x == a_boneID ) ? 1.0 : 0.0; 
 		pos = pos * mult;
 	#endif
 	

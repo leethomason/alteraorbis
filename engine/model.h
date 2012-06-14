@@ -110,6 +110,15 @@ struct ModelHeader
 	MetaData				metaData[EL_MAX_METADATA];
 	BoneDesc				boneName[EL_MAX_BONES];		// ordered by name, not ID
 
+	const char* BoneNameFromID( int id ) const {
+		for( int i=0; i<EL_MAX_BONES; ++i ) {
+			if ( boneName[i].id == id ) {
+				return boneName[i].name.c_str();
+			}
+		}
+		return 0;
+	}
+
 	void Set( const char* name, int nGroups, int nTotalVertices, int nTotalIndices,
 			  const grinliz::Rectangle3F& bounds );
 
@@ -199,18 +208,15 @@ public:
 	void Queue( RenderQueue* queue, EngineShaders* shaders );
 
 	enum {
-		MODEL_SELECTABLE			=  0x001,
-		MODEL_PARAM_IS_TEX_XFORM	=  0x002,
-		MODEL_PARAM_IS_COLOR		=  0x004,
-		MODEL_PARAM_IS_BONE_FILTER	=  0x008,
+		MODEL_SELECTABLE			= 0x0001,
+		MODEL_PARAM_IS_TEX_XFORM	= 0x0002,
+		MODEL_PARAM_IS_COLOR		= 0x0004,
+		MODEL_PARAM_IS_BONE_FILTER	= 0x0008,
 		MODEL_PARAM_MASK			= MODEL_PARAM_IS_TEX_XFORM | MODEL_PARAM_IS_COLOR | MODEL_PARAM_IS_BONE_FILTER,
-		MODEL_NO_SHADOW				=  0x100,
-		MODEL_INVISIBLE				=  0x200,
+		MODEL_NO_SHADOW				= 0x0100,
+		MODEL_INVISIBLE				= 0x0200,
 
 		MODEL_USER					= 0x1000		// reserved for user code.
-		
-		//MODEL_METADATA				= 0x80,		// mapmaker data that isn't displayed in-game
-		//MODEL_TEXTURE_MATS			= 2
 	};
 
 	int IsFlagSet( int f ) const	{ return flags & f; }

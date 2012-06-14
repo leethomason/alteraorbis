@@ -53,7 +53,7 @@ void AnimationScene::Resize()
 	LayoutCalculator layout = lumosGame->DefaultLayout();
 	layout.PosAbs( &boneLeft, 0, -2 );
 	layout.PosAbs( &boneName, 1, -2 );
-	layout.PosAbs( &boneRight, 2, -2 );
+	layout.PosAbs( &boneRight, 3, -2 );
 }
 
 
@@ -65,7 +65,8 @@ void AnimationScene::UpdateBoneInfo()
 	}
 	else {
 		GLString str;
-		str.Format( "%d", currentBone );
+		const char* name = model->GetResource()->header.BoneNameFromID( currentBone );
+		str.Format( "%d:%s", currentBone, name ? name : "none" );
 		boneName.SetText( str.c_str() );
 		model->SetBoneFilter( currentBone );
 	}

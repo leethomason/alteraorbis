@@ -119,6 +119,12 @@ void ModelLoader::Load( const gamedb::Item* item, ModelResource* res )
 	res->invariantBounds.min.Set( -greater, res->header.bounds.min.y, -greater );
 	res->invariantBounds.max.Set( greater, res->header.bounds.max.y, greater );
 
+	for( int i=0; i<EL_MAX_BONES; ++i ) {
+		if ( !res->header.boneName[i].name.empty() ) {
+			GLOUTPUT(( "Model %s bone %s id=%d\n", res->header.name.c_str(), res->header.boneName[i].name.c_str(), res->header.boneName[i].id ));
+		}
+	}
+
 	for( U32 i=0; i<res->header.nAtoms; ++i )
 	{
 		const gamedb::Item* groupItem = item->Child( i );

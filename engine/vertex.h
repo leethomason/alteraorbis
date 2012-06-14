@@ -71,6 +71,9 @@ struct InstVertex
 	};
 
 	void From( const Vertex& rhs ) {
+		GLASSERT( ((const U8*)&boneID) - ((const U8*)this) == BONE_ID_OFFSET );
+		GLASSERT( ((const U8*)&instanceID) - ((const U8*)this) == INSTANCE_OFFSET );
+
 		this->pos = rhs.pos;
 		this->normal = rhs.normal;
 		this->tex = rhs.tex;
