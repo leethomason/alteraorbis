@@ -306,10 +306,6 @@ void Engine::Draw( U32 deltaTime )
 
 	// ----------- Render Passess ---------- //
 	if ( glow ) {
-		// fixme:
-		//		Set 'emissive' model flag on queue
-		//		Run over, set EMEX
-		//		Submit( 0, EMEX, 0 ), Submit( &flatBlack, 0, EMEX )
 		if ( !renderTarget[RT_LIGHTS] ) {
 			renderTarget[RT_LIGHTS] = new RenderTarget( screenport->PhysicalWidth(), screenport->PhysicalHeight(), true );
 		}
@@ -318,20 +314,21 @@ void Engine::Draw( U32 deltaTime )
 
 		// Tweak the shaders for glow-only rendering.
 		// Make the light shader flat black:
-		GPUShader savedLightShader = engineShaders->light;
-		engineShaders->light = FlatShader();
-		engineShaders->light.SetColor( 0, 0, 0 );
+		FlatShader black;
+		black.SetColor( 0, 0, 0, 0 );
+		engineShaders->SetEmissiveEx();
 
 		// And throw the emissive shader to exclusive:
-		engineShaders->emissive.SetShaderFlag( ShaderManager::EMISSIVE_EXCLUSIVE );
-		engineShaders->Generate();
+		engineShaders->SetEmissiveEx();
 
-		renderQueue->Submit( 0, 0, 0, 0 );
+		// Render flat black everything that does NOT emit light:
+		renderQueue->Submit( &black, 0, 0, 0, ShaderManager::EMISSIVE_EXCLUSIVE, 0 );
+		// Submit everything that emits light:
+		renderQueue->Submit( 0, 0, 0, 0, ShaderManager::EMISSIVE_EXCLUSIVE, 0 );
 		
 		// recove the shader settings
-		engineShaders->light = savedLightShader;
-		engineShaders->emissive.ClearShaderFlag( ShaderManager::EMISSIVE_EXCLUSIVE );
-		engineShaders->Generate();
+		engineShaders->ClearEmissiveEx();
+
 		renderTarget[RT_LIGHTS]->SetActive( false, this );
 	}
 
@@ -359,7 +356,8 @@ void Engine::Draw( U32 deltaTime )
 			renderQueue->Submit(	&shadowShader,
 									0,
 									Model::MODEL_NO_SHADOW,
-									&shadowMatrix );
+									&shadowMatrix, 
+									0, 0 );
 
 			map->Draw3D( shadow, GPUShader::STENCIL_SET );
 		}
@@ -374,7 +372,7 @@ void Engine::Draw( U32 deltaTime )
 	// -------- Models ---------- //
 #ifdef ENGINE_RENDER_MODELS
 	{
-		renderQueue->Submit( 0, 0, 0, 0 );
+		renderQueue->Submit( 0, 0, 0, 0, 0, 0 );
 	}
 #endif
 

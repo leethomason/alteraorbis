@@ -31,7 +31,6 @@ private:
 	// These things can't move in memory.
 	struct Node {
 		int base;
-		int flags;
 		GPUShader* shader;
 	};
 

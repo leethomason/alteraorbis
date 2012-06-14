@@ -131,7 +131,7 @@ void RenderQueue::Add( Model* model, const ModelAtom* atom, GPUShader* shader, c
 }
 
 
-void RenderQueue::Submit( GPUShader* overRideShader, int required, int excluded, const Matrix4* xform )
+void RenderQueue::Submit( GPUShader* overRideShader, int modelRequired, int modelExcluded, const Matrix4* xform, int shaderRequired, int shaderExcluded )
 {
 	//GRINLIZ_PERFTRACK
 
@@ -141,6 +141,12 @@ void RenderQueue::Submit( GPUShader* overRideShader, int required, int excluded,
 		if ( !overRideShader ) {
 			shader->SetTexture0( statePool[i].texture );
 		}
+		if (    (( shader->ShaderFlags() & shaderRequired ) != shaderRequired )
+			 || ( shader->ShaderFlags() & shaderExcluded ) )
+		{
+			// This shader is excluded.
+			continue;
+		}
 
 		// Filter out all the items for this RenderState
 		itemArr.Clear();
@@ -149,8 +155,8 @@ void RenderQueue::Submit( GPUShader* overRideShader, int required, int excluded,
 			Model* model = item->model;
 			int modelFlags = model->Flags();
 
-			if (    ( (required & modelFlags) == required)
-				 && ( (excluded & modelFlags) == 0 ) )
+			if (    ( (modelRequired & modelFlags) == modelRequired)
+				 && ( (modelExcluded & modelFlags) == 0 ) )
 			{
 				itemArr.Push( item );
 			}

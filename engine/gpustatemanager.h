@@ -147,7 +147,7 @@ public:
 
 	enum BlendMode {
 		BLEND_NONE,			// opaque
-		BLEND_NORMAL,		// normal but not good...
+		BLEND_NORMAL,		// a, 1-a
 		BLEND_ADD			// additive blending
 	};
 

@@ -42,18 +42,18 @@ public:
 		LIGHTING_DIFFUSE	= (1<<10),		// Diffuse lighting. Requires per vertex normals, 
 											// light direction, ambient color, and diffuse color.
 		LIGHTING_HEMI		= (1<<11),		// Hemisperical lighting. Like diffuse, but uses a 
-											// different light model.
+											// different light model. FLAG
 		INSTANCE			= (1<<12),		// Use instancing. Up to 16 uniform matrices contain the model
 											// transform. The instance attribute must be in the vertex data.
 		PREMULT				= (1<<13),		// convert to pre-multiplied in the fragment shader
-		EMISSIVE			= (1<<14),		// interpret the alpha channel as emission.
+		EMISSIVE			= (1<<14),		// interpret the alpha channel as emission. FLAG
 		EMISSIVE_EXCLUSIVE  = (1<<15),		// everything not emissive is black
 		BONES				= (1<<16),		// Bones are being used by this shader.
 		BONE_FILTER			= (1<<17),		// Only show one bone. PARAM.x
 
 		// Switch to different shader:
 		BLUR				= (1<<18),		// requires u_radius
-		BLUR_Y				= (1<<19),
+		BLUR_Y				= (1<<19),		//
 	};
 
 	void DeviceLoss();

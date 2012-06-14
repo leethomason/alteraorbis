@@ -47,11 +47,11 @@ GPUShader* EngineShaders::GetShader( int base, int flags )
 	}
 	for( int i=0; i<shaderArr.Size(); ++i ) {
 		const Node& node = shaderArr[i];
-		if ( node.base == base && node.flags == flags ) {
+		if ( node.base == base && node.shader->ShaderFlags() == flags ) {
 			return shaderArr[i].shader;
 		}
 	}
-	Node node = { base, flags, new GPUShader() };
+	Node node = { base, new GPUShader() };
 	switch( base ) {
 	case LIGHT:
 		*node.shader = light;
@@ -74,9 +74,19 @@ void EngineShaders::SetEmissiveEx()
 {
 	emissive.SetShaderFlag( ShaderManager::EMISSIVE_EXCLUSIVE ); 
 	for( int i=0; i<shaderArr.Size(); ++i ) {
-
+		if ( shaderArr[i].base == EMISSIVE ) {
+			shaderArr[i].shader->SetShaderFlag( ShaderManager::EMISSIVE_EXCLUSIVE ); 
+		}
 	}
 }
 
 
-
+void EngineShaders::ClearEmissiveEx()
+{
+	emissive.ClearShaderFlag( ShaderManager::EMISSIVE_EXCLUSIVE ); 
+	for( int i=0; i<shaderArr.Size(); ++i ) {
+		if ( shaderArr[i].base == EMISSIVE ) {
+			shaderArr[i].shader->ClearShaderFlag( ShaderManager::EMISSIVE_EXCLUSIVE ); 
+		}
+	}
+}

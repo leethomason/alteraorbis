@@ -56,10 +56,13 @@ public:
 
 	/* If a shader is passed it, it will override the shader set by the Add. */
 	void Submit(	GPUShader* shader, 
-					int required, 
-					int excluded,
-					const grinliz::Matrix4* xform );	// Additional transformation applied to model matrix,
+					int modelRequired, 
+					int modelExcluded,
+					const grinliz::Matrix4* xform,		// Additional transformation applied to model matrix,
 														// usually the shadow matrix.
+					int shaderRequired,
+					int shaderExcluded );
+
 	bool Empty() { return nState == 0 && nItem == 0; }
 	void Clear() { nState = 0; nItem = 0; }
 
