@@ -41,6 +41,32 @@ void Camera::TiltRotationToQuat( float tilt, float yRotation )
 }
 
 
+void Camera::SetDir( const grinliz::Vector3F& dir, const grinliz::Vector3F& up )
+{
+	Matrix4 m;
+
+	GLASSERT( Equal( dir.Length(), 1.0f, 0.01f ));
+
+    /* Side = forward x up */
+	Vector3F side;
+	CrossProduct(dir, up, &side);
+    side.Normalize();
+
+    m.x[ m.INDEX(0,0) ] = side.x;
+    m.x[ m.INDEX(0,1) ] = side.y;
+    m.x[ m.INDEX(0,2) ] = side.z;
+
+    m.x[ m.INDEX(1,0)] = up.x;
+    m.x[ m.INDEX(1,1)] = up.y;
+    m.x[ m.INDEX(1,2)] = up.z;
+
+    m.x[ m.INDEX(2,0)] = -dir.x;
+    m.x[ m.INDEX(2,1)] = -dir.y;
+    m.x[ m.INDEX(2,2)] = -dir.z;
+	quat.FromRotationMatrix( m );
+}
+
+
 void Camera::CalcWorldXForm()
 {
 	if ( !valid ) {

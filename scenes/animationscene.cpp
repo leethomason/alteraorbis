@@ -91,7 +91,17 @@ void AnimationScene::ItemTapped( const gamui::UIItem* item )
 	}
 	else if ( item == &ortho ) {
 		Screenport* port = engine->GetScreenportMutable();
-		port->SetOrthoCamera( ortho.Down() );
+		if ( ortho.Down() ) {
+			port->SetOrthoCamera( true, 0, 2.5f );
+			static const Vector3F DIR = { -1, 0, 0 };	// FIXME: bug in camera code. (EEK.) Why is the direction negative???
+			static const Vector3F UP  = { 0, 1, 0 };
+			engine->camera.SetPosWC( -5, 0, 1 );
+			engine->camera.SetDir( DIR, UP );
+		}
+		else {
+			port->SetOrthoCamera( false, 0, 0 );
+			engine->CameraLookAt( 1, 1, 5 );
+		}
 	}
 
 	UpdateBoneInfo();

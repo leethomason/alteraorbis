@@ -34,6 +34,7 @@ public:
 
 	// Convert from the old system:
 	void TiltRotationToQuat( float tilt, float yRotation );
+	void SetDir( const grinliz::Vector3F& dir, const grinliz::Vector3F& up );
 
 	// Move the camera around a center pole. The idea of rotation from the users point of view.
 	void Orbit( float delta );

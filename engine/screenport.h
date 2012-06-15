@@ -82,7 +82,9 @@ public:
 	// Set the perspective PROJECTION.
 	void SetPerspective();
 
-	void SetOrthoCamera( bool ortho )								{ orthoCamera = ortho; }
+	// Uses an ortho camera in perspective mode. Either the width or height should be
+	// 0, and the other will be calculated.
+	void SetOrthoCamera( bool ortho, float w, float h )				{ orthoCamera = ortho; orthoWidth = w; orthoHeight = h; }
 
 	// Set the MODELVIEW from the camera.
 	void SetView( const grinliz::Matrix4& view );
@@ -122,6 +124,8 @@ private:
 
 	bool uiMode;
 	bool orthoCamera;
+	float orthoWidth;
+	float orthoHeight;
 	Frustum frustum;
 	grinliz::Matrix4 projection2D;
 	grinliz::Matrix4 projection3D, view3D;

@@ -112,7 +112,17 @@ void Screenport::SetPerspective()
 	frustum.right	=  halfLongSide;
 	
 	if ( orthoCamera ) {
-		projection3D.SetOrtho( frustum.left*2.f, frustum.right*2.f, frustum.bottom*2.f, frustum.top*2.f, frustum.zNear, frustum.zFar );
+		float w = 0;
+		float h = 0;
+		if ( orthoWidth > 0 ) {
+			w = orthoWidth;
+			h = orthoWidth * ratio;
+		}
+		else {
+			w = orthoHeight / ratio;
+			h = orthoHeight;
+		}
+		projection3D.SetOrtho( -w/2, w/2, -h/2, h/2, frustum.zNear, frustum.zFar );
 		GPUShader::SetPerspectiveTransform( projection3D );
 	}
 	else {
