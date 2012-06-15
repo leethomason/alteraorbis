@@ -31,9 +31,10 @@ private:
 	Model* model;
 
 	int currentBone;
+	bool doExport;
 
 	gamui::PushButton okay;
-	gamui::PushButton boneLeft, boneRight;
+	gamui::PushButton boneLeft, boneRight, exportSCML;
 	gamui::ToggleButton ortho;
 	gamui::TextLabel  boneName;
 };

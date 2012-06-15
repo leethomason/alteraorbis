@@ -2,6 +2,8 @@
 #include "../game/lumosgame.h"
 #include "../engine/engine.h"
 #include "../engine/model.h"
+#include "../shared/lodepng.h"
+#include "../win32/glew.h"
 
 using namespace gamui;
 using namespace grinliz;
@@ -9,6 +11,7 @@ using namespace grinliz;
 AnimationScene::AnimationScene( LumosGame* game ) : Scene( game )
 {
 	currentBone = -1;
+	doExport = false;
 
 	game->InitStd( &gamui2D, &okay, 0 );
 	Screenport* port = game->GetScreenportMutable();
@@ -29,6 +32,10 @@ AnimationScene::AnimationScene( LumosGame* game ) : Scene( game )
 	ortho.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
 	ortho.SetSize( layout.Width(), layout.Height() );
 	ortho.SetText( "ortho" );
+
+	exportSCML.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
+	exportSCML.SetSize( layout.Width(), layout.Height() );
+	exportSCML.SetText( "export" );
 
 	engine = new Engine( port, game->GetDatabase(), 0 );
 
@@ -54,9 +61,11 @@ void AnimationScene::Resize()
 	lumosGame->PositionStd( &okay, 0 );
 
 	LayoutCalculator layout = lumosGame->DefaultLayout();
-	layout.PosAbs( &boneLeft, 0, -2 );
-	layout.PosAbs( &boneName, 1, -2 );
-	layout.PosAbs( &boneRight, 3, -2 );
+	layout.PosAbs( &boneLeft,	0, -2 );
+	layout.PosAbs( &boneName,	1, -2 );
+	layout.PosAbs( &boneRight,	3, -2 );
+	layout.PosAbs( &ortho,		4, -2 );
+	layout.PosAbs( &exportSCML,	5, -2 );
 }
 
 
@@ -92,16 +101,19 @@ void AnimationScene::ItemTapped( const gamui::UIItem* item )
 	else if ( item == &ortho ) {
 		Screenport* port = engine->GetScreenportMutable();
 		if ( ortho.Down() ) {
-			port->SetOrthoCamera( true, 0, 2.5f );
+			port->SetOrthoCamera( true, 0, 3.0f );
 			static const Vector3F DIR = { -1, 0, 0 };	// FIXME: bug in camera code. (EEK.) Why is the direction negative???
 			static const Vector3F UP  = { 0, 1, 0 };
-			engine->camera.SetPosWC( -5, 0, 1 );
-			engine->camera.SetDir( DIR, UP );
+			engine->camera.SetPosWC( -5, 0.4f, 1 );
+			engine->camera.SetDir( DIR, UP ); 
 		}
 		else {
 			port->SetOrthoCamera( false, 0, 0 );
 			engine->CameraLookAt( 1, 1, 5 );
 		}
+	}
+	else if ( item == &exportSCML ) {
+		doExport = true;
 	}
 
 	UpdateBoneInfo();
@@ -111,4 +123,20 @@ void AnimationScene::ItemTapped( const gamui::UIItem* item )
 void AnimationScene::Draw3D( U32 deltaTime )
 {
 	engine->Draw( deltaTime );
+
+	if ( doExport ) {
+		const Screenport& port = game->GetScreenport();
+		int width = port.PhysicalWidth();
+		int height = port.PhysicalHeight();
+		U32* pixels = new U32[width*height];
+		for( int i=0; i<width*height; ++i ) {
+			*pixels |= 0x000000ff;
+		}
+
+		glReadPixels( 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels );
+
+		lodepng::encode( "test.png", (const unsigned char*)pixels, width, height );
+		delete [] pixels;
+		doExport = false;
+	}
 }
