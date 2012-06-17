@@ -2,8 +2,10 @@
 #include "../game/lumosgame.h"
 #include "../engine/engine.h"
 #include "../engine/model.h"
-#include "../shared/lodepng.h"
-#include "../win32/glew.h"
+//#include "../shared/lodepng.h"
+//#include "../win32/glew.h"
+
+extern void ScreenCapture( const char* baseFilename, bool appendCount, bool trim, bool makeTransparent, grinliz::Rectangle2I* size );
 
 using namespace gamui;
 using namespace grinliz;
@@ -122,21 +124,16 @@ void AnimationScene::ItemTapped( const gamui::UIItem* item )
 
 void AnimationScene::Draw3D( U32 deltaTime )
 {
+	bool glow = engine->GetGlow();
+	if ( doExport ) {
+		engine->SetGlow( false );
+	}
 	engine->Draw( deltaTime );
+	engine->SetGlow( glow );
 
 	if ( doExport ) {
-		const Screenport& port = game->GetScreenport();
-		int width = port.PhysicalWidth();
-		int height = port.PhysicalHeight();
-		U32* pixels = new U32[width*height];
-		for( int i=0; i<width*height; ++i ) {
-			*pixels |= 0x000000ff;
-		}
-
-		glReadPixels( 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels );
-
-		lodepng::encode( "test.png", (const unsigned char*)pixels, width, height );
-		delete [] pixels;
+		Rectangle2I size;
+		ScreenCapture( "test", false, true, true, &size );
 		doExport = false;
 	}
 }

@@ -22,12 +22,16 @@
 #include "../grinliz/gltypes.h"
 #include "../grinliz/glutil.h"
 #include "../grinliz/glvector.h"
-#include "../xegame/cgame.h"
+#include "../grinliz/glrectangle.h"
 #include "../grinliz/glstringutil.h"
-#include "audio.h"
-#include "../version.h"
+
+#include "../xegame/cgame.h"
 #include "../game/gamesettings.h"
 
+#include "../shared/lodepng.h"
+
+#include "../version.h"
+#include "audio.h"
 #include "wglew.h"
 
 // For error logging.
@@ -83,7 +87,7 @@ const int rotation = 1;
 const int rotation = 0;
 #endif
 
-void ScreenCapture( const char* baseFilename );
+void ScreenCapture( const char* baseFilename, bool appendCount, bool trim, bool makeTransparent, grinliz::Rectangle2I* size );
 void PostCurrentGame();
 
 static const int SHADE = 6;
@@ -372,7 +376,7 @@ int main( int argc, char **argv )
 					case SDLK_s:
 						GameDoTick( game, SDL_GetTicks() );
 						SDL_GL_SwapBuffers();
-						ScreenCapture( "cap" );
+						ScreenCapture( "cap", true, false, false, 0 );
 						break;
 
 					case SDLK_p:
@@ -514,9 +518,31 @@ int main( int argc, char **argv )
 }
 
 
+// 0:lowX, 1:highX, 2:lowY, 3:highY
+bool RectangleIsBlack( const grinliz::Rectangle2I& r, int edge, SDL_Surface* surface )
+{
+	grinliz::Rectangle2I c;
+	switch( edge ) {
+	case 0: c.Set( r.min.x, r.min.y, r.min.x, r.max.y ); break;
+	case 1: c.Set( r.max.x, r.min.y, r.max.x, r.max.y ); break;
+	case 2: c.Set( r.min.x, r.min.y, r.max.x, r.min.y ); break;
+	case 3: c.Set( r.min.x, r.max.y, r.max.x, r.max.y ); break;
+	}
+
+	for( int y=c.min.y; y<=c.max.y; ++y ) {
+		for( int x=c.min.x; x<=c.max.x; ++x ) {
+			U32 color = *( (U32*)surface->pixels + y*surface->w + x ) & 0x00ffffff;
+			if ( color )
+				return false;
+		}
+	}
+	return true;
+}
 
 
-void ScreenCapture( const char* baseFilename )
+// No alpha channel in BMP. (Sigh.) Need to switch to ping.
+// Might as well make core code as well.
+void ScreenCapture( const char* baseFilename, bool appendCount, bool trim, bool makeTransparent, grinliz::Rectangle2I* size )
 {
 	int viewPort[4];
 	glGetIntegerv(GL_VIEWPORT, viewPort);
@@ -552,47 +578,73 @@ void ScreenCapture( const char* baseFilename )
 	for( i=0; i<width*height; ++i )
 		*( (U32*)surface->pixels + i ) |= 0xff000000;
 
-	int index = 0;
-	char buf[ 256 ];
-	for( index = 0; index<100; ++index )
-	{
-		grinliz::SNPrintf( buf, 256, "%s%02d.bmp", baseFilename, index );
-#pragma warning ( push )
-#pragma warning ( disable : 4996 )	// fopen is unsafe. For video games that seems extreme.
-		FILE* fp = fopen( buf, "rb" );
-#pragma warning ( pop )
-		if ( fp )
-			fclose( fp );
-		else
-			break;
+	grinliz::Rectangle2I r;
+	r.Set( 0, 0, width-1, height-1 );
+	if ( trim ) {
+
+		while ( r.min.x < r.max.x && RectangleIsBlack( r, 0, surface )) {
+			++r.min.x;
+		}
+		while ( r.min.x < r.max.x && RectangleIsBlack( r, 1, surface )) {
+			--r.max.x;
+		}
+		while ( r.min.y < r.max.y && RectangleIsBlack( r, 2, surface )) {
+			++r.min.y;
+		}
+		while ( r.min.y < r.max.y && RectangleIsBlack( r, 3, surface )) {
+			--r.max.y;
+		}
+		SDL_Surface* newSurface = SDL_CreateRGBSurface( SDL_SWSURFACE, r.Width(), r.Height(), 
+														32, 0xff, 0xff<<8, 0xff<<16, 0xff<<24 );
+		// Stupid BLT semantics consider dst alpha.
+		memset( newSurface->pixels, 255, newSurface->pitch*r.Height() );
+		SDL_Rect srcRect = { r.min.x, r.min.y, r.Width(), r.Height() };
+		SDL_Rect dstRect = { 0, 0, r.Width(), r.Height() };
+		SDL_BlitSurface( surface, &srcRect, newSurface, &dstRect ); 
+
+		SDL_FreeSurface( surface );
+		surface = newSurface;
+		width = r.Width();
+		height = r.Height();
 	}
-	if ( index < 100 )
-		SDL_SaveBMP( surface, buf );
-	SDL_FreeSurface( surface );
-}
+	if ( size ) {
+		*size = r;
+	}
 
-
-/*
-void SaveLightMap( const Surface* core )
-{
-	SDL_Surface* surface = SDL_CreateRGBSurface( SDL_SWSURFACE, core->Width(), core->Height(), 
-												 32, 0xff, 0xff<<8, 0xff<<16, 0xff<<24 );
-	if ( !surface )
-		return;
-
-	for( int j=0; j<core->Height(); ++j ) {
-		for( int i=0; i<core->Width(); ++i ) {
-
-			U16 c = core->GetImg16( i, j );
-			grinliz::Color4U8 rgba = Surface::CalcRGB16( c );
-
-			*((U32*)surface->pixels + j*surface->pitch/4+i) = rgba.r | (rgba.g<<8) | (rgba.b<<16) | (0xff<<24);
+	if ( makeTransparent ) {
+		// And now, set all the alphas to opaque:
+		for( i=0; i<width*height; ++i ) {
+			if (( *( (U32*)surface->pixels + i ) & 0x00ffffff ) == 0 ) {
+				*( (U32*)surface->pixels + i ) = 0;
+			}
 		}
 	}
-	SDL_SaveBMP( surface, "lightmap.bmp" );
+
+	int index = 0;
+	char buf[ 256 ];
+	if ( appendCount ) {
+		for( index = 0; index<100; ++index )
+		{
+			grinliz::SNPrintf( buf, 256, "%s%02d.png", baseFilename, index );
+	#pragma warning ( push )
+	#pragma warning ( disable : 4996 )	// fopen is unsafe. For video games that seems extreme.
+			FILE* fp = fopen( buf, "rb" );
+	#pragma warning ( pop )
+			if ( fp )
+				fclose( fp );
+			else
+				break;
+		}
+	}
+	else {
+		grinliz::SNPrintf( buf, 256, "%s.png", baseFilename );
+	}
+	if ( index < 100 ) {
+//		SDL_SaveBMP( surface, buf );
+		lodepng_encode32_file( buf, (const unsigned char*)surface->pixels, width, height );
+	}
 	SDL_FreeSurface( surface );
 }
-*/
 
 /*
 void PostCurrentGame()
