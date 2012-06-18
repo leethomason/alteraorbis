@@ -610,6 +610,9 @@ void ScreenCapture( const char* baseFilename, bool appendCount, bool trim, bool 
 	if ( size ) {
 		*size = r;
 	}
+	if ( width == 0 || height == 0 ) {
+		return;
+	}
 
 	if ( makeTransparent ) {
 		// And now, set all the alphas to opaque:

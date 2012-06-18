@@ -32,6 +32,7 @@ private:
 
 	int currentBone;
 	bool doExport;
+	int exportCount;
 
 	gamui::PushButton okay;
 	gamui::PushButton boneLeft, boneRight, exportSCML;

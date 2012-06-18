@@ -36,7 +36,7 @@ AnimationScene::AnimationScene( LumosGame* game ) : Scene( game )
 	ortho.SetText( "ortho" );
 
 	exportSCML.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
-	exportSCML.SetSize( layout.Width(), layout.Height() );
+	exportSCML.SetSize( layout.Width()*2.0f, layout.Height() );
 	exportSCML.SetText( "export" );
 
 	engine = new Engine( port, game->GetDatabase(), 0 );
@@ -116,6 +116,7 @@ void AnimationScene::ItemTapped( const gamui::UIItem* item )
 	}
 	else if ( item == &exportSCML ) {
 		doExport = true;
+		exportCount = -1;
 	}
 
 	UpdateBoneInfo();
@@ -124,16 +125,32 @@ void AnimationScene::ItemTapped( const gamui::UIItem* item )
 
 void AnimationScene::Draw3D( U32 deltaTime )
 {
-	bool glow = engine->GetGlow();
 	if ( doExport ) {
-		engine->SetGlow( false );
-	}
-	engine->Draw( deltaTime );
-	engine->SetGlow( glow );
 
-	if ( doExport ) {
 		Rectangle2I size;
-		ScreenCapture( "test", false, true, true, &size );
-		doExport = false;
+		char buf[256];
+		const char* part = "reference";
+		if ( exportCount >= 0 ) {
+			part = model->GetResource()->header.BoneNameFromID( exportCount );
+			model->SetBoneFilter( exportCount );
+		}
+
+		bool glow = engine->GetGlow();
+		engine->SetGlow( false );
+		engine->Draw( deltaTime );
+		engine->SetGlow( glow );
+
+		if ( part && *part ) {
+			SNPrintf( buf, 256, "./resin/%s/assets/%s.png", model->GetResource()->header.name.c_str(), part );
+			ScreenCapture( buf, false, true, true, &size );
+		}
+		++exportCount;
+		if ( exportCount == EL_MAX_BONES ) {
+			doExport = false;
+			model->ClearParam();
+		}
+	}
+	else {
+		engine->Draw( deltaTime );
 	}
 }
