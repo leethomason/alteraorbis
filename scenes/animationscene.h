@@ -3,6 +3,7 @@
 
 #include "../xegame/scene.h"
 #include "../gamui/gamui.h"
+#include "../tinyxml2/tinyxml2.h"
 
 class LumosGame;
 class Engine;
@@ -25,19 +26,29 @@ public:
 
 private:
 	void UpdateBoneInfo();
+	void InitXML( const grinliz::Rectangle2I& bounds );
+	void FinishXML();
 
+	void InitFrame();
+	void PushSprite( const char* name, const grinliz::Rectangle2I& bounds );
+	void FinishFrame();
 
 	Engine* engine;
 	Model* model;
 
-	int currentBone;
+	int  currentBone;
 	bool doExport;
-	int exportCount;
+	int  exportCount;
 
 	gamui::PushButton okay;
 	gamui::PushButton boneLeft, boneRight, exportSCML;
 	gamui::ToggleButton ortho;
 	gamui::TextLabel  boneName;
+
+	tinyxml2::XMLDocument* xmlDocument;
+	tinyxml2::XMLPrinter*  xmlPrinter;
+	FILE* scmlFP;
+	grinliz::Vector2I origin;
 };
 
 

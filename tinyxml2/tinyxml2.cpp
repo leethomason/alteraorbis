@@ -23,18 +23,10 @@ distribution.
 
 #include "tinyxml2.h"
 
-#if 1
-	#include <cstdio>
-	#include <cstdlib>
-	#include <new>
-#else
-	#include <string.h>
-	#include <stdlib.h>
-	#include <stdio.h>
-	#include <ctype.h>
-	#include <new>
-	#include <stdarg.h>
-#endif
+#include <cstdio>
+#include <cstdlib>
+#include <new>
+#include <cstddef>
 
 using namespace tinyxml2;
 
@@ -120,7 +112,7 @@ char* StrPair::ParseText( char* p, const char* endTag, int strFlags )
 
 	char* start = p;	// fixme: hides a member
 	char  endChar = *endTag;
-	int   length = strlen( endTag );	
+	size_t length = strlen( endTag );
 
 	// Inner loop of text parsing.
 	while ( *p ) {
@@ -316,7 +308,7 @@ const char* XMLUtil::GetCharacterRef( const char* p, char* value, int* length )
 	if ( *(p+1) == '#' && *(p+2) )
 	{
 		unsigned long ucs = 0;
-		int delta = 0;
+		ptrdiff_t delta = 0;
 		unsigned mult = 1;
 
 		if ( *(p+2) == 'x' )
@@ -329,7 +321,7 @@ const char* XMLUtil::GetCharacterRef( const char* p, char* value, int* length )
 
 			if ( !q || !*q ) return 0;
 
-			delta = (q-p);
+			delta = q-p;
 			--q;
 
 			while ( *q != 'x' )
@@ -375,6 +367,37 @@ const char* XMLUtil::GetCharacterRef( const char* p, char* value, int* length )
 	}
 	return p+1;
 }
+
+
+void XMLUtil::ToStr( int v, char* buffer, int bufferSize ) 
+{
+	TIXML_SNPRINTF( buffer, bufferSize, "%d", v );	
+}
+
+
+void XMLUtil::ToStr( unsigned v, char* buffer, int bufferSize )
+{
+	TIXML_SNPRINTF( buffer, bufferSize, "%u", v );	
+}
+
+
+void XMLUtil::ToStr( bool v, char* buffer, int bufferSize )
+{
+	TIXML_SNPRINTF( buffer, bufferSize, "%d", v ? 1 : 0 );	
+}
+
+
+void XMLUtil::ToStr( float v, char* buffer, int bufferSize )
+{
+	TIXML_SNPRINTF( buffer, bufferSize, "%f", v );	
+}
+
+
+void XMLUtil::ToStr( double v, char* buffer, int bufferSize )
+{
+	TIXML_SNPRINTF( buffer, bufferSize, "%f", v );	
+}
+
 
 
 char* XMLDocument::Identify( char* p, XMLNode** node ) 
@@ -997,7 +1020,7 @@ void XMLAttribute::SetAttribute( const char* v )
 void XMLAttribute::SetAttribute( int v )
 {
 	char buf[BUF_SIZE];
-	TIXML_SNPRINTF( buf, BUF_SIZE, "%d", v );	
+	XMLUtil::ToStr( v, buf, BUF_SIZE );
 	value.SetStr( buf );
 }
 
@@ -1005,7 +1028,7 @@ void XMLAttribute::SetAttribute( int v )
 void XMLAttribute::SetAttribute( unsigned v )
 {
 	char buf[BUF_SIZE];
-	TIXML_SNPRINTF( buf, BUF_SIZE, "%u", v );	
+	XMLUtil::ToStr( v, buf, BUF_SIZE );
 	value.SetStr( buf );
 }
 
@@ -1013,21 +1036,21 @@ void XMLAttribute::SetAttribute( unsigned v )
 void XMLAttribute::SetAttribute( bool v )
 {
 	char buf[BUF_SIZE];
-	TIXML_SNPRINTF( buf, BUF_SIZE, "%d", v ? 1 : 0 );	
+	XMLUtil::ToStr( v, buf, BUF_SIZE );
 	value.SetStr( buf );
 }
 
 void XMLAttribute::SetAttribute( double v )
 {
 	char buf[BUF_SIZE];
-	TIXML_SNPRINTF( buf, BUF_SIZE, "%f", v );	
+	XMLUtil::ToStr( v, buf, BUF_SIZE );
 	value.SetStr( buf );
 }
 
 void XMLAttribute::SetAttribute( float v )
 {
 	char buf[BUF_SIZE];
-	TIXML_SNPRINTF( buf, BUF_SIZE, "%f", v );	
+	XMLUtil::ToStr( v, buf, BUF_SIZE );
 	value.SetStr( buf );
 }
 
@@ -1092,31 +1115,30 @@ const char* XMLElement::GetText() const
 }
 
 
-
 XMLAttribute* XMLElement::FindOrCreateAttribute( const char* name )
 {
-	XMLAttribute* attrib = FindAttribute( name );
+	XMLAttribute* last = 0;
+	XMLAttribute* attrib = 0;
+	for( attrib = rootAttribute;
+		 attrib;
+		 last = attrib, attrib = attrib->next )
+	{		 
+		if ( XMLUtil::StringEqual( attrib->Name(), name ) ) {
+			break;
+		}
+	}
 	if ( !attrib ) {
 		attrib = new (document->attributePool.Alloc() ) XMLAttribute();
 		attrib->memPool = &document->attributePool;
-		LinkAttribute( attrib );
+		if ( last ) {
+			last->next = attrib;
+		}
+		else {
+			rootAttribute = attrib;
+		}
 		attrib->SetName( name );
 	}
 	return attrib;
-}
-
-
-void XMLElement::LinkAttribute( XMLAttribute* attrib )
-{
-	if ( rootAttribute ) {
-		XMLAttribute* end = rootAttribute;
-		while ( end->next )
-			end = end->next;
-		end->next = attrib;
-	}
-	else {
-		rootAttribute = attrib;
-	}
 }
 
 
@@ -1142,6 +1164,7 @@ void XMLElement::DeleteAttribute( const char* name )
 char* XMLElement::ParseAttributes( char* p )
 {
 	const char* start = p;
+	XMLAttribute* prevAttribute = 0;
 
 	// Read the attributes.
 	while( p ) {
@@ -1162,7 +1185,18 @@ char* XMLElement::ParseAttributes( char* p )
 				document->SetError( XML_ERROR_PARSING_ATTRIBUTE, start, p );
 				return 0;
 			}
-			LinkAttribute( attrib );
+			// There is a minor bug here: if the attribute in the source xml
+			// document is duplicated, it will not be detected and the
+			// attribute will be doubly added. However, tracking the 'prevAttribute'
+			// avoids re-scanning the attribute list. Preferring performance for
+			// now, may reconsider in the future.
+			if ( prevAttribute ) { 
+				prevAttribute->next = attrib;
+			}
+			else {
+				rootAttribute = attrib;
+			}	
+			prevAttribute = attrib;
 		}
 		// end of the tag
 		else if ( *p == '/' && *(p+1) == '>' ) {
@@ -1340,7 +1374,7 @@ XMLDeclaration* XMLDocument::NewDeclaration( const char* str )
 {
 	XMLDeclaration* dec = new (commentPool.Alloc()) XMLDeclaration( this );
 	dec->memPool = &commentPool;
-	dec->SetValue( str );
+	dec->SetValue( str ? str : "xml version=\"1.0\" encoding=\"UTF-8\"" );
 	return dec;
 }
 
@@ -1407,7 +1441,7 @@ int XMLDocument::LoadFile( FILE* fp )
 }
 
 
-void XMLDocument::SaveFile( const char* filename )
+int XMLDocument::SaveFile( const char* filename )
 {
 #if defined(_MSC_VER)
 #pragma warning ( push )
@@ -1417,14 +1451,21 @@ void XMLDocument::SaveFile( const char* filename )
 #if defined(_MSC_VER)
 #pragma warning ( pop )
 #endif
-	if ( fp ) {
-		XMLPrinter stream( fp );
-		Print( &stream );
-		fclose( fp );
-	}
-	else {
+	if ( !fp ) {
 		SetError( XML_ERROR_FILE_COULD_NOT_BE_OPENED, filename, 0 );
+		return errorID;
 	}
+	SaveFile(fp);
+	fclose( fp );
+	return errorID;
+}
+
+
+int XMLDocument::SaveFile( FILE* fp )
+{
+	XMLPrinter stream( fp );
+	Print( &stream );
+	return errorID;
 }
 
 
@@ -1641,7 +1682,7 @@ void XMLPrinter::PushAttribute( const char* name, const char* value )
 void XMLPrinter::PushAttribute( const char* name, int v )
 {
 	char buf[BUF_SIZE];
-	TIXML_SNPRINTF( buf, BUF_SIZE, "%d", v );	
+	XMLUtil::ToStr( v, buf, BUF_SIZE );
 	PushAttribute( name, buf );
 }
 
@@ -1649,7 +1690,7 @@ void XMLPrinter::PushAttribute( const char* name, int v )
 void XMLPrinter::PushAttribute( const char* name, unsigned v )
 {
 	char buf[BUF_SIZE];
-	TIXML_SNPRINTF( buf, BUF_SIZE, "%u", v );	
+	XMLUtil::ToStr( v, buf, BUF_SIZE );
 	PushAttribute( name, buf );
 }
 
@@ -1657,7 +1698,7 @@ void XMLPrinter::PushAttribute( const char* name, unsigned v )
 void XMLPrinter::PushAttribute( const char* name, bool v )
 {
 	char buf[BUF_SIZE];
-	TIXML_SNPRINTF( buf, BUF_SIZE, "%d", v ? 1 : 0 );	
+	XMLUtil::ToStr( v, buf, BUF_SIZE );
 	PushAttribute( name, buf );
 }
 
@@ -1665,7 +1706,7 @@ void XMLPrinter::PushAttribute( const char* name, bool v )
 void XMLPrinter::PushAttribute( const char* name, double v )
 {
 	char buf[BUF_SIZE];
-	TIXML_SNPRINTF( buf, BUF_SIZE, "%f", v );	
+	XMLUtil::ToStr( v, buf, BUF_SIZE );
 	PushAttribute( name, buf );
 }
 
@@ -1716,6 +1757,45 @@ void XMLPrinter::PushText( const char* text, bool cdata )
 	else {
 		PrintString( text, true );
 	}
+}
+
+void XMLPrinter::PushText( int value ) 
+{
+	char buf[BUF_SIZE];
+	XMLUtil::ToStr( value, buf, BUF_SIZE );
+	PushText( buf, false );
+}
+
+
+void XMLPrinter::PushText( unsigned value ) 
+{
+	char buf[BUF_SIZE];
+	XMLUtil::ToStr( value, buf, BUF_SIZE );
+	PushText( buf, false );
+}
+
+
+void XMLPrinter::PushText( bool value ) 
+{
+	char buf[BUF_SIZE];
+	XMLUtil::ToStr( value, buf, BUF_SIZE );
+	PushText( buf, false );
+}
+
+
+void XMLPrinter::PushText( float value ) 
+{
+	char buf[BUF_SIZE];
+	XMLUtil::ToStr( value, buf, BUF_SIZE );
+	PushText( buf, false );
+}
+
+
+void XMLPrinter::PushText( double value ) 
+{
+	char buf[BUF_SIZE];
+	XMLUtil::ToStr( value, buf, BUF_SIZE );
+	PushText( buf, false );
 }
 
 

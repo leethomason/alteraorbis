@@ -9,6 +9,7 @@ extern void ScreenCapture( const char* baseFilename, bool appendCount, bool trim
 
 using namespace gamui;
 using namespace grinliz;
+using namespace tinyxml2;
 
 AnimationScene::AnimationScene( LumosGame* game ) : Scene( game )
 {
@@ -123,6 +124,129 @@ void AnimationScene::ItemTapped( const gamui::UIItem* item )
 }
 
 
+void AnimationScene::InitXML( const Rectangle2I& bounds )
+{
+	char buf[256];
+	
+	const char* name = model->GetResource()->header.name.c_str();
+	SNPrintf( buf, 256, "./resin/%s/%s.scml", name, name );
+	scmlFP = fopen( buf, "w" );
+
+	xmlDocument = new XMLDocument();
+	xmlPrinter  = new XMLPrinter( scmlFP );
+
+	xmlPrinter->OpenElement( "spriterdata" );
+	xmlPrinter->OpenElement(	"char" );
+	xmlPrinter->OpenElement(		"name" );
+	xmlPrinter->PushText(				"char_000" );
+	xmlPrinter->CloseElement();
+	xmlPrinter->OpenElement(		"anim" );
+	xmlPrinter->OpenElement(			"name" );
+	xmlPrinter->PushText(					"reference" );
+	xmlPrinter->CloseElement();			// name
+	xmlPrinter->OpenElement(			"frame" );
+	xmlPrinter->OpenElement(				"name" );
+	xmlPrinter->PushText(						"frame_000" );
+	xmlPrinter->CloseElement();
+	xmlPrinter->OpenElement(				"duration" );
+	xmlPrinter->PushText(						"500.0" );
+	xmlPrinter->CloseElement();				// duration
+	xmlPrinter->CloseElement();			// frame
+	xmlPrinter->CloseElement();		// anim
+	xmlPrinter->OpenElement(		"box" );
+	xmlPrinter->OpenElement(			"bottom" );
+	xmlPrinter->PushText(					bounds.max.y );
+	xmlPrinter->CloseElement();
+	xmlPrinter->OpenElement(			"top" );
+	xmlPrinter->PushText(					bounds.min.y );
+	xmlPrinter->CloseElement();
+	xmlPrinter->OpenElement(			"left" );
+	xmlPrinter->PushText(					bounds.min.x );
+	xmlPrinter->CloseElement();
+	xmlPrinter->OpenElement(			"right" );
+	xmlPrinter->PushText(					bounds.max.x );
+	xmlPrinter->CloseElement();
+	xmlPrinter->CloseElement();		// box
+	xmlPrinter->CloseElement();	// char
+}
+
+
+void AnimationScene::InitFrame()
+{
+	xmlPrinter->OpenElement( "frame" );
+	xmlPrinter->OpenElement(	"name" );
+	xmlPrinter->PushText(			"frame_000" );
+	xmlPrinter->CloseElement();	// name
+}
+
+
+void AnimationScene::FinishFrame()
+{
+	xmlPrinter->CloseElement();
+}
+
+
+void AnimationScene::PushSprite( const char* name, const grinliz::Rectangle2I& bounds )
+{
+	char buf[200];
+
+	xmlPrinter->OpenElement( "sprite" );
+	xmlPrinter->OpenElement(	"image" );
+
+	SNPrintf( buf, 200, "assets\\%s.png", name );
+	xmlPrinter->PushText( buf );
+	xmlPrinter->CloseElement();
+
+	xmlPrinter->OpenElement(	"color" );
+	xmlPrinter->PushText( "16777215" );
+	xmlPrinter->CloseElement();
+
+	xmlPrinter->OpenElement(	"opacity" );
+	xmlPrinter->PushText( "100.0" );
+	xmlPrinter->CloseElement();
+
+	xmlPrinter->OpenElement(	"angle" );
+	xmlPrinter->PushText( "0.0" );
+	xmlPrinter->CloseElement();
+
+	xmlPrinter->OpenElement(	"xflip" );
+	xmlPrinter->PushText( "0" );
+	xmlPrinter->CloseElement();
+
+	xmlPrinter->OpenElement(	"yflip" );
+	xmlPrinter->PushText( "0" );
+	xmlPrinter->CloseElement();
+
+	xmlPrinter->OpenElement(	"width" );
+	xmlPrinter->PushText( bounds.Width()  );
+	xmlPrinter->CloseElement();
+
+	xmlPrinter->OpenElement(	"height" );
+	xmlPrinter->PushText( bounds.Height() );
+	xmlPrinter->CloseElement();
+
+	xmlPrinter->OpenElement(	"x" );
+	xmlPrinter->PushText( bounds.min.x );
+	xmlPrinter->CloseElement();
+
+	xmlPrinter->OpenElement(	"y" );
+	xmlPrinter->PushText( bounds.min.y );
+	xmlPrinter->CloseElement();
+
+	xmlPrinter->CloseElement();
+}
+
+
+void AnimationScene::FinishXML()
+{
+	xmlPrinter->CloseElement();
+
+	delete xmlPrinter;
+	delete xmlDocument;
+	fclose( scmlFP );
+}
+
+
 void AnimationScene::Draw3D( U32 deltaTime )
 {
 	if ( doExport ) {
@@ -143,11 +267,26 @@ void AnimationScene::Draw3D( U32 deltaTime )
 		if ( part && *part ) {
 			SNPrintf( buf, 256, "./resin/%s/assets/%s.png", model->GetResource()->header.name.c_str(), part );
 			ScreenCapture( buf, false, true, true, &size );
+			if ( exportCount < 0 ) {
+				origin.x = Mean( size.min.x, size.max.x );
+				origin.y = size.max.y;
+				size.min -= origin;
+				size.max -= origin;
+				InitXML( size );
+				InitFrame();
+			}
+			else {
+				size.min -= origin;
+				size.max -= origin;
+				PushSprite( part, size );
+			}
 		}
 		++exportCount;
 		if ( exportCount == EL_MAX_BONES ) {
 			doExport = false;
 			model->ClearParam();
+			FinishFrame();
+			FinishXML();
 		}
 	}
 	else {
