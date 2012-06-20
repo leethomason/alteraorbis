@@ -43,7 +43,8 @@ private:
 	gamui::PushButton okay;
 	gamui::PushButton boneLeft, boneRight, exportSCML;
 	gamui::ToggleButton ortho;
-	gamui::TextLabel  boneName;
+	gamui::TextLabel boneName;
+	gamui::TextLabel pixelUnitRatio;
 
 	tinyxml2::XMLDocument* xmlDocument;
 	tinyxml2::XMLPrinter*  xmlPrinter;

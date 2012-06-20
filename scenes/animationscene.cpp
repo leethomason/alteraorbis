@@ -37,8 +37,10 @@ AnimationScene::AnimationScene( LumosGame* game ) : Scene( game )
 	ortho.SetText( "ortho" );
 
 	exportSCML.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
-	exportSCML.SetSize( layout.Width()*2.0f, layout.Height() );
+	exportSCML.SetSize( layout.Width(), layout.Height() );
 	exportSCML.SetText( "export" );
+
+	pixelUnitRatio.Init( &gamui2D );
 
 	engine = new Engine( port, game->GetDatabase(), 0 );
 
@@ -69,6 +71,7 @@ void AnimationScene::Resize()
 	layout.PosAbs( &boneRight,	3, -2 );
 	layout.PosAbs( &ortho,		4, -2 );
 	layout.PosAbs( &exportSCML,	5, -2 );
+	layout.PosAbs( &pixelUnitRatio, 6, -2 );
 }
 
 
@@ -274,6 +277,8 @@ void AnimationScene::Draw3D( U32 deltaTime )
 				size.max -= origin;
 				InitXML( size );
 				InitFrame();
+				SNPrintf( buf, 256, "PUR=%.1f", (float)size.Height() / model->GetResource()->AABB().SizeY() );
+				pixelUnitRatio.SetText( buf );
 			}
 			else {
 				size.min -= origin;
