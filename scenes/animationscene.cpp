@@ -43,6 +43,10 @@ AnimationScene::AnimationScene( LumosGame* game ) : Scene( game )
 	pixelUnitRatio.Init( &gamui2D );
 
 	engine = new Engine( port, game->GetDatabase(), 0 );
+	engine->lighting.ambient.Set( 0.5f, 0.5f, 0.5f );
+	engine->lighting.direction.Set( -1, 1, 1 );
+	engine->lighting.direction.Normalize();
+	engine->lighting.diffuse.Set( 0.5f, 0.5f, 0.5f );
 
 	const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( "humanFemale" );
 	GLASSERT( res );
