@@ -265,7 +265,7 @@ void AnimationScene::Draw3D( U32 deltaTime )
 		engine->SetGlow( glow );
 
 		if ( part && *part ) {
-			SNPrintf( buf, 256, "./resin/%s/assets/%s.png", model->GetResource()->header.name.c_str(), part );
+			SNPrintf( buf, 256, "./resin/%s/assets/%s", model->GetResource()->header.name.c_str(), part );
 			ScreenCapture( buf, false, true, true, &size );
 			if ( exportCount < 0 ) {
 				origin.x = Mean( size.min.x, size.max.x );
