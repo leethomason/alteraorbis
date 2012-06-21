@@ -33,6 +33,9 @@ void ModelHeader::Load( const gamedb::Item* item )
 	nTotalIndices = header->GetInt( "nTotalIndices" );
 	flags = header->GetInt( "flags" );
 	nAtoms = header->GetInt( "nGroups" );
+	if ( header->HasAttribute( "animation" ) ) {
+		animation = header->GetString( "animation" );
+	}
 
 	bounds.Zero();
 	const gamedb::Item* boundsItem = header->Child( "bounds" );

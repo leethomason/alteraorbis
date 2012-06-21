@@ -129,6 +129,9 @@ void ModelHeader::Save( gamedb::WItem* parent )
 	node->SetInt( "nTotalIndices", nTotalIndices );
 	node->SetInt( "flags", flags );
 	node->SetInt( "nGroups", nAtoms );
+	if ( !animation.empty() ) {
+		node->SetString( "animation", animation.c_str() );
+	}
 
 	gamedb::WItem* boundNode = node->CreateChild( "bounds" );
 	boundNode->SetFloat( "min.x", bounds.min.x );
@@ -531,6 +534,8 @@ void ProcessModel( XMLElement* model )
 
 	ModelHeader header;
 	header.Set( assetName.c_str(), builder->NumGroups(), nTotalVertex, nTotalIndex, builder->Bounds() );
+	header.animation = animation.c_str();
+
 	for( unsigned i=0; i<builder->boneNames.Size(); ++i ) {
 		header.boneName[i].name = builder->boneNames[i].c_str();
 		header.boneName[i].id = i;

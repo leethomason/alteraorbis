@@ -102,7 +102,8 @@ struct ModelHeader
 	bool NoShadow() const			{ return (flags&RESOURCE_NO_SHADOW) ? true : false; }
 
 	grinliz::CStr<EL_FILE_STRING_LEN>	name;
-	U16						nTotalVertices;		// in all atoms
+	grinliz::CStr<EL_FILE_STRING_LEN>	animation;		// the name of the animation, if exists, for this model.
+	U16						nTotalVertices;				// in all atoms
 	U16						nTotalIndices;
 	U16						flags;
 	U16						nAtoms;
@@ -167,6 +168,11 @@ public:
 
 	static void Create();
 	static void Destroy();
+
+	const ModelResource* const* GetAllResources( int *count ) const {
+		*count = modelResArr.Size();
+		return modelResArr.Mem();
+	}
 
 private:
 	enum { 

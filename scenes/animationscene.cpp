@@ -48,10 +48,18 @@ AnimationScene::AnimationScene( LumosGame* game ) : Scene( game )
 	engine->lighting.direction.Normalize();
 	engine->lighting.diffuse.Set( 0.5f, 0.5f, 0.5f );
 
-	const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( "humanFemale" );
-	GLASSERT( res );
-	model = engine->AllocModel( res );
-	model->SetPos( 1, 0, 1 );
+	int count=0;
+	model = 0;
+	const ModelResource* const* resArr = ModelResourceManager::Instance()->GetAllResources( &count );
+	for( int i=0; i<count; ++i ) {
+		if ( !resArr[i]->header.animation.empty() ) {
+			const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( "humanFemale" );
+			GLASSERT( res );
+			model = engine->AllocModel( res );
+			model->SetPos( 1, 0, 1 );
+		}
+	}
+
 	engine->CameraLookAt( 1, 1, 5 );
 }
 
