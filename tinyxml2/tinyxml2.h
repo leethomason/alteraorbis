@@ -394,6 +394,12 @@ public:
 	static void ToStr( bool v, char* buffer, int bufferSize );
 	static void ToStr( float v, char* buffer, int bufferSize );
 	static void ToStr( double v, char* buffer, int bufferSize );
+
+	static bool	ToInt( const char* str, int* value );
+	static bool ToUnsigned( const char* str, unsigned* value );
+	static bool	ToBool( const char* str, bool* value );
+	static bool	ToFloat( const char* str, float* value );
+	static bool ToDouble( const char* str, double* value );
 };
 
 

@@ -16,15 +16,26 @@
 #ifndef UFO_BUILDER_INCLUDED
 #define UFO_BUILDER_INCLUDED
 
+#include "../grinliz/gltypes.h"
+#include "../grinliz/gldebug.h"
 #include "../grinliz/glcolor.h"
+#include "../grinliz/glstringutil.h"
+#include "../tinyxml2/tinyxml2.h"
+
+struct SDL_Surface;
 
 grinliz::Color4U8 GetPixel( const SDL_Surface *surface, int x, int y);
 void PutPixel(SDL_Surface *surface, int x, int y, const grinliz::Color4U8& pixel);
 
-class Builder
-{
+void ParseNames(	const tinyxml2::XMLElement* element, 
+					grinliz::GLString* _assetName, 
+					grinliz::GLString* _fullPath, 
+					grinliz::GLString* _extension, 
+					grinliz::GLString* _fullPath2=0 );
 
-
-};
+void ExitError( const char* tag, 
+				const char* pathName,
+				const char* assetName,
+				const char* message );
 
 #endif // UFO_BUILDER_INCLUDED

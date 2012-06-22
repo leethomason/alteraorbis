@@ -37,16 +37,21 @@
   <model filename="unitPlateCentered.ac" shading="flat" />
   <model filename="unitPlateArrow.ac" shading="flat" />
   <model filename="unitCube.ac" shading="flat" />
+  
+  <!-- 251 pixels, 1.064, pur=235.9 -->
+  <animation filename="humanFemale/humanFemale.scml" assetName="humanFemale" pur="235.9">    
+  </animation>
 
   <!-- Tactical Sprite models are centered at (0,0,0) -->
   <model filename="human.ac" modelName="humanFemale" animation="humanFemale"
          origin="1 0 0" shading="crease" polyRemoval="pre">
     <meta trigger="1.15 0.52 0" target="1 0.68 0" />
   </model>    
+  
+  <!--
   <model filename="human.ac" modelName="humanMale" origin="0 0 0" shading="crease" polyRemoval="pre" />
-
-  <model filename="chess_characters.ac" modelName="hornet"  origin="2 0 0" shading="flat" polyRemoval="pre">
  
+  <model filename="chess_characters.ac" modelName="hornet"  origin="2 0 0" shading="flat" polyRemoval="pre"> 
   </model>
   <model filename="chess_characters.ac" modelName="prime"   origin="1 0 0" shading="flat" polyRemoval="pre">
     <meta trigger="0.8 0.56 0" target="1 0.54 0" />
@@ -331,6 +336,6 @@
       <kerning first="123" second="106" amount="1" />
     </kernings>
   </font>
-
+  -->
 
 </resource>

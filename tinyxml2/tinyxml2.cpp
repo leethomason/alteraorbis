@@ -399,6 +399,55 @@ void XMLUtil::ToStr( double v, char* buffer, int bufferSize )
 }
 
 
+bool XMLUtil::ToInt( const char* str, int* value )
+{
+	if ( TIXML_SSCANF( str, "%d", value ) == 1 )
+		return true;
+	return false;
+}
+
+bool XMLUtil::ToUnsigned( const char* str, unsigned *value )
+{
+	if ( TIXML_SSCANF( str, "%u", value ) == 1 )
+		return true;
+	return false;
+}
+
+bool XMLUtil::ToBool( const char* str, bool* value )
+{
+	int ival = 0;
+	if ( ToInt( str, &ival )) {
+		*value = (ival==0) ? false : true;
+		return true;
+	}
+	if ( StringEqual( str, "true" ) ) {
+		*value = true;
+		return true;
+	}
+	else if ( StringEqual( str, "false" ) ) {
+		*value = false;
+		return true;
+	}
+	return false;
+}
+
+
+bool XMLUtil::ToFloat( const char* str, float* value )
+{
+	if ( TIXML_SSCANF( str, "%f", value ) == 1 ) {
+		return true;
+	}
+	return false;
+}
+
+bool XMLUtil::ToDouble( const char* str, double* value )
+{
+	if ( TIXML_SSCANF( str, "%lf", value ) == 1 ) {
+		return true;
+	}
+	return false;
+}
+
 
 char* XMLDocument::Identify( char* p, XMLNode** node ) 
 {
@@ -964,7 +1013,7 @@ void XMLAttribute::SetName( const char* n )
 
 int XMLAttribute::QueryIntValue( int* value ) const
 {
-	if ( TIXML_SSCANF( Value(), "%d", value ) == 1 )
+	if ( XMLUtil::ToInt( Value(), value ))
 		return XML_NO_ERROR;
 	return XML_WRONG_ATTRIBUTE_TYPE;
 }
@@ -972,7 +1021,7 @@ int XMLAttribute::QueryIntValue( int* value ) const
 
 int XMLAttribute::QueryUnsignedValue( unsigned int* value ) const
 {
-	if ( TIXML_SSCANF( Value(), "%u", value ) == 1 )
+	if ( XMLUtil::ToUnsigned( Value(), value ))
 		return XML_NO_ERROR;
 	return XML_WRONG_ATTRIBUTE_TYPE;
 }
@@ -980,32 +1029,24 @@ int XMLAttribute::QueryUnsignedValue( unsigned int* value ) const
 
 int XMLAttribute::QueryBoolValue( bool* value ) const
 {
-	int ival = -1;
-	QueryIntValue( &ival );
-
-	if ( ival > 0 || XMLUtil::StringEqual( Value(), "true" ) ) {
-		*value = true;
+	if ( XMLUtil::ToBool( Value(), value )) {
 		return XML_NO_ERROR;
 	}
-	else if ( ival == 0 || XMLUtil::StringEqual( Value(), "false" ) ) {
-		*value = false;
-		return XML_NO_ERROR;
-	}
-	return XML_WRONG_ATTRIBUTE_TYPE;
-}
-
-
-int XMLAttribute::QueryDoubleValue( double* value ) const
-{
-	if ( TIXML_SSCANF( Value(), "%lf", value ) == 1 )
-		return XML_NO_ERROR;
 	return XML_WRONG_ATTRIBUTE_TYPE;
 }
 
 
 int XMLAttribute::QueryFloatValue( float* value ) const
 {
-	if ( TIXML_SSCANF( Value(), "%f", value ) == 1 )
+	if ( XMLUtil::ToFloat( Value(), value ))
+		return XML_NO_ERROR;
+	return XML_WRONG_ATTRIBUTE_TYPE;
+}
+
+
+int XMLAttribute::QueryDoubleValue( double* value ) const
+{
+	if ( XMLUtil::ToDouble( Value(), value ))
 		return XML_NO_ERROR;
 	return XML_WRONG_ATTRIBUTE_TYPE;
 }

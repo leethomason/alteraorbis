@@ -46,6 +46,9 @@
     <ClCompile Include="btexture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="animationbuilder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="builder.h">
@@ -82,6 +85,9 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="btexture.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="animationbuilder.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -46,6 +46,7 @@
 #include "btexture.h"
 #include "dither.h"
 #include "atlas.h"
+#include "animationbuilder.h"
 
 using namespace std;
 using namespace grinliz;
@@ -1035,6 +1036,9 @@ int main( int argc, char* argv[] )
 		}
 		else if ( StrEqual( child->Value(),  "model" )) {
 			ProcessModel( child );
+		}
+		else if ( StrEqual( child->Value(), "animation" )) {
+			ProcessAnimation( child, writer->Root()->FetchChild( "animations" ) );
 		}
 		else if ( StrEqual( child->Value(), "data" )) {
 			ProcessData( child );
