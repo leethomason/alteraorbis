@@ -29,7 +29,7 @@ void InsertFrame( gamedb::WItem* frame, const tinyxml2::XMLElement* frameEle, co
 				bone->SetFloat( "angle", angle );
 
 				// FIXME: x and y need to be deltas from the reference.
-				// FIXME: x and y need to be normalized to the Pixel-Unit ration
+				// FIXME: x and y need to be normalized to the Pixel-Unit ratio
 				bone->SetFloat( "x", x );
 				bone->SetFloat( "y", y );
 			}
@@ -72,8 +72,6 @@ void ProcessAnimation( const tinyxml2::XMLElement* element, gamedb::WItem* witem
 		//printf( "  animation: %s\n", name );
 		
 		gamedb::WItem* anim = root->CreateChild( animName );	// "walk"
-
-		int frameCount = 0;
 
 		for( const XMLElement* frameEle = animEle->FirstChildElement( "frame" );
 			 frameEle;

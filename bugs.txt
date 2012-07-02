@@ -53,7 +53,6 @@ X particle test scene
 	- modify shaders
 	- blend animations
 
-
 X Blue Smoke Map Test
 	X full size (1024x1024), 2000 units
 		X faster avoidance
