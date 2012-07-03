@@ -5,23 +5,32 @@
 using namespace grinliz;
 using namespace tinyxml2;
 
-void InsertFrame(	gamedb::WItem* frame, 
-					const tinyxml2::XMLElement* reference, 
-					const tinyxml2::XMLElement* frameEle, 
-					const char* frameName )
+GLString GetBoneName( const XMLElement* spriteEle )
 {
-	// Find the frame.
+	GLString boneName = spriteEle->FirstChildElement( "image" )->GetText();
+	boneName = boneName.substr( 7, 1000 );					// remove "asset/"
+	boneName = boneName.substr( 0, boneName.size()-4 );		// remove ".png"
+	return boneName;
+}
+
+
+const XMLElement* InsertFrame(	gamedb::WItem* frame, 
+								const tinyxml2::XMLElement* reference, 
+								const tinyxml2::XMLElement* frameEle, 
+								const char* frameName )
+{
+	// Find the frame, in this case the frame description,
+	// not the character frame.
+	
 	for ( ; frameEle; frameEle=frameEle->NextSiblingElement( "frame" ) ) {
 		const char* name = frameEle->FirstChildElement( "name" )->GetText();
 		if ( StrEqual( name, frameName ) ) {
+
 			for( const XMLElement* spriteEle = frameEle->FirstChildElement( "sprite" );
 				 spriteEle;
 				 spriteEle = spriteEle->NextSiblingElement( "sprite" ) )
 			{
-				GLString boneName = spriteEle->FirstChildElement( "image" )->GetText();
-				boneName = boneName.substr( 7, 1000 );					// remove "asset/"
-				boneName = boneName.substr( 0, boneName.size()-4 );	// remove ".png"
-
+				GLString boneName = GetBoneName( spriteEle );
 				gamedb::WItem* bone = frame->CreateChild( boneName.c_str() );
 				
 				float x=0, y=0, angle=0;
@@ -37,7 +46,8 @@ void InsertFrame(	gamedb::WItem* frame,
 						 refSpriteEle;
 						 refSpriteEle = refSpriteEle->NextSiblingElement( "sprite" ))
 					{
-						if ( StrEqual( refSpriteEle->FirstChildElement( "image" )->GetText(), boneName.c_str() ) ) {
+						GLString refBoneName = GetBoneName( refSpriteEle );
+						if ( boneName == refBoneName ) {
 							break;
 						}
 					}
@@ -66,8 +76,10 @@ void InsertFrame(	gamedb::WItem* frame,
 				bone->SetFloat( "dx", dx );
 				bone->SetFloat( "dy", dy );
 			}
+			return frameEle;
 		}
 	}
+	return 0;
 }
 
 
@@ -129,13 +141,12 @@ void ProcessAnimation( const tinyxml2::XMLElement* element, gamedb::WItem* witem
 
 					const char* frameName = frameEle->FirstChildElement( "name" )->GetText();
 
-					InsertFrame( frame, 
-								 reference,
-								 docH.FirstChildElement( "spriterdata" ).FirstChildElement( "frame" ).ToElement(), 
-								 frameName );
-
-					if ( StrEqual( animName, "reference" ) ) {
-						reference = frameEle;
+					const XMLElement* f = InsertFrame(	frame, 
+														reference,
+														docH.FirstChildElement( "spriterdata" ).FirstChildElement( "frame" ).ToElement(), 
+														frameName );
+					if ( pass == 0 ) {
+						reference = f;
 					}
 				}
 			}
