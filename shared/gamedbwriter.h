@@ -72,10 +72,12 @@ public:
 	/// Add/Set a boolean attribute.
 	void SetBool( const char* name, bool value );
 
+#if 0
 	// Normally, you don't query a WItem, but if needed:
 	int GetInt( const char* name );
 	float GetFloat( const char* name );
 	bool GetBool( const char* name );
+#endif
 
 	void EnumerateStrings( std::set< std::string >* stringSet );
 

@@ -5,7 +5,10 @@
 using namespace grinliz;
 using namespace tinyxml2;
 
-void InsertFrame( gamedb::WItem* frame, gamedb::WItem* reference, const tinyxml2::XMLElement* frameEle, const char* frameName )
+void InsertFrame(	gamedb::WItem* frame, 
+					const tinyxml2::XMLElement* reference, 
+					const tinyxml2::XMLElement* frameEle, 
+					const char* frameName )
 {
 	// Find the frame.
 	for ( ; frameEle; frameEle=frameEle->NextSiblingElement( "frame" ) ) {
@@ -24,13 +27,28 @@ void InsertFrame( gamedb::WItem* frame, gamedb::WItem* reference, const tinyxml2
 				float x=0, y=0, angle=0;
 				float dx=0, dy=0;
 
-				if ( reference ) {
-					spriteEle->FirstChildElement( "angle" )->QueryFloatText( &angle );
-					spriteEle->FirstChildElement( "x"     )->QueryFloatText( &x );
-					spriteEle->FirstChildElement( "y"     )->QueryFloatText( &y );
+				spriteEle->FirstChildElement( "angle" )->QueryFloatText( &angle );
+				spriteEle->FirstChildElement( "x"     )->QueryFloatText( &x );
+				spriteEle->FirstChildElement( "y"     )->QueryFloatText( &y );
 
-					dx = reference->FetchChild( boneName )->GetFloat( "x" ) - x;
-					dy = reference->FetchChild( boneName )->GetFloat( "y" ) - y;
+				if ( reference ) {
+					const XMLElement* refSpriteEle = 0;
+					for( refSpriteEle = reference->FirstChildElement( "sprite" );
+						 refSpriteEle;
+						 refSpriteEle = refSpriteEle->NextSiblingElement( "sprite" ))
+					{
+						if ( StrEqual( refSpriteEle->FirstChildElement( "image" )->GetText(), boneName.c_str() ) ) {
+							break;
+						}
+					}
+					GLASSERT( refSpriteEle );
+
+					float rx=0, ry=0;
+					refSpriteEle->FirstChildElement( "x" )->QueryFloatText( &rx );
+					refSpriteEle->FirstChildElement( "y" )->QueryFloatText( &ry );
+
+					dx = rx - x;
+					dy = ry - y;
 				}
 				// Spriter transformation is written as the position of the bitmap, relative
 				// to the model origin, followed by a rotation. (Origin of the bitmap is 
@@ -43,8 +61,10 @@ void InsertFrame( gamedb::WItem* frame, gamedb::WItem* reference, const tinyxml2
 
 				// FIXME: x and y need to be deltas from the reference.
 				// FIXME: x and y need to be normalized to the Pixel-Unit ratio
-				bone->SetFloat( "x", dx );
-				bone->SetFloat( "y", dy );
+				bone->SetFloat( "x", x );
+				bone->SetFloat( "y", y );
+				bone->SetFloat( "dx", dx );
+				bone->SetFloat( "dy", dy );
 			}
 		}
 	}
@@ -79,7 +99,7 @@ void ProcessAnimation( const tinyxml2::XMLElement* element, gamedb::WItem* witem
 	gamedb::WItem* root = witem->CreateChild( assetName.c_str() );	// "humanFemale" 
 
 	const XMLConstHandle docH( doc );
-	gamedb::WItem* reference = 0;
+	const XMLElement* reference = 0;
 
 	// First pass is to get the reference animation; the 2nd pass parses the various flavors.
 	for( int pass=0; pass<2; ++pass ) {
@@ -115,7 +135,7 @@ void ProcessAnimation( const tinyxml2::XMLElement* element, gamedb::WItem* witem
 								 frameName );
 
 					if ( StrEqual( animName, "reference" ) ) {
-						reference = frame;
+						reference = frameEle;
 					}
 				}
 			}

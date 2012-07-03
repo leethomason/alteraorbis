@@ -301,6 +301,7 @@ void WItem::SetBool( const char* name, bool value )
 }
 
 
+#if 0
 int WItem::GetInt( const char* name )
 {
 	GLASSERT( name && *name );
@@ -330,8 +331,7 @@ bool WItem::GetBool( const char* name )
 	GLASSERT( a.type == ATTRIBUTE_BOOL );
 	return a.intVal ? true : false;
 }
-
-
+#endif
 
 
 int WItem::FindString( const std::string& str, const std::vector< std::string >& stringPool )
