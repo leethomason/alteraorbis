@@ -19,6 +19,7 @@
 
 #define XENOENGINE_INSTANCING
 #define EL_USE_VBO			// Use VBOs: a good thing, everywhere but the original iPhone
+#define EL_USE_MRT_BLUR
 
 
 enum HitTestMethod 

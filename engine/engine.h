@@ -137,8 +137,6 @@ private:
 	void CalcCameraRotation( grinliz::Matrix4* );
 
 	void Blur();
-//	void PushShadowSwizzleMatrix( GPUShader* );
-//	void PushLightSwizzleMatrix( GPUShader* );
 	void CreateMiniMap();
 
 	Screenport* screenport;
@@ -152,9 +150,19 @@ private:
 
 	enum {
 		RT_LIGHTS,
+#ifdef EL_USE_MRT_BLUR
+		RT_BLUR_0,
+		RT_BLUR_1,
+		RT_BLUR_2,
+		RT_BLUR_3,
+		//RT_BLUR_4,
+		//RT_BLUR_5,
+#else
 		RT_BLUR_X,
 		RT_BLUR_Y,
-		RT_COUNT
+#endif
+		RT_COUNT,
+		BLUR_COUNT = 4
 	};
 	RenderTarget* renderTarget[RT_COUNT];
 	RenderTarget* miniMapRenderTarget;

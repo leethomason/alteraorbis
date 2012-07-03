@@ -378,11 +378,23 @@ void Engine::Draw( U32 deltaTime )
 #else
 		CompositingShader shader( GPUShader::BLEND_ADD );
 #endif
+
+#ifdef EL_USE_MRT_BLUR
+		const float intensity = 1.0f;// / BLUR_COUNT;
+		for( int i=0; i<BLUR_COUNT; ++i ) {
+			shader.SetTexture0( renderTarget[RT_BLUR_0+i]->GetTexture() );
+			shader.SetColor( lighting.glow.r*intensity, lighting.glow.g*intensity, lighting.glow.b*intensity, 0 );
+			Vector3F p0 = { 0, screenport->UIHeight(), 0 };
+			Vector3F p1 = { screenport->UIWidth(), 0, 0 };
+			shader.DrawQuad( p0, p1 );
+		}
+#else
 		shader.SetTexture0( renderTarget[RT_BLUR_Y]->GetTexture() );
 		shader.SetColor( lighting.glow.r, lighting.glow.g, lighting.glow.b, 0 );
 		Vector3F p0 = { 0, screenport->UIHeight(), 0 };
 		Vector3F p1 = { screenport->UIWidth(), 0, 0 };
 		shader.DrawQuad( p0, p1 );
+#endif
 
 		screenport->SetPerspective();
 	}
@@ -397,6 +409,28 @@ void Engine::Draw( U32 deltaTime )
 
 void Engine::Blur()
 {
+#ifdef EL_USE_MRT_BLUR
+	for( int i=0; i<BLUR_COUNT; ++i ) {
+		if ( !renderTarget[i+RT_BLUR_0] ) {
+			int shift = i+1;
+			renderTarget[i+RT_BLUR_0] = new RenderTarget( screenport->PhysicalWidth()>>shift, screenport->PhysicalHeight()>>shift, false );
+		}
+	}
+	for( int i=0; i<BLUR_COUNT; ++i ) {
+		renderTarget[i+RT_BLUR_0]->SetActive( true, this );
+		renderTarget[i+RT_BLUR_0]->screenport->SetUI();
+		//int shift = i+1;
+
+		FlatShader shader;
+		shader.SetTexture0( renderTarget[i+RT_BLUR_0-1]->GetTexture() );
+		Vector3F p0 = { 0, screenport->UIHeight(), 0 };
+		Vector3F p1 = { screenport->UIWidth(), 0, 0 };
+		shader.DrawQuad( p0, p1 );
+
+		renderTarget[i+RT_BLUR_0]->SetActive( false, this );
+	}
+
+#else
 	if ( !renderTarget[RT_BLUR_X] ) {
 		renderTarget[RT_BLUR_X] = new RenderTarget( screenport->PhysicalWidth(), screenport->PhysicalHeight(), false );
 	}
@@ -433,6 +467,7 @@ void Engine::Blur()
 		shader.DrawQuad( p0, p1 );
 	}
 	renderTarget[RT_BLUR_Y]->SetActive( false, this );
+#endif
 }
 
 
