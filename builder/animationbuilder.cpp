@@ -18,7 +18,8 @@ GLString GetBoneName( const XMLElement* spriteEle )
 const XMLElement* InsertFrame(	gamedb::WItem* frame, 
 								const tinyxml2::XMLElement* reference, 
 								const tinyxml2::XMLElement* frameEle, 
-								const char* frameName )
+								const char* frameName,
+								float pur )
 {
 	// Find the frame, in this case the frame description,
 	// not the character frame.
@@ -34,12 +35,15 @@ const XMLElement* InsertFrame(	gamedb::WItem* frame,
 				GLString boneName = GetBoneName( spriteEle );
 				gamedb::WItem* bone = frame->CreateChild( boneName.c_str() );
 				
-				float x=0, y=0, angle=0;
-				float dx=0, dy=0;
+				float x=0, y=0, angle=0, anglePrime=0;
+				float dy=0, dz=0;
 
 				spriteEle->FirstChildElement( "angle" )->QueryFloatText( &angle );
 				spriteEle->FirstChildElement( "x"     )->QueryFloatText( &x );
 				spriteEle->FirstChildElement( "y"     )->QueryFloatText( &y );
+
+				x /= pur;
+				y /= pur;
 
 				// Spriter transformation is written as the position of the bitmap, relative
 				// to the model origin, followed by a rotation. (Origin of the bitmap is 
@@ -64,20 +68,29 @@ const XMLElement* InsertFrame(	gamedb::WItem* frame,
 					float rx=0, ry=0;
 					refSpriteEle->FirstChildElement( "x" )->QueryFloatText( &rx );
 					refSpriteEle->FirstChildElement( "y" )->QueryFloatText( &ry );
+					rx /= pur;
+					ry /= pur;
 
-					dx = rx - x;
-					dy = ry - y;
+					// Deltas, convert to Xenoengine coordinates.
+					dz =  (rx - x) / pur;
+					dy = -(ry - y) / pur;
 
-					//Matrix4 t, r, origin;
-					//t.SetTranslation( 
+					// Part to origin. Rotate. Back to pos. Apply delta.
+					Matrix4 toOrigin, toPos, rot, delta;
+					toOrigin.SetTranslation( 0, ry, -rx );
+					rot.SetXRotation( -angle );
+					toPos.SetTranslation( 0, -ry + dy, rx + dz );
+
+					Matrix4 m = delta * toPos * rot * toOrigin;
+					//m.Dump( "Bone" );
+					anglePrime = m.CalcRotationAroundAxis( 0 );
+					//GLOUTPUT(( "anglePrime=%f\n", anglePrime ));
 				}
 
 				bone->SetFloat( "angle", angle );
-
-				// FIXME: x and y need to be normalized to the Pixel-Unit ratio
 				bone->SetFloat( "x", x );
 				bone->SetFloat( "y", y );
-				bone->SetFloat( "dx", dx );
+				bone->SetFloat( "dz", dz );
 				bone->SetFloat( "dy", dy );
 			}
 			return frameEle;
@@ -116,6 +129,8 @@ void ProcessAnimation( const tinyxml2::XMLElement* element, gamedb::WItem* witem
 
 	const XMLConstHandle docH( doc );
 	const XMLElement* reference = 0;
+	float pur = 1;
+	element->QueryFloatAttribute( "pur", &pur );
 
 	// First pass is to get the reference animation; the 2nd pass parses the various flavors.
 	for( int pass=0; pass<2; ++pass ) {
@@ -148,7 +163,8 @@ void ProcessAnimation( const tinyxml2::XMLElement* element, gamedb::WItem* witem
 					const XMLElement* f = InsertFrame(	frame, 
 														reference,
 														docH.FirstChildElement( "spriterdata" ).FirstChildElement( "frame" ).ToElement(), 
-														frameName );
+														frameName, 
+														pur );
 					if ( pass == 0 ) {
 						reference = f;
 					}
