@@ -750,7 +750,10 @@ enum {
 	XML_ERROR_PARSING_UNKNOWN,
 	XML_ERROR_EMPTY_DOCUMENT,
 	XML_ERROR_MISMATCHED_ELEMENT,
-	XML_ERROR_PARSING
+	XML_ERROR_PARSING,
+
+	XML_CAN_NOT_CONVERT_TEXT,
+	XML_NO_TEXT_ELEMENT
 };
 
 
@@ -958,6 +961,11 @@ public:
 		GetText() will return "This is ".
 	*/
 	const char* GetText() const;
+	int QueryIntText( int* _value ) const;
+	int QueryUnsignedText( unsigned* _value ) const;
+	int QueryBoolText( bool* _value ) const;
+	int QueryDoubleText( double* _value ) const;
+	int QueryFloatText( float* _value ) const;
 
 	// internal:
 	enum {

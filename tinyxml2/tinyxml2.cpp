@@ -1156,6 +1156,72 @@ const char* XMLElement::GetText() const
 }
 
 
+int XMLElement::QueryIntText( int* _value ) const
+{
+	if ( FirstChild() && FirstChild()->ToText() ) {
+		const char* t = FirstChild()->ToText()->Value();
+		if ( XMLUtil::ToInt( t, _value ) ) {
+			return XML_SUCCESS;
+		}
+		return XML_CAN_NOT_CONVERT_TEXT;
+	}
+	return XML_NO_TEXT_ELEMENT;
+}
+
+
+int XMLElement::QueryUnsignedText( unsigned* _value ) const
+{
+	if ( FirstChild() && FirstChild()->ToText() ) {
+		const char* t = FirstChild()->ToText()->Value();
+		if ( XMLUtil::ToUnsigned( t, _value ) ) {
+			return XML_SUCCESS;
+		}
+		return XML_CAN_NOT_CONVERT_TEXT;
+	}
+	return XML_NO_TEXT_ELEMENT;
+}
+
+
+int XMLElement::QueryBoolText( bool* _value ) const
+{
+	if ( FirstChild() && FirstChild()->ToText() ) {
+		const char* t = FirstChild()->ToText()->Value();
+		if ( XMLUtil::ToBool( t, _value ) ) {
+			return XML_SUCCESS;
+		}
+		return XML_CAN_NOT_CONVERT_TEXT;
+	}
+	return XML_NO_TEXT_ELEMENT;
+}
+
+
+int XMLElement::QueryDoubleText( double* _value ) const
+{
+	if ( FirstChild() && FirstChild()->ToText() ) {
+		const char* t = FirstChild()->ToText()->Value();
+		if ( XMLUtil::ToDouble( t, _value ) ) {
+			return XML_SUCCESS;
+		}
+		return XML_CAN_NOT_CONVERT_TEXT;
+	}
+	return XML_NO_TEXT_ELEMENT;
+}
+
+
+int XMLElement::QueryFloatText( float* _value ) const
+{
+	if ( FirstChild() && FirstChild()->ToText() ) {
+		const char* t = FirstChild()->ToText()->Value();
+		if ( XMLUtil::ToFloat( t, _value ) ) {
+			return XML_SUCCESS;
+		}
+		return XML_CAN_NOT_CONVERT_TEXT;
+	}
+	return XML_NO_TEXT_ELEMENT;
+}
+
+
+
 XMLAttribute* XMLElement::FindOrCreateAttribute( const char* name )
 {
 	XMLAttribute* last = 0;

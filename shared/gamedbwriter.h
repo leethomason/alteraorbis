@@ -57,6 +57,7 @@ public:
 		CreateChild( 1 ) and CreateChild( "1" ) are exactly the same. 
 	*/
 	WItem* CreateChild( int id );
+		
 	/// Get a Child if it exists, create it if the child does not.
 	WItem* FetchChild( const char* name );
 
@@ -70,6 +71,11 @@ public:
 	void SetString( const char* name, const char* str );
 	/// Add/Set a boolean attribute.
 	void SetBool( const char* name, bool value );
+
+	// Normally, you don't query a WItem, but if needed:
+	int GetInt( const char* name );
+	float GetFloat( const char* name );
+	bool GetBool( const char* name );
 
 	void EnumerateStrings( std::set< std::string >* stringSet );
 

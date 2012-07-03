@@ -301,6 +301,39 @@ void WItem::SetBool( const char* name, bool value )
 }
 
 
+int WItem::GetInt( const char* name )
+{
+	GLASSERT( name && *name );
+	GLASSERT( data.find( name ) != data.end() );
+
+	Attrib a = data[ name ];
+	GLASSERT( a.type == ATTRIBUTE_INT );
+	return a.intVal;
+}
+
+
+float WItem::GetFloat( const char* name )
+{
+	GLASSERT( name && *name );
+	GLASSERT( data.find( name ) != data.end() );
+	Attrib a = data[ name ];
+	GLASSERT( a.type == ATTRIBUTE_FLOAT );
+	return a.floatVal;
+}
+
+
+bool WItem::GetBool( const char* name )
+{
+	GLASSERT( name && *name );
+	GLASSERT( data.find( name ) != data.end() );
+	Attrib a = data[ name ];
+	GLASSERT( a.type == ATTRIBUTE_BOOL );
+	return a.intVal ? true : false;
+}
+
+
+
+
 int WItem::FindString( const std::string& str, const std::vector< std::string >& stringPool )
 {
 	unsigned low = 0;

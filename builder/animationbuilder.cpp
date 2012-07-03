@@ -5,7 +5,7 @@
 using namespace grinliz;
 using namespace tinyxml2;
 
-void InsertFrame( gamedb::WItem* frame, const tinyxml2::XMLElement* frameEle, const char* frameName )
+void InsertFrame( gamedb::WItem* frame, gamedb::WItem* reference, const tinyxml2::XMLElement* frameEle, const char* frameName )
 {
 	// Find the frame.
 	for ( ; frameEle; frameEle=frameEle->NextSiblingElement( "frame" ) ) {
@@ -22,16 +22,29 @@ void InsertFrame( gamedb::WItem* frame, const tinyxml2::XMLElement* frameEle, co
 				gamedb::WItem* bone = frame->CreateChild( boneName.c_str() );
 				
 				float x=0, y=0, angle=0;
-				XMLUtil::ToFloat( spriteEle->FirstChildElement( "angle" )->GetText(), &angle );
-				XMLUtil::ToFloat( spriteEle->FirstChildElement( "x" )->GetText(), &x );
-				XMLUtil::ToFloat( spriteEle->FirstChildElement( "y" )->GetText(), &y );
+				float dx=0, dy=0;
+
+				if ( reference ) {
+					spriteEle->FirstChildElement( "angle" )->QueryFloatText( &angle );
+					spriteEle->FirstChildElement( "x"     )->QueryFloatText( &x );
+					spriteEle->FirstChildElement( "y"     )->QueryFloatText( &y );
+
+					dx = reference->FetchChild( boneName )->GetFloat( "x" ) - x;
+					dy = reference->FetchChild( boneName )->GetFloat( "y" ) - y;
+				}
+				// Spriter transformation is written as the position of the bitmap, relative
+				// to the model origin, followed by a rotation. (Origin of the bitmap is 
+				// the upper left in this version.)
+				//
+				// Lumos needs the transformation (delta) from the origin.
+				// To translate, we need the reference (untransformed) frame.
 
 				bone->SetFloat( "angle", angle );
 
 				// FIXME: x and y need to be deltas from the reference.
 				// FIXME: x and y need to be normalized to the Pixel-Unit ratio
-				bone->SetFloat( "x", x );
-				bone->SetFloat( "y", y );
+				bone->SetFloat( "x", dx );
+				bone->SetFloat( "y", dy );
 			}
 		}
 	}
@@ -66,29 +79,46 @@ void ProcessAnimation( const tinyxml2::XMLElement* element, gamedb::WItem* witem
 	gamedb::WItem* root = witem->CreateChild( assetName.c_str() );	// "humanFemale" 
 
 	const XMLConstHandle docH( doc );
-	const XMLElement* animEle = docH.FirstChildElement( "spriterdata" ).FirstChildElement( "char" ).FirstChildElement( "anim" ).ToElement();
-	for( ; animEle; animEle=animEle->NextSiblingElement( "anim" ) ) {
-		const char* animName = animEle->FirstChildElement( "name" )->GetText();
-		//printf( "  animation: %s\n", name );
+	gamedb::WItem* reference = 0;
+
+	// First pass is to get the reference animation; the 2nd pass parses the various flavors.
+	for( int pass=0; pass<2; ++pass ) {
+
+		const XMLElement* animEle = docH.FirstChildElement( "spriterdata" ).FirstChildElement( "char" ).FirstChildElement( "anim" ).ToElement();
+		for( ; animEle; animEle=animEle->NextSiblingElement( "anim" ) ) {
+
+			const char* animName = animEle->FirstChildElement( "name" )->GetText();
+			if (    ( pass == 0 && StrEqual( animName, "reference" ) )
+				 || ( pass == 1 && !StrEqual( animName, "reference" )))
+			{
+				//printf( "  animation: %s\n", name );
 		
-		gamedb::WItem* anim = root->CreateChild( animName );	// "walk"
+				gamedb::WItem* anim = root->CreateChild( animName );	// "walk"
+				int frameCount = 0;
 
-		for( const XMLElement* frameEle = animEle->FirstChildElement( "frame" );
-			 frameEle;
-			 frameEle = frameEle->NextSiblingElement( "frame" ) )
-		{
-			gamedb::WItem* frame = anim->CreateChild( frameCount++ );
-			float duration = 100.0f;
-			XMLUtil::ToFloat( frameEle->FirstChildElement( "duration" )->GetText(), &duration );
+				for( const XMLElement* frameEle = animEle->FirstChildElement( "frame" );
+					 frameEle;
+					 frameEle = frameEle->NextSiblingElement( "frame" ) )
+				{
+					gamedb::WItem* frame = anim->CreateChild( frameCount++ );
+					float duration = 100.0f;
+					XMLUtil::ToFloat( frameEle->FirstChildElement( "duration" )->GetText(), &duration );
 
-			duration *= 10.0f;	// Totally mystery. Seems to be in 1/100th seconds. Likely Spriter bug.
-			frame->SetFloat( "duration", duration );
+					duration *= 10.0f;	// Totally mystery. Seems to be in 1/100th seconds. Likely Spriter bug.
+					frame->SetFloat( "duration", duration );
 
-			const char* frameName = frameEle->FirstChildElement( "name" )->GetText();
+					const char* frameName = frameEle->FirstChildElement( "name" )->GetText();
 
-			InsertFrame( frame, 
-						 docH.FirstChildElement( "spriterdata" ).FirstChildElement( "frame" ).ToElement(), 
-						 frameName );
+					InsertFrame( frame, 
+								 reference,
+								 docH.FirstChildElement( "spriterdata" ).FirstChildElement( "frame" ).ToElement(), 
+								 frameName );
+
+					if ( StrEqual( animName, "reference" ) ) {
+						reference = frame;
+					}
+				}
+			}
 		}
 	}
 
