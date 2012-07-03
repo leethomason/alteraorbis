@@ -1,6 +1,7 @@
 #include "animationbuilder.h"
 #include "builder.h"
 #include "../tinyxml2/tinyxml2.h"
+#include "../grinliz/glmatrix.h"
 
 using namespace grinliz;
 using namespace tinyxml2;
@@ -40,6 +41,13 @@ const XMLElement* InsertFrame(	gamedb::WItem* frame,
 				spriteEle->FirstChildElement( "x"     )->QueryFloatText( &x );
 				spriteEle->FirstChildElement( "y"     )->QueryFloatText( &y );
 
+				// Spriter transformation is written as the position of the bitmap, relative
+				// to the model origin, followed by a rotation. (Origin of the bitmap is 
+				// the upper left in this version.)
+				//
+				// Lumos needs the transformation (delta) from the origin.
+				// To translate, we need the reference (untransformed) frame.
+
 				if ( reference ) {
 					const XMLElement* refSpriteEle = 0;
 					for( refSpriteEle = reference->FirstChildElement( "sprite" );
@@ -59,17 +67,13 @@ const XMLElement* InsertFrame(	gamedb::WItem* frame,
 
 					dx = rx - x;
 					dy = ry - y;
+
+					//Matrix4 t, r, origin;
+					//t.SetTranslation( 
 				}
-				// Spriter transformation is written as the position of the bitmap, relative
-				// to the model origin, followed by a rotation. (Origin of the bitmap is 
-				// the upper left in this version.)
-				//
-				// Lumos needs the transformation (delta) from the origin.
-				// To translate, we need the reference (untransformed) frame.
 
 				bone->SetFloat( "angle", angle );
 
-				// FIXME: x and y need to be deltas from the reference.
 				// FIXME: x and y need to be normalized to the Pixel-Unit ratio
 				bone->SetFloat( "x", x );
 				bone->SetFloat( "y", y );
