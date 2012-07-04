@@ -35,6 +35,7 @@ class GPUShader;
 class EngineShaders;
 class Chit;
 
+
 /*
 	v0 v1 v2 v0 v1 v2									vertex (3 points x 2 instances)
 	i0 i1 i2 i0 i0 i0 i0+3 i1+3 i2+3 i0+3 i0+3 i0+3		index (2 triangle x 2 instances)
@@ -147,12 +148,11 @@ public:
 	bool GetMetaData( const char* name, grinliz::Vector3F* value ) const;
 
 
-	ModelHeader header;						// loaded
-	grinliz::Rectangle3F	hitBounds;		// for picking - a bounds approximation
+	ModelHeader header;							// loaded
+	grinliz::Rectangle3F	hitBounds;			// for picking - a bounds approximation
 	grinliz::Rectangle3F	invariantBounds;	// build y rotation in, so that bounds can
 												// be generated with simple addition, without
 												// causing the call to Model::XForm 
-
 	ModelAtom atom[EL_MAX_MODEL_GROUPS];
 };
 

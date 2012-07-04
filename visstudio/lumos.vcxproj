@@ -79,6 +79,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\engine\animation.cpp" />
     <ClCompile Include="..\engine\camera.cpp" />
     <ClCompile Include="..\engine\engine.cpp" />
     <ClCompile Include="..\engine\engineshaders.cpp" />
@@ -141,6 +142,7 @@
     <ClCompile Include="..\xegame\ufosound.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\engine\animation.h" />
     <ClInclude Include="..\engine\camera.h" />
     <ClInclude Include="..\engine\engine.h" />
     <ClInclude Include="..\engine\enginelimits.h" />

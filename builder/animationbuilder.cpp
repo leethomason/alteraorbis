@@ -87,9 +87,9 @@ const XMLElement* InsertFrame(	gamedb::WItem* frame,
 					//GLOUTPUT(( "anglePrime=%f\n", anglePrime ));
 				}
 
-				bone->SetFloat( "angle", angle );
-				bone->SetFloat( "x", x );
-				bone->SetFloat( "y", y );
+				bone->SetFloat( "angle", anglePrime );
+				//bone->SetFloat( "x", x );
+				//bone->SetFloat( "y", y );
 				bone->SetFloat( "dz", dz );
 				bone->SetFloat( "dy", dy );
 			}
