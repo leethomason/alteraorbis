@@ -1,3 +1,6 @@
+- Animation
+	- bounds need to be adjusted to account for animation
+
 - combat test scene
 	- animation/lack of making me crazy. What plan?
 	- particle effect for melee strick not "connected" to character
@@ -27,18 +30,17 @@
 	- add rez and de-rez effect for chits
 
 
+- move lighting loading from render test scene to engine
 - cameras only self-delete if they reach destination; should do better. Probably
   should only be one camera in existence. (BlueSmoke, NavTest2)
 - record perf max/min. surprisingly hard.
 - shadows should be part of space-tree bounds
 - memory pool everything in the chit/component system
 - container to support copy semantics
-- blur: switch to "down blit" approach, optionally
 
 X particle test scene
 	X alpha processing for additive blending
 	- particle groups (ex: fire)
-	- particles that aren't quads (beziers)
 
 
 ** LOW PRI **
@@ -53,6 +55,11 @@ X particle test scene
 	- modify shaders
 	- blend animations
 
+** Defer **
+- particles that aren't quads (beziers)
+
+
+X blur: switch to "down blit" approach, optionally
 X Blue Smoke Map Test
 	X full size (1024x1024), 2000 units
 		X faster avoidance

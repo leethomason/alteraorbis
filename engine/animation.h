@@ -3,6 +3,8 @@
 
 #include "../grinliz/gltypes.h"
 #include "../grinliz/gldebug.h"
+#include "../grinliz/glcontainer.h"
+
 #include "../shared/gamedbreader.h"
 
 
@@ -21,11 +23,35 @@ class AnimationResource
 {
 public:
 	AnimationResource( const gamedb::Item* animationItem );
-	~AnimationResource();
+	~AnimationResource()	{}
 
-	const char* Name();	// the name of the resource.
+	const char* Name() const { return name; }	// the name of the resource.
 
-	bool GetTransform( const char* animationName, U32 time, int bone, AnimationXForm* xform );
+	bool GetTransform( const char* animationName, U32 time, int bone, AnimationXForm* xform ) const;
+
+private:
+	const char* name;
+};
+
+
+class AnimationResourceManager
+{
+public:
+	static AnimationResourceManager* Instance() { return instance; }
+
+	static void Create();
+	static void Destroy();
+
+	void Load( const gamedb::Reader* reader );
+	const AnimationResource* GetResource( const char* name );
+
+private:
+	AnimationResourceManager();
+	~AnimationResourceManager();
+
+	static AnimationResourceManager* instance;
+
+	grinliz::CDynArray< AnimationResource* > resArr;
 };
 
 

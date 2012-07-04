@@ -24,6 +24,7 @@
 #include "../engine/gpustatemanager.h"
 #include "../engine/renderqueue.h"
 #include "../engine/shadermanager.h"
+#include "../engine/animation.h"
 
 #include "../grinliz/glmatrix.h"
 #include "../grinliz/glutil.h"
@@ -93,6 +94,7 @@ void Game::Init()
 	TextureManager::Create( database0 );
 	ImageManager::Create( database0 );
 	ModelResourceManager::Create();
+	AnimationResourceManager::Create();
 //	ParticleSystem::Create();
 
 	LoadTextures();
@@ -100,6 +102,7 @@ void Game::Init()
 	LoadModels();
 	LoadAtoms();
 	LoadPalettes();
+	AnimationResourceManager::Instance()->Load( database0 );
 
 	delete modelLoader;
 	modelLoader = 0;
@@ -126,7 +129,7 @@ Game::~Game()
 
 	UFOText::Destroy();
 	SoundManager::Destroy();
-//	ParticleSystem::Destroy();
+	AnimationResourceManager::Destroy();
 	ModelResourceManager::Destroy();
 	ImageManager::Destroy();
 	TextureManager::Destroy();

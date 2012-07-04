@@ -26,6 +26,8 @@ distribution.
 #ifndef GRINLIZ_CONTAINER_INCLUDED
 #define GRINLIZ_CONTAINER_INCLUDED
 
+#include <cstring>
+
 #include "gldebug.h"
 #include "gltypes.h"
 #include "glutil.h"

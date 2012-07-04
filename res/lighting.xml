@@ -2,7 +2,7 @@
 
 <!--
   Lighting mode: hemi or lam
-  <map> is the color of the testmap (and a hack; non red by Lighting in the code.)
+  <map> is the color of the testmap (and a hack; non read by Lighting in the code.)
   <glow> is the amount of glow to composite
 -->
 
@@ -11,7 +11,7 @@
   
   
   <direction x="-2" y="5" z="-1.5" />
-  <glow radius="0.018" gray="1.5" />
+  <glow radius="0.018" gray="1.3" />
   
   <lambert>
     <diffuse red="0.7" green="0.7" blue="0.7"/>

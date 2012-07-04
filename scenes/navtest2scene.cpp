@@ -88,7 +88,6 @@ void NavTest2Scene::LoadMap()
 
 	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase(), map );	
 
-
 	for ( int i=0; i<blocks.Size(); ++i ) {
 		Chit* chit = chitBag.NewChit();
 		const Vector2I& v = blocks[i];
