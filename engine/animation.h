@@ -25,12 +25,17 @@ public:
 	AnimationResource( const gamedb::Item* animationItem );
 	~AnimationResource()	{}
 
-	const char* Name() const { return name; }	// the name of the resource.
+	const char* Name() const		{ return name; }	// the name of the resource.
+	int NumAnimations() const		{ return nAnimations; }
+	const char* AnimationName( int index ) const;
 
 	bool GetTransform( const char* animationName, U32 time, int bone, AnimationXForm* xform ) const;
 
 private:
 	const char* name;
+	int nAnimations;
+
+	const gamedb::Item* item;
 };
 
 

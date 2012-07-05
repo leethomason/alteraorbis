@@ -34,6 +34,7 @@ class RenderQueue;
 class GPUShader;
 class EngineShaders;
 class Chit;
+class AnimationResource;
 
 
 /*
@@ -148,7 +149,7 @@ public:
 	bool GetMetaData( const char* name, grinliz::Vector3F* value ) const;
 
 
-	ModelHeader header;							// loaded
+	ModelHeader				header;				// loaded
 	grinliz::Rectangle3F	hitBounds;			// for picking - a bounds approximation
 	grinliz::Rectangle3F	invariantBounds;	// build y rotation in, so that bounds can
 												// be generated with simple addition, without
@@ -242,6 +243,13 @@ public:
 
 	void SetPosAndYRotation( const grinliz::Vector3F& pos, float yRot );
 
+	// Get the animation resource, if it exists.
+	const AnimationResource* GetAnimationResource() const { return animationResource; }
+	// Set the current animation, null or "reference" turns off animation.
+	void SetAnimation( const char* name );
+	// Update the time and animation rendering.
+	void DeltaAnimation( U32 time );
+
 	// WARNING: not really supported. Just for debug rendering. May break:
 	// normals, lighting, bounds, picking, etc. etc.
 	void SetScale( float s );
@@ -311,10 +319,6 @@ public:
 	Model* next0;			// used by the Engine sub-sorting
 	Chit*  userData;		// really should be void* - but types are nice.
 
-	// Set by the engine. Any xform change will set this
-	// to (-1,-1)-(-1,-1) to then be set by the engine.
-	//grinliz::Rectangle2I mapBoundsCache;
-
 	const grinliz::Matrix4& XForm() const;
 
 private:
@@ -343,6 +347,7 @@ private:
 
 	SpaceTree* tree;
 	const ModelResource* resource;
+	const AnimationResource* animationResource;
 	grinliz::Vector3F pos;
 	float rot[3];
 	float debugScale;

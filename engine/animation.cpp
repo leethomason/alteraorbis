@@ -1,5 +1,6 @@
 #include "animation.h"
 #include "../grinliz/glstringutil.h"
+#include "../shared/gamedbreader.h"
 
 using namespace grinliz;
 
@@ -60,8 +61,19 @@ const AnimationResource* AnimationResourceManager::GetResource( const char* name
 }
 
 
-AnimationResource::AnimationResource( const gamedb::Item* item )
+AnimationResource::AnimationResource( const gamedb::Item* _item )
 {
+	item = _item;
 	name = item->Name();
+	nAnimations = item->NumChildren();
 }
+
+
+const char* AnimationResource::AnimationName( int index ) const
+{
+	GLASSERT( index >= 0 && index < NumAnimations() );
+	return item->Child( index )->Name();
+}
+
+
 

@@ -2,8 +2,7 @@
 #include "../game/lumosgame.h"
 #include "../engine/engine.h"
 #include "../engine/model.h"
-//#include "../shared/lodepng.h"
-//#include "../win32/glew.h"
+#include "../engine/animation.h"
 
 extern void ScreenCapture( const char* baseFilename, bool appendCount, bool trim, bool makeTransparent, grinliz::Rectangle2I* size );
 
@@ -14,6 +13,7 @@ using namespace tinyxml2;
 AnimationScene::AnimationScene( LumosGame* game ) : Scene( game )
 {
 	currentBone = -1;
+	currentAnim = 0;
 	doExport = false;
 
 	game->InitStd( &gamui2D, &okay, 0 );
@@ -31,6 +31,17 @@ AnimationScene::AnimationScene( LumosGame* game ) : Scene( game )
 
 	boneName.Init( &gamui2D );
 	boneName.SetText( "all" );
+
+	animLeft.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
+	animLeft.SetSize( layout.Width(), layout.Height() );
+	animLeft.SetText( "<" );
+
+	animRight.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
+	animRight.SetSize( layout.Width(), layout.Height() );
+	animRight.SetText( ">" );	
+
+	animName.Init( &gamui2D );
+	animName.SetText( "no animation" );
 
 	ortho.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
 	ortho.SetSize( layout.Width(), layout.Height() );
@@ -61,6 +72,7 @@ AnimationScene::AnimationScene( LumosGame* game ) : Scene( game )
 	}
 
 	engine->CameraLookAt( 1, 1, 5 );
+	UpdateAnimationInfo();
 }
 
 
@@ -84,6 +96,11 @@ void AnimationScene::Resize()
 	layout.PosAbs( &ortho,		4, -2 );
 	layout.PosAbs( &exportSCML,	5, -2 );
 	layout.PosAbs( &pixelUnitRatio, 6, -2 );
+
+	layout.PosAbs( &animLeft,	0, 0 );
+	layout.PosAbs( &animName,	1, 0 );
+	layout.PosAbs( &animRight,	3, 0 );
+
 }
 
 
@@ -103,6 +120,21 @@ void AnimationScene::UpdateBoneInfo()
 }
 
 
+void AnimationScene::UpdateAnimationInfo()
+{
+	const AnimationResource* res = model->GetAnimationResource();
+	int nAnim = res->NumAnimations();
+	GLASSERT( currentAnim >=0 && currentAnim < nAnim );
+
+	const char* name = "no animation";
+	if ( nAnim > 0 ) {
+		name = res->AnimationName( currentAnim );
+	}
+	animName.SetText( name );
+}
+
+
+
 void AnimationScene::ItemTapped( const gamui::UIItem* item )
 {
 	if ( item == &okay ) {
@@ -115,6 +147,20 @@ void AnimationScene::ItemTapped( const gamui::UIItem* item )
 	else if ( item == &boneLeft ) {
 		--currentBone;
 		if ( currentBone == -2 ) currentBone = EL_MAX_BONES-1;
+	}
+	else if ( item == &animRight ) {
+		++currentAnim;
+		const AnimationResource* res = model->GetAnimationResource();
+		if ( currentAnim >= res->NumAnimations() ) {
+			currentAnim = 0;
+		}
+	}
+	else if ( item == &animLeft ) {
+		-- currentAnim;
+		if ( currentAnim < 0 ) {
+			const AnimationResource* res = model->GetAnimationResource();
+			currentAnim = res->NumAnimations()-1;
+		}
 	}
 	else if ( item == &ortho ) {
 		Screenport* port = engine->GetScreenportMutable();
@@ -136,6 +182,7 @@ void AnimationScene::ItemTapped( const gamui::UIItem* item )
 	}
 
 	UpdateBoneInfo();
+	UpdateAnimationInfo();
 }
 
 

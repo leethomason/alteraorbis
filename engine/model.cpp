@@ -19,6 +19,7 @@
 #include "renderQueue.h"
 #include "engineshaders.h"
 #include "shadermanager.h"
+#include "animation.h"
 
 #include "../grinliz/glvector.h"
 #include "../grinliz/glstringutil.h"
@@ -209,6 +210,7 @@ void Model::Init( const ModelResource* resource, SpaceTree* tree )
 {
 	this->resource = resource; 
 	this->tree = tree;
+	animationResource = AnimationResourceManager::Instance()->GetResource( resource->header.animation.c_str() );
 
 	debugScale = 1.0f;
 	pos.Set( 0, 0, 0 );

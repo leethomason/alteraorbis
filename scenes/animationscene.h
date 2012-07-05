@@ -26,6 +26,8 @@ public:
 
 private:
 	void UpdateBoneInfo();
+	void UpdateAnimationInfo();
+
 	void InitXML( const grinliz::Rectangle2I& bounds );
 	void FinishXML();
 
@@ -37,13 +39,17 @@ private:
 	Model* model;
 
 	int  currentBone;
+	int  currentAnim;
 	bool doExport;
 	int  exportCount;
 
 	gamui::PushButton okay;
-	gamui::PushButton boneLeft, boneRight, exportSCML;
+	gamui::PushButton boneLeft, boneRight;
+	gamui::PushButton animLeft, animRight;
+	gamui::PushButton exportSCML;
+
 	gamui::ToggleButton ortho;
-	gamui::TextLabel boneName;
+	gamui::TextLabel boneName, animName;
 	gamui::TextLabel pixelUnitRatio;
 
 	tinyxml2::XMLDocument* xmlDocument;
