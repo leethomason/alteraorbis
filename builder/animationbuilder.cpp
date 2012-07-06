@@ -6,6 +6,7 @@
 using namespace grinliz;
 using namespace tinyxml2;
 
+
 GLString GetBoneName( const XMLElement* spriteEle )
 {
 	GLString boneName = spriteEle->FirstChildElement( "image" )->GetText();
@@ -36,7 +37,6 @@ const XMLElement* InsertFrame(	gamedb::WItem* frame,
 				gamedb::WItem* bone = frame->CreateChild( boneName.c_str() );
 				
 				float x=0, y=0, angle=0, anglePrime=0;
-				//float dy=0, dz=0;
 
 				spriteEle->FirstChildElement( "angle" )->QueryFloatText( &angle );
 				spriteEle->FirstChildElement( "x"     )->QueryFloatText( &x );
@@ -73,10 +73,6 @@ const XMLElement* InsertFrame(	gamedb::WItem* frame,
 					rx /= pur;
 					ry /= pur;
 
-					// Deltas, convert to Xenoengine coordinates.
-					//dz =  (rx - x);
-					//dy = -(ry - y);
-
 					// Part to origin. Rotate. Back to pos. Apply delta.
 					Matrix4 toOrigin, toPos, rot, delta;
 
@@ -85,7 +81,6 @@ const XMLElement* InsertFrame(	gamedb::WItem* frame,
 					toPos.SetTranslation( 0, -y, x );				// positive direction
 
 					m = delta * toPos * rot * toOrigin;
-					//m = toOrigin * rot * toPos * delta;
 					//m.Dump( "Bone" );
 					anglePrime = m.CalcRotationAroundAxis( 0 );		// not very meaningful, just used to construct a transformation matrix in the shader
 					//GLOUTPUT(( "anglePrime=%f\n", anglePrime ));
@@ -160,8 +155,6 @@ void ProcessAnimation( const tinyxml2::XMLElement* element, gamedb::WItem* witem
 			if (    ( pass == 0 && StrEqual( animName, "reference" ) )
 				 || ( pass == 1 && !StrEqual( animName, "reference" )))
 			{
-				//printf( "  animation: %s\n", name );
-		
 				gamedb::WItem* anim = root->CreateChild( animName );	// "walk"
 				int frameCount = 0;
 				float totalDuration = 0;
@@ -196,4 +189,3 @@ void ProcessAnimation( const tinyxml2::XMLElement* element, gamedb::WItem* witem
 
 	fclose( fp );
 }
-

@@ -98,34 +98,51 @@ bool AnimationResource::GetTransform( const char* animationName, const ModelHead
 	float time = fmodf( (float)timeClock, totalTime );
 	float fraction = 0;
 
-	const gamedb::Item* frameItem = 0;
+	const gamedb::Item* frameItem0 = 0;
+	const gamedb::Item* frameItem1 = 0;
+
 	for( int frame=0; frame<animItem->NumChildren(); ++frame ) {
-		frameItem = animItem->Child( frame );
-		GLASSERT( frameItem );
+		frameItem0 = animItem->Child( frame );
+		GLASSERT( frameItem0 );
 		//GLOUTPUT(( "frameItem %s\n", frameItem->Name() ));
 
-		float frameDuration = frameItem->GetFloat( "duration" );
+		float frameDuration = frameItem0->GetFloat( "duration" );
 		if ( (float)time < frameDuration ) {
 			// We found the frame!
-			fraction = (float)time / (float)frameDuration;
+			fraction = 1.0f - (float)time / (float)frameDuration;
+			frameItem1 = animItem->Child( (frame+1)%animItem->NumChildren() );
+
 			break;
 		}
 		time -= frameDuration;
 	}
-	GLASSERT( frameItem );
+	GLASSERT( frameItem0 );
+	GLASSERT( frameItem1 );
 
-	for( int i=0; i<frameItem->NumChildren(); ++i ) {
+	for( int i=0; i<frameItem0->NumChildren(); ++i ) {
 		GLASSERT( i < EL_MAX_BONES );
-		const gamedb::Item* boneItem = frameItem->Child( i );
 
-		const char* boneName = boneItem->Name();
+		const gamedb::Item* boneItem0 = frameItem0->Child( i );
+		const gamedb::Item* boneItem1 = frameItem1->Child( i );
+
+		const char* boneName = boneItem0->Name();
 		int index = header.BoneIDFromName( boneName );
 		//GLASSERT( index >= 0 );
 
 		boneData->name[index] = boneName;
-		boneData->bone[index].angleRadians	= ToRadian( boneItem->GetFloat( "angle" ));
-		boneData->bone[index].dy			= boneItem->GetFloat( "dy" );
-		boneData->bone[index].dz			= boneItem->GetFloat( "dz" );
+		boneItem1 = boneItem0;
+
+		float angle0 = boneItem0->GetFloat( "angle" );
+		float angle1 = boneItem1->GetFloat( "angle" );
+		//if ( fabs( angle0-angle1 ) > 180.0f ) {
+
+			//if ( angle0 < angle1 )	angle0 += 360.0f;
+			//else					angle1 += 360.0f;
+		//}
+
+		boneData->bone[index].angleRadians	= ToRadian( NormalizeAngleDegrees( Lerp( angle0, angle1, fraction )));
+		boneData->bone[index].dy			= Lerp( boneItem0->GetFloat( "dy" ), boneItem1->GetFloat( "dy" ), fraction );
+		boneData->bone[index].dz			= Lerp( boneItem0->GetFloat( "dz" ), boneItem1->GetFloat( "dz" ), fraction );
 	}
 	return true;
 }
