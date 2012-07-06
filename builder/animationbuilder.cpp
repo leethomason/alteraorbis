@@ -2,10 +2,10 @@
 #include "builder.h"
 #include "../tinyxml2/tinyxml2.h"
 #include "../grinliz/glmatrix.h"
+#include "../engine/enginelimits.h"
 
 using namespace grinliz;
 using namespace tinyxml2;
-
 
 GLString GetBoneName( const XMLElement* spriteEle )
 {
@@ -29,9 +29,10 @@ const XMLElement* InsertFrame(	gamedb::WItem* frame,
 		const char* name = frameEle->FirstChildElement( "name" )->GetText();
 		if ( StrEqual( name, frameName ) ) {
 
+			int i=0;
 			for( const XMLElement* spriteEle = frameEle->FirstChildElement( "sprite" );
 				 spriteEle;
-				 spriteEle = spriteEle->NextSiblingElement( "sprite" ) )
+				 spriteEle = spriteEle->NextSiblingElement( "sprite" ), ++i )
 			{
 				GLString boneName = GetBoneName( spriteEle );
 				gamedb::WItem* bone = frame->CreateChild( boneName.c_str() );
@@ -74,13 +75,13 @@ const XMLElement* InsertFrame(	gamedb::WItem* frame,
 					ry /= pur;
 
 					// Part to origin. Rotate. Back to pos. Apply delta.
-					Matrix4 toOrigin, toPos, rot, delta;
+					Matrix4 toOrigin, toPos, rot;
 
 					toOrigin.SetTranslation( 0, ry, -rx );			// negative direction, remembering: 1) y is flipped, 2) x maps to z
 					rot.SetXRotation( -angle );						// rotate, convert to YZ right hand rule
 					toPos.SetTranslation( 0, -y, x );				// positive direction
 
-					m = delta * toPos * rot * toOrigin;
+					m = toPos * rot * toOrigin;
 					//m.Dump( "Bone" );
 					anglePrime = m.CalcRotationAroundAxis( 0 );		// not very meaningful, just used to construct a transformation matrix in the shader
 					//GLOUTPUT(( "anglePrime=%f\n", anglePrime ));

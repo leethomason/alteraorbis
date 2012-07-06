@@ -123,26 +123,34 @@ bool AnimationResource::GetTransform( const char* animationName, const ModelHead
 		GLASSERT( i < EL_MAX_BONES );
 
 		const gamedb::Item* boneItem0 = frameItem0->Child( i );
-		const gamedb::Item* boneItem1 = frameItem1->Child( i );
+		//const gamedb::Item* boneItem1 = frameItem1->Child( i );
+		const gamedb::Item* boneItem1 = boneItem0;	// disable interpolation
 
 		const char* boneName = boneItem0->Name();
 		int index = header.BoneIDFromName( boneName );
 		//GLASSERT( index >= 0 );
 
 		boneData->name[index] = boneName;
-		boneItem1 = boneItem0;
 
 		float angle0 = boneItem0->GetFloat( "angle" );
 		float angle1 = boneItem1->GetFloat( "angle" );
-		//if ( fabs( angle0-angle1 ) > 180.0f ) {
 
-			//if ( angle0 < angle1 )	angle0 += 360.0f;
-			//else					angle1 += 360.0f;
-		//}
+		float dy0 = boneItem0->GetFloat( "dy" );
+		float dy1 = boneItem1->GetFloat( "dy" );
+
+		float dz0 = boneItem0->GetFloat( "dz" );
+		float dz1 = boneItem1->GetFloat( "dz" );
+
+		if ( fabs( angle0 - angle1 ) > 180.0f ) {
+			GLASSERT( 0 );	// won't interpolate correctly
+		}
+
+		//if ( angle0 < 90.0f ) angle0 += 360.f;
+		//if ( angle1 < 90.0f ) angle1 += 360.f;
 
 		boneData->bone[index].angleRadians	= ToRadian( NormalizeAngleDegrees( Lerp( angle0, angle1, fraction )));
-		boneData->bone[index].dy			= Lerp( boneItem0->GetFloat( "dy" ), boneItem1->GetFloat( "dy" ), fraction );
-		boneData->bone[index].dz			= Lerp( boneItem0->GetFloat( "dz" ), boneItem1->GetFloat( "dz" ), fraction );
+		boneData->bone[index].dy			= Lerp( dy0, dy1, fraction );
+		boneData->bone[index].dz			= Lerp( dz0, dz1, fraction );
 	}
 	return true;
 }
