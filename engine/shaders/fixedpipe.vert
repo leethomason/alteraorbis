@@ -150,7 +150,7 @@ void main() {
 			xform[2][2] = cosTheta;
 			
 			xform[3][1] = bone.y;
-			xform[3][1] = bone.z;
+			xform[3][2] = bone.z;
 			
 			vec4 pos = u_mvpMatrix * xform * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );
 		#endif

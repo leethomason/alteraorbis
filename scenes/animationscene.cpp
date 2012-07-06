@@ -357,6 +357,7 @@ void AnimationScene::Draw3D( U32 deltaTime )
 		}
 	}
 	else {
+		model->DeltaAnimation( deltaTime );
 		engine->Draw( deltaTime );
 	}
 }

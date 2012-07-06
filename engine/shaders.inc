@@ -132,7 +132,7 @@ static const char* fixedpipe_vert = {
     "			xform[2][2] = cosTheta;\n"
     "			\n"
     "			xform[3][1] = bone.y;\n"
-    "			xform[3][1] = bone.z;\n"
+    "			xform[3][2] = bone.z;\n"
     "			\n"
     "			vec4 pos = u_mvpMatrix * xform * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );\n"
     "		#endif\n"

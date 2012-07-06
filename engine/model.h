@@ -125,7 +125,7 @@ struct ModelHeader
 	int BoneIDFromName( const char* name ) const {
 		for( int i=0; i<EL_MAX_BONES; ++i ) {
 			if ( boneName[i].name == name ) {
-				return i;
+				return boneName[i].id;
 			}
 		}
 		return -1;
