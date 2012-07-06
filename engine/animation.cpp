@@ -1,6 +1,7 @@
 #include "animation.h"
 #include "../grinliz/glstringutil.h"
 #include "../shared/gamedbreader.h"
+#include "model.h"
 
 using namespace grinliz;
 
@@ -85,24 +86,23 @@ bool AnimationResource::HasAnimation( const char* name ) const
 }
 
 
-bool AnimationResource::GetTransform( const char* animationName, U32 timeClock, BoneData* boneData ) const
+bool AnimationResource::GetTransform( const char* animationName, const ModelHeader& header, U32 timeClock, BoneData* boneData ) const
 {
 	const gamedb::Item* animItem = item->Child( animationName );
 	GLASSERT( animItem );
 	memset( boneData, 0, sizeof( *boneData ));
 	
-	float totalTimeF = animItem->GetFloat( "totalDuration" );
-	int totalTime = (int)(totalTimeF*1000.0);
-	int time = timeClock % totalTime;
+	float totalTime = animItem->GetFloat( "totalDuration" );
+	float time = fmodf( (float)timeClock, totalTime );
 	float fraction = 0;
-	const gamedb::Item* frameItem = item->Child( 0 );
+	const gamedb::Item* frameItem = animItem->Child( 0 );
 
-	for( int frame=0; frame<item->NumChildren(); ++frame ) {
-		frameItem = item->Child( frame );
+	for( int frame=0; frame<animItem->NumChildren(); ++frame ) {
+		frameItem = animItem->Child( frame );
 		GLASSERT( frameItem );
 
-		int frameDuration = frameItem->GetInt( "duration" );
-		if ( time < frameDuration ) {
+		float frameDuration = frameItem->GetFloat( "duration" );
+		if ( (float)time < frameDuration ) {
 			// We found the frame!
 			fraction = (float)time / (float)frameDuration;
 			break;
@@ -113,9 +113,15 @@ bool AnimationResource::GetTransform( const char* animationName, U32 timeClock, 
 	for( int i=0; i<frameItem->NumChildren(); ++i ) {
 		GLASSERT( i < EL_MAX_BONES );
 		const gamedb::Item* boneItem = animItem->Child( i );
-		boneData->bone[i].angleRadians	= ToRadian( boneItem->GetFloat( "angle" ));
-		boneData->bone[i].dy			= ToRadian( boneItem->GetFloat( "dy" ));
-		boneData->bone[i].dz			= ToRadian( boneItem->GetFloat( "dz" ));
+
+		const char* boneName = boneItem->Name();
+		int index = header.BoneIDFromName( boneName );
+		GLASSERT( index >= 0 );
+
+		boneData->name[index] = boneName;
+		boneData->bone[index].angleRadians	= ToRadian( boneItem->GetFloat( "angle" ));
+		boneData->bone[index].dy			= ToRadian( boneItem->GetFloat( "dy" ));
+		boneData->bone[index].dz			= ToRadian( boneItem->GetFloat( "dz" ));
 	}
 	return true;
 }

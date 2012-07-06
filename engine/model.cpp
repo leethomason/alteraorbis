@@ -227,6 +227,7 @@ void Model::Init( const ModelResource* resource, SpaceTree* tree )
 	}
 	userData = 0;
 	animationTime = 0;
+	animationName.Clear();
 }
 
 
@@ -367,10 +368,10 @@ void Model::Queue( RenderQueue* queue, EngineShaders* engineShaders )
 
 		BoneData* pBD = 0;
 		BoneData boneData;
-		//if ( animationResource && !animationName.empty() ) {
-		//	animationResource->GetTransform( animationName.c_str(), animationTime, &boneData );
-		//	pBD = &boneData;
-		//}
+		if ( animationResource && !animationName.empty() ) {
+			animationResource->GetTransform( animationName.c_str(), resource->header, animationTime, &boneData );
+			pBD = &boneData;
+		}
 
 		queue->Add( this,									// reference back
 					&resource->atom[i],						// model atom to render

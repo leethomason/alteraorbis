@@ -9,6 +9,8 @@
 
 #include "vertex.h"
 
+struct ModelHeader;
+
 
 class AnimationResource
 {
@@ -22,7 +24,10 @@ public:
 	bool		HasAnimation( const char* name ) const;
 	const char* AnimationName( int index ) const;
 
-	bool GetTransform( const char* animationName, U32 time, BoneData* boneData ) const;
+	bool GetTransform(	const char* animationName,	// which animation to play: "reference", "gunrun", etc.
+						const ModelHeader& header,	// used to get the bone IDs
+						U32 time,					// time for this animation
+						BoneData* boneData ) const;
 
 private:
 	const char* name;

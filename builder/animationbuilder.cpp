@@ -82,7 +82,7 @@ const XMLElement* InsertFrame(	gamedb::WItem* frame,
 					toPos.SetTranslation( 0, -ry + dy, rx + dz );
 
 					Matrix4 m = delta * toPos * rot * toOrigin;
-					m.Dump( "Bone" );
+					//m.Dump( "Bone" );
 					anglePrime = m.CalcRotationAroundAxis( 0 );
 					//GLOUTPUT(( "anglePrime=%f\n", anglePrime ));
 				}
@@ -100,15 +100,16 @@ const XMLElement* InsertFrame(	gamedb::WItem* frame,
 }
 
 
-//	animations
-//    "humanFemale"
-//		"walk"
-//			0	[time=0]								Milliseconds
-//				arm.left.upper [y=0.01 z=0.02 r=73]		Translation then rotation. Unit coordinates. Degrees.
-//														YZ plane. Origin lower left.
-//				arm.left.lower [...]
-//				...
-//			1	[time=400]
+/*
+  animations []
+    humanFemale []
+      gunrun [ totalDuration=1200.000000]
+        0 [ duration=200.000000]
+          arm.lower.left [ angle=27.083555 dy=-0.000076 dz=0.000340]
+          arm.lower.right [ angle=268.449707 dy=0.000445 dz=-0.000228]
+          arm.upper.left [ angle=28.810850 dy=-0.000000 dz=0.000000]
+		  ...
+*/
 
 void ProcessAnimation( const tinyxml2::XMLElement* element, gamedb::WItem* witem )
 {

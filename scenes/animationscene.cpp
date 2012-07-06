@@ -129,6 +129,9 @@ void AnimationScene::UpdateAnimationInfo()
 	const char* name = "no animation";
 	if ( nAnim > 0 ) {
 		name = res->AnimationName( currentAnim );
+		if ( !StrEqual( model->GetAnimation(), name )) {
+			model->SetAnimation( name );
+		}
 	}
 	animName.SetText( name );
 }

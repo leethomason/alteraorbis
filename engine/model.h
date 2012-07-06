@@ -122,6 +122,15 @@ struct ModelHeader
 		return 0;
 	}
 
+	int BoneIDFromName( const char* name ) const {
+		for( int i=0; i<EL_MAX_BONES; ++i ) {
+			if ( boneName[i].name == name ) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
 	void Set( const char* name, int nGroups, int nTotalVertices, int nTotalIndices,
 			  const grinliz::Rectangle3F& bounds );
 
@@ -247,6 +256,7 @@ public:
 	const AnimationResource* GetAnimationResource() const { return animationResource; }
 	// Set the current animation, null or "reference" turns off animation.
 	void SetAnimation( const char* name );
+	const char* GetAnimation() const { return animationName.c_str(); }
 	// Update the time and animation rendering.
 	void DeltaAnimation( U32 time );
 
