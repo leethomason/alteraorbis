@@ -36,12 +36,13 @@ const XMLElement* InsertFrame(	gamedb::WItem* frame,
 				gamedb::WItem* bone = frame->CreateChild( boneName.c_str() );
 				
 				float x=0, y=0, angle=0, anglePrime=0;
-				float dy=0, dz=0;
+				//float dy=0, dz=0;
 
 				spriteEle->FirstChildElement( "angle" )->QueryFloatText( &angle );
 				spriteEle->FirstChildElement( "x"     )->QueryFloatText( &x );
 				spriteEle->FirstChildElement( "y"     )->QueryFloatText( &y );
 
+				angle = NormalizeAngleDegrees( angle );
 				x /= pur;
 				y /= pur;
 
@@ -51,6 +52,7 @@ const XMLElement* InsertFrame(	gamedb::WItem* frame,
 				//
 				// Lumos needs the transformation (delta) from the origin.
 				// To translate, we need the reference (untransformed) frame.
+				Matrix4 m;
 
 				if ( reference ) {
 					const XMLElement* refSpriteEle = 0;
@@ -72,26 +74,41 @@ const XMLElement* InsertFrame(	gamedb::WItem* frame,
 					ry /= pur;
 
 					// Deltas, convert to Xenoengine coordinates.
-					dz =  (rx - x) / pur;
-					dy = -(ry - y) / pur;
+					//dz =  (rx - x);
+					//dy = -(ry - y);
 
 					// Part to origin. Rotate. Back to pos. Apply delta.
 					Matrix4 toOrigin, toPos, rot, delta;
-					toOrigin.SetTranslation( 0, ry, -rx );
-					rot.SetXRotation( -angle );
-					toPos.SetTranslation( 0, -ry + dy, rx + dz );
 
-					Matrix4 m = delta * toPos * rot * toOrigin;
+					toOrigin.SetTranslation( 0, ry, -rx );			// negative direction, remembering: 1) y is flipped, 2) x maps to z
+					rot.SetXRotation( -angle );						// rotate, convert to YZ right hand rule
+					toPos.SetTranslation( 0, -y, x );				// positive direction
+
+					m = delta * toPos * rot * toOrigin;
+					//m = toOrigin * rot * toPos * delta;
 					//m.Dump( "Bone" );
-					anglePrime = m.CalcRotationAroundAxis( 0 );
+					anglePrime = m.CalcRotationAroundAxis( 0 );		// not very meaningful, just used to construct a transformation matrix in the shader
 					//GLOUTPUT(( "anglePrime=%f\n", anglePrime ));
+
+#ifdef DEBUG
+					// Check that the matrix can be reconstructed.
+					Matrix4 shader;
+					float sinTheta = sinf( ToRadian( anglePrime ));
+					float cosTheta = cosf( ToRadian( anglePrime ));
+					shader.m22 = cosTheta;
+					shader.m32 = sinTheta;
+					shader.m23 = -sinTheta;
+					shader.m33 = cosTheta;
+					shader.m24 = m.m24;	// see below
+					shader.m34 = m.m34;	// see below
+
+					GLASSERT( Equal( shader, m ));
+#endif
 				}
 
 				bone->SetFloat( "angle", anglePrime );
-				//bone->SetFloat( "x", x );
-				//bone->SetFloat( "y", y );
-				bone->SetFloat( "dz", dz );
-				bone->SetFloat( "dy", dy );
+				bone->SetFloat( "dy", m.m24 );
+				bone->SetFloat( "dz", m.m34 );
 			}
 			return frameEle;
 		}

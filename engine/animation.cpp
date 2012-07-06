@@ -123,10 +123,9 @@ bool AnimationResource::GetTransform( const char* animationName, const ModelHead
 		//GLASSERT( index >= 0 );
 
 		boneData->name[index] = boneName;
-		//boneData->bone[index].angleRadians	= ToRadian( boneItem->GetFloat( "angle" ));
-		boneData->bone[index].angleRadians = 0;
-		boneData->bone[index].dy			= boneItem->GetFloat( "dy" )*200.f;
-		boneData->bone[index].dz			= boneItem->GetFloat( "dz" )*200.f;
+		boneData->bone[index].angleRadians	= ToRadian( boneItem->GetFloat( "angle" ));
+		boneData->bone[index].dy			= boneItem->GetFloat( "dy" );
+		boneData->bone[index].dz			= boneItem->GetFloat( "dz" );
 	}
 	return true;
 }
