@@ -127,9 +127,11 @@ void RenderQueue::Add( Model* model, const ModelAtom* atom, GPUShader* shader, c
 	item->param = param;
 	if ( boneData ) {
 		item->boneData = *boneData;
+		item->hasBoneData = true;
 	}
 	else {
 		memset( &item->boneData, 0, sizeof( item->boneData ) );
+		item->hasBoneData = false;
 	}
 	
 	item->next  = state->root;
@@ -222,7 +224,9 @@ void RenderQueue::Submit( GPUShader* overRideShader, int modelRequired, int mode
 					}
 					shader->MultMatrix( GPUShader::MODELVIEW_MATRIX, model->XForm() );
 					shader->SetParam( item->param );
-					shader->InstanceBones( 0, item->boneData );
+					if ( item->hasBoneData ) {
+						shader->InstanceBones( 0, item->boneData );
+					}
 					shader->Draw();
 					shader->PopMatrix( GPUShader::MODELVIEW_MATRIX );
 				}

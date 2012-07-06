@@ -72,6 +72,7 @@ private:
 		Model*					model;
 		const ModelAtom*		atom;	
 		grinliz::Vector4F		param;	// color, texture xForm, etc. Not yet supported. Needs sorting
+		bool					hasBoneData;
 		BoneData				boneData;
 		Item*					next;
 	};

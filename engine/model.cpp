@@ -364,6 +364,11 @@ void Model::Queue( RenderQueue* queue, EngineShaders* engineShaders )
 		else if ( HasBoneFilter() ) {
 			mod = ShaderManager::BONE_FILTER;
 		}
+
+		if ( animationResource && !animationName.empty() ) {
+			mod |= ShaderManager::BONE_XFORM;
+		}
+
 		GPUShader* shader = engineShaders->GetShader( base, mod );
 
 		BoneData* pBD = 0;

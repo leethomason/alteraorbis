@@ -130,7 +130,8 @@ private:
 							  | ShaderManager::BONE_FILTER )) != 0; 
 		}
 		bool BonesNeeded() const {
-			return (flags & ShaderManager::BONE_FILTER) != 0;
+			return (flags & (   ShaderManager::BONE_FILTER 
+							  | ShaderManager::BONE_XFORM ))  != 0;
 		}
 
 		int flags;

@@ -93,13 +93,16 @@ bool AnimationResource::GetTransform( const char* animationName, const ModelHead
 	memset( boneData, 0, sizeof( *boneData ));
 	
 	float totalTime = animItem->GetFloat( "totalDuration" );
+	//GLOUTPUT(( "animItem %s\n", animItem->Name() ));
+
 	float time = fmodf( (float)timeClock, totalTime );
 	float fraction = 0;
-	const gamedb::Item* frameItem = animItem->Child( 0 );
 
+	const gamedb::Item* frameItem = 0;
 	for( int frame=0; frame<animItem->NumChildren(); ++frame ) {
 		frameItem = animItem->Child( frame );
 		GLASSERT( frameItem );
+		//GLOUTPUT(( "frameItem %s\n", frameItem->Name() ));
 
 		float frameDuration = frameItem->GetFloat( "duration" );
 		if ( (float)time < frameDuration ) {
@@ -109,19 +112,21 @@ bool AnimationResource::GetTransform( const char* animationName, const ModelHead
 		}
 		time -= frameDuration;
 	}
-	
+	GLASSERT( frameItem );
+
 	for( int i=0; i<frameItem->NumChildren(); ++i ) {
 		GLASSERT( i < EL_MAX_BONES );
-		const gamedb::Item* boneItem = animItem->Child( i );
+		const gamedb::Item* boneItem = frameItem->Child( i );
 
 		const char* boneName = boneItem->Name();
 		int index = header.BoneIDFromName( boneName );
-		GLASSERT( index >= 0 );
+		//GLASSERT( index >= 0 );
 
 		boneData->name[index] = boneName;
 		boneData->bone[index].angleRadians	= ToRadian( boneItem->GetFloat( "angle" ));
-		boneData->bone[index].dy			= ToRadian( boneItem->GetFloat( "dy" ));
-		boneData->bone[index].dz			= ToRadian( boneItem->GetFloat( "dz" ));
+		boneData->bone[index].angleRadians = 0;
+		boneData->bone[index].dy			= boneItem->GetFloat( "dy" );
+		boneData->bone[index].dz			= boneItem->GetFloat( "dz" );
 	}
 	return true;
 }
