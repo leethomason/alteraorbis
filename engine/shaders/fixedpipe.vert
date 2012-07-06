@@ -37,6 +37,8 @@ attribute vec3 a_pos;				// vertex position
 
 #if BONES == 1
 	attribute float a_boneID;
+	// FIXME: account for instancing.
+	uniform vec3 u_boneXForm[EL_MAX_BONES];		// FIXME: Can (and should) pack into floats and use a scaling term. Currently: xform.x:rotation, xform.y:y, xform.z:z
 #endif
 
 #if LIGHTING_DIFFUSE > 0
@@ -117,7 +119,41 @@ void main() {
 	v_color = color;
 	
 	#if INSTANCE == 0 
-		vec4 pos = u_mvpMatrix * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );
+		#if BONES == 0
+			vec4 pos = u_mvpMatrix * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );
+		#else
+			mat4 xform = mat4( 1.0 );	
+			vec3 bone = u_boneXForm[int(a_boneID)];
+			float sinTheta = sin( bone.x );
+			float cosTheta = cos( bone.x );
+
+			/*
+				// COLUMN 1
+				x[0] = 1.0f;
+				x[1] = 0.0f;
+				x[2] = 0.0f;
+				
+				// COLUMN 2
+				x[4] = 0.0f;
+				x[5] = cosTheta;
+				x[6] = sinTheta;
+
+				// COLUMN 3
+				x[8] = 0.0f;
+				x[9] = -sinTheta;
+				x[10] = cosTheta;
+			*/			
+			// column, row (grr)
+			xform[1][1] = cosTheta;
+			xform[1][2] = sinTheta;
+			xform[2][1] = -sinTheta;
+			xform[2][2] = cosTheta;
+			
+			xform[3][1] = bone.y;
+			xform[3][1] = bone.z;
+			
+			vec4 pos = u_mvpMatrix * xform * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );
+		#endif
 	#else
 		vec4 pos = (u_mvpMatrix * u_mMatrix[int(a_instanceID)]) * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );
 	#endif

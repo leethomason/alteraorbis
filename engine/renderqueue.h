@@ -52,7 +52,8 @@ public:
 	void Add(	Model* model,					// Can be chaned: billboard rotation will be set.
 				const ModelAtom* atom, 
 				GPUShader* shader,
-				const grinliz::Vector4F& param );
+				const grinliz::Vector4F& param,
+				const BoneData* bones );
 
 	/* If a shader is passed it, it will override the shader set by the Add. */
 	void Submit(	GPUShader* shader, 
@@ -71,6 +72,7 @@ private:
 		Model*					model;
 		const ModelAtom*		atom;	
 		grinliz::Vector4F		param;	// color, texture xForm, etc. Not yet supported. Needs sorting
+		BoneData				boneData;
 		Item*					next;
 	};
 

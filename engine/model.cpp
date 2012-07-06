@@ -226,6 +226,7 @@ void Model::Init( const ModelResource* resource, SpaceTree* tree )
 		flags |= MODEL_NO_SHADOW;
 	}
 	userData = 0;
+	animationTime = 0;
 }
 
 
@@ -286,6 +287,28 @@ void Model::SetRotation( float r, int axis )
 }
 
 
+void Model::SetAnimation( const char* name )
+{
+	if ( name && *name ) {
+		if ( animationName != name ) {
+			animationName = name;
+			GLASSERT( animationResource );
+			GLASSERT( animationResource->HasAnimation( name ));
+			animationTime = 0;
+		}
+	}
+	else {
+		animationName = "";
+	}
+}
+
+
+void Model::DeltaAnimation( U32 time )
+{
+	animationTime += time;
+}
+
+
 void Model::CalcHitAABB( Rectangle3F* aabb ) const
 {
 	// This is already an approximation - ignore rotation.
@@ -342,10 +365,18 @@ void Model::Queue( RenderQueue* queue, EngineShaders* engineShaders )
 		}
 		GPUShader* shader = engineShaders->GetShader( base, mod );
 
+		BoneData* pBD = 0;
+		BoneData boneData;
+		//if ( animationResource && !animationName.empty() ) {
+		//	animationResource->GetTransform( animationName.c_str(), animationTime, &boneData );
+		//	pBD = &boneData;
+		//}
+
 		queue->Add( this,									// reference back
 					&resource->atom[i],						// model atom to render
-					shader,								
-					param[i] );								// parameter to the shader
+					shader,
+					param[i],								// parameter to the shader
+					pBD );								
 	}
 }
 

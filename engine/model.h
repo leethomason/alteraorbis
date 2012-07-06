@@ -89,12 +89,12 @@ struct ModelAtom
 struct ModelHeader
 {
 	struct MetaData {
-		grinliz::CStr< EL_METADATA_NAME_LEN > name;
-		grinliz::Vector3F					  value;
+		grinliz::CStr< EL_RES_NAME_LEN >	name;
+		grinliz::Vector3F					value;
 	};
 	struct BoneDesc {
-		grinliz::CStr< EL_BONE_NAME_LEN > name;
-		int								  id;
+		grinliz::CStr< EL_RES_NAME_LEN >	name;
+		int									id;
 	};
 
 	// flags
@@ -351,6 +351,9 @@ private:
 	grinliz::Vector3F pos;
 	float rot[3];
 	float debugScale;
+
+	U32 animationTime;
+	grinliz::CStr< EL_RES_NAME_LEN > animationName;
 
 	grinliz::Vector4F	param[EL_MAX_MODEL_GROUPS];
 

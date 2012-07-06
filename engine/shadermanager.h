@@ -48,11 +48,15 @@ public:
 		PREMULT				= (1<<13),		// convert to pre-multiplied in the fragment shader
 		EMISSIVE			= (1<<14),		// interpret the alpha channel as emission. FLAG
 		EMISSIVE_EXCLUSIVE  = (1<<15),		// everything not emissive is black
+		
 		BONE_FILTER			= (1<<17),		// Only show one bone. PARAM.x
+		BONE_XFORM			= (1<<18),
 
+		/*
 		// Switch to different shader:
 		BLUR				= (1<<18),		// requires u_radius
 		BLUR_Y				= (1<<19),		//
+		*/
 	};
 
 	void DeviceLoss();
@@ -91,6 +95,7 @@ public:
 		U_DIFFUSE,
 		U_RADIUS,
 		U_PARAM,
+		U_BONEXFORM,
 		MAX_UNIFORM
 	};
 
@@ -106,6 +111,7 @@ public:
 
 	void SetUniformArray( int id, int count, const grinliz::Matrix4* mat );
 	void SetUniformArray( int id, int count, const grinliz::Vector4F* params );
+	void SetUniformArray( int id, int count, const grinliz::Vector3F* params );
 
 private:
 	static ShaderManager* instance;

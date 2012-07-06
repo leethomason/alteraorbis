@@ -36,6 +36,7 @@ static const char* gUniformName[ShaderManager::MAX_UNIFORM] =
 	"u_diffuse",
 	"u_radius",
 	"u_param",
+	"u_boneXForm",
 };
 
 
@@ -195,6 +196,16 @@ void ShaderManager::SetUniformArray( int id, int count, const grinliz::Vector4F*
 }
 
 
+void ShaderManager::SetUniformArray( int id, int count, const grinliz::Vector3F* v )
+{
+	CHECK_GL_ERROR;
+	int loc = active->GetUniformLocation( id );
+	GLASSERT( loc >= 0 );
+	glUniform3fv( loc, count, &v->x );
+	CHECK_GL_ERROR;
+}
+
+
 void ShaderManager::SetTexture( int index, Texture* texture )
 {
 	char name[9] = "texture0";
@@ -291,11 +302,12 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 	else 
 		AppendFlag( &header, "LIGHTING_DIFFUSE", 0, 0 );
 
-	if ( flags & BLUR ) {
-		AppendFlag( &header, "BLUR_Y", flags & BLUR_Y );
-	}
+//	if ( flags & BLUR ) {
+//		AppendFlag( &header, "BLUR_Y", flags & BLUR_Y );
+//	}
 
 	AppendConst( &header, "EL_MAX_INSTANCE", EL_MAX_INSTANCE );
+	AppendConst( &header, "EL_MAX_BONES",	 EL_MAX_BONES );
 
 #ifdef DEBUG_OUTPUT
 	GLOUTPUT(( "header\n%s\n", header.c_str() ));
@@ -303,10 +315,11 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 
 	const char* vertexSrc[2]   = { header.c_str(), fixedpipe_vert };
 	const char* fragmentSrc[2] = { header.c_str(), fixedpipe_frag };
-	if ( flags & BLUR ) {
-		vertexSrc[1]   = blur_vert;
-		fragmentSrc[1] = blur_frag;
-	}
+
+//	if ( flags & BLUR ) {
+//		vertexSrc[1]   = blur_vert;
+//		fragmentSrc[1] = blur_frag;
+//	}
 
 	glShaderSource( shader->vertexProg, 2, vertexSrc, 0 );
 	glCompileShader( shader->vertexProg );

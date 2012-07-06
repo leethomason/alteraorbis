@@ -244,9 +244,14 @@ public:
 		GLASSERT( i >= 0 && i < EL_MAX_INSTANCE );
 		instanceParam[i] = v; 
 	}
+	void InstanceBones( int i, const BoneData& bones ) {
+		GLASSERT( i >= 0 && i < EL_MAX_INSTANCE );
+		instanceBones[i] = bones;
+	}
 	void SetParam( const grinliz::Vector4F& v ) {
 		InstanceParam( 0, v );
 	}
+
 
 	void SetStencilMode( StencilMode value ) { stencilMode = value; }
 	void SetDepthWrite( bool value ) { depthWrite = value; }
@@ -295,6 +300,7 @@ public:
 		ambient.Set( 0, 0, 0, 0 );
 		diffuse.Set( 0, 0, 0, 0 );
 		memset( instanceParam, 0, sizeof(*instanceParam)*EL_MAX_INSTANCE );
+		memset( instanceBones, 0, sizeof(*instanceBones)*EL_MAX_INSTANCE );
 	}
 
 protected:
@@ -353,6 +359,7 @@ protected:
 
 	grinliz::Matrix4	instanceMatrix[EL_MAX_INSTANCE];
 	grinliz::Vector4F	instanceParam[EL_MAX_INSTANCE];
+	BoneData			instanceBones[EL_MAX_INSTANCE];
 };
 
 

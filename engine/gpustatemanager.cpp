@@ -357,7 +357,9 @@ void GPUShader::SetState( const GPUShader& ns )
 	// bones
 	if ( bonesNeeded ) {
 		GLASSERT( ns.stream.boneOffset );	// could be zero...but that would be odd.
-		shadman->SetStreamData( ShaderManager::A_BONE_ID, 1, GL_UNSIGNED_SHORT, ns.stream.stride, PTR( ns.streamPtr, ns.stream.boneOffset ) );	 
+
+		shadman->SetUniformArray( ShaderManager::U_BONEXFORM, EL_MAX_BONES, (const Vector3F*) ns.instanceBones );
+		shadman->SetStreamData( ShaderManager::A_BONE_ID, 1, GL_UNSIGNED_SHORT, ns.stream.stride, PTR( ns.streamPtr, ns.stream.boneOffset ) );
 	}
 
 	// lighting 
@@ -377,9 +379,9 @@ void GPUShader::SetState( const GPUShader& ns )
 		shadman->SetStreamData( ShaderManager::A_NORMAL, 3, GL_FLOAT, ns.stream.stride, PTR( ns.streamPtr, ns.stream.normalOffset ) );	 
 	}
 
-	if ( flags & ShaderManager::BLUR ) {
-		shadman->SetUniform( ShaderManager::U_RADIUS, ns.radius );
-	}
+//	if ( flags & ShaderManager::BLUR ) {
+//		shadman->SetUniform( ShaderManager::U_RADIUS, ns.radius );
+//	}
 
 	// color multiplier
 	if ( flags & ShaderManager::COLOR_MULTIPLIER ) {

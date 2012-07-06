@@ -32,6 +32,7 @@ enum HitTestMethod
 static const int EL_MAX_MAP_SIZE = 1024;
 
 enum {
+	EL_RES_NAME_LEN			= 24,
 	EL_MAX_VERTEX_IN_GROUP	= 4096,
 	EL_MAX_INDEX_IN_GROUP	= 4096,
 	EL_MAX_MODEL_GROUPS		= 4,
@@ -39,16 +40,10 @@ enum {
 	EL_MAX_INDEX_IN_MODEL	= EL_MAX_INDEX_IN_GROUP * EL_MAX_MODEL_GROUPS,
 	EL_ALLOCATED_MODELS		= 4000,
 	EL_FILE_STRING_LEN		= 24,
-	EL_MAX_ITEM_DEFS		= 100,		// can be any size, but a smaller value is less memory scanning
-	EL_NIGHT_RED_U8			= 131,
-	EL_NIGHT_GREEN_U8		= 125,
-	EL_NIGHT_BLUE_U8		= 255,
 	EL_MAP_SIZE				= 64,		// maximum size.
 	EL_MAP_MAX_PATH			= 12,		// longest path anything can travel in one turn. Used to limit display memory.
 	EL_MAP_TEXTURE_SIZE		= 512,
-	EL_METADATA_NAME_LEN	= 16,
 	EL_MAX_METADATA			= 4,
-	EL_BONE_NAME_LEN		= 32,
 	EL_MAX_BONES			= 12,		// could be 16?
 
 	// performance tuning

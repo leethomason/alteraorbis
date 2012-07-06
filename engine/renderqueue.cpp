@@ -102,7 +102,7 @@ RenderQueue::State* RenderQueue::FindState( const State& state )
 }
 
 
-void RenderQueue::Add( Model* model, const ModelAtom* atom, GPUShader* shader, const grinliz::Vector4F& param )
+void RenderQueue::Add( Model* model, const ModelAtom* atom, GPUShader* shader, const Vector4F& param, const BoneData* boneData  )
 {
 	GLASSERT( model );
 	GLASSERT( atom );
@@ -125,6 +125,12 @@ void RenderQueue::Add( Model* model, const ModelAtom* atom, GPUShader* shader, c
 	item->model = model;
 	item->atom = atom;
 	item->param = param;
+	if ( boneData ) {
+		item->boneData = *boneData;
+	}
+	else {
+		memset( &item->boneData, 0, sizeof( item->boneData ) );
+	}
 	
 	item->next  = state->root;
 	state->root = item;
@@ -216,6 +222,7 @@ void RenderQueue::Submit( GPUShader* overRideShader, int modelRequired, int mode
 					}
 					shader->MultMatrix( GPUShader::MODELVIEW_MATRIX, model->XForm() );
 					shader->SetParam( item->param );
+					shader->InstanceBones( 0, item->boneData );
 					shader->Draw();
 					shader->PopMatrix( GPUShader::MODELVIEW_MATRIX );
 				}

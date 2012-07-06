@@ -18,6 +18,7 @@
 
 #include "../grinliz/glvector.h"
 #include "../grinliz/glmatrix.h"
+#include "enginelimits.h"
 
 class Texture;
 
@@ -110,6 +111,19 @@ struct PTVertex2
 
 	grinliz::Vector2F	pos;
 	grinliz::Vector2F	tex;
+};
+
+
+struct BoneData
+{
+	// maps to Vector3F
+	struct Bone {
+		float angleRadians;
+		float dy;
+		float dz;
+	};
+
+	Bone bone[EL_MAX_BONES];
 };
 
 

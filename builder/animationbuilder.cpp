@@ -82,7 +82,7 @@ const XMLElement* InsertFrame(	gamedb::WItem* frame,
 					toPos.SetTranslation( 0, -ry + dy, rx + dz );
 
 					Matrix4 m = delta * toPos * rot * toOrigin;
-					//m.Dump( "Bone" );
+					m.Dump( "Bone" );
 					anglePrime = m.CalcRotationAroundAxis( 0 );
 					//GLOUTPUT(( "anglePrime=%f\n", anglePrime ));
 				}
@@ -146,6 +146,7 @@ void ProcessAnimation( const tinyxml2::XMLElement* element, gamedb::WItem* witem
 		
 				gamedb::WItem* anim = root->CreateChild( animName );	// "walk"
 				int frameCount = 0;
+				float totalDuration = 0;
 
 				for( const XMLElement* frameEle = animEle->FirstChildElement( "frame" );
 					 frameEle;
@@ -157,6 +158,7 @@ void ProcessAnimation( const tinyxml2::XMLElement* element, gamedb::WItem* witem
 
 					duration *= 10.0f;	// Totally mystery. Seems to be in 1/100th seconds. Likely Spriter bug.
 					frame->SetFloat( "duration", duration );
+					totalDuration += duration;
 
 					const char* frameName = frameEle->FirstChildElement( "name" )->GetText();
 
@@ -169,6 +171,7 @@ void ProcessAnimation( const tinyxml2::XMLElement* element, gamedb::WItem* witem
 						reference = f;
 					}
 				}
+				anim->SetFloat( "totalDuration", totalDuration );
 			}
 		}
 	}

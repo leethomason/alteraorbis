@@ -7,16 +7,7 @@
 
 #include "../shared/gamedbreader.h"
 
-
-struct AnimationXForm
-{
-	int boneID;
-	const char* boneName;
-
-	float dx;
-	float dy;
-	float angle;
-};
+#include "vertex.h"
 
 
 class AnimationResource
@@ -27,9 +18,11 @@ public:
 
 	const char* Name() const		{ return name; }	// the name of the resource.
 	int NumAnimations() const		{ return nAnimations; }
+
+	bool		HasAnimation( const char* name ) const;
 	const char* AnimationName( int index ) const;
 
-	bool GetTransform( const char* animationName, U32 time, int bone, AnimationXForm* xform ) const;
+	bool GetTransform( const char* animationName, U32 time, BoneData* boneData ) const;
 
 private:
 	const char* name;
