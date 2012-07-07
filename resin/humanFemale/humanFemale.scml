@@ -122,18 +122,18 @@
             </frame>
         </anim>
         <anim>
-            <name>swing</name>
+            <name>melee</name>
             <frame>
                 <name>frame_013</name>
                 <duration>12.24736</duration>
             </frame>
             <frame>
                 <name>frame_016</name>
-                <duration>8.86878</duration>
+                <duration>13.49732</duration>
             </frame>
             <frame>
                 <name>frame_014</name>
-                <duration>19.12519</duration>
+                <duration>14.49665</duration>
             </frame>
             <frame>
                 <name>frame_017</name>
@@ -141,22 +141,11 @@
             </frame>
             <frame>
                 <name>frame_015</name>
-                <duration>15.98793</duration>
+                <duration>13.45361</duration>
             </frame>
             <frame>
                 <name>frame_018</name>
-                <duration>10.31674</duration>
-            </frame>
-        </anim>
-        <anim>
-            <name>melee</name>
-            <frame>
-                <name>frame_013</name>
-                <duration>30.09050</duration>
-            </frame>
-            <frame>
-                <name>frame_019</name>
-                <duration>29.90950</duration>
+                <duration>12.85107</duration>
             </frame>
         </anim>
         <box>
@@ -171,7 +160,7 @@
         <sprite>
             <image>assets\arm.lower.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -183,7 +172,7 @@
         <sprite>
             <image>assets\arm.upper.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -195,7 +184,7 @@
         <sprite>
             <image>assets\leg.upper.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -207,7 +196,7 @@
         <sprite>
             <image>assets\leg.lower.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -219,7 +208,7 @@
         <sprite>
             <image>assets\head.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -231,7 +220,7 @@
         <sprite>
             <image>assets\torso.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -243,7 +232,7 @@
         <sprite>
             <image>assets\leg.upper.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -255,7 +244,7 @@
         <sprite>
             <image>assets\leg.lower.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -267,7 +256,7 @@
         <sprite>
             <image>assets\arm.upper.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -279,7 +268,7 @@
         <sprite>
             <image>assets\arm.lower.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -294,7 +283,7 @@
         <sprite>
             <image>assets\arm.lower.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>332.91644</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -306,7 +295,7 @@
         <sprite>
             <image>assets\arm.upper.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>331.18915</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -318,31 +307,31 @@
         <sprite>
             <image>assets\leg.upper.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>26.77783</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>18.00000</width>
             <height>61.00000</height>
-            <x>-7.77606</x>
-            <y>-110.17441</y>
+            <x>-8.77606</x>
+            <y>-108.17441</y>
         </sprite>
         <sprite>
             <image>assets\leg.lower.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>25.69901</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>19.00000</width>
             <height>57.00000</height>
-            <x>19.82642</x>
-            <y>-54.26038</y>
+            <x>18.82648</x>
+            <y>-53.26038</y>
         </sprite>
         <sprite>
             <image>assets\head.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -354,7 +343,7 @@
         <sprite>
             <image>assets\torso.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -366,50 +355,50 @@
         <sprite>
             <image>assets\arm.lower.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>42.51068</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>14.00000</width>
             <height>55.00000</height>
-            <x>9.25745</x>
-            <y>-141.54156</y>
+            <x>16.25745</x>
+            <y>-144.54156</y>
         </sprite>
         <sprite>
             <image>assets\arm.upper.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>33.02362</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>14.00000</width>
             <height>38.00000</height>
-            <x>-8.22375</x>
-            <y>-173.11557</y>
+            <x>-5.22375</x>
+            <y>-178.11557</y>
         </sprite>
         <sprite>
             <image>assets\leg.upper.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>337.22961</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>18.00000</width>
             <height>62.00000</height>
             <x>-4.30035</x>
-            <y>-122.06732</y>
+            <y>-118.06732</y>
         </sprite>
         <sprite>
             <image>assets\leg.lower.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>337.58380</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>19.00000</width>
             <height>56.00000</height>
-            <x>-31.10486</x>
-            <y>-63.50693</y>
+            <x>-29.10486</x>
+            <y>-60.50693</y>
         </sprite>
     </frame>
     <frame>
@@ -417,55 +406,55 @@
         <sprite>
             <image>assets\arm.lower.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>41.10754</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>14.00000</width>
             <height>54.00000</height>
-            <x>17.97394</x>
-            <y>-132.74155</y>
+            <x>19.97388</x>
+            <y>-146.74155</y>
         </sprite>
         <sprite>
             <image>assets\arm.upper.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>40.39673</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>14.00000</width>
             <height>39.00000</height>
-            <x>-6.81714</x>
-            <y>-163.66980</y>
+            <x>-5.81714</x>
+            <y>-176.66980</y>
         </sprite>
         <sprite>
             <image>assets\leg.upper.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>331.70804</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>18.00000</width>
             <height>61.00000</height>
             <x>-4.46899</x>
-            <y>-113.12228</y>
+            <y>-115.12228</y>
         </sprite>
         <sprite>
             <image>assets\leg.lower.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>327.08191</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>19.00000</width>
             <height>57.00000</height>
-            <x>-33.48676</x>
-            <y>-59.08694</y>
+            <x>-34.48676</x>
+            <y>-61.08694</y>
         </sprite>
         <sprite>
             <image>assets\head.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -477,7 +466,7 @@
         <sprite>
             <image>assets\torso.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -489,7 +478,7 @@
         <sprite>
             <image>assets\arm.lower.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>331.19681</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -501,7 +490,7 @@
         <sprite>
             <image>assets\arm.upper.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>326.23080</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -513,26 +502,26 @@
         <sprite>
             <image>assets\leg.upper.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>25.22208</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>18.00000</width>
             <height>62.00000</height>
-            <x>-9.35187</x>
-            <y>-107.20941</y>
+            <x>-8.35187</x>
+            <y>-109.20941</y>
         </sprite>
         <sprite>
             <image>assets\leg.lower.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>23.52414</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>19.00000</width>
             <height>56.00000</height>
-            <x>17.11377</x>
-            <y>-49.88120</y>
+            <x>18.11371</x>
+            <y>-51.88120</y>
         </sprite>
     </frame>
     <frame>
@@ -540,7 +529,7 @@
         <sprite>
             <image>assets\arm.lower.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>337.37833</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -552,7 +541,7 @@
         <sprite>
             <image>assets\arm.upper.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>344.98157</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -564,31 +553,31 @@
         <sprite>
             <image>assets\leg.upper.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>14.18784</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>18.00000</width>
             <height>61.00000</height>
             <x>-7.77612</x>
-            <y>-110.17438</y>
+            <y>-112.17438</y>
         </sprite>
         <sprite>
             <image>assets\leg.lower.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>15.58862</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>19.00000</width>
             <height>57.00000</height>
             <x>7.01343</x>
-            <y>-53.33319</y>
+            <y>-51.33319</y>
         </sprite>
         <sprite>
             <image>assets\head.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -600,7 +589,7 @@
         <sprite>
             <image>assets\torso.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -612,43 +601,43 @@
         <sprite>
             <image>assets\arm.lower.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>40.56223</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>14.00000</width>
             <height>55.00000</height>
-            <x>1.79950</x>
-            <y>-139.33984</y>
+            <x>9.79956</x>
+            <y>-142.33984</y>
         </sprite>
         <sprite>
             <image>assets\arm.upper.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>19.96307</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>14.00000</width>
             <height>38.00000</height>
-            <x>-9.22375</x>
-            <y>-173.11557</y>
+            <x>-5.06635</x>
+            <y>-178.46844</y>
         </sprite>
         <sprite>
             <image>assets\leg.upper.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>350.51761</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>18.00000</width>
             <height>62.00000</height>
             <x>-7.76996</x>
-            <y>-112.05914</y>
+            <y>-114.05914</y>
         </sprite>
         <sprite>
             <image>assets\leg.lower.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>344.53598</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -663,55 +652,55 @@
         <sprite>
             <image>assets\arm.lower.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>24.70486</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>14.00000</width>
             <height>54.00000</height>
             <x>6.35620</x>
-            <y>-140.60315</y>
+            <y>-142.60315</y>
         </sprite>
         <sprite>
             <image>assets\arm.upper.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>17.10266</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>14.00000</width>
             <height>39.00000</height>
-            <x>-4.42511</x>
-            <y>-178.57910</y>
+            <x>-5.42511</x>
+            <y>-181.57910</y>
         </sprite>
         <sprite>
             <image>assets\leg.upper.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>355.86765</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>18.00000</width>
             <height>61.00000</height>
             <x>-10.77875</x>
-            <y>-110.06924</y>
+            <y>-113.06924</y>
         </sprite>
         <sprite>
             <image>assets\leg.lower.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>352.91953</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>19.00000</width>
             <height>57.00000</height>
-            <x>-18.91455</x>
-            <y>-54.45367</y>
+            <x>-15.91455</x>
+            <y>-52.45367</y>
         </sprite>
         <sprite>
             <image>assets\head.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -723,7 +712,7 @@
         <sprite>
             <image>assets\torso.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -735,50 +724,50 @@
         <sprite>
             <image>assets\arm.lower.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>3.69424</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>14.00000</width>
             <height>55.00000</height>
-            <x>-21.75732</x>
-            <y>-141.99182</y>
+            <x>-22.75732</x>
+            <y>-145.99182</y>
         </sprite>
         <sprite>
             <image>assets\arm.upper.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>338.42365</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>14.00000</width>
             <height>38.00000</height>
-            <x>-6.52240</x>
-            <y>-179.24283</y>
+            <x>-6.52246</x>
+            <y>-184.24283</y>
         </sprite>
         <sprite>
             <image>assets\leg.upper.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>8.83987</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>18.00000</width>
             <height>62.00000</height>
             <x>-10.76996</x>
-            <y>-110.05911</y>
+            <y>-113.05911</y>
         </sprite>
         <sprite>
             <image>assets\leg.lower.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>7.75485</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>19.00000</width>
             <height>56.00000</height>
-            <x>-1.19128</x>
-            <y>-48.46204</y>
+            <x>-0.19128</x>
+            <y>-51.46204</y>
         </sprite>
     </frame>
     <frame>
@@ -786,55 +775,55 @@
         <sprite>
             <image>assets\arm.lower.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>36.85828</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>14.00000</width>
             <height>54.00000</height>
             <x>8.20355</x>
-            <y>-130.40442</y>
+            <y>-141.40442</y>
         </sprite>
         <sprite>
             <image>assets\arm.upper.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>23.66992</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>14.00000</width>
             <height>39.00000</height>
-            <x>-7.81714</x>
-            <y>-168.66968</y>
+            <x>-8.23975</x>
+            <y>-179.04926</y>
         </sprite>
         <sprite>
             <image>assets\leg.upper.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>345.95764</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>18.00000</width>
             <height>61.00000</height>
             <x>-4.46893</x>
-            <y>-113.12228</y>
+            <y>-115.12228</y>
         </sprite>
         <sprite>
             <image>assets\leg.lower.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>344.48172</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>19.00000</width>
             <height>57.00000</height>
-            <x>-19.52863</x>
-            <y>-53.00272</y>
+            <x>-20.52863</x>
+            <y>-55.00272</y>
         </sprite>
         <sprite>
             <image>assets\head.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -846,7 +835,7 @@
         <sprite>
             <image>assets\torso.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -858,43 +847,43 @@
         <sprite>
             <image>assets\arm.lower.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>7.58521</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>14.00000</width>
             <height>55.00000</height>
             <x>-21.07971</x>
-            <y>-142.72809</y>
+            <y>-145.72809</y>
         </sprite>
         <sprite>
             <image>assets\arm.upper.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>341.71664</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>14.00000</width>
             <height>38.00000</height>
             <x>-8.61292</x>
-            <y>-174.07916</y>
+            <y>-185.07919</y>
         </sprite>
         <sprite>
             <image>assets\leg.upper.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>10.92746</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>18.00000</width>
             <height>62.00000</height>
             <x>-6.35181</x>
-            <y>-109.20941</y>
+            <y>-111.20941</y>
         </sprite>
         <sprite>
             <image>assets\leg.lower.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>10.14703</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -909,55 +898,55 @@
         <sprite>
             <image>assets\arm.lower.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>349.40109</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>14.00000</width>
             <height>54.00000</height>
             <x>-19.91437</x>
-            <y>-143.82687</y>
+            <y>-147.82687</y>
         </sprite>
         <sprite>
             <image>assets\arm.upper.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>341.98932</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>14.00000</width>
             <height>39.00000</height>
             <x>-7.62769</x>
-            <y>-181.70883</y>
+            <y>-185.70883</y>
         </sprite>
         <sprite>
             <image>assets\leg.upper.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>19.36139</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>18.00000</width>
             <height>61.00000</height>
             <x>-10.39288</x>
-            <y>-100.40039</y>
+            <y>-105.40039</y>
         </sprite>
         <sprite>
             <image>assets\leg.lower.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>21.41830</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>19.00000</width>
             <height>57.00000</height>
-            <x>8.86462</x>
-            <y>-43.29498</y>
+            <x>9.86456</x>
+            <y>-47.29495</y>
         </sprite>
         <sprite>
             <image>assets\head.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -969,7 +958,7 @@
         <sprite>
             <image>assets\torso.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -981,50 +970,50 @@
         <sprite>
             <image>assets\arm.lower.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>32.74875</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>14.00000</width>
             <height>55.00000</height>
             <x>6.23633</x>
-            <y>-137.34219</y>
+            <y>-140.34219</y>
         </sprite>
         <sprite>
             <image>assets\arm.upper.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>20.31000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>14.00000</width>
             <height>38.00000</height>
             <x>-8.61292</x>
-            <y>-174.07910</y>
+            <y>-178.07910</y>
         </sprite>
         <sprite>
             <image>assets\leg.upper.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>340.11197</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>18.00000</width>
             <height>62.00000</height>
-            <x>-5.91754</x>
-            <y>-108.21277</y>
+            <x>-6.91754</x>
+            <y>-114.21277</y>
         </sprite>
         <sprite>
             <image>assets\leg.lower.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>339.54965</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>19.00000</width>
             <height>56.00000</height>
-            <x>-27.06049</x>
-            <y>-50.54871</y>
+            <x>-28.11816</x>
+            <y>-55.55457</y>
         </sprite>
     </frame>
     <frame>
@@ -1032,7 +1021,7 @@
         <sprite>
             <image>assets\arm.lower.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>332.91644</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1044,7 +1033,7 @@
         <sprite>
             <image>assets\arm.upper.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>331.18915</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1056,7 +1045,7 @@
         <sprite>
             <image>assets\leg.upper.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>26.77783</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1068,7 +1057,7 @@
         <sprite>
             <image>assets\leg.lower.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>25.69901</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1080,7 +1069,7 @@
         <sprite>
             <image>assets\head.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1092,7 +1081,7 @@
         <sprite>
             <image>assets\torso.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1104,7 +1093,7 @@
         <sprite>
             <image>assets\arm.lower.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>91.55029</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1116,7 +1105,7 @@
         <sprite>
             <image>assets\arm.upper.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>2.35208</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1128,7 +1117,7 @@
         <sprite>
             <image>assets\leg.upper.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>337.22961</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1140,7 +1129,7 @@
         <sprite>
             <image>assets\leg.lower.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>337.58380</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1155,7 +1144,7 @@
         <sprite>
             <image>assets\arm.lower.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>24.70486</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1167,7 +1156,7 @@
         <sprite>
             <image>assets\arm.upper.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>17.10266</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1179,7 +1168,7 @@
         <sprite>
             <image>assets\leg.upper.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>355.86765</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1191,7 +1180,7 @@
         <sprite>
             <image>assets\leg.lower.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>352.91953</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1203,7 +1192,7 @@
         <sprite>
             <image>assets\head.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1215,7 +1204,7 @@
         <sprite>
             <image>assets\torso.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1227,7 +1216,7 @@
         <sprite>
             <image>assets\arm.lower.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>90.10010</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1239,7 +1228,7 @@
         <sprite>
             <image>assets\arm.upper.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>2.84290</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1251,7 +1240,7 @@
         <sprite>
             <image>assets\leg.upper.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>8.83987</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1263,7 +1252,7 @@
         <sprite>
             <image>assets\leg.lower.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>7.75485</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1278,7 +1267,7 @@
         <sprite>
             <image>assets\arm.lower.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>41.10754</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1290,7 +1279,7 @@
         <sprite>
             <image>assets\arm.upper.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>40.39673</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1302,7 +1291,7 @@
         <sprite>
             <image>assets\leg.upper.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>331.70804</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1314,7 +1303,7 @@
         <sprite>
             <image>assets\leg.lower.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>327.08191</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1326,7 +1315,7 @@
         <sprite>
             <image>assets\head.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1338,7 +1327,7 @@
         <sprite>
             <image>assets\torso.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1350,7 +1339,7 @@
         <sprite>
             <image>assets\arm.lower.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>93.44702</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1362,7 +1351,7 @@
         <sprite>
             <image>assets\arm.upper.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>2.01578</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1374,7 +1363,7 @@
         <sprite>
             <image>assets\leg.upper.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>25.22208</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1386,7 +1375,7 @@
         <sprite>
             <image>assets\leg.lower.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>23.52414</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1401,7 +1390,7 @@
         <sprite>
             <image>assets\arm.lower.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>36.85828</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1413,7 +1402,7 @@
         <sprite>
             <image>assets\arm.upper.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>23.66992</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1425,7 +1414,7 @@
         <sprite>
             <image>assets\leg.upper.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>345.95764</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1437,7 +1426,7 @@
         <sprite>
             <image>assets\leg.lower.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>344.48172</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1449,7 +1438,7 @@
         <sprite>
             <image>assets\head.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1461,7 +1450,7 @@
         <sprite>
             <image>assets\torso.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1473,7 +1462,7 @@
         <sprite>
             <image>assets\arm.lower.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>93.10486</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1485,7 +1474,7 @@
         <sprite>
             <image>assets\arm.upper.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>2.75888</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1497,7 +1486,7 @@
         <sprite>
             <image>assets\leg.upper.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>10.92746</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1509,7 +1498,7 @@
         <sprite>
             <image>assets\leg.lower.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>10.14703</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1524,7 +1513,7 @@
         <sprite>
             <image>assets\arm.lower.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>337.37833</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1536,7 +1525,7 @@
         <sprite>
             <image>assets\arm.upper.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>344.98157</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1548,7 +1537,7 @@
         <sprite>
             <image>assets\leg.upper.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>14.18784</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1560,7 +1549,7 @@
         <sprite>
             <image>assets\leg.lower.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>15.58862</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1572,7 +1561,7 @@
         <sprite>
             <image>assets\head.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1584,7 +1573,7 @@
         <sprite>
             <image>assets\torso.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1596,7 +1585,7 @@
         <sprite>
             <image>assets\arm.lower.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>88.66870</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1608,7 +1597,7 @@
         <sprite>
             <image>assets\arm.upper.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>2.43997</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1620,7 +1609,7 @@
         <sprite>
             <image>assets\leg.upper.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>350.51761</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1632,7 +1621,7 @@
         <sprite>
             <image>assets\leg.lower.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>344.53598</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1647,7 +1636,7 @@
         <sprite>
             <image>assets\arm.lower.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>349.40109</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1659,7 +1648,7 @@
         <sprite>
             <image>assets\arm.upper.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>341.98932</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1671,7 +1660,7 @@
         <sprite>
             <image>assets\leg.upper.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>19.36139</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1683,7 +1672,7 @@
         <sprite>
             <image>assets\leg.lower.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>21.41830</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1695,7 +1684,7 @@
         <sprite>
             <image>assets\head.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1707,7 +1696,7 @@
         <sprite>
             <image>assets\torso.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1719,7 +1708,7 @@
         <sprite>
             <image>assets\arm.lower.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>91.48602</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1731,7 +1720,7 @@
         <sprite>
             <image>assets\arm.upper.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>2.62900</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1743,7 +1732,7 @@
         <sprite>
             <image>assets\leg.upper.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>340.11197</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1755,7 +1744,7 @@
         <sprite>
             <image>assets\leg.lower.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>339.54965</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1770,7 +1759,7 @@
         <sprite>
             <image>assets\arm.lower.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1782,7 +1771,7 @@
         <sprite>
             <image>assets\arm.upper.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1794,7 +1783,7 @@
         <sprite>
             <image>assets\leg.upper.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1806,7 +1795,7 @@
         <sprite>
             <image>assets\leg.lower.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1818,7 +1807,7 @@
         <sprite>
             <image>assets\head.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1830,7 +1819,7 @@
         <sprite>
             <image>assets\torso.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1842,7 +1831,7 @@
         <sprite>
             <image>assets\leg.upper.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1854,7 +1843,7 @@
         <sprite>
             <image>assets\leg.lower.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1866,7 +1855,7 @@
         <sprite>
             <image>assets\arm.upper.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1878,7 +1867,7 @@
         <sprite>
             <image>assets\arm.lower.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>90.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1893,7 +1882,7 @@
         <sprite>
             <image>assets\arm.lower.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1905,7 +1894,7 @@
         <sprite>
             <image>assets\arm.upper.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1917,7 +1906,7 @@
         <sprite>
             <image>assets\leg.upper.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1929,7 +1918,7 @@
         <sprite>
             <image>assets\leg.lower.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1941,7 +1930,7 @@
         <sprite>
             <image>assets\head.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1953,7 +1942,7 @@
         <sprite>
             <image>assets\torso.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1965,7 +1954,7 @@
         <sprite>
             <image>assets\leg.upper.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1977,7 +1966,7 @@
         <sprite>
             <image>assets\leg.lower.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -1989,26 +1978,26 @@
         <sprite>
             <image>assets\arm.upper.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>64.59225</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>14.00000</width>
             <height>38.00000</height>
-            <x>-6.00000</x>
-            <y>-176.00003</y>
+            <x>-2.16565</x>
+            <y>-176.82916</y>
         </sprite>
         <sprite>
             <image>assets\arm.lower.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
-            <angle>154.41151</angle>
+            <opacity>50.00000</opacity>
+            <angle>94.36130</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>14.00000</width>
             <height>55.00000</height>
-            <x>45.43604</x>
-            <y>-166.17389</y>
+            <x>35.11194</x>
+            <y>-158.92902</y>
         </sprite>
     </frame>
     <frame>
@@ -2016,7 +2005,7 @@
         <sprite>
             <image>assets\arm.lower.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -2028,7 +2017,7 @@
         <sprite>
             <image>assets\arm.upper.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -2040,7 +2029,7 @@
         <sprite>
             <image>assets\leg.upper.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -2052,7 +2041,7 @@
         <sprite>
             <image>assets\leg.lower.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -2064,7 +2053,7 @@
         <sprite>
             <image>assets\head.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -2076,7 +2065,7 @@
         <sprite>
             <image>assets\torso.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -2088,7 +2077,7 @@
         <sprite>
             <image>assets\leg.upper.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -2100,7 +2089,7 @@
         <sprite>
             <image>assets\leg.lower.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -2112,26 +2101,26 @@
         <sprite>
             <image>assets\arm.upper.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
-            <angle>20.85443</angle>
+            <opacity>50.00000</opacity>
+            <angle>51.11237</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>14.00000</width>
             <height>38.00000</height>
-            <x>-6.30530</x>
-            <y>-174.26331</y>
+            <x>-3.18378</x>
+            <y>-175.47946</y>
         </sprite>
         <sprite>
             <image>assets\arm.lower.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
-            <angle>42.15033</angle>
+            <opacity>50.00000</opacity>
+            <angle>97.89395</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>14.00000</width>
             <height>55.00000</height>
-            <x>10.61810</x>
-            <y>-134.68901</y>
+            <x>32.72192</x>
+            <y>-147.28949</y>
         </sprite>
     </frame>
     <frame>
@@ -2139,7 +2128,7 @@
         <sprite>
             <image>assets\arm.lower.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -2151,7 +2140,7 @@
         <sprite>
             <image>assets\arm.upper.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -2163,7 +2152,7 @@
         <sprite>
             <image>assets\leg.upper.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -2175,7 +2164,7 @@
         <sprite>
             <image>assets\leg.lower.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -2187,7 +2176,7 @@
         <sprite>
             <image>assets\head.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -2199,7 +2188,7 @@
         <sprite>
             <image>assets\torso.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -2211,7 +2200,7 @@
         <sprite>
             <image>assets\leg.upper.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -2223,7 +2212,7 @@
         <sprite>
             <image>assets\leg.lower.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -2235,26 +2224,26 @@
         <sprite>
             <image>assets\arm.upper.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>34.75592</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>14.00000</width>
             <height>38.00000</height>
             <x>-7.58264</x>
-            <y>-176.61960</y>
+            <y>-181.61960</y>
         </sprite>
         <sprite>
             <image>assets\arm.lower.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
-            <angle>115.84415</angle>
+            <opacity>50.00000</opacity>
+            <angle>105.44434</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>14.00000</width>
             <height>55.00000</height>
-            <x>25.30194</x>
-            <y>-141.71219</y>
+            <x>27.35718</x>
+            <y>-144.92947</y>
         </sprite>
     </frame>
     <frame>
@@ -2262,7 +2251,7 @@
         <sprite>
             <image>assets\arm.lower.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -2274,7 +2263,7 @@
         <sprite>
             <image>assets\arm.upper.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -2286,7 +2275,7 @@
         <sprite>
             <image>assets\leg.upper.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -2298,7 +2287,7 @@
         <sprite>
             <image>assets\leg.lower.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -2310,7 +2299,7 @@
         <sprite>
             <image>assets\head.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -2322,7 +2311,7 @@
         <sprite>
             <image>assets\torso.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -2334,7 +2323,7 @@
         <sprite>
             <image>assets\leg.upper.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -2346,7 +2335,7 @@
         <sprite>
             <image>assets\leg.lower.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -2358,26 +2347,26 @@
         <sprite>
             <image>assets\arm.upper.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
-            <angle>47.91080</angle>
+            <opacity>50.00000</opacity>
+            <angle>90.23801</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>14.00000</width>
             <height>38.00000</height>
-            <x>-6.00000</x>
-            <y>-176.00005</y>
+            <x>1.02924</x>
+            <y>-175.92114</y>
         </sprite>
         <sprite>
             <image>assets\arm.lower.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
-            <angle>74.93518</angle>
+            <opacity>50.00000</opacity>
+            <angle>90.96277</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>14.00000</width>
             <height>55.00000</height>
-            <x>25.62573</x>
-            <y>-147.38814</y>
+            <x>39.73730</x>
+            <y>-176.12607</y>
         </sprite>
     </frame>
     <frame>
@@ -2385,7 +2374,7 @@
         <sprite>
             <image>assets\arm.lower.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -2397,7 +2386,7 @@
         <sprite>
             <image>assets\arm.upper.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -2409,7 +2398,7 @@
         <sprite>
             <image>assets\leg.upper.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -2421,7 +2410,7 @@
         <sprite>
             <image>assets\leg.lower.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -2433,7 +2422,7 @@
         <sprite>
             <image>assets\head.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -2445,7 +2434,7 @@
         <sprite>
             <image>assets\torso.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -2457,7 +2446,7 @@
         <sprite>
             <image>assets\leg.upper.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -2469,7 +2458,7 @@
         <sprite>
             <image>assets\leg.lower.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -2481,26 +2470,26 @@
         <sprite>
             <image>assets\arm.upper.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>43.01318</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>14.00000</width>
             <height>38.00000</height>
-            <x>-7.30524</x>
-            <y>-169.26331</y>
+            <x>-5.07953</x>
+            <y>-176.11758</y>
         </sprite>
         <sprite>
             <image>assets\arm.lower.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
-            <angle>67.83923</angle>
+            <opacity>50.00000</opacity>
+            <angle>96.05490</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
             <width>14.00000</width>
             <height>55.00000</height>
-            <x>20.89099</x>
-            <y>-136.89029</y>
+            <x>30.39185</x>
+            <y>-144.13831</y>
         </sprite>
     </frame>
     <frame>
@@ -2508,7 +2497,7 @@
         <sprite>
             <image>assets\arm.lower.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>89.01859</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -2520,7 +2509,7 @@
         <sprite>
             <image>assets\arm.upper.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>87.13760</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -2532,7 +2521,7 @@
         <sprite>
             <image>assets\leg.upper.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -2544,7 +2533,7 @@
         <sprite>
             <image>assets\leg.lower.left.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -2556,7 +2545,7 @@
         <sprite>
             <image>assets\head.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -2568,7 +2557,7 @@
         <sprite>
             <image>assets\torso.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -2580,7 +2569,7 @@
         <sprite>
             <image>assets\leg.upper.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -2592,7 +2581,7 @@
         <sprite>
             <image>assets\leg.lower.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -2604,7 +2593,7 @@
         <sprite>
             <image>assets\arm.upper.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>0.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>
@@ -2616,7 +2605,7 @@
         <sprite>
             <image>assets\arm.lower.right.png</image>
             <color>16777215</color>
-            <opacity>100.00000</opacity>
+            <opacity>50.00000</opacity>
             <angle>90.00000</angle>
             <xflip>0</xflip>
             <yflip>0</yflip>

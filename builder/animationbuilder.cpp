@@ -54,6 +54,7 @@ const XMLElement* InsertFrame(	gamedb::WItem* frame,
 				// Lumos needs the transformation (delta) from the origin.
 				// To translate, we need the reference (untransformed) frame.
 				Matrix4 m;
+				float rx=0, ry=0;
 
 				if ( reference ) {
 					const XMLElement* refSpriteEle = 0;
@@ -68,7 +69,6 @@ const XMLElement* InsertFrame(	gamedb::WItem* frame,
 					}
 					GLASSERT( refSpriteEle );
 
-					float rx=0, ry=0;
 					refSpriteEle->FirstChildElement( "x" )->QueryFloatText( &rx );
 					refSpriteEle->FirstChildElement( "y" )->QueryFloatText( &ry );
 					rx /= pur;
@@ -102,9 +102,17 @@ const XMLElement* InsertFrame(	gamedb::WItem* frame,
 #endif
 				}
 
-				bone->SetFloat( "angle", anglePrime );
+				bone->SetFloat( "anglePrime", anglePrime );
 				bone->SetFloat( "dy", m.m24 );
 				bone->SetFloat( "dz", m.m34 );
+
+				/*
+				bone->SetFloat( "angle", NormalizeAngleDegrees( -angle ));
+				bone->SetFloat( "z", x );
+				bone->SetFloat( "y", -y );
+				bone->SetFloat( "rz", rx );
+				bone->SetFloat( "ry", -ry );
+				*/
 			}
 			return frameEle;
 		}

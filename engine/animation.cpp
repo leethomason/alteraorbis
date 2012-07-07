@@ -101,16 +101,20 @@ bool AnimationResource::GetTransform( const char* animationName, const ModelHead
 	const gamedb::Item* frameItem0 = 0;
 	const gamedb::Item* frameItem1 = 0;
 
-	for( int frame=0; frame<animItem->NumChildren(); ++frame ) {
-		frameItem0 = animItem->Child( frame );
+	int frame0 = 0;
+	int frame1 = 0;
+
+	for( frame0=0; frame0<animItem->NumChildren(); ++frame0 ) {
+		frameItem0 = animItem->Child( frame0 );
 		GLASSERT( frameItem0 );
 		//GLOUTPUT(( "frameItem %s\n", frameItem->Name() ));
 
 		float frameDuration = frameItem0->GetFloat( "duration" );
 		if ( (float)time < frameDuration ) {
 			// We found the frame!
-			fraction = 1.0f - (float)time / (float)frameDuration;
-			frameItem1 = animItem->Child( (frame+1)%animItem->NumChildren() );
+			fraction = (float)time / (float)frameDuration;
+			frame1 = (frame0 + 1) % animItem->NumChildren();
+			frameItem1 = animItem->Child( frame1 );
 
 			break;
 		}
@@ -132,31 +136,29 @@ bool AnimationResource::GetTransform( const char* animationName, const ModelHead
 
 		boneData->name[index] = boneName;
 
-		float angle0 = boneItem0->GetFloat( "angle" );
-		float angle1 = boneItem1->GetFloat( "angle" );
+		float angle0 = boneItem0->GetFloat( "anglePrime" );
+		float angle1 = boneItem1->GetFloat( "anglePrime" );
+
+		float add = 0.0f;
+		if ( fabsf( angle0-angle1 ) > 180.0f ) {
+			if ( angle1 < angle0 ) angle1 += 360.0f;
+			else				   angle1 -= 360.0f;
+		}
+		float angle = Lerp( angle0, angle1, fraction );
+		//if ( angle < 0 ) angle += 360.0f;
+		//if ( angle >= 360.0f ) angle -= 360.0f;
 
 		float dy0 = boneItem0->GetFloat( "dy" );
 		float dy1 = boneItem1->GetFloat( "dy" );
+		float dy  = Lerp( dy0, dy1, fraction );
 
 		float dz0 = boneItem0->GetFloat( "dz" );
 		float dz1 = boneItem1->GetFloat( "dz" );
+		float dz  = Lerp( dz0, dz1, fraction );
 
-		/*
-		if ( fabs( angle0 - angle1 ) > 180.0f ) {
-			if ( angle0 < angle1 )	
-				angle0 += 360.0f;
-			else					
-				angle1 += 360.0f;
-			if ( dz0 * dz1 < 0 ) 
-				dz1 = -dz1;
-			if ( dy0 * dy1 < 0 ) 
-				dy1 = -dy1;
-		}
-		*/
-
-		boneData->bone[index].angleRadians	= ToRadian( NormalizeAngleDegrees( Lerp( angle0, angle1, fraction )));
-		boneData->bone[index].dy			= Lerp( dy0, dy1, fraction );
-		boneData->bone[index].dz			= Lerp( dz0, dz1, fraction );
+		boneData->bone[index].angleRadians	= ToRadian( angle );
+		boneData->bone[index].dy			= dy;
+		boneData->bone[index].dz			= dz;
 	}
 	return true;
 }

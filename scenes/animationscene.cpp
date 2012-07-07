@@ -134,6 +134,19 @@ void AnimationScene::UpdateAnimationInfo()
 		}
 	}
 	animName.SetText( name );
+
+
+	char buf[256];
+	const char* fname = model->GetResource()->header.name.c_str();
+	SNPrintf( buf, 256, "./resin/%s/%s.scml", fname, fname );
+	FILE* fp = fopen( buf, "r" );
+	if ( fp ) {
+		exportSCML.SetEnabled( false );
+		fclose( fp );
+	}
+	else {
+		exportSCML.SetEnabled( true );
+	}
 }
 
 
