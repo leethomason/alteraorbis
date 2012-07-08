@@ -5,7 +5,7 @@
 #include "shaders.inc"
 
 
-#define DEBUG_OUTPUT
+//#define DEBUG_OUTPUT
 
 using namespace grinliz;
 
@@ -353,7 +353,12 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 #endif
 	CHECK_GL_ERROR;
 
-	// glUseProgram
+	int nUniforms, maxUniforms;
+	glGetProgramiv( shader->prog, GL_ACTIVE_UNIFORMS, &nUniforms );
+	glGetIntegerv( GL_MAX_VERTEX_UNIFORM_COMPONENTS, &maxUniforms );
+	GLOUTPUT(( "Shader %d created. Uniforms=%d / %d\n", flags, nUniforms, maxUniforms ));
+	CHECK_GL_ERROR;
+
 	return shader;
 }
 

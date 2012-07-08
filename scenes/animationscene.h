@@ -25,6 +25,8 @@ public:
 	virtual void Draw3D( U32 deltaTime );
 
 private:
+	void LoadModel( const char* name );
+	void SetModelVis( bool onlyShowOne );
 	void UpdateBoneInfo();
 	void UpdateAnimationInfo();
 
@@ -36,7 +38,8 @@ private:
 	void FinishFrame();
 
 	Engine* engine;
-	Model* model;
+	enum { NUM_MODELS = 3 };
+	Model* model[ NUM_MODELS ];
 
 	int  currentBone;
 	int  currentAnim;
@@ -49,6 +52,8 @@ private:
 	gamui::PushButton exportSCML;
 
 	gamui::ToggleButton ortho;
+	gamui::ToggleButton instance;
+
 	gamui::TextLabel boneName, animName;
 	gamui::TextLabel pixelUnitRatio;
 

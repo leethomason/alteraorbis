@@ -134,7 +134,7 @@ bool AnimationResource::GetTransform( const char* animationName, const ModelHead
 		int index = header.BoneIDFromName( boneName );
 		//GLASSERT( index >= 0 );
 
-		boneData->name[index] = boneName;
+		//boneData->name[index] = boneName;
 
 		float angle0 = boneItem0->GetFloat( "anglePrime" );
 		float angle1 = boneItem1->GetFloat( "anglePrime" );

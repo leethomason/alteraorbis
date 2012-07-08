@@ -47,6 +47,10 @@ AnimationScene::AnimationScene( LumosGame* game ) : Scene( game )
 	ortho.SetSize( layout.Width(), layout.Height() );
 	ortho.SetText( "ortho" );
 
+	instance.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
+	instance.SetSize( layout.Width(), layout.Height() );
+	instance.SetText( "3x" );
+
 	exportSCML.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
 	exportSCML.SetSize( layout.Width(), layout.Height() );
 	exportSCML.SetText( "export" );
@@ -60,16 +64,10 @@ AnimationScene::AnimationScene( LumosGame* game ) : Scene( game )
 	engine->lighting.diffuse.Set( 0.5f, 0.5f, 0.5f );
 
 	int count=0;
-	model = 0;
-	const ModelResource* const* resArr = ModelResourceManager::Instance()->GetAllResources( &count );
-	for( int i=0; i<count; ++i ) {
-		if ( !resArr[i]->header.animation.empty() ) {
-			const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( "humanFemale" );
-			GLASSERT( res );
-			model = engine->AllocModel( res );
-			model->SetPos( 1, 0, 1 );
-		}
+	for( int i=0; i<NUM_MODELS; ++i ) {
+		model[i] = 0;
 	}
+	LoadModel( "humanFemale" );
 
 	engine->CameraLookAt( 1, 1, 5 );
 	UpdateAnimationInfo();
@@ -78,7 +76,9 @@ AnimationScene::AnimationScene( LumosGame* game ) : Scene( game )
 
 AnimationScene::~AnimationScene()
 {
-	engine->FreeModel( model );
+	for( int i=0; i<NUM_MODELS; ++i ) {
+		engine->FreeModel( model[i] );
+	}
 	delete engine;
 }
 
@@ -90,12 +90,13 @@ void AnimationScene::Resize()
 	lumosGame->PositionStd( &okay, 0 );
 
 	LayoutCalculator layout = lumosGame->DefaultLayout();
-	layout.PosAbs( &boneLeft,	0, -2 );
-	layout.PosAbs( &boneName,	1, -2 );
-	layout.PosAbs( &boneRight,	3, -2 );
-	layout.PosAbs( &ortho,		4, -2 );
-	layout.PosAbs( &exportSCML,	5, -2 );
-	layout.PosAbs( &pixelUnitRatio, 6, -2 );
+	layout.PosAbs( &boneLeft,		0, -2 );
+	layout.PosAbs( &boneName,		1, -2 );
+	layout.PosAbs( &boneRight,		3, -2 );
+	layout.PosAbs( &ortho,			4, -2 );
+	layout.PosAbs( &instance,		5, -2 );
+	layout.PosAbs( &exportSCML,		6, -2 );
+	layout.PosAbs( &pixelUnitRatio, 7, -2 );
 
 	layout.PosAbs( &animLeft,	0, 0 );
 	layout.PosAbs( &animName,	1, 0 );
@@ -104,40 +105,64 @@ void AnimationScene::Resize()
 }
 
 
+void AnimationScene::LoadModel( const char* name )
+{
+//	const ModelResource* const* resArr = ModelResourceManager::Instance()->GetAllResources( &count );
+//	for( int i=0; i<count; ++i ) {
+//		if ( !resArr[i]->header.animation.empty() ) {
+			const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( name );
+			GLASSERT( res );
+			for( int j=0; j<NUM_MODELS; ++j ) {
+				if ( model[j] ) {
+					engine->FreeModel( model[j] );
+				}
+				model[j] = engine->AllocModel( res );
+				model[j]->SetPos( (float)(1+j), 0, 1 );
+			}
+			SetModelVis( false );
+//		}
+//	}
+}
+
+
 void AnimationScene::UpdateBoneInfo()
 {
 	if ( currentBone == -1 ) {
 		boneName.SetText( "all" );
-		model->ClearParam();
+		for( int i=0; i<NUM_MODELS; ++i )
+			model[i]->ClearParam();
 	}
 	else {
 		GLString str;
-		const char* name = model->GetResource()->header.BoneNameFromID( currentBone );
+		const char* name = model[0]->GetResource()->header.BoneNameFromID( currentBone );
 		str.Format( "%d:%s", currentBone, name ? name : "none" );
 		boneName.SetText( str.c_str() );
-		model->SetBoneFilter( currentBone );
+		for( int i=0; i<NUM_MODELS; ++i )
+			model[i]->SetBoneFilter( currentBone );
 	}
 }
 
 
 void AnimationScene::UpdateAnimationInfo()
 {
-	const AnimationResource* res = model->GetAnimationResource();
+	const AnimationResource* res = model[0]->GetAnimationResource();
 	int nAnim = res->NumAnimations();
 	GLASSERT( currentAnim >=0 && currentAnim < nAnim );
 
 	const char* name = "no animation";
 	if ( nAnim > 0 ) {
 		name = res->AnimationName( currentAnim );
-		if ( !StrEqual( model->GetAnimation(), name )) {
-			model->SetAnimation( name );
+		if ( !StrEqual( model[0]->GetAnimation(), name )) {
+			for( int i=0; i<NUM_MODELS; ++i ) {
+				model[i]->SetAnimation( name );
+			}
 		}
 	}
 	animName.SetText( name );
 
 
 	char buf[256];
-	const char* fname = model->GetResource()->header.name.c_str();
+	const char* fname = model[0]->GetResource()->header.name.c_str();
 	SNPrintf( buf, 256, "./resin/%s/%s.scml", fname, fname );
 	FILE* fp = fopen( buf, "r" );
 	if ( fp ) {
@@ -149,6 +174,18 @@ void AnimationScene::UpdateAnimationInfo()
 	}
 }
 
+
+void AnimationScene::SetModelVis( bool onlyShowOne )
+{
+	for( int i=1; i<NUM_MODELS; ++i ) {
+		if ( onlyShowOne || !instance.Down() ) {
+			model[i]->SetFlag( Model::MODEL_INVISIBLE );
+		}
+		else {
+			model[i]->ClearFlag( Model::MODEL_INVISIBLE );
+		}
+	}
+}
 
 
 void AnimationScene::ItemTapped( const gamui::UIItem* item )
@@ -166,7 +203,7 @@ void AnimationScene::ItemTapped( const gamui::UIItem* item )
 	}
 	else if ( item == &animRight ) {
 		++currentAnim;
-		const AnimationResource* res = model->GetAnimationResource();
+		const AnimationResource* res = model[0]->GetAnimationResource();
 		if ( currentAnim >= res->NumAnimations() ) {
 			currentAnim = 0;
 		}
@@ -174,7 +211,7 @@ void AnimationScene::ItemTapped( const gamui::UIItem* item )
 	else if ( item == &animLeft ) {
 		-- currentAnim;
 		if ( currentAnim < 0 ) {
-			const AnimationResource* res = model->GetAnimationResource();
+			const AnimationResource* res = model[0]->GetAnimationResource();
 			currentAnim = res->NumAnimations()-1;
 		}
 	}
@@ -186,11 +223,16 @@ void AnimationScene::ItemTapped( const gamui::UIItem* item )
 			static const Vector3F UP  = { 0, 1, 0 };
 			engine->camera.SetPosWC( -5, 0.4f, 1 );
 			engine->camera.SetDir( DIR, UP ); 
+			SetModelVis( true );
 		}
 		else {
 			port->SetOrthoCamera( false, 0, 0 );
 			engine->CameraLookAt( 1, 1, 5 );
+			SetModelVis( false );
 		}
+	}
+	else if ( item == &instance ) {
+		SetModelVis( false );
 	}
 	else if ( item == &exportSCML ) {
 		doExport = true;
@@ -206,7 +248,7 @@ void AnimationScene::InitXML( const Rectangle2I& bounds )
 {
 	char buf[256];
 	
-	const char* name = model->GetResource()->header.name.c_str();
+	const char* name = model[0]->GetResource()->header.name.c_str();
 	SNPrintf( buf, 256, "./resin/%s/%s.scml", name, name );
 	scmlFP = fopen( buf, "w" );
 
@@ -328,13 +370,14 @@ void AnimationScene::FinishXML()
 void AnimationScene::Draw3D( U32 deltaTime )
 {
 	if ( doExport ) {
+		SetModelVis( true );
 
 		Rectangle2I size;
 		char buf[256];
 		const char* part = "reference";
 		if ( exportCount >= 0 ) {
-			part = model->GetResource()->header.BoneNameFromID( exportCount );
-			model->SetBoneFilter( exportCount );
+			part = model[0]->GetResource()->header.BoneNameFromID( exportCount );
+			model[0]->SetBoneFilter( exportCount );
 		}
 
 		bool glow = engine->GetGlow();
@@ -343,7 +386,7 @@ void AnimationScene::Draw3D( U32 deltaTime )
 		engine->SetGlow( glow );
 
 		if ( part && *part ) {
-			SNPrintf( buf, 256, "./resin/%s/assets/%s", model->GetResource()->header.name.c_str(), part );
+			SNPrintf( buf, 256, "./resin/%s/assets/%s", model[0]->GetResource()->header.name.c_str(), part );
 			ScreenCapture( buf, false, true, true, &size );
 			if ( exportCount < 0 ) {
 				origin.x = Mean( size.min.x, size.max.x );
@@ -352,7 +395,7 @@ void AnimationScene::Draw3D( U32 deltaTime )
 				size.max -= origin;
 				InitXML( size );
 				InitFrame();
-				SNPrintf( buf, 256, "PUR=%.1f", (float)size.Height() / model->GetResource()->AABB().SizeY() );
+				SNPrintf( buf, 256, "PUR=%.1f", (float)size.Height() / model[0]->GetResource()->AABB().SizeY() );
 				pixelUnitRatio.SetText( buf );
 			}
 			else {
@@ -364,13 +407,16 @@ void AnimationScene::Draw3D( U32 deltaTime )
 		++exportCount;
 		if ( exportCount == EL_MAX_BONES ) {
 			doExport = false;
-			model->ClearParam();
+			for( int i=0; i<NUM_MODELS; ++i ) 
+				model[i]->ClearParam();
 			FinishFrame();
 			FinishXML();
+			SetModelVis( false );
 		}
 	}
 	else {
-		model->DeltaAnimation( deltaTime );
+		for( int i=0; i<NUM_MODELS; ++i )
+			model[i]->DeltaAnimation( deltaTime );
 		engine->Draw( deltaTime );
 	}
 }
