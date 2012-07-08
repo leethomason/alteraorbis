@@ -1,9 +1,16 @@
 - Animation
 	- bounds need to be adjusted to account for animation
+	- support for instancing
+	- particle tracking of meta-data
+	- item tracking of meta-data
+	- animition aware hit testing
+	- timing of impact / shoot / hit events
+	- need impact animation (light & heavy?)
+
 
 - combat test scene
-	- animation/lack of making me crazy. What plan?
-	- particle effect for melee strick not "connected" to character
+	X animation/lack of making me crazy. What plan?
+	X particle effect for melee strick not "connected" to character
 	- item definition: one big wad of data? handle "inherited items"?
 	- properly hook up items and such, so that items, health, all be driven correctly
 	- use space tree query for impacted items
