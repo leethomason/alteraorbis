@@ -206,6 +206,9 @@ void RenderQueue::Submit( GPUShader* overRideShader, int modelRequired, int mode
 							shader->InstanceMatrix( index, item->model->XForm() );
 						}
 						shader->InstanceParam( index, item->param );
+						if ( item->hasBoneData ) {
+							shader->InstanceBones( index, item->boneData );
+						}
 					}
 					shader->Draw( delta );
 					k += delta;

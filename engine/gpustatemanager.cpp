@@ -357,8 +357,12 @@ void GPUShader::SetState( const GPUShader& ns )
 	// bones
 	if ( bonesNeeded ) {
 		GLASSERT( ns.stream.boneOffset );	// could be zero...but that would be odd.
+		int count = EL_MAX_BONES;
+		if ( flags & ShaderManager::INSTANCE ) {
+			count *= EL_MAX_INSTANCE;
+		}
 
-		shadman->SetUniformArray( ShaderManager::U_BONEXFORM, EL_MAX_BONES, (const Vector3F*) ns.instanceBones );
+		shadman->SetUniformArray( ShaderManager::U_BONEXFORM, count, (const Vector3F*) ns.instanceBones );
 		shadman->SetStreamData( ShaderManager::A_BONE_ID, 1, GL_UNSIGNED_SHORT, ns.stream.stride, PTR( ns.streamPtr, ns.stream.boneOffset ) );
 	}
 

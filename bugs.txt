@@ -1,12 +1,11 @@
 - Animation
-	- bounds need to be adjusted to account for animation
-	- support for instancing
+	X support for instancing
 	- particle tracking of meta-data
 	- item tracking of meta-data
 	- animition aware hit testing
 	- timing of impact / shoot / hit events
 	- need impact animation (light & heavy?)
-
+	- bounds need to be adjusted to account for animation
 
 - combat test scene
 	X animation/lack of making me crazy. What plan?
