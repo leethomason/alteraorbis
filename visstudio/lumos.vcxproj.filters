@@ -79,9 +79,6 @@
     <ClCompile Include="..\engine\texture.cpp">
       <Filter>Source Files\engine</Filter>
     </ClCompile>
-    <ClCompile Include="..\engine\tga.cpp">
-      <Filter>Source Files\engine</Filter>
-    </ClCompile>
     <ClCompile Include="..\engine\ufoutil.cpp">
       <Filter>Source Files\engine</Filter>
     </ClCompile>
@@ -220,6 +217,9 @@
     <ClCompile Include="..\engine\animation.cpp">
       <Filter>Source Files\engine</Filter>
     </ClCompile>
+    <ClCompile Include="..\engine\vertex.cpp">
+      <Filter>Source Files\engine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\camera.h">
@@ -271,9 +271,6 @@
       <Filter>Source Files\engine</Filter>
     </ClInclude>
     <ClInclude Include="..\engine\texture.h">
-      <Filter>Source Files\engine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\engine\tga.h">
       <Filter>Source Files\engine</Filter>
     </ClInclude>
     <ClInclude Include="..\engine\ufoutil.h">

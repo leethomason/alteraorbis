@@ -755,6 +755,7 @@ void Quaternion::FromRotationMatrix( const Matrix4& m )
 
 const void Quaternion::ToAxisAngle( Vector3F* axis, float* angleOut ) const
 {
+	// FIXME: huh? why check for length normalization and then correct for it?
 	GLASSERT( Equal( sqrt( (double)(x*x + y*y + z*z + w*w) ), 1.0, 0.001 ) );
     
 	float len2 = x*x + y*y + z*z;

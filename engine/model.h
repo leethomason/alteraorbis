@@ -86,12 +86,14 @@ struct ModelAtom
 };
 
 
+struct ModelMetaData {
+	grinliz::CStr< EL_RES_NAME_LEN >	name;
+	grinliz::Vector3F					pos;
+	grinliz::CStr< EL_RES_NAME_LEN >	boneName;
+};
+
 struct ModelHeader
 {
-	struct MetaData {
-		grinliz::CStr< EL_RES_NAME_LEN >	name;
-		grinliz::Vector3F					value;
-	};
 	struct BoneDesc {
 		grinliz::CStr< EL_RES_NAME_LEN >	name;
 		int									id;
@@ -110,7 +112,7 @@ struct ModelHeader
 	U16						flags;
 	U16						nAtoms;
 	grinliz::Rectangle3F	bounds;
-	MetaData				metaData[EL_MAX_METADATA];
+	ModelMetaData			metaData[EL_MAX_METADATA];
 	BoneDesc				boneName[EL_MAX_BONES];		// ordered by name, not ID
 
 	const char* BoneNameFromID( int id ) const {
@@ -155,7 +157,7 @@ public:
 					const grinliz::Vector3F& dir,
 					grinliz::Vector3F* intersect ) const;
 
-	bool GetMetaData( const char* name, grinliz::Vector3F* value ) const;
+	const ModelMetaData* GetMetaData( const char* name ) const;
 
 
 	ModelHeader				header;				// loaded
@@ -247,8 +249,14 @@ public:
 	float Y() const { return pos.y; }
 	float Z() const { return pos.z; }
 
-	void SetRotation( float rot, int axis=1 );
-	float GetRotation( int axis=1 ) const			{ return rot[axis]; }
+	void SetRotation( const grinliz::Quaternion& rot );
+	void SetYRotation( float yRot ) {
+		grinliz::Quaternion q;
+		static const grinliz::Vector3F UP = {0,1,0};
+		q.FromAxisAngle( UP, yRot );
+		SetRotation( q );
+	}
+	const grinliz::Quaternion& GetRotation() const			{ return rot; }
 
 	void SetPosAndYRotation( const grinliz::Vector3F& pos, float yRot );
 
@@ -314,7 +322,7 @@ public:
 		return b;
 	}
 
-	void CalcMeta( const char* name, grinliz::Vector3F* meta ) const;
+	void CalcMetaData( const char* name, grinliz::Matrix4* xform ) const;
 	void CalcTargetSize( float* width, float* height ) const;
 
 	// Returns grinliz::INTERSECT or grinliz::REJECT
@@ -354,15 +362,16 @@ private:
 		//mapBoundsCache.Set( -1, -1, -1, -1 ); 
 	}
 	const grinliz::Matrix4& InvXForm() const;
+	bool HasAnimation() const { return animationResource && !animationName.empty(); }
 
 	SpaceTree* tree;
 	const ModelResource* resource;
-	const AnimationResource* animationResource;
 	grinliz::Vector3F pos;
-	float rot[3];
+	grinliz::Quaternion rot;
 	float debugScale;
 
 	U32 animationTime;
+	const AnimationResource* animationResource;
 	grinliz::CStr< EL_RES_NAME_LEN > animationName;
 
 	grinliz::Vector4F	param[EL_MAX_MODEL_GROUPS];

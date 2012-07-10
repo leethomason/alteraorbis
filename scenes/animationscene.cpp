@@ -415,8 +415,13 @@ void AnimationScene::Draw3D( U32 deltaTime )
 		}
 	}
 	else {
-		for( int i=0; i<NUM_MODELS; ++i )
+		GLASSERT( NUM_MODELS >= 2 );
+		model[0]->DeltaAnimation( deltaTime );
+		model[1]->DeltaAnimation( deltaTime*3/4 );
+		model[2]->DeltaAnimation( deltaTime*5/4 );
+		for( int i=3; i<NUM_MODELS; ++i ) {
 			model[i]->DeltaAnimation( deltaTime );
+		}
 		engine->Draw( deltaTime );
 	}
 }

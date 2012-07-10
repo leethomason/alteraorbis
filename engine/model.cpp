@@ -82,17 +82,16 @@ int ModelResource::Intersect(	const grinliz::Vector3F& point,
 }
 
 
-bool ModelResource::GetMetaData( const char* name, grinliz::Vector3F* value ) const
+const ModelMetaData* ModelResource::GetMetaData( const char* name ) const
 {
 	for( int i=0; i<EL_MAX_METADATA; ++i ) {
 		if ( StrEqual( name, header.metaData[i].name.c_str() )) {
-			*value = header.metaData[i].value;
-			return true;
+			return &header.metaData[i];
 		}
 	}
 
 	GLASSERT( 0 );	// not found
-	return false;
+	return 0;
 }
 
 
@@ -214,7 +213,6 @@ void Model::Init( const ModelResource* resource, SpaceTree* tree )
 
 	debugScale = 1.0f;
 	pos.Set( 0, 0, 0 );
-	rot[0] = rot[1] = rot[2] = 0.0f;
 	Modify();
 
 	if ( tree ) {
@@ -238,12 +236,13 @@ void Model::Free()
 
 void Model::SetPosAndYRotation( const grinliz::Vector3F& pos, float r )
 {
-	while( r < 0 )			{ r += 360.0f; }
-	while( r >= 360 )		{ r -= 360.0f; }
+	static const Vector3F UP = { 0, 1, 0 };
+	Quaternion q;
+	q.FromAxisAngle( UP, r );
 
-	if ( pos != this->pos || r != this->rot[1] ) {
+	if ( pos != this->pos || q != rot ) {
 		this->pos = pos;
-		this->rot[1] = r;
+		this->rot = q;
 		Modify();
 		if ( tree ) {
 			tree->Update( this );
@@ -273,15 +272,11 @@ void Model::SetScale( float s )
 }
 
 
-void Model::SetRotation( float r, int axis )
+void Model::SetRotation( const Quaternion& q )
 {
-	GLASSERT( axis >= 0 && axis < 3 );
-	while( r < 0 )			{ r += 360.0f; }
-	while( r >= 360 )		{ r -= 360.0f; }
-
-	if ( r != this->rot[axis] ) {
+	if ( q != rot ) {
 		Modify();
-		this->rot[axis] = r;		
+		this->rot = q;		
 		if ( tree )
 			tree->Update( this );	// call because bound computation changes with rotation
 	}
@@ -318,15 +313,30 @@ void Model::CalcHitAABB( Rectangle3F* aabb ) const
 }
 
 
-void Model::CalcMeta( const char* name, grinliz::Vector3F* meta ) const
+void Model::CalcMetaData( const char* name, grinliz::Matrix4* meta ) const
 {
-	const Matrix4& xform = XForm();
-	Vector3F value = { 0, 0, 0 };
-	resource->GetMetaData( name, &value );
-	Vector4F v4 = { value.x, value.y, value.z, 1 };
-	Vector4F out;
-	out = xform * v4;
-	meta->Set( out.x, out.y, out.z );
+	const Matrix4& xform = XForm();	// xform of this model
+	const ModelMetaData* data = resource->GetMetaData( name );
+	GLASSERT( data );
+
+	if ( !HasAnimation() ) {
+		Matrix4 local;
+		local.SetTranslation( data->pos );
+
+		GLASSERT( 0 );	// DEBUG THIS - order correct?
+		*meta = local * xform;
+	}
+	else {
+		BoneData boneData;
+		animationResource->GetTransform( animationName.c_str(), resource->header, animationTime, &boneData );
+
+		int index = resource->header.BoneIDFromName( data->boneName.c_str() );
+
+		Matrix4 local;
+		boneData.bone[index].ToMatrix( &local );
+		GLASSERT( 0 );	// DEBUG THIS - order correct?
+		*meta = local * xform;
+	}
 }
 
 
@@ -365,7 +375,7 @@ void Model::Queue( RenderQueue* queue, EngineShaders* engineShaders )
 			mod = ShaderManager::BONE_FILTER;
 		}
 
-		if ( animationResource && !animationName.empty() ) {
+		if ( HasAnimation() ) {
 			mod |= ShaderManager::BONE_XFORM;
 		}
 
@@ -373,7 +383,7 @@ void Model::Queue( RenderQueue* queue, EngineShaders* engineShaders )
 
 		BoneData* pBD = 0;
 		BoneData boneData;
-		if ( animationResource && !animationName.empty() ) {
+		if ( HasAnimation() ) {
 			animationResource->GetTransform( animationName.c_str(), resource->header, animationTime, &boneData );
 			pBD = &boneData;
 		}
@@ -423,19 +433,14 @@ const grinliz::Matrix4& Model::XForm() const
 		Matrix4 t;
 		t.SetTranslation( pos );
 
-		Matrix4 r;
+		Matrix4 s;
 		if ( debugScale != 1.0 ) {
-			r.SetScale( debugScale );
+			s.SetScale( debugScale );
 		}
+		Matrix4 r;
+		rot.ToMatrix( &r );
 
-		if ( rot[1] != 0.0f ) 
-			r.ConcatRotation( rot[1], 1 );
-		if ( rot[2] != 0.0f )
-			r.ConcatRotation( rot[2], 2 );
-		if ( rot[0] != 0.0f )
-			r.ConcatRotation( rot[0], 0 );
-
-		_xform = t*r;
+		_xform = t*r*s;
 
 		// compute the AABB.
 		MultMatrix4( _xform, resource->header.bounds, &aabb );

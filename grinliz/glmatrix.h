@@ -130,11 +130,23 @@ class Matrix4
 		return true;
 	}
 
-	/// Return a row of the matrix
-	void Row( unsigned i, Vector3F *row ) const	{ row->x=x[INDEX(i,0)]; row->y=x[INDEX(i,1)]; row->z=x[INDEX(i,2)]; }
-	/// Return a column of the matrix
-	void Col( unsigned i, Vector3F *col ) const	{ col->x=x[INDEX(0,i)]; col->y=x[INDEX(1,i)]; col->z=x[INDEX(2,i)]; }
+	// Conventional names of rows.
+	enum {
+		RIGHT,
+		UP,
+		OUT
+	};
 
+	/// Return a row of the matrix
+	Vector3F Row( int i ) const	{
+		Vector3F r = { x[INDEX(i,0)], x[INDEX(i,1)], x[INDEX(i,2)] };
+		return r;
+	}
+	/// Return a column of the matrix
+	Vector3F Col( int i ) const	{ 
+		Vector3F c = { x[INDEX(0,i)], x[INDEX(1,i)], x[INDEX(2,i)] };
+		return c;
+	}
 	/// Transpose 
 	void Transpose( Matrix4* transpose ) const;
 	/// Determinant

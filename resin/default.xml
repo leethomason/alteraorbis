@@ -39,12 +39,13 @@
   <model filename="unitCube.ac" shading="flat" />
   
   <!-- 251 pixels, 1.064, pur=235.9 -->
-  <animation filename="humanFemale/humanFemale.scml" assetName="humanFemale" pur="235.9" />    
+  <animation filename="humanFemale/humanFemale.scml" assetName="humanFemaleAnimation" pur="235.9" />    
 
   <!-- Tactical Sprite models are centered at (0,0,0) -->
-  <model filename="human.ac" modelName="humanFemale" animation="humanFemale"
-         origin="1 0 0" shading="crease" polyRemoval="pre">
-    <meta trigger="1.15 0.52 0" target="1 0.68 0" />
+  <model filename="human.ac" modelName="humanFemale" animation="humanFemaleAnimation"
+         origin="1 0 0" shading="flat" polyRemoval="pre">
+    <meta name="trigger" pos="1.15 0.52 0" boneName="arm.lower.right" />
+    <meta name="target"  pos="1 0.68 0" />
   </model>    
   
   <model filename="human.ac" modelName="humanMale" origin="0 0 0" shading="crease" polyRemoval="pre" />

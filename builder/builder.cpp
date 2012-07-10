@@ -119,7 +119,7 @@ void ModelHeader::Set(	const char* name, int nAtoms, int nTotalVertices, int nTo
 	this->nTotalVertices = nTotalVertices;
 	this->nTotalIndices = nTotalIndices;
 	this->bounds = bounds;
-	memset( metaData, 0, sizeof(MetaData)*EL_MAX_METADATA );
+	memset( metaData, 0, sizeof(ModelMetaData)*EL_MAX_METADATA );
 }
 
 
@@ -146,9 +146,10 @@ void ModelHeader::Save( gamedb::WItem* parent )
 	for( int i=0; i<EL_MAX_METADATA; ++i ) {
 		if ( !metaData[i].name.empty() ) {
 			gamedb::WItem* data = metaNode->CreateChild( metaData[i].name.c_str() );
-			data->SetFloat( "x", metaData[i].value.x );
-			data->SetFloat( "y", metaData[i].value.y );
-			data->SetFloat( "z", metaData[i].value.z );
+			data->SetFloat( "x", metaData[i].pos.x );
+			data->SetFloat( "y", metaData[i].pos.y );
+			data->SetFloat( "z", metaData[i].pos.z );
+			data->SetString( "boneName", metaData[i].boneName.c_str() );
 		}
 	}
 
@@ -547,18 +548,17 @@ void ProcessModel( XMLElement* model )
 	}
 
 	int nMeta = 0;
-	const XMLElement* metaEle = model->FirstChildElement( "meta" );
-	if ( metaEle ) {
-
-		for ( const XMLAttribute* att = metaEle->FirstAttribute(); 
-			  att && nMeta < EL_MAX_METADATA; 
-			  att=att->Next(), ++nMeta ) 
-		{
-			header.metaData[nMeta].name = att->Name();
-			Vector3F value = { 0, 0, 0 };
-			StringToVector( att->Value(), &value );
-			header.metaData[nMeta].value = value - origin;
+	for(	const XMLElement* metaEle = model->FirstChildElement( "meta" );
+			metaEle;
+			metaEle = metaEle->NextSiblingElement( "meta" ) )
+	{
+		header.metaData[nMeta].name = metaEle->Attribute( "name" );
+		if ( metaEle->Attribute( "pos" )) {
+			StringToVector( metaEle->Attribute( "pos" ), &header.metaData[nMeta].pos );
+			header.metaData[nMeta].pos = header.metaData[nMeta].pos - origin;
 		}
+		header.metaData[nMeta].boneName = metaEle->Attribute( "boneName" );
+		++nMeta;
 	}
 
 	gamedb::WItem* witem = writer->Root()->FetchChild( "models" )->CreateChild( assetName.c_str() );

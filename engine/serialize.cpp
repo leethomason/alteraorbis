@@ -48,15 +48,16 @@ void ModelHeader::Load( const gamedb::Item* item )
 		bounds.max.z = boundsItem->GetFloat( "max.z" );
 	}
 
-	memset( metaData, 0, sizeof(MetaData)*EL_MAX_METADATA );
+	memset( metaData, 0, sizeof(ModelMetaData)*EL_MAX_METADATA );
 	const gamedb::Item* metaItem = header->Child( "metaData" );
 	if ( metaItem ) {
 		for( int i=0; i<metaItem->NumChildren(); ++i ) {
 			const gamedb::Item* dataItem = metaItem->Child( i );
 			metaData[i].name = dataItem->Name();
-			metaData[i].value.x = dataItem->GetFloat( "x" );
-			metaData[i].value.y = dataItem->GetFloat( "y" );
-			metaData[i].value.z = dataItem->GetFloat( "z" );
+			metaData[i].pos.x = dataItem->GetFloat( "x" );
+			metaData[i].pos.y = dataItem->GetFloat( "y" );
+			metaData[i].pos.z = dataItem->GetFloat( "z" );
+			metaData[i].boneName = dataItem->GetString( "boneName" );
 		}
 	}
 

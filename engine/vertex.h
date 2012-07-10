@@ -121,6 +121,7 @@ struct BoneData
 		float angleRadians;
 		float dy;
 		float dz;
+		void ToMatrix( grinliz::Matrix4* mat ) const;
 	};
 
 	// WARNING: cast to vector3. This must be size Vector3.

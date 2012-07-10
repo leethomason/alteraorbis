@@ -115,9 +115,10 @@ void Engine::CameraIso( bool normal, bool sizeToWidth, float width, float height
 }
 
 
+
 void Engine::MoveCameraHome()
 {
-	camera.SetPosWC( EL_MAP_SIZE/2, 25.0f, EL_MAP_SIZE/2 );
+	camera.SetPosWC( 1, 25.0f, 1 );
 	camera.TiltRotationToQuat( -50.f, -45.f );
 }
 
@@ -279,7 +280,7 @@ void Engine::Draw( U32 deltaTime )
 		engineShaders->emissive.SetShaderFlag( ShaderManager::LIGHTING_HEMI );
 	}
 	
-	Rectangle2I mapBounds( 0, 0, EL_MAP_SIZE-1, EL_MAP_SIZE-1 );
+	Rectangle2I mapBounds( 0, 0, EL_MAX_MAP_SIZE-1, EL_MAX_MAP_SIZE-1 );
 	if ( map ) {
 		mapBounds = map->Bounds();
 	}

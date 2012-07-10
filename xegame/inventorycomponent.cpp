@@ -25,15 +25,16 @@ void InventoryComponent::AddToInventory( Chit* itemChit )
 	}
 	GLASSERT( !itemChit->GetSpatialComponent() );
 
-	Vector3F trigger = { 0, 0, 0 };
-	if ( parentChit->GetRenderComponent() ) {
-		parentChit->GetRenderComponent()->GetMetaData( "trigger", &trigger, false );
-	}
+	//Vector3F trigger = { 0, 0, 0 };
+	//if ( parentChit->GetRenderComponent() ) {
+	//	parentChit->GetRenderComponent()->GetMetaData( "trigger", &trigger, false );
+	//}
 
 	RelativeSpatialComponent* rsc = new RelativeSpatialComponent( false );
 	itemChit->Add( rsc );
 	parentChit->AddListener( rsc );
-	rsc->SetRelativePosYRot( trigger, 0 );
+	//rsc->SetRelativePosYRot( trigger, 0 );
+	rsc->SetMetaDataToTrack( "trigger" );
 
 	// Sleazy trick: the relative spatial updates as a consequence of the
 	// spatial. But that's hard to remember, to reset the spatial.

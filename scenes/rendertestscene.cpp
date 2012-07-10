@@ -85,7 +85,7 @@ void RenderTestScene::SetupTest0()
 	for( int i=0; i<NUM_MODELS; ++i ) {
 		model[i] = engine->AllocModel( i<3 ? res0 : res1 );
 		model[i]->SetPos( 1, 0, (float)i );
-		model[i]->SetRotation( (float)(-i*30) );
+		model[i]->SetYRotation( (float)(-i*30) );
 	}
 	engine->CameraLookAt( 0, (float)(NUM_MODELS/2), 12 );
 

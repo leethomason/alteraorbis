@@ -60,9 +60,19 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, WeaponItem* weapon
 	Vector2F srcNormal = src->GetSpatialComponent()->GetHeading2D();
 
 	if ( engine && src->GetRenderComponent() ) {
-		Vector3F trigger;
-		src->GetRenderComponent()->GetMetaData( "trigger", &trigger, true );
-		Vector3F srcNormal3 = src->GetSpatialComponent()->GetHeading();
+		static const Vector4F POS = { 0, 0, 0, 1 };
+		static const Vector4F DIR = { 0, 0, 0, 0 };
+
+		// fixme: switch to barrel or emitter, not trigger
+		Matrix4 triggerXForm;
+		src->GetRenderComponent()->GetMetaData( "trigger", &triggerXForm );
+		Vector4F trigger4 = triggerXForm * POS;
+		Vector3F trigger = { trigger4.x, trigger4.y, trigger4.z };
+
+		Vector4F srcNormal4 = triggerXForm * DIR;
+		Vector3F srcNormal3 = { srcNormal4.x, srcNormal4.y, srcNormal4.z };
+		srcNormal3.Normalize();
+
 		trigger = trigger + srcNormal3 * (0.5f*MELEE_RANGE);
 		Vector3F cross;
 		static const Vector3F UP = { 0, 1, 0 };

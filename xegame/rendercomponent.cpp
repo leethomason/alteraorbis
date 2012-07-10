@@ -66,18 +66,11 @@ float RenderComponent::RadiusOfBase()
 }
 
 
-bool RenderComponent::GetMetaData( const char* name, grinliz::Vector3F* value, bool transformed )
+bool RenderComponent::GetMetaData( const char* name, grinliz::Matrix4* xform )
 {
-	if ( transformed ) {
-		if ( model ) {
-			model->CalcMeta( name, value );
-			return true;
-		}
-	}
-	else {
-		if ( resource ) {
-			return resource->GetMetaData( name, value );
-		}
+	if ( model ) {
+		model->CalcMetaData( name, xform );
+		return true;
 	}
 	return false;
 }

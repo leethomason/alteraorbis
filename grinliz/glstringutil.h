@@ -130,8 +130,7 @@ public:
 	template < class T > bool operator==( const T& str ) const		{ return buf && strcmp( buf, str.c_str() ) == 0; }
 
 	void operator=( const char* src )	{	
-		GLASSERT( src );
-		if (src) {
+		if (src && *src) {
 			GLASSERT( strlen( src ) < (ALLOCATE-1) );
 			StrNCpy( buf, src, ALLOCATE ); 
 		}

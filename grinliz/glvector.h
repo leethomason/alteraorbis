@@ -131,6 +131,20 @@ struct Vector2
 		#endif
 	}
 
+	void SafeNormalize( T altx, T alty )	
+	{ 
+		T len = grinliz::Length( x, y);
+		if ( len > static_cast<T>(0.00001) ) {
+			T lenInv = static_cast<T>(1) / grinliz::Length( x, y );
+			x *= lenInv; 
+			y *= lenInv;
+		}
+		else {
+			x = altx; y = alty;
+		}
+	}
+
+
 	void RotatePos90()
 	{
 		T a = x;
