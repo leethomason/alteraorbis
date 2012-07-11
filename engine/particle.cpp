@@ -157,13 +157,12 @@ void ParticleSystem::EmitBeam( const grinliz::Vector3F& p0, const grinliz::Vecto
 void ParticleSystem::EmitPD(	const char* name,
 								const grinliz::Vector3F& initPos,
 								const grinliz::Vector3F& normal, 
-								const grinliz::Vector3F& dir, 
 								const grinliz::Vector3F eyeDir[],
 								U32 deltaTime )
 {
 	for( int i=0; i<particleDefArr.Size(); ++i ) {
 		if ( particleDefArr[i].name == name ) {
-			EmitPD( particleDefArr[i], initPos, normal, dir, eyeDir, deltaTime );
+			EmitPD( particleDefArr[i], initPos, normal, eyeDir, deltaTime );
 			break;
 		}
 	}
@@ -173,7 +172,6 @@ void ParticleSystem::EmitPD(	const char* name,
 void ParticleSystem::EmitPD(	const ParticleDef& def,
 								const grinliz::Vector3F& initPos,
 								const grinliz::Vector3F& normal, 
-								const grinliz::Vector3F& dir, 
 								const grinliz::Vector3F eyeDir[],
 								U32 deltaTime )
 {
@@ -240,21 +238,10 @@ void ParticleSystem::EmitPD(	const ParticleDef& def,
 			};
 			const Vector4F size = def.size;
 
-			if ( def.config == ParticleSystem::PARTICLE_WORLD ) {
-				Vector3F tangent;
-				CrossProduct( normal, dir, &tangent );
-				ps[0].pos = pos - tangent*size.w - dir*size.z;
-				ps[1].pos = pos - tangent*size.y + dir*size.x;
-				ps[2].pos = pos + tangent*size.y + dir*size.x;
-				ps[3].pos = pos + tangent*size.w - dir*size.z;
-				pd->size.x = FLT_MAX;	// mark this as world space.
-			}
-			else {
-				ps[0].pos = pos - up*size.w - right*size.z;
-				ps[1].pos = pos - up*size.w + right*size.x;
-				ps[2].pos = pos + up*size.y + right*size.x;
-				ps[3].pos = pos + up*size.y - right*size.z;
-			}
+			ps[0].pos = pos - up*size.w - right*size.z;
+			ps[1].pos = pos - up*size.w + right*size.x;
+			ps[2].pos = pos + up*size.y + right*size.x;
+			ps[3].pos = pos + up*size.y - right*size.z;
 
 			++nParticles;
 		}
@@ -402,7 +389,7 @@ void ParticleDef::Load( const tinyxml2::XMLElement* ele )
 	config = ParticleSystem::PARTICLE_RAY;
 	if ( ele->Attribute( "config", "sphere" ) ) config = ParticleSystem::PARTICLE_SPHERE;
 	if ( ele->Attribute( "config", "hemi" ) ) config = ParticleSystem::PARTICLE_HEMISPHERE;
-	if ( ele->Attribute( "config", "world" ) ) config = ParticleSystem::PARTICLE_WORLD;
+//	if ( ele->Attribute( "config", "world" ) ) config = ParticleSystem::PARTICLE_WORLD;
 
 	posFuzz = 0;
 	ele->QueryFloatAttribute( "posFuzz", &posFuzz );

@@ -40,19 +40,25 @@
     <colorVelocity red="0" green="0" blue="0" alpha="-0.5" />
   </particle>
 
+  <!--
   <particle name="melee" count="1" sizePX="0.5" sizeNX="0.5" sizePY="0.1" sizeNY="0.05" config="world"
             velocity="0.2"
             texMin="3">
     <color red="1" green="0" blue="0" alpha="1"/>
     <colorVelocity red="1" green="0.8" blue="0" alpha="-1.5"/>
   </particle>
+  -->
 
   <particle name="derez" size="0.1" count="20" config="ray" 
             velocity="1.2" velocityFuzz="0.5">
     <color red="0" green="0" blue="1" alpha="1"/>
     <colorVelocity red="0" green="0.8" blue="0" alpha="-1.5"/>
   </particle>
-  
-  
+
+  <particle name="spell" size="0.15" count="1" config="hemi"
+            velocity="0" velocityFuzz="0">
+    <color red="1" green="0.3" blue="0" />
+    <colorVelocity red="0" green="0" blue="0" alpha="-1" />
+  </particle>
 
 </particles>

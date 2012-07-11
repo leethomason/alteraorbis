@@ -335,7 +335,7 @@ void Model::CalcMetaData( const char* name, grinliz::Matrix4* meta ) const
 
 		Matrix4 local;
 		boneData.bone[index].ToMatrix( &local );
-		GLASSERT( 0 );	// DEBUG THIS - order correct?
+//		GLASSERT( 0 );	// DEBUG THIS - order correct?
 		*meta = local * xform;
 	}
 }

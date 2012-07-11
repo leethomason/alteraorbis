@@ -51,6 +51,10 @@ AnimationScene::AnimationScene( LumosGame* game ) : Scene( game )
 	instance.SetSize( layout.Width(), layout.Height() );
 	instance.SetText( "3x" );
 
+	particle.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
+	particle.SetSize( layout.Width(), layout.Height() );
+	particle.SetText( "particle" );
+
 	exportSCML.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
 	exportSCML.SetSize( layout.Width(), layout.Height() );
 	exportSCML.SetText( "export" );
@@ -95,8 +99,10 @@ void AnimationScene::Resize()
 	layout.PosAbs( &boneRight,		3, -2 );
 	layout.PosAbs( &ortho,			4, -2 );
 	layout.PosAbs( &instance,		5, -2 );
-	layout.PosAbs( &exportSCML,		6, -2 );
-	layout.PosAbs( &pixelUnitRatio, 7, -2 );
+	layout.PosAbs( &particle,		6, -2 );
+
+	layout.PosAbs( &exportSCML,		4, -1 );
+	layout.PosAbs( &pixelUnitRatio, 5, -1 );
 
 	layout.PosAbs( &animLeft,	0, 0 );
 	layout.PosAbs( &animName,	1, 0 );
@@ -118,6 +124,7 @@ void AnimationScene::LoadModel( const char* name )
 				}
 				model[j] = engine->AllocModel( res );
 				model[j]->SetPos( (float)(1+j), 0, 1 );
+				model[j]->SetYRotation( 20.0f );
 			}
 			SetModelVis( false );
 //		}
@@ -422,6 +429,19 @@ void AnimationScene::Draw3D( U32 deltaTime )
 		for( int i=3; i<NUM_MODELS; ++i ) {
 			model[i]->DeltaAnimation( deltaTime );
 		}
+
+		static const Vector3F UP = { 0, 1, 0 };
+		if ( particle.Down() ) {
+			static const Vector3F POS = { 0,0,0 };
+			Matrix4 xform;
+			model[0]->CalcMetaData( "trigger", &xform );
+			Vector3F p = xform * POS;
+			engine->particleSystem->EmitPD( "spell", p, UP, engine->camera.EyeDir3(), 0 ); 
+		}
+		//Vector3F test = { 1.5f, 0.5f, 1.5f };
+		//engine->particleSystem->EmitPD( "spell", test, UP, engine->camera.EyeDir3(), 0 );
+
+
 		engine->Draw( deltaTime );
 	}
 }

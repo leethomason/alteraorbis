@@ -53,6 +53,7 @@ private:
 
 	gamui::ToggleButton ortho;
 	gamui::ToggleButton instance;
+	gamui::ToggleButton particle;
 
 	gamui::TextLabel boneName, animName;
 	gamui::TextLabel pixelUnitRatio;

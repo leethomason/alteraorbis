@@ -78,7 +78,7 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, WeaponItem* weapon
 		static const Vector3F UP = { 0, 1, 0 };
 		CrossProduct( srcNormal3, UP, &cross );
 
-		engine->particleSystem->EmitPD( "melee", trigger, UP, cross, engine->camera.EyeDir3(), 0 );
+		engine->particleSystem->EmitPD( "melee", trigger, UP, engine->camera.EyeDir3(), 0 );
 	}
 
 

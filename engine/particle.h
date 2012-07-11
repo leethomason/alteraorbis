@@ -116,19 +116,16 @@ public:
 		PARTICLE_RAY,
 		PARTICLE_HEMISPHERE,
 		PARTICLE_SPHERE,
-		PARTICLE_WORLD,			// particle is in world coordinates.
 	};
 
 	void EmitPD(	const ParticleDef& pd,
 					const grinliz::Vector3F& pos,
 					const grinliz::Vector3F& normal,
-					const grinliz::Vector3F& dir,		// only used for "world" particles
 					const grinliz::Vector3F eyeDir[],
 					U32 deltaTime );					// needed for pd.config == continuous
 	void EmitPD(	const char* name,
 					const grinliz::Vector3F& initPos,
 					const grinliz::Vector3F& normal, 
-					const grinliz::Vector3F& dir,		// only used for "world" particles
 					const grinliz::Vector3F eyeDir[],
 					U32 deltaTime );
 
