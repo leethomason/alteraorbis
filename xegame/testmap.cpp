@@ -51,4 +51,17 @@ void TestMap::Draw3D(  const Color3F& colorMult, GPUShader::StencilMode mode )
 	shader.SetStencilMode( mode );
 	shader.SetStream( stream, vertex, width*height*6, index );
 	shader.Draw();
+
+	{
+		// Debugging coordinate system:
+		Vector3F origin = { 0, 0.05f, 0 };
+		Vector3F xaxis = { 5, 0, 0 };
+		Vector3F zaxis = { 0, 0.05f, 5 };
+
+		FlatShader debug;
+		debug.SetColor( 1, 0, 0, 1 );
+		debug.DrawArrow( origin, xaxis, false, 0.1f );
+		debug.SetColor( 0, 0, 1, 1 );
+		debug.DrawArrow( origin, zaxis, false, 0.1f );
+	}
 }

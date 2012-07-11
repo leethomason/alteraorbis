@@ -341,6 +341,7 @@ public:
 	Quaternion() : x( 0.0f ), y( 0.0f ), z( 0.0f ), w( 1.0f )	{}
 
 	void Normalize();
+	void Zero() { x=0; y=0; z=0; w=1; }
 
 	const void ToAxisAngle( Vector3F* axis, float* angleOut ) const;
 	const void ToMatrix( Matrix4* matrix ) const;

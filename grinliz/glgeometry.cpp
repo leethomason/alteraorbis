@@ -670,31 +670,19 @@ const void Quaternion::ToMatrix( Matrix4* mat ) const
 {
 	GLASSERT( Equal( 1.0f, x*x + y*y + z*z + w*w, 0.0001f ) );
 
-	float fTx  = 2.0f*x;
-	float fTy  = 2.0f*y;
-	float fTz  = 2.0f*z;
-	float fTwx = fTx*w;
-	float fTwy = fTy*w;
-	float fTwz = fTz*w;
-	float fTxx = fTx*x;
-	float fTxy = fTy*x;
-	float fTxz = fTz*x;
-	float fTyy = fTy*y;
-	float fTyz = fTz*y;
-	float fTzz = fTz*z;
-	mat->x[0] = 1.0f-(fTyy+fTzz);
-	mat->x[1] = fTxy-fTwz;
-	mat->x[2] = fTxz+fTwy;
+	mat->x[0] = 1.0f-2.0f*(y*y + z*z);
+	mat->x[1] = 2.0f*(x*y + z*w);
+	mat->x[2] = 2.0f*(x*z - y*w);
 	mat->x[3] = 0.0f;
 
-	mat->x[4] = fTxy+fTwz;
-	mat->x[5] = 1.0f-(fTxx+fTzz);
-	mat->x[6] = fTyz-fTwx;
+	mat->x[4] = 2.0f*(x*y - z*w);
+	mat->x[5] = 1.0f-2.0f*(x*x + z*z);
+	mat->x[6] = 2.0f*(y*z + x*w);
 	mat->x[7] = 0.0f;
 
-	mat->x[8] = fTxz-fTwy;
-	mat->x[9] = fTyz+fTwx;
-	mat->x[10] = 1.0f-(fTxx+fTyy);
+	mat->x[8]  = 2.0f*(x*z + y*w);
+	mat->x[9]  = 2.0f*(y*z - x*w);
+	mat->x[10] = 1.0f-2.0f*(x*x + y*y);
 	mat->x[11] = 0.0f;
 
 	mat->x[12] = 0.0f;
@@ -710,52 +698,50 @@ void Quaternion::FromRotationMatrix( const Matrix4& m )
 {
 	GLASSERT( m.IsRotation() );
 
-    float trace = m.x[0] + m.x[5] + m.x[10];
-	const int next[3] = { 1, 2, 0 };
+    float trace = m.m11 + m.m22 + m.m33;
 
     if ( trace > 0.0f )
     {
-		float s = (float)sqrt(trace + 1.0f);
-		w = s / 2.0f;
-		s = 0.5f / s;
-		
-		x = ( m.x[9] - m.x[6] ) * s;
-		y = ( m.x[2] - m.x[8] ) * s;
-		z = ( m.x[4] - m.x[1] ) * s;
+		float s = sqrtf(trace + 1.0f) * 2.0f;
+		w = 0.25f * s;
+		x = ( m.m32 - m.m23 ) / s;
+		y = ( m.m13 - m.m31 ) / s;
+		z = ( m.m21 - m.m12 ) / s;
 	}
-	else
-	{
-		int i=0;
-
-		if (m.x[5]  > m.x[0])		i = 1;
-		if (m.x[10] > m.x[i*4+i])	i = 2;
-    
-		int j = next[i];
-		int k = next[j];
-
-		float s = (float) sqrt ((m.x[i*4+i] - (m.x[j*4+j] + m.x[k*4+k])) + 1.0f);
-      
-		float q[4];
-		q[i] = s * 0.5f;
-
-		if (s != 0.0f) s = 0.5f / s;
-
-		q[3] = (m.x[k*4+j] - m.x[j*4+k]) * s;
-		q[j] = (m.x[j*4+i] + m.x[i*4+j]) * s;
-		q[k] = (m.x[k*4+i] + m.x[i*4+k]) * s;
-
-		x = q[0];
-		y = q[1];
-		z = q[2];
-		w = q[3];
+	else if ( ( m.m11 > m.m22 ) && (m.m11 > m.m33) ) {
+		float S = sqrtf(1.0f + m.m11 - m.m22 - m.m33) * 2.0f; 
+		w = (m.m32 - m.m23) / S;
+		x = 0.25f * S;
+		y = (m.m12 + m.m21) / S; 
+		z = (m.m13 + m.m31) / S; 
+	} else if (m.m22 > m.m33) { 
+		float S = sqrtf(1.0f + m.m22 - m.m11 - m.m33) * 2.0f;
+		w = (m.m13 - m.m31) / S;
+		x = (m.m12 + m.m21) / S; 
+		y = 0.25f * S;
+		z = (m.m23 + m.m32) / S; 
+	} else { 
+		float S = sqrtf(1.0f + m.m33 - m.m11 - m.m22) * 2.0f;
+		w = (m.m21 - m.m12) / S;
+		x = (m.m13 + m.m31) / S;
+		y = (m.m23 + m.m32) / S;
+		z = 0.25f * S;
 	}
 	GLASSERT( Equal( 1.0f, x*x + y*y + z*z + w*w, 0.0001f ) );
+#ifdef DEBUG
+	Matrix4 t;
+	this->ToMatrix( &t );
+	if( !Equal( t, m )) {
+		m.Dump( "in" );	GLOUTPUT(( "\n" ));
+		t.Dump( "out" ); GLOUTPUT(( "\n" ));
+		GLASSERT( 0 );
+	}
+#endif
 }
 
 
 const void Quaternion::ToAxisAngle( Vector3F* axis, float* angleOut ) const
 {
-	// FIXME: huh? why check for length normalization and then correct for it?
 	GLASSERT( Equal( sqrt( (double)(x*x + y*y + z*z + w*w) ), 1.0, 0.001 ) );
     
 	float len2 = x*x + y*y + z*z;
@@ -779,16 +765,16 @@ const void Quaternion::ToAxisAngle( Vector3F* axis, float* angleOut ) const
 
 
 
+// http://www.euclideanspace.com/maths/geometry/rotations/conversions/angleToQuaternion/index.htm
+//
 void Quaternion::FromAxisAngle( const Vector3F& axis, float angle )
 {
-	angle *= DEG_TO_RAD;
-    float halfAngle = 0.5f*angle;
-    float sinHalfAngle = (float) sin(halfAngle);
-    w = (float)cos(halfAngle);
-    x = sinHalfAngle*axis.x;
-    y = sinHalfAngle*axis.y;
-    z = sinHalfAngle*axis.z;
-	GLASSERT( Equal( 1.0f, x*x + y*y + z*z + w*w, 0.0001f ) );
+	float rad = ToRadian( angle );
+	float s = sinf( rad*0.5f );
+	x = axis.x*s;
+	y = axis.y*s;
+	z = axis.z*s;
+	w = cosf( rad*0.5f );
 }
 
 

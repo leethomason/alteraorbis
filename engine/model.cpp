@@ -213,6 +213,7 @@ void Model::Init( const ModelResource* resource, SpaceTree* tree )
 
 	debugScale = 1.0f;
 	pos.Set( 0, 0, 0 );
+	rot.Zero();
 	Modify();
 
 	if ( tree ) {

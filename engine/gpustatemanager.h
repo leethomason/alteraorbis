@@ -269,7 +269,7 @@ public:
 	void Draw( int instances=0 );
 
 	void DrawQuad( const grinliz::Vector3F p0, const grinliz::Vector3F p1, bool positiveWinding=true );
-	void DrawArrow( const grinliz::Vector3F p0, const grinliz::Vector3F p1, bool positiveWinding=true );
+	void DrawArrow( const grinliz::Vector3F p0, const grinliz::Vector3F p1, bool positiveWinding=true, float width=0.4f );
 
 	int SortOrder()	const { 
 		if ( blend == BLEND_NORMAL ) return 2;

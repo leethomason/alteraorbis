@@ -617,14 +617,14 @@ void GPUShader::DrawQuad( const grinliz::Vector3F p0, const grinliz::Vector3F p1
 }
 
 
-void GPUShader::DrawArrow( const grinliz::Vector3F p0, const grinliz::Vector3F p1, bool positive )
+void GPUShader::DrawArrow( const grinliz::Vector3F p0, const grinliz::Vector3F p1, bool positive, float width )
 {
 	const Vector3F UP = { 0, 1, 0 };
 	Vector3F normal; 
 	CrossProduct( UP, p1-p0, &normal );
 	if ( normal.Length() > 0.001f ) {
 		normal.Normalize();
-		normal = normal * 0.4f;
+		normal = normal * width;
 
 		PTVertex pos[4] = { 
 			{ p0-normal, { 0, 0 } },

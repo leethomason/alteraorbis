@@ -70,7 +70,7 @@ float SpatialComponent::GetYRotation() const
 	rotation.ToAxisAngle( &axis, &angle );
 #ifdef DEBUG
 	static const Vector3F UP = {0,1,0};
-	GLASSERT( DotProduct( UP, axis ) > 0.99f );	// else probably not what was intended.
+	GLASSERT( angle == 0 ||  DotProduct( UP, axis ) > 0.99f );	// else probably not what was intended.
 #endif
 	return angle;
 }

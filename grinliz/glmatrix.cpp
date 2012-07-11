@@ -266,7 +266,7 @@ bool Matrix4::IsRotation() const
 		}
 		if ( !Equal( row, 1.0f, 0.0001f ) )
 			return false;
-		if ( !Equal( row, 1.0f, 0.0001f ) )
+		if ( !Equal( col, 1.0f, 0.0001f ) )
 			return false;
 	}
 	// Should also really check orthogonality.
