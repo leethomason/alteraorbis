@@ -62,6 +62,8 @@ AnimationScene::AnimationScene( LumosGame* game ) : Scene( game )
 	pixelUnitRatio.Init( &gamui2D );
 
 	engine = new Engine( port, game->GetDatabase(), 0 );
+	engine->particleSystem->LoadParticleDefs( "./res/particles.xml" );
+
 	engine->lighting.ambient.Set( 0.5f, 0.5f, 0.5f );
 	engine->lighting.direction.Set( -1, 1, 1 );
 	engine->lighting.direction.Normalize();
@@ -374,6 +376,29 @@ void AnimationScene::FinishXML()
 }
 
 
+void AnimationScene::DoTick( U32 deltaTime )
+{
+	GLASSERT( NUM_MODELS >= 2 );
+	model[0]->DeltaAnimation( deltaTime );
+	model[1]->DeltaAnimation( deltaTime*3/4 );
+	model[2]->DeltaAnimation( deltaTime*5/4 );
+	for( int i=3; i<NUM_MODELS; ++i ) {
+		model[i]->DeltaAnimation( deltaTime );
+	}
+
+	static const Vector3F UP = { 0, 1, 0 };
+	if ( particle.Down() ) {
+		static const Vector3F POS = { 0,0,0 };
+		Matrix4 xform;
+		model[0]->CalcMetaData( "trigger", &xform );
+		Vector3F p = xform * POS;
+		engine->particleSystem->EmitPD( "spell", p, UP, engine->camera.EyeDir3(), 0 ); 
+	}
+	//Vector3F test = { 1.5f, 0.5f, 1.5f };
+	//engine->particleSystem->EmitPD( "spell", test, UP, engine->camera.EyeDir3(), 0 );
+}
+
+
 void AnimationScene::Draw3D( U32 deltaTime )
 {
 	if ( doExport ) {
@@ -422,26 +447,6 @@ void AnimationScene::Draw3D( U32 deltaTime )
 		}
 	}
 	else {
-		GLASSERT( NUM_MODELS >= 2 );
-		model[0]->DeltaAnimation( deltaTime );
-		model[1]->DeltaAnimation( deltaTime*3/4 );
-		model[2]->DeltaAnimation( deltaTime*5/4 );
-		for( int i=3; i<NUM_MODELS; ++i ) {
-			model[i]->DeltaAnimation( deltaTime );
-		}
-
-		static const Vector3F UP = { 0, 1, 0 };
-		if ( particle.Down() ) {
-			static const Vector3F POS = { 0,0,0 };
-			Matrix4 xform;
-			model[0]->CalcMetaData( "trigger", &xform );
-			Vector3F p = xform * POS;
-			engine->particleSystem->EmitPD( "spell", p, UP, engine->camera.EyeDir3(), 0 ); 
-		}
-		//Vector3F test = { 1.5f, 0.5f, 1.5f };
-		//engine->particleSystem->EmitPD( "spell", test, UP, engine->camera.EyeDir3(), 0 );
-
-
 		engine->Draw( deltaTime );
 	}
 }

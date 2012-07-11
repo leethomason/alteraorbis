@@ -328,15 +328,19 @@ void Model::CalcMetaData( const char* name, grinliz::Matrix4* meta ) const
 		*meta = local * xform;
 	}
 	else {
-		BoneData boneData;
-		animationResource->GetTransform( animationName.c_str(), resource->header, animationTime, &boneData );
-
-		int index = resource->header.BoneIDFromName( data->boneName.c_str() );
+		BoneData::Bone bone;
+		animationResource->GetTransform( animationName.c_str(),  data->boneName.c_str(), resource->header, animationTime, &bone );
 
 		Matrix4 local;
-		boneData.bone[index].ToMatrix( &local );
+		bone.ToMatrix( &local );
+		Matrix4 t;
+		t.SetTranslation( data->pos );
+
+		//Vector3F pos = data->pos;
+		//Vector3F posInObject = local*pos;
+
 //		GLASSERT( 0 );	// DEBUG THIS - order correct?
-		*meta = local * xform;
+		*meta = xform * local * t;
 	}
 }
 

@@ -86,6 +86,24 @@ bool AnimationResource::HasAnimation( const char* name ) const
 }
 
 
+bool AnimationResource::GetTransform(	const char* animationName,	// which animation to play: "reference", "gunrun", etc.
+										const char* boneName,
+										const ModelHeader& header,	// used to get the bone IDs
+										U32 time,					// time for this animation
+										BoneData::Bone* bone ) const
+{
+	// FIXME optimize to calc only one bone?
+	BoneData boneData;
+	GetTransform( animationName, header, time, &boneData );
+	int index = header.BoneIDFromName( boneName );
+	if ( index >= 0 ) {
+		*bone = boneData.bone[index];		
+		return true;
+	}
+	return false;
+}
+
+
 bool AnimationResource::GetTransform( const char* animationName, const ModelHeader& header, U32 timeClock, BoneData* boneData ) const
 {
 	const gamedb::Item* animItem = item->Child( animationName );

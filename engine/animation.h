@@ -29,6 +29,11 @@ public:
 						U32 time,					// time for this animation
 						BoneData* boneData ) const;
 
+	bool GetTransform(	const char* animationName,	// which animation to play: "reference", "gunrun", etc.
+						const char* boneName,
+						const ModelHeader& header,	// used to get the bone IDs
+						U32 time,					// time for this animation
+						BoneData::Bone* bone ) const;
 private:
 	const char* name;
 	int nAnimations;

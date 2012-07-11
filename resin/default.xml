@@ -42,9 +42,8 @@
   <animation filename="humanFemale/humanFemale.scml" assetName="humanFemaleAnimation" pur="235.9" />    
 
   <!-- Tactical Sprite models are centered at (0,0,0) -->
-  <model filename="human.ac" modelName="humanFemale" animation="humanFemaleAnimation"
-         origin="1 0 0" shading="flat" polyRemoval="pre">
-    <meta name="trigger" pos="1.15 0.52 0" boneName="arm.lower.right" />
+  <model filename="human.ac" modelName="humanFemale" animation="humanFemaleAnimation" origin="1 0 0" shading="flat" polyRemoval="pre">
+    <meta name="trigger" pos="0.84 0.43 -0.003" boneName="arm.lower.right" />
     <meta name="target"  pos="1 0.68 0" />
   </model>    
   

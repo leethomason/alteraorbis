@@ -163,9 +163,10 @@ void ParticleSystem::EmitPD(	const char* name,
 	for( int i=0; i<particleDefArr.Size(); ++i ) {
 		if ( particleDefArr[i].name == name ) {
 			EmitPD( particleDefArr[i], initPos, normal, eyeDir, deltaTime );
-			break;
+			return;
 		}
 	}
+	GLASSERT( 0 );	// probably meant to actually find that particle.
 }
 
 

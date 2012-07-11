@@ -55,10 +55,10 @@
     <colorVelocity red="0" green="0.8" blue="0" alpha="-1.5"/>
   </particle>
 
-  <particle name="spell" size="0.15" count="1" config="hemi"
+  <particle name="spell" size="0.015" count="1" config="hemi"
             velocity="0" velocityFuzz="0">
     <color red="1" green="0.3" blue="0" />
-    <colorVelocity red="0" green="0" blue="0" alpha="-1" />
+    <colorVelocity red="0" green="0" blue="0" alpha="-2" />
   </particle>
 
 </particles>
