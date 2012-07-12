@@ -55,6 +55,12 @@ AnimationScene::AnimationScene( LumosGame* game ) : Scene( game )
 	particle.SetSize( layout.Width(), layout.Height() );
 	particle.SetText( "particle" );
 
+	gun.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
+	gun.SetSize( layout.Width(), layout.Height() );
+	gun.SetText( "gun" );
+
+	gun.AddToToggleGroup( &particle );
+
 	exportSCML.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
 	exportSCML.SetSize( layout.Width(), layout.Height() );
 	exportSCML.SetText( "export" );
@@ -73,6 +79,10 @@ AnimationScene::AnimationScene( LumosGame* game ) : Scene( game )
 	for( int i=0; i<NUM_MODELS; ++i ) {
 		model[i] = 0;
 	}
+
+	const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( "testgun" );
+	gunModel = engine->AllocModel( res );
+
 	LoadModel( "humanFemale" );
 
 	engine->CameraLookAt( 1, 1, 5 );
@@ -85,6 +95,7 @@ AnimationScene::~AnimationScene()
 	for( int i=0; i<NUM_MODELS; ++i ) {
 		engine->FreeModel( model[i] );
 	}
+	engine->FreeModel( gunModel );
 	delete engine;
 }
 
@@ -102,6 +113,7 @@ void AnimationScene::Resize()
 	layout.PosAbs( &ortho,			4, -2 );
 	layout.PosAbs( &instance,		5, -2 );
 	layout.PosAbs( &particle,		6, -2 );
+	layout.PosAbs( &gun,			7, -2 );
 
 	layout.PosAbs( &exportSCML,		4, -1 );
 	layout.PosAbs( &pixelUnitRatio, 5, -1 );
@@ -126,7 +138,6 @@ void AnimationScene::LoadModel( const char* name )
 				}
 				model[j] = engine->AllocModel( res );
 				model[j]->SetPos( (float)(1+j), 0, 1 );
-				model[j]->SetYRotation( 20.0f );
 			}
 			SetModelVis( false );
 //		}
@@ -184,15 +195,21 @@ void AnimationScene::UpdateAnimationInfo()
 }
 
 
-void AnimationScene::SetModelVis( bool onlyShowOne )
+void AnimationScene::SetModelVis( bool onlyShowOneUnrotated )
 {
 	for( int i=1; i<NUM_MODELS; ++i ) {
-		if ( onlyShowOne || !instance.Down() ) {
+		if ( onlyShowOneUnrotated || !instance.Down() ) {
 			model[i]->SetFlag( Model::MODEL_INVISIBLE );
 		}
 		else {
 			model[i]->ClearFlag( Model::MODEL_INVISIBLE );
 		}
+	}
+	for( int i=0; i<NUM_MODELS; ++i ) {
+		if ( onlyShowOneUnrotated )
+			model[i]->SetYRotation( 0 );
+		else
+			model[i]->SetYRotation( 20 );
 	}
 }
 
@@ -394,6 +411,26 @@ void AnimationScene::DoTick( U32 deltaTime )
 		Vector3F p = xform * POS;
 		engine->particleSystem->EmitPD( "spell", p, UP, engine->camera.EyeDir3(), 0 ); 
 	}
+
+	if ( gun.Down() ) {
+		gunModel->ClearFlag( Model::MODEL_INVISIBLE );
+
+		static const Vector3F POS = { 0,0,0 };
+		Matrix4 xform;
+		model[0]->CalcMetaData( "trigger", &xform );
+
+		Vector3F pos = xform.Col( 3 );
+		Quaternion q;
+		xform.m14 = 0; xform.m24 = 0; xform.m34 = 0;
+		q.FromRotationMatrix( xform );
+
+		gunModel->SetPos( pos );
+		gunModel->SetRotation( q );
+	}
+	else {
+		gunModel->SetFlag( Model::MODEL_INVISIBLE );
+	}
+
 	//Vector3F test = { 1.5f, 0.5f, 1.5f };
 	//engine->particleSystem->EmitPD( "spell", test, UP, engine->camera.EyeDir3(), 0 );
 }

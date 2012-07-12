@@ -87,9 +87,11 @@ struct ModelAtom
 
 
 struct ModelMetaData {
-	grinliz::CStr< EL_RES_NAME_LEN >	name;
-	grinliz::Vector3F					pos;
-	grinliz::CStr< EL_RES_NAME_LEN >	boneName;
+	grinliz::CStr< EL_RES_NAME_LEN >	name;		// name of the metadata
+	grinliz::Vector3F					pos;		// position
+	grinliz::Vector3F					axis;		// axis of rotation (if any)
+	float								rotation;	// amount of rotation (if any)
+	grinliz::CStr< EL_RES_NAME_LEN >	boneName;	// name of the bone this metadat is attached to (if any)
 };
 
 struct ModelHeader

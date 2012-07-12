@@ -139,6 +139,7 @@ void ProcessAnimation( const tinyxml2::XMLElement* element, gamedb::WItem* witem
 
 	printf( "Animation path='%s' name='%s'\n", pathName.c_str(), assetName.c_str() );
 
+	// -- Process the SCML file --- //
 	FILE* fp = fopen( pathName.c_str(), "r" );
 	if ( !fp ) {
 		ExitError( "Animation", pathName.c_str(), assetName.c_str(), "could not load file" );
@@ -147,7 +148,7 @@ void ProcessAnimation( const tinyxml2::XMLElement* element, gamedb::WItem* witem
 	doc.LoadFile( fp );
 	printf( "ErrorID=%d\n", doc.ErrorID() );
 
-	gamedb::WItem* root = witem->CreateChild( assetName.c_str() );	// "humanFemale" 
+	gamedb::WItem* root = witem->CreateChild( assetName.c_str() );	// "humanFemaleAnimation" 
 
 	const XMLConstHandle docH( doc );
 	const XMLElement* reference = 0;
@@ -165,6 +166,7 @@ void ProcessAnimation( const tinyxml2::XMLElement* element, gamedb::WItem* witem
 				 || ( pass == 1 && !StrEqual( animName, "reference" )))
 			{
 				gamedb::WItem* anim = root->CreateChild( animName );	// "walk"
+				anim->FetchChild( "metaData" );		// always write so that NumFrames = NumChildren - 1
 				int frameCount = 0;
 				float totalDuration = 0;
 
@@ -194,6 +196,22 @@ void ProcessAnimation( const tinyxml2::XMLElement* element, gamedb::WItem* witem
 				anim->SetFloat( "totalDuration", totalDuration );
 			}
 		}
+	}
+
+	// -- Process the meta data -- //
+	for(	const XMLElement* metaEle = element->FirstChildElement( "meta" );
+			metaEle;
+			metaEle = metaEle->NextSiblingElement( "meta" ) )
+	{
+		const char* animationName = metaEle->Attribute( "animation" );
+		const char* metaName = metaEle->Attribute( "name" );
+		float time = 0;
+		metaEle->QueryFloatAttribute( "time", &time );
+
+		gamedb::WItem* animationItem = root->FetchChild( animationName );
+		gamedb::WItem* metaDataItem  = animationItem->FetchChild( "metaData" );
+		gamedb::WItem* eventItem     = metaDataItem->FetchChild( metaName );
+		eventItem->SetFloat( "time", time );
 	}
 
 	fclose( fp );

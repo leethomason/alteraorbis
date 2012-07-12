@@ -325,7 +325,7 @@ void Model::CalcMetaData( const char* name, grinliz::Matrix4* meta ) const
 		local.SetTranslation( data->pos );
 
 		GLASSERT( 0 );	// DEBUG THIS - order correct?
-		*meta = local * xform;
+		*meta = xform * local;
 	}
 	else {
 		BoneData::Bone bone;
@@ -333,14 +333,18 @@ void Model::CalcMetaData( const char* name, grinliz::Matrix4* meta ) const
 
 		Matrix4 local;
 		bone.ToMatrix( &local );
+
 		Matrix4 t;
 		t.SetTranslation( data->pos );
 
-		//Vector3F pos = data->pos;
-		//Vector3F posInObject = local*pos;
+		Matrix4 r;
+		if ( data->axis.Length() ) {
+			GLASSERT( Equal( data->axis.Length(), 1.0f, 0.0001f ));
+			// FIXME: yet another transform bug? sure looks like a positive rotation.
+			r.SetAxisAngle( data->axis, -data->rotation );
+		}
 
-//		GLASSERT( 0 );	// DEBUG THIS - order correct?
-		*meta = xform * local * t;
+		*meta = xform * local * t * r;
 	}
 }
 

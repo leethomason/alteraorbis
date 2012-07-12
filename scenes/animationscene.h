@@ -40,7 +40,9 @@ private:
 
 	Engine* engine;
 	enum { NUM_MODELS = 3 };
+
 	Model* model[ NUM_MODELS ];
+	Model* gunModel;
 
 	int  currentBone;
 	int  currentAnim;
@@ -54,7 +56,7 @@ private:
 
 	gamui::ToggleButton ortho;
 	gamui::ToggleButton instance;
-	gamui::ToggleButton particle;
+	gamui::ToggleButton particle, gun;
 
 	gamui::TextLabel boneName, animName;
 	gamui::TextLabel pixelUnitRatio;

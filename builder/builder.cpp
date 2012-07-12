@@ -149,6 +149,12 @@ void ModelHeader::Save( gamedb::WItem* parent )
 			data->SetFloat( "x", metaData[i].pos.x );
 			data->SetFloat( "y", metaData[i].pos.y );
 			data->SetFloat( "z", metaData[i].pos.z );
+
+			data->SetFloat( "axis.x", metaData[i].axis.x );
+			data->SetFloat( "axis.y", metaData[i].axis.y );
+			data->SetFloat( "axis.z", metaData[i].axis.z );
+			data->SetFloat( "rotation", metaData[i].rotation );
+
 			data->SetString( "boneName", metaData[i].boneName.c_str() );
 		}
 	}
@@ -465,6 +471,15 @@ void StringToVector( const char* str, Vector3F* vec )
 }
 
 
+void StringToAxisAngle( const char* str, Vector3F* axis, float* angle )
+{
+#pragma warning ( push )
+#pragma warning ( disable : 4996 )
+		sscanf( str, "%f %f %f %f", &axis->x, &axis->y, &axis->z, angle );
+#pragma warning ( pop )
+}
+
+
 void ProcessModel( XMLElement* model )
 {
 	int nTotalIndex = 0;
@@ -556,6 +571,9 @@ void ProcessModel( XMLElement* model )
 		if ( metaEle->Attribute( "pos" )) {
 			StringToVector( metaEle->Attribute( "pos" ), &header.metaData[nMeta].pos );
 			header.metaData[nMeta].pos = header.metaData[nMeta].pos - origin;
+		}
+		if ( metaEle->Attribute( "rot" )) {
+			StringToAxisAngle( metaEle->Attribute( "rot" ), &header.metaData[nMeta].axis, &header.metaData[nMeta].rotation );
 		}
 		header.metaData[nMeta].boneName = metaEle->Attribute( "boneName" );
 		++nMeta;

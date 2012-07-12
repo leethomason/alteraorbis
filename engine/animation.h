@@ -11,6 +11,14 @@
 
 struct ModelHeader;
 
+/*
+class AnimationMetaData
+{
+	const char* name;
+	U32			time;
+};
+*/
+
 
 class AnimationResource
 {

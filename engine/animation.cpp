@@ -121,8 +121,10 @@ bool AnimationResource::GetTransform( const char* animationName, const ModelHead
 
 	int frame0 = 0;
 	int frame1 = 0;
+	int nFrames = animItem->NumChildren()-1;
+	GLASSERT( nFrames >= 1 );
 
-	for( frame0=0; frame0<animItem->NumChildren(); ++frame0 ) {
+	for( frame0=0; frame0<nFrames; ++frame0 ) {
 		frameItem0 = animItem->Child( frame0 );
 		GLASSERT( frameItem0 );
 		//GLOUTPUT(( "frameItem %s\n", frameItem->Name() ));
@@ -131,7 +133,7 @@ bool AnimationResource::GetTransform( const char* animationName, const ModelHead
 		if ( (float)time < frameDuration ) {
 			// We found the frame!
 			fraction = (float)time / (float)frameDuration;
-			frame1 = (frame0 + 1) % animItem->NumChildren();
+			frame1 = (frame0 + 1) % nFrames;
 			frameItem1 = animItem->Child( frame1 );
 
 			break;

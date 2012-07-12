@@ -57,6 +57,12 @@ void ModelHeader::Load( const gamedb::Item* item )
 			metaData[i].pos.x = dataItem->GetFloat( "x" );
 			metaData[i].pos.y = dataItem->GetFloat( "y" );
 			metaData[i].pos.z = dataItem->GetFloat( "z" );
+
+			metaData[i].axis.x = dataItem->GetFloat( "axis.x" );
+			metaData[i].axis.y = dataItem->GetFloat( "axis.y" );
+			metaData[i].axis.z = dataItem->GetFloat( "axis.z" );
+			metaData[i].rotation = dataItem->GetFloat( "rotation" );
+
 			metaData[i].boneName = dataItem->GetString( "boneName" );
 		}
 	}
