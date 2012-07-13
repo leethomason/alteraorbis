@@ -86,6 +86,15 @@ bool AnimationResource::HasAnimation( const char* name ) const
 }
 
 
+U32 AnimationResource::Duration( const char* name ) const
+{
+	const gamedb::Item* animItem = item->Child( name );
+	GLASSERT( animItem );
+	U32 totalTime = (U32)animItem->GetFloat( "totalDuration" );
+	return totalTime;
+}
+
+
 bool AnimationResource::GetTransform(	const char* animationName,	// which animation to play: "reference", "gunrun", etc.
 										const char* boneName,
 										const ModelHeader& header,	// used to get the bone IDs
@@ -110,8 +119,9 @@ bool AnimationResource::GetTransform( const char* animationName, const ModelHead
 	GLASSERT( animItem );
 	memset( boneData, 0, sizeof( *boneData ));
 	
-	float totalTime = animItem->GetFloat( "totalDuration" );
-	float time = fmodf( (float)timeClock, totalTime );
+	// Use doubles, which have a great enough range to not overflow from U32
+	double totalTime = animItem->GetFloat( "totalDuration" );
+	double time = fmod( (double)timeClock, totalTime );
 	float fraction = 0;
 
 	const gamedb::Item* frameItem0 = 0;
@@ -127,10 +137,10 @@ bool AnimationResource::GetTransform( const char* animationName, const ModelHead
 		GLASSERT( frameItem0 );
 		//GLOUTPUT(( "frameItem %s\n", frameItem->Name() ));
 
-		float frameDuration = frameItem0->GetFloat( "duration" );
-		if ( (float)time < frameDuration ) {
+		double frameDuration = frameItem0->GetFloat( "duration" );
+		if ( (double)time < frameDuration ) {
 			// We found the frame!
-			fraction = (float)time / (float)frameDuration;
+			fraction = (float)((double)time / (double)frameDuration);
 			frame1 = (frame0 + 1) % nFrames;
 			frameItem1 = animItem->Child( frame1 );
 
@@ -146,25 +156,18 @@ bool AnimationResource::GetTransform( const char* animationName, const ModelHead
 
 		const gamedb::Item* boneItem0 = frameItem0->Child( i );
 		const gamedb::Item* boneItem1 = frameItem1->Child( i );
-		//const gamedb::Item* boneItem1 = boneItem0;	// disable interpolation
 
 		const char* boneName = boneItem0->Name();
 		int index = header.BoneIDFromName( boneName );
-		//GLASSERT( index >= 0 );
-
-		//boneData->name[index] = boneName;
 
 		float angle0 = boneItem0->GetFloat( "anglePrime" );
 		float angle1 = boneItem1->GetFloat( "anglePrime" );
 
-		float add = 0.0f;
-		if ( fabsf( angle0-angle1 ) > 180.0f ) {
-			if ( angle1 < angle0 ) angle1 += 360.0f;
-			else				   angle1 -= 360.0f;
+		if ( fabsf( angle0-angle1 ) > 180.0 ) {
+			if ( angle1 < angle0 ) angle1 += 360.0;
+			else				   angle1 -= 360.0;
 		}
 		float angle = Lerp( angle0, angle1, fraction );
-		//if ( angle < 0 ) angle += 360.0f;
-		//if ( angle >= 360.0f ) angle -= 360.0f;
 
 		float dy0 = boneItem0->GetFloat( "dy" );
 		float dy1 = boneItem1->GetFloat( "dy" );
@@ -194,14 +197,14 @@ void AnimationResource::GetMetaData(	const char* animationName,
 	GLASSERT( t1 >= t0 );
 	int delta = t1 - t0;
 	
-	float totalTime = animItem->GetFloat( "totalDuration" );
-	float t0f = fmodf( (float)t0, totalTime );
-	float t1f = t0f + Min( (float)delta, totalTime );
+	double totalTime = animItem->GetFloat( "totalDuration" );
+	double t0f = fmod( (double)t0, totalTime );
+	double t1f = t0f + Min( (double)delta, totalTime );
 
 	for( int pass=0; pass<2; ++pass ) {
 		for( int i=0; i<metaItem->NumChildren(); ++i ) {
 			const gamedb::Item* dataItem = metaItem->Child( i );
-			float t = dataItem->GetFloat( "time" );
+			double t = dataItem->GetFloat( "time" );
 
 			if ( t >= t0f && t < t1f ) {
 				AnimationMetaData amd;

@@ -26,11 +26,13 @@ public:
 	AnimationResource( const gamedb::Item* animationItem );
 	~AnimationResource()	{}
 
-	const char* Name() const		{ return name; }	// the name of the resource.
+	// Name of the resource, not the animation
+	const char* Name() const		{ return name; }
 	int NumAnimations() const		{ return nAnimations; }
 
 	bool		HasAnimation( const char* name ) const;
 	const char* AnimationName( int index ) const;
+	U32			Duration( const char* name ) const;
 
 	bool GetTransform(	const char* animationName,	// which animation to play: "reference", "gunrun", etc.
 						const ModelHeader& header,	// used to get the bone IDs

@@ -3,7 +3,7 @@
 	X particle tracking of meta-data
 	X item tracking of meta-data
 	- animition aware hit testing
-	- timing of impact / shoot / hit events
+	X timing of impact / shoot / hit events
 	X need impact animation (light & heavy?)
 	- bounds need to be adjusted to account for animation
 	- 2nd test animation, with a scaled size

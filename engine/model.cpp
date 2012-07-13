@@ -227,6 +227,8 @@ void Model::Init( const ModelResource* resource, SpaceTree* tree )
 	userData = 0;
 	animationTime = 0;
 	animationRate = 1.0f;
+	crossFadeTime = 0;
+	totalCrossFadeTime = 0;
 	animationName.Clear();
 }
 
@@ -285,14 +287,20 @@ void Model::SetRotation( const Quaternion& q )
 }
 
 
-void Model::SetAnimation( const char* name )
+void Model::SetAnimation( const char* name, U32 crossFade )
 {
 	if ( name && *name ) {
 		if ( animationName != name ) {
+			totalCrossFadeTime = crossFade;
+			crossFadeTime = 0;
+			prevAnimationName = animationName;
+
 			animationName = name;
 			GLASSERT( animationResource );
 			GLASSERT( animationResource->HasAnimation( name ));
-			animationTime = 0;
+
+			U32 duration = animationResource->Duration( name );
+			totalCrossFadeTime = Min( totalCrossFadeTime, duration / 2 );
 		}
 	}
 	else {
@@ -312,6 +320,7 @@ void Model::DeltaAnimation( U32 time, grinliz::CArray<AnimationMetaData, 4> *met
 	}
 
 	animationTime += time;
+	crossFadeTime += time;
 }
 
 
@@ -320,6 +329,54 @@ void Model::CalcHitAABB( Rectangle3F* aabb ) const
 	// This is already an approximation - ignore rotation.
 	aabb->min = pos + resource->hitBounds.min;
 	aabb->max = pos + resource->hitBounds.max;
+}
+
+
+void Model::CalcAnimation( BoneData* boneData ) const
+{
+	animationResource->GetTransform( animationName.c_str(), resource->header, animationTime, boneData );
+
+	if ( crossFadeTime < totalCrossFadeTime && !prevAnimationName.empty() ) {
+		BoneData boneData2;
+		animationResource->GetTransform( prevAnimationName.c_str(), resource->header, animationTime, &boneData2 );
+		float fraction = (float)crossFadeTime / (float)totalCrossFadeTime;
+
+		for( int i=0; i<EL_MAX_BONES; ++i ) {
+			float angle1 = boneData->bone[i].angleRadians;
+			float angle2 = boneData2.bone[i].angleRadians;
+			if ( fabsf( angle1-angle2 ) > PI ) {
+				if ( angle1 < angle2 ) angle2 -= TWO_PI;
+				else				   angle2 += TWO_PI;
+			}
+
+			boneData->bone[i].angleRadians = Lerp( angle2, angle1, fraction ); 
+			boneData->bone[i].dy = Lerp( boneData2.bone[i].dy, boneData->bone[i].dy, fraction ); 
+			boneData->bone[i].dz = Lerp( boneData2.bone[i].dz, boneData->bone[i].dz, fraction ); 
+		}
+	}
+}
+
+
+void Model::CalcAnimation( BoneData::Bone* bone, const char* boneName ) const
+{
+	animationResource->GetTransform( animationName.c_str(), boneName, resource->header, animationTime, bone );
+
+	if ( crossFadeTime < totalCrossFadeTime && !prevAnimationName.empty() ) {
+		BoneData::Bone bone2;
+		animationResource->GetTransform( prevAnimationName.c_str(), boneName, resource->header, animationTime, &bone2 );
+		float fraction = (float)crossFadeTime / (float)totalCrossFadeTime;
+
+		float angle1 = bone->angleRadians;
+		float angle2 = bone2.angleRadians;
+		if ( fabsf( angle1-angle2 ) > PI ) {
+			if ( angle1 < angle2 ) angle2 -= TWO_PI;
+			else				   angle2 += TWO_PI;
+		}
+
+		bone->angleRadians	= Lerp( angle2, angle1, fraction ); 
+		bone->dy			= Lerp( bone2.dy, bone->dy, fraction ); 
+		bone->dz			= Lerp( bone2.dz, bone->dz, fraction ); 
+	}
 }
 
 
@@ -338,7 +395,7 @@ void Model::CalcMetaData( const char* name, grinliz::Matrix4* meta ) const
 	}
 	else {
 		BoneData::Bone bone;
-		animationResource->GetTransform( animationName.c_str(),  data->boneName.c_str(), resource->header, animationTime, &bone );
+		CalcAnimation( &bone, data->boneName.c_str() );
 
 		Matrix4 local;
 		bone.ToMatrix( &local );
@@ -402,7 +459,7 @@ void Model::Queue( RenderQueue* queue, EngineShaders* engineShaders )
 		BoneData* pBD = 0;
 		BoneData boneData;
 		if ( HasAnimation() ) {
-			animationResource->GetTransform( animationName.c_str(), resource->header, animationTime, &boneData );
+			CalcAnimation( &boneData ); 
 			pBD = &boneData;
 		}
 

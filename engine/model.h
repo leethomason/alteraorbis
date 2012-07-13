@@ -265,7 +265,7 @@ public:
 	// Get the animation resource, if it exists.
 	const AnimationResource* GetAnimationResource() const	{ return animationResource; }
 	// Set the current animation, null or "reference" turns off animation.
-	void SetAnimation( const char* name );
+	void SetAnimation( const char* name, U32 crossFade );
 	const char* GetAnimation() const						{ return animationName.c_str(); }
 	// Update the time and animation rendering.
 	void DeltaAnimation( U32 time, grinliz::CArray<AnimationMetaData, 4> *metaData );
@@ -366,6 +366,8 @@ private:
 	}
 	const grinliz::Matrix4& InvXForm() const;
 	bool HasAnimation() const { return animationResource && !animationName.empty(); }
+	void CalcAnimation( BoneData* boneData ) const;	// compute the animition, accounting for crossfade, etc.
+	void CalcAnimation( BoneData::Bone* bone, const char* boneName ) const;	// compute the animition, accounting for crossfade, etc.
 
 	SpaceTree* tree;
 	const ModelResource* resource;
@@ -375,8 +377,11 @@ private:
 
 	U32 animationTime;
 	float animationRate;
+	U32 totalCrossFadeTime;
+	U32 crossFadeTime;
 	const AnimationResource* animationResource;
 	grinliz::CStr< EL_RES_NAME_LEN > animationName;
+	grinliz::CStr< EL_RES_NAME_LEN > prevAnimationName;
 
 	grinliz::Vector4F	param[EL_MAX_MODEL_GROUPS];
 
