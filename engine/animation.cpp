@@ -111,8 +111,6 @@ bool AnimationResource::GetTransform( const char* animationName, const ModelHead
 	memset( boneData, 0, sizeof( *boneData ));
 	
 	float totalTime = animItem->GetFloat( "totalDuration" );
-	//GLOUTPUT(( "animItem %s\n", animItem->Name() ));
-
 	float time = fmodf( (float)timeClock, totalTime );
 	float fraction = 0;
 
@@ -181,5 +179,45 @@ bool AnimationResource::GetTransform( const char* animationName, const ModelHead
 		boneData->bone[index].dz			= dz;
 	}
 	return true;
+}
+
+
+void AnimationResource::GetMetaData(	const char* animationName,
+										U32 t0, U32 t1,				// t1 > t0
+										grinliz::CArray<AnimationMetaData, EL_MAX_METADATA>* data ) const
+{
+	const gamedb::Item* animItem = item->Child( animationName );
+	GLASSERT( animItem );
+	const gamedb::Item* metaItem = animItem->Child( "metaData" );
+	data->Clear();
+
+	GLASSERT( t1 >= t0 );
+	int delta = t1 - t0;
+	
+	float totalTime = animItem->GetFloat( "totalDuration" );
+	float t0f = fmodf( (float)t0, totalTime );
+	float t1f = t0f + Min( (float)delta, totalTime );
+
+	for( int pass=0; pass<2; ++pass ) {
+		for( int i=0; i<metaItem->NumChildren(); ++i ) {
+			const gamedb::Item* dataItem = metaItem->Child( i );
+			float t = dataItem->GetFloat( "time" );
+
+			if ( t >= t0f && t < t1f ) {
+				AnimationMetaData amd;
+				amd.name = dataItem->Name();
+				amd.time = (U32)t;
+				data->Push( amd );
+			}
+		}
+		if ( t1f > totalTime ) {
+			t0f -= totalTime;
+			t1f -= totalTime;
+			// go around again.
+		}
+		else {
+			break;
+		}
+	}
 }
 

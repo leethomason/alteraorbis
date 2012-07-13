@@ -55,7 +55,7 @@ void AIComponent::UpdateChitData()
 	for( int k=0; k<2; ++k ) {
 		CArray<ChitData, MAX_TRACK>& list = (k==0) ? friendList : enemyList;
 
-		unsigned i=0; 
+		int i=0; 
 		while( i < list.Size() ) {
 			Chit* chit = GetChitBag()->GetChit( list[i].chitID );
 			list[i].chit = chit;

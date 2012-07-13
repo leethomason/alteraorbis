@@ -8,6 +8,7 @@
 	- bounds need to be adjusted to account for animation
 	- 2nd test animation, with a scaled size
 	X remove rotation twist for ortho
+	X animation rate
 
 - combat test scene
 	X animation/lack of making me crazy. What plan?
@@ -38,7 +39,7 @@
 	- add rez and de-rez effect for chits
 
 
-- remove particle params not needed for world
+X remove particle params not needed for world
 - move lighting loading from render test scene to engine
 - cameras only self-delete if they reach destination; should do better. Probably
   should only be one camera in existence. (BlueSmoke, NavTest2)

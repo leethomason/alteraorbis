@@ -11,13 +11,13 @@
 
 struct ModelHeader;
 
-/*
-class AnimationMetaData
+
+// POD
+struct AnimationMetaData
 {
 	const char* name;
 	U32			time;
 };
-*/
 
 
 class AnimationResource
@@ -42,6 +42,11 @@ public:
 						const ModelHeader& header,	// used to get the bone IDs
 						U32 time,					// time for this animation
 						BoneData::Bone* bone ) const;
+
+	void GetMetaData(	const char* animationName,
+						U32 t0, U32 t1,				// t1 > t0
+						grinliz::CArray<AnimationMetaData, EL_MAX_METADATA>* data ) const;
+
 private:
 	const char* name;
 	int nAnimations;

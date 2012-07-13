@@ -553,7 +553,7 @@ void ProcessModel( XMLElement* model )
 	header.Set( assetName.c_str(), builder->NumGroups(), nTotalVertex, nTotalIndex, builder->Bounds() );
 	header.animation = animation.c_str();
 
-	for( unsigned i=0; i<builder->boneNames.Size(); ++i ) {
+	for( int i=0; i<builder->boneNames.Size(); ++i ) {
 		header.boneName[i].name = builder->boneNames[i].c_str();
 		header.boneName[i].id = i;
 	}

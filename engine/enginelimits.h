@@ -28,8 +28,6 @@ enum HitTestMethod
 	TEST_TRI,
 };
 
-// Used for allocated lookup structures.
-static const int EL_MAX_MAP_SIZE = 1024;
 
 enum {
 	EL_RES_NAME_LEN			= 24,
@@ -40,11 +38,9 @@ enum {
 	EL_MAX_INDEX_IN_MODEL	= EL_MAX_INDEX_IN_GROUP * EL_MAX_MODEL_GROUPS,
 	EL_ALLOCATED_MODELS		= 4000,
 	EL_FILE_STRING_LEN		= 24,
-	//EL_MAP_SIZE				= 64,		// maximum size.
-	//EL_MAP_MAX_PATH			= 12,		// longest path anything can travel in one turn. Used to limit display memory.
-	//EL_MAP_TEXTURE_SIZE		= 512,
-	EL_MAX_METADATA			= 4,
+	EL_MAX_METADATA			= 4,		// both animation and model
 	EL_MAX_BONES			= 12,		// could be 16?
+	EL_MAX_MAP_SIZE			= 1024,		// used for allocating hash tables and lookup structures
 
 	// performance tuning
 	EL_MAX_INSTANCE			= 16,		// Max instances used. Impacts # of uniforms.

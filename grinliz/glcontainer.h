@@ -161,8 +161,8 @@ public:
 		return &vec[size-1];
 	}
 
-	unsigned Size() const		{ return size; }
-	unsigned Capacity() const	{ return CAPACITY; }
+	int Size() const		{ return size; }
+	int Capacity() const	{ return CAPACITY; }
 	bool HasCap() const			{ return size < CAPACITY; }
 	
 	void Clear()	{ 
@@ -179,7 +179,7 @@ public:
 
 private:
 	T vec[CAPACITY];
-	unsigned size;
+	int size;
 };
 
 

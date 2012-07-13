@@ -47,14 +47,14 @@ void TextureManager::DeviceLoss()
 {
 	ContextShift();
 
-	for( unsigned i=0; i<gpuMemArr.Size(); ++i ) {
+	for( int i=0; i<gpuMemArr.Size(); ++i ) {
 		if ( gpuMemArr[i].glID ) {
 			glDeleteTextures( 1, (const GLuint*) &gpuMemArr[i].glID );
 		}
 	}
 	gpuMap.Clear();
 	gpuMemArr.Clear();
-	for( unsigned i=0; i<textureArr.Size(); ++i ) {
+	for( int i=0; i<textureArr.Size(); ++i ) {
 		textureArr[i].gpuMem = 0;
 	}
 }
@@ -63,7 +63,7 @@ void TextureManager::DeviceLoss()
 void TextureManager::Reload()
 {
 	DeviceLoss();
-	for ( unsigned i=0; i<textureArr.Size(); ++i ) {
+	for ( int i=0; i<textureArr.Size(); ++i ) {
 		Texture* tex = &textureArr[i];
 		if ( tex->creator == 0 ) {
 			if ( tex->Name() ) {
@@ -153,7 +153,7 @@ Texture* TextureManager::CreateTexture( const char* name, int w, int h, int form
 	Texture* t = 0;
 
 	if ( emptySpace > 0 ) {
-		for( unsigned i=0; i<textureArr.Size(); ++i ) {
+		for( int i=0; i<textureArr.Size(); ++i ) {
 			if ( textureArr[i].Empty() ) {
 				t = &textureArr[i];
 				--emptySpace;
@@ -189,7 +189,7 @@ void TextureManager::DeleteTexture( Texture* t )
 
 void TextureManager::ContextShift()
 {
-	for( unsigned i=0; i<textureArr.Size(); ++i ) {
+	for( int i=0; i<textureArr.Size(); ++i ) {
 		if ( textureArr[i].gpuMem ) {
 			GLASSERT( textureArr[i].gpuMem->inUse );
 			// const to the texture, not const to this object.
@@ -222,7 +222,7 @@ const GPUMem* TextureManager::AllocGPUMemory(	int w, int h, int format, int flag
 		}
 	}
 	// Search for memory to re-use (cache re-use)
-	for( unsigned i=0; i<gpuMemArr.Size(); ++i ) {
+	for( int i=0; i<gpuMemArr.Size(); ++i ) {
 		GPUMem* gpu = &gpuMemArr[i];
 
 		if (	!gpu->inUse 
@@ -440,7 +440,7 @@ void Texture::Upload( const Surface& surface )
 U32 TextureManager::CalcTextureMem() const
 {
 	U32 mem = 0;
-	for( unsigned i=0; i<textureArr.Size(); ++i ) {
+	for( int i=0; i<textureArr.Size(); ++i ) {
 		mem += textureArr[i].BytesInImage();
 	}
 	return mem;
@@ -450,7 +450,7 @@ U32 TextureManager::CalcTextureMem() const
 U32 TextureManager::CalcGPUMem() const
 {
 	U32 mem = 0;
-	for( unsigned i=0; i<gpuMemArr.Size(); ++i ) {
+	for( int i=0; i<gpuMemArr.Size(); ++i ) {
 		mem += gpuMemArr[i].Memory();
 	}
 	return mem;

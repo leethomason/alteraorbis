@@ -27,6 +27,7 @@
 #include "enginelimits.h"
 #include "serialize.h"
 #include "gpustatemanager.h"
+#include "animation.h"
 
 class Texture;
 class SpaceTree;
@@ -259,16 +260,16 @@ public:
 		SetRotation( q );
 	}
 	const grinliz::Quaternion& GetRotation() const			{ return rot; }
-
 	void SetPosAndYRotation( const grinliz::Vector3F& pos, float yRot );
 
 	// Get the animation resource, if it exists.
-	const AnimationResource* GetAnimationResource() const { return animationResource; }
+	const AnimationResource* GetAnimationResource() const	{ return animationResource; }
 	// Set the current animation, null or "reference" turns off animation.
 	void SetAnimation( const char* name );
-	const char* GetAnimation() const { return animationName.c_str(); }
+	const char* GetAnimation() const						{ return animationName.c_str(); }
 	// Update the time and animation rendering.
-	void DeltaAnimation( U32 time );
+	void DeltaAnimation( U32 time, grinliz::CArray<AnimationMetaData, 4> *metaData );
+	void SetAnimationRate( float rate )						{ animationRate = rate; }
 
 	// WARNING: not really supported. Just for debug rendering. May break:
 	// normals, lighting, bounds, picking, etc. etc.
@@ -373,6 +374,7 @@ private:
 	float debugScale;
 
 	U32 animationTime;
+	float animationRate;
 	const AnimationResource* animationResource;
 	grinliz::CStr< EL_RES_NAME_LEN > animationName;
 

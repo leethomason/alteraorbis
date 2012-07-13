@@ -137,11 +137,13 @@ void AnimationScene::LoadModel( const char* name )
 					engine->FreeModel( model[j] );
 				}
 				model[j] = engine->AllocModel( res );
-				model[j]->SetPos( (float)(1+j), 0, 1 );
+				model[j]->SetPos( 1.0f + (float)j*0.6f, 0, 1 );
 			}
 			SetModelVis( false );
 //		}
 //	}
+			model[1]->SetAnimationRate( 0.8f );
+			model[2]->SetAnimationRate( 1.2f );
 }
 
 
@@ -395,21 +397,23 @@ void AnimationScene::FinishXML()
 
 void AnimationScene::DoTick( U32 deltaTime )
 {
-	GLASSERT( NUM_MODELS >= 2 );
-	model[0]->DeltaAnimation( deltaTime );
-	model[1]->DeltaAnimation( deltaTime*3/4 );
-	model[2]->DeltaAnimation( deltaTime*5/4 );
-	for( int i=3; i<NUM_MODELS; ++i ) {
-		model[i]->DeltaAnimation( deltaTime );
+	grinliz::CArray<AnimationMetaData, 4> metaData;
+	for( int i=0; i<NUM_MODELS; ++i ) {
+		model[i]->DeltaAnimation( deltaTime, (i==0) ? &metaData : 0 );
 	}
 
 	static const Vector3F UP = { 0, 1, 0 };
+	static const Vector3F POS = { 0,0,0 };
+	Matrix4 xform;
+	model[0]->CalcMetaData( "trigger", &xform );
+	Vector3F p = xform * POS;
+
 	if ( particle.Down() ) {
-		static const Vector3F POS = { 0,0,0 };
-		Matrix4 xform;
-		model[0]->CalcMetaData( "trigger", &xform );
-		Vector3F p = xform * POS;
 		engine->particleSystem->EmitPD( "spell", p, UP, engine->camera.EyeDir3(), 0 ); 
+	}
+
+	for( int i=0; i<metaData.Size(); ++i ) {
+		engine->particleSystem->EmitPD( "derez", p, UP, engine->camera.EyeDir3(), 0 );	
 	}
 
 	if ( gun.Down() ) {
@@ -430,9 +434,6 @@ void AnimationScene::DoTick( U32 deltaTime )
 	else {
 		gunModel->SetFlag( Model::MODEL_INVISIBLE );
 	}
-
-	//Vector3F test = { 1.5f, 0.5f, 1.5f };
-	//engine->particleSystem->EmitPD( "spell", test, UP, engine->camera.EyeDir3(), 0 );
 }
 
 

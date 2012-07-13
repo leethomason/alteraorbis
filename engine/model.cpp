@@ -226,6 +226,7 @@ void Model::Init( const ModelResource* resource, SpaceTree* tree )
 	}
 	userData = 0;
 	animationTime = 0;
+	animationRate = 1.0f;
 	animationName.Clear();
 }
 
@@ -300,8 +301,16 @@ void Model::SetAnimation( const char* name )
 }
 
 
-void Model::DeltaAnimation( U32 time )
+void Model::DeltaAnimation( U32 time, grinliz::CArray<AnimationMetaData, 4> *metaData )
 {
+	if ( animationRate != 1.0f ) {
+		time = (U32)((float)time*animationRate);
+	}
+
+	if ( metaData && HasAnimation() ) {
+		animationResource->GetMetaData( animationName.c_str(), animationTime, animationTime+time, metaData );
+	}
+
 	animationTime += time;
 }
 
@@ -567,14 +576,14 @@ ModelResourceManager::ModelResourceManager()
 
 ModelResourceManager::~ModelResourceManager()
 {
-	for( unsigned i=0; i<modelResArr.Size(); ++i )
+	for( int i=0; i<modelResArr.Size(); ++i )
 		delete modelResArr[i];
 }
 
 
 void ModelResourceManager::DeviceLoss()
 {
-	for( unsigned i=0; i<modelResArr.Size(); ++i )
+	for( int i=0; i<modelResArr.Size(); ++i )
 		modelResArr[i]->DeviceLoss();
 
 }
