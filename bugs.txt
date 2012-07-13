@@ -9,6 +9,8 @@
 	- 2nd test animation, with a scaled size
 	X remove rotation twist for ortho
 	X animation rate
+	X cross fading
+	- revisit all scenes, add animation
 
 - combat test scene
 	X animation/lack of making me crazy. What plan?
