@@ -51,7 +51,7 @@ public:
 	RenderComponent*	GetRenderComponent()	{ return renderComponent; }
 	Component*			GetComponent( const char* name );
 
-	void RequestUpdate();
+	//void RequestUpdate();
 	ChitBag* GetChitBag() { return chitBag; }
 
 	/*

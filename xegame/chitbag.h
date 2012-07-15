@@ -33,7 +33,7 @@ public:
 
 	// Due to events, changes, etc. a chit may need an update, possibily in addition to, the tick.
 	// Normally called automatically.
-	void RequestUpdate( Chit* );
+	//void RequestUpdate( Chit* );
 	void QueueDelete( Chit* chit );
 
 	void QueueEvent( const ChitEvent& event )			{ events.Push( event ); }

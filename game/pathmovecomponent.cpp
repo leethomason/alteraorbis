@@ -16,6 +16,21 @@ using namespace grinliz;
 
 #define DEBUG_PMC
 
+// no weapon:
+//		reference
+//		walk
+// weapon:
+//		gunstand
+//		gunrun
+// both:
+//		melee
+//		impactlight
+//		impactheavy
+//
+// path move can figure out stand vs.run
+// melee/impact TBD
+// gun vs. not is a query to the inventory component
+
 void PathMoveComponent::OnAdd( Chit* chit )
 {
 	MoveComponent::OnAdd( chit );
@@ -322,9 +337,11 @@ void PathMoveComponent::DoTick( U32 delta )
 
 	blockForceApplied = false;
 	avoidForceApplied = false;
+	isMoving = false;
 
-	// Apply final rotation.
 	if ( pathPos == nPathPos && dest.rotation >= 0 ) {
+		// is rotation moving? Should isMoving be set?
+		// Apply final rotation if the path is complete.
 		GetPosRot( &pos2, &rot );
 
 		float deltaRot, bias;
@@ -341,6 +358,8 @@ void PathMoveComponent::DoTick( U32 delta )
 		SetPosRot( pos2, rot );
 	}
 	else if ( pathPos < nPathPos ) {
+		// Move down the path.
+		isMoving = true;
 		GetPosRot( &pos2, &rot );
 		int startPathPos = pathPos;
 		float distToNext2 = GetDistToNext2( pos2 );

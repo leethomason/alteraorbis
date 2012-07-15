@@ -89,12 +89,14 @@ Component* Chit::GetComponent( const char* name )
 }
 
 
+/*
 void Chit::RequestUpdate()
 {
 	if ( chitBag ) {
 		chitBag->RequestUpdate( this );
 	}
 }
+*/
 
 
 

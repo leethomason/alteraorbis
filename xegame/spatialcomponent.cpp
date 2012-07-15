@@ -38,7 +38,7 @@ void SpatialComponent::SetPosRot( const Vector3F& v, const Quaternion& _q )
 		position = v;
 		rotation = q;
 
-		RequestUpdate();	// Render triggers off update.
+		//RequestUpdate();	// Render triggers off update.
 		parentChit->SendMessage( SPATIAL_MSG_CHANGED, this, 0 );
 	}
 }

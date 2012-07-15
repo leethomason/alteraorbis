@@ -42,13 +42,22 @@ void RenderComponent::OnRemove()
 }
 
 
-void RenderComponent::DoUpdate()
+void RenderComponent::DoTick( U32 deltaTime )
 {
 	GRINLIZ_PERFTRACK;
 
 	SpatialComponent* spatial = parentChit->GetSpatialComponent();
 	if ( model && spatial ) {
 		model->SetPosAndYRotation( spatial->GetPosition(), spatial->GetYRotation() );
+
+		MoveComponent* move = parentChit->GetMoveComponent();
+		if ( move ) {
+			// Compute the animation:
+			// Move: isMoving or not
+			// Inventory: has gun
+//			model->SetAnimation( move->GetAnimation(), CROSS_FADE_TIME );
+			model->DeltaAnimation( deltaTime, 0 );
+		}
 	}
 }
 

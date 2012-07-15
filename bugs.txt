@@ -11,6 +11,8 @@
 	X animation rate
 	X cross fading
 	- revisit all scenes, add animation
+		Where does animation fit in? walk, gun-run, impact-, melee
+		Render: query walking/standing from Move component?
 
 - combat test scene
 	X animation/lack of making me crazy. What plan?

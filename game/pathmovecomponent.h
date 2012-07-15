@@ -44,8 +44,8 @@ public:
 	// Status info
 	int BlockForceApplied() const	{ return blockForceApplied; }
 	bool IsStuck() const			{ return isStuck; }
-	bool IsMoving() const			{ return pathPos < nPathPos; }
 	bool IsAvoiding() const			{ return avoidForceApplied; }
+	virtual bool IsMoving() const	{ return isMoving; } 
 
 private:
 	// Commit the 'queued' to the 'dest', if possible. 
@@ -60,7 +60,8 @@ private:
 	}
 
 	// Move, then set rotation from movement.
-	void MoveFirst( U32 delta );
+	//void MoveFirst( U32 delta );
+	
 	// Rotate, then move in that direction.
 	void RotationFirst( U32 delta );
 	// Try to avoid walking through others.
@@ -93,6 +94,7 @@ private:
 	bool blockForceApplied;		
 	bool avoidForceApplied;
 	bool isStuck;
+	bool isMoving;
 
 	grinliz::Vector2F path[MAX_MOVE_PATH];
 };
