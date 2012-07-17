@@ -41,6 +41,9 @@ public:
 	int   GetFlags() const { return flags; }
 	bool  GetMetaData( const char* name, grinliz::Matrix4* xform );
 
+	// A render component has one primary, animated model. Additional
+	// assets (guns, shields, etc.) can be Attached and Detatched
+	// to "metadata hardpoints".
 	void Attach( const char* metaData, const char* asset );
 	void Detach( const char* metaData );
 

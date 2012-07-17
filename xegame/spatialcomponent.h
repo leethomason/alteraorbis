@@ -55,42 +55,11 @@ public:
 	grinliz::Vector2F GetPosition2D() const			{ grinliz::Vector2F v = { position.x, position.z }; return v; }
 	grinliz::Vector2F GetHeading2D() const;
 
-	//void AddChild( Chit* chit )			{ children.Add( chit ); }
-	//void RemoveChild( Chit* chit )		{ children.Remove( chit ); }
-
 protected:
 	grinliz::Vector3F	position;
 	grinliz::Quaternion	rotation;
 	bool				track;
-	//SafeChitList		children;
 };
 
-
-#if 0
-// Currently attaches to:
-//		- a metaData point on another chit.
-//		- a relative offset fromm another chit (currently commented out)
-class RelativeSpatialComponent : public SpatialComponent
-{
-public:
-	RelativeSpatialComponent( bool track ) : SpatialComponent( track ) {
-	}
-	virtual ~RelativeSpatialComponent()	{}
-
-	virtual Component*          ToComponent( const char* name ) {
-		if ( grinliz::StrEqual( name, "RelativeSpatialComponent" ) ) return this;
-		return SpatialComponent::ToComponent( name );
-	}
-	virtual RelativeSpatialComponent* ToRelative()	{ return this; }
-
-	virtual void DebugStr( grinliz::GLString* str );
-
-	// Track to metadata on another chit.
-	void SetMetaDataToTrack( const char* metaName )	{ metaData = metaName; }
-
-private:
-	grinliz::CStr< EL_RES_NAME_LEN > metaData;
-};
-#endif
 
 #endif // SPACIAL_COMPONENT_INCLUDED

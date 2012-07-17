@@ -102,32 +102,3 @@ void SpatialComponent::OnRemove()
 	}
 	Component::OnRemove();
 }
-
-
-#if 0 
-void RelativeSpatialComponent::DebugStr( GLString* str )
-{
-	str->Format( "[RelativeSpatial]=%.1f,%.1f,%.1f ", position.x, position.y, position.z );
-}
-
-
-//void RelativeSpatialComponent::OnChitMsg( Chit* chit, int id, const ChitEvent* event )
-//{
-//	if ( id == SPATIAL_MSG_CHANGED) {
-
-
-		RenderComponent* otherRender = chit->GetRenderComponent();
-
-		Matrix4 xform;
-		if ( otherRender && !metaData.empty() ) {
-			otherRender->GetMetaData( metaData.c_str(), &xform );
-		}
-		else {
-			GLASSERT( 0 );	// need to get the other path working
-		}
-
-		Vector3F v;
-		Quaternion q;
-		Quaternion::Decompose( xform, &v, &q );
-		this->SetPosRot( v, q );
-#endif

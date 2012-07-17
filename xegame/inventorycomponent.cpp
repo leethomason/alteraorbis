@@ -26,23 +26,12 @@ void InventoryComponent::AddToInventory( Chit* itemChit )
 	if ( itemChit->GetSpatialComponent() ) {
 		itemChit->Remove( itemChit->GetSpatialComponent() );
 	}
-	GLASSERT( !itemChit->GetSpatialComponent() );
-
-//	SpatialComponent* rsc = new SpatialComponent( false );
-//	itemChit->Add( rsc );
-	//parentChit->AddListener( rsc );
-	//rsc->SetMetaDataToTrack( "trigger" );
-	parentChit->GetRenderComponent()->Attach( "trigger", "testgun" );	// fixme: should come from item
-
-	// Sleazy trick: the relative spatial updates as a consequence of the
-	// spatial. But that's hard to remember, to reset the spatial.
-	if ( parentChit->GetSpatialComponent() ) {
-		Vector3F pos = parentChit->GetSpatialComponent()->GetPosition();
-		Vector3F posPrime = pos;
-		posPrime.y += 0.01f;
-		parentChit->GetSpatialComponent()->SetPosition( posPrime );
-		parentChit->GetSpatialComponent()->SetPosition( pos );
+	if ( itemChit->GetRenderComponent() ) {
+		itemChit->Remove( itemChit->GetRenderComponent() );
 	}
+
+	// Attach the item to the metaData hardpoint
+	parentChit->GetRenderComponent()->Attach( "trigger", "testgun" );	// fixme: should come from item
 }
 
 
