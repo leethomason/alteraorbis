@@ -261,6 +261,7 @@ public:
 	}
 	const grinliz::Quaternion& GetRotation() const			{ return rot; }
 	void SetPosAndYRotation( const grinliz::Vector3F& pos, float yRot );
+	void SetTransform( const grinliz::Matrix4& mat );
 
 	// Get the animation resource, if it exists.
 	const AnimationResource* GetAnimationResource() const	{ return animationResource; }
@@ -371,8 +372,10 @@ private:
 
 	SpaceTree* tree;
 	const ModelResource* resource;
-	grinliz::Vector3F pos;
+
+	grinliz::Vector3F	pos;
 	grinliz::Quaternion rot;
+	
 	float debugScale;
 
 	U32 animationTime;

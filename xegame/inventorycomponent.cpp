@@ -17,6 +17,9 @@ void InventoryComponent::AddToInventory( Chit* itemChit )
 	inventory.Add( itemChit );
 	itemChit->AddListener( this );
 
+	// Idea: doesn't have a spatial or render component. (Strange, yes.)
+	//		 It attaches to a 'hardpoints' of an existing render component.
+
 	// Need a relative spatial component. If there is a render
 	// component, that will get picked up. If no render, no 
 	// worries, it just won't render.
@@ -25,16 +28,11 @@ void InventoryComponent::AddToInventory( Chit* itemChit )
 	}
 	GLASSERT( !itemChit->GetSpatialComponent() );
 
-	//Vector3F trigger = { 0, 0, 0 };
-	//if ( parentChit->GetRenderComponent() ) {
-	//	parentChit->GetRenderComponent()->GetMetaData( "trigger", &trigger, false );
-	//}
-
-	RelativeSpatialComponent* rsc = new RelativeSpatialComponent( false );
-	itemChit->Add( rsc );
-	parentChit->AddListener( rsc );
-	//rsc->SetRelativePosYRot( trigger, 0 );
-	rsc->SetMetaDataToTrack( "trigger" );
+//	SpatialComponent* rsc = new SpatialComponent( false );
+//	itemChit->Add( rsc );
+	//parentChit->AddListener( rsc );
+	//rsc->SetMetaDataToTrack( "trigger" );
+	parentChit->GetRenderComponent()->Attach( "trigger", "testgun" );	// fixme: should come from item
 
 	// Sleazy trick: the relative spatial updates as a consequence of the
 	// spatial. But that's hard to remember, to reset the spatial.

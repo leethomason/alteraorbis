@@ -422,14 +422,7 @@ void AnimationScene::DoTick( U32 deltaTime )
 		static const Vector3F POS = { 0,0,0 };
 		Matrix4 xform;
 		model[0]->CalcMetaData( "trigger", &xform );
-
-		Vector3F pos = xform.Col( 3 );
-		Quaternion q;
-		xform.m14 = 0; xform.m24 = 0; xform.m34 = 0;
-		q.FromRotationMatrix( xform );
-
-		gunModel->SetPos( pos );
-		gunModel->SetRotation( q );
+		gunModel->SetTransform( xform );
 	}
 	else {
 		gunModel->SetFlag( Model::MODEL_INVISIBLE );

@@ -135,8 +135,11 @@ private:
 class SafeChitList
 {
 public:
-	SafeChitList( ChitBag* bag ) : chitBag( bag ), it( 0 )	{}
+	SafeChitList( ChitBag* bag=0 ) : chitBag( bag ), it( 0 )	{}
 	~SafeChitList()	{}
+
+	void Init( ChitBag* bag );
+	void Free();	// free everything, null the chitbag pointer
 
 	Chit* Add( Chit* c );		// returns chit added
 	Chit* Remove( Chit* c );	// returns chit removed or null

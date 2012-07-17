@@ -110,9 +110,9 @@ void BattleTestScene::LoadMap()
 	event.bounds.Set( 0, 0, (float)(map->Width()), (float)(map->Height()) );
 
 	event.data0 = 0;	
-	chitBag.QueueEvent( event );
+	//chitBag.QueueEvent( event );
 	event.data0 = 1;	
-	chitBag.QueueEvent( event );
+	//chitBag.QueueEvent( event );
 }
 
 
@@ -158,10 +158,10 @@ void BattleTestScene::CreateChit( const Vector2I& p )
 	GET_COMPONENT( chit, HealthComponent )->SetHealth( 100, 100 );
 
 	if ( team == HUMAN || team == HORNET ) {
-		WeaponItem* gunItem = new WeaponItem( "ASLT-1", "ASLT-1" );
+		WeaponItem* gunItem = new WeaponItem( "testgun", "testgun" );
 
 		Chit* gun = chitBag.NewChit();
-		gun->Add( new RenderComponent( engine, "ASLT-1", 0 ));
+		gun->Add( new RenderComponent( engine, "testgun", 0 ));
 		gun->Add( new ItemComponent( gunItem ));
 
 		inv->AddToInventory( gun );

@@ -16,20 +16,6 @@ using namespace grinliz;
 
 #define DEBUG_PMC
 
-// no weapon:
-//		reference
-//		walk
-// weapon:
-//		gunstand
-//		gunrun
-// both:
-//		melee
-//		impactlight
-//		impactheavy
-//
-// path move can figure out stand vs.run
-// melee/impact TBD
-// gun vs. not is a query to the inventory component
 
 void PathMoveComponent::OnAdd( Chit* chit )
 {

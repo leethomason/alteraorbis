@@ -348,9 +348,10 @@ public:
 
 	void FromRotationMatrix( const Matrix4& matrix );
 	void FromAxisAngle( const Vector3F& axis, float angleDegrees );
-
+	
 	static void SLERP( const Quaternion& start, const Quaternion& end, float t, Quaternion* result );
 	static void Multiply( const Quaternion& a, const Quaternion& b, Quaternion* result );
+	static void Decompose( const Matrix4& tr, Vector3F* translation,  Quaternion* rotation );
 
 	bool operator==( const Quaternion& rhs ) const { return rhs.x == x && rhs.y == y && rhs.z == z && rhs.w == w; }
 	bool operator!=( const Quaternion& rhs ) const { return !(*this == rhs); }

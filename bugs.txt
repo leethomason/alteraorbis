@@ -13,6 +13,7 @@
 	- revisit all scenes, add animation
 		Where does animation fit in? walk, gun-run, impact-, melee
 		Render: query walking/standing from Move component?
+		The AnimatedRenderComponent is annoying - move code to RenderComponent
 
 - combat test scene
 	X animation/lack of making me crazy. What plan?

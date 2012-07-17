@@ -11,7 +11,7 @@ static const float MAX_BASE_RADIUS = 0.4f;
 // the spatial cache.
 static const int MAX_MAP_SIZE = 1024;
 
-static const U32   CROSS_FADE_TIME = 500;		// time to blend animations
+static const U32   CROSS_FADE_TIME = 300;		// time to blend animations
 
 
 enum {

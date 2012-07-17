@@ -220,6 +220,20 @@ void Chit::DebugStr( GLString* str )
 }
 
 
+void SafeChitList::Init( ChitBag* cb )
+{
+	GLASSERT( array.Empty() );
+	GLASSERT( chitBag == 0 );
+	chitBag = cb;
+}
+
+
+void SafeChitList::Free() 
+{
+	array.Clear();
+	chitBag = 0;
+}
+
 
 Chit* SafeChitList::Add( Chit* c )			
 {

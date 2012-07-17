@@ -44,6 +44,7 @@ public:
 	// yRot=0 is the +z axis
 	void SetYRotation( float yDegrees )				{ SetPosYRot( position, yDegrees ); }
 	float GetYRotation() const;
+	const grinliz::Quaternion& GetRotation() const	{ return rotation; }
 
 	void SetPosYRot( float x, float y, float z, float yRot );
 	void SetPosYRot( const grinliz::Vector3F& v, float yRot ) { SetPosYRot( v.x, v.y, v.z, yRot ); }
@@ -54,13 +55,18 @@ public:
 	grinliz::Vector2F GetPosition2D() const			{ grinliz::Vector2F v = { position.x, position.z }; return v; }
 	grinliz::Vector2F GetHeading2D() const;
 
+	//void AddChild( Chit* chit )			{ children.Add( chit ); }
+	//void RemoveChild( Chit* chit )		{ children.Remove( chit ); }
+
 protected:
 	grinliz::Vector3F	position;
 	grinliz::Quaternion	rotation;
 	bool				track;
+	//SafeChitList		children;
 };
 
 
+#if 0
 // Currently attaches to:
 //		- a metaData point on another chit.
 //		- a relative offset fromm another chit (currently commented out)
@@ -68,8 +74,6 @@ class RelativeSpatialComponent : public SpatialComponent
 {
 public:
 	RelativeSpatialComponent( bool track ) : SpatialComponent( track ) {
-		//relativePosition.Zero();
-		//relativeYRotation = 0;
 	}
 	virtual ~RelativeSpatialComponent()	{}
 
@@ -80,18 +84,13 @@ public:
 	virtual RelativeSpatialComponent* ToRelative()	{ return this; }
 
 	virtual void DebugStr( grinliz::GLString* str );
-	virtual void OnChitMsg( Chit* chit, int id, const ChitEvent* event );
 
 	// Track to metadata on another chit.
 	void SetMetaDataToTrack( const char* metaName )	{ metaData = metaName; }
-	
-	//void SetRelativePosYRot( float x, float y, float z, float rot );
-	//void SetRelativePosYRot( const grinliz::Vector3F& v, float rot )	{ SetRelativePosYRot( v.x, v.y, v.z, rot ); }
 
 private:
-	//grinliz::Vector3F relativePosition;
-	//float relativeYRotation;
 	grinliz::CStr< EL_RES_NAME_LEN > metaData;
 };
+#endif
 
 #endif // SPACIAL_COMPONENT_INCLUDED

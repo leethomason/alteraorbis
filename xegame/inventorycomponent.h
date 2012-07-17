@@ -21,7 +21,13 @@ public:
 	void AddToInventory( Chit* chit );
 	void RemoveFromInventory( Chit* chit );
 
+	// FIXME: after being away and looking at this again, seems very
+	// weird that the inventory is made up of chits. That seemed useful,
+	// but now I'm not so sure.
 	const SafeChitList& GetInventory() const { return inventory; }
+	// FIXME: needs to see if we are carrying something in the inventory.
+	// used by animation
+	bool IsCarrying() { return true; }
 
 private:
 	SafeChitList inventory;

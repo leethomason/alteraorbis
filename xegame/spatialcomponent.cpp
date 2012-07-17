@@ -16,8 +16,8 @@ void SpatialComponent::DebugStr( GLString* str )
 
 void SpatialComponent::SetPosRot( const Vector3F& v, const Quaternion& _q )
 {
-	GLASSERT( v.x >= 0 && v.x < EL_MAX_MAP_SIZE );
-	GLASSERT( v.z >= 0 && v.z < EL_MAX_MAP_SIZE );
+	GLASSERT( v.x >= -1 && v.x < EL_MAX_MAP_SIZE );
+	GLASSERT( v.z >= -1 && v.z < EL_MAX_MAP_SIZE );
 	GLASSERT( v.y >= -1 && v.y <= 10 );	// obviously just general sanity
 
 	Quaternion q = _q;
@@ -104,45 +104,30 @@ void SpatialComponent::OnRemove()
 }
 
 
+#if 0 
 void RelativeSpatialComponent::DebugStr( GLString* str )
 {
 	str->Format( "[RelativeSpatial]=%.1f,%.1f,%.1f ", position.x, position.y, position.z );
 }
 
 
-void RelativeSpatialComponent::OnChitMsg( Chit* chit, int id, const ChitEvent* event )
-{
-	if ( id == SPATIAL_MSG_CHANGED) {
-		SpatialComponent* other = chit->GetSpatialComponent();
-		GLASSERT( other );
-		RenderComponent* render = chit->GetRenderComponent();
+//void RelativeSpatialComponent::OnChitMsg( Chit* chit, int id, const ChitEvent* event )
+//{
+//	if ( id == SPATIAL_MSG_CHANGED) {
+
+
+		RenderComponent* otherRender = chit->GetRenderComponent();
 
 		Matrix4 xform;
-		if ( render && !metaData.empty() ) {
-			render->GetMetaData( metaData.c_str(), &xform );
+		if ( otherRender && !metaData.empty() ) {
+			otherRender->GetMetaData( metaData.c_str(), &xform );
 		}
 		else {
 			GLASSERT( 0 );	// need to get the other path working
 		}
 
-
-		/*
-		Matrix4 m, r, t;
-		r.SetYRotation(   other->GetYRotation() );
-
-		Vector3F newPos = r * relativePosition;
-
-		this->SetPosYRot( other->GetPosition() + newPos,
-						  other->GetYRotation() + relativeYRotation );
-		*/
-	}
-}
-
-
-/*
-void RelativeSpatialComponent::SetRelativePosYRot( float x, float y, float z, float rot )
-{
-	relativePosition.Set( x, y, z );
-	relativeYRotation = rot;
-}
-*/
+		Vector3F v;
+		Quaternion q;
+		Quaternion::Decompose( xform, &v, &q );
+		this->SetPosRot( v, q );
+#endif

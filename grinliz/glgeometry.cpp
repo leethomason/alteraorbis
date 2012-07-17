@@ -849,6 +849,38 @@ void Quaternion::SLERP( const Quaternion& start, const Quaternion& end, float t,
 }
 
 
+void Quaternion::Decompose( const Matrix4& tr, Vector3F* pos,  Quaternion* rot )
+{
+	// Once again: Diana Gruber "The Mathematics of the 3D Rotation Matrix" to the rescue.
+	// "just multiply the transform matrix by the transpose of the rotation matrix to get the translation matrix"
+	// However, raw extraction seems to work fine...which meanns my transforms may
+	// all use the opposite convention. Hmm.
+
+	Matrix4 r = tr;
+	r.m14 = 0;
+	r.m24 = 0;
+	r.m34 = 0;
+	r.m44 = 1;
+	rot->FromRotationMatrix( r );
+
+	/*
+	Matrix4 rTranspose;
+	r.Transpose( &rTranspose );
+
+	Matrix4 t = tr * rTranspose;
+	pos.Set( t.m14, t.m24, t.m34 );
+	*/
+	pos->Set( tr.m14, tr.m24, tr.m34 );
+
+#ifdef DEBUG
+	Matrix4 rmat, tmat;
+	rot->ToMatrix( &rmat );
+	tmat.SetTranslation( *pos );
+	GLASSERT( Equal( tmat*rmat, tr ));
+#endif
+}
+
+
 int grinliz::ComparePlaneAABB( const Plane& plane, const Rectangle3F& aabb )
 {
 	// Only need to check the most positive and most negative point,

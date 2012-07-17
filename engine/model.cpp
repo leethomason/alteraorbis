@@ -255,6 +255,23 @@ void Model::SetPosAndYRotation( const grinliz::Vector3F& pos, float r )
 }
 
 
+void Model::SetTransform( const grinliz::Matrix4& tr )
+{
+	Quaternion q;
+	Vector3F v;
+	Quaternion::Decompose( tr, &v, &q );
+
+	if ( v != pos || q != rot ) {
+		pos = v;
+		rot = q;
+		Modify();
+		if ( tree ) {
+			tree->Update( this );
+		}
+	}
+}
+
+
 void Model::SetPos( const grinliz::Vector3F& pos )
 { 
 	if ( pos != this->pos ) {
@@ -390,7 +407,6 @@ void Model::CalcMetaData( const char* name, grinliz::Matrix4* meta ) const
 		Matrix4 local;
 		local.SetTranslation( data->pos );
 
-		GLASSERT( 0 );	// DEBUG THIS - order correct?
 		*meta = xform * local;
 	}
 	else {
