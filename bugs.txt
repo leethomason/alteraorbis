@@ -17,7 +17,7 @@
 
 - combat test scene
 	X animation/lack of making me crazy. What plan?
-	X particle effect for melee strick not "connected" to character
+	X particle effect for melee strike not "connected" to character
 	- item definition: one big wad of data? handle "inherited items"?
 	- properly hook up items and such, so that items, health, all be driven correctly
 	- use space tree query for impacted items
@@ -52,6 +52,7 @@ X remove particle params not needed for world
 - shadows should be part of space-tree bounds
 - memory pool everything in the chit/component system
 - container to support copy semantics
+- analyze/optimize what causes component update: DoTick(), etc. Likely many DoTicks() getting called that aren't needed. (especially rendering...)
 
 X particle test scene
 	X alpha processing for additive blending

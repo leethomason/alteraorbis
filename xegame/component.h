@@ -39,6 +39,7 @@ public:
 
 	// Tick is a regular call; update because of events/change.
 	virtual void DoTick( U32 delta )			{}
+	virtual void DoSlowTick()					{}
 	virtual void DoUpdate()						{}
 	virtual void DebugStr( grinliz::GLString* str )		{}
 	// 'chit' and/or 'event' can be null, depending on event

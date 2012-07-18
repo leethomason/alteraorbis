@@ -85,6 +85,7 @@ private:
 	ChitBag* chitBag;
 	int id;
 	int nTickers;	// number of components that need a tick.
+	U32 slowTickTimer;
 	grinliz::CDynArray<IChitListener*, 2> listeners;
 
 	struct CList

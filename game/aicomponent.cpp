@@ -27,7 +27,7 @@ AIComponent::AIComponent( Engine* _engine, WorldMap* _map )
 {
 	engine = _engine;
 	map = _map;
-	combatInfoAge = 0xffffff;
+	currentAction = 0;
 }
 
 
@@ -50,6 +50,7 @@ int AIComponent::GetTeamStatus( Chit* other )
 }
 
 
+/*
 void AIComponent::UpdateChitData()
 {
 	for( int k=0; k<2; ++k ) {
@@ -69,75 +70,82 @@ void AIComponent::UpdateChitData()
 		}
 	}
 }
+*/
 
 
 void AIComponent::UpdateCombatInfo( const Rectangle2F* _zone )
 {
-	combatInfoAge = (parentChit->ID())%100;	// space out updates in a random yet predictable way
-
 	SpatialComponent* sc = parentChit->GetSpatialComponent();
 	if ( !sc ) return;
 	Vector2F center = sc->GetPosition2D();
 
 	Rectangle2F zone;
-	zone.min = center; zone.max = center;
-	zone.Outset( COMBAT_INFO_RANGE );
 	if ( !_zone ) {
-		// Clear and reset the existing info.
-		friendList.Clear();
-		enemyList.Clear();
+		// Generate the default zone.
+		zone.min = center; zone.max = center;
+		zone.Outset( COMBAT_INFO_RANGE );
 	}
 	else {
 		// Use the passed in info, add to the existing.
 		zone = *_zone;
 	}
-
-	const CDynArray<Chit*>& chitArr = GetChitBag()->QuerySpatialHash( zone, parentChit, true );
+	// Clear and reset the existing info.
+	friendList.Clear();
+	enemyList.Clear();
 
 	// Sort in by as-the-crow-flies range. Not correct, but don't want to deal with arbitrarily long query.
+	const CDynArray<Chit*>& chitArr = GetChitBag()->QuerySpatialHash( zone, parentChit, true );
 
 	for( int i=0; i<chitArr.Size(); ++i ) {
 		Chit* chit = chitArr[i];
 
 		int teamStatus = GetTeamStatus( chit );
-		ChitData* cd = 0;
 
 		if ( teamStatus == FRIENDLY && friendList.HasCap() )
-			cd = friendList.Push();
+			friendList.Push( chit->ID() );
 		else if ( teamStatus == ENEMY && enemyList.HasCap() )
-			cd = enemyList.Push();
-
-		if ( cd ) {
-			Vector2F chitCenter = chit->GetSpatialComponent()->GetPosition2D();
-			float cost = FLT_MAX;
-			map->CalcPath( center, chitCenter, 0, 0, 0, &cost, false );
-
-			cd->chitID = chit->ID();
-			cd->chit   = chit;
-			cd->pathDistance = cost;
-			cd->range = (center-chitCenter).Length();
-		}
+			 enemyList.Push( chit->ID() );
 	}
+}
+
+
+void AIComponent::DoSlowTick()
+{
+	UpdateCombatInfo();
+}
+
+
+void AIComponent::DoMelee()
+{
+	// Are we close enough to hit? Then swing. Else move to target.
+
 }
 
 
 void AIComponent::DoTick( U32 deltaTime )
 {
-	// Update the info around us.
-	// Then:
-	//		Move: closer, away, strafe
-	//		Shoot
-	//		Reload
+	// Are we doing something? Then do that; if not, look for
+	// something else to do.
+	if ( currentAction ) {
+		switch( currentAction ) {
+		case MELEE:
+			DoMelee();
+			break;
+		}
 
-	// Routine update to situational awareness.
-	combatInfoAge += deltaTime;
-	if ( combatInfoAge > UPDATE_COMBAT_INFO ) {
-		UpdateCombatInfo();
+		default:
+			GLASSERT( 0 );
+			currentAction = 0;
 	}
 	else {
-		UpdateChitData();
-	}
+		
+		if ( !enemyList.Empty() ) {
+			currentAction = MELEE;
+			action.melee.targetID = enemyList[0];
+		}
 
+	}
+	/*
 	// Check for events that change the situation
 	const CDynArray<ChitEvent>& events = GetChitBag()->GetEvents();
 	ItemComponent* itemComp = GET_COMPONENT( parentChit, ItemComponent );
@@ -200,6 +208,7 @@ void AIComponent::DoTick( U32 deltaTime )
 			}
 		}
 	}
+	*/
 }
 
 

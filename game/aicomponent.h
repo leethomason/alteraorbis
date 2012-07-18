@@ -22,6 +22,7 @@ public:
 
 	virtual bool NeedsTick()					{ return true; }
 	virtual void DoTick( U32 delta );
+	virtual void DoSlowTick();
 	virtual void DebugStr( grinliz::GLString* str );
 	virtual void OnChitMsg( Chit* chit, int id, const ChitEvent* event );
 
@@ -32,25 +33,37 @@ private:
 		NEUTRAL,
 		
 		MAX_TRACK = 8,
-
 	};
 
 	void UpdateCombatInfo( const grinliz::Rectangle2F* _zone=0 );
-	void UpdateChitData();	// brings chit pointers in friend/enemy list up to date			
+	//void UpdateChitData();	// brings chit pointers in friend/enemy list up to date			
 	int GetTeamStatus( Chit* other );
 
 	Engine*		engine;
 	WorldMap*	map;
-	U32			combatInfoAge;
 
-	struct ChitData {
-		int   chitID;
-		Chit* chit;			// *only* valid after Purge() or UpdateCombatInfo()	
-		float pathDistance;
-		float range;
+	enum {
+		// Possible actions:
+		NO_ACTION,
+		MELEE			// go to the target and hit it.
 	};
-	grinliz::CArray<ChitData, MAX_TRACK> friendList;
-	grinliz::CArray<ChitData, MAX_TRACK> enemyList;
+	int currentAction;
+
+	void DoMelee();
+
+	struct ActionMelee
+	{
+		int targetID;
+	};
+	
+	union Action
+	{
+		ActionMelee	melee;
+	};
+	Action action;
+
+	grinliz::CArray<int, MAX_TRACK> friendList;
+	grinliz::CArray<int, MAX_TRACK> enemyList;
 };
 
 
