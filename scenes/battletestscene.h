@@ -30,10 +30,16 @@ public:
 	virtual void MouseMove( const grinliz::Vector2F& view, const grinliz::Ray& world ) { debugRay = world; }
 
 private:
+	enum {
+		HUMAN=1,
+		HORNET,
+		DUMMY
+	};
+
 	void LoadMap();
 	void CreateChit( const grinliz::Vector2I& p );
 
-	gamui::PushButton okay;
+	gamui::PushButton okay, goButton;
 
 	Engine* engine;
 	WorldMap* map;

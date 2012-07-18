@@ -128,6 +128,8 @@ public:
 
 	virtual void DeviceLoss();
 
+	void LoadConfigFiles( const char* particle, const char* lighting );
+
 private:
 	enum ShadowState {
 		IN_SHADOW,

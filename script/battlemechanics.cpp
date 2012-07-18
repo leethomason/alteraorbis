@@ -61,7 +61,7 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, WeaponItem* weapon
 
 	if ( engine && src->GetRenderComponent() ) {
 		static const Vector4F POS = { 0, 0, 0, 1 };
-		static const Vector4F DIR = { 0, 0, 0, 0 };
+		static const Vector4F DIR = { 0, 0, 1, 0 };
 
 		// fixme: switch to barrel or emitter, not trigger
 		Matrix4 triggerXForm;
@@ -77,8 +77,6 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, WeaponItem* weapon
 		Vector3F cross;
 		static const Vector3F UP = { 0, 1, 0 };
 		CrossProduct( srcNormal3, UP, &cross );
-
-		engine->particleSystem->EmitPD( "melee", trigger, UP, engine->camera.EyeDir3(), 0 );
 	}
 
 

@@ -31,12 +31,20 @@ BattleTestScene::BattleTestScene( LumosGame* game ) : Scene( game )
 	debugRay.origin.Zero();
 
 	game->InitStd( &gamui2D, &okay, 0 );
+	LayoutCalculator layout = game->DefaultLayout();
+
+	const ButtonLook& look = game->GetButtonLook( LumosGame::BUTTON_LOOK_STD );
+	const float width  = layout.Width();
+	const float height = layout.Height();
+
+	goButton.Init( &gamui2D, look );
+	goButton.SetText( "Go!" );
+	goButton.SetSize( width, height );
+
 	engine = 0;
 	map = 0;
 
 	LoadMap();
-
-//	LayoutCalculator layout = game->DefaultLayout();
 }
 
 
@@ -53,8 +61,9 @@ void BattleTestScene::Resize()
 	LumosGame* lumosGame = static_cast<LumosGame*>( game );
 	lumosGame->PositionStd( &okay, 0 );
 
-	//const Screenport& port = lumosGame->GetScreenport();
-	//LayoutCalculator layout = lumosGame->DefaultLayout();
+	const Screenport& port = lumosGame->GetScreenport();
+	LayoutCalculator layout = lumosGame->DefaultLayout();
+	layout.PosAbs( &goButton, 0, -2 );
 }
 
 
@@ -68,7 +77,7 @@ void BattleTestScene::LoadMap()
 	map->InitPNG( "./res/testarena32.png", &blocks, &waypoints, &features );
 
 	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase(), map );	
-	engine->particleSystem->LoadParticleDefs( "./res/particles.xml" );
+	engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
 
 	for ( int i=0; i<blocks.Size(); ++i ) {
 		Chit* chit = chitBag.NewChit();
@@ -102,29 +111,15 @@ void BattleTestScene::LoadMap()
 	CreateChit( dummy );
 
 	engine->CameraLookAt( (float)map->Width()/2, (float)map->Height()/2, 
-		                  42.f,		// height
+		                  22.f,		// height
 						  225.f );	// rotattion
 
-	// Trigger the AI to do something.
-	ChitEvent event( AI_EVENT_AWARENESS );
-	event.bounds.Set( 0, 0, (float)(map->Width()), (float)(map->Height()) );
-
-	event.data0 = 0;	
-	//chitBag.QueueEvent( event );
-	event.data0 = 1;	
-	//chitBag.QueueEvent( event );
 }
 
 
 void BattleTestScene::CreateChit( const Vector2I& p )
 {
 	//GRINLIZ_PERFTRACK;
-
-	enum {
-		HUMAN=1,
-		HORNET,
-		DUMMY
-	};
 
 	int team = HUMAN;
 	const char* asset = "humanFemale";
@@ -229,6 +224,14 @@ void BattleTestScene::ItemTapped( const gamui::UIItem* item )
 {
 	if ( item == &okay ) {
 		game->PopScene();
+	}
+	else if ( item == &goButton ) {
+		// Trigger the AI to do something.
+		ChitEvent event( AI_EVENT_AWARENESS );
+		event.bounds.Set( 0, 0, (float)(map->Width()), (float)(map->Height()) );
+
+		event.data0 = HUMAN;	
+		chitBag.QueueEvent( event );
 	}
 }
 

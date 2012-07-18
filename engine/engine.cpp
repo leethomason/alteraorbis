@@ -624,3 +624,15 @@ Texture* Engine::GetRenderTargetTexture( int i )
 	GLASSERT( i >= 0 && i < RT_COUNT );
 	return renderTarget[i] ? renderTarget[i]->GetTexture() : 0; 
 }
+
+
+void Engine::LoadConfigFiles( const char* particleName, const char* lightName )
+{
+	particleSystem->LoadParticleDefs( particleName );
+
+	tinyxml2::XMLDocument doc;
+	doc.LoadFile( lightName );
+	lighting.Load( doc.FirstChildElement( "lighting" ));
+}
+
+
