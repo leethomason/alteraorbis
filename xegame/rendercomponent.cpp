@@ -73,9 +73,9 @@ SpatialComponent* RenderComponent::SyncToSpatial()
 }
 
 
-int RenderComponent::CalcAnimation() const
+AnimationType RenderComponent::CalcAnimation() const
 {
-	int n = ANIM_STAND;
+	AnimationType n = ANIM_STAND;
 
 	MoveComponent* move = parentChit->GetMoveComponent();
 	bool isMoving = move && move->IsMoving();
@@ -101,9 +101,8 @@ int RenderComponent::CalcAnimation() const
 
 bool RenderComponent::AnimationReady() const
 {
-	if ( model[0] ) {
-			
-	}
+	// fixme: should do something
+	return true;
 }
 
 
@@ -149,7 +148,7 @@ void RenderComponent::DoTick( U32 deltaTime )
 	SpatialComponent* spatial = SyncToSpatial();
 	// Animate the primary model.
 	if ( spatial && model[0] && model[0]->GetAnimationResource() ) {
-		const char* n = this->GetAnimationName();
+		AnimationType n = this->CalcAnimation();
 		model[0]->SetAnimation( n, CROSS_FADE_TIME );
 		model[0]->DeltaAnimation( deltaTime, 0 );
 	}

@@ -267,8 +267,8 @@ public:
 	// Get the animation resource, if it exists.
 	const AnimationResource* GetAnimationResource() const	{ return animationResource; }
 	// Set the current animation, null or "reference" turns off animation.
-	void SetAnimation( int id, U32 crossFade );
-	int GetAnimation() const						{ return animationID; }
+	void SetAnimation( AnimationType id, U32 crossFade );
+	AnimationType GetAnimation() const						{ return animationID; }
 	// Update the time and animation rendering.
 	void DeltaAnimation( U32 time, grinliz::CArray<AnimationMetaData, 4> *metaData );
 	void SetAnimationRate( float rate )						{ animationRate = rate; }
@@ -384,8 +384,8 @@ private:
 	U32 totalCrossFadeTime;
 	U32 crossFadeTime;
 	const AnimationResource* animationResource;
-	int animationID;
-	int prevAnimationID;
+	AnimationType animationID;
+	AnimationType prevAnimationID;
 
 	grinliz::Vector4F	param[EL_MAX_MODEL_GROUPS];
 

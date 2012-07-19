@@ -3,9 +3,11 @@
 
 #include "component.h"
 #include "../engine/enginelimits.h"
+#include "../engine/animation.h"
 #include "../xegame/xegamelimits.h"
 #include "../grinliz/glvector.h"
 #include "../grinliz/glmatrix.h"
+
 
 class Engine;
 class ModelResource;
@@ -50,7 +52,7 @@ public:
 	void Detach( const char* metaData );
 
 private:
-	int CalcAnimation() const;
+	AnimationType CalcAnimation() const;
 	SpatialComponent* SyncToSpatial();	// this a scary function: location is stored in both the model and the spatialcomponent
 
 	Engine* engine;

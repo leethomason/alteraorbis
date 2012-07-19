@@ -174,10 +174,9 @@ void AnimationScene::UpdateAnimationInfo()
 	const char* name = "no animation";
 	if ( nAnim > 0 ) {
 		name = res->AnimationName( currentAnim );
-		if ( !StrEqual( model[0]->GetAnimation(), name )) {
-			for( int i=0; i<NUM_MODELS; ++i ) {
-				model[i]->SetAnimation( name, 500 );
-			}
+		AnimationType type = AnimationResource::NameToType( name );
+		for( int i=0; i<NUM_MODELS; ++i ) {
+			model[i]->SetAnimation( type, 500 );
 		}
 	}
 	animName.SetText( name );

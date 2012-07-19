@@ -304,7 +304,7 @@ void Model::SetRotation( const Quaternion& q )
 }
 
 
-void Model::SetAnimation( int id, U32 crossFade )
+void Model::SetAnimation( AnimationType id, U32 crossFade )
 {
 	GLASSERT( id >= ANIM_OFF && id < ANIM_COUNT );
 
@@ -316,9 +316,9 @@ void Model::SetAnimation( int id, U32 crossFade )
 
 			animationID = id;
 			GLASSERT( animationResource );
-			GLASSERT( animationResource->HasAnimation( name ));
+			GLASSERT( animationResource->HasAnimation( id ));
 
-			U32 duration = animationResource->Duration( name );
+			U32 duration = animationResource->Duration( id );
 			totalCrossFadeTime = Min( totalCrossFadeTime, duration / 2 );
 		}
 	}
@@ -335,7 +335,7 @@ void Model::DeltaAnimation( U32 time, grinliz::CArray<AnimationMetaData, 4> *met
 	}
 
 	if ( metaData && HasAnimation() ) {
-		animationResource->GetMetaData( animationName.c_str(), animationTime, animationTime+time, metaData );
+		animationResource->GetMetaData( animationID, animationTime, animationTime+time, metaData );
 	}
 
 	animationTime += time;
@@ -353,11 +353,11 @@ void Model::CalcHitAABB( Rectangle3F* aabb ) const
 
 void Model::CalcAnimation( BoneData* boneData ) const
 {
-	animationResource->GetTransform( animationName.c_str(), resource->header, animationTime, boneData );
+	animationResource->GetTransform( animationID, resource->header, animationTime, boneData );
 
-	if ( crossFadeTime < totalCrossFadeTime && !prevAnimationName.empty() ) {
+	if ( (crossFadeTime < totalCrossFadeTime) && (prevAnimationID >= 0) ) {
 		BoneData boneData2;
-		animationResource->GetTransform( prevAnimationName.c_str(), resource->header, animationTime, &boneData2 );
+		animationResource->GetTransform( prevAnimationID, resource->header, animationTime, &boneData2 );
 		float fraction = (float)crossFadeTime / (float)totalCrossFadeTime;
 
 		for( int i=0; i<EL_MAX_BONES; ++i ) {
@@ -378,11 +378,11 @@ void Model::CalcAnimation( BoneData* boneData ) const
 
 void Model::CalcAnimation( BoneData::Bone* bone, const char* boneName ) const
 {
-	animationResource->GetTransform( animationName.c_str(), boneName, resource->header, animationTime, bone );
+	animationResource->GetTransform( animationID, boneName, resource->header, animationTime, bone );
 
-	if ( crossFadeTime < totalCrossFadeTime && !prevAnimationName.empty() ) {
+	if ( crossFadeTime < totalCrossFadeTime && (prevAnimationID >= 0) ) {
 		BoneData::Bone bone2;
-		animationResource->GetTransform( prevAnimationName.c_str(), boneName, resource->header, animationTime, &bone2 );
+		animationResource->GetTransform( prevAnimationID, boneName, resource->header, animationTime, &bone2 );
 		float fraction = (float)crossFadeTime / (float)totalCrossFadeTime;
 
 		float angle1 = bone->angleRadians;

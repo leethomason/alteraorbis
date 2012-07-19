@@ -128,7 +128,7 @@ void AIComponent::DoTick( U32 deltaTime )
 	// something else to do.
 	if ( currentAction ) {
 
-		if ( parentChit->GetRenderComponent() && parentChit->GetRenderComponent()->AnimationBusy() ) {
+		if ( parentChit->GetRenderComponent() && !parentChit->GetRenderComponent()->AnimationReady() ) {
 			// just wait.
 		}
 		else {

@@ -7,9 +7,32 @@ using namespace grinliz;
 
 AnimationResourceManager* AnimationResourceManager::instance = 0;
 
-static const char* gAnimationName[ (int)ANIM_COUNT ] = {
-	
+static const char* gAnimationName[ ANIM_COUNT ] = {
+	"reference",
+	"walk",
+	"gunrun",
+	"gunstand",
+	"melee",
+	"impactlight",
+	"impactheavy"
 };
+
+
+/* static */ const char* AnimationResource::TypeToName( AnimationType type )
+{
+	return gAnimationName[ type ];
+}
+
+/* static */ AnimationType AnimationResource::NameToType( const char* name )
+{
+	for( int i=0; i<ANIM_COUNT; ++i ) {
+		if ( StrEqual( gAnimationName[i], name )) {
+			return (AnimationType)i;
+		}
+	}
+	return ANIM_OFF;
+}
+
 
 void AnimationResourceManager::Create()
 {
@@ -60,7 +83,7 @@ const AnimationResource* AnimationResourceManager::GetResource( const char* name
 		return 0;
 	}
 	for( int i=0; i<resArr.Size(); ++i ) {
-		if ( StrEqual( resArr[i]->Name(), name ) ) {
+		if ( StrEqual( resArr[i]->ResourceName(), name ) ) {
 			return resArr[i];
 		}
 	}
@@ -72,7 +95,7 @@ const AnimationResource* AnimationResourceManager::GetResource( const char* name
 AnimationResource::AnimationResource( const gamedb::Item* _item )
 {
 	item = _item;
-	name = item->Name();
+	resName = item->Name();
 	nAnimations = item->NumChildren();
 }
 
@@ -86,13 +109,14 @@ const char* AnimationResource::AnimationName( int index ) const
 
 bool AnimationResource::HasAnimation( AnimationType type ) const
 {
-
+	const char* name = TypeToName( type );
 	return item->Child( name ) != 0;
 }
 
 
-U32 AnimationResource::Duration( const char* name ) const
+U32 AnimationResource::Duration( AnimationType type ) const
 {
+	const char* name = TypeToName( type );
 	const gamedb::Item* animItem = item->Child( name );
 	GLASSERT( animItem );
 	U32 totalTime = (U32)animItem->GetFloat( "totalDuration" );
@@ -100,7 +124,7 @@ U32 AnimationResource::Duration( const char* name ) const
 }
 
 
-bool AnimationResource::GetTransform(	const char* animationName,	// which animation to play: "reference", "gunrun", etc.
+bool AnimationResource::GetTransform(	AnimationType type,	// which animation to play: "reference", "gunrun", etc.
 										const char* boneName,
 										const ModelHeader& header,	// used to get the bone IDs
 										U32 time,					// time for this animation
@@ -108,7 +132,7 @@ bool AnimationResource::GetTransform(	const char* animationName,	// which animat
 {
 	// FIXME optimize to calc only one bone?
 	BoneData boneData;
-	GetTransform( animationName, header, time, &boneData );
+	GetTransform( type, header, time, &boneData );
 	int index = header.BoneIDFromName( boneName );
 	if ( index >= 0 ) {
 		*bone = boneData.bone[index];		
@@ -118,8 +142,9 @@ bool AnimationResource::GetTransform(	const char* animationName,	// which animat
 }
 
 
-bool AnimationResource::GetTransform( const char* animationName, const ModelHeader& header, U32 timeClock, BoneData* boneData ) const
+bool AnimationResource::GetTransform( AnimationType type, const ModelHeader& header, U32 timeClock, BoneData* boneData ) const
 {
+	const char* animationName = TypeToName( type );
 	const gamedb::Item* animItem = item->Child( animationName );
 	GLASSERT( animItem );
 	memset( boneData, 0, sizeof( *boneData ));
@@ -190,10 +215,11 @@ bool AnimationResource::GetTransform( const char* animationName, const ModelHead
 }
 
 
-void AnimationResource::GetMetaData(	const char* animationName,
+void AnimationResource::GetMetaData(	AnimationType type,
 										U32 t0, U32 t1,				// t1 > t0
 										grinliz::CArray<AnimationMetaData, EL_MAX_METADATA>* data ) const
 {
+	const char* animationName = TypeToName( type );
 	const gamedb::Item* animItem = item->Child( animationName );
 	GLASSERT( animItem );
 	const gamedb::Item* metaItem = animItem->Child( "metaData" );

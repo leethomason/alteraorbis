@@ -41,13 +41,18 @@ public:
 	AnimationResource( const gamedb::Item* animationItem );
 	~AnimationResource()	{}
 
+	// Used in the UI/debugging
+	static const char* TypeToName( AnimationType type );	// Convert type to name
+	static AnimationType NameToType( const char* name );
+
 	// Name of the resource, not the animation
-	const char* Name() const		{ return name; }
-	int NumAnimations() const		{ return nAnimations; }
+	const char* ResourceName() const		{ return resName; }
+	int NumAnimations() const				{ return nAnimations; }
 
 	bool		HasAnimation( AnimationType type ) const;
-	const char* AnimationName( int index ) const;
-	U32			Duration( const char* name ) const;
+	const char* AnimationName( int index ) const;			// Get the name of animation at this location
+	
+	U32			Duration( AnimationType name ) const;
 
 	bool GetTransform(	AnimationType type,			// which animation to play: "reference", "gunrun", etc.
 						const ModelHeader& header,	// used to get the bone IDs
@@ -65,7 +70,7 @@ public:
 						grinliz::CArray<AnimationMetaData, EL_MAX_METADATA>* data ) const;
 
 private:
-	const char* name;
+	const char* resName;
 	int nAnimations;
 
 	const gamedb::Item* item;
