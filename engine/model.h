@@ -95,6 +95,7 @@ struct ModelMetaData {
 	grinliz::CStr< EL_RES_NAME_LEN >	boneName;	// name of the bone this metadat is attached to (if any)
 };
 
+
 struct ModelHeader
 {
 	struct BoneDesc {
@@ -266,8 +267,8 @@ public:
 	// Get the animation resource, if it exists.
 	const AnimationResource* GetAnimationResource() const	{ return animationResource; }
 	// Set the current animation, null or "reference" turns off animation.
-	void SetAnimation( const char* name, U32 crossFade );
-	const char* GetAnimation() const						{ return animationName.c_str(); }
+	void SetAnimation( int id, U32 crossFade );
+	int GetAnimation() const						{ return animationID; }
 	// Update the time and animation rendering.
 	void DeltaAnimation( U32 time, grinliz::CArray<AnimationMetaData, 4> *metaData );
 	void SetAnimationRate( float rate )						{ animationRate = rate; }
@@ -366,7 +367,7 @@ private:
 		//mapBoundsCache.Set( -1, -1, -1, -1 ); 
 	}
 	const grinliz::Matrix4& InvXForm() const;
-	bool HasAnimation() const { return animationResource && !animationName.empty(); }
+	bool HasAnimation() const { return animationResource && (animationID>=0); }
 	void CalcAnimation( BoneData* boneData ) const;	// compute the animition, accounting for crossfade, etc.
 	void CalcAnimation( BoneData::Bone* bone, const char* boneName ) const;	// compute the animition, accounting for crossfade, etc.
 
@@ -383,8 +384,8 @@ private:
 	U32 totalCrossFadeTime;
 	U32 crossFadeTime;
 	const AnimationResource* animationResource;
-	grinliz::CStr< EL_RES_NAME_LEN > animationName;
-	grinliz::CStr< EL_RES_NAME_LEN > prevAnimationName;
+	int animationID;
+	int prevAnimationID;
 
 	grinliz::Vector4F	param[EL_MAX_MODEL_GROUPS];
 

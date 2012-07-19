@@ -37,9 +37,11 @@ public:
 	// ------ Additional --------
 	// Radius of the "base" the model stands on. Used to position
 	// the model so it doesn't walk into walls or other models.
-	float RadiusOfBase();
-	int   GetFlags() const { return flags; }
-	bool  GetMetaData( const char* name, grinliz::Matrix4* xform );
+	float	RadiusOfBase();
+	int		GetFlags() const { return flags; }
+	bool	GetMetaData( const char* name, grinliz::Matrix4* xform );
+	// Is the animation ready to change?
+	bool	AnimationReady() const;
 
 	// A render component has one primary, animated model. Additional
 	// assets (guns, shields, etc.) can be Attached and Detatched
@@ -48,7 +50,7 @@ public:
 	void Detach( const char* metaData );
 
 private:
-	const char* GetAnimationName() const;
+	int CalcAnimation() const;
 	SpatialComponent* SyncToSpatial();	// this a scary function: location is stored in both the model and the spatialcomponent
 
 	Engine* engine;

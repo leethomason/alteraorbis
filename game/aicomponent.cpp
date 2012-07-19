@@ -127,15 +127,22 @@ void AIComponent::DoTick( U32 deltaTime )
 	// Are we doing something? Then do that; if not, look for
 	// something else to do.
 	if ( currentAction ) {
-		switch( currentAction ) {
-		case MELEE:
-			DoMelee();
-			break;
-		}
 
-		default:
-			GLASSERT( 0 );
-			currentAction = 0;
+		if ( parentChit->GetRenderComponent() && parentChit->GetRenderComponent()->AnimationBusy() ) {
+			// just wait.
+		}
+		else {
+			switch( currentAction ) {
+
+			case MELEE:
+				DoMelee();
+				break;
+
+			default:
+				GLASSERT( 0 );
+				currentAction = 0;
+			}
+		}
 	}
 	else {
 		

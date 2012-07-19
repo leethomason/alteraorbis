@@ -11,6 +11,21 @@
 
 struct ModelHeader;
 
+enum AnimationType {
+	ANIM_OFF = -1,
+
+	ANIM_REFERENCE,
+	ANIM_STAND = ANIM_REFERENCE,
+
+	ANIM_WALK,
+	ANIM_GUN_WALK,
+	ANIM_GUN_STAND,
+	ANIM_MELEE,
+	ANIM_LIGHT_IMPACT,
+	ANIM_HEAVY_IMPACT,
+	ANIM_COUNT
+};
+
 
 // POD
 struct AnimationMetaData
@@ -30,22 +45,22 @@ public:
 	const char* Name() const		{ return name; }
 	int NumAnimations() const		{ return nAnimations; }
 
-	bool		HasAnimation( const char* name ) const;
+	bool		HasAnimation( AnimationType type ) const;
 	const char* AnimationName( int index ) const;
 	U32			Duration( const char* name ) const;
 
-	bool GetTransform(	const char* animationName,	// which animation to play: "reference", "gunrun", etc.
+	bool GetTransform(	AnimationType type,			// which animation to play: "reference", "gunrun", etc.
 						const ModelHeader& header,	// used to get the bone IDs
 						U32 time,					// time for this animation
 						BoneData* boneData ) const;
 
-	bool GetTransform(	const char* animationName,	// which animation to play: "reference", "gunrun", etc.
+	bool GetTransform(	AnimationType type,			// which animation to play: "reference", "gunrun", etc.
 						const char* boneName,
 						const ModelHeader& header,	// used to get the bone IDs
 						U32 time,					// time for this animation
 						BoneData::Bone* bone ) const;
 
-	void GetMetaData(	const char* animationName,
+	void GetMetaData(	AnimationType type,
 						U32 t0, U32 t1,				// t1 > t0
 						grinliz::CArray<AnimationMetaData, EL_MAX_METADATA>* data ) const;
 

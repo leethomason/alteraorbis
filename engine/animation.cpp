@@ -7,6 +7,10 @@ using namespace grinliz;
 
 AnimationResourceManager* AnimationResourceManager::instance = 0;
 
+static const char* gAnimationName[ (int)ANIM_COUNT ] = {
+	
+};
+
 void AnimationResourceManager::Create()
 {
 	GLASSERT( !instance );
@@ -80,8 +84,9 @@ const char* AnimationResource::AnimationName( int index ) const
 }
 
 
-bool AnimationResource::HasAnimation( const char* name ) const
+bool AnimationResource::HasAnimation( AnimationType type ) const
 {
+
 	return item->Child( name ) != 0;
 }
 

@@ -229,7 +229,7 @@ void Model::Init( const ModelResource* resource, SpaceTree* tree )
 	animationRate = 1.0f;
 	crossFadeTime = 0;
 	totalCrossFadeTime = 0;
-	animationName.Clear();
+	animationID = ANIM_OFF;
 }
 
 
@@ -304,15 +304,17 @@ void Model::SetRotation( const Quaternion& q )
 }
 
 
-void Model::SetAnimation( const char* name, U32 crossFade )
+void Model::SetAnimation( int id, U32 crossFade )
 {
-	if ( name && *name ) {
-		if ( animationName != name ) {
+	GLASSERT( id >= ANIM_OFF && id < ANIM_COUNT );
+
+	if ( id >= 0 ) {
+		if ( animationID != id ) {
 			totalCrossFadeTime = crossFade;
 			crossFadeTime = 0;
-			prevAnimationName = animationName;
+			prevAnimationID = animationID;
 
-			animationName = name;
+			animationID = id;
 			GLASSERT( animationResource );
 			GLASSERT( animationResource->HasAnimation( name ));
 
@@ -321,7 +323,7 @@ void Model::SetAnimation( const char* name, U32 crossFade )
 		}
 	}
 	else {
-		animationName = "";
+		animationID = ANIM_OFF;
 	}
 }
 

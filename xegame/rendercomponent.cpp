@@ -73,9 +73,9 @@ SpatialComponent* RenderComponent::SyncToSpatial()
 }
 
 
-const char* RenderComponent::GetAnimationName() const
+int RenderComponent::CalcAnimation() const
 {
-	const char* n = "reference";
+	int n = ANIM_STAND;
 
 	MoveComponent* move = parentChit->GetMoveComponent();
 	bool isMoving = move && move->IsMoving();
@@ -84,18 +84,26 @@ const char* RenderComponent::GetAnimationName() const
 
 	if ( isMoving ) {
 		if ( isCarrying ) {
-			n = "gunrun";
+			n = ANIM_GUN_WALK;
 		}
 		else {
-			n = "walk";
+			n = ANIM_WALK;
 		}
 	}
 	else {
 		if ( isCarrying ) {
-			n = "gunstand";
+			n = ANIM_GUN_STAND;
 		}
 	}
 	return n;
+}
+
+
+bool RenderComponent::AnimationReady() const
+{
+	if ( model[0] ) {
+			
+	}
 }
 
 
@@ -172,14 +180,13 @@ float RenderComponent::RadiusOfBase()
 
 bool RenderComponent::GetMetaData( const char* name, grinliz::Matrix4* xform )
 {
-	if ( model ) {
+	if ( model[0] ) {
 		SyncToSpatial();
 		model[0]->CalcMetaData( name, xform );
 		return true;
 	}
 	return false;
 }
-
 
 
 void RenderComponent::DebugStr( GLString* str )
