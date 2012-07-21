@@ -36,7 +36,6 @@ private:
 	};
 
 	void UpdateCombatInfo( const grinliz::Rectangle2F* _zone=0 );
-	//void UpdateChitData();	// brings chit pointers in friend/enemy list up to date			
 	int GetTeamStatus( Chit* other );
 
 	Engine*		engine;

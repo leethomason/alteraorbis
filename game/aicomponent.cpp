@@ -119,29 +119,82 @@ void AIComponent::DoMelee()
 {
 	// Are we close enough to hit? Then swing. Else move to target.
 
+	Chit* targetChit = parentChit->GetChitBag()->GetChit( action.melee.targetID );
+	if ( targetChit == 0 ) {
+		currentAction = NO_ACTION;
+		enemyList.Clear();
+		return;
+	}
+
+	SpatialComponent* spatial = parentChit->GetSpatialComponent();
+	if ( !spatial ) return;
+	RenderComponent* render = parentChit->GetRenderComponent();
+	if ( !render ) return;
+	PathMoveComponent* pmc = GET_COMPONENT( parentChit, PathMoveComponent );
+	if ( !pmc ) return;
+
+	SpatialComponent* targetSpatial = targetChit->GetSpatialComponent();
+	if ( !targetSpatial ) return;
+	RenderComponent* targetRender = targetChit->GetRenderComponent();
+	if ( !targetRender ) return;
+
+	Vector2F normalToTarget = spatial->GetPosition2D() - targetSpatial->GetPosition2D();
+	const float distToTarget = normalToTarget.Length();
+	normalToTarget.Normalize();
+
+	int test = IntersectRayCircle( targetSpatial->GetPosition2D(),
+								   targetRender->RadiusOfBase(),
+								   spatial->GetPosition2D(),
+								   normalToTarget );
+	bool intersect = ( test == INTERSECT || test == INSIDE );
+
+	const float meleeRangeDiff = 0.5f * render->RadiusOfBase();	// FIXME: correct??? better metric?
+	const float meleeRange = render->RadiusOfBase() + targetRender->RadiusOfBase() + meleeRangeDiff;
+
+	if ( intersect && distToTarget < meleeRange ) {
+		render->PlayAnimation( ANIM_MELEE );
+	}
+	else {
+		// Move to target. Be more careful if we are closer.
+		//if ( distToTarget < 2.0f ) {
+			pmc->QueueDest( targetSpatial->GetPosition2D(), RotationXZDegrees( normalToTarget.x, normalToTarget.y ) );
+		//}
+	}
 }
 
 
 void AIComponent::DoTick( U32 deltaTime )
 {
+	ItemComponent* itemComp = GET_COMPONENT( parentChit, ItemComponent );
+	if ( itemComp ) {
+		const CDynArray<ChitEvent>& events = GetChitBag()->GetEvents();
+		for( int i=0; i<events.Size(); ++i ) {
+			if( events[i].ID() == ChitEvent::AWARENESS ) {
+				const AwarenessChitEvent& event = (const AwarenessChitEvent&) events[i];
+				if ( event.Team() == itemComp->GetItem()->ToGameItem()->primaryTeam ) 
+				{
+					UpdateCombatInfo( &event.Bounds() );
+				}
+			}
+		}
+	}
+	if ( parentChit->GetRenderComponent() && !parentChit->GetRenderComponent()->AnimationReady() ) {
+		return;
+	}
+
 	// Are we doing something? Then do that; if not, look for
 	// something else to do.
 	if ( currentAction ) {
 
-		if ( parentChit->GetRenderComponent() && !parentChit->GetRenderComponent()->AnimationReady() ) {
-			// just wait.
-		}
-		else {
-			switch( currentAction ) {
+		switch( currentAction ) {
 
-			case MELEE:
-				DoMelee();
-				break;
+		case MELEE:
+			DoMelee();
+			break;
 
-			default:
-				GLASSERT( 0 );
-				currentAction = 0;
-			}
+		default:
+			GLASSERT( 0 );
+			currentAction = 0;
 		}
 	}
 	else {

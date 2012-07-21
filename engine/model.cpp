@@ -328,7 +328,7 @@ void Model::SetAnimation( AnimationType id, U32 crossFade )
 }
 
 
-void Model::DeltaAnimation( U32 time, grinliz::CArray<AnimationMetaData, 4> *metaData )
+void Model::DeltaAnimation( U32 time, grinliz::CArray<AnimationMetaData, EL_MAX_METADATA> *metaData, bool *looped )
 {
 	if ( animationRate != 1.0f ) {
 		time = (U32)((float)time*animationRate);
@@ -336,6 +336,15 @@ void Model::DeltaAnimation( U32 time, grinliz::CArray<AnimationMetaData, 4> *met
 
 	if ( metaData && HasAnimation() ) {
 		animationResource->GetMetaData( animationID, animationTime, animationTime+time, metaData );
+	}
+
+	if ( looped ) {
+		*looped = false;
+		U32 duration = animationResource->Duration( animationID );
+		U32 frame0 = animationTime % duration;
+		U32 frame1 = (animationTime+time) % duration;
+		if ( frame1 < frame0 ) 
+			*looped = true;
 	}
 
 	animationTime += time;

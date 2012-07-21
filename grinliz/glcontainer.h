@@ -155,10 +155,10 @@ public:
 		size += n;
 		return rst;
 	}
-	T* Push() {
-		GLASSERT( size < CAPACITY );
-		size++;
-		return &vec[size-1];
+
+	T Pop() {
+		GLASSERT( size > 0 );
+		return vec[--size];
 	}
 
 	int Size() const		{ return size; }

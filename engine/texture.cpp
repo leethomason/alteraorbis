@@ -130,7 +130,7 @@ Texture* TextureManager::GetTexture( const char* name, bool reload )
 				GLASSERT( t );
 			}
 			else {
-				t = textureArr.Push();
+				t = textureArr.PushArr(1);
 			}
 			t->Set( name, w, h, format, flags );
 			t->item = item;
@@ -162,7 +162,7 @@ Texture* TextureManager::CreateTexture( const char* name, int w, int h, int form
 		}
 	}
 	else {
-		t = textureArr.Push();
+		t = textureArr.PushArr(1);
 	}
 	GLASSERT( t );
 
@@ -242,7 +242,7 @@ const GPUMem* TextureManager::AllocGPUMemory(	int w, int h, int format, int flag
 	}
 
 	// allocate some memory (cache miss)
-	GPUMem* gpu = gpuMemArr.Push();
+	GPUMem* gpu = gpuMemArr.PushArr(1);
 	gpu->w = w;
 	gpu->h = h;
 	gpu->format = format;

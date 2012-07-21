@@ -398,7 +398,7 @@ void AnimationScene::DoTick( U32 deltaTime )
 {
 	grinliz::CArray<AnimationMetaData, 4> metaData;
 	for( int i=0; i<NUM_MODELS; ++i ) {
-		model[i]->DeltaAnimation( deltaTime, (i==0) ? &metaData : 0 );
+		model[i]->DeltaAnimation( deltaTime, (i==0) ? &metaData : 0, 0 );
 	}
 
 	static const Vector3F UP = { 0, 1, 0 };

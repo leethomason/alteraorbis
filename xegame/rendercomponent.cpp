@@ -3,6 +3,7 @@
 #include "inventorycomponent.h"
 #include "chit.h"
 
+#include "../engine/animation.h"
 #include "../engine/model.h"
 #include "../engine/engine.h"
 #include "../engine/particle.h"
@@ -75,6 +76,14 @@ SpatialComponent* RenderComponent::SyncToSpatial()
 
 AnimationType RenderComponent::CalcAnimation() const
 {
+	AnimationType current = model[0]->GetAnimation();
+	
+	// If the animation can't be interupted, just return
+	// the current animation.
+	if ( current == ANIM_MELEE ) {
+		return current;
+	}
+
 	AnimationType n = ANIM_STAND;
 
 	MoveComponent* move = parentChit->GetMoveComponent();
@@ -101,9 +110,28 @@ AnimationType RenderComponent::CalcAnimation() const
 
 bool RenderComponent::AnimationReady() const
 {
-	// fixme: should do something
+	AnimationType type = model[0]->GetAnimation();
+	if ( type == ANIM_MELEE ) {
+		return false;
+	}
 	return true;
 }
+
+
+bool RenderComponent::PlayAnimation( AnimationType type )
+{
+	if ( type == ANIM_MELEE ) {
+		if ( AnimationReady() ) {
+			model[0]->SetAnimation( ANIM_MELEE, CROSS_FADE_TIME );
+			return true;
+		}
+	}
+	else {
+		GLASSERT( 0 );	// need to support other cases
+	}
+	return false;
+}
+
 
 
 void RenderComponent::Attach( const char* metaData, const char* asset )
@@ -148,9 +176,25 @@ void RenderComponent::DoTick( U32 deltaTime )
 	SpatialComponent* spatial = SyncToSpatial();
 	// Animate the primary model.
 	if ( spatial && model[0] && model[0]->GetAnimationResource() ) {
+
 		AnimationType n = this->CalcAnimation();
 		model[0]->SetAnimation( n, CROSS_FADE_TIME );
-		model[0]->DeltaAnimation( deltaTime, 0 );
+
+		bool looped = false;
+		grinliz::CArray<AnimationMetaData, EL_MAX_METADATA> metaData;
+		model[0]->DeltaAnimation( deltaTime, &metaData, &looped );
+
+		if ( n == ANIM_MELEE || n == ANIM_LIGHT_IMPACT || n == ANIM_HEAVY_IMPACT ) {
+			model[0]->SetAnimation( ANIM_REFERENCE, CROSS_FADE_TIME );
+		}
+		for( int i=0; i<metaData.Size(); ++i ) {
+			if ( StrEqual( metaData[i].name, "impact" )) {
+				parentChit->SendMessage( RENDER_MSG_IMPACT, 0, 0 );
+			}
+			else {
+				GLASSERT( 0 );	// event not recognized
+			}
+		}
 	}
 	// Position the attachments
 	for( int i=1; i<NUM_MODELS; ++i ) {

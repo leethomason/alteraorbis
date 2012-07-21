@@ -44,6 +44,9 @@ public:
 	bool	GetMetaData( const char* name, grinliz::Matrix4* xform );
 	// Is the animation ready to change?
 	bool	AnimationReady() const;
+	// Play the special animations: MELEE, IMPACT, etc.
+	// Walk, stand, etc. are played automatically.
+	bool	PlayAnimation( AnimationType type );
 
 	// A render component has one primary, animated model. Additional
 	// assets (guns, shields, etc.) can be Attached and Detatched

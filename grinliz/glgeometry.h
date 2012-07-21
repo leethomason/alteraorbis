@@ -549,7 +549,7 @@ int IntersectRaySphere(	const Sphere& sphere,
 						const Vector3F& dir );
 
 /** Tests a ray to a sphere.
-	@return REJECT or INTERSECT
+	@return REJECT, INSIDE, INTERSECT
 */
 int IntersectRayCircle(	const Vector2F& center,
 						float radius,

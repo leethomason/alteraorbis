@@ -23,6 +23,8 @@ enum {
 	// Componets
 	SPATIAL_MSG_CHANGED,		// the position or rotation has changed
 
+	RENDER_MSG_IMPACT,			// impact metadata event has occured
+
 	GAME_COMPONENT_MSG_START = 0x100
 };
 

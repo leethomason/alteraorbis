@@ -50,13 +50,6 @@ Chit* ChitBag::GetChit( int id )
 }
 
 
-/*
-void ChitBag::RequestUpdate( Chit* chit )
-{
-	updateList.Push( chit );
-}
-*/
-
 void ChitBag::QueueDelete( Chit* chit )
 {
 	deleteList.Add( chit );

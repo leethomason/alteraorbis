@@ -6,23 +6,37 @@
 #include "../grinliz/glrectangle.h"
 #include "../grinliz/glvector.h"
 
-// Shallow
+
+// Shallow/copied
+// All data needs to be in the base class.
 class ChitEvent
 {
-public:
-
-	ChitEvent() : id( -1 )	{}
-	ChitEvent( int _id ) : id(_id), data0(-1), pData0(0), pData1(0) { 
-		normal.Zero(); 
-		bounds.Zero(); 
-	}
-
+protected:
 	int id;
-	int data0;
-	const void* pData0;	
-	const void* pData1;
-	grinliz::Vector2F    normal;
-	grinliz::Rectangle2F bounds;
+	grinliz::Rectangle2F bounds2F;
+
+	union {
+		int team;
+	};
+
+public:
+	ChitEvent( int _id=-1 ) : id( _id ) {}
+	int ID() const						{ return id; }
+
+	enum {
+		AWARENESS
+	};
+};
+
+
+class AwarenessChitEvent : public ChitEvent {
+public:
+	AwarenessChitEvent( int _team, const grinliz::Rectangle2F& _bounds ) : ChitEvent( ChitEvent::AWARENESS ) {
+		bounds2F = _bounds;
+		team = _team;
+	}
+	const grinliz::Rectangle2F& Bounds() const { return bounds2F; }
+	int Team() const { return team; }
 };
 
 

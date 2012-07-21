@@ -227,10 +227,9 @@ void BattleTestScene::ItemTapped( const gamui::UIItem* item )
 	}
 	else if ( item == &goButton ) {
 		// Trigger the AI to do something.
-		ChitEvent event( AI_EVENT_AWARENESS );
-		event.bounds.Set( 0, 0, (float)(map->Width()), (float)(map->Height()) );
-
-		event.data0 = HUMAN;	
+		Rectangle2F b;
+		b.Set( 0, 0, (float)map->Width(), (float)map->Height() );
+		AwarenessChitEvent event( HUMAN, b );
 		chitBag.QueueEvent( event );
 	}
 }

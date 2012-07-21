@@ -88,6 +88,11 @@ inline bool EqualInt( float a, float epsilon = EPSILON )
 */
 void MinDeltaDegrees( float angle0, float angle1, float* distance, float* bias );
 
+inline float RotationXZDegrees( float x, float z ) {
+	return NormalizeAngleDegrees( ToDegree( atan2f( x, z )));
+}
+
+
 inline float SquareF( float x ) { return x*x; }
 
 /** A length that is reasonably accurate. (24 bits or better.) */

@@ -175,7 +175,7 @@ void PathMoveComponent::RotationFirst( U32 delta )
 				continue;
 			}
 
-			float targetRot = NormalizeAngleDegrees( ToDegree( atan2f( delta.x, delta.y )));
+			float targetRot = RotationXZDegrees( delta.x, delta.y );
 
 			float deltaRot, bias;
 			MinDeltaDegrees( rot, targetRot, &deltaRot, &bias );

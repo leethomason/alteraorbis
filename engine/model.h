@@ -270,7 +270,10 @@ public:
 	void SetAnimation( AnimationType id, U32 crossFade );
 	AnimationType GetAnimation() const						{ return animationID; }
 	// Update the time and animation rendering.
-	void DeltaAnimation( U32 time, grinliz::CArray<AnimationMetaData, 4> *metaData );
+	void DeltaAnimation(	U32 time, 
+							grinliz::CArray<AnimationMetaData, EL_MAX_METADATA> *metaData,
+							bool *looped );
+
 	void SetAnimationRate( float rate )						{ animationRate = rate; }
 
 	// WARNING: not really supported. Just for debug rendering. May break:
