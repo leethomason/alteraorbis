@@ -27,15 +27,12 @@ distribution.
 #define GRINLIZ_MEMORY_POOL
 
 #include "gldebug.h"
-
-#ifdef DEBUG
-#include <string.h>
-#endif
-
+#include <new>
 
 namespace grinliz {
 
-/*	A memory pool that will dynamically grow as memory is needed.
+/*	
+	A memory pool that will dynamically grow as memory is needed.
 */
 class MemoryPool
 {
@@ -102,6 +99,31 @@ class MemoryPool
 	bool warn;
 };
 
+template < class T >
+class MemoryPoolT
+{
+public:
+	MemoryPoolT() : pool( "typed", sizeof(T) ) 	{}
+	~MemoryPoolT() {}
+
+	T* Alloc() {
+		void* mem = pool.Alloc();
+		return new (mem) T();
+	}
+	void Free( T* mem ) {
+		if ( mem ) {
+			mem->~T();
+			pool.Free( mem );
+		}
+	}
+
+	bool Empty() const { return pool.Empty(); }
+
+private:
+	MemoryPool pool;
+};
+
+#if 0
 /*	A memory pool that has a fixed allocation.
 	Essentially a cross between a linked list and an array.
 */
@@ -164,8 +186,8 @@ class FixedMemoryPool
 	unsigned inUse;
 	Chunk* root;
 };
+#endif
 
-
-};
+};	// grinliz
 
 #endif

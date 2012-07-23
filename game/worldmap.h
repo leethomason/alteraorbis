@@ -6,7 +6,7 @@
 #include "../micropather/micropather.h"
 #include "../grinliz/glrectangle.h"
 #include "../grinliz/glcontainer.h"
-#include "../SimpleLib/SimpleLib.h"
+#include "../grinliz/glmemorypool.h"
 
 class Texture;
 
@@ -103,6 +103,7 @@ private:
 	void Init( int w, int h );
 	void Tessellate();
 	void CalcZone( int x, int y );
+	void DeleteAllRegions();
 
 	void DrawZones();			// debugging
 	void ClearDebugDrawing();	// debugging
@@ -121,7 +122,7 @@ private:
 		U8 debug_path		: 1;
 
 		U16 x, y, dx, dy;
-		grinliz::CDynArray< micropather::StateCost, 8 > adjacent;
+		grinliz::CDynArray< micropather::StateCost> adjacent;
 
 		Region() : x(-1), y(-1), dx(-1), dy(-1), debug_origin(0), debug_adjacent(0), debug_path(0) {}
 		~Region() {
@@ -153,7 +154,7 @@ private:
 			r->Set( (float)x, (float)y, (float)(x+dx), (float)(y+dy) );
 		}
 	};
-	Simple::CPlex<Region> regionPlex;
+	grinliz::MemoryPoolT<Region> regionPlex;
 
 	// The solver has 3 components:
 	//	Vector path:	the final result, a collection of points that form connected vector

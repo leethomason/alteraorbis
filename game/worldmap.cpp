@@ -41,6 +41,7 @@ WorldMap::WorldMap( int width, int height ) : Map( width, height )
 
 WorldMap::~WorldMap()
 {
+	DeleteAllRegions();
 	delete [] grid;
 	delete [] zoneInit;
 	delete pather;
@@ -55,7 +56,7 @@ float WorldMap::PatherCache()
 }
 
 
-void WorldMap::Init( int w, int h )
+void WorldMap::DeleteAllRegions()
 {
 	if ( grid ) {
 		// Delete all the regions. Be careful to only
@@ -69,6 +70,12 @@ void WorldMap::Init( int w, int h )
 			}
 		}
 	}
+}
+
+
+void WorldMap::Init( int w, int h )
+{
+	DeleteAllRegions();
 	delete [] grid;
 	delete [] zoneInit;
 	if ( pather ) {
@@ -85,7 +92,7 @@ void WorldMap::Init( int w, int h )
 
 void WorldMap::InitCircle()
 {
-	GLASSERT( regionPlex.GetCount() == 0 );
+	GLASSERT( regionPlex.Empty() == true );
 	memset( grid, 0, width*height*sizeof(Grid) );
 	memset( zoneInit, 0, sizeof(*zoneInit)*width*height/ZONE_SIZE2 );
 
@@ -112,7 +119,7 @@ bool WorldMap::InitPNG( const char* filename,
 						grinliz::CDynArray<grinliz::Vector2I>* wayPoints,
 						grinliz::CDynArray<grinliz::Vector2I>* features )
 {
-	GLASSERT( regionPlex.GetCount() == 0 );
+	GLASSERT( regionPlex.Empty() );
 
 	unsigned char* pixels = 0;
 	unsigned w=0, h=0;

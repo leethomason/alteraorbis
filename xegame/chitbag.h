@@ -6,7 +6,6 @@
 #include "../grinliz/glrandom.h"
 
 #include "../engine/enginelimits.h"
-#include "../SimpleLib/SimpleLib.h"
 
 #include "chit.h"
 #include "xegamelimits.h"
@@ -62,13 +61,13 @@ private:
 
 	int idPool;
 	U32 bagTime;
-	Simple::CIndex< int, Chit*, 
-					Simple::SValue, Simple::SOwnedPtr> chits;	// Owned chit pointers. Note that CIndex 
-																// supports fast iteration, which is critical.
-	grinliz::CDynArray<Chit*> updateList;		// chits that need the Update() called. Can
-												// have duplicates, which seems to be faster than
-												// guarenteeing uniqueness.
-	Simple::CSortedVector<Chit*> deleteList;					// <set> of chits that need to be deleted.
+	grinliz::HashTable< int, Chit*, grinliz::CompValue, grinliz::OwnedPtrSem > chits;
+#if 0
+	//grinliz::CDynArray<Chit*> updateList;						// chits that need the Update() called. Can
+																// have duplicates, which seems to be faster than
+																// guarenteeing uniqueness.
+#endif
+	grinliz::CDynArray<int> deleteList;		// <set> of chits that need to be deleted.
 	grinliz::CDynArray<Chit*> hashQuery;
 	grinliz::CDynArray<ChitEvent> events;
 	Chit* spatialHash[SIZE*SIZE];

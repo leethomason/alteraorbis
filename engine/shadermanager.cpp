@@ -266,7 +266,7 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 		}
 	}
 
-	Shader* shader = shaderArr.Push();
+	Shader* shader = shaderArr.PushArr(1);
 	shader->Init();
 	shader->flags = flags;
 

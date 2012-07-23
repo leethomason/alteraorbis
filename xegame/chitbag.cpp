@@ -5,14 +5,12 @@
 #include "rendercomponent.h"
 #include "../grinliz/glperformance.h"
 
-using namespace Simple;
 using namespace grinliz;
 
 ChitBag::ChitBag()
 {
 	idPool = 0;
 	bagTime = 0;
-	deleteList.Resort( 0, false );
 	memset( spatialHash, 0, sizeof(*spatialHash)*SIZE*SIZE );
 }
 
@@ -25,7 +23,7 @@ ChitBag::~ChitBag()
 
 void ChitBag::DeleteAll()
 {
-	chits.RemoveAll();	// calles delete, since the list is set with "owned"
+	chits.RemoveAll();
 }
 
 
@@ -39,7 +37,7 @@ Chit* ChitBag::NewChit()
 
 void ChitBag::DeleteChit( Chit* chit ) 
 {
-	GLASSERT( chits.Find( chit->ID(), chit ));
+	GLASSERT( chits.Query( chit->ID(), 0 ));
 	chits.Remove( chit->ID() );
 }
 
@@ -52,7 +50,7 @@ Chit* ChitBag::GetChit( int id )
 
 void ChitBag::QueueDelete( Chit* chit )
 {
-	deleteList.Add( chit );
+	deleteList.Push( chit->ID() );
 }
 
 
@@ -61,21 +59,21 @@ void ChitBag::DoTick( U32 delta )
 	GRINLIZ_PERFTRACK;
 	bagTime += delta;
 
-	for( int i=0; i<chits.GetSize(); ++i ) {
-		Chit* c = chits[i].Value;
+	Chit** chitArr = chits.GetValues();
+	for( int i=0; i<chits.NumValues(); ++i ) {
+		Chit* c = chitArr[i];
 		if ( c->NeedsTick() ) {
 			c->DoTick( delta );
 		}
 	}
-	while( !updateList.Empty() ) {
-		Chit* c = updateList.Pop();
-		c->DoUpdate();
+	for( int i=0; i<deleteList.Size(); ++i ) {
+		Chit* chit = 0;
+		chits.Query( deleteList[i], &chit );
+		if ( chit ) {
+			DeleteChit( chit );
+		}
 	}
-	for( int i=0; i<deleteList.GetSize(); ++i ) {
-		//GLOUTPUT(( "ChitBag queude delete: %x\n", deleteList[i] ));
-		DeleteChit( deleteList[i] );
-	}
-	deleteList.RemoveAll();
+	deleteList.Clear();
 	events.Clear();
 }
 

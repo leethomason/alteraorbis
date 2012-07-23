@@ -365,7 +365,7 @@ void Game::LoadPalettes()
 
 		Palette* p = 0;
 		if ( palettes.Size() <= i ) 
-			p = palettes.Push();
+			p = palettes.PushArr(1);
 		else
 			p = &palettes[i];
 		p->name = child->Name();

@@ -26,57 +26,84 @@ distribution.
 #ifndef GRINLIZ_CONTAINER_INCLUDED
 #define GRINLIZ_CONTAINER_INCLUDED
 
+#include <new>
 #include <cstring>
 
 #include "gldebug.h"
 #include "gltypes.h"
 #include "glutil.h"
+#include "glstringutil.h"
 
 namespace grinliz
 {
 
 
-/* A dynamic array class for shallow c-structs. (No constructor, no destructor, 
-	can be copied.) Basic number of objects are allocated in-line, so there is
-	no initial allocation.
+class ValueSem {
+public:
+	template <class T>
+	static void DoRemove(T& v) {}
+};
+
+
+class OwnedPtrSem {
+public:
+	template <class T>
+	static void DoRemove(T& v) { delete v; }
+};
+
+
+/*	A dynamic array class that supports C++ classes.
+	Carefully manages construct / destruct.
+	NOTE: The array may move around in memory; classes that contain
+	      pointers to their own memory will be corrupted.
 */
-template < class T, int CACHE=2 >
+template < class T, class SEM=ValueSem >
 class CDynArray
 {
+	enum { CACHE = 4 };
 public:
-	CDynArray() : mem( cache ), size( 0 ), capacity( CACHE ) {
+	CDynArray() : size( 0 ), capacity( 0 ), nAlloc(0) {
+		mem = reinterpret_cast<T*>(cache);
 	}
 
 	~CDynArray() {
-		if ( mem != cache ) {
+		Clear();
+		if ( mem != reinterpret_cast<T*>(cache) ) {
 			free( mem );
 		}
+		GLASSERT( nAlloc == 0 );
 	}
 
 	T& operator[]( int i )				{ GLASSERT( i>=0 && i<(int)size ); return mem[i]; }
 	const T& operator[]( int i ) const	{ GLASSERT( i>=0 && i<(int)size ); return mem[i]; }
 
-	void Push( T t ) {
+	void Push( const T& t ) {
 		EnsureCap( size+1 );
-		mem[size++] = t;
+		new (mem+size) T( t );	// placement new copy constructor.
+		++size;
+		++nAlloc;
 	}
 
-	T* Push() {
-		EnsureCap( size+1 );
-		size++;
-		return &mem[size-1];
-	}
 
 	T* PushArr( int count ) {
 		EnsureCap( size+count );
 		T* result = &mem[size];
+		for( int i=0; i<count; ++i ) {
+			new (result+i) T();	// placement new constructor
+		}
 		size += count;
+		nAlloc += count;
 		return result;
 	}
 
 	T Pop() {
 		GLASSERT( size > 0 );
-		return mem[--size];
+		--size;
+		T temp = mem[size];
+		SEM::DoRemove( mem[size] );
+		(mem+size)->~T();
+		--nAlloc;
+		return temp;
 	}
 
 	void SwapRemove( int i ) {
@@ -86,6 +113,7 @@ public:
 		mem[i] = mem[size-1];
 		Pop();
 	}
+
 	int Find( const T& t ) {
 		for( int i=0; i<size; ++i ) {
 			if ( mem[i] == t )
@@ -95,27 +123,25 @@ public:
 	}
 
 	int Size() const		{ return size; }
-	void Trim( int sz )		{ GLASSERT( sz <= size );
-							  size = sz;
-							}
 	
-	void Clear()			{ size = 0; }
+	void Clear()			{ 
+		while( !Empty() ) Pop();
+	}
 	bool Empty() const		{ return size==0; }
 	const T* Mem() const	{ return mem; }
 	T* Mem()				{ return mem; }
 
 private:
-	CDynArray( const CDynArray<T, CACHE>& );	// not allowed. Add a missing '&' in the code.
+	CDynArray( const CDynArray<T>& );	// not allowed. Add a missing '&' in the code.
 
 	void EnsureCap( int count ) {
 		if ( count > capacity ) {
-			capacity = grinliz::Max( CeilPowerOf2( count ), (U32) 16 );
-			if ( mem == cache ) {
-				mem = (T*) malloc( capacity*sizeof(T) );
-				memcpy( mem, cache, size*sizeof(T) );
+			capacity = Max( CeilPowerOf2( count ), (U32) 16 );
+			if ( mem == reinterpret_cast<T*>(cache) ) {
+				mem = (T*)malloc( capacity*sizeof(T) );
 			}
 			else {
-				mem = (T*) realloc( mem, capacity*sizeof(T) );
+				mem = (T*)realloc( mem, capacity*sizeof(T) );
 			}
 		}
 	}
@@ -123,32 +149,35 @@ private:
 	T* mem;
 	int size;
 	int capacity;
-	T cache[CACHE];
+	int nAlloc;
+	int cache[(CACHE*sizeof(T)+sizeof(int)-1)/sizeof(int)];
 };
 
 
-
-
-
 /* A fixed array class for any type.
-   Note that the memory stays around and constructors aren't called until
-   the CArray is destroyed.
+   Supports copy construction, proper destruction, etc.
+   Does keep the objects around, until entire CArray is destroyed,
+
  */
 template < class T, int CAPACITY >
 class CArray
 {
 public:
+	// construction
 	CArray() : size( 0 )	{}
 	~CArray()				{}
 
+	// operations
 	T& operator[]( int i )				{ GLASSERT( i>=0 && i<(int)size ); return vec[i]; }
 	const T& operator[]( int i ) const	{ GLASSERT( i>=0 && i<(int)size ); return vec[i]; }
 
-	void Push( T t ) {
+	// Push on
+	void Push( const T& t ) {
 		GLASSERT( size < CAPACITY );
 		vec[size++] = t;
 	}
 
+	// Returns space to uninitialized objects.
 	T* PushArr( int n ) {
 		GLASSERT( size+n <= CAPACITY );
 		T* rst = &vec[size];
@@ -158,28 +187,184 @@ public:
 
 	T Pop() {
 		GLASSERT( size > 0 );
-		return vec[--size];
+		return mem[--size];
 	}
 
 	int Size() const		{ return size; }
 	int Capacity() const	{ return CAPACITY; }
-	bool HasCap() const			{ return size < CAPACITY; }
+	bool HasCap() const		{ return size < CAPACITY; }
 	
 	void Clear()	{ 
 		size = 0; 
 	}
 	bool Empty() const		{ return size==0; }
 	const T* Mem() const	{ return vec; }
+
 	void SwapRemove( int i ) {
-		GLASSERT( size > 0 );
 		GLASSERT( i >= 0 && i < (int)size );
 		vec[i] = vec[size-1];
-		--size;
+		Pop();
 	}
 
 private:
 	T vec[CAPACITY];
 	int size;
+};
+
+
+class CompValue {
+public:
+	template <class T>
+	static unsigned Hash(T& v)						{ return (unsigned)(v*7); }
+	template <class T>
+	static bool Equal( const T& v0, const T& v1 )	{ return v0 == v1; }
+};
+
+
+class CompCharPtr {
+public:
+	static unsigned Hash( const char* p) {
+		unsigned hash = 2166136261UL;
+		for( ; *p; ++p ) {
+			hash ^= *p;
+			hash *= 16777619;
+		}
+		return hash;
+	}
+	static bool Equal( const char* v0, const char* v1 ) { return StrEqual( v0, v1 ); }
+};
+
+
+template <class K, class V, class KCOMPARE=CompValue, class SEM=ValueSem >
+class HashTable
+{
+public:
+	HashTable() : nAdds(0), nItems(0), nBuckets(0), buckets(0) {}
+	~HashTable() { RemoveAll(); }
+
+	void Add( const K& key, const V& value ) 
+	{
+		values.Clear();
+		int hash = CompValue::Hash(key) & (nBuckets-1);
+		while( true ) {
+			hash = hash & (nBuckets-1);
+			if ( buckets[hash].state == UNUSED || buckets[hash].state == DELETED ) {
+				buckets[hash].state = IN_USE;
+				buckets[hash].key   = key;
+				buckets[hash].value = value;
+				++nAdds;
+				++nItems;
+				break;
+			}
+			++hash;
+		}
+	}
+
+	V Remove( int key ) {
+		int index = FindIndex( key );
+		GLASSERT( index >= 0 );
+		buckets[index].state = DELETED;
+		--nItems;
+		SEM::DoRemove( buckets[index].value );
+		return buckets[index].value;
+	}
+
+	void RemoveAll() {
+		for( int i=0; i<nBuckets; ++i ) {
+			if ( buckets[i].state == IN_USE ) {
+				SEM::DoRemove( buckets[i].value );
+				--nItems;
+			}
+			buckets[i].state = UNUSED;
+		}
+		GLASSERT( nItems == 0 );
+	}
+
+
+	V Get( const K& key ) const {
+		int index = FindIndex( key );
+		GLASSERT( index >= 0 );
+		return buckets[index].value;
+	}
+
+	bool Query( const K& key, V* value ) const {
+		int index = FindIndex( key );
+		if ( index >= 0 ) {
+			*value = buckets[index].value;
+			return true;
+		}
+		return false;
+	}
+
+	int NumValues() const { return nItems; }
+
+	V* GetValues() {
+		// Create a cache of the values, so they can be a true array.
+		if ( values.Empty() ) {
+			for( int i=0; i<nBuckets; ++i ) {
+				if ( buckets[i].state == IN_USE ) {
+					values.Push( buckets[i].value );
+				}
+			}	
+		}
+		GLASSERT( values.Size() == nItems );
+		return values.Mem();
+	}
+
+private:
+	void EnsureCap() {
+		if ( nAdds >= nBuckets*3/4 ) {
+			Bucket* oldBuckets = buckets;
+			int oldNBuckets = nBuckets;
+
+			nBuckets = Max( (int) CeilPowerOf2( nItems*4 ), (int) 128 );
+			buckets = new Bucket[nBuckets];
+
+			for( int i=0; i<oldNBuckets; ++i ) {
+				if ( oldBuckets[i].key >= 0 ) {
+					Add( oldBuckets[i].key, oldBuckets[i].value );
+				}
+			}
+			delete [] oldBuckets;
+			values.Clear();
+		}
+	}
+
+	int FindIndex( const K& key ) const
+	{
+		int hash = KCOMPARE::Hash( key ) & (nBuckets-1);
+		while( true ) {
+			hash = hash & (nBuckets-1);
+			if ( KCOMPARE::Equal( buckets[hash].key, key )) {
+				return hash;
+			}
+			else if ( buckets[hash].key == UNUSED ) {
+				return -1;
+			}
+			++hash;
+		}
+	}
+
+	int nAdds;
+	int nItems;
+	int nBuckets;
+
+	enum {
+		UNUSED,
+		IN_USE,
+		DELETED
+	};
+
+	struct Bucket
+	{
+		Bucket() : state( UNUSED ) {}
+		char	state;
+		K		key;
+		V		value;
+	};
+	Bucket *buckets;
+
+	CDynArray< V > values;
 };
 
 

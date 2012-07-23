@@ -86,14 +86,14 @@ private:
 	int id;
 	int nTickers;	// number of components that need a tick.
 	U32 slowTickTimer;
-	grinliz::CDynArray<IChitListener*, 2> listeners;
+	grinliz::CDynArray<IChitListener*> listeners;
 
 	struct CList
 	{
 		int chitID;
 		int componentID;
 	};
-	grinliz::CDynArray<CList, 2> cListeners;
+	grinliz::CDynArray<CList> cListeners;
 
 	enum {
 		SPATIAL,
@@ -154,7 +154,7 @@ public:
 public:
 	ChitBag* chitBag;
 	mutable int it;
-	mutable grinliz::CDynArray<int, 8> array;
+	mutable grinliz::CDynArray<int> array;
 };
 
 
