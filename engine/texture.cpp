@@ -52,7 +52,7 @@ void TextureManager::DeviceLoss()
 			glDeleteTextures( 1, (const GLuint*) &gpuMemArr[i].glID );
 		}
 	}
-	gpuMap.Clear();
+	gpuMap.RemoveAll();
 	gpuMemArr.Clear();
 	for( int i=0; i<textureArr.Size(); ++i ) {
 		textureArr[i].gpuMem = 0;

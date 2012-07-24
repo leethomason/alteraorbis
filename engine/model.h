@@ -199,7 +199,7 @@ private:
 
 	static ModelResourceManager* instance;
 	grinliz::CArray< ModelResource*, MAX_MODELS > modelResArr;
-	CStringMap<	ModelResource* > map;
+	grinliz::HashTable<	const char*, ModelResource*, grinliz::CompCharPtr > map;
 };
 
 

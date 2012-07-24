@@ -79,7 +79,10 @@ public:
 
 	void Push( const T& t ) {
 		EnsureCap( size+1 );
+		#pragma warning ( push )
+		#pragma warning ( disable : 4345 )	// PODs will get constructors generated for them. Yes I know.
 		new (mem+size) T( t );	// placement new copy constructor.
+		#pragma warning ( pop )
 		++size;
 		++nAlloc;
 	}
@@ -89,7 +92,10 @@ public:
 		EnsureCap( size+count );
 		T* result = &mem[size];
 		for( int i=0; i<count; ++i ) {
+			#pragma warning ( push )
+			#pragma warning ( disable : 4345 )	// PODs will get constructors generated for them. Yes I know.
 			new (result+i) T();	// placement new constructor
+			#pragma warning ( pop )
 		}
 		size += count;
 		nAlloc += count;
@@ -125,7 +131,8 @@ public:
 	int Size() const		{ return size; }
 	
 	void Clear()			{ 
-		while( !Empty() ) Pop();
+		while( !Empty() ) 
+			Pop();
 	}
 	bool Empty() const		{ return size==0; }
 	const T* Mem() const	{ return mem; }
@@ -215,7 +222,7 @@ private:
 class CompValue {
 public:
 	template <class T>
-	static unsigned Hash(T& v)						{ return (unsigned)(v*7); }
+	static U32 Hash(T& v)						{ return (unsigned)(v); }
 	template <class T>
 	static bool Equal( const T& v0, const T& v1 )	{ return v0 == v1; }
 };
@@ -223,15 +230,18 @@ public:
 
 class CompCharPtr {
 public:
-	static unsigned Hash( const char* p) {
-		unsigned hash = 2166136261UL;
+	template <class T>
+	static U32 Hash( T& _p) {
+		const char* p = _p;
+		U32 hash = 2166136261UL;
 		for( ; *p; ++p ) {
 			hash ^= *p;
 			hash *= 16777619;
 		}
 		return hash;
 	}
-	static bool Equal( const char* v0, const char* v1 ) { return StrEqual( v0, v1 ); }
+	template <class T>
+	static bool Equal( T& v0, T& v1 ) { return StrEqual( v0, v1 ); }
 };
 
 
@@ -245,7 +255,8 @@ public:
 	void Add( const K& key, const V& value ) 
 	{
 		values.Clear();
-		int hash = CompValue::Hash(key) & (nBuckets-1);
+		EnsureCap();
+		U32 hash = CompValue::Hash(key);
 		while( true ) {
 			hash = hash & (nBuckets-1);
 			if ( buckets[hash].state == UNUSED || buckets[hash].state == DELETED ) {
@@ -260,7 +271,7 @@ public:
 		}
 	}
 
-	V Remove( int key ) {
+	V Remove( K key ) {
 		int index = FindIndex( key );
 		GLASSERT( index >= 0 );
 		buckets[index].state = DELETED;
@@ -270,7 +281,7 @@ public:
 	}
 
 	void RemoveAll() {
-		for( int i=0; i<nBuckets; ++i ) {
+		for( U32 i=0; i<nBuckets; ++i ) {
 			if ( buckets[i].state == IN_USE ) {
 				SEM::DoRemove( buckets[i].value );
 				--nItems;
@@ -301,7 +312,7 @@ public:
 	V* GetValues() {
 		// Create a cache of the values, so they can be a true array.
 		if ( values.Empty() ) {
-			for( int i=0; i<nBuckets; ++i ) {
+			for( U32 i=0; i<nBuckets; ++i ) {
 				if ( buckets[i].state == IN_USE ) {
 					values.Push( buckets[i].value );
 				}
@@ -315,12 +326,12 @@ private:
 	void EnsureCap() {
 		if ( nAdds >= nBuckets*3/4 ) {
 			Bucket* oldBuckets = buckets;
-			int oldNBuckets = nBuckets;
+			U32 oldNBuckets = nBuckets;
 
-			nBuckets = Max( (int) CeilPowerOf2( nItems*4 ), (int) 128 );
+			nBuckets = Max( CeilPowerOf2( nItems*4 ), (U32) 128 );
 			buckets = new Bucket[nBuckets];
 
-			for( int i=0; i<oldNBuckets; ++i ) {
+			for( U32 i=0; i<oldNBuckets; ++i ) {
 				if ( oldBuckets[i].key >= 0 ) {
 					Add( oldBuckets[i].key, oldBuckets[i].value );
 				}
@@ -332,22 +343,28 @@ private:
 
 	int FindIndex( const K& key ) const
 	{
-		int hash = KCOMPARE::Hash( key ) & (nBuckets-1);
-		while( true ) {
-			hash = hash & (nBuckets-1);
-			if ( KCOMPARE::Equal( buckets[hash].key, key )) {
-				return hash;
+		if ( nBuckets > 0 ) {
+			U32 hash = KCOMPARE::Hash( key );
+			while( true ) {
+				hash = hash & (nBuckets-1);
+				if ( buckets[hash].state == IN_USE ) {
+					const K& bkey = buckets[hash].key;
+					if ( KCOMPARE::Equal( bkey, key )) {
+						return hash;
+					}
+				}
+				else if ( buckets[hash].state == UNUSED ) {
+					return -1;
+				}
+				++hash;
 			}
-			else if ( buckets[hash].key == UNUSED ) {
-				return -1;
-			}
-			++hash;
 		}
+		return -1;
 	}
 
-	int nAdds;
+	U32 nAdds;
 	int nItems;
-	int nBuckets;
+	U32 nBuckets;
 
 	enum {
 		UNUSED,

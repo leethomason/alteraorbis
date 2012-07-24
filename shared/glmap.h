@@ -9,6 +9,7 @@
 #include <memory.h>
 #include <string.h>
  
+#if 0
 class CMapBase
 {
 public:
@@ -121,7 +122,7 @@ public:
 private:
 	CMapBase cmap;
 };
-
+#endif
 #endif // CMAP_INCLUDED
 
 

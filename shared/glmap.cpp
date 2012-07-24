@@ -3,6 +3,7 @@
 #include "../grinliz/glutil.h"
 
 
+#if 0
 CMapBase::CMapBase( bool str, int size ) : EMPTY_BUCKET( (const char*)(1) )
 {
 	stringKey = str;
@@ -144,3 +145,4 @@ bool CMapBase::Query( const char* key, void** value ) const
 	}
 	return false;
 }
+#endif
