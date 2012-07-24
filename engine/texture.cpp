@@ -85,11 +85,8 @@ bool TextureManager::IsTexture( const char* name )
 	const gamedb::Item* item = database->Root()->Child( "textures" )->Child( name );
 	if ( item != 0 )
 		return true;
-	Texture* t = 0;
-	map.Query( name, &t );
-	if ( t )
-		return true;
-	return false;
+
+	return texMap.Query( name, 0 );
 }
 
 
@@ -100,7 +97,7 @@ Texture* TextureManager::GetTexture( const char* name, bool reload )
 	// The texture may not be allocated on the GPU - that
 	// happens when the GLID is hit.
 	Texture* t = 0;
-	map.Query( name, &t );
+	texMap.Query( name, &t );
 
 	if ( !t || reload ) {
 		const gamedb::Item* item = database->Root()->Child( "textures" )->Child( name );
@@ -135,8 +132,10 @@ Texture* TextureManager::GetTexture( const char* name, bool reload )
 			t->Set( name, w, h, format, flags );
 			t->item = item;
 
-			if ( !reload )
-				map.Add( t->Name(), t );
+			if ( !reload ) {
+				GLASSERT( !texMap.Query( t->Name(), 0 ));
+				texMap.Add( t->Name(), t );
+			}
 		}
 	}
 	return t;
@@ -145,7 +144,7 @@ Texture* TextureManager::GetTexture( const char* name, bool reload )
 
 Texture* TextureManager::CreateTexture( const char* name, int w, int h, int format, int flags, ITextureCreator* creator )
 {
-	GLASSERT( !map.Query( name, 0 ) );
+	GLASSERT( !texMap.Query( name, 0 ) );
 	GLASSERT( w > 1 );	// some drivers don't like size=1 textures
 	GLASSERT( h > 1 );
 	GLASSERT( emptySpace >= 0 );
@@ -168,19 +167,19 @@ Texture* TextureManager::CreateTexture( const char* name, int w, int h, int form
 
 	t->Set( name, w, h, format, flags );
 	t->creator = creator;
-	map.Add( t->Name(), t );
+	texMap.Add( t->Name(), t );
 	return t;
 }
 
 
 void TextureManager::DeleteTexture( Texture* t )
 {
-	GLASSERT( map.Query( t->Name(), 0 ) );
+	GLASSERT( texMap.Query( t->Name(), 0 ) );
 
 	// Disconnect the GPU memory.
 	ContextShift();
 
-	map.Remove( t->Name() );
+	texMap.Remove( t->Name() );
 	GLASSERT( t->gpuMem == 0 );
 	++emptySpace;
 	memset( t, 0, sizeof( Texture ) );
@@ -253,6 +252,7 @@ const GPUMem* TextureManager::AllocGPUMemory(	int w, int h, int format, int flag
 	++cacheMiss;
 
 	if ( gpu->item ) {
+		GLASSERT( !gpuMap.Query( gpu->item, 0 ) );
 		gpuMap.Add( gpu->item, gpu );
 	}
 	return gpu;
@@ -280,6 +280,7 @@ U32 Texture::GLID()
 	TextureManager* manager = TextureManager::Instance();
 	bool inCache = false;
 
+	GLOUTPUT(( "Allocating: %s\n", this->name.c_str() ));
 	// Allocate memory to store this. The memory should always be available. We
 	// may even get memory that already contains the correct pixels.
 	gpuMem = manager->AllocGPUMemory( w, h, format, flags, item, &inCache );

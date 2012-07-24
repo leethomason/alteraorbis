@@ -144,10 +144,10 @@ private:
 	int cacheReuse;
 	int emptySpace;
 
-	grinliz::CArray< Texture, MAX_TEXTURES > textureArr;		// textures
+	grinliz::CArray< Texture, MAX_TEXTURES > textureArr;	// textures
 	grinliz::CArray< GPUMem, MAX_TEXTURES > gpuMemArr;		// references into the GPU mem
-	grinliz::HashTable<	const char*, Texture*, grinliz::CompCharPtr > map;
-	grinliz::HashTable< const gamedb::Item*, GPUMem* > gpuMap;
+	grinliz::HashTable<	const char*, Texture*, grinliz::CompCharPtr >	texMap;
+	grinliz::HashTable< const gamedb::Item*, GPUMem* >					gpuMap;
 };
 
 #endif // UFO_ATTACK_TEXTURE_INCLUDED

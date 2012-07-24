@@ -249,7 +249,7 @@ template <class K, class V, class KCOMPARE=CompValue, class SEM=ValueSem >
 class HashTable
 {
 public:
-	HashTable() : nAdds(0), nItems(0), nBuckets(0), buckets(0) {}
+	HashTable() : nAdds(0), nItems(0), nBuckets(0), buckets(0), reallocating(false) {}
 	~HashTable() 
 	{ 
 		RemoveAll();
@@ -265,7 +265,7 @@ public:
 		EnsureCap();
 
 		// Existing value?
-		int index = Query( key, 0 );
+		int index = FindIndex( key );
 		if ( index >= 0 ) {
 			// Replace!
 			SEM::DoRemove( buckets[index].value );
@@ -344,12 +344,16 @@ public:
 private:
 	void EnsureCap() {
 		if ( nAdds >= nBuckets*3/4 ) {
+			GLASSERT( !reallocating );
+			reallocating = true;
 			Bucket* oldBuckets = buckets;
 			U32 oldNBuckets = nBuckets;
 
 			nBuckets = Max( CeilPowerOf2( nItems*4 ), (U32) 128 );
 			buckets = new Bucket[nBuckets];
 
+			nAdds = 0;
+			nItems = 0;
 			for( U32 i=0; i<oldNBuckets; ++i ) {
 				if ( oldBuckets[i].key >= 0 ) {
 					Add( oldBuckets[i].key, oldBuckets[i].value );
@@ -357,6 +361,7 @@ private:
 			}
 			delete [] oldBuckets;
 			values.Clear();
+			reallocating = false;
 		}
 	}
 
@@ -384,6 +389,7 @@ private:
 	U32 nAdds;
 	int nItems;
 	U32 nBuckets;
+	bool reallocating;
 
 	enum {
 		UNUSED,
