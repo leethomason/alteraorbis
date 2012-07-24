@@ -222,7 +222,7 @@ private:
 class CompValue {
 public:
 	template <class T>
-	static U32 Hash(T& v)						{ return (unsigned)(v); }
+	static U32 Hash(T& v)							{ return (U32)(v); }
 	template <class T>
 	static bool Equal( const T& v0, const T& v1 )	{ return v0 == v1; }
 };
@@ -250,24 +250,41 @@ class HashTable
 {
 public:
 	HashTable() : nAdds(0), nItems(0), nBuckets(0), buckets(0) {}
-	~HashTable() { RemoveAll(); }
+	~HashTable() 
+	{ 
+		RemoveAll();
+		delete [] buckets;
+	}
 
+	// Adds a key/value pair. What about duplicates? Duplicate
+	// keys aren't allowed. An old value will be deleted and
+	// replaced.
 	void Add( const K& key, const V& value ) 
 	{
 		values.Clear();
 		EnsureCap();
-		U32 hash = CompValue::Hash(key);
-		while( true ) {
-			hash = hash & (nBuckets-1);
-			if ( buckets[hash].state == UNUSED || buckets[hash].state == DELETED ) {
-				buckets[hash].state = IN_USE;
-				buckets[hash].key   = key;
-				buckets[hash].value = value;
-				++nAdds;
-				++nItems;
-				break;
+
+		// Existing value?
+		int index = Query( key, 0 );
+		if ( index >= 0 ) {
+			// Replace!
+			SEM::DoRemove( buckets[index].value );
+			buckets[index].value = value;
+		}
+		else {
+			U32 hash = CompValue::Hash(key);
+			while( true ) {
+				hash = hash & (nBuckets-1);
+				if ( buckets[hash].state == UNUSED || buckets[hash].state == DELETED ) {
+					buckets[hash].state = IN_USE;
+					buckets[hash].key   = key;
+					buckets[hash].value = value;
+					++nAdds;
+					++nItems;
+					break;
+				}
+				++hash;
 			}
-			++hash;
 		}
 	}
 
@@ -301,7 +318,9 @@ public:
 	bool Query( const K& key, V* value ) const {
 		int index = FindIndex( key );
 		if ( index >= 0 ) {
-			*value = buckets[index].value;
+			if ( value ) {
+				*value = buckets[index].value;
+			}
 			return true;
 		}
 		return false;
