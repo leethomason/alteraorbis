@@ -129,7 +129,8 @@ private:
 			// Invalidate our neighbors that may have
 			// pointers back to us.
 			for( int i=0; i<adjacent.Size(); ++i ) {
-				static_cast<Region*>(adjacent[i].state)->adjacent.Clear();
+				Region* r = static_cast<Region*>(adjacent[i].state);
+				r->adjacent.Clear();
 			}
 			adjacent.Clear();
 		}

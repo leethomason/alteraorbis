@@ -272,7 +272,7 @@ public:
 			buckets[index].value = value;
 		}
 		else {
-			U32 hash = CompValue::Hash(key);
+			U32 hash = KCOMPARE::Hash(key);
 			while( true ) {
 				hash = hash & (nBuckets-1);
 				if ( buckets[hash].state == UNUSED || buckets[hash].state == DELETED ) {
@@ -343,13 +343,17 @@ public:
 
 private:
 	void EnsureCap() {
-		if ( nAdds >= nBuckets*3/4 ) {
+		if ( nAdds >= nBuckets*1/2 ) {
 			GLASSERT( !reallocating );
 			reallocating = true;
 			Bucket* oldBuckets = buckets;
 			U32 oldNBuckets = nBuckets;
+			U32 oldNAdds = nAdds;
+			U32 oldNItems = nItems;
 
-			nBuckets = Max( CeilPowerOf2( nItems*4 ), (U32) 128 );
+			nBuckets = CeilPowerOf2( Max(	(U32)(nItems*3), 
+											nAdds*2, 
+											(U32) 128 ));
 			buckets = new Bucket[nBuckets];
 
 			nAdds = 0;
