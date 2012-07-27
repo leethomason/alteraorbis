@@ -103,10 +103,13 @@ private:
 	void Init( int w, int h );
 	void Tessellate();
 	void CalcZone( int x, int y );
+
+	bool DeleteRegion( int x, int y );	// surprisingly complex
 	void DeleteAllRegions();
 
 	void DrawZones();			// debugging
 	void ClearDebugDrawing();	// debugging
+	void DumpRegions();
 
 	enum {
 		TRUE		= 1,
@@ -114,7 +117,13 @@ private:
 		ZONE_SIZE	= 16,		// adjust size of bit fields to be big enough to represent this
 		ZONE_SIZE2  = ZONE_SIZE*ZONE_SIZE,
 	};
-		
+	
+	/* A rectangular area used for pathing. 
+	   Keeps information about location and size.
+	   Note that the 'adjacent' is not symmetric.
+	   The adjacent is created on demand, so neighbors
+	   may not have the array cached.
+	*/
 	struct Region : public micropather::PathNode
 	{
 		U8 debug_origin		: 1;
@@ -126,13 +135,8 @@ private:
 
 		Region() : x(-1), y(-1), dx(-1), dy(-1), debug_origin(0), debug_adjacent(0), debug_path(0) {}
 		~Region() {
-			// Invalidate our neighbors that may have
-			// pointers back to us.
-			for( int i=0; i<adjacent.Size(); ++i ) {
-				Region* r = static_cast<Region*>(adjacent[i].state);
-				r->adjacent.Clear();
-			}
-			adjacent.Clear();
+			// MUST BE UNLINKED!
+			GLASSERT( adjacent.Size() == 0 );
 		}
 
 		void Init( U16 _x, U16 _y, U16 _dx, U16 _dy ) {

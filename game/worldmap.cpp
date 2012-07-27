@@ -41,10 +41,32 @@ WorldMap::WorldMap( int width, int height ) : Map( width, height )
 
 WorldMap::~WorldMap()
 {
+	//DumpRegions();
 	DeleteAllRegions();
 	delete [] grid;
 	delete [] zoneInit;
 	delete pather;
+}
+
+
+void WorldMap::DumpRegions()
+{
+	if ( grid ) {
+		// Delete all the regions. Be careful to only
+		// delete from the origin location.
+		for( int j=0; j<height; ++j ) {	
+			for( int i=0; i<width; ++i ) {
+				Region* r = grid[INDEX(i,j)].region;
+				if ( IsRegionOrigin( r, i, j )) {
+					GLOUTPUT(( "Region %x %d,%d ", r, r->x, r->y ));
+					for( int k=0; k<r->adjacent.Size(); ++k ) {
+						GLOUTPUT(( "[%x] ", r->adjacent[k].state ));
+					}
+					GLOUTPUT(( "\n" ));
+				}
+			}
+		}
+	}
 }
 
 
@@ -65,7 +87,7 @@ void WorldMap::DeleteAllRegions()
 			for( int i=0; i<width; ++i ) {
 				Region* r = grid[INDEX(i,j)].region;
 				if ( IsRegionOrigin( r, i, j )) {
-					regionPlex.Free( r );
+					DeleteRegion( i, j );
 				}
 			}
 		}
@@ -384,6 +406,46 @@ bool WorldMap::RectPassableAndOpen( int x0, int y0, int x1, int y1 )
 }
 
 
+bool WorldMap::DeleteRegion( int x, int y )
+{
+	Region* r = grid[INDEX(x,y)].region;
+	if ( !r ) {
+		return false;
+	}
+	Rectangle2I bounds = this->Bounds();
+	Rectangle2I inner, outer;
+	inner.Set( r->x, r->y, r->x+r->dx, r->y+r->dy );
+	outer = inner;
+	outer.Outset( 1 );
+
+	// Need to delete any adjacent regions that might have a cached
+	// pointer back to this one.
+	for( int j=r->y-1; j<r->y+r->dy+1; ++j ) {
+		for( int i=r->x-1; i<r->x+r->dx+1; ++i ) {
+			if (    bounds.Contains( i, j )
+			 	 && outer.Contains( i, j )
+				 && !inner.Contains( i, j )) 
+			{
+				Region* n = grid[INDEX(i,j)].region;
+				if ( n ) {
+					n->adjacent.Clear();	// deletes the cache of states
+				}
+			}
+		}
+	}
+	r->adjacent.Clear();	// this cache is no longer valid either
+
+	// Null out all the pointrs to it.
+	for( int j=r->y; j<r->y+r->dy; ++j ) {
+		for( int i=r->x; i<r->x+r->dx; ++i ) {
+			grid[INDEX(i,j)].region = 0;
+		}
+	}
+	regionPlex.Free( r );
+	return true;
+}
+
+
 void WorldMap::CalcZone( int zx, int zy )
 {
 	zx = zx & (~(ZONE_SIZE-1));
@@ -393,16 +455,14 @@ void WorldMap::CalcZone( int zx, int zy )
 		//GLOUTPUT(( "CalcZone (%d,%d) %d\n", zx, zy, ZDEX(zx,zy) ));
 		zoneInit[ZDEX(zx,zy)] = 1;
 
-
 		// Free the region memory (which calls the destructor)
 		// and null out all the pointrs to it.
 		for( int y=zy; y<zy+ZONE_SIZE; ++y ) {
 			for( int x=zx; x<zx+ZONE_SIZE; ++x ) {
 				Region* r = grid[INDEX(zx,zy)].region;
 				if ( IsRegionOrigin( r, x, y ) ) {
-					regionPlex.Free( r );
+					DeleteRegion( x, y );
 				}
-				grid[INDEX(x,y)].region = 0;
 			}
 		}
 
@@ -522,9 +582,8 @@ void WorldMap::AdjacentCost( PathNode* state, micropather::StateCost**adjacent, 
 
 		Rectangle2I bounds = this->Bounds();
 		Vector2I currentZone = { -1, -1 };
-
-		int num=0;
 		Vector2I adj[ZONE_SIZE*4+4];
+		int num = 0;
 
 		int dx = region->dx;
 		int dy = region->dy;

@@ -64,6 +64,7 @@ class CDynArray
 public:
 	CDynArray() : size( 0 ), capacity( 0 ), nAlloc(0) {
 		mem = reinterpret_cast<T*>(cache);
+		GLASSERT( CACHE_SIZE*sizeof(int) >= CACHE*sizeof(T) );
 	}
 
 	~CDynArray() {
@@ -105,10 +106,11 @@ public:
 	T Pop() {
 		GLASSERT( size > 0 );
 		--size;
+		--nAlloc;
+
 		T temp = mem[size];
 		SEM::DoRemove( mem[size] );
-		(mem+size)->~T();
-		--nAlloc;
+		mem[size].~T();
 		return temp;
 	}
 
@@ -133,6 +135,8 @@ public:
 	void Clear()			{ 
 		while( !Empty() ) 
 			Pop();
+		GLASSERT( nAlloc == 0 );
+		GLASSERT( size == 0 );
 	}
 	bool Empty() const		{ return size==0; }
 	const T* Mem() const	{ return mem; }
@@ -157,7 +161,10 @@ private:
 	int size;
 	int capacity;
 	int nAlloc;
-	int cache[(CACHE*sizeof(T)+sizeof(int)-1)/sizeof(int)];
+	enum { 
+		CACHE_SIZE = (CACHE*sizeof(T)+sizeof(int)-1)/sizeof(int)
+	};
+	int cache[CACHE_SIZE];
 };
 
 
