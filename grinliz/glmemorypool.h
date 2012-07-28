@@ -106,11 +106,11 @@ public:
 	MemoryPoolT() : pool( "typed", sizeof(T) ) 	{}
 	~MemoryPoolT() {}
 
-	T* Alloc() {
+	T* New() {
 		void* mem = pool.Alloc();
 		return new (mem) T();
 	}
-	void Free( T* mem ) {
+	void Delete( T* mem ) {
 		if ( mem ) {
 			mem->~T();
 			pool.Free( mem );
@@ -123,70 +123,6 @@ private:
 	MemoryPool pool;
 };
 
-#if 0
-/*	A memory pool that has a fixed allocation.
-	Essentially a cross between a linked list and an array.
-*/
-template < class T, int COUNT >
-class FixedMemoryPool
-{
-  private:
-	struct Chunk
-	{
-		Chunk* next;
-	};
-
-  public:
-	FixedMemoryPool()
-	{
-		GLASSERT( sizeof( T ) >= sizeof( Chunk* ) );
-		for( int i=0; i<COUNT-1; ++i )
-		{
-			( (Chunk*)(&memory[i]) )->next = (Chunk*)(&memory[i+1]);
-		}
-		( (Chunk*)(&memory[COUNT-1]) )->next = 0;
-		root = ( (Chunk*)(&memory[0]) );
-		inUse = 0;
-	}
-
-	~FixedMemoryPool()	{}
-
-	T* Alloc()
-	{
-		T* ret = 0;
-		if ( root )
-		{
-			ret = (T*) root;
-			root = root->next;
-			++inUse;
-		}
-		return ret;
-	}
-
-	void Free( T* _mem )
-	{
-		if ( _mem )
-		{
-			Chunk* mem = (Chunk*) _mem;
-			#ifdef DEBUG
-				memset( mem, 0xfe, sizeof( T ) );
-			#endif
-			mem->next = root;
-			root = mem;
-			--inUse;
-		}
-	}
-
-	unsigned InUse()	{	return inUse; }
-	unsigned Remain()	{	return COUNT - inUse; }
-	bool     Contains( T* mem )	{ return mem >= memory && mem < &memory[COUNT]; }
-
-  private:
-	T memory[ COUNT ];
-	unsigned inUse;
-	Chunk* root;
-};
-#endif
 
 };	// grinliz
 

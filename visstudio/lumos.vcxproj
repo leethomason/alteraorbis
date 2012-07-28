@@ -123,7 +123,6 @@
     <ClCompile Include="..\scenes\rendertestscene.cpp" />
     <ClCompile Include="..\script\battlemechanics.cpp" />
     <ClCompile Include="..\shared\gamedbreader.cpp" />
-    <ClCompile Include="..\shared\glmap.cpp" />
     <ClCompile Include="..\win32\audio.cpp" />
     <ClCompile Include="..\win32\framebuffer.cpp" />
     <ClCompile Include="..\win32\glew.c" />
@@ -191,7 +190,6 @@
     <ClInclude Include="..\script\battlemechanics.h" />
     <ClInclude Include="..\shared\gamedb.h" />
     <ClInclude Include="..\shared\gamedbreader.h" />
-    <ClInclude Include="..\shared\glmap.h" />
     <ClInclude Include="..\win32\audio.h" />
     <ClInclude Include="..\win32\framebuffer.h" />
     <ClInclude Include="..\win32\glew.h" />

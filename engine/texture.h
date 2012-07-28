@@ -7,7 +7,6 @@
 #include "../grinliz/glcontainer.h"
 #include "../shared/gamedbreader.h"
 #include "../engine/ufoutil.h"
-#include "../shared/glmap.h"
 
 class Surface;
 class Texture;

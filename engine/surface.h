@@ -23,7 +23,6 @@
 #include "../grinliz/glvector.h"
 #include "../grinliz/glstringutil.h"
 
-#include "../shared/glmap.h"
 #include "../engine/ufoutil.h"
 #include "../shared/gamedbreader.h"
 

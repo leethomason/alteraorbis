@@ -106,9 +106,6 @@
     <ClCompile Include="..\shared\gamedbreader.cpp">
       <Filter>Source Files\shared</Filter>
     </ClCompile>
-    <ClCompile Include="..\shared\glmap.cpp">
-      <Filter>Source Files\shared</Filter>
-    </ClCompile>
     <ClCompile Include="..\win32\audio.cpp">
       <Filter>Source Files\win32</Filter>
     </ClCompile>
@@ -304,9 +301,6 @@
       <Filter>Source Files\shared</Filter>
     </ClInclude>
     <ClInclude Include="..\shared\gamedbreader.h">
-      <Filter>Source Files\shared</Filter>
-    </ClInclude>
-    <ClInclude Include="..\shared\glmap.h">
       <Filter>Source Files\shared</Filter>
     </ClInclude>
     <ClInclude Include="..\win32\audio.h">

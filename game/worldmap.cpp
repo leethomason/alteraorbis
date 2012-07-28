@@ -441,7 +441,7 @@ bool WorldMap::DeleteRegion( int x, int y )
 			grid[INDEX(i,j)].region = 0;
 		}
 	}
-	regionPlex.Free( r );
+	regionPlex.Delete( r );
 	return true;
 }
 
@@ -530,7 +530,7 @@ void WorldMap::CalcZone( int zx, int zy )
 
 					if ( area > 0 ) {
 						// Actually create a region!
-						Region* r = regionPlex.Alloc();
+						Region* r = regionPlex.New();
 						r->Init( x0, y0, x1-x0+1, y1-y0+1 );
 
 						for( int j=y0; j<=y1; ++j ) {

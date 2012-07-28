@@ -28,9 +28,6 @@
     <ClCompile Include="..\shared\gamedbwriter.cpp">
       <Filter>Source Files\shared</Filter>
     </ClCompile>
-    <ClCompile Include="..\shared\glmap.cpp">
-      <Filter>Source Files\shared</Filter>
-    </ClCompile>
     <ClCompile Include="..\importers\ac3d.c">
       <Filter>Source Files\importers</Filter>
     </ClCompile>
@@ -67,9 +64,6 @@
       <Filter>Source Files\shared</Filter>
     </ClInclude>
     <ClInclude Include="..\shared\gamedbwriter.h">
-      <Filter>Source Files\shared</Filter>
-    </ClInclude>
-    <ClInclude Include="..\shared\glmap.h">
       <Filter>Source Files\shared</Filter>
     </ClInclude>
     <ClInclude Include="..\importers\ac3d.h">

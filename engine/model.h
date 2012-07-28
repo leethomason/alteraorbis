@@ -21,7 +21,6 @@
 #include "../grinliz/glgeometry.h"
 #include "../grinliz/glmemorypool.h"
 #include "../grinliz/glcontainer.h"
-#include "../shared/glmap.h"
 #include "../shared/gamedbreader.h"
 #include "vertex.h"
 #include "enginelimits.h"
