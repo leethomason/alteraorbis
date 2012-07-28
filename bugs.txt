@@ -1,19 +1,6 @@
-- Animation
-	X support for instancing
-	X particle tracking of meta-data
-	X item tracking of meta-data
-	- animition aware hit testing
-	X timing of impact / shoot / hit events
-	X need impact animation (light & heavy?)
-	- bounds need to be adjusted to account for animation
-	- 2nd test animation, with a scaled size
-	X remove rotation twist for ortho
-	X animation rate
-	X cross fading
-	X revisit all scenes, add animation
-		Where does animation fit in? walk, gun-run, impact-, melee
-		X Render: query walking/standing from Move component?
-		X The AnimatedRenderComponent is annoying - move code to RenderComponent
+- animition aware hit testing
+- bounds need to be adjusted to account for animation
+- what is going on with engine state when there are 2 textures?
 
 - combat test scene
 	X animation/lack of making me crazy. What plan?
@@ -27,7 +14,7 @@
 	- load in the correct lighting
 
 	- weapons
-		- relative positioning (implemented, broken again)
+		X relative positioning (implemented, broken again)
 		- weapon definition - item question: how is a chit a weapon?
 		- item definition
 	- AI (task AI)
@@ -75,6 +62,19 @@ X particle test scene
 - particles that aren't quads (beziers)
 
 
+X Animation
+	X support for instancing
+	X particle tracking of meta-data
+	X item tracking of meta-data
+	X timing of impact / shoot / hit events
+	X need impact animation (light & heavy?)
+	X remove rotation twist for ortho
+	X animation rate
+	X cross fading
+	X revisit all scenes, add animation
+		X Where does animation fit in? walk, gun-run, impact-, melee
+		X Render: query walking/standing from Move component?
+		X The AnimatedRenderComponent is annoying - move code to RenderComponent
 X blur: switch to "down blit" approach, optionally
 X Blue Smoke Map Test
 	X full size (1024x1024), 2000 units

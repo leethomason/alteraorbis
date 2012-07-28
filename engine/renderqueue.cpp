@@ -17,6 +17,7 @@
 #include "model.h"    
 #include "texture.h"
 #include "gpustatemanager.h"
+#include "shadermanager.h"
 #include "../grinliz/glperformance.h"
 #include <limits.h>
 
@@ -146,9 +147,20 @@ void RenderQueue::Submit( GPUShader* overRideShader, int modelRequired, int mode
 	for( int i=0; i<nState; ++i ) {
 		GPUShader* shader = overRideShader ? overRideShader : statePool[i].shader;
 		GLASSERT( shader );
+
 		if ( !overRideShader ) {
 			shader->SetTexture0( statePool[i].texture );
 		}
+		else {
+			// HACK that reveals issue with how the shader flags are managed.
+			// (Lots of issues in that code: was ported over with the fixed
+			// pipeline and not cleaned up enough.) But if the overRideShader
+			// is in use, it still needs some flags from the shader it is overriding.
+			if ( statePool[i].shader->ShaderFlags() & ShaderManager::BONE_XFORM ) {
+				shader->SetShaderFlag( ShaderManager::BONE_XFORM );
+			}
+		}
+
 		if (    (( shader->ShaderFlags() & shaderRequired ) != shaderRequired )
 			 || ( shader->ShaderFlags() & shaderExcluded ) )
 		{
