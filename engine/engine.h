@@ -36,6 +36,10 @@ class RenderTarget;
 class ParticleSystem;
 class EngineShaders;
 
+static const grinliz::Vector3F V3F_ZERO = { 0, 0, 0 };
+static const grinliz::Vector3F V3F_UP   = { 0, 1, 0 };
+
+
 /*
 	Standard state:
 	Z-Write		enabled

@@ -182,19 +182,19 @@ public:
 	~CArray()				{}
 
 	// operations
-	T& operator[]( int i )				{ GLASSERT( i>=0 && i<(int)size ); return vec[i]; }
-	const T& operator[]( int i ) const	{ GLASSERT( i>=0 && i<(int)size ); return vec[i]; }
+	T& operator[]( int i )				{ GLASSERT( i>=0 && i<(int)size ); return mem[i]; }
+	const T& operator[]( int i ) const	{ GLASSERT( i>=0 && i<(int)size ); return mem[i]; }
 
 	// Push on
 	void Push( const T& t ) {
 		GLASSERT( size < CAPACITY );
-		vec[size++] = t;
+		mem[size++] = t;
 	}
 
 	// Returns space to uninitialized objects.
 	T* PushArr( int n ) {
 		GLASSERT( size+n <= CAPACITY );
-		T* rst = &vec[size];
+		T* rst = &mem[size];
 		size += n;
 		return rst;
 	}
@@ -202,6 +202,16 @@ public:
 	T Pop() {
 		GLASSERT( size > 0 );
 		return mem[--size];
+	}
+
+	T PopFront() {
+		GLASSERT( size > 0 );
+		T temp = mem[0];
+		for( int i=0; i<size-1; ++i ) {
+			mem[i] = mem[i+1];
+		}
+		--size;
+		return temp;
 	}
 
 	int Size() const		{ return size; }
@@ -212,16 +222,16 @@ public:
 		size = 0; 
 	}
 	bool Empty() const		{ return size==0; }
-	const T* Mem() const	{ return vec; }
+	const T* Mem() const	{ return mem; }
 
 	void SwapRemove( int i ) {
 		GLASSERT( i >= 0 && i < (int)size );
-		vec[i] = vec[size-1];
+		mem[i] = mem[size-1];
 		Pop();
 	}
 
 private:
-	T vec[CAPACITY];
+	T mem[CAPACITY];
 	int size;
 };
 

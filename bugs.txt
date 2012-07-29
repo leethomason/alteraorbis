@@ -1,7 +1,3 @@
-- animition aware hit testing
-- bounds need to be adjusted to account for animation
-- what is going on with engine state when there are 2 textures?
-
 - combat test scene
 	X animation/lack of making me crazy. What plan?
 	X particle effect for melee strike not "connected" to character
@@ -11,7 +7,7 @@
 	- data driven item creation
 	- need to check rotation in the path component
 	- buttons to select scenario, load items
-	- load in the correct lighting
+	X load in the correct lighting
 
 	- weapons
 		X relative positioning (implemented, broken again)
@@ -31,8 +27,9 @@
 	- add rez and de-rez effect for chits
 
 
-X remove particle params not needed for world
-- move lighting loading from render test scene to engine
+- animition aware hit testing
+- bounds need to be adjusted to account for animation
+- what is going on with engine state when there are 2 textures?
 - cameras only self-delete if they reach destination; should do better. Probably
   should only be one camera in existence. (BlueSmoke, NavTest2)
 - record perf max/min. surprisingly hard.
@@ -61,7 +58,10 @@ X particle test scene
 ** Defer **
 - particles that aren't quads (beziers)
 
+----------- FIXED -------------
 
+X remove particle params not needed for world
+X move lighting loading from render test scene to engine
 X Animation
 	X support for instancing
 	X particle tracking of meta-data

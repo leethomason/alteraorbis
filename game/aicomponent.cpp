@@ -50,29 +50,6 @@ int AIComponent::GetTeamStatus( Chit* other )
 }
 
 
-/*
-void AIComponent::UpdateChitData()
-{
-	for( int k=0; k<2; ++k ) {
-		CArray<ChitData, MAX_TRACK>& list = (k==0) ? friendList : enemyList;
-
-		int i=0; 
-		while( i < list.Size() ) {
-			Chit* chit = GetChitBag()->GetChit( list[i].chitID );
-			list[i].chit = chit;
-			if ( chit && chit->GetSpatialComponent() ) {
-				list[i].range = ( parentChit->GetSpatialComponent()->GetPosition() - chit->GetSpatialComponent()->GetPosition() ).Length();
-				++i;
-			}
-			else {
-				list.SwapRemove( i );
-			}
-		}
-	}
-}
-*/
-
-
 void AIComponent::UpdateCombatInfo( const Rectangle2F* _zone )
 {
 	SpatialComponent* sc = parentChit->GetSpatialComponent();
@@ -89,22 +66,25 @@ void AIComponent::UpdateCombatInfo( const Rectangle2F* _zone )
 		// Use the passed in info, add to the existing.
 		zone = *_zone;
 	}
-	// Clear and reset the existing info.
-	friendList.Clear();
-	enemyList.Clear();
 
 	// Sort in by as-the-crow-flies range. Not correct, but don't want to deal with arbitrarily long query.
 	const CDynArray<Chit*>& chitArr = GetChitBag()->QuerySpatialHash( zone, parentChit, true );
 
-	for( int i=0; i<chitArr.Size(); ++i ) {
-		Chit* chit = chitArr[i];
+	if ( !chitArr.Empty() ) {
+		// Clear and reset the existing info.
+		friendList.Clear();
+		enemyList.Clear();
 
-		int teamStatus = GetTeamStatus( chit );
+		for( int i=0; i<chitArr.Size(); ++i ) {
+			Chit* chit = chitArr[i];
 
-		if ( teamStatus == FRIENDLY && friendList.HasCap() )
-			friendList.Push( chit->ID() );
-		else if ( teamStatus == ENEMY && enemyList.HasCap() )
-			 enemyList.Push( chit->ID() );
+			int teamStatus = GetTeamStatus( chit );
+
+			if ( teamStatus == FRIENDLY && friendList.HasCap() )
+				friendList.Push( chit->ID() );
+			else if ( teamStatus == ENEMY && enemyList.HasCap() )
+				 enemyList.Push( chit->ID() );
+		}
 	}
 }
 
@@ -122,7 +102,7 @@ void AIComponent::DoMelee()
 	Chit* targetChit = parentChit->GetChitBag()->GetChit( action.melee.targetID );
 	if ( targetChit == 0 ) {
 		currentAction = NO_ACTION;
-		enemyList.Clear();
+		enemyList.PopFront();
 		return;
 	}
 
@@ -203,72 +183,7 @@ void AIComponent::DoTick( U32 deltaTime )
 			currentAction = MELEE;
 			action.melee.targetID = enemyList[0];
 		}
-
 	}
-	/*
-	// Check for events that change the situation
-	const CDynArray<ChitEvent>& events = GetChitBag()->GetEvents();
-	ItemComponent* itemComp = GET_COMPONENT( parentChit, ItemComponent );
-
-	for( int i=0; i<events.Size(); ++i ) {
-		if(    events[i].id == AI_EVENT_AWARENESS 
-			&& itemComp
-			&& events[i].data0 == itemComp->GetItem()->ToGameItem()->primaryTeam ) 
-		{
-			// FIXME: double call can cause 2 entries for the same unit
-			UpdateCombatInfo( &events[i].bounds );
-		}
-	}
-
-	if ( enemyList.Size() > 0 ) {
-		const ChitData& target = enemyList[0];
-
-		SpatialComponent*  thisSpatial = parentChit->GetSpatialComponent();
-		RenderComponent*   thisRender = parentChit->GetRenderComponent();
-		SpatialComponent*  targetSpatial = target.chit->GetSpatialComponent();
-		PathMoveComponent* pmc = GET_COMPONENT( parentChit, PathMoveComponent );
-		GLASSERT( pmc );
-		if ( !pmc ) return;
-
-		U32 absTime = GetChitBag()->AbsTime();
-
-		grinliz::CArray<XEItem*, MAX_ACTIVE_ITEMS> activeItems;
-		GameItem::GetActiveItems( parentChit, &activeItems );
-		// FIXME: choose weapons, etc.
-		XEItem* xeitem = activeItems[0];
-		GameItem* gameItem = xeitem->ToGameItem();
-		WeaponItem* weapon = gameItem->ToWeapon();
-
-		GLASSERT( pmc );
-		GLASSERT( thisSpatial );
-		GLASSERT( targetSpatial );
-		GLASSERT( thisRender );
-
-		static const Vector3F UP = { 0, 1, 0 };
-		const Vector3F* eyeDir = engine->camera.EyeDir3();
-
-		if ( activeItems.Size() > 0 ) {
-			// fixme: use best item for situation
-
-			if (    BattleMechanics::InMeleeZone( thisSpatial->GetPosition2D(),
-												  thisSpatial->GetHeading2D(),
-												  targetSpatial->GetPosition2D() ))
-			{
-				if ( weapon->CanMelee( absTime ) )
-				{
-					BattleMechanics::MeleeAttack( engine, parentChit, weapon );																	
-				}
-			}
-			else {
-				Vector2F delta = enemyList[0].chit->GetSpatialComponent()->GetPosition2D() - thisSpatial->GetPosition2D();
-				float targetRot = NormalizeAngleDegrees( ToDegree( atan2f( delta.x, delta.y )));
-
-				pmc->QueueDest( enemyList[0].chit->GetSpatialComponent()->GetPosition2D(),
-								targetRot );
-			}
-		}
-	}
-	*/
 }
 
 
@@ -280,4 +195,15 @@ void AIComponent::DebugStr( grinliz::GLString* str )
 
 void AIComponent::OnChitMsg( Chit* chit, int id, const ChitEvent* event )
 {
+	if ( chit == parentChit && id == RENDER_MSG_IMPACT ) {
+		RenderComponent* render = parentChit->GetRenderComponent();
+		GLASSERT( render );	// it is a message from the render component, after all.
+		if ( !render ) return;
+
+		Matrix4 xform;
+		render->GetMetaData( "trigger", &xform );
+		Vector3F pos = xform * V3F_ZERO;
+
+		engine->particleSystem->EmitPD( "derez", pos, V3F_UP, engine->camera.EyeDir3(), 0 );
+	}
 }
