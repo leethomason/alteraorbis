@@ -11,6 +11,8 @@ class Component;
 class SpatialComponent;
 class RenderComponent;
 class MoveComponent;
+class InventoryComponent;
+class ItemComponent;
 
 class ChitBag;
 class Chit;
@@ -48,19 +50,13 @@ public:
 
 	SpatialComponent*	GetSpatialComponent()	{ return spatialComponent; }
 	MoveComponent*		GetMoveComponent()		{ return moveComponent; }
+	InventoryComponent*	GetInventoryComponent()	{ return inventoryComponent; }
+	ItemComponent*		GetItemComponent()		{ return itemComponent; }
 	RenderComponent*	GetRenderComponent()	{ return renderComponent; }
 	Component*			GetComponent( const char* name );
 
 	//void RequestUpdate();
 	ChitBag* GetChitBag() { return chitBag; }
-
-	/*
-	enum {
-		LISTENERS  = 0x01,
-		COMPONENTS = 0x02,
-		ALL		   = 0xff
-	};
-	*/
 
 	// Send a message to the listeners, and every component
 	// in the chit (which don't need to be listeners.)
@@ -98,13 +94,13 @@ private:
 	enum {
 		SPATIAL,
 		MOVE,
+		INVENTORY,
+		ITEM,
 		GENERAL_0,
 		GENERAL_1,
 		GENERAL_2,
 		GENERAL_3,
-		GENERAL_4,
-		GENERAL_5,
-		GENERAL_6,	// FIXME: fragile system
+		GENERAL_4,	// FIXME: fragile system
 		RENDER,
 		NUM_SLOTS,
 
@@ -117,13 +113,13 @@ private:
 		struct {
 			SpatialComponent*	spatialComponent;
 			MoveComponent*		moveComponent;
+			InventoryComponent*	inventoryComponent;
+			ItemComponent*		itemComponent;
 			Component*			general0;
 			Component*			general1;
 			Component*			general2;
 			Component*			general3;
 			Component*			general4;
-			Component*			general5;
-			Component*			general6;
 			RenderComponent*	renderComponent;		// should be last
 		};
 		Component*			slot[NUM_SLOTS];

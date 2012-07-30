@@ -19,19 +19,34 @@
 using namespace grinliz;
 
 
-bool BattleMechanics::InMeleeZone( const grinliz::Vector2F& origin, 
-									const grinliz::Vector2F& dir, 
-									const grinliz::Vector2F& target )
+bool BattleMechanics::InMeleeZone(	Engine* engine,
+									Chit* src,
+									Chit* target )
 {
-	GLASSERT( Equal( dir.Length(), 1.0f, 0.001f ) );
+	SpatialComponent* spatial		= src->GetSpatialComponent();
+	RenderComponent*  render		= src->GetRenderComponent();
+	SpatialComponent* targetSpatial = target->GetSpatialComponent();
+	RenderComponent*  targetRender	= target->GetRenderComponent();
 
-	float d2 = ( target - origin ).LengthSquared();
-	if ( d2 <= (MELEE_RANGE*MELEE_RANGE) ) {
-		Vector2F normal = target - origin;
-		normal.Normalize();
-		if ( DotProduct( dir, normal ) >= MELEE_COS_THETA ) {
-			return true;
-		}
+	if ( spatial && render && targetSpatial && targetRender ) {}	// all good
+	else return false;
+
+	Vector2F normalToTarget = spatial->GetPosition2D() - targetSpatial->GetPosition2D();
+	const float distToTarget = normalToTarget.Length();
+	normalToTarget.Normalize();
+
+	int test = IntersectRayCircle( targetSpatial->GetPosition2D(),
+								   targetRender->RadiusOfBase(),
+								   spatial->GetPosition2D(),
+								   normalToTarget );
+
+	bool intersect = ( test == INTERSECT || test == INSIDE );
+
+	const float meleeRangeDiff = 0.5f * render->RadiusOfBase();	// FIXME: correct??? better metric?
+	const float meleeRange = render->RadiusOfBase() + targetRender->RadiusOfBase() + meleeRangeDiff;
+
+	if ( intersect && distToTarget < meleeRange ) {
+		return true;
 	}
 	return false;
 }
@@ -39,11 +54,14 @@ bool BattleMechanics::InMeleeZone( const grinliz::Vector2F& origin,
 
 void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, WeaponItem* weapon )
 {
+	GLASSERT( engine && src && weapon );
 	ChitBag* chitBag = src->GetChitBag();
 	GLASSERT( chitBag );
 
 	U32 absTime = chitBag->AbsTime();
-	GLASSERT( weapon->CanMelee( absTime ) );
+	if( !weapon->CanMelee( absTime )) {
+		return;
+	}
 	weapon->DoMelee( absTime );
 
 	// Get origin and direction of melee attack,
@@ -54,32 +72,10 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, WeaponItem* weapon
 	// for objects in air and such (bad...)
 	// Does establish that everything in the chitbag
 	// query is something that can be hit by melee/etc.
-	// FIXME: may never be hitting world objects
+	// FIXME: may never be hitting world objects (blocks and such)
+	// that aren't in the ChitBag
 
 	Vector2F srcPos = src->GetSpatialComponent()->GetPosition2D();
-	Vector2F srcNormal = src->GetSpatialComponent()->GetHeading2D();
-
-	if ( engine && src->GetRenderComponent() ) {
-		static const Vector4F POS = { 0, 0, 0, 1 };
-		static const Vector4F DIR = { 0, 0, 1, 0 };
-
-		// fixme: switch to barrel or emitter, not trigger
-		Matrix4 triggerXForm;
-		src->GetRenderComponent()->GetMetaData( "trigger", &triggerXForm );
-		Vector4F trigger4 = triggerXForm * POS;
-		Vector3F trigger = { trigger4.x, trigger4.y, trigger4.z };
-
-		Vector4F srcNormal4 = triggerXForm * DIR;
-		Vector3F srcNormal3 = { srcNormal4.x, srcNormal4.y, srcNormal4.z };
-		srcNormal3.Normalize();
-
-		trigger = trigger + srcNormal3 * (0.5f*MELEE_RANGE);
-		Vector3F cross;
-		static const Vector3F UP = { 0, 1, 0 };
-		CrossProduct( srcNormal3, UP, &cross );
-	}
-
-
 	Rectangle2F b;
 	b.min = srcPos; b.max = srcPos;
 	b.Outset( MELEE_RANGE + MAX_BASE_RADIUS );
@@ -87,9 +83,8 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, WeaponItem* weapon
 
 	for( int i=0; i<nearChits.Size(); ++i ) {
 		Chit* target = nearChits[i];
-		GLASSERT( target->GetSpatialComponent() );
-		if ( InMeleeZone( srcPos, srcNormal, target->GetSpatialComponent()->GetPosition2D() )) {
 
+		if ( InMeleeZone( engine, src, target )) {
 			// FIXME: account for armor, shields, etc. etc.
 			// FIXME: account for knockback (physics move), catching fire, etc.
 			// FIXME: account for critical damage

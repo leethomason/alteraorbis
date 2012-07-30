@@ -13,9 +13,13 @@ class BattleMechanics
 {
 public:
 	static void MeleeAttack( Engine* engine, Chit* src, WeaponItem* weapon );
-	static bool InMeleeZone(	const grinliz::Vector2F& origin, 
-								const grinliz::Vector2F& dirNormal, 
-								const grinliz::Vector2F& target );
+
+	// Returns true the melee attack can/does succeed. Note that any animation
+	// is pure decoration, melee success is just based on relative positions.
+	// This is simple, but could be improved.
+	static bool InMeleeZone( Engine* engine,
+							 Chit* src,
+							 Chit* target );
 };
 
 

@@ -32,20 +32,26 @@ Chit::~Chit()
 	
 void Chit::Add( Component* c )
 {
-	if ( c->ToSpatial() ) {
-		GLASSERT( !slot[SPATIAL] );
-		slot[SPATIAL] = c;
-		GLASSERT( spatialComponent == c );
+	int s = -1;
+	if ( c->ToComponent( "SpatialComponent" )) {
+		s = SPATIAL;
 	}
-	else if ( c->ToRender() ) {
-		GLASSERT( !slot[RENDER] );
-		slot[RENDER] = c;
-		GLASSERT( renderComponent == c );
+	else if ( c->ToComponent( "MoveComponent" )) {
+		s = MOVE;
 	}
-	else if ( c->ToMove() ) {
-		GLASSERT( !slot[MOVE] );
-		slot[MOVE] = c;
-		GLASSERT( moveComponent == c );
+	else if ( c->ToComponent( "InventoryComponent" )) {
+		s = INVENTORY;
+	}
+	else if ( c->ToComponent( "ItemComponent" )) {
+		s = ITEM;
+	}
+	else if ( c->ToComponent( "RenderComponent" )) {
+		s = RENDER;
+	}
+
+	if ( s >= 0 ) {
+		GLASSERT( !slot[s] );
+		slot[s] = c;
 	}
 	else {
 		int i;

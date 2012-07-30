@@ -28,9 +28,6 @@ public:
 		if ( grinliz::StrEqual( name, "Component" ) ) return this;
 		return 0;
 	}
-	virtual SpatialComponent*	ToSpatial()		{ return 0; }
-	virtual MoveComponent*		ToMove()		{ return 0; }
-	virtual RenderComponent*	ToRender()		{ return 0; }
 
 	// fixme: switch to a request/release model?
 	virtual bool NeedsTick()					{ return false; }

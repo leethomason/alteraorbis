@@ -31,7 +31,8 @@ public:
 	virtual void OnChitMsg( Chit* chit, int id, const ChitEvent* event );
 
 	void QueueDest( grinliz::Vector2F dest,
-					float rotation = -1.f );	// if specified, the rotation we wish to get to
+					float rotation = -1.f );		// if specified, the rotation we wish to get to
+	void QueueDest( Chit* targetChit );
 
 	/*
 	// Set whether rotation is prioritized over movement. (Default

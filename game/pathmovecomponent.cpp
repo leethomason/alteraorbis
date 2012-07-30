@@ -48,7 +48,19 @@ void PathMoveComponent::QueueDest( grinliz::Vector2F d, float r /*, int doNotAvo
 
 	queued.pos = d;
 	queued.rotation = r;
-//	queued.doNotAvoid = doNotAvoid;
+}
+
+
+void PathMoveComponent::QueueDest( Chit* target ) 
+{
+	SpatialComponent* targetSpatial = target->GetSpatialComponent();
+	SpatialComponent* srcSpatial = parentChit->GetSpatialComponent();
+	if ( targetSpatial && srcSpatial ) {
+		Vector2F v = targetSpatial->GetPosition2D();
+		Vector2F delta = v - srcSpatial->GetPosition2D();
+		float angle = RotationXZDegrees( delta.x, delta.y );
+		QueueDest( v, angle );
+	}
 }
 
 

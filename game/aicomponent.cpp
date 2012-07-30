@@ -106,39 +106,15 @@ void AIComponent::DoMelee()
 		return;
 	}
 
-	SpatialComponent* spatial = parentChit->GetSpatialComponent();
-	if ( !spatial ) return;
-	RenderComponent* render = parentChit->GetRenderComponent();
-	if ( !render ) return;
-	PathMoveComponent* pmc = GET_COMPONENT( parentChit, PathMoveComponent );
-	if ( !pmc ) return;
-
-	SpatialComponent* targetSpatial = targetChit->GetSpatialComponent();
-	if ( !targetSpatial ) return;
-	RenderComponent* targetRender = targetChit->GetRenderComponent();
-	if ( !targetRender ) return;
-
-	Vector2F normalToTarget = spatial->GetPosition2D() - targetSpatial->GetPosition2D();
-	const float distToTarget = normalToTarget.Length();
-	normalToTarget.Normalize();
-
-	int test = IntersectRayCircle( targetSpatial->GetPosition2D(),
-								   targetRender->RadiusOfBase(),
-								   spatial->GetPosition2D(),
-								   normalToTarget );
-	bool intersect = ( test == INTERSECT || test == INSIDE );
-
-	const float meleeRangeDiff = 0.5f * render->RadiusOfBase();	// FIXME: correct??? better metric?
-	const float meleeRange = render->RadiusOfBase() + targetRender->RadiusOfBase() + meleeRangeDiff;
-
-	if ( intersect && distToTarget < meleeRange ) {
-		render->PlayAnimation( ANIM_MELEE );
+	if ( BattleMechanics::InMeleeZone( engine, parentChit, targetChit ) ) {
+		parentChit->GetRenderComponent()->PlayAnimation( ANIM_MELEE );
 	}
 	else {
-		// Move to target. Be more careful if we are closer.
-		//if ( distToTarget < 2.0f ) {
-			pmc->QueueDest( targetSpatial->GetPosition2D(), RotationXZDegrees( normalToTarget.x, normalToTarget.y ) );
-		//}
+		// Move to target.
+		PathMoveComponent* pmc = GET_COMPONENT( parentChit, PathMoveComponent );
+		if ( pmc ) {
+			pmc->QueueDest( targetChit );
+		}
 	}
 }
 
@@ -196,14 +172,19 @@ void AIComponent::DebugStr( grinliz::GLString* str )
 void AIComponent::OnChitMsg( Chit* chit, int id, const ChitEvent* event )
 {
 	if ( chit == parentChit && id == RENDER_MSG_IMPACT ) {
+		
 		RenderComponent* render = parentChit->GetRenderComponent();
 		GLASSERT( render );	// it is a message from the render component, after all.
-		if ( !render ) return;
+		ItemComponent* item = GET_COMPONENT( parentChit, ItemComponent );
+
+		if ( !render || !item ) return;
 
 		Matrix4 xform;
 		render->GetMetaData( "trigger", &xform );
 		Vector3F pos = xform * V3F_ZERO;
 
 		engine->particleSystem->EmitPD( "derez", pos, V3F_UP, engine->camera.EyeDir3(), 0 );
+		
+		BattleMechanics::MeleeAttack( engine, parentChit, item->GetItem()->ToGameItem()->ToWeapon() );
 	}
 }
