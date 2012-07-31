@@ -1,6 +1,8 @@
 #ifndef XENOENGINE_GAME_LIMITS_INCLUDED
 #define XENOENGINE_GAME_LIMITS_INCLUDED
 
+#include "../grinliz/gltypes.h"
+
 // Cross-everything constant. How big can the base
 // of a Chit be? Impacts pathing, collision, map,
 // etc. Can't be >= 0.5f since the chit could get

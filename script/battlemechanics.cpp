@@ -52,17 +52,18 @@ bool BattleMechanics::InMeleeZone(	Engine* engine,
 }
 
 
-void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, WeaponItem* weapon )
+void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, GameItem* weapon )
 {
-	GLASSERT( engine && src && weapon );
+	GLASSERT( engine && src && weapon && weapon->ToMeleeWeaponItem() );
 	ChitBag* chitBag = src->GetChitBag();
 	GLASSERT( chitBag );
+	IMeleeWeaponItem* melee = weapon->ToMeleeWeaponItem();
 
 	U32 absTime = chitBag->AbsTime();
-	if( !weapon->CanMelee( absTime )) {
+	if( !weapon->Ready( absTime )) {
 		return;
 	}
-	weapon->DoMelee( absTime );
+	weapon->Use( absTime );
 
 	// Get origin and direction of melee attack,
 	// then send messages to everyone hit.
@@ -90,7 +91,10 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, WeaponItem* weapon
 			// FIXME: account for critical damage
 			HealthComponent* targetHealth = GET_COMPONENT( target, HealthComponent );
 			if ( targetHealth ) {
-				targetHealth->DeltaHealth( -weapon->BaseDamage() );
+				DamageDesc dd;
+				melee->GetDamageDesc( &dd );
+
+				targetHealth->DeltaHealth( -(int)dd.Total() );
 			}
 		}
 	}

@@ -1,6 +1,7 @@
 #ifndef XEITEM_INCLUDED
 #define XEITEM_INCLUDED
 
+#if 0
 #include "../grinliz/gldebug.h"
 #include "../grinliz/gltypes.h"
 #include "../grinliz/glstringutil.h"
@@ -28,5 +29,5 @@ public:
 
 	virtual GameItem* ToGameItem() { return 0; }
 };
-
+#endif
 #endif // XEITEM_INCLUDED

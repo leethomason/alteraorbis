@@ -3,6 +3,7 @@
 #include "../xegame/inventorycomponent.h"
 #include "../xegame/itemcomponent.h"
 
+#if 0
 void GameItem::GetActiveItems( Chit* chit, grinliz::CArray<XEItem*, MAX_ACTIVE_ITEMS>* array )
 {
 	// Chits can contain Item components and Inventory components. 
@@ -20,3 +21,4 @@ void GameItem::GetActiveItems( Chit* chit, grinliz::CArray<XEItem*, MAX_ACTIVE_I
 		}
 	}
 }
+#endif

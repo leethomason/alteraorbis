@@ -42,7 +42,7 @@ int AIComponent::GetTeamStatus( Chit* other )
 	ItemComponent* thisItem  = GET_COMPONENT( parentChit, ItemComponent );
 	ItemComponent* otherItem = GET_COMPONENT( other, ItemComponent );
 	if ( thisItem && otherItem ) {
-		if ( thisItem->GetItem()->ToGameItem()->primaryTeam != otherItem->GetItem()->ToGameItem()->primaryTeam ) {
+		if ( thisItem->item.primaryTeam != otherItem->item.primaryTeam ) {
 			return ENEMY;
 		}
 	}
@@ -127,7 +127,7 @@ void AIComponent::DoTick( U32 deltaTime )
 		for( int i=0; i<events.Size(); ++i ) {
 			if( events[i].ID() == ChitEvent::AWARENESS ) {
 				const AwarenessChitEvent& event = (const AwarenessChitEvent&) events[i];
-				if ( event.Team() == itemComp->GetItem()->ToGameItem()->primaryTeam ) 
+				if ( event.Team() == itemComp->item.primaryTeam ) 
 				{
 					UpdateCombatInfo( &event.Bounds() );
 				}
@@ -185,6 +185,6 @@ void AIComponent::OnChitMsg( Chit* chit, int id, const ChitEvent* event )
 
 		engine->particleSystem->EmitPD( "derez", pos, V3F_UP, engine->camera.EyeDir3(), 0 );
 		
-		BattleMechanics::MeleeAttack( engine, parentChit, item->GetItem()->ToGameItem()->ToWeapon() );
+		BattleMechanics::MeleeAttack( engine, parentChit, &item->item );
 	}
 }

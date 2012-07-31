@@ -20,8 +20,9 @@
 
 static const int MAX_MOVE_PATH = MAX_MAP_SIZE/2;	// repath if we need to
 
-static const float METERS_PER_GRID = 2.0f;
-static const int MAX_ACTIVE_ITEMS = 8;
+static const float METERS_PER_GRID	= 2.0f;
+static const int MAX_ACTIVE_ITEMS	= 8;
+static const int MAX_ITEM_NAME		= 24;
 
 static const int MODEL_USER	= 0x1000;				// from model.h
 

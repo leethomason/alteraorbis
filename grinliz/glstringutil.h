@@ -89,7 +89,7 @@ void StrNCpy( char* dst, const char* src, size_t bufferSize );
 int SNPrintf(char *str, size_t size, const char *format, ...);
 
 
-/*
+/*f
 	A class that wraps a c-array of characters.
 */
 template< int ALLOCATE >
@@ -101,18 +101,25 @@ public:
 										Validate();
 									}
 	CStr( const char* src )			{	GLASSERT(sizeof(*this) == ALLOCATE );
-										GLASSERT( strlen( src ) < (ALLOCATE-1));
 										*buf = 0;
-										if ( src ) 
+										if ( src ) {
+											GLASSERT( strlen( src ) < (ALLOCATE-1));
 											StrNCpy( buf, src, ALLOCATE ); 
+										}
 										Validate();
 									}
+	CStr( const CStr<ALLOCATE>& other ) {
+										memcpy( buf, other.buf, ALLOCATE );
+										Validate();
+									}
+
+#if 0
 	// fixme: inconsistent with += behavior
 	CStr( int value )				{	GLASSERT(sizeof(*this) == ALLOCATE );		// not required for class to work, but certainly the intended design
 										buf[0] = 0; 
 										SNPrintf( buf, ALLOCATE, "%d", value );
 										Validate();
-									}
+#endif									}
 	~CStr()	{}
 
 	const char* c_str()	const			{ return buf; }
@@ -123,6 +130,25 @@ public:
 	int Capacity() const				{ return ALLOCATE-1; }
 	void ClearBuf()						{ memset( buf, 0, ALLOCATE ); }
 	void Clear()						{ buf[0] = 0; }
+	void Format( const char* format, ...) 
+	{
+		va_list     va;
+
+		//
+		//  format and output the message..
+		//
+		va_start( va, format );
+	#ifdef _MSC_VER
+		int result = vsnprintf_s( buf, ALLOCATE, _TRUNCATE, format, va );
+	#else
+		// Reading the spec, the size does seem correct. The man pages
+		// say it will aways be null terminated (whereas the strcpy is not.)
+		// Pretty nervous about the implementation, so force a null after.
+		int result = vsnprintf( buf, ALLOCATE, format, va );
+	#endif
+		va_end( va );
+		Validate();
+	}
 
 	bool operator==( const char* str ) const						{ return buf && str && strcmp( buf, str ) == 0; }
 	bool operator!=( const char* str ) const						{ return !(*this == str); }
