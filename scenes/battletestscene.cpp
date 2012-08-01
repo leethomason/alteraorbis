@@ -41,6 +41,18 @@ BattleTestScene::BattleTestScene( LumosGame* game ) : Scene( game )
 	goButton.SetText( "Go!" );
 	goButton.SetSize( width, height );
 
+	// matches 'groups', below
+	static const char* names[NUM_OPTIONS] = {
+		"dummy", "human", "mantis", "balrog",
+		"none", "melee", "pistol"
+	};
+
+	for( int i=0; i<NUM_BUTTONS; ++i ) {
+		optionButton[i].Init( &gamui2D, look );
+		optionButton[i].SetSize( width, height*0.5f );
+		optionButton[i].SetText( i >= NUM_OPTIONS ? names[i-NUM_OPTIONS] : names[i] );
+	}
+
 	engine = 0;
 	map = 0;
 
@@ -63,7 +75,27 @@ void BattleTestScene::Resize()
 
 	const Screenport& port = lumosGame->GetScreenport();
 	LayoutCalculator layout = lumosGame->DefaultLayout();
+	layout.SetSize( layout.Width(), layout.Height()*0.5f );
 	layout.PosAbs( &goButton, 0, -2 );
+
+	// matches 'names', above
+	static const int groups[] = { 4, 3, 0 };
+
+	for( int pass=0; pass<2; ++pass ) {
+		int groupIndex = 0;
+		int group = groups[0];
+		int x = 0;
+		for( int i=0; i<NUM_OPTIONS; ++i ) {
+			layout.PosAbs( &optionButton[i+NUM_OPTIONS*pass], -4*pass + x, groupIndex );
+			++x;
+			--group;
+			if ( group == 0 ) {
+				groupIndex++;
+				group = groups[groupIndex];
+				x = 0;
+			}
+		}
+	}
 }
 
 
@@ -124,8 +156,9 @@ void BattleTestScene::CreateChit( const Vector2I& p )
 	int team = HUMAN;
 	const char* asset = "humanFemale";
 	if ( p.x > 27 ) {
-		team = HORNET;
-		asset = "hornet";
+//		team = HORNET;
+//		asset = "hornet";
+		GLASSERT( 0 );
 	}
 	else if ( p.x > 6 && p.x < 27 ) {
 		team = DUMMY;
@@ -136,7 +169,7 @@ void BattleTestScene::CreateChit( const Vector2I& p )
 	chit->Add( new SpatialComponent( true ) );
 	chit->Add( new RenderComponent( engine, asset, 0 ));
 	chit->Add( new PathMoveComponent( map ));
-	if ( team == HUMAN || team == HORNET ) {
+	if ( team == HUMAN ) {
 		chit->Add( new AIComponent( engine, map ));
 	}
 
@@ -152,7 +185,7 @@ void BattleTestScene::CreateChit( const Vector2I& p )
 	chit->GetSpatialComponent()->SetPosYRot( (float)p.x+0.5f, 0, (float)p.y+0.5f, (float)random.Rand( 360 ) );
 	GET_COMPONENT( chit, HealthComponent )->SetHealth( 100, 100 );
 
-	if ( team == HUMAN || team == HORNET ) {
+	if ( team == HUMAN ) {
 		GameItem hand( GameItem::MELEE_WEAPON | GameItem::APPENDAGE );
 		inv->AddToInventory( hand );
 

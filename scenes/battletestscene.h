@@ -30,16 +30,26 @@ public:
 	virtual void MouseMove( const grinliz::Vector2F& view, const grinliz::Ray& world ) { debugRay = world; }
 
 private:
-	enum {
-		HUMAN=1,
-		HORNET,
-		DUMMY
-	};
 
 	void LoadMap();
 	void CreateChit( const grinliz::Vector2I& p );
 
 	gamui::PushButton okay, goButton;
+
+	enum {
+		DUMMY,		
+		HUMAN,		// fist, ring, ranged weapon
+		MANTIS,		// pincer
+		BALROG,		// fist, axe, ranged intrinsic
+		
+		NO_WEAPON,
+		MELEE_WEAPON,
+		PISTOL,
+
+		NUM_OPTIONS,
+		NUM_BUTTONS = NUM_OPTIONS*2
+	};
+	gamui::ToggleButton optionButton[NUM_BUTTONS];
 
 	Engine* engine;
 	WorldMap* map;
