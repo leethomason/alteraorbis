@@ -115,6 +115,7 @@ public:
 
 	//IWeaponItem
 	void GetDamageDesc( DamageDesc* desc ) {
+		// FIXME: fake
 		desc->energy = 20.0f;
 		desc->fire = 0;
 		desc->kinetic = 0;

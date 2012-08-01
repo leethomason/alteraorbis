@@ -16,7 +16,7 @@ using namespace gamui;
 
 
 LumosGame::LumosGame(  int width, int height, int rotation, const char* savepath ) 
-	: Game( width, height, rotation, 480, savepath )
+	: Game( width, height, rotation, 600, savepath )
 {
 	InitButtonLooks();
 

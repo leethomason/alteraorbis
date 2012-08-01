@@ -62,8 +62,8 @@ static const int SCREEN_HEIGHT = IPOD_SCREEN_HEIGHT;
 #endif
 #if 1
 // A default screenshot size for market.
-static const int SCREEN_WIDTH  = NEXUS_ONE_SCREEN_WIDTH;
-static const int SCREEN_HEIGHT = NEXUS_ONE_SCREEN_HEIGHT;
+static const int SCREEN_WIDTH  = NEXUS_ONE_SCREEN_WIDTH*5/4;
+static const int SCREEN_HEIGHT = NEXUS_ONE_SCREEN_HEIGHT*5/4;
 #endif
 #if 0
 // used in "how to play" and the source code web pages

@@ -1,17 +1,17 @@
 - combat test scene
 	X animation/lack of making me crazy. What plan?
 	X particle effect for melee strike not "connected" to character
-	- item definition: one big wad of data? handle "inherited items"?
+	X item definition: one big wad of data? handle "inherited items"?
 	- properly hook up items and such, so that items, health, all be driven correctly
 	- use space tree query for impacted items
 	- data driven item creation
-	- need to check rotation in the path component
+	X need to check rotation in the path component
 	- buttons to select scenario, load items
 	X load in the correct lighting
 
 	- weapons
 		X relative positioning (implemented, broken again)
-		- weapon definition - item question: how is a chit a weapon?
+		X weapon definition - item question: how is a chit a weapon?
 		- item definition
 	- AI (task AI)
 		- establish friend vs. enemy
