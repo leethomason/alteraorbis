@@ -2,6 +2,7 @@
 #include "spatialcomponent.h"
 #include "inventorycomponent.h"
 #include "chit.h"
+#include "chitevent.h"
 
 #include "../engine/animation.h"
 #include "../engine/model.h"
@@ -189,7 +190,8 @@ void RenderComponent::DoTick( U32 deltaTime )
 		}
 		for( int i=0; i<metaData.Size(); ++i ) {
 			if ( StrEqual( metaData[i].name, "impact" )) {
-				parentChit->SendMessage( RENDER_MSG_IMPACT, 0, 0 );
+				ChitEvent e( RENDER_MSG_IMPACT, n );
+				parentChit->SendMessage( RENDER_MSG_IMPACT, 0, &e );
 			}
 			else {
 				GLASSERT( 0 );	// event not recognized

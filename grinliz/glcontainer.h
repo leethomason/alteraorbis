@@ -311,6 +311,7 @@ public:
 		buckets[index].state = DELETED;
 		--nItems;
 		SEM::DoRemove( buckets[index].value );
+		values.Clear();
 		return buckets[index].value;
 	}
 
@@ -322,6 +323,7 @@ public:
 			}
 			buckets[i].state = UNUSED;
 		}
+		values.Clear();
 		GLASSERT( nItems == 0 );
 	}
 

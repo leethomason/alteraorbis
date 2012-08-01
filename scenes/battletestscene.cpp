@@ -153,12 +153,11 @@ void BattleTestScene::CreateChit( const Vector2I& p )
 	GET_COMPONENT( chit, HealthComponent )->SetHealth( 100, 100 );
 
 	if ( team == HUMAN || team == HORNET ) {
-		GameItem gunItem( GameItem::MELEE_WEAPON | GameItem::RANGED_WEAPON,
-						  "testgun", "testgun" );
+		GameItem hand( GameItem::MELEE_WEAPON | GameItem::APPENDAGE );
+		inv->AddToInventory( hand );
 
-		Chit* gun = chitBag.NewChit();
-		gun->Add( new ItemComponent( gunItem ));
-
+		GameItem gun( GameItem::MELEE_WEAPON | GameItem::RANGED_WEAPON | GameItem::HELD,
+					  "testgun", "testgun", "trigger" );
 		inv->AddToInventory( gun );
 	}
 }

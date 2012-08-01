@@ -54,10 +54,9 @@ bool BattleMechanics::InMeleeZone(	Engine* engine,
 
 void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, GameItem* weapon )
 {
-	GLASSERT( engine && src && weapon && weapon->ToMeleeWeaponItem() );
+	GLASSERT( engine && src && weapon && weapon->ToMeleeWeapon() );
 	ChitBag* chitBag = src->GetChitBag();
 	GLASSERT( chitBag );
-	IMeleeWeaponItem* melee = weapon->ToMeleeWeaponItem();
 
 	U32 absTime = chitBag->AbsTime();
 	if( !weapon->Ready( absTime )) {
@@ -92,7 +91,7 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, GameItem* weapon )
 			HealthComponent* targetHealth = GET_COMPONENT( target, HealthComponent );
 			if ( targetHealth ) {
 				DamageDesc dd;
-				melee->GetDamageDesc( &dd );
+				weapon->GetDamageDesc( &dd );
 
 				targetHealth->DeltaHealth( -(int)dd.Total() );
 			}

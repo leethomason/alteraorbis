@@ -12,49 +12,37 @@ void InventoryComponent::DebugStr( grinliz::GLString* str )
 }
 
 
-void InventoryComponent::AddToInventory( Chit* itemChit )
+void InventoryComponent::AddToInventory( const GameItem& item )
 {
-	inventory.Add( itemChit );
-	itemChit->AddListener( this );
-
-	// Idea: doesn't have a spatial or render component. (Strange, yes.)
-	//		 It attaches to a 'hardpoints' of an existing render component.
-
-	// Need a relative spatial component. If there is a render
-	// component, that will get picked up. If no render, no 
-	// worries, it just won't render.
-	if ( itemChit->GetSpatialComponent() ) {
-		itemChit->Remove( itemChit->GetSpatialComponent() );
+	if ( item.flags & GameItem::APPENDAGE ) {
+		hardpoints.Push( item );
 	}
-	if ( itemChit->GetRenderComponent() ) {
-		itemChit->Remove( itemChit->GetRenderComponent() );
-	}
-
-	// Attach the item to the metaData hardpoint
-	parentChit->GetRenderComponent()->Attach( "trigger", "testgun" );	// fixme: should come from item
-}
-
-
-void InventoryComponent::RemoveFromInventory( Chit* itemChit )
-{
-	itemChit = inventory.Remove( itemChit );
-	if ( itemChit >= 0 ) {
-		itemChit->RemoveListener( this );
-		itemChit->Remove( itemChit->GetSpatialComponent() );
-	}
-}
-
-
-/*
-frought with deletion order peril
-void InventoryComponent::OnChitMsg( Chit* chit, int id )
-{
-	if ( id == CHIT_MSG_DELETING ) {
-
-		int index = inventory.Find( chit );
-		if ( index >= 0 ) {
-			inventory.SwapRemove( index );
+	else if ( item.flags & GameItem::HELD ) {
+		// FIXME: attach to the correct hardpoint, not just any.
+		GLASSERT( attached.Size() < hardpoints.Size() );
+		attached.Push( item );
+		GLASSERT( !item.resource.empty() );
+		GLASSERT( !item.hardpoint.empty() );
+		
+		RenderComponent* render = parentChit->GetRenderComponent();
+		GLASSERT( render );
+		if ( render ) {
+			render->Attach( item.Hardpoint(), item.ResourceName() );
 		}
 	}
+	else {
+		pack.Push( item );
+	}
 }
-*/
+
+
+GameItem* InventoryComponent::IsCarrying()
+{
+	// Do we have a held item on an "trigger" hardpoint?
+	for( int i=0; i<attached.Size(); ++i ) {
+		if ( StrEqual( attached[i].Hardpoint(), "trigger" )) {
+			return &attached[i];
+		}
+	}
+	return 0;
+}

@@ -46,7 +46,9 @@ public:
 	int BlockForceApplied() const	{ return blockForceApplied; }
 	bool IsStuck() const			{ return isStuck; }
 	bool IsAvoiding() const			{ return avoidForceApplied; }
-	virtual bool IsMoving() const	{ return isMoving; } 
+	virtual bool IsMoving() const	{ 
+		return isMoving; 
+	} 
 
 private:
 	// Commit the 'queued' to the 'dest', if possible. 

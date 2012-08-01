@@ -13,6 +13,7 @@
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/rendercomponent.h"
 #include "../xegame/itemcomponent.h"
+#include "../xegame/inventorycomponent.h"
 
 #include "../grinliz/glrectangle.h"
 #include <climits>
@@ -175,9 +176,15 @@ void AIComponent::OnChitMsg( Chit* chit, int id, const ChitEvent* event )
 		
 		RenderComponent* render = parentChit->GetRenderComponent();
 		GLASSERT( render );	// it is a message from the render component, after all.
-		ItemComponent* item = GET_COMPONENT( parentChit, ItemComponent );
+		InventoryComponent* inventory = parentChit->GetInventoryComponent();
+		GLASSERT( inventory );	// need to be  holding a melee weapon. possible the weapon
+								// was lost before impact, in which case this assert should
+								// be removed.
+		GameItem* item = inventory->IsCarrying();
+		GLASSERT( item && item->ToMeleeWeapon() );
 
-		if ( !render || !item ) return;
+		if ( render && inventory && item && item->ToMeleeWeapon() ) { /* okay */ }
+		else return;
 
 		Matrix4 xform;
 		render->GetMetaData( "trigger", &xform );
@@ -185,6 +192,6 @@ void AIComponent::OnChitMsg( Chit* chit, int id, const ChitEvent* event )
 
 		engine->particleSystem->EmitPD( "derez", pos, V3F_UP, engine->camera.EyeDir3(), 0 );
 		
-		BattleMechanics::MeleeAttack( engine, parentChit, &item->item );
+		BattleMechanics::MeleeAttack( engine, parentChit, item );
 	}
 }

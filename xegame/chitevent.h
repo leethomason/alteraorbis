@@ -12,7 +12,8 @@
 class ChitEvent
 {
 protected:
-	int id;
+	int id;		// the message sent
+	int data;	// if there is obvious data - not warranting a sub-class - put it here
 	grinliz::Rectangle2F bounds2F;
 
 	union {
@@ -20,8 +21,9 @@ protected:
 	};
 
 public:
-	ChitEvent( int _id=-1 ) : id( _id ) {}
-	int ID() const						{ return id; }
+	ChitEvent( int _id=-1, int _data=0 ) : id( _id ), data( _data ) {}
+	int ID() const			{ return id; }
+	int Data() const		{ return data; }
 
 	enum {
 		AWARENESS

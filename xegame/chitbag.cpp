@@ -44,7 +44,9 @@ void ChitBag::DeleteChit( Chit* chit )
 
 Chit* ChitBag::GetChit( int id )
 {
-	return chits.Get( id );
+	Chit* c = 0;
+	chits.Query( id, &c );
+	return c;
 }
 
 
