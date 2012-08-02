@@ -71,12 +71,14 @@ BattleTestScene::~BattleTestScene()
 void BattleTestScene::Resize()
 {
 	LumosGame* lumosGame = static_cast<LumosGame*>( game );
-	lumosGame->PositionStd( &okay, 0 );
 
 	const Screenport& port = lumosGame->GetScreenport();
 	LayoutCalculator layout = lumosGame->DefaultLayout();
-	layout.SetSize( layout.Width(), layout.Height()*0.5f );
+
+	layout.PosAbs( &okay, 0, -1 );
 	layout.PosAbs( &goButton, 0, -2 );
+
+	layout.SetSize( layout.Width(), layout.Height()*0.5f );
 
 	// matches 'names', above
 	static const int groups[] = { 4, 3, 0 };
@@ -162,7 +164,7 @@ void BattleTestScene::CreateChit( const Vector2I& p )
 	}
 	else if ( p.x > 6 && p.x < 27 ) {
 		team = DUMMY;
-		asset = "prime";
+		asset = "dummytarget";
 	}
 
 	Chit* chit = chitBag.NewChit();
