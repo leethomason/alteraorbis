@@ -44,12 +44,13 @@
   </animation>    
 
   <!-- Tactical Sprite models are centered at (0,0,0) -->
-  <model filename="human.ac" modelName="humanFemale" animation="humanFemaleAnimation" origin="1 0 0" shading="flat" polyRemoval="pre">
+  <model filename="human.ac" modelName="humanFemale" animation="humanFemaleAnimation" scale="0.5" origin="2 0 0" shading="flat" polyRemoval="pre">
     <meta name="trigger" pos="0.84 0.43 -0.003" rot="1 0 0 90" boneName="arm.lower.right" />
     <meta name="target"  pos="1 0.68 0" />
-  </model>    
-  
-  <model filename="human.ac" modelName="humanMale" origin="0 0 0" shading="crease" polyRemoval="pre" />
+  </model>
+
+  <model filename="human.ac"        modelName="humanMale"   origin="0 0 0" shading="crease" polyRemoval="pre" />
+  <model filename="dummytarget.ac"                                         shading="flat" polyRemoval="pre" />
  
   <model filename="chess_characters.ac" modelName="hornet"  origin="2 0 0" shading="flat" polyRemoval="pre"> 
   </model>
@@ -66,7 +67,9 @@
   <model filename="alltree.ac" modelName="cactus2"  origin="12 0 0"  shading="smooth" polyRemoval="pre" />
   <model filename="alltree.ac" modelName="stump"    origin="0 0 2"  shading="smooth" polyRemoval="pre" />
 
-  <model filename="weapons.ac"          modelName="testgun"   origin="0 0 0"    shadowCaster="false" />
+  <model filename="weapons.ac"          modelName="testgun"   origin="0 0 0"        shadowCaster="false" />
+  <model filename="weapons.ac"          modelName="testknife"   origin="0.20 0 0"   shadowCaster="false" />
+  
   <model filename="chess_weapons.ac"    modelName="RAY-1"        origin="0 0 0"/>
   <model filename="chess_weapons.ac"    modelName="PLS-1"        origin="1 0 0"/>
   <model filename="chess_weapons.ac"    modelName="STORM-1"      origin="2 0 0"/>
