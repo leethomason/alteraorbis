@@ -274,6 +274,7 @@ public:
 							bool *looped );
 
 	void SetAnimationRate( float rate )						{ animationRate = rate; }
+	bool HasAnimation() const								{ return animationResource && (animationID>=0); }
 
 	// WARNING: not really supported. Just for debug rendering. May break:
 	// normals, lighting, bounds, picking, etc. etc.
@@ -369,7 +370,6 @@ private:
 		//mapBoundsCache.Set( -1, -1, -1, -1 ); 
 	}
 	const grinliz::Matrix4& InvXForm() const;
-	bool HasAnimation() const { return animationResource && (animationID>=0); }
 	void CalcAnimation( BoneData* boneData ) const;	// compute the animition, accounting for crossfade, etc.
 	void CalcAnimation( BoneData::Bone* bone, const char* boneName ) const;	// compute the animition, accounting for crossfade, etc.
 

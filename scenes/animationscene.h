@@ -4,10 +4,12 @@
 #include "../xegame/scene.h"
 #include "../gamui/gamui.h"
 #include "../tinyxml2/tinyxml2.h"
+#include "../grinliz/glcontainer.h"
 
 class LumosGame;
 class Engine;
 class Model;
+class ModelResource;
 
 class AnimationScene : public Scene
 {
@@ -26,10 +28,11 @@ public:
 	virtual void Draw3D( U32 deltaTime );
 
 private:
-	void LoadModel( const char* name );
+	void LoadModel();
 	void SetModelVis( bool onlyShowOne );
 	void UpdateBoneInfo();
 	void UpdateAnimationInfo();
+	void UpdateModelInfo();
 
 	void InitXML( const grinliz::Rectangle2I& bounds );
 	void FinishXML();
@@ -41,9 +44,11 @@ private:
 	Engine* engine;
 	enum { NUM_MODELS = 3 };
 
+	grinliz::CDynArray< const ModelResource* > resourceArr;
 	Model* model[ NUM_MODELS ];
 	Model* gunModel;
 
+	int currentModel;
 	int  currentBone;
 	int  currentAnim;
 	bool doExport;
@@ -52,13 +57,14 @@ private:
 	gamui::PushButton okay;
 	gamui::PushButton boneLeft, boneRight;
 	gamui::PushButton animLeft, animRight;
+	gamui::PushButton modelLeft, modelRight;
 	gamui::PushButton exportSCML;
 
 	gamui::ToggleButton ortho;
 	gamui::ToggleButton instance;
 	gamui::ToggleButton particle, gun;
 
-	gamui::TextLabel boneName, animName;
+	gamui::TextLabel boneName, animName, modelName;
 	gamui::TextLabel pixelUnitRatio;
 
 	tinyxml2::XMLDocument* xmlDocument;

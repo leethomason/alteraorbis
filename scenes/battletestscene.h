@@ -32,9 +32,17 @@ public:
 private:
 
 	void LoadMap();
-	void CreateChit( const grinliz::Vector2I& p );
+	void CreateChit( const grinliz::Vector2I& p, int team, int loadout );
+	void GoScene();
 
 	gamui::PushButton okay, goButton;
+
+	struct ButtonDef
+	{
+		int			id;
+		const char* label;
+		int			group;
+	};
 
 	enum {
 		DUMMY,		
@@ -50,6 +58,7 @@ private:
 		NUM_BUTTONS = NUM_OPTIONS*2
 	};
 	gamui::ToggleButton optionButton[NUM_BUTTONS];
+	static const ButtonDef buttonDef[NUM_BUTTONS];
 
 	Engine* engine;
 	WorldMap* map;

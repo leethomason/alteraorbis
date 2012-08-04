@@ -4,6 +4,8 @@
 #include "../engine/model.h"
 #include "../engine/animation.h"
 
+#include <direct.h>
+
 extern void ScreenCapture( const char* baseFilename, bool appendCount, bool trim, bool makeTransparent, grinliz::Rectangle2I* size );
 
 using namespace gamui;
@@ -43,6 +45,17 @@ AnimationScene::AnimationScene( LumosGame* game ) : Scene( game )
 	animName.Init( &gamui2D );
 	animName.SetText( "no animation" );
 
+	modelLeft.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
+	modelLeft.SetSize( layout.Width(), layout.Height() );
+	modelLeft.SetText( "<-" );
+
+	modelRight.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
+	modelRight.SetSize( layout.Width(), layout.Height() );
+	modelRight.SetText( "->" );	
+
+	modelName.Init( &gamui2D );
+	modelName.SetText( "no model" );
+
 	ortho.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
 	ortho.SetSize( layout.Width(), layout.Height() );
 	ortho.SetText( "ortho" );
@@ -80,10 +93,21 @@ AnimationScene::AnimationScene( LumosGame* game ) : Scene( game )
 		model[i] = 0;
 	}
 
+	currentModel = 0;
+	const ModelResource* const* resArr = ModelResourceManager::Instance()->GetAllResources( &count );
+	for( int i=0; i<count; ++i ) {
+		if ( !resArr[i]->header.animation.empty() ) {
+			resourceArr.Push( resArr[i] );
+			if ( resArr[i]->header.name == "humanFemale" ) {
+				currentModel = resourceArr.Size()-1;
+			}
+		}
+	}
+
 	const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( "testgun" );
 	gunModel = engine->AllocModel( res );
 
-	LoadModel( "humanFemale" );
+	LoadModel();
 
 	engine->CameraLookAt( 1, 1, 5 );
 	UpdateAnimationInfo();
@@ -122,28 +146,29 @@ void AnimationScene::Resize()
 	layout.PosAbs( &animName,	1, 0 );
 	layout.PosAbs( &animRight,	3, 0 );
 
+	layout.PosAbs( &modelLeft,	0, -3 );
+	layout.PosAbs( &modelName,	1, -3 );
+	layout.PosAbs( &modelRight,	3, -3 );
 }
 
 
-void AnimationScene::LoadModel( const char* name )
+void AnimationScene::LoadModel()
 {
-//	const ModelResource* const* resArr = ModelResourceManager::Instance()->GetAllResources( &count );
-//	for( int i=0; i<count; ++i ) {
-//		if ( !resArr[i]->header.animation.empty() ) {
-			const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( name );
-			GLASSERT( res );
-			for( int j=0; j<NUM_MODELS; ++j ) {
-				if ( model[j] ) {
-					engine->FreeModel( model[j] );
-				}
-				model[j] = engine->AllocModel( res );
-				model[j]->SetPos( 1.0f + (float)j*0.6f, 0, 1 );
-			}
-			SetModelVis( false );
-//		}
-//	}
-			model[1]->SetAnimationRate( 0.8f );
-			model[2]->SetAnimationRate( 1.2f );
+	if ( currentModel >= resourceArr.Size() ) currentModel = 0;
+	if ( currentModel < 0 ) currentModel = resourceArr.Size()-1;
+
+	const ModelResource* res = resourceArr[currentModel];;
+	GLASSERT( res );
+	for( int j=0; j<NUM_MODELS; ++j ) {
+		if ( model[j] ) {
+			engine->FreeModel( model[j] );
+		}
+		model[j] = engine->AllocModel( res );
+		model[j]->SetPos( 1.0f + (float)j*0.6f, 0, 1 );
+	}
+	SetModelVis( false );
+	model[1]->SetAnimationRate( 0.8f );
+	model[2]->SetAnimationRate( 1.2f );
 }
 
 
@@ -165,30 +190,34 @@ void AnimationScene::UpdateBoneInfo()
 }
 
 
+void AnimationScene::UpdateModelInfo()
+{
+	const ModelResource* res = resourceArr[currentModel];
+	modelName.SetText( res->header.name.c_str() );
+	if ( model[0]->GetResource() != res ) {
+		LoadModel();
+	}
+	modelName.SetText( model[0]->GetResource()->header.name.c_str() );
+}
+
+
 void AnimationScene::UpdateAnimationInfo()
 {
 	const AnimationResource* res = model[0]->GetAnimationResource();
-	int nAnim = res->NumAnimations();
-	GLASSERT( currentAnim >=0 && currentAnim < nAnim );
+	if ( res ) {
+		int nAnim = res->NumAnimations();
+		GLASSERT( currentAnim >=0 && currentAnim < nAnim );
 
-	const char* name = "no animation";
-	if ( nAnim > 0 ) {
-		name = res->AnimationName( currentAnim );
-		AnimationType type = AnimationResource::NameToType( name );
-		for( int i=0; i<NUM_MODELS; ++i ) {
-			model[i]->SetAnimation( type, 500 );
+		const char* name = "no animation";
+		if ( nAnim > 0 ) {
+			name = res->AnimationName( currentAnim );
+			AnimationType type = AnimationResource::NameToType( name );
+			for( int i=0; i<NUM_MODELS; ++i ) {
+				model[i]->SetAnimation( type, 500 );
+			}
 		}
-	}
-	animName.SetText( name );
-
-
-	char buf[256];
-	const char* fname = model[0]->GetResource()->header.name.c_str();
-	SNPrintf( buf, 256, "./resin/%s/%s.scml", fname, fname );
-	FILE* fp = fopen( buf, "r" );
-	if ( fp ) {
+		animName.SetText( name );
 		exportSCML.SetEnabled( false );
-		fclose( fp );
 	}
 	else {
 		exportSCML.SetEnabled( true );
@@ -248,7 +277,7 @@ void AnimationScene::ItemTapped( const gamui::UIItem* item )
 			port->SetOrthoCamera( true, 0, 3.0f );
 			static const Vector3F DIR = { -1, 0, 0 };	// FIXME: bug in camera code. (EEK.) Why is the direction negative???
 			static const Vector3F UP  = { 0, 1, 0 };
-			engine->camera.SetPosWC( -5, 0.4f, 1 );
+			engine->camera.SetPosWC( -5, 0.55f, 1 );
 			engine->camera.SetDir( DIR, UP ); 
 			SetModelVis( true );
 		}
@@ -265,9 +294,18 @@ void AnimationScene::ItemTapped( const gamui::UIItem* item )
 		doExport = true;
 		exportCount = -1;
 	}
+	else if ( item == &modelRight ) {
+		++currentModel;
+		if ( currentModel == resourceArr.Size() ) currentModel = 0;
+	}
+	else if ( item == &modelLeft ) {
+		--currentModel;
+		if ( currentModel < 0 ) currentModel = resourceArr.Size()-1;
+	}
 
-	UpdateBoneInfo();
+	UpdateModelInfo();
 	UpdateAnimationInfo();
+	UpdateBoneInfo();
 }
 
 
@@ -276,6 +314,8 @@ void AnimationScene::InitXML( const Rectangle2I& bounds )
 	char buf[256];
 	
 	const char* name = model[0]->GetResource()->header.name.c_str();
+	SNPrintf( buf, 256, ".\\resin\\%s", name );
+	_mkdir( buf );
 	SNPrintf( buf, 256, "./resin/%s/%s.scml", name, name );
 	scmlFP = fopen( buf, "w" );
 
@@ -401,30 +441,32 @@ void AnimationScene::DoTick( U32 deltaTime )
 		model[i]->DeltaAnimation( deltaTime, (i==0) ? &metaData : 0, 0 );
 	}
 
-	static const Vector3F UP = { 0, 1, 0 };
-	static const Vector3F POS = { 0,0,0 };
-	Matrix4 xform;
-	model[0]->CalcMetaData( "trigger", &xform );
-	Vector3F p = xform * POS;
-
-	if ( particle.Down() ) {
-		engine->particleSystem->EmitPD( "spell", p, UP, engine->camera.EyeDir3(), 0 ); 
-	}
-
-	for( int i=0; i<metaData.Size(); ++i ) {
-		engine->particleSystem->EmitPD( "derez", p, UP, engine->camera.EyeDir3(), 0 );	
-	}
-
-	if ( gun.Down() ) {
-		gunModel->ClearFlag( Model::MODEL_INVISIBLE );
-
+	if ( model[0]->HasAnimation() ) {
+		static const Vector3F UP = { 0, 1, 0 };
 		static const Vector3F POS = { 0,0,0 };
 		Matrix4 xform;
 		model[0]->CalcMetaData( "trigger", &xform );
-		gunModel->SetTransform( xform );
-	}
-	else {
-		gunModel->SetFlag( Model::MODEL_INVISIBLE );
+		Vector3F p = xform * POS;
+
+		if ( particle.Down() ) {
+			engine->particleSystem->EmitPD( "spell", p, UP, engine->camera.EyeDir3(), 0 ); 
+		}
+
+		for( int i=0; i<metaData.Size(); ++i ) {
+			engine->particleSystem->EmitPD( "derez", p, UP, engine->camera.EyeDir3(), 0 );	
+		}
+
+		if ( gun.Down() ) {
+			gunModel->ClearFlag( Model::MODEL_INVISIBLE );
+
+			static const Vector3F POS = { 0,0,0 };
+			Matrix4 xform;
+			model[0]->CalcMetaData( "trigger", &xform );
+			gunModel->SetTransform( xform );
+		}
+		else {
+			gunModel->SetFlag( Model::MODEL_INVISIBLE );
+		}
 	}
 }
 
@@ -448,6 +490,8 @@ void AnimationScene::Draw3D( U32 deltaTime )
 		engine->SetGlow( glow );
 
 		if ( part && *part ) {
+			SNPrintf( buf, 256, "./resin/%s/assets", model[0]->GetResource()->header.name.c_str() );
+			_mkdir( buf );
 			SNPrintf( buf, 256, "./resin/%s/assets/%s", model[0]->GetResource()->header.name.c_str(), part );
 			ScreenCapture( buf, false, true, true, &size );
 			if ( exportCount < 0 ) {
