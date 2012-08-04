@@ -26,21 +26,29 @@ using namespace gamui;
 
 const BattleTestScene::ButtonDef BattleTestScene::buttonDef[NUM_BUTTONS] =
 {
-	{ DUMMY,	"Dummy",	0 },
-	{ HUMAN,	"Human",	0 },
-	{ MANTIS,	"Mantis",	0 },
-	{ BALROG,	"Balrog",	0 },
-	{ NO_WEAPON,"None",		1 },
-	{ MELEE_WEAPON, "Melee",1 },
-	{ PISTOL,	"Pistol",	1 },
+	{ COUNT_1,	"1",		0 },
+	{ COUNT_2,	"2",		0 },
+	{ COUNT_4,	"4",		0 },
+	{ COUNT_8,	"8",		0 },
+	{ DUMMY,	"Dummy",	1 },
+	{ HUMAN,	"Human",	1 },
+	{ MANTIS,	"Mantis",	1 },
+	{ BALROG,	"Balrog",	1 },
+	{ NO_WEAPON,"None",		2 },
+	{ MELEE_WEAPON, "Melee",2 },
+	{ PISTOL,	"Pistol",	2 },
 
-	{ DUMMY,	"Dummy",	10 },
-	{ HUMAN,	"Human",	10 },
-	{ MANTIS,	"Mantis",	10 },
-	{ BALROG,	"Balrog",	10 },
-	{ NO_WEAPON,"None",		11 },
-	{ MELEE_WEAPON, "Melee",11 },
-	{ PISTOL,	"Pistol",	11 },
+	{ COUNT_1,	"1",		10 },
+	{ COUNT_2,	"2",		10 },
+	{ COUNT_4,	"4",		10 },
+	{ COUNT_8,	"8",		10 },
+	{ DUMMY,	"Dummy",	11 },
+	{ HUMAN,	"Human",	11 },
+	{ MANTIS,	"Mantis",	11 },
+	{ BALROG,	"Balrog",	11 },
+	{ NO_WEAPON,"None",		12 },
+	{ MELEE_WEAPON, "Melee",12 },
+	{ PISTOL,	"Pistol",	12 },
 };
 
 
@@ -79,6 +87,7 @@ BattleTestScene::BattleTestScene( LumosGame* game ) : Scene( game )
 
 	optionButton[HUMAN].SetDown();
 	optionButton[DUMMY].SetVisible( false );
+	optionButton[COUNT_4+NUM_OPTIONS].SetDown();
 
 	// WIP:
 	optionButton[MANTIS].SetEnabled( false );	optionButton[MANTIS+NUM_OPTIONS].SetEnabled( false );

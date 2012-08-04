@@ -45,6 +45,11 @@ private:
 	};
 
 	enum {
+		COUNT_1,
+		COUNT_2,
+		COUNT_4,
+		COUNT_8,
+
 		DUMMY,		
 		HUMAN,		// fist, ring, ranged weapon
 		MANTIS,		// pincer
