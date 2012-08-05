@@ -111,9 +111,8 @@ void DiffusionDitherTo16( const SDL_Surface* _surface, int format, bool invert, 
 		for( int i=0; i<surface->w; ++i ) 
 		{
 			Color4U8 color = GetPixel( surface, i, j );
-			Color4F colorF = Convert_4U8_4F( color );
 			U16 p = 0;
-			Color4F colorPrime;
+			Color4U8 colorPrime;
 
 			int numer = 1;
 			int denom = 1;
@@ -125,7 +124,7 @@ void DiffusionDitherTo16( const SDL_Surface* _surface, int format, bool invert, 
 						| ( ReducePixelDiv( color.g, 4, numer, denom ) << 8 )
 						| ( ReducePixelDiv( color.b, 4, numer, denom ) << 4)
 						| ( ( color.a>>4 ) << 0 );
-					colorPrime = Convert_RGBA16_4F( p );
+					colorPrime = Convert_RGBA16_4U8( p );
 					break;
 
 				case RGB16:
@@ -133,37 +132,40 @@ void DiffusionDitherTo16( const SDL_Surface* _surface, int format, bool invert, 
 						  ( ReducePixelDiv( color.r, 3, numer, denom ) << 11 )
 						| ( ReducePixelDiv( color.g, 2, numer, denom ) << 5 )
 						| ( ReducePixelDiv( color.b, 3, numer, denom ) );
-					colorPrime = Convert_RGB16_4F( p );
+					colorPrime = Convert_RGB16_4U8( p );
 					break;
 
 				default:
 					GLASSERT( 0 );
 					break;
 			}
-
-		
+			
 			// Get the value we just wrote; distribute the error.
-			Color4F error = colorF - colorPrime;
+			Color4U8 error = color - colorPrime;
 
 			// 0 * 7		1/16
 			// 3 5 1
 			static const Vector2I offset[4] = { {1,0}, {-1,1}, {0,1}, {1,1} };
-			static const float	  ratio[4]  = { 7.f, 3.f, 5.f, 1.f };
+			//static const float	  ratio[4]  = { 7.f, 3.f, 5.f, 1.f };
+			static const int ratio[4] = { 7, 3, 5, 1 };
 			for( int k=0; k<4; ++k ) {
 				int x = i + offset[k].x;
 				int y = j + offset[k].y;
 				if ( x >= 0 && x<surface->w && y >= 0 && y < surface->h ) {
-					Color4F delta = error * (255.f * ratio[k] / 16.0f );
 					Color4U8 c = GetPixel( surface, x, y );
 					
-					c.r = Clamp( int( c.r + LRintf( delta.r )), 0, 255 );
-					c.g = Clamp( int( c.g + LRintf( delta.g )), 0, 255 );
-					c.b = Clamp( int( c.b + LRintf( delta.b )), 0, 255 );
+					S8 er = error.r;
+					S8 eg = error.g;
+					S8 eb = error.b;
+
+					c.r = Clamp( c.r + er*ratio[k]/10, 0, 255 );
+					c.g = Clamp( c.g + eg*ratio[k]/10, 0, 255 );
+					c.b = Clamp( c.b + eb*ratio[k]/10, 0, 255 );
 
 					PutPixel( surface, x, y, c );
 				}
 			}
-		
+			
 
 			*target++ = p;
 		}

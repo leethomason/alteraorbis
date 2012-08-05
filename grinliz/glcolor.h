@@ -150,6 +150,23 @@ inline Color4F Convert_RGB16_4F( U16 c ) {
 	return f;
 }
 
+inline Color4U8 Convert_RGBA16_4U8( U16 c ) {
+	Color4U8 r;
+	r.r = (((c & 0xf000)>>8)+8);
+	r.g = (((c & 0x0f00)>>4)+8);
+	r.b = (((c & 0x00f0)>>0)+8);
+	r.a = (((c & 0x000f)<<4)+8);
+	return r;
+}
+
+
+inline Color4U8 Convert_RGB16_4U8( U16 c ) {
+	Color4U8 r;
+	r.r =  ((c & 0xF800) >> 8 )+8;
+	r.g =  ((c & 0x07E0) >> 3 )+8;
+	r.b =  ((c & 0x001F) << 3 )+8;
+	return r;
+}
 
 
 /// Interpolate between 2 colors. 'val' can range from 0 to 1.

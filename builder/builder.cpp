@@ -991,17 +991,18 @@ int main( int argc, char* argv[] )
 	printf( "Opening, path: '%s' filename: '%s'\n", inputDirectory.c_str(), inputFullPath.c_str() );
 	
 	// Test:
-	/*
+	
 	{
 		string testInput = inputDirectory + "Lenna.png";
 		SDL_Surface* surface = libIMG_Load( testInput.c_str() );
-		if ( surface ) {
-			pixelBuffer16.resize( surface->w*surface->h );
-			pixelBuffer16.reserve( surface->w*surface->h );
+		BTexture btexture;
+		btexture.Create( surface->w, surface->h, BTexture::RGB16 );
+		btexture.ToBuffer();
 
+		if ( surface ) {
 			// 444
-			OrderedDitherTo16( surface, RGBA16, false, &pixelBuffer16[0] );
-			SDL_Surface* newSurf = SDL_CreateRGBSurfaceFrom(	&pixelBuffer16[0], surface->w, surface->h, 16, surface->w*2,
+			OrderedDitherTo16( surface, RGBA16, false, btexture.pixelBuffer16 );
+			SDL_Surface* newSurf = SDL_CreateRGBSurfaceFrom(	btexture.pixelBuffer16, surface->w, surface->h, 16, surface->w*2,
 																0xf000, 0x0f00, 0x00f0, 0 );
 			string out = inputDirectory + "Lenna4440.bmp";
 			SDL_SaveBMP( newSurf, out.c_str() );
@@ -1009,8 +1010,8 @@ int main( int argc, char* argv[] )
 			SDL_FreeSurface( newSurf );
 
 			// 565
-			OrderedDitherTo16( surface, RGB16, false, &pixelBuffer16[0] );
-			newSurf = SDL_CreateRGBSurfaceFrom(	&pixelBuffer16[0], surface->w, surface->h, 16, surface->w*2,
+			OrderedDitherTo16( surface, RGB16, false, btexture.pixelBuffer16 );
+			newSurf = SDL_CreateRGBSurfaceFrom(	btexture.pixelBuffer16, surface->w, surface->h, 16, surface->w*2,
 												0xf800, 0x07e0, 0x001f, 0 );
 			string out1 = inputDirectory + "Lenna565.bmp";
 			SDL_SaveBMP( newSurf, out1.c_str() );
@@ -1018,8 +1019,8 @@ int main( int argc, char* argv[] )
 			SDL_FreeSurface( newSurf );
 
 			// 565 Diffusion
-			DiffusionDitherTo16( surface, RGB16, false, &pixelBuffer16[0] );
-			newSurf = SDL_CreateRGBSurfaceFrom(	&pixelBuffer16[0], surface->w, surface->h, 16, surface->w*2,
+			DiffusionDitherTo16( surface, RGB16, false, btexture.pixelBuffer16 );
+			newSurf = SDL_CreateRGBSurfaceFrom(	btexture.pixelBuffer16, surface->w, surface->h, 16, surface->w*2,
 												0xf800, 0x07e0, 0x001f, 0 );
 			string out2 = inputDirectory + "Lenna565Diffuse.bmp";
 			SDL_SaveBMP( newSurf, out2.c_str() );
@@ -1029,7 +1030,7 @@ int main( int argc, char* argv[] )
 			SDL_FreeSurface( surface );
 		}
 	}
-	*/
+	
 
 	XMLDocument xmlDoc;
 	xmlDoc.LoadFile( inputFullPath.c_str() );
