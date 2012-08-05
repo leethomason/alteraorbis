@@ -44,9 +44,8 @@ public:
 	void Add( Component* );
 	void Remove( Component* );
 
-	bool NeedsTick() const		{ return nTickers > 0; }
+	bool NeedsTick() const		{ return nTickers > 0 || oneTickNeeded; }
 	void DoTick( U32 delta );
-	void DoUpdate();
 
 	SpatialComponent*	GetSpatialComponent()	{ return spatialComponent; }
 	MoveComponent*		GetMoveComponent()		{ return moveComponent; }
@@ -79,7 +78,8 @@ private:
 
 	ChitBag* chitBag;
 	int id;
-	int nTickers;	// number of components that need a tick.
+	int		nTickers;		// number of components that need a tick.
+	bool	oneTickNeeded;	// even if a component generally doesn't need a tick, it might sometimes
 	U32 slowTickTimer;
 	grinliz::CDynArray<IChitListener*> listeners;
 

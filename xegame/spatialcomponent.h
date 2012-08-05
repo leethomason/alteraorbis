@@ -22,7 +22,6 @@ public:
 
 		static const grinliz::Vector3F UP = { 0, 1, 0 };
 		rotation.FromAxisAngle( UP, 0 );
-		track = true;
 	}
 
 	virtual Component*          ToComponent( const char* name ) {
@@ -58,7 +57,6 @@ public:
 protected:
 	grinliz::Vector3F	position;
 	grinliz::Quaternion	rotation;
-	bool				track;
 };
 
 

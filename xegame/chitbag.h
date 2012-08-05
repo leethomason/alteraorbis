@@ -60,6 +60,8 @@ private:
 
 	int idPool;
 	U32 bagTime;
+	// FIXME: chits could be stored in a DynArr. Go cohenent memory, go! Makes 
+	// walking the high level list potentially faster.
 	grinliz::HashTable< int, Chit*, grinliz::CompValue, grinliz::OwnedPtrSem > chits;
 	grinliz::CDynArray<int>			deleteList;		// <set> of chits that need to be deleted.
 	grinliz::CDynArray<Chit*>		hashQuery;
