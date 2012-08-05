@@ -55,7 +55,6 @@ public:
 	RenderComponent*	GetRenderComponent()	{ return renderComponent; }
 	Component*			GetComponent( const char* name );
 
-	//void RequestUpdate();
 	ChitBag* GetChitBag() { return chitBag; }
 
 	// Send a message to the listeners, and every component

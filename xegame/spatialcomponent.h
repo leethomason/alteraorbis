@@ -17,12 +17,12 @@ class SpatialComponent : public Component
 {
 public:
 	//  track: should this be tracked in the ChitBag's spatial hash?
-	SpatialComponent( bool _track ) {
+	SpatialComponent() {
 		position.Zero();
 
 		static const grinliz::Vector3F UP = { 0, 1, 0 };
 		rotation.FromAxisAngle( UP, 0 );
-		track = _track;
+		track = true;
 	}
 
 	virtual Component*          ToComponent( const char* name ) {

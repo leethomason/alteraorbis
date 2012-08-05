@@ -143,8 +143,10 @@ void BattleTestScene::LoadMap()
 	delete map;
 
 	map = new WorldMap( 32, 32 );
-	grinliz::CDynArray<Vector2I> blocks, features;
-	map->InitPNG( "./res/testarena32.png", &blocks, &waypoints, &features );
+	grinliz::CDynArray<Vector2I> blocks, features, wp;
+	map->InitPNG( "./res/testarena32.png", &blocks, &wp, &features );
+
+	//for( int i=0; i<wp.Size(); ++i 
 
 	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase(), map );	
 	engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
@@ -201,7 +203,7 @@ void BattleTestScene::CreateChit( const Vector2I& p, int team, int loadout )
 	}
 
 	Chit* chit = chitBag.NewChit();
-	chit->Add( new SpatialComponent( true ));
+	chit->Add( new SpatialComponent());
 	chit->Add( new RenderComponent( engine, asset, 0 ));
 	chit->Add( new PathMoveComponent( map ));
 	if ( team != DUMMY ) {

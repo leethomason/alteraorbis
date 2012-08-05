@@ -58,9 +58,13 @@ private:
 		NO_WEAPON,
 		MELEE_WEAPON,
 		PISTOL,
-
+		
 		NUM_OPTIONS,
-		NUM_BUTTONS = NUM_OPTIONS*2
+		NUM_BUTTONS = NUM_OPTIONS*2,
+
+		LEFT=0,
+		MID,
+		RIGHT
 	};
 	gamui::ToggleButton optionButton[NUM_BUTTONS];
 	static const ButtonDef buttonDef[NUM_BUTTONS];
@@ -69,7 +73,7 @@ private:
 	WorldMap* map;
 
 	grinliz::Random random;
-	grinliz::CDynArray<grinliz::Vector2I> waypoints;
+	grinliz::CDynArray<grinliz::Vector2I> waypoints[3];
 	grinliz::Ray debugRay;
 	
 	ChitBag chitBag;

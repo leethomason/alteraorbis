@@ -124,7 +124,7 @@ void NavTest2Scene::CreateChit( const Vector2I& p )
 	//GRINLIZ_PERFTRACK;
 
 	Chit* chit = chitBag.NewChit();
-	chit->Add( new SpatialComponent( true ) );
+	chit->Add( new SpatialComponent() );
 
 	const char* asset = "humanFemale";
 	if ( random.Rand( 4 ) == 0 ) {
