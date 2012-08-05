@@ -26,7 +26,7 @@ void SpatialComponent::SetPosRot( const Vector3F& v, const Quaternion& _q )
 	bool posChange = (position != v);
 	bool rotChange = (rotation != q);
 
-	if ( posChange && track ) {
+	if ( posChange ) {
 		int oldX = (int)position.x;
 		int oldY = (int)position.z;
 		int newX = (int)v.x;
@@ -88,17 +88,13 @@ Vector2F SpatialComponent::GetHeading2D() const
 void SpatialComponent::OnAdd( Chit* chit )
 {
 	Component::OnAdd( chit );
-	if ( track ) {
-		GLASSERT( chit == parentChit );
-		parentChit->GetChitBag()->AddToSpatialHash( chit, (int)position.x, (int)position.z );
-	}
+	GLASSERT( chit == parentChit );
+	parentChit->GetChitBag()->AddToSpatialHash( chit, (int)position.x, (int)position.z );
 }
 
 
 void SpatialComponent::OnRemove()
 {
-	if ( track ) {
-		parentChit->GetChitBag()->RemoveFromSpatialHash( parentChit, (int)position.x, (int)position.z );
-	}
+	parentChit->GetChitBag()->RemoveFromSpatialHash( parentChit, (int)position.x, (int)position.z );
 	Component::OnRemove();
 }

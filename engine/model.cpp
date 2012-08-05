@@ -209,7 +209,11 @@ void Model::Init( const ModelResource* resource, SpaceTree* tree )
 {
 	this->resource = resource; 
 	this->tree = tree;
-	animationResource = AnimationResourceManager::Instance()->GetResource( resource->header.animation.c_str() );
+
+	animationResource = 0;
+	if ( resource->header.animation != "create" ) {
+		animationResource = AnimationResourceManager::Instance()->GetResource( resource->header.animation.c_str() );
+	}
 
 	debugScale = 1.0f;
 	pos.Set( 0, 0, 0 );
@@ -330,11 +334,14 @@ void Model::SetAnimation( AnimationType id, U32 crossFade )
 
 void Model::DeltaAnimation( U32 time, grinliz::CArray<AnimationMetaData, EL_MAX_METADATA> *metaData, bool *looped )
 {
+	if ( !HasAnimation() )
+		return;
+
 	if ( animationRate != 1.0f ) {
 		time = (U32)((float)time*animationRate);
 	}
 
-	if ( metaData && HasAnimation() ) {
+	if ( metaData ) {
 		animationResource->GetMetaData( animationID, animationTime, animationTime+time, metaData );
 	}
 
@@ -362,6 +369,7 @@ void Model::CalcHitAABB( Rectangle3F* aabb ) const
 
 void Model::CalcAnimation( BoneData* boneData ) const
 {
+	GLASSERT( HasAnimation() );
 	animationResource->GetTransform( animationID, resource->header, animationTime, boneData );
 
 	if ( (crossFadeTime < totalCrossFadeTime) && (prevAnimationID >= 0) ) {
@@ -387,6 +395,7 @@ void Model::CalcAnimation( BoneData* boneData ) const
 
 void Model::CalcAnimation( BoneData::Bone* bone, const char* boneName ) const
 {
+	GLASSERT( HasAnimation() );
 	animationResource->GetTransform( animationID, boneName, resource->header, animationTime, bone );
 
 	if ( crossFadeTime < totalCrossFadeTime && (prevAnimationID >= 0) ) {

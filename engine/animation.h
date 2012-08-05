@@ -86,15 +86,17 @@ public:
 	static void Destroy();
 
 	void Load( const gamedb::Reader* reader );
+
 	const AnimationResource* GetResource( const char* name );
+	bool HasResource( const char* name );
 
 private:
 	AnimationResourceManager();
 	~AnimationResourceManager();
 
 	static AnimationResourceManager* instance;
-
-	grinliz::CDynArray< AnimationResource* > resArr;
+	
+	grinliz::HashTable< const char*, AnimationResource*, grinliz::CompCharPtr, grinliz::OwnedPtrSem > resArr;
 };
 
 

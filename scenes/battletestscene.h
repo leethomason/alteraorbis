@@ -32,11 +32,24 @@ public:
 private:
 
 	void LoadMap();
-	void CreateChit( const grinliz::Vector2I& p );
+	void CreateChit( const grinliz::Vector2I& p, int team, int loadout );
+	void GoScene();
 
 	gamui::PushButton okay, goButton;
 
+	struct ButtonDef
+	{
+		int			id;
+		const char* label;
+		int			group;
+	};
+
 	enum {
+		COUNT_1,
+		COUNT_2,
+		COUNT_4,
+		COUNT_8,
+
 		DUMMY,		
 		HUMAN,		// fist, ring, ranged weapon
 		MANTIS,		// pincer
@@ -45,17 +58,22 @@ private:
 		NO_WEAPON,
 		MELEE_WEAPON,
 		PISTOL,
-
+		
 		NUM_OPTIONS,
-		NUM_BUTTONS = NUM_OPTIONS*2
+		NUM_BUTTONS = NUM_OPTIONS*2,
+
+		LEFT=0,
+		MID,
+		RIGHT
 	};
 	gamui::ToggleButton optionButton[NUM_BUTTONS];
+	static const ButtonDef buttonDef[NUM_BUTTONS];
 
 	Engine* engine;
 	WorldMap* map;
 
 	grinliz::Random random;
-	grinliz::CDynArray<grinliz::Vector2I> waypoints;
+	grinliz::CDynArray<grinliz::Vector2I> waypoints[3];
 	grinliz::Ray debugRay;
 	
 	ChitBag chitBag;

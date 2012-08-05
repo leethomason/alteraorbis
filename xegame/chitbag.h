@@ -32,7 +32,6 @@ public:
 
 	// Due to events, changes, etc. a chit may need an update, possibily in addition to, the tick.
 	// Normally called automatically.
-	//void RequestUpdate( Chit* );
 	void QueueDelete( Chit* chit );
 
 	void QueueEvent( const ChitEvent& event )			{ events.Push( event ); }
@@ -61,15 +60,12 @@ private:
 
 	int idPool;
 	U32 bagTime;
+	// FIXME: chits could be stored in a DynArr. Go cohenent memory, go! Makes 
+	// walking the high level list potentially faster.
 	grinliz::HashTable< int, Chit*, grinliz::CompValue, grinliz::OwnedPtrSem > chits;
-#if 0
-	//grinliz::CDynArray<Chit*> updateList;						// chits that need the Update() called. Can
-																// have duplicates, which seems to be faster than
-																// guarenteeing uniqueness.
-#endif
-	grinliz::CDynArray<int> deleteList;		// <set> of chits that need to be deleted.
-	grinliz::CDynArray<Chit*> hashQuery;
-	grinliz::CDynArray<ChitEvent> events;
+	grinliz::CDynArray<int>			deleteList;		// <set> of chits that need to be deleted.
+	grinliz::CDynArray<Chit*>		hashQuery;
+	grinliz::CDynArray<ChitEvent>	events;
 	Chit* spatialHash[SIZE*SIZE];
 };
 

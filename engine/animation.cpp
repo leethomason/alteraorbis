@@ -56,9 +56,6 @@ AnimationResourceManager::AnimationResourceManager()
 
 AnimationResourceManager::~AnimationResourceManager()
 {
-	for( int i=0; i<resArr.Size(); ++i ) {
-		delete resArr[i];
-	}
 }
 
 
@@ -72,7 +69,8 @@ void AnimationResourceManager::Load( const gamedb::Reader* reader )
 		const gamedb::Item* node = parent->Child( i );
 		
 		AnimationResource* ar = new AnimationResource( node );
-		resArr.Push( ar );
+		GLASSERT( !resArr.Query( ar->ResourceName(), 0 ));
+		resArr.Add( ar->ResourceName(), ar );
 	}
 }
 
@@ -82,13 +80,16 @@ const AnimationResource* AnimationResourceManager::GetResource( const char* name
 	if ( !name || !(*name) ) {
 		return 0;
 	}
-	for( int i=0; i<resArr.Size(); ++i ) {
-		if ( StrEqual( resArr[i]->ResourceName(), name ) ) {
-			return resArr[i];
-		}
+	return resArr.Get( name );
+}
+
+
+bool AnimationResourceManager::HasResource( const char* name )
+{
+	if ( !name || !(*name) ) {
+		return false;
 	}
-	GLASSERT( 0 );
-	return 0;
+	return resArr.Query( name, 0 );
 }
 
 

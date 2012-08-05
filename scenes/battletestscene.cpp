@@ -24,6 +24,33 @@
 using namespace grinliz;
 using namespace gamui;
 
+const BattleTestScene::ButtonDef BattleTestScene::buttonDef[NUM_BUTTONS] =
+{
+	{ COUNT_1,	"1",		0 },
+	{ COUNT_2,	"2",		0 },
+	{ COUNT_4,	"4",		0 },
+	{ COUNT_8,	"8",		0 },
+	{ DUMMY,	"Dummy",	1 },
+	{ HUMAN,	"Human",	1 },
+	{ MANTIS,	"Mantis",	1 },
+	{ BALROG,	"Balrog",	1 },
+	{ NO_WEAPON,"None",		2 },
+	{ MELEE_WEAPON, "Melee",2 },
+	{ PISTOL,	"Pistol",	2 },
+
+	{ COUNT_1,	"1",		10 },
+	{ COUNT_2,	"2",		10 },
+	{ COUNT_4,	"4",		10 },
+	{ COUNT_8,	"8",		10 },
+	{ DUMMY,	"Dummy",	11 },
+	{ HUMAN,	"Human",	11 },
+	{ MANTIS,	"Mantis",	11 },
+	{ BALROG,	"Balrog",	11 },
+	{ NO_WEAPON,"None",		12 },
+	{ MELEE_WEAPON, "Melee",12 },
+	{ PISTOL,	"Pistol",	12 },
+};
+
 
 BattleTestScene::BattleTestScene( LumosGame* game ) : Scene( game )
 {
@@ -41,17 +68,31 @@ BattleTestScene::BattleTestScene( LumosGame* game ) : Scene( game )
 	goButton.SetText( "Go!" );
 	goButton.SetSize( width, height );
 
-	// matches 'groups', below
-	static const char* names[NUM_OPTIONS] = {
-		"dummy", "human", "mantis", "balrog",
-		"none", "melee", "pistol"
-	};
+	int currentGroup = -1;
+	ToggleButton* toggle = 0;
 
 	for( int i=0; i<NUM_BUTTONS; ++i ) {
 		optionButton[i].Init( &gamui2D, look );
 		optionButton[i].SetSize( width, height*0.5f );
-		optionButton[i].SetText( i >= NUM_OPTIONS ? names[i-NUM_OPTIONS] : names[i] );
+		optionButton[i].SetText( buttonDef[i].label );
+		if ( currentGroup != buttonDef[i].group ) {
+			currentGroup = buttonDef[i].group;
+			toggle = &optionButton[i];
+			//optionButton[i].SetDown();
+		}
+		else {
+			toggle->AddToToggleGroup( &optionButton[i] );
+		}
 	}
+
+	optionButton[HUMAN].SetDown();
+	optionButton[DUMMY].SetVisible( false );
+	optionButton[COUNT_4+NUM_OPTIONS].SetDown();
+
+	// WIP:
+	optionButton[MANTIS].SetEnabled( false );	optionButton[MANTIS+NUM_OPTIONS].SetEnabled( false );
+	optionButton[BALROG].SetEnabled( false );	optionButton[BALROG+NUM_OPTIONS].SetEnabled( false );
+	optionButton[BALROG].SetEnabled( false );	optionButton[BALROG+NUM_OPTIONS].SetEnabled( false );
 
 	engine = 0;
 	map = 0;
@@ -80,23 +121,18 @@ void BattleTestScene::Resize()
 
 	layout.SetSize( layout.Width(), layout.Height()*0.5f );
 
-	// matches 'names', above
-	static const int groups[] = { 4, 3, 0 };
+	int currentGroup = -1;
+	int y = -1;
+	int x = 0;
 
-	for( int pass=0; pass<2; ++pass ) {
-		int groupIndex = 0;
-		int group = groups[0];
-		int x = 0;
-		for( int i=0; i<NUM_OPTIONS; ++i ) {
-			layout.PosAbs( &optionButton[i+NUM_OPTIONS*pass], -4*pass + x, groupIndex );
-			++x;
-			--group;
-			if ( group == 0 ) {
-				groupIndex++;
-				group = groups[groupIndex];
-				x = 0;
-			}
+	for( int i=0; i<NUM_BUTTONS; ++i ) {
+		if ( buttonDef[i].group != currentGroup ) {
+			y = i== NUM_OPTIONS ? 0 : y+1;
+			x = i < NUM_OPTIONS ? 0 : -4;
+			currentGroup = buttonDef[i].group;
 		}
+		layout.PosAbs( &optionButton[i], x, y );
+		++x;
 	}
 }
 
@@ -107,8 +143,10 @@ void BattleTestScene::LoadMap()
 	delete map;
 
 	map = new WorldMap( 32, 32 );
-	grinliz::CDynArray<Vector2I> blocks, features;
-	map->InitPNG( "./res/testarena32.png", &blocks, &waypoints, &features );
+	grinliz::CDynArray<Vector2I> blocks, features, wp;
+	map->InitPNG( "./res/testarena32.png", &blocks, &wp, &features );
+
+	//for( int i=0; i<wp.Size(); ++i 
 
 	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase(), map );	
 	engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
@@ -132,46 +170,43 @@ void BattleTestScene::LoadMap()
 		GET_COMPONENT( chit, MapSpatialComponent )->SetMapPosition( v.x, v.y, 0 );
 	}
 
-	/*
-	for( int i=0; i<waypoints.Size(); ++i ) {
-		CreateChit( waypoints[i] );
-	}
-	*/
 	Vector2I unit = { 2, 16 };
 	Vector2I dummy = { 16, 16 };
-	CreateChit( unit );
-	CreateChit( dummy );
+	CreateChit( unit, HUMAN, PISTOL );
+	CreateChit( dummy, DUMMY, NO_WEAPON );
 	dummy.Set( 16, 17 );
-	CreateChit( dummy );
+	CreateChit( dummy, DUMMY, NO_WEAPON );
 
 	engine->CameraLookAt( (float)map->Width()/2, (float)map->Height()/2, 
 		                  22.f,		// height
 						  225.f );	// rotattion
-
 }
 
 
-void BattleTestScene::CreateChit( const Vector2I& p )
+void BattleTestScene::GoScene()
 {
-	//GRINLIZ_PERFTRACK;
+	// Trigger the AI to do something.
+	Rectangle2F b;
+	b.Set( 0, 0, (float)map->Width(), (float)map->Height() );
+	AwarenessChitEvent event( HUMAN, b );
+	chitBag.QueueEvent( event );
+}
 
-	int team = HUMAN;
+		
+void BattleTestScene::CreateChit( const Vector2I& p, int team, int loadout )
+{
 	const char* asset = "humanFemale";
-	if ( p.x > 27 ) {
-//		team = HORNET;
-//		asset = "hornet";
-		GLASSERT( 0 );
-	}
-	else if ( p.x > 6 && p.x < 27 ) {
-		team = DUMMY;
-		asset = "dummytarget";
+	switch ( team ) {
+		case DUMMY:			asset="dummytarget";	break;
+		case MANTIS:		asset="mantis";			break;
+		case BALROG:		asset="balrog";			break;
 	}
 
 	Chit* chit = chitBag.NewChit();
-	chit->Add( new SpatialComponent( true ) );
+	chit->Add( new SpatialComponent());
 	chit->Add( new RenderComponent( engine, asset, 0 ));
 	chit->Add( new PathMoveComponent( map ));
-	if ( team == HUMAN ) {
+	if ( team != DUMMY ) {
 		chit->Add( new AIComponent( engine, map ));
 	}
 
@@ -191,9 +226,26 @@ void BattleTestScene::CreateChit( const Vector2I& p )
 		GameItem hand( GameItem::MELEE_WEAPON | GameItem::APPENDAGE );
 		inv->AddToInventory( hand );
 
-		GameItem gun( GameItem::MELEE_WEAPON | GameItem::RANGED_WEAPON | GameItem::HELD,
-					  "testgun", "testgun", "trigger" );
-		inv->AddToInventory( gun );
+		if( loadout == MELEE_WEAPON ) {
+			GameItem knife( GameItem::MELEE_WEAPON | GameItem::HELD,
+						  "testknife", "testknife", "trigger" );
+			inv->AddToInventory( knife );
+		}
+		else if ( loadout == PISTOL ) {
+			GameItem gun( GameItem::MELEE_WEAPON | GameItem::RANGED_WEAPON | GameItem::HELD,
+						  "testgun", "testgun", "trigger" );
+			inv->AddToInventory( gun );
+		}
+	}
+	else if ( team == BALROG ) {
+		// FIXME kinetic damage bonus
+		GameItem claw( GameItem::MELEE_WEAPON | GameItem::APPENDAGE );
+		inv->AddToInventory( claw );
+	}
+	else if ( team == MANTIS ) {
+		// FIXME kinetic damage bonus
+		GameItem pincer( GameItem::MELEE_WEAPON | GameItem::APPENDAGE );
+		inv->AddToInventory( pincer );
 	}
 }
 
@@ -260,11 +312,7 @@ void BattleTestScene::ItemTapped( const gamui::UIItem* item )
 		game->PopScene();
 	}
 	else if ( item == &goButton ) {
-		// Trigger the AI to do something.
-		Rectangle2F b;
-		b.Set( 0, 0, (float)map->Width(), (float)map->Height() );
-		AwarenessChitEvent event( HUMAN, b );
-		chitBag.QueueEvent( event );
+		GoScene();
 	}
 }
 
