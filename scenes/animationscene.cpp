@@ -441,7 +441,8 @@ void AnimationScene::DoTick( U32 deltaTime )
 		model[i]->DeltaAnimation( deltaTime, (i==0) ? &metaData : 0, 0 );
 	}
 
-	if ( model[0]->HasAnimation() ) {
+	gunModel->SetFlag( Model::MODEL_INVISIBLE );
+	if ( model[0]->HasAnimation() && model[0]->GetResource()->GetMetaData( "trigger" )) {
 		static const Vector3F UP = { 0, 1, 0 };
 		static const Vector3F POS = { 0,0,0 };
 		Matrix4 xform;
@@ -463,9 +464,6 @@ void AnimationScene::DoTick( U32 deltaTime )
 			Matrix4 xform;
 			model[0]->CalcMetaData( "trigger", &xform );
 			gunModel->SetTransform( xform );
-		}
-		else {
-			gunModel->SetFlag( Model::MODEL_INVISIBLE );
 		}
 	}
 }

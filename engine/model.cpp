@@ -89,8 +89,6 @@ const ModelMetaData* ModelResource::GetMetaData( const char* name ) const
 			return &header.metaData[i];
 		}
 	}
-
-	GLASSERT( 0 );	// not found
 	return 0;
 }
 
