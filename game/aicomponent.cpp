@@ -120,21 +120,23 @@ void AIComponent::DoMelee()
 }
 
 
-void AIComponent::DoTick( U32 deltaTime )
+void AIComponent::OnChitEvent( const ChitEvent& event )
 {
-	ItemComponent* itemComp = GET_COMPONENT( parentChit, ItemComponent );
-	if ( itemComp ) {
-		const CDynArray<ChitEvent>& events = GetChitBag()->GetEvents();
-		for( int i=0; i<events.Size(); ++i ) {
-			if( events[i].ID() == ChitEvent::AWARENESS ) {
-				const AwarenessChitEvent& event = (const AwarenessChitEvent&) events[i];
-				if ( event.Team() == itemComp->item.primaryTeam ) 
-				{
-					UpdateCombatInfo( &event.Bounds() );
-				}
+	if ( event.ID() == ChitEvent::AWARENESS ) {
+		ItemComponent* itemComp = GET_COMPONENT( parentChit, ItemComponent );
+		if ( itemComp ) {
+			const AwarenessChitEvent& aware = (const AwarenessChitEvent&) event;
+			if ( aware.Team() == itemComp->item.primaryTeam ) 
+			{
+				UpdateCombatInfo( &aware.Bounds() );
 			}
 		}
 	}
+}
+
+
+void AIComponent::DoTick( U32 deltaTime )
+{
 	if ( parentChit->GetRenderComponent() && !parentChit->GetRenderComponent()->AnimationReady() ) {
 		return;
 	}
@@ -170,9 +172,9 @@ void AIComponent::DebugStr( grinliz::GLString* str )
 }
 
 
-void AIComponent::OnChitMsg( Chit* chit, int id, const ChitEvent* event )
+void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {
-	if ( chit == parentChit && id == RENDER_MSG_IMPACT ) {
+	if ( chit == parentChit && msg.ID() == RENDER_MSG_IMPACT ) {
 		
 		RenderComponent* render = parentChit->GetRenderComponent();
 		GLASSERT( render );	// it is a message from the render component, after all.

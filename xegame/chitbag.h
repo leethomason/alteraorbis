@@ -35,7 +35,6 @@ public:
 	void QueueDelete( Chit* chit );
 
 	void QueueEvent( const ChitEvent& event )			{ events.Push( event ); }
-	const grinliz::CDynArray<ChitEvent>& GetEvents()	{ return events; }
 
 	// Hashes based on integer coordinates. No need to call
 	// if they don't change.

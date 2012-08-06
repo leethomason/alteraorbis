@@ -18,10 +18,25 @@ class ChitBag;
 class Chit;
 class ChitEvent;
 
+class ChitMsg
+{
+public:
+	ChitMsg( int _id, int _data=0 ) : id(_id), data(_data) {}
+
+	int ID() const { return id; }
+	int Data() const { return data; }
+
+private:
+	int id;
+	int data;
+};
+
+
+
 class IChitListener
 {
 public:
-	virtual void OnChitMsg( Chit* chit, int id, const ChitEvent* ) = 0;
+	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg ) = 0;
 };
 
 // MyComponent* mc = GET_COMPONENT( chit, MyComponent );
@@ -47,6 +62,8 @@ public:
 	bool NeedsTick() const		{ return nTickers > 0 || oneTickNeeded; }
 	void DoTick( U32 delta );
 
+	void OnChitEvent( const ChitEvent& event );
+
 	SpatialComponent*	GetSpatialComponent()	{ return spatialComponent; }
 	MoveComponent*		GetMoveComponent()		{ return moveComponent; }
 	InventoryComponent*	GetInventoryComponent()	{ return inventoryComponent; }
@@ -58,9 +75,9 @@ public:
 
 	// Send a message to the listeners, and every component
 	// in the chit (which don't need to be listeners.)
-	void SendMessage(	int msgID, 
-						Component* exclude,			// useful to not call ourselves. 
-						const ChitEvent* event );	// may be null
+	// Synchronous
+	void SendMessage(	const ChitMsg& message, 
+						Component* exclude );			// useful to not call ourselves. 
 	void AddListener( IChitListener* listener );
 	void RemoveListener( IChitListener* listener );
 
@@ -74,7 +91,7 @@ public:
 	Chit* next;
 
 private:
-	bool CarryMsg( int componentID, Chit* src, int msgID, const ChitEvent* event );
+	bool CarryMsg( int componentID, Chit* src, const ChitMsg& msg );
 
 	ChitBag* chitBag;
 	int id;

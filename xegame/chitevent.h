@@ -11,6 +11,9 @@
 // All data needs to be in the base class.
 class ChitEvent
 {
+private:
+	grinliz::Rectangle2F aoe;	// how broadly this event is broadcast
+
 protected:
 	int id;		// the message sent
 	int data;	// if there is obvious data - not warranting a sub-class - put it here
@@ -21,7 +24,11 @@ protected:
 	};
 
 public:
-	ChitEvent( int _id=-1, int _data=0 ) : id( _id ), data( _data ) {}
+	ChitEvent( const grinliz::Rectangle2F& areaOfEffect,
+		       int _id, int _data=0 ) 
+		: aoe( areaOfEffect ), id( _id ), data( _data ) {}
+	
+	const grinliz::Rectangle2F& AreaOfEffect() const { return aoe; }
 	int ID() const			{ return id; }
 	int Data() const		{ return data; }
 
@@ -33,7 +40,7 @@ public:
 
 class AwarenessChitEvent : public ChitEvent {
 public:
-	AwarenessChitEvent( int _team, const grinliz::Rectangle2F& _bounds ) : ChitEvent( ChitEvent::AWARENESS ) {
+	AwarenessChitEvent( int _team, const grinliz::Rectangle2F& _bounds ) : ChitEvent( _bounds, ChitEvent::AWARENESS ) {
 		bounds2F = _bounds;
 		team = _team;
 	}

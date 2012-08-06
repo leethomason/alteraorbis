@@ -28,7 +28,7 @@ public:
 	virtual void OnRemove();
 	virtual bool NeedsTick()					{ return true; }
 	virtual void DoTick( U32 delta );
-	virtual void OnChitMsg( Chit* chit, int id, const ChitEvent* event );
+	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
 
 	void QueueDest( grinliz::Vector2F dest,
 					float rotation = -1.f );		// if specified, the rotation we wish to get to

@@ -25,7 +25,7 @@ public:
 	virtual void ItemTapped( const gamui::UIItem* item );
 	virtual void Draw3D( U32 deltaTime );
 
-	virtual void OnChitMsg( Chit* chit, int id, const ChitEvent* );
+	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
 
 	virtual void DrawDebugText();
 	virtual void MouseMove( const grinliz::Vector2F& view, const grinliz::Ray& world );

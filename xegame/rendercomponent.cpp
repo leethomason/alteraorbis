@@ -190,8 +190,7 @@ void RenderComponent::DoTick( U32 deltaTime )
 		}
 		for( int i=0; i<metaData.Size(); ++i ) {
 			if ( StrEqual( metaData[i].name, "impact" )) {
-				ChitEvent e( RENDER_MSG_IMPACT, n );
-				parentChit->SendMessage( RENDER_MSG_IMPACT, 0, &e );
+				parentChit->SendMessage( ChitMsg( RENDER_MSG_IMPACT, n ), this );
 			}
 			else {
 				GLASSERT( 0 );	// event not recognized

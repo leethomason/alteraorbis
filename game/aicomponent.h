@@ -24,7 +24,8 @@ public:
 	virtual void DoTick( U32 delta );
 	virtual void DoSlowTick();
 	virtual void DebugStr( grinliz::GLString* str );
-	virtual void OnChitMsg( Chit* chit, int id, const ChitEvent* event );
+	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
+	virtual void OnChitEvent( const ChitEvent& event );
 
 private:
 	enum {

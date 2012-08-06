@@ -61,6 +61,19 @@ void ChitBag::DoTick( U32 delta )
 	GRINLIZ_PERFTRACK;
 	bagTime += delta;
 
+	// Events.
+	// Ticks.
+	// probably correct in that order.
+
+	for( int i=0; i<events.Size(); ++i ) {
+		const ChitEvent& e = events[i];
+		const grinliz::CDynArray<Chit*>& arr = QuerySpatialHash( e.AreaOfEffect(), 0, false );
+		for( int j=0; j<arr.Size(); ++j ) {
+			arr[j]->OnChitEvent( e );
+		}
+	}
+
+
 	Chit** chitArr = chits.GetValues();
 	for( int i=0; i<chits.NumValues(); ++i ) {
 		Chit* c = chitArr[i];
