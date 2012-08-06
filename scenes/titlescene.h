@@ -22,9 +22,8 @@ public:
 	virtual void ItemTapped( const gamui::UIItem* item );
 
 private:
-	LumosGame* lumosGame;
-	gamui::TextLabel	label;
-	gamui::Image		background;
+	LumosGame*		lumosGame;
+	gamui::Image	background;
 
 	enum { 
 		TEST_DIALOG,

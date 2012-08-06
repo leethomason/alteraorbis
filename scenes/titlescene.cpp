@@ -13,9 +13,6 @@ TitleScene::TitleScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 {
 	LayoutCalculator layout = lumosGame->DefaultLayout();
 
-	label.Init( &gamui2D );
-	label.SetText( "Hello Lumos" );
-
 	RenderAtom batom = game->CreateRenderAtom( UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, "title" );
 	background.Init( &gamui2D, batom, false );
 
@@ -39,7 +36,6 @@ void TitleScene::Resize()
 {
 	const Screenport& port = game->GetScreenport();
 
-	label.SetPos( 10, 10 );
 	background.SetPos( 0, 0 );
 	background.SetSize( port.UIWidth(), port.UIHeight() );
 
@@ -47,7 +43,7 @@ void TitleScene::Resize()
 	for( int i=0; i<NUM_TESTS; ++i ) {
 		int y = i / TESTS_PER_ROW;
 		int x = i - y*TESTS_PER_ROW;
-		layout.PosAbs( &testScene[i], x, y+1 );
+		layout.PosAbs( &testScene[i], x, y );
 	}
 }
 

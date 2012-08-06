@@ -50,8 +50,12 @@
   <animation filename="humanFemale/humanFemale.scml" assetName="humanFemaleAnimation" pur="235.9" >
     <meta animation="melee" name="impact" time="400.0" />    
   </animation>
+  <animation filename="mantis/mantis.scml" assetName="mantisAnimation" pur="340.5" >
+  </animation>
+  <!--
   <animation filename="balrog/balrog.scml" assetName="balrogAnimation" pur="235.9">
   </animation>
+  -->
 
   <!-- Tactical Sprite models are centered at (0,0,0) -->
   <model filename="human.ac" modelName="humanFemale" animation="humanFemaleAnimation" origin="1 0 0" shading="flat" polyRemoval="pre">
@@ -60,7 +64,7 @@
   </model>
   <model filename="mantis.ac" animation="create" shading="flat" polyRemoval="pre"> 
   </model>  
-  <model filename="balrog.ac" animation="balrogAnimation" shading="flat" polyRemoval="pre">
+  <model filename="balrog.ac" shading="flat" polyRemoval="pre">
   </model>
   
   <model filename="human.ac"        modelName="humanMale"   origin="0 0 0" shading="crease" polyRemoval="pre" />
