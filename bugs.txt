@@ -1,3 +1,5 @@
+X NavTest-1 is broken. More container fallout. And once again an existing bug
+  revealed by tighter container code.
 - combat test scene
 	X animation/lack of making me crazy. What plan?
 	X particle effect for melee strike not "connected" to character
@@ -36,7 +38,6 @@
 - record perf max/min. surprisingly hard.
 - shadows should be part of space-tree bounds
 - memory pool everything in the chit/component system
-- container to support copy semantics
 - analyze/optimize what causes component update: DoTick(), etc. Likely many DoTicks() getting called that aren't needed. (especially rendering...)
 
 X particle test scene
@@ -61,6 +62,7 @@ X particle test scene
 
 ----------- FIXED -------------
 
+X container to support copy semantics
 X remove particle params not needed for world
 X move lighting loading from render test scene to engine
 X Animation

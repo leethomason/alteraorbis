@@ -90,7 +90,7 @@ void RenderTestScene::SetupTest0()
 	}
 	engine->CameraLookAt( 0, (float)(NUM_MODELS/2), 12 );
 
-	textBox.SetText( "DC = ( 1fem + 1male ) * ( 1color + 1shadow) + 2map = 6`. 'u' disable ui" ); 
+	textBox.SetText( "DC = (1fem+1male)*(1color+1shadow) + 2map*3passes = 10`. glow disabled, 'u' disable ui" ); 
 }
 
 

@@ -5,13 +5,6 @@
 #include "../grinliz/glstringutil.h"
 using namespace grinliz;
 
-// Optimizing texture memory.
-// F5 -> Continue -> NextChar, Help->Next
-// Base: 1620/1290, 2644/2314   (16/0/0)-(18/0/0)
-//
-// ContextShift:
-// 1620/1290, 2644/1290  (16/0/3)-(16/2/9) Nice.
-
 /*static*/ void TextureManager::Create( const gamedb::Reader* reader )
 {
 	GLASSERT( instance == 0 );
@@ -54,6 +47,7 @@ void TextureManager::DeviceLoss()
 	}
 	gpuMap.RemoveAll();
 	gpuMemArr.Clear();
+
 	for( int i=0; i<textureArr.Size(); ++i ) {
 		textureArr[i].gpuMem = 0;
 	}
@@ -63,14 +57,12 @@ void TextureManager::DeviceLoss()
 void TextureManager::Reload()
 {
 	DeviceLoss();
+
 	for ( int i=0; i<textureArr.Size(); ++i ) {
 		Texture* tex = &textureArr[i];
 		if ( tex->creator == 0 ) {
 			if ( tex->Name() ) {
-				CStr< Texture::MAX_TEXTURE_NAME > name = tex->Name();
-				if ( !name.empty() ) {
-					GetTexture( name.c_str(), true );
-				}
+				GetTexture( tex->Name(), true );
 			}
 		}
 	}
@@ -101,7 +93,6 @@ Texture* TextureManager::GetTexture( const char* name, bool reload )
 
 	if ( !t || reload ) {
 		const gamedb::Item* item = database->Root()->Child( "textures" )->Child( name );
-		item = database->ChainItem( item );
 #ifdef DEBUG
 		if ( !item ) 
 			GLOUTPUT(( "GetTexture '%s' failed.\n", name ));
@@ -167,6 +158,7 @@ Texture* TextureManager::CreateTexture( const char* name, int w, int h, int form
 
 	t->Set( name, w, h, format, flags );
 	t->creator = creator;
+	GLASSERT( !texMap.Query( t->Name(), 0 ));
 	texMap.Add( t->Name(), t );
 	return t;
 }
