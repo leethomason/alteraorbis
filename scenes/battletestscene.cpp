@@ -26,29 +26,29 @@ using namespace gamui;
 
 const BattleTestScene::ButtonDef BattleTestScene::buttonDef[NUM_BUTTONS] =
 {
-	{ COUNT_1,	"1",		0 },
-	{ COUNT_2,	"2",		0 },
-	{ COUNT_4,	"4",		0 },
-	{ COUNT_8,	"8",		0 },
-	{ DUMMY,	"Dummy",	1 },
-	{ HUMAN,	"Human",	1 },
-	{ MANTIS,	"Mantis",	1 },
-	{ BALROG,	"Balrog",	1 },
-	{ NO_WEAPON,"None",		2 },
-	{ MELEE_WEAPON, "Melee",2 },
-	{ PISTOL,	"Pistol",	2 },
+	{ COUNT_1,	"1",		LEFT_COUNT },
+	{ COUNT_2,	"2",		LEFT_COUNT },
+	{ COUNT_4,	"4",		LEFT_COUNT },
+	{ COUNT_8,	"8",		LEFT_COUNT },
+	{ DUMMY,	"Dummy",	LEFT_MOB },
+	{ HUMAN,	"Human",	LEFT_MOB },
+	{ MANTIS,	"Mantis",	LEFT_MOB },
+	{ BALROG,	"Balrog",	LEFT_MOB },
+	{ NO_WEAPON,"None",		LEFT_WEAPON },
+	{ MELEE_WEAPON, "Melee",LEFT_WEAPON },
+	{ PISTOL,	"Pistol",	LEFT_WEAPON },
 
-	{ COUNT_1,	"1",		10 },
-	{ COUNT_2,	"2",		10 },
-	{ COUNT_4,	"4",		10 },
-	{ COUNT_8,	"8",		10 },
-	{ DUMMY,	"Dummy",	11 },
-	{ HUMAN,	"Human",	11 },
-	{ MANTIS,	"Mantis",	11 },
-	{ BALROG,	"Balrog",	11 },
-	{ NO_WEAPON,"None",		12 },
-	{ MELEE_WEAPON, "Melee",12 },
-	{ PISTOL,	"Pistol",	12 },
+	{ COUNT_1,	"1",		RIGHT_COUNT },
+	{ COUNT_2,	"2",		RIGHT_COUNT },
+	{ COUNT_4,	"4",		RIGHT_COUNT },
+	{ COUNT_8,	"8",		RIGHT_COUNT },
+	{ DUMMY,	"Dummy",	RIGHT_MOB },
+	{ HUMAN,	"Human",	RIGHT_MOB },
+	{ MANTIS,	"Mantis",	RIGHT_MOB },
+	{ BALROG,	"Balrog",	RIGHT_MOB },
+	{ NO_WEAPON,"None",		RIGHT_WEAPON },
+	{ MELEE_WEAPON, "Melee",RIGHT_WEAPON },
+	{ PISTOL,	"Pistol",	RIGHT_WEAPON },
 };
 
 
@@ -137,6 +137,21 @@ void BattleTestScene::Resize()
 }
 
 
+int BattleTestScene::ButtonDownID( int group )
+{
+	for( int i=0; i<NUM_BUTTONS; ++i ) {
+		if (    buttonDef[i].group == group
+			 && optionButton[i].Enabled()
+			 && optionButton[i].Down() ) 
+		{
+			return buttonDef[i].id;
+		}
+	}
+	GLASSERT( 0 );
+	return -1;
+}
+
+
 void BattleTestScene::LoadMap()
 {
 	delete engine;
@@ -206,15 +221,23 @@ void BattleTestScene::GoScene()
 		chitBag.DeleteChit( arr[i] );
 	}
 
-	Vector2I unit = { 2, 16 };
-	Vector2I dummy = { 16, 16 };
-	CreateChit( unit, HUMAN, PISTOL );
-	CreateChit( dummy, DUMMY, NO_WEAPON );
-	dummy.Set( 16, 17 );
-	CreateChit( dummy, DUMMY, NO_WEAPON );
+	int leftCount	= 1 << ButtonDownID( LEFT_COUNT );
+	int leftMoB		= ButtonDownID( LEFT_MOB );
+	int leftWeapon	= ButtonDownID( LEFT_WEAPON );
+	int rightCount	= 1 << ButtonDownID( RIGHT_COUNT );
+	int rightMoB	= ButtonDownID( RIGHT_MOB );
+	int rightWeapon = ButtonDownID( RIGHT_WEAPON );
+	int rightLoc = (rightMoB == DUMMY) ? MID : RIGHT;
+
+	for( int i=0; i<leftCount; ++i ) {
+		CreateChit( waypoints[LEFT][i], leftMoB, leftWeapon );
+	}
+	for( int i=0; i<rightCount; ++i ) {
+		CreateChit( waypoints[rightLoc][i], rightMoB, rightWeapon );
+	}
 
 	// Trigger the AI to do something.
-	AwarenessChitEvent event( HUMAN, b );
+	AwarenessChitEvent event( leftMoB, b );
 	chitBag.QueueEvent( event );
 }
 

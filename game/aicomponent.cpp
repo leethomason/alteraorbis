@@ -182,8 +182,11 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		GLASSERT( inventory );	// need to be  holding a melee weapon. possible the weapon
 								// was lost before impact, in which case this assert should
 								// be removed.
-		GameItem* item = inventory->IsCarrying();
-		GLASSERT( item && item->ToMeleeWeapon() );
+
+		CArray< GameItem*, EL_MAX_METADATA > weapons;
+		inventory->GetWeapons( &weapons );
+		GameItem* item=0;
+		if ( weapons.Size() ) item = weapons[0];
 
 		if ( render && inventory && item && item->ToMeleeWeapon() ) { /* okay */ }
 		else return;

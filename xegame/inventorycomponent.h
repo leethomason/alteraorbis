@@ -32,6 +32,9 @@ public:
 	// Is carrying anything - primarily a query for the animation system.
 	GameItem* IsCarrying();
 
+	// Weapon in/is hand first. Followed by intrinsics.
+	void GetWeapons( grinliz::CArray< GameItem*, EL_MAX_METADATA >* weapons );
+
 private:
 	// EL_MAX_METADATA is also the maximum number of hardpoints.
 	// Therefore the first EL_MAX_METADATA slots are items being

@@ -34,6 +34,7 @@ private:
 	void LoadMap();
 	void CreateChit( const grinliz::Vector2I& p, int team, int loadout );
 	void GoScene();
+	int ButtonDownID( int group );
 
 	gamui::PushButton okay, goButton;
 
@@ -64,7 +65,14 @@ private:
 
 		LEFT=0,
 		MID,
-		RIGHT
+		RIGHT,
+
+		LEFT_COUNT=1,
+		LEFT_MOB,
+		LEFT_WEAPON,
+		RIGHT_COUNT,
+		RIGHT_MOB,
+		RIGHT_WEAPON
 	};
 	gamui::ToggleButton optionButton[NUM_BUTTONS];
 	static const ButtonDef buttonDef[NUM_BUTTONS];
