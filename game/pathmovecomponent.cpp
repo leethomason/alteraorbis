@@ -4,6 +4,7 @@
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/rendercomponent.h"
 #include "../xegame/chitbag.h"
+#include "../xegame/itemcomponent.h"
 
 #include "../engine/loosequadtree.h"
 
@@ -242,7 +243,7 @@ bool PathMoveComponent::AvoidOthers( U32 delta )
 	bounds.Set( pos2.x-PATH_AVOID_DISTANCE, pos2.y-PATH_AVOID_DISTANCE, 
 		        pos2.x+PATH_AVOID_DISTANCE, pos2.y+PATH_AVOID_DISTANCE );
 	
-	const CDynArray<Chit*>& chitArr = GetChitBag()->QuerySpatialHash( bounds, parentChit, false );
+	GetChitBag()->QuerySpatialHash( &chitArr, bounds, parentChit, GameItem::CHARACTER, false );
 
 	if ( !chitArr.Empty() ) {
 		Vector3F pos3    = { pos2.x, 0, pos2.y };

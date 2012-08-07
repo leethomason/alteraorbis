@@ -4,6 +4,7 @@
 #include "../xegame/component.h"
 #include "../grinliz/glcontainer.h"
 #include "../grinliz/glrectangle.h"
+#include "../script/battlemechanics.h"
 
 class WorldMap;
 class Engine;
@@ -64,6 +65,8 @@ private:
 
 	grinliz::CArray<int, MAX_TRACK> friendList;
 	grinliz::CArray<int, MAX_TRACK> enemyList;
+	grinliz::CDynArray<Chit*>		chitArr;
+	BattleMechanics battleMechanics;
 };
 
 

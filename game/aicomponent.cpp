@@ -69,7 +69,7 @@ void AIComponent::UpdateCombatInfo( const Rectangle2F* _zone )
 	}
 
 	// Sort in by as-the-crow-flies range. Not correct, but don't want to deal with arbitrarily long query.
-	const CDynArray<Chit*>& chitArr = GetChitBag()->QuerySpatialHash( zone, parentChit, true );
+	GetChitBag()->QuerySpatialHash( &chitArr, zone, parentChit, GameItem::CHARACTER, true );
 
 	if ( !chitArr.Empty() ) {
 		// Clear and reset the existing info.
@@ -107,7 +107,7 @@ void AIComponent::DoMelee()
 		return;
 	}
 
-	if ( BattleMechanics::InMeleeZone( engine, parentChit, targetChit ) ) {
+	if ( battleMechanics.InMeleeZone( engine, parentChit, targetChit ) ) {
 		parentChit->GetRenderComponent()->PlayAnimation( ANIM_MELEE );
 	}
 	else {
@@ -194,6 +194,6 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 
 		engine->particleSystem->EmitPD( "derez", pos, V3F_UP, engine->camera.EyeDir3(), 0 );
 		
-		BattleMechanics::MeleeAttack( engine, parentChit, item );
+		battleMechanics.MeleeAttack( engine, parentChit, item );
 	}
 }

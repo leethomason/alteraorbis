@@ -252,7 +252,7 @@ template < class T >
 class Flag
 {
   public:
-	Flag()								{ store = 0; }
+	Flag( int initFlags )				{ store = initFlags; }
 	
 	inline void Set( T flag )			{ store |= flag; }
 	inline void Clear( T flag )			{ store &= ~flag; }

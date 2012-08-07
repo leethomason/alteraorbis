@@ -3,6 +3,7 @@
 
 #include "spatialcomponent.h"
 #include "rendercomponent.h"
+#include "itemcomponent.h"
 #include "../grinliz/glperformance.h"
 
 using namespace grinliz;
@@ -67,9 +68,9 @@ void ChitBag::DoTick( U32 delta )
 
 	for( int i=0; i<events.Size(); ++i ) {
 		const ChitEvent& e = events[i];
-		const grinliz::CDynArray<Chit*>& arr = QuerySpatialHash( e.AreaOfEffect(), 0, false );
-		for( int j=0; j<arr.Size(); ++j ) {
-			arr[j]->OnChitEvent( e );
+		QuerySpatialHash( &hashQuery, e.AreaOfEffect(), 0, 0, false );
+		for( int j=0; j<hashQuery.Size(); ++j ) {
+			hashQuery[j]->OnChitEvent( e );
 		}
 	}
 
@@ -153,7 +154,11 @@ int ChitBag::CompareDistance( const void* p0, const void* p1 )
 }
 
 
-const CDynArray<Chit*>& ChitBag::QuerySpatialHash( const Rectangle2F& rf, const Chit* ignore, bool distanceSort )
+void ChitBag::QuerySpatialHash(	grinliz::CDynArray<Chit*>* array, 
+								const grinliz::Rectangle2F& rf, 
+								const Chit* ignore,
+								int itemFilter,
+								bool distanceSort )
 {
 	Rectangle2I b;
 	b.Set( 0, 0, SIZE-1, SIZE-1 );
@@ -167,25 +172,31 @@ const CDynArray<Chit*>& ChitBag::QuerySpatialHash( const Rectangle2F& rf, const 
 	r.max.y >>= SHIFT;
 	r.DoIntersection( b );
 
-	hashQuery.Clear();
+	array->Clear();
 	for( int y=r.min.y; y<=r.max.y; ++y ) {
 		for( int x=r.min.x; x<=r.max.x; ++x ) {
 			unsigned index = y*SIZE+x;
 			for( Chit* it=spatialHash[ index ]; it; it=it->next ) {
 				if ( it != ignore ) {
+					if ( itemFilter ) {
+						if ( it->GetItemComponent() && (it->GetItemComponent()->item.flags & itemFilter )) {
+							// okay!
+						}
+						else {
+							continue;
+						}
+					}
 					const Vector3F& pos = it->GetSpatialComponent()->GetPosition();
 					if ( rf.Contains( pos.x, pos.z ) ) {
-						hashQuery.Push( it );
+						array->Push( it );
 					}
 				}
 			}
 		}
 	}
-	if ( hashQuery.Size() > 1 && distanceSort ) {
+	if ( array->Size() > 1 && distanceSort ) {
 		Vector2F origin = rf.Center();
 		compareOrigin.Set( origin.x, 0, origin.y );
-		qsort( hashQuery.Mem(), hashQuery.Size(), sizeof(Chit*), CompareDistance ); 
+		qsort( array->Mem(), array->Size(), sizeof(Chit*), CompareDistance ); 
 	}
-
-	return hashQuery;
 }

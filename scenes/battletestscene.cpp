@@ -146,7 +146,18 @@ void BattleTestScene::LoadMap()
 	grinliz::CDynArray<Vector2I> blocks, features, wp;
 	map->InitPNG( "./res/testarena32.png", &blocks, &wp, &features );
 
-	//for( int i=0; i<wp.Size(); ++i 
+	for( int i=0; i<wp.Size(); ++i ) {
+		Vector2I v = wp[i];
+		if ( v.x < map->Width() / 3 ) {
+			waypoints[LEFT].Push( v );
+		}
+		else if ( v.x > map->Width()*2/3 ) {
+			waypoints[RIGHT].Push( v );
+		}
+		else {
+			waypoints[MID].Push( v );
+		}
+	}
 
 	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase(), map );	
 	engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
@@ -185,9 +196,24 @@ void BattleTestScene::LoadMap()
 
 void BattleTestScene::GoScene()
 {
-	// Trigger the AI to do something.
 	Rectangle2F b;
 	b.Set( 0, 0, (float)map->Width(), (float)map->Height() );
+
+	// Remove everything that is currently on the board that is some sort of character.
+	CDynArray<Chit*> arr;
+	chitBag.QuerySpatialHash( &arr, b, 0, GameItem::CHARACTER, false );
+	for( int i=0; i<arr.Size(); ++i ) {
+		chitBag.DeleteChit( arr[i] );
+	}
+
+	Vector2I unit = { 2, 16 };
+	Vector2I dummy = { 16, 16 };
+	CreateChit( unit, HUMAN, PISTOL );
+	CreateChit( dummy, DUMMY, NO_WEAPON );
+	dummy.Set( 16, 17 );
+	CreateChit( dummy, DUMMY, NO_WEAPON );
+
+	// Trigger the AI to do something.
 	AwarenessChitEvent event( HUMAN, b );
 	chitBag.QueueEvent( event );
 }

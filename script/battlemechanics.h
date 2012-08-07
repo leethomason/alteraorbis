@@ -13,14 +13,16 @@ class Engine;
 class BattleMechanics
 {
 public:
-	static void MeleeAttack( Engine* engine, Chit* src, GameItem* weapon );
+	void MeleeAttack( Engine* engine, Chit* src, GameItem* weapon );
 
 	// Returns true the melee attack can/does succeed. Note that any animation
 	// is pure decoration, melee success is just based on relative positions.
 	// This is simple, but could be improved.
-	static bool InMeleeZone( Engine* engine,
-							 Chit* src,
-							 Chit* target );
+	bool InMeleeZone( Engine* engine,
+					  Chit* src,
+					  Chit* target );
+private:
+	grinliz::CDynArray<Chit*> hashQuery;
 };
 
 

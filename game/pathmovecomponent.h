@@ -3,6 +3,7 @@
 
 #include "../xegame/component.h"
 #include "../grinliz/glvector.h"
+#include "../grinliz/glcontainer.h"
 #include "gamelimits.h"
 
 class WorldMap;
@@ -99,6 +100,7 @@ private:
 	bool isStuck;
 	bool isMoving;
 
+	grinliz::CDynArray< Chit* > chitArr;
 	grinliz::Vector2F path[MAX_MOVE_PATH];
 };
 
