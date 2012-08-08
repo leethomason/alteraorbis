@@ -1,15 +1,17 @@
-X NavTest-1 is broken. More container fallout. And once again an existing bug
-  revealed by tighter container code.
 - combat test scene
+	- properly hook up items and such, so that items, health, all be driven correctly
+	- data driven item creation
+	- buttons to select scenario, load items
+	- melee attack standing too close 
+	- avoiding while pathing doesn't look quite correct
+	- leaving guy standing after battle
+	- need left/right team, not species based
 	X animation/lack of making me crazy. What plan?
 	X particle effect for melee strike not "connected" to character
 	X item definition: one big wad of data? handle "inherited items"?
-	- properly hook up items and such, so that items, health, all be driven correctly
 	X use space tree query for impacted items. Everything that has a spatial component
 	  is now in the table, so this should be "fixed".
-	- data driven item creation
 	X need to check rotation in the path component
-	- buttons to select scenario, load items
 	X load in the correct lighting
 
 	- weapons
@@ -22,6 +24,7 @@ X NavTest-1 is broken. More container fallout. And once again an existing bug
 		- CA to handle friends and enemies
 	- UI
 		- set up different battles
+		- battle results
 
 	- serialization
 	- hesitation when near melee target (probably squatted destination code kicking in)
@@ -62,6 +65,8 @@ X particle test scene
 
 ----------- FIXED -------------
 
+X NavTest-1 is broken. More container fallout. And once again an existing bug
+  revealed by tighter container code.
 X container to support copy semantics
 X remove particle params not needed for world
 X move lighting loading from render test scene to engine

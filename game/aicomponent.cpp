@@ -103,7 +103,9 @@ void AIComponent::DoMelee()
 	Chit* targetChit = parentChit->GetChitBag()->GetChit( action.melee.targetID );
 	if ( targetChit == 0 ) {
 		currentAction = NO_ACTION;
-		enemyList.PopFront();
+		if ( enemyList.Size() && enemyList[0] == action.melee.targetID ) {
+			enemyList.PopFront();
+		}
 		return;
 	}
 

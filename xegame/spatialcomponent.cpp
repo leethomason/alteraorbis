@@ -16,8 +16,8 @@ void SpatialComponent::DebugStr( GLString* str )
 
 void SpatialComponent::SetPosRot( const Vector3F& v, const Quaternion& _q )
 {
-	GLASSERT( v.x >= -1 && v.x < EL_MAX_MAP_SIZE );
-	GLASSERT( v.z >= -1 && v.z < EL_MAX_MAP_SIZE );
+	GLASSERT( v.x >= 0 && v.x < EL_MAX_MAP_SIZE );
+	GLASSERT( v.z >= 0 && v.z < EL_MAX_MAP_SIZE );
 	GLASSERT( v.y >= -1 && v.y <= 10 );	// obviously just general sanity
 
 	Quaternion q = _q;

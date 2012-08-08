@@ -31,9 +31,9 @@ bool BattleMechanics::InMeleeZone(	Engine* engine,
 	if ( spatial && render && targetSpatial && targetRender ) {}	// all good
 	else return false;
 
-	Vector2F normalToTarget = spatial->GetPosition2D() - targetSpatial->GetPosition2D();
+	Vector2F normalToTarget = targetSpatial->GetPosition2D() - spatial->GetPosition2D();
 	const float distToTarget = normalToTarget.Length();
-	normalToTarget.Normalize();
+	normalToTarget.SafeNormalize( 1, 0 );
 
 	int test = IntersectRayCircle( targetSpatial->GetPosition2D(),
 								   targetRender->RadiusOfBase(),

@@ -32,7 +32,7 @@ public:
 private:
 
 	void LoadMap();
-	void CreateChit( const grinliz::Vector2I& p, int team, int loadout );
+	void CreateChit( const grinliz::Vector2I& p, int type, int loadout, int team );
 	void GoScene();
 	int ButtonDownID( int group );
 

@@ -173,6 +173,9 @@ void BattleTestScene::LoadMap()
 			waypoints[MID].Push( v );
 		}
 	}
+	ShuffleArray( waypoints[RIGHT].Mem(), waypoints[RIGHT].Size(), &random );
+	ShuffleArray( waypoints[LEFT].Mem(),  waypoints[LEFT].Size(),  &random );
+	ShuffleArray( waypoints[MID].Mem(),   waypoints[MID].Size(),   &random );
 
 	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase(), map );	
 	engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
@@ -198,10 +201,10 @@ void BattleTestScene::LoadMap()
 
 	Vector2I unit = { 2, 16 };
 	Vector2I dummy = { 16, 16 };
-	CreateChit( unit, HUMAN, PISTOL );
-	CreateChit( dummy, DUMMY, NO_WEAPON );
+	CreateChit( unit, HUMAN, PISTOL, LEFT );
+	CreateChit( dummy, DUMMY, NO_WEAPON, MID );
 	dummy.Set( 16, 17 );
-	CreateChit( dummy, DUMMY, NO_WEAPON );
+	CreateChit( dummy, DUMMY, NO_WEAPON, MID );
 
 	engine->CameraLookAt( (float)map->Width()/2, (float)map->Height()/2, 
 		                  22.f,		// height
@@ -230,10 +233,10 @@ void BattleTestScene::GoScene()
 	int rightLoc = (rightMoB == DUMMY) ? MID : RIGHT;
 
 	for( int i=0; i<leftCount; ++i ) {
-		CreateChit( waypoints[LEFT][i], leftMoB, leftWeapon );
+		CreateChit( waypoints[LEFT][i], leftMoB, leftWeapon, LEFT );
 	}
 	for( int i=0; i<rightCount; ++i ) {
-		CreateChit( waypoints[rightLoc][i], rightMoB, rightWeapon );
+		CreateChit( waypoints[rightLoc][i], rightMoB, rightWeapon, rightLoc );
 	}
 
 	// Trigger the AI to do something.
@@ -242,10 +245,10 @@ void BattleTestScene::GoScene()
 }
 
 		
-void BattleTestScene::CreateChit( const Vector2I& p, int team, int loadout )
+void BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int team )
 {
 	const char* asset = "humanFemale";
-	switch ( team ) {
+	switch ( type ) {
 		case DUMMY:			asset="dummytarget";	break;
 		case MANTIS:		asset="mantis";			break;
 		case BALROG:		asset="balrog";			break;
@@ -254,16 +257,19 @@ void BattleTestScene::CreateChit( const Vector2I& p, int team, int loadout )
 	Chit* chit = chitBag.NewChit();
 	chit->Add( new SpatialComponent());
 	chit->Add( new RenderComponent( engine, asset, 0 ));
-	chit->Add( new PathMoveComponent( map ));
-	if ( team != DUMMY ) {
+	if ( type != DUMMY ) {
+		chit->Add( new PathMoveComponent( map ));
 		chit->Add( new AIComponent( engine, map ));
+		chit->Add( new DebugPathComponent( engine, map, static_cast<LumosGame*>(game) ));
+	}
+	else {
+		chit->Add( new MoveComponent());
 	}
 
 	GameItem item( GameItem::CHARACTER );
 	item.primaryTeam = team;
 	chit->Add( new ItemComponent( item ));
 
-	chit->Add( new DebugPathComponent( engine, map, static_cast<LumosGame*>(game) ));
 	chit->Add( new HealthComponent());
 	InventoryComponent* inv = new InventoryComponent( &chitBag );
 	chit->Add( inv );
@@ -271,7 +277,7 @@ void BattleTestScene::CreateChit( const Vector2I& p, int team, int loadout )
 	chit->GetSpatialComponent()->SetPosYRot( (float)p.x+0.5f, 0, (float)p.y+0.5f, (float)random.Rand( 360 ) );
 	GET_COMPONENT( chit, HealthComponent )->SetHealth( 100, 100 );
 
-	if ( team == HUMAN ) {
+	if ( type == HUMAN ) {
 		GameItem hand( GameItem::MELEE_WEAPON | GameItem::APPENDAGE );
 		inv->AddToInventory( hand );
 
@@ -286,12 +292,12 @@ void BattleTestScene::CreateChit( const Vector2I& p, int team, int loadout )
 			inv->AddToInventory( gun );
 		}
 	}
-	else if ( team == BALROG ) {
+	else if ( type == BALROG ) {
 		// FIXME kinetic damage bonus
 		GameItem claw( GameItem::MELEE_WEAPON | GameItem::APPENDAGE );
 		inv->AddToInventory( claw );
 	}
-	else if ( team == MANTIS ) {
+	else if ( type == MANTIS ) {
 		// FIXME kinetic damage bonus
 		GameItem pincer( GameItem::MELEE_WEAPON | GameItem::APPENDAGE );
 		inv->AddToInventory( pincer );

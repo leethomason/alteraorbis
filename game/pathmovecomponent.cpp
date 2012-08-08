@@ -113,14 +113,22 @@ void PathMoveComponent::GetPosRot( grinliz::Vector2F* pos, float* rot )
 	GLASSERT( spatial );
 	const Vector3F& pos3 = spatial->GetPosition();
 	pos->Set( pos3.x, pos3.z );
+	GLASSERT( map->Bounds().Contains( (int)pos->x, (int)pos->y ));
 	*rot = spatial->GetYRotation();
 }
 
 
-void PathMoveComponent::SetPosRot( const grinliz::Vector2F& pos, float rot )
+void PathMoveComponent::SetPosRot( grinliz::Vector2F pos, float rot )
 {
 	SpatialComponent* spatial = parentChit->GetSpatialComponent();
 	GLASSERT( spatial );
+
+	Rectangle2F b;
+	b.Set( 0, 0, (float)map->Width(), (float)map->Height() );
+	b.Outset( -0.1f );
+	pos.x = Clamp( pos.x, b.min.x, b.max.x );
+	pos.y = Clamp( pos.y, b.min.y, b.max.y );
+
 	spatial->SetPosition( pos.x, 0, pos.y );
 	spatial->SetYRotation( rot );
 }
@@ -243,7 +251,7 @@ bool PathMoveComponent::AvoidOthers( U32 delta )
 	bounds.Set( pos2.x-PATH_AVOID_DISTANCE, pos2.y-PATH_AVOID_DISTANCE, 
 		        pos2.x+PATH_AVOID_DISTANCE, pos2.y+PATH_AVOID_DISTANCE );
 	
-	GetChitBag()->QuerySpatialHash( &chitArr, bounds, parentChit, GameItem::CHARACTER, false );
+	GetChitBag()->QuerySpatialHash( &chitArr, bounds, parentChit, 0, false );
 
 	if ( !chitArr.Empty() ) {
 		Vector3F pos3    = { pos2.x, 0, pos2.y };
@@ -258,6 +266,12 @@ bool PathMoveComponent::AvoidOthers( U32 delta )
 		for( int i=0; i<chitArr.Size(); ++i ) {
 			Chit* chit = chitArr[i];
 			GLASSERT( chit != parentChit );
+			
+			// Only avoid things with move components. This is
+			// a little dicey logic. May need to re-visit.
+			if ( !chit->GetMoveComponent()) {
+				continue;
+			}
 				
 			Vector3F itPos3 = chit->GetSpatialComponent()->GetPosition();
 			float itRadius  = chit->GetRenderComponent()->RadiusOfBase(); 
@@ -280,13 +294,14 @@ bool PathMoveComponent::AvoidOthers( U32 delta )
 					// Dang squatter.
 					if ( pathPos < nPathPos-1 ) {
 						++pathPos;	// go around
-						break;		// and stop avoiding since we are changing dest.
+						//break;		// and stop avoiding since we are changing dest.
 					}
 					else {
 						squattingDest = true;
 					}
 				}
-				else {
+				//else 
+				{
 					float mag = Min( r-d, Travel( MOVE_SPEED, delta ) ); 
 					normal.Multiply( mag );
 					avoid += normal;
@@ -412,6 +427,12 @@ void PathMoveComponent::DoTick( U32 delta )
 			}
 		}
 	}
+	else {
+		GetPosRot( &pos2, &rot );
+		AvoidOthers( delta );
+		ApplyBlocks();
+		SetPosRot( pos2, rot );
+	};
 //	GLASSERT( (pathPos < nPathPos ) || queuedDest.x >= 0 );
 }
 

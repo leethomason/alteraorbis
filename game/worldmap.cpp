@@ -783,8 +783,10 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 	Region* regionStart = grid[INDEX(starti)].region;
 	Region* regionEnd   = grid[INDEX(endi)].region;
 
-	GLASSERT( regionStart );
-	GLASSERT( regionEnd );
+	GLASSERT( regionStart && regionEnd );	// is someone stuck?
+	if ( !regionStart || !regionEnd ) {
+		return false;
+	}
 
 	if ( regionStart == regionEnd ) {
 		okay = true;

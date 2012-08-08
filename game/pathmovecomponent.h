@@ -34,13 +34,8 @@ public:
 	void QueueDest( grinliz::Vector2F dest,
 					float rotation = -1.f );		// if specified, the rotation we wish to get to
 	void QueueDest( Chit* targetChit );
+	//bool SetActive( bool active );
 
-	/*
-	// Set whether rotation is prioritized over movement. (Default
-	// to true.) If false, then motion will happen and the rotation
-	// is set from the motion.
-	void SetRotationFirst( bool r ) { rotationFirst = r; }
-	*/
 	void SetPathDebugging( bool d )	{ pathDebugging = d; }
 
 	// Status info
@@ -56,7 +51,7 @@ private:
 	void ComputeDest();
 	
 	void GetPosRot( grinliz::Vector2F* pos, float* rot );
-	void SetPosRot( const grinliz::Vector2F& pos, float rot );
+	void SetPosRot( grinliz::Vector2F pos, float rot );
 	float GetDistToNext2( const grinliz::Vector2F& currentPos );
 	void SetNoPath() {
 		nPathPos = pathPos = repath = 0;

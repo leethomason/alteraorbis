@@ -137,6 +137,17 @@ private:
 	static U8 series[256];
 };
 
+
+template< class T >
+void ShuffleArray( T* mem, int size, Random* random ) {
+	for( int i=0; i<size; ++i ) {
+		int j = random->Rand(size);
+		T temp = mem[i];
+		mem[i] = mem[j];
+		mem[j] = temp;
+	}
+}
+
 };	// namespace grinliz
 
 #endif
