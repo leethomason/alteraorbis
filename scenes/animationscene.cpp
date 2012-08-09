@@ -208,7 +208,7 @@ void AnimationScene::UpdateAnimationInfo()
 		int nAnim = res->NumAnimations();
 		GLASSERT( currentAnim >=0 && currentAnim < nAnim );
 
-		const char* name = "no animation";
+		const char* name = "none";
 		if ( nAnim > 0 ) {
 			name = res->AnimationName( currentAnim );
 			AnimationType type = AnimationResource::NameToType( name );
@@ -220,6 +220,7 @@ void AnimationScene::UpdateAnimationInfo()
 		exportSCML.SetEnabled( false );
 	}
 	else {
+		animName.SetText( "none" );
 		exportSCML.SetEnabled( true );
 	}
 }
@@ -260,6 +261,7 @@ void AnimationScene::ItemTapped( const gamui::UIItem* item )
 	else if ( item == &animRight ) {
 		++currentAnim;
 		const AnimationResource* res = model[0]->GetAnimationResource();
+		GLASSERT( res );
 		if ( currentAnim >= res->NumAnimations() ) {
 			currentAnim = 0;
 		}
@@ -297,10 +299,12 @@ void AnimationScene::ItemTapped( const gamui::UIItem* item )
 	else if ( item == &modelRight ) {
 		++currentModel;
 		if ( currentModel == resourceArr.Size() ) currentModel = 0;
+		currentAnim = 0;
 	}
 	else if ( item == &modelLeft ) {
 		--currentModel;
 		if ( currentModel < 0 ) currentModel = resourceArr.Size()-1;
+		currentAnim = 0;
 	}
 
 	UpdateModelInfo();
