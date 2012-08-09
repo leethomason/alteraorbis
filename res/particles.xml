@@ -18,7 +18,7 @@
 
   <particle name="smoke" texMin="1" texMax="2"
             time="continuous" size="0.4" count="3" config="ray"
-            posFuzz="0.0" velocity="1.0" velocityFuzz="0.1" >
+            posFuzz="0.0" velocity="0.7" velocityFuzz="0.1" >
     <color red="0.7" green="0.7" blue="0.7" alpha="0.1"/>
     <colorVelocity red="0" green="0" blue="0" alpha="1.0" />
     <colorVelocity red="-0.2" green="-0.2" blue="-0.2" alpha="-0.3" />
@@ -27,11 +27,27 @@
   <particle name="fire" 
             time="continuous" size="0.3" count="10" config="ray"
             posFuzz="0.1" velocity="1.0" velocityFuzz="0.2" >
-    <color red="1" green="0" blue="0" alpha="0.1"/>
-    <colorVelocity red="0" green="0" blue="0" alpha="1.5" />
-    <colorVelocity red="-0.1" green="0.6" blue="0" alpha="-0.5" />
+    <color red="1" green="0.6" blue="0" alpha="0.1"/>
+    <colorVelocity red="0" green="-0.1" blue="0" alpha="1.5" />
+    <colorVelocity red="-0.05" green="-0.8" blue="0" alpha="-0.5" />
   </particle>
 
+  <particle name="hsmoke" texMin="1" texMax="2"
+          time="continuous" size="0.2" count="5" config="ray"
+          posFuzz="0.0" velocity="0.7" velocityFuzz="0.1" >
+    <color red="0.7" green="0.7" blue="0.7" alpha="0.1"/>
+    <colorVelocity red="0" green="0" blue="0" alpha="1.0" />
+    <colorVelocity red="-0.2" green="-0.2" blue="-0.2" alpha="-0.5" />
+  </particle>
+
+  <particle name="hfire"
+            time="continuous" size="0.15" count="15" config="ray"
+            posFuzz="0.1" velocity="1.0" velocityFuzz="0.2" >
+    <color red="1" green="0.6" blue="0" alpha="0.1"/>
+    <colorVelocity red="0" green="-0.1" blue="0" alpha="1.2" />
+    <colorVelocity red="-0.05" green="-1.5" blue="0" alpha="-0.7" />
+  </particle>
+ 
   <particle name="performance"
             time="continuous" size="0.1" count="1200" config="ray"
             posFuzz="0.5" velocity="1.0" velocityFuzz="0.5" >

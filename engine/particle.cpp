@@ -106,13 +106,13 @@ void ParticleSystem::Process( U32 delta, const grinliz::Vector3F eyeDir[] )
 
 			pd->pos += pd->velocity * deltaF;
 			const Vector3F pos = pd->pos;
-			const Vector4F size = pd->size;
+			const float size = pd->size;
 
-			if ( size.x != FLT_MAX ) {
-				ps[0].pos = pos - up*size.w - right*size.z;
-				ps[1].pos = pos - up*size.w + right*size.x;
-				ps[2].pos = pos + up*size.y + right*size.x;
-				ps[3].pos = pos + up*size.y - right*size.z;
+			if ( size != FLT_MAX ) {
+				ps[0].pos = pos - up*size - right*size;
+				ps[1].pos = pos - up*size + right*size;
+				ps[2].pos = pos + up*size + right*size;
+				ps[3].pos = pos + up*size - right*size;
 			}
 
 			ps[0].color = color;
@@ -154,17 +154,27 @@ void ParticleSystem::EmitBeam( const grinliz::Vector3F& p0, const grinliz::Vecto
 */
 
 
+const ParticleDef* ParticleSystem::GetPD( const char* name )
+{
+	for( int i=0; i<particleDefArr.Size(); ++i ) {
+		if ( particleDefArr[i].name == name ) {
+			return &particleDefArr[i];
+		}
+	}
+	return 0;
+}
+
+
 void ParticleSystem::EmitPD(	const char* name,
 								const grinliz::Vector3F& initPos,
 								const grinliz::Vector3F& normal, 
 								const grinliz::Vector3F eyeDir[],
 								U32 deltaTime )
 {
-	for( int i=0; i<particleDefArr.Size(); ++i ) {
-		if ( particleDefArr[i].name == name ) {
-			EmitPD( particleDefArr[i], initPos, normal, eyeDir, deltaTime );
-			return;
-		}
+	const ParticleDef* pd = GetPD( name );
+	if ( pd ) {
+		EmitPD( *pd, initPos, normal, eyeDir, deltaTime );
+		return;
 	}
 	GLASSERT( 0 );	// probably meant to actually find that particle.
 }
@@ -237,12 +247,12 @@ void ParticleSystem::EmitPD(	const ParticleDef& def,
 				ps[k].uv = uv[k];
 				ps[k].uv.x += uOffset;
 			};
-			const Vector4F size = def.size;
+			const float size = def.size;
 
-			ps[0].pos = pos - up*size.w - right*size.z;
-			ps[1].pos = pos - up*size.w + right*size.x;
-			ps[2].pos = pos + up*size.y + right*size.x;
-			ps[3].pos = pos + up*size.y - right*size.z;
+			ps[0].pos = pos - up*size - right*size;
+			ps[1].pos = pos - up*size + right*size;
+			ps[2].pos = pos + up*size + right*size;
+			ps[3].pos = pos + up*size - right*size;
 
 			++nParticles;
 		}
@@ -370,15 +380,10 @@ void ParticleDef::Load( const tinyxml2::XMLElement* ele )
 	if ( ele->Attribute( "time", "continuous" ) ) {
 		time = CONTINUOUS;
 	}
-	size.Set( 1, 1, 1, 1 );
+	size = 1.0f;
 	if ( ele->Attribute( "size" )) {
-		ele->QueryFloatAttribute( "size", &size.x );
-		size.y = size.z = size.w = size.x;
+		ele->QueryFloatAttribute( "size", &size );
 	}
-	ele->QueryFloatAttribute( "sizePX", &size.x );
-	ele->QueryFloatAttribute( "sizePY", &size.y );
-	ele->QueryFloatAttribute( "sizeNX", &size.z );
-	ele->QueryFloatAttribute( "sizeNY", &size.w );
 
 	count = 1;
 	ele->QueryIntAttribute( "count", &count );

@@ -66,6 +66,10 @@
   <model filename="balrog.ac" animation="balrogAnimation" shading="flat" polyRemoval="pre">
     <meta name="trigger" pos="0.40 0.45 0.004" rot="1 0 0 90" boneName="arm.lower.left" />
     <meta name="target"  pos="0 1.40 0" />
+    <meta name="particle.0.hfire"  pos="0.40 0.45 0"   boneName="arm.lower.left" />
+    <meta name="particle.1.hfire"  pos="-0.40 0.45 0"  boneName="arm.lower.right" />
+    <meta name="particle.2.hfire"  pos="0 1.87 -0.10"  boneName="head" />
+    <meta name="particle.3.hsmoke" pos="0 1.87 -0.10"  boneName="head" />
   </model>
   
   <model filename="human.ac"        modelName="humanMale"   origin="0 0 0" shading="crease" polyRemoval="pre" />

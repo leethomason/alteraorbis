@@ -49,10 +49,10 @@ struct Particle
 // CPU part.
 struct ParticleData
 {
+	float				size;
 	grinliz::Vector4F	colorVel;		// units / second added to color. particle dead when a<=0
 	grinliz::Vector4F	colorVel1;
 	grinliz::Vector3F	velocity;		// units / second added to origin
-	grinliz::Vector4F	size;			// interpreted as: right, top, left, bottom. if size.x==FLT_MAX then world particle.
 	grinliz::Vector3F	pos;
 };
 
@@ -72,6 +72,14 @@ struct ParticleStream
 };
 
 
+/*
+struct ParticleGroup
+{
+	enum { MAX_DEFS = 4 };
+	grinliz::CStr<16> name[MAX_DEFS];
+};
+*/
+
 // SHALLOW
 struct ParticleDef
 {
@@ -86,8 +94,8 @@ struct ParticleDef
 	float posFuzz;
 	float velocity;
 	float velocityFuzz;
+	float size;		
 
-	grinliz::Vector4F size;		// interpreted as: right, top, left, bottom
 	grinliz::Vector4F color;
 	grinliz::Vector4F colorVelocity0;
 	grinliz::Vector4F colorVelocity1;
@@ -128,11 +136,13 @@ public:
 					const grinliz::Vector3F& normal, 
 					const grinliz::Vector3F eyeDir[],
 					U32 deltaTime );
+	const ParticleDef* GetPD( const char* name );
 
 	void Update( U32 deltaTime, const grinliz::Vector3F eyeDir[] );
 	void Draw();
 	void Clear();
 	int NumParticles() const { return nParticles; }
+
 	void LoadParticleDefs( const char* filename );
 
 private:

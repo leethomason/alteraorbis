@@ -161,6 +161,7 @@ public:
 					grinliz::Vector3F* intersect ) const;
 
 	const ModelMetaData* GetMetaData( const char* name ) const;
+	const ModelMetaData* GetMetaData( int i ) const { GLASSERT( i>= 0 && i < EL_MAX_METADATA ); return &header.metaData[i]; }
 
 
 	ModelHeader				header;				// loaded
