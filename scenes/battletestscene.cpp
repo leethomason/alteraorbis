@@ -208,7 +208,7 @@ void BattleTestScene::LoadMap()
 
 	engine->CameraLookAt( (float)map->Width()/2, (float)map->Height()/2, 
 		                  22.f,		// height
-						  225.f );	// rotattion
+						  225.f );	// rotation
 }
 
 
@@ -230,7 +230,7 @@ void BattleTestScene::GoScene()
 	int rightCount	= 1 << ButtonDownID( RIGHT_COUNT );
 	int rightMoB	= ButtonDownID( RIGHT_MOB );
 	int rightWeapon = ButtonDownID( RIGHT_WEAPON );
-	int rightLoc = (rightMoB == DUMMY) ? MID : RIGHT;
+	int rightLoc    = (rightMoB == DUMMY) ? MID : RIGHT;
 
 	for( int i=0; i<leftCount; ++i ) {
 		CreateChit( waypoints[LEFT][i], leftMoB, leftWeapon, LEFT );
