@@ -64,15 +64,18 @@ AnimationScene::AnimationScene( LumosGame* game ) : Scene( game )
 	instance.SetSize( layout.Width(), layout.Height() );
 	instance.SetText( "3x" );
 
-	particle.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
-	particle.SetSize( layout.Width(), layout.Height() );
-	particle.SetText( "particle" );
+	static const char* triggerLabels[NUM_TRIGGERS] = {
+		"particle", "gun", "knife", "ax"
+	};
 
-	gun.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
-	gun.SetSize( layout.Width(), layout.Height() );
-	gun.SetText( "gun" );
-
-	gun.AddToToggleGroup( &particle );
+	for( int i=0; i<NUM_TRIGGERS; ++i ) {
+		triggerToggle[i].Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
+		triggerToggle[i].SetSize( layout.Width(), layout.Height() );
+		triggerToggle[i].SetText( triggerLabels[i] );
+		if ( i > 0 ) {
+			triggerToggle[0].AddToToggleGroup( &triggerToggle[i] );
+		}
+	}
 
 	exportSCML.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
 	exportSCML.SetSize( layout.Width(), layout.Height() );
@@ -104,9 +107,7 @@ AnimationScene::AnimationScene( LumosGame* game ) : Scene( game )
 		}
 	}
 
-	const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( "testgun" );
-	gunModel = engine->AllocModel( res );
-
+	triggerModel = 0;
 	LoadModel();
 
 	engine->CameraLookAt( 1, 1, 5 );
@@ -119,7 +120,9 @@ AnimationScene::~AnimationScene()
 	for( int i=0; i<NUM_MODELS; ++i ) {
 		engine->FreeModel( model[i] );
 	}
-	engine->FreeModel( gunModel );
+	if ( triggerModel ) {
+		engine->FreeModel( triggerModel );
+	}
 	delete engine;
 }
 
@@ -136,8 +139,9 @@ void AnimationScene::Resize()
 	layout.PosAbs( &boneRight,		3, -2 );
 	layout.PosAbs( &ortho,			4, -2 );
 	layout.PosAbs( &instance,		5, -2 );
-	layout.PosAbs( &particle,		6, -2 );
-	layout.PosAbs( &gun,			7, -2 );
+	for( int i=0; i<NUM_TRIGGERS; ++i ) {
+		layout.PosAbs( &triggerToggle[i], 6+i, -2 );
+	}
 
 	layout.PosAbs( &exportSCML,		4, -1 );
 	layout.PosAbs( &pixelUnitRatio, 5, -1 );
@@ -440,12 +444,11 @@ void AnimationScene::FinishXML()
 
 void AnimationScene::DoTick( U32 deltaTime )
 {
-	grinliz::CArray<AnimationMetaData, 4> metaData;
+	grinliz::CArray<AnimationMetaData, 4> metaDataEvents;
 	for( int i=0; i<NUM_MODELS; ++i ) {
-		model[i]->DeltaAnimation( deltaTime, (i==0) ? &metaData : 0, 0 );
+		model[i]->DeltaAnimation( deltaTime, (i==0) ? &metaDataEvents : 0, 0 );
 	}
 
-	gunModel->SetFlag( Model::MODEL_INVISIBLE );
 	if ( model[0]->HasAnimation() && model[0]->GetResource()->GetMetaData( "trigger" )) {
 		static const Vector3F UP = { 0, 1, 0 };
 		static const Vector3F POS = { 0,0,0 };
@@ -453,22 +456,38 @@ void AnimationScene::DoTick( U32 deltaTime )
 		model[0]->CalcMetaData( "trigger", &xform );
 		Vector3F p = xform * POS;
 
-		if ( particle.Down() ) {
-			engine->particleSystem->EmitPD( "spell", p, UP, engine->camera.EyeDir3(), 0 ); 
-		}
-
-		for( int i=0; i<metaData.Size(); ++i ) {
+		for( int i=0; i<metaDataEvents.Size(); ++i ) {
 			engine->particleSystem->EmitPD( "derez", p, UP, engine->camera.EyeDir3(), 0 );	
 		}
 
-		if ( gun.Down() ) {
-			gunModel->ClearFlag( Model::MODEL_INVISIBLE );
-
-			static const Vector3F POS = { 0,0,0 };
-			Matrix4 xform;
-			model[0]->CalcMetaData( "trigger", &xform );
-			gunModel->SetTransform( xform );
+		if ( triggerToggle[PARTICLE].Down() ) {
+			engine->particleSystem->EmitPD( "spell", p, UP, engine->camera.EyeDir3(), 0 ); 
+			if ( triggerModel ) { engine->FreeModel( triggerModel ); triggerModel = 0;	}
 		}
+		else {
+			const ModelResource* res = 0;
+			if		( triggerToggle[GUN].Down() )	{ res = ModelResourceManager::Instance()->GetModelResource( "testgun" ); }
+			else if ( triggerToggle[KNIFE].Down() )	{ res = ModelResourceManager::Instance()->GetModelResource( "testknife" ); }
+			else if ( triggerToggle[AX].Down() )		{ res = ModelResourceManager::Instance()->GetModelResource( "ax" ); }
+
+			if ( triggerModel && triggerModel->GetResource() != res ) {
+				engine->FreeModel( triggerModel );
+				triggerModel = 0;
+			}
+
+			if( res && !triggerModel ) {
+				triggerModel = engine->AllocModel( res );
+			}
+
+			if ( triggerModel ) {
+				Matrix4 xform;
+				model[0]->CalcMetaData( "trigger", &xform );
+				triggerModel->SetTransform( xform );
+			}
+		}
+	}
+	else {
+		if ( triggerModel ) { engine->FreeModel( triggerModel ); triggerModel = 0;	}
 	}
 }
 
