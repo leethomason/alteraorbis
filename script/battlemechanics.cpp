@@ -79,10 +79,10 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, GameItem* weapon )
 	Rectangle2F b;
 	b.min = srcPos; b.max = srcPos;
 	b.Outset( MELEE_RANGE + MAX_BASE_RADIUS );
-	const CDynArray<Chit*>& nearChits = chitBag->QuerySpatialHash( b, src, false );
+	chitBag->QuerySpatialHash( &hashQuery, b, src, GameItem::CHARACTER, false );
 
-	for( int i=0; i<nearChits.Size(); ++i ) {
-		Chit* target = nearChits[i];
+	for( int i=0; i<hashQuery.Size(); ++i ) {
+		Chit* target = hashQuery[i];
 
 		if ( InMeleeZone( engine, src, target )) {
 			// FIXME: account for armor, shields, etc. etc.

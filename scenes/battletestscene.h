@@ -26,7 +26,7 @@ public:
 	virtual void ItemTapped( const gamui::UIItem* item );
 	virtual void Draw3D( U32 deltaTime );
 	virtual void DrawDebugText();
-	virtual void OnChitMsg( Chit* chit, int id, const ChitEvent* );
+	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
 	virtual void MouseMove( const grinliz::Vector2F& view, const grinliz::Ray& world ) { debugRay = world; }
 
 private:
@@ -34,6 +34,7 @@ private:
 	void LoadMap();
 	void CreateChit( const grinliz::Vector2I& p, int team, int loadout );
 	void GoScene();
+	int ButtonDownID( int group );
 
 	gamui::PushButton okay, goButton;
 
@@ -64,7 +65,14 @@ private:
 
 		LEFT=0,
 		MID,
-		RIGHT
+		RIGHT,
+
+		LEFT_COUNT=1,
+		LEFT_MOB,
+		LEFT_WEAPON,
+		RIGHT_COUNT,
+		RIGHT_MOB,
+		RIGHT_WEAPON
 	};
 	gamui::ToggleButton optionButton[NUM_BUTTONS];
 	static const ButtonDef buttonDef[NUM_BUTTONS];

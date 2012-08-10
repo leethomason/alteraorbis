@@ -50,13 +50,13 @@ void DebugStateComponent::OnRemove()
 }
 
 
-void DebugStateComponent::OnChitMsg( Chit* chit, int id, const ChitEvent* )
+void DebugStateComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {
-	if ( id == SPATIAL_MSG_CHANGED ) {
+	if ( msg.ID() == SPATIAL_MSG_CHANGED ) {
 		Vector2F pos = chit->GetSpatialComponent()->GetPosition2D() + OFFSET;
 		healthBar.SetPos( pos.x, pos.y );
 	}
-	else if ( id == HEALTH_MSG_CHANGED ) {
+	else if ( msg.ID() == HEALTH_MSG_CHANGED ) {
 		HealthComponent* pHealth = GET_COMPONENT( chit, HealthComponent );
 		healthBar.SetRange( pHealth->GetHealthFraction() );
 	}

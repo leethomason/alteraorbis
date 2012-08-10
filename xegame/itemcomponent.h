@@ -19,6 +19,7 @@ public:
 		str->Format( "[Item] %s ", item.Name() );
 	}
 
+	GameItem* GetItem() { return &item; }
 	GameItem item;
 };
 

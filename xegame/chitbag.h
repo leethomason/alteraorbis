@@ -35,16 +35,17 @@ public:
 	void QueueDelete( Chit* chit );
 
 	void QueueEvent( const ChitEvent& event )			{ events.Push( event ); }
-	const grinliz::CDynArray<ChitEvent>& GetEvents()	{ return events; }
 
 	// Hashes based on integer coordinates. No need to call
 	// if they don't change.
 	void AddToSpatialHash( Chit*, int x, int y );
 	void RemoveFromSpatialHash( Chit*, int x, int y );
 	void UpdateSpatialHash( Chit*, int x0, int y0, int x1, int y1 );
-	const grinliz::CDynArray<Chit*>& QuerySpatialHash( const grinliz::Rectangle2F& r, 
-		                                               const Chit* ignoreMe,
-													   bool distanceSort );
+	void QuerySpatialHash(	grinliz::CDynArray<Chit*>* array, 
+							const grinliz::Rectangle2F& r, 
+		                    const Chit* ignoreMe,
+							int itemFilter,
+							bool distanceSort );
 
 private:
 	enum {

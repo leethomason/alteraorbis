@@ -4,6 +4,7 @@
 #include "../xegame/component.h"
 #include "../grinliz/glcontainer.h"
 #include "../grinliz/glrectangle.h"
+#include "../script/battlemechanics.h"
 
 class WorldMap;
 class Engine;
@@ -24,7 +25,8 @@ public:
 	virtual void DoTick( U32 delta );
 	virtual void DoSlowTick();
 	virtual void DebugStr( grinliz::GLString* str );
-	virtual void OnChitMsg( Chit* chit, int id, const ChitEvent* event );
+	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
+	virtual void OnChitEvent( const ChitEvent& event );
 
 private:
 	enum {
@@ -63,6 +65,8 @@ private:
 
 	grinliz::CArray<int, MAX_TRACK> friendList;
 	grinliz::CArray<int, MAX_TRACK> enemyList;
+	grinliz::CDynArray<Chit*>		chitArr;
+	BattleMechanics battleMechanics;
 };
 
 

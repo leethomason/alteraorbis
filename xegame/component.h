@@ -12,6 +12,7 @@ class MoveComponent;
 class Chit;
 class ChitBag;
 class ChitEvent;
+class ChitMsg;
 
 class Component
 {
@@ -30,7 +31,7 @@ public:
 	}
 
 	// fixme: switch to a request/release model?
-	virtual bool NeedsTick()					{ return false; }
+	virtual bool NeedsTick()							{ return false; }
 
 	Chit* ParentChit() { return parentChit; }
 
@@ -39,8 +40,9 @@ public:
 	virtual void DoSlowTick()					{}
 	virtual void DoUpdate()						{}
 	virtual void DebugStr( grinliz::GLString* str )		{}
-	// 'chit' and/or 'event' can be null, depending on event
-	virtual void OnChitMsg( Chit* chit, int id, const ChitEvent* event )	{}
+
+	virtual void OnChitEvent( const ChitEvent& event )			{}
+	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg )	{}
 
 protected:
 	void RequestUpdate();

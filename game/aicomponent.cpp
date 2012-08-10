@@ -69,7 +69,7 @@ void AIComponent::UpdateCombatInfo( const Rectangle2F* _zone )
 	}
 
 	// Sort in by as-the-crow-flies range. Not correct, but don't want to deal with arbitrarily long query.
-	const CDynArray<Chit*>& chitArr = GetChitBag()->QuerySpatialHash( zone, parentChit, true );
+	GetChitBag()->QuerySpatialHash( &chitArr, zone, parentChit, GameItem::CHARACTER, true );
 
 	if ( !chitArr.Empty() ) {
 		// Clear and reset the existing info.
@@ -107,7 +107,7 @@ void AIComponent::DoMelee()
 		return;
 	}
 
-	if ( BattleMechanics::InMeleeZone( engine, parentChit, targetChit ) ) {
+	if ( battleMechanics.InMeleeZone( engine, parentChit, targetChit ) ) {
 		parentChit->GetRenderComponent()->PlayAnimation( ANIM_MELEE );
 	}
 	else {
@@ -120,21 +120,23 @@ void AIComponent::DoMelee()
 }
 
 
-void AIComponent::DoTick( U32 deltaTime )
+void AIComponent::OnChitEvent( const ChitEvent& event )
 {
-	ItemComponent* itemComp = GET_COMPONENT( parentChit, ItemComponent );
-	if ( itemComp ) {
-		const CDynArray<ChitEvent>& events = GetChitBag()->GetEvents();
-		for( int i=0; i<events.Size(); ++i ) {
-			if( events[i].ID() == ChitEvent::AWARENESS ) {
-				const AwarenessChitEvent& event = (const AwarenessChitEvent&) events[i];
-				if ( event.Team() == itemComp->item.primaryTeam ) 
-				{
-					UpdateCombatInfo( &event.Bounds() );
-				}
+	if ( event.ID() == ChitEvent::AWARENESS ) {
+		ItemComponent* itemComp = GET_COMPONENT( parentChit, ItemComponent );
+		if ( itemComp ) {
+			const AwarenessChitEvent& aware = (const AwarenessChitEvent&) event;
+			if ( aware.Team() == itemComp->item.primaryTeam ) 
+			{
+				UpdateCombatInfo( &aware.Bounds() );
 			}
 		}
 	}
+}
+
+
+void AIComponent::DoTick( U32 deltaTime )
+{
 	if ( parentChit->GetRenderComponent() && !parentChit->GetRenderComponent()->AnimationReady() ) {
 		return;
 	}
@@ -170,9 +172,9 @@ void AIComponent::DebugStr( grinliz::GLString* str )
 }
 
 
-void AIComponent::OnChitMsg( Chit* chit, int id, const ChitEvent* event )
+void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {
-	if ( chit == parentChit && id == RENDER_MSG_IMPACT ) {
+	if ( chit == parentChit && msg.ID() == RENDER_MSG_IMPACT ) {
 		
 		RenderComponent* render = parentChit->GetRenderComponent();
 		GLASSERT( render );	// it is a message from the render component, after all.
@@ -180,8 +182,11 @@ void AIComponent::OnChitMsg( Chit* chit, int id, const ChitEvent* event )
 		GLASSERT( inventory );	// need to be  holding a melee weapon. possible the weapon
 								// was lost before impact, in which case this assert should
 								// be removed.
-		GameItem* item = inventory->IsCarrying();
-		GLASSERT( item && item->ToMeleeWeapon() );
+
+		CArray< GameItem*, EL_MAX_METADATA > weapons;
+		inventory->GetWeapons( &weapons );
+		GameItem* item=0;
+		if ( weapons.Size() ) item = weapons[0];
 
 		if ( render && inventory && item && item->ToMeleeWeapon() ) { /* okay */ }
 		else return;
@@ -192,6 +197,6 @@ void AIComponent::OnChitMsg( Chit* chit, int id, const ChitEvent* event )
 
 		engine->particleSystem->EmitPD( "derez", pos, V3F_UP, engine->camera.EyeDir3(), 0 );
 		
-		BattleMechanics::MeleeAttack( engine, parentChit, item );
+		battleMechanics.MeleeAttack( engine, parentChit, item );
 	}
 }

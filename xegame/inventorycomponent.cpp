@@ -41,8 +41,27 @@ GameItem* InventoryComponent::IsCarrying()
 	// Do we have a held item on an "trigger" hardpoint?
 	for( int i=0; i<attached.Size(); ++i ) {
 		if ( StrEqual( attached[i].Hardpoint(), "trigger" )) {
+			GLASSERT( i==0 );	// trigger must be the first hardpoint!
 			return &attached[i];
 		}
 	}
 	return 0;
+}
+
+
+void InventoryComponent::GetWeapons( grinliz::CArray< GameItem*, EL_MAX_METADATA >* weapons )
+{
+	weapons->Clear();
+	for( int i=0; i<EL_MAX_METADATA; ++i ) {
+		if ( hardpoints.Size() > i ) {
+			if ( hardpoints[i].ToWeapon() ) {
+				weapons->Push( &hardpoints[i] );
+			}
+		}
+		else if ( attached.Size() > i ) {
+			if ( attached[i].ToWeapon() ) {
+				weapons->Push( &attached[i] );
+			}
+		}
+	}
 }

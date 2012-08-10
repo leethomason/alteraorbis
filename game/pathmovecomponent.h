@@ -3,6 +3,7 @@
 
 #include "../xegame/component.h"
 #include "../grinliz/glvector.h"
+#include "../grinliz/glcontainer.h"
 #include "gamelimits.h"
 
 class WorldMap;
@@ -28,7 +29,7 @@ public:
 	virtual void OnRemove();
 	virtual bool NeedsTick()					{ return true; }
 	virtual void DoTick( U32 delta );
-	virtual void OnChitMsg( Chit* chit, int id, const ChitEvent* event );
+	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
 
 	void QueueDest( grinliz::Vector2F dest,
 					float rotation = -1.f );		// if specified, the rotation we wish to get to
@@ -99,6 +100,7 @@ private:
 	bool isStuck;
 	bool isMoving;
 
+	grinliz::CDynArray< Chit* > chitArr;
 	grinliz::Vector2F path[MAX_MOVE_PATH];
 };
 

@@ -119,11 +119,21 @@ void Chit::DoTick( U32 delta )
 }
 
 
-void Chit::SendMessage( int msgID, Component* exclude, const ChitEvent* event )
+void Chit::OnChitEvent( const ChitEvent& event )
+{
+	for( int i=0; i<NUM_SLOTS; ++i ) {
+		if ( slot[i] ) {
+			slot[i]->OnChitEvent( event );
+		}
+	}
+}
+
+
+void Chit::SendMessage( const ChitMsg& msg, Component* exclude )
 {
 	// Listeners.
 	for( int i=0; i<listeners.Size(); ++i ) {
-		listeners[i]->OnChitMsg( this, msgID, event );
+		listeners[i]->OnChitMsg( this, msg );
 	}
 
 	int i=0;
@@ -133,7 +143,7 @@ void Chit::SendMessage( int msgID, Component* exclude, const ChitEvent* event )
 			cListeners.SwapRemove(i);
 			continue;
 		}
-		bool okay = target->CarryMsg( cListeners[i].componentID, this, msgID, event );
+		bool okay = target->CarryMsg( cListeners[i].componentID, this, msg );
 		if ( !okay ) {
 			// dead link
 			cListeners.SwapRemove(i);
@@ -145,17 +155,17 @@ void Chit::SendMessage( int msgID, Component* exclude, const ChitEvent* event )
 	// Components
 	for( int i=0; i<NUM_SLOTS; ++i ) {
 		if ( slot[i] && slot[i] != exclude ) {
-			slot[i]->OnChitMsg( this, msgID, event );
+			slot[i]->OnChitMsg( this, msg );
 		}
 	}
 }
 
 
-bool Chit::CarryMsg( int componentID, Chit* src, int msgID, const ChitEvent* event )
+bool Chit::CarryMsg( int componentID, Chit* src, const ChitMsg& msg )
 {
 	for( int i=0; i<NUM_SLOTS; ++i ) {
 		if ( slot[i] && slot[i]->ID() == componentID ) {
-			slot[i]->OnChitMsg( src, msgID, event );
+			slot[i]->OnChitMsg( src, msg );
 			return true;
 		}
 	}

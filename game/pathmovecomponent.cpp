@@ -4,6 +4,7 @@
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/rendercomponent.h"
 #include "../xegame/chitbag.h"
+#include "../xegame/itemcomponent.h"
 
 #include "../engine/loosequadtree.h"
 
@@ -37,7 +38,7 @@ void PathMoveComponent::OnRemove()
 
 
 
-void PathMoveComponent::OnChitMsg( Chit* chit, int id, const ChitEvent* event )
+void PathMoveComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {
 }
 
@@ -95,7 +96,7 @@ void PathMoveComponent::ComputeDest()
 	bool okay = map->CalcPath( posVec, dest.pos, path, &nPathPos, MAX_MOVE_PATH, &cost, pathDebugging ); 
 	if ( !okay ) {
 		SetNoPath();
-		parentChit->SendMessage( PATHMOVE_MSG_DESTINATION_BLOCKED, this, 0 ); 
+		parentChit->SendMessage( ChitMsg( PATHMOVE_MSG_DESTINATION_BLOCKED ), this ); 
 	}
 	else {
 		GLASSERT( nPathPos > 0 );
@@ -242,7 +243,7 @@ bool PathMoveComponent::AvoidOthers( U32 delta )
 	bounds.Set( pos2.x-PATH_AVOID_DISTANCE, pos2.y-PATH_AVOID_DISTANCE, 
 		        pos2.x+PATH_AVOID_DISTANCE, pos2.y+PATH_AVOID_DISTANCE );
 	
-	const CDynArray<Chit*>& chitArr = GetChitBag()->QuerySpatialHash( bounds, parentChit, false );
+	GetChitBag()->QuerySpatialHash( &chitArr, bounds, parentChit, GameItem::CHARACTER, false );
 
 	if ( !chitArr.Empty() ) {
 		Vector3F pos3    = { pos2.x, 0, pos2.y };
@@ -401,7 +402,7 @@ void PathMoveComponent::DoTick( U32 delta )
 				GLOUTPUT(( "Dest reached. squatted=%s\n", squattingDest ? "true" : "false" ));
 #endif
 				// actually reached the end!
-				parentChit->SendMessage( PATHMOVE_MSG_DESTINATION_REACHED, this, 0 );
+				parentChit->SendMessage( ChitMsg(PATHMOVE_MSG_DESTINATION_REACHED), this );
 				SetNoPath();
 			}
 			else {

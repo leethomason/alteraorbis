@@ -459,7 +459,7 @@ void WorldMap::CalcZone( int zx, int zy )
 		// and null out all the pointrs to it.
 		for( int y=zy; y<zy+ZONE_SIZE; ++y ) {
 			for( int x=zx; x<zx+ZONE_SIZE; ++x ) {
-				Region* r = grid[INDEX(zx,zy)].region;
+				Region* r = grid[INDEX(x,y)].region;
 				if ( IsRegionOrigin( r, x, y ) ) {
 					DeleteRegion( x, y );
 				}
