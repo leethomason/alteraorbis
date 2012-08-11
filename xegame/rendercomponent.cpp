@@ -23,6 +23,7 @@ RenderComponent::RenderComponent( Engine* _engine, const char* _asset, int _flag
 		resource[i] = 0;
 		model[i] = 0;
 	}
+	radiusOfBase = 0;
 }
 
 
@@ -211,14 +212,24 @@ void RenderComponent::DoTick( U32 deltaTime )
 
 float RenderComponent::RadiusOfBase()
 {
-	// fixme: cache
-	float radius = 0;
-	if ( resource ) {
+	if ( resource[0] && radiusOfBase == 0 ) {
 		const Rectangle3F& b = resource[0]->AABB();
-		radius = Mean( b.SizeX(), b.SizeZ() );
-		radius = Min( radius, MAX_BASE_RADIUS );
+		radiusOfBase = Mean( b.SizeX(), b.SizeZ() );
+		radiusOfBase = Min( radiusOfBase, MAX_BASE_RADIUS );
 	}
-	return radius;
+	return radiusOfBase;
+}
+
+
+const char* RenderComponent::GetMetaData( int i )
+{
+	GLASSERT( i >= 0 && i < EL_MAX_METADATA );
+	if ( resource[0] ) {
+		const char* name = resource[0]->header.metaData[i].name.c_str();
+		if ( name && *name )
+			return name;
+	}
+	return 0;
 }
 
 

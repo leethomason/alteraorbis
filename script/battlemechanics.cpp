@@ -8,6 +8,7 @@
 #include "../xegame/chit.h"
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/rendercomponent.h"
+#include "../xegame/itemcomponent.h"
 
 #include "../grinliz/glvector.h"
 #include "../grinliz/glgeometry.h"
@@ -17,6 +18,16 @@
 #include "../engine/particle.h"
 
 using namespace grinliz;
+
+
+/*static*/ int BattleMechanics::PrimaryTeam( Chit* src )
+{
+	int primaryTeam = -1;
+	if ( src->GetItemComponent() ) {
+		primaryTeam = src->GetItemComponent()->item.primaryTeam;
+	}
+	return primaryTeam;
+}
 
 
 bool BattleMechanics::InMeleeZone(	Engine* engine,
@@ -63,26 +74,26 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, GameItem* weapon )
 		return;
 	}
 	weapon->Use( absTime );
+	int primaryTeam = PrimaryTeam( src );
 
 	// Get origin and direction of melee attack,
-	// then send messages to everyone hit.
-	// FIXME:
-	// Use the chitBag query, which avoids smacking
-	// weapons and such (good) but may not account
-	// for objects in air and such (bad...)
-	// Does establish that everything in the chitbag
-	// query is something that can be hit by melee/etc.
-	// FIXME: may never be hitting world objects (blocks and such)
-	// that aren't in the ChitBag
+	// then send messages to everyone hit. Everything
+	// with a spatial component is tracked by the 
+	// chitBag, so it's a very handly query.
 
 	Vector2F srcPos = src->GetSpatialComponent()->GetPosition2D();
 	Rectangle2F b;
 	b.min = srcPos; b.max = srcPos;
 	b.Outset( MELEE_RANGE + MAX_BASE_RADIUS );
-	chitBag->QuerySpatialHash( &hashQuery, b, src, GameItem::CHARACTER, false );
+	chitBag->QuerySpatialHash( &hashQuery, b, src, 0, false );
 
 	for( int i=0; i<hashQuery.Size(); ++i ) {
 		Chit* target = hashQuery[i];
+
+		// Melee damage is chaos. Don't hit your own team.
+		if ( PrimaryTeam( target ) == primaryTeam ) {
+			continue;
+		}
 
 		if ( InMeleeZone( engine, src, target )) {
 			// FIXME: account for armor, shields, etc. etc.

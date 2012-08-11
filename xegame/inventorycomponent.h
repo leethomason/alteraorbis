@@ -24,7 +24,10 @@ public:
 
 	virtual void DebugStr( grinliz::GLString* str );
 
-	void AddToInventory( const GameItem& item );
+	virtual void OnAdd( Chit* chit );
+	virtual void OnRemove();
+
+	void AddToInventory( const GameItem& item, bool equip );
 	void RemoveFromInventory( int slot );
 
 	int GetItemsOfType( int flags, grinliz::CDynArray<GameItem*>* arr ) const;
@@ -35,14 +38,14 @@ public:
 	// Weapon in/is hand first. Followed by intrinsics.
 	void GetWeapons( grinliz::CArray< GameItem*, EL_MAX_METADATA >* weapons );
 
+	static const char* HardpointFlagToName( int f );
+	static int HardpointNameToFlag( const char* name );
+
 private:
-	// EL_MAX_METADATA is also the maximum number of hardpoints.
-	// Therefore the first EL_MAX_METADATA slots are items being
-	// carried, and map to the hardpoint, and slots beyond that
-	// are carried in the pack.
-	grinliz::CArray< GameItem, EL_MAX_METADATA > hardpoints;
-	grinliz::CArray< GameItem, EL_MAX_METADATA > attached;
-	grinliz::CDynArray< GameItem >				 pack;
+	int hardpoints;
+	int hardpointsInUse;
+	grinliz::CDynArray< GameItem > equippedItems;
+	grinliz::CDynArray< GameItem > packItems;
 };
 
 #endif // INVENTORY_COMPONENT_INCLUDED

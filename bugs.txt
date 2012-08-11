@@ -1,11 +1,17 @@
 - combat test scene
+	- string interning!
 	- properly hook up items and such, so that items, health, all be driven correctly
 	- data driven item creation
 	- buttons to select scenario, load items
-	- melee attack standing too close 
-	- avoiding while pathing doesn't look quite correct
 	- leaving guy standing after battle
-	- need left/right team, not species based
+	- removing unit "clumping" (3yr old soccer team). Basic formation?
+	- unique look for units so teams can be distinguished
+	- impact (light/heavy)
+	- animation speed isn't correct
+
+	X melee attack standing too close 
+	X avoiding while pathing doesn't look quite correct
+	X need left/right team, not species based
 	X animation/lack of making me crazy. What plan?
 	X particle effect for melee strike not "connected" to character
 	X item definition: one big wad of data? handle "inherited items"?

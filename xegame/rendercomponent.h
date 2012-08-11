@@ -40,6 +40,7 @@ public:
 	// the model so it doesn't walk into walls or other models.
 	float	RadiusOfBase();
 	int		GetFlags() const { return flags; }
+	const char* GetMetaData( int i );
 	bool	GetMetaData( const char* name, grinliz::Matrix4* xform );
 	// Is the animation ready to change?
 	bool	AnimationReady() const;
@@ -57,12 +58,15 @@ private:
 	AnimationType CalcAnimation() const;
 	SpatialComponent* SyncToSpatial();	// this a scary function: location is stored in both the model and the spatialcomponent
 
-	Engine* engine;
 	enum { NUM_MODELS = EL_MAX_METADATA+1 };	// slot[0] is the main model; others are hardpoint attach
-	const ModelResource* resource[ NUM_MODELS ];
-	Model* model[ NUM_MODELS ];
-	grinliz::CStr<EL_RES_NAME_LEN> metaDataName[EL_MAX_METADATA];
-	int flags;
+
+	Engine* engine;
+	int		flags;
+	float	radiusOfBase;
+
+	const ModelResource*			resource[ NUM_MODELS ];
+	Model*							model[ NUM_MODELS ];
+	grinliz::CStr<EL_RES_NAME_LEN>	metaDataName[EL_MAX_METADATA];
 };
 
 #endif // RENDER_COMPONENT_INCLUDED

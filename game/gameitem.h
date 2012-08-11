@@ -16,14 +16,38 @@
 	have a GameItem in an ItemComponent.
 
 	Characters (and some other things) *have* items, in an inventory.
-	- Some are built in: hands, claws, pincers. These things are hardpoints.
+	- Some are built in: hands, claws, pincers. These may be hardpoints.
 	- Some attach to hardpoints: shields
 	- Some over-ride the built in AND attach to hardpoints: gun, sword
-	- Some are carried in the back pack
-	
+	- Some are carried in the pack
+		
+		Examples:
+			- Human
+				- "hand" is an item and trigger hardpoint.
+				- "sword" overrides hand and attaches to trigger hardpoint
+				- "shield" attaches to the shield harpoint (but there is no
+				   item that it overrides)
+				- "amulet" is carried, doesn't render, but isn't in pack.
+			- Mantis
+				- "pincer" is an item, but not a hardpoint
+
+		Leads to:
+			INTRINSIC_AT_HARDPOINT		hand
+			INTRINSIC_FREE				pincer
+			HELD_AT_HARDPOINT			sword, shield
+			HELD_FREE					amulet
+
+	Hardpoints
+	- The possible list of hardpoints lives in the GameItem (as bit flags)
+	- The Render component exposes a list of metadata is supports
+	- The Inventory component translates between the metadata and hardpoints
+
 	Constraints:
 	- There can only be one melee weapon / attack. This simplies the animation,
 	  and not having to track which melee hit. (This could be fixed, of course.)
+	- An item can only attach to one hardpoint. It would be good if it could attach
+	  to either left or right hands, for example.
+	  
 */
 
 class Chit;
@@ -54,10 +78,9 @@ class IRangedWeaponItem : virtual public IWeaponItem
 class GameItem : public IMeleeWeaponItem, public IRangedWeaponItem
 {
 public:
-	GameItem( int _flags=0, const char* _name=0, const char* _res=0, const char* _hardpoint=0 ) :
+	GameItem( int _flags=0, const char* _name=0, const char* _res=0 ) :
 		name( _name ),
 		resource( _res ),
-		hardpoint( _hardpoint ),
 		flags( _flags ),
 		primaryTeam( 0 ),
 		rounds( 10 ),
@@ -71,20 +94,33 @@ public:
 
 	const char* Name() const			{ return name.c_str(); }
 	const char* ResourceName() const	{ return resource.c_str(); }
-	const char* Hardpoint() const		{ return hardpoint.c_str(); }
+
+	int AttachmentFlags() const			{ return flags & (HELD|HARDPOINT); }
+	int HardpointFlags() const			{ return flags & (HARDPOINT_TRIGGER|HARDPOINT_SHIELD); }
 
 	enum {
+		// Type of the item
 		CHARACTER			= (1),
 		MELEE_WEAPON		= (1<<1),
 		RANGED_WEAPON		= (1<<2),
 
-		APPENDAGE			= (1<<3),	// this is built in: hands, claws, etc. Appendage is a hard point.
-		HELD				= (1<<4),	// requires an appendage to use, and overrides that appendage
+		// How items are equipped. These 2 flags are much clearer as the descriptive values below.
+		HELD				= (1<<3),
+		HARDPOINT			= (1<<4),
+		PACK				= (1<<5),	// in inventory; not carried or activated
+
+		INTRINSIC_AT_HARDPOINT	= HARDPOINT,		//	a hand. built in, but located at a hardpoint
+		INTRINSIC_FREE			= 0,				//  pincer. built in, no hardpoint
+		HELD_AT_HARDPOINT		= HARDPOINT | HELD,	// 	sword, shield. at hardpoint, overrides built in.
+		HELD_FREE				= HELD,				//	amulet, rind. held, put not at a hardpoint, and not rendered
+
+		// The set of hardpoints	
+		HARDPOINT_TRIGGER	= (1<<6),	// this attaches to the trigger hardpoint
+		HARDPOINT_SHIELD	= (1<<7),	// this attaches to the shield hardpoint
 	};
 
-	grinliz::CStr< MAX_ITEM_NAME >		name;
-	grinliz::CStr< EL_RES_NAME_LEN >	resource;
-	grinliz::CStr< EL_RES_NAME_LEN >	hardpoint;
+	grinliz::CStr< MAX_ITEM_NAME >		name;		// name of the item 
+	grinliz::CStr< EL_RES_NAME_LEN >	resource;	// resource used to  render the item
 	int flags;
 	int	primaryTeam;		// who owns this items
 	int rounds;

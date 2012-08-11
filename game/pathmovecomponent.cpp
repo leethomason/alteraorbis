@@ -294,25 +294,21 @@ bool PathMoveComponent::AvoidOthers( U32 delta )
 					// Dang squatter.
 					if ( pathPos < nPathPos-1 ) {
 						++pathPos;	// go around
-						//break;		// and stop avoiding since we are changing dest.
 					}
 					else {
 						squattingDest = true;
 					}
 				}
-				//else 
-				{
-					float mag = Min( r-d, Travel( MOVE_SPEED, delta ) ); 
-					normal.Multiply( mag );
-					avoid += normal;
+				float mag = Min( r-d, Travel( MOVE_SPEED, delta ) ); 
+				normal.Multiply( mag );
+				avoid += normal;
 				
-					// Apply a sidestep vector so they don't just push.
-					if ( alignment > 0.7f ) {
-						Vector3F right;
-						CrossProduct( destNormal, UP, &right );
-						avoid += right * (0.5f*mag );
-					}	
-				}
+				// Apply a sidestep vector so they don't just push.
+				if ( alignment > 0.7f ) {
+					Vector3F right;
+					CrossProduct( destNormal, UP, &right );
+					avoid += right * (0.5f*mag );
+				}	
 			}
 		}
 		avoid.y = 0;	// be sure.

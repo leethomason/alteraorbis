@@ -68,7 +68,7 @@ void ChitBag::DoTick( U32 delta )
 
 	for( int i=0; i<events.Size(); ++i ) {
 		const ChitEvent& e = events[i];
-		QuerySpatialHash( &hashQuery, e.AreaOfEffect(), 0, 0, false );
+		QuerySpatialHash( &hashQuery, e.AreaOfEffect(), 0, e.GetItemFilter(), false );
 		for( int j=0; j<hashQuery.Size(); ++j ) {
 			hashQuery[j]->OnChitEvent( e );
 		}

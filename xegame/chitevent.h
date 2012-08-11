@@ -17,6 +17,7 @@ private:
 protected:
 	int id;		// the message sent
 	int data;	// if there is obvious data - not warranting a sub-class - put it here
+	int itemFilter;
 	grinliz::Rectangle2F bounds2F;
 
 	union {
@@ -26,7 +27,10 @@ protected:
 public:
 	ChitEvent( const grinliz::Rectangle2F& areaOfEffect,
 		       int _id, int _data=0 ) 
-		: aoe( areaOfEffect ), id( _id ), data( _data ) {}
+		: aoe( areaOfEffect ), id( _id ), data( _data ), itemFilter(0) {}
+
+	void SetItemFilter( int flag )	{ itemFilter = flag; }
+	int  GetItemFilter() const		{ return itemFilter; }
 	
 	const grinliz::Rectangle2F& AreaOfEffect() const { return aoe; }
 	int ID() const			{ return id; }

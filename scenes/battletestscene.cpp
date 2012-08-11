@@ -240,7 +240,8 @@ void BattleTestScene::GoScene()
 	}
 
 	// Trigger the AI to do something.
-	AwarenessChitEvent event( leftMoB, b );
+	AwarenessChitEvent event( LEFT, b );
+	event.SetItemFilter( GameItem::CHARACTER );
 	chitBag.QueueEvent( event );
 }
 
@@ -278,29 +279,29 @@ void BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int 
 	GET_COMPONENT( chit, HealthComponent )->SetHealth( 100, 100 );
 
 	if ( type == HUMAN ) {
-		GameItem hand( GameItem::MELEE_WEAPON | GameItem::APPENDAGE );
-		inv->AddToInventory( hand );
+		GameItem hand( GameItem::MELEE_WEAPON | GameItem::INTRINSIC_AT_HARDPOINT | GameItem::HARDPOINT_TRIGGER );
+		inv->AddToInventory( hand, true );
 
 		if( loadout == MELEE_WEAPON ) {
-			GameItem knife( GameItem::MELEE_WEAPON | GameItem::HELD,
-						  "testknife", "testknife", "trigger" );
-			inv->AddToInventory( knife );
+			GameItem knife( GameItem::MELEE_WEAPON | GameItem::HELD_AT_HARDPOINT | GameItem::HARDPOINT_TRIGGER,
+						  "testknife", "testknife" );
+			inv->AddToInventory( knife, true );
 		}
 		else if ( loadout == PISTOL ) {
-			GameItem gun( GameItem::MELEE_WEAPON | GameItem::RANGED_WEAPON | GameItem::HELD,
-						  "testgun", "testgun", "trigger" );
-			inv->AddToInventory( gun );
+			GameItem gun( GameItem::MELEE_WEAPON | GameItem::RANGED_WEAPON | GameItem::HELD_AT_HARDPOINT | GameItem::HARDPOINT_TRIGGER,
+						  "testgun", "testgun" );
+			inv->AddToInventory( gun, true );
 		}
 	}
 	else if ( type == BALROG ) {
 		// FIXME kinetic damage bonus
-		GameItem claw( GameItem::MELEE_WEAPON | GameItem::APPENDAGE );
-		inv->AddToInventory( claw );
+		GameItem claw( GameItem::MELEE_WEAPON | GameItem::INTRINSIC_AT_HARDPOINT | GameItem::HARDPOINT_TRIGGER );
+		inv->AddToInventory( claw, true );
 	}
 	else if ( type == MANTIS ) {
 		// FIXME kinetic damage bonus
-		GameItem pincer( GameItem::MELEE_WEAPON | GameItem::APPENDAGE );
-		inv->AddToInventory( pincer );
+		GameItem pincer( GameItem::MELEE_WEAPON | GameItem::INTRINSIC_FREE | GameItem::HARDPOINT_TRIGGER );
+		inv->AddToInventory( pincer, true );
 	}
 }
 

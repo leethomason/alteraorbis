@@ -34,7 +34,6 @@ public:
 	void QueueDest( grinliz::Vector2F dest,
 					float rotation = -1.f );		// if specified, the rotation we wish to get to
 	void QueueDest( Chit* targetChit );
-	//bool SetActive( bool active );
 
 	void SetPathDebugging( bool d )	{ pathDebugging = d; }
 

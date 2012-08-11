@@ -21,6 +21,9 @@ public:
 	bool InMeleeZone( Engine* engine,
 					  Chit* src,
 					  Chit* target );
+
+	static int PrimaryTeam( Chit* src );
+
 private:
 	grinliz::CDynArray<Chit*> hashQuery;
 };

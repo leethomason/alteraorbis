@@ -6,32 +6,108 @@
 using namespace grinliz;
 
 
+void InventoryComponent::OnAdd( Chit* chit )
+{
+	Component::OnAdd( chit );
+	hardpoints = -1;
+	hardpointsInUse = 0;
+	equippedItems.Clear();
+	packItems.Clear();
+}
+
+
+void InventoryComponent::OnRemove()
+{
+	Component::OnRemove();
+}
+
+
 void InventoryComponent::DebugStr( grinliz::GLString* str )
 {
 	str->Format( "[Inventory] " );
 }
 
 
-void InventoryComponent::AddToInventory( const GameItem& item )
+const char* InventoryComponent::HardpointFlagToName( int f )
 {
-	if ( item.flags & GameItem::APPENDAGE ) {
-		hardpoints.Push( item );
-	}
-	else if ( item.flags & GameItem::HELD ) {
-		// FIXME: attach to the correct hardpoint, not just any.
-		GLASSERT( attached.Size() < hardpoints.Size() );
-		attached.Push( item );
-		GLASSERT( !item.resource.empty() );
-		GLASSERT( !item.hardpoint.empty() );
-		
-		RenderComponent* render = parentChit->GetRenderComponent();
-		GLASSERT( render );
-		if ( render ) {
-			render->Attach( item.Hardpoint(), item.ResourceName() );
+	if ( f & GameItem::HARDPOINT_TRIGGER )
+		return "trigger";
+	else if ( f & GameItem::HARDPOINT_SHIELD )
+		return "shield";
+	return 0;
+}
+
+
+int InventoryComponent::HardpointNameToFlag( const char* name )
+{
+	if ( StrEqual( name, "trigger" ) ) 
+		return GameItem::HARDPOINT_TRIGGER;
+	else if ( StrEqual( name, "shield" ))
+		return GameItem::HARDPOINT_SHIELD;
+	return 0;
+}
+
+
+void InventoryComponent::AddToInventory( const GameItem& item, bool equip )
+{
+	RenderComponent* rc = parentChit->GetRenderComponent();
+	if ( hardpoints == -1 ) {
+		hardpoints = 0;
+		hardpointsInUse = 0;
+		if ( rc ) {
+			for( int i=0; i<EL_MAX_METADATA; ++i ) {
+				const char* name = rc->GetMetaData(i);
+				int h = HardpointNameToFlag( name );
+				GLASSERT( h );
+				hardpoints |= GameItem::HARDPOINT_TRIGGER;
+			}
 		}
 	}
-	else {
-		pack.Push( item );
+	GLASSERT( hardpoints != -1 );
+	if ( hardpoints == -1 ) return;
+
+	int attachment = item.AttachmentFlags();
+	bool equipped = false;
+	
+	if ( attachment == GameItem::INTRINSIC_AT_HARDPOINT ) {
+		GLASSERT( item.HardpointFlags() & hardpoints );	// be sure the attachment point and hardpoint line up.
+		equippedItems.Push( item );
+		equipped = true;
+	}
+	else if ( attachment == GameItem::INTRINSIC_FREE ) {
+		equippedItems.Push( item );
+		equipped = true;
+	}
+	else if ( attachment == GameItem::HELD_AT_HARDPOINT ) {
+		if ( equip ) {
+			// check that the needed hardpoint is free.
+			if (    (( hardpoints & item.HardpointFlags() ) !=0 )			// does the hardpoint exist?
+				 && (( hardpointsInUse & item.HardpointFlags() ) == 0 ) )	// is the hardpoint available?
+			{
+				hardpointsInUse |= item.HardpointFlags();
+				equippedItems.Push( item );
+				equipped = true;
+
+				GLASSERT( rc );
+				if ( rc ) {
+					const char* hardpoint = HardpointFlagToName( item.HardpointFlags() );
+					GLASSERT( hardpoint );
+					rc->Attach( hardpoint, item.ResourceName() );
+				}
+			}
+		}
+		if ( !equipped ) {
+			packItems.Push( item );
+		}
+	}
+	else if ( attachment == GameItem::HELD_FREE ) {
+		if ( equip ) {
+			equippedItems.Push( item );
+			equipped = true;
+		}
+		else {
+			packItems.Push( item );
+		}
 	}
 }
 
@@ -39,11 +115,15 @@ void InventoryComponent::AddToInventory( const GameItem& item )
 GameItem* InventoryComponent::IsCarrying()
 {
 	// Do we have a held item on an "trigger" hardpoint?
-	for( int i=0; i<attached.Size(); ++i ) {
-		if ( StrEqual( attached[i].Hardpoint(), "trigger" )) {
-			GLASSERT( i==0 );	// trigger must be the first hardpoint!
-			return &attached[i];
+	if ( hardpointsInUse & GameItem::HARDPOINT_TRIGGER ) {
+		for( int i=0; i<equippedItems.Size(); ++i ) {
+			if (    equippedItems[i].AttachmentFlags() == GameItem::HELD_AT_HARDPOINT
+				 && equippedItems[i].HardpointFlags() == GameItem::HARDPOINT_TRIGGER ) 
+			{
+				return &equippedItems[i];
+			}
 		}
+		GLASSERT( 0 );	// the hardpoint is in use; it should have been found.
 	}
 	return 0;
 }
@@ -53,14 +133,19 @@ void InventoryComponent::GetWeapons( grinliz::CArray< GameItem*, EL_MAX_METADATA
 {
 	weapons->Clear();
 	for( int i=0; i<EL_MAX_METADATA; ++i ) {
-		if ( hardpoints.Size() > i ) {
-			if ( hardpoints[i].ToWeapon() ) {
-				weapons->Push( &hardpoints[i] );
+		GameItem* item = &equippedItems[i];
+		if ( item->ToWeapon() ) {
+			if ( item->AttachmentFlags() == GameItem::INTRINSIC_AT_HARDPOINT ) {
+				// may  be overridden by a held item.
+				if ( hardpointsInUse & item->HardpointFlags() ) {
+					// yep; holding something else at this slot.
+				}
+				else {
+					weapons->Push( item );
+				}
 			}
-		}
-		else if ( attached.Size() > i ) {
-			if ( attached[i].ToWeapon() ) {
-				weapons->Push( &attached[i] );
+			else {
+				weapons->Push( item );
 			}
 		}
 	}
