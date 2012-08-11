@@ -4,7 +4,7 @@ OBJECT world
 kids 1
 OBJECT group
 name "mantis"
-loc 0.0059875 0.22399 0.0749789
+loc 0.00125294 0.22399 0.0749789
 kids 10
 OBJECT poly
 name "head"

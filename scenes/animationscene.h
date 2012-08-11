@@ -46,7 +46,7 @@ private:
 
 	grinliz::CDynArray< const ModelResource* > resourceArr;
 	Model* model[ NUM_MODELS ];
-	Model* gunModel;
+	Model* triggerModel;
 
 	int currentModel;
 	int  currentBone;
@@ -62,7 +62,8 @@ private:
 
 	gamui::ToggleButton ortho;
 	gamui::ToggleButton instance;
-	gamui::ToggleButton particle, gun;
+	enum { PARTICLE, GUN, KNIFE, AX, NUM_TRIGGERS };
+	gamui::ToggleButton triggerToggle[NUM_TRIGGERS];
 
 	gamui::TextLabel boneName, animName, modelName;
 	gamui::TextLabel pixelUnitRatio;

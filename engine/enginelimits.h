@@ -38,7 +38,7 @@ enum {
 	EL_MAX_INDEX_IN_MODEL	= EL_MAX_INDEX_IN_GROUP * EL_MAX_MODEL_GROUPS,
 	EL_ALLOCATED_MODELS		= 4000,
 	EL_FILE_STRING_LEN		= 24,
-	EL_MAX_METADATA			= 4,		// both animation and model
+	EL_MAX_METADATA			= 6,		// both animation and model
 	EL_MAX_BONES			= 12,		// could be 16?
 	EL_MAX_MAP_SIZE			= 1024,		// used for allocating hash tables and lookup structures
 

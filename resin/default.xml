@@ -52,19 +52,24 @@
   </animation>
   <animation filename="mantis/mantis.scml" assetName="mantisAnimation" pur="340.5" >
   </animation>
-  <!--
-  <animation filename="balrog/balrog.scml" assetName="balrogAnimation" pur="235.9">
+  <animation filename="balrog/balrog.scml" assetName="balrogAnimation" pur="339">
   </animation>
-  -->
-
+ 
   <!-- Tactical Sprite models are centered at (0,0,0) -->
   <model filename="human.ac" modelName="humanFemale" animation="humanFemaleAnimation" origin="1 0 0" shading="flat" polyRemoval="pre">
     <meta name="trigger" pos="0.84 0.43 -0.003" rot="1 0 0 90" boneName="arm.lower.right" />
     <meta name="target"  pos="1 0.68 0" />
   </model>
-  <model filename="mantis.ac" animation="mantisAnimation" shading="flat" polyRemoval="pre"> 
+  <model filename="mantis.ac" animation="mantisAnimation" shading="flat" polyRemoval="pre">
+    <meta name="target"  pos="0 0.30 0" />
   </model>  
-  <model filename="balrog.ac" shading="flat" polyRemoval="pre">
+  <model filename="balrog.ac" animation="balrogAnimation" shading="flat" polyRemoval="pre">
+    <meta name="trigger" pos="0.40 0.45 0.004" rot="1 0 0 90" boneName="arm.lower.left" />
+    <meta name="target"  pos="0 1.40 0" />
+    <meta name="particle.0.hfire"  pos="0.40 0.45 0"   boneName="arm.lower.left" />
+    <meta name="particle.1.hfire"  pos="-0.40 0.45 0"  boneName="arm.lower.right" />
+    <meta name="particle.2.hfire"  pos="0 1.87 -0.10"  boneName="head" />
+    <meta name="particle.3.hsmoke" pos="0 1.87 -0.10"  boneName="head" />
   </model>
   
   <model filename="human.ac"        modelName="humanMale"   origin="0 0 0" shading="crease" polyRemoval="pre" />
@@ -85,8 +90,9 @@
   <model filename="alltree.ac" modelName="cactus2"  origin="12 0 0"  shading="smooth" polyRemoval="pre" />
   <model filename="alltree.ac" modelName="stump"    origin="0 0 2"  shading="smooth" polyRemoval="pre" />
 
-  <model filename="weapons.ac"          modelName="testgun"   origin="0 0 0"        shadowCaster="false" />
+  <model filename="weapons.ac"          modelName="testgun"     origin="0 0 0"      shadowCaster="false" />
   <model filename="weapons.ac"          modelName="testknife"   origin="0.20 0 0"   shadowCaster="false" />
+  <model                                filename="ax.ac"        origin="0 0 0"      shadowCaster="true" />
   
   <model filename="chess_weapons.ac"    modelName="RAY-1"        origin="0 0 0"/>
   <model filename="chess_weapons.ac"    modelName="PLS-1"        origin="1 0 0"/>
