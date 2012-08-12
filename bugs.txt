@@ -33,7 +33,7 @@
 
 	- serialization
 	- hesitation when near melee target (probably squatted destination code kicking in)
-	  (possibly shader kicking in: never scene it happen twice)
+	  (possibly shader kicking in: never seen it happen twice)
 	- error in ray-cast: detecting a 'tree' where it shouldn't (near the head of the prime)
 	- add rez and de-rez effect for chits
 
@@ -47,29 +47,27 @@
 - shadows should be part of space-tree bounds
 - memory pool everything in the chit/component system
 - analyze/optimize what causes component update: DoTick(), etc. Likely many DoTicks() getting called that aren't needed. (especially rendering...)
+- pack animation bone info into shaders
 
 X particle test scene
 	X alpha processing for additive blending
-	- particle groups (ex: fire)
+	D particle groups (ex: fire)
 
-
-** LOW PRI **
-- rotation: in spatial component? Matrix or Quat?
 
 ** ECR **
-
-- ECR: proper rotation support
-- feature: Animation
-	- figure out animation needs (standing, walking, sidestep, shooting, etc.)
-	- define skeletal animation export
-	- modify shaders
-	- blend animations
 
 ** Defer **
 - particles that aren't quads (beziers)
 
 ----------- FIXED -------------
 
+X ECR: proper rotation support
+X feature: Animation
+	X figure out animation needs (standing, walking, sidestep, shooting, etc.)
+	X define skeletal animation export
+	X modify shaders
+	X blend animations
+X rotation: in spatial component? Matrix or Quat?
 X NavTest-1 is broken. More container fallout. And once again an existing bug
   revealed by tighter container code.
 X container to support copy semantics

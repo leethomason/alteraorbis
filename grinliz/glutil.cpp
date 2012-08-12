@@ -27,36 +27,3 @@ distribution.
 #include <stdarg.h>
 #include "glutil.h"
 
-
-float grinliz::gU8ToFloat[256];
-
-
-namespace grinliz
-{
-	class U8ToFloatInit
-	{
-	  public:
-		U8ToFloatInit() {
-			for ( int i=0; i<256; ++i )
-				gU8ToFloat[i] = (float)i / 255.f;
-		}
-	};
-};
-
-static grinliz::U8ToFloatInit u8ToFloatInit;
-
-void grinliz::SwapBufferBE16( U16* buffer, int size )
-{
-	for( int i=0; i<size; ++i ) {
-		*buffer = SwapBE16( *buffer );
-		buffer++;
-	}
-}
-
-void grinliz::SwapBufferBE32( U32* buffer, int size )
-{
-	for( int i=0; i<size; ++i ) {
-		*buffer = SwapBE32( *buffer );
-		buffer++;
-	}
-}

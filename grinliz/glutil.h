@@ -208,43 +208,7 @@ inline long LRintf( float val)
 }
 
 
-extern float gU8ToFloat[256];
-
-/// Normalized U8 to float; maps [0,255] to [0.0f,1.0f]
-inline float U8ToFloat( U8 v )
-{
-	return gU8ToFloat[v];
-}
-
-#if defined(__hppa__) || \
-    defined(__m68k__) || defined(mc68000) || defined(_M_M68K) || \
-    (defined(__MIPS__) && defined(__MISPEB__)) || \
-    defined(__ppc__) || defined(__POWERPC__) || defined(_M_PPC) || \
-    defined(__sparc__)
-	#define GRINLIZ_BIG_ENDIAN
-#else
-	#define GRINLIZ_LITTLE_ENDIAN
-#endif
-
-inline U16 Swap16( U16 x ) { return ((x<<8)|(x>>8)); }
-inline U32 Swap32( U32 x ) { return ((x<<24)|((x<<8)&0x00FF0000)|((x>>8)&0x0000FF00)|(x>>24)); }
-
-#ifdef GRINLIZ_LITTLE_ENDIAN
-	inline U16 SwapLE16( U16 x )	{ return x; }
-	inline U32 SwapLE32( U32 x )	{ return x; }
-	inline U16 SwapBE16( U16 x )	{ return Swap16(x); }
-	inline U32 SwapBE32( U32 x )	{ return Swap32(x); }
-	void SwapBufferBE16( U16* buffer, int size );
-	void SwapBufferBE32( U32* buffer, int size );
-#else
-	inline U16 SwapLE16( U16 x )	{ return Swap16(x); }
-	inline U32 SwapLE32( U32 x )	{ return Swap32(x); }
-	inline U16 SwapBE16( U16 x )	{ return x; }
-	inline U32 SwapBE32( U32 x )	{ return x; }
-	void SwapBufferBE16( U16* buffer, int size )	{}
-	void SwapBufferBE32( U32* buffer, int size )	{}
-#endif
-
+#if 0
 /*	A class to store a set of bit flags, and set and get them in a standard way.
 	Class T must be some kind of integer type.
 */
@@ -266,6 +230,8 @@ class Flag
   private:
 	T store;
 };	
+#endif
+
 
 
 };	// namespace grinliz

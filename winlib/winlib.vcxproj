@@ -120,7 +120,6 @@
     <ClInclude Include="..\grinliz\glnoise.h" />
     <ClInclude Include="..\grinliz\glperformance.h" />
     <ClInclude Include="..\grinliz\glprime.h" />
-    <ClInclude Include="..\grinliz\glpublisher.h" />
     <ClInclude Include="..\grinliz\glrandom.h" />
     <ClInclude Include="..\grinliz\glrectangle.h" />
     <ClInclude Include="..\grinliz\glstringutil.h" />

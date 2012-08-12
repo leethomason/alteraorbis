@@ -180,9 +180,6 @@
     <ClInclude Include="..\grinliz\glprime.h">
       <Filter>Source Files\grinliz</Filter>
     </ClInclude>
-    <ClInclude Include="..\grinliz\glpublisher.h">
-      <Filter>Source Files\grinliz</Filter>
-    </ClInclude>
     <ClInclude Include="..\grinliz\glrandom.h">
       <Filter>Source Files\grinliz</Filter>
     </ClInclude>
