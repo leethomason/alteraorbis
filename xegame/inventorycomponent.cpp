@@ -57,9 +57,8 @@ void InventoryComponent::AddToInventory( const GameItem& item, bool equip )
 		if ( rc ) {
 			for( int i=0; i<EL_MAX_METADATA; ++i ) {
 				const char* name = rc->GetMetaData(i);
-				int h = HardpointNameToFlag( name );
-				GLASSERT( h );
-				hardpoints |= GameItem::HARDPOINT_TRIGGER;
+				int h = HardpointNameToFlag( name );		// often 0; lots of metadata isn't a hardpoint
+				hardpoints |= h;	
 			}
 		}
 	}
@@ -132,7 +131,7 @@ GameItem* InventoryComponent::IsCarrying()
 void InventoryComponent::GetWeapons( grinliz::CArray< GameItem*, EL_MAX_METADATA >* weapons )
 {
 	weapons->Clear();
-	for( int i=0; i<EL_MAX_METADATA; ++i ) {
+	for( int i=0; i<equippedItems.Size(); ++i ) {
 		GameItem* item = &equippedItems[i];
 		if ( item->ToWeapon() ) {
 			if ( item->AttachmentFlags() == GameItem::INTRINSIC_AT_HARDPOINT ) {

@@ -1,5 +1,4 @@
 - combat test scene
-	- string interning!
 	- properly hook up items and such, so that items, health, all be driven correctly
 	- data driven item creation
 	- buttons to select scenario, load items
