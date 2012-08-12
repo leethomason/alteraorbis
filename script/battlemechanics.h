@@ -13,7 +13,7 @@ class Engine;
 class BattleMechanics
 {
 public:
-	void MeleeAttack( Engine* engine, Chit* src, GameItem* weapon );
+	void MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* weapon );
 
 	// Returns true the melee attack can/does succeed. Note that any animation
 	// is pure decoration, melee success is just based on relative positions.

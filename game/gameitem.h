@@ -65,7 +65,14 @@ struct DamageDesc
 class IWeaponItem 
 {
 public:
-	virtual void GetDamageDesc( DamageDesc* desc ) = 0;
+	void GetDamageDesc( DamageDesc* desc ) {
+		// FIXME: fake
+		desc->energy = 20.0f;
+		desc->fire = 0;
+		desc->kinetic = 0;
+	}
+	virtual bool Ready( U32 time ) = 0;
+	virtual bool Use( U32 time ) = 0;
 };
 
 class IMeleeWeaponItem : virtual public IWeaponItem
@@ -75,7 +82,7 @@ class IRangedWeaponItem : virtual public IWeaponItem
 {};
 
 
-class GameItem : public IMeleeWeaponItem, public IRangedWeaponItem
+class GameItem : private IMeleeWeaponItem, private IRangedWeaponItem
 {
 public:
 	GameItem( int _flags=0, const char* _name=0, const char* _res=0 ) :
@@ -83,10 +90,19 @@ public:
 		resource( _res ),
 		flags( _flags ),
 		primaryTeam( 0 ),
-		rounds( 10 ),
-		roundsCap( 10 ),
-		reloadTime( 1000 ),
+		//rounds( 10 ),
+		//roundsCap( 10 ),
+		//reloadTime( 1000 ),
 		coolDownTime( 1000 )
+	{
+	}
+
+	GameItem( const GameItem& rhs ) :
+		name( rhs.name ),
+		resource( rhs.resource ),
+		flags( rhs.flags ),
+		primaryTeam( rhs.primaryTeam ),
+		coolDownTime( rhs.coolDownTime )
 	{
 	}
 
@@ -99,7 +115,7 @@ public:
 	int HardpointFlags() const			{ return flags & (HARDPOINT_TRIGGER|HARDPOINT_SHIELD); }
 
 	enum {
-		// Type of the item
+		// Type(s) of the item
 		CHARACTER			= (1),
 		MELEE_WEAPON		= (1<<1),
 		RANGED_WEAPON		= (1<<2),
@@ -123,9 +139,9 @@ public:
 	grinliz::CStr< EL_RES_NAME_LEN >	resource;	// resource used to  render the item
 	int flags;
 	int	primaryTeam;		// who owns this items
-	int rounds;
-	int roundsCap;
-	U32 reloadTime;			// time to set rounds back to roundsCapacity
+	//int rounds;
+	//int roundsCap;
+	//U32 reloadTime;			// time to set rounds back to roundsCapacity
 	U32 coolDownTime;		// time between uses
 
 	virtual IMeleeWeaponItem*	ToMeleeWeapon()		{ return (flags & MELEE_WEAPON) ? this : 0; }
@@ -134,27 +150,19 @@ public:
 	virtual IWeaponItem*		ToWeapon()			{ return (flags & (MELEE_WEAPON | RANGED_WEAPON)) ? this : 0; }
 	virtual const IWeaponItem*	ToWeapon() const	{ return (flags & (MELEE_WEAPON | RANGED_WEAPON)) ? this : 0; }
 
-	bool Ready( U32 absTime ) {
+	virtual bool Ready( U32 absTime ) {
 		if ( coolDownTime == 0 || absTime >= coolDownTime ) {
 			return true;
 		}
 		return false;
 	}
 
-	bool Use( U32 absTime ) {
+	virtual bool Use( U32 absTime ) {
 		if ( Ready( absTime )) {
 			coolDownTime = absTime + COOLDOWN_TIME;
 			return true;
 		}
 		return false;
-	}
-
-	//IWeaponItem
-	void GetDamageDesc( DamageDesc* desc ) {
-		// FIXME: fake
-		desc->energy = 20.0f;
-		desc->fire = 0;
-		desc->kinetic = 0;
 	}
 };
 

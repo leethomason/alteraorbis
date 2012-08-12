@@ -63,9 +63,9 @@ bool BattleMechanics::InMeleeZone(	Engine* engine,
 }
 
 
-void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, GameItem* weapon )
+void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* weapon )
 {
-	GLASSERT( engine && src && weapon && weapon->ToMeleeWeapon() );
+	GLASSERT( engine && src && weapon );
 	ChitBag* chitBag = src->GetChitBag();
 	GLASSERT( chitBag );
 

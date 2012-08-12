@@ -199,6 +199,6 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 
 		engine->particleSystem->EmitPD( "derez", pos, V3F_UP, engine->camera.EyeDir3(), 0 );
 		
-		battleMechanics.MeleeAttack( engine, parentChit, item );
+		battleMechanics.MeleeAttack( engine, parentChit, item->ToMeleeWeapon() );
 	}
 }
