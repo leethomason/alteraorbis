@@ -95,6 +95,11 @@ struct ModelMetaData {
 };
 
 
+struct ModelParticleEffect {
+	int									metaData;	// index of the metadata
+	grinliz::CStr< EL_RES_NAME_LEN >	name;		// name of the particle effect.
+};
+
 struct ModelHeader
 {
 	struct BoneDesc {
@@ -116,6 +121,7 @@ struct ModelHeader
 	U16						nAtoms;
 	grinliz::Rectangle3F	bounds;
 	ModelMetaData			metaData[EL_MAX_METADATA];
+	ModelParticleEffect		effects[EL_MAX_MODEL_EFFECTS];
 	BoneDesc				boneName[EL_MAX_BONES];		// ordered by name, not ID
 
 	const char* BoneNameFromID( int id ) const {

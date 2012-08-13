@@ -8,6 +8,8 @@
 #include "../grinliz/glcontainer.h"
 #include "../grinliz/glstringutil.h"
 
+#include "../tinyxml2/tinyxml2.h"
+
 /*
 	Items and Inventory.
 
@@ -108,6 +110,9 @@ public:
 
 	virtual ~GameItem()	{}
 
+	virtual void Save( tinyxml2::XMLPrinter* );
+	virtual void Load( const tinyxml2::XMLElement* doc );
+
 	const char* Name() const			{ return name.c_str(); }
 	const char* ResourceName() const	{ return resource.c_str(); }
 
@@ -132,16 +137,15 @@ public:
 
 		// The set of hardpoints	
 		HARDPOINT_TRIGGER	= (1<<6),	// this attaches to the trigger hardpoint
-		HARDPOINT_SHIELD	= (1<<7),	// this attaches to the shield hardpoint
+		HARDPOINT_ALTHAND	= (1<<7),	// this attaches to the alternate hand (non-trigger) hardpoint
+		HARDPOINT_HEAD		= (1<<8),	// this attaches to the head hardpoint
+		HARDPOINT_SHIELD	= (1<<9),	// this attaches to the shield hardpoint
 	};
 
 	grinliz::CStr< MAX_ITEM_NAME >		name;		// name of the item 
 	grinliz::CStr< EL_RES_NAME_LEN >	resource;	// resource used to  render the item
-	int flags;
+	int flags;				// flags that define this item; 'constant'
 	int	primaryTeam;		// who owns this items
-	//int rounds;
-	//int roundsCap;
-	//U32 reloadTime;			// time to set rounds back to roundsCapacity
 	U32 coolDownTime;		// time between uses
 
 	virtual IMeleeWeaponItem*	ToMeleeWeapon()		{ return (flags & MELEE_WEAPON) ? this : 0; }

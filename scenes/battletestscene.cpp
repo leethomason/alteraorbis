@@ -300,7 +300,7 @@ void BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int 
 	}
 	else if ( type == MANTIS ) {
 		// FIXME kinetic damage bonus
-		GameItem pincer( GameItem::MELEE_WEAPON | GameItem::INTRINSIC_FREE | GameItem::HARDPOINT_TRIGGER );
+		GameItem pincer( GameItem::MELEE_WEAPON | GameItem::INTRINSIC_FREE );
 		inv->AddToInventory( pincer, true );
 	}
 }

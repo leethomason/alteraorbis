@@ -1,0 +1,65 @@
+<itemdef>
+  <item name="humanFemale"
+        resource="humanFemale"
+			  flags="CHARACTER"
+			  mass ="50">
+    <intrinsics>
+      <item name="hand"
+            flags="MELEE_WEAPON INTRINSIC_AT_HARDPOINT"
+            hardpoint="trigger" />
+    </intrinsics>
+  </item>>
+
+  <item name="mantis"
+        resource="mantis"
+        flags="CHARACTER"
+        mass="40">
+    <intrinsics>
+      <item name="pincer"
+            flags="MELEE_WEAPON INTRINSIC_FREE"
+            melee.kinetic="3"/>
+    </intrinsics>
+  </item>
+
+  <item name="balrog"
+        resource="balrog"
+        flags="CHARACTER"
+        immune="FIRE"
+        mass="400">
+    <intrinsics>
+      <item name="claw"
+            flags="MELEE_WEAPON INTRINSIC_AT_HARDPOINT"
+            melee.kinetic="1.5"
+            hardpoint="trigger"
+            effect="FIRE"
+            />
+      <item name="breath"
+            flags="RANGED_WEAPON INTRINSIC_FREE"
+            melee.kinetic="1.5"
+            effect="FIRE"
+            />
+    </intrinsics>
+  </item>
+
+  <item name="testknife"
+        resource="testknife"
+        flags="MELEE_WEAPON HELD_AT_HARDPOINT"
+        melee.kinetic="2"
+        hardpoint="trigger" />
+
+  <item name="ax"
+        resource="ax"
+        flags="MELEE_WEAPON HELD_AT_HARDPOINT"
+        melee.kinetic="3"
+        hardpoint="trigger" />
+
+  <item name="testgun"
+        resource="testgun"
+        flags="MELEE_WEAPON RANGED_WEAPON HELD_AT_HARDPOINT"
+        melee.kinetic="1.1"
+        ranged.energy="20"
+        rounds="5"
+        reload="1000"
+        hardpoint="trigger" />
+
+</itemdef>

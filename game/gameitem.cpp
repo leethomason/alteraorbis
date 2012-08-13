@@ -1,24 +1,43 @@
 #include "gameitem.h"
-#include "../xegame/chit.h"
-#include "../xegame/inventorycomponent.h"
-#include "../xegame/itemcomponent.h"
+#include "../grinliz/glstringutil.h"
+#include "../tinyxml2/tinyxml2.h"
 
-#if 0
-void GameItem::GetActiveItems( Chit* chit, grinliz::CArray<XEItem*, MAX_ACTIVE_ITEMS>* array )
+using namespace grinliz;
+using namespace tinyxml2;
+
+#define READ_FLAG( flags, str, name ) { if ( strstr( str, #name )) flags |= name; }
+
+void GameItem::Save( tinyxml2::XMLPrinter* )
 {
-	// Chits can contain Item components and Inventory components. 
-	InventoryComponent *ic = GET_COMPONENT( chit, InventoryComponent );
-	GLASSERT( ic );
-	if ( ic ) {
-		const SafeChitList& list = ic->GetInventory();
-		for( Chit* chitItem = list.First(); chitItem; chitItem = list.Next() ) {
-			ItemComponent* itemComp = GET_COMPONENT( chitItem, ItemComponent );
-			// FIXME: should itemComponent and Item be different??
-			// Sure doesn't seem like it.
-			if ( itemComp && itemComp->GetItem() ) {
-				array->Push( itemComp->GetItem() );
-			}
-		}
-	}
+	GLASSERT( 0 );
 }
-#endif
+
+
+void GameItem::Load( const tinyxml2::XMLElement* ele )
+{
+	GLASSERT( StrEqual( ele->Name(), "item" ));
+	
+	name		= ele->Attribute( "name" );
+	resource	= ele->Attribute( "resource" );
+	flags = 0;
+	const char* f = ele->Attribute( "flags" );
+
+	READ_FLAG( flags, f, CHARACTER );
+	READ_FLAG( flags, f, MELEE_WEAPON );
+	READ_FLAG( flags, f, RANGED_WEAPON );
+	READ_FLAG( flags, f, INTRINSIC_AT_HARDPOINT );
+	READ_FLAG( flags, f, INTRINSIC_FREE );
+	READ_FLAG( flags, f, HELD_AT_HARDPOINT );
+	READ_FLAG( flags, f, HELD_FREE );
+	READ_FLAG( flags, f, HARDPOINT_TRIGGER );
+	READ_FLAG( flags, f, HARDPOINT_ALTHAND );
+	READ_FLAG( flags, f, HARDPOINT_HEAD );
+	READ_FLAG( flags, f, HARDPOINT_SHIELD );
+
+	primaryTeam = 0;
+	ele->QueryIntAttribute( "primaryTeam", &primaryTeam );
+	coolDownTime = 1000;
+	ele->QueryUnsignedAttribute( "coolDownTime", &coolDownTime );
+}
+
+

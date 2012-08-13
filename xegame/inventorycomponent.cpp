@@ -42,6 +42,10 @@ int InventoryComponent::HardpointNameToFlag( const char* name )
 {
 	if ( StrEqual( name, "trigger" ) ) 
 		return GameItem::HARDPOINT_TRIGGER;
+	else if ( StrEqual( name, "althand" ))
+		return GameItem::HARDPOINT_ALTHAND;
+	else if ( StrEqual( name, "head" ))
+		return GameItem::HARDPOINT_HEAD;
 	else if ( StrEqual( name, "shield" ))
 		return GameItem::HARDPOINT_SHIELD;
 	return 0;
