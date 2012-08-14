@@ -67,6 +67,16 @@ void ModelHeader::Load( const gamedb::Item* item )
 		}
 	}
 
+	memset( effectData, 0, sizeof(ModelParticleEffect)*EL_MAX_MODEL_EFFECTS );
+	const gamedb::Item* effectItem = header->Child( "effectData" );
+	if ( effectData ) {
+		for( int i=0; i<effectItem->NumChildren(); ++i ) {
+			const gamedb::Item* item = effectItem->Child(i);
+			effectData[i].metaData = item->GetString( "metaData" );
+			effectData[i].name = item->GetString( "name" );
+		}
+	}
+
 	memset( boneName, 0, sizeof(BoneDesc)*EL_MAX_BONES );
 	const gamedb::Item* boneItem = header->Child( "bones" );
 	if ( boneItem ) {

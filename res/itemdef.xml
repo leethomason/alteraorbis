@@ -21,21 +21,26 @@
     </intrinsics>
   </item>
 
+  <!-- Base effects, FIRE, in this case, are part of the Balrog
+       model. Combination effects SMOKE=FIRE+WATER are 
+       procedurally generated at run time.
+  -->
   <item name="balrog"
         resource="balrog"
         flags="CHARACTER"
-        immune="FIRE"
         mass="400">
     <intrinsics>
+      <!-- since intrinsic, also grants fire immunity -->
       <item name="claw"
             flags="MELEE_WEAPON INTRINSIC_AT_HARDPOINT"
             melee.kinetic="1.5"
             hardpoint="trigger"
-            effect="FIRE"
+            effect="FIRE"       
             />
       <item name="breath"
             flags="RANGED_WEAPON INTRINSIC_FREE"
-            melee.kinetic="1.5"
+            ranged.kinetic="0.5"
+            ranged.fire="3"
             effect="FIRE"
             />
     </intrinsics>
