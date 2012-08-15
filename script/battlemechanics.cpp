@@ -98,13 +98,12 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* 
 		if ( InMeleeZone( engine, src, target )) {
 			// FIXME: account for armor, shields, etc. etc.
 			// FIXME: account for knockback (physics move), catching fire, etc.
-			// FIXME: account for critical damage
 			HealthComponent* targetHealth = GET_COMPONENT( target, HealthComponent );
 			if ( targetHealth ) {
 				DamageDesc dd;
 				weapon->GetDamageDesc( &dd );
 
-				targetHealth->DeltaHealth( -(int)dd.Total() );
+				targetHealth->DeltaHealth( -dd.Total() );
 			}
 		}
 	}

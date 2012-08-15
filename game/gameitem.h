@@ -54,34 +54,50 @@
 
 class Chit;
 class WeaponItem;
+class GameItem;
 
-struct DamageDesc
+class DamageDesc
 {
+private:
+
 	float kinetic;
 	float energy;
 	float fire;
 
+public:
+	DamageDesc() : kinetic(1), energy(0), fire(0) {}
+
+	void Set( float _kinetic, float _energy, float _fire ) { kinetic = _kinetic; energy = _energy; fire = _fire; }
 	float Total() const { return kinetic + energy + fire; }
+
+	float Kinetic() const	{ return kinetic; }
+	float Energy() const	{ return energy; }
+	float Fire() const		{ return fire; }
+
+	void Save( const char* prefix, tinyxml2::XMLPrinter* );
+	void Load( const char* prefix, const tinyxml2::XMLElement* doc );
 };
 
 class IWeaponItem 
 {
 public:
-	void GetDamageDesc( DamageDesc* desc ) {
-		// FIXME: fake
-		desc->energy = 20.0f;
-		desc->fire = 0;
-		desc->kinetic = 0;
-	}
+	//virtual void GetDamageDesc( DamageDesc* desc ) = 0;
 	virtual bool Ready( U32 time ) = 0;
 	virtual bool Use( U32 time ) = 0;
+	virtual GameItem* GetItem() = 0;
 };
 
 class IMeleeWeaponItem : virtual public IWeaponItem
-{};
+{
+public:
+	virtual void GetDamageDesc( DamageDesc* desc );
+};
 
 class IRangedWeaponItem : virtual public IWeaponItem
-{};
+{
+public:
+	virtual void GetDamageDesc( DamageDesc* desc );
+};
 
 
 // FIXME: memory pool
@@ -100,6 +116,7 @@ public:
 	void operator=( const GameItem& rhs )	{ CopyFrom( &rhs );	}
 
 	virtual ~GameItem()	{}
+	virtual GameItem* GetItem() { return this; }
 
 	virtual void Save( tinyxml2::XMLPrinter* );
 	virtual void Load( const tinyxml2::XMLElement* doc );
@@ -145,27 +162,44 @@ public:
 	};
 
 	grinliz::CStr< MAX_ITEM_NAME >		name;		// name of the item
-	grinliz::CStr< MAX_ITEM_NAME >		key;		// modified name, for storage
+	grinliz::CStr< MAX_ITEM_NAME >		key;		// modified name, for storage. not serialized.
 	grinliz::CStr< EL_RES_NAME_LEN >	resource;	// resource used to  render the item
 	int flags;				// flags that define this item; 'constant'
+	float mass;				// mass (kg)
 	int	primaryTeam;		// who owns this items
+	DamageDesc meleeDamage;	// a multiplier of the base (effective mass) and other modifiers
+	DamageDesc rangedDamage;// a multiplier of the mass
 	U32 coolDownTime;		// time between uses
+
+	float hp;				// current hp for this item
 
 	// Group all the copy/init in one place!
 	void CopyFrom( const GameItem* rhs ) {
 		if ( rhs ) {
 			name			= rhs->name;
+			key				= rhs->key;
 			resource		= rhs->resource;
 			flags			= rhs->flags;
+			mass			= rhs->mass;
 			primaryTeam		= rhs->primaryTeam;
+			meleeDamage		= rhs->meleeDamage;
+			rangedDamage	= rhs->rangedDamage;
 			coolDownTime	= rhs->coolDownTime;
+
+			hp				= rhs->hp;
 		}
 		else {
 			name.Clear();
+			key.Clear();
 			resource.Clear();
 			flags = 0;
+			mass = 100;
 			primaryTeam = 0;
+			meleeDamage.Set( 1, 0, 0 );
+			rangedDamage.Set( 1, 0, 0 );
 			coolDownTime = 1000;
+
+			hp = TotalHP();
 		}
 	}
 
@@ -189,6 +223,9 @@ public:
 		}
 		return false;
 	}
+
+	// Note that the current HP, if it has one, 
+	float TotalHP() const { return (float) mass; }
 
 private:
 };

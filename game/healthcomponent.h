@@ -3,30 +3,27 @@
 
 #include "../xegame/component.h"
 
+/*
+	Binds to the Item component for values; essentually the script that
+	drives health, effects, etc.
+*/
 class HealthComponent : public Component
 {
 public:
-	HealthComponent() : health( 0xffff ), maxHealth( 0xffff ) {}
-	virtual ~HealthComponent() {}
+	HealthComponent()			{}
+	virtual ~HealthComponent()	{}
 
 	virtual Component* ToComponent( const char* name ) {
 		if ( grinliz::StrEqual( name, "HealthComponent" ) ) return this;
 		return 0;
 	}
 
-	virtual void DebugStr( grinliz::GLString* str )		{ str->Format( "[Health] hp=%d ", health ); }
+	virtual void DebugStr( grinliz::GLString* str )		{ str->Format( "[Health] " ); }
 
-	void SetHealth( int h );
-	void SetHealth( int _health, int _max ) { GLASSERT( _max >= _health ); SetMaxHealth( _max ); SetHealth( _health ); }
-	void SetMaxHealth( int m );
-	int  GetHealth() const			{ return health; }
-	int  GetMaxHealth() const		{ return maxHealth; }
-	float GetHealthFraction() const { return (float)health / (float)maxHealth; }
-	void DeltaHealth( int delta );
+	float GetHealthFraction() const;
+	void  DeltaHealth( float delta );
 
 private:
-	int health;
-	int maxHealth;
 };
 
 

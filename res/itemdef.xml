@@ -16,8 +16,9 @@
         mass="40">
     <intrinsics>
       <item name="pincer"
-            flags="MELEE_WEAPON INTRINSIC_FREE"
-            melee.kinetic="3"/>
+            flags="MELEE_WEAPON INTRINSIC_FREE">
+            <melee kinetic="3" fire="0"/>
+      </item>
     </intrinsics>
   </item>
 
@@ -37,14 +38,13 @@
       <!-- since intrinsic, also grants fire immunity -->
       <item name="claw"
             flags="MELEE_WEAPON INTRINSIC_AT_HARDPOINT EFFECT_FIRE"
-            melee.kinetic="1.5"
-            hardpoint="trigger"
-            />
+            hardpoint="trigger">
+            <melee kinetic="1.5" />
+      </item>
       <item name="breath"
-            flags="RANGED_WEAPON INTRINSIC_FREE EFFECT_FIRE"
-            ranged.kinetic="0.5"
-            ranged.fire="3"
-            />
+            flags="RANGED_WEAPON INTRINSIC_FREE EFFECT_FIRE">
+            <ranged kinetic ="0.5" fire="3" />
+      </item>
     </intrinsics>
   </item>
 
@@ -57,22 +57,23 @@
   <item name="testknife"
         resource="testknife"
         flags="MELEE_WEAPON HELD_AT_HARDPOINT"
-        melee.kinetic="2"
-        hardpoint="trigger" />
-
+        hardpoint="trigger">
+        <melee kinetic="2" />
+  </item>
+  
   <item name="ax"
         resource="ax"
         flags="MELEE_WEAPON HELD_AT_HARDPOINT"
-        melee.kinetic="3"
-        hardpoint="trigger" />
+        hardpoint="trigger">
+        <melee kinetic="3" />
+  </item>
 
   <item name="testgun"
         resource="testgun"
         flags="MELEE_WEAPON RANGED_WEAPON HELD_AT_HARDPOINT"
-        melee.kinetic="1.1"
-        ranged.energy="20"
-        rounds="5"
         reload="1000"
-        hardpoint="trigger" />
-
+        hardpoint="trigger">
+        <melee kinetic="1.1"/>
+        <ranged energy="20" rounds="5" />
+  </item>
 </items>

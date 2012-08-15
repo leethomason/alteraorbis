@@ -281,7 +281,6 @@ void BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int 
 	chit->Add( inv );
 
 	chit->GetSpatialComponent()->SetPosYRot( (float)p.x+0.5f, 0, (float)p.y+0.5f, (float)random.Rand( 360 ) );
-	GET_COMPONENT( chit, HealthComponent )->SetHealth( 100, 100 );
 
 	for( int i=1; i<itemDefArr.Size(); ++i ) {
 		GameItem intrinsic( *(itemDefArr[i] ));
