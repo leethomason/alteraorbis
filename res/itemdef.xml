@@ -48,6 +48,12 @@
     </intrinsics>
   </item>
 
+  <item name="dummytarget"
+        resource="dummytarget"
+        flags="CHARACTER"
+        mass="30"
+        />
+
   <item name="testknife"
         resource="testknife"
         flags="MELEE_WEAPON HELD_AT_HARDPOINT"

@@ -256,6 +256,10 @@ void BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int 
 		case BALROG:		asset="balrog";			break;
 	}
 
+	ItemStorage::GameItemArr itemDefArr;
+	itemStorage.Get( asset, &itemDefArr );
+	GLASSERT( itemDefArr.Size() > 0 );
+
 	Chit* chit = chitBag.NewChit();
 	chit->Add( new SpatialComponent());
 	chit->Add( new RenderComponent( engine, asset, 0 ));
@@ -268,7 +272,7 @@ void BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int 
 		chit->Add( new MoveComponent());
 	}
 
-	GameItem item( GameItem::CHARACTER );
+	GameItem item( *(itemDefArr[0]));
 	item.primaryTeam = team;
 	chit->Add( new ItemComponent( item ));
 
@@ -279,30 +283,22 @@ void BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int 
 	chit->GetSpatialComponent()->SetPosYRot( (float)p.x+0.5f, 0, (float)p.y+0.5f, (float)random.Rand( 360 ) );
 	GET_COMPONENT( chit, HealthComponent )->SetHealth( 100, 100 );
 
-	if ( type == HUMAN ) {
-		GameItem hand( GameItem::MELEE_WEAPON | GameItem::INTRINSIC_AT_HARDPOINT | GameItem::HARDPOINT_TRIGGER );
-		inv->AddToInventory( hand, true );
+	for( int i=1; i<itemDefArr.Size(); ++i ) {
+		GameItem intrinsic( *(itemDefArr[i] ));
+		inv->AddToInventory( intrinsic, true );
+	}
 
+	if ( type == HUMAN ) {
 		if( loadout == MELEE_WEAPON ) {
-			GameItem knife( GameItem::MELEE_WEAPON | GameItem::HELD_AT_HARDPOINT | GameItem::HARDPOINT_TRIGGER,
-						  "testknife", "testknife" );
-			inv->AddToInventory( knife, true );
+			const GameItem *knife = itemStorage.Get( "testknife" );
+			GLASSERT( knife );
+			inv->AddToInventory( *knife, true );
 		}
 		else if ( loadout == PISTOL ) {
-			GameItem gun( GameItem::MELEE_WEAPON | GameItem::RANGED_WEAPON | GameItem::HELD_AT_HARDPOINT | GameItem::HARDPOINT_TRIGGER,
-						  "testgun", "testgun" );
-			inv->AddToInventory( gun, true );
+			const GameItem* gun = itemStorage.Get( "testgun" );
+			GLASSERT( gun );
+			inv->AddToInventory( *gun, true );
 		}
-	}
-	else if ( type == BALROG ) {
-		// FIXME kinetic damage bonus
-		GameItem claw( GameItem::MELEE_WEAPON | GameItem::INTRINSIC_AT_HARDPOINT | GameItem::HARDPOINT_TRIGGER );
-		inv->AddToInventory( claw, true );
-	}
-	else if ( type == MANTIS ) {
-		// FIXME kinetic damage bonus
-		GameItem pincer( GameItem::MELEE_WEAPON | GameItem::INTRINSIC_FREE );
-		inv->AddToInventory( pincer, true );
 	}
 }
 

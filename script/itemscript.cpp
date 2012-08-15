@@ -70,6 +70,7 @@ void ItemStorage::Get( const char* name, GameItemArr* arr )
 	for( int i=0; true; ++i ) {
 		grinliz::CStr< MAX_ITEM_NAME > n;
 		n.Format( "%s.%d", name, i );
+		item = 0;
 		map.Query( n.c_str(), &item );
 
 		if ( !item ) 
