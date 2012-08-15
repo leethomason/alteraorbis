@@ -39,7 +39,7 @@
       <item name="claw"
             flags="MELEE_WEAPON INTRINSIC_AT_HARDPOINT EFFECT_FIRE"
             hardpoint="trigger">
-            <melee kinetic="1.5" />
+            <melee kinetic="1.5" fire="0.5"/>
       </item>
       <item name="breath"
             flags="RANGED_WEAPON INTRINSIC_FREE EFFECT_FIRE">
