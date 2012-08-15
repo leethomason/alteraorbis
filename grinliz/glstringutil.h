@@ -42,6 +42,7 @@ distribution.
 namespace grinliz 
 {
 	
+#if 0
 inline int HexLowerCharToInt( int c ) {
 	GLASSERT( (c>='0'&&c<='9') || (c>='a'&&c<='f') );
 	if ( c <= '9' )
@@ -52,6 +53,7 @@ inline int HexLowerCharToInt( int c ) {
 	//const int bit6 = (c&0x40) >> 6;
 	//return bit6*( c - 'a' + 10 ) + (1-bit6)*( c - '0');
 }
+#endif
 
 inline bool StrEqual( const char* a, const char* b ) 
 {
