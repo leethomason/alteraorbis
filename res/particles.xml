@@ -32,7 +32,7 @@
     <colorVelocity red="-0.05" green="-0.8" blue="0" alpha="-0.5" />
   </particle>
 
-  <particle name="hsmoke" texMin="1" texMax="2"
+  <particle name="balsmoke" texMin="1" texMax="2"
           time="continuous" size="0.2" count="5" config="ray"
           posFuzz="0.0" velocity="0.7" velocityFuzz="0.1" >
     <color red="0.7" green="0.7" blue="0.7" alpha="0.1"/>
@@ -40,7 +40,7 @@
     <colorVelocity red="-0.2" green="-0.2" blue="-0.2" alpha="-0.5" />
   </particle>
 
-  <particle name="hfire"
+  <particle name="balfire"
             time="continuous" size="0.15" count="15" config="ray"
             posFuzz="0.1" velocity="1.0" velocityFuzz="0.2" >
     <color red="1" green="0.6" blue="0" alpha="0.1"/>
