@@ -96,6 +96,7 @@ BattleTestScene::BattleTestScene( LumosGame* game ) : Scene( game )
 
 	engine = 0;
 	map = 0;
+	itemStorage.Load( "./res/itemdef.xml" );
 
 	LoadMap();
 }

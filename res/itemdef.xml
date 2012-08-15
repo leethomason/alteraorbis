@@ -1,4 +1,4 @@
-<itemdef>
+<items>
   <item name="humanFemale"
         resource="humanFemale"
 			  flags="CHARACTER"
@@ -24,6 +24,10 @@
   <!-- Base effects, FIRE, in this case, are part of the Balrog
        model. Combination effects SMOKE=FIRE+WATER are 
        procedurally generated at run time.
+       
+       "mass" is the basis for melee damage. Numbers (melee.kinetic) are
+       modifiers of that. 
+       TBD is the basis for ranged damage.
   -->
   <item name="balrog"
         resource="balrog"
@@ -32,16 +36,14 @@
     <intrinsics>
       <!-- since intrinsic, also grants fire immunity -->
       <item name="claw"
-            flags="MELEE_WEAPON INTRINSIC_AT_HARDPOINT"
+            flags="MELEE_WEAPON INTRINSIC_AT_HARDPOINT EFFECT_FIRE"
             melee.kinetic="1.5"
             hardpoint="trigger"
-            effect="FIRE"       
             />
       <item name="breath"
-            flags="RANGED_WEAPON INTRINSIC_FREE"
+            flags="RANGED_WEAPON INTRINSIC_FREE EFFECT_FIRE"
             ranged.kinetic="0.5"
             ranged.fire="3"
-            effect="FIRE"
             />
     </intrinsics>
   </item>
@@ -67,4 +69,4 @@
         reload="1000"
         hardpoint="trigger" />
 
-</itemdef>
+</items>

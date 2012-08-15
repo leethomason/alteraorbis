@@ -84,34 +84,29 @@ class IRangedWeaponItem : virtual public IWeaponItem
 {};
 
 
+// FIXME: memory pool
 class GameItem : private IMeleeWeaponItem, private IRangedWeaponItem
 {
 public:
-	GameItem( int _flags=0, const char* _name=0, const char* _res=0 ) :
-		name( _name ),
-		resource( _res ),
-		flags( _flags ),
-		primaryTeam( 0 ),
-		//rounds( 10 ),
-		//roundsCap( 10 ),
-		//reloadTime( 1000 ),
-		coolDownTime( 1000 )
+	GameItem( int _flags=0, const char* _name=0, const char* _res=0 )
 	{
+		CopyFrom(0);
+		flags = _flags;
+		name = _name;
+		resource = _res;
 	}
 
-	GameItem( const GameItem& rhs ) :
-		name( rhs.name ),
-		resource( rhs.resource ),
-		flags( rhs.flags ),
-		primaryTeam( rhs.primaryTeam ),
-		coolDownTime( rhs.coolDownTime )
-	{
-	}
+	GameItem( const GameItem& rhs )			{ CopyFrom( &rhs );	}
+	void operator=( const GameItem& rhs )	{ CopyFrom( &rhs );	}
 
 	virtual ~GameItem()	{}
 
 	virtual void Save( tinyxml2::XMLPrinter* );
 	virtual void Load( const tinyxml2::XMLElement* doc );
+	// If an intrinsic sub item has a trait - say, FIRE - that
+	// implies that the parent is immune to fire. Apply() sets
+	// basic sanity flags.
+	void Apply( const GameItem* intrinsic );	
 
 	const char* Name() const			{ return name.c_str(); }
 	const char* ResourceName() const	{ return resource.c_str(); }
@@ -140,13 +135,39 @@ public:
 		HARDPOINT_ALTHAND	= (1<<7),	// this attaches to the alternate hand (non-trigger) hardpoint
 		HARDPOINT_HEAD		= (1<<8),	// this attaches to the head hardpoint
 		HARDPOINT_SHIELD	= (1<<9),	// this attaches to the shield hardpoint
+
+		IMMUNE_FIRE			= (1<<10),
+		FLAMMABLE			= (1<<11),
+		IMMUNE_ENERGY		= (1<<12),
+
+		EFFECT_FIRE			= (1<<13),
+		EFFECT_ENERGY		= (1<<14),
 	};
 
-	grinliz::CStr< MAX_ITEM_NAME >		name;		// name of the item 
+	grinliz::CStr< MAX_ITEM_NAME >		name;		// name of the item
+	grinliz::CStr< MAX_ITEM_NAME >		key;		// modified name, for storage
 	grinliz::CStr< EL_RES_NAME_LEN >	resource;	// resource used to  render the item
 	int flags;				// flags that define this item; 'constant'
 	int	primaryTeam;		// who owns this items
 	U32 coolDownTime;		// time between uses
+
+	// Group all the copy/init in one place!
+	void CopyFrom( const GameItem* rhs ) {
+		if ( rhs ) {
+			name			= rhs->name;
+			resource		= rhs->resource;
+			flags			= rhs->flags;
+			primaryTeam		= rhs->primaryTeam;
+			coolDownTime	= rhs->coolDownTime;
+		}
+		else {
+			name.Clear();
+			resource.Clear();
+			flags = 0;
+			primaryTeam = 0;
+			coolDownTime = 1000;
+		}
+	}
 
 	virtual IMeleeWeaponItem*	ToMeleeWeapon()		{ return (flags & MELEE_WEAPON) ? this : 0; }
 	virtual IRangedWeaponItem*	ToRangedWeapon()	{ return (flags & RANGED_WEAPON) ? this : 0; }
@@ -168,6 +189,8 @@ public:
 		}
 		return false;
 	}
+
+private:
 };
 
 #endif // GAMEITEM_INCLUDED
