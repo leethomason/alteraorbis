@@ -96,7 +96,7 @@ struct ModelMetaData {
 
 
 struct ModelParticleEffect {
-	int									metaData;	// index of the metadata
+	grinliz::CStr< EL_RES_NAME_LEN >	metaData;	// name	 of the metadata
 	grinliz::CStr< EL_RES_NAME_LEN >	name;		// name of the particle effect.
 };
 
@@ -121,7 +121,7 @@ struct ModelHeader
 	U16						nAtoms;
 	grinliz::Rectangle3F	bounds;
 	ModelMetaData			metaData[EL_MAX_METADATA];
-	ModelParticleEffect		effects[EL_MAX_MODEL_EFFECTS];
+	ModelParticleEffect		effectData[EL_MAX_MODEL_EFFECTS];
 	BoneDesc				boneName[EL_MAX_BONES];		// ordered by name, not ID
 
 	const char* BoneNameFromID( int id ) const {
@@ -338,6 +338,7 @@ public:
 	}
 
 	void CalcMetaData( const char* name, grinliz::Matrix4* xform ) const;
+	void EmitParticles( ParticleSystem* system, const grinliz::Vector3F* eyeDir, U32 deltaTime ) const;
 	void CalcTargetSize( float* width, float* height ) const;
 
 	// Returns grinliz::INTERSECT or grinliz::REJECT

@@ -2,8 +2,11 @@
 #define BATTLE_SCENE_INCLUDED
 
 #include "../grinliz/glrandom.h"
+
 #include "../xegame/scene.h"
 #include "../xegame/chitbag.h"
+
+#include "../script/itemscript.h"
 
 class LumosGame;
 class Engine;
@@ -85,6 +88,7 @@ private:
 	grinliz::Ray debugRay;
 	
 	ChitBag chitBag;
+	ItemStorage itemStorage;
 };
 
 

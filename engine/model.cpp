@@ -449,6 +449,24 @@ void Model::CalcMetaData( const char* name, grinliz::Matrix4* meta ) const
 }
 
 
+void Model::EmitParticles( ParticleSystem* system, const Vector3F* eyeDir, U32 deltaTime ) const
+{
+	if ( flags & MODEL_INVISIBLE )
+		return;
+
+	for( int i=0; i<EL_MAX_MODEL_EFFECTS; ++i ) {
+		const ModelParticleEffect& effect = resource->header.effectData[i];
+		if ( !effect.name.empty() ) {
+			Matrix4 xform;
+			CalcMetaData( effect.metaData.c_str(), &xform );
+			Vector3F pos = xform.Col(3);
+			static const Vector3F UP = { 0, 1, 0 };
+			system->EmitPD( effect.name.c_str(), pos, UP, eyeDir, deltaTime );
+		}
+	}
+}
+
+
 void Model::CalcTargetSize( float* width, float* height ) const
 {
 	*width  = ( resource->AABB().SizeX() +resource->AABB().SizeZ() )*0.5f;

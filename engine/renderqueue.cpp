@@ -159,6 +159,9 @@ void RenderQueue::Submit( GPUShader* overRideShader, int modelRequired, int mode
 			if ( statePool[i].shader->ShaderFlags() & ShaderManager::BONE_XFORM ) {
 				shader->SetShaderFlag( ShaderManager::BONE_XFORM );
 			}
+			else {
+				shader->ClearShaderFlag( ShaderManager::BONE_XFORM );
+			}
 		}
 
 		if (    (( shader->ShaderFlags() & shaderRequired ) != shaderRequired )

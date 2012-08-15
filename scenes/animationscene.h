@@ -24,6 +24,7 @@ public:
 		ProcessTap( action, screen, world );
 	}
 	virtual void ItemTapped( const gamui::UIItem* item );
+	void Zoom( int style, float delta );
 	virtual void DoTick( U32 deltaTime );
 	virtual void Draw3D( U32 deltaTime );
 

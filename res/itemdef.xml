@@ -1,4 +1,4 @@
-<itemdef>
+<items>
   <item name="humanFemale"
         resource="humanFemale"
 			  flags="CHARACTER"
@@ -16,50 +16,64 @@
         mass="40">
     <intrinsics>
       <item name="pincer"
-            flags="MELEE_WEAPON INTRINSIC_FREE"
-            melee.kinetic="3"/>
+            flags="MELEE_WEAPON INTRINSIC_FREE">
+            <melee kinetic="3" fire="0"/>
+      </item>
     </intrinsics>
   </item>
 
+  <!-- Base effects, FIRE, in this case, are part of the Balrog
+       model. Combination effects SMOKE=FIRE+WATER are 
+       procedurally generated at run time.
+       
+       "mass" is the basis for melee damage. Numbers (melee.kinetic) are
+       modifiers of that. 
+       TBD is the basis for ranged damage.
+  -->
   <item name="balrog"
         resource="balrog"
         flags="CHARACTER"
-        immune="FIRE"
         mass="400">
     <intrinsics>
+      <!-- since intrinsic, also grants fire immunity -->
       <item name="claw"
-            flags="MELEE_WEAPON INTRINSIC_AT_HARDPOINT"
-            melee.kinetic="1.5"
-            hardpoint="trigger"
-            effect="FIRE"
-            />
+            flags="MELEE_WEAPON INTRINSIC_AT_HARDPOINT EFFECT_FIRE"
+            hardpoint="trigger">
+            <melee kinetic="1.5" fire="0.5"/>
+      </item>
       <item name="breath"
-            flags="RANGED_WEAPON INTRINSIC_FREE"
-            melee.kinetic="1.5"
-            effect="FIRE"
-            />
+            flags="RANGED_WEAPON INTRINSIC_FREE EFFECT_FIRE">
+            <ranged kinetic ="0.5" fire="3" />
+      </item>
     </intrinsics>
   </item>
+
+  <item name="dummytarget"
+        resource="dummytarget"
+        flags="CHARACTER"
+        mass="30"
+        />
 
   <item name="testknife"
         resource="testknife"
         flags="MELEE_WEAPON HELD_AT_HARDPOINT"
-        melee.kinetic="2"
-        hardpoint="trigger" />
-
+        hardpoint="trigger">
+        <melee kinetic="2" />
+  </item>
+  
   <item name="ax"
         resource="ax"
         flags="MELEE_WEAPON HELD_AT_HARDPOINT"
-        melee.kinetic="3"
-        hardpoint="trigger" />
+        hardpoint="trigger">
+        <melee kinetic="3" />
+  </item>
 
   <item name="testgun"
         resource="testgun"
         flags="MELEE_WEAPON RANGED_WEAPON HELD_AT_HARDPOINT"
-        melee.kinetic="1.1"
-        ranged.energy="20"
-        rounds="5"
         reload="1000"
-        hardpoint="trigger" />
-
-</itemdef>
+        hardpoint="trigger">
+        <melee kinetic="1.1"/>
+        <ranged energy="20" rounds="5" />
+  </item>
+</items>

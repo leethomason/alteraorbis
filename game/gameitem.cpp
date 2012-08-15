@@ -15,6 +15,8 @@ void GameItem::Save( tinyxml2::XMLPrinter* )
 
 void GameItem::Load( const tinyxml2::XMLElement* ele )
 {
+	this->CopyFrom( 0 );
+
 	GLASSERT( StrEqual( ele->Name(), "item" ));
 	
 	name		= ele->Attribute( "name" );
@@ -33,11 +35,77 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 	READ_FLAG( flags, f, HARDPOINT_ALTHAND );
 	READ_FLAG( flags, f, HARDPOINT_HEAD );
 	READ_FLAG( flags, f, HARDPOINT_SHIELD );
+	READ_FLAG( flags, f, IMMUNE_FIRE );
+	READ_FLAG( flags, f, FLAMMABLE );
+	READ_FLAG( flags, f, IMMUNE_ENERGY );
+	READ_FLAG( flags, f, EFFECT_FIRE );
+	READ_FLAG( flags, f, EFFECT_ENERGY );
 
-	primaryTeam = 0;
-	ele->QueryIntAttribute( "primaryTeam", &primaryTeam );
-	coolDownTime = 1000;
-	ele->QueryUnsignedAttribute( "coolDownTime", &coolDownTime );
+	if ( EFFECT_FIRE )	flags |= IMMUNE_FIRE;
+	if ( EFFECT_ENERGY)	flags |= IMMUNE_ENERGY;
+
+	ele->QueryFloatAttribute( "mass",			&mass );
+	ele->QueryIntAttribute( "primaryTeam",		&primaryTeam );
+	ele->QueryUnsignedAttribute( "coolDownTime",&coolDownTime );
+
+	const XMLElement* meleeEle = ele->FirstChildElement( "melee" );
+	if ( meleeEle ) {
+		meleeDamage.Load( "melee", meleeEle );
+	}
+	const XMLElement* rangedEle = ele->FirstChildElement( "ranged" );
+	if ( rangedEle ) {
+		rangedDamage.Load( "ranged", rangedEle );
+	}
+
+	const char* hardpoint = ele->Attribute( "hardpoint" );
+	if ( StrEqual( hardpoint, "trigger" ))	flags |= HARDPOINT_TRIGGER;
+	if ( StrEqual( hardpoint, "althand" ))	flags |= HARDPOINT_ALTHAND;
+	if ( StrEqual( hardpoint, "head" ))		flags |= HARDPOINT_HEAD;
+	if ( StrEqual( hardpoint, "shield" ))	flags |= HARDPOINT_SHIELD;
 }
 
 
+void GameItem::Apply( const GameItem* intrinsic )
+{
+	if ( intrinsic->flags & EFFECT_FIRE )
+		flags |= IMMUNE_FIRE;
+	if ( intrinsic->flags & EFFECT_ENERGY )
+		flags |= IMMUNE_ENERGY;
+}
+
+
+void IMeleeWeaponItem::GetDamageDesc( DamageDesc* dd )
+{
+	GameItem* item = GetItem();
+	// How many strikes does it take a unit of equal
+	// mass to destroy a unit of the same mass?
+	static const float STRIKE_RATIO = 5.0f;
+
+	dd->Set( item->mass * item->meleeDamage.Kinetic() / STRIKE_RATIO,
+			 item->mass * item->meleeDamage.Energy()  / STRIKE_RATIO,
+			 item->mass * item->meleeDamage.Fire()    / STRIKE_RATIO );
+}
+
+
+void IRangedWeaponItem::GetDamageDesc( DamageDesc* dd )
+{
+	GLASSERT( 0 );	 // FIXME
+}
+
+
+void DamageDesc::Save( const char* prefix, tinyxml2::XMLPrinter* )
+{
+	GLASSERT( 0 );	// FIXME
+}
+
+
+void DamageDesc::Load( const char* prefix, const tinyxml2::XMLElement* doc )
+{
+	kinetic = 0;
+	energy = 0;
+	fire = 0;
+
+	doc->QueryFloatAttribute( "kinetic", &kinetic );
+	doc->QueryFloatAttribute( "energy", &energy );
+	doc->QueryFloatAttribute( "fire", &fire );
+}

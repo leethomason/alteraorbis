@@ -249,6 +249,15 @@ void AnimationScene::SetModelVis( bool onlyShowOneUnrotated )
 }
 
 
+void AnimationScene::Zoom( int style, float delta )
+{
+	if ( style == GAME_ZOOM_PINCH )
+		engine->SetZoom( engine->GetZoom() *( 1.0f+delta) );
+	else
+		engine->SetZoom( engine->GetZoom() + delta );
+}
+
+
 void AnimationScene::ItemTapped( const gamui::UIItem* item )
 {
 	if ( item == &okay ) {
@@ -447,24 +456,10 @@ void AnimationScene::DoTick( U32 deltaTime )
 	grinliz::CArray<AnimationMetaData, EL_MAX_METADATA> metaDataEvents;
 	for( int i=0; i<NUM_MODELS; ++i ) {
 		model[i]->DeltaAnimation( deltaTime, (i==0) ? &metaDataEvents : 0, 0 );
+		model[i]->EmitParticles( engine->particleSystem, engine->camera.EyeDir3(), deltaTime );
 	}
 
-	const ModelResource* mRes = model[0]->GetResource();
-	for( int i=0; i<EL_MAX_METADATA; ++i ) {
-		const ModelMetaData* data = mRes->GetMetaData( i );
-		if ( StrEqualUntil( data->name.c_str(), "particle", '.' )) {
-			const char* name = data->name.c_str() + strlen( "particle.0." );
-
-			Matrix4 xform;
-			model[0]->CalcMetaData( data->name.c_str(), &xform );
-			const ParticleDef* pdPtr = engine->particleSystem->GetPD( name );
-			if ( pdPtr ) {
-				engine->particleSystem->EmitPD( *pdPtr, xform.Col(3), V3F_UP, engine->camera.EyeDir3(), deltaTime );
-			}
-		}
-	}
-
-	if ( model[0]->HasAnimation() && mRes->GetMetaData( "trigger" )) {
+	if ( model[0]->HasAnimation() && model[0]->GetResource()->GetMetaData( "trigger" )) {
 		static const Vector3F UP = { 0, 1, 0 };
 		static const Vector3F POS = { 0,0,0 };
 		Matrix4 xform;

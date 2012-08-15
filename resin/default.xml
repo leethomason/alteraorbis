@@ -95,7 +95,7 @@
 
   <model filename="weapons.ac"          modelName="testgun"     origin="0 0 0"      shadowCaster="false" />
   <model filename="weapons.ac"          modelName="testknife"   origin="0.20 0 0"   shadowCaster="false" />
-  <model                                filename="ax.ac"        origin="0 0 0"      shadowCaster="true" />
+  <!--<model                                filename="ax.ac"        origin="0 0 0"      shadowCaster="true" />-->
   
   <model filename="chess_weapons.ac"    modelName="RAY-1"        origin="0 0 0"/>
   <model filename="chess_weapons.ac"    modelName="PLS-1"        origin="1 0 0"/>

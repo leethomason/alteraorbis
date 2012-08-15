@@ -54,64 +54,76 @@
 
 class Chit;
 class WeaponItem;
+class GameItem;
 
-struct DamageDesc
+class DamageDesc
 {
+private:
+
 	float kinetic;
 	float energy;
 	float fire;
 
+public:
+	DamageDesc() : kinetic(1), energy(0), fire(0) {}
+
+	void Set( float _kinetic, float _energy, float _fire ) { kinetic = _kinetic; energy = _energy; fire = _fire; }
 	float Total() const { return kinetic + energy + fire; }
+
+	float Kinetic() const	{ return kinetic; }
+	float Energy() const	{ return energy; }
+	float Fire() const		{ return fire; }
+
+	void Save( const char* prefix, tinyxml2::XMLPrinter* );
+	void Load( const char* prefix, const tinyxml2::XMLElement* doc );
 };
 
 class IWeaponItem 
 {
 public:
-	void GetDamageDesc( DamageDesc* desc ) {
-		// FIXME: fake
-		desc->energy = 20.0f;
-		desc->fire = 0;
-		desc->kinetic = 0;
-	}
+	//virtual void GetDamageDesc( DamageDesc* desc ) = 0;
 	virtual bool Ready( U32 time ) = 0;
 	virtual bool Use( U32 time ) = 0;
+	virtual GameItem* GetItem() = 0;
 };
 
 class IMeleeWeaponItem : virtual public IWeaponItem
-{};
+{
+public:
+	virtual void GetDamageDesc( DamageDesc* desc );
+};
 
 class IRangedWeaponItem : virtual public IWeaponItem
-{};
+{
+public:
+	virtual void GetDamageDesc( DamageDesc* desc );
+};
 
 
+// FIXME: memory pool
 class GameItem : private IMeleeWeaponItem, private IRangedWeaponItem
 {
 public:
-	GameItem( int _flags=0, const char* _name=0, const char* _res=0 ) :
-		name( _name ),
-		resource( _res ),
-		flags( _flags ),
-		primaryTeam( 0 ),
-		//rounds( 10 ),
-		//roundsCap( 10 ),
-		//reloadTime( 1000 ),
-		coolDownTime( 1000 )
+	GameItem( int _flags=0, const char* _name=0, const char* _res=0 )
 	{
+		CopyFrom(0);
+		flags = _flags;
+		name = _name;
+		resource = _res;
 	}
 
-	GameItem( const GameItem& rhs ) :
-		name( rhs.name ),
-		resource( rhs.resource ),
-		flags( rhs.flags ),
-		primaryTeam( rhs.primaryTeam ),
-		coolDownTime( rhs.coolDownTime )
-	{
-	}
+	GameItem( const GameItem& rhs )			{ CopyFrom( &rhs );	}
+	void operator=( const GameItem& rhs )	{ CopyFrom( &rhs );	}
 
 	virtual ~GameItem()	{}
+	virtual GameItem* GetItem() { return this; }
 
 	virtual void Save( tinyxml2::XMLPrinter* );
 	virtual void Load( const tinyxml2::XMLElement* doc );
+	// If an intrinsic sub item has a trait - say, FIRE - that
+	// implies that the parent is immune to fire. Apply() sets
+	// basic sanity flags.
+	void Apply( const GameItem* intrinsic );	
 
 	const char* Name() const			{ return name.c_str(); }
 	const char* ResourceName() const	{ return resource.c_str(); }
@@ -140,13 +152,56 @@ public:
 		HARDPOINT_ALTHAND	= (1<<7),	// this attaches to the alternate hand (non-trigger) hardpoint
 		HARDPOINT_HEAD		= (1<<8),	// this attaches to the head hardpoint
 		HARDPOINT_SHIELD	= (1<<9),	// this attaches to the shield hardpoint
+
+		IMMUNE_FIRE			= (1<<10),
+		FLAMMABLE			= (1<<11),
+		IMMUNE_ENERGY		= (1<<12),
+
+		EFFECT_FIRE			= (1<<13),
+		EFFECT_ENERGY		= (1<<14),
 	};
 
-	grinliz::CStr< MAX_ITEM_NAME >		name;		// name of the item 
+	grinliz::CStr< MAX_ITEM_NAME >		name;		// name of the item
+	grinliz::CStr< MAX_ITEM_NAME >		key;		// modified name, for storage. not serialized.
 	grinliz::CStr< EL_RES_NAME_LEN >	resource;	// resource used to  render the item
 	int flags;				// flags that define this item; 'constant'
+	float mass;				// mass (kg)
 	int	primaryTeam;		// who owns this items
+	DamageDesc meleeDamage;	// a multiplier of the base (effective mass) and other modifiers
+	DamageDesc rangedDamage;// a multiplier of the mass
 	U32 coolDownTime;		// time between uses
+
+	float hp;				// current hp for this item
+
+	// Group all the copy/init in one place!
+	void CopyFrom( const GameItem* rhs ) {
+		if ( rhs ) {
+			name			= rhs->name;
+			key				= rhs->key;
+			resource		= rhs->resource;
+			flags			= rhs->flags;
+			mass			= rhs->mass;
+			primaryTeam		= rhs->primaryTeam;
+			meleeDamage		= rhs->meleeDamage;
+			rangedDamage	= rhs->rangedDamage;
+			coolDownTime	= rhs->coolDownTime;
+
+			hp				= rhs->hp;
+		}
+		else {
+			name.Clear();
+			key.Clear();
+			resource.Clear();
+			flags = 0;
+			mass = 100;
+			primaryTeam = 0;
+			meleeDamage.Set( 1, 0, 0 );
+			rangedDamage.Set( 1, 0, 0 );
+			coolDownTime = 1000;
+
+			hp = TotalHP();
+		}
+	}
 
 	virtual IMeleeWeaponItem*	ToMeleeWeapon()		{ return (flags & MELEE_WEAPON) ? this : 0; }
 	virtual IRangedWeaponItem*	ToRangedWeapon()	{ return (flags & RANGED_WEAPON) ? this : 0; }
@@ -168,6 +223,11 @@ public:
 		}
 		return false;
 	}
+
+	// Note that the current HP, if it has one, 
+	float TotalHP() const { return (float) mass; }
+
+private:
 };
 
 #endif // GAMEITEM_INCLUDED

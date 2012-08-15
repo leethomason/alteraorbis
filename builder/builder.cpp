@@ -120,6 +120,7 @@ void ModelHeader::Set(	const char* name, int nAtoms, int nTotalVertices, int nTo
 	this->nTotalIndices = nTotalIndices;
 	this->bounds = bounds;
 	memset( metaData, 0, sizeof(ModelMetaData)*EL_MAX_METADATA );
+	memset( effectData, 0, sizeof(ModelParticleEffect)*EL_MAX_MODEL_EFFECTS );
 }
 
 
@@ -156,6 +157,15 @@ void ModelHeader::Save( gamedb::WItem* parent )
 			data->SetFloat( "rotation", metaData[i].rotation );
 
 			data->SetString( "boneName", metaData[i].boneName.c_str() );
+		}
+	}
+
+	gamedb::WItem* effectNode = node->CreateChild( "effectData" );
+	for( int i=0; i<EL_MAX_MODEL_EFFECTS; ++i ) {
+		if ( !effectData[i].name.empty() ) {
+			gamedb::WItem* data = effectNode->CreateChild(i);
+			data->SetString( "metaData", effectData[i].metaData.c_str() );
+			data->SetString( "name", effectData[i].name.c_str() );
 		}
 	}
 
@@ -564,7 +574,7 @@ void ProcessModel( XMLElement* model )
 
 	int nMeta = 0;
 	for(	const XMLElement* metaEle = model->FirstChildElement( "meta" );
-			metaEle;
+			metaEle && nMeta < EL_MAX_METADATA;
 			metaEle = metaEle->NextSiblingElement( "meta" ) )
 	{
 		header.metaData[nMeta].name = metaEle->Attribute( "name" );
@@ -577,6 +587,16 @@ void ProcessModel( XMLElement* model )
 		}
 		header.metaData[nMeta].boneName = metaEle->Attribute( "boneName" );
 		++nMeta;
+	}
+
+	int nEffect = 0;
+	for(	const XMLElement* effectEle = model->FirstChildElement( "particle" );
+			effectEle && nEffect < EL_MAX_MODEL_EFFECTS;
+			effectEle = effectEle->NextSiblingElement( "particle" ))
+	{
+		header.effectData[nEffect].metaData = effectEle->Attribute( "meta" );
+		header.effectData[nEffect].name = effectEle->Attribute( "name" );
+		++nEffect;
 	}
 
 	gamedb::WItem* witem = writer->Root()->FetchChild( "models" )->CreateChild( assetName.c_str() );
