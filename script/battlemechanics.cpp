@@ -9,6 +9,7 @@
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/rendercomponent.h"
 #include "../xegame/itemcomponent.h"
+#include "../xegame/inventorycomponent.h"
 
 #include "../grinliz/glvector.h"
 #include "../grinliz/glgeometry.h"
@@ -101,10 +102,48 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* 
 			HealthComponent* targetHealth = GET_COMPONENT( target, HealthComponent );
 			if ( targetHealth ) {
 				DamageDesc dd;
-				weapon->GetDamageDesc( &dd );
-
+				CalcMeleeDamage( src, weapon, &dd );
 				targetHealth->DeltaHealth( -dd.Total() );
 			}
 		}
+	}
+}
+
+
+
+void BattleMechanics::CalcMeleeDamage( Chit* src, IMeleeWeaponItem* weapon, DamageDesc* dd )
+{
+	GameItem* item = weapon->GetItem();
+
+	InventoryComponent* inv = src->GetInventoryComponent();
+	GLASSERT( inv && item );
+	if ( !inv ) return;
+
+	grinliz::CArray< GameItem*, 4 > chain;
+	inv->GetChain( item, &chain );
+	GLASSERT( !chain.Empty() );
+
+	MathVector<float,DamageDesc::NUM_COMPONENTS> components = item->meleeDamage.components;
+	
+	static const float CHAIN_FRACTION = 0.5f;
+
+	// Compute the multiplier. It is the maximum of
+	// the item itself, and a percentage of the value 
+	// of the chain items. So a creature of fire
+	// will do some fire damage, even when using a
+	// normal sword.
+	for( int i=0; i<DamageDesc::NUM_COMPONENTS; ++i ) {
+		for( int j=1; j<chain.Size(); ++j ) {
+			components[i] = Max( components[i], CHAIN_FRACTION*chain[j]->meleeDamage.components[i] );
+		}
+	}
+
+	// That was the multiplier; the actual damage is based on the mass.
+	// How many strikes does it take a unit of equal
+	// mass to destroy a unit of the same mass?
+	static const float STRIKE_RATIO = 5.0f;
+
+	for( int i=0; i<DamageDesc::NUM_COMPONENTS; ++i ) {
+		dd->components[i] = components[i] * item->mass / STRIKE_RATIO;
 	}
 }

@@ -7,6 +7,7 @@
 
 #include "../grinliz/glcontainer.h"
 #include "../grinliz/glstringutil.h"
+#include "../grinliz/glmath.h"
 
 #include "../tinyxml2/tinyxml2.h"
 
@@ -58,21 +59,30 @@ class GameItem;
 
 class DamageDesc
 {
-private:
-
-	float kinetic;
-	float energy;
-	float fire;
-
 public:
-	DamageDesc() : kinetic(1), energy(0), fire(0) {}
+	enum {
+		KINETIC, ENERGY, FIRE, NUM_COMPONENTS
+	};
 
-	void Set( float _kinetic, float _energy, float _fire ) { kinetic = _kinetic; energy = _energy; fire = _fire; }
-	float Total() const { return kinetic + energy + fire; }
+	grinliz::MathVector<float,NUM_COMPONENTS> components;
 
-	float Kinetic() const	{ return kinetic; }
-	float Energy() const	{ return energy; }
-	float Fire() const		{ return fire; }
+	DamageDesc() { components[KINETIC] = 1; }
+
+	void Set( float _kinetic, float _energy, float _fire ) { 
+		components[KINETIC] = _kinetic;
+		components[ENERGY]  = _energy;
+		components[FIRE]    = _fire;
+	}
+	float Total() const { 
+		float total=0;
+		for( int i=0; i<NUM_COMPONENTS; ++i )
+			total += components[i];
+		return total;
+	}
+
+	float Kinetic() const	{ return components[KINETIC]; }
+	float Energy() const	{ return components[ENERGY]; }
+	float Fire() const		{ return components[FIRE]; }
 
 	void Save( const char* prefix, tinyxml2::XMLPrinter* );
 	void Load( const char* prefix, const tinyxml2::XMLElement* doc );
@@ -81,7 +91,6 @@ public:
 class IWeaponItem 
 {
 public:
-	//virtual void GetDamageDesc( DamageDesc* desc ) = 0;
 	virtual bool Ready( U32 time ) = 0;
 	virtual bool Use( U32 time ) = 0;
 	virtual GameItem* GetItem() = 0;
@@ -90,15 +99,12 @@ public:
 class IMeleeWeaponItem : virtual public IWeaponItem
 {
 public:
-	virtual void GetDamageDesc( DamageDesc* desc );
 };
 
 class IRangedWeaponItem : virtual public IWeaponItem
 {
 public:
-	virtual void GetDamageDesc( DamageDesc* desc );
 };
-
 
 // FIXME: memory pool
 class GameItem : private IMeleeWeaponItem, private IRangedWeaponItem
@@ -193,7 +199,7 @@ public:
 			key.Clear();
 			resource.Clear();
 			flags = 0;
-			mass = 100;
+			mass = 1;
 			primaryTeam = 0;
 			meleeDamage.Set( 1, 0, 0 );
 			rangedDamage.Set( 1, 0, 0 );

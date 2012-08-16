@@ -22,6 +22,8 @@ public:
 					  Chit* src,
 					  Chit* target );
 
+	void CalcMeleeDamage( Chit* src, IMeleeWeaponItem* weapon, DamageDesc* );
+
 	static int PrimaryTeam( Chit* src );
 
 private:

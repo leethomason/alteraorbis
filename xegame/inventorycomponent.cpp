@@ -1,6 +1,7 @@
 #include "inventorycomponent.h"
 #include "spatialcomponent.h"
 #include "rendercomponent.h"
+#include "itemcomponent.h"
 #include "chit.h"
 
 using namespace grinliz;
@@ -153,3 +154,43 @@ void InventoryComponent::GetWeapons( grinliz::CArray< GameItem*, EL_MAX_METADATA
 		}
 	}
 }
+
+
+void InventoryComponent::GetChain( GameItem* item, grinliz::CArray< GameItem*, 4 >* chain )
+{
+	chain->Clear();
+
+	// Is item equipped?
+	for( int i=0; i<equippedItems.Size(); ++i ) {
+		if ( &equippedItems[i] == item ) {
+			chain->Push( item );
+		}
+	}
+	if ( chain->Empty() )
+		return;
+
+	// If it's held at a hardpoint, add the hardpoint.
+	int attachment = item->AttachmentFlags();
+	int hardpoint  = item->HardpointFlags();
+
+	if ( attachment == GameItem::HELD_AT_HARDPOINT ) {
+		GLASSERT( hardpoint );
+		for( int i=0; i<equippedItems.Size(); ++i ) {
+			bool found = false;
+			if (    equippedItems[i].AttachmentFlags() == GameItem::INTRINSIC_AT_HARDPOINT
+				 && equippedItems[i].HardpointFlags()  == hardpoint )
+			{	
+				chain->Push( &equippedItems[i] );
+				found = true;
+			}
+			GLASSERT( found );
+		}
+	}
+
+	// Add the top level item.
+	GLASSERT( parentChit->GetItemComponent() );
+	if ( parentChit->GetItemComponent() ) {
+		chain->Push( parentChit->GetItemComponent()->GetItem() );
+	}
+}
+

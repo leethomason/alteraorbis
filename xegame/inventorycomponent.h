@@ -30,13 +30,13 @@ public:
 	void AddToInventory( const GameItem& item, bool equip );
 	void RemoveFromInventory( int slot );
 
-	int GetItemsOfType( int flags, grinliz::CDynArray<GameItem*>* arr ) const;
-
 	// Is carrying anything - primarily a query for the animation system.
 	GameItem* IsCarrying();
-
 	// Weapon in/is hand first. Followed by intrinsics.
 	void GetWeapons( grinliz::CArray< GameItem*, EL_MAX_METADATA >* weapons );
+	// Get the "chain" of items: held, intrinsic, parent.
+	// Will return an empty array if the item isn't equipped.
+	void GetChain( GameItem* item, grinliz::CArray< GameItem*, 4 >* chain );
 
 	static const char* HardpointFlagToName( int f );
 	static int HardpointNameToFlag( const char* name );

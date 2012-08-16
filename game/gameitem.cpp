@@ -74,9 +74,11 @@ void GameItem::Apply( const GameItem* intrinsic )
 }
 
 
+/*
 void IMeleeWeaponItem::GetDamageDesc( DamageDesc* dd )
 {
 	GameItem* item = GetItem();
+
 	// How many strikes does it take a unit of equal
 	// mass to destroy a unit of the same mass?
 	static const float STRIKE_RATIO = 5.0f;
@@ -89,9 +91,8 @@ void IMeleeWeaponItem::GetDamageDesc( DamageDesc* dd )
 
 void IRangedWeaponItem::GetDamageDesc( DamageDesc* dd )
 {
-	GLASSERT( 0 );	 // FIXME
 }
-
+*/
 
 void DamageDesc::Save( const char* prefix, tinyxml2::XMLPrinter* )
 {
@@ -101,11 +102,9 @@ void DamageDesc::Save( const char* prefix, tinyxml2::XMLPrinter* )
 
 void DamageDesc::Load( const char* prefix, const tinyxml2::XMLElement* doc )
 {
-	kinetic = 0;
-	energy = 0;
-	fire = 0;
+	components.Zero();
 
-	doc->QueryFloatAttribute( "kinetic", &kinetic );
-	doc->QueryFloatAttribute( "energy", &energy );
-	doc->QueryFloatAttribute( "fire", &fire );
+	doc->QueryFloatAttribute( "kinetic", &components[KINETIC] );
+	doc->QueryFloatAttribute( "energy", &components[ENERGY] );
+	doc->QueryFloatAttribute( "fire", &components[FIRE] );
 }

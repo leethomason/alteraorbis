@@ -170,6 +170,18 @@ template <class T> inline T Average( T y0, T y1 )
 }
 
 
+template< class T, int SIZE >
+class MathVector
+{
+public:
+	MathVector() { Zero(); }
+
+	void Zero() { for ( int i=0; i<SIZE; ++i ) vec[i] = 0; }
+	T& operator[](int i)				{ GLASSERT( i>=0 && i<SIZE); return vec[i]; }
+	const T& operator[](int i) const	{ GLASSERT( i>=0 && i<SIZE); return vec[i]; }
+
+	T vec[SIZE];
+};
 
 };	// namespace grinliz
 
