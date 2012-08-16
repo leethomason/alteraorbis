@@ -62,6 +62,9 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 	if ( StrEqual( hardpoint, "althand" ))	flags |= HARDPOINT_ALTHAND;
 	if ( StrEqual( hardpoint, "head" ))		flags |= HARDPOINT_HEAD;
 	if ( StrEqual( hardpoint, "shield" ))	flags |= HARDPOINT_SHIELD;
+
+	hp = mass;
+	ele->QueryFloatAttribute( "hp", &hp );
 }
 
 

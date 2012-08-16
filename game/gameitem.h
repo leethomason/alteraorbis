@@ -64,9 +64,10 @@ public:
 		KINETIC, ENERGY, FIRE, NUM_COMPONENTS
 	};
 
-	grinliz::MathVector<float,NUM_COMPONENTS> components;
+	typedef grinliz::MathVector<float,NUM_COMPONENTS> Vector;
+	Vector components;
 
-	DamageDesc() { components[KINETIC] = 1; }
+	DamageDesc() {}
 
 	void Set( float _kinetic, float _energy, float _fire ) { 
 		components[KINETIC] = _kinetic;
