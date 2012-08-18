@@ -198,6 +198,8 @@ void RenderComponent::DoTick( U32 deltaTime )
 			}
 		}
 	}
+	model[0]->EmitParticles( engine->particleSystem, engine->camera.EyeDir3(), deltaTime );
+
 	// Position the attachments
 	for( int i=1; i<NUM_MODELS; ++i ) {
 		if ( model[i] ) {

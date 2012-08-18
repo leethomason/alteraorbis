@@ -174,17 +174,17 @@ void InventoryComponent::GetChain( GameItem* item, grinliz::CArray< GameItem*, 4
 	int hardpoint  = item->HardpointFlags();
 
 	if ( attachment == GameItem::HELD_AT_HARDPOINT ) {
+		bool found = false;
 		GLASSERT( hardpoint );
 		for( int i=0; i<equippedItems.Size(); ++i ) {
-			bool found = false;
 			if (    equippedItems[i].AttachmentFlags() == GameItem::INTRINSIC_AT_HARDPOINT
 				 && equippedItems[i].HardpointFlags()  == hardpoint )
 			{	
 				chain->Push( &equippedItems[i] );
 				found = true;
 			}
-			GLASSERT( found );
 		}
+		GLASSERT( found );
 	}
 
 	// Add the top level item.

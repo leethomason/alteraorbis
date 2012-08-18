@@ -51,8 +51,10 @@
     <meta animation="melee" name="impact" time="400.0" />    
   </animation>
   <animation filename="mantis/mantis.scml" assetName="mantisAnimation" pur="340.5" >
+    <meta animation="melee" name="impact" time="300.0" />
   </animation>
   <animation filename="balrog/balrog.scml" assetName="balrogAnimation" pur="339">
+    <meta animation="melee" name="impact" time="800.0" />
   </animation>
  
   <!-- Tactical Sprite models are centered at (0,0,0) -->

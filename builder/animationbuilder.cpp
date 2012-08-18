@@ -140,13 +140,15 @@ void ProcessAnimation( const tinyxml2::XMLElement* element, gamedb::WItem* witem
 	printf( "Animation path='%s' name='%s'\n", pathName.c_str(), assetName.c_str() );
 
 	// -- Process the SCML file --- //
-	FILE* fp = fopen( pathName.c_str(), "r" );
-	if ( !fp ) {
-		ExitError( "Animation", pathName.c_str(), assetName.c_str(), "could not load file" );
-	}
+	//FILE* fp = fopen( pathName.c_str(), "r" );
+	//if ( !fp ) {
+	//	ExitError( "Animation", pathName.c_str(), assetName.c_str(), "could not load file" );
+	//}
 	XMLDocument doc;
-	doc.LoadFile( fp );
-	printf( "ErrorID=%d\n", doc.ErrorID() );
+	doc.LoadFile( pathName.c_str() );
+	if ( doc.Error() ) {
+		ExitError( "Animation", pathName.c_str(), assetName.c_str(), "tinyxml-2 could not parse scml" );
+	}
 
 	gamedb::WItem* root = witem->CreateChild( assetName.c_str() );	// "humanFemaleAnimation" 
 
@@ -214,5 +216,5 @@ void ProcessAnimation( const tinyxml2::XMLElement* element, gamedb::WItem* witem
 		eventItem->SetFloat( "time", time );
 	}
 
-	fclose( fp );
+//	fclose( fp );
 }

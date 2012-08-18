@@ -80,7 +80,7 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* 
 	// Get origin and direction of melee attack,
 	// then send messages to everyone hit. Everything
 	// with a spatial component is tracked by the 
-	// chitBag, so it's a very handly query.
+	// chitBag, so it's a very handy query.
 
 	Vector2F srcPos = src->GetSpatialComponent()->GetPosition2D();
 	Rectangle2F b;
@@ -103,11 +103,14 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* 
 			if ( targetHealth ) {
 				DamageDesc dd;
 				CalcMeleeDamage( src, weapon, &dd );
-				targetHealth->DeltaHealth( -dd.Total() );
 
-				GLOUTPUT(( "Chit %d hit %d for %.1f hp, which has %.1f hp remaining\n", 
-							src->ID(), target->ID(), dd.Total(), 
-							target->GetItemComponent()->GetItem()->hp ));
+				GLLOG(( "Chit %3d '%s' using '%s' hit %3d '%s' dd=[%5.1f %5.1f %5.1f]\n", 
+						src->ID(), src->GetItemComponent()->GetItem()->Name(),
+						weapon->GetItem()->Name(),
+						target->ID(), target->GetItemComponent()->GetItem()->Name(),
+						dd.components[0], dd.components[1], dd.components[2] ));
+
+				targetHealth->DeltaHealth( -dd.Total() );
 			}
 		}
 	}

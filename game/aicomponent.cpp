@@ -37,6 +37,18 @@ AIComponent::~AIComponent()
 }
 
 
+/*
+bool AIComponent::AwareOfEnemy() const {
+	for( int i=0; i<enemyList.Size(); ++i ) {
+		Chit* chit = parentChit->GetChitBag()->GetChit( enemyList[i] );
+		if ( chit )
+			return true;
+	}
+	return false;
+}
+*/
+
+
 int AIComponent::GetTeamStatus( Chit* other )
 {
 	// FIXME: placeholder friend/enemy logic
