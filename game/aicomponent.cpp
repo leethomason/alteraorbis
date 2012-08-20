@@ -37,18 +37,6 @@ AIComponent::~AIComponent()
 }
 
 
-/*
-bool AIComponent::AwareOfEnemy() const {
-	for( int i=0; i<enemyList.Size(); ++i ) {
-		Chit* chit = parentChit->GetChitBag()->GetChit( enemyList[i] );
-		if ( chit )
-			return true;
-	}
-	return false;
-}
-*/
-
-
 int AIComponent::GetTeamStatus( Chit* other )
 {
 	// FIXME: placeholder friend/enemy logic
@@ -197,12 +185,8 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 								// was lost before impact, in which case this assert should
 								// be removed.
 
-		CArray< GameItem*, EL_MAX_METADATA > weapons;
-		inventory->GetWeapons( &weapons );
-		GameItem* item=0;
-		if ( weapons.Size() ) item = weapons[0];
-
-		if ( render && inventory && item && item->ToMeleeWeapon() ) { /* okay */ }
+		IMeleeWeaponItem* item=inventory->GetMeleeWeapon();
+		if ( render && inventory && item  ) { /* okay */ }
 		else return;
 
 		Matrix4 xform;
@@ -211,6 +195,6 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 
 		engine->particleSystem->EmitPD( "derez", pos, V3F_UP, engine->camera.EyeDir3(), 0 );
 		
-		battleMechanics.MeleeAttack( engine, parentChit, item->ToMeleeWeapon() );
+		battleMechanics.MeleeAttack( engine, parentChit, item );
 	}
 }

@@ -57,12 +57,16 @@
     <meta animation="melee" name="impact" time="800.0" />
   </animation>
  
-  <!-- Tactical Sprite models are centered at (0,0,0) -->
+  <!-- Tactical Sprite models are centered at (0,0,0) 
+       ALL sprites must have a 'trigger' and a 'target' to work correctly.
+       'trigger' should be first.
+  -->
   <model filename="human.ac" modelName="humanFemale" animation="humanFemaleAnimation" origin="1 0 0" shading="flat" polyRemoval="pre">
     <meta name="trigger" pos="0.84 0.43 -0.003" rot="1 0 0 90" boneName="arm.lower.right" />
     <meta name="target"  pos="1 0.68 0" />
   </model>
   <model filename="mantis.ac" animation="mantisAnimation" shading="flat" polyRemoval="pre">
+    <meta name="trigger" pos="-0.08 0.26 0.47" />
     <meta name="target"  pos="0 0.30 0" />
   </model>  
   <model filename="balrog.ac" animation="balrogAnimation" shading="flat" polyRemoval="pre">

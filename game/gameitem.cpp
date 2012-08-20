@@ -1,6 +1,7 @@
 #include "gameitem.h"
 #include "../grinliz/glstringutil.h"
 #include "../tinyxml2/tinyxml2.h"
+#include "../xegame/inventorycomponent.h"
 
 using namespace grinliz;
 using namespace tinyxml2;
@@ -31,10 +32,6 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 	READ_FLAG( flags, f, INTRINSIC_FREE );
 	READ_FLAG( flags, f, HELD_AT_HARDPOINT );
 	READ_FLAG( flags, f, HELD_FREE );
-	READ_FLAG( flags, f, HARDPOINT_TRIGGER );
-	READ_FLAG( flags, f, HARDPOINT_ALTHAND );
-	READ_FLAG( flags, f, HARDPOINT_HEAD );
-	READ_FLAG( flags, f, HARDPOINT_SHIELD );
 	READ_FLAG( flags, f, IMMUNE_FIRE );
 	READ_FLAG( flags, f, FLAMMABLE );
 	READ_FLAG( flags, f, IMMUNE_ENERGY );
@@ -57,11 +54,12 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 		rangedDamage.Load( "ranged", rangedEle );
 	}
 
-	const char* hardpoint = ele->Attribute( "hardpoint" );
-	if ( StrEqual( hardpoint, "trigger" ))	flags |= HARDPOINT_TRIGGER;
-	if ( StrEqual( hardpoint, "althand" ))	flags |= HARDPOINT_ALTHAND;
-	if ( StrEqual( hardpoint, "head" ))		flags |= HARDPOINT_HEAD;
-	if ( StrEqual( hardpoint, "shield" ))	flags |= HARDPOINT_SHIELD;
+	hardpoint = NO_HARDPOINT;
+	const char* h = ele->Attribute( "hardpoint" );
+	if ( h ) {
+		hardpoint = InventoryComponent::HardpointNameToFlag( h );
+		GLASSERT( hardpoint >= 0 );
+	}
 
 	hp = mass;
 	ele->QueryFloatAttribute( "hp", &hp );

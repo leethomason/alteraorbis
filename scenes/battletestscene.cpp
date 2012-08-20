@@ -243,9 +243,11 @@ void BattleTestScene::GoScene()
 	}
 
 	// Trigger the AI to do something.
-	AwarenessChitEvent event( LEFT, b );
-	event.SetItemFilter( GameItem::CHARACTER );
-	chitBag.QueueEvent( event );
+	for( int i=LEFT; i<=RIGHT; ++i ) {
+		AwarenessChitEvent event( i, b );
+		event.SetItemFilter( GameItem::CHARACTER );
+		chitBag.QueueEvent( event );
+	}
 }
 
 		
@@ -292,20 +294,26 @@ void BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int 
 	chit->GetSpatialComponent()->SetPosYRot( (float)p.x+0.5f, 0, (float)p.y+0.5f, (float)random.Rand( 360 ) );
 
 	for( int i=1; i<itemDefArr.Size(); ++i ) {
-		GameItem intrinsic( *(itemDefArr[i] ));
-		inv->AddToInventory( intrinsic, true );
+		inv->AddToInventory( new GameItem( *(itemDefArr[i]) ), true );
 	}
 
 	if ( type == HUMAN ) {
 		if( loadout == MELEE_WEAPON ) {
 			const GameItem *knife = itemStorage.Get( "testknife" );
 			GLASSERT( knife );
-			inv->AddToInventory( *knife, true );
+			inv->AddToInventory( new GameItem(*knife), true );
 		}
 		else if ( loadout == PISTOL ) {
 			const GameItem* gun = itemStorage.Get( "testgun" );
 			GLASSERT( gun );
-			inv->AddToInventory( *gun, true );
+			inv->AddToInventory( new GameItem(*gun), true );
+		}
+	}
+	else if ( type == BALROG ) {
+		if ( loadout == MELEE_WEAPON ) {
+			const GameItem* ax = itemStorage.Get( "ax" );
+			GLASSERT( ax );
+			inv->AddToInventory( new GameItem(*ax), true );
 		}
 	}
 }
