@@ -1,8 +1,8 @@
 - combat test scene
 	- properly hook up items and such, so that items, health, all be driven correctly
-	- data driven item creation
+	X data driven item creation
 	- buttons to select scenario, load items
-	- leaving guy standing after battle
+	X leaving guy standing after battle
 	- removing unit "clumping" (3yr old soccer team). Basic formation?
 	- unique look for units so teams can be distinguished
 	- impact (light/heavy)

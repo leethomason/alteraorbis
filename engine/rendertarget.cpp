@@ -31,13 +31,13 @@ RenderTarget::RenderTarget( int width, int height, bool depthBuffer )
 	glBindFramebuffer( GL_FRAMEBUFFER, 0 );
 	CHECK_GL_ERROR;
 
-	gpuMem.w = width;
-	gpuMem.h = height;
-	gpuMem.format = Texture::RGB16;
-	gpuMem.flags = Texture::PARAM_LINEAR;
-	gpuMem.item = 0;
-	gpuMem.inUse = true;
-	gpuMem.glID = renderTextureID;
+//	gpuMem.w = width;
+//	gpuMem.h = height;
+//	gpuMem.format = Texture::RGB16;
+//	gpuMem.flags = Texture::PARAM_LINEAR;
+//	gpuMem.item = 0;
+//	gpuMem.inUse = true;
+//	gpuMem.glID = renderTextureID;
 
 	texture.w = width;
 	texture.h = height;
@@ -45,7 +45,7 @@ RenderTarget::RenderTarget( int width, int height, bool depthBuffer )
 	texture.flags = Texture::PARAM_LINEAR;
 	texture.creator = 0;
 	texture.item = 0;
-	texture.gpuMem = &gpuMem;
+	texture.glID= renderTextureID;
 }
 
 
@@ -65,11 +65,11 @@ void RenderTarget::SetActive( bool active, Engine* engine )
 
 	if ( active ) {
 		if ( !screenport ) {
-			screenport = new Screenport( gpuMem.w, gpuMem.h, gpuMem.h );
+			screenport = new Screenport( texture.w, texture.h, texture.h );
 		}
 		savedScreenport = engine->GetScreenportMutable();
 		engine->SetScreenport( screenport );
-		screenport->Resize( gpuMem.w, gpuMem.h );
+		screenport->Resize( texture.w, texture.h );
 
 		glBindFramebuffer( GL_FRAMEBUFFER, frameBufferID );
 		glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderTextureID, 0);

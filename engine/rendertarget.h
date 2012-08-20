@@ -21,15 +21,15 @@ public:
 	Texture* GetTexture() { return &texture; }
 	Screenport* screenport;
 
-	int Width() const	{ return gpuMem.w; };
-	int Height() const	{ return gpuMem.h; }
+	int Width() const	{ return texture.w; };
+	int Height() const	{ return texture.h; }
 
 private:
 	U32 frameBufferID, 
 		depthBufferID,
 		renderTextureID;
 
-	GPUMem gpuMem;
+	//GPUMem gpuMem;
 	Texture texture;
 	Screenport* savedScreenport;
 };

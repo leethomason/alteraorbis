@@ -38,19 +38,18 @@ TextureManager::~TextureManager()
 
 void TextureManager::DeviceLoss()
 {
-	ContextShift();
-
-	for( int i=0; i<gpuMemArr.Size(); ++i ) {
-		if ( gpuMemArr[i].glID ) {
-			glDeleteTextures( 1, (const GLuint*) &gpuMemArr[i].glID );
+	for( int i=0; i<textureArr.Size(); ++i ) {
+		if ( textureArr[i].glID ) {
+			glDeleteTextures( 1, (const GLuint*) &textureArr[i].glID );
+			textureArr[i].glID = 0;
 		}
 	}
-	gpuMap.RemoveAll();
-	gpuMemArr.Clear();
+	//gpuMap.RemoveAll();
+	//gpuMemArr.Clear();
 
-	for( int i=0; i<textureArr.Size(); ++i ) {
-		textureArr[i].gpuMem = 0;
-	}
+	//for( int i=0; i<textureArr.Size(); ++i ) {
+	//	textureArr[i].gpuMem = 0;
+	//}
 }
 
 
@@ -164,6 +163,7 @@ Texture* TextureManager::CreateTexture( const char* name, int w, int h, int form
 }
 
 
+/*
 void TextureManager::DeleteTexture( Texture* t )
 {
 	GLASSERT( texMap.Query( t->Name(), 0 ) );
@@ -176,11 +176,13 @@ void TextureManager::DeleteTexture( Texture* t )
 	++emptySpace;
 	memset( t, 0, sizeof( Texture ) );
 }
+*/
 
 
 void TextureManager::ContextShift()
 {
-	for( int i=0; i<textureArr.Size(); ++i ) {
+	DeviceLoss();
+/*	for( int i=0; i<textureArr.Size(); ++i ) {
 		if ( textureArr[i].gpuMem ) {
 			GLASSERT( textureArr[i].gpuMem->inUse );
 			// const to the texture, not const to this object.
@@ -190,9 +192,10 @@ void TextureManager::ContextShift()
 			textureArr[i].gpuMem = 0;
 		}
 	}
+	*/
 }
 
-
+#if 0
 const GPUMem* TextureManager::AllocGPUMemory(	int w, int h, int format, int flags, 
 												const gamedb::Item* item, bool* inCache )
 {
@@ -249,7 +252,7 @@ const GPUMem* TextureManager::AllocGPUMemory(	int w, int h, int format, int flag
 	}
 	return gpu;
 }
-
+#endif
 
 void Texture::Set( const char* p_name, int p_w, int p_h, int p_format, int p_flags )
 {
@@ -260,41 +263,35 @@ void Texture::Set( const char* p_name, int p_w, int p_h, int p_format, int p_fla
 	flags = p_flags;
 	creator = 0;
 	item = 0;
-	gpuMem = 0;
+	glID = 0;
 }
 
 
 U32 Texture::GLID() 
 {
-	if ( gpuMem ) 
-		return gpuMem->glID;
+	if ( glID ) 
+		return glID;
 	
 	TextureManager* manager = TextureManager::Instance();
-	bool inCache = false;
 
-	GLOUTPUT(( "Allocating: %s\n", this->name.c_str() ));
-	// Allocate memory to store this. The memory should always be available. We
-	// may even get memory that already contains the correct pixels.
-	gpuMem = manager->AllocGPUMemory( w, h, format, flags, item, &inCache );
+	glID = manager->CreateGLTexture( w, h, format, flags );
 
-	if ( creator || !inCache ) {
-		// Need to actually generate the texture. Either pull it from 
-		// the database, or call the ICreator to push it to the GPU.
-		if ( item ) {
-			const gamedb::Reader* database = gamedb::Reader::GetContext( item );
-			GLASSERT( item->HasAttribute( "pixels" ) );
-			int size;
-			const void* pixels = database->AccessData( item, "pixels", &size );
-			Upload( pixels, size );
-		}
-		else if ( creator ) {
-			creator->CreateTexture( this );
-		}
-		else {
-			GLASSERT( 0 );
-		}
+	// Need to actually generate the texture. Either pull it from 
+	// the database, or call the ICreator to push it to the GPU.
+	if ( item ) {
+		const gamedb::Reader* database = gamedb::Reader::GetContext( item );
+		GLASSERT( item->HasAttribute( "pixels" ) );
+		int size;
+		const void* pixels = database->AccessData( item, "pixels", &size );
+		Upload( pixels, size );
 	}
-	return gpuMem->glID;
+	else if ( creator ) {
+		creator->CreateTexture( this );
+	}
+	else {
+		GLASSERT( 0 );
+	}
+	return glID;
 }
 
 
@@ -390,13 +387,11 @@ void Texture::Upload( const void* pixels, int size )
 {
 	GLASSERT( pixels );
 	GLASSERT( size == BytesInImage() );
-	GLID();
-	GLASSERT( gpuMem );
-	GLASSERT( gpuMem->glID );
+	GLASSERT( glID );
 
 	int glFormat, glType;
 	TextureManager::Instance()->CalcOpenGL( format, &glFormat, &glType );
-	glBindTexture( GL_TEXTURE_2D, gpuMem->glID );
+	glBindTexture( GL_TEXTURE_2D, glID );
 
 #if defined( UFO_WIN32_SDL ) && defined( DEBUG )
 	int data;
@@ -440,6 +435,7 @@ U32 TextureManager::CalcTextureMem() const
 }
 
 
+/*
 U32 TextureManager::CalcGPUMem() const
 {
 	U32 mem = 0;
@@ -448,4 +444,4 @@ U32 TextureManager::CalcGPUMem() const
 	}
 	return mem;
 }
-
+*/
