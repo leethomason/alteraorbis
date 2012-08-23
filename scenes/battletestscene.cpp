@@ -180,6 +180,7 @@ void BattleTestScene::LoadMap()
 
 	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase(), map );	
 	engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
+	engine->SetGlow( true );
 
 	for ( int i=0; i<blocks.Size(); ++i ) {
 		Chit* chit = chitBag.NewChit();
@@ -212,6 +213,14 @@ void BattleTestScene::LoadMap()
 						  225.f );	// rotation
 }
 
+
+
+void BattleTestScene::HandleHotKeyMask( int mask )
+{
+	if ( mask == GAME_HK_TOGGLE_GLOW ) {
+		engine->SetGlow( !engine->Glow() );
+	}
+}
 
 void BattleTestScene::GoScene()
 {

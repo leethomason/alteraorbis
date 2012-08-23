@@ -969,7 +969,8 @@ void WorldMap::DrawZones()
 }
 
 
-void WorldMap::Draw3D(  const grinliz::Color3F& colorMult, GPUShader::StencilMode mode )
+
+void WorldMap::Submit( GPUShader* shader, bool emissiveOnly )
 {
 	GPUStream stream;
 
@@ -980,15 +981,25 @@ void WorldMap::Draw3D(  const grinliz::Color3F& colorMult, GPUShader::StencilMod
 	stream.texture0Offset = PTVertex::TEXTURE_OFFSET;
 	stream.nTexture0 = 2;
 
+	for( int i=0; i<LOWER_TYPES; ++i ) {
+		shader->SetStream( stream, vertex[i].Mem(), index[i].Size(), index[i].Mem() );
+		if ( emissiveOnly && !texture[i]->Emissive() )
+			continue;
+		shader->SetTexture0( texture[i] );
+		shader->Draw();
+	}
+
+}
+
+
+void WorldMap::Draw3D(  const grinliz::Color3F& colorMult, GPUShader::StencilMode mode )
+{
+
 	// Real code to draw the map:
 	FlatShader shader;
 	shader.SetColor( colorMult.r, colorMult.g, colorMult.b );
 	shader.SetStencilMode( mode );
-	for( int i=0; i<LOWER_TYPES; ++i ) {
-		shader.SetStream( stream, vertex[i].Mem(), index[i].Size(), index[i].Mem() );
-		shader.SetTexture0( texture[i] );
-		shader.Draw();
-	}
+	Submit( &shader, false );
 
 	if ( debugRegionOverlay ) {
 		if ( mode == GPUShader::STENCIL_CLEAR ) {

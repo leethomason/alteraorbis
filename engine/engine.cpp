@@ -314,8 +314,10 @@ void Engine::Draw( U32 deltaTime )
 		// Render flat black everything that does NOT emit light:
 		renderQueue->Submit( &black, 0, 0, 0, 0, ShaderManager::EMISSIVE_EXCLUSIVE );
 		// Submit everything that emits light:
+		if ( map ) {
+			map->Submit( &engineShaders->emissive, true );
+		}
 		renderQueue->Submit( 0, 0, 0, 0, ShaderManager::EMISSIVE_EXCLUSIVE, 0 );
-		
 		// recove the shader settings
 		engineShaders->ClearEmissiveEx();
 

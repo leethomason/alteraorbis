@@ -515,7 +515,7 @@ void AnimationScene::Draw3D( U32 deltaTime )
 			model[0]->SetBoneFilter( exportCount );
 		}
 
-		bool glow = engine->GetGlow();
+		bool glow = engine->Glow();
 		engine->SetGlow( false );
 		engine->Draw( deltaTime );
 		engine->SetGlow( glow );
