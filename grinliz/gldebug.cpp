@@ -273,6 +273,31 @@ void dprintf( const char* format, ... )
 	printf( "%s", buffer );
 	fflush( 0 );
 }
+
+
+FILE* logFP = 0;
+
+void logprintf( const char* format, ... )
+{
+    va_list     va;
+    char		buffer[1024];
+
+    //
+    //  format and output the message..
+    //
+    va_start( va, format );
+#ifdef _MSC_VER
+    vsprintf_s( buffer, 1024, format, va );
+#else
+    vsnprintf( buffer, 1024, format, va );
+#endif
+    va_end( va );
+
+	if ( !logFP ) {
+		logFP = fopen( "log.txt", "w" );
+	}
+	fprintf( logFP, "%s", buffer );
+}
 #endif
 
 

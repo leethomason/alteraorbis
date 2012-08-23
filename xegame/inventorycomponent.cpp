@@ -11,14 +11,25 @@ void InventoryComponent::OnAdd( Chit* chit )
 {
 	Component::OnAdd( chit );
 	hardpoints = -1;
-	hardpointsInUse = 0;
-	equippedItems.Clear();
 	packItems.Clear();
+	freeItems.Clear();
+	for( int i=0; i<NUM_HARDPOINTS; ++i ) {
+		delete intrinsicAt[i];
+		intrinsicAt[i] = 0;
+		delete heldAt[i];
+		heldAt[i] = 0;
+	}
 }
 
 
 void InventoryComponent::OnRemove()
 {
+	for( int i=0; i<NUM_HARDPOINTS; ++i ) {
+		delete intrinsicAt[i];
+		intrinsicAt[i] = 0;
+		delete heldAt[i];
+		heldAt[i] = 0;
+	}
 	Component::OnRemove();
 }
 
@@ -29,74 +40,75 @@ void InventoryComponent::DebugStr( grinliz::GLString* str )
 }
 
 
+static const char* gHardpointNames[NUM_HARDPOINTS] = {
+	"trigger",
+	"althand",
+	"head",
+	"shield"
+};
+
 const char* InventoryComponent::HardpointFlagToName( int f )
 {
-	if ( f & GameItem::HARDPOINT_TRIGGER )
-		return "trigger";
-	else if ( f & GameItem::HARDPOINT_SHIELD )
-		return "shield";
+	GLASSERT( f >= 0 && f < NUM_HARDPOINTS );
+	if ( f >= 0 && f < NUM_HARDPOINTS ) {
+		return gHardpointNames[f];
+	}
 	return 0;
 }
 
 
 int InventoryComponent::HardpointNameToFlag( const char* name )
 {
-	if ( StrEqual( name, "trigger" ) ) 
-		return GameItem::HARDPOINT_TRIGGER;
-	else if ( StrEqual( name, "althand" ))
-		return GameItem::HARDPOINT_ALTHAND;
-	else if ( StrEqual( name, "head" ))
-		return GameItem::HARDPOINT_HEAD;
-	else if ( StrEqual( name, "shield" ))
-		return GameItem::HARDPOINT_SHIELD;
-	return 0;
+	for( int i=0; i<NUM_HARDPOINTS; ++i ) {
+		if ( StrEqual( name, gHardpointNames[i] ) )
+			return i;
+	}
+	return NO_HARDPOINT;
 }
 
 
-void InventoryComponent::AddToInventory( const GameItem& item, bool equip )
+bool InventoryComponent::AddToInventory( GameItem* item, bool equip )
 {
 	RenderComponent* rc = parentChit->GetRenderComponent();
 	if ( hardpoints == -1 ) {
 		hardpoints = 0;
-		hardpointsInUse = 0;
 		if ( rc ) {
 			for( int i=0; i<EL_MAX_METADATA; ++i ) {
 				const char* name = rc->GetMetaData(i);
 				int h = HardpointNameToFlag( name );		// often 0; lots of metadata isn't a hardpoint
-				hardpoints |= h;	
+				hardpoints |= (1<<h);	
 			}
 		}
 	}
-	GLASSERT( hardpoints != -1 );
-	if ( hardpoints == -1 ) return;
-
-	int attachment = item.AttachmentFlags();
+	int attachment = item->AttachmentFlags();
 	bool equipped = false;
 	
 	if ( attachment == GameItem::INTRINSIC_AT_HARDPOINT ) {
-		GLASSERT( item.HardpointFlags() & hardpoints );	// be sure the attachment point and hardpoint line up.
-		equippedItems.Push( item );
+		GLASSERT( (1<<item->hardpoint) & hardpoints );	// be sure the attachment point and hardpoint line up.
+		GLASSERT( intrinsicAt[item->hardpoint] == 0 );
+		intrinsicAt[item->hardpoint] = item;
 		equipped = true;
 	}
-	else if ( attachment == GameItem::INTRINSIC_FREE ) {
-		equippedItems.Push( item );
+	else if (    attachment == GameItem::INTRINSIC_FREE
+		      || attachment == GameItem::HELD_FREE) {
+		freeItems.Push( item );
 		equipped = true;
-	}
+	} 
 	else if ( attachment == GameItem::HELD_AT_HARDPOINT ) {
 		if ( equip ) {
 			// check that the needed hardpoint is free.
-			if (    (( hardpoints & item.HardpointFlags() ) !=0 )			// does the hardpoint exist?
-				 && (( hardpointsInUse & item.HardpointFlags() ) == 0 ) )	// is the hardpoint available?
+			if (    intrinsicAt[item->hardpoint]			// does the hardpoint exist?
+			     && ( heldAt[item->hardpoint] == 0 ) )		// is the hardpoint available?
 			{
-				hardpointsInUse |= item.HardpointFlags();
-				equippedItems.Push( item );
+				heldAt[item->hardpoint] = item;
 				equipped = true;
 
+				// Tell the render component to render.
 				GLASSERT( rc );
 				if ( rc ) {
-					const char* hardpoint = HardpointFlagToName( item.HardpointFlags() );
-					GLASSERT( hardpoint );
-					rc->Attach( hardpoint, item.ResourceName() );
+					const char* n = HardpointFlagToName( item->hardpoint );
+					GLASSERT( n );
+					rc->Attach( n, item->ResourceName() );
 				}
 			}
 		}
@@ -104,91 +116,50 @@ void InventoryComponent::AddToInventory( const GameItem& item, bool equip )
 			packItems.Push( item );
 		}
 	}
-	else if ( attachment == GameItem::HELD_FREE ) {
-		if ( equip ) {
-			equippedItems.Push( item );
-			equipped = true;
-		}
-		else {
-			packItems.Push( item );
-		}
-	}
+	return equipped;
 }
 
 
 GameItem* InventoryComponent::IsCarrying()
 {
-	// Do we have a held item on an "trigger" hardpoint?
-	if ( hardpointsInUse & GameItem::HARDPOINT_TRIGGER ) {
-		for( int i=0; i<equippedItems.Size(); ++i ) {
-			if (    equippedItems[i].AttachmentFlags() == GameItem::HELD_AT_HARDPOINT
-				 && equippedItems[i].HardpointFlags() == GameItem::HARDPOINT_TRIGGER ) 
-			{
-				return &equippedItems[i];
-			}
-		}
-		GLASSERT( 0 );	// the hardpoint is in use; it should have been found.
-	}
-	return 0;
+	return heldAt[HARDPOINT_TRIGGER];
 }
 
 
-void InventoryComponent::GetWeapons( grinliz::CArray< GameItem*, EL_MAX_METADATA >* weapons )
+void InventoryComponent::GetWeapons( grinliz::CArray< GameItem*, NUM_HARDPOINTS >* weapons )
 {
 	weapons->Clear();
-	for( int i=0; i<equippedItems.Size(); ++i ) {
-		GameItem* item = &equippedItems[i];
-		if ( item->ToWeapon() ) {
-			if ( item->AttachmentFlags() == GameItem::INTRINSIC_AT_HARDPOINT ) {
-				// may  be overridden by a held item.
-				if ( hardpointsInUse & item->HardpointFlags() ) {
-					// yep; holding something else at this slot.
-				}
-				else {
-					weapons->Push( item );
-				}
-			}
-			else {
-				weapons->Push( item );
-			}
-		}
+	for( int i=0; i<NUM_HARDPOINTS; ++i ) {
+		if ( heldAt[i] )
+			weapons->Push( heldAt[i] );
+		else if ( intrinsicAt[i] )
+			weapons->Push( intrinsicAt[i] );
 	}
+}
+
+
+IMeleeWeaponItem* InventoryComponent::GetMeleeWeapon()
+{
+	if ( heldAt[HARDPOINT_TRIGGER] )
+		return heldAt[HARDPOINT_TRIGGER]->ToMeleeWeapon();
+	if ( intrinsicAt[HARDPOINT_TRIGGER] )
+		return intrinsicAt[HARDPOINT_TRIGGER]->ToMeleeWeapon();
+	return 0;
 }
 
 
 void InventoryComponent::GetChain( GameItem* item, grinliz::CArray< GameItem*, 4 >* chain )
 {
 	chain->Clear();
-
-	// Is item equipped?
-	for( int i=0; i<equippedItems.Size(); ++i ) {
-		if ( &equippedItems[i] == item ) {
-			chain->Push( item );
+	if ( item->hardpoint >= 0 ) {
+		if ( heldAt[item->hardpoint] ) {
+			GLASSERT( heldAt[item->hardpoint] == item );
+			chain->Push( heldAt[item->hardpoint] );
+		}
+		if ( intrinsicAt[item->hardpoint] ) {
+			chain->Push( intrinsicAt[item->hardpoint] );
 		}
 	}
-	if ( chain->Empty() )
-		return;
-
-	// If it's held at a hardpoint, add the hardpoint.
-	int attachment = item->AttachmentFlags();
-	int hardpoint  = item->HardpointFlags();
-
-	if ( attachment == GameItem::HELD_AT_HARDPOINT ) {
-		GLASSERT( hardpoint );
-		for( int i=0; i<equippedItems.Size(); ++i ) {
-			bool found = false;
-			if (    equippedItems[i].AttachmentFlags() == GameItem::INTRINSIC_AT_HARDPOINT
-				 && equippedItems[i].HardpointFlags()  == hardpoint )
-			{	
-				chain->Push( &equippedItems[i] );
-				found = true;
-			}
-			GLASSERT( found );
-		}
-	}
-
-	// Add the top level item.
-	GLASSERT( parentChit->GetItemComponent() );
 	if ( parentChit->GetItemComponent() ) {
 		chain->Push( parentChit->GetItemComponent()->GetItem() );
 	}

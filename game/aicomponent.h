@@ -28,6 +28,9 @@ public:
 	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
 	virtual void OnChitEvent( const ChitEvent& event );
 
+	// Approximate. enemyList may not be flushed.
+	bool AwareOfEnemy() const { return enemyList.Size() > 0; }
+
 private:
 	enum {
 		FRIENDLY,

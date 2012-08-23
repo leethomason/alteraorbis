@@ -35,6 +35,19 @@ static const float MELEE_COS_THETA = 0.71f;		// How wide the melee swipe is
 static const U32   COOLDOWN_TIME = 750;
 
 
+// This arrangement breaks the case where something can attach
+// to multiple hardpoints. Fine; fix later.
+enum {
+	NO_HARDPOINT = -1,
+	// The set of hardpoints	
+	HARDPOINT_TRIGGER = 0,	// this attaches to the trigger hardpoint
+	HARDPOINT_ALTHAND,		// this attaches to the alternate hand (non-trigger) hardpoint
+	HARDPOINT_HEAD,			// this attaches to the head hardpoint
+	HARDPOINT_SHIELD,		// this attaches to the shield hardpoint
+	NUM_HARDPOINTS,
+};
+
+
 enum {
 	GAME_COMPONENT_MSG = GAME_COMPONENT_MSG_START,
 	

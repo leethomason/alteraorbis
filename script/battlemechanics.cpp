@@ -80,7 +80,7 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* 
 	// Get origin and direction of melee attack,
 	// then send messages to everyone hit. Everything
 	// with a spatial component is tracked by the 
-	// chitBag, so it's a very handly query.
+	// chitBag, so it's a very handy query.
 
 	Vector2F srcPos = src->GetSpatialComponent()->GetPosition2D();
 	Rectangle2F b;
@@ -103,6 +103,13 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* 
 			if ( targetHealth ) {
 				DamageDesc dd;
 				CalcMeleeDamage( src, weapon, &dd );
+
+				GLLOG(( "Chit %3d '%s' using '%s' hit %3d '%s' dd=[%5.1f %5.1f %5.1f]\n", 
+						src->ID(), src->GetItemComponent()->GetItem()->Name(),
+						weapon->GetItem()->Name(),
+						target->ID(), target->GetItemComponent()->GetItem()->Name(),
+						dd.components[0], dd.components[1], dd.components[2] ));
+
 				targetHealth->DeltaHealth( -dd.Total() );
 			}
 		}
@@ -122,8 +129,20 @@ void BattleMechanics::CalcMeleeDamage( Chit* src, IMeleeWeaponItem* weapon, Dama
 	grinliz::CArray< GameItem*, 4 > chain;
 	inv->GetChain( item, &chain );
 	GLASSERT( !chain.Empty() );
+	GLASSERT( chain.Size() == 2 || chain.Size() == 3 );
 
-	MathVector<float,DamageDesc::NUM_COMPONENTS> components = item->meleeDamage.components;
+	DamageDesc::Vector vec = item->meleeDamage.components;
+	DamageDesc::Vector handVec;
+	if ( chain.Size() == 3 ) {
+		handVec = chain[1]->meleeDamage.components;
+	}
+	// The parent item doesn't do damage. But
+	// give it credit for FLAME, etc.
+	GameItem* parentItem = chain[chain.Size()-1];
+	DamageDesc::Vector parentVec = chain[chain.Size()-1]->meleeDamage.components;
+	if ( parentItem->flags & GameItem::EFFECT_FIRE ) {
+		parentVec[DamageDesc::FIRE] = 1;
+	}
 	
 	static const float CHAIN_FRACTION = 0.5f;
 
@@ -133,9 +152,7 @@ void BattleMechanics::CalcMeleeDamage( Chit* src, IMeleeWeaponItem* weapon, Dama
 	// will do some fire damage, even when using a
 	// normal sword.
 	for( int i=0; i<DamageDesc::NUM_COMPONENTS; ++i ) {
-		for( int j=1; j<chain.Size(); ++j ) {
-			components[i] = Max( components[i], CHAIN_FRACTION*chain[j]->meleeDamage.components[i] );
-		}
+		vec[i] = Max( vec[i], CHAIN_FRACTION*handVec[i], CHAIN_FRACTION*parentVec[i] );
 	}
 
 	// That was the multiplier; the actual damage is based on the mass.
@@ -144,6 +161,6 @@ void BattleMechanics::CalcMeleeDamage( Chit* src, IMeleeWeaponItem* weapon, Dama
 	static const float STRIKE_RATIO = 5.0f;
 
 	for( int i=0; i<DamageDesc::NUM_COMPONENTS; ++i ) {
-		dd->components[i] = components[i] * item->mass / STRIKE_RATIO;
+		dd->components[i] = vec[i] * parentItem->mass / STRIKE_RATIO;
 	}
 }

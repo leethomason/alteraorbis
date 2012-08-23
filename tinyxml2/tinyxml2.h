@@ -85,7 +85,7 @@ distribution.
 
 static const int TIXML2_MAJOR_VERSION = 1;
 static const int TIXML2_MINOR_VERSION = 0;
-static const int TIXML2_PATCH_VERSION = 1;
+static const int TIXML2_PATCH_VERSION = 6;
 
 namespace tinyxml2
 {
@@ -134,7 +134,7 @@ public:
 	void SetInternedStr( const char* str ) { Reset(); this->start = const_cast<char*>(str); }
 	void SetStr( const char* str, int flags=0 );
 
-	char* ParseText( char* in, const char* endTag, int strFlags );
+	char* ParseText( char* in, const char* endTag, int strFlags );	
 	char* ParseName( char* in );
 
 
@@ -363,8 +363,8 @@ class XMLUtil
 public:
 	// Anything in the high order range of UTF-8 is assumed to not be whitespace. This isn't 
 	// correct, but simple, and usually works.
-	static const char* SkipWhiteSpace( const char* p )	{ while( !IsUTF8Continuation(*p) && isspace( *p ) ) { ++p; } return p; }
-	static char* SkipWhiteSpace( char* p )				{ while( !IsUTF8Continuation(*p) && isspace( *p ) ) { ++p; } return p; }
+	static const char* SkipWhiteSpace( const char* p )	{ while( !IsUTF8Continuation(*p) && isspace( *reinterpret_cast<const unsigned char*>(p) ) ) { ++p; } return p; }
+	static char* SkipWhiteSpace( char* p )				{ while( !IsUTF8Continuation(*p) && isspace( *reinterpret_cast<unsigned char*>(p) ) )		{ ++p; } return p; }
 
 	inline static bool StringEqual( const char* p, const char* q, int nChar=INT_MAX )  {
 		int n = 0;
@@ -389,12 +389,14 @@ public:
 	static const char* GetCharacterRef( const char* p, char* value, int* length );
 	static void ConvertUTF32ToUTF8( unsigned long input, char* output, int* length );
 
+	// converts primitive types to strings
 	static void ToStr( int v, char* buffer, int bufferSize );
 	static void ToStr( unsigned v, char* buffer, int bufferSize );
 	static void ToStr( bool v, char* buffer, int bufferSize );
 	static void ToStr( float v, char* buffer, int bufferSize );
 	static void ToStr( double v, char* buffer, int bufferSize );
 
+	// converts strings to primitive types
 	static bool	ToInt( const char* str, int* value );
 	static bool ToUnsigned( const char* str, unsigned* value );
 	static bool	ToBool( const char* str, bool* value );
@@ -585,7 +587,7 @@ protected:
 	XMLNode( XMLDocument* );
 	virtual ~XMLNode();
 	XMLNode( const XMLNode& );	// not supported
-	void operator=( const XMLNode& );	// not supported
+	XMLNode& operator=( const XMLNode& );	// not supported
 	
 	XMLDocument*	document;
 	XMLNode*		parent;
@@ -639,7 +641,7 @@ protected:
 	XMLText( XMLDocument* doc )	: XMLNode( doc ), isCData( false )	{}
 	virtual ~XMLText()												{}
 	XMLText( const XMLText& );	// not supported
-	void operator=( const XMLText& );	// not supported
+	XMLText& operator=( const XMLText& );	// not supported
 
 private:
 	bool isCData;
@@ -664,7 +666,7 @@ protected:
 	XMLComment( XMLDocument* doc );
 	virtual ~XMLComment();
 	XMLComment( const XMLComment& );	// not supported
-	void operator=( const XMLComment& );	// not supported
+	XMLComment& operator=( const XMLComment& );	// not supported
 
 private:
 };
@@ -698,7 +700,7 @@ protected:
 	XMLDeclaration( XMLDocument* doc );
 	virtual ~XMLDeclaration();
 	XMLDeclaration( const XMLDeclaration& );	// not supported
-	void operator=( const XMLDeclaration& );	// not supported
+	XMLDeclaration& operator=( const XMLDeclaration& );	// not supported
 };
 
 
@@ -726,7 +728,7 @@ protected:
 	XMLUnknown( XMLDocument* doc );
 	virtual ~XMLUnknown();
 	XMLUnknown( const XMLUnknown& );	// not supported
-	void operator=( const XMLUnknown& );	// not supported
+	XMLUnknown& operator=( const XMLUnknown& );	// not supported
 };
 
 
@@ -739,6 +741,7 @@ enum {
 
 	XML_ERROR_FILE_NOT_FOUND,
 	XML_ERROR_FILE_COULD_NOT_BE_OPENED,
+	XML_ERROR_FILE_READ_ERROR,
 	XML_ERROR_ELEMENT_MISMATCH,
 	XML_ERROR_PARSING_ELEMENT,
 	XML_ERROR_PARSING_ATTRIBUTE,
@@ -753,7 +756,7 @@ enum {
 	XML_ERROR_PARSING,
 
 	XML_CAN_NOT_CONVERT_TEXT,
-	XML_NO_TEXT_ELEMENT
+	XML_NO_TEXT_NODE
 };
 
 
@@ -942,7 +945,7 @@ public:
 		This is a convenient method for getting the text of simple contained text:
 		@verbatim
 		<foo>This is text</foo>
-		const char* str = fooElement->GetText();
+			const char* str = fooElement->GetText();
 		@endverbatim
 
 		'str' will be a pointer to "This is text". 
@@ -950,21 +953,52 @@ public:
 		Note that this function can be misleading. If the element foo was created from
 		this XML:
 		@verbatim
-		<foo><b>This is text</b></foo> 
+			<foo><b>This is text</b></foo> 
 		@endverbatim
 
 		then the value of str would be null. The first child node isn't a text node, it is
 		another element. From this XML:
 		@verbatim
-		<foo>This is <b>text</b></foo> 
+			<foo>This is <b>text</b></foo> 
 		@endverbatim
 		GetText() will return "This is ".
 	*/
 	const char* GetText() const;
+
+	/** 
+		Convenience method to query the value of a child text node. This is probably best
+		shown by example. Given you have a document is this form:
+		@verbatim
+			<point>
+				<x>1</x>
+				<y>1.4</y>
+			</point>
+		@endverbatim
+
+		The QueryIntText() and similar functions provide a safe and easier way to get to the
+		"value" of x and y.
+
+		@verbatim
+			int x = 0;
+			float y = 0;	// types of x and y are contrived for example
+			const XMLElement* xElement = pointElement->FirstChildElement( "x" );
+			const XMLElement* yElement = pointElement->FirstChildElement( "y" );
+			xElement->QueryIntText( &x );
+			yElement->QueryFloatText( &y );
+		@endverbatim
+
+		@returns XML_SUCCESS (0) on success, XML_CAN_NOT_CONVERT_TEXT if the text cannot be converted
+				 to the requested type, and XML_NO_TEXT_NODE if there is no child text to query.
+			
+	*/
 	int QueryIntText( int* _value ) const;
+	/// See QueryIntText()
 	int QueryUnsignedText( unsigned* _value ) const;
+	/// See QueryIntText()
 	int QueryBoolText( bool* _value ) const;
+	/// See QueryIntText()
 	int QueryDoubleText( double* _value ) const;
+	/// See QueryIntText()
 	int QueryFloatText( float* _value ) const;
 
 	// internal:
@@ -1231,7 +1265,7 @@ public:
 	/// Copy constructor
 	XMLHandle( const XMLHandle& ref )										{ node = ref.node; }
 	/// Assignment
-	XMLHandle operator=( const XMLHandle& ref )								{ node = ref.node; return *this; }
+	XMLHandle& operator=( const XMLHandle& ref )							{ node = ref.node; return *this; }
 
 	/// Get the first child of this handle.
 	XMLHandle FirstChild() 													{ return XMLHandle( node ? node->FirstChild() : 0 ); }
@@ -1277,7 +1311,7 @@ public:
 	XMLConstHandle( const XMLNode& _node )											{ node = &_node; }
 	XMLConstHandle( const XMLConstHandle& ref )										{ node = ref.node; }
 
-	XMLConstHandle operator=( const XMLConstHandle& ref )							{ node = ref.node; return *this; }
+	XMLConstHandle& operator=( const XMLConstHandle& ref )							{ node = ref.node; return *this; }
 
 	const XMLConstHandle FirstChild() const											{ return XMLConstHandle( node ? node->FirstChild() : 0 ); }
 	const XMLConstHandle FirstChildElement( const char* value=0 ) const				{ return XMLConstHandle( node ? node->FirstChildElement( value ) : 0 ); }
@@ -1347,9 +1381,11 @@ class XMLPrinter : public XMLVisitor
 public:
 	/** Construct the printer. If the FILE* is specified,
 		this will print to the FILE. Else it will print
-		to memory, and the result is available in CStr()
+		to memory, and the result is available in CStr().
+		If 'compact' is set to true, then output is created
+		with only required whitespace and newlines.
 	*/
-	XMLPrinter( FILE* file=0 );
+	XMLPrinter( FILE* file=0, bool compact = false );
 	~XMLPrinter()	{}
 
 	/** If streaming, write the BOM and declaration. */
@@ -1369,10 +1405,15 @@ public:
 
 	/// Add a text node.
 	void PushText( const char* text, bool cdata=false );
+	/// Add a text node from an integer.
 	void PushText( int value );
+	/// Add a text node from an unsigned.
 	void PushText( unsigned value );
+	/// Add a text node from a bool.
 	void PushText( bool value );
+	/// Add a text node from a float.
 	void PushText( float value );
+	/// Add a text node from a double.
 	void PushText( double value );
 
 	/// Add a comment
@@ -1402,7 +1443,7 @@ public:
 		of the XML file in memory. (Note the size returned
 		includes the terminating null.)
   	*/
-  	const int CStrSize()const{ return buffer.Size(); }
+  	int CStrSize() const { return buffer.Size(); }
 
 private:
 	void SealElement();
@@ -1416,6 +1457,7 @@ private:
 	int depth;
 	int textDepth;
 	bool processEntities;
+	bool compactMode;
 
 	enum {
 		ENTITY_RANGE = 64,
@@ -1425,7 +1467,10 @@ private:
 	bool restrictedEntityFlag[ENTITY_RANGE];
 
 	DynArray< const char*, 10 > stack;
-	DynArray< char, 20 > buffer, accumulator;
+	DynArray< char, 20 > buffer;
+#ifdef _MSC_VER
+	DynArray< char, 20 > accumulator;
+#endif
 };
 
 

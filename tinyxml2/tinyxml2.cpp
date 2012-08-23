@@ -190,8 +190,6 @@ const char* StrPair::GetStr()
 					*q++ = LF;
 				}
 				else if ( (flags & NEEDS_ENTITY_PROCESSING) && *p == '&' ) {
-					int i=0;
-
 					// Entities handled by tinyXML2:
 					// - special entities in the entity table [in/out]
 					// - numeric character reference [in]
@@ -207,7 +205,8 @@ const char* StrPair::GetStr()
 						TIXMLASSERT( q <= p );
 					}
 					else {
-						for( i=0; i<NUM_ENTITIES; ++i ) {
+						int i=0;
+						for(; i<NUM_ENTITIES; ++i ) {
 							if (    strncmp( p+1, entities[i].pattern, entities[i].length ) == 0
 								 && *(p+entities[i].length+1) == ';' ) 
 							{
@@ -768,7 +767,7 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEnd )
 		// We read the end tag. Return it to the parent.
 		if ( node->ToElement() && node->ToElement()->ClosingType() == XMLElement::CLOSING ) {
 			if ( parentEnd ) {
-				*parentEnd = ((XMLElement*)node)->value;
+				*parentEnd = static_cast<XMLElement*>(node)->value;
 			}
 			DELETE_NODE( node );
 			return p;
@@ -994,13 +993,22 @@ bool XMLUnknown::Accept( XMLVisitor* visitor ) const
 // --------- XMLAttribute ---------- //
 char* XMLAttribute::ParseDeep( char* p, bool processEntities )
 {
-	p = name.ParseText( p, "=", StrPair::ATTRIBUTE_NAME );
+	// Parse using the name rules: bug fix, was using ParseText before
+	p = name.ParseName( p );
 	if ( !p || !*p ) return 0;
 
+	// Skip white space before =
+	p = XMLUtil::SkipWhiteSpace( p );
+	if ( !p || *p != '=' ) return 0;
+
+	++p;	// move up to opening quote
+	p = XMLUtil::SkipWhiteSpace( p );
+	if ( *p != '\"' && *p != '\'' ) return 0;
+
 	char endTag[2] = { *p, 0 };
-	++p;
+	++p;	// move past opening quote
+
 	p = value.ParseText( p, endTag, processEntities ? StrPair::ATTRIBUTE_VALUE : StrPair::ATTRIBUTE_VALUE_LEAVE_ENTITIES );
-	//if ( value.Empty() ) return 0;
 	return p;
 }
 
@@ -1165,7 +1173,7 @@ int XMLElement::QueryIntText( int* _value ) const
 		}
 		return XML_CAN_NOT_CONVERT_TEXT;
 	}
-	return XML_NO_TEXT_ELEMENT;
+	return XML_NO_TEXT_NODE;
 }
 
 
@@ -1178,7 +1186,7 @@ int XMLElement::QueryUnsignedText( unsigned* _value ) const
 		}
 		return XML_CAN_NOT_CONVERT_TEXT;
 	}
-	return XML_NO_TEXT_ELEMENT;
+	return XML_NO_TEXT_NODE;
 }
 
 
@@ -1191,7 +1199,7 @@ int XMLElement::QueryBoolText( bool* _value ) const
 		}
 		return XML_CAN_NOT_CONVERT_TEXT;
 	}
-	return XML_NO_TEXT_ELEMENT;
+	return XML_NO_TEXT_NODE;
 }
 
 
@@ -1204,7 +1212,7 @@ int XMLElement::QueryDoubleText( double* _value ) const
 		}
 		return XML_CAN_NOT_CONVERT_TEXT;
 	}
-	return XML_NO_TEXT_ELEMENT;
+	return XML_NO_TEXT_NODE;
 }
 
 
@@ -1217,7 +1225,7 @@ int XMLElement::QueryFloatText( float* _value ) const
 		}
 		return XML_CAN_NOT_CONVERT_TEXT;
 	}
-	return XML_NO_TEXT_ELEMENT;
+	return XML_NO_TEXT_NODE;
 }
 
 
@@ -1380,6 +1388,8 @@ bool XMLElement::ShallowEqual( const XMLNode* compare ) const
 			if ( !XMLUtil::StringEqual( a->Value(), b->Value() ) ) {
 				return false;
 			}
+			a = a->Next();
+			b = b->Next();
 		}	
 		if ( a || b ) {
 			// different count
@@ -1532,7 +1542,12 @@ int XMLDocument::LoadFile( FILE* fp )
 	}
 
 	charBuffer = new char[size+1];
-	fread( charBuffer, size, 1, fp );
+	size_t read = fread( charBuffer, 1, size, fp );
+	if ( read != size ) {
+		SetError( XML_ERROR_FILE_READ_ERROR, 0, 0 );
+		return errorID;
+	}
+	
 	charBuffer[size] = 0;
 
 	const char* p = charBuffer;
@@ -1639,13 +1654,14 @@ void XMLDocument::PrintError() const
 }
 
 
-XMLPrinter::XMLPrinter( FILE* file ) : 
+XMLPrinter::XMLPrinter( FILE* file, bool compact ) : 
 	elementJustOpened( false ), 
 	firstElement( true ),
 	fp( file ), 
 	depth( 0 ), 
 	textDepth( -1 ),
-	processEntities( true )
+	processEntities( true ),
+	compactMode( compact )
 {
 	for( int i=0; i<ENTITY_RANGE; ++i ) {
 		entityFlag[i] = false;
@@ -1765,7 +1781,7 @@ void XMLPrinter::OpenElement( const char* name )
 	}
 	stack.Push( name );
 
-	if ( textDepth < 0 && !firstElement ) {
+	if ( textDepth < 0 && !firstElement && !compactMode ) {
 		Print( "\n" );
 		PrintSpace( depth );
 	}
@@ -1827,7 +1843,7 @@ void XMLPrinter::CloseElement()
 		Print( "/>" );
 	}
 	else {
-		if ( textDepth < 0 ) {
+		if ( textDepth < 0 && !compactMode) {
 			Print( "\n" );
 			PrintSpace( depth );
 		}
@@ -1836,7 +1852,7 @@ void XMLPrinter::CloseElement()
 
 	if ( textDepth == depth )
 		textDepth = -1;
-	if ( depth == 0 )
+	if ( depth == 0 && !compactMode)
 		Print( "\n" );
 	elementJustOpened = false;
 }
@@ -1911,7 +1927,7 @@ void XMLPrinter::PushComment( const char* comment )
 	if ( elementJustOpened ) {
 		SealElement();
 	}
-	if ( textDepth < 0 && !firstElement ) {
+	if ( textDepth < 0 && !firstElement && !compactMode) {
 		Print( "\n" );
 		PrintSpace( depth );
 	}
@@ -1925,7 +1941,7 @@ void XMLPrinter::PushDeclaration( const char* value )
 	if ( elementJustOpened ) {
 		SealElement();
 	}
-	if ( textDepth < 0 && !firstElement) {
+	if ( textDepth < 0 && !firstElement && !compactMode) {
 		Print( "\n" );
 		PrintSpace( depth );
 	}
@@ -1939,7 +1955,7 @@ void XMLPrinter::PushUnknown( const char* value )
 	if ( elementJustOpened ) {
 		SealElement();
 	}
-	if ( textDepth < 0 && !firstElement ) {
+	if ( textDepth < 0 && !firstElement && !compactMode) {
 		Print( "\n" );
 		PrintSpace( depth );
 	}

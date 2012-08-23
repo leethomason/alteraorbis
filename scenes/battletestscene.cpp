@@ -56,6 +56,7 @@ BattleTestScene::BattleTestScene( LumosGame* game ) : Scene( game )
 {
 	debugRay.direction.Zero();
 	debugRay.origin.Zero();
+	battleStarted = false;
 
 	game->InitStd( &gamui2D, &okay, 0 );
 	LayoutCalculator layout = game->DefaultLayout();
@@ -90,9 +91,9 @@ BattleTestScene::BattleTestScene( LumosGame* game ) : Scene( game )
 	optionButton[COUNT_4+NUM_OPTIONS].SetDown();
 
 	// WIP:
-	optionButton[MANTIS].SetEnabled( false );	optionButton[MANTIS+NUM_OPTIONS].SetEnabled( false );
-	optionButton[BALROG].SetEnabled( false );	optionButton[BALROG+NUM_OPTIONS].SetEnabled( false );
-	optionButton[BALROG].SetEnabled( false );	optionButton[BALROG+NUM_OPTIONS].SetEnabled( false );
+	//optionButton[MANTIS].SetEnabled( false );	optionButton[MANTIS+NUM_OPTIONS].SetEnabled( false );
+	//optionButton[BALROG].SetEnabled( false );	optionButton[BALROG+NUM_OPTIONS].SetEnabled( false );
+	//optionButton[BALROG].SetEnabled( false );	optionButton[BALROG+NUM_OPTIONS].SetEnabled( false );
 
 	engine = 0;
 	map = 0;
@@ -224,14 +225,15 @@ void BattleTestScene::HandleHotKeyMask( int mask )
 
 void BattleTestScene::GoScene()
 {
+	GLLOG(( "---- GO ---- \n" ));
+	battleStarted = true;
 	Rectangle2F b;
 	b.Set( 0, 0, (float)map->Width(), (float)map->Height() );
 
 	// Remove everything that is currently on the board that is some sort of character.
-	CDynArray<Chit*> arr;
-	chitBag.QuerySpatialHash( &arr, b, 0, GameItem::CHARACTER, false );
-	for( int i=0; i<arr.Size(); ++i ) {
-		chitBag.DeleteChit( arr[i] );
+	chitBag.QuerySpatialHash( &chitArr, b, 0, GameItem::CHARACTER, false );
+	for( int i=0; i<chitArr.Size(); ++i ) {
+		chitBag.DeleteChit( chitArr[i] );
 	}
 
 	int leftCount	= 1 << ButtonDownID( LEFT_COUNT );
@@ -250,9 +252,11 @@ void BattleTestScene::GoScene()
 	}
 
 	// Trigger the AI to do something.
-	AwarenessChitEvent event( LEFT, b );
-	event.SetItemFilter( GameItem::CHARACTER );
-	chitBag.QueueEvent( event );
+	for( int i=LEFT; i<=RIGHT; ++i ) {
+		AwarenessChitEvent event( i, b );
+		event.SetItemFilter( GameItem::CHARACTER );
+		chitBag.QueueEvent( event );
+	}
 }
 
 		
@@ -270,6 +274,12 @@ void BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int 
 	GLASSERT( itemDefArr.Size() > 0 );
 
 	Chit* chit = chitBag.NewChit();
+
+	const char* weaponNames[3] = { "none", "melee", "pistol" };
+	GLLOG(( "Chit Created: %d '%s' weapon='%s' team=%d\n",
+		    chit->ID(), 
+			asset, weaponNames[loadout-NO_WEAPON], team ));
+
 	chit->Add( new SpatialComponent());
 	chit->Add( new RenderComponent( engine, asset, 0 ));
 	if ( type != DUMMY ) {
@@ -289,23 +299,30 @@ void BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int 
 	InventoryComponent* inv = new InventoryComponent( &chitBag );
 	chit->Add( inv );
 
+	chit->AddListener( this );
 	chit->GetSpatialComponent()->SetPosYRot( (float)p.x+0.5f, 0, (float)p.y+0.5f, (float)random.Rand( 360 ) );
 
 	for( int i=1; i<itemDefArr.Size(); ++i ) {
-		GameItem intrinsic( *(itemDefArr[i] ));
-		inv->AddToInventory( intrinsic, true );
+		inv->AddToInventory( new GameItem( *(itemDefArr[i]) ), true );
 	}
 
 	if ( type == HUMAN ) {
 		if( loadout == MELEE_WEAPON ) {
 			const GameItem *knife = itemStorage.Get( "testknife" );
 			GLASSERT( knife );
-			inv->AddToInventory( *knife, true );
+			inv->AddToInventory( new GameItem(*knife), true );
 		}
 		else if ( loadout == PISTOL ) {
 			const GameItem* gun = itemStorage.Get( "testgun" );
 			GLASSERT( gun );
-			inv->AddToInventory( *gun, true );
+			inv->AddToInventory( new GameItem(*gun), true );
+		}
+	}
+	else if ( type == BALROG ) {
+		if ( loadout == MELEE_WEAPON ) {
+			const GameItem* ax = itemStorage.Get( "ax" );
+			GLASSERT( ax );
+			inv->AddToInventory( new GameItem(*ax), true );
 		}
 	}
 }
@@ -381,6 +398,28 @@ void BattleTestScene::ItemTapped( const gamui::UIItem* item )
 void BattleTestScene::DoTick( U32 deltaTime )
 {
 	chitBag.DoTick( deltaTime );
+
+	if ( battleStarted ) {
+		bool aware = false;
+		Rectangle2F b;
+		b.Set( 0, 0, (float)map->Width(), (float)map->Height() );
+
+		chitBag.QuerySpatialHash( &chitArr, b, 0, GameItem::CHARACTER, false );
+		for( int i=0; i<chitArr.Size(); ++i ) {
+			Chit* c = chitArr[i];
+
+			AIComponent* ai = GET_COMPONENT( c, AIComponent );
+			if ( ai && ai->AwareOfEnemy() ) {
+				aware = true;
+				break;
+			}
+		}
+		if ( !aware ) {
+			AwarenessChitEvent event( LEFT, b );
+			event.SetItemFilter( GameItem::CHARACTER );
+			chitBag.QueueEvent( event );
+		}
+	}
 }
 
 

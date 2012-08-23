@@ -16,7 +16,8 @@
         mass="40">
     <intrinsics>
       <item name="pincer"
-            flags="MELEE_WEAPON INTRINSIC_FREE">
+            flags="MELEE_WEAPON INTRINSIC_AT_HARDPOINT"
+            hardpoint="trigger" >
             <melee kinetic="3" fire="0"/>
       </item>
     </intrinsics>

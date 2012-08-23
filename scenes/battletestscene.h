@@ -83,10 +83,12 @@ private:
 
 	Engine* engine;
 	WorldMap* map;
+	bool battleStarted;
 
 	grinliz::Random random;
 	grinliz::CDynArray<grinliz::Vector2I> waypoints[3];
 	grinliz::Ray debugRay;
+	grinliz::CDynArray<Chit*> chitArr;
 	
 	ChitBag chitBag;
 	ItemStorage itemStorage;

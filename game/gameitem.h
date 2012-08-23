@@ -64,9 +64,10 @@ public:
 		KINETIC, ENERGY, FIRE, NUM_COMPONENTS
 	};
 
-	grinliz::MathVector<float,NUM_COMPONENTS> components;
+	typedef grinliz::MathVector<float,NUM_COMPONENTS> Vector;
+	Vector components;
 
-	DamageDesc() { components[KINETIC] = 1; }
+	DamageDesc() {}
 
 	void Set( float _kinetic, float _energy, float _fire ) { 
 		components[KINETIC] = _kinetic;
@@ -135,7 +136,6 @@ public:
 	const char* ResourceName() const	{ return resource.c_str(); }
 
 	int AttachmentFlags() const			{ return flags & (HELD|HARDPOINT); }
-	int HardpointFlags() const			{ return flags & (HARDPOINT_TRIGGER|HARDPOINT_SHIELD); }
 
 	enum {
 		// Type(s) of the item
@@ -148,16 +148,13 @@ public:
 		HARDPOINT			= (1<<4),
 		PACK				= (1<<5),	// in inventory; not carried or activated
 
+		// ALL weapons have to be at hardpoints, for effect rendering if nothing else.
+		// Also the current weapons are scanned from a fixed array of hardpoints.
+		// May be able to pull out the "FREE" case.
 		INTRINSIC_AT_HARDPOINT	= HARDPOINT,		//	a hand. built in, but located at a hardpoint
 		INTRINSIC_FREE			= 0,				//  pincer. built in, no hardpoint
 		HELD_AT_HARDPOINT		= HARDPOINT | HELD,	// 	sword, shield. at hardpoint, overrides built in.
-		HELD_FREE				= HELD,				//	amulet, rind. held, put not at a hardpoint, and not rendered
-
-		// The set of hardpoints	
-		HARDPOINT_TRIGGER	= (1<<6),	// this attaches to the trigger hardpoint
-		HARDPOINT_ALTHAND	= (1<<7),	// this attaches to the alternate hand (non-trigger) hardpoint
-		HARDPOINT_HEAD		= (1<<8),	// this attaches to the head hardpoint
-		HARDPOINT_SHIELD	= (1<<9),	// this attaches to the shield hardpoint
+		HELD_FREE				= HELD,				//	amulet, ring. held, put not at a hardpoint, and not rendered
 
 		IMMUNE_FIRE			= (1<<10),
 		FLAMMABLE			= (1<<11),
@@ -171,6 +168,7 @@ public:
 	grinliz::CStr< MAX_ITEM_NAME >		key;		// modified name, for storage. not serialized.
 	grinliz::CStr< EL_RES_NAME_LEN >	resource;	// resource used to  render the item
 	int flags;				// flags that define this item; 'constant'
+	int hardpoint;
 	float mass;				// mass (kg)
 	int	primaryTeam;		// who owns this items
 	DamageDesc meleeDamage;	// a multiplier of the base (effective mass) and other modifiers
@@ -186,6 +184,7 @@ public:
 			key				= rhs->key;
 			resource		= rhs->resource;
 			flags			= rhs->flags;
+			hardpoint		= rhs->hardpoint;
 			mass			= rhs->mass;
 			primaryTeam		= rhs->primaryTeam;
 			meleeDamage		= rhs->meleeDamage;
@@ -199,6 +198,7 @@ public:
 			key.Clear();
 			resource.Clear();
 			flags = 0;
+			hardpoint = 0;
 			mass = 1;
 			primaryTeam = 0;
 			meleeDamage.Set( 1, 0, 0 );
