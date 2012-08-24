@@ -128,7 +128,7 @@ public:
 
 	Texture* GetRenderTargetTexture( int id=0 );
 	void SetGlow( bool b ) { glow = b; }
-	bool GetGlow() const { return glow; }
+	bool Glow() const { return glow; }
 
 	virtual void DeviceLoss();
 

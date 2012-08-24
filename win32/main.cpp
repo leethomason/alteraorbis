@@ -373,6 +373,10 @@ int main( int argc, char **argv )
 						GameHotKey( game, GAME_HK_TOGGLE_UI );
 						break;
 
+					case SDLK_g:
+						GameHotKey( game, GAME_HK_TOGGLE_GLOW );
+						break;
+
 					case SDLK_s:
 						GameDoTick( game, SDL_GetTicks() );
 						SDL_GL_SwapBuffers();

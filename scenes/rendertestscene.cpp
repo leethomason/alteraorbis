@@ -132,7 +132,7 @@ void RenderTestScene::ItemTapped( const gamui::UIItem* item )
 			}
 		}
 #endif
-		engine->SetGlow( !engine->GetGlow() );
+		engine->SetGlow( !engine->Glow() );
 	}
 	else if ( item == &refreshButton ) {
 		LoadLighting();

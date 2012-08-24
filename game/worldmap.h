@@ -72,6 +72,7 @@ public:
 									grinliz::Vector2F* outPos );
 
 	// ---- Map ---- //
+	virtual void Submit( GPUShader* shader, bool emissiveOnly );
 	virtual void Draw3D(  const grinliz::Color3F& colorMult, GPUShader::StencilMode );
 
 	// ---- MicroPather ---- //

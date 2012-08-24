@@ -10,14 +10,16 @@
   <texture filename="charSwatch.png" width="128" height="8" /> 
   <texture filename="characters.png" />
   <texture filename="treetextures.png" />
+  <texture filename="bluestone.png" />
   <texture filename="debugging.png" noMip="true" />
 
   <!-- note this makes textures and materials the same thing, to have the emissive
        behavior defined like this. That's okay for now.
   -->
   <texture filename="emchartest.png" filename2="emchartest_em.png" emissive="true"/>
-  <texture filename="map_land.png" />
-  <texture filename="map_water.png" />
+  <!--<texture filename="map_land.png"   filename2="map_land_em.png"   emissive="true" />-->
+  <texture assetName="map_land" filename="map_land2.png"   />
+  <texture filename="map_water.png"  filename2="map_water_em.png"  emissive="true"/>
 
   <!-- UI elements -->
   <texture filename="intro.png" width="64" height="64" />

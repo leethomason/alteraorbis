@@ -8,8 +8,7 @@
 
 <lighting mode="hemi">
   <map red="0.4" green="0.4" blue="0.5"/>
-  
-  
+    
   <direction x="-2" y="5" z="-1.5" />
   <glow radius="0.018" gray="1.3" />
   
@@ -22,7 +21,7 @@
   <hemispherical>
     <diffuse red="0.9" green="0.9" blue="0.9"/>
     <ambient red="0.2" green="0.2" blue="0.3"/>
-    <shadow red="0.3" green="0.3" blue="0.3"/>
+    <shadow red="0.5" green="0.5" blue="0.5"/>
   </hemispherical>
 
 </lighting>

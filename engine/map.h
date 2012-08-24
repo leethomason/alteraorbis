@@ -41,6 +41,7 @@ public:
 	grinliz::Rectangle2I Bounds() const		{	return grinliz::Rectangle2I( 0, 0, width-1, height-1 ); }
 
 	void DrawOverlay();
+	virtual void Submit( GPUShader* shader, bool emissiveOnly )	{}
 	virtual void Draw3D( const grinliz::Color3F& colorMult, GPUShader::StencilMode )	{}
 
 	// IGamuiRenderer
