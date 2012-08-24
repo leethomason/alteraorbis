@@ -251,7 +251,7 @@ bool PathMoveComponent::AvoidOthers( U32 delta )
 	bounds.Set( pos2.x-PATH_AVOID_DISTANCE, pos2.y-PATH_AVOID_DISTANCE, 
 		        pos2.x+PATH_AVOID_DISTANCE, pos2.y+PATH_AVOID_DISTANCE );
 	
-	GetChitBag()->QuerySpatialHash( &chitArr, bounds, parentChit, 0, false );
+	GetChitBag()->QuerySpatialHash( &chitArr, bounds, parentChit, 0 );
 
 	if ( !chitArr.Empty() ) {
 		Vector3F pos3    = { pos2.x, 0, pos2.y };

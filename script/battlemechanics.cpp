@@ -86,7 +86,7 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* 
 	Rectangle2F b;
 	b.min = srcPos; b.max = srcPos;
 	b.Outset( MELEE_RANGE + MAX_BASE_RADIUS );
-	chitBag->QuerySpatialHash( &hashQuery, b, src, 0, false );
+	chitBag->QuerySpatialHash( &hashQuery, b, src, 0 );
 
 	for( int i=0; i<hashQuery.Size(); ++i ) {
 		Chit* target = hashQuery[i];

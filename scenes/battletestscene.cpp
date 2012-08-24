@@ -222,7 +222,7 @@ void BattleTestScene::GoScene()
 	b.Set( 0, 0, (float)map->Width(), (float)map->Height() );
 
 	// Remove everything that is currently on the board that is some sort of character.
-	chitBag.QuerySpatialHash( &chitArr, b, 0, GameItem::CHARACTER, false );
+	chitBag.QuerySpatialHash( &chitArr, b, 0, GameItem::CHARACTER );
 	for( int i=0; i<chitArr.Size(); ++i ) {
 		chitBag.DeleteChit( chitArr[i] );
 	}
@@ -395,7 +395,7 @@ void BattleTestScene::DoTick( U32 deltaTime )
 		Rectangle2F b;
 		b.Set( 0, 0, (float)map->Width(), (float)map->Height() );
 
-		chitBag.QuerySpatialHash( &chitArr, b, 0, GameItem::CHARACTER, false );
+		chitBag.QuerySpatialHash( &chitArr, b, 0, GameItem::CHARACTER );
 		for( int i=0; i<chitArr.Size(); ++i ) {
 			Chit* c = chitArr[i];
 

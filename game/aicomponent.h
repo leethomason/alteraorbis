@@ -9,6 +9,25 @@
 class WorldMap;
 class Engine;
 
+inline float UtilityCubic( float y0, float y1, float x ) {
+	x = grinliz::Clamp( x, 0.0f, 1.0f );
+	float a = grinliz::Lerp( y0, y1, x*x*x );
+	return a;
+}
+
+inline float UtilityFade( float y0, float y1, float x ) {
+	x = grinliz::Clamp( x, 0.0f, 1.0f );
+	float a = grinliz::Lerp( y0, y1, grinliz::Fade5( x ) );
+	return a;
+}
+
+inline float UtilityLinear( float y0, float y1, float x ) {
+	x = grinliz::Clamp( x, 0.0f, 1.0f );
+	float a = grinliz::Lerp( y0, y1, x );
+	return a;
+}
+
+
 // Combat AI: needs refactoring
 class AIComponent : public Component
 {
@@ -42,6 +61,7 @@ private:
 
 	void UpdateCombatInfo( const grinliz::Rectangle2F* _zone=0 );
 	int GetTeamStatus( Chit* other );
+	void Think();	// Choose a new action.
 
 	Engine*		engine;
 	WorldMap*	map;
@@ -55,6 +75,7 @@ private:
 
 	void DoMelee();
 
+	/*
 	struct ActionMelee
 	{
 		int targetID;
@@ -65,6 +86,7 @@ private:
 		ActionMelee	melee;
 	};
 	Action action;
+	*/
 
 	grinliz::CArray<int, MAX_TRACK> friendList;
 	grinliz::CArray<int, MAX_TRACK> enemyList;

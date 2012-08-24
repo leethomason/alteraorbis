@@ -7,6 +7,14 @@
 	- unique look for units so teams can be distinguished
 	- impact (light/heavy)
 	- animation speed isn't correct
+	- shields
+	- adjust particles to have "impact" effect
+	- add de-rez
+	- why does balrog just stand around not attacking mantis, and yet the AOE of
+	  melee seems huge. clean all that up.
+	- flaming sword
+	- flaming sword should catch things on fire
+
 
 	X melee attack standing too close 
 	X avoiding while pathing doesn't look quite correct

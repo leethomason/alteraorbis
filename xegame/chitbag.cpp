@@ -68,7 +68,7 @@ void ChitBag::DoTick( U32 delta )
 
 	for( int i=0; i<events.Size(); ++i ) {
 		const ChitEvent& e = events[i];
-		QuerySpatialHash( &hashQuery, e.AreaOfEffect(), 0, e.GetItemFilter(), false );
+		QuerySpatialHash( &hashQuery, e.AreaOfEffect(), 0, e.GetItemFilter() );
 		for( int j=0; j<hashQuery.Size(); ++j ) {
 			hashQuery[j]->OnChitEvent( e );
 		}
@@ -157,8 +157,7 @@ int ChitBag::CompareDistance( const void* p0, const void* p1 )
 void ChitBag::QuerySpatialHash(	grinliz::CDynArray<Chit*>* array, 
 								const grinliz::Rectangle2F& rf, 
 								const Chit* ignore,
-								int itemFilter,
-								bool distanceSort )
+								int itemFilter )
 {
 	Rectangle2I b;
 	b.Set( 0, 0, SIZE-1, SIZE-1 );
@@ -194,9 +193,14 @@ void ChitBag::QuerySpatialHash(	grinliz::CDynArray<Chit*>* array,
 			}
 		}
 	}
+	/*
 	if ( array->Size() > 1 && distanceSort ) {
 		Vector2F origin = rf.Center();
 		compareOrigin.Set( origin.x, 0, origin.y );
 		qsort( array->Mem(), array->Size(), sizeof(Chit*), CompareDistance ); 
+		for( int i=0; i<array->Size(); ++i ) {
+			GLOUTPUT(( "sh: %d d=%.1f\n", (*array)[i]->ID(), ((*array)[i]->GetSpatialComponent()->GetPosition() - compareOrigin).Length() ));
+		}
 	}
+	*/
 }

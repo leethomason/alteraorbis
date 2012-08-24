@@ -20,9 +20,15 @@
 
 using namespace grinliz;
 
-static const U32	UPDATE_COMBAT_INFO	= 1000;		// how often to update the friend/enemy lists
-static const float	COMBAT_INFO_RANGE	= 10.0f;	// range around to scan for friendlies/enemies
+static const float COMBAT_INFO_RANGE	= 10.0f;	// range around to scan for friendlies/enemies
 
+static const float PRIMARY_UTILITY		= 10.0f;
+static const float SECONDARY_UTILITY	= 3.0f;
+static const float TERTIARY_UTILITY		= 1.0f;
+
+static const float LOW_UTILITY			= 0.2f;
+static const float MED_UTILITY			= 0.5f;
+static const float HIGH_UTILITY			= 0.8f;
 
 AIComponent::AIComponent( Engine* _engine, WorldMap* _map )
 {
@@ -69,43 +75,53 @@ void AIComponent::UpdateCombatInfo( const Rectangle2F* _zone )
 	}
 
 	// Sort in by as-the-crow-flies range. Not correct, but don't want to deal with arbitrarily long query.
-	GetChitBag()->QuerySpatialHash( &chitArr, zone, parentChit, GameItem::CHARACTER, true );
+	GetChitBag()->QuerySpatialHash( &chitArr, zone, parentChit, GameItem::CHARACTER );
 
+	// This is surprisingly subtle. On the one hand, if we don't find anything, we
+	// don't want to clear existing targets. (Guys just stand around.) On the other
+	// hand, we don't want old info in there.
 	if ( !chitArr.Empty() ) {
-		// Clear and reset the existing info.
-		friendList.Clear();
-		enemyList.Clear();
+		bool friendClear = false;
+		bool enemyClear = false;
 
 		for( int i=0; i<chitArr.Size(); ++i ) {
 			Chit* chit = chitArr[i];
 
 			int teamStatus = GetTeamStatus( chit );
 
-			if ( teamStatus == FRIENDLY && friendList.HasCap() )
-				friendList.Push( chit->ID() );
-			else if ( teamStatus == ENEMY && enemyList.HasCap() )
-				 enemyList.Push( chit->ID() );
+			if ( teamStatus == FRIENDLY ) {
+				if (!friendClear ) {
+					friendList.Clear();
+					friendClear = true;
+				}
+				if ( friendList.HasCap() )
+					friendList.Push( chit->ID() );
+			}
+			else if ( teamStatus == ENEMY ) {
+				if (!enemyClear ) {
+					enemyList.Clear();
+					enemyClear = true;
+				}
+				if ( enemyList.HasCap() )
+					enemyList.Push( chit->ID() );
+			}
 		}
 	}
-}
-
-
-void AIComponent::DoSlowTick()
-{
-	UpdateCombatInfo();
+	Think();
 }
 
 
 void AIComponent::DoMelee()
 {
 	// Are we close enough to hit? Then swing. Else move to target.
-
-	Chit* targetChit = parentChit->GetChitBag()->GetChit( action.melee.targetID );
+	Chit* targetChit = 0;
+	while ( !enemyList.Empty() ) {
+		targetChit = parentChit->GetChitBag()->GetChit( enemyList[0] );
+		if ( targetChit )
+			break;
+		enemyList.SwapRemove(0);
+	}
 	if ( targetChit == 0 ) {
-		currentAction = NO_ACTION;
-		if ( enemyList.Size() && enemyList[0] == action.melee.targetID ) {
-			enemyList.PopFront();
-		}
 		return;
 	}
 
@@ -137,8 +153,75 @@ void AIComponent::OnChitEvent( const ChitEvent& event )
 }
 
 
+void AIComponent::Think()
+{
+	// This may get called when there is an action, and update.
+	// Or there may be no action.
+
+	SpatialComponent* spatial = parentChit->GetSpatialComponent();
+	const GameItem* item = parentChit->GetItemComponent() ? parentChit->GetItemComponent()->GetItem() : 0;
+
+	if ( spatial && item )	{}
+	else return;
+
+	const Vector3F& pos = spatial->GetPosition();
+
+	if ( currentAction == NO_ACTION || currentAction == MELEE ) {
+		currentAction = NO_ACTION;
+		if ( !enemyList.Empty() ) {
+
+			// Primary:   Distance: cubic, closer is better
+			// Secondary: Strength: linear, more is better 
+			// could add:
+			//   damage done by enemy (higher is better)
+			//   weakness to effects
+
+			float bestUtility = 0;
+			int   bestIndex = -1;
+
+			for( int i=0; i<enemyList.Size(); ++i ) {
+				Chit* enemy = parentChit->GetChitBag()->GetChit( enemyList[i] );
+				if (    enemy 
+					 && enemy->GetSpatialComponent() 
+					 && enemy->GetItemComponent() ) 
+				{
+					const Vector3F enemyPos = enemy->GetSpatialComponent()->GetPosition();
+					float normalizedRange = (enemyPos - pos).Length() / COMBAT_INFO_RANGE;
+					float utilityDistance = UtilityCubic( 1.0f, LOW_UTILITY, normalizedRange );
+
+					const GameItem* enemyItem = enemy->GetItemComponent()->GetItem();
+					if ( enemyItem->hp == 0 )
+						continue;	// already dead.
+
+					float normalizedDamage = enemyItem->hp / item->mass;	// basic melee advantage 
+					float utilityDamage = UtilityLinear( 1.f, 0.f, normalizedDamage );
+
+					float utility = utilityDistance*PRIMARY_UTILITY + utilityDamage*SECONDARY_UTILITY;
+					if ( utility > bestUtility ) {
+						bestIndex = i;
+						bestUtility = utility;
+					}
+				}
+			}
+			if ( bestIndex >= 0 ) {
+				currentAction = MELEE;
+				// Make the best target the 1st in the list.
+				Swap( &enemyList[bestIndex], &enemyList[0] );
+			}
+		}
+	}
+}
+
+
+void AIComponent::DoSlowTick()
+{
+	UpdateCombatInfo();
+}
+
+
 void AIComponent::DoTick( U32 deltaTime )
 {
+	// If we are in some action, do nothing and return.
 	if ( parentChit->GetRenderComponent() && !parentChit->GetRenderComponent()->AnimationReady() ) {
 		return;
 	}
@@ -159,11 +242,7 @@ void AIComponent::DoTick( U32 deltaTime )
 		}
 	}
 	else {
-		
-		if ( !enemyList.Empty() ) {
-			currentAction = MELEE;
-			action.melee.targetID = enemyList[0];
-		}
+		Think();
 	}
 }
 
@@ -174,6 +253,7 @@ void AIComponent::DebugStr( grinliz::GLString* str )
 }
 
 
+// FIXME: move out of AI!
 void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {
 	if ( chit == parentChit && msg.ID() == RENDER_MSG_IMPACT ) {

@@ -44,8 +44,7 @@ public:
 	void QuerySpatialHash(	grinliz::CDynArray<Chit*>* array, 
 							const grinliz::Rectangle2F& r, 
 		                    const Chit* ignoreMe,
-							int itemFilter,
-							bool distanceSort );
+							int itemFilter );
 
 private:
 	enum {
