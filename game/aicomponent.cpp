@@ -158,13 +158,11 @@ void AIComponent::Think()
 	// This may get called when there is an action, and update.
 	// Or there may be no action.
 
-	SpatialComponent* spatial = parentChit->GetSpatialComponent();
-	const GameItem* item = parentChit->GetItemComponent() ? parentChit->GetItemComponent()->GetItem() : 0;
+	ComponentSet thisComp( parentChit, Chit::SPATIAL_BIT | Chit::ITEM_BIT );
+	if ( !thisComp.okay )
+		return;
 
-	if ( spatial && item )	{}
-	else return;
-
-	const Vector3F& pos = spatial->GetPosition();
+	const Vector3F& pos = thisComp.spatial->GetPosition();
 
 	if ( currentAction == NO_ACTION || currentAction == MELEE ) {
 		currentAction = NO_ACTION;
@@ -180,20 +178,17 @@ void AIComponent::Think()
 			int   bestIndex = -1;
 
 			for( int i=0; i<enemyList.Size(); ++i ) {
-				Chit* enemy = parentChit->GetChitBag()->GetChit( enemyList[i] );
-				if (    enemy 
-					 && enemy->GetSpatialComponent() 
-					 && enemy->GetItemComponent() ) 
+				ComponentSet enemy( GetChit( enemyList[i] ), Chit::SPATIAL_BIT | Chit::ITEM_BIT );
+				if ( enemy.okay ) 
 				{
-					const Vector3F enemyPos = enemy->GetSpatialComponent()->GetPosition();
+					if ( enemy.item->hp == 0 )
+						continue;	// already dead.
+
+					const Vector3F enemyPos = enemy.spatial->GetPosition();
 					float normalizedRange = (enemyPos - pos).Length() / COMBAT_INFO_RANGE;
 					float utilityDistance = UtilityCubic( 1.0f, LOW_UTILITY, normalizedRange );
 
-					const GameItem* enemyItem = enemy->GetItemComponent()->GetItem();
-					if ( enemyItem->hp == 0 )
-						continue;	// already dead.
-
-					float normalizedDamage = enemyItem->hp / item->mass;	// basic melee advantage 
+					float normalizedDamage = enemy.item->hp / thisComp.item->mass;	// basic melee advantage 
 					float utilityDamage = UtilityLinear( 1.f, 0.f, normalizedDamage );
 
 					float utility = utilityDistance*PRIMARY_UTILITY + utilityDamage*SECONDARY_UTILITY;

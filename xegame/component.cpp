@@ -1,16 +1,16 @@
 #include "component.h"
 #include "chit.h"
+#include "chitbag.h"
 
 int Component::idPool = 1;
 
-/*
-void Component::RequestUpdate()
+Chit* Component::GetChit( int id )
 {
 	if ( parentChit ) {
-		parentChit->RequestUpdate();
+		return parentChit->GetChitBag()->GetChit( id );
 	}
+	return 0;
 }
-*/
 
 
 ChitBag* Component::GetChitBag()

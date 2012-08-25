@@ -17,6 +17,7 @@ class ItemComponent;
 class ChitBag;
 class Chit;
 class ChitEvent;
+class GameItem;
 
 class ChitMsg
 {
@@ -124,6 +125,16 @@ private:
 		GENERAL_END   = RENDER,
 	};
 
+public:
+	enum {
+		SPATIAL_BIT		= (1<<SPATIAL),
+		MOVE_BIT		= (1<<MOVE),
+		INVENTORY_BIT	= (1<<INVENTORY),
+		ITEM_BIT		= (1<<ITEM),
+		RENDER_BIT		= (1<<RENDER)
+	};
+
+private:
 	union {
 		// Update ordering is tricky. Defined by the order of the slots;
 		struct {
@@ -140,6 +151,23 @@ private:
 		};
 		Component*			slot[NUM_SLOTS];
 	};
+};
+
+
+struct ComponentSet
+{
+	ComponentSet( Chit* chit, int bits );
+	void Zero();
+
+	bool okay;
+	Chit* chit;
+
+	SpatialComponent*	spatial;
+	MoveComponent*		move;
+	InventoryComponent*	inventory;
+	ItemComponent*		itemComponent;
+	GameItem*			item;
+	RenderComponent*	render;
 };
 
 

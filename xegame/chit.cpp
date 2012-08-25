@@ -3,6 +3,7 @@
 #include "component.h"
 #include "spatialcomponent.h"
 #include "rendercomponent.h"
+#include "itemcomponent.h"
 
 #include "../grinliz/glstringutil.h"
 
@@ -286,3 +287,55 @@ Chit* SafeChitList::Next() const {
 	}
 	return 0;
 }
+
+
+ComponentSet::ComponentSet( Chit* _chit, int bits )
+{
+	Zero();
+	if ( _chit ) {
+		chit = _chit;
+		int error = 0;
+		if ( bits & Chit::SPATIAL_BIT ) {
+			spatial = chit->GetSpatialComponent();
+			if ( !spatial ) ++error;
+		}
+		if ( bits & Chit::MOVE_BIT ) {
+			move = chit->GetMoveComponent();
+			if ( !move ) ++error;
+		}
+		if ( bits & Chit::INVENTORY_BIT ) {
+			inventory = chit->GetInventoryComponent();
+			if ( !inventory ) ++error;
+		}
+		if ( bits & Chit::ITEM_BIT ) {
+			itemComponent = chit->GetItemComponent();
+			if ( !itemComponent ) 
+				++error;
+			else
+				item = &itemComponent->item;
+		}
+		if ( bits & Chit::RENDER_BIT ) {
+			render = chit->GetRenderComponent();
+			if ( !render ) ++error;
+		}
+
+		if ( error ) 
+			Zero();
+		okay = !error;
+	}
+}
+
+
+void ComponentSet::Zero()
+{
+	okay = false;
+	chit = 0;
+	spatial = 0;
+	move = 0;
+	inventory = 0;
+	itemComponent = 0;
+	item = 0;
+	render = 0;
+}
+
+

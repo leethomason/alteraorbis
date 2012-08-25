@@ -400,11 +400,11 @@ void Engine::Draw( U32 deltaTime )
 #endif
 
 		screenport->SetPerspective();
+		screenport->SetView( camera.ViewMatrix() );	// Draw the camera
 	}
 
 	// ------ Particle system ------------- //
 	const Vector3F* eyeDir = camera.EyeDir3();
-	//ParticleSystem* particleSystem = ParticleSystem::Instance();
 	particleSystem->Update( deltaTime, eyeDir );
 	particleSystem->Draw();
 }
