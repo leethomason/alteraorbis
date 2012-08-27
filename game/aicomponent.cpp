@@ -113,18 +113,28 @@ void AIComponent::UpdateCombatInfo( const Rectangle2F* _zone )
 
 void AIComponent::DoMelee()
 {
-	// FIXME: don't issue new move every tick?
-	// FIXME: don't keep chasing when there are no targets
+	ComponentSet thisComp( parentChit, Chit::RENDER_BIT | Chit::SPATIAL_BIT | ComponentSet::IS_ALIVE );
+	if ( !thisComp.okay )
+		return;
 
 	// Are we close enough to hit? Then swing. Else move to target.
 	Chit* targetChit = 0;
+	bool repath = false;
+
 	while ( !enemyList.Empty() ) {
 		targetChit = parentChit->GetChitBag()->GetChit( enemyList[0] );
 		if ( targetChit )
 			break;
 		enemyList.SwapRemove(0);
+		repath = true;
 	}
-	if ( targetChit == 0 ) {
+	ComponentSet target( targetChit, Chit::SPATIAL_BIT | ComponentSet::IS_ALIVE );
+	if ( !target.okay ) {
+		PathMoveComponent* pmc = GET_COMPONENT( parentChit, PathMoveComponent );
+		if ( pmc ) {
+			pmc->QueueDest( parentChit );	// stop moving.
+		}
+		currentAction = NO_ACTION;
 		return;
 	}
 
@@ -135,7 +145,18 @@ void AIComponent::DoMelee()
 		// Move to target.
 		PathMoveComponent* pmc = GET_COMPONENT( parentChit, PathMoveComponent );
 		if ( pmc ) {
-			pmc->QueueDest( targetChit );
+			Vector2F targetPos = target.spatial->GetPosition2D();
+			Vector2F pos = thisComp.spatial->GetPosition2D();
+			Vector2F dest = { -1, -1 };
+			pmc->QueuedDest( &dest );
+
+			float delta = ( dest-targetPos ).Length();
+			float distanceToTarget = (targetPos - pos).Length();
+
+			// If the error is greater than distance to, then re-path.
+			if ( repath || delta > distanceToTarget * 0.25f ) {
+				pmc->QueueDest( targetChit );
+			}
 		}
 	}
 }

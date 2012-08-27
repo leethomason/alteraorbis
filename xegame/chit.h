@@ -156,11 +156,16 @@ private:
 
 struct ComponentSet
 {
+	enum {
+		IS_ALIVE = (1<<30)
+	};
+
 	ComponentSet( Chit* chit, int bits );
 	void Zero();
 
-	bool okay;
-	Chit* chit;
+	bool	okay;
+	Chit*	chit;
+	bool	alive;
 
 	SpatialComponent*	spatial;
 	MoveComponent*		move;

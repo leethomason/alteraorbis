@@ -314,6 +314,19 @@ ComponentSet::ComponentSet( Chit* _chit, int bits )
 			else
 				item = &itemComponent->item;
 		}
+		{
+			// Always check if alive:
+			ItemComponent* ic = chit->GetItemComponent();
+			if ( !ic ) alive = true;	// weird has-no-health-must-be-alive case
+			if ( ic ) {
+				alive = ic->GetItem()->hp > 0;
+			}
+			// But only set error if requested
+			if ( bits & ComponentSet::IS_ALIVE ) {
+				if ( !alive )
+					++error;
+			}
+		}
 		if ( bits & Chit::RENDER_BIT ) {
 			render = chit->GetRenderComponent();
 			if ( !render ) ++error;
