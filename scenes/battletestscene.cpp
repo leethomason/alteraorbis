@@ -175,6 +175,9 @@ void BattleTestScene::LoadMap()
 			waypoints[MID].Push( v );
 		}
 	}
+	GLASSERT( waypoints[RIGHT].Size() == 8 );
+	GLASSERT( waypoints[LEFT].Size() == 8 );
+	GLASSERT( waypoints[MID].Size() == 8 );
 	ShuffleArray( waypoints[RIGHT].Mem(), waypoints[RIGHT].Size(), &random );
 	ShuffleArray( waypoints[LEFT].Mem(),  waypoints[LEFT].Size(),  &random );
 	ShuffleArray( waypoints[MID].Mem(),   waypoints[MID].Size(),   &random );
@@ -253,8 +256,8 @@ void BattleTestScene::GoScene()
 
 	// Trigger the AI to do something.
 	for( int i=LEFT; i<=RIGHT; ++i ) {
-		AwarenessChitEvent event( i, b );
-		event.SetItemFilter( GameItem::CHARACTER );
+		AwarenessChitEvent* event = new AwarenessChitEvent( i, b );
+		event->SetItemFilter( GameItem::CHARACTER );
 		chitBag.QueueEvent( event );
 	}
 }
@@ -415,8 +418,8 @@ void BattleTestScene::DoTick( U32 deltaTime )
 			}
 		}
 		if ( !aware ) {
-			AwarenessChitEvent event( LEFT, b );
-			event.SetItemFilter( GameItem::CHARACTER );
+			AwarenessChitEvent* event = new AwarenessChitEvent( LEFT, b );
+			event->SetItemFilter( GameItem::CHARACTER );
 			chitBag.QueueEvent( event );
 		}
 	}

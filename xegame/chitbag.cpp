@@ -67,13 +67,12 @@ void ChitBag::DoTick( U32 delta )
 	// probably correct in that order.
 
 	for( int i=0; i<events.Size(); ++i ) {
-		const ChitEvent& e = events[i];
+		const ChitEvent& e = *events[i];
 		QuerySpatialHash( &hashQuery, e.AreaOfEffect(), 0, e.GetItemFilter() );
 		for( int j=0; j<hashQuery.Size(); ++j ) {
 			hashQuery[j]->OnChitEvent( e );
 		}
 	}
-
 
 	Chit** chitArr = chits.GetValues();
 	for( int i=0; i<chits.NumValues(); ++i ) {

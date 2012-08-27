@@ -34,7 +34,8 @@ public:
 	// Normally called automatically.
 	void QueueDelete( Chit* chit );
 
-	void QueueEvent( const ChitEvent& event )			{ events.Push( event ); }
+	// passes ownership
+	void QueueEvent( ChitEvent* event )			{ events.Push( event ); }
 
 	// Hashes based on integer coordinates. No need to call
 	// if they don't change.
@@ -62,10 +63,12 @@ private:
 	U32 bagTime;
 	// FIXME: chits could be stored in a DynArr. Go cohenent memory, go! Makes 
 	// walking the high level list potentially faster.
-	grinliz::HashTable< int, Chit*, grinliz::CompValue, grinliz::OwnedPtrSem > chits;
+	grinliz::HashTable< int, Chit*, 
+		                grinliz::CompValue, 
+						grinliz::OwnedPtrSem > chits;
 	grinliz::CDynArray<int>			deleteList;		// <set> of chits that need to be deleted.
 	grinliz::CDynArray<Chit*>		hashQuery;
-	grinliz::CDynArray<ChitEvent>	events;
+	grinliz::CDynArray<ChitEvent*, grinliz::OwnedPtrSem >	events;
 	Chit* spatialHash[SIZE*SIZE];
 };
 

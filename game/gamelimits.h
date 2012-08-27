@@ -27,12 +27,10 @@ static const int MAX_ITEM_NAME		= 24;
 static const int MODEL_USER	= 0x1000;				// from model.h
 
 // Debugging values:
-static const float MOVE_SPEED = 2.0f;			// grid/second
-static const float ROTATION_SPEED = 360.f;		// degrees/second
-static const float ROTATION_LIMIT = 45.0f;
-static const float MELEE_RANGE = 1.0f;			// FIXME: vary per monster, should be a max
-static const float MELEE_COS_THETA = 0.71f;		// How wide the melee swipe is	
-static const U32   COOLDOWN_TIME = 750;
+static const float ROTATION_LIMIT	= 45.0f;
+static const float MELEE_RANGE		= 1.0f;			// FIXME: vary per monster, should be a max
+static const float MELEE_COS_THETA	= 0.71f;		// How wide the melee swipe is	
+static const U32   COOLDOWN_TIME	= 750;
 
 
 // This arrangement breaks the case where something can attach

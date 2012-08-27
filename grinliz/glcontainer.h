@@ -370,7 +370,7 @@ private:
 			U32 oldNAdds = nAdds;
 			U32 oldNItems = nItems;
 
-			nBuckets = CeilPowerOf2( Max(	(U32)(nItems*3), 
+			nBuckets = CeilPowerOf2( Max(	(U32)(nItems*4), 
 											nAdds*2, 
 											(U32) 128 ));
 			buckets = new Bucket[nBuckets];
@@ -378,7 +378,7 @@ private:
 			nAdds = 0;
 			nItems = 0;
 			for( U32 i=0; i<oldNBuckets; ++i ) {
-				if ( oldBuckets[i].key >= 0 ) {
+				if ( oldBuckets[i].state == IN_USE ) {
 					Add( oldBuckets[i].key, oldBuckets[i].value );
 				}
 			}

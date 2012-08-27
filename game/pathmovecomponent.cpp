@@ -17,6 +17,11 @@ using namespace grinliz;
 
 #define DEBUG_PMC
 
+// 4 miles/hour = 6000m/hr = 1.6m/s = 0.8grid/s
+// Which looks like a mellow walk.
+static const float MOVE_SPEED		= 1.2f;			// grid/second
+static const float ROTATION_SPEED	= 360.f;		// degrees/second
+
 
 void PathMoveComponent::OnAdd( Chit* chit )
 {

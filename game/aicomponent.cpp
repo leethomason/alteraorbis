@@ -113,6 +113,9 @@ void AIComponent::UpdateCombatInfo( const Rectangle2F* _zone )
 
 void AIComponent::DoMelee()
 {
+	// FIXME: don't issue new move every tick?
+	// FIXME: don't keep chasing when there are no targets
+
 	// Are we close enough to hit? Then swing. Else move to target.
 	Chit* targetChit = 0;
 	while ( !enemyList.Empty() ) {
@@ -140,13 +143,13 @@ void AIComponent::DoMelee()
 
 void AIComponent::OnChitEvent( const ChitEvent& event )
 {
-	if ( event.ID() == ChitEvent::AWARENESS ) {
+	if ( event.ToAwareness() ) {
 		ItemComponent* itemComp = GET_COMPONENT( parentChit, ItemComponent );
 		if ( itemComp ) {
-			const AwarenessChitEvent& aware = (const AwarenessChitEvent&) event;
-			if ( aware.Team() == itemComp->item.primaryTeam ) 
+			const AwarenessChitEvent* aware = event.ToAwareness();
+			if ( aware->Team() == itemComp->item.primaryTeam ) 
 			{
-				UpdateCombatInfo( &aware.Bounds() );
+				UpdateCombatInfo( &aware->Bounds() );
 			}
 		}
 	}
