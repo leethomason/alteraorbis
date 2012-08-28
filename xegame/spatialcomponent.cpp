@@ -3,6 +3,8 @@
 #include "chitbag.h"
 #include "xegamelimits.h"
 #include "rendercomponent.h"
+
+#include "../engine/engine.h"
 #include "../grinliz/glmatrix.h"
 
 using namespace grinliz;
@@ -59,7 +61,8 @@ Vector3F SpatialComponent::GetHeading() const
 {
 	Matrix4 r;
 	rotation.ToMatrix( &r );
-	return r.Row( Matrix4::OUT );
+	Vector3F v = r * V3F_OUT;
+	return v;
 }
 
 
@@ -80,7 +83,6 @@ Vector2F SpatialComponent::GetHeading2D() const
 {
 	Vector3F h = GetHeading();
 	Vector2F norm = { h.x, h.z };
-	// Not normalized; I think this is the intention.
 	return norm;	
 }
 

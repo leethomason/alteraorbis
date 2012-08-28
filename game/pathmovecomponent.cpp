@@ -224,7 +224,9 @@ void PathMoveComponent::RotationFirst( U32 delta )
 			}
 			
 			if ( deltaRot < rotationLimit ) {
-				Vector2F norm = { sinf(ToRadian(rot)), cosf(ToRadian(rot)) };
+				//Vector2F norm = { sinf(ToRadian(rot)), cosf(ToRadian(rot)) };
+				Vector2F norm = parentChit->GetSpatialComponent()->GetHeading2D();
+				norm.Normalize();
 
 				if ( dist <= travel ) {
 					travel -= dist;

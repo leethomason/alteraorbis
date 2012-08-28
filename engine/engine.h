@@ -38,7 +38,7 @@ class EngineShaders;
 
 static const grinliz::Vector3F V3F_ZERO = { 0, 0, 0 };
 static const grinliz::Vector3F V3F_UP   = { 0, 1, 0 };
-
+static const grinliz::Vector3F V3F_OUT	= { 0, 0, 1 };
 
 /*
 	Standard state:

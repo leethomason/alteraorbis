@@ -131,11 +131,11 @@ class Matrix4
 	}
 
 	// Conventional names of rows.
-	enum {
-		RIGHT,
-		UP,
-		OUT
-	};
+	//enum {
+	//	RIGHT,
+	//	UP,
+	//	OUT
+	//};
 
 	/// Return a row of the matrix
 	Vector3F Row( int i ) const	{

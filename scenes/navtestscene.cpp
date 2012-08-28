@@ -67,7 +67,8 @@ NavTestScene::NavTestScene( LumosGame* game ) : Scene( game )
 	map = new WorldMap( 32, 32 );
 	map->InitCircle();
 	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase(), map );
-	
+	engine->SetGlow( false );
+
 	map->ShowRegionOverlay( true );
 
 	engine->CameraLookAt( 10, 10, 40 );

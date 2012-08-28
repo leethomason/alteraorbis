@@ -1,7 +1,7 @@
 - combat test scene
 	X why does balrog just stand around not attacking mantis
 	X ...and yet the AOE of melee seems huge. clean all that up.
-	- human runs up to dummy, circles around it
+	X human runs up to dummy, circles around it
 	- shields
 	- impact (light/heavy)
 	- removing unit "clumping" (3yr old soccer team). Basic formation?
@@ -16,7 +16,7 @@
 	- flaming sword
 	- flaming sword should catch things on fire
 	- refactor code - if needed? - in AIComponent (the fixmes)
-	- debugging info for chit ticks
+	X debugging info for chit ticks
 	X back in the tick system: the "need tick" vs. "no tick" changes. Note for 
 	  example whether an item has effects applied. Or the kind of animation. Don't
 	  want to tick granite chunks when they don't need it. Key concerns: 
