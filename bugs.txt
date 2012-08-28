@@ -1,19 +1,20 @@
 - combat test scene
+	X why does balrog just stand around not attacking mantis
+	X ...and yet the AOE of melee seems huge. clean all that up.
+	- impact (light/heavy)
+	- removing unit "clumping" (3yr old soccer team). Basic formation?
+	- unique look for units so teams can be distinguished
 	- properly hook up items and such, so that items, health, all be driven correctly
+	- shields
 	X data driven item creation
 	- buttons to select scenario, load items
 	X leaving guy standing after battle
-	- removing unit "clumping" (3yr old soccer team). Basic formation?
-	- unique look for units so teams can be distinguished
-	- impact (light/heavy)
 	- animation speed isn't correct
-	- shields
 	- adjust particles to have "impact" effect
 	- add de-rez
-	- why does balrog just stand around not attacking mantis, and yet the AOE of
-	  melee seems huge. clean all that up.
 	- flaming sword
 	- flaming sword should catch things on fire
+	- refactor code - if needed? - in AIComponent (the fixmes)
 
 
 	X melee attack standing too close 

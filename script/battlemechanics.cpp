@@ -35,32 +35,26 @@ bool BattleMechanics::InMeleeZone(	Engine* engine,
 									Chit* src,
 									Chit* target )
 {
-	SpatialComponent* spatial		= src->GetSpatialComponent();
-	RenderComponent*  render		= src->GetRenderComponent();
-	SpatialComponent* targetSpatial = target->GetSpatialComponent();
-	RenderComponent*  targetRender	= target->GetRenderComponent();
+	ComponentSet srcComp(   src,     Chit::SPATIAL_BIT | Chit::RENDER_BIT | ComponentSet::IS_ALIVE );
+	ComponentSet targetComp( target, Chit::SPATIAL_BIT | Chit::RENDER_BIT | ComponentSet::IS_ALIVE );
 
-	if ( spatial && render && targetSpatial && targetRender ) {}	// all good
-	else return false;
+	if ( !srcComp.okay || !targetComp.okay )
+		return false;
 
-	Vector2F normalToTarget = targetSpatial->GetPosition2D() - spatial->GetPosition2D();
-	const float distToTarget = normalToTarget.Length();
-	normalToTarget.SafeNormalize( 1, 0 );
+	// Check range up front and early out.
+	const float meleeRange =   srcComp.render->RadiusOfBase()*1.5f				// FIXME: correct??
+		                     + targetComp.render->RadiusOfBase();
+	const float range = ( targetComp.spatial->GetPosition2D() - srcComp.spatial->GetPosition2D() ).Length();
+	if ( range > meleeRange )
+		return false;
 
-	int test = IntersectRayCircle( targetSpatial->GetPosition2D(),
-								   targetRender->RadiusOfBase(),
-								   spatial->GetPosition2D(),
-								   normalToTarget );
+	int test = IntersectRayCircle( targetComp.spatial->GetPosition2D(),
+								   targetComp.render->RadiusOfBase(),
+								   srcComp.spatial->GetPosition2D(),
+								   srcComp.spatial->GetHeading2D() );
 
 	bool intersect = ( test == INTERSECT || test == INSIDE );
-
-	const float meleeRangeDiff = 0.5f * render->RadiusOfBase();	// FIXME: correct??? better metric?
-	const float meleeRange = render->RadiusOfBase() + targetRender->RadiusOfBase() + meleeRangeDiff;
-
-	if ( intersect && distToTarget < meleeRange ) {
-		return true;
-	}
-	return false;
+	return intersect;
 }
 
 
