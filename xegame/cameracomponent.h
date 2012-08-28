@@ -25,8 +25,7 @@ public:
 		return Component::ToComponent( name );
 	}
 	virtual void DebugStr( grinliz::GLString* str );
-	virtual void DoTick( U32 delta );
-	virtual bool NeedsTick()					{ return true; }
+	virtual bool DoTick( U32 delta );
 
 	void SetAutoDelete( bool ad )				{ autoDelete = ad; }
 	void SetPanTo( grinliz::Vector3F& dest, float speed = 40.0f );

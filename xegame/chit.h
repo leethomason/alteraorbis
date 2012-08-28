@@ -60,7 +60,8 @@ public:
 	void Add( Component* );
 	void Remove( Component* );
 
-	bool NeedsTick() const		{ return nTickers > 0 || oneTickNeeded; }
+	bool TickNeeded() const		{ return tickNeeded; }
+	void SetTickNeeded()		{ tickNeeded = true; }
 	void DoTick( U32 delta );
 
 	void OnChitEvent( const ChitEvent& event );
@@ -95,10 +96,9 @@ private:
 	bool CarryMsg( int componentID, Chit* src, const ChitMsg& msg );
 
 	ChitBag* chitBag;
-	int id;
-	int		nTickers;		// number of components that need a tick.
-	bool	oneTickNeeded;	// even if a component generally doesn't need a tick, it might sometimes
-	U32 slowTickTimer;
+	int		 id;
+	bool	 tickNeeded;
+	U32		 slowTickTimer;
 	grinliz::CDynArray<IChitListener*> listeners;
 
 	struct CList

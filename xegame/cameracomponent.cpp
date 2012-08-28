@@ -24,7 +24,7 @@ void CameraComponent::SetPanTo( grinliz::Vector3F& _dest, float _speed )
 }
 
 
-void CameraComponent::DoTick( U32 delta ) 
+bool CameraComponent::DoTick( U32 delta ) 
 {
 	switch ( mode ) {
 	case DONE:
@@ -54,6 +54,7 @@ void CameraComponent::DoTick( U32 delta )
 	default:
 		GLASSERT( 0 );
 	}
+	return true;
 }
 
 

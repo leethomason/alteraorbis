@@ -10,13 +10,13 @@
 using namespace grinliz;
 const U32 SLOW_TICK = 500;
 
-Chit::Chit( int _id, ChitBag* bag ) :	chitBag( bag ), id( _id ), nTickers( 0 ), oneTickNeeded( true )
+Chit::Chit( int _id, ChitBag* bag ) :	chitBag( bag ), id( _id ), tickNeeded( true )
 {
 	next = 0;
 	for( int i=0; i<NUM_SLOTS; ++i ) {
 		slot[i] = 0;
 	}
-	slowTickTimer = (_id * 37)%SLOW_TICK;
+	slowTickTimer = (_id * 37) % SLOW_TICK;
 }
 
 
@@ -65,19 +65,13 @@ void Chit::Add( Component* c )
 		GLASSERT( i < GENERAL_END );
 	}
 	c->OnAdd( this );
-	if ( c->NeedsTick() ) {
-		++nTickers;
-	}
-	oneTickNeeded = true;
+	tickNeeded = true;
 }
 
 
 void Chit::Remove( Component* c )
 {
-	if ( c->NeedsTick() )
-		--nTickers;
-	oneTickNeeded = true;
-
+	tickNeeded = true;
 	for( int i=0; i<NUM_SLOTS; ++i ) {
 		if ( slot[i] == c ) {
 			c->OnRemove();
@@ -102,20 +96,23 @@ Component* Chit::GetComponent( const char* name )
 
 void Chit::DoTick( U32 delta )
 {
-	GLASSERT( NeedsTick() );
-	oneTickNeeded = false;	// clear before tick, which may set the flag again
 	slowTickTimer += delta;
+	tickNeeded = false;
 
 	if ( slowTickTimer > SLOW_TICK ) {
 		slowTickTimer = 0;
 		for( int i=0; i<NUM_SLOTS; ++i ) {
-			if ( slot[i] ) 
-				slot[i]->DoSlowTick();
+			if ( slot[i] ) { 
+				if ( slot[i]->DoSlowTick() )
+					tickNeeded = true;
+			}
 		}
 	}
 	for( int i=0; i<NUM_SLOTS; ++i ) {
-		if ( slot[i] ) 
-			slot[i]->DoTick( delta );
+		if ( slot[i] ) { 
+			if ( slot[i]->DoTick( delta ) )
+				tickNeeded = true;
+		}
 	}
 }
 

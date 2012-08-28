@@ -232,6 +232,14 @@ void Model::Init( const ModelResource* resource, SpaceTree* tree )
 	crossFadeTime = 0;
 	totalCrossFadeTime = 0;
 	animationID = ANIM_OFF;
+
+	hasParticles = false;
+	for( int i=0; i<EL_MAX_MODEL_EFFECTS; ++i ) {
+		const ModelParticleEffect& effect = resource->header.effectData[i];
+		if ( !effect.name.empty() ) {
+			hasParticles = true;
+		}
+	}
 }
 
 

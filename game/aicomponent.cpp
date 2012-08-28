@@ -232,17 +232,18 @@ void AIComponent::Think()
 }
 
 
-void AIComponent::DoSlowTick()
+bool AIComponent::DoSlowTick()
 {
 	UpdateCombatInfo();
+	return true;
 }
 
 
-void AIComponent::DoTick( U32 deltaTime )
+bool AIComponent::DoTick( U32 deltaTime )
 {
 	// If we are in some action, do nothing and return.
 	if ( parentChit->GetRenderComponent() && !parentChit->GetRenderComponent()->AnimationReady() ) {
-		return;
+		return true;
 	}
 
 	// Are we doing something? Then do that; if not, look for
@@ -263,6 +264,7 @@ void AIComponent::DoTick( U32 deltaTime )
 	else {
 		Think();
 	}
+	return true;
 }
 
 

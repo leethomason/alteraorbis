@@ -341,7 +341,7 @@ void PathMoveComponent::ApplyBlocks()
 }
 
 
-void PathMoveComponent::DoTick( U32 delta )
+bool PathMoveComponent::DoTick( U32 delta )
 {
 	GRINLIZ_PERFTRACK;
 
@@ -435,6 +435,7 @@ void PathMoveComponent::DoTick( U32 delta )
 		SetPosRot( pos2, rot );
 	};
 //	GLASSERT( (pathPos < nPathPos ) || queuedDest.x >= 0 );
+	return true;
 }
 
 

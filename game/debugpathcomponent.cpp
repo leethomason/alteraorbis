@@ -44,7 +44,7 @@ void DebugPathComponent::OnRemove()
 }
 
 
-void DebugPathComponent::DoTick( U32 delta )
+bool DebugPathComponent::DoTick( U32 delta )
 {
 	SpatialComponent* spatial = parentChit->GetSpatialComponent();
 	if ( spatial ) {
@@ -76,5 +76,6 @@ void DebugPathComponent::DoTick( U32 delta )
 
 		model->SetColor( color );
 	}
+	return false;
 }
 

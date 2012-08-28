@@ -171,13 +171,15 @@ void RenderComponent::Detach( const char* metaData )
 }
 
 
-void RenderComponent::DoTick( U32 deltaTime )
+bool RenderComponent::DoTick( U32 deltaTime )
 {
 	GRINLIZ_PERFTRACK;
+	bool needsTick = false;
 
 	SpatialComponent* spatial = SyncToSpatial();
 	// Animate the primary model.
 	if ( spatial && model[0] && model[0]->GetAnimationResource() ) {
+		needsTick = true;
 
 		AnimationType n = this->CalcAnimation();
 		model[0]->SetAnimation( n, CROSS_FADE_TIME );
@@ -198,7 +200,12 @@ void RenderComponent::DoTick( U32 deltaTime )
 			}
 		}
 	}
-	model[0]->EmitParticles( engine->particleSystem, engine->camera.EyeDir3(), deltaTime );
+	for( int i=0; i<NUM_MODELS; ++i ) {
+		if( model[i] && model[i]->HasParticles() ) {
+			model[i]->EmitParticles( engine->particleSystem, engine->camera.EyeDir3(), deltaTime );
+			needsTick = true;
+		}
+	}
 
 	// Position the attachments
 	for( int i=1; i<NUM_MODELS; ++i ) {
@@ -209,6 +216,7 @@ void RenderComponent::DoTick( U32 deltaTime )
 			model[i]->SetTransform( xform );
 		}
 	}
+	return needsTick;
 }
 
 

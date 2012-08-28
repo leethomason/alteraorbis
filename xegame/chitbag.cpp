@@ -77,7 +77,7 @@ void ChitBag::DoTick( U32 delta )
 	Chit** chitArr = chits.GetValues();
 	for( int i=0; i<chits.NumValues(); ++i ) {
 		Chit* c = chitArr[i];
-		if ( c->NeedsTick() ) {
+		if ( c->TickNeeded() ) {
 			c->DoTick( delta );
 		}
 	}

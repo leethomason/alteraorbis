@@ -10,40 +10,15 @@
 using namespace grinliz;
 
 
-/*
-void HealthComponent::SetHealth( int h )
-{
-	if ( health != h ) {
-		health = h;
-		parentChit->SendMessage( ChitMsg(HEALTH_MSG_CHANGED), this );
-	}
-}
-
-
-void HealthComponent::SetMaxHealth( int h )
-{
-	if ( maxHealth != h ) {
-		maxHealth = h;
-		health = grinliz::Min( health, maxHealth );
-		parentChit->SendMessage( ChitMsg(HEALTH_MSG_CHANGED), this );
-	}
-}
-*/
-
-
 float HealthComponent::GetHealthFraction() const
 {
-	float fraction = 1.0f;
-	GameItem* item = 0;
-	if ( parentChit->GetItemComponent() ) {
-		item = parentChit->GetItemComponent()->GetItem();
-	}
-	if ( item ) {
-		fraction = item->hp / item->TotalHP();
-	}
+	if ( !parentChit->GetItemComponent() )
+		return 1.0f;
+
+	GameItem* item = parentChit->GetItemComponent()->GetItem();
+	float fraction = item->hp / item->TotalHP();
 	return fraction;
 }
-
 
 
 void HealthComponent::DeltaHealth( float d )

@@ -338,6 +338,7 @@ public:
 	}
 
 	void CalcMetaData( const char* name, grinliz::Matrix4* xform ) const;
+	bool HasParticles() const {  return hasParticles; }
 	void EmitParticles( ParticleSystem* system, const grinliz::Vector3F* eyeDir, U32 deltaTime ) const;
 	void CalcTargetSize( float* width, float* height ) const;
 
@@ -396,6 +397,7 @@ private:
 	const AnimationResource* animationResource;
 	AnimationType animationID;
 	AnimationType prevAnimationID;
+	bool hasParticles;
 
 	grinliz::Vector4F	param[EL_MAX_MODEL_GROUPS];
 

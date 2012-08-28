@@ -32,7 +32,7 @@ public:
 	virtual void OnAdd( Chit* chit );
 	virtual void OnRemove();
 
-	virtual void DoTick( U32 deltaTime );
+	virtual bool DoTick( U32 deltaTime );
 	virtual void OnChitMsg( Chit* chit, int id, const ChitEvent* event );
 
 	// ------ Additional --------

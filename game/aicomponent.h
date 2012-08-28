@@ -40,9 +40,8 @@ public:
 		return Component::ToComponent( name );
 	}
 
-	virtual bool NeedsTick()					{ return true; }
-	virtual void DoTick( U32 delta );
-	virtual void DoSlowTick();
+	virtual bool DoTick( U32 delta );
+	virtual bool DoSlowTick();
 	virtual void DebugStr( grinliz::GLString* str );
 	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
 	virtual void OnChitEvent( const ChitEvent& event );
