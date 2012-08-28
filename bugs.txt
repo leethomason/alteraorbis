@@ -16,7 +16,8 @@
 	- flaming sword
 	- flaming sword should catch things on fire
 	- refactor code - if needed? - in AIComponent (the fixmes)
-	- back in the tick system: the "need tick" vs. "no tick" changes. Note for 
+	- debugging info for chit ticks
+	X back in the tick system: the "need tick" vs. "no tick" changes. Note for 
 	  example whether an item has effects applied. Or the kind of animation. Don't
 	  want to tick granite chunks when they don't need it. Key concerns: 
 	  Rendering, Item that changes tick status

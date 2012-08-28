@@ -30,6 +30,9 @@ public:
 	void DoTick( U32 delta );	
 	U32 AbsTime() const { return bagTime; }
 
+	int NumChits() const { return chits.NumValues(); }
+	int NumTicked() const { return nTicked; }
+
 	// Due to events, changes, etc. a chit may need an update, possibily in addition to, the tick.
 	// Normally called automatically.
 	void QueueDelete( Chit* chit );
@@ -42,6 +45,7 @@ public:
 	void AddToSpatialHash( Chit*, int x, int y );
 	void RemoveFromSpatialHash( Chit*, int x, int y );
 	void UpdateSpatialHash( Chit*, int x0, int y0, int x1, int y1 );
+
 	void QuerySpatialHash(	grinliz::CDynArray<Chit*>* array, 
 							const grinliz::Rectangle2F& r, 
 		                    const Chit* ignoreMe,
@@ -61,6 +65,7 @@ private:
 
 	int idPool;
 	U32 bagTime;
+	int nTicked;
 	// FIXME: chits could be stored in a DynArr. Go cohenent memory, go! Makes 
 	// walking the high level list potentially faster.
 	grinliz::HashTable< int, Chit*, 

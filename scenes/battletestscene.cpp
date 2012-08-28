@@ -338,9 +338,10 @@ void BattleTestScene::DrawDebugText()
 	float ratio;
 	map->PatherCacheHitMiss( 0, 0, &ratio );
 
-	ufoText->Draw( 0, 16, "PathCache=%.3f hit%%=%d", 
+	ufoText->Draw( 0, 16, "PathCache=%.3f hit%%=%d chits:ticked/total=%d/%d", 
 		map->PatherCache(), 
-		(int)(ratio*100.f) );
+		(int)(ratio*100.f),
+		chitBag.NumTicked(), chitBag.NumChits() );
 
 	if ( debugRay.direction.x ) {
 		Model* root = engine->IntersectModel( debugRay, TEST_TRI, 0, 0, 0, 0 );

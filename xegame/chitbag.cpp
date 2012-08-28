@@ -61,6 +61,7 @@ void ChitBag::DoTick( U32 delta )
 {
 	GRINLIZ_PERFTRACK;
 	bagTime += delta;
+	nTicked = 0;
 
 	// Events.
 	// Ticks.
@@ -78,6 +79,7 @@ void ChitBag::DoTick( U32 delta )
 	for( int i=0; i<chits.NumValues(); ++i ) {
 		Chit* c = chitArr[i];
 		if ( c->TickNeeded() ) {
+			++nTicked;
 			c->DoTick( delta );
 		}
 	}
