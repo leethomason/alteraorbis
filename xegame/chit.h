@@ -44,17 +44,20 @@ public:
 #define GET_COMPONENT( chit, name ) static_cast<name*>( chit->GetComponent( #name ) )
 
 
-/* General purpose GameObject.
-   A class to hold Components.
-	
+/*	General purpose GameObject.
+	A class to hold Components.
+	Actually a POD. Do not subclass.
 */
 class Chit
 {
 public:
 	// Should always use Create from ChitBag
-	Chit( int id, ChitBag* chitBag );
+	Chit( int id=0, ChitBag* chitBag=0 );
 	// Should always use Delete from ChitBag
 	~Chit();
+
+	void Init( int id, ChitBag* chitBag );
+	void Free();
 
 	int ID() const { return id; }
 	void Add( Component* );

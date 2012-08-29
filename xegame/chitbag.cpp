@@ -13,6 +13,7 @@ ChitBag::ChitBag()
 	idPool = 0;
 	bagTime = 0;
 	memset( spatialHash, 0, sizeof(*spatialHash)*SIZE*SIZE );
+	memRoot = 0;
 }
 
 
@@ -24,29 +25,52 @@ ChitBag::~ChitBag()
 
 void ChitBag::DeleteAll()
 {
-	chits.RemoveAll();
+	chitID.RemoveAll();
+	while ( !blocks.Empty() ) {
+		Chit* block = blocks.Pop();
+		delete [] block;
+	}
 }
 
 
 Chit* ChitBag::NewChit()
 {
-	Chit* chit = new Chit( ++idPool, this );
-	chits.Add( chit->ID(), chit );
-	return chit;
+	if ( !memRoot ) {
+		// Allocate a new block.
+		Chit* block = new Chit[BLOCK_SIZE];
+
+		// Hook up the free memory pointers.
+		block[BLOCK_SIZE-1].next = 0;
+		for( int i=BLOCK_SIZE-2; i>=0; --i ) {
+			block[i].next = &block[i+1];
+		}
+		memRoot = &block[0];
+		blocks.Push( block );
+	}
+	Chit* c = memRoot;
+	memRoot = memRoot->next;
+	c->next = 0;
+	c->Init( ++idPool, this );
+	chitID.Add( c->ID(), c );
+	return c;
 }
 
 
 void ChitBag::DeleteChit( Chit* chit ) 
 {
-	GLASSERT( chits.Query( chit->ID(), 0 ));
-	chits.Remove( chit->ID() );
+	GLASSERT( chitID.Query( chit->ID(), 0 ));
+	chitID.Remove( chit->ID() );
+	chit->Free();
+	// Link back in to free pool.
+	chit->next = memRoot;
+	memRoot = chit;
 }
 
 
 Chit* ChitBag::GetChit( int id )
 {
 	Chit* c = 0;
-	chits.Query( id, &c );
+	chitID.Query( id, &c );
 	return c;
 }
 
@@ -75,17 +99,18 @@ void ChitBag::DoTick( U32 delta )
 		}
 	}
 
-	Chit** chitArr = chits.GetValues();
-	for( int i=0; i<chits.NumValues(); ++i ) {
-		Chit* c = chitArr[i];
-		if ( c->TickNeeded() ) {
-			++nTicked;
-			c->DoTick( delta );
+	for( int i=0; i<blocks.Size(); ++i ) {
+		Chit* block = blocks[i];
+		for( int j=0; j<BLOCK_SIZE; ++j ) {
+			if ( block[j].ID() && block[j].TickNeeded() ) {
+				++nTicked;
+				block[j].DoTick( delta );
+			}
 		}
 	}
 	for( int i=0; i<deleteList.Size(); ++i ) {
 		Chit* chit = 0;
-		chits.Query( deleteList[i], &chit );
+		chitID.Query( deleteList[i], &chit );
 		if ( chit ) {
 			DeleteChit( chit );
 		}
@@ -141,6 +166,7 @@ void ChitBag::UpdateSpatialHash( Chit* c, int x0, int y0, int x1, int y1 )
 }
 
 
+/*
 Vector3F ChitBag::compareOrigin;
 
 int ChitBag::CompareDistance( const void* p0, const void* p1 ) 
@@ -153,7 +179,7 @@ int ChitBag::CompareDistance( const void* p0, const void* p1 )
 
 	return LRintf(d0 - d1);
 }
-
+*/
 
 void ChitBag::QuerySpatialHash(	grinliz::CDynArray<Chit*>* array, 
 								const grinliz::Rectangle2F& rf, 
@@ -194,14 +220,4 @@ void ChitBag::QuerySpatialHash(	grinliz::CDynArray<Chit*>* array,
 			}
 		}
 	}
-	/*
-	if ( array->Size() > 1 && distanceSort ) {
-		Vector2F origin = rf.Center();
-		compareOrigin.Set( origin.x, 0, origin.y );
-		qsort( array->Mem(), array->Size(), sizeof(Chit*), CompareDistance ); 
-		for( int i=0; i<array->Size(); ++i ) {
-			GLOUTPUT(( "sh: %d d=%.1f\n", (*array)[i]->ID(), ((*array)[i]->GetSpatialComponent()->GetPosition() - compareOrigin).Length() ));
-		}
-	}
-	*/
 }

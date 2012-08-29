@@ -30,7 +30,7 @@ public:
 	void DoTick( U32 delta );	
 	U32 AbsTime() const { return bagTime; }
 
-	int NumChits() const { return chits.NumValues(); }
+	int NumChits() const { return chitID.NumValues(); }
 	int NumTicked() const { return nTicked; }
 
 	// Due to events, changes, etc. a chit may need an update, possibily in addition to, the tick.
@@ -60,17 +60,20 @@ private:
 		return ( (y>>SHIFT)*SIZE + (x>>SHIFT) );
 	}
 
+	/*
 	static grinliz::Vector3F compareOrigin;
 	static int CompareDistance( const void* p0, const void* p1 );
-
+	*/
 	int idPool;
 	U32 bagTime;
 	int nTicked;
-	// FIXME: chits could be stored in a DynArr. Go cohenent memory, go! Makes 
-	// walking the high level list potentially faster.
-	grinliz::HashTable< int, Chit*, 
-		                grinliz::CompValue, 
-						grinliz::OwnedPtrSem > chits;
+
+	enum { BLOCK_SIZE = 1000 };
+	Chit* memRoot;
+	// Use a memory pool so the chits don't move on re-allocation.
+	grinliz::CDynArray< Chit* >		blocks;
+	grinliz::HashTable< int, Chit* >  chitID;
+
 	grinliz::CDynArray<int>			deleteList;		// <set> of chits that need to be deleted.
 	grinliz::CDynArray<Chit*>		hashQuery;
 	grinliz::CDynArray<ChitEvent*, grinliz::OwnedPtrSem >	events;

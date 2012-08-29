@@ -10,9 +10,22 @@
 using namespace grinliz;
 const U32 SLOW_TICK = 500;
 
-Chit::Chit( int _id, ChitBag* bag ) :	chitBag( bag ), id( _id ), tickNeeded( true )
+Chit::Chit( int _id, ChitBag* bag ) : next( 0 ), chitBag( bag ), id( _id ), tickNeeded( true )
 {
-	next = 0;
+	Init( _id, bag );
+}
+
+
+void Chit::Init( int _id, ChitBag* _chitBag )
+{
+	GLASSERT( chitBag == 0 );
+	GLASSERT( id == 0 );
+	GLASSERT( next == 0 );
+	GLASSERT( listeners.Empty() );
+
+	id = _id;
+	chitBag = _chitBag;
+
 	for( int i=0; i<NUM_SLOTS; ++i ) {
 		slot[i] = 0;
 	}
@@ -22,12 +35,23 @@ Chit::Chit( int _id, ChitBag* bag ) :	chitBag( bag ), id( _id ), tickNeeded( tru
 
 Chit::~Chit()
 {
+	Free();
+}
+
+
+void Chit::Free()
+{
 	for( int i=0; i<NUM_SLOTS; ++i ) {
 		if ( slot[i] ) {
 			slot[i]->OnRemove();
 			delete slot[i];
+			slot[i] = 0;
 		}
 	}
+	id = 0;
+	next = 0;
+	chitBag = 0;
+	listeners.Clear();
 }
 
 	

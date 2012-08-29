@@ -83,7 +83,6 @@ class MemoryPool
 		return (Object*)mem;
 	}
 
-
 	unsigned objectSize;		// size of chunk in bytes
 	unsigned blockSize;			// size of block in bytes
 	unsigned objectsPerBlock;
