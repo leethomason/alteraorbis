@@ -77,4 +77,13 @@
         <melee kinetic="1.1"/>
         <ranged energy="20" rounds="5" />
   </item>
+
+  <item name="shield"
+        resource="shield"
+        flags="HELD_AT_HARDPOINT"
+        hardpoint="shield"
+        mass="0.1"
+        power="20">
+  </item>
+  
 </items>

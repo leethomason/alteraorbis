@@ -42,6 +42,7 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 	if ( EFFECT_ENERGY)	flags |= IMMUNE_ENERGY;
 
 	ele->QueryFloatAttribute( "mass",			&mass );
+	ele->QueryFloatAttribute( "power",			&power );
 	ele->QueryIntAttribute( "primaryTeam",		&primaryTeam );
 	ele->QueryUnsignedAttribute( "coolDownTime",&coolDownTime );
 
@@ -74,26 +75,6 @@ void GameItem::Apply( const GameItem* intrinsic )
 		flags |= IMMUNE_ENERGY;
 }
 
-
-/*
-void IMeleeWeaponItem::GetDamageDesc( DamageDesc* dd )
-{
-	GameItem* item = GetItem();
-
-	// How many strikes does it take a unit of equal
-	// mass to destroy a unit of the same mass?
-	static const float STRIKE_RATIO = 5.0f;
-
-	dd->Set( item->mass * item->meleeDamage.Kinetic() / STRIKE_RATIO,
-			 item->mass * item->meleeDamage.Energy()  / STRIKE_RATIO,
-			 item->mass * item->meleeDamage.Fire()    / STRIKE_RATIO );
-}
-
-
-void IRangedWeaponItem::GetDamageDesc( DamageDesc* dd )
-{
-}
-*/
 
 void DamageDesc::Save( const char* prefix, tinyxml2::XMLPrinter* )
 {
