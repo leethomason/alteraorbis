@@ -96,30 +96,6 @@ void main() {
 		color *= a_color;
 	#endif
 
-	#if LIGHTING_DIFFUSE  > 0
-		#if INSTANCE == 0 
-			vec3 normal = normalize( ( u_normalMatrix * vec4( a_normal.x, a_normal.y, a_normal.z, 0 ) ).xyz );
-		#else
-			vec3 normal = normalize( (( u_normalMatrix * u_mMatrix[int(a_instanceID)]) * vec4( a_normal.x, a_normal.y, a_normal.z, 0 ) ).xyz );
-		#endif
-
-		#if LIGHTING_DIFFUSE == 1
-			// Lambert lighting with ambient term.
-			// fixme: not clear we need to normalize
-			float nDotL = max( dot( normal, u_lightDir ), 0.0 );
-			vec4 light = u_ambient + u_diffuse * nDotL;
-		#elif LIGHTING_DIFFUSE == 2
-			// Hemispherical lighting. The 'u_diffuse' is used for the main light,
-			// and 'u_ambient' for the key light, just so as not to introduce new variables.
-			// fixme: not clear we need to normalize
-			float nDotL = dot( normal, u_lightDir );
-			vec4 light = mix( u_ambient, u_diffuse, (nDotL + 1.0)*0.5 );
-		#else	
-			#error light not defined
-		#endif
-		color *= light;
-	#endif
-	
 	#if TEXTURE0 == 1
 		#if TEXTURE0_TRANSFORM == 1
 			v_uv0 = vec2( a_uv0.x*param.x + param.z, a_uv0.y*param.y + param.w );
@@ -135,10 +111,8 @@ void main() {
 		#endif
 	#endif
 
-	v_color = color;
-
+	mat4 xform = mat4( 1.0 );	
 	#if BONES == 1
-		mat4 xform = mat4( 1.0 );	
 		#if INSTANCE == 1
 		vec3 bone = u_boneXForm[int(a_boneID + a_instanceID*float(EL_MAX_BONES))];
 		#else
@@ -187,10 +161,35 @@ void main() {
 		#endif
 	#endif
 	
+	#if LIGHTING_DIFFUSE  > 0
+		#if INSTANCE == 0 
+			vec3 normal = normalize( ( u_normalMatrix  * xform * vec4( a_normal.x, a_normal.y, a_normal.z, 0 ) ).xyz );
+		#else
+			vec3 normal = normalize( (( u_normalMatrix  * xform * u_mMatrix[int(a_instanceID)]) * vec4( a_normal.x, a_normal.y, a_normal.z, 0 ) ).xyz );
+		#endif
+
+		#if LIGHTING_DIFFUSE == 1
+			// Lambert lighting with ambient term.
+			// fixme: not clear we need to normalize
+			float nDotL = max( dot( normal, u_lightDir ), 0.0 );
+			vec4 light = u_ambient + u_diffuse * nDotL;
+		#elif LIGHTING_DIFFUSE == 2
+			// Hemispherical lighting. The 'u_diffuse' is used for the main light,
+			// and 'u_ambient' for the key light, just so as not to introduce new variables.
+			// fixme: not clear we need to normalize
+			float nDotL = dot( normal, u_lightDir );
+			vec4 light = mix( u_ambient, u_diffuse, (nDotL + 1.0)*0.5 );
+		#else	
+			#error light not defined
+		#endif
+		color *= light;
+	#endif
+	
 	#if BONE_FILTER == 1
 		float mult = ( param.x == a_boneID ) ? 1.0 : 0.0; 
 		pos = pos * mult;
 	#endif
 	
 	gl_Position = pos;
+	v_color = color;
 }

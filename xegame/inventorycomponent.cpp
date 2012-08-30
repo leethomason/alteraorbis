@@ -76,7 +76,9 @@ bool InventoryComponent::AddToInventory( GameItem* item, bool equip )
 			for( int i=0; i<EL_MAX_METADATA; ++i ) {
 				const char* name = rc->GetMetaData(i);
 				int h = HardpointNameToFlag( name );		// often 0; lots of metadata isn't a hardpoint
-				hardpoints |= (1<<h);	
+				if ( h != NO_HARDPOINT ) {
+					hardpoints |= (1<<h);	
+				}
 			}
 		}
 	}
@@ -96,8 +98,9 @@ bool InventoryComponent::AddToInventory( GameItem* item, bool equip )
 	} 
 	else if ( attachment == GameItem::HELD_AT_HARDPOINT ) {
 		if ( equip ) {
+			GLASSERT( hardpoints & (1<<item->hardpoint) );
 			// check that the needed hardpoint is free.
-			if (    intrinsicAt[item->hardpoint]			// does the hardpoint exist?
+			if (    ( hardpoints & (1<<item->hardpoint))		// does the hardpoint exist?
 			     && ( heldAt[item->hardpoint] == 0 ) )		// is the hardpoint available?
 			{
 				heldAt[item->hardpoint] = item;

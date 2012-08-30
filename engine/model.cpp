@@ -448,8 +448,7 @@ void Model::CalcMetaData( const char* name, grinliz::Matrix4* meta ) const
 		Matrix4 r;
 		if ( data->axis.Length() ) {
 			GLASSERT( Equal( data->axis.Length(), 1.0f, 0.0001f ));
-			// FIXME: yet another transform bug? sure looks like a positive rotation.
-			r.SetAxisAngle( data->axis, -data->rotation );
+			r.SetAxisAngle( data->axis, data->rotation );
 		}
 
 		*meta = xform * local * t * r;

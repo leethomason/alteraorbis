@@ -11,6 +11,7 @@
   <texture filename="characters.png" />
   <texture filename="treetextures.png" />
   <texture filename="bluestone.png" />
+  <texture filename="shield.png" filename2="shield_em.png" emissive="true" />
   <texture filename="debugging.png" noMip="true" />
 
   <!-- note this makes textures and materials the same thing, to have the emissive
@@ -65,16 +66,16 @@
        'trigger' should be first.
   -->
   <model filename="human.ac" modelName="humanFemale" animation="humanFemaleAnimation" origin="1 0 0" shading="flat" polyRemoval="pre">
-    <meta name="trigger" pos="0.84 0.43 -0.003" rot="1 0 0 90" boneName="arm.lower.right" />
+    <meta name="trigger" pos="0.84 0.43 -0.003" rot="1 0 0 -90" boneName="arm.lower.right" />
     <meta name="target"  pos="1 0.68 0"/>
-    <meta name="shield"  pos="0 0.71 -0.06" rot="1 0 0 170" boneName="torso" />
+    <meta name="shield"  pos="1 0.71 -0.06" rot="1 0 0 80" boneName="torso" />
   </model>
   <model filename="mantis.ac" animation="mantisAnimation" shading="flat" polyRemoval="pre">
     <meta name="trigger" pos="-0.08 0.26 0.47" />
     <meta name="target"  pos="0 0.30 0" />
   </model>  
   <model filename="balrog.ac" animation="balrogAnimation" shading="flat" polyRemoval="pre">
-    <meta name="trigger" pos="0.40 0.45 0.004" rot="1 0 0 90" boneName="arm.lower.left" />
+    <meta name="trigger" pos="0.40 0.45 0.004" rot="1 0 0 -90" boneName="arm.lower.left" />
     <meta name="target"  pos="0 1.40 0" />
     <meta name="althand" pos="-0.40 0.45 0.004" boneName="arm.lower.right" />
     <meta name="head"    pos="0 1.87 -0.10" boneName="head" />
