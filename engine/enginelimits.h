@@ -41,6 +41,7 @@ enum {
 	EL_MAX_METADATA			= 4,		// both animation and model
 	EL_MAX_MODEL_EFFECTS	= 4,		// max # of particle effects emitted by model
 	EL_MAX_BONES			= 12,		// could be 16?
+	EL_MAX_ANIM_FRAMES		= 15,
 	EL_MAX_MAP_SIZE			= 1024,		// used for allocating hash tables and lookup structures
 
 	// performance tuning

@@ -81,9 +81,17 @@ private:
 
 	const gamedb::Item* item;
 
+	struct Frame {
+		U32			duration;
+		const char* boneName[EL_MAX_BONES];
+		U32			boneHash[EL_MAX_BONES];
+		BoneData	boneData;
+	};
+
 	struct Sequence {
 		U32 totalDuration;
 		const gamedb::Item* item;
+		Frame frame[EL_MAX_ANIM_FRAMES];
 	};
 	Sequence sequence[ANIM_COUNT];
 };

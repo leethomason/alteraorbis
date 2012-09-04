@@ -122,6 +122,16 @@ bool AnimationResourceManager::HasResource( const char* name )
 }
 
 
+/*
+  animations []
+    humanFemale []
+      gunrun [ totalDuration=1200.000000]
+        0 [ duration=200.000000]
+          arm.lower.left [ angle=27.083555 dy=-0.000076 dz=0.000340]
+          arm.lower.right [ angle=268.449707 dy=0.000445 dz=-0.000228]
+          arm.upper.left [ angle=28.810850 dy=-0.000000 dz=0.000000]
+		  ...
+*/
 AnimationResource::AnimationResource( const gamedb::Item* _item )
 {
 	item = _item;
@@ -131,11 +141,33 @@ AnimationResource::AnimationResource( const gamedb::Item* _item )
 	memset( sequence, 0, sizeof(Sequence)*ANIM_COUNT );
 
 	for( int i=0; i<nAnimations; ++i ) {
-		const gamedb::Item* subItem = item->Child(i);
-		AnimationType type = NameToType( subItem->Name() );
+		const gamedb::Item* animItem = item->Child(i);		// "gunrun" in the example
+		AnimationType type = NameToType( animItem->Name() );
 		
-		sequence[type].item = subItem;
-		sequence[type].totalDuration = (U32) subItem->GetFloat( "totalDuration" );
+		sequence[type].item = animItem;
+		sequence[type].totalDuration = 0;					// computed from frame durations, below
+
+		int nFrames = animItem->NumChildren()-1;			// last child is metadata
+		GLASSERT( nFrames >= 1 );
+
+		for( int frame=0; frame<nFrames; ++frame ) {
+			const gamedb::Item* frameItem = animItem->Child( frame );	// frame[0]
+			
+			sequence[type].frame[frame].duration = LRintf( frameItem->GetFloat( "duration" ));
+			sequence[type].totalDuration += sequence[type].frame[frame].duration;
+
+			int nBones = frameItem->NumChildren();
+			for( int bone=0; bone<nBones; ++bone ) {
+				const gamedb::Item* boneItem = frameItem->Child( i );
+				const char* boneName = boneItem->Name();
+
+				sequence[type].frame[frame].boneName[bone] = boneName;
+				sequence[type].frame[frame].boneHash[bone] = Random::Hash( boneName, strlen( boneName ));
+				sequence[type].frame[frame].boneData.bone[bone].angleRadians = boneItem->GetFloat( "anglePrime" );
+				sequence[type].frame[frame].boneData.bone[bone].dy = boneItem->GetFloat( "dy" );
+				sequence[type].frame[frame].boneData.bone[bone].dz = boneItem->GetFloat( "dz" );
+			}
+		}
 	}
 }
 
@@ -157,11 +189,7 @@ bool AnimationResource::HasAnimation( AnimationType type ) const
 U32 AnimationResource::Duration( AnimationType type ) const
 {
 	GLASSERT( type >= 0 && type < ANIM_COUNT );
-	const char* name = TypeToName( type );
-	const gamedb::Item* animItem = item->Child( name );
-	GLASSERT( animItem );
-	U32 totalTime = (U32)animItem->GetFloat( "totalDuration" );
-	return totalTime;
+	return sequence[type].totalDuration;
 }
 
 
@@ -183,6 +211,22 @@ bool AnimationResource::GetTransform(	AnimationType type,	// which animation to 
 }
 
 
+U32 AnimationResource::TimeInRange( AnimationType type, U32 t ) const
+{
+	GLASSERT( type >= 0 && type < ANIM_COUNT );
+	U32 total = sequence[type].totalDuration;
+	U32 result = 0;
+
+	if ( Looping( type )) {
+		result = t % total;
+	}
+	else {
+		result = Max( total-1, t );
+	}
+	return result;
+}
+
+
 bool AnimationResource::GetTransform(	AnimationType type, 
 										const ModelHeader& header, 
 										U32 timeClock, 
@@ -192,16 +236,9 @@ bool AnimationResource::GetTransform(	AnimationType type,
 	const gamedb::Item* animItem = item->Child( animationName );
 	GLASSERT( animItem );
 	memset( boneData, 0, sizeof( *boneData ));
-	
+
 	// Use doubles, which have a great enough range to not overflow from U32
-	double totalDuration = animItem->GetFloat( "totalDuration" );
-	double time = 0;
-	if ( AnimationResource::Looping( type )) {
-		time = fmod( (double)timeClock, totalDuration );
-	}
-	else {
-		time = Min( (double)timeClock, (double)(totalDuration-1) );
-	}
+	double time = (double)TimeInRange( type, timeClock );
 	float fraction = 0;
 
 	const gamedb::Item* frameItem0 = 0;
@@ -276,11 +313,11 @@ void AnimationResource::GetMetaData(	AnimationType type,
 	data->Clear();
 
 	GLASSERT( t1 >= t0 );
-	int delta = t1 - t0;
+	U32 delta = t1 - t0;
 	
-	double totalTime = animItem->GetFloat( "totalDuration" );
-	double t0f = fmod( (double)t0, totalTime );
-	double t1f = t0f + Min( (double)delta, totalTime );
+	double totalTime = (double)Duration( type );
+	double t0f = (double)TimeInRange( type, t0 );
+	double t1f = (double)TimeInRange( type, t0 + Min( delta, Duration( type )));
 
 	for( int pass=0; pass<2; ++pass ) {
 		for( int i=0; i<metaItem->NumChildren(); ++i ) {
