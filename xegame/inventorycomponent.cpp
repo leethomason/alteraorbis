@@ -151,6 +151,12 @@ IMeleeWeaponItem* InventoryComponent::GetMeleeWeapon()
 }
 
 
+GameItem* InventoryComponent::GetShield() 
+{
+	return heldAt[HARDPOINT_SHIELD];
+}
+
+
 void InventoryComponent::GetChain( GameItem* item, grinliz::CArray< GameItem*, 4 >* chain )
 {
 	chain->Clear();

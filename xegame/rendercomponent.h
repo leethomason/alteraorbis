@@ -55,7 +55,7 @@ public:
 	void Detach( const char* metaData );
 
 private:
-	AnimationType CalcAnimation() const;
+	AnimationType CalcAnimation( bool excludeMelee ) const;
 	SpatialComponent* SyncToSpatial();	// this a scary function: location is stored in both the model and the spatialcomponent
 
 	enum { NUM_MODELS = EL_MAX_METADATA+1 };	// slot[0] is the main model; others are hardpoint attach

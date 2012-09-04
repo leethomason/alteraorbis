@@ -310,6 +310,7 @@ void BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int 
 	}
 
 	if ( type == HUMAN ) {
+		// Always get a shield
 		{
 			const GameItem* shield = itemStorage.Get( "shield" );
 			GLASSERT( shield );

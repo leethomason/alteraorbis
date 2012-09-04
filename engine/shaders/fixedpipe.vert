@@ -162,6 +162,7 @@ void main() {
 	#endif
 	
 	#if LIGHTING_DIFFUSE  > 0
+		// FIXME: xform will be identity if bones=0
 		#if INSTANCE == 0 
 			vec3 normal = normalize( ( u_normalMatrix  * xform * vec4( a_normal.x, a_normal.y, a_normal.z, 0 ) ).xyz );
 		#else

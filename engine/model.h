@@ -273,15 +273,16 @@ public:
 	// Get the animation resource, if it exists.
 	const AnimationResource* GetAnimationResource() const	{ return animationResource; }
 	// Set the current animation, null or "reference" turns off animation.
+	// Does nothing if the 'id' is the currently playing animation
 	void SetAnimation( AnimationType id, U32 crossFade );
-	AnimationType GetAnimation() const						{ return animationID; }
+	AnimationType GetAnimation() const						{ return currentAnim.id; }
 	// Update the time and animation rendering.
 	void DeltaAnimation(	U32 time, 
 							grinliz::CArray<AnimationMetaData, EL_MAX_METADATA> *metaData,
-							bool *looped );
+							bool *done );
 
 	void SetAnimationRate( float rate )						{ animationRate = rate; }
-	bool HasAnimation() const								{ return animationResource && (animationID>=0); }
+	bool HasAnimation() const								{ return animationResource && (currentAnim.id>=0); }
 
 	// WARNING: not really supported. Just for debug rendering. May break:
 	// normals, lighting, bounds, picking, etc. etc.
@@ -379,8 +380,10 @@ private:
 		//mapBoundsCache.Set( -1, -1, -1, -1 ); 
 	}
 	const grinliz::Matrix4& InvXForm() const;
+
 	void CalcAnimation( BoneData* boneData ) const;	// compute the animition, accounting for crossfade, etc.
 	void CalcAnimation( BoneData::Bone* bone, const char* boneName ) const;	// compute the animition, accounting for crossfade, etc.
+	void CrossFade( float fraction, BoneData::Bone* inOut, const BoneData::Bone& prev ) const;
 
 	SpaceTree* tree;
 	const ModelResource* resource;
@@ -389,14 +392,21 @@ private:
 	grinliz::Quaternion rot;
 	
 	float debugScale;
+	
+	U32 time;				// debugging.
+	struct AnimationState {
+		void Init() { time=0; id=ANIM_OFF; }
+		U32				time;
+		AnimationType	id;
+	};
+	AnimationState	currentAnim;
+	AnimationState	prevAnim;
 
-	U32 animationTime;
 	float animationRate;
-	U32 totalCrossFadeTime;
+	U32 totalCrossFadeTime;	// how much time the crossfade will use
 	U32 crossFadeTime;
+
 	const AnimationResource* animationResource;
-	AnimationType animationID;
-	AnimationType prevAnimationID;
 	bool hasParticles;
 
 	grinliz::Vector4F	param[EL_MAX_MODEL_GROUPS];

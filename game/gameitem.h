@@ -61,7 +61,9 @@ class DamageDesc
 {
 public:
 	enum {
-		KINETIC, ENERGY, FIRE, NUM_COMPONENTS
+		// 'shock' may be corruption, shock, or electric
+		// 'energy' is a plasma bolt
+		KINETIC, ENERGY, FIRE, SHOCK, NUM_COMPONENTS
 	};
 
 	typedef grinliz::MathVector<float,NUM_COMPONENTS> Vector;
@@ -69,10 +71,11 @@ public:
 
 	DamageDesc() {}
 
-	void Set( float _kinetic, float _energy, float _fire ) { 
+	void Set( float _kinetic, float _energy, float _fire, float _shock ) { 
 		components[KINETIC] = _kinetic;
 		components[ENERGY]  = _energy;
 		components[FIRE]    = _fire;
+		components[SHOCK]	= _shock;
 	}
 	float Total() const { 
 		float total=0;
@@ -84,9 +87,11 @@ public:
 	float Kinetic() const	{ return components[KINETIC]; }
 	float Energy() const	{ return components[ENERGY]; }
 	float Fire() const		{ return components[FIRE]; }
+	float Shock() const		{ return components[SHOCK]; }
 
 	void Save( const char* prefix, tinyxml2::XMLPrinter* );
 	void Load( const char* prefix, const tinyxml2::XMLElement* doc );
+	void Log();
 };
 
 class IWeaponItem 
@@ -174,6 +179,7 @@ public:
 	int	primaryTeam;		// who owns this items
 	DamageDesc meleeDamage;	// a multiplier of the base (effective mass) and other modifiers
 	DamageDesc rangedDamage;// a multiplier of the power
+	DamageDesc resist;		// multiplier of damage absorbed by this item. 1: normal, 0: no damage, 1.5: extra damage
 	U32 coolDownTime;		// time between uses
 
 	float hp;				// current hp for this item
@@ -191,6 +197,7 @@ public:
 			primaryTeam		= rhs->primaryTeam;
 			meleeDamage		= rhs->meleeDamage;
 			rangedDamage	= rhs->rangedDamage;
+			resist			= rhs->resist;
 			coolDownTime	= rhs->coolDownTime;
 
 			hp				= rhs->hp;
@@ -204,8 +211,9 @@ public:
 			mass = 1;
 			power = 0;
 			primaryTeam = 0;
-			meleeDamage.Set( 1, 0, 0 );
-			rangedDamage.Set( 1, 0, 0 );
+			meleeDamage.Set( 1, 0, 0, 0 );
+			rangedDamage.Set( 1, 0, 0, 0 );
+			resist.Set( 1, 1, 1, 1 );	// resist nothing, bonus nothing
 			coolDownTime = 1000;
 
 			hp = TotalHP();
@@ -235,6 +243,9 @@ public:
 
 	// Note that the current HP, if it has one, 
 	float TotalHP() const { return (float) mass; }
+
+	// Absorb damage.'remain' is how much damage passes through the shield
+	void AbsorbDamage( const DamageDesc& dd, DamageDesc* remain, const char* log );
 
 private:
 };

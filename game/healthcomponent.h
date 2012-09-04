@@ -10,7 +10,7 @@
 class HealthComponent : public Component
 {
 public:
-	HealthComponent()			{}
+	HealthComponent() : destroyed(false)	{}
 	virtual ~HealthComponent()	{}
 
 	virtual Component* ToComponent( const char* name ) {
@@ -21,9 +21,10 @@ public:
 	virtual void DebugStr( grinliz::GLString* str )		{ str->Format( "[Health] " ); }
 
 	float GetHealthFraction() const;
-	void  DeltaHealth( float delta );
+	void  DeltaHealth();
 
 private:
+	bool destroyed;
 };
 
 

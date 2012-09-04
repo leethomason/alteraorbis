@@ -39,6 +39,7 @@ public:
 	void GetWeapons( grinliz::CArray< GameItem*, NUM_HARDPOINTS >* weapons );
 	// The current melee weapon. There is only ever 1 (or 0)
 	IMeleeWeaponItem* GetMeleeWeapon();
+	GameItem* GetShield();
 
 	// Get the "chain" of items: held, intrinsic, parent.
 	// Will return an empty array if the item isn't equipped.

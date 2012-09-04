@@ -94,17 +94,28 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* 
 			// FIXME: account for armor, shields, etc. etc.
 			// FIXME: account for knockback (physics move), catching fire, etc.
 			HealthComponent* targetHealth = GET_COMPONENT( target, HealthComponent );
-			if ( targetHealth ) {
+			ComponentSet targetComp( target, Chit::ITEM_BIT | ComponentSet::IS_ALIVE );
+
+			if ( targetHealth && targetComp.okay ) {
+				target->SetTickNeeded();	// Fire up tick to handle health effects over time
 				DamageDesc dd;
 				CalcMeleeDamage( src, weapon, &dd );
 
-				GLLOG(( "Chit %3d '%s' using '%s' hit %3d '%s' dd=[%5.1f %5.1f %5.1f]\n", 
+				GLLOG(( "Chit %3d '%s' using '%s' hit %3d '%s'\n", 
 						src->ID(), src->GetItemComponent()->GetItem()->Name(),
 						weapon->GetItem()->Name(),
-						target->ID(), target->GetItemComponent()->GetItem()->Name(),
-						dd.components[0], dd.components[1], dd.components[2] ));
+						target->ID(), targetComp.item->Name() ));
 
-				targetHealth->DeltaHealth( -dd.Total() );
+				if ( target->GetInventoryComponent() ) {
+					GameItem* shield = target->GetInventoryComponent()->GetShield();
+					if ( shield ) {
+						shield->AbsorbDamage( dd, &dd, "shield" );
+					}
+				}
+
+				targetComp.item->AbsorbDamage( dd, 0, targetComp.item->Name() );
+				GLLOG(( "\n" ));
+				targetHealth->DeltaHealth();
 			}
 		}
 	}

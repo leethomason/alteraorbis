@@ -76,16 +76,17 @@ SpatialComponent* RenderComponent::SyncToSpatial()
 }
 
 
-AnimationType RenderComponent::CalcAnimation() const
+AnimationType RenderComponent::CalcAnimation( bool excludeMelee ) const
 {
 	AnimationType current = model[0]->GetAnimation();
 	
-	// If the animation can't be interupted, just return
-	// the current animation.
-	if ( current == ANIM_MELEE ) {
-		return current;
+	if ( !excludeMelee ) {
+		// If the animation can't be interupted, just return
+		// the current animation.
+		if ( current == ANIM_MELEE ) {
+			return current;
+		}
 	}
-
 	AnimationType n = ANIM_STAND;
 
 	MoveComponent* move = parentChit->GetMoveComponent();
@@ -177,19 +178,21 @@ bool RenderComponent::DoTick( U32 deltaTime )
 	bool needsTick = false;
 
 	SpatialComponent* spatial = SyncToSpatial();
+
 	// Animate the primary model.
 	if ( spatial && model[0] && model[0]->GetAnimationResource() ) {
 		needsTick = true;
 
-		AnimationType n = this->CalcAnimation();
+		AnimationType n = this->CalcAnimation( false );
 		model[0]->SetAnimation( n, CROSS_FADE_TIME );
 
 		bool looped = false;
 		grinliz::CArray<AnimationMetaData, EL_MAX_METADATA> metaData;
 		model[0]->DeltaAnimation( deltaTime, &metaData, &looped );
 
-		if ( n == ANIM_MELEE || n == ANIM_LIGHT_IMPACT || n == ANIM_HEAVY_IMPACT ) {
-			model[0]->SetAnimation( ANIM_REFERENCE, CROSS_FADE_TIME );
+		if ( looped && ( n == ANIM_MELEE )) {
+			n = this->CalcAnimation( true );
+			model[0]->SetAnimation( n, CROSS_FADE_TIME );
 		}
 		for( int i=0; i<metaData.Size(); ++i ) {
 			if ( StrEqual( metaData[i].name, "impact" )) {

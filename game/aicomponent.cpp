@@ -113,8 +113,18 @@ void AIComponent::UpdateCombatInfo( const Rectangle2F* _zone )
 
 void AIComponent::DoMelee()
 {
-	ComponentSet thisComp( parentChit, Chit::RENDER_BIT | Chit::SPATIAL_BIT | ComponentSet::IS_ALIVE );
+	ComponentSet thisComp( parentChit, Chit::RENDER_BIT | 
+		                               Chit::SPATIAL_BIT |
+									   Chit::INVENTORY_BIT |		// need to be carrying a melee weapon
+									   ComponentSet::IS_ALIVE );
 	if ( !thisComp.okay )
+		return;
+
+	IMeleeWeaponItem* weapon = thisComp.inventory->GetMeleeWeapon();
+	if ( !weapon ) 
+		return;
+	GameItem* item = weapon->GetItem();
+	if ( !item->Ready( parentChit->GetChitBag()->AbsTime() )) 
 		return;
 
 	// Are we close enough to hit? Then swing. Else move to target.
@@ -139,6 +149,7 @@ void AIComponent::DoMelee()
 	}
 
 	if ( battleMechanics.InMeleeZone( engine, parentChit, targetChit ) ) {
+		GLASSERT( parentChit->GetRenderComponent()->AnimationReady() );
 		parentChit->GetRenderComponent()->PlayAnimation( ANIM_MELEE );
 	}
 	else {

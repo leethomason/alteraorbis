@@ -84,6 +84,7 @@
         hardpoint="shield"
         mass="0.1"
         power="20">
+    <resist kinetic="0.5" energy="1.0" fire="0.5" shock="1.5" />
   </item>
   
 </items>

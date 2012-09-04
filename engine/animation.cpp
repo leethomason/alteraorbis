@@ -17,6 +17,35 @@ static const char* gAnimationName[ ANIM_COUNT ] = {
 	"impactheavy"
 };
 
+static const bool gAnimationLooping[ ANIM_COUNT ] = {
+	false,
+	true,
+	true,
+	false,
+	false,
+	false,
+	false
+};
+
+static const bool gAnimationSync[ ANIM_COUNT ] = {
+	false,
+	true,
+	true,
+	false,
+	false,
+	false,
+	false
+};
+
+
+bool AnimationResource::Looping( AnimationType type ) { 
+	return gAnimationLooping[type]; 
+}
+
+bool AnimationResource::Synchronized( AnimationType type ) { 
+	return gAnimationSync[type]; 
+}
+
 
 /* static */ const char* AnimationResource::TypeToName( AnimationType type )
 {
@@ -98,6 +127,16 @@ AnimationResource::AnimationResource( const gamedb::Item* _item )
 	item = _item;
 	resName = item->Name();
 	nAnimations = item->NumChildren();
+	GLASSERT( nAnimations <= ANIM_COUNT );
+	memset( sequence, 0, sizeof(Sequence)*ANIM_COUNT );
+
+	for( int i=0; i<nAnimations; ++i ) {
+		const gamedb::Item* subItem = item->Child(i);
+		AnimationType type = NameToType( subItem->Name() );
+		
+		sequence[type].item = subItem;
+		sequence[type].totalDuration = (U32) subItem->GetFloat( "totalDuration" );
+	}
 }
 
 
@@ -117,6 +156,7 @@ bool AnimationResource::HasAnimation( AnimationType type ) const
 
 U32 AnimationResource::Duration( AnimationType type ) const
 {
+	GLASSERT( type >= 0 && type < ANIM_COUNT );
 	const char* name = TypeToName( type );
 	const gamedb::Item* animItem = item->Child( name );
 	GLASSERT( animItem );
@@ -143,7 +183,10 @@ bool AnimationResource::GetTransform(	AnimationType type,	// which animation to 
 }
 
 
-bool AnimationResource::GetTransform( AnimationType type, const ModelHeader& header, U32 timeClock, BoneData* boneData ) const
+bool AnimationResource::GetTransform(	AnimationType type, 
+										const ModelHeader& header, 
+										U32 timeClock, 
+										BoneData* boneData ) const
 {
 	const char* animationName = TypeToName( type );
 	const gamedb::Item* animItem = item->Child( animationName );
@@ -151,8 +194,14 @@ bool AnimationResource::GetTransform( AnimationType type, const ModelHeader& hea
 	memset( boneData, 0, sizeof( *boneData ));
 	
 	// Use doubles, which have a great enough range to not overflow from U32
-	double totalTime = animItem->GetFloat( "totalDuration" );
-	double time = fmod( (double)timeClock, totalTime );
+	double totalDuration = animItem->GetFloat( "totalDuration" );
+	double time = 0;
+	if ( AnimationResource::Looping( type )) {
+		time = fmod( (double)timeClock, totalDuration );
+	}
+	else {
+		time = Min( (double)timeClock, (double)(totalDuration-1) );
+	}
 	float fraction = 0;
 
 	const gamedb::Item* frameItem0 = 0;

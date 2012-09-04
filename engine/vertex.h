@@ -126,7 +126,6 @@ struct BoneData
 
 	// WARNING: cast to vector3. This must be size Vector3.
 	Bone bone[EL_MAX_BONES];
-//	const char* name[EL_MAX_BONES];
 };
 
 

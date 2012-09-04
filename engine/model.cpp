@@ -227,11 +227,14 @@ void Model::Init( const ModelResource* resource, SpaceTree* tree )
 		flags |= MODEL_NO_SHADOW;
 	}
 	userData = 0;
-	animationTime = 0;
+
 	animationRate = 1.0f;
+
+	time = 0;
 	crossFadeTime = 0;
 	totalCrossFadeTime = 0;
-	animationID = ANIM_OFF;
+	currentAnim.Init();
+	prevAnim.Init();
 
 	hasParticles = false;
 	for( int i=0; i<EL_MAX_MODEL_EFFECTS; ++i ) {
@@ -319,26 +322,47 @@ void Model::SetAnimation( AnimationType id, U32 crossFade )
 	GLASSERT( id >= ANIM_OFF && id < ANIM_COUNT );
 
 	if ( id >= 0 ) {
-		if ( animationID != id ) {
+		if ( currentAnim.id != id ) {
+/*#ifdef DEBUG
+			if ( resource->header.name == "balrog" ) {
+				GLOUTPUT(( "switch %d to %d crossFade=%d time=%d\n",
+					       animationID, id, crossFade, time ));
+			}
+#endif*/
 			totalCrossFadeTime = crossFade;
 			crossFadeTime = 0;
-			prevAnimationID = animationID;
 
-			animationID = id;
-			GLASSERT( animationResource );
-			GLASSERT( animationResource->HasAnimation( id ));
+			// Only push the previous if it's a good animation
+			// for blending.
+			if ( currentAnim.time > 0 || prevAnim.id == ANIM_OFF ) {
+				prevAnim = currentAnim;
+				currentAnim.id = id;
 
-			U32 duration = animationResource->Duration( id );
+				if (    AnimationResource::Synchronized( id )
+					 && AnimationResource::Synchronized( prevAnim.id ) ) 
+				{
+					currentAnim.time = prevAnim.time;
+				}
+				else {
+					currentAnim.time = 0;
+				}
+			}
+
+			U32 duration = animationResource->Duration( currentAnim.id );
 			totalCrossFadeTime = Min( totalCrossFadeTime, duration / 2 );
+
+			GLASSERT( animationResource );
+			GLASSERT( animationResource->HasAnimation( currentAnim.id ));
 		}
 	}
 	else {
-		animationID = ANIM_OFF;
+		currentAnim.id = ANIM_OFF;
+		currentAnim.time = 0;
 	}
 }
 
 
-void Model::DeltaAnimation( U32 time, grinliz::CArray<AnimationMetaData, EL_MAX_METADATA> *metaData, bool *looped )
+void Model::DeltaAnimation( U32 _time, grinliz::CArray<AnimationMetaData, EL_MAX_METADATA> *metaData, bool *done )
 {
 	if ( !HasAnimation() )
 		return;
@@ -348,20 +372,21 @@ void Model::DeltaAnimation( U32 time, grinliz::CArray<AnimationMetaData, EL_MAX_
 	}
 
 	if ( metaData ) {
-		animationResource->GetMetaData( animationID, animationTime, animationTime+time, metaData );
+		animationResource->GetMetaData( currentAnim.id, currentAnim.time, currentAnim.time+_time, metaData );
 	}
 
-	if ( looped ) {
-		*looped = false;
-		U32 duration = animationResource->Duration( animationID );
-		U32 frame0 = animationTime % duration;
-		U32 frame1 = (animationTime+time) % duration;
-		if ( frame1 < frame0 ) 
-			*looped = true;
+	if ( done && !AnimationResource::Looping( currentAnim.id) ) {
+		*done = false;
+		U32 duration = animationResource->Duration( currentAnim.id );
+		if ( currentAnim.time >= duration ) {
+			*done = true;
+		}
 	}
 
-	animationTime += time;
-	crossFadeTime += time;
+	time				+= _time;
+	currentAnim.time	+= _time;
+	prevAnim.time		+= _time;
+	crossFadeTime		+= _time;
 }
 
 
@@ -373,52 +398,49 @@ void Model::CalcHitAABB( Rectangle3F* aabb ) const
 }
 
 
+void Model::CrossFade( float fraction, BoneData::Bone* inOut, const BoneData::Bone& prev ) const
+{
+	float angle1 = inOut->angleRadians;
+	float angle2 = prev.angleRadians;
+	if ( fabsf( angle1-angle2 ) > PI ) {
+		if ( angle1 < angle2 ) angle2 -= TWO_PI;
+		else				   angle2 += TWO_PI;
+	}
+
+	inOut->angleRadians = Lerp( angle2, angle1, fraction ); 
+	inOut->dy = Lerp( prev.dy, inOut->dy, fraction ); 
+	inOut->dz = Lerp( prev.dz, inOut->dz, fraction ); 
+}
+
+
 void Model::CalcAnimation( BoneData* boneData ) const
 {
 	GLASSERT( HasAnimation() );
-	animationResource->GetTransform( animationID, resource->header, animationTime, boneData );
+	animationResource->GetTransform( currentAnim.id, resource->header, currentAnim.time, boneData );
 
-	if ( (crossFadeTime < totalCrossFadeTime) && (prevAnimationID >= 0) ) {
-		BoneData boneData2;
-		animationResource->GetTransform( prevAnimationID, resource->header, animationTime, &boneData2 );
+	if ( (crossFadeTime < totalCrossFadeTime) && (prevAnim.id >= 0) ) {
+		BoneData prevBoneData;
+		animationResource->GetTransform( prevAnim.id, resource->header, prevAnim.time, &prevBoneData );
 		float fraction = (float)crossFadeTime / (float)totalCrossFadeTime;
 
 		for( int i=0; i<EL_MAX_BONES; ++i ) {
-			float angle1 = boneData->bone[i].angleRadians;
-			float angle2 = boneData2.bone[i].angleRadians;
-			if ( fabsf( angle1-angle2 ) > PI ) {
-				if ( angle1 < angle2 ) angle2 -= TWO_PI;
-				else				   angle2 += TWO_PI;
-			}
-
-			boneData->bone[i].angleRadians = Lerp( angle2, angle1, fraction ); 
-			boneData->bone[i].dy = Lerp( boneData2.bone[i].dy, boneData->bone[i].dy, fraction ); 
-			boneData->bone[i].dz = Lerp( boneData2.bone[i].dz, boneData->bone[i].dz, fraction ); 
+			CrossFade( fraction, &boneData->bone[i], prevBoneData.bone[i] );
 		}
 	}
 }
 
 
+
 void Model::CalcAnimation( BoneData::Bone* bone, const char* boneName ) const
 {
 	GLASSERT( HasAnimation() );
-	animationResource->GetTransform( animationID, boneName, resource->header, animationTime, bone );
+	animationResource->GetTransform( currentAnim.id, boneName, resource->header, currentAnim.time, bone );
 
-	if ( crossFadeTime < totalCrossFadeTime && (prevAnimationID >= 0) ) {
+	if ( crossFadeTime < totalCrossFadeTime && (prevAnim.id >= 0) ) {
 		BoneData::Bone bone2;
-		animationResource->GetTransform( prevAnimationID, boneName, resource->header, animationTime, &bone2 );
+		animationResource->GetTransform( prevAnim.id, boneName, resource->header, prevAnim.time, &bone2 );
 		float fraction = (float)crossFadeTime / (float)totalCrossFadeTime;
-
-		float angle1 = bone->angleRadians;
-		float angle2 = bone2.angleRadians;
-		if ( fabsf( angle1-angle2 ) > PI ) {
-			if ( angle1 < angle2 ) angle2 -= TWO_PI;
-			else				   angle2 += TWO_PI;
-		}
-
-		bone->angleRadians	= Lerp( angle2, angle1, fraction ); 
-		bone->dy			= Lerp( bone2.dy, bone->dy, fraction ); 
-		bone->dz			= Lerp( bone2.dz, bone->dz, fraction ); 
+		CrossFade( fraction, bone, bone2 );
 	}
 }
 

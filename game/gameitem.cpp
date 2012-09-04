@@ -54,6 +54,10 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 	if ( rangedEle ) {
 		rangedDamage.Load( "ranged", rangedEle );
 	}
+	const XMLElement* resistEle = ele->FirstChildElement( "resist" );
+	if ( resistEle ) {
+		resist.Load( "resist", resistEle );
+	}
 
 	hardpoint = NO_HARDPOINT;
 	const char* h = ele->Attribute( "hardpoint" );
@@ -62,7 +66,11 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 		GLASSERT( hardpoint >= 0 );
 	}
 
-	hp = mass;
+	// Default of hp is 'power' then 'mass'
+	if ( ele->Attribute( "power" ))
+		hp = power;
+	else	
+		hp = mass;
 	ele->QueryFloatAttribute( "hp", &hp );
 }
 
@@ -73,6 +81,25 @@ void GameItem::Apply( const GameItem* intrinsic )
 		flags |= IMMUNE_FIRE;
 	if ( intrinsic->flags & EFFECT_ENERGY )
 		flags |= IMMUNE_ENERGY;
+}
+
+
+void GameItem::AbsorbDamage( const DamageDesc& dd, DamageDesc* remain, const char* log )
+{
+	float total = 0;
+	GLLOG(( "%s Damage ", log ));
+	for( int i=0; i<DamageDesc::NUM_COMPONENTS && hp > 0; ++i ) {
+		float d = resist.components[i] * dd.components[i];
+		GLLOG(( "%.1f ", d ));
+		if ( remain ) {
+			// Damage that passes through this 
+			float r = (1.f - Clamp(resist.components[i], 0.f, 1.f ) * dd.components[i] );
+			remain->components[i] = r;
+		}
+		total += d;
+	}
+	hp = Max( 0.f, hp-total );
+	GLLOG(( "total=%.1f hp=%.1f" ));
 }
 
 
@@ -89,4 +116,13 @@ void DamageDesc::Load( const char* prefix, const tinyxml2::XMLElement* doc )
 	doc->QueryFloatAttribute( "kinetic", &components[KINETIC] );
 	doc->QueryFloatAttribute( "energy", &components[ENERGY] );
 	doc->QueryFloatAttribute( "fire", &components[FIRE] );
+	doc->QueryFloatAttribute( "shock", &components[SHOCK] );
 }
+
+
+void DamageDesc::Log()
+{
+	GLLOG(( "[k=%.1f e=%.1f f=%.1f s=%.1f sm=%.1f]",
+			Kinetic(), Energy(), Fire(), Shock(), Total() ));
+}
+

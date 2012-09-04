@@ -69,11 +69,23 @@ public:
 						U32 t0, U32 t1,				// t1 > t0
 						grinliz::CArray<AnimationMetaData, EL_MAX_METADATA>* data ) const;
 
+	static bool Looping( AnimationType type );
+	// does this animation sync to the loop cycle?
+	static bool Synchronized( AnimationType type );
+
 private:
+	U32 TimeInRange( AnimationType type, U32 t ) const;
+
 	const char* resName;
 	int nAnimations;
 
 	const gamedb::Item* item;
+
+	struct Sequence {
+		U32 totalDuration;
+		const gamedb::Item* item;
+	};
+	Sequence sequence[ANIM_COUNT];
 };
 
 
