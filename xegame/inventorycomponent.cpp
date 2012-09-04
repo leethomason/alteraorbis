@@ -98,6 +98,7 @@ bool InventoryComponent::AddToInventory( GameItem* item, bool equip )
 	} 
 	else if ( attachment == GameItem::HELD_AT_HARDPOINT ) {
 		if ( equip ) {
+
 			GLASSERT( hardpoints & (1<<item->hardpoint) );
 			// check that the needed hardpoint is free.
 			if (    ( hardpoints & (1<<item->hardpoint))		// does the hardpoint exist?
