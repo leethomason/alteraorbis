@@ -149,16 +149,21 @@ AnimationResource::AnimationResource( const gamedb::Item* _item )
 
 		int nFrames = animItem->NumChildren()-1;			// last child is metadata
 		GLASSERT( nFrames >= 1 );
+		sequence[type].nFrames = nFrames;
 
 		for( int frame=0; frame<nFrames; ++frame ) {
 			const gamedb::Item* frameItem = animItem->Child( frame );	// frame[0]
 			
 			sequence[type].frame[frame].duration = LRintf( frameItem->GetFloat( "duration" ));
+			sequence[type].frame[frame].start = sequence[type].totalDuration;
 			sequence[type].totalDuration += sequence[type].frame[frame].duration;
+			sequence[type].frame[frame].end = sequence[type].totalDuration;
 
 			int nBones = frameItem->NumChildren();
+			sequence[type].nBones = nBones;
+
 			for( int bone=0; bone<nBones; ++bone ) {
-				const gamedb::Item* boneItem = frameItem->Child( i );
+				const gamedb::Item* boneItem = frameItem->Child( bone );
 				const char* boneName = boneItem->Name();
 
 				sequence[type].frame[frame].boneName[bone] = boneName;
@@ -232,66 +237,57 @@ bool AnimationResource::GetTransform(	AnimationType type,
 										U32 timeClock, 
 										BoneData* boneData ) const
 {
-	const char* animationName = TypeToName( type );
-	const gamedb::Item* animItem = item->Child( animationName );
-	GLASSERT( animItem );
 	memset( boneData, 0, sizeof( *boneData ));
 
 	// Use doubles, which have a great enough range to not overflow from U32
-	double time = (double)TimeInRange( type, timeClock );
+	U32 time = TimeInRange( type, timeClock );
 	float fraction = 0;
-
-	const gamedb::Item* frameItem0 = 0;
-	const gamedb::Item* frameItem1 = 0;
 
 	int frame0 = 0;
 	int frame1 = 0;
-	int nFrames = animItem->NumChildren()-1;
-	GLASSERT( nFrames >= 1 );
 
-	for( frame0=0; frame0<nFrames; ++frame0 ) {
-		frameItem0 = animItem->Child( frame0 );
-		GLASSERT( frameItem0 );
-		//GLOUTPUT(( "frameItem %s\n", frameItem->Name() ));
-
-		double frameDuration = frameItem0->GetFloat( "duration" );
-		if ( (double)time < frameDuration ) {
+	for( frame0=0; frame0<sequence[type].nFrames; ++frame0 ) {
+		U32 start = sequence[type].frame[frame0].start;
+		U32 end   = sequence[type].frame[frame0].end;
+		if (    time >= start
+			 && time <  end ) 
+		{
 			// We found the frame!
-			fraction = (float)((double)time / (double)frameDuration);
-			frame1 = (frame0 + 1) % nFrames;
-			frameItem1 = animItem->Child( frame1 );
-
+			fraction = (float)((double)(time-start) / (double)(end-start));
+			frame1 = (frame0 + 1) % sequence[type].nFrames;
 			break;
 		}
-		time -= frameDuration;
 	}
-	GLASSERT( frameItem0 );
-	GLASSERT( frameItem1 );
+	GLASSERT( frame0 < sequence[type].nFrames );
+	GLASSERT( frame1 < sequence[type].nFrames );
 
-	for( int i=0; i<frameItem0->NumChildren(); ++i ) {
+	for( int i=0; i<sequence[type].nBones; ++i ) {
 		GLASSERT( i < EL_MAX_BONES );
 
-		const gamedb::Item* boneItem0 = frameItem0->Child( i );
-		const gamedb::Item* boneItem1 = frameItem1->Child( i );
-
-		const char* boneName = boneItem0->Name();
+		// The index and the boneName don't match up. Patch here.
+		// Can't patch at load time because the 'header' is required,
+		// so that animation can be multiply assigned.
+		const char* boneName = sequence[type].frame[frame0].boneName[i];
 		int index = header.BoneIDFromName( boneName );
 
-		float angle0 = boneItem0->GetFloat( "anglePrime" );
-		float angle1 = boneItem1->GetFloat( "anglePrime" );
+		const BoneData::Bone* bone0 = &sequence[type].frame[frame0].boneData.bone[i];
+		const BoneData::Bone* bone1 = &sequence[type].frame[frame1].boneData.bone[i];
 
-		if ( fabsf( angle0-angle1 ) > 180.0 ) {
-			if ( angle1 < angle0 ) angle1 += 360.0;
-			else				   angle1 -= 360.0;
+		float angle0 = bone0->angleRadians;
+		float angle1 = bone1->angleRadians;
+
+		if ( fabsf( angle0-angle1 ) > 180.0f ) {
+			if ( angle1 < angle0 ) angle1 += 360.0f;
+			else				   angle1 -= 360.0f;
 		}
 		float angle = Lerp( angle0, angle1, fraction );
 
-		float dy0 = boneItem0->GetFloat( "dy" );
-		float dy1 = boneItem1->GetFloat( "dy" );
+		float dy0 = bone0->dy;
+		float dy1 = bone1->dy;
 		float dy  = Lerp( dy0, dy1, fraction );
 
-		float dz0 = boneItem0->GetFloat( "dz" );
-		float dz1 = boneItem1->GetFloat( "dz" );
+		float dz0 = bone0->dz;
+		float dz1 = bone1->dz;
 		float dz  = Lerp( dz0, dz1, fraction );
 
 		boneData->bone[index].angleRadians	= ToRadian( angle );

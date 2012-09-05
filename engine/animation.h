@@ -83,15 +83,19 @@ private:
 
 	struct Frame {
 		U32			duration;
+		U32			start;
+		U32			end;
 		const char* boneName[EL_MAX_BONES];
 		U32			boneHash[EL_MAX_BONES];
 		BoneData	boneData;
 	};
 
 	struct Sequence {
-		U32 totalDuration;
+		U32					totalDuration;
 		const gamedb::Item* item;
-		Frame frame[EL_MAX_ANIM_FRAMES];
+		int					nFrames;
+		int					nBones;
+		Frame				frame[EL_MAX_ANIM_FRAMES];
 	};
 	Sequence sequence[ANIM_COUNT];
 };
