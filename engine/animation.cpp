@@ -198,24 +198,6 @@ U32 AnimationResource::Duration( AnimationType type ) const
 }
 
 
-bool AnimationResource::GetTransform(	AnimationType type,	// which animation to play: "reference", "gunrun", etc.
-										const char* boneName,
-										const ModelHeader& header,	// used to get the bone IDs
-										U32 time,					// time for this animation
-										BoneData::Bone* bone ) const
-{
-	// FIXME optimize to calc only one bone?
-	BoneData boneData;
-	GetTransform( type, header, time, &boneData );
-	int index = header.BoneIDFromName( boneName );
-	if ( index >= 0 ) {
-		*bone = boneData.bone[index];		
-		return true;
-	}
-	return false;
-}
-
-
 U32 AnimationResource::TimeInRange( AnimationType type, U32 t ) const
 {
 	GLASSERT( type >= 0 && type < ANIM_COUNT );
@@ -232,25 +214,20 @@ U32 AnimationResource::TimeInRange( AnimationType type, U32 t ) const
 }
 
 
-bool AnimationResource::GetTransform(	AnimationType type, 
-										const ModelHeader& header, 
-										U32 timeClock, 
-										BoneData* boneData ) const
+void AnimationResource::ComputeFrame( AnimationType type,
+									  U32 timeClock,
+									  int *_frame0, int* _frame1, float* _fraction ) const
 {
-	memset( boneData, 0, sizeof( *boneData ));
+	int frame0=0, frame1=0;
+	float fraction=0;
 
-	// Use doubles, which have a great enough range to not overflow from U32
 	U32 time = TimeInRange( type, timeClock );
-	float fraction = 0;
-
-	int frame0 = 0;
-	int frame1 = 0;
 
 	for( frame0=0; frame0<sequence[type].nFrames; ++frame0 ) {
 		U32 start = sequence[type].frame[frame0].start;
 		U32 end   = sequence[type].frame[frame0].end;
 		if (    time >= start
-			 && time <  end ) 
+				&& time <  end ) 
 		{
 			// We found the frame!
 			fraction = (float)((double)(time-start) / (double)(end-start));
@@ -260,6 +237,78 @@ bool AnimationResource::GetTransform(	AnimationType type,
 	}
 	GLASSERT( frame0 < sequence[type].nFrames );
 	GLASSERT( frame1 < sequence[type].nFrames );
+	*_frame0 = frame0;
+	*_frame1 = frame1;
+	*_fraction = fraction;
+}
+
+
+void AnimationResource::ComputeBone( AnimationType type,
+									 int frame0, int frame1, float fraction,
+									 int i,
+									 BoneData::Bone* bone ) const
+{
+	const BoneData::Bone* bone0 = &sequence[type].frame[frame0].boneData.bone[i];
+	const BoneData::Bone* bone1 = &sequence[type].frame[frame1].boneData.bone[i];
+
+	float angle0 = bone0->angleRadians;
+	float angle1 = bone1->angleRadians;
+
+	if ( fabsf( angle0-angle1 ) > 180.0f ) {
+		if ( angle1 < angle0 ) angle1 += 360.0f;
+		else				   angle1 -= 360.0f;
+	}
+	float angle = Lerp( angle0, angle1, fraction );
+
+	float dy0 = bone0->dy;
+	float dy1 = bone1->dy;
+	float dy  = Lerp( dy0, dy1, fraction );
+
+	float dz0 = bone0->dz;
+	float dz1 = bone1->dz;
+	float dz  = Lerp( dz0, dz1, fraction );
+
+	bone->angleRadians	= ToRadian( angle );
+	bone->dy			= dy;
+	bone->dz			= dz;
+}
+
+
+bool AnimationResource::GetTransform(	AnimationType type,	// which animation to play: "reference", "gunrun", etc.
+										const char* boneName,
+										const ModelHeader& header,	// used to get the bone IDs
+										U32 time,					// time for this animation
+										BoneData::Bone* bone ) const
+{
+	int i=0;
+	for( ; i<sequence[type].nBones; ++i ) {
+		if ( StrEqual( sequence[type].frame[0].boneName[i], boneName )) {
+			break;
+		}
+	}
+	if ( i < sequence[type].nBones ) {
+		float fraction = 0;
+		int frame0 = 0;
+		int frame1 = 0;
+		ComputeFrame( type, time, &frame0, &frame1, &fraction );
+		ComputeBone( type, frame0, frame1, fraction, i, bone );
+		return true;
+	}
+	return false;
+}
+
+
+bool AnimationResource::GetTransform(	AnimationType type, 
+										const ModelHeader& header, 
+										U32 timeClock, 
+										BoneData* boneData ) const
+{
+	memset( boneData, 0, sizeof( *boneData ));
+
+	float fraction = 0;
+	int frame0 = 0;
+	int frame1 = 0;
+	ComputeFrame( type, timeClock, &frame0, &frame1, &fraction );
 
 	for( int i=0; i<sequence[type].nBones; ++i ) {
 		GLASSERT( i < EL_MAX_BONES );
@@ -270,29 +319,7 @@ bool AnimationResource::GetTransform(	AnimationType type,
 		const char* boneName = sequence[type].frame[frame0].boneName[i];
 		int index = header.BoneIDFromName( boneName );
 
-		const BoneData::Bone* bone0 = &sequence[type].frame[frame0].boneData.bone[i];
-		const BoneData::Bone* bone1 = &sequence[type].frame[frame1].boneData.bone[i];
-
-		float angle0 = bone0->angleRadians;
-		float angle1 = bone1->angleRadians;
-
-		if ( fabsf( angle0-angle1 ) > 180.0f ) {
-			if ( angle1 < angle0 ) angle1 += 360.0f;
-			else				   angle1 -= 360.0f;
-		}
-		float angle = Lerp( angle0, angle1, fraction );
-
-		float dy0 = bone0->dy;
-		float dy1 = bone1->dy;
-		float dy  = Lerp( dy0, dy1, fraction );
-
-		float dz0 = bone0->dz;
-		float dz1 = bone1->dz;
-		float dz  = Lerp( dz0, dz1, fraction );
-
-		boneData->bone[index].angleRadians	= ToRadian( angle );
-		boneData->bone[index].dy			= dy;
-		boneData->bone[index].dz			= dz;
+		ComputeBone( type, frame0, frame1, fraction, i, boneData->bone + index );
 	}
 	return true;
 }

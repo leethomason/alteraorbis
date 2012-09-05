@@ -74,7 +74,14 @@ public:
 	static bool Synchronized( AnimationType type );
 
 private:
-	U32 TimeInRange( AnimationType type, U32 t ) const;
+	U32 TimeInRange( AnimationType type, U32 t ) const;	
+	void ComputeFrame( AnimationType type,
+					   U32 time,
+					   int *_frame0, int* _frame1, float* _fraction ) const;
+	void ComputeBone( AnimationType type,
+					  int frame0, int frame1, float fraction,
+					  int i,
+					  BoneData::Bone* bone ) const;
 
 	const char* resName;
 	int nAnimations;
