@@ -72,6 +72,9 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 	else	
 		hp = mass;
 	ele->QueryFloatAttribute( "hp", &hp );
+
+	GLASSERT( TotalHP() > 0 );
+	GLASSERT( hp > 0 );	// else should be destroyed
 }
 
 
@@ -99,7 +102,7 @@ void GameItem::AbsorbDamage( const DamageDesc& dd, DamageDesc* remain, const cha
 		total += d;
 	}
 	hp = Max( 0.f, hp-total );
-	GLLOG(( "total=%.1f hp=%.1f" ));
+	GLLOG(( "total=%.1f hp=%.1f", total, hp ));
 }
 
 

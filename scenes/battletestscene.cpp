@@ -90,11 +90,6 @@ BattleTestScene::BattleTestScene( LumosGame* game ) : Scene( game )
 	optionButton[DUMMY].SetVisible( false );
 	optionButton[COUNT_4+NUM_OPTIONS].SetDown();
 
-	// WIP:
-	//optionButton[MANTIS].SetEnabled( false );	optionButton[MANTIS+NUM_OPTIONS].SetEnabled( false );
-	//optionButton[BALROG].SetEnabled( false );	optionButton[BALROG+NUM_OPTIONS].SetEnabled( false );
-	//optionButton[BALROG].SetEnabled( false );	optionButton[BALROG+NUM_OPTIONS].SetEnabled( false );
-
 	engine = 0;
 	map = 0;
 	itemStorage.Load( "./res/itemdef.xml" );
@@ -310,12 +305,14 @@ void BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int 
 	}
 
 	if ( type == HUMAN ) {
+		/* Not working yet.
 		// Always get a shield
 		{
 			const GameItem* shield = itemStorage.Get( "shield" );
 			GLASSERT( shield );
 			inv->AddToInventory( new GameItem( *shield ), true );
 		}
+		*/
 
 		if( loadout == MELEE_WEAPON ) {
 			const GameItem *knife = itemStorage.Get( "testknife" );
