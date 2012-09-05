@@ -278,7 +278,7 @@ public:
 	AnimationType GetAnimation() const						{ return currentAnim.id; }
 	// Update the time and animation rendering.
 	void DeltaAnimation(	U32 time, 
-							grinliz::CArray<AnimationMetaData, EL_MAX_METADATA> *metaData,
+							grinliz::CArray<const AnimationMetaData*, EL_MAX_METADATA> *metaData,
 							bool *done );
 
 	void SetAnimationRate( float rate )						{ animationRate = rate; }

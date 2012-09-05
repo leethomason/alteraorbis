@@ -187,7 +187,7 @@ bool RenderComponent::DoTick( U32 deltaTime )
 		model[0]->SetAnimation( n, CROSS_FADE_TIME );
 
 		bool looped = false;
-		grinliz::CArray<AnimationMetaData, EL_MAX_METADATA> metaData;
+		grinliz::CArray<const AnimationMetaData*, EL_MAX_METADATA> metaData;
 		model[0]->DeltaAnimation( deltaTime, &metaData, &looped );
 
 		if ( looped && ( n == ANIM_MELEE )) {
@@ -195,7 +195,7 @@ bool RenderComponent::DoTick( U32 deltaTime )
 			model[0]->SetAnimation( n, CROSS_FADE_TIME );
 		}
 		for( int i=0; i<metaData.Size(); ++i ) {
-			if ( StrEqual( metaData[i].name, "impact" )) {
+			if ( StrEqual( metaData[i]->name, "impact" )) {
 				parentChit->SendMessage( ChitMsg( RENDER_MSG_IMPACT, n ), this );
 			}
 			else {

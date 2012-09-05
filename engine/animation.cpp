@@ -173,6 +173,15 @@ AnimationResource::AnimationResource( const gamedb::Item* _item )
 				sequence[type].frame[frame].boneData.bone[bone].dz = boneItem->GetFloat( "dz" );
 			}
 		}
+
+		// The extra frame.
+		const gamedb::Item* metaItem = animItem->Child( "metaData" );
+		for( int j=0; j<metaItem->NumChildren(); ++j ) {
+			const gamedb::Item* dataItem = metaItem->Child( j );
+
+			sequence[type].metaData[j].time = LRintf( dataItem->GetFloat( "time" ));
+			sequence[type].metaData[j].name = dataItem->Name();
+		}
 	}
 }
 
@@ -208,7 +217,7 @@ U32 AnimationResource::TimeInRange( AnimationType type, U32 t ) const
 		result = t % total;
 	}
 	else {
-		result = Max( total-1, t );
+		result = Min( total-1, t );
 	}
 	return result;
 }
@@ -327,40 +336,24 @@ bool AnimationResource::GetTransform(	AnimationType type,
 
 void AnimationResource::GetMetaData(	AnimationType type,
 										U32 t0, U32 t1,				// t1 > t0
-										grinliz::CArray<AnimationMetaData, EL_MAX_METADATA>* data ) const
+										grinliz::CArray<const AnimationMetaData*, EL_MAX_METADATA>* data ) const
 {
-	const char* animationName = TypeToName( type );
-	const gamedb::Item* animItem = item->Child( animationName );
-	GLASSERT( animItem );
-	const gamedb::Item* metaItem = animItem->Child( "metaData" );
 	data->Clear();
 
 	GLASSERT( t1 >= t0 );
 	U32 delta = t1 - t0;
 	
-	double totalTime = (double)Duration( type );
-	double t0f = (double)TimeInRange( type, t0 );
-	double t1f = (double)TimeInRange( type, t0 + Min( delta, Duration( type )));
+	t0 = TimeInRange( type, t0 );
+	t1 = t0 + delta;
 
-	for( int pass=0; pass<2; ++pass ) {
-		for( int i=0; i<metaItem->NumChildren(); ++i ) {
-			const gamedb::Item* dataItem = metaItem->Child( i );
-			double t = dataItem->GetFloat( "time" );
-
-			if ( t >= t0f && t < t1f ) {
-				AnimationMetaData amd;
-				amd.name = dataItem->Name();
-				amd.time = (U32)t;
-				data->Push( amd );
+	for( int i=0; i<EL_MAX_METADATA; ++i ) {
+		if ( sequence[type].metaData[i].name ) {
+			U32 t = sequence[type].metaData[i].time;
+			if ( t < t0 )
+				t += Duration(type);
+			if ( t >= t0 && t < t1 ) {
+				data->Push( &sequence[type].metaData[i]);
 			}
-		}
-		if ( t1f > totalTime ) {
-			t0f -= totalTime;
-			t1f -= totalTime;
-			// go around again.
-		}
-		else {
-			break;
 		}
 	}
 }
