@@ -69,9 +69,12 @@ public:
 						U32 t0, U32 t1,				// t1 > t0
 						grinliz::CArray<const AnimationMetaData*, EL_MAX_METADATA>* data ) const;
 
+	// does this animation loop?
 	static bool Looping( AnimationType type );
-	// does this animation sync to the loop cycle?
+	// does this animation sync to the walk cycle?
 	static bool Synchronized( AnimationType type );
+	// does this animation represent motion?
+	static bool Motion( AnimationType type );
 
 private:
 	U32 TimeInRange( AnimationType type, U32 t ) const;	

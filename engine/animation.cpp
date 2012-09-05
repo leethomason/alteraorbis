@@ -37,6 +37,15 @@ static const bool gAnimationSync[ ANIM_COUNT ] = {
 	false
 };
 
+static const bool gAnimationMotion[ ANIM_COUNT ] = {
+	false,
+	true,
+	true,
+	false,
+	false,
+	true,
+	true
+};
 
 bool AnimationResource::Looping( AnimationType type ) { 
 	return gAnimationLooping[type]; 
@@ -44,6 +53,10 @@ bool AnimationResource::Looping( AnimationType type ) {
 
 bool AnimationResource::Synchronized( AnimationType type ) { 
 	return gAnimationSync[type]; 
+}
+
+bool AnimationResource::Motion( AnimationType type ) {
+	return gAnimationMotion[type];
 }
 
 

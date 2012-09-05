@@ -217,7 +217,7 @@ void AnimationScene::UpdateAnimationInfo()
 			name = res->AnimationName( currentAnim );
 			AnimationType type = AnimationResource::NameToType( name );
 			for( int i=0; i<NUM_MODELS; ++i ) {
-				model[i]->SetAnimation( type, 500 );
+				model[i]->SetAnimation( type, 500, false );
 			}
 		}
 		animName.SetText( name );

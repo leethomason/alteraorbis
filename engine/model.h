@@ -274,8 +274,10 @@ public:
 	const AnimationResource* GetAnimationResource() const	{ return animationResource; }
 	// Set the current animation, null or "reference" turns off animation.
 	// Does nothing if the 'id' is the currently playing animation
-	void SetAnimation( AnimationType id, U32 crossFade );
+	void SetAnimation( AnimationType id, U32 crossFade, bool restart );
 	AnimationType GetAnimation() const						{ return currentAnim.id; }
+	bool AnimationDone() const;
+
 	// Update the time and animation rendering.
 	void DeltaAnimation(	U32 time, 
 							grinliz::CArray<const AnimationMetaData*, EL_MAX_METADATA> *metaData,

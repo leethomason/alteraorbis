@@ -238,6 +238,10 @@ void AIComponent::Think()
 				// Make the best target the 1st in the list.
 				Swap( &enemyList[bestIndex], &enemyList[0] );
 			}
+			else {
+				// Nothing with utility found. Clear out the enemy list.
+				enemyList.Clear();
+			}
 		}
 	}
 }

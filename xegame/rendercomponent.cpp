@@ -76,18 +76,18 @@ SpatialComponent* RenderComponent::SyncToSpatial()
 }
 
 
-AnimationType RenderComponent::CalcAnimation( bool excludeMelee ) const
+AnimationType RenderComponent::CalcAnimation() const
 {
 	AnimationType current = model[0]->GetAnimation();
 	
-	if ( !excludeMelee ) {
-		// If the animation can't be interupted, just return
-		// the current animation.
-		if ( current == ANIM_MELEE ) {
-			return current;
-		}
-	}
 	AnimationType n = ANIM_STAND;
+
+	// Melee is tricky. If we are just standing around,
+	// can stay in melee...but motion should override.
+	if ( current == ANIM_MELEE ) {
+		if ( !model[0]->AnimationDone() )
+			return current;
+	}
 
 	MoveComponent* move = parentChit->GetMoveComponent();
 	bool isMoving = move && move->IsMoving();
@@ -102,7 +102,7 @@ AnimationType RenderComponent::CalcAnimation( bool excludeMelee ) const
 			n = ANIM_WALK;
 		}
 	}
-	else {
+	else if ( n == ANIM_STAND ) {
 		if ( isCarrying ) {
 			n = ANIM_GUN_STAND;
 		}
@@ -115,7 +115,7 @@ bool RenderComponent::AnimationReady() const
 {
 	AnimationType type = model[0]->GetAnimation();
 	if ( type == ANIM_MELEE ) {
-		return false;
+		return model[0]->AnimationDone();
 	}
 	return true;
 }
@@ -125,7 +125,7 @@ bool RenderComponent::PlayAnimation( AnimationType type )
 {
 	if ( type == ANIM_MELEE ) {
 		if ( AnimationReady() ) {
-			model[0]->SetAnimation( ANIM_MELEE, CROSS_FADE_TIME );
+			model[0]->SetAnimation( ANIM_MELEE, CROSS_FADE_TIME, true );
 			return true;
 		}
 	}
@@ -181,22 +181,21 @@ bool RenderComponent::DoTick( U32 deltaTime )
 
 	// Animate the primary model.
 	if ( spatial && model[0] && model[0]->GetAnimationResource() ) {
-		needsTick = true;
+		needsTick = true;	
 
-		AnimationType n = this->CalcAnimation( false );
-		model[0]->SetAnimation( n, CROSS_FADE_TIME );
-
-		bool looped = false;
-		grinliz::CArray<const AnimationMetaData*, EL_MAX_METADATA> metaData;
-		model[0]->DeltaAnimation( deltaTime, &metaData, &looped );
-
-		if ( looped && ( n == ANIM_MELEE )) {
-			n = this->CalcAnimation( true );
-			model[0]->SetAnimation( n, CROSS_FADE_TIME );
+		// Update to the current, correct animation if we are
+		// in a slice we can change
+		if ( AnimationReady() ) {
+			AnimationType n = this->CalcAnimation();
+			model[0]->SetAnimation( n, CROSS_FADE_TIME, false );
 		}
+
+		grinliz::CArray<const AnimationMetaData*, EL_MAX_METADATA> metaData;
+		model[0]->DeltaAnimation( deltaTime, &metaData, 0 );
+
 		for( int i=0; i<metaData.Size(); ++i ) {
 			if ( StrEqual( metaData[i]->name, "impact" )) {
-				parentChit->SendMessage( ChitMsg( RENDER_MSG_IMPACT, n ), this );
+				parentChit->SendMessage( ChitMsg( RENDER_MSG_IMPACT ), this );
 			}
 			else {
 				GLASSERT( 0 );	// event not recognized

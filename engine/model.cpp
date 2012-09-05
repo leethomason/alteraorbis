@@ -317,12 +317,20 @@ void Model::SetRotation( const Quaternion& q )
 }
 
 
-void Model::SetAnimation( AnimationType id, U32 crossFade )
+bool Model::AnimationDone() const
+{
+	if ( currentAnim.id >= 0 && currentAnim.time >= animationResource->Duration( currentAnim.id ) )
+		return true;
+	return false;
+}
+
+
+void Model::SetAnimation( AnimationType id, U32 crossFade, bool restart )
 {
 	GLASSERT( id >= ANIM_OFF && id < ANIM_COUNT );
 
 	if ( id >= 0 ) {
-		if ( currentAnim.id != id ) {
+		if ( restart || currentAnim.id != id ) {
 /*#ifdef DEBUG
 			if ( resource->header.name == "balrog" ) {
 				GLOUTPUT(( "switch %d to %d crossFade=%d time=%d\n",
