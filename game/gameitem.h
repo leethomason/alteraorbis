@@ -109,6 +109,7 @@ public:
 
 class IRangedWeaponItem : virtual public IWeaponItem
 {
+
 public:
 };
 
@@ -180,9 +181,12 @@ public:
 	DamageDesc meleeDamage;	// a multiplier of the base (effective mass) and other modifiers
 	DamageDesc rangedDamage;// a multiplier of the power
 	DamageDesc resist;		// multiplier of damage absorbed by this item. 1: normal, 0: no damage, 1.5: extra damage
-	U32 coolDownTime;		// time between uses
+	U32 cooldown;			// time between uses
+	U32 reload;				// time to reload once clip is used up
+	int clipCap;			// possible rounds in the clip
 
 	float hp;				// current hp for this item
+	int clipCount;			// current rounds in the clip
 
 	// Group all the copy/init in one place!
 	void CopyFrom( const GameItem* rhs ) {
@@ -198,7 +202,7 @@ public:
 			meleeDamage		= rhs->meleeDamage;
 			rangedDamage	= rhs->rangedDamage;
 			resist			= rhs->resist;
-			coolDownTime	= rhs->coolDownTime;
+			cooldown		= rhs->cooldown;
 
 			hp				= rhs->hp;
 		}
@@ -214,7 +218,7 @@ public:
 			meleeDamage.Set( 1, 0, 0, 0 );
 			rangedDamage.Set( 1, 0, 0, 0 );
 			resist.Set( 1, 1, 1, 1 );	// resist nothing, bonus nothing
-			coolDownTime = 1000;
+			cooldown = 1000;
 
 			hp = TotalHP();
 		}
@@ -227,15 +231,15 @@ public:
 	virtual const IWeaponItem*	ToWeapon() const	{ return (flags & (MELEE_WEAPON | RANGED_WEAPON)) ? this : 0; }
 
 	virtual bool Ready( U32 absTime ) {
-		if ( coolDownTime == 0 || absTime >= coolDownTime ) {
-			return true;
-		}
-		return false;
+		//if ( cooldown == 0 || absTime >= cool ) {
+		//	return true;
+		//}
+		return true;
 	}
 
 	virtual bool Use( U32 absTime ) {
 		if ( Ready( absTime )) {
-			coolDownTime = absTime + COOLDOWN_TIME;
+			//coolDownTime = absTime + COOLDOWN_TIME;
 			return true;
 		}
 		return false;

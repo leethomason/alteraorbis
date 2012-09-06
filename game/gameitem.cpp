@@ -44,7 +44,7 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 	ele->QueryFloatAttribute( "mass",			&mass );
 	ele->QueryFloatAttribute( "power",			&power );
 	ele->QueryIntAttribute( "primaryTeam",		&primaryTeam );
-	ele->QueryUnsignedAttribute( "coolDownTime",&coolDownTime );
+//	ele->QueryUnsignedAttribute( "coolDownTime",&coolDownTime );
 
 	const XMLElement* meleeEle = ele->FirstChildElement( "melee" );
 	if ( meleeEle ) {

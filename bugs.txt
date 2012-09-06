@@ -32,10 +32,22 @@
 	X need to check rotation in the path component
 	X load in the correct lighting
 
-	- weapons
+	- ranged weapons
+		- bolts
+			- damage (defined)
+			d speed
+			d range
+			- compute color
+			d effect strength
+		d accuracy
+		- reload time 'reload'
+		- time per shot 'cooldown'
+		- rounds in clip
+		d effect
+	X weapons
 		X relative positioning (implemented, broken again)
 		X weapon definition - item question: how is a chit a weapon?
-		- item definition
+		X item definition
 	- AI (task AI)
 		- establish friend vs. enemy
 		- basic states

@@ -72,10 +72,15 @@
   <item name="testgun"
         resource="testgun"
         flags="MELEE_WEAPON RANGED_WEAPON HELD_AT_HARDPOINT"
+        hardpoint="trigger"
+        power="30"
+        mass="1.5"
+        cooldown="500"
         reload="1000"
-        hardpoint="trigger">
+        clipCap="6"
+        >
         <melee kinetic="1.1"/>
-        <ranged energy="20" rounds="5" />
+        <ranged energy="1" />
   </item>
 
   <item name="shield"
