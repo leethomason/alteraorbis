@@ -14,17 +14,18 @@ class Engine;
 struct Bolt {
 	Bolt() {
 		head.Set( 0, 0, 0 );
-		tail.Set( 0, 0, 0 );
+		//tail.Set( 0, 0, 0 );
+		len = 0;
 		dir.Set( 1, 0, 0 );
 		impact = false;
 		color.Set( 1, 1, 1, 1 );
 	} 
 
 	grinliz::Vector3F	head;
-	grinliz::Vector3F	tail;
+	//grinliz::Vector3F	tail;
+	float				len;
 	grinliz::Vector3F	dir;	// normal vector
 	bool				impact;	// 'head' is the impact location
-	//float				len;
 	grinliz::Vector4F	color;
 	//int					chitID;	// who fired this bolt
 

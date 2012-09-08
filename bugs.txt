@@ -1,4 +1,5 @@
-- combat test scene
+- combat test scene	
+	- kinetic damage of held weapons shouldn't be multiplied with mass (added)
 	- shields
 	- impact (light/heavy)
 	- removing unit "clumping" (3yr old soccer team). Basic formation?

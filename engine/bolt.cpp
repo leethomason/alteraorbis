@@ -37,12 +37,12 @@ void Bolt::TickAll( grinliz::CDynArray<Bolt>* bolts, U32 delta, Engine* engine )
 			// FIXME: add ignore list of the shooter, or move head away from model?
 			Vector3F at;
 
-			if ( b.head.y < 0 ) {
+			if ( (b.head + travel).y <= 0 ) {
 				b.impact = true;
 					
 				// we hit the ground.
-				if ( b.tail.y > 0 ) {
-					at = Lerp( b.tail, b.head, (0.f-b.tail.y) / (b.head.y-b.tail.y));
+				if ( b.head.y > 0 ) {
+					at = Lerp( b.head, b.head+travel, (b.head.y) / (travel.y));
 				}
 				else {
 					at = b.head;	// not really sure how this happened.
@@ -64,14 +64,22 @@ void Bolt::TickAll( grinliz::CDynArray<Bolt>* bolts, U32 delta, Engine* engine )
 			}
 		}
 
-		if ( !b.impact )
+		if ( !b.impact ) {
 			b.head += travel;
-		b.tail += travel;
+			b.len += SPEED*timeSlice;
+			if ( b.len > 2.0f )
+				b.len = 2.0f;
+		}
+		else {
+			b.len -= SPEED*timeSlice;
+		}
 		
-		if ( !bounds.Contains( b.head ) && !bounds.Contains( b.tail ) ) {
+		Vector3F tail = b.head - b.len*b.dir;
+		
+		if ( !bounds.Contains( b.head ) && !bounds.Contains( tail ) ) {
 			bolts->SwapRemove( i );
 		}
-		else if ( DotProduct( b.tail, b.dir ) > DotProduct( b.head, b.dir ) ) {
+		else if ( b.len <= 0 ) {
 			bolts->SwapRemove( i );
 		}
 		else {
@@ -120,11 +128,12 @@ void BoltRenderer::DrawAll( const Bolt* bolts, int nBolts, Engine* engine )
 	for( int i=0; i<nBolts; ++i ) {
 
 		Vector3F n;
-		CrossProduct( eyeNormal, bolts[i].head - bolts[i].tail, &n );
+		Vector3F tail = bolts[i].head - bolts[i].len*bolts[i].dir;
+		CrossProduct( eyeNormal, bolts[i].head - tail, &n );
 		n.SafeNormalize( 1, 0, 0 );
 
-		vertex[i*4+0].pos = bolts[i].tail - hw*n;
-		vertex[i*4+1].pos = bolts[i].tail + hw*n;
+		vertex[i*4+0].pos = tail - hw*n;
+		vertex[i*4+1].pos = tail + hw*n;
 		vertex[i*4+2].pos = bolts[i].head + hw*n;
 		vertex[i*4+3].pos = bolts[i].head - hw*n;
 
