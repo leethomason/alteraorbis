@@ -419,10 +419,13 @@ void SpaceTree::QueryPlanesRec(	const Plane* planes, int nPlanes, int intersecti
 
 Model* SpaceTree::QueryRay( const Vector3F& _origin, 
 							const Vector3F& _direction, 
+							float length,
 							int required, int excluded, const Model** ignore,
 							HitTestMethod testType,
 							Vector3F* intersection ) 
 {
+	// FIXME: can optimize for 'length'
+
 	//GLOUTPUT(( "query ray\n" ));
 	modelRoot = 0;
 	nodesVisited = 0;
@@ -460,7 +463,7 @@ Model* SpaceTree::QueryRay( const Vector3F& _origin,
 	// We now have a batch of models. Are any of them a hit??
 	GLASSERT( testType == TEST_HIT_AABB || testType == TEST_TRI );
 
-	float close = FLT_MAX;
+	float close = length;
 	Model* closeModel = 0;
 	Vector3F testInt;
 	float t;

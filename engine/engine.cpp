@@ -30,7 +30,7 @@
 #include "particle.h"
 #include "rendertarget.h"
 #include "engineshaders.h"
-
+#include "bolt.h"
 
 /*
 	XenoEngine-2 has a cleaned up render queue. The sorting of items probably makes the engine
@@ -64,6 +64,7 @@ Engine::Engine( Screenport* port, const gamedb::Reader* database, Map* m )
 	ShaderManager::Instance()->AddDeviceLossHandler( this );
 	particleSystem = new ParticleSystem();
 	engineShaders = new EngineShaders();
+	boltRenderer = new BoltRenderer();
 	miniMapRenderTarget = 0;
 }
 
@@ -78,6 +79,7 @@ Engine::~Engine()
 	for( int i=0; i<RT_COUNT; ++i )
 		delete renderTarget[i];
 	delete engineShaders;
+	delete boltRenderer;
 }
 
 
@@ -229,7 +231,7 @@ Texture* Engine::GetMiniMapTexture()
 }
 
 
-void Engine::Draw( U32 deltaTime )
+void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 {
 	GRINLIZ_PERFTRACK;
 
@@ -404,6 +406,8 @@ void Engine::Draw( U32 deltaTime )
 	}
 
 	// ------ Particle system ------------- //
+	boltRenderer->DrawAll( bolts, nBolts, this );
+
 	const Vector3F* eyeDir = camera.EyeDir3();
 	particleSystem->Update( deltaTime, eyeDir );
 	particleSystem->Draw();
@@ -550,11 +554,13 @@ void Engine::CalcFrustumPlanes( grinliz::Plane* planes )
 }
 
 
-Model* Engine::IntersectModel( const grinliz::Ray& ray, HitTestMethod method, int required, int exclude, const Model* ignore[], Vector3F* intersection )
+Model* Engine::IntersectModel( const Vector3F& origin, const Vector3F& dir, float length,
+							   HitTestMethod method, 
+							   int required, int exclude, const Model* ignore[], Vector3F* intersection )
 {
 	//GRINLIZ_PERFTRACK
 
-	Model* model = spaceTree->QueryRay(	ray.origin, ray.direction, 
+	Model* model = spaceTree->QueryRay(	origin, dir, length,
 										required, exclude, ignore,
 										method,
 										intersection );

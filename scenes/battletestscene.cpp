@@ -348,7 +348,7 @@ void BattleTestScene::DrawDebugText()
 		chitBag.NumTicked(), chitBag.NumChits() );
 
 	if ( debugRay.direction.x ) {
-		Model* root = engine->IntersectModel( debugRay, TEST_TRI, 0, 0, 0, 0 );
+		Model* root = engine->IntersectModel( debugRay.origin, debugRay.direction, FLT_MAX, TEST_TRI, 0, 0, 0, 0 );
 		int y = 32;
 		for ( ; root; root=root->next ) {
 			Chit* chit = root->userData;
@@ -405,7 +405,18 @@ void BattleTestScene::ItemTapped( const gamui::UIItem* item )
 
 void BattleTestScene::DoTick( U32 deltaTime )
 {
-	chitBag.DoTick( deltaTime );
+	boltTimer += deltaTime;
+	if ( boltTimer > 500 ) {
+		boltTimer = 0;
+		Bolt* bolt = chitBag.NewBolt();
+
+		bolt->dir.Set( -0.1f+fuzz.Uniform()*0.2f, 0, 1 );
+		bolt->head.Set( 0.5f * (float)map->Width(), 0.5f, 2 );
+		bolt->tail.Set( 0.5f * (float)map->Width(), 0.5f, 0 );
+		bolt->color.Set( 1, 0.1f, 0.3f, 1 );
+	}
+
+	chitBag.DoTick( deltaTime, engine );
 
 	if ( battleStarted ) {
 		bool aware = false;
@@ -433,6 +444,6 @@ void BattleTestScene::DoTick( U32 deltaTime )
 
 void BattleTestScene::Draw3D( U32 deltaTime )
 {
-	engine->Draw( deltaTime );
+	engine->Draw( deltaTime, chitBag.BoltMem(), chitBag.NumBolts() );
 }
 

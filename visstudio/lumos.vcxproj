@@ -80,6 +80,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\engine\animation.cpp" />
+    <ClCompile Include="..\engine\bolt.cpp" />
     <ClCompile Include="..\engine\camera.cpp" />
     <ClCompile Include="..\engine\engine.cpp" />
     <ClCompile Include="..\engine\engineshaders.cpp" />
@@ -143,6 +144,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\animation.h" />
+    <ClInclude Include="..\engine\bolt.h" />
     <ClInclude Include="..\engine\camera.h" />
     <ClInclude Include="..\engine\engine.h" />
     <ClInclude Include="..\engine\enginelimits.h" />

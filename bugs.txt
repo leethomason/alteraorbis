@@ -1,36 +1,17 @@
 - combat test scene
-	X why does balrog just stand around not attacking mantis
-	X ...and yet the AOE of melee seems huge. clean all that up.
-	X human runs up to dummy, circles around it
 	- shields
 	- impact (light/heavy)
 	- removing unit "clumping" (3yr old soccer team). Basic formation?
 	- unique look for units so teams can be distinguished
 	- properly hook up items and such, so that items, health, all be driven correctly
-	X data driven item creation
 	- buttons to select scenario, load items
-	X leaving guy standing after battle
 	- animation speed isn't correct
 	- adjust particles to have "impact" effect
 	- add de-rez
 	- flaming sword
 	- flaming sword should catch things on fire
 	- refactor code - if needed? - in AIComponent (the fixmes)
-	X debugging info for chit ticks
-	X back in the tick system: the "need tick" vs. "no tick" changes. Note for 
-	  example whether an item has effects applied. Or the kind of animation. Don't
-	  want to tick granite chunks when they don't need it. Key concerns: 
-	  Rendering, Item that changes tick status
-	X melee attack standing too close 
-	X avoiding while pathing doesn't look quite correct
-	X need left/right team, not species based
-	X animation/lack of making me crazy. What plan?
-	X particle effect for melee strike not "connected" to character
-	X item definition: one big wad of data? handle "inherited items"?
-	X use space tree query for impacted items. Everything that has a spatial component
-	  is now in the table, so this should be "fixed".
-	X need to check rotation in the path component
-	X load in the correct lighting
+	- gunrun to walk not synchronized correctly
 
 	- ranged weapons
 		- bolts
@@ -61,6 +42,27 @@
 	  (possibly shader kicking in: never seen it happen twice)
 	- error in ray-cast: detecting a 'tree' where it shouldn't (near the head of the prime)
 	- add rez and de-rez effect for chits
+
+	X why does balrog just stand around not attacking mantis
+	X ...and yet the AOE of melee seems huge. clean all that up.
+	X human runs up to dummy, circles around it
+	X data driven item creation
+	X leaving guy standing after battle
+	X debugging info for chit ticks
+	X back in the tick system: the "need tick" vs. "no tick" changes. Note for 
+	  example whether an item has effects applied. Or the kind of animation. Don't
+	  want to tick granite chunks when they don't need it. Key concerns: 
+	  Rendering, Item that changes tick status
+	X melee attack standing too close 
+	X avoiding while pathing doesn't look quite correct
+	X need left/right team, not species based
+	X animation/lack of making me crazy. What plan?
+	X particle effect for melee strike not "connected" to character
+	X item definition: one big wad of data? handle "inherited items"?
+	X use space tree query for impacted items. Everything that has a spatial component
+	  is now in the table, so this should be "fixed".
+	X need to check rotation in the path component
+	X load in the correct lighting
 
 
 - animition aware hit testing

@@ -212,7 +212,7 @@ void NavTestScene::ItemTapped( const gamui::UIItem* item )
 
 void NavTestScene::DoTick( U32 deltaTime )
 {
-	chitBag.DoTick( deltaTime );
+	chitBag.DoTick( deltaTime, 0 );
 }
 
 
@@ -220,7 +220,7 @@ void NavTestScene::DrawDebugText()
 {
 	UFOText* ufoText = UFOText::Instance();
 	if ( debugRay.direction.x ) {
-		Model* root = engine->IntersectModel( debugRay, TEST_TRI, 0, 0, 0, 0 );
+		Model* root = engine->IntersectModel( debugRay.direction, debugRay.origin, FLT_MAX, TEST_TRI, 0, 0, 0, 0 );
 		int y = 16;
 		for ( ; root; root=root->next ) {
 			Chit* chit = root->userData;

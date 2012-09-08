@@ -102,6 +102,20 @@ struct PTVertex
 };
 
 
+struct PTCVertex
+{
+	enum {
+		POS_OFFSET = 0,
+		TEXTURE_OFFSET = 12,
+		COLOR_OFFSET = 20
+	};
+
+	grinliz::Vector3F	pos;
+	grinliz::Vector2F	tex;
+	grinliz::Vector4F	color;
+};
+
+
 struct PTVertex2
 {
 	enum {

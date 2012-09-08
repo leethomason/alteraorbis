@@ -36,6 +36,9 @@ class RenderTarget;
 class ParticleSystem;
 class EngineShaders;
 
+struct Bolt;
+class BoltRenderer;
+
 static const grinliz::Vector3F V3F_ZERO = { 0, 0, 0 };
 static const grinliz::Vector3F V3F_UP   = { 0, 1, 0 };
 static const grinliz::Vector3F V3F_OUT	= { 0, 0, 1 };
@@ -75,7 +78,7 @@ public:
 	ParticleSystem*	particleSystem;
 
 	// Send everything to the GPU
-	void Draw( U32 deltaTime );
+	void Draw( U32 deltaTime, const Bolt* bolts=0, int nBolts=0 );
 
 	SpaceTree* GetSpaceTree()	{ return spaceTree; }
 
@@ -103,7 +106,9 @@ public:
 							  grinliz::Ray* ray,
 							  grinliz::Vector3F* intersection );
 
-	Model* IntersectModel(	const grinliz::Ray& ray, 
+	Model* IntersectModel(	const grinliz::Vector3F& origin,
+							const grinliz::Vector3F& dir,
+							float length,							// FLT_MAX 
 							HitTestMethod testMethod,
 							int required, int exclude, const Model* ignore[],
 							grinliz::Vector3F* intersection );
@@ -153,6 +158,7 @@ private:
 	Map*	map;
 	SpaceTree* spaceTree;
 	RenderQueue* renderQueue;
+	BoltRenderer* boltRenderer;
 
 	enum {
 		RT_LIGHTS,

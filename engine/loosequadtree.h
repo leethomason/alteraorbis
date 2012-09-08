@@ -53,7 +53,9 @@ public:
 	Model* QueryRect( const grinliz::Rectangle2F& rect, int required, int excluded );
 
 	// Returns the FIRST model impacted.
-	Model* QueryRay( const grinliz::Vector3F& origin, const grinliz::Vector3F& direction, 
+	Model* QueryRay( const grinliz::Vector3F& origin, 
+					 const grinliz::Vector3F& direction,	// does not need to be unit length, will be normalized
+					 float length,							// maximum distance from origin to intersection or FLT_MAX
 					 int required, int excluded, const Model** ignore,
 					 HitTestMethod method,
 					 grinliz::Vector3F* intersection );

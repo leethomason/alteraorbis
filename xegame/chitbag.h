@@ -6,13 +6,13 @@
 #include "../grinliz/glrandom.h"
 
 #include "../engine/enginelimits.h"
+#include "../engine/bolt.h"
 
 #include "chit.h"
 #include "xegamelimits.h"
 #include "chitevent.h"
 
 class Engine;
-	
 
 class ChitBag
 {
@@ -26,8 +26,14 @@ public:
 	void  DeleteChit( Chit* );
 	Chit* GetChit( int id );
 
+	// Bolts are a special kind of chit. Just easier
+	// and faster to treat them as a 2nd stage.
+	Bolt* NewBolt();
+	const Bolt* BoltMem() const { return bolts.Mem(); }
+	int NumBolts() const { return bolts.Size(); }
+
 	// Calls every chit that has a tick.
-	void DoTick( U32 delta );	
+	void DoTick( U32 delta, Engine* engine );	
 	U32 AbsTime() const { return bagTime; }
 
 	int NumChits() const { return chitID.NumValues(); }
@@ -60,10 +66,6 @@ private:
 		return ( (y>>SHIFT)*SIZE + (x>>SHIFT) );
 	}
 
-	/*
-	static grinliz::Vector3F compareOrigin;
-	static int CompareDistance( const void* p0, const void* p1 );
-	*/
 	int idPool;
 	U32 bagTime;
 	int nTicked;
@@ -71,12 +73,15 @@ private:
 	enum { BLOCK_SIZE = 1000 };
 	Chit* memRoot;
 	// Use a memory pool so the chits don't move on re-allocation.
-	grinliz::CDynArray< Chit* >		blocks;
+	grinliz::CDynArray< Chit* >		  blocks;
 	grinliz::HashTable< int, Chit* >  chitID;
 
 	grinliz::CDynArray<int>			deleteList;		// <set> of chits that need to be deleted.
 	grinliz::CDynArray<Chit*>		hashQuery;
 	grinliz::CDynArray<ChitEvent*, grinliz::OwnedPtrSem >	events;
+	
+	grinliz::CDynArray<Bolt> bolts;
+	
 	Chit* spatialHash[SIZE*SIZE];
 };
 

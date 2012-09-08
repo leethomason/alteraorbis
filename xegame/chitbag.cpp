@@ -4,6 +4,7 @@
 #include "spatialcomponent.h"
 #include "rendercomponent.h"
 #include "itemcomponent.h"
+
 #include "../grinliz/glperformance.h"
 
 using namespace grinliz;
@@ -30,6 +31,7 @@ void ChitBag::DeleteAll()
 		Chit* block = blocks.Pop();
 		delete [] block;
 	}
+	bolts.Clear();
 }
 
 
@@ -81,7 +83,13 @@ void ChitBag::QueueDelete( Chit* chit )
 }
 
 
-void ChitBag::DoTick( U32 delta )
+Bolt* ChitBag::NewBolt()
+{
+	return bolts.PushArr(1);
+}
+
+
+void ChitBag::DoTick( U32 delta, Engine* engine )
 {
 	GRINLIZ_PERFTRACK;
 	bagTime += delta;
@@ -89,6 +97,7 @@ void ChitBag::DoTick( U32 delta )
 
 	// Events.
 	// Ticks.
+	// Bolts.
 	// probably correct in that order.
 
 	for( int i=0; i<events.Size(); ++i ) {
@@ -117,6 +126,8 @@ void ChitBag::DoTick( U32 delta )
 	}
 	deleteList.Clear();
 	events.Clear();
+
+	Bolt::TickAll( &bolts, delta, engine );
 }
 
 

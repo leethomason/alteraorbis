@@ -84,8 +84,10 @@ private:
 	Engine* engine;
 	WorldMap* map;
 	bool battleStarted;
+	U32 boltTimer;
 
 	grinliz::Random random;
+	grinliz::Random fuzz;
 	grinliz::CDynArray<grinliz::Vector2I> waypoints[3];
 	grinliz::Ray debugRay;
 	grinliz::CDynArray<Chit*> chitArr;

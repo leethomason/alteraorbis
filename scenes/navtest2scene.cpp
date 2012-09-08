@@ -162,7 +162,7 @@ void NavTest2Scene::DrawDebugText()
 		SpaceTree::nModelsAtDepth[4] );	
 
 	if ( debugRay.direction.x ) {
-		Model* root = engine->IntersectModel( debugRay, TEST_TRI, 0, 0, 0, 0 );
+		Model* root = engine->IntersectModel( debugRay.origin, debugRay.direction, FLT_MAX, TEST_TRI, 0, 0, 0, 0 );
 		int y = 32;
 		for ( ; root; root=root->next ) {
 			Chit* chit = root->userData;
@@ -258,7 +258,7 @@ void NavTest2Scene::ItemTapped( const gamui::UIItem* item )
 
 void NavTest2Scene::DoTick( U32 deltaTime )
 {
-	chitBag.DoTick( deltaTime );
+	chitBag.DoTick( deltaTime, 0 );
 	++creationTick;
 	
 	if ( creationTick >= 5 && nChits < data->nChits ) {

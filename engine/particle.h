@@ -90,6 +90,7 @@ struct ParticleDef
 
 	int count;
 	int config;		// "sphere" "hemi" "ray"
+	enum { SPHERE, SMOKE_0, SMOKE_1, SQUARE, BOLT, NUM_TEX=8 };
 	int texMin, texMax;	// min and max texture index
 	float posFuzz;
 	float velocity;
