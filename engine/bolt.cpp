@@ -8,14 +8,6 @@ using namespace grinliz;
 
 void Bolt::TickAll( grinliz::CDynArray<Bolt>* bolts, U32 delta, Engine* engine )
 {
-	//	Move
-	//	Check for done
-	//	Check for impact.
-	//		Send a message to impacted object, telling it to absorb damage
-	//		Terminate bolt motion at that location
-	//		Particle effect
-	//	Move bolt forward
-
 	static const float SPEED = 5.0f;
 
 	GLASSERT( engine->GetMap() );
@@ -31,16 +23,19 @@ void Bolt::TickAll( grinliz::CDynArray<Bolt>* bolts, U32 delta, Engine* engine )
 	while ( i < bolts->Size() ) {
 		Bolt& b = (*bolts)[i];
 
-		Vector3F travel = b.dir * SPEED * timeSlice;
+		float distance = SPEED * timeSlice;
+		Vector3F travel = b.dir * distance;
+		Vector3F normal = { 0, 1, 0 };
+
 		if ( !b.impact ) {
 			// Check if we hit something in the world.
 			// FIXME: add ignore list of the shooter, or move head away from model?
 			Vector3F at;
 
+			// Check ground hit.
 			if ( (b.head + travel).y <= 0 ) {
 				b.impact = true;
 					
-				// we hit the ground.
 				if ( b.head.y > 0 ) {
 					at = Lerp( b.head, b.head+travel, (b.head.y) / (travel.y));
 				}
@@ -49,18 +44,20 @@ void Bolt::TickAll( grinliz::CDynArray<Bolt>* bolts, U32 delta, Engine* engine )
 				}
 			}
 
+			// Check model hit.
 			if ( !b.impact ) {
 				Model* m = engine->IntersectModel( b.head, b.dir, SPEED*timeSlice, TEST_TRI, 0, 0, 0, &at );
 				if ( m ) {
 					b.impact = true;
-					b.head = at;
+					normal = b.dir;
 				}
 			}
 
 			if ( b.impact ) {
+				b.head = at;
 				ParticleDef def = *ps->GetPD( "boltImpact" );
 				def.color = b.color;
-				ps->EmitPD( def, at, b.dir, engine->camera.EyeDir3(), delta );
+				ps->EmitPD( def, at, normal, engine->camera.EyeDir3(), delta );
 			}
 		}
 
