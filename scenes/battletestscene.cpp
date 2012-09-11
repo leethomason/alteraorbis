@@ -410,10 +410,10 @@ void BattleTestScene::DoTick( U32 deltaTime )
 		boltTimer = 0;
 		Bolt* bolt = chitBag.NewBolt();
 
-		bolt->dir.Set( -0.1f+fuzz.Uniform()*0.2f, -0.1f*fuzz.Uniform(), 1 );
+		bolt->dir.Set( -0.1f+fuzz.Uniform()*0.2f, 0 /*-0.1f*fuzz.Uniform()*/, 1 );
 		bolt->head.Set( 0.5f * (float)map->Width(), 0.5f, 2 );
-		//bolt->tail.Set( 0.5f * (float)map->Width(), 0.5f, 0 );
 		bolt->color.Set( 1, 0.1f, 0.3f, 1 );
+		bolt->damage.vec[ DamageDesc::KINETIC ] = 20;
 	}
 
 	chitBag.DoTick( deltaTime, engine );

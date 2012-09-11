@@ -6,7 +6,7 @@
 
 using namespace grinliz;
 
-void Bolt::TickAll( grinliz::CDynArray<Bolt>* bolts, U32 delta, Engine* engine )
+void Bolt::TickAll( grinliz::CDynArray<Bolt>* bolts, U32 delta, Engine* engine, IBoltImpactHandler* handler )
 {
 	static const float SPEED = 5.0f;
 
@@ -50,6 +50,9 @@ void Bolt::TickAll( grinliz::CDynArray<Bolt>* bolts, U32 delta, Engine* engine )
 				if ( m ) {
 					b.impact = true;
 					normal = b.dir;
+					if ( handler ) {
+						handler->HandleBolt( b, m, at );
+					}
 				}
 			}
 

@@ -19,17 +19,20 @@ class Chit;
 class ChitEvent;
 class GameItem;
 
+// Synchronous. Can be sub-classed.
 class ChitMsg
 {
 public:
-	ChitMsg( int _id, int _data=0 ) : id(_id), data(_data) {}
+	ChitMsg( int _id, int _data=0, const void* _ptr=0 ) : id(_id), data(_data), ptr(_ptr) {}
 
 	int ID() const { return id; }
 	int Data() const { return data; }
+	const void* Ptr() const { return ptr; }
 
 private:
 	int id;
 	int data;
+	const void* ptr;
 };
 
 

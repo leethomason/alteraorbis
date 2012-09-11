@@ -20,12 +20,12 @@ enum {
 	COMPONENT_MSG_NONE,
 	
 	// Chits
-	MSG_CHIT_DESTROYED,
+	MSG_CHIT_DESTROYED,			// when destroyed, sender: health
+	MSG_CHIT_BOLT_HIT,			// bolt impact, sender: chitBag, Ptr = &DamageDesc
 
 	// Componets
-	SPATIAL_MSG_CHANGED,		// the position or rotation has changed
-
-	RENDER_MSG_IMPACT,			// impact metadata event has occured
+	SPATIAL_MSG_CHANGED,		// the position or rotation has changed, sender: spatial
+	RENDER_MSG_IMPACT,			// impact metadata event has occured, sender: render component
 
 	GAME_COMPONENT_MSG_START = 0x100
 };

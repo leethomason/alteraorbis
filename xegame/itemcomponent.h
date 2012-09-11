@@ -1,6 +1,8 @@
 #ifndef ITEMCOMPONENT_INCLUDED
 #define ITEMCOMPONENT_INCLUDED
 
+#include "component.h"
+
 // Hack. It begins. Engine code including game code.
 #include "../game/gameitem.h"
 
@@ -18,6 +20,8 @@ public:
 	virtual void DebugStr( grinliz::GLString* str ) {
 		str->Format( "[Item] %s ", item.Name() );
 	}
+
+	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
 
 	GameItem* GetItem() { return &item; }
 	GameItem item;

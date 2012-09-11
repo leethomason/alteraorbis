@@ -14,11 +14,11 @@
 
 class Engine;
 
-class ChitBag
+class ChitBag : public IBoltImpactHandler
 {
 public:
 	ChitBag();
-	~ChitBag();
+	virtual ~ChitBag();
 
 	// Chit creation/query
 	void DeleteAll();
@@ -56,6 +56,9 @@ public:
 							const grinliz::Rectangle2F& r, 
 		                    const Chit* ignoreMe,
 							int itemFilter );
+
+	// IBoltImpactHandler
+	virtual void HandleBolt( const Bolt& bolt, Model* m, const grinliz::Vector3F& at );
 
 private:
 	enum {

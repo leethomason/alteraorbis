@@ -5,6 +5,8 @@
 #include "rendercomponent.h"
 #include "itemcomponent.h"
 
+#include "../engine/model.h"
+
 #include "../grinliz/glperformance.h"
 
 using namespace grinliz;
@@ -127,7 +129,20 @@ void ChitBag::DoTick( U32 delta, Engine* engine )
 	deleteList.Clear();
 	events.Clear();
 
-	Bolt::TickAll( &bolts, delta, engine );
+	Bolt::TickAll( &bolts, delta, engine, this );
+}
+
+
+void ChitBag::HandleBolt( const Bolt& bolt, Model* m, const grinliz::Vector3F& at )
+{
+	Chit* chit = m->userData;
+	GLASSERT( chit );
+	GLASSERT( GetChit( chit->ID() ) == chit );
+//	GLOUTPUT(( "Chit id=%d hit\n", chit->ID() ));
+
+	DamageDesc dd;
+	dd.components = bolt.damage;
+	chit->SendMessage( ChitMsg( MSG_CHIT_BOLT_HIT, 0, &dd ), 0 );
 }
 
 
