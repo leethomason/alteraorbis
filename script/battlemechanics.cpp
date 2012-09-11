@@ -106,16 +106,18 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* 
 						weapon->GetItem()->Name(),
 						target->ID(), targetComp.item->Name() ));
 
-				if ( target->GetInventoryComponent() ) {
-					GameItem* shield = target->GetInventoryComponent()->GetShield();
-					if ( shield ) {
-						shield->AbsorbDamage( dd, &dd, "shield" );
-					}
-				}
+				target->SendMessage( ChitMsg( MSG_CHIT_DAMAGE, 0, &dd ), 0 );
 
-				targetComp.item->AbsorbDamage( dd, 0, targetComp.item->Name() );
-				GLLOG(( "\n" ));
-				targetHealth->DeltaHealth();
+//				if ( target->GetInventoryComponent() ) {
+//					GameItem* shield = target->GetInventoryComponent()->GetShield();
+//					if ( shield ) {
+//						shield->AbsorbDamage( dd, &dd, "shield" );
+//					}
+//				}
+
+//				targetComp.item->AbsorbDamage( dd, 0, targetComp.item->Name() );
+//				GLLOG(( "\n" ));
+//				targetHealth->DeltaHealth();
 			}
 		}
 	}

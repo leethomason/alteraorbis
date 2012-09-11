@@ -21,7 +21,7 @@ enum {
 	
 	// Chits
 	MSG_CHIT_DESTROYED,			// when destroyed, sender: health
-	MSG_CHIT_BOLT_HIT,			// bolt impact, sender: chitBag, Ptr = &DamageDesc
+	MSG_CHIT_DAMAGE,			// bolt impact, sender: chitBag, Ptr = &DamageDesc
 
 	// Componets
 	SPATIAL_MSG_CHANGED,		// the position or rotation has changed, sender: spatial

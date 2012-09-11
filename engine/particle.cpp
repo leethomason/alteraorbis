@@ -177,8 +177,8 @@ void ParticleSystem::EmitPD(	const ParticleDef& def,
 {
 	Vector3F velocity = normal * def.velocity;
 
-	static const Vector2F uv[4] = {{0,0},{0.25,0},{0.25,1},{0,1}};
 	static const float TEXTURE_SIZE = ParticleDef::NUM_TEX;
+	static const Vector2F uv[4] = {{0,0},{1.f/TEXTURE_SIZE,0},{1.f/TEXTURE_SIZE,1},{0,1}};
 	const Vector3F& up = eyeDir[1];
 	const Vector3F& right = eyeDir[2];
 	int count = def.count;

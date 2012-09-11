@@ -1,6 +1,8 @@
 - combat test scene	
-	- kinetic damage of held weapons shouldn't be multiplied with mass (added)
-	- shields
+	- eval: kinetic damage of held weapons shouldn't be multiplied with mass (added)
+	- shields, general bonus/cost/damage propegation
+	- knife -> ring
+	- bolt: glow around white core? end caps?
 	- impact (light/heavy)
 	- removing unit "clumping" (3yr old soccer team). Basic formation?
 	- unique look for units so teams can be distinguished
@@ -16,10 +18,10 @@
 
 	- ranged weapons
 		- bolts
-			- damage (defined)
+			x damage (defined)
 			d speed
 			d range
-			- compute color
+			x compute color
 			d effect strength
 		d accuracy
 		- reload time 'reload'
