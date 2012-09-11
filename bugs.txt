@@ -19,15 +19,15 @@
 	- ranged weapons
 		- bolts
 			x damage (defined)
-			d speed
-			d range
+			- speed
+			- range
 			x compute color
-			d effect strength
-		d accuracy
+			- effect strength
+		- accuracy
 		- reload time 'reload'
 		- time per shot 'cooldown'
 		- rounds in clip
-		d effect
+		- effect
 	X weapons
 		X relative positioning (implemented, broken again)
 		X weapon definition - item question: how is a chit a weapon?
