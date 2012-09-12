@@ -77,10 +77,12 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* 
 	GLASSERT( chitBag );
 
 	U32 absTime = chitBag->AbsTime();
-	if( !weapon->Ready( absTime )) {
+	if( !weapon->Ready()) {
 		return;
 	}
-	weapon->Use( absTime );
+	weapon->Use();
+	src->SetTickNeeded();
+	
 	int primaryTeam = PrimaryTeam( src );
 
 	// Get origin and direction of melee attack,
@@ -183,3 +185,25 @@ void BattleMechanics::CalcMeleeDamage( Chit* src, IMeleeWeaponItem* weapon, Dama
 		dd->components[i] = vec[i] * parentItem->mass / STRIKE_RATIO;
 	}
 }
+
+
+void BattleMechanics::Shoot( ChitBag* bag, Chit* src, Chit* target, IRangedWeaponItem* weapon, const Vector3F& pos )
+{
+	GLASSERT( weapon->Ready() );
+	weapon->Use();
+	src->SetTickNeeded();
+	Bolt* bolt = bag->NewBolt();
+	
+	Vector3F t; 
+	target->GetRenderComponent()->GetMetaData( "target", &t );
+	Vector3F dir = t - pos;
+	dir.Normalize();
+
+	bolt->head = pos + dir;		// FIXME: use team ignore, not offset
+	bolt->len = 1.0f;
+	bolt->dir = dir;
+	bolt->color.Set( 1, 0, 0, 1 );	// FIXME: real color based on item
+	bolt->chitID = src->ID();
+	bolt->damage = weapon->GetItem()->rangedDamage.components;
+}
+

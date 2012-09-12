@@ -4,13 +4,12 @@
 #include "component.h"
 #include "chit.h"
 #include "../grinliz/glcontainer.h"
+#include "../grinliz/glvector.h"
 
 // Doesn't isolate the game from xe-game...oh well. Fix in XenoEngine3. :)
 #include "../game/gameitem.h"
 
-/*
 
-*/
 class InventoryComponent : public Component
 {
 public:
@@ -35,8 +34,13 @@ public:
 
 	// Is carrying anything - primarily a query for the animation system.
 	GameItem* IsCarrying();
-	// All weapons currently in use.
-	void GetRangedWeapons( grinliz::CArray< IRangedWeaponItem*, NUM_HARDPOINTS >* weapons );
+
+	struct RangedInfo {
+		IRangedWeaponItem* weapon;
+		grinliz::Vector3F  trigger;
+	};
+	void GetRangedWeapons( grinliz::CArray< RangedInfo, NUM_HARDPOINTS >* weapons );
+
 	// The current melee weapon. There is only ever 1 (or 0)
 	IMeleeWeaponItem* GetMeleeWeapon();
 	GameItem* GetShield();
@@ -49,8 +53,7 @@ public:
 	static int HardpointNameToFlag( const char* name );
 
 private:
-	int hardpoints;			// which ones do we have??
-
+	int hardpoints;			// which ones do we have?? If we have the hardpoint, intrinsicAt or heldAt may be used.
 	GameItem* intrinsicAt[NUM_HARDPOINTS];
 	GameItem* heldAt[NUM_HARDPOINTS];
 	

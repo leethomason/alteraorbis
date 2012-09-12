@@ -150,22 +150,22 @@ void AIComponent::DoShoot()
 		else {
 			PathMoveComponent* pmc = GET_COMPONENT( parentChit, PathMoveComponent );
 			if ( pmc ) {
-				pmc->QueuedDest( thisComp.spatial->GetPosition2D(), 
-								 RotationXZDegrees( normalToTarget.x, normalToTarget.y ) );
+				pmc->QueueDest( thisComp.spatial->GetPosition2D(), 
+								RotationXZDegrees( normalToTarget.x, normalToTarget.y ) );
 			}
 		}
 		break;
 	}
 
 	if ( pointed ) {
-		CArray< IRangedWeaponItem*, NUM_HARDPOINTS > weapons;
+		CArray< InventoryComponent::RangedInfo, NUM_HARDPOINTS > weapons;
 		thisComp.inventory->GetRangedWeapons( &weapons );
 
 		// FIXME: choose best weapon, not just first one that works.
 		for( int i=0; i<weapons.Size(); ++i ) {
-			GameItem* item = weapons[i]->GetItem();
+			GameItem* item = weapons[i].weapon->GetItem();
 			if ( item->Ready() ) {
-				battleMechanics.Shoot( parentChit, targetChit, weapons[i] );
+				battleMechanics.Shoot( GetChitBag(), parentChit, targetChit, weapons[i].weapon, weapons[i].trigger );
 				break;
 			}
 		}
@@ -186,7 +186,7 @@ void AIComponent::DoMelee()
 	if ( !weapon ) 
 		return;
 	GameItem* item = weapon->GetItem();
-	if ( !item->Ready( parentChit->GetChitBag()->AbsTime() )) 
+	if ( !item->Ready() )
 		return;
 
 	// Are we close enough to hit? Then swing. Else move to target.

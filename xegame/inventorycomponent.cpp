@@ -3,6 +3,7 @@
 #include "rendercomponent.h"
 #include "itemcomponent.h"
 #include "chit.h"
+#include "../engine/engine.h"
 
 using namespace grinliz;
 
@@ -101,7 +102,7 @@ bool InventoryComponent::AddToInventory( GameItem* item, bool equip )
 
 			GLASSERT( hardpoints & (1<<item->hardpoint) );
 			// check that the needed hardpoint is free.
-			if (    ( hardpoints & (1<<item->hardpoint))		// does the hardpoint exist?
+			if (    ( hardpoints & (1<<item->hardpoint))	// does the hardpoint exist?
 			     && ( heldAt[item->hardpoint] == 0 ) )		// is the hardpoint available?
 			{
 				heldAt[item->hardpoint] = item;
@@ -130,22 +131,27 @@ GameItem* InventoryComponent::IsCarrying()
 }
 
 
-void InventoryComponent::GetRangedWeapons( grinliz::CArray< IRangedWeaponItem*, NUM_HARDPOINTS >* weapons )
+void InventoryComponent::GetRangedWeapons( grinliz::CArray< RangedInfo, NUM_HARDPOINTS >* weapons )
 {
 	weapons->Clear();
 	for( int i=0; i<NUM_HARDPOINTS; ++i ) {
+		IRangedWeaponItem* ranged = 0;
 		if ( heldAt[i] ) {
-			IRangedWeaponItem* ranged = heldAt[i]->ToRangedWeapon();
-			if ( ranged ) {
-				weapons->Push( ranged );
-			}
+			ranged = heldAt[i]->ToRangedWeapon();
 		}
 		else if ( intrinsicAt[i] ) {
-			IRangedWeaponItem* ranged = heldAt[i]->ToRangedWeapon();
-			if ( ranged ) {
-				weapons->Push( ranged );
+			ranged = heldAt[i]->ToRangedWeapon();
+		}
+		if ( ranged ) {
+			RenderComponent* rc = parentChit->GetRenderComponent();
+			GLASSERT( rc );
+			if ( rc ) {
+				Matrix4 xform;
+				rc->GetMetaData( HardpointFlagToName(i), &xform );
+				Vector3F pos = xform * V3F_ZERO;
+				RangedInfo info = { ranged, pos };
+				weapons->Push( info );
 			}
-			weapons->Push( ranged );
 		}
 	}
 }

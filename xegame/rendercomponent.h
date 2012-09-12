@@ -40,8 +40,11 @@ public:
 	// the model so it doesn't walk into walls or other models.
 	float	RadiusOfBase();
 	int		GetFlags() const { return flags; }
+
 	const char* GetMetaData( int i );
-	bool	GetMetaData( const char* name, grinliz::Matrix4* xform );
+	bool GetMetaData( const char* name, grinliz::Matrix4* xform );
+	bool GetMetaData( const char* name, grinliz::Vector3F* pos );	
+
 	// Is the animation ready to change?
 	bool	AnimationReady() const;
 	// Play the special animations: MELEE, IMPACT, etc.

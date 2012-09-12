@@ -25,3 +25,10 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 }
 
 
+bool ItemComponent::DoTick( U32 delta )
+{
+	return item.DoTick( delta );
+}
+
+
+

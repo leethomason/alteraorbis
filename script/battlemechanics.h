@@ -9,6 +9,7 @@
 
 class Chit;
 class Engine;
+class ChitBag;
 
 class BattleMechanics
 {
@@ -26,6 +27,7 @@ public:
 					  Chit* target );
 
 	void CalcMeleeDamage( Chit* src, IMeleeWeaponItem* weapon, DamageDesc* );
+	void Shoot( ChitBag* bag, Chit* src, Chit* target, IRangedWeaponItem* weapon, const grinliz::Vector3F& pos );
 
 	static int PrimaryTeam( Chit* src );
 

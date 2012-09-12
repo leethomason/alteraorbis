@@ -23,6 +23,8 @@ public:
 
 	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
 
+	virtual bool DoTick( U32 delta );
+
 	GameItem* GetItem() { return &item; }
 	GameItem item;
 };

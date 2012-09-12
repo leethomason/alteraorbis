@@ -30,9 +30,6 @@ public:
 		return 0;
 	}
 
-	// fixme: switch to a request/release model?
-	virtual bool NeedsTick()							{ return false; }
-
 	// Utility
 	Chit* ParentChit() { return parentChit; }
 	Chit* GetChit( int id );

@@ -97,8 +97,8 @@ public:
 class IWeaponItem 
 {
 public:
-	virtual bool Ready( U32 time ) = 0;
-	virtual bool Use( U32 time ) = 0;
+	virtual bool Ready() = 0;
+	virtual bool Use() = 0;
 	virtual GameItem* GetItem() = 0;
 };
 
@@ -182,6 +182,7 @@ public:
 	DamageDesc rangedDamage;// a multiplier of the power
 	DamageDesc resist;		// multiplier of damage absorbed by this item. 1: normal, 0: no damage, 1.5: extra damage
 	U32 cooldown;			// time between uses
+	U32 coolTime;			// counting up to ready state
 	U32 reload;				// time to reload once clip is used up
 	int clipCap;			// possible rounds in the clip
 
@@ -203,6 +204,7 @@ public:
 			rangedDamage	= rhs->rangedDamage;
 			resist			= rhs->resist;
 			cooldown		= rhs->cooldown;
+			coolTime		= rhs->coolTime;
 
 			hp				= rhs->hp;
 		}
@@ -219,6 +221,7 @@ public:
 			rangedDamage.Set( 1, 0, 0, 0 );
 			resist.Set( 1, 1, 1, 1 );	// resist nothing, bonus nothing
 			cooldown = 1000;
+			coolTime = cooldown;
 
 			hp = TotalHP();
 		}
@@ -230,16 +233,18 @@ public:
 	virtual IWeaponItem*		ToWeapon()			{ return (flags & (MELEE_WEAPON | RANGED_WEAPON)) ? this : 0; }
 	virtual const IWeaponItem*	ToWeapon() const	{ return (flags & (MELEE_WEAPON | RANGED_WEAPON)) ? this : 0; }
 
-	virtual bool Ready( U32 absTime ) {
-		//if ( cooldown == 0 || absTime >= cool ) {
-		//	return true;
-		//}
-		return true;
+	bool DoTick( U32 delta ) {
+		coolTime += delta;
+		return coolTime < cooldown;
 	}
 
-	virtual bool Use( U32 absTime ) {
-		if ( Ready( absTime )) {
-			//coolDownTime = absTime + COOLDOWN_TIME;
+	virtual bool Ready() {
+		return coolTime >= cooldown;
+	}
+
+	virtual bool Use() {
+		if ( Ready()) {
+			coolTime = 0;
 			return true;
 		}
 		return false;

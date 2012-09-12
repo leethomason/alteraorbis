@@ -256,6 +256,17 @@ bool RenderComponent::GetMetaData( const char* name, grinliz::Matrix4* xform )
 }
 
 
+bool RenderComponent::GetMetaData( const char* name, grinliz::Vector3F* pos )
+{
+	Matrix4 xform;
+	if ( GetMetaData( name, &xform ) ) {
+		*pos = xform * V3F_ZERO;
+		return true;
+	}
+	return false;
+}
+
+
 void RenderComponent::DebugStr( GLString* str )
 {
 	str->Format( "[Render]=%s ", resource[0]->header.name.c_str() );
