@@ -139,21 +139,22 @@ void AIComponent::DoShoot()
 	
 		// Rotate to target.
 		Vector2F heading = thisComp.spatial->GetHeading2D();
-		heading.Normalize();
+		float headingAngle = RotationXZDegrees( heading.x, heading.y );
+
 		Vector2F normalToTarget = target.spatial->GetPosition2D() - thisComp.spatial->GetPosition2D();
 		float distanceToTarget = normalToTarget.Length();
 		normalToTarget.Normalize();
+		float angleToTarget = RotationXZDegrees( normalToTarget.x, normalToTarget.y );
 
 		// FIXME: actual cosine of correct angle should be typed in.
-		static const float COS_ANGLE = 0.90f;
-		if ( DotProduct( normalToTarget, heading ) > COS_ANGLE ) {
+		static const float ANGLE = 10.0f;
+		if ( fabsf( headingAngle - angleToTarget ) < ANGLE ) {
 			pointed = true;
 		}
 		else {
 			PathMoveComponent* pmc = GET_COMPONENT( parentChit, PathMoveComponent );
 			if ( pmc ) {
-				pmc->QueueDest( thisComp.spatial->GetPosition2D(), 
-								RotationXZDegrees( normalToTarget.x, normalToTarget.y ) );
+				pmc->QueueDest( thisComp.spatial->GetPosition2D(), angleToTarget );
 			}
 		}
 		break;
@@ -257,11 +258,16 @@ void AIComponent::Think()
 	// This may get called when there is an action, and update.
 	// Or there may be no action.
 
-	ComponentSet thisComp( parentChit, Chit::SPATIAL_BIT | Chit::ITEM_BIT );
+	ComponentSet thisComp( parentChit, Chit::SPATIAL_BIT | Chit::ITEM_BIT | ComponentSet::IS_ALIVE );
 	if ( !thisComp.okay )
 		return;
 
 	const Vector3F& pos = thisComp.spatial->GetPosition();
+
+	CArray< InventoryComponent::RangedInfo, NUM_HARDPOINTS > rangedWeapons;
+	if ( parentChit->GetInventoryComponent() ) {
+		parentChit->GetInventoryComponent()->GetRangedWeapons( &rangedWeapons );
+	}
 
 	currentAction = NO_ACTION;
 	if ( !enemyList.Empty() ) {
@@ -293,7 +299,8 @@ void AIComponent::Think()
 				float normalizedDamage = enemy.item->hp / thisComp.item->mass;	// basic melee advantage 
 				float utilityDamage = UtilityLinear( 1.f, 0.f, normalizedDamage );
 
-				float utility = utilityDistance*PRIMARY_UTILITY + utilityDamage*SECONDARY_UTILITY;
+				float utility = (utilityDistance*PRIMARY_UTILITY + utilityDamage*SECONDARY_UTILITY)/(PRIMARY_UTILITY+SECONDARY_UTILITY);
+				GLASSERT( utility >= 0 && utility <= 1.0f );
 				if ( utility > bestUtility ) {
 					bestIndex = i;
 					bestUtility = utility;
@@ -303,7 +310,7 @@ void AIComponent::Think()
 		}
 		// If there are melee targets in range, always go melee.
 		// Else look for a shooting target that may be better.
-		if ( !meleeInRange && thisComp.item->ToRangedWeapon() ) {
+		if ( !meleeInRange && rangedWeapons.Size() ) {
 			// It would be nice to go through the loop twice. Integrate with above?
 			for( int i=0; i<enemyList.Size(); ++i ) {
 

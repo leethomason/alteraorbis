@@ -73,13 +73,11 @@ void PathMoveComponent::QueueDest( Chit* target )
 void PathMoveComponent::ComputeDest()
 {
 	GRINLIZ_PERFTRACK;
+	ComponentSet thisComp( parentChit, Chit::SPATIAL_BIT | Chit::RENDER_BIT | ComponentSet::IS_ALIVE );
+	if ( !thisComp.okay )
+		return;
 
-	SpatialComponent* spatial = parentChit->GetSpatialComponent();
-	GLASSERT( spatial );
-	RenderComponent* render = parentChit->GetRenderComponent();
-	GLASSERT( render );
-
-	const Vector2F& posVec = spatial->GetPosition2D();
+	const Vector2F& posVec = thisComp.spatial->GetPosition2D();
 
 	GLASSERT( queued.pos.x >= 0 && queued.pos.y >= 0 );
 	dest = queued;
@@ -89,7 +87,7 @@ void PathMoveComponent::ComputeDest()
 	pathPos = 0;
 
 	// Make sure the 'dest' is actually a point we can get to.
-	float radius = render->RadiusOfBase();
+	float radius = thisComp.render->RadiusOfBase();
 	Vector2F d = dest.pos;
 	if ( map->ApplyBlockEffect( d, radius, &dest.pos ) ) {
 #ifdef DEBUG_PMC
@@ -145,38 +143,6 @@ float PathMoveComponent::GetDistToNext2( const Vector2F& current )
 	float dy = current.y - path[pathPos].y;
 	return dx*dx + dy*dy;
 }
-
-
-#if 0
-void PathMoveComponent::MoveFirst( U32 delta )
-{
-	if ( pathPos < nPathPos ) {
-
-		float travel = Travel( MOVE_SPEED, delta );
-		Vector2F startingPos2 = pos2;
-
-		while ( travel > 0 && pathPos < nPathPos ) {
-			startingPos2 = pos2;
-
-			float distToNext = (pos2-path[pathPos]).Length();
-			if ( distToNext <= travel ) {
-				// Move to the next waypoint
-				travel -= distToNext;
-				pos2 = path[pathPos];
-				++pathPos;
-			}
-			else {
-				pos2 = Lerp( pos2, path[pathPos], travel / distToNext );
-				travel = 0;
-			}
-		}
-		Vector2F delta = pos2 - startingPos2;
-		if ( delta.LengthSquared() ) {
-			rot = ToDegree( atan2f( delta.x, delta.y ) );
-		}
-	}
-}
-#endif
 
 
 void PathMoveComponent::RotationFirst( U32 delta )
@@ -356,39 +322,42 @@ bool PathMoveComponent::DoTick( U32 delta )
 	avoidForceApplied = false;
 	isMoving = false;
 
-	if ( pathPos == nPathPos && dest.rotation >= 0 ) {
-		// is rotation moving? Should isMoving be set?
-		// Apply final rotation if the path is complete.
-		GetPosRot( &pos2, &rot );
-
-		float deltaRot, bias;
-		MinDeltaDegrees( rot, dest.rotation, &deltaRot, &bias );
-		float travelRot	= Travel( ROTATION_SPEED, delta );
-		if ( deltaRot <= travelRot ) {
-			rot = dest.rotation;
-			dest.rotation = -1.f;
-		}
-		else {
-			rot = NormalizeAngleDegrees( rot + bias*travelRot );
-		}
-
-		SetPosRot( pos2, rot );
-	}
-	else if ( pathPos < nPathPos ) {
-		// Move down the path.
-		isMoving = true;
-		GetPosRot( &pos2, &rot );
+	if ( nPathPos > 0 ) {
+		// We should be doing something!
+		bool squattingDest = false;
 		int startPathPos = pathPos;
 		float distToNext2 = GetDistToNext2( pos2 );
 
-		RotationFirst( delta );
+		if ( pathPos == nPathPos && dest.rotation >= 0 ) {
+			// is rotation moving? Should isMoving be set?
+			// Apply final rotation if the path is complete.
+			GetPosRot( &pos2, &rot );
 
-		bool squattingDest = AvoidOthers( delta );
-		ApplyBlocks();
-		SetPosRot( pos2, rot );
+			float deltaRot, bias;
+			MinDeltaDegrees( rot, dest.rotation, &deltaRot, &bias );
+			float travelRot	= Travel( ROTATION_SPEED, delta );
+			if ( deltaRot <= travelRot ) {
+				rot = dest.rotation;
+				dest.rotation = -1.f;
+			}
+			else {
+				rot = NormalizeAngleDegrees( rot + bias*travelRot );
+			}
+			SetPosRot( pos2, rot );
+		}
+		else if ( pathPos < nPathPos ) {
+			// Move down the path.
+			isMoving = true;
+			GetPosRot( &pos2, &rot );
+
+			RotationFirst( delta );
+
+			squattingDest = AvoidOthers( delta );
+			ApplyBlocks();
+			SetPosRot( pos2, rot );
+		}
 
 		// Position set: nothing below can change.
-
 		if ( squattingDest ) {
 			GLASSERT( pathPos >= nPathPos-1 );
 			pathPos = nPathPos;
@@ -414,7 +383,10 @@ bool PathMoveComponent::DoTick( U32 delta )
 			}
 		}
 		// Are we at the end of the path data?
-		if ( nPathPos > 0 && pathPos == nPathPos ) {
+		if (    nPathPos > 0 
+			 && pathPos == nPathPos
+			 && ( dest.rotation < 0 || Equal( dest.rotation, rot, 0.01f ))) 
+		{
 			if ( squattingDest || dest.pos.Equal( path[nPathPos-1], parentChit->GetRenderComponent()->RadiusOfBase()*0.2f ) ) {
 #ifdef DEBUG_PMC
 				GLOUTPUT(( "Dest reached. squatted=%s\n", squattingDest ? "true" : "false" ));

@@ -130,6 +130,7 @@ GameItem* InventoryComponent::IsCarrying()
 	return heldAt[HARDPOINT_TRIGGER];
 }
 
+// FIXME: write queries to get all held and/or intrinsic and/or free and/or carried items
 
 void InventoryComponent::GetRangedWeapons( grinliz::CArray< RangedInfo, NUM_HARDPOINTS >* weapons )
 {
@@ -139,7 +140,7 @@ void InventoryComponent::GetRangedWeapons( grinliz::CArray< RangedInfo, NUM_HARD
 		if ( heldAt[i] ) {
 			ranged = heldAt[i]->ToRangedWeapon();
 		}
-		else if ( intrinsicAt[i] ) {
+		else if ( heldAt[i] ) {
 			ranged = heldAt[i]->ToRangedWeapon();
 		}
 		if ( ranged ) {

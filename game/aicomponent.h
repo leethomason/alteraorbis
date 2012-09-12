@@ -31,7 +31,7 @@ inline float UtilityLinear( float y0, float y1, float x ) {
 inline float UtilityParabolic( float y0, float maxY, float y1, float x ) {
 	x = grinliz::Clamp( x, 0.0f, 1.0f );
 	float xp = x - 0.5f;
-	float a = 1.0f - ( x*x )*4.f;
+	float a = 1.0f - ( xp*xp )*4.f;
 	return a;
 }
 

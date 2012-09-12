@@ -75,7 +75,7 @@ float SpatialComponent::GetYRotation() const
 	static const Vector3F UP = {0,1,0};
 	GLASSERT( angle == 0 ||  DotProduct( UP, axis ) > 0.99f );	// else probably not what was intended.
 #endif
-	return angle;
+	return NormalizeAngleDegrees( angle );
 }
 
 

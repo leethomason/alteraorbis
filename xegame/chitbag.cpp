@@ -129,7 +129,9 @@ void ChitBag::DoTick( U32 delta, Engine* engine )
 	deleteList.Clear();
 	events.Clear();
 
-	Bolt::TickAll( &bolts, delta, engine, this );
+	if ( engine ) {
+		Bolt::TickAll( &bolts, delta, engine, this );
+	}
 }
 
 
