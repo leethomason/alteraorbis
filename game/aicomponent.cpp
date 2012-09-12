@@ -21,6 +21,7 @@
 using namespace grinliz;
 
 static const float COMBAT_INFO_RANGE	= 10.0f;	// range around to scan for friendlies/enemies
+static const float LONGEST_WEAPON_RANGE = 20.0f;
 
 static const float PRIMARY_UTILITY		= 10.0f;
 static const float SECONDARY_UTILITY	= 3.0f;
@@ -108,6 +109,67 @@ void AIComponent::UpdateCombatInfo( const Rectangle2F* _zone )
 		}
 	}
 	Think();
+}
+
+
+void AIComponent::DoShoot()
+{
+	ComponentSet thisComp( parentChit, Chit::RENDER_BIT | 
+		                               Chit::SPATIAL_BIT |
+									   Chit::INVENTORY_BIT |		// need to be carrying a melee weapon
+									   ComponentSet::IS_ALIVE );
+	if ( !thisComp.okay )
+		return;
+
+	// FIXME: rotation should be continuous, not just when not pointed the correct way
+	bool pointed = false;
+	Chit* targetChit = 0;
+
+	while ( !enemyList.Empty() ) {
+		ComponentSet target( GetChit( enemyList[0] ), Chit::RENDER_BIT |
+													  Chit::SPATIAL_BIT |
+													  ComponentSet::IS_ALIVE );
+		if ( !target.okay ) {
+			enemyList.SwapRemove( 0 );
+			continue;
+		}
+		targetChit = target.chit;
+	
+		// Rotate to target.
+		Vector2F heading = thisComp.spatial->GetHeading2D();
+		heading.Normalize();
+		Vector2F normalToTarget = target.spatial->GetPosition2D() - thisComp.spatial->GetPosition2D();
+		float distanceToTarget = normalToTarget.Length();
+		normalToTarget.Normalize();
+
+		// FIXME: actual cosine of correct angle should be typed in.
+		static const float COS_ANGLE = 0.90f;
+		if ( DotProduct( normalToTarget, heading ) > COS_ANGLE ) {
+			pointed = true;
+		}
+		else {
+			PathMoveComponent* pmc = GET_COMPONENT( parentChit, PathMoveComponent );
+			if ( pmc ) {
+				pmc->QueuedDest( thisComp.spatial->GetPosition2D(), 
+								 RotationXZDegrees( normalToTarget.x, normalToTarget.y ) );
+			}
+		}
+		break;
+	}
+
+	if ( pointed ) {
+		CArray< IRangedWeaponItem*, NUM_HARDPOINTS > weapons;
+		thisComp.inventory->GetRangedWeapons( &weapons );
+
+		// FIXME: choose best weapon, not just first one that works.
+		for( int i=0; i<weapons.Size(); ++i ) {
+			GameItem* item = weapons[i]->GetItem();
+			if ( item->Ready() ) {
+				battleMechanics.Shoot( parentChit, targetChit, weapons[i] );
+				break;
+			}
+		}
+	}
 }
 
 
@@ -199,49 +261,80 @@ void AIComponent::Think()
 
 	const Vector3F& pos = thisComp.spatial->GetPosition();
 
-	if ( currentAction == NO_ACTION || currentAction == MELEE ) {
-		currentAction = NO_ACTION;
-		if ( !enemyList.Empty() ) {
+	currentAction = NO_ACTION;
+	if ( !enemyList.Empty() ) {
 
-			// Primary:   Distance: cubic, closer is better
-			// Secondary: Strength: linear, more is better 
-			// could add:
-			//   damage done by enemy (higher is better)
-			//   weakness to effects
+		// Primary:   Distance: cubic, closer is better
+		// Secondary: Strength: linear, more is better 
+		// could add:
+		//   damage done by enemy (higher is better)
+		//   weakness to effects
 
-			float bestUtility = 0;
-			int   bestIndex = -1;
+		float bestUtility = 0;
+		int   bestIndex = -1;
+		int	  meleeInRange = 0;
+		int	  bestAction = 0;
 
+		for( int i=0; i<enemyList.Size(); ++i ) {
+			Chit* enemyChit = GetChit( enemyList[i] );
+			ComponentSet enemy( enemyChit, Chit::SPATIAL_BIT | Chit::ITEM_BIT | ComponentSet::IS_ALIVE );
+			if ( enemy.okay ) 
+			{
+				const Vector3F enemyPos = enemy.spatial->GetPosition();
+				float range = (enemyPos - pos).Length();
+				if ( range < BattleMechanics::MeleeRange( parentChit, enemyChit ) ) {
+					++meleeInRange;
+				}
+				float normalizedRange = range / LONGEST_WEAPON_RANGE;
+				float utilityDistance = UtilityCubic( 1.0f, LOW_UTILITY, normalizedRange );
+
+				float normalizedDamage = enemy.item->hp / thisComp.item->mass;	// basic melee advantage 
+				float utilityDamage = UtilityLinear( 1.f, 0.f, normalizedDamage );
+
+				float utility = utilityDistance*PRIMARY_UTILITY + utilityDamage*SECONDARY_UTILITY;
+				if ( utility > bestUtility ) {
+					bestIndex = i;
+					bestUtility = utility;
+					bestAction = MELEE;
+				}
+			}
+		}
+		// If there are melee targets in range, always go melee.
+		// Else look for a shooting target that may be better.
+		if ( !meleeInRange && thisComp.item->ToRangedWeapon() ) {
+			// It would be nice to go through the loop twice. Integrate with above?
 			for( int i=0; i<enemyList.Size(); ++i ) {
-				ComponentSet enemy( GetChit( enemyList[i] ), Chit::SPATIAL_BIT | Chit::ITEM_BIT );
-				if ( enemy.okay ) 
-				{
-					if ( enemy.item->hp == 0 )
-						continue;	// already dead.
 
+				const float bestRange = 10.0f;	// fixme: placeholder, depends on weapon
+				// fixme: should account for:
+				//		ranged weapons available (can be more than one?)
+				//		whether needs re-load, or wait
+
+				Chit* enemyChit = GetChit( enemyList[i] );
+				ComponentSet enemy( enemyChit, Chit::SPATIAL_BIT | Chit::ITEM_BIT | ComponentSet::IS_ALIVE );
+				if ( enemy.okay ) {
 					const Vector3F enemyPos = enemy.spatial->GetPosition();
-					float normalizedRange = (enemyPos - pos).Length() / COMBAT_INFO_RANGE;
-					float utilityDistance = UtilityCubic( 1.0f, LOW_UTILITY, normalizedRange );
-
-					float normalizedDamage = enemy.item->hp / thisComp.item->mass;	// basic melee advantage 
-					float utilityDamage = UtilityLinear( 1.f, 0.f, normalizedDamage );
-
-					float utility = utilityDistance*PRIMARY_UTILITY + utilityDamage*SECONDARY_UTILITY;
+					float range = (enemyPos - pos).Length();
+					float normalizedRange = 0.5f * range / bestRange;
+					float utility = UtilityParabolic( 0, 1, 0, normalizedRange );
 					if ( utility > bestUtility ) {
 						bestIndex = i;
 						bestUtility = utility;
+						bestAction = SHOOT;
 					}
 				}
 			}
-			if ( bestIndex >= 0 ) {
-				currentAction = MELEE;
-				// Make the best target the 1st in the list.
-				Swap( &enemyList[bestIndex], &enemyList[0] );
-			}
-			else {
-				// Nothing with utility found. Clear out the enemy list.
-				enemyList.Clear();
-			}
+		}
+
+		if ( bestIndex >= 0 ) {
+			currentAction = bestAction;
+			// Make the best target the 1st in the list.
+			Swap( &enemyList[bestIndex], &enemyList[0] );
+		}
+		else {
+			// Nothing with utility found. Clear out the enemy list,
+			// so the AwareOfEnemy() will be false.
+			enemyList.Clear();
 		}
 	}
 }
@@ -267,9 +360,8 @@ bool AIComponent::DoTick( U32 deltaTime )
 
 		switch( currentAction ) {
 
-		case MELEE:
-			DoMelee();
-			break;
+		case MELEE:		DoMelee();	break;
+		case SHOOT:		DoShoot();	break;
 
 		default:
 			GLASSERT( 0 );

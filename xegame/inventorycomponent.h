@@ -36,7 +36,7 @@ public:
 	// Is carrying anything - primarily a query for the animation system.
 	GameItem* IsCarrying();
 	// All weapons currently in use.
-	void GetWeapons( grinliz::CArray< GameItem*, NUM_HARDPOINTS >* weapons );
+	void GetRangedWeapons( grinliz::CArray< IRangedWeaponItem*, NUM_HARDPOINTS >* weapons );
 	// The current melee weapon. There is only ever 1 (or 0)
 	IMeleeWeaponItem* GetMeleeWeapon();
 	GameItem* GetShield();

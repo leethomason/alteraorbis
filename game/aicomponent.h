@@ -27,6 +27,14 @@ inline float UtilityLinear( float y0, float y1, float x ) {
 	return a;
 }
 
+// Highest at x=0.5
+inline float UtilityParabolic( float y0, float maxY, float y1, float x ) {
+	x = grinliz::Clamp( x, 0.0f, 1.0f );
+	float xp = x - 0.5f;
+	float a = 1.0f - ( x*x )*4.f;
+	return a;
+}
+
 
 // Combat AI: needs refactoring
 class AIComponent : public Component
@@ -68,24 +76,16 @@ private:
 	enum {
 		// Possible actions:
 		NO_ACTION,
-		MELEE			// go to the target and hit it.
+		MELEE,			// go to the target and hit it.
+		SHOOT,			// shoot targets
+		//MOVE			// move to a better location (rejoin squad or during re-load)
+		//RELOAD
+		//RUN_AND_GUN
 	};
 	int currentAction;
 
 	void DoMelee();
-
-	/*
-	struct ActionMelee
-	{
-		int targetID;
-	};
-	
-	union Action
-	{
-		ActionMelee	melee;
-	};
-	Action action;
-	*/
+	void DoShoot();
 
 	grinliz::CArray<int, MAX_TRACK> friendList;
 	grinliz::CArray<int, MAX_TRACK> enemyList;

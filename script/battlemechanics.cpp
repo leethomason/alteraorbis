@@ -31,6 +31,19 @@ using namespace grinliz;
 }
 
 
+/*static*/ float BattleMechanics::MeleeRange( Chit* src, Chit* target )
+{
+	RenderComponent* srcRender = src->GetRenderComponent();
+	RenderComponent* targetRender = target->GetRenderComponent();
+
+	if ( srcRender && targetRender ) {
+		float meleeRange = srcRender->RadiusOfBase()*1.5f + targetRender->RadiusOfBase();
+		return meleeRange;
+	}
+	return 0;
+}
+
+
 bool BattleMechanics::InMeleeZone(	Engine* engine,
 									Chit* src,
 									Chit* target )
@@ -42,8 +55,7 @@ bool BattleMechanics::InMeleeZone(	Engine* engine,
 		return false;
 
 	// Check range up front and early out.
-	const float meleeRange =   srcComp.render->RadiusOfBase()*1.5f				// FIXME: correct??
-		                     + targetComp.render->RadiusOfBase();
+	const float meleeRange = MeleeRange( src, target );
 	const float range = ( targetComp.spatial->GetPosition2D() - srcComp.spatial->GetPosition2D() ).Length();
 	if ( range > meleeRange )
 		return false;

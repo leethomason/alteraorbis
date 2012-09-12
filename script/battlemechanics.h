@@ -15,6 +15,9 @@ class BattleMechanics
 public:
 	void MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* weapon );
 
+	// Returns the melee range of 2 chits, or 0 if none.
+	static float MeleeRange( Chit* src, Chit* target );
+
 	// Returns true the melee attack can/does succeed. Note that any animation
 	// is pure decoration, melee success is just based on relative positions.
 	// This is simple, but could be improved.

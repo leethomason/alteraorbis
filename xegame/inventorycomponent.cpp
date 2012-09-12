@@ -130,14 +130,23 @@ GameItem* InventoryComponent::IsCarrying()
 }
 
 
-void InventoryComponent::GetWeapons( grinliz::CArray< GameItem*, NUM_HARDPOINTS >* weapons )
+void InventoryComponent::GetRangedWeapons( grinliz::CArray< IRangedWeaponItem*, NUM_HARDPOINTS >* weapons )
 {
 	weapons->Clear();
 	for( int i=0; i<NUM_HARDPOINTS; ++i ) {
-		if ( heldAt[i] )
-			weapons->Push( heldAt[i] );
-		else if ( intrinsicAt[i] )
-			weapons->Push( intrinsicAt[i] );
+		if ( heldAt[i] ) {
+			IRangedWeaponItem* ranged = heldAt[i]->ToRangedWeapon();
+			if ( ranged ) {
+				weapons->Push( ranged );
+			}
+		}
+		else if ( intrinsicAt[i] ) {
+			IRangedWeaponItem* ranged = heldAt[i]->ToRangedWeapon();
+			if ( ranged ) {
+				weapons->Push( ranged );
+			}
+			weapons->Push( ranged );
+		}
 	}
 }
 
