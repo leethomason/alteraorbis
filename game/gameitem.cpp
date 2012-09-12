@@ -1,7 +1,10 @@
 #include "gameitem.h"
+
 #include "../grinliz/glstringutil.h"
 #include "../tinyxml2/tinyxml2.h"
+
 #include "../xegame/inventorycomponent.h"
+#include "../xegame/chit.h"
 
 using namespace grinliz;
 using namespace tinyxml2;
@@ -78,6 +81,16 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 }
 
 
+bool GameItem::Use( Chit* chit ) {
+	if ( Ready()) {
+		coolTime = 0;
+		chit->SetTickNeeded();
+		return true;
+	}
+	return false;
+}
+
+
 void GameItem::Apply( const GameItem* intrinsic )
 {
 	if ( intrinsic->flags & EFFECT_FIRE )
@@ -128,4 +141,3 @@ void DamageDesc::Log()
 	GLLOG(( "[k=%.1f e=%.1f f=%.1f s=%.1f sm=%.1f]",
 			Kinetic(), Energy(), Fire(), Shock(), Total() ));
 }
-

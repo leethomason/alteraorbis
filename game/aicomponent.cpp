@@ -31,6 +31,8 @@ static const float LOW_UTILITY			= 0.2f;
 static const float MED_UTILITY			= 0.5f;
 static const float HIGH_UTILITY			= 0.8f;
 
+#define AI_OUTPUT
+
 AIComponent::AIComponent( Engine* _engine, WorldMap* _map )
 {
 	engine = _engine;
@@ -186,8 +188,6 @@ void AIComponent::DoMelee()
 	if ( !weapon ) 
 		return;
 	GameItem* item = weapon->GetItem();
-	if ( !item->Ready() )
-		return;
 
 	// Are we close enough to hit? Then swing. Else move to target.
 	Chit* targetChit = 0;
@@ -211,8 +211,10 @@ void AIComponent::DoMelee()
 	}
 
 	if ( battleMechanics.InMeleeZone( engine, parentChit, targetChit ) ) {
-		GLASSERT( parentChit->GetRenderComponent()->AnimationReady() );
-		parentChit->GetRenderComponent()->PlayAnimation( ANIM_MELEE );
+		if ( item->Ready() ) {
+			GLASSERT( parentChit->GetRenderComponent()->AnimationReady() );
+			parentChit->GetRenderComponent()->PlayAnimation( ANIM_MELEE );
+		}
 	}
 	else {
 		// Move to target.
@@ -337,6 +339,11 @@ void AIComponent::Think()
 			enemyList.Clear();
 		}
 	}
+
+#ifdef AI_OUTPUT
+	static const char* actionName[NUM_ACTIONS] = { "noaction", "melee", "shoot" };
+	GLOUTPUT(( "ID=%d Think: action=%s\n", parentChit->ID(), actionName[currentAction] ));
+#endif
 }
 
 

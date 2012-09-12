@@ -190,3 +190,25 @@ void InventoryComponent::GetChain( GameItem* item, grinliz::CArray< GameItem*, 4
 	}
 }
 
+
+bool InventoryComponent::DoTick( U32 delta )
+{
+	bool callback = false;
+	for( int i=0; i<NUM_HARDPOINTS; ++i ) {
+		if ( intrinsicAt[i] && intrinsicAt[i]->DoTick(delta) )
+			callback = true;
+		if ( heldAt[i] && heldAt[i]->DoTick(delta) )
+			callback = true;
+	}
+	for( int i=0; i<freeItems.Size(); ++i ) {
+		if ( freeItems[i] && freeItems[i]->DoTick(delta) )
+			callback  = true;
+	}
+	for( int i=0; i<packItems.Size(); ++i ) {
+		if ( packItems[i] && packItems[i]->DoTick(delta) )
+			callback  = true;
+	}
+	return callback;
+}
+
+

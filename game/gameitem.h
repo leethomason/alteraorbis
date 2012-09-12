@@ -98,7 +98,7 @@ class IWeaponItem
 {
 public:
 	virtual bool Ready() = 0;
-	virtual bool Use() = 0;
+	virtual bool Use( Chit* owner ) = 0;
 	virtual GameItem* GetItem() = 0;
 };
 
@@ -235,20 +235,14 @@ public:
 
 	bool DoTick( U32 delta ) {
 		coolTime += delta;
-		return coolTime < cooldown;
+		return coolTime < cooldown;	
 	}
 
 	virtual bool Ready() {
 		return coolTime >= cooldown;
 	}
 
-	virtual bool Use() {
-		if ( Ready()) {
-			coolTime = 0;
-			return true;
-		}
-		return false;
-	}
+	virtual bool Use( Chit* owner );
 
 	// Note that the current HP, if it has one, 
 	float TotalHP() const { return (float) mass; }

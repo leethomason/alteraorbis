@@ -29,6 +29,8 @@ public:
 	virtual void OnAdd( Chit* chit );
 	virtual void OnRemove();
 
+	virtual bool DoTick( U32 delta );
+
 	bool AddToInventory( GameItem* item, bool equip );
 	void RemoveFromInventory( int slot );
 

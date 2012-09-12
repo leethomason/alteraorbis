@@ -81,6 +81,7 @@ private:
 		//MOVE			// move to a better location (rejoin squad or during re-load)
 		//RELOAD
 		//RUN_AND_GUN
+		NUM_ACTIONS,
 	};
 	int currentAction;
 

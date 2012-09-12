@@ -80,8 +80,7 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* 
 	if( !weapon->Ready()) {
 		return;
 	}
-	weapon->Use();
-	src->SetTickNeeded();
+	weapon->Use( src );
 	
 	int primaryTeam = PrimaryTeam( src );
 
@@ -190,8 +189,7 @@ void BattleMechanics::CalcMeleeDamage( Chit* src, IMeleeWeaponItem* weapon, Dama
 void BattleMechanics::Shoot( ChitBag* bag, Chit* src, Chit* target, IRangedWeaponItem* weapon, const Vector3F& pos )
 {
 	GLASSERT( weapon->Ready() );
-	weapon->Use();
-	src->SetTickNeeded();
+	weapon->Use( src );
 	Bolt* bolt = bag->NewBolt();
 	
 	Vector3F t; 
