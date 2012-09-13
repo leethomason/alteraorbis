@@ -487,7 +487,7 @@ Model* SpaceTree::QueryRay( const Vector3F& _origin,
 
 			if ( result == grinliz::INTERSECT ) {
 				Vector3F delta = p0 - testInt;
-				t = delta.LengthSquared();
+				t = delta.Length();
 				//GLOUTPUT(( "Hit: %s t=%.2f\n", root->GetResource()->header.name, t ));
 			}	
 		}
