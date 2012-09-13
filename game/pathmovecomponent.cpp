@@ -70,6 +70,30 @@ void PathMoveComponent::QueueDest( Chit* target )
 }
 
 
+bool PathMoveComponent::NeedComputeDest()
+{
+	if ( queued.pos.x < 0 ) 
+		return false;
+
+	// Optimize - can tweak existing path? 
+	// - If there is a path, and this doesn't change it, do nothing.
+	// - If there is a path, and this only changes the end rotation, just do that.
+	if ( HasPath() ) {
+		static const float EPS = 0.01f;
+		if ( dest.pos.Equal( queued.pos, EPS ) && Equal( dest.rotation, queued.rotation, EPS ) ) {
+			queued.Clear();
+			return false;
+		}
+		if ( dest.pos.Equal( queued.pos, EPS ) ) {
+			dest.rotation = queued.rotation;
+			queued.Clear();
+			return false;
+		}
+	}
+	return true;
+}
+
+
 void PathMoveComponent::ComputeDest()
 {
 	GRINLIZ_PERFTRACK;
@@ -313,7 +337,7 @@ bool PathMoveComponent::DoTick( U32 delta )
 {
 	GRINLIZ_PERFTRACK;
 
-	if ( queued.pos.x >= 0 ) {
+	if ( NeedComputeDest() ) {
 		pathPos = nPathPos = 0;	// clear the old path.
 		ComputeDest();			// ComputeDest can fail, send message, then cause re-queue
 	}
@@ -322,7 +346,7 @@ bool PathMoveComponent::DoTick( U32 delta )
 	avoidForceApplied = false;
 	isMoving = false;
 
-	if ( nPathPos > 0 ) {
+	if ( HasPath() ) {
 		// We should be doing something!
 		bool squattingDest = false;
 		int startPathPos = pathPos;
@@ -383,8 +407,7 @@ bool PathMoveComponent::DoTick( U32 delta )
 			}
 		}
 		// Are we at the end of the path data?
-		if (    nPathPos > 0 
-			 && pathPos == nPathPos
+		if (    pathPos == nPathPos
 			 && ( dest.rotation < 0 || Equal( dest.rotation, rot, 0.01f ))) 
 		{
 			if ( squattingDest || dest.pos.Equal( path[nPathPos-1], parentChit->GetRenderComponent()->RadiusOfBase()*0.2f ) ) {

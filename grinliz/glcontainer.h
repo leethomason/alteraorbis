@@ -214,6 +214,14 @@ public:
 		return temp;
 	}
 
+	int Find( const T& key ) {
+		for( int i=0; i<size; ++i ) {
+			if ( mem[i] == key )
+				return i;
+		}
+		return -1;
+	}
+
 	int Size() const		{ return size; }
 	int Capacity() const	{ return CAPACITY; }
 	bool HasCap() const		{ return size < CAPACITY; }

@@ -42,8 +42,10 @@ public:
 	int		GetFlags() const { return flags; }
 
 	const char* GetMetaData( int i );
+
 	bool GetMetaData( const char* name, grinliz::Matrix4* xform );
 	bool GetMetaData( const char* name, grinliz::Vector3F* pos );	
+	void GetIgnoreList( grinliz::CArray<const Model*, EL_MAX_METADATA+2> *ignore  );	// ignore must be at least NUM_HARDPOINTS+2 long
 
 	// Is the animation ready to change?
 	bool	AnimationReady() const;

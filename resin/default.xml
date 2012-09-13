@@ -87,7 +87,9 @@
   </model>
   
   <model filename="human.ac"        modelName="humanMale"   origin="0 0 0" shading="crease" polyRemoval="pre" />
-  <model filename="dummytarget.ac"                                         shading="flat" polyRemoval="pre" />
+  <model filename="dummytarget.ac"                                         shading="flat" polyRemoval="pre">
+    <meta name="target" pos="0 0.5 0" />
+  </model>
  
   <model filename="chess_characters.ac" modelName="hornet"  origin="2 0 0" shading="flat" polyRemoval="pre"> 
   </model>

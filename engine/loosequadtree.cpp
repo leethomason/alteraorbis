@@ -420,7 +420,7 @@ void SpaceTree::QueryPlanesRec(	const Plane* planes, int nPlanes, int intersecti
 Model* SpaceTree::QueryRay( const Vector3F& _origin, 
 							const Vector3F& _direction, 
 							float length,
-							int required, int excluded, const Model** ignore,
+							int required, int excluded, const Model* const * ignore,
 							HitTestMethod testType,
 							Vector3F* intersection ) 
 {

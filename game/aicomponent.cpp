@@ -60,6 +60,33 @@ int AIComponent::GetTeamStatus( Chit* other )
 }
 
 
+bool AIComponent::LineOfSight( Chit* src, Chit* t )
+{
+	ComponentSet thisComp( src, Chit::SPATIAL_BIT | Chit::RENDER_BIT | ComponentSet::IS_ALIVE );
+	ComponentSet target( t, Chit::SPATIAL_BIT | Chit::RENDER_BIT | ComponentSet::IS_ALIVE );
+
+	if ( !thisComp.okay || !target.okay )
+		return false;
+
+	Vector3F origin, dest;
+	thisComp.render->GetMetaData( "trigger", &origin );		// FIXME: not necessarily trigger; get correct hardpoint. 
+	target.render->GetMetaData( "target", &dest );
+	Vector3F dir = dest - origin;
+	float length = dir.Length() + 1.0f;	// a little extra just in case
+	CArray<const Model*, EL_MAX_METADATA+2> ignore, targetModels;
+	thisComp.render->GetIgnoreList( &ignore );
+
+	Vector3F at;
+
+	Model* m = engine->IntersectModel( origin, dir, length, TEST_TRI, 0, 0, ignore.Mem(), &at );
+	if ( m ) {
+		target.render->GetIgnoreList( &targetModels );
+		return targetModels.Find( m ) >= 0;
+	}
+	return false;
+}
+
+
 void AIComponent::UpdateCombatInfo( const Rectangle2F* _zone )
 {
 	SpatialComponent* sc = parentChit->GetSpatialComponent();
@@ -138,6 +165,7 @@ void AIComponent::DoShoot()
 		targetChit = target.chit;
 	
 		// Rotate to target.
+		// FIXME: normal to target should be based on 'trigger'
 		Vector2F heading = thisComp.spatial->GetHeading2D();
 		float headingAngle = RotationXZDegrees( heading.x, heading.y );
 
@@ -146,7 +174,6 @@ void AIComponent::DoShoot()
 		normalToTarget.Normalize();
 		float angleToTarget = RotationXZDegrees( normalToTarget.x, normalToTarget.y );
 
-		// FIXME: actual cosine of correct angle should be typed in.
 		static const float ANGLE = 10.0f;
 		if ( fabsf( headingAngle - angleToTarget ) < ANGLE ) {
 			pointed = true;
@@ -321,7 +348,7 @@ void AIComponent::Think()
 
 				Chit* enemyChit = GetChit( enemyList[i] );
 				ComponentSet enemy( enemyChit, Chit::SPATIAL_BIT | Chit::ITEM_BIT | ComponentSet::IS_ALIVE );
-				if ( enemy.okay ) {
+				if ( enemy.okay && LineOfSight( parentChit, enemy.chit )) {
 					const Vector3F enemyPos = enemy.spatial->GetPosition();
 					float range = (enemyPos - pos).Length();
 					float normalizedRange = 0.5f * range / bestRange;

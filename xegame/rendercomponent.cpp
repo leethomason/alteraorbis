@@ -267,6 +267,17 @@ bool RenderComponent::GetMetaData( const char* name, grinliz::Vector3F* pos )
 }
 
 
+void RenderComponent::GetIgnoreList( grinliz::CArray<const Model*, NUM_HARDPOINTS+2> *ignore )
+{
+	ignore->Clear();
+	for( int i=0; i<NUM_MODELS; ++i ) {
+		if ( model[i] ) 
+			ignore->Push( model[i] );
+	}
+	ignore->Push( 0 );
+}
+
+
 void RenderComponent::DebugStr( GLString* str )
 {
 	str->Format( "[Render]=%s ", resource[0]->header.name.c_str() );

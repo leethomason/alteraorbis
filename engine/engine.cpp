@@ -556,7 +556,7 @@ void Engine::CalcFrustumPlanes( grinliz::Plane* planes )
 
 Model* Engine::IntersectModel( const Vector3F& origin, const Vector3F& dir, float length,
 							   HitTestMethod method, 
-							   int required, int exclude, const Model* ignore[], Vector3F* intersection )
+							   int required, int exclude, const Model * const * ignore, Vector3F* intersection )
 {
 	//GRINLIZ_PERFTRACK
 

@@ -68,6 +68,7 @@ private:
 
 	void UpdateCombatInfo( const grinliz::Rectangle2F* _zone=0 );
 	int GetTeamStatus( Chit* other );
+	bool LineOfSight( Chit* src, Chit* target );
 	void Think();	// Choose a new action.
 
 	Engine*		engine;

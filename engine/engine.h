@@ -110,7 +110,7 @@ public:
 							const grinliz::Vector3F& dir,
 							float length,							// FLT_MAX 
 							HitTestMethod testMethod,
-							int required, int exclude, const Model* ignore[],
+							int required, int exclude, const Model* const * ignore,
 							grinliz::Vector3F* intersection );
 
 	enum {

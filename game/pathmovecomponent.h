@@ -51,13 +51,18 @@ public:
 private:
 	// Commit the 'queued' to the 'dest', if possible. 
 	void ComputeDest();
+	bool NeedComputeDest();
 	
 	void GetPosRot( grinliz::Vector2F* pos, float* rot );
 	void SetPosRot( grinliz::Vector2F pos, float rot );
 	float GetDistToNext2( const grinliz::Vector2F& currentPos );
+
 	void SetNoPath() {
 		nPathPos = pathPos = repath = 0;
 		dest.Clear();
+	}
+	bool HasPath() {
+		return dest.pos.x >= 0;
 	}
 
 	// Move, then set rotation from movement.
