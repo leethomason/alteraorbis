@@ -459,7 +459,7 @@ void Model::CalcMetaData( const char* name, grinliz::Matrix4* meta ) const
 	const ModelMetaData* data = resource->GetMetaData( name );
 	GLASSERT( data );
 
-	if ( !HasAnimation() ) {
+	if ( !HasAnimation() || data->boneName.empty() ) {
 		Matrix4 local;
 		local.SetTranslation( data->pos );
 

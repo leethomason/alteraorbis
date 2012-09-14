@@ -122,7 +122,7 @@ void BoltRenderer::DrawAll( const Bolt* bolts, int nBolts, Engine* engine )
 	// FIXME: move more to the shader?
 
 	Vector3F eyeNormal = engine->camera.EyeDir3()[Camera::NORMAL];
-	static const float hw = 0.1f;
+	static const float HALF_WIDTH = 0.07f;
 
 	nBolts = Min( nBolts, (int)MAX_BOLTS );
 	for( int i=0; i<nBolts; ++i ) {
@@ -132,10 +132,10 @@ void BoltRenderer::DrawAll( const Bolt* bolts, int nBolts, Engine* engine )
 		CrossProduct( eyeNormal, bolts[i].head - tail, &n );
 		n.SafeNormalize( 1, 0, 0 );
 
-		vertex[i*4+0].pos = tail - hw*n;
-		vertex[i*4+1].pos = tail + hw*n;
-		vertex[i*4+2].pos = bolts[i].head + hw*n;
-		vertex[i*4+3].pos = bolts[i].head - hw*n;
+		vertex[i*4+0].pos = tail - HALF_WIDTH*n;
+		vertex[i*4+1].pos = tail + HALF_WIDTH*n;
+		vertex[i*4+2].pos = bolts[i].head + HALF_WIDTH*n;
+		vertex[i*4+3].pos = bolts[i].head - HALF_WIDTH*n;
 
 		Vector4F color = bolts[i].color;
 		vertex[i*4+0].color = color;

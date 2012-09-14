@@ -52,12 +52,14 @@ void SinCosDegree( float degreeTheta, float* sinTheta, float* cosTheta );
 const float EPSILON = 0.000001f;
 
 inline float NormalizeAngleDegrees( float alpha ) {
+	GLASSERT( alpha >= -360.f && alpha <= 720.0f );	// check for reasonable input
 	while ( alpha < 0.0f )		alpha += 360.0f;
 	while ( alpha >= 360.0f )	alpha -= 360.0f;
 	return alpha;
 }
 
 inline int NormalizeAngleDegrees( int alpha ) {
+	GLASSERT( alpha >= -360 && alpha <= 720 );
 	while ( alpha < 0 )		alpha += 360;
 	while ( alpha >= 360 )	alpha -= 360;
 	return alpha;

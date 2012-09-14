@@ -31,7 +31,7 @@ static const float LOW_UTILITY			= 0.2f;
 static const float MED_UTILITY			= 0.5f;
 static const float HIGH_UTILITY			= 0.8f;
 
-#define AI_OUTPUT
+//#define AI_OUTPUT
 
 AIComponent::AIComponent( Engine* _engine, WorldMap* _map )
 {

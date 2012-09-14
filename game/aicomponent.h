@@ -77,8 +77,9 @@ private:
 	enum {
 		// Possible actions:
 		NO_ACTION,
-		MELEE,			// go to the target and hit it.
-		SHOOT,			// shoot targets
+		MELEE,			// Go to the target and hit it. The basic combat action.
+		SHOOT,			// Shoot targets. Fall back to melee if no shot, which
+						// gets closer to target. Run and Gun if it makes sense.
 		//MOVE			// move to a better location (rejoin squad or during re-load)
 		//RELOAD
 		//RUN_AND_GUN

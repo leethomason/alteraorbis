@@ -176,7 +176,7 @@ public:
 	int flags;				// flags that define this item; 'constant'
 	int hardpoint;
 	float mass;				// mass (kg)
-	float power;			// works like mass for energy items - shield strength, gun power
+	//float power;			// works like mass for energy items - shield strength, gun power
 	int	primaryTeam;		// who owns this items
 	DamageDesc meleeDamage;	// a multiplier of the base (effective mass) and other modifiers
 	DamageDesc rangedDamage;// a multiplier of the power
@@ -198,7 +198,7 @@ public:
 			flags			= rhs->flags;
 			hardpoint		= rhs->hardpoint;
 			mass			= rhs->mass;
-			power			= rhs->power;
+			//power			= rhs->power;
 			primaryTeam		= rhs->primaryTeam;
 			meleeDamage		= rhs->meleeDamage;
 			rangedDamage	= rhs->rangedDamage;
@@ -215,7 +215,7 @@ public:
 			flags = 0;
 			hardpoint = 0;
 			mass = 1;
-			power = 0;
+			//power = 0;
 			primaryTeam = 0;
 			meleeDamage.Set( 1, 0, 0, 0 );
 			rangedDamage.Set( 1, 0, 0, 0 );

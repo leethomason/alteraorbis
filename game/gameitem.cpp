@@ -45,7 +45,7 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 	if ( EFFECT_ENERGY)	flags |= IMMUNE_ENERGY;
 
 	ele->QueryFloatAttribute( "mass",			&mass );
-	ele->QueryFloatAttribute( "power",			&power );
+	//ele->QueryFloatAttribute( "power",			&power );
 	ele->QueryIntAttribute( "primaryTeam",		&primaryTeam );
 //	ele->QueryUnsignedAttribute( "coolDownTime",&coolDownTime );
 
@@ -70,10 +70,10 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 	}
 
 	// Default of hp is 'power' then 'mass'
-	if ( ele->Attribute( "power" ))
-		hp = power;
-	else	
-		hp = mass;
+//	if ( ele->Attribute( "power" ))
+//		hp = power;
+//	else	
+	hp = mass;
 	ele->QueryFloatAttribute( "hp", &hp );
 
 	GLASSERT( TotalHP() > 0 );
