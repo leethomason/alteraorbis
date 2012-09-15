@@ -59,15 +59,9 @@ distribution.
 		#define GLOUTPUT( x )	printf x	
 	#endif
 #else
- 	#if defined(UNIX)
-		#define GLOUTPUT( x )
-	#else
-		#define GLOUTPUT( x )
-	#endif
-
+	#define GLOUTPUT( x )
+	#define GLLOG( x )
 	#define GLASSERT( x )		{}
-	// Turned off for now. The error reporting is hard enough.
-	#define GLRELASSERT( x )	{}
 #endif
 
 #if defined(DEBUG)

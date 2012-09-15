@@ -1,4 +1,7 @@
 - combat test scene	
+	X put in license header
+	- push to altera site
+	- melee attack goes back to reference position between hits
 	- eval: kinetic damage of held weapons shouldn't be multiplied with mass (added)
 	- shields, general bonus/cost/damage propegation
 	- knife -> ring
