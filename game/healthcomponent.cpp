@@ -41,6 +41,8 @@ void HealthComponent::DeltaHealth()
 	if ( destroyed )
 		return;
 
+	parentChit->SendMessage( ChitMsg( HEALTH_MSG_CHANGED ), this );
+
 	GameItem* item = 0;
 	if ( parentChit->GetItemComponent() ) {
 		item = parentChit->GetItemComponent()->GetItem();

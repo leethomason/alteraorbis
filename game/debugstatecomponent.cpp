@@ -43,18 +43,15 @@ void DebugStateComponent::OnAdd( Chit* chit )
 	Component::OnAdd( chit );
 	map->overlay.Add( &healthBar );
 
-	chit->AddListener( this );
-	//if ( chit->GetSpatialComponent() ) {
-	//	Vector2F pos = chit->GetSpatialComponent()->GetPosition2D() + OFFSET;
-	//	healthBar.SetPos( pos.x, pos.y );
-	//}
 	healthBar.SetSize( SIZE_X, SIZE_Y );
 
-	//HealthComponent* pHealth = GET_COMPONENT( chit, HealthComponent );
-	//if ( pHealth ) {
-	//	health = pHealth->Health();
-	//}
-	healthBar.SetRange( 0.8f );
+	HealthComponent* pHealth = GET_COMPONENT( chit, HealthComponent );
+	if ( pHealth ) {
+		healthBar.SetRange( pHealth->GetHealthFraction() );
+	}
+	else {
+		healthBar.SetRange( 1.0f );
+	}
 }
 
 
