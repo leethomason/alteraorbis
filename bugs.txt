@@ -27,9 +27,9 @@
 			x compute color
 			- effect strength
 		- accuracy
-		- reload time 'reload'
-		- time per shot 'cooldown'
-		- rounds in clip
+		X reload time 'reload'
+		X time per shot 'cooldown'
+		X rounds in clip
 		- effect
 	X weapons
 		X relative positioning (implemented, broken again)
