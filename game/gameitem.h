@@ -245,8 +245,8 @@ public:
 			cooldownTime = cooldown;
 			reload = 2000;
 			reloadTime = reload;
-			clipCap = 6;
-			rounds = clipCap;
+			clipCap = 0;			// default to no clip and unlimited ammo
+			rounds = 0;
 
 			hp = TotalHP();
 			parentChit = 0;
@@ -271,7 +271,7 @@ public:
 
 	virtual bool Use();
 	virtual bool Reload();
-	virtual bool CanReload() const { return Ready() && (rounds < clipCap); }
+	virtual bool CanReload() const { return Ready() && !Reloading() && (rounds < clipCap); }
 	virtual bool Reloading() const { return clipCap > 0 && reloadTime < reload; }
 
 	int Rounds() const { return rounds; }
