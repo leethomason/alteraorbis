@@ -159,7 +159,7 @@ void ChitBag::HandleBolt( const Bolt& bolt, Model* m, const grinliz::Vector3F& a
 
 	DamageDesc dd;
 	dd.components = bolt.damage;
-	chit->SendMessage( ChitMsg( MSG_CHIT_DAMAGE, 0, &dd ), 0 );
+	chit->SendMessage( ChitMsg( ChitMsg::CHIT_DAMAGE, 0, &dd ), 0 );
 }
 
 

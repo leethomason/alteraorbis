@@ -19,7 +19,7 @@
 
 void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {
-	if ( msg.ID() == MSG_CHIT_DAMAGE ) {
+	if ( msg.ID() == ChitMsg::CHIT_DAMAGE ) {
 		const DamageDesc* dd = (const DamageDesc*) msg.Ptr();
 		GLASSERT( dd );
 		GLLOG(( "Chit %3d '%s' ", parentChit->ID(), item.Name() ));
@@ -46,4 +46,18 @@ bool ItemComponent::DoTick( U32 delta )
 }
 
 
+void ItemComponent::OnAdd( Chit* chit )
+{
+	Component::OnAdd( chit );
+	GLASSERT( !item.parentChit );
+	item.parentChit = parentChit;
+}
+
+
+void ItemComponent::OnRemove() 
+{
+	GLASSERT( item.parentChit == parentChit );
+	item.parentChit = 0;
+	Component::OnRemove();
+}
 

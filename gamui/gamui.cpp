@@ -1049,6 +1049,20 @@ void DigitalBar::SetSize( float w, float h )
 }
 
 
+void DigitalBar::SetLowerAtom( const RenderAtom& atom )
+{
+	m_atomLower = atom;
+	Modify();
+}
+
+
+void DigitalBar::SetHigherAtom( const RenderAtom& atom )
+{
+	m_atomHigher = atom;
+	Modify();
+}
+
+
 void DigitalBar::SetRange( float t0 )
 {
 	GAMUIASSERT( t0 >= 0 && t0 <= 1 );

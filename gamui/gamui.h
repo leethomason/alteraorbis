@@ -877,6 +877,9 @@ public:
 	virtual void SetVisible( bool visible );
 	void SetSize( float w, float h );
 
+	void SetLowerAtom( const RenderAtom& );
+	void SetHigherAtom( const RenderAtom& );
+
 	virtual const RenderAtom* GetRenderAtom() const;
 	virtual bool DoLayout();
 	virtual void Queue( grinliz::CDynArray< uint16_t > *index, grinliz::CDynArray< Gamui::Vertex > *vertex );

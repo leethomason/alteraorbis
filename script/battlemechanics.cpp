@@ -95,7 +95,7 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* 
 	if( !weapon->Ready()) {
 		return;
 	}
-	weapon->Use( src );
+	weapon->Use();
 	
 	int primaryTeam = PrimaryTeam( src );
 
@@ -134,7 +134,7 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* 
 						weapon->GetItem()->Name(),
 						target->ID(), targetComp.item->Name() ));
 
-				target->SendMessage( ChitMsg( MSG_CHIT_DAMAGE, 0, &dd ), 0 );
+				target->SendMessage( ChitMsg( ChitMsg::CHIT_DAMAGE, 0, &dd ), 0 );
 			}
 		}
 	}
@@ -193,7 +193,10 @@ void BattleMechanics::CalcMeleeDamage( Chit* src, IMeleeWeaponItem* weapon, Dama
 void BattleMechanics::Shoot( ChitBag* bag, Chit* src, Chit* target, IRangedWeaponItem* weapon, const Vector3F& pos )
 {
 	GLASSERT( weapon->Ready() );
-	weapon->Use( src );
+	bool okay = weapon->Use();
+	if ( !okay ) {
+		return;
+	}
 	Bolt* bolt = bag->NewBolt();
 	
 	Vector3F t; 

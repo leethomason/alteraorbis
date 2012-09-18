@@ -38,6 +38,26 @@ class GameItem;
 class ChitMsg
 {
 public:
+	enum {
+		// ---- Chit --- //
+		CHIT_DESTROYED,			// sender: health
+		CHIT_DAMAGE,			// sender: chitBag, Ptr = &DamageDesc
+
+		// ---- Component ---- //
+		// Game
+		PATHMOVE_DESTINATION_REACHED,
+		PATHMOVE_DESTINATION_BLOCKED,
+
+		HEALTH_CHANGED,
+		
+		ITEM_ROUNDS_CHANGED,	// Ptr = &GameItem
+		ITEM_RELOADING,			// Ptr = &GameItem
+
+		// XE
+		SPATIAL_CHANGED,		// the position or rotation has changed, sender: spatial
+		RENDER_IMPACT,			// impact metadata event has occured, sender: render component
+	};
+
 	ChitMsg( int _id, int _data=0, const void* _ptr=0 ) : id(_id), data(_data), ptr(_ptr) {}
 
 	int ID() const { return id; }

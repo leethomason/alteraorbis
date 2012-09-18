@@ -210,7 +210,7 @@ bool RenderComponent::DoTick( U32 deltaTime )
 
 		for( int i=0; i<metaData.Size(); ++i ) {
 			if ( StrEqual( metaData[i]->name, "impact" )) {
-				parentChit->SendMessage( ChitMsg( RENDER_MSG_IMPACT ), this );
+				parentChit->SendMessage( ChitMsg( ChitMsg::RENDER_IMPACT ), this );
 			}
 			else {
 				GLASSERT( 0 );	// event not recognized
@@ -299,9 +299,9 @@ void RenderComponent::DebugStr( GLString* str )
 }
 
 
-void RenderComponent::OnChitMsg( Chit* chit, int id, const ChitEvent* event )
+void RenderComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {
-	if ( chit == parentChit && id == MSG_CHIT_DESTROYED ) {
+	if ( chit == parentChit && msg.ID() == ChitMsg::CHIT_DESTROYED ) {
 		static const Vector3F UP = { 0, 1, 0 };
 		static const Vector3F DOWN = { 0, -1, 0 };
 		static const Vector3F RIGHT = { 1, 0, 0 };

@@ -41,7 +41,7 @@ void HealthComponent::DeltaHealth()
 	if ( destroyed )
 		return;
 
-	parentChit->SendMessage( ChitMsg( HEALTH_MSG_CHANGED ), this );
+	parentChit->SendMessage( ChitMsg( ChitMsg::HEALTH_CHANGED ), this );
 
 	GameItem* item = 0;
 	if ( parentChit->GetItemComponent() ) {
@@ -49,7 +49,7 @@ void HealthComponent::DeltaHealth()
 	}
 	if ( item ) {
 		if ( item->hp == 0 ) {
-			parentChit->SendMessage( ChitMsg(MSG_CHIT_DESTROYED), this );
+			parentChit->SendMessage( ChitMsg( ChitMsg::CHIT_DESTROYED), this );
 			GLLOG(( "Chit %3d destroyed.\n", parentChit->ID() ));
 			GetChitBag()->QueueDelete( parentChit );
 			destroyed = true;

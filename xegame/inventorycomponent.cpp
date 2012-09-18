@@ -136,6 +136,8 @@ bool InventoryComponent::AddToInventory( GameItem* item, bool equip )
 			packItems.Push( item );
 		}
 	}
+	GLASSERT( item->parentChit == 0 );
+	item->parentChit = parentChit;
 	return equipped;
 }
 

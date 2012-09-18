@@ -210,7 +210,12 @@ void AIComponent::DoShoot()
 		for( int i=0; i<weapons.Size(); ++i ) {
 			GameItem* item = weapons[i].weapon->GetItem();
 			if ( item->Ready() ) {
-				battleMechanics.Shoot( GetChitBag(), parentChit, targetChit, weapons[i].weapon, weapons[i].trigger );
+				if ( item->HasRound() ) {
+					battleMechanics.Shoot( GetChitBag(), parentChit, targetChit, weapons[i].weapon, weapons[i].trigger );
+				}
+				else {
+					item->Reload();
+				}
 				break;
 			}
 		}
@@ -440,7 +445,7 @@ void AIComponent::DebugStr( grinliz::GLString* str )
 // FIXME: move out of AI!
 void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {
-	if ( chit == parentChit && msg.ID() == RENDER_MSG_IMPACT ) {
+	if ( chit == parentChit && msg.ID() == ChitMsg::RENDER_IMPACT ) {
 		
 		RenderComponent* render = parentChit->GetRenderComponent();
 		GLASSERT( render );	// it is a message from the render component, after all.

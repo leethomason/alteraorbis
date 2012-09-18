@@ -138,7 +138,7 @@ void PathMoveComponent::ComputeDest()
 	bool okay = map->CalcPath( posVec, dest.pos, path, &nPathPos, MAX_MOVE_PATH, &cost, pathDebugging ); 
 	if ( !okay ) {
 		SetNoPath();
-		parentChit->SendMessage( ChitMsg( PATHMOVE_MSG_DESTINATION_BLOCKED ), this ); 
+		parentChit->SendMessage( ChitMsg( ChitMsg::PATHMOVE_DESTINATION_BLOCKED ), this ); 
 	}
 	else {
 		GLASSERT( nPathPos > 0 );
@@ -430,7 +430,7 @@ bool PathMoveComponent::DoTick( U32 delta )
 				GLOUTPUT(( "Dest reached. squatted=%s\n", squattingDest ? "true" : "false" ));
 #endif
 				// actually reached the end!
-				parentChit->SendMessage( ChitMsg(PATHMOVE_MSG_DESTINATION_REACHED), this );
+				parentChit->SendMessage( ChitMsg( ChitMsg::PATHMOVE_DESTINATION_REACHED), this );
 				SetNoPath();
 			}
 			else {

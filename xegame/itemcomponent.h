@@ -37,6 +37,8 @@ public:
 	}
 
 	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
+	virtual void OnAdd( Chit* chit );
+	virtual void OnRemove();
 
 	virtual bool DoTick( U32 delta );
 

@@ -112,9 +112,12 @@ public:
 class IWeaponItem 
 {
 public:
-	virtual bool Ready() = 0;
-	virtual bool Use( Chit* owner ) = 0;
+	virtual bool Ready() const = 0;
+	virtual bool Use() = 0;
 	virtual GameItem* GetItem() = 0;
+	virtual bool Reload() = 0;
+	virtual bool CanReload() const = 0;
+	virtual bool Reloading() const = 0;
 };
 
 class IMeleeWeaponItem : virtual public IWeaponItem
@@ -124,7 +127,6 @@ public:
 
 class IRangedWeaponItem : virtual public IWeaponItem
 {
-
 public:
 };
 
@@ -189,20 +191,21 @@ public:
 	grinliz::CStr< MAX_ITEM_NAME >		key;		// modified name, for storage. not serialized.
 	grinliz::CStr< EL_RES_NAME_LEN >	resource;	// resource used to  render the item
 	int flags;				// flags that define this item; 'constant'
-	int hardpoint;
+	int hardpoint;			// id of hardpoint this item attaches to
 	float mass;				// mass (kg)
-	//float power;			// works like mass for energy items - shield strength, gun power
 	int	primaryTeam;		// who owns this items
 	DamageDesc meleeDamage;	// a multiplier of the base (effective mass) and other modifiers
 	DamageDesc rangedDamage;// a multiplier of the power
 	DamageDesc resist;		// multiplier of damage absorbed by this item. 1: normal, 0: no damage, 1.5: extra damage
 	U32 cooldown;			// time between uses
-	U32 coolTime;			// counting up to ready state
+	U32 cooldownTime;		// counting UP to ready state
 	U32 reload;				// time to reload once clip is used up
+	U32 reloadTime;			// counting UP to ready state
 	int clipCap;			// possible rounds in the clip
+	int rounds;				// current rounds in the clip
 
 	float hp;				// current hp for this item
-	int clipCount;			// current rounds in the clip
+	Chit* parentChit;		// only set when attached to a Component
 
 	// Group all the copy/init in one place!
 	void CopyFrom( const GameItem* rhs ) {
@@ -213,15 +216,19 @@ public:
 			flags			= rhs->flags;
 			hardpoint		= rhs->hardpoint;
 			mass			= rhs->mass;
-			//power			= rhs->power;
 			primaryTeam		= rhs->primaryTeam;
 			meleeDamage		= rhs->meleeDamage;
 			rangedDamage	= rhs->rangedDamage;
 			resist			= rhs->resist;
 			cooldown		= rhs->cooldown;
-			coolTime		= rhs->coolTime;
+			cooldownTime	= rhs->cooldownTime;
+			reload			= rhs->reload;
+			reloadTime		= rhs->reloadTime;
+			clipCap			= rhs->clipCap;
+			rounds			= rhs->rounds;
 
 			hp				= rhs->hp;
+			parentChit		= 0;	// NOT copied
 		}
 		else {
 			name.Clear();
@@ -230,15 +237,19 @@ public:
 			flags = 0;
 			hardpoint = 0;
 			mass = 1;
-			//power = 0;
 			primaryTeam = 0;
 			meleeDamage.Set( 1, 0, 0, 0 );
 			rangedDamage.Set( 1, 0, 0, 0 );
 			resist.Set( 1, 1, 1, 1 );	// resist nothing, bonus nothing
 			cooldown = 1000;
-			coolTime = cooldown;
+			cooldownTime = cooldown;
+			reload = 2000;
+			reloadTime = reload;
+			clipCap = 6;
+			rounds = clipCap;
 
 			hp = TotalHP();
+			parentChit = 0;
 		}
 	}
 
@@ -248,16 +259,28 @@ public:
 	virtual IWeaponItem*		ToWeapon()			{ return (flags & (MELEE_WEAPON | RANGED_WEAPON)) ? this : 0; }
 	virtual const IWeaponItem*	ToWeapon() const	{ return (flags & (MELEE_WEAPON | RANGED_WEAPON)) ? this : 0; }
 
-	bool DoTick( U32 delta ) {
-		coolTime += delta;
-		return coolTime < cooldown;	
+
+	bool DoTick( U32 delta );
+	
+	// 'Ready' and 'Rounds' are orthogonal. You are Ready()
+	// if the cooldown is passed. You HasRound() if the
+	// weapon has (possibly unlimited) rounds.
+	virtual bool Ready() const {
+		return cooldownTime >= cooldown;
 	}
 
-	virtual bool Ready() {
-		return coolTime >= cooldown;
-	}
+	virtual bool Use();
+	virtual bool Reload();
+	virtual bool CanReload() const { return Ready() && (rounds < clipCap); }
+	virtual bool Reloading() const { return clipCap > 0 && reloadTime < reload; }
 
-	virtual bool Use( Chit* owner );
+	int Rounds() const { return rounds; }
+	int ClipCap() const { return clipCap; }
+	bool HasRound() const { 
+		GLASSERT( rounds <= clipCap );
+		return rounds || clipCap == 0; 
+	}
+	void UseRound();
 
 	// Note that the current HP, if it has one, 
 	float TotalHP() const { return (float) mass; }

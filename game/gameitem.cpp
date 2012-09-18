@@ -24,7 +24,11 @@
 using namespace grinliz;
 using namespace tinyxml2;
 
-#define READ_FLAG( flags, str, name ) { if ( strstr( str, #name )) flags |= name; }
+#define READ_FLAG( flags, str, name )	{ if ( strstr( str, #name )) flags |= name; }
+#define READ_FLOAT_ATTR( ele, name )	{ ele->QueryFloatAttribute( #name, &name ); }
+#define READ_INT_ATTR( ele, name )		{ ele->QueryIntAttribute( #name, &name ); }
+#define READ_UINT_ATTR( ele, name )		{ ele->QueryUnsignedAttribute( #name, &name ); }
+
 
 void GameItem::Save( tinyxml2::XMLPrinter* )
 {
@@ -59,10 +63,14 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 	if ( EFFECT_FIRE )	flags |= IMMUNE_FIRE;
 	if ( EFFECT_ENERGY)	flags |= IMMUNE_ENERGY;
 
-	ele->QueryFloatAttribute( "mass",			&mass );
-	//ele->QueryFloatAttribute( "power",			&power );
-	ele->QueryIntAttribute( "primaryTeam",		&primaryTeam );
-//	ele->QueryUnsignedAttribute( "coolDownTime",&coolDownTime );
+	READ_FLOAT_ATTR( ele, mass );
+	READ_INT_ATTR( ele, primaryTeam );
+	READ_UINT_ATTR( ele, cooldown );
+	READ_UINT_ATTR( ele, cooldownTime );
+	READ_UINT_ATTR( ele, reload );
+	READ_UINT_ATTR( ele, reloadTime );
+	READ_INT_ATTR( ele, clipCap );
+	READ_INT_ATTR( ele, rounds );
 
 	const XMLElement* meleeEle = ele->FirstChildElement( "melee" );
 	if ( meleeEle ) {
@@ -84,10 +92,6 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 		GLASSERT( hardpoint >= 0 );
 	}
 
-	// Default of hp is 'power' then 'mass'
-//	if ( ele->Attribute( "power" ))
-//		hp = power;
-//	else	
 	hp = mass;
 	ele->QueryFloatAttribute( "hp", &hp );
 
@@ -96,13 +100,61 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 }
 
 
-bool GameItem::Use( Chit* chit ) {
-	if ( Ready()) {
-		coolTime = 0;
-		chit->SetTickNeeded();
+bool GameItem::Use() {
+	if ( Ready() && HasRound() ) {
+		UseRound();
+		cooldownTime = 0;
+		if ( parentChit ) {
+			parentChit->SetTickNeeded();
+		}
 		return true;
 	}
 	return false;
+}
+
+
+bool GameItem::Reload() {
+	if ( CanReload()) {
+		reloadTime = 0;
+		if ( parentChit ) {
+			parentChit->SetTickNeeded();
+		}
+		return true;
+	}
+	return false;
+}
+
+
+void GameItem::UseRound() { 
+	if ( clipCap > 0 ) { 
+		GLASSERT( rounds > 0 ); 
+		--rounds; 
+		if ( parentChit ) {
+			parentChit->SendMessage( ChitMsg( ChitMsg::ITEM_ROUNDS_CHANGED, 0, this ), 0 );
+		}
+	} 
+}
+
+
+bool GameItem::DoTick( U32 delta )
+{
+	cooldownTime += delta;
+	if ( reloadTime < reload ) {
+		reloadTime += delta;
+
+		if ( reloadTime >= reload ) {
+			rounds = clipCap;
+			if ( parentChit ) {
+				parentChit->SendMessage( ChitMsg( ChitMsg::ITEM_ROUNDS_CHANGED, 0, this ), 0 );
+			}
+		}
+		else {
+			if ( parentChit ) {
+				parentChit->SendMessage( ChitMsg( ChitMsg::ITEM_RELOADING, 0, this ), 0 );
+			}
+		}
+	}
+	return !Ready() || Reloading();	
 }
 
 
