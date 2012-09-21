@@ -50,8 +50,7 @@ public:
 
 		HEALTH_CHANGED,
 		
-		ITEM_ROUNDS_CHANGED,	// Ptr = &GameItem
-		ITEM_RELOADING,			// Ptr = &GameItem		FIXME: high frequency
+		GAMEITEM_TICK,			// Ptr = &GameItem
 
 		// XE
 		SPATIAL_CHANGED,		// the position or rotation has changed, sender: spatial

@@ -299,11 +299,11 @@ void BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int 
 		chit->Add( new PathMoveComponent( map ));
 		chit->Add( new AIComponent( engine, map ));
 		//chit->Add( new DebugPathComponent( engine, map, static_cast<LumosGame*>(game) ));
+		chit->Add( new DebugStateComponent( map ));
 	}
 	else {
 		chit->Add( new MoveComponent());
 	}
-	chit->Add( new DebugStateComponent( map ));
 
 	GameItem item( *(itemDefArr[0]));
 	item.primaryTeam = team;

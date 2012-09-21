@@ -86,27 +86,30 @@ void DebugStateComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		HealthComponent* pHealth = GET_COMPONENT( chit, HealthComponent );
 		healthBar.SetRange( pHealth->GetHealthFraction() );
 	}
-	else if ( msg.ID() == ChitMsg::ITEM_ROUNDS_CHANGED ) {
+	else if ( msg.ID() == ChitMsg::GAMEITEM_TICK ) {
 		GameItem* pItem = (GameItem*)msg.Ptr();
-
-		RenderAtom grey   = LumosGame::CalcPaletteAtom( 0, 6 );
-		RenderAtom blue   = LumosGame::CalcPaletteAtom( 8, 0 );	
+		if ( pItem->ToRangedWeapon() ) {		
+			RenderAtom grey   = LumosGame::CalcPaletteAtom( 0, 6 );
+			RenderAtom blue   = LumosGame::CalcPaletteAtom( 8, 0 );	
+			RenderAtom orange = LumosGame::CalcPaletteAtom( 4, 0 );
 	
-		float r = (float)pItem->rounds / (float)pItem->clipCap;
-		ammoBar.SetLowerAtom( blue );
-		ammoBar.SetHigherAtom( grey );
-		ammoBar.SetRange( r );
-	}
-	else if ( msg.ID() == ChitMsg::ITEM_RELOADING ) {
-		GameItem* pItem = (GameItem*)msg.Ptr();
-
-		RenderAtom grey   = LumosGame::CalcPaletteAtom( 0, 6 );
-		RenderAtom orange = LumosGame::CalcPaletteAtom( 4, 0 );
-	
-		float r = (float)pItem->reloadTime / (float)pItem->reload;
-		ammoBar.SetLowerAtom( orange );
-		ammoBar.SetHigherAtom( grey );
-		ammoBar.SetRange( Clamp( r, 0.f, 1.f ) );
+			float r = 1;
+			if ( pItem->Reloading() ) {
+				if ( pItem->reload ) {
+					r = (float)pItem->reloadTime / (float)pItem->reload;
+				}
+				ammoBar.SetLowerAtom( orange );
+				ammoBar.SetHigherAtom( grey );
+			}
+			else {
+				if ( pItem->clipCap ) {
+					r = (float)pItem->rounds / (float)pItem->clipCap;
+				}
+				ammoBar.SetLowerAtom( blue );
+				ammoBar.SetHigherAtom( grey );
+			}
+			ammoBar.SetRange( Clamp( r, 0.f, 1.f ) );
+		}
 	}
 }
 

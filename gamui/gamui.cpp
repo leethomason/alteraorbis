@@ -1051,15 +1051,29 @@ void DigitalBar::SetSize( float w, float h )
 
 void DigitalBar::SetLowerAtom( const RenderAtom& atom )
 {
-	m_atomLower = atom;
-	Modify();
+	if ( !atom.Equal( m_atomLower )) {
+		m_atomLower = atom;
+		Modify();
+
+		int index = (int)( m_t * (float)m_nTicks + 0.5f );
+		for( int i=0; i<index; ++i ) {
+			m_image[i].SetAtom( m_atomLower );
+		}
+	}
 }
 
 
 void DigitalBar::SetHigherAtom( const RenderAtom& atom )
 {
-	m_atomHigher = atom;
-	Modify();
+	if ( !atom.Equal( m_atomHigher )) {
+		m_atomHigher = atom;
+		Modify();
+
+		int index = (int)( m_t * (float)m_nTicks + 0.5f );
+		for( int i=index; i<m_nTicks; ++i ) {
+			m_image[i].SetAtom( m_atomHigher );
+		}
+	}
 }
 
 

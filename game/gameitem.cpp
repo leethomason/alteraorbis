@@ -130,9 +130,6 @@ void GameItem::UseRound() {
 	if ( clipCap > 0 ) { 
 		GLASSERT( rounds > 0 ); 
 		--rounds; 
-		if ( parentChit ) {
-			parentChit->SendMessage( ChitMsg( ChitMsg::ITEM_ROUNDS_CHANGED, 0, this ), 0 );
-		}
 	} 
 }
 
@@ -145,15 +142,10 @@ bool GameItem::DoTick( U32 delta )
 
 		if ( reloadTime >= reload ) {
 			rounds = clipCap;
-			if ( parentChit ) {
-				parentChit->SendMessage( ChitMsg( ChitMsg::ITEM_ROUNDS_CHANGED, 0, this ), 0 );
-			}
 		}
-		else {
-			if ( parentChit ) {
-				parentChit->SendMessage( ChitMsg( ChitMsg::ITEM_RELOADING, 0, this ), 0 );
-			}
-		}
+	}
+	if ( parentChit ) {
+		parentChit->SendMessage( ChitMsg( ChitMsg::GAMEITEM_TICK, 0, this ), 0 );
 	}
 	return !Ready() || Reloading();	
 }
