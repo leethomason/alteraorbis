@@ -157,8 +157,8 @@ void InventoryComponent::GetRangedWeapons( grinliz::CArray< RangedInfo, NUM_HARD
 		if ( heldAt[i] ) {
 			ranged = heldAt[i]->ToRangedWeapon();
 		}
-		else if ( heldAt[i] ) {
-			ranged = heldAt[i]->ToRangedWeapon();
+		else if ( intrinsicAt[i] ) {
+			ranged = intrinsicAt[i]->ToRangedWeapon();
 		}
 		if ( ranged ) {
 			RenderComponent* rc = parentChit->GetRenderComponent();

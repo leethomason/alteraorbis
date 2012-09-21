@@ -42,6 +42,9 @@ struct Bolt {
 		dir.Set( 1, 0, 0 );
 		impact = false;
 		color.Set( 1, 1, 1, 1 );
+		speed = 1.0f;
+		particle = false;
+		explosive = false;
 
 		chitID = 0;
 	} 
@@ -51,6 +54,9 @@ struct Bolt {
 	grinliz::Vector3F	dir;	// normal vector
 	bool				impact;	// 'head' is the impact location
 	grinliz::Vector4F	color;
+	float				speed;
+	bool				particle;
+	bool				explosive;
 
 	// Userdata follows
 	int								chitID;		// who fired this bolt

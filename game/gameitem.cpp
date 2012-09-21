@@ -56,12 +56,12 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 	READ_FLAG( flags, f, HELD_FREE );
 	READ_FLAG( flags, f, IMMUNE_FIRE );
 	READ_FLAG( flags, f, FLAMMABLE );
-	READ_FLAG( flags, f, IMMUNE_ENERGY );
+	READ_FLAG( flags, f, EXPLOSIVE );
 	READ_FLAG( flags, f, EFFECT_FIRE );
-	READ_FLAG( flags, f, EFFECT_ENERGY );
+	READ_FLAG( flags, f, EFFECT_SHOCK );
+	READ_FLAG( flags, f, RENDER_TRAIL );
 
 	if ( EFFECT_FIRE )	flags |= IMMUNE_FIRE;
-	if ( EFFECT_ENERGY)	flags |= IMMUNE_ENERGY;
 
 	READ_FLOAT_ATTR( ele, mass );
 	READ_INT_ATTR( ele, primaryTeam );
@@ -71,6 +71,7 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 	READ_UINT_ATTR( ele, reloadTime );
 	READ_INT_ATTR( ele, clipCap );
 	READ_INT_ATTR( ele, rounds );
+	READ_FLOAT_ATTR( ele, speed );
 
 	const XMLElement* meleeEle = ele->FirstChildElement( "melee" );
 	if ( meleeEle ) {
@@ -162,8 +163,8 @@ void GameItem::Apply( const GameItem* intrinsic )
 {
 	if ( intrinsic->flags & EFFECT_FIRE )
 		flags |= IMMUNE_FIRE;
-	if ( intrinsic->flags & EFFECT_ENERGY )
-		flags |= IMMUNE_ENERGY;
+//	if ( intrinsic->flags & EFFECT_ENERGY )
+//		flags |= IMMUNE_ENERGY;
 }
 
 

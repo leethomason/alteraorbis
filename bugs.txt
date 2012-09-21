@@ -1,14 +1,15 @@
 - combat test scene	
 	X put in license header
 	X push to altera site
+	- balrog fire attack
+	- shields, general bonus/cost/damage propegation
+	- removing unit "clumping" (3yr old soccer team). Basic formation?
+	- unique look for units so teams can be distinguished
 	- melee attack goes back to reference position between hits
 	- eval: kinetic damage of held weapons shouldn't be multiplied with mass (added)
-	- shields, general bonus/cost/damage propegation
 	- knife -> ring
 	- bolt: glow around white core? end caps?
 	- impact (light/heavy)
-	- removing unit "clumping" (3yr old soccer team). Basic formation?
-	- unique look for units so teams can be distinguished
 	- properly hook up items and such, so that items, health, all be driven correctly
 	- buttons to select scenario, load items
 	- animation speed isn't correct
@@ -18,6 +19,7 @@
 	- flaming sword should catch things on fire
 	- refactor code - if needed? - in AIComponent (the fixmes)
 	- gunrun to walk not synchronized correctly
+	- item: support speed, pass on to bolts
 
 	- ranged weapons
 		- bolts

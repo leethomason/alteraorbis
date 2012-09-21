@@ -179,12 +179,14 @@ public:
 		HELD_AT_HARDPOINT		= HARDPOINT | HELD,	// 	sword, shield. at hardpoint, overrides built in.
 		HELD_FREE				= HELD,				//	amulet, ring. held, put not at a hardpoint, and not rendered
 
-		IMMUNE_FIRE			= (1<<10),
-		FLAMMABLE			= (1<<11),
-		IMMUNE_ENERGY		= (1<<12),
+		IMMUNE_FIRE			= (1<<10),				// doesn't burn *at all*
+		FLAMMABLE			= (1<<11),				// burns until gone (wood)
 
+		EXPLOSIVE			= (1<<12),
 		EFFECT_FIRE			= (1<<13),
-		EFFECT_ENERGY		= (1<<14),
+		EFFECT_SHOCK		= (1<<14),
+
+		RENDER_TRAIL		= (1<<15),				// render a bolt with a 'smoketrail' vs. regular bolt
 	};
 
 	grinliz::CStr< MAX_ITEM_NAME >		name;		// name of the item
@@ -203,6 +205,7 @@ public:
 	U32 reloadTime;			// counting UP to ready state
 	int clipCap;			// possible rounds in the clip
 	int rounds;				// current rounds in the clip
+	float speed;			// speed for a variety of uses. 
 
 	float hp;				// current hp for this item
 	Chit* parentChit;		// only set when attached to a Component
@@ -226,6 +229,7 @@ public:
 			reloadTime		= rhs->reloadTime;
 			clipCap			= rhs->clipCap;
 			rounds			= rhs->rounds;
+			speed			= rhs->speed;
 
 			hp				= rhs->hp;
 			parentChit		= 0;	// NOT copied
@@ -247,6 +251,7 @@ public:
 			reloadTime = reload;
 			clipCap = 0;			// default to no clip and unlimited ammo
 			rounds = 0;
+			speed = 1.0f;
 
 			hp = TotalHP();
 			parentChit = 0;

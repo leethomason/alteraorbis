@@ -198,17 +198,21 @@ void BattleMechanics::Shoot( ChitBag* bag, Chit* src, Chit* target, IRangedWeapo
 		return;
 	}
 	Bolt* bolt = bag->NewBolt();
+	GameItem* item = weapon->GetItem();
 	
 	Vector3F t; 
 	target->GetRenderComponent()->GetMetaData( "target", &t );
 	Vector3F dir = t - pos;
 	dir.Normalize();
 
-	bolt->head = pos + dir;		// FIXME: use team ignore, not offset
+	bolt->head = pos + dir;			// FIXME: use team ignore, not offset
 	bolt->len = 1.0f;
 	bolt->dir = dir;
 	bolt->color.Set( 1, 0, 0, 1 );	// FIXME: real color based on item
 	bolt->chitID = src->ID();
-	bolt->damage = weapon->GetItem()->rangedDamage.components;
+	bolt->damage = item->rangedDamage.components;
+	bolt->particle  = (item->flags & GameItem::RENDER_TRAIL) ? true : false;
+	bolt->explosive = (item->flags & GameItem::EXPLOSIVE) ? true : false;
+	bolt->speed = item->speed;
 }
 

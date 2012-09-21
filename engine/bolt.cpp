@@ -23,7 +23,7 @@ using namespace grinliz;
 
 void Bolt::TickAll( grinliz::CDynArray<Bolt>* bolts, U32 delta, Engine* engine, IBoltImpactHandler* handler )
 {
-	static const float SPEED = 5.0f;
+	static const float SPEED = 8.0f;
 
 	GLASSERT( engine->GetMap() );
 	Map* map = engine->GetMap();
@@ -32,13 +32,14 @@ void Bolt::TickAll( grinliz::CDynArray<Bolt>* bolts, U32 delta, Engine* engine, 
 	bounds.Set( 0, 0, 0, (float)(map->Width()), (float)(map->Width())*0.25f, (float)(map->Height()) ); 
 	float timeSlice = (float)delta / 1000.0f;
 
+	int i=0;	
 	ParticleSystem* ps = engine->particleSystem;
 
-	int i=0;
 	while ( i < bolts->Size() ) {
 		Bolt& b = (*bolts)[i];
-
-		float distance = SPEED * timeSlice;
+ 
+		float speed = SPEED * b.speed;
+		float distance = speed * timeSlice;
 		Vector3F travel = b.dir * distance;
 		Vector3F normal = { 0, 1, 0 };
 
@@ -61,7 +62,7 @@ void Bolt::TickAll( grinliz::CDynArray<Bolt>* bolts, U32 delta, Engine* engine, 
 
 			// Check model hit.
 			if ( !b.impact ) {
-				Model* m = engine->IntersectModel( b.head, b.dir, SPEED*timeSlice, TEST_TRI, 0, 0, 0, &at );
+				Model* m = engine->IntersectModel( b.head, b.dir, speed*timeSlice, TEST_TRI, 0, 0, 0, &at );
 				if ( m ) {
 					b.impact = true;
 					normal = b.dir;
@@ -81,12 +82,12 @@ void Bolt::TickAll( grinliz::CDynArray<Bolt>* bolts, U32 delta, Engine* engine, 
 
 		if ( !b.impact ) {
 			b.head += travel;
-			b.len += SPEED*timeSlice;
+			b.len += speed*timeSlice;
 			if ( b.len > 2.0f )
 				b.len = 2.0f;
 		}
 		else {
-			b.len -= SPEED*timeSlice;
+			b.len -= speed*timeSlice;
 		}
 		
 		Vector3F tail = b.head - b.len*b.dir;
@@ -140,28 +141,39 @@ void BoltRenderer::DrawAll( const Bolt* bolts, int nBolts, Engine* engine )
 	static const float HALF_WIDTH = 0.07f;
 
 	nBolts = Min( nBolts, (int)MAX_BOLTS );
+	ParticleSystem* ps = engine->particleSystem;
+	ParticleDef def = *ps->GetPD( "smoketrail" );
+
+	int count = 0;
 	for( int i=0; i<nBolts; ++i ) {
+		if ( bolts[i].particle ) {
+			def.color = bolts[i].color;
+			ps->EmitPD( def, bolts[i].head, V3F_UP, engine->camera.EyeDir3(), 0 );
+		}
+		else {
+			++count;
 
-		Vector3F n;
-		Vector3F tail = bolts[i].head - bolts[i].len*bolts[i].dir;
-		CrossProduct( eyeNormal, bolts[i].head - tail, &n );
-		n.SafeNormalize( 1, 0, 0 );
+			Vector3F n;
+			Vector3F tail = bolts[i].head - bolts[i].len*bolts[i].dir;
+			CrossProduct( eyeNormal, bolts[i].head - tail, &n );
+			n.SafeNormalize( 1, 0, 0 );
 
-		vertex[i*4+0].pos = tail - HALF_WIDTH*n;
-		vertex[i*4+1].pos = tail + HALF_WIDTH*n;
-		vertex[i*4+2].pos = bolts[i].head + HALF_WIDTH*n;
-		vertex[i*4+3].pos = bolts[i].head - HALF_WIDTH*n;
+			vertex[i*4+0].pos = tail - HALF_WIDTH*n;
+			vertex[i*4+1].pos = tail + HALF_WIDTH*n;
+			vertex[i*4+2].pos = bolts[i].head + HALF_WIDTH*n;
+			vertex[i*4+3].pos = bolts[i].head - HALF_WIDTH*n;
 
-		Vector4F color = bolts[i].color;
-		vertex[i*4+0].color = color;
-		vertex[i*4+1].color = color;
-		vertex[i*4+2].color = color;
-		vertex[i*4+3].color = color;
+			Vector4F color = bolts[i].color;
+			vertex[i*4+0].color = color;
+			vertex[i*4+1].color = color;
+			vertex[i*4+2].color = color;
+			vertex[i*4+3].color = color;
+		}
 	}
 
 	Texture* texture = TextureManager::Instance()->GetTexture( "particle" );
 
-	if ( nBolts ) {
+	if ( count ) {
 		ParticleShader shader;
 		shader.SetTexture0( texture );
 
@@ -174,7 +186,7 @@ void BoltRenderer::DrawAll( const Bolt* bolts, int nBolts, Engine* engine )
 		stream.nColor			= 4;
 		stream.colorOffset		= PTCVertex::COLOR_OFFSET;
 
-		shader.SetStream( stream, vertex, nBolts*6, index );
+		shader.SetStream( stream, vertex, count*6, index );
 		shader.Draw();
 	}
 }

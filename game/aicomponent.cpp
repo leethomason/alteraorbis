@@ -429,9 +429,6 @@ bool AIComponent::DoTick( U32 deltaTime )
 			currentAction = 0;
 		}
 	}
-	else {
-		Think();
-	}
 	return true;
 }
 

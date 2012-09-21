@@ -43,8 +43,13 @@
             <melee kinetic="1.5" fire="0.5"/>
       </item>
       <item name="breath"
-            flags="RANGED_WEAPON INTRINSIC_FREE EFFECT_FIRE">
-            <ranged kinetic ="0.5" fire="3" />
+            flags="RANGED_WEAPON INTRINSIC_AT_HARDPOINT EFFECT_FIRE EXPLOSIVE RENDER_TRAIL"
+            hardpoint="head"
+            cooldown="1000"
+            reload="3000"
+            clipCap="1"
+            speed =" 0.6">
+            <ranged kinetic ="10" fire="50" />
       </item>
     </intrinsics>
   </item>
