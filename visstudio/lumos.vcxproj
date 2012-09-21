@@ -108,6 +108,7 @@
     <ClCompile Include="..\game\debugstatecomponent.cpp" />
     <ClCompile Include="..\game\gameitem.cpp" />
     <ClCompile Include="..\game\healthcomponent.cpp" />
+    <ClCompile Include="..\game\lumoschitbag.cpp" />
     <ClCompile Include="..\game\lumosgame.cpp" />
     <ClCompile Include="..\game\mapspatialcomponent.cpp" />
     <ClCompile Include="..\game\pathmovecomponent.cpp" />
@@ -176,6 +177,7 @@
     <ClInclude Include="..\game\gameitem.h" />
     <ClInclude Include="..\game\gamelimits.h" />
     <ClInclude Include="..\game\healthcomponent.h" />
+    <ClInclude Include="..\game\lumoschitbag.h" />
     <ClInclude Include="..\game\lumosgame.h" />
     <ClInclude Include="..\game\mapspatialcomponent.h" />
     <ClInclude Include="..\game\pathmovecomponent.h" />
