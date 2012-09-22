@@ -20,6 +20,7 @@
 	- refactor code - if needed? - in AIComponent (the fixmes)
 	- gunrun to walk not synchronized correctly
 	- item: support speed, pass on to bolts
+	- fix particle def to return a default - the pointer is dangerous
 
 	- ranged weapons
 		- bolts

@@ -10,10 +10,10 @@ using namespace grinliz;
 void LumosChitBag::HandleBolt( const Bolt& bolt, Model* modelHit, const grinliz::Vector3F& at )
 {
 	GLASSERT( engine );
-	Chit* chitHit = modelHit->userData;
 	Chit* chitShooter = GetChit( bolt.chitID );	// may be null
  
 	if ( !bolt.explosive ) {
+		Chit* chitHit = modelHit->userData;
 		GLASSERT( chitHit );
 		GLASSERT( GetChit( chitHit->ID() ) == chitHit );
 		DamageDesc dd;

@@ -640,6 +640,7 @@ void Engine::LoadConfigFiles( const char* particleName, const char* lightName )
 
 	tinyxml2::XMLDocument doc;
 	doc.LoadFile( lightName );
+	GLASSERT( !doc.Error() );
 	lighting.Load( doc.FirstChildElement( "lighting" ));
 }
 

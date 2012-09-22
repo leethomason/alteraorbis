@@ -75,9 +75,16 @@ void Bolt::TickAll( grinliz::CDynArray<Bolt>* bolts, U32 delta, Engine* engine, 
 					handler->HandleBolt( b, m, at );
 				}
 				b.head = at;
+
 				ParticleDef def = *ps->GetPD( "boltImpact" );
 				def.color = b.color;
 				ps->EmitPD( def, at, normal, engine->camera.EyeDir3(), delta );
+
+				if ( b.explosive ) {
+					def = *ps->GetPD( "explosion" );
+					def.color = b.color;
+					ps->EmitPD( def, at, normal, engine->camera.EyeDir3(), delta );
+				}
 			}
 		}
 
@@ -137,6 +144,9 @@ void BoltRenderer::DrawAll( const Bolt* bolts, int nBolts, Engine* engine )
 {
 	// FIXME: crude culling to the view frustum
 	// FIXME: move more to the shader?
+
+	if ( nBolts == 0 )
+		return;
 
 	Vector3F eyeNormal = engine->camera.EyeDir3()[Camera::NORMAL];
 	static const float HALF_WIDTH = 0.07f;
