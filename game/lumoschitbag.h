@@ -6,11 +6,17 @@
 class LumosChitBag : public ChitBag
 {
 public:
-	LumosChitBag()			{}
+	LumosChitBag() : engine(0)	{}
 	virtual ~LumosChitBag() {}
+
+	void SetEngine( Engine* e ) { engine = e; }
 
 	// IBoltImpactHandler
 	virtual void HandleBolt( const Bolt& bolt, Model* m, const grinliz::Vector3F& at );
+
+private:
+	grinliz::CDynArray<Chit*> chitList;
+	Engine* engine;
 };
 
 

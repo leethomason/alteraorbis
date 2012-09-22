@@ -61,18 +61,19 @@ void Bolt::TickAll( grinliz::CDynArray<Bolt>* bolts, U32 delta, Engine* engine, 
 			}
 
 			// Check model hit.
+			Model* m = 0;
 			if ( !b.impact ) {
-				Model* m = engine->IntersectModel( b.head, b.dir, speed*timeSlice, TEST_TRI, 0, 0, 0, &at );
+				m = engine->IntersectModel( b.head, b.dir, speed*timeSlice, TEST_TRI, 0, 0, 0, &at );
 				if ( m ) {
 					b.impact = true;
 					normal = b.dir;
-					if ( handler ) {
-						handler->HandleBolt( b, m, at );
-					}
 				}
 			}
 
 			if ( b.impact ) {
+				if ( handler ) {
+					handler->HandleBolt( b, m, at );
+				}
 				b.head = at;
 				ParticleDef def = *ps->GetPD( "boltImpact" );
 				def.color = b.color;

@@ -195,6 +195,7 @@ void BattleTestScene::LoadMap()
 	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase(), map );	
 	engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
 	engine->SetGlow( true );
+	chitBag.SetEngine( engine );
 
 	for ( int i=0; i<blocks.Size(); ++i ) {
 		Chit* chit = chitBag.NewChit();

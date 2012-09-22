@@ -178,7 +178,9 @@ class MathVector
 public:
 	MathVector() { Zero(); }
 
-	void Zero() { for ( int i=0; i<SIZE; ++i ) vec[i] = 0; }
+	void Zero()				{ for ( int i=0; i<SIZE; ++i ) vec[i] = 0; }
+	void Mult( float m )	{ for ( int i=0; i<SIZE; ++i ) vec[i] *= m; }
+
 	T& operator[](int i)				{ GLASSERT( i>=0 && i<SIZE); return vec[i]; }
 	const T& operator[](int i) const	{ GLASSERT( i>=0 && i<SIZE); return vec[i]; }
 

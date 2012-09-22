@@ -260,6 +260,18 @@ const char* RenderComponent::GetMetaData( int i )
 }
 
 
+bool RenderComponent::HasMetaData( const char* name )
+{
+	for( int i=0; i<EL_MAX_METADATA; ++i ) {
+		if ( resource[0] ) {
+			if ( resource[0]->header.metaData[i].name == name )
+				return true;
+		}
+	}
+	return false;
+}
+
+
 bool RenderComponent::GetMetaData( const char* name, grinliz::Matrix4* xform )
 {
 	if ( model[0] ) {
@@ -276,6 +288,16 @@ bool RenderComponent::GetMetaData( const char* name, grinliz::Vector3F* pos )
 	Matrix4 xform;
 	if ( GetMetaData( name, &xform ) ) {
 		*pos = xform * V3F_ZERO;
+		return true;
+	}
+	return false;
+}
+
+
+bool RenderComponent::CalcTarget( grinliz::Vector3F* pos )
+{
+	if ( model[0] ) {
+		*pos = model[0]->AABB().Center();
 		return true;
 	}
 	return false;

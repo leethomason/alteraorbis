@@ -58,8 +58,10 @@ public:
 
 	const char* GetMetaData( int i );
 
+	bool HasMetaData( const char* name );
 	bool GetMetaData( const char* name, grinliz::Matrix4* xform );
 	bool GetMetaData( const char* name, grinliz::Vector3F* pos );	
+	bool CalcTarget( grinliz::Vector3F* pos );	// manufacture a target if there isn't metadata
 	void GetIgnoreList( grinliz::CArray<const Model*, EL_MAX_METADATA+2> *ignore  );	// ignore must be at least NUM_HARDPOINTS+2 long
 
 	// Is the animation ready to change?
