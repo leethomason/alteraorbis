@@ -29,6 +29,7 @@ void LumosChitBag::HandleBolt( const Bolt& bolt, Model* modelHit, const grinliz:
 		// see what gets hit by the explosion.
 
 		float rewind = Min( 0.1f, 0.5f*bolt.len );
+		GLASSERT( Equal( bolt.dir.Length(), 1.f, 0.001f ));
 		Vector3F origin = at - bolt.dir * rewind;
 		static const float RANGE = 2.0f;
 
@@ -63,12 +64,17 @@ void LumosChitBag::HandleBolt( const Bolt& bolt, Model* modelHit, const grinliz:
 				}
 				Vector3F hit;
 				Model* m = engine->IntersectModel( origin, target-origin, RANGE, TEST_TRI, 0, 0, 0, &hit );
+				if ( m ) 
+					DebugLine( origin, hit, 1, 0, 0 );
+				else
+					DebugLine( origin, target );
+
 				if ( m ) {
 					// Did we hit the current chit? Use the ignoreList 'in reverse': if
 					// we hit any component of the Chit, we hit the chit.
 					CArray<const Model*, EL_MAX_METADATA+2> targetList;
 					rc->GetIgnoreList( &targetList );
-					if ( targetList.Find( m ) ) {
+					if ( targetList.Find( m ) >= 0 ) {
 						// HIT!
 						float len = (hit-origin).Length();
 						// Scale the damage based on the range.

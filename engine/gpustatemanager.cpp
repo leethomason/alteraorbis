@@ -183,6 +183,7 @@ void MatrixStack::Multiply( const grinliz::Matrix4& m )
 }
 
 
+/*static*/ int			GPUShader::primitive = GL_TRIANGLES; 
 /*static*/ int			GPUShader::trianglesDrawn = 0;
 /*static*/ int			GPUShader::drawCalls = 0;
 /*static*/ uint32_t		GPUShader::uid = 0;
@@ -577,7 +578,7 @@ void GPUShader::Draw( int instances )
 	else {
 		ClearShaderFlag( ShaderManager::INSTANCE );
 	}
-	GLASSERT( nIndex % 3 == 0 );
+	GLASSERT( (primitive != GL_TRIANGLES ) || (nIndex % 3 == 0 ));
 
 	trianglesDrawn += instances * nIndex / 3;
 	++drawCalls;
@@ -589,7 +590,8 @@ void GPUShader::Draw( int instances )
 		SetState( *this );
 
 		GLASSERT( !indexBuffer );
-		glDrawElements( GL_TRIANGLES, nIndex*instances, GL_UNSIGNED_SHORT, indexPtr );
+		glDrawElements( primitive,	//GL_TRIANGLES except where debugging 
+						nIndex*instances, GL_UNSIGNED_SHORT, indexPtr );
 
 		if ( vertexBuffer ) {
 			glBindBufferX( GL_ARRAY_BUFFER, 0 );
@@ -607,7 +609,8 @@ void GPUShader::Draw( int instances )
 		glBindBufferX( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
 		SetState( *this );
 
-		glDrawElements( GL_TRIANGLES, nIndex*instances, GL_UNSIGNED_SHORT, 0 );
+		glDrawElements( primitive,	// GL_TRIANGLES except when debugging 
+						nIndex*instances, GL_UNSIGNED_SHORT, 0 );
 
 		glBindBufferX( GL_ARRAY_BUFFER, 0 );
 		glBindBufferX( GL_ELEMENT_ARRAY_BUFFER, 0 );
@@ -629,6 +632,22 @@ void GPUShader::DrawQuad( const grinliz::Vector3F p0, const grinliz::Vector3F p1
 	const U16* index = positive ? indexPos : indexNeg;
 
 	DebugDraw( pos, 6, index );
+}
+
+
+void GPUShader::DrawLine( const grinliz::Vector3F p0, const grinliz::Vector3F p1 )
+{
+	Vector3F v[2] = { p0, p1 };
+	static const U16 index[2] = { 0, 1 };
+
+	GPUStream stream;
+	stream.stride = sizeof(Vector3F);
+	stream.nPos = 3;
+
+	primitive = GL_LINES;
+	SetStream( stream, v, 2, index );
+	Draw();
+	primitive = GL_TRIANGLES;
 }
 
 

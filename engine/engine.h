@@ -43,6 +43,13 @@ static const grinliz::Vector3F V3F_ZERO = { 0, 0, 0 };
 static const grinliz::Vector3F V3F_UP   = { 0, 1, 0 };
 static const grinliz::Vector3F V3F_OUT	= { 0, 0, 1 };
 
+void DebugLine(	const grinliz::Vector3F& tail, 
+				const grinliz::Vector3F& head,
+				float r=1, float g=1, float b=1, 
+				U32 time=1000 );
+
+void DrawDebugLines( U32 delta );
+
 /*
 	Standard state:
 	Z-Write		enabled

@@ -1,7 +1,9 @@
 - combat test scene	
 	X put in license header
 	X push to altera site
-	- balrog fire attack
+	X balrog fire attack
+	- visual debugging: line drawing. check bolt impacts.
+	- impact (light/heavy)
 	- shields, general bonus/cost/damage propegation
 	- removing unit "clumping" (3yr old soccer team). Basic formation?
 	- unique look for units so teams can be distinguished
@@ -9,7 +11,6 @@
 	- eval: kinetic damage of held weapons shouldn't be multiplied with mass (added)
 	- knife -> ring
 	- bolt: glow around white core? end caps?
-	- impact (light/heavy)
 	- properly hook up items and such, so that items, health, all be driven correctly
 	- buttons to select scenario, load items
 	- animation speed isn't correct
@@ -19,8 +20,9 @@
 	- flaming sword should catch things on fire
 	- refactor code - if needed? - in AIComponent (the fixmes)
 	- gunrun to walk not synchronized correctly
-	- item: support speed, pass on to bolts
+	X item: support speed, pass on to bolts
 	- fix particle def to return a default - the pointer is dangerous
+	- DebugDraw is getting used for release drawing - fine in most (all?) cases. But clean up.
 
 	- ranged weapons
 		- bolts

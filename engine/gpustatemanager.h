@@ -182,7 +182,7 @@ public:
 	void SetStream( const GPUStream& stream, const void* vertex, int nIndex, const uint16_t* indices ) 
 	{
 		GLASSERT( stream.stride > 0 );
-		GLASSERT( nIndex % 3 == 0 );
+		//GLASSERT( nIndex % 3 == 0 );
 
 		this->stream = stream;
 		this->streamPtr = vertex;
@@ -283,6 +283,7 @@ public:
 
 	void Draw( int instances=0 );
 
+	void DrawLine( const grinliz::Vector3F p0, const grinliz::Vector3F p1 );
 	void DrawQuad( const grinliz::Vector3F p0, const grinliz::Vector3F p1, bool positiveWinding=true );
 	void DrawArrow( const grinliz::Vector3F p0, const grinliz::Vector3F p1, bool positiveWinding=true, float width=0.4f );
 
@@ -339,6 +340,7 @@ private:
 	static StencilMode currentStencilMode;
 
 protected:
+	static int		primitive;
 	static int		trianglesDrawn;
 	static int		drawCalls;
 	static uint32_t uid;

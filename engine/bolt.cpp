@@ -80,11 +80,13 @@ void Bolt::TickAll( grinliz::CDynArray<Bolt>* bolts, U32 delta, Engine* engine, 
 				def.color = b.color;
 				ps->EmitPD( def, at, normal, engine->camera.EyeDir3(), delta );
 
+				/*
 				if ( b.explosive ) {
 					def = *ps->GetPD( "explosion" );
 					def.color = b.color;
 					ps->EmitPD( def, at, normal, engine->camera.EyeDir3(), delta );
 				}
+				*/
 			}
 		}
 

@@ -411,6 +411,11 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 	const Vector3F* eyeDir = camera.EyeDir3();
 	particleSystem->Update( deltaTime, eyeDir );
 	particleSystem->Draw();
+
+	// ---- Debugging ---
+	{
+		DrawDebugLines( deltaTime );
+	}
 }
 
 
@@ -645,3 +650,44 @@ void Engine::LoadConfigFiles( const char* particleName, const char* lightName )
 }
 
 
+struct DLine {
+	Vector3F tail;
+	Vector3F head;
+	Vector3F color;
+	int		 time;
+};
+
+grinliz::CArray<DLine, 100> debugLines;
+
+void DebugLine(	const grinliz::Vector3F& tail, 
+						const grinliz::Vector3F& head,
+						float r, float g, float b, 
+						U32 time )
+{
+	if ( debugLines.HasCap() ) {
+		DLine* dl = debugLines.PushArr(1);
+		dl->tail = tail;
+		dl->head = head;
+		dl->color.Set( r, g, b );
+		dl->time = time;
+	}
+}
+
+
+void DrawDebugLines( U32 delta )
+{
+	FlatShader flatShader;
+	int i=0;
+	while( i<debugLines.Size() ) {
+		DLine* dl = &debugLines[i];
+		if ( dl->time > 0 ) {
+			dl->time -= delta;
+			flatShader.SetColor( dl->color.x, dl->color.y, dl->color.z );
+			flatShader.DrawLine( dl->tail, dl->head );
+			++i;
+		}
+		else {
+			debugLines.SwapRemove(i);
+		}
+	}
+}
