@@ -297,7 +297,12 @@ bool RenderComponent::GetMetaData( const char* name, grinliz::Vector3F* pos )
 bool RenderComponent::CalcTarget( grinliz::Vector3F* pos )
 {
 	if ( model[0] ) {
-		*pos = model[0]->AABB().Center();
+		if ( HasMetaData( "target" )) {
+			GetMetaData( "target", pos );
+		}
+		else {
+			*pos = model[0]->AABB().Center();
+		}
 		return true;
 	}
 	return false;

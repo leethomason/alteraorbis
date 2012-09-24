@@ -45,6 +45,8 @@ public:
 	virtual bool DoTick( U32 delta );
 	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
 
+	virtual void CalcVelocity( grinliz::Vector3F* v );
+
 	void QueueDest( grinliz::Vector2F dest,
 					float rotation = -1.f );		// if specified, the rotation we wish to get to
 	void QueueDest( Chit* targetChit );
@@ -80,9 +82,6 @@ private:
 		return dest.pos.x >= 0;
 	}
 
-	// Move, then set rotation from movement.
-	//void MoveFirst( U32 delta );
-	
 	// Rotate, then move in that direction.
 	void RotationFirst( U32 delta );
 	// Try to avoid walking through others.
@@ -96,7 +95,6 @@ private:
 
 		grinliz::Vector2F	pos;
 		float				rotation;	 // <0 means ignore
-		//int					doNotAvoid;
 	};
 
 	WorldMap*	map;

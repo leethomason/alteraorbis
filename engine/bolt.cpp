@@ -23,8 +23,6 @@ using namespace grinliz;
 
 void Bolt::TickAll( grinliz::CDynArray<Bolt>* bolts, U32 delta, Engine* engine, IBoltImpactHandler* handler )
 {
-	static const float SPEED = 8.0f;
-
 	GLASSERT( engine->GetMap() );
 	Map* map = engine->GetMap();
 
@@ -38,8 +36,7 @@ void Bolt::TickAll( grinliz::CDynArray<Bolt>* bolts, U32 delta, Engine* engine, 
 	while ( i < bolts->Size() ) {
 		Bolt& b = (*bolts)[i];
  
-		float speed = SPEED * b.speed;
-		float distance = speed * timeSlice;
+		float distance = b.speed * timeSlice;
 		Vector3F travel = b.dir * distance;
 		Vector3F normal = { 0, 1, 0 };
 
@@ -63,7 +60,7 @@ void Bolt::TickAll( grinliz::CDynArray<Bolt>* bolts, U32 delta, Engine* engine, 
 			// Check model hit.
 			Model* m = 0;
 			if ( !b.impact ) {
-				m = engine->IntersectModel( b.head, b.dir, speed*timeSlice, TEST_TRI, 0, 0, 0, &at );
+				m = engine->IntersectModel( b.head, b.dir, distance, TEST_TRI, 0, 0, 0, &at );
 				if ( m ) {
 					b.impact = true;
 					normal = b.dir;
@@ -80,24 +77,22 @@ void Bolt::TickAll( grinliz::CDynArray<Bolt>* bolts, U32 delta, Engine* engine, 
 				def.color = b.color;
 				ps->EmitPD( def, at, normal, engine->camera.EyeDir3(), delta );
 
-				/*
 				if ( b.explosive ) {
 					def = *ps->GetPD( "explosion" );
 					def.color = b.color;
 					ps->EmitPD( def, at, normal, engine->camera.EyeDir3(), delta );
 				}
-				*/
 			}
 		}
 
 		if ( !b.impact ) {
 			b.head += travel;
-			b.len += speed*timeSlice;
+			b.len += distance;
 			if ( b.len > 2.0f )
 				b.len = 2.0f;
 		}
 		else {
-			b.len -= speed*timeSlice;
+			b.len -= distance;
 		}
 		
 		Vector3F tail = b.head - b.len*b.dir;

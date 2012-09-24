@@ -197,12 +197,24 @@ void BattleMechanics::Shoot( ChitBag* bag, Chit* src, Chit* target, IRangedWeapo
 	if ( !okay ) {
 		return;
 	}
+	if ( !target->GetRenderComponent() ) {
+		return;
+	}
 	Bolt* bolt = bag->NewBolt();
 	GameItem* item = weapon->GetItem();
 	
-	Vector3F t; 
-	target->GetRenderComponent()->GetMetaData( "target", &t );
-	Vector3F dir = t - pos;
+	Vector3F t = { 0, 0, 0 };
+	Vector3F v = { 0, 0, 0 };
+	target->GetRenderComponent()->CalcTarget( &t );
+	if ( target->GetMoveComponent() ) {
+		target->GetMoveComponent()->CalcVelocity( &v );
+	}
+
+	static const float SPEED = 8.0f;
+	float speed = SPEED * item->speed;
+	Vector3F aimAt = ComputeLeadingShot( pos, t, v, speed );
+
+	Vector3F dir = aimAt - pos;
 	dir.Normalize();
 
 	bolt->head = pos + dir;			// FIXME: use team ignore, not offset
@@ -213,6 +225,40 @@ void BattleMechanics::Shoot( ChitBag* bag, Chit* src, Chit* target, IRangedWeapo
 	bolt->damage = item->rangedDamage.components;
 	bolt->particle  = (item->flags & GameItem::RENDER_TRAIL) ? true : false;
 	bolt->explosive = (item->flags & GameItem::EXPLOSIVE) ? true : false;
-	bolt->speed = item->speed;
+	bolt->speed = speed;
 }
 
+
+Vector3F BattleMechanics::ComputeLeadingShot(	const grinliz::Vector3F& origin,
+												const grinliz::Vector3F& target,
+												const grinliz::Vector3F& v,
+												float speed )
+{
+
+	// FIRE! compute the "best" shot. Simple, but not trivial, math. Stack overflow, you are mighty:
+	// http://stackoverflow.com/questions/2248876/2d-game-fire-at-a-moving-target-by-predicting-intersection-of-projectile-and-un
+	// a := sqr(target.velocityX) + sqr(target.velocityY) - sqr(projectile_speed)
+	// b := 2 * (target.velocityX * (target.startX - cannon.X) + target.velocityY * (target.startY - cannon.Y))
+	// c := sqr(target.startX - cannon.X) + sqr(target.startY - cannon.Y)
+	//
+		
+	float a = SquareF( v.x ) + SquareF(  v.y ) + SquareF( v.z ) - SquareF( speed );
+	float b = 2.0f * ( v.x*(target.x - origin.x) + v.y*(target.y - origin.y) + v.z*(target.z - origin.z));
+	float c = SquareF( target.x - origin.x ) + SquareF( target.y - origin.y) + SquareF( target.z - origin.z);
+
+	float disc = b*b - 4.0f*a*c;
+	Vector3F aimAt = target;	// default to shooting straight at target if there is an error
+
+	if ( disc > 0.01f ) {
+		float t1 = ( -b + sqrtf( disc ) ) / (2.0f * a );
+		float t2 = ( -b - sqrtf( disc ) ) / (2.0f * a );
+
+		float t = 0;
+		if ( t1 > 0 && t2 > 0 ) t = Min( t1, t2 );
+		else if ( t1 > 0 ) t = t1;
+		else t = t2;
+
+		aimAt = target + t * v;
+	}
+	return aimAt;
+}

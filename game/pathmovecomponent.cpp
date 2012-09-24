@@ -63,6 +63,16 @@ void PathMoveComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 }
 
 
+void PathMoveComponent::CalcVelocity( grinliz::Vector3F* v )
+{
+	v->Zero();
+	SpatialComponent* spatial = parentChit->GetSpatialComponent();
+	if ( spatial && this->IsMoving() ) {
+		*v = spatial->GetHeading() * MOVE_SPEED;
+	}
+}
+
+
 void PathMoveComponent::QueueDest( grinliz::Vector2F d, float r /*, int doNotAvoid*/ )
 {
 	GLASSERT(  d.x >= 0 && d.y >= 0 );

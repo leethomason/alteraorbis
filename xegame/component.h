@@ -19,6 +19,7 @@
 #include "../grinliz/gltypes.h"
 #include "../grinliz/gldebug.h"
 #include "../grinliz/glstringutil.h"
+#include "../grinliz/glvector.h"
 
 // The primary components:
 class SpatialComponent;
@@ -84,6 +85,9 @@ public:
 		if ( grinliz::StrEqual( name, "MoveComponent" ) ) return this;
 		return Component::ToComponent( name );
 	}
+
+	// approximate, may lag, etc. useful for AI
+	virtual void CalcVelocity( grinliz::Vector3F* v ) { v->Set( 0,0,0 ); }
 };
 
 

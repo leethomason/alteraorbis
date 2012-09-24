@@ -43,6 +43,11 @@ public:
 
 	void CalcMeleeDamage( Chit* src, IMeleeWeaponItem* weapon, DamageDesc* );
 	void Shoot( ChitBag* bag, Chit* src, Chit* target, IRangedWeaponItem* weapon, const grinliz::Vector3F& pos );
+	grinliz::Vector3F ComputeLeadingShot( const grinliz::Vector3F& origin,
+										  const grinliz::Vector3F& target,
+										  const grinliz::Vector3F& velocity,
+										  float speed );
+
 
 	static int PrimaryTeam( Chit* src );
 

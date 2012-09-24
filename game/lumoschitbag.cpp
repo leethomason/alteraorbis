@@ -5,6 +5,8 @@
 #include "../engine/engine.h"
 #include "../engine/loosequadtree.h"
 
+//#define DEBUG_EXPLOSION
+
 using namespace grinliz;
 
 void LumosChitBag::HandleBolt( const Bolt& bolt, Model* modelHit, const grinliz::Vector3F& at )
@@ -56,19 +58,16 @@ void LumosChitBag::HandleBolt( const Bolt& bolt, Model* modelHit, const grinliz:
 			Chit* chit = chitList[i];
 			RenderComponent* rc = chit->GetRenderComponent();
 			if ( rc && (chit != chitShooter)) {
-				if ( rc->HasMetaData( "target" )) {
-					rc->GetMetaData( "target", &target );
-				}
-				else {
-					rc->CalcTarget( &target );
-				}
+				rc->CalcTarget( &target );
+
 				Vector3F hit;
 				Model* m = engine->IntersectModel( origin, target-origin, RANGE, TEST_TRI, 0, 0, 0, &hit );
+#ifdef DEBUG_EXPLOSION
 				if ( m ) 
 					DebugLine( origin, hit, 1, 0, 0 );
 				else
 					DebugLine( origin, target );
-
+#endif
 				if ( m ) {
 					// Did we hit the current chit? Use the ignoreList 'in reverse': if
 					// we hit any component of the Chit, we hit the chit.
