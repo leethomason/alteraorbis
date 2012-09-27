@@ -28,7 +28,7 @@ static const char* gAnimationName[ ANIM_COUNT ] = {
 	"gunrun",
 	"gunstand",
 	"melee",
-	"impactlight",
+	//"impactlight",
 	"impactheavy"
 };
 
@@ -38,7 +38,7 @@ static const bool gAnimationLooping[ ANIM_COUNT ] = {
 	true,
 	false,
 	false,
-	false,
+	//false,
 	false
 };
 
@@ -48,7 +48,7 @@ static const bool gAnimationSync[ ANIM_COUNT ] = {
 	true,
 	false,
 	false,
-	false,
+	//false,
 	false
 };
 
@@ -58,7 +58,7 @@ static const bool gAnimationMotion[ ANIM_COUNT ] = {
 	true,
 	false,
 	false,
-	true,
+	//true,
 	true
 };
 

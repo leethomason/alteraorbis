@@ -21,6 +21,7 @@
 #include "../grinliz/gldebug.h"
 #include "../grinliz/glcontainer.h"
 #include "../grinliz/glstringutil.h"
+#include "../grinliz/glvector.h"
 
 class Component;
 class SpatialComponent;
@@ -41,7 +42,7 @@ public:
 	enum {
 		// ---- Chit --- //
 		CHIT_DESTROYED,			// sender: health
-		CHIT_DAMAGE,			// sender: chitBag, Ptr = &DamageDesc
+		CHIT_DAMAGE,			// sender: chitBag, Data=isExplosion Ptr = &DamageDesc, vector=kickback
 
 		// ---- Component ---- //
 		// Game
@@ -57,11 +58,16 @@ public:
 		RENDER_IMPACT,			// impact metadata event has occured, sender: render component
 	};
 
-	ChitMsg( int _id, int _data=0, const void* _ptr=0 ) : id(_id), data(_data), ptr(_ptr) {}
+	ChitMsg( int _id, int _data=0, const void* _ptr=0 ) : id(_id), data(_data), ptr(_ptr) {
+		vector.Zero();
+	}
 
 	int ID() const { return id; }
 	int Data() const { return data; }
 	const void* Ptr() const { return ptr; }
+
+	// useful data members:
+	grinliz::Vector3F vector;
 
 private:
 	int id;
@@ -197,7 +203,8 @@ private:
 struct ComponentSet
 {
 	enum {
-		IS_ALIVE = (1<<30)
+		IS_ALIVE		= (1<<30),
+		NOT_IN_IMPACT	= (1<<29),
 	};
 
 	ComponentSet( Chit* chit, int bits );

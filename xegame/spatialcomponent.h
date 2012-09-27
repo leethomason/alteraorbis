@@ -28,6 +28,9 @@
 
 class RelativeSpatialComponent;
 
+/* Chits with a SpatialComponent are in the map world as there own entity. (Hardpoint
+   items do not have SpatialComponents.
+*/
 class SpatialComponent : public Component
 {
 public:

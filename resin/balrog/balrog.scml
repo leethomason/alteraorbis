@@ -141,6 +141,7 @@
                 <duration>24.97340</duration>
             </frame>
         </anim>
+        <!--
         <anim>
             <name>impactlight</name>
             <frame>
@@ -148,6 +149,7 @@
                 <duration>500.00000</duration>
             </frame>
         </anim>
+        -->
         <anim>
             <name>impactheavy</name>
             <frame>

@@ -40,7 +40,7 @@ static const float ROTATION_SPEED	= 360.f;		// degrees/second
 
 void PathMoveComponent::OnAdd( Chit* chit )
 {
-	MoveComponent::OnAdd( chit );
+	GameMoveComponent::OnAdd( chit );
 	SetNoPath();
 	blockForceApplied = false;
 	avoidForceApplied = false;
@@ -53,7 +53,7 @@ void PathMoveComponent::OnAdd( Chit* chit )
 
 void PathMoveComponent::OnRemove()
 {
-	MoveComponent::OnRemove();
+	GameMoveComponent::OnRemove();
 }
 
 
@@ -341,23 +341,6 @@ bool PathMoveComponent::AvoidOthers( U32 delta )
 }
 
 
-void PathMoveComponent::ApplyBlocks()
-{
-	GRINLIZ_PERFTRACK;
-	RenderComponent* render = parentChit->GetRenderComponent();
-
-	Vector2F newPos2 = pos2;
-	float rotation = 0;
-	float radius = render->RadiusOfBase();
-
-	WorldMap::BlockResult result = map->ApplyBlockEffect( pos2, radius, &newPos2 );
-	blockForceApplied = ( result == WorldMap::FORCE_APPLIED );
-	isStuck = ( result == WorldMap::STUCK );
-	
-	pos2 = newPos2;
-}
-
-
 bool PathMoveComponent::DoTick( U32 delta )
 {
 	GRINLIZ_PERFTRACK;
@@ -402,7 +385,7 @@ bool PathMoveComponent::DoTick( U32 delta )
 			RotationFirst( delta );
 
 			squattingDest = AvoidOthers( delta );
-			ApplyBlocks();
+			ApplyBlocks( &pos2, &this->blockForceApplied, &this->isStuck );
 			SetPosRot( pos2, rot );
 		}
 
@@ -453,7 +436,7 @@ bool PathMoveComponent::DoTick( U32 delta )
 	else {
 		GetPosRot( &pos2, &rot );
 		AvoidOthers( delta );
-		ApplyBlocks();
+		ApplyBlocks( &pos2, &this->blockForceApplied, &this->isStuck );
 		SetPosRot( pos2, rot );
 	};
 //	GLASSERT( (pathPos < nPathPos ) || queuedDest.x >= 0 );

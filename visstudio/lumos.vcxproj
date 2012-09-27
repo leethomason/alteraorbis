@@ -108,11 +108,13 @@
     <ClCompile Include="..\game\debugpathcomponent.cpp" />
     <ClCompile Include="..\game\debugstatecomponent.cpp" />
     <ClCompile Include="..\game\gameitem.cpp" />
+    <ClCompile Include="..\game\gamemovecomponent.cpp" />
     <ClCompile Include="..\game\healthcomponent.cpp" />
     <ClCompile Include="..\game\lumoschitbag.cpp" />
     <ClCompile Include="..\game\lumosgame.cpp" />
     <ClCompile Include="..\game\mapspatialcomponent.cpp" />
     <ClCompile Include="..\game\pathmovecomponent.cpp" />
+    <ClCompile Include="..\game\physicsmovecomponent.cpp" />
     <ClCompile Include="..\game\worldmap.cpp" />
     <ClCompile Include="..\gamui\gamui.cpp" />
     <ClCompile Include="..\micropather\micropather.cpp" />
@@ -126,6 +128,7 @@
     <ClCompile Include="..\scenes\rendertestscene.cpp" />
     <ClCompile Include="..\script\battlemechanics.cpp" />
     <ClCompile Include="..\script\itemscript.cpp" />
+    <ClCompile Include="..\script\worldscript.cpp" />
     <ClCompile Include="..\shared\gamedbreader.cpp" />
     <ClCompile Include="..\win32\audio.cpp" />
     <ClCompile Include="..\win32\framebuffer.cpp" />
@@ -177,11 +180,13 @@
     <ClInclude Include="..\game\debugstatecomponent.h" />
     <ClInclude Include="..\game\gameitem.h" />
     <ClInclude Include="..\game\gamelimits.h" />
+    <ClInclude Include="..\game\gamemovecomponent.h" />
     <ClInclude Include="..\game\healthcomponent.h" />
     <ClInclude Include="..\game\lumoschitbag.h" />
     <ClInclude Include="..\game\lumosgame.h" />
     <ClInclude Include="..\game\mapspatialcomponent.h" />
     <ClInclude Include="..\game\pathmovecomponent.h" />
+    <ClInclude Include="..\game\physicsmovecomponent.h" />
     <ClInclude Include="..\game\worldmap.h" />
     <ClInclude Include="..\gamui\gamui.h" />
     <ClInclude Include="..\micropather\micropather.h" />
@@ -196,6 +201,7 @@
     <ClInclude Include="..\scenes\titlescene.h" />
     <ClInclude Include="..\script\battlemechanics.h" />
     <ClInclude Include="..\script\itemscript.h" />
+    <ClInclude Include="..\script\worldscript.h" />
     <ClInclude Include="..\shared\gamedb.h" />
     <ClInclude Include="..\shared\gamedbreader.h" />
     <ClInclude Include="..\win32\audio.h" />

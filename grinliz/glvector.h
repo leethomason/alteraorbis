@@ -109,6 +109,7 @@ struct Vector2
 		this->x = _x;
 		this->y = _y;
 	}
+
 	void Zero() {
 		x = (T)0;
 		y = (T)0;
@@ -290,6 +291,11 @@ struct Vector3
 		this->x = _x;
 		this->y = _y;
 		this->z = _z;
+	}
+
+	void XZ( const Vector2<T>& v ) {
+		this->x = v.x;
+		this->z = v.y;
 	}
 
 	void Normalize()	

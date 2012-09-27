@@ -15,7 +15,12 @@
 
 #include "itemcomponent.h"
 #include "chit.h"
+
 #include "../game/healthcomponent.h"
+#include "../game/physicsmovecomponent.h"
+#include "../xegame/rendercomponent.h"
+
+using namespace grinliz;
 
 void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {
@@ -27,13 +32,51 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		// FIXME: see if inventory can absorb first (shields)
 
 		float hp = item.hp;
-		item.AbsorbDamage( *dd, 0, "DAMAGE" );
+		float delta = item.AbsorbDamage( *dd, 0, "DAMAGE" );
 		GLLOG(( "\n" ));
 
 		if ( item.hp != hp ) {
 			HealthComponent* hc = GET_COMPONENT( parentChit, HealthComponent );
 			if ( hc ) {
 				hc->DeltaHealth();
+
+				// Can this be knocked back??
+				ComponentSet thisComp( chit, ComponentSet::IS_ALIVE | Chit::SPATIAL_BIT | Chit::RENDER_BIT );
+				if ( thisComp.okay ) {
+					// Do we apply knockback? In place or travelling?
+					// What are the rules?
+					//  - solid hits do knockback
+					//  - minor explosions do knockback
+					bool knockback = false;
+					if ( msg.Data() ) {
+						// explosion
+						if ( delta > item.TotalHP() * 0.2f ) {
+							knockback = true;
+						}
+					}
+					else {
+						if ( delta > item.TotalHP() * 0.4f ) {
+							knockback = true;
+						}
+					}
+
+					if ( knockback ) {
+						thisComp.render->PlayAnimation( ANIM_HEAVY_IMPACT );
+
+						GameMoveComponent* gmc = GET_COMPONENT( parentChit, GameMoveComponent );
+						if ( gmc ) {
+							WorldMap* map = gmc->GetWorldMap();
+							parentChit->Remove( gmc );
+							delete gmc; gmc = 0;
+
+							PhysicsMoveComponent* pmc = new PhysicsMoveComponent( map );
+							parentChit->Add( pmc );
+
+							Vector3F v = { 1,6,1 };
+							pmc->Set( v );
+						}
+					}
+				}
 			}
 		}
 	}

@@ -16,27 +16,27 @@
 #ifndef PATH_MOVE_COMPONENT_INCLUDED
 #define PATH_MOVE_COMPONENT_INCLUDED
 
-#include "../xegame/component.h"
 #include "../grinliz/glvector.h"
 #include "../grinliz/glcontainer.h"
 #include "gamelimits.h"
+#include "gamemovecomponent.h"
 
 class WorldMap;
 
 /*	Move along a path.
 	Future note: Pathing should be async and done by message passing.
 */
-class PathMoveComponent : public MoveComponent
+class PathMoveComponent : public GameMoveComponent
 {
 public:
 
 	PathMoveComponent(	WorldMap* _map )				// required; used to avoids blocks when moving. 
-		: map( _map ), nPathPos( 0 ), pathPos( 0 ), pathDebugging( false ) {}
+		: GameMoveComponent( _map ), nPathPos( 0 ), pathPos( 0 ), pathDebugging( false ) {}
 	virtual ~PathMoveComponent() {}
 
 	virtual Component* ToComponent( const char* name ) {
 		if ( grinliz::StrEqual( name, "PathMoveComponent" ) ) return this;
-		return MoveComponent::ToComponent( name );
+		return GameMoveComponent::ToComponent( name );
 	}
 	virtual void DebugStr( grinliz::GLString* str );
 
@@ -87,8 +87,6 @@ private:
 	// Try to avoid walking through others.
 	// Returns 'true' if the destination is being squatted.
 	bool AvoidOthers( U32 delta );
-	// Keep from hitting world objects.
-	void ApplyBlocks();
 
 	struct Dest {
 		void Clear() { pos.Set( -1, -1 ); rotation = -1.f; /*doNotAvoid = 0;*/ }
@@ -97,7 +95,6 @@ private:
 		float				rotation;	 // <0 means ignore
 	};
 
-	WorldMap*	map;
 	int nPathPos;				// size of path
 	int pathPos;				// index of where we are on path
 	int repath;					// counter to see if we are stuck

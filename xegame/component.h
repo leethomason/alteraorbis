@@ -79,13 +79,13 @@ class MoveComponent : public Component
 {
 public:
 	virtual MoveComponent*		ToMove()		{ return this; }
-	virtual bool IsMoving() const				{ return false; }
 
 	virtual Component*          ToComponent( const char* name ) {
 		if ( grinliz::StrEqual( name, "MoveComponent" ) ) return this;
 		return Component::ToComponent( name );
 	}
 
+	virtual bool IsMoving() const				{ return false; }
 	// approximate, may lag, etc. useful for AI
 	virtual void CalcVelocity( grinliz::Vector3F* v ) { v->Set( 0,0,0 ); }
 };

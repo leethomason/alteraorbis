@@ -2,8 +2,9 @@
 	X put in license header
 	X push to altera site
 	X balrog fire attack
-	- visual debugging: line drawing. check bolt impacts.
+	X visual debugging: line drawing. check bolt impacts.
 	- impact (light/heavy)
+	- heavy weapons should do knockback, not just amount of damage/explosion
 	- shields, general bonus/cost/damage propegation
 	- removing unit "clumping" (3yr old soccer team). Basic formation?
 	- unique look for units so teams can be distinguished

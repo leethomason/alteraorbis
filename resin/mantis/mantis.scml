@@ -110,18 +110,20 @@
                 <duration>13.78724</duration>
             </frame>
         </anim>
+       <!--
         <anim>
             <name>impactlight</name>
             <frame>
                 <name>frame_014</name>
-                <duration>500.00000</duration>
+                <duration>25.00000</duration>
             </frame>
         </anim>
+        --> 
         <anim>
             <name>impactheavy</name>
             <frame>
                 <name>frame_015</name>
-                <duration>500.00000</duration>
+                <duration>60.00000</duration>
             </frame>
         </anim>
         <box>

@@ -94,7 +94,6 @@ SpatialComponent* RenderComponent::SyncToSpatial()
 AnimationType RenderComponent::CalcAnimation() const
 {
 	AnimationType current = model[0]->GetAnimation();
-	
 	AnimationType n = ANIM_STAND;
 
 	// Melee is tricky. If we are just standing around,
@@ -126,10 +125,16 @@ AnimationType RenderComponent::CalcAnimation() const
 }
 
 
+AnimationType RenderComponent::CurrentAnimation() const
+{
+	return model[0]->GetAnimation();
+}
+
+
 bool RenderComponent::AnimationReady() const
 {
 	AnimationType type = model[0]->GetAnimation();
-	if ( type == ANIM_MELEE ) {
+	if ( type == ANIM_MELEE || type == ANIM_HEAVY_IMPACT ) {
 		return model[0]->AnimationDone();
 	}
 	return true;
@@ -138,14 +143,25 @@ bool RenderComponent::AnimationReady() const
 
 bool RenderComponent::PlayAnimation( AnimationType type )
 {
-	if ( type == ANIM_MELEE ) {
+	if ( type == ANIM_HEAVY_IMPACT ) {
+		// *always* overrides
+		model[0]->SetAnimation( ANIM_HEAVY_IMPACT, CROSS_FADE_TIME, true );
+	}
+//	else if ( type == ANIM_LIGHT_IMPACT ) {
+//		// overrides everything but heavy
+//		if ( model[0]->GetAnimation() != ANIM_HEAVY_IMPACT ) {
+//			model[0]->SetAnimation( ANIM_LIGHT_IMPACT, CROSS_FADE_TIME, true );
+//		}
+//	}
+	else if ( type == ANIM_MELEE ) {
+		// melee if we can
 		if ( AnimationReady() ) {
 			model[0]->SetAnimation( ANIM_MELEE, CROSS_FADE_TIME, true );
 			return true;
 		}
 	}
 	else {
-		GLASSERT( 0 );	// need to support other cases
+		GLASSERT( 0 );	// other cases aren't explicity set
 	}
 	return false;
 }
@@ -309,7 +325,7 @@ bool RenderComponent::CalcTarget( grinliz::Vector3F* pos )
 }
 
 
-void RenderComponent::GetIgnoreList( grinliz::CArray<const Model*, NUM_HARDPOINTS+2> *ignore )
+void RenderComponent::GetModelList( grinliz::CArray<const Model*, NUM_HARDPOINTS+2> *ignore )
 {
 	ignore->Clear();
 	for( int i=0; i<NUM_MODELS; ++i ) {

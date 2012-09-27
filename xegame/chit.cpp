@@ -363,9 +363,15 @@ ComponentSet::ComponentSet( Chit* _chit, int bits )
 					++error;
 			}
 		}
-		if ( bits & Chit::RENDER_BIT ) {
+		if ( (bits & Chit::RENDER_BIT) || (bits & NOT_IN_IMPACT) ) {
 			render = chit->GetRenderComponent();
 			if ( !render ) ++error;
+
+			if ( bits & NOT_IN_IMPACT ) {
+				AnimationType type = render->CurrentAnimation();
+				if ( type == ANIM_HEAVY_IMPACT )
+					++error;
+			}
 		}
 
 		if ( error ) 

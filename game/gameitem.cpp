@@ -160,10 +160,11 @@ void GameItem::Apply( const GameItem* intrinsic )
 }
 
 
-void GameItem::AbsorbDamage( const DamageDesc& dd, DamageDesc* remain, const char* log )
+float GameItem::AbsorbDamage( const DamageDesc& dd, DamageDesc* remain, const char* log )
 {
 	float total = 0;
 	GLLOG(( "%s Damage ", log ));
+
 	for( int i=0; i<DamageDesc::NUM_COMPONENTS && hp > 0; ++i ) {
 		float d = resist.components[i] * dd.components[i];
 		GLLOG(( "%.1f ", d ));
@@ -174,8 +175,10 @@ void GameItem::AbsorbDamage( const DamageDesc& dd, DamageDesc* remain, const cha
 		}
 		total += d;
 	}
+	total = Min( hp, total );
 	hp = Max( 0.f, hp-total );
 	GLLOG(( "total=%.1f hp=%.1f", total, hp ));
+	return total;
 }
 
 

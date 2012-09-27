@@ -33,6 +33,9 @@
 
 #include "../engine/engine.h"
 #include "../engine/text.h"
+#include "../engine/loosequadtree.h"
+
+#include "../script/worldscript.h"
 
 #include <ctime>
 
@@ -368,14 +371,18 @@ void BattleTestScene::DrawDebugText()
 		chitBag.NumTicked(), chitBag.NumChits() );
 
 	if ( debugRay.direction.x ) {
-		Model* root = engine->IntersectModel( debugRay.origin, debugRay.direction, FLT_MAX, TEST_TRI, 0, 0, 0, 0 );
-		int y = 32;
-		for ( ; root; root=root->next ) {
+		Vector3F at;
+		Model* root = engine->IntersectModel( debugRay.origin, debugRay.direction, FLT_MAX, TEST_TRI, 0, 0, 0, &at );
+
+		if ( root ) {
+			engine->particleSystem->EmitPD( "spell", at, V3F_UP, engine->camera.EyeDir3(), 0 );
+
+			int y = 32;
 			Chit* chit = root->userData;
 			if ( chit ) {
 				GLString str;
 				chit->DebugStr( &str );
-				ufoText->Draw( 0, y, "%s", str.c_str() );
+				ufoText->Draw( 0, y, "%s ", str.c_str() );
 				y += 16;
 			}
 		}
@@ -407,7 +414,43 @@ void BattleTestScene::Tap( int action, const grinliz::Vector2F& view, const grin
 {
 	bool uiHasTap = ProcessTap( action, view, world );
 	if ( !uiHasTap ) {
-		int tap = Process3DTap( action, view, world, engine );
+		bool tap = Process3DTap( action, view, world, engine );
+		if ( action == GAME_TAP_DOWN ) {
+
+			Vector3F at;
+			IntersectRayPlane( debugRay.origin, debugRay.direction, 1, 0, &at );
+			at.y = 0.01f;
+
+			DamageDesc dd;
+			dd.Set( 20, 0, 0, 0 );
+			ChitMsg msg( ChitMsg::CHIT_DAMAGE, 5, &dd );
+			msg.vector = debugRay.direction;
+
+			Rectangle2F rect;
+			rect.Set( at.x, at.z, at.x, at.z );
+			rect.Outset( 3.0f );
+	
+			WorldScript::QueryChits( rect, engine, &chitArr );
+			for( int i=0; i<chitArr.Size(); ++i ) {
+				GLString str;
+				chitArr[i]->DebugStr( &str );
+				GLOUTPUT(( "%s\n", str.c_str() ));
+
+				chitArr[i]->SendMessage( msg, 0 );
+			}
+#if 0
+			Model* root = engine->IntersectModel( debugRay.origin, debugRay.direction, FLT_MAX, TEST_TRI, 0, 0, 0, 0 );
+			if ( root && root->userData ) {
+				Chit* chit = root->userData;
+
+				DamageDesc dd;
+				dd.Set( 5, 0, 0, 0 );
+				ChitMsg msg( ChitMsg::CHIT_DAMAGE, 0, &dd );
+
+				chit->SendMessage( msg, 0 );
+			}
+#endif
+		}
 	}
 }
 

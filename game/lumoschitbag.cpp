@@ -4,6 +4,7 @@
 #include "../engine/model.h"
 #include "../engine/engine.h"
 #include "../engine/loosequadtree.h"
+#include "../script/worldscript.h"
 
 //#define DEBUG_EXPLOSION
 
@@ -20,7 +21,10 @@ void LumosChitBag::HandleBolt( const Bolt& bolt, Model* modelHit, const grinliz:
 		GLASSERT( GetChit( chitHit->ID() ) == chitHit );
 		DamageDesc dd;
 		dd.components = bolt.damage;
-		chitHit->SendMessage( ChitMsg( ChitMsg::CHIT_DAMAGE, 0, &dd ), 0 );
+		
+		ChitMsg msg( ChitMsg::CHIT_DAMAGE, 0, &dd );
+		msg.vector = bolt.dir;
+		chitHit->SendMessage( msg, 0 );
 	}
 	else {
 		// Here don't worry abou the chit hit. Just ray cast to see
@@ -38,19 +42,7 @@ void LumosChitBag::HandleBolt( const Bolt& bolt, Model* modelHit, const grinliz:
 		Rectangle2F rect;
 		rect.Set( origin.x, origin.z, origin.x, origin.z );
 		rect.Outset( RANGE );
-		Model* root = engine->GetSpaceTree()->QueryRect( rect, 0, 0 );
-
-		// Only "top level" Chits have a Spatial, can filter on that.
-		// Also, both queries use the same Model linked list, so need
-		// to save the result to an array.
-		chitList.Clear();
-		for( ; root; root=root->next ) {
-			Chit* chit = root->userData;
-			GLASSERT( chit );
-			if ( chit && chit->GetSpatialComponent() ) {
-				chitList.Push( chit );
-			}
-		}
+		WorldScript::QueryChits( rect, engine, &chitList );
 
 		GLLOG(( "<Explosion> (%.1f,%.1f,%.1f)\n", at.x, at.y, at.z ));
 		for( int i=0; i<chitList.Size(); ++i ) {
@@ -72,7 +64,7 @@ void LumosChitBag::HandleBolt( const Bolt& bolt, Model* modelHit, const grinliz:
 					// Did we hit the current chit? Use the ignoreList 'in reverse': if
 					// we hit any component of the Chit, we hit the chit.
 					CArray<const Model*, EL_MAX_METADATA+2> targetList;
-					rc->GetIgnoreList( &targetList );
+					rc->GetModelList( &targetList );
 					if ( targetList.Find( m ) >= 0 ) {
 						// HIT!
 						float len = (hit-origin).Length();
@@ -81,7 +73,11 @@ void LumosChitBag::HandleBolt( const Bolt& bolt, Model* modelHit, const grinliz:
 							DamageDesc dd;
 							dd.components = bolt.damage;
 							dd.components.Mult( (RANGE-len)/RANGE );
-							chit->SendMessage( ChitMsg( ChitMsg::CHIT_DAMAGE, 0, &dd ), 0 );
+
+							ChitMsg msg( ChitMsg::CHIT_DAMAGE, 1, &dd );
+							msg.vector = target - origin;
+							msg.vector.Normalize();
+							chit->SendMessage( msg, 0 );
 						}
 					}
 				}

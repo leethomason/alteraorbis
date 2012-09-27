@@ -89,13 +89,13 @@ bool AIComponent::LineOfSight( Chit* src, Chit* t )
 	Vector3F dir = dest - origin;
 	float length = dir.Length() + 1.0f;	// a little extra just in case
 	CArray<const Model*, EL_MAX_METADATA+2> ignore, targetModels;
-	thisComp.render->GetIgnoreList( &ignore );
+	thisComp.render->GetModelList( &ignore );
 
 	Vector3F at;
 
 	Model* m = engine->IntersectModel( origin, dir, length, TEST_TRI, 0, 0, ignore.Mem(), &at );
 	if ( m ) {
-		target.render->GetIgnoreList( &targetModels );
+		target.render->GetModelList( &targetModels );
 		return targetModels.Find( m ) >= 0;
 	}
 	return false;
@@ -228,10 +228,11 @@ void AIComponent::DoMelee()
 	ComponentSet thisComp( parentChit, Chit::RENDER_BIT | 
 		                               Chit::SPATIAL_BIT |
 									   Chit::INVENTORY_BIT |		// need to be carrying a melee weapon
-									   ComponentSet::IS_ALIVE );
+									   ComponentSet::IS_ALIVE |
+									   ComponentSet::NOT_IN_IMPACT );
 	if ( !thisComp.okay )
 		return;
-
+	
 	IMeleeWeaponItem* weapon = thisComp.inventory->GetMeleeWeapon();
 	if ( !weapon ) 
 		return;
@@ -305,7 +306,10 @@ void AIComponent::Think()
 	// This may get called when there is an action, and update.
 	// Or there may be no action.
 
-	ComponentSet thisComp( parentChit, Chit::SPATIAL_BIT | Chit::ITEM_BIT | ComponentSet::IS_ALIVE );
+	ComponentSet thisComp( parentChit,	Chit::SPATIAL_BIT | 
+										Chit::ITEM_BIT | 
+										ComponentSet::IS_ALIVE |
+										ComponentSet::NOT_IN_IMPACT );
 	if ( !thisComp.okay )
 		return;
 
@@ -411,7 +415,9 @@ bool AIComponent::DoSlowTick()
 bool AIComponent::DoTick( U32 deltaTime )
 {
 	// If we are in some action, do nothing and return.
-	if ( parentChit->GetRenderComponent() && !parentChit->GetRenderComponent()->AnimationReady() ) {
+	if (    parentChit->GetRenderComponent() 
+		 && !parentChit->GetRenderComponent()->AnimationReady() ) 
+	{
 		return true;
 	}
 

@@ -148,41 +148,21 @@
                 <duration>12.85107</duration>
             </frame>
         </anim>
+        <!--
         <anim>
             <name>impactlight</name>
-          <!--
-            <frame>
-                <name>frame_000</name>
-                <duration>25.18617</duration>
-            </frame>
-          -->
             <frame>
                 <name>frame_023</name>
                 <duration>24.81383</duration>
             </frame>
         </anim>
+        -->
         <anim>
             <name>impactheavy</name>
-          <!--
-            <frame>
-                <name>frame_000</name>
-                <duration>10.31915</duration>
-            </frame>
-            <frame>
-                <name>frame_021</name>
-                <duration>10.05319</duration>
-            </frame>
-            -->
             <frame>
                 <name>frame_020</name>
-                <duration>60.37234</duration>
+                <duration>60</duration>
             </frame>
-          <!--
-            <frame>
-                <name>frame_022</name>
-                <duration>19.25532</duration>
-            </frame>
-            -->
         </anim>
         <box>
             <bottom>0.00000</bottom>

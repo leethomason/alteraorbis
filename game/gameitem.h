@@ -291,7 +291,7 @@ public:
 	float TotalHP() const { return (float) mass; }
 
 	// Absorb damage.'remain' is how much damage passes through the shield
-	void AbsorbDamage( const DamageDesc& dd, DamageDesc* remain, const char* log );
+	float AbsorbDamage( const DamageDesc& dd, DamageDesc* remain, const char* log );
 
 private:
 };
