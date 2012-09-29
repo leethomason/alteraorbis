@@ -14,7 +14,7 @@ public:
 
 	virtual Component* ToComponent( const char* name ) {
 		if ( grinliz::StrEqual( name, "GameMoveComponent" ) ) return this;
-		return Component::ToComponent( name );
+		return MoveComponent::ToComponent( name );
 	}
 
 	WorldMap* GetWorldMap() { return map; }

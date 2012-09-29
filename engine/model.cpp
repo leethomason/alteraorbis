@@ -327,6 +327,9 @@ bool Model::AnimationDone() const
 
 void Model::SetAnimation( AnimationType id, U32 crossFade, bool restart )
 {
+	if ( !animationResource )
+		return;
+	
 	GLASSERT( id >= ANIM_OFF && id < ANIM_COUNT );
 
 	if ( id >= 0 ) {

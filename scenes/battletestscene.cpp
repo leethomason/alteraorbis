@@ -424,7 +424,6 @@ void BattleTestScene::Tap( int action, const grinliz::Vector2F& view, const grin
 			DamageDesc dd;
 			dd.Set( 20, 0, 0, 0 );
 			ChitMsg msg( ChitMsg::CHIT_DAMAGE, 5, &dd );
-			msg.vector = debugRay.direction;
 
 			Rectangle2F rect;
 			rect.Set( at.x, at.z, at.x, at.z );
@@ -436,6 +435,9 @@ void BattleTestScene::Tap( int action, const grinliz::Vector2F& view, const grin
 				chitArr[i]->DebugStr( &str );
 				GLOUTPUT(( "%s\n", str.c_str() ));
 
+				msg.vector = chitArr[i]->GetSpatialComponent()->GetPosition() - at;
+				msg.vector.SafeNormalize( 1, 0, 0 );
+				msg.vector.y = 6;
 				chitArr[i]->SendMessage( msg, 0 );
 			}
 #if 0

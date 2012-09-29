@@ -105,6 +105,7 @@ public:
 	int ID() const { return id; }
 	void Add( Component* );
 	void Remove( Component* );
+	void Shelve( Component* c );
 
 	bool TickNeeded() const		{ return tickNeeded; }
 	void SetTickNeeded()		{ tickNeeded = true; }
@@ -140,11 +141,13 @@ public:
 
 private:
 	bool CarryMsg( int componentID, Chit* src, const ChitMsg& msg );
+	int Slot( Component* c );
 
 	ChitBag* chitBag;
 	int		 id;
 	bool	 tickNeeded;
 	U32		 slowTickTimer;
+	Component* shelf;
 	grinliz::CDynArray<IChitListener*> listeners;
 
 	struct CList

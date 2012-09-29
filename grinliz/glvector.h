@@ -298,6 +298,11 @@ struct Vector3
 		this->z = v.y;
 	}
 
+	Vector2<T> XZ() {
+		Vector2<T> xz = { x, z }; 
+		return xz;
+	}
+
 	void Normalize()	
 	{ 
 

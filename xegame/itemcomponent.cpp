@@ -19,6 +19,7 @@
 #include "../game/healthcomponent.h"
 #include "../game/physicsmovecomponent.h"
 #include "../xegame/rendercomponent.h"
+#include "../xegame/spatialcomponent.h"
 
 using namespace grinliz;
 
@@ -63,17 +64,32 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 					if ( knockback ) {
 						thisComp.render->PlayAnimation( ANIM_HEAVY_IMPACT );
 
-						GameMoveComponent* gmc = GET_COMPONENT( parentChit, GameMoveComponent );
-						if ( gmc ) {
-							WorldMap* map = gmc->GetWorldMap();
-							parentChit->Remove( gmc );
-							delete gmc; gmc = 0;
+						// Immediately reflect off the ground.
+						Vector3F v = msg.vector;
+						if ( thisComp.spatial->GetPosition().y < 0.1f ) {
+							if ( v.y < 0 )
+								v.y = -v.y;
+							if ( v.y < 3.0f )
+								v.y = 3.0f;		// make more interesting
+						}
+						// Rotation
 
-							PhysicsMoveComponent* pmc = new PhysicsMoveComponent( map );
-							parentChit->Add( pmc );
+						PhysicsMoveComponent* pmc = GET_COMPONENT( parentChit, PhysicsMoveComponent );
+						if ( pmc ) {
+							pmc->Add( v );
+						}
+						else {
+							GameMoveComponent* gmc = GET_COMPONENT( parentChit, GameMoveComponent );
+							if ( gmc ) {
+								WorldMap* map = gmc->GetWorldMap();
+								parentChit->Shelve( gmc );
 
-							Vector3F v = { 1,6,1 };
-							pmc->Set( v );
+								pmc = new PhysicsMoveComponent( map );
+								parentChit->Add( pmc );
+
+								pmc->Set( v );
+								pmc->DeleteWhenDone( true );
+							}
 						}
 					}
 				}

@@ -7,7 +7,7 @@
 
 using namespace grinliz;
 
-PhysicsMoveComponent::PhysicsMoveComponent( WorldMap* _map ) : GameMoveComponent( _map )
+PhysicsMoveComponent::PhysicsMoveComponent( WorldMap* _map ) : GameMoveComponent( _map ), deleteWhenDone( false )
 {
 	velocity.Zero();
 }
@@ -58,8 +58,9 @@ bool PhysicsMoveComponent::DoTick( U32 delta )
 
 		static const float VDONE = 0.1f;
 		static const float GRAVITY = 10.0f*METERS_PER_GRID;
+		static const float EPS = 0.01f;
 
-		if ( velocity.LengthSquared() < (VDONE*VDONE)) {
+		if ( pos.y < EPS && velocity.XZ().LengthSquared() < (VDONE*VDONE)) {
 			velocity.Zero();
 			pos.y = 0;
 		}
@@ -74,7 +75,12 @@ bool PhysicsMoveComponent::DoTick( U32 delta )
 		pos.XZ( pos2 );
 		thisComp.spatial->SetPosition( pos );
 	}
-	return IsMoving();
+	bool isMoving = IsMoving();
+	if ( !isMoving && deleteWhenDone ) {
+		parentChit->Remove( this );
+		delete this;
+	}
+	return isMoving;
 }
 
 

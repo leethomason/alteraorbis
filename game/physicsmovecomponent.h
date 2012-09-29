@@ -24,9 +24,13 @@ public:
 	virtual void CalcVelocity( grinliz::Vector3F* v )	{ *v = velocity; }
 
 	void Set( const grinliz::Vector3F& _velocity )		{ velocity = _velocity; }
+	void Add( const grinliz::Vector3F& _velocity )		{ velocity += _velocity; }
+
+	void DeleteWhenDone( bool _deleteWhenDone )			{ deleteWhenDone = _deleteWhenDone; }
 
 private:
 	grinliz::Vector3F velocity;
+	bool deleteWhenDone;
 };
 
 

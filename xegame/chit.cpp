@@ -25,7 +25,7 @@
 using namespace grinliz;
 const U32 SLOW_TICK = 500;
 
-Chit::Chit( int _id, ChitBag* bag ) : next( 0 ), chitBag( bag ), id( _id ), tickNeeded( true )
+Chit::Chit( int _id, ChitBag* bag ) : next( 0 ), chitBag( bag ), id( _id ), tickNeeded( true ), shelf( 0 )
 {
 	Init( _id, bag );
 }
@@ -63,14 +63,19 @@ void Chit::Free()
 			slot[i] = 0;
 		}
 	}
+	if ( shelf ) {
+		delete shelf; 
+		shelf = 0;
+	}
+
 	id = 0;
 	next = 0;
 	chitBag = 0;
 	listeners.Clear();
 }
 
-	
-void Chit::Add( Component* c )
+
+int Chit::Slot( Component* c )
 {
 	int s = -1;
 	if ( c->ToComponent( "SpatialComponent" )) {
@@ -89,20 +94,24 @@ void Chit::Add( Component* c )
 		s = RENDER;
 	}
 
-	if ( s >= 0 ) {
-		GLASSERT( !slot[s] );
-		slot[s] = c;
-	}
-	else {
-		int i;
-		for( i=GENERAL_START; i<GENERAL_END; ++i ) {
+	if ( s < 0 ) {
+		for( int i=GENERAL_START; i<GENERAL_END; ++i ) {
 			if ( slot[i] == 0 ) {
-				slot[i] = c;
+				s = i;
 				break;
 			}
 		}
-		GLASSERT( i < GENERAL_END );
+		GLASSERT( s < GENERAL_END );
 	}
+
+	return s;
+}
+	
+void Chit::Add( Component* c )
+{
+	int s = Slot( c );
+	GLASSERT( slot[s] == 0 );
+	slot[s] = c;
 	c->OnAdd( this );
 	tickNeeded = true;
 }
@@ -115,10 +124,23 @@ void Chit::Remove( Component* c )
 		if ( slot[i] == c ) {
 			c->OnRemove();
 			slot[i] = 0;
+
+			if ( shelf && Slot(shelf) == i ) {
+				Add( shelf );
+				shelf = 0;
+			}
 			return;
 		}
 	}
 	GLASSERT( 0 );	// not found
+}
+
+
+void Chit::Shelve( Component* c )
+{
+	GLASSERT( !shelf );
+	Remove( c );
+	shelf = c;
 }
 
 
@@ -192,7 +214,9 @@ void Chit::SendMessage( const ChitMsg& msg, Component* exclude )
 	// Components
 	for( int i=0; i<NUM_SLOTS; ++i ) {
 		if ( slot[i] && slot[i] != exclude ) {
+			//GLOUTPUT(( "Sending message to %d from chit %d %x\n", i, ID(), this ));
 			slot[i]->OnChitMsg( this, msg );
+			//GLOUTPUT(( "return\n" ));
 		}
 	}
 }
