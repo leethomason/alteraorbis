@@ -67,7 +67,7 @@ void SpatialComponent::SetPosYRot( float x, float y, float z, float yRot )
 	Quaternion q;
 
 	static const Vector3F UP = { 0, 1, 0 };
-	q.FromAxisAngle( UP, yRot );
+	q.FromAxisAngle( UP, NormalizeAngleDegrees( yRot ) );
 	SetPosRot( v, q );
 }
 

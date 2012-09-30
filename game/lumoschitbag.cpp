@@ -87,6 +87,7 @@ void LumosChitBag::HandleBolt( const Bolt& bolt, Model* modelHit, const grinliz:
 							msg.vector = target - origin;
 							msg.vector.Normalize();
 							msg.vector.Multiply( Lerp( 2.f, 4.f, t ));
+							msg.dataF = -400.0f + (float)random.Rand( 800 );
 							chit->SendMessage( msg, 0 );
 						}
 					}

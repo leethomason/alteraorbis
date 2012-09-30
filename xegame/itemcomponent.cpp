@@ -66,6 +66,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 
 						// Immediately reflect off the ground.
 						Vector3F v = msg.vector;
+
 						if ( thisComp.spatial->GetPosition().y < 0.1f ) {
 							if ( v.y < 0 )
 								v.y = -v.y;
@@ -73,10 +74,11 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 								v.y = 3.0f;		// make more interesting
 						}
 						// Rotation
+						float r = msg.dataF;
 
 						PhysicsMoveComponent* pmc = GET_COMPONENT( parentChit, PhysicsMoveComponent );
 						if ( pmc ) {
-							pmc->Add( v );
+							pmc->Add( v, r );
 						}
 						else {
 							GameMoveComponent* gmc = GET_COMPONENT( parentChit, GameMoveComponent );
@@ -87,7 +89,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 								pmc = new PhysicsMoveComponent( map );
 								parentChit->Add( pmc );
 
-								pmc->Set( v );
+								pmc->Set( v, r );
 								pmc->DeleteWhenDone( true );
 							}
 						}

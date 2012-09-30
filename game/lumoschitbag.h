@@ -2,6 +2,7 @@
 #define LUMOS_CHIT_BAG_INCLUDED
 
 #include "../xegame/chitbag.h"
+#include "../grinliz/glrandom.h"
 
 class LumosChitBag : public ChitBag
 {
@@ -17,6 +18,8 @@ public:
 private:
 	grinliz::CDynArray<Chit*> chitList;
 	Engine* engine;
+	grinliz::Random random;
+
 };
 
 

@@ -42,7 +42,10 @@ public:
 	enum {
 		// ---- Chit --- //
 		CHIT_DESTROYED,			// sender: health
-		CHIT_DAMAGE,			// sender: chitBag, Data=isExplosion Ptr = &DamageDesc, vector=kickback
+		CHIT_DAMAGE,			// sender: chitBag, Data=isExplosion 
+								//					Ptr = &DamageDesc, 
+								//					vector=direction of impact
+								//					dataF=rotation
 
 		// ---- Component ---- //
 		// Game
@@ -58,7 +61,7 @@ public:
 		RENDER_IMPACT,			// impact metadata event has occured, sender: render component
 	};
 
-	ChitMsg( int _id, int _data=0, const void* _ptr=0 ) : id(_id), data(_data), ptr(_ptr) {
+	ChitMsg( int _id, int _data=0, const void* _ptr=0 ) : id(_id), data(_data), ptr(_ptr), dataF(0) {
 		vector.Zero();
 	}
 
@@ -67,7 +70,8 @@ public:
 	const void* Ptr() const { return ptr; }
 
 	// useful data members:
-	grinliz::Vector3F vector;
+	grinliz::Vector3F	vector;
+	float				dataF;
 
 private:
 	int id;
