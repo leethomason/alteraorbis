@@ -226,6 +226,7 @@
     <ClInclude Include="..\xegame\xeitem.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\bugs.txt" />
     <None Include="..\engine\sources.mk" />
     <ClCompile Include="..\scenes\titlescene.cpp">
       <FileType>Document</FileType>

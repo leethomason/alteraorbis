@@ -29,6 +29,7 @@
 
 #include "../grinliz/glvector.h"
 #include "../grinliz/glgeometry.h"
+#include "../grinliz/glrandom.h"
 
 #include "../engine/engine.h"
 #include "../engine/camera.h"
@@ -191,7 +192,7 @@ void BattleMechanics::CalcMeleeDamage( Chit* src, IMeleeWeaponItem* weapon, Dama
 }
 
 
-void BattleMechanics::Shoot( ChitBag* bag, Chit* src, Chit* target, IRangedWeaponItem* weapon, const Vector3F& pos )
+void BattleMechanics::Shoot( ChitBag* bag, Chit* src, Chit* target, IRangedWeaponItem* weapon, const Vector3F& pos, float area )
 {
 	GLASSERT( weapon->Ready() );
 	bool okay = weapon->Use();
@@ -215,18 +216,40 @@ void BattleMechanics::Shoot( ChitBag* bag, Chit* src, Chit* target, IRangedWeapo
 	float speed = SPEED * item->speed;
 	Vector3F aimAt = ComputeLeadingShot( pos, t, v, speed );
 
-	Vector3F dir = aimAt - pos;
-	dir.Normalize();
+	Vector3F dir = FuzzyAim( pos, aimAt, area );
 
 	bolt->head = pos + dir;			// FIXME: use team ignore, not offset
 	bolt->len = 1.0f;
 	bolt->dir = dir;
-	bolt->color.Set( 1, 0, 0, 1 );	// FIXME: real color based on item
+	if ( item->flags & GameItem::EFFECT_FIRE )
+		bolt->color.Set( 1, 0, 0, 1 );	// FIXME: real color based on item
+	else
+		bolt->color.Set( 0, 1, 0, 1 );	// FIXME: real color based on item
 	bolt->chitID = src->ID();
 	bolt->damage = item->rangedDamage.components;
 	bolt->particle  = (item->flags & GameItem::RENDER_TRAIL) ? true : false;
 	bolt->explosive = (item->flags & GameItem::EXPLOSIVE) ? true : false;
 	bolt->speed = speed;
+}
+
+
+Vector3F BattleMechanics::FuzzyAim( const Vector3F& pos, const Vector3F& aimAt, float area )
+{
+	Vector3F dir = aimAt - pos;
+	float len = dir.Length();
+
+	if ( area > 0 && len > 0 ) {
+		// a = pi*r*r
+		float r = sqrtf( area / PI );
+
+		Vector3F rv;
+		random.NormalVector3D( &rv.x );
+
+		Vector3F aimAtPrim = aimAt + rv * r * len;	// area defined at length=1
+		dir = aimAtPrim - pos;
+	}
+	dir.Normalize();
+	return dir;
 }
 
 

@@ -3,8 +3,13 @@
 	X push to altera site
 	X balrog fire attack
 	X visual debugging: line drawing. check bolt impacts.
-	- impact (light/heavy)
-	- heavy weapons should do knockback, not just amount of damage/explosion
+	X impact (light/heavy)
+	X heavy weapons should do knockback, not just amount of damage/explosion
+	X change bolt color
+	X item: support speed, pass on to bolts
+	- optimize start time
+	- change effect strategy - are all effects just flags?
+	- revisit accuracy comuptation. what scales with distance? area? volume? radius?
 	- shields, general bonus/cost/damage propegation
 	- removing unit "clumping" (3yr old soccer team). Basic formation?
 	- unique look for units so teams can be distinguished
@@ -21,7 +26,6 @@
 	- flaming sword should catch things on fire
 	- refactor code - if needed? - in AIComponent (the fixmes)
 	- gunrun to walk not synchronized correctly
-	X item: support speed, pass on to bolts
 	- fix particle def to return a default - the pointer is dangerous
 	- DebugDraw is getting used for release drawing - fine in most (all?) cases. But clean up.
 	- bolts don't hit own team but explosions do
@@ -29,7 +33,7 @@
 	- ranged weapons
 		- bolts
 			x damage (defined)
-			- speed
+			x speed
 			- range
 			x compute color
 			- effect strength

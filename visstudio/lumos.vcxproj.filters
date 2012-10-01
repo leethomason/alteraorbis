@@ -473,5 +473,8 @@
     <None Include="..\particles.xml">
       <Filter>Source Files\game</Filter>
     </None>
+    <None Include="..\bugs.txt">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

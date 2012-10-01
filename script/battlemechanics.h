@@ -19,6 +19,7 @@
 #include "../grinliz/gltypes.h"
 #include "../grinliz/gldebug.h"
 #include "../grinliz/glvector.h"
+#include "../grinliz/glrandom.h"
 
 #include "../game/gameitem.h"
 
@@ -46,7 +47,15 @@ public:
 	void CalcMeleeDamage( Chit* src, IMeleeWeaponItem* weapon, DamageDesc* );
 	
 	// Shooting ------------------- //
-	void Shoot( ChitBag* bag, Chit* src, Chit* target, IRangedWeaponItem* weapon, const grinliz::Vector3F& pos );
+	void Shoot( ChitBag* bag, 
+				Chit* src, 
+				Chit* target, 
+				IRangedWeaponItem* weapon, 
+				const grinliz::Vector3F& pos,
+				float accuracyArea );
+
+	grinliz::Vector3F FuzzyAim( const grinliz::Vector3F& origin, const grinliz::Vector3F& target, float area );
+
 	grinliz::Vector3F ComputeLeadingShot( const grinliz::Vector3F& origin,
 										  const grinliz::Vector3F& target,
 										  const grinliz::Vector3F& velocity,
@@ -60,6 +69,7 @@ public:
 
 private:
 	grinliz::CDynArray<Chit*> hashQuery;
+	grinliz::Random random;
 };
 
 

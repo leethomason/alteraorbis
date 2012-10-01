@@ -21,15 +21,17 @@ void LumosChitBag::HandleBolt( const Bolt& bolt, Model* modelHit, const grinliz:
 	Chit* chitShooter = GetChit( bolt.chitID );	// may be null
  
 	if ( !bolt.explosive ) {
-		Chit* chitHit = modelHit->userData;
-		GLASSERT( chitHit );
-		GLASSERT( GetChit( chitHit->ID() ) == chitHit );
-		DamageDesc dd;
-		dd.components = bolt.damage;
+		if ( modelHit ) {
+			Chit* chitHit = modelHit->userData;
+			GLASSERT( chitHit );
+			GLASSERT( GetChit( chitHit->ID() ) == chitHit );
+			DamageDesc dd;
+			dd.components = bolt.damage;
 		
-		ChitMsg msg( ChitMsg::CHIT_DAMAGE, 0, &dd );
-		msg.vector = at;
-		chitHit->SendMessage( msg, 0 );
+			ChitMsg msg( ChitMsg::CHIT_DAMAGE, 0, &dd );
+			msg.vector = at;
+			chitHit->SendMessage( msg, 0 );
+		}
 	}
 	else {
 		// Here don't worry abou the chit hit. Just ray cast to see

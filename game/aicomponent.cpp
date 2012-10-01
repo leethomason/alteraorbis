@@ -35,9 +35,6 @@
 
 using namespace grinliz;
 
-static const float COMBAT_INFO_RANGE	= 10.0f;	// range around to scan for friendlies/enemies
-static const float LONGEST_WEAPON_RANGE = 20.0f;
-
 static const float PRIMARY_UTILITY		= 10.0f;
 static const float SECONDARY_UTILITY	= 3.0f;
 static const float TERTIARY_UTILITY		= 1.0f;
@@ -112,7 +109,7 @@ void AIComponent::UpdateCombatInfo( const Rectangle2F* _zone )
 	if ( !_zone ) {
 		// Generate the default zone.
 		zone.min = center; zone.max = center;
-		zone.Outset( COMBAT_INFO_RANGE );
+		zone.Outset( LONGEST_WEAPON_RANGE );
 	}
 	else {
 		// Use the passed in info, add to the existing.
@@ -211,7 +208,10 @@ void AIComponent::DoShoot()
 			GameItem* item = weapons[i].weapon->GetItem();
 			if ( item->Ready() ) {
 				if ( item->HasRound() ) {
-					battleMechanics.Shoot( GetChitBag(), parentChit, targetChit, weapons[i].weapon, weapons[i].trigger );
+					battleMechanics.Shoot(	GetChitBag(), 
+											parentChit, targetChit, 
+											weapons[i].weapon, weapons[i].trigger,
+											0.01f );		// fixme: hardcode accuracy use skill
 				}
 				else {
 					item->Reload();
