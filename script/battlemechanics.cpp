@@ -14,6 +14,7 @@
 */
 
 #include "battlemechanics.h"
+#include "worldscript.h"
 
 #include "../game/gameitem.h"
 #include "../game/gamelimits.h"
@@ -262,3 +263,63 @@ Vector3F BattleMechanics::ComputeLeadingShot(	const grinliz::Vector3F& origin,
 	}
 	return aimAt;
 }
+
+
+void BattleMechanics::GenerateExplosionMsgs( const DamageDesc& _dd, const Vector3F& origin, Engine* engine, CDynArray<Chit*>* hashQuery )
+{
+	Rectangle2F rect;
+	rect.Set( origin.x, origin.z, origin.x, origin.z );
+	rect.Outset( EXPLOSIVE_RANGE );
+	WorldScript::QueryChits( rect, engine, hashQuery );
+
+	GLLOG(( "<Explosion> (%.1f,%.1f,%.1f)\n", origin.x, origin.y, origin.z ));
+	for( int i=0; i<hashQuery->Size(); ++i ) {
+		Vector3F target = { 0, 0, 0 };
+		Chit* chit = (*hashQuery)[i];
+
+		RenderComponent* rc = chit->GetRenderComponent();
+		if ( rc ) {
+			rc->CalcTarget( &target );
+
+	#if 0
+			// This is correct, and keeps explosions from going through walls.
+			// But is unsitifying, too, since models stope explosions.
+			Vector3F hit;
+			Model* m = engine->IntersectModel( origin, target-origin, RANGE, TEST_TRI, 0, 0, 0, &hit );
+	#ifdef DEBUG_EXPLOSION
+			if ( m ) 
+				DebugLine( origin, hit, 1, 0, 0 );
+			else
+				DebugLine( origin, target );
+	#endif
+			if ( m ) {
+				// Did we hit the current chit? Use the ignoreList 'in reverse': if
+				// we hit any component of the Chit, we hit the chit.
+				CArray<const Model*, EL_MAX_METADATA+2> targetList;
+				rc->GetModelList( &targetList );
+				if ( targetList.Find( m ) >= 0 ) {
+	#else
+			Vector3F hit = target;
+			{
+				{
+	#endif
+					// HIT!
+					float len = (hit-origin).Length();
+					// Scale the damage based on the range.
+					if ( len < EXPLOSIVE_RANGE ) {
+						DamageDesc dd = _dd;
+						float t = (EXPLOSIVE_RANGE-len)/EXPLOSIVE_RANGE;
+						dd.components.Mult( t );
+
+						ChitMsg msg( ChitMsg::CHIT_DAMAGE, 1, &dd );
+						msg.vector = target - origin;
+						msg.vector.Normalize();
+						msg.vector.Multiply( Lerp( 2.f, 4.f, t ));
+						chit->SendMessage( msg, 0 );
+					}
+				}
+			}
+		}
+	}
+}
+

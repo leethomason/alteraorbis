@@ -18,8 +18,6 @@ public:
 private:
 	grinliz::CDynArray<Chit*> chitList;
 	Engine* engine;
-	grinliz::Random random;
-
 };
 
 

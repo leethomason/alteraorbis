@@ -44,7 +44,7 @@ public:
 		CHIT_DESTROYED,			// sender: health
 		CHIT_DAMAGE,			// sender: chitBag, Data=isExplosion 
 								//					Ptr = &DamageDesc, 
-								//					vector=direction of impact
+								//					vector=origin of impact
 								//					dataF=rotation
 
 		// ---- Component ---- //

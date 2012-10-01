@@ -24,6 +24,7 @@
 	X item: support speed, pass on to bolts
 	- fix particle def to return a default - the pointer is dangerous
 	- DebugDraw is getting used for release drawing - fine in most (all?) cases. But clean up.
+	- bolts don't hit own team but explosions do
 
 	- ranged weapons
 		- bolts

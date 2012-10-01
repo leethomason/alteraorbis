@@ -423,35 +423,7 @@ void BattleTestScene::Tap( int action, const grinliz::Vector2F& view, const grin
 
 			DamageDesc dd;
 			dd.Set( 20, 0, 0, 0 );
-			ChitMsg msg( ChitMsg::CHIT_DAMAGE, 5, &dd );
-
-			Rectangle2F rect;
-			rect.Set( at.x, at.z, at.x, at.z );
-			rect.Outset( 3.0f );
-	
-			WorldScript::QueryChits( rect, engine, &chitArr );
-			for( int i=0; i<chitArr.Size(); ++i ) {
-				GLString str;
-				chitArr[i]->DebugStr( &str );
-				GLOUTPUT(( "%s\n", str.c_str() ));
-
-				msg.vector = chitArr[i]->GetSpatialComponent()->GetPosition() - at;
-				msg.vector.SafeNormalize( 1, 0, 0 );
-				msg.vector.y = 6;
-				chitArr[i]->SendMessage( msg, 0 );
-			}
-#if 0
-			Model* root = engine->IntersectModel( debugRay.origin, debugRay.direction, FLT_MAX, TEST_TRI, 0, 0, 0, 0 );
-			if ( root && root->userData ) {
-				Chit* chit = root->userData;
-
-				DamageDesc dd;
-				dd.Set( 5, 0, 0, 0 );
-				ChitMsg msg( ChitMsg::CHIT_DAMAGE, 0, &dd );
-
-				chit->SendMessage( msg, 0 );
-			}
-#endif
+			BattleMechanics::GenerateExplosionMsgs( dd, at, engine, &chitArr );
 		}
 	}
 }

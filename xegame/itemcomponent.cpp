@@ -16,8 +16,11 @@
 #include "itemcomponent.h"
 #include "chit.h"
 
+#include "../grinliz/glrandom.h"
+
 #include "../game/healthcomponent.h"
 #include "../game/physicsmovecomponent.h"
+
 #include "../xegame/rendercomponent.h"
 #include "../xegame/spatialcomponent.h"
 
@@ -44,22 +47,9 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 				// Can this be knocked back??
 				ComponentSet thisComp( chit, ComponentSet::IS_ALIVE | Chit::SPATIAL_BIT | Chit::RENDER_BIT );
 				if ( thisComp.okay ) {
-					// Do we apply knockback? In place or travelling?
-					// What are the rules?
-					//  - solid hits do knockback
-					//  - minor explosions do knockback
-					bool knockback = false;
-					if ( msg.Data() ) {
-						// explosion
-						if ( delta > item.TotalHP() * 0.2f ) {
-							knockback = true;
-						}
-					}
-					else {
-						if ( delta > item.TotalHP() * 0.4f ) {
-							knockback = true;
-						}
-					}
+					// Do we apply knockback?
+					bool explosion = msg.Data() != 0;
+					bool knockback = delta > item.TotalHP() * ( explosion ? 0.1f : 0.4f );
 
 					if ( knockback ) {
 						thisComp.render->PlayAnimation( ANIM_HEAVY_IMPACT );
@@ -74,7 +64,9 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 								v.y = 3.0f;		// make more interesting
 						}
 						// Rotation
-						float r = msg.dataF;
+						Random random( ((int)v.x*1000)^((int)v.y*1000)^((int)v.z*1000) );
+						random.Rand();
+						float r = -400.0f + (float)random.Rand( 800 );
 
 						PhysicsMoveComponent* pmc = GET_COMPONENT( parentChit, PhysicsMoveComponent );
 						if ( pmc ) {

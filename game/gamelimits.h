@@ -31,7 +31,10 @@ static const float ROTATION_LIMIT	= 45.0f;
 static const float MELEE_RANGE		= 1.0f;			// FIXME: vary per monster, should be a max
 static const float MELEE_COS_THETA	= 0.71f;		// How wide the melee swipe is	
 static const U32   COOLDOWN_TIME	= 750;
+// End debugging values
 
+static const float EXPLOSIVE_RANGE	= 1.5f;			// explosions go through walls. Make this too big,
+													// that becomes an issue. Too small, explosions aren't fun.
 
 // This arrangement breaks the case where something can attach
 // to multiple hardpoints. Fine; fix later.

@@ -1,10 +1,15 @@
 #include "lumoschitbag.h"
 #include "gameitem.h"
+#include "gamelimits.h"
+
 #include "../xegame/rendercomponent.h"
+
 #include "../engine/model.h"
 #include "../engine/engine.h"
 #include "../engine/loosequadtree.h"
-#include "../script/worldscript.h"
+
+#include "../script/battlemechanics.h"
+
 
 //#define DEBUG_EXPLOSION
 
@@ -23,7 +28,7 @@ void LumosChitBag::HandleBolt( const Bolt& bolt, Model* modelHit, const grinliz:
 		dd.components = bolt.damage;
 		
 		ChitMsg msg( ChitMsg::CHIT_DAMAGE, 0, &dd );
-		msg.vector = bolt.dir;
+		msg.vector = at;
 		chitHit->SendMessage( msg, 0 );
 	}
 	else {
@@ -37,63 +42,9 @@ void LumosChitBag::HandleBolt( const Bolt& bolt, Model* modelHit, const grinliz:
 		float rewind = Min( 0.1f, 0.5f*bolt.len );
 		GLASSERT( Equal( bolt.dir.Length(), 1.f, 0.001f ));
 		Vector3F origin = at - bolt.dir * rewind;
-		static const float RANGE = 1.5f;
 
-		Rectangle2F rect;
-		rect.Set( origin.x, origin.z, origin.x, origin.z );
-		rect.Outset( RANGE );
-		WorldScript::QueryChits( rect, engine, &chitList );
-
-		GLLOG(( "<Explosion> (%.1f,%.1f,%.1f)\n", at.x, at.y, at.z ));
-		for( int i=0; i<chitList.Size(); ++i ) {
-			Vector3F target = { 0, 0, 0 };
-			Chit* chit = chitList[i];
-			RenderComponent* rc = chit->GetRenderComponent();
-			if ( rc && (chit != chitShooter)) {
-				rc->CalcTarget( &target );
-
-#if 0
-				// This is correct, and keeps explosions from going through walls.
-				// But is unsitifying, too, since models stope explosions.
-				Vector3F hit;
-				Model* m = engine->IntersectModel( origin, target-origin, RANGE, TEST_TRI, 0, 0, 0, &hit );
-	#ifdef DEBUG_EXPLOSION
-				if ( m ) 
-					DebugLine( origin, hit, 1, 0, 0 );
-				else
-					DebugLine( origin, target );
-	#endif
-				if ( m ) {
-					// Did we hit the current chit? Use the ignoreList 'in reverse': if
-					// we hit any component of the Chit, we hit the chit.
-					CArray<const Model*, EL_MAX_METADATA+2> targetList;
-					rc->GetModelList( &targetList );
-					if ( targetList.Find( m ) >= 0 ) {
-#else
-				Vector3F hit = target;
-				{
-					{
-#endif
-						// HIT!
-						float len = (hit-origin).Length();
-						// Scale the damage based on the range.
-						if ( len < RANGE ) {
-							DamageDesc dd;
-							dd.components = bolt.damage;
-							float t = (RANGE-len)/RANGE;
-							dd.components.Mult( t );
-
-							ChitMsg msg( ChitMsg::CHIT_DAMAGE, 1, &dd );
-							msg.vector = target - origin;
-							msg.vector.Normalize();
-							msg.vector.Multiply( Lerp( 2.f, 4.f, t ));
-							msg.dataF = -400.0f + (float)random.Rand( 800 );
-							chit->SendMessage( msg, 0 );
-						}
-					}
-				}
-			}
-		}
-		GLLOG(( "</Explosion>\n" ));
+		DamageDesc dd;
+		dd.components = bolt.damage;
+		BattleMechanics::GenerateExplosionMsgs( dd, origin, engine, &chitList );
 	}
 }

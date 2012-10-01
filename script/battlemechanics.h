@@ -25,10 +25,12 @@
 class Chit;
 class Engine;
 class ChitBag;
+class DamageDesc;
 
 class BattleMechanics
 {
 public:
+	// Melee --------------------- //
 	void MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* weapon );
 
 	// Returns the melee range of 2 chits, or 0 if none.
@@ -42,12 +44,17 @@ public:
 					  Chit* target );
 
 	void CalcMeleeDamage( Chit* src, IMeleeWeaponItem* weapon, DamageDesc* );
+	
+	// Shooting ------------------- //
 	void Shoot( ChitBag* bag, Chit* src, Chit* target, IRangedWeaponItem* weapon, const grinliz::Vector3F& pos );
 	grinliz::Vector3F ComputeLeadingShot( const grinliz::Vector3F& origin,
 										  const grinliz::Vector3F& target,
 										  const grinliz::Vector3F& velocity,
 										  float speed );
 
+	// Other --------------------- //
+
+	static void GenerateExplosionMsgs( const DamageDesc& dd, const grinliz::Vector3F& origin, Engine* engine, grinliz::CDynArray<Chit*>* storage );
 
 	static int PrimaryTeam( Chit* src );
 
