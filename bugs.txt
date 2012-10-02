@@ -186,3 +186,32 @@ X draw dude on map
 	X with shader
 	X clean up opengl = 2
 X convert to tinyxml2
+
+
+Baseline
+#define TEXTURE0 1
+#define TEXTURE0_ALPHA_ONLY 0
+#define TEXTURE0_TRANSFORM 0
+#define TEXTURE1 0
+#define COLOR_PARAM 0
+#define COLORS 0
+#define COLOR_MULTIPLIER 0
+#define INSTANCE 1
+#define PREMULT 0
+#define EMISSIVE 0
+#define EMISSIVE_EXCLUSIVE 0
+#define BONE_FILTER 0
+#define BONES 0
+#define PARAM 0
+#define LIGHTING_DIFFUSE 1
+#define EL_MAX_INSTANCE 16
+#define EL_MAX_BONES 12
+
+CreateProgram flags=7169 665 msec total=2016
+CreateProgram flags=7169 681 msec total=1901
+CreateProgram flags=7169 685 msec total=1987
+
+Remove shader info log query:
+CreateProgram flags=7169 682 msec total=2130	// good! does nothing
+
+

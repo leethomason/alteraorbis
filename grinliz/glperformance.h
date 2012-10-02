@@ -39,7 +39,7 @@ distribution.
 #include "gldebug.h"
 #include "gltypes.h"
 #include <stdio.h>
-
+#include <time.h>
 
 #if defined(_MSC_VER)
 namespace grinliz {
@@ -80,23 +80,49 @@ namespace grinliz {
 class QuickProfile
 {
 public:
-	QuickProfile( const char* name)		{ 
+	QuickProfile( const char* name)	{ 
 		startTime = FastTime(); 
 		this->name = name;
 	}
-	~QuickProfile()		{ 
+
+	~QuickProfile()	{ 
 		U64 endTime = FastTime();	
-		GLOUTPUT(( "%s %d MClocks\n", name, (int)((endTime-startTime)/(U64)(1000*1000)) ));
+		GLOUTPUT (( "%s %d MClocks\n", name, (int)((endTime-startTime)/(U64)(1000*1000)) ));
 	}
 
 private:
 	TimeUnit startTime;
 	const char* name;
 };
-
 		
-static const int GL_MAX_SAMPLES = 1000*1000;
-static const int GL_MAX_PERFDATA = 100;
+class QuickClockProfile
+{
+public:
+	QuickClockProfile( const char* name, U32* _total=0 )	{ 
+		startTime = clock(); 
+		this->name = name;
+		total = _total;
+	}
+
+	~QuickClockProfile()	{ 
+		clock_t endTime = clock();	
+		U32 time = endTime - startTime;
+		if ( total ) {
+			*total += time;
+			GLOUTPUT (( "%s %d msec total=%d\n", name, time, *total ));
+		}
+		else {
+			GLOUTPUT (( "%s %d msec\n", name, time ));
+		}
+	}
+
+private:
+	clock_t startTime;
+	const char* name;
+	U32* total;
+};
+
+static const int GL_MAX_PERF_SAMPLES = 1000*1000;
 
 struct PerfData
 {
@@ -139,9 +165,9 @@ class Performance
 			return;
 
 		if ( !samples ) {
-			samples = new Sample[GL_MAX_SAMPLES];
+			samples = new Sample[GL_MAX_PERF_SAMPLES];
 		}
-		if ( nSamples < GL_MAX_SAMPLES ) {
+		if ( nSamples < GL_MAX_PERF_SAMPLES ) {
 			samples[nSamples++].Set( name, enter, FastTime() );
 		}
 	}

@@ -164,9 +164,12 @@ private:
 	grinliz::CDynArray< IDeviceLossHandler* > deviceLossHandlers;
 	grinliz::CDynArray< Shader > shaderArr;
 	grinliz::GLString header;
+	grinliz::GLString fixedpipeVert, fixedpipeFrag;
 	Shader* active;
 	grinliz::CDynArray<int> activeStreams;
+	U32 totalCompileTime;
 
+	void LoadProgram( const char* name, grinliz::GLString *store );
 	Shader* CreateProgram( int flag );
 	void DeleteProgram( Shader* );
 

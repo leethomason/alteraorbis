@@ -17,8 +17,9 @@
 #include "platformgl.h"
 #include "texture.h"
 
-#include "shaders.inc"
+//#include "shaders.inc"
 
+#include "../grinliz/glperformance.h"
 
 //#define DEBUG_OUTPUT
 
@@ -80,8 +81,10 @@ int ShaderManager::Shader::GetUniformLocation( int uniform )
 }
 
 
-ShaderManager::ShaderManager() : active( 0 )
+ShaderManager::ShaderManager() : active(0), totalCompileTime(0)
 {
+	LoadProgram( "fixedpipe.vert", &fixedpipeVert );
+	LoadProgram( "fixedpipe.frag", &fixedpipeFrag );
 }
 
 
@@ -92,6 +95,23 @@ ShaderManager::~ShaderManager()
 			DeleteProgram( &shaderArr[i] );
 		}
 	}
+}
+
+
+void ShaderManager::LoadProgram( const char* name, GLString* str ) 
+{
+	CStr<256> path;
+	path.Format( "./res/%s", name );
+	FILE* fp = fopen( path.c_str(), "r" );
+	GLASSERT( fp );
+
+	static const int SIZE = 100;
+	char buf[SIZE];
+	int count = 0;
+	while( (count = fread( buf, 1, SIZE, fp )) > 0 ) {
+		str->append( buf, count );
+	}
+	fclose( fp );
 }
 
 
@@ -281,6 +301,10 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 		}
 	}
 
+	CStr<200> profileStr;
+	profileStr.Format( "CreateProgram flags=%d", flags );
+	QuickClockProfile profile( profileStr.c_str(), &this->totalCompileTime );
+
 	Shader* shader = shaderArr.PushArr(1);
 	shader->Init();
 	shader->flags = flags;
@@ -317,10 +341,6 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 	else 
 		AppendFlag( &header, "LIGHTING_DIFFUSE", 0, 0 );
 
-//	if ( flags & BLUR ) {
-//		AppendFlag( &header, "BLUR_Y", flags & BLUR_Y );
-//	}
-
 	AppendConst( &header, "EL_MAX_INSTANCE", EL_MAX_INSTANCE );
 	AppendConst( &header, "EL_MAX_BONES",	 EL_MAX_BONES );
 
@@ -328,13 +348,12 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 	GLOUTPUT(( "header\n%s\n", header.c_str() ));
 #endif
 
-	const char* vertexSrc[2]   = { header.c_str(), fixedpipe_vert };
-	const char* fragmentSrc[2] = { header.c_str(), fixedpipe_frag };
+	const char* vertexSrc[2]   = { header.c_str(), fixedpipeVert.c_str() };
+	const char* fragmentSrc[2] = { header.c_str(), fixedpipeFrag.c_str() };
 
-//	if ( flags & BLUR ) {
-//		vertexSrc[1]   = blur_vert;
-//		fragmentSrc[1] = blur_frag;
-//	}
+	if ( flags == 7169 ) {
+		GLOUTPUT(( "%s\n", header.c_str() ));
+	}
 
 	glShaderSource( shader->vertexProg, 2, vertexSrc, 0 );
 	glCompileShader( shader->vertexProg );
