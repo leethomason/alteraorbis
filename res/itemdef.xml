@@ -6,7 +6,9 @@
     <intrinsics>
       <item name="hand"
             flags="MELEE_WEAPON INTRINSIC_AT_HARDPOINT"
-            hardpoint="trigger" />
+            hardpoint="trigger">
+        <melee kinetic="1" />
+      </item>>
     </intrinsics>
   </item>>
 
@@ -18,7 +20,7 @@
       <item name="pincer"
             flags="MELEE_WEAPON INTRINSIC_AT_HARDPOINT"
             hardpoint="trigger" >
-            <melee kinetic="3" fire="0"/>
+            <melee kinetic="3"/>
       </item>
     </intrinsics>
   </item>
@@ -40,16 +42,16 @@
       <item name="claw"
             flags="MELEE_WEAPON INTRINSIC_AT_HARDPOINT EFFECT_FIRE"
             hardpoint="trigger">
-            <melee kinetic="1.5" fire="0.5"/>
+            <melee kinetic="1.5"/>
       </item>
       <item name="breath"
-            flags="RANGED_WEAPON INTRINSIC_AT_HARDPOINT EFFECT_FIRE EXPLOSIVE RENDER_TRAIL"
+            flags="RANGED_WEAPON INTRINSIC_AT_HARDPOINT EFFECT_FIRE EFFECT_EXPLOSIVE RENDER_TRAIL"
             hardpoint="head"
             cooldown="1000"
             reload="3000"
             clipCap="1"
-            speed =" 0.6">
-            <ranged kinetic ="10" fire="50" />
+            speed ="0.6">
+            <ranged kinetic="50"/>
       </item>
     </intrinsics>
   </item>
@@ -83,7 +85,7 @@
         reload="1000"
         clipCap="6"
         >
-        <melee kinetic="1.1"/>
+        <melee  kinetic="1.1"/>
         <ranged energy="30" />
   </item>
 
@@ -93,7 +95,6 @@
         hardpoint="shield"
         mass="0.1"
         power="20">
-    <resist kinetic="0.5" energy="1.0" fire="0.5" shock="1.5" />
   </item>
   
 </items>

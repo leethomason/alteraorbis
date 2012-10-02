@@ -56,7 +56,8 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 	READ_FLAG( flags, f, HELD_FREE );
 	READ_FLAG( flags, f, IMMUNE_FIRE );
 	READ_FLAG( flags, f, FLAMMABLE );
-	READ_FLAG( flags, f, EXPLOSIVE );
+	READ_FLAG( flags, f, EFFECT_ENERGY );
+	READ_FLAG( flags, f, EFFECT_EXPLOSIVE );
 	READ_FLAG( flags, f, EFFECT_FIRE );
 	READ_FLAG( flags, f, EFFECT_SHOCK );
 	READ_FLAG( flags, f, RENDER_TRAIL );
