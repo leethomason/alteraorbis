@@ -225,3 +225,5 @@ CreateProgram flags=7169 690 msec total=2239	// this is just weird
 CreateProgram flags=7169 675 msec total=2009
 CreateProgram flags=7169 691 msec total=2079
 
+Updated Driver. *sigh*
+CreateProgram flags=7169 779 msec total=2086
