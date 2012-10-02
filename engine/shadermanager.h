@@ -165,6 +165,7 @@ private:
 	grinliz::CDynArray< Shader > shaderArr;
 	grinliz::GLString header;
 	grinliz::GLString fixedpipeVert, fixedpipeFrag;
+	grinliz::GLString fixedpipe7Vert, fixedpipe7Frag;
 	Shader* active;
 	grinliz::CDynArray<int> activeStreams;
 	U32 totalCompileTime;

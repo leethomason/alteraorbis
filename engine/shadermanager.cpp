@@ -85,6 +85,8 @@ ShaderManager::ShaderManager() : active(0), totalCompileTime(0)
 {
 	LoadProgram( "fixedpipe.vert", &fixedpipeVert );
 	LoadProgram( "fixedpipe.frag", &fixedpipeFrag );
+	LoadProgram( "fixedpipe7.vert", &fixedpipe7Vert );
+	LoadProgram( "fixedpipe7.frag", &fixedpipe7Frag );
 }
 
 
@@ -352,10 +354,14 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 	const char* fragmentSrc[2] = { header.c_str(), fixedpipeFrag.c_str() };
 
 	if ( flags == 7169 ) {
-		GLOUTPUT(( "%s\n", header.c_str() ));
+		//GLOUTPUT(( "%s\n", header.c_str() ));
+		const char* ptr = fixedpipe7Vert.c_str();
+		glShaderSource( shader->vertexProg, 1, &ptr, 0 );
+	}
+	else {
+		glShaderSource( shader->vertexProg, 2, vertexSrc, 0 );
 	}
 
-	glShaderSource( shader->vertexProg, 2, vertexSrc, 0 );
 	glCompileShader( shader->vertexProg );
 	glGetShaderInfoLog( shader->vertexProg, LEN, &outLen, buf );
 #ifdef DEBUG_OUTPUT
@@ -365,7 +371,13 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 #endif
 	CHECK_GL_ERROR;
 
-	glShaderSource( shader->fragmentProg, 2, fragmentSrc, 0 );
+	if ( flags == 7169 ) {
+		const char* ptr = fixedpipe7Frag.c_str();
+		glShaderSource( shader->fragmentProg, 1, &ptr, 0 );
+	}
+	else {
+		glShaderSource( shader->fragmentProg, 2, fragmentSrc, 0 );
+	}
 	glCompileShader( shader->fragmentProg );
 	glGetShaderInfoLog( shader->fragmentProg, LEN, &outLen, buf );
 #ifdef DEBUG_OUTPUT

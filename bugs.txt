@@ -214,4 +214,14 @@ CreateProgram flags=7169 685 msec total=1987
 Remove shader info log query:
 CreateProgram flags=7169 682 msec total=2130	// good! does nothing
 
+Use one file instead of separate header and source:
+CreateProgram flags=7169 680 msec total=2067	// does nothing, but more surprising
+
+Remove the 2 constants.
+CreateProgram flags=7169 672 msec total=1917	// still does nothing
+
+Trim down the program to minimal compilation.
+CreateProgram flags=7169 690 msec total=2239	// this is just weird
+CreateProgram flags=7169 675 msec total=2009
+CreateProgram flags=7169 691 msec total=2079
 
