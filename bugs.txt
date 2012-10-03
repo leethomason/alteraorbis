@@ -227,3 +227,12 @@ CreateProgram flags=7169 691 msec total=2079
 
 Updated Driver. *sigh*
 CreateProgram flags=7169 779 msec total=2086
+
+
+
+Desktop, caching on:
+CreateProgram flags=7169 2 msec total=20
+CreateProgram flags=7169 3 msec total=25
+Desktop, caching off:
+CreateProgram flags=7169 72 msec total=873	// Huge success! If only it worked on laptop.
+CreateProgram flags=7169 89 msec total=772	// Pull out color mult
