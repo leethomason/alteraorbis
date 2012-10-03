@@ -30,10 +30,7 @@ uniform mat4 	u_mvpMatrix;		// model-view-projection.
 	#endif
 #endif
 
-#if COLOR_MULTIPLIER == 1
-	uniform vec4 u_colorMult;		// Overall Color, if specified.
-#endif
-
+uniform vec4 u_colorMult;			// Overall Color, if specified.
 attribute vec3 a_pos;				// vertex position
 
 #if COLORS == 1
@@ -82,11 +79,7 @@ void main() {
 		#endif
 	#endif
 
-	#if COLOR_MULTIPLIER == 0
-		vec4 color = vec4( 1,1,1,1 );
-	#elif COLOR_MULTIPLIER == 1
-		vec4 color = u_colorMult;
-	#endif
+	vec4 color = u_colorMult;
 	
 	#if COLOR_PARAM == 1
 		color *= param;

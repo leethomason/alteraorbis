@@ -53,7 +53,7 @@ public:
 		
 		COLOR_PARAM			= (1<<7),		// Apply per model color. PARAM
 		COLORS				= (1<<8),		// Per-vertex colors.
-		COLOR_MULTIPLIER	= (1<<9),		// Global color multiplier.
+		//COLOR_MULTIPLIER	= (1<<9),		// Global color multiplier.
 		LIGHTING_DIFFUSE	= (1<<10),		// Diffuse lighting. Requires per vertex normals, 
 											// light direction, ambient color, and diffuse color.
 		LIGHTING_HEMI		= (1<<11),		// Hemisperical lighting. Like diffuse, but uses a 
@@ -66,12 +66,6 @@ public:
 		
 		BONE_FILTER			= (1<<17),		// Only show one bone. PARAM.x
 		BONE_XFORM			= (1<<18),
-
-		/*
-		// Switch to different shader:
-		BLUR				= (1<<18),		// requires u_radius
-		BLUR_Y				= (1<<19),		//
-		*/
 	};
 
 	void DeviceLoss();

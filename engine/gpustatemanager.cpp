@@ -299,7 +299,6 @@ void GPUShader::SetState( const GPUShader& ns )
 	GLASSERT( !ns.HasTexture1() || ns.stream.nTexture0 == 2 );
 
 	flags |= ns.stream.HasColor() ? ShaderManager::COLORS : 0;
-	flags |= ( ns.color.r != 1.f || ns.color.g != 1.f || ns.color.b != 1.f || ns.color.a != 1.f ) ? ShaderManager::COLOR_MULTIPLIER : 0;
 	
 	if ( ns.HasLighting( 0, 0, 0 )) {
 		if ( ns.hemisphericalLighting )
@@ -399,14 +398,8 @@ void GPUShader::SetState( const GPUShader& ns )
 		shadman->SetStreamData( ShaderManager::A_NORMAL, 3, GL_FLOAT, ns.stream.stride, PTR( ns.streamPtr, ns.stream.normalOffset ) );	 
 	}
 
-//	if ( flags & ShaderManager::BLUR ) {
-//		shadman->SetUniform( ShaderManager::U_RADIUS, ns.radius );
-//	}
-
-	// color multiplier
-	if ( flags & ShaderManager::COLOR_MULTIPLIER ) {
-		shadman->SetUniform( ShaderManager::U_COLOR_MULT, ns.color );
-	}
+	// color multiplier is always set
+	shadman->SetUniform( ShaderManager::U_COLOR_MULT, ns.color );
 
 	// Blend
 	if ( ns.blend != currentBlend ) {

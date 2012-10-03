@@ -232,6 +232,11 @@ Caching, first run:
 CreateProgram flags=7169 803 msec total=2393	// write to disk included
 CreateProgram flags=7169 864 msec total=1755	// AACCK stupid intel driver doesn't support extension
 
-But on the desktop, 40X (yes 40) faster:
-CreateProgram flags=7169 3 msec total=566
+Desktop, caching on:
+CreateProgram flags=7169 2 msec total=20
+CreateProgram flags=7169 3 msec total=25
+Desktop, caching off:
+CreateProgram flags=7169 72 msec total=873	// Huge success! If only it worked on laptop.
+CreateProgram flags=7169 89 msec total=772	// Pull out color mult
 
+But on the desktop, 40X (yes 40) faster:
