@@ -72,23 +72,9 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 	READ_INT_ATTR( ele, rounds );
 	READ_FLOAT_ATTR( ele, speed );
 	READ_FLOAT_ATTR( ele, meleeDamageMult );
-	READ_INT_ATTR( ele, meleeEffect );
 	READ_FLOAT_ATTR( ele, rangedDamage );
-	READ_INT_ATTR( ele, rangedEffect );
 
 	if ( EFFECT_FIRE )	flags |= IMMUNE_FIRE;
-
-	if ( meleeDamageMult > 0 ) {
-		GLASSERT( meleeEffect );
-		GLASSERT( !( (meleeEffect&EFFECT_KINETIC) && (meleeEffect&EFFECT_ENERGY) ) );
-		meleeEffect |= (( flags & EFFECT_MASK ) ^ EFFECT_EXPLOSIVE );
-	}
-
-	if ( rangedDamage > 0 ) {
-		GLASSERT( rangedEffect );
-		GLASSERT( !( (meleeEffect&EFFECT_KINETIC) && (meleeEffect&EFFECT_ENERGY) ) );
-		rangedEffect |= (flags & EFFECT_MASK );
-	}
 
 	hardpoint = NO_HARDPOINT;
 	const char* h = ele->Attribute( "hardpoint" );
@@ -169,24 +155,14 @@ float GameItem::AbsorbDamage( const DamageDesc& dd, DamageDesc* remain, const ch
 	float total = 0;
 	GLLOG(( "%s Damage ", log ));
 
-	for( int i=0; i<DamageDesc::NUM_COMPONENTS && hp > 0; ++i ) {
-		float d = resist.components[i] * dd.components[i];
-		GLLOG(( "%.1f ", d ));
-		if ( remain ) {
-			// Damage that passes through this 
-			float r = (1.f - Clamp(resist.components[i], 0.f, 1.f ) * dd.components[i] );
-			remain->components[i] = r;
-		}
-		total += d;
-	}
-	total = Min( hp, total );
-	hp = Max( 0.f, hp-total );
+	total = Min( hp, dd.damage );
+	hp = hp-total;
 	GLLOG(( "total=%.1f hp=%.1f", total, hp ));
 	return total;
 }
 
 
-void DamageDesc::Save( const char* prefix, tinyxml2::XMLPrinter* )
+/*void DamageDesc::Save( const char* prefix, tinyxml2::XMLPrinter* )
 {
 	GLASSERT( 0 );	// FIXME
 }
@@ -201,10 +177,9 @@ void DamageDesc::Load( const char* prefix, const tinyxml2::XMLElement* doc )
 	doc->QueryFloatAttribute( "fire", &components[FIRE] );
 	doc->QueryFloatAttribute( "shock", &components[SHOCK] );
 }
-
+*/
 
 void DamageDesc::Log()
 {
-	GLLOG(( "[k=%.1f e=%.1f f=%.1f s=%.1f sm=%.1f]",
-			Kinetic(), Energy(), Fire(), Shock(), Total() ));
+	GLLOG(( "[damage=%.1f]", damage ));
 }

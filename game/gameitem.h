@@ -78,22 +78,12 @@ class GameItem;
 class DamageDesc
 {
 public:
+	DamageDesc() : damage(1), effects(0) {}
+	DamageDesc( float _damage, int _effects ) : damage(_damage), effects(_effects) {}
+
 	float damage;
 	int   effects;
 
-/*	void Set( float _kinetic, float _energy, float _fire, float _shock ) { 
-		components[KINETIC] = _kinetic;
-		components[ENERGY]  = _energy;
-		components[FIRE]    = _fire;
-		components[SHOCK]	= _shock;
-	}
-	float Total() const { 
-		float total=0;
-		for( int i=0; i<NUM_COMPONENTS; ++i )
-			total += components[i];
-		return total;
-	}
-*/
 //	bool Kinetic() const	{ return (effects & GameItem::EFFECT_ENERGY) == 0; }
 //	bool Energy() const		{ return (effects & GameItem::EFFECT_ENERGY) != 0; }
 //	bool Fire() const		{ return (effects & GameItem::EFFECT_FIRE) != 0; }
@@ -197,9 +187,7 @@ public:
 	float mass;				// mass (kg)
 	int	primaryTeam;		// who owns this items
 	float meleeDamageMult;	// a multiplier of the base (effective mass) and other modifiers
-	int   meleeEffect;
 	float rangedDamage;		// base ranged damage
-	int   rangedEffect;
 	U32 cooldown;			// time between uses
 	U32 cooldownTime;		// counting UP to ready state
 	U32 reload;				// time to reload once clip is used up
@@ -242,10 +230,8 @@ public:
 			hardpoint = 0;
 			mass = 1;
 			primaryTeam = 0;
-			meleeDamageMult = 0;
-			meleeEffect = 0;
+			meleeDamageMult = 1;
 			rangedDamage = 0;
-			rangedEffect = 0;
 			cooldown = 1000;
 			cooldownTime = cooldown;
 			reload = 2000;
@@ -265,7 +251,7 @@ public:
 	virtual IWeaponItem*		ToWeapon()			{ return (flags & (MELEE_WEAPON | RANGED_WEAPON)) ? this : 0; }
 	virtual const IWeaponItem*	ToWeapon() const	{ return (flags & (MELEE_WEAPON | RANGED_WEAPON)) ? this : 0; }
 
-
+	int Effects() const { return flags & EFFECT_MASK; }
 	bool DoTick( U32 delta );
 	
 	// 'Ready' and 'Rounds' are orthogonal. You are Ready()

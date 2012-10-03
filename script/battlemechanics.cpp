@@ -152,43 +152,37 @@ void BattleMechanics::CalcMeleeDamage( Chit* src, IMeleeWeaponItem* weapon, Dama
 	GLASSERT( inv && item );
 	if ( !inv ) return;
 
+	// A chain is: sword[0] -> claw[1] -> creature[2]
 	grinliz::CArray< GameItem*, 4 > chain;
 	inv->GetChain( item, &chain );
 	GLASSERT( !chain.Empty() );
 	GLASSERT( chain.Size() == 2 || chain.Size() == 3 );
 
-	DamageDesc::Vector vec = item->meleeDamage.components;
-	DamageDesc::Vector handVec;
-	if ( chain.Size() == 3 ) {
-		handVec = chain[1]->meleeDamage.components;
-	}
-	// The parent item doesn't do damage. But
-	// give it credit for FLAME, etc.
-	GameItem* parentItem = chain[chain.Size()-1];
-	DamageDesc::Vector parentVec = chain[chain.Size()-1]->meleeDamage.components;
-	if ( parentItem->flags & GameItem::EFFECT_FIRE ) {
-		parentVec[DamageDesc::FIRE] = 1;
-	}
-	
-	static const float CHAIN_FRACTION = 0.5f;
+	// Now that we have a chain, how do effects commute?
+	// Generally left:
+	//		A flaming creature will impart FIRE to a regular sword.
+	// But not right:
+	//		A flaming sword won't light up the creature.
+	// 
+	// Or at least that is the theory so far.
 
-	// Compute the multiplier. It is the maximum of
-	// the item itself, and a percentage of the value 
-	// of the chain items. So a creature of fire
-	// will do some fire damage, even when using a
-	// normal sword.
-	for( int i=0; i<DamageDesc::NUM_COMPONENTS; ++i ) {
-		vec[i] = Max( vec[i], CHAIN_FRACTION*handVec[i], CHAIN_FRACTION*parentVec[i] );
+	int effect = 0;
+	for( int i=chain.Size()-1; i>=0; --i ) {
+		effect |= ( chain[i]->flags & GameItem::EFFECT_MASK );
 	}
+	// Remove explosive melee effect. It would only be funny 10 or 20 times.
+	effect ^= GameItem::EFFECT_EXPLOSIVE;
 
-	// That was the multiplier; the actual damage is based on the mass.
-	// How many strikes does it take a unit of equal
-	// mass to destroy a unit of the same mass?
-	static const float STRIKE_RATIO = 5.0f;
-
-	for( int i=0; i<DamageDesc::NUM_COMPONENTS; ++i ) {
-		dd->components[i] = vec[i] * parentItem->mass / STRIKE_RATIO;
+	// Now about mass.
+	// For now, go with the mass of the item + 1/2 the mass of right
+	float mass = 0;
+	for( int i=0; i<chain.Size(); ++i ) {
+		mass += chain[i]->mass * (i==0 ? 1.f : 0.5f );
 	}
+	static const float STRIKE_RATIO_INV = 1.0f / 5.0f;
+
+	dd->damage = mass * chain[0]->meleeDamageMult * STRIKE_RATIO_INV;
+	dd->effects = effect;
 }
 
 
@@ -226,9 +220,9 @@ void BattleMechanics::Shoot( ChitBag* bag, Chit* src, Chit* target, IRangedWeapo
 	else
 		bolt->color.Set( 0, 1, 0, 1 );	// FIXME: real color based on item
 	bolt->chitID = src->ID();
-	bolt->damage = item->rangedDamage.components;
+	bolt->damage = item->rangedDamage;
+	bolt->effect = item->Effects();
 	bolt->particle  = (item->flags & GameItem::RENDER_TRAIL) ? true : false;
-	bolt->explosive = (item->flags & GameItem::EXPLOSIVE) ? true : false;
 	bolt->speed = speed;
 }
 
@@ -332,7 +326,7 @@ void BattleMechanics::GenerateExplosionMsgs( const DamageDesc& _dd, const Vector
 					if ( len < EXPLOSIVE_RANGE ) {
 						DamageDesc dd = _dd;
 						float t = (EXPLOSIVE_RANGE-len)/EXPLOSIVE_RANGE;
-						dd.components.Mult( t );
+						dd.damage *= t;
 
 						ChitMsg msg( ChitMsg::CHIT_DAMAGE, 1, &dd );
 						msg.vector = target - origin;

@@ -6,8 +6,8 @@
     <intrinsics>
       <item name="hand"
             flags="MELEE_WEAPON INTRINSIC_AT_HARDPOINT"
-            hardpoint="trigger">
-        <melee kinetic="1" />
+            hardpoint="trigger"
+            meleeDamageMult="1">
       </item>>
     </intrinsics>
   </item>>
@@ -19,8 +19,8 @@
     <intrinsics>
       <item name="pincer"
             flags="MELEE_WEAPON INTRINSIC_AT_HARDPOINT"
-            hardpoint="trigger" >
-            <melee kinetic="3"/>
+            hardpoint="trigger"
+            meleeDamageMult="3">
       </item>
     </intrinsics>
   </item>
@@ -41,8 +41,8 @@
       <!-- since intrinsic, also grants fire immunity -->
       <item name="claw"
             flags="MELEE_WEAPON INTRINSIC_AT_HARDPOINT EFFECT_FIRE"
-            hardpoint="trigger">
-            <melee kinetic="1.5"/>
+            hardpoint="trigger"
+            meleeDamageMult="1.5">
       </item>
       <item name="breath"
             flags="RANGED_WEAPON INTRINSIC_AT_HARDPOINT EFFECT_FIRE EFFECT_EXPLOSIVE RENDER_TRAIL"
@@ -50,8 +50,8 @@
             cooldown="1000"
             reload="3000"
             clipCap="1"
-            speed ="0.6">
-            <ranged kinetic="50"/>
+            speed ="0.6"
+            rangedDamage="50">
       </item>
     </intrinsics>
   </item>

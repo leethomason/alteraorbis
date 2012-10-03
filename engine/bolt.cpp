@@ -18,6 +18,7 @@
 #include "enginelimits.h"
 #include "texture.h"
 #include "gpustatemanager.h"
+#include "../game/gameitem.h"
 
 using namespace grinliz;
 
@@ -77,7 +78,7 @@ void Bolt::TickAll( grinliz::CDynArray<Bolt>* bolts, U32 delta, Engine* engine, 
 				def.color = b.color;
 				ps->EmitPD( def, at, normal, engine->camera.EyeDir3(), delta );
 
-				if ( b.explosive ) {
+				if ( b.effect & GameItem::EFFECT_EXPLOSIVE ) {
 					def = *ps->GetPD( "explosion" );
 					def.color = b.color;
 					ps->EmitPD( def, at, normal, engine->camera.EyeDir3(), delta );

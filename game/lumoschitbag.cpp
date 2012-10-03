@@ -19,14 +19,14 @@ void LumosChitBag::HandleBolt( const Bolt& bolt, Model* modelHit, const grinliz:
 {
 	GLASSERT( engine );
 	Chit* chitShooter = GetChit( bolt.chitID );	// may be null
+	int explosive = bolt.effect & GameItem::EFFECT_EXPLOSIVE;
  
-	if ( !bolt.explosive ) {
+	if ( !explosive ) {
 		if ( modelHit ) {
 			Chit* chitHit = modelHit->userData;
 			GLASSERT( chitHit );
 			GLASSERT( GetChit( chitHit->ID() ) == chitHit );
-			DamageDesc dd;
-			dd.components = bolt.damage;
+			DamageDesc dd( bolt.damage, bolt.effect );
 		
 			ChitMsg msg( ChitMsg::CHIT_DAMAGE, 0, &dd );
 			msg.vector = at;
@@ -45,8 +45,7 @@ void LumosChitBag::HandleBolt( const Bolt& bolt, Model* modelHit, const grinliz:
 		GLASSERT( Equal( bolt.dir.Length(), 1.f, 0.001f ));
 		Vector3F origin = at - bolt.dir * rewind;
 
-		DamageDesc dd;
-		dd.components = bolt.damage;
+		DamageDesc dd( bolt.damage, bolt.effect );
 		BattleMechanics::GenerateExplosionMsgs( dd, origin, engine, &chitList );
 	}
 }

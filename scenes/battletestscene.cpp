@@ -421,8 +421,7 @@ void BattleTestScene::Tap( int action, const grinliz::Vector2F& view, const grin
 			IntersectRayPlane( debugRay.origin, debugRay.direction, 1, 0, &at );
 			at.y = 0.01f;
 
-			DamageDesc dd;
-			dd.Set( 20, 0, 0, 0 );
+			DamageDesc dd( 20, 0 );
 			BattleMechanics::GenerateExplosionMsgs( dd, at, engine, &chitArr );
 		}
 	}

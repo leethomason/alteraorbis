@@ -44,7 +44,6 @@ struct Bolt {
 		color.Set( 1, 1, 1, 1 );
 		speed = 1.0f;
 		particle = false;
-		explosive = false;
 
 		chitID = 0;
 	} 
@@ -56,11 +55,11 @@ struct Bolt {
 	grinliz::Vector4F	color;
 	float				speed;
 	bool				particle;
-	bool				explosive;
 
 	// Userdata follows
-	int								chitID;		// who fired this bolt
-	grinliz::MathVector<float,4>	damage;		// damageDesc. Don't worry about he '4', won't compile if mis-match
+	int		chitID;		// who fired this bolt
+	float	damage;
+	int		effect;
 
 	static void TickAll( grinliz::CDynArray<Bolt>* bolts, U32 delta, Engine* engine, IBoltImpactHandler* handler );
 };
