@@ -84,9 +84,11 @@
         cooldown="500"
         reload="1000"
         clipCap="6"
+        meleeDamage="1.1"
+        meleeEffect="EFFECT_KINETIC"
+        rangedDamage="30"
+        rangedEffect ="EFFECT_ENERGY"
         >
-        <melee  kinetic="1.1"/>
-        <ranged energy="30" />
   </item>
 
   <item name="shield"

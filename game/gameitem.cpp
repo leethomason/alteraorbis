@@ -62,8 +62,6 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 	READ_FLAG( flags, f, EFFECT_SHOCK );
 	READ_FLAG( flags, f, RENDER_TRAIL );
 
-	if ( EFFECT_FIRE )	flags |= IMMUNE_FIRE;
-
 	READ_FLOAT_ATTR( ele, mass );
 	READ_INT_ATTR( ele, primaryTeam );
 	READ_UINT_ATTR( ele, cooldown );
@@ -73,18 +71,23 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 	READ_INT_ATTR( ele, clipCap );
 	READ_INT_ATTR( ele, rounds );
 	READ_FLOAT_ATTR( ele, speed );
+	READ_FLOAT_ATTR( ele, meleeDamageMult );
+	READ_INT_ATTR( ele, meleeEffect );
+	READ_FLOAT_ATTR( ele, rangedDamage );
+	READ_INT_ATTR( ele, rangedEffect );
 
-	const XMLElement* meleeEle = ele->FirstChildElement( "melee" );
-	if ( meleeEle ) {
-		meleeDamage.Load( "melee", meleeEle );
+	if ( EFFECT_FIRE )	flags |= IMMUNE_FIRE;
+
+	if ( meleeDamageMult > 0 ) {
+		GLASSERT( meleeEffect );
+		GLASSERT( !( (meleeEffect&EFFECT_KINETIC) && (meleeEffect&EFFECT_ENERGY) ) );
+		meleeEffect |= (( flags & EFFECT_MASK ) ^ EFFECT_EXPLOSIVE );
 	}
-	const XMLElement* rangedEle = ele->FirstChildElement( "ranged" );
-	if ( rangedEle ) {
-		rangedDamage.Load( "ranged", rangedEle );
-	}
-	const XMLElement* resistEle = ele->FirstChildElement( "resist" );
-	if ( resistEle ) {
-		resist.Load( "resist", resistEle );
+
+	if ( rangedDamage > 0 ) {
+		GLASSERT( rangedEffect );
+		GLASSERT( !( (meleeEffect&EFFECT_KINETIC) && (meleeEffect&EFFECT_ENERGY) ) );
+		rangedEffect |= (flags & EFFECT_MASK );
 	}
 
 	hardpoint = NO_HARDPOINT;

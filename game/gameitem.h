@@ -75,6 +75,37 @@ class WeaponItem;
 class GameItem;
 
 
+class DamageDesc
+{
+public:
+	float damage;
+	int   effects;
+
+/*	void Set( float _kinetic, float _energy, float _fire, float _shock ) { 
+		components[KINETIC] = _kinetic;
+		components[ENERGY]  = _energy;
+		components[FIRE]    = _fire;
+		components[SHOCK]	= _shock;
+	}
+	float Total() const { 
+		float total=0;
+		for( int i=0; i<NUM_COMPONENTS; ++i )
+			total += components[i];
+		return total;
+	}
+*/
+//	bool Kinetic() const	{ return (effects & GameItem::EFFECT_ENERGY) == 0; }
+//	bool Energy() const		{ return (effects & GameItem::EFFECT_ENERGY) != 0; }
+//	bool Fire() const		{ return (effects & GameItem::EFFECT_FIRE) != 0; }
+//	bool Shock() const		{ return (effects & GameItem::EFFECT_SHOCK) != 0; }
+//	bool Explosive() const	{ return (effects & GameItem::EFFECT_EXPLOSIVE) != 0; }
+
+//	void Save( const ch//ar* prefix, tinyxml2::XMLPrinter* );
+//	void Load( const char* prefix, const tinyxml2::XMLElement* doc );
+	void Log();
+};
+
+
 class IWeaponItem 
 {
 public:
@@ -148,12 +179,14 @@ public:
 		IMMUNE_FIRE			= (1<<10),				// doesn't burn *at all*
 		FLAMMABLE			= (1<<11),				// burns until gone (wood)
 
-		EFFECT_ENERGY		= (1<<12),
-		EFFECT_EXPLOSIVE	= (1<<13),
-		EFFECT_FIRE			= (1<<14),
-		EFFECT_SHOCK		= (1<<15),
+		EFFECT_KINETIC		= (1<<12),
+		EFFECT_ENERGY		= (1<<13),
+		EFFECT_EXPLOSIVE	= (1<<14),
+		EFFECT_FIRE			= (1<<15),
+		EFFECT_SHOCK		= (1<<16),
+		EFFECT_MASK			= EFFECT_KINETIC | EFFECT_ENERGY | EFFECT_EXPLOSIVE | EFFECT_FIRE | EFFECT_SHOCK,
 
-		RENDER_TRAIL		= (1<<16),				// render a bolt with a 'smoketrail' vs. regular bolt
+		RENDER_TRAIL		= (1<<17),				// render a bolt with a 'smoketrail' vs. regular bolt
 	};
 
 	grinliz::CStr< MAX_ITEM_NAME >		name;		// name of the item
@@ -163,8 +196,10 @@ public:
 	int hardpoint;			// id of hardpoint this item attaches to
 	float mass;				// mass (kg)
 	int	primaryTeam;		// who owns this items
-	float meleeDamage;		// a multiplier of the base (effective mass) and other modifiers
+	float meleeDamageMult;	// a multiplier of the base (effective mass) and other modifiers
+	int   meleeEffect;
 	float rangedDamage;		// base ranged damage
+	int   rangedEffect;
 	U32 cooldown;			// time between uses
 	U32 cooldownTime;		// counting UP to ready state
 	U32 reload;				// time to reload once clip is used up
@@ -186,7 +221,7 @@ public:
 			hardpoint		= rhs->hardpoint;
 			mass			= rhs->mass;
 			primaryTeam		= rhs->primaryTeam;
-			meleeDamage		= rhs->meleeDamage;
+			meleeDamageMult	= rhs->meleeDamageMult;
 			rangedDamage	= rhs->rangedDamage;
 			cooldown		= rhs->cooldown;
 			cooldownTime	= rhs->cooldownTime;
@@ -207,8 +242,10 @@ public:
 			hardpoint = 0;
 			mass = 1;
 			primaryTeam = 0;
-			meleeDamage = 0;
+			meleeDamageMult = 0;
+			meleeEffect = 0;
 			rangedDamage = 0;
+			rangedEffect = 0;
 			cooldown = 1000;
 			cooldownTime = cooldown;
 			reload = 2000;
@@ -260,36 +297,6 @@ public:
 private:
 };
 
-
-class DamageDesc
-{
-public:
-	float damage;
-	int   effects;
-
-/*	void Set( float _kinetic, float _energy, float _fire, float _shock ) { 
-		components[KINETIC] = _kinetic;
-		components[ENERGY]  = _energy;
-		components[FIRE]    = _fire;
-		components[SHOCK]	= _shock;
-	}
-	float Total() const { 
-		float total=0;
-		for( int i=0; i<NUM_COMPONENTS; ++i )
-			total += components[i];
-		return total;
-	}
-*/
-	bool Kinetic() const	{ return (effects & GameItem::EFFECT_ENERGY) == 0; }
-	bool Energy() const		{ return (effects & GameItem::EFFECT_ENERGY) != 0; }
-	bool Fire() const		{ return (effects & GameItem::EFFECT_FIRE) != 0; }
-	bool Shock() const		{ return (effects & GameItem::EFFECT_SHOCK) != 0; }
-	bool Explosive() const	{ return (effects & GameItem::EFFECT_EXPLOSIVE) != 0; }
-
-	void Save( const char* prefix, tinyxml2::XMLPrinter* );
-	void Load( const char* prefix, const tinyxml2::XMLElement* doc );
-	void Log();
-};
 
 
 #endif // GAMEITEM_INCLUDED
