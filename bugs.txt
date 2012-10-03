@@ -7,8 +7,8 @@
 	X heavy weapons should do knockback, not just amount of damage/explosion
 	X change bolt color
 	X item: support speed, pass on to bolts
-	- optimize start time
-	- change effect strategy - are all effects just flags?
+	X optimize start time
+	X change effect strategy - are all effects just flags?
 	- revisit accuracy comuptation. what scales with distance? area? volume? radius?
 	- shields, general bonus/cost/damage propegation
 	- removing unit "clumping" (3yr old soccer team). Basic formation?
@@ -231,3 +231,7 @@ CreateProgram flags=7169 779 msec total=2086
 Caching, first run:
 CreateProgram flags=7169 803 msec total=2393	// write to disk included
 CreateProgram flags=7169 864 msec total=1755	// AACCK stupid intel driver doesn't support extension
+
+But on the desktop, 40X (yes 40) faster:
+CreateProgram flags=7169 3 msec total=566
+
