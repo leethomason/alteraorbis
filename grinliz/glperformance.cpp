@@ -64,6 +64,7 @@ PerfData* Performance::root = 0;
 int Performance::framesSampled = 0;
 bool Performance::sampling = true;
 
+static const int GL_MAX_PERFDATA = 100;
 
 void Performance::Process()
 {

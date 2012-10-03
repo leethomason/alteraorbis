@@ -17,8 +17,10 @@
 #include "platformgl.h"
 #include "texture.h"
 
-#include "shaders.inc"
+//#include "shaders.inc"
 
+#include "../grinliz/glperformance.h"
+#include "../grinliz/glrandom.h"
 
 //#define DEBUG_OUTPUT
 
@@ -80,8 +82,18 @@ int ShaderManager::Shader::GetUniformLocation( int uniform )
 }
 
 
-ShaderManager::ShaderManager() : active( 0 )
+ShaderManager::ShaderManager() : active(0), totalCompileTime(0)
 {
+	LoadProgram( "fixedpipe.vert", &fixedpipeVert );
+	LoadProgram( "fixedpipe.frag", &fixedpipeFrag );
+
+	U32 hash0 = Random::Hash( fixedpipeVert.c_str(), fixedpipeVert.size() );
+	U32 hash1 = Random::Hash( fixedpipeFrag.c_str(), fixedpipeFrag.size() );
+	U32 hash = hash0 ^ hash1;
+
+	hashStr.Format( "%x", hash );
+
+	// FIXME make cache directory
 }
 
 
@@ -92,6 +104,23 @@ ShaderManager::~ShaderManager()
 			DeleteProgram( &shaderArr[i] );
 		}
 	}
+}
+
+
+void ShaderManager::LoadProgram( const char* name, GLString* str ) 
+{
+	CStr<256> path;
+	path.Format( "./res/%s", name );
+	FILE* fp = fopen( path.c_str(), "r" );
+	GLASSERT( fp );
+
+	static const int SIZE = 100;
+	char buf[SIZE];
+	int count = 0;
+	while( (count = fread( buf, 1, SIZE, fp )) > 0 ) {
+		str->append( buf, count );
+	}
+	fclose( fp );
 }
 
 
@@ -281,9 +310,43 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 		}
 	}
 
+	CStr<50> profileStr;
+	profileStr.Format( "CreateProgram flags=%d", flags );
+	QuickClockProfile profile( profileStr.c_str(), &this->totalCompileTime );
+
 	Shader* shader = shaderArr.PushArr(1);
 	shader->Init();
 	shader->flags = flags;
+	shader->prog = glCreateProgram();
+
+	// Is it in the cache?
+	if ( GLEW_ARB_get_program_binary ) {
+		CStr<200> path;
+		path.Format( "./cache/shader_%s_%d.shader", hashStr.c_str(), flags );
+		FILE* fp = fopen( path.c_str(), "rb" );
+		if ( fp ) {
+			// In the cache!
+			fseek( fp, 0, SEEK_END );
+			long len = ftell( fp )-4;
+			fseek( fp, 0, SEEK_SET );
+			U8* data = new U8[len];
+			U32 binaryFormat;
+			fread( &binaryFormat, 4, 1, fp );
+			fread( data, 1, len, fp );
+			fclose( fp );
+
+			glProgramBinary( shader->prog, binaryFormat, data, len );
+			delete [] data;
+			int success = 0;
+
+			glGetProgramiv( shader->prog, GL_LINK_STATUS, &success);
+			if ( success ) {
+				GLOUTPUT(( "Shader %d loaded from cache.\n", flags ));
+				return shader;
+			}
+			GLASSERT( false );	// bad cache
+		}
+	}
 
 	shader->vertexProg = glCreateShader( GL_VERTEX_SHADER );
 	shader->fragmentProg = glCreateShader( GL_FRAGMENT_SHADER );
@@ -317,10 +380,6 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 	else 
 		AppendFlag( &header, "LIGHTING_DIFFUSE", 0, 0 );
 
-//	if ( flags & BLUR ) {
-//		AppendFlag( &header, "BLUR_Y", flags & BLUR_Y );
-//	}
-
 	AppendConst( &header, "EL_MAX_INSTANCE", EL_MAX_INSTANCE );
 	AppendConst( &header, "EL_MAX_BONES",	 EL_MAX_BONES );
 
@@ -328,15 +387,11 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 	GLOUTPUT(( "header\n%s\n", header.c_str() ));
 #endif
 
-	const char* vertexSrc[2]   = { header.c_str(), fixedpipe_vert };
-	const char* fragmentSrc[2] = { header.c_str(), fixedpipe_frag };
-
-//	if ( flags & BLUR ) {
-//		vertexSrc[1]   = blur_vert;
-//		fragmentSrc[1] = blur_frag;
-//	}
+	const char* vertexSrc[2]   = { header.c_str(), fixedpipeVert.c_str() };
+	const char* fragmentSrc[2] = { header.c_str(), fixedpipeFrag.c_str() };
 
 	glShaderSource( shader->vertexProg, 2, vertexSrc, 0 );
+
 	glCompileShader( shader->vertexProg );
 	glGetShaderInfoLog( shader->vertexProg, LEN, &outLen, buf );
 #ifdef DEBUG_OUTPUT
@@ -356,9 +411,11 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 #endif
 	CHECK_GL_ERROR;
 
-	shader->prog = glCreateProgram();
 	glAttachShader( shader->prog, shader->vertexProg );
 	glAttachShader( shader->prog, shader->fragmentProg );
+	if ( GLEW_ARB_get_program_binary ) {
+		glProgramParameteri( shader->prog, GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE);
+	}
 	glLinkProgram( shader->prog );
 	glGetProgramInfoLog( shader->prog, LEN, &outLen, buf );
 #ifdef DEBUG_OUTPUT
@@ -368,6 +425,23 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 #endif
 	CHECK_GL_ERROR;
 
+	if ( GLEW_ARB_get_program_binary ) {
+		CStr<200> path;
+		path.Format( "./cache/shader_%s_%d.shader", hashStr.c_str(), flags );
+		FILE* fp = fopen( path.c_str(), "wb" );
+		if ( fp ) {
+			int len;
+			U32 format=0;
+			glGetProgramiv( shader->prog, GL_PROGRAM_BINARY_LENGTH, &len);
+			U8* data = new U8[len];
+			glGetProgramBinary(shader->prog, len, NULL, &format, data);
+
+			fwrite( &format, 4, 1, fp );
+			fwrite( data, len, 1, fp );
+			fclose( fp );
+			delete [] data;
+		}
+	}
 	int nUniforms, maxUniforms;
 	glGetProgramiv( shader->prog, GL_ACTIVE_UNIFORMS, &nUniforms );
 	glGetIntegerv( GL_MAX_VERTEX_UNIFORM_COMPONENTS, &maxUniforms );
@@ -382,12 +456,16 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 void ShaderManager::DeleteProgram( Shader* shader )
 {
 	CHECK_GL_ERROR;
-	glDetachShader( shader->prog, shader->vertexProg );
+	if ( shader->vertexProg )	// 0 in the case of loaded from disk cache
+		glDetachShader( shader->prog, shader->vertexProg );
 	CHECK_GL_ERROR;
-	glDetachShader( shader->prog, shader->fragmentProg );
+	if ( shader->fragmentProg ) 
+		glDetachShader( shader->prog, shader->fragmentProg );
 	CHECK_GL_ERROR;
-	glDeleteShader( shader->vertexProg );
-	glDeleteShader( shader->fragmentProg );
+	if ( shader->vertexProg )	// 0 in the case of loaded from disk cache
+		glDeleteShader( shader->vertexProg );
+	if ( shader->fragmentProg )	// 0 in the case of loaded from disk cache
+		glDeleteShader( shader->fragmentProg );
 	glDeleteProgram( shader->prog );
 	CHECK_GL_ERROR;
 }
