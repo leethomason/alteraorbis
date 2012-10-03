@@ -227,3 +227,7 @@ CreateProgram flags=7169 691 msec total=2079
 
 Updated Driver. *sigh*
 CreateProgram flags=7169 779 msec total=2086
+
+Caching, first run:
+CreateProgram flags=7169 803 msec total=2393	// write to disk included
+CreateProgram flags=7169 864 msec total=1755	// AACCK stupid intel driver doesn't support extension
