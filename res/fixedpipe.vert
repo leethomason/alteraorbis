@@ -5,12 +5,12 @@
 // EL_MAX_BONES = 12
 // 
 //	mvpMatrix		4			4
-// 	mMatrix		4*16		64
+// 	mMatrix			4*16		64
 //	paramArr		1*16		16
 //	colorMult		1			1
-//	boneXForm	12*16	192		// technically vec3, but doubt it packs
+//	boneXForm		12*16		192		// technically vec3, but doubt it packs
 //	normalMat		4			4
-// 	lighting			3			3
+// 	lighting		3			3
 //
 //									284 plus overhead
 // If needed, can possibly pack boneXForm into 4*16 = 64, bringing it down to 156, which is huge in getting it under 256, for systems with that limit. 
