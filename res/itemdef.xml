@@ -62,8 +62,8 @@
         mass="30"
         />
 
-  <item name="testknife"
-        resource="testknife"
+  <item name="ring"
+        resource="ring"
         flags="MELEE_WEAPON HELD_AT_HARDPOINT"
         hardpoint="trigger">
         <melee kinetic="2" />

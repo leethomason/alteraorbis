@@ -492,7 +492,7 @@ void AnimationScene::DoTick( U32 deltaTime )
 		else {
 			const ModelResource* res = 0;
 			if		( triggerToggle[GUN].Down() )	{ res = ModelResourceManager::Instance()->GetModelResource( "testgun" ); }
-			else if ( triggerToggle[KNIFE].Down() )	{ res = ModelResourceManager::Instance()->GetModelResource( "testknife" ); }
+			else if ( triggerToggle[KNIFE].Down() )	{ res = ModelResourceManager::Instance()->GetModelResource( "ring" ); }
 			else if ( triggerToggle[AX].Down() )	{ res = ModelResourceManager::Instance()->GetModelResource( "ax" ); }
 
 			if ( triggerModel && triggerModel->GetResource() != res ) {

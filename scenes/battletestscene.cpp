@@ -338,7 +338,7 @@ void BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int 
 		*/
 
 		if( loadout == MELEE_WEAPON ) {
-			const GameItem *knife = itemStorage.Get( "testknife" );
+			const GameItem *knife = itemStorage.Get( "ring" );
 			GLASSERT( knife );
 			inv->AddToInventory( new GameItem(*knife), true );
 		}

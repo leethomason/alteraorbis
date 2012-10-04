@@ -124,7 +124,7 @@
   <model filename="alltree.ac" modelName="stump"    origin="0 0 2"  shading="smooth" polyRemoval="pre" />
 
   <model filename="weapons.ac"          modelName="testgun"     origin="0 0 0"      shadowCaster="false" />
-  <model filename="weapons.ac"          modelName="testknife"   origin="0.20 0 0"   shadowCaster="false" />
+  <model filename="weapons.ac"          modelName="ring"        origin="0.20 0 0"   shadowCaster="false" />
   <model                                filename="ax.ac"        origin="0 0 0"      shadowCaster="true" />
   <model                                filename="shield.ac"    origin="0 0 0"      shadowCaster="false" />
   
