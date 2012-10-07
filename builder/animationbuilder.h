@@ -18,10 +18,36 @@
 
 #include "../grinliz/gltypes.h"
 #include "../grinliz/gldebug.h"
+#include "../grinliz/glcontainer.h"
+#include "../grinliz/glstringutil.h"
+
 #include "../tinyxml2/tinyxml2.h"
+
 #include "../shared/gamedbwriter.h"
 
-void ProcessAnimation( const tinyxml2::XMLElement* element,
-					   gamedb::WItem* witem );
+void ProcessAnimation( const tinyxml2::XMLElement* element, gamedb::WItem* witem );
+
+class SCMLParser
+{
+public:
+	SCMLParser() {}
+	~SCMLParser() {}
+
+	void Parse( const tinyxml2::XMLDocument* doc, gamedb::WItem* witem );
+
+private:
+	void ReadPartNames( const tinyxml2::XMLDocument* doc );
+	void ReadAnimations( const tinyxml2::XMLDocument* doc );
+	void ReadAnimation( const tinyxml2::XMLDocument* doc, gamedb::WItem* witem, const Animation& a );
+
+	grinliz::HashTable< int, grinliz::GLString > partIDNameMap;
+	struct Animation {
+		grinliz::GLString name;
+		int id;
+		U32 length;
+		int nFrames;
+	};
+	grinliz::CDynArray< Animation > animationArr;
+};
 
 #endif // ANIMATION_BUILDER_INCLUDED

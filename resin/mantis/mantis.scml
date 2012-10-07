@@ -1,2104 +1,659 @@
-<spriterdata>
-    <hotspotarray>
-        <hotspot>
-            <filepath>assets\head.png</filepath>
-            <x>0.00000</x>
-            <y>0.00000</y>
-        </hotspot>
-        <hotspot>
-            <filepath>assets\torso.png</filepath>
-            <x>0.00000</x>
-            <y>0.00000</y>
-        </hotspot>
-        <hotspot>
-            <filepath>assets\arm.upper.right.png</filepath>
-            <x>0.00000</x>
-            <y>0.00000</y>
-        </hotspot>
-        <hotspot>
-            <filepath>assets\arm.lower.right.png</filepath>
-            <x>0.00000</x>
-            <y>0.00000</y>
-        </hotspot>
-        <hotspot>
-            <filepath>assets\leg.upper.right.png</filepath>
-            <x>0.00000</x>
-            <y>0.00000</y>
-        </hotspot>
-        <hotspot>
-            <filepath>assets\leg.lower.right.png</filepath>
-            <x>0.00000</x>
-            <y>0.00000</y>
-        </hotspot>
-        <hotspot>
-            <filepath>assets\leg.lower.left.png</filepath>
-            <x>0.00000</x>
-            <y>0.00000</y>
-        </hotspot>
-        <hotspot>
-            <filepath>assets\leg.upper.left.png</filepath>
-            <x>0.00000</x>
-            <y>0.00000</y>
-        </hotspot>
-        <hotspot>
-            <filepath>assets\arm.upper.left.png</filepath>
-            <x>0.00000</x>
-            <y>0.00000</y>
-        </hotspot>
-        <hotspot>
-            <filepath>assets\arm.lower.left.png</filepath>
-            <x>0.00000</x>
-            <y>0.00000</y>
-        </hotspot>
-    </hotspotarray>
-    <char>
-        <name>char_000</name>
-        <anim>
-            <name>reference</name>
-            <frame>
-                <name>frame_000</name>
-                <duration>500.00000</duration>
-            </frame>
-        </anim>
-        <anim>
-            <name>walk</name>
-            <frame>
-                <name>frame_001</name>
-                <duration>16.91489</duration>
-            </frame>
-            <frame>
-                <name>frame_005</name>
-                <duration>15.95745</duration>
-            </frame>
-            <frame>
-                <name>frame_006</name>
-                <duration>17.28724</duration>
-            </frame>
-            <frame>
-                <name>frame_004</name>
-                <duration>15.85106</duration>
-            </frame>
-            <frame>
-                <name>frame_008</name>
-                <duration>16.48936</duration>
-            </frame>
-            <frame>
-                <name>frame_009</name>
-                <duration>17.50000</duration>
-            </frame>
-        </anim>
-        <anim>
-            <name>melee</name>
-            <frame>
-                <name>frame_000</name>
-                <duration>7.21277</duration>
-            </frame>
-            <frame>
-                <name>frame_011</name>
-                <duration>13.50000</duration>
-            </frame>
-            <frame>
-                <name>frame_012</name>
-                <duration>9.44681</duration>
-            </frame>
-            <frame>
-                <name>frame_010</name>
-                <duration>16.05319</duration>
-            </frame>
-            <frame>
-                <name>frame_013</name>
-                <duration>13.78724</duration>
-            </frame>
-        </anim>
-       <!--
-        <anim>
-            <name>impactlight</name>
-            <frame>
-                <name>frame_014</name>
-                <duration>25.00000</duration>
-            </frame>
-        </anim>
-        --> 
-        <anim>
-            <name>impactheavy</name>
-            <frame>
-                <name>frame_015</name>
-                <duration>60.00000</duration>
-            </frame>
-        </anim>
-        <box>
-            <bottom>0.00000</bottom>
-            <top>-186.00000</top>
-            <right>172.00000</right>
-            <left>-172.00000</left>
-        </box>
-    </char>
-    <frame>
-        <name>frame_000</name>
-        <sprite>
-            <image>assets\head.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>85.00000</width>
-            <height>54.00000</height>
-            <x>88.00000</x>
-            <y>-186.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\torso.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>279.00000</width>
-            <height>105.00000</height>
-            <x>-172.00000</x>
-            <y>-162.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.upper.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>28.00000</width>
-            <height>68.00000</height>
-            <x>56.00000</x>
-            <y>-148.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.lower.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>97.00000</width>
-            <height>32.00000</height>
-            <x>60.00000</x>
-            <y>-88.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.upper.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>60.00000</width>
-            <height>74.00000</height>
-            <x>-39.00000</x>
-            <y>-116.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.lower.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>51.00000</width>
-            <height>42.00000</height>
-            <x>-32.00000</x>
-            <y>-41.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.lower.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>51.00000</width>
-            <height>42.00000</height>
-            <x>-32.00000</x>
-            <y>-41.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.upper.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>60.00000</width>
-            <height>74.00000</height>
-            <x>-39.00000</x>
-            <y>-116.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.upper.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>28.00000</width>
-            <height>68.00000</height>
-            <x>55.00000</x>
-            <y>-148.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.lower.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>96.00000</width>
-            <height>32.00000</height>
-            <x>60.00000</x>
-            <y>-88.00000</y>
-        </sprite>
-    </frame>
-    <frame>
-        <name>frame_001</name>
-        <sprite>
-            <image>assets\head.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>85.00000</width>
-            <height>54.00000</height>
-            <x>88.00000</x>
-            <y>-186.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.lower.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>343.13684</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>51.00000</width>
-            <height>42.00000</height>
-            <x>-64.31171</x>
-            <y>-42.49423</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.upper.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>336.32938</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>60.00000</width>
-            <height>74.00000</height>
-            <x>-39.00000</x>
-            <y>-116.00012</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.upper.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>350.53766</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>28.00000</width>
-            <height>68.00000</height>
-            <x>55.00006</x>
-            <y>-148.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.lower.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>96.00000</width>
-            <height>32.00000</height>
-            <x>45.00000</x>
-            <y>-88.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\torso.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>279.00000</width>
-            <height>105.00000</height>
-            <x>-172.00000</x>
-            <y>-162.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.upper.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>18.79974</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>60.00000</width>
-            <height>74.00000</height>
-            <x>-38.99933</x>
-            <y>-116.00037</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.lower.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>51.00000</width>
-            <height>42.00000</height>
-            <x>-5.49994</x>
-            <y>-64.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.upper.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>9.29330</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>28.00000</width>
-            <height>68.00000</height>
-            <x>56.00012</x>
-            <y>-148.00003</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.lower.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>97.00000</width>
-            <height>32.00000</height>
-            <x>66.50000</x>
-            <y>-93.00000</y>
-        </sprite>
-    </frame>
-    <frame>
-        <name>frame_002</name>
-        <sprite>
-            <image>assets\head.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>85.00000</width>
-            <height>54.00000</height>
-            <x>88.00000</x>
-            <y>-186.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.lower.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>51.00000</width>
-            <height>42.00000</height>
-            <x>-32.00000</x>
-            <y>-41.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.upper.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>349.82440</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>60.00000</width>
-            <height>74.00000</height>
-            <x>-39.00000</x>
-            <y>-116.00012</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.upper.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>28.00000</width>
-            <height>68.00000</height>
-            <x>55.00000</x>
-            <y>-148.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.lower.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>96.00000</width>
-            <height>32.00000</height>
-            <x>60.00000</x>
-            <y>-88.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\torso.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>279.00000</width>
-            <height>105.00000</height>
-            <x>-172.00000</x>
-            <y>-162.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.upper.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>9.00824</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>60.00000</width>
-            <height>74.00000</height>
-            <x>-38.99890</x>
-            <y>-116.00055</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.lower.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>51.00000</width>
-            <height>42.00000</height>
-            <x>-32.00000</x>
-            <y>-41.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.upper.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>28.00000</width>
-            <height>68.00000</height>
-            <x>56.00000</x>
-            <y>-148.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.lower.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>97.00000</width>
-            <height>32.00000</height>
-            <x>60.00000</x>
-            <y>-88.00000</y>
-        </sprite>
-    </frame>
-    <frame>
-        <name>frame_003</name>
-        <sprite>
-            <image>assets\head.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>85.00000</width>
-            <height>54.00000</height>
-            <x>88.00000</x>
-            <y>-186.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.lower.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>51.00000</width>
-            <height>42.00000</height>
-            <x>-32.00000</x>
-            <y>-41.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.upper.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>349.82440</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>60.00000</width>
-            <height>74.00000</height>
-            <x>-39.00000</x>
-            <y>-116.00012</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.upper.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>28.00000</width>
-            <height>68.00000</height>
-            <x>55.00000</x>
-            <y>-148.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.lower.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>96.00000</width>
-            <height>32.00000</height>
-            <x>60.00000</x>
-            <y>-88.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\torso.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>279.00000</width>
-            <height>105.00000</height>
-            <x>-172.00000</x>
-            <y>-162.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.upper.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>9.00824</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>60.00000</width>
-            <height>74.00000</height>
-            <x>-38.99890</x>
-            <y>-116.00055</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.lower.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>51.00000</width>
-            <height>42.00000</height>
-            <x>-32.00000</x>
-            <y>-41.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.upper.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>28.00000</width>
-            <height>68.00000</height>
-            <x>56.00000</x>
-            <y>-148.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.lower.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>97.00000</width>
-            <height>32.00000</height>
-            <x>60.00000</x>
-            <y>-88.00000</y>
-        </sprite>
-    </frame>
-    <frame>
-        <name>frame_004</name>
-        <sprite>
-            <image>assets\head.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>85.00000</width>
-            <height>54.00000</height>
-            <x>88.00000</x>
-            <y>-186.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.lower.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>51.00000</width>
-            <height>42.00000</height>
-            <x>-11.49994</x>
-            <y>-60.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.upper.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>16.38947</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>60.00000</width>
-            <height>74.00000</height>
-            <x>-38.99994</x>
-            <y>-116.00012</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.upper.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>12.09473</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>28.00000</width>
-            <height>68.00000</height>
-            <x>55.00024</x>
-            <y>-148.00009</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.lower.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>96.00000</width>
-            <height>32.00000</height>
-            <x>73.00000</x>
-            <y>-95.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\torso.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>279.00000</width>
-            <height>105.00000</height>
-            <x>-172.00000</x>
-            <y>-162.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.upper.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>335.92419</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>60.00000</width>
-            <height>74.00000</height>
-            <x>-38.99927</x>
-            <y>-116.00031</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.lower.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>340.98715</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>51.00000</width>
-            <height>42.00000</height>
-            <x>-63.26746</x>
-            <y>-42.16174</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.upper.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>356.18591</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>28.00000</width>
-            <height>68.00000</height>
-            <x>56.00006</x>
-            <y>-148.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.lower.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>97.00000</width>
-            <height>32.00000</height>
-            <x>47.50000</x>
-            <y>-87.00000</y>
-        </sprite>
-    </frame>
-    <frame>
-        <name>frame_005</name>
-        <sprite>
-            <image>assets\head.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>85.00000</width>
-            <height>54.00000</height>
-            <x>88.00000</x>
-            <y>-186.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.lower.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>342.59091</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>51.00000</width>
-            <height>42.00000</height>
-            <x>-49.04889</x>
-            <y>-44.66745</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.upper.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>345.96365</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>60.00000</width>
-            <height>74.00000</height>
-            <x>-39.00000</x>
-            <y>-116.00018</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.upper.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>354.98688</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>28.00000</width>
-            <height>68.00000</height>
-            <x>54.99994</x>
-            <y>-148.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.lower.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>96.00000</width>
-            <height>32.00000</height>
-            <x>48.00000</x>
-            <y>-88.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\torso.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>279.00000</width>
-            <height>105.00000</height>
-            <x>-172.00000</x>
-            <y>-162.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.upper.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>3.90024</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>60.00000</width>
-            <height>74.00000</height>
-            <x>-38.99945</x>
-            <y>-116.00043</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.lower.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>51.00000</width>
-            <height>42.00000</height>
-            <x>-24.50000</x>
-            <y>-46.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.upper.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>4.84402</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>28.00000</width>
-            <height>68.00000</height>
-            <x>56.00012</x>
-            <y>-148.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.lower.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>97.00000</width>
-            <height>32.00000</height>
-            <x>61.50000</x>
-            <y>-92.00000</y>
-        </sprite>
-    </frame>
-    <frame>
-        <name>frame_006</name>
-        <sprite>
-            <image>assets\head.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>85.00000</width>
-            <height>54.00000</height>
-            <x>88.00000</x>
-            <y>-186.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.lower.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>51.00000</width>
-            <height>42.00000</height>
-            <x>-23.50000</x>
-            <y>-48.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.upper.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>6.13712</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>60.00000</width>
-            <height>74.00000</height>
-            <x>-39.00000</x>
-            <y>-116.00024</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.upper.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>7.52380</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>28.00000</width>
-            <height>68.00000</height>
-            <x>54.99994</x>
-            <y>-148.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.lower.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>96.00000</width>
-            <height>32.00000</height>
-            <x>66.00000</x>
-            <y>-93.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\torso.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>279.00000</width>
-            <height>105.00000</height>
-            <x>-172.00000</x>
-            <y>-162.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.upper.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>346.63940</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>60.00000</width>
-            <height>74.00000</height>
-            <x>-38.99951</x>
-            <y>-116.00043</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.lower.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>351.50143</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>51.00000</width>
-            <height>42.00000</height>
-            <x>-52.11652</x>
-            <y>-41.53793</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.upper.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>357.91742</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>28.00000</width>
-            <height>68.00000</height>
-            <x>56.00018</x>
-            <y>-148.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.lower.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>97.00000</width>
-            <height>32.00000</height>
-            <x>50.50000</x>
-            <y>-90.00000</y>
-        </sprite>
-    </frame>
-    <frame>
-        <name>frame_007</name>
-        <sprite>
-            <image>assets\head.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>85.00000</width>
-            <height>54.00000</height>
-            <x>88.00000</x>
-            <y>-186.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.lower.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>51.00000</width>
-            <height>42.00000</height>
-            <x>-32.00000</x>
-            <y>-41.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.upper.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>5.77426</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>60.00000</width>
-            <height>74.00000</height>
-            <x>-38.99988</x>
-            <y>-116.00009</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.upper.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>28.00000</width>
-            <height>68.00000</height>
-            <x>55.00000</x>
-            <y>-148.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.lower.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>96.00000</width>
-            <height>32.00000</height>
-            <x>60.00000</x>
-            <y>-88.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\torso.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>279.00000</width>
-            <height>105.00000</height>
-            <x>-172.00000</x>
-            <y>-162.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.upper.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>349.85416</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>60.00000</width>
-            <height>74.00000</height>
-            <x>-38.99927</x>
-            <y>-116.00037</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.lower.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>51.00000</width>
-            <height>42.00000</height>
-            <x>-32.00000</x>
-            <y>-41.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.upper.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>28.00000</width>
-            <height>68.00000</height>
-            <x>56.00000</x>
-            <y>-148.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.lower.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>97.00000</width>
-            <height>32.00000</height>
-            <x>60.00000</x>
-            <y>-88.00000</y>
-        </sprite>
-    </frame>
-    <frame>
-        <name>frame_008</name>
-        <sprite>
-            <image>assets\head.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>85.00000</width>
-            <height>54.00000</height>
-            <x>88.00000</x>
-            <y>-186.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.lower.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>51.00000</width>
-            <height>42.00000</height>
-            <x>-24.49994</x>
-            <y>-47.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.upper.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>5.19443</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>60.00000</width>
-            <height>74.00000</height>
-            <x>-38.99988</x>
-            <y>-116.00003</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.upper.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>7.38605</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>28.00000</width>
-            <height>68.00000</height>
-            <x>55.00018</x>
-            <y>-148.00003</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.lower.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>96.00000</width>
-            <height>32.00000</height>
-            <x>67.00000</x>
-            <y>-92.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\torso.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>279.00000</width>
-            <height>105.00000</height>
-            <x>-172.00000</x>
-            <y>-162.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.upper.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>347.94894</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>60.00000</width>
-            <height>74.00000</height>
-            <x>-38.99933</x>
-            <y>-116.00031</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.lower.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>352.95419</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>51.00000</width>
-            <height>42.00000</height>
-            <x>-48.73151</x>
-            <y>-38.96930</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.upper.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>-0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>28.00000</width>
-            <height>68.00000</height>
-            <x>56.00012</x>
-            <y>-148.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.lower.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>97.00000</width>
-            <height>32.00000</height>
-            <x>52.50000</x>
-            <y>-90.00000</y>
-        </sprite>
-    </frame>
-    <frame>
-        <name>frame_009</name>
-        <sprite>
-            <image>assets\head.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>85.00000</width>
-            <height>54.00000</height>
-            <x>88.00000</x>
-            <y>-186.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.lower.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>345.45477</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>51.00000</width>
-            <height>42.00000</height>
-            <x>-46.40869</x>
-            <y>-43.73111</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.upper.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>348.14688</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>60.00000</width>
-            <height>74.00000</height>
-            <x>-38.99988</x>
-            <y>-116.00012</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.upper.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>356.47855</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>28.00000</width>
-            <height>68.00000</height>
-            <x>55.00006</x>
-            <y>-148.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.lower.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>96.00000</width>
-            <height>32.00000</height>
-            <x>45.00000</x>
-            <y>-88.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\torso.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>279.00000</width>
-            <height>105.00000</height>
-            <x>-172.00000</x>
-            <y>-162.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.upper.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>4.28897</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>60.00000</width>
-            <height>74.00000</height>
-            <x>-38.99915</x>
-            <y>-116.00031</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.lower.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>51.00000</width>
-            <height>42.00000</height>
-            <x>-24.50000</x>
-            <y>-45.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.upper.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>3.06647</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>28.00000</width>
-            <height>68.00000</height>
-            <x>55.99994</x>
-            <y>-148.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.lower.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>97.00000</width>
-            <height>32.00000</height>
-            <x>59.50000</x>
-            <y>-92.00000</y>
-        </sprite>
-    </frame>
-    <frame>
-        <name>frame_010</name>
-        <sprite>
-            <image>assets\head.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>85.00000</width>
-            <height>54.00000</height>
-            <x>88.00000</x>
-            <y>-186.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\torso.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>279.00000</width>
-            <height>105.00000</height>
-            <x>-172.00000</x>
-            <y>-162.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.upper.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>49.76328</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>28.00000</width>
-            <height>68.00000</height>
-            <x>64.00171</x>
-            <y>-130.27484</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.lower.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>97.00000</width>
-            <height>32.00000</height>
-            <x>129.50000</x>
-            <y>-118.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.upper.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>60.00000</width>
-            <height>74.00000</height>
-            <x>-39.00000</x>
-            <y>-116.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.lower.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>51.00000</width>
-            <height>42.00000</height>
-            <x>-32.00000</x>
-            <y>-41.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.lower.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>51.00000</width>
-            <height>42.00000</height>
-            <x>-32.00000</x>
-            <y>-41.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.upper.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>60.00000</width>
-            <height>74.00000</height>
-            <x>-39.00000</x>
-            <y>-116.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.upper.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>46.88556</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>28.00000</width>
-            <height>68.00000</height>
-            <x>63.61194</x>
-            <y>-130.01770</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.lower.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>96.00000</width>
-            <height>32.00000</height>
-            <x>131.00000</x>
-            <y>-117.00000</y>
-        </sprite>
-    </frame>
-    <frame>
-        <name>frame_011</name>
-        <sprite>
-            <image>assets\head.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>85.00000</width>
-            <height>54.00000</height>
-            <x>88.00000</x>
-            <y>-186.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\torso.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>279.00000</width>
-            <height>105.00000</height>
-            <x>-172.00000</x>
-            <y>-162.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.upper.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>28.00000</width>
-            <height>68.00000</height>
-            <x>56.00000</x>
-            <y>-148.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.lower.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>97.00000</width>
-            <height>32.00000</height>
-            <x>60.00000</x>
-            <y>-88.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.upper.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>60.00000</width>
-            <height>74.00000</height>
-            <x>-39.00000</x>
-            <y>-116.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.lower.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>51.00000</width>
-            <height>42.00000</height>
-            <x>-32.00000</x>
-            <y>-41.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.lower.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>51.00000</width>
-            <height>42.00000</height>
-            <x>-32.00000</x>
-            <y>-41.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.upper.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>60.00000</width>
-            <height>74.00000</height>
-            <x>-39.00000</x>
-            <y>-116.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.upper.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>5.29007</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>28.00000</width>
-            <height>68.00000</height>
-            <x>58.92487</x>
-            <y>-145.56439</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.lower.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>96.00000</width>
-            <height>32.00000</height>
-            <x>87.00000</x>
-            <y>-95.00000</y>
-        </sprite>
-    </frame>
-    <frame>
-        <name>frame_012</name>
-        <sprite>
-            <image>assets\head.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>85.00000</width>
-            <height>54.00000</height>
-            <x>88.00000</x>
-            <y>-186.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\torso.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>279.00000</width>
-            <height>105.00000</height>
-            <x>-172.00000</x>
-            <y>-162.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.upper.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>21.61487</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>28.00000</width>
-            <height>68.00000</height>
-            <x>60.46002</x>
-            <y>-136.45203</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.lower.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>97.00000</width>
-            <height>32.00000</height>
-            <x>98.50000</x>
-            <y>-95.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.upper.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>60.00000</width>
-            <height>74.00000</height>
-            <x>-39.00000</x>
-            <y>-116.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.lower.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>51.00000</width>
-            <height>42.00000</height>
-            <x>-32.00000</x>
-            <y>-41.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.lower.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>51.00000</width>
-            <height>42.00000</height>
-            <x>-32.00000</x>
-            <y>-41.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.upper.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>60.00000</width>
-            <height>74.00000</height>
-            <x>-39.00000</x>
-            <y>-116.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.upper.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>29.20743</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>28.00000</width>
-            <height>68.00000</height>
-            <x>63.18890</x>
-            <y>-133.84558</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.lower.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>96.00000</width>
-            <height>32.00000</height>
-            <x>117.00000</x>
-            <y>-104.00000</y>
-        </sprite>
-    </frame>
-    <frame>
-        <name>frame_013</name>
-        <sprite>
-            <image>assets\head.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>85.00000</width>
-            <height>54.00000</height>
-            <x>88.00000</x>
-            <y>-186.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\torso.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>279.00000</width>
-            <height>105.00000</height>
-            <x>-172.00000</x>
-            <y>-162.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.upper.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>35.23993</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>28.00000</width>
-            <height>68.00000</height>
-            <x>62.94751</x>
-            <y>-136.69122</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.lower.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>97.00000</width>
-            <height>32.00000</height>
-            <x>122.50000</x>
-            <y>-111.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.upper.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>60.00000</width>
-            <height>74.00000</height>
-            <x>-39.00000</x>
-            <y>-116.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.lower.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>51.00000</width>
-            <height>42.00000</height>
-            <x>-32.00000</x>
-            <y>-41.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.lower.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>51.00000</width>
-            <height>42.00000</height>
-            <x>-32.00000</x>
-            <y>-41.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.upper.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>60.00000</width>
-            <height>74.00000</height>
-            <x>-39.00000</x>
-            <y>-116.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.upper.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>33.14166</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>28.00000</width>
-            <height>68.00000</height>
-            <x>59.68933</x>
-            <y>-135.81497</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.lower.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>96.00000</width>
-            <height>32.00000</height>
-            <x>120.00000</x>
-            <y>-112.00000</y>
-        </sprite>
-    </frame>
-    <frame>
-        <name>frame_014</name>
-        <sprite>
-            <image>assets\head.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>351.80191</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>85.00000</width>
-            <height>54.00000</height>
-            <x>92.78442</x>
-            <y>-184.78442</y>
-        </sprite>
-        <sprite>
-            <image>assets\torso.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>279.00000</width>
-            <height>105.00000</height>
-            <x>-172.00000</x>
-            <y>-162.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.upper.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>28.00000</width>
-            <height>68.00000</height>
-            <x>56.00000</x>
-            <y>-148.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.lower.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>97.00000</width>
-            <height>32.00000</height>
-            <x>60.00000</x>
-            <y>-88.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.upper.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>60.00000</width>
-            <height>74.00000</height>
-            <x>-39.00000</x>
-            <y>-116.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.lower.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>51.00000</width>
-            <height>42.00000</height>
-            <x>-32.00000</x>
-            <y>-41.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.lower.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>51.00000</width>
-            <height>42.00000</height>
-            <x>-32.00000</x>
-            <y>-41.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.upper.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>60.00000</width>
-            <height>74.00000</height>
-            <x>-39.00000</x>
-            <y>-116.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.upper.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>346.21838</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>28.00000</width>
-            <height>68.00000</height>
-            <x>64.50256</x>
-            <y>-150.35626</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.lower.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>354.42783</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>96.00000</width>
-            <height>32.00000</height>
-            <x>72.78040</x>
-            <y>-94.58517</y>
-        </sprite>
-    </frame>
-    <frame>
-        <name>frame_015</name>
-        <sprite>
-            <image>assets\head.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>340.06741</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>85.00000</width>
-            <height>54.00000</height>
-            <x>97.25073</x>
-            <y>-185.87140</y>
-        </sprite>
-        <sprite>
-            <image>assets\torso.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>0.00000</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>279.00000</width>
-            <height>105.00000</height>
-            <x>-172.00000</x>
-            <y>-162.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.upper.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>352.40536</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>28.00000</width>
-            <height>68.00000</height>
-            <x>55.99994</x>
-            <y>-148.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.lower.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>347.30728</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>97.00000</width>
-            <height>32.00000</height>
-            <x>74.20081</x>
-            <y>-95.26553</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.upper.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>9.78238</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>60.00000</width>
-            <height>74.00000</height>
-            <x>-38.99994</x>
-            <y>-116.00006</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.lower.right.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>13.58292</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>51.00000</width>
-            <height>42.00000</height>
-            <x>-14.71869</x>
-            <y>-43.42392</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.lower.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>343.09067</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>51.00000</width>
-            <height>42.00000</height>
-            <x>-54.28949</x>
-            <y>-43.50897</y>
-        </sprite>
-        <sprite>
-            <image>assets\leg.upper.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>341.79150</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>60.00000</width>
-            <height>74.00000</height>
-            <x>-39.00000</x>
-            <y>-116.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.upper.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>333.43494</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>28.00000</width>
-            <height>68.00000</height>
-            <x>55.00000</x>
-            <y>-148.00000</y>
-        </sprite>
-        <sprite>
-            <image>assets\arm.lower.left.png</image>
-            <color>16777215</color>
-            <opacity>50.00000</opacity>
-            <angle>331.92749</angle>
-            <xflip>0</xflip>
-            <yflip>0</yflip>
-            <width>96.00000</width>
-            <height>32.00000</height>
-            <x>55.17645</x>
-            <y>-93.70590</y>
-        </sprite>
-    </frame>
-</spriterdata>
+<?xml version="1.0" encoding="UTF-8"?>
+<spriter_data scml_version="1.0" generator="BrashMonkey Spriter" generator_version="a2">
+    <folder id="0" name="assets">
+        <file id="0" name="assets/head.png" width="85" height="54"/>
+        <file id="1" name="assets/torso.png" width="279" height="105"/>
+        <file id="2" name="assets/arm.upper.right.png" width="28" height="68"/>
+        <file id="3" name="assets/arm.lower.right.png" width="97" height="32"/>
+        <file id="4" name="assets/leg.upper.right.png" width="60" height="74"/>
+        <file id="5" name="assets/leg.lower.right.png" width="51" height="42"/>
+        <file id="6" name="assets/leg.lower.left.png" width="51" height="42"/>
+        <file id="7" name="assets/leg.upper.left.png" width="60" height="74"/>
+        <file id="8" name="assets/arm.upper.left.png" width="28" height="68"/>
+        <file id="9" name="assets/arm.lower.left.png" width="96" height="32"/>
+    </folder>
+    <entity id="0" name="char_000">
+        <animation id="0" name="reference" length="5000" looping="false">
+            <mainline>
+                <key id="0">
+                    <object_ref id="0" timeline="0" key="0" z_index="0"/>
+                    <object_ref id="1" timeline="1" key="0" z_index="1"/>
+                    <object_ref id="2" timeline="2" key="0" z_index="2"/>
+                    <object_ref id="3" timeline="3" key="0" z_index="3"/>
+                    <object_ref id="4" timeline="4" key="0" z_index="4"/>
+                    <object_ref id="5" timeline="5" key="0" z_index="5"/>
+                    <object_ref id="6" timeline="6" key="0" z_index="6"/>
+                    <object_ref id="7" timeline="7" key="0" z_index="7"/>
+                    <object_ref id="8" timeline="8" key="0" z_index="8"/>
+                    <object_ref id="9" timeline="9" key="0" z_index="9"/>
+                </key>
+            </mainline>
+            <timeline id="0">
+                <key id="0">
+                    <object folder="0" file="0" x="88" y="186" a="0.5"/>
+                </key>
+            </timeline>
+            <timeline id="1">
+                <key id="0">
+                    <object folder="0" file="1" x="-172" y="162" a="0.5"/>
+                </key>
+            </timeline>
+            <timeline id="2">
+                <key id="0">
+                    <object folder="0" file="2" x="56" y="148" a="0.5"/>
+                </key>
+            </timeline>
+            <timeline id="3">
+                <key id="0">
+                    <object folder="0" file="3" x="60" y="88" a="0.5"/>
+                </key>
+            </timeline>
+            <timeline id="4">
+                <key id="0">
+                    <object folder="0" file="4" x="-39" y="116" a="0.5"/>
+                </key>
+            </timeline>
+            <timeline id="5">
+                <key id="0">
+                    <object folder="0" file="5" x="-32" y="41" a="0.5"/>
+                </key>
+            </timeline>
+            <timeline id="6">
+                <key id="0">
+                    <object folder="0" file="6" x="-32" y="41" a="0.5"/>
+                </key>
+            </timeline>
+            <timeline id="7">
+                <key id="0">
+                    <object folder="0" file="7" x="-39" y="116" a="0.5"/>
+                </key>
+            </timeline>
+            <timeline id="8">
+                <key id="0">
+                    <object folder="0" file="8" x="55" y="148" a="0.5"/>
+                </key>
+            </timeline>
+            <timeline id="9">
+                <key id="0">
+                    <object folder="0" file="9" x="60" y="88" a="0.5"/>
+                </key>
+            </timeline>
+        </animation>
+        <animation id="1" name="walk" length="997">
+            <mainline>
+                <key id="0">
+                    <object_ref id="0" timeline="0" key="0" z_index="0"/>
+                    <object_ref id="1" timeline="1" key="0" z_index="1"/>
+                    <object_ref id="2" timeline="2" key="0" z_index="2"/>
+                    <object_ref id="3" timeline="3" key="0" z_index="3"/>
+                    <object_ref id="4" timeline="4" key="0" z_index="4"/>
+                    <object_ref id="5" timeline="5" key="0" z_index="5"/>
+                    <object_ref id="6" timeline="6" key="0" z_index="6"/>
+                    <object_ref id="7" timeline="7" key="0" z_index="7"/>
+                    <object_ref id="8" timeline="8" key="0" z_index="8"/>
+                    <object_ref id="9" timeline="9" key="0" z_index="9"/>
+                </key>
+                <key id="1" time="169">
+                    <object_ref id="0" timeline="0" key="1" z_index="0"/>
+                    <object_ref id="1" timeline="1" key="1" z_index="1"/>
+                    <object_ref id="2" timeline="2" key="1" z_index="2"/>
+                    <object_ref id="3" timeline="3" key="1" z_index="3"/>
+                    <object_ref id="4" timeline="4" key="1" z_index="4"/>
+                    <object_ref id="5" timeline="5" key="1" z_index="5"/>
+                    <object_ref id="6" timeline="6" key="1" z_index="6"/>
+                    <object_ref id="7" timeline="7" key="1" z_index="7"/>
+                    <object_ref id="8" timeline="8" key="1" z_index="8"/>
+                    <object_ref id="9" timeline="9" key="1" z_index="9"/>
+                </key>
+                <key id="2" time="328">
+                    <object_ref id="0" timeline="0" key="2" z_index="0"/>
+                    <object_ref id="1" timeline="1" key="2" z_index="1"/>
+                    <object_ref id="2" timeline="2" key="2" z_index="2"/>
+                    <object_ref id="3" timeline="3" key="2" z_index="3"/>
+                    <object_ref id="4" timeline="4" key="2" z_index="4"/>
+                    <object_ref id="5" timeline="5" key="2" z_index="5"/>
+                    <object_ref id="6" timeline="6" key="2" z_index="6"/>
+                    <object_ref id="7" timeline="7" key="2" z_index="7"/>
+                    <object_ref id="8" timeline="8" key="2" z_index="8"/>
+                    <object_ref id="9" timeline="9" key="2" z_index="9"/>
+                </key>
+                <key id="3" time="500">
+                    <object_ref id="0" timeline="0" key="3" z_index="0"/>
+                    <object_ref id="1" timeline="1" key="3" z_index="1"/>
+                    <object_ref id="2" timeline="2" key="3" z_index="2"/>
+                    <object_ref id="3" timeline="3" key="3" z_index="3"/>
+                    <object_ref id="4" timeline="4" key="3" z_index="4"/>
+                    <object_ref id="5" timeline="5" key="3" z_index="5"/>
+                    <object_ref id="6" timeline="6" key="3" z_index="6"/>
+                    <object_ref id="7" timeline="7" key="3" z_index="7"/>
+                    <object_ref id="8" timeline="8" key="3" z_index="8"/>
+                    <object_ref id="9" timeline="9" key="3" z_index="9"/>
+                </key>
+                <key id="4" time="658">
+                    <object_ref id="0" timeline="0" key="4" z_index="0"/>
+                    <object_ref id="1" timeline="1" key="4" z_index="1"/>
+                    <object_ref id="2" timeline="2" key="4" z_index="2"/>
+                    <object_ref id="3" timeline="3" key="4" z_index="3"/>
+                    <object_ref id="4" timeline="4" key="4" z_index="4"/>
+                    <object_ref id="5" timeline="5" key="4" z_index="5"/>
+                    <object_ref id="6" timeline="6" key="4" z_index="6"/>
+                    <object_ref id="7" timeline="7" key="4" z_index="7"/>
+                    <object_ref id="8" timeline="8" key="4" z_index="8"/>
+                    <object_ref id="9" timeline="9" key="4" z_index="9"/>
+                </key>
+                <key id="5" time="822">
+                    <object_ref id="0" timeline="0" key="5" z_index="0"/>
+                    <object_ref id="1" timeline="1" key="5" z_index="1"/>
+                    <object_ref id="2" timeline="2" key="5" z_index="2"/>
+                    <object_ref id="3" timeline="3" key="5" z_index="3"/>
+                    <object_ref id="4" timeline="4" key="5" z_index="4"/>
+                    <object_ref id="5" timeline="5" key="5" z_index="5"/>
+                    <object_ref id="6" timeline="6" key="5" z_index="6"/>
+                    <object_ref id="7" timeline="7" key="5" z_index="7"/>
+                    <object_ref id="8" timeline="8" key="5" z_index="8"/>
+                    <object_ref id="9" timeline="9" key="5" z_index="9"/>
+                </key>
+            </mainline>
+            <timeline id="0">
+                <key id="0">
+                    <object folder="0" file="0" x="88" y="186" a="0.5"/>
+                </key>
+                <key id="1" time="169">
+                    <object folder="0" file="0" x="88" y="186" a="0.5"/>
+                </key>
+                <key id="2" time="328">
+                    <object folder="0" file="0" x="88" y="186" a="0.5"/>
+                </key>
+                <key id="3" time="500">
+                    <object folder="0" file="0" x="88" y="186" a="0.5"/>
+                </key>
+                <key id="4" time="658">
+                    <object folder="0" file="0" x="88" y="186" a="0.5"/>
+                </key>
+                <key id="5" time="822">
+                    <object folder="0" file="0" x="88" y="186" a="0.5"/>
+                </key>
+            </timeline>
+            <timeline id="1">
+                <key id="0" spin="-1">
+                    <object folder="0" file="6" x="-64.31171" y="42.49423" angle="343.13684" a="0.5"/>
+                </key>
+                <key id="1" time="169">
+                    <object folder="0" file="6" x="-49.04889" y="44.66745" angle="342.59091" a="0.5"/>
+                </key>
+                <key id="2" time="328">
+                    <object folder="0" file="6" x="-23.5" y="48" a="0.5"/>
+                </key>
+                <key id="3" time="500">
+                    <object folder="0" file="6" x="-11.49994" y="60" a="0.5"/>
+                </key>
+                <key id="4" time="658" spin="-1">
+                    <object folder="0" file="6" x="-24.49994" y="47" a="0.5"/>
+                </key>
+                <key id="5" time="822" spin="-1">
+                    <object folder="0" file="6" x="-46.40869" y="43.73111" angle="345.45477" a="0.5"/>
+                </key>
+            </timeline>
+            <timeline id="2">
+                <key id="0">
+                    <object folder="0" file="7" x="-39" y="116.00012" angle="336.32938" a="0.5"/>
+                </key>
+                <key id="1" time="169">
+                    <object folder="0" file="7" x="-39" y="116.00018" angle="345.96365" a="0.5"/>
+                </key>
+                <key id="2" time="328">
+                    <object folder="0" file="7" x="-39" y="116.00024" angle="6.13712" a="0.5"/>
+                </key>
+                <key id="3" time="500" spin="-1">
+                    <object folder="0" file="7" x="-38.99994" y="116.00012" angle="16.38947" a="0.5"/>
+                </key>
+                <key id="4" time="658" spin="-1">
+                    <object folder="0" file="7" x="-38.99988" y="116.00003" angle="5.19443" a="0.5"/>
+                </key>
+                <key id="5" time="822" spin="-1">
+                    <object folder="0" file="7" x="-38.99988" y="116.00012" angle="348.14688" a="0.5"/>
+                </key>
+            </timeline>
+            <timeline id="3">
+                <key id="0">
+                    <object folder="0" file="8" x="55.00006" y="148" angle="350.53766" a="0.5"/>
+                </key>
+                <key id="1" time="169">
+                    <object folder="0" file="8" x="54.99994" y="148" angle="354.98688" a="0.5"/>
+                </key>
+                <key id="2" time="328">
+                    <object folder="0" file="8" x="54.99994" y="148" angle="7.5238" a="0.5"/>
+                </key>
+                <key id="3" time="500" spin="-1">
+                    <object folder="0" file="8" x="55.00024" y="148.00009" angle="12.09473" a="0.5"/>
+                </key>
+                <key id="4" time="658" spin="-1">
+                    <object folder="0" file="8" x="55.00018" y="148.00003" angle="7.38605" a="0.5"/>
+                </key>
+                <key id="5" time="822" spin="-1">
+                    <object folder="0" file="8" x="55.00006" y="148" angle="356.47855" a="0.5"/>
+                </key>
+            </timeline>
+            <timeline id="4">
+                <key id="0">
+                    <object folder="0" file="9" x="45" y="88" a="0.5"/>
+                </key>
+                <key id="1" time="169">
+                    <object folder="0" file="9" x="48" y="88" a="0.5"/>
+                </key>
+                <key id="2" time="328">
+                    <object folder="0" file="9" x="66" y="93" a="0.5"/>
+                </key>
+                <key id="3" time="500">
+                    <object folder="0" file="9" x="73" y="95" a="0.5"/>
+                </key>
+                <key id="4" time="658">
+                    <object folder="0" file="9" x="67" y="92" a="0.5"/>
+                </key>
+                <key id="5" time="822">
+                    <object folder="0" file="9" x="45" y="88" a="0.5"/>
+                </key>
+            </timeline>
+            <timeline id="5">
+                <key id="0">
+                    <object folder="0" file="1" x="-172" y="162" a="0.5"/>
+                </key>
+                <key id="1" time="169">
+                    <object folder="0" file="1" x="-172" y="162" a="0.5"/>
+                </key>
+                <key id="2" time="328">
+                    <object folder="0" file="1" x="-172" y="162" a="0.5"/>
+                </key>
+                <key id="3" time="500">
+                    <object folder="0" file="1" x="-172" y="162" a="0.5"/>
+                </key>
+                <key id="4" time="658">
+                    <object folder="0" file="1" x="-172" y="162" a="0.5"/>
+                </key>
+                <key id="5" time="822">
+                    <object folder="0" file="1" x="-172" y="162" a="0.5"/>
+                </key>
+            </timeline>
+            <timeline id="6">
+                <key id="0" spin="-1">
+                    <object folder="0" file="4" x="-38.99933" y="116.00037" angle="18.79974" a="0.5"/>
+                </key>
+                <key id="1" time="169" spin="-1">
+                    <object folder="0" file="4" x="-38.99945" y="116.00043" angle="3.90024" a="0.5"/>
+                </key>
+                <key id="2" time="328" spin="-1">
+                    <object folder="0" file="4" x="-38.99951" y="116.00043" angle="346.6394" a="0.5"/>
+                </key>
+                <key id="3" time="500">
+                    <object folder="0" file="4" x="-38.99927" y="116.00031" angle="335.92419" a="0.5"/>
+                </key>
+                <key id="4" time="658">
+                    <object folder="0" file="4" x="-38.99933" y="116.00031" angle="347.94894" a="0.5"/>
+                </key>
+                <key id="5" time="822">
+                    <object folder="0" file="4" x="-38.99915" y="116.00031" angle="4.28897" a="0.5"/>
+                </key>
+            </timeline>
+            <timeline id="7">
+                <key id="0">
+                    <object folder="0" file="5" x="-5.49994" y="64" a="0.5"/>
+                </key>
+                <key id="1" time="169" spin="-1">
+                    <object folder="0" file="5" x="-24.5" y="46" a="0.5"/>
+                </key>
+                <key id="2" time="328" spin="-1">
+                    <object folder="0" file="5" x="-52.11652" y="41.53793" angle="351.50143" a="0.5"/>
+                </key>
+                <key id="3" time="500">
+                    <object folder="0" file="5" x="-63.26746" y="42.16174" angle="340.98715" a="0.5"/>
+                </key>
+                <key id="4" time="658">
+                    <object folder="0" file="5" x="-48.73151" y="38.9693" angle="352.95419" a="0.5"/>
+                </key>
+                <key id="5" time="822">
+                    <object folder="0" file="5" x="-24.5" y="45" a="0.5"/>
+                </key>
+            </timeline>
+            <timeline id="8">
+                <key id="0" spin="-1">
+                    <object folder="0" file="2" x="56.00012" y="148.00003" angle="9.2933" a="0.5"/>
+                </key>
+                <key id="1" time="169" spin="-1">
+                    <object folder="0" file="2" x="56.00012" y="148" angle="4.84402" a="0.5"/>
+                </key>
+                <key id="2" time="328" spin="-1">
+                    <object folder="0" file="2" x="56.00018" y="148" angle="357.91742" a="0.5"/>
+                </key>
+                <key id="3" time="500">
+                    <object folder="0" file="2" x="56.00006" y="148" angle="356.18591" a="0.5"/>
+                </key>
+                <key id="4" time="658">
+                    <object folder="0" file="2" x="56.00012" y="148" a="0.5"/>
+                </key>
+                <key id="5" time="822">
+                    <object folder="0" file="2" x="55.99994" y="148" angle="3.06647" a="0.5"/>
+                </key>
+            </timeline>
+            <timeline id="9">
+                <key id="0">
+                    <object folder="0" file="3" x="66.5" y="93" a="0.5"/>
+                </key>
+                <key id="1" time="169">
+                    <object folder="0" file="3" x="61.5" y="92" a="0.5"/>
+                </key>
+                <key id="2" time="328">
+                    <object folder="0" file="3" x="50.5" y="90" a="0.5"/>
+                </key>
+                <key id="3" time="500">
+                    <object folder="0" file="3" x="47.5" y="87" a="0.5"/>
+                </key>
+                <key id="4" time="658">
+                    <object folder="0" file="3" x="52.5" y="90" a="0.5"/>
+                </key>
+                <key id="5" time="822">
+                    <object folder="0" file="3" x="59.5" y="92" a="0.5"/>
+                </key>
+            </timeline>
+        </animation>
+        <animation id="2" name="melee" length="598">
+            <mainline>
+                <key id="0">
+                    <object_ref id="0" timeline="0" key="0" z_index="0"/>
+                    <object_ref id="1" timeline="1" key="0" z_index="1"/>
+                    <object_ref id="2" timeline="2" key="0" z_index="2"/>
+                    <object_ref id="3" timeline="3" key="0" z_index="3"/>
+                    <object_ref id="4" timeline="4" key="0" z_index="4"/>
+                    <object_ref id="5" timeline="5" key="0" z_index="5"/>
+                    <object_ref id="6" timeline="6" key="0" z_index="6"/>
+                    <object_ref id="7" timeline="7" key="0" z_index="7"/>
+                    <object_ref id="8" timeline="8" key="0" z_index="8"/>
+                    <object_ref id="9" timeline="9" key="0" z_index="9"/>
+                </key>
+                <key id="1" time="72">
+                    <object_ref id="0" timeline="0" key="1" z_index="0"/>
+                    <object_ref id="1" timeline="1" key="1" z_index="1"/>
+                    <object_ref id="2" timeline="2" key="1" z_index="2"/>
+                    <object_ref id="3" timeline="3" key="1" z_index="3"/>
+                    <object_ref id="4" timeline="4" key="1" z_index="4"/>
+                    <object_ref id="5" timeline="5" key="1" z_index="5"/>
+                    <object_ref id="6" timeline="6" key="1" z_index="6"/>
+                    <object_ref id="7" timeline="7" key="1" z_index="7"/>
+                    <object_ref id="8" timeline="8" key="1" z_index="8"/>
+                    <object_ref id="9" timeline="9" key="1" z_index="9"/>
+                </key>
+                <key id="2" time="207">
+                    <object_ref id="0" timeline="0" key="2" z_index="0"/>
+                    <object_ref id="1" timeline="1" key="2" z_index="1"/>
+                    <object_ref id="2" timeline="2" key="2" z_index="2"/>
+                    <object_ref id="3" timeline="3" key="2" z_index="3"/>
+                    <object_ref id="4" timeline="4" key="2" z_index="4"/>
+                    <object_ref id="5" timeline="5" key="2" z_index="5"/>
+                    <object_ref id="6" timeline="6" key="2" z_index="6"/>
+                    <object_ref id="7" timeline="7" key="2" z_index="7"/>
+                    <object_ref id="8" timeline="8" key="2" z_index="8"/>
+                    <object_ref id="9" timeline="9" key="2" z_index="9"/>
+                </key>
+                <key id="3" time="301">
+                    <object_ref id="0" timeline="0" key="3" z_index="0"/>
+                    <object_ref id="1" timeline="1" key="3" z_index="1"/>
+                    <object_ref id="2" timeline="2" key="3" z_index="2"/>
+                    <object_ref id="3" timeline="3" key="3" z_index="3"/>
+                    <object_ref id="4" timeline="4" key="3" z_index="4"/>
+                    <object_ref id="5" timeline="5" key="3" z_index="5"/>
+                    <object_ref id="6" timeline="6" key="3" z_index="6"/>
+                    <object_ref id="7" timeline="7" key="3" z_index="7"/>
+                    <object_ref id="8" timeline="8" key="3" z_index="8"/>
+                    <object_ref id="9" timeline="9" key="3" z_index="9"/>
+                </key>
+                <key id="4" time="461">
+                    <object_ref id="0" timeline="0" key="4" z_index="0"/>
+                    <object_ref id="1" timeline="1" key="4" z_index="1"/>
+                    <object_ref id="2" timeline="2" key="4" z_index="2"/>
+                    <object_ref id="3" timeline="3" key="4" z_index="3"/>
+                    <object_ref id="4" timeline="4" key="4" z_index="4"/>
+                    <object_ref id="5" timeline="5" key="4" z_index="5"/>
+                    <object_ref id="6" timeline="6" key="4" z_index="6"/>
+                    <object_ref id="7" timeline="7" key="4" z_index="7"/>
+                    <object_ref id="8" timeline="8" key="4" z_index="8"/>
+                    <object_ref id="9" timeline="9" key="4" z_index="9"/>
+                </key>
+            </mainline>
+            <timeline id="0">
+                <key id="0">
+                    <object folder="0" file="0" x="88" y="186" a="0.5"/>
+                </key>
+                <key id="1" time="72">
+                    <object folder="0" file="0" x="88" y="186" a="0.5"/>
+                </key>
+                <key id="2" time="207">
+                    <object folder="0" file="0" x="88" y="186" a="0.5"/>
+                </key>
+                <key id="3" time="301">
+                    <object folder="0" file="0" x="88" y="186" a="0.5"/>
+                </key>
+                <key id="4" time="461">
+                    <object folder="0" file="0" x="88" y="186" a="0.5"/>
+                </key>
+            </timeline>
+            <timeline id="1">
+                <key id="0">
+                    <object folder="0" file="1" x="-172" y="162" a="0.5"/>
+                </key>
+                <key id="1" time="72">
+                    <object folder="0" file="1" x="-172" y="162" a="0.5"/>
+                </key>
+                <key id="2" time="207">
+                    <object folder="0" file="1" x="-172" y="162" a="0.5"/>
+                </key>
+                <key id="3" time="301">
+                    <object folder="0" file="1" x="-172" y="162" a="0.5"/>
+                </key>
+                <key id="4" time="461">
+                    <object folder="0" file="1" x="-172" y="162" a="0.5"/>
+                </key>
+            </timeline>
+            <timeline id="2">
+                <key id="0">
+                    <object folder="0" file="2" x="56" y="148" a="0.5"/>
+                </key>
+                <key id="1" time="72">
+                    <object folder="0" file="2" x="56" y="148" a="0.5"/>
+                </key>
+                <key id="2" time="207">
+                    <object folder="0" file="2" x="60.46002" y="136.45203" angle="21.61487" a="0.5"/>
+                </key>
+                <key id="3" time="301" spin="-1">
+                    <object folder="0" file="2" x="64.00171" y="130.27484" angle="49.76328" a="0.5"/>
+                </key>
+                <key id="4" time="461" spin="-1">
+                    <object folder="0" file="2" x="62.94751" y="136.69122" angle="35.23993" a="0.5"/>
+                </key>
+            </timeline>
+            <timeline id="3">
+                <key id="0">
+                    <object folder="0" file="3" x="60" y="88" a="0.5"/>
+                </key>
+                <key id="1" time="72">
+                    <object folder="0" file="3" x="60" y="88" a="0.5"/>
+                </key>
+                <key id="2" time="207">
+                    <object folder="0" file="3" x="98.5" y="95" a="0.5"/>
+                </key>
+                <key id="3" time="301">
+                    <object folder="0" file="3" x="129.5" y="118" a="0.5"/>
+                </key>
+                <key id="4" time="461">
+                    <object folder="0" file="3" x="122.5" y="111" a="0.5"/>
+                </key>
+            </timeline>
+            <timeline id="4">
+                <key id="0">
+                    <object folder="0" file="4" x="-39" y="116" a="0.5"/>
+                </key>
+                <key id="1" time="72">
+                    <object folder="0" file="4" x="-39" y="116" a="0.5"/>
+                </key>
+                <key id="2" time="207">
+                    <object folder="0" file="4" x="-39" y="116" a="0.5"/>
+                </key>
+                <key id="3" time="301">
+                    <object folder="0" file="4" x="-39" y="116" a="0.5"/>
+                </key>
+                <key id="4" time="461">
+                    <object folder="0" file="4" x="-39" y="116" a="0.5"/>
+                </key>
+            </timeline>
+            <timeline id="5">
+                <key id="0">
+                    <object folder="0" file="5" x="-32" y="41" a="0.5"/>
+                </key>
+                <key id="1" time="72">
+                    <object folder="0" file="5" x="-32" y="41" a="0.5"/>
+                </key>
+                <key id="2" time="207">
+                    <object folder="0" file="5" x="-32" y="41" a="0.5"/>
+                </key>
+                <key id="3" time="301">
+                    <object folder="0" file="5" x="-32" y="41" a="0.5"/>
+                </key>
+                <key id="4" time="461">
+                    <object folder="0" file="5" x="-32" y="41" a="0.5"/>
+                </key>
+            </timeline>
+            <timeline id="6">
+                <key id="0">
+                    <object folder="0" file="6" x="-32" y="41" a="0.5"/>
+                </key>
+                <key id="1" time="72">
+                    <object folder="0" file="6" x="-32" y="41" a="0.5"/>
+                </key>
+                <key id="2" time="207">
+                    <object folder="0" file="6" x="-32" y="41" a="0.5"/>
+                </key>
+                <key id="3" time="301">
+                    <object folder="0" file="6" x="-32" y="41" a="0.5"/>
+                </key>
+                <key id="4" time="461">
+                    <object folder="0" file="6" x="-32" y="41" a="0.5"/>
+                </key>
+            </timeline>
+            <timeline id="7">
+                <key id="0">
+                    <object folder="0" file="7" x="-39" y="116" a="0.5"/>
+                </key>
+                <key id="1" time="72">
+                    <object folder="0" file="7" x="-39" y="116" a="0.5"/>
+                </key>
+                <key id="2" time="207">
+                    <object folder="0" file="7" x="-39" y="116" a="0.5"/>
+                </key>
+                <key id="3" time="301">
+                    <object folder="0" file="7" x="-39" y="116" a="0.5"/>
+                </key>
+                <key id="4" time="461">
+                    <object folder="0" file="7" x="-39" y="116" a="0.5"/>
+                </key>
+            </timeline>
+            <timeline id="8">
+                <key id="0">
+                    <object folder="0" file="8" x="55" y="148" a="0.5"/>
+                </key>
+                <key id="1" time="72">
+                    <object folder="0" file="8" x="58.92487" y="145.56439" angle="5.29007" a="0.5"/>
+                </key>
+                <key id="2" time="207">
+                    <object folder="0" file="8" x="63.1889" y="133.84558" angle="29.20743" a="0.5"/>
+                </key>
+                <key id="3" time="301" spin="-1">
+                    <object folder="0" file="8" x="63.61194" y="130.0177" angle="46.88556" a="0.5"/>
+                </key>
+                <key id="4" time="461" spin="-1">
+                    <object folder="0" file="8" x="59.68933" y="135.81497" angle="33.14166" a="0.5"/>
+                </key>
+            </timeline>
+            <timeline id="9">
+                <key id="0">
+                    <object folder="0" file="9" x="60" y="88" a="0.5"/>
+                </key>
+                <key id="1" time="72">
+                    <object folder="0" file="9" x="87" y="95" a="0.5"/>
+                </key>
+                <key id="2" time="207">
+                    <object folder="0" file="9" x="117" y="104" a="0.5"/>
+                </key>
+                <key id="3" time="301">
+                    <object folder="0" file="9" x="131" y="117" a="0.5"/>
+                </key>
+                <key id="4" time="461">
+                    <object folder="0" file="9" x="120" y="112" a="0.5"/>
+                </key>
+            </timeline>
+        </animation>
+        <animation id="3" name="impactheavy" length="600" looping="false">
+            <mainline>
+                <key id="0">
+                    <object_ref id="0" timeline="0" key="0" z_index="0"/>
+                    <object_ref id="1" timeline="1" key="0" z_index="1"/>
+                    <object_ref id="2" timeline="2" key="0" z_index="2"/>
+                    <object_ref id="3" timeline="3" key="0" z_index="3"/>
+                    <object_ref id="4" timeline="4" key="0" z_index="4"/>
+                    <object_ref id="5" timeline="5" key="0" z_index="5"/>
+                    <object_ref id="6" timeline="6" key="0" z_index="6"/>
+                    <object_ref id="7" timeline="7" key="0" z_index="7"/>
+                    <object_ref id="8" timeline="8" key="0" z_index="8"/>
+                    <object_ref id="9" timeline="9" key="0" z_index="9"/>
+                </key>
+            </mainline>
+            <timeline id="0">
+                <key id="0">
+                    <object folder="0" file="0" x="97.25073" y="185.8714" angle="340.06741" a="0.5"/>
+                </key>
+            </timeline>
+            <timeline id="1">
+                <key id="0">
+                    <object folder="0" file="1" x="-172" y="162" a="0.5"/>
+                </key>
+            </timeline>
+            <timeline id="2">
+                <key id="0">
+                    <object folder="0" file="2" x="55.99994" y="148" angle="352.40536" a="0.5"/>
+                </key>
+            </timeline>
+            <timeline id="3">
+                <key id="0">
+                    <object folder="0" file="3" x="74.20081" y="95.26553" angle="347.30728" a="0.5"/>
+                </key>
+            </timeline>
+            <timeline id="4">
+                <key id="0">
+                    <object folder="0" file="4" x="-38.99994" y="116.00006" angle="9.78238" a="0.5"/>
+                </key>
+            </timeline>
+            <timeline id="5">
+                <key id="0">
+                    <object folder="0" file="5" x="-14.71869" y="43.42392" angle="13.58292" a="0.5"/>
+                </key>
+            </timeline>
+            <timeline id="6">
+                <key id="0">
+                    <object folder="0" file="6" x="-54.28949" y="43.50897" angle="343.09067" a="0.5"/>
+                </key>
+            </timeline>
+            <timeline id="7">
+                <key id="0">
+                    <object folder="0" file="7" x="-39" y="116" angle="341.7915" a="0.5"/>
+                </key>
+            </timeline>
+            <timeline id="8">
+                <key id="0">
+                    <object folder="0" file="8" x="55" y="148" angle="333.43494" a="0.5"/>
+                </key>
+            </timeline>
+            <timeline id="9">
+                <key id="0">
+                    <object folder="0" file="9" x="55.17645" y="93.7059" angle="331.92749" a="0.5"/>
+                </key>
+            </timeline>
+        </animation>
+    </entity>
+</spriter_data>

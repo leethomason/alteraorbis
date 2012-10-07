@@ -22,6 +22,136 @@
 using namespace grinliz;
 using namespace tinyxml2;
 
+
+void SCMLParser::ReadPartNames( const tinyxml2::XMLDocument* doc )
+{
+	XMLConstHandle h( doc );
+	const XMLElement* folderEle = h.FirstChildElement( "spriter_data" ).FirstChildElement( "folder" ).ToElement();
+	GLASSERT( folderEle );
+
+	for( const XMLElement* fileEle=folderEle->FirstChildElement( "file" ); fileEle; fileEle=fileEle->NextSiblingElement( "file" ) )
+	{
+		int id=0;
+		fileEle->QueryIntAttribute( "id", &id );
+		const char* fullName = fileEle->Attribute( "name" );
+		GLASSERT( fullName );
+		const char* name = strstr( fullName, "/" );
+		GLASSERT( name );
+		name++;
+
+		GLString str( name );
+		//GLOUTPUT(( "adding [%d]=%s\n", id, str.c_str() ));
+		partIDNameMap.Add( id, str );
+	}
+}
+
+
+void SCMLParser::ReadAnimations( const tinyxml2::XMLDocument* doc )
+{
+	XMLConstHandle h( doc );
+	const XMLElement* entityEle = h.FirstChildElement( "spriter_data" ).FirstChildElement( "entity" ).ToElement();
+	GLASSERT( entityEle );
+
+	for( const XMLElement* animationEle=entityEle->FirstChildElement( "animation" ); animationEle; animationEle=animationEle->NextSiblingElement( "animation" ) )
+	{
+		Animation a;
+		a.name = animationEle->Attribute( "name" );
+		animationEle->QueryUnsignedAttribute( "length", &a.length );
+		animationEle->QueryIntAttribute( "id", &a.id );
+		//GLOUTPUT(( "Animation: %s len=%d id=%d\n", a.name.c_str(), a.length, a.id ));
+		a.nFrames = 0;
+		const XMLElement* mainlineEle = animationEle->FirstChildElement( "mainline" );
+		GLASSERT( mainlineEle );
+		for( const XMLElement* keyEle=mainlineEle->FirstChildElement( "key" ); keyEle; keyEle=keyEle->NextSiblingElement( "key" ))
+		{
+			a.nFrames++;
+		}
+		animationArr.Push( a );
+	}
+}
+
+
+const XMLElement* SCMLParser::GetAnimationEle( const XMLDocument* doc, const GLString& name )
+{
+	XMLConstHandle h( doc );
+	const XMLElement* entityEle = h.FirstChildElement( "spriter_data" ).FirstChildElement( "entity" ).ToElement();
+	GLASSERT( entityEle );
+
+	for( const XMLElement* animEle=entityEle->FirstChildElement( "animation" ); animEle; animEle=animEle->NextSiblingElement( "animation" ))
+	{
+		if ( name == animEle->Attribute( "name" ))
+			return animEle;
+	}
+	return 0;
+}
+
+
+void SCMLParser::ReadAnimation( const XMLDocument* doc, const Animation& a )
+{
+	XMLConstHandle h( doc );
+
+	gamedb::WItem* animItem = witem->CreateChild( a.name.c_str() );
+	animItem->SetInt( "totalDuration", a.length );
+
+	const XMLElement* animationEle = GetAnimationEle( doc, a.name );
+	GLASSERT( animationEle );
+	const XMLElement* mainlineEle = animationEle->FirstChildElement( "mainline" );
+	GLASSERT( mainlineEle );
+
+	for( const XMLElement* keyEle=mainlineEle->FirstChildElement( "key" );
+		 keyEle;
+		 keyEle = keyEle->NextSiblingElement( "key" ))
+	{
+		int keyID = 0;
+		keyEle->QueryIntAttribute( "id", &keyID );
+		int startTime=0;
+		keyEle->QueryIntAttribute( "time", &startTime );
+
+		gamedb::WItem* frameItem = animItem->CreateChild( id );
+		frameItem->SetInt( "startTime", startTime );
+
+		for( const XMLElement* objectRefEle=keyEle->FirstChildElement( "object_ref" );
+			 objectRefEle;
+			 objectRefEle = objectRefEle->NextSiblingElement( "object_ref" ))
+		{
+			int partID=0;
+			int timeline=0;
+			objectRefEle->QueryIntAttribute( "id", &partID );
+			objectRefEle->QueryIntAttribute( "timeline", &timeline );
+
+			const XMLElement* objectEle = GetObjectEle( animationEle, partID, timeline );
+
+			float x=0;
+			float y=0;
+			float angle=0;
+			objectEle->QueryFloatAttribute( "x", &x );
+			objectEle->QueryFloatAttribute( "y", &y );
+			objectEle->QueryFloatAttribute( "angle", &angle );
+
+			FIXME crazy code from below
+
+			const GLString& name = partIDNameMap.Get( partID );
+			gamedb::WItem* partItem = frameItem->CreateChild( name.c_str() );
+			partItem->SetFloat( "anglePrime", angle );
+			partItem->SetFloat( "dy", dy );
+			partItem->SetFloat( "dz", dz );
+		}
+	}
+}
+
+
+void SCMLParser::Parse( const tinyxml2::XMLDocument* doc, gamedb::WItem* witem )
+{
+	ReadPartNames( doc );
+	ReadAnimations( doc );
+
+	for( int i=0; i<animationArr.Size(); ++i ) {
+		ReadAnimation( doc, witem, animationArr[i] );
+	}
+}
+
+
+
 GLString GetBoneName( const XMLElement* spriteEle )
 {
 	GLString boneName = spriteEle->FirstChildElement( "image" )->GetText();
@@ -155,10 +285,6 @@ void ProcessAnimation( const tinyxml2::XMLElement* element, gamedb::WItem* witem
 	printf( "Animation path='%s' name='%s'\n", pathName.c_str(), assetName.c_str() );
 
 	// -- Process the SCML file --- //
-	//FILE* fp = fopen( pathName.c_str(), "r" );
-	//if ( !fp ) {
-	//	ExitError( "Animation", pathName.c_str(), assetName.c_str(), "could not load file" );
-	//}
 	XMLDocument doc;
 	doc.LoadFile( pathName.c_str() );
 	if ( doc.Error() ) {
@@ -166,6 +292,9 @@ void ProcessAnimation( const tinyxml2::XMLElement* element, gamedb::WItem* witem
 	}
 
 	gamedb::WItem* root = witem->CreateChild( assetName.c_str() );	// "humanFemaleAnimation" 
+
+	SCMLParser parser;
+	parser.Parse( &doc, root );
 
 	const XMLConstHandle docH( doc );
 	const XMLElement* reference = 0;
