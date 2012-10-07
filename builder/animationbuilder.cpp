@@ -163,6 +163,65 @@ void SCMLParser::ReadAnimation( const XMLDocument* doc, Animation* a )
 }
 
 
+void SCMLParser::WriteAnimation( gamedb::WItem* witem, const Animation& a, const Animation* reference, float pur )
+{
+	gamedb::WItem* animationItem = witem->CreateChild( a.name.c_str() );
+	animationItem->SetInt( "totalDuration", a.length );
+
+	for( int i=0; i<a.nFrames; ++i ) {
+		const Frame& f = a.frames[i];
+		gamedb::WItem* frameItem = animationItem->CreateChild( i );
+		frameItem->SetInt( "time", f.time );
+
+		for( int k=0; k<EL_MAX_BONES; ++k ) {
+			GLString name;
+			GLASSERT( k == f.xforms[k].id );	
+
+			if ( partIDNameMap.Query( f.xforms[k].id, &name ) ) {
+				const PartXForm& xform = f.time[k];
+				gamedb::WItem* bone = frameItem->CreateChild( name.c_str() );
+
+				float anglePrime = 0;
+				float dy = 0;
+				float dz = 0;
+				
+				float angle = NormalizeAngleDegrees( xform.angle );
+				float x = xform.x / pur;
+				float y = xform.y / pur;
+
+				// Spriter transformation is written as the position of the bitmap, relative
+				// to the model origin, followed by a rotation. (Origin of the bitmap is 
+				// the upper left in this version.)
+				//
+				// Lumos needs the transformation (delta) from the origin.
+				// To translate, we need the reference (untransformed) frame.
+				Matrix4 m;
+				float rx=0, ry=0;
+
+				if ( reference ) {
+					rx = reference->frames[k].xforms[k].x / pur;
+					ry = reference->frames[k].xforms[k].y / pur;
+
+					// Part to origin. Rotate. Back to pos. Apply delta.
+					Matrix4 toOrigin, toPos, rot;
+
+					toOrigin.SetTranslation( 0, ry, -rx );			// negative direction, remembering: 1) y is flipped, 2) x maps to z
+					rot.SetXRotation( -angle );						// rotate, convert to YZ right hand rule
+					toPos.SetTranslation( 0, -y, x );				// positive direction
+
+					m = toPos * rot * toOrigin;
+					anglePrime = m.CalcRotationAroundAxis( 0 );		// not very meaningful, just used to construct a transformation matrix in the shader
+				}
+
+				bone->SetFloat( "anglePrime", anglePrime );
+				bone->SetFloat( "dy", m.m24 );
+				bone->SetFloat( "dz", m.m34 );
+			}
+		}
+	}
+}
+
+
 void SCMLParser::Parse( const tinyxml2::XMLDocument* doc, gamedb::WItem* witem )
 {
 	ReadPartNames( doc );
@@ -191,6 +250,17 @@ void SCMLParser::Parse( const tinyxml2::XMLDocument* doc, gamedb::WItem* witem )
 				}
 			}
 		}
+	}
+
+	const Animation* reference = 0;
+	for( int i=0; i<animationArr.Size(); ++i ) {
+		if ( animationArr[i].name == "reference" ) {
+			reference = &animationArr[i];
+			break;
+		}
+	}
+	for( int i=0; i<animationArr.Size(); ++i ) {
+		WriteAnimation( witem, animationArr[i], reference == &animationArr[i] ? 0 : reference );
 	}
 }
 

@@ -35,7 +35,7 @@ public:
 	SCMLParser() {}
 	~SCMLParser() {}
 
-	void Parse( const tinyxml2::XMLDocument* doc, gamedb::WItem* witem );
+	void Parse( const tinyxml2::XMLDocument* doc, gamedb::WItem* witem, float pur );
 
 private:
 	
@@ -64,6 +64,7 @@ private:
 	void ReadPartNames( const tinyxml2::XMLDocument* doc );
 	void ReadAnimations( const tinyxml2::XMLDocument* doc );
 	void ReadAnimation( const tinyxml2::XMLDocument* doc, Animation* a );
+	void WriteAnimation( gamedb::WItem* witem, const Animation& a, const Animation* reference, float pur );
 
 	const tinyxml2::XMLElement* GetAnimationEle( const tinyxml2::XMLDocument* doc, const grinliz::GLString& name );
 	const tinyxml2::XMLElement* GetObjectEle(	const tinyxml2::XMLElement* animationEle,
