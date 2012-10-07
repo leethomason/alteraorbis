@@ -86,29 +86,56 @@ const XMLElement* SCMLParser::GetAnimationEle( const XMLDocument* doc, const GLS
 }
 
 
-void SCMLParser::ReadAnimation( const XMLDocument* doc, const Animation& a )
+const tinyxml2::XMLElement* SCMLParser::GetObjectEle(	const tinyxml2::XMLElement* animationEle,
+														int timelineID,
+														int keyID )
+{
+	for( const XMLElement* timelineEle = animationEle->FirstChildElement( "timeline" );
+		 timelineEle;
+		 timelineEle = timelineEle->NextSiblingElement( "timeline" ) )
+	{
+		int id=-1;
+		timelineEle->QueryIntAttribute( "id", &id );
+		if ( id == timelineID ) {
+			for( const XMLElement* keyEle = timelineEle->FirstChildElement( "key" );
+				 keyEle;
+				 keyEle = keyEle->NextSiblingElement( "key" ) )
+			{
+				int k=-1;
+				keyEle->QueryIntAttribute( "id", &k );
+				if ( keyID == k ) {
+					const XMLElement* objectEle = keyEle->FirstChildElement( "object" );
+					return objectEle;
+				}
+			}
+		}
+	}
+	return 0;
+}
+
+
+void SCMLParser::ReadAnimation( const XMLDocument* doc, Animation* a )
 {
 	XMLConstHandle h( doc );
 
-	gamedb::WItem* animItem = witem->CreateChild( a.name.c_str() );
-	animItem->SetInt( "totalDuration", a.length );
-
-	const XMLElement* animationEle = GetAnimationEle( doc, a.name );
+	const XMLElement* animationEle = GetAnimationEle( doc, a->name );
 	GLASSERT( animationEle );
 	const XMLElement* mainlineEle = animationEle->FirstChildElement( "mainline" );
 	GLASSERT( mainlineEle );
 
+	int keyCount=0;
 	for( const XMLElement* keyEle=mainlineEle->FirstChildElement( "key" );
 		 keyEle;
-		 keyEle = keyEle->NextSiblingElement( "key" ))
+		 keyEle = keyEle->NextSiblingElement( "key" ), ++keyCount )
 	{
 		int keyID = 0;
 		keyEle->QueryIntAttribute( "id", &keyID );
+		GLASSERT( keyID == keyCount );
+
 		int startTime=0;
 		keyEle->QueryIntAttribute( "time", &startTime );
-
-		gamedb::WItem* frameItem = animItem->CreateChild( id );
-		frameItem->SetInt( "startTime", startTime );
+		
+		a->frames[keyCount].time = startTime;
 
 		for( const XMLElement* objectRefEle=keyEle->FirstChildElement( "object_ref" );
 			 objectRefEle;
@@ -119,7 +146,7 @@ void SCMLParser::ReadAnimation( const XMLDocument* doc, const Animation& a )
 			objectRefEle->QueryIntAttribute( "id", &partID );
 			objectRefEle->QueryIntAttribute( "timeline", &timeline );
 
-			const XMLElement* objectEle = GetObjectEle( animationEle, partID, timeline );
+			const XMLElement* objectEle = GetObjectEle( animationEle, timeline, keyID );
 
 			float x=0;
 			float y=0;
@@ -128,13 +155,9 @@ void SCMLParser::ReadAnimation( const XMLDocument* doc, const Animation& a )
 			objectEle->QueryFloatAttribute( "y", &y );
 			objectEle->QueryFloatAttribute( "angle", &angle );
 
-			FIXME crazy code from below
-
-			const GLString& name = partIDNameMap.Get( partID );
-			gamedb::WItem* partItem = frameItem->CreateChild( name.c_str() );
-			partItem->SetFloat( "anglePrime", angle );
-			partItem->SetFloat( "dy", dy );
-			partItem->SetFloat( "dz", dz );
+			a->frames[keyCount].xforms[partID].angle = angle;
+			a->frames[keyCount].xforms[partID].x	 = x;
+			a->frames[keyCount].xforms[partID].y	 = y;
 		}
 	}
 }
@@ -146,7 +169,28 @@ void SCMLParser::Parse( const tinyxml2::XMLDocument* doc, gamedb::WItem* witem )
 	ReadAnimations( doc );
 
 	for( int i=0; i<animationArr.Size(); ++i ) {
-		ReadAnimation( doc, witem, animationArr[i] );
+		ReadAnimation( doc, &animationArr[i] );
+	}
+
+	GLOUTPUT(( "Animation\n" ));
+	for( int i=0; i<animationArr.Size(); ++i ) {
+		GLOUTPUT(( "  Animation name=%s nFrames=%d duration=%d\n",
+			       animationArr[i].name.c_str(),
+				   animationArr[i].nFrames,
+				   animationArr[i].length ));
+		for( int j=0; j<animationArr[i].nFrames; ++j ) {
+			GLOUTPUT(( "    Frame time=%d\n", animationArr[i].frames[j].time ));
+			for( int k=0; k<EL_MAX_BONES; ++k ) {
+				GLString name;
+				if ( partIDNameMap.Query( k, &name ) ) {
+					GLOUTPUT(( "      Bone %d %s angle=%.1f x=%.1f y=%.1f\n",
+							  k, name.c_str(), 
+							  animationArr[i].frames[j].xforms[k].angle,
+							  animationArr[i].frames[j].xforms[k].x,
+							  animationArr[i].frames[j].xforms[k].y ));
+				}
+			}
+		}
 	}
 }
 

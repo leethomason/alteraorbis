@@ -25,6 +25,8 @@
 
 #include "../shared/gamedbwriter.h"
 
+#include "../engine/enginelimits.h"
+
 void ProcessAnimation( const tinyxml2::XMLElement* element, gamedb::WItem* witem );
 
 class SCMLParser
@@ -36,17 +38,40 @@ public:
 	void Parse( const tinyxml2::XMLDocument* doc, gamedb::WItem* witem );
 
 private:
-	void ReadPartNames( const tinyxml2::XMLDocument* doc );
-	void ReadAnimations( const tinyxml2::XMLDocument* doc );
-	void ReadAnimation( const tinyxml2::XMLDocument* doc, gamedb::WItem* witem, const Animation& a );
+	
+	struct PartXForm {
+		// in Spriter coordinates:
+		int		id;
+		float	x;
+		float	y;
+		float	angle;
+	};
 
-	grinliz::HashTable< int, grinliz::GLString > partIDNameMap;
+	struct Frame {
+		int			time;
+		PartXForm	xforms[EL_MAX_BONES];
+	};
+	
 	struct Animation {
 		grinliz::GLString name;
 		int id;
 		U32 length;
 		int nFrames;
+
+		Frame frames[EL_MAX_ANIM_FRAMES];
+
 	};
+	void ReadPartNames( const tinyxml2::XMLDocument* doc );
+	void ReadAnimations( const tinyxml2::XMLDocument* doc );
+	void ReadAnimation( const tinyxml2::XMLDocument* doc, Animation* a );
+
+	const tinyxml2::XMLElement* GetAnimationEle( const tinyxml2::XMLDocument* doc, const grinliz::GLString& name );
+	const tinyxml2::XMLElement* GetObjectEle(	const tinyxml2::XMLElement* animationEle,
+												int timeline,
+												int partID );
+
+	grinliz::HashTable< int, grinliz::GLString > partIDNameMap;
+
 	grinliz::CDynArray< Animation > animationArr;
 };
 
