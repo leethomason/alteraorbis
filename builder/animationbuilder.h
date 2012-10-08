@@ -35,10 +35,13 @@ public:
 	SCMLParser() {}
 	~SCMLParser() {}
 
-	void Parse( const tinyxml2::XMLDocument* doc, gamedb::WItem* witem, float pur );
+	void Parse( const tinyxml2::XMLElement* element,	// element in the lumos XML file
+				const tinyxml2::XMLDocument* doc,		// the parsed SCML file
+				gamedb::WItem* witem,					// base to create database entries from
+				float pur );							// pixel-unit ratio
 
 private:
-	
+
 	struct PartXForm {
 		// in Spriter coordinates:
 		int		id;
@@ -48,8 +51,9 @@ private:
 	};
 
 	struct Frame {
-		int			time;
-		PartXForm	xforms[EL_MAX_BONES];
+		int					time;
+		grinliz::GLString	meta[EL_MAX_METADATA];
+		PartXForm			xforms[EL_MAX_BONES];
 	};
 	
 	struct Animation {

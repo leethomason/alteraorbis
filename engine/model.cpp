@@ -373,7 +373,7 @@ void Model::SetAnimation( AnimationType id, U32 crossFade, bool restart )
 }
 
 
-void Model::DeltaAnimation( U32 _time, grinliz::CArray<const AnimationMetaData*, EL_MAX_METADATA> *metaData, bool *done )
+void Model::DeltaAnimation( U32 _time, grinliz::CArray<int, EL_MAX_METADATA> *metaData, bool *done )
 {
 	if ( !HasAnimation() )
 		return;

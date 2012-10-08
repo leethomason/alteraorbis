@@ -178,6 +178,14 @@ void SCMLParser::WriteAnimation( gamedb::WItem* witem, const Animation& a, const
 		gamedb::WItem* frameItem = animationItem->CreateChild( i );
 		frameItem->SetInt( "time", f.time );
 
+		for( int k=0; k<EL_MAX_METADATA; ++k ) {
+			if ( f.meta[k].size() > 0 ) {
+				GLString str;
+				str.Format( "event%d", k );
+				frameItem->SetString( str.c_str(), f.meta[k].c_str() );
+			}
+		}
+
 		for( int k=0; k<EL_MAX_BONES; ++k ) {
 			GLString name;
 
@@ -227,7 +235,7 @@ void SCMLParser::WriteAnimation( gamedb::WItem* witem, const Animation& a, const
 }
 
 
-void SCMLParser::Parse( const tinyxml2::XMLDocument* doc, gamedb::WItem* witem, float pur )
+void SCMLParser::Parse( const XMLElement* element, const XMLDocument* doc, gamedb::WItem* witem, float pur )
 {
 	ReadPartNames( doc );
 	ReadAnimations( doc );
@@ -264,11 +272,7 @@ void SCMLParser::Parse( const tinyxml2::XMLDocument* doc, gamedb::WItem* witem, 
 			break;
 		}
 	}
-	for( int i=0; i<animationArr.Size(); ++i ) {
-		WriteAnimation( witem, animationArr[i], reference == &animationArr[i] ? 0 : reference, pur );
-	}
 
-/*
 	// -- Process the meta data -- //
 	for(	const XMLElement* metaEle = element->FirstChildElement( "meta" );
 			metaEle;
@@ -276,15 +280,31 @@ void SCMLParser::Parse( const tinyxml2::XMLDocument* doc, gamedb::WItem* witem, 
 	{
 		const char* animationName = metaEle->Attribute( "animation" );
 		const char* metaName = metaEle->Attribute( "name" );
-		float time = 0;
-		metaEle->QueryFloatAttribute( "time", &time );
+		int time = 0;
+		metaEle->QueryIntAttribute( "time", &time );
 
-		gamedb::WItem* animationItem = root->FetchChild( animationName );
-		gamedb::WItem* metaDataItem  = animationItem->FetchChild( "metaData" );
-		gamedb::WItem* eventItem     = metaDataItem->FetchChild( metaName );
-		eventItem->SetFloat( "time", time );
+		for( int i=0; i<animationArr.Size(); ++i ) {
+			if ( animationArr[i].name == animationName ) {
+				for( int j=animationArr[i].nFrames-1; j>=0; --j ) {
+					if ( time >= animationArr[i].frames[j].time ) {
+						for( int k=0; k<EL_MAX_METADATA; ++k ) {
+							if ( animationArr[i].frames[j].meta[k].size() == 0 ) {
+								animationArr[i].frames[j].meta[k] = metaName;
+								goto done;
+							}
+						}
+					}
+				}
+				goto done;
+			}
+		}
+done:
+		continue;
 	}
-*/
+
+	for( int i=0; i<animationArr.Size(); ++i ) {
+		WriteAnimation( witem, animationArr[i], reference == &animationArr[i] ? 0 : reference, pur );
+	}
 }
 
 
@@ -319,7 +339,7 @@ void ProcessAnimation( const tinyxml2::XMLElement* element, gamedb::WItem* witem
 	gamedb::WItem* root = witem->CreateChild( assetName.c_str() );	// "humanFemaleAnimation" 
 
 	SCMLParser parser;
-	parser.Parse( &doc, root, pur );
+	parser.Parse( element, &doc, root, pur );
 
 //	fclose( fp );
 }

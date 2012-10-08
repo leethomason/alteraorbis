@@ -221,11 +221,11 @@ bool RenderComponent::DoTick( U32 deltaTime )
 			model[0]->SetAnimation( n, CROSS_FADE_TIME, false );
 		}
 
-		grinliz::CArray<const AnimationMetaData*, EL_MAX_METADATA> metaData;
+		grinliz::CArray<int, EL_MAX_METADATA> metaData;
 		model[0]->DeltaAnimation( deltaTime, &metaData, 0 );
 
 		for( int i=0; i<metaData.Size(); ++i ) {
-			if ( StrEqual( metaData[i]->name, "impact" )) {
+			if ( metaData[i] == ANIM_META_IMPACT ) {
 				parentChit->SendMessage( ChitMsg( ChitMsg::RENDER_IMPACT ), this );
 			}
 			else {

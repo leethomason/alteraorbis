@@ -175,17 +175,29 @@ AnimationResource::AnimationResource( const gamedb::Item* _item )
 		sequence[type].item = animItem;
 		sequence[type].totalDuration = 0;					// computed from frame durations, below
 
-		int nFrames = animItem->NumChildren()-1;			// last child is metadata
+		int nFrames = animItem->NumChildren();
 		GLASSERT( nFrames >= 1 );
 		sequence[type].nFrames = nFrames;
 
 		for( int frame=0; frame<nFrames; ++frame ) {
 			const gamedb::Item* frameItem = animItem->Child( frame );	// frame[0]
 			
-			sequence[type].frame[frame].duration = LRintf( frameItem->GetFloat( "duration" ));
-			sequence[type].frame[frame].start = sequence[type].totalDuration;
-			sequence[type].totalDuration += sequence[type].frame[frame].duration;
-			sequence[type].frame[frame].end = sequence[type].totalDuration;
+			sequence[type].frame[frame].start = frameItem->GetInt( "time" );
+			
+			static const char* events[EL_MAX_METADATA] = { "event0", "event1", "event2", "event3" };
+			static const char* metaNames[ANIM_META_COUNT] = { "none", "impact" };
+
+			for( int k=0; k<EL_MAX_METADATA; ++k ) {
+				if ( frameItem->HasAttribute( events[k] ) ) {
+					const char* metaName = frameItem->GetString( events[k] );
+					for( int n=0; n<ANIM_META_COUNT; ++n ) {
+						if ( StrEqual( metaNames[n], metaName ) ) {
+							sequence[type].frame[frame].metaData[k] = n;
+							break;
+						}
+					}
+				}
+			}
 
 			int nBones = frameItem->NumChildren();
 			sequence[type].nBones = nBones;
@@ -201,15 +213,13 @@ AnimationResource::AnimationResource( const gamedb::Item* _item )
 				sequence[type].frame[frame].boneData.bone[bone].dz = boneItem->GetFloat( "dz" );
 			}
 		}
-
-		// The extra frame.
-		const gamedb::Item* metaItem = animItem->Child( "metaData" );
-		for( int j=0; j<metaItem->NumChildren(); ++j ) {
-			const gamedb::Item* dataItem = metaItem->Child( j );
-
-			sequence[type].metaData[j].time = LRintf( dataItem->GetFloat( "time" ));
-			sequence[type].metaData[j].name = dataItem->Name();
+		for( int frame=0; frame<nFrames; ++frame ) {
+			if ( frame+1 < nFrames )
+				sequence[type].frame[frame].end = sequence[type].frame[frame+1].start;
+			else
+				sequence[type].frame[frame].end = sequence[type].totalDuration;
 		}
+
 	}
 }
 
@@ -364,7 +374,7 @@ bool AnimationResource::GetTransform(	AnimationType type,
 
 void AnimationResource::GetMetaData(	AnimationType type,
 										U32 t0, U32 t1,				// t1 > t0
-										grinliz::CArray<const AnimationMetaData*, EL_MAX_METADATA>* data ) const
+										grinliz::CArray<int, EL_MAX_METADATA>* data ) const
 {
 	data->Clear();
 
@@ -374,14 +384,25 @@ void AnimationResource::GetMetaData(	AnimationType type,
 	t0 = TimeInRange( type, t0 );
 	t1 = t0 + delta;
 
-	for( int i=0; i<EL_MAX_METADATA; ++i ) {
-		if ( sequence[type].metaData[i].name ) {
-			U32 t = sequence[type].metaData[i].time;
-			if ( t < t0 )
-				t += Duration(type);
-			if ( t >= t0 && t < t1 ) {
-				data->Push( &sequence[type].metaData[i]);
+	for( int pass=0; pass<2; ++pass ) {
+		for( int i=0; i<sequence[type].nFrames; ++i ) {
+			if (    t0 >= sequence[type].frame[i].start 
+				 && t1 < sequence[type].frame[i].end ) 
+			{
+				for( int j=0; j<EL_MAX_METADATA;  ++j ) {
+					int m = sequence[type].frame[i].metaData[j];
+					if ( m > 0 ) {
+						data->Push( m ); 
+					}
+				}
 			}
+		}
+		if ( t1 > Duration(type) ) {
+			t0 = 0;
+			t1 -= Duration(type);
+		}
+		else {
+			break;
 		}
 	}
 }

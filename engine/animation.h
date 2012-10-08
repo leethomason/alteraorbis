@@ -41,13 +41,12 @@ enum AnimationType {
 	ANIM_COUNT
 };
 
-
-// POD
-struct AnimationMetaData
-{
-	const char* name;
-	U32			time;
+enum {
+	ANIM_META_NONE = 0,
+	ANIM_META_IMPACT,		// strike event during melee
+	ANIM_META_COUNT
 };
+
 
 
 class AnimationResource
@@ -82,7 +81,7 @@ public:
 
 	void GetMetaData(	AnimationType type,
 						U32 t0, U32 t1,				// t1 > t0
-						grinliz::CArray<const AnimationMetaData*, EL_MAX_METADATA>* data ) const;
+						grinliz::CArray< int, EL_MAX_METADATA>* data ) const;
 
 	// does this animation loop?
 	static bool Looping( AnimationType type );
@@ -107,11 +106,11 @@ private:
 	const gamedb::Item* item;
 
 	struct Frame {
-		U32			duration;
 		U32			start;
 		U32			end;
 		const char* boneName[EL_MAX_BONES];
 		U32			boneHash[EL_MAX_BONES];
+		int			metaData[EL_MAX_METADATA];
 		BoneData	boneData;
 	};
 
@@ -120,7 +119,6 @@ private:
 		const gamedb::Item* item;
 		int					nFrames;
 		int					nBones;
-		AnimationMetaData	metaData[EL_MAX_METADATA];
 		Frame				frame[EL_MAX_ANIM_FRAMES];
 	};
 	Sequence sequence[ANIM_COUNT];

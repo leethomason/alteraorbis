@@ -468,7 +468,7 @@ void AnimationScene::FinishXML()
 
 void AnimationScene::DoTick( U32 deltaTime )
 {
-	grinliz::CArray<const AnimationMetaData*, EL_MAX_METADATA> metaDataEvents;
+	grinliz::CArray<int, EL_MAX_METADATA> metaDataEvents;
 	for( int i=0; i<NUM_MODELS; ++i ) {
 		model[i]->DeltaAnimation( deltaTime, (i==0) ? &metaDataEvents : 0, 0 );
 		model[i]->EmitParticles( engine->particleSystem, engine->camera.EyeDir3(), deltaTime );
