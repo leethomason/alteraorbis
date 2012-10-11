@@ -240,7 +240,7 @@ void ModelBuilder::PushObjectName( const char* name )
 {
 	++depth;
 	if ( depth == 2 && enableBones ) {
-		boneNames.Push( GLString( name ));
+		boneNames.Push( StringPool::Intern( name ));
 		++boneID;
 		//GLOUTPUT(( "  Bone: %s=%d\n", name, boneID ));
 	}

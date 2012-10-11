@@ -127,44 +127,57 @@ void SCMLParser::ReadAnimation( const XMLDocument* doc, Animation* a )
 	const XMLElement* mainlineEle = animationEle->FirstChildElement( "mainline" );
 	GLASSERT( mainlineEle );
 
-	int keyCount=0;
-	for( const XMLElement* keyEle=mainlineEle->FirstChildElement( "key" );
-		 keyEle;
-		 keyEle = keyEle->NextSiblingElement( "key" ), ++keyCount )
-	{
-		int keyID = 0;
-		keyEle->QueryIntAttribute( "id", &keyID );
-		GLASSERT( keyID == keyCount );
+	/*
+		This is a little weird.
 
-		int startTime=0;
-		keyEle->QueryIntAttribute( "time", &startTime );
+            <timeline id="5">
+                <key id="0">
+                    <object folder="0" file="1" x="-172" y="162" a="0.5"/>
+                </key>
 		
-		a->frames[keyCount].time = startTime;
+		timeline.id -> ??
+		timeline::key.id -> frame
+		timeline::key::object.file -> partID
 
-		for( const XMLElement* objectRefEle=keyEle->FirstChildElement( "object_ref" );
-			 objectRefEle;
-			 objectRefEle = objectRefEle->NextSiblingElement( "object_ref" ))
+		At some point I'll get docs and this will make sense.
+	*/
+
+	for( const XMLElement* timelineEle = animationEle->FirstChildElement( "timeline" );
+		 timelineEle;
+		 timelineEle = timelineEle->NextSiblingElement( "timeline" ))
+	{
+		for( const XMLElement* keyEle=timelineEle->FirstChildElement( "key" );
+			 keyEle;
+			 keyEle = keyEle->NextSiblingElement( "key" ) )
 		{
-			int partID=0;
-			int timeline=0;
-			objectRefEle->QueryIntAttribute( "id", &partID );
-			objectRefEle->QueryIntAttribute( "timeline", &timeline );
+			// Start time and frame number, makes sense. (What's with the 'id' thing??)
+			int frameNumber = 0;
+			int startTime=0;
+			keyEle->QueryIntAttribute( "id", &frameNumber );
+			keyEle->QueryIntAttribute( "time", &startTime );
 
-			const XMLElement* objectEle = GetObjectEle( animationEle, timeline, keyID );
+			a->frames[frameNumber].time = startTime;
 
+			const XMLElement* objectEle = keyEle->FirstChildElement( "object" );
+			GLASSERT( objectEle );	// can there be more than one? Less? No docs. Guessing.
+
+			int partID = 0;
 			float x=0;
 			float y=0;
 			float angle=0;
+
+			objectEle->QueryIntAttribute( "file", &partID );
 			objectEle->QueryFloatAttribute( "x", &x );
 			objectEle->QueryFloatAttribute( "y", &y );
 			objectEle->QueryFloatAttribute( "angle", &angle );
 
-			a->frames[keyCount].xforms[partID].id    = partID;
-			a->frames[keyCount].xforms[partID].angle = angle;
-			a->frames[keyCount].xforms[partID].x	 = x;
-			a->frames[keyCount].xforms[partID].y	 = y;
+			a->frames[frameNumber].xforms[partID].id    = partID;
+			a->frames[frameNumber].xforms[partID].angle = angle;
+			a->frames[frameNumber].xforms[partID].x	 = x;
+			a->frames[frameNumber].xforms[partID].y	 = y;
 		}
 	}
+
 }
 
 
@@ -218,11 +231,12 @@ void SCMLParser::WriteAnimation( gamedb::WItem* witem, const Animation& a, const
 					// Part to origin. Rotate. Back to pos. Apply delta.
 					Matrix4 toOrigin, toPos, rot;
 
-					toOrigin.SetTranslation( 0, ry, -rx );			// negative direction, remembering: 1) y is flipped, 2) x maps to z
-					rot.SetXRotation( -angle );						// rotate, convert to YZ right hand rule
-					toPos.SetTranslation( 0, -y, x );				// positive direction
+					toOrigin.SetTranslation( 0, ry, -rx );	// negative direction, remembering: 1) y is flipped, 2) x maps to z
+					rot.SetXRotation( -angle );				// rotate, convert to YZ right hand rule
+					toPos.SetTranslation( 0, -y, x );		// positive direction
 
 					m = toPos * rot * toOrigin;
+					//m = toOrigin * rot * toPos;
 					anglePrime = m.CalcRotationAroundAxis( 0 );		// not very meaningful, just used to construct a transformation matrix in the shader
 				}
 
@@ -246,20 +260,22 @@ void SCMLParser::Parse( const XMLElement* element, const XMLDocument* doc, gamed
 
 	GLOUTPUT(( "Animation\n" ));
 	for( int i=0; i<animationArr.Size(); ++i ) {
-		GLOUTPUT(( "  Animation name=%s nFrames=%d duration=%d\n",
-			       animationArr[i].name.c_str(),
-				   animationArr[i].nFrames,
-				   animationArr[i].length ));
-		for( int j=0; j<animationArr[i].nFrames; ++j ) {
-			GLOUTPUT(( "    Frame time=%d\n", animationArr[i].frames[j].time ));
-			for( int k=0; k<EL_MAX_BONES; ++k ) {
-				GLString name;
-				if ( partIDNameMap.Query( k, &name ) ) {
-					GLOUTPUT(( "      Bone %d %s angle=%.1f x=%.1f y=%.1f\n",
-							  k, name.c_str(), 
-							  animationArr[i].frames[j].xforms[k].angle,
-							  animationArr[i].frames[j].xforms[k].x,
-							  animationArr[i].frames[j].xforms[k].y ));
+		if ( animationArr[i].name == "walk" ) {
+			GLOUTPUT(( "  Animation name=%s nFrames=%d duration=%d\n",
+					   animationArr[i].name.c_str(),
+					   animationArr[i].nFrames,
+					   animationArr[i].length ));
+			for( int j=0; j<animationArr[i].nFrames; ++j ) {
+				GLOUTPUT(( "    Frame time=%d\n", animationArr[i].frames[j].time ));
+				for( int k=0; k<EL_MAX_BONES; ++k ) {
+					GLString name;
+					if ( partIDNameMap.Query( k, &name ) ) {
+						GLOUTPUT(( "      Bone %d %s angle=%.1f x=%.1f y=%.1f\n",
+								  k, name.c_str(), 
+								  animationArr[i].frames[j].xforms[k].angle,
+								  animationArr[i].frames[j].xforms[k].x,
+								  animationArr[i].frames[j].xforms[k].y ));
+					}
 				}
 			}
 		}

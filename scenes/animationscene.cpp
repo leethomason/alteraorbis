@@ -200,7 +200,7 @@ void AnimationScene::UpdateBoneInfo()
 	}
 	else {
 		GLString str;
-		const char* name = model[0]->GetResource()->header.BoneNameFromID( currentBone );
+		const char* name = model[0]->GetResource()->header.boneName[currentBone].c_str();
 		str.Format( "%d:%s", currentBone, name ? name : "none" );
 		boneName.SetText( str.c_str() );
 		for( int i=0; i<NUM_MODELS; ++i )
@@ -526,7 +526,7 @@ void AnimationScene::Draw3D( U32 deltaTime )
 		char buf[256];
 		const char* part = "reference";
 		if ( exportCount >= 0 ) {
-			part = model[0]->GetResource()->header.BoneNameFromID( exportCount );
+			part = model[0]->GetResource()->header.boneName[exportCount].c_str();
 			model[0]->SetBoneFilter( exportCount );
 		}
 

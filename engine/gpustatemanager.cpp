@@ -377,7 +377,14 @@ void GPUShader::SetState( const GPUShader& ns )
 			count *= EL_MAX_INSTANCE;
 		}
 
-		shadman->SetUniformArray( ShaderManager::U_BONEXFORM, count, (const Vector3F*) ns.instanceBones );
+		Vector3F data[EL_MAX_BONES*EL_MAX_INSTANCE];
+		for( int i=0; i<EL_MAX_INSTANCE; ++i ) {
+			for( int j=0; j<EL_MAX_BONES; ++j ) {
+				const BoneData::Bone& bone = ns.instanceBones[i].bone[j];
+				data[i*EL_MAX_BONES+j].Set( bone.angleRadians, bone.dy, bone.dz );
+			}
+		}
+		shadman->SetUniformArray( ShaderManager::U_BONEXFORM, count, data );
 		shadman->SetStreamData( ShaderManager::A_BONE_ID, 1, GL_UNSIGNED_SHORT, ns.stream.stride, PTR( ns.streamPtr, ns.stream.boneOffset ) );
 	}
 

@@ -173,7 +173,7 @@ AnimationResource::AnimationResource( const gamedb::Item* _item )
 		AnimationType type = NameToType( animItem->Name() );
 		
 		sequence[type].item = animItem;
-		sequence[type].totalDuration = 0;					// computed from frame durations, below
+		sequence[type].totalDuration = animItem->GetInt( "totalDuration" );
 
 		int nFrames = animItem->NumChildren();
 		GLASSERT( nFrames >= 1 );
@@ -204,10 +204,9 @@ AnimationResource::AnimationResource( const gamedb::Item* _item )
 
 			for( int bone=0; bone<nBones; ++bone ) {
 				const gamedb::Item* boneItem = frameItem->Child( bone );
-				const char* boneName = boneItem->Name();
+				IString boneName = StringPool::Intern( boneItem->Name(), true );
 
-				sequence[type].frame[frame].boneName[bone] = boneName;
-				sequence[type].frame[frame].boneHash[bone] = Random::Hash( boneName, strlen( boneName ));
+				sequence[type].frame[frame].boneData.bone[bone].name = boneName;
 				sequence[type].frame[frame].boneData.bone[bone].angleRadians = boneItem->GetFloat( "anglePrime" );
 				sequence[type].frame[frame].boneData.bone[bone].dy = boneItem->GetFloat( "dy" );
 				sequence[type].frame[frame].boneData.bone[bone].dz = boneItem->GetFloat( "dz" );
@@ -292,11 +291,11 @@ void AnimationResource::ComputeFrame( AnimationType type,
 
 void AnimationResource::ComputeBone( AnimationType type,
 									 int frame0, int frame1, float fraction,
-									 int i,
+									 IString boneName,
 									 BoneData::Bone* bone ) const
 {
-	const BoneData::Bone* bone0 = &sequence[type].frame[frame0].boneData.bone[i];
-	const BoneData::Bone* bone1 = &sequence[type].frame[frame1].boneData.bone[i];
+	const BoneData::Bone* bone0 = sequence[type].frame[frame0].boneData.GetBone( boneName );
+	const BoneData::Bone* bone1 = sequence[type].frame[frame1].boneData.GetBone( boneName );
 
 	float angle0 = bone0->angleRadians;
 	float angle1 = bone1->angleRadians;
@@ -322,26 +321,17 @@ void AnimationResource::ComputeBone( AnimationType type,
 
 
 bool AnimationResource::GetTransform(	AnimationType type,	// which animation to play: "reference", "gunrun", etc.
-										const char* boneName,
+										IString boneName,
 										const ModelHeader& header,	// used to get the bone IDs
 										U32 time,					// time for this animation
 										BoneData::Bone* bone ) const
 {
-	int i=0;
-	for( ; i<sequence[type].nBones; ++i ) {
-		if ( StrEqual( sequence[type].frame[0].boneName[i], boneName )) {
-			break;
-		}
-	}
-	if ( i < sequence[type].nBones ) {
-		float fraction = 0;
-		int frame0 = 0;
-		int frame1 = 0;
-		ComputeFrame( type, time, &frame0, &frame1, &fraction );
-		ComputeBone( type, frame0, frame1, fraction, i, bone );
-		return true;
-	}
-	return false;
+	float fraction = 0;
+	int frame0 = 0;
+	int frame1 = 0;
+	ComputeFrame( type, time, &frame0, &frame1, &fraction );
+	ComputeBone( type, frame0, frame1, fraction, boneName, bone );
+	return true;
 }
 
 
@@ -360,13 +350,9 @@ bool AnimationResource::GetTransform(	AnimationType type,
 	for( int i=0; i<sequence[type].nBones; ++i ) {
 		GLASSERT( i < EL_MAX_BONES );
 
-		// The index and the boneName don't match up. Patch here.
-		// Can't patch at load time because the 'header' is required,
-		// so that animation can be multiply assigned.
-		const char* boneName = sequence[type].frame[frame0].boneName[i];
-		int index = header.BoneIDFromName( boneName );
-
-		ComputeBone( type, frame0, frame1, fraction, i, boneData->bone + index );
+		IString boneName = sequence[type].frame[frame0].boneData.bone[i].name;
+		boneData->bone[i].name = boneName;
+		ComputeBone( type, frame0, frame1, fraction, boneName, boneData->bone + i );
 	}
 	return true;
 }
@@ -379,30 +365,28 @@ void AnimationResource::GetMetaData(	AnimationType type,
 	data->Clear();
 
 	GLASSERT( t1 >= t0 );
-	U32 delta = t1 - t0;
+	int delta = int(t1 - t0);
 	
 	t0 = TimeInRange( type, t0 );
-	t1 = t0 + delta;
 
-	for( int pass=0; pass<2; ++pass ) {
-		for( int i=0; i<sequence[type].nFrames; ++i ) {
-			if (    t0 >= sequence[type].frame[i].start 
-				 && t1 < sequence[type].frame[i].end ) 
-			{
-				for( int j=0; j<EL_MAX_METADATA;  ++j ) {
-					int m = sequence[type].frame[i].metaData[j];
-					if ( m > 0 ) {
-						data->Push( m ); 
-					}
+	int i=0;
+	while( delta > 0 ) {
+		if (    t0 >= sequence[type].frame[i].start 
+			 && t0 < sequence[type].frame[i].end ) 
+		{
+			for( int j=0; j<EL_MAX_METADATA;  ++j ) {
+				int m = sequence[type].frame[i].metaData[j];
+				if ( m > 0 ) {
+					data->Push( m ); 
 				}
 			}
+			delta -= sequence[type].frame[i].end - t0;
+			t0 = sequence[type].frame[i].end;
 		}
-		if ( t1 > Duration(type) ) {
+		++i;
+		if ( i==sequence[type].nFrames ) {
+			i = 0;
 			t0 = 0;
-			t1 -= Duration(type);
-		}
-		else {
-			break;
 		}
 	}
 }

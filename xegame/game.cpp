@@ -135,6 +135,7 @@ Game::~Game()
 	TextureManager::Destroy();
 	delete ShaderManager::Instance();
 	delete database0;
+	delete StringPool::Instance();
 	Performance::Free();
 }
 

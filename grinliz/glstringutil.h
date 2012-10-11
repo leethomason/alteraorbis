@@ -42,7 +42,7 @@ distribution.
 
 namespace grinliz 
 {
-	
+
 #if 0
 inline int HexLowerCharToInt( int c ) {
 	GLASSERT( (c>='0'&&c<='9') || (c>='a'&&c<='f') );
@@ -92,7 +92,7 @@ void StrNCpy( char* dst, const char* src, size_t bufferSize );
 int SNPrintf(char *str, size_t size, const char *format, ...);
 
 
-/*f
+/*
 	A class that wraps a c-array of characters.
 */
 template< int ALLOCATE >
@@ -244,6 +244,7 @@ public:
 	void append( const char* );
 	void append( const char* p, int n );
 	int compare( const char* str ) const			{ return strcmp( m_buf, str ); }
+	bool empty() const								{ return m_size == 0; }
 
 	unsigned size() const							{ return m_size; }
 	const char* c_str() const						{ return m_buf; }
@@ -264,6 +265,73 @@ private:
 	char*		m_buf;
 	unsigned	m_allocated;
 	unsigned	m_size;
+};
+
+
+// Immutable, interned string
+class IString
+{
+	friend class StringPool;
+public:
+	IString()									{ str = 0; }
+	IString( const IString& other )				{ str = other.str; }	
+	void operator=( const IString& other )		{ str = other.str; }
+
+	bool operator==( const IString& other )	const	{ return other.str == str; }
+	bool operator==( const GLString& other ) const  { return    (str == 0 && other.empty() )
+															 || StrEqual( other.c_str(), str ); }
+	bool operator==( const char* other ) const		{ return    (str == 0 && other == 0)
+														     || StrEqual( other, str ); }
+
+	bool operator!=( const IString& other ) const	{ return other.str != str; }
+	bool operator!=( const GLString& other )  const	{ return !(*this == other); }
+	bool operator!=( const char* other )  const		{ return !(*this == other); }
+
+	const char* c_str() const					{ return str; }
+	bool empty() const							{ return !str || *str == 0; }
+
+private:
+	IString( const char* _str )					{ str = _str; }
+	const char* str;
+};
+
+
+class StringPool
+{
+public:
+	static StringPool* Instance();
+	~StringPool();
+
+	IString Get( const char* str, bool strIsStaticMem=false );
+
+	static IString Intern( const char* str, bool strIsStaticMem=false ) {
+		return Instance()->Get( str, strIsStaticMem );
+	}
+
+private:
+	StringPool();
+	const char* Add( const char* str );
+
+	static StringPool* instance;
+
+	enum { BLOCK_SIZE = 4000 };
+	struct Node {
+		U32 hash;
+		const char* str;
+	};
+	struct Block {
+		Block* next;
+		int nBytes;
+		char mem[BLOCK_SIZE];
+	};
+	int treeSize;
+	int treeDepth;
+	Node* tree;
+	Block* root;
+
+	int nStrings;
+	int nStored;
+	int nBlocks;
 };
 
 

@@ -118,8 +118,8 @@ void ModelLoader::Load( const gamedb::Item* item, ModelResource* res )
 	res->invariantBounds.max.Set( greater, res->header.bounds.max.y, greater );
 
 	for( int i=0; i<EL_MAX_BONES; ++i ) {
-		if ( !res->header.boneName[i].name.empty() ) {
-			GLOUTPUT(( "Model %s bone %s id=%d\n", res->header.name.c_str(), res->header.boneName[i].name.c_str(), res->header.boneName[i].id ));
+		if ( !res->header.boneName[i].empty() ) {
+			GLOUTPUT(( "Model %s bone %d=%s\n", res->header.name.c_str(), i, res->header.boneName[i].c_str() ));
 		}
 	}
 
@@ -442,9 +442,10 @@ void Model::CalcAnimation( BoneData* boneData ) const
 
 
 
-void Model::CalcAnimation( BoneData::Bone* bone, const char* boneName ) const
+void Model::CalcAnimation( BoneData::Bone* bone, const char* _boneName ) const
 {
 	GLASSERT( HasAnimation() );
+	IString boneName = StringPool::Intern( _boneName );
 	animationResource->GetTransform( currentAnim.id, boneName, resource->header, currentAnim.time, bone );
 
 	if ( crossFadeTime < totalCrossFadeTime && (prevAnim.id >= 0) ) {

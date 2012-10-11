@@ -74,7 +74,7 @@ public:
 						BoneData* boneData ) const;
 
 	bool GetTransform(	AnimationType type,			// which animation to play: "reference", "gunrun", etc.
-						const char* boneName,
+						grinliz::IString boneName,
 						const ModelHeader& header,	// used to get the bone IDs
 						U32 time,					// time for this animation
 						BoneData::Bone* bone ) const;
@@ -97,7 +97,7 @@ private:
 					   int *_frame0, int* _frame1, float* _fraction ) const;
 	void ComputeBone( AnimationType type,
 					  int frame0, int frame1, float fraction,
-					  int i,
+					  grinliz::IString name,
 					  BoneData::Bone* bone ) const;
 
 	const char* resName;
@@ -108,8 +108,6 @@ private:
 	struct Frame {
 		U32			start;
 		U32			end;
-		const char* boneName[EL_MAX_BONES];
-		U32			boneHash[EL_MAX_BONES];
 		int			metaData[EL_MAX_METADATA];
 		BoneData	boneData;
 	};

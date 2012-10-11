@@ -103,7 +103,7 @@ public:
 
 	const grinliz::Rectangle3F& Bounds()		{ return bounds; }
 
-	grinliz::CArray<grinliz::GLString, EL_MAX_BONES> boneNames;
+	grinliz::CArray<grinliz::IString, EL_MAX_BONES> boneNames;
 
 private:
 	int current;

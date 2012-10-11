@@ -18,6 +18,7 @@
 
 #include "../grinliz/glvector.h"
 #include "../grinliz/glmatrix.h"
+#include "../grinliz/glstringutil.h"
 #include "enginelimits.h"
 
 class Texture;
@@ -132,13 +133,23 @@ struct BoneData
 {
 	// maps to Vector3F
 	struct Bone {
+		grinliz::IString name;	
 		float angleRadians;
 		float dy;
 		float dz;
 		void ToMatrix( grinliz::Matrix4* mat ) const;
 	};
 
-	// WARNING: cast to vector3. This must be size Vector3.
+	const Bone* GetBone( const grinliz::IString& internedName ) const {
+		for( int i=0; i<EL_MAX_BONES; ++i ) {
+			if ( bone[i].name == internedName ) {
+				return bone+i;
+			}
+		}
+		GLASSERT( 0 );
+		return 0;
+	}
+
 	Bone bone[EL_MAX_BONES];
 };
 

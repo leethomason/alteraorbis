@@ -26,7 +26,7 @@ using namespace tinyxml2;
 
 void ModelHeader::Load( const gamedb::Item* item )
 {
-	name = item->Name();
+	name = StringPool::Intern( item->Name(), true );
 
 	const gamedb::Item* header = item->Child( "header" );
 	nTotalVertices = header->GetInt( "nTotalVertices" );
@@ -34,7 +34,7 @@ void ModelHeader::Load( const gamedb::Item* item )
 	flags = header->GetInt( "flags" );
 	nAtoms = header->GetInt( "nGroups" );
 	if ( header->HasAttribute( "animation" ) ) {
-		animation = header->GetString( "animation" );
+		animation = StringPool::Intern( header->GetString( "animation" ), true );
 	}
 
 	bounds.Zero();
@@ -53,7 +53,7 @@ void ModelHeader::Load( const gamedb::Item* item )
 	if ( metaItem ) {
 		for( int i=0; i<metaItem->NumChildren(); ++i ) {
 			const gamedb::Item* dataItem = metaItem->Child( i );
-			metaData[i].name = dataItem->Name();
+			metaData[i].name = StringPool::Intern( dataItem->Name(), true );
 			metaData[i].pos.x = dataItem->GetFloat( "x" );
 			metaData[i].pos.y = dataItem->GetFloat( "y" );
 			metaData[i].pos.z = dataItem->GetFloat( "z" );
@@ -63,7 +63,10 @@ void ModelHeader::Load( const gamedb::Item* item )
 			metaData[i].axis.z = dataItem->GetFloat( "axis.z" );
 			metaData[i].rotation = dataItem->GetFloat( "rotation" );
 
-			metaData[i].boneName = dataItem->GetString( "boneName" );
+			metaData[i].boneName = IString();
+			if ( dataItem->HasAttribute( "boneName" )) {
+				metaData[i].boneName = StringPool::Intern( dataItem->GetString( "boneName" ), true );
+			}
 		}
 	}
 
@@ -72,18 +75,21 @@ void ModelHeader::Load( const gamedb::Item* item )
 	if ( effectData ) {
 		for( int i=0; i<effectItem->NumChildren(); ++i ) {
 			const gamedb::Item* item = effectItem->Child(i);
-			effectData[i].metaData = item->GetString( "metaData" );
-			effectData[i].name = item->GetString( "name" );
+			effectData[i].metaData	= StringPool::Intern( item->GetString( "metaData" ), true );
+			effectData[i].name		= StringPool::Intern( item->GetString( "name" ), true );
 		}
 	}
 
-	memset( boneName, 0, sizeof(BoneDesc)*EL_MAX_BONES );
+	memset( boneName, 0, sizeof(const char*)*EL_MAX_BONES );
 	const gamedb::Item* boneItem = header->Child( "bones" );
 	if ( boneItem ) {
 		for( int i=0; i<boneItem->NumChildren(); ++i ) {
 			const gamedb::Item* dataItem = boneItem->Child( i );
-			boneName[i].name = dataItem->Name();
-			boneName[i].id = dataItem->GetInt( "id" );
+			IString name = StringPool::Intern( dataItem->Name(), true );
+			int id       = dataItem->GetInt( "id" );
+
+			GLASSERT( boneName[id] == 0 );	// else duplicated bone?
+			boneName[id] = name;
 		}
 	}
 }

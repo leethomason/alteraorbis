@@ -102,7 +102,7 @@ void LoadLibrary()
 
 
 
-void ModelHeader::Set(	const char* name, int nAtoms, int nTotalVertices, int nTotalIndices,
+void ModelHeader::Set(	const IString& name, int nAtoms, int nTotalVertices, int nTotalIndices,
 						const grinliz::Rectangle3F& bounds )
 {
 	GLASSERT( nAtoms > 0 && nAtoms < EL_MAX_MODEL_GROUPS );
@@ -112,7 +112,6 @@ void ModelHeader::Set(	const char* name, int nAtoms, int nTotalVertices, int nTo
 	GLASSERT( EL_MAX_INDEX_IN_MODEL <= 0xffff );
 	GLASSERT( nTotalVertices <= nTotalIndices );
 
-	this->name.ClearBuf();
 	this->name = name;
 	this->flags = 0;
 	this->nAtoms = nAtoms;
@@ -156,7 +155,9 @@ void ModelHeader::Save( gamedb::WItem* parent )
 			data->SetFloat( "axis.z", metaData[i].axis.z );
 			data->SetFloat( "rotation", metaData[i].rotation );
 
-			data->SetString( "boneName", metaData[i].boneName.c_str() );
+			if( !metaData[i].boneName.empty() ) {
+				data->SetString( "boneName", metaData[i].boneName.c_str() );
+			}
 		}
 	}
 
@@ -170,9 +171,9 @@ void ModelHeader::Save( gamedb::WItem* parent )
 	}
 
 	gamedb::WItem* boneNode = node->CreateChild( "bones" );
-	for( int i=0; i<EL_MAX_BONES && !boneName[i].name.empty(); ++i ) {
-		gamedb::WItem* data = boneNode->CreateChild( boneName[i].name.c_str() );
-		data->SetInt( "id", boneName[i].id );
+	for( int i=0; i<EL_MAX_BONES && !boneName[i].empty(); ++i ) {
+		gamedb::WItem* data = boneNode->CreateChild( boneName[i].c_str() );
+		data->SetInt( "id", i );
 	}
 }
 
@@ -560,12 +561,11 @@ void ProcessModel( XMLElement* model )
 	printf( " groups=%d nVertex=%d nTri=%d\n", builder->NumGroups(), nTotalVertex, nTotalIndex/3 );
 
 	ModelHeader header;
-	header.Set( assetName.c_str(), builder->NumGroups(), nTotalVertex, nTotalIndex, builder->Bounds() );
-	header.animation = animation.c_str();
+	header.Set( StringPool::Intern( assetName.c_str() ), builder->NumGroups(), nTotalVertex, nTotalIndex, builder->Bounds() );
+	header.animation = StringPool::Intern( animation.c_str() );
 
 	for( int i=0; i<builder->boneNames.Size(); ++i ) {
-		header.boneName[i].name = builder->boneNames[i].c_str();
-		header.boneName[i].id = i;
+		header.boneName[i] = builder->boneNames[i];
 	}
 
 	if ( grinliz::StrEqual( model->Attribute( "shadowCaster" ), "false" ) ) {
@@ -577,7 +577,7 @@ void ProcessModel( XMLElement* model )
 			metaEle && nMeta < EL_MAX_METADATA;
 			metaEle = metaEle->NextSiblingElement( "meta" ) )
 	{
-		header.metaData[nMeta].name = metaEle->Attribute( "name" );
+		header.metaData[nMeta].name = StringPool::Intern( metaEle->Attribute( "name" ) );
 		if ( metaEle->Attribute( "pos" )) {
 			StringToVector( metaEle->Attribute( "pos" ), &header.metaData[nMeta].pos );
 			header.metaData[nMeta].pos = header.metaData[nMeta].pos - origin;
@@ -585,7 +585,7 @@ void ProcessModel( XMLElement* model )
 		if ( metaEle->Attribute( "rot" )) {
 			StringToAxisAngle( metaEle->Attribute( "rot" ), &header.metaData[nMeta].axis, &header.metaData[nMeta].rotation );
 		}
-		header.metaData[nMeta].boneName = metaEle->Attribute( "boneName" );
+		header.metaData[nMeta].boneName = StringPool::Intern( metaEle->Attribute( "boneName" ) );
 		++nMeta;
 	}
 
@@ -594,8 +594,8 @@ void ProcessModel( XMLElement* model )
 			effectEle && nEffect < EL_MAX_MODEL_EFFECTS;
 			effectEle = effectEle->NextSiblingElement( "particle" ))
 	{
-		header.effectData[nEffect].metaData = effectEle->Attribute( "meta" );
-		header.effectData[nEffect].name = effectEle->Attribute( "name" );
+		header.effectData[nEffect].metaData = StringPool::Intern( effectEle->Attribute( "meta" ) );
+		header.effectData[nEffect].name     = StringPool::Intern( effectEle->Attribute( "name" ) );
 		++nEffect;
 	}
 
@@ -1118,5 +1118,6 @@ int main( int argc, char* argv[] )
 		reader.RecWalk( reader.Root(), 0 );
 	}
 
+	delete StringPool::Instance();
 	return 0;
 }

@@ -23,6 +23,9 @@ distribution.
 */
 
 #include "glstringutil.h"
+#include "glrandom.h"
+#include "glcontainer.h"
+
 #include <stdarg.h>
 #include <stdio.h>
 #include <ctype.h>
@@ -342,3 +345,134 @@ void grinliz::StrTokenize( const GLString& in, int maxTokens, StrToken *tokens, 
 	}
 }
 
+
+StringPool* StringPool::instance = 0;
+
+
+StringPool* StringPool::Instance() {
+	if ( !instance ) {
+		instance = new StringPool();
+	}
+	return instance;
+}
+
+
+StringPool::StringPool()
+{
+	treeSize = 1+2+4+8+16;
+	treeDepth = 5;
+	tree = (Node*) calloc( treeSize, sizeof(Node) );
+	root = 0;
+
+	nStrings = 0;
+	nStored = 0;
+	nBlocks = 0;
+}
+
+
+StringPool::~StringPool()
+{
+	GLOUTPUT(( "StringPool destructor. nStrings=%d nStored=%d treeDepth=%d mem=%d blocks * %d = %d\n",
+			   nStrings,
+			   nStored,
+			   treeDepth,
+			   nBlocks,
+			   BLOCK_SIZE,
+			   BLOCK_SIZE * nBlocks ));
+
+	if ( tree )
+		free( tree );
+	while( root ) {
+		Block* b = root->next;
+		free( root );
+		root = b;
+	}
+}
+
+
+/*
+		     0
+	    1          2
+	  3   4     5     6
+	 7 8 9 10 11 12 13 14
+*/
+
+IString StringPool::Get( const char* str, bool strIsStaticMem )
+{
+	if ( !str || !*str ) {
+		return IString();
+	}
+	GLASSERT( strlen( str ) < BLOCK_SIZE-1 );
+
+	U32 hash = Random::Hash( str, U32(-1) ); 
+	
+	int depth=0; 
+	int offset=0;
+	Node* node = tree;
+
+	while( depth < treeDepth ) {
+		GLASSERT( node < tree + treeSize );
+		if ( node->str == 0 ) {
+			break;	// empty
+		}
+		if ( node->hash == hash && StrEqual( node->str, str ) ) {
+			return IString( node->str );
+		}
+		else if ( hash < node->hash ) {
+			++depth;
+			offset = offset*2 + 1;
+			node = tree + offset;
+		}
+		else {
+			++depth;
+			offset = offset*2+2;
+			node = tree + offset;
+		}
+	}
+	// Didn't find. Do we need to extend the tree?
+	if ( offset >= treeSize ) {
+		int oldTreeSize = treeSize;
+		treeSize += (1<<treeDepth);
+		++treeDepth;
+		tree = (Node*) realloc( tree, treeSize*sizeof(Node) );
+		memset( tree + oldTreeSize, 0, (treeSize-oldTreeSize)*sizeof(Node) );
+	}
+
+	node = tree + offset;
+	GLASSERT( node->hash == 0 );
+	GLASSERT( node->str == 0 );
+	node->hash = hash;
+	++nStrings;
+	if ( strIsStaticMem ) {
+		node->str = str;
+	}
+	else {
+		node->str = Add( str );
+		++nStored;
+	}
+	return node->str;
+}
+
+
+const char* StringPool::Add( const char* str )
+{
+	int len = strlen( str );
+	int nBytes = len+1;
+
+	for( Block* b = root; b; b=b->next ) {
+		if ( b->nBytes + nBytes < BLOCK_SIZE ) {
+			memcpy( b->mem + b->nBytes, str, nBytes );
+			const char* s = b->mem + b->nBytes;
+			b->nBytes += nBytes;
+			return s;
+		}
+	}
+	++nBlocks;
+	Block* b = (Block*)malloc( sizeof(Block) );
+	b->nBytes = nBytes;
+	b->next = root;
+	root = b;
+
+	memcpy( b->mem, str, nBytes );
+	return b->mem;
+}

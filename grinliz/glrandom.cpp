@@ -188,12 +188,21 @@ void Random::NormalVector( float* v, int dim )
 
 /*static*/ U32 Random::Hash( const void* data, U32 len )
 {
+	static const U32 NULLT = U32(-1);
 	const unsigned char *p = (const unsigned char *)(data);
 	unsigned int h = 2166136261U;
 
-	for( U32 i=0; i<len; ++i, ++p ) {
-		h ^= *p;
-		h *= 16777619;
+	if ( len != NULLT ) {
+		for( U32 i=0; i<len; ++i, ++p ) {
+			h ^= *p;
+			h *= 16777619;
+		}
+	}
+	else {
+		for( ; *p; ++p ) {
+			h ^= *p;
+			h *= 16777619;
+		}
 	}
 	return h;
 }

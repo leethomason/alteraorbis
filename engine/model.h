@@ -87,62 +87,39 @@ struct ModelAtom
 
 
 struct ModelMetaData {
-	grinliz::CStr< EL_RES_NAME_LEN >	name;		// name of the metadata
-	grinliz::Vector3F					pos;		// position
-	grinliz::Vector3F					axis;		// axis of rotation (if any)
-	float								rotation;	// amount of rotation (if any)
-	grinliz::CStr< EL_RES_NAME_LEN >	boneName;	// name of the bone this metadat is attached to (if any)
+	grinliz::IString		name;		// name of the metadata
+	grinliz::Vector3F		pos;		// position
+	grinliz::Vector3F		axis;		// axis of rotation (if any)
+	float					rotation;	// amount of rotation (if any)
+	grinliz::IString		boneName;	// name of the bone this metadat is attached to (if any)
 };
 
 
 struct ModelParticleEffect {
-	grinliz::CStr< EL_RES_NAME_LEN >	metaData;	// name	 of the metadata
-	grinliz::CStr< EL_RES_NAME_LEN >	name;		// name of the particle effect.
+	grinliz::IString	metaData;	// name	 of the metadata
+	grinliz::IString	name;		// name of the particle effect.
 };
 
 struct ModelHeader
 {
-	struct BoneDesc {
-		grinliz::CStr< EL_RES_NAME_LEN >	name;
-		int									id;
-	};
-
 	// flags
 	enum {
 		RESOURCE_NO_SHADOW	= 0x08,		// model casts no shadow
 	};
 	bool NoShadow() const			{ return (flags&RESOURCE_NO_SHADOW) ? true : false; }
 
-	grinliz::CStr<EL_FILE_STRING_LEN>	name;
-	grinliz::CStr<EL_FILE_STRING_LEN>	animation;		// the name of the animation, if exists, for this model.
-	U16						nTotalVertices;				// in all atoms
+	grinliz::IString		name;
+	grinliz::IString		animation;			// the name of the animation, if exists, for this model.
+	U16						nTotalVertices;		// in all atoms
 	U16						nTotalIndices;
 	U16						flags;
 	U16						nAtoms;
 	grinliz::Rectangle3F	bounds;
 	ModelMetaData			metaData[EL_MAX_METADATA];
 	ModelParticleEffect		effectData[EL_MAX_MODEL_EFFECTS];
-	BoneDesc				boneName[EL_MAX_BONES];		// ordered by name, not ID
+	grinliz::IString		boneName[EL_MAX_BONES];
 
-	const char* BoneNameFromID( int id ) const {
-		for( int i=0; i<EL_MAX_BONES; ++i ) {
-			if ( boneName[i].id == id ) {
-				return boneName[i].name.c_str();
-			}
-		}
-		return 0;
-	}
-
-	int BoneIDFromName( const char* name ) const {
-		for( int i=0; i<EL_MAX_BONES; ++i ) {
-			if ( boneName[i].name == name ) {
-				return boneName[i].id;
-			}
-		}
-		return -1;
-	}
-
-	void Set( const char* name, int nGroups, int nTotalVertices, int nTotalIndices,
+	void Set( const grinliz::IString& name, int nGroups, int nTotalVertices, int nTotalIndices,
 			  const grinliz::Rectangle3F& bounds );
 
 	void Load(	const gamedb::Item* );		// database connection
