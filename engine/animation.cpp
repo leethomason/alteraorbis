@@ -205,7 +205,7 @@ AnimationResource::AnimationResource( const gamedb::Item* _item )
 			for( int bone=0; bone<nBones; ++bone ) {
 				const gamedb::Item* boneItem = frameItem->Child( bone );
 				IString boneName = StringPool::Intern( boneItem->Name(), true );
-
+				
 				sequence[type].frame[frame].boneData.bone[bone].name = boneName;
 				sequence[type].frame[frame].boneData.bone[bone].angleRadians = boneItem->GetFloat( "anglePrime" );
 				sequence[type].frame[frame].boneData.bone[bone].dy = boneItem->GetFloat( "dy" );
@@ -351,8 +351,10 @@ bool AnimationResource::GetTransform(	AnimationType type,
 		GLASSERT( i < EL_MAX_BONES );
 
 		IString boneName = sequence[type].frame[frame0].boneData.bone[i].name;
-		boneData->bone[i].name = boneName;
-		ComputeBone( type, frame0, frame1, fraction, boneName, boneData->bone + i );
+		int offset = header.BoneNameToOffset( boneName );
+
+		boneData->bone[offset].name = boneName;
+		ComputeBone( type, frame0, frame1, fraction, boneName, boneData->bone + offset );
 	}
 	return true;
 }

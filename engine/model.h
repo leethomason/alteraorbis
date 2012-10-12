@@ -119,6 +119,15 @@ struct ModelHeader
 	ModelParticleEffect		effectData[EL_MAX_MODEL_EFFECTS];
 	grinliz::IString		boneName[EL_MAX_BONES];
 
+	int BoneNameToOffset( const grinliz::IString& name ) const {
+		for ( int i=0; i<EL_MAX_BONES; ++i ) {
+			if ( boneName[i] == name )
+				return i;
+		}
+		GLASSERT( 0 );
+		return 0;
+	}
+
 	void Set( const grinliz::IString& name, int nGroups, int nTotalVertices, int nTotalIndices,
 			  const grinliz::Rectangle3F& bounds );
 

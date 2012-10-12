@@ -235,8 +235,8 @@ void SCMLParser::WriteAnimation( gamedb::WItem* witem, const Animation& a, const
 					rot.SetXRotation( -angle );				// rotate, convert to YZ right hand rule
 					toPos.SetTranslation( 0, -y, x );		// positive direction
 
-					m = toPos * rot * toOrigin;
-					//m = toOrigin * rot * toPos;
+					//m = toPos * rot * toOrigin;
+					m = toOrigin * rot * toPos;
 					anglePrime = m.CalcRotationAroundAxis( 0 );		// not very meaningful, just used to construct a transformation matrix in the shader
 				}
 
