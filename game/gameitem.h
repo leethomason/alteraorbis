@@ -125,8 +125,8 @@ public:
 	{
 		CopyFrom(0);
 		flags = _flags;
-		name = _name;
-		resource = _res;
+		name = grinliz::StringPool::Intern( _name );
+		resource = grinliz::StringPool::Intern( _res );
 	}
 
 	GameItem( const GameItem& rhs )			{ CopyFrom( &rhs );	}
@@ -179,9 +179,9 @@ public:
 		RENDER_TRAIL		= (1<<17),				// render a bolt with a 'smoketrail' vs. regular bolt
 	};
 
-	grinliz::CStr< MAX_ITEM_NAME >		name;		// name of the item
-	grinliz::CStr< MAX_ITEM_NAME >		key;		// modified name, for storage. not serialized.
-	grinliz::CStr< EL_RES_NAME_LEN >	resource;	// resource used to  render the item
+	grinliz::IString		name;		// name of the item
+	grinliz::IString		key;		// modified name, for storage. not serialized.
+	grinliz::IString		resource;	// resource used to  render the item
 	int flags;				// flags that define this item; 'constant'
 	int hardpoint;			// id of hardpoint this item attaches to
 	float mass;				// mass (kg)
@@ -223,9 +223,9 @@ public:
 			parentChit		= 0;	// NOT copied
 		}
 		else {
-			name.Clear();
-			key.Clear();
-			resource.Clear();
+			name = grinliz::IString();
+			key  = grinliz::IString();
+			resource = grinliz::IString();
 			flags = 0;
 			hardpoint = 0;
 			mass = 1;

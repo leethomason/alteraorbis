@@ -42,8 +42,8 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 
 	GLASSERT( StrEqual( ele->Name(), "item" ));
 	
-	name		= ele->Attribute( "name" );
-	resource	= ele->Attribute( "resource" );
+	name		= StringPool::Intern( ele->Attribute( "name" ));
+	resource	= StringPool::Intern( ele->Attribute( "resource" ));
 	flags = 0;
 	const char* f = ele->Attribute( "flags" );
 

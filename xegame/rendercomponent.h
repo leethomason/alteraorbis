@@ -89,9 +89,9 @@ private:
 	int		flags;
 	float	radiusOfBase;
 
-	const ModelResource*			resource[ NUM_MODELS ];
-	Model*							model[ NUM_MODELS ];
-	grinliz::CStr<EL_RES_NAME_LEN>	metaDataName[EL_MAX_METADATA];
+	const ModelResource*	resource[ NUM_MODELS ];
+	Model*					model[ NUM_MODELS ];
+	grinliz::IString		metaDataName[EL_MAX_METADATA];
 };
 
 #endif // RENDER_COMPONENT_INCLUDED

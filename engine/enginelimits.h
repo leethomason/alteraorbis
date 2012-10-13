@@ -30,7 +30,7 @@ enum HitTestMethod
 
 
 enum {
-	EL_RES_NAME_LEN			= 24,
+	//EL_RES_NAME_LEN			= 24,
 	EL_MAX_VERTEX_IN_GROUP	= 4096,
 	EL_MAX_INDEX_IN_GROUP	= 4096,
 	EL_MAX_MODEL_GROUPS		= 4,

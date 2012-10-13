@@ -48,7 +48,9 @@ void ItemStorage::Load( const char* path )
 					subItem->Load( subItemEle );
 
 					// Patch the name to make a sub-item
-					subItem->key.Format( "%s.%d", item->Name(), nSub );
+					GLString str;
+					str.Format( "%s.%d", item->Name(), nSub );
+					subItem->key = StringPool::Intern( str.c_str() );
 					GLASSERT( !map.Query( subItem->key.c_str(), 0 ));
 					map.Add( subItem->key.c_str(), subItem );
 

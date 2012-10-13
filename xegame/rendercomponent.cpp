@@ -75,7 +75,7 @@ void RenderComponent::OnRemove()
 		}
 	}
 	for( int i=0; i<EL_MAX_METADATA; ++i ) {
-		metaDataName[i].Clear();
+		metaDataName[i] = IString();
 	}
 }
 
@@ -172,7 +172,7 @@ void RenderComponent::Attach( const char* metaData, const char* asset )
 {
 	for( int j=1; j<NUM_MODELS; ++j ) {
 		if ( metaDataName[j-1].empty() ) {
-			metaDataName[j-1] = metaData;
+			metaDataName[j-1] = StringPool::Intern( metaData );
 			GLASSERT( model[j] == 0 );
 			resource[j] = ModelResourceManager::Instance()->GetModelResource( asset );
 			GLASSERT( resource[j] );
@@ -193,7 +193,7 @@ void RenderComponent::Detach( const char* metaData )
 {
 	for( int i=1; i<NUM_MODELS; ++i ) {
 		if ( metaDataName[i-1] == metaData ) {
-			metaDataName[i-1].Clear();
+			metaDataName[i-1] = IString();
 			if ( model[i] )
 				engine->FreeModel( model[i] );
 			model[i] = 0;
