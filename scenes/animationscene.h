@@ -50,12 +50,8 @@ private:
 	void UpdateAnimationInfo();
 	void UpdateModelInfo();
 
-	void InitXML( const grinliz::Rectangle2I& bounds );
-	void FinishXML();
-
-	void InitFrame();
-	void PushSprite( const char* name, const grinliz::Rectangle2I& bounds );
-	void FinishFrame();
+	grinliz::GLString MakeFilename( const char* in );
+	void WriteXML();
 
 	Engine* engine;
 	enum { NUM_MODELS = 3 };
@@ -84,10 +80,9 @@ private:
 	gamui::TextLabel boneName, animName, modelName;
 	gamui::TextLabel pixelUnitRatio;
 
-	tinyxml2::XMLDocument* xmlDocument;
-	tinyxml2::XMLPrinter*  xmlPrinter;
-	FILE* scmlFP;
 	grinliz::Vector2I origin;
+	grinliz::Rectangle2I size;
+	grinliz::Rectangle2I partSize[EL_MAX_BONES];
 };
 
 

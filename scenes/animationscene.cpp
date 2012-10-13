@@ -341,128 +341,96 @@ void AnimationScene::ItemTapped( const gamui::UIItem* item )
 }
 
 
-void AnimationScene::InitXML( const Rectangle2I& bounds )
+void AnimationScene::WriteXML()
 {
 	char buf[256];
+	const ModelHeader& header = model[0]->GetResource()->header;
 	
-	const char* name = model[0]->GetResource()->header.name.c_str();
+	const char* name = header.name.c_str();
 	SNPrintf( buf, 256, ".\\resin\\%s", name );
 	_mkdir( buf );
 	SNPrintf( buf, 256, "./resin/%s/%s.scml", name, name );
-	scmlFP = fopen( buf, "w" );
 
-	xmlDocument = new XMLDocument();
-	xmlPrinter  = new XMLPrinter( scmlFP );
+	FILE* fp = fopen( buf, "w" );
+	XMLPrinter* xmlPrinter  = new XMLPrinter( fp );
 
-	xmlPrinter->OpenElement( "spriterdata" );
-	xmlPrinter->OpenElement(	"char" );
-	xmlPrinter->OpenElement(		"name" );
-	xmlPrinter->PushText(				"char_000" );
-	xmlPrinter->CloseElement();
-	xmlPrinter->OpenElement(		"anim" );
-	xmlPrinter->OpenElement(			"name" );
-	xmlPrinter->PushText(					"reference" );
-	xmlPrinter->CloseElement();			// name
-	xmlPrinter->OpenElement(			"frame" );
-	xmlPrinter->OpenElement(				"name" );
-	xmlPrinter->PushText(						"frame_000" );
-	xmlPrinter->CloseElement();
-	xmlPrinter->OpenElement(				"duration" );
-	xmlPrinter->PushText(						"500.0" );
-	xmlPrinter->CloseElement();				// duration
-	xmlPrinter->CloseElement();			// frame
-	xmlPrinter->CloseElement();		// anim
-	xmlPrinter->OpenElement(		"box" );
-	xmlPrinter->OpenElement(			"bottom" );
-	xmlPrinter->PushText(					bounds.max.y );
-	xmlPrinter->CloseElement();
-	xmlPrinter->OpenElement(			"top" );
-	xmlPrinter->PushText(					bounds.min.y );
-	xmlPrinter->CloseElement();
-	xmlPrinter->OpenElement(			"left" );
-	xmlPrinter->PushText(					bounds.min.x );
-	xmlPrinter->CloseElement();
-	xmlPrinter->OpenElement(			"right" );
-	xmlPrinter->PushText(					bounds.max.x );
-	xmlPrinter->CloseElement();
-	xmlPrinter->CloseElement();		// box
-	xmlPrinter->CloseElement();	// char
-}
+	int nBones=0;
+	for( ; nBones < EL_MAX_BONES; ++nBones ) {
+		if ( header.boneName[nBones].empty() )
+			break;
+	}
+	GLASSERT( nBones );
 
+	xmlPrinter->OpenElement( "spriter_data" );
+	xmlPrinter->PushAttribute( "scml_version", "1.0" );
 
-void AnimationScene::InitFrame()
-{
-	xmlPrinter->OpenElement( "frame" );
-	xmlPrinter->OpenElement(	"name" );
-	xmlPrinter->PushText(			"frame_000" );
-	xmlPrinter->CloseElement();	// name
-}
+	xmlPrinter->OpenElement(	"folder" );
+	xmlPrinter->PushAttribute( "id", "0" );
+	xmlPrinter->PushAttribute( "name", "assets" );
 
+	for( int i=0; i<nBones; ++i ) {
+		xmlPrinter->OpenElement( "file" );
+		xmlPrinter->PushAttribute( "id", i );
+		GLString fname = MakeFilename( header.boneName[i].c_str() );
+		SNPrintf( buf, 256, "assets/%s.png", fname.c_str() );
+		xmlPrinter->PushAttribute( "name", buf );
+		xmlPrinter->PushAttribute( "width", partSize[i].Width() );
+		xmlPrinter->PushAttribute( "height", partSize[i].Height() );
 
-void AnimationScene::FinishFrame()
-{
-	xmlPrinter->CloseElement();
-}
+		xmlPrinter->CloseElement();
+	}
+	xmlPrinter->CloseElement();	// folder
 
+	xmlPrinter->OpenElement( "entity" );
+	xmlPrinter->PushAttribute( "id", 0 );
+	xmlPrinter->PushAttribute( "name", "char_000" );
 
-void AnimationScene::PushSprite( const char* name, const grinliz::Rectangle2I& bounds )
-{
-	char buf[200];
+	xmlPrinter->OpenElement( "animation" );
+	xmlPrinter->PushAttribute( "id", 0 );
+	xmlPrinter->PushAttribute( "name", "reference" );
+	xmlPrinter->PushAttribute( "length", 5000 );
+	xmlPrinter->PushAttribute( "looping", "false" );
 
-	xmlPrinter->OpenElement( "sprite" );
-	xmlPrinter->OpenElement(	"image" );
+	xmlPrinter->OpenElement( "mainline" );
+	
+	xmlPrinter->OpenElement( "key" );
+	xmlPrinter->PushAttribute( "id", 0 );
 
-	SNPrintf( buf, 200, "assets\\%s.png", name );
-	xmlPrinter->PushText( buf );
-	xmlPrinter->CloseElement();
+	for( int i=0; i<nBones; ++i ) {
+		xmlPrinter->OpenElement( "object_ref" );
+		xmlPrinter->PushAttribute( "id", i );
+		xmlPrinter->PushAttribute( "timeline", i );
+		xmlPrinter->PushAttribute( "key", 0 );
+		xmlPrinter->PushAttribute( "z_index", i );
+		xmlPrinter->CloseElement();
+	}
+	xmlPrinter->CloseElement();	// key
+	xmlPrinter->CloseElement(); // mainline
 
-	xmlPrinter->OpenElement(	"color" );
-	xmlPrinter->PushText( "16777215" );
-	xmlPrinter->CloseElement();
+	for( int i=0; i<nBones; ++i ) {
+		xmlPrinter->OpenElement( "timeline" );
+		xmlPrinter->PushAttribute( "id", i );
 
-	xmlPrinter->OpenElement(	"opacity" );
-	xmlPrinter->PushText( "100.0" );
-	xmlPrinter->CloseElement();
+		xmlPrinter->OpenElement( "key" );
+		xmlPrinter->PushAttribute( "id", 0 );
 
-	xmlPrinter->OpenElement(	"angle" );
-	xmlPrinter->PushText( "0.0" );
-	xmlPrinter->CloseElement();
+		xmlPrinter->OpenElement( "object" );
+		xmlPrinter->PushAttribute( "folder", 0 );
+		xmlPrinter->PushAttribute( "file", i );
+		xmlPrinter->PushAttribute( "x", partSize[i].min.x );
+		xmlPrinter->PushAttribute( "y", -partSize[i].min.y );
+		xmlPrinter->PushAttribute( "a", 0.5f );
 
-	xmlPrinter->OpenElement(	"xflip" );
-	xmlPrinter->PushText( "0" );
-	xmlPrinter->CloseElement();
-
-	xmlPrinter->OpenElement(	"yflip" );
-	xmlPrinter->PushText( "0" );
-	xmlPrinter->CloseElement();
-
-	xmlPrinter->OpenElement(	"width" );
-	xmlPrinter->PushText( bounds.Width()  );
-	xmlPrinter->CloseElement();
-
-	xmlPrinter->OpenElement(	"height" );
-	xmlPrinter->PushText( bounds.Height() );
-	xmlPrinter->CloseElement();
-
-	xmlPrinter->OpenElement(	"x" );
-	xmlPrinter->PushText( bounds.min.x );
-	xmlPrinter->CloseElement();
-
-	xmlPrinter->OpenElement(	"y" );
-	xmlPrinter->PushText( bounds.min.y );
-	xmlPrinter->CloseElement();
-
-	xmlPrinter->CloseElement();
-}
-
-
-void AnimationScene::FinishXML()
-{
-	xmlPrinter->CloseElement();
+		xmlPrinter->CloseElement();	 //object
+		xmlPrinter->CloseElement();	 //key
+		xmlPrinter->CloseElement();	 //timeline
+	}
+	xmlPrinter->CloseElement();	 //animation
+	xmlPrinter->CloseElement();	 //entity
+	xmlPrinter->CloseElement();	 //spriter_data
 
 	delete xmlPrinter;
-	delete xmlDocument;
-	fclose( scmlFP );
+	fclose( fp );
 }
 
 
@@ -517,12 +485,24 @@ void AnimationScene::DoTick( U32 deltaTime )
 }
 
 
+GLString AnimationScene::MakeFilename( const char* in )
+{
+	GLString s = in;
+	while( true ) {
+		int i = s.find( '.' );
+		if ( i == s.size() )
+			break;
+		s[i] = '_';
+	}
+	return s;
+}
+
+
 void AnimationScene::Draw3D( U32 deltaTime )
 {
 	if ( doExport ) {
 		SetModelVis( true );
 
-		Rectangle2I size;
 		char buf[256];
 		const char* part = "reference";
 		if ( exportCount >= 0 ) {
@@ -538,31 +518,30 @@ void AnimationScene::Draw3D( U32 deltaTime )
 		if ( part && *part ) {
 			SNPrintf( buf, 256, "./resin/%s/assets", model[0]->GetResource()->header.name.c_str() );
 			_mkdir( buf );
-			SNPrintf( buf, 256, "./resin/%s/assets/%s", model[0]->GetResource()->header.name.c_str(), part );
-			ScreenCapture( buf, false, true, true, &size );
+			GLString fname = MakeFilename( part );
+			SNPrintf( buf, 256, "./resin/%s/assets/%s", model[0]->GetResource()->header.name.c_str(), fname.c_str() );
+
 			if ( exportCount < 0 ) {
+				ScreenCapture( buf, false, true, true, &size );
 				origin.x = Mean( size.min.x, size.max.x );
 				origin.y = size.max.y;
 				size.min -= origin;
 				size.max -= origin;
-				InitXML( size );
-				InitFrame();
 				SNPrintf( buf, 256, "PUR=%.1f", (float)size.Height() / model[0]->GetResource()->AABB().SizeY() );
 				pixelUnitRatio.SetText( buf );
 			}
 			else {
-				size.min -= origin;
-				size.max -= origin;
-				PushSprite( part, size );
+				ScreenCapture( buf, false, true, true, &partSize[exportCount] );
+				partSize[exportCount].min -= origin;
+				partSize[exportCount].max -= origin;
 			}
 		}
 		++exportCount;
 		if ( exportCount == EL_MAX_BONES ) {
 			doExport = false;
+			WriteXML();
 			for( int i=0; i<NUM_MODELS; ++i ) 
 				model[i]->ClearParam();
-			FinishFrame();
-			FinishXML();
 			SetModelVis( false );
 		}
 	}

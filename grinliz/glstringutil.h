@@ -231,6 +231,9 @@ public:
 	char operator[]( unsigned i ) const				{ GLASSERT( i < size() );
 													  return m_buf[i];
 													}
+	char& operator[]( unsigned i )					{ GLASSERT( i < size() );
+													  return m_buf[i];
+													}
 
 	unsigned find( char c )	const					{	const char* p = strchr( m_buf, c );
 														return ( p ) ? (p-m_buf) : size();
