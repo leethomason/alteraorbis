@@ -153,8 +153,10 @@ void SCMLParser::ReadAnimation( const XMLDocument* doc, Animation* a )
 			// Start time and frame number, makes sense. (What's with the 'id' thing??)
 			int frameNumber = 0;
 			int startTime=0;
+			int spin = 1;
 			keyEle->QueryIntAttribute( "id", &frameNumber );
 			keyEle->QueryIntAttribute( "time", &startTime );
+			keyEle->QueryIntAttribute( "spin", &spin );
 
 			a->frames[frameNumber].time = startTime;
 
@@ -175,6 +177,7 @@ void SCMLParser::ReadAnimation( const XMLDocument* doc, Animation* a )
 			a->frames[frameNumber].xforms[partID].angle = angle;
 			a->frames[frameNumber].xforms[partID].x	 = x;
 			a->frames[frameNumber].xforms[partID].y	 = y;
+			a->frames[frameNumber].xforms[partID].spin = spin;
 		}
 	}
 
@@ -211,38 +214,42 @@ void SCMLParser::WriteAnimation( gamedb::WItem* witem, const Animation& a, const
 				float dy = 0;
 				float dz = 0;
 				
-				float angle = NormalizeAngleDegrees( xform.angle );
-				float x = xform.x / pur;
-				float y = xform.y / pur;
-
 				// Spriter transformation is written as the position of the bitmap, relative
 				// to the model origin, followed by a rotation. (Origin of the bitmap is 
 				// the upper left in this version.)
 				//
 				// Lumos needs the transformation (delta) from the origin.
 				// To translate, we need the reference (untransformed) frame.
-				Matrix4 m;
-				float rx=0, ry=0;
 
 				if ( reference ) {
-					rx = reference->frames[0].xforms[k].x / pur;
-					ry = reference->frames[0].xforms[k].y / pur;
+					GLASSERT( reference->name == "reference" );
+					GLASSERT( reference->frames[0].xforms[k].id == xform.id );
 
+					const PartXForm& rform = reference->frames[0].xforms[k];
+
+					float rx = rform.x / pur;
+					float ry = rform.y / pur;
+
+					float tx = xform.x / pur;
+					float ty = xform.y / pur;
+					
 					// Part to origin. Rotate. Back to pos. Apply delta.
 					Matrix4 toOrigin, toPos, rot;
 
-					toOrigin.SetTranslation( 0, ry, -rx );	// negative direction, remembering: 1) y is flipped, 2) x maps to z
-					rot.SetXRotation( -angle );				// rotate, convert to YZ right hand rule
-					toPos.SetTranslation( 0, -y, x );		// positive direction
+					toOrigin.SetTranslation( 0, -ry, -rx );			//  x maps to z
+					rot.SetXRotation( -xform.angle );				// rotate, convert to YZ right hand rule
+					toPos.SetTranslation( 0, ty, tx );				// positive direction
 
-					//m = toPos * rot * toOrigin;
-					m = toOrigin * rot * toPos;
-					anglePrime = m.CalcRotationAroundAxis( 0 );		// not very meaningful, just used to construct a transformation matrix in the shader
+					Matrix4 m = toPos * rot * toOrigin;
+					
+					anglePrime = m.CalcRotationAroundAxis( 0 );
+					dy = m.m24;
+					dz = m.m34;
 				}
 
 				bone->SetFloat( "anglePrime", anglePrime );
-				bone->SetFloat( "dy", m.m24 );
-				bone->SetFloat( "dz", m.m34 );
+				bone->SetFloat( "dy", dy );
+				bone->SetFloat( "dz", dz );
 			}
 		}
 	}

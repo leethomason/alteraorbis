@@ -48,6 +48,7 @@ private:
 		float	x;
 		float	y;
 		float	angle;
+		int		spin;
 	};
 
 	struct Frame {
