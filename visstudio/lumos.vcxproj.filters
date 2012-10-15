@@ -238,6 +238,9 @@
     <ClCompile Include="..\script\worldscript.cpp">
       <Filter>Source Files\script</Filter>
     </ClCompile>
+    <ClCompile Include="..\scenes\livepreviewscene.cpp">
+      <Filter>Source Files\scenes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\camera.h">
@@ -464,6 +467,9 @@
     </ClInclude>
     <ClInclude Include="..\script\worldscript.h">
       <Filter>Source Files\script</Filter>
+    </ClInclude>
+    <ClInclude Include="..\scenes\livepreviewscene.h">
+      <Filter>Source Files\scenes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

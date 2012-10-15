@@ -121,6 +121,7 @@
     <ClCompile Include="..\scenes\animationscene.cpp" />
     <ClCompile Include="..\scenes\battletestscene.cpp" />
     <ClCompile Include="..\scenes\dialogscene.cpp" />
+    <ClCompile Include="..\scenes\livepreviewscene.cpp" />
     <ClCompile Include="..\scenes\navtest2scene.cpp" />
     <ClCompile Include="..\scenes\navtestscene.cpp" />
     <ClCompile Include="..\scenes\noisetestscene.cpp" />
@@ -193,6 +194,7 @@
     <ClInclude Include="..\scenes\animationscene.h" />
     <ClInclude Include="..\scenes\battletestscene.h" />
     <ClInclude Include="..\scenes\dialogscene.h" />
+    <ClInclude Include="..\scenes\livepreviewscene.h" />
     <ClInclude Include="..\scenes\navtest2scene.h" />
     <ClInclude Include="..\scenes\navtestscene.h" />
     <ClInclude Include="..\scenes\noisetestscene.h" />

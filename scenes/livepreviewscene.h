@@ -13,20 +13,18 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef TITLESCENE_INCLUDED
-#define TITLESCENE_INCLUDED
+#ifndef LIVE_PREVIEW_SCENE_INCLUDED
+#define LIVE_PREVIEW_SCENE_INCLUDED
 
 #include "../xegame/scene.h"
-#include "../gamui/gamui.h"
 
 class LumosGame;
 
-
-class TitleScene : public Scene
+class LivePreviewScene : public Scene
 {
 public:
-	TitleScene( LumosGame* game );
-	virtual ~TitleScene() {}
+	LivePreviewScene( LumosGame* game );
+	virtual ~LivePreviewScene()	{}
 
 	virtual void Resize();
 
@@ -37,25 +35,8 @@ public:
 	virtual void ItemTapped( const gamui::UIItem* item );
 
 private:
-	LumosGame*		lumosGame;
-	gamui::Image	background;
+	gamui::PushButton okay;
 
-	enum { 
-		TEST_DIALOG,
-		TEST_RENDER_0,
-		TEST_RENDER_1,
-		TEST_PARTICLE,
-		TEST_NAV,
-		TEST_NAV2,
-		TEST_NAV_WORLD,
-		TEST_NOISE,
-		TEST_BATTLE,
-		TEST_ANIMATION,
-		TEST_LIVEPREVIEW,
-		NUM_TESTS,
-		TESTS_PER_ROW = 6
-	};
-	gamui::PushButton	testScene[NUM_TESTS];
 };
 
-#endif // TITLESCENE_INCLUDED
+#endif // LIVE_PREVIEW_SCENE_INCLUDED
