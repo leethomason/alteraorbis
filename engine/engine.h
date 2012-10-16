@@ -140,6 +140,7 @@ public:
 	void RestrictCamera();
 
 	Texture* GetRenderTargetTexture( int id=0 );
+
 	void SetGlow( bool b ) { glow = b; }
 	bool Glow() const { return glow; }
 

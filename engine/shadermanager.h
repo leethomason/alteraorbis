@@ -66,6 +66,7 @@ public:
 		
 		BONE_FILTER			= (1<<17),		// Only show one bone. PARAM.x
 		BONE_XFORM			= (1<<18),
+		PROCEDURAL			= (1<<19),		// Engage the procedural renderer, and use a Matrix param.
 	};
 
 	void DeviceLoss();

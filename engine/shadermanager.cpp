@@ -22,7 +22,7 @@
 #include "../grinliz/glperformance.h"
 #include "../grinliz/glrandom.h"
 
-//#define DEBUG_OUTPUT
+#define DEBUG_OUTPUT
 
 using namespace grinliz;
 
@@ -372,6 +372,7 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 	AppendFlag( &header, "BONE_FILTER",			flags & BONE_FILTER );
 	AppendFlag( &header, "BONES",				shader->BonesNeeded() );
 	AppendFlag( &header, "PARAM",				shader->ParamNeeded() );
+	AppendFlag( &header, "PROCEDURAL",			flags & PROCEDURAL );
 
 	if ( flags & LIGHTING_DIFFUSE )
 		AppendFlag( &header, "LIGHTING_DIFFUSE", 1, 1 );

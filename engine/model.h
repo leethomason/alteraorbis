@@ -229,6 +229,7 @@ public:
 		MODEL_PARAM_MASK			= MODEL_PARAM_IS_TEX_XFORM | MODEL_PARAM_IS_COLOR | MODEL_PARAM_IS_BONE_FILTER,
 		MODEL_NO_SHADOW				= 0x0100,
 		MODEL_INVISIBLE				= 0x0200,
+		MODEL_PROCEDURAL			= 0x0400,
 
 		MODEL_USER					= 0x1000		// reserved for user code.
 	};
@@ -310,6 +311,12 @@ public:
 		return IsFlagSet( MODEL_PARAM_IS_BONE_FILTER ) != 0;
 	}
 	//// </PARAMS>
+	void SetProcedural( bool on ) {
+		if ( on ) 
+			SetFlag( MODEL_PROCEDURAL );
+		else
+			ClearFlag( MODEL_PROCEDURAL );
+	}
 
 	// AABB for user selection (bigger than the true AABB)
 	void CalcHitAABB( grinliz::Rectangle3F* aabb ) const;

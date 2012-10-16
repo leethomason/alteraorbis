@@ -546,6 +546,9 @@ void Model::Queue( RenderQueue* queue, EngineShaders* engineShaders )
 		if ( HasAnimation() ) {
 			mod |= ShaderManager::BONE_XFORM;
 		}
+		if ( flags & MODEL_PROCEDURAL ) {
+			mod = ShaderManager::PROCEDURAL;
+		}
 
 		GPUShader* shader = engineShaders->GetShader( base, mod );
 

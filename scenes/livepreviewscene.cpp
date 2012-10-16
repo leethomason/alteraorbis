@@ -23,9 +23,13 @@ LivePreviewScene::LivePreviewScene( LumosGame* game ) : Scene( game )
 	//map->SetColor( c );
 
 	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase(), map );
+	engine->SetGlow( true );
+	engine->lighting.direction.Set( 0, 1, 0 );
+
 	const ModelResource* modelResource = ModelResourceManager::Instance()->GetModelResource( "unitPlateProcedural" );
 	model = engine->AllocModel( modelResource );
 	model->SetPos( CENTER_X, 0, CENTER_Z );
+	model->SetProcedural( true );
 
 	model->SetYRotation( 180.0f );	// FIXME: compensating for camera issue, below. Camera is "upside down" when looking down.
 	engine->camera.SetPosWC( CENTER_X, 8, CENTER_Z );
@@ -38,7 +42,6 @@ LivePreviewScene::LivePreviewScene( LumosGame* game ) : Scene( game )
 	CreateTexture( t );
 
 	game->InitStd( &gamui2D, &okay, 0 );
-
 }
 
 
@@ -82,20 +85,21 @@ void LivePreviewScene::CreateTexture( Texture* t )
 	GLASSERT( error == 0 );
 	GLASSERT( w == SIZE*4 );
 	GLASSERT( h == SIZE );
-	U16 buffer[SIZE*SIZE];
+	static const int BUFFER_SIZE = SIZE*SIZE*4;
+	U16 buffer[BUFFER_SIZE];
 
 	if ( error == 0 ) {
 		int scanline = w*4;
 
 		for( int j=0; j<SIZE; ++j ) {
-			for( int i=0; i<SIZE; ++i ) {
+			for( unsigned i=0; i<w; ++i ) {
 				const U8* p = pixels + scanline*j + i*4;
 				Color4U8 color = { p[0], p[1], p[2], p[3] };
 				U16 c = Surface::CalcRGBA16( color );
-				buffer[SIZE*(SIZE-1-j)+i] = c;
+				buffer[SIZE*4*(SIZE-1-j)+i] = c;
 			}
 		}
-		t->Upload( buffer, SIZE*SIZE*sizeof(buffer[0]) );
+		t->Upload( buffer, BUFFER_SIZE*sizeof(buffer[0]) );
 		free( pixels );
 	}
 	else {

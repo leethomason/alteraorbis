@@ -2,6 +2,11 @@
 #if TEXTURE0 == 1
 	uniform sampler2D texture0;
 	varying vec2 v_uv0;
+	#if PROCEDURAL == 1
+		varying vec2 v_uv1;
+		varying vec2 v_uv2;
+		varying vec2 v_uv3;
+	#endif
 #endif
 #if TEXTURE1 == 1
 	uniform sampler2D texture1;
@@ -30,6 +35,12 @@ void main()
 				// to the emmissive color.
 				color = mix( vec4(0,0,0,1), texColor, texColor.a );
 			#endif
+		#elif PROCEDURAL == 1
+			vec4 c0 = texture2D( texture0, v_uv0 );
+			vec4 c1 = texture2D( texture0, v_uv1 );
+			vec4 c2 = texture2D( texture0, v_uv2 );
+			vec4 c3 = texture2D( texture0, v_uv3 );
+			color *= c0 + c1*c1.a + c2+c2.a + c3+c3.a;
 		#else
 			color *= texture2D( texture0, v_uv0 );
 		#endif

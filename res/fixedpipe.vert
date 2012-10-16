@@ -40,11 +40,19 @@ attribute vec3 a_pos;				// vertex position
 #if TEXTURE0 == 1
 	attribute vec2 a_uv0;
 	varying vec2 v_uv0;
+	#if PROCEDURAL == 1
+		varying vec2 v_uv1;
+		varying vec2 v_uv2;
+		varying vec2 v_uv3;
+	#endif
 #endif
 
 #if TEXTURE1 == 1
 	attribute vec2 a_uv1;
 	varying vec2 v_uv1;
+	#if PROCEDURAL > 0
+		#error Only one texture if procedural.
+	#endif
 #endif
 
 #if BONES == 1
@@ -92,8 +100,16 @@ void main() {
 	#if TEXTURE0 == 1
 		#if TEXTURE0_TRANSFORM == 1
 			v_uv0 = vec2( a_uv0.x*param.x + param.z, a_uv0.y*param.y + param.w );
+			#if PROCEDURAL > 0
+				#error not supported
+			#endif
 		#else
 			v_uv0 = a_uv0;
+			#if PROCEDURAL == 1
+				v_uv1 = vec2( a_uv0.x+0.25, a_uv0.y );
+				v_uv2 = vec2( a_uv0.x+0.50, a_uv0.y );
+				v_uv3 = vec2( a_uv0.x+0.75, a_uv0.y );
+			#endif
 		#endif
 	#endif
 	#if TEXTURE1 == 1
