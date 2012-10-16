@@ -401,8 +401,8 @@ U32 TextureManager::CreateGLTexture( int w, int h, int format, int flags )
 void Texture::Upload( const void* pixels, int size )
 {
 	GLASSERT( pixels );
+	this->GLID();	// flush the openGL id
 	GLASSERT( size == BytesInImage() );
-	GLASSERT( glID );
 
 	int glFormat, glType;
 	TextureManager::Instance()->CalcOpenGL( format, &glFormat, &glType );

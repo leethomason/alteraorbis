@@ -41,6 +41,7 @@ class BoltRenderer;
 
 static const grinliz::Vector3F V3F_ZERO = { 0, 0, 0 };
 static const grinliz::Vector3F V3F_UP   = { 0, 1, 0 };
+static const grinliz::Vector3F V3F_DOWN = { 0, -1, 0 };
 static const grinliz::Vector3F V3F_OUT	= { 0, 0, 1 };
 
 void DebugLine(	const grinliz::Vector3F& tail, 

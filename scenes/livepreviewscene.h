@@ -17,14 +17,17 @@
 #define LIVE_PREVIEW_SCENE_INCLUDED
 
 #include "../xegame/scene.h"
+#include "../engine/texture.h"
 
 class LumosGame;
+class Engine;
+class Model;
 
-class LivePreviewScene : public Scene
+class LivePreviewScene : public Scene	//, public ITextureCreator
 {
 public:
 	LivePreviewScene( LumosGame* game );
-	virtual ~LivePreviewScene()	{}
+	virtual ~LivePreviewScene();
 
 	virtual void Resize();
 
@@ -33,9 +36,15 @@ public:
 		ProcessTap( action, screen, world );
 	}
 	virtual void ItemTapped( const gamui::UIItem* item );
+	virtual void LivePreviewScene::Draw3D( U32 deltaTime );
 
 private:
+	void CreateTexture( Texture* t );
+
 	gamui::PushButton okay;
+
+	Engine*		engine;
+	Model*		model;
 
 };
 

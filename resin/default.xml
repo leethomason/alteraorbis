@@ -35,10 +35,9 @@
        behavior defined like this. That's okay for now.
   -->
   <texture filename="emchartest.png" filename2="emchartest_em.png" emissive="true"/>
-  <!--<texture filename="map_land.png"   filename2="map_land_em.png"   emissive="true" />-->
   <texture assetName="map_land" filename="map_land2.png"   />
   <texture filename="map_water.png"  filename2="map_water_em.png"  emissive="true"/>
-  <!--<texture filename="map_water.png"  />-->
+  <texture filename="procedural.png" />
 
   <!-- UI elements -->
   <texture filename="intro.png" width="64" height="64" />
@@ -56,6 +55,7 @@
   <model filename="teststructures.ac" modelName="testStruct0"  origin="0 0 0"  shading="flat" polyRemoval="pre" />
   <model filename="teststructures.ac" modelName="testStruct1"  origin="2 0 0"  shading="flat" polyRemoval="pre" />
   <model filename="unitPlateCentered.ac" shading="flat" />
+  <model filename="unitPlateProcedural.ac" shading="flat" />
   <model filename="unitPlateArrow.ac" shading="flat" />
   <model filename="unitCube.ac" shading="flat" />
   
