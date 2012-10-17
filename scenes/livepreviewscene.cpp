@@ -40,6 +40,7 @@ LivePreviewScene::LivePreviewScene( LumosGame* game ) : Scene( game )
 	Texture* t = texman->GetTexture( "procedural" );
 	GLASSERT( t );
 	CreateTexture( t );
+	GLASSERT( t->Alpha() );
 
 	game->InitStd( &gamui2D, &okay, 0 );
 }
@@ -95,6 +96,9 @@ void LivePreviewScene::CreateTexture( Texture* t )
 			for( unsigned i=0; i<w; ++i ) {
 				const U8* p = pixels + scanline*j + i*4;
 				Color4U8 color = { p[0], p[1], p[2], p[3] };
+				if ( color.a == 0 ) {
+					color.Set( 0, 0, 0, 0 );
+				}
 				U16 c = Surface::CalcRGBA16( color );
 				buffer[SIZE*4*(SIZE-1-j)+i] = c;
 			}
