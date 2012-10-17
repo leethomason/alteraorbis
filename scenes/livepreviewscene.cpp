@@ -92,13 +92,37 @@ void LivePreviewScene::CreateTexture( Texture* t )
 	if ( error == 0 ) {
 		int scanline = w*4;
 
+		static const int RAD=3;
 		for( int j=0; j<SIZE; ++j ) {
-			for( unsigned i=0; i<w; ++i ) {
+			for( int i=0; i<int(w); ++i ) {
 				const U8* p = pixels + scanline*j + i*4;
 				Color4U8 color = { p[0], p[1], p[2], p[3] };
+
 				if ( color.a == 0 ) {
 					color.Set( 0, 0, 0, 0 );
-				}
+					if ( i >= RAD && i < (int(w)-RAD) && j >= RAD && j < (int(h)-RAD) ) {
+						int w = 0;
+						Color4<U32> cSum = { 0, 0, 0, 0 };
+
+						for( int y=j-RAD; y<=j+RAD; ++y ) {
+							for( int x=i-RAD; x<=i+RAD; ++x ) {
+								const U8* q = pixels + scanline*y + x*4;
+								Color4U8 c = { q[0], q[1], q[2], q[3] };
+								int mult = 1 + 2*RAD*RAD - ((x-i)*(x-i) + (y-j)*(y-j));
+								if ( c.a > 0 ) {
+									cSum.r += mult * c.r;
+									cSum.g += mult * c.g;
+									cSum.b += mult * c.b;
+									cSum.a += mult * c.a;
+									w += mult;
+								}
+							}
+						}
+						if ( w > 0 ) {
+							color.Set( cSum.r/w, cSum.g/w, cSum.b/w, 0 );
+						}
+					}
+				}	
 				U16 c = Surface::CalcRGBA16( color );
 				buffer[SIZE*4*(SIZE-1-j)+i] = c;
 			}

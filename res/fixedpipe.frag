@@ -22,10 +22,6 @@ void main()
 		#if  PROCEDURAL == 0
 			vec4 sample = texture2D( texture0, v_uv0 );
 		#elif PROCEDURAL == 1
-			float r = 1.0;
-
-			vec4 sample = vec4( 0, 0, 0, 0);
-
 			vec4 color0 = vec4( 1.0, 0.6, 0.4, 1 );	// (r) skin
 			vec4 color1 = vec4( 1, 1, 1, 1);		// (b0) highlight
 			vec4 color2 = vec4( 0, 0.6, 1.0, 1 );	// (b1) glasses / tattoo
@@ -35,50 +31,18 @@ void main()
 			vec4 s1 = texture2D( texture0, v_uv1 );
 			vec4 s2 = texture2D( texture0, v_uv2 );
 			vec4 s3 = texture2D( texture0, v_uv3 );
-
-			vec4 t = mix( mix( mix(  s0, s1, s1.a ), s2, s2.a ), s3, s3.a );
-			sample = t.r*color0 + t.g*color3 + t.b*color2;
-
-			/*
-			// Additive
-			vec4 t = vec4( 0, 0, 0, 0);
-			vec4 s = texture2D( texture0, v_uv3 );
-			t += s * s.a * r;
-			r -= r*s.a;
-
-			s = texture2D( texture0, v_uv2 );
-			t += s * s.a * r;
-			r -= r*s.a;
-
-			s = texture2D( texture0, v_uv1 );
-			t += s * s.a * r;
-			r -= r*s.a;
-
-			s = texture2D( texture0, v_uv0 );
-			t += s * s.a * r;
-			sample = t.r*color0 + t.g*color3 + t.b*color2;
-			*/
 			
-			/*
-			s = texture2D( texture0, v_uv2 );
-			vec4 c2 = s.r*color0 + s.g*color3 + s.b*color2;
-			c2.a = s.a;
+			vec4  a = vec4( 0, s1.a, s2.a, s3.a );
 
-			s = texture2D( texture0, v_uv3 );
-			vec4 c3 = s.r*color0 + s.g*color3 + s.b*color2;
-			c3.a = s.a;
-			*/
+			s0.a = 0;
+			s1.a = 0;
+			s2.a = s2.b;
+			s2.b = 0;
+			s3.a = s3.b;
+			s3.b = 0;
 			
-			/*
-			vec4 s = texture2D( texture0, v_uv0 );
-			vec4 c0 = s.r*color0 + s.g*color3 + s.b*color1;
-			
-			s = texture2D( texture0, v_uv1 );
-			vec4 c1 = s.r*color0 + s.g*color3 + s.b*color1;
-
-			sample = mix( c0, c1, c1.a );
-			*/
-			//vec4 sample = mix( mix( mix( c0, c1, c1.a ), c2, c2.a ), c3, c3.a );
+			vec4 t = mix( mix( mix(  s0, s1, a[1] ), s2, a[2] ), s3, a[3] );
+			vec4 sample = t.r*color0 + t.g*color3 + t.b*color1 + t.a*color2;
 		#endif
 
 		#if TEXTURE0_ALPHA_ONLY == 1
