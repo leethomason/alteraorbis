@@ -128,7 +128,7 @@ void LivePreviewScene::CreateTexture()
 
 				if ( color.a == 0 ) {
 					color.Set( 0, 0, 0, 0 );
-				}
+				}				
 				/*
 					int zone = i / SIZE;
 					if ( zone == 0 )      color.Set( 255, 0, 0, 0 );
