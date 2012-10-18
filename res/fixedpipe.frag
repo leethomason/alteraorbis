@@ -34,6 +34,10 @@ void main()
 			
 			vec4  a = vec4( s0.a, s1.a, s2.a, s3.a );
 
+			// red->C0
+			// green->C3
+			// on layer 0 and 1, blue->C1
+			// on layer 2 and 3, blue->C2 (alpha channel used)
 			s0.a = 0;
 			s1.a = 0;
 			s2.a = s2.b;

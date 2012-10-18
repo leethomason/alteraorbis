@@ -1,3 +1,10 @@
+- procedural rendering
+	- static scene showing item combinations
+	- color variation 
+	- color variation for live mode
+	- emissive support
+	- item bone/part support
+
 - combat test scene	
 	X put in license header
 	X push to altera site

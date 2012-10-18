@@ -20,9 +20,11 @@ static const int SIZE = 256;
 LivePreviewScene::LivePreviewScene( LumosGame* game ) : Scene( game )
 {
 	TestMap* map = 0;
-	//TestMap* map = new TestMap( 8, 8 );
-	//Color3F c = { 0.5f, 0.5f, 0.5f };
-	//map->SetColor( c );
+	/*
+	map = new TestMap( 8, 8 );
+	Color3F c = { 0.5f, 0.5f, 0.5f };
+	map->SetColor( c );
+	*/
 
 	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase(), map );
 	engine->SetGlow( true );
@@ -31,7 +33,7 @@ LivePreviewScene::LivePreviewScene( LumosGame* game ) : Scene( game )
 	const ModelResource* modelResource = ModelResourceManager::Instance()->GetModelResource( "unitPlateProcedural" );
 	for( int i=0; i<NUM_MODEL; ++i ) {
 		model[i] = engine->AllocModel( modelResource );
-		model[i]->SetPos( CENTER_X + float(i), 0, CENTER_Z );
+		model[i]->SetPos( CENTER_X + float(i), 0.1f, CENTER_Z );
 		model[i]->SetProcedural( true );
 	}
 	model[1]->SetScale( 0.5f );
@@ -142,10 +144,11 @@ void LivePreviewScene::CreateTexture()
 		}
 		t->Upload( buffer, BUFFER_SIZE*sizeof(buffer[0]) );
 
+		/*
 		static bool result = false;
 		if ( !result ) {
-			for( int j=0; j<h; ++j ) {
-				for( int i=0; i<w; ++i ) {
+			for( unsigned j=0; j<h; ++j ) {
+				for( unsigned i=0; i<w; ++i ) {
 					U16 c = buffer[SIZE*4*(SIZE-1-j)+i];
 					Color4U8 color = Surface::CalcRGBA16( c );
 					U8* p = pixels + scanline*j + i*4;
@@ -158,6 +161,7 @@ void LivePreviewScene::CreateTexture()
 			lodepng_encode32_file( "./res/facetest.png", pixels, w, h );
 			result = true;
 		}
+		*/
 		free( pixels );
 	}
 	else {
