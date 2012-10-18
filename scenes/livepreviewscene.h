@@ -23,7 +23,7 @@ class LumosGame;
 class Engine;
 class Model;
 
-class LivePreviewScene : public Scene	//, public ITextureCreator
+class LivePreviewScene : public Scene
 {
 public:
 	LivePreviewScene( LumosGame* game );
@@ -36,15 +36,20 @@ public:
 		ProcessTap( action, screen, world );
 	}
 	virtual void ItemTapped( const gamui::UIItem* item );
-	virtual void LivePreviewScene::Draw3D( U32 deltaTime );
+	virtual void Draw3D( U32 deltaTime );
+	virtual void DoTick( U32 deltaTime );
+
 
 private:
-	void CreateTexture( Texture* t );
+	void CreateTexture();
 
 	gamui::PushButton okay;
+	U32 fileTimer;
+	time_t fileTime;
 
 	Engine*		engine;
-	Model*		model;
+	enum { NUM_MODEL = 2 };
+	Model*		model[NUM_MODEL];
 
 };
 

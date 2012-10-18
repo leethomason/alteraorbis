@@ -8,6 +8,8 @@
 
 #include "../game/lumosgame.h"
 
+#include <sys/stat.h>
+
 using namespace gamui;
 using namespace grinliz;
 
@@ -27,29 +29,31 @@ LivePreviewScene::LivePreviewScene( LumosGame* game ) : Scene( game )
 	engine->lighting.direction.Set( 0, 1, 0 );
 
 	const ModelResource* modelResource = ModelResourceManager::Instance()->GetModelResource( "unitPlateProcedural" );
-	model = engine->AllocModel( modelResource );
-	model->SetPos( CENTER_X, 0, CENTER_Z );
-	model->SetProcedural( true );
+	for( int i=0; i<NUM_MODEL; ++i ) {
+		model[i] = engine->AllocModel( modelResource );
+		model[i]->SetPos( CENTER_X + float(i), 0, CENTER_Z );
+		model[i]->SetProcedural( true );
+	}
+	model[1]->SetScale( 0.5f );
 
-	model->SetYRotation( 180.0f );	// FIXME: compensating for camera issue, below. Camera is "upside down" when looking down.
 	engine->camera.SetPosWC( CENTER_X, 8, CENTER_Z );
 	static const Vector3F out = { 0, 0, 1 };
 	engine->camera.SetDir( V3F_DOWN, out );		// look straight down. This works! cool.
+	engine->camera.Orbit( 180.0f );
 
-	TextureManager* texman = TextureManager::Instance();
-	Texture* t = texman->GetTexture( "procedural" );
-	GLASSERT( t );
-	CreateTexture( t );
-	GLASSERT( t->Alpha() );
+	CreateTexture();
 
 	game->InitStd( &gamui2D, &okay, 0 );
+	fileTimer = 0;
+	fileTime = 0;
 }
 
 
 LivePreviewScene::~LivePreviewScene()
 {
 	Map* map = engine->GetMap();
-	engine->FreeModel( model );
+	for( int i=0; i<NUM_MODEL; ++i ) 
+		engine->FreeModel( model[i] );
 	delete engine;
 	delete map;
 }
@@ -78,11 +82,35 @@ void LivePreviewScene::Draw3D( U32 deltaTime )
 }
 
 
-void LivePreviewScene::CreateTexture( Texture* t )
+void LivePreviewScene::DoTick( U32 deltaTime )
 {
+	fileTimer += deltaTime;
+	if ( fileTimer > 1000 ) {
+		fileTimer = 0;
+		CreateTexture();
+	}
+}
+
+
+void LivePreviewScene::CreateTexture()
+{
+	static const char* filename = "./res/face.png";
+	struct _stat buf;
+
+	_stat( filename, &buf );
+	if ( fileTime == buf.st_mtime ) {
+		return;
+	}
+	fileTime = buf.st_mtime;
+
+	TextureManager* texman = TextureManager::Instance();
+	Texture* t = texman->GetTexture( "procedural" );
+	GLASSERT( t );
+	GLASSERT( t->Alpha() );
+
 	unsigned w=0, h=0;
 	U8* pixels = 0;
-	int error = lodepng_decode32_file( &pixels, &w, &h, "./res/face.png" );
+	int error = lodepng_decode32_file( &pixels, &w, &h, filename );
 	GLASSERT( error == 0 );
 	GLASSERT( w == SIZE*4 );
 	GLASSERT( h == SIZE );
@@ -92,7 +120,7 @@ void LivePreviewScene::CreateTexture( Texture* t )
 	if ( error == 0 ) {
 		int scanline = w*4;
 
-		static const int RAD=3;
+		static const int RAD=8;
 		for( int j=0; j<SIZE; ++j ) {
 			for( int i=0; i<int(w); ++i ) {
 				const U8* p = pixels + scanline*j + i*4;
@@ -100,34 +128,36 @@ void LivePreviewScene::CreateTexture( Texture* t )
 
 				if ( color.a == 0 ) {
 					color.Set( 0, 0, 0, 0 );
-					if ( i >= RAD && i < (int(w)-RAD) && j >= RAD && j < (int(h)-RAD) ) {
-						int w = 0;
-						Color4<U32> cSum = { 0, 0, 0, 0 };
-
-						for( int y=j-RAD; y<=j+RAD; ++y ) {
-							for( int x=i-RAD; x<=i+RAD; ++x ) {
-								const U8* q = pixels + scanline*y + x*4;
-								Color4U8 c = { q[0], q[1], q[2], q[3] };
-								int mult = 1 + 2*RAD*RAD - ((x-i)*(x-i) + (y-j)*(y-j));
-								if ( c.a > 0 ) {
-									cSum.r += mult * c.r;
-									cSum.g += mult * c.g;
-									cSum.b += mult * c.b;
-									cSum.a += mult * c.a;
-									w += mult;
-								}
-							}
-						}
-						if ( w > 0 ) {
-							color.Set( cSum.r/w, cSum.g/w, cSum.b/w, 0 );
-						}
-					}
-				}	
+				}
+				/*
+					int zone = i / SIZE;
+					if ( zone == 0 )      color.Set( 255, 0, 0, 0 );
+					else if ( zone == 1 ) color.Set( 255, 0, 0, 0 );
+					else if ( zone == 2 ) color.Set( 0, 0, 255, 0 );
+					else                  color.Set( 0, 255, 0, 0 );
+				}*/
 				U16 c = Surface::CalcRGBA16( color );
 				buffer[SIZE*4*(SIZE-1-j)+i] = c;
 			}
 		}
 		t->Upload( buffer, BUFFER_SIZE*sizeof(buffer[0]) );
+
+		static bool result = false;
+		if ( !result ) {
+			for( int j=0; j<h; ++j ) {
+				for( int i=0; i<w; ++i ) {
+					U16 c = buffer[SIZE*4*(SIZE-1-j)+i];
+					Color4U8 color = Surface::CalcRGBA16( c );
+					U8* p = pixels + scanline*j + i*4;
+					p[0] = color.r;
+					p[1] = color.g;
+					p[2] = color.b;
+					p[3] = 255;
+				}
+			}
+			lodepng_encode32_file( "./res/facetest.png", pixels, w, h );
+			result = true;
+		}
 		free( pixels );
 	}
 	else {

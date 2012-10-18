@@ -32,7 +32,7 @@ void main()
 			vec4 s2 = texture2D( texture0, v_uv2 );
 			vec4 s3 = texture2D( texture0, v_uv3 );
 			
-			vec4  a = vec4( 0, s1.a, s2.a, s3.a );
+			vec4  a = vec4( s0.a, s1.a, s2.a, s3.a );
 
 			s0.a = 0;
 			s1.a = 0;
