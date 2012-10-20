@@ -1,4 +1,5 @@
 - procedural rendering
+	- re-organize the palette?
 	- static scene showing item combinations
 	- color variation 
 	- color variation for live mode
@@ -99,6 +100,7 @@
 - memory pool everything in the chit/component system
 - analyze/optimize what causes component update: DoTick(), etc. Likely many DoTicks() getting called that aren't needed. (especially rendering...)
 - pack animation bone info into shaders
+- the render::Item class doesn't make much sense any more. should probaly just be a reference to the Model
 
 X particle test scene
 	X alpha processing for additive blending

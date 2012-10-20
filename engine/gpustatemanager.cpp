@@ -328,6 +328,9 @@ void GPUShader::SetState( const GPUShader& ns )
 		if ( paramNeeded ) {
 			shadman->SetUniformArray( ShaderManager::U_PARAM_ARR, EL_MAX_INSTANCE, ns.instanceParam );
 		}
+		if ( flags & ShaderManager::PROCEDURAL ) {
+			shadman->SetUniformArray( ShaderManager::U_PARAM4_ARR, EL_MAX_INSTANCE, ns.instanceParam4 );
+		}
 	}
 	else {
 		Matrix4 mvp;
@@ -335,6 +338,9 @@ void GPUShader::SetState( const GPUShader& ns )
 		shadman->SetUniform( ShaderManager::U_MVP_MAT, mvp );
 		if ( paramNeeded ) {
 			shadman->SetUniform( ShaderManager::U_PARAM, ns.instanceParam[0] );
+		}
+		if ( flags & ShaderManager::PROCEDURAL ) {
+			shadman->SetUniform( ShaderManager::U_PARAM4, ns.instanceParam4[0] );
 		}
 	}
 

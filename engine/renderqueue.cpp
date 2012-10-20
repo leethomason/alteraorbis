@@ -103,7 +103,12 @@ RenderQueue::State* RenderQueue::FindState( const State& state )
 }
 
 
-void RenderQueue::Add( Model* model, const ModelAtom* atom, GPUShader* shader, const Vector4F& param, const BoneData* boneData  )
+void RenderQueue::Add(	Model* model, 
+						const ModelAtom* atom, 
+						GPUShader* shader, 
+						const Vector4F& param, 
+						const Matrix4* param4,
+						const BoneData* boneData  )
 {
 	GLASSERT( model );
 	GLASSERT( atom );
@@ -126,6 +131,16 @@ void RenderQueue::Add( Model* model, const ModelAtom* atom, GPUShader* shader, c
 	item->model = model;
 	item->atom = atom;
 	item->param = param;
+
+	if ( param4 ) {
+		item->param4 = *param4;
+		item->hasParam4 = true;
+	}
+	else {
+		memset( &item->param4, 0, sizeof( item->param4 ));
+		item->hasParam4 = false;
+	}
+	
 	if ( boneData ) {
 		item->boneData = *boneData;
 		item->hasBoneData = true;
@@ -221,6 +236,9 @@ void RenderQueue::Submit( GPUShader* overRideShader, int modelRequired, int mode
 							shader->InstanceMatrix( index, item->model->XForm() );
 						}
 						shader->InstanceParam( index, item->param );
+						if ( item->hasParam4 ) {
+							shader->InstanceParam4( index, item->param4 );
+						}
 						if ( item->hasBoneData ) {
 							shader->InstanceBones( index, item->boneData );
 						}
@@ -242,6 +260,9 @@ void RenderQueue::Submit( GPUShader* overRideShader, int modelRequired, int mode
 					}
 					shader->MultMatrix( GPUShader::MODELVIEW_MATRIX, model->XForm() );
 					shader->SetParam( item->param );
+					if ( item->hasParam4 ) {
+						shader->InstanceParam4( 0, item->param4 );
+					}
 					if ( item->hasBoneData ) {
 						shader->InstanceBones( 0, item->boneData );
 					}

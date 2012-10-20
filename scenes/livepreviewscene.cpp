@@ -20,21 +20,30 @@ static const int SIZE = 256;
 LivePreviewScene::LivePreviewScene( LumosGame* game ) : Scene( game )
 {
 	TestMap* map = 0;
-	/*
+	
 	map = new TestMap( 8, 8 );
 	Color3F c = { 0.5f, 0.5f, 0.5f };
 	map->SetColor( c );
-	*/
+	
 
 	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase(), map );
 	engine->SetGlow( true );
 	engine->lighting.direction.Set( 0, 1, 0 );
 
+
+	static const Color4F color[4] = {
+		{ 1.0f, 0.6f, 0.4f, 1.0f },	// (r) skin
+		{ 1.0f, 1.0f, 1.0f, 1.0f },	// (b0) highlight
+		{ 0.0f, 0.6f, 1.0f, 1.0f },	// (b1) glasses / tattoo
+		{ 0.5f, 0.2f, 0.0f, 1.0f }	// (g) hair
+	};
+	static const float tex[4] = { 0, 0, 0, 0 };
+
 	const ModelResource* modelResource = ModelResourceManager::Instance()->GetModelResource( "unitPlateProcedural" );
 	for( int i=0; i<NUM_MODEL; ++i ) {
 		model[i] = engine->AllocModel( modelResource );
 		model[i]->SetPos( CENTER_X + float(i), 0.1f, CENTER_Z );
-		model[i]->SetProcedural( true );
+		model[i]->SetProcedural( true, color, tex );
 	}
 	model[1]->SetScale( 0.5f );
 

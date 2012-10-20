@@ -23,10 +23,16 @@ uniform mat4 	u_mvpMatrix;		// model-view-projection.
 	#if PARAM == 1
 		uniform vec4	u_paramArr[EL_MAX_INSTANCE];	// Arbitrary params, if used. (texture xform, color, etc.)
 	#endif
+	#if PARAM4 == 1
+		uniform mat4	u_param4Arr[EL_MAX_INSTANCE];	// Used for procedural rendering. Could be made arbitrary.
+	#endif
 	attribute float a_instanceID;					// Index into the transformation.
 #else
 	#if PARAM == 1
 		uniform vec4	u_param;					// Arbitrary params, if used. (texture xform, color, etc.)
+	#endif
+	#if PARAM4 == 1
+		uniform max4	u_param;					// Used for procedural rendering. Could be made arbitrary.
 	#endif
 #endif
 
@@ -44,6 +50,11 @@ attribute vec3 a_pos;				// vertex position
 		varying vec2 v_uv1;
 		varying vec2 v_uv2;
 		varying vec2 v_uv3;
+
+		varying vec4 v_color0;
+		varying vec4 v_color1;
+		varying vec4 v_color2;
+		varying vec4 v_color3;
 	#endif
 #endif
 
@@ -86,6 +97,14 @@ void main() {
 			vec4 param = u_param;
 		#endif
 	#endif
+	#if PARAM4 == 1
+		// Don't go insane with #if syntax later:
+		#if INSTANCE == 1
+			mat4 param4 = u_param4Arr[int(a_instanceID)];
+		#else
+			mat4 param4 = u_param4;
+		#endif
+	#endif
 
 	vec4 color = u_colorMult;
 	
@@ -103,13 +122,24 @@ void main() {
 			#if PROCEDURAL > 0
 				#error not supported
 			#endif
-		#else
+		#endif	
+		#if PROCEDURAL == 0
 			v_uv0 = a_uv0;
-			#if PROCEDURAL == 1
-				v_uv1 = vec2( a_uv0.x+0.25, a_uv0.y );
-				v_uv2 = vec2( a_uv0.x+0.50, a_uv0.y );
-				v_uv3 = vec2( a_uv0.x+0.75, a_uv0.y );
-			#endif
+		#else
+			// column, row
+			v_uv0 = a_uv0 + vec2( 0,    param4[3][0] );
+			v_uv1 = a_uv0 + vec2( 0.25, param4[3][1] );
+			v_uv2 = a_uv0 + vec2( 0.50, param4[3][2] );
+			v_uv3 = a_uv0 + vec2( 0.75, param4[3][3] );
+
+			v_color0 = vec4( param4[0][0], param4[1][0], param4[2][0], 1.0 );		// FIXME: switch to columns
+			v_color1 = vec4( param4[0][1], param4[1][1], param4[2][1], 1.0 );		// FIXME: switch to columns
+			v_color2 = vec4( param4[0][2], param4[1][2], param4[2][2], 1.0 );		// FIXME: switch to columns
+			v_color3 = vec4( param4[0][3], param4[1][3], param4[2][3], 1.0 );		// FIXME: switch to columns
+			//v_color0 = vec4( 1, 1, 1, 1);
+			//v_color1 = vec4( 1, 1, 1, 1);
+			//v_color2 = vec4( 1, 1, 1, 1);
+			//v_color3 = vec4( 1, 1, 1, 1);
 		#endif
 	#endif
 	#if TEXTURE1 == 1

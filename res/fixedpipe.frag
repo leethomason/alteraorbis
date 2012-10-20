@@ -6,6 +6,12 @@
 		varying vec2 v_uv1;
 		varying vec2 v_uv2;
 		varying vec2 v_uv3;
+
+		// A single texture that is procedural pretty much eats up all the varying data
+		varying vec4 v_color0;
+		varying vec4 v_color1;
+		varying vec4 v_color2;
+		varying vec4 v_color3;
 	#endif
 #endif
 #if TEXTURE1 == 1
@@ -22,10 +28,10 @@ void main()
 		#if  PROCEDURAL == 0
 			vec4 sample = texture2D( texture0, v_uv0 );
 		#elif PROCEDURAL == 1
-			vec4 color0 = vec4( 1.0, 0.6, 0.4, 1 );	// (r) skin
-			vec4 color1 = vec4( 1, 1, 1, 1);		// (b0) highlight
-			vec4 color2 = vec4( 0, 0.6, 1.0, 1 );	// (b1) glasses / tattoo
-			vec4 color3 = vec4( 0.5, 0.2, 0, 1 );	// (g) hair
+			//vec4 color0 = vec4( 1.0, 0.6, 0.4, 1 );	// (r) skin
+			//vec4 color1 = vec4( 1, 1, 1, 1);		// (b0) highlight
+			//vec4 color2 = vec4( 0, 0.6, 1.0, 1 );	// (b1) glasses / tattoo
+			//vec4 color3 = vec4( 0.5, 0.2, 0, 1 );	// (g) hair
 
 			vec4 s0 = texture2D( texture0, v_uv0 );
 			vec4 s1 = texture2D( texture0, v_uv1 );
@@ -38,15 +44,15 @@ void main()
 			// green->C3
 			// on layer 0 and 1, blue->C1
 			// on layer 2 and 3, blue->C2 (alpha channel used)
-			s0.a = 0;
-			s1.a = 0;
+			s0.a = 0.0;
+			s1.a = 0.0;
 			s2.a = s2.b;
-			s2.b = 0;
+			s2.b = 0.0;
 			s3.a = s3.b;
-			s3.b = 0;
+			s3.b = 0.0;
 			
 			vec4 t = mix( mix( mix(  s0, s1, a[1] ), s2, a[2] ), s3, a[3] );
-			vec4 sample = t.r*color0 + t.g*color3 + t.b*color1 + t.a*color2;
+			vec4 sample = t.r*v_color0 + t.g*v_color3 + t.b*v_color1 + t.a*v_color2;
 		#endif
 
 		#if TEXTURE0_ALPHA_ONLY == 1

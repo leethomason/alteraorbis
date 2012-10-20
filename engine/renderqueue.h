@@ -53,6 +53,7 @@ public:
 				const ModelAtom* atom, 
 				GPUShader* shader,
 				const grinliz::Vector4F& param,
+				const grinliz::Matrix4* param4,
 				const BoneData* bones );
 
 	/* If a shader is passed it, it will override the shader set by the Add. */
@@ -71,7 +72,9 @@ private:
 	struct Item {
 		Model*					model;
 		const ModelAtom*		atom;	
-		grinliz::Vector4F		param;	// color, texture xForm, etc. Not yet supported. Needs sorting
+		grinliz::Vector4F		param;			// per instance data (vec4)
+		bool					hasParam4;
+		grinliz::Matrix4		param4;			// per instance data (matrix)
 		bool					hasBoneData;
 		BoneData				boneData;
 		Item*					next;

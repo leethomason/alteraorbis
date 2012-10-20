@@ -311,13 +311,7 @@ public:
 		return IsFlagSet( MODEL_PARAM_IS_BONE_FILTER ) != 0;
 	}
 	//// </PARAMS>
-	void SetProcedural( bool on ) {
-		if ( on ) 
-			SetFlag( MODEL_PROCEDURAL );
-		else
-			ClearFlag( MODEL_PROCEDURAL );
-	}
-
+	void SetProcedural( bool on, const grinliz::Color4F* colors, const float* v );
 	// AABB for user selection (bigger than the true AABB)
 	void CalcHitAABB( grinliz::Rectangle3F* aabb ) const;
 
@@ -405,6 +399,7 @@ private:
 	bool hasParticles;
 
 	grinliz::Vector4F	param[EL_MAX_MODEL_GROUPS];
+	grinliz::Matrix4	procMat;
 
 	int flags;
 

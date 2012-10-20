@@ -317,6 +317,22 @@ void Model::SetRotation( const Quaternion& q )
 }
 
 
+void Model::SetProcedural( bool on, const Color4F* colors, const float* v ) {
+	if ( on ) { 
+		SetFlag( MODEL_PROCEDURAL );
+		for( int r=0; r<4; ++r ) {
+			procMat.m( r, 3 ) = v[r];
+			for( int c=0; c<3; ++c ) {
+				procMat.m( r, c ) = colors[r].X(c);	// rgb, 'a' not encoded for now
+			}
+		}
+	}
+	else {
+		ClearFlag( MODEL_PROCEDURAL );
+	}
+}
+
+
 bool Model::AnimationDone() const
 {
 	if ( currentAnim.id >= 0 && currentAnim.time >= animationResource->Duration( currentAnim.id ) )
@@ -558,11 +574,16 @@ void Model::Queue( RenderQueue* queue, EngineShaders* engineShaders )
 			CalcAnimation( &boneData ); 
 			pBD = &boneData;
 		}
+		const Matrix4* pMat = 0;
+		if ( flags & MODEL_PROCEDURAL ) {
+			pMat = &this->procMat;
+		}
 
 		queue->Add( this,									// reference back
 					&resource->atom[i],						// model atom to render
 					shader,
 					param[i],								// parameter to the shader
+					pMat,
 					pBD );								
 	}
 }

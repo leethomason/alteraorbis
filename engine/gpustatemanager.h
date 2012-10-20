@@ -259,6 +259,11 @@ public:
 		GLASSERT( i >= 0 && i < EL_MAX_INSTANCE );
 		instanceParam[i] = v; 
 	}
+	void InstanceParam4( int i, const grinliz::Matrix4& m ) {
+		GLASSERT( i >= 0 && i < EL_MAX_INSTANCE );
+		instanceParam4[i] = m; 
+	}
+
 	void InstanceBones( int i, const BoneData& bones ) {
 		GLASSERT( i >= 0 && i < EL_MAX_INSTANCE );
 		instanceBones[i] = bones;
@@ -266,7 +271,6 @@ public:
 	void SetParam( const grinliz::Vector4F& v ) {
 		InstanceParam( 0, v );
 	}
-
 
 	void SetStencilMode( StencilMode value ) { stencilMode = value; }
 	void SetDepthWrite( bool value ) { depthWrite = value; }
@@ -376,6 +380,7 @@ protected:
 
 	grinliz::Matrix4	instanceMatrix[EL_MAX_INSTANCE];
 	grinliz::Vector4F	instanceParam[EL_MAX_INSTANCE];
+	grinliz::Matrix4	instanceParam4[EL_MAX_INSTANCE];
 	BoneData			instanceBones[EL_MAX_INSTANCE];
 };
 

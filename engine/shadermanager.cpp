@@ -45,6 +45,7 @@ static const char* gUniformName[ShaderManager::MAX_UNIFORM] =
 	"u_mvpMatrix",
 	"u_mMatrix",
 	"u_paramArr",
+	"u_param4Arr",
 
 	"u_normalMatrix",
 	"u_colorMult",
@@ -53,6 +54,7 @@ static const char* gUniformName[ShaderManager::MAX_UNIFORM] =
 	"u_diffuse",
 	"u_radius",
 	"u_param",
+	"u_param4",
 	"u_boneXForm",
 };
 
@@ -364,7 +366,6 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 	}
 	AppendFlag( &header, "COLOR_PARAM",			flags & COLOR_PARAM );
 	AppendFlag( &header, "COLORS",				flags & COLORS );
-	//AppendFlag( &header, "COLOR_MULTIPLIER",	flags & COLOR_MULTIPLIER );
 	AppendFlag( &header, "INSTANCE",			flags & INSTANCE );
 	AppendFlag( &header, "PREMULT",				flags & PREMULT );
 	AppendFlag( &header, "EMISSIVE",			flags & EMISSIVE );
@@ -372,7 +373,8 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 	AppendFlag( &header, "BONE_FILTER",			flags & BONE_FILTER );
 	AppendFlag( &header, "BONES",				shader->BonesNeeded() );
 	AppendFlag( &header, "PARAM",				shader->ParamNeeded() );
-	AppendFlag( &header, "PROCEDURAL",			flags & PROCEDURAL );
+	AppendFlag( &header, "PROCEDURAL",			flags & PROCEDURAL );	// both are triggered off procedural. deserves a clean-up.
+	AppendFlag( &header, "PARAM4",				flags & PROCEDURAL );
 
 	if ( flags & LIGHTING_DIFFUSE )
 		AppendFlag( &header, "LIGHTING_DIFFUSE", 1, 1 );
@@ -384,8 +386,10 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 	AppendConst( &header, "EL_MAX_INSTANCE", EL_MAX_INSTANCE );
 	AppendConst( &header, "EL_MAX_BONES",	 EL_MAX_BONES );
 
+#if 0 
 #ifdef DEBUG_OUTPUT
 	GLOUTPUT(( "header\n%s\n", header.c_str() ));
+#endif
 #endif
 
 	const char* vertexSrc[2]   = { header.c_str(), fixedpipeVert.c_str() };

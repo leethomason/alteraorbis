@@ -97,6 +97,7 @@ public:
 		U_MVP_MAT,		
 		U_M_MAT_ARR,	// array for instancing
 		U_PARAM_ARR,	// params for instancing
+		U_PARAM4_ARR,	// params for instancing
 
 		U_NORMAL_MAT,
 		U_COLOR_MULT,
@@ -105,6 +106,7 @@ public:
 		U_DIFFUSE,
 		U_RADIUS,
 		U_PARAM,
+		U_PARAM4,
 		U_BONEXFORM,
 		MAX_UNIFORM
 	};
