@@ -181,7 +181,7 @@ void BattleMechanics::CalcMeleeDamage( Chit* src, IMeleeWeaponItem* weapon, Dama
 	}
 	static const float STRIKE_RATIO_INV = 1.0f / 5.0f;
 
-	dd->damage = mass * chain[0]->meleeDamageMult * STRIKE_RATIO_INV;
+	dd->damage = mass * chain[0]->meleeDamage * STRIKE_RATIO_INV;
 	dd->effects = effect;
 }
 

@@ -29,7 +29,10 @@ void LumosChitBag::HandleBolt( const Bolt& bolt, Model* modelHit, const grinliz:
 			DamageDesc dd( bolt.damage, bolt.effect );
 		
 			ChitMsg msg( ChitMsg::CHIT_DAMAGE, 0, &dd );
-			msg.vector = at;
+			// 'vector' copied from BattleMechanics::GenerateExplosionMsgs
+			msg.vector = bolt.dir;
+			msg.vector.Normalize();
+			msg.vector.Multiply( 2.0f );
 			chitHit->SendMessage( msg, 0 );
 		}
 	}

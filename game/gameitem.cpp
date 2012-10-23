@@ -63,6 +63,7 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 	READ_FLAG( flags, f, RENDER_TRAIL );
 
 	READ_FLOAT_ATTR( ele, mass );
+	READ_FLOAT_ATTR( ele, hpPerMass );
 	READ_INT_ATTR( ele, primaryTeam );
 	READ_UINT_ATTR( ele, cooldown );
 	READ_UINT_ATTR( ele, cooldownTime );
@@ -71,7 +72,7 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 	READ_INT_ATTR( ele, clipCap );
 	READ_INT_ATTR( ele, rounds );
 	READ_FLOAT_ATTR( ele, speed );
-	READ_FLOAT_ATTR( ele, meleeDamageMult );
+	READ_FLOAT_ATTR( ele, meleeDamage );
 	READ_FLOAT_ATTR( ele, rangedDamage );
 
 	if ( EFFECT_FIRE )	flags |= IMMUNE_FIRE;
@@ -83,7 +84,7 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 		GLASSERT( hardpoint >= 0 );
 	}
 
-	hp = mass;
+	hp = this->TotalHP();
 	ele->QueryFloatAttribute( "hp", &hp );
 
 	GLASSERT( TotalHP() > 0 );

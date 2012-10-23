@@ -1,8 +1,8 @@
 - procedural rendering
-	- re-organize the palette?
+	X re-organize the palette?
 	- static scene showing item combinations
-	- color variation 
-	- color variation for live mode
+	X color variation 
+	X color variation for live mode
 	- emissive support
 	- item bone/part support
 
@@ -17,8 +17,8 @@
 	X item: support speed, pass on to bolts
 	X optimize start time
 	X change effect strategy - are all effects just flags?
-	- revisit accuracy comuptation. what scales with distance? area? volume? radius?
 	- shields, general bonus/cost/damage propegation
+	- bolts are hitting own team
 	- removing unit "clumping" (3yr old soccer team). Basic formation?
 	- unique look for units so teams can be distinguished
 	- melee attack goes back to reference position between hits
@@ -36,7 +36,8 @@
 	- gunrun to walk not synchronized correctly
 	- fix particle def to return a default - the pointer is dangerous
 	- DebugDraw is getting used for release drawing - fine in most (all?) cases. But clean up.
-	- bolts don't hit own team but explosions do
+	X bolts don't hit own team but explosions do. decided this was a good thing.
+	- revisit accuracy comuptation. what scales with distance? area? volume? radius?
 
 	- ranged weapons
 		- bolts
@@ -101,6 +102,7 @@
 - analyze/optimize what causes component update: DoTick(), etc. Likely many DoTicks() getting called that aren't needed. (especially rendering...)
 - pack animation bone info into shaders
 - the render::Item class doesn't make much sense any more. should probaly just be a reference to the Model
+- use optimizer to pre-process shaders
 
 X particle test scene
 	X alpha processing for additive blending

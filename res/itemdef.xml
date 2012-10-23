@@ -95,8 +95,8 @@
         resource="shield"
         flags="HELD_AT_HARDPOINT"
         hardpoint="shield"
-        mass="0.1"
-        power="20">
+        mass="1.0"
+        hpPerMass="20">
   </item>
   
 </items>

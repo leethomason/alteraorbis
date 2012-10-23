@@ -185,8 +185,9 @@ public:
 	int flags;				// flags that define this item; 'constant'
 	int hardpoint;			// id of hardpoint this item attaches to
 	float mass;				// mass (kg)
+	float hpPerMass;		// typically 1
 	int	primaryTeam;		// who owns this items
-	float meleeDamageMult;	// a multiplier of the base (effective mass) and other modifiers
+	float meleeDamage;		// a multiplier of the base (effective mass) and other modifiers
 	float rangedDamage;		// base ranged damage
 	U32 cooldown;			// time between uses
 	U32 cooldownTime;		// counting UP to ready state
@@ -208,8 +209,9 @@ public:
 			flags			= rhs->flags;
 			hardpoint		= rhs->hardpoint;
 			mass			= rhs->mass;
+			hpPerMass		= rhs->hpPerMass;
 			primaryTeam		= rhs->primaryTeam;
-			meleeDamageMult	= rhs->meleeDamageMult;
+			meleeDamage		= rhs->meleeDamage;
 			rangedDamage	= rhs->rangedDamage;
 			cooldown		= rhs->cooldown;
 			cooldownTime	= rhs->cooldownTime;
@@ -229,8 +231,9 @@ public:
 			flags = 0;
 			hardpoint = 0;
 			mass = 1;
+			hpPerMass = 1;
 			primaryTeam = 0;
-			meleeDamageMult = 1;
+			meleeDamage = 1;
 			rangedDamage = 0;
 			cooldown = 1000;
 			cooldownTime = cooldown;
@@ -275,7 +278,7 @@ public:
 	void UseRound();
 
 	// Note that the current HP, if it has one, 
-	float TotalHP() const { return (float) mass; }
+	float TotalHP() const { return mass*hpPerMass; }
 
 	// Absorb damage.'remain' is how much damage passes through the shield
 	float AbsorbDamage( const DamageDesc& dd, DamageDesc* remain, const char* log );
