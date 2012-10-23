@@ -52,7 +52,7 @@
       <PreprocessorDefinitions>GRINLIZ_PROFILE; _CRT_SECURE_NO_WARNINGS;UFO_WIN32_SDL;WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>false</ExceptionHandling>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
-      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <FloatingPointModel>Fast</FloatingPointModel>
     </ClCompile>
     <Link>
@@ -129,6 +129,7 @@
     <ClCompile Include="..\scenes\rendertestscene.cpp" />
     <ClCompile Include="..\script\battlemechanics.cpp" />
     <ClCompile Include="..\script\itemscript.cpp" />
+    <ClCompile Include="..\script\procedural.cpp" />
     <ClCompile Include="..\script\worldscript.cpp" />
     <ClCompile Include="..\shared\gamedbreader.cpp" />
     <ClCompile Include="..\win32\audio.cpp" />
@@ -203,6 +204,7 @@
     <ClInclude Include="..\scenes\titlescene.h" />
     <ClInclude Include="..\script\battlemechanics.h" />
     <ClInclude Include="..\script\itemscript.h" />
+    <ClInclude Include="..\script\procedural.h" />
     <ClInclude Include="..\script\worldscript.h" />
     <ClInclude Include="..\shared\gamedb.h" />
     <ClInclude Include="..\shared\gamedbreader.h" />

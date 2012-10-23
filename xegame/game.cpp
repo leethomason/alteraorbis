@@ -722,6 +722,9 @@ void Game::Resize( int width, int height, int rotation )
 
 const Game::Palette* Game::GetPalette( const char* name ) const
 {
+	if ( !name || !*name ) {
+		name = "mainPalette";
+	}
 	for( int i=0; i<palettes.Size(); ++i ) {
 		if ( StrEqual( name, palettes[i].name ) ) {
 			return &palettes[i];

@@ -30,7 +30,7 @@
 
 using namespace grinliz;
 
-#define DEBUG_PMC
+//#define DEBUG_PMC
 
 // 4 miles/hour = 6000m/hr = 1.6m/s = 0.8grid/s
 // Which looks like a mellow walk.

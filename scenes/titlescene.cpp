@@ -44,6 +44,8 @@ TitleScene::TitleScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 	}
 	testScene[TEST_NAV_WORLD].SetText(  "Blue" );
 	testScene[TEST_NAV_WORLD].SetText2( "Smoke" );
+	testScene[TEST_LIVEPREVIEW].SetText( "Live" );
+	testScene[TEST_LIVEPREVIEW].SetText2( "Preview" );
 }
 
 

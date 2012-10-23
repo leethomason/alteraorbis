@@ -1,3 +1,4 @@
+#pragma warning (disable:4530)
 #include "../shared/lodepng.h"
 
 #include "livepreviewscene.h"
@@ -7,6 +8,7 @@
 #include "../xegame/testmap.h"
 
 #include "../game/lumosgame.h"
+#include "../script/procedural.h"
 
 #include <sys/stat.h>
 
@@ -21,28 +23,50 @@ LivePreviewScene::LivePreviewScene( LumosGame* game ) : Scene( game )
 {
 	TestMap* map = 0;
 	
-	map = new TestMap( 8, 8 );
-	Color3F c = { 0.5f, 0.5f, 0.5f };
-	map->SetColor( c );
+	//map = new TestMap( 8, 8 );
+	//Color3F c = { 0.5f, 0.5f, 0.5f };
+	//map->SetColor( c );
 	
 
 	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase(), map );
 	engine->SetGlow( true );
 	engine->lighting.direction.Set( 0, 1, 0 );
 
+	FaceGen faceGen( game->GetPalette() );
 
-	static const Color4F color[4] = {
-		{ 1.0f, 0.6f, 0.4f, 1.0f },	// (r) skin
-		{ 1.0f, 1.0f, 1.0f, 1.0f },	// (b0) highlight
-		{ 0.0f, 0.6f, 1.0f, 1.0f },	// (b1) glasses / tattoo
-		{ 0.5f, 0.2f, 0.0f, 1.0f }	// (g) hair
-	};
 	static const float tex[4] = { 0, 0, 0, 0 };
+	Random random;
 
 	const ModelResource* modelResource = ModelResourceManager::Instance()->GetModelResource( "unitPlateProcedural" );
 	for( int i=0; i<NUM_MODEL; ++i ) {
+		Color4F skin, highlight, hair, glasses;
+		faceGen.GetSkinColor( i<FaceGen::NUM_SKIN_COLORS ? i : random.Rand( FaceGen::NUM_SKIN_COLORS ), 
+							  i<FaceGen::NUM_SKIN_COLORS ? i : random.Rand( FaceGen::NUM_SKIN_COLORS ),
+							  random.Uniform(), 
+							  &skin, &highlight );
+		faceGen.GetHairColor( i%FaceGen::NUM_HAIR_COLORS, &hair );
+		faceGen.GetGlassesColor( i<FaceGen::NUM_GLASSES_COLORS ? i : random.Rand( FaceGen::NUM_GLASSES_COLORS ),
+								 i<FaceGen::NUM_GLASSES_COLORS ? i : random.Rand( FaceGen::NUM_GLASSES_COLORS ),
+								 random.Uniform(),
+								 &glasses );
+
+		const Color4F color[4] = {
+			skin,						// (r) skin
+			highlight,					// (b0) highlight
+			glasses,					// (b1) glasses / tattoo
+			hair						// (g) hair
+		};
+
 		model[i] = engine->AllocModel( modelResource );
-		model[i]->SetPos( CENTER_X + float(i), 0.1f, CENTER_Z );
+		if ( i<2 ) {
+			model[i]->SetPos( CENTER_X + float(i), 0.1f, CENTER_Z );
+		}
+		else if ( i<7 ) {
+			model[i]->SetPos( CENTER_X + float(i-4), 0.1f, CENTER_Z - 1.0f );
+		}
+		else {
+			model[i]->SetPos( CENTER_X + float(i-9), 0.1f, CENTER_Z + 1.0f );
+		}
 		model[i]->SetProcedural( true, color, tex );
 	}
 	model[1]->SetScale( 0.5f );

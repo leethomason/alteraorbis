@@ -128,8 +128,20 @@ public:
 		int dx;
 		int dy;
 		grinliz::CArray< grinliz::Color4U8, 128 > colors;
+
+		grinliz::Color4U8 Get4U8( int x, int y ) const {
+			GLASSERT( x >= 0 && x < dx && y >= 0 && y < dy );
+			int i = y*dx + x;
+			return colors[i];
+		}
+
+		grinliz::Color4F Get4F( int x, int y ) const {
+			GLASSERT( x >= 0 && x < dx && y >= 0 && y < dy );
+			int i = y*dx + x;
+			return grinliz::Convert_4U8_4F( colors[i] );
+		}
 	};
-	const Palette* GetPalette( const char* name ) const;
+	const Palette* GetPalette( const char* name=0 ) const;
 
 	virtual void PrintPerf( int depth, const grinliz::PerfData& data );
 

@@ -48,7 +48,7 @@ private:
 	time_t fileTime;
 
 	Engine*		engine;
-	enum { NUM_MODEL = 2 };
+	enum { NUM_MODEL = 2+5+5 };
 	Model*		model[NUM_MODEL];
 
 };
