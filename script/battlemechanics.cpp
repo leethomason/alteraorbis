@@ -234,6 +234,7 @@ Vector3F BattleMechanics::FuzzyAim( const Vector3F& pos, const Vector3F& aimAt, 
 
 	if ( area > 0 && len > 0 ) {
 		// a = pi*r*r
+		GLASSERT( area > 0 );
 		float r = sqrtf( area / PI );
 
 		Vector3F rv;

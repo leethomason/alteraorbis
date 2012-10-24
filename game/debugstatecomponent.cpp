@@ -41,6 +41,10 @@ DebugStateComponent::DebugStateComponent( WorldMap* _map ) : map( _map )
 
 	RenderAtom blue   = LumosGame::CalcPaletteAtom( 8, 0 );	
 	ammoBar.Init( &map->overlay, 10, blue, blue );
+
+	RenderAtom purple = LumosGame::CalcPaletteAtom( 10, 0 );
+	RenderAtom grey   = LumosGame::CalcPaletteAtom( 0, 6 );
+	shieldBar.Init( &map->overlay, 10, purple, grey );
 }
 
 void DebugStateComponent::OnAdd( Chit* chit )
@@ -64,6 +68,11 @@ void DebugStateComponent::OnAdd( Chit* chit )
 		float r = (float)pItem->GetItem()->rounds / (float)pItem->GetItem()->clipCap;
 		ammoBar.SetRange( r ); 
 	}
+
+	map->overlay.Add( &shieldBar );
+	shieldBar.SetSize( SIZE_X, SIZE_Y );
+	shieldBar.SetRange( 1.0f );
+
 }
 
 
@@ -71,6 +80,7 @@ void DebugStateComponent::OnRemove()
 {
 	map->overlay.Remove( &healthBar );
 	map->overlay.Remove( &ammoBar );
+	map->overlay.Remove( &shieldBar );
 	Component::OnRemove();
 }
 
@@ -81,6 +91,7 @@ void DebugStateComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		Vector2F pos = chit->GetSpatialComponent()->GetPosition2D() + OFFSET;
 		healthBar.SetPos( pos.x, pos.y );
 		ammoBar.SetPos( pos.x, pos.y + SIZE_Y*1.5f );
+		shieldBar.SetPos( pos.x, pos.y + SIZE_Y*3.0f );
 	}
 	else if ( msg.ID() == ChitMsg::HEALTH_CHANGED ) {
 		HealthComponent* pHealth = GET_COMPONENT( chit, HealthComponent );
@@ -88,11 +99,11 @@ void DebugStateComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 	}
 	else if ( msg.ID() == ChitMsg::GAMEITEM_TICK ) {
 		GameItem* pItem = (GameItem*)msg.Ptr();
-		if ( pItem->ToRangedWeapon() ) {		
-			RenderAtom grey   = LumosGame::CalcPaletteAtom( 0, 6 );
-			RenderAtom blue   = LumosGame::CalcPaletteAtom( 8, 0 );	
-			RenderAtom orange = LumosGame::CalcPaletteAtom( 4, 0 );
-	
+		RenderAtom grey   = LumosGame::CalcPaletteAtom( 0, 6 );
+		RenderAtom blue   = LumosGame::CalcPaletteAtom( 8, 0 );	
+		RenderAtom orange = LumosGame::CalcPaletteAtom( 4, 0 );
+
+		if ( pItem->ToRangedWeapon() ) {			
 			float r = 1;
 			if ( pItem->Reloading() ) {
 				if ( pItem->reload ) {
@@ -109,6 +120,14 @@ void DebugStateComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 				ammoBar.SetHigherAtom( grey );
 			}
 			ammoBar.SetRange( Clamp( r, 0.f, 1.f ) );
+		}
+		if ( pItem->absorbsDamage != 0 ) {
+			// will tweak out if there are multiple absorbers.
+			float r = 1;
+			if ( pItem->TotalHP() ) {
+				r = pItem->hp / pItem->TotalHP();
+			}
+			shieldBar.SetRange( Clamp( r, 0.f, 1.0f ));
 		}
 	}
 }

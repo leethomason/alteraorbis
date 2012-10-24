@@ -23,6 +23,7 @@
 
 #include "../xegame/rendercomponent.h"
 #include "../xegame/spatialcomponent.h"
+#include "../xegame/inventorycomponent.h"
 
 using namespace grinliz;
 
@@ -33,11 +34,22 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		GLASSERT( dd );
 		GLLOG(( "Chit %3d '%s' ", parentChit->ID(), item.Name() ));
 
-		// FIXME: see if inventory can absorb first (shields)
+		// See what is in the inventory that can absorb damage.
+		// The inventory can't handle the message, because it has
+		// to come first, and this code needs the return value.
+		// Messy.
 
-		float hp = item.hp;
-		float delta = item.AbsorbDamage( *dd, 0, "DAMAGE" );
+		float originalHP = 0;
+		InventoryComponent* ic = parentChit->GetInventoryComponent();
+		DamageDesc dd2 = *dd;
+		if ( ic ) {
+			ic->AbsorbDamage( *dd, &dd2, "DAMAGE" );
+		}
+
+		float hp = item.hp;	
+		item.AbsorbDamage( false, dd2, 0, "DAMAGE" );
 		GLLOG(( "\n" ));
+		float delta = originalHP - item.hp;
 
 		if ( item.hp != hp ) {
 			HealthComponent* hc = GET_COMPONENT( parentChit, HealthComponent );

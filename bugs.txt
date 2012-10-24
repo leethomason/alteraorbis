@@ -18,7 +18,7 @@
 	X optimize start time
 	X change effect strategy - are all effects just flags?
 	- shields, general bonus/cost/damage propegation
-	- bolts are hitting own team
+	- bolts are hitting own team	
 	- removing unit "clumping" (3yr old soccer team). Basic formation?
 	- unique look for units so teams can be distinguished
 	- melee attack goes back to reference position between hits

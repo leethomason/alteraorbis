@@ -49,8 +49,12 @@ public:
 	bool AddToInventory( GameItem* item, bool equip );
 	void RemoveFromInventory( int slot );
 
+
 	// Is carrying anything - primarily a query for the animation system.
 	GameItem* IsCarrying();
+	// The inventory may take damage before the actual character. (Shields, secondary
+	// effects, etc.) So this is called before the actual chit->item->absorb
+	void AbsorbDamage( const DamageDesc& dd, DamageDesc* absorbed, const char* logstr );
 
 	struct RangedInfo {
 		IRangedWeaponItem* weapon;

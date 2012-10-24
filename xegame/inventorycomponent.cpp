@@ -147,6 +147,17 @@ GameItem* InventoryComponent::IsCarrying()
 	return heldAt[HARDPOINT_TRIGGER];
 }
 
+
+void InventoryComponent::AbsorbDamage( const DamageDesc& dd, DamageDesc* absorbed, const char* logstr )
+{
+	for( int i=0; i<NUM_HARDPOINTS; ++i ) {
+		if ( heldAt[i] ) {
+			heldAt[i]->AbsorbDamage( true, dd, absorbed, logstr );
+		}
+	}
+}
+
+
 // FIXME: write queries to get all held and/or intrinsic and/or free and/or carried items
 
 void InventoryComponent::GetRangedWeapons( grinliz::CArray< RangedInfo, NUM_HARDPOINTS >* weapons )

@@ -41,6 +41,7 @@ private:
 	WorldMap* map;
 	gamui::DigitalBar healthBar;
 	gamui::DigitalBar ammoBar;
+	gamui::DigitalBar shieldBar;
 };
 
 #endif // DEBUG_STATE_COMPONENT

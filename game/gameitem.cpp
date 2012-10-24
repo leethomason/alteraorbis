@@ -64,6 +64,7 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 
 	READ_FLOAT_ATTR( ele, mass );
 	READ_FLOAT_ATTR( ele, hpPerMass );
+	READ_FLOAT_ATTR( ele, hpRegen );
 	READ_INT_ATTR( ele, primaryTeam );
 	READ_UINT_ATTR( ele, cooldown );
 	READ_UINT_ATTR( ele, cooldownTime );
@@ -74,6 +75,7 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 	READ_FLOAT_ATTR( ele, speed );
 	READ_FLOAT_ATTR( ele, meleeDamage );
 	READ_FLOAT_ATTR( ele, rangedDamage );
+	READ_FLOAT_ATTR( ele, absorbsDamage );
 
 	if ( EFFECT_FIRE )	flags |= IMMUNE_FIRE;
 
@@ -151,15 +153,23 @@ void GameItem::Apply( const GameItem* intrinsic )
 }
 
 
-float GameItem::AbsorbDamage( const DamageDesc& dd, DamageDesc* remain, const char* log )
+void GameItem::AbsorbDamage( bool inInventory, const DamageDesc& dd, DamageDesc* remain, const char* log )
 {
-	float total = 0;
-	GLLOG(( "%s Damage ", log ));
+	bool doDamage = !inInventory || (absorbsDamage != 0);
+	float absorb = inInventory ? this->absorbsDamage : 1.0f;
 
-	total = Min( hp, dd.damage );
-	hp = hp-total;
-	GLLOG(( "total=%.1f hp=%.1f", total, hp ));
-	return total;
+	if ( doDamage ) {
+		float d = dd.damage * absorb;
+		if ( d > 0 && TotalHP() ) {
+			d = Max( d, hp );
+			hp -= d;
+			if ( parentChit ) parentChit->SetTickNeeded();
+		}
+		if ( remain ) {
+			remain->damage = Max( remain->damage - d, 0.0f );
+		}
+		GLLOG(( "Damage %s total=%.1f hp=%.1f", inInventory ? "Inventory" : "", d, hp ));
+	}
 }
 
 

@@ -30,6 +30,8 @@ void LumosChitBag::HandleBolt( const Bolt& bolt, Model* modelHit, const grinliz:
 		
 			ChitMsg msg( ChitMsg::CHIT_DAMAGE, 0, &dd );
 			// 'vector' copied from BattleMechanics::GenerateExplosionMsgs
+			// This code is strange: the vector doesn't contain the origin,
+			// but the impulse (velocity). Weird.
 			msg.vector = bolt.dir;
 			msg.vector.Normalize();
 			msg.vector.Multiply( 2.0f );

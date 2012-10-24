@@ -104,7 +104,8 @@ inline float Length( float x, float y )
 	//		http://www.azillionmonkeys.com/qed/sqroot.html
 	// to make this (perhaps) better. 
 
-	// Use the much faster "f" version.
+	// Use the hopefully faster "f" version.
+	GLASSERT( x*x + y*y > 0 );
 	return sqrtf( x*x + y*y );
 }
 
@@ -128,7 +129,8 @@ inline double Length( double x, double y, double z )
 /** A length that is reasonably accurate. (24 bits or better.) */
 inline float Length( float x, float y, float z, float w )
 {
-	return sqrtf( x*x + y*y + z*z + w*w );
+	float len2 = x*x + y*y + z*z + w*w;
+	return len2 == 0 ? 0 :sqrtf( x*x + y*y + z*z + w*w );
 }
 
 

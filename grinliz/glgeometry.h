@@ -162,6 +162,7 @@ struct Plane
 
 	void Normalize()
 	{
+		GLASSERT( ( n.x * n.x ) + ( n.y * n.y ) + ( n.z * n.z ) > 0 );
 		float div = 1.0f / sqrtf( ( n.x * n.x ) + ( n.y * n.y ) + ( n.z * n.z ) );
 		n.x *= div;
 		n.y *= div;

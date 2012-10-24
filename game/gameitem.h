@@ -186,9 +186,11 @@ public:
 	int hardpoint;			// id of hardpoint this item attaches to
 	float mass;				// mass (kg)
 	float hpPerMass;		// typically 1
+	float hpRegen;			// hp / second regenerated (or lost) by this item
 	int	primaryTeam;		// who owns this items
 	float meleeDamage;		// a multiplier of the base (effective mass) and other modifiers
 	float rangedDamage;		// base ranged damage
+	float absorbsDamage;	// how much damage this consumes, in the inventory (shield, armor, etc.) 1.0: all, 0.5: half
 	U32 cooldown;			// time between uses
 	U32 cooldownTime;		// counting UP to ready state
 	U32 reload;				// time to reload once clip is used up
@@ -210,9 +212,11 @@ public:
 			hardpoint		= rhs->hardpoint;
 			mass			= rhs->mass;
 			hpPerMass		= rhs->hpPerMass;
+			hpRegen			= rhs->hpRegen;
 			primaryTeam		= rhs->primaryTeam;
 			meleeDamage		= rhs->meleeDamage;
 			rangedDamage	= rhs->rangedDamage;
+			absorbsDamage	= rhs->absorbsDamage;
 			cooldown		= rhs->cooldown;
 			cooldownTime	= rhs->cooldownTime;
 			reload			= rhs->reload;
@@ -232,9 +236,11 @@ public:
 			hardpoint = 0;
 			mass = 1;
 			hpPerMass = 1;
+			hpRegen = 0;
 			primaryTeam = 0;
 			meleeDamage = 1;
 			rangedDamage = 0;
+			absorbsDamage = 0;
 			cooldown = 1000;
 			cooldownTime = cooldown;
 			reload = 2000;
@@ -281,7 +287,7 @@ public:
 	float TotalHP() const { return mass*hpPerMass; }
 
 	// Absorb damage.'remain' is how much damage passes through the shield
-	float AbsorbDamage( const DamageDesc& dd, DamageDesc* remain, const char* log );
+	void AbsorbDamage( bool inInventory, const DamageDesc& dd, DamageDesc* remain, const char* log );
 
 private:
 };
