@@ -155,13 +155,12 @@ void GameItem::Apply( const GameItem* intrinsic )
 
 void GameItem::AbsorbDamage( bool inInventory, const DamageDesc& dd, DamageDesc* remain, const char* log )
 {
-	bool doDamage = !inInventory || (absorbsDamage != 0);
 	float absorb = inInventory ? this->absorbsDamage : 1.0f;
 
-	if ( doDamage ) {
+	if ( absorb != 0 ) {
 		float d = dd.damage * absorb;
 		if ( d > 0 && TotalHP() ) {
-			d = Max( d, hp );
+			d = Min( d, hp );
 			hp -= d;
 			if ( parentChit ) parentChit->SetTickNeeded();
 		}

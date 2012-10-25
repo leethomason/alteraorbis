@@ -39,17 +39,19 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		// to come first, and this code needs the return value.
 		// Messy.
 
-		float originalHP = 0;
+		float delta = 0;
+
 		InventoryComponent* ic = parentChit->GetInventoryComponent();
 		DamageDesc dd2 = *dd;
 		if ( ic ) {
 			ic->AbsorbDamage( *dd, &dd2, "DAMAGE" );
+			delta += dd->damage - dd2.damage;
 		}
 
 		float hp = item.hp;	
 		item.AbsorbDamage( false, dd2, 0, "DAMAGE" );
 		GLLOG(( "\n" ));
-		float delta = originalHP - item.hp;
+		delta += hp - item.hp;
 
 		if ( item.hp != hp ) {
 			HealthComponent* hc = GET_COMPONENT( parentChit, HealthComponent );

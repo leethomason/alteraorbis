@@ -3,6 +3,9 @@ This is a very early alpha tech test for the game Altera.
 More at: grinninglizard.com/altera
 
 Unzip (to desktop, or downloads directory) and run the game .exe
+It may require the microsoft redistributables. (Although if you installed Xenowar, these
+are already installed.)
+http://www.microsoft.com/en-us/download/details.aspx?id=5555
 
 The are a variety of test scenes, in different states. The important one for this release;
 

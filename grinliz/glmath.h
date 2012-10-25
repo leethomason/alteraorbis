@@ -105,7 +105,6 @@ inline float Length( float x, float y )
 	// to make this (perhaps) better. 
 
 	// Use the hopefully faster "f" version.
-	GLASSERT( x*x + y*y > 0 );
 	return sqrtf( x*x + y*y );
 }
 
