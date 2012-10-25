@@ -90,8 +90,8 @@ void DebugStateComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 	if ( msg.ID() == ChitMsg::SPATIAL_CHANGED ) {
 		Vector2F pos = chit->GetSpatialComponent()->GetPosition2D() + OFFSET;
 		healthBar.SetPos( pos.x, pos.y );
-		ammoBar.SetPos( pos.x, pos.y + SIZE_Y*1.5f );
-		shieldBar.SetPos( pos.x, pos.y + SIZE_Y*3.0f );
+		shieldBar.SetPos( pos.x, pos.y + SIZE_Y*1.5f );
+		ammoBar.SetPos(   pos.x, pos.y + SIZE_Y*3.0f );
 	}
 	else if ( msg.ID() == ChitMsg::HEALTH_CHANGED ) {
 		HealthComponent* pHealth = GET_COMPONENT( chit, HealthComponent );

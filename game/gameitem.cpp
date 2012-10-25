@@ -137,6 +137,13 @@ bool GameItem::DoTick( U32 delta )
 			rounds = clipCap;
 		}
 	}
+	if (    TotalHP() 
+		 && hpRegen != 0
+		 && ( hp != totalHP || hp != 0 ) ) 
+	{
+		hp += hpRegen * (float)delta / 1000.0f;
+	}
+
 	if ( parentChit ) {
 		parentChit->SendMessage( ChitMsg( ChitMsg::GAMEITEM_TICK, 0, this ), 0 );
 	}
