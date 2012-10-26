@@ -61,7 +61,7 @@ public:
 		RENDER_IMPACT,			// impact metadata event has occured, sender: render component
 	};
 
-	ChitMsg( int _id, int _data=0, const void* _ptr=0 ) : id(_id), data(_data), ptr(_ptr), dataF(0) {
+	ChitMsg( int _id, int _data=0, const void* _ptr=0 ) : id(_id), data(_data), ptr(_ptr), dataF(0), originID(0) {
 		vector.Zero();
 	}
 
@@ -72,6 +72,7 @@ public:
 	// useful data members:
 	grinliz::Vector3F	vector;
 	float				dataF;
+	int					originID;
 
 private:
 	int id;

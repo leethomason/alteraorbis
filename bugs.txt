@@ -1,31 +1,21 @@
 - procedural rendering
-	X re-organize the palette?
 	- static scene showing item combinations
-	X color variation 
-	X color variation for live mode
 	- emissive support
 	- item bone/part support
+	X re-organize the palette?
+	X color variation 
+	X color variation for live mode
 
 - combat test scene	
-	X put in license header
-	X push to altera site
-	X balrog fire attack
-	X visual debugging: line drawing. check bolt impacts.
-	X impact (light/heavy)
-	X heavy weapons should do knockback, not just amount of damage/explosion
-	X change bolt color
-	X item: support speed, pass on to bolts
-	X optimize start time
-	X change effect strategy - are all effects just flags?
-	- shields, general bonus/cost/damage propegation
 	- bolts are hitting own team	
 	- removing unit "clumping" (3yr old soccer team). Basic formation?
+	- eval: kinetic damage of held weapons shouldn't be multiplied with mass (added)
+	- properly hook up items and such, so that items, health, all be driven correctly
+	- effects
+
 	- unique look for units so teams can be distinguished
 	- melee attack goes back to reference position between hits
-	- eval: kinetic damage of held weapons shouldn't be multiplied with mass (added)
-	- knife -> ring
 	- bolt: glow around white core? end caps?
-	- properly hook up items and such, so that items, health, all be driven correctly
 	- buttons to select scenario, load items
 	- animation speed isn't correct
 	- adjust particles to have "impact" effect
@@ -36,7 +26,6 @@
 	- gunrun to walk not synchronized correctly
 	- fix particle def to return a default - the pointer is dangerous
 	- DebugDraw is getting used for release drawing - fine in most (all?) cases. But clean up.
-	X bolts don't hit own team but explosions do. decided this was a good thing.
 	- revisit accuracy comuptation. what scales with distance? area? volume? radius?
 
 	- ranged weapons
@@ -89,7 +78,19 @@
 	  is now in the table, so this should be "fixed".
 	X need to check rotation in the path component
 	X load in the correct lighting
-
+	X put in license header
+	X push to altera site
+	X balrog fire attack
+	X visual debugging: line drawing. check bolt impacts.
+	X impact (light/heavy)
+	X heavy weapons should do knockback, not just amount of damage/explosion
+	X change bolt color
+	X item: support speed, pass on to bolts
+	X optimize start time
+	X change effect strategy - are all effects just flags?
+	X shields, general bonus/cost/damage propegation
+	X knife -> ring
+	X bolts don't hit own team but explosions do. decided this was a good thing.
 
 - animition aware hit testing
 - bounds need to be adjusted to account for animation

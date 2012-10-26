@@ -192,11 +192,13 @@ void GameItem::AbsorbDamage( bool inInventory, const DamageDesc& dd, DamageDesc*
 		remain->damage = dd.damage - absorbed;
 		GLASSERT( remain->damage >= 0 );
 	}
-	if ( inInventory ) {
-		GLLOG(( "Damage Absorbed %s absorbed=%.1f\n", name.c_str(), absorbed ));
-	}
-	else {
-		GLLOG(( "Damage %s total=%.1f hp=%.1f", name.c_str(), absorbed, hp ));
+	if ( absorbed ) {
+		if ( inInventory ) {
+			GLLOG(( "Damage Absorbed %s absorbed=%.1f ", name.c_str(), absorbed ));
+		}
+		else {
+			GLLOG(( "Damage %s total=%.1f hp=%.1f ", name.c_str(), absorbed, hp ));
+		}
 	}
 }
 

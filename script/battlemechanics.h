@@ -63,7 +63,7 @@ public:
 
 	// Other --------------------- //
 
-	static void GenerateExplosionMsgs( const DamageDesc& dd, const grinliz::Vector3F& origin, Engine* engine, grinliz::CDynArray<Chit*>* storage );
+	static void GenerateExplosionMsgs( const DamageDesc& dd, const grinliz::Vector3F& origin, int originID, Engine* engine, grinliz::CDynArray<Chit*>* storage );
 
 	static int PrimaryTeam( Chit* src );
 

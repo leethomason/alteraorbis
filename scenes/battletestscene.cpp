@@ -328,7 +328,6 @@ void BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int 
 	}
 
 	if ( type == HUMAN ) {
-		/* Not working yet.*/
 		// Always get a shield
 		{
 			const GameItem* shield = itemStorage.Get( "shield" );
@@ -421,7 +420,7 @@ void BattleTestScene::Tap( int action, const grinliz::Vector2F& view, const grin
 			at.y = 0.01f;
 
 			DamageDesc dd( 20, 0 );
-			BattleMechanics::GenerateExplosionMsgs( dd, at, engine, &chitArr );
+			BattleMechanics::GenerateExplosionMsgs( dd, at, 0, engine, &chitArr );
 		}
 	}
 }

@@ -32,7 +32,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 	if ( msg.ID() == ChitMsg::CHIT_DAMAGE ) {
 		const DamageDesc* dd = (const DamageDesc*) msg.Ptr();
 		GLASSERT( dd );
-		GLLOG(( "Chit %3d '%s' ", parentChit->ID(), item.Name() ));
+		GLLOG(( "Chit %3d '%s' (origin=%d) ", parentChit->ID(), item.Name(), msg.originID ));
 
 		// See what is in the inventory that can absorb damage.
 		// The inventory can't handle the message, because it has

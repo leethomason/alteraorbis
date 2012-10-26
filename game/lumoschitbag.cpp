@@ -35,22 +35,25 @@ void LumosChitBag::HandleBolt( const Bolt& bolt, Model* modelHit, const grinliz:
 			msg.vector = bolt.dir;
 			msg.vector.Normalize();
 			msg.vector.Multiply( 2.0f );
+			msg.originID = bolt.chitID;
 			chitHit->SendMessage( msg, 0 );
 		}
 	}
 	else {
-		// Here don't worry abou the chit hit. Just ray cast to see
+		// Here don't worry about the chit hit. Just ray cast to see
 		// who is in range of the explosion and takes damage.
 		
 		// Back up the origin of the bolt just a bit, so it doesn't keep
 		// intersecting the model it hit. Then do ray checks around to 
 		// see what gets hit by the explosion.
 
+		//GLLOG(( "Explosion: " ));
+
 		float rewind = Min( 0.1f, 0.5f*bolt.len );
 		GLASSERT( Equal( bolt.dir.Length(), 1.f, 0.001f ));
 		Vector3F origin = at - bolt.dir * rewind;
 
 		DamageDesc dd( bolt.damage, bolt.effect );
-		BattleMechanics::GenerateExplosionMsgs( dd, origin, engine, &chitList );
+		BattleMechanics::GenerateExplosionMsgs( dd, origin, bolt.chitID, engine, &chitList );
 	}
 }

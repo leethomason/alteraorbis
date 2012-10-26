@@ -283,7 +283,7 @@ Vector3F BattleMechanics::ComputeLeadingShot(	const grinliz::Vector3F& origin,
 }
 
 
-void BattleMechanics::GenerateExplosionMsgs( const DamageDesc& _dd, const Vector3F& origin, Engine* engine, CDynArray<Chit*>* hashQuery )
+void BattleMechanics::GenerateExplosionMsgs( const DamageDesc& _dd, const Vector3F& origin, int originID, Engine* engine, CDynArray<Chit*>* hashQuery )
 {
 	Rectangle2F rect;
 	rect.Set( origin.x, origin.z, origin.x, origin.z );
@@ -333,11 +333,13 @@ void BattleMechanics::GenerateExplosionMsgs( const DamageDesc& _dd, const Vector
 						msg.vector = target - origin;
 						msg.vector.Normalize();
 						msg.vector.Multiply( Lerp( 2.f, 4.f, t ));
+						msg.originID = originID;
 						chit->SendMessage( msg, 0 );
 					}
 				}
 			}
 		}
 	}
+	GLLOG(( "</Explosion>\n" ));
 }
 
