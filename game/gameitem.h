@@ -177,6 +177,7 @@ public:
 		EFFECT_MASK			= EFFECT_KINETIC | EFFECT_ENERGY | EFFECT_EXPLOSIVE | EFFECT_FIRE | EFFECT_SHOCK,
 
 		RENDER_TRAIL		= (1<<17),				// render a bolt with a 'smoketrail' vs. regular bolt
+		SHIELD				= (1<<18),				// essentially a special type of weapon
 	};
 
 	grinliz::IString		name;		// name of the item

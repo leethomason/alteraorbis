@@ -154,6 +154,12 @@ void InventoryComponent::AbsorbDamage( const DamageDesc& dd, DamageDesc* absorbe
 		if ( heldAt[i] ) {
 			heldAt[i]->AbsorbDamage( true, dd, absorbed, logstr );
 		}
+		if ( intrinsicAt[i] ) {
+			intrinsicAt[i]->AbsorbDamage( true, dd, absorbed, logstr );
+		}
+	}
+	if ( absorbed->damage > dd.damage ) {
+		absorbed->damage = dd.damage;
 	}
 }
 

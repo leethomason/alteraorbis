@@ -121,11 +121,11 @@ void DebugStateComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			}
 			ammoBar.SetRange( Clamp( r, 0.f, 1.f ) );
 		}
-		if ( pItem->absorbsDamage != 0 ) {
+		if ( pItem->flags & GameItem::SHIELD ) {
 			// will tweak out if there are multiple absorbers.
 			float r = 1;
-			if ( pItem->TotalHP() ) {
-				r = pItem->hp / pItem->TotalHP();
+			if ( pItem->clipCap ) {
+				r = (float)pItem->rounds / (float)pItem->clipCap;
 			}
 			shieldBar.SetRange( Clamp( r, 0.f, 1.0f ));
 		}

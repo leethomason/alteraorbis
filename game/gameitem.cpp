@@ -61,6 +61,7 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 	READ_FLAG( flags, f, EFFECT_FIRE );
 	READ_FLAG( flags, f, EFFECT_SHOCK );
 	READ_FLAG( flags, f, RENDER_TRAIL );
+	READ_FLAG( flags, f, SHIELD );
 
 	READ_FLOAT_ATTR( ele, mass );
 	READ_FLOAT_ATTR( ele, hpPerMass );
@@ -137,17 +138,21 @@ bool GameItem::DoTick( U32 delta )
 			rounds = clipCap;
 		}
 	}
+
+	bool tick = false;
+
 	if (    TotalHP() 
 		 && hpRegen != 0
-		 && ( hp != totalHP || hp != 0 ) ) 
+		 && ( hp != TotalHP() || hp != 0 ) ) 
 	{
 		hp += hpRegen * (float)delta / 1000.0f;
+		tick = true;
 	}
 
 	if ( parentChit ) {
 		parentChit->SendMessage( ChitMsg( ChitMsg::GAMEITEM_TICK, 0, this ), 0 );
 	}
-	return !Ready() || Reloading();	
+	return !Ready() || Reloading() || tick;	
 }
 
 
@@ -162,19 +167,36 @@ void GameItem::Apply( const GameItem* intrinsic )
 
 void GameItem::AbsorbDamage( bool inInventory, const DamageDesc& dd, DamageDesc* remain, const char* log )
 {
-	float absorb = inInventory ? this->absorbsDamage : 1.0f;
+	float absorbed = 0;
 
-	if ( absorb != 0 ) {
-		float d = dd.damage * absorb;
-		if ( d > 0 && TotalHP() ) {
-			d = Min( d, hp );
-			hp -= d;
-			if ( parentChit ) parentChit->SetTickNeeded();
+	if ( !inInventory ) {
+		// just regular item getting hit, that takes damage.
+		absorbed = Min( dd.damage, hp );
+		hp -= absorbed;
+	}
+	else {
+		// Items in the inventory don't take damage. They
+		// may reduce damage for there parent.
+		if ( flags & SHIELD ) {
+			reloadTime = 0;
+			absorbed = Min( dd.damage * absorbsDamage, (float)rounds );
+			rounds -= LRintf( absorbed );
+			if ( rounds < 0 ) rounds = 0;
 		}
-		if ( remain ) {
-			remain->damage = Max( remain->damage - d, 0.0f );
+		else {
+			// Something that straight up reduces damage.
+			absorbed = dd.damage * absorbsDamage;
 		}
-		GLLOG(( "Damage %s total=%.1f hp=%.1f", inInventory ? "Inventory" : "", d, hp ));
+	}
+	if ( remain ) {
+		remain->damage = dd.damage - absorbed;
+		GLASSERT( remain->damage >= 0 );
+	}
+	if ( inInventory ) {
+		GLLOG(( "Damage Absorbed %s absorbed=%.1f\n", name.c_str(), absorbed ));
+	}
+	else {
+		GLLOG(( "Damage %s total=%.1f hp=%.1f", name.c_str(), absorbed, hp ));
 	}
 }
 

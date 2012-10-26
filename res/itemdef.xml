@@ -93,10 +93,11 @@
 
   <item name="shield"
         resource="shield"
-        flags="HELD_AT_HARDPOINT"
+        flags="HELD_AT_HARDPOINT SHIELD"
         hardpoint="shield"
+        reload ="3000"
+        clipCap="20"
         mass="1.0"
-        hpPerMass="20"
         absorbsDamage="0.8">
   </item>
   

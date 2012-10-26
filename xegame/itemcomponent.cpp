@@ -53,7 +53,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		GLLOG(( "\n" ));
 		delta += hp - item.hp;
 
-		if ( item.hp != hp ) {
+		if ( delta || (item.hp != hp) ) {
 			HealthComponent* hc = GET_COMPONENT( parentChit, HealthComponent );
 			if ( hc ) {
 				hc->DeltaHealth();
