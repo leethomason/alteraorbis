@@ -286,6 +286,12 @@ public:
 
 	// Note that the current HP, if it has one, 
 	float TotalHP() const { return mass*hpPerMass; }
+	float RoundsFraction() const {
+		if ( clipCap ) {
+			return (float)rounds / (float)clipCap;
+		}
+		return 1.0f;
+	}
 
 	// Absorb damage.'remain' is how much damage passes through the shield
 	void AbsorbDamage( bool inInventory, const DamageDesc& dd, DamageDesc* remain, const char* log );

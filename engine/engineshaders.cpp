@@ -63,25 +63,3 @@ GPUShader* EngineShaders::GetShader( int base, int flags )
 	return node.shader;
 }
 
-
-
-void EngineShaders::SetEmissiveEx()
-{
-	emissive.SetShaderFlag( ShaderManager::EMISSIVE_EXCLUSIVE ); 
-	for( int i=0; i<shaderArr.Size(); ++i ) {
-		if ( shaderArr[i].base == EMISSIVE ) {
-			shaderArr[i].shader->SetShaderFlag( ShaderManager::EMISSIVE_EXCLUSIVE ); 
-		}
-	}
-}
-
-
-void EngineShaders::ClearEmissiveEx()
-{
-	emissive.ClearShaderFlag( ShaderManager::EMISSIVE_EXCLUSIVE ); 
-	for( int i=0; i<shaderArr.Size(); ++i ) {
-		if ( shaderArr[i].base == EMISSIVE ) {
-			shaderArr[i].shader->ClearShaderFlag( ShaderManager::EMISSIVE_EXCLUSIVE ); 
-		}
-	}
-}

@@ -273,7 +273,7 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 
 	engineShaders->light    = LightShader( ambient, dir, diffuse );
 	engineShaders->emissive = LightShader( ambient, dir, diffuse );
-	engineShaders->emissive.SetShaderFlag( ShaderManager::EMISSIVE );
+	engineShaders->emissive.SetShaderFlag(   ShaderManager::EMISSIVE );
 	engineShaders->blend    = LightShader( ambient, dir, diffuse, GPUShader::BLEND_NORMAL );
 
 	if ( lighting.hemispheric ) {
@@ -306,23 +306,28 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 		renderTarget[RT_LIGHTS]->SetActive( true, this );
 		renderTarget[RT_LIGHTS]->screenport->SetPerspective();
 
+		// ---------- Pass 1 -----------
 		// Tweak the shaders for glow-only rendering.
 		// Make the light shader flat black:
 		FlatShader black;
 		black.SetColor( 0, 0, 0, 0 );
 
-		// And throw the emissive shader to exclusive:
-		engineShaders->SetEmissiveEx();
 		// Render flat black everything that does NOT emit light:
-		renderQueue->Submit( &black, 0, 0, 0, 0, ShaderManager::EMISSIVE_EXCLUSIVE );
-		// Submit everything that emits light:
-		if ( map ) {
-			map->Submit( &engineShaders->emissive, true );
-		}
-		renderQueue->Submit( 0, 0, 0, 0, ShaderManager::EMISSIVE_EXCLUSIVE, 0 );
-		// recove the shader settings
-		engineShaders->ClearEmissiveEx();
+		renderQueue->Submit( &black, true, 0, 0, 0, 0, ShaderManager::EMISSIVE );
 
+		// ---------- Pass 2 -----------
+		//GPUShader saved = engineShaders->emissive;
+		GPUShader ex = FlatShader();
+		ex.SetShaderFlag( ShaderManager::EMISSIVE );
+		ex.SetShaderFlag( ShaderManager::EMISSIVE_EXCLUSIVE );
+		//engineShaders->emissive = ex;
+
+		if ( map ) {
+			map->Submit( &ex, true );
+		}
+		// And throw the emissive shader to exclusive:
+		renderQueue->Submit( &ex, false, 0, 0, 0, ShaderManager::EMISSIVE, 0 );
+		//engineShaders->emissive =  saved;
 		renderTarget[RT_LIGHTS]->SetActive( false, this );
 	}
 
@@ -348,7 +353,7 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 			shadowMatrix.m32 = -lighting.direction.z/lighting.direction.y;
 
 			renderQueue->Submit(	&shadowShader,
-									0,
+									0, false,
 									Model::MODEL_NO_SHADOW,
 									&shadowMatrix, 
 									0, 0 );
@@ -366,7 +371,7 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 	// -------- Models ---------- //
 #ifdef ENGINE_RENDER_MODELS
 	{
-		renderQueue->Submit( 0, 0, 0, 0, 0, 0 );
+		renderQueue->Submit( 0, false, 0, 0, 0, 0, 0 );
 	}
 #endif
 

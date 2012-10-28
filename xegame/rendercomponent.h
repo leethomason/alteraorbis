@@ -32,8 +32,7 @@ class RenderComponent : public Component
 {
 public:
 	// spacetree probably  sufficient, but 'engine' easier to keep track of
-	// flags: MODEL_USER_AVOIDS
-	RenderComponent( Engine* engine, const char* asset, int modelFlags );
+	RenderComponent( Engine* engine, const char* asset );
 	virtual ~RenderComponent();
 
 	// ------ Component functionality: -------
@@ -54,7 +53,6 @@ public:
 	// Radius of the "base" the model stands on. Used to position
 	// the model so it doesn't walk into walls or other models.
 	float	RadiusOfBase();
-	int		GetFlags() const { return flags; }
 
 	const char* GetMetaData( int i );
 
@@ -76,8 +74,9 @@ public:
 	// A render component has one primary, animated model. Additional
 	// assets (guns, shields, etc.) can be Attached and Detatched
 	// to "metadata hardpoints".
-	void Attach( const char* metaData, const char* asset );
-	void Detach( const char* metaData );
+	void Attach( const char* hardpoint, const char* asset );
+	void ParamColor( const char* hardpoint, const grinliz::Vector4F& colorMult );
+	void Detach( const char* hardpoint );
 
 private:
 	AnimationType CalcAnimation() const;
@@ -86,7 +85,6 @@ private:
 	enum { NUM_MODELS = EL_MAX_METADATA+1 };	// slot[0] is the main model; others are hardpoint attach
 
 	Engine* engine;
-	int		flags;
 	float	radiusOfBase;
 
 	const ModelResource*	resource[ NUM_MODELS ];

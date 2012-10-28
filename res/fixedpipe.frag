@@ -70,6 +70,7 @@ void main()
 				// In 'exclusive' mode, everything is black, and mixed
 				// to the emmissive color.
 				color = mix( vec4(0,0,0,1), texColor, texColor.a );
+				//color = vec4( 1,0,0,1 );
 			#endif
 		#else
 			color *= sample;

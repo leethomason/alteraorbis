@@ -38,10 +38,6 @@ public:
 
 	GPUShader* GetShader( int base, int flags );
 	
-	// Special functions for glow:
-	void SetEmissiveEx();
-	void ClearEmissiveEx();
-
 private:
 	// These things can't move in memory.
 	struct Node {

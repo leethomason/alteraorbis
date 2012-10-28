@@ -58,6 +58,7 @@ public:
 
 	/* If a shader is passed it, it will override the shader set by the Add. */
 	void Submit(	GPUShader* shader, 
+					bool suppressTexture,
 					int modelRequired, 
 					int modelExcluded,
 					const grinliz::Matrix4* xform,		// Additional transformation applied to model matrix,

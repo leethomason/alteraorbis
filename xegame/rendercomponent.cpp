@@ -28,8 +28,8 @@
 
 using namespace grinliz;
 
-RenderComponent::RenderComponent( Engine* _engine, const char* _asset, int _flags ) 
-	: engine( _engine ), flags( _flags )
+RenderComponent::RenderComponent( Engine* _engine, const char* _asset ) 
+	: engine( _engine )
 {
 	resource[0] = ModelResourceManager::Instance()->GetModelResource( _asset );
 	GLASSERT( resource[0] );
@@ -58,7 +58,6 @@ void RenderComponent::OnAdd( Chit* chit )
 		if ( resource[i] ) {
 			model[i] = engine->AllocModel( resource[i] );
 			model[i]->userData = parentChit;
-			model[i]->SetFlag( flags );
 		}
 	}
 }
@@ -181,11 +180,25 @@ void RenderComponent::Attach( const char* metaData, const char* asset )
 			if ( model[0] ) {
 				model[j] = engine->AllocModel( resource[j] );
 				model[j]->userData = parentChit;
-				model[j]->SetFlag( flags );
 			}
 			break;
 		}
 	}
+}
+
+
+void RenderComponent::ParamColor( const char* hardpoint, const grinliz::Vector4F& colorMult )
+{
+	for( int i=0; i<EL_MAX_METADATA; ++i ) {
+		if ( metaDataName[i] == hardpoint ) {
+			GLASSERT( model[i+1] );
+			if ( model[i+1] ) {
+				model[i+1]->SetColor( colorMult );
+				return;
+			}
+		}
+	}
+	GLASSERT( 0 );	// safe, but we meant to find something.
 }
 
 

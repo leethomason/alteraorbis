@@ -155,7 +155,11 @@ void RenderQueue::Add(	Model* model,
 }
 
 
-void RenderQueue::Submit( GPUShader* overRideShader, int modelRequired, int modelExcluded, const Matrix4* xform, int shaderRequired, int shaderExcluded )
+void RenderQueue::Submit(	GPUShader* overRideShader, 
+							bool suppressTexture,
+							int modelRequired, int modelExcluded, 
+							const Matrix4* xform, 
+							int shaderRequired, int shaderExcluded )
 {
 	//GRINLIZ_PERFTRACK
 
@@ -163,24 +167,23 @@ void RenderQueue::Submit( GPUShader* overRideShader, int modelRequired, int mode
 		GPUShader* shader = overRideShader ? overRideShader : statePool[i].shader;
 		GLASSERT( shader );
 
-		if ( !overRideShader ) {
+		if ( !suppressTexture ) {
 			shader->SetTexture0( statePool[i].texture );
 		}
+		// HACK that reveals issue with how the shader flags are managed.
+		// (Lots of issues in that code: was ported over with the fixed
+		// pipeline and not cleaned up enough.) But if the overRideShader
+		// is in use, it still needs some flags from the shader it is overriding.
+		if ( statePool[i].shader->ShaderFlags() & ShaderManager::BONE_XFORM ) {
+			shader->SetShaderFlag( ShaderManager::BONE_XFORM );
+		}
 		else {
-			// HACK that reveals issue with how the shader flags are managed.
-			// (Lots of issues in that code: was ported over with the fixed
-			// pipeline and not cleaned up enough.) But if the overRideShader
-			// is in use, it still needs some flags from the shader it is overriding.
-			if ( statePool[i].shader->ShaderFlags() & ShaderManager::BONE_XFORM ) {
-				shader->SetShaderFlag( ShaderManager::BONE_XFORM );
-			}
-			else {
-				shader->ClearShaderFlag( ShaderManager::BONE_XFORM );
-			}
+			shader->ClearShaderFlag( ShaderManager::BONE_XFORM );
 		}
 
-		if (    (( shader->ShaderFlags() & shaderRequired ) != shaderRequired )
-			 || ( shader->ShaderFlags() & shaderExcluded ) )
+		// Note that the flags operate on the origin shader, not the override.
+		if (    (( statePool[i].shader->ShaderFlags() & shaderRequired ) != shaderRequired )
+			 || ( statePool[i].shader->ShaderFlags() & shaderExcluded ) )
 		{
 			// This shader is excluded.
 			continue;

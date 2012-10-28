@@ -108,7 +108,7 @@ void NavTest2Scene::LoadMap()
 		const Vector2I& v = blocks[i];
 		MapSpatialComponent* msc = new MapSpatialComponent( 1, 1, map );
 		chit->Add( msc );
-		chit->Add( new RenderComponent( engine, "unitCube", 0 ));
+		chit->Add( new RenderComponent( engine, "unitCube" ));
 
 		GET_COMPONENT( chit, MapSpatialComponent )->SetMapPosition( v.x, v.y, 0 );
 	}
@@ -117,7 +117,7 @@ void NavTest2Scene::LoadMap()
 		const Vector2I& v = features[i];
 		MapSpatialComponent* msc = new MapSpatialComponent( 1, 1, map );
 		chit->Add( msc );
-		chit->Add( new RenderComponent( engine, "tree", 0 ));
+		chit->Add( new RenderComponent( engine, "tree" ));
 
 		GET_COMPONENT( chit, MapSpatialComponent )->SetMapPosition( v.x, v.y, 0 );
 	}
@@ -146,7 +146,7 @@ void NavTest2Scene::CreateChit( const Vector2I& p )
 		asset = "hornet";
 	}
 
-	chit->Add( new RenderComponent( engine, asset, 0 ));
+	chit->Add( new RenderComponent( engine, asset ));
 	chit->Add( new PathMoveComponent( map ));
 #ifdef DEBUG_PMC
 	chit->Add( new DebugPathComponent( engine, map, static_cast<LumosGame*>(game) ));

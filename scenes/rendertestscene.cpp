@@ -207,7 +207,10 @@ void RenderTestScene::HandleHotKeyMask( int mask )
 void RenderTestScene::Draw3D( U32 deltaTime )
 {
 	engine->Draw( deltaTime );
-	
-	//RenderAtom atom( (const void*)UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, (const void*)engine->GetRenderTargetTexture(2), 0.25f, 0.25f, 0.75f, 0.75f );
-	//rtImage.SetAtom( atom );
+
+#if 0
+	RenderAtom atom( (const void*)UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, 
+		             (const void*)engine->GetRenderTargetTexture(0), 0.25f, 0.25f, 0.75f, 0.75f );
+	rtImage.SetAtom( atom );
+#endif
 }
