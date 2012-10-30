@@ -28,17 +28,27 @@ public:
 	EngineShaders();
 	~EngineShaders();
 
-	GPUShader light;
-	GPUShader blend;
-	GPUShader emissive;
-
 	enum {
-		LIGHT, BLEND, EMISSIVE		// base
+		LIGHT=1, BLEND=2, EMISSIVE=4		// base
 	};
 
 	GPUShader* GetShader( int base, int flags );
+
+	void Push( int base, const GPUShader& shader );
+	void Pop( int base );
+
+	void PushAll( const GPUShader& shader );
+	void PopAll();
 	
 private:
+	enum { STACK = 2 };
+	GPUShader light[STACK];
+	GPUShader blend[STACK];
+	GPUShader emissive[STACK];
+	int nLight;
+	int nBlend;
+	int nEmissive;
+
 	// These things can't move in memory.
 	struct Node {
 		int base;

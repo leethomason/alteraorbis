@@ -231,6 +231,22 @@ Texture* Engine::GetMiniMapTexture()
 }
 
 
+void Engine::QueueSet(	EngineShaders* engineShaders, Model* root, 
+						int requiredModelFlag, int excludedModelFlag,						
+						int requiredShaderFlag, int excludedShaderFlag )
+{
+	renderQueue->Clear();
+	for( Model* model=root; model; model=model->next ) {
+		int flag = model->Flags();
+		if (    (( requiredModelFlag & flag ) == requiredModelFlag )
+			 && (( excludedModelFlag & flag ) == 0 ) )
+		{
+			model->Queue( renderQueue, engineShaders, requiredShaderFlag, excludedShaderFlag );
+		}
+	}
+}
+
+
 void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 {
 	GRINLIZ_PERFTRACK;
@@ -259,11 +275,11 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 	}
 #endif
 				
-
 	// Compute the frustum planes and query the tree.
 	Plane planes[6];
 	CalcFrustumPlanes( planes );
 
+	// Get the working set of models.
 	int exclude = Model::MODEL_INVISIBLE;
 	Model* modelRoot = spaceTree->Query( planes, 6, 0, exclude );
 	
@@ -271,32 +287,26 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 	Vector4F dir;
 	lighting.Query( &ambient, &dir, &diffuse );
 
-	engineShaders->light    = LightShader( ambient, dir, diffuse );
-	engineShaders->emissive = LightShader( ambient, dir, diffuse );
-	engineShaders->emissive.SetShaderFlag(   ShaderManager::EMISSIVE );
-	engineShaders->blend    = LightShader( ambient, dir, diffuse, GPUShader::BLEND_NORMAL );
+	{
+		LightShader light( ambient, dir, diffuse );
+		LightShader em( ambient, dir, diffuse );
+		em.SetShaderFlag( ShaderManager::EMISSIVE );
+		LightShader blend( ambient, dir, diffuse, GPUShader::BLEND_NORMAL );
 
-	if ( lighting.hemispheric ) {
-		engineShaders->light.SetShaderFlag(    ShaderManager::LIGHTING_HEMI );
-		engineShaders->blend.SetShaderFlag(    ShaderManager::LIGHTING_HEMI );
-		engineShaders->emissive.SetShaderFlag( ShaderManager::LIGHTING_HEMI );
+		if ( lighting.hemispheric ) {
+			light.SetShaderFlag(    ShaderManager::LIGHTING_HEMI );
+			blend.SetShaderFlag(    ShaderManager::LIGHTING_HEMI );
+			em.SetShaderFlag(		ShaderManager::LIGHTING_HEMI );
+		}
+
+		engineShaders->Push( EngineShaders::LIGHT, light );
+		engineShaders->Push( EngineShaders::EMISSIVE, em );
+		engineShaders->Push( EngineShaders::BLEND, blend );
 	}
-	
 	Rectangle2I mapBounds( 0, 0, EL_MAX_MAP_SIZE-1, EL_MAX_MAP_SIZE-1 );
 	if ( map ) {
 		mapBounds = map->Bounds();
 	}
-
-
-	// ------------ Process the models into the render queue -----------
-	{
-		GLASSERT( renderQueue->Empty() );
-
-		for( Model* model=modelRoot; model; model=model->next ) {
-			model->Queue( renderQueue, engineShaders );
-		}
-	}
-
 
 	// ----------- Render Passess ---------- //
 	if ( glow ) {
@@ -313,21 +323,24 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 		black.SetColor( 0, 0, 0, 0 );
 
 		// Render flat black everything that does NOT emit light:
-		renderQueue->Submit( &black, true, 0, 0, 0, 0, ShaderManager::EMISSIVE );
+		engineShaders->PushAll( black );
+		QueueSet( engineShaders, modelRoot, 0, 0, 0, EngineShaders::EMISSIVE );
+		renderQueue->Submit( 0, 0, 0 );
+		engineShaders->PopAll();
 
 		// ---------- Pass 2 -----------
-		//GPUShader saved = engineShaders->emissive;
 		GPUShader ex = FlatShader();
 		ex.SetShaderFlag( ShaderManager::EMISSIVE );
 		ex.SetShaderFlag( ShaderManager::EMISSIVE_EXCLUSIVE );
-		//engineShaders->emissive = ex;
+		engineShaders->Push( EngineShaders::EMISSIVE, ex );
+		QueueSet( engineShaders, modelRoot, 0, 0, EngineShaders::EMISSIVE, 0 );
 
 		if ( map ) {
 			map->Submit( &ex, true );
 		}
 		// And throw the emissive shader to exclusive:
-		renderQueue->Submit( &ex, false, 0, 0, 0, ShaderManager::EMISSIVE, 0 );
-		//engineShaders->emissive =  saved;
+		renderQueue->Submit( 0, 0, 0 );
+		engineShaders->Pop( EngineShaders::EMISSIVE );
 		renderTarget[RT_LIGHTS]->SetActive( false, this );
 	}
 
@@ -340,6 +353,7 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 
 #ifdef ENGINE_RENDER_SHADOWS
 		if ( shadowAmount > 0.0f ) {
+
 			FlatShader shadowShader;
 			shadowShader.SetStencilMode( GPUShader::STENCIL_WRITE );
 			shadowShader.SetDepthTest( false );	// flat plane. 1st pass.
@@ -347,16 +361,17 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 			shadowShader.SetColorWrite( false );
 			shadowShader.SetColor( 1, 0, 0 );	// testing
 
+			engineShaders->PushAll( shadowShader );
+			QueueSet( engineShaders, modelRoot, 0, Model::MODEL_NO_SHADOW, 0, EngineShaders::BLEND );
+
 			Matrix4 shadowMatrix;
 			shadowMatrix.m12 = -lighting.direction.x/lighting.direction.y;
 			shadowMatrix.m22 = 0.0f;
 			shadowMatrix.m32 = -lighting.direction.z/lighting.direction.y;
 
-			renderQueue->Submit(	&shadowShader,
-									0, false,
-									Model::MODEL_NO_SHADOW,
-									&shadowMatrix, 
-									0, 0 );
+			renderQueue->Submit( 0, 0, &shadowMatrix );
+
+			engineShaders->PopAll();
 
 			map->Draw3D( shadow, GPUShader::STENCIL_SET );
 		}
@@ -371,10 +386,12 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 	// -------- Models ---------- //
 #ifdef ENGINE_RENDER_MODELS
 	{
-		renderQueue->Submit( 0, false, 0, 0, 0, 0, 0 );
+		QueueSet( engineShaders, modelRoot, 0, 0, 0, 0  );
+		renderQueue->Submit( 0, 0, 0 );
 	}
 #endif
 
+	engineShaders->PopAll();
 	renderQueue->Clear();
 
 	// --------- Composite Glow -------- //

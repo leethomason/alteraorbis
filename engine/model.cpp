@@ -531,7 +531,7 @@ void Model::CalcTargetSize( float* width, float* height ) const
 }
 
 
-void Model::Queue( RenderQueue* queue, EngineShaders* engineShaders )
+void Model::Queue( RenderQueue* queue, EngineShaders* engineShaders, int required, int excluded )
 {
 	if ( flags & MODEL_INVISIBLE )
 		return;
@@ -548,43 +548,45 @@ void Model::Queue( RenderQueue* queue, EngineShaders* engineShaders )
 				base = EngineShaders::BLEND;
 		}
 
-		int mod = 0;
-		if ( HasTextureXForm(i) ) {
-			mod = ShaderManager::TEXTURE0_TRANSFORM;
-		}
-		else if ( HasColor() ) {
-			mod = ShaderManager::COLOR_PARAM;
-		}
-		else if ( HasBoneFilter() ) {
-			mod = ShaderManager::BONE_FILTER;
-		}
+		if ( (( base & required ) == required ) && (( base & excluded ) == 0 ) ) {
+			int mod = 0;
+			if ( HasTextureXForm(i) ) {
+				mod = ShaderManager::TEXTURE0_TRANSFORM;
+			}
+			else if ( HasColor() ) {
+				mod = ShaderManager::COLOR_PARAM;
+			}
+			else if ( HasBoneFilter() ) {
+				mod = ShaderManager::BONE_FILTER;
+			}
 
-		if ( HasAnimation() ) {
-			mod |= ShaderManager::BONE_XFORM;
-		}
-		if ( flags & MODEL_PROCEDURAL ) {
-			mod = ShaderManager::PROCEDURAL;
-		}
+			if ( HasAnimation() ) {
+				mod |= ShaderManager::BONE_XFORM;
+			}
+			if ( flags & MODEL_PROCEDURAL ) {
+				mod = ShaderManager::PROCEDURAL;
+			}
 
-		GPUShader* shader = engineShaders->GetShader( base, mod );
+			GPUShader* shader = engineShaders->GetShader( base, mod );
 
-		BoneData* pBD = 0;
-		BoneData boneData;
-		if ( HasAnimation() ) {
-			CalcAnimation( &boneData ); 
-			pBD = &boneData;
-		}
-		const Matrix4* pMat = 0;
-		if ( flags & MODEL_PROCEDURAL ) {
-			pMat = &this->procMat;
-		}
+			const BoneData* pBD = 0;
+			const Matrix4* pMat = 0;
 
-		queue->Add( this,									// reference back
-					&resource->atom[i],						// model atom to render
-					shader,
-					param[i],								// parameter to the shader
-					pMat,
-					pBD );								
+			if ( HasAnimation() ) {
+				CalcAnimation( &this->boneData ); 
+				pBD = &boneData;
+			}
+			if ( flags & MODEL_PROCEDURAL ) {
+				pMat = &this->procMat;
+			}
+
+			queue->Add( this,									// reference back
+						&resource->atom[i],						// model atom to render
+						shader,
+						param[i],								// parameter to the shader
+						pMat,
+						pBD );
+		}
 	}
 }
 

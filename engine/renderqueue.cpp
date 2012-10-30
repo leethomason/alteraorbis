@@ -27,15 +27,11 @@ RenderQueue::RenderQueue()
 {
 	nState = 0;
 	nItem = 0;
-
-	vertexCacheSize = 0;
-	vertexCacheCap = 0;
 }
 
 
 RenderQueue::~RenderQueue()
 {
-	vertexCache.Destroy();
 }
 
 
@@ -131,63 +127,24 @@ void RenderQueue::Add(	Model* model,
 	item->model = model;
 	item->atom = atom;
 	item->param = param;
-
-	if ( param4 ) {
-		item->param4 = *param4;
-		item->hasParam4 = true;
-	}
-	else {
-		memset( &item->param4, 0, sizeof( item->param4 ));
-		item->hasParam4 = false;
-	}
-	
-	if ( boneData ) {
-		item->boneData = *boneData;
-		item->hasBoneData = true;
-	}
-	else {
-		memset( &item->boneData, 0, sizeof( item->boneData ) );
-		item->hasBoneData = false;
-	}
+	item->param4 = param4;
+	item->boneData = boneData;
 	
 	item->next  = state->root;
 	state->root = item;
 }
 
 
-void RenderQueue::Submit(	GPUShader* overRideShader, 
-							bool suppressTexture,
-							int modelRequired, int modelExcluded, 
-							const Matrix4* xform, 
-							int shaderRequired, int shaderExcluded )
+void RenderQueue::Submit(	int modelRequired, 
+							int modelExcluded, 
+							const Matrix4* xform )
 {
 	//GRINLIZ_PERFTRACK
 
 	for( int i=0; i<nState; ++i ) {
-		GPUShader* shader = overRideShader ? overRideShader : statePool[i].shader;
+		GPUShader* shader = statePool[i].shader;
 		GLASSERT( shader );
-
-		if ( !suppressTexture ) {
-			shader->SetTexture0( statePool[i].texture );
-		}
-		// HACK that reveals issue with how the shader flags are managed.
-		// (Lots of issues in that code: was ported over with the fixed
-		// pipeline and not cleaned up enough.) But if the overRideShader
-		// is in use, it still needs some flags from the shader it is overriding.
-		if ( statePool[i].shader->ShaderFlags() & ShaderManager::BONE_XFORM ) {
-			shader->SetShaderFlag( ShaderManager::BONE_XFORM );
-		}
-		else {
-			shader->ClearShaderFlag( ShaderManager::BONE_XFORM );
-		}
-
-		// Note that the flags operate on the origin shader, not the override.
-		if (    (( statePool[i].shader->ShaderFlags() & shaderRequired ) != shaderRequired )
-			 || ( statePool[i].shader->ShaderFlags() & shaderExcluded ) )
-		{
-			// This shader is excluded.
-			continue;
-		}
+		shader->SetTexture0( statePool[i].texture );
 
 		// Filter out all the items for this RenderState
 		itemArr.Clear();
@@ -206,7 +163,7 @@ void RenderQueue::Submit(	GPUShader* overRideShader,
 		// For this RenderState, we now have all the items to be drawn.
 		// We now want to group the items by RenderAtom, so that the 
 		// Atoms which are instanced can be rendered together.
-		qsort( itemArr.Mem(), itemArr.Size(), sizeof(Item*), CompareAtom );
+		qsort( (void*)itemArr.Mem(), itemArr.Size(), sizeof(Item*), CompareAtom );
 
 		int start = 0;
 		int end = 0;
@@ -222,8 +179,11 @@ void RenderQueue::Submit(	GPUShader* overRideShader,
 			int delta = end - start;
 			const ModelAtom* atom = itemArr[start]->atom;
 
-			#ifdef XENOENGINE_INSTANCING
-			if ( atom->instances > 1 && delta > 1 ) {
+#ifdef XENOENGINE_INSTANCING
+			// The 2 paths is a real pain in the butt, both
+			// for startup time and debugging. If instancing
+			// in use, always instance.
+			{
 				atom->Bind( shader );
 
 				int k=start;
@@ -239,18 +199,18 @@ void RenderQueue::Submit(	GPUShader* overRideShader,
 							shader->InstanceMatrix( index, item->model->XForm() );
 						}
 						shader->InstanceParam( index, item->param );
-						if ( item->hasParam4 ) {
-							shader->InstanceParam4( index, item->param4 );
+						if ( item->param4 ) {
+							shader->InstanceParam4( index, *item->param4 );
 						}
-						if ( item->hasBoneData ) {
-							shader->InstanceBones( index, item->boneData );
+						if ( item->boneData ) {
+							shader->InstanceBones( index, *item->boneData );
 						}
 					}
 					shader->Draw( delta );
 					k += delta;
 				}
-			} else
-			#endif
+			}
+#else
 			{
 				atom->Bind( shader );
 				for( int k=start; k<end; ++k ) {
@@ -273,6 +233,7 @@ void RenderQueue::Submit(	GPUShader* overRideShader,
 					shader->PopMatrix( GPUShader::MODELVIEW_MATRIX );
 				}
 			}
+#endif
 			start = end;
 		}
 	}

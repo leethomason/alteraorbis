@@ -246,7 +246,8 @@ bool InventoryComponent::DoTick( U32 delta )
 
 	GameItem* shield = GetShield();
 	if ( shield && parentChit->GetRenderComponent() ) {
-		Vector4F c = { 1, 1, 1, shield->RoundsFraction() };
+		Vector4F c = { 1, 0, 0, shield->RoundsFraction() };
+		//Vector4F c = { 1, 1, 1, 1 };
 		parentChit->GetRenderComponent()->ParamColor( "shield", c );
 	}
 

@@ -1,3 +1,10 @@
+- move EngineShaders local
+- one item array
+- extend rendering test to animation
+- output drawcalls per state
+- clean up Shields
+- clean up instance rendering
+
 - procedural rendering
 	- static scene showing item combinations
 	- emissive support

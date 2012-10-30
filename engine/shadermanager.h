@@ -42,6 +42,17 @@ public:
 
 	static ShaderManager* Instance() { if ( !instance ) instance = new ShaderManager(); return instance; }
 
+	/* The current design came from migrating the Xenowar fixed pipeline. And
+	   although that was a good move from a test case point of view,
+	   it didn't lean to a clean architecture between the ShaderManager and the
+	   GPUState, and the GPUStream. 
+
+	   There are 3 "levels" of state. There should only be 2, and managed better.
+	   1. Environment - TEXTURE, stream data, LIGHTING
+	   2. Model (Queue) - PARAM (often want on submit), EMISSIVE, BONE, PROCEDURAL
+	   3. Model (Submit) - INSTANCE
+	*/
+
 	enum {				
 		TEXTURE0			= (1<<0),		// Texture is in use. Note that the sampling state (linear, nearest) is saved with the texture.
 		TEXTURE0_ALPHA_ONLY = (1<<1),		// Texture is only alpha, which composites differently.

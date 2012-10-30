@@ -219,10 +219,11 @@ public:
 	void Init( const ModelResource* resource, SpaceTree* tree );
 	void Free();
 
-	void Queue( RenderQueue* queue, EngineShaders* shaders );
+	void Queue( RenderQueue* queue, EngineShaders* shaders, int requiredShaderFlag, int excludedShaderFlag );
 
 	enum {
 		MODEL_SELECTABLE			= 0x0001,
+		// FIXME: Clean this up. The universal param is a horrible idea.
 		MODEL_PARAM_IS_TEX_XFORM	= 0x0002,
 		MODEL_PARAM_IS_COLOR		= 0x0004,
 		MODEL_PARAM_IS_BONE_FILTER	= 0x0008,
@@ -398,6 +399,7 @@ private:
 	const AnimationResource* animationResource;
 	bool hasParticles;
 
+	BoneData			boneData;
 	grinliz::Vector4F	param[EL_MAX_MODEL_GROUPS];
 	grinliz::Matrix4	procMat;
 

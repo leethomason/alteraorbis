@@ -61,15 +61,14 @@ void main()
 			// Basically, the alpha color is used to
 			// modulate the incoming fragment color, which
 			// is the result of lighting.
-			vec4 texColor = sample;
 			#if EMISSIVE_EXCLUSIVE == 0
 				// In 'normal'emissive mode, the incoming color (lighting)
 				// is mixed out as the emissiveness increases.
-				color = mix( color, vec4(1,1,1,1), texColor.a ) * texColor;
+				color = mix( color, vec4(1,1,1,1), sample.a ) * sample;
 			#elif EMISSIVE_EXCLUSIVE == 1
 				// In 'exclusive' mode, everything is black, and mixed
 				// to the emmissive color.
-				color = mix( vec4(0,0,0,1), texColor, texColor.a );
+				color = mix( vec4(0,0,0,1), sample, sample.a ) * color;
 				//color = vec4( 1,0,0,1 );
 			#endif
 		#else

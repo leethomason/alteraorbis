@@ -49,22 +49,19 @@ public:
 
 	RenderQueue();
 	~RenderQueue();
+
 	void Add(	Model* model,					// Can be chaned: billboard rotation will be set.
 				const ModelAtom* atom, 
 				GPUShader* shader,
-				const grinliz::Vector4F& param,
+				const grinliz::Vector4F& param, 
 				const grinliz::Matrix4* param4,
-				const BoneData* bones );
+				const BoneData* boneData  );
+
 
 	/* If a shader is passed it, it will override the shader set by the Add. */
-	void Submit(	GPUShader* shader, 
-					bool suppressTexture,
-					int modelRequired, 
+	void Submit(	int modelRequired, 
 					int modelExcluded,
-					const grinliz::Matrix4* xform,		// Additional transformation applied to model matrix,
-														// usually the shadow matrix.
-					int shaderRequired,
-					int shaderExcluded );
+					const grinliz::Matrix4* xform );
 
 	bool Empty() { return nState == 0 && nItem == 0; }
 	void Clear() { nState = 0; nItem = 0; }
@@ -74,10 +71,8 @@ private:
 		Model*					model;
 		const ModelAtom*		atom;	
 		grinliz::Vector4F		param;			// per instance data (vec4)
-		bool					hasParam4;
-		grinliz::Matrix4		param4;			// per instance data (matrix)
-		bool					hasBoneData;
-		BoneData				boneData;
+		const grinliz::Matrix4*	param4;			// per instance data (matrix)
+		const BoneData*			boneData;
 		Item*					next;
 	};
 
@@ -112,16 +107,9 @@ private:
 	int nState;
 	int nItem;
 
-	GPUVertexBuffer vertexCache;
-	int vertexCacheSize;
-	int vertexCacheCap;
-
-	grinliz::CDynArray<Vertex> vertexBuf;
-	grinliz::CDynArray<U16>    indexBuf;
-	grinliz::CDynArray<Item*>  itemArr;
-
 	State statePool[MAX_STATE];
-	Item itemPool[MAX_ITEMS];
+	Item  itemPool[MAX_ITEMS];
+	grinliz::CArray< Item*, MAX_ITEMS > itemArr;
 };
 
 
