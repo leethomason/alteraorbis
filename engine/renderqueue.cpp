@@ -193,17 +193,17 @@ void RenderQueue::Submit(	int modelRequired,
 					for( int index=0; index<delta; ++index ) {
 						const Item* item = itemArr[k+index];
 						if ( xform ) {
-							shader->InstanceMatrix( index, (*xform) * item->model->XForm() );
+							GPUShader::instanceMatrix[index] = (*xform) * item->model->XForm();
 						}
 						else {
-							shader->InstanceMatrix( index, item->model->XForm() );
+							GPUShader::instanceMatrix[index] = item->model->XForm();
 						}
-						shader->InstanceParam( index, item->param );
+						GPUShader::instanceParam[index] = item->param;
 						if ( item->param4 ) {
-							shader->InstanceParam4( index, *item->param4 );
+							GPUShader::instanceParam4[index] = *item->param4;
 						}
 						if ( item->boneData ) {
-							shader->InstanceBones( index, *item->boneData );
+							GPUShader::instanceBones[index] = *item->boneData;
 						}
 					}
 					shader->Draw( delta );

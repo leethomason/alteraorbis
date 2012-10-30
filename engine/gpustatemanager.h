@@ -251,27 +251,6 @@ public:
 	void ClearShaderFlag( int flag )			{ shaderFlags &= (~flag); }
 	int  ShaderFlags() const					{ return shaderFlags; }
 
-	void InstanceMatrix( int i, const grinliz::Matrix4& mat ) { 
-		GLASSERT( i >= 0 && i < EL_MAX_INSTANCE );
-		instanceMatrix[i] = mat; 
-	}
-	void InstanceParam( int i, const grinliz::Vector4F& v ) {
-		GLASSERT( i >= 0 && i < EL_MAX_INSTANCE );
-		instanceParam[i] = v; 
-	}
-	void InstanceParam4( int i, const grinliz::Matrix4& m ) {
-		GLASSERT( i >= 0 && i < EL_MAX_INSTANCE );
-		instanceParam4[i] = m; 
-	}
-
-	void InstanceBones( int i, const BoneData& bones ) {
-		GLASSERT( i >= 0 && i < EL_MAX_INSTANCE );
-		instanceBones[i] = bones;
-	}
-	void SetParam( const grinliz::Vector4F& v ) {
-		InstanceParam( 0, v );
-	}
-
 	void SetStencilMode( StencilMode value ) { stencilMode = value; }
 	void SetDepthWrite( bool value ) { depthWrite = value; }
 	void SetDepthTest( bool value ) { depthTest = value; }
@@ -284,6 +263,14 @@ public:
 
 	static const grinliz::Matrix4& TopMatrix( MatrixType type );
 	static const grinliz::Matrix4& ViewMatrix();
+
+	// Input to the Draw() call, basically. The instance data
+	// will be consumed by the draw. A giant param list / structure
+	// didn't seem better.
+	static grinliz::Matrix4		instanceMatrix[EL_MAX_INSTANCE];
+	static grinliz::Vector4F	instanceParam[EL_MAX_INSTANCE];
+	static grinliz::Matrix4		instanceParam4[EL_MAX_INSTANCE];
+	static BoneData				instanceBones[EL_MAX_INSTANCE];
 
 	void Draw( int instances=0 );
 
@@ -377,11 +364,6 @@ protected:
 	grinliz::Color4F	ambient;
 	grinliz::Vector4F	direction;
 	grinliz::Color4F	diffuse;
-
-	grinliz::Matrix4	instanceMatrix[EL_MAX_INSTANCE];
-	grinliz::Vector4F	instanceParam[EL_MAX_INSTANCE];
-	grinliz::Matrix4	instanceParam4[EL_MAX_INSTANCE];
-	BoneData			instanceBones[EL_MAX_INSTANCE];
 };
 
 

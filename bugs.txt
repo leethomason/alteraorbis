@@ -1,5 +1,5 @@
 - move EngineShaders local
-- one item array
+X one item array
 - extend rendering test to animation
 - output drawcalls per state
 - clean up Shields

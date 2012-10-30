@@ -286,7 +286,6 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 	Color4F ambient, diffuse;
 	Vector4F dir;
 	lighting.Query( &ambient, &dir, &diffuse );
-
 	{
 		LightShader light( ambient, dir, diffuse );
 		LightShader em( ambient, dir, diffuse );
@@ -303,6 +302,8 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 		engineShaders->Push( EngineShaders::EMISSIVE, em );
 		engineShaders->Push( EngineShaders::BLEND, blend );
 	}
+	// 33364 to 1108 once the instance buffers made static.
+	// GLOUTPUT(( "sizeof(engineShaders)=%d\n", sizeof(*engineShaders) ));
 	Rectangle2I mapBounds( 0, 0, EL_MAX_MAP_SIZE-1, EL_MAX_MAP_SIZE-1 );
 	if ( map ) {
 		mapBounds = map->Bounds();

@@ -28,6 +28,10 @@
 using namespace grinliz;
 
 int GPUShader::matrixDepth[3];
+grinliz::Matrix4	GPUShader::instanceMatrix[EL_MAX_INSTANCE];
+grinliz::Vector4F	GPUShader::instanceParam[EL_MAX_INSTANCE];
+grinliz::Matrix4	GPUShader::instanceParam4[EL_MAX_INSTANCE];
+BoneData			GPUShader::instanceBones[EL_MAX_INSTANCE];
 
 /*static*/ GPUVertexBuffer GPUVertexBuffer::Create( const void* vertex, int size, int nVertex )
 {
