@@ -63,7 +63,6 @@ Engine::Engine( Screenport* port, const gamedb::Reader* database, Map* m )
 		renderTarget[i] = 0;
 	ShaderManager::Instance()->AddDeviceLossHandler( this );
 	particleSystem = new ParticleSystem();
-	engineShaders = new EngineShaders();
 	boltRenderer = new BoltRenderer();
 	miniMapRenderTarget = 0;
 }
@@ -78,7 +77,6 @@ Engine::~Engine()
 	delete miniMapRenderTarget;
 	for( int i=0; i<RT_COUNT; ++i )
 		delete renderTarget[i];
-	delete engineShaders;
 	delete boltRenderer;
 }
 
@@ -286,6 +284,8 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 	Color4F ambient, diffuse;
 	Vector4F dir;
 	lighting.Query( &ambient, &dir, &diffuse );
+
+	EngineShaders engineShaders;
 	{
 		LightShader light( ambient, dir, diffuse );
 		LightShader em( ambient, dir, diffuse );
@@ -298,9 +298,9 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 			em.SetShaderFlag(		ShaderManager::LIGHTING_HEMI );
 		}
 
-		engineShaders->Push( EngineShaders::LIGHT, light );
-		engineShaders->Push( EngineShaders::EMISSIVE, em );
-		engineShaders->Push( EngineShaders::BLEND, blend );
+		engineShaders.Push( EngineShaders::LIGHT, light );
+		engineShaders.Push( EngineShaders::EMISSIVE, em );
+		engineShaders.Push( EngineShaders::BLEND, blend );
 	}
 	// 33364 to 1108 once the instance buffers made static.
 	// GLOUTPUT(( "sizeof(engineShaders)=%d\n", sizeof(*engineShaders) ));
@@ -324,24 +324,24 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 		black.SetColor( 0, 0, 0, 0 );
 
 		// Render flat black everything that does NOT emit light:
-		engineShaders->PushAll( black );
-		QueueSet( engineShaders, modelRoot, 0, 0, 0, EngineShaders::EMISSIVE );
+		engineShaders.PushAll( black );
+		QueueSet( &engineShaders, modelRoot, 0, 0, 0, EngineShaders::EMISSIVE );
 		renderQueue->Submit( 0, 0, 0 );
-		engineShaders->PopAll();
+		engineShaders.PopAll();
 
 		// ---------- Pass 2 -----------
 		GPUShader ex = FlatShader();
 		ex.SetShaderFlag( ShaderManager::EMISSIVE );
 		ex.SetShaderFlag( ShaderManager::EMISSIVE_EXCLUSIVE );
-		engineShaders->Push( EngineShaders::EMISSIVE, ex );
-		QueueSet( engineShaders, modelRoot, 0, 0, EngineShaders::EMISSIVE, 0 );
+		engineShaders.Push( EngineShaders::EMISSIVE, ex );
+		QueueSet( &engineShaders, modelRoot, 0, 0, EngineShaders::EMISSIVE, 0 );
 
 		if ( map ) {
 			map->Submit( &ex, true );
 		}
 		// And throw the emissive shader to exclusive:
 		renderQueue->Submit( 0, 0, 0 );
-		engineShaders->Pop( EngineShaders::EMISSIVE );
+		engineShaders.Pop( EngineShaders::EMISSIVE );
 		renderTarget[RT_LIGHTS]->SetActive( false, this );
 	}
 
@@ -362,8 +362,8 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 			shadowShader.SetColorWrite( false );
 			shadowShader.SetColor( 1, 0, 0 );	// testing
 
-			engineShaders->PushAll( shadowShader );
-			QueueSet( engineShaders, modelRoot, 0, Model::MODEL_NO_SHADOW, 0, EngineShaders::BLEND );
+			engineShaders.PushAll( shadowShader );
+			QueueSet( &engineShaders, modelRoot, 0, Model::MODEL_NO_SHADOW, 0, EngineShaders::BLEND );
 
 			Matrix4 shadowMatrix;
 			shadowMatrix.m12 = -lighting.direction.x/lighting.direction.y;
@@ -372,7 +372,7 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 
 			renderQueue->Submit( 0, 0, &shadowMatrix );
 
-			engineShaders->PopAll();
+			engineShaders.PopAll();
 
 			map->Draw3D( shadow, GPUShader::STENCIL_SET );
 		}
@@ -387,12 +387,12 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 	// -------- Models ---------- //
 #ifdef ENGINE_RENDER_MODELS
 	{
-		QueueSet( engineShaders, modelRoot, 0, 0, 0, 0  );
+		QueueSet( &engineShaders, modelRoot, 0, 0, 0, 0  );
 		renderQueue->Submit( 0, 0, 0 );
 	}
 #endif
 
-	engineShaders->PopAll();
+	engineShaders.PopAll();
 	renderQueue->Clear();
 
 	// --------- Composite Glow -------- //

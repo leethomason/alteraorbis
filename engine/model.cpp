@@ -207,6 +207,7 @@ void Model::Init( const ModelResource* resource, SpaceTree* tree )
 {
 	this->resource = resource; 
 	this->tree = tree;
+	this->aux = 0;
 
 	animationResource = 0;
 	if ( resource->header.animation != "create" ) {
@@ -248,6 +249,8 @@ void Model::Init( const ModelResource* resource, SpaceTree* tree )
 
 void Model::Free()
 {
+	ModelResourceManager::Instance()->modelAuxPool.Delete( aux );
+	aux = 0;
 }
 
 
@@ -319,11 +322,15 @@ void Model::SetRotation( const Quaternion& q )
 
 void Model::SetProcedural( bool on, const Color4F* colors, const float* v ) {
 	if ( on ) { 
+		if ( !aux ) {
+			aux = ModelResourceManager::Instance()->modelAuxPool.New();
+		}
+
 		SetFlag( MODEL_PROCEDURAL );
 		for( int r=0; r<4; ++r ) {
-			procMat.m( r, 3 ) = v[r];
+			aux->procMat.m( r, 3 ) = v[r];
 			for( int c=0; c<3; ++c ) {
-				procMat.m( r, c ) = colors[r].X(c);	// rgb, 'a' not encoded for now
+				aux->procMat.m( r, c ) = colors[r].X(c);	// rgb, 'a' not encoded for now
 			}
 		}
 	}
@@ -573,11 +580,15 @@ void Model::Queue( RenderQueue* queue, EngineShaders* engineShaders, int require
 			const Matrix4* pMat = 0;
 
 			if ( HasAnimation() ) {
-				CalcAnimation( &this->boneData ); 
-				pBD = &boneData;
+				if ( !aux ) {
+					aux = ModelResourceManager::Instance()->modelAuxPool.New();
+				}
+				CalcAnimation( &aux->boneData ); 
+				pBD = &aux->boneData;
 			}
 			if ( flags & MODEL_PROCEDURAL ) {
-				pMat = &this->procMat;
+				GLASSERT( aux );
+				pMat = &aux->procMat;
 			}
 
 			queue->Add( this,									// reference back

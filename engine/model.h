@@ -165,6 +165,11 @@ public:
 };
 
 
+struct ModelAux {
+	BoneData			boneData;
+	grinliz::Matrix4	procMat;
+};
+
 class ModelResourceManager
 {
 public:
@@ -181,6 +186,8 @@ public:
 		*count = modelResArr.Size();
 		return modelResArr.Mem();
 	}
+
+	grinliz::MemoryPoolT< ModelAux > modelAuxPool;
 
 private:
 	enum { 
@@ -399,10 +406,8 @@ private:
 	const AnimationResource* animationResource;
 	bool hasParticles;
 
-	BoneData			boneData;
 	grinliz::Vector4F	param[EL_MAX_MODEL_GROUPS];
-	grinliz::Matrix4	procMat;
-
+	ModelAux* aux;
 	int flags;
 
 	mutable bool xformValid;

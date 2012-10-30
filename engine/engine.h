@@ -190,8 +190,6 @@ private:
 	};
 	RenderTarget* renderTarget[RT_COUNT];
 	RenderTarget* miniMapRenderTarget;
-
-	EngineShaders* engineShaders;
 };
 
 #endif // UFOATTACK_ENGINE_INCLUDED

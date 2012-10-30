@@ -137,6 +137,7 @@ struct BoneData
 		float angleRadians;
 		float dy;
 		float dz;
+
 		void ToMatrix( grinliz::Matrix4* mat ) const;
 	};
 

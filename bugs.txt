@@ -1,8 +1,8 @@
-- move EngineShaders local
+X move EngineShaders local
 X one item array
 - extend rendering test to animation
 - output drawcalls per state
-- clean up Shields
+- clean up shields
 - clean up instance rendering
 
 - procedural rendering
