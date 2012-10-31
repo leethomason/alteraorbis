@@ -65,6 +65,7 @@ Engine::Engine( Screenport* port, const gamedb::Reader* database, Map* m )
 	particleSystem = new ParticleSystem();
 	boltRenderer = new BoltRenderer();
 	miniMapRenderTarget = 0;
+	engineShaders = 0;
 }
 
 
@@ -78,6 +79,7 @@ Engine::~Engine()
 	for( int i=0; i<RT_COUNT; ++i )
 		delete renderTarget[i];
 	delete boltRenderer;
+	delete engineShaders;
 }
 
 
@@ -89,6 +91,8 @@ void Engine::DeviceLoss()
 	}
 	delete miniMapRenderTarget;
 	miniMapRenderTarget = 0;
+	delete engineShaders;
+	engineShaders = 0;
 }
 
 
@@ -248,6 +252,8 @@ void Engine::QueueSet(	EngineShaders* engineShaders, Model* root,
 void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 {
 	GRINLIZ_PERFTRACK;
+	for( int i=0; i<NUM_MODEL_DRAW_CALLS; ++i )
+		modelDrawCalls[i] = 0;
 
 	if ( map && !miniMapRenderTarget ) {
 		CreateMiniMap();
@@ -285,8 +291,14 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 	Vector4F dir;
 	lighting.Query( &ambient, &dir, &diffuse );
 
-	EngineShaders engineShaders;
+	if ( !engineShaders ) {
+		engineShaders = new EngineShaders();
+	}
 	{
+		FIXME CHange thing.
+		Don't need the whole thing. Something like:
+		GPUState
+
 		LightShader light( ambient, dir, diffuse );
 		LightShader em( ambient, dir, diffuse );
 		em.SetShaderFlag( ShaderManager::EMISSIVE );
@@ -326,7 +338,11 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 		// Render flat black everything that does NOT emit light:
 		engineShaders.PushAll( black );
 		QueueSet( &engineShaders, modelRoot, 0, 0, 0, EngineShaders::EMISSIVE );
-		renderQueue->Submit( 0, 0, 0 );
+		{
+			modelDrawCalls[GLOW_BLACK] = GPUShader::DrawCalls();
+			renderQueue->Submit( 0, 0, 0 );
+			modelDrawCalls[GLOW_BLACK] = GPUShader::DrawCalls() - modelDrawCalls[GLOW_BLACK];
+		}
 		engineShaders.PopAll();
 
 		// ---------- Pass 2 -----------
@@ -340,7 +356,11 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 			map->Submit( &ex, true );
 		}
 		// And throw the emissive shader to exclusive:
-		renderQueue->Submit( 0, 0, 0 );
+		{
+			modelDrawCalls[GLOW_EMISSIVE] = GPUShader::DrawCalls();
+			renderQueue->Submit( 0, 0, 0 );
+			modelDrawCalls[GLOW_EMISSIVE] = GPUShader::DrawCalls() - modelDrawCalls[GLOW_EMISSIVE];
+		}
 		engineShaders.Pop( EngineShaders::EMISSIVE );
 		renderTarget[RT_LIGHTS]->SetActive( false, this );
 	}
@@ -360,7 +380,7 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 			shadowShader.SetDepthTest( false );	// flat plane. 1st pass.
 			shadowShader.SetDepthWrite( false );
 			shadowShader.SetColorWrite( false );
-			shadowShader.SetColor( 1, 0, 0 );	// testing
+			//shadowShader.SetColor( 1, 0, 0 );	// testing
 
 			engineShaders.PushAll( shadowShader );
 			QueueSet( &engineShaders, modelRoot, 0, Model::MODEL_NO_SHADOW, 0, EngineShaders::BLEND );
@@ -370,8 +390,11 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 			shadowMatrix.m22 = 0.0f;
 			shadowMatrix.m32 = -lighting.direction.z/lighting.direction.y;
 
-			renderQueue->Submit( 0, 0, &shadowMatrix );
-
+			{
+				modelDrawCalls[SHADOW] = GPUShader::DrawCalls();
+				renderQueue->Submit( 0, 0, &shadowMatrix );
+				modelDrawCalls[SHADOW] = GPUShader::DrawCalls() - modelDrawCalls[SHADOW];
+			}
 			engineShaders.PopAll();
 
 			map->Draw3D( shadow, GPUShader::STENCIL_SET );
@@ -388,7 +411,11 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 #ifdef ENGINE_RENDER_MODELS
 	{
 		QueueSet( &engineShaders, modelRoot, 0, 0, 0, 0  );
-		renderQueue->Submit( 0, 0, 0 );
+		{
+			modelDrawCalls[MODELS] = GPUShader::DrawCalls();
+			renderQueue->Submit( 0, 0, 0 );
+			modelDrawCalls[MODELS] = GPUShader::DrawCalls() - modelDrawCalls[MODELS];
+		}
 	}
 #endif
 

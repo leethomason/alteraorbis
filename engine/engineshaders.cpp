@@ -92,13 +92,13 @@ void EngineShaders::PopAll()
 GPUShader* EngineShaders::GetShader( int base, int flags )
 {
 	GPUShader* shader = 0;
-	if ( flags == 0 ) {
-		switch( base ) {
-			case LIGHT: return light + nLight - 1;
-			case BLEND: return blend + nBlend - 1;
-			case EMISSIVE: return emissive + nEmissive - 1;
-			default: GLASSERT( 0 ); return emissive;
-		}
+	U32 hash = 0;
+
+	switch( base ) {
+	case LIGHT:		hash = light[nLight - 1].StateHash();
+	case BLEND:		hash = blend[nBlend - 1].StateHash();
+	case EMISSIVE:	return emissive + nEmissive - 1;
+		default: GLASSERT( 0 ); return emissive;
 	}
 	for( int i=0; i<shaderArr.Size(); ++i ) {
 		const Node& node = shaderArr[i];

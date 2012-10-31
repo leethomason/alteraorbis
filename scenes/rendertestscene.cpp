@@ -19,6 +19,7 @@
 #include "../engine/engine.h"
 #include "../xegame/testmap.h"
 #include "../grinliz/glcolor.h"
+#include "../engine/text.h"
 
 using namespace gamui;
 using namespace tinyxml2;
@@ -59,9 +60,6 @@ RenderTestScene::RenderTestScene( LumosGame* game, const RenderTestSceneData* da
 	refreshButton.SetSize( layout.Width(), layout.Height() );
 	refreshButton.SetText( "refresh" );
 
-	textBox.Init( &gamui2D );
-	textBox.SetSize( 400, 100 );
-
 	RenderAtom nullAtom;
 	rtImage.Init( &gamui2D, nullAtom, true );
 	rtImage.SetSize( 400.f, 200.f );
@@ -87,8 +85,6 @@ void RenderTestScene::Resize()
 	LayoutCalculator layout = lumosGame->DefaultLayout();
 	layout.PosAbs( &glowButton, 1, -1 );
 	layout.PosAbs( &refreshButton, 2, -1 );
-
-	textBox.SetPos( okay.X(), okay.Y()-100 );
 }
 
 
@@ -97,15 +93,18 @@ void RenderTestScene::SetupTest0()
 {
 	const ModelResource* res0 = ModelResourceManager::Instance()->GetModelResource( "humanFemale" );
 	const ModelResource* res1 = ModelResourceManager::Instance()->GetModelResource( "humanMale" );
-	for( int i=0; i<NUM_MODELS; ++i ) {
+	for( int i=0; i<NUM_MODELS/2; ++i ) {
 		model[i] = engine->AllocModel( i<3 ? res0 : res1 );
 		model[i]->SetPos( 1, 0, (float)i );
 		model[i]->SetYRotation( (float)(i*30) );
-		//model[i]->XForm().Dump( "model" );	GLOUTPUT(( "\n" ));
 	}
-	engine->CameraLookAt( 0, (float)(NUM_MODELS/2), 12 );
-
-	textBox.SetText( "DC = (1fem+1male)*(1color+1shadow) + 2map*3passes = 10`. glow disabled, 'u' disable ui" ); 
+	for( int i=NUM_MODELS/2; i<NUM_MODELS; ++i ) {
+		model[i] = engine->AllocModel( (i-NUM_MODELS/2)<3 ? res0 : res1 );
+		model[i]->SetPos( 2, 0, (float)(i-NUM_MODELS/2) );
+		model[i]->SetYRotation( (float)(i*30) );
+		model[i]->SetAnimation( ANIM_WALK, 1000, true ); 
+	}
+	engine->CameraLookAt( 0, (float)(NUM_MODELS/4), 12 );
 }
 
 
@@ -197,7 +196,6 @@ void RenderTestScene::HandleHotKeyMask( int mask )
 			okay.SetVisible( visible );
 			glowButton.SetVisible( visible );
 			refreshButton.SetVisible( visible );
-			textBox.SetVisible( visible );
 		}
 		break;
 	}
@@ -206,6 +204,9 @@ void RenderTestScene::HandleHotKeyMask( int mask )
 
 void RenderTestScene::Draw3D( U32 deltaTime )
 {
+	for( int i=0; i<NUM_MODELS; ++i ) {
+		model[i]->DeltaAnimation( deltaTime, 0, 0 );
+	}
 	engine->Draw( deltaTime );
 
 #if 0
@@ -214,3 +215,15 @@ void RenderTestScene::Draw3D( U32 deltaTime )
 	rtImage.SetAtom( atom );
 #endif
 }
+
+
+void RenderTestScene::DrawDebugText()
+{
+	UFOText* ufoText = UFOText::Instance();
+	ufoText->Draw( 0, 16, "Model Draw Calls GLOW-BLACK=%d GLOW-EM=%d SHADOW=%d MODEL=%d",
+		engine->modelDrawCalls[Engine::GLOW_BLACK],
+		engine->modelDrawCalls[Engine::GLOW_EMISSIVE],
+		engine->modelDrawCalls[Engine::SHADOW],
+		engine->modelDrawCalls[Engine::MODELS] );
+}
+

@@ -49,11 +49,10 @@ private:
 	int nBlend;
 	int nEmissive;
 
-	// These things can't move in memory.
 	struct Node {
 		int base;
-		int flags;		// the shader flags that we set (a subset of all the flags the shader is actually using)
-		GPUShader* shader;
+		int flags;			// the shader flags that we set (a subset of all the flags the shader is actually using)
+		GPUShader* shader;	// can't move in memory - has to be allocated.
 	};
 
 	// FIXME: switch to HashTable

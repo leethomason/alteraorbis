@@ -47,10 +47,11 @@ public:
 	virtual void HandleHotKeyMask( int mask );
 
 	virtual void Draw3D( U32 deltaTime );
+	virtual void DrawDebugText();
 
 private:
 	enum { NUM_ITEMS = 4,
-		   NUM_MODELS = 8 };
+		   NUM_MODELS = 16 };
 
 	void SetupTest0();
 	void SetupTest1();
@@ -62,7 +63,6 @@ private:
 	gamui::PushButton okay;
 	gamui::PushButton glowButton;
 	gamui::PushButton refreshButton;
-	gamui::TextBox textBox;
 	gamui::Image rtImage;
 
 	Engine* engine;

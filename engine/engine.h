@@ -88,6 +88,15 @@ public:
 	// Send everything to the GPU
 	void Draw( U32 deltaTime, const Bolt* bolts=0, int nBolts=0 );
 
+	enum {
+		GLOW_BLACK,
+		GLOW_EMISSIVE,
+		SHADOW,
+		MODELS,
+		NUM_MODEL_DRAW_CALLS
+	};
+	int modelDrawCalls[NUM_MODEL_DRAW_CALLS];
+
 	SpaceTree* GetSpaceTree()	{ return spaceTree; }
 
 	void MoveCameraHome();
@@ -134,9 +143,9 @@ public:
 	float GetZoom();
 	void SetZoom( float zoom );
 
-	void SetScreenport( Screenport* port ) { screenport = port; }
-	const Screenport& GetScreenport() { return *screenport; }
-	Screenport* GetScreenportMutable() { return screenport; }
+	void SetScreenport( Screenport* port )	{ screenport = port; }
+	const Screenport& GetScreenport()		{ return *screenport; }
+	Screenport* GetScreenportMutable()		{ return screenport; }
 	void RestrictCamera();
 
 	Texture* GetRenderTargetTexture( int id=0 );
@@ -171,6 +180,7 @@ private:
 	SpaceTree* spaceTree;
 	RenderQueue* renderQueue;
 	BoltRenderer* boltRenderer;
+	EngineShaders* engineShaders;
 
 	enum {
 		RT_LIGHTS,

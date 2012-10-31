@@ -3,7 +3,7 @@ X one item array
 - extend rendering test to animation
 - output drawcalls per state
 - clean up shields
-- clean up instance rendering
+X clean up instance rendering
 
 - procedural rendering
 	- static scene showing item combinations

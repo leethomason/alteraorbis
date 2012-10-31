@@ -144,6 +144,7 @@ struct GPUStream {
    Sub-classes are for initialization. They can't
    store data.
 */
+// SHould be GPURenderObject?? Something
 class GPUShader 
 {
 public:
@@ -272,6 +273,12 @@ public:
 	static grinliz::Matrix4		instanceParam4[EL_MAX_INSTANCE];
 	static BoneData				instanceBones[EL_MAX_INSTANCE];
 
+	// More input to the draw call. Must be set up by the engine.
+	static grinliz::Color4F		color;
+	static grinliz::Color4F		ambient;
+	static grinliz::Vector4F	direction;
+	static grinliz::Color4F		diffuse;
+
 	void Draw( int instances=0 );
 
 	void DrawLine( const grinliz::Vector3F p0, const grinliz::Vector3F p1 );
@@ -341,29 +348,36 @@ protected:
 		return (const void*)((const U8*)base + offset);
 	}
 
-	Texture* texture0;
-	Texture* texture1;
-
+	// ----------- Set per Draw() -------- //
+	// Stream description:
 	GPUStream		stream;
+
+	// Stream data (attribute)
 	const void*		streamPtr;
 	int				nIndex;
 	const uint16_t* indexPtr;
 	U32				vertexBuffer;
 	U32				indexBuffer;
+
+	// Stream data (uniform)
+	Texture*			texture0;
+	//Texture*			texture1;
+
+	// ------------ Immutable --------- //
+	// Fixed state and shader state are bound together.
+	// Legacy of previous architecture.
+	BlendMode		blend;
+	bool			depthWrite;
+	bool			depthTest;
+	bool			colorWrite;
+	StencilMode		stencilMode;
+	bool			hemisphericalLighting;
+	// Fixed to the state, but a bunch of 
+	// shaders get generated for this.
 	int				shaderFlags;
-	float			radius;
 
-	BlendMode	blend;
-	bool		depthWrite;
-	bool		depthTest;
-	bool		colorWrite;
-	StencilMode	stencilMode;
+public:
 
-	bool				hemisphericalLighting;
-	grinliz::Color4F	color;
-	grinliz::Color4F	ambient;
-	grinliz::Vector4F	direction;
-	grinliz::Color4F	diffuse;
 };
 
 
