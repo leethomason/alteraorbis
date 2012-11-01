@@ -40,9 +40,9 @@
 using namespace grinliz;
 
 #define ENGINE_RENDER_MODELS
-//#define ENGINE_RENDER_SHADOWS
+#define ENGINE_RENDER_SHADOWS
 #define ENGINE_RENDER_MAP
-//#define ENGINE_RENDER_GLOW
+#define ENGINE_RENDER_GLOW
 
 
 Engine::Engine( Screenport* port, const gamedb::Reader* database, Map* m ) 
