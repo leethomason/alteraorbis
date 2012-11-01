@@ -164,7 +164,6 @@ struct GPUStreamData
    Sub-classes are for initialization. They can't
    store data.
 */
-// SHould be GPURenderObject?? Something
 class GPUState 
 {
 public:
@@ -200,12 +199,7 @@ public:
 	static void SetCameraTransform( const grinliz::Matrix4& camera );
 	static void SetScissor( int x, int y, int w, int h );
 
-	//void SetTexture0( Texture* tex ) { texture0 = tex; }
-	//Texture* Texture0() const { return texture0; }
 	int HasLighting() const;
-
-	//void SetTexture1( Texture* tex ) { texture1 = tex; }
-	//Texture* Texture1() const { return texture1; }
 
 	void SetColor( float r, float g, float b )				{ color.r = r; color.g = g; color.b = b; color.a = 1; }
 	void SetColor( float r, float g, float b, float a )		{ color.r = r; color.g = g; color.b = b; color.a = a; }
@@ -247,7 +241,7 @@ public:
 	void Draw( const GPUStream& stream, Texture* texture, const GPUVertexBuffer& vertex,	int nIndex, const GPUIndexBuffer& index );
 
 	void DrawLine( const grinliz::Vector3F p0, const grinliz::Vector3F p1 );
-	void DrawQuad( const grinliz::Vector3F p0, const grinliz::Vector3F p1, bool positiveWinding=true );
+	void DrawQuad( Texture* texture, const grinliz::Vector3F p0, const grinliz::Vector3F p1, bool positiveWinding=true );
 	void DrawArrow( const grinliz::Vector3F p0, const grinliz::Vector3F p1, bool positiveWinding=true, float width=0.4f );
 
 	int SortOrder()	const { 

@@ -274,5 +274,5 @@ void NavTestScene::Draw3D( U32 deltaTime )
 	FlatShader flat;
 	flat.SetColor( 1, 0, 0 );
 	Vector3F delta = { 0.2f, 0, 0.2f };
-	flat.DrawQuad( tapMark-delta, tapMark+delta, false );
+	flat.DrawQuad( 0, tapMark-delta, tapMark+delta, false );
 }

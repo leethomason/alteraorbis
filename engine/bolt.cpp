@@ -183,8 +183,6 @@ void BoltRenderer::DrawAll( const Bolt* bolts, int nBolts, Engine* engine )
 	Texture* texture = TextureManager::Instance()->GetTexture( "particle" );
 
 	if ( count ) {
-		ParticleShader shader;
-		shader.SetTexture0( texture );
 
 		GPUStream stream;
 		stream.stride			= sizeof( vertex[0] );
@@ -195,8 +193,8 @@ void BoltRenderer::DrawAll( const Bolt* bolts, int nBolts, Engine* engine )
 		stream.nColor			= 4;
 		stream.colorOffset		= PTCVertex::COLOR_OFFSET;
 
-		shader.SetStream( stream, vertex, count*6, index );
-		shader.Draw();
+		ParticleShader shader;
+		shader.Draw( stream, texture, vertex, count*6, index );
 	}
 }
 

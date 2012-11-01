@@ -65,7 +65,6 @@ Engine::Engine( Screenport* port, const gamedb::Reader* database, Map* m )
 	particleSystem = new ParticleSystem();
 	boltRenderer = new BoltRenderer();
 	miniMapRenderTarget = 0;
-	engineShaders = 0;
 }
 
 
@@ -79,7 +78,6 @@ Engine::~Engine()
 	for( int i=0; i<RT_COUNT; ++i )
 		delete renderTarget[i];
 	delete boltRenderer;
-	delete engineShaders;
 }
 
 
@@ -91,8 +89,6 @@ void Engine::DeviceLoss()
 	}
 	delete miniMapRenderTarget;
 	miniMapRenderTarget = 0;
-	delete engineShaders;
-	engineShaders = 0;
 }
 
 
@@ -215,10 +211,10 @@ void Engine::CreateMiniMap()
 	miniMapRenderTarget->screenport->SetView( view );
 	
 	Color3F color = { 1, 1, 1 };
-	GPUShader::PushMatrix( GPUShader::MODELVIEW_MATRIX );
-	GPUShader::MultMatrix( GPUShader::MODELVIEW_MATRIX, scaleMat );
-	map->Draw3D( color, GPUShader::STENCIL_OFF );
-	GPUShader::PopMatrix( GPUShader::MODELVIEW_MATRIX );
+	GPUState::PushMatrix( GPUState::MODELVIEW_MATRIX );
+	GPUState::MultMatrix( GPUState::MODELVIEW_MATRIX, scaleMat );
+	map->Draw3D( color, GPUState::STENCIL_OFF );
+	GPUState::PopMatrix( GPUState::MODELVIEW_MATRIX );
 
 	miniMapRenderTarget->SetActive( false, this );
 }
@@ -290,25 +286,21 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 	Color4F ambient, diffuse;
 	Vector4F dir;
 	lighting.Query( &ambient, &dir, &diffuse );
+	GPUState::ambient = ambient;
+	GPUState::directionWC = dir;
+	GPUState::diffuse = diffuse;
 
-	if ( !engineShaders ) {
-		engineShaders = new EngineShaders();
-	}
+	EngineShaders engineShaders;
 	{
-		LightShader light( ambient, dir, diffuse );
-		LightShader em( ambient, dir, diffuse );
+		int flag = lighting.hemispheric ? ShaderManager::LIGHTING_HEMI : ShaderManager::LIGHTING_DIFFUSE;
+		LightShader light( flag );
+		FlatShader em;
 		em.SetShaderFlag( ShaderManager::EMISSIVE );
-		LightShader blend( ambient, dir, diffuse, GPUShader::BLEND_NORMAL );
+		LightShader blend( flag, GPUState::BLEND_NORMAL );
 
-		if ( lighting.hemispheric ) {
-			light.SetShaderFlag(    ShaderManager::LIGHTING_HEMI );
-			blend.SetShaderFlag(    ShaderManager::LIGHTING_HEMI );
-			em.SetShaderFlag(		ShaderManager::LIGHTING_HEMI );
-		}
-
-		engineShaders->Push( EngineShaders::LIGHT, light );
-		engineShaders->Push( EngineShaders::EMISSIVE, em );
-		engineShaders->Push( EngineShaders::BLEND, blend );
+		engineShaders.Push( EngineShaders::LIGHT, light );
+		engineShaders.Push( EngineShaders::EMISSIVE, em );
+		engineShaders.Push( EngineShaders::BLEND, blend );
 	}
 	// 33364 to 1108 once the instance buffers made static.
 	// GLOUTPUT(( "sizeof(engineShaders)=%d\n", sizeof(*engineShaders) ));
@@ -332,32 +324,32 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 		black.SetColor( 0, 0, 0, 0 );
 
 		// Render flat black everything that does NOT emit light:
-		engineShaders->PushAll( black );
-		QueueSet( engineShaders, modelRoot, 0, 0, 0, EngineShaders::EMISSIVE );
+		engineShaders.PushAll( black );
+		QueueSet( &engineShaders, modelRoot, 0, 0, 0, EngineShaders::EMISSIVE );
 		{
-			modelDrawCalls[GLOW_BLACK] = GPUShader::DrawCalls();
+			modelDrawCalls[GLOW_BLACK] = GPUState::DrawCalls();
 			renderQueue->Submit( 0, 0, 0 );
-			modelDrawCalls[GLOW_BLACK] = GPUShader::DrawCalls() - modelDrawCalls[GLOW_BLACK];
+			modelDrawCalls[GLOW_BLACK] = GPUState::DrawCalls() - modelDrawCalls[GLOW_BLACK];
 		}
-		engineShaders->PopAll();
+		engineShaders.PopAll();
 
 		// ---------- Pass 2 -----------
-		GPUShader ex = FlatShader();
+		GPUState ex = FlatShader();
 		ex.SetShaderFlag( ShaderManager::EMISSIVE );
 		ex.SetShaderFlag( ShaderManager::EMISSIVE_EXCLUSIVE );
-		engineShaders->Push( EngineShaders::EMISSIVE, ex );
-		QueueSet( engineShaders, modelRoot, 0, 0, EngineShaders::EMISSIVE, 0 );
+		engineShaders.Push( EngineShaders::EMISSIVE, ex );
+		QueueSet( &engineShaders, modelRoot, 0, 0, EngineShaders::EMISSIVE, 0 );
 
 		if ( map ) {
 			map->Submit( &ex, true );
 		}
 		// And throw the emissive shader to exclusive:
 		{
-			modelDrawCalls[GLOW_EMISSIVE] = GPUShader::DrawCalls();
+			modelDrawCalls[GLOW_EMISSIVE] = GPUState::DrawCalls();
 			renderQueue->Submit( 0, 0, 0 );
-			modelDrawCalls[GLOW_EMISSIVE] = GPUShader::DrawCalls() - modelDrawCalls[GLOW_EMISSIVE];
+			modelDrawCalls[GLOW_EMISSIVE] = GPUState::DrawCalls() - modelDrawCalls[GLOW_EMISSIVE];
 		}
-		engineShaders->Pop( EngineShaders::EMISSIVE );
+		engineShaders.Pop( EngineShaders::EMISSIVE );
 		renderTarget[RT_LIGHTS]->SetActive( false, this );
 	}
 
@@ -372,14 +364,14 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 		if ( shadowAmount > 0.0f ) {
 
 			FlatShader shadowShader;
-			shadowShader.SetStencilMode( GPUShader::STENCIL_WRITE );
+			shadowShader.SetStencilMode( GPUState::STENCIL_WRITE );
 			shadowShader.SetDepthTest( false );	// flat plane. 1st pass.
 			shadowShader.SetDepthWrite( false );
 			shadowShader.SetColorWrite( false );
 			//shadowShader.SetColor( 1, 0, 0 );	// testing
 
-			engineShaders->PushAll( shadowShader );
-			QueueSet( engineShaders, modelRoot, 0, Model::MODEL_NO_SHADOW, 0, EngineShaders::BLEND );
+			engineShaders.PushAll( shadowShader );
+			QueueSet( &engineShaders, modelRoot, 0, Model::MODEL_NO_SHADOW, 0, EngineShaders::BLEND );
 
 			Matrix4 shadowMatrix;
 			shadowMatrix.m12 = -lighting.direction.x/lighting.direction.y;
@@ -387,16 +379,16 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 			shadowMatrix.m32 = -lighting.direction.z/lighting.direction.y;
 
 			{
-				modelDrawCalls[SHADOW] = GPUShader::DrawCalls();
+				modelDrawCalls[SHADOW] = GPUState::DrawCalls();
 				renderQueue->Submit( 0, 0, &shadowMatrix );
-				modelDrawCalls[SHADOW] = GPUShader::DrawCalls() - modelDrawCalls[SHADOW];
+				modelDrawCalls[SHADOW] = GPUState::DrawCalls() - modelDrawCalls[SHADOW];
 			}
-			engineShaders->PopAll();
+			engineShaders.PopAll();
 
-			map->Draw3D( shadow, GPUShader::STENCIL_SET );
+			map->Draw3D( shadow, GPUState::STENCIL_SET );
 		}
 #endif
-		map->Draw3D( lighted, GPUShader::STENCIL_CLEAR );
+		map->Draw3D( lighted, GPUState::STENCIL_CLEAR );
 
 #ifdef ENGINE_RENDER_MAP
 		map->DrawOverlay();
@@ -406,16 +398,16 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 	// -------- Models ---------- //
 #ifdef ENGINE_RENDER_MODELS
 	{
-		QueueSet( engineShaders, modelRoot, 0, 0, 0, 0  );
+		QueueSet( &engineShaders, modelRoot, 0, 0, 0, 0  );
 		{
-			modelDrawCalls[MODELS] = GPUShader::DrawCalls();
+			modelDrawCalls[MODELS] = GPUState::DrawCalls();
 			renderQueue->Submit( 0, 0, 0 );
-			modelDrawCalls[MODELS] = GPUShader::DrawCalls() - modelDrawCalls[MODELS];
+			modelDrawCalls[MODELS] = GPUState::DrawCalls() - modelDrawCalls[MODELS];
 		}
 	}
 #endif
 
-	engineShaders->PopAll();
+	engineShaders.PopAll();
 	renderQueue->Clear();
 
 	// --------- Composite Glow -------- //
@@ -425,19 +417,18 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 		screenport->SetUI();
 
 #ifdef ENGINE_DEBUG_GLOW
-		CompositingShader shader( GPUShader::BLEND_NONE );
+		CompositingShader shader( GPUState::BLEND_NONE );
 #else
-		CompositingShader shader( GPUShader::BLEND_ADD );
+		CompositingShader shader( GPUState::BLEND_ADD );
 #endif
 
 #ifdef EL_USE_MRT_BLUR
 		const float intensity = 1.0f;// / BLUR_COUNT;
 		for( int i=0; i<BLUR_COUNT; ++i ) {
-			shader.SetTexture0( renderTarget[RT_BLUR_0+i]->GetTexture() );
 			shader.SetColor( lighting.glow.r*intensity, lighting.glow.g*intensity, lighting.glow.b*intensity, 0 );
 			Vector3F p0 = { 0, screenport->UIHeight(), 0 };
 			Vector3F p1 = { screenport->UIWidth(), 0, 0 };
-			shader.DrawQuad( p0, p1 );
+			shader.DrawQuad( renderTarget[RT_BLUR_0+i]->GetTexture(), p0, p1 );
 		}
 #else
 		shader.SetTexture0( renderTarget[RT_BLUR_Y]->GetTexture() );
@@ -480,10 +471,9 @@ void Engine::Blur()
 		//int shift = i+1;
 
 		FlatShader shader;
-		shader.SetTexture0( renderTarget[i+RT_BLUR_0-1]->GetTexture() );
 		Vector3F p0 = { 0, screenport->UIHeight(), 0 };
 		Vector3F p1 = { screenport->UIWidth(), 0, 0 };
-		shader.DrawQuad( p0, p1 );
+		shader.DrawQuad( renderTarget[i+RT_BLUR_0-1]->GetTexture(), p0, p1 );
 
 		renderTarget[i+RT_BLUR_0]->SetActive( false, this );
 	}

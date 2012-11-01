@@ -17,107 +17,68 @@
 #include "shadermanager.h"
 
 
-EngineShaders::EngineShaders() : nLight(0), nBlend(0), nEmissive(0)
+EngineShaders::EngineShaders()
 {
 }
 
 
 EngineShaders::~EngineShaders()
 {
-	for( int i=0; i<shaderArr.Size(); ++i ) {
-		delete shaderArr[i].shader;
+}
+
+
+void EngineShaders::Push( int base, const GPUState& state )
+{
+	switch( base ) {
+	case LIGHT:		light.Push( state ); break;
+	case BLEND:		blend.Push( state ); break;
+	case EMISSIVE:	emissive.Push( state );	break;
+	default: GLASSERT( 0 );
 	}
 }
 
 
-void EngineShaders::Push( int base, const GPUShader& shader )
+void EngineShaders::PushAll( const GPUState& state )
 {
-	switch ( base ) {
-	case LIGHT:
-		GLASSERT( nLight < STACK );
-		light[nLight++] = shader;
-		break;
-	case BLEND:
-		GLASSERT( nBlend < STACK );
-		blend[nBlend++] = shader;
-		break;
-	case EMISSIVE:
-		GLASSERT( nEmissive < STACK );
-		emissive[nEmissive++] = shader;
-		break;
-	default:
-		GLASSERT( 0 );
-	}
+	light.Push( state );
+	blend.Push( state );
+	emissive.Push( state );
 }
 
 
-void EngineShaders::Pop( int base ) 
+void EngineShaders::Pop( int base )
 {
-	switch ( base ) {
-	case LIGHT:
-		GLASSERT( nLight > 0 );
-		--nLight;
-		break;
-	case BLEND:
-		GLASSERT( nBlend > 0 );
-		--nBlend;
-		break;
-	case EMISSIVE:
-		GLASSERT( nEmissive > 0 );
-		--nEmissive;
-		break;
-	default:
-		GLASSERT( 0 );
-		break;
+	switch( base ) {
+	case LIGHT:	light.Pop();	break;
+	case BLEND: blend.Pop();	break;
+	case EMISSIVE: emissive.Pop(); break;
+	default: GLASSERT(0);
 	}
-}
-
-
-void EngineShaders::PushAll( const GPUShader& shader )
-{
-	Push( LIGHT, shader );
-	Push( BLEND, shader );
-	Push( EMISSIVE, shader );
 }
 
 
 void EngineShaders::PopAll()
 {
-	Pop( LIGHT );
-	Pop( BLEND );
-	Pop( EMISSIVE );
+	light.Pop();
+	blend.Pop();
+	emissive.Pop();
 }
 
 
-GPUShader* EngineShaders::GetShader( int base, int flags )
+void EngineShaders::GetState( int base, int flags, GPUState* state )
 {
-	int f = flags;
 	switch( base ) {
 	case LIGHT:
-		f |= light.ShaderFlags();
+		*state = light[light.Size()-1];
 		break;
 	case BLEND:
-		f |= blend.ShaderFlags();
+		*state = blend[blend.Size()-1];
 		break;
 	default:
-		f |= emissive.ShaderFlags();
+		*state = emissive[emissive.Size()-1];
 		break;
 	}
-	
-	GPUShader* shader = ShaderManager::
-
-
-	for( int i=0; i<shaderArr.Size(); ++i ) {
-		const Node& node = shaderArr[i];
-		if ( node.base == base && node.flags == flags ) {
-			return shaderArr[i].shader;
-		}
-	}
-	Node node = { base, flags, new GPUShader() };
-
-	node.shader->SetShaderFlag( flags );
-	shaderArr.Push( node );
-	return node.shader;
+	state->SetShaderFlag( flags );
 }
 
 

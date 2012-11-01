@@ -34,8 +34,14 @@ public:
 
 	void GetState( int base, int flags, GPUState* state );
 
-	GPUState	light,
-				blend,
-				emissive;
+	void Push( int base, const GPUState& state );
+	void PushAll( const GPUState& state );
+	void Pop( int base );
+	void PopAll();
+
+private:
+	grinliz::CArray< GPUState, 2 > light;
+	grinliz::CArray< GPUState, 2 > blend;
+	grinliz::CArray< GPUState, 2 > emissive;
 };
 #endif // ENGINE_SHADERS_INCLUDED

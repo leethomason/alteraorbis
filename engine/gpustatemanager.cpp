@@ -372,9 +372,10 @@ void GPUState::Weld( const GPUState& state, const GPUStream& stream, const GPUSt
 	// Texture0
 	glActiveTexture( GL_TEXTURE0 );
 
-	if (  stream.HasTexture0() ) {
-		glBindTexture( GL_TEXTURE_2D, state.texture0->GLID() );
-		shadman->SetTexture( 0, state.texture0 );
+	if ( flags & ShaderManager::TEXTURE0 ) {
+		GLASSERT( data.texture0 );
+		glBindTexture( GL_TEXTURE_2D, data.texture0->GLID() );
+		shadman->SetTexture( 0, data.texture0 );
 		shadman->SetStreamData( ShaderManager::A_TEXTURE0, stream.nTexture0, GL_FLOAT, stream.stride, PTR( data.streamPtr, stream.texture0Offset ) );
 	}
 	CHECK_GL_ERROR;
@@ -401,7 +402,7 @@ void GPUState::Weld( const GPUState& state, const GPUStream& stream, const GPUSt
 		Vector3F d[EL_MAX_BONES*EL_MAX_INSTANCE];
 		for( int i=0; i<EL_MAX_INSTANCE; ++i ) {
 			for( int j=0; j<EL_MAX_BONES; ++j ) {
-				const BoneData::Bone& bone = data.instanceBones[i].bone[j];
+				const BoneData::Bone& bone = data.bones[i].bone[j];
 				d[i*EL_MAX_BONES+j].Set( bone.angleRadians, bone.dy, bone.dz );
 			}
 		}
@@ -637,31 +638,33 @@ void GPUState::Draw( const GPUStream& stream, const GPUStreamData& data, int nIn
 }
 
 
-void GPUState::Draw( const GPUStream& stream, const void* vertex, int nIndex, const uint16_t* indices )
+void GPUState::Draw( const GPUStream& stream, Texture* texture, const void* vertex, int nIndex, const uint16_t* indices )
 {
 	GPUStreamData data;
 	data.streamPtr = vertex;
 	data.indexPtr = indices;
+	data.texture0 = texture;
 	Draw( stream, data, nIndex );
 }
 
 
-void GPUState::Draw( const GPUStream& stream, const GPUVertexBuffer& vertex, int nIndex, const uint16_t* indices )
+void GPUState::Draw( const GPUStream& stream, Texture* texture, const GPUVertexBuffer& vertex, int nIndex, const uint16_t* indices )
 {
 	GPUStreamData data;
 	data.vertexBuffer = vertex.ID();
 	data.indexPtr = indices;
+	data.texture0 = texture;
 	Draw( stream, data, nIndex );
 }
 
 
-void GPUState::Draw( const GPUStream& stream, const GPUVertexBuffer& vertex,	int nIndex, const GPUIndexBuffer& index )
+void GPUState::Draw( const GPUStream& stream, Texture* texture, const GPUVertexBuffer& vertex,	int nIndex, const GPUIndexBuffer& index )
 {
 	GPUStreamData data;
 	data.vertexBuffer = vertex.ID();
 	data.indexBuffer = index.ID();
+	data.texture0 = texture;
 	Draw( stream, data, nIndex );
-
 }
 
 
@@ -720,7 +723,7 @@ void GPUState::Draw( const GPUStream& stream, const GPUVertexBuffer& vertex, int
 }
 */
 
-void GPUState::DrawQuad( const grinliz::Vector3F p0, const grinliz::Vector3F p1, bool positive )
+void GPUState::DrawQuad( Texture* texture, const grinliz::Vector3F p0, const grinliz::Vector3F p1, bool positive )
 {
 	PTVertex pos[4] = { 
 		{ { p0.x, p0.y, p0.z }, { 0, 0 } },
@@ -733,7 +736,7 @@ void GPUState::DrawQuad( const grinliz::Vector3F p0, const grinliz::Vector3F p1,
 	const U16* index = positive ? indexPos : indexNeg;
 
 	GPUStream stream( pos );
-	Draw( stream, pos, 6, index );
+	Draw( stream, texture, pos, 6, index );
 }
 
 
@@ -747,7 +750,7 @@ void GPUState::DrawLine( const grinliz::Vector3F p0, const grinliz::Vector3F p1 
 	stream.nPos = 3;
 
 	primitive = GL_LINES;
-	Draw( stream, v, 2, index );
+	Draw( stream, 0, v, 2, index );
 	primitive = GL_TRIANGLES;
 }
 
@@ -771,7 +774,7 @@ void GPUState::DrawArrow( const grinliz::Vector3F p0, const grinliz::Vector3F p1
 		const U16* index = positive ? indexPos : indexNeg;
 
 		GPUStream stream( pos );
-		Draw( stream, pos, 3, index );
+		Draw( stream, 0, pos, 3, index );
 	}
 }
 

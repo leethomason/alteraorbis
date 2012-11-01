@@ -180,7 +180,6 @@ private:
 	SpaceTree* spaceTree;
 	RenderQueue* renderQueue;
 	BoltRenderer* boltRenderer;
-	EngineShaders* engineShaders;
 
 	enum {
 		RT_LIGHTS,

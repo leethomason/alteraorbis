@@ -967,16 +967,16 @@ void WorldMap::DrawZones()
 				Vector3F p1 = { (float)(i+xSize)-offset, 0.1f, (float)(j+ySize)-offset };
 
 				if ( g.region->debug_origin ) {
-					debugOrigin.DrawQuad( p0, p1, false );
+					debugOrigin.DrawQuad( 0, p0, p1, false );
 				}
 				else if ( g.region->debug_adjacent ) {
-					debugAdjacent.DrawQuad( p0, p1, false );
+					debugAdjacent.DrawQuad( 0, p0, p1, false );
 				}
 				else if ( g.region->debug_path ) {
-					debugPath.DrawQuad( p0, p1, false );
+					debugPath.DrawQuad( 0, p0, p1, false );
 				}
 				else {
-					debug.DrawQuad( p0, p1, false );
+					debug.DrawQuad( 0, p0, p1, false );
 				}
 			}
 		}
