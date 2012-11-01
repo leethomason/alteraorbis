@@ -190,6 +190,10 @@ void RenderQueue::Submit(	int modelRequired,
 				BoneData	instanceBone[EL_MAX_INSTANCE];
 
 				atom->Bind( &stream, &data );
+				data.matrix = instanceMatrix;
+				data.param  = instanceParam;
+				data.param4 = instanceParam4;
+				data.bones  = instanceBone;
 				GLASSERT( data.texture0 );	// not required, but not sure it works without
 
 				int k=start;

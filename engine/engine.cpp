@@ -40,9 +40,9 @@
 using namespace grinliz;
 
 #define ENGINE_RENDER_MODELS
-#define ENGINE_RENDER_SHADOWS
+//#define ENGINE_RENDER_SHADOWS
 #define ENGINE_RENDER_MAP
-//#define ENGINE_DEBUG_GLOW
+//#define ENGINE_RENDER_GLOW
 
 
 Engine::Engine( Screenport* port, const gamedb::Reader* database, Map* m ) 
@@ -294,7 +294,7 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 	{
 		int flag = lighting.hemispheric ? ShaderManager::LIGHTING_HEMI : ShaderManager::LIGHTING_DIFFUSE;
 		LightShader light( flag );
-		FlatShader em;
+		LightShader em( flag );
 		em.SetShaderFlag( ShaderManager::EMISSIVE );
 		LightShader blend( flag, GPUState::BLEND_NORMAL );
 
@@ -302,14 +302,13 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 		engineShaders.Push( EngineShaders::EMISSIVE, em );
 		engineShaders.Push( EngineShaders::BLEND, blend );
 	}
-	// 33364 to 1108 once the instance buffers made static.
-	// GLOUTPUT(( "sizeof(engineShaders)=%d\n", sizeof(*engineShaders) ));
 	Rectangle2I mapBounds( 0, 0, EL_MAX_MAP_SIZE-1, EL_MAX_MAP_SIZE-1 );
 	if ( map ) {
 		mapBounds = map->Bounds();
 	}
 
 	// ----------- Render Passess ---------- //
+#ifdef ENGINE_RENDER_GLOW
 	if ( glow ) {
 		if ( !renderTarget[RT_LIGHTS] ) {
 			renderTarget[RT_LIGHTS] = new RenderTarget( screenport->PhysicalWidth(), screenport->PhysicalHeight(), true );
@@ -352,6 +351,7 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 		engineShaders.Pop( EngineShaders::EMISSIVE );
 		renderTarget[RT_LIGHTS]->SetActive( false, this );
 	}
+#endif
 
 	if ( map ) {
 		// Draw shadows to stencil buffer.
@@ -411,18 +411,19 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 	renderQueue->Clear();
 
 	// --------- Composite Glow -------- //
+#ifdef ENGINE_RENDER_GLOW
 	if ( glow ) {
 		Blur();
 
 		screenport->SetUI();
 
-#ifdef ENGINE_DEBUG_GLOW
+	#ifdef ENGINE_DEBUG_GLOW
 		CompositingShader shader( GPUState::BLEND_NONE );
-#else
+	#else
 		CompositingShader shader( GPUState::BLEND_ADD );
-#endif
+	#endif
 
-#ifdef EL_USE_MRT_BLUR
+	#ifdef EL_USE_MRT_BLUR
 		const float intensity = 1.0f;// / BLUR_COUNT;
 		for( int i=0; i<BLUR_COUNT; ++i ) {
 			shader.SetColor( lighting.glow.r*intensity, lighting.glow.g*intensity, lighting.glow.b*intensity, 0 );
@@ -430,17 +431,18 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 			Vector3F p1 = { screenport->UIWidth(), 0, 0 };
 			shader.DrawQuad( renderTarget[RT_BLUR_0+i]->GetTexture(), p0, p1 );
 		}
-#else
+	#else
 		shader.SetTexture0( renderTarget[RT_BLUR_Y]->GetTexture() );
 		shader.SetColor( lighting.glow.r, lighting.glow.g, lighting.glow.b, 0 );
 		Vector3F p0 = { 0, screenport->UIHeight(), 0 };
 		Vector3F p1 = { screenport->UIWidth(), 0, 0 };
 		shader.DrawQuad( p0, p1 );
-#endif
+	#endif
 
 		screenport->SetPerspective();
 		screenport->SetView( camera.ViewMatrix() );	// Draw the camera
 	}
+#endif
 
 	// ------ Particle system ------------- //
 	boltRenderer->DrawAll( bolts, nBolts, this );

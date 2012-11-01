@@ -28,14 +28,6 @@
 using namespace grinliz;
 
 int GPUState::matrixDepth[3];
-/*
-grinliz::Matrix4	GPUState::instanceMatrix[EL_MAX_INSTANCE];
-grinliz::Vector4F	GPUState::instanceParam[EL_MAX_INSTANCE];
-grinliz::Matrix4	GPUState::instanceParam4[EL_MAX_INSTANCE];
-BoneData			GPUState::instanceBones[EL_MAX_INSTANCE];
-*/
-
-grinliz::Color4F	GPUState::color;
 grinliz::Color4F	GPUState::ambient;
 grinliz::Vector4F	GPUState::directionWC;
 grinliz::Color4F	GPUState::diffuse;
@@ -334,14 +326,17 @@ void GPUState::Weld( const GPUState& state, const GPUStream& stream, const GPUSt
 		MultMatrix4( GPUState::TopMatrix( GPUState::PROJECTION_MATRIX ), GPUState::ViewMatrix(), &vp );
 
 		shadman->SetUniform( ShaderManager::U_MVP_MAT, vp );
+		GLASSERT( data.matrix );
 		shadman->SetUniformArray( ShaderManager::U_M_MAT_ARR, EL_MAX_INSTANCE, data.matrix );
 		GLASSERT( stream.instanceIDOffset > 0 );
 		shadman->SetStreamData( ShaderManager::A_INSTANCE_ID, 1, GL_UNSIGNED_SHORT, 
 			                    stream.stride, PTR( data.streamPtr, stream.instanceIDOffset ) );
 		if ( paramNeeded ) {
+			GLASSERT( data.param );
 			shadman->SetUniformArray( ShaderManager::U_PARAM_ARR, EL_MAX_INSTANCE, data.param );
 		}
 		if ( flags & ShaderManager::PROCEDURAL ) {
+			GLASSERT( data.param4 );
 			shadman->SetUniformArray( ShaderManager::U_PARAM4_ARR, EL_MAX_INSTANCE, data.param4 );
 		}
 	}
@@ -350,9 +345,11 @@ void GPUState::Weld( const GPUState& state, const GPUStream& stream, const GPUSt
 		MultMatrix4( GPUState::TopMatrix( GPUState::PROJECTION_MATRIX ), mv, &mvp );
 		shadman->SetUniform( ShaderManager::U_MVP_MAT, mvp );
 		if ( paramNeeded ) {
+			GLASSERT( data.param );
 			shadman->SetUniform( ShaderManager::U_PARAM, data.param[0] );
 		}
 		if ( flags & ShaderManager::PROCEDURAL ) {
+			GLASSERT( data.param4 );
 			shadman->SetUniform( ShaderManager::U_PARAM4, data.param4[0] );
 		}
 	}
@@ -426,7 +423,7 @@ void GPUState::Weld( const GPUState& state, const GPUStream& stream, const GPUSt
 	}
 
 	// color multiplier is always set
-	shadman->SetUniform( ShaderManager::U_COLOR_MULT, GPUState::color );
+	shadman->SetUniform( ShaderManager::U_COLOR_MULT, state.color );
 
 	// Blend
 	if ( state.blend != currentBlend ) {
@@ -574,13 +571,6 @@ void GPUState::Clear()
 	}
 }
 #endif
-
-GPUState::~GPUState()
-{
-	GLASSERT( matrixDepth[0] >= 0 );
-	GLASSERT( matrixDepth[1] >= 0 );
-	GLASSERT( matrixDepth[2] >= 0 );
-}
 
 
 void GPUState::Draw( const GPUStream& stream, const GPUStreamData& data, int nIndex, int instances )
@@ -983,11 +973,6 @@ LightShader::LightShader( int flag, BlendMode blend )
 {
 	this->blend = blend;
 	this->SetShaderFlag( flag );
-}
-
-
-LightShader::~LightShader()
-{
 }
 
 

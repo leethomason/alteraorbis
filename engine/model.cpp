@@ -626,6 +626,7 @@ void ModelAtom::Bind( GPUStream* stream, GPUStreamData* data ) const
 		data->indexPtr = index;
 		data->streamPtr = vertex;
 	}
+	data->texture0 = this->texture;
 }
 
 

@@ -167,8 +167,6 @@ struct GPUStreamData
 class GPUState 
 {
 public:
-	virtual ~GPUState();
-
 	enum MatrixType {
 		MODELVIEW_MATRIX,
 		PROJECTION_MATRIX,
@@ -229,7 +227,6 @@ public:
 	static const grinliz::Matrix4& ViewMatrix();
 
 	// More input to the draw call. Must be set up by the engine.
-	static grinliz::Color4F		color;
 	static grinliz::Color4F		ambient;
 	static grinliz::Vector4F	directionWC;
 	static grinliz::Color4F		diffuse;
@@ -257,16 +254,14 @@ public:
 	static bool SupportsVBOs();
 
 
-	GPUState() : //texture0( 0 ), texture1( 0 ), 
-				 //streamPtr( 0 ), nIndex( 0 ), indexPtr( 0 ),
-				 //vertexBuffer( 0 ), indexBuffer( 0 ),
-				 shaderFlags( 0 ),
+	GPUState() : shaderFlags( 0 ),
 				 blend( BLEND_NONE ),
 				 depthWrite( true ), depthTest( true ),
 				 colorWrite( true ),
 				 stencilMode( STENCIL_OFF ),
 				 hemisphericalLighting( false )
 	{
+		color.Set( 1,1,1,1 );
 	}
 
 protected:
@@ -306,8 +301,8 @@ protected:
 	bool			colorWrite;
 	StencilMode		stencilMode;
 	bool			hemisphericalLighting;
-	// Fixed to the state, but a bunch of 
-	// shaders get generated for this.
+	grinliz::Color4F color;	// actual state color; render a bunch of stuff in black, for example.
+							// not to be confused with per-vertex or per-instance color, also supported.
 	int				shaderFlags;
 
 public:
@@ -318,17 +313,21 @@ public:
 				&& colorWrite == s.colorWrite
 				&& stencilMode == s.stencilMode
 				&& hemisphericalLighting == s.hemisphericalLighting
+				&& color == s.color
 				&& shaderFlags == s.shaderFlags );
 	}
 	U32 Hash() const {
-		U32 h[7] = {	(U32)blend, 
+		grinliz::Color4U8 c = grinliz::Convert_4F_4U8( color );
+		U32 h[8] = {	(U32)blend, 
 						depthWrite ? 1 : 0, 
 						depthTest ? 1 : 0, 
 						colorWrite ? 1 : 0, 
 						(U32)stencilMode, 
 						hemisphericalLighting ? 1 : 0,
-						shaderFlags };
-		return grinliz::Random::Hash( h,7*sizeof(U32) );
+						shaderFlags,
+						(c.r) | (c.g<<8) | (c.b<<16) | (c.a<<24)
+					};
+		return grinliz::Random::Hash( h,8*sizeof(U32) );
 	}
 };
 
@@ -353,7 +352,6 @@ class LightShader : public GPUState
 public:
 	/** Texture or color. Writes & tests z. Enables lighting. */
 	LightShader( int lightFlag, BlendMode blend = BLEND_NONE );
-	~LightShader();
 	
 protected:
 };
