@@ -368,7 +368,6 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 			shadowShader.SetDepthTest( false );	// flat plane. 1st pass.
 			shadowShader.SetDepthWrite( false );
 			shadowShader.SetColorWrite( false );
-			//shadowShader.SetColor( 1, 0, 0 );	// testing
 
 			engineShaders.PushAll( shadowShader );
 			QueueSet( &engineShaders, modelRoot, 0, Model::MODEL_NO_SHADOW, 0, EngineShaders::BLEND );

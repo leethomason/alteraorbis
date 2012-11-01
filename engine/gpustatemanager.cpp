@@ -658,61 +658,6 @@ void GPUState::Draw( const GPUStream& stream, Texture* texture, const GPUVertexB
 }
 
 
-/*
-void GPUState::Draw( const GPUStream& stream, const GPUVertexBuffer& vertex, int nIndex, const uint16_t* index, int instances )
-{
-	if ( nIndex == 0 )
-		return;
-
-	bool useInstancing = instances > 0;
-	if ( instances == 0 ) instances = 1;
-	if ( useInstancing ) {
-		SetShaderFlag( ShaderManager::INSTANCE );
-	}
-	else {
-		ClearShaderFlag( ShaderManager::INSTANCE );
-	}
-	GLASSERT( (primitive != GL_TRIANGLES ) || (nIndex % 3 == 0 ));
-
-	trianglesDrawn += instances * nIndex / 3;
-	++drawCalls;
-
-	if ( indexPtr ) {	
-		if ( vertexBuffer ) {
-			glBindBufferX( GL_ARRAY_BUFFER, vertexBuffer );
-		}
-		SetState( *this );
-
-		GLASSERT( !indexBuffer );
-		glDrawElements( primitive,	//GL_TRIANGLES except where debugging 
-						nIndex*instances, GL_UNSIGNED_SHORT, indexPtr );
-
-		if ( vertexBuffer ) {
-			glBindBufferX( GL_ARRAY_BUFFER, 0 );
-		}
-	}
-	else {
-		GLASSERT( vertexBuffer );
-		GLASSERT( indexBuffer );
-
-		// This took a long time to figure. OpenGL is a state machine, except, apparently, when it isn't.
-		// The VBOs impact how the SetxxxPointers work. If they aren't set, then the wrong thing gets
-		// bound. What a PITA. And ugly design problem with OpenGL.
-		//
-		glBindBufferX( GL_ARRAY_BUFFER, vertexBuffer );
-		glBindBufferX( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
-		SetState( *this );
-
-		glDrawElements( primitive,	// GL_TRIANGLES except when debugging 
-						nIndex*instances, GL_UNSIGNED_SHORT, 0 );
-
-		glBindBufferX( GL_ARRAY_BUFFER, 0 );
-		glBindBufferX( GL_ELEMENT_ARRAY_BUFFER, 0 );
-	}
-	CHECK_GL_ERROR;
-}
-*/
-
 void GPUState::DrawQuad( Texture* texture, const grinliz::Vector3F p0, const grinliz::Vector3F p1, bool positive )
 {
 	PTVertex pos[4] = { 

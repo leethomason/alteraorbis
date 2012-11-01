@@ -19,6 +19,7 @@
 
 EngineShaders::EngineShaders()
 {
+	GLASSERT( sizeof(*this) < 1000 );	// sanity check. make sure nothing huge gets added.
 }
 
 

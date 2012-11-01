@@ -104,7 +104,7 @@ void RenderTestScene::SetupTest0()
 		model[i]->SetYRotation( (float)(i*30) );
 		model[i]->SetAnimation( ANIM_WALK, 1000, true ); 
 	}
-	engine->CameraLookAt( 0, (float)(NUM_MODELS/4), 12 );
+	engine->CameraLookAt( 2, (float)(NUM_MODELS/4), 12 );
 }
 
 

@@ -102,6 +102,8 @@ public:
 };
 
 
+/* Class that defines the data layout of a stream.
+*/
 struct GPUStream {
 	// Defines float sized components.
 	int stride;
@@ -143,6 +145,8 @@ struct GPUStream {
 };
 
 
+/* Class that actually contains the pointers, buffers, and uniforms for rendering.
+*/
 struct GPUStreamData
 {
 	GPUStreamData() : streamPtr(0), indexPtr(0), vertexBuffer(0), indexBuffer(0), texture0(0), matrix(0), param(0), param4(0), bones(0) {}
@@ -267,7 +271,6 @@ public:
 protected:
 
 	static void Weld( const GPUState&, const GPUStream&, const GPUStreamData& );
-	//void DebugDraw( const PTVertex* v, int nIndex, const U16* index );
 
 private:
 

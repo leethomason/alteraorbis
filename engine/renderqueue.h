@@ -31,13 +31,12 @@ class Texture;
 
 
 /* 
-	The prevailing wisdom for GPU performance is to group the submission by 1)render state
-	and 2) texture. In general I question this for tile based GPUs, but it's better to start
-	with a queue architecture rather than have to retrofit later.
+	A simple grouping queue. States are ordered (see CompareState) in prioritizing:
+	- pass (opaque, blend)
+	- state (which defines the fixed state)
+	- texture
 
-	RenderQueue queues up everything to be rendered. Flush() commits, and should be called 
-	at the end of the render pass. Flush() may also be called automatically if the queues 
-	are full.
+	Within a run of items, ModelAtoms are grouped together and rendererd via instancing.
 */
 class RenderQueue
 {
