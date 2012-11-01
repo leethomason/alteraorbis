@@ -25,7 +25,7 @@
 #include "../gamui/gamui.h"
 #include "../shared/gamedbreader.h"
 
-class GPUShader;
+class GPUState;
 
 class UFOText
 {
@@ -55,7 +55,7 @@ private:
 	void CacheMetric( int c );
 	void CacheKern( int c, int cPrev );
 
-	void TextOut( GPUShader* shader, const char* str, int x, int y, int h, int *w );
+	void TextOut( GPUState* shader, const char* str, int x, int y, int h, int *w );
 
 	static UFOText* instance;
 	

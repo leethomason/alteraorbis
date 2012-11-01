@@ -53,10 +53,9 @@ TestMap::~TestMap()
 }
 
 
-void TestMap::Draw3D(  const Color3F& colorMult, GPUShader::StencilMode mode )
+void TestMap::Draw3D(  const Color3F& colorMult, GPUState::StencilMode mode )
 {
 	GPUStream stream;
-
 	stream.posOffset = 0;
 	stream.nPos = 3;
 	stream.stride = sizeof( Vector3F );
@@ -64,8 +63,8 @@ void TestMap::Draw3D(  const Color3F& colorMult, GPUShader::StencilMode mode )
 	FlatShader shader;
 	shader.SetColor( colorMult.r*color.r, colorMult.g*color.g, colorMult.b*color.b );
 	shader.SetStencilMode( mode );
-	shader.SetStream( stream, vertex, width*height*6, index );
-	shader.Draw();
+
+	shader.Draw( stream, 0, vertex, width*height*6, index );
 
 	{
 		// Debugging coordinate system:

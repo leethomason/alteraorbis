@@ -23,6 +23,7 @@
 #include "../grinliz/gldebug.h"
 #include "../grinliz/glmatrix.h"
 #include "../grinliz/glcolor.h"
+#include "../grinliz/glrandom.h"
 
 #include "vertex.h"
 #include "enginelimits.h"
@@ -117,6 +118,8 @@ struct GPUStream {
 	int instanceIDOffset;
 	int boneOffset;
 
+	enum GamuiType { kGamuiType };
+
 	GPUStream() :  stride( 0 ),
 				nPos( 0 ), posOffset( 0 ), 
 				nTexture0( 0 ), texture0Offset( 0 ),
@@ -126,10 +129,10 @@ struct GPUStream {
 
 	GPUStream( const Vertex* vertex );
 	GPUStream( const InstVertex* vertex );
-
-	enum GamuiType { kGamuiType };
 	GPUStream( GamuiType );
+	GPUStream( const PTVertex* vertex );
 	GPUStream( const PTVertex2* vertex );
+
 	void Clear();
 
 	bool HasPos() const			{ return nPos > 0; }
@@ -140,15 +143,32 @@ struct GPUStream {
 };
 
 
+struct GPUStreamData
+{
+	GPUStreamData() : streamPtr(0), indexPtr(0), vertexBuffer(0), indexBuffer(0), texture0(0), matrix(0), param(0), param4(0), bones(0) {}
+
+	const void*			streamPtr;
+	const uint16_t*		indexPtr;
+	U32					vertexBuffer;
+	U32					indexBuffer;
+
+	Texture*			texture0;
+	grinliz::Matrix4*	matrix;
+	grinliz::Vector4F*	param;
+	grinliz::Matrix4*	param4;
+	BoneData*			bones;
+};
+
+
 /* WARNING: this gets copied around, and slices.
    Sub-classes are for initialization. They can't
    store data.
 */
 // SHould be GPURenderObject?? Something
-class GPUShader 
+class GPUState 
 {
 public:
-	virtual ~GPUShader();
+	virtual ~GPUState();
 
 	enum MatrixType {
 		MODELVIEW_MATRIX,
@@ -179,63 +199,13 @@ public:
 	// The top level V matrix in perspective mode.
 	static void SetCameraTransform( const grinliz::Matrix4& camera );
 	static void SetScissor( int x, int y, int w, int h );
-	
-	void SetStream( const GPUStream& stream, const void* vertex, int nIndex, const uint16_t* indices ) 
-	{
-		GLASSERT( stream.stride > 0 );
-		//GLASSERT( nIndex % 3 == 0 );
 
-		this->stream = stream;
-		this->streamPtr = vertex;
-		this->indexPtr = indices;
-		this->nIndex = nIndex;
-		this->vertexBuffer = 0;
-		this->indexBuffer = 0;
-	}
+	//void SetTexture0( Texture* tex ) { texture0 = tex; }
+	//Texture* Texture0() const { return texture0; }
+	int HasLighting() const;
 
-
-	void SetStream( const GPUStream& stream, const GPUVertexBuffer& vertex, int nIndex, const GPUIndexBuffer& index ) 
-	{
-		GLASSERT( stream.stride > 0 );
-		GLASSERT( nIndex % 3 == 0 );
-		GLASSERT( vertex.IsValid() );
-		GLASSERT( index.IsValid() );
-
-		this->stream = stream;
-		this->streamPtr = 0;
-		this->indexPtr = 0;
-		this->nIndex = nIndex;
-		this->vertexBuffer = vertex.ID();
-		this->indexBuffer = index.ID();
-	}
-
-
-	void SetStream( const GPUStream& stream, const GPUVertexBuffer& vertex, int nIndex, const uint16_t* index ) 
-	{
-		GLASSERT( stream.stride > 0 );
-		GLASSERT( nIndex % 3 == 0 );
-		GLASSERT( vertex.IsValid() );
-		GLASSERT( index );
-
-		this->stream = stream;
-		this->streamPtr = 0;
-		this->indexPtr = index;
-		this->nIndex = nIndex;
-		this->vertexBuffer = vertex.ID();
-		this->indexBuffer = 0;
-	}
-
-	void SetTexture0( Texture* tex ) { texture0 = tex; }
-	bool HasTexture0() const { return texture0 != 0; }
-	bool HasLighting( grinliz::Vector4F* dir, grinliz::Vector4F* ambient, grinliz::Vector4F* diffuse ) const { 
-		if ( dir ) *dir = direction;
-		if ( ambient ) ambient->Set( this->ambient.r, this->ambient.g, this->ambient.b, this->ambient.a );
-		if ( diffuse ) diffuse->Set( this->diffuse.r, this->diffuse.g, this->diffuse.b, this->diffuse.a );
-		return direction.Length() > 0;
-	}
-
-	void SetTexture1( Texture* tex ) { texture1 = tex; }
-	bool HasTexture1() const { return texture1 != 0; }
+	//void SetTexture1( Texture* tex ) { texture1 = tex; }
+	//Texture* Texture1() const { return texture1; }
 
 	void SetColor( float r, float g, float b )				{ color.r = r; color.g = g; color.b = b; color.a = 1; }
 	void SetColor( float r, float g, float b, float a )		{ color.r = r; color.g = g; color.b = b; color.a = a; }
@@ -245,7 +215,6 @@ public:
 		grinliz::Color4F c = { (float)color.r*INV, (float)color.g*INV, (float)color.b*INV, (float)color.a*INV };
 		SetColor( c );
 	}
-	void SetRadius( float r ) { radius = r; }
 
 	// Set any of the flags (that are boolean) from ShaderManager
 	void SetShaderFlag( int flag )				{ shaderFlags |= flag; }
@@ -265,21 +234,17 @@ public:
 	static const grinliz::Matrix4& TopMatrix( MatrixType type );
 	static const grinliz::Matrix4& ViewMatrix();
 
-	// Input to the Draw() call, basically. The instance data
-	// will be consumed by the draw. A giant param list / structure
-	// didn't seem better.
-	static grinliz::Matrix4		instanceMatrix[EL_MAX_INSTANCE];
-	static grinliz::Vector4F	instanceParam[EL_MAX_INSTANCE];
-	static grinliz::Matrix4		instanceParam4[EL_MAX_INSTANCE];
-	static BoneData				instanceBones[EL_MAX_INSTANCE];
-
 	// More input to the draw call. Must be set up by the engine.
 	static grinliz::Color4F		color;
 	static grinliz::Color4F		ambient;
-	static grinliz::Vector4F	direction;
+	static grinliz::Vector4F	directionWC;
 	static grinliz::Color4F		diffuse;
 
-	void Draw( int instances=0 );
+	void Draw( const GPUStream& stream, const GPUStreamData& data, int nIndex, int nInstance=0 );
+
+	void Draw( const GPUStream& stream, Texture* texture, const void* vertex,				int nIndex, const uint16_t* indices );
+	void Draw( const GPUStream& stream, Texture* texture, const GPUVertexBuffer& vertex,	int nIndex, const uint16_t* index );
+	void Draw( const GPUStream& stream, Texture* texture, const GPUVertexBuffer& vertex,	int nIndex, const GPUIndexBuffer& index );
 
 	void DrawLine( const grinliz::Vector3F p0, const grinliz::Vector3F p1 );
 	void DrawQuad( const grinliz::Vector3F p0, const grinliz::Vector3F p1, bool positiveWinding=true );
@@ -298,29 +263,22 @@ public:
 	static bool SupportsVBOs();
 
 
-	GPUShader() : texture0( 0 ), texture1( 0 ), 
-				 streamPtr( 0 ), nIndex( 0 ), indexPtr( 0 ),
-				 vertexBuffer( 0 ), indexBuffer( 0 ),
+	GPUState() : //texture0( 0 ), texture1( 0 ), 
+				 //streamPtr( 0 ), nIndex( 0 ), indexPtr( 0 ),
+				 //vertexBuffer( 0 ), indexBuffer( 0 ),
 				 shaderFlags( 0 ),
-				 radius( 1.0f ),
 				 blend( BLEND_NONE ),
 				 depthWrite( true ), depthTest( true ),
 				 colorWrite( true ),
 				 stencilMode( STENCIL_OFF ),
 				 hemisphericalLighting( false )
 	{
-		color.Set( 1, 1, 1, 1 );
-		direction.Set( 0, 0, 0, 0 );
-		ambient.Set( 0, 0, 0, 0 );
-		diffuse.Set( 0, 0, 0, 0 );
-		memset( instanceParam, 0, sizeof(*instanceParam)*EL_MAX_INSTANCE );
-		memset( instanceBones, 0, sizeof(*instanceBones)*EL_MAX_INSTANCE );
 	}
 
 protected:
 
-	static void SetState( const GPUShader& );
-	void DebugDraw( const PTVertex* v, int nIndex, const U16* index );
+	static void Weld( const GPUState&, const GPUStream&, const GPUStreamData& );
+	//void DebugDraw( const PTVertex* v, int nIndex, const U16* index );
 
 private:
 
@@ -348,24 +306,6 @@ protected:
 		return (const void*)((const U8*)base + offset);
 	}
 
-	// ----------- Set per Draw() -------- //
-	// Stream description:
-	GPUStream		stream;
-
-	// Stream data (attribute)
-	const void*		streamPtr;
-	int				nIndex;
-	const uint16_t* indexPtr;
-	U32				vertexBuffer;
-	U32				indexBuffer;
-
-	// Stream data (uniform)
-	Texture*			texture0;
-	//Texture*			texture1;
-
-	// ------------ Immutable --------- //
-	// Fixed state and shader state are bound together.
-	// Legacy of previous architecture.
 	BlendMode		blend;
 	bool			depthWrite;
 	bool			depthTest;
@@ -377,11 +317,29 @@ protected:
 	int				shaderFlags;
 
 public:
-
+	bool operator==( const GPUState& s ) const {
+		return (   blend == s.blend 
+				&& depthWrite == s.depthWrite
+				&& depthTest == s.depthTest
+				&& colorWrite == s.colorWrite
+				&& stencilMode == s.stencilMode
+				&& hemisphericalLighting == s.hemisphericalLighting
+				&& shaderFlags == s.shaderFlags );
+	}
+	U32 Hash() const {
+		U32 h[7] = {	(U32)blend, 
+						depthWrite ? 1 : 0, 
+						depthTest ? 1 : 0, 
+						colorWrite ? 1 : 0, 
+						(U32)stencilMode, 
+						hemisphericalLighting ? 1 : 0,
+						shaderFlags };
+		return grinliz::Random::Hash( h,7*sizeof(U32) );
+	}
 };
 
 
-class CompositingShader : public GPUShader
+class CompositingShader : public GPUState
 {
 public:
 	/** Writes texture or color and neither writes nor tests z. 
@@ -396,28 +354,25 @@ public:
 };
 
 
-class LightShader : public GPUShader
+class LightShader : public GPUState
 {
 public:
 	/** Texture or color. Writes & tests z. Enables lighting. */
-	LightShader( const grinliz::Color4F& ambient, 
-		         const grinliz::Vector4F& direction, 
-				 const grinliz::Color4F& diffuse, 
-				 BlendMode blend = BLEND_NONE );
+	LightShader( int lightFlag, BlendMode blend = BLEND_NONE );
 	~LightShader();
 	
 protected:
 };
 
 
-class FlatShader : public GPUShader
+class FlatShader : public GPUState
 {
 public:
 	FlatShader()	{}	// totally vanilla
 };
 
 
-class ParticleShader : public GPUShader
+class ParticleShader : public GPUState
 {
 public:
 	ParticleShader();

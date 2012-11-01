@@ -101,21 +101,20 @@ RenderQueue::State* RenderQueue::FindState( const State& state )
 
 void RenderQueue::Add(	Model* model, 
 						const ModelAtom* atom, 
-						GPUShader* shader, 
+						const GPUState& s, 
 						const Vector4F& param, 
 						const Matrix4* param4,
 						const BoneData* boneData  )
 {
 	GLASSERT( model );
 	GLASSERT( atom );
-	GLASSERT( shader );
 
 	if ( nItem == MAX_ITEMS ) {
 		GLASSERT( 0 );
 		return;
 	}
 
-	State s0 = { shader, atom->texture, 0 };
+	State s0 = { s, atom->texture, 0 };
 
 	State* state = FindState( s0 );
 	if ( !state ) {
@@ -142,9 +141,8 @@ void RenderQueue::Submit(	int modelRequired,
 	//GRINLIZ_PERFTRACK
 
 	for( int i=0; i<nState; ++i ) {
-		GPUShader* shader = statePool[i].shader;
-		GLASSERT( shader );
-		shader->SetTexture0( statePool[i].texture );
+		GPUState* state = &statePool[i].state;
+		GLASSERT( state );
 
 		// Filter out all the items for this RenderState
 		itemArr.Clear();
@@ -167,6 +165,8 @@ void RenderQueue::Submit(	int modelRequired,
 
 		int start = 0;
 		int end = 0;
+		GPUStream		stream;
+		GPUStreamData   data;
 
 		while( start < itemArr.Size() ) {
 			// Get a range;
@@ -180,11 +180,17 @@ void RenderQueue::Submit(	int modelRequired,
 			const ModelAtom* atom = itemArr[start]->atom;
 
 #ifdef XENOENGINE_INSTANCING
-			// The 2 paths is a real pain in the butt, both
+			// The 2 paths is a PITA, both
 			// for startup time and debugging. If instancing
 			// in use, always instance.
 			{
-				atom->Bind( shader );
+				Matrix4		instanceMatrix[EL_MAX_INSTANCE];
+				Vector4F	instanceParam[EL_MAX_INSTANCE];
+				Matrix4		instanceParam4[EL_MAX_INSTANCE];
+				BoneData	instanceBone[EL_MAX_INSTANCE];
+
+				atom->Bind( &stream, &data );
+				GLASSERT( data.texture0 );	// not required, but not sure it works without
 
 				int k=start;
 				while( k < end ) {
@@ -193,20 +199,20 @@ void RenderQueue::Submit(	int modelRequired,
 					for( int index=0; index<delta; ++index ) {
 						const Item* item = itemArr[k+index];
 						if ( xform ) {
-							GPUShader::instanceMatrix[index] = (*xform) * item->model->XForm();
+							instanceMatrix[index] = (*xform) * item->model->XForm();
 						}
 						else {
-							GPUShader::instanceMatrix[index] = item->model->XForm();
+							instanceMatrix[index] = item->model->XForm();
 						}
-						GPUShader::instanceParam[index] = item->param;
+						instanceParam[index] = item->param;
 						if ( item->param4 ) {
-							GPUShader::instanceParam4[index] = *item->param4;
+							instanceParam4[index] = *item->param4;
 						}
 						if ( item->boneData ) {
-							GPUShader::instanceBones[index] = *item->boneData;
+							instanceBone[index] = *item->boneData;
 						}
 					}
-					shader->Draw( delta );
+					state->Draw( stream, data, atom->nIndex, delta );
 					k += delta;
 				}
 			}
@@ -217,11 +223,11 @@ void RenderQueue::Submit(	int modelRequired,
 					const Item* item = itemArr[k];
 					Model* model = item->model;
 
-					shader->PushMatrix( GPUShader::MODELVIEW_MATRIX );
+					shader->PushMatrix( GPUState::MODELVIEW_MATRIX );
 					if ( xform ) {
-						shader->MultMatrix( GPUShader::MODELVIEW_MATRIX, *xform );
+						shader->MultMatrix( GPUState::MODELVIEW_MATRIX, *xform );
 					}
-					shader->MultMatrix( GPUShader::MODELVIEW_MATRIX, model->XForm() );
+					shader->MultMatrix( GPUState::MODELVIEW_MATRIX, model->XForm() );
 					shader->SetParam( item->param );
 					if ( item->hasParam4 ) {
 						shader->InstanceParam4( 0, item->param4 );
@@ -230,7 +236,7 @@ void RenderQueue::Submit(	int modelRequired,
 						shader->InstanceBones( 0, item->boneData );
 					}
 					shader->Draw();
-					shader->PopMatrix( GPUShader::MODELVIEW_MATRIX );
+					shader->PopMatrix( GPUState::MODELVIEW_MATRIX );
 				}
 			}
 #endif

@@ -44,8 +44,8 @@ void Screenport::Resize( int w, int h )
 		h = (int)physicalHeight;
 	}
 
-	GPUShader::SetViewport( w, h );
-	GPUShader::SetScissor( 0, 0, 0, 0 );
+	GPUState::SetViewport( w, h );
+	GPUState::SetScissor( 0, 0, 0, 0 );
 
 	// Sad but true: the game assets are set up for 480x320 resolution.
 	// How to scale?
@@ -67,7 +67,7 @@ void Screenport::SetUI()
 {
 	projection2D.SetIdentity();
 	projection2D.SetOrtho( 0, screenWidth, screenHeight, 0, -1, 1 );
-	GPUShader::SetOrthoTransform( (int)screenWidth, (int)screenHeight );
+	GPUState::SetOrthoTransform( (int)screenWidth, (int)screenHeight );
 	uiMode = true;
 }
 
@@ -76,7 +76,7 @@ void Screenport::SetView( const Matrix4& _view )
 {
 	GLASSERT( uiMode == false );
 	view3D = _view;
-	GPUShader::SetCameraTransform( view3D );
+	GPUState::SetCameraTransform( view3D );
 }
 
 
@@ -123,11 +123,11 @@ void Screenport::SetPerspective()
 			h = orthoHeight;
 		}
 		projection3D.SetOrtho( -w/2, w/2, -h/2, h/2, frustum.zNear, frustum.zFar );
-		GPUShader::SetPerspectiveTransform( projection3D );
+		GPUState::SetPerspectiveTransform( projection3D );
 	}
 	else {
 		projection3D.SetFrustum( frustum.left, frustum.right, frustum.bottom, frustum.top, frustum.zNear, frustum.zFar );
-		GPUShader::SetPerspectiveTransform( projection3D );
+		GPUState::SetPerspectiveTransform( projection3D );
 	}
 }
 

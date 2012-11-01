@@ -52,7 +52,7 @@ public:
 
 	void Add(	Model* model,					// Can be chaned: billboard rotation will be set.
 				const ModelAtom* atom, 
-				GPUShader* shader,
+				const GPUState& state,
 				const grinliz::Vector4F& param, 
 				const grinliz::Matrix4* param4,
 				const BoneData* boneData  );
@@ -77,22 +77,23 @@ private:
 	};
 
 	struct State {
-		GPUShader*			shader;
-		Texture*			texture;
-		Item*				root;
+		GPUState	state;
+		Texture*	texture0;
+		Item*		root;		// list of items in this state.
 	};
 
 	static int CompareState( const State& s0, const State& s1 ) 
 	{
-		if ( s0.shader == s1.shader ) {
-			if ( s0.texture == s1.texture )
+		GLASSERT( sizeof(GPUState) < 100 );	// just a sanity check.
+		if ( s0.state == s1.state ) {
+			if ( s0.texture0 == s1.texture0 )
 				return 0;
-			return ( s0.texture < s1.texture ) ? -1 : 1;
+			return ( s0.texture0 < s1.texture0 ) ? -1 : 1;
 		}
-		if ( s0.shader->SortOrder() == s1.shader->SortOrder() ) {
-			return s0.shader < s1.shader ? -1 : 1;
+		if ( s0.state.SortOrder() == s1.state.SortOrder() ) {
+			return s0.state.Hash() < s1.state.Hash() ? -1 : 1;
 		}
-		return s0.shader->SortOrder() - s1.shader->SortOrder();
+		return s0.state.SortOrder() - s1.state.SortOrder();
 	}
 
 	static int CompareAtom( const void* vi0, const void* vi1 ) 

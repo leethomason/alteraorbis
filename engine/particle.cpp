@@ -271,10 +271,7 @@ void ParticleSystem::Draw()
 	stream.colorOffset = ParticleStream::COLOR_OFFSET;
 
 	ParticleShader shader;
-	shader.SetTexture0( texture );
-
-	shader.SetStream( stream, vertexBuffer, 6*nParticles, indexBuffer );
-	shader.Draw(); 
+	shader.Draw( stream, texture, vertexBuffer, 6*nParticles, indexBuffer );
 }
 
 

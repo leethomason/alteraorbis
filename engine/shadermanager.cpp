@@ -322,6 +322,7 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 	shader->prog = glCreateProgram();
 
 	// Is it in the cache?
+#if 0
 	if ( GLEW_ARB_get_program_binary ) {
 		CStr<200> path;
 		path.Format( "./cache/shader_%s_%d.shader", hashStr.c_str(), flags );
@@ -349,6 +350,7 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 			GLASSERT( false );	// bad cache
 		}
 	}
+#endif
 
 	shader->vertexProg = glCreateShader( GL_VERTEX_SHADER );
 	shader->fragmentProg = glCreateShader( GL_FRAGMENT_SHADER );

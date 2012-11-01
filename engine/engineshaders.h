@@ -32,31 +32,10 @@ public:
 		LIGHT=1, BLEND=2, EMISSIVE=4		// base
 	};
 
-	GPUShader* GetShader( int base, int flags );
+	void GetState( int base, int flags, GPUState* state );
 
-	void Push( int base, const GPUShader& shader );
-	void Pop( int base );
-
-	void PushAll( const GPUShader& shader );
-	void PopAll();
-	
-private:
-	enum { STACK = 2 };
-	GPUShader light[STACK];
-	GPUShader blend[STACK];
-	GPUShader emissive[STACK];
-	int nLight;
-	int nBlend;
-	int nEmissive;
-
-	struct Node {
-		int base;
-		int flags;			// the shader flags that we set (a subset of all the flags the shader is actually using)
-		GPUShader* shader;	// can't move in memory - has to be allocated.
-	};
-
-	// FIXME: switch to HashTable
-	grinliz::CDynArray<Node> shaderArr;	
+	GPUState	light,
+				blend,
+				emissive;
 };
-
 #endif // ENGINE_SHADERS_INCLUDED

@@ -34,6 +34,12 @@ public:
 	virtual void DeviceLoss() = 0;
 };
 
+
+
+/*	A class to manage shaders. No actual "shader" object is returned; a
+	Shader is made current with ActivateShader() and then Set methods
+	are used.
+*/
 class ShaderManager
 {
 public:
@@ -42,48 +48,45 @@ public:
 
 	static ShaderManager* Instance() { if ( !instance ) instance = new ShaderManager(); return instance; }
 
-	/* The current design came from migrating the Xenowar fixed pipeline. And
-	   although that was a good move from a test case point of view,
-	   it didn't lean to a clean architecture between the ShaderManager and the
-	   GPUState, and the GPUStream. 
-
-	   There are 3 "levels" of state. There should only be 2, and managed better.
-	   1. Environment - TEXTURE, stream data, LIGHTING
-	   2. Model (Queue) - PARAM (often want on submit), EMISSIVE, BONE, PROCEDURAL
-	   3. Model (Submit) - INSTANCE
-	*/
-
 	enum {				
-		TEXTURE0			= (1<<0),		// Texture is in use. Note that the sampling state (linear, nearest) is saved with the texture.
-		TEXTURE0_ALPHA_ONLY = (1<<1),		// Texture is only alpha, which composites differently.
-		TEXTURE0_TRANSFORM	= (1<<2),		// Texture has a texture transform: PARAM
-
-		TEXTURE1			= (1<<4),
-		TEXTURE1_ALPHA_ONLY	= (1<<5),
-		TEXTURE1_TRANSFORM	= (1<<6),
-		
-		COLOR_PARAM			= (1<<7),		// Apply per model color. PARAM
-		COLORS				= (1<<8),		// Per-vertex colors.
-		//COLOR_MULTIPLIER	= (1<<9),		// Global color multiplier.
-		LIGHTING_DIFFUSE	= (1<<10),		// Diffuse lighting. Requires per vertex normals, 
-											// light direction, ambient color, and diffuse color.
-		LIGHTING_HEMI		= (1<<11),		// Hemisperical lighting. Like diffuse, but uses a 
-											// different light model. FLAG
-		INSTANCE			= (1<<12),		// Use instancing. Up to 16 uniform matrices contain the model
+		INSTANCE			= (1<<0),		// Use instancing. Up to 16 uniform matrices contain the model
 											// transform. The instance attribute must be in the vertex data.
-		PREMULT				= (1<<13),		// convert to pre-multiplied in the fragment shader
-		EMISSIVE			= (1<<14),		// interpret the alpha channel as emission. FLAG
-		EMISSIVE_EXCLUSIVE  = (1<<15),		// everything not emissive is black
+
+		// Texture state.
+		TEXTURE0			= (1<<1),		// Texture is in use. Note that the sampling state (linear, nearest) is saved with the texture.
+		TEXTURE0_ALPHA_ONLY = (1<<2),		// Texture is only alpha, which composites differently.
+
+		TEXTURE1			= (1<<3),
+		TEXTURE1_ALPHA_ONLY	= (1<<4),
 		
-		BONE_FILTER			= (1<<17),		// Only show one bone. PARAM.x
-		BONE_XFORM			= (1<<18),
-		PROCEDURAL			= (1<<19),		// Engage the procedural renderer, and use a Matrix param.
+		// Colors and Lighting
+		COLORS				= (1<<5),		// Per-vertex colors.
+		LIGHTING_DIFFUSE	= (1<<6),		// Diffuse lighting. Requires per vertex normals, 
+											// light direction, ambient color, and diffuse color.
+		LIGHTING_HEMI		= (1<<7),		// Hemisperical lighting. Like diffuse, but uses a 
+											// different light model.
+
+		// Color features.
+		PREMULT				= (1<<8),		// convert to pre-multiplied in the fragment shader
+		EMISSIVE			= (1<<9),		// interpret the alpha channel as emission.
+		EMISSIVE_EXCLUSIVE  = (1<<10),		// everything not emissive is black
+
+		// The Param. "COLOR" is the real one. The others are effectively debugging modes since they conflict with using "color"
+		COLOR_PARAM			= (1<<11),		// Apply per model color.
+		BONE_FILTER			= (1<<12),
+		TEXTURE0_TRANSFORM	= (1<<13),		// Texture has a texture transform
+		TEXTURE1_TRANSFORM	= (1<<14),
+
+		// Features:
+		PROCEDURAL			= (1<<15),		// Engage the procedural renderer, and use a Matrix param.
+		BONE_XFORM			= (1<<16),
 	};
 
 	void DeviceLoss();
 	void AddDeviceLossHandler( IDeviceLossHandler* handler );
 	void RemoveDeviceLossHandler( IDeviceLossHandler* handler );
 
+	// ActivateShader should be called *before* the sets, so  the sets are correctly validated. 
 	void ActivateShader( int flags );
 	bool ParamNeeded() const { return active->ParamNeeded(); }
 	bool BonesNeeded() const { return active->BonesNeeded(); }

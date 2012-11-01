@@ -25,7 +25,7 @@ using namespace gamui;
 void UIRenderer::BeginRender()
 {
 	// Should be completely uneeded, but fixes bugs on a netbook. (With questionable drivers.)
-	GPUShader::ResetState();
+	GPUState::ResetState();
 }
 
 
@@ -40,37 +40,37 @@ void UIRenderer::BeginRenderState( const void* renderState )
 	{
 	case RENDERSTATE_UI_NORMAL:
 		shader.SetColor( 1, 1, 1, 1 );
-		shader.SetBlend( GPUShader::BLEND_NORMAL );
+		shader.SetBlend( GPUState::BLEND_NORMAL );
 		break;
 
 	case RENDERSTATE_UI_NORMAL_OPAQUE:
 		shader.SetColor( 1, 1, 1, 1 );
-		shader.SetBlend( GPUShader::BLEND_NONE );
+		shader.SetBlend( GPUState::BLEND_NONE );
 		break;
 
 	case RENDERSTATE_UI_DISABLED:
 		shader.SetColor( 1, 1, 1, 0.5f );
-		shader.SetBlend( GPUShader::BLEND_NORMAL );
+		shader.SetBlend( GPUState::BLEND_NORMAL );
 		break;
 
 	case RENDERSTATE_UI_TEXT:
 		shader.SetColor( textRed, textGreen, textBlue, 1 );
-		shader.SetBlend( GPUShader::BLEND_NORMAL );
+		shader.SetBlend( GPUState::BLEND_NORMAL );
 		break;
 
 	case RENDERSTATE_UI_TEXT_DISABLED:
 		shader.SetColor( textRed, textGreen, textBlue, 0.5f );
-		shader.SetBlend( GPUShader::BLEND_NORMAL );
+		shader.SetBlend( GPUState::BLEND_NORMAL );
 		break;
 
 	case RENDERSTATE_UI_DECO:
 		shader.SetColor( 1, 1, 1, 0.7f );
-		shader.SetBlend( GPUShader::BLEND_NORMAL );
+		shader.SetBlend( GPUState::BLEND_NORMAL );
 		break;
 
 	case RENDERSTATE_UI_DECO_DISABLED:
 		shader.SetColor( 1, 1, 1, 0.2f );
-		shader.SetBlend( GPUShader::BLEND_NORMAL );
+		shader.SetBlend( GPUState::BLEND_NORMAL );
 		break;
 
 	default:
@@ -82,20 +82,14 @@ void UIRenderer::BeginRenderState( const void* renderState )
 
 void UIRenderer::BeginTexture( const void* textureHandle )
 {
-	Texture* texture = (Texture*)textureHandle;
-	//glBindTexture( GL_TEXTURE_2D, texture->GLID() );
-	shader.SetTexture0( texture );
+	texture = (Texture*)textureHandle;
 }
 
 
 void UIRenderer::Render( const void* renderState, const void* textureHandle, int nIndex, const uint16_t* index, int nVertex, const Gamui::Vertex* vertex )
 {
-//	shader.SetVertex( 2, sizeof(Gamui::Vertex), &vertex[0].x );
-//	shader.SetTexture0( 2, sizeof(Gamui::Vertex), &vertex[0].tx );
 	GPUStream stream( GPUStream::kGamuiType );
-	shader.SetStream( stream, vertex, nIndex, index );
-
-	shader.Draw();
+	shader.Draw( stream, texture, vertex, nIndex, index );
 }
 
 

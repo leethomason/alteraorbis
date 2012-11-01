@@ -941,13 +941,13 @@ void WorldMap::ShowAdjacentRegions( float _x, float _y )
 
 void WorldMap::DrawZones()
 {
-	CompositingShader debug( GPUShader::BLEND_NORMAL );
+	CompositingShader debug( GPUState::BLEND_NORMAL );
 	debug.SetColor( 1, 1, 1, 0.5f );
-	CompositingShader debugOrigin( GPUShader::BLEND_NORMAL );
+	CompositingShader debugOrigin( GPUState::BLEND_NORMAL );
 	debugOrigin.SetColor( 1, 0, 0, 0.5f );
-	CompositingShader debugAdjacent( GPUShader::BLEND_NORMAL );
+	CompositingShader debugAdjacent( GPUState::BLEND_NORMAL );
 	debugAdjacent.SetColor( 1, 1, 0, 0.5f );
-	CompositingShader debugPath( GPUShader::BLEND_NORMAL );
+	CompositingShader debugPath( GPUState::BLEND_NORMAL );
 	debugPath.SetColor( 0.5f, 0.5f, 1, 0.5f );
 
 	for( int j=0; j<height; ++j ) {
@@ -985,29 +985,20 @@ void WorldMap::DrawZones()
 
 
 
-void WorldMap::Submit( GPUShader* shader, bool emissiveOnly )
+void WorldMap::Submit( GPUState* shader, bool emissiveOnly )
 {
-	GPUStream stream;
-
-	stream.stride = sizeof( PTVertex );
-
-	stream.posOffset = PTVertex::POS_OFFSET;
-	stream.nPos = 3;
-	stream.texture0Offset = PTVertex::TEXTURE_OFFSET;
-	stream.nTexture0 = 2;
 
 	for( int i=0; i<LOWER_TYPES; ++i ) {
-		shader->SetStream( stream, vertex[i].Mem(), index[i].Size(), index[i].Mem() );
 		if ( emissiveOnly && !texture[i]->Emissive() )
 			continue;
-		shader->SetTexture0( texture[i] );
-		shader->Draw();
+		GPUStream stream( vertex[i].Mem() );
+		shader->Draw( stream, texture[i], vertex[i].Mem(), index[i].Size(), index[i].Mem() );
 	}
 
 }
 
 
-void WorldMap::Draw3D(  const grinliz::Color3F& colorMult, GPUShader::StencilMode mode )
+void WorldMap::Draw3D(  const grinliz::Color3F& colorMult, GPUState::StencilMode mode )
 {
 
 	// Real code to draw the map:
@@ -1017,7 +1008,7 @@ void WorldMap::Draw3D(  const grinliz::Color3F& colorMult, GPUShader::StencilMod
 	Submit( &shader, false );
 
 	if ( debugRegionOverlay ) {
-		if ( mode == GPUShader::STENCIL_CLEAR ) {
+		if ( mode == GPUState::STENCIL_CLEAR ) {
 			// Debugging pathing zones:
 			DrawZones();
 		}

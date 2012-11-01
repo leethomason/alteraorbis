@@ -87,8 +87,8 @@ public:
 									grinliz::Vector2F* outPos );
 
 	// ---- Map ---- //
-	virtual void Submit( GPUShader* shader, bool emissiveOnly );
-	virtual void Draw3D(  const grinliz::Color3F& colorMult, GPUShader::StencilMode );
+	virtual void Submit( GPUState* shader, bool emissiveOnly );
+	virtual void Draw3D(  const grinliz::Color3F& colorMult, GPUState::StencilMode );
 
 	// ---- MicroPather ---- //
 	virtual float LeastCostEstimate( micropather::PathNode* stateStart, micropather::PathNode* stateEnd );

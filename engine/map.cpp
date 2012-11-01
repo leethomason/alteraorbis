@@ -44,6 +44,7 @@ Map::Map( int w, int h )
 
 	width = w;
 	height = h;
+	texture = 0;
 	GLASSERT( w <= EL_MAX_MAP_SIZE );
 	GLASSERT( h <= EL_MAX_MAP_SIZE );
 	GLOUTPUT(( "Map created. %dK\n", sizeof( *this )/1024 ));
@@ -81,17 +82,17 @@ void Map::Load( const XMLElement* mapElement )
 
 void Map::BeginRender()
 {
-	gamuiShader.PushMatrix( GPUShader::MODELVIEW_MATRIX );
+	gamuiShader.PushMatrix( GPUState::MODELVIEW_MATRIX );
 
 	Matrix4 rot;
 	rot.SetXRotation( 90 );
-	gamuiShader.MultMatrix( GPUShader::MODELVIEW_MATRIX, rot );
+	gamuiShader.MultMatrix( GPUState::MODELVIEW_MATRIX, rot );
 }
 
 
 void Map::EndRender()
 {
-	gamuiShader.PopMatrix( GPUShader::MODELVIEW_MATRIX );
+	gamuiShader.PopMatrix( GPUState::MODELVIEW_MATRIX );
 }
 
 
@@ -103,22 +104,22 @@ void Map::BeginRenderState( const void* renderState )
 		case UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE:
 		case RENDERSTATE_MAP_OPAQUE:
 			gamuiShader.SetColor( 1, 1, 1, 1 );
-			gamuiShader.SetBlend( GPUShader::BLEND_NONE );
+			gamuiShader.SetBlend( GPUState::BLEND_NONE );
 			break;
 
 		case UIRenderer::RENDERSTATE_UI_NORMAL:
 		case RENDERSTATE_MAP_NORMAL:
 			gamuiShader.SetColor( 1.0f, 1.0f, 1.0f, 0.8f );
-			gamuiShader.SetBlend( GPUShader::BLEND_NORMAL );
+			gamuiShader.SetBlend( GPUState::BLEND_NORMAL );
 			break;
 
 		case RENDERSTATE_MAP_TRANSLUCENT:
 			gamuiShader.SetColor( 1, 1, 1, ALPHA );
-			gamuiShader.SetBlend( GPUShader::BLEND_NORMAL );
+			gamuiShader.SetBlend( GPUState::BLEND_NORMAL );
 			break;
 		case RENDERSTATE_MAP_MORE_TRANSLUCENT:
 			gamuiShader.SetColor( 1, 1, 1, ALPHA_1 );
-			gamuiShader.SetBlend( GPUShader::BLEND_NORMAL );
+			gamuiShader.SetBlend( GPUState::BLEND_NORMAL );
 			break;
 		default:
 			GLASSERT( 0 );
@@ -128,14 +129,12 @@ void Map::BeginRenderState( const void* renderState )
 
 void Map::BeginTexture( const void* textureHandle )
 {
-	gamuiShader.SetTexture0( (Texture*)textureHandle );
+	texture = (Texture*)textureHandle;
 }
 
 
 void Map::Render( const void* renderState, const void* textureHandle, int nIndex, const uint16_t* index, int nVertex, const gamui::Gamui::Vertex* vertex )
 {
 	GPUStream stream( GPUStream::kGamuiType );
-	gamuiShader.SetStream( stream, vertex, nIndex, index );
-
-	gamuiShader.Draw();
+	gamuiShader.Draw( stream, texture, vertex, nIndex, index );
 }

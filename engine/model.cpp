@@ -574,7 +574,8 @@ void Model::Queue( RenderQueue* queue, EngineShaders* engineShaders, int require
 				mod = ShaderManager::PROCEDURAL;
 			}
 
-			GPUShader* shader = engineShaders->GetShader( base, mod );
+			GPUState state;
+			engineShaders->GetState( base, mod, &state );
 
 			const BoneData* pBD = 0;
 			const Matrix4* pMat = 0;
@@ -593,7 +594,7 @@ void Model::Queue( RenderQueue* queue, EngineShaders* engineShaders, int require
 
 			queue->Add( this,									// reference back
 						&resource->atom[i],						// model atom to render
-						shader,
+						state,
 						param[i],								// parameter to the shader
 						pMat,
 						pBD );
@@ -602,12 +603,13 @@ void Model::Queue( RenderQueue* queue, EngineShaders* engineShaders, int require
 }
 
 
-void ModelAtom::Bind( GPUShader* shader ) const
+void ModelAtom::Bind( GPUStream* stream, GPUStreamData* data ) const
 {
-	GPUStream stream( vertex );
+	GPUStream vertexStream( vertex );
+	*stream = vertexStream;
 
 #ifdef EL_USE_VBO
-	if ( GPUShader::SupportsVBOs() && !vertexBuffer.IsValid() ) {
+	if ( GPUState::SupportsVBOs() && !vertexBuffer.IsValid() ) {
 		GLASSERT( !indexBuffer.IsValid() );
 
 		vertexBuffer = GPUVertexBuffer::Create( vertex, sizeof(*vertex), nVertex*instances );
@@ -615,12 +617,14 @@ void ModelAtom::Bind( GPUShader* shader ) const
 	}
 
 	if ( vertexBuffer.IsValid() && indexBuffer.IsValid() ) {
-		shader->SetStream( stream, vertexBuffer, nIndex, indexBuffer );
+		data->indexBuffer = indexBuffer.ID();
+		data->vertexBuffer = vertexBuffer.ID();
 	}
 	else
 #endif
 	{
-		shader->SetStream( stream, vertex, nIndex, index );
+		data->indexPtr = index;
+		data->streamPtr = vertex;
 	}
 }
 

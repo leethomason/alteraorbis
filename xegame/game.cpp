@@ -542,8 +542,8 @@ void Game::DoTick( U32 _currentTime )
 			deltaTime = 100;
 
 		
-		GPUShader::ResetState();
-		GPUShader::Clear();
+		GPUState::ResetState();
+		GPUState::Clear();
 
 		Scene* scene = sceneStack.Top()->scene;
 		scene->DoTick( deltaTime );
@@ -584,9 +584,9 @@ void Game::DoTick( U32 _currentTime )
 			ufoText->Draw(	0,  Y, "#%d %5.1ffps vbo=%d %4.1fK/f %3ddc/f nPart=%d", 
 							VERSION, 
 							framesPerSecond, 
-							GPUShader::SupportsVBOs() ? 1 : 0,
-							(float)GPUShader::TrianglesDrawn()/1000.0f,
-							GPUShader::DrawCalls(),
+							GPUState::SupportsVBOs() ? 1 : 0,
+							(float)GPUState::TrianglesDrawn()/1000.0f,
+							GPUState::DrawCalls(),
 							-1 ); //ParticleSystem::Instance()->NumParticles() );
 			sceneStack.Top()->scene->DrawDebugText();
 		}
@@ -619,7 +619,7 @@ void Game::DoTick( U32 _currentTime )
 	}
 #endif
 
-	GPUShader::ResetTriCount();
+	GPUState::ResetTriCount();
 	previousTime = currentTime;
 	++currentFrame;
 
@@ -709,7 +709,7 @@ void Game::DeviceLoss()
 	TextureManager::Instance()->DeviceLoss();
 	ModelResourceManager::Instance()->DeviceLoss();
 	ShaderManager::Instance()->DeviceLoss();
-	GPUShader::ResetState();
+	GPUState::ResetState();
 }
 
 

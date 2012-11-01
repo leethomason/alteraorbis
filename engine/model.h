@@ -31,7 +31,9 @@
 class Texture;
 class SpaceTree;
 class RenderQueue;
-class GPUShader;
+class GPUState;
+struct GPUStream;
+struct GPUStreamData;
 class EngineShaders;
 class Chit;
 class AnimationResource;
@@ -75,7 +77,7 @@ struct ModelAtom
 	mutable GPUIndexBuffer  indexBuffer;
 #	endif
 
-	void Bind( GPUShader* shader ) const;
+	void Bind( GPUStream* stream, GPUStreamData* data ) const;
 
 	U32 nVertex;
 	U32 nIndex;

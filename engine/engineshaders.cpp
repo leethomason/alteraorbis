@@ -91,15 +91,22 @@ void EngineShaders::PopAll()
 
 GPUShader* EngineShaders::GetShader( int base, int flags )
 {
-	GPUShader* shader = 0;
-	U32 hash = 0;
-
+	int f = flags;
 	switch( base ) {
-	case LIGHT:		hash = light[nLight - 1].StateHash();
-	case BLEND:		hash = blend[nBlend - 1].StateHash();
-	case EMISSIVE:	return emissive + nEmissive - 1;
-		default: GLASSERT( 0 ); return emissive;
+	case LIGHT:
+		f |= light.ShaderFlags();
+		break;
+	case BLEND:
+		f |= blend.ShaderFlags();
+		break;
+	default:
+		f |= emissive.ShaderFlags();
+		break;
 	}
+	
+	GPUShader* shader = ShaderManager::
+
+
 	for( int i=0; i<shaderArr.Size(); ++i ) {
 		const Node& node = shaderArr[i];
 		if ( node.base == base && node.flags == flags ) {
@@ -107,17 +114,7 @@ GPUShader* EngineShaders::GetShader( int base, int flags )
 		}
 	}
 	Node node = { base, flags, new GPUShader() };
-	switch( base ) {
-	case LIGHT:
-		*node.shader = light[nLight-1];
-		break;
-	case BLEND:
-		*node.shader = blend[nBlend-1];
-		break;
-	default:
-		*node.shader = emissive[nEmissive-1];
-		break;
-	}
+
 	node.shader->SetShaderFlag( flags );
 	shaderArr.Push( node );
 	return node.shader;
