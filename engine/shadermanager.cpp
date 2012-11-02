@@ -225,6 +225,7 @@ void ShaderManager::SetUniform( int id, const grinliz::Vector3F& value )
 void ShaderManager::SetUniformArray( int id, int count, const grinliz::Matrix4* mat )
 {
 	CHECK_GL_ERROR;
+	GLASSERT( mat );
 	int loc = active->GetUniformLocation( id );
 	GLASSERT( loc >= 0 );
 	glUniformMatrix4fv( loc, count, false, mat->x );
@@ -235,6 +236,7 @@ void ShaderManager::SetUniformArray( int id, int count, const grinliz::Matrix4* 
 void ShaderManager::SetUniformArray( int id, int count, const grinliz::Vector4F* v )
 {
 	CHECK_GL_ERROR;
+	GLASSERT( v );
 	int loc = active->GetUniformLocation( id );
 	GLASSERT( loc >= 0 );
 	glUniform4fv( loc, count, &v->x );
@@ -245,6 +247,7 @@ void ShaderManager::SetUniformArray( int id, int count, const grinliz::Vector4F*
 void ShaderManager::SetUniformArray( int id, int count, const grinliz::Vector3F* v )
 {
 	CHECK_GL_ERROR;
+	GLASSERT( v );
 	int loc = active->GetUniformLocation( id );
 	GLASSERT( loc >= 0 );
 	glUniform3fv( loc, count, &v->x );
@@ -254,6 +257,7 @@ void ShaderManager::SetUniformArray( int id, int count, const grinliz::Vector3F*
 
 void ShaderManager::SetTexture( int index, Texture* texture )
 {
+	GLASSERT( texture );
 	char name[9] = "texture0";
 	name[7] = '0' + index;
 	int loc = glGetUniformLocation( active->prog, name );

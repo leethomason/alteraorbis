@@ -239,7 +239,7 @@ void UFOText::TextOut( GPUState* shader, const char* str, int _x, int _y, int _h
 		if ( rendering ) {
 			if ( pos == BUF_SIZE || *(str+1) == 0 ) {
 				if ( pos > 0 ) {
-					GPUStream stream( vBuf );
+					GPUStream stream( *vBuf );
 					shader->Draw( stream, texture, vBuf, pos*6, iBuf );
 					pos = 0;
 				}

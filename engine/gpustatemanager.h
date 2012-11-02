@@ -129,11 +129,12 @@ struct GPUStream {
 				nNormal( 0 ), normalOffset( 0 ),
 				nColor( 0 ), colorOffset( 0 ), instanceIDOffset( 0 ), boneOffset( 0 ) {}
 
-	GPUStream( const Vertex* vertex );
-	GPUStream( const InstVertex* vertex );
+	// Uses type: GPUStream stream( Vertex );
+	GPUStream( const Vertex& vertex );
+	GPUStream( const InstVertex& vertex );
 	GPUStream( GamuiType );
-	GPUStream( const PTVertex* vertex );
-	GPUStream( const PTVertex2* vertex );
+	GPUStream( const PTVertex& vertex );
+	GPUStream( const PTVertex2& vertex );
 
 	void Clear();
 

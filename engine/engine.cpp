@@ -354,6 +354,7 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 #endif
 
 	if ( map ) {
+#ifdef ENGINE_RENDER_MAP
 		// Draw shadows to stencil buffer.
 		float shadowAmount = 1.0f;
 		Color3F shadow, lighted;
@@ -386,10 +387,11 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 
 			map->Draw3D( shadow, GPUState::STENCIL_SET );
 		}
-#endif
 		map->Draw3D( lighted, GPUState::STENCIL_CLEAR );
+#else
+		map->Draw3D( lighted, GPUState::STENCIL_OFF );
+#endif
 
-#ifdef ENGINE_RENDER_MAP
 		map->DrawOverlay();
 #endif
 	}

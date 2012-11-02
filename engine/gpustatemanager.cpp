@@ -670,7 +670,7 @@ void GPUState::DrawQuad( Texture* texture, const grinliz::Vector3F p0, const gri
 	static const U16 indexNeg[6] = { 0, 2, 1, 0, 3, 2 };
 	const U16* index = positive ? indexPos : indexNeg;
 
-	GPUStream stream( pos );
+	GPUStream stream( pos[0] );
 	Draw( stream, texture, pos, 6, index );
 }
 
@@ -708,7 +708,7 @@ void GPUState::DrawArrow( const grinliz::Vector3F p0, const grinliz::Vector3F p1
 		static const U16 indexNeg[6] = { 0, 2, 1 };
 		const U16* index = positive ? indexPos : indexNeg;
 
-		GPUStream stream( pos );
+		GPUStream stream( pos[0] );
 		Draw( stream, 0, pos, 3, index );
 	}
 }
@@ -841,11 +841,11 @@ void GPUStream::Clear()
 }
 
 
-GPUStream::GPUStream( const Vertex* vertex )
+GPUStream::GPUStream( const Vertex& vertex )
 {
 	Clear();
 
-	stride = sizeof( *vertex );
+	stride = sizeof( Vertex );
 	nPos = 3;
 	posOffset = Vertex::POS_OFFSET;
 	nNormal = 3;
@@ -856,11 +856,11 @@ GPUStream::GPUStream( const Vertex* vertex )
 }
 
 
-GPUStream::GPUStream( const InstVertex* vertex )
+GPUStream::GPUStream( const InstVertex& vertex )
 {
 	Clear();
 
-	stride = sizeof( *vertex );
+	stride = sizeof( InstVertex );
 	nPos = 3;
 	posOffset = InstVertex::POS_OFFSET;
 	nNormal = 3;
@@ -883,21 +883,21 @@ GPUStream::GPUStream( GamuiType )
 }
 
 
-GPUStream::GPUStream( const PTVertex* vertex )
+GPUStream::GPUStream( const PTVertex& vertex )
 {
 	Clear();
-	stride = sizeof( *vertex );
-	nPos = 2;
+	stride = sizeof( PTVertex );
+	nPos = 3;
 	posOffset = PTVertex::POS_OFFSET;
 	nTexture0 = 2;
 	texture0Offset = PTVertex::TEXTURE_OFFSET;
 }
 
 
-GPUStream::GPUStream( const PTVertex2* vertex )
+GPUStream::GPUStream( const PTVertex2& vertex )
 {
 	Clear();
-	stride = sizeof( *vertex );
+	stride = sizeof( PTVertex2 );
 	nPos = 2;
 	posOffset = PTVertex2::POS_OFFSET;
 	nTexture0 = 2;

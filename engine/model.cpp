@@ -605,7 +605,7 @@ void Model::Queue( RenderQueue* queue, EngineShaders* engineShaders, int require
 
 void ModelAtom::Bind( GPUStream* stream, GPUStreamData* data ) const
 {
-	GPUStream vertexStream( vertex );
+	GPUStream vertexStream( *vertex );
 	*stream = vertexStream;
 
 #ifdef EL_USE_VBO

@@ -205,7 +205,9 @@ void RenderTestScene::HandleHotKeyMask( int mask )
 void RenderTestScene::Draw3D( U32 deltaTime )
 {
 	for( int i=0; i<NUM_MODELS; ++i ) {
-		model[i]->DeltaAnimation( deltaTime, 0, 0 );
+		if ( model[i] ) {
+			model[i]->DeltaAnimation( deltaTime, 0, 0 );
+		}
 	}
 	engine->Draw( deltaTime );
 

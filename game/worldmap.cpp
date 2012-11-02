@@ -984,17 +984,16 @@ void WorldMap::DrawZones()
 }
 
 
-
 void WorldMap::Submit( GPUState* shader, bool emissiveOnly )
 {
-
 	for( int i=0; i<LOWER_TYPES; ++i ) {
 		if ( emissiveOnly && !texture[i]->Emissive() )
 			continue;
-		GPUStream stream( vertex[i].Mem() );
-		shader->Draw( stream, texture[i], vertex[i].Mem(), index[i].Size(), index[i].Mem() );
+		if ( vertex[i].Size() > 0 ) {
+			GPUStream stream( vertex[i][0] );
+			shader->Draw( stream, texture[i], vertex[i].Mem(), index[i].Size(), index[i].Mem() );
+			}
 	}
-
 }
 
 
