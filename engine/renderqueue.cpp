@@ -45,7 +45,7 @@ RenderQueue::State* RenderQueue::FindState( const State& state )
 
 	while (low <= high) {
 		mid = low + (high - low) / 2;
-		int compare = CompareState( statePool[mid], state );
+		int compare = CompareState( state, statePool[mid] );
 
 		if (compare > 0) {
 			high = mid - 1;
@@ -72,7 +72,7 @@ RenderQueue::State* RenderQueue::FindState( const State& state )
 	}
 	else {
 		while (    insert < nState
-			    && CompareState( statePool[insert], state ) < 0 ) 
+			    && CompareState( state, statePool[insert] ) < 0 ) 
 		{
 			++insert;
 		}
@@ -90,7 +90,7 @@ RenderQueue::State* RenderQueue::FindState( const State& state )
 #ifdef DEBUG
 	for( int i=0; i<nState-1; ++i ) {
 		//GLOUTPUT(( " %d:%d:%x", statePool[i].state.flags, statePool[i].state.textureID, statePool[i].state.atom ));
-		GLASSERT( CompareState( statePool[i], statePool[i+1] ) < 0 );
+		GLASSERT( CompareState( statePool[i], statePool[i+1] ) > 0 );
 	}
 	//GLOUTPUT(( "\n" ));
 #endif
