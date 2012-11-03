@@ -121,7 +121,7 @@ void DebugStateComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			}
 			ammoBar.SetRange( Clamp( r, 0.f, 1.f ) );
 		}
-		if ( pItem->flags & GameItem::SHIELD ) {
+		if ( pItem->ToShield() ) {
 			// will tweak out if there are multiple absorbers.
 			float r = 1;
 			if ( pItem->clipCap ) {

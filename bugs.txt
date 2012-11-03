@@ -1,6 +1,4 @@
-X RenderState search is reversed
 - Need BSearch and QSort
-- clean up shields
 
 - procedural rendering
 	- static scene showing item combinations
@@ -19,7 +17,6 @@ X RenderState search is reversed
 
 	- unique look for units so teams can be distinguished
 	- melee attack goes back to reference position between hits
-	- bolt: glow around white core? end caps?
 	- buttons to select scenario, load items
 	- animation speed isn't correct
 	- adjust particles to have "impact" effect
@@ -29,25 +26,21 @@ X RenderState search is reversed
 	- refactor code - if needed? - in AIComponent (the fixmes)
 	- gunrun to walk not synchronized correctly
 	- fix particle def to return a default - the pointer is dangerous
-	- DebugDraw is getting used for release drawing - fine in most (all?) cases. But clean up.
+	X DebugDraw is getting used for release drawing - fine in most (all?) cases. But clean up.
 	- revisit accuracy comuptation. what scales with distance? area? volume? radius?
 
 	- ranged weapons
 		- bolts
+			- range
+			- effect strength
 			x damage (defined)
 			x speed
-			- range
 			x compute color
-			- effect strength
 		- accuracy
+		- effect
 		X reload time 'reload'
 		X time per shot 'cooldown'
 		X rounds in clip
-		- effect
-	X weapons
-		X relative positioning (implemented, broken again)
-		X weapon definition - item question: how is a chit a weapon?
-		X item definition
 	- AI (task AI)
 		- establish friend vs. enemy
 		- basic states
@@ -57,12 +50,16 @@ X RenderState search is reversed
 		- battle results
 
 	- serialization
-	- hesitation when near melee target (probably squatted destination code kicking in)
-	  (possibly shader kicking in: never seen it happen twice)
 	- error in ray-cast: detecting a 'tree' where it shouldn't (near the head of the prime)
 	- add rez and de-rez effect for chits
 
-	X why does balrog just stand around not attacking mantis
+	X hesitation when near melee target (probably squatted destination code kicking in)
+	  (possibly shader kicking in: never seen it happen twice). Not actually fixed - may need
+	  GL optimizer - but definitely the shader kicking in
+	X weapons
+		X relative positioning (implemented, broken again)
+		X weapon definition - item question: how is a chit a weapon?
+		X item d	X why does balrog just stand around not attacking mantis
 	X ...and yet the AOE of melee seems huge. clean all that up.
 	X human runs up to dummy, circles around it
 	X data driven item creation
@@ -98,17 +95,28 @@ X RenderState search is reversed
 
 - animition aware hit testing
 - bounds need to be adjusted to account for animation
-- what is going on with engine state when there are 2 textures?
 - cameras only self-delete if they reach destination; should do better. Probably
   should only be one camera in existence. (BlueSmoke, NavTest2)
 - record perf max/min. surprisingly hard.
 - shadows should be part of space-tree bounds
 - memory pool everything in the chit/component system
 - analyze/optimize what causes component update: DoTick(), etc. Likely many DoTicks() getting called that aren't needed. (especially rendering...)
-- pack animation bone info into shaders
-- the render::Item class doesn't make much sense any more. should probaly just be a reference to the Model
 - use optimizer to pre-process shaders
 
+
+** ECR **
+
+** Defer **
+- bolt: glow around white core? end caps?
+- particles that aren't quads (beziers)
+- pack animation bone info into shaders
+
+----------- FIXED -------------
+
+X the render::Item class doesn't make much sense any more. should probaly just be a reference to the Model
+X what is going on with engine state when there are 2 textures?
+X RenderState search is reversed
+X clean up shields
 X move EngineShaders local
 X one item array
 X extend rendering test to animation
@@ -117,15 +125,6 @@ X clean up instance rendering
 X particle test scene
 	X alpha processing for additive blending
 	D particle groups (ex: fire)
-
-
-** ECR **
-
-** Defer **
-- particles that aren't quads (beziers)
-
------------ FIXED -------------
-
 X ECR: proper rotation support
 X feature: Animation
 	X figure out animation needs (standing, walking, sidestep, shooting, etc.)

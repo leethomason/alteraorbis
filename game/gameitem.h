@@ -65,6 +65,8 @@ class DamageDesc;
 	Constraints:
 	- There can only be one melee weapon / attack. This simplies the animation,
 	  and not having to track which melee hit. (This could be fixed, of course.)
+	  The melee weapon must be on the 'trigger' hardpoint.
+	- Similarly, the shield must be on the 'shield' hardpoitn
 	- An item can only attach to one hardpoint. It would be good if it could attach
 	  to either left or right hands, for example.
 	  
@@ -117,8 +119,16 @@ class IRangedWeaponItem : virtual public IWeaponItem
 public:
 };
 
+class IShield
+{
+public:
+};
+
+
 // FIXME: memory pool
-class GameItem : private IMeleeWeaponItem, private IRangedWeaponItem
+class GameItem :	private IMeleeWeaponItem, 
+					private IRangedWeaponItem,
+					private IShield
 {
 public:
 	GameItem( int _flags=0, const char* _name=0, const char* _res=0 )
@@ -177,7 +187,6 @@ public:
 		EFFECT_MASK			= EFFECT_KINETIC | EFFECT_ENERGY | EFFECT_EXPLOSIVE | EFFECT_FIRE | EFFECT_SHOCK,
 
 		RENDER_TRAIL		= (1<<17),				// render a bolt with a 'smoketrail' vs. regular bolt
-		SHIELD				= (1<<18),				// essentially a special type of weapon
 	};
 
 	grinliz::IString		name;		// name of the item
@@ -260,6 +269,8 @@ public:
 
 	virtual IWeaponItem*		ToWeapon()			{ return (flags & (MELEE_WEAPON | RANGED_WEAPON)) ? this : 0; }
 	virtual const IWeaponItem*	ToWeapon() const	{ return (flags & (MELEE_WEAPON | RANGED_WEAPON)) ? this : 0; }
+
+	virtual IShield*			ToShield()			{ return ( hardpoint == HARDPOINT_SHIELD ) ? this : 0; }
 
 	int Effects() const { return flags & EFFECT_MASK; }
 	bool DoTick( U32 delta );

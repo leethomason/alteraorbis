@@ -93,7 +93,7 @@
 
   <item name="shield"
         resource="shield"
-        flags="HELD_AT_HARDPOINT SHIELD"
+        flags="HELD_AT_HARDPOINT"
         hardpoint="shield"
         reload ="3000"
         clipCap="20"

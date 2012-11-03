@@ -61,7 +61,6 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 	READ_FLAG( flags, f, EFFECT_FIRE );
 	READ_FLAG( flags, f, EFFECT_SHOCK );
 	READ_FLAG( flags, f, RENDER_TRAIL );
-	READ_FLAG( flags, f, SHIELD );
 
 	READ_FLOAT_ATTR( ele, mass );
 	READ_FLOAT_ATTR( ele, hpPerMass );
@@ -177,7 +176,7 @@ void GameItem::AbsorbDamage( bool inInventory, const DamageDesc& dd, DamageDesc*
 	else {
 		// Items in the inventory don't take damage. They
 		// may reduce damage for there parent.
-		if ( flags & SHIELD ) {
+		if ( ToShield() ) {
 			reloadTime = 0;
 			absorbed = Min( dd.damage * absorbsDamage, (float)rounds );
 			rounds -= LRintf( absorbed );
