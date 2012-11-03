@@ -67,8 +67,9 @@ void main()
 				color = mix( color, vec4(1,1,1,1), sample.a ) * sample;
 			#elif EMISSIVE_EXCLUSIVE == 1
 				// In 'exclusive' mode, everything is black, and mixed
-				// to the emmissive color.
-				color = mix( vec4(0,0,0,1), sample, sample.a ) * color;
+				// to the emmissive color. Note that the incoming color.a
+				// doesn't do anything unless it's used in mix()
+				color = mix( vec4(0,0,0,1), sample, sample.a*color.a ) * color;
 				//color = vec4( 1,0,0,1 );
 			#endif
 		#else

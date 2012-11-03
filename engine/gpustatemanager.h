@@ -248,12 +248,6 @@ public:
 	void ClearShaderFlag( int flag )			{ shaderFlags &= (~flag); }
 	int  ShaderFlags() const					{ return shaderFlags; }
 	int  StateFlags() const						{ return stateFlags; }
-	int  SortOrder() const {
-		// Want the blend mode in the high bits. Make sure the shader flags don't get to the high bits:
-		GLASSERT( (shaderFlags & 0xff000000 ) == 0 );	// easy fixes, if it does.
-		int order = (stateFlags << (30-STATE_BITS)) | shaderFlags;
-		return order;
-	}
 
 	void SetStencilMode( StencilMode value )	{ stateFlags &= (~STENCIL_MASK); stateFlags |= value; }
 	void SetDepthWrite( bool value )			{ stateFlags &= (~DEPTH_WRITE_MASK); stateFlags |= (value ? DEPTH_WRITE_TRUE : DEPTH_WRITE_FALSE); }

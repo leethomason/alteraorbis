@@ -83,16 +83,14 @@ private:
 
 	static int CompareState( const State& s0, const State& s1 ) 
 	{
-		GLASSERT( sizeof(GPUState) < 100 );	// just a sanity check.
-		if ( s0.state == s1.state ) {
-			if ( s0.texture0 == s1.texture0 )
-				return 0;
-			return ( s0.texture0 < s1.texture0 ) ? -1 : 1;
-		}
-		if ( s0.state.SortOrder() == s1.state.SortOrder() ) {
-			return s0.state.Hash() < s1.state.Hash() ? -1 : 1;
-		}
-		return s0.state.SortOrder() - s1.state.SortOrder();
+		GLASSERT( sizeof(GPUState) < 100 );	// just a sanity check.	
+		int result = s1.state.StateFlags() - s0.state.StateFlags();
+		if ( result ) return result;
+
+		result = s1.state.ShaderFlags() - s0.state.ShaderFlags();
+		if ( result ) return result;
+
+		return ( (int)s1.texture0 - (int)s0.texture0 );
 	}
 
 	static int CompareAtom( const void* vi0, const void* vi1 ) 

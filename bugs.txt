@@ -1,3 +1,5 @@
+- RenderState search is revered
+- Need BSearch and QSort
 - clean up shields
 
 - procedural rendering
