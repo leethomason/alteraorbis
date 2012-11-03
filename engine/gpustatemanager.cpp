@@ -196,9 +196,9 @@ void MatrixStack::Multiply( const grinliz::Matrix4& m )
 /*static*/ MatrixStack	GPUState::projStack;
 /*static*/ int			GPUState::vboSupport = 0;
 /*static*/ GPUState::BlendMode	GPUState::currentBlend = BLEND_NONE;
-/*static*/ bool			GPUState::currentDepthWrite = true;
-/*static*/ bool			GPUState::currentDepthTest = true;
-/*static*/ bool			GPUState::currentColorWrite = true;
+/*static*/ GPUState::DepthWrite	GPUState::currentDepthWrite = DEPTH_WRITE_TRUE;
+/*static*/ GPUState::DepthTest	GPUState::currentDepthTest = DEPTH_TEST_TRUE;
+/*static*/ GPUState::ColorWrite	GPUState::currentColorWrite = COLOR_WRITE_TRUE;
 /*static*/ GPUState::StencilMode GPUState::currentStencilMode = STENCIL_OFF;
 
 /*static*/ bool GPUState::SupportsVBOs()
@@ -271,9 +271,9 @@ void MatrixStack::Multiply( const grinliz::Matrix4& m )
 	glColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE );
 
 	currentBlend = BLEND_NONE;
-	currentDepthTest = true;
-	currentDepthWrite = true;
-	currentColorWrite = true;
+	currentDepthTest = DEPTH_TEST_TRUE;
+	currentDepthWrite = DEPTH_WRITE_TRUE;
+	currentColorWrite = COLOR_WRITE_TRUE;
 	currentStencilMode = STENCIL_OFF;
 
 	CHECK_GL_ERROR;
@@ -426,9 +426,9 @@ void GPUState::Weld( const GPUState& state, const GPUStream& stream, const GPUSt
 	shadman->SetUniform( ShaderManager::U_COLOR_MULT, state.color );
 
 	// Blend
-	if ( state.blend != currentBlend ) {
-		currentBlend = state.blend;
-		switch( state.blend ) {
+	if ( (state.stateFlags & BLEND_MASK) != currentBlend ) {
+		currentBlend = BlendMode(state.stateFlags & BLEND_MASK);
+		switch( state.stateFlags & BLEND_MASK ) {
 		case BLEND_NONE:
 			glDisable( GL_BLEND );
 				break;
@@ -440,42 +440,48 @@ void GPUState::Weld( const GPUState& state, const GPUStream& stream, const GPUSt
 			glEnable( GL_BLEND );
 			glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
 			break;
+		default:
+			GLASSERT( 0 );
 		}
 	}
 
 	// Depth Write
-	if ( state.depthWrite && !currentDepthWrite ) {
+	DepthWrite depthWrite = DepthWrite(state.stateFlags & DEPTH_WRITE_MASK);
+	if ( (depthWrite == DEPTH_WRITE_TRUE) && (currentDepthWrite == DEPTH_WRITE_FALSE) ) {
 		glDepthMask( GL_TRUE );
-		currentDepthWrite = true;
+		currentDepthWrite = DEPTH_WRITE_TRUE;
 	}
-	else if ( !state.depthWrite && currentDepthWrite ) {
+	else if ( depthWrite == DEPTH_WRITE_FALSE && currentDepthWrite == DEPTH_WRITE_TRUE ) {
 		glDepthMask( GL_FALSE );
-		currentDepthWrite = false;
+		currentDepthWrite = DEPTH_WRITE_FALSE;
 	}
 
 	// Depth test
-	if ( state.depthTest && !currentDepthTest ) {
+	DepthTest depthTest = DepthTest(state.stateFlags & DEPTH_TEST_MASK);
+	if ( (depthTest == DEPTH_TEST_TRUE) && (currentDepthTest == DEPTH_TEST_FALSE) ) {
 		glEnable( GL_DEPTH_TEST );
-		currentDepthTest = true;
+		currentDepthTest = DEPTH_TEST_TRUE;
 	}
-	else if ( !state.depthTest && currentDepthTest ) {
+	else if ( (depthTest == DEPTH_TEST_FALSE) && (currentDepthTest == DEPTH_TEST_TRUE) ) {
 		glDisable( GL_DEPTH_TEST );
-		currentDepthTest = false;
+		currentDepthTest = DEPTH_TEST_FALSE;
 	}
 
 	// Color test
-	if ( state.colorWrite && !currentColorWrite ) {
+	ColorWrite colorWrite = ColorWrite(state.stateFlags & COLOR_WRITE_MASK);
+	if ( (colorWrite == COLOR_WRITE_TRUE) && (currentColorWrite == COLOR_WRITE_FALSE)) {
 		glColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE );
-		currentColorWrite = true;
+		currentColorWrite = COLOR_WRITE_TRUE;
 	}
-	else if ( !state.colorWrite && currentColorWrite ) {
+	else if ( (colorWrite == COLOR_WRITE_FALSE) && (currentColorWrite == COLOR_WRITE_TRUE) ) {
 		glColorMask( GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE );
-		currentColorWrite = false;
+		currentColorWrite = COLOR_WRITE_FALSE;
 	}
 
-	if ( state.stencilMode != currentStencilMode ) {
-		currentStencilMode = state.stencilMode;
-		switch( state.stencilMode ) {
+	StencilMode stencilMode = StencilMode(state.stateFlags & STENCIL_MASK);
+	if ( stencilMode != currentStencilMode ) {
+		currentStencilMode = stencilMode;
+		switch( stencilMode ) {
 		case STENCIL_OFF:
 			glDisable( GL_STENCIL_TEST );
 			glStencilMask( GL_FALSE );
@@ -908,25 +914,24 @@ GPUStream::GPUStream( const PTVertex2& vertex )
 
 CompositingShader::CompositingShader( BlendMode _blend )
 {
-	blend = _blend;
-	depthWrite = false;
-	depthTest = false;
+	SetBlendMode( _blend );
+	SetDepthWrite( false );
+	SetDepthTest( false );
 }
 
 
 LightShader::LightShader( int flag, BlendMode blend )
 {
-	this->blend = blend;
-	this->SetShaderFlag( flag );
+	SetBlendMode( blend );
+	SetShaderFlag( flag );
 }
 
 
 ParticleShader::ParticleShader() : GPUState() 
 {
-	depthWrite = false;
-	depthTest = true;
+	SetDepthWrite( false );
+	SetDepthTest( true );
+	SetBlendMode( BLEND_ADD );
 	SetShaderFlag( ShaderManager::PREMULT );
-	blend = BLEND_ADD;
-	//blend = BLEND_NORMAL;
 }
 

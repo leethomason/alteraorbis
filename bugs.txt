@@ -1,9 +1,4 @@
-X move EngineShaders local
-X one item array
-- extend rendering test to animation
-- output drawcalls per state
 - clean up shields
-X clean up instance rendering
 
 - procedural rendering
 	- static scene showing item combinations
@@ -112,6 +107,11 @@ X clean up instance rendering
 - the render::Item class doesn't make much sense any more. should probaly just be a reference to the Model
 - use optimizer to pre-process shaders
 
+X move EngineShaders local
+X one item array
+X extend rendering test to animation
+X output drawcalls per state
+X clean up instance rendering
 X particle test scene
 	X alpha processing for additive blending
 	D particle groups (ex: fire)

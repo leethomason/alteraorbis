@@ -296,6 +296,7 @@ public:
 		}
 	}
 
+	/*
 	void SetTexXForm( int index, float xScale, float yScale, float dx, float dy ) { 
 		grinliz::Vector4F v = { xScale, yScale, dx, dy };
 		SetParam( MODEL_PARAM_IS_TEX_XFORM, index, v );
@@ -305,6 +306,7 @@ public:
 		static const grinliz::Vector4F zero = { 0, 0, 0, 0 };
 		return IsFlagSet( MODEL_PARAM_IS_TEX_XFORM ) && param[index] != zero;
 	}
+	*/
 
 	void SetColor( const grinliz::Vector4F& color ) {
 		SetParam( MODEL_PARAM_IS_COLOR, -1, color );

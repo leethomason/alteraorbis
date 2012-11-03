@@ -18,6 +18,7 @@
 #include "rendercomponent.h"
 #include "itemcomponent.h"
 #include "chit.h"
+#include "chitbag.h"
 #include "../engine/engine.h"
 
 using namespace grinliz;
@@ -244,10 +245,12 @@ bool InventoryComponent::DoTick( U32 delta )
 			callback  = true;
 	}
 
+	callback = true;
 	GameItem* shield = GetShield();
 	if ( shield && parentChit->GetRenderComponent() ) {
-		Vector4F c = { 1, 0, 0, shield->RoundsFraction() };
+		//Vector4F c = { 1, 1, 1, shield->RoundsFraction() };
 		//Vector4F c = { 1, 1, 1, 1 };
+		Vector4F c = { 1, 1, 1, float(this->GetChitBag()->AbsTime() % 1000)*0.001f };
 		parentChit->GetRenderComponent()->ParamColor( "shield", c );
 	}
 

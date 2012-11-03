@@ -177,18 +177,48 @@ public:
 		PROJECTION_MATRIX,
 	};
 
+	// FLag values used for state ordering - be sure Blend is in the correct high bits!
+
 	enum StencilMode {
-		STENCIL_OFF,		// ignore stencil
-		STENCIL_WRITE,		// draw commands write to stencil
-		STENCIL_SET,		// draw if stencil is set
-		STENCIL_CLEAR		// draw if stencil is clear
+		STENCIL_OFF		= 0,			// ignore stencil
+		STENCIL_WRITE	= (1<<0),		// draw commands write to stencil
+		STENCIL_SET		= (1<<1),		// draw if stencil is set
+		STENCIL_CLEAR	= (1<<2),		// draw if stencil is clear
+		STENCIL_MASK    = STENCIL_WRITE | STENCIL_SET | STENCIL_CLEAR
+	};
+
+	enum DepthWrite {
+		DEPTH_WRITE_TRUE	= 0,
+		DEPTH_WRITE_FALSE	= (1<<3),
+		DEPTH_WRITE_MASK	= DEPTH_WRITE_FALSE
+	};
+
+	enum DepthTest {
+		DEPTH_TEST_TRUE		= 0,
+		DEPTH_TEST_FALSE	= (1<<4),
+		DEPTH_TEST_MASK		= DEPTH_TEST_FALSE
+	};
+
+	enum ColorWrite {
+		COLOR_WRITE_TRUE	= 0,
+		COLOR_WRITE_FALSE	= (1<<5),
+		COLOR_WRITE_MASK	= COLOR_WRITE_FALSE
+	};
+
+	enum Lighting {
+		LIGHTING_LAMBERT	= 0,
+		LIGHTING_HEMI		= (1<<6),
+		LIGHTING_MASK		= LIGHTING_HEMI
 	};
 
 	enum BlendMode {
-		BLEND_NONE,			// opaque
-		BLEND_NORMAL,		// a, 1-a
-		BLEND_ADD			// additive blending
+		BLEND_NONE		= 0,			// opaque
+		BLEND_NORMAL	= (1<<7),		// a, 1-a
+		BLEND_ADD		= (1<<8),		// additive blending
+		BLEND_MASK		= BLEND_NORMAL | BLEND_ADD
 	};
+	enum { STATE_BITS = 9 };
+
 
 	static void ResetState();
 	static void Clear();
@@ -217,11 +247,19 @@ public:
 	void SetShaderFlag( int flag )				{ shaderFlags |= flag; }
 	void ClearShaderFlag( int flag )			{ shaderFlags &= (~flag); }
 	int  ShaderFlags() const					{ return shaderFlags; }
+	int  StateFlags() const						{ return stateFlags; }
+	int  SortOrder() const {
+		// Want the blend mode in the high bits. Make sure the shader flags don't get to the high bits:
+		GLASSERT( (shaderFlags & 0xff000000 ) == 0 );	// easy fixes, if it does.
+		int order = (stateFlags << (30-STATE_BITS)) | shaderFlags;
+		return order;
+	}
 
-	void SetStencilMode( StencilMode value ) { stencilMode = value; }
-	void SetDepthWrite( bool value ) { depthWrite = value; }
-	void SetDepthTest( bool value ) { depthTest = value; }
-	void SetColorWrite( bool value ) { colorWrite = value; }
+	void SetStencilMode( StencilMode value )	{ stateFlags &= (~STENCIL_MASK); stateFlags |= value; }
+	void SetDepthWrite( bool value )			{ stateFlags &= (~DEPTH_WRITE_MASK); stateFlags |= (value ? DEPTH_WRITE_TRUE : DEPTH_WRITE_FALSE); }
+	void SetDepthTest( bool value )				{ stateFlags &= (~DEPTH_TEST_MASK); stateFlags |= (value ? DEPTH_TEST_TRUE : DEPTH_TEST_FALSE); }
+	void SetColorWrite( bool value )			{ stateFlags &= (~COLOR_WRITE_MASK); stateFlags |= (value ? COLOR_WRITE_TRUE : COLOR_WRITE_FALSE); }
+	void SetBlendMode( BlendMode value )		{ stateFlags &= (~BLEND_MASK); stateFlags |= value; }
 
 	static void PushMatrix( MatrixType type );
 	static void SetMatrix( MatrixType type, const grinliz::Matrix4& m );
@@ -246,12 +284,6 @@ public:
 	void DrawQuad( Texture* texture, const grinliz::Vector3F p0, const grinliz::Vector3F p1, bool positiveWinding=true );
 	void DrawArrow( const grinliz::Vector3F p0, const grinliz::Vector3F p1, bool positiveWinding=true, float width=0.4f );
 
-	int SortOrder()	const { 
-		if ( blend == BLEND_NORMAL ) return 2;
-		if ( blend == BLEND_ADD ) return 1;
-		return 0;
-	}
-
 	static void ResetTriCount()	{ trianglesDrawn = 0; drawCalls = 0; }
 	static int TrianglesDrawn() { return trianglesDrawn; }
 	static int DrawCalls()		{ return drawCalls; }
@@ -259,12 +291,8 @@ public:
 	static bool SupportsVBOs();
 
 
-	GPUState() : shaderFlags( 0 ),
-				 blend( BLEND_NONE ),
-				 depthWrite( true ), depthTest( true ),
-				 colorWrite( true ),
-				 stencilMode( STENCIL_OFF ),
-				 hemisphericalLighting( false )
+	GPUState() : stateFlags( 0 ),
+				 shaderFlags( 0 )
 	{
 		color.Set( 1,1,1,1 );
 	}
@@ -282,11 +310,11 @@ private:
 	static MatrixStack mvStack;
 	static MatrixStack projStack;
 
-	static BlendMode currentBlend;
-	static bool currentDepthTest;
-	static bool currentDepthWrite;
-	static bool currentColorWrite;
-	static StencilMode currentStencilMode;
+	static BlendMode	currentBlend;
+	static DepthTest	currentDepthTest;
+	static DepthWrite	currentDepthWrite;
+	static ColorWrite	currentColorWrite;
+	static StencilMode	currentStencilMode;
 
 protected:
 	static int		primitive;
@@ -299,39 +327,25 @@ protected:
 		return (const void*)((const U8*)base + offset);
 	}
 
-	BlendMode		blend;
-	bool			depthWrite;
-	bool			depthTest;
-	bool			colorWrite;
-	StencilMode		stencilMode;
-	bool			hemisphericalLighting;
+	int				stateFlags;
+	int				shaderFlags;
 	grinliz::Color4F color;	// actual state color; render a bunch of stuff in black, for example.
 							// not to be confused with per-vertex or per-instance color, also supported.
-	int				shaderFlags;
 
 public:
 	bool operator==( const GPUState& s ) const {
-		return (   blend == s.blend 
-				&& depthWrite == s.depthWrite
-				&& depthTest == s.depthTest
-				&& colorWrite == s.colorWrite
-				&& stencilMode == s.stencilMode
-				&& hemisphericalLighting == s.hemisphericalLighting
-				&& color == s.color
-				&& shaderFlags == s.shaderFlags );
+		return (   stateFlags == s.stateFlags
+				&& shaderFlags == s.shaderFlags
+				&& color == s.color );
 	}
 	U32 Hash() const {
-		grinliz::Color4U8 c = grinliz::Convert_4F_4U8( color );
-		U32 h[8] = {	(U32)blend, 
-						depthWrite ? 1 : 0, 
-						depthTest ? 1 : 0, 
-						colorWrite ? 1 : 0, 
-						(U32)stencilMode, 
-						hemisphericalLighting ? 1 : 0,
-						shaderFlags,
-						(c.r) | (c.g<<8) | (c.b<<16) | (c.a<<24)
-					};
-		return grinliz::Random::Hash( h,8*sizeof(U32) );
+		U32 h[6] = {	stateFlags, 
+						shaderFlags, 
+						grinliz::LRintf(color.r*256.f), 
+						grinliz::LRintf(color.g*256.f), 
+						grinliz::LRintf(color.b*256.f), 
+						grinliz::LRintf(color.a*256.f) };
+		return grinliz::Random::Hash( h,6*sizeof(U32) );
 	}
 };
 
@@ -347,7 +361,7 @@ public:
 		Blend support
 	*/
 	CompositingShader( BlendMode blend=BLEND_NONE );
-	void SetBlend( BlendMode _blend )				{ this->blend = _blend; }
+	void SetBlend( BlendMode _blend )				{ this->stateFlags |= _blend; }
 };
 
 

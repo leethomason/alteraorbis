@@ -143,6 +143,7 @@ void RenderQueue::Submit(	int modelRequired,
 	for( int i=0; i<nState; ++i ) {
 		GPUState* state = &statePool[i].state;
 		GLASSERT( state );
+		//GLOUTPUT(( "%d state=%d shader=%d order=%d\n", i, state->StateFlags(), state->ShaderFlags(), state->SortOrder() ));
 
 		// Filter out all the items for this RenderState
 		itemArr.Clear();
