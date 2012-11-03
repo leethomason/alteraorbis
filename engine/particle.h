@@ -137,7 +137,7 @@ public:
 					const grinliz::Vector3F& normal, 
 					const grinliz::Vector3F eyeDir[],
 					U32 deltaTime );
-	const ParticleDef* GetPD( const char* name );
+	const ParticleDef& GetPD( const char* name );
 
 	void Update( U32 deltaTime, const grinliz::Vector3F eyeDir[] );
 	void Draw();

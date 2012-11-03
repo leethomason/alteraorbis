@@ -202,23 +202,6 @@ void GameItem::AbsorbDamage( bool inInventory, const DamageDesc& dd, DamageDesc*
 }
 
 
-/*void DamageDesc::Save( const char* prefix, tinyxml2::XMLPrinter* )
-{
-	GLASSERT( 0 );	// FIXME
-}
-
-
-void DamageDesc::Load( const char* prefix, const tinyxml2::XMLElement* doc )
-{
-	components.Zero();
-
-	doc->QueryFloatAttribute( "kinetic", &components[KINETIC] );
-	doc->QueryFloatAttribute( "energy", &components[ENERGY] );
-	doc->QueryFloatAttribute( "fire", &components[FIRE] );
-	doc->QueryFloatAttribute( "shock", &components[SHOCK] );
-}
-*/
-
 void DamageDesc::Log()
 {
 	GLLOG(( "[damage=%.1f]", damage ));

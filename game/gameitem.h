@@ -189,6 +189,7 @@ public:
 		RENDER_TRAIL		= (1<<17),				// render a bolt with a 'smoketrail' vs. regular bolt
 	};
 
+	// ------ description ------
 	grinliz::IString		name;		// name of the item
 	grinliz::IString		key;		// modified name, for storage. not serialized.
 	grinliz::IString		resource;	// resource used to  render the item
@@ -202,14 +203,16 @@ public:
 	float rangedDamage;		// base ranged damage
 	float absorbsDamage;	// how much damage this consumes, in the inventory (shield, armor, etc.) 1.0: all, 0.5: half
 	U32 cooldown;			// time between uses
-	U32 cooldownTime;		// counting UP to ready state
 	U32 reload;				// time to reload once clip is used up
-	U32 reloadTime;			// counting UP to ready state
 	int clipCap;			// possible rounds in the clip
-	int rounds;				// current rounds in the clip
 	float speed;			// speed for a variety of uses. 
 
+	// ------- current --------
 	float hp;				// current hp for this item
+	U32 cooldownTime;		// counting UP to ready state
+	U32 reloadTime;			// counting UP to ready state
+	int rounds;				// current rounds in the clip
+
 	Chit* parentChit;		// only set when attached to a Component
 
 	// Group all the copy/init in one place!

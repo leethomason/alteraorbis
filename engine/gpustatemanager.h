@@ -332,15 +332,6 @@ public:
 				&& shaderFlags == s.shaderFlags
 				&& color == s.color );
 	}
-	U32 Hash() const {
-		U32 h[6] = {	stateFlags, 
-						shaderFlags, 
-						grinliz::LRintf(color.r*256.f), 
-						grinliz::LRintf(color.g*256.f), 
-						grinliz::LRintf(color.b*256.f), 
-						grinliz::LRintf(color.a*256.f) };
-		return grinliz::Random::Hash( h,6*sizeof(U32) );
-	}
 };
 
 
@@ -355,7 +346,6 @@ public:
 		Blend support
 	*/
 	CompositingShader( BlendMode blend=BLEND_NONE );
-	void SetBlend( BlendMode _blend )				{ this->stateFlags |= _blend; }
 };
 
 

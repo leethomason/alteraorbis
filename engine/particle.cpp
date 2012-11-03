@@ -143,14 +143,15 @@ void ParticleSystem::Update( U32 deltaTime, const grinliz::Vector3F eyeDir[] )
 }
 
 
-const ParticleDef* ParticleSystem::GetPD( const char* name )
+const ParticleDef& ParticleSystem::GetPD( const char* name )
 {
 	for( int i=0; i<particleDefArr.Size(); ++i ) {
 		if ( particleDefArr[i].name == name ) {
-			return &particleDefArr[i];
+			return particleDefArr[i];
 		}
 	}
-	return 0;
+	GLASSERT( 0 );	// not intended
+	return particleDefArr[0];
 }
 
 
@@ -160,12 +161,8 @@ void ParticleSystem::EmitPD(	const char* name,
 								const grinliz::Vector3F eyeDir[],
 								U32 deltaTime )
 {
-	const ParticleDef* pd = GetPD( name );
-	if ( pd ) {
-		EmitPD( *pd, initPos, normal, eyeDir, deltaTime );
-		return;
-	}
-	GLASSERT( 0 );	// probably meant to actually find that particle.
+	const ParticleDef& pd = GetPD( name );
+	EmitPD( pd, initPos, normal, eyeDir, deltaTime );
 }
 
 

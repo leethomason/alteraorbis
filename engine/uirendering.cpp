@@ -40,37 +40,37 @@ void UIRenderer::BeginRenderState( const void* renderState )
 	{
 	case RENDERSTATE_UI_NORMAL:
 		shader.SetColor( 1, 1, 1, 1 );
-		shader.SetBlend( GPUState::BLEND_NORMAL );
+		shader.SetBlendMode( GPUState::BLEND_NORMAL );
 		break;
 
 	case RENDERSTATE_UI_NORMAL_OPAQUE:
 		shader.SetColor( 1, 1, 1, 1 );
-		shader.SetBlend( GPUState::BLEND_NONE );
+		shader.SetBlendMode( GPUState::BLEND_NONE );
 		break;
 
 	case RENDERSTATE_UI_DISABLED:
 		shader.SetColor( 1, 1, 1, 0.5f );
-		shader.SetBlend( GPUState::BLEND_NORMAL );
+		shader.SetBlendMode( GPUState::BLEND_NORMAL );
 		break;
 
 	case RENDERSTATE_UI_TEXT:
 		shader.SetColor( textRed, textGreen, textBlue, 1 );
-		shader.SetBlend( GPUState::BLEND_NORMAL );
+		shader.SetBlendMode( GPUState::BLEND_NORMAL );
 		break;
 
 	case RENDERSTATE_UI_TEXT_DISABLED:
 		shader.SetColor( textRed, textGreen, textBlue, 0.5f );
-		shader.SetBlend( GPUState::BLEND_NORMAL );
+		shader.SetBlendMode( GPUState::BLEND_NORMAL );
 		break;
 
 	case RENDERSTATE_UI_DECO:
 		shader.SetColor( 1, 1, 1, 0.7f );
-		shader.SetBlend( GPUState::BLEND_NORMAL );
+		shader.SetBlendMode( GPUState::BLEND_NORMAL );
 		break;
 
 	case RENDERSTATE_UI_DECO_DISABLED:
 		shader.SetColor( 1, 1, 1, 0.2f );
-		shader.SetBlend( GPUState::BLEND_NORMAL );
+		shader.SetBlendMode( GPUState::BLEND_NORMAL );
 		break;
 
 	default:

@@ -49,7 +49,7 @@ public:
 	RenderQueue();
 	~RenderQueue();
 
-	void Add(	Model* model,					// Can be chaned: billboard rotation will be set.
+	void Add(	Model* model,
 				const ModelAtom* atom, 
 				const GPUState& state,
 				const grinliz::Vector4F& param, 

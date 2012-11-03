@@ -1,5 +1,3 @@
-- Need BSearch and QSort
-
 - procedural rendering
 	- static scene showing item combinations
 	- emissive support
@@ -25,7 +23,7 @@
 	- flaming sword should catch things on fire
 	- refactor code - if needed? - in AIComponent (the fixmes)
 	- gunrun to walk not synchronized correctly
-	- fix particle def to return a default - the pointer is dangerous
+	X fix particle def to return a default - the pointer is dangerous
 	X DebugDraw is getting used for release drawing - fine in most (all?) cases. But clean up.
 	- revisit accuracy comuptation. what scales with distance? area? volume? radius?
 
@@ -93,6 +91,7 @@
 	X knife -> ring
 	X bolts don't hit own team but explosions do. decided this was a good thing.
 
+- Need BSearch and QSort
 - animition aware hit testing
 - bounds need to be adjusted to account for animation
 - cameras only self-delete if they reach destination; should do better. Probably

@@ -414,13 +414,14 @@ void BattleTestScene::Tap( int action, const grinliz::Vector2F& view, const grin
 	if ( !uiHasTap ) {
 		bool tap = Process3DTap( action, view, world, engine );
 		if ( action == GAME_TAP_DOWN ) {
-
+#if 0
 			Vector3F at;
 			IntersectRayPlane( debugRay.origin, debugRay.direction, 1, 0, &at );
 			at.y = 0.01f;
 
 			DamageDesc dd( 20, 0 );
 			BattleMechanics::GenerateExplosionMsgs( dd, at, 0, engine, &chitArr );
+#endif		
 		}
 	}
 }

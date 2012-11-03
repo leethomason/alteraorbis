@@ -232,7 +232,6 @@ public:
 
 	enum {
 		MODEL_SELECTABLE			= 0x0001,
-		// FIXME: Clean this up. The universal param is a horrible idea.
 		MODEL_PARAM_IS_TEX_XFORM	= 0x0002,
 		MODEL_PARAM_IS_COLOR		= 0x0004,
 		MODEL_PARAM_IS_BONE_FILTER	= 0x0008,
@@ -378,7 +377,6 @@ private:
 	{			
 		xformValid = false; 
 		invValid = false; 
-		//mapBoundsCache.Set( -1, -1, -1, -1 ); 
 	}
 	const grinliz::Matrix4& InvXForm() const;
 
