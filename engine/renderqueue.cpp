@@ -134,6 +134,7 @@ void RenderQueue::Add(	Model* model,
 }
 
 
+
 void RenderQueue::Submit(	int modelRequired, 
 							int modelExcluded, 
 							const Matrix4* xform )
@@ -162,7 +163,8 @@ void RenderQueue::Submit(	int modelRequired,
 		// For this RenderState, we now have all the items to be drawn.
 		// We now want to group the items by RenderAtom, so that the 
 		// Atoms which are instanced can be rendered together.
-		qsort( (void*)itemArr.Mem(), itemArr.Size(), sizeof(Item*), CompareAtom );
+		//qsort( (void*)itemArr.Mem(), itemArr.Size(), sizeof(Item*), CompareAtom );
+		Sort<Item*, CompAtom>( itemArr.Mem(), itemArr.Size() );
 
 		int start = 0;
 		int end = 0;

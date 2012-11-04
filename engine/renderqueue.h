@@ -93,12 +93,21 @@ private:
 		return ( (int)s1.texture0 - (int)s0.texture0 );
 	}
 
+	/*
 	static int CompareAtom( const void* vi0, const void* vi1 ) 
 	{
 		const Item** i0 = (const Item**)vi0;
         const Item** i1 = (const Item**)vi1;
         return (int)((*i0)->atom) - (int)((*i1)->atom);
 	}
+	*/
+	class CompAtom
+	{
+	public:
+		static bool Less( const Item* i0, const Item* i1 ) {
+			return (int)(i1->atom) > (int)(i0->atom);
+		}
+	};
 
 	State* FindState( const State& state );
 
