@@ -205,7 +205,7 @@ void main() {
 		#if INSTANCE == 0 
 			vec3 normal = normalize( ( u_normalMatrix  * xform * vec4( a_normal.x, a_normal.y, a_normal.z, 0 ) ).xyz );
 		#else
-			vec3 normal = normalize( (( u_normalMatrix  * xform * u_mMatrix[int(a_instanceID)]) * vec4( a_normal.x, a_normal.y, a_normal.z, 0 ) ).xyz );
+			vec3 normal = normalize( (( u_normalMatrix * u_mMatrix[int(a_instanceID)]) * xform * vec4( a_normal.x, a_normal.y, a_normal.z, 0 ) ).xyz );
 		#endif
 
 		#if LIGHTING_DIFFUSE == 1
