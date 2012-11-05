@@ -41,11 +41,6 @@ class Texture;
 class RenderQueue
 {
 public:
-	enum {
-		MAX_STATE  = 128,
-		MAX_ITEMS  = 1024,
-	};
-
 	RenderQueue();
 	~RenderQueue();
 
@@ -62,61 +57,32 @@ public:
 					int modelExcluded,
 					const grinliz::Matrix4* xform );
 
-	bool Empty() { return nState == 0 && nItem == 0; }
-	void Clear() { nState = 0; nItem = 0; }
+	bool Empty() { return itemPool.Empty(); }
+	void Clear() { itemPool.Clear(); itemArr.Clear(); }
 
 private:
 	struct Item {
+		GPUState				state;
 		Model*					model;
 		const ModelAtom*		atom;	
 		grinliz::Vector4F		param;			// per instance data (vec4)
 		const grinliz::Matrix4*	param4;			// per instance data (matrix)
 		const BoneData*			boneData;
-		Item*					next;
-	};
 
-	struct State {
-		GPUState	state;
-		Texture*	texture0;
-		Item*		root;		// list of items in this state.
-	};
-
-	static int CompareState( const State& s0, const State& s1 ) 
-	{
-		GLASSERT( sizeof(GPUState) < 100 );	// just a sanity check.	
-		int result = s1.state.StateFlags() - s0.state.StateFlags();
-		if ( result ) return result;
-
-		result = s1.state.ShaderFlags() - s0.state.ShaderFlags();
-		if ( result ) return result;
-
-		return ( (int)s1.texture0 - (int)s0.texture0 );
-	}
-
-	/*
-	static int CompareAtom( const void* vi0, const void* vi1 ) 
-	{
-		const Item** i0 = (const Item**)vi0;
-        const Item** i1 = (const Item**)vi1;
-        return (int)((*i0)->atom) - (int)((*i1)->atom);
-	}
-	*/
-	class CompAtom
-	{
-	public:
-		static bool Less( const Item* i0, const Item* i1 ) {
-			return (int)(i1->atom) > (int)(i0->atom);
+		bool IsInstance( const Item* item ) {
+			return    state == item->state 
+				   && atom == item->atom;
 		}
 	};
 
-	State* FindState( const State& state );
+	class CompareItem
+	{
+	public:
+		static bool Less( const Item* s0, const Item* s1 );
+	};
 
-	int nState;
-	int nItem;
-
-	State statePool[MAX_STATE];
-	Item  itemPool[MAX_ITEMS];
-	grinliz::CArray< Item*, MAX_ITEMS > itemArr;
+	grinliz::CDynArray< Item >  itemPool;
+	grinliz::CDynArray< Item* > itemArr;
 };
 
 

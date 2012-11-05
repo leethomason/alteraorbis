@@ -464,9 +464,9 @@ inline int CombSortGap( int gap )
 		gap = table[gap];
 	}
 	else {
-		//gap = (gap * 10) / 13;
-		gap = (gap * 205)>>8;
+		gap = (gap * 103)>>7;
 	}
+	GLASSERT( gap  > 0 );
 	return gap;
 }
 

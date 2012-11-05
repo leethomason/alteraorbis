@@ -25,8 +25,6 @@ using namespace grinliz;
 
 RenderQueue::RenderQueue()
 {
-	nState = 0;
-	nItem = 0;
 }
 
 
@@ -34,74 +32,28 @@ RenderQueue::~RenderQueue()
 {
 }
 
-
-RenderQueue::State* RenderQueue::FindState( const State& state )
+bool RenderQueue::CompareItem::Less( const Item* s0, const Item* s1 )
 {
-	int low = 0;
-	int high = nState - 1;
-	int answer = -1;
-	int mid = 0;
-	int insert = 0;		// Where to put the new state. 
+	// Priority list:
 
-	while (low <= high) {
-		mid = low + (high - low) / 2;
-		int compare = CompareState( state, statePool[mid] );
+	GLASSERT( sizeof(Item) < 100 );	// just a sanity check.	
+	int result = s1->state.StateFlags() - s0->state.StateFlags();
+	if ( result ) return result > 0;
 
-		if (compare > 0) {
-			high = mid - 1;
-		}
-		else if ( compare < 0) {
-			insert = mid;	// since we know the mid is less than the state we want to add,
-							// we can move insert up at least to that index.
-			low = mid + 1;
-		}
-		else {
-           answer = mid;
-		   break;
-		}
-	}
-	if ( answer >= 0 ) {
-		return &statePool[answer];
-	}
-	if ( nState == MAX_STATE ) {
-		return 0;
-	}
+	result = (int)((SPTR)s1->atom - (SPTR)s0->atom);
+	if ( result ) return result > 0;
 
-	if ( nState == 0 ) {
-		insert = 0;
-	}
-	else {
-		while (    insert < nState
-			    && CompareState( state, statePool[insert] ) < 0 ) 
-		{
-			++insert;
-		}
-	}
+	result = (int)((SPTR)s1->atom->texture - (SPTR)s0->atom->texture);
+	if ( result ) return result > 0;
 
-	// move up
-	for( int i=nState; i>insert; --i ) {
-		statePool[i] = statePool[i-1];
-	}
-	// and insert
-	statePool[insert] = state;
-	statePool[insert].root = 0;
-	nState++;
-
-#ifdef DEBUG
-	for( int i=0; i<nState-1; ++i ) {
-		//GLOUTPUT(( " %d:%d:%x", statePool[i].state.flags, statePool[i].state.textureID, statePool[i].state.atom ));
-		GLASSERT( CompareState( statePool[i], statePool[i+1] ) > 0 );
-	}
-	//GLOUTPUT(( "\n" ));
-#endif
-
-	return &statePool[insert];
+	result = s1->state.ShaderFlags() - s0->state.ShaderFlags();
+	return result > 0;
 }
 
 
 void RenderQueue::Add(	Model* model, 
 						const ModelAtom* atom, 
-						const GPUState& s, 
+						const GPUState& state, 
 						const Vector4F& param, 
 						const Matrix4* param4,
 						const BoneData* boneData  )
@@ -109,30 +61,16 @@ void RenderQueue::Add(	Model* model,
 	GLASSERT( model );
 	GLASSERT( atom );
 
-	if ( nItem == MAX_ITEMS ) {
-		GLASSERT( 0 );
-		return;
-	}
-
-	State s0 = { s, atom->texture, 0 };
-
-	State* state = FindState( s0 );
-	if ( !state ) {
-		GLASSERT( 0 );
-		return;
-	}
-
-	Item* item = &itemPool[nItem++];
+	Item* item = itemPool.PushArr(1);
+	item->state = state;
 	item->model = model;
 	item->atom = atom;
 	item->param = param;
 	item->param4 = param4;
 	item->boneData = boneData;
-	
-	item->next  = state->root;
-	state->root = item;
-}
 
+	GLASSERT( itemPool.Size() < 1000 );	// sanity, infinite loop detection
+}
 
 
 void RenderQueue::Submit(	int modelRequired, 
@@ -140,114 +78,110 @@ void RenderQueue::Submit(	int modelRequired,
 							const Matrix4* xform )
 {
 	//GRINLIZ_PERFTRACK
+	itemArr.Clear();
 
-	for( int i=0; i<nState; ++i ) {
-		GPUState* state = &statePool[i].state;
-		GLASSERT( state );
-		//GLOUTPUT(( "%d state=%d shader=%d texture=%x\n", i, state->StateFlags(), state->ShaderFlags(), statePool[i].texture0 ));
+	for( int i=0; i<itemPool.Size(); ++i ) {
 
-		// Filter out all the items for this RenderState
-		itemArr.Clear();
-		for( Item* item = statePool[i].root; item; item=item->next ) 
+		Item* item = &itemPool[i];
+		Model* model = item->model;
+		int modelFlags = model->Flags();
+
+		if (    ( (modelRequired & modelFlags) == modelRequired)
+			 && ( (modelExcluded & modelFlags) == 0 ) )
 		{
-			Model* model = item->model;
-			int modelFlags = model->Flags();
-
-			if (    ( (modelRequired & modelFlags) == modelRequired)
-				 && ( (modelExcluded & modelFlags) == 0 ) )
-			{
-				itemArr.Push( item );
-			}
+			itemArr.Push( item );
 		}
+	}
 
-		// For this RenderState, we now have all the items to be drawn.
-		// We now want to group the items by RenderAtom, so that the 
-		// Atoms which are instanced can be rendered together.
-		//qsort( (void*)itemArr.Mem(), itemArr.Size(), sizeof(Item*), CompareAtom );
-		Sort<Item*, CompAtom>( itemArr.Mem(), itemArr.Size() );
+	Sort<Item*, CompareItem>( itemArr.Mem(), itemArr.Size() );
 
-		int start = 0;
-		int end = 0;
-		GPUStream		stream;
-		GPUStreamData   data;
+	int start = 0;
+	int end = 0;
+	GPUStream		stream;
+	GPUStreamData   data;
 
-		while( start < itemArr.Size() ) {
-			// Get a range;
-			end = start + 1;
-			while(    end < itemArr.Size() 
-				   && itemArr[end]->atom == itemArr[start]->atom ) 
-			{
-				++end;
-			}
-			int delta = end - start;
-			const ModelAtom* atom = itemArr[start]->atom;
+	//GLOUTPUT(( "Batch:\n" ));
+	while( start < itemArr.Size() ) {
+		// Get a range;
+		end = start + 1;
+		while(    end < itemArr.Size() 
+			   && itemArr[end]->IsInstance( itemArr[start] ) ) 
+		{
+			++end;
+		}
+		int delta = end - start;
+		const ModelAtom* atom = itemArr[start]->atom;
+		GPUState* state = &itemArr[start]->state;
+
+		//GLOUTPUT(( "  n=%d state=%d shader=%d texture=%s atom=%x\n", 
+		//			delta, state->StateFlags(), state->ShaderFlags(),
+		//			atom->texture->Name(), atom ));
 
 #ifdef XENOENGINE_INSTANCING
-			// The 2 paths is a PITA, both
-			// for startup time and debugging. If instancing
-			// in use, always instance.
-			{
-				Matrix4		instanceMatrix[EL_MAX_INSTANCE];
-				Vector4F	instanceParam[EL_MAX_INSTANCE];
-				Matrix4		instanceParam4[EL_MAX_INSTANCE];
-				BoneData	instanceBone[EL_MAX_INSTANCE];
+		// The 2 paths is a PITA, both
+		// for startup time and debugging. If instancing
+		// in use, always instance.
+		{
+			Matrix4		instanceMatrix[EL_MAX_INSTANCE];
+			Vector4F	instanceParam[EL_MAX_INSTANCE];
+			Matrix4		instanceParam4[EL_MAX_INSTANCE];
+			BoneData	instanceBone[EL_MAX_INSTANCE];
 
-				atom->Bind( &stream, &data );
-				data.matrix = instanceMatrix;
-				data.param  = instanceParam;
-				data.param4 = instanceParam4;
-				data.bones  = instanceBone;
-				GLASSERT( data.texture0 );	// not required, but not sure it works without
+			atom->Bind( &stream, &data );
+			data.matrix = instanceMatrix;
+			data.param  = instanceParam;
+			data.param4 = instanceParam4;
+			data.bones  = instanceBone;
+			GLASSERT( data.texture0 );	// not required, but not sure it works without
 
-				int k=start;
-				while( k < end ) {
-					int delta = Min( end-k, (int)EL_MAX_INSTANCE );
+			int k=start;
+			while( k < end ) {
+				int delta = Min( end-k, (int)EL_MAX_INSTANCE );
 
-					for( int index=0; index<delta; ++index ) {
-						const Item* item = itemArr[k+index];
-						if ( xform ) {
-							instanceMatrix[index] = (*xform) * item->model->XForm();
-						}
-						else {
-							instanceMatrix[index] = item->model->XForm();
-						}
-						instanceParam[index] = item->param;
-						if ( item->param4 ) {
-							instanceParam4[index] = *item->param4;
-						}
-						if ( item->boneData ) {
-							instanceBone[index] = *item->boneData;
-						}
-					}
-					state->Draw( stream, data, atom->nIndex, delta );
-					k += delta;
-				}
-			}
-#else
-			{
-				atom->Bind( shader );
-				for( int k=start; k<end; ++k ) {
-					const Item* item = itemArr[k];
-					Model* model = item->model;
-
-					shader->PushMatrix( GPUState::MODELVIEW_MATRIX );
+				for( int index=0; index<delta; ++index ) {
+					const Item* item = itemArr[k+index];
 					if ( xform ) {
-						shader->MultMatrix( GPUState::MODELVIEW_MATRIX, *xform );
+						instanceMatrix[index] = (*xform) * item->model->XForm();
 					}
-					shader->MultMatrix( GPUState::MODELVIEW_MATRIX, model->XForm() );
-					shader->SetParam( item->param );
-					if ( item->hasParam4 ) {
-						shader->InstanceParam4( 0, item->param4 );
+					else {
+						instanceMatrix[index] = item->model->XForm();
 					}
-					if ( item->hasBoneData ) {
-						shader->InstanceBones( 0, item->boneData );
+					instanceParam[index] = item->param;
+					if ( item->param4 ) {
+						instanceParam4[index] = *item->param4;
 					}
-					shader->Draw();
-					shader->PopMatrix( GPUState::MODELVIEW_MATRIX );
+					if ( item->boneData ) {
+						instanceBone[index] = *item->boneData;
+					}
 				}
+				state->Draw( stream, data, atom->nIndex, delta );
+				k += delta;
 			}
-#endif
-			start = end;
 		}
+#else
+		{
+			atom->Bind( shader );
+			for( int k=start; k<end; ++k ) {
+				const Item* item = itemArr[k];
+				Model* model = item->model;
+
+				shader->PushMatrix( GPUState::MODELVIEW_MATRIX );
+				if ( xform ) {
+					shader->MultMatrix( GPUState::MODELVIEW_MATRIX, *xform );
+				}
+				shader->MultMatrix( GPUState::MODELVIEW_MATRIX, model->XForm() );
+				shader->SetParam( item->param );
+				if ( item->hasParam4 ) {
+					shader->InstanceParam4( 0, item->param4 );
+				}
+				if ( item->hasBoneData ) {
+					shader->InstanceBones( 0, item->boneData );
+				}
+				shader->Draw();
+				shader->PopMatrix( GPUState::MODELVIEW_MATRIX );
+			}
+		}
+#endif
+		start = end;
 	}
 }
