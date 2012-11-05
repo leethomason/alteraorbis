@@ -91,7 +91,6 @@
 	X knife -> ring
 	X bolts don't hit own team but explosions do. decided this was a good thing.
 
-- Need BSearch and QSort
 - animition aware hit testing
 - bounds need to be adjusted to account for animation
 - cameras only self-delete if they reach destination; should do better. Probably
@@ -112,6 +111,7 @@
 
 ----------- FIXED -------------
 
+X Need BSearch and QSort
 X the render::Item class doesn't make much sense any more. should probaly just be a reference to the Model
 X what is going on with engine state when there are 2 textures?
 X RenderState search is reversed
