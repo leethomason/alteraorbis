@@ -3,6 +3,7 @@
 #include "gamelimits.h"
 
 #include "../xegame/rendercomponent.h"
+#include "../xegame/itemcomponent.h"
 
 #include "../engine/model.h"
 #include "../engine/engine.h"
@@ -19,6 +20,10 @@ void LumosChitBag::HandleBolt( const Bolt& bolt, Model* modelHit, const grinliz:
 {
 	GLASSERT( engine );
 	Chit* chitShooter = GetChit( bolt.chitID );	// may be null
+	int shooterTeam = -1;
+	if ( chitShooter && chitShooter->GetItemComponent() ) {
+		shooterTeam = chitShooter->GetItemComponent()->GetItem()->primaryTeam;
+	}
 	int explosive = bolt.effect & GameItem::EFFECT_EXPLOSIVE;
  
 	if ( !explosive ) {
@@ -26,17 +31,24 @@ void LumosChitBag::HandleBolt( const Bolt& bolt, Model* modelHit, const grinliz:
 			Chit* chitHit = modelHit->userData;
 			GLASSERT( chitHit );
 			GLASSERT( GetChit( chitHit->ID() ) == chitHit );
-			DamageDesc dd( bolt.damage, bolt.effect );
+			if ( chitHit->GetItemComponent() &&
+				 chitHit->GetItemComponent()->GetItem()->primaryTeam == shooterTeam ) 
+			{
+				// do nothing. don't shoot own team.
+			}
+			else {
+				DamageDesc dd( bolt.damage, bolt.effect );
 		
-			ChitMsg msg( ChitMsg::CHIT_DAMAGE, 0, &dd );
-			// 'vector' copied from BattleMechanics::GenerateExplosionMsgs
-			// This code is strange: the vector doesn't contain the origin,
-			// but the impulse (velocity). Weird.
-			msg.vector = bolt.dir;
-			msg.vector.Normalize();
-			msg.vector.Multiply( 2.0f );
-			msg.originID = bolt.chitID;
-			chitHit->SendMessage( msg, 0 );
+				ChitMsg msg( ChitMsg::CHIT_DAMAGE, 0, &dd );
+				// 'vector' copied from BattleMechanics::GenerateExplosionMsgs
+				// This code is strange: the vector doesn't contain the origin,
+				// but the impulse (velocity). Weird.
+				msg.vector = bolt.dir;
+				msg.vector.Normalize();
+				msg.vector.Multiply( 2.0f );
+				msg.originID = bolt.chitID;
+				chitHit->SendMessage( msg, 0 );
+			}
 		}
 	}
 	else {

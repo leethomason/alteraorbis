@@ -40,8 +40,8 @@ LivePreviewScene::LivePreviewScene( LumosGame* game ) : Scene( game )
 	const ModelResource* modelResource = ModelResourceManager::Instance()->GetModelResource( "unitPlateProcedural" );
 	for( int i=0; i<NUM_MODEL; ++i ) {
 		Color4F skin, highlight, hair, glasses;
-		faceGen.GetSkinColor( i<FaceGen::NUM_SKIN_COLORS ? i : random.Rand( FaceGen::NUM_SKIN_COLORS ), 
-							  i<FaceGen::NUM_SKIN_COLORS ? i : random.Rand( FaceGen::NUM_SKIN_COLORS ),
+		faceGen.GetSkinColor( i<FaceGen::NUM_SKIN_COLORS ? i : (i%FaceGen::NUM_SKIN_COLORS), 
+							  i<FaceGen::NUM_SKIN_COLORS ? i : ((NUM_MODEL-i)%FaceGen::NUM_SKIN_COLORS ),
 							  random.Uniform(), 
 							  &skin, &highlight );
 		faceGen.GetHairColor( i%FaceGen::NUM_HAIR_COLORS, &hair );

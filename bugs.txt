@@ -7,12 +7,7 @@
 	X color variation for live mode
 
 - combat test scene	
-	- bolts are hitting own team	
-	- removing unit "clumping" (3yr old soccer team). Basic formation?
-	- eval: kinetic damage of held weapons shouldn't be multiplied with mass (added)
-	- properly hook up items and such, so that items, health, all be driven correctly
 	- effects
-
 	- unique look for units so teams can be distinguished
 	- melee attack goes back to reference position between hits
 	- buttons to select scenario, load items
@@ -23,8 +18,6 @@
 	- flaming sword should catch things on fire
 	- refactor code - if needed? - in AIComponent (the fixmes)
 	- gunrun to walk not synchronized correctly
-	X fix particle def to return a default - the pointer is dangerous
-	X DebugDraw is getting used for release drawing - fine in most (all?) cases. But clean up.
 	- revisit accuracy comuptation. what scales with distance? area? volume? radius?
 
 	- ranged weapons
@@ -40,6 +33,7 @@
 		X time per shot 'cooldown'
 		X rounds in clip
 	- AI (task AI)
+		- removing unit "clumping" (3yr old soccer team). Basic formation?
 		- establish friend vs. enemy
 		- basic states
 		- CA to handle friends and enemies
@@ -51,6 +45,11 @@
 	- error in ray-cast: detecting a 'tree' where it shouldn't (near the head of the prime)
 	- add rez and de-rez effect for chits
 
+	x bolts are hitting own team	
+	X eval: kinetic damage of held weapons shouldn't be multiplied with mass (added)
+	X properly hook up items and such, so that items, health, all be driven correctly
+	X fix particle def to return a default - the pointer is dangerous
+	X DebugDraw is getting used for release drawing - fine in most (all?) cases. But clean up.
 	X hesitation when near melee target (probably squatted destination code kicking in)
 	  (possibly shader kicking in: never seen it happen twice). Not actually fixed - may need
 	  GL optimizer - but definitely the shader kicking in

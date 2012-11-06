@@ -20,7 +20,7 @@
       <item name="pincer"
             flags="MELEE_WEAPON INTRINSIC_AT_HARDPOINT"
             hardpoint="trigger"
-            meleeDamageMult="3">
+            meleeDamageMult="2">
       </item>
     </intrinsics>
   </item>
@@ -42,7 +42,7 @@
       <item name="claw"
             flags="MELEE_WEAPON INTRINSIC_AT_HARDPOINT EFFECT_FIRE"
             hardpoint="trigger"
-            meleeDamageMult="1.5">
+            meleeDamageMult="1.2">
       </item>
       <item name="breath"
             flags="RANGED_WEAPON INTRINSIC_AT_HARDPOINT EFFECT_FIRE EFFECT_EXPLOSIVE RENDER_TRAIL"
@@ -73,7 +73,7 @@
         resource="ax"
         flags="MELEE_WEAPON HELD_AT_HARDPOINT"
         hardpoint="trigger">
-        <melee kinetic="3" />
+        <melee kinetic="2" />
   </item>
 
   <item name="testgun"

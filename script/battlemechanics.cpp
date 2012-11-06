@@ -174,10 +174,10 @@ void BattleMechanics::CalcMeleeDamage( Chit* src, IMeleeWeaponItem* weapon, Dama
 	effect ^= GameItem::EFFECT_EXPLOSIVE;
 
 	// Now about mass.
-	// For now, go with the mass of the item + 1/2 the mass of right
+	// Use the sum; using another approach can yield surprising damage calc.
 	float mass = 0;
 	for( int i=0; i<chain.Size(); ++i ) {
-		mass += chain[i]->mass * (i==0 ? 1.f : 0.5f );
+		mass += chain[i]->mass;
 	}
 	static const float STRIKE_RATIO_INV = 1.0f / 5.0f;
 
