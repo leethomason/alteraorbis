@@ -144,6 +144,7 @@
     <ClCompile Include="..\xegame\component.cpp" />
     <ClCompile Include="..\xegame\game.cpp" />
     <ClCompile Include="..\xegame\inventorycomponent.cpp" />
+    <ClCompile Include="..\xegame\itembasecomponent.cpp" />
     <ClCompile Include="..\xegame\itemcomponent.cpp" />
     <ClCompile Include="..\xegame\rendercomponent.cpp" />
     <ClCompile Include="..\xegame\scene.cpp" />
@@ -221,6 +222,7 @@
     <ClInclude Include="..\xegame\component.h" />
     <ClInclude Include="..\xegame\game.h" />
     <ClInclude Include="..\xegame\inventorycomponent.h" />
+    <ClInclude Include="..\xegame\itembasecomponent.h" />
     <ClInclude Include="..\xegame\itemcomponent.h" />
     <ClInclude Include="..\xegame\rendercomponent.h" />
     <ClInclude Include="..\xegame\scene.h" />

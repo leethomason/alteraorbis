@@ -209,12 +209,17 @@ void BattleTestScene::LoadMap()
 
 		GET_COMPONENT( chit, MapSpatialComponent )->SetMapPosition( v.x, v.y, 0 );
 	}
+
+	const GameItem& treeItem = *itemStorage.Get( "tree" );
+
 	for( int i=0; i<features.Size(); ++i ) {
 		Chit* chit = chitBag.NewChit();
 		const Vector2I& v = features[i];
-		MapSpatialComponent* msc = new MapSpatialComponent( 1, 1, map );
-		chit->Add( msc );
+
+		chit->Add( new MapSpatialComponent( 1, 1, map ));
 		chit->Add( new RenderComponent( engine, "tree" ));
+		chit->Add( new ItemComponent( treeItem ));
+		chit->Add( new HealthComponent());
 
 		GET_COMPONENT( chit, MapSpatialComponent )->SetMapPosition( v.x, v.y, 0 );
 	}
@@ -440,7 +445,8 @@ void BattleTestScene::ItemTapped( const gamui::UIItem* item )
 
 void BattleTestScene::DoTick( U32 deltaTime )
 {
-	/*
+	// Battle Bolt test!
+#if 1
 	boltTimer += deltaTime;
 	if ( boltTimer > 500 ) {
 		boltTimer = 0;
@@ -449,9 +455,11 @@ void BattleTestScene::DoTick( U32 deltaTime )
 		bolt->dir.Set( -0.1f+fuzz.Uniform()*0.2f, 0, 1 );
 		bolt->head.Set( 0.5f * (float)map->Width(), 0.5f, 2 );
 		bolt->color.Set( 1, 0.1f, 0.3f, 1 );
-		bolt->damage.vec[ DamageDesc::KINETIC ] = 20;
+		bolt->damage = 20.0f;
+		bolt->effect = GameItem::EFFECT_FIRE;
+		bolt->speed = 10.0f;
 	}
-	*/
+#endif
 
 	chitBag.DoTick( deltaTime, engine );
 

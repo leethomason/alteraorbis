@@ -8,14 +8,17 @@
 
 - combat test scene	
 	- effects
+		- effects spread to nearby when they should
+		- environment: water contains fire, spreads shock
+		- down chain: a fire creature should catch things on fire that it holds
+		- flaming sword
+		- flaming sword should catch things on fire when it hits
 	- unique look for units so teams can be distinguished
 	- melee attack goes back to reference position between hits
 	- buttons to select scenario, load items
 	- animation speed isn't correct
 	- adjust particles to have "impact" effect
 	- add de-rez
-	- flaming sword
-	- flaming sword should catch things on fire
 	- refactor code - if needed? - in AIComponent (the fixmes)
 	- gunrun to walk not synchronized correctly
 	- revisit accuracy comuptation. what scales with distance? area? volume? radius?
@@ -45,6 +48,7 @@
 	- error in ray-cast: detecting a 'tree' where it shouldn't (near the head of the prime)
 	- add rez and de-rez effect for chits
 
+	X don't check for item destroyed/death on DAMAGE msg - needs to be moved to tick.
 	x bolts are hitting own team	
 	X eval: kinetic damage of held weapons shouldn't be multiplied with mass (added)
 	X properly hook up items and such, so that items, health, all be driven correctly

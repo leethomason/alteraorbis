@@ -176,17 +176,19 @@ public:
 		HELD_AT_HARDPOINT		= HARDPOINT | HELD,	// 	sword, shield. at hardpoint, overrides built in.
 		HELD_FREE				= HELD,				//	amulet, ring. held, put not at a hardpoint, and not rendered
 
-		IMMUNE_FIRE			= (1<<10),				// doesn't burn *at all*
-		FLAMMABLE			= (1<<11),				// burns until gone (wood)
+		IMMUNE_FIRE			= (1<<6),				// doesn't burn *at all*
+		FLAMMABLE			= (1<<7),				// burns until gone (wood)
+		IMMUNE_SHOCK		= (1<<8),
+		SHOCKABLE			= (1<<9),
 
-		EFFECT_KINETIC		= (1<<12),
-		EFFECT_ENERGY		= (1<<13),
-		EFFECT_EXPLOSIVE	= (1<<14),
-		EFFECT_FIRE			= (1<<15),
-		EFFECT_SHOCK		= (1<<16),
+		EFFECT_KINETIC		= (1<<10),
+		EFFECT_ENERGY		= (1<<11),
+		EFFECT_EXPLOSIVE	= (1<<12),
+		EFFECT_FIRE			= (1<<13),
+		EFFECT_SHOCK		= (1<<14),
 		EFFECT_MASK			= EFFECT_KINETIC | EFFECT_ENERGY | EFFECT_EXPLOSIVE | EFFECT_FIRE | EFFECT_SHOCK,
 
-		RENDER_TRAIL		= (1<<17),				// render a bolt with a 'smoketrail' vs. regular bolt
+		RENDER_TRAIL		= (1<<15),				// render a bolt with a 'smoketrail' vs. regular bolt
 	};
 
 	// ------ description ------
@@ -212,6 +214,8 @@ public:
 	U32 cooldownTime;		// counting UP to ready state
 	U32 reloadTime;			// counting UP to ready state
 	int rounds;				// current rounds in the clip
+	float accruedFire;		// how much fire damage built up, not yet applied
+	float accruedShock;		// how much shock damage built up, not yet applied
 
 	Chit* parentChit;		// only set when attached to a Component
 
@@ -239,6 +243,9 @@ public:
 			speed			= rhs->speed;
 
 			hp				= rhs->hp;
+			accruedFire		= rhs->accruedFire;
+			accruedShock	= rhs->accruedShock;
+
 			parentChit		= 0;	// NOT copied
 		}
 		else {
@@ -263,6 +270,9 @@ public:
 			speed = 1.0f;
 
 			hp = TotalHP();
+			accruedFire = 0;
+			accruedShock = 0;
+
 			parentChit = 0;
 		}
 	}
@@ -297,6 +307,8 @@ public:
 		return rounds || clipCap == 0; 
 	}
 	void UseRound();
+	bool OnFire() const  { return (!(flags & IMMUNE_FIRE)) && accruedFire > 0; }
+	bool OnShock() const { return (!(flags & IMMUNE_SHOCK)) && accruedShock > 0; }
 
 	// Note that the current HP, if it has one, 
 	float TotalHP() const { return mass*hpPerMass; }
@@ -311,6 +323,9 @@ public:
 	void AbsorbDamage( bool inInventory, const DamageDesc& dd, DamageDesc* remain, const char* log );
 
 private:
+	float Delta( U32 delta, float v ) {
+		return v * (float)delta * 0.001f;
+	}
 };
 
 

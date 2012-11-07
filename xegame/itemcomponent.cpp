@@ -30,6 +30,7 @@ using namespace grinliz;
 void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {
 	if ( msg.ID() == ChitMsg::CHIT_DAMAGE ) {
+		parentChit->SetTickNeeded();
 		const DamageDesc* dd = (const DamageDesc*) msg.Ptr();
 		GLASSERT( dd );
 		GLLOG(( "Chit %3d '%s' (origin=%d) ", parentChit->ID(), item.Name(), msg.originID ));
@@ -109,13 +110,25 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 
 bool ItemComponent::DoTick( U32 delta )
 {
-	return item.DoTick( delta );
+	bool needsTick = item.DoTick( delta );
+
+	HealthComponent* hc = GET_COMPONENT( parentChit, HealthComponent );
+	if ( hc ) {
+		hc->DeltaHealth();
+	}
+	return needsTick;
+}
+
+
+void ItemComponent::EmitEffect( Engine* engine, U32 deltaTime )
+{
+	LowerEmitEffect( engine, item, deltaTime );
 }
 
 
 void ItemComponent::OnAdd( Chit* chit )
 {
-	Component::OnAdd( chit );
+	super::OnAdd( chit );
 	GLASSERT( !item.parentChit );
 	item.parentChit = parentChit;
 }
@@ -125,6 +138,6 @@ void ItemComponent::OnRemove()
 {
 	GLASSERT( item.parentChit == parentChit );
 	item.parentChit = 0;
-	Component::OnRemove();
+	super::OnRemove();
 }
 

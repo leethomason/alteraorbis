@@ -26,7 +26,7 @@ using namespace grinliz;
 
 void InventoryComponent::OnAdd( Chit* chit )
 {
-	Component::OnAdd( chit );
+	super::OnAdd( chit );
 	hardpoints = -1;
 	packItems.Clear();
 	freeItems.Clear();
@@ -47,7 +47,7 @@ void InventoryComponent::OnRemove()
 		delete heldAt[i];
 		heldAt[i] = 0;
 	}
-	Component::OnRemove();
+	super::OnRemove();
 }
 
 
@@ -162,6 +162,7 @@ void InventoryComponent::AbsorbDamage( const DamageDesc& dd, DamageDesc* absorbe
 	if ( absorbed->damage > dd.damage ) {
 		absorbed->damage = dd.damage;
 	}
+	parentChit->SetTickNeeded();
 }
 
 
@@ -227,14 +228,29 @@ void InventoryComponent::GetChain( GameItem* item, grinliz::CArray< GameItem*, 4
 }
 
 
+void InventoryComponent::EmitEffect( Engine* engine, U32 delta )
+{
+	for( int i=0; i<NUM_HARDPOINTS; ++i ) {
+		if ( intrinsicAt[i] ) {
+			LowerEmitEffect( engine, *intrinsicAt[i], delta );
+		}
+		if ( heldAt[i] ) {
+			LowerEmitEffect( engine, *heldAt[i], delta );
+		}
+	}
+}
+
+
 bool InventoryComponent::DoTick( U32 delta )
 {
 	bool callback = false;
 	for( int i=0; i<NUM_HARDPOINTS; ++i ) {
-		if ( intrinsicAt[i] && intrinsicAt[i]->DoTick(delta) )
+		if ( intrinsicAt[i] && intrinsicAt[i]->DoTick(delta) ) {
 			callback = true;
-		if ( heldAt[i] && heldAt[i]->DoTick(delta) )
+		}
+		if ( heldAt[i] && heldAt[i]->DoTick(delta) ) {
 			callback = true;
+		}
 	}
 	for( int i=0; i<freeItems.Size(); ++i ) {
 		if ( freeItems[i] && freeItems[i]->DoTick(delta) )

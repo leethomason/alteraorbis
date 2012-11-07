@@ -60,8 +60,6 @@ public:
 	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg )	{}
 
 protected:
-	void RequestUpdate();
-
 	float Travel( float rate, U32 time ) const {
 		return rate * ((float)time) * 0.001f;
 	}

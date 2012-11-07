@@ -18,6 +18,7 @@
 #include "inventorycomponent.h"
 #include "chit.h"
 #include "chitevent.h"
+#include "itemcomponent.h"
 
 #include "../engine/animation.h"
 #include "../engine/model.h"
@@ -146,12 +147,6 @@ bool RenderComponent::PlayAnimation( AnimationType type )
 		// *always* overrides
 		model[0]->SetAnimation( ANIM_HEAVY_IMPACT, CROSS_FADE_TIME, true );
 	}
-//	else if ( type == ANIM_LIGHT_IMPACT ) {
-//		// overrides everything but heavy
-//		if ( model[0]->GetAnimation() != ANIM_HEAVY_IMPACT ) {
-//			model[0]->SetAnimation( ANIM_LIGHT_IMPACT, CROSS_FADE_TIME, true );
-//		}
-//	}
 	else if ( type == ANIM_MELEE ) {
 		// melee if we can
 		if ( AnimationReady() ) {
@@ -246,6 +241,8 @@ bool RenderComponent::DoTick( U32 deltaTime )
 			}
 		}
 	}
+
+	// Some models are particle emitters; handle those here:
 	for( int i=0; i<NUM_MODELS; ++i ) {
 		if( model[i] && model[i]->HasParticles() ) {
 			model[i]->EmitParticles( engine->particleSystem, engine->camera.EyeDir3(), deltaTime );
@@ -253,7 +250,7 @@ bool RenderComponent::DoTick( U32 deltaTime )
 		}
 	}
 
-	// Position the attachments
+	// Position the attachments relative to the parent.
 	for( int i=1; i<NUM_MODELS; ++i ) {
 		if ( model[i] ) {
 			GLASSERT( !metaDataName[i-1].empty() );
@@ -262,6 +259,12 @@ bool RenderComponent::DoTick( U32 deltaTime )
 			model[i]->SetTransform( xform );
 		}
 	}
+
+	if ( parentChit->GetItemComponent() ) 
+		parentChit->GetItemComponent()->EmitEffect( engine, deltaTime );
+	if ( parentChit->GetInventoryComponent() ) 
+		parentChit->GetInventoryComponent()->EmitEffect( engine, deltaTime );
+
 	return needsTick;
 }
 

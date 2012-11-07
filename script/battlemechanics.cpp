@@ -196,7 +196,6 @@ void BattleMechanics::Shoot( ChitBag* bag, Chit* src, Chit* target, IRangedWeapo
 	if ( !target->GetRenderComponent() ) {
 		return;
 	}
-	Bolt* bolt = bag->NewBolt();
 	GameItem* item = weapon->GetItem();
 	
 	Vector3F t = { 0, 0, 0 };
@@ -212,6 +211,7 @@ void BattleMechanics::Shoot( ChitBag* bag, Chit* src, Chit* target, IRangedWeapo
 
 	Vector3F dir = FuzzyAim( pos, aimAt, area );
 
+	Bolt* bolt = bag->NewBolt();
 	bolt->head = pos + dir;			// FIXME: use team ignore, not offset
 	bolt->len = 1.0f;
 	bolt->dir = dir;

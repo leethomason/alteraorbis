@@ -76,8 +76,10 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 	READ_FLOAT_ATTR( ele, meleeDamage );
 	READ_FLOAT_ATTR( ele, rangedDamage );
 	READ_FLOAT_ATTR( ele, absorbsDamage );
+	READ_FLOAT_ATTR( ele, accruedFire );
+	READ_FLOAT_ATTR( ele, accruedShock );
 
-	if ( EFFECT_FIRE )	flags |= IMMUNE_FIRE;
+	if ( flags & EFFECT_FIRE )	flags |= IMMUNE_FIRE;
 
 	hardpoint = NO_HARDPOINT;
 	const char* h = ele->Attribute( "hardpoint" );
@@ -127,31 +129,52 @@ void GameItem::UseRound() {
 }
 
 
+// FIXME: pass in items affecting this one:
+// The body affects the claw. Environment (water) affects the body.
 bool GameItem::DoTick( U32 delta )
 {
+	bool tick = false;
+
 	cooldownTime += delta;
 	if ( reloadTime < reload ) {
 		reloadTime += delta;
+		tick = true;
 
 		if ( reloadTime >= reload ) {
 			rounds = clipCap;
 		}
 	}
 
-	bool tick = false;
-
-	if (    TotalHP() 
-		 && hpRegen != 0
-		 && ( hp != TotalHP() || hp != 0 ) ) 
-	{
-		hp += hpRegen * (float)delta / 1000.0f;
-		tick = true;
+	float savedHP = hp;
+	if ( accruedFire > 0 ) {
+		int debug=1;
 	}
+	if ( flags & IMMUNE_FIRE )
+		accruedFire = 0;
+	if ( flags & IMMUNE_SHOCK )
+		accruedShock = 0;
+
+	float maxEffectDamage = Delta( delta, EFFECT_DAMAGE_PER_SEC );
+	hp -= Min( accruedFire, maxEffectDamage );
+	hp -= Min( accruedShock, maxEffectDamage );
+	if ( !(flags & FLAMMABLE)) {
+		accruedFire -= maxEffectDamage;
+		accruedFire = Max( 0.0f, accruedFire );
+	}
+	if ( !(flags & SHOCKABLE)) {
+		accruedShock -= maxEffectDamage;
+		accruedShock = Max( 0.0f, accruedShock );
+	}
+
+	hp += Delta( delta, hpRegen );
+	hp = Clamp( hp, 0.0f, TotalHP() );
+
+	tick = tick || (savedHP != hp);
 
 	if ( parentChit ) {
 		parentChit->SendMessage( ChitMsg( ChitMsg::GAMEITEM_TICK, 0, this ), 0 );
 	}
-	return !Ready() || Reloading() || tick;	
+	return tick;	
 }
 
 
@@ -159,8 +182,8 @@ void GameItem::Apply( const GameItem* intrinsic )
 {
 	if ( intrinsic->flags & EFFECT_FIRE )
 		flags |= IMMUNE_FIRE;
-//	if ( intrinsic->flags & EFFECT_ENERGY )
-//		flags |= IMMUNE_ENERGY;
+	if ( intrinsic->flags & EFFECT_SHOCK )
+		flags |= IMMUNE_SHOCK;
 }
 
 
@@ -171,11 +194,15 @@ void GameItem::AbsorbDamage( bool inInventory, const DamageDesc& dd, DamageDesc*
 	if ( !inInventory ) {
 		// just regular item getting hit, that takes damage.
 		absorbed = Min( dd.damage, hp );
+		if ( dd.effects & EFFECT_FIRE )
+			accruedFire += absorbed;
+		if ( dd.effects & EFFECT_SHOCK )
+			accruedShock += absorbed;
 		hp -= absorbed;
 	}
 	else {
 		// Items in the inventory don't take damage. They
-		// may reduce damage for there parent.
+		// may reduce damage for their parent.
 		if ( ToShield() ) {
 			reloadTime = 0;
 			absorbed = Min( dd.damage * absorbsDamage, (float)rounds );
@@ -196,7 +223,7 @@ void GameItem::AbsorbDamage( bool inInventory, const DamageDesc& dd, DamageDesc*
 			GLLOG(( "Damage Absorbed %s absorbed=%.1f ", name.c_str(), absorbed ));
 		}
 		else {
-			GLLOG(( "Damage %s total=%.1f hp=%.1f ", name.c_str(), absorbed, hp ));
+			GLLOG(( "Damage %s total=%.1f hp=%.1f accFire=%.1f accShock=%.1f ", name.c_str(), absorbed, hp, accruedFire, accruedShock ));
 		}
 	}
 }

@@ -16,7 +16,7 @@
 #ifndef INVENTORY_COMPONENT_INCLUDED
 #define INVENTORY_COMPONENT_INCLUDED
 
-#include "component.h"
+#include "itembasecomponent.h"
 #include "chit.h"
 #include "../grinliz/glcontainer.h"
 #include "../grinliz/glvector.h"
@@ -25,8 +25,11 @@
 #include "../game/gameitem.h"
 
 
-class InventoryComponent : public Component
+class InventoryComponent : public ItemBaseComponent
 {
+private:
+	typedef ItemBaseComponent super;
+
 public:
 	InventoryComponent( ChitBag* bag ) : hardpoints(-1) {
 		memset( intrinsicAt, 0, sizeof(GameItem*)*NUM_HARDPOINTS );
@@ -36,7 +39,7 @@ public:
 
 	virtual Component* ToComponent( const char* name ) {
 		if ( grinliz::StrEqual( name, "InventoryComponent" ) ) return this;
-		return Component::ToComponent( name );
+		return super::ToComponent( name );
 	}
 
 	virtual void DebugStr( grinliz::GLString* str );
@@ -72,6 +75,8 @@ public:
 
 	static const char* HardpointFlagToName( int f );
 	static int HardpointNameToFlag( const char* name );
+
+	void EmitEffect( Engine* engine, U32 deltaTime );
 
 private:
 	int hardpoints;			// which ones do we have?? If we have the hardpoint, intrinsicAt or heldAt may be used.
