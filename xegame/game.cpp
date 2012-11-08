@@ -55,6 +55,7 @@ Game::Game( int width, int height, int rotation, int uiHeight, const char* path 
 	perfLevel( 0 ),
 	perfFrameCount( 0 ),
 	suppressText( false ),
+	renderUI( true ),
 	previousTime( 0 ),
 	isDragging( false )
 {
@@ -548,10 +549,6 @@ void Game::DoTick( U32 _currentTime )
 		Scene* scene = sceneStack.Top()->scene;
 		scene->DoTick( deltaTime );
 
-		Rectangle2I clip2D, clip3D;
-		clip2D.SetInvalid();
-		clip3D.SetInvalid();
-	
 		{
 			GRINLIZ_PERFTRACK_NAME( "Game::DoTick 3D" );
 
@@ -566,9 +563,10 @@ void Game::DoTick( U32 _currentTime )
 			screenport.SetUI(); 
 			scene->RenderGamui3D();
 
-			screenport.SetUI();
-			scene->DrawHUD();
-			scene->RenderGamui2D();
+			if ( renderUI ) {
+				screenport.SetUI();
+				scene->RenderGamui2D();
+			}
 		}
 	}
 
@@ -692,14 +690,19 @@ void Game::CancelInput()
 }
 
 
-void Game::HandleHotKeyMask( int mask )
+void Game::HandleHotKey( int key )
 {
-	sceneStack.Top()->scene->HandleHotKeyMask( mask );
-	if ( mask & GAME_HK_TOGGLE_DEBUG_TEXT ) {
+	if ( key == GAME_HK_TOGGLE_UI ) {
+		renderUI = !renderUI;
+	}
+	if ( key == GAME_HK_TOGGLE_DEBUG_TEXT ) {
 		SetDebugLevel( GetDebugLevel() + 1 );
 	}
-	if ( mask & GAME_HK_TOGGLE_PERF ) {
+	else if ( key == GAME_HK_TOGGLE_PERF ) {
 		SetPerfLevel( GetPerfLevel() + 1 );
+	}
+	else {
+		sceneStack.Top()->scene->HandleHotKey( key );
 	}
 }
 

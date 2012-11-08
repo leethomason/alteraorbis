@@ -75,6 +75,7 @@ BattleTestScene::BattleTestScene( LumosGame* game ) : Scene( game )
 	debugRay.direction.Zero();
 	debugRay.origin.Zero();
 	battleStarted = false;
+	fireTestGun = false;
 
 	game->InitStd( &gamui2D, &okay, 0 );
 	LayoutCalculator layout = game->DefaultLayout();
@@ -238,10 +239,13 @@ void BattleTestScene::LoadMap()
 
 
 
-void BattleTestScene::HandleHotKeyMask( int mask )
+void BattleTestScene::HandleHotKey( int mask )
 {
 	if ( mask == GAME_HK_TOGGLE_GLOW ) {
 		engine->SetGlow( !engine->Glow() );
+	}
+	else if ( mask == GAME_HK_SPACE ) {
+		fireTestGun = !fireTestGun;
 	}
 }
 
@@ -275,8 +279,7 @@ void BattleTestScene::GoScene()
 
 	// Trigger the AI to do something.
 	for( int i=LEFT; i<=RIGHT; ++i ) {
-		AwarenessChitEvent* event = new AwarenessChitEvent( i, b );
-		event->SetItemFilter( GameItem::CHARACTER );
+		ChitEvent event( ChitEvent::AWARENESS, b, GameItem::CHARACTER );
 		chitBag.QueueEvent( event );
 	}
 }
@@ -446,20 +449,20 @@ void BattleTestScene::ItemTapped( const gamui::UIItem* item )
 void BattleTestScene::DoTick( U32 deltaTime )
 {
 	// Battle Bolt test!
-#if 1
-	boltTimer += deltaTime;
-	if ( boltTimer > 500 ) {
-		boltTimer = 0;
-		Bolt* bolt = chitBag.NewBolt();
+	if ( fireTestGun ) {
+		boltTimer += deltaTime;
+		if ( boltTimer > 500 ) {
+			boltTimer = 0;
+			Bolt* bolt = chitBag.NewBolt();
 
-		bolt->dir.Set( -0.1f+fuzz.Uniform()*0.2f, 0, 1 );
-		bolt->head.Set( 0.5f * (float)map->Width(), 0.5f, 2 );
-		bolt->color.Set( 1, 0.1f, 0.3f, 1 );
-		bolt->damage = 20.0f;
-		bolt->effect = GameItem::EFFECT_FIRE;
-		bolt->speed = 10.0f;
+			bolt->dir.Set( -0.1f+fuzz.Uniform()*0.2f, 0, 1 );
+			bolt->head.Set( 0.5f * (float)map->Width(), 0.5f, 2 );
+			bolt->color.Set( 1, 0.1f, 0.3f, 1 );
+			bolt->damage = 20.0f;
+			bolt->effect = GameItem::EFFECT_FIRE;
+			bolt->speed = 10.0f;
+		}
 	}
-#endif
 
 	chitBag.DoTick( deltaTime, engine );
 
@@ -479,8 +482,8 @@ void BattleTestScene::DoTick( U32 deltaTime )
 			}
 		}
 		if ( !aware ) {
-			AwarenessChitEvent* event = new AwarenessChitEvent( LEFT, b );
-			event->SetItemFilter( GameItem::CHARACTER );
+			ChitEvent event( ChitEvent::AWARENESS, b, GameItem::CHARACTER );
+			event.team = LEFT;
 			chitBag.QueueEvent( event );
 		}
 	}

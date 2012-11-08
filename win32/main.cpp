@@ -337,44 +337,16 @@ int main( int argc, char **argv )
 							done = true;
 						break;
 
-						/*
-					case SDLK_KP_PLUS:
-					case SDLK_KP_MINUS:
-						{
-							float zoom;
-							GameCameraGet( game, GAME_CAMERA_ZOOM, &zoom );
-							zoom += event.key.keysym.sym == SDLK_KP_PLUS ? 0.1f : -0.1f;
-							GameCameraSet( game, GAME_CAMERA_ZOOM, zoom );
-						}
-						break;
-						*/
-
-					/*
-					case SDLK_RIGHT:
-						if ( !mapMakerMode ) {
-							if ( sdlMod & (KMOD_RCTRL|KMOD_LCTRL) )
-								GameHotKey( game, GAME_HK_ROTATE_CW );
-							else
-								GameHotKey( game, GAME_HK_NEXT_UNIT );
-						}
-						break;
-
-					case SDLK_LEFT:
-						if ( !mapMakerMode ) {
-							if ( sdlMod & (KMOD_RCTRL|KMOD_LCTRL) )
-								GameHotKey( game, GAME_HK_ROTATE_CCW );
-							else
-								GameHotKey( game, GAME_HK_PREV_UNIT );
-						}
-						break;
-					*/
-
 					case SDLK_u:
 						GameHotKey( game, GAME_HK_TOGGLE_UI );
 						break;
 
 					case SDLK_g:
 						GameHotKey( game, GAME_HK_TOGGLE_GLOW );
+						break;
+
+					case SDLK_SPACE:
+						GameHotKey( game, GAME_HK_SPACE );
 						break;
 
 					case SDLK_s:

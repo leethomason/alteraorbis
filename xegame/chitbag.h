@@ -59,7 +59,7 @@ public:
 	void QueueDelete( Chit* chit );
 
 	// passes ownership
-	void QueueEvent( ChitEvent* event )			{ events.Push( event ); }
+	void QueueEvent( const ChitEvent& event )			{ events.Push( event ); }
 
 	// Hashes based on integer coordinates. No need to call
 	// if they don't change.
@@ -96,7 +96,7 @@ private:
 
 	grinliz::CDynArray<int>			deleteList;		// <set> of chits that need to be deleted.
 	grinliz::CDynArray<Chit*>		hashQuery;
-	grinliz::CDynArray<ChitEvent*, grinliz::OwnedPtrSem >	events;
+	grinliz::CDynArray<ChitEvent>	events;
 	
 	grinliz::CDynArray<Bolt> bolts;
 	

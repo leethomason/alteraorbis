@@ -21,47 +21,31 @@
 #include "../grinliz/glrectangle.h"
 #include "../grinliz/glvector.h"
 
-class AwarenessChitEvent;
-
+// Asynchronous! 
+// All data is copied, sliced, all that fun stuff. Can't be subclassed.
 class ChitEvent
 {
-protected:
-	grinliz::Rectangle2F aoe;	// how broadly this event is broadcast
-
-protected:
-	int data;	// if there is obvious data - not warranting a sub-class - put it here
-	int itemFilter;
-
-	union {
-		int team;
+public:
+	enum { 
+		AWARENESS,
+		EFFECT					// data: EFFECT_xyz, factor: strength of effect at AOE center
 	};
 
-public:
-	ChitEvent( const grinliz::Rectangle2F& areaOfEffect,
-		       int _data=0 ) 
-		: aoe( areaOfEffect ), data( _data ), itemFilter(0) {}
+	int		data;				// if there is obvious data
+	int		team;
+	float	factor;				
 
-	void SetItemFilter( int flag )	{ itemFilter = flag; }
-	int  GetItemFilter() const		{ return itemFilter; }
-	
-	const grinliz::Rectangle2F& AreaOfEffect() const { return aoe; }
-	int Data() const		{ return data; }
+	ChitEvent( int p_id, const grinliz::Rectangle2F& areaOfEffect, int filter )
+		: id(p_id), aoe( areaOfEffect ), itemFilter(filter), data(0), team(0) {}
 
-	virtual const AwarenessChitEvent* ToAwareness() const { return 0; }
+	const grinliz::Rectangle2F& AreaOfEffect() const	{ return aoe; }
+	int ItemFilter() const								{ return itemFilter; }
+	int ID() const										{ return id; }
+
+private:
+	grinliz::Rectangle2F aoe;	// how broadly this event is broadcast
+	int id;
+	int itemFilter;				// used to filter the spatial query
 };
-
-
-class AwarenessChitEvent : public ChitEvent {
-public:
-	AwarenessChitEvent( int _team, const grinliz::Rectangle2F& _bounds ) : ChitEvent( _bounds ) {
-		aoe = _bounds;
-		team = _team;
-	}
-	const grinliz::Rectangle2F& Bounds() const { return aoe; }
-	int Team() const { return team; }
-
-	virtual const AwarenessChitEvent* ToAwareness() const { return this; }
-};
-
 
 #endif // CHIT_EVENT_INCLUDED

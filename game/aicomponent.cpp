@@ -288,13 +288,12 @@ void AIComponent::DoMelee()
 
 void AIComponent::OnChitEvent( const ChitEvent& event )
 {
-	if ( event.ToAwareness() ) {
+	if ( event.ID() == ChitEvent::AWARENESS ) {
 		ItemComponent* itemComp = GET_COMPONENT( parentChit, ItemComponent );
 		if ( itemComp ) {
-			const AwarenessChitEvent* aware = event.ToAwareness();
-			if ( aware->Team() == itemComp->item.primaryTeam ) 
+			if ( event.team == itemComp->item.primaryTeam ) 
 			{
-				UpdateCombatInfo( &aware->Bounds() );
+				UpdateCombatInfo( &event.AreaOfEffect() );
 			}
 		}
 	}

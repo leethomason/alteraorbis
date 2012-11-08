@@ -187,7 +187,7 @@ void RenderTestScene::Rotate( float degrees )
 }
 
 
-void RenderTestScene::HandleHotKeyMask( int mask )
+void RenderTestScene::HandleHotKey( int mask )
 {
 	switch( mask ) {
 	case GAME_HK_TOGGLE_UI:

@@ -118,8 +118,8 @@ void ChitBag::DoTick( U32 delta, Engine* engine )
 	// probably correct in that order.
 
 	for( int i=0; i<events.Size(); ++i ) {
-		const ChitEvent& e = *events[i];
-		QuerySpatialHash( &hashQuery, e.AreaOfEffect(), 0, e.GetItemFilter() );
+		const ChitEvent& e = events[i];
+		QuerySpatialHash( &hashQuery, e.AreaOfEffect(), 0, e.ItemFilter() );
 		for( int j=0; j<hashQuery.Size(); ++j ) {
 			hashQuery[j]->OnChitEvent( e );
 		}

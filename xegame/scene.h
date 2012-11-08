@@ -76,7 +76,7 @@ public:
 	virtual bool CanSave()										{ return false; }
 	virtual void Save( tinyxml2::XMLPrinter* )					{}
 	virtual void Load( const tinyxml2::XMLElement* doc )		{}
-	virtual void HandleHotKeyMask( int mask )					{}
+	virtual void HandleHotKey( int mask )						{}
 	virtual void Resize()										{}
 
 	virtual void SceneResult( int sceneID, int result )			{}
@@ -103,7 +103,7 @@ public:
 	void RenderGamui3D()	{ gamui3D.Render(); }
 
 	// 2D overlay rendering.
-	virtual void DrawHUD()										{}
+	//virtual void DrawHUD()										{}
 	virtual void DrawDebugText()								{}
 
 	// Debugging

@@ -136,4 +136,3 @@ bool Scene::Process3DTap( int action, const grinliz::Vector2F& view, const grinl
 	}
 	return result;
 }
-

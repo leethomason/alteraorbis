@@ -181,7 +181,7 @@ void GameHotKey( void* handle, int mask )
 	CheckThread check;
 
 	Game* game = (Game*)handle;
-	return game->HandleHotKeyMask( mask );
+	return game->HandleHotKey( mask );
 }
 
 

@@ -44,7 +44,7 @@ public:
 	virtual void ItemTapped( const gamui::UIItem* item );
 	virtual void Zoom( int style, float normal );
 	virtual void Rotate( float degrees );
-	virtual void HandleHotKeyMask( int mask );
+	virtual void HandleHotKey( int mask );
 
 	virtual void Draw3D( U32 deltaTime );
 	virtual void DrawDebugText();

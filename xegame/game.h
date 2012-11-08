@@ -76,7 +76,7 @@ public:
 	
 	// debugging / testing / mapmaker
 	void MouseMove( int x, int y );
-	void HandleHotKeyMask( int mask );
+	void HandleHotKey( int mask );
 
 	void RotateSelection( int delta );
 	void DeleteAtSelection();
@@ -176,6 +176,7 @@ private:
 	int perfLevel;
 	int perfFrameCount;
 	bool suppressText;
+	bool renderUI;
 	int perfY;
 
 	ModelLoader* modelLoader;

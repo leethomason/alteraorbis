@@ -44,7 +44,7 @@ public:
 	virtual void DrawDebugText();
 	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
 	virtual void MouseMove( const grinliz::Vector2F& view, const grinliz::Ray& world ) { debugRay = world; }
-	virtual void HandleHotKeyMask( int mask );
+	virtual void HandleHotKey( int mask );
 
 private:
 
@@ -98,6 +98,7 @@ private:
 	WorldMap* map;
 	bool battleStarted;
 	U32 boltTimer;
+	bool fireTestGun;
 
 	grinliz::Random random;
 	grinliz::Random fuzz;

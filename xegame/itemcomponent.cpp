@@ -112,6 +112,11 @@ bool ItemComponent::DoTick( U32 delta )
 {
 	bool needsTick = item.DoTick( delta );
 
+	// Look around for fire or shock spread.
+	if ( item.accruedFire > 0 || item.accruedShock > 0 ) {
+
+	}
+
 	HealthComponent* hc = GET_COMPONENT( parentChit, HealthComponent );
 	if ( hc ) {
 		hc->DeltaHealth();
