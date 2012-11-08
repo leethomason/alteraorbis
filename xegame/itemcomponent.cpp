@@ -15,6 +15,8 @@
 
 #include "itemcomponent.h"
 #include "chit.h"
+#include "chitevent.h"
+#include "chitbag.h"
 
 #include "../grinliz/glrandom.h"
 
@@ -108,14 +110,61 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 }
 
 
+void ItemComponent::OnChitEvent( const ChitEvent& event )
+{
+	if ( event.ID() == ChitEvent::EFFECT ) {
+		// It's important to remember this event could be
+		// coming from ourselves: which is how fire / shock
+		// grows, but don't want a positive feedback loop
+		// for normal-susceptible.
+
+		if (    parentChit->random.Rand(12) == 0
+			 && parentChit->GetSpatialComponent() ) 
+		{
+			DamageDesc dd( event.factor, event.data );
+			ChitMsg msg( ChitMsg::CHIT_DAMAGE, 0, &dd );
+
+			Vector2F v = parentChit->GetSpatialComponent()->GetPosition2D() - event.AreaOfEffect().Center();
+			msg.vector.Set( v.x, 0, v.y );
+			msg.vector.SafeNormalize( 0,1,0 );
+			parentChit->SendMessage( msg );
+		}
+	}
+}
+
+
+bool ItemComponent::DoSlowTick()
+{
+	// Look around for fire or shock spread.
+	if ( item.accruedFire > 0 || item.accruedShock > 0 ) {
+		SpatialComponent* sc = parentChit->GetSpatialComponent();
+		if ( sc ) {
+			Rectangle2F aoe;
+			aoe.max = aoe.min = sc->GetPosition2D();
+			aoe.Outset( EFFECT_RADIUS );
+
+			if ( item.accruedFire ) {
+				ChitEvent event( ChitEvent::EFFECT, aoe );
+				event.data = GameItem::EFFECT_FIRE;
+				event.factor = item.accruedFire;
+				GetChitBag()->QueueEvent( event );
+			}
+			if ( item.accruedShock ) {
+				ChitEvent event( ChitEvent::EFFECT, aoe );
+				event.data = GameItem::EFFECT_SHOCK;
+				event.factor = item.accruedShock;
+				GetChitBag()->QueueEvent( event );
+			}
+			return true;
+		}
+	}
+	return false;
+}
+
+
 bool ItemComponent::DoTick( U32 delta )
 {
 	bool needsTick = item.DoTick( delta );
-
-	// Look around for fire or shock spread.
-	if ( item.accruedFire > 0 || item.accruedShock > 0 ) {
-
-	}
 
 	HealthComponent* hc = GET_COMPONENT( parentChit, HealthComponent );
 	if ( hc ) {

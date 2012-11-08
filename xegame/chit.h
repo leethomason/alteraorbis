@@ -22,6 +22,7 @@
 #include "../grinliz/glcontainer.h"
 #include "../grinliz/glstringutil.h"
 #include "../grinliz/glvector.h"
+#include "../grinliz/glrandom.h"
 
 class Component;
 class SpatialComponent;
@@ -131,7 +132,7 @@ public:
 	// in the chit (which don't need to be listeners.)
 	// Synchronous
 	void SendMessage(	const ChitMsg& message, 
-						Component* exclude );			// useful to not call ourselves. 
+						Component* exclude=0 );			// useful to not call ourselves. 
 	void AddListener( IChitListener* listener );
 	void RemoveListener( IChitListener* listener );
 
@@ -143,6 +144,8 @@ public:
 
 	// used by the spatial hash:
 	Chit* next;
+	// for components, so there is one random # generator per chit (not per component)
+	grinliz::Random random;
 
 private:
 	bool CarryMsg( int componentID, Chit* src, const ChitMsg& msg );

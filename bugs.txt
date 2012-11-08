@@ -8,7 +8,7 @@
 
 - combat test scene	
 	- effects
-		- effects spread to nearby when they should
+		X effects spread to nearby when they should
 		- environment: water contains fire, spreads shock
 		- down chain: a fire creature should catch things on fire that it holds
 		- flaming sword

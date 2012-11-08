@@ -30,7 +30,7 @@ public:
 	ItemComponent( const GameItem& _item ) : item( _item ) {}
 	virtual ~ItemComponent() {}
 
-	virtual Component*          ToComponent( const char* name ) {
+	virtual Component* ToComponent( const char* name ) {
 		if ( grinliz::StrEqual( name, "ItemComponent" ) ) return this;
 		return super::ToComponent( name );
 	}
@@ -44,6 +44,8 @@ public:
 	virtual void OnRemove();
 
 	virtual bool DoTick( U32 delta );
+	virtual bool DoSlowTick();
+	virtual void OnChitEvent( const ChitEvent& event );
 
 	GameItem* GetItem() { return &item; }
 	GameItem item;

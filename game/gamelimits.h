@@ -36,7 +36,9 @@ static const U32   COOLDOWN_TIME	= 750;
 static const float EXPLOSIVE_RANGE	= 1.5f;			// explosions go through walls. Make this too big,
 													// that becomes an issue. Too small, explosions aren't fun.
 static const float LONGEST_WEAPON_RANGE = 20.0f;	// effects AI logic, queries
-static const float EFFECT_DAMAGE_PER_SEC = 40.0f;
+static const float EFFECT_DAMAGE_PER_SEC = 20.0f;
+static const float EFFECT_RADIUS = 1.5f;
+static const float EFFECT_ACCRUED_MAX = EFFECT_DAMAGE_PER_SEC;
 
 // This arrangement breaks the case where something can attach
 // to multiple hardpoints. Fine; fix later.

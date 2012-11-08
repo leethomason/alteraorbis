@@ -104,7 +104,7 @@
   <item name="tree"
         resource="tree"
         flags="FLAMMABLE"
-        mass ="250"
+        mass ="400"
         />
 
 </items>

@@ -35,7 +35,7 @@ public:
 	int		team;
 	float	factor;				
 
-	ChitEvent( int p_id, const grinliz::Rectangle2F& areaOfEffect, int filter )
+	ChitEvent( int p_id, const grinliz::Rectangle2F& areaOfEffect, int filter=0 )
 		: id(p_id), aoe( areaOfEffect ), itemFilter(filter), data(0), team(0) {}
 
 	const grinliz::Rectangle2F& AreaOfEffect() const	{ return aoe; }

@@ -45,6 +45,7 @@ void Chit::Init( int _id, ChitBag* _chitBag )
 		slot[i] = 0;
 	}
 	slowTickTimer = (_id * 37) % SLOW_TICK;
+	random.SetSeed( _id );
 }
 
 

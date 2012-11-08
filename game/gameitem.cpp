@@ -154,6 +154,9 @@ bool GameItem::DoTick( U32 delta )
 	if ( flags & IMMUNE_SHOCK )
 		accruedShock = 0;
 
+	accruedFire  = Min( accruedFire,  EFFECT_ACCRUED_MAX );
+	accruedShock = Min( accruedShock, EFFECT_ACCRUED_MAX );
+
 	float maxEffectDamage = Delta( delta, EFFECT_DAMAGE_PER_SEC );
 	hp -= Min( accruedFire, maxEffectDamage );
 	hp -= Min( accruedShock, maxEffectDamage );

@@ -114,6 +114,16 @@ public:
 		return temp;
 	}
 
+	void Remove( int i ) {
+		GLASSERT( i < (int)size );
+		// Copy down.
+		for( int j=i; j<size-1; ++j ) {
+			mem[j] = mem[j+1];
+		}
+		// Get rid of the end:
+		Pop();
+	}
+
 	void SwapRemove( int i ) {
 		GLASSERT( i<(int)size );
 		GLASSERT( size > 0 );
