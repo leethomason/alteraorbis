@@ -59,7 +59,7 @@ public:
 		SCOPE,
 		MELEE
 	};
-	void Generate( GameItem* item, int type, int features, int effect, float level, U32 seed );
+	void Generate( GameItem* item, int type, int featureFlags, int effectFlags, int level, U32 seed );
 };
 
 
