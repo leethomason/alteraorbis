@@ -7,13 +7,15 @@ class WorldMap;
 
 class PhysicsMoveComponent : public GameMoveComponent
 {
+private:
+	typedef GameMoveComponent super;
 public:
 	PhysicsMoveComponent( WorldMap* _map );
 	virtual ~PhysicsMoveComponent() {}
 
 	virtual Component* ToComponent( const char* name ) {
 		if ( grinliz::StrEqual( name, "PhysicsMoveComponent" ) ) return this;
-		return GameMoveComponent::ToComponent( name );
+		return super::ToComponent( name );
 	}
 	virtual void DebugStr( grinliz::GLString* str );
 

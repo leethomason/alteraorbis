@@ -85,9 +85,35 @@
         reload="1000"
         clipCap="6"
         meleeDamage="1.1"
-        meleeEffect="EFFECT_KINETIC"
         rangedDamage="30"
-        rangedEffect ="EFFECT_ENERGY"
+        >
+  </item>
+
+  <item name="blaster"
+        resource="testgun"
+        flags="MELEE_WEAPON RANGED_WEAPON HELD_AT_HARDPOINT"
+        hardpoint="trigger"
+        mass="1.5"
+        cooldown="500"
+        reload="1000"
+        clipCap="6"
+        meleeDamage="1.1"
+        rangedDamage="30"
+        accuracy ="1.0"
+        >
+  </item>
+
+  <item name="shotgun"
+        resource="testgun"
+        flags="MELEE_WEAPON RANGED_WEAPON HELD_AT_HARDPOINT"
+        hardpoint="trigger"
+        mass="1.5"
+        cooldown="500"
+        reload="1000"
+        clipCap="2"
+        meleeDamage="1.1"
+        rangedDamage="30"
+        accuracy="0.5"
         >
   </item>
 

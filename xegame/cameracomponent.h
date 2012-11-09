@@ -25,6 +25,8 @@ class Camera;
 // Also needs other modes.
 class CameraComponent : public Component
 {
+private:
+	typedef Component super;
 public:
 	CameraComponent( Camera* _camera ) 
 		:	camera( _camera ),
@@ -35,9 +37,9 @@ public:
 		dest.Zero();
 	}
 
-	virtual Component*          ToComponent( const char* name ) {
+	virtual Component* ToComponent( const char* name ) {
 		if ( grinliz::StrEqual( name, "CameraComponent" ) ) return this;
-		return Component::ToComponent( name );
+		return super::ToComponent( name );
 	}
 	virtual void DebugStr( grinliz::GLString* str );
 	virtual bool DoTick( U32 delta );

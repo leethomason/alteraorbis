@@ -57,7 +57,7 @@ public:
 	GameItem* IsCarrying();
 	// The inventory may take damage before the actual character. (Shields, secondary
 	// effects, etc.) So this is called before the actual chit->item->absorb
-	void AbsorbDamage( const DamageDesc& dd, DamageDesc* absorbed, const char* logstr );
+	void AbsorbDamage( DamageDesc dd, DamageDesc* remain, const char* logstr );
 
 	struct RangedInfo {
 		IRangedWeaponItem* weapon;

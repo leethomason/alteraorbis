@@ -75,12 +75,14 @@ protected:
 // Abstract at the XenoEngine level.
 class MoveComponent : public Component
 {
+private:
+	typedef Component super;
 public:
 	virtual MoveComponent*		ToMove()		{ return this; }
 
 	virtual Component*          ToComponent( const char* name ) {
 		if ( grinliz::StrEqual( name, "MoveComponent" ) ) return this;
-		return Component::ToComponent( name );
+		return super::ToComponent( name );
 	}
 
 	virtual bool IsMoving() const				{ return false; }

@@ -56,7 +56,6 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 	READ_FLAG( flags, f, HELD_FREE );
 	READ_FLAG( flags, f, IMMUNE_FIRE );
 	READ_FLAG( flags, f, FLAMMABLE );
-	READ_FLAG( flags, f, EFFECT_ENERGY );
 	READ_FLAG( flags, f, EFFECT_EXPLOSIVE );
 	READ_FLAG( flags, f, EFFECT_FIRE );
 	READ_FLAG( flags, f, EFFECT_SHOCK );
@@ -190,9 +189,10 @@ void GameItem::Apply( const GameItem* intrinsic )
 }
 
 
-void GameItem::AbsorbDamage( bool inInventory, const DamageDesc& dd, DamageDesc* remain, const char* log )
+void GameItem::AbsorbDamage( bool inInventory, DamageDesc dd, DamageDesc* remain, const char* log )
 {
 	float absorbed = 0;
+	int   effect = dd.effects;
 
 	if ( !inInventory ) {
 		// just regular item getting hit, that takes damage.
@@ -211,6 +211,15 @@ void GameItem::AbsorbDamage( bool inInventory, const DamageDesc& dd, DamageDesc*
 			absorbed = Min( dd.damage * absorbsDamage, (float)rounds );
 			rounds -= LRintf( absorbed );
 			if ( rounds < 0 ) rounds = 0;
+
+			// If the shield still has power, remove the effect.
+			if ( rounds > 0 ) {
+				if ( flags & EFFECT_FIRE )
+					effect &= (~EFFECT_FIRE);
+				if ( flags & EFFECT_SHOCK )
+					effect &= (~EFFECT_SHOCK);
+			}
+
 		}
 		else {
 			// Something that straight up reduces damage.
@@ -219,6 +228,7 @@ void GameItem::AbsorbDamage( bool inInventory, const DamageDesc& dd, DamageDesc*
 	}
 	if ( remain ) {
 		remain->damage = dd.damage - absorbed;
+		remain->effects = effect;
 		GLASSERT( remain->damage >= 0 );
 	}
 	if ( absorbed ) {

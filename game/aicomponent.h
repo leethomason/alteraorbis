@@ -54,13 +54,16 @@ inline float UtilityParabolic( float y0, float maxY, float y1, float x ) {
 // Combat AI: needs refactoring
 class AIComponent : public Component
 {
+private:
+	typedef Component super;
+
 public:
 	AIComponent( Engine* _engine, WorldMap* _worldMap );
 	virtual ~AIComponent();
 
 	virtual Component* ToComponent( const char* name ) {
 		if ( grinliz::StrEqual( name, "AIComponent" ) ) return this;
-		return Component::ToComponent( name );
+		return super::ToComponent( name );
 	}
 
 	virtual bool DoTick( U32 delta );

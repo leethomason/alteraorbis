@@ -149,18 +149,18 @@ GameItem* InventoryComponent::IsCarrying()
 }
 
 
-void InventoryComponent::AbsorbDamage( const DamageDesc& dd, DamageDesc* absorbed, const char* logstr )
+void InventoryComponent::AbsorbDamage( DamageDesc dd, DamageDesc* remain, const char* logstr )
 {
 	for( int i=0; i<NUM_HARDPOINTS; ++i ) {
 		if ( heldAt[i] ) {
-			heldAt[i]->AbsorbDamage( true, dd, absorbed, logstr );
+			heldAt[i]->AbsorbDamage( true, dd, &dd, logstr );
 		}
 		if ( intrinsicAt[i] ) {
-			intrinsicAt[i]->AbsorbDamage( true, dd, absorbed, logstr );
+			intrinsicAt[i]->AbsorbDamage( true, dd, &dd, logstr );
 		}
 	}
-	if ( absorbed->damage > dd.damage ) {
-		absorbed->damage = dd.damage;
+	if ( remain ) {
+		*remain = dd;
 	}
 	parentChit->SetTickNeeded();
 }

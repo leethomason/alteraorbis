@@ -97,4 +97,9 @@ void ItemStorage::Get( const char* name, GameItemArr* arr )
 }
 
 
+void GunGenerator::Generate( GameItem* item, int type, int features, int effect, float level, U32 seed )
+{
+
+}
+
 

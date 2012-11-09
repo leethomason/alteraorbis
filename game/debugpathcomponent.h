@@ -26,13 +26,16 @@ class ModelResource;
 
 class DebugPathComponent : public Component
 {
+private:
+	typedef Component super;
+
 public:
 	DebugPathComponent( Engine*, WorldMap*, LumosGame* );
 	~DebugPathComponent();
 
 	virtual Component* ToComponent( const char* name ) {
 		if ( grinliz::StrEqual( name, "DebugPathComponent" ) ) return this;
-		return Component::ToComponent( name );
+		return super::ToComponent( name );
 	}
 
 	virtual void OnAdd( Chit* chit );

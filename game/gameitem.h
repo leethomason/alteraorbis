@@ -86,14 +86,6 @@ public:
 	float damage;
 	int   effects;
 
-//	bool Kinetic() const	{ return (effects & GameItem::EFFECT_ENERGY) == 0; }
-//	bool Energy() const		{ return (effects & GameItem::EFFECT_ENERGY) != 0; }
-//	bool Fire() const		{ return (effects & GameItem::EFFECT_FIRE) != 0; }
-//	bool Shock() const		{ return (effects & GameItem::EFFECT_SHOCK) != 0; }
-//	bool Explosive() const	{ return (effects & GameItem::EFFECT_EXPLOSIVE) != 0; }
-
-//	void Save( const ch//ar* prefix, tinyxml2::XMLPrinter* );
-//	void Load( const char* prefix, const tinyxml2::XMLElement* doc );
 	void Log();
 };
 
@@ -181,14 +173,12 @@ public:
 		IMMUNE_SHOCK		= (1<<8),
 		SHOCKABLE			= (1<<9),
 
-		EFFECT_KINETIC		= (1<<10),
-		EFFECT_ENERGY		= (1<<11),
-		EFFECT_EXPLOSIVE	= (1<<12),
-		EFFECT_FIRE			= (1<<13),
-		EFFECT_SHOCK		= (1<<14),
-		EFFECT_MASK			= EFFECT_KINETIC | EFFECT_ENERGY | EFFECT_EXPLOSIVE | EFFECT_FIRE | EFFECT_SHOCK,
+		EFFECT_EXPLOSIVE	= (1<<10),
+		EFFECT_FIRE			= (1<<11),
+		EFFECT_SHOCK		= (1<<12),
+		EFFECT_MASK			= EFFECT_EXPLOSIVE | EFFECT_FIRE | EFFECT_SHOCK,
 
-		RENDER_TRAIL		= (1<<15),				// render a bolt with a 'smoketrail' vs. regular bolt
+		RENDER_TRAIL		= (1<<13),				// render a bolt with a 'smoketrail' vs. regular bolt
 	};
 
 	// ------ description ------
@@ -320,7 +310,7 @@ public:
 	}
 
 	// Absorb damage.'remain' is how much damage passes through the shield
-	void AbsorbDamage( bool inInventory, const DamageDesc& dd, DamageDesc* remain, const char* log );
+	void AbsorbDamage( bool inInventory, DamageDesc dd, DamageDesc* remain, const char* log );
 
 private:
 	float Delta( U32 delta, float v ) {

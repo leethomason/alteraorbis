@@ -28,6 +28,8 @@ class WorldMap;
 */
 class PathMoveComponent : public GameMoveComponent
 {
+private:
+	typedef GameMoveComponent super;
 public:
 
 	PathMoveComponent(	WorldMap* _map )				// required; used to avoids blocks when moving. 
@@ -36,7 +38,7 @@ public:
 
 	virtual Component* ToComponent( const char* name ) {
 		if ( grinliz::StrEqual( name, "PathMoveComponent" ) ) return this;
-		return GameMoveComponent::ToComponent( name );
+		return super::ToComponent( name );
 	}
 	virtual void DebugStr( grinliz::GLString* str );
 

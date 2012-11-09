@@ -21,13 +21,13 @@ void PhysicsMoveComponent::DebugStr( grinliz::GLString* str )
 
 void PhysicsMoveComponent::OnAdd( Chit* chit )
 {
-	GameMoveComponent::OnAdd( chit );
+	super::OnAdd( chit );
 }
 
 
 void PhysicsMoveComponent::OnRemove()
 {
-	GameMoveComponent::OnRemove();
+	super::OnRemove();
 }
 
 

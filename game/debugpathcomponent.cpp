@@ -43,7 +43,7 @@ DebugPathComponent::~DebugPathComponent()
 
 void DebugPathComponent::OnAdd( Chit* chit )
 {
-	Component::OnAdd( chit );
+	super::OnAdd( chit );
 	model = engine->AllocModel( resource );
 	model->SetFlag( Model::MODEL_NO_SHADOW );
 }
@@ -51,7 +51,7 @@ void DebugPathComponent::OnAdd( Chit* chit )
 
 void DebugPathComponent::OnRemove()
 {
-	Component::OnRemove();
+	super::OnRemove();
 	if ( model ) {
 		engine->FreeModel( model );
 		model = 0;

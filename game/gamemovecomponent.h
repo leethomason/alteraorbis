@@ -7,6 +7,9 @@ class WorldMap;
 
 class GameMoveComponent : public MoveComponent
 {
+private:
+	typedef MoveComponent super;
+
 public:
 	GameMoveComponent( WorldMap* _map ) : map( _map ) {
 	}
@@ -14,7 +17,7 @@ public:
 
 	virtual Component* ToComponent( const char* name ) {
 		if ( grinliz::StrEqual( name, "GameMoveComponent" ) ) return this;
-		return MoveComponent::ToComponent( name );
+		return super::ToComponent( name );
 	}
 
 	WorldMap* GetWorldMap() { return map; }

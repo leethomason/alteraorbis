@@ -24,13 +24,16 @@ class LumosGame;
 
 class DebugStateComponent : public Component
 {
+private:
+	typedef Component super;
+
 public:
 	DebugStateComponent( WorldMap* _map );
 	~DebugStateComponent()	{}
 
 	virtual Component* ToComponent( const char* name ) {
 		if ( grinliz::StrEqual( name, "DebugStateComponent" ) ) return this;
-		return Component::ToComponent( name );
+		return super::ToComponent( name );
 	}
 
 	virtual void OnAdd( Chit* chit );

@@ -49,7 +49,7 @@ DebugStateComponent::DebugStateComponent( WorldMap* _map ) : map( _map )
 
 void DebugStateComponent::OnAdd( Chit* chit )
 {
-	Component::OnAdd( chit );
+	super::OnAdd( chit );
 	map->overlay.Add( &healthBar );
 
 	healthBar.SetSize( SIZE_X, SIZE_Y );
@@ -81,7 +81,7 @@ void DebugStateComponent::OnRemove()
 	map->overlay.Remove( &healthBar );
 	map->overlay.Remove( &ammoBar );
 	map->overlay.Remove( &shieldBar );
-	Component::OnRemove();
+	super::OnRemove();
 }
 
 

@@ -40,7 +40,7 @@ static const float ROTATION_SPEED	= 360.f;		// degrees/second
 
 void PathMoveComponent::OnAdd( Chit* chit )
 {
-	GameMoveComponent::OnAdd( chit );
+	super::OnAdd( chit );
 	SetNoPath();
 	blockForceApplied = false;
 	avoidForceApplied = false;
@@ -53,7 +53,7 @@ void PathMoveComponent::OnAdd( Chit* chit )
 
 void PathMoveComponent::OnRemove()
 {
-	GameMoveComponent::OnRemove();
+	super::OnRemove();
 }
 
 

@@ -9,8 +9,8 @@
 - combat test scene	
 	- effects
 		X effects spread to nearby when they should
-		- environment: water contains fire, spreads shock
-		- down chain: a fire creature should catch things on fire that it holds
+		d environment: water contains fire, spreads shock
+		d down chain: a fire creature should catch things on fire that it holds
 		- flaming sword
 		- flaming sword should catch things on fire when it hits
 	- unique look for units so teams can be distinguished
@@ -26,12 +26,12 @@
 	- ranged weapons
 		- bolts
 			- range
-			- effect strength
+			x effect strength
 			x damage (defined)
 			x speed
 			x compute color
 		- accuracy
-		- effect
+		x effect
 		X reload time 'reload'
 		X time per shot 'cooldown'
 		X rounds in clip

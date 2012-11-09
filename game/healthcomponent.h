@@ -24,13 +24,16 @@
 */
 class HealthComponent : public Component
 {
+private:
+	typedef Component super;
+
 public:
 	HealthComponent() : destroyed(false)	{}
 	virtual ~HealthComponent()	{}
 
 	virtual Component* ToComponent( const char* name ) {
 		if ( grinliz::StrEqual( name, "HealthComponent" ) ) return this;
-		return 0;
+		return super::ToComponent( name );
 	}
 
 	virtual void DebugStr( grinliz::GLString* str )		{ str->Format( "[Health] " ); }

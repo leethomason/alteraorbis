@@ -43,4 +43,24 @@ private:
 };
 
 
+class GunGenerator
+{
+public:
+	// Base gun & level
+	//	Features: scope, melee, clip, driver (?)
+	//  Traits:   effect
+	enum {
+		BLASTER,
+		SHOTGUN,
+		ASSAULT,
+		SNIPER
+	};
+	enum {
+		SCOPE,
+		MELEE
+	};
+	void Generate( GameItem* item, int type, int features, int effect, float level, U32 seed );
+};
+
+
 #endif // ITEM_SCRIPT_INCLUDED

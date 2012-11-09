@@ -23,6 +23,8 @@ class WorldMap;
 // Extra methods that support map positioning.
 class MapSpatialComponent : public SpatialComponent
 {
+private:
+	typedef SpatialComponent super;
 public:
 	// fixme: need a system to:
 	// - create from definition
@@ -31,9 +33,9 @@ public:
 	MapSpatialComponent( int width, int height, WorldMap* map );
 	virtual ~MapSpatialComponent()	{}
 
-	virtual Component*          ToComponent( const char* name ) {
+	virtual Component* ToComponent( const char* name ) {
 		if ( grinliz::StrEqual( name, "MapSpatialComponent" ) ) return this;
-		return SpatialComponent::ToComponent( name );
+		return super::ToComponent( name );
 	}
 
 	// Set the location of the origin point.
