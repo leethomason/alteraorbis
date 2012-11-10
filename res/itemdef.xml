@@ -99,7 +99,6 @@
         clipCap="6"
         meleeDamage="1.1"
         rangedDamage="30"
-        accuracy ="1.0"
         >
   </item>
 
@@ -113,7 +112,6 @@
         clipCap="2"
         meleeDamage="1.1"
         rangedDamage="30"
-        accuracy="0.5"
         >
   </item>
 

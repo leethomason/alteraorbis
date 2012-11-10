@@ -7,15 +7,16 @@
 	X color variation for live mode
 
 - combat test scene	
+	- ranged accuracy / weapon types / ItemStat data
 	- add de-rez
 	- unique look for units so teams can be distinguished
-	- melee attack goes back to reference position between hits
-	- buttons to select scenario, load items
-	- animation speed isn't correct
-	- adjust particles to have "impact" effect
 	- refactor code - if needed? - in AIComponent (the fixmes)
+	- buttons to select scenario, load items
+
+	- animation speed isn't correct
 	- gunrun to walk not synchronized correctly
 	- revisit accuracy comuptation. what scales with distance? area? volume? radius?
+	- melee attack goes back to reference position between hits
 
 	- ranged weapons
 		- accuracy
@@ -33,7 +34,6 @@
 		- battle results
 
 	- serialization
-	- error in ray-cast: detecting a 'tree' where it shouldn't (near the head of the prime)
 	- add rez and de-rez effect for chits
 
 - animition aware hit testing
@@ -60,6 +60,8 @@
 ----------- FIXED -------------
 
 x battle scene
+	X error in ray-cast: detecting a 'tree' where it shouldn't (near the head of the prime)
+	x adjust particles to have "impact" effect
 	X don't check for item destroyed/death on DAMAGE msg - needs to be moved to tick.
 	x bolts are hitting own team	
 	X eval: kinetic damage of held weapons shouldn't be multiplied with mass (added)
