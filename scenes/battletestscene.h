@@ -54,6 +54,7 @@ private:
 	int ButtonDownID( int group );
 
 	gamui::PushButton okay, goButton;
+	gamui::ToggleButton regionButton;
 
 	struct ButtonDef
 	{

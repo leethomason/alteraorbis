@@ -88,6 +88,10 @@ BattleTestScene::BattleTestScene( LumosGame* game ) : Scene( game )
 	goButton.SetText( "Go!" );
 	goButton.SetSize( width, height );
 
+	regionButton.Init( &gamui2D, look );
+	regionButton.SetText( "region" );
+	regionButton.SetSize( width, height );
+
 	int currentGroup = -1;
 	ToggleButton* toggle = 0;
 
@@ -134,6 +138,7 @@ void BattleTestScene::Resize()
 
 	layout.PosAbs( &okay, 0, -1 );
 	layout.PosAbs( &goButton, 0, -2 );
+	layout.PosAbs( &regionButton, 1, -2 );
 
 	layout.SetSize( layout.Width(), layout.Height()*0.5f );
 
@@ -371,10 +376,11 @@ void BattleTestScene::DrawDebugText()
 	float ratio;
 	map->PatherCacheHitMiss( 0, 0, &ratio );
 
-	ufoText->Draw( 0, 16, "PathCache=%.3f hit%%=%d chits:ticked/total=%d/%d", 
+	ufoText->Draw( 0, 16, "PathCache=%.3f hit%%=%d chits:ticked/total=%d/%d regions=%d", 
 		map->PatherCache(), 
 		(int)(ratio*100.f),
-		chitBag.NumTicked(), chitBag.NumChits() );
+		chitBag.NumTicked(), chitBag.NumChits(),
+		map->CalcNumRegions() );
 
 	if ( debugRay.direction.x ) {
 		Vector3F at;
@@ -442,6 +448,10 @@ void BattleTestScene::ItemTapped( const gamui::UIItem* item )
 	}
 	else if ( item == &goButton ) {
 		GoScene();
+	}
+	else if ( item == &regionButton ) {
+		bool showRegions = regionButton.Down();
+		map->ShowRegionOverlay( showRegions );
 	}
 }
 

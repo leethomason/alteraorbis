@@ -38,6 +38,8 @@ distribution.
 	on the Grinning Lizard website: http://grinninglizard.com/micropather/
 */
 
+#define GRINLIZ_NO_STL
+
 #ifdef GRINLIZ_NO_STL
 #	define MP_VECTOR micropather::MPVector
 #else
@@ -125,8 +127,6 @@ namespace micropather
 	};
 #endif
 
-	class PathNode;
-
 	/**
 		Used to pass the cost of states from the cliet application to MicroPather. This
 		structure is copied in a vector.
@@ -135,7 +135,7 @@ namespace micropather
 	*/
 	struct StateCost
 	{
-		PathNode* state;		///< The state as a void*
+		void* state;			///< The state as a void*
 		float cost;				///< The cost to the state. Use FLT_MAX for infinite cost.
 	};
 
@@ -165,7 +165,7 @@ namespace micropather
 			map. If you pathfinding is based on minimum time, it is the minimal travel time 
 			between 2 points given the best possible terrain.
 		*/
-		virtual float LeastCostEstimate( PathNode* stateStart, PathNode* stateEnd ) = 0;
+		virtual float LeastCostEstimate( void* stateStart, void* stateEnd ) = 0;
 
 		/** 
 			Return the exact cost from the given state to all its neighboring states. This
@@ -173,14 +173,23 @@ namespace micropather
 			exact values for every call to MicroPather::Solve(). It should generally be a simple,
 			fast function with no callbacks into the pather.
 		*/	
-		virtual void AdjacentCost( PathNode* state, micropather::StateCost **adjacent, int* nAdjacent ) = 0;
+		virtual void AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > *adjacent ) = 0;
 
 		/**
 			This function is only used in DEBUG mode - it dumps output to stdout. Since void* 
 			aren't really human readable, normally you print out some concise info (like "(1,2)") 
 			without an ending newline.
 		*/
-		virtual void  PrintStateInfo( PathNode* state ) = 0;
+		virtual void  PrintStateInfo( void* state ) = 0;
+	};
+
+
+	class PathNode;
+
+	struct NodeCost
+	{
+		PathNode* node;
+		float cost;
 	};
 
 
@@ -190,26 +199,36 @@ namespace micropather
 	*/
 	class PathNode
 	{
-	public:
-	    virtual ~PathNode() {}
-
+	  public:
 		void Init(	unsigned _frame,
+					void* _state,
 					float _costFromStart, 
 					float _estToGoal, 
 					PathNode* _parent );
 
+		void Clear() {
+			memset( this, 0, sizeof( PathNode ) );
+			numAdjacent = -1;
+			cacheIndex  = -1;
+		}
 		void InitSentinel() {
-			Init( 0, FLT_MAX, FLT_MAX, 0 );
+			Clear();
+			Init( 0, 0, FLT_MAX, FLT_MAX, 0 );
 			prev = next = this;
-			frame = 0;
 		}	
 
-		unsigned frame;			// used to determine whether init should do anything
+		void *state;			// the client state
 		float costFromStart;	// exact
 		float estToGoal;		// estimated
 		float totalCost;		// could be a function, but save some math.
 		PathNode* parent;		// the parent is used to reconstruct the path
+		unsigned frame;			// unique id for this path, so the solver can distinguish
+								// correct from stale values
 
+		int numAdjacent;		// -1  is unknown & needs to be queried
+		int cacheIndex;			// position in cache
+
+		PathNode *child[2];		// Binary search in the hash table. [left, right]
 		PathNode *next, *prev;	// used by open queue
 
 		bool inOpen;
@@ -250,63 +269,79 @@ namespace micropather
 	};
 
 
-	struct NodeCost
-	{
-		PathNode* node;
-		float cost;
-	};
-
-
-	class PathCache
+	/* Memory manager for the PathNodes. */
+	class PathNodePool
 	{
 	public:
-		struct Item {
-			// The key:
-			PathNode* start;
-			PathNode* end;
+		PathNodePool( unsigned allocate, unsigned typicalAdjacent );
+		~PathNodePool();
 
-			bool KeyEqual( const Item& item ) {
-				return start == item.start && end == item.end;
-			}
+		// Free all the memory except the first block. Resets all memory.
+		void Clear();
 
-			// Metadata:
-			PathNode* next;
-			float	  cost;	// from start to next
+		// Essentially:
+		// pNode = Find();
+		// if ( !pNode )
+		//		pNode = New();
+		//
+		// Get the PathNode associated with this state. If the PathNode already
+		// exists (allocated and is on the current frame), it will be returned. 
+		// Else a new PathNode is allocated and returned. The returned object
+		// is always fully initialized.
+		//
+		// NOTE: if the pathNode exists (and is current) all the initialization
+		//       parameters are ignored.
+		PathNode* GetPathNode(		unsigned frame,
+									void* _state,
+									float _costFromStart, 
+									float _estToGoal, 
+									PathNode* _parent );
 
-			unsigned Hash() const
-			{
-				const unsigned char *p = (const unsigned char *)(&start);
-				unsigned int h = 2166136261U;
+		// Store stuff in cache
+		bool PushCache( const NodeCost* nodes, int nNodes, int* start );
 
-				for( unsigned i=0; i<sizeof(PathNode*)*2; ++i, ++p ) {
-					h ^= *p;
-					h *= 16777619;
-				}
-				return h;
-			}
-		};
+		// Get neighbors from the cache
+		// Note - always access this with an offset. Can get re-allocated.
+		void GetCache( int start, int nNodes, NodeCost* nodes ) {
+			MPASSERT( start >= 0 && start < cacheCap );
+			MPASSERT( nNodes > 0 );
+			MPASSERT( start + nNodes <= cacheCap );
+			memcpy( nodes, &cache[start], sizeof(NodeCost)*nNodes );
+		}
 
-		PathCache( int itemsToAllocate, bool symmetric );
-		~PathCache();
-		
-		void Reset();
-		void Add( const MP_VECTOR< PathNode* >& path );
-		void AddNoSolution( PathNode* end, PathNode* states[], int count );
-		int Solve( PathNode* startState, PathNode* endState, MP_VECTOR< PathNode* >* path, float* totalCost );
-
-		int AllocatedBytes() const { return allocated * sizeof(Item); }
-		int UsedBytes() const { return nItems * sizeof(Item); }
-		void HitMiss( int *hits, int *miss, float* hitsOfTotal );
+		// Return all the allocated states. Useful for visuallizing what
+		// the pather is doing.
+		void AllStates( unsigned frame, MP_VECTOR< void* >* stateVec );
 
 	private:
-		void AddItem( const Item& item );
-		Item* Find( PathNode* start, PathNode* end );
-		
-		Item*	mem;
-		int		allocated;
-		int		nItems;
-		bool	symmetric;
-		int		hit, miss;
+		struct Block
+		{
+			Block* nextBlock;
+			PathNode pathNode[1];
+		};
+
+		unsigned Hash( void* voidval );
+		unsigned HashSize() const	{ return 1<<hashShift; }
+		unsigned HashMask()	const	{ return ((1<<hashShift)-1); }
+		void AddPathNode( unsigned key, PathNode* p );
+		Block* NewBlock();
+		PathNode* Alloc();
+
+		PathNode**	hashTable;
+		Block*		firstBlock;
+		Block*		blocks;
+
+		NodeCost*	cache;
+		int			cacheCap;
+		int			cacheSize;
+
+		PathNode	freeMemSentinel;
+		unsigned	allocate;				// how big a block of pathnodes to allocate at once
+		unsigned	nAllocated;				// number of pathnodes allocated (from Alloc())
+		unsigned	nAvailable;				// number available for allocation
+
+		unsigned	hashShift;	
+		unsigned	totalCollide;
 	};
 
 
@@ -324,9 +359,6 @@ namespace micropather
 			SOLVED,
 			NO_SOLUTION,
 			START_END_SAME,
-
-			// internal:
-			NOT_CACHED
 		};
 
 		/**
@@ -334,8 +366,23 @@ namespace micropather
 			the Graph callbacks.
 
 			@param graph		The "map" that implements the Graph callbacks.
+			@param allocate		How many states should be internally allocated at a time. This
+								can be hard to get correct. The higher the value, the more memory
+								MicroPather will use.
+								- If you have a small map (a few thousand states?) it may make sense
+								  to pass in the maximum value. This will cache everything, and MicroPather
+								  will only need one main memory allocation. For a chess board, allocate 
+								  would be set to 8x8 (64)
+								- If your map is large, something like 1/4 the number of possible
+								  states is good. For example, Lilith3D normally has about 16,000 
+								  states, so 'allocate' should be about 4000.
+							    - If your state space is huge, use a multiple (5-10x) of the normal
+								  path. "Occasionally" call Reset() to free unused memory.
+			@param typicalAdjacent	Used to determine cache size. The typical number of adjacent states
+									to a given state. (On a chessboard, 8.) Higher values use a little
+									more memory.
 		*/
-		MicroPather( Graph* graph, unsigned cacheAllocate=1000, bool symmetric=false );
+		MicroPather( Graph* graph, unsigned allocate = 250, unsigned typicalAdjacent=6 );
 		~MicroPather();
 
 		/**
@@ -347,7 +394,7 @@ namespace micropather
 			@param totalCost	Output, the cost of the path, if found.
 			@return				Success or failure, expressed as SOLVED, NO_SOLUTION, or START_END_SAME.
 		*/
-		int Solve( PathNode* startState, PathNode* endState, MP_VECTOR< PathNode* >* path, float* totalCost );
+		int Solve( void* startState, void* endState, MP_VECTOR< void* >* path, float* totalCost );
 
 		/**
 			Find all the states within a given cost from startState.
@@ -358,30 +405,42 @@ namespace micropather
 								larger 'near' sets and take more time to compute.)
 			@return				Success or failure, expressed as SOLVED or NO_SOLUTION.
 		*/
-		int SolveForNearStates( PathNode* startState, MP_VECTOR< StateCost >* near, float maxCost );
+		int SolveForNearStates( void* startState, MP_VECTOR< StateCost >* near, float maxCost );
 
 		/** Should be called whenever the cost between states or the connection between states changes.
 			Also frees overhead memory used by MicroPather, and calling will free excess memory.
 		*/
 		void Reset();
 
+		/**
+			Return the "checksum" of the last path returned by Solve(). Useful for debugging,
+			and a quick way to see if 2 paths are the same.
+		*/
+		MP_UPTR Checksum()	{ return checksum; }
+
 		// Debugging function to return all states that were used by the last "solve" 
-		int PathCacheAllocated() const { return pathCache.AllocatedBytes(); }
-		int PathCacheUsed() const      { return pathCache.UsedBytes(); }
-		void PathCacheHitMiss( int *hits, int *miss, float* hitsOfTotal ) { return pathCache.HitMiss( hits, miss, hitsOfTotal ); }
+		void StatesInPool( MP_VECTOR< void* >* stateVec );
 
 	  private:
 		MicroPather( const MicroPather& );	// undefined and unsupported
 		void operator=( const MicroPather ); // undefined and unsupported
 		
-		void GoalReached( PathNode* node, PathNode* start, PathNode* end, MP_VECTOR< PathNode* > *path );
+		void GoalReached( PathNode* node, void* start, void* end, MP_VECTOR< void* > *path );
 
+		void GetNodeNeighbors(	PathNode* node, MP_VECTOR< NodeCost >* neighborNode );
+
+		#ifdef DEBUG
+		//void DumpStats();
+		#endif
+
+		PathNodePool				pathNodePool;
 		MP_VECTOR< StateCost >	stateCostVec;	// local to Solve, but put here to reduce memory allocation
-		MP_VECTOR< PathNode* > tracking;
+		MP_VECTOR< NodeCost >		nodeCostVec;	// local to Solve, but put here to reduce memory allocation
 
-		unsigned frame;
 		Graph* graph;
-		PathCache pathCache;
+		unsigned frame;						// incremented with every solve, used to determine if cached data needs to be refreshed
+		MP_UPTR checksum;						// the checksum of the last successful "Solve".
+		
 	};
 };	// namespace grinliz
 

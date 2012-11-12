@@ -16,12 +16,17 @@
 #ifndef LUMOS_WORLD_MAP_INCLUDED
 #define LUMOS_WORLD_MAP_INCLUDED
 
+#include "gamelimits.h"
+
 #include "../engine/map.h"
 #include "../engine/rendertarget.h"
+
 #include "../micropather/micropather.h"
+
 #include "../grinliz/glrectangle.h"
 #include "../grinliz/glcontainer.h"
 #include "../grinliz/glmemorypool.h"
+#include "../grinliz/glbitarray.h"
 
 class Texture;
 
@@ -91,16 +96,17 @@ public:
 	virtual void Draw3D(  const grinliz::Color3F& colorMult, GPUState::StencilMode );
 
 	// ---- MicroPather ---- //
-	virtual float LeastCostEstimate( micropather::PathNode* stateStart, micropather::PathNode* stateEnd );
-	virtual void AdjacentCost( micropather::PathNode* state, micropather::StateCost** adjacent, int* numAdjacent );
-	virtual void  PrintStateInfo( micropather::PathNode* state );
+	virtual float LeastCostEstimate( void* stateStart, void* stateEnd );
+	virtual void AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > *adjacent );
+	virtual void  PrintStateInfo( void* state );
 
 	// --- Debugging -- //
 	void ShowAdjacentRegions( float x, float y );
 	void ShowRegionPath( float x0, float y0, float x1, float y1 );
 	void ShowRegionOverlay( bool over ) { debugRegionOverlay = over; }
 	float PatherCache();
-	void PatherCacheHitMiss( int* hits, int* miss, float* ratio ) { pather->PathCacheHitMiss( hits, miss, ratio ); }
+	void PatherCacheHitMiss( int* hits, int* miss, float* ratio ) { *hits=0; *miss=0; *ratio=1; }
+	int CalcNumRegions();
 
 private:
 	int INDEX( int x, int y ) const { 
@@ -127,55 +133,33 @@ private:
 	void ClearDebugDrawing();	// debugging
 	void DumpRegions();
 
+	/* A 16x16 zone, needs 3 bits to describe the depth. From the depth
+	   can infer the origin, etc.
+		d=0 16
+		d=1 8
+		d=2 4
+		d=3 2
+		d=4 1
+	*/
 	enum {
 		TRUE		= 1,
 		FALSE		= 0,
 		ZONE_SIZE	= 16,		// adjust size of bit fields to be big enough to represent this
+		ZONE_SHIFT  = 4,
 		ZONE_SIZE2  = ZONE_SIZE*ZONE_SIZE,
 	};
 	
-	/* A rectangular area used for pathing. 
-	   Keeps information about location and size.
-	   Note that the 'adjacent' is not symmetric.
-	   The adjacent is created on demand, so neighbors
-	   may not have the array cached.
-	*/
-	struct Region : public micropather::PathNode
-	{
-		U8 debug_origin		: 1;
-		U8 debug_adjacent	: 1;
-		U8 debug_path		: 1;
+	struct Grid {
+		U32 isLand			: 1;
+		U32 isBlock			: 1;
+		U32 color			: 8;	// zone color
+		U32 size			: 5;	// if passable, size of the region
+		U32 debug_adjacent  : 1;
+		U32 debug_origin    : 1;
+		U32 debug_path		: 1;
 
-		U16 x, y, dx, dy;
-		grinliz::CDynArray< micropather::StateCost> adjacent;
-
-		Region() : x(-1), y(-1), dx(-1), dy(-1), debug_origin(0), debug_adjacent(0), debug_path(0) {}
-		~Region() {
-			// MUST BE UNLINKED!
-			GLASSERT( adjacent.Size() == 0 );
-		}
-
-		void Init( U16 _x, U16 _y, U16 _dx, U16 _dy ) {
-			x = _x; y = _y; dx = _dx; dy = _dy;
-		}
-		grinliz::Vector2I OriginI() const {
-			GLASSERT( x >= 0 && y >= 0 && dx > 0 && dy > 0 );
-			grinliz::Vector2I v = { x, y };
-			return v;
-		}
-
-		grinliz::Vector2F CenterF() const {
-			GLASSERT( x >= 0 && y >= 0 && dx > 0 && dy > 0 );
-			grinliz::Vector2F v = { (float)x + (float)dx*0.5f, (float)y + (float)dy*0.5f };
-			return v;
-		}
-
-		void BoundsF( grinliz::Rectangle2F* r ) const {
-			GLASSERT( x >= 0 && y >= 0 && dx > 0 && dy > 0 );
-			r->Set( (float)x, (float)y, (float)(x+dx), (float)(y+dy) );
-		}
+		bool IsPassable() const			{ return isLand == TRUE && isBlock == FALSE; }
 	};
-	grinliz::MemoryPoolT<Region> regionPlex;
 
 	// The solver has 3 components:
 	//	Vector path:	the final result, a collection of points that form connected vector
@@ -184,41 +168,70 @@ private:
 	//  Region path:	the micropather computed region
 
 	// Call the region solver. Put the result in the pathVector
-	int  RegionSolve( Region* start, Region* end, float* totalCost );
+	//int  RegionSolve( Region* start, Region* end, float* totalCost );
 	bool GridPath( const grinliz::Vector2F& start, const grinliz::Vector2F& end );
 
-	// FIXME: many sites claim bitfields defeat the optimizer,
-	// and it may be possible to pack into 16 bits. Makes for
-	// way cleaner code though.
-	struct Grid {
-		U32 isLand			: 1;
-		U32 isBlock			: 1;
-		U32 color			: 8;	// zone color
-
-		Region* region;
-
-		bool IsPassable() const			{ return isLand == TRUE && isBlock == FALSE; }
-	};
-	bool IsRegionOrigin( const Region* r, int x, int y ) { return r && r->x == x && r->y ==y; }
-
-	micropather::PathNode* ToState( int x, int y ) {
-		GLASSERT( x >= 0 && x < width && y >= 0 && y < height );
-		Region* r = grid[INDEX(x,y)].region;
-		GLASSERT( r );
-		return r;
-	}
-	Region* ToGrid( micropather::PathNode* state ) {
-		return static_cast<Region*>(state);
+	Grid* GridAt( int x, int y ) {
+		GLASSERT( grid );
+		GLASSERT( x >= 0 && x < width );
+		GLASSERT( y >= 0 && y < height );
+		return grid + y*width + x;
 	}
 
-	bool RectPassableAndOpen( int x0, int y0, int x1, int y1 );
+	grinliz::Vector2I RegionOrigin( int x, int y ) {
+		Grid* g = GridAt( x, y );
+		U32 size = g->size;
+		U32 mask = ~(size-1);
+		grinliz::Vector2I v = { x&mask, y&mask };
+		return v;
+	}
+
+	bool IsRegionOrigin( int x, int y ) { 
+		Grid* g = GridAt( x, y );
+		U32 size = g->size;
+		U32 mask = ~(size-1);
+		return (x == (x&mask)) && (y == (y&mask));
+	}
+
+	grinliz::Vector2F RegionCenter( int x, int y ) {
+		Grid* g = GridAt( x, y );
+		grinliz::Vector2I v = RegionOrigin( x, y );
+		float half = (float)g->size * 0.5f;
+		grinliz::Vector2F c = { (float)(x) + half, (float)y + half };
+		return c;
+	}
+
+	grinliz::Rectangle2F RegionBounds( int x, int y ) {
+		Grid* g = GridAt( x, y );
+		grinliz::Vector2I v = RegionOrigin( x, y );
+		grinliz::Rectangle2F b;
+		b.min.Set( (float)v.x, (float)v.y );
+		b.max.Set( (float)(v.x + g->size), (float)(v.y + g->size) );
+		return b;
+	}
+		
+	void* ToState( int x, int y ) {
+		Grid* g = GridAt( x, y );
+		U32 size = g->size;
+		U32 mask = ~(size-1);
+		return (void*)(y*width+x);
+	}
+
+	Grid* ToGrid( void* state, grinliz::Vector2I* vec ) {
+		int v = (int)(state);
+		int y = v / width;
+		int x = v - y*width;
+		if ( vec ) {
+			vec->Set( x, y );
+		}
+		return GridAt( x, y );
+	}
 
 	Grid* grid;		// pathing info.
-	U8* zoneInit;	// flag whether this zone is valid.
 	micropather::MicroPather *pather;
 	bool debugRegionOverlay;
 
-	MP_VECTOR< micropather::PathNode* >		pathRegions;
+	MP_VECTOR< void* >						pathRegions;
 	grinliz::CDynArray< grinliz::Vector2F >	debugPathVector;
 	grinliz::CDynArray< grinliz::Vector2F >	pathCache;
 
@@ -228,6 +241,7 @@ private:
 	Texture*						texture[LOWER_TYPES];
 	grinliz::CDynArray<PTVertex>	vertex[LOWER_TYPES];
 	grinliz::CDynArray<U16>			index[LOWER_TYPES];
+	grinliz::BitArray< MAX_MAP_SIZE/ZONE_SIZE, MAX_MAP_SIZE/ZONE_SIZE, 1 > zoneInit;
 };
 
 #endif // LUMOS_WORLD_MAP_INCLUDED
