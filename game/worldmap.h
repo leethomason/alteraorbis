@@ -165,66 +165,67 @@ private:
 	//	Vector path:	the final result, a collection of points that form connected vector
 	//					line segments.
 	//	Grid path:		intermediate; a path checked by a step walk between points on the grid
-	//  Region path:	the micropather computed region
+	//  State path:		the micropather computed region
 
-	// Call the region solver. Put the result in the pathVector
-	//int  RegionSolve( Region* start, Region* end, float* totalCost );
 	bool GridPath( const grinliz::Vector2F& start, const grinliz::Vector2F& end );
 
-	Grid* GridAt( int x, int y ) {
-		GLASSERT( grid );
-		GLASSERT( x >= 0 && x < width );
-		GLASSERT( y >= 0 && y < height );
-		return grid + y*width + x;
+	Grid* GridOrigin( int x, int y ) {
+		const Grid& g = grid[INDEX(x,y)];
+		U32 mask = 0xffffffff;
+		if ( g.size ) {
+			U32 size = g.size;
+			mask = ~(size-1);
+		}
+		return grid + INDEX( x&mask, y&mask );
 	}
 
 	grinliz::Vector2I RegionOrigin( int x, int y ) {
-		Grid* g = GridAt( x, y );
-		U32 size = g->size;
-		U32 mask = ~(size-1);
+		const Grid& g = grid[INDEX(x,y)];
+		U32 mask = 0xffffffff;
+		if ( g.size ) {
+			U32 size = g.size;
+			mask = ~(size-1);
+		}
 		grinliz::Vector2I v = { x&mask, y&mask };
 		return v;
 	}
 
 	bool IsRegionOrigin( int x, int y ) { 
-		Grid* g = GridAt( x, y );
-		U32 size = g->size;
-		U32 mask = ~(size-1);
-		return (x == (x&mask)) && (y == (y&mask));
+		grinliz::Vector2I v = RegionOrigin( x, y );
+		return (x == v.x && y == v.y);
 	}
 
 	grinliz::Vector2F RegionCenter( int x, int y ) {
-		Grid* g = GridAt( x, y );
+		const Grid& g = grid[INDEX(x,y)];
 		grinliz::Vector2I v = RegionOrigin( x, y );
-		float half = (float)g->size * 0.5f;
+		float half = (float)g.size * 0.5f;
 		grinliz::Vector2F c = { (float)(x) + half, (float)y + half };
 		return c;
 	}
 
 	grinliz::Rectangle2F RegionBounds( int x, int y ) {
-		Grid* g = GridAt( x, y );
+		const Grid& g = grid[INDEX(x,y)];
 		grinliz::Vector2I v = RegionOrigin( x, y );
 		grinliz::Rectangle2F b;
 		b.min.Set( (float)v.x, (float)v.y );
-		b.max.Set( (float)(v.x + g->size), (float)(v.y + g->size) );
+		b.max.Set( (float)(v.x + g.size), (float)(v.y + g.size) );
 		return b;
 	}
 		
 	void* ToState( int x, int y ) {
-		Grid* g = GridAt( x, y );
-		U32 size = g->size;
-		U32 mask = ~(size-1);
-		return (void*)(y*width+x);
+		grinliz::Vector2I v = RegionOrigin( x, y );
+		return (void*)(v.y*width+v.x);
 	}
 
 	Grid* ToGrid( void* state, grinliz::Vector2I* vec ) {
 		int v = (int)(state);
-		int y = v / width;
-		int x = v - y*width;
 		if ( vec ) {
+			int y = v / width;
+			int x = v - y*width;
 			vec->Set( x, y );
 		}
-		return GridAt( x, y );
+		GLASSERT( v < width*height );
+		return grid+v;
 	}
 
 	Grid* grid;		// pathing info.
