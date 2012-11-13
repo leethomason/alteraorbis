@@ -507,22 +507,23 @@ void WorldMap::AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > *a
 		// Scan the border.
 		Vector2I v = borderStart[i];
 		for( int k=0; k<size; ++k, v = v + borderDir[i] ) {
-			Grid* g = grid + INDEX( v.x, v.y );
-			if (    bounds.Contains( v.x, v.y )
-				 && g->IsPassable() ) 
+			if ( bounds.Contains( v.x, v.y ) )
 			{
-				Grid* origin = GridOrigin( v.x, v.y );
-				GLASSERT( ToState( v.x, v.y ) != state );
-				GLASSERT( origin->IsPassable() );
-				adj.Push( v );
+				Grid* g = grid + INDEX( v.x, v.y );
+				if ( g->IsPassable() ) 
+				{
+					Grid* origin = GridOrigin( v.x, v.y );
+					GLASSERT( ToState( v.x, v.y ) != state );
+					GLASSERT( origin->IsPassable() );
+					adj.Push( v );
+				}
 			}
 		}
 		// Check the corner.
 		bool pass = true;
 		for( int j=0; j<3; ++j ) {
-			Vector2I delta = { cornerDir[i].x * filter[j].x, cornerDir[i].y * filter[j].x };
+			Vector2I delta = { cornerDir[i].x * filter[j].x, cornerDir[i].y * filter[j].y };
 			v = corner[i] + delta;
-			CalcZone( v.x, v.y );
 			if ( bounds.Contains( v ) && grid[INDEX( v.x, v.y )].IsPassable() ) {
 				// all is well.
 			}
@@ -539,6 +540,7 @@ void WorldMap::AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > *a
 	}
 
 	Grid* current = 0;
+	Grid* first = 0;
 	for( int i=0; i<adj.Size(); ++i ) {
 		int x = adj[i].x;
 		int y = adj[i].y;
@@ -547,9 +549,15 @@ void WorldMap::AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > *a
 		CalcZone( x, y );
 		Grid* g = GridOrigin( x, y );
 		GLASSERT( g->IsPassable() );
-		if ( g == current )
+
+		// The corners wrap around:
+		if ( g == current || g == first)
+		{
 			continue;
+		}
 		current = g;
+		if ( !first )
+			first = g;
 
 		Vector2F otherC = RegionCenter( x, y );
 		float cost = (otherC-startC).Length();
@@ -570,6 +578,13 @@ void WorldMap::PrintStateInfo( void* state )
 	GLOUTPUT(( "(%d,%d)s=%d ", vec.x, vec.y, size ));	
 }
 
+
+void WorldMap::PatherCacheHitMiss( int* hits, int* miss, float* ratio )
+{
+	if ( hits ) *hits = 0;
+	if ( miss ) *miss = 0;
+	if ( ratio ) *ratio = 1;
+}
 
 // Such a good site, for many years: http://www-cs-students.stanford.edu/~amitp/gameprog.html
 // Specifically this link: http://playtechs.blogspot.com/2007/03/raytracing-on-grid.html

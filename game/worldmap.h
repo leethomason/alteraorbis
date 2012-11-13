@@ -105,7 +105,7 @@ public:
 	void ShowRegionPath( float x0, float y0, float x1, float y1 );
 	void ShowRegionOverlay( bool over ) { debugRegionOverlay = over; }
 	float PatherCache();
-	void PatherCacheHitMiss( int* hits, int* miss, float* ratio ) { *hits=0; *miss=0; *ratio=1; }
+	void PatherCacheHitMiss( int* hits, int* miss, float* ratio );
 	int CalcNumRegions();
 
 private:
