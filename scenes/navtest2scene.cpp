@@ -162,13 +162,12 @@ void NavTest2Scene::CreateChit( const Vector2I& p )
 void NavTest2Scene::DrawDebugText()
 {
 	UFOText* ufoText = UFOText::Instance();
+	micropather::CacheData cacheData;
+	map->PatherCacheHitMiss( &cacheData );
 
-	float ratio;
-	map->PatherCacheHitMiss( 0, 0, &ratio );
-
-	ufoText->Draw( 0, 16, "PathCache=%.3f hit%%=%d walkers=%d [%d %d %d %d %d]", 
-		map->PatherCache(), 
-		(int)(ratio*100.f),
+	ufoText->Draw( 0, 16, "PathCache mem%%=%d hit%%=%d walkers=%d [%d %d %d %d %d]", 
+		(int)(cacheData.memoryFraction * 100.0f),
+		(int)(cacheData.hitFraction * 100.f),
 		nChits,
 		SpaceTree::nModelsAtDepth[0], 
 		SpaceTree::nModelsAtDepth[1], 

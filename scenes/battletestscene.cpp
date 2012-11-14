@@ -373,12 +373,12 @@ void BattleTestScene::DrawDebugText()
 {
 	UFOText* ufoText = UFOText::Instance();
 
-	float ratio;
-	map->PatherCacheHitMiss( 0, 0, &ratio );
+	micropather::CacheData cacheData;
+	map->PatherCacheHitMiss( &cacheData );
 
-	ufoText->Draw( 0, 16, "PathCache=%.3f hit%%=%d chits:ticked/total=%d/%d regions=%d", 
-		map->PatherCache(), 
-		(int)(ratio*100.f),
+	ufoText->Draw( 0, 16, "PathCache mem=%%=%d hit%%=%d chits:ticked/total=%d/%d regions=%d", 
+		(int)(cacheData.memoryFraction * 100.0f),
+		(int)(cacheData.hitFraction * 100.f),
 		chitBag.NumTicked(), chitBag.NumChits(),
 		map->CalcNumRegions() );
 

@@ -47,7 +47,6 @@ WorldMap::WorldMap( int width, int height ) : Map( width, height )
 
 	texture[0] = TextureManager::Instance()->GetTexture( "map_water" );
 	texture[1] = TextureManager::Instance()->GetTexture( "map_land" );
-	pather = new micropather::MicroPather( this, 100*1000, true );
 
 	debugRegionOverlay = false;
 }
@@ -95,15 +94,6 @@ void WorldMap::DumpRegions()
 }
 
 
-float WorldMap::PatherCache()
-{
-	return 1.0f;
-//	int allocated = pather->PathCacheAllocated();
-//	int used = pather->PathCacheUsed();
-//	return (float)used / (float)allocated;
-}
-
-
 void WorldMap::DeleteAllRegions()
 {
 	zoneInit.ClearAll();
@@ -121,6 +111,9 @@ void WorldMap::Init( int w, int h )
 	this->height = h;
 	grid = new Grid[width*height];
 	memset( grid, 0, width*height*sizeof(Grid) );
+
+	delete pather;
+	pather = new micropather::MicroPather( this, width*height/4, 8, true );
 }
 
 
@@ -579,12 +572,6 @@ void WorldMap::PrintStateInfo( void* state )
 }
 
 
-void WorldMap::PatherCacheHitMiss( int* hits, int* miss, float* ratio )
-{
-	if ( hits ) *hits = 0;
-	if ( miss ) *miss = 0;
-	if ( ratio ) *ratio = 1;
-}
 
 // Such a good site, for many years: http://www-cs-students.stanford.edu/~amitp/gameprog.html
 // Specifically this link: http://playtechs.blogspot.com/2007/03/raytracing-on-grid.html

@@ -104,8 +104,7 @@ public:
 	void ShowAdjacentRegions( float x, float y );
 	void ShowRegionPath( float x0, float y0, float x1, float y1 );
 	void ShowRegionOverlay( bool over ) { debugRegionOverlay = over; }
-	float PatherCache();
-	void PatherCacheHitMiss( int* hits, int* miss, float* ratio );
+	void PatherCacheHitMiss( micropather::CacheData* data )	{ pather->GetCacheData( data ); }
 	int CalcNumRegions();
 
 private:

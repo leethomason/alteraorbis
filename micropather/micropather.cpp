@@ -35,7 +35,11 @@ distribution.
 //#define DEBUG_PATH
 //#define DEBUG_PATH_DEEP
 //#define TRACK_COLLISION
+//#define DEBUG_CACHING
 
+#ifdef DEBUG_CACHING
+#include "../grinliz/gldebug.h"
+#endif
 
 #include "micropather.h"
 
@@ -401,6 +405,22 @@ void PathNodePool::AddPathNode( unsigned key, PathNode* root )
 }
 
 
+PathNode* PathNodePool::FetchPathNode( void* state )
+{
+	unsigned key = Hash( state );
+
+	PathNode* root = hashTable[key];
+	while( root ) {
+		if ( root->state == state ) {
+			break;
+		}
+		root = ( state < root->state ) ? root->child[0] : root->child[1];
+	}
+	MPASSERT( root );
+	return root;
+}
+
+
 PathNode* PathNodePool::GetPathNode( unsigned frame, void* _state, float _costFromStart, float _estToGoal, PathNode* _parent )
 {
 	unsigned key = Hash( _state );
@@ -443,24 +463,30 @@ void PathNode::Init(	unsigned _frame,
 	inClosed = 0;
 }
 
-MicroPather::MicroPather( Graph* _graph, unsigned allocate, unsigned typicalAdjacent )
+MicroPather::MicroPather( Graph* _graph, unsigned allocate, unsigned typicalAdjacent, bool cache )
 	:	pathNodePool( allocate, typicalAdjacent ),
 		graph( _graph ),
-		frame( 0 ),
-		checksum( 0 )
-{}
+		frame( 0 )
+{
+	if ( cache ) {
+		pathCache = new PathCache( allocate*4 );	// untuned arbitrary constant	
+	}
+}
 
 
 MicroPather::~MicroPather()
 {
+	delete pathCache;
 }
 
 	      
 void MicroPather::Reset()
 {
 	pathNodePool.Clear();
+	if ( pathCache ) {
+		pathCache->Reset();
+	}
 	frame = 0;
-	checksum = 0;
 }
 
 
@@ -505,15 +531,33 @@ void MicroPather::GoalReached( PathNode* node, void* start, void* end, MP_VECTOR
 		}
 	}
 
-	checksum = 0;
+	if ( pathCache ) {
+		costVec.clear();
+
+		PathNode* pn0 = pathNodePool.FetchPathNode( path[0] );
+		PathNode* pn1 = 0;
+		for( unsigned i=0; i<path.size()-1; ++i ) {
+			pn1 = pathNodePool.FetchPathNode( path[i+1] );
+			nodeCostVec.clear();
+			GetNodeNeighbors( pn0, &nodeCostVec );
+			for( unsigned j=0; j<nodeCostVec.size(); ++j ) {
+				if ( nodeCostVec[j].node == pn1 ) {
+					costVec.push_back( nodeCostVec[j].cost );
+					break;
+				}
+			}
+			MPASSERT( costVec.size() == i+1 );
+			pn0 = pn1;
+		}
+		pathCache->Add( path, costVec );
+	}
+
 	#ifdef DEBUG_PATH
 	printf( "Path: " );
 	int counter=0;
 	#endif
 	for ( unsigned k=0; k<path.size(); ++k )
 	{
-		checksum += ((MP_UPTR)(path[k])) << (k%8);
-
 		#ifdef DEBUG_PATH
 		graph->PrintStateInfo( path[k] );
 		printf( " " );
@@ -638,6 +682,148 @@ void PathNodePool::AllStates( unsigned frame, MP_VECTOR< void* >* stateVec )
 }   
 
 
+PathCache::PathCache( int _allocated )
+{
+	mem = new Item[_allocated];
+	memset( mem, 0, sizeof(*mem)*_allocated );
+	allocated = _allocated;
+	nItems = 0;
+	hit = 0;
+	miss = 0;
+}
+
+
+PathCache::~PathCache()
+{
+	delete [] mem;
+}
+
+
+void PathCache::Reset()
+{
+	if ( nItems ) {
+		memset( mem, 0, sizeof(*mem)*allocated );
+		nItems = 0;
+		hit = 0;
+		miss = 0;
+	}
+}
+
+
+void PathCache::Add( const MP_VECTOR< void* >& path, const MP_VECTOR< float >& cost )
+{
+	if ( nItems + (int)path.size() > allocated*3/4 ) {
+		return;
+	}
+
+	for( unsigned i=0; i<path.size()-1; ++i ) {
+		// example: a->b->c->d
+		// Huge memory saving to only store 3 paths to 'd'
+		// Can put more in cache with also adding path to b, c, & d
+		// But uses much more memory. Experiment with this commented
+		// in and out and how to set.
+
+		void* end   = path[path.size()-1];
+		Item item = { path[i], end, path[i+1], cost[i] };
+		AddItem( item );
+	}
+}
+
+
+void PathCache::AddNoSolution( void* end, void* states[], int count )
+{
+	for( int i=0; i<count; ++i ) {
+		Item item = { states[i], end, 0, FLT_MAX };
+		AddItem( item );
+	}
+}
+
+
+int PathCache::Solve( void* start, void* end, MP_VECTOR< void* >* path, float* totalCost )
+{
+	const Item* item = Find( start, end );
+	if ( item ) {
+		if ( item->cost == FLT_MAX ) {
+			++hit;
+			return MicroPather::NO_SOLUTION;
+		}
+
+		path->clear();
+		path->push_back( start );
+		*totalCost = 0;
+
+		for ( ;start != end; start=item->next, item=Find(start, end) ) {
+			MPASSERT( item );
+			*totalCost += item->cost;
+			path->push_back( item->next );
+		}
+		++hit;
+		return MicroPather::SOLVED;
+	}
+	++miss;
+	return MicroPather::NOT_CACHED;
+}
+
+
+void PathCache::AddItem( const Item& item )
+{
+	unsigned index = item.Hash() % allocated;
+	while( true ) {
+		if ( mem[index].Empty() ) {
+			mem[index] = item;
+			++nItems;
+#ifdef DEBUG_CACHING
+			GLOUTPUT(( "Add: start=%x next=%x end=%x\n", item.start, item.next, item.end ));
+#endif
+			break;
+		}
+		else if ( mem[index].KeyEqual( item ) ) {
+			MPASSERT( (mem[index].next && item.next) || (mem[index].next==0 && item.next == 0) );
+			// do nothing; in cache
+			break;
+		}
+		++index;
+		if ( index == allocated )
+			index = 0;
+	}
+}
+
+
+const PathCache::Item* PathCache::Find( void* start, void* end )
+{
+	Item fake = { start, end, 0, 0 };
+	unsigned index = fake.Hash() % allocated;
+	while( true ) {
+		if ( mem[index].Empty() ) {
+			return 0;
+		}
+		if ( mem[index].KeyEqual( fake )) {
+			return mem + index;
+		}
+		++index;
+		if ( index == allocated )
+			index = 0;
+	}
+}
+
+
+void MicroPather::GetCacheData( CacheData* data )
+{
+	memset( data, 0, sizeof(*data) );
+
+	if ( pathCache ) {
+		data->nBytesAllocated = pathCache->AllocatedBytes();
+		data->nBytesUsed = pathCache->UsedBytes();
+		data->memoryFraction = (float)( (double)data->nBytesUsed / (double)data->nBytesAllocated );
+
+		data->hit = pathCache->hit;
+		data->miss = pathCache->miss;
+		data->hitFraction = (float)( (double)(data->hit) / (double)(data->hit + data->miss) );
+	}
+}
+
+
+
 int MicroPather::Solve( void* startNode, void* endNode, MP_VECTOR< void* >* path, float* cost )
 {
 	// Important to clear() in case the caller doesn't check the return code. There
@@ -656,6 +842,19 @@ int MicroPather::Solve( void* startNode, void* endNode, MP_VECTOR< void* >* path
 
 	if ( startNode == endNode )
 		return START_END_SAME;
+
+	if ( pathCache ) {
+		int cacheResult = pathCache->Solve( startNode, endNode, path, cost );
+		if ( cacheResult == SOLVED || cacheResult == NO_SOLUTION ) {
+		#ifdef DEBUG_CACHING
+			GLOUTPUT(( "PathCache hit. result=%s\n", cacheResult == SOLVED ? "solved" : "no_solution" ));
+		#endif
+			return cacheResult;
+		}
+		#ifdef DEBUG_CACHING
+		GLOUTPUT(( "PathCache miss\n" ));
+		#endif
+	}
 
 	++frame;
 
@@ -734,6 +933,10 @@ int MicroPather::Solve( void* startNode, void* endNode, MP_VECTOR< void* >* path
 	#ifdef DEBUG_PATH
 	DumpStats();
 	#endif
+	if ( pathCache ) {
+		// Could add a bunch more with a little tracking.
+		pathCache->AddNoSolution( endNode, &startNode, 1 );
+	}
 	return NO_SOLUTION;		
 }	
 

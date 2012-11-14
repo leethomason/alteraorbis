@@ -297,6 +297,9 @@ namespace micropather
 									float _estToGoal, 
 									PathNode* _parent );
 
+		// Get a pathnode that is already in the pool.
+		PathNode* FetchPathNode( void* state );
+
 		// Store stuff in cache
 		bool PushCache( const NodeCost* nodes, int nNodes, int* start );
 
@@ -345,6 +348,70 @@ namespace micropather
 	};
 
 
+	/* Used to cache results of paths. Much, much faster
+	   to return an existing solution than to calculate
+	   a new one.
+	*/
+	class PathCache
+	{
+	public:
+		struct Item {
+			// The key:
+			void* start;
+			void* end;
+
+			bool KeyEqual( const Item& item ) const	{ return start == item.start && end == item.end; }
+			bool Empty() const						{ return start == 0 && end == 0; }
+
+			// Data:
+			void*	next;
+			float	cost;	// from 'start' to 'next'. FLT_MAX if unsolveable.
+
+			unsigned Hash() const {
+				const unsigned char *p = (const unsigned char *)(&start);
+				unsigned int h = 2166136261U;
+
+				for( unsigned i=0; i<sizeof(void*)*2; ++i, ++p ) {
+					h ^= *p;
+					h *= 16777619;
+				}
+				return h;
+			}
+		};
+
+		PathCache( int itemsToAllocate );
+		~PathCache();
+		
+		void Reset();
+		void Add( const MP_VECTOR< void* >& path, const MP_VECTOR< float >& cost );
+		void AddNoSolution( void* end, void* states[], int count );
+		int Solve( void* startState, void* endState, MP_VECTOR< void* >* path, float* totalCost );
+
+		int AllocatedBytes() const { return allocated * sizeof(Item); }
+		int UsedBytes() const { return nItems * sizeof(Item); }
+
+		int hit;
+		int miss;
+
+	private:
+		void AddItem( const Item& item );
+		const Item* Find( void* start, void* end );
+		
+		Item*	mem;
+		int		allocated;
+		int		nItems;
+	};
+
+	struct CacheData {
+		int nBytesAllocated;
+		int nBytesUsed;
+		float memoryFraction;
+
+		int hit;
+		int miss;
+		float hitFraction;
+	};
+
 	/**
 		Create a MicroPather object to solve for a best path. Detailed usage notes are
 		on the main page.
@@ -359,6 +426,9 @@ namespace micropather
 			SOLVED,
 			NO_SOLUTION,
 			START_END_SAME,
+
+			// internal
+			NOT_CACHED
 		};
 
 		/**
@@ -382,7 +452,7 @@ namespace micropather
 									to a given state. (On a chessboard, 8.) Higher values use a little
 									more memory.
 		*/
-		MicroPather( Graph* graph, unsigned allocate = 250, unsigned typicalAdjacent=6 );
+		MicroPather( Graph* graph, unsigned allocate = 250, unsigned typicalAdjacent=6, bool cache=true );
 		~MicroPather();
 
 		/**
@@ -412,14 +482,9 @@ namespace micropather
 		*/
 		void Reset();
 
-		/**
-			Return the "checksum" of the last path returned by Solve(). Useful for debugging,
-			and a quick way to see if 2 paths are the same.
-		*/
-		MP_UPTR Checksum()	{ return checksum; }
-
 		// Debugging function to return all states that were used by the last "solve" 
 		void StatesInPool( MP_VECTOR< void* >* stateVec );
+		void GetCacheData( CacheData* data );
 
 	  private:
 		MicroPather( const MicroPather& );	// undefined and unsupported
@@ -433,14 +498,14 @@ namespace micropather
 		//void DumpStats();
 		#endif
 
-		PathNodePool				pathNodePool;
+		PathNodePool			pathNodePool;
 		MP_VECTOR< StateCost >	stateCostVec;	// local to Solve, but put here to reduce memory allocation
-		MP_VECTOR< NodeCost >		nodeCostVec;	// local to Solve, but put here to reduce memory allocation
+		MP_VECTOR< NodeCost >	nodeCostVec;	// local to Solve, but put here to reduce memory allocation
+		MP_VECTOR< float >		costVec;
 
 		Graph* graph;
 		unsigned frame;						// incremented with every solve, used to determine if cached data needs to be refreshed
-		MP_UPTR checksum;						// the checksum of the last successful "Solve".
-		
+		PathCache* pathCache;
 	};
 };	// namespace grinliz
 
