@@ -186,7 +186,7 @@ void BattleMechanics::CalcMeleeDamage( Chit* src, IMeleeWeaponItem* weapon, Dama
 }
 
 
-void BattleMechanics::Shoot( ChitBag* bag, Chit* src, Chit* target, IRangedWeaponItem* weapon, const Vector3F& pos, float area )
+void BattleMechanics::Shoot( ChitBag* bag, Chit* src, Chit* target, IRangedWeaponItem* weapon, const Vector3F& pos )
 {
 	GLASSERT( weapon->Ready() );
 	bool okay = weapon->Use();
@@ -209,7 +209,9 @@ void BattleMechanics::Shoot( ChitBag* bag, Chit* src, Chit* target, IRangedWeapo
 	float speed = SPEED * item->speed;
 	Vector3F aimAt = ComputeLeadingShot( pos, t, v, speed );
 
-	Vector3F dir = FuzzyAim( pos, aimAt, area );
+	// 0.10: can't hit a barn
+	// 0.05: bad shot - about untrained?
+	Vector3F dir = FuzzyAim( pos, aimAt, 0.05f );
 
 	Bolt* bolt = bag->NewBolt();
 	bolt->head = pos + dir;			// FIXME: use team ignore, not offset
@@ -227,20 +229,17 @@ void BattleMechanics::Shoot( ChitBag* bag, Chit* src, Chit* target, IRangedWeapo
 }
 
 
-Vector3F BattleMechanics::FuzzyAim( const Vector3F& pos, const Vector3F& aimAt, float area )
+Vector3F BattleMechanics::FuzzyAim( const Vector3F& pos, const Vector3F& aimAt, float radiusAt1 )
 {
 	Vector3F dir = aimAt - pos;
 	float len = dir.Length();
 
-	if ( area > 0 && len > 0 ) {
-		// a = pi*r*r
-		GLASSERT( area > 0 );
-		float r = sqrtf( area / PI );
+	if ( radiusAt1 > 0 && len > 0 ) {
 
 		Vector3F rv;
 		random.NormalVector3D( &rv.x );
 
-		Vector3F aimAtPrim = aimAt + rv * r * len;	// area defined at length=1
+		Vector3F aimAtPrim = aimAt + rv * radiusAt1 * len;
 		dir = aimAtPrim - pos;
 	}
 	dir.Normalize();

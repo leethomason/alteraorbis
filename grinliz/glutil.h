@@ -71,6 +71,18 @@ template <class T> inline T		Mean( T t0, T t1 )	{ return (t0 + t1)/static_cast<T
 /// Average (mean) value
 template <class T> inline T		Mean( T t0, T t1, T t2 )	{ return (t0+t1+t2)/static_cast<T>( 3 ); }
 
+/// Find the highest bit set.
+inline U32 LogBase2( U32 v ) 
+{
+	// I don't love this implementation, and I
+	// don't love the table alternatives either.
+	U32 r=0;
+	while ( v >>= 1 ) {
+		++r;
+	}
+	return r;
+}
+
 /// Round down to the next power of 2
 inline U32 FloorPowerOf2( U32 v )
 {

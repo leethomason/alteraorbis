@@ -7,12 +7,12 @@
 	X color variation for live mode
 
 - combat test scene	
-	- restore micropather cache
 	- ranged accuracy / weapon types / ItemStat data
 	- add de-rez
 	- unique look for units so teams can be distinguished
 	- refactor code - if needed? - in AIComponent (the fixmes)
 	- buttons to select scenario, load items
+	x restore micropather cache
 
 	- animation speed isn't correct
 	- gunrun to walk not synchronized correctly
@@ -49,6 +49,7 @@
 
 
 ** ECR **
+- face renderer should use bicubic filtering
 
 ** Defer **
 - bolt: glow around white core? end caps?

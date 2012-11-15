@@ -210,8 +210,7 @@ void AIComponent::DoShoot()
 				if ( item->HasRound() ) {
 					battleMechanics.Shoot(	GetChitBag(), 
 											parentChit, targetChit, 
-											weapons[i].weapon, weapons[i].trigger,
-											0.01f );		// fixme: hardcode accuracy use skill
+											weapons[i].weapon, weapons[i].trigger );
 				}
 				else {
 					item->Reload();

@@ -117,6 +117,38 @@ public:
 };
 
 
+class GameStat
+{
+public:
+	GameStat() : strength(10), will(10), charisma(10), intelligence(10), dexterity(10), exp(0) {}
+
+	// 1-20
+	int Strength() const		{ return strength; }
+	int Will() const			{ return will; }
+	int Charisma() const		{ return charisma; }
+	int Intelligent() const		{ return intelligence; }
+	int Dexterity() const		{ return dexterity; }
+
+	int Experience() const		{ return exp; }
+	int Level() const			{ return ExperienceToLevel( exp ); }
+
+	// 1.0 is normal, 0.1 very low, 2+ exceptional.
+	float Accuracy() const		{ return LeveledSkill( Dexterity() ); }
+
+	static int ExperienceToLevel( int ep )	{ return grinliz::LogBase2( ep >> 4 ); } 
+	static int LevelToExperience( int lp )	{ int base = (lp > 0) ? (1 << (lp-1)) : 0; 
+											  return 16 * base; }
+
+private:
+	float LeveledSkill( int value ) const {
+		return (float)value + (float)Level() * 0.5f;
+	}
+
+	int strength, will, charisma, intelligence, dexterity;
+	U32 exp;
+};
+
+
 // FIXME: memory pool
 class GameItem :	private IMeleeWeaponItem, 
 					private IRangedWeaponItem,
@@ -185,27 +217,27 @@ public:
 	grinliz::IString		name;		// name of the item
 	grinliz::IString		key;		// modified name, for storage. not serialized.
 	grinliz::IString		resource;	// resource used to  render the item
-	int flags;				// flags that define this item; 'constant'
-	int hardpoint;			// id of hardpoint this item attaches to
-	float mass;				// mass (kg)
-	float hpPerMass;		// typically 1
-	float hpRegen;			// hp / second regenerated (or lost) by this item
-	int	primaryTeam;		// who owns this items
-	float meleeDamage;		// a multiplier of the base (effective mass) and other modifiers
-	float rangedDamage;		// base ranged damage
-	float absorbsDamage;	// how much damage this consumes, in the inventory (shield, armor, etc.) 1.0: all, 0.5: half
-	U32 cooldown;			// time between uses
-	U32 reload;				// time to reload once clip is used up
-	int clipCap;			// possible rounds in the clip
-	float speed;			// speed for a variety of uses. 
+	int		flags;			// flags that define this item; 'constant'
+	int		hardpoint;		// id of hardpoint this item attaches to
+	float	mass;			// mass (kg)
+	float	hpPerMass;		// typically 1
+	float	hpRegen;		// hp / second regenerated (or lost) by this item
+	int		primaryTeam;	// who owns this items
+	float	meleeDamage;	// a multiplier of the base (effective mass) and other modifiers
+	float	rangedDamage;	// base ranged damage
+	float	absorbsDamage;	// how much damage this consumes, in the inventory (shield, armor, etc.) 1.0: all, 0.5: half
+	U32		cooldown;		// time between uses
+	U32		reload;			// time to reload once clip is used up
+	int		clipCap;		// possible rounds in the clip
+	float	speed;			// speed for a variety of uses. 
 
 	// ------- current --------
-	float hp;				// current hp for this item
-	U32 cooldownTime;		// counting UP to ready state
-	U32 reloadTime;			// counting UP to ready state
-	int rounds;				// current rounds in the clip
-	float accruedFire;		// how much fire damage built up, not yet applied
-	float accruedShock;		// how much shock damage built up, not yet applied
+	float	hp;				// current hp for this item
+	U32		cooldownTime;	// counting UP to ready state
+	U32		reloadTime;		// counting UP to ready state
+	int		rounds;			// current rounds in the clip
+	float	accruedFire;	// how much fire damage built up, not yet applied
+	float	accruedShock;	// how much shock damage built up, not yet applied
 
 	Chit* parentChit;		// only set when attached to a Component
 

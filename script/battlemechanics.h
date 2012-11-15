@@ -51,10 +51,9 @@ public:
 				Chit* src, 
 				Chit* target, 
 				IRangedWeaponItem* weapon, 
-				const grinliz::Vector3F& pos,
-				float accuracyArea );
+				const grinliz::Vector3F& pos );
 
-	grinliz::Vector3F FuzzyAim( const grinliz::Vector3F& origin, const grinliz::Vector3F& target, float area );
+	grinliz::Vector3F FuzzyAim( const grinliz::Vector3F& origin, const grinliz::Vector3F& target, float radiusAt1 );
 
 	grinliz::Vector3F ComputeLeadingShot( const grinliz::Vector3F& origin,
 										  const grinliz::Vector3F& target,
