@@ -67,6 +67,8 @@ public:
 
 	int Format() const			{ return format; }
 	int Flags() const			{ return flags; }
+	int Width() const			{ return w; }
+	int Height() const			{ return h; }
 
 	void Upload( const void* mem, int size );
 	void Upload( const Surface& surface );

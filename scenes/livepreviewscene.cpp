@@ -17,7 +17,11 @@ using namespace grinliz;
 
 static const float CENTER_X = 4.0f;
 static const float CENTER_Z = 4.0f;
+static const float START_X = 2.0f;
+static const float START_Z = 2.5f;
 static const int SIZE = 256;
+static const int ROWS = 4;
+static const int COLS = 4;
 
 LivePreviewScene::LivePreviewScene( LumosGame* game ) : Scene( game )
 {
@@ -32,46 +36,23 @@ LivePreviewScene::LivePreviewScene( LumosGame* game ) : Scene( game )
 	engine->SetGlow( true );
 	engine->lighting.direction.Set( 0, 1, 0 );
 
-	FaceGen faceGen( game->GetPalette() );
-
-	static const float tex[4] = { 0, 0, 0, 0 };
-	Random random;
-
-	const ModelResource* modelResource = ModelResourceManager::Instance()->GetModelResource( "unitPlateProcedural" );
-	for( int i=0; i<NUM_MODEL; ++i ) {
-		Color4F skin, highlight, hair, glasses;
-		faceGen.GetSkinColor( i<FaceGen::NUM_SKIN_COLORS ? i : (i%FaceGen::NUM_SKIN_COLORS), 
-							  i<FaceGen::NUM_SKIN_COLORS ? i : ((NUM_MODEL-i)%FaceGen::NUM_SKIN_COLORS ),
-							  random.Uniform(), 
-							  &skin, &highlight );
-		faceGen.GetHairColor( i%FaceGen::NUM_HAIR_COLORS, &hair );
-		faceGen.GetGlassesColor( i<FaceGen::NUM_GLASSES_COLORS ? i : random.Rand( FaceGen::NUM_GLASSES_COLORS ),
-								 i<FaceGen::NUM_GLASSES_COLORS ? i : random.Rand( FaceGen::NUM_GLASSES_COLORS ),
-								 random.Uniform(),
-								 &glasses );
-
-		const Color4F color[4] = {
-			skin,						// (r) skin
-			highlight,					// (b0) highlight
-			glasses,					// (b1) glasses / tattoo
-			hair						// (g) hair
-		};
-
-		model[i] = engine->AllocModel( modelResource );
-		if ( i<2 ) {
-			model[i]->SetPos( CENTER_X + float(i), 0.1f, CENTER_Z );
-		}
-		else if ( i<7 ) {
-			model[i]->SetPos( CENTER_X + float(i-4), 0.1f, CENTER_Z - 1.0f );
-		}
-		else {
-			model[i]->SetPos( CENTER_X + float(i-9), 0.1f, CENTER_Z + 1.0f );
-		}
-		model[i]->SetProcedural( true, color, tex );
+	LayoutCalculator layout = game->DefaultLayout();
+	const ButtonLook& look = game->GetButtonLook(0);
+	const float width  = layout.Width();
+	const float height = layout.Height();
+	for( int i=0; i<ROWS; ++i ) {
+		rowButton[i].Init( &gamui2D, look );
+		rowButton[i].SetSize( width, height );
+		CStr< 16 > t;
+		t.Format( "%d", i );
+		rowButton[i].SetText( t.c_str() );
+		rowButton[0].AddToToggleGroup( &rowButton[i] );
 	}
-	model[1]->SetScale( 0.5f );
 
-	engine->camera.SetPosWC( CENTER_X, 8, CENTER_Z );
+	memset( model, 0, sizeof(Model*) * NUM_MODEL );
+	GenerateFaces( 0 );
+
+	engine->camera.SetPosWC( CENTER_X, 11, CENTER_Z );
 	static const Vector3F out = { 0, 0, 1 };
 	engine->camera.SetDir( V3F_DOWN, out );		// look straight down. This works! cool.
 	engine->camera.Orbit( 180.0f );
@@ -99,14 +80,80 @@ void LivePreviewScene::Resize()
 	//const Screenport& port = game->GetScreenport();
 	static_cast<LumosGame*>(game)->PositionStd( &okay, 0 );
 
-	//LayoutCalculator layout = lumosGame->DefaultLayout();
+	LayoutCalculator layout = static_cast<LumosGame*>(game)->DefaultLayout();
+	for( int i=0; i<ROWS; ++i ) {
+		layout.PosAbs( &rowButton[i], 0, i );
+	}
 }
 
+
+
+void LivePreviewScene::GenerateFaces( int mainRow )
+{
+	FaceGen faceGen( game->GetPalette() );
+
+	float tex[4] = { 0, 0, 0, 0 };
+	Random random( mainRow );
+	random.Rand();
+
+	const ModelResource* modelResource = ModelResourceManager::Instance()->GetModelResource( "unitPlateProcedural" );
+	for( int i=0; i<NUM_MODEL; ++i ) {
+		if ( model[i] ) {
+			engine->FreeModel( model[i] );
+			model[i] = 0;
+		}
+
+		Color4F skin, highlight, hair, glasses;
+		faceGen.GetSkinColor( i, random.Rand(), random.Uniform(), &skin, &highlight ); 
+		faceGen.GetHairColor( i, &hair );
+		faceGen.GetGlassesColor( i, random.Rand(), random.Uniform(), &glasses );
+
+		model[i] = engine->AllocModel( modelResource );
+		int row = i / COLS;
+		int col = i - row*COLS;
+		float x = START_X + float(col);
+		float z = START_Z + float(row);
+		float current = 1.0f - 0.25f * (float)(mainRow);
+
+		switch ( row ) {
+		case 0:
+			model[i]->SetScale( Lerp( 1.0f, 0.25f, (float)(col)/(float)COLS ));
+			faceGen.GetSkinColor( col, col, 0, &skin, &highlight ); 
+			faceGen.GetHairColor( col, &hair );
+			tex[0] = tex[1] = tex[2] = tex[3] = current;
+			break;
+
+		default:
+			tex[0] = 0.25f * (float)random.Rand(4);
+			tex[1] = 0.25f * (float)random.Rand(4);
+			tex[2] = 0.25f * (float)random.Rand(4);
+			tex[3] = 0.25f * (float)random.Rand(4);
+			tex[col] = current;
+			break;
+		}
+
+		const Color4F color[4] = {
+			skin,						// (r) skin
+			highlight,					// (b0) highlight
+			glasses,					// (b1) glasses / tattoo
+			hair						// (g) hair
+		};
+
+		model[i]->SetPos( x, 0.1f, z );
+		model[i]->SetProcedural( true, color, tex );
+	}
+}
 
 void LivePreviewScene::ItemTapped( const gamui::UIItem* item )
 {
 	if ( item == &okay ) {
 		game->PopScene();
+	}
+	for( int i=0; i<ROWS; ++i ) {
+		if ( item == &rowButton[i] ) {
+			GenerateFaces( i );
+			break;
+		}
 	}
 }
 
@@ -129,7 +176,7 @@ void LivePreviewScene::DoTick( U32 deltaTime )
 
 void LivePreviewScene::CreateTexture()
 {
-	static const char* filename = "./res/face.png";
+	static const char* filename = "./res/humanMaleFace.png";
 	struct _stat buf;
 
 	_stat( filename, &buf );
@@ -142,62 +189,41 @@ void LivePreviewScene::CreateTexture()
 	Texture* t = texman->GetTexture( "procedural" );
 	GLASSERT( t );
 	GLASSERT( t->Alpha() );
+	GLASSERT( t->Width() == SIZE*COLS );
+	GLASSERT( t->Height() == SIZE*ROWS );
 
 	unsigned w=0, h=0;
 	U8* pixels = 0;
 	int error = lodepng_decode32_file( &pixels, &w, &h, filename );
 	GLASSERT( error == 0 );
-	GLASSERT( w == SIZE*4 );
-	GLASSERT( h == SIZE );
-	static const int BUFFER_SIZE = SIZE*SIZE*4;
-	U16 buffer[BUFFER_SIZE];
+	GLASSERT( w == SIZE*COLS );
+	GLASSERT( h == SIZE*ROWS );
+	static const int BUFFER_SIZE = SIZE*SIZE*COLS*ROWS;
+	U16* buffer = new U16[BUFFER_SIZE];
 
 	if ( error == 0 ) {
-		int scanline = w*4;
+		int scanline = SIZE*COLS*4;
 
 		static const int RAD=8;
-		for( int j=0; j<SIZE; ++j ) {
-			for( int i=0; i<int(w); ++i ) {
+		for( int j=0; j<SIZE*ROWS; ++j ) {
+			for( int i=0; i<SIZE*COLS; ++i ) {
 				const U8* p = pixels + scanline*j + i*4;
 				Color4U8 color = { p[0], p[1], p[2], p[3] };
 
 				if ( color.a == 0 ) {
 					color.Set( 0, 0, 0, 0 );
 				}				
-				/*
-					int zone = i / SIZE;
-					if ( zone == 0 )      color.Set( 255, 0, 0, 0 );
-					else if ( zone == 1 ) color.Set( 255, 0, 0, 0 );
-					else if ( zone == 2 ) color.Set( 0, 0, 255, 0 );
-					else                  color.Set( 0, 255, 0, 0 );
-				}*/
 				U16 c = Surface::CalcRGBA16( color );
-				buffer[SIZE*4*(SIZE-1-j)+i] = c;
+				int offset = SIZE*COLS*(SIZE*ROWS-1-j)+i;
+				GLASSERT( offset >= 0 && offset < BUFFER_SIZE );
+				buffer[offset] = c;
 			}
 		}
 		t->Upload( buffer, BUFFER_SIZE*sizeof(buffer[0]) );
-
-		/*
-		static bool result = false;
-		if ( !result ) {
-			for( unsigned j=0; j<h; ++j ) {
-				for( unsigned i=0; i<w; ++i ) {
-					U16 c = buffer[SIZE*4*(SIZE-1-j)+i];
-					Color4U8 color = Surface::CalcRGBA16( c );
-					U8* p = pixels + scanline*j + i*4;
-					p[0] = color.r;
-					p[1] = color.g;
-					p[2] = color.b;
-					p[3] = 255;
-				}
-			}
-			lodepng_encode32_file( "./res/facetest.png", pixels, w, h );
-			result = true;
-		}
-		*/
 		free( pixels );
 	}
 	else {
 		GLASSERT( 0 );
 	}	
+	delete [] buffer;
 }

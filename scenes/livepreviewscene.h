@@ -39,18 +39,24 @@ public:
 	virtual void Draw3D( U32 deltaTime );
 	virtual void DoTick( U32 deltaTime );
 
-
 private:
 	void CreateTexture();
+	void GenerateFaces( int mainRow );
+
+	enum { 
+		ROWS = 4, 
+		COLS = 4, 
+		NUM_MODEL = ROWS*COLS 
+	};
 
 	gamui::PushButton okay;
+	gamui::ToggleButton rowButton[ROWS];
+
 	U32 fileTimer;
 	time_t fileTime;
 
 	Engine*		engine;
-	enum { NUM_MODEL = 2+5+5 };
 	Model*		model[NUM_MODEL];
-
 };
 
 #endif // LIVE_PREVIEW_SCENE_INCLUDED

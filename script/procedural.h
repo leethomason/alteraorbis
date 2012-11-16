@@ -25,7 +25,7 @@ public:
 	FaceGen( const Game::Palette* p_palette ) : palette( p_palette ) {}
 
 	enum { 
-		NUM_SKIN_COLORS = 3,
+		NUM_SKIN_COLORS = 4,
 		NUM_HAIR_COLORS	= 10,
 		NUM_GLASSES_COLORS = 4
 	};
