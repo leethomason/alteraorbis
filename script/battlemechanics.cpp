@@ -37,6 +37,10 @@
 
 using namespace grinliz;
 
+static const float SHOOTER_MOVE_MULT = 0.5f;
+static const float TARGET_MOVE_MULT  = 0.7f;
+static const float ACCURACY_MULT = 0.06f;
+
 
 /*static*/ int BattleMechanics::PrimaryTeam( Chit* src )
 {
@@ -186,6 +190,31 @@ void BattleMechanics::CalcMeleeDamage( Chit* src, IMeleeWeaponItem* weapon, Dama
 }
 
 
+float BattleMechanics::ComputeAccuracy( Chit* shooter, IRangedWeaponItem* weapon, Chit* target )
+{
+	float accShooter = 1;
+	float accWeapon = 1;
+	float accMod = 1;
+
+	if ( shooter && shooter->GetMoveComponent() && shooter->GetMoveComponent()->IsMoving() ) {
+		accMod *= SHOOTER_MOVE_MULT;
+	}
+	if ( shooter && shooter->GetItemComponent() ) {
+		accShooter = shooter->GetItemComponent()->GetItem()->stats.Accuracy();
+	}
+	if ( weapon ) {
+		accWeapon = weapon->GetItem()->stats.Accuracy();
+	}
+	if ( target && target->GetMoveComponent() && target->GetMoveComponent()->IsMoving() ) {
+		accMod = TARGET_MOVE_MULT;
+	}
+
+	// 0.10: can't hit a barn
+	// 0.05: bad shot - untrained?
+	return accShooter * accWeapon * accMod * ACCURACY_MULT;
+}
+
+
 void BattleMechanics::Shoot( ChitBag* bag, Chit* src, Chit* target, IRangedWeaponItem* weapon, const Vector3F& pos )
 {
 	GLASSERT( weapon->Ready() );
@@ -209,9 +238,8 @@ void BattleMechanics::Shoot( ChitBag* bag, Chit* src, Chit* target, IRangedWeapo
 	float speed = SPEED * item->speed;
 	Vector3F aimAt = ComputeLeadingShot( pos, t, v, speed );
 
-	// 0.10: can't hit a barn
-	// 0.05: bad shot - about untrained?
-	Vector3F dir = FuzzyAim( pos, aimAt, 0.05f );
+	float accuracy = ComputeAccuracy( src, weapon, target );
+	Vector3F dir = FuzzyAim( pos, aimAt, accuracy );
 
 	Bolt* bolt = bag->NewBolt();
 	bolt->head = pos + dir;			// FIXME: use team ignore, not offset
@@ -227,6 +255,58 @@ void BattleMechanics::Shoot( ChitBag* bag, Chit* src, Chit* target, IRangedWeapo
 	bolt->particle  = (item->flags & GameItem::RENDER_TRAIL) ? true : false;
 	bolt->speed = speed;
 }
+
+
+float BattleMechanics::TestFire( float range, float targetDiameter, const GameItem* shooter, const GameItem* weapon )
+{
+	float hit = 0;
+
+#if 0
+	Random random( seed );
+	Vector3F target = { range, 0, 0 };
+	Vector3F src = { 0, 0, 0 };
+
+	for( int i=0; i<nTests; ++i ) {
+		Vector3F aimAt = target;
+		float accuracy = ComputeAccuracy( 0, 0, 0 );
+		Vector3F dir = FuzzyAim( src, aimAt, accuracy );
+
+		Vector3F at;
+		IntersectRayPlane( src, dir, 0, range, &at );
+		float len = sqrtf( at.y*at.y + at.z*at.z );
+		if ( len < targetDiameter * 0.5f ) {
+			++hit;
+		}
+	}
+
+#else
+
+	// V = (4/3)PI r^3
+
+	float accuracy = ComputeAccuracy( 0, 0, 0 );
+	if ( shooter ) {
+		accuracy *= shooter->stats.Accuracy();
+	}
+	if ( weapon ) {
+		accuracy *= weapon->stats.Accuracy();
+	}
+
+	float rOuter = range * accuracy;
+	float vOuter = 4.f / 3.f * PI * rOuter * rOuter * rOuter;
+
+	float rInner = targetDiameter * 0.5f;
+	float vInner = 4.f / 3.f * PI * rInner * rInner * rInner;
+
+	if ( rOuter <= rInner ) {
+		hit = 1.0f;
+	}
+	else {
+		hit = vInner / vOuter;
+	}
+#endif
+	return hit;
+}
+
 
 
 Vector3F BattleMechanics::FuzzyAim( const Vector3F& pos, const Vector3F& aimAt, float radiusAt1 )

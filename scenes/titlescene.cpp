@@ -22,6 +22,8 @@
 
 #include "../game/lumosgame.h"
 
+#include "../script/battlemechanics.h"
+
 using namespace gamui;
 
 TitleScene::TitleScene( LumosGame* game ) : Scene( game ), lumosGame( game ) 
@@ -35,7 +37,7 @@ TitleScene::TitleScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 													"render0", "render1", 
 													"particle", 
 													"nav", "nav2", "navWorld", 
-													"noise", "battle", "animation", "livePr" };
+													"noise", "battle", "animation", "livePr", "" };
 
 	for( int i=0; i<NUM_TESTS; ++i ) {
 		testScene[i].Init( &gamui2D, lumosGame->GetButtonLook( LumosGame::BUTTON_LOOK_STD ) );
@@ -46,6 +48,8 @@ TitleScene::TitleScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 	testScene[TEST_NAV_WORLD].SetText2( "Smoke" );
 	testScene[TEST_LIVEPREVIEW].SetText( "Live" );
 	testScene[TEST_LIVEPREVIEW].SetText2( "Preview" );
+	testScene[TEST_WEAPON_STAT].SetText( "Weapon" );
+	testScene[TEST_WEAPON_STAT].SetText2( "Stat" );
 }
 
 
@@ -99,6 +103,17 @@ void TitleScene::ItemTapped( const gamui::UIItem* item )
 	}
 	else if ( item == &testScene[TEST_LIVEPREVIEW] ) {
 		game->PushScene( LumosGame::SCENE_LIVEPREVIEW, 0 );
+	}
+	else if ( item == &testScene[TEST_WEAPON_STAT] ) {
+		BattleMechanics battle;
+		FILE* fp = fopen( "weapons.txt", "w" );
+
+		fprintf( fp, "Unit 0 Weapon 0 Range\n" );
+		for( int range=2; range<=10; range += 2 ) {
+			float hits = battle.TestFire( (float)range, 0.4f, 0, 0 );
+			fprintf( fp, "  %2d  %d%%\n", range, (int)(hits*100.0f) );
+		}
+		fclose( fp );
 	}
 }
 

@@ -90,6 +90,44 @@ public:
 };
 
 
+class GameStat
+{
+public:
+	GameStat() : strength(10), will(10), charisma(10), intelligence(10), dexterity(10), exp(0) {}
+
+	void Init() {
+		strength = will = charisma = intelligence = dexterity = 10;
+		exp = 0;
+	}
+
+	// 1-20
+	int Strength() const		{ return strength; }
+	int Will() const			{ return will; }
+	int Charisma() const		{ return charisma; }
+	int Intelligent() const		{ return intelligence; }
+	int Dexterity() const		{ return dexterity; }
+
+	int Experience() const		{ return exp; }
+	int Level() const			{ return ExperienceToLevel( exp ); }
+
+	// 1.0 is normal, 0.1 very low, 2+ exceptional.
+	float Accuracy() const		{ return LeveledSkill( Dexterity() ) * 0.1f; }
+
+	static int ExperienceToLevel( int ep )	{ return grinliz::LogBase2( ep >> 4 ); } 
+	static int LevelToExperience( int lp )	{ int base = (lp > 0) ? (1 << (lp-1)) : 0; 
+											  return 16 * base; }
+
+private:
+	float LeveledSkill( int value ) const {
+		return (float)value + (float)Level() * 0.5f;
+	}
+
+	int strength, will, charisma, intelligence, dexterity;
+	U32 exp;
+};
+
+
+
 class IWeaponItem 
 {
 public:
@@ -114,38 +152,6 @@ public:
 class IShield
 {
 public:
-};
-
-
-class GameStat
-{
-public:
-	GameStat() : strength(10), will(10), charisma(10), intelligence(10), dexterity(10), exp(0) {}
-
-	// 1-20
-	int Strength() const		{ return strength; }
-	int Will() const			{ return will; }
-	int Charisma() const		{ return charisma; }
-	int Intelligent() const		{ return intelligence; }
-	int Dexterity() const		{ return dexterity; }
-
-	int Experience() const		{ return exp; }
-	int Level() const			{ return ExperienceToLevel( exp ); }
-
-	// 1.0 is normal, 0.1 very low, 2+ exceptional.
-	float Accuracy() const		{ return LeveledSkill( Dexterity() ); }
-
-	static int ExperienceToLevel( int ep )	{ return grinliz::LogBase2( ep >> 4 ); } 
-	static int LevelToExperience( int lp )	{ int base = (lp > 0) ? (1 << (lp-1)) : 0; 
-											  return 16 * base; }
-
-private:
-	float LeveledSkill( int value ) const {
-		return (float)value + (float)Level() * 0.5f;
-	}
-
-	int strength, will, charisma, intelligence, dexterity;
-	U32 exp;
 };
 
 
@@ -231,6 +237,8 @@ public:
 	int		clipCap;		// possible rounds in the clip
 	float	speed;			// speed for a variety of uses. 
 
+	GameStat stats;
+
 	// ------- current --------
 	float	hp;				// current hp for this item
 	U32		cooldownTime;	// counting UP to ready state
@@ -263,6 +271,7 @@ public:
 			clipCap			= rhs->clipCap;
 			rounds			= rhs->rounds;
 			speed			= rhs->speed;
+			stats			= rhs->stats;
 
 			hp				= rhs->hp;
 			accruedFire		= rhs->accruedFire;
@@ -290,6 +299,7 @@ public:
 			clipCap = 0;			// default to no clip and unlimited ammo
 			rounds = 0;
 			speed = 1.0f;
+			stats.Init();
 
 			hp = TotalHP();
 			accruedFire = 0;

@@ -49,7 +49,7 @@
 
 
 ** ECR **
-- face renderer should use bicubic filtering
+- face renderer should use bicubic filtering, also: switch to image magick for image processing
 
 ** Defer **
 - bolt: glow around white core? end caps?
