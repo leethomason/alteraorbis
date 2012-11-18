@@ -44,7 +44,7 @@ LivePreviewScene::LivePreviewScene( LumosGame* game ) : Scene( game )
 		rowButton[i].Init( &gamui2D, look );
 		rowButton[i].SetSize( width, height );
 		CStr< 16 > t;
-		t.Format( "%d", i );
+		t.Format( "%d", i+1 );
 		rowButton[i].SetText( t.c_str() );
 		rowButton[0].AddToToggleGroup( &rowButton[i] );
 	}
