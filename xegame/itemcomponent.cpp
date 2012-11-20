@@ -59,8 +59,6 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		if ( delta || (item.hp != hp) ) {
 			HealthComponent* hc = GET_COMPONENT( parentChit, HealthComponent );
 			if ( hc ) {
-				hc->DeltaHealth();
-
 				// Can this be knocked back??
 				ComponentSet thisComp( chit, ComponentSet::IS_ALIVE | Chit::SPATIAL_BIT | Chit::RENDER_BIT );
 				if ( thisComp.okay ) {
@@ -165,11 +163,6 @@ bool ItemComponent::DoSlowTick()
 bool ItemComponent::DoTick( U32 delta )
 {
 	bool needsTick = item.DoTick( delta );
-
-	HealthComponent* hc = GET_COMPONENT( parentChit, HealthComponent );
-	if ( hc ) {
-		hc->DeltaHealth();
-	}
 	return needsTick;
 }
 

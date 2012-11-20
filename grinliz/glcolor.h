@@ -65,6 +65,8 @@ struct Color4
 	T X(int i) const					{ GLASSERT( i>=0 && i<4 ); return *(&r+i); }
 	T& X(int i)							{ GLASSERT( i>=0 && i<4 ); return *(&r+i); }
 
+	Vector4F ToVector() const { Vector4F v = { r, g, b, a }; return v; }
+
 	bool operator==( const Color4<T>& rh ) const {
 		return r==rh.r && g==rh.g && b==rh.b && a==rh.a;
 	}
@@ -167,7 +169,6 @@ inline Color4U8 Convert_RGB16_4U8( U16 c ) {
 	r.b =  ((c & 0x001F) << 3 )+8;
 	return r;
 }
-
 
 /// Interpolate between 2 colors. 'val' can range from 0 to 1.
 inline void InterpolateColor( const Color3U8& c0, const Color3U8& c1, float val, Color3U8* out ) {

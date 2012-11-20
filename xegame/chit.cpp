@@ -276,6 +276,16 @@ void Chit::RemoveListener( Component* c )
 }
 
 
+GameItem* Chit::GetItem()
+{
+	ItemComponent* pIC = GetItemComponent();
+	if ( pIC ) {
+		return pIC->GetItem();
+	}
+	return 0;
+}
+
+
 void Chit::DebugStr( GLString* str )
 {
 	str->Format( "Chit=%x ", this );

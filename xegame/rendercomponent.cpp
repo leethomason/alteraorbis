@@ -184,16 +184,21 @@ void RenderComponent::Attach( const char* metaData, const char* asset )
 
 void RenderComponent::ParamColor( const char* hardpoint, const grinliz::Vector4F& colorMult )
 {
-	for( int i=0; i<EL_MAX_METADATA; ++i ) {
-		if ( metaDataName[i] == hardpoint ) {
-			GLASSERT( model[i+1] );
-			if ( model[i+1] ) {
-				model[i+1]->SetColor( colorMult );
-				return;
+	if ( hardpoint ) {
+		for( int i=0; i<EL_MAX_METADATA; ++i ) {
+			if ( metaDataName[i] == hardpoint ) {
+				GLASSERT( model[i+1] );
+				if ( model[i+1] ) {
+					model[i+1]->SetColor( colorMult );
+					return;
+				}
 			}
 		}
+		GLASSERT( 0 );	// safe, but we meant to find something.
 	}
-	GLASSERT( 0 );	// safe, but we meant to find something.
+	else {
+		model[0]->SetColor( colorMult );
+	}
 }
 
 

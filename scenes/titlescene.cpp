@@ -110,7 +110,7 @@ void TitleScene::ItemTapped( const gamui::UIItem* item )
 
 		fprintf( fp, "Unit 0 Weapon 0 Range\n" );
 		for( int range=2; range<=10; range += 2 ) {
-			float hits = battle.TestFire( (float)range, 0.4f, 0, 0 );
+			float hits = battle.TestFire( (float)range, 0.4f );
 			fprintf( fp, "  %2d  %d%%\n", range, (int)(hits*100.0f) );
 		}
 		fclose( fp );

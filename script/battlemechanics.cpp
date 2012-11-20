@@ -39,7 +39,6 @@ using namespace grinliz;
 
 static const float SHOOTER_MOVE_MULT = 0.5f;
 static const float TARGET_MOVE_MULT  = 0.7f;
-static const float ACCURACY_MULT = 0.06f;
 
 
 /*static*/ int BattleMechanics::PrimaryTeam( Chit* src )
@@ -185,12 +184,15 @@ void BattleMechanics::CalcMeleeDamage( Chit* src, IMeleeWeaponItem* weapon, Dama
 	}
 	static const float STRIKE_RATIO_INV = 1.0f / 5.0f;
 
-	dd->damage = mass * chain[0]->meleeDamage * STRIKE_RATIO_INV;
+	float trait0 = chain[0]->stats.Damage();
+	float trait2 = chain[chain.Size()-1]->stats.Damage(); 
+
+	dd->damage = mass * chain[0]->meleeDamage * STRIKE_RATIO_INV * trait0 * trait2;
 	dd->effects = effect;
 }
 
 
-float BattleMechanics::ComputeAccuracy( Chit* shooter, IRangedWeaponItem* weapon, Chit* target )
+float BattleMechanics::ComputeRadAt1( Chit* shooter, IRangedWeaponItem* weapon, Chit* target )
 {
 	float accShooter = 1;
 	float accWeapon = 1;
@@ -211,7 +213,10 @@ float BattleMechanics::ComputeAccuracy( Chit* shooter, IRangedWeaponItem* weapon
 
 	// 0.10: can't hit a barn
 	// 0.05: bad shot - untrained?
-	return accShooter * accWeapon * accMod * ACCURACY_MULT;
+	// Untuned. 
+	float acc = accShooter * accWeapon * accMod;
+	float radAt1 = AbilityCurve( 0.12f, 0.05f, 0.01f, 0.001f, acc );
+	return radAt1;
 }
 
 
@@ -236,10 +241,10 @@ void BattleMechanics::Shoot( ChitBag* bag, Chit* src, Chit* target, IRangedWeapo
 
 	static const float SPEED = 8.0f;
 	float speed = SPEED * item->speed;
-	Vector3F aimAt = ComputeLeadingShot( pos, t, v, speed );
 
-	float accuracy = ComputeAccuracy( src, weapon, target );
-	Vector3F dir = FuzzyAim( pos, aimAt, accuracy );
+	Vector3F aimAt = ComputeLeadingShot( pos, t, v, speed );
+	float radAt1 = ComputeRadAt1( src, weapon, target );
+	Vector3F dir = FuzzyAim( pos, aimAt, radAt1 );
 
 	Bolt* bolt = bag->NewBolt();
 	bolt->head = pos + dir;			// FIXME: use team ignore, not offset
@@ -250,14 +255,14 @@ void BattleMechanics::Shoot( ChitBag* bag, Chit* src, Chit* target, IRangedWeapo
 	else
 		bolt->color.Set( 0, 1, 0, 1 );	// FIXME: real color based on item
 	bolt->chitID = src->ID();
-	bolt->damage = item->rangedDamage;
+	bolt->damage = item->rangedDamage * item->stats.Damage();
 	bolt->effect = item->Effects();
 	bolt->particle  = (item->flags & GameItem::RENDER_TRAIL) ? true : false;
 	bolt->speed = speed;
 }
 
 
-float BattleMechanics::TestFire( float range, float targetDiameter, const GameItem* shooter, const GameItem* weapon )
+float BattleMechanics::TestFire( float range, float targetDiameter )
 {
 	float hit = 0;
 
@@ -283,15 +288,9 @@ float BattleMechanics::TestFire( float range, float targetDiameter, const GameIt
 
 	// V = (4/3)PI r^3
 
-	float accuracy = ComputeAccuracy( 0, 0, 0 );
-	if ( shooter ) {
-		accuracy *= shooter->stats.Accuracy();
-	}
-	if ( weapon ) {
-		accuracy *= weapon->stats.Accuracy();
-	}
+	float radAt1 = ComputeRadAt1( 0, 0, 0 );
 
-	float rOuter = range * accuracy;
+	float rOuter = range * radAt1;
 	float vOuter = 4.f / 3.f * PI * rOuter * rOuter * rOuter;
 
 	float rInner = targetDiameter * 0.5f;

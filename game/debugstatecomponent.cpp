@@ -55,24 +55,21 @@ void DebugStateComponent::OnAdd( Chit* chit )
 	healthBar.SetSize( SIZE_X, SIZE_Y );
 	healthBar.SetRange( 1.0f );
 
-	HealthComponent* pHealth = GET_COMPONENT( chit, HealthComponent );
-	if ( pHealth ) {
-		healthBar.SetRange( pHealth->GetHealthFraction() );
+	ItemComponent* pItem = chit->GetItemComponent();
+	if ( pItem ) {
+		healthBar.SetRange( pItem->GetItem()->HPFraction() );
 	}
 
 	map->overlay.Add( &ammoBar );
 	ammoBar.SetSize( SIZE_X, SIZE_Y );
 	ammoBar.SetRange( 1.0f );
-	ItemComponent* pItem = chit->GetItemComponent();
 	if ( pItem ) {
 		float r = (float)pItem->GetItem()->rounds / (float)pItem->GetItem()->clipCap;
 		ammoBar.SetRange( r ); 
 	}
-
 	map->overlay.Add( &shieldBar );
 	shieldBar.SetSize( SIZE_X, SIZE_Y );
 	shieldBar.SetRange( 1.0f );
-
 }
 
 
@@ -93,12 +90,11 @@ void DebugStateComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		shieldBar.SetPos( pos.x, pos.y + SIZE_Y*1.5f );
 		ammoBar.SetPos(   pos.x, pos.y + SIZE_Y*3.0f );
 	}
-	else if ( msg.ID() == ChitMsg::HEALTH_CHANGED ) {
-		HealthComponent* pHealth = GET_COMPONENT( chit, HealthComponent );
-		healthBar.SetRange( pHealth->GetHealthFraction() );
-	}
 	else if ( msg.ID() == ChitMsg::GAMEITEM_TICK ) {
 		GameItem* pItem = (GameItem*)msg.Ptr();
+
+		healthBar.SetRange( pItem->HPFraction() );
+
 		RenderAtom grey   = LumosGame::CalcPaletteAtom( 0, 6 );
 		RenderAtom blue   = LumosGame::CalcPaletteAtom( 8, 0 );	
 		RenderAtom orange = LumosGame::CalcPaletteAtom( 4, 0 );

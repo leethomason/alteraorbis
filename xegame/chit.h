@@ -127,6 +127,7 @@ public:
 	Component*			GetComponent( const char* name );
 
 	ChitBag* GetChitBag() { return chitBag; }
+	GameItem* GetItem();
 
 	// Send a message to the listeners, and every component
 	// in the chit (which don't need to be listeners.)

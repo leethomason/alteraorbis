@@ -25,14 +25,11 @@
 using namespace grinliz;
 
 
-float HealthComponent::GetHealthFraction() const
+void HealthComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {
-	if ( !parentChit->GetItemComponent() )
-		return 1.0f;
-
-	GameItem* item = parentChit->GetItemComponent()->GetItem();
-	float fraction = item->hp / item->TotalHP();
-	return fraction;
+	if ( msg.ID() == ChitMsg::GAMEITEM_TICK ) {
+		DeltaHealth();
+	}
 }
 
 
@@ -41,11 +38,9 @@ void HealthComponent::DeltaHealth()
 	if ( destroyed )
 		return;
 
-	parentChit->SendMessage( ChitMsg( ChitMsg::HEALTH_CHANGED ), this );
-
 	GameItem* item = 0;
 	if ( parentChit->GetItemComponent() ) {
-		item = parentChit->GetItemComponent()->GetItem();
+		item = parentChit->GetItem();
 	}
 	if ( item ) {
 		if ( item->hp == 0 ) {

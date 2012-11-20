@@ -30,6 +30,19 @@ using namespace tinyxml2;
 #define READ_UINT_ATTR( ele, name )		{ ele->QueryUnsignedAttribute( #name, &name ); }
 
 
+float AbilityCurve( float yAt0, float yAt1, float yAt16, float yAt32, float x )
+{
+	GLASSERT( grinliz::InRange( x, 0.0f, 32.0f ));
+	if ( x < 1 ) {
+		return grinliz::Lerp( yAt0, yAt1, x );
+	}
+	else if ( x < 16 ) {
+		return grinliz::Lerp( yAt1, yAt16, (x-1.0f)/15.0f );
+	}
+	return grinliz::Lerp( yAt16, yAt32, (x-16.0f)/16.0f );
+}
+
+
 void GameItem::Save( tinyxml2::XMLPrinter* )
 {
 	GLASSERT( 0 );
@@ -159,14 +172,12 @@ bool GameItem::DoTick( U32 delta )
 	float maxEffectDamage = Delta( delta, EFFECT_DAMAGE_PER_SEC );
 	hp -= Min( accruedFire, maxEffectDamage );
 	hp -= Min( accruedShock, maxEffectDamage );
-	if ( !(flags & FLAMMABLE)) {
-		accruedFire -= maxEffectDamage;
-		accruedFire = Max( 0.0f, accruedFire );
-	}
-	if ( !(flags & SHOCKABLE)) {
-		accruedShock -= maxEffectDamage;
-		accruedShock = Max( 0.0f, accruedShock );
-	}
+
+	accruedFire -= maxEffectDamage * ((flags & FLAMMABLE) ? 0.1f : 1.0f);
+	accruedFire = Max( 0.0f, accruedFire );
+	
+	accruedShock -= maxEffectDamage * ((flags & SHOCKABLE) ? 0.5f : 1.0f);
+	accruedShock = Max( 0.0f, accruedShock );
 
 	hp += Delta( delta, hpRegen );
 	hp = Clamp( hp, 0.0f, TotalHP() );
@@ -210,6 +221,10 @@ void GameItem::AbsorbDamage( bool inInventory, DamageDesc dd, DamageDesc* remain
 			reloadTime = 0;
 			absorbed = Min( dd.damage * absorbsDamage, (float)rounds );
 			rounds -= LRintf( absorbed );
+			// Shock does extra damage to shields.
+			if ( effect & EFFECT_SHOCK ) {
+				rounds -= LRintf( absorbed * 0.5f );
+			}
 			if ( rounds < 0 ) rounds = 0;
 
 			// If the shield still has power, remove the effect.
