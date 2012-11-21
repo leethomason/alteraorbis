@@ -55,6 +55,7 @@ void RenderQueue::Add(	Model* model,
 						const ModelAtom* atom, 
 						const GPUState& state, 
 						const Vector4F& param, 
+						const Vector4F& control,
 						const Matrix4* param4,
 						const BoneData* boneData  )
 {
@@ -66,6 +67,7 @@ void RenderQueue::Add(	Model* model,
 	item->model = model;
 	item->atom = atom;
 	item->param = param;
+	item->control = control;
 	item->param4 = param4;
 	item->boneData = boneData;
 
@@ -149,7 +151,7 @@ void RenderQueue::Submit(	int modelRequired,
 						instanceMatrix[index] = item->model->XForm();
 					}
 					instanceParam1[index] = item->param;
-					instanceControlParam[index].Set( 1,1,1,1 );
+					instanceControlParam[index] = item->control;
 
 					if ( item->param4 ) {
 						instanceParam4[index] = *item->param4;

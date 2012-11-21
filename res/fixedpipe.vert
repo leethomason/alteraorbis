@@ -210,7 +210,7 @@ void main() {
 		// Fade at edges: light * max(normal.z,0) since the normal is in eye coordinates.
 		// Just gives weird lighting here in low poly world. Sort of dramatic - worth considering
 		// as an "outline" effect.
-		color *= light * mix( normal.z, 1.0, controlParam.x );
+		color *= light * mix( 1.0-normal.z, 1.0, smoothstep( 0.5, 1.0, controlParam.x )) * smoothstep( 0.0, 0.5, controlParam.x );
 	#else
 		color *= controlParam.x;
 	#endif

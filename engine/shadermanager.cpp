@@ -16,9 +16,6 @@
 #include "shadermanager.h"
 #include "platformgl.h"
 #include "texture.h"
-
-//#include "shaders.inc"
-
 #include "../grinliz/glperformance.h"
 #include "../grinliz/glrandom.h"
 

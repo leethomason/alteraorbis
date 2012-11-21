@@ -295,18 +295,6 @@ public:
 		}
 	}
 
-	/*
-	void SetTexXForm( int index, float xScale, float yScale, float dx, float dy ) { 
-		grinliz::Vector4F v = { xScale, yScale, dx, dy };
-		SetParam( MODEL_PARAM_IS_TEX_XFORM, index, v );
-	}
-	bool HasTextureXForm( int index ) const
-	{
-		static const grinliz::Vector4F zero = { 0, 0, 0, 0 };
-		return IsFlagSet( MODEL_PARAM_IS_TEX_XFORM ) && param[index] != zero;
-	}
-	*/
-
 	void SetColor( const grinliz::Vector4F& color ) {
 		SetParam( MODEL_PARAM_IS_COLOR, -1, color );
 	}
@@ -323,6 +311,8 @@ public:
 	}
 	//// </PARAMS>
 	void SetProcedural( bool on, const grinliz::Color4F* colors, const float* v );
+	void SetControl( const grinliz::Vector4F& v )	{ control = v; }
+
 	// AABB for user selection (bigger than the true AABB)
 	void CalcHitAABB( grinliz::Rectangle3F* aabb ) const;
 
@@ -409,6 +399,7 @@ private:
 	bool hasParticles;
 
 	grinliz::Vector4F	param[EL_MAX_MODEL_GROUPS];
+	grinliz::Vector4F	control;
 	ModelAux* aux;
 	int flags;
 

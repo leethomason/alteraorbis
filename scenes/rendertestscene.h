@@ -51,7 +51,8 @@ public:
 
 private:
 	enum { NUM_ITEMS = 4,
-		   NUM_MODELS = 16 };
+		   NUM_MODELS = 16,
+		   NUM_CONTROL = 6 };
 
 	void SetupTest0();
 	void SetupTest1();
@@ -63,6 +64,7 @@ private:
 	gamui::PushButton okay;
 	gamui::PushButton glowButton;
 	gamui::PushButton refreshButton;
+	gamui::ToggleButton control[ NUM_CONTROL ];
 	gamui::Image rtImage;
 
 	Engine* engine;
