@@ -100,6 +100,14 @@ void ChitBag::QueueDelete( Chit* chit )
 }
 
 
+void ChitBag::QueueDeleteComponent( Component* comp )
+{
+	CompID* c = compDeleteList.PushArr(1);
+	c->chitID = comp->ParentChit()->ID();
+	c->compID = comp->ID();
+}
+
+
 Bolt* ChitBag::NewBolt()
 {
 	return bolts.PushArr(1);
@@ -145,6 +153,21 @@ void ChitBag::DoTick( U32 delta, Engine* engine )
 		}
 	}
 	deleteList.Clear();
+
+
+	for( int i=0; i<compDeleteList.Size(); ++i ) {
+		Chit* chit = 0;
+		chitID.Query( compDeleteList[i].chitID, &chit );
+		if ( chit ) {
+			Component* c = chit->GetComponent( compDeleteList[i].compID );
+			if ( c ) {
+				chit->Remove( c );
+				delete c;
+			}
+		}
+	}
+	compDeleteList.Clear();
+
 
 	if ( engine ) {
 		Bolt::TickAll( &bolts, delta, engine, this );

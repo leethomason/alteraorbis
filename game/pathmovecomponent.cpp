@@ -60,6 +60,7 @@ void PathMoveComponent::OnRemove()
 
 void PathMoveComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {
+	super::OnChitMsg( chit, msg );
 }
 
 

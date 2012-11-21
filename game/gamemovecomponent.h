@@ -20,6 +20,8 @@ public:
 		return super::ToComponent( name );
 	}
 
+	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
+
 	WorldMap* GetWorldMap() { return map; }
 
 protected:

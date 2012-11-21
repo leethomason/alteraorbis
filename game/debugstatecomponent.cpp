@@ -126,5 +126,8 @@ void DebugStateComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			shieldBar.SetRange( Clamp( r, 0.f, 1.0f ));
 		}
 	}
+	else {
+		super::OnChitMsg( chit, msg );
+	}
 }
 

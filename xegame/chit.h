@@ -42,7 +42,9 @@ class ChitMsg
 public:
 	enum {
 		// ---- Chit --- //
-		CHIT_DESTROYED,			// sender: health
+		CHIT_DESTROYED_START,	// sender: health. *starts* the countdown sequence.
+		CHIT_DESTROYED_TICK,	// dataF = fraction
+		CHIT_DESTROYED_END,		// sender: health. ends the sequence, next step is the chit delete
 		CHIT_DAMAGE,			// sender: chitBag, Data=isExplosion 
 								//					Ptr = &DamageDesc, 
 								//					vector=origin of impact
@@ -125,6 +127,7 @@ public:
 	ItemComponent*		GetItemComponent()		{ return itemComponent; }
 	RenderComponent*	GetRenderComponent()	{ return renderComponent; }
 	Component*			GetComponent( const char* name );
+	Component*			GetComponent( int id );
 
 	ChitBag* GetChitBag() { return chitBag; }
 	GameItem* GetItem();

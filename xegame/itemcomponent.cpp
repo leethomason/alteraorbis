@@ -105,6 +105,9 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			}
 		}
 	}
+	else {
+		super::OnChitMsg( chit, msg );
+	}
 }
 
 

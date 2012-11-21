@@ -115,3 +115,14 @@ void SpatialComponent::OnRemove()
 	parentChit->GetChitBag()->RemoveFromSpatialHash( parentChit, (int)position.x, (int)position.z );
 	Component::OnRemove();
 }
+
+
+void SpatialComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
+{
+	if ( msg.ID() == ChitMsg::CHIT_DESTROYED_START ) {
+		// NOT deleted by destroy sequence.
+	}
+	else {
+		super::OnChitMsg( chit, msg );
+	}
+}

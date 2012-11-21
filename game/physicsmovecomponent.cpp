@@ -4,6 +4,7 @@
 
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/chit.h"
+#include "../xegame/chitbag.h"
 
 using namespace grinliz;
 

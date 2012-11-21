@@ -33,6 +33,8 @@ class RelativeSpatialComponent;
 */
 class SpatialComponent : public Component
 {
+private:
+	typedef Component super;
 public:
 	//  track: should this be tracked in the ChitBag's spatial hash?
 	SpatialComponent() {
@@ -52,6 +54,7 @@ public:
 
 	virtual void OnAdd( Chit* chit );
 	virtual void OnRemove();
+	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
 
 	// Position and rotation are absolute (post-transform)
 	void SetPosition( float x, float y, float z )	{ grinliz::Vector3F v = { x, y, z }; SetPosition( v ); }

@@ -30,6 +30,28 @@ void HealthComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 	if ( msg.ID() == ChitMsg::GAMEITEM_TICK ) {
 		DeltaHealth();
 	}
+	else {
+		super::OnChitMsg( chit, msg );
+	}
+}
+
+
+bool HealthComponent::DoTick( U32 delta )
+{
+	if ( destroyed ) {
+		destroyed += delta;
+		GLASSERT( parentChit );
+		if ( destroyed >= COUNTDOWN ) {
+			parentChit->SendMessage( ChitMsg( ChitMsg::CHIT_DESTROYED_END ), this );
+			GetChitBag()->QueueDelete( parentChit );
+		}
+		else {
+			ChitMsg msg( ChitMsg::CHIT_DESTROYED_TICK );
+			msg.dataF = 1.0f - this->DestroyedFraction();
+			parentChit->SendMessage( msg );
+		}
+	}
+	return destroyed > 0;
 }
 
 
@@ -43,11 +65,10 @@ void HealthComponent::DeltaHealth()
 		item = parentChit->GetItem();
 	}
 	if ( item ) {
-		if ( item->hp == 0 ) {
-			parentChit->SendMessage( ChitMsg( ChitMsg::CHIT_DESTROYED), this );
+		if ( item->hp == 0 && item->TotalHP() != 0 ) {
+			parentChit->SendMessage( ChitMsg( ChitMsg::CHIT_DESTROYED_START), this );
 			GLLOG(( "Chit %3d destroyed.\n", parentChit->ID() ));
-			GetChitBag()->QueueDelete( parentChit );
-			destroyed = true;
+			destroyed = 1;
 		}
 	}
 }
