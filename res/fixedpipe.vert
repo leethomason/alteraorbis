@@ -1,25 +1,10 @@
 // CAUTION: never use 'int' attributes. They don't work for reasons unknown to me.
 
-// There doesn't seem to be a good way to query the uniforms in use for OpenGL 3.1. Very annoying.
-// EL_MAX_INSTANCE = 16
-// EL_MAX_BONES = 12
-// 
-//	mvpMatrix		4			4
-// 	mMatrix			4*16		64
-//	paramArr		1*16		16
-//	colorMult		1			1
-//	boneXForm		12*16		192		// technically vec3, but doubt it packs
-//	normalMat		4			4
-// 	lighting		3			3
-//
-//									284 plus overhead
-// If needed, can possibly pack boneXForm into 4*16 = 64, bringing it down to 156, which is huge in getting it under 256, for systems with that limit. 
-
 uniform mat4 	u_mvpMatrix;		// model-view-projection.
 									// although the model is identity in the instancing case.
-
 #if INSTANCE == 1
-	uniform mat4 	u_mMatrix[EL_MAX_INSTANCE];		// Each instance gets its own transform. Burns up uniforms; this can't be huge.
+	uniform mat4 		u_mMatrix[EL_MAX_INSTANCE];		// Each instance gets its own transform. Burns up uniforms; this can't be huge.
+	uniform vec4		u_controlParamArr[EL_MAX_INSTANCE];
 	#if PARAM == 1
 		uniform vec4	u_paramArr[EL_MAX_INSTANCE];	// Arbitrary params, if used. (texture xform, color, etc.)
 	#endif
@@ -28,6 +13,7 @@ uniform mat4 	u_mvpMatrix;		// model-view-projection.
 	#endif
 	attribute float a_instanceID;					// Index into the transformation.
 #else
+	uniform vec4 		u_controlParam;				// Controls fade.
 	#if PARAM == 1
 		uniform vec4	u_param;					// Arbitrary params, if used. (texture xform, color, etc.)
 	#endif
@@ -89,20 +75,24 @@ varying vec4 v_color;
 
 void main() {
 
+	#if INSTANCE == 1
+		vec4 controlParam 	= u_controlParamArr[int(a_instanceID)];
+	#else
+		vec4 controlParam 	= u_controlParam;
+	#endif
 	#if PARAM == 1
 		// Don't go insane with #if syntax later:
 		#if INSTANCE == 1
-			vec4 param = u_paramArr[int(a_instanceID)];
+			vec4 param 		= u_paramArr[int(a_instanceID)];
 		#else
-			vec4 param = u_param;
+			vec4 param 		= u_param;
 		#endif
 	#endif
 	#if PARAM4 == 1
-		// Don't go insane with #if syntax later:
 		#if INSTANCE == 1
-			mat4 param4 = u_param4Arr[int(a_instanceID)];
+			mat4 param4 	= u_param4Arr[int(a_instanceID)];
 		#else
-			mat4 param4 = u_param4;
+			mat4 param4 	= u_param4;
 		#endif
 	#endif
 
@@ -136,10 +126,6 @@ void main() {
 			v_color1 = vec4( param4[0][1], param4[1][1], param4[2][1], 1.0 );		// FIXME: switch to columns
 			v_color2 = vec4( param4[0][2], param4[1][2], param4[2][2], 1.0 );		// FIXME: switch to columns
 			v_color3 = vec4( param4[0][3], param4[1][3], param4[2][3], 1.0 );		// FIXME: switch to columns
-			//v_color0 = vec4( 1, 1, 1, 1);
-			//v_color1 = vec4( 1, 1, 1, 1);
-			//v_color2 = vec4( 1, 1, 1, 1);
-			//v_color3 = vec4( 1, 1, 1, 1);
 		#endif
 	#endif
 	#if TEXTURE1 == 1
@@ -201,7 +187,6 @@ void main() {
 	#endif
 	
 	#if LIGHTING_DIFFUSE  > 0
-		// FIXME: xform will be identity if bones=0
 		#if INSTANCE == 0 
 			vec3 normal = normalize( ( u_normalMatrix  * xform * vec4( a_normal.x, a_normal.y, a_normal.z, 0 ) ).xyz );
 		#else
@@ -222,9 +207,14 @@ void main() {
 		#else	
 			#error light not defined
 		#endif
-		color *= light;
+		// Fade at edges: light * max(normal.z,0) since the normal is in eye coordinates.
+		// Just gives weird lighting here in low poly world. Sort of dramatic - worth considering
+		// as an "outline" effect.
+		color *= light * mix( normal.z, 1.0, controlParam.x );
+	#else
+		color *= controlParam.x;
 	#endif
-	
+
 	#if BONE_FILTER == 1
 		float mult = ( param.x == a_boneID ) ? 1.0 : 0.0; 
 		pos = pos * mult;

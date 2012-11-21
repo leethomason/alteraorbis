@@ -45,6 +45,7 @@ static const char* gUniformName[ShaderManager::MAX_UNIFORM] =
 	"u_mvpMatrix",
 	"u_mMatrix",
 	"u_paramArr",
+	"u_controlParamArr",
 	"u_param4Arr",
 
 	"u_normalMatrix",
@@ -54,6 +55,7 @@ static const char* gUniformName[ShaderManager::MAX_UNIFORM] =
 	"u_diffuse",
 	"u_radius",
 	"u_param",
+	"u_controlParam",
 	"u_param4",
 	"u_boneXForm",
 };

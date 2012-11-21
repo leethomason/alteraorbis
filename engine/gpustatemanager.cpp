@@ -332,25 +332,34 @@ void GPUState::Weld( const GPUState& state, const GPUStream& stream, const GPUSt
 		shadman->SetStreamData( ShaderManager::A_INSTANCE_ID, 1, GL_UNSIGNED_SHORT, 
 			                    stream.stride, PTR( data.streamPtr, stream.instanceIDOffset ) );
 		if ( paramNeeded ) {
-			GLASSERT( data.param );
-			shadman->SetUniformArray( ShaderManager::U_PARAM_ARR, EL_MAX_INSTANCE, data.param );
+			GLASSERT( data.param1 );
+			shadman->SetUniformArray( ShaderManager::U_PARAM_ARR, EL_MAX_INSTANCE, data.param1 );
 		}
 		if ( flags & ShaderManager::PROCEDURAL ) {
 			GLASSERT( data.param4 );
 			shadman->SetUniformArray( ShaderManager::U_PARAM4_ARR, EL_MAX_INSTANCE, data.param4 );
 		}
+		GLASSERT( data.controlParam );
+		shadman->SetUniformArray( ShaderManager::U_CONTROL_PARAM_ARR, EL_MAX_INSTANCE, data.controlParam );
 	}
 	else {
 		Matrix4 mvp;
 		MultMatrix4( GPUState::TopMatrix( GPUState::PROJECTION_MATRIX ), mv, &mvp );
 		shadman->SetUniform( ShaderManager::U_MVP_MAT, mvp );
 		if ( paramNeeded ) {
-			GLASSERT( data.param );
-			shadman->SetUniform( ShaderManager::U_PARAM, data.param[0] );
+			GLASSERT( data.param1 );
+			shadman->SetUniform( ShaderManager::U_PARAM, data.param1[0] );
 		}
 		if ( flags & ShaderManager::PROCEDURAL ) {
 			GLASSERT( data.param4 );
 			shadman->SetUniform( ShaderManager::U_PARAM4, data.param4[0] );
+		}
+		if ( data.controlParam ) {
+			shadman->SetUniform( ShaderManager::U_CONTROL_PARAM, data.controlParam[0] );
+		}
+		else {
+			Vector4F v = { 1, 1, 1, 1 };
+			shadman->SetUniform( ShaderManager::U_CONTROL_PARAM, v );
 		}
 	}
 
