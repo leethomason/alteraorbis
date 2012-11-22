@@ -42,15 +42,21 @@ public:
 private:
 	void CreateTexture();
 	void GenerateFaces( int mainRow );
+	void GenerateRing( int mainRow );
 
 	enum { 
 		ROWS = 4, 
 		COLS = 4, 
-		NUM_MODEL = ROWS*COLS 
+		NUM_MODEL = ROWS*COLS,
+
+		FACE = 0,
+		RING,
+		NUM_TYPES
 	};
 
 	gamui::PushButton okay;
 	gamui::ToggleButton rowButton[ROWS];
+	gamui::ToggleButton typeButton[NUM_TYPES];
 
 	U32 fileTimer;
 	time_t fileTime;

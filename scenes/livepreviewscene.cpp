@@ -40,6 +40,7 @@ LivePreviewScene::LivePreviewScene( LumosGame* game ) : Scene( game )
 	const ButtonLook& look = game->GetButtonLook(0);
 	const float width  = layout.Width();
 	const float height = layout.Height();
+
 	for( int i=0; i<ROWS; ++i ) {
 		rowButton[i].Init( &gamui2D, look );
 		rowButton[i].SetSize( width, height );
@@ -47,6 +48,14 @@ LivePreviewScene::LivePreviewScene( LumosGame* game ) : Scene( game )
 		t.Format( "%d", i+1 );
 		rowButton[i].SetText( t.c_str() );
 		rowButton[0].AddToToggleGroup( &rowButton[i] );
+	}
+
+	static const char* typeName[NUM_TYPES] = { "Face", "Ring" };
+	for( int i=0; i<NUM_TYPES; ++i ) {
+		typeButton[i].Init( &gamui2D, look );
+		typeButton[i].SetSize( width, height );
+		typeButton[i].SetText( typeName[i] );
+		typeButton[0].AddToToggleGroup( &typeButton[i] );
 	}
 
 	memset( model, 0, sizeof(Model*) * NUM_MODEL );
@@ -83,6 +92,9 @@ void LivePreviewScene::Resize()
 	LayoutCalculator layout = static_cast<LumosGame*>(game)->DefaultLayout();
 	for( int i=0; i<ROWS; ++i ) {
 		layout.PosAbs( &rowButton[i], 0, i );
+	}
+	for( int i=0; i<NUM_TYPES; ++i ) {
+		layout.PosAbs( &typeButton[i], -1, i );
 	}
 }
 
@@ -143,6 +155,13 @@ void LivePreviewScene::GenerateFaces( int mainRow )
 		model[i]->SetProcedural( true, color, tex );
 	}
 }
+
+
+void LivePreviewScene::GenerateRing( int mainRow )
+{
+
+}
+
 
 void LivePreviewScene::ItemTapped( const gamui::UIItem* item )
 {
