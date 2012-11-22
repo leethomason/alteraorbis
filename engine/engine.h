@@ -157,6 +157,16 @@ public:
 
 	void LoadConfigFiles( const char* particle, const char* lighting );
 
+	enum {
+		RT_LIGHTS,
+		RT_BLUR_0,
+		RT_BLUR_1,
+		RT_BLUR_2,
+		RT_BLUR_3,
+		RT_COUNT,
+		BLUR_COUNT = 4
+	};
+
 private:
 	enum ShadowState {
 		IN_SHADOW,
@@ -181,22 +191,6 @@ private:
 	RenderQueue* renderQueue;
 	BoltRenderer* boltRenderer;
 
-	enum {
-		RT_LIGHTS,
-#ifdef EL_USE_MRT_BLUR
-		RT_BLUR_0,
-		RT_BLUR_1,
-		RT_BLUR_2,
-		//RT_BLUR_3,
-		//RT_BLUR_4,
-		//RT_BLUR_5,
-#else
-		RT_BLUR_X,
-		RT_BLUR_Y,
-#endif
-		RT_COUNT,
-		BLUR_COUNT = 3
-	};
 	RenderTarget* renderTarget[RT_COUNT];
 	RenderTarget* miniMapRenderTarget;
 };

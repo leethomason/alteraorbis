@@ -7,25 +7,12 @@
 	X color variation for live mode
 
 - combat test scene	
-	x ranged accuracy / weapon types / ItemStat data
-	- add de-rez
-	x unique look for units so teams can be distinguished
-	x buttons to select scenario, load items
-	x shock should affect shields, fire should diminish even when flammable, and shockable should diminish
-	x restore micropather cache
-
 	- weapon types
 	- animation speed isn't correct
 	- gunrun to walk not synchronized correctly
 	- revisit accuracy comuptation. what scales with distance? area? volume? radius?
 	- melee attack goes back to reference position between hits
 
-	x ranged weapons
-		x accuracy
-		x effect
-		X reload time 'reload'
-		X time per shot 'cooldown'
-		X rounds in clip
 	- AI (task AI)
 		- removing unit "clumping" (3yr old soccer team). Basic formation?
 		- establish friend vs. enemy
@@ -37,8 +24,8 @@
 		- battle results
 
 	- serialization
-	- add rez and de-rez effect for chits
 
+- particles should use palette. <color palette="2 3 1.0"/> possibly
 - remove normalization in shader
 - print uniform count for shaders
 - animition aware hit testing
@@ -50,7 +37,7 @@
 - memory pool everything in the chit/component system
 - analyze/optimize what causes component update: DoTick(), etc. Likely many DoTicks() getting called that aren't needed. (especially rendering...)
 - use optimizer to pre-process shaders
-
+- add rez effect for item switch?
 
 ** ECR **
 - face renderer should use bicubic filtering, also: switch to image magick for image processing
@@ -66,6 +53,18 @@
 ----------- FIXED -------------
 
 x battle scene
+	x ranged weapons
+		x accuracy
+		x effect
+		X reload time 'reload'
+		X time per shot 'cooldown'
+		X rounds in clip
+	x ranged accuracy / weapon types / ItemStat data
+	x add de-rez
+	x unique look for units so teams can be distinguished
+	x buttons to select scenario, load items
+	x shock should affect shields, fire should diminish even when flammable, and shockable should diminish
+	x restore micropather cache
 	X error in ray-cast: detecting a 'tree' where it shouldn't (near the head of the prime)
 	x adjust particles to have "impact" effect
 	X don't check for item destroyed/death on DAMAGE msg - needs to be moved to tick.
