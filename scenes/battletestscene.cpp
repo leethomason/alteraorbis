@@ -36,6 +36,7 @@
 #include "../engine/loosequadtree.h"
 
 #include "../script/worldscript.h"
+#include "../script/procedural.h"
 
 #include <ctime>
 
@@ -55,6 +56,10 @@ const BattleTestScene::ButtonDef BattleTestScene::buttonDef[NUM_BUTTONS] =
 	{ NO_WEAPON,"None",		LEFT_WEAPON },
 	{ MELEE_WEAPON, "Melee",LEFT_WEAPON },
 	{ PISTOL,	"Pistol",	LEFT_WEAPON },
+	{ LEVEL_0,	"Lev0",		LEFT_LEVEL },
+	{ LEVEL_2,	"Lev2",		LEFT_LEVEL },
+	{ LEVEL_4,	"Lev4",		LEFT_LEVEL },
+	{ LEVEL_8,	"Lev8",		LEFT_LEVEL },
 
 	{ COUNT_1,	"1",		RIGHT_COUNT },
 	{ COUNT_2,	"2",		RIGHT_COUNT },
@@ -67,6 +72,10 @@ const BattleTestScene::ButtonDef BattleTestScene::buttonDef[NUM_BUTTONS] =
 	{ NO_WEAPON,"None",		RIGHT_WEAPON },
 	{ MELEE_WEAPON, "Melee",RIGHT_WEAPON },
 	{ PISTOL,	"Pistol",	RIGHT_WEAPON },
+	{ LEVEL_0,	"Lev0",		RIGHT_LEVEL },
+	{ LEVEL_2,	"Lev2",		RIGHT_LEVEL },
+	{ LEVEL_4,	"Lev4",		RIGHT_LEVEL },
+	{ LEVEL_8,	"Lev8",		RIGHT_LEVEL },
 };
 
 
@@ -113,6 +122,11 @@ BattleTestScene::BattleTestScene( LumosGame* game ) : Scene( game )
 	optionButton[DUMMY].SetVisible( false );
 	optionButton[COUNT_4+NUM_OPTIONS].SetDown();
 
+	label[0].Init( &gamui2D );
+	label[0].SetText( "" );
+	label[1].Init( &gamui2D );
+	label[1].SetText( "Team Tangerine" );
+
 	engine = 0;
 	map = 0;
 	itemStorage.Load( "./res/itemdef.xml" );
@@ -152,9 +166,11 @@ void BattleTestScene::Resize()
 			x = i < NUM_OPTIONS ? 0 : -4;
 			currentGroup = buttonDef[i].group;
 		}
-		layout.PosAbs( &optionButton[i], x, y );
+		layout.PosAbs( &optionButton[i], x, y+1 );
 		++x;
 	}
+	layout.PosAbs( &label[0], 0, 0 );
+	layout.PosAbs( &label[1], -4, 0 );
 }
 
 
@@ -232,10 +248,10 @@ void BattleTestScene::LoadMap()
 
 	Vector2I unit = { 2, 16 };
 	Vector2I dummy = { 16, 16 };
-	CreateChit( unit, HUMAN, PISTOL, LEFT );
-	CreateChit( dummy, DUMMY, NO_WEAPON, MID );
+	CreateChit( unit, HUMAN, PISTOL, LEFT, 0 );
+	CreateChit( dummy, DUMMY, NO_WEAPON, MID, 0 );
 	dummy.Set( 16, 17 );
-	CreateChit( dummy, DUMMY, NO_WEAPON, MID );
+	CreateChit( dummy, DUMMY, NO_WEAPON, MID, 0 );
 
 	engine->CameraLookAt( (float)map->Width()/2, (float)map->Height()/2, 
 		                  22.f,		// height
@@ -267,19 +283,23 @@ void BattleTestScene::GoScene()
 		chitBag.DeleteChit( chitArr[i] );
 	}
 
+	static const int LEVEL[4] = { 0, 2, 4, 8 };
+
 	int leftCount	= 1 << ButtonDownID( LEFT_COUNT );
 	int leftMoB		= ButtonDownID( LEFT_MOB );
 	int leftWeapon	= ButtonDownID( LEFT_WEAPON );
+	int leftLevel   = LEVEL[ ButtonDownID( LEFT_LEVEL ) - LEVEL_0  ];
 	int rightCount	= 1 << ButtonDownID( RIGHT_COUNT );
 	int rightMoB	= ButtonDownID( RIGHT_MOB );
 	int rightWeapon = ButtonDownID( RIGHT_WEAPON );
 	int rightLoc    = (rightMoB == DUMMY) ? MID : RIGHT;
+	int rightLevel   = LEVEL[ ButtonDownID( RIGHT_LEVEL ) - LEVEL_0  ];
 
 	for( int i=0; i<leftCount; ++i ) {
-		CreateChit( waypoints[LEFT][i], leftMoB, leftWeapon, LEFT );
+		CreateChit( waypoints[LEFT][i], leftMoB, leftWeapon, LEFT, leftLevel );
 	}
 	for( int i=0; i<rightCount; ++i ) {
-		CreateChit( waypoints[rightLoc][i], rightMoB, rightWeapon, rightLoc );
+		CreateChit( waypoints[rightLoc][i], rightMoB, rightWeapon, rightLoc, rightLevel );
 	}
 
 	// Trigger the AI to do something.
@@ -290,7 +310,7 @@ void BattleTestScene::GoScene()
 }
 
 		
-void BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int team )
+void BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int team, int level )
 {
 	const char* asset = "humanFemale";
 	switch ( type ) {
@@ -327,6 +347,8 @@ void BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int 
 
 	GameItem item( *(itemDefArr[0]));
 	item.primaryTeam = team;
+	item.stats.SetExpFromLevel( level );
+	item.InitState();
 	chit->Add( new ItemComponent( item ));
 
 	chit->Add( new HealthComponent());
@@ -341,29 +363,50 @@ void BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int 
 	}
 
 	if ( type == HUMAN ) {
+		Color4F tangerine = game->GetPalette()->Get4F( PAL_TANGERINE*2, PAL_TANGERINE );
+		Color4F blue      = game->GetPalette()->Get4F( PAL_BLUE*2, PAL_BLUE );
+		if ( team == RIGHT ) {
+			chit->GetRenderComponent()->ParamColor( 0, tangerine.ToVector() );
+		}
+		if ( team == LEFT ) {
+			chit->GetRenderComponent()->ParamColor( 0, blue.ToVector() );
+		}
+
 		// Always get a shield
 		{
 			const GameItem* shield = itemStorage.Get( "shield" );
 			GLASSERT( shield );
-			inv->AddToInventory( new GameItem( *shield ), true );
+			GameItem* gi = new GameItem( *shield );
+			gi->stats.SetExpFromLevel( level );
+			gi->InitState();
+			inv->AddToInventory( gi, true );
 		}
 
 		if( loadout == MELEE_WEAPON ) {
 			const GameItem *knife = itemStorage.Get( "ring" );
 			GLASSERT( knife );
-			inv->AddToInventory( new GameItem(*knife), true );
+			GameItem* gi = new GameItem( *knife );
+			gi->stats.SetExpFromLevel( level );
+			gi->InitState();
+			inv->AddToInventory( gi, true );
 		}
 		else if ( loadout == PISTOL ) {
 			const GameItem* gun = itemStorage.Get( "testgun" );
 			GLASSERT( gun );
-			inv->AddToInventory( new GameItem(*gun), true );
+			GameItem* gi = new GameItem( *gun );
+			gi->stats.SetExpFromLevel( level );
+			gi->InitState();
+			inv->AddToInventory( gi, true );
 		}
 	}
 	else if ( type == BALROG ) {
 		if ( loadout == MELEE_WEAPON ) {
 			const GameItem* ax = itemStorage.Get( "ax" );
 			GLASSERT( ax );
-			inv->AddToInventory( new GameItem(*ax), true );
+			GameItem* gi = new GameItem( *ax );
+			gi->stats.SetExpFromLevel( level );
+			gi->InitState();
+			inv->AddToInventory( gi, true );
 		}
 	}
 }

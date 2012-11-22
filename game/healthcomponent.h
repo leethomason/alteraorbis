@@ -37,11 +37,10 @@ public:
 	}
 
 	virtual void DebugStr( grinliz::GLString* str )		{ str->Format( "[Health] " ); }
-
-	float GetHealthFraction() const;
-	void  DeltaHealth();
+	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
 
 private:
+	void  DeltaHealth();
 	bool destroyed;
 };
 

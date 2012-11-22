@@ -53,7 +53,7 @@ public:
 				IRangedWeaponItem* weapon, 
 				const grinliz::Vector3F& pos );
 
-	float TestFire( float range, float targetDiameter, const GameItem* shooter, const GameItem* weapon );
+	float TestFire( float range, float targetDiameter );
 
 	// Other --------------------- //
 
@@ -62,7 +62,7 @@ public:
 	static int PrimaryTeam( Chit* src );
 
 private:
-	float ComputeAccuracy( Chit* shooter, IRangedWeaponItem* weapon, Chit* target );
+	float ComputeRadAt1( Chit* shooter, IRangedWeaponItem* weapon, Chit* target );
 	grinliz::Vector3F FuzzyAim( const grinliz::Vector3F& origin, const grinliz::Vector3F& target, float radiusAt1 );
 
 	grinliz::Vector3F ComputeLeadingShot( const grinliz::Vector3F& origin,

@@ -7,20 +7,21 @@
 	X color variation for live mode
 
 - combat test scene	
-	- ranged accuracy / weapon types / ItemStat data
+	x ranged accuracy / weapon types / ItemStat data
 	- add de-rez
-	- unique look for units so teams can be distinguished
-	- refactor code - if needed? - in AIComponent (the fixmes)
-	- buttons to select scenario, load items
+	x unique look for units so teams can be distinguished
+	k buttons to select scenario, load items
+	x shock should affect shields, fire should diminish even when flammable, and shockable should diminish
 	x restore micropather cache
 
+	- weapon types
 	- animation speed isn't correct
 	- gunrun to walk not synchronized correctly
 	- revisit accuracy comuptation. what scales with distance? area? volume? radius?
 	- melee attack goes back to reference position between hits
 
-	- ranged weapons
-		- accuracy
+	x ranged weapons
+		x accuracy
 		x effect
 		X reload time 'reload'
 		X time per shot 'cooldown'
@@ -30,8 +31,9 @@
 		- establish friend vs. enemy
 		- basic states
 		- CA to handle friends and enemies
+		- refactor code - if needed? - in AIComponent (the fixmes)
 	- UI
-		- set up different battles
+		x set up different battles
 		- battle results
 
 	- serialization

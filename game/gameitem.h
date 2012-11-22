@@ -23,6 +23,7 @@
 #include "../grinliz/glcontainer.h"
 #include "../grinliz/glstringutil.h"
 #include "../grinliz/glmath.h"
+#include "../grinliz/glutil.h"
 
 #include "../tinyxml2/tinyxml2.h"
 
@@ -90,6 +91,13 @@ public:
 };
 
 
+static const float SKILL_NORMALIZE = 0.1f;	// skill of 10 is a multiple 1.0
+static const float LEVEL_BONUS     = 0.5f;
+
+
+float AbilityCurve( float yAt0, float yAt1, float yAt16, float yAt32, float x );
+
+
 class GameStat
 {
 public:
@@ -110,16 +118,28 @@ public:
 	int Experience() const		{ return exp; }
 	int Level() const			{ return ExperienceToLevel( exp ); }
 
-	// 1.0 is normal, 0.1 very low, 2+ exceptional.
-	float Accuracy() const		{ return LeveledSkill( Dexterity() ) * 0.1f; }
+	void SetExpFromLevel( int level ) {		
+		exp = LevelToExperience( level );
+		GLASSERT( level == ExperienceToLevel( exp ));
+	}
 
+	// 1.0 is normal, 0.1 very low, 2+ exceptional.
+	float Accuracy() const		{ return NormalLeveledSkill( Dexterity() ); }
+	float Damage() const		{ return NormalLeveledSkill( Strength() ); }
+	float NormalWill() const	{ return NormalLeveledSkill( Will() ); }
+
+	// exp: 0  lev: 0
+	//      1       0
+	//      2       1
+	//      3       1
+	//      4       2
 	static int ExperienceToLevel( int ep )	{ return grinliz::LogBase2( ep >> 4 ); } 
-	static int LevelToExperience( int lp )	{ int base = (lp > 0) ? (1 << (lp-1)) : 0; 
+	static int LevelToExperience( int lp )	{ int base = (lp > 0) ? (1 << lp) : 0; 
 											  return 16 * base; }
 
 private:
-	float LeveledSkill( int value ) const {
-		return (float)value + (float)Level() * 0.5f;
+	float NormalLeveledSkill( int value ) const {
+		return ((float)value + (float)Level() * LEVEL_BONUS) * SKILL_NORMALIZE;
 	}
 
 	int strength, will, charisma, intelligence, dexterity;
@@ -229,8 +249,8 @@ public:
 	float	hpPerMass;		// typically 1
 	float	hpRegen;		// hp / second regenerated (or lost) by this item
 	int		primaryTeam;	// who owns this items
-	float	meleeDamage;	// a multiplier of the base (effective mass) and other modifiers
-	float	rangedDamage;	// base ranged damage
+	float	meleeDamage;	// a multiplier of the base (effective mass) applied before stats.Damage()
+	float	rangedDamage;	// base ranged damage, applied before stats.Damage()
 	float	absorbsDamage;	// how much damage this consumes, in the inventory (shield, armor, etc.) 1.0: all, 0.5: half
 	U32		cooldown;		// time between uses
 	U32		reload;			// time to reload once clip is used up
@@ -297,7 +317,7 @@ public:
 			reload = 2000;
 			reloadTime = reload;
 			clipCap = 0;			// default to no clip and unlimited ammo
-			rounds = 0;
+			rounds = clipCap;
 			speed = 1.0f;
 			stats.Init();
 
@@ -307,6 +327,15 @@ public:
 
 			parentChit = 0;
 		}
+	}
+
+	void InitState() {
+		hp = TotalHP();
+		accruedFire = 0;
+		accruedShock = 0;
+		cooldownTime = cooldown;
+		reloadTime = reload;
+		rounds = clipCap;
 	}
 
 	virtual IMeleeWeaponItem*	ToMeleeWeapon()		{ return (flags & MELEE_WEAPON) ? this : 0; }
@@ -343,7 +372,9 @@ public:
 	bool OnShock() const { return (!(flags & IMMUNE_SHOCK)) && accruedShock > 0; }
 
 	// Note that the current HP, if it has one, 
-	float TotalHP() const { return mass*hpPerMass; }
+	float TotalHP() const		{ return mass*hpPerMass*stats.NormalWill(); }
+	float HPFraction() const	{ return hp / TotalHP(); } 
+
 	float RoundsFraction() const {
 		if ( clipCap ) {
 			return (float)rounds / (float)clipCap;
