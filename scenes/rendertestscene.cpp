@@ -225,7 +225,7 @@ void RenderTestScene::Draw3D( U32 deltaTime )
 	}
 	engine->Draw( deltaTime );
 
-#if 1
+#if 0
 	RenderAtom atom( (const void*)UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, 
 		(const void*)engine->GetRenderTargetTexture(Engine::RT_BLUR_3), 0.25f, 0.25f, 0.75f, 0.75f );
 	rtImage.SetAtom( atom );

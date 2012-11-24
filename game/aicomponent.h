@@ -93,11 +93,15 @@ private:
 	WorldMap*	map;
 
 	enum {
-		// Primarily:	Also:
-		// Move			maybe shoot (run & gun) or reload
-		// Shoot	
-		// Melee		
-		// Stand 
+		/*
+			move,			get to shot, closer to friends, further from friends, close with enemy
+			move & shoot	
+			move & reload
+			move & melee	going in for the hit (ignore friends)
+			stand & shoot	good shot, good range, want aim bonus
+			stand & reload	
+			stand			stuck?
+		*/
 
 		// Possible actions:
 		NO_ACTION,
