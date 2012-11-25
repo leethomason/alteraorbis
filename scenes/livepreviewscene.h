@@ -61,6 +61,7 @@ private:
 	U32 fileTimer;
 	time_t fileTime;
 
+	bool		live;
 	Engine*		engine;
 	Model*		model[NUM_MODEL];
 };

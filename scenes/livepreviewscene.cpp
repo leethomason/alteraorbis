@@ -26,6 +26,7 @@ static const int COLS = 4;
 LivePreviewScene::LivePreviewScene( LumosGame* game ) : Scene( game )
 {
 	TestMap* map = 0;
+	live = false;
 	
 	//map = new TestMap( 8, 8 );
 	//Color3F c = { 0.5f, 0.5f, 0.5f };

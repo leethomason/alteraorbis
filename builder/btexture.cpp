@@ -42,6 +42,7 @@ BTexture::BTexture()
 	  emissive( false ),
 	  targetWidth( 0 ),
 	  targetHeight( 0 ),
+	  targetMax( 0 ),
 	  atlasX( 0 ),
 	  atlasY( 0 ),
 	  format( RGBA16 ),
@@ -80,6 +81,7 @@ bool BTexture::ParseTag( const tinyxml2::XMLElement* element )
 	element->QueryBoolAttribute( "noMip", &noMip );
 	element->QueryIntAttribute( "width", &targetWidth );
 	element->QueryIntAttribute( "height", &targetHeight );
+	element->QueryIntAttribute( "maxSize", &targetMax );
 	element->QueryBoolAttribute( "premult", &doPreMult );
 	element->QueryBoolAttribute( "emissive", &emissive );
 
@@ -177,6 +179,19 @@ void BTexture::Create( int w, int h, int format )
 
 bool BTexture::Scale()
 {
+	if ( targetMax ) {
+		targetWidth = surface->w;
+		targetHeight = surface->h;
+		while ( targetWidth > targetMax ) {
+			targetWidth >>= 1;
+			targetHeight >>= 1;
+		}
+		while ( targetHeight > targetMax ) {
+			targetWidth >>= 1;
+			targetHeight >>= 1;
+		}
+	}
+
 	if ( targetWidth && targetHeight )
 	{
 		SDL_Surface* old = surface;

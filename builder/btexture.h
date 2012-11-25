@@ -68,6 +68,7 @@ public:
 	bool emissive;	// if set, the alpha channel is emissiveness, not transparency
 	int targetWidth;
 	int targetHeight;
+	int targetMax;
 	int atlasX;
 	int atlasY;
 

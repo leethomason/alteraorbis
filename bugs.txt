@@ -1,4 +1,8 @@
 - procedural rendering
+	- fix glasses: they can be tightly packed, and occurance done in script
+	- procedural: the shading should "go through" so that a shadow on layer 3 is renderered below colors are layer0
+	- hair / skin color too similar some times
+	- more natural skin colors
 	- static scene showing item combinations
 	- emissive support
 	- item bone/part support
