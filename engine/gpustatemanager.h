@@ -222,7 +222,7 @@ public:
 
 
 	static void ResetState();
-	static void Clear();
+	static void Clear( float r, float g, float b, float a );
 
 	// Set the top level state. The engine has top level (root transforms)
 	// for the screen size, scissor, and transform:

@@ -66,6 +66,7 @@ public:
 	bool doPreMult;
 	bool invert;
 	bool emissive;	// if set, the alpha channel is emissiveness, not transparency
+	bool blackAlpha0;	// if set, all alpha=0 becomes 0,0,0,0	
 	int targetWidth;
 	int targetHeight;
 	int targetMax;

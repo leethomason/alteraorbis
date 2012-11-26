@@ -544,9 +544,12 @@ void Game::DoTick( U32 _currentTime )
 
 		
 		GPUState::ResetState();
-		GPUState::Clear();
 
 		Scene* scene = sceneStack.Top()->scene;
+
+		Color4F cc = scene->ClearColor();
+		GPUState::Clear( cc.r, cc.g, cc.b, cc.a );
+
 		scene->DoTick( deltaTime );
 
 		{

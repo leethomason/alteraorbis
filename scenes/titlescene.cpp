@@ -16,6 +16,7 @@
 #include "titlescene.h"
 #include "rendertestscene.h"
 #include "navtest2scene.h"
+#include "livepreviewscene.h"
 
 #include "../engine/uirendering.h"
 #include "../engine/texture.h"
@@ -38,7 +39,7 @@ TitleScene::TitleScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 													"particle", 
 													"nav", "nav2", "navWorld", 
 													//"noise", 
-													"battle", "animation", "livePr", "" };
+													"battle", "animation", "livePr", "assetPr", "" };
 
 	for( int i=0; i<NUM_TESTS; ++i ) {
 		testScene[i].Init( &gamui2D, lumosGame->GetButtonLook( LumosGame::BUTTON_LOOK_STD ) );
@@ -103,7 +104,10 @@ void TitleScene::ItemTapped( const gamui::UIItem* item )
 		game->PushScene( LumosGame::SCENE_ANIMATION, 0 );
 	}
 	else if ( item == &testScene[TEST_LIVEPREVIEW] ) {
-		game->PushScene( LumosGame::SCENE_LIVEPREVIEW, 0 );
+		game->PushScene( LumosGame::SCENE_LIVEPREVIEW, new LivePreviewSceneData( true ) );
+	}
+	else if ( item == &testScene[TEST_ASSETPREVIEW] ) {
+		game->PushScene( LumosGame::SCENE_LIVEPREVIEW, new LivePreviewSceneData( false ) );
 	}
 	else if ( item == &testScene[TEST_WEAPON_STAT] ) {
 		BattleMechanics battle;

@@ -29,6 +29,7 @@
 
 	- serialization
 
+- credits scene
 - particles should use palette. <color palette="2 3 1.0"/> possibly
 - remove normalization in shader
 - print uniform count for shaders

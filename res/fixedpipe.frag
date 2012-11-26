@@ -28,11 +28,7 @@ void main()
 		#if  PROCEDURAL == 0
 			vec4 sample = texture2D( texture0, v_uv0 );
 		#elif PROCEDURAL == 1
-			//vec4 color0 = vec4( 1.0, 0.6, 0.4, 1 );	// (r) skin
-			//vec4 color1 = vec4( 1, 1, 1, 1);		// (b0) highlight
-			//vec4 color2 = vec4( 0, 0.6, 1.0, 1 );	// (b1) glasses / tattoo
-			//vec4 color3 = vec4( 0.5, 0.2, 0, 1 );	// (g) hair
-
+			vec4 base = vec4(0,0,0,0);
 			vec4 s0 = texture2D( texture0, v_uv0 );
 			vec4 s1 = texture2D( texture0, v_uv1 );
 			vec4 s2 = texture2D( texture0, v_uv2 );
@@ -51,8 +47,13 @@ void main()
 			s3.a = s3.b;
 			s3.b = 0.0;
 			
-			vec4 t = mix( mix( mix(  s0, s1, a[1] ), s2, a[2] ), s3, a[3] );
+			// Composite together the color layes based on the (recorded) alphas
+			vec4 t = mix( mix( mix(  mix( base, s0, a[0] ), s1, a[1] ), s2, a[2] ), s3, a[3] );
+			// Now that the color layers are composited, convert from false color to correct color.
+			// Note that the alpha channel is being used as a color, not alpha.
 			vec4 sample = t.r*v_color0 + t.g*v_color3 + t.b*v_color1 + t.a*v_color2;
+			// Compute alpha. This is an approximation.
+			sample.a = clamp( a[0]+a[1]+a[2]+a[3], 0.0, 1.0 );
 		#endif
 
 		#if TEXTURE0_ALPHA_ONLY == 1

@@ -524,11 +524,12 @@ void GPUState::Weld( const GPUState& state, const GPUStream& stream, const GPUSt
 }
 
 
-void GPUState::Clear()
+void GPUState::Clear( float r, float g, float b, float a )
 {
 	GLASSERT( currentStencilMode == STENCIL_OFF );	// could be fixed, just implemented for 'off'
 	glStencilMask( GL_TRUE );	// Stupid stupid opengl behavior.
 	glClearStencil( 0 );
+	glClearColor( r, g, b, a );
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
 	glStencilMask( GL_FALSE );
 }

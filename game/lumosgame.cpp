@@ -72,14 +72,14 @@ Scene* LumosGame::CreateScene( int id, SceneData* data )
 	switch ( id ) {
 	case SCENE_TITLE:		scene = new TitleScene( this );				break;
 	case SCENE_DIALOG:		scene = new DialogScene( this );			break;
-	case SCENE_RENDERTEST:	scene = new RenderTestScene( this, (const RenderTestSceneData*)data );	break;
+	case SCENE_RENDERTEST:	scene = new RenderTestScene( this, (const RenderTestSceneData*)data );		break;
 	case SCENE_PARTICLE:	scene = new ParticleScene( this );			break;
 	case SCENE_NAVTEST:		scene = new NavTestScene( this );			break;
 	case SCENE_NAVTEST2:	scene = new NavTest2Scene( this, (const NavTest2SceneData*)data );			break;
 	case SCENE_NOISETEST:	scene = new NoiseTestScene( this );			break;
 	case SCENE_BATTLETEST:	scene = new BattleTestScene( this );		break;
 	case SCENE_ANIMATION:	scene = new AnimationScene( this );			break;
-	case SCENE_LIVEPREVIEW:	scene = new LivePreviewScene( this );		break;
+	case SCENE_LIVEPREVIEW:	scene = new LivePreviewScene( this, (const LivePreviewSceneData*)data );	break;
 
 	default:
 		GLASSERT( 0 );

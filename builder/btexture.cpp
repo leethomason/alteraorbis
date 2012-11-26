@@ -40,6 +40,7 @@ BTexture::BTexture()
 	  doPreMult( false ),
 	  invert( true ),
 	  emissive( false ),
+	  blackAlpha0( false ),
 	  targetWidth( 0 ),
 	  targetHeight( 0 ),
 	  targetMax( 0 ),
@@ -84,6 +85,7 @@ bool BTexture::ParseTag( const tinyxml2::XMLElement* element )
 	element->QueryIntAttribute( "maxSize", &targetMax );
 	element->QueryBoolAttribute( "premult", &doPreMult );
 	element->QueryBoolAttribute( "emissive", &emissive );
+	element->QueryBoolAttribute( "blackAlpha0", &blackAlpha0 );
 
 	return true;
 }
@@ -119,6 +121,8 @@ bool BTexture::Load()
 				PutPixel( surface, x, y, c );
 			}
 		}
+		SDL_FreeSurface( rgb );
+		SDL_FreeSurface( alpha );
 	}
 
 	if (    isImage
@@ -147,6 +151,19 @@ bool BTexture::Load()
 
 	if ( emissive && format != RGBA16 ) {
 		ExitError( "Texture", pathName.c_str(), assetName.c_str(), "Emmisive only supported on RGBA." );
+	}
+	if ( format == RGBA16 && blackAlpha0 ) {
+		for( int y=0; y<surface->h; ++y ) {
+			for( int x=0; x<surface->w; ++x ) {
+				Color4U8 rgbC = GetPixel( surface, x, y );
+				if ( rgbC.a == 0 ) {
+					rgbC.Set( 0, 0, 0, 0 );
+				}
+				Color4U8 c = { rgbC.r, rgbC.g, rgbC.b, rgbC.a };
+				PutPixel( surface, x, y, c );
+			}
+		}
+
 	}
 
 	printf( "%s Loaded: '%s' bpp=%d em=%d", 

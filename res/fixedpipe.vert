@@ -122,10 +122,10 @@ void main() {
 			v_uv2 = a_uv0 + vec2( 0.50, param4[3][2] );
 			v_uv3 = a_uv0 + vec2( 0.75, param4[3][3] );
 
-			v_color0 = vec4( param4[0][0], param4[1][0], param4[2][0], 1.0 );		// FIXME: switch to columns
-			v_color1 = vec4( param4[0][1], param4[1][1], param4[2][1], 1.0 );		// FIXME: switch to columns
-			v_color2 = vec4( param4[0][2], param4[1][2], param4[2][2], 1.0 );		// FIXME: switch to columns
-			v_color3 = vec4( param4[0][3], param4[1][3], param4[2][3], 1.0 );		// FIXME: switch to columns
+			v_color0 = vec4( param4[0][0], param4[1][0], param4[2][0], 1.0 );
+			v_color1 = vec4( param4[0][1], param4[1][1], param4[2][1], 1.0 );
+			v_color2 = vec4( param4[0][2], param4[1][2], param4[2][2], 1.0 );
+			v_color3 = vec4( param4[0][3], param4[1][3], param4[2][3], 1.0 );
 		#endif
 	#endif
 	#if TEXTURE1 == 1
