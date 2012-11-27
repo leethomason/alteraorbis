@@ -44,6 +44,9 @@
 - use optimizer to pre-process shaders
 - add rez effect for item switch?
 
+** Art **
+- explore "digital color" options (the bug in the face renderer is pretty inspiring). Color filter applied per face.
+
 ** ECR **
 - face renderer should use bicubic filtering, also: switch to image magick for image processing
 
