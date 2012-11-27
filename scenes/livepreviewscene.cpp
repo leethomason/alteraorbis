@@ -155,6 +155,13 @@ void LivePreviewScene::GenerateFaces( int mainRow )
 			tex[0] = rowMult * (float)random.Rand(srcRows);
 			tex[1] = rowMult * (float)random.Rand(srcRows);
 			tex[2] = rowMult * (float)random.Rand(srcRows);
+			if ( !live ) {
+				// glasses handled special:
+				if ( random.Bit() )
+					tex[2] = rowMult * (float)(srcRows);
+				else
+					tex[2] = rowMult * (float)( srcRows - random.Rand( FaceGen::GLASSES_ROWS ));
+			}
 			tex[3] = rowMult * (float)random.Rand(srcRows);
 			if ( live ) {
 				tex[col] = current;

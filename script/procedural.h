@@ -27,7 +27,12 @@ public:
 	enum { 
 		NUM_SKIN_COLORS = 4,
 		NUM_HAIR_COLORS	= 10,
-		NUM_GLASSES_COLORS = 4
+		NUM_GLASSES_COLORS = 4,
+
+		FACE_ROWS = 16,
+		EYE_ROWS = 16,
+		GLASSES_ROWS = 10,
+		HAIR_ROWS = 16
 	};
 	void GetSkinColor( int index0, int index1, float fade, grinliz::Color4F* c, grinliz::Color4F* highlight );
 	void GetHairColor( int index0, grinliz::Color4F* c );
