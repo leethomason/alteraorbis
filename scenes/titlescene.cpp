@@ -37,21 +37,19 @@ TitleScene::TitleScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 	static const char* testSceneName[NUM_TESTS] = { "dialog", 
 													"render0", "render1", 
 													"particle", 
-													"nav", "nav2", "navWorld", 
+													"nav", "nav2", "Blue\nSmoke", 
 													//"noise", 
-													"battle", "animation", "livePr", "assetPr", "" };
+													"battle", 
+													"animation", 
+													"Live\nPreview", 
+													"Asset\nPreview", 
+													"Weapon\nStat" };
 
 	for( int i=0; i<NUM_TESTS; ++i ) {
 		testScene[i].Init( &gamui2D, lumosGame->GetButtonLook( LumosGame::BUTTON_LOOK_STD ) );
 		testScene[i].SetText( testSceneName[i] );
 		testScene[i].SetSize( layout.Width(), layout.Height() );
 	}
-	testScene[TEST_NAV_WORLD].SetText(  "Blue" );
-	testScene[TEST_NAV_WORLD].SetText2( "Smoke" );
-	testScene[TEST_LIVEPREVIEW].SetText( "Live" );
-	testScene[TEST_LIVEPREVIEW].SetText2( "Preview" );
-	testScene[TEST_WEAPON_STAT].SetText( "Weapon" );
-	testScene[TEST_WEAPON_STAT].SetText2( "Stat" );
 }
 
 

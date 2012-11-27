@@ -667,8 +667,6 @@ public:
 
 	void SetText( const char* text );
 	const char* GetText() const { return m_label[0].GetText(); }
-
-	void SetText2( const char* text );
 	const char* GetText2() const { return m_label[1].GetText(); }
 
 	enum {
@@ -708,6 +706,7 @@ protected:
 private:
 
 	void PositionChildren();
+	void SetText2( const char* text );
 
 	enum {
 		UP,

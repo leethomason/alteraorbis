@@ -819,7 +819,14 @@ void Button::SetSizeByScale( float sx, float sy )
 
 void Button::SetText( const char* text )
 {
-	m_label[0].SetText( text );	// calls Modify()
+	const char* p = strchr( text, '\n' );
+	if ( p && *(p+1) ) {
+		m_label[0].SetText( text, p );	// calls Modify()
+		SetText2( p+1 );
+	}
+	else {
+		m_label[0].SetText( text );	// calls Modify()
+	}
 }
 
 

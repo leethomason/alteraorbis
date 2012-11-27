@@ -74,8 +74,7 @@ NavTestScene::NavTestScene( LumosGame* game ) : Scene( game )
 
 	showZonePath.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
 	showZonePath.SetSize( layout.Width(), layout.Height() );
-	showZonePath.SetText( "Region" );
-	showZonePath.SetText2( "Path" );
+	showZonePath.SetText( "Region\nPath" );
 
 	textLabel.Init( &gamui2D );
 
