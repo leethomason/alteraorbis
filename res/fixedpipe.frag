@@ -56,7 +56,7 @@ void main()
 				// Compute alpha. This is an approximation of transparency.
 				sample.a = clamp( a[0]+a[1]+a[2]+a[3], 0.0, 1.0 );
 			#else
-				sample.a = 0.0f;
+				//sample.a = 0.0f;
 			#endif
 		#endif
 
