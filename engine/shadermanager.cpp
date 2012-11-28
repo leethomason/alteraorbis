@@ -260,8 +260,10 @@ void ShaderManager::SetTexture( int index, Texture* texture )
 	char name[9] = "texture0";
 	name[7] = '0' + index;
 	int loc = glGetUniformLocation( active->prog, name );
-	GLASSERT( loc >= 0 );
-	glUniform1i( loc, index );
+	//GLASSERT( loc >= 0 );
+	if ( loc >= 0 ) {
+		glUniform1i( loc, index );
+	}
 	CHECK_GL_ERROR;
 }
 
