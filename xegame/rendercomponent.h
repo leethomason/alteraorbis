@@ -30,6 +30,8 @@ class Model;
 
 class RenderComponent : public Component
 {
+private:
+	typedef Component super;
 public:
 	// spacetree probably  sufficient, but 'engine' easier to keep track of
 	RenderComponent( Engine* engine, const char* asset );

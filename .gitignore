@@ -1,8 +1,11 @@
 *.bak
 *.exe
+*.zip
+*.user
 Debug
 Release
 cap??.bmp
+cap??.png
 atlas*.bmp
 
 

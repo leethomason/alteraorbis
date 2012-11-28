@@ -150,7 +150,7 @@ struct GPUStream {
 */
 struct GPUStreamData
 {
-	GPUStreamData() : streamPtr(0), indexPtr(0), vertexBuffer(0), indexBuffer(0), texture0(0), matrix(0), param(0), param4(0), bones(0) {}
+	GPUStreamData() : streamPtr(0), indexPtr(0), vertexBuffer(0), indexBuffer(0), texture0(0), matrix(0), param1(0), controlParam(0), param4(0), bones(0) {}
 
 	const void*			streamPtr;
 	const uint16_t*		indexPtr;
@@ -159,7 +159,8 @@ struct GPUStreamData
 
 	Texture*			texture0;
 	grinliz::Matrix4*	matrix;
-	grinliz::Vector4F*	param;
+	grinliz::Vector4F*	param1;
+	grinliz::Vector4F*  controlParam;
 	grinliz::Matrix4*	param4;
 	BoneData*			bones;
 };
@@ -221,7 +222,7 @@ public:
 
 
 	static void ResetState();
-	static void Clear();
+	static void Clear( float r, float g, float b, float a );
 
 	// Set the top level state. The engine has top level (root transforms)
 	// for the screen size, scissor, and transform:

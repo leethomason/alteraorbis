@@ -48,6 +48,7 @@ public:
 				const ModelAtom* atom, 
 				const GPUState& state,
 				const grinliz::Vector4F& param, 
+				const grinliz::Vector4F& control,
 				const grinliz::Matrix4* param4,
 				const BoneData* boneData  );
 
@@ -66,6 +67,7 @@ private:
 		Model*					model;
 		const ModelAtom*		atom;	
 		grinliz::Vector4F		param;			// per instance data (vec4)
+		grinliz::Vector4F		control;		// per instance data 
 		const grinliz::Matrix4*	param4;			// per instance data (matrix)
 		const BoneData*			boneData;
 

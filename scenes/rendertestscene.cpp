@@ -60,6 +60,15 @@ RenderTestScene::RenderTestScene( LumosGame* game, const RenderTestSceneData* da
 	refreshButton.SetSize( layout.Width(), layout.Height() );
 	refreshButton.SetText( "refresh" );
 
+	for( int i=0; i<NUM_CONTROL; ++i ) {
+		control[i].Init( &gamui2D, game->GetButtonLook( 0 ) );
+		control[i].SetSize( layout.Width(), layout.Height() );
+		CStr<16> str;
+		str.Format( "%.2f", (float)i/(float)(NUM_CONTROL-1) );
+		control[i].SetText( str.c_str() );
+		control[0].AddToToggleGroup( &control[i] );
+	}
+
 	RenderAtom nullAtom;
 	rtImage.Init( &gamui2D, nullAtom, true );
 	rtImage.SetSize( 400.f, 200.f );
@@ -85,6 +94,9 @@ void RenderTestScene::Resize()
 	LayoutCalculator layout = lumosGame->DefaultLayout();
 	layout.PosAbs( &glowButton, 1, -1 );
 	layout.PosAbs( &refreshButton, 2, -1 );
+	for( int i=0; i<NUM_CONTROL; ++i ) {
+		layout.PosAbs( &control[i], i, -2 );
+	}
 }
 
 
@@ -138,18 +150,20 @@ void RenderTestScene::ItemTapped( const gamui::UIItem* item )
 		game->PopScene();
 	}
 	else if ( item == &glowButton ) {
-#if 0
-		Texture* white = TextureManager::Instance()->GetTexture( "white" );
-		for( int i=0; i<NUM_MODELS; ++i ) {
-			if ( model[i] ) {
-				model[i]->SetTexture( white );
-			}
-		}
-#endif
 		engine->SetGlow( !engine->Glow() );
 	}
 	else if ( item == &refreshButton ) {
 		LoadLighting();
+	}
+
+	for( int i=0; i<NUM_CONTROL; ++i ) {
+		if ( item == &control[i] ) {
+			for( int k=0; k<NUM_MODELS; ++k ) {
+				Vector4F v = { (float)i/(float)(NUM_CONTROL-1), 1, 1, 1 };
+				model[k]->SetControl( v );
+			}
+			break;
+		}
 	}
 }
 
@@ -213,7 +227,7 @@ void RenderTestScene::Draw3D( U32 deltaTime )
 
 #if 0
 	RenderAtom atom( (const void*)UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, 
-		             (const void*)engine->GetRenderTargetTexture(0), 0.25f, 0.25f, 0.75f, 0.75f );
+		(const void*)engine->GetRenderTargetTexture(Engine::RT_BLUR_3), 0.25f, 0.25f, 0.75f, 0.75f );
 	rtImage.SetAtom( atom );
 #endif
 }

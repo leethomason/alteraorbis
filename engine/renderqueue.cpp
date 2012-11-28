@@ -55,6 +55,7 @@ void RenderQueue::Add(	Model* model,
 						const ModelAtom* atom, 
 						const GPUState& state, 
 						const Vector4F& param, 
+						const Vector4F& control,
 						const Matrix4* param4,
 						const BoneData* boneData  )
 {
@@ -66,6 +67,7 @@ void RenderQueue::Add(	Model* model,
 	item->model = model;
 	item->atom = atom;
 	item->param = param;
+	item->control = control;
 	item->param4 = param4;
 	item->boneData = boneData;
 
@@ -123,13 +125,15 @@ void RenderQueue::Submit(	int modelRequired,
 		// in use, always instance.
 		{
 			Matrix4		instanceMatrix[EL_MAX_INSTANCE];
-			Vector4F	instanceParam[EL_MAX_INSTANCE];
+			Vector4F	instanceParam1[EL_MAX_INSTANCE];
+			Vector4F	instanceControlParam[EL_MAX_INSTANCE];
 			Matrix4		instanceParam4[EL_MAX_INSTANCE];
 			BoneData	instanceBone[EL_MAX_INSTANCE];
 
 			atom->Bind( &stream, &data );
 			data.matrix = instanceMatrix;
-			data.param  = instanceParam;
+			data.param1 = instanceParam1;
+			data.controlParam = instanceControlParam;
 			data.param4 = instanceParam4;
 			data.bones  = instanceBone;
 			GLASSERT( data.texture0 );	// not required, but not sure it works without
@@ -146,7 +150,9 @@ void RenderQueue::Submit(	int modelRequired,
 					else {
 						instanceMatrix[index] = item->model->XForm();
 					}
-					instanceParam[index] = item->param;
+					instanceParam1[index] = item->param;
+					instanceControlParam[index] = item->control;
+
 					if ( item->param4 ) {
 						instanceParam4[index] = *item->param4;
 					}

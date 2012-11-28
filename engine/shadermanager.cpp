@@ -16,9 +16,6 @@
 #include "shadermanager.h"
 #include "platformgl.h"
 #include "texture.h"
-
-//#include "shaders.inc"
-
 #include "../grinliz/glperformance.h"
 #include "../grinliz/glrandom.h"
 
@@ -45,6 +42,7 @@ static const char* gUniformName[ShaderManager::MAX_UNIFORM] =
 	"u_mvpMatrix",
 	"u_mMatrix",
 	"u_paramArr",
+	"u_controlParamArr",
 	"u_param4Arr",
 
 	"u_normalMatrix",
@@ -54,6 +52,7 @@ static const char* gUniformName[ShaderManager::MAX_UNIFORM] =
 	"u_diffuse",
 	"u_radius",
 	"u_param",
+	"u_controlParam",
 	"u_param4",
 	"u_boneXForm",
 };
@@ -326,7 +325,7 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 	shader->prog = glCreateProgram();
 
 	// Is it in the cache?
-#if 0
+#if 1
 	if ( GLEW_ARB_get_program_binary ) {
 		CStr<200> path;
 		path.Format( "./cache/shader_%s_%d.shader", hashStr.c_str(), flags );

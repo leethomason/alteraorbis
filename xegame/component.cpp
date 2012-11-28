@@ -37,3 +37,9 @@ ChitBag* Component::GetChitBag()
 }
 
 
+void Component::OnChitMsg( Chit* chit, const ChitMsg& msg )
+{
+	if ( msg.ID() == ChitMsg::CHIT_DESTROYED_START ) {
+		parentChit->GetChitBag()->QueueDeleteComponent( this );
+	}
+}

@@ -27,7 +27,12 @@ public:
 	enum { 
 		NUM_SKIN_COLORS = 4,
 		NUM_HAIR_COLORS	= 10,
-		NUM_GLASSES_COLORS = 4
+		NUM_GLASSES_COLORS = 4,
+
+		FACE_ROWS = 16,
+		EYE_ROWS = 16,
+		GLASSES_ROWS = 10,
+		HAIR_ROWS = 16
 	};
 	void GetSkinColor( int index0, int index1, float fade, grinliz::Color4F* c, grinliz::Color4F* highlight );
 	void GetHairColor( int index0, grinliz::Color4F* c );
@@ -37,6 +42,19 @@ public:
 		SKIN, HIGHLIGHT, GLASSES, HAIR
 	};
 	void GetColors( U32 seed, grinliz::Color4F* c );
+
+private:
+	const Game::Palette* palette;
+};
+
+
+class WeaponGen 
+{
+public:
+	WeaponGen( const Game::Palette* p_palette ) : palette( p_palette ) {}
+
+	void GetBaseColors( int i0, int i1, int i2, grinliz::Color4F* primary, grinliz::Color4F* secondary, grinliz::Color4F* glow );
+	void GetEffectColor( bool fire, bool shock, grinliz::Color4F* effect );
 
 private:
 	const Game::Palette* palette;

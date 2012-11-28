@@ -6,6 +6,12 @@
 
 using namespace grinliz;
 
+void GameMoveComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
+{
+	super::OnChitMsg( chit, msg );
+}
+
+
 void GameMoveComponent::ApplyBlocks( Vector2F* pos, bool* forceApplied, bool* isStuck )
 {
 	GRINLIZ_PERFTRACK;

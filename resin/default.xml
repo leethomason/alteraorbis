@@ -38,9 +38,11 @@
   <texture assetName="map_land" filename="map_land2.png"   />
   <texture filename="map_water.png"  filename2="map_water_em.png"  emissive="true"/>
   <texture filename="procedural.png" />
+  <texture filename="ring.png" />"
 
   <!-- UI elements -->
   <texture filename="intro.png" width="64" height="64" />
+  <texture filename="humanMaleFace.png" maxSize="2048"/>
   <palette assetName="mainPalette" filename="palette.png" dx="14" dy="7" sx="0.5" sy="0.5" />
   
   <!-- Particles -->
@@ -56,6 +58,7 @@
   <model filename="teststructures.ac" modelName="testStruct1"  origin="2 0 0"  shading="flat" polyRemoval="pre" />
   <model filename="unitPlateCentered.ac" shading="flat" />
   <model filename="unitPlateProcedural.ac" shading="flat" />
+  <model filename="unitPlateHumanMaleFace.ac" shading="flat" />
   <model filename="unitPlateArrow.ac" shading="flat" />
   <model filename="unitCube.ac" shading="flat" />
   
@@ -127,7 +130,9 @@
   <model filename="weapons.ac"          modelName="ring"        origin="0.20 0 0"   shadowCaster="false" />
   <model                                filename="ax.ac"        origin="0 0 0"      shadowCaster="true" />
   <model                                filename="shield.ac"    origin="0 0 0"      shadowCaster="false" />
-  
+
+  <model filename="weaponsProc.ac"      modelName="ringProc"    origin="0.20 0 0"   shadowCaster="false" />
+
   <model filename="chess_weapons.ac"    modelName="RAY-1"        origin="0 0 0"/>
   <model filename="chess_weapons.ac"    modelName="PLS-1"        origin="1 0 0"/>
   <model filename="chess_weapons.ac"    modelName="STORM-1"      origin="2 0 0"/>

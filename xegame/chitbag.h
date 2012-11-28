@@ -57,6 +57,7 @@ public:
 	// Due to events, changes, etc. a chit may need an update, possibily in addition to, the tick.
 	// Normally called automatically.
 	void QueueDelete( Chit* chit );
+	void QueueDeleteComponent( Component* comp );
 
 	// passes ownership
 	void QueueEvent( const ChitEvent& event )			{ events.Push( event ); }
@@ -88,13 +89,19 @@ private:
 	U32 bagTime;
 	int nTicked;
 
+	struct CompID { 
+		int chitID;
+		int compID;
+	};
+
 	enum { BLOCK_SIZE = 1000 };
 	Chit* memRoot;
 	// Use a memory pool so the chits don't move on re-allocation.
 	grinliz::CDynArray< Chit* >		  blocks;
 	grinliz::HashTable< int, Chit* >  chitID;
 
-	grinliz::CDynArray<int>			deleteList;		// <set> of chits that need to be deleted.
+	grinliz::CDynArray<int>			deleteList;	
+	grinliz::CDynArray<CompID>		compDeleteList;	
 	grinliz::CDynArray<Chit*>		hashQuery;
 	grinliz::CDynArray<ChitEvent>	events;
 	

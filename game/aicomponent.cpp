@@ -467,4 +467,7 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		
 		battleMechanics.MeleeAttack( engine, parentChit, item );
 	}
+	else {
+		super::OnChitMsg( chit, msg );
+	}
 }

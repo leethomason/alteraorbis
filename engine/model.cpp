@@ -218,6 +218,7 @@ void Model::Init( const ModelResource* resource, SpaceTree* tree )
 	pos.Set( 0, 0, 0 );
 	rot.Zero();
 	Modify();
+	control.Set( 1, 1, 1, 1 );
 
 	if ( tree ) {
 		tree->Update( this );
@@ -557,10 +558,6 @@ void Model::Queue( RenderQueue* queue, EngineShaders* engineShaders, int require
 
 		if ( (( base & required ) == required ) && (( base & excluded ) == 0 ) ) {
 			int mod = 0;
-			//if ( HasTextureXForm(i) ) {
-			//	mod = ShaderManager::TEXTURE0_TRANSFORM;
-			//}
-			//else 
 			if ( HasColor() ) {
 				mod = ShaderManager::COLOR_PARAM;
 			}
@@ -597,6 +594,7 @@ void Model::Queue( RenderQueue* queue, EngineShaders* engineShaders, int require
 						&resource->atom[i],						// model atom to render
 						state,
 						param[i],								// parameter to the shader
+						control,								// parameter to the shader #2
 						pMat,
 						pBD );
 		}

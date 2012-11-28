@@ -23,10 +23,19 @@ class LumosGame;
 class Engine;
 class Model;
 
+
+class LivePreviewSceneData : public SceneData
+{
+public:
+	LivePreviewSceneData( bool isLive ) : live( isLive ) {}
+	bool live;
+};
+
+
 class LivePreviewScene : public Scene
 {
 public:
-	LivePreviewScene( LumosGame* game );
+	LivePreviewScene( LumosGame* game, const LivePreviewSceneData* data );
 	virtual ~LivePreviewScene();
 
 	virtual void Resize();
@@ -38,9 +47,10 @@ public:
 	virtual void ItemTapped( const gamui::UIItem* item );
 	virtual void Draw3D( U32 deltaTime );
 	virtual void DoTick( U32 deltaTime );
+	virtual grinliz::Color4F ClearColor();
 
 private:
-	void CreateTexture();
+	void CreateTexture( int type );
 	void GenerateFaces( int mainRow );
 	void GenerateRing( int mainRow );
 
@@ -61,6 +71,8 @@ private:
 	U32 fileTimer;
 	time_t fileTime;
 
+	bool		live;
+	int			currentType;
 	Engine*		engine;
 	Model*		model[NUM_MODEL];
 };

@@ -156,6 +156,17 @@ Component* Chit::GetComponent( const char* name )
 }
 
 
+Component* Chit::GetComponent( int id )
+{
+	for( int i=0; i<NUM_SLOTS; ++i ) {
+		if ( slot[i] && slot[i]->ID() == id ) {
+			return slot[i];
+		}
+	}
+	return 0;
+}
+
+
 void Chit::DoTick( U32 delta )
 {
 	slowTickTimer += delta;

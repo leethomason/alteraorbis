@@ -57,7 +57,7 @@ public:
 	virtual void DebugStr( grinliz::GLString* str )		{}
 
 	virtual void OnChitEvent( const ChitEvent& event )			{}
-	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg )	{}
+	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
 
 protected:
 	float Travel( float rate, U32 time ) const {
