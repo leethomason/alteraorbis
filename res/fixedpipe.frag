@@ -52,8 +52,12 @@ void main()
 			// Now that the color layers are composited, convert from false color to correct color.
 			// Note that the alpha channel is being used as a color, not alpha.
 			vec4 sample = t.r*v_color0 + t.g*v_color3 + t.b*v_color1 + t.a*v_color2;
-			// Compute alpha. This is an approximation.
-			sample.a = clamp( a[0]+a[1]+a[2]+a[3], 0.0, 1.0 );
+			#if EMISSIVE == 0
+				// Compute alpha. This is an approximation of transparency.
+				sample.a = clamp( a[0]+a[1]+a[2]+a[3], 0.0, 1.0 );
+			#else
+				sample.a = 0.0f;
+			#endif
 		#endif
 
 		#if TEXTURE0_ALPHA_ONLY == 1

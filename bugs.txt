@@ -3,6 +3,8 @@
 	d procedural: the shading should "go through" so that a shadow on layer 3 is renderered below colors are layer0
 	- hair / skin color too similar some times
 	- more natural skin colors
+	- more glasses colors
+	- move texture coordinate calc to script
 	x static scene showing item combinations
 	- emissive support
 	- item bone/part support
@@ -29,6 +31,7 @@
 
 	- serialization
 
+- switch to ImageMagick for texture scaling
 - credits scene
 - particles should use palette. <color palette="2 3 1.0"/> possibly
 - remove normalization in shader

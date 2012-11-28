@@ -3,7 +3,7 @@ MATERIAL "ac3dmat1" rgb 1 1 1  amb 0.2 0.2 0.2  emis 0 0 0  spec 0.2 0.2 0.2  sh
 OBJECT world
 kids 2
 OBJECT group
-name "testgun"
+name "testgunProc"
 loc 0.00507646 0.0421523 0.0420876
 kids 3
 OBJECT poly
@@ -181,13 +181,13 @@ refs 4
 1 0.90625 0.277344
 kids 0
 OBJECT group
-name "ring"
+name "ringProc"
 loc 0.197614 0.0241704 0.0135685
 kids 5
 OBJECT poly
 name "blade"
 loc -0.000110626 -0.0215154 -0.0135685
-texture "C:/src/alteraorbis/res/ring.png"
+texture "procedural.png"
 crease 45.000000
 numvert 45
 -0.00825803 -0.0390761 0.0622916
@@ -520,7 +520,7 @@ kids 0
 OBJECT poly
 name "main"
 loc -0.000110626 -0.0229225 -0.0135685
-texture "C:/src/alteraorbis/res/ring.png"
+texture "procedural.png"
 crease 45.000000
 numvert 153
 0 0.0853236 0
@@ -2085,7 +2085,7 @@ kids 2
 OBJECT poly
 name "ring"
 loc 0 0.00281401 -0.00351751
-texture "C:/src/alteraorbis/res/ring.png"
+texture "procedural.png"
 crease 45.000000
 numvert 9
 0 -0.122137 -0.056535
@@ -2130,7 +2130,7 @@ kids 0
 OBJECT poly
 name "ring"
 loc 0 -0.002814 0.00351751
-texture "C:/src/alteraorbis/res/ring.png"
+texture "procedural.png"
 crease 45.000000
 numvert 9
 0.0124475 0.112438 -0.0560515
@@ -2179,7 +2179,7 @@ kids 3
 OBJECT poly
 name "sphere"
 loc -1.49012e-008 0.0119593 -0.0311885
-texture "C:/src/alteraorbis/res/ring.png"
+texture "procedural.png"
 crease 45.000000
 numvert 32
 0 0.00879377 0
@@ -2459,7 +2459,7 @@ kids 0
 OBJECT poly
 name "sphere"
 loc -1.49012e-008 0.00211033 0.00328296
-texture "C:/src/alteraorbis/res/ring.png"
+texture "procedural.png"
 crease 45.000000
 numvert 32
 0 -0.00879377 0
@@ -2739,7 +2739,7 @@ kids 0
 OBJECT poly
 name "sphere"
 loc -1.49012e-008 -0.0140697 0.0279056
-texture "C:/src/alteraorbis/res/ring.png"
+texture "procedural.png"
 crease 45.000000
 numvert 32
 0 0.00879377 0
@@ -3023,7 +3023,7 @@ kids 4
 OBJECT poly
 name "box"
 loc 0.000335991 -0.000511912 -0.0407171
-texture "C:/src/alteraorbis/res/ring.png"
+texture "procedural.png"
 crease 45.000000
 numvert 8
 -0.00351751 -0.00809026 0.0193463
@@ -3081,7 +3081,7 @@ kids 0
 OBJECT poly
 name "box"
 loc 0.000335991 0.034052 0.0208364
-texture "C:/src/alteraorbis/res/ring.png"
+texture "procedural.png"
 crease 45.000000
 numvert 8
 -0.00351751 0.0232617 -0.00159796
@@ -3139,7 +3139,7 @@ kids 0
 OBJECT poly
 name "cylinder"
 loc -0.001008 -0.000645279 -0.00104358
-texture "C:/src/alteraorbis/res/ring.png"
+texture "procedural.png"
 crease 45.000000
 numvert 26
 -0.00809275 -2.09548e-009 0
@@ -3401,7 +3401,7 @@ kids 0
 OBJECT poly
 name "box"
 loc 0.000335991 -0.0328949 0.0209243
-texture "C:/src/alteraorbis/res/ring.png"
+texture "procedural.png"
 crease 45.000000
 numvert 8
 -0.00351751 0.0207995 -0.00266677

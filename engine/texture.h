@@ -78,6 +78,11 @@ public:
 	int BytesPerPixel() const	{ return (format == ALPHA) ? 1 : 2; }
 
 	U32 GLID();
+	void SetEmissive( bool on )	{ if ( on ) 
+									flags |= PARAM_EMISSIVE;
+								  else
+									flags &= (~PARAM_EMISSIVE);
+								}
 
 private:
 	void Set( const char* name, int w, int h, int format, int flags );

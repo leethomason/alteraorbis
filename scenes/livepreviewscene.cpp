@@ -15,11 +15,6 @@
 using namespace gamui;
 using namespace grinliz;
 
-static const float CENTER_X = 4.0f;
-static const float CENTER_Z = 4.0f;
-static const float START_X = 2.0f;
-static const float START_Z = 2.5f;
-
 LivePreviewScene::LivePreviewScene( LumosGame* game, const LivePreviewSceneData* data ) : Scene( game )
 {
 	TestMap* map = 0;
@@ -32,7 +27,6 @@ LivePreviewScene::LivePreviewScene( LumosGame* game, const LivePreviewSceneData*
 
 	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase(), map );
 	engine->SetGlow( true );
-	engine->lighting.direction.Set( 0, 1, 0 );
 
 	LayoutCalculator layout = game->DefaultLayout();
 	const ButtonLook& look = game->GetButtonLook(0);
@@ -56,16 +50,12 @@ LivePreviewScene::LivePreviewScene( LumosGame* game, const LivePreviewSceneData*
 		typeButton[0].AddToToggleGroup( &typeButton[i] );
 	}
 
-	memset( model, 0, sizeof(Model*) * NUM_MODEL );
+	memset( model, 0, sizeof(model[0])*NUM_MODEL );
+
+	currentType = FACE;
 	GenerateFaces( 0 );
-
-	engine->camera.SetPosWC( CENTER_X, 11, CENTER_Z );
-	static const Vector3F out = { 0, 0, 1 };
-	engine->camera.SetDir( V3F_DOWN, out );		// look straight down. This works! cool.
-	engine->camera.Orbit( 180.0f );
-
 	if ( live ) {
-		CreateTexture();
+		CreateTexture( FACE );
 	}
 	game->InitStd( &gamui2D, &okay, 0 );
 	fileTimer = 0;
@@ -108,6 +98,17 @@ grinliz::Color4F LivePreviewScene::ClearColor()
 
 void LivePreviewScene::GenerateFaces( int mainRow )
 {
+	static const float CENTER_X = 4.0f;
+	static const float CENTER_Z = 4.0f;
+	static const float START_X = 2.0f;
+	static const float START_Z = 2.5f;
+
+	engine->lighting.direction.Set( 0, 1, 0 );
+	engine->camera.SetPosWC( CENTER_X, 11, CENTER_Z );
+	static const Vector3F out = { 0, 0, 1 };
+	engine->camera.SetDir( V3F_DOWN, out );		// look straight down. This works! cool.
+	engine->camera.Orbit( 180.0f );
+
 	FaceGen faceGen( game->GetPalette() );
 
 	float tex[4] = { 0, 0, 0, 0 };
@@ -184,7 +185,67 @@ void LivePreviewScene::GenerateFaces( int mainRow )
 
 void LivePreviewScene::GenerateRing( int mainRow )
 {
+	static const float DELTA  = 0.3f;
+	static const float ORIGIN = DELTA*1.5f;
 
+	engine->lighting.direction.Set( 1, 1, -1 );
+	engine->lighting.direction.Normalize();
+
+	engine->camera.SetPosWC( ORIGIN, ORIGIN, 0 );
+	static const Vector3F out = { 0, 0, 1 };
+	engine->camera.SetDir( out, V3F_UP );
+
+	float tex[4] = { 0, 0, 0, 0 };
+	Random random( mainRow );
+	random.Rand();
+
+	const ModelResource* modelResource = 0;
+	modelResource = ModelResourceManager::Instance()->GetModelResource( "ringProc" );
+
+	int srcRows = modelResource->atom[0].texture->Height() / modelResource->atom[0].texture->Width() * 4;
+	float rowMult = 1.0f / (float)srcRows;
+
+	for( int i=0; i<NUM_MODEL; ++i ) {
+		if ( model[i] ) {
+			engine->FreeModel( model[i] );
+			model[i] = 0;
+		}
+
+		model[i] = engine->AllocModel( modelResource );
+		int row = i / COLS;
+		int col = i - row*COLS;
+		float x = float(col) * DELTA;
+		float y = float(row) * DELTA;
+		float current = 1.0f - rowMult * (float)(mainRow);
+
+		//switch ( row ) {
+		//default:
+			tex[0] = rowMult * (float)random.Rand(srcRows);
+			tex[1] = rowMult * (float)random.Rand(srcRows);
+			tex[2] = rowMult * (float)random.Rand(srcRows);
+			tex[3] = rowMult * (float)random.Rand(srcRows);
+			if ( live ) {
+				tex[col] = current;
+			}
+			//break;
+		//}
+
+		Color4F base     = { 1, 0, 0, 0 };
+		Color4F contrast = { 1, 1, 0, 0 };
+		Color4F effect   = { 0, 1, 0, 1 };
+		Color4F glow     = { 1, 0, 0, 0.5f };
+
+		const Color4F color[4] = {
+			base,					// (r) base
+			contrast,				// (b0) contrast
+			effect,					// (b1) effect
+			glow					// (g) glow
+		};
+
+		model[i]->SetPos( x, y, 3.0f );
+		model[i]->SetYRotation( -90 );
+		model[i]->SetProcedural( true, color, tex );
+	}
 }
 
 
@@ -193,11 +254,20 @@ void LivePreviewScene::ItemTapped( const gamui::UIItem* item )
 	if ( item == &okay ) {
 		game->PopScene();
 	}
-	for( int i=0; i<ROWS; ++i ) {
-		if ( item == &rowButton[i] ) {
-			GenerateFaces( i );
-			break;
+	else if ( item == &typeButton[FACE] ) {
+		for( int i=0; i<ROWS; ++i ) {
+			if ( item == &rowButton[i] ) {
+				currentType = FACE;
+				CreateTexture( FACE );
+				GenerateFaces( i );
+				break;
+			}
 		}
+	}
+	else if ( item == &typeButton[RING] ) {
+		currentType = RING;
+		CreateTexture( RING );
+		GenerateRing( 0 );
 	}
 }
 
@@ -214,16 +284,22 @@ void LivePreviewScene::DoTick( U32 deltaTime )
 		fileTimer += deltaTime;
 		if ( fileTimer > 1000 ) {
 			fileTimer = 0;
-			CreateTexture();
+			CreateTexture( currentType );
 		}
 	}
 }
 
 
-void LivePreviewScene::CreateTexture()
+void LivePreviewScene::CreateTexture( int type )
 {
 	GLASSERT( live );
-	static const char* filename = "./res/humanMaleFace.png";
+	const char* filename = 0;
+	switch( type ) {
+		case FACE:	filename = "./res/humanMaleFace.png";	break;
+		case RING:	filename = "./res/ring.png";			break;
+		default:	GLASSERT( 0 );							break;
+	}
+
 	static const int SIZE = 256;
 	struct _stat buf;
 
@@ -271,4 +347,10 @@ void LivePreviewScene::CreateTexture()
 		GLASSERT( 0 );
 	}	
 	delete [] buffer;
+
+
+	if ( type == FACE ) 
+		t->SetEmissive( false );	// alpha is transparency
+	else
+		t->SetEmissive( true );		// alpha is emissive
 }

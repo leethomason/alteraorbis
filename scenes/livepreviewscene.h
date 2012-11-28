@@ -50,7 +50,7 @@ public:
 	virtual grinliz::Color4F ClearColor();
 
 private:
-	void CreateTexture();
+	void CreateTexture( int type );
 	void GenerateFaces( int mainRow );
 	void GenerateRing( int mainRow );
 
@@ -72,6 +72,7 @@ private:
 	time_t fileTime;
 
 	bool		live;
+	int			currentType;
 	Engine*		engine;
 	Model*		model[NUM_MODEL];
 };
