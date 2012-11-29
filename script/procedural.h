@@ -51,10 +51,20 @@ private:
 class WeaponGen 
 {
 public:
+	enum {
+		BASE,
+		CONTRAST,
+		EFFECT,
+		GLOW,
+
+		NUM_COLORS = 11
+	};
+
 	WeaponGen( const Game::Palette* p_palette ) : palette( p_palette ) {}
 
-	void GetBaseColors( int i0, int i1, int i2, grinliz::Color4F* primary, grinliz::Color4F* secondary, grinliz::Color4F* glow );
-	void GetEffectColor( bool fire, bool shock, grinliz::Color4F* effect );
+	// [base, contrast, effect, glow]
+	void GetColors( int i, bool fire, bool shock, 
+					grinliz::Color4F* array );
 
 private:
 	const Game::Palette* palette;

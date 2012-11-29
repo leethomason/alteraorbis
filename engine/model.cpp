@@ -329,8 +329,7 @@ void Model::SetProcedural( bool on, const Color4F* colors, const float* v ) {
 
 		SetFlag( MODEL_PROCEDURAL );
 		for( int r=0; r<4; ++r ) {
-			aux->procMat.m( r, 3 ) = v[r];
-
+			// red, green: 1st and 2nd column
 			aux->procMat.m( r, 0 ) = colors[r].r;
 			aux->procMat.m( r, 1 ) = colors[r].g;
 			
@@ -338,6 +337,9 @@ void Model::SetProcedural( bool on, const Color4F* colors, const float* v ) {
 			GLASSERT( InRange( colors[r].b, 0.0f, 1.0f ));
 			GLASSERT( InRange( colors[r].a, 0.0f, 1.0f ));
 			aux->procMat.m( r, 2 ) = floor(colors[r].b * 256.0f) + colors[r].a*0.5f;
+
+			// Offset into texture encoding in the 4th column.
+			aux->procMat.m( r, 3 ) = v[r];
 		}
 	}
 	else {

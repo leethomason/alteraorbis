@@ -187,12 +187,13 @@ void LivePreviewScene::GenerateRing( int mainRow )
 {
 	static const float DELTA  = 0.3f;
 	static const float ORIGIN = DELTA*1.5f;
+	static const float DIST   = 3.0f;
 
-	engine->lighting.direction.Set( 1, 1, -1 );
+	engine->lighting.direction.Set( -1, 1, -1 );
 	engine->lighting.direction.Normalize();
 
-	engine->camera.SetPosWC( ORIGIN, ORIGIN, 0 );
-	static const Vector3F out = { 0, 0, 1 };
+	engine->camera.SetPosWC( 0, ORIGIN, ORIGIN );
+	static const Vector3F out = { -1, 0, 0 };			// FIXME: weird camera issue illustrated, again.
 	engine->camera.SetDir( out, V3F_UP );
 
 	float tex[4] = { 0, 0, 0, 0 };
@@ -215,11 +216,15 @@ void LivePreviewScene::GenerateRing( int mainRow )
 		int row = i / COLS;
 		int col = i - row*COLS;
 		float x = float(col) * DELTA;
-		float y = float(row) * DELTA;
+		float y = float(ROWS-1-row) * DELTA;
 		float current = 1.0f - rowMult * (float)(mainRow);
 
-		//switch ( row ) {
-		//default:
+		switch ( row ) {
+		case 0:
+			tex[0] = tex[1] = tex[2] = tex[3] = 0;
+			break;
+		
+		default:
 			tex[0] = rowMult * (float)random.Rand(srcRows);
 			tex[1] = rowMult * (float)random.Rand(srcRows);
 			tex[2] = rowMult * (float)random.Rand(srcRows);
@@ -227,23 +232,16 @@ void LivePreviewScene::GenerateRing( int mainRow )
 			if ( live ) {
 				tex[col] = current;
 			}
-			//break;
-		//}
+			break;
+		}
 
-		Color4F base     = { 1, 0, 0, 0 };
-		Color4F contrast = { 1, 1, 0, 0 };
-		Color4F effect   = { 0, 1, 0, 1 };
-		Color4F glow     = { 1, 0, 0, 0.5f };
+		WeaponGen weaponGen( game->GetPalette() );
+		Color4F color[4];
+		// r, b0, b1, g
+		// base, contrast, effect, glow
+		weaponGen.GetColors( i, col==2, col==3, color );
 
-		const Color4F color[4] = {
-			base,					// (r) base
-			contrast,				// (b0) contrast
-			effect,					// (b1) effect
-			glow					// (g) glow
-		};
-
-		model[i]->SetPos( x, y, 3.0f );
-		model[i]->SetYRotation( -90 );
+		model[i]->SetPos( 3.0f, y, x );
 		model[i]->SetProcedural( true, color, tex );
 	}
 }

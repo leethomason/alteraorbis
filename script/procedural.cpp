@@ -79,3 +79,44 @@ void FaceGen::GetColors( U32 seed, grinliz::Color4F* c )
 }
 
 
+void WeaponGen::GetColors( int i, bool fire, bool shock, grinliz::Color4F* array )
+{
+	// red for fire
+	// green for shock/corruption? 
+	static const Vector2I c[NUM_COLORS*2] = {
+		{ PAL_GREEN*2, PAL_ZERO },		{ PAL_GREEN*2, PAL_ZERO },
+		{ PAL_GREEN*2, PAL_ZERO },		{ PAL_GREEN*2, PAL_RED },
+		{ PAL_GREEN*2+1, PAL_BLUE },	{ PAL_GREEN*2+1, PAL_BLUE },
+		{ PAL_GREEN*2+1, PAL_BLUE },	{ PAL_GREEN*2+1, PAL_PURPLE },
+		{ PAL_GREEN*2+1, PAL_PURPLE },	{ PAL_GREEN*2+1, PAL_PURPLE },
+		{ PAL_BLUE*2, PAL_RED },		{ PAL_BLUE*2, PAL_RED },
+		{ PAL_PURPLE*2, PAL_RED },		{ PAL_BLUE*2, PAL_RED },
+		{ PAL_GRAY*2, PAL_GRAY },		{ PAL_GRAY*2, PAL_GRAY },
+		{ PAL_GRAY*2, PAL_GRAY },		{ PAL_GRAY*2, PAL_PURPLE },
+		{ PAL_GRAY*2, PAL_GRAY },		{ PAL_GRAY*2, PAL_BLUE },
+		{ PAL_GRAY*2, PAL_GRAY },		{ PAL_GRAY*2, PAL_TANGERINE },
+	};
+
+	i = abs(i) % NUM_COLORS;
+
+	Vector2I effect = c[i*2+1];
+	if ( fire && shock ) {
+		effect.Set( 1, PAL_TANGERINE );
+	}
+	else if ( fire ) {
+		effect.Set( 1, PAL_RED );
+	}
+	else if ( shock ) {
+		effect.Set( 1, PAL_GREEN );
+	}
+
+	array[BASE]		= palette->Get4F( c[i*2+0].x, c[i*2+0].y );
+	array[CONTRAST] = palette->Get4F( c[i*2+1].x, c[i*2+1].y );
+	array[EFFECT]	= palette->Get4F( effect.x, effect.y );
+	array[GLOW]		= array[BASE];
+
+	array[BASE].a		= 0;
+	array[CONTRAST].a	= 0;
+	array[EFFECT].a		= (fire || shock) ? 0.7f : 0.0f;
+	array[GLOW].a		= 0.5f;
+}

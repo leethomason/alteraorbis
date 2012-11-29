@@ -86,7 +86,7 @@ public:
 	// Rendering
 	virtual void DoTick( U32 deltaTime )						{}
 	virtual void Draw3D( U32 deltaTime )						{}
-	virtual grinliz::Color4F ClearColor()						{ grinliz::Color4F c = { 1, 1, 1, 1 }; return c; }
+	virtual grinliz::Color4F ClearColor()						{ grinliz::Color4F c = { 0,0,0,0 }; return c; }
 
 	// Utility
 	
