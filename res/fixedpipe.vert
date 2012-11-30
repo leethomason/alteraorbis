@@ -18,7 +18,7 @@ uniform mat4 	u_mvpMatrix;		// model-view-projection.
 		uniform vec4	u_param;					// Arbitrary params, if used. (texture xform, color, etc.)
 	#endif
 	#if PARAM4 == 1
-		uniform max4	u_param;					// Used for procedural rendering. Could be made arbitrary.
+		uniform mat4	u_param;					// Used for procedural rendering. Could be made arbitrary.
 	#endif
 #endif
 

@@ -593,7 +593,7 @@ void Model::Queue( RenderQueue* queue, EngineShaders* engineShaders, int require
 				mod |= ShaderManager::BONE_XFORM;
 			}
 			if ( flags & MODEL_PROCEDURAL ) {
-				mod = ShaderManager::PROCEDURAL;
+				mod |= ShaderManager::PROCEDURAL;
 			}
 
 			GPUState state;

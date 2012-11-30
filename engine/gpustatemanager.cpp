@@ -319,7 +319,6 @@ void GPUState::Weld( const GPUState& state, const GPUStream& stream, const GPUSt
 
 	const Matrix4& mv = GPUState::TopMatrix( GPUState::MODELVIEW_MATRIX );
 	bool paramNeeded = shadman->ParamNeeded();
-	bool bonesNeeded = shadman->BonesNeeded();
 
 	if ( flags & ShaderManager::INSTANCE ) {
 		Matrix4 vp;
@@ -398,7 +397,7 @@ void GPUState::Weld( const GPUState& state, const GPUStream& stream, const GPUSt
 	}
 
 	// bones
-	if ( bonesNeeded ) {
+	if ( flags & ShaderManager::BONE_XFORM ) {
 		GLASSERT( stream.boneOffset );	// could be zero...but that would be odd.
 		int count = EL_MAX_BONES;
 		if ( flags & ShaderManager::INSTANCE ) {
@@ -413,6 +412,9 @@ void GPUState::Weld( const GPUState& state, const GPUStream& stream, const GPUSt
 			}
 		}
 		shadman->SetUniformArray( ShaderManager::U_BONEXFORM, count, d );
+		shadman->SetStreamData( ShaderManager::A_BONE_ID, 1, GL_UNSIGNED_SHORT, stream.stride, PTR( data.streamPtr, stream.boneOffset ) );
+	}
+	else if ( flags & ShaderManager::BONE_FILTER ) {
 		shadman->SetStreamData( ShaderManager::A_BONE_ID, 1, GL_UNSIGNED_SHORT, stream.stride, PTR( data.streamPtr, stream.boneOffset ) );
 	}
 

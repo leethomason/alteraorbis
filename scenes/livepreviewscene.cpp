@@ -27,6 +27,7 @@ LivePreviewScene::LivePreviewScene( LumosGame* game, const LivePreviewSceneData*
 
 	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase(), map );
 	engine->SetGlow( true );
+	engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
 
 	LayoutCalculator layout = game->DefaultLayout();
 	const ButtonLook& look = game->GetButtonLook(0);
@@ -245,6 +246,8 @@ void LivePreviewScene::GenerateRing( int mainRow )
 		int ids[4] = { -1,-1,-1,-1 };
 
 		ids[0] = model[i]->GetBoneID( StringPool::Intern( "main", true ));
+		GLASSERT( ids[0] >= 0 && ids[0] < 4 );
+		/*
 		for( int k=1; k<4; ++k ) {
 			int id = model[i]->GetBoneID( StringPool::Intern( parts[k], true ));
 			GLASSERT( id >= 0 && id < 4 );
@@ -252,12 +255,18 @@ void LivePreviewScene::GenerateRing( int mainRow )
 				ids[k] = id;
 			}
 		}
+		*/
 
 		WeaponGen weaponGen( game->GetPalette() );
-		Color4F color[4];
+		Color4F color[4] = {
+			{ 1, 0, 0, 0 },	// base:		red
+			{ 1, 1, 0, 0 },	// contrast:	yellow
+			{ 0, 1, 0, 1 },	// effect:		blue
+			{ 1, 0.5f, 0, 1 }	// glow:		orange
+		};
 		// r,    b0,       b1,     g
 		// base, contrast, effect, glow
-		weaponGen.GetColors( i, col==2, col==3, color );
+		//weaponGen.GetColors( i, col==2, col==3, color );
 
 		model[i]->SetPos( 3.0f, y, x );
 		model[i]->SetProcedural( true, color, tex );
