@@ -255,7 +255,7 @@ void LivePreviewScene::GenerateRing( int mainRow )
 
 		WeaponGen weaponGen( game->GetPalette() );
 		Color4F color[4];
-		// r, b0, b1, g
+		// r,    b0,       b1,     g
 		// base, contrast, effect, glow
 		weaponGen.GetColors( i, col==2, col==3, color );
 
