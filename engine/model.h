@@ -21,6 +21,7 @@
 #include "../grinliz/glgeometry.h"
 #include "../grinliz/glmemorypool.h"
 #include "../grinliz/glcontainer.h"
+#include "../grinliz/glstringutil.h"
 #include "../shared/gamedbreader.h"
 #include "vertex.h"
 #include "enginelimits.h"
@@ -274,6 +275,9 @@ public:
 	AnimationType GetAnimation() const						{ return currentAnim.id; }
 	bool AnimationDone() const;
 
+	grinliz::IString GetBoneName( int i ) const;
+	int GetBoneID( grinliz::IString name ) const;
+
 	// Update the time and animation rendering.
 	void DeltaAnimation(	U32 time, 
 							grinliz::CArray<int, EL_MAX_METADATA> *metaData,
@@ -302,8 +306,9 @@ public:
 		return IsFlagSet( MODEL_PARAM_IS_COLOR ) != 0;
 	}
 
-	void SetBoneFilter( int boneID ) {
-		grinliz::Vector4F v = { (float)boneID, 0, 0, 0 };
+	// 4 ids
+	void SetBoneFilter( const int* boneID ) {
+		grinliz::Vector4F v = { (float)boneID[0], (float)boneID[1], (float)boneID[2], (float)boneID[3] };
 		SetParam( MODEL_PARAM_IS_BONE_FILTER, -1, v );
 	}
 	bool HasBoneFilter() const {

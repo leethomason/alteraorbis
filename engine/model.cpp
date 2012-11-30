@@ -521,6 +521,23 @@ void Model::CalcMetaData( const char* name, grinliz::Matrix4* meta ) const
 }
 
 
+grinliz::IString Model::GetBoneName( int i ) const
+{
+	GLASSERT( i >= 0 && i < EL_MAX_BONES );
+	return resource->header.boneName[i];
+}
+
+
+int Model::GetBoneID( grinliz::IString name ) const
+{
+	for( int i=0; i<EL_MAX_BONES; ++i ) {
+		if ( resource->header.boneName[i] == name )
+			return i;
+	}
+	return -1;
+}
+
+
 void Model::EmitParticles( ParticleSystem* system, const Vector3F* eyeDir, U32 deltaTime ) const
 {
 	if ( flags & MODEL_INVISIBLE )

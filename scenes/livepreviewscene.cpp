@@ -235,6 +235,24 @@ void LivePreviewScene::GenerateRing( int mainRow )
 			break;
 		}
 
+		// NOT in order.
+		static const char* parts[4] = {
+			"main",
+			"guard",
+			"triad",
+			"blade"
+		};
+		int ids[4] = { -1,-1,-1,-1 };
+
+		ids[0] = model[i]->GetBoneID( StringPool::Intern( "main", true ));
+		for( int k=1; k<4; ++k ) {
+			int id = model[i]->GetBoneID( StringPool::Intern( parts[k], true ));
+			GLASSERT( id >= 0 && id < 4 );
+			if ( i & (1<<k) ) {
+				ids[k] = id;
+			}
+		}
+
 		WeaponGen weaponGen( game->GetPalette() );
 		Color4F color[4];
 		// r, b0, b1, g
@@ -243,6 +261,7 @@ void LivePreviewScene::GenerateRing( int mainRow )
 
 		model[i]->SetPos( 3.0f, y, x );
 		model[i]->SetProcedural( true, color, tex );
+		model[i]->SetBoneFilter( ids );
 	}
 }
 

@@ -4,9 +4,9 @@
 	- hair / skin color too similar some times
 	- more natural skin colors
 	- more glasses colors
-	- move texture coordinate calc to script
+	x move texture coordinate calc to script
 	x static scene showing item combinations
-	- emissive support
+	x emissive support
 	- item bone/part support
 	X re-organize the palette?
 	X color variation 
@@ -31,6 +31,8 @@
 
 	- serialization
 
+- put metadata in model
+- mantis trigger broken
 - switch to ImageMagick for texture scaling
 - credits scene
 - particles should use palette. <color palette="2 3 1.0"/> possibly
@@ -46,6 +48,10 @@
 - analyze/optimize what causes component update: DoTick(), etc. Likely many DoTicks() getting called that aren't needed. (especially rendering...)
 - use optimizer to pre-process shaders
 - add rez effect for item switch?
+
+** Art **
+- wilder, more digital face colors
+- filter face colors to matching effect
 
 ** ECR **
 - face renderer should use bicubic filtering, also: switch to image magick for image processing

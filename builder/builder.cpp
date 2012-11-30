@@ -521,6 +521,11 @@ void ProcessModel( XMLElement* model )
 		builder->EnableBones( true );
 		animation = model->Attribute( "animation" );
 	}
+	if ( model->Attribute( "bones" )) {
+		bool b;
+		model->QueryBoolAttribute( "bones", &b );
+		builder->EnableBones( b );
+	}
 
 	if ( grinliz::StrEqual( model->Attribute( "shading" ), "smooth" ) ) {
 		builder->SetShading( ModelBuilder::SMOOTH );

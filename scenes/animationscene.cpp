@@ -200,11 +200,13 @@ void AnimationScene::UpdateBoneInfo()
 	}
 	else {
 		GLString str;
-		const char* name = model[0]->GetResource()->header.boneName[currentBone].c_str();
-		str.Format( "%d:%s", currentBone, name ? name : "none" );
+		IString name = model[0]->GetBoneName( currentBone );
+		str.Format( "%d:%s", currentBone, !name.empty() ? name.c_str() : "none" );
 		boneName.SetText( str.c_str() );
+	
+		int id[4] = { currentBone, -1, -1, -1 };
 		for( int i=0; i<NUM_MODELS; ++i )
-			model[i]->SetBoneFilter( currentBone );
+			model[i]->SetBoneFilter( id );
 	}
 }
 
@@ -507,7 +509,8 @@ void AnimationScene::Draw3D( U32 deltaTime )
 		const char* part = "reference";
 		if ( exportCount >= 0 ) {
 			part = model[0]->GetResource()->header.boneName[exportCount].c_str();
-			model[0]->SetBoneFilter( exportCount );
+			int id[4] = { exportCount, -1, -1, -1 };
+			model[0]->SetBoneFilter( id );
 		}
 
 		bool glow = engine->Glow();

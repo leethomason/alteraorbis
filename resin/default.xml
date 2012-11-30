@@ -127,11 +127,11 @@
   <model filename="alltree.ac" modelName="stump"    origin="0 0 2"  shading="smooth" polyRemoval="pre" />
 
   <model filename="weapons.ac"          modelName="testgun"     origin="0 0 0"      shadowCaster="false" />
-  <model filename="weapons.ac"          modelName="ring"        origin="0.20 0 0"   shadowCaster="false" />
+  <model filename="weapons.ac"          modelName="ring"        origin="0.20 0 0"   shadowCaster="false" bones="true" />
   <model                                filename="ax.ac"        origin="0 0 0"      shadowCaster="true" />
   <model                                filename="shield.ac"    origin="0 0 0"      shadowCaster="false" />
 
-  <model filename="weaponsProc.ac"      modelName="ringProc"    origin="0.20 0 0"   shadowCaster="false" />
+  <model filename="weaponsProc.ac"      modelName="ringProc"    origin="0.20 0 0"   shadowCaster="false" bones="true" />
 
   <model filename="chess_weapons.ac"    modelName="RAY-1"        origin="0 0 0"/>
   <model filename="chess_weapons.ac"    modelName="PLS-1"        origin="1 0 0"/>
