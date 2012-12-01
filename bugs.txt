@@ -1,18 +1,5 @@
-- procedural rendering
-	x fix glasses: they can be tightly packed, and occurance done in script
-	d procedural: the shading should "go through" so that a shadow on layer 3 is renderered below colors are layer0
-	- hair / skin color too similar some times
-	- more natural skin colors
-	- more glasses colors
-	x move texture coordinate calc to script
-	x static scene showing item combinations
-	x emissive support
-	- item bone/part support
-	X re-organize the palette?
-	X color variation 
-	X color variation for live mode
-
 - combat test scene	
+	- connect item to procedural rendering of melee weapon
 	- weapon types
 	- animation speed isn't correct
 	- gunrun to walk not synchronized correctly
@@ -46,17 +33,15 @@
 - shadows should be part of space-tree bounds
 - memory pool everything in the chit/component system
 - analyze/optimize what causes component update: DoTick(), etc. Likely many DoTicks() getting called that aren't needed. (especially rendering...)
-- use optimizer to pre-process shaders
 - add rez effect for item switch?
 
 ** Art **
 - wilder, more digital face colors
 - filter face colors to matching effect
-
-** ECR **
-- face renderer should use bicubic filtering, also: switch to image magick for image processing
+- more natural skin tones
 
 ** Defer **
+- use optimizer to pre-process shaders
 - bolt: glow around white core? end caps?
 - particles that aren't quads (beziers)
 - pack animation bone info into shaders
@@ -66,6 +51,17 @@
 
 ----------- FIXED -------------
 
+x procedural rendering
+	x more glasses colors
+	x fix glasses: they can be tightly packed, and occurance done in script
+	d procedural: the shading should "go through" so that a shadow on layer 3 is renderered below colors are layer0
+	x move texture coordinate calc to script
+	x static scene showing item combinations
+	x emissive support
+	x item bone/part support
+	x re-organize the palette?
+	x color variation 
+	x color variation for live mode
 x battle scene
 	x ranged weapons
 		x accuracy

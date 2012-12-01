@@ -27,8 +27,10 @@ void FaceGen::GetGlassesColor( int index0, int index1, float fade, Color4F* colo
 	static const Vector2I c[NUM_GLASSES_COLORS] = {
 		{ PAL_BLUE*2, PAL_ZERO },
 		{ PAL_BLUE*2, PAL_RED },
+		{ PAL_BLUE*2, PAL_GREEN },
 		{ PAL_ZERO*2+1, PAL_BLUE },
-		{ PAL_RED*2+1, PAL_BLUE }
+		{ PAL_RED*2+1, PAL_BLUE },
+		{ PAL_RED*2+1, PAL_PURPLE }
 	};
 
 	index0 = abs(index0) % NUM_GLASSES_COLORS;

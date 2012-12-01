@@ -27,7 +27,7 @@ public:
 	enum { 
 		NUM_SKIN_COLORS = 4,
 		NUM_HAIR_COLORS	= 10,
-		NUM_GLASSES_COLORS = 4,
+		NUM_GLASSES_COLORS = 6,
 
 		FACE_ROWS = 16,
 		EYE_ROWS = 16,
