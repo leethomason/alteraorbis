@@ -222,7 +222,7 @@ void LivePreviewScene::GenerateRing( int mainRow )
 
 		switch ( row ) {
 		case 0:
-			tex[0] = tex[1] = tex[2] = tex[3] = 0;
+			tex[0] = tex[1] = tex[2] = tex[3] = current;
 			break;
 		
 		default:
@@ -247,26 +247,25 @@ void LivePreviewScene::GenerateRing( int mainRow )
 
 		ids[0] = model[i]->GetBoneID( StringPool::Intern( "main", true ));
 		GLASSERT( ids[0] >= 0 && ids[0] < 4 );
-		/*
+		
 		for( int k=1; k<4; ++k ) {
 			int id = model[i]->GetBoneID( StringPool::Intern( parts[k], true ));
 			GLASSERT( id >= 0 && id < 4 );
-			if ( i & (1<<k) ) {
+			if ( (i==0) || (i & (1<<k))) {
 				ids[k] = id;
 			}
 		}
-		*/
 
 		WeaponGen weaponGen( game->GetPalette() );
-		Color4F color[4] = {
-			{ 1, 0, 0, 0 },	// base:		red
-			{ 1, 1, 0, 0 },	// contrast:	yellow
-			{ 0, 1, 0, 1 },	// effect:		blue
+		Color4F color[4] = {	// Test color. Comment out assignment below.
+			{ 1, 0, 0, 0 },		// base:		red
+			{ 1, 1, 0, 0 },		// contrast:	yellow
+			{ 0, 1, 0, 1 },		// effect:		blue
 			{ 1, 0.5f, 0, 1 }	// glow:		orange
 		};
 		// r,    b0,       b1,     g
 		// base, contrast, effect, glow
-		//weaponGen.GetColors( i, col==2, col==3, color );
+		weaponGen.GetColors( i, col==2, col==3, color );
 
 		model[i]->SetPos( 3.0f, y, x );
 		model[i]->SetProcedural( true, color, tex );
@@ -281,19 +280,26 @@ void LivePreviewScene::ItemTapped( const gamui::UIItem* item )
 		game->PopScene();
 	}
 	else if ( item == &typeButton[FACE] ) {
-		for( int i=0; i<ROWS; ++i ) {
-			if ( item == &rowButton[i] ) {
-				currentType = FACE;
-				CreateTexture( FACE );
-				GenerateFaces( i );
-				break;
-			}
-		}
+		currentType = FACE;
+		CreateTexture( FACE );
+		GenerateFaces( 0 );
+		rowButton[0].SetDown();
 	}
 	else if ( item == &typeButton[RING] ) {
 		currentType = RING;
 		CreateTexture( RING );
 		GenerateRing( 0 );
+		rowButton[0].SetDown();
+	}
+
+	for( int i=0; i<ROWS; ++i ) {
+		if ( item == &rowButton[i] ) {
+			switch ( currentType ) {
+			case FACE:	GenerateFaces( i ); break;
+			case RING:	GenerateRing( i );	break;
+			default: GLASSERT( 0 );			break;
+			}
+		}
 	}
 }
 
