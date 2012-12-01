@@ -91,7 +91,8 @@ void LivePreviewScene::Resize()
 
 grinliz::Color4F LivePreviewScene::ClearColor()
 {
-	Color4F cc = game->GetPalette(0)->Get4F( PAL_ZERO, PAL_GRAY );
+	//Color4F cc = game->GetPalette(0)->Get4F( PAL_ZERO, PAL_GRAY );
+	Color4F cc = { 0.2f, 0.2f, 0.2f, 0.0f };
 	//Color4F cc = { 0,0,0,0 };
 	return cc;
 }
@@ -202,7 +203,7 @@ void LivePreviewScene::GenerateRing( int mainRow )
 	random.Rand();
 
 	const ModelResource* modelResource = 0;
-	modelResource = ModelResourceManager::Instance()->GetModelResource( "ringProc" );
+	modelResource = ModelResourceManager::Instance()->GetModelResource( live ? "ringProc" : "ring" );
 
 	int srcRows = modelResource->atom[0].texture->Height() / modelResource->atom[0].texture->Width() * 4;
 	float rowMult = 1.0f / (float)srcRows;
@@ -324,7 +325,9 @@ void LivePreviewScene::DoTick( U32 deltaTime )
 
 void LivePreviewScene::CreateTexture( int type )
 {
-	GLASSERT( live );
+	if ( !live ) 
+		return;
+
 	const char* filename = 0;
 	switch( type ) {
 		case FACE:	filename = "./res/humanMaleFace.png";	break;
