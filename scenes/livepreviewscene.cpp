@@ -19,6 +19,7 @@ LivePreviewScene::LivePreviewScene( LumosGame* game, const LivePreviewSceneData*
 {
 	TestMap* map = 0;
 	live = data->live;
+	timer = 0;
 	
 	//map = new TestMap( 8, 8 );
 	//Color3F c = { 0.5f, 0.5f, 0.5f };
@@ -266,7 +267,7 @@ void LivePreviewScene::GenerateRing( int mainRow )
 		};
 		// r,    b0,       b1,     g
 		// base, contrast, effect, glow
-		weaponGen.GetColors( i, col==2, col==3, color );
+		weaponGen.GetColors( i+mainRow*NUM_MODEL, col==2, col==3, color );
 
 		model[i]->SetPos( 3.0f, y, x );
 		model[i]->SetProcedural( true, color, tex );
@@ -307,6 +308,10 @@ void LivePreviewScene::ItemTapped( const gamui::UIItem* item )
 
 void LivePreviewScene::Draw3D( U32 deltaTime )
 {
+	timer += deltaTime;
+	if ( currentType != FACE ) {
+		model[NUM_MODEL-1]->SetYRotation( (float)((timer/20)%360) );
+	}
 	engine->Draw( deltaTime );
 }
 

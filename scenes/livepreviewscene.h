@@ -69,6 +69,7 @@ private:
 	gamui::ToggleButton typeButton[NUM_TYPES];
 
 	U32 fileTimer;
+	U32 timer;
 	time_t fileTime;
 
 	bool		live;
