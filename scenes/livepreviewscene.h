@@ -56,7 +56,7 @@ private:
 
 	enum { 
 		ROWS = 4, 
-		COLS = 4, 
+		COLS = 5, 
 		NUM_MODEL = ROWS*COLS,
 
 		FACE = 0,

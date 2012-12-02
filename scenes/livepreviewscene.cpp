@@ -25,7 +25,6 @@ LivePreviewScene::LivePreviewScene( LumosGame* game, const LivePreviewSceneData*
 	//Color3F c = { 0.5f, 0.5f, 0.5f };
 	//map->SetColor( c );
 	
-
 	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase(), map );
 	engine->SetGlow( true );
 	engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
@@ -168,7 +167,7 @@ void LivePreviewScene::GenerateFaces( int mainRow )
 			}
 			tex[3] = rowMult * (float)random.Rand(srcRows);
 			if ( live ) {
-				tex[col] = current;
+				tex[col%4] = current;
 			}
 			break;
 		}
@@ -189,13 +188,12 @@ void LivePreviewScene::GenerateFaces( int mainRow )
 void LivePreviewScene::GenerateRing( int mainRow )
 {
 	static const float DELTA  = 0.3f;
-	static const float ORIGIN = DELTA*1.5f;
 	static const float DIST   = 3.0f;
 
 	engine->lighting.direction.Set( -1, 1, -1 );
 	engine->lighting.direction.Normalize();
-
-	engine->camera.SetPosWC( 0, ORIGIN, ORIGIN );
+	
+	engine->camera.SetPosWC( 0, DELTA*1.5f, DELTA*(float)(COLS-1)*0.5f );
 	static const Vector3F out = { -1, 0, 0 };			// FIXME: weird camera issue illustrated, again.
 	engine->camera.SetDir( out, V3F_UP );
 
@@ -233,7 +231,7 @@ void LivePreviewScene::GenerateRing( int mainRow )
 			tex[2] = rowMult * (float)random.Rand(srcRows);
 			tex[3] = rowMult * (float)random.Rand(srcRows);
 			if ( live ) {
-				tex[col] = current;
+				tex[col%4] = current;
 			}
 			break;
 		}
@@ -253,7 +251,7 @@ void LivePreviewScene::GenerateRing( int mainRow )
 		for( int k=1; k<4; ++k ) {
 			int id = model[i]->GetBoneID( StringPool::Intern( parts[k], true ));
 			GLASSERT( id >= 0 && id < 4 );
-			if ( (i==0) || (i & (1<<k))) {
+			if ( (i==0) || ((i+mainRow*NUM_MODEL) & (1<<k))) {
 				ids[k] = id;
 			}
 		}
@@ -341,6 +339,9 @@ void LivePreviewScene::CreateTexture( int type )
 	}
 
 	static const int SIZE = 256;
+	static const int ICOLS = 4;
+	static const int IROWS = 4;
+
 	struct _stat buf;
 
 	_stat( filename, &buf );
@@ -353,29 +354,29 @@ void LivePreviewScene::CreateTexture( int type )
 	Texture* t = texman->GetTexture( "procedural" );
 	GLASSERT( t );
 	GLASSERT( t->Alpha() );
-	GLASSERT( t->Width() == SIZE*COLS );
-	GLASSERT( t->Height() == SIZE*ROWS );
+	GLASSERT( t->Width() == SIZE*ICOLS );
+	GLASSERT( t->Height() == SIZE*IROWS );
 
 	unsigned w=0, h=0;
 	U8* pixels = 0;
 	int error = lodepng_decode32_file( &pixels, &w, &h, filename );
 	GLASSERT( error == 0 );
-	GLASSERT( w == SIZE*COLS );
-	GLASSERT( h == SIZE*ROWS );
-	static const int BUFFER_SIZE = SIZE*SIZE*COLS*ROWS;
+	GLASSERT( w == SIZE*ICOLS );
+	GLASSERT( h == SIZE*IROWS );
+	static const int BUFFER_SIZE = SIZE*SIZE*ICOLS*IROWS;
 	U16* buffer = new U16[BUFFER_SIZE];
 
 	if ( error == 0 ) {
-		int scanline = SIZE*COLS*4;
+		int scanline = SIZE*ICOLS*4;
 
 		static const int RAD=8;
-		for( int j=0; j<SIZE*ROWS; ++j ) {
-			for( int i=0; i<SIZE*COLS; ++i ) {
+		for( int j=0; j<SIZE*IROWS; ++j ) {
+			for( int i=0; i<SIZE*ICOLS; ++i ) {
 				const U8* p = pixels + scanline*j + i*4;
 				Color4U8 color = { p[0], p[1], p[2], p[3] };
 
 				U16 c = Surface::CalcRGBA16( color );
-				int offset = SIZE*COLS*(SIZE*ROWS-1-j)+i;
+				int offset = SIZE*ICOLS*(SIZE*IROWS-1-j)+i;
 				GLASSERT( offset >= 0 && offset < BUFFER_SIZE );
 				buffer[offset] = c;
 			}
