@@ -209,6 +209,10 @@ void Model::Init( const ModelResource* resource, SpaceTree* tree )
 	this->tree = tree;
 	this->aux = 0;
 
+	color.Set(1,1,1,1);
+	boneFilter.Set(0,0,0,0);
+	control.Set( 1, 1, 1, 1 );
+
 	animationResource = 0;
 	if ( resource->header.animation != "create" ) {
 		animationResource = AnimationResourceManager::Instance()->GetResource( resource->header.animation.c_str() );
@@ -218,7 +222,6 @@ void Model::Init( const ModelResource* resource, SpaceTree* tree )
 	pos.Set( 0, 0, 0 );
 	rot.Zero();
 	Modify();
-	control.Set( 1, 1, 1, 1 );
 
 	if ( tree ) {
 		tree->Update( this );
@@ -583,12 +586,11 @@ void Model::Queue( RenderQueue* queue, EngineShaders* engineShaders, int require
 		if ( (( base & required ) == required ) && (( base & excluded ) == 0 ) ) {
 			int mod = 0;
 			if ( HasColor() ) {
-				mod = ShaderManager::COLOR_PARAM;
+				mod |= ShaderManager::COLOR_PARAM;
 			}
-			else if ( HasBoneFilter() ) {
-				mod = ShaderManager::BONE_FILTER;
+			if ( HasBoneFilter() ) {
+				mod |= ShaderManager::BONE_FILTER;
 			}
-
 			if ( HasAnimation() ) {
 				mod |= ShaderManager::BONE_XFORM;
 			}
@@ -617,7 +619,8 @@ void Model::Queue( RenderQueue* queue, EngineShaders* engineShaders, int require
 			queue->Add( this,									// reference back
 						&resource->atom[i],						// model atom to render
 						state,
-						param[i],								// parameter to the shader
+						color,
+						boneFilter,
 						control,								// parameter to the shader #2
 						pMat,
 						pBD );

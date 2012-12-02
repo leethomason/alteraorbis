@@ -196,7 +196,7 @@ void AnimationScene::UpdateBoneInfo()
 	if ( currentBone == -1 ) {
 		boneName.SetText( "all" );
 		for( int i=0; i<NUM_MODELS; ++i )
-			model[i]->ClearParam();
+			model[i]->SetBoneFilter( 0 );
 	}
 	else {
 		GLString str;
@@ -544,7 +544,7 @@ void AnimationScene::Draw3D( U32 deltaTime )
 			doExport = false;
 			WriteXML();
 			for( int i=0; i<NUM_MODELS; ++i ) 
-				model[i]->ClearParam();
+				model[i]->SetBoneFilter( 0 );
 			SetModelVis( false );
 		}
 	}

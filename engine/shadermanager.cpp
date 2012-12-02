@@ -41,7 +41,8 @@ static const char* gUniformName[ShaderManager::MAX_UNIFORM] =
 {
 	"u_mvpMatrix",
 	"u_mMatrix",
-	"u_paramArr",
+	"u_colorParamArr",
+	"u_filterParamArr",
 	"u_controlParamArr",
 	"u_param4Arr",
 
@@ -51,7 +52,8 @@ static const char* gUniformName[ShaderManager::MAX_UNIFORM] =
 	"u_ambient",
 	"u_diffuse",
 	"u_radius",
-	"u_param",
+	"u_colorParam",
+	"u_filterParam",
 	"u_controlParam",
 	"u_param4",
 	"u_boneXForm",
@@ -364,12 +366,12 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 	AppendFlag( &header, "TEXTURE0",			flags & TEXTURE0 );
 	if ( flags & TEXTURE0 ) {
 		AppendFlag( &header, "TEXTURE0_ALPHA_ONLY",	flags & TEXTURE0_ALPHA_ONLY );
-		AppendFlag( &header, "TEXTURE0_TRANSFORM",	flags & TEXTURE0_TRANSFORM );
+		//AppendFlag( &header, "TEXTURE0_TRANSFORM",	flags & TEXTURE0_TRANSFORM );
 	}
 	AppendFlag( &header, "TEXTURE1",			flags & TEXTURE1 );
 	if ( flags & TEXTURE1 ) {
 		AppendFlag( &header, "TEXTURE1_ALPHA_ONLY",	flags & TEXTURE1_ALPHA_ONLY );
-		AppendFlag( &header, "TEXTURE1_TRANSFORM",	flags & TEXTURE1_TRANSFORM );
+		//AppendFlag( &header, "TEXTURE1_TRANSFORM",	flags & TEXTURE1_TRANSFORM );
 	}
 	AppendFlag( &header, "COLOR_PARAM",			flags & COLOR_PARAM );
 	AppendFlag( &header, "COLORS",				flags & COLORS );
@@ -378,8 +380,7 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 	AppendFlag( &header, "EMISSIVE",			flags & EMISSIVE );
 	AppendFlag( &header, "EMISSIVE_EXCLUSIVE",	flags & EMISSIVE_EXCLUSIVE );
 	AppendFlag( &header, "BONE_FILTER",			flags & BONE_FILTER );
-	AppendFlag( &header, "BONES",				shader->BonesNeeded() );
-	AppendFlag( &header, "PARAM",				shader->ParamNeeded() );
+	AppendFlag( &header, "BONES",				flags & (BONE_FILTER | BONE_XFORM) );
 	AppendFlag( &header, "PROCEDURAL",			flags & PROCEDURAL );	// both are triggered off procedural. deserves a clean-up.
 	AppendFlag( &header, "PARAM4",				flags & PROCEDURAL );
 

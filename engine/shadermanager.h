@@ -71,15 +71,12 @@ public:
 		EMISSIVE			= (1<<9),		// interpret the alpha channel as emission.
 		EMISSIVE_EXCLUSIVE  = (1<<10),		// everything not emissive is black
 
-		// The Param. "COLOR" is the real one. The others are effectively debugging modes since they conflict with using "color"
 		COLOR_PARAM			= (1<<11),		// Apply per model color.
-		BONE_FILTER			= (1<<12),
-		TEXTURE0_TRANSFORM	= (1<<13),		// Texture has a texture transform
-		TEXTURE1_TRANSFORM	= (1<<14),
+		BONE_FILTER			= (1<<12),		// Apply per model bone filtering
 
 		// Features:
-		PROCEDURAL			= (1<<15),		// Engage the procedural renderer, and use a Matrix param.
-		BONE_XFORM			= (1<<16),
+		PROCEDURAL			= (1<<13),		// Engage the procedural renderer, and use a Matrix param.
+		BONE_XFORM			= (1<<14),
 	};
 
 	void DeviceLoss();
@@ -88,8 +85,8 @@ public:
 
 	// ActivateShader should be called *before* the sets, so  the sets are correctly validated. 
 	void ActivateShader( int flags );
-	bool ParamNeeded() const { return active->ParamNeeded(); }
-	bool BonesNeeded() const { return active->BonesNeeded(); }
+	//bool ParamNeeded() const { return active->ParamNeeded(); }
+	//bool BonesNeeded() const { return active->BonesNeeded(); }
 
 	// Warning: must match gAttributeName
 	enum {
@@ -110,7 +107,8 @@ public:
 	enum {
 		U_MVP_MAT,		
 		U_M_MAT_ARR,	// array for instancing
-		U_PARAM_ARR,	// params for instancing
+		U_COLOR_PARAM_ARR,	// params for instancing
+		U_FILTER_PARAM_ARR,
 		U_CONTROL_PARAM_ARR,
 		U_PARAM4_ARR,	// params for instancing
 
@@ -120,7 +118,8 @@ public:
 		U_AMBIENT,
 		U_DIFFUSE,
 		U_RADIUS,
-		U_PARAM,
+		U_COLOR_PARAM,
+		U_FILTER_PARAM,
 		U_CONTROL_PARAM,
 		U_PARAM4,
 		U_BONEXFORM,
@@ -151,6 +150,7 @@ private:
 			for( int i=0; i<MAX_ATTRIBUTE; ++i ) attributeLoc[i] = -1;
 			for( int i=0; i<MAX_UNIFORM; ++i ) uniformLoc[i] = -1;
 		}
+		/*
 		bool ParamNeeded() const { 
 			return (flags & (   ShaderManager::TEXTURE0_TRANSFORM 
 				              | ShaderManager::TEXTURE1_TRANSFORM 
@@ -161,6 +161,7 @@ private:
 			return (flags & (   ShaderManager::BONE_FILTER 
 							  | ShaderManager::BONE_XFORM ))  != 0;
 		}
+		*/
 
 		int flags;
 		U32 vertexProg;

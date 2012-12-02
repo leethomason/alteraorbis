@@ -233,10 +233,9 @@ public:
 
 	enum {
 		MODEL_SELECTABLE			= 0x0001,
-		MODEL_PARAM_IS_TEX_XFORM	= 0x0002,
-		MODEL_PARAM_IS_COLOR		= 0x0004,
-		MODEL_PARAM_IS_BONE_FILTER	= 0x0008,
-		MODEL_PARAM_MASK			= MODEL_PARAM_IS_TEX_XFORM | MODEL_PARAM_IS_COLOR | MODEL_PARAM_IS_BONE_FILTER,
+		//MODEL_PARAM_IS_TEX_XFORM	= 0x0002,
+		MODEL_HAS_COLOR				= 0x0004,
+		MODEL_HAS_BONE_FILTER		= 0x0008,
 		MODEL_NO_SHADOW				= 0x0100,
 		MODEL_INVISIBLE				= 0x0200,
 		MODEL_PROCEDURAL			= 0x0400,
@@ -291,30 +290,28 @@ public:
 	void SetScale( float s );
 	float GetScale() const							{ return debugScale; }
 	
-	// <PARAMS> Only one can be in use at a time.
-	void ClearParam() {
-		ClearFlag( MODEL_PARAM_MASK );
-		for( int i=0; i<EL_MAX_MODEL_GROUPS; ++i ) {
-			param[i].Zero();
-		}
-	}
-
 	void SetColor( const grinliz::Vector4F& color ) {
-		SetParam( MODEL_PARAM_IS_COLOR, -1, color );
+		SetFlag( MODEL_HAS_COLOR );
+		this->color = color;
 	}
 	bool HasColor() const {
-		return IsFlagSet( MODEL_PARAM_IS_COLOR ) != 0;
+		return IsFlagSet( MODEL_HAS_COLOR ) != 0;
 	}
 
-	// 4 ids
+	// 4 ids. Null to clear.
 	void SetBoneFilter( const int* boneID ) {
-		grinliz::Vector4F v = { (float)boneID[0], (float)boneID[1], (float)boneID[2], (float)boneID[3] };
-		SetParam( MODEL_PARAM_IS_BONE_FILTER, -1, v );
+		if ( boneID ) {
+			boneFilter.Set(  (float)boneID[0], (float)boneID[1], (float)boneID[2], (float)boneID[3] );
+			SetFlag( MODEL_HAS_BONE_FILTER );
+		}
+		else {
+			ClearFlag( MODEL_HAS_BONE_FILTER );
+		}
 	}
 	bool HasBoneFilter() const {
-		return IsFlagSet( MODEL_PARAM_IS_BONE_FILTER ) != 0;
+		return IsFlagSet( MODEL_HAS_BONE_FILTER ) != 0;
 	}
-	//// </PARAMS>
+
 	void SetProcedural( bool on, const grinliz::Color4F* colors, const float* v );
 	void SetControl( const grinliz::Vector4F& v )	{ control = v; }
 
@@ -353,21 +350,6 @@ public:
 	const grinliz::Matrix4& XForm() const;
 
 private:
-	void SetParam( int flag, int index, const grinliz::Vector4F& v ) {
-		GLASSERT( flag & MODEL_PARAM_MASK );
-		GLASSERT( index >= -1 && index < EL_MAX_MODEL_GROUPS );
-
-		ClearFlag( MODEL_PARAM_MASK );
-		SetFlag( flag ); 
-
-		for( int i=0; i<EL_MAX_MODEL_GROUPS; ++i ) {
-			param[i].Zero();
-			if ( index < 0 || index == i ) {
-				param[i] = v;
-			}
-		}
-	}
-
 	void Modify() 
 	{			
 		xformValid = false; 
@@ -403,7 +385,8 @@ private:
 	const AnimationResource* animationResource;
 	bool hasParticles;
 
-	grinliz::Vector4F	param[EL_MAX_MODEL_GROUPS];
+	grinliz::Vector4F	color;
+	grinliz::Vector4F	boneFilter;
 	grinliz::Vector4F	control;
 	ModelAux* aux;
 	int flags;

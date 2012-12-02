@@ -47,7 +47,8 @@ public:
 	void Add(	Model* model,
 				const ModelAtom* atom, 
 				const GPUState& state,
-				const grinliz::Vector4F& param, 
+				const grinliz::Vector4F& color,
+				const grinliz::Vector4F& filter,
 				const grinliz::Vector4F& control,
 				const grinliz::Matrix4* param4,
 				const BoneData* boneData  );
@@ -66,7 +67,8 @@ private:
 		GPUState				state;
 		Model*					model;
 		const ModelAtom*		atom;	
-		grinliz::Vector4F		param;			// per instance data (vec4)
+		grinliz::Vector4F		color;			// per instance data (vec4)
+		grinliz::Vector4F		boneFilter;		// per instance filter
 		grinliz::Vector4F		control;		// per instance data 
 		const grinliz::Matrix4*	param4;			// per instance data (matrix)
 		const BoneData*			boneData;

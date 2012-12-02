@@ -318,7 +318,6 @@ void GPUState::Weld( const GPUState& state, const GPUStream& stream, const GPUSt
 	shadman->ClearStream();
 
 	const Matrix4& mv = GPUState::TopMatrix( GPUState::MODELVIEW_MATRIX );
-	bool paramNeeded = shadman->ParamNeeded();
 
 	if ( flags & ShaderManager::INSTANCE ) {
 		Matrix4 vp;
@@ -330,9 +329,13 @@ void GPUState::Weld( const GPUState& state, const GPUStream& stream, const GPUSt
 		GLASSERT( stream.instanceIDOffset > 0 );
 		shadman->SetStreamData( ShaderManager::A_INSTANCE_ID, 1, GL_UNSIGNED_SHORT, 
 			                    stream.stride, PTR( data.streamPtr, stream.instanceIDOffset ) );
-		if ( paramNeeded ) {
-			GLASSERT( data.param1 );
-			shadman->SetUniformArray( ShaderManager::U_PARAM_ARR, EL_MAX_INSTANCE, data.param1 );
+		if ( flags & ShaderManager::COLOR_PARAM ) {
+			GLASSERT( data.colorParam );
+			shadman->SetUniformArray( ShaderManager::U_COLOR_PARAM_ARR, EL_MAX_INSTANCE, data.colorParam );
+		}
+		if ( flags & ShaderManager::BONE_FILTER ) {
+			GLASSERT( data.boneFilter );
+			shadman->SetUniformArray( ShaderManager::U_FILTER_PARAM_ARR, EL_MAX_INSTANCE, data.colorParam );
 		}
 		if ( flags & ShaderManager::PROCEDURAL ) {
 			GLASSERT( data.param4 );
@@ -345,9 +348,13 @@ void GPUState::Weld( const GPUState& state, const GPUStream& stream, const GPUSt
 		Matrix4 mvp;
 		MultMatrix4( GPUState::TopMatrix( GPUState::PROJECTION_MATRIX ), mv, &mvp );
 		shadman->SetUniform( ShaderManager::U_MVP_MAT, mvp );
-		if ( paramNeeded ) {
-			GLASSERT( data.param1 );
-			shadman->SetUniform( ShaderManager::U_PARAM, data.param1[0] );
+		if ( flags & ShaderManager::COLOR_PARAM ) {
+			GLASSERT( data.colorParam );
+			shadman->SetUniform( ShaderManager::U_COLOR_PARAM, data.colorParam[0] );
+		}
+		if ( flags & ShaderManager::BONE_FILTER ) {
+			GLASSERT( data.boneFilter );
+			shadman->SetUniform( ShaderManager::U_COLOR_PARAM, data.boneFilter[0] );
 		}
 		if ( flags & ShaderManager::PROCEDURAL ) {
 			GLASSERT( data.param4 );

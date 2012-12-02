@@ -5,8 +5,11 @@ uniform mat4 	u_mvpMatrix;		// model-view-projection.
 #if INSTANCE == 1
 	uniform mat4 		u_mMatrix[EL_MAX_INSTANCE];		// Each instance gets its own transform. Burns up uniforms; this can't be huge.
 	uniform vec4		u_controlParamArr[EL_MAX_INSTANCE];
-	#if PARAM == 1
-		uniform vec4	u_paramArr[EL_MAX_INSTANCE];	// Arbitrary params, if used. (texture xform, color, etc.)
+	#if COLOR_PARAM == 1
+		uniform vec4	u_colorParamArr[EL_MAX_INSTANCE];
+	#endif
+	#if BONE_FILTER == 1
+		uniform vec4	u_filterParamArr[EL_MAX_INSTANCE];
 	#endif
 	#if PARAM4 == 1
 		uniform mat4	u_param4Arr[EL_MAX_INSTANCE];	// Used for procedural rendering. Could be made arbitrary.
@@ -14,8 +17,11 @@ uniform mat4 	u_mvpMatrix;		// model-view-projection.
 	attribute float a_instanceID;					// Index into the transformation.
 #else
 	uniform vec4 		u_controlParam;				// Controls fade.
-	#if PARAM == 1
-		uniform vec4	u_param;					// Arbitrary params, if used. (texture xform, color, etc.)
+	#if COLOR_PARAM == 1
+		uniform vec4	u_colorParam;
+	#endif
+	#if BONE_FILTER == 1
+		uniform vec4	u_filterParam;
 	#endif
 	#if PARAM4 == 1
 		uniform mat4	u_param;					// Used for procedural rendering. Could be made arbitrary.
@@ -80,12 +86,19 @@ void main() {
 	#else
 		vec4 controlParam 	= u_controlParam;
 	#endif
-	#if PARAM == 1
+	#if COLOR_PARAM == 1
 		// Don't go insane with #if syntax later:
 		#if INSTANCE == 1
-			vec4 param 		= u_paramArr[int(a_instanceID)];
+			vec4 colorParam 	= u_colorParamArr[int(a_instanceID)];
 		#else
-			vec4 param 		= u_param;
+			vec4 colorParam 	= u_colorParam;
+		#endif
+	#endif
+	#if BONE_FILTER == 1
+		#if INSTANCE == 1
+			vec4 filterParam 	= u_filterParamArr[int(a_instanceID)];
+		#else
+			vec4 filterParam 	= u_filterParam;
 		#endif
 	#endif
 	#if PARAM4 == 1
@@ -107,12 +120,12 @@ void main() {
 	#endif
 
 	#if TEXTURE0 == 1
-		#if TEXTURE0_TRANSFORM == 1
-			v_uv0 = vec2( a_uv0.x*param.x + param.z, a_uv0.y*param.y + param.w );
-			#if PROCEDURAL > 0
-				#error not supported
-			#endif
-		#endif	
+//		#if TEXTURE0_TRANSFORM == 1
+//			v_uv0 = vec2( a_uv0.x*param.x + param.z, a_uv0.y*param.y + param.w );
+//			#if PROCEDURAL > 0
+//				#error not supported: texture0_transform and procedural
+//			#endif
+//		#endif	
 		#if PROCEDURAL == 0
 			v_uv0 = a_uv0;
 		#else
@@ -129,11 +142,11 @@ void main() {
 		#endif
 	#endif
 	#if TEXTURE1 == 1
-		#if TEXTURE1_TRANSFORM == 1
-			v_uv1 = vec2( a_uv1.x*param.x + param.z, a_uv1.y*param.y + param.w );
-		#else
+//		#if TEXTURE1_TRANSFORM == 1
+//			v_uv1 = vec2( a_uv1.x*param.x + param.z, a_uv1.y*param.y + param.w );
+//		#else
 			v_uv1 = a_uv1;
-		#endif
+//		#endif
 	#endif
 
 	mat4 xform = mat4( 1.0 );	
@@ -216,7 +229,7 @@ void main() {
 	#endif
 
 	#if BONE_FILTER == 1
-		float mult = ( param.x == a_boneID || param.y == a_boneID || param.z == a_boneID || param.w == a_boneID ) ? 1.0 : 0.0; 
+		float mult = ( filterParam.x == a_boneID || filterParam.y == a_boneID || filterParam.z == a_boneID || filterParam.w == a_boneID ) ? 1.0 : 0.0; 
 		pos = pos * mult;
 	#endif
 	

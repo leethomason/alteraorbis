@@ -54,7 +54,8 @@ bool RenderQueue::CompareItem::Less( const Item* s0, const Item* s1 )
 void RenderQueue::Add(	Model* model, 
 						const ModelAtom* atom, 
 						const GPUState& state, 
-						const Vector4F& param, 
+						const Vector4F& color,
+						const Vector4F& filter,
 						const Vector4F& control,
 						const Matrix4* param4,
 						const BoneData* boneData  )
@@ -66,7 +67,8 @@ void RenderQueue::Add(	Model* model,
 	item->state = state;
 	item->model = model;
 	item->atom = atom;
-	item->param = param;
+	item->color = color;
+	item->boneFilter = filter;
 	item->control = control;
 	item->param4 = param4;
 	item->boneData = boneData;
@@ -125,14 +127,16 @@ void RenderQueue::Submit(	int modelRequired,
 		// in use, always instance.
 		{
 			Matrix4		instanceMatrix[EL_MAX_INSTANCE];
-			Vector4F	instanceParam1[EL_MAX_INSTANCE];
+			Vector4F	instanceColorParam[EL_MAX_INSTANCE];
+			Vector4F	instanceBoneFilter[EL_MAX_INSTANCE];
 			Vector4F	instanceControlParam[EL_MAX_INSTANCE];
 			Matrix4		instanceParam4[EL_MAX_INSTANCE];
 			BoneData	instanceBone[EL_MAX_INSTANCE];
 
 			atom->Bind( &stream, &data );
 			data.matrix = instanceMatrix;
-			data.param1 = instanceParam1;
+			data.colorParam = instanceColorParam;
+			data.boneFilter = instanceBoneFilter;
 			data.controlParam = instanceControlParam;
 			data.param4 = instanceParam4;
 			data.bones  = instanceBone;
@@ -150,7 +154,8 @@ void RenderQueue::Submit(	int modelRequired,
 					else {
 						instanceMatrix[index] = item->model->XForm();
 					}
-					instanceParam1[index] = item->param;
+					instanceColorParam[index] = item->color;
+					instanceBoneFilter[index] = item->boneFilter;
 					instanceControlParam[index] = item->control;
 
 					if ( item->param4 ) {
