@@ -335,7 +335,7 @@ void GPUState::Weld( const GPUState& state, const GPUStream& stream, const GPUSt
 		}
 		if ( flags & ShaderManager::BONE_FILTER ) {
 			GLASSERT( data.boneFilter );
-			shadman->SetUniformArray( ShaderManager::U_FILTER_PARAM_ARR, EL_MAX_INSTANCE, data.colorParam );
+			shadman->SetUniformArray( ShaderManager::U_FILTER_PARAM_ARR, EL_MAX_INSTANCE, data.boneFilter );
 		}
 		if ( flags & ShaderManager::PROCEDURAL ) {
 			GLASSERT( data.param4 );

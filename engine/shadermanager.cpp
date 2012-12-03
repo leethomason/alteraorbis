@@ -373,16 +373,16 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 		AppendFlag( &header, "TEXTURE1_ALPHA_ONLY",	flags & TEXTURE1_ALPHA_ONLY );
 		//AppendFlag( &header, "TEXTURE1_TRANSFORM",	flags & TEXTURE1_TRANSFORM );
 	}
-	AppendFlag( &header, "COLOR_PARAM",			flags & COLOR_PARAM );
-	AppendFlag( &header, "COLORS",				flags & COLORS );
 	AppendFlag( &header, "INSTANCE",			flags & INSTANCE );
+	AppendFlag( &header, "COLORS",				flags & COLORS );
 	AppendFlag( &header, "PREMULT",				flags & PREMULT );
 	AppendFlag( &header, "EMISSIVE",			flags & EMISSIVE );
 	AppendFlag( &header, "EMISSIVE_EXCLUSIVE",	flags & EMISSIVE_EXCLUSIVE );
+	AppendFlag( &header, "COLOR_PARAM",			flags & COLOR_PARAM );
 	AppendFlag( &header, "BONE_FILTER",			flags & BONE_FILTER );
-	AppendFlag( &header, "BONES",				flags & (BONE_FILTER | BONE_XFORM) );
 	AppendFlag( &header, "PROCEDURAL",			flags & PROCEDURAL );	// both are triggered off procedural. deserves a clean-up.
 	AppendFlag( &header, "PARAM4",				flags & PROCEDURAL );
+	AppendFlag( &header, "BONE_XFORM",			flags & BONE_XFORM );
 
 	if ( flags & LIGHTING_DIFFUSE )
 		AppendFlag( &header, "LIGHTING_DIFFUSE", 1, 1 );

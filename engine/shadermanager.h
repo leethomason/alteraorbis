@@ -85,8 +85,6 @@ public:
 
 	// ActivateShader should be called *before* the sets, so  the sets are correctly validated. 
 	void ActivateShader( int flags );
-	//bool ParamNeeded() const { return active->ParamNeeded(); }
-	//bool BonesNeeded() const { return active->BonesNeeded(); }
 
 	// Warning: must match gAttributeName
 	enum {
@@ -150,18 +148,6 @@ private:
 			for( int i=0; i<MAX_ATTRIBUTE; ++i ) attributeLoc[i] = -1;
 			for( int i=0; i<MAX_UNIFORM; ++i ) uniformLoc[i] = -1;
 		}
-		/*
-		bool ParamNeeded() const { 
-			return (flags & (   ShaderManager::TEXTURE0_TRANSFORM 
-				              | ShaderManager::TEXTURE1_TRANSFORM 
-							  | ShaderManager::COLOR_PARAM
-							  | ShaderManager::BONE_FILTER )) != 0; 
-		}
-		bool BonesNeeded() const {
-			return (flags & (   ShaderManager::BONE_FILTER 
-							  | ShaderManager::BONE_XFORM ))  != 0;
-		}
-		*/
 
 		int flags;
 		U32 vertexProg;

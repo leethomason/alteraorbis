@@ -58,13 +58,15 @@ attribute vec3 a_pos;				// vertex position
 	#endif
 #endif
 
-#if BONES == 1
+#if BONE_XFORM == 1 || BONE_FILTER == 1
 	attribute float a_boneID;
-	#if INSTANCE == 1
-		// FIXME: Can (and should) pack into floats and use a scaling term. Currently: xform.x:rotation, xform.y:y, xform.z:z
-		uniform vec3 u_boneXForm[EL_MAX_BONES*EL_MAX_INSTANCE];
-	#else
-		uniform vec3 u_boneXForm[EL_MAX_BONES];	
+	#if BONE_XFORM == 1
+		#if INSTANCE == 1
+			// FIXME: Can (and should) pack into floats and use a scaling term. Currently: xform.x:rotation, xform.y:y, xform.z:z
+			uniform vec3 u_boneXForm[EL_MAX_BONES*EL_MAX_INSTANCE];
+		#else
+			uniform vec3 u_boneXForm[EL_MAX_BONES];	
+		#endif
 	#endif
 #endif
 
@@ -150,7 +152,7 @@ void main() {
 	#endif
 
 	mat4 xform = mat4( 1.0 );	
-	#if BONES == 1
+	#if BONE_XFORM == 1
 		#if INSTANCE == 1
 		vec3 bone = u_boneXForm[int(a_boneID + a_instanceID*float(EL_MAX_BONES))];
 		#else
@@ -186,13 +188,13 @@ void main() {
 	#endif
 	
 	#if INSTANCE == 0 
-		#if BONES == 0
+		#if BONE_XFORM == 0
 			vec4 pos = u_mvpMatrix * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );
 		#else
 			vec4 pos = u_mvpMatrix * xform * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );
 		#endif
 	#else
-		#if BONES == 0
+		#if BONE_XFORM == 0
 			vec4 pos = (u_mvpMatrix * u_mMatrix[int(a_instanceID)]) * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );
 		#else
 			vec4 pos = (u_mvpMatrix * u_mMatrix[int(a_instanceID)]) * xform * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );

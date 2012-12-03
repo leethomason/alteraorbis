@@ -232,15 +232,14 @@ public:
 	void Queue( RenderQueue* queue, EngineShaders* shaders, int requiredShaderFlag, int excludedShaderFlag );
 
 	enum {
-		MODEL_SELECTABLE			= 0x0001,
-		//MODEL_PARAM_IS_TEX_XFORM	= 0x0002,
-		MODEL_HAS_COLOR				= 0x0004,
-		MODEL_HAS_BONE_FILTER		= 0x0008,
-		MODEL_NO_SHADOW				= 0x0100,
-		MODEL_INVISIBLE				= 0x0200,
-		MODEL_PROCEDURAL			= 0x0400,
+		MODEL_SELECTABLE			= (1<<0),
+		MODEL_HAS_COLOR				= (1<<1),
+		MODEL_HAS_BONE_FILTER		= (1<<2),
+		MODEL_NO_SHADOW				= (1<<3),
+		MODEL_INVISIBLE				= (1<<4),
+		MODEL_PROCEDURAL			= (1<<5),
 
-		MODEL_USER					= 0x1000		// reserved for user code.
+		MODEL_USER					= (1<<16)		// reserved for user code.
 	};
 
 	int IsFlagSet( int f ) const	{ return flags & f; }

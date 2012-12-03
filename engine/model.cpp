@@ -585,6 +585,7 @@ void Model::Queue( RenderQueue* queue, EngineShaders* engineShaders, int require
 
 		if ( (( base & required ) == required ) && (( base & excluded ) == 0 ) ) {
 			int mod = 0;
+
 			if ( HasColor() ) {
 				mod |= ShaderManager::COLOR_PARAM;
 			}
