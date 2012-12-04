@@ -120,7 +120,7 @@
         resource="shield"
         flags="HELD_AT_HARDPOINT"
         hardpoint="shield"
-        procedural="shield"
+        procedural="roundsToGlow"
         reload ="3000"
         clipCap="20"
         mass="1.0"

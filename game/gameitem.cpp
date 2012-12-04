@@ -31,6 +31,7 @@ using namespace tinyxml2;
 #define READ_UINT_ATTR( ele, name )		{ ele->QueryUnsignedAttribute( #name, &name ); }
 
 
+// FIXME: make this way, way simpler
 float AbilityCurve( float yAt0, float yAt1, float yAt16, float yAt32, float x )
 {
 	GLASSERT( grinliz::InRange( x, 0.0f, 32.0f ));
@@ -41,6 +42,15 @@ float AbilityCurve( float yAt0, float yAt1, float yAt16, float yAt32, float x )
 		return grinliz::Lerp( yAt1, yAt16, (x-1.0f)/15.0f );
 	}
 	return grinliz::Lerp( yAt16, yAt32, (x-16.0f)/16.0f );
+}
+
+
+void GameStat::Roll( U32 seed )
+{
+	Random random( seed );
+	for( int i=0; i<NUM_TRAITS; ++i ) {
+		trait[i] = random.Dice( 3, 6 );
+	}
 }
 
 

@@ -101,19 +101,21 @@ float AbilityCurve( float yAt0, float yAt1, float yAt16, float yAt32, float x );
 class GameStat
 {
 public:
-	GameStat() : strength(10), will(10), charisma(10), intelligence(10), dexterity(10), exp(0) {}
+	GameStat()  {
+		Init();	
+	}
 
 	void Init() {
-		strength = will = charisma = intelligence = dexterity = 10;
-		exp = 0;
+		for( int i=0; i<NUM_TRAITS; ++i ) trait[i] = 10;
+		exp	= 0;
 	}
 
 	// 1-20
-	int Strength() const		{ return strength; }
-	int Will() const			{ return will; }
-	int Charisma() const		{ return charisma; }
-	int Intelligent() const		{ return intelligence; }
-	int Dexterity() const		{ return dexterity; }
+	int Strength() const		{ return trait[STR]; }
+	int Will() const			{ return trait[WILL]; }
+	int Charisma() const		{ return trait[CHR]; }
+	int Intelligent() const		{ return trait[INT]; }
+	int Dexterity() const		{ return trait[DEX]; }
 
 	int Experience() const		{ return exp; }
 	int Level() const			{ return ExperienceToLevel( exp ); }
@@ -122,13 +124,20 @@ public:
 		exp = LevelToExperience( level );
 		GLASSERT( level == ExperienceToLevel( exp ));
 	}
+	void Roll( U32 seed );
 
 	// 1.0 is normal, 0.1 very low, 2+ exceptional.
 	float Accuracy() const		{ return NormalLeveledSkill( Dexterity() ); }
 	float Damage() const		{ return NormalLeveledSkill( Strength() ); }
 	float NormalWill() const	{ return NormalLeveledSkill( Will() ); }
 
-	U32 Hash() const			{ return (strength<<0) | (will<<5) | (charisma<<10) | (intelligence<<15) | (dexterity<<20); }
+	U32 Hash() const			{ 
+		U32 h = 0;
+		for( int i=0; i<NUM_TRAITS; ++i ) {
+			h |= trait[i] << (5*i);
+		}
+		return h;
+	}
 
 	// exp: 0  lev: 0
 	//      1       0
@@ -144,7 +153,15 @@ private:
 		return ((float)value + (float)Level() * LEVEL_BONUS) * SKILL_NORMALIZE;
 	}
 
-	int strength, will, charisma, intelligence, dexterity;
+	// Group. Sometimes accessed as array.
+	enum {	STR,
+			WILL,
+			CHR,
+			INT,
+			DEX,
+			NUM_TRAITS
+		};
+	int trait[NUM_TRAITS];
 	U32 exp;
 };
 
@@ -247,7 +264,7 @@ public:
 	grinliz::IString		resource;	// resource used to  render the item
 	int		flags;			// flags that define this item; 'constant'
 	int		hardpoint;		// id of hardpoint this item attaches to
-	int		procedural;		// uses a procedural renderer
+	int		procedural;		// uses a procedural renderer: PROCEDURAL_SHIELD, etc.
 	float	mass;			// mass (kg)
 	float	hpPerMass;		// typically 1
 	float	hpRegen;		// hp / second regenerated (or lost) by this item

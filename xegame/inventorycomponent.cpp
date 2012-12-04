@@ -130,6 +130,16 @@ bool InventoryComponent::AddToInventory( GameItem* item, bool equip )
 					IString n = HardpointFlagToName( item->hardpoint );
 					GLASSERT( !n.empty() );
 					rc->Attach( n, item->ResourceName() );
+
+					if ( item->procedural & PROCEDURAL_INIT_MASK ) {
+						Color4F colorArr[4];
+						float vArr[4];
+						int result = ItemGen::RenderItem( game->GetPalette(), *heldAt[item->hardpoint], colorArr, vArr );
+
+						if ( result == ItemGen::PROC4 ) {
+							rc->SetProcedural( n, colorArr, vArr );
+						}
+					}
 				}
 			}
 		}
@@ -260,7 +270,7 @@ bool InventoryComponent::DoTick( U32 delta )
 		bool tick = gi->DoTick(delta);
 		callback = callback || tick;
 		
-		if ( rc && (gi->hardpoint != NO_HARDPOINT) && (gi->procedural != PROCEDURAL_NONE) ) {
+		if ( rc && (gi->hardpoint != NO_HARDPOINT) && (gi->procedural & PROCEDURAL_TICK_MASK) ) {
 			Color4F colorArr[4];
 			float vArr[4];
 			int result = ItemGen::RenderItem( game->GetPalette(), *work[i], colorArr, vArr );
@@ -269,9 +279,6 @@ bool InventoryComponent::DoTick( U32 delta )
 
 			if ( result == ItemGen::COLOR_XFORM ) {
 				rc->SetColor( name, colorArr[0].ToVector() );
-			}
-			else if ( result == ItemGen::PROC4 ) {
-				rc->SetProcedural( name, colorArr, vArr );
 			}
 		}
 	}
@@ -284,14 +291,6 @@ bool InventoryComponent::DoTick( U32 delta )
 		if ( packItems[i] && packItems[i]->DoTick(delta) )
 			callback  = true;
 	}
-
-	/*
-	GameItem* shield = GetShield();
-	if ( shield && parentChit->GetRenderComponent() ) {
-		Vector4F c = { 1, 1, 1, shield->RoundsFraction() };
-		parentChit->GetRenderComponent()->SetColor( "shield", c );
-	}
-	*/
 
 	return callback;
 }

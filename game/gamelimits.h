@@ -54,8 +54,11 @@ enum {
 
 enum {
 	PROCEDURAL_NONE,
-	PROCEDURAL_SHIELD,		// rounds -> glow intensity
-	PROCEDURAL_RING			// layers, etc.
+	PROCEDURAL_ROUNDS_TO_GLOW,	// rounds -> glow intensity
+	PROCEDURAL_RING,			// layers, etc.
+
+	PROCEDURAL_INIT_MASK = PROCEDURAL_RING,				// mask of procedural rendering done at init time
+	PROCEDURAL_TICK_MASK = PROCEDURAL_ROUNDS_TO_GLOW,	// mask of procedural rendering done per tick
 };
 
 

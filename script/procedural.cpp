@@ -166,8 +166,8 @@ void WeaponGen::Render( const GameItem& item, grinliz::Color4F* colorArr, float*
 
 int ItemGen::ToID( IString name )
 {
-	if ( name == "shield" ) {
-		return PROCEDURAL_SHIELD;
+	if ( name == "roundsToGlow" ) {
+		return PROCEDURAL_ROUNDS_TO_GLOW;
 	}
 	else if ( name == "ring" ) {
 		return PROCEDURAL_RING;
@@ -179,8 +179,8 @@ int ItemGen::ToID( IString name )
 grinliz::IString ItemGen::ToName( int id )
 {
 	switch( id ) {
-	case PROCEDURAL_SHIELD:	return StringPool::Intern( "shield", true );
-	case PROCEDURAL_RING:	return StringPool::Intern( "ring", true );
+	case PROCEDURAL_ROUNDS_TO_GLOW:	return StringPool::Intern( "roundsToGlow", true );
+	case PROCEDURAL_RING:			return StringPool::Intern( "ring", true );
 	default:
 		break;
 	}
@@ -192,7 +192,7 @@ int ItemGen::RenderItem( const Game::Palette* palette, const GameItem& item, gri
 {
 	int result = NONE;
 	switch ( item.procedural ) {
-		case PROCEDURAL_SHIELD:
+		case PROCEDURAL_ROUNDS_TO_GLOW:
 		{
 			colorArr[0].Set( 1, 1, 1, item.RoundsFraction() );
 			result = COLOR_XFORM;

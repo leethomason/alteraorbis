@@ -377,6 +377,7 @@ void BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int 
 			const GameItem* shield = itemStorage.Get( "shield" );
 			GLASSERT( shield );
 			GameItem* gi = new GameItem( *shield );
+			gi->stats.Roll( random.Rand() );
 			gi->stats.SetExpFromLevel( level );
 			gi->InitState();
 			inv->AddToInventory( gi, true );
@@ -386,6 +387,7 @@ void BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int 
 			const GameItem *knife = itemStorage.Get( "ring" );
 			GLASSERT( knife );
 			GameItem* gi = new GameItem( *knife );
+			gi->stats.Roll( random.Rand() );
 			gi->stats.SetExpFromLevel( level );
 			gi->InitState();
 			inv->AddToInventory( gi, true );
