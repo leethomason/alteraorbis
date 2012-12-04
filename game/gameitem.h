@@ -128,6 +128,8 @@ public:
 	float Damage() const		{ return NormalLeveledSkill( Strength() ); }
 	float NormalWill() const	{ return NormalLeveledSkill( Will() ); }
 
+	U32 Hash() const			{ return (strength<<0) | (will<<5) | (charisma<<10) | (intelligence<<15) | (dexterity<<20); }
+
 	// exp: 0  lev: 0
 	//      1       0
 	//      2       1
@@ -245,6 +247,7 @@ public:
 	grinliz::IString		resource;	// resource used to  render the item
 	int		flags;			// flags that define this item; 'constant'
 	int		hardpoint;		// id of hardpoint this item attaches to
+	int		procedural;		// uses a procedural renderer
 	float	mass;			// mass (kg)
 	float	hpPerMass;		// typically 1
 	float	hpRegen;		// hp / second regenerated (or lost) by this item
@@ -277,6 +280,7 @@ public:
 			resource		= rhs->resource;
 			flags			= rhs->flags;
 			hardpoint		= rhs->hardpoint;
+			procedural		= rhs->procedural;
 			mass			= rhs->mass;
 			hpPerMass		= rhs->hpPerMass;
 			hpRegen			= rhs->hpRegen;
@@ -304,7 +308,8 @@ public:
 			key  = grinliz::IString();
 			resource = grinliz::IString();
 			flags = 0;
-			hardpoint = 0;
+			hardpoint = NO_HARDPOINT;
+			procedural = PROCEDURAL_NONE;
 			mass = 1;
 			hpPerMass = 1;
 			hpRegen = 0;

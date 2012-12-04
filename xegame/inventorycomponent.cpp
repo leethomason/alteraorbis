@@ -20,6 +20,7 @@
 #include "chit.h"
 #include "chitbag.h"
 #include "../engine/engine.h"
+#include "../script/procedural.h"
 
 using namespace grinliz;
 
@@ -64,13 +65,13 @@ static const char* gHardpointNames[NUM_HARDPOINTS] = {
 	"shield"
 };
 
-const char* InventoryComponent::HardpointFlagToName( int f )
+IString InventoryComponent::HardpointFlagToName( int f )
 {
 	GLASSERT( f >= 0 && f < NUM_HARDPOINTS );
 	if ( f >= 0 && f < NUM_HARDPOINTS ) {
-		return gHardpointNames[f];
+		return StringPool::Intern( gHardpointNames[f], true );
 	}
-	return 0;
+	return IString();
 }
 
 
@@ -115,7 +116,6 @@ bool InventoryComponent::AddToInventory( GameItem* item, bool equip )
 	} 
 	else if ( attachment == GameItem::HELD_AT_HARDPOINT ) {
 		if ( equip ) {
-
 			GLASSERT( hardpoints & (1<<item->hardpoint) );
 			// check that the needed hardpoint is free.
 			if (    ( hardpoints & (1<<item->hardpoint))	// does the hardpoint exist?
@@ -127,8 +127,8 @@ bool InventoryComponent::AddToInventory( GameItem* item, bool equip )
 				// Tell the render component to render.
 				GLASSERT( rc );
 				if ( rc ) {
-					const char* n = HardpointFlagToName( item->hardpoint );
-					GLASSERT( n );
+					IString n = HardpointFlagToName( item->hardpoint );
+					GLASSERT( !n.empty() );
 					rc->Attach( n, item->ResourceName() );
 				}
 			}
@@ -184,7 +184,8 @@ void InventoryComponent::GetRangedWeapons( grinliz::CArray< RangedInfo, NUM_HARD
 			GLASSERT( rc );
 			if ( rc ) {
 				Matrix4 xform;
-				rc->GetMetaData( HardpointFlagToName(i), &xform );
+				IString name = HardpointFlagToName(i);
+				rc->GetMetaData( name.c_str(), &xform );
 				Vector3F pos = xform * V3F_ZERO;
 				RangedInfo info = { ranged, pos };
 				weapons->Push( info );
@@ -244,14 +245,37 @@ void InventoryComponent::EmitEffect( Engine* engine, U32 delta )
 bool InventoryComponent::DoTick( U32 delta )
 {
 	bool callback = false;
+	CArray<GameItem*, NUM_HARDPOINTS*2> work;
+	RenderComponent* rc = parentChit->GetRenderComponent();
+
 	for( int i=0; i<NUM_HARDPOINTS; ++i ) {
-		if ( intrinsicAt[i] && intrinsicAt[i]->DoTick(delta) ) {
-			callback = true;
-		}
-		if ( heldAt[i] && heldAt[i]->DoTick(delta) ) {
-			callback = true;
+		if ( intrinsicAt[i] )
+			work.Push( intrinsicAt[i] );
+		if ( heldAt[i] )
+			work.Push( heldAt[i] );
+	}
+
+	for( int i=0; i<work.Size(); ++i ) {
+		GameItem* gi = work[i];
+		bool tick = gi->DoTick(delta);
+		callback = callback || tick;
+		
+		if ( rc && (gi->hardpoint != NO_HARDPOINT) && (gi->procedural != PROCEDURAL_NONE) ) {
+			Color4F colorArr[4];
+			float vArr[4];
+			int result = ItemGen::RenderItem( game->GetPalette(), *work[i], colorArr, vArr );
+
+			IString name = HardpointFlagToName( gi->hardpoint );
+
+			if ( result == ItemGen::COLOR_XFORM ) {
+				rc->SetColor( name, colorArr[0].ToVector() );
+			}
+			else if ( result == ItemGen::PROC4 ) {
+				rc->SetProcedural( name, colorArr, vArr );
+			}
 		}
 	}
+
 	for( int i=0; i<freeItems.Size(); ++i ) {
 		if ( freeItems[i] && freeItems[i]->DoTick(delta) )
 			callback  = true;
@@ -261,11 +285,13 @@ bool InventoryComponent::DoTick( U32 delta )
 			callback  = true;
 	}
 
+	/*
 	GameItem* shield = GetShield();
 	if ( shield && parentChit->GetRenderComponent() ) {
 		Vector4F c = { 1, 1, 1, shield->RoundsFraction() };
-		parentChit->GetRenderComponent()->ParamColor( "shield", c );
+		parentChit->GetRenderComponent()->SetColor( "shield", c );
 	}
+	*/
 
 	return callback;
 }

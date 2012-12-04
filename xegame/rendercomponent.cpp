@@ -162,11 +162,11 @@ bool RenderComponent::PlayAnimation( AnimationType type )
 
 
 
-void RenderComponent::Attach( const char* metaData, const char* asset )
+void RenderComponent::Attach( IString metaData, const char* asset )
 {
 	for( int j=1; j<NUM_MODELS; ++j ) {
 		if ( metaDataName[j-1].empty() ) {
-			metaDataName[j-1] = StringPool::Intern( metaData );
+			metaDataName[j-1] = metaData;
 			GLASSERT( model[j] == 0 );
 			resource[j] = ModelResourceManager::Instance()->GetModelResource( asset );
 			GLASSERT( resource[j] );
@@ -182,9 +182,9 @@ void RenderComponent::Attach( const char* metaData, const char* asset )
 }
 
 
-void RenderComponent::ParamColor( const char* hardpoint, const grinliz::Vector4F& colorMult )
+void RenderComponent::SetColor( IString hardpoint, const grinliz::Vector4F& colorMult )
 {
-	if ( hardpoint ) {
+	if ( !hardpoint.empty() ) {
 		for( int i=0; i<EL_MAX_METADATA; ++i ) {
 			if ( metaDataName[i] == hardpoint ) {
 				GLASSERT( model[i+1] );
@@ -202,7 +202,27 @@ void RenderComponent::ParamColor( const char* hardpoint, const grinliz::Vector4F
 }
 
 
-void RenderComponent::Detach( const char* metaData )
+void RenderComponent::SetProcedural( IString hardpoint, const grinliz::Color4F* c, const float* v )
+{
+	if ( !hardpoint.empty() ) {
+		for( int i=0; i<EL_MAX_METADATA; ++i ) {
+			if ( metaDataName[i] == hardpoint ) {
+				GLASSERT( model[i+1] );
+				if ( model[i+1] ) {
+					model[i+1]->SetProcedural( true, c, v );
+					return;
+				}
+			}
+		}
+		GLASSERT( 0 );	// safe, but we meant to find something.
+	}
+	else {
+		model[0]->SetProcedural( true, c, v );
+	}
+}
+
+
+void RenderComponent::Detach( IString metaData )
 {
 	for( int i=1; i<NUM_MODELS; ++i ) {
 		if ( metaDataName[i-1] == metaData ) {

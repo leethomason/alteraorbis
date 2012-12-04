@@ -1,5 +1,6 @@
 #include "procedural.h"
 #include "../grinliz/glvector.h"
+#include "../game/gameitem.h"
 
 using namespace grinliz;
 
@@ -81,6 +82,26 @@ void FaceGen::GetColors( U32 seed, grinliz::Color4F* c )
 }
 
 
+void FaceGen::Render( const GameItem& item, grinliz::Color4F* colorArr, float* vArr )
+{
+	U32 seed = item.stats.Hash();
+	Random random( seed );
+	random.Rand();
+
+	GetColors( random.Rand(), colorArr );
+
+	vArr[0] = (float)(FACE_ROWS - random.Rand(FACE_ROWS)) / (float)FACE_ROWS;
+	vArr[1] = (float)(EYE_ROWS - random.Rand(EYE_ROWS)) / (float)EYE_ROWS;
+	
+	// 50% chance of having glasses.
+	if ( random.Bit() )
+		vArr[2] = 1.0f;
+	else
+		vArr[2] = (float)(GLASSES_ROWS - random.Rand(GLASSES_ROWS)) / (float)GLASSES_ROWS;
+	vArr[3] = (float)(HAIR_ROWS - random.Rand(HAIR_ROWS)) / (float)HAIR_ROWS;
+}
+
+
 void WeaponGen::GetColors( int i, bool fire, bool shock, grinliz::Color4F* array )
 {
 	// red for fire
@@ -121,4 +142,74 @@ void WeaponGen::GetColors( int i, bool fire, bool shock, grinliz::Color4F* array
 	array[CONTRAST].a	= 0;
 	array[EFFECT].a		= (fire || shock) ? 0.7f : 0.0f;
 	array[GLOW].a		= 0.7f;
+}
+
+
+void WeaponGen::Render( const GameItem& item, grinliz::Color4F* colorArr, float* vArr )
+{
+	U32 seed = item.stats.Hash();
+	Random random( seed );
+	random.Rand();
+
+	GetColors(	random.Rand(), 
+				(item.flags & GameItem::EFFECT_FIRE) != 0, 
+				(item.flags & GameItem::EFFECT_SHOCK) != 0, 
+				colorArr );
+
+	vArr[0] = (float)( NUM_ROWS - random.Rand(NUM_ROWS)) / (float)(NUM_ROWS);
+	vArr[1] = (float)( NUM_ROWS - random.Rand(NUM_ROWS)) / (float)(NUM_ROWS);
+	vArr[2] = (float)( NUM_ROWS - random.Rand(NUM_ROWS)) / (float)(NUM_ROWS);
+	vArr[3] = (float)( NUM_ROWS - random.Rand(NUM_ROWS)) / (float)(NUM_ROWS);	
+}
+
+
+
+int ItemGen::ToID( IString name )
+{
+	if ( name == "shield" ) {
+		return PROCEDURAL_SHIELD;
+	}
+	else if ( name == "ring" ) {
+		return PROCEDURAL_RING;
+	}
+	return PROCEDURAL_NONE;
+}
+
+
+grinliz::IString ItemGen::ToName( int id )
+{
+	switch( id ) {
+	case PROCEDURAL_SHIELD:	return StringPool::Intern( "shield", true );
+	case PROCEDURAL_RING:	return StringPool::Intern( "ring", true );
+	default:
+		break;
+	}
+	return IString();
+}
+
+
+int ItemGen::RenderItem( const Game::Palette* palette, const GameItem& item, grinliz::Color4F* colorArr, float* vArr )
+{
+	int result = NONE;
+	switch ( item.procedural ) {
+		case PROCEDURAL_SHIELD:
+		{
+			colorArr[0].Set( 1, 1, 1, item.RoundsFraction() );
+			result = COLOR_XFORM;
+		}
+		break;
+
+		case PROCEDURAL_RING:
+		{
+			WeaponGen gen( palette );
+			gen.Render( item, colorArr, vArr );
+			result = PROC4;
+		}
+		break;
+
+		default:
+			GLASSERT( 0 );
+			break;
+	}
+	return result;
 }

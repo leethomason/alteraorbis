@@ -17,6 +17,7 @@
 
 #include "../grinliz/glstringutil.h"
 #include "../tinyxml2/tinyxml2.h"
+#include "../script/procedural.h"
 
 #include "../xegame/inventorycomponent.h"
 #include "../xegame/chit.h"
@@ -98,6 +99,11 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 	if ( h ) {
 		hardpoint = InventoryComponent::HardpointNameToFlag( h );
 		GLASSERT( hardpoint >= 0 );
+	}
+	procedural = PROCEDURAL_NONE;
+	const char* p = ele->Attribute( "procedural" );
+	if ( p ) {
+		procedural = ItemGen::ToID( StringPool::Intern( p ) );
 	}
 
 	hp = this->TotalHP();

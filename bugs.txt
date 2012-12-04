@@ -18,7 +18,8 @@
 
 	- serialization
 
-- put metadata in model
+- put metadata in model (authoring  time)
+- rationalize hardpoints: array index or flag? lookt at RenderComponent
 - mantis trigger broken
 - switch to ImageMagick for texture scaling
 - credits scene

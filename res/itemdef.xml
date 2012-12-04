@@ -65,8 +65,9 @@
   <item name="ring"
         resource="ring"
         flags="MELEE_WEAPON HELD_AT_HARDPOINT"
+        procedural="ring"
         hardpoint="trigger">
-        <melee kinetic="2" />
+    <melee kinetic="2" />
   </item>
   
   <item name="ax"
@@ -119,6 +120,7 @@
         resource="shield"
         flags="HELD_AT_HARDPOINT"
         hardpoint="shield"
+        procedural="shield"
         reload ="3000"
         clipCap="20"
         mass="1.0"

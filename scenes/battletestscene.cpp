@@ -352,7 +352,7 @@ void BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int 
 	chit->Add( new ItemComponent( item ));
 
 	chit->Add( new HealthComponent());
-	InventoryComponent* inv = new InventoryComponent( &chitBag );
+	InventoryComponent* inv = new InventoryComponent( &chitBag, game );
 	chit->Add( inv );
 
 	chit->AddListener( this );
@@ -366,10 +366,10 @@ void BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int 
 		Color4F tangerine = game->GetPalette()->Get4F( PAL_TANGERINE*2, PAL_TANGERINE );
 		Color4F blue      = game->GetPalette()->Get4F( PAL_BLUE*2, PAL_BLUE );
 		if ( team == RIGHT ) {
-			chit->GetRenderComponent()->ParamColor( 0, tangerine.ToVector() );
+			chit->GetRenderComponent()->SetColor( IString(), tangerine.ToVector() );
 		}
 		if ( team == LEFT ) {
-			chit->GetRenderComponent()->ParamColor( 0, blue.ToVector() );
+			chit->GetRenderComponent()->SetColor( IString(), blue.ToVector() );
 		}
 
 		// Always get a shield

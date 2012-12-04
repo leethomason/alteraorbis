@@ -24,6 +24,7 @@
 // Doesn't isolate the game from xe-game...oh well. Fix in XenoEngine3. :)
 #include "../game/gameitem.h"
 
+class Game;
 
 class InventoryComponent : public ItemBaseComponent
 {
@@ -31,7 +32,7 @@ private:
 	typedef ItemBaseComponent super;
 
 public:
-	InventoryComponent( ChitBag* bag ) : hardpoints(-1) {
+	InventoryComponent( ChitBag* bag, Game* _game ) : hardpoints(-1), game(_game) {
 		memset( intrinsicAt, 0, sizeof(GameItem*)*NUM_HARDPOINTS );
 		memset( heldAt, 0, sizeof(GameItem*)*NUM_HARDPOINTS );
 	}
@@ -73,12 +74,13 @@ public:
 	// Will return an empty array if the item isn't equipped.
 	void GetChain( GameItem* item, grinliz::CArray< GameItem*, 4 >* chain );
 
-	static const char* HardpointFlagToName( int f );
+	static grinliz::IString HardpointFlagToName( int f );
 	static int HardpointNameToFlag( const char* name );
 
 	void EmitEffect( Engine* engine, U32 deltaTime );
 
 private:
+	Game* game;
 	int hardpoints;			// which ones do we have?? If we have the hardpoint, intrinsicAt or heldAt may be used.
 	GameItem* intrinsicAt[NUM_HARDPOINTS];
 	GameItem* heldAt[NUM_HARDPOINTS];

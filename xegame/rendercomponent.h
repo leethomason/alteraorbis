@@ -22,6 +22,7 @@
 #include "../xegame/xegamelimits.h"
 #include "../grinliz/glvector.h"
 #include "../grinliz/glmatrix.h"
+#include "../grinliz/glcolor.h"
 
 
 class Engine;
@@ -76,9 +77,10 @@ public:
 	// A render component has one primary, animated model. Additional
 	// assets (guns, shields, etc.) can be Attached and Detatched
 	// to "metadata hardpoints".
-	void Attach( const char* hardpoint, const char* asset );
-	void ParamColor( const char* hardpoint, const grinliz::Vector4F& colorMult );
-	void Detach( const char* hardpoint );
+	void Attach(   grinliz::IString hardpoint, const char* asset );
+	void SetColor( grinliz::IString hardpoint, const grinliz::Vector4F& colorMult );
+	void SetProcedural( grinliz::IString hardpoint, const grinliz::Color4F* c, const float* v );
+	void Detach(   grinliz::IString hardpoint );
 
 private:
 	AnimationType CalcAnimation() const;

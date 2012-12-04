@@ -52,5 +52,11 @@ enum {
 	NUM_HARDPOINTS,
 };
 
+enum {
+	PROCEDURAL_NONE,
+	PROCEDURAL_SHIELD,		// rounds -> glow intensity
+	PROCEDURAL_RING			// layers, etc.
+};
+
 
 #endif // GAMELIMITS_INCLUDED

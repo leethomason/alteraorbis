@@ -114,7 +114,7 @@ void main() {
 	vec4 color = u_colorMult;
 	
 	#if COLOR_PARAM == 1
-		color *= param;
+		color *= colorParam;
 	#endif
 	
 	#if COLORS == 1
