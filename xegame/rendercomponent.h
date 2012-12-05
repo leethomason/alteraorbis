@@ -17,9 +17,12 @@
 #define RENDER_COMPONENT_INCLUDED
 
 #include "component.h"
+
 #include "../engine/enginelimits.h"
 #include "../engine/animation.h"
+
 #include "../xegame/xegamelimits.h"
+
 #include "../grinliz/glvector.h"
 #include "../grinliz/glmatrix.h"
 #include "../grinliz/glcolor.h"
@@ -28,6 +31,7 @@
 class Engine;
 class ModelResource;
 class Model;
+struct ProcRenderInfo;
 
 class RenderComponent : public Component
 {
@@ -79,7 +83,7 @@ public:
 	// to "metadata hardpoints".
 	void Attach(   grinliz::IString hardpoint, const char* asset );
 	void SetColor( grinliz::IString hardpoint, const grinliz::Vector4F& colorMult );
-	void SetProcedural( grinliz::IString hardpoint, const grinliz::Color4F* c, const float* v );
+	void SetProcedural( grinliz::IString hardpoint, const ProcRenderInfo& info );
 	void Detach(   grinliz::IString hardpoint );
 
 private:

@@ -307,6 +307,9 @@ public:
 			ClearFlag( MODEL_HAS_BONE_FILTER );
 		}
 	}
+	// [4]
+	void SetBoneFilter( const grinliz::IString* names, const bool* filter );
+
 	bool HasBoneFilter() const {
 		return IsFlagSet( MODEL_HAS_BONE_FILTER ) != 0;
 	}

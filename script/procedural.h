@@ -19,7 +19,34 @@ enum {
 	PAL_COUNT
 };
 
+enum {
+	PROC_RING_MAIN	= 0,	// each group starts at 0
+	PROC_RING_GUARD,
+	PROC_RING_TRIAD,
+	PROC_RING_BLADE,
+
+	PROC_COUNT
+};
+
+
 class GameItem;
+
+struct ProcRenderInfo
+{
+	ProcRenderInfo() {
+		for( int i=0; i<4; ++i ) {
+			color[i].Set( 1,1,1,1 );
+			vOffset[i] = 0;
+			filterName[i] = grinliz::IString();
+			filter[i] = true;
+		}
+	}
+
+	grinliz::Color4F	color[4];		// color of the layers
+	float				vOffset[4];		// texture offset
+	grinliz::IString	filterName[4];
+	bool				filter[4];		// item filters - maps to PROC_RING_MAIN, etc.
+};
 
 
 class ItemGen
@@ -36,9 +63,11 @@ public:
 		COLOR_XFORM,
 		PROC4
 	};
-	static int RenderItem( const Game::Palette* palette, const GameItem& item, grinliz::Color4F* colorArr, float* vArr );
+	static int RenderItem( const Game::Palette* palette, const GameItem& item, ProcRenderInfo* info );
+	// PROC_RING_GUARD -> "guard"
+	static grinliz::IString ProcIDToName( int id );
 
-	virtual void Render( const GameItem& item, grinliz::Color4F* colorArr, float* vArr ) = 0;
+	virtual void Render( const GameItem& item, ProcRenderInfo* info ) = 0;
 
 protected:
 	ItemGen( const Game::Palette* p_palette ) : palette( p_palette ) {}
@@ -70,8 +99,7 @@ public:
 		SKIN, HIGHLIGHT, GLASSES, HAIR
 	};
 	void GetColors( U32 seed, grinliz::Color4F* c );
-	virtual void Render( const GameItem& item, grinliz::Color4F* colorArr, float* vArr );
-
+	virtual void Render( const GameItem& item, ProcRenderInfo* info );
 };
 
 
@@ -89,7 +117,7 @@ public:
 	};
 
 	WeaponGen( const Game::Palette* p_palette ) : ItemGen( p_palette ) {}
-	virtual void Render( const GameItem& item, grinliz::Color4F* colorArr, float* vArr );
+	virtual void Render( const GameItem& item, ProcRenderInfo* info );
 
 	// [base, contrast, effect, glow]
 	void GetColors( int i, bool fire, bool shock, grinliz::Color4F* array );

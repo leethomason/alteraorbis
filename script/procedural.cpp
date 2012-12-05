@@ -4,6 +4,20 @@
 
 using namespace grinliz;
 
+
+/*static*/ grinliz::IString ItemGen::ProcIDToName( int id )
+{
+	static const char* procNames[PROC_COUNT] = {
+		"main",
+		"guard",
+		"triad",
+		"blade"
+	};
+	GLASSERT( id >= 0 && id < PROC_COUNT );
+	return StringPool::Intern( procNames[id], true );
+}
+
+
 void FaceGen::GetSkinColor( int index0, int index1, float fade, Color4F* color, Color4F* highlight )
 {
 	static const Vector2I c[NUM_SKIN_COLORS] = {
@@ -82,23 +96,24 @@ void FaceGen::GetColors( U32 seed, grinliz::Color4F* c )
 }
 
 
-void FaceGen::Render( const GameItem& item, grinliz::Color4F* colorArr, float* vArr )
+void FaceGen::Render( const GameItem& item, ProcRenderInfo* info )
 {
 	U32 seed = item.stats.Hash();
 	Random random( seed );
 	random.Rand();
 
-	GetColors( random.Rand(), colorArr );
+	GetColors( random.Rand(), info->color );
 
-	vArr[0] = (float)(FACE_ROWS - random.Rand(FACE_ROWS)) / (float)FACE_ROWS;
-	vArr[1] = (float)(EYE_ROWS - random.Rand(EYE_ROWS)) / (float)EYE_ROWS;
+	info->vOffset[0] = (float)(FACE_ROWS - random.Rand(FACE_ROWS)) / (float)FACE_ROWS;
+	info->vOffset[1] = (float)(EYE_ROWS - random.Rand(EYE_ROWS)) / (float)EYE_ROWS;
 	
 	// 50% chance of having glasses.
 	if ( random.Bit() )
-		vArr[2] = 1.0f;
+		info->vOffset[2] = 1.0f;
 	else
-		vArr[2] = (float)(GLASSES_ROWS - random.Rand(GLASSES_ROWS)) / (float)GLASSES_ROWS;
-	vArr[3] = (float)(HAIR_ROWS - random.Rand(HAIR_ROWS)) / (float)HAIR_ROWS;
+		info->vOffset[2] = (float)(GLASSES_ROWS - random.Rand(GLASSES_ROWS)) / (float)GLASSES_ROWS;
+
+	info->vOffset[3] = (float)(HAIR_ROWS - random.Rand(HAIR_ROWS)) / (float)HAIR_ROWS;
 }
 
 
@@ -145,7 +160,7 @@ void WeaponGen::GetColors( int i, bool fire, bool shock, grinliz::Color4F* array
 }
 
 
-void WeaponGen::Render( const GameItem& item, grinliz::Color4F* colorArr, float* vArr )
+void WeaponGen::Render( const GameItem& item, ProcRenderInfo* info )
 {
 	U32 seed = item.stats.Hash();
 	Random random( seed );
@@ -154,12 +169,21 @@ void WeaponGen::Render( const GameItem& item, grinliz::Color4F* colorArr, float*
 	GetColors(	random.Rand(), 
 				(item.flags & GameItem::EFFECT_FIRE) != 0, 
 				(item.flags & GameItem::EFFECT_SHOCK) != 0, 
-				colorArr );
+				info->color );
 
-	vArr[0] = (float)( NUM_ROWS - random.Rand(NUM_ROWS)) / (float)(NUM_ROWS);
-	vArr[1] = (float)( NUM_ROWS - random.Rand(NUM_ROWS)) / (float)(NUM_ROWS);
-	vArr[2] = (float)( NUM_ROWS - random.Rand(NUM_ROWS)) / (float)(NUM_ROWS);
-	vArr[3] = (float)( NUM_ROWS - random.Rand(NUM_ROWS)) / (float)(NUM_ROWS);	
+	info->vOffset[0] = (float)( NUM_ROWS - random.Rand(NUM_ROWS)) / (float)(NUM_ROWS);
+	info->vOffset[1] = (float)( NUM_ROWS - random.Rand(NUM_ROWS)) / (float)(NUM_ROWS);
+	info->vOffset[2] = (float)( NUM_ROWS - random.Rand(NUM_ROWS)) / (float)(NUM_ROWS);
+	info->vOffset[3] = (float)( NUM_ROWS - random.Rand(NUM_ROWS)) / (float)(NUM_ROWS);	
+
+	info->filter[PROC_RING_MAIN] = true;
+	info->filter[PROC_RING_GUARD] = random.Boolean();
+	info->filter[PROC_RING_TRIAD] = random.Boolean();
+	info->filter[PROC_RING_BLADE] = random.Boolean();
+
+	for( int i=0; i<4; ++i ) {
+		info->filterName[i] = ProcIDToName( PROC_RING_MAIN+i );
+	}
 }
 
 
@@ -188,13 +212,13 @@ grinliz::IString ItemGen::ToName( int id )
 }
 
 
-int ItemGen::RenderItem( const Game::Palette* palette, const GameItem& item, grinliz::Color4F* colorArr, float* vArr )
+/* static */ int ItemGen::RenderItem( const Game::Palette* palette, const GameItem& item, ProcRenderInfo* info )
 {
 	int result = NONE;
 	switch ( item.procedural ) {
 		case PROCEDURAL_ROUNDS_TO_GLOW:
 		{
-			colorArr[0].Set( 1, 1, 1, item.RoundsFraction() );
+			info->color[0].Set( 1, 1, 1, item.RoundsFraction() );
 			result = COLOR_XFORM;
 		}
 		break;
@@ -202,7 +226,7 @@ int ItemGen::RenderItem( const Game::Palette* palette, const GameItem& item, gri
 		case PROCEDURAL_RING:
 		{
 			WeaponGen gen( palette );
-			gen.Render( item, colorArr, vArr );
+			gen.Render( item, info );
 			result = PROC4;
 		}
 		break;

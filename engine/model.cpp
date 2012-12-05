@@ -541,6 +541,17 @@ int Model::GetBoneID( grinliz::IString name ) const
 }
 
 
+void Model::SetBoneFilter( const grinliz::IString* names, const bool* filter )
+{
+	int id[4] = { -1, -1, -1, -1 };
+	for( int i=0; i<4; ++i ) {
+		id[i] = GetBoneID( names[i] );
+	}
+	SetBoneFilter( id );
+}
+
+
+
 void Model::EmitParticles( ParticleSystem* system, const Vector3F* eyeDir, U32 deltaTime ) const
 {
 	if ( flags & MODEL_INVISIBLE )

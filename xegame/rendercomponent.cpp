@@ -26,6 +26,7 @@
 #include "../engine/particle.h"
 
 #include "../grinliz/glperformance.h"
+#include "../script/procedural.h"
 
 using namespace grinliz;
 
@@ -202,14 +203,15 @@ void RenderComponent::SetColor( IString hardpoint, const grinliz::Vector4F& colo
 }
 
 
-void RenderComponent::SetProcedural( IString hardpoint, const grinliz::Color4F* c, const float* v )
+void RenderComponent::SetProcedural( IString hardpoint, const ProcRenderInfo& info )
 {
 	if ( !hardpoint.empty() ) {
 		for( int i=0; i<EL_MAX_METADATA; ++i ) {
 			if ( metaDataName[i] == hardpoint ) {
 				GLASSERT( model[i+1] );
 				if ( model[i+1] ) {
-					model[i+1]->SetProcedural( true, c, v );
+					model[i+1]->SetProcedural( true, info.color, info.vOffset );
+					model[i+1]->SetBoneFilter( info.filterName, info.filter );
 					return;
 				}
 			}
@@ -217,7 +219,8 @@ void RenderComponent::SetProcedural( IString hardpoint, const grinliz::Color4F* 
 		GLASSERT( 0 );	// safe, but we meant to find something.
 	}
 	else {
-		model[0]->SetProcedural( true, c, v );
+		model[0]->SetProcedural( true, info.color, info.vOffset );
+		model[0]->SetBoneFilter( info.filterName, info.filter );
 	}
 }
 

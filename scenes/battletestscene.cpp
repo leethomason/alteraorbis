@@ -397,7 +397,7 @@ void BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int 
 			GLASSERT( gun );
 			GameItem* gi = new GameItem( *gun );
 			gi->stats.SetExpFromLevel( level );
-			gi->InitState();
+			gi->InitState();	
 			inv->AddToInventory( gi, true );
 		}
 	}

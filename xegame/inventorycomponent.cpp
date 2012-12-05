@@ -132,12 +132,11 @@ bool InventoryComponent::AddToInventory( GameItem* item, bool equip )
 					rc->Attach( n, item->ResourceName() );
 
 					if ( item->procedural & PROCEDURAL_INIT_MASK ) {
-						Color4F colorArr[4];
-						float vArr[4];
-						int result = ItemGen::RenderItem( game->GetPalette(), *heldAt[item->hardpoint], colorArr, vArr );
+						ProcRenderInfo info;
+						int result = ItemGen::RenderItem( game->GetPalette(), *heldAt[item->hardpoint], &info );
 
 						if ( result == ItemGen::PROC4 ) {
-							rc->SetProcedural( n, colorArr, vArr );
+							rc->SetProcedural( n, info );
 						}
 					}
 				}
@@ -271,14 +270,12 @@ bool InventoryComponent::DoTick( U32 delta )
 		callback = callback || tick;
 		
 		if ( rc && (gi->hardpoint != NO_HARDPOINT) && (gi->procedural & PROCEDURAL_TICK_MASK) ) {
-			Color4F colorArr[4];
-			float vArr[4];
-			int result = ItemGen::RenderItem( game->GetPalette(), *work[i], colorArr, vArr );
-
+			ProcRenderInfo info;
+			int result = ItemGen::RenderItem( game->GetPalette(), *work[i], &info );
 			IString name = HardpointFlagToName( gi->hardpoint );
 
 			if ( result == ItemGen::COLOR_XFORM ) {
-				rc->SetColor( name, colorArr[0].ToVector() );
+				rc->SetColor( name, info.color[0].ToVector() );
 			}
 		}
 	}
