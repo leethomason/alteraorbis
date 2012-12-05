@@ -43,6 +43,7 @@
   <!-- UI elements -->
   <texture filename="intro.png" width="64" height="64" />
   <texture filename="humanMaleFace.png" maxSize="2048"/>
+  <texture filename="humanFemaleFace.png" maxSize="2048"/>
   <palette assetName="mainPalette" filename="palette.png" dx="14" dy="7" sx="0.5" sy="0.5" />
   
   <!-- Particles -->
@@ -59,6 +60,7 @@
   <model filename="unitPlateCentered.ac" shading="flat" />
   <model filename="unitPlateProcedural.ac" shading="flat" />
   <model filename="unitPlateHumanMaleFace.ac" shading="flat" />
+  <model filename="unitPlateHumanFemaleFace.ac" shading="flat" />
   <model filename="unitPlateArrow.ac" shading="flat" />
   <model filename="unitCube.ac" shading="flat" />
   

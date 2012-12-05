@@ -43,7 +43,7 @@ LivePreviewScene::LivePreviewScene( LumosGame* game, const LivePreviewSceneData*
 		rowButton[0].AddToToggleGroup( &rowButton[i] );
 	}
 
-	static const char* typeName[NUM_TYPES] = { "Face", "Ring" };
+	static const char* typeName[NUM_TYPES] = { "Male\nFace", "Female\nFace", "Ring" };
 	for( int i=0; i<NUM_TYPES; ++i ) {
 		typeButton[i].Init( &gamui2D, look );
 		typeButton[i].SetSize( width, height );
@@ -53,10 +53,10 @@ LivePreviewScene::LivePreviewScene( LumosGame* game, const LivePreviewSceneData*
 
 	memset( model, 0, sizeof(model[0])*NUM_MODEL );
 
-	currentType = FACE;
+	currentType = HUMAN_MALE_FACE;
 	GenerateFaces( 0 );
 	if ( live ) {
-		CreateTexture( FACE );
+		CreateTexture( HUMAN_MALE_FACE );
 	}
 	game->InitStd( &gamui2D, &okay, 0 );
 	fileTimer = 0;
@@ -117,11 +117,14 @@ void LivePreviewScene::GenerateFaces( int mainRow )
 	Random random( mainRow );
 	random.Rand();
 
+	static const char* resName[2] = { "unitPlateHumanMaleFace", "unitPlateHumanFemaleFace" };
+	GLASSERT( currentType >= 0 && currentType < 2 );
+
 	const ModelResource* modelResource = 0;
 	if ( live ) 
 		modelResource = ModelResourceManager::Instance()->GetModelResource( "unitPlateProcedural" );
 	else
-		modelResource = ModelResourceManager::Instance()->GetModelResource( "unitPlateHumanMaleFace" );
+		modelResource = ModelResourceManager::Instance()->GetModelResource( resName[currentType] );
 
 	int srcRows = modelResource->atom[0].texture->Height() / modelResource->atom[0].texture->Width() * 4;
 	float rowMult = 1.0f / (float)srcRows;
@@ -279,9 +282,15 @@ void LivePreviewScene::ItemTapped( const gamui::UIItem* item )
 	if ( item == &okay ) {
 		game->PopScene();
 	}
-	else if ( item == &typeButton[FACE] ) {
-		currentType = FACE;
-		CreateTexture( FACE );
+	else if ( item == &typeButton[HUMAN_MALE_FACE] ) {
+		currentType = HUMAN_MALE_FACE;
+		CreateTexture( HUMAN_MALE_FACE );
+		GenerateFaces( 0 );
+		rowButton[0].SetDown();
+	}
+	else if ( item == &typeButton[HUMAN_FEMALE_FACE] ) {
+		currentType = HUMAN_FEMALE_FACE;
+		CreateTexture( HUMAN_FEMALE_FACE );
 		GenerateFaces( 0 );
 		rowButton[0].SetDown();
 	}
@@ -295,8 +304,8 @@ void LivePreviewScene::ItemTapped( const gamui::UIItem* item )
 	for( int i=0; i<ROWS; ++i ) {
 		if ( item == &rowButton[i] ) {
 			switch ( currentType ) {
-			case FACE:	GenerateFaces( i ); break;
-			case RING:	GenerateRing( i );	break;
+			case HUMAN_FEMALE_FACE:	GenerateFaces( i ); break;
+			case RING:				GenerateRing( i );	break;
 			default: GLASSERT( 0 );			break;
 			}
 		}
@@ -307,7 +316,7 @@ void LivePreviewScene::ItemTapped( const gamui::UIItem* item )
 void LivePreviewScene::Draw3D( U32 deltaTime )
 {
 	timer += deltaTime;
-	if ( currentType != FACE ) {
+	if ( currentType > HUMAN_FEMALE_FACE ) {
 		model[NUM_MODEL-1]->SetYRotation( (float)((timer/20)%360) );
 	}
 	engine->Draw( deltaTime );
@@ -333,8 +342,9 @@ void LivePreviewScene::CreateTexture( int type )
 
 	const char* filename = 0;
 	switch( type ) {
-		case FACE:	filename = "./res/humanMaleFace.png";	break;
-		case RING:	filename = "./res/ring.png";			break;
+		case HUMAN_MALE_FACE:	filename = "./res/humanMaleFace.png";	break;
+		case HUMAN_FEMALE_FACE:	filename = "./res/humanFemaleFace.png";	break;
+		case RING:				filename = "./res/ring.png";			break;
 		default:	GLASSERT( 0 );							break;
 	}
 
@@ -390,7 +400,9 @@ void LivePreviewScene::CreateTexture( int type )
 	delete [] buffer;
 
 
-	if ( type == FACE ) 
+	if ( type == HUMAN_MALE_FACE ) 
+		t->SetEmissive( false );	// alpha is transparency
+	else if ( type == HUMAN_FEMALE_FACE )
 		t->SetEmissive( false );	// alpha is transparency
 	else
 		t->SetEmissive( true );		// alpha is emissive

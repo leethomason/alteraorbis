@@ -59,7 +59,8 @@ private:
 		COLS = 5, 
 		NUM_MODEL = ROWS*COLS,
 
-		FACE = 0,
+		HUMAN_MALE_FACE = 0,
+		HUMAN_FEMALE_FACE,
 		RING,
 		NUM_TYPES
 	};
