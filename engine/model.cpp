@@ -545,7 +545,9 @@ void Model::SetBoneFilter( const grinliz::IString* names, const bool* filter )
 {
 	int id[4] = { -1, -1, -1, -1 };
 	for( int i=0; i<4; ++i ) {
-		id[i] = GetBoneID( names[i] );
+		if ( filter[i] ) {
+			id[i] = GetBoneID( names[i] );
+		}
 	}
 	SetBoneFilter( id );
 }
