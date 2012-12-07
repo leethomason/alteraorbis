@@ -20,7 +20,7 @@
 
 - put metadata in model (authoring  time)
 - rationalize hardpoints: array index or flag? lookt at RenderComponent
-- mantis trigger broken
+x mantis trigger broken
 - switch to ImageMagick for texture scaling
 - credits scene
 - particles should use palette. <color palette="2 3 1.0"/> possibly
@@ -35,6 +35,7 @@
 - memory pool everything in the chit/component system
 - analyze/optimize what causes component update: DoTick(), etc. Likely many DoTicks() getting called that aren't needed. (especially rendering...)
 - add rez effect for item switch?
+- animation generation
 
 ** Art **
 - wilder, more digital face colors

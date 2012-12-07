@@ -10,6 +10,7 @@ class PerlinNoise
 public:
 	PerlinNoise( U32 seed );
 	
+	// [-1,1]
 	float Noise(float _x, float _y, float _z);
 
 	float AbsNoise( float x, float y, float z ) {
