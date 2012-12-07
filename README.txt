@@ -10,10 +10,14 @@ http://www.microsoft.com/en-us/download/details.aspx?id=5555
 The are a variety of test scenes, in different states. The important one for this release;
 
 * Live Preview *
-This scene allows you to edit face art and see the result. If you edit and save ./res/face.png
-it will be automatically displayed in a variety of colors. More info at: 
+This scene allows you to edit face art and ring (melee weapon) art and see the result as
+soon as you save the .png file.
 
 http://code.google.com/p/alteraorbis/wiki/ProceduralRendering
+
+* Asset Preview *
+Shows the face and ring art as they will appear in the game. The texture is 
+pulled from the database file.
 
 Other scenes:
 * dialog: simple drag & drop test
@@ -24,6 +28,7 @@ Other scenes:
 * noise: initial perlin noise / world gen test
 * battle: battle test scene. the main work-in-progress is to get this fulling implemented
 * animation: animation preview utiliti
+* weapon stat: in development, dumps weapon statistics to disk
 
 http://grinninglizard.com/altera/
 

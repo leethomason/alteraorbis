@@ -16,7 +16,8 @@
 #include "game.h"
 #include "scene.h"
 #include "../grinliz/glstringutil.h"
-#include "../engine/engine.h"			// used for 3D dragging; Scene should *not* have an engine.
+#include "../engine/engine.h"			// used for 3D dragging and debugging. Scene should *not* have an engine requirement.
+#include "../engine/text.h"
 
 using namespace grinliz;
 using namespace gamui;
@@ -136,3 +137,15 @@ bool Scene::Process3DTap( int action, const grinliz::Vector2F& view, const grinl
 	}
 	return result;
 }
+
+
+void Scene::DrawDebugTextDrawCalls( int y, Engine* engine )
+{
+	UFOText* ufoText = UFOText::Instance();
+	ufoText->Draw( 0, y, "Model Draw Calls GLOW-BLACK=%d GLOW-EM=%d SHADOW=%d MODEL=%d",
+		engine->modelDrawCalls[Engine::GLOW_BLACK],
+		engine->modelDrawCalls[Engine::GLOW_EMISSIVE],
+		engine->modelDrawCalls[Engine::SHADOW],
+		engine->modelDrawCalls[Engine::MODELS] );
+}
+

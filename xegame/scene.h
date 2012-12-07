@@ -104,13 +104,15 @@ public:
 	void RenderGamui3D()	{ gamui3D.Render(); }
 
 	// 2D overlay rendering.
-	//virtual void DrawHUD()										{}
 	virtual void DrawDebugText()								{}
 
 	// Debugging
 	virtual void MouseMove( const grinliz::Vector2F& view, const grinliz::Ray& world )	{}
 
 protected:
+
+	// Utility function for standard output:
+	void DrawDebugTextDrawCalls( int y, Engine* engine );
 
 	Game*			game;
 	UIRenderer		uiRenderer;

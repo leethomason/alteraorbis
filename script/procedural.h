@@ -79,17 +79,18 @@ class FaceGen : public ItemGen
 {
 public:
 
-	FaceGen( const Game::Palette* p_palette ) : ItemGen( p_palette ) {}
+	FaceGen( bool p_female, const Game::Palette* p_palette ) : ItemGen( p_palette ), female(p_female) {}
 
 	enum { 
 		NUM_SKIN_COLORS = 4,
 		NUM_HAIR_COLORS	= 10,
 		NUM_GLASSES_COLORS = 6,
 
-		FACE_ROWS		= 16,
-		EYE_ROWS		= 16,
-		GLASSES_ROWS	= 10,
-		HAIR_ROWS		= 16
+		FACE_ROWS			= 16,
+		EYE_ROWS			= 16,
+		MALE_GLASSES_ROWS	= 11,
+		FEMALE_GLASSES_ROWS	= 15,
+		HAIR_ROWS			= 16
 	};
 	void GetSkinColor( int index0, int index1, float fade, grinliz::Color4F* c, grinliz::Color4F* highlight );
 	void GetHairColor( int index0, grinliz::Color4F* c );
@@ -100,6 +101,9 @@ public:
 	};
 	void GetColors( U32 seed, grinliz::Color4F* c );
 	virtual void Render( const GameItem& item, ProcRenderInfo* info );
+
+private:
+	bool female;
 };
 
 

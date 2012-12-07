@@ -235,11 +235,6 @@ void RenderTestScene::Draw3D( U32 deltaTime )
 
 void RenderTestScene::DrawDebugText()
 {
-	UFOText* ufoText = UFOText::Instance();
-	ufoText->Draw( 0, 16, "Model Draw Calls GLOW-BLACK=%d GLOW-EM=%d SHADOW=%d MODEL=%d",
-		engine->modelDrawCalls[Engine::GLOW_BLACK],
-		engine->modelDrawCalls[Engine::GLOW_EMISSIVE],
-		engine->modelDrawCalls[Engine::SHADOW],
-		engine->modelDrawCalls[Engine::MODELS] );
+	DrawDebugTextDrawCalls( 16, engine );
 }
 

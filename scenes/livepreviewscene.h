@@ -48,6 +48,7 @@ public:
 	virtual void Draw3D( U32 deltaTime );
 	virtual void DoTick( U32 deltaTime );
 	virtual grinliz::Color4F ClearColor();
+	virtual void DrawDebugText();
 
 private:
 	void CreateTexture( int type );
