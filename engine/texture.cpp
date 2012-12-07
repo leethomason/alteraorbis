@@ -59,12 +59,6 @@ void TextureManager::DeviceLoss()
 			textureArr[i].glID = 0;
 		}
 	}
-	//gpuMap.RemoveAll();
-	//gpuMemArr.Clear();
-
-	//for( int i=0; i<textureArr.Size(); ++i ) {
-	//	textureArr[i].gpuMem = 0;
-	//}
 }
 
 
@@ -178,96 +172,11 @@ Texture* TextureManager::CreateTexture( const char* name, int w, int h, int form
 }
 
 
-/*
-void TextureManager::DeleteTexture( Texture* t )
-{
-	GLASSERT( texMap.Query( t->Name(), 0 ) );
-
-	// Disconnect the GPU memory.
-	ContextShift();
-
-	texMap.Remove( t->Name() );
-	GLASSERT( t->gpuMem == 0 );
-	++emptySpace;
-	memset( t, 0, sizeof( Texture ) );
-}
-*/
-
-
 void TextureManager::ContextShift()
 {
 	DeviceLoss();
-/*	for( int i=0; i<textureArr.Size(); ++i ) {
-		if ( textureArr[i].gpuMem ) {
-			GLASSERT( textureArr[i].gpuMem->inUse );
-			// const to the texture, not const to this object.
-			// (and this is not a const method)
-			GPUMem* gpuMem = const_cast< GPUMem* >( textureArr[i].gpuMem );
-			gpuMem->inUse = false;
-			textureArr[i].gpuMem = 0;
-		}
-	}
-	*/
 }
 
-#if 0
-const GPUMem* TextureManager::AllocGPUMemory(	int w, int h, int format, int flags, 
-												const gamedb::Item* item, bool* inCache )
-{
-	*inCache = false;
-
-	// Is the texture currently available? (cache hit)
-	if ( item ) {
-		GPUMem* gpu = 0;
-		if ( gpuMap.Query( item, &gpu ) ) {
-			// we're good - have this one cached and ready.
-			GLASSERT( gpu->item == item );
-			GLASSERT( !gpu->inUse );	// huh? why isn't the texture set?
-			GLASSERT( gpu->glID );		// should be attached to memory
-			gpu->inUse = true;	
-			*inCache = true;
-			++cacheHit;
-			return gpu;
-		}
-	}
-	// Search for memory to re-use (cache re-use)
-	for( int i=0; i<gpuMemArr.Size(); ++i ) {
-		GPUMem* gpu = &gpuMemArr[i];
-
-		if (	!gpu->inUse 
-			  && gpu->w == w 
-			  && gpu->h == h 
-			  && gpu->format == format 
-			  && gpu->flags == flags ) 
-		{
-			if ( gpu->item ) {
-				gpuMap.Remove( gpu->item );
-			}
-			gpu->inUse = true;
-			gpu->item = item;
-			++cacheReuse;
-			return gpu;
-		}
-	}
-
-	// allocate some memory (cache miss)
-	GPUMem* gpu = gpuMemArr.PushArr(1);
-	gpu->w = w;
-	gpu->h = h;
-	gpu->format = format;
-	gpu->flags = flags;
-	gpu->item = item;
-	gpu->inUse = true;
-	gpu->glID = CreateGLTexture( w, h, format, flags );
-	++cacheMiss;
-
-	if ( gpu->item ) {
-		GLASSERT( !gpuMap.Query( gpu->item, 0 ) );
-		gpuMap.Add( gpu->item, gpu );
-	}
-	return gpu;
-}
-#endif
 
 void Texture::Set( const char* p_name, int p_w, int p_h, int p_format, int p_flags )
 {
@@ -448,15 +357,3 @@ U32 TextureManager::CalcTextureMem() const
 	}
 	return mem;
 }
-
-
-/*
-U32 TextureManager::CalcGPUMem() const
-{
-	U32 mem = 0;
-	for( int i=0; i<gpuMemArr.Size(); ++i ) {
-		mem += gpuMemArr[i].Memory();
-	}
-	return mem;
-}
-*/

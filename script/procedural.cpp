@@ -108,10 +108,12 @@ void FaceGen::Render( const GameItem& item, ProcRenderInfo* info )
 	info->vOffset[1] = (float)(EYE_ROWS - random.Rand(EYE_ROWS)) / (float)EYE_ROWS;
 	
 	// 50% chance of having glasses.
+	const int glassesRows = female ? FEMALE_GLASSES_ROWS : MALE_GLASSES_ROWS;
+
 	if ( random.Bit() )
 		info->vOffset[2] = 1.0f;
 	else
-		info->vOffset[2] = (float)(GLASSES_ROWS - random.Rand(GLASSES_ROWS)) / (float)GLASSES_ROWS;
+		info->vOffset[2] = (float)(glassesRows - random.Rand(glassesRows)) / (float)glassesRows;
 
 	info->vOffset[3] = (float)(HAIR_ROWS - random.Rand(HAIR_ROWS)) / (float)HAIR_ROWS;
 }

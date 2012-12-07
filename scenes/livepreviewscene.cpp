@@ -111,7 +111,7 @@ void LivePreviewScene::GenerateFaces( int mainRow )
 	engine->camera.SetDir( V3F_DOWN, out );		// look straight down. This works! cool.
 	engine->camera.Orbit( 180.0f );
 
-	FaceGen faceGen( game->GetPalette() );
+	FaceGen faceGen( currentType == HUMAN_FEMALE_FACE, game->GetPalette() );
 
 	float tex[4] = { 0, 0, 0, 0 };
 	Random random( mainRow );
@@ -166,7 +166,7 @@ void LivePreviewScene::GenerateFaces( int mainRow )
 				if ( random.Bit() )
 					tex[2] = rowMult * (float)(srcRows);
 				else
-					tex[2] = rowMult * (float)( srcRows - random.Rand( FaceGen::GLASSES_ROWS ));
+					tex[2] = rowMult * (float)( srcRows - random.Rand( Max( FaceGen::MALE_GLASSES_ROWS, FaceGen::FEMALE_GLASSES_ROWS ) ));
 			}
 			tex[3] = rowMult * (float)random.Rand(srcRows);
 			if ( live ) {
@@ -304,6 +304,7 @@ void LivePreviewScene::ItemTapped( const gamui::UIItem* item )
 	for( int i=0; i<ROWS; ++i ) {
 		if ( item == &rowButton[i] ) {
 			switch ( currentType ) {
+			case HUMAN_MALE_FACE:	GenerateFaces( i ); break;
 			case HUMAN_FEMALE_FACE:	GenerateFaces( i ); break;
 			case RING:				GenerateRing( i );	break;
 			default: GLASSERT( 0 );			break;
@@ -406,4 +407,9 @@ void LivePreviewScene::CreateTexture( int type )
 		t->SetEmissive( false );	// alpha is transparency
 	else
 		t->SetEmissive( true );		// alpha is emissive
+}
+
+void LivePreviewScene::DrawDebugText()
+{
+	DrawDebugTextDrawCalls( 16, engine );
 }

@@ -1,5 +1,12 @@
+- game
+	- generate a random world
+	- walk around it
+	- save it
+	- load it
+	- inventory screen
+
 - combat test scene	
-	- connect item to procedural rendering of melee weapon
+	x connect item to procedural rendering of melee weapon
 	- weapon types
 	- animation speed isn't correct
 	- gunrun to walk not synchronized correctly
@@ -18,6 +25,7 @@
 
 	- serialization
 
+x drawcalls debugging for all scenes
 - put metadata in model (authoring  time)
 - rationalize hardpoints: array index or flag? lookt at RenderComponent
 x mantis trigger broken
