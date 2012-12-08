@@ -90,11 +90,10 @@ void RenderTarget::SetActive( bool active, Engine* engine )
 		glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderTextureID, 0);
 		glFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBufferID );
 
-#ifdef DEBUG
-		int status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-		GLASSERT( status == GL_FRAMEBUFFER_COMPLETE);
-#endif
-
+		if ( gDebugging ) {
+			int status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+			GLASSERT( status == GL_FRAMEBUFFER_COMPLETE);
+		}
 		glClearColor(.0f, .0f, .0f, 1.0f);
 		glClear( GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 	}

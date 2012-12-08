@@ -368,12 +368,6 @@ void Model::SetAnimation( AnimationType id, U32 crossFade, bool restart )
 
 	if ( id >= 0 ) {
 		if ( restart || currentAnim.id != id ) {
-/*#ifdef DEBUG
-			if ( resource->header.name == "balrog" ) {
-				GLOUTPUT(( "switch %d to %d crossFade=%d time=%d\n",
-					       animationID, id, crossFade, time ));
-			}
-#endif*/
 			totalCrossFadeTime = crossFade;
 			crossFadeTime = 0;
 

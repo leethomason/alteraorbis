@@ -225,7 +225,7 @@ void Game::SceneNode::Free()
 
 void Game::PushScene( int sceneID, SceneData* data )
 {
-	GLOUTPUT(( "PushScene %d\n", sceneID ));
+	GLOUTPUT_REL(( "PushScene %d\n", sceneID ));
 	GLASSERT( sceneQueued.sceneID == MAX_SCENES );
 	GLASSERT( sceneQueued.scene == 0 );
 
@@ -236,7 +236,7 @@ void Game::PushScene( int sceneID, SceneData* data )
 
 void Game::PopScene( int result )
 {
-	GLOUTPUT(( "PopScene result=%d\n", result ));
+	GLOUTPUT_REL(( "PopScene result=%d\n", result ));
 	GLASSERT( scenePopQueued == false );
 	scenePopQueued = true;
 	if ( result != INT_MAX )

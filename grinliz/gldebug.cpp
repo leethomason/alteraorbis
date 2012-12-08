@@ -42,6 +42,8 @@ distribution.
 #include <time.h>
 #include "glstringutil.h"
 
+bool gDebugging = true;
+
 #ifdef DEBUG
 
 #if defined(_MSC_VER)
@@ -294,9 +296,34 @@ void logprintf( const char* format, ... )
     va_end( va );
 
 	if ( !logFP ) {
-		logFP = fopen( "log.txt", "w" );
+		logFP = fopen( "test_log.txt", "w" );
 	}
 	fprintf( logFP, "%s", buffer );
+}
+
+FILE* relFP = 0;
+
+void relprintf( const char* format, ... )
+{
+    va_list     va;
+    char		buffer[1024];
+
+    //
+    //  format and output the message..
+    //
+    va_start( va, format );
+#ifdef _MSC_VER
+    vsprintf_s( buffer, 1024, format, va );
+#else
+    vsnprintf( buffer, 1024, format, va );
+#endif
+    va_end( va );
+
+	if ( !relFP ) {
+		relFP = fopen( "release_log.txt", "w" );
+	}
+	fprintf( relFP, "%s", buffer );
+	fflush( relFP );
 }
 #endif
 

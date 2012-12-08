@@ -214,8 +214,8 @@ int main( int argc, char **argv )
 	int depth = 0;
 	SDL_GL_GetAttribute( SDL_GL_STENCIL_SIZE, &stencil );
 	glGetIntegerv( GL_DEPTH_BITS, &depth );
-	GLOUTPUT(( "SDL surface created. w=%d h=%d bpp=%d stencil=%d depthBits=%d\n", 
-				surface->w, surface->h, surface->format->BitsPerPixel, stencil, depth ));
+	GLOUTPUT_REL(( "SDL surface created. w=%d h=%d bpp=%d stencil=%d depthBits=%d\n", 
+					surface->w, surface->h, surface->format->BitsPerPixel, stencil, depth ));
 
     /* Verify there is a surface */
     if ( !surface ) {
@@ -237,7 +237,7 @@ int main( int argc, char **argv )
 	const unsigned char* renderer = glGetString( GL_RENDERER );
 	const unsigned char* version  = glGetString( GL_VERSION );
 
-	GLOUTPUT(( "OpenGL vendor: '%s'  Renderer: '%s'  Version: '%s'\n", vendor, renderer, version ));
+	GLOUTPUT_REL(( "OpenGL vendor: '%s'  Renderer: '%s'  Version: '%s'\n", vendor, renderer, version ));
 
 	Audio_Init();
 

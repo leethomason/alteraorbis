@@ -362,13 +362,10 @@ void Reader::GetData( int dataID, void* target, int memSize ) const
 		}
 		fread( buffer, dataDesc.compressedSize, 1, fp );
 
-#ifdef DEBUG
-		int result =
-#endif
-		uncompress(	(Bytef*)target, 
-					(uLongf*)&dataDesc.size, 
-					(const Bytef*)buffer,
-					dataDesc.compressedSize );
+		int result = uncompress(	(Bytef*)target, 
+									(uLongf*)&dataDesc.size, 
+									(const Bytef*)buffer,
+									dataDesc.compressedSize );
 		GLASSERT( result == Z_OK );
 		GLASSERT( dataDesc.size == (U32)memSize );
 	}

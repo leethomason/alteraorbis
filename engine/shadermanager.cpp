@@ -171,12 +171,12 @@ void ShaderManager::SetStreamData( int id, int size, int type, int stride, const
 {
 	int loc = active->GetAttributeLocation( id );
 	GLASSERT( loc >= 0 );
-#ifdef DEBUG
-	const float* ft = (const float*)data;
-	for( int i=0; i<activeStreams.Size(); ++i ) {
-		GLASSERT( activeStreams[i] != loc );
+	if ( gDebugging ) {
+		const float* ft = (const float*)data;
+		for( int i=0; i<activeStreams.Size(); ++i ) {
+			GLASSERT( activeStreams[i] != loc );
+		}
 	}
-#endif
 	glVertexAttribPointer( loc, size, type, 0, stride, data );
 	glEnableVertexAttribArray(loc);
 	CHECK_GL_ERROR;
@@ -407,21 +407,19 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 
 	glCompileShader( shader->vertexProg );
 	glGetShaderInfoLog( shader->vertexProg, LEN, &outLen, buf );
-#ifdef DEBUG_OUTPUT
+
 	if ( outLen > 0 ) {
-		GLOUTPUT(( "Vertex %d:\n%s\n", flags, buf ));
+		GLOUTPUT_REL(( "Vertex %d:\n%s\n", flags, buf ));
 	}
-#endif
 	CHECK_GL_ERROR;
 
 	glShaderSource( shader->fragmentProg, 2, fragmentSrc, 0 );
 	glCompileShader( shader->fragmentProg );
 	glGetShaderInfoLog( shader->fragmentProg, LEN, &outLen, buf );
-#ifdef DEBUG_OUTPUT
+
 	if ( outLen > 0 ) {
-		GLOUTPUT(( "Fragment %d:\n%s\n", flags, buf ));
+		GLOUTPUT_REL(( "Fragment %d:\n%s\n", flags, buf ));
 	}
-#endif
 	CHECK_GL_ERROR;
 
 	glAttachShader( shader->prog, shader->vertexProg );
@@ -431,11 +429,10 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 	}
 	glLinkProgram( shader->prog );
 	glGetProgramInfoLog( shader->prog, LEN, &outLen, buf );
-#ifdef DEBUG_OUTPUT
+
 	if ( outLen > 0 ) {
-		GLOUTPUT(( "Link %d:\n%s\n", flags, buf ));
+		GLOUTPUT_REL(( "Link %d:\n%s\n", flags, buf ));
 	}
-#endif
 	CHECK_GL_ERROR;
 
 	if ( GLEW_ARB_get_program_binary ) {

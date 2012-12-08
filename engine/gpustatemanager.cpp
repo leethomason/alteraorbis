@@ -277,10 +277,6 @@ void MatrixStack::Multiply( const grinliz::Matrix4& m )
 	currentStencilMode = STENCIL_OFF;
 
 	CHECK_GL_ERROR;
-
-#ifdef DEBUG
-	// fixme: get the # of stencil buffer bits to check. fallback if 0?
-#endif
 }
 
 
@@ -297,9 +293,7 @@ void GPUState::Weld( const GPUState& state, const GPUStream& stream, const GPUSt
 	// State Flags
 	flags |= (data.texture0 ) ? ShaderManager::TEXTURE0 : 0;
 	flags |= (data.texture0 && (data.texture0->Format() == Texture::ALPHA )) ? ShaderManager::TEXTURE0_ALPHA_ONLY : 0;
-#ifdef DEBUG
 	if ( flags & ShaderManager::TEXTURE0 ) GLASSERT( stream.nTexture0 );
-#endif
 
 	/*
 	flags |= (state.HasTexture1() ) ? ShaderManager::TEXTURE1 : 0;
@@ -762,15 +756,6 @@ void GPUState::PushMatrix( MatrixType type )
 		return;
 	}
 	matrixDepth[(int)type] += 1;
-
-#ifdef DEBUG
-	GLenum error = glGetError();
-	if ( error  != GL_NO_ERROR ) 
-	{	
-		GLOUTPUT(( "GL Error: %x matrixMode=%d depth=%d\n", error, (int)type, matrixDepth[(int)type] ));	
-		GLASSERT( 0 );							
-	}
-#endif
 }
 
 
