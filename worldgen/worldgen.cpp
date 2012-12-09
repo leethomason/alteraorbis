@@ -11,11 +11,11 @@ using namespace grinliz;
 static const int WIDTH = 512;
 static const int HEIGHT = 512;
 
-static const float BASE0 = 4.f;
+static const float BASE0 = 8.f;
 static const float BASE1 = 64.f;
 static const float EDGE = 0.1f;
 
-static const float FRACTION_LAND = 0.5f;
+static const float FRACTION_LAND = 0.3f;
 
 int CountFlixelsAboveCutoff( const float* flixels, float cutoff )
 {
@@ -57,7 +57,8 @@ int main(int argc, const char* argv[])
 			float n1 = noise.Noise( BASE1*nx, BASE1*ny, 1.0f );
 
 			float d2 = (nx-0.5f)*(nx-0.5f) + (ny-0.5f)*(ny-0.5f);
-			float octave = Lerp( 0.0f, 0.3f, d2 );
+			//float octave = Lerp( 0.0f, 0.3f, d2 );
+			float octave = 0.2f;
 
 			float n = Clamp( n0 + n1*octave, -1.0f, 1.0f );
 			n = PerlinNoise::Normalize( n );
@@ -74,19 +75,22 @@ int main(int argc, const char* argv[])
 
 	float cutoff = FRACTION_LAND;
 	int target = (int)((float)(WIDTH*HEIGHT)*FRACTION_LAND);
+	float high = 1.0f;
+	float low = 0.0f;
 
-	/*
-	for( int i=0; i<3; ++i ) {
+	while( true ) {
 		int count = CountFlixelsAboveCutoff( flixels, cutoff );
-
-		int rise = WIDTH*HEIGHT - count;
-		float run = 1.0f - cutoff;
-		float slope = (float)rise / run;
-
-		cutoff += slope * (float)(target-count)/(float)(WIDTH*HEIGHT);
-		cutoff = Clamp( cutoff, 0.001f, 0.99f );
+		if ( count > target ) {
+			low = cutoff;
+		}
+		else {
+			high = cutoff;
+		}
+		if ( abs(count - target) < (target/10) ) {
+			break;
+		}
+		cutoff = (high+low)*0.5f;
 	}
-	*/
 
 	for( int j=0; j<HEIGHT; ++j ) {
 		for( int i=0; i<WIDTH; ++i ) {

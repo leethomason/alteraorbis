@@ -90,37 +90,6 @@ const int rotation = 0;
 void ScreenCapture( const char* baseFilename, bool appendCount, bool trim, bool makeTransparent, grinliz::Rectangle2I* size );
 void PostCurrentGame();
 
-static const int SHADE = 6;
-
-static const U8 dayLight[30] = {
-	255, 140, 140,	// red
-	255, 244, 140,	// yellow
-	140, 255, 140,	// green
-	200, 200, 255,	// lt blue
-	140, 140, 255,	// dk blue
-	200, 145, 255,	// purple
-	140, 140, 140,	// shade
-	180, 180, 180,	//
-	220, 220, 220,	//
-	255, 255, 255	// sun
-};
-
-
-static const U8 nightLight[30] = {
-	255, 140, 140,	// red
-	255, 244, 140,	// yellow
-	140, 255, 140,	// green
-	200, 200, 255,	// lt blue
-	140, 140, 255,	// dk blue
-	200, 145, 255,	// purple
-	131, 125, 255,	// shade
-	172, 165, 255,	//
-	214, 225, 255,	//
-	255, 255, 255	// sun
-};
-
-
-
 void TransformXY( int x0, int y0, int* x1, int* y1 )
 {
 	// As a way to do scaling outside of the core, translate all
@@ -157,6 +126,7 @@ int main( int argc, char **argv )
 	{ char* test = new char[16]; delete [] test; }
 
 	SDL_Surface *surface = 0;
+	GLOUTPUT_REL(( "Altera startup. version=%d\n", VERSION ));
 
 	// SDL initialization steps.
     if ( SDL_Init( SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE | SDL_INIT_TIMER | SDL_INIT_AUDIO ) < 0 )

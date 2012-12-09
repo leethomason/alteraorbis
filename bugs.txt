@@ -1,9 +1,29 @@
 - game
-	- generate a random world
-	- walk around it
-	- save it
-	- load it
-	- inventory screen
+	- Land and Water
+		- generate a random world
+		- walk around it
+		- save it
+		- load it
+	- Rock and Stream
+		- rock formation
+		- cave
+		- streams
+	- Flora
+		- plants
+		- weather
+		- growth, spread
+		- aging of stone
+	- Fauna
+		- monster ecology
+		- monsters to fight
+		- visitors
+		- inventory screen
+	- Building
+		- construction
+		- economics
+		- domain building
+	- AI
+		- other cores doing the same
 
 - combat test scene	
 	x connect item to procedural rendering of melee weapon
@@ -25,7 +45,7 @@
 
 	- serialization
 
-x drawcalls debugging for all scenes
+- bone filter in reverse. more efficient and useful.
 - put metadata in model (authoring  time)
 - rationalize hardpoints: array index or flag? lookt at RenderComponent
 x mantis trigger broken
@@ -46,6 +66,38 @@ x mantis trigger broken
 - animation generation
 
 ** Art **
+- Cyclops
+    - http://grinninglizard.com/altera/forum/index.php?topic=8.msg172#msg172
+	- replace balrog
+	- model
+	- animation
+	- variant: fire
+	- variant: shock
+	- variant: blaster
+- Human Male
+	- model
+	- texture (procedural)
+	- animation
+- Human Female v2
+	- model
+	- texture (procedural)
+	- animation
+- Goblin Half Man
+	- http://grinninglizard.com/altera/forum/index.php?topic=8.msg186#msg186
+	- model
+	- animation
+- Mantis Man
+	- concept
+	- model 
+	- animation
+- Mantis
+	- concept
+	- model 
+	- animation
+- Flora
+	- concept
+	- models
+
 - wilder, more digital face colors
 - filter face colors to matching effect
 - more natural skin tones
@@ -61,6 +113,7 @@ x mantis trigger broken
 
 ----------- FIXED -------------
 
+x drawcalls debugging for all scenes
 x procedural rendering
 	x more glasses colors
 	x fix glasses: they can be tightly packed, and occurance done in script
