@@ -247,6 +247,9 @@
     <ClCompile Include="..\xegame\itembasecomponent.cpp">
       <Filter>Source Files\xegame</Filter>
     </ClCompile>
+    <ClCompile Include="..\script\worldgen.cpp">
+      <Filter>Source Files\script</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\camera.h">
@@ -482,6 +485,9 @@
     </ClInclude>
     <ClInclude Include="..\xegame\itembasecomponent.h">
       <Filter>Source Files\xegame</Filter>
+    </ClInclude>
+    <ClInclude Include="..\script\worldgen.h">
+      <Filter>Source Files\script</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

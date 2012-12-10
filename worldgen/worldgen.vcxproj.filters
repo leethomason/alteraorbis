@@ -7,8 +7,16 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="worldgen.cpp">
+    <ClCompile Include="..\script\worldgen.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="wgen.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\script\worldgen.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
