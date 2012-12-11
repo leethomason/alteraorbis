@@ -27,36 +27,42 @@ WorldGen::~WorldGen()
 }
 
 
-bool WorldGen::CalcLandAndWater( U32 seed0, U32 seed1, float fractionLand )
+void WorldGen::StartLandAndWater( U32 seed0, U32 seed1 )
 {
-	float* flixels = new float[SIZE*SIZE];
+	flixels = new float[SIZE*SIZE];
 
-	PerlinNoise noise0( seed0 );
-	PerlinNoise noise1( seed1 );
+	noise0 = new PerlinNoise( seed0 );
+	noise1 = new PerlinNoise( seed1 );
+}
 
-	for( int j=0; j<SIZE; ++j ) {
-		for( int i=0; i<SIZE; ++i ) {
 
-			float nx = (float)i/(float)SIZE;
-			float ny = (float)j/(float)SIZE;
+void WorldGen::DoLandAndWater( int j )
+{
+	GLASSERT( j >= 0 && j < SIZE );
+	for( int i=0; i<SIZE; ++i ) {
+		float nx = (float)i/(float)SIZE;
+		float ny = (float)j/(float)SIZE;
 
-			// Noise layer.
-			float n0 = noise0.Noise( BASE0*nx, BASE0*ny, nx );
-			float n1 = noise1.Noise( BASE1*nx, BASE1*ny, nx );
+		// Noise layer.
+		float n0 = noise0->Noise( BASE0*nx, BASE0*ny, nx );
+		float n1 = noise1->Noise( BASE1*nx, BASE1*ny, nx );
 
-			float n = n0 + n1*OCTAVE;
-			n = PerlinNoise::Normalize( n );
+		float n = n0 + n1*OCTAVE;
+		n = PerlinNoise::Normalize( n );
 
-			// Water at the edges.
-			float dEdge = Min( nx, 1.0f-nx );
-			if ( dEdge < EDGE )		n = Lerp( 0.f, n, dEdge/EDGE );
-			dEdge = Min( ny, 1.0f-ny );
-			if ( dEdge < EDGE )		n = Lerp( 0.f, n, dEdge/EDGE );
+		// Water at the edges.
+		float dEdge = Min( nx, 1.0f-nx );
+		if ( dEdge < EDGE )		n = Lerp( 0.f, n, dEdge/EDGE );
+		dEdge = Min( ny, 1.0f-ny );
+		if ( dEdge < EDGE )		n = Lerp( 0.f, n, dEdge/EDGE );
 
-			flixels[j*SIZE+i] = n;
-		}
+		flixels[j*SIZE+i] = n;
 	}
+}
 
+
+bool WorldGen::EndLandAndWater( float fractionLand )
+{
 	float cutoff = fractionLand;
 	int target = (int)((float)(SIZE*SIZE)*fractionLand);
 	float high = 1.0f;
@@ -89,7 +95,10 @@ bool WorldGen::CalcLandAndWater( U32 seed0, U32 seed1, float fractionLand )
 			land[j*SIZE+i] = flixels[j*SIZE+i] > cutoff ? 1 : 0;
 		}
 	}
+
 	delete [] flixels;
+	delete noise0;
+	delete noise1;
 	return iteration < MAX_ITERATION;
 }
 

@@ -21,12 +21,19 @@ static const int HEIGHT = WorldGen::SIZE;
 int main(int argc, const char* argv[])
 {
 
-	int seed = 0; //random.Rand();
+	U32 seed0 = 0;
+	U32 seed1 = 4321;
 	int count = COUNT;
 
 	if ( argc >= 2 ) {
-		seed = atoi( argv[1] );
+		seed0 = atoi( argv[1] );
+		printf( "seed0=%d\n", seed0 );
+		seed1 = seed0 + 4321;
 		count = 1;
+	}
+	if ( argc >= 3 ) {
+		seed1 = atoi( argv[2] );
+		printf( "seed1=%d\n", seed1 );
 	}
 
 	Color4U8* pixels = new Color4U8[WIDTH*HEIGHT];
@@ -36,15 +43,23 @@ int main(int argc, const char* argv[])
 	clock_t loopTime = startTime;
 
 	WorldGen worldGen;
-	U32 seed0 = seed;
-	U32 seed1 = seed*43+1924;
 
 	for( int i=0; i<count; ++i ) {
 		// Always change seed in case of retry.
 		seed0 = seed0*3+7;
 		seed1 = seed1*11+2;
 
-		bool result = worldGen.CalcLandAndWater( seed0, seed1, FRACTION_LAND );
+		worldGen.StartLandAndWater( seed0, seed1 );
+		printf( "Calc" ); fflush( stdout );
+		for( int j=0; j<HEIGHT; ++j ) {
+			worldGen.DoLandAndWater( j );
+			if ( j%32 == 0 )
+				printf( "." ); fflush( stdout );
+		}
+		printf( "Iterating...\n" );
+		bool result = worldGen.EndLandAndWater( FRACTION_LAND );
+		printf( "Done.\n" );
+
 		if ( !result ) {
 			printf( "CalcLandAndWater failed. Retry.\n" );
 			--i;
@@ -102,6 +117,7 @@ int main(int argc, const char* argv[])
 
 		CStr<32> fname;
 		fname.Format( "worldgen%02d.png", i );
+		printf( "Writing %s\n", fname.c_str() );
 		lodepng_encode32_file( fname.c_str(), (const unsigned char*)pixels, WIDTH, HEIGHT );
 	}
 	printf( "total time %dms\n", clock()-startTime );
