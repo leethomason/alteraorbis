@@ -41,6 +41,11 @@ public:
 	const WorldFeature* WorldFeatures() const	{ return featureArr.Mem(); }
 	int	  NumWorldFeatures() const				{ return featureArr.Size(); }
 
+	// Save in standard format:
+	// land:	[0, 255, c]		c: color, <255
+	// water:	[0, c, 255]
+	void Save( const char* fname );
+
 	enum {
 		SIZE = MAX_MAP_SIZE
 	};

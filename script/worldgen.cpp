@@ -1,8 +1,13 @@
 #include "worldgen.h"
+
 #include <string.h>
+
 #include "../grinliz/glnoise.h"
 #include "../grinliz/glcontainer.h"
 #include "../grinliz/glrandom.h"
+#include "../grinliz/glcolor.h"
+
+#include "../shared/lodepng.h"
 
 using namespace grinliz;
 
@@ -173,7 +178,7 @@ bool WorldGen::CalColor()
 
 	Sort<WorldFeature, CompareWF>( featureArr.Mem(), featureArr.Size() );
 
-	return c < 256;
+	return c < 255;	// [0,254], need 255 for color-zone encoding in Save()
 }
 
 
@@ -207,6 +212,28 @@ void WorldGen::DrawCanal( Vector2I v, int radius, int dx, int dy, const Rectangl
 		if ( random.Rand(3) == 0 ) v.y += dx; 
 		if ( random.Rand(3) == 0 ) v.y -= dx; 
 	}
+}
+
+
+void WorldGen::Save( const char* fname )
+{
+	Color4U8* pixels = new Color4U8[SIZE*SIZE];
+	memset( pixels, 0, sizeof(Color4U8)*SIZE*SIZE );
+
+	for( int y=0; y<SIZE; ++y ) {
+		for( int x=0; x<SIZE; ++x ) {
+			if ( land[y*SIZE+x] ) {
+				Color4U8 c8 = { 0, 255, color[y*SIZE+x], 255 };
+				pixels[y*SIZE+x] = c8;
+			}
+			else {
+				Color4U8 c8 = { 0, color[y*SIZE+x], 255, 255 };
+				pixels[y*SIZE+x] = c8;
+			}
+		}
+	}
+	lodepng_encode32_file( fname, (const unsigned char*)pixels, SIZE, SIZE );
+	delete [] pixels;
 }
 
 

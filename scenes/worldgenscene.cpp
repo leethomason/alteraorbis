@@ -54,6 +54,7 @@ void WorldGenScene::Resize()
 void WorldGenScene::ItemTapped( const gamui::UIItem* item )
 {
 	if ( item == &okay ) {
+		worldGen.Save( "./save/world.png" );
 		game->PopScene();
 	}
 	else if ( item == &cancel ) {

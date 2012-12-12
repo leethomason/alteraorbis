@@ -1,9 +1,10 @@
 // worldgen.cpp : Defines the entry point for the console application.
 //
 
+#include <stdio.h>
+#include <stdlib.h>
 #include <ctime>
 
-#include "../shared/lodepng.h"
 #include "../grinliz/glcolor.h"
 #include "../grinliz/glnoise.h"
 #include "../grinliz/glrandom.h"
@@ -35,9 +36,6 @@ int main(int argc, const char* argv[])
 		seed1 = atoi( argv[2] );
 		printf( "seed1=%d\n", seed1 );
 	}
-
-	Color4U8* pixels = new Color4U8[WIDTH*HEIGHT];
-	memset( pixels, 0xa0, sizeof(Color4U8)*WIDTH*HEIGHT );
 
 	clock_t startTime = clock();
 	clock_t loopTime = startTime;
@@ -73,33 +71,6 @@ int main(int argc, const char* argv[])
 			continue;
 		}
 
-		const U8* land = worldGen.Land();
-		const U8* color = worldGen.Color();
-		static const Color4U8 LAND_COLOR[7] = {
-			{ 0, 255, 33, 255 },
-			{ 255, 216, 0, 255 },
-			{ 182, 255, 0, 255 },
-			{ 192, 192, 192, 255 },
-			{ 0, 165, 19, 255 },
-			{ 165, 138, 0, 255 },
-			{ 118, 165, 0, 255 },
-		};
-	
-		for( int j=0; j<HEIGHT; ++j ) {
-			for( int i=0; i<WIDTH; ++i ) {
-				
-				Color4U8 rgb = { 0, 0, 0, 255 };
-				U8 c = color[j*WIDTH+i];
-
-				if ( land[j*WIDTH+i] ) {
-					rgb = LAND_COLOR[c%7];
-				}
-				else {
-					rgb.Set( 0, 19, 127, 255 );
-				}
-				pixels[j*WIDTH+i] = rgb;
-			}
-		}
 		clock_t endTime = clock();
 		printf( "loop %d: %dms\n", i, endTime - loopTime );
 		loopTime = endTime;
@@ -118,7 +89,7 @@ int main(int argc, const char* argv[])
 		CStr<32> fname;
 		fname.Format( "worldgen%02d.png", i );
 		printf( "Writing %s\n", fname.c_str() );
-		lodepng_encode32_file( fname.c_str(), (const unsigned char*)pixels, WIDTH, HEIGHT );
+		worldGen.Save( fname.c_str() );
 	}
 	printf( "total time %dms\n", clock()-startTime );
 	return 0;
