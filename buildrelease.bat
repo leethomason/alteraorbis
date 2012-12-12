@@ -3,6 +3,8 @@ del /Q Altera\res\*.*
 
 mkdir Altera
 mkdir Altera\res
+mkdir Altera\cache
+mkdir Altera\save
 
 copy .\res\*.* Altera\res\*.*
 

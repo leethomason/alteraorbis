@@ -249,6 +249,11 @@ public:
 	void SetTextHeight( float h )			{ m_textHeight = h; }
 	float GetTextHeight() const				{ return m_textHeight; }
 
+	// fixme: the 'static' is problem. need to work through initialization
+	static void SetDefaultSize( float x, float y )  { m_defaultXSize =x; m_defaultYSize = y; }
+	static float DefaultWidth() 					{ return m_defaultXSize; }
+	static float DefaultHeight() 					{ return m_defaultYSize; }
+
 	/** Feed touch/mouse events to Gamui. You should use TapDown/TapUp as a pair, OR just use Tap. TapDown/Up
 		is richer, but you need device support. (Mice certainly, fingers possibly.) 
 		* TapDown return the item tapped on. This does not activate anything except capture.
@@ -304,13 +309,11 @@ private:
 	bool			m_orderChanged;
 	bool			m_modified;
 	grinliz::CDynArray<UIItem*> m_itemArr;
-	//UIItem**		m_itemArr;
-	//int			m_nItems;
-	//int			m_nItemsAllocated;
 	const UIItem*	m_dragStart;
 	const UIItem*	m_dragEnd;
 	float			m_textHeight;
 	float			m_relativeX, m_relativeY;
+	static float	m_defaultXSize, m_defaultYSize;
 
 	struct State {
 		uint16_t	vertexStart;
@@ -915,7 +918,7 @@ public:
 		useTextOffset = false;
 	}
 
-	float Width() const { return width; }
+	float Width() const  { return width; }
 	float Height() const { return height; }
 
 private:

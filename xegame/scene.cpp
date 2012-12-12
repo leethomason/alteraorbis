@@ -22,6 +22,7 @@
 using namespace grinliz;
 using namespace gamui;
 
+
 Scene::Scene( Game* _game )
 	: game( _game )
 {

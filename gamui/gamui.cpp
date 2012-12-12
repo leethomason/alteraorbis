@@ -690,6 +690,8 @@ void Button::Init(	Gamui* gamui,
 	m_label[0].Init( gamui );
 	m_label[1].Init( gamui );
 	gamui->Add( this );
+
+	SetSize( gamui->DefaultWidth(), gamui->DefaultHeight() );
 }
 
 
@@ -1150,14 +1152,14 @@ void DigitalBar::Queue( CDynArray< uint16_t > *indexBuf, CDynArray< Gamui::Verte
 }
 
 
+float Gamui::m_defaultXSize = 20.0f;
+float Gamui::m_defaultYSize = 20.0f;
+
 Gamui::Gamui()
 	:	m_itemTapped( 0 ),
 		m_iText( 0 ),
 		m_orderChanged( true ),
 		m_modified( true ),
-		//m_itemArr( 0 ),
-		//m_nItems( 0 ),
-		//m_nItemsAllocated( 0 ),
 		m_dragStart( 0 ),
 		m_dragEnd( 0 ),
 		m_textHeight( 16 ),
@@ -1175,9 +1177,6 @@ Gamui::Gamui(	IGamuiRenderer* renderer,
 		m_iText( 0 ),
 		m_orderChanged( true ),
 		m_modified( true ),
-		//m_itemArr( 0 ),
-		//m_nItems( 0 ),
-		//m_nItemsAllocated( 0 ),
 		m_textHeight( 16 )
 {
 	Init( renderer, textEnabled, textDisabled, iText );
@@ -1189,7 +1188,6 @@ Gamui::~Gamui()
 	for( int i=0; i<m_itemArr.Size(); ++i ) {
 		m_itemArr[i]->Clear();
 	}
-	//free( m_itemArr );
 }
 
 
@@ -1207,11 +1205,6 @@ void Gamui::Init(	IGamuiRenderer* renderer,
 
 void Gamui::Add( UIItem* item )
 {
-//	if ( m_nItemsAllocated == m_nItems ) {
-//		m_nItemsAllocated = m_nItemsAllocated*3/2 + 16;
-//		m_itemArr = (UIItem**) realloc( m_itemArr, m_nItemsAllocated*sizeof(UIItem*) );
-//	}
-//	m_itemArr[m_nItems++] = item;
 	m_itemArr.Push( item );
 	OrderChanged();
 }
@@ -1224,19 +1217,6 @@ void Gamui::Remove( UIItem* item )
 	if ( index >= 0 ) {
 		m_itemArr.SwapRemove( index );
 	}
-	/*
-	// hmm...linear search. could be better.
-	for( int i=0; i<m_nItems; ++i ) {
-		if ( m_itemArr[i] == item ) {
-			// swap off the back.
-			m_itemArr[i] = m_itemArr[m_nItems-1];
-			m_nItems--;
-
-			item->Clear();
-			break;
-		}
-	}
-	*/
 	OrderChanged();
 }
 

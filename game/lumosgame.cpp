@@ -22,14 +22,15 @@
 #include "../scenes/particlescene.h"
 #include "../scenes/navtestscene.h"
 #include "../scenes/navtest2scene.h"
-#include "../scenes/noisetestscene.h"
 #include "../scenes/battletestscene.h"
 #include "../scenes/animationscene.h"
 #include "../scenes/livepreviewscene.h"
+#include "../scenes/worldgenscene.h"
 
 using namespace grinliz;
 using namespace gamui;
 
+static const float LAYOUT_SIZE = 75.0f;
 
 LumosGame::LumosGame(  int width, int height, int rotation, const char* savepath ) 
 	: Game( width, height, rotation, 600, savepath )
@@ -38,6 +39,8 @@ LumosGame::LumosGame(  int width, int height, int rotation, const char* savepath
 
 	PushScene( SCENE_TITLE, 0 );
 	PushPopScene();
+
+	Gamui::SetDefaultSize( LAYOUT_SIZE, LAYOUT_SIZE );
 }
 
 
@@ -76,10 +79,10 @@ Scene* LumosGame::CreateScene( int id, SceneData* data )
 	case SCENE_PARTICLE:	scene = new ParticleScene( this );			break;
 	case SCENE_NAVTEST:		scene = new NavTestScene( this );			break;
 	case SCENE_NAVTEST2:	scene = new NavTest2Scene( this, (const NavTest2SceneData*)data );			break;
-	case SCENE_NOISETEST:	scene = new NoiseTestScene( this );			break;
 	case SCENE_BATTLETEST:	scene = new BattleTestScene( this );		break;
 	case SCENE_ANIMATION:	scene = new AnimationScene( this );			break;
 	case SCENE_LIVEPREVIEW:	scene = new LivePreviewScene( this, (const LivePreviewSceneData*)data );	break;
+	case SCENE_WORLDGEN:	scene = new WorldGenScene( this );			break;
 
 	default:
 		GLASSERT( 0 );
@@ -187,7 +190,7 @@ gamui::LayoutCalculator LumosGame::DefaultLayout()
 	const Screenport& port = GetScreenport();
 	LayoutCalculator layout( port.UIWidth(), port.UIHeight() );
 	layout.SetGutter( 10.0f );
-	layout.SetSize( 75.0f, 75.0f );
+	layout.SetSize( LAYOUT_SIZE, LAYOUT_SIZE );
 	layout.SetSpacing( 5.0f );
 	return layout;
 }

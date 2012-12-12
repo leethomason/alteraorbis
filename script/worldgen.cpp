@@ -17,6 +17,9 @@ WorldGen::WorldGen()
 	memset( land, 0, SIZE*SIZE );
 	color = new U8[SIZE*SIZE];
 	memset( color, 0, SIZE*SIZE );
+	flixels = 0;
+	noise0 = 0;
+	noise1 = 0;
 }
 
 
@@ -24,6 +27,9 @@ WorldGen::~WorldGen()
 {
 	delete [] land;
 	delete [] color;
+	delete [] flixels;
+	delete noise0;
+	delete noise1;
 }
 
 
@@ -96,9 +102,9 @@ bool WorldGen::EndLandAndWater( float fractionLand )
 		}
 	}
 
-	delete [] flixels;
-	delete noise0;
-	delete noise1;
+	delete [] flixels;	flixels = 0;
+	delete noise0;		noise0 = 0;
+	delete noise1;		noise1 = 0;
 	return iteration < MAX_ITERATION;
 }
 

@@ -125,9 +125,9 @@
     <ClCompile Include="..\scenes\livepreviewscene.cpp" />
     <ClCompile Include="..\scenes\navtest2scene.cpp" />
     <ClCompile Include="..\scenes\navtestscene.cpp" />
-    <ClCompile Include="..\scenes\noisetestscene.cpp" />
     <ClCompile Include="..\scenes\particlescene.cpp" />
     <ClCompile Include="..\scenes\rendertestscene.cpp" />
+    <ClCompile Include="..\scenes\worldgenscene.cpp" />
     <ClCompile Include="..\script\battlemechanics.cpp" />
     <ClCompile Include="..\script\itemscript.cpp" />
     <ClCompile Include="..\script\procedural.cpp" />
@@ -201,10 +201,10 @@
     <ClInclude Include="..\scenes\livepreviewscene.h" />
     <ClInclude Include="..\scenes\navtest2scene.h" />
     <ClInclude Include="..\scenes\navtestscene.h" />
-    <ClInclude Include="..\scenes\noisetestscene.h" />
     <ClInclude Include="..\scenes\particlescene.h" />
     <ClInclude Include="..\scenes\rendertestscene.h" />
     <ClInclude Include="..\scenes\titlescene.h" />
+    <ClInclude Include="..\scenes\worldgenscene.h" />
     <ClInclude Include="..\script\battlemechanics.h" />
     <ClInclude Include="..\script\itemscript.h" />
     <ClInclude Include="..\script\procedural.h" />

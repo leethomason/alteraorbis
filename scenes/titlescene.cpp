@@ -50,6 +50,13 @@ TitleScene::TitleScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 		testScene[i].SetText( testSceneName[i] );
 		testScene[i].SetSize( layout.Width(), layout.Height() );
 	}
+
+	static const char* gameSceneName[NUM_GAME] = { "Generate", "New", "Continue" };
+	for( int i=0; i<NUM_GAME; ++i ) {
+		gameScene[i].Init( &gamui2D, lumosGame->GetButtonLook( LumosGame::BUTTON_LOOK_STD ) );
+		gameScene[i].SetText( gameSceneName[i] );
+		gameScene[i].SetSize( layout.Width()*2.0f, layout.Height() );
+	}
 }
 
 
@@ -65,6 +72,9 @@ void TitleScene::Resize()
 		int y = i / TESTS_PER_ROW;
 		int x = i - y*TESTS_PER_ROW;
 		layout.PosAbs( &testScene[i], x, y );
+	}
+	for( int i=0; i<NUM_GAME; ++i ) {
+		layout.PosAbs( &gameScene[i], i*2, -1 );
 	}
 }
 
@@ -92,9 +102,6 @@ void TitleScene::ItemTapped( const gamui::UIItem* item )
 	else if ( item == &testScene[TEST_NAV_WORLD] ) {
 		game->PushScene( LumosGame::SCENE_NAVTEST2, new NavTest2SceneData( "./res/testnav1024.png", 2000, 40 ) );
 	}
-//	else if ( item == &testScene[TEST_NOISE] ) {
-//		game->PushScene( LumosGame::SCENE_NOISETEST, 0 );
-//	}
 	else if ( item == &testScene[TEST_BATTLE] ) {
 		game->PushScene( LumosGame::SCENE_BATTLETEST, 0 );
 	}
@@ -106,6 +113,9 @@ void TitleScene::ItemTapped( const gamui::UIItem* item )
 	}
 	else if ( item == &testScene[TEST_ASSETPREVIEW] ) {
 		game->PushScene( LumosGame::SCENE_LIVEPREVIEW, new LivePreviewSceneData( false ) );
+	}
+	else if ( item == &gameScene[GENERATE_WORLD] ) {
+		game->PushScene( LumosGame::SCENE_WORLDGEN, 0 );
 	}
 	else if ( item == &testScene[TEST_WEAPON_STAT] ) {
 		BattleMechanics battle;

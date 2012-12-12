@@ -48,16 +48,22 @@ private:
 		TEST_NAV,
 		TEST_NAV2,
 		TEST_NAV_WORLD,
-		//TEST_NOISE,
 		TEST_BATTLE,
 		TEST_ANIMATION,
 		TEST_LIVEPREVIEW,
 		TEST_ASSETPREVIEW,
 		TEST_WEAPON_STAT,
 		NUM_TESTS,
-		TESTS_PER_ROW = 6
+
+		TESTS_PER_ROW = 6,
+
+		GENERATE_WORLD = 0,
+		NEW_GAME,
+		CONTINUE,
+		NUM_GAME
 	};
 	gamui::PushButton	testScene[NUM_TESTS];
+	gamui::PushButton	gameScene[NUM_GAME];
 };
 
 #endif // TITLESCENE_INCLUDED
