@@ -2,6 +2,7 @@
 #include "../xegame/xegamelimits.h"
 #include "../game/lumosgame.h"
 #include "../engine/surface.h"
+#include "../game/worldinfo.h"
 
 using namespace grinliz;
 using namespace gamui;
@@ -55,6 +56,7 @@ void WorldGenScene::ItemTapped( const gamui::UIItem* item )
 {
 	if ( item == &okay ) {
 		worldGen.Save( "./save/world.png" );
+		game->SaveGame();
 		game->PopScene();
 	}
 	else if ( item == &cancel ) {
@@ -129,6 +131,11 @@ void WorldGenScene::DoTick( U32 delta )
 	}
 	else if ( scanline == WorldGen::SIZE ) {
 		bool okay = worldGen.EndLandAndWater( 0.4f );
+		if ( okay ) {
+			LumosGame* lg = static_cast<LumosGame*>(game);
+			lg->worldInfo->featureArr.Clear();
+			worldGen.CalColor( &lg->worldInfo->featureArr );
+		}
 		if ( okay ) {
 			sendTexture = true;
 			label.SetText( "Done" );

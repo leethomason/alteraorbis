@@ -18,6 +18,8 @@
 
 #include "../xegame/game.h"
 
+class WorldInfo;
+
 class LumosGame : public Game
 {
 public:
@@ -73,6 +75,11 @@ public:
 	gamui::LayoutCalculator DefaultLayout();
 	void InitStd( gamui::Gamui* g, gamui::PushButton* okay, gamui::PushButton* cancel );
 	void PositionStd( gamui::PushButton* okay, gamui::PushButton* cancel );
+
+	virtual void Save( tinyxml2::XMLPrinter* );
+
+	// Place to hang off information about the world. 
+	WorldInfo* worldInfo;
 
 private:
 	void InitButtonLooks();

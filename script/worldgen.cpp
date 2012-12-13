@@ -127,10 +127,9 @@ int WorldGen::CountFlixelsAboveCutoff( const float* flixels, float cutoff )
 }
 
 
-bool WorldGen::CalColor()
+bool WorldGen::CalColor( CDynArray<WorldFeature>* featureArr )
 {
 	memset( color, 0, SIZE*SIZE );
-	featureArr.Clear();
 	int c = 1;
 
 	Vector2I v;
@@ -171,12 +170,12 @@ bool WorldGen::CalColor()
 					}
 				}
 				++c;
-				featureArr.Push( wf );
+				featureArr->Push( wf );
 			}
 		}
 	}
 
-	Sort<WorldFeature, CompareWF>( featureArr.Mem(), featureArr.Size() );
+	Sort<WorldFeature, WorldFeature::Compare>( featureArr->Mem(), featureArr->Size() );
 
 	return c < 255;	// [0,254], need 255 for color-zone encoding in Save()
 }
@@ -237,6 +236,7 @@ void WorldGen::Save( const char* fname )
 }
 
 
+#if 0
 bool WorldGen::Split( int maxSize, int radius )
 {
 	bool processed = false;
@@ -260,3 +260,4 @@ bool WorldGen::Split( int maxSize, int radius )
 	}
 	return processed;
 }
+#endif

@@ -64,7 +64,8 @@ int main(int argc, const char* argv[])
 			continue;
 		}
 
-		result = worldGen.CalColor();
+		CDynArray<WorldFeature> featureArr;
+		result = worldGen.CalColor( &featureArr );
 		if ( !result ) {
 			printf( "CalcColor failed. Retry.\n" );
 			--i;
@@ -75,8 +76,8 @@ int main(int argc, const char* argv[])
 		printf( "loop %d: %dms\n", i, endTime - loopTime );
 		loopTime = endTime;
 
-		for( int j=0; j<Min(worldGen.NumWorldFeatures(),10); ++j ) {
-			const WorldFeature& wf = *(worldGen.WorldFeatures() + j);
+		for( int j=0; j<Min(featureArr.Size(),10); ++j ) {
+			const WorldFeature& wf = featureArr[j];
 			if ( wf.land ) {
 				printf( "%d  %s area=%d (%d,%d)-(%d,%d)\n", 
 						wf.id, 

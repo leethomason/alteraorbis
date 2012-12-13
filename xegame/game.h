@@ -103,8 +103,10 @@ public:
 	void SavePathTimeStamp(int slot, grinliz::GLString* stamp );
 	int LoadSlot() const				{ return loadSlot; }
 
-	void Load( const tinyxml2::XMLDocument& doc );
-	void Save( int slot, bool saveGeo, bool saveTac );
+
+	void SaveGame( int slot=0 );
+	virtual void Save( tinyxml2::XMLPrinter* ) {}
+	virtual void Load( const tinyxml2::XMLDocument& doc );
 
 	bool PopSound( int* database, int* offset, int* size );
 

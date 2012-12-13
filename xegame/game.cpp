@@ -460,42 +460,31 @@ void Game::SavePathTimeStamp( int slot, GLString* stamp )
 }
 
 
-void Game::Save( int slot, bool saveGeo, bool saveTac )
+void Game::SaveGame( int slot )
 {
-	// For loading, the BOTTOM loads and then loads higher scenes.
-	// For saving, the GeoScene saves itself before pushing the tactical
-	// scene, so save from the top back. (But still need to save if
-	// we are in a character scene for example.)
-	for( SceneNode* node=sceneStack.BeginTop(); node; node=sceneStack.Next() ) {
-		if ( node->scene->CanSave() )
-		{
-			FILE* fp = GameSavePath( SAVEPATH_WRITE, slot );
-			GLASSERT( fp );
-			if ( fp ) {
-				XMLPrinter printer( fp );
-				printer.OpenElement( "Game" );
-				printer.PushAttribute( "version", VERSION );
-				printer.PushAttribute( "sceneID", node->sceneID );
+	FILE* fp = GameSavePath( SAVEPATH_WRITE, slot );
+	GLASSERT( fp );
+	if ( fp ) {
+		XMLPrinter printer( fp );
+		printer.OpenElement( "Game" );
+		printer.PushAttribute( "version", VERSION );
 
-				// Somewhat scary c code to get the current time.
-				char buf[40];
-			    time_t rawtime;
-				struct tm * timeinfo;  
-				time ( &rawtime );
-				timeinfo = localtime ( &rawtime );
-				const char* atime = asctime( timeinfo );
+		// Somewhat scary c code to get the current time.
+		char buf[40];
+		time_t rawtime;
+		struct tm * timeinfo;  
+		time ( &rawtime );
+		timeinfo = localtime( &rawtime );
+		const char* atime = asctime( timeinfo );
 
-				StrNCpy( buf, atime, 40 );
-				buf[ strlen(buf)-1 ] = 0;	// remove trailing newline.
+		StrNCpy( buf, atime, 40 );
+		buf[ strlen(buf)-1 ] = 0;	// remove trailing newline.
 
-				printer.PushAttribute( "timestamp", buf );
-				node->scene->Save( &printer );
-				printer.CloseElement();
+		printer.PushAttribute( "timestamp", buf );
+		Save( &printer );
+		printer.CloseElement();
 
-				fclose( fp );
-				break;
-			}
-		}
+		fclose( fp );
 	}
 }
 

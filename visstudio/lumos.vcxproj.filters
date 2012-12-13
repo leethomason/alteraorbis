@@ -489,6 +489,9 @@
     <ClInclude Include="..\scenes\worldgenscene.h">
       <Filter>Source Files\scenes</Filter>
     </ClInclude>
+    <ClInclude Include="..\game\worldinfo.h">
+      <Filter>Source Files\game</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\engine\sources.mk">
