@@ -232,6 +232,6 @@ void LumosGame::PositionStd( gamui::PushButton* okay, gamui::PushButton* cancel 
 
 void LumosGame::Save( tinyxml2::XMLPrinter* printer )
 {
-	
+	worldInfo->Save( printer );
 }
 

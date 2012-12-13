@@ -16,6 +16,21 @@ static const float BASE1 = 64.f;
 static const float EDGE = 0.1f;
 static const float OCTAVE = 0.18f;
 
+
+void WorldFeature::Save( tinyxml2::XMLPrinter* printer )
+{
+	printer->OpenElement( "WorldFeature" );
+	printer->PushAttribute( "id", id );
+	printer->PushAttribute( "land", land );
+	printer->PushAttribute( "bounds.min.x", bounds.min.x );
+	printer->PushAttribute( "bounds.min.y", bounds.min.y );
+	printer->PushAttribute( "bounds.max.x", bounds.max.x );
+	printer->PushAttribute( "bounds.max.y", bounds.max.y );
+	printer->PushAttribute( "area", area );
+	printer->CloseElement();
+}
+
+
 WorldGen::WorldGen()
 {
 	land = new U8[SIZE*SIZE];

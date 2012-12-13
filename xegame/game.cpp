@@ -421,6 +421,7 @@ void Game::Load( const XMLDocument& doc )
 FILE* Game::GameSavePath( SavePathMode mode, int slot ) const
 {	
 	grinliz::GLString str( savePath );
+	str += "./save/";
 	str += "game";
 
 	if ( slot > 0 ) {

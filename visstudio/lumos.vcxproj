@@ -116,6 +116,7 @@
     <ClCompile Include="..\game\mapspatialcomponent.cpp" />
     <ClCompile Include="..\game\pathmovecomponent.cpp" />
     <ClCompile Include="..\game\physicsmovecomponent.cpp" />
+    <ClCompile Include="..\game\worldinfo.cpp" />
     <ClCompile Include="..\game\worldmap.cpp" />
     <ClCompile Include="..\gamui\gamui.cpp" />
     <ClCompile Include="..\micropather\micropather.cpp" />
