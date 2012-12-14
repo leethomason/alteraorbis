@@ -177,11 +177,11 @@ Reader::~Reader()
 	}
 
 	if ( mem )
-		free( mem );
+		Free( mem );
 	if ( buffer )
-		free( buffer );
+		Free( buffer );
 	if ( access )
-		free( access );
+		Free( access );
 	if ( fp ) {
 		fclose( fp );
 	}
@@ -224,7 +224,7 @@ bool Reader::Init( int id, const char* filename, int _offset )
 		return false;
 	}
 
-	mem = malloc( memSize );
+	mem = Malloc( memSize );
 	endMem = (const char*)mem + memSize;
 
 	GLOUTPUT(( "Reading '%s' from offset=%d\n", filename, offset ));
@@ -356,9 +356,9 @@ void Reader::GetData( int dataID, void* target, int memSize ) const
 			if ( bufferSize < 1000 )
 				bufferSize = 1000;
 			if ( buffer )
-				buffer = realloc( buffer, bufferSize );
+				buffer = Realloc( buffer, bufferSize );
 			else 
-				buffer = malloc( bufferSize );
+				buffer = Malloc( bufferSize );
 		}
 		fread( buffer, dataDesc.compressedSize, 1, fp );
 
@@ -385,9 +385,9 @@ const void* Reader::AccessData( const Item* item, const char* name, int* p_size 
 	if ( (size+1) > accessSize ) {
 		accessSize = (size+1) * 5 / 4;
 		if ( access )
-			access = realloc( access, accessSize );
+			access = Realloc( access, accessSize );
 		else
-			access = malloc( accessSize );
+			access = Malloc( accessSize );
 	}
 	item->GetData( name, access, size );
 	*((char*)access + size) = 0;	// null terminate for text assets.

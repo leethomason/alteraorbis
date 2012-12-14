@@ -37,6 +37,7 @@
 #include "ufosound.h"
 
 #include <time.h>
+#include <direct.h>	// for _mkdir
 
 using namespace grinliz;
 using namespace gamui;
@@ -78,7 +79,7 @@ void Game::Init()
 	scenePopQueued = false;
 	loadSlot = 0;
 	currentFrame = 0;
-	surface.Set( Surface::RGBA16, 256, 256 );		// All the memory we will ever need (? or that is the intention)
+	surface.Set( Surface::RGBA16, 256, 256 );
 
 	// Load the database.
 	char buffer[260];
@@ -96,7 +97,6 @@ void Game::Init()
 	ImageManager::Create( database0 );
 	ModelResourceManager::Create();
 	AnimationResourceManager::Create();
-//	ParticleSystem::Create();
 
 	LoadTextures();
 	modelLoader = new ModelLoader();
@@ -112,6 +112,7 @@ void Game::Init()
 	GLASSERT( textTexture );
 	UFOText::Create( database0, textTexture, &screenport );
 
+	_mkdir( "save" );
 	GLOUTPUT(( "Game::Init complete.\n" ));
 }
 

@@ -33,6 +33,8 @@ distribution.
 	#endif
 #endif
 
+#include <stdlib.h>
+
 extern bool gDebugging;	// global debugging flag
 
 #if defined(DEBUG)
@@ -81,6 +83,30 @@ extern bool gDebugging;	// global debugging flag
 			return DebugNew( size, false, file, line );
 		}
 
+		void TrackMalloc( const void*, size_t size );
+		//void TrackRealloc( const void*, size_t newSize );
+		void TrackFree( const void* );
+
+		inline void* Malloc( size_t size ) {
+			void* v = malloc( size );
+			TrackMalloc( v, size );
+			return v;
+		}
+
+		inline void* Realloc( void* v, size_t size ) {
+			if ( v ) {
+				TrackFree( v );
+			}
+			v = realloc( v, size );
+			TrackMalloc( v, size );
+			return v;
+		}
+
+		inline void Free( void* v ) {
+			TrackFree( v );
+			free( v );
+		}
+
 		void MemLeakCheck();
 		void MemStartCheck();
 		void MemHeapCheck();
@@ -90,11 +116,17 @@ extern bool gDebugging;	// global debugging flag
 		inline void MemLeakCheck()	{}
 		inline void MemStartCheck()	{}
 		inline void MemHeapCheck()	{}
+		inline void TrackMalloc( const void*, size_t size )	{}
+		//inline void TrackRealloc( const void*, size_t newSize )	{}
+		inline void TrackFree( const void* )	{}
 	#endif
 #else
 	#define glnew new
 	inline void MemLeakCheck()	{}
 	inline void MemStartCheck()	{}
+	inline void TrackMalloc( const void*, size_t size )	{}
+	//inline void TrackRealloc( const void*, size_t newSize )	{}
+	inline void TrackFree( const void* )	{}
 #endif
 
 #endif // file

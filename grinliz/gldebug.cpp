@@ -37,7 +37,6 @@ distribution.
 
 
 #include "gldebug.h"
-#include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
 #include "glstringutil.h"
@@ -63,6 +62,7 @@ unsigned long MEM_DELETED0 = 0x12345678;
 unsigned long MEM_DELETED1 = 0x9ABCDEF0;
 unsigned long idPool = 0;
 bool checking = false;
+int distribution[32] = { 0 };
 
 struct MemCheckHead
 {
@@ -83,6 +83,66 @@ struct MemCheckTail
 {
 	unsigned long magic;
 };
+
+
+struct MTrack
+{
+	const void* mem;
+	size_t size;
+};
+
+MTrack* mtrackRoot = 0;
+unsigned long nMTrack = 0;
+unsigned long mTrackAlloc = 0;
+
+U32 logBase2( U32 v ) 
+{
+	// I don't love this implementation, and I
+	// don't love the table alternatives either.
+	U32 r=0;
+	while ( v >>= 1 ) {
+		++r;
+	}
+	if ( r == 24 ) {
+		int debug = 1;
+	}
+	return r;
+}
+
+
+void TrackMalloc( const void* mem, size_t size )
+{
+	if ( nMTrack == mTrackAlloc ) {
+		mTrackAlloc += 64;
+		mtrackRoot = (MTrack*)realloc( mtrackRoot, mTrackAlloc*sizeof(MTrack) );
+	}
+	mtrackRoot[ nMTrack ].mem = mem;
+	mtrackRoot[ nMTrack ].size = size;
+	++nMTrack;
+
+	memTotal += size;
+	if ( memTotal > memWatermark )
+		memWatermark = memTotal;
+	
+	memNewCount++;
+	distribution[ logBase2(size) ] += 1;
+}
+
+
+void TrackFree( const void* mem )	
+{
+	for( unsigned long i=0; i<nMTrack; ++i ) {
+		if ( mtrackRoot[i].mem == mem ) {
+			memTotal -= mtrackRoot[i].size;
+			memDeleteCount++;
+			mtrackRoot[i] = mtrackRoot[nMTrack-1];
+			--nMTrack;
+			return;
+		}
+	}
+	GLASSERT( 0 );
+}
+
 
 void* DebugNew( size_t size, bool arrayType, const char* name, int line )
 {
@@ -108,6 +168,8 @@ void* DebugNew( size_t size, bool arrayType, const char* name, int line )
 	head->magic = MEM_MAGIC0;
 	tail->magic = MEM_MAGIC1;
 	head->prev = head->next = 0;
+
+	distribution[ logBase2(size) ] += 1;
 
 	if ( checking )
 	{
@@ -200,15 +262,39 @@ void operator delete( void* mem )
 
 void MemLeakCheck()
 {
-	GLOUTPUT((	"MEMORY REPORT: watermark=%dk new count=%d. delete count=%d. %d allocations leaked.\n",
-				(int)(memWatermark/1024), (int)memNewCount, (int)memDeleteCount, (int)(memNewCount-memDeleteCount) ));
+	GLOUTPUT((	"MEMORY REPORT: watermark=%dk =%dM new count=%d. delete count=%d. %d allocations leaked.\n",
+				(int)(memWatermark/1024), (int)(memWatermark/(1024*1024)),
+				(int)memNewCount, (int)memDeleteCount, (int)(memNewCount-memDeleteCount) ));
+
+	for( int i=0; i<30; ++i ) {
+		U32 m32 = 1<<i;
+		U32 div = 1;
+		char suffix = 'b';
+		if ( m32 >= 1024 && m32 < (1024*1024) ) {
+			suffix = 'k';
+			div = 1024;
+		}
+		else if ( m32 >= (1024*1024) ) {
+			suffix = 'M';
+			div = 1024*1024;
+		}
+		GLOUTPUT(( "  distribution[%2d] %3d%c nAlloc=%5d mem=%8.1fM\n",
+				   i, 
+				   m32/div, suffix,
+				   distribution[i], 
+				   (float)(distribution[i]*m32)/(float)(1024*1024) ));
+	}
 
 	for( MemCheckHead* node = root; node; node=node->next )
 	{
 		GLOUTPUT(( "  size=%d %s id=%d name=%s line=%d\n",
 					(int)node->size, (node->arrayType) ? "array" : "single", (int)node->id,
 					(node->name) ? node->name :  "(null)", node->line ));
-	}		    
+	}		  
+
+	for( unsigned long i=0; i<nMTrack; ++i ) {
+		GLOUTPUT(( "  malloc size=%d\n", mtrackRoot[i].size ));
+	}
 
 	/*
 		If these fire, then a memory leak has been detected. The library doesn't track
@@ -218,7 +304,7 @@ void MemLeakCheck()
 
 		It's not elegant, but it does work.
 	*/
-	GLASSERT( memNewCount-memDeleteCount == 0 && !root );
+	GLASSERT( memNewCount-memDeleteCount == 0 && !root && !nMTrack );
 
 	// If this fires, the code isn't working or you never allocated memory:
 	GLASSERT( memNewCount );
@@ -226,6 +312,7 @@ void MemLeakCheck()
 
 void MemHeapCheck()
 {
+	// FIXME: add in walk of malloc/free list
 	unsigned long size = 0;
 	for ( MemCheckHead* head = root; head; head=head->next )
 	{
@@ -342,40 +429,3 @@ void dprintf( const char* format, ... )
 
 }
 #endif
-
-/*
-Good code...but actually adds uncertainty once the "send current game on crash" system went in.
-
-grinliz::CStr<200> releasePath;
-
-void GrinlizReleaseAssert( const char* file, int line ) 
-{
-	time_t rawtime = time( 0 );
-	struct tm * timeinfo = localtime ( &rawtime );
-
-	if ( releasePath.empty() ) {
-		GrinlizSetReleaseAssertPath( "" );
-	}
-
-	FILE* fp = fopen( releasePath.c_str(), "a" );
-	if ( fp ) {
-		fprintf( fp, "Release assert at file='%s' line=%d at %s\n", file, line, asctime( timeinfo ) );
-		fclose( fp );
-	}
-
-#ifdef ANDROID_NDK
-	__android_log_assert( "assert", "grinliz", "ASSERT in '%s' at %d.", file, line );
-#endif
-	GLASSERT( 0 );
-	exit( 1 );
-}
-
-extern "C" void GrinlizSetReleaseAssertPath( const char* path )
-{
-	releasePath = path;
-	if ( !releasePath.empty() && releasePath[ releasePath.Length()-1 ] != '/' ) {
-		releasePath += "/";
-	}
-	releasePath += "releaseErrorLog.txt";
-}
-*/

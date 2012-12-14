@@ -113,7 +113,7 @@ void WorldMap::Init( int w, int h )
 	memset( grid, 0, width*height*sizeof(Grid) );
 
 	delete pather;
-	pather = new micropather::MicroPather( this, width*height/4, 8, true );
+	pather = new micropather::MicroPather( this, width*height/16, 8, true );
 }
 
 

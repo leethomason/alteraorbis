@@ -79,7 +79,7 @@ void Audio_Close()
 	SDL_CloseAudio();
 	for( int i=0; i<NUM_SOUNDS; ++i ){
 		if ( sounds[i].data ) {
-			free( sounds[i].data );
+			Free( sounds[i].data );
 		}
 	}
 	if ( fp ) {
@@ -118,7 +118,7 @@ void Audio_PlayWav( const char* filename, int offset, int size )
 		}
 		if ( index < NUM_SOUNDS ) {
 		    if ( sounds[index].data ) {
-		        free(sounds[index].data);
+		        Free(sounds[index].data);
 			}
 			sounds[index].data = 0;
 			sounds[index].len = 0;
@@ -148,7 +148,7 @@ void Audio_PlayWav( const char* filename, int offset, int size )
     SDL_BuildAudioCVT(&cvt, wave.format, wave.channels, wave.freq,
 							audioSpec.format, audioSpec.channels, audioSpec.freq );
 
-	cvt.buf = (Uint8*)malloc(len*cvt.len_mult);
+	cvt.buf = (Uint8*)Malloc(len*cvt.len_mult);
     memcpy(cvt.buf, data, len);
     cvt.len = len;
     SDL_ConvertAudio(&cvt);

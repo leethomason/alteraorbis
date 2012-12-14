@@ -71,7 +71,7 @@ void DeleteGame( void* handle )
 	}
 	for( int i=0; i<GAME_MAX_MOD_DATABASES; ++i ) {
 		if ( modDatabases[i] ) {
-			free( modDatabases[i] );
+			Free( modDatabases[i] );
 			modDatabases[i] = 0;
 		}
 	}
@@ -231,7 +231,7 @@ void GameAddDatabase( const char* path )
 	for( int i=0; i<GAME_MAX_MOD_DATABASES; ++i ) {
 		if ( modDatabases[i] == 0 ) {
 			int len = strlen( path ) + 1;
-			modDatabases[i] = (char*)malloc( len );
+			modDatabases[i] = (char*)Malloc( len );
 			strcpy( modDatabases[i], path );
 			break;
 		}
