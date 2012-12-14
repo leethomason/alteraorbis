@@ -45,6 +45,7 @@
 
 	- serialization
 
+- GT bug: reconsider auto-mip. review texture upload.
 - bone filter in reverse. more efficient and useful.
 - put metadata in model (authoring  time)
 - rationalize hardpoints: array index or flag? lookt at RenderComponent

@@ -280,7 +280,7 @@ void Game::PushPopScene()
 
 	if ( loadSlot ) {
 		if( HasSaveFile( loadSlot ) ) {
-			sceneQueued.sceneID = LoadSceneID();
+			sceneQueued.sceneID = 0;
 		}
 	}
 
@@ -317,22 +317,6 @@ void Game::PushPopScene()
 
 		if ( oldTop ) 
 			oldTop->scene->ChildActivated( node->sceneID, node->scene, node->data );
-
-		if (    node->scene->CanSave() 
-			 && sceneStack.Size() == 1 ) 
-		{
-			FILE* fp = GameSavePath( SAVEPATH_READ, loadSlot );
-			if ( fp ) {
-				XMLDocument doc;
-				doc.LoadFile( fp );
-				//GLASSERT( !doc.Error() );
-				if ( !doc.Error() ) {
-					Load( doc );
-				}
-				fclose( fp );
-			}
-			loadSlot = 0;	// queried during the load; don't clear until after load.
-		}
 	}
 }
 
@@ -398,23 +382,6 @@ RenderAtom Game::CreateRenderAtom( int uiRendering, const char* assetName, float
 	return RenderAtom(	(const void*)uiRendering,
 						tm->GetTexture( assetName ),
 						x0, y0, x1, y1 );
-}
-
-
-void Game::Load( const XMLDocument& doc )
-{
-	//ParticleSystem::Instance()->Clear();
-
-	// Already pushed the BattleScene. Note that the
-	// BOTTOM of the stack loads. (BattleScene or GeoScene).
-	// A GeoScene will in turn load a BattleScene.
-	const XMLElement* game = doc.RootElement();
-	GLASSERT( game );
-	if ( game ) {
-		GLASSERT( StrEqual( game->Value(), "Game" ) );
-		const XMLElement* scene = game->FirstChildElement();
-		sceneStack.Top()->scene->Load( scene );
-	}
 }
 
 
@@ -485,6 +452,26 @@ void Game::SaveGame( int slot )
 		Save( &printer );
 		printer.CloseElement();
 
+		fclose( fp );
+	}
+}
+
+
+void Game::LoadGame()
+{
+	FILE* fp = GameSavePath( SAVEPATH_READ, 0 );
+	GLASSERT( fp );
+	if ( fp ) {
+		XMLDocument doc;
+		doc.LoadFile( fp );
+		GLASSERT( !doc.Error() );
+		if ( !doc.Error() ) {
+			const tinyxml2::XMLElement* gameElement = doc.FirstChildElement( "Game" );
+			GLASSERT( gameElement );
+			if ( gameElement ) {
+				Load( *gameElement );
+			}
+		}
 		fclose( fp );
 	}
 }

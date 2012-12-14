@@ -117,6 +117,9 @@ void TitleScene::ItemTapped( const gamui::UIItem* item )
 	else if ( item == &gameScene[GENERATE_WORLD] ) {
 		game->PushScene( LumosGame::SCENE_WORLDGEN, 0 );
 	}
+	else if ( item == &gameScene[CONTINUE] ) {
+		game->PushScene( LumosGame::SCENE_GAME, 0 );
+	}
 	else if ( item == &testScene[TEST_WEAPON_STAT] ) {
 		BattleMechanics battle;
 		FILE* fp = fopen( "weapons.txt", "w" );

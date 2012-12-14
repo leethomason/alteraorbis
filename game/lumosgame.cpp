@@ -27,6 +27,7 @@
 #include "../scenes/animationscene.h"
 #include "../scenes/livepreviewscene.h"
 #include "../scenes/worldgenscene.h"
+#include "../scenes/gamescene.h"
 
 using namespace grinliz;
 using namespace gamui;
@@ -87,6 +88,7 @@ Scene* LumosGame::CreateScene( int id, SceneData* data )
 	case SCENE_ANIMATION:	scene = new AnimationScene( this );			break;
 	case SCENE_LIVEPREVIEW:	scene = new LivePreviewScene( this, (const LivePreviewSceneData*)data );	break;
 	case SCENE_WORLDGEN:	scene = new WorldGenScene( this );			break;
+	case SCENE_GAME:		scene = new GameScene( this );				break;
 
 	default:
 		GLASSERT( 0 );
@@ -235,3 +237,8 @@ void LumosGame::Save( tinyxml2::XMLPrinter* printer )
 	worldInfo->Save( printer );
 }
 
+
+void LumosGame::Load( const tinyxml2::XMLElement& parent )
+{
+	worldInfo->Load( parent );
+}

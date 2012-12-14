@@ -197,7 +197,6 @@ U32 Texture::GLID()
 		return glID;
 	
 	TextureManager* manager = TextureManager::Instance();
-
 	glID = manager->CreateGLTexture( w, h, format, flags );
 
 	// Need to actually generate the texture. Either pull it from 
@@ -310,8 +309,14 @@ U32 TextureManager::CreateGLTexture( int w, int h, int format, int flags )
 void Texture::Upload( const void* pixels, int size )
 {
 	GLASSERT( pixels );
-	this->GLID();	// flush the openGL id
 	GLASSERT( size == BytesInImage() );
+
+	if ( glID == 0 ) {
+		// Make sure we have on OpenGL ID
+		TextureManager* manager = TextureManager::Instance();
+		glID = manager->CreateGLTexture( w, h, format, flags );
+		GLASSERT( glID );
+	}
 
 	int glFormat, glType;
 	TextureManager::Instance()->CalcOpenGL( format, &glFormat, &glType );

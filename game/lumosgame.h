@@ -48,7 +48,6 @@ public:
 		SCENE_GAME
 	};
 
-	virtual int LoadSceneID()								{ return SCENE_GAME; }
 	virtual Scene* CreateScene( int id, SceneData* data );
 	virtual void CreateTexture( Texture* t );
 
@@ -77,6 +76,7 @@ public:
 	void PositionStd( gamui::PushButton* okay, gamui::PushButton* cancel );
 
 	virtual void Save( tinyxml2::XMLPrinter* );
+	virtual void Load( const tinyxml2::XMLElement& parent );
 
 	// Place to hang off information about the world. 
 	WorldInfo* worldInfo;

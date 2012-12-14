@@ -355,7 +355,6 @@ void BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int 
 	InventoryComponent* inv = new InventoryComponent( &chitBag, game );
 	chit->Add( inv );
 
-	chit->AddListener( this );
 	chit->GetSpatialComponent()->SetPosYRot( (float)p.x+0.5f, 0, (float)p.y+0.5f, (float)random.Rand( 360 ) );
 
 	for( int i=1; i<itemDefArr.Size(); ++i ) {
@@ -444,11 +443,6 @@ void BattleTestScene::DrawDebugText()
 			}
 		}
 	}
-}
-
-
-void BattleTestScene::OnChitMsg( Chit* chit, const ChitMsg& msg )
-{
 }
 
 
