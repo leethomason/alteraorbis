@@ -75,7 +75,7 @@ void MemoryPool::NewBlock()
 {
 	GLASSERT( head == 0 );
 
-	Block* block = (Block*) malloc( blockSize );
+	Block* block = (Block*) Malloc( blockSize );
 	GLASSERT( block );
 
 	block->nextBlock = rootBlock;
@@ -102,7 +102,7 @@ void MemoryPool::FreePool()
 	while ( block )
 	{
 		Block* temp = block->nextBlock;
-		free( block );
+		::Free( block );
 		block = temp;
 	}
 	numBlocks = 0;

@@ -70,7 +70,7 @@ public:
 	~CDynArray() {
 		Clear();
 		if ( mem != reinterpret_cast<T*>(cache) ) {
-			free( mem );
+			Free( mem );
 		}
 		GLASSERT( nAlloc == 0 );
 	}
@@ -159,10 +159,10 @@ private:
 		if ( count > capacity ) {
 			capacity = Max( CeilPowerOf2( count ), (U32) 16 );
 			if ( mem == reinterpret_cast<T*>(cache) ) {
-				mem = (T*)malloc( capacity*sizeof(T) );
+				mem = (T*)Malloc( capacity*sizeof(T) );
 			}
 			else {
-				mem = (T*)realloc( mem, capacity*sizeof(T) );
+				mem = (T*)Realloc( mem, capacity*sizeof(T) );
 			}
 		}
 	}

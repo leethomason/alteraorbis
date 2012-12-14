@@ -37,7 +37,6 @@ distribution.
 
 
 #include "gldebug.h"
-#include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
 #include "glstringutil.h"
@@ -83,6 +82,49 @@ struct MemCheckTail
 {
 	unsigned long magic;
 };
+
+
+struct MTrack
+{
+	const void* mem;
+	size_t size;
+};
+
+MTrack* mtrackRoot = 0;
+unsigned long nMTrack = 0;
+unsigned long mTrackAlloc = 0;
+
+void TrackMalloc( const void* mem, size_t size )
+{
+	if ( nMTrack == mTrackAlloc ) {
+		mTrackAlloc += 64;
+		mtrackRoot = (MTrack*)realloc( mtrackRoot, mTrackAlloc*sizeof(MTrack) );
+	}
+	mtrackRoot[ nMTrack ].mem = mem;
+	mtrackRoot[ nMTrack ].size = size;
+	++nMTrack;
+
+	memTotal += size;
+	if ( memTotal > memWatermark )
+		memWatermark = memTotal;
+	memNewCount++;
+}
+
+
+void TrackFree( const void* mem )	
+{
+	for( unsigned long i=0; i<nMTrack; ++i ) {
+		if ( mtrackRoot[i].mem == mem ) {
+			memTotal -= mtrackRoot[i].size;
+			memDeleteCount++;
+			mtrackRoot[i] = mtrackRoot[nMTrack-1];
+			--nMTrack;
+			return;
+		}
+	}
+	GLASSERT( 0 );
+}
+
 
 void* DebugNew( size_t size, bool arrayType, const char* name, int line )
 {
@@ -200,15 +242,20 @@ void operator delete( void* mem )
 
 void MemLeakCheck()
 {
-	GLOUTPUT((	"MEMORY REPORT: watermark=%dk new count=%d. delete count=%d. %d allocations leaked.\n",
-				(int)(memWatermark/1024), (int)memNewCount, (int)memDeleteCount, (int)(memNewCount-memDeleteCount) ));
+	GLOUTPUT((	"MEMORY REPORT: watermark=%dk =%dM new count=%d. delete count=%d. %d allocations leaked.\n",
+				(int)(memWatermark/1024), (int)(memWatermark/(1024*1024)),
+				(int)memNewCount, (int)memDeleteCount, (int)(memNewCount-memDeleteCount) ));
 
 	for( MemCheckHead* node = root; node; node=node->next )
 	{
 		GLOUTPUT(( "  size=%d %s id=%d name=%s line=%d\n",
 					(int)node->size, (node->arrayType) ? "array" : "single", (int)node->id,
 					(node->name) ? node->name :  "(null)", node->line ));
-	}		    
+	}		  
+
+	for( unsigned long i=0; i<nMTrack; ++i ) {
+		GLOUTPUT(( "  malloc size=%d\n", mtrackRoot[i].size ));
+	}
 
 	/*
 		If these fire, then a memory leak has been detected. The library doesn't track
@@ -218,7 +265,7 @@ void MemLeakCheck()
 
 		It's not elegant, but it does work.
 	*/
-	GLASSERT( memNewCount-memDeleteCount == 0 && !root );
+	GLASSERT( memNewCount-memDeleteCount == 0 && !root && !nMTrack );
 
 	// If this fires, the code isn't working or you never allocated memory:
 	GLASSERT( memNewCount );
@@ -226,6 +273,7 @@ void MemLeakCheck()
 
 void MemHeapCheck()
 {
+	// FIXME: add in walk of malloc/free list
 	unsigned long size = 0;
 	for ( MemCheckHead* head = root; head; head=head->next )
 	{

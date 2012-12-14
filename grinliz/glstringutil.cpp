@@ -361,7 +361,8 @@ StringPool::StringPool()
 {
 	treeSize = 1+2+4+8+16;
 	treeDepth = 5;
-	tree = (Node*) calloc( treeSize, sizeof(Node) );
+	tree = (Node*) Malloc( treeSize*sizeof(Node) );
+	memset( tree, 0, treeSize*sizeof(Node) );
 	root = 0;
 
 	nStrings = 0;
@@ -381,10 +382,10 @@ StringPool::~StringPool()
 			   BLOCK_SIZE * nBlocks ));
 
 	if ( tree )
-		free( tree );
+		Free( tree );
 	while( root ) {
 		Block* b = root->next;
-		free( root );
+		Free( root );
 		root = b;
 	}
 }
@@ -434,7 +435,7 @@ IString StringPool::Get( const char* str, bool strIsStaticMem )
 		int oldTreeSize = treeSize;
 		treeSize += (1<<treeDepth);
 		++treeDepth;
-		tree = (Node*) realloc( tree, treeSize*sizeof(Node) );
+		tree = (Node*) Realloc( tree, treeSize*sizeof(Node) );
 		memset( tree + oldTreeSize, 0, (treeSize-oldTreeSize)*sizeof(Node) );
 	}
 
@@ -468,7 +469,7 @@ const char* StringPool::Add( const char* str )
 		}
 	}
 	++nBlocks;
-	Block* b = (Block*)malloc( sizeof(Block) );
+	Block* b = (Block*)Malloc( sizeof(Block) );
 	b->nBytes = nBytes;
 	b->next = root;
 	root = b;
