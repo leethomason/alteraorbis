@@ -38,8 +38,6 @@ LumosGame::LumosGame(  int width, int height, int rotation, const char* savepath
 	: Game( width, height, rotation, 600, savepath )
 {
 	InitButtonLooks();
-	worldInfo = new WorldInfo();
-
 	PushScene( SCENE_TITLE, 0 );
 	PushPopScene();
 
@@ -49,7 +47,6 @@ LumosGame::LumosGame(  int width, int height, int rotation, const char* savepath
 
 LumosGame::~LumosGame()
 {
-	delete worldInfo;
 }
 
 
@@ -234,11 +231,9 @@ void LumosGame::PositionStd( gamui::PushButton* okay, gamui::PushButton* cancel 
 
 void LumosGame::Save( tinyxml2::XMLPrinter* printer )
 {
-	worldInfo->Save( printer );
 }
 
 
 void LumosGame::Load( const tinyxml2::XMLElement& parent )
 {
-	worldInfo->Load( parent );
 }

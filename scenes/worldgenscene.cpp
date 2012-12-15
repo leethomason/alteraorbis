@@ -3,6 +3,7 @@
 #include "../game/lumosgame.h"
 #include "../engine/surface.h"
 #include "../game/worldinfo.h"
+#include "../game/worldmap.h"
 
 using namespace grinliz;
 using namespace gamui;
@@ -11,7 +12,8 @@ WorldGenScene::WorldGenScene( LumosGame* game ) : Scene( game )
 {
 	game->InitStd( &gamui2D, &okay, &cancel );
 
-	pixels = new U16[MAX_MAP_SIZE*MAX_MAP_SIZE];
+	worldMap = new WorldMap( WorldGen::SIZE, WorldGen::SIZE );
+	pix16 = 0;
 
 	TextureManager* texman = TextureManager::Instance();
 	if ( !texman->IsTexture( "worldGenPreview" ) ) {
@@ -32,7 +34,8 @@ WorldGenScene::WorldGenScene( LumosGame* game ) : Scene( game )
 
 WorldGenScene::~WorldGenScene()
 {
-	delete [] pixels;
+	delete [] worldMap;
+	delete [] pix16;
 }
 
 
@@ -72,22 +75,19 @@ void WorldGenScene::CreateTexture( Texture* t )
 {
 	if ( StrEqual( t->Name(), "worldGenPreview" ) ) {
 
-		const U8* land = worldGen.Land();
+		static const int SIZE2 = WorldGen::SIZE*WorldGen::SIZE; 
 
-		for( int j=0; j<WorldGen::SIZE; ++j ) {
-			for( int i=0; i<WorldGen::SIZE; ++i ) {
-				Color4U8 rgb8;
-				if ( land[j*WorldGen::SIZE+i] ) {
-					rgb8.Set( 0, 255, 0, 255 );
-				}
-				else {
-					rgb8.Set( 0, 0, 255, 255 );
-				}
-				U16 rgb16 = Surface::CalcRGB16( rgb8 );
-				pixels[j*WorldGen::SIZE+i] = rgb16;
-			}
+		if ( !pix16 ) {
+			pix16 = new U16[SIZE2];
 		}
-		t->Upload( pixels, MAX_MAP_SIZE*MAX_MAP_SIZE*sizeof(U16) );
+		const Color4U8* pix32 = worldMap->Pixels();
+
+		worldMap->Init( worldGen.Land(), worldGen.Color(), featureArr );
+
+		for( int i=0; i<SIZE2; ++i ) {
+			pix16[i] = Surface::CalcRGB16( pix32[i] );
+		}
+		t->Upload( pix16, SIZE2*sizeof(U16) );
 	}
 	else {
 		GLASSERT( 0 );
@@ -132,9 +132,8 @@ void WorldGenScene::DoTick( U32 delta )
 	else if ( scanline == WorldGen::SIZE ) {
 		bool okay = worldGen.EndLandAndWater( 0.4f );
 		if ( okay ) {
-			LumosGame* lg = static_cast<LumosGame*>(game);
-			lg->worldInfo->featureArr.Clear();
-			worldGen.CalColor( &lg->worldInfo->featureArr );
+			featureArr.Clear();
+			worldGen.CalColor( &featureArr );
 		}
 		if ( okay ) {
 			sendTexture = true;

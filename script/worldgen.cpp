@@ -31,6 +31,12 @@ void WorldFeature::Save( tinyxml2::XMLPrinter* printer )
 }
 
 
+void WorldFeature::Load( const tinyxml2::XMLElement& doc )
+{
+
+}
+
+
 WorldGen::WorldGen()
 {
 	land = new U8[SIZE*SIZE];

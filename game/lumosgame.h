@@ -18,8 +18,6 @@
 
 #include "../xegame/game.h"
 
-class WorldInfo;
-
 class LumosGame : public Game
 {
 public:
@@ -77,9 +75,6 @@ public:
 
 	virtual void Save( tinyxml2::XMLPrinter* );
 	virtual void Load( const tinyxml2::XMLElement& parent );
-
-	// Place to hang off information about the world. 
-	WorldInfo* worldInfo;
 
 private:
 	void InitButtonLooks();

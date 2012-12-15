@@ -25,6 +25,8 @@
 #include "../engine/texture.h"
 #include "../engine/ufoutil.h"
 
+#include "worldinfo.h"
+
 using namespace grinliz;
 using namespace micropather;
 
@@ -43,6 +45,7 @@ WorldMap::WorldMap( int width, int height ) : Map( width, height )
 
 	grid = 0;
 	pather = 0;
+	worldInfo = new WorldInfo();
 	Init( width, height );
 
 	texture[0] = TextureManager::Instance()->GetTexture( "map_water" );
@@ -57,6 +60,7 @@ WorldMap::~WorldMap()
 	DeleteAllRegions();
 	delete [] grid;
 	delete pather;
+	delete worldInfo;
 }
 
 
@@ -85,7 +89,7 @@ void WorldMap::DumpRegions()
 			for( int i=0; i<width; ++i ) {
 				const Grid& g = grid[INDEX(i,j)];
 				if ( g.IsPassable() && IsRegionOrigin( i, j )) {
-					GLOUTPUT(( "Region %d,%d size=%d", i, j, g.size ));
+					GLOUTPUT(( "Region %d,%d size=%d", i, j, g.ZoneSize() ));
 					GLOUTPUT(( "\n" ));
 				}
 			}
@@ -131,7 +135,7 @@ void WorldMap::InitCircle()
 			int r2 = (x-cx)*(x-cx) + (y-cy)*(y-cy);
 			if ( r2 < R2 ) {
 				int i = INDEX( x, y );
-				grid[i].isLand = TRUE;
+				grid[i].SetLand();
 			}
 		}
 	}
@@ -162,26 +166,26 @@ bool WorldMap::InitPNG( const char* filename,
 			Color3U8 c = { pixels[i*3+0], pixels[i*3+1], pixels[i*3+2] };
 			Vector2I p = { x, y };
 			if ( c == BLACK ) {
-				grid[i].isLand = 1;
-				grid[i].color = color;
+				grid[i].SetLand();
+				grid[i].SetZoneColor( color );
 				blocks->Push( p );
 			}
 			else if ( c.r == c.g && c.g == c.b ) {
-				grid[i].isLand = 1;
+				grid[i].SetLand();
 				color = c.r;
-				grid[i].color = color;
+				grid[i].SetZoneColor( color );
 			}
 			else if ( c == BLUE ) {
-				grid[i].isLand = 0;
+				grid[i].SetWater();
 			}
 			else if ( c == RED ) {
-				grid[i].isLand = 1;
-				grid[i].color = color;
+				grid[i].SetLand();
+				grid[i].SetZoneColor( color );
 				wayPoints->Push( p );
 			}
 			else if ( c == GREEN ) {
-				grid[i].isLand = 1;
-				grid[i].color = color;
+				grid[i].SetLand();
+				grid[i].SetZoneColor( color );
 				features->Push( p );
 			}
 			++x;
@@ -196,6 +200,11 @@ bool WorldMap::InitPNG( const char* filename,
 	return error == 0;
 }
 
+
+void WorldMap::Init( const U8* land, const U8* color, grinliz::CDynArray< WorldFeature >& featureArr )
+{
+	GLASSERT( 0 );
+}
 
 
 void WorldMap::Tessellate()
@@ -212,7 +221,7 @@ void WorldMap::Tessellate()
 	for( int j=0; j<height; ++j ) {
 		int i=0;
 		while ( i < width ) {
-			int layer = grid[INDEX(i,j)].isLand;
+			bool layer = grid[INDEX(i,j)].IsLand();
 
 			U16* pi = index[layer].PushArr( 6 );
 			int base = vertex[layer].Size();
@@ -231,7 +240,7 @@ void WorldMap::Tessellate()
 
 			int w = 1;
 			++i;
-			while( i<width && grid[INDEX(i,j)].isLand == layer ) {
+			while( i<width && grid[INDEX(i,j)].IsLand() == layer ) {
 				++i;
 				++w;
 			}
@@ -250,8 +259,8 @@ void WorldMap::SetBlock( const grinliz::Rectangle2I& pos )
 	for( int y=pos.min.y; y<=pos.max.y; ++y ) {
 		for( int x=pos.min.x; x<=pos.max.x; ++x ) {
 			int i = INDEX( x, y );
-			GLASSERT( grid[i].isBlock == FALSE );
-			grid[i].isBlock = TRUE;
+			GLASSERT( grid[i].IsBlock() == FALSE );
+			grid[i].SetBlock( true );
 			zoneInit.Clear( x>>ZONE_SHIFT, y>>ZONE_SHIFT );
 			//GLOUTPUT(( "Block (%d,%d) index=%d zone=%d set\n", x, y, i, ZDEX(x,y) ));
 		}
@@ -265,8 +274,8 @@ void WorldMap::ClearBlock( const grinliz::Rectangle2I& pos )
 	for( int y=pos.min.y; y<=pos.max.y; ++y ) {
 		for( int x=pos.min.x; x<=pos.max.x; ++x ) {
 			int i = INDEX( x, y );
-			GLASSERT( grid[i].isBlock );
-			grid[i].isBlock = FALSE;
+			GLASSERT( grid[i].IsBlock() );
+			grid[i].SetBlock( false );
 			zoneInit.Clear( x>>ZONE_SHIFT, y>>ZONE_SHIFT );
 		}
 	}
@@ -406,7 +415,7 @@ void WorldMap::CalcZone( int zx, int zy )
 		for( int y=zy; y<zy+ZONE_SIZE; ++y ) {
 			for( int x=zx; x<zx+ZONE_SIZE; ++x ) {
 				Grid* g = &grid[INDEX(x,y)];
-				g->size = g->IsPassable() ? 1 : 0;
+				g->SetZoneSize( g->IsPassable() ? 1 : 0 );
 			}
 		}
 
@@ -420,7 +429,7 @@ void WorldMap::CalcZone( int zx, int zy )
 					for( int j=y; j<y+size; j+=half ) {
 						for( int i=x; i<x+size; i+=half ) {
 							Grid* g = &grid[INDEX(i,j)];
-							if ( !g->IsPassable() || g->size != half ) {
+							if ( !g->IsPassable() || g->ZoneSize() != half ) {
 								okay = false;
 								break;
 							}
@@ -430,7 +439,7 @@ void WorldMap::CalcZone( int zx, int zy )
 						for( int j=y; j<y+size; j++ ) {
 							for( int i=x; i<x+size; i++ ) {
 								Grid* g = &grid[INDEX(i,j)];
-								g->size = size;
+								g->SetZoneSize( size );
 							}
 						}
 					}
@@ -467,7 +476,7 @@ void WorldMap::AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > *a
 	Vector2I currentZone = { -1, -1 };
 	CArray< Vector2I, ZONE_SIZE*4+4 > adj;
 
-	int size = startGrid->size;
+	int size = startGrid->ZoneSize();
 	GLASSERT( size > 0 );
 
 	// Start and direction for the walk. Note that
@@ -567,7 +576,7 @@ void WorldMap::PrintStateInfo( void* state )
 {
 	Vector2I vec;
 	Grid* g = ToGrid( state, &vec );
-	int size = g->size;
+	int size = g->ZoneSize();
 	GLOUTPUT(( "(%d,%d)s=%d ", vec.x, vec.y, size ));	
 }
 
@@ -667,8 +676,8 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 	Vector2I endi   = { (int)end.x,   (int)end.y };
 
 	// Check color:
-	U32 c0 = grid[INDEX(starti)].color;
-	U32 c1 = grid[INDEX(endi)].color;
+	U32 c0 = grid[INDEX(starti)].ZoneColor();
+	U32 c1 = grid[INDEX(endi)].ZoneColor();
 
 	if ( c0 != c1 ) {
 		return false;
@@ -844,7 +853,7 @@ void WorldMap::DrawZones()
 				if ( g.IsPassable() ) {
 
 					Vector3F p0 = { (float)i+offset, 0.01f, (float)j+offset };
-					Vector3F p1 = { (float)(i+g.size)-offset, 0.01f, (float)(j+g.size)-offset };
+					Vector3F p1 = { (float)(i+g.ZoneSize())-offset, 0.01f, (float)(j+g.ZoneSize())-offset };
 
 					if ( g.debug_origin ) {
 						debugOrigin.DrawQuad( 0, p0, p1, false );

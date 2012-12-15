@@ -260,9 +260,9 @@ U32 TextureManager::CreateGLTexture( int w, int h, int format, int flags )
 	glBindTexture( GL_TEXTURE_2D, texID );
 
 	if ( flags & Texture::PARAM_NEAREST ) {
-		glTexParameteri(	GL_TEXTURE_2D,
-							GL_GENERATE_MIPMAP,
-							GL_FALSE );
+		//glTexParameteri(	GL_TEXTURE_2D,
+		//					GL_GENERATE_MIPMAP,
+		//					GL_FALSE );
 
 		glTexParameteri(	GL_TEXTURE_2D,
 							GL_TEXTURE_MAG_FILTER,
@@ -273,9 +273,9 @@ U32 TextureManager::CreateGLTexture( int w, int h, int format, int flags )
 							GL_NEAREST );
 	}
 	else if ( flags & Texture::PARAM_LINEAR ) {
-		glTexParameteri(	GL_TEXTURE_2D,
-							GL_GENERATE_MIPMAP,
-							GL_FALSE );
+		//glTexParameteri(	GL_TEXTURE_2D,
+		//					GL_GENERATE_MIPMAP,
+		//					GL_FALSE );
 
 		glTexParameteri(	GL_TEXTURE_2D,
 							GL_TEXTURE_MAG_FILTER,
@@ -286,9 +286,9 @@ U32 TextureManager::CreateGLTexture( int w, int h, int format, int flags )
 							GL_LINEAR );
 	}
 	else {
-		glTexParameteri(	GL_TEXTURE_2D,
-							GL_GENERATE_MIPMAP,
-							GL_TRUE );
+		//glTexParameteri(	GL_TEXTURE_2D,
+		//					GL_GENERATE_MIPMAP,
+		//					GL_TRUE );
 
 		glTexParameteri(	GL_TEXTURE_2D,
 							GL_TEXTURE_MAG_FILTER,
@@ -298,8 +298,8 @@ U32 TextureManager::CreateGLTexture( int w, int h, int format, int flags )
 							GL_TEXTURE_MIN_FILTER,
 							GL_LINEAR_MIPMAP_NEAREST );
 	}
-	//GLOUTPUT(( "OpenGL texture %d created.\n", texID ));
-					
+
+	//GLOUTPUT(( "OpenGL texture %d created.\n", texID ));				
 	CHECK_GL_ERROR;
 
 	return texID;
@@ -344,6 +344,11 @@ void Texture::Upload( const void* pixels, int size )
 					glType,
 					pixels );
 //	GLOUTPUT(( "OpenGL texture %d Upload.\n", gpuMem->glID ));
+	CHECK_GL_ERROR;
+
+	if ( !(flags & PARAM_LINEAR) ) {
+		glGenerateMipmap( GL_TEXTURE_2D );
+	}
 	CHECK_GL_ERROR;
 }
 

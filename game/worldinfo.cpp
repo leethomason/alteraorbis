@@ -30,7 +30,8 @@ void WorldInfo::Load( const tinyxml2::XMLElement& parent )
 				 feature = feature->NextSiblingElement( "WorldFeature" ) ) 
 			{
 				WorldFeature* wf = featureArr.PushArr(1);
-				wf->Load( feature );
+				GLASSERT( 0 );	// fix all this
+				//wf->Load( 0 );
 			}
 		}
 	}

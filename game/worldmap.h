@@ -29,6 +29,8 @@
 #include "../grinliz/glbitarray.h"
 
 class Texture;
+class WorldInfo;
+struct WorldFeature;
 
 /*
 	The world map has layers. (May add more in the future.)
@@ -47,19 +49,22 @@ public:
 	WorldMap( int width, int height );
 	~WorldMap();
 
+	// Test initiliazation:
 	void InitCircle();
 	bool InitPNG( const char* filename, 
 				  grinliz::CDynArray<grinliz::Vector2I>* blocks,
 				  grinliz::CDynArray<grinliz::Vector2I>* wayPoints,
 				  grinliz::CDynArray<grinliz::Vector2I>* features );
+	// Init from WorldGen data:
+	void Init( const U8* land, const U8* color, grinliz::CDynArray< WorldFeature >& featureArr );
 
 	void SetBlock( int x, int y )	{ grinliz::Rectangle2I pos; pos.Set( x, y, x, y ); SetBlock( pos ); }
 	void SetBlock( const grinliz::Rectangle2I& pos );
 	void ClearBlock( int x, int y )	{ grinliz::Rectangle2I pos; pos.Set( x, y, x, y ); ClearBlock( pos ); }
 	void ClearBlock( const grinliz::Rectangle2I& pos );
 
-	bool IsBlockSet( int x, int y ) { return grid[INDEX(x,y)].isBlock != 0; }
-	bool IsLand( int x, int y )		{ return grid[INDEX(x,y)].isLand != 0; }
+	bool IsBlockSet( int x, int y ) { return grid[INDEX(x,y)].IsBlock(); }
+	bool IsLand( int x, int y )		{ return grid[INDEX(x,y)].IsLand(); }
 	
 	// Call the pather; return true if successful.
 	bool CalcPath(	const grinliz::Vector2F& start, 
@@ -107,6 +112,10 @@ public:
 	void PatherCacheHitMiss( micropather::CacheData* data )	{ pather->GetCacheData( data ); }
 	int CalcNumRegions();
 
+	// --- MetaData --- //
+	const WorldInfo& GetWorldInfo()		{ return *worldInfo; }
+	const grinliz::Color4U8* Pixels()	{ return (const grinliz::Color4U8*) grid; }
+
 private:
 	int INDEX( int x, int y ) const { 
 		GLASSERT( x >= 0 && x < width ); GLASSERT( y >= 0 && y < height ); 
@@ -148,16 +157,52 @@ private:
 		ZONE_SIZE2  = ZONE_SIZE*ZONE_SIZE,
 	};
 	
+	// Trick: overlay the color (RGBA U8) and 
+	// the pathing data. That way there is a clean
+	// way to save, and do basic checks, on the
+	// information.
+	//						Red				Green		Blue		Alpha
+	//	Water				L:std flags		cz			H Set		0xff
+	//	Land				L:std flags		H Set		cz
+	//		rock			H: rock height & age
+	//		rock&lake		H: water height
+	//	Magma				L:std flags
+	//						0xf0
+
 	struct Grid {
-		U32 isLand			: 1;
+	private:
+		// memset(0) should work, and make it water.
+		// Red Channel
 		U32 isBlock			: 1;
-		U32 color			: 8;	// zone color
-		U32 size			: 5;	// if passable, size of the region
+	public:
 		U32 debug_adjacent  : 1;
 		U32 debug_origin    : 1;
 		U32 debug_path		: 1;
+	private:
+		U32	pad0			: 1;
+		U32 highRed			: 3;	// Magma: 0xe0
+		// Green					
+		U32 zoneColorLow	: 4;
+		U32 green			: 4;	// Land: 0xf0
+		// Blue						
+		U32 zoneColorHigh	: 4;	
+		U32 blue			: 4;	// Water: 0xf0
+		// Alpha
+		U32	size			: 5;	// zone size
+		U32 alpha			: 3;	// 0xe0
 
-		bool IsPassable() const			{ return isLand == TRUE && isBlock == FALSE; }
+	public:
+		bool IsBlock() const		{ return isBlock != 0; }
+		bool IsLand() const			{ return green != 0; }
+		bool IsPassable() const		{ return green && !isBlock; }
+		U32  ZoneSize()  const		{ return size; }
+		U32  ZoneColor() const		{ return zoneColorLow | (zoneColorHigh << 4); }
+
+		void SetBlock( bool block )	{ isBlock = block ? 1 : 0; }
+		void SetLand()				{ blue = 0; green = 0xf; }
+		void SetWater()				{ blue = 0xf; green = 0; }
+		void SetZoneColor( int c )	{ GLASSERT( c >= 0 && c <= 255 ); zoneColorLow = c & 0xf; zoneColorHigh = (c>>4)&0xf; }
+		void SetZoneSize( U32 s )	{ GLASSERT( s >= 0 && s <= ZONE_SIZE ); size = s; }
 	};
 
 	// The solver has 3 components:
@@ -171,8 +216,8 @@ private:
 	Grid* GridOrigin( int x, int y ) {
 		const Grid& g = grid[INDEX(x,y)];
 		U32 mask = 0xffffffff;
-		if ( g.size ) {
-			U32 size = g.size;
+		U32 size = g.ZoneSize();
+		if ( size ) {
 			mask = ~(size-1);
 		}
 		return grid + INDEX( x&mask, y&mask );
@@ -181,8 +226,8 @@ private:
 	grinliz::Vector2I RegionOrigin( int x, int y ) {
 		const Grid& g = grid[INDEX(x,y)];
 		U32 mask = 0xffffffff;
-		if ( g.size ) {
-			U32 size = g.size;
+		U32 size = g.ZoneSize();
+		if ( size ) {
 			mask = ~(size-1);
 		}
 		grinliz::Vector2I v = { x&mask, y&mask };
@@ -197,7 +242,7 @@ private:
 	grinliz::Vector2F RegionCenter( int x, int y ) {
 		const Grid& g = grid[INDEX(x,y)];
 		grinliz::Vector2I v = RegionOrigin( x, y );
-		float half = (float)g.size * 0.5f;
+		float half = (float)g.ZoneSize() * 0.5f;
 		grinliz::Vector2F c = { (float)(x) + half, (float)y + half };
 		return c;
 	}
@@ -207,7 +252,7 @@ private:
 		grinliz::Vector2I v = RegionOrigin( x, y );
 		grinliz::Rectangle2F b;
 		b.min.Set( (float)v.x, (float)v.y );
-		b.max.Set( (float)(v.x + g.size), (float)(v.y + g.size) );
+		b.max.Set( (float)(v.x + g.ZoneSize()), (float)(v.y + g.ZoneSize()) );
 		return b;
 	}
 		
@@ -227,9 +272,10 @@ private:
 		return grid+v;
 	}
 
-	Grid* grid;		// pathing info.
-	micropather::MicroPather *pather;
-	bool debugRegionOverlay;
+	Grid*						grid;		// pathing info.
+	WorldInfo*					worldInfo;
+	micropather::MicroPather*	pather;
+	bool						debugRegionOverlay;
 
 	MP_VECTOR< void* >						pathRegions;
 	grinliz::CDynArray< grinliz::Vector2F >	debugPathVector;

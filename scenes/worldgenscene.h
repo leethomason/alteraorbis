@@ -7,6 +7,7 @@
 #include "../script/worldgen.h"
 
 class LumosGame;
+class WorldMap;
 
 class WorldGenScene : public Scene, public ITextureCreator
 {
@@ -25,9 +26,12 @@ public:
 	void CreateTexture( Texture* t );
 
 private:
-	WorldGen worldGen;
+	WorldGen	worldGen;
+	WorldMap*	worldMap;
+	U16*		pix16;
+	grinliz::CDynArray< WorldFeature > featureArr;
+
 	int scanline;	// -1: not started
-	U16*				pixels;
 	gamui::PushButton	okay, cancel, tryAgain;
 	gamui::Image		worldImage;
 	gamui::TextLabel	label;
