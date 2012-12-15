@@ -17,6 +17,7 @@
 #define LUMOS_WORLD_MAP_INCLUDED
 
 #include "gamelimits.h"
+#include "worldgrid.h"
 
 #include "../engine/map.h"
 #include "../engine/rendertarget.h"
@@ -27,6 +28,8 @@
 #include "../grinliz/glcontainer.h"
 #include "../grinliz/glmemorypool.h"
 #include "../grinliz/glbitarray.h"
+
+#include "../tinyxml2/tinyxml2.h"
 
 class Texture;
 class WorldInfo;
@@ -57,6 +60,8 @@ public:
 				  grinliz::CDynArray<grinliz::Vector2I>* features );
 	// Init from WorldGen data:
 	void Init( const U8* land, const U8* color, grinliz::CDynArray< WorldFeature >& featureArr );
+
+	void Save( const char* path, tinyxml2::XMLPrinter* printer );
 
 	void SetBlock( int x, int y )	{ grinliz::Rectangle2I pos; pos.Set( x, y, x, y ); SetBlock( pos ); }
 	void SetBlock( const grinliz::Rectangle2I& pos );
@@ -157,53 +162,6 @@ private:
 		ZONE_SIZE2  = ZONE_SIZE*ZONE_SIZE,
 	};
 	
-	// Trick: overlay the color (RGBA U8) and 
-	// the pathing data. That way there is a clean
-	// way to save, and do basic checks, on the
-	// information.
-	//						Red				Green		Blue		Alpha
-	//	Water				L:std flags		cz			H Set		0xff
-	//	Land				L:std flags		H Set		cz
-	//		rock			H: rock height & age
-	//		rock&lake		H: water height
-	//	Magma				L:std flags
-	//						0xf0
-
-	struct Grid {
-	private:
-		// memset(0) should work, and make it water.
-		// Red Channel
-		U32 isBlock			: 1;
-	public:
-		U32 debug_adjacent  : 1;
-		U32 debug_origin    : 1;
-		U32 debug_path		: 1;
-	private:
-		U32	pad0			: 1;
-		U32 highRed			: 3;	// Magma: 0xe0
-		// Green					
-		U32 zoneColorLow	: 4;
-		U32 green			: 4;	// Land: 0xf0
-		// Blue						
-		U32 zoneColorHigh	: 4;	
-		U32 blue			: 4;	// Water: 0xf0
-		// Alpha
-		U32	size			: 5;	// zone size
-		U32 alpha			: 3;	// 0xe0
-
-	public:
-		bool IsBlock() const		{ return isBlock != 0; }
-		bool IsLand() const			{ return green != 0; }
-		bool IsPassable() const		{ return green && !isBlock; }
-		U32  ZoneSize()  const		{ return size; }
-		U32  ZoneColor() const		{ return zoneColorLow | (zoneColorHigh << 4); }
-
-		void SetBlock( bool block )	{ isBlock = block ? 1 : 0; }
-		void SetLand()				{ blue = 0; green = 0xf; }
-		void SetWater()				{ blue = 0xf; green = 0; }
-		void SetZoneColor( int c )	{ GLASSERT( c >= 0 && c <= 255 ); zoneColorLow = c & 0xf; zoneColorHigh = (c>>4)&0xf; }
-		void SetZoneSize( U32 s )	{ GLASSERT( s >= 0 && s <= ZONE_SIZE ); size = s; }
-	};
 
 	// The solver has 3 components:
 	//	Vector path:	the final result, a collection of points that form connected vector
@@ -213,8 +171,8 @@ private:
 
 	bool GridPath( const grinliz::Vector2F& start, const grinliz::Vector2F& end );
 
-	Grid* GridOrigin( int x, int y ) {
-		const Grid& g = grid[INDEX(x,y)];
+	WorldGrid* GridOrigin( int x, int y ) {
+		const WorldGrid& g = grid[INDEX(x,y)];
 		U32 mask = 0xffffffff;
 		U32 size = g.ZoneSize();
 		if ( size ) {
@@ -224,7 +182,7 @@ private:
 	}
 
 	grinliz::Vector2I RegionOrigin( int x, int y ) {
-		const Grid& g = grid[INDEX(x,y)];
+		const WorldGrid& g = grid[INDEX(x,y)];
 		U32 mask = 0xffffffff;
 		U32 size = g.ZoneSize();
 		if ( size ) {
@@ -240,7 +198,7 @@ private:
 	}
 
 	grinliz::Vector2F RegionCenter( int x, int y ) {
-		const Grid& g = grid[INDEX(x,y)];
+		const WorldGrid& g = grid[INDEX(x,y)];
 		grinliz::Vector2I v = RegionOrigin( x, y );
 		float half = (float)g.ZoneSize() * 0.5f;
 		grinliz::Vector2F c = { (float)(x) + half, (float)y + half };
@@ -248,7 +206,7 @@ private:
 	}
 
 	grinliz::Rectangle2F RegionBounds( int x, int y ) {
-		const Grid& g = grid[INDEX(x,y)];
+		const WorldGrid& g = grid[INDEX(x,y)];
 		grinliz::Vector2I v = RegionOrigin( x, y );
 		grinliz::Rectangle2F b;
 		b.min.Set( (float)v.x, (float)v.y );
@@ -261,7 +219,7 @@ private:
 		return (void*)(v.y*width+v.x);
 	}
 
-	Grid* ToGrid( void* state, grinliz::Vector2I* vec ) {
+	WorldGrid* ToGrid( void* state, grinliz::Vector2I* vec ) {
 		int v = (int)(state);
 		if ( vec ) {
 			int y = v / width;
@@ -272,7 +230,7 @@ private:
 		return grid+v;
 	}
 
-	Grid*						grid;		// pathing info.
+	WorldGrid*					grid;		// pathing info.
 	WorldInfo*					worldInfo;
 	micropather::MicroPather*	pather;
 	bool						debugRegionOverlay;

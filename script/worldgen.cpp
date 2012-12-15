@@ -235,6 +235,7 @@ void WorldGen::DrawCanal( Vector2I v, int radius, int dx, int dy, const Rectangl
 }
 
 
+/*
 void WorldGen::Save( const char* fname )
 {
 	Color4U8* pixels = new Color4U8[SIZE*SIZE];
@@ -255,6 +256,7 @@ void WorldGen::Save( const char* fname )
 	lodepng_encode32_file( fname, (const unsigned char*)pixels, SIZE, SIZE );
 	delete [] pixels;
 }
+*/
 
 
 #if 0

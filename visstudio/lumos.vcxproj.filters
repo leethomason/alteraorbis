@@ -507,6 +507,9 @@
     <ClInclude Include="..\game\sim.h">
       <Filter>Source Files\game</Filter>
     </ClInclude>
+    <ClInclude Include="..\game\worldgrid.h">
+      <Filter>Source Files\game</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\engine\sources.mk">

@@ -58,8 +58,16 @@ void WorldGenScene::Resize()
 void WorldGenScene::ItemTapped( const gamui::UIItem* item )
 {
 	if ( item == &okay ) {
-		worldGen.Save( "./save/world.png" );
-		game->SaveGame();
+		//worldGen.Save( "./save/world.png" );
+		//game->SaveGame();
+
+		FILE* fp = fopen( "./save/map.xml", "w" );
+		GLASSERT( fp );
+		if ( fp ) {
+			tinyxml2::XMLPrinter printer( fp );
+			worldMap->Save( "./save/world.png", &printer );
+			fclose( fp );
+		}
 		game->PopScene();
 	}
 	else if ( item == &cancel ) {
