@@ -797,9 +797,9 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 void WorldMap::ClearDebugDrawing()
 {
 	for( int i=0; i<width*height; ++i ) {
-		grid[i].debug_adjacent  = 0;
-		grid[i].debug_origin = 0;
-		grid[i].debug_path = 0;
+		grid[i].SetDebugAdjacent( false );
+		grid[i].SetDebugOrigin( false );
+		grid[i].SetDebugPath( false );
 	}
 	debugPathVector.Clear();
 }
@@ -818,7 +818,7 @@ void WorldMap::ShowRegionPath( float x0, float y0, float x1, float y1 )
 		if ( result == micropather::MicroPather::SOLVED ) {
 			for( unsigned i=0; i<pathRegions.size(); ++i ) {
 				WorldGrid* vp = ToGrid( pathRegions[i], 0 );
-				vp->debug_path = TRUE;
+				vp->SetDebugPath( true );
 			}
 		}
 	}
@@ -833,13 +833,13 @@ void WorldMap::ShowAdjacentRegions( float _x, float _y )
 
 	WorldGrid* r = GridOrigin( x, y );
 	if ( r->IsPassable() ) {
-		r->debug_origin = TRUE;
+		r->SetDebugOrigin( true );
 		MP_VECTOR< micropather::StateCost > adj;
 		AdjacentCost( ToState( x, y ), &adj );
 		for( unsigned i=0; i<adj.size(); ++i ) {
 			WorldGrid* n = ToGrid( adj[i].state, 0 );
-			GLASSERT( n->debug_adjacent == 0 );
-			n->debug_adjacent  = 1;
+			GLASSERT( n->DebugAdjacent() == false );
+			n->SetDebugAdjacent( true );
 		}
 	}
 }
@@ -869,13 +869,13 @@ void WorldMap::DrawZones()
 					Vector3F p0 = { (float)i+offset, 0.01f, (float)j+offset };
 					Vector3F p1 = { (float)(i+g.ZoneSize())-offset, 0.01f, (float)(j+g.ZoneSize())-offset };
 
-					if ( g.debug_origin ) {
+					if ( g.DebugOrigin() ) {
 						debugOrigin.DrawQuad( 0, p0, p1, false );
 					}
-					else if ( g.debug_adjacent ) {
+					else if ( g.DebugAdjacent() ) {
 						debugAdjacent.DrawQuad( 0, p0, p1, false );
 					}
-					else if ( g.debug_path ) {
+					else if ( g.DebugPath() ) {
 						debugPath.DrawQuad( 0, p0, p1, false );
 					}
 					else {
