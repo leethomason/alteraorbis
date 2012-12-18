@@ -52,7 +52,8 @@ public:
 		PARAM_NONE		= 0,
 		PARAM_NEAREST	= 0x01,
 		PARAM_LINEAR	= 0x02,
-		PARAM_EMISSIVE	= 0x04
+		PARAM_EMISSIVE	= 0x04,
+		PARAM_SOFTWARE_MIP = 0x08,	// work around driver bug.
 	};
 
 	Texture()					{ creator = 0; } 
@@ -78,12 +79,18 @@ public:
 	int BytesPerPixel() const	{ return (format == ALPHA) ? 1 : 2; }
 
 	U32 GLID();
+
 	void SetEmissive( bool on )	{ if ( on ) 
 									flags |= PARAM_EMISSIVE;
 								  else
 									flags &= (~PARAM_EMISSIVE);
 								}
-
+	void SetSoftwareMip( bool on )	{	if ( on )
+											flags |= PARAM_SOFTWARE_MIP;
+										else
+											flags &= (~PARAM_SOFTWARE_MIP);
+										}
+								
 private:
 	void Set( const char* name, int w, int h, int format, int flags );
 
