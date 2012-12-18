@@ -124,9 +124,19 @@ extern bool gDebugging;	// global debugging flag
 	#define glnew new
 	inline void MemLeakCheck()	{}
 	inline void MemStartCheck()	{}
-	inline void TrackMalloc( const void*, size_t size )	{}
-	//inline void TrackRealloc( const void*, size_t newSize )	{}
-	inline void TrackFree( const void* )	{}
+	inline void* Malloc( size_t size ) {
+		void* v = malloc( size );
+		return v;
+	}
+
+	inline void* Realloc( void* v, size_t size ) {
+		v = realloc( v, size );
+		return v;
+	}
+
+	inline void Free( void* v ) {
+		free( v );
+	}
 #endif
 
 #endif // file
