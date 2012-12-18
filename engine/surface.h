@@ -138,7 +138,7 @@ public:
 		GLASSERT( x >=0 && x < Width() );
 		GLASSERT( y >=0 && y < Height() );
 		GLASSERT( BytesPerPixel() == 2 );
-		return *((const U16*)pixels + (h-1-y)*w + x);
+		return *((const U16*)pixels + y*w + x);
 	}
 
 	void SetTex16( int x, int y, U16 c ) {
@@ -147,6 +147,33 @@ public:
 		GLASSERT( BytesPerPixel() == 2 );
 		*((U16*)pixels + y*w + x) = c;
 	}
+
+	grinliz::Color4U8 GetTex4U8( int x, int y ) const {
+		GLASSERT( x >=0 && x < Width() );
+		GLASSERT( y >=0 && y < Height() );
+		grinliz::Color4U8 c = { 0, 0, 0, 0 };
+
+		switch ( format ) {
+		case RGBA16:	c = CalcRGBA16( GetTex16( x, y ));	break;
+		case RGB16:		c = CalcRGB16( GetTex16( x, y ));	break;
+		case ALPHA:		c.a = pixels[y*w+x];				break;
+		default:		GLASSERT( 0 );
+		}
+		return c;
+	}
+
+	void SetTex4U8( int x, int y, grinliz::Color4U8 c ) {
+		GLASSERT( x >=0 && x < Width() );
+		GLASSERT( y >=0 && y < Height() );
+
+		switch ( format ) {
+		case RGBA16:	SetTex16( x, y, CalcRGBA16( c ) );	break;
+		case RGB16:		SetTex16( x, y, CalcRGB16( c ) );	break;
+		case ALPHA:		pixels[y*w+x] = c.a;				break;
+		default:		GLASSERT( 0 );
+		}
+	}
+
 
 	// Set the format and allocate memory.
 	void Set( int format, int w, int h );
@@ -159,6 +186,7 @@ public:
 	void BlitImg(	const grinliz::Rectangle2I& target,
 					const Surface* src,
 					const Matrix2I& xformTargetToSrc );
+	void ScaleByHalf();
 
 	static int QueryFormat( const char* formatString );
 

@@ -347,7 +347,32 @@ void Texture::Upload( const void* pixels, int size )
 	CHECK_GL_ERROR;
 
 	if ( !(flags & PARAM_LINEAR) ) {
-		glGenerateMipmap( GL_TEXTURE_2D );
+		if ( !(flags & PARAM_SOFTWARE_MIP) ) {
+			glGenerateMipmap( GL_TEXTURE_2D );
+		}
+		else {
+			Surface s;
+			s.Set( format, w, h );
+			memcpy( s.Pixels(), pixels, s.BytesInImage() );
+
+			int level=0;
+			while ( s.Width() > 1 && s.Height() > 1 ) {
+				++level;
+				s.ScaleByHalf();
+				glTexImage2D(	GL_TEXTURE_2D,
+								level,
+								glFormat,
+								s.Width(),
+								s.Height(),
+								0,
+								glFormat,
+								glType,
+								s.Pixels() );
+			}
+			glTexParameteri(	GL_TEXTURE_2D,
+								GL_TEXTURE_MAX_LEVEL,
+								level );
+		}
 	}
 	CHECK_GL_ERROR;
 }

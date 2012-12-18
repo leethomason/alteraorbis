@@ -118,6 +118,37 @@ void Surface::BlitImg(	const grinliz::Rectangle2I& target,
 }
 
 
+void Surface::ScaleByHalf()
+{
+	// Tricky. Modifies the buffer in-place.
+	int halfW = w / 2;
+	int halfH = h / 2;
+	for( int y=0; y<halfH; ++y ) {
+		for( int x=0; x<halfW; ++x ) {
+
+			Color4U8 c00 = GetTex4U8( x*2+0, y*2+0 );
+			Color4U8 c01 = GetTex4U8( x*2+0, y*2+1 );
+			Color4U8 c10 = GetTex4U8( x*2+1, y*2+0 );
+			Color4U8 c11 = GetTex4U8( x*2+1, y*2+1 );
+
+			Color4U8 c = {  (c00.r+c01.r+c10.r+c11.r)>>2,
+							(c00.g+c01.g+c10.g+c11.g)>>2,
+							(c00.b+c01.b+c10.b+c11.b)>>2,
+							(c00.a+c01.a+c10.a+c11.a)>>2 };
+
+			int savedW = w;
+			int savedH = h;
+			w = halfW;
+			h = halfH;
+			SetTex4U8( x, y, c );
+			w = savedW;
+			h = savedH;
+		}
+	}
+	Set( format, halfW, halfH );
+}
+
+
 void Surface::Load( const gamedb::Item* node )
 {
 	GLASSERT( node->GetBool( "isImage" ) == true );

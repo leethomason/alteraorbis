@@ -367,6 +367,7 @@ void LivePreviewScene::CreateTexture( int type )
 	GLASSERT( t->Alpha() );
 	GLASSERT( t->Width() == SIZE*ICOLS );
 	GLASSERT( t->Height() == SIZE*IROWS );
+	t->SetSoftwareMip( true );
 
 	unsigned w=0, h=0;
 	U8* pixels = 0;
