@@ -26,7 +26,7 @@ class Engine;
 class WorldMap;
 
 
-class BattleTestScene : public Scene, public IChitListener
+class BattleTestScene : public Scene
 {
 public:
 	BattleTestScene( LumosGame* game );
@@ -42,7 +42,6 @@ public:
 	virtual void ItemTapped( const gamui::UIItem* item );
 	virtual void Draw3D( U32 deltaTime );
 	virtual void DrawDebugText();
-	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
 	virtual void MouseMove( const grinliz::Vector2F& view, const grinliz::Ray& world ) { debugRay = world; }
 	virtual void HandleHotKey( int mask );
 

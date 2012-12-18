@@ -21,7 +21,7 @@ struct WorldFeature {
 	int area;						// actual area
 
 	void Save( tinyxml2::XMLPrinter* );
-	void Load( const tinyxml2::XMLDocument& doc );
+	void Load( const tinyxml2::XMLElement& doc );
 
 	class Compare
 	{
@@ -50,13 +50,12 @@ public:
 	// SIZExSIZE
 	const U8* Land() const						{ return land; }
 	const U8* Color() const						{ return color; }
-	//const WorldFeature* WorldFeatures() const	{ return featureArr.Mem(); }
-	//int	  NumWorldFeatures() const				{ return featureArr.Size(); }
 
+	// Save is complex; use a WorlrdMap
 	// Save in standard format:
 	// land:	[0, 255, c]		c: color, <255
 	// water:	[0, c, 255]
-	void Save( const char* fname );
+	//void Save( const char* fname );
 
 	enum {
 		SIZE = MAX_MAP_SIZE

@@ -27,6 +27,7 @@
 #include "../scenes/animationscene.h"
 #include "../scenes/livepreviewscene.h"
 #include "../scenes/worldgenscene.h"
+#include "../scenes/gamescene.h"
 
 using namespace grinliz;
 using namespace gamui;
@@ -37,8 +38,6 @@ LumosGame::LumosGame(  int width, int height, int rotation, const char* savepath
 	: Game( width, height, rotation, 600, savepath )
 {
 	InitButtonLooks();
-	worldInfo = new WorldInfo();
-
 	PushScene( SCENE_TITLE, 0 );
 	PushPopScene();
 
@@ -48,7 +47,6 @@ LumosGame::LumosGame(  int width, int height, int rotation, const char* savepath
 
 LumosGame::~LumosGame()
 {
-	delete worldInfo;
 }
 
 
@@ -87,6 +85,7 @@ Scene* LumosGame::CreateScene( int id, SceneData* data )
 	case SCENE_ANIMATION:	scene = new AnimationScene( this );			break;
 	case SCENE_LIVEPREVIEW:	scene = new LivePreviewScene( this, (const LivePreviewSceneData*)data );	break;
 	case SCENE_WORLDGEN:	scene = new WorldGenScene( this );			break;
+	case SCENE_GAME:		scene = new GameScene( this );				break;
 
 	default:
 		GLASSERT( 0 );
@@ -232,6 +231,9 @@ void LumosGame::PositionStd( gamui::PushButton* okay, gamui::PushButton* cancel 
 
 void LumosGame::Save( tinyxml2::XMLPrinter* printer )
 {
-	worldInfo->Save( printer );
 }
 
+
+void LumosGame::Load( const tinyxml2::XMLElement& parent )
+{
+}

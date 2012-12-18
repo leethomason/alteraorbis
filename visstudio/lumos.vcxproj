@@ -116,6 +116,7 @@
     <ClCompile Include="..\game\mapspatialcomponent.cpp" />
     <ClCompile Include="..\game\pathmovecomponent.cpp" />
     <ClCompile Include="..\game\physicsmovecomponent.cpp" />
+    <ClCompile Include="..\game\sim.cpp" />
     <ClCompile Include="..\game\worldinfo.cpp" />
     <ClCompile Include="..\game\worldmap.cpp" />
     <ClCompile Include="..\gamui\gamui.cpp" />
@@ -123,6 +124,7 @@
     <ClCompile Include="..\scenes\animationscene.cpp" />
     <ClCompile Include="..\scenes\battletestscene.cpp" />
     <ClCompile Include="..\scenes\dialogscene.cpp" />
+    <ClCompile Include="..\scenes\gamescene.cpp" />
     <ClCompile Include="..\scenes\livepreviewscene.cpp" />
     <ClCompile Include="..\scenes\navtest2scene.cpp" />
     <ClCompile Include="..\scenes\navtestscene.cpp" />
@@ -193,6 +195,8 @@
     <ClInclude Include="..\game\mapspatialcomponent.h" />
     <ClInclude Include="..\game\pathmovecomponent.h" />
     <ClInclude Include="..\game\physicsmovecomponent.h" />
+    <ClInclude Include="..\game\sim.h" />
+    <ClInclude Include="..\game\worldgrid.h" />
     <ClInclude Include="..\game\worldinfo.h" />
     <ClInclude Include="..\game\worldmap.h" />
     <ClInclude Include="..\gamui\gamui.h" />
@@ -200,6 +204,7 @@
     <ClInclude Include="..\scenes\animationscene.h" />
     <ClInclude Include="..\scenes\battletestscene.h" />
     <ClInclude Include="..\scenes\dialogscene.h" />
+    <ClInclude Include="..\scenes\gamescene.h" />
     <ClInclude Include="..\scenes\livepreviewscene.h" />
     <ClInclude Include="..\scenes\navtest2scene.h" />
     <ClInclude Include="..\scenes\navtestscene.h" />

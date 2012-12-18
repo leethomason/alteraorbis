@@ -46,14 +46,6 @@ RenderTarget::RenderTarget( int width, int height, bool depthBuffer )
 	glBindFramebuffer( GL_FRAMEBUFFER, 0 );
 	CHECK_GL_ERROR;
 
-//	gpuMem.w = width;
-//	gpuMem.h = height;
-//	gpuMem.format = Texture::RGB16;
-//	gpuMem.flags = Texture::PARAM_LINEAR;
-//	gpuMem.item = 0;
-//	gpuMem.inUse = true;
-//	gpuMem.glID = renderTextureID;
-
 	texture.w = width;
 	texture.h = height;
 	texture.format = Texture::RGB16;

@@ -31,6 +31,12 @@ void WorldFeature::Save( tinyxml2::XMLPrinter* printer )
 }
 
 
+void WorldFeature::Load( const tinyxml2::XMLElement& doc )
+{
+
+}
+
+
 WorldGen::WorldGen()
 {
 	land = new U8[SIZE*SIZE];
@@ -229,6 +235,7 @@ void WorldGen::DrawCanal( Vector2I v, int radius, int dx, int dy, const Rectangl
 }
 
 
+/*
 void WorldGen::Save( const char* fname )
 {
 	Color4U8* pixels = new Color4U8[SIZE*SIZE];
@@ -249,6 +256,7 @@ void WorldGen::Save( const char* fname )
 	lodepng_encode32_file( fname, (const unsigned char*)pixels, SIZE, SIZE );
 	delete [] pixels;
 }
+*/
 
 
 #if 0

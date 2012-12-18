@@ -435,12 +435,8 @@ int main( int argc, char **argv )
 	SDL_RemoveTimer( timerID );
 #endif
 
-//	if ( mapMakerMode ) {
-//		const Surface* lightmap = ((Game*)game)->engine->GetMap()->GetLightMap();
-//		SaveLightMap( lightmap );
-//	}
-
-	GameSave( game );
+	// FIXME: turn save on exit back on.
+	//GameSave( game );
 	DeleteGame( game );
 	Audio_Close();
 

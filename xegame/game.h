@@ -69,9 +69,6 @@ public:
 	void Rotate( float degreesFromStart );
 	void CancelInput();
 
-	// 0 is always the title screen.
-	// query for the sub-scene id
-	virtual int LoadSceneID() = 0;
 	virtual Scene* CreateScene( int id, SceneData* data ) = 0;
 	
 	// debugging / testing / mapmaker
@@ -105,8 +102,10 @@ public:
 
 
 	void SaveGame( int slot=0 );
+	void LoadGame();
+
 	virtual void Save( tinyxml2::XMLPrinter* ) {}
-	virtual void Load( const tinyxml2::XMLDocument& doc );
+	virtual void Load( const tinyxml2::XMLElement& parent )	{}
 
 	bool PopSound( int* database, int* offset, int* size );
 

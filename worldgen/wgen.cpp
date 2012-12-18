@@ -9,7 +9,10 @@
 #include "../grinliz/glnoise.h"
 #include "../grinliz/glrandom.h"
 #include "../grinliz/glstringutil.h"
+#include "../shared/lodepng.h"
+
 #include "../script/worldgen.h"
+#include "../game/worldgrid.h"
 
 using namespace grinliz;
 
@@ -90,7 +93,15 @@ int main(int argc, const char* argv[])
 		CStr<32> fname;
 		fname.Format( "worldgen%02d.png", i );
 		printf( "Writing %s\n", fname.c_str() );
-		worldGen.Save( fname.c_str() );
+		
+		static const int SIZE2 = WorldGen::SIZE*WorldGen::SIZE;
+		WorldGrid* grid = new WorldGrid[SIZE2];
+		for( int i=0; i<SIZE2; ++i ) {
+			grid[i].SetLand( (worldGen.Land() + i) != 0 );
+			grid[i].SetZoneColor( *(worldGen.Color() + i) );
+		}
+		lodepng_encode32_file( fname.c_str(), (const unsigned char*)grid, WorldGen::SIZE, WorldGen::SIZE );
+		delete [] grid;
 	}
 	printf( "total time %dms\n", clock()-startTime );
 	return 0;

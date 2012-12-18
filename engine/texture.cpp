@@ -197,7 +197,6 @@ U32 Texture::GLID()
 		return glID;
 	
 	TextureManager* manager = TextureManager::Instance();
-
 	glID = manager->CreateGLTexture( w, h, format, flags );
 
 	// Need to actually generate the texture. Either pull it from 
@@ -261,9 +260,9 @@ U32 TextureManager::CreateGLTexture( int w, int h, int format, int flags )
 	glBindTexture( GL_TEXTURE_2D, texID );
 
 	if ( flags & Texture::PARAM_NEAREST ) {
-		glTexParameteri(	GL_TEXTURE_2D,
-							GL_GENERATE_MIPMAP,
-							GL_FALSE );
+		//glTexParameteri(	GL_TEXTURE_2D,
+		//					GL_GENERATE_MIPMAP,
+		//					GL_FALSE );
 
 		glTexParameteri(	GL_TEXTURE_2D,
 							GL_TEXTURE_MAG_FILTER,
@@ -274,9 +273,9 @@ U32 TextureManager::CreateGLTexture( int w, int h, int format, int flags )
 							GL_NEAREST );
 	}
 	else if ( flags & Texture::PARAM_LINEAR ) {
-		glTexParameteri(	GL_TEXTURE_2D,
-							GL_GENERATE_MIPMAP,
-							GL_FALSE );
+		//glTexParameteri(	GL_TEXTURE_2D,
+		//					GL_GENERATE_MIPMAP,
+		//					GL_FALSE );
 
 		glTexParameteri(	GL_TEXTURE_2D,
 							GL_TEXTURE_MAG_FILTER,
@@ -287,9 +286,9 @@ U32 TextureManager::CreateGLTexture( int w, int h, int format, int flags )
 							GL_LINEAR );
 	}
 	else {
-		glTexParameteri(	GL_TEXTURE_2D,
-							GL_GENERATE_MIPMAP,
-							GL_TRUE );
+		//glTexParameteri(	GL_TEXTURE_2D,
+		//					GL_GENERATE_MIPMAP,
+		//					GL_TRUE );
 
 		glTexParameteri(	GL_TEXTURE_2D,
 							GL_TEXTURE_MAG_FILTER,
@@ -299,8 +298,8 @@ U32 TextureManager::CreateGLTexture( int w, int h, int format, int flags )
 							GL_TEXTURE_MIN_FILTER,
 							GL_LINEAR_MIPMAP_NEAREST );
 	}
-	//GLOUTPUT(( "OpenGL texture %d created.\n", texID ));
-					
+
+	//GLOUTPUT(( "OpenGL texture %d created.\n", texID ));				
 	CHECK_GL_ERROR;
 
 	return texID;
@@ -310,8 +309,14 @@ U32 TextureManager::CreateGLTexture( int w, int h, int format, int flags )
 void Texture::Upload( const void* pixels, int size )
 {
 	GLASSERT( pixels );
-	this->GLID();	// flush the openGL id
 	GLASSERT( size == BytesInImage() );
+
+	if ( glID == 0 ) {
+		// Make sure we have on OpenGL ID
+		TextureManager* manager = TextureManager::Instance();
+		glID = manager->CreateGLTexture( w, h, format, flags );
+		GLASSERT( glID );
+	}
 
 	int glFormat, glType;
 	TextureManager::Instance()->CalcOpenGL( format, &glFormat, &glType );
@@ -339,6 +344,11 @@ void Texture::Upload( const void* pixels, int size )
 					glType,
 					pixels );
 //	GLOUTPUT(( "OpenGL texture %d Upload.\n", gpuMem->glID ));
+	CHECK_GL_ERROR;
+
+	if ( !(flags & PARAM_LINEAR) ) {
+		glGenerateMipmap( GL_TEXTURE_2D );
+	}
 	CHECK_GL_ERROR;
 }
 

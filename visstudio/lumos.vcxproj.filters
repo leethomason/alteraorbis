@@ -253,6 +253,12 @@
     <ClCompile Include="..\game\worldinfo.cpp">
       <Filter>Source Files\game</Filter>
     </ClCompile>
+    <ClCompile Include="..\scenes\gamescene.cpp">
+      <Filter>Source Files\scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\sim.cpp">
+      <Filter>Source Files\game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\camera.h">
@@ -493,6 +499,15 @@
       <Filter>Source Files\scenes</Filter>
     </ClInclude>
     <ClInclude Include="..\game\worldinfo.h">
+      <Filter>Source Files\game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\scenes\gamescene.h">
+      <Filter>Source Files\scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\game\sim.h">
+      <Filter>Source Files\game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\game\worldgrid.h">
       <Filter>Source Files\game</Filter>
     </ClInclude>
   </ItemGroup>
