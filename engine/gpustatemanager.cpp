@@ -219,15 +219,15 @@ void MatrixStack::Multiply( const grinliz::Matrix4& m )
 /*static */ void GPUState::ResetState()
 {
 	// Texture unit 1
-	glActiveTexture( GL_TEXTURE1 );
+	//glActiveTexture( GL_TEXTURE1 );
 	//glClientActiveTexture( GL_TEXTURE1 );
-	glDisable( GL_TEXTURE_2D );
+	//glDisable( GL_TEXTURE_2D );
 	//glDisableClientState( GL_TEXTURE_COORD_ARRAY );
 
 	// Texture unit 0
 	glActiveTexture( GL_TEXTURE0 );
 	//glClientActiveTexture( GL_TEXTURE0 );
-	glDisable( GL_TEXTURE_2D );
+	//glDisable( GL_TEXTURE_2D );
 	//glDisableClientState( GL_TEXTURE_COORD_ARRAY );
 
 	// Client state
@@ -239,11 +239,11 @@ void MatrixStack::Multiply( const grinliz::Matrix4& m )
 	// Blend/Alpha
 	glDisable( GL_BLEND );
 	glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-	glDisable( GL_ALPHA_TEST );
+	//glDisable( GL_ALPHA_TEST );
 	//glAlphaFunc( GL_GREATER, 0.5f );
 
 	// Ligting
-	glDisable( GL_LIGHTING );
+	//glDisable( GL_LIGHTING );
 
 	// Depth
 	glDepthMask( GL_TRUE );

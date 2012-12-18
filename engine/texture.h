@@ -120,8 +120,6 @@ public:
 	static void Create( const gamedb::Reader* );
 	static void Destroy();
 
-	void* WorkingMemory( int w, int h );
-
 private:
 	TextureManager( const gamedb::Reader* );
 	~TextureManager();

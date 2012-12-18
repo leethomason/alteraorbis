@@ -244,6 +244,10 @@ void TextureManager::CalcOpenGL( int format, int* glFormat, int* glType )
 	}
 }
 
+// Hating intel drivers right now. Not very happy with the GL3 vs GL3.2 vs. ES2 spec either.
+#define GEN_MIP			// unreliable on the "3000" driver. Just started working with update. Yay!
+//#define PARAM_MIP		// works fine on the "3000" driver, doesn't upload correctly on the "family" driver
+//#define RUNTIME_MIP	// Feels really silly this doesn't work...
 
 U32 TextureManager::CreateGLTexture( int w, int h, int format, int flags )
 {
@@ -253,16 +257,16 @@ U32 TextureManager::CreateGLTexture( int w, int h, int format, int flags )
 	GLASSERT( w && h && (format >= 0) );
 	CHECK_GL_ERROR;
 
-	glEnable( GL_TEXTURE_2D );
-
 	GLuint texID;
 	glGenTextures( 1, &texID );
 	glBindTexture( GL_TEXTURE_2D, texID );
 
 	if ( flags & Texture::PARAM_NEAREST ) {
-		//glTexParameteri(	GL_TEXTURE_2D,
-		//					GL_GENERATE_MIPMAP,
-		//					GL_FALSE );
+#ifdef PARAM_MIP
+		glTexParameteri(	GL_TEXTURE_2D,
+							GL_GENERATE_MIPMAP,
+							GL_TRUE );
+#endif
 
 		glTexParameteri(	GL_TEXTURE_2D,
 							GL_TEXTURE_MAG_FILTER,
@@ -273,9 +277,11 @@ U32 TextureManager::CreateGLTexture( int w, int h, int format, int flags )
 							GL_NEAREST );
 	}
 	else if ( flags & Texture::PARAM_LINEAR ) {
-		//glTexParameteri(	GL_TEXTURE_2D,
-		//					GL_GENERATE_MIPMAP,
-		//					GL_FALSE );
+#ifdef PARAM_MIP
+		glTexParameteri(	GL_TEXTURE_2D,
+							GL_GENERATE_MIPMAP,
+							GL_FALSE );
+#endif
 
 		glTexParameteri(	GL_TEXTURE_2D,
 							GL_TEXTURE_MAG_FILTER,
@@ -286,9 +292,11 @@ U32 TextureManager::CreateGLTexture( int w, int h, int format, int flags )
 							GL_LINEAR );
 	}
 	else {
-		//glTexParameteri(	GL_TEXTURE_2D,
-		//					GL_GENERATE_MIPMAP,
-		//					GL_TRUE );
+#ifdef PARAM_MIP
+		glTexParameteri(	GL_TEXTURE_2D,
+							GL_GENERATE_MIPMAP,
+							GL_TRUE );
+#endif
 
 		glTexParameteri(	GL_TEXTURE_2D,
 							GL_TEXTURE_MAG_FILTER,
@@ -316,6 +324,7 @@ void Texture::Upload( const void* pixels, int size )
 		TextureManager* manager = TextureManager::Instance();
 		glID = manager->CreateGLTexture( w, h, format, flags );
 		GLASSERT( glID );
+		//this->GLID();
 	}
 
 	int glFormat, glType;
@@ -346,9 +355,37 @@ void Texture::Upload( const void* pixels, int size )
 //	GLOUTPUT(( "OpenGL texture %d Upload.\n", gpuMem->glID ));
 	CHECK_GL_ERROR;
 
+#ifdef GEN_MIP
 	if ( !(flags & PARAM_LINEAR) ) {
 		glGenerateMipmap( GL_TEXTURE_2D );
 	}
+#endif
+#ifdef RUNTIME_MIP
+	int mipW = w/2;
+	int mipH = h/2;
+	Surface surface;
+	int level = 0;
+
+	while ( mipW > 1 || mipH > 1 ) {
+		++level;
+		surface.Set( format, mipW, mipH );
+		memset( surface.Pixels(), 0xff, surface.BytesInImage() );
+		glTexImage2D(	GL_TEXTURE_2D,
+						level,
+						glFormat,
+						mipW,
+						mipH,
+						0,
+						glFormat,
+						glType,
+						surface.Pixels() );
+		if ( mipW > 1 ) mipW /= 2;
+		if ( mipH > 1 ) mipH /= 2;
+		CHECK_GL_ERROR;
+	}
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, level);
+
+#endif
 	CHECK_GL_ERROR;
 }
 

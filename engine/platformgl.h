@@ -45,12 +45,12 @@
 	#define glFrustumfX		glFrustum
 	#define glOrthofX		glOrtho
 	#define USING_GL
-	#define glGenBuffersX	glGenBuffersARB
-	#define glBindBufferX	glBindBufferARB
-	#define glBufferDataX	glBufferDataARB
-	#define glBufferSubDataX	glBufferSubDataARB
-	#define glBindBufferX	glBindBufferARB
-	#define glDeleteBuffersX	glDeleteBuffersARB
+	#define glGenBuffersX		glGenBuffers
+	#define glBindBufferX		glBindBuffer
+	#define glBufferDataX		glBufferData
+	#define glBufferSubDataX	glBufferSubData
+	#define glBindBufferX		glBindBuffer
+	#define glDeleteBuffersX	glDeleteBuffers
 #else
 	#error Undefined platform
 #endif

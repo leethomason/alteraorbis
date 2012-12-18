@@ -352,6 +352,8 @@ void LivePreviewScene::CreateTexture( int type )
 	static const int SIZE = 256;
 	static const int ICOLS = 4;
 	static const int IROWS = 4;
+	static const int PIXWIDTH = SIZE*ICOLS;
+	static const int PIXHEIGHT = SIZE*IROWS;
 
 	struct _stat buf;
 
@@ -362,6 +364,7 @@ void LivePreviewScene::CreateTexture( int type )
 	fileTime = buf.st_mtime;
 
 	TextureManager* texman = TextureManager::Instance();
+
 	Texture* t = texman->GetTexture( "procedural" );
 	GLASSERT( t );
 	GLASSERT( t->Alpha() );
@@ -374,25 +377,28 @@ void LivePreviewScene::CreateTexture( int type )
 	GLASSERT( error == 0 );
 	GLASSERT( w == SIZE*ICOLS );
 	GLASSERT( h == SIZE*IROWS );
-	static const int BUFFER_SIZE = SIZE*SIZE*ICOLS*IROWS;
+	static const int BUFFER_SIZE = PIXWIDTH*PIXHEIGHT;
 	U16* buffer = new U16[BUFFER_SIZE];
 
-	if ( error == 0 ) {
-		int scanline = SIZE*ICOLS*4;
+	memset( buffer, 0xaaaa, BUFFER_SIZE*sizeof(U16) );
+	t->Upload( buffer, BUFFER_SIZE*sizeof(U16) );
 
-		static const int RAD=8;
-		for( int j=0; j<SIZE*IROWS; ++j ) {
-			for( int i=0; i<SIZE*ICOLS; ++i ) {
+	if ( error == 0 ) {
+		int scanline = PIXWIDTH*4;
+		int dstScan  = PIXWIDTH;
+
+		for( int j=0; j<PIXHEIGHT; ++j ) {
+			for( int i=0; i<PIXWIDTH; ++i ) {
 				const U8* p = pixels + scanline*j + i*4;
 				Color4U8 color = { p[0], p[1], p[2], p[3] };
 
 				U16 c = Surface::CalcRGBA16( color );
-				int offset = SIZE*ICOLS*(SIZE*IROWS-1-j)+i;
+				int offset = dstScan*(PIXHEIGHT-1-j)+i;
 				GLASSERT( offset >= 0 && offset < BUFFER_SIZE );
 				buffer[offset] = c;
 			}
 		}
-		t->Upload( buffer, BUFFER_SIZE*sizeof(buffer[0]) );
+		t->Upload( buffer, BUFFER_SIZE*sizeof(U16) );
 		free( pixels );
 	}
 	else {

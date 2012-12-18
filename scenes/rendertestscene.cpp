@@ -159,8 +159,10 @@ void RenderTestScene::ItemTapped( const gamui::UIItem* item )
 	for( int i=0; i<NUM_CONTROL; ++i ) {
 		if ( item == &control[i] ) {
 			for( int k=0; k<NUM_MODELS; ++k ) {
-				Vector4F v = { (float)i/(float)(NUM_CONTROL-1), 1, 1, 1 };
-				model[k]->SetControl( v );
+				if ( model[k] ) {
+					Vector4F v = { (float)i/(float)(NUM_CONTROL-1), 1, 1, 1 };
+					model[k]->SetControl( v );
+				}
 			}
 			break;
 		}

@@ -140,6 +140,38 @@ void Surface::Load( const gamedb::Item* node )
 	node->GetData( "pixels", Pixels(), size );
 }
 
+/*
+void Surface::Scale( const U16* src, int srcW, int srcH )
+{
+	int dx = srcW / x;
+	GLASSERT( dx >= 1 );
+	int dy = srcH / h;
+	GLASSERT( dy >= 1 );
+
+	switch ( format ) {
+	case RGBA16:
+		{
+			for (int j=0; j<h; ++j ) {
+				for( int i=0; i<w; ++i ) {
+					int r=0, g=0, b=0, a=0;
+					
+					for( int y=j; y<j+dy; ++y ) {
+						for( int x=i; x<i+dx; ++x ) {
+							U16 c16 = src[y*srcW+x];
+							Color4U8 cu8 = CalcRGBA16( c16 );
+							r += cu8.r;
+							g += cu8.g;
+							b += cu8.b;
+							a += cu8.a;
+						}
+					}
+
+				}
+			}
+		}
+	}
+}
+*/
 
 ImageManager* ImageManager::instance = 0;
 

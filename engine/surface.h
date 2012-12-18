@@ -160,6 +160,10 @@ public:
 					const Surface* src,
 					const Matrix2I& xformTargetToSrc );
 
+	// Note that the src can be a pointer to this object;
+	// this works in-place.
+//	void Scale( const U16* src );
+
 	static int QueryFormat( const char* formatString );
 
 	void Load( const gamedb::Item* );
