@@ -414,6 +414,8 @@ void LivePreviewScene::CreateTexture( int type )
 		t->SetEmissive( false );	// alpha is transparency
 	else
 		t->SetEmissive( true );		// alpha is emissive
+
+	t->SetSoftwareMip( false );
 }
 
 void LivePreviewScene::DrawDebugText()

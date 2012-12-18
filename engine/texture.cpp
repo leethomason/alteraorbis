@@ -247,7 +247,6 @@ void TextureManager::CalcOpenGL( int format, int* glFormat, int* glType )
 // Hating intel drivers right now. Not very happy with the GL3 vs GL3.2 vs. ES2 spec either.
 #define GEN_MIP			// unreliable on the "3000" driver. Just started working with update. Yay!
 //#define PARAM_MIP		// works fine on the "3000" driver, doesn't upload correctly on the "family" driver
-//#define RUNTIME_MIP	// Feels really silly this doesn't work...
 
 U32 TextureManager::CreateGLTexture( int w, int h, int format, int flags )
 {
@@ -355,10 +354,11 @@ void Texture::Upload( const void* pixels, int size )
 //	GLOUTPUT(( "OpenGL texture %d Upload.\n", gpuMem->glID ));
 	CHECK_GL_ERROR;
 
-#ifdef GEN_MIP
 	if ( !(flags & PARAM_LINEAR) ) {
 		if ( !(flags & PARAM_SOFTWARE_MIP) ) {
+#ifdef GEN_MIP
 			glGenerateMipmap( GL_TEXTURE_2D );
+#endif
 		}
 		else {
 			Surface s;
@@ -384,33 +384,6 @@ void Texture::Upload( const void* pixels, int size )
 								level );
 		}
 	}
-#endif
-#ifdef RUNTIME_MIP
-	int mipW = w/2;
-	int mipH = h/2;
-	Surface surface;
-	int level = 0;
-
-	while ( mipW > 1 || mipH > 1 ) {
-		++level;
-		surface.Set( format, mipW, mipH );
-		memset( surface.Pixels(), 0xff, surface.BytesInImage() );
-		glTexImage2D(	GL_TEXTURE_2D,
-						level,
-						glFormat,
-						mipW,
-						mipH,
-						0,
-						glFormat,
-						glType,
-						surface.Pixels() );
-		if ( mipW > 1 ) mipW /= 2;
-		if ( mipH > 1 ) mipH /= 2;
-		CHECK_GL_ERROR;
-	}
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, level);
-
-#endif
 	CHECK_GL_ERROR;
 }
 
