@@ -61,7 +61,7 @@ public:
 	// Init from WorldGen data:
 	void Init( const U8* land, const U8* color, grinliz::CDynArray< WorldFeature >& featureArr );
 
-	void Save( const char* path, tinyxml2::XMLPrinter* printer );
+	void Save( const char* pathToPNG, const char* pathToXML );
 
 	void SetBlock( int x, int y )	{ grinliz::Rectangle2I pos; pos.Set( x, y, x, y ); SetBlock( pos ); }
 	void SetBlock( const grinliz::Rectangle2I& pos );

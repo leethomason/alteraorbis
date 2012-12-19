@@ -56,7 +56,7 @@ TitleScene::TitleScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 		gameScene[i].Init( &gamui2D, lumosGame->GetButtonLook( LumosGame::BUTTON_LOOK_STD ) );
 		gameScene[i].SetText( gameSceneName[i] );
 		gameScene[i].SetSize( layout.Width()*2.0f, layout.Height() );
-		gameScene[i].SetEnabled( false );
+		//gameScene[i].SetEnabled( false );
 	}
 }
 

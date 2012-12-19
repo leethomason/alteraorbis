@@ -29,6 +29,7 @@
 
 using namespace grinliz;
 using namespace micropather;
+using namespace tinyxml2;
 
 // Startup for test world
 // Baseline:				15,000
@@ -64,9 +65,25 @@ WorldMap::~WorldMap()
 }
 
 
-void WorldMap::Save( const char* path, tinyxml2::XMLPrinter* printer )
+void WorldMap::Save( const char* pathToPNG, const char* pathToXML )
 {
-	lodepng_encode32_file( path, (const unsigned char*)grid, width, height );
+	lodepng_encode32_file( pathToPNG, (const unsigned char*)grid, width, height );
+
+	FILE* fp = fopen( pathToXML, "w" );
+	GLASSERT( fp );
+	if ( fp ) {
+		XMLPrinter printer( fp );
+		
+		printer.OpenElement( "Map" );
+		printer.PushAttribute( "width", width );
+		printer.PushAttribute( "height", height );
+
+		worldInfo->Save( &printer );
+
+		printer.CloseElement();
+		
+		fclose( fp );
+	}
 }
 
 
