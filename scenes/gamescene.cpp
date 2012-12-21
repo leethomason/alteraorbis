@@ -2,13 +2,19 @@
 #include "../game/lumosgame.h"
 #include "../game/sim.h"
 
+using namespace grinliz;
+
 GameScene::GameScene( LumosGame* game ) : Scene( game )
 {
 	lumosGame = game;
 	game->InitStd( &gamui2D, &okay, 0 );
 	sim = new Sim( lumosGame );
 
-	game->LoadGame();
+	//game->LoadGame();
+
+	GLString xmlPath = game->GamePath( "map", 0, "xml" );
+	GLString pngPath = game->GamePath( "map", 0, "png" );
+	sim->Load( pngPath.c_str(), xmlPath.c_str() );
 }
 
 

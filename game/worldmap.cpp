@@ -67,6 +67,7 @@ WorldMap::~WorldMap()
 
 void WorldMap::Save( const char* pathToPNG, const char* pathToXML )
 {
+	// fixme: saves upside down
 	lodepng_encode32_file( pathToPNG, (const unsigned char*)grid, width, height );
 
 	FILE* fp = fopen( pathToXML, "w" );

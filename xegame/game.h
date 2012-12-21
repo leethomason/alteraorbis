@@ -94,12 +94,9 @@ public:
 	void SetPerfLevel( int level )		{ perfLevel = (level%2); }
 	int GetPerfLevel() const			{ return perfLevel; }
 
-	FILE* GameSavePath( SavePathMode mode, int slot ) const;
-	bool HasSaveFile( int slot ) const;
-	void DeleteSaveFile( int slot );
-	void SavePathTimeStamp(int slot, grinliz::GLString* stamp );
-	int LoadSlot() const				{ return loadSlot; }
-
+	grinliz::GLString GamePath( const char* type, int slot, const char* extension ) const;
+	bool HasFile( const char* file ) const;
+	void DeleteFile( const char* file );
 
 	void SaveGame( int slot=0 );
 	void LoadGame();
@@ -160,7 +157,6 @@ private:
 
 
 	bool scenePopQueued;
-	int loadSlot;
 
 	void Init();
 	void LoadTextures();

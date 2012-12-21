@@ -19,6 +19,8 @@ public:
 	void Draw3D( U32 deltaTime );
 	void DrawDebugText();
 
+	void Load( const char* mapPNG, const char* mapXML );
+
 private:
 	LumosGame*	lumosGame;
 	Engine*		engine;

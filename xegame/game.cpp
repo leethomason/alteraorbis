@@ -77,7 +77,6 @@ Game::Game( int width, int height, int rotation, int uiHeight, const char* path 
 void Game::Init()
 {
 	scenePopQueued = false;
-	loadSlot = 0;
 	currentFrame = 0;
 	surface.Set( Surface::RGBA16, 256, 256 );
 
@@ -189,15 +188,15 @@ void Game::LoadModels()
 }
 
 
-bool Game::HasSaveFile( int slot ) const
+bool Game::HasFile( const char* path ) const
 {
 	bool result = false;
 
-	FILE* fp = GameSavePath( SAVEPATH_READ, slot );
+	FILE* fp = fopen( path, "rb" );
 	if ( fp ) {
 		fseek( fp, 0, SEEK_END );
 		long d = ftell( fp );
-		if ( d > 100 ) {	// has to be something there: sanity check
+		if ( d > 10 ) {	// has to be something there: sanity check
 			result = true;
 		}
 		fclose( fp );
@@ -206,9 +205,9 @@ bool Game::HasSaveFile( int slot ) const
 }
 
 
-void Game::DeleteSaveFile(int slot )
+void Game::DeleteFile( const char* path )
 {
-	FILE* fp = GameSavePath( SAVEPATH_WRITE, slot );
+	FILE* fp = fopen( path, "w" );
 	if ( fp ) {
 		fclose( fp );
 	}
@@ -250,7 +249,6 @@ void Game::PopAllAndLoad( int slot )
 	GLASSERT( scenePopQueued == false );
 	GLASSERT( slot > 0 );
 	scenePopQueued = true;
-	loadSlot = slot;
 }
 
 
@@ -260,7 +258,7 @@ void Game::PushPopScene()
 		TextureManager::Instance()->ContextShift();
 	}
 
-	while ( ( scenePopQueued || loadSlot ) && !sceneStack.Empty() )
+	while ( scenePopQueued && !sceneStack.Empty() )
 	{
 		sceneStack.Top()->scene->DeActivate();
 		scenePopQueued = false;
@@ -279,19 +277,9 @@ void Game::PushPopScene()
 		}
 	}
 
-	if ( loadSlot ) {
-		if( HasSaveFile( loadSlot ) ) {
-			sceneQueued.sceneID = 0;
-		}
-	}
-
 	if (    sceneQueued.sceneID == MAX_SCENES 
 		 && sceneStack.Empty() ) 
 	{
-		// Unwind and full reset.
-		DeleteSaveFile( 0 );
-		DeleteSaveFile( 0 );
-
 		PushScene( 0, 0 );
 		PushPopScene();
 	}
@@ -386,23 +374,23 @@ RenderAtom Game::CreateRenderAtom( int uiRendering, const char* assetName, float
 }
 
 
-FILE* Game::GameSavePath( SavePathMode mode, int slot ) const
+GLString Game::GamePath( const char* type, int slot, const char* extension ) const
 {	
 	grinliz::GLString str( savePath );
 	str += "./save/";
-	str += "game";
+	str += type;
 
 	if ( slot > 0 ) {
 		str += "-";
 		str += '0' + slot;
 	}
-	str += ".xml";
-
-	FILE* fp = fopen( str.c_str(), (mode == SAVEPATH_WRITE) ? "wb" : "rb" );
-	return fp;
+	str += ".";
+	str += extension;
+	return str;
 }
 
 
+/*
 void Game::SavePathTimeStamp( int slot, GLString* stamp )
 {
 	*stamp = "";
@@ -427,11 +415,12 @@ void Game::SavePathTimeStamp( int slot, GLString* stamp )
 		fclose( fp );
 	}
 }
-
+*/
 
 void Game::SaveGame( int slot )
 {
-	FILE* fp = GameSavePath( SAVEPATH_WRITE, slot );
+	GLString path = GamePath( "game", 0, "xml" );
+	FILE* fp = fopen( path.c_str(), "w" );
 	GLASSERT( fp );
 	if ( fp ) {
 		XMLPrinter printer( fp );
@@ -460,7 +449,8 @@ void Game::SaveGame( int slot )
 
 void Game::LoadGame()
 {
-	FILE* fp = GameSavePath( SAVEPATH_READ, 0 );
+	GLString path = GamePath( "game", 0, "xml" );
+	FILE* fp = fopen( path.c_str(), "r" );
 	GLASSERT( fp );
 	if ( fp ) {
 		XMLDocument doc;
