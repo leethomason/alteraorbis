@@ -20,10 +20,11 @@ public:
 	void DrawDebugText();
 
 	void Load( const char* mapPNG, const char* mapXML );
+	void Draw( U32 delta );
 
 private:
-	LumosGame*	lumosGame;
 	Engine*		engine;
+	LumosGame*	lumosGame;
 	WorldMap*	worldMap;
 };
 

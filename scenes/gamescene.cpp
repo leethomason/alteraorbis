@@ -1,6 +1,9 @@
 #include "gamescene.h"
+
 #include "../game/lumosgame.h"
 #include "../game/sim.h"
+
+#include "../engine/engine.h"
 
 using namespace grinliz;
 
@@ -76,6 +79,7 @@ void GameScene::DoTick( U32 delta )
 
 void GameScene::Draw3D( U32 deltaTime )
 {
+	sim->Draw3D( deltaTime );
 }
 
 

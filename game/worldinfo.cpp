@@ -1,6 +1,9 @@
 #include "worldinfo.h"
 
+#include "../grinliz/glrandom.h"
+
 using namespace tinyxml2;
+using namespace grinliz;
 
 void WorldInfo::Save( tinyxml2::XMLPrinter* printer )
 {
@@ -36,3 +39,4 @@ void WorldInfo::Load( const tinyxml2::XMLElement& parent )
 		}
 	}
 }
+

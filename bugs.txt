@@ -1,13 +1,16 @@
 - game
 	- Land and Water
-		- generate a random world
-		- walk around it
+		x generate a random world
 		- save it
 		- load it
+		- walk around it
+			- where is world origin? mini-map origin? save/load origin? line all that up
+			- mark location on mini-map
 	- Rock and Stream
 		- rock formation
 		- cave
 		- streams
+		- fast-step world sim
 	- Flora
 		- plants
 		- weather
@@ -45,7 +48,8 @@
 
 	- serialization
 
-- GT bug: reconsider auto-mip. review texture upload.
+- handle device loss in live preview
+d GT bug: reconsider auto-mip. review texture upload. 
 - bone filter in reverse. more efficient and useful.
 - put metadata in model (authoring  time)
 - rationalize hardpoints: array index or flag? lookt at RenderComponent

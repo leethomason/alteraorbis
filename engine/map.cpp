@@ -65,6 +65,7 @@ void Map::DrawOverlay()
 }
 
 
+/*
 void Map::Save( XMLPrinter* printer )
 {
 	printer->OpenElement( "Map" );
@@ -78,7 +79,7 @@ void Map::Load( const XMLElement* mapElement )
 {
 	GLASSERT( mapElement );
 }
-
+*/
 
 void Map::BeginRender()
 {

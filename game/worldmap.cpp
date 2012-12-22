@@ -88,6 +88,40 @@ void WorldMap::Save( const char* pathToPNG, const char* pathToXML )
 }
 
 
+void WorldMap::Load( const char* pathToPNG, const char* pathToXML )
+{
+	XMLDocument doc;
+	doc.LoadFile( pathToXML );
+	GLASSERT( !doc.Error() );
+	if ( !doc.Error() ) {
+		
+		const XMLElement* mapEle = doc.FirstChildElement( "Map" );
+		GLASSERT( mapEle );
+		if ( mapEle ) {
+			int w = 64;
+			int h = 64;
+			mapEle->QueryIntAttribute( "width", &w );
+			mapEle->QueryIntAttribute( "height", &h );
+			Init( w, h );
+
+			unsigned int pngW=0, pngH=0;
+			U8* mem=0;
+			lodepng_decode32_file( &mem, &pngW, &pngH, pathToPNG );
+			GLASSERT( mem );
+			GLASSERT( pngW == width );
+			GLASSERT( pngH == height );
+			memcpy( grid, mem, width*height*4 );
+
+			free( mem );	// lower case; can't be tracked by memory system
+
+			worldInfo->Load( *mapEle );
+
+			Tessellate();
+		}
+	}
+}
+
+
 int WorldMap::CalcNumRegions()
 {
 	int count = 0;
@@ -283,6 +317,38 @@ void WorldMap::Tessellate()
 			pv[1].tex.Set( (float)w, 1 );
 		}
 	}
+}
+
+
+Vector2I WorldMap::FindEmbark()
+{
+	const WorldFeature* wf = 0;
+	for( int i=0; i<worldInfo->featureArr.Size(); ++i ) {
+		wf = &worldInfo->featureArr[i];
+		if ( wf->land ) {
+			break;
+		}
+	}
+	GLASSERT( wf );
+	
+	Random random;
+
+	int w = wf->bounds.Width();
+	int h = wf->bounds.Height();
+
+	while( true ) {
+		int dx = random.Rand( w );
+		int dy = random.Rand( h );
+		int x = wf->bounds.min.x + dx;
+		int y = wf->bounds.min.y + dy;
+
+		if ( grid[INDEX(x,y)].IsPassable() ) {
+			Vector2I v = { x, y };
+			return v;
+		}
+	}
+	Vector2I v = { 0, 0 };
+	return v;
 }
 
 
