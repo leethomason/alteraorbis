@@ -31,9 +31,21 @@ void WorldFeature::Save( tinyxml2::XMLPrinter* printer )
 }
 
 
-void WorldFeature::Load( const tinyxml2::XMLElement& doc )
+void WorldFeature::Load( const tinyxml2::XMLElement& ele )
 {
+	GLASSERT( StrEqual( ele.Name(), "WorldFeature" ));
+	id = 0;
+	land = 0;
+	bounds.Set( 0, 0, 0, 0 );
+	area = 0;
 
+	ele.QueryIntAttribute( "id", &id );
+	ele.QueryBoolAttribute( "land", &land );
+	ele.QueryIntAttribute( "bounds.min.x", &bounds.min.x );
+	ele.QueryIntAttribute( "bounds.min.y", &bounds.min.y );
+	ele.QueryIntAttribute( "bounds.max.x", &bounds.max.x );
+	ele.QueryIntAttribute( "bounds.max.y", &bounds.max.y );
+	ele.QueryIntAttribute( "area", &area );
 }
 
 

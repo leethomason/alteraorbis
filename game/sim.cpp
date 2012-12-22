@@ -29,7 +29,7 @@ void Sim::Load( const char* mapPNG, const char* mapXML )
 {
 	worldMap->Load( mapPNG, mapXML );
 	Vector2I v = worldMap->FindEmbark();
-	engine->CameraLookAt( (float)v.x, (float)v.y, 30 );
+	engine->CameraLookAt( (float)v.x, (float)v.y, 50 );
 }
 
 

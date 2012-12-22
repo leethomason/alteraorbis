@@ -21,7 +21,7 @@ struct WorldFeature {
 	int area;						// actual area
 
 	void Save( tinyxml2::XMLPrinter* );
-	void Load( const tinyxml2::XMLElement& doc );
+	void Load( const tinyxml2::XMLElement& element );
 
 	class Compare
 	{
