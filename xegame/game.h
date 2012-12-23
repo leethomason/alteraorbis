@@ -141,6 +141,11 @@ public:
 	};
 	const Palette* GetPalette( const char* name=0 ) const;
 
+	// This is a hack; but if there isn't a static method, lots
+	// of code needs a game* that only needs a palette. Should
+	// get moved out of game to its own thing.
+	static const Palette* GetMainPalette()	{ return mainPalette; }
+
 	virtual void PrintPerf( int depth, const grinliz::PerfData& data );
 
 protected:

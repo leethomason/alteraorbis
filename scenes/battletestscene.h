@@ -24,7 +24,7 @@
 class LumosGame;
 class Engine;
 class WorldMap;
-
+class ItemStorage;
 
 class BattleTestScene : public Scene
 {

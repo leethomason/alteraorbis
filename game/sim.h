@@ -3,11 +3,13 @@
 
 #include "../grinliz/gltypes.h"
 #include "../grinliz/gldebug.h"
-
+#include "../grinliz/glvector.h"
 
 class Engine;
 class WorldMap;
 class LumosGame;
+class ChitBag;
+class ItemStorage;
 
 class Sim
 {
@@ -23,9 +25,13 @@ public:
 	void Draw( U32 delta );
 
 private:
-	Engine*		engine;
-	LumosGame*	lumosGame;
-	WorldMap*	worldMap;
+	void CreatePlayer( const grinliz::Vector2I& pos, const char* assetName );
+
+	Engine*			engine;
+	LumosGame*		lumosGame;
+	WorldMap*		worldMap;
+	ItemStorage*	itemStorage;
+	ChitBag*		chitBag;
 };
 
 

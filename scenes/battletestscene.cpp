@@ -352,7 +352,7 @@ void BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int 
 	chit->Add( new ItemComponent( item ));
 
 	chit->Add( new HealthComponent());
-	InventoryComponent* inv = new InventoryComponent( &chitBag, game );
+	InventoryComponent* inv = new InventoryComponent();
 	chit->Add( inv );
 
 	chit->GetSpatialComponent()->SetPosYRot( (float)p.x+0.5f, 0, (float)p.y+0.5f, (float)random.Rand( 360 ) );
