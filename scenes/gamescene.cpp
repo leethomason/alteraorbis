@@ -1,14 +1,21 @@
 #include "gamescene.h"
 
+#include "../xegame/chit.h"
+#include "../xegame/spatialcomponent.h"
+
 #include "../game/lumosgame.h"
 #include "../game/sim.h"
 
 #include "../engine/engine.h"
+#include "../engine/text.h"
+
+#include "../script/procedural.h"
 
 using namespace grinliz;
 using namespace gamui;
 
 static const float MINI_MAP_SIZE = 150.0f;
+static const float MARK_SIZE = 6.0f;
 
 GameScene::GameScene( LumosGame* game ) : Scene( game )
 {
@@ -25,6 +32,10 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	RenderAtom atom;
 	minimap.Init( &gamui2D, atom, false );
 	minimap.SetSize( MINI_MAP_SIZE, MINI_MAP_SIZE );
+
+	atom = lumosGame->CalcPaletteAtom( PAL_TANGERINE*2, PAL_ZERO );
+	playerMark.Init( &gamui2D, atom, true );
+	playerMark.SetSize( MARK_SIZE, MARK_SIZE );
 }
 
 
@@ -96,10 +107,29 @@ void GameScene::Draw3D( U32 deltaTime )
 					 (const void*)sim->GetMiniMapTexture(), 
 					 0, 0, 1, 1 );
 	minimap.SetAtom( atom );
+
+	Chit* chit = sim->GetPlayerChit();
+	if ( chit && chit->GetSpatialComponent() ) {
+		const Vector3F& v = chit->GetSpatialComponent()->GetPosition();
+		Map* map = sim->GetEngine()->GetMap();
+		
+		float x = minimap.X() + Lerp( 0.f, minimap.Width(), v.x / (float)map->Width() );
+		float y = minimap.Y() + minimap.Height() - Lerp( 0.f, minimap.Height(), v.z / (float)map->Height() );
+
+		playerMark.SetCenterPos( x, y );
+	}
 }
 
 
 void GameScene::DrawDebugText()
 {
+	DrawDebugTextDrawCalls( 16, sim->GetEngine() );
+
+	UFOText* ufoText = UFOText::Instance();
+	Chit* chit = sim->GetPlayerChit();
+	if ( chit && chit->GetSpatialComponent() ) {
+		const Vector3F& v = chit->GetSpatialComponent()->GetPosition();
+		ufoText->Draw( 0, 32, "Player: %.1f, %.1f, %.1f", v.x, v.y, v.z );
+	}
 }
 

@@ -32,6 +32,7 @@ private:
 
 	gamui::PushButton	okay;
 	gamui::Image		minimap;
+	gamui::Image		playerMark;
 };
 
 

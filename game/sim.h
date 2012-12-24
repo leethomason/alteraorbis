@@ -10,6 +10,7 @@ class WorldMap;
 class LumosGame;
 class LumosChitBag;
 class Texture;
+class Chit;
 
 class Sim
 {
@@ -24,7 +25,11 @@ public:
 	void Load( const char* mapPNG, const char* mapXML );
 	void Draw( U32 delta );
 
-	Texture* GetMiniMapTexture();
+	Texture*	GetMiniMapTexture();
+	Chit*		GetPlayerChit();
+
+	// use with caution: (primarily for debugging)
+	Engine*	GetEngine()	{ return engine; }
 
 private:
 	void CreatePlayer( const grinliz::Vector2I& pos, const char* assetName );
@@ -33,6 +38,8 @@ private:
 	LumosGame*		lumosGame;
 	WorldMap*		worldMap;
 	LumosChitBag*	chitBag;
+
+	int playerID;
 };
 
 

@@ -34,6 +34,7 @@ Sim::Sim( LumosGame* g )
 	engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
 
 	chitBag = new LumosChitBag();
+	playerID = 0;
 }
 
 
@@ -64,6 +65,8 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos, const char* assetName )
 	GLASSERT( itemDefArr.Size() > 0 );
 
 	Chit* chit = chitBag->NewChit();
+	playerID = chit->ID();
+
 	chit->Add( new SpatialComponent());
 	chit->Add( new RenderComponent( engine, assetName ));
 	chit->Add( new PathMoveComponent( worldMap ));
@@ -79,6 +82,12 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos, const char* assetName )
 	chit->Add( new InventoryComponent());
 
 	chit->GetSpatialComponent()->SetPosYRot( (float)pos.x+0.5f, 0, (float)pos.y+0.5f, 0 );
+}
+
+
+Chit* Sim::GetPlayerChit()
+{
+	return chitBag->GetChit( playerID );
 }
 
 
