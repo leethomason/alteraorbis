@@ -150,9 +150,9 @@ public:
 
 protected:
 	void PushPopScene();
-	static const Palette* mainPalette;
 
 private:
+	static const Palette* mainPalette;
 
 	// Color palettes
 	grinliz::CDynArray< Palette > palettes;
@@ -163,7 +163,6 @@ private:
 
 	bool scenePopQueued;
 
-	void Init();
 	void LoadTextures();
 	void LoadModels();
 	void LoadModel( const char* name );

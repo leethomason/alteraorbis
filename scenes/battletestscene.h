@@ -115,7 +115,6 @@ private:
 	grinliz::CDynArray<Chit*> chitArr;
 	
 	LumosChitBag	chitBag;
-	ItemStorage		itemStorage;
 };
 
 

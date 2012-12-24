@@ -8,8 +8,8 @@
 class Engine;
 class WorldMap;
 class LumosGame;
-class ChitBag;
-class ItemStorage;
+class LumosChitBag;
+class Texture;
 
 class Sim
 {
@@ -24,14 +24,15 @@ public:
 	void Load( const char* mapPNG, const char* mapXML );
 	void Draw( U32 delta );
 
+	Texture* GetMiniMapTexture();
+
 private:
 	void CreatePlayer( const grinliz::Vector2I& pos, const char* assetName );
 
 	Engine*			engine;
 	LumosGame*		lumosGame;
 	WorldMap*		worldMap;
-	ItemStorage*	itemStorage;
-	ChitBag*		chitBag;
+	LumosChitBag*	chitBag;
 };
 
 

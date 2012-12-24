@@ -6,6 +6,9 @@
 #include "../engine/engine.h"
 
 using namespace grinliz;
+using namespace gamui;
+
+static const float MINI_MAP_SIZE = 150.0f;
 
 GameScene::GameScene( LumosGame* game ) : Scene( game )
 {
@@ -18,6 +21,10 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	GLString xmlPath = game->GamePath( "map", 0, "xml" );
 	GLString pngPath = game->GamePath( "map", 0, "png" );
 	sim->Load( pngPath.c_str(), xmlPath.c_str() );
+
+	RenderAtom atom;
+	minimap.Init( &gamui2D, atom, false );
+	minimap.SetSize( MINI_MAP_SIZE, MINI_MAP_SIZE );
 }
 
 
@@ -30,6 +37,9 @@ GameScene::~GameScene()
 void GameScene::Resize()
 {
 	lumosGame->PositionStd( &okay, 0 );
+
+	const Screenport& port = lumosGame->GetScreenport();
+	minimap.SetPos( port.UIWidth()-MINI_MAP_SIZE, 0 );
 }
 
 
@@ -74,12 +84,18 @@ void GameScene::HandleHotKey( int mask )
 
 void GameScene::DoTick( U32 delta )
 {
+	sim->DoTick( delta );
 }
 
 
 void GameScene::Draw3D( U32 deltaTime )
 {
 	sim->Draw3D( deltaTime );
+
+	RenderAtom atom( (const void*)UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, 
+					 (const void*)sim->GetMiniMapTexture(), 
+					 0, 0, 1, 1 );
+	minimap.SetAtom( atom );
 }
 
 

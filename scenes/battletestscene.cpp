@@ -129,7 +129,6 @@ BattleTestScene::BattleTestScene( LumosGame* game ) : Scene( game )
 
 	engine = 0;
 	map = 0;
-	itemStorage.Load( "./res/itemdef.xml" );
 
 	LoadMap();
 }
@@ -232,7 +231,8 @@ void BattleTestScene::LoadMap()
 		GET_COMPONENT( chit, MapSpatialComponent )->SetMapPosition( v.x, v.y, 0 );
 	}
 
-	const GameItem& treeItem = *itemStorage.Get( "tree" );
+	ItemDefDB* itemDefDB = ItemDefDB::Instance();
+	const GameItem& treeItem = itemDefDB->Get( "tree" );
 
 	for( int i=0; i<features.Size(); ++i ) {
 		Chit* chit = chitBag.NewChit();
@@ -319,8 +319,9 @@ void BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int 
 		case BALROG:		asset="balrog";			break;
 	}
 
-	ItemStorage::GameItemArr itemDefArr;
-	itemStorage.Get( asset, &itemDefArr );
+	ItemDefDB::GameItemArr itemDefArr;
+	ItemDefDB* itemDefDB = ItemDefDB::Instance();
+	itemDefDB->Get( asset, &itemDefArr );
 	GLASSERT( itemDefArr.Size() > 0 );
 
 	Chit* chit = chitBag.NewChit();
@@ -373,9 +374,8 @@ void BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int 
 
 		// Always get a shield
 		{
-			const GameItem* shield = itemStorage.Get( "shield" );
-			GLASSERT( shield );
-			GameItem* gi = new GameItem( *shield );
+			const GameItem& shield = itemDefDB->Get( "shield" );
+			GameItem* gi = new GameItem( shield );
 			gi->stats.Roll( random.Rand() );
 			gi->stats.SetExpFromLevel( level );
 			gi->InitState();
@@ -383,18 +383,16 @@ void BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int 
 		}
 
 		if( loadout == MELEE_WEAPON ) {
-			const GameItem *knife = itemStorage.Get( "ring" );
-			GLASSERT( knife );
-			GameItem* gi = new GameItem( *knife );
+			const GameItem& knife = itemDefDB->Get( "ring" );
+			GameItem* gi = new GameItem( knife );
 			gi->stats.Roll( random.Rand() );
 			gi->stats.SetExpFromLevel( level );
 			gi->InitState();
 			inv->AddToInventory( gi, true );
 		}
 		else if ( loadout == PISTOL ) {
-			const GameItem* gun = itemStorage.Get( "testgun" );
-			GLASSERT( gun );
-			GameItem* gi = new GameItem( *gun );
+			const GameItem& gun = itemDefDB->Get( "testgun" );
+			GameItem* gi = new GameItem( gun );
 			gi->stats.SetExpFromLevel( level );
 			gi->InitState();	
 			inv->AddToInventory( gi, true );
@@ -402,9 +400,8 @@ void BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int 
 	}
 	else if ( type == BALROG ) {
 		if ( loadout == MELEE_WEAPON ) {
-			const GameItem* ax = itemStorage.Get( "ax" );
-			GLASSERT( ax );
-			GameItem* gi = new GameItem( *ax );
+			const GameItem& ax = itemDefDB->Get( "ax" );
+			GameItem* gi = new GameItem( ax );
 			gi->stats.SetExpFromLevel( level );
 			gi->InitState();
 			inv->AddToInventory( gi, true );

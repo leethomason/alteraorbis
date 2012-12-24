@@ -29,7 +29,9 @@ public:
 private:
 	LumosGame*	lumosGame;
 	Sim*		sim;
-	gamui::PushButton okay;
+
+	gamui::PushButton	okay;
+	gamui::Image		minimap;
 };
 
 

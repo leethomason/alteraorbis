@@ -70,12 +70,6 @@ Game::Game( int width, int height, int rotation, int uiHeight, const char* path 
 #endif
 	}	
 	
-	Init();
-}
-
-
-void Game::Init()
-{
 	scenePopQueued = false;
 	currentFrame = 0;
 	surface.Set( Surface::RGBA16, 256, 256 );
