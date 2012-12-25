@@ -188,10 +188,6 @@ public:
 					const Matrix2I& xformTargetToSrc );
 	void ScaleByHalf();
 
-	// Note that the src can be a pointer to this object;
-	// this works in-place.
-//	void Scale( const U16* src );
-
 	static int QueryFormat( const char* formatString );
 
 	void Load( const gamedb::Item* );
@@ -212,6 +208,9 @@ private:
 	U8* pixels;
 };
 
+
+// Utility function to y-flip a surface to deal with the texture/image thing
+void FlipSurface( void* pixels, int scanline, int h );
 
 
 class ImageManager

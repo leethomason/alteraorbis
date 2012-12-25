@@ -123,6 +123,16 @@ void Engine::MoveCameraHome()
 }
 
 
+void Engine::CameraLookAt( const grinliz::Vector3F& c, const grinliz::Vector3F& target )
+{
+	camera.SetPosWC( c );
+
+	Vector3F dir = target - c;
+	dir.Normalize();
+	camera.SetDir( dir, V3F_UP );
+}
+
+
 void Engine::CameraLookAt( float x, float z, float heightOfCamera, float yRotation, float tilt )
 {
 	camera.SetPosWC( x, heightOfCamera, z );
@@ -204,7 +214,7 @@ void Engine::CreateMiniMap()
 	float h = 0.5f * size / tanf(theta);	
 	Vector3F eye = { size/2, h, size/2 };
 	Vector3F at  = { size/2, 0, size/2 };
-	Vector3F up  = { 0, 0, -1 };
+	Vector3F up  = { 0, 0, 1 };
 	view.SetLookAt( eye, at, up );
 
 	miniMapRenderTarget->screenport->SetPerspective();

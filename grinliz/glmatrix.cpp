@@ -276,6 +276,7 @@ bool Matrix4::IsRotation() const
 
 void Matrix4::Transpose( Matrix4* transpose ) const
 {
+	GLASSERT( transpose != this );
   for (int r = 0; r < 4; ++r) {
         for (int c = 0; c < 4; ++c) {
 			transpose->x[INDEX(c,r)] = x[INDEX(r,c)];
@@ -427,6 +428,9 @@ float Matrix4::SubDeterminant(int excludeRow, int excludeCol) const
 				x[INDEX(row[0],col[2])] * cofactor20;
 }
 
+//
+// http://www.opengl.org/wiki/GluLookAt_code
+//
 bool Matrix4::SetLookAt( const Vector3F& eye, const Vector3F& center, const Vector3F& up )
 {
 	Vector3F forward = center - eye;
@@ -441,18 +445,21 @@ bool Matrix4::SetLookAt( const Vector3F& eye, const Vector3F& center, const Vect
 	Vector3F up2;
     CrossProduct(side, forward, &up2);
 
-    SetIdentity();
-    x[ INDEX(0,0) ] = side.x;
-    x[ INDEX(0,1) ] = side.y;
-    x[ INDEX(0,2) ] = side.z;
+	SetIdentity();
+    m11 = side.x;
+    m12 = side.y;
+    m13 = side.z;
+	m14 = 0.0f;
 
-    x[ INDEX(1,0)] = up2.x;
-    x[ INDEX(1,1)] = up2.y;
-    x[ INDEX(1,2)] = up2.z;
+    m21 = up2.x;
+    m22 = up2.y;
+    m23 = up2.z;
+	m24 = 0.0;
 
-    x[ INDEX(2,0)] = -forward.x;
-    x[ INDEX(2,1)] = -forward.y;
-    x[ INDEX(2,2)] = -forward.z;
+    m31 = -forward.x;
+    m32 = -forward.y;
+    m33 = -forward.z;
+	m34 = 0.0f;
 
 	Matrix4 m, n;
 	m.SetTranslation( -eye.x, -eye.y, -eye.z );

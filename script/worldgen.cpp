@@ -147,6 +147,22 @@ bool WorldGen::EndLandAndWater( float fractionLand )
 }
 
 
+void WorldGen::WriteMarker()
+{
+	static const int S = 8;
+	for ( int y=0; y<S; ++y ) {
+		for( int x=0; x<S; ++x ) {
+			if ( y==0 || y==(S-1) || x==0 || x==(S-1) ) {
+				land[y*SIZE+x] = 0;
+			}
+			else {
+				land[y*SIZE+x] = 1;
+			}
+		}
+	}
+}
+
+
 int WorldGen::CountFlixelsAboveCutoff( const float* flixels, float cutoff )
 {
 	int count = 0;

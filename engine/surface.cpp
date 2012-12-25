@@ -171,38 +171,21 @@ void Surface::Load( const gamedb::Item* node )
 	node->GetData( "pixels", Pixels(), size );
 }
 
-/*
-void Surface::Scale( const U16* src, int srcW, int srcH )
+void FlipSurface( void* pixels, int scanline, int h )
 {
-	int dx = srcW / x;
-	GLASSERT( dx >= 1 );
-	int dy = srcH / h;
-	GLASSERT( dy >= 1 );
+	U8* temp = new U8[scanline];
 
-	switch ( format ) {
-	case RGBA16:
-		{
-			for (int j=0; j<h; ++j ) {
-				for( int i=0; i<w; ++i ) {
-					int r=0, g=0, b=0, a=0;
-					
-					for( int y=j; y<j+dy; ++y ) {
-						for( int x=i; x<i+dx; ++x ) {
-							U16 c16 = src[y*srcW+x];
-							Color4U8 cu8 = CalcRGBA16( c16 );
-							r += cu8.r;
-							g += cu8.g;
-							b += cu8.b;
-							a += cu8.a;
-						}
-					}
+	for( int y=0; y<h/2; ++y ) {
+		int b = h-1-y;
 
-				}
-			}
-		}
+		memcpy( temp, (U8*)pixels + y*scanline, scanline );
+		memcpy( (U8*)pixels + y*scanline, (U8*)pixels + b*scanline, scanline );
+		memcpy( (U8*)pixels + b*scanline, temp, scanline );
 	}
+
+	delete [] temp;
 }
-*/
+
 
 ImageManager* ImageManager::instance = 0;
 

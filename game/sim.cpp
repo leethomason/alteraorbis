@@ -52,7 +52,12 @@ void Sim::Load( const char* mapPNG, const char* mapXML )
 	worldMap->Load( mapPNG, mapXML );
 
 	Vector2I v = worldMap->FindEmbark();
-	engine->CameraLookAt( (float)v.x, (float)v.y, 20 );
+	//engine->CameraLookAt( (float)v.x, (float)v.y, 20 );
+
+	Vector3F v3 = { (float)v.x, 0, (float)v.y };
+	Vector3F cam = { v3.x, 20.0f, v3.z-20.0f };
+
+	engine->CameraLookAt( cam, v3 );
 	CreatePlayer( v, "humanFemale" );
 }
 

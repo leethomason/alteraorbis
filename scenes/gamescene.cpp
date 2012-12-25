@@ -14,8 +14,9 @@
 using namespace grinliz;
 using namespace gamui;
 
-static const float MINI_MAP_SIZE = 150.0f;
-static const float MARK_SIZE = 6.0f;
+static const float DEBUG_SCALE = 2.0f;
+static const float MINI_MAP_SIZE = 150.0f*DEBUG_SCALE;
+static const float MARK_SIZE = 6.0f*DEBUG_SCALE;
 
 GameScene::GameScene( LumosGame* game ) : Scene( game )
 {
@@ -106,6 +107,12 @@ void GameScene::Draw3D( U32 deltaTime )
 	RenderAtom atom( (const void*)UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, 
 					 (const void*)sim->GetMiniMapTexture(), 
 					 0, 0, 1, 1 );
+	/* coordinate test. they are correct.
+	RenderAtom atom( (const void*)UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, 
+					 (const void*)TextureManager::Instance()->GetTexture( "palette" ),
+					 0, 0, 1, 1 );
+	*/
+
 	minimap.SetAtom( atom );
 
 	Chit* chit = sim->GetPlayerChit();

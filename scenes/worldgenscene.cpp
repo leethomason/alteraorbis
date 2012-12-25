@@ -133,6 +133,7 @@ void WorldGenScene::DoTick( U32 delta )
 	else if ( scanline == WorldGen::SIZE ) {
 		bool okay = worldGen.EndLandAndWater( 0.4f );
 		if ( okay ) {
+			worldGen.WriteMarker();
 			featureArr.Clear();
 			worldGen.CalColor( &featureArr );
 		}
