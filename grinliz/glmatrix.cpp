@@ -431,8 +431,18 @@ float Matrix4::SubDeterminant(int excludeRow, int excludeCol) const
 //
 // http://www.opengl.org/wiki/GluLookAt_code
 //
-bool Matrix4::SetLookAt( const Vector3F& eye, const Vector3F& center, const Vector3F& up )
+void grinliz::LookAt( bool cameraFlipBug,
+					  const Vector3F& eye, const Vector3F& center, const Vector3F& up,
+					  Matrix4* rot, Matrix4* trans, Matrix4* view )
 {
+	Matrix4 _rot, _trans, _view;
+	if ( !rot )
+		rot = &_rot;
+	if ( !trans )
+		trans = &_trans;
+	if ( !view )
+		view = &_view;
+
 	Vector3F forward = center - eye;
 	forward.Normalize();
 
@@ -445,27 +455,25 @@ bool Matrix4::SetLookAt( const Vector3F& eye, const Vector3F& center, const Vect
 	Vector3F up2;
     CrossProduct(side, forward, &up2);
 
-	SetIdentity();
-    m11 = side.x;
-    m12 = side.y;
-    m13 = side.z;
-	m14 = 0.0f;
+	if ( cameraFlipBug ) {
+		// GAH FIXME this should all be SetRow. 
+		// Something has gone screwy in the camera code. Need
+		// to root out the issue.
+		rot->SetCol( 0, side.x, side.y, side.z, 0.0f );
+		rot->SetCol( 1, up2.x, up2.y, up2.z, 0.0f );
+		rot->SetCol( 2, -forward.x, -forward.y, -forward.z, 0 );
+		rot->SetCol( 3, 0, 0, 0, 1 );
+	}
+	else {
+		rot->SetRow( 0, side.x, side.y, side.z, 0.0f );
+		rot->SetRow( 1, up2.x, up2.y, up2.z, 0.0f );
+		rot->SetRow( 2, -forward.x, -forward.y, -forward.z, 0 );
+		rot->SetRow( 3, 0, 0, 0, 1 );
+	}
+	trans->SetIdentity();
+	trans->SetTranslation( -eye.x, -eye.y, -eye.z );
 
-    m21 = up2.x;
-    m22 = up2.y;
-    m23 = up2.z;
-	m24 = 0.0;
-
-    m31 = -forward.x;
-    m32 = -forward.y;
-    m33 = -forward.z;
-	m34 = 0.0f;
-
-	Matrix4 m, n;
-	m.SetTranslation( -eye.x, -eye.y, -eye.z );
-	MultMatrix4( *this, m, &n );
-	*this = n;
-	return true;
+	*view = (*rot) * (*trans);
 }
 
 

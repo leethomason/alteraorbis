@@ -20,7 +20,8 @@ WorldGenScene::WorldGenScene( LumosGame* game ) : Scene( game )
 		texman->CreateTexture( "worldGenPreview", MAX_MAP_SIZE, MAX_MAP_SIZE, Surface::RGB16, Texture::PARAM_NONE, this );
 	}
 
-	RenderAtom atom( (const void*)UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, texman->GetTexture( "worldGenPreview" ), 0, 0, 1, 1 );
+	RenderAtom atom( (const void*)UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, texman->GetTexture( "worldGenPreview" ), 
+					 0, 1, 1, 0 );	// y-flip: image to texture coordinate conversion
 	worldImage.Init( &gamui2D, atom, false );
 	worldImage.SetSize( 400, 400 );
 

@@ -68,10 +68,8 @@ WorldMap::~WorldMap()
 
 void WorldMap::Save( const char* pathToPNG, const char* pathToXML )
 {
-	// fixme: saves upside down
-	FlipSurface( grid, width*sizeof(WorldGrid), height );
+	// The map is actually in image coordinates: origin grid[0] is upper left
 	lodepng_encode32_file( pathToPNG, (const unsigned char*)grid, width, height );
-	FlipSurface( grid, width*sizeof(WorldGrid), height );
 
 	FILE* fp = fopen( pathToXML, "w" );
 	GLASSERT( fp );
@@ -114,8 +112,6 @@ void WorldMap::Load( const char* pathToPNG, const char* pathToXML )
 			GLASSERT( pngW == width );
 			GLASSERT( pngH == height );
 			memcpy( grid, mem, width*height*4 );
-			// patch image/texture coordinates:
-			FlipSurface( grid, width*sizeof(WorldGrid), height );
 
 			free( mem );	// lower case; can't be tracked by memory system
 

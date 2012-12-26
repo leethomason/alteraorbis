@@ -44,28 +44,10 @@ void Camera::TiltRotationToQuat( float tilt, float yRotation )
 void Camera::SetDir( const grinliz::Vector3F& dir, const grinliz::Vector3F& up )
 {
 	Matrix4 m;
-
 	GLASSERT( Equal( dir.Length(), 1.0f, 0.01f ));
 
-    /* Side = forward x up */
-	Vector3F side;
-	CrossProduct(dir, up, &side);
-    side.Normalize();
-
-	Vector3F up2;
-	CrossProduct( side, dir, &up2 );
-
-    m.x[ m.INDEX(0,0) ] = side.x;
-    m.x[ m.INDEX(0,1) ] = side.y;
-    m.x[ m.INDEX(0,2) ] = side.z;
-
-    m.x[ m.INDEX(1,0)] = up2.x;
-    m.x[ m.INDEX(1,1)] = up2.y;
-    m.x[ m.INDEX(1,2)] = up2.z;
-
-    m.x[ m.INDEX(2,0)] = -dir.x;
-    m.x[ m.INDEX(2,1)] = -dir.y;
-    m.x[ m.INDEX(2,2)] = -dir.z;
+	static const Vector3F zero = { 0, 0, 0 };
+	LookAt( true, zero, dir, up, &m, 0, 0 );
 	quat.FromRotationMatrix( m );
 }
 
@@ -84,9 +66,7 @@ void Camera::CalcWorldXForm()
 		CalcEyeDir();
 
 		// Calc the View Matrix
-		Matrix4 inv, zRot;
-		worldXForm.Invert( &inv );
-		viewMatrix = zRot*inv;
+		worldXForm.Invert( &viewMatrix );
 
 		valid = true;
 	}
@@ -103,9 +83,7 @@ void Camera::CalcEyeDir()
 
 	for( int i=0; i<3; ++i ) {
 		eyeDir[i] = worldXForm * dir[i];
-		eyeDir3[i].x = eyeDir[i].x;
-		eyeDir3[i].y = eyeDir[i].y;
-		eyeDir3[i].z = eyeDir[i].z;
+		eyeDir3[i].Set( eyeDir[i].x, eyeDir[i].y, eyeDir[i].z );
 	}
 }
 

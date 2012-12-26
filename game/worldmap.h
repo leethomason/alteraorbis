@@ -36,6 +36,21 @@ class WorldInfo;
 struct WorldFeature;
 
 /*
+	Remembering Y is up and we are in the xz plane:
+
+	+--------x
+	|
+	|
+	|
+	|
+	z
+
+	1. The (0,0) world origin is in the upper left.
+	2. This is annoying, but it's important to keep sane.
+	3. If the mark is used it should display, save, and load in the upper left
+*/
+
+/*
 	The world map has layers. (May add more in the future.)
 	Basic layer: water or land.
 	For land, is it passable or not?

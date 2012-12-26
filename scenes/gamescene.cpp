@@ -120,8 +120,8 @@ void GameScene::Draw3D( U32 deltaTime )
 		const Vector3F& v = chit->GetSpatialComponent()->GetPosition();
 		Map* map = sim->GetEngine()->GetMap();
 		
-		float x = minimap.X() + Lerp( 0.f, minimap.Width(), v.x / (float)map->Width() );
-		float y = minimap.Y() + minimap.Height() - Lerp( 0.f, minimap.Height(), v.z / (float)map->Height() );
+		float x = minimap.X() + Lerp( 0.f, minimap.Width(),  v.x / (float)map->Width() );
+		float y = minimap.Y() + Lerp( 0.f, minimap.Height(), v.z / (float)map->Height() );
 
 		playerMark.SetCenterPos( x, y );
 	}
