@@ -41,10 +41,11 @@ void Camera::TiltRotationToQuat( float tilt, float yRotation )
 }
 
 
-void Camera::SetDir( const grinliz::Vector3F& dir, const grinliz::Vector3F& up )
+void Camera::SetDir( const grinliz::Vector3F& _dir, const grinliz::Vector3F& up )
 {
 	Matrix4 m;
-	GLASSERT( Equal( dir.Length(), 1.0f, 0.01f ));
+	Vector3F dir = _dir;
+	dir.Normalize();
 
 	static const Vector3F zero = { 0, 0, 0 };
 	LookAt( true, zero, dir, up, &m, 0, 0 );

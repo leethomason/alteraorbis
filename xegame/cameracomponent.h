@@ -44,8 +44,9 @@ public:
 	virtual void DebugStr( grinliz::GLString* str );
 	virtual bool DoTick( U32 delta );
 
-	void SetAutoDelete( bool ad )				{ autoDelete = ad; }
+	void SetAutoDelete( bool ad )									{ autoDelete = ad; }
 	void SetPanTo( grinliz::Vector3F& dest, float speed = 40.0f );
+	void SetTrack( int targetChitID, const grinliz::Vector3F& delta );
 
 private:
 	Camera* camera;
@@ -53,10 +54,12 @@ private:
 
 	enum {
 		DONE,	// will delete
-		PAN
+		PAN,
+		TRACK
 	};
 	int mode;
 	grinliz::Vector3F dest;
+	int targetChitID;
 	float speed;
 };
 

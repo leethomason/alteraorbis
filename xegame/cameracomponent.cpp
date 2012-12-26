@@ -16,7 +16,9 @@
 #include "cameracomponent.h"
 #include "chit.h"
 #include "chitbag.h"
+#include "spatialcomponent.h"
 #include "../engine/camera.h"
+#include "../engine/engine.h"
 
 using namespace grinliz;
 
@@ -36,6 +38,14 @@ void CameraComponent::SetPanTo( grinliz::Vector3F& _dest, float _speed )
 	mode = PAN;
 	dest = _dest;
 	speed = _speed;
+}
+
+
+void CameraComponent::SetTrack( int targetID, const Vector3F& offset ) 
+{
+	mode = TRACK;
+	dest = offset;
+	targetChitID = targetID;
 }
 
 
@@ -62,6 +72,17 @@ bool CameraComponent::DoTick( U32 delta )
 				toDest.Normalize();
 				Vector3F v = toDest * travel;
 				camera->DeltaPosWC( v.x, v.y, v.z );
+			}
+		}
+		break;
+
+	case TRACK:
+		{
+			Chit* chit = this->GetChitBag()->GetChit( targetChitID );
+			if ( chit && chit->GetSpatialComponent() ) {
+				Vector3F pos = chit->GetSpatialComponent()->GetPosition();
+				camera->SetPosWC( pos + dest );
+				camera->SetDir( -dest, V3F_UP );
 			}
 		}
 		break;
