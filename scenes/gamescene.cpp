@@ -7,6 +7,7 @@
 #include "../game/lumosgame.h"
 #include "../game/lumoschitbag.h"
 #include "../game/sim.h"
+#include "../game/pathmovecomponent.h"
 
 #include "../engine/engine.h"
 #include "../engine/text.h"
@@ -66,25 +67,43 @@ void GameScene::Resize()
 
 void GameScene::Zoom( int style, float delta )
 {
-/*	if ( style == GAME_ZOOM_PINCH )
+	// fixme: camera is fixed, this does nothing
+	Engine* engine = sim->GetEngine();
+	if ( style == GAME_ZOOM_PINCH )
 		engine->SetZoom( engine->GetZoom() *( 1.0f+delta) );
 	else
 		engine->SetZoom( engine->GetZoom() + delta );
-*/
+
 }
 
 void GameScene::Rotate( float degrees )
 {
-//	engine->camera.Orbit( degrees );
+	// fixme: camera is fixed, this does nothing
+	sim->GetEngine()->camera.Orbit( degrees );
 }
 
 
 void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::Ray& world )
 {
 	bool uiHasTap = ProcessTap( action, view, world );
-//	if ( !uiHasTap ) {
-//		bool tap = Process3DTap( action, view, world, engine );
-//	}
+	if ( !uiHasTap ) {
+		//bool tap = Process3DTap( action, view, world, sim->GetEngine() );
+
+		Matrix4 mvpi;
+		Ray ray;
+		Vector3F at;
+		game->GetScreenport().ViewProjectionInverse3D( &mvpi );
+		sim->GetEngine()->RayFromViewToYPlane( view, mvpi, &ray, &at );
+
+		Chit* chit = sim->GetPlayerChit();
+		if ( chit ) {
+			PathMoveComponent* pmc = GET_COMPONENT( chit, PathMoveComponent );
+			if ( pmc ) {
+				Vector2F dest = { at.x, at.z };
+				pmc->QueueDest( dest );
+			}
+		}
+	}
 }
 
 
