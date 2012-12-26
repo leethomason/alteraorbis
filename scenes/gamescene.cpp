@@ -2,8 +2,10 @@
 
 #include "../xegame/chit.h"
 #include "../xegame/spatialcomponent.h"
+#include "../xegame/cameracomponent.h"
 
 #include "../game/lumosgame.h"
+#include "../game/lumoschitbag.h"
 #include "../game/sim.h"
 
 #include "../engine/engine.h"
@@ -29,6 +31,12 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	GLString xmlPath = game->GamePath( "map", 0, "xml" );
 	GLString pngPath = game->GamePath( "map", 0, "png" );
 	sim->Load( pngPath.c_str(), xmlPath.c_str() );
+
+	Chit* camChit = sim->GetChitBag()->NewChit();
+	CameraComponent* cameraComp = new CameraComponent( &sim->GetEngine()->camera );
+	camChit->Add( cameraComp );
+	Vector3F delta = { 20.0f, 20.0f, 20.0f };
+	cameraComp->SetTrack( sim->GetPlayerChit()->ID(), delta );
 
 	RenderAtom atom;
 	minimap.Init( &gamui2D, atom, false );

@@ -8,7 +8,6 @@
 #include "../xegame/rendercomponent.h"
 #include "../xegame/chitbag.h"
 #include "../xegame/inventorycomponent.h"
-#include "../xegame/cameracomponent.h"
 
 #include "../script/itemscript.h"
 
@@ -53,19 +52,12 @@ void Sim::Load( const char* mapPNG, const char* mapXML )
 	worldMap->Load( mapPNG, mapXML );
 
 	Vector2I v = worldMap->FindEmbark();
-	//engine->CameraLookAt( (float)v.x, (float)v.y, 20 );
 
-	Vector3F at  = { (float)v.x, 0, (float)v.y };
-	Vector3F cam = { at.x-2.0f, 20.0f, at.z-20.0f };
-
-	engine->CameraLookAt( cam, at );
+//	Vector3F at  = { (float)v.x, 0, (float)v.y };
+//	Vector3F cam = { at.x-2.0f, 20.0f, at.z-20.0f };
+//	engine->CameraLookAt( cam, at );
 	CreatePlayer( v, "humanFemale" );
 
-	Chit* camChit = chitBag->NewChit();
-	CameraComponent* cameraComp = new CameraComponent( &engine->camera );
-	camChit->Add( cameraComp );
-	Vector3F delta = { 20.0f, 20.0f, 20.0f };
-	cameraComp->SetTrack( GetPlayerChit()->ID(), delta );
 }
 
 

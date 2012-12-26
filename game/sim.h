@@ -25,11 +25,12 @@ public:
 	void Load( const char* mapPNG, const char* mapXML );
 	void Draw( U32 delta );
 
-	Texture*	GetMiniMapTexture();
-	Chit*		GetPlayerChit();
+	Texture*		GetMiniMapTexture();
+	Chit*			GetPlayerChit();
 
-	// use with caution: (primarily for debugging)
-	Engine*	GetEngine()	{ return engine; }
+	// use with caution: not a clear separation between sim and game
+	Engine*			GetEngine()		{ return engine; }
+	LumosChitBag*	GetChitBag()	{ return chitBag; }
 
 private:
 	void CreatePlayer( const grinliz::Vector2I& pos, const char* assetName );
