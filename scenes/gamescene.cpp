@@ -33,15 +33,19 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	GLString pngPath = game->GamePath( "map", 0, "png" );
 	sim->Load( pngPath.c_str(), xmlPath.c_str() );
 
+	Vector3F delta = { 20.0f, 20.0f, 20.0f };
+	Vector3F target = sim->GetPlayerChit()->GetSpatialComponent()->GetPosition();
+	sim->GetEngine()->CameraLookAt( target + delta, target );
+
 	Chit* camChit = sim->GetChitBag()->NewChit();
 	CameraComponent* cameraComp = new CameraComponent( &sim->GetEngine()->camera );
 	camChit->Add( cameraComp );
-	Vector3F delta = { 20.0f, 20.0f, 20.0f };
-	cameraComp->SetTrack( sim->GetPlayerChit()->ID(), delta );
+	cameraComp->SetTrack( sim->GetPlayerChit()->ID() );
 
 	RenderAtom atom;
 	minimap.Init( &gamui2D, atom, false );
 	minimap.SetSize( MINI_MAP_SIZE, MINI_MAP_SIZE );
+	minimap.SetCapturesTap( true );
 
 	atom = lumosGame->CalcPaletteAtom( PAL_TANGERINE*2, PAL_ZERO );
 	playerMark.Init( &gamui2D, atom, true );
@@ -67,7 +71,6 @@ void GameScene::Resize()
 
 void GameScene::Zoom( int style, float delta )
 {
-	// fixme: camera is fixed, this does nothing
 	Engine* engine = sim->GetEngine();
 	if ( style == GAME_ZOOM_PINCH )
 		engine->SetZoom( engine->GetZoom() *( 1.0f+delta) );
@@ -78,7 +81,6 @@ void GameScene::Zoom( int style, float delta )
 
 void GameScene::Rotate( float degrees )
 {
-	// fixme: camera is fixed, this does nothing
 	sim->GetEngine()->camera.Orbit( degrees );
 }
 
@@ -86,21 +88,49 @@ void GameScene::Rotate( float degrees )
 void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::Ray& world )
 {
 	bool uiHasTap = ProcessTap( action, view, world );
+	Engine* engine = sim->GetEngine();
+
+	/*
+	if ( action == GAME_TAP_UP && !uiHasTap ) {
+		// Check mini-map
+		grinliz::Vector2F ui;
+		game->GetScreenport().ViewToUI( view, &ui );
+
+		if (    ui.x >= minimap.X() && ui.x <= minimap.X()+minimap.Width()
+			 && ui.y >= minimap.Y() && ui.y <= minimap.Y()+minimap.Height() )
+		{
+			Vector2F dest = { 0, 0 };
+			dest.x = (ui.x - minimap.X())*(float)engine->GetMap()->Width() / minimap.Width();
+			dest.y = (ui.y - minimap.Y())*(float)engine->GetMap()->Height() / minimap.Height();
+
+			Chit* chit = sim->GetPlayerChit();
+			if ( chit ) {
+				PathMoveComponent* pmc = GET_COMPONENT( chit, PathMoveComponent );
+				if ( pmc ) {
+					pmc->QueueDest( dest );
+				}
+			}
+		}
+	}
+	*/
+
 	if ( !uiHasTap ) {
-		//bool tap = Process3DTap( action, view, world, sim->GetEngine() );
+		bool tap = Process3DTap( action, view, world, sim->GetEngine() );
 
-		Matrix4 mvpi;
-		Ray ray;
-		Vector3F at;
-		game->GetScreenport().ViewProjectionInverse3D( &mvpi );
-		sim->GetEngine()->RayFromViewToYPlane( view, mvpi, &ray, &at );
+		if ( tap ) {
+			Matrix4 mvpi;
+			Ray ray;
+			Vector3F at;
+			game->GetScreenport().ViewProjectionInverse3D( &mvpi );
+			sim->GetEngine()->RayFromViewToYPlane( view, mvpi, &ray, &at );
 
-		Chit* chit = sim->GetPlayerChit();
-		if ( chit ) {
-			PathMoveComponent* pmc = GET_COMPONENT( chit, PathMoveComponent );
-			if ( pmc ) {
-				Vector2F dest = { at.x, at.z };
-				pmc->QueueDest( dest );
+			Chit* chit = sim->GetPlayerChit();
+			if ( chit ) {
+				PathMoveComponent* pmc = GET_COMPONENT( chit, PathMoveComponent );
+				if ( pmc ) {
+					Vector2F dest = { at.x, at.z };
+					pmc->QueueDest( dest );
+				}
 			}
 		}
 	}
@@ -111,6 +141,24 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 {
 	if ( item == &okay ) {
 		game->PopScene();
+	}
+	else if ( item == &minimap ) {
+		float x=0, y=0;
+		gamui2D.GetRelativeTap( &x, &y );
+		GLOUTPUT(( "minimap tapped nx=%.1f ny=%.1f\n", x, y ));
+
+		Engine* engine = sim->GetEngine();
+		Vector2F dest = { 0, 0 };
+		dest.x = x*(float)engine->GetMap()->Width();
+		dest.y = y*(float)engine->GetMap()->Height();
+
+		Chit* chit = sim->GetPlayerChit();
+		if ( chit ) {
+			PathMoveComponent* pmc = GET_COMPONENT( chit, PathMoveComponent );
+			if ( pmc ) {
+				pmc->QueueDest( dest );
+			}
+		}
 	}
 }
 

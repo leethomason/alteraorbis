@@ -84,7 +84,7 @@ Game::Game( int width, int height, int rotation, int uiHeight, const char* path 
 
 	GLOUTPUT(( "Game::Init Database initialized.\n" ));
 
-	GLOUTPUT(( "Game::Init stage 10\n" ));
+	GLOUTPUT_REL(( "Game::Init stage 10\n" ));
 	SoundManager::Create( database0 );
 	TextureManager::Create( database0 );
 	ImageManager::Create( database0 );
@@ -132,6 +132,8 @@ Game::~Game()
 	delete database0;
 	delete StringPool::Instance();
 	Performance::Free();
+
+	GLOUTPUT_REL(( "Game destructor complete.\n" ));
 }
 
 

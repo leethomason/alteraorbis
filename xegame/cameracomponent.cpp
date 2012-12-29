@@ -41,10 +41,9 @@ void CameraComponent::SetPanTo( grinliz::Vector3F& _dest, float _speed )
 }
 
 
-void CameraComponent::SetTrack( int targetID, const Vector3F& offset ) 
+void CameraComponent::SetTrack( int targetID ) 
 {
 	mode = TRACK;
-	dest = offset;
 	targetChitID = targetID;
 }
 
@@ -80,9 +79,27 @@ bool CameraComponent::DoTick( U32 delta )
 		{
 			Chit* chit = this->GetChitBag()->GetChit( targetChitID );
 			if ( chit && chit->GetSpatialComponent() ) {
+				
 				Vector3F pos = chit->GetSpatialComponent()->GetPosition();
-				camera->SetPosWC( pos + dest );
-				camera->SetDir( -dest, V3F_UP );
+				pos.y = 0;
+
+				/*
+				Vector3F delta = pos - prevTarget;
+				if ( delta.LengthSquared() ) {
+					camera->DeltaPosWC( delta.x, delta.y, delta.z );
+					prevTarget = pos;
+				}
+				*/
+
+				// Scoot the camera to always focus on the target. Removes
+				// errors that occur from rotation, drift, etc.
+				const Vector3F* eye3 = camera->EyeDir3();
+				Vector3F at;
+				int result = IntersectRayPlane( camera->PosWC(), eye3[0], 1, 0.0f, &at );
+				if ( result == INTERSECT ) {
+					Vector3F delta = camera->PosWC() - at;
+					camera->SetPosWC( pos + delta );
+				}
 			}
 		}
 		break;

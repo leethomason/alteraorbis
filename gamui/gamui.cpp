@@ -387,7 +387,8 @@ void TextBox::Queue( CDynArray< uint16_t > *indexBuf, CDynArray< Gamui::Vertex >
 Image::Image() : UIItem( Gamui::LEVEL_BACKGROUND ),
 	  m_width( DEFAULT_SIZE ),
 	  m_height( DEFAULT_SIZE ),
-	  m_slice( false )
+	  m_slice( false ),
+	  m_capturesTap( false )
 {
 }
 
@@ -414,6 +415,21 @@ void Image::Init( Gamui* gamui, const RenderAtom& atom, bool foreground )
 	m_gamui = gamui;
 	gamui->Add( this );
 	this->SetForeground( foreground );
+}
+
+
+bool Image::HandleTap( TapAction action, float x, float y )
+{
+	if ( action == TAP_DOWN ) {
+		return true;
+	}
+	else if ( action == TAP_CANCEL ) {
+		return true;
+	}
+	else if ( action == TAP_UP && x >= X() && x < X()+Width() && y >= Y() && y < Y()+Height() ) {
+		return true;
+	}
+	return false;
 }
 
 
@@ -1251,8 +1267,8 @@ void Gamui::TapDown( float x, float y )
 		{
 			if ( item->HandleTap( UIItem::TAP_DOWN, x, y ) ) {
 				m_itemTapped = item;
-				m_relativeX = (item->X() - x) / item->Width();
-				m_relativeY = (item->X() - x) / item->Height();
+				m_relativeX = (x - item->X()) / item->Width();
+				m_relativeY = (y - item->Y()) / item->Height();
 				break;
 			}
 		}
