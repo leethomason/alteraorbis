@@ -52,12 +52,15 @@ void Sim::Load( const char* mapPNG, const char* mapXML )
 	worldMap->Load( mapPNG, mapXML );
 
 	Vector2I v = worldMap->FindEmbark();
-
-//	Vector3F at  = { (float)v.x, 0, (float)v.y };
-//	Vector3F cam = { at.x-2.0f, 20.0f, at.z-20.0f };
-//	engine->CameraLookAt( cam, at );
 	CreatePlayer( v, "humanFemale" );
 
+}
+
+
+void Sim::Save( const char* mapPNG, const char* mapXML, const char* gameXML )
+{
+	worldMap->Save( mapPNG, mapXML );
+	chitBag->Save( gameXML );
 }
 
 

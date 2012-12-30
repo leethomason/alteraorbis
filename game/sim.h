@@ -23,6 +23,8 @@ public:
 	void DrawDebugText();
 
 	void Load( const char* mapPNG, const char* mapXML );
+	void Save( const char* mapPNG, const char* mapXML, const char* gameXML );
+
 	void Draw( U32 delta );
 
 	Texture*		GetMiniMapTexture();

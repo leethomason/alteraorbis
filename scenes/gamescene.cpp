@@ -55,6 +55,12 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 
 GameScene::~GameScene()
 {
+	GLString xmlPath = game->GamePath( "map", 0, "xml" );
+	GLString pngPath = game->GamePath( "map", 0, "png" );
+	GLString gamePath = game->GamePath( "game", 0, "xml" );
+	sim->Save( pngPath.c_str(), xmlPath.c_str(), gamePath.c_str() );
+
+	//game->SaveGame();
 	delete sim;
 }
 
@@ -89,30 +95,6 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 {
 	bool uiHasTap = ProcessTap( action, view, world );
 	Engine* engine = sim->GetEngine();
-
-	/*
-	if ( action == GAME_TAP_UP && !uiHasTap ) {
-		// Check mini-map
-		grinliz::Vector2F ui;
-		game->GetScreenport().ViewToUI( view, &ui );
-
-		if (    ui.x >= minimap.X() && ui.x <= minimap.X()+minimap.Width()
-			 && ui.y >= minimap.Y() && ui.y <= minimap.Y()+minimap.Height() )
-		{
-			Vector2F dest = { 0, 0 };
-			dest.x = (ui.x - minimap.X())*(float)engine->GetMap()->Width() / minimap.Width();
-			dest.y = (ui.y - minimap.Y())*(float)engine->GetMap()->Height() / minimap.Height();
-
-			Chit* chit = sim->GetPlayerChit();
-			if ( chit ) {
-				PathMoveComponent* pmc = GET_COMPONENT( chit, PathMoveComponent );
-				if ( pmc ) {
-					pmc->QueueDest( dest );
-				}
-			}
-		}
-	}
-	*/
 
 	if ( !uiHasTap ) {
 		bool tap = Process3DTap( action, view, world, sim->GetEngine() );
@@ -213,5 +195,6 @@ void GameScene::DrawDebugText()
 		const Vector3F& v = chit->GetSpatialComponent()->GetPosition();
 		ufoText->Draw( 0, 32, "Player: %.1f, %.1f, %.1f", v.x, v.y, v.z );
 	}
+	ufoText->Draw( 0, 48, "Tap world or map to go to location. End/Home rotate, PgUp/Down zoom." );
 }
 

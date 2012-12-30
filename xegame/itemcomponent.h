@@ -43,13 +43,18 @@ public:
 	virtual void OnAdd( Chit* chit );
 	virtual void OnRemove();
 
+	virtual void Load( const tinyxml2::XMLElement* element );
+	virtual void Save( tinyxml2::XMLPrinter* printer );
+
 	virtual bool DoTick( U32 delta );
 	virtual bool DoSlowTick();
 	virtual void OnChitEvent( const ChitEvent& event );
 
 	GameItem* GetItem() { return &item; }
-	GameItem item;
 	void EmitEffect( Engine* engine, U32 deltaTime );
+
+private:
+	GameItem item;
 };
 
 #endif // ITEMCOMPONENT_INCLUDED

@@ -21,10 +21,11 @@
 #include "itemcomponent.h"
 
 #include "../engine/model.h"
-
 #include "../grinliz/glperformance.h"
+#include "../tinyxml2/tinyxml2.h"
 
 using namespace grinliz;
+using namespace tinyxml2;
 
 ChitBag::ChitBag()
 {
@@ -49,6 +50,29 @@ void ChitBag::DeleteAll()
 		delete [] block;
 	}
 	bolts.Clear();
+}
+
+
+void ChitBag::Save( const char* pathToXML )
+{
+	FILE* fp = fopen( pathToXML, "w" );
+	GLASSERT( fp );
+	if ( fp ) {
+		XMLPrinter printer( fp );
+
+		printer.OpenElement( "ChitBag" );
+		printer.PushAttribute( "idPool", idPool );
+		printer.PushAttribute( "bagTime", bagTime );
+
+		printer.OpenElement( "Chits" );
+		Chit** chits = chitID.GetValues();
+		for( int i=0; i<chitID.NumValues(); ++i ) {
+			chits[i]->Save( &printer );
+		}
+		printer.CloseElement();	// Chits
+
+		printer.CloseElement();	// ChitBag
+	}
 }
 
 

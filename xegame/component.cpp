@@ -37,6 +37,19 @@ ChitBag* Component::GetChitBag()
 }
 
 
+void Component::BeginSave( tinyxml2::XMLPrinter* printer, const char* name )
+{
+	printer->OpenElement( name );
+	printer->PushAttribute( "id", id );
+}
+
+
+void Component::EndSave( tinyxml2::XMLPrinter* printer )
+{
+	printer->CloseElement();
+}
+
+
 void Component::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {
 	if ( msg.ID() == ChitMsg::CHIT_DESTROYED_START ) {

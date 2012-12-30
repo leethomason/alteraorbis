@@ -24,6 +24,8 @@
 #include "../grinliz/glvector.h"
 #include "../grinliz/glrandom.h"
 
+#include "../tinyxml2/tinyxml2.h"
+
 class Component;
 class SpatialComponent;
 class RenderComponent;
@@ -112,6 +114,8 @@ public:
 
 	void Init( int id, ChitBag* chitBag );
 	void Free();
+
+	void Save( tinyxml2::XMLPrinter* );
 
 	int ID() const { return id; }
 	void Add( Component* );
