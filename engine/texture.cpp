@@ -141,33 +141,48 @@ Texture* TextureManager::GetTexture( const char* name, bool reload )
 }
 
 
-Texture* TextureManager::CreateTexture( const char* name, int w, int h, int format, int flags, ITextureCreator* creator )
+void TextureManager::TextureCreatorInvalid( ITextureCreator* creator )
 {
-	GLASSERT( !texMap.Query( name, 0 ) );
-	GLASSERT( w > 1 );	// some drivers don't like size=1 textures
-	GLASSERT( h > 1 );
-	GLASSERT( emptySpace >= 0 );
-
-	Texture* t = 0;
-
-	if ( emptySpace > 0 ) {
-		for( int i=0; i<textureArr.Size(); ++i ) {
-			if ( textureArr[i].Empty() ) {
-				t = &textureArr[i];
-				--emptySpace;
-				break;
-			}
+	for( int i=0; i<textureArr.Size(); ++i ) {
+		if ( textureArr[i].creator == creator ) {
+			textureArr[i].creator = 0;
 		}
 	}
-	else {
-		t = textureArr.PushArr(1);
-	}
-	GLASSERT( t );
+}
 
-	t->Set( name, w, h, format, flags );
-	t->creator = creator;
-	GLASSERT( !texMap.Query( t->Name(), 0 ));
-	texMap.Add( t->Name(), t );
+
+Texture* TextureManager::CreateTexture( const char* name, int w, int h, int format, int flags, ITextureCreator* creator )
+{
+	GLASSERT( w > 1 );	// some drivers don't like size=1 textures
+	GLASSERT( h > 1 );
+
+	Texture* t = 0;
+	if ( texMap.Query( name, &t ) ) {
+		GLASSERT( t->creator == 0 || t->creator == creator );
+		t->Set( name, w, h, format, flags );
+		t->creator = creator;
+	}
+	else {
+		GLASSERT( emptySpace >= 0 );
+		if ( emptySpace > 0 ) {
+			for( int i=0; i<textureArr.Size(); ++i ) {
+				if ( textureArr[i].Empty() ) {
+					t = &textureArr[i];
+					--emptySpace;
+					break;
+				}
+			}
+		}
+		else {
+			t = textureArr.PushArr(1);
+		}
+		GLASSERT( t );
+
+		t->Set( name, w, h, format, flags );
+		t->creator = creator;
+		GLASSERT( !texMap.Query( t->Name(), 0 ));
+		texMap.Add( t->Name(), t );
+	}
 	return t;
 }
 
@@ -197,12 +212,16 @@ U32 Texture::GLID()
 		return glID;
 	
 	TextureManager* manager = TextureManager::Instance();
+	GLASSERT( manager );
 	glID = manager->CreateGLTexture( w, h, format, flags );
+	GLASSERT( glID );
 
 	// Need to actually generate the texture. Either pull it from 
 	// the database, or call the ICreator to push it to the GPU.
 	if ( item ) {
 		const gamedb::Reader* database = gamedb::Reader::GetContext( item );
+		GLASSERT( database );
+		GLASSERT( database->ItemInReader( item ));
 		GLASSERT( item->HasAttribute( "pixels" ) );
 		int size;
 		const void* pixels = database->AccessData( item, "pixels", &size );
@@ -212,6 +231,7 @@ U32 Texture::GLID()
 		creator->CreateTexture( this );
 	}
 	else {
+		GLOUTPUT(( "No texture creator for '%s'\n", this->name.c_str() ));
 		GLASSERT( 0 );
 	}
 	return glID;

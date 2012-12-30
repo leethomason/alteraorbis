@@ -3,9 +3,9 @@
 		x generate a random world
 		- save it
 		- load it
-		- walk around it
-			- where is world origin? mini-map origin? save/load origin? line all that up
-			- mark location on mini-map
+		x walk around it
+			x where is world origin? mini-map origin? save/load origin? line all that up
+			x mark location on mini-map
 	- Rock and Stream
 		- rock formation
 		- cave

@@ -49,6 +49,7 @@ LumosGame::LumosGame(  int width, int height, int rotation, const char* savepath
 
 LumosGame::~LumosGame()
 {
+	TextureManager::Instance()->TextureCreatorInvalid( this );
 	delete ItemDefDB::Instance();
 }
 

@@ -374,6 +374,8 @@ void Reader::GetData( int dataID, void* target, int memSize ) const
 
 const void* Reader::AccessData( const Item* item, const char* name, int* p_size ) const
 {
+	GLASSERT( ItemInReader( item ));
+
 	int size = 0;
 	if ( p_size ) *p_size = 0;
 

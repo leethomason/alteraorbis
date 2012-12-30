@@ -16,9 +16,7 @@ WorldGenScene::WorldGenScene( LumosGame* game ) : Scene( game )
 	pix16 = 0;
 
 	TextureManager* texman = TextureManager::Instance();
-	if ( !texman->IsTexture( "worldGenPreview" ) ) {
-		texman->CreateTexture( "worldGenPreview", MAX_MAP_SIZE, MAX_MAP_SIZE, Surface::RGB16, Texture::PARAM_NONE, this );
-	}
+	texman->CreateTexture( "worldGenPreview", MAX_MAP_SIZE, MAX_MAP_SIZE, Surface::RGB16, Texture::PARAM_NONE, this );
 
 	RenderAtom atom( (const void*)UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, texman->GetTexture( "worldGenPreview" ), 
 					 0, 1, 1, 0 );	// y-flip: image to texture coordinate conversion
@@ -35,6 +33,7 @@ WorldGenScene::WorldGenScene( LumosGame* game ) : Scene( game )
 
 WorldGenScene::~WorldGenScene()
 {
+	TextureManager::Instance()->TextureCreatorInvalid( this );
 	delete [] worldMap;
 	delete [] pix16;
 }

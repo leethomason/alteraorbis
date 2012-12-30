@@ -122,6 +122,7 @@ Game::~Game()
 	sceneStack.Top()->Free();
 	sceneStack.Pop();
 
+	TextureManager::Instance()->TextureCreatorInvalid( this );
 	UFOText::Destroy();
 	SoundManager::Destroy();
 	AnimationResourceManager::Destroy();
@@ -525,6 +526,7 @@ void Game::DoTick( U32 _currentTime )
 
 		{
 			GRINLIZ_PERFTRACK_NAME( "Game::DoTick UI" );
+			GLASSERT( scene );
 
 			// UI Pass
 			screenport.SetUI(); 

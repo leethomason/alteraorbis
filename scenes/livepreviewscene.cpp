@@ -197,7 +197,7 @@ void LivePreviewScene::GenerateRing( int mainRow )
 	engine->lighting.direction.Normalize();
 	
 	engine->camera.SetPosWC( 0, DELTA*1.5f, DELTA*(float)(COLS-1)*0.5f );
-	static const Vector3F out = { -1, 0, 0 };			// FIXME: weird camera issue illustrated, again.
+	static const Vector3F out = { 1, 0, 0 };
 	engine->camera.SetDir( out, V3F_UP );
 
 	float tex[4] = { 0, 0, 0, 0 };
