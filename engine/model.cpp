@@ -20,6 +20,7 @@
 #include "engineshaders.h"
 #include "shadermanager.h"
 #include "animation.h"
+#include "serialize.h"
 
 #include "../grinliz/glvector.h"
 #include "../grinliz/glstringutil.h"
@@ -235,7 +236,6 @@ void Model::Init( const ModelResource* resource, SpaceTree* tree )
 
 	animationRate = 1.0f;
 
-	time = 0;
 	crossFadeTime = 0;
 	totalCrossFadeTime = 0;
 	currentAnim.Init();
@@ -255,6 +255,54 @@ void Model::Free()
 {
 	ModelResourceManager::Instance()->modelAuxPool.Delete( aux );
 	aux = 0;
+}
+
+
+void Model::Load( const tinyxml2::XMLElement* element )
+{
+	GLASSERT( 0 );
+}
+
+
+void Model::Save( tinyxml2::XMLPrinter* printer )
+{
+	printer->OpenElement( "Model" );
+	printer->PushAttribute( "resource", resource->header.name.c_str() );
+	printer->PushAttribute( "debugScale", debugScale );
+	printer->PushAttribute( "animationRate", animationRate );
+	printer->PushAttribute( "totalCrossFadeTime", totalCrossFadeTime );
+	printer->PushAttribute( "crossFadeTime", crossFadeTime );
+	if ( animationResource ) {
+		printer->PushAttribute( "animationResource", animationResource->ResourceName() );
+	}
+	printer->PushAttribute( "crossFadeTime", crossFadeTime );
+	printer->PushAttribute( "hasParticles", hasParticles );
+	printer->PushAttribute( "flags", flags );
+
+	printer->OpenElement( "currentAnim" );
+	printer->PushAttribute( "time", currentAnim.time );
+	printer->PushAttribute( "id", (int)currentAnim.id );
+	printer->CloseElement();
+
+	printer->OpenElement( "prevAnim" );
+	printer->PushAttribute( "time", prevAnim.time );
+	printer->PushAttribute( "id", (int)prevAnim.id );
+	printer->CloseElement();
+
+	PushVector( printer, "pos", pos );
+	PushVector( printer, "rot", rot );
+	PushVector( printer, "color", color );
+	PushVector( printer, "boneFilter", boneFilter );
+	PushVector( printer, "control", control );
+
+	if ( aux ) {
+		printer->OpenElement( "aux" );
+		aux->boneData.Save( printer );
+		PushMatrix( printer, "procMat", aux->procMat );
+		printer->CloseElement();	// aux
+	}
+
+	printer->CloseElement();	// model
 }
 
 
@@ -422,7 +470,6 @@ void Model::DeltaAnimation( U32 _time, grinliz::CArray<int, EL_MAX_METADATA> *me
 		}
 	}
 
-	time				+= _time;
 	currentAnim.time	+= _time;
 	prevAnim.time		+= _time;
 	crossFadeTime		+= _time;

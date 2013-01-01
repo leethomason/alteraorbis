@@ -26,6 +26,8 @@
 #include "../grinliz/glstringutil.h"
 #include "../grinliz/glcolor.h"
 #include "../grinliz/glcontainer.h"
+#include "../grinliz/glgeometry.h"
+#include "../grinliz/glmatrix.h"
 
 #include "../shared/gamedbreader.h"
 #include "../tinyxml2/tinyxml2.h"
@@ -51,5 +53,10 @@ void LoadVector( const tinyxml2::XMLElement* element, grinliz::Vector3F* vec );
 void LoadColor( const tinyxml2::XMLElement* element, grinliz::Color3F* color );
 void LoadColor( const tinyxml2::XMLElement* element, grinliz::Color4F* color );
 void LoadColor( const tinyxml2::XMLElement* element, grinliz::Vector4F* color );
+
+void PushVector( tinyxml2::XMLPrinter* printer, const char* name, const grinliz::Vector3F& vec );
+void PushVector( tinyxml2::XMLPrinter* printer, const char* name, const grinliz::Vector4F& vec );
+void PushVector( tinyxml2::XMLPrinter* printer, const char* name, const grinliz::Quaternion& vec );
+void PushMatrix( tinyxml2::XMLPrinter* printer, const char* name, const grinliz::Matrix4& mat );
 
 #endif // UFOATTACK_SERIALIZE_INCLUDED

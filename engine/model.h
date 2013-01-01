@@ -22,7 +22,11 @@
 #include "../grinliz/glmemorypool.h"
 #include "../grinliz/glcontainer.h"
 #include "../grinliz/glstringutil.h"
+
 #include "../shared/gamedbreader.h"
+
+#include "../tinyxml2/tinyxml2.h"
+
 #include "vertex.h"
 #include "enginelimits.h"
 #include "serialize.h"
@@ -229,6 +233,9 @@ public:
 	void Init( const ModelResource* resource, SpaceTree* tree );
 	void Free();
 
+	void Load( const tinyxml2::XMLElement* element );
+	void Save( tinyxml2::XMLPrinter* printer );
+
 	void Queue( RenderQueue* queue, EngineShaders* shaders, int requiredShaderFlag, int excludedShaderFlag );
 
 	enum {
@@ -371,7 +378,6 @@ private:
 	
 	float debugScale;
 	
-	U32 time;				// debugging.
 	struct AnimationState {
 		void Init() { time=0; id=ANIM_OFF; }
 		U32				time;
@@ -386,12 +392,12 @@ private:
 
 	const AnimationResource* animationResource;
 	bool hasParticles;
+	int flags;
 
 	grinliz::Vector4F	color;
 	grinliz::Vector4F	boneFilter;
 	grinliz::Vector4F	control;
 	ModelAux* aux;
-	int flags;
 
 	mutable bool xformValid;
 	mutable bool invValid;

@@ -56,3 +56,17 @@ void Component::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		parentChit->GetChitBag()->QueueDeleteComponent( this );
 	}
 }
+
+
+void MoveComponent::Load( const tinyxml2::XMLElement* element )
+{
+	GLASSERT( 0 );
+}
+
+
+void MoveComponent::Save( tinyxml2::XMLPrinter* printer )
+{
+	this->BeginSave( printer, "MoveComponent" );
+	this->EndSave( printer );
+}
+

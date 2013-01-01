@@ -45,7 +45,7 @@ static const float TARGET_MOVE_MULT  = 0.7f;
 {
 	int primaryTeam = -1;
 	if ( src->GetItemComponent() ) {
-		primaryTeam = src->GetItemComponent()->item.primaryTeam;
+		primaryTeam = src->GetItemComponent()->GetItem()->primaryTeam;
 	}
 	return primaryTeam;
 }

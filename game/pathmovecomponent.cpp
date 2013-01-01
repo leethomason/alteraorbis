@@ -38,6 +38,33 @@ static const float MOVE_SPEED		= 1.2f;			// grid/second
 static const float ROTATION_SPEED	= 360.f;		// degrees/second
 
 
+void PathMoveComponent::Load( const tinyxml2::XMLElement* element )
+{
+	GLASSERT( 0 );
+}
+
+
+void PathMoveComponent::Save( tinyxml2::XMLPrinter* printer )
+{
+	// note that save/load causes re-path. Too much data to save otherwise.
+	this->BeginSave( printer, "PathMoveComponent" );
+
+	printer->OpenElement( "queued" );
+	printer->PushAttribute( "x", queued.pos.x );
+	printer->PushAttribute( "y", queued.pos.x );
+	printer->PushAttribute( "rotation", queued.rotation );
+	printer->CloseElement();
+	
+	printer->OpenElement( "dest" );
+	printer->PushAttribute( "x", dest.pos.x );
+	printer->PushAttribute( "y", dest.pos.x );
+	printer->PushAttribute( "rotation", dest.rotation );
+	printer->CloseElement();
+	
+	this->EndSave( printer );
+}
+
+
 void PathMoveComponent::OnAdd( Chit* chit )
 {
 	super::OnAdd( chit );

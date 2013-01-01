@@ -22,6 +22,24 @@
 
 using namespace grinliz;
 
+void CameraComponent::Load( const tinyxml2::XMLElement* element )
+{
+	GLASSERT( 0 );
+}
+
+
+void CameraComponent::Save( tinyxml2::XMLPrinter* printer )
+{
+	this->BeginSave( printer, "CameraComponent" );
+	printer->PushAttribute( "autoDelete", autoDelete );
+	printer->PushAttribute( "mode", mode );
+	printer->PushAttribute( "targetChitID", targetChitID );
+	printer->PushAttribute( "speed", speed );
+	PushVector( printer, "dest", dest );
+	this->EndSave( printer );
+}
+
+
 void CameraComponent::DebugStr( grinliz::GLString* str )
 {
 	str->Format( "[Camera] mode=" );

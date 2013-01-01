@@ -42,6 +42,8 @@ public:
 	}
 	virtual void DebugStr( grinliz::GLString* str );
 
+	virtual void Load( const tinyxml2::XMLElement* element );
+	virtual void Save( tinyxml2::XMLPrinter* printer );
 	virtual void OnAdd( Chit* chit );
 	virtual void OnRemove();
 	virtual bool DoTick( U32 delta );
@@ -90,16 +92,16 @@ private:
 	// Returns 'true' if the destination is being squatted.
 	bool AvoidOthers( U32 delta );
 
+	int nPathPos;				// size of path
+	int pathPos;				// index of where we are on path
+	int repath;					// counter to see if we are stuck
+
 	struct Dest {
 		void Clear() { pos.Set( -1, -1 ); rotation = -1.f; /*doNotAvoid = 0;*/ }
 
 		grinliz::Vector2F	pos;
 		float				rotation;	 // <0 means ignore
 	};
-
-	int nPathPos;				// size of path
-	int pathPos;				// index of where we are on path
-	int repath;					// counter to see if we are stuck
 
 	Dest queued;	// queued up, 
 	Dest dest;		// in use

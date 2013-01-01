@@ -102,6 +102,21 @@ Vector2F SpatialComponent::GetHeading2D() const
 }
 
 
+void SpatialComponent::Load( const tinyxml2::XMLElement* element )
+{
+	GLASSERT( 0 );
+}
+
+
+void SpatialComponent::Save( tinyxml2::XMLPrinter* printer )
+{
+	this->BeginSave( printer, "SpatialComponent" );
+	PushVector( printer, "position", position );
+	PushVector( printer, "rotation", rotation );
+	this->EndSave( printer );
+}
+
+
 void SpatialComponent::OnAdd( Chit* chit )
 {
 	Component::OnAdd( chit );

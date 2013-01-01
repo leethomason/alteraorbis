@@ -92,6 +92,9 @@ public:
 		return super::ToComponent( name );
 	}
 
+	virtual void Load( const tinyxml2::XMLElement* element );
+	virtual void Save( tinyxml2::XMLPrinter* printer );
+
 	virtual bool IsMoving() const				{ return false; }
 	// approximate, may lag, etc. useful for AI
 	virtual void CalcVelocity( grinliz::Vector3F* v ) { v->Set( 0,0,0 ); }

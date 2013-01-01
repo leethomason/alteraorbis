@@ -25,6 +25,20 @@
 using namespace grinliz;
 
 
+void HealthComponent::Load( const tinyxml2::XMLElement* element )
+{
+	GLASSERT( 0 );
+}
+
+
+void HealthComponent::Save( tinyxml2::XMLPrinter* printer )
+{
+	this->BeginSave( printer, "HealthComponent" );
+	printer->PushAttribute( "destroyed", destroyed );
+	this->EndSave( printer );
+}
+
+
 void HealthComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {
 	if ( msg.ID() == ChitMsg::GAMEITEM_TICK ) {

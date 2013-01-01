@@ -414,7 +414,7 @@ ComponentSet::ComponentSet( Chit* _chit, int bits )
 			if ( !itemComponent ) 
 				++error;
 			else
-				item = &itemComponent->item;
+				item = itemComponent->GetItem();
 		}
 		{
 			// Always check if alive:

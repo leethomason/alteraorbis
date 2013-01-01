@@ -36,6 +36,9 @@ public:
 		return super::ToComponent( name );
 	}
 
+	virtual void Load( const tinyxml2::XMLElement* element );
+	virtual void Save( tinyxml2::XMLPrinter* printer );
+
 	virtual void DebugStr( grinliz::GLString* str )		{ str->Format( "[Health] " ); }
 	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
 	virtual bool DoTick( U32 delta );

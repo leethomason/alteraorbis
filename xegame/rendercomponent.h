@@ -50,6 +50,8 @@ public:
 	virtual RenderComponent*	ToRender()		{ return this; }
 	virtual void DebugStr( grinliz::GLString* str );
 
+	virtual void Load( const tinyxml2::XMLElement* element );
+	virtual void Save( tinyxml2::XMLPrinter* printer );
 	virtual void OnAdd( Chit* chit );
 	virtual void OnRemove();
 

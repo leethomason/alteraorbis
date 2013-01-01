@@ -35,7 +35,7 @@
   -->
   <item name="balrog"
         resource="balrog"
-        flags="CHARACTER"
+        flags="CHARACTER EFFECT_FIRE IMMUNE_FIRE"
         mass="400">
     <intrinsics>
       <!-- since intrinsic, also grants fire immunity -->
@@ -56,6 +56,25 @@
     </intrinsics>
   </item>
 
+  <!-- 
+  <item name="balrog"
+        resource="balrog"
+        flags="CHARACTER EFFECT_FIRE IMMUNE_FIRE"
+        mass="400">
+    <melee name="claw"
+           hardpoint="trigger"
+           damage="1.2"
+           canHold="true"/>
+    <ranged name="breath"
+            hardpoint="head"
+            flags="EFFECT_EXPLOSIVE RENDER_TRAIL"
+            cooldown="1000"
+            reload="3000"
+            clipCap="1"
+            speed="0.6"
+            damage="50"/>
+   
+  -->
   <item name="dummytarget"
         resource="dummytarget"
         flags="CHARACTER"

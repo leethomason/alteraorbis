@@ -47,6 +47,20 @@ DebugStateComponent::DebugStateComponent( WorldMap* _map ) : map( _map )
 	shieldBar.Init( &map->overlay, 10, purple, grey );
 }
 
+
+void DebugStateComponent::Load( const tinyxml2::XMLElement* element )
+{
+	GLASSERT( 0 );
+}
+
+
+void DebugStateComponent::Save( tinyxml2::XMLPrinter* printer )
+{
+	this->BeginSave( printer, "DebugStateComponent" );
+	this->EndSave( printer );
+}
+
+
 void DebugStateComponent::OnAdd( Chit* chit )
 {
 	super::OnAdd( chit );

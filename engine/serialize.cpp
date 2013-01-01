@@ -174,3 +174,51 @@ void LoadVector( const tinyxml2::XMLElement* element, grinliz::Vector3F* vec )
 	element->QueryFloatAttribute( "y", &vec->y );
 	element->QueryFloatAttribute( "z", &vec->z );
 }
+
+
+void PushVector( tinyxml2::XMLPrinter* printer, const char* name, const Vector3F& vec )
+{
+	printer->OpenElement( name );
+	printer->PushAttribute( "type", "Vector3F" );
+	printer->PushAttribute( "x", vec.x );
+	printer->PushAttribute( "y", vec.y );
+	printer->PushAttribute( "z", vec.z );
+	printer->CloseElement();
+}
+
+
+void PushVector( tinyxml2::XMLPrinter* printer, const char* name, const Vector4F& vec )
+{
+	printer->OpenElement( name );
+	printer->PushAttribute( "type", "Vector4F" );
+	printer->PushAttribute( "x", vec.x );
+	printer->PushAttribute( "y", vec.y );
+	printer->PushAttribute( "z", vec.z );
+	printer->PushAttribute( "w", vec.w );
+	printer->CloseElement();
+}
+
+
+void PushMatrix( tinyxml2::XMLPrinter* printer, const char* name, const Matrix4& mat )
+{
+	printer->OpenElement( name );
+	printer->PushAttribute( "type", "Matrix4" );
+	for( int i=0; i<16; ++i ) {
+		CStr<10> str;
+		str.Format( "x%0d", i );
+		printer->PushAttribute( str.c_str(), mat.x[i] );
+	}
+	printer->CloseElement();
+}
+
+
+void PushVector( tinyxml2::XMLPrinter* printer, const char* name, const Quaternion& q )
+{
+	printer->OpenElement( name );
+	printer->PushAttribute( "type", "Quaternion" );
+	printer->PushAttribute( "x", q.x );
+	printer->PushAttribute( "y", q.y );
+	printer->PushAttribute( "z", q.z );
+	printer->PushAttribute( "w", q.w );
+	printer->CloseElement();
+}

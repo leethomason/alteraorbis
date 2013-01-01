@@ -25,6 +25,57 @@
 using namespace grinliz;
 
 
+void InventoryComponent::Load( const tinyxml2::XMLElement* element )
+{
+	GLASSERT( 0 );
+}
+
+
+void InventoryComponent::Save( tinyxml2::XMLPrinter* printer )
+{
+	this->BeginSave( printer, "InventoryComponent" );
+	printer->PushAttribute( "hardpoints", hardpoints );
+
+	printer->OpenElement( "intrinsicAt" );
+	for( int i=0; i<NUM_HARDPOINTS; ++i ) {
+		if ( intrinsicAt[i] ) {
+			intrinsicAt[i]->Save( printer );
+		}
+		else {
+			printer->OpenElement( "intrinsic" );
+			printer->CloseElement();
+		}
+	}
+	printer->CloseElement();
+
+	printer->OpenElement( "heldAt" );
+	for( int i=0; i<NUM_HARDPOINTS; ++i ) {
+		if ( heldAt[i] ) {
+			heldAt[i]->Save( printer );
+		}
+		else {
+			printer->OpenElement( "held" );
+			printer->CloseElement();
+		}
+	}
+	printer->CloseElement();
+
+	printer->OpenElement( "freeItems" );
+	for( int i=0; i<freeItems.Size(); ++i ) {
+		freeItems[i]->Save( printer );
+	}
+	printer->CloseElement();
+
+	printer->OpenElement( "packItems" );
+	for( int i=0; i<packItems.Size(); ++i ) {
+		packItems[i]->Save( printer );
+	}
+	printer->CloseElement();
+
+	this->EndSave( printer );
+}
+
+
 void InventoryComponent::OnAdd( Chit* chit )
 {
 	super::OnAdd( chit );

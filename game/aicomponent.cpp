@@ -58,13 +58,29 @@ AIComponent::~AIComponent()
 }
 
 
+void AIComponent::Load( const tinyxml2::XMLElement* element )
+{
+	GLASSERT( 0 );
+}
+
+
+void AIComponent::Save( tinyxml2::XMLPrinter* printer )
+{
+	// note that no state is saved - AI will recompute. Maybe this
+	// is okay, maybe not.
+	this->BeginSave( printer, "AIComponent" );
+
+	this->EndSave( printer );
+}
+
+
 int AIComponent::GetTeamStatus( Chit* other )
 {
 	// FIXME: placeholder friend/enemy logic
 	ItemComponent* thisItem  = GET_COMPONENT( parentChit, ItemComponent );
 	ItemComponent* otherItem = GET_COMPONENT( other, ItemComponent );
 	if ( thisItem && otherItem ) {
-		if ( thisItem->item.primaryTeam != otherItem->item.primaryTeam ) {
+		if ( thisItem->GetItem()->primaryTeam != otherItem->GetItem()->primaryTeam ) {
 			return ENEMY;
 		}
 	}
@@ -290,7 +306,7 @@ void AIComponent::OnChitEvent( const ChitEvent& event )
 	if ( event.ID() == ChitEvent::AWARENESS ) {
 		ItemComponent* itemComp = GET_COMPONENT( parentChit, ItemComponent );
 		if ( itemComp ) {
-			if ( event.team == itemComp->item.primaryTeam ) 
+			if ( event.team == itemComp->GetItem()->primaryTeam ) 
 			{
 				UpdateCombatInfo( &event.AreaOfEffect() );
 			}

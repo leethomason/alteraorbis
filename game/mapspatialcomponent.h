@@ -38,6 +38,9 @@ public:
 		return super::ToComponent( name );
 	}
 
+	virtual void Load( const tinyxml2::XMLElement* element )	{ GLASSERT( 0 ); }
+	virtual void Save( tinyxml2::XMLPrinter* printer )			{ GLASSERT( 0 ); }
+
 	// Set the location of the origin point.
 	// 0, 90, 180, 270
 	void SetMapPosition( int x, int y, int r );

@@ -52,6 +52,52 @@ RenderComponent::~RenderComponent()
 }
 
 
+void RenderComponent::Load( const tinyxml2::XMLElement* element )
+{
+	GLASSERT( 0 );
+}
+
+	
+void RenderComponent::Save( tinyxml2::XMLPrinter* printer )
+{
+	this->BeginSave( printer, "RenderComponent" );
+
+	printer->OpenElement( "resources" );
+	for( int i=0; i<NUM_MODELS; ++i ) {
+		printer->OpenElement( "resource" );
+		if ( resource[i] ) {
+			printer->PushAttribute( "name", resource[i]->header.name.c_str() );
+		}
+		printer->CloseElement();	// resource
+	}
+	printer->CloseElement(); // resources
+
+	printer->OpenElement( "models" );
+	for( int i=0; i<NUM_MODELS; ++i ) {
+		if ( model[i] ) {
+			model[i]->Save( printer );
+		}
+		else {
+			printer->OpenElement( "model" );
+			printer->CloseElement();
+		}
+	}
+	printer->CloseElement();	// models
+
+	printer->OpenElement( "metaDataNames" );
+	for( int i=0; i<NUM_MODELS; ++i ) {
+		printer->OpenElement( "metaDataName" );
+		if ( !metaDataName[i].empty() ) {
+			printer->PushAttribute( "name", metaDataName[i].c_str() );
+		}
+		printer->CloseElement();	// metaDataName
+	}
+	printer->CloseElement();	// metaDataNames
+
+	this->EndSave( printer );
+}
+
+
 void RenderComponent::OnAdd( Chit* chit )
 {
 	Component::OnAdd( chit );

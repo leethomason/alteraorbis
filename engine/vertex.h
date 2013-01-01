@@ -19,6 +19,7 @@
 #include "../grinliz/glvector.h"
 #include "../grinliz/glmatrix.h"
 #include "../grinliz/glstringutil.h"
+#include "../tinyxml2/tinyxml2.h"
 #include "enginelimits.h"
 
 class Texture;
@@ -152,6 +153,9 @@ struct BoneData
 	}
 
 	Bone bone[EL_MAX_BONES];
+
+	void Load( const tinyxml2::XMLElement* element );
+	void Save( tinyxml2::XMLPrinter* printer );
 };
 
 

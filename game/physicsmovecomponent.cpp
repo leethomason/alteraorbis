@@ -2,6 +2,8 @@
 #include "worldmap.h"
 #include "gamelimits.h"
 
+#include "../engine/serialize.h"
+
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/chit.h"
 #include "../xegame/chitbag.h"
@@ -17,6 +19,24 @@ PhysicsMoveComponent::PhysicsMoveComponent( WorldMap* _map ) : GameMoveComponent
 void PhysicsMoveComponent::DebugStr( grinliz::GLString* str )
 {
 	str->Format( "[PhysicsMove] " );
+}
+
+
+void PhysicsMoveComponent::Load( const tinyxml2::XMLElement* element )
+{
+	GLASSERT( 0 );
+}
+
+
+void PhysicsMoveComponent::Save( tinyxml2::XMLPrinter* printer )
+{
+	this->BeginSave( printer, "PhysicsMoveComponent" );
+
+	printer->PushAttribute( "rotation", rotation );
+	printer->PushAttribute( "deleteWhenDone", deleteWhenDone );
+	PushVector( printer, "velocity", velocity ); 
+
+	this->EndSave( printer );
 }
 
 

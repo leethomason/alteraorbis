@@ -289,7 +289,7 @@ void ChitBag::QuerySpatialHash(	grinliz::CDynArray<Chit*>* array,
 			for( Chit* it=spatialHash[ index ]; it; it=it->next ) {
 				if ( it != ignore ) {
 					if ( itemFilter ) {
-						if ( it->GetItemComponent() && (it->GetItemComponent()->item.flags & itemFilter )) {
+						if ( it->GetItemComponent() && (it->GetItemComponent()->GetItem()->flags & itemFilter )) {
 							// okay!
 						}
 						else {

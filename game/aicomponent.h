@@ -66,6 +66,8 @@ public:
 		return super::ToComponent( name );
 	}
 
+	virtual void Load( const tinyxml2::XMLElement* element );
+	virtual void Save( tinyxml2::XMLPrinter* printer );
 	virtual bool DoTick( U32 delta );
 	virtual bool DoSlowTick();
 	virtual void DebugStr( grinliz::GLString* str );
