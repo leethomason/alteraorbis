@@ -29,9 +29,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 
 	//game->LoadGame();
 
-	GLString xmlPath = game->GamePath( "map", 0, "xml" );
-	GLString pngPath = game->GamePath( "map", 0, "png" );
-	sim->Load( pngPath.c_str(), xmlPath.c_str() );
+	Load();
 
 	Vector3F delta = { 20.0f, 20.0f, 20.0f };
 	Vector3F target = sim->GetPlayerChit()->GetSpatialComponent()->GetPosition();
@@ -50,17 +48,14 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	atom = lumosGame->CalcPaletteAtom( PAL_TANGERINE*2, PAL_ZERO );
 	playerMark.Init( &gamui2D, atom, true );
 	playerMark.SetSize( MARK_SIZE, MARK_SIZE );
+
+	refresh.Init( &gamui2D, game->GetButtonLook(0) );
+	refresh.SetText( "Refresh" );
 }
 
 
 GameScene::~GameScene()
 {
-	GLString xmlPath = game->GamePath( "map", 0, "xml" );
-	GLString pngPath = game->GamePath( "map", 0, "png" );
-	GLString gamePath = game->GamePath( "game", 0, "xml" );
-	sim->Save( pngPath.c_str(), xmlPath.c_str(), gamePath.c_str() );
-
-	//game->SaveGame();
 	delete sim;
 }
 
@@ -68,11 +63,36 @@ GameScene::~GameScene()
 void GameScene::Resize()
 {
 	lumosGame->PositionStd( &okay, 0 );
+	
+	LayoutCalculator layout = static_cast<LumosGame*>(game)->DefaultLayout();
+	layout.PosAbs( &refresh, 0, -2 );
 
 	const Screenport& port = lumosGame->GetScreenport();
 	minimap.SetPos( port.UIWidth()-MINI_MAP_SIZE, 0 );
 }
 
+
+void GameScene::Save()
+{
+	GLString xmlPath = game->GamePath( "map", 0, "xml" );
+	GLString pngPath = game->GamePath( "map", 0, "png" );
+	GLString gamePath = game->GamePath( "game", 0, "xml" );
+	sim->Save( pngPath.c_str(), xmlPath.c_str(), gamePath.c_str() );
+}
+
+
+void GameScene::Load()
+{
+	GLString xmlPath  = lumosGame->GamePath( "map", 0, "xml" );
+	GLString pngPath  = lumosGame->GamePath( "map", 0, "png" );
+	GLString gamePath = lumosGame->GamePath( "game", 0, "xml" );
+	if ( lumosGame->HasFile( gamePath.c_str() )) {
+		sim->Load( pngPath.c_str(), xmlPath.c_str(), gamePath.c_str() );
+	}
+	else {
+		sim->Load( pngPath.c_str(), xmlPath.c_str(), 0 );
+	}
+}
 
 
 void GameScene::Zoom( int style, float delta )
@@ -141,6 +161,9 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 				pmc->QueueDest( dest );
 			}
 		}
+	}
+	else if ( item == &refresh ) {
+		Save();
 	}
 }
 

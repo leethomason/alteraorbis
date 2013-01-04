@@ -16,6 +16,9 @@
 #include "component.h"
 #include "chit.h"
 #include "chitbag.h"
+#include "../grinliz/glstringutil.h"
+
+using namespace grinliz;
 
 int Component::idPool = 1;
 
@@ -47,6 +50,14 @@ void Component::BeginSave( tinyxml2::XMLPrinter* printer, const char* name )
 void Component::EndSave( tinyxml2::XMLPrinter* printer )
 {
 	printer->CloseElement();
+}
+
+
+void Component::BeginLoad( const tinyxml2::XMLElement* element, const char* name )
+{
+	GLASSERT( StrEqual( element->Value(), name ));
+	id = 0;
+	element->QueryIntAttribute( "id", &id );
 }
 
 

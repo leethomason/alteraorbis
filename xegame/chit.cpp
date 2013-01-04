@@ -19,10 +19,13 @@
 #include "spatialcomponent.h"
 #include "rendercomponent.h"
 #include "itemcomponent.h"
+#include "componentfactory.h"
 
 #include "../grinliz/glstringutil.h"
 
 using namespace grinliz;
+using namespace tinyxml2;
+
 const U32 SLOW_TICK = 500;
 
 Chit::Chit( int _id, ChitBag* bag ) : next( 0 ), chitBag( bag ), id( _id ), tickNeeded( true ), shelf( 0 )
@@ -93,6 +96,23 @@ void Chit::Save( tinyxml2::XMLPrinter* printer )
 	}
 
 	printer->CloseElement();	// Chit
+}
+
+
+void Chit::Load( const ComponentFactory* factory, const XMLElement* ele ) 
+{
+	GLASSERT( StrEqual( ele->Value(), "Chit" ));
+	ele->QueryIntAttribute( "id", &id );
+
+	for( const XMLElement* slotEle = ele->FirstChildElement();
+		 slotEle;
+		 slotEle = slotEle->NextSiblingElement() )
+	{
+		Component* component = factory->Factory( slotEle->Name(), this ); 
+		GLASSERT( component );
+		component->Load( slotEle );
+		this->Add( component );
+	}
 }
 
 

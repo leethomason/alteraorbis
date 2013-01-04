@@ -35,7 +35,7 @@ void CameraComponent::Save( tinyxml2::XMLPrinter* printer )
 	printer->PushAttribute( "mode", mode );
 	printer->PushAttribute( "targetChitID", targetChitID );
 	printer->PushAttribute( "speed", speed );
-	PushVector( printer, "dest", dest );
+	PushType( printer, "dest", dest );
 	this->EndSave( printer );
 }
 

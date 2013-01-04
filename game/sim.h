@@ -22,7 +22,7 @@ public:
 	void Draw3D( U32 deltaTime );
 	void DrawDebugText();
 
-	void Load( const char* mapPNG, const char* mapXML );
+	void Load( const char* mapPNG, const char* mapXML, const char* gameXML );
 	void Save( const char* mapPNG, const char* mapXML, const char* gameXML );
 
 	void Draw( U32 delta );

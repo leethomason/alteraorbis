@@ -54,9 +54,16 @@ void LoadColor( const tinyxml2::XMLElement* element, grinliz::Color3F* color );
 void LoadColor( const tinyxml2::XMLElement* element, grinliz::Color4F* color );
 void LoadColor( const tinyxml2::XMLElement* element, grinliz::Vector4F* color );
 
-void PushVector( tinyxml2::XMLPrinter* printer, const char* name, const grinliz::Vector3F& vec );
-void PushVector( tinyxml2::XMLPrinter* printer, const char* name, const grinliz::Vector4F& vec );
-void PushVector( tinyxml2::XMLPrinter* printer, const char* name, const grinliz::Quaternion& vec );
-void PushMatrix( tinyxml2::XMLPrinter* printer, const char* name, const grinliz::Matrix4& mat );
+void PushType( tinyxml2::XMLPrinter* printer, const char* name, const grinliz::Vector3F& vec );
+void PushType( tinyxml2::XMLPrinter* printer, const char* name, const grinliz::Vector4F& vec );
+void PushType( tinyxml2::XMLPrinter* printer, const char* name, const grinliz::Quaternion& vec );
+void PushType( tinyxml2::XMLPrinter* printer, const char* name, const grinliz::Matrix4& mat );
+
+void XEArchive( tinyxml2::XMLPrinter* printer, const tinyxml2::XMLElement* element, const char* name, 
+				float& value );
+void XEArchive( tinyxml2::XMLPrinter* printer, const tinyxml2::XMLElement* element, const char* name, 
+				grinliz::Vector3F& vec );
+void XEArchive( tinyxml2::XMLPrinter* printer, const tinyxml2::XMLElement* element, const char* name, 
+				grinliz::Quaternion& vec );
 
 #endif // UFOATTACK_SERIALIZE_INCLUDED

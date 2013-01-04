@@ -50,7 +50,8 @@ DebugStateComponent::DebugStateComponent( WorldMap* _map ) : map( _map )
 
 void DebugStateComponent::Load( const tinyxml2::XMLElement* element )
 {
-	GLASSERT( 0 );
+	this->BeginLoad( element, "DebugStateComponent" );
+	this->EndLoad( element );
 }
 
 
@@ -77,10 +78,14 @@ void DebugStateComponent::OnAdd( Chit* chit )
 	map->overlay.Add( &ammoBar );
 	ammoBar.SetSize( SIZE_X, SIZE_Y );
 	ammoBar.SetRange( 1.0f );
+	/*
 	if ( pItem ) {
-		float r = (float)pItem->GetItem()->rounds / (float)pItem->GetItem()->clipCap;
+		const GameItem* item = pItem->GetItem();
+		float r = (float)item->rounds / (float)item->clipCap;
+		GLASSERT( r >= 0 && r <= 1 );
 		ammoBar.SetRange( r ); 
 	}
+	*/
 	map->overlay.Add( &shieldBar );
 	shieldBar.SetSize( SIZE_X, SIZE_Y );
 	shieldBar.SetRange( 1.0f );

@@ -26,6 +26,7 @@
 #include "../script/battlemechanics.h"
 
 using namespace gamui;
+using namespace grinliz;
 
 TitleScene::TitleScene( LumosGame* game ) : Scene( game ), lumosGame( game ) 
 {
@@ -51,12 +52,11 @@ TitleScene::TitleScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 		testScene[i].SetSize( layout.Width(), layout.Height() );
 	}
 
-	static const char* gameSceneName[NUM_GAME] = { "Generate", "New", "Continue" };
+	static const char* gameSceneName[NUM_GAME] = { "Generate", "Continue" };
 	for( int i=0; i<NUM_GAME; ++i ) {
 		gameScene[i].Init( &gamui2D, lumosGame->GetButtonLook( LumosGame::BUTTON_LOOK_STD ) );
 		gameScene[i].SetText( gameSceneName[i] );
 		gameScene[i].SetSize( layout.Width()*2.0f, layout.Height() );
-		//gameScene[i].SetEnabled( false );
 	}
 }
 

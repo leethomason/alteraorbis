@@ -27,10 +27,14 @@ public:
 	virtual void DrawDebugText();
 
 private:
+	void Save();
+	void Load();
+
 	LumosGame*	lumosGame;
 	Sim*		sim;
 
 	gamui::PushButton	okay;
+	gamui::PushButton	refresh;
 	gamui::Image		minimap;
 	gamui::Image		playerMark;
 };

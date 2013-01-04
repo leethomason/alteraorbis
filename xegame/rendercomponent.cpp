@@ -29,6 +29,7 @@
 #include "../script/procedural.h"
 
 using namespace grinliz;
+using namespace tinyxml2;
 
 RenderComponent::RenderComponent( Engine* _engine, const char* _asset ) 
 	: engine( _engine )
@@ -54,7 +55,60 @@ RenderComponent::~RenderComponent()
 
 void RenderComponent::Load( const tinyxml2::XMLElement* element )
 {
-	GLASSERT( 0 );
+	this->BeginLoad( element, "RenderComponent" );
+	
+	// Load the resources.
+	const XMLElement* resEle = element->FirstChildElement( "resources" );
+	GLASSERT( resEle );
+	if ( resEle ) {
+		int i=0;
+		for( const XMLElement* it = resEle->FirstChildElement( "resource" );
+			 it && i < NUM_MODELS;
+			 i++, it = it->NextSiblingElement( "resource" ) )
+		{
+			resource[i] = 0;
+			const char* asset = it->Attribute( "name" );
+			if ( asset ) {
+				resource[i] = ModelResourceManager::Instance()->GetModelResource( asset );
+			}
+		}
+	}
+
+	// And now the models.
+	const XMLElement* modelEle = element->FirstChildElement( "models" );
+	GLASSERT( modelEle );
+	if ( modelEle ) {
+		int i=0;
+		for ( const XMLElement* it = modelEle->FirstChildElement( "Model" );
+			  it && i<NUM_MODELS;
+			  ++i, it = it->NextSiblingElement( "Model" ))
+		{
+			model[i] = 0;
+			GLASSERT( !resource[i] || it->FirstAttribute() );
+			if ( it->FirstAttribute() ) {
+				GLASSERT( resource[i] );
+				model[i] = engine->AllocModel( resource[i] );
+				model[i]->Load( it );
+			}
+		}
+	}
+
+	const XMLElement* metaEle = element->FirstChildElement( "metaDataNames" );
+	GLASSERT( metaEle );
+	if ( metaEle ) {
+		int i=0; 
+		for( const XMLElement* it = metaEle->FirstChildElement( "metaDataName" );
+			 it;
+			 ++i, it=it->NextSiblingElement( "metaDataName" ))
+		{
+			metaDataName[i] = IString();
+			const char* name = it->Attribute( "name" );
+			if ( name ) {
+				metaDataName[i] = StringPool::Intern( name );
+			}
+		}
+	}
+	this->EndLoad( element );
 }
 
 	
@@ -78,14 +132,14 @@ void RenderComponent::Save( tinyxml2::XMLPrinter* printer )
 			model[i]->Save( printer );
 		}
 		else {
-			printer->OpenElement( "model" );
+			printer->OpenElement( "Model" );
 			printer->CloseElement();
 		}
 	}
 	printer->CloseElement();	// models
 
 	printer->OpenElement( "metaDataNames" );
-	for( int i=0; i<NUM_MODELS; ++i ) {
+	for( int i=0; i<EL_MAX_METADATA; ++i ) {
 		printer->OpenElement( "metaDataName" );
 		if ( !metaDataName[i].empty() ) {
 			printer->PushAttribute( "name", metaDataName[i].c_str() );

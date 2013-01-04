@@ -39,7 +39,13 @@ void ItemComponent::Save( tinyxml2::XMLPrinter* printer )
 
 void ItemComponent::Load( const tinyxml2::XMLElement* element )
 {
-	GLASSERT( 0 );
+	this->BeginLoad( element, "ItemComponent" );
+	const tinyxml2::XMLElement* itemElement = element->FirstChildElement( "item" );
+	GLASSERT( itemElement );
+	if ( itemElement ) {
+		item.Load( itemElement );
+	}
+	this->EndLoad( element );
 }
 
 

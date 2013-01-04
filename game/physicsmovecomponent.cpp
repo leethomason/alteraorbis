@@ -34,7 +34,7 @@ void PhysicsMoveComponent::Save( tinyxml2::XMLPrinter* printer )
 
 	printer->PushAttribute( "rotation", rotation );
 	printer->PushAttribute( "deleteWhenDone", deleteWhenDone );
-	PushVector( printer, "velocity", velocity ); 
+	PushType( printer, "velocity", velocity ); 
 
 	this->EndSave( printer );
 }

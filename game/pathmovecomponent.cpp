@@ -38,9 +38,23 @@ static const float MOVE_SPEED		= 1.2f;			// grid/second
 static const float ROTATION_SPEED	= 360.f;		// degrees/second
 
 
+void PathMoveComponent::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele )
+{
+	XEArchive( prn, ele, "queued.pos.x", queued.pos.x );
+	XEArchive( prn, ele, "queued.pos.y", queued.pos.y );
+	XEArchive( prn, ele, "queued.rotation", queued.rotation );
+
+	XEArchive( prn, ele, "dest.pos.x", dest.pos.x );
+	XEArchive( prn, ele, "dest.pos.y", dest.pos.y );
+	XEArchive( prn, ele, "dest.rotation", dest.rotation );
+}
+
+
 void PathMoveComponent::Load( const tinyxml2::XMLElement* element )
 {
-	GLASSERT( 0 );
+	this->BeginLoad( element, "PathMoveComponent" );
+	Archive( 0, element );
+	this->EndLoad( element );
 }
 
 
@@ -48,19 +62,7 @@ void PathMoveComponent::Save( tinyxml2::XMLPrinter* printer )
 {
 	// note that save/load causes re-path. Too much data to save otherwise.
 	this->BeginSave( printer, "PathMoveComponent" );
-
-	printer->OpenElement( "queued" );
-	printer->PushAttribute( "x", queued.pos.x );
-	printer->PushAttribute( "y", queued.pos.x );
-	printer->PushAttribute( "rotation", queued.rotation );
-	printer->CloseElement();
-	
-	printer->OpenElement( "dest" );
-	printer->PushAttribute( "x", dest.pos.x );
-	printer->PushAttribute( "y", dest.pos.x );
-	printer->PushAttribute( "rotation", dest.rotation );
-	printer->CloseElement();
-	
+	Archive( printer, 0 );	
 	this->EndSave( printer );
 }
 

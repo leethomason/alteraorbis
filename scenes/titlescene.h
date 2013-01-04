@@ -58,7 +58,6 @@ private:
 		TESTS_PER_ROW = 6,
 
 		GENERATE_WORLD = 0,
-		NEW_GAME,
 		CONTINUE,
 		NUM_GAME
 	};

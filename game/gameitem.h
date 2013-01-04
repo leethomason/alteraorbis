@@ -395,7 +395,11 @@ public:
 
 	// Note that the current HP, if it has one, 
 	float TotalHP() const		{ return mass*hpPerMass*stats.NormalWill(); }
-	float HPFraction() const	{ return hp / TotalHP(); } 
+	float HPFraction() const	{ 
+		float f = hp / TotalHP(); 
+		GLASSERT( f >= 0 && f <= 1 );
+		return f;
+	} 
 
 	float RoundsFraction() const {
 		if ( clipCap ) {

@@ -275,7 +275,6 @@ void Model::Save( tinyxml2::XMLPrinter* printer )
 	if ( animationResource ) {
 		printer->PushAttribute( "animationResource", animationResource->ResourceName() );
 	}
-	printer->PushAttribute( "crossFadeTime", crossFadeTime );
 	printer->PushAttribute( "hasParticles", hasParticles );
 	printer->PushAttribute( "flags", flags );
 
@@ -289,16 +288,16 @@ void Model::Save( tinyxml2::XMLPrinter* printer )
 	printer->PushAttribute( "id", (int)prevAnim.id );
 	printer->CloseElement();
 
-	PushVector( printer, "pos", pos );
-	PushVector( printer, "rot", rot );
-	PushVector( printer, "color", color );
-	PushVector( printer, "boneFilter", boneFilter );
-	PushVector( printer, "control", control );
+	PushType( printer, "pos", pos );
+	PushType( printer, "rot", rot );
+	PushType( printer, "color", color );
+	PushType( printer, "boneFilter", boneFilter );
+	PushType( printer, "control", control );
 
 	if ( aux ) {
 		printer->OpenElement( "aux" );
 		aux->boneData.Save( printer );
-		PushMatrix( printer, "procMat", aux->procMat );
+		PushType( printer, "procMat", aux->procMat );
 		printer->CloseElement();	// aux
 	}
 

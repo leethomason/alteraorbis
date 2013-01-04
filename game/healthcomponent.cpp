@@ -27,7 +27,9 @@ using namespace grinliz;
 
 void HealthComponent::Load( const tinyxml2::XMLElement* element )
 {
-	GLASSERT( 0 );
+	this->BeginLoad( element, "HealthComponent" );
+	element->QueryUnsignedAttribute( "destroyed", &destroyed );
+	this->EndLoad( element );
 }
 
 

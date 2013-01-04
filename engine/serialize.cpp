@@ -176,7 +176,7 @@ void LoadVector( const tinyxml2::XMLElement* element, grinliz::Vector3F* vec )
 }
 
 
-void PushVector( tinyxml2::XMLPrinter* printer, const char* name, const Vector3F& vec )
+void PushType( tinyxml2::XMLPrinter* printer, const char* name, const Vector3F& vec )
 {
 	printer->OpenElement( name );
 	printer->PushAttribute( "type", "Vector3F" );
@@ -187,7 +187,7 @@ void PushVector( tinyxml2::XMLPrinter* printer, const char* name, const Vector3F
 }
 
 
-void PushVector( tinyxml2::XMLPrinter* printer, const char* name, const Vector4F& vec )
+void PushType( tinyxml2::XMLPrinter* printer, const char* name, const Vector4F& vec )
 {
 	printer->OpenElement( name );
 	printer->PushAttribute( "type", "Vector4F" );
@@ -199,7 +199,7 @@ void PushVector( tinyxml2::XMLPrinter* printer, const char* name, const Vector4F
 }
 
 
-void PushMatrix( tinyxml2::XMLPrinter* printer, const char* name, const Matrix4& mat )
+void PushType( tinyxml2::XMLPrinter* printer, const char* name, const Matrix4& mat )
 {
 	printer->OpenElement( name );
 	printer->PushAttribute( "type", "Matrix4" );
@@ -212,7 +212,7 @@ void PushMatrix( tinyxml2::XMLPrinter* printer, const char* name, const Matrix4&
 }
 
 
-void PushVector( tinyxml2::XMLPrinter* printer, const char* name, const Quaternion& q )
+void PushType( tinyxml2::XMLPrinter* printer, const char* name, const Quaternion& q )
 {
 	printer->OpenElement( name );
 	printer->PushAttribute( "type", "Quaternion" );
@@ -221,4 +221,67 @@ void PushVector( tinyxml2::XMLPrinter* printer, const char* name, const Quaterni
 	printer->PushAttribute( "z", q.z );
 	printer->PushAttribute( "w", q.w );
 	printer->CloseElement();
+}
+
+
+void XEArchive( XMLPrinter* printer, const XMLElement* element, const char* name, float& value )
+{
+	GLASSERT( !(printer && element));
+	GLASSERT( printer || element );
+	GLASSERT( name && *name );
+
+	if ( printer ) 
+		printer->PushAttribute( name, value );
+
+	if ( element ) {
+		value = 0;
+		element->QueryFloatAttribute( name, &value );
+	}
+}
+
+
+void XEArchive( XMLPrinter* printer, const XMLElement* element, const char* name, Vector3F& vec )
+{
+	GLASSERT( !(printer && element));
+	GLASSERT( printer || element );
+	GLASSERT( name && *name );
+
+	if ( printer ) 
+		PushType( printer, name, vec );
+	if ( element ) {
+		vec.Zero();
+		const XMLElement* ele = element->FirstChildElement( name );
+		GLASSERT( ele );
+		if ( ele ) {
+			const char* type = ele->Attribute( "type" );
+			GLASSERT( type && StrEqual( type,  "Vector3F" ));
+			ele->QueryFloatAttribute( "x", &vec.x );
+			ele->QueryFloatAttribute( "y", &vec.y );
+			ele->QueryFloatAttribute( "z", &vec.z );
+		}
+	}
+}
+
+
+void XEArchive( XMLPrinter* printer, const XMLElement* element, const char* name, Quaternion& q )
+{
+	GLASSERT( !(printer && element));
+	GLASSERT( printer || element );
+	GLASSERT( name && *name );
+
+	if ( printer ) 
+		PushType( printer, name, q );
+	if ( element ) {
+		q.Zero();
+		const XMLElement* ele = element->FirstChildElement( name );
+		GLASSERT( ele );
+		if ( ele ) {
+			const char* type = ele->Attribute( "type" );
+			GLASSERT( type && StrEqual( type,  "Quaternion" ));
+			ele->QueryFloatAttribute( "x", &q.x );
+			ele->QueryFloatAttribute( "y", &q.y );
+			ele->QueryFloatAttribute( "z", &q.z );
+			ele->QueryFloatAttribute( "w", &q.w );
+		}
+	}
 }

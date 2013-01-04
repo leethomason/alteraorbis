@@ -102,17 +102,25 @@ Vector2F SpatialComponent::GetHeading2D() const
 }
 
 
+void SpatialComponent::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele )
+{
+	XEArchive( prn, ele, "position", position );
+	XEArchive( prn, ele, "rotation", rotation );
+}
+
+
 void SpatialComponent::Load( const tinyxml2::XMLElement* element )
 {
-	GLASSERT( 0 );
+	this->BeginLoad( element, "SpatialComponent" );
+	Archive( 0, element );
+	this->EndLoad( element );
 }
 
 
 void SpatialComponent::Save( tinyxml2::XMLPrinter* printer )
 {
 	this->BeginSave( printer, "SpatialComponent" );
-	PushVector( printer, "position", position );
-	PushVector( printer, "rotation", rotation );
+	Archive( printer, 0 );
 	this->EndSave( printer );
 }
 

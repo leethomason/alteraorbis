@@ -62,7 +62,6 @@ void ChitBag::Save( const char* pathToXML )
 
 		printer.OpenElement( "ChitBag" );
 		printer.PushAttribute( "idPool", idPool );
-		printer.PushAttribute( "bagTime", bagTime );
 
 		printer.OpenElement( "Chits" );
 		Chit** chits = chitID.GetValues();
@@ -72,8 +71,35 @@ void ChitBag::Save( const char* pathToXML )
 		printer.CloseElement();	// Chits
 
 		printer.CloseElement();	// ChitBag
+		fclose( fp );
 	}
 }
+
+
+void ChitBag::Load( const ComponentFactory* factory, const char* pathToXML )
+{
+	XMLDocument doc;
+	doc.LoadFile( pathToXML );
+	GLASSERT( !doc.Error() );
+	if ( !doc.Error() ) {
+		const XMLElement* root = doc.RootElement();
+		GLASSERT( StrEqual( root->Value(), "ChitBag" ));
+		root->QueryIntAttribute( "idPool", &idPool );
+
+		const XMLElement* chits = root->FirstChildElement( "Chits" );
+		GLASSERT( chits );
+		if ( chits ) {
+			for( const XMLElement* chit = chits->FirstChildElement( "Chit" );
+				 chit;
+				 chit = chit->NextSiblingElement( "Chit" ) ) 
+			{
+				Chit* c = this->NewChit();
+				c->Load( factory, chit );
+			}
+		}
+	}
+}
+
 
 
 Chit* ChitBag::NewChit()

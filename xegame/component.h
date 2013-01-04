@@ -70,6 +70,8 @@ protected:
 
 	void BeginSave( tinyxml2::XMLPrinter* printer, const char* name );
 	void EndSave( tinyxml2::XMLPrinter* printer );
+	void BeginLoad( const tinyxml2::XMLElement* element, const char* name ); 
+	void EndLoad( const tinyxml2::XMLElement* element )	{}
 
 	ChitBag* GetChitBag();
 	Chit* parentChit;

@@ -23,11 +23,64 @@
 #include "../script/procedural.h"
 
 using namespace grinliz;
-
+using namespace tinyxml2;
 
 void InventoryComponent::Load( const tinyxml2::XMLElement* element )
 {
-	GLASSERT( 0 );
+	this->BeginLoad( element, "InventoryComponent" );
+	element->QueryIntAttribute( "hardpoints", &hardpoints );
+
+	const XMLElement* parent = element->FirstChildElement( "intrinsicAt" );
+	int i=0;
+	for( const XMLElement* it = parent->FirstChildElement();
+		 it;
+		 it = it->NextSiblingElement(), ++i )
+	{
+		if ( it->FirstAttribute() ) {
+			intrinsicAt[i] = new GameItem();
+			intrinsicAt[i]->Load( it );
+		}
+	}
+
+	parent = element->FirstChildElement( "heldAt" );
+	i=0;
+	for( const XMLElement* it = parent->FirstChildElement();
+		 it;
+		 it = it->NextSiblingElement(), ++i )
+	{
+		if ( it->FirstAttribute() ) {
+			heldAt[i] = new GameItem();
+			heldAt[i]->Load( it );
+		}
+	}
+
+	parent = element->FirstChildElement( "freeItems" );
+	i=0;
+	for( const XMLElement* it = parent->FirstChildElement();
+		 it;
+		 it = it->NextSiblingElement(), ++i )
+	{
+		if ( it->FirstAttribute() ) {
+			GameItem* gi = new GameItem();
+			gi->Load( it );
+			freeItems.Push( gi );
+		}
+	}
+
+	parent = element->FirstChildElement( "packItems" );
+	i=0;
+	for( const XMLElement* it = parent->FirstChildElement();
+		 it;
+		 it = it->NextSiblingElement(), ++i )
+	{
+		if ( it->FirstAttribute() ) {
+			GameItem* gi = new GameItem();
+			gi->Load( it );
+			packItems.Push( gi );
+		}
+	}
+
+	this->EndLoad( element );
 }
 
 
@@ -41,10 +94,6 @@ void InventoryComponent::Save( tinyxml2::XMLPrinter* printer )
 		if ( intrinsicAt[i] ) {
 			intrinsicAt[i]->Save( printer );
 		}
-		else {
-			printer->OpenElement( "intrinsic" );
-			printer->CloseElement();
-		}
 	}
 	printer->CloseElement();
 
@@ -52,10 +101,6 @@ void InventoryComponent::Save( tinyxml2::XMLPrinter* printer )
 	for( int i=0; i<NUM_HARDPOINTS; ++i ) {
 		if ( heldAt[i] ) {
 			heldAt[i]->Save( printer );
-		}
-		else {
-			printer->OpenElement( "held" );
-			printer->CloseElement();
 		}
 	}
 	printer->CloseElement();

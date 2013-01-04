@@ -1058,6 +1058,7 @@ class XMLElement : public XMLNode
 public:
     /// Get the name of an element (which is the Value() of the node.)
     const char* Name() const		{
+		TIXMLASSERT( this );
         return Value();
     }
     /// Set the name of the element.

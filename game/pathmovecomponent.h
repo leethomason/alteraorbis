@@ -70,6 +70,8 @@ public:
 	} 
 
 private:
+	void Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele );
+
 	// Commit the 'queued' to the 'dest', if possible. 
 	void ComputeDest();
 	bool NeedComputeDest();

@@ -28,6 +28,7 @@
 #include "chitevent.h"
 
 class Engine;
+class ComponentFactory;
 
 class ChitBag : public IBoltImpactHandler
 {
@@ -42,6 +43,7 @@ public:
 	Chit* GetChit( int id );
 
 	void Save( const char* pathToXML );
+	void Load( const ComponentFactory* factory, const char* pathToXML );
 
 	// Bolts are a special kind of chit. Just easier
 	// and faster to treat them as a 2nd stage.

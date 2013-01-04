@@ -33,12 +33,14 @@ void BoneData::Save( tinyxml2::XMLPrinter* printer )
 {
 	printer->OpenElement( "BoneData" );
 	for( int i=0; i<EL_MAX_BONES; ++i ) {
-		printer->OpenElement( "Bone" );
-		printer->PushAttribute( "name", bone[i].name.c_str() );
-		printer->PushAttribute( "angleRadians", bone[i].angleRadians );
-		printer->PushAttribute( "dy", bone[i].dy );
-		printer->PushAttribute( "dz", bone[i].dz );
-		printer->CloseElement();
+		if ( !bone[i].name.empty() ) {
+			printer->OpenElement( "Bone" );
+			printer->PushAttribute( "name", bone[i].name.c_str() );
+			printer->PushAttribute( "angleRadians", bone[i].angleRadians );
+			printer->PushAttribute( "dy", bone[i].dy );
+			printer->PushAttribute( "dz", bone[i].dz );
+			printer->CloseElement();
+		}
 	}
 	printer->CloseElement();
 }

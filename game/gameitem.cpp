@@ -105,6 +105,7 @@ void GameItem::Save( tinyxml2::XMLPrinter* printer )
 	if ( procedural != PROCEDURAL_NONE ) {
 		printer->PushAttribute( "procedural", ItemGen::ToName( procedural ).c_str() );
 	}
+	GLASSERT( hp <= TotalHP() );
 	printer->PushAttribute( "hp", hp );
 
 	printer->CloseElement();	// item
@@ -170,6 +171,7 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 
 	hp = this->TotalHP();
 	ele->QueryFloatAttribute( "hp", &hp );
+	GLASSERT( hp <= TotalHP() );
 
 	GLASSERT( TotalHP() > 0 );
 	GLASSERT( hp > 0 );	// else should be destroyed

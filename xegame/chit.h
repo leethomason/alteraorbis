@@ -37,6 +37,7 @@ class ChitBag;
 class Chit;
 class ChitEvent;
 class GameItem;
+class ComponentFactory;
 
 // Synchronous. Can be sub-classed.
 class ChitMsg
@@ -116,6 +117,7 @@ public:
 	void Free();
 
 	void Save( tinyxml2::XMLPrinter* );
+	void Load( const ComponentFactory* factory, const tinyxml2::XMLElement* );
 
 	int ID() const { return id; }
 	void Add( Component* );

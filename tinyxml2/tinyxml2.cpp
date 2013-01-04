@@ -1860,6 +1860,8 @@ void XMLPrinter::OpenElement( const char* name )
 void XMLPrinter::PushAttribute( const char* name, const char* value )
 {
     TIXMLASSERT( _elementJustOpened );
+	TIXMLASSERT( name );
+	TIXMLASSERT( value );
     Print( " %s=\"", name );
     PrintString( value, false );
     Print( "\"" );

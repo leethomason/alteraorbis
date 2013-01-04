@@ -39,6 +39,7 @@ private:
 	typedef Component super;
 public:
 	// spacetree probably  sufficient, but 'engine' easier to keep track of
+	// asset can be null if followed by a Load()
 	RenderComponent( Engine* engine, const char* asset );
 	virtual ~RenderComponent();
 

@@ -8,6 +8,7 @@
 #include "../xegame/rendercomponent.h"
 #include "../xegame/chitbag.h"
 #include "../xegame/inventorycomponent.h"
+#include "../xegame/componentfactory.h"
 
 #include "../script/itemscript.h"
 
@@ -46,14 +47,19 @@ Sim::~Sim()
 }
 
 
-void Sim::Load( const char* mapPNG, const char* mapXML )
+void Sim::Load( const char* mapPNG, const char* mapXML, const char* gameXML )
 {
 	chitBag->DeleteAll();
 	worldMap->Load( mapPNG, mapXML );
 
-	Vector2I v = worldMap->FindEmbark();
-	CreatePlayer( v, "humanFemale" );
-
+	if ( !gameXML ) {
+		Vector2I v = worldMap->FindEmbark();
+		CreatePlayer( v, "humanFemale" );
+	}
+	else {
+		ComponentFactory factory( engine, worldMap, lumosGame );
+		chitBag->Load( &factory, gameXML );
+	}
 }
 
 
