@@ -264,7 +264,6 @@ public:
 	void			TapCancel();									///< Cancel a tap (generally in response to the OS)
 	const UIItem*	TapCaptured() const { return m_itemTapped; }	///< The item that received the TapDown, while in move.
 	const UIItem*	Tap( float x, float y );						///< Used to send events on systems that have a simple tap without up/down symantics.
-	// Warning: not yet tested
 	void			GetRelativeTap( float* x, float* y );			///< Get the tap location, in item coordinates, of the last tap down. [0,1]
 
 	/** During (or after) a TapUp, this will return the starting object and ending object of the drag. One
@@ -550,6 +549,9 @@ public:
 		}
 	}
 	void SetForeground( bool foreground );
+	void SetCapturesTap( bool captures )								{ m_capturesTap = captures; }
+
+	virtual bool CanHandleTap()											{ return m_capturesTap; }
 
 	virtual float Width() const											{ return m_width; }
 	virtual float Height() const										{ return m_height; }
@@ -557,12 +559,14 @@ public:
 	virtual const RenderAtom* GetRenderAtom() const;
 	virtual bool DoLayout();
 	virtual void Queue( grinliz::CDynArray< uint16_t > *index, grinliz::CDynArray< Gamui::Vertex > *vertex );
+	virtual bool HandleTap( TapAction action, float x, float y );
 
 private:
 	RenderAtom m_atom;
 	float m_width;
 	float m_height;
 	bool m_slice;
+	bool m_capturesTap;
 };
 
 

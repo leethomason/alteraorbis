@@ -82,17 +82,6 @@ class Matrix4
 	/// Concatenate a rotation in.
 	void ConcatRotation( float thetaDegree, int axis );
 
-	/** Compute the world to eye transform. Given a camera in world coordinates, 
-		what is the world to eye transform?
-		This transform should be applied to the MODELVIEW matrix.
-
-		@param eye		location to look from
-		@param center	location to look to
-		@param up		defines the up vector 
-	*/
-	bool SetLookAt( const Vector3F& eye, const Vector3F& center, const Vector3F& up );
-
-
 	/// Get the rotation around the X(0), Y(1), or Z(2) axis
 	float CalcRotationAroundAxis( int axis ) const;
 
@@ -130,7 +119,8 @@ class Matrix4
 		return true;
 	}
 
-	// Conventional names of rows.
+	// Conventional names of rows. FIXME: this is the essential where it is all strange.
+	// These are not correct in the matrix in use.
 	//enum {
 	//	RIGHT,
 	//	UP,
@@ -147,6 +137,35 @@ class Matrix4
 		Vector3F c = { x[INDEX(0,i)], x[INDEX(1,i)], x[INDEX(2,i)] };
 		return c;
 	}
+
+	void SetRow( int i, const Vector4F& v ) {
+		x[INDEX(i,0)] = v.x;
+		x[INDEX(i,1)] = v.y;
+		x[INDEX(i,2)] = v.z;
+		x[INDEX(i,3)] = v.w;
+	}
+
+	void SetRow( int i, float _x, float y, float z, float w ) {
+		x[INDEX(i,0)] = _x;
+		x[INDEX(i,1)] = y;
+		x[INDEX(i,2)] = z;
+		x[INDEX(i,3)] = w;
+	}
+
+	void SetCol( int i, const Vector4F& v ) {
+		x[INDEX(0,i)] = v.x;
+		x[INDEX(1,i)] = v.y;
+		x[INDEX(2,i)] = v.z;
+		x[INDEX(3,i)] = v.w;
+	}
+
+	void SetCol( int i, float _x, float y, float z, float w ) {
+		x[INDEX(0,i)] = _x;
+		x[INDEX(1,i)] = y;
+		x[INDEX(2,i)] = z;
+		x[INDEX(3,i)] = w;
+	}
+
 	/// Transpose 
 	void Transpose( Matrix4* transpose ) const;
 	/// Determinant
@@ -274,6 +293,19 @@ class Matrix4
 	}
 };
 
+
+/** Compute the world to eye transform. Given a camera in world coordinates, 
+	what is the world to eye transform?
+	This transform should be applied to the MODELVIEW matrix. Any of the
+	output params can be null.
+
+	@param eye		location to look from
+	@param center	location to look to
+	@param up		defines the up vector 
+*/
+void LookAt( bool cameraFlipBug,
+			 const Vector3F& eye, const Vector3F& center, const Vector3F& up,
+			 Matrix4* rotation, Matrix4* translation, Matrix4* view );
 
 /** C = AB. Perform the operation in column-major form, meaning a vector as a columns.
 	Note the target parameter is the last parameter, although it is more

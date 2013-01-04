@@ -120,6 +120,7 @@ public:
 							int flags = 0, 
 							ITextureCreator* create = 0 );
 	void ContextShift();
+	void TextureCreatorInvalid( ITextureCreator* create );
 
 	unsigned NumTextures() const			{ return textureArr.Size(); }
 	U32 CalcTextureMem() const;

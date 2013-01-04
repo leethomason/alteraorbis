@@ -21,7 +21,7 @@ struct WorldFeature {
 	int area;						// actual area
 
 	void Save( tinyxml2::XMLPrinter* );
-	void Load( const tinyxml2::XMLElement& doc );
+	void Load( const tinyxml2::XMLElement& element );
 
 	class Compare
 	{
@@ -37,9 +37,15 @@ public:
 	WorldGen();
 	~WorldGen();
 
+	// Done in order:
+	//  - Start()
+	//  - Do() for each Y
+	//  - End()
+	//  - optional: WriteMarker()
 	void StartLandAndWater( U32 seed0, U32 seed1 );
 	void DoLandAndWater( int y );
 	bool EndLandAndWater( float fractionLand );
+	void WriteMarker();
 
 	bool CalColor( grinliz::CDynArray<WorldFeature>* featureArr );
 

@@ -20,6 +20,8 @@
 
 class LumosGame : public Game
 {
+	typedef Game super;
+
 public:
 	enum {
 		DECO_NONE = 32
@@ -75,6 +77,8 @@ public:
 
 	virtual void Save( tinyxml2::XMLPrinter* );
 	virtual void Load( const tinyxml2::XMLElement& parent );
+
+protected:
 
 private:
 	void InitButtonLooks();

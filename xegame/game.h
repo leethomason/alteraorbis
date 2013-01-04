@@ -94,12 +94,9 @@ public:
 	void SetPerfLevel( int level )		{ perfLevel = (level%2); }
 	int GetPerfLevel() const			{ return perfLevel; }
 
-	FILE* GameSavePath( SavePathMode mode, int slot ) const;
-	bool HasSaveFile( int slot ) const;
-	void DeleteSaveFile( int slot );
-	void SavePathTimeStamp(int slot, grinliz::GLString* stamp );
-	int LoadSlot() const				{ return loadSlot; }
-
+	grinliz::GLString GamePath( const char* type, int slot, const char* extension ) const;
+	bool HasFile( const char* file ) const;
+	void DeleteFile( const char* file );
 
 	void SaveGame( int slot=0 );
 	void LoadGame();
@@ -144,13 +141,18 @@ public:
 	};
 	const Palette* GetPalette( const char* name=0 ) const;
 
+	// This is a hack; but if there isn't a static method, lots
+	// of code needs a game* that only needs a palette. Should
+	// get moved out of game to its own thing.
+	static const Palette* GetMainPalette()	{ return mainPalette; }
+
 	virtual void PrintPerf( int depth, const grinliz::PerfData& data );
 
 protected:
 	void PushPopScene();
-	static const Palette* mainPalette;
 
 private:
+	static const Palette* mainPalette;
 
 	// Color palettes
 	grinliz::CDynArray< Palette > palettes;
@@ -160,9 +162,7 @@ private:
 
 
 	bool scenePopQueued;
-	int loadSlot;
 
-	void Init();
 	void LoadTextures();
 	void LoadModels();
 	void LoadModel( const char* name );

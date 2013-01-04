@@ -20,6 +20,7 @@
 #include "../grinliz/gldebug.h"
 #include "../grinliz/glstringutil.h"
 #include "../grinliz/glvector.h"
+#include "../tinyxml2/tinyxml2.h"
 
 // The primary components:
 class SpatialComponent;
@@ -40,6 +41,9 @@ public:
 
 	virtual void OnAdd( Chit* chit )	{	parentChit = chit; }
 	virtual void OnRemove()				{	parentChit = 0;    }
+
+	virtual void Load( const tinyxml2::XMLElement* element ) = 0;
+	virtual void Save( tinyxml2::XMLPrinter* printer ) = 0;
 
 	virtual Component* ToComponent( const char* name ) = 0 {
 		if ( grinliz::StrEqual( name, "Component" ) ) return this;
@@ -63,6 +67,9 @@ protected:
 	float Travel( float rate, U32 time ) const {
 		return rate * ((float)time) * 0.001f;
 	}
+
+	void BeginSave( tinyxml2::XMLPrinter* printer, const char* name );
+	void EndSave( tinyxml2::XMLPrinter* printer );
 
 	ChitBag* GetChitBag();
 	Chit* parentChit;

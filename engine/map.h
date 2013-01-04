@@ -57,8 +57,8 @@ public:
 	virtual void BeginTexture( const void* textureHandle );
 	virtual void Render( const void* renderState, const void* textureHandle, int nIndex, const uint16_t* index, int nVertex, const gamui::Gamui::Vertex* vertex );
 
-	void Save( tinyxml2::XMLPrinter*  );
-	void Load( const tinyxml2::XMLElement* mapNode );
+	//void Save( tinyxml2::XMLPrinter*  );
+	//void Load( const tinyxml2::XMLElement* mapNode );
 
 	gamui::Gamui overlay;
 

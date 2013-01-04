@@ -31,9 +31,21 @@ void WorldFeature::Save( tinyxml2::XMLPrinter* printer )
 }
 
 
-void WorldFeature::Load( const tinyxml2::XMLElement& doc )
+void WorldFeature::Load( const tinyxml2::XMLElement& ele )
 {
+	GLASSERT( StrEqual( ele.Name(), "WorldFeature" ));
+	id = 0;
+	land = 0;
+	bounds.Set( 0, 0, 0, 0 );
+	area = 0;
 
+	ele.QueryIntAttribute( "id", &id );
+	ele.QueryBoolAttribute( "land", &land );
+	ele.QueryIntAttribute( "bounds.min.x", &bounds.min.x );
+	ele.QueryIntAttribute( "bounds.min.y", &bounds.min.y );
+	ele.QueryIntAttribute( "bounds.max.x", &bounds.max.x );
+	ele.QueryIntAttribute( "bounds.max.y", &bounds.max.y );
+	ele.QueryIntAttribute( "area", &area );
 }
 
 
@@ -132,6 +144,22 @@ bool WorldGen::EndLandAndWater( float fractionLand )
 	delete noise0;		noise0 = 0;
 	delete noise1;		noise1 = 0;
 	return iteration < MAX_ITERATION;
+}
+
+
+void WorldGen::WriteMarker()
+{
+	static const int S = 8;
+	for ( int y=0; y<S; ++y ) {
+		for( int x=0; x<S; ++x ) {
+			if ( y==0 || y==(S-1) || x==0 || x==(S-1) ) {
+				land[y*SIZE+x] = 0;
+			}
+			else {
+				land[y*SIZE+x] = 1;
+			}
+		}
+	}
 }
 
 

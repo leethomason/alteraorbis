@@ -32,7 +32,7 @@ private:
 	typedef ItemBaseComponent super;
 
 public:
-	InventoryComponent( ChitBag* bag, Game* _game ) : hardpoints(-1), game(_game) {
+	InventoryComponent() : hardpoints(-1) {
 		memset( intrinsicAt, 0, sizeof(GameItem*)*NUM_HARDPOINTS );
 		memset( heldAt, 0, sizeof(GameItem*)*NUM_HARDPOINTS );
 	}
@@ -80,7 +80,6 @@ public:
 	void EmitEffect( Engine* engine, U32 deltaTime );
 
 private:
-	Game* game;
 	int hardpoints;			// which ones do we have?? If we have the hardpoint, intrinsicAt or heldAt may be used.
 	GameItem* intrinsicAt[NUM_HARDPOINTS];
 	GameItem* heldAt[NUM_HARDPOINTS];

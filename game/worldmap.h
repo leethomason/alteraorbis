@@ -36,6 +36,21 @@ class WorldInfo;
 struct WorldFeature;
 
 /*
+	Remembering Y is up and we are in the xz plane:
+
+	+--------x
+	|
+	|
+	|
+	|
+	z
+
+	1. The (0,0) world origin is in the upper left.
+	2. This is annoying, but it's important to keep sane.
+	3. If the mark is used it should display, save, and load in the upper left
+*/
+
+/*
 	The world map has layers. (May add more in the future.)
 	Basic layer: water or land.
 	For land, is it passable or not?
@@ -62,6 +77,7 @@ public:
 	void Init( const U8* land, const U8* color, grinliz::CDynArray< WorldFeature >& featureArr );
 
 	void Save( const char* pathToPNG, const char* pathToXML );
+	void Load( const char* pathToPNG, const char* pathToXML );
 
 	void SetBlock( int x, int y )	{ grinliz::Rectangle2I pos; pos.Set( x, y, x, y ); SetBlock( pos ); }
 	void SetBlock( const grinliz::Rectangle2I& pos );
@@ -119,6 +135,8 @@ public:
 
 	// --- MetaData --- //
 	const WorldInfo& GetWorldInfo()		{ return *worldInfo; }
+	// Find random land on the largest continent
+	grinliz::Vector2I FindEmbark();
 	const grinliz::Color4U8* Pixels()	{ return (const grinliz::Color4U8*) grid; }
 
 private:

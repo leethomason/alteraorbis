@@ -125,7 +125,9 @@ void TrackMalloc( const void* mem, size_t size )
 		memWatermark = memTotal;
 	
 	memNewCount++;
-	distribution[ logBase2(size) ] += 1;
+	U32 log2 = logBase2(size);
+	GLASSERT( log2 < 32 );
+	distribution[ log2 ] += 1;
 }
 
 

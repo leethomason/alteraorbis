@@ -16,7 +16,9 @@
 #include "cameracomponent.h"
 #include "chit.h"
 #include "chitbag.h"
+#include "spatialcomponent.h"
 #include "../engine/camera.h"
+#include "../engine/engine.h"
 
 using namespace grinliz;
 
@@ -36,6 +38,13 @@ void CameraComponent::SetPanTo( grinliz::Vector3F& _dest, float _speed )
 	mode = PAN;
 	dest = _dest;
 	speed = _speed;
+}
+
+
+void CameraComponent::SetTrack( int targetID ) 
+{
+	mode = TRACK;
+	targetChitID = targetID;
 }
 
 
@@ -62,6 +71,35 @@ bool CameraComponent::DoTick( U32 delta )
 				toDest.Normalize();
 				Vector3F v = toDest * travel;
 				camera->DeltaPosWC( v.x, v.y, v.z );
+			}
+		}
+		break;
+
+	case TRACK:
+		{
+			Chit* chit = this->GetChitBag()->GetChit( targetChitID );
+			if ( chit && chit->GetSpatialComponent() ) {
+				
+				Vector3F pos = chit->GetSpatialComponent()->GetPosition();
+				pos.y = 0;
+
+				/*
+				Vector3F delta = pos - prevTarget;
+				if ( delta.LengthSquared() ) {
+					camera->DeltaPosWC( delta.x, delta.y, delta.z );
+					prevTarget = pos;
+				}
+				*/
+
+				// Scoot the camera to always focus on the target. Removes
+				// errors that occur from rotation, drift, etc.
+				const Vector3F* eye3 = camera->EyeDir3();
+				Vector3F at;
+				int result = IntersectRayPlane( camera->PosWC(), eye3[0], 1, 0.0f, &at );
+				if ( result == INTERSECT ) {
+					Vector3F delta = camera->PosWC() - at;
+					camera->SetPosWC( pos + delta );
+				}
 			}
 		}
 		break;

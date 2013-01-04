@@ -24,7 +24,7 @@
 class LumosGame;
 class Engine;
 class WorldMap;
-
+class ItemStorage;
 
 class BattleTestScene : public Scene
 {
@@ -115,7 +115,6 @@ private:
 	grinliz::CDynArray<Chit*> chitArr;
 	
 	LumosChitBag	chitBag;
-	ItemStorage		itemStorage;
 };
 
 

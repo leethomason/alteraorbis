@@ -76,6 +76,26 @@ void Chit::Free()
 }
 
 
+void Chit::Save( tinyxml2::XMLPrinter* printer )
+{
+	printer->OpenElement( "Chit" );
+	printer->PushAttribute( "id", id );
+
+	if ( shelf ) {
+		printer->OpenElement( "Shelf" );
+		shelf->Save( printer );
+		printer->CloseElement();
+	}
+	for( int i=0; i<NUM_SLOTS; ++i ) {
+		if ( slot[i] ) {
+			slot[i]->Save( printer );
+		}
+	}
+
+	printer->CloseElement();	// Chit
+}
+
+
 int Chit::Slot( Component* c )
 {
 	int s = -1;

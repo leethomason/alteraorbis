@@ -52,7 +52,7 @@ public:
 	bool DebugPath() const		{ return (r & DEBUG_PATH) != 0; }
 	bool IsBlock() const		{ return (r & IS_BLOCK) != 0; }
 	bool IsLand() const			{ return (g & GREEN) != 0; }
-	bool IsPassable() const		{ return (g & GREEN) && !(r & IS_BLOCK); }
+	bool IsPassable() const		{ return IsLand() && !IsBlock(); }
 	U32  ZoneSize()  const		{ return (a & ZONE_SIZE); }
 	U32  ZoneColor() const		{ return (g & ZONE_COLOR_LOW) | ((b & ZONE_COLOR_HIGH)<< 4); }
 

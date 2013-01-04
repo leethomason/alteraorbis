@@ -276,6 +276,7 @@ bool Matrix4::IsRotation() const
 
 void Matrix4::Transpose( Matrix4* transpose ) const
 {
+	GLASSERT( transpose != this );
   for (int r = 0; r < 4; ++r) {
         for (int c = 0; c < 4; ++c) {
 			transpose->x[INDEX(c,r)] = x[INDEX(r,c)];
@@ -427,8 +428,21 @@ float Matrix4::SubDeterminant(int excludeRow, int excludeCol) const
 				x[INDEX(row[0],col[2])] * cofactor20;
 }
 
-bool Matrix4::SetLookAt( const Vector3F& eye, const Vector3F& center, const Vector3F& up )
+//
+// http://www.opengl.org/wiki/GluLookAt_code
+//
+void grinliz::LookAt( bool cameraFlipBug,
+					  const Vector3F& eye, const Vector3F& center, const Vector3F& up,
+					  Matrix4* rot, Matrix4* trans, Matrix4* view )
 {
+	Matrix4 _rot, _trans, _view;
+	if ( !rot )
+		rot = &_rot;
+	if ( !trans )
+		trans = &_trans;
+	if ( !view )
+		view = &_view;
+
 	Vector3F forward = center - eye;
 	forward.Normalize();
 
@@ -441,24 +455,25 @@ bool Matrix4::SetLookAt( const Vector3F& eye, const Vector3F& center, const Vect
 	Vector3F up2;
     CrossProduct(side, forward, &up2);
 
-    SetIdentity();
-    x[ INDEX(0,0) ] = side.x;
-    x[ INDEX(0,1) ] = side.y;
-    x[ INDEX(0,2) ] = side.z;
+	if ( cameraFlipBug ) {
+		// GAH FIXME this should all be SetRow. 
+		// Something has gone screwy in the camera code. Need
+		// to root out the issue.
+		rot->SetCol( 0, side.x, side.y, side.z, 0.0f );
+		rot->SetCol( 1, up2.x, up2.y, up2.z, 0.0f );
+		rot->SetCol( 2, -forward.x, -forward.y, -forward.z, 0 );
+		rot->SetCol( 3, 0, 0, 0, 1 );
+	}
+	else {
+		rot->SetRow( 0, side.x, side.y, side.z, 0.0f );
+		rot->SetRow( 1, up2.x, up2.y, up2.z, 0.0f );
+		rot->SetRow( 2, -forward.x, -forward.y, -forward.z, 0 );
+		rot->SetRow( 3, 0, 0, 0, 1 );
+	}
+	trans->SetIdentity();
+	trans->SetTranslation( -eye.x, -eye.y, -eye.z );
 
-    x[ INDEX(1,0)] = up2.x;
-    x[ INDEX(1,1)] = up2.y;
-    x[ INDEX(1,2)] = up2.z;
-
-    x[ INDEX(2,0)] = -forward.x;
-    x[ INDEX(2,1)] = -forward.y;
-    x[ INDEX(2,2)] = -forward.z;
-
-	Matrix4 m, n;
-	m.SetTranslation( -eye.x, -eye.y, -eye.z );
-	MultMatrix4( *this, m, &n );
-	*this = n;
-	return true;
+	*view = (*rot) * (*trans);
 }
 
 

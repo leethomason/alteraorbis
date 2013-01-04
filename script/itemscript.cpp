@@ -19,7 +19,9 @@
 using namespace tinyxml2;
 using namespace grinliz;
 
-void ItemStorage::Load( const char* path )
+/*static*/ ItemDefDB* ItemDefDB::instance = 0;
+
+void ItemDefDB::Load( const char* path )
 {
 	XMLDocument doc;
 	doc.LoadFile( path );
@@ -62,7 +64,7 @@ void ItemStorage::Load( const char* path )
 }
 
 
-const GameItem* ItemStorage::Get( const char* name, int intrinsic )
+const GameItem& ItemDefDB::Get( const char* name, int intrinsic )
 {
 	GameItem* item=0;
 	if ( intrinsic >= 0 ) {
@@ -73,11 +75,15 @@ const GameItem* ItemStorage::Get( const char* name, int intrinsic )
 	else {
 		map.Query( name, &item );
 	}
-	return item;
+	if ( item ) {
+		return *item;
+	}
+	GLASSERT( 0 );
+	return nullItem;
 }
 
 
-void ItemStorage::Get( const char* name, GameItemArr* arr )
+void ItemDefDB::Get( const char* name, GameItemArr* arr )
 {
 	GameItem* item=0;
 	map.Query( name, &item );

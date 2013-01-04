@@ -23,15 +23,15 @@
 #include "../game/gameitem.h"
 
 
-class ItemStorage
+class ItemDefDB
 {
 public:
-	ItemStorage()	{}
-	~ItemStorage()	{}
+	static ItemDefDB* Instance() { if ( !instance ) instance = new ItemDefDB(); return instance; }
+	~ItemDefDB()	{ instance = 0; }
 
 	void Load( const char* path );
 
-	const GameItem* Get( const char* name, int intrinsic=-1 );
+	const GameItem& Get( const char* name, int intrinsic=-1 );
 
 	typedef grinliz::CArray<GameItem*, 16> GameItemArr;
 	// Query an item and all its intrinsics; main item is
@@ -39,6 +39,11 @@ public:
 	void Get( const char* name, GameItemArr* arr );
 
 private:
+	ItemDefDB()		{}
+
+	static ItemDefDB* instance;
+	GameItem nullItem;
+
 	grinliz::HashTable< const char*, GameItem*, grinliz::CompCharPtr, grinliz::OwnedPtrSem > map;
 };
 

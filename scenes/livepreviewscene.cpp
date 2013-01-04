@@ -197,7 +197,7 @@ void LivePreviewScene::GenerateRing( int mainRow )
 	engine->lighting.direction.Normalize();
 	
 	engine->camera.SetPosWC( 0, DELTA*1.5f, DELTA*(float)(COLS-1)*0.5f );
-	static const Vector3F out = { -1, 0, 0 };			// FIXME: weird camera issue illustrated, again.
+	static const Vector3F out = { 1, 0, 0 };
 	engine->camera.SetDir( out, V3F_UP );
 
 	float tex[4] = { 0, 0, 0, 0 };
@@ -370,7 +370,7 @@ void LivePreviewScene::CreateTexture( int type )
 	GLASSERT( t->Alpha() );
 	GLASSERT( t->Width() == SIZE*ICOLS );
 	GLASSERT( t->Height() == SIZE*IROWS );
-	t->SetSoftwareMip( true );
+	//t->SetSoftwareMip( true );
 
 	unsigned w=0, h=0;
 	U8* pixels = 0;
@@ -381,6 +381,7 @@ void LivePreviewScene::CreateTexture( int type )
 	static const int BUFFER_SIZE = PIXWIDTH*PIXHEIGHT;
 	U16* buffer = new U16[BUFFER_SIZE];
 
+	// Test code to stress the upload. Annoying, annoying driver bugs.
 	memset( buffer, 0xaaaa, BUFFER_SIZE*sizeof(U16) );
 	t->Upload( buffer, BUFFER_SIZE*sizeof(U16) );
 
@@ -415,7 +416,7 @@ void LivePreviewScene::CreateTexture( int type )
 	else
 		t->SetEmissive( true );		// alpha is emissive
 
-	t->SetSoftwareMip( false );
+	//t->SetSoftwareMip( false );
 }
 
 void LivePreviewScene::DrawDebugText()

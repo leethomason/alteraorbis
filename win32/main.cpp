@@ -38,8 +38,6 @@
 #define WINDOWS_LEAN_AND_MEAN
 #include <winhttp.h>
 
-//#include "../xegame/game.h"
-
 //#define TEST_ROTATION
 //#define TEST_FULLSPEED
 //#define SEND_CRASH_LOGS
@@ -51,6 +49,9 @@
 
 #define NEXUS_ONE_SCREEN_WIDTH  480
 #define NEXUS_ONE_SCREEN_HEIGHT  800
+
+static const float KEY_ZOOM_SPEED		= 0.02f;
+static const float KEY_ROTATE_SPEED		= 2.0f;
 
 #if 0
 static const int SCREEN_WIDTH  = IPOD_SCREEN_WIDTH*2;
@@ -408,6 +409,20 @@ int main( int argc, char **argv )
 				glEnable( GL_DEPTH_TEST );
 				glDepthFunc( GL_LEQUAL );
 
+				const U8* keys = SDL_GetKeyState( 0 );
+				if ( keys[SDLK_PAGEDOWN] ) {
+					GameZoom( game, GAME_ZOOM_DISTANCE, KEY_ZOOM_SPEED );
+				}
+				if ( keys[SDLK_PAGEUP] ) {
+					GameZoom( game, GAME_ZOOM_DISTANCE, -KEY_ZOOM_SPEED );
+				}
+				if ( keys[SDLK_HOME] ) {
+					GameCameraRotate( game, KEY_ROTATE_SPEED );
+				}
+				if ( keys[SDLK_END] ) {
+					GameCameraRotate( game, -KEY_ROTATE_SPEED );
+				}
+					
 				GameDoTick( game, SDL_GetTicks() );
 				SDL_GL_SwapBuffers();
 
@@ -482,8 +497,6 @@ bool RectangleIsBlack( const grinliz::Rectangle2I& r, int edge, SDL_Surface* sur
 }
 
 
-// No alpha channel in BMP. (Sigh.) Need to switch to ping.
-// Might as well make core code as well.
 void ScreenCapture( const char* baseFilename, bool appendCount, bool trim, bool makeTransparent, grinliz::Rectangle2I* size )
 {
 	int viewPort[4];

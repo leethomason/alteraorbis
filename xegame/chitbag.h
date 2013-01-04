@@ -41,6 +41,8 @@ public:
 	void  DeleteChit( Chit* );
 	Chit* GetChit( int id );
 
+	void Save( const char* pathToXML );
+
 	// Bolts are a special kind of chit. Just easier
 	// and faster to treat them as a 2nd stage.
 	Bolt* NewBolt();
@@ -102,7 +104,7 @@ private:
 
 	grinliz::CDynArray<int>			deleteList;	
 	grinliz::CDynArray<CompID>		compDeleteList;	
-	grinliz::CDynArray<Chit*>		hashQuery;
+	grinliz::CDynArray<Chit*>		hashQuery;			// local data, cached at class level
 	grinliz::CDynArray<ChitEvent>	events;
 	
 	grinliz::CDynArray<Bolt> bolts;

@@ -16,11 +16,10 @@ WorldGenScene::WorldGenScene( LumosGame* game ) : Scene( game )
 	pix16 = 0;
 
 	TextureManager* texman = TextureManager::Instance();
-	if ( !texman->IsTexture( "worldGenPreview" ) ) {
-		texman->CreateTexture( "worldGenPreview", MAX_MAP_SIZE, MAX_MAP_SIZE, Surface::RGB16, Texture::PARAM_NONE, this );
-	}
+	texman->CreateTexture( "worldGenPreview", MAX_MAP_SIZE, MAX_MAP_SIZE, Surface::RGB16, Texture::PARAM_NONE, this );
 
-	RenderAtom atom( (const void*)UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, texman->GetTexture( "worldGenPreview" ), 0, 0, 1, 1 );
+	RenderAtom atom( (const void*)UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, texman->GetTexture( "worldGenPreview" ), 
+					 0, 1, 1, 0 );	// y-flip: image to texture coordinate conversion
 	worldImage.Init( &gamui2D, atom, false );
 	worldImage.SetSize( 400, 400 );
 
@@ -34,6 +33,7 @@ WorldGenScene::WorldGenScene( LumosGame* game ) : Scene( game )
 
 WorldGenScene::~WorldGenScene()
 {
+	TextureManager::Instance()->TextureCreatorInvalid( this );
 	delete [] worldMap;
 	delete [] pix16;
 }
@@ -58,7 +58,9 @@ void WorldGenScene::Resize()
 void WorldGenScene::ItemTapped( const gamui::UIItem* item )
 {
 	if ( item == &okay ) {
+		// fixme: get a correct, generic, path from the Game
 		worldMap->Save( "./save/map.png", "./save/map.xml" );
+		//game->SaveGame();
 		game->PopScene();
 	}
 	else if ( item == &cancel ) {
@@ -131,6 +133,7 @@ void WorldGenScene::DoTick( U32 delta )
 	else if ( scanline == WorldGen::SIZE ) {
 		bool okay = worldGen.EndLandAndWater( 0.4f );
 		if ( okay ) {
+			worldGen.WriteMarker();
 			featureArr.Clear();
 			worldGen.CalColor( &featureArr );
 		}

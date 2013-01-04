@@ -42,7 +42,7 @@ public:
 	float DestroyedFraction() const { return (float)destroyed/(float)COUNTDOWN; }
 
 private:
-	enum { COUNTDOWN = 500 };
+	enum { COUNTDOWN = 800 };
 	void DeltaHealth();
 	U32 destroyed;
 };

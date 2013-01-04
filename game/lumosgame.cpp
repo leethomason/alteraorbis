@@ -38,6 +38,8 @@ LumosGame::LumosGame(  int width, int height, int rotation, const char* savepath
 	: Game( width, height, rotation, 600, savepath )
 {
 	InitButtonLooks();
+	ItemDefDB::Instance()->Load( "./res/itemdef.xml" );
+
 	PushScene( SCENE_TITLE, 0 );
 	PushPopScene();
 
@@ -47,6 +49,8 @@ LumosGame::LumosGame(  int width, int height, int rotation, const char* savepath
 
 LumosGame::~LumosGame()
 {
+	TextureManager::Instance()->TextureCreatorInvalid( this );
+	delete ItemDefDB::Instance();
 }
 
 
@@ -171,7 +175,8 @@ RenderAtom LumosGame::CalcDecoAtom( int id, bool enabled )
 
 RenderAtom LumosGame::CalcPaletteAtom( int x, int y )
 {
-	const Game::Palette* p = mainPalette;
+	const Game::Palette* p = Game::GetMainPalette();
+
 	float u = ((float)x+0.5f)/(float)p->dx;
 	float v = 1.0f - ((float)y+0.5f)/(float)p->dy;
 

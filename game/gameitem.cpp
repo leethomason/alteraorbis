@@ -30,6 +30,9 @@ using namespace tinyxml2;
 #define READ_INT_ATTR( ele, name )		{ ele->QueryIntAttribute( #name, &name ); }
 #define READ_UINT_ATTR( ele, name )		{ ele->QueryUnsignedAttribute( #name, &name ); }
 
+#define APPEND_FLAG( flags, cstr, name )	{ if ( flags & name ) f += #name; }
+#define PUSH_ATTRIBUTE( prnt, name )		{ prnt->PushAttribute( #name, name ); }
+
 
 // FIXME: make this way, way simpler
 float AbilityCurve( float yAt0, float yAt1, float yAt16, float yAt32, float x )
@@ -54,12 +57,59 @@ void GameStat::Roll( U32 seed )
 }
 
 
-void GameItem::Save( tinyxml2::XMLPrinter* )
+void GameItem::Save( tinyxml2::XMLPrinter* printer )
 {
-	GLASSERT( 0 );
+	printer->OpenElement( "item" );
+
+	printer->PushAttribute( "name", name.c_str() );
+	printer->PushAttribute( "resource", resource.c_str() );
+
+	CStr<512> f;
+	APPEND_FLAG( flags, f, CHARACTER );
+	APPEND_FLAG( flags, f, MELEE_WEAPON );
+	APPEND_FLAG( flags, f, RANGED_WEAPON );
+	APPEND_FLAG( flags, f, INTRINSIC_AT_HARDPOINT );
+	APPEND_FLAG( flags, f, INTRINSIC_FREE );
+	APPEND_FLAG( flags, f, HELD_AT_HARDPOINT );
+	APPEND_FLAG( flags, f, HELD_FREE );
+	APPEND_FLAG( flags, f, IMMUNE_FIRE );
+	APPEND_FLAG( flags, f, FLAMMABLE );
+	APPEND_FLAG( flags, f, IMMUNE_SHOCK );
+	APPEND_FLAG( flags, f, SHOCKABLE );
+	APPEND_FLAG( flags, f, EFFECT_EXPLOSIVE );
+	APPEND_FLAG( flags, f, EFFECT_FIRE );
+	APPEND_FLAG( flags, f, EFFECT_SHOCK );
+	APPEND_FLAG( flags, f, RENDER_TRAIL );
+	printer->PushAttribute( "flags", f.c_str() );
+	
+	PUSH_ATTRIBUTE( printer, mass );
+	PUSH_ATTRIBUTE( printer, hpPerMass );
+	PUSH_ATTRIBUTE( printer, hpRegen );
+	PUSH_ATTRIBUTE( printer, primaryTeam );
+	PUSH_ATTRIBUTE( printer, cooldown );
+	PUSH_ATTRIBUTE( printer, cooldownTime );
+	PUSH_ATTRIBUTE( printer, reload );
+	PUSH_ATTRIBUTE( printer, reloadTime );
+	PUSH_ATTRIBUTE( printer, clipCap );
+	PUSH_ATTRIBUTE( printer, rounds );
+	PUSH_ATTRIBUTE( printer, speed );
+	PUSH_ATTRIBUTE( printer, meleeDamage );
+	PUSH_ATTRIBUTE( printer, rangedDamage );
+	PUSH_ATTRIBUTE( printer, absorbsDamage );
+	PUSH_ATTRIBUTE( printer, accruedFire );
+	PUSH_ATTRIBUTE( printer, accruedShock );
+
+	if ( hardpoint != NO_HARDPOINT ) {
+		printer->PushAttribute( "hardpoint", InventoryComponent::HardpointFlagToName( hardpoint ).c_str() );
+	}
+	if ( procedural != PROCEDURAL_NONE ) {
+		printer->PushAttribute( "procedural", ItemGen::ToName( procedural ).c_str() );
+	}
+	printer->PushAttribute( "hp", hp );
+
+	printer->CloseElement();	// item
 }
-
-
+	
 void GameItem::Load( const tinyxml2::XMLElement* ele )
 {
 	this->CopyFrom( 0 );
@@ -80,6 +130,8 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 	READ_FLAG( flags, f, HELD_FREE );
 	READ_FLAG( flags, f, IMMUNE_FIRE );
 	READ_FLAG( flags, f, FLAMMABLE );
+	READ_FLAG( flags, f, IMMUNE_SHOCK );
+	READ_FLAG( flags, f, SHOCKABLE );
 	READ_FLAG( flags, f, EFFECT_EXPLOSIVE );
 	READ_FLAG( flags, f, EFFECT_FIRE );
 	READ_FLAG( flags, f, EFFECT_SHOCK );

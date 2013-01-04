@@ -169,6 +169,7 @@ public:
 
 	// Debug dump
 	void RecWalk( const Item* item, int depth );
+	bool ItemInReader( const Item* item ) const { return item >= mem && item < endMem; }
 
 private:
 	static Reader* readerRoot;
