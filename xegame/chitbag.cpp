@@ -53,47 +53,40 @@ void ChitBag::DeleteAll()
 }
 
 
-void ChitBag::Save( const char* pathToXML )
+void ChitBag::Save( XMLPrinter* printer )
 {
-	FILE* fp = fopen( pathToXML, "w" );
-	GLASSERT( fp );
-	if ( fp ) {
-		XMLPrinter printer( fp );
-
-		printer.OpenElement( "ChitBag" );
-		printer.PushAttribute( "idPool", idPool );
-
-		printer.OpenElement( "Chits" );
-		Chit** chits = chitID.GetValues();
-		for( int i=0; i<chitID.NumValues(); ++i ) {
-			chits[i]->Save( &printer );
-		}
-		printer.CloseElement();	// Chits
-
-		printer.CloseElement();	// ChitBag
-		fclose( fp );
+	printer->OpenElement( "ChitBag" );
+	printer->OpenElement( "Chits" );
+	Chit** chits = chitID.GetValues();
+	for( int i=0; i<chitID.NumValues(); ++i ) {
+		chits[i]->Save( printer );
 	}
+	printer->CloseElement();	// Chits
+
+	printer->CloseElement();	// ChitBag
 }
 
 
-void ChitBag::Load( const ComponentFactory* factory, const char* pathToXML )
+void ChitBag::Load( const ComponentFactory* factory, const XMLElement* ele )
 {
-	XMLDocument doc;
-	doc.LoadFile( pathToXML );
-	GLASSERT( !doc.Error() );
-	if ( !doc.Error() ) {
-		const XMLElement* root = doc.RootElement();
-		GLASSERT( StrEqual( root->Value(), "ChitBag" ));
-		root->QueryIntAttribute( "idPool", &idPool );
+	const XMLElement* child = ele->FirstChildElement( "ChitBag" );
+	GLASSERT( child );
+	if ( child ) {
+		idPool = 0;
 
-		const XMLElement* chits = root->FirstChildElement( "Chits" );
+		const XMLElement* chits = child->FirstChildElement( "Chits" );
 		GLASSERT( chits );
 		if ( chits ) {
 			for( const XMLElement* chit = chits->FirstChildElement( "Chit" );
 				 chit;
 				 chit = chit->NextSiblingElement( "Chit" ) ) 
 			{
-				Chit* c = this->NewChit();
+				int id = 0;
+				chit->QueryIntAttribute( "id", &id );
+				GLASSERT( id > 0 );
+				idPool = Max( id, idPool );
+
+				Chit* c = this->NewChit( id );
 				c->Load( factory, chit );
 			}
 		}
@@ -102,7 +95,7 @@ void ChitBag::Load( const ComponentFactory* factory, const char* pathToXML )
 
 
 
-Chit* ChitBag::NewChit()
+Chit* ChitBag::NewChit( int id )
 {
 	if ( !memRoot ) {
 		// Allocate a new block.
@@ -119,7 +112,9 @@ Chit* ChitBag::NewChit()
 	Chit* c = memRoot;
 	memRoot = memRoot->next;
 	c->next = 0;
-	c->Init( ++idPool, this );
+	c->Init( id ? id : (++idPool), this );
+	GLASSERT( chitID.Query( c->ID(), 0 ) == false );
+
 	chitID.Add( c->ID(), c );
 	return c;
 }

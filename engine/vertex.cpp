@@ -14,6 +14,9 @@
 */
 
 #include "vertex.h"
+#include "../grinliz/glstringutil.h"
+
+using namespace grinliz;
 
 void BoneData::Bone::ToMatrix( grinliz::Matrix4* mat ) const
 {
@@ -25,7 +28,24 @@ void BoneData::Bone::ToMatrix( grinliz::Matrix4* mat ) const
 
 void BoneData::Load( const tinyxml2::XMLElement* element )
 {
-	GLASSERT( 0 );	
+	Clear();
+	const tinyxml2::XMLElement* boneEle = element->FirstChildElement( "BoneData" );
+	if ( boneEle ) {
+		int i=0;
+		for( const tinyxml2::XMLElement* ele = boneEle->FirstChildElement( "Bone" );
+			 ele && i < EL_MAX_BONES;
+			 ++i, ele = ele->NextSiblingElement( "Bone" ))
+		{
+			if ( ele->FirstAttribute() ) {
+				const char* name = ele->Attribute( "name" );
+				GLASSERT( name );
+				bone[i].name = StringPool::Intern( name );
+				ele->QueryAttribute( "angleRadians", &bone[i].angleRadians );
+				ele->QueryAttribute( "dy", &bone[i].dy );
+				ele->QueryAttribute( "dz", &bone[i].dz );
+			}
+		}
+	}
 }
 
 

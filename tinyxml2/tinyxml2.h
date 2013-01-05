@@ -1187,7 +1187,28 @@ public:
         return a->QueryFloatValue( value );
     }
 
-    /// Sets the named attribute to value.
+	
+	int QueryAttribute( const char* name, int* value ) const {
+		return QueryIntAttribute( name, value );
+	}
+
+	int QueryAttribute( const char* name, unsigned int* value ) const {
+		return QueryUnsignedAttribute( name, value );
+	}
+
+	int QueryAttribute( const char* name, bool* value ) const {
+		return QueryBoolAttribute( name, value );
+	}
+
+	int QueryAttribute( const char* name, double* value ) const {
+		return QueryDoubleAttribute( name, value );
+	}
+
+	int QueryAttribute( const char* name, float* value ) const {
+		return QueryFloatAttribute( name, value );
+	}
+
+	/// Sets the named attribute to value.
     void SetAttribute( const char* name, const char* value )	{
         XMLAttribute* a = FindOrCreateAttribute( name );
         a->SetAttribute( value );

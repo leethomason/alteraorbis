@@ -105,6 +105,9 @@ public:
 		Init();	
 	}
 
+	void Save( tinyxml2::XMLPrinter* );
+	void Load( const tinyxml2::XMLElement* doc );
+
 	void Init() {
 		for( int i=0; i<NUM_TRAITS; ++i ) trait[i] = 10;
 		exp	= 0;
@@ -152,6 +155,7 @@ private:
 	float NormalLeveledSkill( int value ) const {
 		return ((float)value + (float)Level() * LEVEL_BONUS) * SKILL_NORMALIZE;
 	}
+	void Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele );
 
 	// Group. Sometimes accessed as array.
 	enum {	STR,
@@ -216,6 +220,7 @@ public:
 
 	virtual void Save( tinyxml2::XMLPrinter* );
 	virtual void Load( const tinyxml2::XMLElement* doc );
+
 	// If an intrinsic sub item has a trait - say, FIRE - that
 	// implies that the parent is immune to fire. Apply() sets
 	// basic sanity flags.

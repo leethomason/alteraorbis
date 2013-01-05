@@ -154,6 +154,7 @@ struct BoneData
 
 	Bone bone[EL_MAX_BONES];
 
+	void Clear() { memset( bone, 0, sizeof(Bone)*EL_MAX_BONES ); }
 	void Load( const tinyxml2::XMLElement* element );
 	void Save( tinyxml2::XMLPrinter* printer );
 };

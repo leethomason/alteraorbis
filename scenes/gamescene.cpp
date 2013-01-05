@@ -32,6 +32,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	Load();
 
 	Vector3F delta = { 20.0f, 20.0f, 20.0f };
+	GLASSERT( sim->GetPlayerChit() );
 	Vector3F target = sim->GetPlayerChit()->GetSpatialComponent()->GetPosition();
 	sim->GetEngine()->CameraLookAt( target + delta, target );
 

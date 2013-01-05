@@ -33,7 +33,6 @@ using namespace tinyxml2;
 #define APPEND_FLAG( flags, cstr, name )	{ if ( flags & name ) f += #name; }
 #define PUSH_ATTRIBUTE( prnt, name )		{ prnt->PushAttribute( #name, name ); }
 
-
 // FIXME: make this way, way simpler
 float AbilityCurve( float yAt0, float yAt1, float yAt16, float yAt32, float x )
 {
@@ -45,6 +44,34 @@ float AbilityCurve( float yAt0, float yAt1, float yAt16, float yAt32, float x )
 		return grinliz::Lerp( yAt1, yAt16, (x-1.0f)/15.0f );
 	}
 	return grinliz::Lerp( yAt16, yAt32, (x-16.0f)/16.0f );
+}
+
+
+void GameStat::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele )
+{
+	XEArchiveT( prn, ele, "STR",  trait[STR] );
+	XEArchiveT( prn, ele, "WILL", trait[WILL] );
+	XEArchiveT( prn, ele, "CHR",  trait[CHR] );
+	XEArchiveT( prn, ele, "INT",  trait[INT] );
+	XEArchiveT( prn, ele, "DEX",  trait[DEX] );
+	XEArchiveT( prn, ele, "exp",  exp );
+}
+
+
+void GameStat::Save( tinyxml2::XMLPrinter* printer )
+{
+	printer->OpenElement( "GameStat" );
+	Archive( printer, 0 );
+	printer->CloseElement();
+}
+
+
+void GameStat::Load( const tinyxml2::XMLElement* parent )
+{
+	const tinyxml2::XMLElement* ele = parent->FirstChildElement( "GameStat" );
+	if ( ele ) {
+		Archive( 0, ele );
+	}
 }
 
 
@@ -108,6 +135,8 @@ void GameItem::Save( tinyxml2::XMLPrinter* printer )
 	GLASSERT( hp <= TotalHP() );
 	printer->PushAttribute( "hp", hp );
 
+	stats.Save( printer );
+
 	printer->CloseElement();	// item
 }
 	
@@ -168,6 +197,8 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 	if ( p ) {
 		procedural = ItemGen::ToID( StringPool::Intern( p ) );
 	}
+
+	stats.Load( ele );
 
 	hp = this->TotalHP();
 	ele->QueryFloatAttribute( "hp", &hp );

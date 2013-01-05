@@ -258,49 +258,80 @@ void Model::Free()
 }
 
 
+void Model::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele )
+{
+	XE_ARCHIVE( debugScale );
+	XE_ARCHIVE( animationRate );
+	XE_ARCHIVE( totalCrossFadeTime );
+	XE_ARCHIVE( crossFadeTime );
+	XE_ARCHIVE( hasParticles );
+	XE_ARCHIVE( flags );
+	XE_ARCHIVE( currentAnim.time );
+	
+	// Trick to do casting: if save, will write int. If load, will read int.
+	int id = (int)currentAnim.id;
+	XEArchiveT( prn, ele, "currentAnim.id", id );
+	currentAnim.id = (AnimationType)id;
+
+	XE_ARCHIVE( prevAnim.time );
+	
+	id = (int)prevAnim.id;
+	XEArchiveT( prn, ele, "prevAnim.id", id );
+	prevAnim.id = (AnimationType)id;
+
+	XEArchive( prn, ele, "pos", pos );
+	XEArchive( prn, ele, "rot", rot );
+	XEArchive( prn, ele, "color", color );
+	XEArchive( prn, ele, "boneFilter", boneFilter );
+	XEArchive( prn, ele, "control", control );
+}
+
+
 void Model::Load( const tinyxml2::XMLElement* element )
 {
-	GLASSERT( 0 );
+	GLASSERT( StrEqual( element->Name(), "Model" ));
+
+	const char* resName = element->Attribute( "resource" );
+	if ( resource ) {
+		GLASSERT( resource->header.name == resName );
+	}
+	else {
+		resource = ModelResourceManager::Instance()->GetModelResource( resName );
+		GLASSERT( resource );
+	}
+
+	const char* animResName = element->Attribute( "animationResource" );
+	if ( animResName ) {
+		animationResource = AnimationResourceManager::Instance()->GetResource( animResName );
+		GLASSERT( animationResource );
+	}
+
+	Archive( 0, element );
+	const tinyxml2::XMLElement* auxEle = element->FirstChildElement( "aux" );
+	if ( auxEle ) {
+		aux = ModelResourceManager::Instance()->modelAuxPool.New();
+		aux->boneData.Load( auxEle );
+		XEArchive( 0, auxEle, "procMat", aux->procMat );
+	}
 }
 
 
 void Model::Save( tinyxml2::XMLPrinter* printer )
 {
 	printer->OpenElement( "Model" );
+
 	printer->PushAttribute( "resource", resource->header.name.c_str() );
-	printer->PushAttribute( "debugScale", debugScale );
-	printer->PushAttribute( "animationRate", animationRate );
-	printer->PushAttribute( "totalCrossFadeTime", totalCrossFadeTime );
-	printer->PushAttribute( "crossFadeTime", crossFadeTime );
 	if ( animationResource ) {
-		printer->PushAttribute( "animationResource", animationResource->ResourceName() );
+		printer->PushAttribute( "animationResorce", animationResource->ResourceName() );
 	}
-	printer->PushAttribute( "hasParticles", hasParticles );
-	printer->PushAttribute( "flags", flags );
 
-	printer->OpenElement( "currentAnim" );
-	printer->PushAttribute( "time", currentAnim.time );
-	printer->PushAttribute( "id", (int)currentAnim.id );
-	printer->CloseElement();
-
-	printer->OpenElement( "prevAnim" );
-	printer->PushAttribute( "time", prevAnim.time );
-	printer->PushAttribute( "id", (int)prevAnim.id );
-	printer->CloseElement();
-
-	PushType( printer, "pos", pos );
-	PushType( printer, "rot", rot );
-	PushType( printer, "color", color );
-	PushType( printer, "boneFilter", boneFilter );
-	PushType( printer, "control", control );
-
+	Archive( printer, 0 );
 	if ( aux ) {
 		printer->OpenElement( "aux" );
 		aux->boneData.Save( printer );
 		PushType( printer, "procMat", aux->procMat );
 		printer->CloseElement();	// aux
 	}
-
 	printer->CloseElement();	// model
 }
 
@@ -814,6 +845,8 @@ void ModelResourceManager::AddModelResource( ModelResource* res )
 
 const ModelResource* ModelResourceManager::GetModelResource( const char* name, bool errorIfNotFound )
 {
+	GLASSERT( name );
+
 	ModelResource* res = 0;
 	bool found = map.Query( name, &res );
 

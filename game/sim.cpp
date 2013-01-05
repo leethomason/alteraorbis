@@ -21,6 +21,7 @@
 #include "lumoschitbag.h"
 
 using namespace grinliz;
+using namespace tinyxml2;
 
 Sim::Sim( LumosGame* g )
 {
@@ -58,7 +59,15 @@ void Sim::Load( const char* mapPNG, const char* mapXML, const char* gameXML )
 	}
 	else {
 		ComponentFactory factory( engine, worldMap, lumosGame );
-		chitBag->Load( &factory, gameXML );
+		XMLDocument doc;
+		doc.LoadFile( gameXML );
+		GLASSERT( !doc.Error() );
+		if ( !doc.Error() ) {
+			const XMLElement* root = doc.FirstChildElement( "Sim" );
+			playerID = 0;
+			root->QueryAttribute( "playerID", &playerID );
+			chitBag->Load( &factory, root );
+		}
 	}
 }
 
@@ -66,7 +75,17 @@ void Sim::Load( const char* mapPNG, const char* mapXML, const char* gameXML )
 void Sim::Save( const char* mapPNG, const char* mapXML, const char* gameXML )
 {
 	worldMap->Save( mapPNG, mapXML );
-	chitBag->Save( gameXML );
+
+	FILE* fp = fopen( gameXML, "w" );
+	GLASSERT( fp );
+	if ( fp ) {
+		XMLPrinter printer( fp );
+		printer.OpenElement( "Sim" );
+		printer.PushAttribute( "playerID", playerID );
+		chitBag->Save( &printer );
+		printer.CloseElement();
+		fclose( fp );
+	}
 }
 
 

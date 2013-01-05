@@ -40,13 +40,13 @@ static const float ROTATION_SPEED	= 360.f;		// degrees/second
 
 void PathMoveComponent::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele )
 {
-	XEArchive( prn, ele, "queued.pos.x", queued.pos.x );
-	XEArchive( prn, ele, "queued.pos.y", queued.pos.y );
-	XEArchive( prn, ele, "queued.rotation", queued.rotation );
+	XE_ARCHIVE( queued.pos.x );
+	XE_ARCHIVE( queued.pos.y );
+	XE_ARCHIVE( queued.rotation );
 
-	XEArchive( prn, ele, "dest.pos.x", dest.pos.x );
-	XEArchive( prn, ele, "dest.pos.y", dest.pos.y );
-	XEArchive( prn, ele, "dest.rotation", dest.rotation );
+	XE_ARCHIVE( dest.pos.x );
+	XE_ARCHIVE( dest.pos.y );
+	XE_ARCHIVE( dest.rotation );
 }
 
 

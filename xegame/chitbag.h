@@ -38,12 +38,12 @@ public:
 
 	// Chit creation/query
 	void DeleteAll();
-	Chit* NewChit();
+	Chit* NewChit( int id=0 );
 	void  DeleteChit( Chit* );
 	Chit* GetChit( int id );
 
-	void Save( const char* pathToXML );
-	void Load( const ComponentFactory* factory, const char* pathToXML );
+	void Save( tinyxml2::XMLPrinter* );
+	void Load( const ComponentFactory* factory, const tinyxml2::XMLElement* );
 
 	// Bolts are a special kind of chit. Just easier
 	// and faster to treat them as a 2nd stage.

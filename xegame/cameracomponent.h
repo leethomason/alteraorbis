@@ -53,6 +53,8 @@ public:
 	void SetTrack( int targetChitID );
 
 private:
+	void Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele );
+	
 	Camera* camera;
 	bool autoDelete;
 

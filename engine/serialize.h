@@ -60,10 +60,33 @@ void PushType( tinyxml2::XMLPrinter* printer, const char* name, const grinliz::Q
 void PushType( tinyxml2::XMLPrinter* printer, const char* name, const grinliz::Matrix4& mat );
 
 void XEArchive( tinyxml2::XMLPrinter* printer, const tinyxml2::XMLElement* element, const char* name, 
-				float& value );
+				U32& value );
 void XEArchive( tinyxml2::XMLPrinter* printer, const tinyxml2::XMLElement* element, const char* name, 
 				grinliz::Vector3F& vec );
 void XEArchive( tinyxml2::XMLPrinter* printer, const tinyxml2::XMLElement* element, const char* name, 
+				grinliz::Vector4F& vec );
+void XEArchive( tinyxml2::XMLPrinter* printer, const tinyxml2::XMLElement* element, const char* name, 
 				grinliz::Quaternion& vec );
+void XEArchive( tinyxml2::XMLPrinter* printer, const tinyxml2::XMLElement* element, const char* name, 
+				grinliz::Matrix4& vec );
+
+template< class T >
+void XEArchiveT( tinyxml2::XMLPrinter* printer, const tinyxml2::XMLElement* element, const char* name, T& value )
+{
+	GLASSERT( !(printer && element));
+	GLASSERT( printer || element );
+	GLASSERT( name && *name );
+
+	if ( printer ) 
+		printer->PushAttribute( name, value );
+
+	if ( element ) {
+		value = 0;
+		element->QueryAttribute( name, &value );
+	}
+}
+
+
+#define XE_ARCHIVE( name ) XEArchiveT( prn, ele, #name, name );
 
 #endif // UFOATTACK_SERIALIZE_INCLUDED

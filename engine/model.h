@@ -359,6 +359,8 @@ public:
 	const grinliz::Matrix4& XForm() const;
 
 private:
+	void Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele );
+
 	void Modify() 
 	{			
 		xformValid = false; 

@@ -224,22 +224,6 @@ void PushType( tinyxml2::XMLPrinter* printer, const char* name, const Quaternion
 }
 
 
-void XEArchive( XMLPrinter* printer, const XMLElement* element, const char* name, float& value )
-{
-	GLASSERT( !(printer && element));
-	GLASSERT( printer || element );
-	GLASSERT( name && *name );
-
-	if ( printer ) 
-		printer->PushAttribute( name, value );
-
-	if ( element ) {
-		value = 0;
-		element->QueryFloatAttribute( name, &value );
-	}
-}
-
-
 void XEArchive( XMLPrinter* printer, const XMLElement* element, const char* name, Vector3F& vec )
 {
 	GLASSERT( !(printer && element));
@@ -258,6 +242,30 @@ void XEArchive( XMLPrinter* printer, const XMLElement* element, const char* name
 			ele->QueryFloatAttribute( "x", &vec.x );
 			ele->QueryFloatAttribute( "y", &vec.y );
 			ele->QueryFloatAttribute( "z", &vec.z );
+		}
+	}
+}
+
+
+void XEArchive( XMLPrinter* printer, const XMLElement* element, const char* name, Vector4F& vec )
+{
+	GLASSERT( !(printer && element));
+	GLASSERT( printer || element );
+	GLASSERT( name && *name );
+
+	if ( printer ) 
+		PushType( printer, name, vec );
+	if ( element ) {
+		vec.Zero();
+		const XMLElement* ele = element->FirstChildElement( name );
+		GLASSERT( ele );
+		if ( ele ) {
+			const char* type = ele->Attribute( "type" );
+			GLASSERT( type && StrEqual( type,  "Vector4F" ));
+			ele->QueryFloatAttribute( "x", &vec.x );
+			ele->QueryFloatAttribute( "y", &vec.y );
+			ele->QueryFloatAttribute( "z", &vec.z );
+			ele->QueryFloatAttribute( "w", &vec.w );
 		}
 	}
 }
@@ -282,6 +290,31 @@ void XEArchive( XMLPrinter* printer, const XMLElement* element, const char* name
 			ele->QueryFloatAttribute( "y", &q.y );
 			ele->QueryFloatAttribute( "z", &q.z );
 			ele->QueryFloatAttribute( "w", &q.w );
+		}
+	}
+}
+
+
+void XEArchive( XMLPrinter* printer, const XMLElement* element, const char* name, Matrix4& m )
+{
+	GLASSERT( !(printer && element));
+	GLASSERT( printer || element );
+	GLASSERT( name && *name );
+
+	if ( printer ) 
+		PushType( printer, name, m );
+	if ( element ) {
+		m.SetIdentity();
+		const XMLElement* ele = element->FirstChildElement( name );
+		GLASSERT( ele );
+		if ( ele ) {
+			const char* type = ele->Attribute( "type" );
+			GLASSERT( type && StrEqual( type, "Matrix4" ));
+			for( int i=0; i<16; ++i ) {
+				CStr<10> str;
+				str.Format( "x%0d", i );
+				element->QueryFloatAttribute( str.c_str(), &m.x[i] );
+			}
 		}
 	}
 }

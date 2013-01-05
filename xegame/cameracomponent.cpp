@@ -22,20 +22,28 @@
 
 using namespace grinliz;
 
-void CameraComponent::Load( const tinyxml2::XMLElement* element )
+
+void CameraComponent::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele )
 {
-	GLASSERT( 0 );
+	XE_ARCHIVE( autoDelete );
+	XE_ARCHIVE( mode );
+	XE_ARCHIVE( targetChitID );
+	XE_ARCHIVE( speed );
+	XEArchive( prn, ele, "dest", dest );
 }
 
+
+void CameraComponent::Load( const tinyxml2::XMLElement* element )
+{
+	this->BeginLoad( element, "CameraComponent" );
+	Archive( 0, element );
+	this->EndLoad( element );
+}
 
 void CameraComponent::Save( tinyxml2::XMLPrinter* printer )
 {
 	this->BeginSave( printer, "CameraComponent" );
-	printer->PushAttribute( "autoDelete", autoDelete );
-	printer->PushAttribute( "mode", mode );
-	printer->PushAttribute( "targetChitID", targetChitID );
-	printer->PushAttribute( "speed", speed );
-	PushType( printer, "dest", dest );
+	Archive( printer, 0 );
 	this->EndSave( printer );
 }
 

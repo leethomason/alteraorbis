@@ -34,8 +34,11 @@ using namespace tinyxml2;
 RenderComponent::RenderComponent( Engine* _engine, const char* _asset ) 
 	: engine( _engine )
 {
-	resource[0] = ModelResourceManager::Instance()->GetModelResource( _asset );
-	GLASSERT( resource[0] );
+	resource[0] = 0;
+	if ( _asset ) {
+		resource[0] = ModelResourceManager::Instance()->GetModelResource( _asset );
+		GLASSERT( resource[0] );
+	}
 	model[0] = 0;
 	for( int i=1; i<NUM_MODELS; ++i ) {
 		resource[i] = 0;
@@ -156,8 +159,7 @@ void RenderComponent::OnAdd( Chit* chit )
 {
 	Component::OnAdd( chit );
 	for( int i=0; i<NUM_MODELS; ++i ) {
-		GLASSERT( model[i] == 0 );
-		if ( resource[i] ) {
+		if ( resource[i] && !model[i] ) {
 			model[i] = engine->AllocModel( resource[i] );
 			model[i]->userData = parentChit;
 		}
