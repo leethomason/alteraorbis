@@ -51,8 +51,11 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	playerMark.Init( &gamui2D, atom, true );
 	playerMark.SetSize( MARK_SIZE, MARK_SIZE );
 
-	refresh.Init( &gamui2D, game->GetButtonLook(0) );
-	refresh.SetText( "Refresh" );
+	static const char* serialText[NUM_SERIAL_BUTTONS] = { "Save", "Load", "Cycle" }; 
+	for( int i=0; i<NUM_SERIAL_BUTTONS; ++i ) {
+		serialButton[i].Init( &gamui2D, game->GetButtonLook(0) );
+		serialButton[i].SetText( serialText[i] );
+	}
 }
 
 
@@ -67,7 +70,9 @@ void GameScene::Resize()
 	lumosGame->PositionStd( &okay, 0 );
 	
 	LayoutCalculator layout = static_cast<LumosGame*>(game)->DefaultLayout();
-	layout.PosAbs( &refresh, 0, -2 );
+	for( int i=0; i<NUM_SERIAL_BUTTONS; ++i ) {
+		layout.PosAbs( &serialButton[i], i, -2 );
+	}
 
 	const Screenport& port = lumosGame->GetScreenport();
 	minimap.SetPos( port.UIWidth()-MINI_MAP_SIZE, 0 );
@@ -164,8 +169,19 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 			}
 		}
 	}
-	else if ( item == &refresh ) {
+	else if ( item == &serialButton[SAVE] ) {
 		Save();
+	}
+	else if ( item == &serialButton[LOAD] ) {
+		delete sim;
+		sim = new Sim( lumosGame );
+		Load();
+	}
+	else if ( item == &serialButton[CYCLE] ) {
+		Save();
+		delete sim;
+		sim = new Sim( lumosGame );
+		Load();
 	}
 }
 

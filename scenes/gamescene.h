@@ -33,8 +33,15 @@ private:
 	LumosGame*	lumosGame;
 	Sim*		sim;
 
+	enum {
+		SAVE,
+		LOAD,
+		CYCLE,
+		NUM_SERIAL_BUTTONS
+	};
+
 	gamui::PushButton	okay;
-	gamui::PushButton	refresh;
+	gamui::PushButton	serialButton[NUM_SERIAL_BUTTONS];
 	gamui::Image		minimap;
 	gamui::Image		playerMark;
 };
