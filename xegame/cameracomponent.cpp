@@ -23,6 +23,23 @@
 using namespace grinliz;
 
 
+void CameraComponent::OnAdd( Chit* c )
+{
+	super::OnAdd( c );
+	if ( GetChitBag()->ActiveCamera() == 0 ) {
+		GetChitBag()->SetActiveCamera( this->ID() );
+	}
+}
+
+
+void CameraComponent::OnRemove()
+{
+	if ( GetChitBag()->ActiveCamera() == this->ID() ) {
+		GetChitBag()->SetActiveCamera( 0 );
+	}
+}
+
+
 void CameraComponent::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele )
 {
 	XE_ARCHIVE( autoDelete );
@@ -76,6 +93,10 @@ void CameraComponent::SetTrack( int targetID )
 
 bool CameraComponent::DoTick( U32 delta ) 
 {
+	if ( GetChitBag()->ActiveCamera() != this->ID() ) {
+		return true;
+	}
+
 	switch ( mode ) {
 	case DONE:
 		if ( autoDelete ) {
@@ -108,14 +129,6 @@ bool CameraComponent::DoTick( U32 delta )
 				
 				Vector3F pos = chit->GetSpatialComponent()->GetPosition();
 				pos.y = 0;
-
-				/*
-				Vector3F delta = pos - prevTarget;
-				if ( delta.LengthSquared() ) {
-					camera->DeltaPosWC( delta.x, delta.y, delta.z );
-					prevTarget = pos;
-				}
-				*/
 
 				// Scoot the camera to always focus on the target. Removes
 				// errors that occur from rotation, drift, etc.

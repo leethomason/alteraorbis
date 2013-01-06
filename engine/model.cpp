@@ -287,7 +287,7 @@ void Model::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele 
 }
 
 
-void Model::Load( const tinyxml2::XMLElement* element )
+void Model::Load( const tinyxml2::XMLElement* element, SpaceTree* tree )
 {
 	GLASSERT( StrEqual( element->Name(), "Model" ));
 
@@ -313,6 +313,10 @@ void Model::Load( const tinyxml2::XMLElement* element )
 		aux->boneData.Load( auxEle );
 		XEArchive( 0, auxEle, "procMat", aux->procMat );
 	}
+
+	if ( tree ) {
+		tree->Update( this );
+	}
 }
 
 
@@ -322,7 +326,7 @@ void Model::Save( tinyxml2::XMLPrinter* printer )
 
 	printer->PushAttribute( "resource", resource->header.name.c_str() );
 	if ( animationResource ) {
-		printer->PushAttribute( "animationResorce", animationResource->ResourceName() );
+		printer->PushAttribute( "animationResource", animationResource->ResourceName() );
 	}
 
 	Archive( printer, 0 );

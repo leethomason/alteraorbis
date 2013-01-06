@@ -70,22 +70,10 @@ void DebugStateComponent::OnAdd( Chit* chit )
 	healthBar.SetSize( SIZE_X, SIZE_Y );
 	healthBar.SetRange( 1.0f );
 
-	ItemComponent* pItem = chit->GetItemComponent();
-	if ( pItem ) {
-		healthBar.SetRange( pItem->GetItem()->HPFraction() );
-	}
-
 	map->overlay.Add( &ammoBar );
 	ammoBar.SetSize( SIZE_X, SIZE_Y );
 	ammoBar.SetRange( 1.0f );
-	/*
-	if ( pItem ) {
-		const GameItem* item = pItem->GetItem();
-		float r = (float)item->rounds / (float)item->clipCap;
-		GLASSERT( r >= 0 && r <= 1 );
-		ammoBar.SetRange( r ); 
-	}
-	*/
+
 	map->overlay.Add( &shieldBar );
 	shieldBar.SetSize( SIZE_X, SIZE_Y );
 	shieldBar.SetRange( 1.0f );

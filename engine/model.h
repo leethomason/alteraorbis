@@ -233,7 +233,7 @@ public:
 	void Init( const ModelResource* resource, SpaceTree* tree );
 	void Free();
 
-	void Load( const tinyxml2::XMLElement* element );
+	void Load( const tinyxml2::XMLElement* element, SpaceTree* tree );
 	void Save( tinyxml2::XMLPrinter* printer );
 
 	void Queue( RenderQueue* queue, EngineShaders* shaders, int requiredShaderFlag, int excludedShaderFlag );
@@ -358,14 +358,15 @@ public:
 
 	const grinliz::Matrix4& XForm() const;
 
-private:
-	void Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele );
-
 	void Modify() 
 	{			
 		xformValid = false; 
 		invValid = false; 
 	}
+
+private:
+	void Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele );
+
 	const grinliz::Matrix4& InvXForm() const;
 
 	void CalcAnimation( BoneData* boneData ) const;	// compute the animition, accounting for crossfade, etc.

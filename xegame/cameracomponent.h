@@ -42,6 +42,9 @@ public:
 		return super::ToComponent( name );
 	}
 
+	virtual void OnAdd( Chit* );
+	virtual void OnRemove();
+
 	virtual void Load( const tinyxml2::XMLElement* element );
 	virtual void Save( tinyxml2::XMLPrinter* printer );
 

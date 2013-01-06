@@ -80,6 +80,10 @@ public:
 	// IBoltImpactHandler
 	virtual void HandleBolt( const Bolt& bolt, Model* m, const grinliz::Vector3F& at );
 
+	// There can only be one camera actually in use:
+	void SetActiveCamera( int id )	{ activeCamera = id; }
+	int  ActiveCamera() const		{ return activeCamera; }
+
 private:
 	enum {
 		SHIFT = 2,	// a little tuning done; seems reasonable
@@ -92,6 +96,7 @@ private:
 	int idPool;
 	U32 bagTime;
 	int nTicked;
+	int activeCamera;
 
 	struct CompID { 
 		int chitID;
@@ -109,7 +114,7 @@ private:
 	grinliz::CDynArray<Chit*>		hashQuery;			// local data, cached at class level
 	grinliz::CDynArray<ChitEvent>	events;
 	
-	grinliz::CDynArray<Bolt> bolts;
+	grinliz::CDynArray<Bolt>		bolts;
 	
 	Chit* spatialHash[SIZE*SIZE];
 };

@@ -35,12 +35,13 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	GLASSERT( sim->GetPlayerChit() );
 	Vector3F target = sim->GetPlayerChit()->GetSpatialComponent()->GetPosition();
 	sim->GetEngine()->CameraLookAt( target + delta, target );
-
-	Chit* camChit = sim->GetChitBag()->NewChit();
-	CameraComponent* cameraComp = new CameraComponent( &sim->GetEngine()->camera );
-	camChit->Add( cameraComp );
-	cameraComp->SetTrack( sim->GetPlayerChit()->ID() );
-
+	
+	if ( !sim->GetChitBag()->ActiveCamera() ) {
+		Chit* camChit = sim->GetChitBag()->NewChit();
+		CameraComponent* cameraComp = new CameraComponent( &sim->GetEngine()->camera );
+		camChit->Add( cameraComp );
+		cameraComp->SetTrack( sim->GetPlayerChit()->ID() );
+	}
 	RenderAtom atom;
 	minimap.Init( &gamui2D, atom, false );
 	minimap.SetSize( MINI_MAP_SIZE, MINI_MAP_SIZE );
@@ -215,9 +216,13 @@ void GameScene::DrawDebugText()
 
 	UFOText* ufoText = UFOText::Instance();
 	Chit* chit = sim->GetPlayerChit();
+	Engine* engine = sim->GetEngine();
+
 	if ( chit && chit->GetSpatialComponent() ) {
 		const Vector3F& v = chit->GetSpatialComponent()->GetPosition();
-		ufoText->Draw( 0, 32, "Player: %.1f, %.1f, %.1f", v.x, v.y, v.z );
+		ufoText->Draw( 0, 32, "Player: %.1f, %.1f, %.1f  Camera: %.1f %.1f %.1f", 
+			           v.x, v.y, v.z,
+					   engine->camera.PosWC().x, engine->camera.PosWC().y, engine->camera.PosWC().z );
 	}
 	ufoText->Draw( 0, 48, "Tap world or map to go to location. End/Home rotate, PgUp/Down zoom." );
 }

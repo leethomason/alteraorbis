@@ -33,6 +33,7 @@ ChitBag::ChitBag()
 	bagTime = 0;
 	memset( spatialHash, 0, sizeof(*spatialHash)*SIZE*SIZE );
 	memRoot = 0;
+	activeCamera = 0;
 }
 
 

@@ -21,6 +21,7 @@
 #include "../grinliz/glvector.h"
 #include "../grinliz/glmatrix.h"
 #include "../grinliz/glgeometry.h"
+#include "../tinyxml2/tinyxml2.h"
 
 /*	By default, the camera is looking down the -z axis with y up.
 	View rotation is handled by this class to account for device
@@ -59,6 +60,9 @@ public:
 	// normal(0), up(1), right(2)
 	const grinliz::Vector3F* EyeDir3()				{ if ( !valid ) CalcWorldXForm();
 													  return eyeDir3; }
+
+	virtual void Load( const tinyxml2::XMLElement* element );
+	virtual void Save( tinyxml2::XMLPrinter* printer );
 
 private:
 	// Position of the camera in the world - no view rotation, no inverse.

@@ -29,6 +29,26 @@ Camera::Camera() :
 }
 
 
+void Camera::Load( const tinyxml2::XMLElement* element )
+{
+	const tinyxml2::XMLElement* camEle = element->FirstChildElement( "Camera" );
+	GLASSERT( camEle );
+	if ( camEle ) {
+		XEArchive( 0, camEle, "posWC", posWC );
+		XEArchive( 0, camEle, "quat",  quat );
+	}
+}
+
+
+void Camera::Save( tinyxml2::XMLPrinter* printer )
+{
+	printer->OpenElement( "Camera" );
+	XEArchive( printer, 0, "posWC", posWC );
+	XEArchive( printer, 0, "quat",  quat );
+	printer->CloseElement();
+}
+
+
 void Camera::TiltRotationToQuat( float tilt, float yRotation )
 {
 	Matrix4 rotationY, rotationTilt;

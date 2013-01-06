@@ -66,6 +66,7 @@ void Sim::Load( const char* mapPNG, const char* mapXML, const char* gameXML )
 			const XMLElement* root = doc.FirstChildElement( "Sim" );
 			playerID = 0;
 			root->QueryAttribute( "playerID", &playerID );
+			engine->camera.Load( root );
 			chitBag->Load( &factory, root );
 		}
 	}
@@ -82,6 +83,7 @@ void Sim::Save( const char* mapPNG, const char* mapXML, const char* gameXML )
 		XMLPrinter printer( fp );
 		printer.OpenElement( "Sim" );
 		printer.PushAttribute( "playerID", playerID );
+		engine->camera.Save( &printer );
 		chitBag->Save( &printer );
 		printer.CloseElement();
 		fclose( fp );

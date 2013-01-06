@@ -24,6 +24,7 @@
 #include "../engine/model.h"
 #include "../engine/engine.h"
 #include "../engine/particle.h"
+#include "../engine/loosequadtree.h"
 
 #include "../grinliz/glperformance.h"
 #include "../script/procedural.h"
@@ -91,7 +92,7 @@ void RenderComponent::Load( const tinyxml2::XMLElement* element )
 			if ( it->FirstAttribute() ) {
 				GLASSERT( resource[i] );
 				model[i] = engine->AllocModel( resource[i] );
-				model[i]->Load( it );
+				model[i]->Load( it, engine->GetSpaceTree() );
 			}
 		}
 	}
@@ -159,9 +160,12 @@ void RenderComponent::OnAdd( Chit* chit )
 {
 	Component::OnAdd( chit );
 	for( int i=0; i<NUM_MODELS; ++i ) {
-		if ( resource[i] && !model[i] ) {
-			model[i] = engine->AllocModel( resource[i] );
+		if ( resource[i] ) {
+			if ( !model[i] ) {
+				model[i] = engine->AllocModel( resource[i] );
+			}
 			model[i]->userData = parentChit;
+			model[i]->Modify();
 		}
 	}
 }
