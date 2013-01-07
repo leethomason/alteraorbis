@@ -21,6 +21,7 @@
 #include "../grinliz/glvector.h"
 #include "../grinliz/glcolor.h"
 #include "../grinliz/glcontainer.h"
+#include "../tinyxml2/tinyxml2.h"
 
 #include "vertex.h"
 
@@ -48,6 +49,9 @@ struct Bolt {
 		chitID = 0;
 	} 
 
+	void Save( tinyxml2::XMLPrinter* );
+	void Load( const tinyxml2::XMLElement* );
+
 	grinliz::Vector3F	head;
 	float				len;
 	grinliz::Vector3F	dir;	// normal vector
@@ -62,6 +66,10 @@ struct Bolt {
 	int		effect;
 
 	static void TickAll( grinliz::CDynArray<Bolt>* bolts, U32 delta, Engine* engine, IBoltImpactHandler* handler );
+
+private:
+	void Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele );
+
 };
 
 

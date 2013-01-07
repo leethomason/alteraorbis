@@ -33,7 +33,12 @@ private:
 public:
 
 	PathMoveComponent(	WorldMap* _map )				// required; used to avoids blocks when moving. 
-		: GameMoveComponent( _map ), nPathPos( 0 ), pathPos( 0 ), pathDebugging( false ) {}
+		: GameMoveComponent( _map ), nPathPos( 0 ), pathPos( 0 ), pathDebugging( false ) 
+	{ 
+		queued.Clear();
+		dest.Clear();
+		SetNoPath(); 
+	}
 	virtual ~PathMoveComponent() {}
 
 	virtual Component* ToComponent( const char* name ) {
@@ -85,7 +90,7 @@ private:
 		dest.Clear();
 	}
 	bool HasPath() {
-		return dest.pos.x >= 0;
+		return dest.pos.x >= 0 && nPathPos > 0;
 	}
 
 	// Rotate, then move in that direction.

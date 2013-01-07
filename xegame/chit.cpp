@@ -104,6 +104,14 @@ void Chit::Load( const ComponentFactory* factory, const XMLElement* ele )
 	GLASSERT( StrEqual( ele->Value(), "Chit" ));
 	ele->QueryIntAttribute( "id", &id );
 
+	const XMLElement* shelfEle = ele->FirstChildElement( "Shelf" );
+	if ( shelfEle ) {
+		const XMLElement* slotEle = shelfEle->FirstChildElement();
+		GLASSERT( slotEle );
+		shelf = factory->Factory( slotEle->Name(),  this );
+		shelf->Load( slotEle );
+	}
+
 	for( const XMLElement* slotEle = ele->FirstChildElement();
 		 slotEle;
 		 slotEle = slotEle->NextSiblingElement() )

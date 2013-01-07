@@ -17,7 +17,7 @@
 using namespace grinliz;
 using namespace gamui;
 
-static const float DEBUG_SCALE = 2.0f;
+static const float DEBUG_SCALE = 1.0f;
 static const float MINI_MAP_SIZE = 150.0f*DEBUG_SCALE;
 static const float MARK_SIZE = 6.0f*DEBUG_SCALE;
 
@@ -26,8 +26,6 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	lumosGame = game;
 	game->InitStd( &gamui2D, &okay, 0 );
 	sim = new Sim( lumosGame );
-
-	//game->LoadGame();
 
 	Load();
 

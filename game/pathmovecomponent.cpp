@@ -70,13 +70,18 @@ void PathMoveComponent::Save( tinyxml2::XMLPrinter* printer )
 void PathMoveComponent::OnAdd( Chit* chit )
 {
 	super::OnAdd( chit );
-	SetNoPath();
 	blockForceApplied = false;
 	avoidForceApplied = false;
 	isStuck = false;
-
-	queued.Clear();
-	dest.Clear();
+	
+	// Serialization case:
+	// if there is a queue location, use that, else use the current location.
+	if ( queued.pos.x >= 0 ) {
+		QueueDest( queued.pos, queued.rotation );
+	}
+	else if ( dest.pos.x >= 0 ) {
+		QueueDest( dest.pos, dest.rotation );
+	}
 }
 
 

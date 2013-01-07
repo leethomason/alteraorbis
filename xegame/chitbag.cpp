@@ -57,12 +57,19 @@ void ChitBag::DeleteAll()
 void ChitBag::Save( XMLPrinter* printer )
 {
 	printer->OpenElement( "ChitBag" );
+
 	printer->OpenElement( "Chits" );
 	Chit** chits = chitID.GetValues();
 	for( int i=0; i<chitID.NumValues(); ++i ) {
 		chits[i]->Save( printer );
 	}
 	printer->CloseElement();	// Chits
+
+	printer->OpenElement( "Bolts" );
+	for( int i=0; i<bolts.Size(); ++i ) {
+		bolts[i].Save( printer );
+	}
+	printer->CloseElement();
 
 	printer->CloseElement();	// ChitBag
 }
@@ -89,6 +96,17 @@ void ChitBag::Load( const ComponentFactory* factory, const XMLElement* ele )
 
 				Chit* c = this->NewChit( id );
 				c->Load( factory, chit );
+			}
+		}
+
+		const XMLElement* boltsEle = child->FirstChildElement( "Bolts" );
+		if ( boltsEle ) {
+			for( const XMLElement* boltEle = boltsEle->FirstChildElement( "Bolt" );
+				 boltEle;
+				 boltEle = boltEle->NextSiblingElement( "Bolt" ))
+			{
+				Bolt* b = bolts.PushArr( 1 );
+				b->Load( boltEle );
 			}
 		}
 	}
