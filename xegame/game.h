@@ -94,7 +94,7 @@ public:
 	void SetPerfLevel( int level )		{ perfLevel = (level%2); }
 	int GetPerfLevel() const			{ return perfLevel; }
 
-	grinliz::GLString GamePath( const char* type, int slot, const char* extension ) const;
+	const char* GamePath( const char* type, int slot, const char* extension ) const;
 	bool HasFile( const char* file ) const;
 	void DeleteFile( const char* file );
 

@@ -34,7 +34,7 @@ void MapSpatialComponent::SetMapPosition( int x, int y, int r )
 		if ( mapPos.x >= 0 ) {
 			Rectangle2I rb;
 			rb.Set( mapPos.x, mapPos.y, mapPos.x+mapSize.x-1, mapPos.y+mapSize.y-1 );
-			map->ClearBlock( rb );
+			map->ClearBlocked( rb );
 		}
 
 		float wx, wz;
@@ -54,7 +54,7 @@ void MapSpatialComponent::SetMapPosition( int x, int y, int r )
 			wz = (float)y + (float)mapSize.x*0.5f;
 			rb.max.Set( x+mapSize.y-1, y+mapSize.x-1 );
 		}		
-		map->SetBlock( rb );
+		map->SetBlocked( rb );
 
 		SetPosition( wx, 0, wz );
 		SetYRotation( (float)mapRotation );

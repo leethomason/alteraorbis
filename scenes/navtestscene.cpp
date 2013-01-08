@@ -169,10 +169,10 @@ void NavTestScene::Tap( int action, const grinliz::Vector2F& view, const grinliz
 
 			if ( toggleBlock.Down() ) {
 				Vector2I d = { (int)tapMark.x, (int)tapMark.z };
-				if ( map->IsBlockSet( d.x, d.y ) ) 
-					map->ClearBlock( d.x, d.y );
+				if ( map->IsBlocked( d.x, d.y ) ) 
+					map->ClearBlocked( d.x, d.y );
 				else
-					map->SetBlock( d.x, d.y );
+					map->SetBlocked( d.x, d.y );
 			}
 			else {
 				// Move to the marked location.
@@ -216,8 +216,8 @@ void NavTestScene::ItemTapped( const gamui::UIItem* item )
 		Rectangle2I b = map->Bounds();
 		int x = random.Rand( b.Width() );
 		int y = random.Rand( b.Height() );
-		if ( map->IsLand( x, y ) && !map->IsBlockSet( x, y ) ) {
-			map->SetBlock( x, y );
+		if ( map->IsLand( x, y ) && !map->IsBlocked( x, y ) ) {
+			map->SetBlocked( x, y );
 			--makeBlocks;
 		}
 	}

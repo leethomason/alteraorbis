@@ -29,7 +29,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 
 	Load();
 
-	Vector3F delta = { 20.0f, 20.0f, 20.0f };
+	Vector3F delta = { 14.0f, 14.0f, 14.0f };
 	GLASSERT( sim->GetPlayerChit() );
 	Vector3F target = sim->GetPlayerChit()->GetSpatialComponent()->GetPosition();
 	sim->GetEngine()->CameraLookAt( target + delta, target );
@@ -79,23 +79,23 @@ void GameScene::Resize()
 
 void GameScene::Save()
 {
-	GLString xmlPath = game->GamePath( "map", 0, "xml" );
-	GLString pngPath = game->GamePath( "map", 0, "png" );
-	GLString gamePath = game->GamePath( "game", 0, "xml" );
-	sim->Save( pngPath.c_str(), xmlPath.c_str(), gamePath.c_str() );
+	const char* xmlPath = game->GamePath( "map", 0, "xml" );
+	const char* pngPath = game->GamePath( "map", 0, "png" );
+	const char* gamePath = game->GamePath( "game", 0, "xml" );
+	sim->Save( pngPath, xmlPath, gamePath );
 }
 
 
 void GameScene::Load()
 {
-	GLString xmlPath  = lumosGame->GamePath( "map", 0, "xml" );
-	GLString pngPath  = lumosGame->GamePath( "map", 0, "png" );
-	GLString gamePath = lumosGame->GamePath( "game", 0, "xml" );
-	if ( lumosGame->HasFile( gamePath.c_str() )) {
-		sim->Load( pngPath.c_str(), xmlPath.c_str(), gamePath.c_str() );
+	const char* xmlPath  = lumosGame->GamePath( "map", 0, "xml" );
+	const char* pngPath  = lumosGame->GamePath( "map", 0, "png" );
+	const char* gamePath = lumosGame->GamePath( "game", 0, "xml" );
+	if ( lumosGame->HasFile( gamePath )) {
+		sim->Load( pngPath, xmlPath, gamePath );
 	}
 	else {
-		sim->Load( pngPath.c_str(), xmlPath.c_str(), 0 );
+		sim->Load( pngPath, xmlPath, 0 );
 	}
 }
 

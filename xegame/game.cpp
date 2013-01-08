@@ -371,9 +371,10 @@ RenderAtom Game::CreateRenderAtom( int uiRendering, const char* assetName, float
 }
 
 
-GLString Game::GamePath( const char* type, int slot, const char* extension ) const
+const char* Game::GamePath( const char* type, int slot, const char* extension ) const
 {	
-	grinliz::GLString str( savePath );
+	CStr<256> str;
+	str = savePath.c_str();
 	str += "./save/";
 	str += type;
 
@@ -383,7 +384,7 @@ GLString Game::GamePath( const char* type, int slot, const char* extension ) con
 	}
 	str += ".";
 	str += extension;
-	return str;
+	return StringPool::Intern( str.c_str() ).c_str();
 }
 
 
@@ -416,8 +417,8 @@ void Game::SavePathTimeStamp( int slot, GLString* stamp )
 
 void Game::SaveGame( int slot )
 {
-	GLString path = GamePath( "game", 0, "xml" );
-	FILE* fp = fopen( path.c_str(), "w" );
+	const char* path = GamePath( "game", 0, "xml" );
+	FILE* fp = fopen( path, "w" );
 	GLASSERT( fp );
 	if ( fp ) {
 		XMLPrinter printer( fp );
@@ -446,8 +447,8 @@ void Game::SaveGame( int slot )
 
 void Game::LoadGame()
 {
-	GLString path = GamePath( "game", 0, "xml" );
-	FILE* fp = fopen( path.c_str(), "r" );
+	const char* path = GamePath( "game", 0, "xml" );
+	FILE* fp = fopen( path, "r" );
 	GLASSERT( fp );
 	if ( fp ) {
 		XMLDocument doc;

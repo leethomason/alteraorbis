@@ -52,6 +52,7 @@ public:
 
 private:
 	void CreateTexture( int type );
+	void GenerateAndCreate( bool createTexture );
 	void GenerateFaces( int mainRow );
 	void GenerateRing( int mainRow );
 

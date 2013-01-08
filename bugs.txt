@@ -1,10 +1,10 @@
 - game
-	- Land and Water
+	x Land and Water
 		x generate a random world
-		- save / load
+		x save / load
 			x 'shelf'
 			x save, load, cycle buttons
-			- optimize cycle time (fast png write?)
+			x optimize cycle time (fast png write?): not much to do here, without swapping out the encoder
 			x save bolts
 		x walk around it
 			x where is world origin? mini-map origin? save/load origin? line all that up

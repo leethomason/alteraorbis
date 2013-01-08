@@ -54,10 +54,7 @@ LivePreviewScene::LivePreviewScene( LumosGame* game, const LivePreviewSceneData*
 	memset( model, 0, sizeof(model[0])*NUM_MODEL );
 
 	currentType = HUMAN_MALE_FACE;
-	GenerateFaces( 0 );
-	if ( live ) {
-		CreateTexture( HUMAN_MALE_FACE );
-	}
+	GenerateAndCreate( true );
 	game->InitStd( &gamui2D, &okay, 0 );
 	fileTimer = 0;
 	fileTime = 0;
@@ -277,6 +274,25 @@ void LivePreviewScene::GenerateRing( int mainRow )
 }
 
 
+void LivePreviewScene::GenerateAndCreate( bool createTexture )
+{
+	if ( createTexture && live ) {
+		CreateTexture( currentType );
+	}
+	for( int i=0; i<ROWS; ++i ) {
+		if ( rowButton[i].Down() ) {
+			switch ( currentType ) {
+				case		HUMAN_MALE_FACE:		GenerateFaces( i );		break;
+				case		HUMAN_FEMALE_FACE:		GenerateFaces( i );		break;
+				case		RING:					GenerateRing( i );		break;
+				default:	GLASSERT( 0 );									break;
+			}
+			break;
+		}
+	}
+}
+
+
 void LivePreviewScene::ItemTapped( const gamui::UIItem* item )
 {
 	if ( item == &okay ) {
@@ -284,33 +300,26 @@ void LivePreviewScene::ItemTapped( const gamui::UIItem* item )
 	}
 	else if ( item == &typeButton[HUMAN_MALE_FACE] ) {
 		currentType = HUMAN_MALE_FACE;
-		CreateTexture( HUMAN_MALE_FACE );
-		GenerateFaces( 0 );
-		rowButton[0].SetDown();
+		//rowButton[0].SetDown();
+		GenerateAndCreate( true );
 	}
 	else if ( item == &typeButton[HUMAN_FEMALE_FACE] ) {
 		currentType = HUMAN_FEMALE_FACE;
-		CreateTexture( HUMAN_FEMALE_FACE );
-		GenerateFaces( 0 );
-		rowButton[0].SetDown();
+		//rowButton[0].SetDown();
+		GenerateAndCreate( true );
 	}
 	else if ( item == &typeButton[RING] ) {
 		currentType = RING;
-		CreateTexture( RING );
-		GenerateRing( 0 );
-		rowButton[0].SetDown();
+		//rowButton[0].SetDown();
+		GenerateAndCreate( true );
 	}
 
 	for( int i=0; i<ROWS; ++i ) {
 		if ( item == &rowButton[i] ) {
-			switch ( currentType ) {
-			case HUMAN_MALE_FACE:	GenerateFaces( i ); break;
-			case HUMAN_FEMALE_FACE:	GenerateFaces( i ); break;
-			case RING:				GenerateRing( i );	break;
-			default: GLASSERT( 0 );			break;
-			}
+			GenerateAndCreate( false );
 		}
 	}
+
 }
 
 

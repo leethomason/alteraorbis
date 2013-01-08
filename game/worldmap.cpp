@@ -373,13 +373,13 @@ Vector2I WorldMap::FindEmbark()
 }
 
 
-void WorldMap::SetBlock( const grinliz::Rectangle2I& pos )
+void WorldMap::SetBlocked( const grinliz::Rectangle2I& pos )
 {
 	for( int y=pos.min.y; y<=pos.max.y; ++y ) {
 		for( int x=pos.min.x; x<=pos.max.x; ++x ) {
 			int i = INDEX( x, y );
-			GLASSERT( grid[i].IsBlock() == FALSE );
-			grid[i].SetBlock( true );
+			GLASSERT( grid[i].IsBlocked() == FALSE );
+			grid[i].SetBlocked( true );
 			zoneInit.Clear( x>>ZONE_SHIFT, y>>ZONE_SHIFT );
 			//GLOUTPUT(( "Block (%d,%d) index=%d zone=%d set\n", x, y, i, ZDEX(x,y) ));
 		}
@@ -388,13 +388,13 @@ void WorldMap::SetBlock( const grinliz::Rectangle2I& pos )
 }
 
 
-void WorldMap::ClearBlock( const grinliz::Rectangle2I& pos )
+void WorldMap::ClearBlocked( const grinliz::Rectangle2I& pos )
 {
 	for( int y=pos.min.y; y<=pos.max.y; ++y ) {
 		for( int x=pos.min.x; x<=pos.max.x; ++x ) {
 			int i = INDEX( x, y );
-			GLASSERT( grid[i].IsBlock() );
-			grid[i].SetBlock( false );
+			GLASSERT( grid[i].IsBlocked() );
+			grid[i].SetBlocked( false );
 			zoneInit.Clear( x>>ZONE_SHIFT, y>>ZONE_SHIFT );
 		}
 	}

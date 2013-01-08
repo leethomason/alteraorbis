@@ -30,7 +30,7 @@ private:
 		DEBUG_ADJACENT	= 0x01,
 		DEBUG_ORIGIN	= 0x02,
 		DEBUG_PATH		= 0x04,
-		IS_BLOCK		= 0x08,
+		IS_BLOCKED		= 0x08,
 		RED				= 0xf0,
 
 		// Green
@@ -50,9 +50,9 @@ public:
 	bool DebugAdjacent() const	{ return (r & DEBUG_ADJACENT) != 0; }
 	bool DebugOrigin() const	{ return (r & DEBUG_ORIGIN) != 0; }
 	bool DebugPath() const		{ return (r & DEBUG_PATH) != 0; }
-	bool IsBlock() const		{ return (r & IS_BLOCK) != 0; }
+	bool IsBlocked() const		{ return (r & IS_BLOCKED) != 0; }
 	bool IsLand() const			{ return (g & GREEN) != 0; }
-	bool IsPassable() const		{ return IsLand() && !IsBlock(); }
+	bool IsPassable() const		{ return IsLand() && !IsBlocked(); }
 	U32  ZoneSize()  const		{ return (a & ZONE_SIZE); }
 	U32  ZoneColor() const		{ return (g & ZONE_COLOR_LOW) | ((b & ZONE_COLOR_HIGH)<< 4); }
 
@@ -69,11 +69,11 @@ public:
 		if ( v ) r |= DEBUG_PATH;
 	}
 
-	void SetBlock( bool block )	{ 
+	void SetBlocked( bool block )	{ 
 		if (block) 
-			r |= IS_BLOCK; 
+			r |= IS_BLOCKED; 
 		else 
-			r &= (~IS_BLOCK); 
+			r &= (~IS_BLOCKED); 
 	}
 	void SetLand( bool land )	{ if ( land ) SetLand(); else SetWater(); }
 	void SetLand()				{ 

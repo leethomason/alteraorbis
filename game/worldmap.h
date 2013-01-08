@@ -79,12 +79,12 @@ public:
 	void Save( const char* pathToPNG, const char* pathToXML );
 	void Load( const char* pathToPNG, const char* pathToXML );
 
-	void SetBlock( int x, int y )	{ grinliz::Rectangle2I pos; pos.Set( x, y, x, y ); SetBlock( pos ); }
-	void SetBlock( const grinliz::Rectangle2I& pos );
-	void ClearBlock( int x, int y )	{ grinliz::Rectangle2I pos; pos.Set( x, y, x, y ); ClearBlock( pos ); }
-	void ClearBlock( const grinliz::Rectangle2I& pos );
+	void SetBlocked( int x, int y )	{ grinliz::Rectangle2I pos; pos.Set( x, y, x, y ); SetBlocked( pos ); }
+	void SetBlocked( const grinliz::Rectangle2I& pos );
+	void ClearBlocked( int x, int y )	{ grinliz::Rectangle2I pos; pos.Set( x, y, x, y ); ClearBlocked( pos ); }
+	void ClearBlocked( const grinliz::Rectangle2I& pos );
 
-	bool IsBlockSet( int x, int y ) { return grid[INDEX(x,y)].IsBlock(); }
+	bool IsBlocked( int x, int y )	{ return grid[INDEX(x,y)].IsBlocked(); }
 	bool IsLand( int x, int y )		{ return grid[INDEX(x,y)].IsLand(); }
 	
 	// Call the pather; return true if successful.

@@ -55,7 +55,7 @@ static const float EL_FOV  = 40.0f;
 static const float EL_NEAR = 2.0f;
 static const float EL_FAR  = 240.0f;
 static const float EL_CAMERA_MIN = 4.0f;
-static const float EL_CAMERA_MAX = 140.0f;
+static const float EL_CAMERA_MAX = 40.0f;
 
 // Set the zoom. The zoom is in a range of 0.1-5.0, based on
 // distance from a hypothetical bitmap. Zoom is passed in
