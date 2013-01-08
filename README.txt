@@ -22,6 +22,26 @@ If you find an issue,
    run the game, so be sure to include the log that show the problem you are submitting.
 
 
+Game Tech
+---------
+A basic map can be created, you can walk around, save, and load.
+
+'Generate' or the title screen will generate a new map.
+'Continue' will load the last saved game or start a newly generated map.
+[Bug: you can 'continue' without generating the world, which will crash the game]
+
+In the main game screen:
+[Control feedback appreciated! These work on my laptop.]
+
+Left-click the world or mini-map to walk there.
+PageUp / PageDown zoom.
+Home / End rotate.
+
+- 'Save' saves the game (there is only one save slot)
+- 'Load' loads the game
+- 'Cycle' saves, tears down the game objects, constructs, and loads. Very useful to test save/load.
+
+
 Features
 --------
 
@@ -43,7 +63,6 @@ Other scenes:
 * particle: particle editing and playback
 * nav: nav mesh and pathfinding tests
 * blue smoke: test of the full system on a game-sized world
-* noise: initial perlin noise / world gen test
 * battle: battle test scene. the main work-in-progress is to get this fulling implemented
 * animation: animation preview utiliti
 * weapon stat: in development, dumps weapon statistics to disk
