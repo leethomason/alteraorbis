@@ -411,16 +411,16 @@ int main( int argc, char **argv )
 
 				const U8* keys = SDL_GetKeyState( 0 );
 				if ( keys[SDLK_PAGEDOWN] ) {
-					GameZoom( game, GAME_ZOOM_DISTANCE, KEY_ZOOM_SPEED );
-				}
-				if ( keys[SDLK_PAGEUP] ) {
 					GameZoom( game, GAME_ZOOM_DISTANCE, -KEY_ZOOM_SPEED );
 				}
+				if ( keys[SDLK_PAGEUP] ) {
+					GameZoom( game, GAME_ZOOM_DISTANCE, KEY_ZOOM_SPEED );
+				}
 				if ( keys[SDLK_HOME] ) {
-					GameCameraRotate( game, KEY_ROTATE_SPEED );
+					GameCameraRotate( game, -KEY_ROTATE_SPEED );
 				}
 				if ( keys[SDLK_END] ) {
-					GameCameraRotate( game, -KEY_ROTATE_SPEED );
+					GameCameraRotate( game, KEY_ROTATE_SPEED );
 				}
 					
 				GameDoTick( game, SDL_GetTicks() );

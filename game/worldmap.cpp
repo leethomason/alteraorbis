@@ -20,6 +20,7 @@
 #include "../grinliz/glutil.h"
 #include "../grinliz/glgeometry.h"
 #include "../grinliz/glcolor.h"
+#include "../grinliz/glperformance.h"
 #include "../shared/lodepng.h"
 
 #include "../engine/texture.h"
@@ -68,9 +69,26 @@ WorldMap::~WorldMap()
 
 void WorldMap::Save( const char* pathToPNG, const char* pathToXML )
 {
+	// Debug or laptap, about 4.5MClock
+	// smaller window size: 3.8MClock
+	// btype == 0 about the same.
+	// None of this matters; may need to add an ultra-simple fast encoder.
+	//QuickProfile qp( "WorldMap::Save" );
+
 	// The map is actually in image coordinates: origin grid[0] is upper left
 	lodepng_encode32_file( pathToPNG, (const unsigned char*)grid, width, height );
-
+	/*
+	unsigned char* buf = 0;
+	size_t outsize = 0;
+	LodePNGState state;
+	lodepng_state_init( &state );
+	state.info_raw.colortype = LCT_RGBA;
+	state.info_png.color.colortype = LCT_RGBA;
+	state.encoder.zlibsettings.windowsize = 64;
+	state.encoder.zlibsettings.btype
+	
+	lodepng_encode( &buf, &outsize, (const unsigned char*)grid, width, height, &state );
+	*/
 	FILE* fp = fopen( pathToXML, "w" );
 	GLASSERT( fp );
 	if ( fp ) {
@@ -86,6 +104,8 @@ void WorldMap::Save( const char* pathToPNG, const char* pathToXML )
 		
 		fclose( fp );
 	}
+//	if ( buf ) 
+//		free( buf );
 }
 
 

@@ -87,7 +87,7 @@ public:
 
 	~QuickProfile()	{ 
 		U64 endTime = FastTime();	
-		GLOUTPUT (( "%s %d MClocks\n", name, (int)((endTime-startTime)/(U64)(1000*1000)) ));
+		GLOUTPUT (( "%s %.1f MClocks\n", name, ((double)(endTime-startTime)/(double)(1000*1000)) ));
 	}
 
 private:
