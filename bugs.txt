@@ -10,7 +10,7 @@
 			x where is world origin? mini-map origin? save/load origin? line all that up
 			x mark location on mini-map
 	- Rock and Stream
-		- rock formation
+		- rock formation: 
 		- cave
 		- streams
 		- fast-step world sim

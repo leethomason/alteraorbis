@@ -70,10 +70,13 @@ public:
 	}
 
 	void SetBlocked( bool block )	{ 
-		if (block) 
+		if (block) {
+			GLASSERT( IsPassable() );
 			r |= IS_BLOCKED; 
-		else 
+		}
+		else { 
 			r &= (~IS_BLOCKED); 
+		}
 	}
 	void SetLand( bool land )	{ if ( land ) SetLand(); else SetWater(); }
 	void SetLand()				{ 
