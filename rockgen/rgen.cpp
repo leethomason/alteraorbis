@@ -9,10 +9,12 @@
 
 using namespace grinliz;
 
-static const int DOMAIN_SIZE = 128;
+static const int DOMAIN_SIZE = 256;
 static const int NUM_TESTS = 5;
 static const int MAX_HEIGHT = 4;
 static const int HEIGHT_TO_COLOR = 60;
+static const int NUM_GENS = 4;
+
 
 int ToHeight( float n, float t ) {
 	if ( n >= t ) {
@@ -25,7 +27,7 @@ int ToHeight( float n, float t ) {
 }
 
 
-int Simple( PerlinNoise* noise, int x, int y, int octave0, int octave1, float octave1Amount )
+float Simple( PerlinNoise* noise, int x, int y, int octave0, int octave1, float octave1Amount )
 {
 	static const float THRESH = 0.1f;
 
@@ -41,11 +43,11 @@ int Simple( PerlinNoise* noise, int x, int y, int octave0, int octave1, float oc
 
 	float n = noise->Noise( nx0, ny0, 0 ) + noise->Noise( nx1, ny1, 0.5f ) * octave1Amount;
 	n = Clamp( n, -1.0f, 1.0f );
-	return ToHeight( n, THRESH );
+	return n;
 }
 
 
-float Fractal( PerlinNoise* noise, PerlinNoise* noise1, int x, int y, int octave0, int octave1, float octave1Amount )
+float Fractal( PerlinNoise* noise, int x, int y, int octave0, int octave1, float octave1Amount )
 {
 	static const float THRESH = 0.1f;
 
@@ -59,23 +61,29 @@ float Fractal( PerlinNoise* noise, PerlinNoise* noise1, int x, int y, int octave
 	float nx1 = OCTAVE_1 * (float)x * DS_INV;
 	float ny1 = OCTAVE_1 * (float)y * DS_INV;
 
-	//float n = noise->Noise( nx0, ny0, 0 );
-	float n = -1.0f + fabs( noise->Noise( nx0, ny0, 0 ) - noise1->Noise( nx0, ny0, 0.0f ) );
-
-	//float n = noise->AbsNoise( nx0, ny0, 0 ) + noise->Noise( nx1, ny1, 0.5f )*octave1Amount;
+	float n = 1.0f - fabs( noise[0].Noise( nx0, ny0, 0 ) - noise[1].Noise( nx0, ny0, 0 ) );
 	n = Clamp( n, -1.0f, 1.0f );
-	//return ToHeight( n, -0.5f );
 	return n;
 }
 
 
 int main(int argc, const char* argv[])
 {
+
 	Color4U8* pixels = new Color4U8[ DOMAIN_SIZE*DOMAIN_SIZE ];
 
 	for( int test=0; test<NUM_TESTS; ++test ) {
 
-		PerlinNoise noise( 42000 + 192837*test ), noise1( 37 + 14235*test );
+		PerlinNoise arr[NUM_GENS] = { 
+			PerlinNoise( 42000 + 192837*test ), 
+			PerlinNoise( 37 + 14235*test ),
+			PerlinNoise( 38103 + 3910*test ),
+			PerlinNoise( test )
+		};
+
+		bool convertToHeight   = true;
+		bool heightIndependent = true;
+		static const float THRESHOLD = -0.7f;
 
 		for( int y=0; y<DOMAIN_SIZE; ++y ) {
 			for( int x=0; x<DOMAIN_SIZE; ++x ) {
@@ -84,10 +92,20 @@ int main(int argc, const char* argv[])
 				//int h = Fractal( &noise, x, y, 8, 32, 0.3f );
 				//Color4U8 c = {  h*HEIGHT_TO_COLOR, h*HEIGHT_TO_COLOR, h*HEIGHT_TO_COLOR, 255 };
 
-				float n = Fractal( &noise, &noise1, x, y, 8, 32, 0 );
+				float n = -Fractal( arr, x, y, 8, 16, 0.5f ) + Simple( arr, x, y, 32, 0, 0 )*0.3f;
 				int v = (int)(255.0f * (0.5f*n+0.5f));
 				Color4U8 c = { v, v, v, 255 };
 
+				if ( convertToHeight ) {
+					int h = 0;
+					if ( heightIndependent ) {
+						h = n > THRESHOLD ? MAX_HEIGHT : 0;
+					}
+					else {
+						h = ToHeight( n, THRESHOLD );
+					}
+					c.Set( h*HEIGHT_TO_COLOR, h*HEIGHT_TO_COLOR, h*HEIGHT_TO_COLOR, 255 );
+				}
 				pixels[y*DOMAIN_SIZE+x] = c;
 			}
 		}
