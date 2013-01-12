@@ -13,13 +13,32 @@ public:
 	// [-1,1]
 	float Noise(float _x, float _y, float _z);
 
+	float Noise( float x, float y, float z, float size, int octave0, int octave1, float octave1Amount )
+	{
+		const float INV      = 1.0f / size;
+		const float OCTAVE_0 = (float)octave0;
+		const float OCTAVE_1 = (float)octave1;
+
+		float nx0 = OCTAVE_0 * (float)x * INV;
+		float ny0 = OCTAVE_0 * (float)y * INV;
+		float nz0 = OCTAVE_0 * (float)z * INV;
+
+		float nx1 = OCTAVE_1 * (float)x * INV;
+		float ny1 = OCTAVE_1 * (float)y * INV;
+		float nz1 = OCTAVE_1 * (float)z * INV;
+
+		float n = Noise( nx0, ny0, nz0 ) + Noise( nx1, ny1, nz1 ) * octave1Amount;
+		return Clamp( n, -1.0f, 1.0f );
+	}
+
+
+	float NormNoise( float x, float y, float z ) {
+		return Normalize( Noise( x, y, z ) );
+	}
+
 	float AbsNoise( float x, float y, float z ) {
 		float v = Noise( x, y, z );
 		return -1.0f + 2.0f*fabsf( v );
-	}
-	float Noise2( float x, float y, float z ) {
-		float v = Noise( x, y, z );
-		return -1.0f + 2.0f * (v*v);
 	}
 
 	// Convert [-1,1] -> [0,1]

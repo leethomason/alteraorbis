@@ -21,13 +21,17 @@ PerlinNoise::PerlinNoise( U32 seed )
 
 float PerlinNoise::Noise(float _x, float _y, float _z) 
 {
-	unsigned X = unsigned( floorf(_x) ) & 255; 
-	unsigned Y = unsigned( floorf(_y) ) & 255; 
-	unsigned Z = unsigned( floorf(_z) ) & 255;
+	unsigned X = unsigned( floorf(_x) ); 
+	unsigned Y = unsigned( floorf(_y) ); 
+	unsigned Z = unsigned( floorf(_z) );
 
 	float x = _x - (float)X;
 	float y = _y - (float)Y;
 	float z = _z - (float)Z;
+
+	X &= 255;
+	Y &= 255;
+	Z &= 255;
 
 	float u = Fade5( x );
 	float v = Fade5( y );
