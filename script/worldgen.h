@@ -57,12 +57,6 @@ public:
 	const U8* Land() const						{ return land; }
 	const U8* Color() const						{ return color; }
 
-	// Save is complex; use a WorlrdMap
-	// Save in standard format:
-	// land:	[0, 255, c]		c: color, <255
-	// water:	[0, c, 255]
-	//void Save( const char* fname );
-
 	enum {
 		SIZE = MAX_MAP_SIZE
 	};

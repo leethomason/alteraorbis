@@ -7,5 +7,7 @@ Release
 cap??.bmp
 cap??.png
 atlas*.bmp
+worldgen/*.png
+rockgen/*.png
 
 

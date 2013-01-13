@@ -2,5 +2,9 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="rgen.cpp" />
+    <ClCompile Include="..\script\rockgen.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\script\rockgen.h" />
   </ItemGroup>
 </Project>

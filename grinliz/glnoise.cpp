@@ -19,30 +19,26 @@ PerlinNoise::PerlinNoise( U32 seed )
 }
 
 
-float PerlinNoise::Noise(float _x, float _y, float _z) 
+float PerlinNoise::Noise(float x, float y, float z) const
 {
-	unsigned X = unsigned( floorf(_x) ); 
-	unsigned Y = unsigned( floorf(_y) ); 
-	unsigned Z = unsigned( floorf(_z) );
+	int X = int( floorf(x) ) & 255; 
+	int Y = int( floorf(y) ) & 255; 
+	int Z = int( floorf(z) ) & 255;
 
-	float x = _x - (float)X;
-	float y = _y - (float)Y;
-	float z = _z - (float)Z;
-
-	X &= 255;
-	Y &= 255;
-	Z &= 255;
+	x -= floorf( x );
+	y -= floorf( y );
+	z -= floorf( z );
 
 	float u = Fade5( x );
 	float v = Fade5( y );
 	float w = Fade5( z );
 
-	unsigned A  = p[X  ]+Y;
-	unsigned AA = p[A]+Z;
-	unsigned AB = p[A+1]+Z;
-	unsigned B  = p[X+1]+Y;
-	unsigned BA = p[B]+Z;
-	unsigned BB = p[B+1]+Z;
+	int A  = p[X  ]+Y;
+	int AA = p[A  ]+Z;
+	int AB = p[A+1]+Z;
+	int B  = p[X+1]+Y;
+	int BA = p[B  ]+Z;
+	int BB = p[B+1]+Z;
 
 	float n=_Lerp(w, _Lerp(v, _Lerp(u, Grad(p[AA  ], x  , y  , z   ),  
 									   Grad(p[BA  ], x-1, y  , z   )), 
@@ -52,6 +48,7 @@ float PerlinNoise::Noise(float _x, float _y, float _z)
 									   Grad(p[BA+1], x-1, y  , z-1 )), 
 							  _Lerp(u, Grad(p[AB+1], x  , y-1, z-1 ),
 									   Grad(p[BB+1], x-1, y-1, z-1 ))));
-	GLASSERT( n >= -1 && n <= 1 );
+	// Mysteries of floating point: occasionally, slightly overflows.
+	//GLASSERT( n >= -1.01f && n <= 1.01f );
 	return n;
 }

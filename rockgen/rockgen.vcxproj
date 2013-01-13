@@ -74,12 +74,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\script\rockgen.cpp" />
     <ClCompile Include="rgen.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\winlib\winlib.vcxproj">
       <Project>{28433181-007b-4bf5-aecc-cc52f97e69a1}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\script\rockgen.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
