@@ -248,7 +248,7 @@ private:
 		return grid+v;
 	}
 
-	WorldGrid*					grid;		// pathing info.
+	WorldGrid*					grid;
 	WorldInfo*					worldInfo;
 	micropather::MicroPather*	pather;
 	bool						debugRegionOverlay;

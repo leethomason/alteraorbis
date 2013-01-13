@@ -4,6 +4,9 @@
 #include "../grinliz/gltypes.h"
 #include "../grinliz/gldebug.h"
 
+// The read-ony parts in the WorldGrid.
+// The read-write parts are in the World
+
 // Trick: overlay the color (RGBA U8) and 
 // the pathing data. That way there is a clean
 // way to save, and do basic checks, on the
@@ -12,13 +15,6 @@
 // Something I learned on this: bit field layout is complier dependent.
 // That's a bummer.
 //
-//						Red				Green		Blue		Alpha
-//	Water				L:std flags		cz			H Set		0xff
-//	Land				L:std flags		H Set		cz
-//		rock			H: rock height & age
-//		rock&lake		H: water height
-//	Magma				L:std flags
-//						0xf0
 
 struct WorldGrid {
 private:
