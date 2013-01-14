@@ -84,8 +84,16 @@ public:
 	void ClearBlocked( int x, int y )	{ grinliz::Rectangle2I pos; pos.Set( x, y, x, y ); ClearBlocked( pos ); }
 	void ClearBlocked( const grinliz::Rectangle2I& pos );
 
-	bool IsBlocked( int x, int y )	{ return grid[INDEX(x,y)].IsBlocked(); }
-	bool IsLand( int x, int y )		{ return grid[INDEX(x,y)].IsLand(); }
+	/*
+	bool IsBlocked( int x, int y )	{ 
+		int i = INDEX(x,y);
+		return WorldGridState::IsBlocked( grid[i], gridState[i] ); 
+	}
+	bool IsLand( int x, int y )		{ 
+		int i = INDEX(x,y);
+		return grid[i].IsLand(); 
+	}
+	*/
 	
 	// Call the pather; return true if successful.
 	bool CalcPath(	const grinliz::Vector2F& start, 
@@ -189,55 +197,53 @@ private:
 
 	bool GridPath( const grinliz::Vector2F& start, const grinliz::Vector2F& end );
 
-	WorldGrid* GridOrigin( int x, int y ) {
-		const WorldGrid& g = grid[INDEX(x,y)];
-		U32 mask = 0xffffffff;
-		U32 size = g.ZoneSize();
-		if ( size ) {
-			mask = ~(size-1);
-		}
-		return grid + INDEX( x&mask, y&mask );
+	grinliz::Vector2I ZoneOrigin( int x, int y ) const {
+		const WorldGridState& gs = gridState[INDEX(x,y)];
+		grinliz::Vector2I origin = gs.ZoneOrigin( x, y );
+		return origin;
 	}
 
-	grinliz::Vector2I RegionOrigin( int x, int y ) {
-		const WorldGrid& g = grid[INDEX(x,y)];
-		U32 mask = 0xffffffff;
-		U32 size = g.ZoneSize();
-		if ( size ) {
-			mask = ~(size-1);
-		}
-		grinliz::Vector2I v = { x&mask, y&mask };
-		return v;
+	const WorldGrid& ZoneOriginG( int x, int y ) const {
+		grinliz::Vector2I v = ZoneOrigin( x, y );
+		return grid[INDEX(v)];
 	}
 
-	bool IsRegionOrigin( int x, int y ) { 
-		grinliz::Vector2I v = RegionOrigin( x, y );
-		return (x == v.x && y == v.y);
+	WorldGridState* ZoneOriginGS( int x, int y ) const {
+		grinliz::Vector2I v = ZoneOrigin( x, y );
+		return gridState + INDEX(v);
 	}
 
-	grinliz::Vector2F RegionCenter( int x, int y ) {
-		const WorldGrid& g = grid[INDEX(x,y)];
-		grinliz::Vector2I v = RegionOrigin( x, y );
-		float half = (float)g.ZoneSize() * 0.5f;
-		grinliz::Vector2F c = { (float)(x) + half, (float)y + half };
-		return c;
+	bool IsZoneOrigin( int x, int y ) const {
+		grinliz::Vector2I v = ZoneOrigin( x, y );
+		return v.x == x && v.y == y;
 	}
 
-	grinliz::Rectangle2F RegionBounds( int x, int y ) {
-		const WorldGrid& g = grid[INDEX(x,y)];
-		grinliz::Vector2I v = RegionOrigin( x, y );
+	bool IsPassable( int x, int y ) const {
+		int index = INDEX(x,y);
+		return WorldGridState::IsPassable( grid[index], gridState[index] );
+	}
+
+	grinliz::Rectangle2F ZoneBounds( int x, int y ) const {
+		grinliz::Vector2I v = ZoneOrigin( x, y );
+		const WorldGridState& gs = gridState[INDEX(x,y)];
 		grinliz::Rectangle2F b;
 		b.min.Set( (float)v.x, (float)v.y );
-		b.max.Set( (float)(v.x + g.ZoneSize()), (float)(v.y + g.ZoneSize()) );
+		int size = gs.ZoneSize();
+		b.max.Set( (float)(v.x + size), (float)(v.y + size) );
 		return b;
 	}
-		
+
+	grinliz::Vector2F ZoneCenter( int x, int y ) const {
+		grinliz::Rectangle2F r = ZoneBounds( x, y );
+		return r.Center();
+	}
+
 	void* ToState( int x, int y ) {
-		grinliz::Vector2I v = RegionOrigin( x, y );
+		grinliz::Vector2I v = ZoneOrigin( x, y );
 		return (void*)(v.y*width+v.x);
 	}
 
-	WorldGrid* ToGrid( void* state, grinliz::Vector2I* vec ) {
+	WorldGrid* ToGrid( void* state, grinliz::Vector2I* vec, WorldGridState** gs=0 ) {
 		int v = (int)(state);
 		if ( vec ) {
 			int y = v / width;
@@ -245,10 +251,15 @@ private:
 			vec->Set( x, y );
 		}
 		GLASSERT( v < width*height );
+		if ( gs ) {
+			*gs = gridState+v;
+		}
 		return grid+v;
 	}
 
 	WorldGrid*					grid;
+	WorldGridState*				gridState;
+
 	WorldInfo*					worldInfo;
 	micropather::MicroPather*	pather;
 	bool						debugRegionOverlay;

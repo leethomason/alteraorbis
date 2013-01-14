@@ -99,7 +99,7 @@ int main(int argc, const char* argv[])
 		memset( grid, 0, sizeof(WorldGrid)*SIZE2 );
 		for( int i=0; i<SIZE2; ++i ) {
 			grid[i].SetLand( *(worldGen.Land() + i) != 0 );
-			grid[i].SetZoneColor( *(worldGen.Color() + i) );
+			grid[i].PathColor( *(worldGen.Color() + i) );
 		}
 		lodepng_encode32_file( fname.c_str(), (const unsigned char*)grid, WorldGen::SIZE, WorldGen::SIZE );
 		delete [] grid;
