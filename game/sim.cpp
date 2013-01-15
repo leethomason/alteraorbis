@@ -48,10 +48,10 @@ Sim::~Sim()
 }
 
 
-void Sim::Load( const char* mapPNG, const char* mapXML, const char* gameXML )
+void Sim::Load( const char* mapPNG, const char* mapDAT, const char* mapXML, const char* gameXML )
 {
 	chitBag->DeleteAll();
-	worldMap->Load( mapPNG, mapXML );
+	worldMap->Load( mapPNG, mapDAT, mapXML );
 
 	if ( !gameXML ) {
 		Vector2I v = worldMap->FindEmbark();
@@ -73,9 +73,9 @@ void Sim::Load( const char* mapPNG, const char* mapXML, const char* gameXML )
 }
 
 
-void Sim::Save( const char* mapPNG, const char* mapXML, const char* gameXML )
+void Sim::Save( const char* mapDAT, const char* mapXML, const char* gameXML )
 {
-	worldMap->Save( mapPNG, mapXML );
+	worldMap->Save( 0, mapDAT, mapXML );
 
 	FILE* fp = fopen( gameXML, "w" );
 	GLASSERT( fp );

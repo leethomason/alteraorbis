@@ -60,10 +60,12 @@ void WorldGenScene::ItemTapped( const gamui::UIItem* item )
 	if ( item == &okay ) {
 		const char* gameXML = game->GamePath( "game", 0, "xml" );
 		const char* mapPNG  = game->GamePath( "map", 0, "png" );
+		const char* mapDAT  = game->GamePath( "map", 0, "dat" );
 		const char* mapXML  = game->GamePath( "map", 0, "xml" );
 
 		game->DeleteFile( gameXML );
-		worldMap->Save( mapPNG, mapXML );
+		game->DeleteFile( mapDAT );
+		worldMap->Save( mapPNG, 0, mapXML );
 		game->PopScene();
 	}
 	else if ( item == &cancel ) {

@@ -80,9 +80,9 @@ void GameScene::Resize()
 void GameScene::Save()
 {
 	const char* xmlPath = game->GamePath( "map", 0, "xml" );
-	const char* pngPath = game->GamePath( "map", 0, "png" );
+	const char* datPath = game->GamePath( "map", 0, "dat" );
 	const char* gamePath = game->GamePath( "game", 0, "xml" );
-	sim->Save( pngPath, xmlPath, gamePath );
+	sim->Save( datPath, xmlPath, gamePath );
 }
 
 
@@ -90,12 +90,13 @@ void GameScene::Load()
 {
 	const char* xmlPath  = lumosGame->GamePath( "map", 0, "xml" );
 	const char* pngPath  = lumosGame->GamePath( "map", 0, "png" );
+	const char* datPath  = lumosGame->GamePath( "map", 0, "dat" );
 	const char* gamePath = lumosGame->GamePath( "game", 0, "xml" );
-	if ( lumosGame->HasFile( gamePath )) {
-		sim->Load( pngPath, xmlPath, gamePath );
+	if ( lumosGame->HasFile( gamePath ) && lumosGame->HasFile( datPath )) {
+		sim->Load( pngPath, datPath, xmlPath, gamePath );
 	}
 	else {
-		sim->Load( pngPath, xmlPath, 0 );
+		sim->Load( pngPath, 0, xmlPath, 0 );
 	}
 }
 

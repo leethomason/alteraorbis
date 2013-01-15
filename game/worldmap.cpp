@@ -47,6 +47,7 @@ WorldMap::WorldMap( int width, int height ) : Map( width, height )
 	GLASSERT( height % ZONE_SIZE == 0 );
 
 	grid = 0;
+	gridState = 0;
 	pather = 0;
 	worldInfo = new WorldInfo();
 	Init( width, height );
@@ -68,28 +69,42 @@ WorldMap::~WorldMap()
 }
 
 
-void WorldMap::Save( const char* pathToPNG, const char* pathToXML )
+void WorldMap::Save( const char* pathToPNG, const char* pathToDAT, const char* pathToXML )
 {
+	GLASSERT( !( pathToPNG && pathToDAT ));	// save world or delta-of-world, but not both.
+
 	// Debug or laptap, about 4.5MClock
 	// smaller window size: 3.8MClock
 	// btype == 0 about the same.
 	// None of this matters; may need to add an ultra-simple fast encoder.
-	//QuickProfile qp( "WorldMap::Save" );
+	QuickProfile qp( "WorldMap::Save" );
 
-	// The map is actually in image coordinates: origin grid[0] is upper left
-	lodepng_encode32_file( pathToPNG, (const unsigned char*)grid, width, height );
-	/*
-	unsigned char* buf = 0;
-	size_t outsize = 0;
-	LodePNGState state;
-	lodepng_state_init( &state );
-	state.info_raw.colortype = LCT_RGBA;
-	state.info_png.color.colortype = LCT_RGBA;
-	state.encoder.zlibsettings.windowsize = 64;
-	state.encoder.zlibsettings.btype
+	if ( pathToPNG ) {
+		// The map is actually in image coordinates: origin grid[0] is upper left
+		lodepng_encode32_file( pathToPNG, (const unsigned char*)grid, width, height );
+		/*
+		unsigned char* buf = 0;
+		size_t outsize = 0;
+		LodePNGState state;
+		lodepng_state_init( &state );
+		state.info_raw.colortype = LCT_RGBA;
+		state.info_png.color.colortype = LCT_RGBA;
+		state.encoder.zlibsettings.windowsize = 64;
+		state.encoder.zlibsettings.btype
 	
-	lodepng_encode( &buf, &outsize, (const unsigned char*)grid, width, height, &state );
-	*/
+		lodepng_encode( &buf, &outsize, (const unsigned char*)grid, width, height, &state );
+		*/
+	}
+
+	if ( pathToDAT ) {
+		FILE* fp = fopen( pathToDAT, "wb" );
+		GLASSERT( fp );
+		if ( fp ) {
+			fwrite( gridState, sizeof(WorldGridState), width*height, fp );
+			fclose( fp );
+		}
+	}
+
 	FILE* fp = fopen( pathToXML, "w" );
 	GLASSERT( fp );
 	if ( fp ) {
@@ -105,12 +120,10 @@ void WorldMap::Save( const char* pathToPNG, const char* pathToXML )
 		
 		fclose( fp );
 	}
-//	if ( buf ) 
-//		free( buf );
 }
 
 
-void WorldMap::Load( const char* pathToPNG, const char* pathToXML )
+void WorldMap::Load( const char* pathToPNG, const char* pathToDAT, const char* pathToXML )
 {
 	XMLDocument doc;
 	doc.LoadFile( pathToXML );
@@ -138,6 +151,15 @@ void WorldMap::Load( const char* pathToPNG, const char* pathToXML )
 
 			worldInfo->Load( *mapEle );
 
+			memset( gridState, 0, sizeof(WorldGridState)*width*height );
+			if ( pathToDAT ) {
+				FILE* datFP = fopen( pathToDAT, "rb" );
+				GLASSERT( datFP );
+				if ( datFP ) {
+					fread( gridState, sizeof(WorldGridState), width*height, datFP );
+					fclose( datFP );
+				}
+			}
 			Tessellate();
 		}
 	}
@@ -188,6 +210,7 @@ void WorldMap::Init( int w, int h )
 {
 	DeleteAllRegions();
 	delete [] grid;
+	delete [] gridState;
 	if ( pather ) {
 		pather->Reset();
 	}	
@@ -254,7 +277,7 @@ bool WorldMap::InitPNG( const char* filename,
 			}
 			else if ( c.r == c.g && c.g == c.b ) {
 				grid[i].SetLand();
-				color = c.r;
+				color = c.r ? 1 : 0;
 				grid[i].SetPathColor( color );
 			}
 			else if ( c == BLUE ) {

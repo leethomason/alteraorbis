@@ -76,24 +76,23 @@ public:
 	// Init from WorldGen data:
 	void Init( const U8* land, const U8* color, grinliz::CDynArray< WorldFeature >& featureArr );
 
-	void Save( const char* pathToPNG, const char* pathToXML );
-	void Load( const char* pathToPNG, const char* pathToXML );
+	void Save( const char* pathToPNG, const char* pathToData, const char* pathToXML );
+	void Load( const char* pathToPNG, const char* pathtoData, const char* pathToXML );
 
 	void SetBlocked( int x, int y )	{ grinliz::Rectangle2I pos; pos.Set( x, y, x, y ); SetBlocked( pos ); }
 	void SetBlocked( const grinliz::Rectangle2I& pos );
 	void ClearBlocked( int x, int y )	{ grinliz::Rectangle2I pos; pos.Set( x, y, x, y ); ClearBlocked( pos ); }
 	void ClearBlocked( const grinliz::Rectangle2I& pos );
 
-	/*
 	bool IsBlocked( int x, int y )	{ 
 		int i = INDEX(x,y);
-		return WorldGridState::IsBlocked( grid[i], gridState[i] ); 
+		return gridState[i].IsBlocked();
 	}
+
 	bool IsLand( int x, int y )		{ 
 		int i = INDEX(x,y);
 		return grid[i].IsLand(); 
 	}
-	*/
 	
 	// Call the pather; return true if successful.
 	bool CalcPath(	const grinliz::Vector2F& start, 
