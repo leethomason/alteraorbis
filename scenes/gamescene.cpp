@@ -92,11 +92,11 @@ void GameScene::Load()
 	const char* pngPath  = lumosGame->GamePath( "map", 0, "png" );
 	const char* datPath  = lumosGame->GamePath( "map", 0, "dat" );
 	const char* gamePath = lumosGame->GamePath( "game", 0, "xml" );
-	if ( lumosGame->HasFile( gamePath ) && lumosGame->HasFile( datPath )) {
-		sim->Load( pngPath, datPath, xmlPath, gamePath );
+	if ( lumosGame->HasFile( gamePath )) {
+		sim->Load( datPath, xmlPath, gamePath );
 	}
 	else {
-		sim->Load( pngPath, 0, xmlPath, 0 );
+		sim->Load( datPath, xmlPath, 0 );
 	}
 }
 

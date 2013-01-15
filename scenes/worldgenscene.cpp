@@ -65,7 +65,8 @@ void WorldGenScene::ItemTapped( const gamui::UIItem* item )
 
 		game->DeleteFile( gameXML );
 		game->DeleteFile( mapDAT );
-		worldMap->Save( mapPNG, 0, mapXML );
+		worldMap->Save( mapDAT, mapXML );
+		worldMap->SavePNG( mapPNG );
 		game->PopScene();
 	}
 	else if ( item == &cancel ) {
@@ -86,12 +87,13 @@ void WorldGenScene::CreateTexture( Texture* t )
 		if ( !pix16 ) {
 			pix16 = new U16[SIZE2];
 		}
-		const Color4U8* pix32 = worldMap->Pixels();
-
 		worldMap->Init( worldGen.Land(), worldGen.Color(), featureArr );
 
-		for( int i=0; i<SIZE2; ++i ) {
-			pix16[i] = Surface::CalcRGB16( pix32[i] );
+		int i=0;
+		for( int y=0; y<WorldGen::SIZE; ++y ) {
+			for( int x=0; x<WorldGen::SIZE; ++x ) {
+				pix16[i++] = Surface::CalcRGB16( worldMap->Pixel( x, y ));
+			}
 		}
 		t->Upload( pix16, SIZE2*sizeof(U16) );
 	}

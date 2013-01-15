@@ -47,7 +47,6 @@ WorldMap::WorldMap( int width, int height ) : Map( width, height )
 	GLASSERT( height % ZONE_SIZE == 0 );
 
 	grid = 0;
-	gridState = 0;
 	pather = 0;
 	worldInfo = new WorldInfo();
 	Init( width, height );
@@ -62,50 +61,43 @@ WorldMap::WorldMap( int width, int height ) : Map( width, height )
 WorldMap::~WorldMap()
 {
 	DeleteAllRegions();
-	delete [] gridState;
 	delete [] grid;
 	delete pather;
 	delete worldInfo;
 }
 
 
-void WorldMap::Save( const char* pathToPNG, const char* pathToDAT, const char* pathToXML )
+void WorldMap::SavePNG( const char* path )
 {
-	GLASSERT( !( pathToPNG && pathToDAT ));	// save world or delta-of-world, but not both.
+	Color4U8* pixels = new Color4U8[width*height];
 
+	for( int i=0; i<width*height; ++i ) {
+		pixels[i] = grid[i].ToColor();
+	}
+	lodepng_encode32_file( path, (const unsigned char*)pixels, width, height );
+
+	delete [] pixels;
+}
+
+
+void WorldMap::Save( const char* pathToDAT, const char* pathToXML )
+{
 	// Debug or laptap, about 4.5MClock
 	// smaller window size: 3.8MClock
 	// btype == 0 about the same.
 	// None of this matters; may need to add an ultra-simple fast encoder.
 	QuickProfile qp( "WorldMap::Save" );
 
-	if ( pathToPNG ) {
-		// The map is actually in image coordinates: origin grid[0] is upper left
-		lodepng_encode32_file( pathToPNG, (const unsigned char*)grid, width, height );
-		/*
-		unsigned char* buf = 0;
-		size_t outsize = 0;
-		LodePNGState state;
-		lodepng_state_init( &state );
-		state.info_raw.colortype = LCT_RGBA;
-		state.info_png.color.colortype = LCT_RGBA;
-		state.encoder.zlibsettings.windowsize = 64;
-		state.encoder.zlibsettings.btype
-	
-		lodepng_encode( &buf, &outsize, (const unsigned char*)grid, width, height, &state );
-		*/
+	FILE* fp = fopen( pathToDAT, "wb" );
+	GLASSERT( fp );
+	if ( fp ) {
+		U32 version = 0;
+		fwrite( &version, 4, 1, fp );
+		fwrite( grid, sizeof(WorldGrid), width*height, fp );
+		fclose( fp );
 	}
 
-	if ( pathToDAT ) {
-		FILE* fp = fopen( pathToDAT, "wb" );
-		GLASSERT( fp );
-		if ( fp ) {
-			fwrite( gridState, sizeof(WorldGridState), width*height, fp );
-			fclose( fp );
-		}
-	}
-
-	FILE* fp = fopen( pathToXML, "w" );
+	fp = fopen( pathToXML, "w" );
 	GLASSERT( fp );
 	if ( fp ) {
 		XMLPrinter printer( fp );
@@ -123,7 +115,7 @@ void WorldMap::Save( const char* pathToPNG, const char* pathToDAT, const char* p
 }
 
 
-void WorldMap::Load( const char* pathToPNG, const char* pathToDAT, const char* pathToXML )
+void WorldMap::Load( const char* pathToDAT, const char* pathToXML )
 {
 	XMLDocument doc;
 	doc.LoadFile( pathToXML );
@@ -140,25 +132,16 @@ void WorldMap::Load( const char* pathToPNG, const char* pathToDAT, const char* p
 			Init( w, h );
 
 			unsigned int pngW=0, pngH=0;
-			U8* mem=0;
-			lodepng_decode32_file( &mem, &pngW, &pngH, pathToPNG );
-			GLASSERT( mem );
-			GLASSERT( pngW == width );
-			GLASSERT( pngH == height );
-			memcpy( grid, mem, width*height*4 );
-
-			free( mem );	// lower case; can't be tracked by memory system
-
 			worldInfo->Load( *mapEle );
 
-			memset( gridState, 0, sizeof(WorldGridState)*width*height );
-			if ( pathToDAT ) {
-				FILE* datFP = fopen( pathToDAT, "rb" );
-				GLASSERT( datFP );
-				if ( datFP ) {
-					fread( gridState, sizeof(WorldGridState), width*height, datFP );
-					fclose( datFP );
-				}
+			memset( grid, 0, sizeof(WorldGrid)*width*height );
+			FILE* datFP = fopen( pathToDAT, "rb" );
+			GLASSERT( datFP );
+			if ( datFP ) {
+				U32 version = 0;
+				fread( &version, 4, 1, datFP );
+				fread( grid, sizeof(WorldGrid), width*height, datFP );
+				fclose( datFP );
 			}
 			Tessellate();
 		}
@@ -190,7 +173,7 @@ void WorldMap::DumpRegions()
 		for( int j=0; j<height; ++j ) {	
 			for( int i=0; i<width; ++i ) {
 				if ( IsPassable(i,j) && IsZoneOrigin(i, j)) {
-					const WorldGridState& gs = gridState[INDEX(i,j)];
+					const WorldGrid& gs = grid[INDEX(i,j)];
 					GLOUTPUT(( "Region %d,%d size=%d", i, j, gs.ZoneSize() ));
 					GLOUTPUT(( "\n" ));
 				}
@@ -210,16 +193,13 @@ void WorldMap::Init( int w, int h )
 {
 	DeleteAllRegions();
 	delete [] grid;
-	delete [] gridState;
 	if ( pather ) {
 		pather->Reset();
 	}	
 	this->width = w;
 	this->height = h;
 	grid = new WorldGrid[width*height];
-	gridState = new WorldGridState[width*height];
 	memset( grid, 0, width*height*sizeof(WorldGrid) );
-	memset( gridState, 0, width*height*sizeof(WorldGridState) );
 
 	delete pather;
 	pather = new micropather::MicroPather( this, width*height/16, 8, true );
@@ -277,7 +257,7 @@ bool WorldMap::InitPNG( const char* filename,
 			}
 			else if ( c.r == c.g && c.g == c.b ) {
 				grid[i].SetLand();
-				color = c.r ? 1 : 0;
+				color = c.r;
 				grid[i].SetPathColor( color );
 			}
 			else if ( c == BLUE ) {
@@ -404,8 +384,8 @@ void WorldMap::SetBlocked( const grinliz::Rectangle2I& pos )
 	for( int y=pos.min.y; y<=pos.max.y; ++y ) {
 		for( int x=pos.min.x; x<=pos.max.x; ++x ) {
 			int i = INDEX( x, y );
-			GLASSERT( gridState[i].IsBlocked() == false );
-			WorldGridState::SetBlocked( grid[i], gridState+i, true );
+			GLASSERT( grid[i].IsBlocked() == false );
+			grid[i].SetBlocked( true );
 			zoneInit.Clear( x>>ZONE_SHIFT, y>>ZONE_SHIFT );
 			//GLOUTPUT(( "Block (%d,%d) index=%d zone=%d set\n", x, y, i, ZDEX(x,y) ));
 		}
@@ -419,8 +399,8 @@ void WorldMap::ClearBlocked( const grinliz::Rectangle2I& pos )
 	for( int y=pos.min.y; y<=pos.max.y; ++y ) {
 		for( int x=pos.min.x; x<=pos.max.x; ++x ) {
 			int i = INDEX( x, y );
-			GLASSERT( gridState[i].IsBlocked() );
-			WorldGridState::SetBlocked( grid[i], gridState+i, false );
+			GLASSERT( grid[i].IsBlocked() );
+			grid[i].SetBlocked( false );
 			zoneInit.Clear( x>>ZONE_SHIFT, y>>ZONE_SHIFT );
 		}
 	}
@@ -560,9 +540,7 @@ void WorldMap::CalcZone( int zx, int zy )
 		for( int y=zy; y<zy+ZONE_SIZE; ++y ) {
 			for( int x=zx; x<zx+ZONE_SIZE; ++x ) {
 				int index = INDEX(x,y);
-				const WorldGrid& g	= grid[index]; 
-				WorldGridState* gs	= gridState + index;
-				gs->SetZoneSize( WorldGridState::IsPassable( g, *gs ) ? 1 : 0 );
+				grid[index].SetZoneSize( grid[index].IsPassable() ? 1 : 0 );
 			}
 		}
 
@@ -577,8 +555,7 @@ void WorldMap::CalcZone( int zx, int zy )
 						for( int i=x; i<x+size; i+=half ) {
 							int index = INDEX(i,j);
 							const WorldGrid& g	= grid[index]; 
-							WorldGridState* gs	= gridState + index;
-							if ( !WorldGridState::IsPassable(g,*gs) || gs->ZoneSize() != half ) {
+							if ( !g.IsPassable() || g.ZoneSize() != half ) {
 								okay = false;
 								break;
 							}
@@ -588,8 +565,7 @@ void WorldMap::CalcZone( int zx, int zy )
 						for( int j=y; j<y+size; j++ ) {
 							for( int i=x; i<x+size; i++ ) {
 								int index = INDEX(i,j);
-								WorldGridState* gs	= gridState + index;
-								gs->SetZoneSize( size );
+								grid[index].SetZoneSize( size );
 							}
 						}
 					}
@@ -604,8 +580,8 @@ void WorldMap::CalcZone( int zx, int zy )
 float WorldMap::LeastCostEstimate( void* stateStart, void* stateEnd )
 {
 	Vector2I startI, endI;
-	ToGrid( stateStart, &startI, 0 );
-	ToGrid( stateEnd, &endI, 0 );
+	ToGrid( stateStart, &startI );
+	ToGrid( stateEnd, &endI );
 
 	Vector2F start = ZoneCenter( startI.x, startI.y );
 	Vector2F end   = ZoneCenter( endI.x, endI.y );
@@ -617,17 +593,16 @@ float WorldMap::LeastCostEstimate( void* stateStart, void* stateEnd )
 void WorldMap::AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > *adjacent )
 {
 	Vector2I start;
-	WorldGridState* startGridState = 0;
-	const WorldGrid* startGrid = ToGrid( state, &start, &startGridState );
+	const WorldGrid* startGrid = ToGrid( state, &start );
 	GLASSERT( zoneInit.IsSet( start.x>>ZONE_SHIFT, start.y>>ZONE_SHIFT ));
-	GLASSERT( WorldGridState::IsPassable( *startGrid, *startGridState ));
+	GLASSERT( startGrid->IsPassable() );
 	Vector2F startC = ZoneCenter( start.x, start.y );
 	
 	Rectangle2I bounds = this->Bounds();
 	Vector2I currentZone = { -1, -1 };
 	CArray< Vector2I, ZONE_SIZE*4+4 > adj;
 
-	int size = startGridState->ZoneSize();
+	int size = startGrid->ZoneSize();
 	GLASSERT( size > 0 );
 
 	// Start and direction for the walk. Note that
@@ -699,7 +674,7 @@ void WorldMap::AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > *a
 		GLASSERT( bounds.Contains( x, y ));
 
 		CalcZone( x, y );
-		const WorldGrid* g = &ZoneOriginG( x, y );
+		const WorldGrid* g = ZoneOriginG( x, y );
 		GLASSERT( IsPassable( x,y ) );
 
 		// The corners wrap around:
@@ -725,9 +700,8 @@ void WorldMap::AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > *a
 void WorldMap::PrintStateInfo( void* state )
 {
 	Vector2I vec;
-	WorldGridState* gs = 0;
-	ToGrid( state, &vec, &gs );
-	int size = gs->ZoneSize();
+	WorldGrid* g = ToGrid( state, &vec );
+	int size = g->ZoneSize();
 	GLOUTPUT(( "(%d,%d)s=%d ", vec.x, vec.y, size ));	
 }
 
@@ -934,9 +908,9 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 void WorldMap::ClearDebugDrawing()
 {
 	for( int i=0; i<width*height; ++i ) {
-		gridState[i].SetDebugAdjacent( false );
-		gridState[i].SetDebugOrigin( false );
-		gridState[i].SetDebugPath( false );
+		grid[i].SetDebugAdjacent( false );
+		grid[i].SetDebugOrigin( false );
+		grid[i].SetDebugPath( false );
 	}
 	debugPathVector.Clear();
 }
@@ -954,8 +928,7 @@ void WorldMap::ShowRegionPath( float x0, float y0, float x1, float y1 )
 		int result = pather->Solve( start, end, &pathRegions, &cost );
 		if ( result == micropather::MicroPather::SOLVED ) {
 			for( unsigned i=0; i<pathRegions.size(); ++i ) {
-				WorldGridState* vp = 0;
-				ToGrid( pathRegions[i], 0, &vp );
+				WorldGrid* vp = ToGrid( pathRegions[i], 0 );
 				vp->SetDebugPath( true );
 			}
 		}
@@ -970,14 +943,13 @@ void WorldMap::ShowAdjacentRegions( float fx, float fy )
 	ClearDebugDrawing();
 
 	if ( IsPassable( x, y ) ) {
-		WorldGridState* r = ZoneOriginGS( x, y );
+		WorldGrid* r = ZoneOriginG( x, y );
 		r->SetDebugOrigin( true );
 
 		MP_VECTOR< micropather::StateCost > adj;
 		AdjacentCost( ToState( x, y ), &adj );
 		for( unsigned i=0; i<adj.size(); ++i ) {
-			WorldGridState* n = 0;
-			ToGrid( adj[i].state, 0, &n );
+			WorldGrid* n = ToGrid( adj[i].state, 0 );
 			GLASSERT( n->DebugAdjacent() == false );
 			n->SetDebugAdjacent( true );
 		}
@@ -1005,7 +977,7 @@ void WorldMap::DrawZones()
 			if ( IsZoneOrigin( i, j ) ) {
 				if ( IsPassable( i, j ) ) {
 
-					const WorldGridState& gs = gridState[INDEX(i,j)];
+					const WorldGrid& gs = grid[INDEX(i,j)];
 					Vector3F p0 = { (float)i+offset, 0.01f, (float)j+offset };
 					Vector3F p1 = { (float)(i+gs.ZoneSize())-offset, 0.01f, (float)(j+gs.ZoneSize())-offset };
 
