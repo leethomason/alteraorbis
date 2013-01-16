@@ -101,7 +101,7 @@ int main(int argc, const char* argv[])
 			WorldGrid grid;
 			memset( &grid, 0, sizeof(grid) );
 
-			grid.SetLandAndRock( *(worldGen.Land() + i) != 0 );
+			grid.SetLandAndRock( *(worldGen.Land() + i) );
 			grid.SetPathColor( *(worldGen.Color() + i) );
 			pixels[i] = grid.ToColor();
 		}

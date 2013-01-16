@@ -4,6 +4,7 @@
 #include "../engine/surface.h"
 #include "../game/worldinfo.h"
 #include "../game/worldmap.h"
+#include "../script/rockgen.h"
 
 using namespace grinliz;
 using namespace gamui;
@@ -137,7 +138,7 @@ void WorldGenScene::DoTick( U32 delta )
 		str.Format( "%d%%", (int)(100.0f*(float)genState.scanline/(float)WorldGen::SIZE) );
 		label.SetText( str.c_str() );
 	}
-	else if ( genState.scanline == WorldGen::SIZE ) {
+	else if ( genState.scanline == WorldGen::SIZE && genState.zone < 0 ) {
 		bool okay = worldGen.EndLandAndWater( 0.4f );
 		if ( okay ) {
 			worldGen.WriteMarker();
@@ -146,11 +147,37 @@ void WorldGenScene::DoTick( U32 delta )
 		}
 		if ( okay ) {
 			sendTexture = true;
-			label.SetText( "Done" );
-			++genState.scanline;
+			label.SetText( "Land/Water\nDone" );
+			genState.zone = 0;
 		}
 		else {
-			genState.scanline = -1;	// around again.
+			genState.Clear();	// around again.
+		}
+	}
+	else if ( genState.scanline == WorldGen::SIZE && genState.zone < NUM_ZONES ) {
+		static const int S = WorldGen::SIZE / NZONE;
+		int y = genState.zone / NZONE;
+		int x = genState.zone - y*NZONE;
+
+		x *= S;
+		y *= S;
+
+		Random random;
+		random.SetSeedFromTime();
+
+		RockGen rockGen( S );
+		rockGen.DoCalc( random.Rand(), RockGen::CAVEY_ROUGH );
+		rockGen.DoThreshold( random.Rand(), 0.5f, RockGen::NOISE_HEIGHT );
+
+		for( int j=y; j<y+S; ++j ) {
+			for( int i=x; i<x+S; ++i ) {
+				worldGen.ApplyHeight( i, j, *(rockGen.Height() + (j-y)*S + (i-x)), 256 );
+			}
+		}
+		sendTexture = true;
+		genState.zone++;
+		if ( genState.zone == NUM_ZONES ) {
+			label.SetText( "Done" );
 		}
 	}
 

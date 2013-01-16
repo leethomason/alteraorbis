@@ -52,3 +52,32 @@ float PerlinNoise::Noise(float x, float y, float z) const
 	//GLASSERT( n >= -1.01f && n <= 1.01f );
 	return n;
 }
+
+
+float PerlinNoise::Noise2(float x, float y) const
+{
+	int X = LRintf( floorf(x) ) & 255; 
+	int Y = LRintf( floorf(y) ) & 255; 
+
+	x -= floorf( x );
+	y -= floorf( y );
+
+	// Fade 3 vs 5 doesn't affect performance.
+	float u = Fade5( x );
+	float v = Fade5( y );
+
+	int A  = p[X  ]+Y;
+	int AA = p[A  ];
+	int AB = p[A+1];
+	int B  = p[X+1]+Y;
+	int BA = p[B  ];
+	int BB = p[B+1];
+
+	float n = _Lerp(v, _Lerp(u, Grad2(p[AA  ], x  , y  ),  
+							    Grad2(p[BA  ], x-1, y  )), 
+					   _Lerp(u, Grad2(p[AB  ], x  , y-1),  
+							    Grad2(p[BB  ], x-1, y-1)));
+	// Mysteries of floating point: occasionally, slightly overflows.
+	//GLASSERT( n >= -1.01f && n <= 1.01f );
+	return n;
+}

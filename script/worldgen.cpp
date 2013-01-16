@@ -89,8 +89,8 @@ void WorldGen::DoLandAndWater( int j )
 		float ny = (float)j/(float)SIZE;
 
 		// Noise layer.
-		float n0 = noise0->Noise( BASE0*nx, BASE0*ny, nx );
-		float n1 = noise1->Noise( BASE1*nx, BASE1*ny, nx );
+		float n0 = noise0->Noise2( BASE0*nx, BASE0*ny );
+		float n1 = noise1->Noise2( BASE1*nx, BASE1*ny );
 
 		float n = n0 + n1*OCTAVE;
 		n = PerlinNoise::Normalize( n );
@@ -116,9 +116,10 @@ bool WorldGen::EndLandAndWater( float fractionLand )
 	int lowCount = SIZE*SIZE;
 	int iteration=0;
 	static const int MAX_ITERATION = 10;
+	float maxh = 1.0f;
 
 	while( iteration<MAX_ITERATION ) {
-		int count = CountFlixelsAboveCutoff( flixels, cutoff );
+		int count = CountFlixelsAboveCutoff( flixels, cutoff, &maxh );
 		if ( count > target ) {
 			low = cutoff;
 			lowCount = count;
@@ -139,9 +140,11 @@ bool WorldGen::EndLandAndWater( float fractionLand )
 		for( int i=0; i<SIZE; ++i ) {
 			if ( flixels[j*SIZE+i] > cutoff ) {
 				float flix = flixels[j*SIZE+i];
-				float f = Lerp( 1.0f, 255.0f, (flix-cutoff)/(1.0f-cutoff) );
+				float f = Lerp( 1.0f, 255.0f, (flix-cutoff)/(maxh-cutoff) );
 				int h = LRintf( f );
 				GLASSERT( h >= 1 && h <= 255 );
+//				if ( h == 255 )
+//					int debug = 1;
 				h = Clamp( h, 1, 255 );
 				land[j*SIZE+i] = h;
 			}
@@ -174,13 +177,17 @@ void WorldGen::WriteMarker()
 }
 
 
-int WorldGen::CountFlixelsAboveCutoff( const float* flixels, float cutoff )
+int WorldGen::CountFlixelsAboveCutoff( const float* flixels, float cutoff, float* maxh )
 {
 	int count = 0;
+	*maxh = 0.0f;
 	for( int j=0; j<SIZE; ++j ) {
 		for( int i=0; i<SIZE; ++i ) {
-			if ( flixels[j*SIZE+i] > cutoff )
+			float f = flixels[j*SIZE+i];
+			if ( f > cutoff ) {
 				++count;
+				if ( f > *maxh ) *maxh = f;
+			}
 		}
 	}
 	return count;
@@ -200,7 +207,7 @@ bool WorldGen::CalColor( CDynArray<WorldFeature>* featureArr )
 	for( int j=0; j<SIZE; ++j ) {
 		for( int i=0; i<SIZE; ++i ) {
 			if ( color[j*SIZE+i] == 0 ) {
-				U8 isLand = land[j*SIZE+i] ? 1 : 0;
+				bool isLand = land[j*SIZE+i] ? true : false;
 				v.Set( i, j );
 				stack.Push( v );
 
@@ -213,7 +220,7 @@ bool WorldGen::CalColor( CDynArray<WorldFeature>* featureArr )
 				while( !stack.Empty() ) {
 					v = stack.Pop();
 					if (    (color[v.y*SIZE+v.x] == 0)
-						 && ((land[v.y*SIZE+v.x] > 0 ? 1 : 0) == isLand) ) 
+						 && ((land[v.y*SIZE+v.x] > 0 ? true : false) == isLand) ) 
 					{
 						color[v.y*SIZE+v.x] = c;
 
@@ -275,53 +282,3 @@ void WorldGen::DrawCanal( Vector2I v, int radius, int dx, int dy, const Rectangl
 	}
 }
 
-
-/*
-void WorldGen::Save( const char* fname )
-{
-	Color4U8* pixels = new Color4U8[SIZE*SIZE];
-	memset( pixels, 0, sizeof(Color4U8)*SIZE*SIZE );
-
-	for( int y=0; y<SIZE; ++y ) {
-		for( int x=0; x<SIZE; ++x ) {
-			if ( land[y*SIZE+x] ) {
-				Color4U8 c8 = { 0, 255, color[y*SIZE+x], 255 };
-				pixels[y*SIZE+x] = c8;
-			}
-			else {
-				Color4U8 c8 = { 0, color[y*SIZE+x], 255, 255 };
-				pixels[y*SIZE+x] = c8;
-			}
-		}
-	}
-	lodepng_encode32_file( fname, (const unsigned char*)pixels, SIZE, SIZE );
-	delete [] pixels;
-}
-*/
-
-
-#if 0
-bool WorldGen::Split( int maxSize, int radius )
-{
-	bool processed = false;
-	for( int i=0; i<featureArr.Size(); ++i ) {
-		const WorldFeature& wf = featureArr[i];
-		if ( wf.land && wf.area > maxSize ) {
-			processed = true;
-			// Drive a canal through.
-			if ( wf.bounds.Width() > wf.bounds.Height() ) {
-				// Vertical line.
-				DrawCanal( wf.bounds.Center(), radius, 0, -1, wf.bounds );
-				DrawCanal( wf.bounds.Center(), radius, 0, 1,  wf.bounds );
-			}
-			else {
-				// Horizontal line.
-				DrawCanal( wf.bounds.Center(), radius, -1, 0, wf.bounds );
-				DrawCanal( wf.bounds.Center(), radius, 1, 0,  wf.bounds );
-			}
-			break;
-		}
-	}
-	return processed;
-}
-#endif

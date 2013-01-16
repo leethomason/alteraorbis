@@ -26,15 +26,20 @@ public:
 	void CreateTexture( Texture* t );
 
 private:
+	enum { 
+		NZONE = 4,
+		NUM_ZONES = NZONE*NZONE
+	};
+
 	WorldGen	worldGen;
 	WorldMap*	worldMap;
 	U16*		pix16;
 	grinliz::CDynArray< WorldFeature > featureArr;
 
 	struct GenState {
-		void Clear() { scanline=-1; zone=0; }
+		void Clear() { scanline=-1; zone=-1; }
 		int scanline;	// -1: not started, [0,y-1] scanning, y done scanning
-		int zone;		
+		int zone;		// 0: first zone, NUM_ZONE done
 	};
 	GenState genState;
 	gamui::PushButton	okay, cancel, tryAgain;

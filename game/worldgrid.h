@@ -30,6 +30,8 @@ private:
 
 public:
 	grinliz::Color4U8 ToColor() const {
+//		if ( nominalRockHeight > 1 )
+//			int debug=1;
 		grinliz::Color4U8 c = {
 			60*nominalRockHeight,	//(17*pathColor) & 127,	
 			(isLand * 0xc0),		//| (pathColor & 0x3f),

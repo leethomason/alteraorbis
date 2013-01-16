@@ -47,11 +47,23 @@ public:
 	bool EndLandAndWater( float fractionLand );
 	void WriteMarker();
 
-	bool CalColor( grinliz::CDynArray<WorldFeature>* featureArr );
+	void ApplyHeight( int x, int y, int h, int blend ) {
+		int index = y*SIZE+x;
+		GLASSERT( blend >= 0 && blend <= 256 );
+		if ( land[index] ) {
+			if ( blend >= 0 ) {
+				land[index] = ((land[index] * (256-blend)) + (h * blend)) >> 8;
+			}
+			else {
+				if ( land[index] ) 
+					land[index] = h;
+			}
+			if ( land[index] == 0 )
+				land[index] = 1;
+		}
+	}
 
-	// This works, but doesn't produce good result.
-	// Early optimizing. Same problem can be solved with roads.
-	bool Split( int maxSize, int radius );
+	bool CalColor( grinliz::CDynArray<WorldFeature>* featureArr );
 
 	// SIZExSIZE
 	const U8* Land() const						{ return land; }
@@ -62,7 +74,7 @@ public:
 	};
 
 private:
-	int CountFlixelsAboveCutoff( const float* flixels, float cutoff );
+	int CountFlixelsAboveCutoff( const float* flixels, float cutoff, float* maxh );
 	void DrawCanal( grinliz::Vector2I v, int radius, int dx, int dy, const grinliz::Rectangle2I& wf );
 
 	float* flixels;

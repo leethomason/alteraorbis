@@ -134,6 +134,7 @@
     <ClCompile Include="..\script\battlemechanics.cpp" />
     <ClCompile Include="..\script\itemscript.cpp" />
     <ClCompile Include="..\script\procedural.cpp" />
+    <ClCompile Include="..\script\rockgen.cpp" />
     <ClCompile Include="..\script\worldgen.cpp" />
     <ClCompile Include="..\script\worldscript.cpp" />
     <ClCompile Include="..\shared\gamedbreader.cpp" />
@@ -216,6 +217,7 @@
     <ClInclude Include="..\script\battlemechanics.h" />
     <ClInclude Include="..\script\itemscript.h" />
     <ClInclude Include="..\script\procedural.h" />
+    <ClInclude Include="..\script\rockgen.h" />
     <ClInclude Include="..\script\worldgen.h" />
     <ClInclude Include="..\script\worldscript.h" />
     <ClInclude Include="..\shared\gamedb.h" />
