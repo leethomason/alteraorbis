@@ -31,7 +31,12 @@ private:
 	U16*		pix16;
 	grinliz::CDynArray< WorldFeature > featureArr;
 
-	int scanline;	// -1: not started
+	struct GenState {
+		void Clear() { scanline=-1; zone=0; }
+		int scanline;	// -1: not started, [0,y-1] scanning, y done scanning
+		int zone;		
+	};
+	GenState genState;
 	gamui::PushButton	okay, cancel, tryAgain;
 	gamui::Image		worldImage;
 	gamui::TextLabel	label;

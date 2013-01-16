@@ -7,6 +7,8 @@
 #include "../grinliz/glrectangle.h"
 #include "../grinliz/glcolor.h"
 
+static const int MAX_ROCK_HEIGHT	= 4;
+
 struct WorldGrid {
 private:
 	// memset(0) should work, and make it water.
@@ -20,6 +22,7 @@ private:
 	unsigned isBlocked			: 1;
 
 	unsigned zoneSize			: 6;	// 0-31
+	unsigned nominalRockHeight	: 3;	// 0-4
 
 	unsigned debugAdjacent		: 1;
 	unsigned debugPath			: 1;
@@ -28,8 +31,8 @@ private:
 public:
 	grinliz::Color4U8 ToColor() const {
 		grinliz::Color4U8 c = {
-			0,
-			(isLand * 0x80) | (pathColor & 0x7f),
+			60*nominalRockHeight,	//(17*pathColor) & 127,	
+			(isLand * 0xc0),		//| (pathColor & 0x3f),
 			(1-isLand) * 0xff,
 			255
 		};
@@ -38,15 +41,33 @@ public:
 
 	bool IsLand() const			{ return isLand != 0; }
 	void SetLand( bool land )	{ if ( land ) SetLand(); else SetWater(); }
+	void SetLandAndRock( U8 h )	{
+		if ( !h ) {
+			SetWater();	
+		}
+		else {
+			SetLand();
+			SetNominalRockHeight( (h+128/MAX_ROCK_HEIGHT) * MAX_ROCK_HEIGHT / 255 );
+		}
+	}
+
 	void SetLand()				{ 
 		GLASSERT( sizeof(WorldGrid) == 2*sizeof(U32) ); 
 		isLand = 1;
+	}
+
+	int NominalRockHeight() const { return nominalRockHeight; }
+	void SetNominalRockHeight( int h ) {
+		GLASSERT( IsLand() );
+		GLASSERT( h >= 0 && h <= 4 );
+		nominalRockHeight = h;
 	}
 
 	bool IsWater() const		{ return !IsLand(); }
 	void SetWater()				{ 
 		GLASSERT( sizeof(WorldGrid) == 2*sizeof(U32) );
 		isLand = 0;
+		nominalRockHeight = 0;
 	}
 
 	U32  PathColor() const		{ return pathColor; }

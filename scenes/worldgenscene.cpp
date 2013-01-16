@@ -27,7 +27,7 @@ WorldGenScene::WorldGenScene( LumosGame* game ) : Scene( game )
 	tryAgain.Init( &gamui2D, game->GetButtonLook(0) );
 	tryAgain.SetText( "Re-try" );
 
-	scanline = -1;
+	genState.Clear();
 }
 
 
@@ -73,7 +73,7 @@ void WorldGenScene::ItemTapped( const gamui::UIItem* item )
 		game->PopScene();
 	}
 	else if ( item == &tryAgain ) {
-		scanline = -1;
+		genState.Clear();
 	}
 }
 
@@ -107,7 +107,7 @@ void WorldGenScene::DoTick( U32 delta )
 {
 	bool sendTexture = false;
 
-	if ( scanline < WorldGen::SIZE ) {
+	if ( genState.scanline < WorldGen::SIZE ) {
 		okay.SetEnabled( false );
 		tryAgain.SetEnabled( false );
 	}
@@ -116,28 +116,28 @@ void WorldGenScene::DoTick( U32 delta )
 		tryAgain.SetEnabled( true );
 	}
 
-	if ( scanline == -1 ) {
+	if ( genState.scanline == -1 ) {
 		Random random;
 		random.SetSeedFromTime();
 		U32 seed0 = random.Rand();
 		U32 seed1 = delta ^ random.Rand();
 
 		worldGen.StartLandAndWater( seed0, seed1 );
-		scanline = 0;
+		genState.scanline = 0;
 	}
-	else if ( scanline < WorldGen::SIZE ) {
+	else if ( genState.scanline < WorldGen::SIZE ) {
 		clock_t start = clock();
-		while( (scanline < WorldGen::SIZE) && (clock() - start < 30) ) {
+		while( ( genState.scanline < WorldGen::SIZE) && (clock() - start < 30) ) {
 			for( int i=0; i<16; ++i ) {
-				worldGen.DoLandAndWater( scanline );
-				++scanline;
+				worldGen.DoLandAndWater( genState.scanline );
+				++genState.scanline;
 			}
 		}
 		CStr<16> str;
-		str.Format( "%d%%", (int)(100.0f*(float)scanline/(float)WorldGen::SIZE) );
+		str.Format( "%d%%", (int)(100.0f*(float)genState.scanline/(float)WorldGen::SIZE) );
 		label.SetText( str.c_str() );
 	}
-	else if ( scanline == WorldGen::SIZE ) {
+	else if ( genState.scanline == WorldGen::SIZE ) {
 		bool okay = worldGen.EndLandAndWater( 0.4f );
 		if ( okay ) {
 			worldGen.WriteMarker();
@@ -147,10 +147,10 @@ void WorldGenScene::DoTick( U32 delta )
 		if ( okay ) {
 			sendTexture = true;
 			label.SetText( "Done" );
-			++scanline;
+			++genState.scanline;
 		}
 		else {
-			scanline = -1;	// around again.
+			genState.scanline = -1;	// around again.
 		}
 	}
 

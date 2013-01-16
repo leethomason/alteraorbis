@@ -8,6 +8,7 @@
 #include "../grinliz/glcolor.h"
 
 #include "../shared/lodepng.h"
+#include "../game/gamelimits.h"
 
 using namespace grinliz;
 
@@ -136,7 +137,17 @@ bool WorldGen::EndLandAndWater( float fractionLand )
 
 	for( int j=0; j<SIZE; ++j ) {
 		for( int i=0; i<SIZE; ++i ) {
-			land[j*SIZE+i] = flixels[j*SIZE+i] > cutoff ? 1 : 0;
+			if ( flixels[j*SIZE+i] > cutoff ) {
+				float flix = flixels[j*SIZE+i];
+				float f = Lerp( 1.0f, 255.0f, (flix-cutoff)/(1.0f-cutoff) );
+				int h = LRintf( f );
+				GLASSERT( h >= 1 && h <= 255 );
+				h = Clamp( h, 1, 255 );
+				land[j*SIZE+i] = h;
+			}
+			else {
+				land[j*SIZE+i] = 0;
+			}
 		}
 	}
 
@@ -189,7 +200,7 @@ bool WorldGen::CalColor( CDynArray<WorldFeature>* featureArr )
 	for( int j=0; j<SIZE; ++j ) {
 		for( int i=0; i<SIZE; ++i ) {
 			if ( color[j*SIZE+i] == 0 ) {
-				U8 isLand = land[j*SIZE+i];
+				U8 isLand = land[j*SIZE+i] ? 1 : 0;
 				v.Set( i, j );
 				stack.Push( v );
 
@@ -201,7 +212,9 @@ bool WorldGen::CalColor( CDynArray<WorldFeature>* featureArr )
 
 				while( !stack.Empty() ) {
 					v = stack.Pop();
-					if ( color[v.y*SIZE+v.x] == 0 && land[v.y*SIZE+v.x] == isLand ) {
+					if (    (color[v.y*SIZE+v.x] == 0)
+						 && ((land[v.y*SIZE+v.x] > 0 ? 1 : 0) == isLand) ) 
+					{
 						color[v.y*SIZE+v.x] = c;
 
 						wf.bounds.DoUnion( v );

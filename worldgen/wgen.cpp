@@ -95,14 +95,18 @@ int main(int argc, const char* argv[])
 		printf( "Writing %s\n", fname.c_str() );
 		
 		static const int SIZE2 = WorldGen::SIZE*WorldGen::SIZE;
-		WorldGrid* grid = new WorldGrid[SIZE2];
-		memset( grid, 0, sizeof(WorldGrid)*SIZE2 );
+		Color4U8* pixels = new Color4U8[SIZE2];
+
 		for( int i=0; i<SIZE2; ++i ) {
-			grid[i].SetLand( *(worldGen.Land() + i) != 0 );
-			grid[i].SetPathColor( *(worldGen.Color() + i) );
+			WorldGrid grid;
+			memset( &grid, 0, sizeof(grid) );
+
+			grid.SetLandAndRock( *(worldGen.Land() + i) != 0 );
+			grid.SetPathColor( *(worldGen.Color() + i) );
+			pixels[i] = grid.ToColor();
 		}
-		lodepng_encode32_file( fname.c_str(), (const unsigned char*)grid, WorldGen::SIZE, WorldGen::SIZE );
-		delete [] grid;
+		lodepng_encode32_file( fname.c_str(), (const unsigned char*)pixels, WorldGen::SIZE, WorldGen::SIZE );
+		delete [] pixels;
 	}
 	printf( "total time %dms\n", clock()-startTime );
 	return 0;

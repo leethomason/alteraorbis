@@ -290,7 +290,7 @@ void WorldMap::Init( const U8* land, const U8* color, grinliz::CDynArray< WorldF
 {
 	GLASSERT( grid );
 	for( int i=0; i<width*height; ++i ) {
-		grid[i].SetLand( land[i] != 0 );
+		grid[i].SetLandAndRock( land[i] );
 		grid[i].SetPathColor( color[i] );
 	}
 	worldInfo->featureArr.Clear();
