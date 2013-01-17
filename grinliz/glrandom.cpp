@@ -379,6 +379,7 @@ int Random::Select( const float* scores, int nItems )
 {
 	float total = 0.0f;
 	for( int i=0; i<nItems; ++i ) {
+		GLASSERT( scores[i] >= 0.0f );
 		total += scores[i];
 	}
 	float uniform = Uniform() * total;

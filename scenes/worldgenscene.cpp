@@ -104,6 +104,62 @@ void WorldGenScene::CreateTexture( Texture* t )
 }
 
 
+void WorldGenScene::BlendZone( int zone )
+{
+	int y = genState.zone / NZONE;
+	int x = genState.zone - y*NZONE;
+
+	Random random;
+	random.SetSeedFromTime();
+
+	const int rockArr[3] = { RockGen::CAVEY_ROUGH, RockGen::CAVEY_SMOOTH, RockGen::BOULDERY };
+	const float rockScore[3] = {
+		(float)(NZONE-1-y),
+		0.5f*(float)(NZONE-1-y+x),
+		(float)y
+	};
+	int rock = rockArr[ random.Select( rockScore, 3 ) ];
+
+	float fractionLand = (x==0 || x==(NZONE-1) || y ==0 || y==(NZONE-1)) ? 0.55f : 0.85f;
+
+	const int heightArr[4] = { RockGen::USE_MAX_HEIGHT, RockGen::NOISE_HEIGHT, RockGen::USE_HIGH_HEIGHT, RockGen::KEEP_HEIGHT };
+	const float heightScore[4] = { 0.2f, 0.8f, 1.0f, 0.5f };
+	int height = heightArr[ random.Select( heightScore, 4 ) ];
+
+	static const int BORDER = 16;
+	static const int S  = WorldGen::SIZE / NZONE;
+	static const int SB = S + BORDER*2;
+	
+	RockGen rockGen( SB );
+	rockGen.DoCalc( random.Rand(), rock );
+	rockGen.DoThreshold( random.Rand(), fractionLand, height );
+
+	int x0 = x*S - BORDER;
+	int y0 = y*S - BORDER;
+
+	Rectangle2I bounds;
+	bounds.Set( 0, 0, WorldGen::SIZE-1, WorldGen::SIZE-1 );
+
+	for( int j=0; j<SB; ++j ) {
+		for( int i=0; i<SB; ++i ) {
+			Vector2I dst = { x0 + i, y0 + j };
+			Vector2I src = { i, j };
+
+			if ( bounds.Contains( dst ) ) {
+				int delta = Min( i, j, SB-1-i, SB-1-j );
+				int blend = 256;
+				if ( delta < BORDER ) {
+					blend = 256*delta/BORDER;
+				}
+				worldGen.ApplyHeight( dst.x, dst.y, 
+					                  *(rockGen.Height() + src.y*SB + src.x),
+									  blend );
+			}
+		}
+	}
+}
+
+
 void WorldGenScene::DoTick( U32 delta )
 {
 	bool sendTexture = false;
@@ -155,25 +211,7 @@ void WorldGenScene::DoTick( U32 delta )
 		}
 	}
 	else if ( genState.scanline == WorldGen::SIZE && genState.zone < NUM_ZONES ) {
-		static const int S = WorldGen::SIZE / NZONE;
-		int y = genState.zone / NZONE;
-		int x = genState.zone - y*NZONE;
-
-		x *= S;
-		y *= S;
-
-		Random random;
-		random.SetSeedFromTime();
-
-		RockGen rockGen( S );
-		rockGen.DoCalc( random.Rand(), RockGen::CAVEY_ROUGH );
-		rockGen.DoThreshold( random.Rand(), 0.5f, RockGen::NOISE_HEIGHT );
-
-		for( int j=y; j<y+S; ++j ) {
-			for( int i=x; i<x+S; ++i ) {
-				worldGen.ApplyHeight( i, j, *(rockGen.Height() + (j-y)*S + (i-x)), 256 );
-			}
-		}
+		BlendZone( genState.zone );
 		sendTexture = true;
 		genState.zone++;
 		if ( genState.zone == NUM_ZONES ) {

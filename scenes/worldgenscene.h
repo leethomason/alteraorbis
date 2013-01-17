@@ -31,6 +31,8 @@ private:
 		NUM_ZONES = NZONE*NZONE
 	};
 
+	void BlendZone( int zone );
+
 	WorldGen	worldGen;
 	WorldMap*	worldMap;
 	U16*		pix16;
