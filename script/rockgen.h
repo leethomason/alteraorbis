@@ -15,7 +15,6 @@ public:
 
 	// HEIGHT style
 	enum {
-		USE_MAX_HEIGHT,		// shear walls to max height
 		NOISE_HEIGHT,		// height from separate generator
 		USE_HIGH_HEIGHT,	// noise from separate generator, but high
 		KEEP_HEIGHT,		// height from noise generator

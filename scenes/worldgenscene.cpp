@@ -122,8 +122,8 @@ void WorldGenScene::BlendZone( int zone )
 
 	float fractionLand = (x==0 || x==(NZONE-1) || y ==0 || y==(NZONE-1)) ? 0.55f : 0.85f;
 
-	const int heightArr[4] = { RockGen::USE_MAX_HEIGHT, RockGen::NOISE_HEIGHT, RockGen::USE_HIGH_HEIGHT, RockGen::KEEP_HEIGHT };
-	const float heightScore[4] = { 0.2f, 0.8f, 1.0f, 0.5f };
+	const int heightArr[3] = { RockGen::NOISE_HEIGHT, RockGen::USE_HIGH_HEIGHT, RockGen::KEEP_HEIGHT };
+	const float heightScore[3] = { 0.8f, 1.0f, 0.5f };
 	int height = heightArr[ random.Select( heightScore, 4 ) ];
 
 	static const int BORDER = 16;

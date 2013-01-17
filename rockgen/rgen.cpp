@@ -8,6 +8,7 @@
 #include "../shared/lodepng.h"
 
 #include "../script/rockgen.h"
+#include "../game/worldgrid.h"
 
 using namespace grinliz;
 
@@ -36,9 +37,15 @@ int main(int argc, const char* argv[])
 
 		for( int y=0; y<DOMAIN_SIZE; ++y ) {
 			for( int x=0; x<DOMAIN_SIZE; ++x ) {
+
+				WorldGrid grid;
+				memset( &grid, 0, sizeof(WorldGrid) );
+
 				int v = heightMap[y*DOMAIN_SIZE+x];
-				Color4U8 c = { v, v, v, 255 };
-				pixels[y*DOMAIN_SIZE+x] = c;
+				if ( v == 0 )
+					v = 1;
+				grid.SetLandAndRock( v );
+				pixels[y*DOMAIN_SIZE+x] = grid.ToColor();
 			}
 		}
 

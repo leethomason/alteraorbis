@@ -64,10 +64,7 @@ void RockGen::DoThreshold( int seed, float targetFractionBlack, int heightStyle 
 				heightMap[i] = 0;
 			}
 			else {
-				if ( heightStyle == USE_MAX_HEIGHT ) {
-					heightMap[i] = 255;
-				}
-				else if ( heightStyle == KEEP_HEIGHT ) {
+				if ( heightStyle == KEEP_HEIGHT ) {
 					int h = 255 * (heightMap[i] - midC) / (255 - midC);
 					heightMap[i] = h;
 				}
