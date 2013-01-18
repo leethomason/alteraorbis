@@ -156,6 +156,7 @@ public:
 	bool operator==( const char* str ) const						{ return buf && str && strcmp( buf, str ) == 0; }
 	bool operator!=( const char* str ) const						{ return !(*this == str); }
 	char operator[]( int i ) const									{ GLASSERT( i>=0 && i<ALLOCATE-1 ); return buf[i]; }
+	char& operator[]( int i ) 										{ GLASSERT( i>=0 && i<ALLOCATE-1 ); return buf[i]; }
 	template < class T > bool operator==( const T& str ) const		{ return buf && strcmp( buf, str.c_str() ) == 0; }
 
 	void operator=( const char* src )	{	

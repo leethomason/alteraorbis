@@ -42,6 +42,7 @@ private:
 
 	gamui::PushButton	okay;
 	gamui::PushButton	serialButton[NUM_SERIAL_BUTTONS];
+	gamui::PushButton	allRockButton;
 	gamui::Image		minimap;
 	gamui::Image		playerMark;
 };

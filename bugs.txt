@@ -1,3 +1,6 @@
+- assert when clicking on location player can't go
+- crash on exit
+
 - game
 	x Land and Water
 		x generate a random world
@@ -10,7 +13,8 @@
 			x where is world origin? mini-map origin? save/load origin? line all that up
 			x mark location on mini-map
 	- Rock and Stream
-		- rock formation: 
+		- rock formation
+			- need more local height variation
 		- cave
 		- streams
 		- fast-step world sim

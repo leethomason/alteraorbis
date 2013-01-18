@@ -34,6 +34,7 @@
 class Texture;
 class WorldInfo;
 struct WorldFeature;
+class Model;
 
 /*
 	Remembering Y is up and we are in the xz plane:
@@ -67,6 +68,9 @@ public:
 	WorldMap( int width, int height );
 	~WorldMap();
 
+	// Call to turn on rock rendering.
+	void AttachEngine( Engine* engine );
+
 	// Test initiliazation:
 	void InitCircle();
 	bool InitPNG( const char* filename, 
@@ -80,6 +84,8 @@ public:
 	void Save( const char* pathToData, const char* pathToXML );
 	void Load( const char* pathtoData, const char* pathToXML );
 
+	// Set the rock to h. h=-1 sets to nominal value.
+	void SetRock( int x, int y, int h );
 	void SetBlocked( int x, int y )	{ grinliz::Rectangle2I pos; pos.Set( x, y, x, y ); SetBlocked( pos ); }
 	void SetBlocked( const grinliz::Rectangle2I& pos );
 	void ClearBlocked( int x, int y )	{ grinliz::Rectangle2I pos; pos.Set( x, y, x, y ); ClearBlocked( pos ); }
@@ -166,8 +172,6 @@ private:
 	void Init( int w, int h );
 	void Tessellate();
 	void CalcZone( int x, int y );
-
-	bool DeleteRegion( int x, int y );	// surprisingly complex
 	void DeleteAllRegions();
 
 	void DrawZones();			// debugging
@@ -252,6 +256,7 @@ private:
 	}
 
 	WorldGrid*					grid;
+	Engine*						engine;
 
 	WorldInfo*					worldInfo;
 	micropather::MicroPather*	pather;
@@ -261,13 +266,22 @@ private:
 	grinliz::CDynArray< grinliz::Vector2F >	debugPathVector;
 	grinliz::CDynArray< grinliz::Vector2F >	pathCache;
 
+	class CompValue {
+	public:
+		static U32 Hash( const grinliz::Vector2I& v)			{ return (U32)(v.y*MAX_MAP_SIZE+v.x); }
+		static bool Equal( const grinliz::Vector2I& v0, const grinliz::Vector2I& v1 )	{ return v0 == v1; }
+	};
+	grinliz::HashTable< grinliz::Vector2I, Model*, CompValue > voxels;
+
 	enum {
 		LOWER_TYPES = 2		// land or water
 	};
 	Texture*						texture[LOWER_TYPES];
 	grinliz::CDynArray<PTVertex>	vertex[LOWER_TYPES];
 	grinliz::CDynArray<U16>			index[LOWER_TYPES];
+
 	grinliz::BitArray< MAX_MAP_SIZE/ZONE_SIZE, MAX_MAP_SIZE/ZONE_SIZE, 1 > zoneInit;
+	grinliz::BitArray< MAX_MAP_SIZE/ZONE_SIZE, MAX_MAP_SIZE/ZONE_SIZE, 1 > zoneTess;
 };
 
 #endif // LUMOS_WORLD_MAP_INCLUDED

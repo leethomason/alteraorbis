@@ -54,6 +54,8 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 		serialButton[i].Init( &gamui2D, game->GetButtonLook(0) );
 		serialButton[i].SetText( serialText[i] );
 	}
+	allRockButton.Init( &gamui2D, game->GetButtonLook(0) );
+	allRockButton.SetText( "All Rock" );
 }
 
 
@@ -71,6 +73,7 @@ void GameScene::Resize()
 	for( int i=0; i<NUM_SERIAL_BUTTONS; ++i ) {
 		layout.PosAbs( &serialButton[i], i, -2 );
 	}
+	layout.PosAbs( &allRockButton, 0, 0 );
 
 	const Screenport& port = lumosGame->GetScreenport();
 	minimap.SetPos( port.UIWidth()-MINI_MAP_SIZE, 0 );
@@ -181,6 +184,9 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		delete sim;
 		sim = new Sim( lumosGame );
 		Load();
+	}
+	else if ( item == &allRockButton ) {
+		sim->SetAllRock();
 	}
 }
 

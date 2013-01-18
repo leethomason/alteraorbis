@@ -23,6 +23,7 @@
 #include "../grinliz/glperformance.h"
 #include "../shared/lodepng.h"
 
+#include "../engine/engine.h"
 #include "../engine/texture.h"
 #include "../engine/ufoutil.h"
 #include "../engine/surface.h"
@@ -47,6 +48,7 @@ WorldMap::WorldMap( int width, int height ) : Map( width, height )
 	GLASSERT( height % ZONE_SIZE == 0 );
 
 	grid = 0;
+	engine = 0;
 	pather = 0;
 	worldInfo = new WorldInfo();
 	Init( width, height );
@@ -60,10 +62,34 @@ WorldMap::WorldMap( int width, int height ) : Map( width, height )
 
 WorldMap::~WorldMap()
 {
+	GLASSERT( engine == 0 );
+
 	DeleteAllRegions();
 	delete [] grid;
 	delete pather;
 	delete worldInfo;
+}
+
+
+void WorldMap::AttachEngine( Engine* e ) 
+{
+	GLASSERT( (e==0 && engine !=0) || (e!=0 && engine==0) );
+
+	Model** mArr = voxels.GetValues();
+	for( int i=0; i<voxels.NumValues(); ++i ) {
+		engine->FreeModel( mArr[i] );
+	}
+	voxels.RemoveAll();
+	if ( !e ) {
+		for( int j=0; j<height; ++j ) {
+			for( int i=0; i<width; ++i ) {
+				if ( grid[INDEX(i,j)].IsLand() ) {
+					SetRock( i, j, 0 );
+				}
+			}
+		}
+	}
+	engine = e;
 }
 
 
@@ -191,6 +217,13 @@ void WorldMap::DeleteAllRegions()
 
 void WorldMap::Init( int w, int h )
 {
+	// Reset the voxels
+	if ( engine ) {
+		Engine* savedEngine = engine;
+		AttachEngine( 0 );
+		AttachEngine( savedEngine );
+	}
+
 	DeleteAllRegions();
 	delete [] grid;
 	if ( pather ) {
@@ -200,6 +233,7 @@ void WorldMap::Init( int w, int h )
 	this->height = h;
 	grid = new WorldGrid[width*height];
 	memset( grid, 0, width*height*sizeof(WorldGrid) );
+	zoneTess.ClearAll();
 
 	delete pather;
 	pather = new micropather::MicroPather( this, width*height/16, 8, true );
@@ -376,6 +410,63 @@ Vector2I WorldMap::FindEmbark()
 	}
 	Vector2I v = { 0, 0 };
 	return v;
+}
+
+
+
+void WorldMap::SetRock( int x, int y, int h )
+{
+	// what is there now? h=[1,4]
+	// does it need to be changed removed?
+	// do blocks need to be set/removed?
+
+
+	Vector2I vec = { x, y };
+	int index = INDEX(x,y);
+	int hNow = grid[index].RockHeight();
+
+	if ( h < 0 ) {
+		h = grid[index].NominalRockHeight();
+	}
+	CStr<12> name = "rock.1"; 
+
+#ifdef DEBUG
+	if ( engine ) {
+		if ( hNow > 0 ) {
+			Model* m = voxels.Get( vec );
+			name[5] = '0' + hNow;
+			GLASSERT( m && m->GetResource()->header.name == name.c_str() );
+		}
+		else {
+			GLASSERT( voxels.Query( vec, 0 ) == false );
+		}
+	}
+#endif
+
+	if ( h != hNow ) {
+		if ( engine ) {
+			if ( hNow ) {
+				Model* m = voxels.Remove( vec );
+				engine->FreeModel( m );
+			}
+			if ( h > 0 ) {
+				name[5] = '0' + h;
+				const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( name.c_str() );
+				Model* m = engine->AllocModel( res );
+				m->SetPos( (float)vec.x+0.5f, 0.0f, (float)vec.y+0.5f );
+				GLASSERT( m );
+				voxels.Add( vec, m );
+			}
+		}
+		grid[index].SetRockHeight( h );
+
+		if ( !hNow && h ) {
+			SetBlocked( vec.x, vec.y );
+		}
+		else if ( hNow && !h ) {
+			ClearBlocked( vec.x, vec.y );
+		}
+	}
 }
 
 
@@ -1008,7 +1099,7 @@ void WorldMap::Submit( GPUState* shader, bool emissiveOnly )
 		if ( vertex[i].Size() > 0 ) {
 			GPUStream stream( vertex[i][0] );
 			shader->Draw( stream, texture[i], vertex[i].Mem(), index[i].Size(), index[i].Mem() );
-			}
+		}
 	}
 }
 
