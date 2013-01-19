@@ -2,8 +2,8 @@
 x crash on exit
 - really must fix the shadow popping bug
 - need free camera mode
-- need teleport mode
-- save / load rocks
+x need teleport mode
+x save / load rocks
 
 - game
 	x Land and Water
