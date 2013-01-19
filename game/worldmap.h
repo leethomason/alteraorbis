@@ -84,7 +84,9 @@ public:
 	void Save( const char* pathToData, const char* pathToXML );
 	void Load( const char* pathtoData, const char* pathToXML );
 
-	// Set the rock to h. h=-1 sets to nominal value.
+	// Set the rock to h. 
+	//		h=-1 sets to nominal value.
+	//		h=-1 sets to initial value, used when loading
 	void SetRock( int x, int y, int h );
 	void SetBlocked( int x, int y )	{ grinliz::Rectangle2I pos; pos.Set( x, y, x, y ); SetBlocked( pos ); }
 	void SetBlocked( const grinliz::Rectangle2I& pos );

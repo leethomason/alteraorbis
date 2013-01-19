@@ -7,7 +7,7 @@
 #include "../grinliz/glrectangle.h"
 #include "../grinliz/glcolor.h"
 
-static const int MAX_ROCK_HEIGHT	= 4;
+static const int MAX_ROCK_HEIGHT	= 3;
 
 struct WorldGrid {
 private:
@@ -22,8 +22,8 @@ private:
 	unsigned isBlocked			: 1;
 
 	unsigned zoneSize			: 6;	// 0-31
-	unsigned nominalRockHeight	: 3;	// 0-4
-	unsigned rockHeight			: 3;
+	unsigned nominalRockHeight	: 2;	// 0-3
+	unsigned rockHeight			: 2;
 
 	unsigned debugAdjacent		: 1;
 	unsigned debugPath			: 1;

@@ -369,7 +369,8 @@ public:
 		return false;
 	}
 
-	int NumValues() const { return nItems; }
+	bool Empty() const		{ return nItems == 0; }
+	int NumValues() const	{ return nItems; }
 
 	V* GetValues() {
 		// Create a cache of the values, so they can be a true array.

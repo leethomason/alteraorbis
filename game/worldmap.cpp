@@ -75,11 +75,6 @@ void WorldMap::AttachEngine( Engine* e )
 {
 	GLASSERT( (e==0 && engine !=0) || (e!=0 && engine==0) );
 
-	Model** mArr = voxels.GetValues();
-	for( int i=0; i<voxels.NumValues(); ++i ) {
-		engine->FreeModel( mArr[i] );
-	}
-	voxels.RemoveAll();
 	if ( !e ) {
 		for( int j=0; j<height; ++j ) {
 			for( int i=0; i<width; ++i ) {
@@ -89,6 +84,7 @@ void WorldMap::AttachEngine( Engine* e )
 			}
 		}
 	}
+	GLASSERT( voxels.Empty() );
 	engine = e;
 }
 
@@ -170,6 +166,16 @@ void WorldMap::Load( const char* pathToDAT, const char* pathToXML )
 				fclose( datFP );
 			}
 			Tessellate();
+
+			for( int j=0; j<height; ++j ) {
+				for( int i=0; i<width; ++i ) {
+					int index = INDEX( i, j );
+					// Clear the block, which is serialized, because the SetRock() will set it.
+					if ( grid[index].IsBlocked() )
+						grid[index].SetBlocked( false );
+					SetRock( i, j, -2 );
+				}
+			}
 		}
 	}
 }
@@ -420,13 +426,16 @@ void WorldMap::SetRock( int x, int y, int h )
 	// does it need to be changed removed?
 	// do blocks need to be set/removed?
 
-
 	Vector2I vec = { x, y };
 	int index = INDEX(x,y);
-	int hNow = grid[index].RockHeight();
 
-	if ( h < 0 ) {
+	int hNow = grid[index].RockHeight();
+	if ( h == -1 ) {
 		h = grid[index].NominalRockHeight();
+	}
+	if ( h == -2 ) {
+		hNow = 0;
+		h = grid[index].RockHeight();
 	}
 	CStr<12> name = "rock.1"; 
 

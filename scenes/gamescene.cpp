@@ -54,6 +54,12 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 		serialButton[i].Init( &gamui2D, game->GetButtonLook(0) );
 		serialButton[i].SetText( serialText[i] );
 	}
+	static const char* camModeText[NUM_CAM_MODES] = { "Track", "Teleport" };
+	for( int i=0; i<NUM_CAM_MODES; ++i ) {
+		camModeButton[i].Init( &gamui2D, game->GetButtonLook(0) );
+		camModeButton[i].SetText( camModeText[i] );
+		camModeButton[0].AddToToggleGroup( &camModeButton[i] );
+	}
 	allRockButton.Init( &gamui2D, game->GetButtonLook(0) );
 	allRockButton.SetText( "All Rock" );
 }
@@ -72,6 +78,9 @@ void GameScene::Resize()
 	LayoutCalculator layout = static_cast<LumosGame*>(game)->DefaultLayout();
 	for( int i=0; i<NUM_SERIAL_BUTTONS; ++i ) {
 		layout.PosAbs( &serialButton[i], i, -2 );
+	}
+	for( int i=0; i<NUM_CAM_MODES; ++i ) {
+		layout.PosAbs( &camModeButton[i], i, 1 );
 	}
 	layout.PosAbs( &allRockButton, 0, 0 );
 
@@ -137,10 +146,17 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 
 			Chit* chit = sim->GetPlayerChit();
 			if ( chit ) {
-				PathMoveComponent* pmc = GET_COMPONENT( chit, PathMoveComponent );
-				if ( pmc ) {
-					Vector2F dest = { at.x, at.z };
-					pmc->QueueDest( dest );
+				if ( camModeButton[TRACK].Down() ) {
+					PathMoveComponent* pmc = GET_COMPONENT( chit, PathMoveComponent );
+					if ( pmc ) {
+						Vector2F dest = { at.x, at.z };
+						pmc->QueueDest( dest );
+					}
+				}
+				else if ( camModeButton[TELEPORT].Down() ) {
+					SpatialComponent* sc = chit->GetSpatialComponent();
+					GLASSERT( sc );
+					sc->SetPosition( at.x, 0, at.z );
 				}
 			}
 		}
@@ -165,9 +181,16 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 
 		Chit* chit = sim->GetPlayerChit();
 		if ( chit ) {
-			PathMoveComponent* pmc = GET_COMPONENT( chit, PathMoveComponent );
-			if ( pmc ) {
-				pmc->QueueDest( dest );
+			if ( camModeButton[TRACK].Down() ) {
+				PathMoveComponent* pmc = GET_COMPONENT( chit, PathMoveComponent );
+				if ( pmc ) {
+					pmc->QueueDest( dest );
+				}
+			}
+			else if ( camModeButton[TELEPORT].Down() ) {
+				SpatialComponent* sc = chit->GetSpatialComponent();
+				GLASSERT( sc );
+				sc->SetPosition( dest.x, 0, dest.y );
 			}
 		}
 	}

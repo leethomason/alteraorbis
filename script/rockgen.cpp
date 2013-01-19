@@ -73,7 +73,7 @@ void RockGen::DoThreshold( int seed, float targetFractionBlack, int heightStyle 
 				}
 				else if ( heightStyle == NOISE_HEIGHT || heightStyle == USE_HIGH_HEIGHT ) {
 
-					float hf = noise.Noise( (float)x, (float)y, 0.0f, (float)size, 8, 32, 0.3f ); 
+					float hf = noise.Noise2( (float)x, (float)y, (float)size, 8, 32, 0.5f ); 
 					hf = Clamp( hf*0.5f + 0.5f, 0.0f, 1.0f );
 
 					int   h=0;
@@ -109,15 +109,15 @@ void RockGen::DoCalc( int seed, int rockStyle )
 
 			float n = 0;
 			if ( rockStyle == BOULDERY ) {
-				n = arr[0].Noise( (float)x, (float)y, 0.0f, (float)size, OCTAVE8, OCTAVE32, 0.3f );	// Plasma rocks.
+				n = arr[0].Noise2( (float)x, (float)y, (float)size, OCTAVE8, OCTAVE32, 0.5f );	// Plasma rocks.
 			}
 			else if ( rockStyle == CAVEY_SMOOTH || rockStyle == CAVEY_ROUGH ) {
 				// Canyon.
 				n = -Fractal( arr, x, y, OCTAVE8, OCTAVE16, 0.2f );		// Good tunnel-canyon look
 				if ( rockStyle == CAVEY_SMOOTH )
-					n +=       arr[1].Noise( (float)x, (float)y, 0.0f, (float)size, OCTAVE16, OCTAVE32, 0.5 )*0.1f;
+					n +=       arr[1].Noise2( (float)x, (float)y, (float)size, OCTAVE16, OCTAVE32, 0.5 )*0.1f;
 				else
-					n +=       arr[1].Noise( (float)x, (float)y, 0.5f, (float)size, OCTAVE32, OCTAVE64, 0.5f )*0.1f;
+					n +=       arr[1].Noise2( (float)x, (float)y, (float)size, OCTAVE32, OCTAVE64, 0.5f )*0.1f;
 			
 				n = Clamp( n, -1.0f, 1.0f );
 			}
