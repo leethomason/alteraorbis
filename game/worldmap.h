@@ -92,12 +92,18 @@ public:
 	void SetBlocked( const grinliz::Rectangle2I& pos );
 	void ClearBlocked( int x, int y )	{ grinliz::Rectangle2I pos; pos.Set( x, y, x, y ); ClearBlocked( pos ); }
 	void ClearBlocked( const grinliz::Rectangle2I& pos );
+	grinliz::Vector2I FindPassable( int x, int y );
 
 	bool IsBlocked( int x, int y ) const	{ 
 		int i = INDEX(x,y);
 		return grid[i].IsBlocked();
 	}
 
+	bool IsPassable( int x, int y ) const {
+		int index = INDEX(x,y);
+		return grid[index].IsPassable();
+	}
+	
 	bool IsLand( int x, int y )		{ 
 		int i = INDEX(x,y);
 		return grid[i].IsLand(); 
@@ -221,11 +227,6 @@ private:
 		return v.x == x && v.y == y;
 	}
 
-	bool IsPassable( int x, int y ) const {
-		int index = INDEX(x,y);
-		return grid[index].IsPassable();
-	}
-	
 	grinliz::Rectangle2F ZoneBounds( int x, int y ) const {
 		grinliz::Vector2I v = ZoneOrigin( x, y );
 		const WorldGrid& g = grid[INDEX(x,y)];

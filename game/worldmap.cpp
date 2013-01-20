@@ -508,6 +508,34 @@ void WorldMap::ClearBlocked( const grinliz::Rectangle2I& pos )
 }
 
 
+Vector2I WorldMap::FindPassable( int x, int y )
+{
+	int c = 0;
+
+	while ( true ) {
+		int x0 = Max( 0, x-c );
+		int x1 = Min( width-1, x+c );
+		int y0 = Max( 0, y-c );
+		int y1 = Min( height-1, y+c );
+
+		for( int j=y0; j<=y1; ++j ) {
+			for( int i=x0; i<=x1; ++i ) {
+				if ( j==y0 || j==y1 || i==x0 || i==x1 ) {
+					if ( grid[INDEX(i,j)].IsPassable() ) {
+						Vector2I v = { i, j };
+						return v;
+					}
+				}
+			}
+		}
+		++c;
+	}
+	GLASSERT( 0 );	// The world is full?
+	Vector2I vz = { 0, 0 };
+	return vz;
+}
+
+
 WorldMap::BlockResult WorldMap::CalcBlockEffect(	const grinliz::Vector2F& pos,
 													float rad,
 													grinliz::Vector2F* force )
@@ -918,7 +946,6 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 	WorldGrid* regionStart = grid + INDEX( starti.x, starti.y );
 	WorldGrid* regionEnd   = grid + INDEX( endi.x, endi.y );
 
-	GLASSERT( IsPassable( starti.x, starti.y ) && IsPassable( endi.x, endi.y ) );	// is someone stuck?
 	if ( !IsPassable( starti.x, starti.y ) || !IsPassable( endi.x, endi.y ) ) {
 		return false;
 	}

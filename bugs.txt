@@ -1,9 +1,10 @@
-- assert when clicking on location player can't go
+x assert when clicking on location player can't go
 x crash on exit
 - really must fix the shadow popping bug
 - need free camera mode
 x need teleport mode
 x save / load rocks
+x get stuck when teleporting
 
 - game
 	x Land and Water
