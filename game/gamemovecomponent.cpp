@@ -32,7 +32,7 @@ void GameMoveComponent::ApplyBlocks( Vector2F* pos, bool* forceApplied, bool* is
 		int y = (int)newPos.y;
 
 		if ( !map->IsPassable( x, y )) {
-			Vector2I out = map->FindPassable( x, y );
+  			Vector2I out = map->FindPassable( x, y );
 			newPos.x = (float)out.x + 0.5f;
 			newPos.y = (float)out.y + 0.5f;
 		}
