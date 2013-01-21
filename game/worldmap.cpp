@@ -23,6 +23,7 @@
 #include "../grinliz/glperformance.h"
 #include "../shared/lodepng.h"
 
+#include "../engine/engine.h"
 #include "../engine/texture.h"
 #include "../engine/ufoutil.h"
 #include "../engine/surface.h"
@@ -47,6 +48,7 @@ WorldMap::WorldMap( int width, int height ) : Map( width, height )
 	GLASSERT( height % ZONE_SIZE == 0 );
 
 	grid = 0;
+	engine = 0;
 	pather = 0;
 	worldInfo = new WorldInfo();
 	Init( width, height );
@@ -60,10 +62,30 @@ WorldMap::WorldMap( int width, int height ) : Map( width, height )
 
 WorldMap::~WorldMap()
 {
+	GLASSERT( engine == 0 );
+
 	DeleteAllRegions();
 	delete [] grid;
 	delete pather;
 	delete worldInfo;
+}
+
+
+void WorldMap::AttachEngine( Engine* e ) 
+{
+	GLASSERT( (e==0 && engine !=0) || (e!=0 && engine==0) );
+
+	if ( !e ) {
+		for( int j=0; j<height; ++j ) {
+			for( int i=0; i<width; ++i ) {
+				if ( grid[INDEX(i,j)].IsLand() ) {
+					SetRock( i, j, 0 );
+				}
+			}
+		}
+	}
+	GLASSERT( voxels.Empty() );
+	engine = e;
 }
 
 
@@ -144,6 +166,16 @@ void WorldMap::Load( const char* pathToDAT, const char* pathToXML )
 				fclose( datFP );
 			}
 			Tessellate();
+
+			for( int j=0; j<height; ++j ) {
+				for( int i=0; i<width; ++i ) {
+					int index = INDEX( i, j );
+					// Clear the block, which is serialized, because the SetRock() will set it.
+					if ( grid[index].IsBlocked() )
+						grid[index].SetBlocked( false );
+					SetRock( i, j, -2 );
+				}
+			}
 		}
 	}
 }
@@ -191,6 +223,13 @@ void WorldMap::DeleteAllRegions()
 
 void WorldMap::Init( int w, int h )
 {
+	// Reset the voxels
+	if ( engine ) {
+		Engine* savedEngine = engine;
+		AttachEngine( 0 );
+		AttachEngine( savedEngine );
+	}
+
 	DeleteAllRegions();
 	delete [] grid;
 	if ( pather ) {
@@ -200,6 +239,7 @@ void WorldMap::Init( int w, int h )
 	this->height = h;
 	grid = new WorldGrid[width*height];
 	memset( grid, 0, width*height*sizeof(WorldGrid) );
+	zoneTess.ClearAll();
 
 	delete pather;
 	pather = new micropather::MicroPather( this, width*height/16, 8, true );
@@ -379,6 +419,66 @@ Vector2I WorldMap::FindEmbark()
 }
 
 
+
+void WorldMap::SetRock( int x, int y, int h )
+{
+	// what is there now? h=[1,4]
+	// does it need to be changed removed?
+	// do blocks need to be set/removed?
+
+	Vector2I vec = { x, y };
+	int index = INDEX(x,y);
+
+	int hNow = grid[index].RockHeight();
+	if ( h == -1 ) {
+		h = grid[index].NominalRockHeight();
+	}
+	if ( h == -2 ) {
+		hNow = 0;
+		h = grid[index].RockHeight();
+	}
+	CStr<12> name = "rock.1"; 
+
+#ifdef DEBUG
+	if ( engine ) {
+		if ( hNow > 0 ) {
+			Model* m = voxels.Get( vec );
+			name[5] = '0' + hNow;
+			GLASSERT( m && m->GetResource()->header.name == name.c_str() );
+		}
+		else {
+			GLASSERT( voxels.Query( vec, 0 ) == false );
+		}
+	}
+#endif
+
+	if ( h != hNow ) {
+		if ( engine ) {
+			if ( hNow ) {
+				Model* m = voxels.Remove( vec );
+				engine->FreeModel( m );
+			}
+			if ( h > 0 ) {
+				name[5] = '0' + h;
+				const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( name.c_str() );
+				Model* m = engine->AllocModel( res );
+				m->SetPos( (float)vec.x+0.5f, 0.0f, (float)vec.y+0.5f );
+				GLASSERT( m );
+				voxels.Add( vec, m );
+			}
+		}
+		grid[index].SetRockHeight( h );
+
+		if ( !hNow && h ) {
+			SetBlocked( vec.x, vec.y );
+		}
+		else if ( hNow && !h ) {
+			ClearBlocked( vec.x, vec.y );
+		}
+	}
+}
+
+
 void WorldMap::SetBlocked( const grinliz::Rectangle2I& pos )
 {
 	for( int y=pos.min.y; y<=pos.max.y; ++y ) {
@@ -405,6 +505,34 @@ void WorldMap::ClearBlocked( const grinliz::Rectangle2I& pos )
 		}
 	}
 	pather->Reset();
+}
+
+
+Vector2I WorldMap::FindPassable( int x, int y )
+{
+	int c = 0;
+
+	while ( true ) {
+		int x0 = Max( 0, x-c );
+		int x1 = Min( width-1, x+c );
+		int y0 = Max( 0, y-c );
+		int y1 = Min( height-1, y+c );
+
+		for( int j=y0; j<=y1; ++j ) {
+			for( int i=x0; i<=x1; ++i ) {
+				if ( j==y0 || j==y1 || i==x0 || i==x1 ) {
+					if ( grid[INDEX(i,j)].IsPassable() ) {
+						Vector2I v = { i, j };
+						return v;
+					}
+				}
+			}
+		}
+		++c;
+	}
+	GLASSERT( 0 );	// The world is full?
+	Vector2I vz = { 0, 0 };
+	return vz;
 }
 
 
@@ -818,7 +946,6 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 	WorldGrid* regionStart = grid + INDEX( starti.x, starti.y );
 	WorldGrid* regionEnd   = grid + INDEX( endi.x, endi.y );
 
-	GLASSERT( IsPassable( starti.x, starti.y ) && IsPassable( endi.x, endi.y ) );	// is someone stuck?
 	if ( !IsPassable( starti.x, starti.y ) || !IsPassable( endi.x, endi.y ) ) {
 		return false;
 	}
@@ -1008,7 +1135,7 @@ void WorldMap::Submit( GPUState* shader, bool emissiveOnly )
 		if ( vertex[i].Size() > 0 ) {
 			GPUStream stream( vertex[i][0] );
 			shader->Draw( stream, texture[i], vertex[i].Mem(), index[i].Size(), index[i].Mem() );
-			}
+		}
 	}
 }
 

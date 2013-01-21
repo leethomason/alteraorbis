@@ -34,6 +34,9 @@ public:
 	Engine*			GetEngine()		{ return engine; }
 	LumosChitBag*	GetChitBag()	{ return chitBag; }
 
+	// Set all rock to the nominal values
+	void SetAllRock();
+
 private:
 	void CreatePlayer( const grinliz::Vector2I& pos, const char* assetName );
 

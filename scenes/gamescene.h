@@ -39,9 +39,16 @@ private:
 		CYCLE,
 		NUM_SERIAL_BUTTONS
 	};
+	enum {
+		TRACK,
+		TELEPORT,
+		NUM_CAM_MODES
+	};
 
 	gamui::PushButton	okay;
 	gamui::PushButton	serialButton[NUM_SERIAL_BUTTONS];
+	gamui::ToggleButton camModeButton[NUM_CAM_MODES];
+	gamui::PushButton	allRockButton;
 	gamui::Image		minimap;
 	gamui::Image		playerMark;
 };

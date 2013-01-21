@@ -26,6 +26,17 @@ void GameMoveComponent::ApplyBlocks( Vector2F* pos, bool* forceApplied, bool* is
 	WorldMap::BlockResult result = map->ApplyBlockEffect( *pos, radius, &newPos );
 	if ( forceApplied ) *forceApplied = ( result == WorldMap::FORCE_APPLIED );
 	if ( isStuck )		*isStuck = ( result == WorldMap::STUCK );
+
+	if ( forceApplied || isStuck ) {
+		int x = (int)newPos.x;
+		int y = (int)newPos.y;
+
+		if ( !map->IsPassable( x, y )) {
+  			Vector2I out = map->FindPassable( x, y );
+			newPos.x = (float)out.x + 0.5f;
+			newPos.y = (float)out.y + 0.5f;
+		}
+	}
 	
 	*pos = newPos;
 }

@@ -22,6 +22,8 @@
 
 using namespace grinliz;
 
+static const int MODEL_BLOCK = 10*1000;
+
 /*
 	Tuning: (from Xenowar)
 	Unit tree:  Query checked=153, computed=145 of 341 nodes, models=347 [35,44,40,26,606]
@@ -32,7 +34,7 @@ using namespace grinliz;
 int SpaceTree::nModelsAtDepth[DEPTH] = { 0 };
 
 SpaceTree::SpaceTree( float yMin, float yMax, int _size ) 
-	:	modelPool( "SpaceTreeModelPool", sizeof( Item ), EL_ALLOCATED_MODELS*sizeof( Item ), true )
+	:	modelPool( "SpaceTreeModelPool", sizeof( Item ), MODEL_BLOCK*sizeof( Item ), false )
 {
 	size = Max( (int)CeilPowerOf2( _size ), 64 );
 	treeBounds.Set( 0, yMin, 0, (float)size, yMax, (float)size );

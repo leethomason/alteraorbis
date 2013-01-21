@@ -31,6 +31,7 @@ Sim::Sim( LumosGame* g )
 
 	worldMap = new WorldMap( MAX_MAP_SIZE, MAX_MAP_SIZE );
 	engine = new Engine( port, database, worldMap );
+	worldMap->AttachEngine( engine );
 
 	engine->SetGlow( true );
 	engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
@@ -42,6 +43,7 @@ Sim::Sim( LumosGame* g )
 
 Sim::~Sim()
 {
+	worldMap->AttachEngine( 0 );
 	delete chitBag;
 	delete engine;
 	delete worldMap;
@@ -142,5 +144,14 @@ void Sim::Draw3D( U32 deltaTime )
 	engine->Draw( deltaTime );
 }
 
+
+void Sim::SetAllRock()
+{
+	for( int j=0; j<worldMap->Height(); ++j ) {
+		for( int i=0; i<worldMap->Width(); ++i ) {
+			worldMap->SetRock( i, j, -1 );
+		}
+	}
+}
 
 

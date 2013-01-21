@@ -124,7 +124,8 @@ void WorldGenScene::BlendZone( int zone )
 
 	const int heightArr[3] = { RockGen::NOISE_HEIGHT, RockGen::USE_HIGH_HEIGHT, RockGen::KEEP_HEIGHT };
 	const float heightScore[3] = { 0.8f, 1.0f, 0.5f };
-	int height = heightArr[ random.Select( heightScore, 4 ) ];
+	const int height = heightArr[ random.Select( heightScore, 4 ) ];
+	const bool blendExisting = (random.Rand(3) == 0);
 
 	static const int BORDER = 16;
 	static const int S  = WorldGen::SIZE / NZONE;
@@ -150,6 +151,9 @@ void WorldGenScene::BlendZone( int zone )
 				int blend = 256;
 				if ( delta < BORDER ) {
 					blend = 256*delta/BORDER;
+				}
+				if ( blendExisting ) {
+					blend /= 2;
 				}
 				worldGen.ApplyHeight( dst.x, dst.y, 
 					                  *(rockGen.Height() + src.y*SB + src.x),

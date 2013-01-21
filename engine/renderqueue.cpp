@@ -73,7 +73,7 @@ void RenderQueue::Add(	Model* model,
 	item->param4 = param4;
 	item->boneData = boneData;
 
-	GLASSERT( itemPool.Size() < 1000 );	// sanity, infinite loop detection
+	GLASSERT( itemPool.Size() < 10*1000 );	// sanity, infinite loop detection
 }
 
 

@@ -259,7 +259,7 @@ class CompValue {
 public:
 	// Hash table:
 	template <class T>
-	static U32 Hash(T& v)							{ return (U32)(v); }
+	static U32 Hash( const T& v)					{ return (U32)(v); }
 	template <class T>
 	static bool Equal( const T& v0, const T& v1 )	{ return v0 == v1; }
 
@@ -369,7 +369,8 @@ public:
 		return false;
 	}
 
-	int NumValues() const { return nItems; }
+	bool Empty() const		{ return nItems == 0; }
+	int NumValues() const	{ return nItems; }
 
 	V* GetValues() {
 		// Create a cache of the values, so they can be a true array.

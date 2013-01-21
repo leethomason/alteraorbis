@@ -136,8 +136,13 @@ bool CameraComponent::DoTick( U32 delta )
 				Vector3F at;
 				int result = IntersectRayPlane( camera->PosWC(), eye3[0], 1, 0.0f, &at );
 				if ( result == INTERSECT ) {
-					Vector3F delta = camera->PosWC() - at;
-					camera->SetPosWC( pos + delta );
+					Vector3F t = (camera->PosWC() - at);
+					
+					//camera->SetPosWC( pos + t );
+					Vector3F c = camera->PosWC();
+					Vector3F d = (pos+t) - c;
+					static const float EASE = 0.5f;
+					camera->SetPosWC( c.x+EASE*d.x, pos.y+t.y, c.z+EASE*d.z );
 				}
 			}
 		}

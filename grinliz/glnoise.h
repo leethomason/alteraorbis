@@ -32,16 +32,21 @@ public:
 		return Clamp( n, -1.0f, 1.0f );
 	}
 
-	/*
-	float NormNoise( float x, float y, float z ) const {
-		return Normalize( Noise( x, y, z ) );
-	}
+	float Noise2( float x, float y, float size, int octave0, int octave1, float octave1Amount ) const
+	{
+		const float INV      = 1.0f / size;
+		const float OCTAVE_0 = (float)octave0;
+		const float OCTAVE_1 = (float)octave1;
 
-	float AbsNoise( float x, float y, float z ) const {
-		float v = Noise( x, y, z );
-		return -1.0f + 2.0f*fabsf( v );
+		float nx0 = OCTAVE_0 * (float)x * INV;
+		float ny0 = OCTAVE_0 * (float)y * INV;
+
+		float nx1 = OCTAVE_1 * (float)x * INV;
+		float ny1 = OCTAVE_1 * (float)y * INV;
+
+		float n = Noise2( nx0, ny0 ) + Noise2( nx1, ny1 ) * octave1Amount;
+		return Clamp( n, -1.0f, 1.0f );
 	}
-	*/
 
 	// Convert [-1,1] -> [0,1]
 	static float Normalize( float n ) { return n*0.5f + 0.5f; }
