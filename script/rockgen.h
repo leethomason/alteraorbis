@@ -16,7 +16,7 @@ public:
 	// HEIGHT style
 	enum {
 		NOISE_HEIGHT,		// height from separate generator
-		USE_HIGH_HEIGHT,	// noise from separate generator, but high
+		NOISE_HIGH_HEIGHT,	// noise from separate generator, but high
 		KEEP_HEIGHT,		// height from noise generator
 	};
 	int		heightStyle;
