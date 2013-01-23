@@ -112,11 +112,20 @@ void ModelLoader::Load( const gamedb::Item* item, ModelResource* res )
 	res->hitBounds.min.Set( -ave, res->header.bounds.min.y, -ave );
 	res->hitBounds.max.Set( ave, res->header.bounds.max.y, ave );
 
-	float greater = grinliz::Max( res->header.bounds.SizeX(), res->header.bounds.SizeZ() );
-	greater *= 1.41f;	// turns 45deg - FIXME: check this on paper
-	greater *= 0.5f;
-	res->invariantBounds.min.Set( -greater, res->header.bounds.min.y, -greater );
-	res->invariantBounds.max.Set( greater, res->header.bounds.max.y, greater );
+	{ 
+		// Calc the invariant bounds, in the 2D plane. Won't be correct for some rotations around X or Z
+		// Surround the bounds with a circle. Use the circle to create new bounds
+		const Rectangle3F& bnd = res->header.bounds;
+		Vector2F a = { bnd.min.x, bnd.min.z };
+		Vector2F b = { bnd.min.x, bnd.max.z };
+		Vector2F c = { bnd.max.x, bnd.min.z };
+		Vector2F d = { bnd.max.x, bnd.max.z };
+		float rad2 = Max( a.LengthSquared(), b.LengthSquared(), c.LengthSquared(), d.LengthSquared() );
+		float rad = sqrtf( rad2 );
+
+		res->invariantBounds.min.Set( -rad, res->header.bounds.min.y, -rad );
+		res->invariantBounds.max.Set( rad, res->header.bounds.max.y, rad );
+	}
 
 	for( int i=0; i<EL_MAX_BONES; ++i ) {
 		if ( !res->header.boneName[i].empty() ) {

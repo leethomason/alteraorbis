@@ -696,6 +696,8 @@ void Engine::LoadConfigFiles( const char* particleName, const char* lightName )
 	doc.LoadFile( lightName );
 	GLASSERT( !doc.Error() );
 	lighting.Load( doc.FirstChildElement( "lighting" ));
+
+	spaceTree->SetLightDir( lighting.direction );
 }
 
 

@@ -249,6 +249,7 @@ public:
 		MODEL_USER					= (1<<16)		// reserved for user code.
 	};
 
+	bool CastsShadow() const		{ return (flags & MODEL_NO_SHADOW) == 0; }
 	int IsFlagSet( int f ) const	{ return flags & f; }
 	void SetFlag( int f )			{ flags |= f; }
 	void ClearFlag( int f )			{ flags &= (~f); }
@@ -332,10 +333,22 @@ public:
 	const grinliz::Rectangle3F& AABB() const;
 
 	// Bigger bounding box, cheaper call.
-	grinliz::Rectangle3F GetInvariantAABB() const {
+	grinliz::Rectangle3F GetInvariantAABB( float xPerY, float zPerY ) const {
 		grinliz::Rectangle3F b = resource->invariantBounds;
 		b.min += pos;
 		b.max += pos;
+		
+		if ( CastsShadow() ) {
+			if ( xPerY > 0 )
+				b.max.x += xPerY * b.max.y;
+			else
+				b.min.x += xPerY * b.max.y;
+
+			if ( zPerY > 0 )
+				b.max.z += zPerY * b.max.y;
+			else
+				b.min.z += zPerY * b.max.y;
+		}
 		return b;
 	}
 

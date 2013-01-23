@@ -1,6 +1,6 @@
 x assert when clicking on location player can't go
 x crash on exit
-- really must fix the shadow popping bug. and bounds calc for that.
+x really must fix the shadow popping bug. and bounds calc for that.
 - need free camera mode
 x need teleport mode
 x save / load rocks
@@ -78,7 +78,7 @@ x mantis trigger broken
 - cameras only self-delete if they reach destination; should do better. Probably
   should only be one camera in existence. (BlueSmoke, NavTest2)
 - record perf max/min. surprisingly hard.
-- shadows should be part of space-tree bounds
+x shadows should be part of space-tree bounds
 - memory pool everything in the chit/component system
 - analyze/optimize what causes component update: DoTick(), etc. Likely many DoTicks() getting called that aren't needed. (especially rendering...)
 - add rez effect for item switch?
