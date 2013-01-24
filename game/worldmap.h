@@ -145,7 +145,7 @@ public:
 	virtual void Draw3D(  const grinliz::Color3F& colorMult, GPUState::StencilMode );
 
 	// Brings water & waterfalls current
-	void DoTick();
+	void DoTick( U32 delta );
 
 	// ---- MicroPather ---- //
 	virtual float LeastCostEstimate( void* stateStart, void* stateEnd );
@@ -305,6 +305,7 @@ private:
 	grinliz::CDynArray<PTVertex>	vertex[LOWER_TYPES];
 	grinliz::CDynArray<U16>			index[LOWER_TYPES];
 
+	grinliz::CDynArray< grinliz::Vector2I > waterfalls;
 	grinliz::BitArray< DZONE, DZONE, 1 > zoneInit;
 	grinliz::BitArray< DZONE, DZONE, 1 > waterInit;
 

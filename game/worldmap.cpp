@@ -427,8 +427,10 @@ Vector2I WorldMap::FindEmbark()
 }
 
 
-void WorldMap::DoTick()
+void WorldMap::DoTick( U32 delta )
 {
+	static const Vector2I next[4] = { {1,0}, {-1,0}, {0,1}, {0,-1} };
+	static const int POOL_HEIGHT = 2;
 	int zoneWidth  = width / ZONE_SIZE;
 	int zoneHeight = height / ZONE_SIZE;
 
@@ -451,6 +453,14 @@ void WorldMap::DoTick()
 				Rectangle2I zbounds;
 				zbounds.Set( baseX, baseY, baseX+ZONE_SIZE-1, baseY+ZONE_SIZE-1 );
 
+				// Clear the waterfalls for this zone.
+				for( int i=0; i<waterfalls.Size(); ++i ) {
+					if ( zbounds.Contains( waterfalls[i] )) {
+						waterfalls.SwapRemove( i );
+						--i;
+					}
+				}
+
 				// Scan for possible pools
 				for( int dy=1; dy<ZONE_SIZE-1; ++dy ) {
 					for( int dx=1; dx<ZONE_SIZE-1; ++dx ) {
@@ -462,7 +472,6 @@ void WorldMap::DoTick()
 						// Determine pool.
 						
 						int currentColor = 1;
-						static const int POOL_HEIGHT = 2;
 						int index = INDEX( x,y );
 
 						if (    grid[index].IsLand() 
@@ -490,7 +499,6 @@ void WorldMap::DoTick()
 									++border;
 								}
 
-								static const Vector2I next[4] = { {1,0}, {-1,0}, {0,1}, {0,-1} };
 								for( int i=0; i<4; ++i ) {
 									Vector2I v = top + next[i];
 
@@ -511,11 +519,21 @@ void WorldMap::DoTick()
 									}
 								}
 							}
-							if ( pool.Size() >= 16 && border == 0 && water == 0 ) {
-								GLOUTPUT(( "pool found. zone=%d,%d area=%d\n", zx, zy, pool.Size() ));
+
+							int waterMax = pool.Size() / 10;
+							if ( pool.Size() >= 10 && border == 0 && water <= waterMax ) {
+								GLOUTPUT(( "pool found. zone=%d,%d area=%d waterFall=%d\n", zx, zy, pool.Size(), water ));
 								for( int i=0; i<pool.Size(); ++i ) {
 									int idx = INDEX( pool[i] );
 									SetRock( pool[i].x, pool[i].y, grid[idx].RockHeight(), POOL_HEIGHT );	
+
+									for( int k=0; k<4; ++k ) {
+										Vector2I v = pool[i] + next[k];
+										GLASSERT( zbounds.Contains( v ));
+										if ( grid[INDEX(v)].IsWater() ) {
+											waterfalls.Push( pool[i] );
+										}
+									}
 								}
 								zoneInfo[zy*DZONE+zx].pools += 1;
 							}
@@ -524,6 +542,21 @@ void WorldMap::DoTick()
 						}
 					}
 				}
+			}
+		}
+	}
+
+	for( int i=0; i<waterfalls.Size(); ++i ) {
+		const Vector2I& wf = waterfalls[i];
+
+		for( int j=0; j<4; ++j ) {
+			Vector2I v = wf + next[j];
+			if ( grid[INDEX(v)].IsWater() ) {
+				Vector3F v3 = { (float)wf.x + 0.5f, (float)POOL_HEIGHT, (float)wf.y + 0.5f };
+				v3.x += (float)next[j].x * 0.5f;
+				v3.z += (float)next[j].y * 0.5f;
+				static const Vector3F DOWN = { 0, -1, 0 };
+				engine->particleSystem->EmitPD( "shock", v3, DOWN, engine->camera.EyeDir3(), delta ); 
 			}
 		}
 	}
@@ -548,6 +581,8 @@ void WorldMap::SetRock( int x, int y, int h, int pool )
 	if ( h == -2 ) {
 		hNow = 0;
 		h = grid[index].RockHeight();
+		pNow = 0;
+		pool = grid[index].PoolHeight();
 	}
 	CStr<12> name; 
 
@@ -556,7 +591,8 @@ void WorldMap::SetRock( int x, int y, int h, int pool )
 		GLASSERT( pool > h );
 	if ( engine ) {
 		if ( hNow > 0 || pNow > 0 ) {
-			Model* m = voxels.Get( vec );
+			Model* m = 0;
+			voxels.Query( vec, &m );
 			GridResName( hNow, pNow, &name );
 			GLASSERT( m && m->GetResource()->header.name == name.c_str() );
 		}

@@ -136,7 +136,7 @@ Texture* Sim::GetMiniMapTexture()
 void Sim::DoTick( U32 delta )
 {
 	chitBag->DoTick( delta, engine );
-	worldMap->DoTick();
+	worldMap->DoTick( delta );
 }
 
 
