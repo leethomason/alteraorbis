@@ -441,7 +441,6 @@ void WorldMap::DoTick()
 
 				waterInit.Set( zx, zy, 0, true );
 				zoneInfo[zy*DZONE+zx].pools = 0;
-				BitArray<ZONE_SIZE, ZONE_SIZE, 1> visited;
 				const int baseX = zx*ZONE_SIZE;
 				const int baseY = zy*ZONE_SIZE;
 
@@ -454,12 +453,16 @@ void WorldMap::DoTick()
 						// Possible fill?
 						int index = INDEX(x,y);
 						const int poolHeight = 2; //Min( grid[index].RockHeight()+1, 2 );
+						BitArray<ZONE_SIZE, ZONE_SIZE, 1> deadEnd;
 
-						if (    grid[index].IsLand() 
+						if (    dx > 0 && dx < ZONE_SIZE-1
+							 && dy > 0 && dy < ZONE_SIZE-1
+							 && grid[index].IsLand() 
 							 && grid[index].RockHeight() < poolHeight	// need space for the pool
-							 && !visited.IsSet( dx, dy ))				// don't revisit
+							 && !deadEnd.IsSet( dx, dy ))				// don't revisit
 						{
 							// Try a fill!
+							BitArray<ZONE_SIZE, ZONE_SIZE, 1> visited;
 							Vector2I start = { x, y };
 							stack.Push( start );
 
@@ -477,11 +480,10 @@ void WorldMap::DoTick()
 									int idx = v.y*width + v.x;
 
 									if (    v.x >= zx*ZONE_SIZE && v.x < (zx+1)*ZONE_SIZE
-										 && v.y >= zy*ZONE_SIZE && v.y < (zy+1)*ZONE_SIZE )
+										 && v.y >= zy*ZONE_SIZE && v.y < (zy+1)*ZONE_SIZE
+										 && grid[idx].IsLand()  )
 									{
-										int idx = INDEX(v.x, v.y);
-										if (    grid[idx].IsLand() 
-	 										 && grid[idx].RockHeight() < poolHeight
+										if (    grid[idx].RockHeight() < poolHeight
 											 && !visited.IsSet( v.x-baseX, v.y-baseY ))
 										{
 											stack.Push( v );
@@ -490,6 +492,10 @@ void WorldMap::DoTick()
 									}
 									else {
 										// Overflow.
+										for( int i=0; i<pool.Size(); ++i ) {
+											deadEnd.Set( pool[i].x, pool[i].y, 0 );
+										}
+
 										pool.Clear();
 										stack.Clear();
 										break;
@@ -504,6 +510,11 @@ void WorldMap::DoTick()
 								}
 								zoneInfo[zy*DZONE+zx].pools += 1;
 							}
+							// Mark this a dead end whether it was set or not.
+							for( int i=0; i<pool.Size(); ++i ) {
+								deadEnd.Set( pool[i].x, pool[i].y, 0 );
+							}
+							pool.Clear();
 						}
 					}
 				}
@@ -538,7 +549,7 @@ void WorldMap::SetRock( int x, int y, int h, int pool )
 	if ( pool > 0 )
 		GLASSERT( pool > h );
 	if ( engine ) {
-		if ( hNow > 0 ) {
+		if ( hNow > 0 || pNow > 0 ) {
 			Model* m = voxels.Get( vec );
 			GridResName( hNow, pNow, &name );
 			GLASSERT( m && m->GetResource()->header.name == name.c_str() );
@@ -555,7 +566,7 @@ void WorldMap::SetRock( int x, int y, int h, int pool )
 				Model* m = voxels.Remove( vec );
 				engine->FreeModel( m );
 			}
-			if ( h > 0 ) {
+			if ( h > 0 || pool > 0 ) {
 				GridResName( h, pool, &name );
 				const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( name.c_str() );
 				Model* m = engine->AllocModel( res );
