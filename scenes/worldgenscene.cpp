@@ -112,22 +112,35 @@ void WorldGenScene::BlendZone( int zone )
 	Random random;
 	random.SetSeedFromTime();
 
-	const int rockArr[3] = { RockGen::CAVEY_ROUGH, RockGen::CAVEY_SMOOTH, RockGen::BOULDERY };
-	const float rockScore[3] = {
-		(float)(NZONE-1-y),
-		0.5f*(float)(NZONE-1-y+x),
-		(float)y
+#if 1
+	const int rockArr[3] = {		RockGen::CAVEY_ROUGH, 
+									RockGen::CAVEY_SMOOTH, 
+									RockGen::BOULDERY };
+	const float rockScore[3] = {	(float)(NZONE-y),
+									0.5f*(float)(NZONE-y),
+									(float)y
 	};
 	int rock = rockArr[ random.Select( rockScore, 3 ) ];
 
-	float fractionLand = (x==0 || x==(NZONE-1) || y ==0 || y==(NZONE-1)) ? 0.55f : 0.85f;
+	float fractionLand = (x==0 || x==(NZONE-1) || y ==0 || y==(NZONE-1)) ? 0.55f : 0.65f;
 
-	const int heightArr[3] = { RockGen::NOISE_HEIGHT, RockGen::USE_HIGH_HEIGHT, RockGen::KEEP_HEIGHT };
-	const float heightScore[3] = { 0.8f, 1.0f, 0.5f };
-	const int height = heightArr[ random.Select( heightScore, 4 ) ];
-	const bool blendExisting = (random.Rand(3) == 0);
+	const int heightArr[3] = {		RockGen::NOISE_HEIGHT, 
+									RockGen::NOISE_HIGH_HEIGHT, 
+									RockGen::KEEP_HEIGHT };
+	const float heightScore[3] = {	2.0f, 
+									1.0f, 
+									0.5f };
+	const int height = heightArr[ random.Select( heightScore, 3 ) ];
 
-	static const int BORDER = 16;
+	const bool blendExisting = false;	// doesn't work (random.Rand(4) == 0);
+#else
+	const int   rock = RockGen::CAVEY_ROUGH;
+	const float fractionLand = 0.55f;
+	const int   height = RockGen::NOISE_HEIGHT;
+	const bool  blendExisting = false;
+#endif
+
+	static const int BORDER = 30;
 	static const int S  = WorldGen::SIZE / NZONE;
 	static const int SB = S + BORDER*2;
 	

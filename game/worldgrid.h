@@ -7,7 +7,7 @@
 #include "../grinliz/glrectangle.h"
 #include "../grinliz/glcolor.h"
 
-static const int MAX_ROCK_HEIGHT	= 3;
+static const int MAX_ROCK_HEIGHT		= 3;
 
 struct WorldGrid {
 private:
@@ -24,6 +24,7 @@ private:
 	unsigned zoneSize			: 6;	// 0-31
 	unsigned nominalRockHeight	: 2;	// 0-3
 	unsigned rockHeight			: 2;
+	unsigned poolHeight			: 2;
 
 	unsigned debugAdjacent		: 1;
 	unsigned debugPath			: 1;
@@ -31,14 +32,20 @@ private:
 
 public:
 	grinliz::Color4U8 ToColor() const {
-//		if ( nominalRockHeight > 1 )
-//			int debug=1;
-		grinliz::Color4U8 c = {
-			60*nominalRockHeight,	//(17*pathColor) & 127,	
-			(isLand * 0xc0),		//| (pathColor & 0x3f),
-			(1-isLand) * 0xff,
-			255
-		};
+		grinliz::Color4U8 c = { 0, 0, 0, 255 };
+#if 1
+		if ( isLand && nominalRockHeight > 0 ) {
+			U8 gr = 80*nominalRockHeight;
+			c.Set( gr, gr, gr, 255 );
+		}
+		else
+#endif
+		{
+			c.Set(	(17*pathColor) & 127,	
+					(isLand * 0xc0),		//| (pathColor & 0x3f),
+					(1-isLand) * 0xff,
+					255 );
+		}
 		return c;
 	}
 
@@ -50,7 +57,16 @@ public:
 		}
 		else {
 			SetLand();
-			SetNominalRockHeight( (h+128/MAX_ROCK_HEIGHT) * MAX_ROCK_HEIGHT / 255 );
+			SetNominalRockHeight( 0 );
+			if ( h > 1 ) {
+				// 2-85    -> 1
+				// 86-170  -> 2
+				// 171-255 -> 3
+				static const int DELTA = 255 / MAX_ROCK_HEIGHT; // 63
+				static const int BIAS = DELTA / 2;
+
+				SetNominalRockHeight( 1 + (h-1)/DELTA );
+			}
 		}
 	}
 
@@ -71,6 +87,13 @@ public:
 		GLASSERT( IsLand() );
 		GLASSERT( h >= 0 && h <= MAX_ROCK_HEIGHT );
 		rockHeight = h;
+	}
+
+	int PoolHeight() const { return poolHeight; }
+	void SetPoolHeight( int p ) {
+		GLASSERT( IsLand() );
+		GLASSERT( !p || p > (int)rockHeight );
+		poolHeight = p;
 	}
 
 	bool IsWater() const		{ return !IsLand(); }

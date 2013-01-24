@@ -19,8 +19,8 @@ int main(int argc, const char* argv[])
 {
 	bool applyThreshold			= true;
 	const float FRACTION_CLEAR	= 0.55f;
-	const int style				= RockGen::CAVEY_ROUGH;
-	const int height			= RockGen::USE_HIGH_HEIGHT;
+	const int style				= RockGen::BOULDERY;
+	const int height			= RockGen::NOISE_HIGH_HEIGHT;
 
 	Color4U8* pixels = new Color4U8[ DOMAIN_SIZE*DOMAIN_SIZE ];
 

@@ -49,6 +49,7 @@ private:
 	gamui::PushButton	serialButton[NUM_SERIAL_BUTTONS];
 	gamui::ToggleButton camModeButton[NUM_CAM_MODES];
 	gamui::PushButton	allRockButton;
+	gamui::PushButton	nextPool;
 	gamui::Image		minimap;
 	gamui::Image		playerMark;
 };

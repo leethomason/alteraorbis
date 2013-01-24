@@ -39,6 +39,8 @@ SpaceTree::SpaceTree( float yMin, float yMax, int _size )
 	size = Max( (int)CeilPowerOf2( _size ), 64 );
 	treeBounds.Set( 0, yMin, 0, (float)size, yMax, (float)size );
 	queryID = 0;
+	lightXPerY = 0;
+	lightZPerY = 0;
 
 	InitNode();
 }
@@ -124,6 +126,16 @@ void SpaceTree::FreeModel( Model* model )
 
 
 
+void SpaceTree::SetLightDir( const Vector3F& light )
+{
+	GLASSERT( light.y > 0 );
+
+	lightXPerY = -light.x / light.y;
+	lightZPerY = -light.z / light.y;
+}
+
+
+
 void SpaceTree::Update( Model* model )
 {
 	// Unlink if currently in tree.
@@ -131,8 +143,7 @@ void SpaceTree::Update( Model* model )
 
 	// This call is very expensive. 3ms (approx bounds) to 20ms in debug mode.
 	//Rectangle3F bounds = model->AABB();
-
-	Rectangle3F bounds = model->GetInvariantAABB();
+	Rectangle3F bounds = model->GetInvariantAABB( lightXPerY, lightZPerY );
 
 	if ( item->node ) 
 		item->node->Remove( item );
@@ -379,7 +390,10 @@ void SpaceTree::QueryPlanesRec(	const Plane* planes, int nPlanes, int intersecti
 			{	
 				//GLOUTPUT(( "%*s[%d] Testing: 0x%x %s", node->depth, " ", node->depth, (int)m, m->GetResource()->header.name.c_str() ));
 				if ( intersection == grinliz::INTERSECT ) {
-					const Rectangle3F& aabb = m->AABB();
+					Rectangle3F aabb = m->AABB();
+					if ( m->CastsShadow() ) {
+						ExpandForLight( &aabb );
+					}
 					int compare = grinliz::INTERSECT;
 
 					for( int k=0; k<nPlanes; ++k ) {

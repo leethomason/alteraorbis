@@ -40,6 +40,8 @@ public:
 	SpaceTree( float yMin, float yMax, int size );
 	~SpaceTree();
 
+	void SetLightDir( const grinliz::Vector3F& light );
+
 	Model* AllocModel( const ModelResource* );
 	void   FreeModel( Model* );
 
@@ -67,6 +69,18 @@ public:
 #endif
 
 private:
+	void ExpandForLight( grinliz::Rectangle3F* r ) {
+		if ( lightXPerY > 0 )
+			r->max.x += lightXPerY * r->max.y;
+		else
+			r->min.x += lightXPerY * r->max.y;
+
+		if ( lightZPerY > 0 )
+			r->max.z += lightXPerY * r->max.y;
+		else
+			r->min.z += lightXPerY * r->max.y;
+	}
+
 	struct Node;
 #ifdef DEBUG
 	void Dump( Node* node );
@@ -120,6 +134,9 @@ private:
 	grinliz::Rectangle3F treeBounds;
 	Model* modelRoot;
 	int size;
+
+	float lightXPerY;
+	float lightZPerY;
 
 	int nodesVisited;
 	int planesComputed;
