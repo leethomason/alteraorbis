@@ -549,14 +549,27 @@ void WorldMap::DoTick( U32 delta )
 	for( int i=0; i<waterfalls.Size(); ++i ) {
 		const Vector2I& wf = waterfalls[i];
 
+		ParticleDef pdWater = engine->particleSystem->GetPD( "fallingwater" );
+		ParticleDef pdMist  = engine->particleSystem->GetPD( "mist" );
+
 		for( int j=0; j<4; ++j ) {
 			Vector2I v = wf + next[j];
 			if ( grid[INDEX(v)].IsWater() ) {
 				Vector3F v3 = { (float)wf.x + 0.5f, (float)POOL_HEIGHT, (float)wf.y + 0.5f };
-				v3.x += (float)next[j].x * 0.5f;
-				v3.z += (float)next[j].y * 0.5f;
+				Vector3F half = { (float)next[j].x*0.5f, 0.0f, (float)next[j].y*0.5f };
+				v3 = v3 + half*1.2f;
+
+				Rectangle3F r3;
+				half.Set( half.z, half.y, half.x );
+				r3.FromPair( v3-half, v3+half );
+
 				static const Vector3F DOWN = { 0, -1, 0 };
-				engine->particleSystem->EmitPD( "shock", v3, DOWN, engine->camera.EyeDir3(), delta ); 
+				engine->particleSystem->EmitPD( pdWater, r3, DOWN, engine->camera.EyeDir3(), delta ); 
+
+				r3.min.y = r3.max.y = (float)POOL_HEIGHT - 0.2f;
+				engine->particleSystem->EmitPD( pdMist, r3, V3F_UP, engine->camera.EyeDir3(), delta ); 
+				r3.min.y = r3.max.y = 0.0f;
+				engine->particleSystem->EmitPD( pdMist, r3, V3F_UP, engine->camera.EyeDir3(), delta ); 
 			}
 		}
 	}

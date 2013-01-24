@@ -162,12 +162,15 @@ void ParticleSystem::EmitPD(	const char* name,
 								U32 deltaTime )
 {
 	const ParticleDef& pd = GetPD( name );
-	EmitPD( pd, initPos, normal, eyeDir, deltaTime );
+	Rectangle3F r;
+	r.min = initPos;
+	r.max = initPos;
+	EmitPD( pd, r, normal, eyeDir, deltaTime );
 }
 
 
 void ParticleSystem::EmitPD(	const ParticleDef& def,
-								const grinliz::Vector3F& initPos,
+								const grinliz::Rectangle3F& initPos,
 								const grinliz::Vector3F& normal, 
 								const grinliz::Vector3F eyeDir[],
 								U32 deltaTime )
@@ -221,7 +224,10 @@ void ParticleSystem::EmitPD(	const ParticleDef& def,
 
 			Vector3F pFuzz;
 			random.NormalVector3D( &pFuzz.x );
-			Vector3F pos = initPos + pFuzz*def.posFuzz;
+			Vector3F pos = {	initPos.min.x + random.Uniform() * (initPos.max.x - initPos.min.x),
+								initPos.min.y + random.Uniform() * (initPos.max.y - initPos.min.y),
+								initPos.min.z + random.Uniform() * (initPos.max.z - initPos.min.z) };
+			pos = pos + pFuzz*def.posFuzz;
 			pd->pos = pos;
 
 			int texOffset = (def.texMax > def.texMin) ? random.Rand( def.texMax - def.texMin + 1 ) : 0;

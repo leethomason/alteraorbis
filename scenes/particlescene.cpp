@@ -61,6 +61,7 @@ void ParticleScene::Resize()
 	lumosGame->PositionStd( &okay, 0 );
 
 	LayoutCalculator layout = lumosGame->DefaultLayout();
+	layout.SetSize( layout.Width(), layout.Height()*0.5f );
 	int x=0;
 	int y=0;
 	for( int i=0; i<buttonArr.Size(); ++i ) {
@@ -95,7 +96,7 @@ void ParticleScene::Load()
 		else {
 			button = new PushButton( &gamui2D, look );
 		}
-		button->SetSize( layout.Width()*2, layout.Height() );
+		button->SetSize( layout.Width()*2, layout.Height()*0.5f );
 		button->SetText( pd.name.c_str() );
 		buttonArr.Push( button );
 	}

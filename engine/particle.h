@@ -128,10 +128,22 @@ public:
 	};
 
 	void EmitPD(	const ParticleDef& pd,
-					const grinliz::Vector3F& pos,
+					const grinliz::Rectangle3F& pos,
 					const grinliz::Vector3F& normal,
 					const grinliz::Vector3F eyeDir[],
 					U32 deltaTime );					// needed for pd.config == continuous
+
+	void EmitPD(	const ParticleDef& pd,
+					const grinliz::Vector3F& pos,
+					const grinliz::Vector3F& normal,
+					const grinliz::Vector3F eyeDir[],
+					U32 deltaTime )
+	{
+		grinliz::Rectangle3F r3;
+		r3.min = r3.max = pos;
+		EmitPD( pd, r3, normal, eyeDir, deltaTime );
+	}
+
 	void EmitPD(	const char* name,
 					const grinliz::Vector3F& initPos,
 					const grinliz::Vector3F& normal, 
