@@ -443,77 +443,83 @@ void WorldMap::DoTick()
 				zoneInfo[zy*DZONE+zx].pools = 0;
 				const int baseX = zx*ZONE_SIZE;
 				const int baseY = zy*ZONE_SIZE;
+				
+				CArray<U8, ZONE_SIZE2> color;
+				color.PushArr( ZONE_SIZE2 );
+				memset( color.Mem(), 0, ZONE_SIZE2 );
+
+				Rectangle2I zbounds;
+				zbounds.Set( baseX, baseY, baseX+ZONE_SIZE-1, baseY+ZONE_SIZE-1 );
 
 				// Scan for possible pools
-				for( int dy=0; dy<ZONE_SIZE; ++dy ) {
-					for( int dx=0; dx<ZONE_SIZE; ++dx ) {
+				for( int dy=1; dy<ZONE_SIZE-1; ++dy ) {
+					for( int dx=1; dx<ZONE_SIZE-1; ++dx ) {
 						const int x = baseX + dx;
 						const int y = baseY + dy;
-						
-						// Possible fill?
-						int index = INDEX(x,y);
-						const int poolHeight = 2; //Min( grid[index].RockHeight()+1, 2 );
-						BitArray<ZONE_SIZE, ZONE_SIZE, 1> deadEnd;
 
-						if (    dx > 0 && dx < ZONE_SIZE-1
-							 && dy > 0 && dy < ZONE_SIZE-1
-							 && grid[index].IsLand() 
-							 && grid[index].RockHeight() < poolHeight	// need space for the pool
-							 && !deadEnd.IsSet( dx, dy ))				// don't revisit
+						// Do a fill of everything land rockHeight < POOL_HEIGHT
+						// Note boundary conditions
+						// Determine pool.
+						
+						int currentColor = 1;
+						static const int POOL_HEIGHT = 2;
+						int index = INDEX( x,y );
+
+						if (    grid[index].IsLand() 
+							 && grid[index].RockHeight() < POOL_HEIGHT	// need space for the pool
+							 && color[dy*ZONE_SIZE+dx] == 0 )			// don't revisit
 						{
 							// Try a fill!
-							BitArray<ZONE_SIZE, ZONE_SIZE, 1> visited;
 							Vector2I start = { x, y };
 							stack.Push( start );
-
+							color[(start.y-baseY)*ZONE_SIZE + start.x-baseX] = currentColor;
 							pool.Clear();
-							visited.Set( start.x-baseX, start.y-baseY );
+
+							int border = 0;
+							int water = 0;
 
 							while ( !stack.Empty() ) {
 
-								static const Vector2I next[4] = { {1,0}, {-1,0}, {0,1}, {0,-1} };
 								Vector2I top = stack.Pop();
 								pool.Push( top );
+								GLASSERT( color[(top.y-baseY)*ZONE_SIZE + top.x-baseX] == currentColor );
 
+								if (    top.x == zbounds.min.x || top.x == zbounds.max.x
+									 || top.y == zbounds.min.y || top.y == zbounds.max.y )
+								{
+									++border;
+								}
+
+								static const Vector2I next[4] = { {1,0}, {-1,0}, {0,1}, {0,-1} };
 								for( int i=0; i<4; ++i ) {
 									Vector2I v = top + next[i];
-									int idx = v.y*width + v.x;
 
-									if (    v.x >= zx*ZONE_SIZE && v.x < (zx+1)*ZONE_SIZE
-										 && v.y >= zy*ZONE_SIZE && v.y < (zy+1)*ZONE_SIZE
-										 && grid[idx].IsLand()  )
+									if ( !zbounds.Contains( v ))
+										continue;
+
+									int idx = INDEX(v);
+
+									if (    grid[idx].IsLand()
+										 && grid[idx].RockHeight() < POOL_HEIGHT
+										 && color[(v.y-baseY)*ZONE_SIZE + v.x-baseX] == 0 )
 									{
-										if (    grid[idx].RockHeight() < poolHeight
-											 && !visited.IsSet( v.x-baseX, v.y-baseY ))
-										{
-											stack.Push( v );
-											visited.Set( v.x-baseX, v.y-baseY, 0, true );
-										}
+										color[(v.y-baseY)*ZONE_SIZE + v.x-baseX] = currentColor;
+										stack.Push( v );
 									}
-									else {
-										// Overflow.
-										for( int i=0; i<pool.Size(); ++i ) {
-											deadEnd.Set( pool[i].x, pool[i].y, 0 );
-										}
-
-										pool.Clear();
-										stack.Clear();
-										break;
+									else if ( grid[idx].IsWater() ) {
+										++water;
 									}
 								}
 							}
-							if ( pool.Size() >= 16 ) {
+							if ( pool.Size() >= 16 && border == 0 && water == 0 ) {
 								GLOUTPUT(( "pool found. zone=%d,%d area=%d\n", zx, zy, pool.Size() ));
 								for( int i=0; i<pool.Size(); ++i ) {
 									int idx = INDEX( pool[i] );
-									SetRock( pool[i].x, pool[i].y, grid[idx].RockHeight(), poolHeight );	
+									SetRock( pool[i].x, pool[i].y, grid[idx].RockHeight(), POOL_HEIGHT );	
 								}
 								zoneInfo[zy*DZONE+zx].pools += 1;
 							}
-							// Mark this a dead end whether it was set or not.
-							for( int i=0; i<pool.Size(); ++i ) {
-								deadEnd.Set( pool[i].x, pool[i].y, 0 );
-							}
+							++currentColor;
 							pool.Clear();
 						}
 					}
@@ -562,7 +568,7 @@ void WorldMap::SetRock( int x, int y, int h, int pool )
 
 	if ( h != hNow || pool != pNow ) {
 		if ( engine ) {
-			if ( hNow ) {
+			if ( hNow || pNow ) {
 				Model* m = voxels.Remove( vec );
 				engine->FreeModel( m );
 			}
@@ -582,10 +588,13 @@ void WorldMap::SetRock( int x, int y, int h, int pool )
 			waterInit.Clear( vec.x >> ZONE_SHIFT, vec.y >> ZONE_SHIFT );
 		}
 
-		if ( !hNow && h ) {
+		bool wasBlocked = (hNow>0) || (pNow>0);
+		bool isBlocked  = (h>0) || (pool>0);
+
+		if ( !wasBlocked && isBlocked ) {
 			SetBlocked( vec.x, vec.y );
 		}
-		else if ( hNow && !h ) {
+		else if ( wasBlocked && !isBlocked ) {
 			ClearBlocked( vec.x, vec.y );
 		}
 	}

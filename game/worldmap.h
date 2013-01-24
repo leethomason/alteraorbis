@@ -180,7 +180,7 @@ public:
 		ZONE_SIZE	= 16,		// adjust size of bit fields to be big enough to represent this
 		ZONE_SHIFT  = 4,
 		ZONE_SIZE2  = ZONE_SIZE*ZONE_SIZE,
-		DZONE		= MAX_MAP_SIZE/ZONE_SIZE,
+		DZONE		= MAX_MAP_SIZE/ZONE_SIZE,	// fixme: misleading. make private.
 	    DZONE2		= DZONE*DZONE,
 	};
 	struct ZoneInfo {
