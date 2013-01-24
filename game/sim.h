@@ -33,6 +33,7 @@ public:
 	// use with caution: not a clear separation between sim and game
 	Engine*			GetEngine()		{ return engine; }
 	LumosChitBag*	GetChitBag()	{ return chitBag; }
+	WorldMap*		GetWorldMap()	{ return worldMap; }
 
 	// Set all rock to the nominal values
 	void SetAllRock();

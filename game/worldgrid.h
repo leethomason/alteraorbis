@@ -24,6 +24,7 @@ private:
 	unsigned zoneSize			: 6;	// 0-31
 	unsigned nominalRockHeight	: 2;	// 0-3
 	unsigned rockHeight			: 2;
+	unsigned poolHeight			: 2;
 
 	unsigned debugAdjacent		: 1;
 	unsigned debugPath			: 1;
@@ -86,6 +87,13 @@ public:
 		GLASSERT( IsLand() );
 		GLASSERT( h >= 0 && h <= MAX_ROCK_HEIGHT );
 		rockHeight = h;
+	}
+
+	int PoolHeight() const { return poolHeight; }
+	void SetPoolHeight( int p ) {
+		GLASSERT( IsLand() );
+		GLASSERT( !p || p > (int)rockHeight );
+		poolHeight = p;
 	}
 
 	bool IsWater() const		{ return !IsLand(); }

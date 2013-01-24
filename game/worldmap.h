@@ -36,6 +36,7 @@ class WorldInfo;
 struct WorldFeature;
 class Model;
 
+
 /*
 	Remembering Y is up and we are in the xz plane:
 
@@ -86,8 +87,8 @@ public:
 
 	// Set the rock to h. 
 	//		h=-1 sets to nominal value.
-	//		h=-1 sets to initial value, used when loading
-	void SetRock( int x, int y, int h );
+	//		h=-2 sets to initial value, used when loading
+	void SetRock( int x, int y, int h, int poolHeight );
 	void SetBlocked( int x, int y )	{ grinliz::Rectangle2I pos; pos.Set( x, y, x, y ); SetBlocked( pos ); }
 	void SetBlocked( const grinliz::Rectangle2I& pos );
 	void ClearBlocked( int x, int y )	{ grinliz::Rectangle2I pos; pos.Set( x, y, x, y ); ClearBlocked( pos ); }
@@ -143,6 +144,9 @@ public:
 	virtual void Submit( GPUState* shader, bool emissiveOnly );
 	virtual void Draw3D(  const grinliz::Color3F& colorMult, GPUState::StencilMode );
 
+	// Brings water & waterfalls current
+	void DoTick();
+
 	// ---- MicroPather ---- //
 	virtual float LeastCostEstimate( void* stateStart, void* stateEnd );
 	virtual void AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > *adjacent );
@@ -156,12 +160,35 @@ public:
 	int CalcNumRegions();
 
 	// --- MetaData --- //
-	const WorldInfo& GetWorldInfo()		{ return *worldInfo; }
+	const WorldInfo& GetWorldInfo()			{ return *worldInfo; }
+
 	// Find random land on the largest continent
 	grinliz::Vector2I FindEmbark();
 	grinliz::Color4U8 Pixel( int x, int y )	{ 
 		return grid[y*width+x].ToColor();
 	}
+
+	/* A 16x16 zone, needs 3 bits to describe the depth. From the depth
+	   can infer the origin, etc.
+		d=0 16
+		d=1 8
+		d=2 4
+		d=3 2
+		d=4 1
+	*/
+	enum {
+		ZONE_SIZE	= 16,		// adjust size of bit fields to be big enough to represent this
+		ZONE_SHIFT  = 4,
+		ZONE_SIZE2  = ZONE_SIZE*ZONE_SIZE,
+		DZONE		= MAX_MAP_SIZE/ZONE_SIZE,
+	    DZONE2		= DZONE*DZONE,
+	};
+	struct ZoneInfo {
+		int x, y;
+		int pools;
+	};
+	const ZoneInfo* GetZoneInfo() const { return zoneInfo; }
+
 
 private:
 	int INDEX( int x, int y ) const { 
@@ -177,6 +204,18 @@ private:
 		return (y*width/ZONE_SIZE) + x; 
 	} 
 
+	void GridResName( int rockHeight, int poolHeight, grinliz::CStr<12>* str ) {
+		str->Clear();
+		if ( poolHeight > rockHeight ) {
+			*str = "pool.1";
+			(*str)[5] = '0' + poolHeight;
+		}
+		else if ( rockHeight > 0 ) {
+			*str = "rock.1";
+			(*str)[5] = '0' + rockHeight;
+		}
+	}
+
 	void Init( int w, int h );
 	void Tessellate();
 	void CalcZone( int x, int y );
@@ -185,23 +224,6 @@ private:
 	void DrawZones();			// debugging
 	void ClearDebugDrawing();	// debugging
 	void DumpRegions();
-
-	/* A 16x16 zone, needs 3 bits to describe the depth. From the depth
-	   can infer the origin, etc.
-		d=0 16
-		d=1 8
-		d=2 4
-		d=3 2
-		d=4 1
-	*/
-	enum {
-		TRUE		= 1,
-		FALSE		= 0,
-		ZONE_SIZE	= 16,		// adjust size of bit fields to be big enough to represent this
-		ZONE_SHIFT  = 4,
-		ZONE_SIZE2  = ZONE_SIZE*ZONE_SIZE,
-	};
-	
 
 	// The solver has 3 components:
 	//	Vector path:	the final result, a collection of points that form connected vector
@@ -283,8 +305,10 @@ private:
 	grinliz::CDynArray<PTVertex>	vertex[LOWER_TYPES];
 	grinliz::CDynArray<U16>			index[LOWER_TYPES];
 
-	grinliz::BitArray< MAX_MAP_SIZE/ZONE_SIZE, MAX_MAP_SIZE/ZONE_SIZE, 1 > zoneInit;
-	grinliz::BitArray< MAX_MAP_SIZE/ZONE_SIZE, MAX_MAP_SIZE/ZONE_SIZE, 1 > zoneTess;
+	grinliz::BitArray< DZONE, DZONE, 1 > zoneInit;
+	grinliz::BitArray< DZONE, DZONE, 1 > waterInit;
+
+	ZoneInfo zoneInfo[ DZONE*DZONE ];
 };
 
 #endif // LUMOS_WORLD_MAP_INCLUDED

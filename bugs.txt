@@ -1,12 +1,6 @@
-x assert when clicking on location player can't go
-x crash on exit
-x really must fix the shadow popping bug. and bounds calc for that.
-- need free camera mode
-x need teleport mode
-x save / load rocks
-x get stuck when teleporting
 
 - game
+	- need free camera mode
 	x Land and Water
 		x generate a random world
 		x save / load
@@ -132,6 +126,12 @@ x shadows should be part of space-tree bounds
 
 ----------- FIXED -------------
 
+x assert when clicking on location player can't go
+x crash on exit
+x really must fix the shadow popping bug. and bounds calc for that.
+x need teleport mode
+x save / load rocks
+x get stuck when teleporting
 x drawcalls debugging for all scenes
 x procedural rendering
 	x more glasses colors

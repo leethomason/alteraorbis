@@ -8,6 +8,7 @@
 #include "../game/lumoschitbag.h"
 #include "../game/sim.h"
 #include "../game/pathmovecomponent.h"
+#include "../game/worldmap.h"
 
 #include "../engine/engine.h"
 #include "../engine/text.h"
@@ -62,6 +63,9 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	}
 	allRockButton.Init( &gamui2D, game->GetButtonLook(0) );
 	allRockButton.SetText( "All Rock" );
+
+	nextPool.Init( &gamui2D, game->GetButtonLook(0) );
+	nextPool.SetText( "Pool" );
 }
 
 
@@ -83,6 +87,8 @@ void GameScene::Resize()
 		layout.PosAbs( &camModeButton[i], i, 1 );
 	}
 	layout.PosAbs( &allRockButton, 0, 0 );
+
+	layout.PosAbs( &nextPool, -1, -1 );
 
 	const Screenport& port = lumosGame->GetScreenport();
 	minimap.SetPos( port.UIWidth()-MINI_MAP_SIZE, 0 );
@@ -210,6 +216,35 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 	}
 	else if ( item == &allRockButton ) {
 		sim->SetAllRock();
+	}
+	else if ( item == &nextPool ) {
+		Chit* chit = sim->GetPlayerChit();
+		if ( chit ) {
+			SpatialComponent* sc = chit->GetSpatialComponent();
+			GLASSERT( sc );
+
+			const Vector3F& pos = sc->GetPosition();
+			int zx = (int)(pos.x) / WorldMap::ZONE_SIZE;
+			int zy = (int)(pos.z) / WorldMap::ZONE_SIZE;
+			int zindex = zy * WorldMap::DZONE + zx;
+
+			const WorldMap::ZoneInfo* zi = sim->GetWorldMap()->GetZoneInfo();
+			int search = zindex+1;
+			if ( search == WorldMap::DZONE2 ) search = 0;
+
+			while ( true ) {
+				if ( zi[search].pools ) {
+					sc->SetPosition( (float)(zi[search].x+WorldMap::ZONE_SIZE/2),
+									 0,
+									 (float)(zi[search].y+WorldMap::ZONE_SIZE/2) );
+					break;
+				}
+				++search;
+				if ( search == zindex ) break;
+				if ( search == WorldMap::DZONE2 )
+					search = 0;
+			}
+		}
 	}
 }
 
