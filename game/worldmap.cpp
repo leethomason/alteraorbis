@@ -34,6 +34,8 @@ using namespace grinliz;
 using namespace micropather;
 using namespace tinyxml2;
 
+static const int POOL_HEIGHT = 2;
+
 // Startup for test world
 // Baseline:				15,000
 // Coloring regions:		 2,300
@@ -427,16 +429,17 @@ Vector2I WorldMap::FindEmbark()
 }
 
 
-void WorldMap::DoTick( U32 delta )
+
+void WorldMap::ProcessWater()
 {
 	static const Vector2I next[4] = { {1,0}, {-1,0}, {0,1}, {0,-1} };
-	static const int POOL_HEIGHT = 2;
 	int zoneWidth  = width / ZONE_SIZE;
 	int zoneHeight = height / ZONE_SIZE;
 
-	CDynArray< Vector2I > stack;
-	CDynArray< Vector2I > pool;
+	waterStack.Clear();
+	poolGrids.Clear();
 
+	// Walk each zone, look for something that needs update.
 	for( int zy=0; zy<zoneHeight; ++zy ) {
 		for( int zx=0; zx<zoneWidth; ++zx ) {
 			if ( !waterInit.IsSet( zx, zy )) {
@@ -461,7 +464,9 @@ void WorldMap::DoTick( U32 delta )
 					}
 				}
 
-				// Scan for possible pools
+				// Scan for possible pools. This is a color fill. Look
+				// for colors that don't touch the border, or too much
+				// water.
 				for( int dy=1; dy<ZONE_SIZE-1; ++dy ) {
 					for( int dx=1; dx<ZONE_SIZE-1; ++dx ) {
 						const int x = baseX + dx;
@@ -480,17 +485,17 @@ void WorldMap::DoTick( U32 delta )
 						{
 							// Try a fill!
 							Vector2I start = { x, y };
-							stack.Push( start );
+							waterStack.Push( start );
 							color[(start.y-baseY)*ZONE_SIZE + start.x-baseX] = currentColor;
-							pool.Clear();
+							poolGrids.Clear();
 
 							int border = 0;
 							int water = 0;
 
-							while ( !stack.Empty() ) {
+							while ( !waterStack.Empty() ) {
 
-								Vector2I top = stack.Pop();
-								pool.Push( top );
+								Vector2I top = waterStack.Pop();
+								poolGrids.Push( top );
 								GLASSERT( color[(top.y-baseY)*ZONE_SIZE + top.x-baseX] == currentColor );
 
 								if (    top.x == zbounds.min.x || top.x == zbounds.max.x
@@ -512,7 +517,7 @@ void WorldMap::DoTick( U32 delta )
 										 && color[(v.y-baseY)*ZONE_SIZE + v.x-baseX] == 0 )
 									{
 										color[(v.y-baseY)*ZONE_SIZE + v.x-baseX] = currentColor;
-										stack.Push( v );
+										waterStack.Push( v );
 									}
 									else if ( grid[idx].IsWater() ) {
 										++water;
@@ -520,32 +525,38 @@ void WorldMap::DoTick( U32 delta )
 								}
 							}
 
-							int waterMax = pool.Size() / 10;
-							if ( pool.Size() >= 10 && border == 0 && water <= waterMax ) {
-								GLOUTPUT(( "pool found. zone=%d,%d area=%d waterFall=%d\n", zx, zy, pool.Size(), water ));
-								for( int i=0; i<pool.Size(); ++i ) {
-									int idx = INDEX( pool[i] );
-									SetRock( pool[i].x, pool[i].y, grid[idx].RockHeight(), POOL_HEIGHT );	
+							int waterMax = poolGrids.Size() / 10;
+							if ( poolGrids.Size() >= 10 && border == 0 && water <= waterMax ) {
+								GLOUTPUT(( "pool found. zone=%d,%d area=%d waterFall=%d\n", zx, zy, poolGrids.Size(), water ));
+								for( int i=0; i<poolGrids.Size(); ++i ) {
+									int idx = INDEX( poolGrids[i] );
+									SetRock( poolGrids[i].x, poolGrids[i].y, grid[idx].RockHeight(), POOL_HEIGHT );	
 
 									for( int k=0; k<4; ++k ) {
-										Vector2I v = pool[i] + next[k];
+										Vector2I v = poolGrids[i] + next[k];
 										GLASSERT( zbounds.Contains( v ));
 										if ( grid[INDEX(v)].IsWater() ) {
-											waterfalls.Push( pool[i] );
+											waterfalls.Push( poolGrids[i] );
 										}
 									}
 								}
 								zoneInfo[zy*DZONE+zx].pools += 1;
 							}
 							++currentColor;
-							pool.Clear();
+							poolGrids.Clear();
 						}
 					}
 				}
 			}
 		}
 	}
+}
 
+
+
+void WorldMap::EmitWaterfalls( U32 delta )
+{
+	static const Vector2I next[4] = { {1,0}, {-1,0}, {0,1}, {0,-1} };
 	for( int i=0; i<waterfalls.Size(); ++i ) {
 		const Vector2I& wf = waterfalls[i];
 
@@ -573,6 +584,12 @@ void WorldMap::DoTick( U32 delta )
 			}
 		}
 	}
+}
+
+void WorldMap::DoTick( U32 delta )
+{
+	ProcessWater();
+	EmitWaterfalls( delta );
 }
 
 

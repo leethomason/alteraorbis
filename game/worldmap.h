@@ -215,6 +215,8 @@ private:
 			(*str)[5] = '0' + rockHeight;
 		}
 	}
+	void ProcessWater();
+	void EmitWaterfalls( U32 delta );	// particle systems
 
 	void Init( int w, int h );
 	void Tessellate();
@@ -308,6 +310,10 @@ private:
 	grinliz::CDynArray< grinliz::Vector2I > waterfalls;
 	grinliz::BitArray< DZONE, DZONE, 1 > zoneInit;
 	grinliz::BitArray< DZONE, DZONE, 1 > waterInit;
+
+	// Temporaries to avoid allocation
+	grinliz::CDynArray< grinliz::Vector2I > waterStack;
+	grinliz::CDynArray< grinliz::Vector2I > poolGrids;
 
 	ZoneInfo zoneInfo[ DZONE*DZONE ];
 };
