@@ -351,11 +351,16 @@ int main( int argc, char **argv )
 
 				mouseDown.Set( event.button.x, event.button.y );
 
+				SDLMod modSDL = SDL_GetModState();
+				int mod = 0;
+				if ( modSDL & ( KMOD_LSHIFT | KMOD_RSHIFT ))    mod = GAME_TAP_MOD_SHIFT;
+				else if ( modSDL & ( KMOD_LCTRL | KMOD_RCTRL )) mod = GAME_TAP_MOD_CTRL;
+
 				if ( event.button.button == 1 ) {
-					GameTap( game, GAME_TAP_DOWN, x, y );
+					GameTap( game, GAME_TAP_DOWN, x, y, mod );
 				}
 				else if ( event.button.button == 3 ) {
-					GameTap( game, GAME_TAP_CANCEL, x, y );
+					GameTap( game, GAME_TAP_CANCEL, x, y, mod );
 					zooming = true;
 					//GameCameraRotate( game, GAME_ROTATE_START, 0.0f );
 					SDL_GetRelativeMouseState( &zoomX, &zoomY );
@@ -372,7 +377,11 @@ int main( int argc, char **argv )
 					zooming = false;
 				}
 				if ( event.button.button == 1 ) {
-					GameTap( game, GAME_TAP_UP, x, y );
+					SDLMod modSDL = SDL_GetModState();
+					int mod = 0;
+					if ( modSDL & ( KMOD_LSHIFT | KMOD_RSHIFT ))    mod = GAME_TAP_MOD_SHIFT;
+					else if ( modSDL & ( KMOD_LCTRL | KMOD_RCTRL )) mod = GAME_TAP_MOD_CTRL;
+					GameTap( game, GAME_TAP_UP, x, y, mod );
 				}
 			}
 			break;
@@ -384,8 +393,13 @@ int main( int argc, char **argv )
 				int x, y;
 				TransformXY( event.button.x, event.button.y, &x, &y );
 
+				SDLMod modSDL = SDL_GetModState();
+				int mod = 0;
+				if ( modSDL & ( KMOD_LSHIFT | KMOD_RSHIFT ))    mod = GAME_TAP_MOD_SHIFT;
+				else if ( modSDL & ( KMOD_LCTRL | KMOD_RCTRL )) mod = GAME_TAP_MOD_CTRL;
+
 				if ( state & SDL_BUTTON(1) ) {
-					GameTap( game, GAME_TAP_MOVE, x, y );
+					GameTap( game, GAME_TAP_MOVE, x, y, mod );
 				}
 				else if ( zooming && (state & SDL_BUTTON(3)) ) {
 					float deltaZoom = 0.01f * (float)zoomY;
@@ -393,7 +407,7 @@ int main( int argc, char **argv )
 					GameCameraRotate( game, (float)(zoomX)*0.5f );
 				}
 				else if ( ( ( state & SDL_BUTTON(1) ) == 0 ) ) {
-					GameTap( game, GAME_TAP_MOVE_UP, x, y );
+					GameTap( game, GAME_TAP_MOVE_UP, x, y, mod );
 				}
 			}
 			break;

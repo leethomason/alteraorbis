@@ -64,7 +64,7 @@ public:
 	void Resize( int width, int height, int rotation );
 	void DoTick( U32 msec );
 
-	void Tap( int action, int x, int y );
+	void Tap( int action, int x, int y, int mod );
 	void Zoom( int style, float distance );
 	void Rotate( float degreesFromStart );
 	void CancelInput();
@@ -93,6 +93,7 @@ public:
 	int GetDebugLevel() const			{ return debugLevel; }
 	void SetPerfLevel( int level )		{ perfLevel = (level%2); }
 	int GetPerfLevel() const			{ return perfLevel; }
+	int GetTapMod() const				{ return tapMod; }
 
 	const char* GamePath( const char* type, int slot, const char* extension ) const;
 	bool HasFile( const char* file ) const;
@@ -169,6 +170,7 @@ private:
 	void LoadAtoms();
 	void LoadPalettes();
 
+	int tapMod;
 	int currentFrame;
 	U32 markFrameTime;
 	U32 frameCountsSinceMark;

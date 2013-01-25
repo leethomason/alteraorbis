@@ -42,6 +42,8 @@ void GameSave( void* handle );
 #define GAME_TAP_UP			2
 #define GAME_TAP_CANCEL		3
 #define GAME_TAP_MOVE_UP	4	// debugging; not on tablets, obviously
+#define GAME_TAP_MOD_SHIFT	5	// debugging
+#define GAME_TAP_MOD_CTRL	6	// debugging
 
 #define GAME_TAP_MASK		0x00ff
 #define GAME_TAP_PANNING	0x0100
@@ -50,8 +52,7 @@ void GameSave( void* handle );
 #define GAME_TAP_UP_PANNING			(GAME_TAP_UP | GAME_TAP_PANNING)
 #define GAME_TAP_CANCEL_PANNING		(GAME_TAP_CANCEL | GAME_TAP_PANNING)
 
-void GameTap( void* handle, int action, int x, int y );
-
+void GameTap( void* handle, int action, int x, int y, int mod );
 
 #define GAME_ZOOM_DISTANCE	0
 #define GAME_ZOOM_PINCH		1

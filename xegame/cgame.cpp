@@ -125,12 +125,12 @@ void GameCameraRotate( void* handle, float degrees )
 }
 
 
-void GameTap( void* handle, int action, int x, int y )
+void GameTap( void* handle, int action, int x, int y, int mod )
 {
 	CheckThread check;
 
 	Game* game = (Game*)handle;
-	game->Tap( action, x, y );
+	game->Tap( action, x, y, mod );
 }
 
 

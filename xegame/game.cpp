@@ -615,8 +615,9 @@ void Game::MouseMove( int x, int y )
 }
 
 
-void Game::Tap( int action, int wx, int wy )
+void Game::Tap( int action, int wx, int wy, int mod )
 {
+	tapMod = mod;
 	if ( action == GAME_TAP_MOVE_UP ) {
 		MouseMove( wx, wy );
 		return;

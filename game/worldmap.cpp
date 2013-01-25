@@ -141,6 +141,7 @@ void WorldMap::Save( const char* pathToDAT, const char* pathToXML )
 
 void WorldMap::Load( const char* pathToDAT, const char* pathToXML )
 {
+	QuickProfile qp( "WorldMap::Load" );
 	XMLDocument doc;
 	doc.LoadFile( pathToXML );
 	GLASSERT( !doc.Error() );
@@ -432,6 +433,7 @@ Vector2I WorldMap::FindEmbark()
 
 void WorldMap::ProcessWater()
 {
+	//QuickProfile qp( "WorldMap::ProcessWater" );
 	static const Vector2I next[4] = { {1,0}, {-1,0}, {0,1}, {0,-1} };
 	int zoneWidth  = width / ZONE_SIZE;
 	int zoneHeight = height / ZONE_SIZE;

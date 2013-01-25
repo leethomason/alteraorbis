@@ -37,6 +37,7 @@ public:
 
 	// Set all rock to the nominal values
 	void SetAllRock();
+	void CreateVolcano( int x, int y );
 
 private:
 	void CreatePlayer( const grinliz::Vector2I& pos, const char* assetName );

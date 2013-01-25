@@ -135,8 +135,8 @@ Texture* Sim::GetMiniMapTexture()
 
 void Sim::DoTick( U32 delta )
 {
-	chitBag->DoTick( delta, engine );
 	worldMap->DoTick( delta );
+	chitBag->DoTick( delta, engine );
 }
 
 
@@ -155,4 +155,9 @@ void Sim::SetAllRock()
 	}
 }
 
+
+void Sim::CreateVolcano( int x, int y )
+{
+	GLOUTPUT(( "CreateVolcano at %d,%d\n", x, y ));
+}
 

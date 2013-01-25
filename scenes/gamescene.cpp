@@ -150,20 +150,27 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 			game->GetScreenport().ViewProjectionInverse3D( &mvpi );
 			sim->GetEngine()->RayFromViewToYPlane( view, mvpi, &ray, &at );
 
-			Chit* chit = sim->GetPlayerChit();
-			if ( chit ) {
-				if ( camModeButton[TRACK].Down() ) {
-					PathMoveComponent* pmc = GET_COMPONENT( chit, PathMoveComponent );
-					if ( pmc ) {
-						Vector2F dest = { at.x, at.z };
-						pmc->QueueDest( dest );
+			int tapMod = lumosGame->GetTapMod();
+
+			if ( tapMod == 0 ) {
+				Chit* chit = sim->GetPlayerChit();
+				if ( chit ) {
+					if ( camModeButton[TRACK].Down() ) {
+						PathMoveComponent* pmc = GET_COMPONENT( chit, PathMoveComponent );
+						if ( pmc ) {
+							Vector2F dest = { at.x, at.z };
+							pmc->QueueDest( dest );
+						}
+					}
+					else if ( camModeButton[TELEPORT].Down() ) {
+						SpatialComponent* sc = chit->GetSpatialComponent();
+						GLASSERT( sc );
+						sc->SetPosition( at.x, 0, at.z );
 					}
 				}
-				else if ( camModeButton[TELEPORT].Down() ) {
-					SpatialComponent* sc = chit->GetSpatialComponent();
-					GLASSERT( sc );
-					sc->SetPosition( at.x, 0, at.z );
-				}
+			}
+			else if ( tapMod == GAME_TAP_MOD_CTRL ) {
+				sim->CreateVolcano( (int)at.x, (int)at.z );
 			}
 		}
 	}
