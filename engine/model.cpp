@@ -342,7 +342,7 @@ void Model::Save( tinyxml2::XMLPrinter* printer )
 	if ( aux ) {
 		printer->OpenElement( "aux" );
 		aux->boneData.Save( printer );
-		PushType( printer, "procMat", aux->procMat );
+		XEArchive( printer, 0, "procMat", aux->procMat );
 		printer->CloseElement();	// aux
 	}
 	printer->CloseElement();	// model

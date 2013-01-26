@@ -22,20 +22,26 @@ void PhysicsMoveComponent::DebugStr( grinliz::GLString* str )
 }
 
 
+void PhysicsMoveComponent::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele )
+{
+	XE_ARCHIVE( rotation );
+	XE_ARCHIVE( deleteWhenDone );
+	XEArchive( prn, ele, "velocity", velocity ); 
+}
+
+
 void PhysicsMoveComponent::Load( const tinyxml2::XMLElement* element )
 {
-	GLASSERT( 0 );
+	this->BeginLoad( element, "PhysicsMoveComponent" );
+	Archive( 0, element );
+	this->EndLoad( element );
 }
 
 
 void PhysicsMoveComponent::Save( tinyxml2::XMLPrinter* printer )
 {
 	this->BeginSave( printer, "PhysicsMoveComponent" );
-
-	printer->PushAttribute( "rotation", rotation );
-	printer->PushAttribute( "deleteWhenDone", deleteWhenDone );
-	PushType( printer, "velocity", velocity ); 
-
+	Archive( printer, 0 );
 	this->EndSave( printer );
 }
 

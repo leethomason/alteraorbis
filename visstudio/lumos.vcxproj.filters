@@ -32,6 +32,9 @@
     <Filter Include="Source Files\script">
       <UniqueIdentifier>{78dc7944-9232-4516-bad8-6a208cfdae5b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\components">
+      <UniqueIdentifier>{a9a1f6ac-4f55-43f9-8b73-96559e22e25e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\engine\camera.cpp">
@@ -163,12 +166,6 @@
     <ClCompile Include="..\xegame\component.cpp">
       <Filter>Source Files\xegame</Filter>
     </ClCompile>
-    <ClCompile Include="..\game\pathmovecomponent.cpp">
-      <Filter>Source Files\game</Filter>
-    </ClCompile>
-    <ClCompile Include="..\game\debugpathcomponent.cpp">
-      <Filter>Source Files\game</Filter>
-    </ClCompile>
     <ClCompile Include="..\engine\engineshaders.cpp">
       <Filter>Source Files\engine</Filter>
     </ClCompile>
@@ -177,9 +174,6 @@
     </ClCompile>
     <ClCompile Include="..\scenes\navtest2scene.cpp">
       <Filter>Source Files\scenes</Filter>
-    </ClCompile>
-    <ClCompile Include="..\game\mapspatialcomponent.cpp">
-      <Filter>Source Files\game</Filter>
     </ClCompile>
     <ClCompile Include="..\xegame\cameracomponent.cpp">
       <Filter>Source Files\xegame</Filter>
@@ -190,16 +184,7 @@
     <ClCompile Include="..\xegame\inventorycomponent.cpp">
       <Filter>Source Files\xegame</Filter>
     </ClCompile>
-    <ClCompile Include="..\game\aicomponent.cpp">
-      <Filter>Source Files\game</Filter>
-    </ClCompile>
     <ClCompile Include="..\game\gameitem.cpp">
-      <Filter>Source Files\game</Filter>
-    </ClCompile>
-    <ClCompile Include="..\game\debugstatecomponent.cpp">
-      <Filter>Source Files\game</Filter>
-    </ClCompile>
-    <ClCompile Include="..\game\healthcomponent.cpp">
       <Filter>Source Files\game</Filter>
     </ClCompile>
     <ClCompile Include="..\script\battlemechanics.cpp">
@@ -224,12 +209,6 @@
       <Filter>Source Files\xegame</Filter>
     </ClCompile>
     <ClCompile Include="..\game\lumoschitbag.cpp">
-      <Filter>Source Files\game</Filter>
-    </ClCompile>
-    <ClCompile Include="..\game\physicsmovecomponent.cpp">
-      <Filter>Source Files\game</Filter>
-    </ClCompile>
-    <ClCompile Include="..\game\gamemovecomponent.cpp">
       <Filter>Source Files\game</Filter>
     </ClCompile>
     <ClCompile Include="..\script\worldscript.cpp">
@@ -263,6 +242,36 @@
       <Filter>Source Files\xegame</Filter>
     </ClCompile>
     <ClCompile Include="..\script\rockgen.cpp">
+      <Filter>Source Files\script</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\physicsmovecomponent.cpp">
+      <Filter>Source Files\components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\mapspatialcomponent.cpp">
+      <Filter>Source Files\components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\healthcomponent.cpp">
+      <Filter>Source Files\components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\gamemovecomponent.cpp">
+      <Filter>Source Files\components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\debugstatecomponent.cpp">
+      <Filter>Source Files\components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\aicomponent.cpp">
+      <Filter>Source Files\components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\debugpathcomponent.cpp">
+      <Filter>Source Files\components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\pathmovecomponent.cpp">
+      <Filter>Source Files\components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\script\scriptcomponent.cpp">
+      <Filter>Source Files\components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\script\volcanoscript.cpp">
       <Filter>Source Files\script</Filter>
     </ClCompile>
   </ItemGroup>
@@ -414,12 +423,6 @@
     <ClInclude Include="..\game\gamelimits.h">
       <Filter>Source Files\game</Filter>
     </ClInclude>
-    <ClInclude Include="..\game\pathmovecomponent.h">
-      <Filter>Source Files\game</Filter>
-    </ClInclude>
-    <ClInclude Include="..\game\debugpathcomponent.h">
-      <Filter>Source Files\game</Filter>
-    </ClInclude>
     <ClInclude Include="..\engine\engineshaders.h">
       <Filter>Source Files\engine</Filter>
     </ClInclude>
@@ -428,9 +431,6 @@
     </ClInclude>
     <ClInclude Include="..\scenes\navtest2scene.h">
       <Filter>Source Files\scenes</Filter>
-    </ClInclude>
-    <ClInclude Include="..\game\mapspatialcomponent.h">
-      <Filter>Source Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\xegame\cameracomponent.h">
       <Filter>Source Files\xegame</Filter>
@@ -449,15 +449,6 @@
     </ClInclude>
     <ClInclude Include="..\xegame\itemcomponent.h">
       <Filter>Source Files\xegame</Filter>
-    </ClInclude>
-    <ClInclude Include="..\game\aicomponent.h">
-      <Filter>Source Files\game</Filter>
-    </ClInclude>
-    <ClInclude Include="..\game\debugstatecomponent.h">
-      <Filter>Source Files\game</Filter>
-    </ClInclude>
-    <ClInclude Include="..\game\healthcomponent.h">
-      <Filter>Source Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\script\battlemechanics.h">
       <Filter>Source Files\script</Filter>
@@ -478,12 +469,6 @@
       <Filter>Source Files\engine</Filter>
     </ClInclude>
     <ClInclude Include="..\game\lumoschitbag.h">
-      <Filter>Source Files\game</Filter>
-    </ClInclude>
-    <ClInclude Include="..\game\physicsmovecomponent.h">
-      <Filter>Source Files\game</Filter>
-    </ClInclude>
-    <ClInclude Include="..\game\gamemovecomponent.h">
       <Filter>Source Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\script\worldscript.h">
@@ -520,6 +505,36 @@
       <Filter>Source Files\xegame</Filter>
     </ClInclude>
     <ClInclude Include="..\script\rockgen.h">
+      <Filter>Source Files\script</Filter>
+    </ClInclude>
+    <ClInclude Include="..\game\physicsmovecomponent.h">
+      <Filter>Source Files\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\game\mapspatialcomponent.h">
+      <Filter>Source Files\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\game\healthcomponent.h">
+      <Filter>Source Files\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\game\gamemovecomponent.h">
+      <Filter>Source Files\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\game\debugstatecomponent.h">
+      <Filter>Source Files\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\game\aicomponent.h">
+      <Filter>Source Files\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\game\debugpathcomponent.h">
+      <Filter>Source Files\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\game\pathmovecomponent.h">
+      <Filter>Source Files\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\script\scriptcomponent.h">
+      <Filter>Source Files\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\script\volcanoscript.h">
       <Filter>Source Files\script</Filter>
     </ClInclude>
   </ItemGroup>

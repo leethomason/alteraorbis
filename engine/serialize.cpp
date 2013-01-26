@@ -224,6 +224,32 @@ void PushType( tinyxml2::XMLPrinter* printer, const char* name, const Quaternion
 }
 
 
+void XEArchive( XMLPrinter* printer, const XMLElement* element, const char* name, Vector2I& vec )
+{
+	GLASSERT( !(printer && element));
+	GLASSERT( printer || element );
+	GLASSERT( name && *name );
+
+	if ( printer ) {
+		printer->OpenElement( name );
+		printer->PushAttribute( "type", "Vector2I" );
+		printer->PushAttribute( "x", vec.x );
+		printer->PushAttribute( "y", vec.y );
+		printer->CloseElement();
+	}
+	if ( element ) {
+		vec.Zero();
+		const XMLElement* ele = element->FirstChildElement( name );
+		GLASSERT( ele );
+		if ( ele ) {
+			const char* type = ele->Attribute( "type" );
+			GLASSERT( type && StrEqual( type,  "Vector2I" ));
+			ele->QueryAttribute( "x", &vec.x );
+			ele->QueryAttribute( "y", &vec.y );
+		}
+	}
+}
+
 void XEArchive( XMLPrinter* printer, const XMLElement* element, const char* name, Vector3F& vec )
 {
 	GLASSERT( !(printer && element));

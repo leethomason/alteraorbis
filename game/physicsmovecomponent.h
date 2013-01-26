@@ -34,6 +34,8 @@ public:
 	void DeleteWhenDone( bool _deleteWhenDone )			{ deleteWhenDone = _deleteWhenDone; }
 
 private:
+	void Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele );
+
 	grinliz::Vector3F velocity;
 	float rotation;
 	bool deleteWhenDone;
