@@ -1,5 +1,7 @@
 #include "volcanoscript.h"
 #include "../engine/serialize.h"
+#include "../xegame/chit.h"
+#include "../xegame/spatialcomponent.h"
 
 using namespace grinliz;
 using namespace tinyxml2;
@@ -11,21 +13,15 @@ VolcanoScript::VolcanoScript( WorldMap* p_map )
 }
 
 
-void VolcanoScript::SetOrigin( int x, int y )
+void VolcanoScript::Init( const ScriptContext& heap )
 {
-	origin.Set( x, y );
-}
-
-
-void VolcanoScript::OnAdd( const ScriptContext& heap )
-{
-	GLOUTPUT(( "VolcanoScript::OnAdd\n" ));
-}
-
-
-void VolcanoScript::OnRemove( const ScriptContext& heap )
-{
-	GLOUTPUT(( "VolcanoScript::OnRemove\n" ));
+	SpatialComponent* sc = heap.chit->GetSpatialComponent();
+	GLASSERT( sc );
+	if ( sc ) {
+		Vector2F pos = sc->GetPosition2D();
+		origin.Set( (int)pos.x, (int)pos.y );
+	}
+	GLOUTPUT(( "VolcanoScript::Init. pos=%d,%d\n", origin.x, origin.y ));
 }
 
 

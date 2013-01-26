@@ -11,6 +11,8 @@
 #include "../xegame/componentfactory.h"
 
 #include "../script/itemscript.h"
+#include "../script/scriptcomponent.h"
+#include "../script/volcanoscript.h"
 
 #include "pathmovecomponent.h"
 #include "debugstatecomponent.h"
@@ -158,6 +160,12 @@ void Sim::SetAllRock()
 
 void Sim::CreateVolcano( int x, int y )
 {
-	GLOUTPUT(( "CreateVolcano at %d,%d\n", x, y ));
+	//GLOUTPUT(( "CreateVolcano at %d,%d\n", x, y ));
+	// FIXME: check that x,y are valid
+	Chit* chit = chitBag->NewChit();
+	chit->Add( new SpatialComponent() );
+	chit->Add( new ScriptComponent( new VolcanoScript( worldMap )));
+
+	chit->GetSpatialComponent()->SetPosition( (float)x+0.5f, 0.0f, (float)y+0.5f );
 }
 

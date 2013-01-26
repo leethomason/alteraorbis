@@ -4,6 +4,7 @@
 
 void ScriptComponent::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele )
 {
+	XE_ARCHIVE( context.initialized );
 	XE_ARCHIVE( context.time );
 }
 
@@ -29,9 +30,9 @@ void ScriptComponent::Save( tinyxml2::XMLPrinter* printer )
 void ScriptComponent::OnAdd( Chit* chit )
 {
 	super::OnAdd( chit );
-	context.chit = chit;
+	context.initialized = false;
 	context.time = 0;
-	script->OnAdd( context );
+	context.chit = chit;
 }
 
 
@@ -43,6 +44,10 @@ void ScriptComponent::OnRemove()
 
 bool ScriptComponent::DoTick( U32 delta )
 {
+	if ( !context.initialized ) {
+		script->Init( context );
+		context.initialized = true;
+	}
 	bool result = script->DoTick( context, delta );
 	context.time += delta;
 	return result;

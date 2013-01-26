@@ -12,10 +12,7 @@ public:
 	VolcanoScript( WorldMap* map );
 	virtual ~VolcanoScript()			{}
 
-	void SetOrigin( int x, int y );
-
-	virtual void OnAdd( const ScriptContext& heap );
-	virtual void OnRemove( const ScriptContext& heap );
+	virtual void Init( const ScriptContext& heap );
 	virtual void Load( const ScriptContext& ctx, const tinyxml2::XMLElement* element );
 	virtual void Save( const ScriptContext& ctx, tinyxml2::XMLPrinter* printer );
 	virtual bool DoTick( const ScriptContext& ctx, U32 delta );

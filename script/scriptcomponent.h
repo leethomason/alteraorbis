@@ -20,7 +20,8 @@
 
 struct ScriptContext
 {
-	ScriptContext() : time( 0 ), chit( 0 ) {}
+	ScriptContext() : initialized(false), time( 0 ), chit( 0 ) {}
+	bool	initialized;
 	U32		time;	// total time ticks
 	Chit*	chit;
 };
@@ -29,8 +30,7 @@ struct ScriptContext
 class IScript
 {
 public:
-	virtual void OnAdd( const ScriptContext& heap )		= 0;
-	virtual void OnRemove( const ScriptContext& heap )	= 0;
+	virtual void Init( const ScriptContext& heap )	= 0;
 	virtual void Load( const ScriptContext& ctx, const tinyxml2::XMLElement* element ) = 0;
 	virtual void Save( const ScriptContext& ctx, tinyxml2::XMLPrinter* printer )       = 0;
 	virtual bool DoTick( const ScriptContext& ctx, U32 delta ) = 0;
