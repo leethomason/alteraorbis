@@ -20,6 +20,7 @@ private:
 
 	unsigned isLand				: 1;
 	unsigned isBlocked			: 1;
+	unsigned magma				: 1;	// land, rock, or water can be set to magma
 
 	unsigned zoneSize			: 6;	// 0-31
 	unsigned nominalRockHeight	: 2;	// 0-3
@@ -102,6 +103,9 @@ public:
 		isLand = 0;
 		nominalRockHeight = 0;
 	}
+
+	bool Magma() const			{ return magma != 0; }
+	void SetMagma( bool m )		{ magma = m ? 1 : 0; }
 
 	U32  PathColor() const		{ return pathColor; }
 	void SetPathColor( int c )	{ 

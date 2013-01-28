@@ -16,6 +16,8 @@
 #include "worldmap.h"
 
 #include "../xegame/xegamelimits.h"
+#include "../xegame/chitevent.h"
+#include "../xegame/chitbag.h"
 
 #include "../grinliz/glutil.h"
 #include "../grinliz/glgeometry.h"
@@ -29,6 +31,7 @@
 #include "../engine/surface.h"
 
 #include "worldinfo.h"
+#include "gameitem.h"
 
 using namespace grinliz;
 using namespace micropather;
@@ -54,6 +57,7 @@ WorldMap::WorldMap( int width, int height ) : Map( width, height )
 	pather = 0;
 	worldInfo = new WorldInfo();
 	Init( width, height );
+	slowTick = SLOW_TICK;
 
 	texture[0] = TextureManager::Instance()->GetTexture( "map_water" );
 	texture[1] = TextureManager::Instance()->GetTexture( "map_land" );
@@ -81,7 +85,7 @@ void WorldMap::AttachEngine( Engine* e )
 		for( int j=0; j<height; ++j ) {
 			for( int i=0; i<width; ++i ) {
 				if ( grid[INDEX(i,j)].IsLand() ) {
-					SetRock( i, j, 0, 0 );
+					SetRock( i, j, 0, 0, false );
 				}
 			}
 		}
@@ -176,7 +180,7 @@ void WorldMap::Load( const char* pathToDAT, const char* pathToXML )
 					// Clear the block, which is serialized, because the SetRock() will set it.
 					if ( grid[index].IsBlocked() )
 						grid[index].SetBlocked( false );
-					SetRock( i, j, -2, 0 );
+					SetRock( i, j, -2, 0, grid[index].Magma() );
 				}
 			}
 		}
@@ -532,7 +536,7 @@ void WorldMap::ProcessWater()
 								GLOUTPUT(( "pool found. zone=%d,%d area=%d waterFall=%d\n", zx, zy, poolGrids.Size(), water ));
 								for( int i=0; i<poolGrids.Size(); ++i ) {
 									int idx = INDEX( poolGrids[i] );
-									SetRock( poolGrids[i].x, poolGrids[i].y, grid[idx].RockHeight(), POOL_HEIGHT );	
+									SetRock( poolGrids[i].x, poolGrids[i].y, grid[idx].RockHeight(), POOL_HEIGHT, grid[idx].Magma() );	
 
 									for( int k=0; k<4; ++k ) {
 										Vector2I v = poolGrids[i] + next[k];
@@ -588,44 +592,87 @@ void WorldMap::EmitWaterfalls( U32 delta )
 	}
 }
 
-void WorldMap::DoTick( U32 delta )
+void WorldMap::DoTick( U32 delta, ChitBag* chitBag )
 {
 	ProcessWater();
 	EmitWaterfalls( delta );
+
+	slowTick -= (int)(delta);
+
+	// Send fire damage events, if needed.
+	if ( slowTick <= 0 ) {
+		slowTick = SLOW_TICK;
+		for( int i=0; i<magmaGrids.Size(); ++i ) {
+			Vector2F origin = { (float)magmaGrids[i].x+0.5f, (float)magmaGrids[i].y + 0.5f };
+			ChitEvent event = ChitEvent::EffectEvent( origin, EFFECT_RADIUS, GameItem::EFFECT_FIRE, EFFECT_ACCRUED_MAX );
+			chitBag->QueueEvent( event );
+		}
+	}
+
+	// Do particles every time.
+	ParticleDef pdEmber = engine->particleSystem->GetPD( "embers" );
+	ParticleDef pdSmoke = engine->particleSystem->GetPD( "smoke" );
+	for( int i=0; i<magmaGrids.Size(); ++i ) {
+		Rectangle3F r;
+		r.min.Set( (float)magmaGrids[i].x, 0, (float)magmaGrids[i].y );
+		r.max = r.min;
+		r.max.x += 1.0f; r.max.z += 1.0f;
+		
+		int index = INDEX(magmaGrids[i]);
+		if ( grid[index].IsWater() || grid[index].PoolHeight() ) {
+			r.min.y =  r.max.y = (float)grid[index].PoolHeight();
+			engine->particleSystem->EmitPD( pdSmoke, r, V3F_UP, engine->camera.EyeDir3(), delta );
+		}
+		else {
+			r.min.y = r.max.y = (float)grid[index].RockHeight();
+			engine->particleSystem->EmitPD( pdSmoke, r, V3F_UP, engine->camera.EyeDir3(), delta );
+		}
+	}
 }
 
 
-void WorldMap::SetRock( int x, int y, int h, int pool )
+void WorldMap::SetRock( int x, int y, int h, int pool, bool magma )
 {
-	// what is there now? h=[1,4]
+	// what is there now? h=[1,3]
 	// does it need to be changed removed?
 	// do blocks need to be set/removed?
 
 	Vector2I vec = { x, y };
 	int index = INDEX(x,y);
 
-	int hNow = grid[index].RockHeight();
-	int pNow = grid[index].PoolHeight();	
+	int  hWas = grid[index].RockHeight();
+	int  pWas = grid[index].PoolHeight();	
+	bool mWas = grid[index].Magma();
 
 	if ( h == -1 ) {
 		h = grid[index].NominalRockHeight();
 	}
-	if ( h == -2 ) {
-		hNow = 0;
-		h = grid[index].RockHeight();
-		pNow = 0;
-		pool = grid[index].PoolHeight();
+	else if ( h == -2 ) {
+		hWas = 0;
+		pWas = 0;
+		mWas = false;
+		h     = grid[index].RockHeight();
+		pool  = grid[index].PoolHeight();
+		magma = grid[index].Magma();
 	}
+
 	CStr<12> name; 
+	bool modelWas = false;
+
+	GridResName( grid[index].IsLand(), hWas, pWas, mWas, &name );
+	if ( name.Length() ) {
+		modelWas = true;
+	}
+
 
 #ifdef DEBUG
 	if ( pool > 0 )
 		GLASSERT( pool > h );
 	if ( engine ) {
-		if ( hNow > 0 || pNow > 0 ) {
+		if ( modelWas ) {
 			Model* m = 0;
 			voxels.Query( vec, &m );
-			GridResName( hNow, pNow, &name );
+			GridResName( grid[index].IsLand(), hWas, pWas, mWas, &name );
 			GLASSERT( m && m->GetResource()->header.name == name.c_str() );
 		}
 		else {
@@ -634,14 +681,14 @@ void WorldMap::SetRock( int x, int y, int h, int pool )
 	}
 #endif
 
-	if ( h != hNow || pool != pNow ) {
+	if ( h != hWas || pool != pWas || magma != mWas ) {
 		if ( engine ) {
-			if ( hNow || pNow ) {
+			if ( modelWas ) {
 				Model* m = voxels.Remove( vec );
 				engine->FreeModel( m );
 			}
-			if ( h > 0 || pool > 0 ) {
-				GridResName( h, pool, &name );
+			GridResName( grid[index].IsLand(), h, pool, magma, &name );
+			if ( name.Length() ) {
 				const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( name.c_str() );
 				Model* m = engine->AllocModel( res );
 				m->SetPos( (float)vec.x+0.5f, 0.0f, (float)vec.y+0.5f );
@@ -651,12 +698,27 @@ void WorldMap::SetRock( int x, int y, int h, int pool )
 		}
 		grid[index].SetRockHeight( h );
 		grid[index].SetPoolHeight( pool );
+		grid[index].SetMagma( magma );
 
-		if ( h != hNow ) {
+		if ( h != hWas ) {
 			waterInit.Clear( vec.x >> ZONE_SHIFT, vec.y >> ZONE_SHIFT );
 		}
+		if ( magma != mWas ) {
+			if ( mWas ) {
+				// Magma going away.
+				int i = magmaGrids.Find( vec );
+				GLASSERT( i >= 0 );
+				if ( i >= 0 ) {
+					magmaGrids.Remove( i );
+				}
+			}
+			else {
+				// Magma adding.
+				magmaGrids.Push( vec );
+			}
+		}
 
-		bool wasBlocked = (hNow>0) || (pNow>0);
+		bool wasBlocked = (hWas>0) || (pWas>0);
 		bool isBlocked  = (h>0) || (pool>0);
 
 		if ( !wasBlocked && isBlocked ) {
@@ -791,7 +853,11 @@ WorldMap::BlockResult WorldMap::CalcBlockEffect(	const grinliz::Vector2F& pos,
 			// Will find the smallest overlap, and apply.
 			Vector2F c = { (float)block.x+0.5f, (float)block.y+0.5f };	// block center.
 			Vector2F p = pos - c;										// translate pos to origin
-			Vector2F n = p; n.Normalize();
+			Vector2F n = p; 
+			if ( n.LengthSquared() )
+				n.Normalize();
+			else
+				n.Set( 1, 0 );
 
 			if ( p.x > fabsf(p.y) && (p.x-rad < 0.5f) ) {				// east quadrant
 				float dx = 0.5f - (p.x-rad) + EPSILON;

@@ -31,6 +31,7 @@
   <texture filename="shield.png" filename2="shield_em.png" emissive="true" />
   <texture filename="debugging.png" noMip="true" />
   <texture filename="rock.png" />
+  <texture filename="magma.png" />
 
   <!-- note this makes textures and materials the same thing, to have the emissive
        behavior defined like this. That's okay for now.
@@ -68,12 +69,13 @@
   <model filename="rock.ac" modelName="rock.1" origin="0 0 0" shading="flat" />
   <model filename="rock.ac" modelName="rock.2" origin="2 0 0" shading="flat" />
   <model filename="rock.ac" modelName="rock.3" origin="4 0 0" shading="flat" />
-  <model filename="rock.ac" modelName="rock.4" origin="6 0 0" shading="flat" />
 
-  <model filename="pool.ac" modelName="pool.1" origin="0 0 0" shading="flat" />
   <model filename="pool.ac" modelName="pool.2" origin="2 0 0" shading="flat" />
-  <model filename="pool.ac" modelName="pool.3" origin="4 0 0" shading="flat" />
-  <model filename="pool.ac" modelName="pool.4" origin="6 0 0" shading="flat" />
+
+  <model filename="magma.ac" modelName="magma.0" origin="-2 0 0" shading="flat" />
+  <model filename="magma.ac" modelName="magma.1" origin="0 0 0" shading="flat" />
+  <model filename="magma.ac" modelName="magma.2" origin="2 0 0" shading="flat" />
+  <model filename="magma.ac" modelName="magma.3" origin="4 0 0" shading="flat" />
 
   <!-- Creating animation
     1. Add a model resource, with the usual flags, plus: animatimation="create"

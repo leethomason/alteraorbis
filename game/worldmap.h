@@ -35,6 +35,7 @@ class Texture;
 class WorldInfo;
 struct WorldFeature;
 class Model;
+class ChitBag;
 
 
 /*
@@ -88,7 +89,7 @@ public:
 	// Set the rock to h. 
 	//		h=-1 sets to nominal value.
 	//		h=-2 sets to initial value, used when loading
-	void SetRock( int x, int y, int h, int poolHeight );
+	void SetRock( int x, int y, int h, int poolHeight, bool magma );
 	void SetBlocked( int x, int y )	{ grinliz::Rectangle2I pos; pos.Set( x, y, x, y ); SetBlocked( pos ); }
 	void SetBlocked( const grinliz::Rectangle2I& pos );
 	void ClearBlocked( int x, int y )	{ grinliz::Rectangle2I pos; pos.Set( x, y, x, y ); ClearBlocked( pos ); }
@@ -145,7 +146,7 @@ public:
 	virtual void Draw3D(  const grinliz::Color3F& colorMult, GPUState::StencilMode );
 
 	// Brings water & waterfalls current
-	void DoTick( U32 delta );
+	void DoTick( U32 delta, ChitBag* chitBag );
 
 	// ---- MicroPather ---- //
 	virtual float LeastCostEstimate( void* stateStart, void* stateEnd );
@@ -204,11 +205,17 @@ private:
 		return (y*width/ZONE_SIZE) + x; 
 	} 
 
-	void GridResName( int rockHeight, int poolHeight, grinliz::CStr<12>* str ) {
+	void GridResName( bool isLand, int rockHeight, int poolHeight, bool magma, grinliz::CStr<12>* str ) {
 		str->Clear();
+		if ( !isLand ) return;
+
 		if ( poolHeight > rockHeight ) {
 			*str = "pool.1";
 			(*str)[5] = '0' + poolHeight;
+		}
+		else if ( magma ) {
+			*str = "magma.0";
+			(*str)[6] = '0' + rockHeight;
 		}
 		else if ( rockHeight > 0 ) {
 			*str = "rock.1";
@@ -284,6 +291,7 @@ private:
 
 	WorldGrid*					grid;
 	Engine*						engine;
+	int							slowTick;
 
 	WorldInfo*					worldInfo;
 	micropather::MicroPather*	pather;
@@ -308,6 +316,8 @@ private:
 	grinliz::CDynArray<U16>			index[LOWER_TYPES];
 
 	grinliz::CDynArray< grinliz::Vector2I > waterfalls;
+	grinliz::CDynArray< grinliz::Vector2I > magmaGrids;
+
 	grinliz::BitArray< DZONE, DZONE, 1 > zoneInit;
 	grinliz::BitArray< DZONE, DZONE, 1 > waterInit;
 

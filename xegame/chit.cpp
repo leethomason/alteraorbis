@@ -26,8 +26,6 @@
 using namespace grinliz;
 using namespace tinyxml2;
 
-const U32 SLOW_TICK = 500;
-
 Chit::Chit( int _id, ChitBag* bag ) : next( 0 ), chitBag( bag ), id( _id ), tickNeeded( true ), shelf( 0 )
 {
 	Init( _id, bag );

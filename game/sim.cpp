@@ -137,7 +137,7 @@ Texture* Sim::GetMiniMapTexture()
 
 void Sim::DoTick( U32 delta )
 {
-	worldMap->DoTick( delta );
+	worldMap->DoTick( delta, chitBag );
 	chitBag->DoTick( delta, engine );
 }
 
@@ -152,7 +152,7 @@ void Sim::SetAllRock()
 {
 	for( int j=0; j<worldMap->Height(); ++j ) {
 		for( int i=0; i<worldMap->Width(); ++i ) {
-			worldMap->SetRock( i, j, -1, 0 );
+			worldMap->SetRock( i, j, -1, 0, false );
 		}
 	}
 }

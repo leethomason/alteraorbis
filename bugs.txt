@@ -318,6 +318,9 @@ X draw dude on map
 X convert to tinyxml2
 
 
+77.5k/frame - using 3 cubes for rocks.
+66.1k/frame - using 1 cube for rock.
+
 Baseline
 #define TEXTURE0 1
 #define TEXTURE0_ALPHA_ONLY 0

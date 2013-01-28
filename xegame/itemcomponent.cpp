@@ -161,20 +161,12 @@ bool ItemComponent::DoSlowTick()
 	if ( item.accruedFire > 0 || item.accruedShock > 0 ) {
 		SpatialComponent* sc = parentChit->GetSpatialComponent();
 		if ( sc ) {
-			Rectangle2F aoe;
-			aoe.max = aoe.min = sc->GetPosition2D();
-			aoe.Outset( EFFECT_RADIUS );
-
 			if ( item.accruedFire ) {
-				ChitEvent event( ChitEvent::EFFECT, aoe );
-				event.data = GameItem::EFFECT_FIRE;
-				event.factor = item.accruedFire;
+				ChitEvent event = ChitEvent::EffectEvent( sc->GetPosition2D(), EFFECT_RADIUS, GameItem::EFFECT_FIRE, item.accruedFire );
 				GetChitBag()->QueueEvent( event );
 			}
 			if ( item.accruedShock ) {
-				ChitEvent event( ChitEvent::EFFECT, aoe );
-				event.data = GameItem::EFFECT_SHOCK;
-				event.factor = item.accruedShock;
+				ChitEvent event = ChitEvent::EffectEvent( sc->GetPosition2D(), EFFECT_RADIUS, GameItem::EFFECT_SHOCK, item.accruedShock );
 				GetChitBag()->QueueEvent( event );
 			}
 			return true;
