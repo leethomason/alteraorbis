@@ -21,7 +21,6 @@ private:
 	void Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele );
 
 	WorldMap*			worldMap;
-	grinliz::Vector2I	origin;
 };
 
 

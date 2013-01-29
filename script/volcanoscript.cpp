@@ -2,6 +2,7 @@
 #include "../engine/serialize.h"
 #include "../xegame/chit.h"
 #include "../xegame/spatialcomponent.h"
+#include "../game/worldmap.h"
 
 using namespace grinliz;
 using namespace tinyxml2;
@@ -9,7 +10,6 @@ using namespace tinyxml2;
 VolcanoScript::VolcanoScript( WorldMap* p_map )
 {
 	worldMap = p_map;
-	origin.Zero();
 }
 
 
@@ -19,15 +19,15 @@ void VolcanoScript::Init( const ScriptContext& heap )
 	GLASSERT( sc );
 	if ( sc ) {
 		Vector2F pos = sc->GetPosition2D();
-		origin.Set( (int)pos.x, (int)pos.y );
+		GLOUTPUT(( "VolcanoScript::Init. pos=%d,%d\n", (int)pos.x, (int)pos.y ));
+		worldMap->SetMagma( (int)pos.x, (int)pos.y, true );
 	}
-	GLOUTPUT(( "VolcanoScript::Init. pos=%d,%d\n", origin.x, origin.y ));
 }
 
 
 void VolcanoScript::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele )
 {
-	XEArchive( prn, ele, "origin", origin );
+	//XEArchive( prn, ele, "origin", origin );
 }
 
 
@@ -36,8 +36,6 @@ void VolcanoScript::Load( const ScriptContext& ctx, const tinyxml2::XMLElement* 
 	const XMLElement* child = parent->FirstChildElement( "VolcanoScript" );
 	GLASSERT( child );
 	
-	origin.Zero();
-
 	if ( child ) {
 		Archive( 0, child );
 	}
