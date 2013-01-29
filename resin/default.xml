@@ -31,7 +31,7 @@
   <texture filename="shield.png" filename2="shield_em.png" emissive="true" />
   <texture filename="debugging.png" noMip="true" />
   <texture filename="rock.png" />
-  <texture filename="magma.png" />
+  <texture filename="magma.png" filename2="magma_em.png" emissive="true"/>
 
   <!-- note this makes textures and materials the same thing, to have the emissive
        behavior defined like this. That's okay for now.

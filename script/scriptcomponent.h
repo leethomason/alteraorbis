@@ -18,9 +18,12 @@
 
 #include "../xegame/component.h"
 
+class ComponentFactory;
+
 struct ScriptContext
 {
 	ScriptContext() : initialized(false), time( 0 ), chit( 0 ) {}
+
 	bool	initialized;
 	U32		time;	// total time ticks
 	Chit*	chit;
@@ -43,7 +46,8 @@ private:
 	typedef Component super;
 
 public:
-	ScriptComponent( IScript* p_script ) : script( p_script )	{}
+	ScriptComponent( IScript* p_script ) : script( p_script ), factory( 0 )	{}
+	ScriptComponent( const ComponentFactory* f ) : script( 0 ), factory( f )	{}
 	virtual ~ScriptComponent()									{ delete script; }
 
 	virtual Component* ToComponent( const char* name ) {
@@ -66,6 +70,7 @@ private:
 
 	ScriptContext context;
 	IScript* script;
+	const ComponentFactory* factory;
 };
 
 #endif // VOLCANO_COMPONENT_INCLUDED

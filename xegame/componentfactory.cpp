@@ -9,6 +9,8 @@
 #include "../game/debugpathcomponent.h"
 #include "../game/healthcomponent.h"
 
+#include "../script/scriptcomponent.h"
+
 #include "componentfactory.h"
 
 #include "../grinliz/glstringutil.h"
@@ -45,6 +47,9 @@ Component* ComponentFactory::Factory( const char* name, Chit* chit ) const
 	}
 	else if ( StrEqual( name, "CameraComponent" )) {
 		return new CameraComponent( &engine->camera );
+	}
+	else if ( StrEqual( name, "ScriptComponent" )) {
+		return new ScriptComponent( this );
 	}
 
 	GLASSERT( 0 );

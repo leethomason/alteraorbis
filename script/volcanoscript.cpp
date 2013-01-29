@@ -31,9 +31,9 @@ void VolcanoScript::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLEleme
 }
 
 
-void VolcanoScript::Load( const ScriptContext& ctx, const tinyxml2::XMLElement* parent )
+void VolcanoScript::Load( const ScriptContext& ctx, const tinyxml2::XMLElement* child )
 {
-	const XMLElement* child = parent->FirstChildElement( "VolcanoScript" );
+	//const XMLElement* child = parent->FirstChildElement( "VolcanoScript" );
 	GLASSERT( child );
 	
 	if ( child ) {

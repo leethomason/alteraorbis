@@ -1,6 +1,11 @@
-#include "scriptcomponent.h"
 #include "../engine/serialize.h"
 
+#include "../xegame/componentfactory.h"
+
+#include "scriptcomponent.h"
+#include "volcanoscript.h"
+
+using namespace grinliz;
 
 void ScriptComponent::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele )
 {
@@ -10,9 +15,22 @@ void ScriptComponent::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLEle
 
 void ScriptComponent::Load( const tinyxml2::XMLElement* element )
 {
+	GLASSERT( !script );
+	GLASSERT( factory );
 	this->BeginLoad( element, "ScriptComponent" );
 	Archive( 0, element );
-	GLASSERT( 0 );	// need factory
+
+	const tinyxml2::XMLElement* child = element->FirstChildElement();
+	const char* name = child->Name();
+	if ( StrEqual( name, "VolcanoScript" )) {
+		script = new VolcanoScript( factory->GetWorldMap() );
+	}
+	else {
+		GLASSERT( 0 );
+	}
+	GLASSERT( script );
+	script->Load( context, child );
+
 	//script->Load( context, element );
 	this->EndLoad( element );
 }
