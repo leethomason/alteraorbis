@@ -94,6 +94,7 @@ public:
 		int index = INDEX( x, y );
 		SetRock( x, y, grid[index].RockHeight(), grid[index].PoolHeight(), magma );
 	}
+	const WorldGrid& GetWorldGrid( int x, int y ) { return grid[INDEX(x,y)]; }
 	void SetBlocked( int x, int y )	{ grinliz::Rectangle2I pos; pos.Set( x, y, x, y ); SetBlocked( pos ); }
 	void SetBlocked( const grinliz::Rectangle2I& pos );
 	void ClearBlocked( int x, int y )	{ grinliz::Rectangle2I pos; pos.Set( x, y, x, y ); ClearBlocked( pos ); }

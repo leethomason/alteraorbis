@@ -9,7 +9,7 @@ class WorldMap;
 class VolcanoScript : public IScript
 {
 public:
-	VolcanoScript( WorldMap* map );
+	VolcanoScript( WorldMap* map, int maxSize );
 	virtual ~VolcanoScript()			{}
 
 	virtual void Init( const ScriptContext& heap );
@@ -20,7 +20,9 @@ public:
 private:
 	void Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele );
 
-	WorldMap*			worldMap;
+	WorldMap*	worldMap;
+	int			size;
+	int			maxSize;
 };
 
 

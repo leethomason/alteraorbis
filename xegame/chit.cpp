@@ -343,6 +343,12 @@ GameItem* Chit::GetItem()
 }
 
 
+void Chit::QueueDelete()
+{
+	this->GetChitBag()->QueueDelete( this );
+}
+
+
 void Chit::DebugStr( GLString* str )
 {
 	str->Format( "Chit=%x ", this );
@@ -359,6 +365,7 @@ void Chit::DebugStr( GLString* str )
 }
 
 
+/*
 void SafeChitList::Init( ChitBag* cb )
 {
 	GLASSERT( array.Empty() );
@@ -415,7 +422,7 @@ Chit* SafeChitList::Next() const {
 	}
 	return 0;
 }
-
+*/
 
 ComponentSet::ComponentSet( Chit* _chit, int bits )
 {

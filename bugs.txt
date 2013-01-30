@@ -17,7 +17,7 @@
 		x cave
 		x pools
 		x waterfall
-		- lava gen
+		x lava gen
 		- fast-step world sim
 	- Flora
 		- plants

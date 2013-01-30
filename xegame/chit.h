@@ -139,7 +139,9 @@ public:
 	Component*			GetComponent( int id );
 
 	ChitBag* GetChitBag() { return chitBag; }
+	// Returns the item if this has the ItemComponent.
 	GameItem* GetItem();
+	void QueueDelete();
 
 	// Send a message to the listeners, and every component
 	// in the chit (which don't need to be listeners.)
@@ -247,6 +249,7 @@ struct ComponentSet
 };
 
 
+/*
 // A list presentation of chits; stores IDs, not pointers,
 // so is safe to deletes.
 class SafeChitList
@@ -272,6 +275,6 @@ public:
 	mutable int it;
 	mutable grinliz::CDynArray<int> array;
 };
-
+*/
 
 #endif // XENOENGINE_CHIT_INCLUDED

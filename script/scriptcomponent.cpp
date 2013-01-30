@@ -23,7 +23,7 @@ void ScriptComponent::Load( const tinyxml2::XMLElement* element )
 	const tinyxml2::XMLElement* child = element->FirstChildElement();
 	const char* name = child->Name();
 	if ( StrEqual( name, "VolcanoScript" )) {
-		script = new VolcanoScript( factory->GetWorldMap() );
+		script = new VolcanoScript( factory->GetWorldMap(), 0 );
 	}
 	else {
 		GLASSERT( 0 );
@@ -48,8 +48,10 @@ void ScriptComponent::Save( tinyxml2::XMLPrinter* printer )
 void ScriptComponent::OnAdd( Chit* chit )
 {
 	super::OnAdd( chit );
-	context.initialized = false;
-	context.time = 0;
+	
+	// Do NOT set these. Will stomp on the Load()
+	//context.initialized = false;
+	//context.time = 0;
 	context.chit = chit;
 }
 

@@ -7,9 +7,13 @@
 using namespace grinliz;
 using namespace tinyxml2;
 
-VolcanoScript::VolcanoScript( WorldMap* p_map )
+static const U32 SPREAD_RATE = 4000;
+
+VolcanoScript::VolcanoScript( WorldMap* p_map, int p_size )
 {
 	worldMap = p_map;
+	maxSize = p_size;
+	size = 0;
 }
 
 
@@ -27,12 +31,16 @@ void VolcanoScript::Init( const ScriptContext& heap )
 
 void VolcanoScript::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele )
 {
+	XE_ARCHIVE( size );
+	XE_ARCHIVE( maxSize );
 	//XEArchive( prn, ele, "origin", origin );
 }
 
 
 void VolcanoScript::Load( const ScriptContext& ctx, const tinyxml2::XMLElement* child )
 {
+	size = maxSize = 0;
+
 	//const XMLElement* child = parent->FirstChildElement( "VolcanoScript" );
 	GLASSERT( child );
 	
@@ -52,7 +60,59 @@ void VolcanoScript::Save( const ScriptContext& ctx, tinyxml2::XMLPrinter* printe
 
 bool VolcanoScript::DoTick( const ScriptContext& ctx, U32 delta )
 {
-	return false;
+	SpatialComponent* sc = ctx.chit->GetSpatialComponent();
+	Vector2I pos = { 0,  0 };
+	GLASSERT( sc );
+	if ( sc ) {
+		Vector2F posF = sc->GetPosition2D();
+		pos.Set( (int)posF.x, (int)posF.y );
+	}
+	else {
+		ctx.chit->QueueDelete();
+	}
+
+	Rectangle2I b = worldMap->Bounds();
+	int rad = ctx.time / SPREAD_RATE;
+	if ( rad > size ) {
+		// Cool (and set) the inner rectangle, make the new rectangle magma.
+		// The origin stays magma until we're done.
+		size = Min( rad-1, maxSize );
+		
+		Rectangle2I r;
+		r.min = r.max = pos;
+		r.Outset( size );
+
+		for( int y=r.min.y; y<=r.max.y; ++y ) {
+			for( int x=r.min.x; x<=r.max.x; ++x ) {
+				if ( b.Contains( x, y ) ) {
+					worldMap->SetMagma( x, y, false );
+					const WorldGrid& g = worldMap->GetWorldGrid( x, y );
+					if ( g.IsLand() && !g.IsBlocked() ) {
+						worldMap->SetRock( x, y, g.NominalRockHeight(), 0, false );
+					}
+				}
+			}
+		}
+
+		size = rad;
+
+		if ( rad < maxSize ) {
+			worldMap->SetMagma( pos.x, pos.y, true );
+			for( int y=r.min.y; y<=r.max.y; ++y ) {
+				for( int x=r.min.x; x<=r.max.x; ++x ) {
+					if ( b.Contains( x, y )) {
+						if ( y == r.min.y || y == r.max.y || x == r.min.x || x == r.max.x ) {
+							worldMap->SetMagma( x, y, true );
+						}
+					}
+				}
+			}
+		}
+		else {
+			ctx.chit->QueueDelete();
+		}
+	}
+	return true;
 }
 
 
