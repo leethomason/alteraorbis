@@ -40,6 +40,8 @@ Sim::Sim( LumosGame* g )
 
 	chitBag = new LumosChitBag();
 	playerID = 0;
+	minuteClock = 0;
+	timeInMinutes = 0;
 }
 
 
@@ -69,11 +71,19 @@ void Sim::Load( const char* mapDAT, const char* mapXML, const char* gameXML )
 		if ( !doc.Error() ) {
 			const XMLElement* root = doc.FirstChildElement( "Sim" );
 			playerID = 0;
-			root->QueryAttribute( "playerID", &playerID );
+			Archive( 0, root );
 			engine->camera.Load( root );
 			chitBag->Load( &factory, root );
 		}
 	}
+}
+
+
+void Sim::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele )
+{
+	XE_ARCHIVE( playerID );
+	XE_ARCHIVE( minuteClock );
+	XE_ARCHIVE( timeInMinutes );
 }
 
 
@@ -86,7 +96,7 @@ void Sim::Save( const char* mapDAT, const char* mapXML, const char* gameXML )
 	if ( fp ) {
 		XMLPrinter printer( fp );
 		printer.OpenElement( "Sim" );
-		printer.PushAttribute( "playerID", playerID );
+		Archive( &printer, 0 );
 		engine->camera.Save( &printer );
 		chitBag->Save( &printer );
 		printer.CloseElement();
@@ -139,6 +149,35 @@ void Sim::DoTick( U32 delta )
 {
 	worldMap->DoTick( delta, chitBag );
 	chitBag->DoTick( delta, engine );
+
+	bool minuteTick = false;
+
+	minuteClock -= (int)delta;
+	if ( minuteClock <= 0 ) {
+		minuteClock += MINUTE;
+		timeInMinutes++;
+		minuteTick = true;
+	}
+
+	// Logic that will probably need to be broken out.
+	// What happens in a given age?
+	int age = minuteClock / AGE;
+
+	switch( age ) {
+	case 0:
+		// The Age of Fire
+		if ( minuteTick ) {
+			CreateVolcano( random.Rand(worldMap->Width()), random.Rand(worldMap->Height() ));
+			CreateVolcano( random.Rand(worldMap->Width()), random.Rand(worldMap->Height() ));
+		}
+		break;
+
+	default:
+		if ( minuteTick && random.Rand(3)==0 ) {
+			CreateVolcano( random.Rand(worldMap->Width()), random.Rand(worldMap->Height() ));
+		}
+		break;
+	}
 }
 
 
@@ -160,8 +199,6 @@ void Sim::SetAllRock()
 
 void Sim::CreateVolcano( int x, int y )
 {
-	//GLOUTPUT(( "CreateVolcano at %d,%d\n", x, y ));
-	// FIXME: check that x,y are valid
 	Chit* chit = chitBag->NewChit();
 	chit->Add( new SpatialComponent() );
 	chit->Add( new ScriptComponent( new VolcanoScript( worldMap, 6 )));

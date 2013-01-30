@@ -4,6 +4,8 @@
 #include "../grinliz/gltypes.h"
 #include "../grinliz/gldebug.h"
 #include "../grinliz/glvector.h"
+#include "../grinliz/glrandom.h"
+#include "../tinyxml2/tinyxml2.h"
 
 class Engine;
 class WorldMap;
@@ -11,6 +13,7 @@ class LumosGame;
 class LumosChitBag;
 class Texture;
 class Chit;
+
 
 class Sim
 {
@@ -39,15 +42,24 @@ public:
 	void SetAllRock();
 	void CreateVolcano( int x, int y );
 
+	enum {
+		MINUTE	= 1000*60,			// game time and real time
+		AGE		= MINUTE * 100		// 1st age, 2nd age, etc.
+	};
+
 private:
 	void CreatePlayer( const grinliz::Vector2I& pos, const char* assetName );
+	void Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele );
 
 	Engine*			engine;
 	LumosGame*		lumosGame;
 	WorldMap*		worldMap;
 	LumosChitBag*	chitBag;
 
+	grinliz::Random	random;
 	int playerID;
+	int minuteClock;
+	U32 timeInMinutes;
 };
 
 

@@ -85,14 +85,14 @@ public:
 
 	int RockHeight() const { return rockHeight; }
 	void SetRockHeight( int h ) {
-		GLASSERT( IsLand() );
+		GLASSERT( IsLand() || (h==0) );
 		GLASSERT( h >= 0 && h <= MAX_ROCK_HEIGHT );
 		rockHeight = h;
 	}
 
 	int PoolHeight() const { return poolHeight; }
 	void SetPoolHeight( int p ) {
-		GLASSERT( IsLand() );
+		GLASSERT( IsLand() || (p==0) );
 		GLASSERT( !p || p > (int)rockHeight );
 		poolHeight = p;
 	}
