@@ -61,4 +61,10 @@ private:
 };
 
 
+struct NewsEvent {
+	grinliz::Vector2F	pos;
+	grinliz::IString	name;
+};
+
+
 #endif // CHIT_EVENT_INCLUDED

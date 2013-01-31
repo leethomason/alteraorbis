@@ -237,13 +237,13 @@ void WorldMap::Init( int w, int h )
 		AttachEngine( savedEngine );
 	}
 
-	memset( zoneInfo, 0, sizeof(ZoneInfo)*DZONE );
-	for( int y=0; y<DZONE; ++y ) {
-		for( int x=0; x<DZONE; ++x ) {
-			zoneInfo[y*DZONE+x].x = x*ZONE_SIZE;
-			zoneInfo[y*DZONE+x].y = y*ZONE_SIZE;
-		}
-	}
+//	memset( zoneInfo, 0, sizeof(ZoneInfo)*DZONE );
+//	for( int y=0; y<DZONE; ++y ) {
+//		for( int x=0; x<DZONE; ++x ) {
+//			zoneInfo[y*DZONE+x].x = x*ZONE_SIZE;
+//			zoneInfo[y*DZONE+x].y = y*ZONE_SIZE;
+//		}
+//	}
 
 	waterInit.ClearAll();
 	DeleteAllRegions();
@@ -435,7 +435,7 @@ Vector2I WorldMap::FindEmbark()
 
 
 
-void WorldMap::ProcessWater()
+void WorldMap::ProcessWater( ChitBag* cb )
 {
 	//QuickProfile qp( "WorldMap::ProcessWater" );
 	static const Vector2I next[4] = { {1,0}, {-1,0}, {0,1}, {0,-1} };
@@ -451,7 +451,7 @@ void WorldMap::ProcessWater()
 			if ( !waterInit.IsSet( zx, zy )) {
 
 				waterInit.Set( zx, zy, 0, true );
-				zoneInfo[zy*DZONE+zx].pools = 0;
+				//zoneInfo[zy*DZONE+zx].pools = 0;
 				const int baseX = zx*ZONE_SIZE;
 				const int baseY = zy*ZONE_SIZE;
 				
@@ -534,6 +534,11 @@ void WorldMap::ProcessWater()
 							int waterMax = poolGrids.Size() / 10;
 							if ( poolGrids.Size() >= 10 && border == 0 && water <= waterMax ) {
 								GLOUTPUT(( "pool found. zone=%d,%d area=%d waterFall=%d\n", zx, zy, poolGrids.Size(), water ));
+								
+								Vector2F posF = { (float)poolGrids[0].x+0.5f, (float)poolGrids[0].y+0.5f };
+								NewsEvent poolNews = { posF, StringPool::Intern( "water", true ) };
+								cb->AddNews( poolNews );
+
 								for( int i=0; i<poolGrids.Size(); ++i ) {
 									int idx = INDEX( poolGrids[i] );
 									SetRock( poolGrids[i].x, poolGrids[i].y, grid[idx].RockHeight(), POOL_HEIGHT, grid[idx].Magma() );	
@@ -543,10 +548,16 @@ void WorldMap::ProcessWater()
 										GLASSERT( zbounds.Contains( v ));
 										if ( grid[INDEX(v)].IsWater() ) {
 											waterfalls.Push( poolGrids[i] );
+
+											posF.Set( (float)poolGrids[i].x+0.5f, (float)poolGrids[i].y+0.5f );
+											NewsEvent we = { posF, StringPool::Intern( "waterfall" ) };
+											cb->AddNews( we );
+											
+											break;
 										}
 									}
 								}
-								zoneInfo[zy*DZONE+zx].pools += 1;
+								//zoneInfo[zy*DZONE+zx].pools += 1;
 							}
 							++currentColor;
 							poolGrids.Clear();
@@ -594,7 +605,7 @@ void WorldMap::EmitWaterfalls( U32 delta )
 
 void WorldMap::DoTick( U32 delta, ChitBag* chitBag )
 {
-	ProcessWater();
+	ProcessWater( chitBag );
 	EmitWaterfalls( delta );
 
 	slowTick -= (int)(delta);

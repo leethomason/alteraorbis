@@ -37,7 +37,11 @@ private:
 		SAVE,
 		LOAD,
 		CYCLE,
-		NUM_SERIAL_BUTTONS
+		NUM_SERIAL_BUTTONS,
+		
+		NUM_NEWS_BUTTONS = 16,
+		NEWS_BUTTON_WIDTH  = 60,
+		NEWS_BUTTON_HEIGHT = 25
 	};
 	enum {
 		TRACK,
@@ -49,7 +53,7 @@ private:
 	gamui::PushButton	serialButton[NUM_SERIAL_BUTTONS];
 	gamui::ToggleButton camModeButton[NUM_CAM_MODES];
 	gamui::PushButton	allRockButton;
-	gamui::PushButton	nextPool;
+	gamui::PushButton	newsButton[NUM_NEWS_BUTTONS];
 	gamui::Image		minimap;
 	gamui::Image		playerMark;
 };

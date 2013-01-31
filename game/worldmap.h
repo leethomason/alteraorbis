@@ -189,11 +189,11 @@ public:
 		DZONE		= MAX_MAP_SIZE/ZONE_SIZE,	// fixme: misleading. make private.
 	    DZONE2		= DZONE*DZONE,
 	};
-	struct ZoneInfo {
-		int x, y;
-		int pools;
-	};
-	const ZoneInfo* GetZoneInfo() const { return zoneInfo; }
+//	struct ZoneInfo {
+//		int x, y;
+//		int pools;
+//	};
+//	const ZoneInfo* GetZoneInfo() const { return zoneInfo; }
 
 
 private:
@@ -227,7 +227,7 @@ private:
 			(*str)[5] = '0' + rockHeight;
 		}
 	}
-	void ProcessWater();
+	void ProcessWater( ChitBag* cb );
 	void EmitWaterfalls( U32 delta );	// particle systems
 
 	void Init( int w, int h );
@@ -330,7 +330,7 @@ private:
 	grinliz::CDynArray< grinliz::Vector2I > waterStack;
 	grinliz::CDynArray< grinliz::Vector2I > poolGrids;
 
-	ZoneInfo zoneInfo[ DZONE*DZONE ];
+	//ZoneInfo zoneInfo[ DZONE*DZONE ];
 };
 
 #endif // LUMOS_WORLD_MAP_INCLUDED

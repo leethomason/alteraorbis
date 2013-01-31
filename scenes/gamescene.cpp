@@ -64,8 +64,13 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	allRockButton.Init( &gamui2D, game->GetButtonLook(0) );
 	allRockButton.SetText( "All Rock" );
 
-	nextPool.Init( &gamui2D, game->GetButtonLook(0) );
-	nextPool.SetText( "Pool" );
+	//nextPool.Init( &gamui2D, game->GetButtonLook(0) );
+	//nextPool.SetText( "Pool" );
+	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
+		newsButton[i].Init( &gamui2D, game->GetButtonLook(0) );
+		newsButton[i].SetSize( NEWS_BUTTON_WIDTH, NEWS_BUTTON_HEIGHT );
+		newsButton[i].SetText( "news" );
+	}
 }
 
 
@@ -88,10 +93,12 @@ void GameScene::Resize()
 	}
 	layout.PosAbs( &allRockButton, 0, 0 );
 
-	layout.PosAbs( &nextPool, -1, -1 );
-
 	const Screenport& port = lumosGame->GetScreenport();
 	minimap.SetPos( port.UIWidth()-MINI_MAP_SIZE, 0 );
+
+	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
+		newsButton[i].SetPos( port.UIWidth()- (NEWS_BUTTON_WIDTH), MINI_MAP_SIZE + (NEWS_BUTTON_HEIGHT+2)*i );
+	}
 }
 
 
@@ -224,6 +231,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 	else if ( item == &allRockButton ) {
 		sim->SetAllRock();
 	}
+	/*
 	else if ( item == &nextPool ) {
 		Chit* chit = sim->GetPlayerChit();
 		if ( chit ) {
@@ -253,6 +261,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 			}
 		}
 	}
+	*/
 }
 
 

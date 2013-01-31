@@ -66,6 +66,10 @@ public:
 	// passes ownership
 	void QueueEvent( const ChitEvent& event )			{ events.Push( event ); }
 
+	void AddNews( const NewsEvent& event );
+	const NewsEvent* News() const { return news.Mem(); }
+	int NumNews() const { return news.Size(); }
+
 	// Hashes based on integer coordinates. No need to call
 	// if they don't change.
 	void AddToSpatialHash( Chit*, int x, int y );
@@ -113,6 +117,7 @@ private:
 	grinliz::CDynArray<CompID>		compDeleteList;	
 	grinliz::CDynArray<Chit*>		hashQuery;			// local data, cached at class level
 	grinliz::CDynArray<ChitEvent>	events;
+	grinliz::CDynArray<NewsEvent>	news;
 	
 	grinliz::CDynArray<Bolt>		bolts;
 	

@@ -244,6 +244,15 @@ void ChitBag::HandleBolt( const Bolt& bolt, Model* m, const grinliz::Vector3F& a
 }
 
 
+void ChitBag::AddNews( const NewsEvent& event )
+{
+	news.PushFront( event );
+	if ( news.Size() > 20 ) {
+		news.Pop();
+	}
+}
+
+
 void ChitBag::AddToSpatialHash( Chit* chit, int x, int y )
 {
 	GLASSERT( chit );
@@ -289,21 +298,6 @@ void ChitBag::UpdateSpatialHash( Chit* c, int x0, int y0, int x1, int y1 )
 	}
 }
 
-
-/*
-Vector3F ChitBag::compareOrigin;
-
-int ChitBag::CompareDistance( const void* p0, const void* p1 ) 
-{
-	Chit** c0 = (Chit**)p0;
-	Chit** c1 = (Chit**)p1;
-
-	float d0 = ( (*c0)->GetSpatialComponent()->GetPosition() - compareOrigin).LengthSquared();
-	float d1 = ( (*c1)->GetSpatialComponent()->GetPosition() - compareOrigin).LengthSquared();
-
-	return LRintf(d0 - d1);
-}
-*/
 
 void ChitBag::QuerySpatialHash(	grinliz::CDynArray<Chit*>* array, 
 								const grinliz::Rectangle2F& rf, 

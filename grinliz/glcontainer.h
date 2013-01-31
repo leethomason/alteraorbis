@@ -89,6 +89,16 @@ public:
 	}
 
 
+	void PushFront( const T& t ) {
+		EnsureCap( size+1 );
+		for( int i=size; i>=0; --i ) {
+			mem[i] = mem[i-1];
+		}
+		mem[0] = t;
+		++size;
+		++nAlloc;
+	}
+
 	T* PushArr( int count ) {
 		EnsureCap( size+count );
 		T* result = &mem[size];

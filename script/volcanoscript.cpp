@@ -1,7 +1,11 @@
 #include "volcanoscript.h"
+
 #include "../engine/serialize.h"
+
 #include "../xegame/chit.h"
 #include "../xegame/spatialcomponent.h"
+#include "../xegame/chitbag.h"
+
 #include "../game/worldmap.h"
 
 using namespace grinliz;
@@ -25,6 +29,9 @@ void VolcanoScript::Init( const ScriptContext& heap )
 		Vector2F pos = sc->GetPosition2D();
 		GLOUTPUT(( "VolcanoScript::Init. pos=%d,%d\n", (int)pos.x, (int)pos.y ));
 		worldMap->SetMagma( (int)pos.x, (int)pos.y, true );
+
+		NewsEvent event = { pos, StringPool::Intern( "volcano", true ) };
+		heap.chit->GetChitBag()->AddNews( event );
 	}
 }
 
@@ -33,15 +40,12 @@ void VolcanoScript::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLEleme
 {
 	XE_ARCHIVE( size );
 	XE_ARCHIVE( maxSize );
-	//XEArchive( prn, ele, "origin", origin );
 }
 
 
 void VolcanoScript::Load( const ScriptContext& ctx, const tinyxml2::XMLElement* child )
 {
 	size = maxSize = 0;
-
-	//const XMLElement* child = parent->FirstChildElement( "VolcanoScript" );
 	GLASSERT( child );
 	
 	if ( child ) {
