@@ -186,6 +186,8 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 
 void GameScene::ItemTapped( const gamui::UIItem* item )
 {
+	Vector2F dest = { -1, -1 };
+
 	if ( item == &okay ) {
 		game->PopScene();
 	}
@@ -195,24 +197,9 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		GLOUTPUT(( "minimap tapped nx=%.1f ny=%.1f\n", x, y ));
 
 		Engine* engine = sim->GetEngine();
-		Vector2F dest = { 0, 0 };
 		dest.x = x*(float)engine->GetMap()->Width();
 		dest.y = y*(float)engine->GetMap()->Height();
 
-		Chit* chit = sim->GetPlayerChit();
-		if ( chit ) {
-			if ( camModeButton[TRACK].Down() ) {
-				PathMoveComponent* pmc = GET_COMPONENT( chit, PathMoveComponent );
-				if ( pmc ) {
-					pmc->QueueDest( dest );
-				}
-			}
-			else if ( camModeButton[TELEPORT].Down() ) {
-				SpatialComponent* sc = chit->GetSpatialComponent();
-				GLASSERT( sc );
-				sc->SetPosition( dest.x, 0, dest.y );
-			}
-		}
 	}
 	else if ( item == &serialButton[SAVE] ) {
 		Save();
@@ -231,37 +218,35 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 	else if ( item == &allRockButton ) {
 		sim->SetAllRock();
 	}
-	/*
-	else if ( item == &nextPool ) {
-		Chit* chit = sim->GetPlayerChit();
-		if ( chit ) {
-			SpatialComponent* sc = chit->GetSpatialComponent();
-			GLASSERT( sc );
 
-			const Vector3F& pos = sc->GetPosition();
-			int zx = (int)(pos.x) / WorldMap::ZONE_SIZE;
-			int zy = (int)(pos.z) / WorldMap::ZONE_SIZE;
-			int zindex = zy * WorldMap::DZONE + zx;
-
-			const WorldMap::ZoneInfo* zi = sim->GetWorldMap()->GetZoneInfo();
-			int search = zindex+1;
-			if ( search == WorldMap::DZONE2 ) search = 0;
-
-			while ( true ) {
-				if ( zi[search].pools ) {
-					sc->SetPosition( (float)(zi[search].x+WorldMap::ZONE_SIZE/2),
-									 0,
-									 (float)(zi[search].y+WorldMap::ZONE_SIZE/2) );
-					break;
-				}
-				++search;
-				if ( search == zindex ) break;
-				if ( search == WorldMap::DZONE2 )
-					search = 0;
-			}
+	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
+		if ( item == &newsButton[i] ) {
+			const NewsEvent* news = sim->GetChitBag()->News();
+			int nNews = sim->GetChitBag()->NumNews();
+			GLASSERT( i < nNews );
+			dest = news[i].pos;
 		}
 	}
-	*/
+
+	if ( dest.x >= 0 ) {
+		Chit* chit = sim->GetPlayerChit();
+		if ( chit ) {
+			if ( camModeButton[TRACK].Down() ) {
+				PathMoveComponent* pmc = GET_COMPONENT( chit, PathMoveComponent );
+				if ( pmc ) {
+					pmc->QueueDest( dest );
+				}
+			}
+			else if ( camModeButton[TELEPORT].Down() ) {
+				SpatialComponent* sc = chit->GetSpatialComponent();
+				GLASSERT( sc );
+				sc->SetPosition( dest.x, 0, dest.y );
+			}
+		}
+		else {
+			sim->GetEngine()->CameraLookAt( dest.x, dest.y );
+		}
+	}
 }
 
 
@@ -274,6 +259,20 @@ void GameScene::HandleHotKey( int mask )
 void GameScene::DoTick( U32 delta )
 {
 	sim->DoTick( delta );
+
+	const NewsEvent* news = sim->GetChitBag()->News();
+	int nNews = sim->GetChitBag()->NumNews();
+
+	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
+		if ( i < nNews ) {
+			newsButton[i].SetText( news[i].name.c_str() );
+			newsButton[i].SetEnabled( true );
+		}
+		else {
+			newsButton[i].SetText( "" );
+			newsButton[i].SetEnabled( false );
+		}
+	}
 }
 
 

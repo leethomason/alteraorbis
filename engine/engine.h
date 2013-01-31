@@ -110,6 +110,7 @@ public:
 	void CameraLookingAt( grinliz::Vector3F* at );
 	void CameraLookAt( float x, float z, float heightOfCamera, float yRotation=-45.0f, float tilt=-50.0f );
 	void CameraLookAt( const grinliz::Vector3F& camera, const grinliz::Vector3F& target );
+	void CameraLookAt( float x, float z );
 
 	Model* AllocModel( const ModelResource* );
 	void FreeModel( Model* );

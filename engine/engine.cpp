@@ -123,6 +123,19 @@ void Engine::MoveCameraHome()
 }
 
 
+
+void Engine::CameraLookAt( float x, float z )
+{
+	Vector3F target = { x, 0, z };
+	Vector3F at = { 0, 0, 0 };
+	CameraLookingAt( &at );
+	if ( at.y == 0 ) {
+		Vector3F delta = target - at;
+		camera.DeltaPosWC( delta.x, 0, delta.z );
+	}
+}
+
+
 void Engine::CameraLookAt( const grinliz::Vector3F& c, const grinliz::Vector3F& target )
 {
 	camera.SetPosWC( c );
