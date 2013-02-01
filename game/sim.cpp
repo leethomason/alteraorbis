@@ -42,6 +42,9 @@ Sim::Sim( LumosGame* g )
 	playerID = 0;
 	minuteClock = 0;
 	timeInMinutes = 0;
+	volcTimer = 0;
+
+	random.SetSeedFromTime();
 }
 
 
@@ -162,19 +165,35 @@ void Sim::DoTick( U32 delta )
 	// Logic that will probably need to be broken out.
 	// What happens in a given age?
 	int age = minuteClock / AGE;
+	volcTimer += delta;
+
+	// Age of Fire
+	static const int VOLC_RAD = 9;
+	static const int VOLC_DIAM = VOLC_RAD*2+1;
+	static const int NUM_VOLC = MAX_MAP_SIZE*MAX_MAP_SIZE / (VOLC_DIAM*VOLC_DIAM);
+	static const int MSEC_TO_VOLC = AGE / NUM_VOLC;
 
 	switch( age ) {
 	case 0:
 		// The Age of Fire
-		if ( minuteTick ) {
-			CreateVolcano( random.Rand(worldMap->Width()), random.Rand(worldMap->Height() ));
-			CreateVolcano( random.Rand(worldMap->Width()), random.Rand(worldMap->Height() ));
+		// Essentially want to get the world covered.
+		while( volcTimer >= MSEC_TO_VOLC ) {
+			volcTimer -= MSEC_TO_VOLC;
+
+			for( int i=0; i<5; ++i ) {
+				int x = random.Rand(worldMap->Width());
+				int y = random.Rand(worldMap->Height());
+				if ( worldMap->IsLand( x, y ) ) {
+					CreateVolcano( x, y, VOLC_RAD );
+					break;
+				}
+			}
 		}
 		break;
 
 	default:
 		if ( minuteTick && random.Rand(3)==0 ) {
-			CreateVolcano( random.Rand(worldMap->Width()), random.Rand(worldMap->Height() ));
+			CreateVolcano( random.Rand(worldMap->Width()), random.Rand(worldMap->Height()), VOLC_RAD );
 		}
 		break;
 	}
@@ -197,11 +216,11 @@ void Sim::SetAllRock()
 }
 
 
-void Sim::CreateVolcano( int x, int y )
+void Sim::CreateVolcano( int x, int y, int size )
 {
 	Chit* chit = chitBag->NewChit();
 	chit->Add( new SpatialComponent() );
-	chit->Add( new ScriptComponent( new VolcanoScript( worldMap, 6 )));
+	chit->Add( new ScriptComponent( new VolcanoScript( worldMap, size )));
 
 	chit->GetSpatialComponent()->SetPosition( (float)x+0.5f, 0.0f, (float)y+0.5f );
 }

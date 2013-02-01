@@ -30,9 +30,6 @@ private:
 	void Save();
 	void Load();
 
-	LumosGame*	lumosGame;
-	Sim*		sim;
-
 	enum {
 		SAVE,
 		LOAD,
@@ -48,6 +45,13 @@ private:
 		TELEPORT,
 		NUM_CAM_MODES
 	};
+
+	LumosGame*	lumosGame;
+	Sim*		sim;
+	bool		fastMode;
+	int			simTimer;		// used to count sim ticks/second
+	int			simCount;
+	float		simPS;
 
 	gamui::PushButton	okay;
 	gamui::PushButton	serialButton[NUM_SERIAL_BUTTONS];

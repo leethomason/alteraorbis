@@ -40,12 +40,14 @@ public:
 
 	// Set all rock to the nominal values
 	void SetAllRock();
-	void CreateVolcano( int x, int y );
+	void CreateVolcano( int x, int y, int size );
 
 	enum {
-		MINUTE	= 1000*60,			// game time and real time
-		AGE		= MINUTE * 100		// 1st age, 2nd age, etc.
+		MINUTE			= 1000*60,						// game time and real time
+		MINUTES_IN_AGE	= 100,
+		AGE				= MINUTE * MINUTES_IN_AGE		// 1st age, 2nd age, etc.
 	};
+	double DateInAge() const { return (double)timeInMinutes / (double)MINUTES_IN_AGE; }
 
 private:
 	void CreatePlayer( const grinliz::Vector2I& pos, const char* assetName );
@@ -60,6 +62,7 @@ private:
 	int playerID;
 	int minuteClock;
 	U32 timeInMinutes;
+	int volcTimer;
 };
 
 

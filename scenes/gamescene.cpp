@@ -24,6 +24,10 @@ static const float MARK_SIZE = 6.0f*DEBUG_SCALE;
 
 GameScene::GameScene( LumosGame* game ) : Scene( game )
 {
+	fastMode = false;
+	simTimer = 0;
+	simPS = 1.0f;
+	simCount = 0;
 	lumosGame = game;
 	game->InitStd( &gamui2D, &okay, 0 );
 	sim = new Sim( lumosGame );
@@ -31,8 +35,10 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	Load();
 
 	Vector3F delta = { 14.0f, 14.0f, 14.0f };
-	GLASSERT( sim->GetPlayerChit() );
-	Vector3F target = sim->GetPlayerChit()->GetSpatialComponent()->GetPosition();
+	Vector3F target = { (float)sim->GetWorldMap()->Width() *0.5f, 0.0f, (float)sim->GetWorldMap()->Height() * 0.5f };
+	if ( sim->GetPlayerChit() ) {
+		target = sim->GetPlayerChit()->GetSpatialComponent()->GetPosition();
+	}
 	sim->GetEngine()->CameraLookAt( target + delta, target );
 	
 	if ( !sim->GetChitBag()->ActiveCamera() ) {
@@ -89,9 +95,9 @@ void GameScene::Resize()
 		layout.PosAbs( &serialButton[i], i, -2 );
 	}
 	for( int i=0; i<NUM_CAM_MODES; ++i ) {
-		layout.PosAbs( &camModeButton[i], i, 1 );
+		layout.PosAbs( &camModeButton[i], i, 2 );
 	}
-	layout.PosAbs( &allRockButton, 0, 0 );
+	layout.PosAbs( &allRockButton, 0, 1 );
 
 	const Screenport& port = lumosGame->GetScreenport();
 	minimap.SetPos( port.UIWidth()-MINI_MAP_SIZE, 0 );
@@ -175,9 +181,12 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 						sc->SetPosition( at.x, 0, at.z );
 					}
 				}
+				else {
+					sim->GetEngine()->CameraLookAt( at.x, at.z );
+				}
 			}
 			else if ( tapMod == GAME_TAP_MOD_CTRL ) {
-				sim->CreateVolcano( (int)at.x, (int)at.z );
+				sim->CreateVolcano( (int)at.x, (int)at.z, 6 );
 			}
 		}
 	}
@@ -252,13 +261,28 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 
 void GameScene::HandleHotKey( int mask )
 {
-	super::HandleHotKey( mask );
+	if ( mask == GAME_HK_SPACE ) {
+		fastMode = !fastMode;
+	}
+	else {
+		super::HandleHotKey( mask );
+	}
 }
 
 
 void GameScene::DoTick( U32 delta )
 {
+	clock_t startTime = clock();
+
 	sim->DoTick( delta );
+	++simCount;
+
+	if ( fastMode ) {
+		while( clock() - startTime < 100 ) {
+			sim->DoTick( 30 );
+			++simCount;
+		}
+	}
 
 	const NewsEvent* news = sim->GetChitBag()->News();
 	int nNews = sim->GetChitBag()->NumNews();
@@ -273,6 +297,9 @@ void GameScene::DoTick( U32 delta )
 			newsButton[i].SetEnabled( false );
 		}
 	}
+
+	clock_t endTime = clock();
+	simTimer += (int)(endTime-startTime);
 }
 
 
@@ -290,17 +317,20 @@ void GameScene::Draw3D( U32 deltaTime )
 	*/
 
 	minimap.SetAtom( atom );
+	Vector3F lookAt = { 0, 0, 0 };
+	sim->GetEngine()->CameraLookingAt( &lookAt );
 
 	Chit* chit = sim->GetPlayerChit();
 	if ( chit && chit->GetSpatialComponent() ) {
-		const Vector3F& v = chit->GetSpatialComponent()->GetPosition();
-		Map* map = sim->GetEngine()->GetMap();
-		
-		float x = minimap.X() + Lerp( 0.f, minimap.Width(),  v.x / (float)map->Width() );
-		float y = minimap.Y() + Lerp( 0.f, minimap.Height(), v.z / (float)map->Height() );
-
-		playerMark.SetCenterPos( x, y );
+		lookAt = chit->GetSpatialComponent()->GetPosition();
 	}
+
+	Map* map = sim->GetEngine()->GetMap();
+	
+	float x = minimap.X() + Lerp( 0.f, minimap.Width(),  lookAt.x / (float)map->Width() );
+	float y = minimap.Y() + Lerp( 0.f, minimap.Height(), lookAt.z / (float)map->Height() );
+
+	playerMark.SetCenterPos( x, y );
 }
 
 
@@ -319,5 +349,16 @@ void GameScene::DrawDebugText()
 					   engine->camera.PosWC().x, engine->camera.PosWC().y, engine->camera.PosWC().z );
 	}
 	ufoText->Draw( 0, 48, "Tap world or map to go to location. End/Home rotate, PgUp/Down zoom." );
+
+	if ( simTimer > 1000 ) {
+		simPS = 1000.0f * (float)simCount / (float)simTimer;
+		simTimer = 0;
+		simCount = 0;
+	}
+
+	ufoText->Draw( 0, 64,	"Date=%.2f %s mode. Sim/S=%.1f", 
+							sim->DateInAge(),
+							fastMode ? "fast" : "normal", 
+							simPS ); 
 }
 

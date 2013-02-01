@@ -189,12 +189,6 @@ public:
 		DZONE		= MAX_MAP_SIZE/ZONE_SIZE,	// fixme: misleading. make private.
 	    DZONE2		= DZONE*DZONE,
 	};
-//	struct ZoneInfo {
-//		int x, y;
-//		int pools;
-//	};
-//	const ZoneInfo* GetZoneInfo() const { return zoneInfo; }
-
 
 private:
 	int INDEX( int x, int y ) const { 
