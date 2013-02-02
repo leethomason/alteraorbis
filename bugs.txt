@@ -1,8 +1,8 @@
 x volcano delayed on save/load cycle (size getting set to zero?)
 - water creation seems deferred to save/load cycle. SetRock() not quite correct?
+- need free camera mode
 
 - game
-	- need free camera mode
 	x Land and Water
 		x generate a random world
 		x save / load

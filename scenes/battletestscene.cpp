@@ -239,7 +239,7 @@ void BattleTestScene::LoadMap()
 		const Vector2I& v = features[i];
 
 		chit->Add( new MapSpatialComponent( 1, 1, map ));
-		chit->Add( new RenderComponent( engine, "tree" ));
+		chit->Add( new RenderComponent( engine, "plant1.3" ));
 		chit->Add( new ItemComponent( treeItem ));
 		chit->Add( new HealthComponent());
 

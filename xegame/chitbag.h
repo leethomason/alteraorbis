@@ -109,7 +109,12 @@ private:
 
 	enum { BLOCK_SIZE = 1000 };
 	Chit* memRoot;
-	// Use a memory pool so the chits don't move on re-allocation.
+	// Use a memory pool so the chits don't move on re-allocation. I
+	// keep wanting to use a DynArray, but that opens up issues of
+	// Chit copying (which they aren't set up for.) It keeps going 
+	// squirrely. If inclined, I think a custom array based on realloc
+	// is probably the correct solution, but the current approach 
+	// may be fine.
 	grinliz::CDynArray< Chit* >		  blocks;
 	grinliz::HashTable< int, Chit* >  chitID;
 
