@@ -41,6 +41,7 @@ public:
 	// Set all rock to the nominal values
 	void SetAllRock();
 	void CreateVolcano( int x, int y, int size );
+	void CreatePlant( int x, int y, int type );
 
 	enum {
 		MINUTE			= 1000*60,						// game time and real time

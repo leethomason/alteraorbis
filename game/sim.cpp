@@ -13,6 +13,7 @@
 #include "../script/itemscript.h"
 #include "../script/scriptcomponent.h"
 #include "../script/volcanoscript.h"
+#include "../script/plantscript.h"
 
 #include "pathmovecomponent.h"
 #include "debugstatecomponent.h"
@@ -221,6 +222,16 @@ void Sim::CreateVolcano( int x, int y, int size )
 	Chit* chit = chitBag->NewChit();
 	chit->Add( new SpatialComponent() );
 	chit->Add( new ScriptComponent( new VolcanoScript( worldMap, size )));
+
+	chit->GetSpatialComponent()->SetPosition( (float)x+0.5f, 0.0f, (float)y+0.5f );
+}
+
+
+void Sim::CreatePlant( int x, int y, int type )
+{
+	Chit* chit = chitBag->NewChit();
+	chit->Add( new SpatialComponent() );
+	chit->Add( new ScriptComponent( new PlantScript( engine, worldMap, type )));
 
 	chit->GetSpatialComponent()->SetPosition( (float)x+0.5f, 0.0f, (float)y+0.5f );
 }

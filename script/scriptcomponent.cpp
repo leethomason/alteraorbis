@@ -4,6 +4,7 @@
 
 #include "scriptcomponent.h"
 #include "volcanoscript.h"
+#include "plantscript.h"
 
 using namespace grinliz;
 
@@ -22,16 +23,19 @@ void ScriptComponent::Load( const tinyxml2::XMLElement* element )
 
 	const tinyxml2::XMLElement* child = element->FirstChildElement();
 	const char* name = child->Name();
+
 	if ( StrEqual( name, "VolcanoScript" )) {
 		script = new VolcanoScript( factory->GetWorldMap(), 0 );
+	}
+	else if ( StrEqual( name, "PlantScript" )) {
+		script = new PlantScript( factory->GetEngine(), factory->GetWorldMap(), 0 );
 	}
 	else {
 		GLASSERT( 0 );
 	}
 	GLASSERT( script );
+	
 	script->Load( context, child );
-
-	//script->Load( context, element );
 	this->EndLoad( element );
 }
 

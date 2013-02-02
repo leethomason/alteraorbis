@@ -17,7 +17,8 @@ public:
 
 	Component* Factory( const char* name, Chit* chit ) const;
 
-	WorldMap* GetWorldMap() const  { return worldMap; }
+	Engine*	GetEngine() const		{ return engine; }
+	WorldMap* GetWorldMap() const	{ return worldMap; }
 
 private:
 	Engine*		engine;

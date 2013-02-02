@@ -4,11 +4,12 @@
 #include "scriptcomponent.h"
 
 class WorldMap;
+class Engine;
 
 class PlantScript : public IScript
 {
 public:
-	PlantScript( WorldMap* map, int type );
+	PlantScript( Engine* engine, WorldMap* map, int type );
 	virtual ~PlantScript()	{}
 
 	virtual void Init( const ScriptContext& heap );
@@ -20,6 +21,7 @@ private:
 	void Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele );
 	void SetRenderComponent()	{}
 
+	Engine*		engine;
 	WorldMap*	worldMap;
 	int			type;		// 0-7, fern, tree, etc.
 	int			stage;		// 0-3
