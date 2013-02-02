@@ -72,7 +72,8 @@ public:
 	bool CalcTarget( grinliz::Vector3F* pos );	// manufacture a target if there isn't metadata
 	
 	void GetModelList( grinliz::CArray<const Model*, EL_MAX_METADATA+2> *ignore  );
-	const Model* MainModel() const { return model[0]; }	// used to map back from world to chits
+	const Model* MainModel() const				{ return model[0]; }	// used to map back from world to chits
+	const ModelResource* MainResource() const	{ return resource[0]; }
 
 	// Is the animation ready to change?
 	bool	AnimationReady() const;

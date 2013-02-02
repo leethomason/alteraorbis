@@ -1,5 +1,5 @@
 x volcano delayed on save/load cycle (size getting set to zero?)
-- water creation seems deferred to save/load cycle. SetRock() not quite correct?
+x water creation seems deferred to save/load cycle. SetRock() not quite correct?
 - need free camera mode
 
 - game
@@ -22,9 +22,9 @@ x volcano delayed on save/load cycle (size getting set to zero?)
 		x lava gen
 		x fast-step world sim
 	- Flora
-		- plants
-		- weather
+		x plants
 		- growth, spread
+		- weather
 		- aging of stone
 	- Intermission: regions
 		- generate regions
