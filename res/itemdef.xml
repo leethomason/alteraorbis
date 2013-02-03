@@ -128,10 +128,16 @@
         absorbsDamage="0.8">
   </item>
 
-  <item name="tree"
-        resource="tree"
+  <!-- The plant items describe the plants at the smallest height. Scaled from there,
+       remembering largest plant is 4x the height, 16x the surface area, and 64x the mass
+  -->
+  <item name="plant0"
+        desc="Orbstalk"
         flags="FLAMMABLE"
-        mass ="400"
+        mass ="5"
+        sun="0.3f"
+        density="0.8"
+        temperature="0.8"
         />
 
 </items>

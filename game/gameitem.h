@@ -227,6 +227,7 @@ public:
 	void Apply( const GameItem* intrinsic );	
 
 	const char* Name() const			{ return name.c_str(); }
+	const char* Desc() const			{ return desc.c_str(); }
 	const char* ResourceName() const	{ return resource.c_str(); }
 
 	int AttachmentFlags() const			{ return flags & (HELD|HARDPOINT); }
@@ -265,32 +266,52 @@ public:
 
 	// ------ description ------
 	grinliz::IString		name;		// name of the item
+	grinliz::IString		desc;		// description / alternate name
 	grinliz::IString		key;		// modified name, for storage. not serialized.
 	grinliz::IString		resource;	// resource used to  render the item
 	int		flags;			// flags that define this item; 'constant'
 	int		hardpoint;		// id of hardpoint this item attaches to
 	int		procedural;		// uses a procedural renderer: PROCEDURAL_SHIELD, etc.
 	float	mass;			// mass (kg)
-	float	hpPerMass;		// typically 1
 	float	hpRegen;		// hp / second regenerated (or lost) by this item
 	int		primaryTeam;	// who owns this items
 	float	meleeDamage;	// a multiplier of the base (effective mass) applied before stats.Damage()
 	float	rangedDamage;	// base ranged damage, applied before stats.Damage()
 	float	absorbsDamage;	// how much damage this consumes, in the inventory (shield, armor, etc.) 1.0: all, 0.5: half
-	U32		cooldown;		// time between uses
-	U32		reload;			// time to reload once clip is used up
+	int		cooldown;		// time between uses
+	int		reload;			// time to reload once clip is used up
 	int		clipCap;		// possible rounds in the clip
-	float	speed;			// speed for a variety of uses. 
 
 	GameStat stats;
 
 	// ------- current --------
 	float	hp;				// current hp for this item
-	U32		cooldownTime;	// counting UP to ready state
-	U32		reloadTime;		// counting UP to ready state
+	int		cooldownTime;	// counting UP to ready state
+	int		reloadTime;		// counting UP to ready state
 	int		rounds;			// current rounds in the clip
 	float	accruedFire;	// how much fire damage built up, not yet applied
 	float	accruedShock;	// how much shock damage built up, not yet applied
+
+	struct KeyValue
+	{
+		grinliz::IString	key;
+		double				value;	// cast as needed - preserves int range
+
+		const char* Key() const		{ return key.c_str(); }
+		U32	Unsigned() const		{ return (U32)( value ); }
+		int Int() const				{ return (int) value; }
+		float Float() const			{ return (float) value; }
+	};
+	grinliz::CDynArray<KeyValue>	keyValues;
+	float GetFloatValue( const char* name, float defaultVal ) {
+		for( int i=0; i<keyValues.Size(); ++i ) {
+			if ( keyValues[i].key == name ) {
+				return keyValues[i].Float();
+			}
+		}
+		GLASSERT( 0 );
+		return defaultVal;
+	}
 
 	Chit* parentChit;		// only set when attached to a Component
 
@@ -298,13 +319,13 @@ public:
 	void CopyFrom( const GameItem* rhs ) {
 		if ( rhs ) {
 			name			= rhs->name;
+			desc			= rhs->desc;
 			key				= rhs->key;
 			resource		= rhs->resource;
 			flags			= rhs->flags;
 			hardpoint		= rhs->hardpoint;
 			procedural		= rhs->procedural;
 			mass			= rhs->mass;
-			hpPerMass		= rhs->hpPerMass;
 			hpRegen			= rhs->hpRegen;
 			primaryTeam		= rhs->primaryTeam;
 			meleeDamage		= rhs->meleeDamage;
@@ -316,24 +337,28 @@ public:
 			reloadTime		= rhs->reloadTime;
 			clipCap			= rhs->clipCap;
 			rounds			= rhs->rounds;
-			speed			= rhs->speed;
 			stats			= rhs->stats;
 
 			hp				= rhs->hp;
 			accruedFire		= rhs->accruedFire;
 			accruedShock	= rhs->accruedShock;
 
+			keyValues.Clear();
+			for( int i=0; i<rhs->keyValues.Size(); ++i ) {
+				keyValues.Push( rhs->keyValues[i] );
+			}
+
 			parentChit		= 0;	// NOT copied
 		}
 		else {
 			name = grinliz::IString();
+			desc = grinliz::IString();
 			key  = grinliz::IString();
 			resource = grinliz::IString();
 			flags = 0;
 			hardpoint = NO_HARDPOINT;
 			procedural = PROCEDURAL_NONE;
 			mass = 1;
-			hpPerMass = 1;
 			hpRegen = 0;
 			primaryTeam = 0;
 			meleeDamage = 1;
@@ -345,8 +370,8 @@ public:
 			reloadTime = reload;
 			clipCap = 0;			// default to no clip and unlimited ammo
 			rounds = clipCap;
-			speed = 1.0f;
 			stats.Init();
+			keyValues.Clear();
 
 			hp = TotalHP();
 			accruedFire = 0;
@@ -399,7 +424,7 @@ public:
 	bool OnShock() const { return (!(flags & IMMUNE_SHOCK)) && accruedShock > 0; }
 
 	// Note that the current HP, if it has one, 
-	float TotalHP() const		{ return mass*hpPerMass*stats.NormalWill(); }
+	float TotalHP() const		{ return mass*stats.NormalWill(); }
 	float HPFraction() const	{ 
 		float f = hp / TotalHP(); 
 		GLASSERT( f >= 0 && f <= 1 );

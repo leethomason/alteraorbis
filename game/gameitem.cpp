@@ -26,9 +26,9 @@ using namespace grinliz;
 using namespace tinyxml2;
 
 #define READ_FLAG( flags, str, name )	{ if ( strstr( str, #name )) flags |= name; }
-#define READ_FLOAT_ATTR( ele, name )	{ ele->QueryFloatAttribute( #name, &name ); }
-#define READ_INT_ATTR( ele, name )		{ ele->QueryIntAttribute( #name, &name ); }
-#define READ_UINT_ATTR( ele, name )		{ ele->QueryUnsignedAttribute( #name, &name ); }
+
+#define READ_FLOAT_ATTR( n )			else if ( name == #n ) { n = attr->FloatValue(); }
+#define READ_INT_ATTR( n )				else if ( name == #n ) { n = attr->IntValue(); }
 
 #define APPEND_FLAG( flags, cstr, name )	{ if ( flags & name ) f += #name; }
 #define PUSH_ATTRIBUTE( prnt, name )		{ prnt->PushAttribute( #name, name ); }
@@ -89,8 +89,12 @@ void GameItem::Save( tinyxml2::XMLPrinter* printer )
 	printer->OpenElement( "item" );
 
 	printer->PushAttribute( "name", name.c_str() );
-	printer->PushAttribute( "resource", resource.c_str() );
-
+	if ( !desc.empty() ) {
+		printer->PushAttribute( "desc", desc.c_str() );
+	}
+	if ( !resource.empty() ) {
+		printer->PushAttribute( "resource", resource.c_str() );
+	}
 	CStr<512> f;
 	APPEND_FLAG( flags, f, CHARACTER );
 	APPEND_FLAG( flags, f, MELEE_WEAPON );
@@ -110,7 +114,6 @@ void GameItem::Save( tinyxml2::XMLPrinter* printer )
 	printer->PushAttribute( "flags", f.c_str() );
 	
 	PUSH_ATTRIBUTE( printer, mass );
-	PUSH_ATTRIBUTE( printer, hpPerMass );
 	PUSH_ATTRIBUTE( printer, hpRegen );
 	PUSH_ATTRIBUTE( printer, primaryTeam );
 	PUSH_ATTRIBUTE( printer, cooldown );
@@ -119,12 +122,15 @@ void GameItem::Save( tinyxml2::XMLPrinter* printer )
 	PUSH_ATTRIBUTE( printer, reloadTime );
 	PUSH_ATTRIBUTE( printer, clipCap );
 	PUSH_ATTRIBUTE( printer, rounds );
-	PUSH_ATTRIBUTE( printer, speed );
 	PUSH_ATTRIBUTE( printer, meleeDamage );
 	PUSH_ATTRIBUTE( printer, rangedDamage );
 	PUSH_ATTRIBUTE( printer, absorbsDamage );
 	PUSH_ATTRIBUTE( printer, accruedFire );
 	PUSH_ATTRIBUTE( printer, accruedShock );
+
+	for( int i=0; i<keyValues.Size(); ++i ) {
+		printer->PushAttribute( keyValues[i].key.c_str(), keyValues[i].value );
+	}
 
 	if ( hardpoint != NO_HARDPOINT ) {
 		printer->PushAttribute( "hardpoint", InventoryComponent::HardpointFlagToName( hardpoint ).c_str() );
@@ -147,6 +153,7 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 	GLASSERT( StrEqual( ele->Name(), "item" ));
 	
 	name		= StringPool::Intern( ele->Attribute( "name" ));
+	desc		= StringPool::Intern( ele->Attribute( "desc" ));
 	resource	= StringPool::Intern( ele->Attribute( "resource" ));
 	flags = 0;
 	const char* f = ele->Attribute( "flags" );
@@ -167,22 +174,36 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 	READ_FLAG( flags, f, EFFECT_SHOCK );
 	READ_FLAG( flags, f, RENDER_TRAIL );
 
-	READ_FLOAT_ATTR( ele, mass );
-	READ_FLOAT_ATTR( ele, hpPerMass );
-	READ_FLOAT_ATTR( ele, hpRegen );
-	READ_INT_ATTR( ele, primaryTeam );
-	READ_UINT_ATTR( ele, cooldown );
-	READ_UINT_ATTR( ele, cooldownTime );
-	READ_UINT_ATTR( ele, reload );
-	READ_UINT_ATTR( ele, reloadTime );
-	READ_INT_ATTR( ele, clipCap );
-	READ_INT_ATTR( ele, rounds );
-	READ_FLOAT_ATTR( ele, speed );
-	READ_FLOAT_ATTR( ele, meleeDamage );
-	READ_FLOAT_ATTR( ele, rangedDamage );
-	READ_FLOAT_ATTR( ele, absorbsDamage );
-	READ_FLOAT_ATTR( ele, accruedFire );
-	READ_FLOAT_ATTR( ele, accruedShock );
+	for( const tinyxml2::XMLAttribute* attr = ele->FirstAttribute();
+		 attr;
+		 attr = attr->Next() )
+	{
+		IString name = StringPool::Intern( attr->Name() );
+		if ( name == "name" || name == "desc" || name == "resource" || name == "flags" ) {
+			// handled above.
+		}
+		else if ( name == "hardpoint" || name == "procedural" || name == "hp" ) {
+			// handled below
+		}
+		READ_FLOAT_ATTR( mass )
+		READ_FLOAT_ATTR( hpRegen )
+		READ_INT_ATTR( primaryTeam )
+		READ_FLOAT_ATTR( meleeDamage )
+		READ_FLOAT_ATTR( rangedDamage )
+		READ_FLOAT_ATTR( absorbsDamage )
+		READ_INT_ATTR( cooldown )
+		READ_INT_ATTR( reload )
+		READ_INT_ATTR( clipCap )
+		READ_INT_ATTR( cooldownTime )
+		READ_INT_ATTR( reloadTime )
+		READ_INT_ATTR( rounds )
+		READ_FLOAT_ATTR( accruedFire )
+		READ_FLOAT_ATTR( accruedShock )
+		else {
+			KeyValue kv = { name, attr->DoubleValue() };
+			keyValues.Push( kv );
+		}
+	}
 
 	if ( flags & EFFECT_FIRE )	flags |= IMMUNE_FIRE;
 
