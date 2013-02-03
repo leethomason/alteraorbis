@@ -240,7 +240,9 @@ void BattleMechanics::Shoot( ChitBag* bag, Chit* src, Chit* target, IRangedWeapo
 	}
 
 	static const float SPEED = 8.0f;
-	float speed = SPEED * item->GetFloatValue( "speed", 1 );
+	float itemSpeed = 1.0f;
+	item->GetValue( "speed", &itemSpeed );
+	float speed = SPEED * itemSpeed;
 
 	Vector3F aimAt = ComputeLeadingShot( pos, t, v, speed );
 	float radAt1 = ComputeRadAt1( src, weapon, target );

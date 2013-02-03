@@ -128,6 +128,12 @@
         absorbsDamage="0.8">
   </item>
 
+  <item name="tree"
+        resource="tree"
+        flags="FLAMMABLE"
+        mass ="400"
+        />
+
   <!-- The plant items describe the plants at the smallest height. Scaled from there,
        remembering largest plant is 4x the height, 16x the surface area, and 64x the mass
   -->
@@ -136,7 +142,7 @@
         flags="FLAMMABLE"
         mass ="5"
         sun="0.3f"
-        density="0.8"
+        leafdensity="0.8"
         temperature="0.8"
         />
 

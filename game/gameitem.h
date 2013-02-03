@@ -294,6 +294,8 @@ public:
 
 	struct KeyValue
 	{
+		bool operator==( const KeyValue& rhs ) const { return key == rhs.key; }
+
 		grinliz::IString	key;
 		double				value;	// cast as needed - preserves int range
 
@@ -303,14 +305,31 @@ public:
 		float Float() const			{ return (float) value; }
 	};
 	grinliz::CDynArray<KeyValue>	keyValues;
-	float GetFloatValue( const char* name, float defaultVal ) {
+
+	bool GetValue( const char* name, double* value ) { 
 		for( int i=0; i<keyValues.Size(); ++i ) {
 			if ( keyValues[i].key == name ) {
-				return keyValues[i].Float();
+				*value = keyValues[i].value;
+				return true;
 			}
 		}
-		GLASSERT( 0 );
-		return defaultVal;
+		return false;
+	}
+	bool GetValue( const char* name, float* value ) {
+		double d;
+		if ( GetValue( name, &d )) {
+			*value = (float)d;
+			return true;
+		}
+		return false;
+	}
+	bool GetValue( const char* name, int* value ) {
+		double d;
+		if ( GetValue( name, &d )) {
+			*value = (int)d;
+			return true;
+		}
+		return false;
 	}
 
 	Chit* parentChit;		// only set when attached to a Component
