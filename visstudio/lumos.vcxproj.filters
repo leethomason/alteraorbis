@@ -543,6 +543,9 @@
     <ClInclude Include="..\script\plantscript.h">
       <Filter>Source Files\script</Filter>
     </ClInclude>
+    <ClInclude Include="..\game\weather.h">
+      <Filter>Source Files\game</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\engine\sources.mk">

@@ -16,6 +16,7 @@ public:
 	virtual void Load( const ScriptContext& ctx, const tinyxml2::XMLElement* element );
 	virtual void Save( const ScriptContext& ctx, tinyxml2::XMLPrinter* printer );
 	virtual bool DoTick( const ScriptContext& ctx, U32 delta );
+	virtual const char* ScriptName() { return "VolcanoScript"; }
 
 private:
 	void Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele );

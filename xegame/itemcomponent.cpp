@@ -126,6 +126,16 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			}
 		}
 	}
+	else if ( msg.ID() == ChitMsg::CHIT_HEAL ) {
+		parentChit->SetTickNeeded();
+		float heal = msg.dataF;
+		GLASSERT( heal >= 0 );
+
+		item.hp += heal;
+		if ( item.hp > item.TotalHP() ) {
+			item.hp = item.TotalHP();
+		}
+	}
 	else {
 		super::OnChitMsg( chit, msg );
 	}

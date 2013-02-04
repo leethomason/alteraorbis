@@ -52,6 +52,7 @@ public:
 								//					Ptr = &DamageDesc, 
 								//					vector=origin of impact
 								//					dataF=rotation
+		CHIT_HEAL,				//					dataF = hitpoints
 		CHIT_PROCEDURAL,		// Data for procedural rendering. Loose coupling between items and
 								// the rendering component.	
 

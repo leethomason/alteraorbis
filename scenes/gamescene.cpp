@@ -189,7 +189,7 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 #if 0
 				sim->CreateVolcano( (int)at.x, (int)at.z, 6 );
 #else
-				sim->CreatePlant( (int)at.x, (int)at.z, 1 );
+				sim->CreatePlant( (int)at.x, (int)at.z, -1 );
 #endif
 			}
 		}

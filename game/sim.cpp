@@ -22,6 +22,7 @@
 #include "lumosgame.h"
 #include "worldmap.h"
 #include "lumoschitbag.h"
+#include "weather.h"
 
 using namespace grinliz;
 using namespace tinyxml2;
@@ -35,6 +36,7 @@ Sim::Sim( LumosGame* g )
 	worldMap = new WorldMap( MAX_MAP_SIZE, MAX_MAP_SIZE );
 	engine = new Engine( port, database, worldMap );
 	worldMap->AttachEngine( engine );
+	weather = new Weather( MAX_MAP_SIZE, MAX_MAP_SIZE );
 
 	engine->SetGlow( true );
 	engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
@@ -51,6 +53,7 @@ Sim::Sim( LumosGame* g )
 
 Sim::~Sim()
 {
+	delete weather;
 	worldMap->AttachEngine( 0 );
 	delete chitBag;
 	delete engine;
@@ -68,7 +71,7 @@ void Sim::Load( const char* mapDAT, const char* mapXML, const char* gameXML )
 		CreatePlayer( v, "humanFemale" );
 	}
 	else {
-		ComponentFactory factory( engine, worldMap, lumosGame );
+		ComponentFactory factory( engine, worldMap, weather, lumosGame );
 		XMLDocument doc;
 		doc.LoadFile( gameXML );
 		GLASSERT( !doc.Error() );
@@ -198,6 +201,8 @@ void Sim::DoTick( U32 delta )
 		}
 		break;
 	}
+
+	// FIXME: spawn plants
 }
 
 
@@ -229,10 +234,44 @@ void Sim::CreateVolcano( int x, int y, int size )
 
 void Sim::CreatePlant( int x, int y, int type )
 {
-	Chit* chit = chitBag->NewChit();
-	chit->Add( new SpatialComponent() );
-	chit->Add( new ScriptComponent( new PlantScript( engine, worldMap, type )));
+	const WorldGrid& wg = worldMap->GetWorldGrid( x, y );
+	if ( wg.IsPassable() ) {
+		// check for a plant already there.
+		// At this point, check for *anything* there. Could relax in future.
+		Rectangle2F r;
+		r.Set( (float)x, (float)y, (float)(x+1), (float)(y+1) );
+		chitBag->QuerySpatialHash( &queryArr, r, 0, 0 );
 
-	chit->GetSpatialComponent()->SetPosition( (float)x+0.5f, 0.0f, (float)y+0.5f );
+		if ( queryArr.Empty() ) {
+
+			if ( type < 0 ) {
+				// Scan for a good type!
+				r.Outset( 3.0f );
+				chitBag->QuerySpatialHash( &queryArr, r, 0, 0 );
+
+				float chance[NUM_PLANT_TYPES] = { 1.0f };
+
+				for( int i=0; i<queryArr.Size(); ++i ) {
+					Vector3F pos = { (float)x+0.5f, 0, (float)y+0.5f };
+					Chit* c = queryArr[i];
+
+					int stage, type;
+					GameItem* item = PlantScript::IsPlant( c, &type, &stage );
+					if ( item ) {
+						float weight = (float)((stage+1)*(stage+1)) / ( c->GetSpatialComponent()->GetPosition() - pos ).Length();
+						chance[type] += weight;
+					}
+				}
+				type = random.Select( chance, NUM_PLANT_TYPES );
+			}
+
+			Chit* chit = chitBag->NewChit();
+			chit->Add( new SpatialComponent() );
+			chit->Add( new ScriptComponent( new PlantScript( engine, worldMap, weather, type )));
+			chit->Add( new HealthComponent() );
+
+			chit->GetSpatialComponent()->SetPosition( (float)x+0.5f, 0.0f, (float)y+0.5f );
+		}
+	}
 }
 

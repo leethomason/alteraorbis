@@ -158,22 +158,23 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 	flags = 0;
 	const char* f = ele->Attribute( "flags" );
 
-	READ_FLAG( flags, f, CHARACTER );
-	READ_FLAG( flags, f, MELEE_WEAPON );
-	READ_FLAG( flags, f, RANGED_WEAPON );
-	READ_FLAG( flags, f, INTRINSIC_AT_HARDPOINT );
-	READ_FLAG( flags, f, INTRINSIC_FREE );
-	READ_FLAG( flags, f, HELD_AT_HARDPOINT );
-	READ_FLAG( flags, f, HELD_FREE );
-	READ_FLAG( flags, f, IMMUNE_FIRE );
-	READ_FLAG( flags, f, FLAMMABLE );
-	READ_FLAG( flags, f, IMMUNE_SHOCK );
-	READ_FLAG( flags, f, SHOCKABLE );
-	READ_FLAG( flags, f, EFFECT_EXPLOSIVE );
-	READ_FLAG( flags, f, EFFECT_FIRE );
-	READ_FLAG( flags, f, EFFECT_SHOCK );
-	READ_FLAG( flags, f, RENDER_TRAIL );
-
+	if ( f ) {
+		READ_FLAG( flags, f, CHARACTER );
+		READ_FLAG( flags, f, MELEE_WEAPON );
+		READ_FLAG( flags, f, RANGED_WEAPON );
+		READ_FLAG( flags, f, INTRINSIC_AT_HARDPOINT );
+		READ_FLAG( flags, f, INTRINSIC_FREE );
+		READ_FLAG( flags, f, HELD_AT_HARDPOINT );
+		READ_FLAG( flags, f, HELD_FREE );
+		READ_FLAG( flags, f, IMMUNE_FIRE );
+		READ_FLAG( flags, f, FLAMMABLE );
+		READ_FLAG( flags, f, IMMUNE_SHOCK );
+		READ_FLAG( flags, f, SHOCKABLE );
+		READ_FLAG( flags, f, EFFECT_EXPLOSIVE );
+		READ_FLAG( flags, f, EFFECT_FIRE );
+		READ_FLAG( flags, f, EFFECT_SHOCK );
+		READ_FLAG( flags, f, RENDER_TRAIL );
+	}
 	for( const tinyxml2::XMLAttribute* attr = ele->FirstAttribute();
 		 attr;
 		 attr = attr->Next() )

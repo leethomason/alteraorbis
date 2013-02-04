@@ -37,6 +37,7 @@ public:
 	virtual void Load( const ScriptContext& ctx, const tinyxml2::XMLElement* element ) = 0;
 	virtual void Save( const ScriptContext& ctx, tinyxml2::XMLPrinter* printer )       = 0;
 	virtual bool DoTick( const ScriptContext& ctx, U32 delta ) = 0;
+	virtual const char* ScriptName() = 0;
 };
 
 
@@ -65,6 +66,8 @@ public:
 //	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
 	virtual bool DoTick( U32 delta );
 
+	// Obviously dangerous; used for casting.	
+	IScript* Script() { return script; }
 private:
 	void Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele );
 

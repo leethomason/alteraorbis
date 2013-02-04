@@ -1,5 +1,7 @@
 x volcano delayed on save/load cycle (size getting set to zero?)
 x water creation seems deferred to save/load cycle. SetRock() not quite correct?
+- health is awkward: keeps copy of HP (oops). move hp to health component? (TotalHP() on item?)
+- chits should have "update time" not boolean flag
 - need free camera mode
 
 - game

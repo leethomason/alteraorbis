@@ -5,6 +5,7 @@
 #include "../grinliz/gldebug.h"
 #include "../grinliz/glvector.h"
 #include "../grinliz/glrandom.h"
+#include "../grinliz/glcontainer.h"
 #include "../tinyxml2/tinyxml2.h"
 
 class Engine;
@@ -13,6 +14,7 @@ class LumosGame;
 class LumosChitBag;
 class Texture;
 class Chit;
+class Weather;
 
 
 class Sim
@@ -41,6 +43,7 @@ public:
 	// Set all rock to the nominal values
 	void SetAllRock();
 	void CreateVolcano( int x, int y, int size );
+	// type=-1 will scan for natural plant choice
 	void CreatePlant( int x, int y, int type );
 
 	enum {
@@ -57,6 +60,7 @@ private:
 	Engine*			engine;
 	LumosGame*		lumosGame;
 	WorldMap*		worldMap;
+	Weather*		weather;
 	LumosChitBag*	chitBag;
 
 	grinliz::Random	random;
@@ -64,6 +68,8 @@ private:
 	int minuteClock;
 	U32 timeInMinutes;
 	int volcTimer;
+
+	grinliz::CDynArray< Chit* >	queryArr;	// local; cached at object.
 };
 
 

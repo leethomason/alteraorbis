@@ -201,6 +201,7 @@
     <ClInclude Include="..\game\pathmovecomponent.h" />
     <ClInclude Include="..\game\physicsmovecomponent.h" />
     <ClInclude Include="..\game\sim.h" />
+    <ClInclude Include="..\game\weather.h" />
     <ClInclude Include="..\game\worldgrid.h" />
     <ClInclude Include="..\game\worldinfo.h" />
     <ClInclude Include="..\game\worldmap.h" />
