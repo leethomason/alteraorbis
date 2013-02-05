@@ -19,7 +19,8 @@ private:
 	U8 pad2;
 
 	unsigned isLand				: 1;
-	unsigned isBlocked			: 1;
+	unsigned isBlocked			: 1;	// blocks the pather; implies inUse
+	unsigned inUse				: 1;	// used, but the pather isn't blocked
 	unsigned magma				: 1;	// land, rock, or water can be set to magma
 
 	unsigned zoneSize			: 6;	// 0-31
@@ -135,6 +136,18 @@ public:
 		}
 		else { 
 			isBlocked = 0;
+		}
+	}
+
+	bool InUse() const				{ return inUse != 0; }
+	void SetInUse( bool use )		{
+		if ( use ) {
+			GLASSERT( !InUse() );
+			inUse = 1;
+		}
+		else {
+			GLASSERT( InUse() );
+			inUse = 0;
 		}
 	}
 

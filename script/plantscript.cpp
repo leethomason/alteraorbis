@@ -8,10 +8,13 @@
 #include "../xegame/chit.h"
 #include "../xegame/rendercomponent.h"
 #include "../xegame/spatialcomponent.h"
+#include "../xegame/chitbag.h"
 
 #include "../grinliz/glstringutil.h"
 
 #include "../game/weather.h"
+#include "../game/worldmap.h"
+#include "../game/sim.h"
 
 using namespace grinliz;
 
@@ -31,7 +34,8 @@ using namespace grinliz;
 }
 
 
-PlantScript::PlantScript( Engine* p_engine, WorldMap* p_map, Weather* p_weather, int p_type ) : 
+PlantScript::PlantScript( Sim* p_sim, Engine* p_engine, WorldMap* p_map, Weather* p_weather, int p_type ) : 
+	sim( p_sim ),
 	engine( p_engine ), 
 	worldMap( p_map ), 
 	weather( p_weather ),
@@ -40,7 +44,7 @@ PlantScript::PlantScript( Engine* p_engine, WorldMap* p_map, Weather* p_weather,
 	stage = 0;
 	age = 0;
 	ageAtStage = 0;
-	timer = 0;
+	growTimer = sporeTimer = 0;
 }
 
 
@@ -77,7 +81,7 @@ void PlantScript::Init( const ScriptContext& ctx )
 {
 	ItemDefDB* itemDefDB = ItemDefDB::Instance();
 
-	CStr<10> str = "plant0.0";
+	CStr<10> str = "plant0";
 	str[5] = '0' + type;
 	resource = &itemDefDB->Get( str.c_str() );
 
@@ -92,6 +96,8 @@ void PlantScript::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement
 	XE_ARCHIVE( stage );
 	XE_ARCHIVE( age );
 	XE_ARCHIVE( ageAtStage );
+	XE_ARCHIVE( growTimer );
+	XE_ARCHIVE( sporeTimer );
 }
 
 
@@ -100,7 +106,7 @@ void PlantScript::Load( const ScriptContext& ctx, const tinyxml2::XMLElement* el
 	stage = 0;
 	age = 0;
 	ageAtStage = 0;
-	timer = 0;
+	growTimer = sporeTimer = 0;
 	GLASSERT( element );
 	Archive( 0, element );
 }
@@ -116,12 +122,13 @@ void PlantScript::Save( const ScriptContext& ctx, tinyxml2::XMLPrinter* printer 
 
 bool PlantScript::DoTick( const ScriptContext& ctx, U32 delta )
 {
-	static const float HP_PER_TICK = 10.0f;
-	static const int   TIME_TO_GROW = 4 * (1000 * 60);	// minutes
+	static const float	HP_PER_TICK = 10.0f;
+	static const int	TIME_TO_GROW  = 4 * (1000 * 60);	// minutes
+	static const int	TIME_TO_SPORE = 1 * (1000 * 60); 
 
-	timer += delta;
-	if ( timer < 1000 ) return true;
-	timer -= 1000;
+	growTimer += delta;
+	if ( growTimer < 1000 ) return true;
+	growTimer -= 1000;
 	age += 1000;
 	ageAtStage += 1000;
 
@@ -165,7 +172,9 @@ bool PlantScript::DoTick( const ScriptContext& ctx, U32 delta )
 		ChitMsg healMsg( ChitMsg::CHIT_HEAL );
 		healMsg.dataF = HP_PER_TICK;
 		ctx.chit->SendMessage( healMsg );
-		
+
+		sporeTimer += 1000;
+
 		// Grow
 		if (    item->HPFraction() > 0.9f 
 			 && ageAtStage > TIME_TO_GROW 
@@ -175,11 +184,22 @@ bool PlantScript::DoTick( const ScriptContext& ctx, U32 delta )
 			ageAtStage = 0;
 			SetRenderComponent( ctx.chit );
 		}
+
+		// Spore
+		if ( sporeTimer > TIME_TO_SPORE ) {
+			sporeTimer -= TIME_TO_SPORE;
+			int dx = ctx.chit->random.Sign();
+			int dy = ctx.chit->random.Sign();
+
+			sim->CreatePlant( pos.x+dx, pos.y+dy, -1 );
+		}
 	}
 	else if ( sun < sunNeeded * 0.5f && water < waterNeeded * 0.5f ) {
 		DamageDesc dd( HP_PER_TICK, 0 );
 		ChitMsg damage( ChitMsg::CHIT_DAMAGE, 0, &dd );
 		ctx.chit->SendMessage( damage );
+
+		sporeTimer = 0;
 	}
 
 	// If healthy create other plants.

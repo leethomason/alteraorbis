@@ -23,6 +23,7 @@
 #include "worldmap.h"
 #include "lumoschitbag.h"
 #include "weather.h"
+#include "mapspatialcomponent.h"
 
 using namespace grinliz;
 using namespace tinyxml2;
@@ -71,7 +72,7 @@ void Sim::Load( const char* mapDAT, const char* mapXML, const char* gameXML )
 		CreatePlayer( v, "humanFemale" );
 	}
 	else {
-		ComponentFactory factory( engine, worldMap, weather, lumosGame );
+		ComponentFactory factory( this, engine, worldMap, weather, lumosGame );
 		XMLDocument doc;
 		doc.LoadFile( gameXML );
 		GLASSERT( !doc.Error() );
@@ -234,8 +235,13 @@ void Sim::CreateVolcano( int x, int y, int size )
 
 void Sim::CreatePlant( int x, int y, int type )
 {
+	if ( !worldMap->Bounds().Contains( x, y ) ) {
+		return;
+	}
+
 	const WorldGrid& wg = worldMap->GetWorldGrid( x, y );
-	if ( wg.IsPassable() ) {
+
+	if ( wg.IsPassable() && !wg.InUse() ) {
 		// check for a plant already there.
 		// At this point, check for *anything* there. Could relax in future.
 		Rectangle2F r;
@@ -249,7 +255,10 @@ void Sim::CreatePlant( int x, int y, int type )
 				r.Outset( 3.0f );
 				chitBag->QuerySpatialHash( &queryArr, r, 0, 0 );
 
-				float chance[NUM_PLANT_TYPES] = { 1.0f };
+				float chance[NUM_PLANT_TYPES];
+				for( int i=0; i<NUM_PLANT_TYPES; ++i ) {
+					chance[i] = 1.0f;
+				}
 
 				for( int i=0; i<queryArr.Size(); ++i ) {
 					Vector3F pos = { (float)x+0.5f, 0, (float)y+0.5f };
@@ -266,11 +275,13 @@ void Sim::CreatePlant( int x, int y, int type )
 			}
 
 			Chit* chit = chitBag->NewChit();
-			chit->Add( new SpatialComponent() );
-			chit->Add( new ScriptComponent( new PlantScript( engine, worldMap, weather, type )));
-			chit->Add( new HealthComponent() );
+			MapSpatialComponent* ms = new MapSpatialComponent( worldMap );
+			ms->SetMapPosition( x, y );
+			chit->Add( ms );
+			GLASSERT( wg.InUse() );
 
-			chit->GetSpatialComponent()->SetPosition( (float)x+0.5f, 0.0f, (float)y+0.5f );
+			chit->Add( new HealthComponent() );
+			chit->Add( new ScriptComponent( new PlantScript( this, engine, worldMap, weather, type )));
 		}
 	}
 }

@@ -81,6 +81,15 @@ public:
 		                    const Chit* ignoreMe,
 							int itemFilter );
 
+	// Use with caution: the array returned can change if a sub-function calls this.
+	const grinliz::CDynArray<Chit*>& QuerySpatialHash(	const grinliz::Rectangle2F& r, 
+														const Chit* ignoreMe,
+														int itemFilter )
+	{
+		QuerySpatialHash( &cachedQuery, r, ignoreMe, itemFilter );
+		return cachedQuery;
+	}
+
 	// IBoltImpactHandler
 	virtual void HandleBolt( const Bolt& bolt, Model* m, const grinliz::Vector3F& at );
 
@@ -121,6 +130,7 @@ private:
 	grinliz::CDynArray<int>			deleteList;	
 	grinliz::CDynArray<CompID>		compDeleteList;	
 	grinliz::CDynArray<Chit*>		hashQuery;			// local data, cached at class level
+	grinliz::CDynArray<Chit*>		cachedQuery;		// local data, cached at class level
 	grinliz::CDynArray<ChitEvent>	events;
 	grinliz::CDynArray<NewsEvent>	news;
 	

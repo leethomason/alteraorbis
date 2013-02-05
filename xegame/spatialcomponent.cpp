@@ -48,15 +48,19 @@ void SpatialComponent::SetPosRot( const Vector3F& v, const Quaternion& _q )
 		int oldY = (int)position.z;
 		int newX = (int)v.x;
 		int newY = (int)v.z;
-		parentChit->GetChitBag()->UpdateSpatialHash( parentChit, oldX, oldY, newX, newY );
+		if ( parentChit ) {
+			parentChit->GetChitBag()->UpdateSpatialHash( parentChit, oldX, oldY, newX, newY );
+		}
 	}
 	
 	if ( posChange || rotChange ) {
 		position = v;
 		rotation = q;
 
-		parentChit->SendMessage( ChitMsg( ChitMsg::SPATIAL_CHANGED ), this );
-		parentChit->SetTickNeeded();
+		if ( parentChit ) {
+			parentChit->SendMessage( ChitMsg( ChitMsg::SPATIAL_CHANGED ), this );
+			parentChit->SetTickNeeded();
+		}
 	}
 }
 

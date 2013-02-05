@@ -2,17 +2,19 @@
 #define PLANT_SCRIPT_INCLUDED
 
 #include "scriptcomponent.h"
+#include "../grinliz/glrandom.h"
 
 class WorldMap;
 class Engine;
 class Weather;
 class GameItem;
 class Chit;
+class Sim;
 
 class PlantScript : public IScript
 {
 public:
-	PlantScript( Engine* engine, WorldMap* map, Weather* weather, int type );
+	PlantScript( Sim* sim, Engine* engine, WorldMap* map, Weather* weather, int type );
 	virtual ~PlantScript()	{}
 
 	virtual void Init( const ScriptContext& heap );
@@ -30,6 +32,7 @@ private:
 	void Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele );
 	void SetRenderComponent( Chit* chit );
 
+	Sim*		sim;
 	Engine*		engine;
 	WorldMap*	worldMap;
 	Weather*	weather;
@@ -38,7 +41,8 @@ private:
 	int			stage;		// 0-3
 	U32			age;
 	U32			ageAtStage;
-	int			timer;
+	int			growTimer;
+	int			sporeTimer;
 };
 
 #endif // PLANT_SCRIPT_INCLUDED

@@ -99,6 +99,9 @@ public:
 	void SetBlocked( const grinliz::Rectangle2I& pos );
 	void ClearBlocked( int x, int y )	{ grinliz::Rectangle2I pos; pos.Set( x, y, x, y ); ClearBlocked( pos ); }
 	void ClearBlocked( const grinliz::Rectangle2I& pos );
+	void SetInUse( int x, int y, bool use ) { grid[INDEX(x,y)].SetInUse( use ); }
+	bool InUse( int x, int y )				{ return grid[INDEX(x,y)].InUse(); }
+
 	grinliz::Vector2I FindPassable( int x, int y );
 
 	bool IsBlocked( int x, int y ) const	{ 

@@ -25,6 +25,7 @@ x water creation seems deferred to save/load cycle. SetRock() not quite correct?
 		x fast-step world sim
 	- Flora
 		x plants
+			- saturation to hp
 		- growth, spread
 		- weather
 		- aging of stone

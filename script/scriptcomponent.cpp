@@ -28,7 +28,7 @@ void ScriptComponent::Load( const tinyxml2::XMLElement* element )
 		script = new VolcanoScript( factory->GetWorldMap(), 0 );
 	}
 	else if ( StrEqual( name, "PlantScript" )) {
-		script = new PlantScript( factory->GetEngine(), factory->GetWorldMap(), factory->GetWeather(), 0 );
+		script = new PlantScript( factory->GetSim(), factory->GetEngine(), factory->GetWorldMap(), factory->GetWeather(), 0 );
 	}
 	else {
 		GLASSERT( 0 );

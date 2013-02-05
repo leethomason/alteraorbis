@@ -78,9 +78,10 @@ public:
 	grinliz::Vector2F GetHeading2D() const;
 
 protected:
-	void Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele );
 	grinliz::Vector3F	position;
 	grinliz::Quaternion	rotation;
+private:
+	void Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele );
 };
 
 

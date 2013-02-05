@@ -224,11 +224,11 @@ void BattleTestScene::LoadMap()
 	for ( int i=0; i<blocks.Size(); ++i ) {
 		Chit* chit = chitBag.NewChit();
 		const Vector2I& v = blocks[i];
-		MapSpatialComponent* msc = new MapSpatialComponent( 1, 1, map );
+		MapSpatialComponent* msc = new MapSpatialComponent( map );
+		msc->SetMapPosition( v.x, v.y );
+		msc->SetMode( MapSpatialComponent::BLOCKS_GRID );
 		chit->Add( msc );
 		chit->Add( new RenderComponent( engine, "unitCube" ));
-
-		GET_COMPONENT( chit, MapSpatialComponent )->SetMapPosition( v.x, v.y, 0 );
 	}
 
 	ItemDefDB* itemDefDB = ItemDefDB::Instance();
@@ -238,12 +238,13 @@ void BattleTestScene::LoadMap()
 		Chit* chit = chitBag.NewChit();
 		const Vector2I& v = features[i];
 
-		chit->Add( new MapSpatialComponent( 1, 1, map ));
+		MapSpatialComponent* msc = new MapSpatialComponent( map );
+		msc->SetMapPosition( v.x, v.y );
+		msc->SetMode( MapSpatialComponent::BLOCKS_GRID );
+		chit->Add( msc );
 		chit->Add( new RenderComponent( engine, "plant1.3" ));
 		chit->Add( new ItemComponent( treeItem ));
 		chit->Add( new HealthComponent());
-
-		GET_COMPONENT( chit, MapSpatialComponent )->SetMapPosition( v.x, v.y, 0 );
 	}
 
 	Vector2I unit = { 2, 16 };

@@ -106,20 +106,20 @@ void NavTest2Scene::LoadMap()
 	for ( int i=0; i<blocks.Size(); ++i ) {
 		Chit* chit = chitBag.NewChit();
 		const Vector2I& v = blocks[i];
-		MapSpatialComponent* msc = new MapSpatialComponent( 1, 1, map );
+		MapSpatialComponent* msc = new MapSpatialComponent( map );
+		msc->SetMapPosition( v.x, v.y );
+		msc->SetMode( MapSpatialComponent::BLOCKS_GRID );
 		chit->Add( msc );
 		chit->Add( new RenderComponent( engine, "unitCube" ));
-
-		GET_COMPONENT( chit, MapSpatialComponent )->SetMapPosition( v.x, v.y, 0 );
 	}
 	for( int i=0; i<features.Size(); ++i ) {
 		Chit* chit = chitBag.NewChit();
 		const Vector2I& v = features[i];
-		MapSpatialComponent* msc = new MapSpatialComponent( 1, 1, map );
+		MapSpatialComponent* msc = new MapSpatialComponent( map );
+		msc->SetMapPosition( v.x, v.y );
+		msc->SetMode( MapSpatialComponent::BLOCKS_GRID );
 		chit->Add( msc );
 		chit->Add( new RenderComponent( engine, "tree" ));
-
-		GET_COMPONENT( chit, MapSpatialComponent )->SetMapPosition( v.x, v.y, 0 );
 	}
 
 	clock_t start = clock();

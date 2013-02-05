@@ -20,17 +20,19 @@
 
 class WorldMap;
 
-// Extra methods that support map positioning.
+// Marks the WorldGrid inUse.
+// FIXME: not mutable; once added, can't be moved.
+//		  can this be fixed with a "mutable" flag on SpatialComponent?
 class MapSpatialComponent : public SpatialComponent
 {
 private:
 	typedef SpatialComponent super;
 public:
-	// fixme: need a system to:
-	// - create from definition
-	// - specify blocks
-	//
-	MapSpatialComponent( int width, int height, WorldMap* map );
+	enum {
+		USES_GRID = 1,
+		BLOCKS_GRID
+	};
+	MapSpatialComponent( WorldMap* map );
 	virtual ~MapSpatialComponent()	{}
 
 	virtual Component* ToComponent( const char* name ) {
@@ -38,21 +40,23 @@ public:
 		return super::ToComponent( name );
 	}
 
-	virtual void Load( const tinyxml2::XMLElement* element )	{ GLASSERT( 0 ); }
-	virtual void Save( tinyxml2::XMLPrinter* printer )			{ GLASSERT( 0 ); }
+	virtual void OnAdd( Chit* chit );
+	virtual void OnRemove();
+	virtual void Load( const tinyxml2::XMLElement* element );
+	virtual void Save( tinyxml2::XMLPrinter* printer );
 
-	// Set the location of the origin point.
-	// 0, 90, 180, 270
-	void SetMapPosition( int x, int y, int r );
+	// WARNING must be called before OnAdd
+	void SetMapPosition( int x, int y );
 
-	const grinliz::Vector2I& GetMapPosition() const { return mapPos; }
-	int GetMapRotation() const { return mapRotation; }
+	grinliz::Vector2I MapPosition() const;
+	void SetMode( int mode );
 
 private:
-	WorldMap* map;
-	grinliz::Vector2I mapPos;
-	grinliz::Vector2I mapSize;
-	int mapRotation;
+	void Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele );
+	bool justLoaded;
+	int mode;
+	WorldMap* worldMap;
 };
+
 
 #endif // MAP_SPATIAL_COMPONENT

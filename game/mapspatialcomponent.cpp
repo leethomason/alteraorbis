@@ -15,51 +15,121 @@
 
 #include "mapspatialcomponent.h"
 #include "worldmap.h"
+#include "../engine/serialize.h"
 
 using namespace grinliz;
 
-MapSpatialComponent::MapSpatialComponent( int width, int height, WorldMap* _map ) : SpatialComponent()
+MapSpatialComponent::MapSpatialComponent( WorldMap* _map ) : SpatialComponent()
 {
-	map = _map;
-	mapPos.Set( -1, -1 );
-	mapSize.Set( width, height );
-	mapRotation = 0;
+	justLoaded = false;
+	worldMap = _map;
+	mode = USES_GRID;
 }
 
 
-void MapSpatialComponent::SetMapPosition( int x, int y, int r )
+void MapSpatialComponent::SetMapPosition( int x, int y )
 {
-	if ( x != mapPos.x || y != mapPos.y || r != mapRotation ) {
+	GLASSERT( parentChit == 0 );
+	SetPosition( (float)x + 0.5f, 0.0f, (float)y + 0.5f );
+}
 
-		if ( mapPos.x >= 0 ) {
-			Rectangle2I rb;
-			rb.Set( mapPos.x, mapPos.y, mapPos.x+mapSize.x-1, mapPos.y+mapSize.y-1 );
-			map->ClearBlocked( rb );
+
+void MapSpatialComponent::SetMode( int newMode ) 
+{
+	if ( parentChit && ( newMode != mode )) {
+		Vector2I pos = MapPosition();
+		if ( newMode == USES_GRID ) {
+			worldMap->ClearBlocked( pos.x, pos.y );
 		}
-
-		float wx, wz;
-		GLASSERT( r == 0 || r == 90 || r == 180 || r == 270  );
-		mapRotation = r;
-
-		Rectangle2I rb;
-		rb.min.Set( x, y );
-
-		if ( mapRotation == 0 || mapRotation == 180 ) {
-			wx = (float)x + (float)mapSize.x*0.5f;
-			wz = (float)y + (float)mapSize.y*0.5f;
-			rb.max.Set( x+mapSize.x-1, y+mapSize.y-1 );
+		else if ( newMode == BLOCKS_GRID ) {
+			worldMap->SetBlocked( pos.x, pos.y );
 		}
-		else {
-			wx = (float)x + (float)mapSize.y*0.5f;
-			wz = (float)y + (float)mapSize.x*0.5f;
-			rb.max.Set( x+mapSize.y-1, y+mapSize.x-1 );
-		}		
-		map->SetBlocked( rb );
-
-		SetPosition( wx, 0, wz );
-		SetYRotation( (float)mapRotation );
+		mode = newMode;
 	}
 }
+
+
+void MapSpatialComponent::OnAdd( Chit* chit )
+{
+	super::OnAdd( chit );
+
+	Vector2I pos = MapPosition();
+	const WorldGrid& wg = worldMap->GetWorldGrid( pos.x, pos.y );
+
+	if ( justLoaded ) {
+		GLASSERT( worldMap->InUse( pos.x, pos.y ));
+		if ( mode == BLOCKS_GRID ) {
+			GLASSERT( worldMap->IsBlocked( pos.x, pos.y ));
+		}
+		justLoaded = false;
+	}
+	else {
+		worldMap->SetInUse( pos.x, pos.y, true );
+		if ( mode == BLOCKS_GRID ) {
+			worldMap->SetBlocked( pos.x, pos.y );
+		}
+	}
+}
+
+
+void MapSpatialComponent::OnRemove()
+{
+	Vector2I pos = MapPosition();
+	const WorldGrid& wg = worldMap->GetWorldGrid( pos.x, pos.y );
+
+	worldMap->SetInUse( pos.x, pos.y, false );
+	if ( mode == BLOCKS_GRID ) {
+		worldMap->ClearBlocked( pos.x, pos.y );
+	}
+
+	super::OnRemove();
+}
+
+
+void MapSpatialComponent::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele )
+{
+	XE_ARCHIVE( mode );
+}
+
+
+void MapSpatialComponent::Load( const tinyxml2::XMLElement* element )
+{
+	mode = USES_GRID;
+	justLoaded = true;
+
+	this->BeginLoad( element, "MapSpatialComponent" );
+	Archive( 0, element );
+	super::Load( element->FirstChildElement( "SpatialComponent" ));
+	this->EndLoad( element );
+
+	/* Oops: this will be done by OnAdd
+	Vector2I m = MapPosition();
+	worldMap->SetInUse( m.x, m.y, true );
+	if ( mode == BLOCKS_GRID ) {
+		worldMap->SetBlocked( m.x, m.y );
+	}
+	*/
+}
+
+
+void MapSpatialComponent::Save( tinyxml2::XMLPrinter* printer )
+{
+	this->BeginSave( printer, "MapSpatialComponent" );
+	Archive( printer, 0 );
+	super::Save( printer );
+	this->EndSave( printer );
+}
+
+
+Vector2I MapSpatialComponent::MapPosition() const
+{
+	Vector2F pos = this->GetPosition2D();
+	Vector2I v = { (int)pos.x, (int)pos.y };
+	return v;
+}
+
+
+
 
 
 

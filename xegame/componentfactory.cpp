@@ -8,6 +8,7 @@
 #include "../game/debugstatecomponent.h"
 #include "../game/debugpathcomponent.h"
 #include "../game/healthcomponent.h"
+#include "../game/mapspatialcomponent.h"
 
 #include "../script/scriptcomponent.h"
 
@@ -50,6 +51,9 @@ Component* ComponentFactory::Factory( const char* name, Chit* chit ) const
 	}
 	else if ( StrEqual( name, "ScriptComponent" )) {
 		return new ScriptComponent( this );
+	}
+	else if ( StrEqual( name, "MapSpatialComponent" )) {
+		return new MapSpatialComponent( worldMap );
 	}
 
 	GLASSERT( 0 );

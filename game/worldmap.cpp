@@ -667,6 +667,10 @@ void WorldMap::SetRock( int x, int y, int h, int pool, bool magma )
 		magma = grid[index].Magma();
 	}
 
+	if ( grid[index].InUse() ) {
+		h = 0;	// can't set rock when grid is locked
+	}
+
 	CStr<12> name; 
 	bool modelWas = false;
 
