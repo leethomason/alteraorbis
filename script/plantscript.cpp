@@ -128,25 +128,31 @@ void PlantScript::Save( const ScriptContext& ctx, tinyxml2::XMLPrinter* printer 
 }
 
 
-bool PlantScript::DoTick( const ScriptContext& ctx, U32 delta )
+int PlantScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 {
-	static const float	HP_PER_TICK = 10.0f;
+	static const float	HP_PER_SECOND = 10.0f;
 	static const int	TIME_TO_GROW  = 4 * (1000 * 60);	// minutes
 	static const int	TIME_TO_SPORE = 1 * (1000 * 60); 
 
-	growTimer += delta;
-	if ( growTimer < 1000 ) return true;
-	growTimer -= 1000;
-	age += 1000;
-	ageAtStage += 1000;
+	age += since;
+	ageAtStage += since;
+
+	const int tick = MINUTE + ctx.chit->random.Rand( 1024*16 );
+
+	growTimer += since;
+	if ( growTimer < MINUTE ) 
+		return tick;
+
+	growTimer = 0;
+	float seconds = (float)since / 1000.0f;
 
 	MapSpatialComponent* sc = GET_COMPONENT( ctx.chit, MapSpatialComponent );
 	GLASSERT( sc );
-	if ( !sc ) return false;
+	if ( !sc ) return tick;
 
 	GameItem* item = ctx.chit->GetItem();
 	GLASSERT( item );
-	if ( !item ) return false;
+	if ( !item ) return tick;
 
 	Vector2I pos = sc->MapPosition();
 
@@ -182,7 +188,7 @@ bool PlantScript::DoTick( const ScriptContext& ctx, U32 delta )
 	if ( distance < 0.4f ) {
 		// Heal.
 		ChitMsg healMsg( ChitMsg::CHIT_HEAL );
-		healMsg.dataF = HP_PER_TICK;
+		healMsg.dataF = HP_PER_SECOND*seconds;
 		ctx.chit->SendMessage( healMsg );
 
 		sporeTimer += 1000;
@@ -216,7 +222,7 @@ bool PlantScript::DoTick( const ScriptContext& ctx, U32 delta )
 		}
 	}
 	else if ( distance > 0.8f ) {
-		DamageDesc dd( HP_PER_TICK, 0 );
+		DamageDesc dd( HP_PER_SECOND * seconds, 0 );
 		ChitMsg damage( ChitMsg::CHIT_DAMAGE, 0, &dd );
 		ctx.chit->SendMessage( damage );
 
@@ -224,8 +230,7 @@ bool PlantScript::DoTick( const ScriptContext& ctx, U32 delta )
 	}
 
 	// If healthy create other plants.
-
-	return true;
+	return tick;
 }
 
 

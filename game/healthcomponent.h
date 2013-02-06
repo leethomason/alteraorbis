@@ -41,7 +41,7 @@ public:
 
 	virtual void DebugStr( grinliz::GLString* str )		{ str->Format( "[Health] " ); }
 	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
-	virtual bool DoTick( U32 delta );
+	virtual int DoTick( U32 delta, U32 since );
 	float DestroyedFraction() const { return (float)destroyed/(float)COUNTDOWN; }
 
 private:

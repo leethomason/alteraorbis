@@ -25,7 +25,8 @@ struct ScriptContext
 	ScriptContext() : initialized(false), time( 0 ), chit( 0 ) {}
 
 	bool	initialized;
-	U32		time;	// total time ticks
+	U32		lastTime;		// time at last tick
+	U32		time;			// time at this tick
 	Chit*	chit;
 };
 
@@ -36,7 +37,7 @@ public:
 	virtual void Init( const ScriptContext& heap )	= 0;
 	virtual void Load( const ScriptContext& ctx, const tinyxml2::XMLElement* element ) = 0;
 	virtual void Save( const ScriptContext& ctx, tinyxml2::XMLPrinter* printer )       = 0;
-	virtual bool DoTick( const ScriptContext& ctx, U32 delta ) = 0;
+	virtual int DoTick( const ScriptContext& ctx, U32 delta, U32 since ) = 0;
 	virtual const char* ScriptName() = 0;
 };
 
@@ -63,8 +64,7 @@ public:
 	virtual void OnRemove();
 
 	virtual void DebugStr( grinliz::GLString* str )		{ str->Format( "[Script] " ); }
-//	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
-	virtual bool DoTick( U32 delta );
+	virtual int DoTick( U32 delta, U32 since );
 
 	// Obviously dangerous; used for casting.	
 	IScript* Script() { return script; }

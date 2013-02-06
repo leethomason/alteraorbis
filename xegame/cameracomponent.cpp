@@ -91,10 +91,10 @@ void CameraComponent::SetTrack( int targetID )
 }
 
 
-bool CameraComponent::DoTick( U32 delta ) 
+int CameraComponent::DoTick( U32 delta, U32 since ) 
 {
 	if ( GetChitBag()->ActiveCamera() != this->ID() ) {
-		return true;
+		return 100;
 	}
 
 	switch ( mode ) {
@@ -151,7 +151,7 @@ bool CameraComponent::DoTick( U32 delta )
 	default:
 		GLASSERT( 0 );
 	}
-	return true;
+	return 0;
 }
 
 

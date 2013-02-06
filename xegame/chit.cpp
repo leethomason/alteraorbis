@@ -26,7 +26,7 @@
 using namespace grinliz;
 using namespace tinyxml2;
 
-Chit::Chit( int _id, ChitBag* bag ) : next( 0 ), chitBag( bag ), id( _id ), tickNeeded( true ), shelf( 0 )
+Chit::Chit( int _id, ChitBag* bag ) : next( 0 ), chitBag( bag ), id( _id ), timeToTick( 0 ), timeSince( 0 ), shelf( 0 )
 {
 	Init( _id, bag );
 }
@@ -45,8 +45,9 @@ void Chit::Init( int _id, ChitBag* _chitBag )
 	for( int i=0; i<NUM_SLOTS; ++i ) {
 		slot[i] = 0;
 	}
-	slowTickTimer = (_id * 37) % SLOW_TICK;
 	random.SetSeed( _id );
+	timeToTick = 0;
+	timeSince = 0;
 }
 
 
@@ -81,6 +82,7 @@ void Chit::Save( tinyxml2::XMLPrinter* printer )
 {
 	printer->OpenElement( "Chit" );
 	printer->PushAttribute( "id", id );
+	printer->PushAttribute( "timeSince", timeSince );
 
 	if ( shelf ) {
 		printer->OpenElement( "Shelf" );
@@ -99,8 +101,11 @@ void Chit::Save( tinyxml2::XMLPrinter* printer )
 
 void Chit::Load( const ComponentFactory* factory, const XMLElement* ele ) 
 {
+	timeSince = 0;
+	timeToTick = 0;
 	GLASSERT( StrEqual( ele->Value(), "Chit" ));
-	ele->QueryIntAttribute( "id", &id );
+	ele->QueryAttribute( "id", &id );
+	ele->QueryAttribute( "timeSince", &timeSince );
 
 	const XMLElement* shelfEle = ele->FirstChildElement( "Shelf" );
 	if ( shelfEle ) {
@@ -160,13 +165,13 @@ void Chit::Add( Component* c )
 	GLASSERT( slot[s] == 0 );
 	slot[s] = c;
 	c->OnAdd( this );
-	tickNeeded = true;
+	timeToTick = 0;
 }
 
 
 void Chit::Remove( Component* c )
 {
-	tickNeeded = true;
+	timeToTick = 0;
 	for( int i=0; i<NUM_SLOTS; ++i ) {
 		if ( slot[i] == c ) {
 			c->OnRemove();
@@ -215,24 +220,17 @@ Component* Chit::GetComponent( int id )
 
 void Chit::DoTick( U32 delta )
 {
-	slowTickTimer += delta;
-	tickNeeded = false;
+	timeToTick = VERY_LONG_TICK;
+	GLASSERT( timeSince >= 0 );
 
-	if ( slowTickTimer > SLOW_TICK ) {
-		slowTickTimer = 0;
-		for( int i=0; i<NUM_SLOTS; ++i ) {
-			if ( slot[i] ) { 
-				if ( slot[i]->DoSlowTick() )
-					tickNeeded = true;
-			}
-		}
-	}
 	for( int i=0; i<NUM_SLOTS; ++i ) {
 		if ( slot[i] ) { 
-			if ( slot[i]->DoTick( delta ) )
-				tickNeeded = true;
+			int t = slot[i]->DoTick( delta, timeSince );
+			timeToTick = Min( timeToTick, t );
 		}
 	}
+
+	timeSince = 0;
 }
 
 

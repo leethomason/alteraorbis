@@ -62,7 +62,7 @@ void VolcanoScript::Save( const ScriptContext& ctx, tinyxml2::XMLPrinter* printe
 }
 
 
-bool VolcanoScript::DoTick( const ScriptContext& ctx, U32 delta )
+int VolcanoScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 {
 	SpatialComponent* sc = ctx.chit->GetSpatialComponent();
 	Vector2I pos = { 0,  0 };
@@ -116,7 +116,9 @@ bool VolcanoScript::DoTick( const ScriptContext& ctx, U32 delta )
 			ctx.chit->QueueDelete();
 		}
 	}
-	return true;
+	// Only need to be called back as often as it spreads,
+	// but give a little more resolution for loading, etc.
+	return SPREAD_RATE / 2 + ctx.chit->random.Rand( SPREAD_RATE / 4 );
 }
 
 

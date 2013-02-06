@@ -52,7 +52,7 @@ void HealthComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 }
 
 
-bool HealthComponent::DoTick( U32 delta )
+int HealthComponent::DoTick( U32 delta, U32 since )
 {
 	if ( destroyed ) {
 		destroyed += delta;
@@ -67,7 +67,7 @@ bool HealthComponent::DoTick( U32 delta )
 			parentChit->SendMessage( msg );
 		}
 	}
-	return destroyed > 0;
+	return destroyed ? 0 : VERY_LONG_TICK;
 }
 
 

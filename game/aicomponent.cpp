@@ -50,6 +50,7 @@ AIComponent::AIComponent( Engine* _engine, WorldMap* _map )
 	engine = _engine;
 	map = _map;
 	currentAction = 0;
+	slowTick = 0;
 }
 
 
@@ -419,20 +420,26 @@ void AIComponent::Think()
 }
 
 
-bool AIComponent::DoSlowTick()
+void AIComponent::DoSlowTick()
 {
 	UpdateCombatInfo();
-	return true;
 }
 
 
-bool AIComponent::DoTick( U32 deltaTime )
+// FIXME: don't need to tick this often.
+int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 {
+	slowTick += timeSince;
+	if ( slowTick > SLOW_TICK ) {
+		slowTick = 0;
+		DoSlowTick();
+	}
+
 	// If we are in some action, do nothing and return.
 	if (    parentChit->GetRenderComponent() 
 		 && !parentChit->GetRenderComponent()->AnimationReady() ) 
 	{
-		return true;
+		return 0;
 	}
 
 	// Are we doing something? Then do that; if not, look for
@@ -449,7 +456,7 @@ bool AIComponent::DoTick( U32 deltaTime )
 			currentAction = 0;
 		}
 	}
-	return true;
+	return 0;
 }
 
 

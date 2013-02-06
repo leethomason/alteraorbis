@@ -165,7 +165,7 @@ void ItemComponent::OnChitEvent( const ChitEvent& event )
 }
 
 
-bool ItemComponent::DoSlowTick()
+void ItemComponent::DoSlowTick()
 {
 	// Look around for fire or shock spread.
 	if ( item.accruedFire > 0 || item.accruedShock > 0 ) {
@@ -179,17 +179,20 @@ bool ItemComponent::DoSlowTick()
 				ChitEvent event = ChitEvent::EffectEvent( sc->GetPosition2D(), EFFECT_RADIUS, GameItem::EFFECT_SHOCK, item.accruedShock );
 				GetChitBag()->QueueEvent( event );
 			}
-			return true;
 		}
 	}
-	return false;
 }
 
 
-bool ItemComponent::DoTick( U32 delta )
+int ItemComponent::DoTick( U32 delta, U32 since )
 {
-	bool needsTick = item.DoTick( delta );
-	return needsTick;
+	slowTickTimer += delta;
+	if ( slowTickTimer > SLOW_TICK ) {
+		slowTickTimer = 0;
+		DoSlowTick();
+	}
+	int tick = item.DoTick( delta, since );
+	return tick;
 }
 
 

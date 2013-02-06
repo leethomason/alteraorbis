@@ -27,7 +27,7 @@ private:
 	typedef ItemBaseComponent super;
 
 public:
-	ItemComponent( const GameItem& _item ) : item( _item ) {}
+	ItemComponent( const GameItem& _item ) : item( _item ), slowTickTimer(0) {}
 	virtual ~ItemComponent() {}
 
 	virtual Component* ToComponent( const char* name ) {
@@ -46,15 +46,17 @@ public:
 	virtual void Load( const tinyxml2::XMLElement* element );
 	virtual void Save( tinyxml2::XMLPrinter* printer );
 
-	virtual bool DoTick( U32 delta );
-	virtual bool DoSlowTick();
+	virtual int DoTick( U32 delta, U32 since );
 	virtual void OnChitEvent( const ChitEvent& event );
 
 	GameItem* GetItem() { return &item; }
 	void EmitEffect( Engine* engine, U32 deltaTime );
 
 private:
+	void DoSlowTick();
+
 	GameItem item;
+	int slowTickTimer;
 };
 
 #endif // ITEMCOMPONENT_INCLUDED

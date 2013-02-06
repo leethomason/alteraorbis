@@ -42,7 +42,7 @@ public:
 	virtual void Save( tinyxml2::XMLPrinter* printer );
 	virtual void OnAdd( Chit* chit );
 	virtual void OnRemove();
-	virtual bool DoTick( U32 delta );
+	virtual int DoTick( U32 delta, U32 since );
 
 private:
 	Engine* engine;

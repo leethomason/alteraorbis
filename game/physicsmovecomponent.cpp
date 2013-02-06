@@ -64,7 +64,7 @@ bool PhysicsMoveComponent::IsMoving() const
 }
 
 
-bool PhysicsMoveComponent::DoTick( U32 delta )
+int PhysicsMoveComponent::DoTick( U32 delta, U32 since )
 {
 	ComponentSet thisComp( parentChit, Chit::SPATIAL_BIT );
 	if ( thisComp.okay ) {
@@ -117,7 +117,7 @@ bool PhysicsMoveComponent::DoTick( U32 delta )
 		parentChit->Remove( this );
 		delete this;
 	}
-	return isMoving;
+	return isMoving ? 0 : VERY_LONG_TICK;
 }
 
 

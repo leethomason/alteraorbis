@@ -68,8 +68,7 @@ public:
 
 	virtual void Load( const tinyxml2::XMLElement* element );
 	virtual void Save( tinyxml2::XMLPrinter* printer );
-	virtual bool DoTick( U32 delta );
-	virtual bool DoSlowTick();
+	virtual int  DoTick( U32 delta, U32 timeSince );
 	virtual void DebugStr( grinliz::GLString* str );
 	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
 	virtual void OnChitEvent( const ChitEvent& event );
@@ -86,6 +85,7 @@ private:
 		MAX_TRACK = 8,
 	};
 
+	void DoSlowTick();
 	void UpdateCombatInfo( const grinliz::Rectangle2F* _zone=0 );
 	int GetTeamStatus( Chit* other );
 	bool LineOfSight( Chit* src, Chit* target );
@@ -93,6 +93,7 @@ private:
 
 	Engine*		engine;
 	WorldMap*	map;
+	int			slowTick;
 
 	enum {
 		/*

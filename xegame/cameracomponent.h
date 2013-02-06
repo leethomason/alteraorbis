@@ -49,7 +49,7 @@ public:
 	virtual void Save( tinyxml2::XMLPrinter* printer );
 
 	virtual void DebugStr( grinliz::GLString* str );
-	virtual bool DoTick( U32 delta );
+	virtual int DoTick( U32 delta, U32 since );
 
 	void SetAutoDelete( bool ad )									{ autoDelete = ad; }
 	void SetPanTo( grinliz::Vector3F& dest, float speed = 40.0f );

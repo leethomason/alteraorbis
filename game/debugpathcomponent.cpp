@@ -59,7 +59,7 @@ void DebugPathComponent::OnRemove()
 }
 
 
-bool DebugPathComponent::DoTick( U32 delta )
+int DebugPathComponent::DoTick( U32 delta, U32 timeSince )
 {
 	SpatialComponent* spatial = parentChit->GetSpatialComponent();
 	if ( spatial ) {
@@ -91,7 +91,7 @@ bool DebugPathComponent::DoTick( U32 delta )
 
 		model->SetColor( color );
 	}
-	return false;
+	return VERY_LONG_TICK;
 }
 
 

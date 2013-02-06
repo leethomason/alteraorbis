@@ -21,6 +21,7 @@
 #include "../grinliz/glstringutil.h"
 #include "../grinliz/glvector.h"
 #include "../tinyxml2/tinyxml2.h"
+#include "xegamelimits.h"
 
 // The primary components:
 class SpatialComponent;
@@ -54,10 +55,8 @@ public:
 	Chit* ParentChit() { return parentChit; }
 	Chit* GetChit( int id );
 
-	// Tick is a regular call; update because of events/change.
-	virtual bool DoTick( U32 delta )			{ return false; }	// returns whether future tick needed
-	virtual bool DoSlowTick()					{ return false; }	// returns whether future tick needed
-	virtual void DoUpdate()						{}
+	virtual int DoTick( U32 delta, U32 since )			{ return VERY_LONG_TICK; }
+	virtual void DoUpdate()								{}
 	virtual void DebugStr( grinliz::GLString* str )		{}
 
 	virtual void OnChitEvent( const ChitEvent& event )			{}

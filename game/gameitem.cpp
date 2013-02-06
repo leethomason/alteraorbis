@@ -266,7 +266,7 @@ void GameItem::UseRound() {
 
 // FIXME: pass in items affecting this one:
 // The body affects the claw. Environment (water) affects the body.
-bool GameItem::DoTick( U32 delta )
+int GameItem::DoTick( U32 delta, U32 sinec )
 {
 	bool tick = false;
 
@@ -310,7 +310,7 @@ bool GameItem::DoTick( U32 delta )
 	if ( parentChit ) {
 		parentChit->SendMessage( ChitMsg( ChitMsg::GAMEITEM_TICK, 0, this ), 0 );
 	}
-	return tick;	
+	return tick ? 0 : VERY_LONG_TICK;	
 }
 
 

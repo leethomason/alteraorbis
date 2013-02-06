@@ -355,16 +355,16 @@ void RenderComponent::Detach( IString metaData )
 }
 
 
-bool RenderComponent::DoTick( U32 deltaTime )
+int RenderComponent::DoTick( U32 deltaTime, U32 since )
 {
 	GRINLIZ_PERFTRACK;
-	bool needsTick = false;
+	int tick = VERY_LONG_TICK;
 
 	SpatialComponent* spatial = SyncToSpatial();
 
 	// Animate the primary model.
 	if ( spatial && model[0] && model[0]->GetAnimationResource() ) {
-		needsTick = true;	
+		tick = 0;	
 
 		// Update to the current, correct animation if we are
 		// in a slice we can change
@@ -390,7 +390,7 @@ bool RenderComponent::DoTick( U32 deltaTime )
 	for( int i=0; i<NUM_MODELS; ++i ) {
 		if( model[i] && model[i]->HasParticles() ) {
 			model[i]->EmitParticles( engine->particleSystem, engine->camera.EyeDir3(), deltaTime );
-			needsTick = true;
+			tick = 0;
 		}
 	}
 
@@ -409,7 +409,7 @@ bool RenderComponent::DoTick( U32 deltaTime )
 	if ( parentChit->GetInventoryComponent() ) 
 		parentChit->GetInventoryComponent()->EmitEffect( engine, deltaTime );
 
-	return needsTick;
+	return tick;
 }
 
 

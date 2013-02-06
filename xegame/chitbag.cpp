@@ -203,9 +203,17 @@ void ChitBag::DoTick( U32 delta, Engine* engine )
 	for( int i=0; i<blocks.Size(); ++i ) {
 		Chit* block = blocks[i];
 		for( int j=0; j<BLOCK_SIZE; ++j ) {
-			if ( block[j].ID() && block[j].TickNeeded() ) {
-				++nTicked;
-				block[j].DoTick( delta );
+			Chit* c = block + j;
+			if ( c->ID() ) {
+				
+				c->timeToTick -= delta;
+				c->timeSince  += delta;
+
+				if ( c->timeToTick <= 0 ) {
+					++nTicked;
+					c->DoTick( delta );
+					GLASSERT( c->timeToTick >= 0 );
+				}
 			}
 		}
 	}

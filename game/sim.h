@@ -8,6 +8,8 @@
 #include "../grinliz/glcontainer.h"
 #include "../tinyxml2/tinyxml2.h"
 
+#include "gamelimits.h"
+
 class Engine;
 class WorldMap;
 class LumosGame;
@@ -46,11 +48,6 @@ public:
 	// type=-1 will scan for natural plant choice
 	void CreatePlant( int x, int y, int type );
 
-	enum {
-		MINUTE			= 1000*60,						// game time and real time
-		MINUTES_IN_AGE	= 100,
-		AGE				= MINUTE * MINUTES_IN_AGE		// 1st age, 2nd age, etc.
-	};
 	double DateInAge() const { return (double)timeInMinutes / (double)MINUTES_IN_AGE; }
 
 private:

@@ -418,7 +418,7 @@ public:
 	virtual IShield*			ToShield()			{ return ( hardpoint == HARDPOINT_SHIELD ) ? this : 0; }
 
 	int Effects() const { return flags & EFFECT_MASK; }
-	bool DoTick( U32 delta );
+	int DoTick( U32 delta, U32 since );
 	
 	// 'Ready' and 'Rounds' are orthogonal. You are Ready()
 	// if the cooldown is passed. You HasRound() if the

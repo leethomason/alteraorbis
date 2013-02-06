@@ -347,9 +347,9 @@ void InventoryComponent::EmitEffect( Engine* engine, U32 delta )
 }
 
 
-bool InventoryComponent::DoTick( U32 delta )
+int InventoryComponent::DoTick( U32 delta, U32 since )
 {
-	bool callback = false;
+	int callback = VERY_LONG_TICK;
 	CArray<GameItem*, NUM_HARDPOINTS*2> work;
 	RenderComponent* rc = parentChit->GetRenderComponent();
 
@@ -362,8 +362,7 @@ bool InventoryComponent::DoTick( U32 delta )
 
 	for( int i=0; i<work.Size(); ++i ) {
 		GameItem* gi = work[i];
-		bool tick = gi->DoTick(delta);
-		callback = callback || tick;
+		callback = Min( gi->DoTick(delta, since), callback );
 		
 		if ( rc && (gi->hardpoint != NO_HARDPOINT) && (gi->procedural & PROCEDURAL_TICK_MASK) ) {
 			ProcRenderInfo info;
@@ -377,12 +376,14 @@ bool InventoryComponent::DoTick( U32 delta )
 	}
 
 	for( int i=0; i<freeItems.Size(); ++i ) {
-		if ( freeItems[i] && freeItems[i]->DoTick(delta) )
-			callback  = true;
+		if ( freeItems[i] ) {
+			callback = Min( freeItems[i]->DoTick(delta,since), callback );
+		}
 	}
 	for( int i=0; i<packItems.Size(); ++i ) {
-		if ( packItems[i] && packItems[i]->DoTick(delta) )
-			callback  = true;
+		if ( packItems[i] ) {
+			callback = Min( packItems[i]->DoTick(delta,since), callback );
+		}
 	}
 
 	return callback;

@@ -50,7 +50,7 @@ public:
 	virtual void OnAdd( Chit* chit );
 	virtual void OnRemove();
 
-	virtual bool DoTick( U32 delta );
+	virtual int DoTick( U32 delta, U32 since );
 
 	bool AddToInventory( GameItem* item, bool equip );
 	void RemoveFromInventory( int slot );

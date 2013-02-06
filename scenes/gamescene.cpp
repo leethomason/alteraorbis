@@ -350,6 +350,7 @@ void GameScene::DrawDebugText()
 	UFOText* ufoText = UFOText::Instance();
 	Chit* chit = sim->GetPlayerChit();
 	Engine* engine = sim->GetEngine();
+	ChitBag* chitBag = sim->GetChitBag();
 
 	if ( chit && chit->GetSpatialComponent() ) {
 		const Vector3F& v = chit->GetSpatialComponent()->GetPosition();
@@ -365,9 +366,10 @@ void GameScene::DrawDebugText()
 		simCount = 0;
 	}
 
-	ufoText->Draw( 0, 64,	"Date=%.2f %s mode. Sim/S=%.1f x%.1f", 
+	ufoText->Draw( 0, 64,	"Date=%.2f %s mode. Sim/S=%.1f x%.1f ticks=%d/%d", 
 							sim->DateInAge(),
 							fastMode ? "fast" : "normal", 
 							simPS,
-							simPS / 30.0f ); 
+							simPS / 30.0f,
+							chitBag->NumTicked(), chitBag->NumChits() ); 
 }

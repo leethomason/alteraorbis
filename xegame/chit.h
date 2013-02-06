@@ -125,8 +125,7 @@ public:
 	void Remove( Component* );
 	void Shelve( Component* c );
 
-	bool TickNeeded() const		{ return tickNeeded; }
-	void SetTickNeeded()		{ tickNeeded = true; }
+	void SetTickNeeded()		{ timeToTick = 0; }
 	void DoTick( U32 delta );
 
 	void OnChitEvent( const ChitEvent& event );
@@ -158,10 +157,14 @@ public:
 
 	void DebugStr( grinliz::GLString* str );
 
+
+	// "private"
 	// used by the spatial hash:
 	Chit* next;
 	// for components, so there is one random # generator per chit (not per component)
 	grinliz::Random random;
+	int timeToTick;		// time until next tick needed: set by DoTick() call
+	int timeSince;		// time since the last tick
 
 private:
 	bool CarryMsg( int componentID, Chit* src, const ChitMsg& msg );
@@ -169,8 +172,6 @@ private:
 
 	ChitBag* chitBag;
 	int		 id;
-	bool	 tickNeeded;
-	U32		 slowTickTimer;
 	Component* shelf;
 	grinliz::CDynArray<IChitListener*> listeners;
 

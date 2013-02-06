@@ -29,6 +29,8 @@ static const float	MAX_BASE_RADIUS = 0.4f;
 static const int	MAX_MAP_SIZE = 1024;
 
 static const U32	CROSS_FADE_TIME = 300;		// time to blend animations
-static const U32	SLOW_TICK = 500;
+
+static const int	VERY_LONG_TICK = 100*1000;
+static const int	SLOW_TICK = 500;
 
 #endif // XENOENGINE_GAME_LIMITS_INCLUDED
