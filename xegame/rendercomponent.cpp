@@ -102,7 +102,7 @@ void RenderComponent::Load( const tinyxml2::XMLElement* element )
 	if ( metaEle ) {
 		int i=0; 
 		for( const XMLElement* it = metaEle->FirstChildElement( "metaDataName" );
-			 it;
+			 it && i<EL_MAX_METADATA;
 			 ++i, it=it->NextSiblingElement( "metaDataName" ))
 		{
 			metaDataName[i] = IString();
@@ -121,7 +121,9 @@ void RenderComponent::Save( tinyxml2::XMLPrinter* printer )
 	this->BeginSave( printer, "RenderComponent" );
 
 	printer->OpenElement( "resources" );
-	for( int i=0; i<NUM_MODELS; ++i ) {
+
+	int n = CountArray( resource, NUM_MODELS );
+	for( int i=0; i<n; ++i ) {
 		printer->OpenElement( "resource" );
 		if ( resource[i] ) {
 			printer->PushAttribute( "name", resource[i]->header.name.c_str() );
@@ -131,7 +133,8 @@ void RenderComponent::Save( tinyxml2::XMLPrinter* printer )
 	printer->CloseElement(); // resources
 
 	printer->OpenElement( "models" );
-	for( int i=0; i<NUM_MODELS; ++i ) {
+	n = CountArray( model, NUM_MODELS );
+	for( int i=0; i<n; ++i ) {
 		if ( model[i] ) {
 			model[i]->Save( printer );
 		}
@@ -143,7 +146,14 @@ void RenderComponent::Save( tinyxml2::XMLPrinter* printer )
 	printer->CloseElement();	// models
 
 	printer->OpenElement( "metaDataNames" );
+
+	n = 0;
 	for( int i=0; i<EL_MAX_METADATA; ++i ) {
+		if ( !metaDataName[i].empty() ) {
+			n = i+1;
+		}
+	}
+	for( int i=0; i<n; ++i ) {
 		printer->OpenElement( "metaDataName" );
 		if ( !metaDataName[i].empty() ) {
 			printer->PushAttribute( "name", metaDataName[i].c_str() );

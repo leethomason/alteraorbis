@@ -30,7 +30,7 @@ using namespace tinyxml2;
 #define READ_FLOAT_ATTR( n )			else if ( name == #n ) { n = attr->FloatValue(); }
 #define READ_INT_ATTR( n )				else if ( name == #n ) { n = attr->IntValue(); }
 
-#define APPEND_FLAG( flags, cstr, name )	{ if ( flags & name ) f += #name; }
+#define APPEND_FLAG( flags, cstr, name )	{ if ( flags & name ) f += #name; f += " "; }
 #define PUSH_ATTRIBUTE( prnt, name )		{ prnt->PushAttribute( #name, name ); }
 
 // FIXME: make this way, way simpler

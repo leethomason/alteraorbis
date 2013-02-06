@@ -31,12 +31,12 @@ public:
 private:
 	void Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele );
 	void SetRenderComponent( Chit* chit );
+	const GameItem* GetResource();
 
 	Sim*		sim;
 	Engine*		engine;
 	WorldMap*	worldMap;
 	Weather*	weather;
-	const GameItem* resource;
 	int			type;		// 0-7, fern, tree, etc.
 	int			stage;		// 0-3
 	U32			age;

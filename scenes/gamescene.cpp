@@ -192,6 +192,11 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 				sim->CreatePlant( (int)at.x, (int)at.z, -1 );
 #endif
 			}
+			else if ( tapMod == GAME_TAP_MOD_SHIFT ) {
+				for( int i=0; i<NUM_PLANT_TYPES; ++i ) {
+					sim->CreatePlant( (int)at.x+i, (int)at.z, i );
+				}
+			}
 		}
 	}
 }
@@ -360,9 +365,9 @@ void GameScene::DrawDebugText()
 		simCount = 0;
 	}
 
-	ufoText->Draw( 0, 64,	"Date=%.2f %s mode. Sim/S=%.1f", 
+	ufoText->Draw( 0, 64,	"Date=%.2f %s mode. Sim/S=%.1f x%.1f", 
 							sim->DateInAge(),
 							fastMode ? "fast" : "normal", 
-							simPS ); 
+							simPS,
+							simPS / 30.0f ); 
 }
-

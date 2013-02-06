@@ -49,6 +49,18 @@ struct ModelGroup
 
 void LoadParticles( grinliz::CDynArray< ParticleDef >* array, const char* path );
 
+// Count the non-zero section of an array.
+template< class T >
+int CountArray( const T* arr, int n ) {
+	int count = 0;
+	for( int i=0; i<n; ++i ) {
+		if ( arr[i] ) {
+			count = i+1;
+		}
+	}
+	return count;
+}
+
 void LoadVector( const tinyxml2::XMLElement* element, grinliz::Vector3F* vec );
 void LoadColor( const tinyxml2::XMLElement* element, grinliz::Color3F* color );
 void LoadColor( const tinyxml2::XMLElement* element, grinliz::Color4F* color );
@@ -61,7 +73,7 @@ void XEArchive( tinyxml2::XMLPrinter* printer, const tinyxml2::XMLElement* eleme
 void XEArchive( tinyxml2::XMLPrinter* printer, const tinyxml2::XMLElement* element, const char* name, 
 				grinliz::Vector3F& vec );
 void XEArchive( tinyxml2::XMLPrinter* printer, const tinyxml2::XMLElement* element, const char* name, 
-				grinliz::Vector4F& vec );
+				grinliz::Vector4F& vec, const grinliz::Vector4F* defaultValue=0 );
 void XEArchive( tinyxml2::XMLPrinter* printer, const tinyxml2::XMLElement* element, const char* name, 
 				grinliz::Quaternion& vec );
 void XEArchive( tinyxml2::XMLPrinter* printer, const tinyxml2::XMLElement* element, const char* name, 

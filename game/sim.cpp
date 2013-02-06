@@ -47,6 +47,7 @@ Sim::Sim( LumosGame* g )
 	minuteClock = 0;
 	timeInMinutes = 0;
 	volcTimer = 0;
+	secondClock = 1000;
 
 	random.SetSeedFromTime();
 }
@@ -159,12 +160,19 @@ void Sim::DoTick( U32 delta )
 	chitBag->DoTick( delta, engine );
 
 	bool minuteTick = false;
+	bool secondTick = false;
 
 	minuteClock -= (int)delta;
 	if ( minuteClock <= 0 ) {
 		minuteClock += MINUTE;
 		timeInMinutes++;
 		minuteTick = true;
+	}
+
+	secondClock -= (int)delta;
+	if ( secondClock <= 0 ) {
+		secondClock += 1000;
+		secondTick = true;
 	}
 
 	// Logic that will probably need to be broken out.
@@ -203,7 +211,9 @@ void Sim::DoTick( U32 delta )
 		break;
 	}
 
-	// FIXME: spawn plants
+	if ( secondTick ) {
+		CreatePlant( random.Rand(worldMap->Width()), random.Rand(worldMap->Height()), -1 );
+	}
 }
 
 

@@ -36,15 +36,26 @@ void MapSpatialComponent::SetMapPosition( int x, int y )
 
 void MapSpatialComponent::SetMode( int newMode ) 
 {
+	GLASSERT( worldMap );
+	GLASSERT( newMode == USES_GRID || newMode == BLOCKS_GRID );
+	GLASSERT( mode == USES_GRID || mode == BLOCKS_GRID );
+	Vector2I pos = MapPosition();
+
 	if ( parentChit && ( newMode != mode )) {
-		Vector2I pos = MapPosition();
+		GLASSERT( worldMap->InUse( pos.x, pos.y ));
 		if ( newMode == USES_GRID ) {
 			worldMap->ClearBlocked( pos.x, pos.y );
 		}
 		else if ( newMode == BLOCKS_GRID ) {
 			worldMap->SetBlocked( pos.x, pos.y );
 		}
-		mode = newMode;
+	}
+
+	mode = newMode;
+	if ( parentChit ) {
+		GLASSERT( (mode != BLOCKS_GRID) || worldMap->IsBlocked( pos.x, pos.y ));
+		GLASSERT( (mode == BLOCKS_GRID) || !worldMap->IsBlocked( pos.x, pos.y ));
+		GLASSERT( worldMap->InUse( pos.x, pos.y ));
 	}
 }
 
@@ -56,10 +67,15 @@ void MapSpatialComponent::OnAdd( Chit* chit )
 	Vector2I pos = MapPosition();
 	const WorldGrid& wg = worldMap->GetWorldGrid( pos.x, pos.y );
 
+	// Messy - since this interacts with the map (which
+	// is saved as a straight block of data.) Needs the "just loaded"
+	// flag.
 	if ( justLoaded ) {
 		GLASSERT( worldMap->InUse( pos.x, pos.y ));
 		if ( mode == BLOCKS_GRID ) {
-			GLASSERT( worldMap->IsBlocked( pos.x, pos.y ));
+			// This is not preserved - the SetRock() is clearing it.
+			// Fragile code.
+			worldMap->SetBlocked( pos.x, pos.y );
 		}
 		justLoaded = false;
 	}
@@ -114,6 +130,15 @@ void MapSpatialComponent::Load( const tinyxml2::XMLElement* element )
 
 void MapSpatialComponent::Save( tinyxml2::XMLPrinter* printer )
 {
+	Vector2I pos = MapPosition();
+	const WorldGrid& wg = worldMap->GetWorldGrid( pos.x, pos.y );
+	GLASSERT( worldMap->InUse( pos.x, pos.y ));
+	GLASSERT( wg.InUse() );
+	if ( mode == BLOCKS_GRID ) {
+		GLASSERT( wg.IsBlocked() );
+		GLASSERT( worldMap->IsBlocked( pos.x, pos.y ));
+	}
+
 	this->BeginSave( printer, "MapSpatialComponent" );
 	Archive( printer, 0 );
 	super::Save( printer );

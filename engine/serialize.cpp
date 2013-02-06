@@ -273,18 +273,24 @@ void XEArchive( XMLPrinter* printer, const XMLElement* element, const char* name
 }
 
 
-void XEArchive( XMLPrinter* printer, const XMLElement* element, const char* name, Vector4F& vec )
+void XEArchive( XMLPrinter* printer, const XMLElement* element, const char* name, Vector4F& vec, const Vector4F* def )
 {
 	GLASSERT( !(printer && element));
 	GLASSERT( printer || element );
 	GLASSERT( name && *name );
 
-	if ( printer ) 
-		PushType( printer, name, vec );
+	if ( printer ) {
+		if ( !def || (*def != vec) ) {	
+			PushType( printer, name, vec );
+		}
+	}
 	if ( element ) {
-		vec.Zero();
+		if ( def ) 
+			vec = *def;
+		else
+			vec.Zero();
+
 		const XMLElement* ele = element->FirstChildElement( name );
-		GLASSERT( ele );
 		if ( ele ) {
 			const char* type = ele->Attribute( "type" );
 			GLASSERT( type && StrEqual( type,  "Vector4F" ));
@@ -303,12 +309,16 @@ void XEArchive( XMLPrinter* printer, const XMLElement* element, const char* name
 	GLASSERT( printer || element );
 	GLASSERT( name && *name );
 
-	if ( printer ) 
-		PushType( printer, name, q );
+	static const Quaternion DEFAULT;
+
+	if ( printer ) {
+		if ( q != DEFAULT ) {
+			PushType( printer, name, q );
+		}
+	}
 	if ( element ) {
-		q.Zero();
+		q = DEFAULT;
 		const XMLElement* ele = element->FirstChildElement( name );
-		GLASSERT( ele );
 		if ( ele ) {
 			const char* type = ele->Attribute( "type" );
 			GLASSERT( type && StrEqual( type,  "Quaternion" ));

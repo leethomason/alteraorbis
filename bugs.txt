@@ -378,3 +378,8 @@ CreateProgram flags=7169 72 msec total=873	// Huge success! If only it worked on
 CreateProgram flags=7169 89 msec total=772	// Pull out color mult
 
 But on the desktop, 40X (yes 40) faster:
+
+Save file (flora)
+11.5MB	baseline
+9.4		initial cleanup of output
+7.7		default values for color and vectors

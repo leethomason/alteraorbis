@@ -65,6 +65,7 @@ private:
 
 	grinliz::Random	random;
 	int playerID;
+	int secondClock;
 	int minuteClock;
 	U32 timeInMinutes;
 	int volcTimer;

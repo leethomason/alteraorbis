@@ -56,6 +56,8 @@ size_t memTotal = 0;
 size_t memWatermark = 0;
 long memNewCount = 0;
 long memDeleteCount = 0;
+long memMallocCount = 0;
+long memFreeCount = 0;
 unsigned long MEM_MAGIC0 = 0xbaada55a;
 unsigned long MEM_MAGIC1 = 0xbaada22a;
 unsigned long MEM_DELETED0 = 0x12345678;
@@ -124,7 +126,7 @@ void TrackMalloc( const void* mem, size_t size )
 	if ( memTotal > memWatermark )
 		memWatermark = memTotal;
 	
-	memNewCount++;
+	memMallocCount++;
 	U32 log2 = logBase2(size);
 	GLASSERT( log2 < 32 );
 	distribution[ log2 ] += 1;
@@ -136,7 +138,7 @@ void TrackFree( const void* mem )
 	for( unsigned long i=0; i<nMTrack; ++i ) {
 		if ( mtrackRoot[i].mem == mem ) {
 			memTotal -= mtrackRoot[i].size;
-			memDeleteCount++;
+			memFreeCount++;
 			mtrackRoot[i] = mtrackRoot[nMTrack-1];
 			--nMTrack;
 			return;
@@ -267,6 +269,8 @@ void MemLeakCheck()
 	GLOUTPUT((	"MEMORY REPORT: watermark=%dk =%dM new count=%d. delete count=%d. %d allocations leaked.\n",
 				(int)(memWatermark/1024), (int)(memWatermark/(1024*1024)),
 				(int)memNewCount, (int)memDeleteCount, (int)(memNewCount-memDeleteCount) ));
+	GLOUTPUT((	"               malloc count=%d. free count=%d. %d allocations leaked.\n",
+				(int)memMallocCount, (int)memFreeCount, (int)(memMallocCount-memFreeCount) ));
 
 	for( int i=0; i<30; ++i ) {
 		U32 m32 = 1<<i;
@@ -307,6 +311,7 @@ void MemLeakCheck()
 		It's not elegant, but it does work.
 	*/
 	GLASSERT( memNewCount-memDeleteCount == 0 && !root && !nMTrack );
+	GLASSERT( memMallocCount - memFreeCount == 0 );
 
 	// If this fires, the code isn't working or you never allocated memory:
 	GLASSERT( memNewCount );

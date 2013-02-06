@@ -15,16 +15,19 @@
 #include "../game/weather.h"
 #include "../game/worldmap.h"
 #include "../game/sim.h"
+#include "../game/mapspatialcomponent.h"
 
 using namespace grinliz;
 
 
 /*static*/ GameItem* PlantScript::IsPlant( Chit* chit, int* type, int* stage )
 {
+	GLASSERT( chit );
 	GameItem* item = chit->GetItem();
 	ScriptComponent* sc = GET_COMPONENT( chit, ScriptComponent );
 
 	if ( item && sc && StrEqual( sc->Script()->ScriptName(), "PlantScript" )) {
+		GLASSERT( sc->Script() );
 		PlantScript* plantScript = static_cast< PlantScript* >( sc->Script() );
 		*type = plantScript->Type();
 		*stage = plantScript->Stage();
@@ -54,6 +57,7 @@ void PlantScript::SetRenderComponent( Chit* chit )
 	str[5] = '0' + type;
 	str[7] = '0' + stage;
 
+	GLASSERT( chit );
 	if ( chit->GetRenderComponent() ) {
 		const ModelResource* res = chit->GetRenderComponent()->MainResource();
 		if ( res && res->header.name == str.c_str() ) {
@@ -63,28 +67,32 @@ void PlantScript::SetRenderComponent( Chit* chit )
 	}
 
 	if ( chit->GetRenderComponent() ) {
-		chit->Remove( chit->GetRenderComponent() );
+		RenderComponent* rc = chit->GetRenderComponent();
+		chit->Remove( rc );
+		delete rc;
 	}
 
-	chit->Add( new RenderComponent( engine, str.c_str() ));
-
-	// Set the mass to be consistent with rendering.
-	GameItem* item = chit->GetItem();
-	GLASSERT( item );
-	if ( item ) {
-		item->mass = resource->mass * (float)((stage+1)*(stage+1));
+	if ( !chit->GetRenderComponent() ) {
+		chit->Add( new RenderComponent( engine, str.c_str() ));
 	}
+}
+
+
+const GameItem* PlantScript::GetResource()
+{
+	CStr<10> str = "plant0";
+	str[5] = '0' + type;
+
+	ItemDefDB* itemDefDB = ItemDefDB::Instance();
+	const GameItem* resource = &itemDefDB->Get( str.c_str() );
+	GLASSERT( resource );
+	return resource;
 }
 
 
 void PlantScript::Init( const ScriptContext& ctx )
 {
-	ItemDefDB* itemDefDB = ItemDefDB::Instance();
-
-	CStr<10> str = "plant0";
-	str[5] = '0' + type;
-	resource = &itemDefDB->Get( str.c_str() );
-
+	const GameItem* resource = GetResource();
 	ctx.chit->Add( new ItemComponent( *resource ));
 	SetRenderComponent( ctx.chit );
 }
@@ -132,7 +140,7 @@ bool PlantScript::DoTick( const ScriptContext& ctx, U32 delta )
 	age += 1000;
 	ageAtStage += 1000;
 
-	SpatialComponent* sc = ctx.chit->GetSpatialComponent();
+	MapSpatialComponent* sc = GET_COMPONENT( ctx.chit, MapSpatialComponent );
 	GLASSERT( sc );
 	if ( !sc ) return false;
 
@@ -140,49 +148,62 @@ bool PlantScript::DoTick( const ScriptContext& ctx, U32 delta )
 	GLASSERT( item );
 	if ( !item ) return false;
 
-	Vector2F posF = sc->GetPosition2D();
-	Vector2I pos = { (int)posF.x, (int)posF.y };
+	Vector2I pos = sc->MapPosition();
 
 	float h = (float)(stage+1);
 
 	float rainFraction	= weather->RainFraction( pos.x, pos.y );	// FIXME: switch to actual "isRaining"
-	float sunHeight		= h;												// FIXME: account for shadows
-	float sun			= sunHeight * (1.0f-rainFraction);
+
+	// rain,sun = [0,1]
+
+	// FIXME: account for shadows
+	float sunHeight		= h;												
+	float sun			= sunHeight * (1.0f-rainFraction) / h;
 
 	// FIXME: account for pools, sea edge
 	// FIXME: account for nearby rock limiting root depth
-	float water = rainFraction * h;				// h also models root depth
-
-	float sunScale = 0.5f;
-	item->GetValue( "sun", &sunScale );
-
-	float sunNeeded   = h * sunScale;
-	float waterNeeded = h * (1.0f-sunScale);
+	// FIXME: model root depth
+	float rain = rainFraction; // * maxdepth / depth
 
 	float temp = weather->Temperature( pos.x, pos.y );
-	float plantTemp = 0.5f;
-	item->GetValue( "temperature", &plantTemp );
-	float tempError = 1.0f - fabsf( plantTemp - temp );
 
-	sun   *= tempError;
-	water *= tempError;
+	Vector3F actual = { sun, rain, temp };
+	Vector3F optimal = { 0.5f, 0.5f, 0.5f };
 
-	if ( sun > sunNeeded && water > waterNeeded ) {
+	item->GetValue( "sun", &optimal.x );
+	item->GetValue( "rain", &optimal.y );
+	item->GetValue( "temp", &optimal.z );
+
+	float distance = ( optimal - actual ).Length();
+
+	// FIXME adjust distance for size.
+	// FIXME scale hp for size2
+
+	if ( distance < 0.4f ) {
 		// Heal.
 		ChitMsg healMsg( ChitMsg::CHIT_HEAL );
 		healMsg.dataF = HP_PER_TICK;
 		ctx.chit->SendMessage( healMsg );
 
 		sporeTimer += 1000;
+		int nStage = 4;
+		item->GetValue( "nStage", &nStage );
 
 		// Grow
 		if (    item->HPFraction() > 0.9f 
 			 && ageAtStage > TIME_TO_GROW 
-			 && stage < 3 ) 
+			 && stage < (nStage-1) ) 
 		{
 			++stage;
 			ageAtStage = 0;
 			SetRenderComponent( ctx.chit );
+
+			// Set the mass to be consistent with rendering.
+			const GameItem* resource = GetResource();
+			item->mass = resource->mass * (float)((stage+1)*(stage+1));
+			item->hp   = item->TotalHP() * 0.5f;
+
+			sc->SetMode( stage < 2 ? MapSpatialComponent::USES_GRID : MapSpatialComponent::BLOCKS_GRID );
 		}
 
 		// Spore
@@ -194,7 +215,7 @@ bool PlantScript::DoTick( const ScriptContext& ctx, U32 delta )
 			sim->CreatePlant( pos.x+dx, pos.y+dy, -1 );
 		}
 	}
-	else if ( sun < sunNeeded * 0.5f && water < waterNeeded * 0.5f ) {
+	else if ( distance > 0.8f ) {
 		DamageDesc dd( HP_PER_TICK, 0 );
 		ChitMsg damage( ChitMsg::CHIT_DAMAGE, 0, &dd );
 		ctx.chit->SendMessage( damage );

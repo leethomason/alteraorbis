@@ -290,9 +290,13 @@ void Model::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele 
 
 	XEArchive( prn, ele, "pos", pos );
 	XEArchive( prn, ele, "rot", rot );
-	XEArchive( prn, ele, "color", color );
-	XEArchive( prn, ele, "boneFilter", boneFilter );
-	XEArchive( prn, ele, "control", control );
+
+	static const Vector4F DEF_ONE = { 1, 1, 1, 1 };
+	static const Vector4F DEF_ZERO = { 0, 0, 0, 0 };
+
+	XEArchive( prn, ele, "color", color, &DEF_ONE );
+	XEArchive( prn, ele, "boneFilter", boneFilter, &DEF_ZERO );
+	XEArchive( prn, ele, "control", control, &DEF_ONE );
 }
 
 
