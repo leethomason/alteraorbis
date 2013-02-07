@@ -31,7 +31,7 @@
 
 #pragma warning ( disable : 4996 )
 using namespace gamedb;
-
+using namespace grinliz;
 
 void WriteU32( FILE* fp, U32 val )
 {
@@ -41,13 +41,14 @@ void WriteU32( FILE* fp, U32 val )
 
 Writer::Writer()
 {
-	root = new WItem( "root", 0 );
+	stringPool = new StringPool();
+	root = new WItem( "root", 0, this );
 }
 
 Writer::~Writer()
 {
 	delete root;
-
+	delete stringPool;
 }
 
 
@@ -60,29 +61,29 @@ void Writer::Save( const char* filename )
 	}
 
 	// Get all the strings used for anything to build a string pool.
-	std::set< std::string > stringSet;
+	std::set<grinliz::IString> stringSet;
 	root->EnumerateStrings( &stringSet );
 
 	// Sort them.
-	std::vector< std::string > pool;
-	for( std::set< std::string >::iterator itr = stringSet.begin(); itr != stringSet.end(); ++itr ) {
-		pool.push_back( *itr );
+	std::vector< grinliz::IString > poolVec;
+	for( std::set< IString >::iterator itr = stringSet.begin(); itr != stringSet.end(); ++itr ) {
+		poolVec.push_back( *itr );
 	}
-	std::sort( pool.begin(), pool.end() );
+	std::sort( poolVec.begin(), poolVec.end() );
 
 	// --- Header --- //
 	HeaderStruct headerStruct;	// come back later and fill in.
 	fwrite( &headerStruct, sizeof(HeaderStruct), 1, fp );
 
 	// --- String Pool --- //
-	headerStruct.nString = pool.size();
-	U32 mark = ftell( fp ) + 4*pool.size();		// position of first string.
-	for( unsigned i=0; i<pool.size(); ++i ) {
+	headerStruct.nString = poolVec.size();
+	U32 mark = ftell( fp ) + 4*poolVec.size();		// position of first string.
+	for( unsigned i=0; i<poolVec.size(); ++i ) {
 		WriteU32( fp, mark );
-		mark += pool[i].size() + 1;				// size of string and null terminator.
+		mark += poolVec[i].size() + 1;				// size of string and null terminator.
 	}
-	for( unsigned i=0; i<pool.size(); ++i ) {
-		fwrite( pool[i].c_str(), pool[i].size()+1, 1, fp );
+	for( unsigned i=0; i<poolVec.size(); ++i ) {
+		fwrite( poolVec[i].c_str(), poolVec[i].size()+1, 1, fp );
 	}
 	// Move to a 32-bit boundary.
 	while( ftell(fp)%4 ) {
@@ -94,7 +95,7 @@ void Writer::Save( const char* filename )
 	std::vector< WItem::MemSize > dataPool;
 	std::vector< U8 > buffer;
 
-	root->Save( fp, pool, &dataPool );
+	root->Save( fp, poolVec, &dataPool );
 
 	// --- Data Description --- //
 	headerStruct.offsetToDataDesc = ftell( fp );
@@ -154,11 +155,12 @@ void Writer::Save( const char* filename )
 }
 
 
-WItem::WItem( const char* name, const WItem* parent )
+WItem::WItem( const char* name, const WItem* parent, Writer* p_writer )
 {
 	GLASSERT( name && *name );
-	itemName = name;
+	itemName = p_writer->SPool()->Get( name );
 	this->parent = parent;
+	writer = p_writer;
 	offset = 0;
 }
 
@@ -166,14 +168,14 @@ WItem::WItem( const char* name, const WItem* parent )
 WItem::~WItem()
 {
 	{
-		std::map<std::string, WItem*>::iterator itr;
+		std::map<IString, WItem*>::iterator itr;
 		for(itr = child.begin(); itr != child.end(); ++itr) {
 			delete (*itr).second;
 		}
 	}
 	{
 		// Free the copy of the memory.
-		for( std::map<std::string, Attrib>::iterator itr = data.begin(); itr != data.end(); ++itr) {
+		for( std::map<IString, Attrib>::iterator itr = data.begin(); itr != data.end(); ++itr) {
 			(*itr).second.Free();
 		}
 	}
@@ -181,17 +183,17 @@ WItem::~WItem()
 }
 
 
-void WItem::EnumerateStrings( std::set< std::string >* stringSet )
+void WItem::EnumerateStrings( std::set< IString >* stringSet )
 {
 	(*stringSet).insert( itemName );
 
-	for( std::map<std::string, Attrib>::iterator itr = data.begin(); itr != data.end(); ++itr) {
+	for( std::map<IString, Attrib>::iterator itr = data.begin(); itr != data.end(); ++itr) {
 		(*stringSet).insert( (*itr).first );
 		if ( (*itr).second.type == ATTRIBUTE_STRING ) {
 			(*stringSet).insert( (*itr).second.stringVal );	// strings are both key and value!!
 		}
 	}
-	for( std::map<std::string, WItem*>::iterator itr = child.begin(); itr != child.end(); ++itr) {
+	for( std::map<IString, WItem*>::iterator itr = child.begin(); itr != child.end(); ++itr) {
 		(*itr).second->EnumerateStrings( stringSet );
 	}
 }
@@ -200,7 +202,8 @@ void WItem::EnumerateStrings( std::set< std::string >* stringSet )
 WItem* WItem::FetchChild( const char* name )
 {
 	GLASSERT( name && *name );
-	std::map<std::string, WItem*>::iterator itr = child.find( name );
+	IString iname = writer->SPool()->Get( name );
+	std::map<IString, WItem*>::iterator itr = child.find( iname );
 	if ( itr == child.end() )
 		return CreateChild( name );
 	return (*itr).second;
@@ -210,10 +213,11 @@ WItem* WItem::FetchChild( const char* name )
 WItem* WItem::CreateChild( const char* name )
 {
 	GLASSERT( name && *name );
-	GLASSERT( child.find( std::string( name ) ) == child.end() );
+	IString iname = writer->SPool()->Get( name );
+	GLASSERT( child.find( iname ) == child.end() );
 	
-	WItem* witem = new WItem( name, this );
-	child[ name ] = witem;
+	WItem* witem = new WItem( name, this, writer );
+	child[ iname ] = witem;
 	return witem;
 }
 
@@ -249,7 +253,8 @@ void WItem::SetData( const char* name, const void* d, int nData, bool useCompres
 	a.dataSize = nData;
 	a.compressData = useCompression;
 
-	data[ name ] = a;
+	IString iname = writer->SPool()->Get( name );
+	data[ iname ] = a;
 }
 
 
@@ -261,7 +266,8 @@ void WItem::SetInt( const char* name, int value )
 	a.type = ATTRIBUTE_INT;
 	a.intVal = value;
 
-	data[ name ] = a;
+	IString iname = writer->SPool()->Get( name );
+	data[ iname ] = a;
 }
 
 
@@ -273,7 +279,8 @@ void WItem::SetFloat( const char* name, float value )
 	a.type = ATTRIBUTE_FLOAT;
 	a.floatVal = value;
 
-	data[ name ] = a;
+	IString iname = writer->SPool()->Get( name );
+	data[ iname ] = a;
 }
 
 
@@ -283,9 +290,10 @@ void WItem::SetString( const char* name, const char* str )
 
 	Attrib a; a.Clear();
 	a.type = ATTRIBUTE_STRING;
-	a.stringVal = str;
+	a.stringVal = writer->SPool()->Get( str );
 
-	data[ name ] = a;
+	IString iname = writer->SPool()->Get( name );
+	data[ iname ] = a;
 }
 
 
@@ -297,44 +305,12 @@ void WItem::SetBool( const char* name, bool value )
 	a.type = ATTRIBUTE_BOOL;
 	a.intVal = value ? 1 : 0;
 
-	data[ name ] = a;
+	IString iname = writer->SPool()->Get( name );
+	data[ iname ] = a;
 }
 
 
-#if 0
-int WItem::GetInt( const char* name )
-{
-	GLASSERT( name && *name );
-	GLASSERT( data.find( name ) != data.end() );
-
-	Attrib a = data[ name ];
-	GLASSERT( a.type == ATTRIBUTE_INT );
-	return a.intVal;
-}
-
-
-float WItem::GetFloat( const char* name )
-{
-	GLASSERT( name && *name );
-	GLASSERT( data.find( name ) != data.end() );
-	Attrib a = data[ name ];
-	GLASSERT( a.type == ATTRIBUTE_FLOAT );
-	return a.floatVal;
-}
-
-
-bool WItem::GetBool( const char* name )
-{
-	GLASSERT( name && *name );
-	GLASSERT( data.find( name ) != data.end() );
-	Attrib a = data[ name ];
-	GLASSERT( a.type == ATTRIBUTE_BOOL );
-	return a.intVal ? true : false;
-}
-#endif
-
-
-int WItem::FindString( const std::string& str, const std::vector< std::string >& stringPool )
+int WItem::FindString( const IString& str, const std::vector< IString >& stringPool )
 {
 	unsigned low = 0;
 	unsigned high = stringPool.size();
@@ -355,7 +331,7 @@ int WItem::FindString( const std::string& str, const std::vector< std::string >&
 
 
 void WItem::Save(	FILE* fp, 
-					const std::vector< std::string >& stringPool, 
+					const std::vector< IString >& stringPool, 
 					std::vector< MemSize >* dataPool )
 {
 	offset = ftell( fp );
@@ -376,7 +352,7 @@ void WItem::Save(	FILE* fp,
 	// And now write the attributes:
 	AttribStruct aStruct;
 
-	for( std::map<std::string, Attrib>::iterator itr = data.begin(); itr != data.end(); ++itr) {
+	for( std::map<IString, Attrib>::iterator itr = data.begin(); itr != data.end(); ++itr) {
 		
 		Attrib* a = &(itr->second);
 		aStruct.SetKeyType( FindString( itr->first, stringPool ), a->type );
@@ -414,7 +390,7 @@ void WItem::Save(	FILE* fp,
 	}
 
 	// Save the children
-	std::map<std::string, WItem*>::iterator itr;
+	std::map<IString, WItem*>::iterator itr;
 	int n = 0;
 
 	for(itr = child.begin(); itr != child.end(); ++itr, ++n ) {

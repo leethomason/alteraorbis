@@ -291,8 +291,12 @@ public:
 	bool operator!=( const GLString& other )  const	{ return !(*this == other); }
 	bool operator!=( const char* other )  const		{ return !(*this == other); }
 
+	bool operator<( const IString& other ) const	{ return strcmp( c_str(), other.c_str() ) < 0; } 
+	bool operator>( const IString& other ) const	{ return strcmp( c_str(), other.c_str() ) > 0; } 
+
 	const char* c_str() const					{ return str; }
 	bool empty() const							{ return !str || *str == 0; }
+	int size() const							{ return strlen( str ); }
 
 private:
 	IString( const char* _str )					{ str = _str; }
@@ -304,6 +308,9 @@ class StringPool
 {
 public:
 	static StringPool* Instance();
+
+	// Create WITHOUT using instance.
+	StringPool();
 	~StringPool();
 
 	IString Get( const char* str, bool strIsStaticMem=false );
@@ -313,7 +320,6 @@ public:
 	}
 
 private:
-	StringPool();
 	const char* Add( const char* str );
 
 	static StringPool* instance;

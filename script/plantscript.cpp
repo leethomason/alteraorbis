@@ -3,6 +3,7 @@
 
 #include "../engine/serialize.h"
 #include "../engine/model.h"
+#include "../engine/engine.h"
 
 #include "../xegame/itemcomponent.h"
 #include "../xegame/chit.h"
@@ -95,6 +96,12 @@ void PlantScript::Init( const ScriptContext& ctx )
 	const GameItem* resource = GetResource();
 	ctx.chit->Add( new ItemComponent( *resource ));
 	SetRenderComponent( ctx.chit );
+
+	const Vector3F& light = engine->lighting.direction;
+	float norm = Max( fabs( light.x ), fabs( light.z ));
+	lightTap.x = LRintf( light.x / norm );
+	lightTap.y = LRintf( light.z / norm );
+	lightTapYMult = sqrtf( light.x*light.x + light.z*light.z ) / light.y;
 }
 
 
@@ -158,9 +165,12 @@ int PlantScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 
 	float h = (float)(stage+1);
 
-	float rainFraction	= weather->RainFraction( pos.x, pos.y );	// FIXME: switch to actual "isRaining"
+	float rainFraction	= weather->RainFraction( pos.x, pos.y );
 
 	// rain,sun = [0,1]
+
+	// Shadows.
+	
 
 	// FIXME: account for shadows
 	float sunHeight		= h;												

@@ -31,9 +31,12 @@
 
 #include "../grinliz/gltypes.h"
 #include "../grinliz/gldebug.h"
+#include "../grinliz/glcontainer.h"
+#include "../grinliz/glstringutil.h"
 
 namespace gamedb
 {
+class Writer;
 
 /**
 	A Write-Item. Used when writing to build a tree to be placed in the database.
@@ -42,7 +45,7 @@ class WItem
 {
 public:
 	/// Construct a WItem. The name must be unique amongst its siblings.
-	WItem( const char* name, const WItem* parent );
+	WItem( const char* name, const WItem* parent, Writer* writer );
 	~WItem();
 
 	/// Query the name of this item.
@@ -72,14 +75,7 @@ public:
 	/// Add/Set a boolean attribute.
 	void SetBool( const char* name, bool value );
 
-#if 0
-	// Normally, you don't query a WItem, but if needed:
-	int GetInt( const char* name );
-	float GetFloat( const char* name );
-	bool GetBool( const char* name );
-#endif
-
-	void EnumerateStrings( std::set< std::string >* stringSet );
+	void EnumerateStrings( std::set< grinliz::IString >* stringSet );
 
 	struct MemSize {
 		const void* mem;
@@ -87,7 +83,7 @@ public:
 		bool compressData;
 	};
 	void Save(	FILE* fp, 
-				const std::vector< std::string >& stringPool, 
+				const std::vector< grinliz::IString >& stringPool, 
 				std::vector< MemSize >* dataPool );
 
 	// internal
@@ -97,7 +93,7 @@ private:
 
 	struct Attrib
 	{
-		void Clear()	{ type=0; data=0; dataSize=0; intVal=0; floatVal=0; stringVal.clear(); }
+		void Clear()	{ type=0; data=0; dataSize=0; intVal=0; floatVal=0; stringVal = grinliz::IString(); }
 		void Free();
 
 		int type;				// ATTRIBUTE_INT, etc.
@@ -108,15 +104,16 @@ private:
 
 		int intVal;
 		float floatVal;
-		std::string stringVal;
+		grinliz::IString stringVal;
 	};
 
-	int FindString( const std::string& str, const std::vector< std::string >& stringPool );
+	int FindString( const grinliz::IString& str, const std::vector< grinliz::IString >& stringPoolVec );
 
-	std::string itemName;
+	grinliz::IString itemName;
 	const WItem* parent;
-	std::map<std::string, WItem*> child;
-	std::map<std::string, Attrib> data;
+	Writer* writer;
+	std::map<grinliz::IString, WItem*> child;
+	std::map<grinliz::IString, Attrib> data;
 };
 
 /** Utility class to create a gamedb database. Memory aggressive; meant for tooling
@@ -142,9 +139,12 @@ public:
 	*/
 	WItem* Root()		{ return root; }
 
+	grinliz::StringPool* SPool() { return stringPool; }
+
 private:
 
-	WItem* root;
+	WItem*		root;
+	grinliz::StringPool* stringPool;
 };
 
 
