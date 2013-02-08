@@ -477,3 +477,28 @@ const char* StringPool::Add( const char* str )
 	memcpy( b->mem, str, nBytes );
 	return b->mem;
 }
+
+
+void StringPool::GetAllStrings( grinliz::CDynArray< const char* >* arr )
+{
+	arr->Clear();
+	arr->EnsureCap( nStrings );
+	for( int i=0; i<nStrings; ++i ) {
+		GLASSERT( tree[i].str );
+		arr->Push( tree[i].str );
+	}
+}
+
+
+void StringPool::GetAllStrings( grinliz::CDynArray< IString >* arr )
+{
+	arr->Clear();
+	arr->EnsureCap( nStrings );
+	for( int i=0; i<treeSize; ++i ) {
+		if ( tree[i].str ) {
+			arr->Push( IString( tree[i].str ));
+		}
+	}
+	GLASSERT( arr->Size() == nStrings );
+}
+

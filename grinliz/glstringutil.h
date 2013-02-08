@@ -38,6 +38,7 @@ distribution.
 
 #include "gldebug.h"
 #include "gltypes.h"
+#include "glcontainer.h"
 
 
 namespace grinliz 
@@ -319,6 +320,9 @@ public:
 		return Instance()->Get( str, strIsStaticMem );
 	}
 
+	void GetAllStrings( CDynArray< const char* >* arr );
+	void GetAllStrings( CDynArray< IString >* arr );
+
 private:
 	const char* Add( const char* str );
 
@@ -336,7 +340,7 @@ private:
 	};
 	int treeSize;
 	int treeDepth;
-	Node* tree;
+	Node* tree;		// An array.
 	Block* root;
 
 	int nStrings;

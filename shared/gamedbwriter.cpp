@@ -61,28 +61,24 @@ void Writer::Save( const char* filename )
 	}
 
 	// Get all the strings used for anything to build a string pool.
-	std::set<grinliz::IString> stringSet;
-	root->EnumerateStrings( &stringSet );
+	CDynArray< IString > poolVec;
+	stringPool->GetAllStrings( &poolVec );
 
 	// Sort them.
-	std::vector< grinliz::IString > poolVec;
-	for( std::set< IString >::iterator itr = stringSet.begin(); itr != stringSet.end(); ++itr ) {
-		poolVec.push_back( *itr );
-	}
-	std::sort( poolVec.begin(), poolVec.end() );
+	Sort< IString, CompValue>( poolVec.Mem(), poolVec.Size() );
 
 	// --- Header --- //
 	HeaderStruct headerStruct;	// come back later and fill in.
 	fwrite( &headerStruct, sizeof(HeaderStruct), 1, fp );
 
 	// --- String Pool --- //
-	headerStruct.nString = poolVec.size();
-	U32 mark = ftell( fp ) + 4*poolVec.size();		// position of first string.
-	for( unsigned i=0; i<poolVec.size(); ++i ) {
+	headerStruct.nString = poolVec.Size();
+	U32 mark = ftell( fp ) + 4*poolVec.Size();		// position of first string.
+	for( int i=0; i<poolVec.Size(); ++i ) {
 		WriteU32( fp, mark );
 		mark += poolVec[i].size() + 1;				// size of string and null terminator.
 	}
-	for( unsigned i=0; i<poolVec.size(); ++i ) {
+	for( int i=0; i<poolVec.Size(); ++i ) {
 		fwrite( poolVec[i].c_str(), poolVec[i].size()+1, 1, fp );
 	}
 	// Move to a 32-bit boundary.
@@ -92,8 +88,8 @@ void Writer::Save( const char* filename )
 
 	// --- Items --- //
 	headerStruct.offsetToItems = ftell( fp );
-	std::vector< WItem::MemSize > dataPool;
-	std::vector< U8 > buffer;
+	grinliz::CDynArray< WItem::MemSize > dataPool;
+	grinliz::CDynArray< U8 > buffer;
 
 	root->Save( fp, poolVec, &dataPool );
 
@@ -101,15 +97,15 @@ void Writer::Save( const char* filename )
 	headerStruct.offsetToDataDesc = ftell( fp );
 
 	// reserve space for offsets
-	std::vector< DataDescStruct > ddsVec;
-	ddsVec.resize( dataPool.size() );
-	fwrite( &ddsVec[0], sizeof(DataDescStruct)*ddsVec.size(), 1, fp );
+	grinliz::CDynArray< DataDescStruct > ddsVec;
+	ddsVec.PushArr( dataPool.Size() );
+	fwrite( &ddsVec[0], sizeof(DataDescStruct)*ddsVec.Size(), 1, fp );
 
 	// --- Data --- //
 	headerStruct.offsetToData = ftell( fp );
-	headerStruct.nData = dataPool.size();
+	headerStruct.nData = dataPool.Size();
 
-	for( unsigned i=0; i<dataPool.size(); ++i ) {
+	for( int i=0; i<dataPool.Size(); ++i ) {
 		WItem::MemSize* m = &dataPool[i];
 
 		ddsVec[i].offset = ftell( fp );
@@ -119,8 +115,9 @@ void Writer::Save( const char* filename )
 		uLongf compressedSize = 0;
 
 		if ( m->size > 20 && dataPool[i].compressData ) {
-			buffer.resize( m->size*8 / 10 );
-			compressedSize = buffer.size();
+			buffer.Clear();
+			buffer.PushArr( m->size*8 / 10 );
+			compressedSize = buffer.Size();
 
 			int result = compress( (Bytef*)&buffer[0], &compressedSize, (const Bytef*)m->mem, m->size );
 			if ( result == Z_OK && compressedSize < (uLongf)m->size )
@@ -140,7 +137,7 @@ void Writer::Save( const char* filename )
 
 	// --- Data Description, revisited --- //
 	fseek( fp, headerStruct.offsetToDataDesc, SEEK_SET );
-	fwrite( &ddsVec[0], sizeof(DataDescStruct)*ddsVec.size(), 1, fp );
+	fwrite( &ddsVec[0], sizeof(DataDescStruct)*ddsVec.Size(), 1, fp );
 
 	// Go back and patch header:
 	fseek( fp, 0, SEEK_SET );
@@ -183,6 +180,7 @@ WItem::~WItem()
 }
 
 
+/*
 void WItem::EnumerateStrings( std::set< IString >* stringSet )
 {
 	(*stringSet).insert( itemName );
@@ -197,6 +195,7 @@ void WItem::EnumerateStrings( std::set< IString >* stringSet )
 		(*itr).second->EnumerateStrings( stringSet );
 	}
 }
+*/
 
 
 WItem* WItem::FetchChild( const char* name )
@@ -310,29 +309,17 @@ void WItem::SetBool( const char* name, bool value )
 }
 
 
-int WItem::FindString( const IString& str, const std::vector< IString >& stringPool )
+int WItem::FindString( const IString& str, const CDynArray< IString >& stringPool )
 {
-	unsigned low = 0;
-	unsigned high = stringPool.size();
-
-    while (low < high) {
-		unsigned mid = low + (high - low) / 2;
-		if ( stringPool[mid] < str )
-			low = mid + 1; 
-		else
-			high = mid; 
-	}
-    if ((low < stringPool.size() ) && ( stringPool[low] == str))
-		return low;
-
-	GLASSERT( 0 );	// should always succeed!
-	return 0;
+	int index = stringPool.BSearch( str );
+	GLASSERT( index >= 0 );	// should always succeed!
+	return index;
 }
 
 
 void WItem::Save(	FILE* fp, 
-					const std::vector< IString >& stringPool, 
-					std::vector< MemSize >* dataPool )
+					const CDynArray< IString >& stringPool, 
+					CDynArray< MemSize >* dataPool )
 {
 	offset = ftell( fp );
 
@@ -360,9 +347,9 @@ void WItem::Save(	FILE* fp,
 		switch ( a->type ) {
 			case ATTRIBUTE_DATA:
 				{
-					int id = dataPool->size();
+					int id = dataPool->Size();
 					MemSize m = { a->data, a->dataSize, a->compressData };
-					dataPool->push_back( m );
+					dataPool->Push( m );
 					aStruct.dataID = id;
 				}
 				break;

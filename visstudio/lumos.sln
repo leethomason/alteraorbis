@@ -20,8 +20,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "worldgen", "..\worldgen\wor
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rockgen", "..\rockgen\rockgen.vcxproj", "{2A4D7045-767C-457C-B928-900363E044BC}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "xarchive", "..\xarchive\xarchive.vcxproj", "{7E47E43E-1E05-4987-9A3D-349F0003E7CB}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -48,10 +46,6 @@ Global
 		{2A4D7045-767C-457C-B928-900363E044BC}.Debug|Win32.Build.0 = Debug|Win32
 		{2A4D7045-767C-457C-B928-900363E044BC}.Release|Win32.ActiveCfg = Release|Win32
 		{2A4D7045-767C-457C-B928-900363E044BC}.Release|Win32.Build.0 = Release|Win32
-		{7E47E43E-1E05-4987-9A3D-349F0003E7CB}.Debug|Win32.ActiveCfg = Debug|Win32
-		{7E47E43E-1E05-4987-9A3D-349F0003E7CB}.Debug|Win32.Build.0 = Debug|Win32
-		{7E47E43E-1E05-4987-9A3D-349F0003E7CB}.Release|Win32.ActiveCfg = Release|Win32
-		{7E47E43E-1E05-4987-9A3D-349F0003E7CB}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

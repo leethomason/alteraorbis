@@ -32,7 +32,7 @@ distribution.
 #include "gldebug.h"
 #include "gltypes.h"
 #include "glutil.h"
-#include "glstringutil.h"
+//#include "glstringutil.h"
 
 namespace grinliz
 {
@@ -162,9 +162,6 @@ public:
 	const T* Mem() const	{ return mem; }
 	T* Mem()				{ return mem; }
 
-private:
-	CDynArray( const CDynArray<T>& );	// not allowed. Add a missing '&' in the code.
-
 	void EnsureCap( int count ) {
 		if ( count > capacity ) {
 			capacity = Max( CeilPowerOf2( count ), (U32) 16 );
@@ -176,6 +173,27 @@ private:
 			}
 		}
 	}
+
+	// Binary Search: array must be sorted!
+	int BSearch( const T& t ) const {
+		int low = 0;
+		int high = Size();
+
+		while (low < high) {
+			int mid = low + (high - low) / 2;
+			if ( mem[mid] < t )
+				low = mid + 1; 
+			else
+				high = mid; 
+		}
+		if ((low < Size() ) && ( mem[low] == t))
+			return low;
+
+		return -1;
+	}
+
+private:
+	CDynArray( const CDynArray<T>& );	// not allowed. Add a missing '&' in the code.
 
 	T* mem;
 	int size;

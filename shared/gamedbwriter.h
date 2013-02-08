@@ -24,15 +24,13 @@
 #ifndef GRINLIZ_GAME_DB_WRITER_INCLUDED
 #define GRINLIZ_GAME_DB_WRITER_INCLUDED
 
-#include <string>
-#include <vector>
-#include <map>
-#include <set>
-
 #include "../grinliz/gltypes.h"
 #include "../grinliz/gldebug.h"
 #include "../grinliz/glcontainer.h"
 #include "../grinliz/glstringutil.h"
+
+#include <stdio.h>
+#include <map>
 
 namespace gamedb
 {
@@ -75,7 +73,7 @@ public:
 	/// Add/Set a boolean attribute.
 	void SetBool( const char* name, bool value );
 
-	void EnumerateStrings( std::set< grinliz::IString >* stringSet );
+	//void EnumerateStrings( std::set< grinliz::IString >* stringSet );
 
 	struct MemSize {
 		const void* mem;
@@ -83,8 +81,8 @@ public:
 		bool compressData;
 	};
 	void Save(	FILE* fp, 
-				const std::vector< grinliz::IString >& stringPool, 
-				std::vector< MemSize >* dataPool );
+				const grinliz::CDynArray< grinliz::IString >& stringPool, 
+				grinliz::CDynArray< MemSize >* dataPool );
 
 	// internal
 	int offset;	// valid after save
@@ -107,7 +105,7 @@ private:
 		grinliz::IString stringVal;
 	};
 
-	int FindString( const grinliz::IString& str, const std::vector< grinliz::IString >& stringPoolVec );
+	int FindString( const grinliz::IString& str, const grinliz::CDynArray< grinliz::IString >& stringPoolVec );
 
 	grinliz::IString itemName;
 	const WItem* parent;

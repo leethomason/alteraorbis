@@ -6,6 +6,7 @@
 #include "../grinliz/glcontainer.h"
 #include "../grinliz/glrandom.h"
 #include "../grinliz/glcolor.h"
+#include "../grinliz/glstringutil.h"
 
 #include "../shared/lodepng.h"
 #include "../game/gamelimits.h"
