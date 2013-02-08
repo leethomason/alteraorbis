@@ -155,10 +155,11 @@ void Writer::Save( const char* filename )
 WItem::WItem( const char* name, const WItem* parent, Writer* p_writer )
 {
 	GLASSERT( name && *name );
-	itemName = p_writer->SPool()->Get( name );
+	itemName = p_writer->stringPool->Get( name );
 	this->parent = parent;
 	writer = p_writer;
 	offset = 0;
+	attrib = 0;
 }
 
 
@@ -172,36 +173,20 @@ WItem::~WItem()
 	}
 	{
 		// Free the copy of the memory.
-		for( std::map<IString, Attrib>::iterator itr = data.begin(); itr != data.end(); ++itr) {
-			(*itr).second.Free();
+		while ( attrib ) {
+			Attrib* a = attrib->next;
+			writer->attribMem.Delete( attrib );
+			attrib = a;
 		}
 	}
 	// Everything else cleaned by destructors.
 }
 
 
-/*
-void WItem::EnumerateStrings( std::set< IString >* stringSet )
-{
-	(*stringSet).insert( itemName );
-
-	for( std::map<IString, Attrib>::iterator itr = data.begin(); itr != data.end(); ++itr) {
-		(*stringSet).insert( (*itr).first );
-		if ( (*itr).second.type == ATTRIBUTE_STRING ) {
-			(*stringSet).insert( (*itr).second.stringVal );	// strings are both key and value!!
-		}
-	}
-	for( std::map<IString, WItem*>::iterator itr = child.begin(); itr != child.end(); ++itr) {
-		(*itr).second->EnumerateStrings( stringSet );
-	}
-}
-*/
-
-
 WItem* WItem::FetchChild( const char* name )
 {
 	GLASSERT( name && *name );
-	IString iname = writer->SPool()->Get( name );
+	IString iname = writer->stringPool->Get( name );
 	std::map<IString, WItem*>::iterator itr = child.find( iname );
 	if ( itr == child.end() )
 		return CreateChild( name );
@@ -212,7 +197,7 @@ WItem* WItem::FetchChild( const char* name )
 WItem* WItem::CreateChild( const char* name )
 {
 	GLASSERT( name && *name );
-	IString iname = writer->SPool()->Get( name );
+	IString iname = writer->stringPool->Get( name );
 	GLASSERT( child.find( iname ) == child.end() );
 	
 	WItem* witem = new WItem( name, this, writer );
@@ -246,14 +231,16 @@ void WItem::SetData( const char* name, const void* d, int nData, bool useCompres
 	void* mem = malloc( nData );
 	memcpy( mem, d, nData );
 
-	Attrib a; a.Clear();
-	a.type = ATTRIBUTE_DATA;
-	a.data = mem;
-	a.dataSize = nData;
-	a.compressData = useCompression;
+	Attrib* a = writer->attribMem.New();
+	a->Clear();
+	a->name = writer->stringPool->Get( name );
+	a->type = ATTRIBUTE_DATA;
+	a->data = mem;
+	a->dataSize = nData;
+	a->compressData = useCompression;
 
-	IString iname = writer->SPool()->Get( name );
-	data[ iname ] = a;
+	a->next = attrib;
+	attrib = a;
 }
 
 
@@ -261,12 +248,14 @@ void WItem::SetInt( const char* name, int value )
 {
 	GLASSERT( name && *name );
 
-	Attrib a; a.Clear();
-	a.type = ATTRIBUTE_INT;
-	a.intVal = value;
+	Attrib* a = writer->attribMem.New();
+	a->Clear();
+	a->name = writer->stringPool->Get( name );
+	a->type = ATTRIBUTE_INT;
+	a->intVal = value;
 
-	IString iname = writer->SPool()->Get( name );
-	data[ iname ] = a;
+	a->next = attrib;
+	attrib = a;
 }
 
 
@@ -274,12 +263,14 @@ void WItem::SetFloat( const char* name, float value )
 {
 	GLASSERT( name && *name );
 
-	Attrib a; a.Clear();
-	a.type = ATTRIBUTE_FLOAT;
-	a.floatVal = value;
+	Attrib* a = writer->attribMem.New();
+	a->Clear();
+	a->name = writer->stringPool->Get( name );
+	a->type = ATTRIBUTE_FLOAT;
+	a->floatVal = value;
 
-	IString iname = writer->SPool()->Get( name );
-	data[ iname ] = a;
+	a->next = attrib;
+	attrib = a;
 }
 
 
@@ -287,12 +278,14 @@ void WItem::SetString( const char* name, const char* str )
 {
 	GLASSERT( name && *name );
 
-	Attrib a; a.Clear();
-	a.type = ATTRIBUTE_STRING;
-	a.stringVal = writer->SPool()->Get( str );
+	Attrib *a = writer->attribMem.New();
+	a->Clear();
+	a->name = writer->stringPool->Get( name );
+	a->type = ATTRIBUTE_STRING;
+	a->stringVal = writer->stringPool->Get( str );
 
-	IString iname = writer->SPool()->Get( name );
-	data[ iname ] = a;
+	a->next = attrib;
+	attrib = a;
 }
 
 
@@ -300,12 +293,14 @@ void WItem::SetBool( const char* name, bool value )
 {
 	GLASSERT( name && *name );
 	
-	Attrib a; a.Clear();
-	a.type = ATTRIBUTE_BOOL;
-	a.intVal = value ? 1 : 0;
+	Attrib* a = writer->attribMem.New();
+	a->Clear();
+	a->name = writer->stringPool->Get( name );
+	a->type = ATTRIBUTE_BOOL;
+	a->intVal = value ? 1 : 0;
 
-	IString iname = writer->SPool()->Get( name );
-	data[ iname ] = a;
+	a->next = attrib;
+	attrib = a;
 }
 
 
@@ -323,10 +318,18 @@ void WItem::Save(	FILE* fp,
 {
 	offset = ftell( fp );
 
+	// Pull out the linked list and sort it.
+	CDynArray< Attrib* >& attribArr = writer->attribArr;
+	attribArr.Clear();
+	for( Attrib* a = attrib; a; a=a->next ) {
+		attribArr.Push( a );
+	}
+	Sort< Attrib*, CompAttribPtr >( attribArr.Mem(), attribArr.Size() );
+
 	ItemStruct itemStruct;
 	itemStruct.nameID = FindString( itemName, stringPool );
 	itemStruct.offsetToParent = Parent() ? Parent()->offset : 0;
-	itemStruct.nAttrib = data.size();
+	itemStruct.nAttrib = attribArr.Size();
 	itemStruct.nChildren = child.size();
 
 	fwrite( &itemStruct, sizeof(itemStruct), 1, fp );
@@ -339,10 +342,9 @@ void WItem::Save(	FILE* fp,
 	// And now write the attributes:
 	AttribStruct aStruct;
 
-	for( std::map<IString, Attrib>::iterator itr = data.begin(); itr != data.end(); ++itr) {
-		
-		Attrib* a = &(itr->second);
-		aStruct.SetKeyType( FindString( itr->first, stringPool ), a->type );
+	for( int i=0; i<attribArr.Size(); ++i ) {
+		Attrib* a = attribArr[i];
+		aStruct.SetKeyType( FindString( a->name, stringPool ), a->type );
 
 		switch ( a->type ) {
 			case ATTRIBUTE_DATA:

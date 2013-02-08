@@ -28,6 +28,7 @@
 #include "../grinliz/gldebug.h"
 #include "../grinliz/glcontainer.h"
 #include "../grinliz/glstringutil.h"
+#include "../grinliz/glmemorypool.h"
 
 #include <stdio.h>
 #include <map>
@@ -41,6 +42,7 @@ class Writer;
 */
 class WItem
 {
+	friend class Writer;
 public:
 	/// Construct a WItem. The name must be unique amongst its siblings.
 	WItem( const char* name, const WItem* parent, Writer* writer );
@@ -73,8 +75,6 @@ public:
 	/// Add/Set a boolean attribute.
 	void SetBool( const char* name, bool value );
 
-	//void EnumerateStrings( std::set< grinliz::IString >* stringSet );
-
 	struct MemSize {
 		const void* mem;
 		int size;
@@ -91,9 +91,10 @@ private:
 
 	struct Attrib
 	{
-		void Clear()	{ type=0; data=0; dataSize=0; intVal=0; floatVal=0; stringVal = grinliz::IString(); }
+		void Clear()	{ type=0; data=0; dataSize=0; intVal=0; floatVal=0; stringVal = grinliz::IString(); next=0; }
 		void Free();
 
+		grinliz::IString name;
 		int type;				// ATTRIBUTE_INT, etc.
 		
 		void* data;
@@ -103,6 +104,14 @@ private:
 		int intVal;
 		float floatVal;
 		grinliz::IString stringVal;
+
+		Attrib* next;
+	};
+
+	class CompAttribPtr {
+	public:
+		// Sort:
+		static bool Less( const Attrib* v0, const Attrib* v1 )	{ return v0->name < v1->name; }
 	};
 
 	int FindString( const grinliz::IString& str, const grinliz::CDynArray< grinliz::IString >& stringPoolVec );
@@ -111,7 +120,7 @@ private:
 	const WItem* parent;
 	Writer* writer;
 	std::map<grinliz::IString, WItem*> child;
-	std::map<grinliz::IString, Attrib> data;
+	Attrib* attrib;
 };
 
 /** Utility class to create a gamedb database. Memory aggressive; meant for tooling
@@ -125,6 +134,7 @@ private:
 */
 class Writer
 {
+	friend class WItem;
 public:
 	Writer();		///<
 	~Writer();
@@ -137,12 +147,12 @@ public:
 	*/
 	WItem* Root()		{ return root; }
 
-	grinliz::StringPool* SPool() { return stringPool; }
-
 private:
 
 	WItem*		root;
 	grinliz::StringPool* stringPool;
+	grinliz::MemoryPoolT< WItem::Attrib > attribMem; 
+	grinliz::CDynArray< WItem::Attrib* > attribArr;		// cached
 };
 
 

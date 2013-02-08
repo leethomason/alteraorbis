@@ -38,6 +38,50 @@ namespace grinliz
 {
 
 
+// I'm completely intriqued by CombSort. QuickSort is
+// fast, but an intricate algorithm that is easy to
+// implement an "almost working" solution. CombSort
+// is very simple, and almost as fast.
+// good description: http://yagni.com/combsort/
+
+inline int CombSortGap( int gap ) 
+{
+	GLASSERT( (gap & 0xff000000) == 0 );
+	// shrink: 1.247
+	// 9 or 10 go to 11 (awesome)
+	//							   0  1  2  3  4  5  6  7  8  9 10 11  12  13  14  15
+	static const int table[16] = { 1, 1, 1, 2, 3, 4, 4, 5, 6, 7, 8, 8, 11, 11, 11, 12 };
+	if ( gap < 16 ) {
+		gap = table[gap];
+	}
+	else {
+		gap = (gap * 103)>>7;
+	}
+	GLASSERT( gap  > 0 );
+	return gap;
+}
+
+template <class T, class KCOMPARE >
+inline void Sort( T* mem, int size )
+{
+	int gap = size;
+	for (;;) {
+		gap = CombSortGap(gap);
+		bool swapped = false;
+		const int end = size - gap;
+		for (int i = 0; i < end; i++) {
+			int j = i + gap;
+			if ( KCOMPARE::Less(mem[j],mem[i]) ) {
+				Swap(mem+i, mem+j);
+				swapped = true;
+			}
+		}
+		if (gap == 1 && !swapped) {
+			break;
+		}
+	}
+}
+
 class ValueSem {
 public:
 	template <class T>
@@ -486,49 +530,6 @@ private:
 };
 
 
-// I'm completely intriqued by CombSort. QuickSort is
-// fast, but an intricate algorithm that is easy to
-// implement an "almost working" solution. CombSort
-// is very simple, and almost as fast.
-// good description: http://yagni.com/combsort/
-
-inline int CombSortGap( int gap ) 
-{
-	GLASSERT( (gap & 0xff000000) == 0 );
-	// shrink: 1.247
-	// 9 or 10 go to 11 (awesome)
-	//							   0  1  2  3  4  5  6  7  8  9 10 11  12  13  14  15
-	static const int table[16] = { 1, 1, 1, 2, 3, 4, 4, 5, 6, 7, 8, 8, 11, 11, 11, 12 };
-	if ( gap < 16 ) {
-		gap = table[gap];
-	}
-	else {
-		gap = (gap * 103)>>7;
-	}
-	GLASSERT( gap  > 0 );
-	return gap;
-}
-
-template <class T, class KCOMPARE >
-inline void Sort( T* mem, int size )
-{
-	int gap = size;
-	for (;;) {
-		gap = CombSortGap(gap);
-		bool swapped = false;
-		const int end = size - gap;
-		for (int i = 0; i < end; i++) {
-			int j = i + gap;
-			if ( KCOMPARE::Less(mem[j],mem[i]) ) {
-				Swap(mem+i, mem+j);
-				swapped = true;
-			}
-		}
-		if (gap == 1 && !swapped) {
-			break;
-		}
-	}
-}
 
 
 }	// namespace grinliz
