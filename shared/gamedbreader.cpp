@@ -288,7 +288,8 @@ void Reader::RecWalk( const Item* item, int depth )
 	}
 	printf( "]\n" );
 
-	for( int i=0; i<item->NumChildren(); ++i ) {
+	int nChildren = item->NumChildren();
+	for( int i=0; i<nChildren; ++i ) {
 		const Item* child = item->Child( i );
 		RecWalk( child, depth + 1 );
 	}

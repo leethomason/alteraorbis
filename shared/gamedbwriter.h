@@ -31,7 +31,6 @@
 #include "../grinliz/glmemorypool.h"
 
 #include <stdio.h>
-#include <map>
 
 namespace gamedb
 {
@@ -45,11 +44,14 @@ class WItem
 	friend class Writer;
 public:
 	/// Construct a WItem. The name must be unique amongst its siblings.
-	WItem( const char* name, const WItem* parent, Writer* writer );
+	WItem();
 	~WItem();
 
+	void Init( const char* name, WItem* parent, Writer* writer );
+
 	/// Query the name of this item.
-	const char* Name() const	{ return itemName.c_str(); }
+	const char* Name() const		{ return itemName.c_str(); }
+	grinliz::IString IName() const	{ return itemName; }
 
 	/// The parent link
 	const WItem* Parent() const { return parent; }
@@ -117,11 +119,20 @@ private:
 	int FindString( const grinliz::IString& str, const grinliz::CDynArray< grinliz::IString >& stringPoolVec );
 
 	grinliz::IString itemName;
-	const WItem* parent;
-	Writer* writer;
-	std::map<grinliz::IString, WItem*> child;
-	Attrib* attrib;
+	const WItem*	parent;
+	Writer*			writer;
+	WItem*			child;
+	WItem*			sibling;
+	Attrib*			attrib;
 };
+
+
+class CompWItemPtr {
+public:
+	// Sort:
+	static bool Less( const WItem* v0, const WItem* v1 )	{ return v0->IName() < v1->IName(); }
+};
+
 
 /** Utility class to create a gamedb database. Memory aggressive; meant for tooling
     not for runtime. Basic use:
@@ -149,10 +160,11 @@ public:
 
 private:
 
-	WItem*		root;
-	grinliz::StringPool* stringPool;
-	grinliz::MemoryPoolT< WItem::Attrib > attribMem; 
-	grinliz::CDynArray< WItem::Attrib* > attribArr;		// cached
+	WItem*									root;
+	grinliz::StringPool*					stringPool;
+	grinliz::MemoryPoolT< WItem::Attrib >	attribMem; 
+	grinliz::MemoryPoolT< WItem >			witemMem; 
+	grinliz::CDynArray< WItem::Attrib* >	attribArr;		// cache. (Some trick doesn't work for child items, where multiple caches would be needed.)
 };
 
 

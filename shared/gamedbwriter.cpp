@@ -42,12 +42,13 @@ void WriteU32( FILE* fp, U32 val )
 Writer::Writer()
 {
 	stringPool = new StringPool();
-	root = new WItem( "root", 0, this );
+	root = witemMem.New();
+	root->Init( "root", 0, this );
 }
 
 Writer::~Writer()
 {
-	delete root;
+	witemMem.Delete( root );
 	delete stringPool;
 }
 
@@ -99,7 +100,7 @@ void Writer::Save( const char* filename )
 	// reserve space for offsets
 	grinliz::CDynArray< DataDescStruct > ddsVec;
 	ddsVec.PushArr( dataPool.Size() );
-	fwrite( &ddsVec[0], sizeof(DataDescStruct)*ddsVec.Size(), 1, fp );
+	fwrite( ddsVec.Mem(), sizeof(DataDescStruct)*ddsVec.Size(), 1, fp );
 
 	// --- Data --- //
 	headerStruct.offsetToData = ftell( fp );
@@ -137,7 +138,7 @@ void Writer::Save( const char* filename )
 
 	// --- Data Description, revisited --- //
 	fseek( fp, headerStruct.offsetToDataDesc, SEEK_SET );
-	fwrite( &ddsVec[0], sizeof(DataDescStruct)*ddsVec.Size(), 1, fp );
+	fwrite( ddsVec.Mem(), sizeof(DataDescStruct)*ddsVec.Size(), 1, fp );
 
 	// Go back and patch header:
 	fseek( fp, 0, SEEK_SET );
@@ -152,13 +153,14 @@ void Writer::Save( const char* filename )
 }
 
 
-WItem::WItem( const char* name, const WItem* parent, Writer* p_writer )
+WItem::WItem()
 {
-	GLASSERT( name && *name );
-	itemName = p_writer->stringPool->Get( name );
-	this->parent = parent;
-	writer = p_writer;
 	offset = 0;
+
+	parent = 0;
+	writer = 0;
+	child  = 0;
+	sibling = 0;
 	attrib = 0;
 }
 
@@ -166,9 +168,10 @@ WItem::WItem( const char* name, const WItem* parent, Writer* p_writer )
 WItem::~WItem()
 {
 	{
-		std::map<IString, WItem*>::iterator itr;
-		for(itr = child.begin(); itr != child.end(); ++itr) {
-			delete (*itr).second;
+		while ( child ) {
+			WItem* w = child->sibling;
+			writer->witemMem.Delete( child );
+			child = w;
 		}
 	}
 	{
@@ -183,14 +186,23 @@ WItem::~WItem()
 }
 
 
+void WItem::Init( const char* name, WItem* parent, Writer* writer )
+{
+	this->itemName = writer->stringPool->Get( name );
+	this->parent = parent;
+	this->writer = writer;
+}
+
+
 WItem* WItem::FetchChild( const char* name )
 {
 	GLASSERT( name && *name );
 	IString iname = writer->stringPool->Get( name );
-	std::map<IString, WItem*>::iterator itr = child.find( iname );
-	if ( itr == child.end() )
-		return CreateChild( name );
-	return (*itr).second;
+	for( WItem* c = child; c; c=c->sibling ) {
+		if ( c->itemName == name )
+			return c;
+	}
+	return CreateChild( name );
 }
 
 
@@ -198,10 +210,12 @@ WItem* WItem::CreateChild( const char* name )
 {
 	GLASSERT( name && *name );
 	IString iname = writer->stringPool->Get( name );
-	GLASSERT( child.find( iname ) == child.end() );
-	
-	WItem* witem = new WItem( name, this, writer );
-	child[ iname ] = witem;
+
+	WItem* witem = writer->witemMem.New();
+	witem->Init( name, this, writer );
+
+	witem->sibling = this->child;
+	this->child = witem;
 	return witem;
 }
 
@@ -308,6 +322,7 @@ int WItem::FindString( const IString& str, const CDynArray< IString >& stringPoo
 {
 	int index = stringPool.BSearch( str );
 	GLASSERT( index >= 0 );	// should always succeed!
+	GLASSERT( index < stringPool.Size() );
 	return index;
 }
 
@@ -318,6 +333,7 @@ void WItem::Save(	FILE* fp,
 {
 	offset = ftell( fp );
 
+	// Attributes:
 	// Pull out the linked list and sort it.
 	CDynArray< Attrib* >& attribArr = writer->attribArr;
 	attribArr.Clear();
@@ -326,24 +342,32 @@ void WItem::Save(	FILE* fp,
 	}
 	Sort< Attrib*, CompAttribPtr >( attribArr.Mem(), attribArr.Size() );
 
+	// Child items:
+	// Pull out the linked list and sort it.
+	CDynArray< WItem* > childArr;
+	childArr.Clear();
+	for( WItem* c = child; c; c=c->sibling ) {
+		childArr.Push( c );
+	}
+	Sort< WItem*, CompWItemPtr >( childArr.Mem(), childArr.Size() );
+
 	ItemStruct itemStruct;
 	itemStruct.nameID = FindString( itemName, stringPool );
 	itemStruct.offsetToParent = Parent() ? Parent()->offset : 0;
 	itemStruct.nAttrib = attribArr.Size();
-	itemStruct.nChildren = child.size();
+	itemStruct.nChildren = childArr.Size();
 
 	fwrite( &itemStruct, sizeof(itemStruct), 1, fp );
 
 	// Reserve the child locations.
 	int markChildren = ftell( fp );
-	for( unsigned i=0; i<child.size(); ++i )
+	for( int i=0; i<childArr.Size(); ++i )
 		WriteU32( fp, 0 );
 	
 	// And now write the attributes:
-	AttribStruct aStruct;
-
 	for( int i=0; i<attribArr.Size(); ++i ) {
 		Attrib* a = attribArr[i];
+		AttribStruct aStruct;
 		aStruct.SetKeyType( FindString( a->name, stringPool ), a->type );
 
 		switch ( a->type ) {
@@ -379,17 +403,14 @@ void WItem::Save(	FILE* fp,
 	}
 
 	// Save the children
-	std::map<IString, WItem*>::iterator itr;
-	int n = 0;
-
-	for(itr = child.begin(); itr != child.end(); ++itr, ++n ) {
+	for( int i=0; i<childArr.Size(); ++i ) {
 		// Back up, write the current position to the child offset.
 		int current = ftell(fp);
-		fseek( fp, markChildren+n*4, SEEK_SET );
+		fseek( fp, markChildren+i*4, SEEK_SET );
 		WriteU32( fp, current );
 		fseek( fp, current, SEEK_SET );
 
 		// save
-		itr->second->Save( fp, stringPool, dataPool );
+		childArr[i]->Save( fp, stringPool, dataPool );
 	}
 }
