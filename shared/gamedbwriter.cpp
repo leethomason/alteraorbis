@@ -374,7 +374,7 @@ void WItem::Save(	FILE* fp,
 			case ATTRIBUTE_DATA:
 				{
 					int id = dataPool->Size();
-					MemSize m = { a->data, a->dataSize, a->compressData };
+					MemSize m = { a->data, a->dataSize, a->compressData ? true : false };
 					dataPool->Push( m );
 					aStruct.dataID = id;
 				}

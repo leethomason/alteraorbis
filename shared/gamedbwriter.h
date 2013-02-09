@@ -96,17 +96,18 @@ private:
 		void Clear()	{ type=0; data=0; dataSize=0; intVal=0; floatVal=0; stringVal = grinliz::IString(); next=0; }
 		void Free();
 
-		grinliz::IString name;
-		int type;				// ATTRIBUTE_INT, etc.
+		U8 type;				// ATTRIBUTE_INT, etc.
+		U8 compressData;
 		
+		grinliz::IString name;
 		void* data;
-		int dataSize;
-		bool compressData;
 
-		int intVal;
-		float floatVal;
+		union {
+			int dataSize;
+			int intVal;
+			float floatVal;
+		};
 		grinliz::IString stringVal;
-
 		Attrib* next;
 	};
 
