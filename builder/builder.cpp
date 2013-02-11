@@ -37,7 +37,7 @@
 #include "../engine/serialize.h"
 
 #include "../tinyxml2/tinyxml2.h"
-#include "../shared/gamedbwriter.h"
+#include "../shared/dbhelper.h"
 #include "../importers/import.h"
 
 #include "../version.h"
@@ -125,7 +125,7 @@ void ModelHeader::Set(	const IString& name, int nAtoms, int nTotalVertices, int 
 
 void ModelHeader::Save( gamedb::WItem* parent )
 {
-	gamedb::WItem* node = parent->CreateChild( "header" );
+	gamedb::WItem* node = parent->FetchChild( "header" );
 	node->SetInt( "nTotalVertices", nTotalVertices );
 	node->SetInt( "nTotalIndices", nTotalIndices );
 	node->SetInt( "flags", flags );
@@ -134,18 +134,19 @@ void ModelHeader::Save( gamedb::WItem* parent )
 		node->SetString( "animation", animation.c_str() );
 	}
 
-	gamedb::WItem* boundNode = node->CreateChild( "bounds" );
+	DBSet( node, "bounds", bounds ); 
+/*	gamedb::WItem* boundNode = node->FetchChild( "bounds" );
 	boundNode->SetFloat( "min.x", bounds.min.x );
 	boundNode->SetFloat( "min.y", bounds.min.y );
 	boundNode->SetFloat( "min.z", bounds.min.z );
 	boundNode->SetFloat( "max.x", bounds.max.x );
 	boundNode->SetFloat( "max.y", bounds.max.y );
 	boundNode->SetFloat( "max.z", bounds.max.z );
-
-	gamedb::WItem* metaNode = node->CreateChild( "metaData" );
+*/
+	gamedb::WItem* metaNode = node->FetchChild( "metaData" );
 	for( int i=0; i<EL_MAX_METADATA; ++i ) {
 		if ( !metaData[i].name.empty() ) {
-			gamedb::WItem* data = metaNode->CreateChild( metaData[i].name.c_str() );
+			gamedb::WItem* data = metaNode->FetchChild( metaData[i].name.c_str() );
 			data->SetFloat( "x", metaData[i].pos.x );
 			data->SetFloat( "y", metaData[i].pos.y );
 			data->SetFloat( "z", metaData[i].pos.z );
@@ -161,18 +162,18 @@ void ModelHeader::Save( gamedb::WItem* parent )
 		}
 	}
 
-	gamedb::WItem* effectNode = node->CreateChild( "effectData" );
+	gamedb::WItem* effectNode = node->FetchChild( "effectData" );
 	for( int i=0; i<EL_MAX_MODEL_EFFECTS; ++i ) {
 		if ( !effectData[i].name.empty() ) {
-			gamedb::WItem* data = effectNode->CreateChild(i);
+			gamedb::WItem* data = effectNode->FetchChild(i);
 			data->SetString( "metaData", effectData[i].metaData.c_str() );
 			data->SetString( "name", effectData[i].name.c_str() );
 		}
 	}
 
-	gamedb::WItem* boneNode = node->CreateChild( "bones" );
+	gamedb::WItem* boneNode = node->FetchChild( "bones" );
 	for( int i=0; i<EL_MAX_BONES && !boneName[i].empty(); ++i ) {
-		gamedb::WItem* data = boneNode->CreateChild( boneName[i].c_str() );
+		gamedb::WItem* data = boneNode->FetchChild( boneName[i].c_str() );
 		data->SetInt( "id", i );
 	}
 }
@@ -307,7 +308,7 @@ void ParseNames( const XMLElement* element, GLString* _assetName, GLString* _ful
 void ProcessTreeRec( gamedb::WItem* parent, XMLElement* ele )
 {
 	string name = ele->Value();
-	gamedb::WItem* witem = parent->CreateChild( name.c_str() );
+	gamedb::WItem* witem = parent->FetchChild( name.c_str() );
 
 	for( const XMLAttribute* attrib=ele->FirstAttribute(); attrib; attrib=attrib->Next() ) {		
 		int i;
@@ -375,7 +376,7 @@ void ProcessData( XMLElement* data )
 	fread( mem, len, 1, read );
 
 	int index = 0;
-	gamedb::WItem* witem = writer->Root()->FetchChild( "data" )->CreateChild( assetName.c_str() );
+	gamedb::WItem* witem = writer->Root()->FetchChild( "data" )->FetchChild( assetName.c_str() );
 	witem->SetData( "binary", mem, len, compression );
 
 	delete [] mem;
@@ -436,7 +437,7 @@ void ProcessText( XMLElement* textEle )
 {
 	string name;
 	AssignIf( name, textEle, "name" );
-	gamedb::WItem* textItem = writer->Root()->FetchChild( "text" )->CreateChild( name.c_str() );
+	gamedb::WItem* textItem = writer->Root()->FetchChild( "text" )->FetchChild( name.c_str() );
 	int index = 0;
 
 	for( XMLElement* pageEle = textEle->FirstChildElement( "page" ); pageEle; pageEle = pageEle->NextSiblingElement( "page" ) ) {
@@ -452,7 +453,7 @@ void ProcessText( XMLElement* textEle )
 		pageEle->Accept( &textBuilder );
 		androidText = textBuilder.str;
 
-		gamedb::WItem* pageItem = textItem->CreateChild( index );
+		gamedb::WItem* pageItem = textItem->FetchChild( index );
 
 		if ( pcText == androidText ) {
 			pageItem->SetData( "text", pcText.c_str(), pcText.size() );
@@ -604,7 +605,7 @@ void ProcessModel( XMLElement* model )
 		++nEffect;
 	}
 
-	gamedb::WItem* witem = writer->Root()->FetchChild( "models" )->CreateChild( assetName.c_str() );
+	gamedb::WItem* witem = writer->Root()->FetchChild( "models" )->FetchChild( assetName.c_str() );
 
 	int totalMemory = 0;
 
@@ -621,7 +622,7 @@ void ProcessModel( XMLElement* model )
 		ModelGroup group;
 		group.Set( vertexGroup[i].textureName.c_str(), vertexGroup[i].nVertex, vertexGroup[i].nIndex );
 
-		gamedb::WItem* witemGroup = witem->CreateChild( i );
+		gamedb::WItem* witemGroup = witem->FetchChild( i );
 		witemGroup->SetString( "textureName", group.textureName.c_str() );
 		witemGroup->SetInt( "nVertex", group.nVertex );
 		witemGroup->SetInt( "nIndex", group.nIndex );
@@ -884,7 +885,7 @@ void ProcessPalette( XMLElement* pal )
 
 	gamedb::WItem* witem = writer->Root()->FetchChild( "data" )
 										 ->FetchChild( "palettes" )
-										 ->CreateChild( assetName.c_str() );
+										 ->FetchChild( assetName.c_str() );
 	witem->SetInt( "dx", dx );
 	witem->SetInt( "dy", dy );
 	witem->SetData( "colors", &colors[0], dx*dy*sizeof(Color4U8), true );
@@ -910,7 +911,7 @@ void ProcessFont( XMLElement* font )
 		    assetName.c_str() );
 	gamedb::WItem* witem = writer->Root()->FetchChild( "data" )
 										 ->FetchChild( "fonts" )
-										 ->CreateChild( assetName.c_str() );
+										 ->FetchChild( assetName.c_str() );
 	
 	// Read the data tags. These describe the font.
 	static const char* tags[] = { "info", "common", 0 };
@@ -924,7 +925,7 @@ void ProcessFont( XMLElement* font )
 			ExitError( "Font", pathName.c_str(), assetName.c_str(), buf );
 		}
 		
-		gamedb::WItem* tagItem = witem->CreateChild( tag );
+		gamedb::WItem* tagItem = witem->FetchChild( tag );
 		for( const XMLAttribute* attrib=element->FirstAttribute();
 			 attrib;
 			 attrib = attrib->Next() )
@@ -939,7 +940,7 @@ void ProcessFont( XMLElement* font )
 		ExitError( "Font", pathName.c_str(), assetName.c_str(), "Font contains no 'chars' XML Element." );
 	}
 
-	gamedb::WItem* charsItem = witem->CreateChild( "chars" );
+	gamedb::WItem* charsItem = witem->FetchChild( "chars" );
 	for( const XMLElement* charElement = charsElement->FirstChildElement( "char" );
 		 charElement;
 		 charElement = charElement->NextSiblingElement( "char" ) )
@@ -949,7 +950,7 @@ void ProcessFont( XMLElement* font )
 		int id = 1;
 		charElement->QueryIntAttribute( "id", &id );
 		buffer[4] = id;
-		gamedb::WItem* charItem = charsItem->CreateChild( buffer );
+		gamedb::WItem* charItem = charsItem->FetchChild( buffer );
 
 		for( const XMLAttribute* attrib=charElement->FirstAttribute();
 			 attrib;
@@ -965,7 +966,7 @@ void ProcessFont( XMLElement* font )
 	if ( !kerningsElement ) {
 		return;
 	}
-	gamedb::WItem* kerningsItem = witem->CreateChild( "kernings" );
+	gamedb::WItem* kerningsItem = witem->FetchChild( "kernings" );
 	for( const XMLElement* kerningElement = kerningsElement->FirstChildElement( "kerning" );
 		 kerningElement;
 		 kerningElement = kerningElement->NextSiblingElement( "kerning" ) )
@@ -977,7 +978,7 @@ void ProcessFont( XMLElement* font )
 		kerningElement->QueryIntAttribute( "second", &second );
 		buffer[7] = first;
 		buffer[8] = second;
-		gamedb::WItem* kerningItem = kerningsItem->CreateChild( buffer );
+		gamedb::WItem* kerningItem = kerningsItem->FetchChild( buffer );
 		int amount = 0;
 		kerningElement->QueryIntAttribute( "amount", &amount );
 		kerningItem->SetInt( "amount",	amount );

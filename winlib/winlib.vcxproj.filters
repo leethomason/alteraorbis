@@ -14,6 +14,9 @@
     <Filter Include="Source Files\tinyxml2">
       <UniqueIdentifier>{582bc43d-8509-4b82-b204-2b27d16b841f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\gamedb">
+      <UniqueIdentifier>{31288942-2d01-40af-a8e3-021e8862dd72}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
@@ -105,6 +108,12 @@
     </ClCompile>
     <ClCompile Include="..\shared\lodepng.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\shared\gamedbreader.cpp">
+      <Filter>Source Files\gamedb</Filter>
+    </ClCompile>
+    <ClCompile Include="..\shared\gamedbwriter.cpp">
+      <Filter>Source Files\gamedb</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -206,6 +215,15 @@
     </ClInclude>
     <ClInclude Include="..\shared\lodepng.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\shared\gamedb.h">
+      <Filter>Source Files\gamedb</Filter>
+    </ClInclude>
+    <ClInclude Include="..\shared\gamedbreader.h">
+      <Filter>Source Files\gamedb</Filter>
+    </ClInclude>
+    <ClInclude Include="..\shared\gamedbwriter.h">
+      <Filter>Source Files\gamedb</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -358,7 +358,7 @@ bool BTexture::ToBuffer()
 
 void BTexture::InsertTextureToDB( gamedb::WItem* parent )
 {
-	gamedb::WItem* witem = parent->CreateChild( assetName.c_str() );
+	gamedb::WItem* witem = parent->FetchChild( assetName.c_str() );
 
 	if ( format == RGBA16 || format == RGB16 ) {
 		witem->SetData( "pixels", pixelBuffer16, TextureMem() );

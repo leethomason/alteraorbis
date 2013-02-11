@@ -383,3 +383,7 @@ Save file (flora)
 11.5MB	baseline
 9.4		initial cleanup of output
 7.7		default values for color and vectors
+
+Save/load time (debug)
+Sim::Load 31.6 MClocks
+Sim::Save 13.4 MClocks

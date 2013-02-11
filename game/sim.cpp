@@ -73,6 +73,7 @@ void Sim::Load( const char* mapDAT, const char* mapXML, const char* gameXML )
 		CreatePlayer( v, "humanFemale" );
 	}
 	else {
+		QuickProfile qp( "Sim::Load" );
 		ComponentFactory factory( this, engine, worldMap, weather, lumosGame );
 		XMLDocument doc;
 		doc.LoadFile( gameXML );
@@ -98,6 +99,7 @@ void Sim::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele )
 
 void Sim::Save( const char* mapDAT, const char* mapXML, const char* gameXML )
 {
+	QuickProfile qp( "Sim::Save" );
 	worldMap->Save( mapDAT, mapXML );
 
 	FILE* fp = fopen( gameXML, "w" );

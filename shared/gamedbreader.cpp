@@ -270,6 +270,40 @@ void Reader::RecWalk( const Item* item, int depth )
 			case ATTRIBUTE_DATA:
 				printf( "data(#%d %d)", item->GetDataID( name ), item->GetDataSize( name ) );
 				break;
+			case ATTRIBUTE_INT_ARRAY:
+				{
+					int n = item->GetArrayLen( name );
+					if ( n <= 8 ) {
+						int array[8];
+						item->GetIntArray( name, n, array );
+						printf( "(" );
+						for( int i=0; i<n; ++i ) {
+							printf( "%d ", array[i] );
+						}
+						printf( ")" );
+					}
+					else {
+						printf( "intArray(#%d %d)", item->GetDataID( name ), item->GetArrayLen( name ) );
+					}
+				}
+				break;
+			case ATTRIBUTE_FLOAT_ARRAY:
+				{
+					int n = item->GetArrayLen( name );
+					if ( n <= 8 ) {
+						float array[8];
+						item->GetFloatArray( name, n, array );
+						printf( "(" );
+						for( int i=0; i<n; ++i ) {
+							printf( "%f ", array[i] );
+						}
+						printf( ")" );
+					}
+					else {
+						printf( "floatArray(#%d %d)", item->GetDataID( name ), item->GetArrayLen( name ) );
+					}
+				}
+				break;
 			case ATTRIBUTE_INT:
 				printf( "%d", item->GetInt( name ) );
 				break;
@@ -380,7 +414,8 @@ const void* Reader::AccessData( const Item* item, const char* name, int* p_size 
 	int size = 0;
 	if ( p_size ) *p_size = 0;
 
-	if ( item->AttributeType( name ) != ATTRIBUTE_DATA ) {
+	int type = item->AttributeType( name ); 
+	if ( !IsDataType( type ) ) {
 		return 0;
 	}
 	size = item->GetDataSize( name );
@@ -524,8 +559,9 @@ int Item::AttributeIndex( const char* name ) const
 
 int	Item::GetDataSize( int i ) const
 {
-	GLASSERT( AttributeType( i ) == ATTRIBUTE_DATA );
-	if ( AttributeType( i ) == ATTRIBUTE_DATA ) {	// also range checks
+	int type = AttributeType( i ); 
+	GLASSERT( IsDataType( type ) );
+	if ( IsDataType( type ) ) {	// also range checks
 		const AttribStruct* attrib = AttributePtr( i );
 		const Reader* context = Reader::GetContext( this );
 		return context->GetDataSize( attrib->dataID );
@@ -546,7 +582,7 @@ int	Item::GetDataSize( const char* name ) const
 
 void Item::GetDataInfo( int i, int* offset, int* size, bool* compressed ) const
 {
-	GLASSERT( AttributeType( i ) == ATTRIBUTE_DATA );
+	GLASSERT( IsDataType( AttributeType( i )));
 	const AttribStruct* attrib = AttributePtr( i );
 	const Reader* context = Reader::GetContext( this );
 
@@ -573,7 +609,7 @@ void Item::GetDataInfo( const char* name, int* offset, int* size, bool* compress
 
 void Item::GetData( int i, void* mem, int memSize ) const
 {
-	GLASSERT( AttributeType( i ) == ATTRIBUTE_DATA );
+	GLASSERT( IsDataType( AttributeType( i )));
 	GLASSERT( GetDataSize( i ) == memSize );
 
 	const Reader* context = Reader::GetContext( this );
@@ -593,7 +629,7 @@ void Item::GetData( const char* name, void* mem, int memSize ) const
 
 int	Item::GetDataID( int i ) const
 {
-	GLASSERT( AttributeType( i ) == ATTRIBUTE_DATA );
+	GLASSERT( IsDataType( AttributeType( i )));
 	const AttribStruct* attrib = AttributePtr( i );
 	return attrib->dataID;
 }
@@ -626,6 +662,70 @@ int Item::GetInt( const char* name ) const
 		return GetInt( i );
 	}
 	return 0;
+}
+
+
+int Item::GetArrayLen( const char* name ) const
+{
+	int type = AttributeType( name ); 
+	GLASSERT( type == ATTRIBUTE_INT_ARRAY || type == ATTRIBUTE_FLOAT_ARRAY );
+	GLASSERT( sizeof(int) == sizeof(float) );
+	if ( type == ATTRIBUTE_INT_ARRAY || type == ATTRIBUTE_FLOAT_ARRAY ) {
+		int n = GetDataSize( name );
+		GLASSERT( (n % sizeof(int) ) == 0 );
+		return n / sizeof(int);
+	}
+	return 0;
+};
+
+
+int Item::GetArrayLen( int i ) const
+{
+	int type = AttributeType( i ); 
+	GLASSERT( type == ATTRIBUTE_INT_ARRAY || type == ATTRIBUTE_FLOAT_ARRAY );
+	GLASSERT( sizeof(int) == sizeof(float) );
+	if ( type == ATTRIBUTE_INT_ARRAY || type == ATTRIBUTE_FLOAT_ARRAY ) {
+		int n = GetDataSize( i );
+		GLASSERT( (n % sizeof(int) ) == 0 );
+		return n / sizeof(int);
+	}
+	return 0;
+};
+
+
+void Item::GetIntArray( const char* name, int nItems, int* array ) const
+{
+	GLASSERT( AttributeType( name ) == ATTRIBUTE_INT_ARRAY );
+	if ( AttributeType( name ) == ATTRIBUTE_INT_ARRAY ) {	
+		GetData( name, array, nItems*sizeof(int) );
+	}
+}
+
+
+void Item::GetIntArray( int i, int nItems, int* array ) const
+{
+	GLASSERT( AttributeType( i ) == ATTRIBUTE_INT_ARRAY );
+	if ( AttributeType( i ) == ATTRIBUTE_INT_ARRAY ) {	
+		GetData( i, array, nItems*sizeof(int) );
+	}
+}
+
+
+void Item::GetFloatArray( const char* name, int nItems, float* array ) const
+{
+	GLASSERT( AttributeType( name ) == ATTRIBUTE_FLOAT_ARRAY );
+	if ( AttributeType( name ) == ATTRIBUTE_FLOAT_ARRAY ) {	
+		GetData( name, array, nItems*sizeof(float) );
+	}
+}
+
+
+void Item::GetFloatArray( int i, int nItems, float* array ) const
+{
+	GLASSERT( AttributeType( i ) == ATTRIBUTE_FLOAT_ARRAY );
+	if ( AttributeType( i ) == ATTRIBUTE_FLOAT_ARRAY ) {	
+		GetData( i, array, nItems*sizeof(float) );
+	}
 }
 
 

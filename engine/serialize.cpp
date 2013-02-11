@@ -20,6 +20,7 @@
 
 #include "../grinliz/glstringutil.h"
 #include "model.h"
+#include "../shared/dbhelper.h"
 
 using namespace grinliz;
 using namespace tinyxml2;
@@ -38,6 +39,8 @@ void ModelHeader::Load( const gamedb::Item* item )
 	}
 
 	bounds.Zero();
+	DBRead( header, "bounds", bounds );
+	/*
 	const gamedb::Item* boundsItem = header->Child( "bounds" );
 	if ( boundsItem ) {
 		bounds.min.x = boundsItem->GetFloat( "min.x" );
@@ -47,6 +50,7 @@ void ModelHeader::Load( const gamedb::Item* item )
 		bounds.max.y = boundsItem->GetFloat( "max.y" );
 		bounds.max.z = boundsItem->GetFloat( "max.z" );
 	}
+	*/
 
 	memset( metaData, 0, sizeof(ModelMetaData)*EL_MAX_METADATA );
 	const gamedb::Item* metaItem = header->Child( "metaData" );

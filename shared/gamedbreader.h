@@ -96,8 +96,17 @@ public:
 	int			GetInt( int i ) const;			///< Returns value of an ATTRIBUTE_INT
 	int			GetInt( const char* ) const;	///< Returns value of an ATTRIBUTE_INT
 
+	int			GetArrayLen( const char* ) const;
+	int			GetArrayLen( int i ) const;
+
+	void		GetIntArray( const char*, int n, int* array ) const; 
+	void		GetIntArray( int i, int n, int* array ) const; 
+
 	float		GetFloat( int i ) const;		///< Returns value of an ATTRIBUTE_FLOAT
 	float		GetFloat( const char* ) const;	///< Returns value of an ATTRIBUTE_FLOAT
+
+	void		GetFloatArray( const char*, int n, float* array ) const; 
+	void		GetFloatArray( int i, int n, float* array ) const; 
 
 	const char*	GetString( int i ) const;		///< Returns value of an ATTRIBUTE_STRING
 	const char*	GetString( const char* ) const;	///< Returns value of an ATTRIBUTE_STRING
@@ -109,6 +118,8 @@ private:
 	Item();
 	Item( const Item& rhs );
 	void operator=( const Item& rhs );
+
+	bool IsDataType( int i ) const { return i == ATTRIBUTE_DATA || i == ATTRIBUTE_INT_ARRAY || i == ATTRIBUTE_FLOAT_ARRAY; }
 
 	const AttribStruct* AttributePtr( int i ) const;
 };
@@ -172,6 +183,8 @@ public:
 	bool ItemInReader( const Item* item ) const { return item >= mem && item < endMem; }
 
 private:
+	bool IsDataType( int i ) const { return i == ATTRIBUTE_DATA || i == ATTRIBUTE_INT_ARRAY || i == ATTRIBUTE_FLOAT_ARRAY; }
+
 	static Reader* readerRoot;
 	Reader* next;
 	const Reader* mod;	// when chaining, 'this' is the base, 'mod' overrides

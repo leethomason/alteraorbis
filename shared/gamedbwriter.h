@@ -56,22 +56,18 @@ public:
 	/// The parent link
 	const WItem* Parent() const { return parent; }
 
-	/// Create a child item by name.
-	WItem* CreateChild( const char* name );
-	/** Create a child item by number, not this simple creates the string value of the name.
-		CreateChild( 1 ) and CreateChild( "1" ) are exactly the same. 
-	*/
-	WItem* CreateChild( int id );
-		
 	/// Get a Child if it exists, create it if the child does not.
 	WItem* FetchChild( const char* name );
+	WItem* FetchChild( int id );
 
 	/// Add/Set binary data (or long/unique string). Data is compressed by default.
 	void SetData( const char* name, const void* data, int nData, bool compress=true );
 	/// Add/Set a integer attribute.
 	void SetInt( const char* name, int value );
+	void SetIntArray( const char* name, const int* value, int nItems );
 	/// Add/Set a floating point attribute
 	void SetFloat( const char* name, float value );
+	void SetFloatArray( const char* name, const float* value, int nItems );
 	/// Add/Set a string attribute. Placed in the string pool.
 	void SetString( const char* name, const char* str );
 	/// Add/Set a boolean attribute.
@@ -117,6 +113,7 @@ private:
 		static bool Less( const Attrib* v0, const Attrib* v1 )	{ return v0->name < v1->name; }
 	};
 
+	WItem* CreateChild( const char* name );
 	int FindString( const grinliz::IString& str, const grinliz::CDynArray< grinliz::IString >& stringPoolVec );
 
 	grinliz::IString itemName;

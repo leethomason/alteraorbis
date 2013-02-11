@@ -186,12 +186,12 @@ void SCMLParser::ReadAnimation( const XMLDocument* doc, Animation* a )
 
 void SCMLParser::WriteAnimation( gamedb::WItem* witem, const Animation& a, const Animation* reference, float pur )
 {
-	gamedb::WItem* animationItem = witem->CreateChild( a.name.c_str() );
+	gamedb::WItem* animationItem = witem->FetchChild( a.name.c_str() );
 	animationItem->SetInt( "totalDuration", a.length );
 
 	for( int i=0; i<a.nFrames; ++i ) {
 		const Frame& f = a.frames[i];
-		gamedb::WItem* frameItem = animationItem->CreateChild( i );
+		gamedb::WItem* frameItem = animationItem->FetchChild( i );
 		frameItem->SetInt( "time", f.time );
 
 		for( int k=0; k<EL_MAX_METADATA; ++k ) {
@@ -208,7 +208,7 @@ void SCMLParser::WriteAnimation( gamedb::WItem* witem, const Animation& a, const
 			if ( partIDNameMap.Query( k, &name ) ) {
 				GLASSERT( k == f.xforms[k].id );	
 				const PartXForm& xform = f.xforms[k];
-				gamedb::WItem* bone = frameItem->CreateChild( name.c_str() );
+				gamedb::WItem* bone = frameItem->FetchChild( name.c_str() );
 
 				float anglePrime = 0;
 				float dy = 0;
@@ -359,7 +359,7 @@ void ProcessAnimation( const tinyxml2::XMLElement* element, gamedb::WItem* witem
 	float pur = 1;
 	element->QueryFloatAttribute( "pur", &pur );
 
-	gamedb::WItem* root = witem->CreateChild( assetName.c_str() );	// "humanFemaleAnimation" 
+	gamedb::WItem* root = witem->FetchChild( assetName.c_str() );	// "humanFemaleAnimation" 
 
 	SCMLParser parser;
 	parser.Parse( element, &doc, root, pur );

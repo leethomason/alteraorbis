@@ -19,6 +19,17 @@ void WorldInfo::Save( tinyxml2::XMLPrinter* printer )
 }
 
 
+void WorldInfo::Save( gamedb::WItem* parent )
+{
+	gamedb::WItem* info = parent->FetchChild( "WorldInfo" );
+	gamedb::WItem* features = info->FetchChild( "WorldFeatures" );
+	for( int i=0; i<featureArr.Size(); ++i ) {
+		featureArr[i].Serialize( DBItem(features), i );
+		//featureArr[i].Save( features );
+	}
+}
+
+
 void WorldInfo::Load( const tinyxml2::XMLElement& parent )
 {
 	Clear();

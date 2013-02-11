@@ -24,6 +24,7 @@
 #include "../grinliz/glcolor.h"
 #include "../grinliz/glperformance.h"
 #include "../shared/lodepng.h"
+#include "../shared/dbhelper.h"
 
 #include "../engine/engine.h"
 #include "../engine/texture.h"
@@ -114,7 +115,6 @@ void WorldMap::Save( const char* pathToDAT, const char* pathToXML )
 	// smaller window size: 3.8MClock
 	// btype == 0 about the same.
 	// None of this matters; may need to add an ultra-simple fast encoder.
-	QuickProfile qp( "WorldMap::Save" );
 
 	FILE* fp = fopen( pathToDAT, "wb" );
 	GLASSERT( fp );
@@ -125,20 +125,37 @@ void WorldMap::Save( const char* pathToDAT, const char* pathToXML )
 		fclose( fp );
 	}
 
-	fp = fopen( pathToXML, "w" );
-	GLASSERT( fp );
-	if ( fp ) {
-		XMLPrinter printer( fp );
+	{
+		QuickProfile qp( "WorldMap::Save XML" );
+		fp = fopen( pathToXML, "w" );
+		GLASSERT( fp );
+		if ( fp ) {
+			XMLPrinter printer( fp );
 		
-		printer.OpenElement( "Map" );
-		printer.PushAttribute( "width", width );
-		printer.PushAttribute( "height", height );
+			printer.OpenElement( "Map" );
+			printer.PushAttribute( "width", width );
+			printer.PushAttribute( "height", height );
 
-		worldInfo->Save( &printer );
+			worldInfo->Save( &printer );
 
-		printer.CloseElement();
+			printer.CloseElement();
 		
-		fclose( fp );
+			fclose( fp );
+		}
+	}
+	{
+		QuickProfile qp( "WorldMap::Save DB" );
+
+		gamedb::Writer writer;
+		gamedb::WItem* root = writer.Root();
+
+		gamedb::WItem* mapItem = root->FetchChild( "Map" );
+		DB_SET( mapItem, width );
+		DB_SET( mapItem, height );
+		
+		worldInfo->Save( mapItem );
+
+		writer.Save( "testsave.db" );
 	}
 }
 

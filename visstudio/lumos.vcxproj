@@ -140,7 +140,6 @@
     <ClCompile Include="..\script\volcanoscript.cpp" />
     <ClCompile Include="..\script\worldgen.cpp" />
     <ClCompile Include="..\script\worldscript.cpp" />
-    <ClCompile Include="..\shared\gamedbreader.cpp" />
     <ClCompile Include="..\win32\audio.cpp" />
     <ClCompile Include="..\win32\framebuffer.cpp" />
     <ClCompile Include="..\win32\glew.c" />
@@ -227,8 +226,7 @@
     <ClInclude Include="..\script\volcanoscript.h" />
     <ClInclude Include="..\script\worldgen.h" />
     <ClInclude Include="..\script\worldscript.h" />
-    <ClInclude Include="..\shared\gamedb.h" />
-    <ClInclude Include="..\shared\gamedbreader.h" />
+    <ClInclude Include="..\shared\dbhelper.h" />
     <ClInclude Include="..\win32\audio.h" />
     <ClInclude Include="..\win32\framebuffer.h" />
     <ClInclude Include="..\win32\glew.h" />

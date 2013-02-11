@@ -26,9 +26,6 @@
 #include "../zlib/zlib.h"
 #include "gamedb.h"
 
-#include <algorithm>
-
-
 #pragma warning ( disable : 4996 )
 using namespace gamedb;
 using namespace grinliz;
@@ -220,11 +217,11 @@ WItem* WItem::CreateChild( const char* name )
 }
 
 
-WItem* WItem::CreateChild( int id )
+WItem* WItem::FetchChild( int id )
 {
 	char buffer[32];
-	grinliz::SNPrintf( buffer, 32, "%d", id );
-	return CreateChild( buffer );
+	grinliz::SNPrintf( buffer, 32, "%03d", id );
+	return FetchChild( buffer );
 }
 
 
@@ -255,6 +252,24 @@ void WItem::SetData( const char* name, const void* d, int nData, bool useCompres
 
 	a->next = attrib;
 	attrib = a;
+}
+
+
+void WItem::SetIntArray( const char* name, const int* value, int nItems )
+{
+	SetData( name, value, nItems*sizeof(int), true );
+	// Sleazy trick. The value we just changed should be root:
+	GLASSERT( attrib->name == name );
+	attrib->type = ATTRIBUTE_INT_ARRAY;	// DATA in every repsect except how it is interpreted.
+}
+
+
+void WItem::SetFloatArray( const char* name, const float* value, int nItems )
+{
+	SetData( name, value, nItems*sizeof(float), true );
+	// Sleazy trick. The value we just changed should be root:
+	GLASSERT( attrib->name == name );
+	attrib->type = ATTRIBUTE_FLOAT_ARRAY;	// DATA in every repsect except how it is interpreted.
 }
 
 
@@ -372,6 +387,8 @@ void WItem::Save(	FILE* fp,
 
 		switch ( a->type ) {
 			case ATTRIBUTE_DATA:
+			case ATTRIBUTE_INT_ARRAY:
+			case ATTRIBUTE_FLOAT_ARRAY:
 				{
 					int id = dataPool->Size();
 					MemSize m = { a->data, a->dataSize, a->compressData ? true : false };

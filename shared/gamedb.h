@@ -97,12 +97,14 @@ namespace gamedb
 
 	/** The types allowed in the attribute list. */
 	enum {
+		ATTRIBUTE_INVALID,
 		ATTRIBUTE_DATA,
 		ATTRIBUTE_INT,
+		ATTRIBUTE_INT_ARRAY,	// saves as DATA, but more info on read.
 		ATTRIBUTE_FLOAT,
+		ATTRIBUTE_FLOAT_ARRAY,	// saves as DATA
 		ATTRIBUTE_STRING,
-		ATTRIBUTE_BOOL,
-		ATTRIBUTE_INVALID
+		ATTRIBUTE_BOOL
 	};
 	struct HeaderStruct	
 	{

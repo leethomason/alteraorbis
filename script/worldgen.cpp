@@ -10,6 +10,7 @@
 
 #include "../shared/lodepng.h"
 #include "../game/gamelimits.h"
+#include "../shared/dbhelper.h"
 
 using namespace grinliz;
 
@@ -30,6 +31,28 @@ void WorldFeature::Save( tinyxml2::XMLPrinter* printer )
 	printer->PushAttribute( "bounds.max.y", bounds.max.y );
 	printer->PushAttribute( "area", area );
 	printer->CloseElement();
+}
+
+
+/*
+void WorldFeature::Save( gamedb::WItem* item )
+{
+	gamedb::WItem* f = item->FetchChild( "WorldFeature" );
+	DB_SET( f, id );
+	DB_SET( f, land );
+	DB_SET( f, area );
+	DB_SET( f, bounds );
+}
+*/
+
+
+void WorldFeature::Serialize( DBItem parent, int i )
+{
+	DBItem f = DBChild( parent, i );
+	DB_SERIAL( f, id );
+	DB_SERIAL( f, land );
+	DB_SERIAL( f, area );
+	DB_SERIAL( f, bounds );
 }
 
 

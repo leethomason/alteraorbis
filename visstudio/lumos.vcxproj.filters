@@ -106,9 +106,6 @@
     <ClCompile Include="..\game\lumosgame.cpp">
       <Filter>Source Files\game</Filter>
     </ClCompile>
-    <ClCompile Include="..\shared\gamedbreader.cpp">
-      <Filter>Source Files\shared</Filter>
-    </ClCompile>
     <ClCompile Include="..\win32\audio.cpp">
       <Filter>Source Files\win32</Filter>
     </ClCompile>
@@ -357,12 +354,6 @@
     <ClInclude Include="..\game\lumosgame.h">
       <Filter>Source Files\game</Filter>
     </ClInclude>
-    <ClInclude Include="..\shared\gamedb.h">
-      <Filter>Source Files\shared</Filter>
-    </ClInclude>
-    <ClInclude Include="..\shared\gamedbreader.h">
-      <Filter>Source Files\shared</Filter>
-    </ClInclude>
     <ClInclude Include="..\win32\audio.h">
       <Filter>Source Files\win32</Filter>
     </ClInclude>
@@ -545,6 +536,9 @@
     </ClInclude>
     <ClInclude Include="..\game\weather.h">
       <Filter>Source Files\game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\shared\dbhelper.h">
+      <Filter>Source Files\shared</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
