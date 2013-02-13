@@ -113,6 +113,15 @@ void Sim::Save( const char* mapDAT, const char* mapXML, const char* gameXML )
 		printer.CloseElement();
 		fclose( fp );
 	}
+
+	{
+		gamedb::Writer writer;
+		gamedb::WItem* root = writer.Root();
+		DBSet( root, "playerID", playerID );
+		DBSet( root, "minuteClock", minuteClock );
+		DBSet( root, "timeInMinutes", timeInMinutes );
+		writer.Save( "simsave.dat" );
+	}
 }
 
 

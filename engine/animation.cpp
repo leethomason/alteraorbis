@@ -123,7 +123,7 @@ void AnimationResourceManager::Load( const gamedb::Reader* reader )
 
 	for( int i=0; i<parent->NumChildren(); ++i )
 	{
-		const gamedb::Item* node = parent->Child( i );
+		const gamedb::Item* node = parent->ChildAt( i );
 		
 		AnimationResource* ar = new AnimationResource( node );
 		GLASSERT( !resArr.Query( ar->ResourceName(), 0 ));
@@ -169,7 +169,7 @@ AnimationResource::AnimationResource( const gamedb::Item* _item )
 	memset( sequence, 0, sizeof(Sequence)*ANIM_COUNT );
 
 	for( int i=0; i<nAnimations; ++i ) {
-		const gamedb::Item* animItem = item->Child(i);		// "gunrun" in the example
+		const gamedb::Item* animItem = item->ChildAt(i);		// "gunrun" in the example
 		int type = NameToType( animItem->Name() );
 		
 		sequence[type].item = animItem;
@@ -203,7 +203,7 @@ AnimationResource::AnimationResource( const gamedb::Item* _item )
 			sequence[type].nBones = nBones;
 
 			for( int bone=0; bone<nBones; ++bone ) {
-				const gamedb::Item* boneItem = frameItem->Child( bone );
+				const gamedb::Item* boneItem = frameItem->ChildAt( bone );
 				IString boneName = StringPool::Intern( boneItem->Name(), true );
 				
 				sequence[type].frame[frame].boneData.bone[bone].name = boneName;
@@ -226,7 +226,7 @@ AnimationResource::AnimationResource( const gamedb::Item* _item )
 const char* AnimationResource::AnimationName( int index ) const
 {
 	GLASSERT( index >= 0 && index < nAnimations );
-	return item->Child( index )->Name();
+	return item->ChildAt( index )->Name();
 }
 
 

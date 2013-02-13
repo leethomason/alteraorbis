@@ -179,7 +179,7 @@ void Game::LoadModels()
 
 	for( int i=0; i<parent->NumChildren(); ++i )
 	{
-		const gamedb::Item* node = parent->Child( i );
+		const gamedb::Item* node = parent->ChildAt( i );
 		LoadModel( node->Name() );
 	}
 }
@@ -332,7 +332,7 @@ void Game::LoadPalettes()
 {
 	const gamedb::Item* parent = database0->Root()->Child( "data" )->Child( "palettes" );
 	for( int i=0; i<parent->NumChildren(); ++i ) {
-		const gamedb::Item* child = parent->Child( i );
+		const gamedb::Item* child = parent->ChildAt( i );
 		child = database0->ChainItem( child );
 
 		Palette* p = 0;

@@ -56,7 +56,7 @@ void ModelHeader::Load( const gamedb::Item* item )
 	const gamedb::Item* metaItem = header->Child( "metaData" );
 	if ( metaItem ) {
 		for( int i=0; i<metaItem->NumChildren(); ++i ) {
-			const gamedb::Item* dataItem = metaItem->Child( i );
+			const gamedb::Item* dataItem = metaItem->ChildAt( i );
 
 			metaData[i].name = StringPool::Intern( dataItem->Name(), true );
 			metaData[i].pos.x = dataItem->GetFloat( "x" );
@@ -90,7 +90,7 @@ void ModelHeader::Load( const gamedb::Item* item )
 	if ( boneItem && boneItem->NumChildren() > 0 ) {
 		for( int i=0; i<boneItem->NumChildren(); ++i ) {
 
-			const gamedb::Item* dataItem = boneItem->Child( i );
+			const gamedb::Item* dataItem = boneItem->ChildAt( i );
 			IString name = StringPool::Intern( dataItem->Name(), true );
 			int id       = dataItem->GetInt( "id" );
 
