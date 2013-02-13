@@ -20,6 +20,7 @@
 #include "../grinliz/glmatrix.h"
 #include "../grinliz/glstringutil.h"
 #include "../tinyxml2/tinyxml2.h"
+#include "../shared/dbhelper.h"
 #include "enginelimits.h"
 
 class Texture;
@@ -157,6 +158,7 @@ struct BoneData
 	void Clear() { memset( bone, 0, sizeof(Bone)*EL_MAX_BONES ); }
 	void Load( const tinyxml2::XMLElement* element );
 	void Save( tinyxml2::XMLPrinter* printer );
+	void Serialize( DBItem item );
 };
 
 

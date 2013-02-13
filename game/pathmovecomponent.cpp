@@ -50,6 +50,16 @@ void PathMoveComponent::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLE
 }
 
 
+void PathMoveComponent::Serialize( DBItem parent )
+{
+	DBItem item = BeginSerialize( parent, "PathMoveComponent" );
+	DB_SERIAL( item, queued.pos );
+	DB_SERIAL( item, queued.rotation );
+	DB_SERIAL( item, dest.pos );
+	DB_SERIAL( item, dest.rotation );
+}
+
+
 void PathMoveComponent::Load( const tinyxml2::XMLElement* element )
 {
 	this->BeginLoad( element, "PathMoveComponent" );

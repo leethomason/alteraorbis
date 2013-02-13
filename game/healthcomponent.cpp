@@ -41,6 +41,13 @@ void HealthComponent::Save( tinyxml2::XMLPrinter* printer )
 }
 
 
+void HealthComponent::Serialize( DBItem parent )
+{
+	DBItem item = BeginSerialize( parent, "HealthComponent" );
+	DB_SERIAL( item, destroyed );
+}
+
+
 void HealthComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {
 	if ( msg.ID() == ChitMsg::GAMEITEM_TICK ) {

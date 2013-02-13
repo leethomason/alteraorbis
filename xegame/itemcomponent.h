@@ -45,6 +45,7 @@ public:
 
 	virtual void Load( const tinyxml2::XMLElement* element );
 	virtual void Save( tinyxml2::XMLPrinter* printer );
+	virtual void Serialize( DBItem item );
 
 	virtual int DoTick( U32 delta, U32 since );
 	virtual void OnChitEvent( const ChitEvent& event );

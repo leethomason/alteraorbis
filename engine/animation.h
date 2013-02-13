@@ -26,7 +26,7 @@
 
 struct ModelHeader;
 
-enum AnimationType {
+enum  {
 	ANIM_OFF = -1,
 
 	ANIM_REFERENCE,
@@ -56,46 +56,46 @@ public:
 	~AnimationResource()	{}
 
 	// Used in the UI/debugging
-	static const char* TypeToName( AnimationType type );	// Convert type to name
-	static AnimationType NameToType( const char* name );
+	static const char* TypeToName( int type );	// Convert type to name
+	static int NameToType( const char* name );
 
 	// Name of the resource, not the animation
 	const char* ResourceName() const		{ return resName; }
 	int NumAnimations() const				{ return nAnimations; }
 
-	bool		HasAnimation( AnimationType type ) const;
+	bool		HasAnimation( int type ) const;
 	const char* AnimationName( int index ) const;			// Get the name of animation at this location
 	
-	U32			Duration( AnimationType name ) const;
+	U32			Duration( int name ) const;
 
-	bool GetTransform(	AnimationType type,			// which animation to play: "reference", "gunrun", etc.
+	bool GetTransform(	int type,			// which animation to play: "reference", "gunrun", etc.
 						const ModelHeader& header,	// used to get the bone IDs
 						U32 time,					// time for this animation
 						BoneData* boneData ) const;
 
-	bool GetTransform(	AnimationType type,			// which animation to play: "reference", "gunrun", etc.
+	bool GetTransform(	int type,			// which animation to play: "reference", "gunrun", etc.
 						grinliz::IString boneName,
 						const ModelHeader& header,	// used to get the bone IDs
 						U32 time,					// time for this animation
 						BoneData::Bone* bone ) const;
 
-	void GetMetaData(	AnimationType type,
+	void GetMetaData(	int type,
 						U32 t0, U32 t1,				// t1 > t0
 						grinliz::CArray< int, EL_MAX_METADATA>* data ) const;
 
 	// does this animation loop?
-	static bool Looping( AnimationType type );
+	static bool Looping( int type );
 	// does this animation sync to the walk cycle?
-	static bool Synchronized( AnimationType type );
+	static bool Synchronized( int type );
 	// does this animation represent motion?
-	static bool Motion( AnimationType type );
+	static bool Motion( int type );
 
 private:
-	U32 TimeInRange( AnimationType type, U32 t ) const;	
-	void ComputeFrame( AnimationType type,
+	U32 TimeInRange( int type, U32 t ) const;	
+	void ComputeFrame( int type,
 					   U32 time,
 					   int *_frame0, int* _frame1, float* _fraction ) const;
-	void ComputeBone( AnimationType type,
+	void ComputeBone( int type,
 					  int frame0, int frame1, float fraction,
 					  grinliz::IString name,
 					  BoneData::Bone* bone ) const;

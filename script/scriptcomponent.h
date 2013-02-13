@@ -37,6 +37,7 @@ public:
 	virtual void Init( const ScriptContext& heap )	= 0;
 	virtual void Load( const ScriptContext& ctx, const tinyxml2::XMLElement* element ) = 0;
 	virtual void Save( const ScriptContext& ctx, tinyxml2::XMLPrinter* printer )       = 0;
+	virtual void Serialize( const ScriptContext& ctx, DBItem item )	= 0;
 	virtual int DoTick( const ScriptContext& ctx, U32 delta, U32 since ) = 0;
 	virtual const char* ScriptName() = 0;
 };
@@ -59,6 +60,7 @@ public:
 
 	virtual void Load( const tinyxml2::XMLElement* element );
 	virtual void Save( tinyxml2::XMLPrinter* printer );
+	virtual void Serialize( DBItem parent );
 
 	virtual void OnAdd( Chit* chit );
 	virtual void OnRemove();

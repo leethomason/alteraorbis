@@ -66,5 +66,17 @@ void BoneData::Save( tinyxml2::XMLPrinter* printer )
 }
 
 
+void BoneData::Serialize( DBItem parent )
+{
+	DBItem item = DBChild( parent, "BoneData" );
+	for( int i=0; i<EL_MAX_BONES; ++i ) {
+		DBItem boneItem = DBChild( parent, i );
+		DB_SERIAL( boneItem, bone[i].name );
+		DB_SERIAL( boneItem, bone[i].angleRadians );
+		DB_SERIAL( boneItem, bone[i].dy );
+		DB_SERIAL( boneItem, bone[i].dz );
+	}
+}
+
 
 

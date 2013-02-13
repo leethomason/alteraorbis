@@ -220,7 +220,7 @@ WItem* WItem::CreateChild( const char* name )
 WItem* WItem::FetchChild( int id )
 {
 	char buffer[32];
-	grinliz::SNPrintf( buffer, 32, "%03d", id );
+	grinliz::SNPrintf( buffer, 32, "%04d", id );
 	return FetchChild( buffer );
 }
 

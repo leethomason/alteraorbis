@@ -95,6 +95,11 @@ int DebugPathComponent::DoTick( U32 delta, U32 timeSince )
 }
 
 
+void DebugPathComponent::Serialize( DBItem parent )
+{
+	DBItem item = BeginSerialize( parent, "DebugPathComponent" );
+}
+
 void DebugPathComponent::Load( const tinyxml2::XMLElement* element )
 {
 	GLASSERT( 0 );

@@ -19,13 +19,12 @@ void WorldInfo::Save( tinyxml2::XMLPrinter* printer )
 }
 
 
-void WorldInfo::Save( gamedb::WItem* parent )
+void WorldInfo::Serialize( DBItem parent )
 {
-	gamedb::WItem* info = parent->FetchChild( "WorldInfo" );
-	gamedb::WItem* features = info->FetchChild( "WorldFeatures" );
+	DBItem info = DBChild( parent, "WorldInfo" );
+	DBItem features = DBChild( info, "WorldFeatures" );
 	for( int i=0; i<featureArr.Size(); ++i ) {
-		featureArr[i].Serialize( DBItem(features), i );
-		//featureArr[i].Save( features );
+		featureArr[i].Serialize( features, i );
 	}
 }
 

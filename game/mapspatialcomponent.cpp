@@ -108,6 +108,18 @@ void MapSpatialComponent::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XM
 }
 
 
+void MapSpatialComponent::Serialize( DBItem parent )
+{
+	if ( parent.Loading() ) {
+		justLoaded = true;
+	}
+
+	DBItem item = BeginSerialize( parent, "MapSpatialComponent" );
+	super::Serialize( item );
+	DB_SERIAL( item, mode );
+}
+
+
 void MapSpatialComponent::Load( const tinyxml2::XMLElement* element )
 {
 	mode = USES_GRID;

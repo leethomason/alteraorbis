@@ -8,10 +8,9 @@ class WorldInfo
 {
 public:
 	grinliz::CDynArray< WorldFeature > featureArr;	// continents & oceans
-
-	void Save( tinyxml2::XMLPrinter* );
-	void Save( gamedb::WItem* parent );
-	void Load( const tinyxml2::XMLElement& doc );
+	void Serialize( DBItem parent );
+	void Save( tinyxml2::XMLPrinter* printer );
+	void Load( const tinyxml2::XMLElement& parent );
 
 private:
 	void Clear() { featureArr.Clear(); }

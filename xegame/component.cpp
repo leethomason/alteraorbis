@@ -40,6 +40,14 @@ ChitBag* Component::GetChitBag()
 }
 
 
+DBItem Component::BeginSerialize( DBItem parent, const char* name )
+{
+	DBItem i = DBChild( parent, name );
+	DB_SERIAL( i, id );
+	return i;
+}
+
+
 void Component::BeginSave( tinyxml2::XMLPrinter* printer, const char* name )
 {
 	printer->OpenElement( name );
@@ -80,4 +88,11 @@ void MoveComponent::Save( tinyxml2::XMLPrinter* printer )
 	this->BeginSave( printer, "MoveComponent" );
 	this->EndSave( printer );
 }
+
+
+void MoveComponent::Serialize( DBItem parent )
+{
+	DBItem item = this->BeginSerialize( parent, "MoveComponent" );
+}
+
 

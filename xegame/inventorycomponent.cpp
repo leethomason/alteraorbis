@@ -25,6 +25,67 @@
 using namespace grinliz;
 using namespace tinyxml2;
 
+void InventoryComponent::Serialize( DBItem parent ) 
+{
+	DBItem item = this->BeginSerialize( parent, "InventoryComponent" );
+	DB_SERIAL( item, hardpoints );
+
+	{
+		static const char* arrNames[2] = { "intrinsicAt", "heldAt" };
+		GameItem** arrAt[2] = { intrinsicAt, heldAt };
+
+		for( int pass=0; pass<2; ++pass ) {
+			DBItem arrayItem = DBChild( item, arrNames[pass] );
+			for( int i=0; i<NUM_HARDPOINTS; ++i ) {
+				if ( item.Loading() ) {
+					const gamedb::Item* it = arrayItem.item->Child(i);
+					if ( it ) {
+						arrAt[pass][i] = new GameItem();
+						arrAt[pass][i]->Serialize( it );
+					}
+				}
+				else {
+					if ( arrAt[pass][i] ) {
+						arrAt[pass][i]->Serialize( item.witem->FetchChild( i ));
+					}
+				}
+			}
+		}
+	}
+	{
+		static const char* arrNames[2] = { "freeItems", "packItems" };
+		CDynArray< GameItem*, grinliz::OwnedPtrSem >* arrAt[2] = { &freeItems, &packItems };
+
+		for( int pass=0; pass<2; ++pass ) {
+			DBItem arrayItem = DBChild( item, arrNames[pass] );
+			int i=0;
+			while( true ) {
+				if ( item.Loading() ) {
+					const gamedb::Item* it = arrayItem.item->Child(i);
+					if ( it ) {
+						GameItem* gi = new GameItem();
+						arrAt[i]->Push( gi );
+						gi->Serialize( it );
+					}
+					else {
+						break;
+					}
+				}
+				else {
+					if ( i < arrAt[pass]->Size() ) {
+						(*arrAt[pass])[i]->Serialize( item.witem->FetchChild( i ));
+					}
+					else {
+						break;
+					}
+				}
+			}
+		}
+	}
+
+}
+
+
 void InventoryComponent::Load( const tinyxml2::XMLElement* element )
 {
 	this->BeginLoad( element, "InventoryComponent" );

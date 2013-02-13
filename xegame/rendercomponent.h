@@ -53,6 +53,8 @@ public:
 
 	virtual void Load( const tinyxml2::XMLElement* element );
 	virtual void Save( tinyxml2::XMLPrinter* printer );
+	virtual void Serialize( DBItem parent );
+
 	virtual void OnAdd( Chit* chit );
 	virtual void OnRemove();
 
@@ -79,8 +81,8 @@ public:
 	bool	AnimationReady() const;
 	// Play the special animations: MELEE, IMPACT, etc.
 	// Walk, stand, etc. are played automatically.
-	bool	PlayAnimation( AnimationType type );
-	AnimationType CurrentAnimation() const;
+	bool	PlayAnimation( int type );
+	int CurrentAnimation() const;
 
 	// A render component has one primary, animated model. Additional
 	// assets (guns, shields, etc.) can be Attached and Detatched
@@ -91,7 +93,7 @@ public:
 	void Detach(   grinliz::IString hardpoint );
 
 private:
-	AnimationType CalcAnimation() const;
+	int CalcAnimation() const;
 	SpatialComponent* SyncToSpatial();	// this a scary function: location is stored in both the model and the spatialcomponent
 
 	enum { NUM_MODELS = EL_MAX_METADATA+1 };	// slot[0] is the main model; others are hardpoint attach

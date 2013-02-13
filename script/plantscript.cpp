@@ -105,6 +105,18 @@ void PlantScript::Init( const ScriptContext& ctx )
 }
 
 
+void PlantScript::Serialize( const ScriptContext& ctx, DBItem parent )
+{
+	DBItem item = DBChild( parent, "PlantScript" );
+	DB_SERIAL( item, type );
+	DB_SERIAL( item, stage );
+	DB_SERIAL( item, age );
+	DB_SERIAL( item, ageAtStage );
+	DB_SERIAL( item, growTimer );
+	DB_SERIAL( item, sporeTimer );
+}
+
+
 void PlantScript::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele )
 {
 	XE_ARCHIVE( type );

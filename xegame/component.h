@@ -21,6 +21,7 @@
 #include "../grinliz/glstringutil.h"
 #include "../grinliz/glvector.h"
 #include "../tinyxml2/tinyxml2.h"
+#include "../shared/dbhelper.h"
 #include "xegamelimits.h"
 
 // The primary components:
@@ -45,6 +46,7 @@ public:
 
 	virtual void Load( const tinyxml2::XMLElement* element ) = 0;
 	virtual void Save( tinyxml2::XMLPrinter* printer ) = 0;
+	virtual void Serialize( DBItem item ) = 0;
 
 	virtual Component* ToComponent( const char* name ) = 0 {
 		if ( grinliz::StrEqual( name, "Component" ) ) return this;
@@ -72,6 +74,8 @@ protected:
 	void BeginLoad( const tinyxml2::XMLElement* element, const char* name ); 
 	void EndLoad( const tinyxml2::XMLElement* element )	{}
 
+	DBItem BeginSerialize( DBItem parent, const char* name );
+
 	ChitBag* GetChitBag();
 	Chit* parentChit;
 	int id;
@@ -95,6 +99,7 @@ public:
 
 	virtual void Load( const tinyxml2::XMLElement* element );
 	virtual void Save( tinyxml2::XMLPrinter* printer );
+	virtual void Serialize( DBItem parent );
 
 	virtual bool IsMoving() const				{ return false; }
 	// approximate, may lag, etc. useful for AI

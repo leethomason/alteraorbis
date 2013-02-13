@@ -278,15 +278,9 @@ void Model::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele 
 	XE_ARCHIVE( currentAnim.time );
 	
 	// Trick to do casting: if save, will write int. If load, will read int.
-	int id = (int)currentAnim.id;
-	XEArchiveT( prn, ele, "currentAnim.id", id );
-	currentAnim.id = (AnimationType)id;
-
+	XEArchiveT( prn, ele, "currentAnim.id", currentAnim.id );
 	XE_ARCHIVE( prevAnim.time );
-	
-	id = (int)prevAnim.id;
-	XEArchiveT( prn, ele, "prevAnim.id", id );
-	prevAnim.id = (AnimationType)id;
+	XEArchiveT( prn, ele, "prevAnim.id", prevAnim.id );
 
 	XEArchive( prn, ele, "pos", pos );
 	XEArchive( prn, ele, "rot", rot );
@@ -298,6 +292,63 @@ void Model::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele 
 	XEArchive( prn, ele, "boneFilter", boneFilter, &DEF_ZERO );
 	XEArchive( prn, ele, "control", control, &DEF_ONE );
 }
+
+
+void Model::Serialize( DBItem item, SpaceTree* tree )
+{
+	DB_SERIAL( item, debugScale );
+	DB_SERIAL( item, animationRate );
+	DB_SERIAL( item, totalCrossFadeTime );
+	DB_SERIAL( item, crossFadeTime );
+	DB_SERIAL( item, hasParticles );
+	DB_SERIAL( item, flags );
+	DB_SERIAL( item, currentAnim.time );
+	DB_SERIAL( item, currentAnim.id );
+
+	DB_SERIAL( item, prevAnim.time );
+	DB_SERIAL( item, prevAnim.id );
+
+	DB_SERIAL( item, pos );
+	DB_SERIAL( item, rot );
+
+	DB_SERIAL( item, color );
+	DB_SERIAL( item, boneFilter );
+	DB_SERIAL( item, control );
+
+	if ( item.Saving() ) {
+		item.witem->SetString( "resource", resource->Name() );
+		if ( animationResource ) {
+			item.witem->SetString( "animationResource", animationResource->ResourceName() );
+		}
+		if ( aux ) {
+			gamedb::WItem* auxItem = item.witem->FetchChild( "aux" );
+			aux->boneData.Serialize( auxItem );
+			DBSet( auxItem, "procMat", aux->procMat );
+		}
+	}
+	else {
+		const char* name = item.item->GetString( "resource" );
+		resource = ModelResourceManager::Instance()->GetModelResource( name );
+		GLASSERT( resource );
+	
+		const char* animResName = item.item->GetString( "animationResource" );
+		if ( animResName ) {
+			animationResource = AnimationResourceManager::Instance()->GetResource( animResName );
+			GLASSERT( animationResource );
+		}
+		const gamedb::Item* auxItem = item.item->Child( "aux" );
+		if ( auxItem ) {
+			aux = ModelResourceManager::Instance()->modelAuxPool.New();
+			aux->boneData.Serialize( auxItem );
+			DBRead( auxItem, "procMat", aux->procMat );
+		}
+	}
+
+	if ( tree ) {
+		tree->Update( this );
+	}
+}
+
 
 
 void Model::Load( const tinyxml2::XMLElement* element, SpaceTree* tree )
@@ -454,7 +505,7 @@ bool Model::AnimationDone() const
 }
 
 
-void Model::SetAnimation( AnimationType id, U32 crossFade, bool restart )
+void Model::SetAnimation( int id, U32 crossFade, bool restart )
 {
 	if ( !animationResource )
 		return;

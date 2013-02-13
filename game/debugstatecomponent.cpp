@@ -62,6 +62,12 @@ void DebugStateComponent::Save( tinyxml2::XMLPrinter* printer )
 }
 
 
+void DebugStateComponent::Serialize( DBItem parent )
+{
+	DBItem item = BeginSerialize( parent, "DebugStateComponent" );
+}
+
+
 void DebugStateComponent::OnAdd( Chit* chit )
 {
 	super::OnAdd( chit );

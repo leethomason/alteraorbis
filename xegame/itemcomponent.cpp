@@ -29,6 +29,14 @@
 
 using namespace grinliz;
 
+
+void ItemComponent::Serialize( DBItem parent )
+{
+	DBItem it = this->BeginSerialize( parent, "ItemComponent" );
+	item.Serialize( DBChild( it, "Item" ));
+}
+
+
 void ItemComponent::Save( tinyxml2::XMLPrinter* printer )
 {
 	BeginSave( printer, "ItemComponent" );

@@ -25,6 +25,8 @@
 #include <string.h>
 
 #include "gamedbreader.h"
+#include "../grinliz/glstringutil.h"	// FIXME: only used for child index snprintf. Can and should be removed.
+
 #ifdef ANDROID_NDK
 #	include <zlib.h>		// Built in zlib support.
 #else
@@ -324,7 +326,7 @@ void Reader::RecWalk( const Item* item, int depth )
 
 	int nChildren = item->NumChildren();
 	for( int i=0; i<nChildren; ++i ) {
-		const Item* child = item->Child( i );
+		const Item* child = item->ChildAt( i );
 		RecWalk( child, depth + 1 );
 	}
 }
@@ -456,7 +458,7 @@ const Item* Item::Parent() const
 }
 
 
-const Item* Item::Child( int i ) const
+const Item* Item::ChildAt( int i ) const
 {
 	const Reader* context = Reader::GetContext( this );
 	const U8* mem = (const U8*)context->BaseMem();
@@ -468,6 +470,14 @@ const Item* Item::Child( int i ) const
 
 	const U32* childOffset = (const U32*)((U8*)this + sizeof( ItemStruct ));
 	return (const Item*)( mem + childOffset[i]);
+}
+
+
+const Item* Item::Child( int i ) const
+{
+	char buffer[32];
+	grinliz::SNPrintf( buffer, 32, "%04d", i );
+	return Child( buffer );
 }
 
 
@@ -484,7 +494,7 @@ const Item* Item::Child( const char* name ) const
 		BinarySearch<U32, CompChild> search;
 		int result = search.Search( childOffset, istruct->nChildren, comp );
 		if ( result >= 0 )
-			return Child( result );
+			return ChildAt( result );
 	}
 	return 0;
 }

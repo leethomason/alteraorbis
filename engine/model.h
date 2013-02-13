@@ -23,7 +23,7 @@
 #include "../grinliz/glcontainer.h"
 #include "../grinliz/glstringutil.h"
 
-#include "../shared/gamedbreader.h"
+#include "../shared/dbhelper.h"
 
 #include "../tinyxml2/tinyxml2.h"
 
@@ -162,6 +162,8 @@ public:
 	const ModelMetaData* GetMetaData( const char* name ) const;
 	const ModelMetaData* GetMetaData( int i ) const { GLASSERT( i>= 0 && i < EL_MAX_METADATA ); return &header.metaData[i]; }
 
+	const char*			Name() const	{ return header.name.c_str(); }
+	grinliz::IString	IName() const	{ return header.name; }
 
 	ModelHeader				header;				// loaded
 	grinliz::Rectangle3F	hitBounds;			// for picking - a bounds approximation
@@ -235,6 +237,7 @@ public:
 
 	void Load( const tinyxml2::XMLElement* element, SpaceTree* tree );
 	void Save( tinyxml2::XMLPrinter* printer );
+	void Serialize( DBItem item, SpaceTree* tree );
 
 	void Queue( RenderQueue* queue, EngineShaders* shaders, int requiredShaderFlag, int excludedShaderFlag );
 
@@ -277,8 +280,8 @@ public:
 	const AnimationResource* GetAnimationResource() const	{ return animationResource; }
 	// Set the current animation, null or "reference" turns off animation.
 	// Does nothing if the 'id' is the currently playing animation
-	void SetAnimation( AnimationType id, U32 crossFade, bool restart );
-	AnimationType GetAnimation() const						{ return currentAnim.id; }
+	void SetAnimation( int id, U32 crossFade, bool restart );
+	int GetAnimation() const						{ return currentAnim.id; }
 	bool AnimationDone() const;
 
 	grinliz::IString GetBoneName( int i ) const;
@@ -397,7 +400,7 @@ private:
 	struct AnimationState {
 		void Init() { time=0; id=ANIM_OFF; }
 		U32				time;
-		AnimationType	id;
+		int				id;
 	};
 	AnimationState	currentAnim;
 	AnimationState	prevAnim;

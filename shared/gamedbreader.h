@@ -51,10 +51,12 @@ public:
 
 	/// Number of child nodes.
 	int NumChildren() const				{ return ((const ItemStruct*)this)->nChildren; }
-	/// Return the child item.
-	const Item* Child( int i ) const;
+	/// Return the child item by offset.
+	const Item* ChildAt( int i ) const;
+
 	/// Return the child item.
 	const Item* Child( const char* name ) const;
+	const Item* Child( int i ) const;
 
 	/// Number of attributes in this Item
 	int NumAttributes() const;

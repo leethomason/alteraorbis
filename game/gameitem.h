@@ -26,6 +26,7 @@
 #include "../grinliz/glutil.h"
 
 #include "../tinyxml2/tinyxml2.h"
+#include "../shared/dbhelper.h"
 
 class DamageDesc;
 
@@ -107,6 +108,7 @@ public:
 
 	void Save( tinyxml2::XMLPrinter* );
 	void Load( const tinyxml2::XMLElement* doc );
+	void Serialize( DBItem item );
 
 	void Init() {
 		for( int i=0; i<NUM_TRAITS; ++i ) trait[i] = 10;
@@ -220,6 +222,7 @@ public:
 
 	virtual void Save( tinyxml2::XMLPrinter* );
 	virtual void Load( const tinyxml2::XMLElement* doc );
+	virtual void Serialize( DBItem item );
 
 	// If an intrinsic sub item has a trait - say, FIRE - that
 	// implies that the parent is immune to fire. Apply() sets

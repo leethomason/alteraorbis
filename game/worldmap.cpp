@@ -153,7 +153,7 @@ void WorldMap::Save( const char* pathToDAT, const char* pathToXML )
 		DB_SET( mapItem, width );
 		DB_SET( mapItem, height );
 		
-		worldInfo->Save( mapItem );
+		worldInfo->Serialize( DBItem(mapItem) );
 
 		writer.Save( "testsave.db" );
 	}

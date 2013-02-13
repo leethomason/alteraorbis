@@ -22,6 +22,15 @@ void PhysicsMoveComponent::DebugStr( grinliz::GLString* str )
 }
 
 
+void PhysicsMoveComponent::Serialize( DBItem parent )
+{
+	DBItem item = BeginSerialize( parent, "PhysicsMoveComponent" );
+	DB_SERIAL( item, rotation );
+	DB_SERIAL( item, deleteWhenDone );
+	DB_SERIAL( item, velocity );
+}
+
+
 void PhysicsMoveComponent::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele )
 {
 	XE_ARCHIVE( rotation );

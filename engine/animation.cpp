@@ -62,29 +62,29 @@ static const bool gAnimationMotion[ ANIM_COUNT ] = {
 	true
 };
 
-bool AnimationResource::Looping( AnimationType type ) { 
+bool AnimationResource::Looping( int type ) { 
 	return gAnimationLooping[type]; 
 }
 
-bool AnimationResource::Synchronized( AnimationType type ) { 
+bool AnimationResource::Synchronized( int type ) { 
 	return gAnimationSync[type]; 
 }
 
-bool AnimationResource::Motion( AnimationType type ) {
+bool AnimationResource::Motion( int type ) {
 	return gAnimationMotion[type];
 }
 
 
-/* static */ const char* AnimationResource::TypeToName( AnimationType type )
+/* static */ const char* AnimationResource::TypeToName( int type )
 {
 	return gAnimationName[ type ];
 }
 
-/* static */ AnimationType AnimationResource::NameToType( const char* name )
+/* static */ int AnimationResource::NameToType( const char* name )
 {
 	for( int i=0; i<ANIM_COUNT; ++i ) {
 		if ( StrEqual( gAnimationName[i], name )) {
-			return (AnimationType)i;
+			return i;
 		}
 	}
 	return ANIM_OFF;
@@ -170,7 +170,7 @@ AnimationResource::AnimationResource( const gamedb::Item* _item )
 
 	for( int i=0; i<nAnimations; ++i ) {
 		const gamedb::Item* animItem = item->Child(i);		// "gunrun" in the example
-		AnimationType type = NameToType( animItem->Name() );
+		int type = NameToType( animItem->Name() );
 		
 		sequence[type].item = animItem;
 		sequence[type].totalDuration = animItem->GetInt( "totalDuration" );
@@ -230,21 +230,21 @@ const char* AnimationResource::AnimationName( int index ) const
 }
 
 
-bool AnimationResource::HasAnimation( AnimationType type ) const
+bool AnimationResource::HasAnimation( int type ) const
 {
 	const char* name = TypeToName( type );
 	return item->Child( name ) != 0;
 }
 
 
-U32 AnimationResource::Duration( AnimationType type ) const
+U32 AnimationResource::Duration( int type ) const
 {
 	GLASSERT( type >= 0 && type < ANIM_COUNT );
 	return sequence[type].totalDuration;
 }
 
 
-U32 AnimationResource::TimeInRange( AnimationType type, U32 t ) const
+U32 AnimationResource::TimeInRange( int type, U32 t ) const
 {
 	GLASSERT( type >= 0 && type < ANIM_COUNT );
 	U32 total = sequence[type].totalDuration;
@@ -260,7 +260,7 @@ U32 AnimationResource::TimeInRange( AnimationType type, U32 t ) const
 }
 
 
-void AnimationResource::ComputeFrame( AnimationType type,
+void AnimationResource::ComputeFrame( int type,
 									  U32 timeClock,
 									  int *_frame0, int* _frame1, float* _fraction ) const
 {
@@ -289,7 +289,7 @@ void AnimationResource::ComputeFrame( AnimationType type,
 }
 
 
-void AnimationResource::ComputeBone( AnimationType type,
+void AnimationResource::ComputeBone( int type,
 									 int frame0, int frame1, float fraction,
 									 IString boneName,
 									 BoneData::Bone* bone ) const
@@ -320,7 +320,7 @@ void AnimationResource::ComputeBone( AnimationType type,
 }
 
 
-bool AnimationResource::GetTransform(	AnimationType type,	// which animation to play: "reference", "gunrun", etc.
+bool AnimationResource::GetTransform(	int type,	// which animation to play: "reference", "gunrun", etc.
 										IString boneName,
 										const ModelHeader& header,	// used to get the bone IDs
 										U32 time,					// time for this animation
@@ -335,7 +335,7 @@ bool AnimationResource::GetTransform(	AnimationType type,	// which animation to 
 }
 
 
-bool AnimationResource::GetTransform(	AnimationType type, 
+bool AnimationResource::GetTransform(	int type, 
 										const ModelHeader& header, 
 										U32 timeClock, 
 										BoneData* boneData ) const
@@ -360,7 +360,7 @@ bool AnimationResource::GetTransform(	AnimationType type,
 }
 
 
-void AnimationResource::GetMetaData(	AnimationType type,
+void AnimationResource::GetMetaData(	int type,
 										U32 t0, U32 t1,				// t1 > t0
 										grinliz::CArray<int, EL_MAX_METADATA>* data ) const
 {

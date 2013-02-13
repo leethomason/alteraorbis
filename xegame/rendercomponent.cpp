@@ -57,6 +57,67 @@ RenderComponent::~RenderComponent()
 }
 
 
+void RenderComponent::Serialize( DBItem parent )
+{
+	bool loading = parent.Loading();
+	DBItem item = BeginSerialize( parent, "RenderComponent" );
+
+	DBItem resItem = DBChild( item, "resources" );
+	for( int i=0; i<NUM_MODELS; ++i ) {
+		if ( loading ) {
+			resource[i] = 0;
+			const gamedb::Item* it = resItem.item->Child( i );
+			if ( it ) {
+				const char* asset = it->GetString( "name" );
+				resource[i] = ModelResourceManager::Instance()->GetModelResource( asset );
+			}
+		}
+		else {
+			if ( resource[i] ) {
+				gamedb::WItem* it = resItem.witem->FetchChild( i );
+				it->SetString( "name", resource[i]->header.name.c_str() );
+			}
+		}
+	}
+
+	DBItem modelItem = DBChild( item, "models" );
+	for( int i=0; i<NUM_MODELS; ++i ) {
+		if ( loading ) {
+			model[i] = 0;
+			const gamedb::Item* it = modelItem.item->Child( i );
+			if ( it ) {
+				GLASSERT( resource[i] );
+				model[i] = engine->AllocModel( resource[i] );
+				model[i]->Serialize( DBItem(it), engine->GetSpaceTree() );
+			}
+		}
+		else {
+			if ( model[i] ) {
+				gamedb::WItem* it = modelItem.witem->FetchChild( i );
+				model[i]->Serialize( DBItem(it), engine->GetSpaceTree() );
+			}
+		}
+	}
+
+	DBItem nameItem = DBChild( item, "metaDataNames" );
+	for( int i=0; i<EL_MAX_METADATA; ++i ) {
+		if ( loading ) {
+			metaDataName[i] = IString();
+			const gamedb::Item* it = nameItem.item->Child( i );
+			if ( it ) {
+				metaDataName[i] = StringPool::Intern( it->GetString( "name" ));
+			}
+		}
+		else {
+			if ( !metaDataName[i].empty() ) {
+				gamedb::WItem* it = nameItem.witem->FetchChild( i );
+				it->SetString( "metaname", metaDataName[i].c_str() );
+			}
+		}
+	}
+}
+
+
 void RenderComponent::Load( const tinyxml2::XMLElement* element )
 {
 	this->BeginLoad( element, "RenderComponent" );
@@ -208,10 +269,10 @@ SpatialComponent* RenderComponent::SyncToSpatial()
 }
 
 
-AnimationType RenderComponent::CalcAnimation() const
+int RenderComponent::CalcAnimation() const
 {
-	AnimationType current = model[0]->GetAnimation();
-	AnimationType n = ANIM_STAND;
+	int current = model[0]->GetAnimation();
+	int n = ANIM_STAND;
 
 	// Melee is tricky. If we are just standing around,
 	// can stay in melee...but motion should override.
@@ -242,7 +303,7 @@ AnimationType RenderComponent::CalcAnimation() const
 }
 
 
-AnimationType RenderComponent::CurrentAnimation() const
+int RenderComponent::CurrentAnimation() const
 {
 	return model[0]->GetAnimation();
 }
@@ -250,7 +311,7 @@ AnimationType RenderComponent::CurrentAnimation() const
 
 bool RenderComponent::AnimationReady() const
 {
-	AnimationType type = model[0]->GetAnimation();
+	int type = model[0]->GetAnimation();
 	if ( type == ANIM_MELEE || type == ANIM_HEAVY_IMPACT ) {
 		return model[0]->AnimationDone();
 	}
@@ -258,7 +319,7 @@ bool RenderComponent::AnimationReady() const
 }
 
 
-bool RenderComponent::PlayAnimation( AnimationType type )
+bool RenderComponent::PlayAnimation( int type )
 {
 	if ( type == ANIM_HEAVY_IMPACT ) {
 		// *always* overrides
@@ -369,7 +430,7 @@ int RenderComponent::DoTick( U32 deltaTime, U32 since )
 		// Update to the current, correct animation if we are
 		// in a slice we can change
 		if ( AnimationReady() ) {
-			AnimationType n = this->CalcAnimation();
+			int n = this->CalcAnimation();
 			model[0]->SetAnimation( n, CROSS_FADE_TIME, false );
 		}
 

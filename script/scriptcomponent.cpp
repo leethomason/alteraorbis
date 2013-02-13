@@ -14,6 +14,35 @@ void ScriptComponent::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLEle
 	XE_ARCHIVE( context.time );
 }
 
+
+void ScriptComponent::Serialize( DBItem parent )
+{
+	DBItem item = BeginSerialize( parent, "ScriptComponent" );
+	DB_SERIAL( item, context.initialized );
+	DB_SERIAL( item, context.time );
+
+	if ( item.Loading() ) {
+		GLASSERT( !script );
+		GLASSERT( factory );
+
+		const gamedb::Item* scriptItem = item.item->ChildAt( 0 );
+		const char* name = scriptItem->Name();
+
+		if ( StrEqual( name, "VolcanoScript" )) {
+			script = new VolcanoScript( factory->GetWorldMap(), 0 );
+		}
+		else if ( StrEqual( name, "PlantScript" )) {
+			script = new PlantScript( factory->GetSim(), factory->GetEngine(), factory->GetWorldMap(), factory->GetWeather(), 0 );
+		}
+		else {
+			GLASSERT( 0 );
+		}
+		GLASSERT( script );
+	}
+	script->Serialize( context, item );	// note parent 'item' is used for saving and loading.
+}
+
+	
 void ScriptComponent::Load( const tinyxml2::XMLElement* element )
 {
 	GLASSERT( !script );

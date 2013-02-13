@@ -68,6 +68,8 @@ public:
 
 	virtual void Load( const tinyxml2::XMLElement* element );
 	virtual void Save( tinyxml2::XMLPrinter* printer );
+	virtual void Serialize( DBItem parent );
+
 	virtual int  DoTick( U32 delta, U32 timeSince );
 	virtual void DebugStr( grinliz::GLString* str );
 	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );

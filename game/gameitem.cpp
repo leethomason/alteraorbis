@@ -58,6 +58,19 @@ void GameStat::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* e
 }
 
 
+
+void GameStat::Serialize( DBItem item )
+{
+	if ( item.Saving() ) {
+		item.witem->SetIntArray( "trait", trait, NUM_TRAITS );
+	}
+	else {
+		item.item->GetIntArray( "trait", NUM_TRAITS, trait );
+	}
+	DB_SERIAL( item, exp );
+}
+
+
 void GameStat::Save( tinyxml2::XMLPrinter* printer )
 {
 	printer->OpenElement( "GameStat" );
@@ -81,6 +94,86 @@ void GameStat::Roll( U32 seed )
 	for( int i=0; i<NUM_TRAITS; ++i ) {
 		trait[i] = random.Dice( 3, 6 );
 	}
+}
+
+
+void GameItem::Serialize( DBItem item )
+{
+	DB_SERIAL( item, name );
+	DB_SERIAL( item, desc );
+	DB_SERIAL( item, resource );
+
+	DB_SERIAL( item, mass );
+	DB_SERIAL( item, hpRegen );
+	DB_SERIAL( item, primaryTeam );
+	DB_SERIAL( item, cooldown );
+	DB_SERIAL( item, cooldownTime );
+	DB_SERIAL( item, reload );
+	DB_SERIAL( item, reloadTime );
+	DB_SERIAL( item, clipCap );
+	DB_SERIAL( item, rounds );
+	DB_SERIAL( item, meleeDamage );
+	DB_SERIAL( item, rangedDamage );
+	DB_SERIAL( item, absorbsDamage );
+	DB_SERIAL( item, accruedFire );
+	DB_SERIAL( item, accruedShock );
+
+	if ( item.Saving() ) {
+		CStr<512> f;
+		APPEND_FLAG( flags, f, CHARACTER );
+		APPEND_FLAG( flags, f, MELEE_WEAPON );
+		APPEND_FLAG( flags, f, RANGED_WEAPON );
+		APPEND_FLAG( flags, f, INTRINSIC_AT_HARDPOINT );
+		APPEND_FLAG( flags, f, INTRINSIC_FREE );
+		APPEND_FLAG( flags, f, HELD_AT_HARDPOINT );
+		APPEND_FLAG( flags, f, HELD_FREE );
+		APPEND_FLAG( flags, f, IMMUNE_FIRE );
+		APPEND_FLAG( flags, f, FLAMMABLE );
+		APPEND_FLAG( flags, f, IMMUNE_SHOCK );
+		APPEND_FLAG( flags, f, SHOCKABLE );
+		APPEND_FLAG( flags, f, EFFECT_EXPLOSIVE );
+		APPEND_FLAG( flags, f, EFFECT_FIRE );
+		APPEND_FLAG( flags, f, EFFECT_SHOCK );
+		APPEND_FLAG( flags, f, RENDER_TRAIL );
+		item.witem->SetString( "flags", f.c_str() );
+
+		gamedb::WItem* kvItem = item.witem->FetchChild( "keyValues" );
+		for( int i=0; i<keyValues.Size(); ++i ) {
+			kvItem->SetFloat( keyValues[i].key.c_str(), (float)keyValues[i].value );
+		}
+	}
+	else {
+		const char* f = item.item->GetString( "flags" );
+		if ( f ) {
+			READ_FLAG( flags, f, CHARACTER );
+			READ_FLAG( flags, f, MELEE_WEAPON );
+			READ_FLAG( flags, f, RANGED_WEAPON );
+			READ_FLAG( flags, f, INTRINSIC_AT_HARDPOINT );
+			READ_FLAG( flags, f, INTRINSIC_FREE );
+			READ_FLAG( flags, f, HELD_AT_HARDPOINT );
+			READ_FLAG( flags, f, HELD_FREE );
+			READ_FLAG( flags, f, IMMUNE_FIRE );
+			READ_FLAG( flags, f, FLAMMABLE );
+			READ_FLAG( flags, f, IMMUNE_SHOCK );
+			READ_FLAG( flags, f, SHOCKABLE );
+			READ_FLAG( flags, f, EFFECT_EXPLOSIVE );
+			READ_FLAG( flags, f, EFFECT_FIRE );
+			READ_FLAG( flags, f, EFFECT_SHOCK );
+			READ_FLAG( flags, f, RENDER_TRAIL );
+
+			const gamedb::Item* kvItem = item.item->Child( "keyValues" );
+			for( int i=0; i<kvItem->NumChildren(); ++i ) {
+				KeyValue kv = { StringPool::Intern( kvItem->AttributeName(i)), kvItem->GetFloat(i) };
+				keyValues.Push( kv );
+			}
+		}
+	}
+
+	DB_SERIAL( item, hardpoint );
+	DB_SERIAL( item, procedural );
+	DB_SERIAL( item, hp );
+
+	stats.Serialize( DBChild( item, "stats") );
 }
 
 

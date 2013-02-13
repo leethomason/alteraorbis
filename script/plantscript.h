@@ -20,6 +20,8 @@ public:
 	virtual void Init( const ScriptContext& heap );
 	virtual void Load( const ScriptContext& ctx, const tinyxml2::XMLElement* element );
 	virtual void Save( const ScriptContext& ctx, tinyxml2::XMLPrinter* printer );
+	virtual void Serialize( const ScriptContext& ctx, DBItem item );
+
 	virtual int DoTick( const ScriptContext& ctx, U32 delta, U32 since );
 	virtual const char* ScriptName() { return "PlantScript"; }
 
