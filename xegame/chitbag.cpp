@@ -54,6 +54,51 @@ void ChitBag::DeleteAll()
 }
 
 
+void ChitBag::Serialize( const ComponentFactory* factory, DBItem parent )
+{
+	DBItem item = DBChild( parent, "ChitBag" );
+
+	if ( item.Saving() ) {
+		gamedb::WItem* chitItem = item.witem->FetchChild( "Chits" );
+		Chit** chits = chitID.GetValues();
+		for( int i=0; i<chitID.NumValues(); ++i ) {
+			gamedb::WItem* child = chitItem->FetchChild( i );
+			chits[i]->Serialize( factory, DBItem(child) );
+		}
+
+		gamedb::WItem* boltItem = item.witem->FetchChild( "Bolts" );
+		for( int i=0; i<bolts.Size(); ++i ) {
+			bolts[i].Serialize( DBItem(boltItem) );
+		}
+	}
+	else {
+		const gamedb::Item* chitsItem = item.item->Child( "Chits" );
+		idPool = 0;
+
+		for( int i=0; true; ++i ) {
+			const gamedb::Item* chitItem = chitsItem->ChildAt(i);
+			if ( !chitItem )
+				break;
+			int id = chitItem->GetInt( "id" );
+			GLASSERT( id > 0 );
+			idPool = Max( id, idPool );
+
+			Chit* c = this->NewChit( id );
+			c->Serialize( factory, chitItem );
+		}
+
+		const gamedb::Item* boltsItem = item.item->Child( "Bolts" );
+		for( int i=0; true; ++i ) {
+			const gamedb::Item* boltItem = boltsItem->ChildAt(i);
+			if ( !boltItem )
+				break;
+			Bolt* b = bolts.PushArr( 1 );
+			b->Serialize( boltItem );			
+		}
+	}
+}
+
+
 void ChitBag::Save( XMLPrinter* printer )
 {
 	printer->OpenElement( "ChitBag" );

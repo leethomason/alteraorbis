@@ -78,6 +78,44 @@ void Chit::Free()
 }
 
 
+void Chit::Serialize( const ComponentFactory* factory, DBItem item )
+{
+	DB_SERIAL( item, id );
+	DB_SERIAL( item, timeSince );
+
+	if ( item.Saving() ) {
+		if ( shelf ) {
+			DBItem shelfItem = DBChild( item, "Shelf" );
+			shelf->Serialize( shelfItem );
+		}
+		for( int i=0; i<NUM_SLOTS; ++i ) {
+			if ( slot[i] ) {
+				slot[i]->Serialize( item );
+			}
+		}
+	}
+	else {
+		for( int i=0; true; ++i ) {
+			const gamedb::Item* compItem = item.item->ChildAt( i );
+			if ( !compItem )
+				break;
+			if ( StrEqual( compItem->Name(), "Shelf" ) ) {
+				const gamedb::Item* shelfItem = compItem->ChildAt(0);
+
+				shelf = factory->Factory( shelfItem->Name(),  this );
+				shelf->Serialize( shelfItem );
+			}
+			else {
+				Component* component = factory->Factory( compItem->Name(), this ); 
+				component->Serialize( compItem );
+				this->Add( component );
+			}
+		}
+
+	}
+}
+
+
 void Chit::Save( tinyxml2::XMLPrinter* printer )
 {
 	printer->OpenElement( "Chit" );

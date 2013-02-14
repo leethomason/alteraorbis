@@ -99,12 +99,12 @@ void Sim::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele )
 
 void Sim::Save( const char* mapDAT, const char* mapXML, const char* gameXML )
 {
-	QuickProfile qp( "Sim::Save" );
 	worldMap->Save( mapDAT, mapXML );
 
 	FILE* fp = fopen( gameXML, "w" );
 	GLASSERT( fp );
 	if ( fp ) {
+		QuickProfile qp( "Sim::SaveXML" );
 		XMLPrinter printer( fp );
 		printer.OpenElement( "Sim" );
 		Archive( &printer, 0 );
@@ -115,11 +115,18 @@ void Sim::Save( const char* mapDAT, const char* mapXML, const char* gameXML )
 	}
 
 	{
+		QuickProfile qp( "Sim::SaveDB" );
+
+		ComponentFactory factory( this, engine, worldMap, weather, lumosGame );
 		gamedb::Writer writer;
 		gamedb::WItem* root = writer.Root();
 		DBSet( root, "playerID", playerID );
 		DBSet( root, "minuteClock", minuteClock );
 		DBSet( root, "timeInMinutes", timeInMinutes );
+		
+		// engine->camera
+		chitBag->Serialize( &factory, root );
+
 		writer.Save( "simsave.dat" );
 	}
 }

@@ -45,7 +45,7 @@ void VolcanoScript::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLEleme
 
 void VolcanoScript::Serialize( const ScriptContext& ctx, DBItem parent )
 {
-	DBItem item = DBChild( item, "VolcanoScript" );
+	DBItem item = DBChild( parent, "VolcanoScript" );
 	DB_SERIAL( item, size );
 	DB_SERIAL( item, maxSize );
 }

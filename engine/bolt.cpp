@@ -38,6 +38,22 @@ void Bolt::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele )
 }
 
 
+void Bolt::Serialize( DBItem parent )
+{
+	DBItem item = DBChild( parent, "bolt" );
+	DB_SERIAL( item, len );
+	DB_SERIAL( item, impact );
+	DB_SERIAL( item, speed );
+	DB_SERIAL( item, particle );
+	DB_SERIAL( item, chitID );
+	DB_SERIAL( item, damage );
+	DB_SERIAL( item, effect );
+	DB_SERIAL( item, head );
+	DB_SERIAL( item, dir );
+	DB_SERIAL( item, color );
+}
+
+
 void Bolt::Save( tinyxml2::XMLPrinter* printer )
 {
 	printer->OpenElement( "Bolt" );
