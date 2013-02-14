@@ -5,27 +5,30 @@
 
 using namespace grinliz;
 
-void MapData( StreamWriter* writer, int i )
+void MapData( XStream* xs, int i )
 {
-	writer->OpenElement( "Data" );
-	writer->CloseElement();
+	XCStr str = "Data";
+	xs->OpenElement( str );
+	xs->CloseElement();
 }
 
 
-void MetaData( StreamWriter* writer )
+void MetaData( XStream* xs )
 {
-	writer->OpenElement( "Meta" );
-	writer->CloseElement();
+	XCStr str = "Meta";
+	xs->OpenElement( str );
+	xs->CloseElement();
 }
 
 
-void Map( StreamWriter* writer )
+void Map( XStream* xs )
 {
-	writer->OpenElement( "Map" );
+	XCStr str = "Map";
+	xs->OpenElement( str );
 	for( int i=0; i<4; ++i ) {
-		MapData( writer, i );
+		MapData( xs, i );
 	}
-	writer->CloseElement();
+	xs->CloseElement();
 }
 
 
@@ -38,13 +41,27 @@ int main( int argc, const char* argv[] )
 		fopen_s( &fp, "test.dat", "wb" );
 
 		StreamWriter writer( fp );
-		writer.OpenElement( "root" );
+		writer.OpenElement( XCStr("root") );
 		Map( &writer );
 		MetaData( &writer );
 		writer.CloseElement();
 
 		fclose( fp );
 	}
+
+	{
+		FILE* fp = 0;
+		fopen_s( &fp, "test.dat", "rb" );
+
+		StreamReader reader( fp );
+		reader.OpenElement( XCStr("root") );
+		Map( &reader );
+		MetaData( &reader );
+		reader.CloseElement();
+	
+		fclose( fp );
+	}
+
 
 	{
 		FILE* fp = 0;

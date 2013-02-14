@@ -37,11 +37,11 @@ void StreamWriter::WriteString( const char* str )
 }
 
 
-void StreamWriter::OpenElement( const char* name ) 
+void StreamWriter::OpenElement( XCStr& name ) 
 {
 	++depth;
 	WriteByte( BEGIN_ELEMENT );
-	WriteString( name );
+	WriteString( name.c_str() );
 }
 
 
@@ -87,41 +87,44 @@ void StreamReader::ReadString( grinliz::CStr<STR_LEN>* str )
 }
 
 
-bool StreamReader::OpenElement( CStr<STR_LEN>* name )
+void StreamReader::OpenElement( XCStr& name )
 {
 	int node = ReadByte();
-	if ( node == BEGIN_ELEMENT ) {
-		ReadString( name );
-		return true;
-	}
-	GLASSERT( node == END_ELEMENT || node == READER_EOF );
-	name->Clear();
-	return false;
+	GLASSERT( node == BEGIN_ELEMENT );
+	ReadString( &name );
+}
+
+
+bool StreamReader::HasChild()
+{
+	char c = getc( fp );
+	bool child = c == BEGIN_ELEMENT;
+	ungetc( c, fp );
+	return child;
 }
 
 
 void StreamReader::CloseElement()
 {
-
+	int node = ReadByte();
+	GLASSERT( node == END_ELEMENT )
 }
-
-
 
 
 void DumpStream( StreamReader* reader, int depth )
 {
 	CStr<XStream::STR_LEN> name;
 	
-	while ( true ) {
-		bool isChild = reader->OpenElement( &name );
-		if ( !isChild ) 
-			break;
+	reader->OpenElement( name );
 
-		for( int i=0; i<depth; ++i ) 
-			printf( "    " );
-		printf( "%s []\n", name.c_str() );
+	for( int i=0; i<depth; ++i ) 
+		printf( "    " );
+	printf( "%s []\n", name.c_str() );
 
+	while ( reader->HasChild() ) {
 		DumpStream( reader, depth+1 );
 	}
+
+	reader->CloseElement();
 }
 

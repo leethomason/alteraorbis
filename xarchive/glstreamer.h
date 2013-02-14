@@ -37,17 +37,23 @@ public:
 	enum {
 		STR_LEN = 16
 	};
+
+	virtual void OpenElement( grinliz::CStr<STR_LEN>& name ) = 0;
+	virtual void CloseElement() = 0;
 };
+
+
+typedef grinliz::CStr< XStream::STR_LEN > XCStr;
 
 class StreamWriter : public XStream {
 public:
 	StreamWriter( FILE* p_fp );
 	~StreamWriter()					{}
 
-	void OpenElement( const char* name );
-	void CloseElement();
-	void SetAttribute( const char* name, int value );
-	void SetAttribute( const char* name, const char* value );
+	virtual void OpenElement( grinliz::CStr<STR_LEN>& name );
+	virtual void CloseElement();
+	//void SetAttribute( const char* name, int value );
+	//void SetAttribute( const char* name, const char* value );
 
 private:
 	void WriteByte( int byte );
@@ -67,8 +73,10 @@ public:
 	~StreamReader()	{}
 
 	int Version() const { return version; }
-	bool OpenElement( grinliz::CStr<STR_LEN>* name );
-	void CloseElement();
+
+	virtual void OpenElement( grinliz::CStr<STR_LEN>& name );
+	bool		 HasChild();
+	virtual void CloseElement();
 
 private:
 	int ReadByte();
