@@ -7,28 +7,36 @@ using namespace grinliz;
 
 void MapData( XStream* xs, int i )
 {
-	XCStr str = "Data";
-	xs->OpenElement( str );
-	xs->CloseElement();
+	XarcOpen( xs, "Data" );
+
+	int local=i;
+	XARC_SER( xs, i );
+	GLASSERT( local == i );
+
+	XarcClose( xs );
 }
 
 
 void MetaData( XStream* xs )
 {
-	XCStr str = "Meta";
-	xs->OpenElement( str );
-	xs->CloseElement();
+	XarcOpen( xs, "Meta" );
+	int i=1, j=2, k=3;
+	XARC_SER( xs, j );
+	XARC_SER( xs, i );
+	XARC_SER( xs, k );
+	XarcClose( xs );
 }
 
 
 void Map( XStream* xs )
 {
-	XCStr str = "Map";
-	xs->OpenElement( str );
-	for( int i=0; i<4; ++i ) {
+	XarcOpen( xs, "Map" );
+	int nData = 4;
+	XARC_SER( xs, nData );
+	for( int i=0; i<nData; ++i ) {
 		MapData( xs, i );
 	}
-	xs->CloseElement();
+	XarcClose( xs );
 }
 
 
@@ -41,7 +49,7 @@ int main( int argc, const char* argv[] )
 		fopen_s( &fp, "test.dat", "wb" );
 
 		StreamWriter writer( fp );
-		writer.OpenElement( XCStr("root") );
+		writer.OpenElement( "root" );
 		Map( &writer );
 		MetaData( &writer );
 		writer.CloseElement();
@@ -54,7 +62,7 @@ int main( int argc, const char* argv[] )
 		fopen_s( &fp, "test.dat", "rb" );
 
 		StreamReader reader( fp );
-		reader.OpenElement( XCStr("root") );
+		reader.OpenElement();
 		Map( &reader );
 		MetaData( &reader );
 		reader.CloseElement();
