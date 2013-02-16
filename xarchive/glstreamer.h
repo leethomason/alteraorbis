@@ -55,8 +55,8 @@ public:
 		ATTRIB_INT				= 0x01,
 		ATTRIB_FLOAT			= 0x02,
 		ATTRIB_DOUBLE			= 0x04,
-		ATTRIB_INT_ARRAY		= 0x08,
-		ATTRIB_DOUBLE_ARRAY		= 0x10,
+		ATTRIB_BYTE				= 0x08,
+		ATTRIB_ARRAY			= 0x10
 	};
 
 	virtual StreamWriter* Saving() { return 0; }
@@ -64,7 +64,10 @@ public:
 
 protected:
 	grinliz::CDynArray< char >		names;
+	grinliz::CDynArray< U8 >		byteData;
 	grinliz::CDynArray< int >		intData;
+	grinliz::CDynArray< float >		floatData;
+	grinliz::CDynArray< double >		doubleData;
 };
 
 
@@ -77,7 +80,15 @@ public:
 
 	void OpenElement( const char* name );
 	void CloseElement();
+
 	void Set( const char* key, int value );
+	void Set( const char* key, float value );
+	void Set( const char* key, double value );
+	void Set( const char* key, U8 value );
+	void SetArr( const char* key, const int* value, int n );
+	void SetArr( const char* key, const float* value, int n );
+	void SetArr( const char* key, const double* value, int n );
+	void SetArr( const char* key, const U8* value, int n );
 
 private:
 	void WriteByte( int byte );
@@ -98,6 +109,7 @@ private:
 		static bool Less( const Attrib& v0, const Attrib& v1 )	{ return strcmp( data+v0.keyIndex, data+v1.keyIndex ) < 0; }
 	};
 
+	Attrib* LowerSet( const char* key, int type, int n );
 	grinliz::CDynArray< Attrib > attribs;
 
 	FILE* fp;
@@ -116,12 +128,37 @@ public:
 	struct Attribute {
 		int type;
 		const char* key;
+		int n;
 
 		union {
 			int intValue;
+			float floatValue;
+			double doubleValue;
+			U8 byteValue;
+
+			const int* intArr;
+			const float* floatArr;
+			const double* doubleArr;
+			const U8* byteArr;
 		};
 
-		int Int() const { GLASSERT( type == ATTRIB_INT ); return intValue; }
+		void Value( int* value ) const		{ GLASSERT( type == ATTRIB_INT );		*value = intValue; }
+		void Value( float* value ) const	{ GLASSERT( type == ATTRIB_FLOAT );		*value = floatValue; }
+		void Value( double* value ) const	{ GLASSERT( type == ATTRIB_DOUBLE );	*value = doubleValue; }
+		void Value( U8* value ) const		{ GLASSERT( type == ATTRIB_BYTE );		*value = byteValue; }
+
+		void Value( int* value, int size ) const	{	GLASSERT( type == (ATTRIB_INT | ATTRIB_ARRAY) ); 
+														GLASSERT( n == size );		
+														memcpy( value, intArr, n*sizeof(int) ); }
+		void Value( float* value, int size ) const	{	GLASSERT( type == (ATTRIB_FLOAT | ATTRIB_ARRAY) ); 
+														GLASSERT( n == size );		
+														memcpy( value, floatArr, n*sizeof(float) ); }
+		void Value( double* value, int size ) const	{	GLASSERT( type == (ATTRIB_DOUBLE | ATTRIB_ARRAY) ); 
+														GLASSERT( n == size );		
+														memcpy( value, doubleArr, n*sizeof(double) ); }
+		void Value( U8* value, int size ) const		{	GLASSERT( type == (ATTRIB_BYTE | ATTRIB_ARRAY) ); 
+														GLASSERT( n == size );		
+														memcpy( value, byteArr, n ); }
 
 		bool operator==( const Attribute& a ) const { return strcmp( key, a.key ) == 0; }
 		bool operator<( const Attribute& a ) const	{ return strcmp( key, a.key ) < 0; }
@@ -170,19 +207,45 @@ inline void XarcClose( XStream* stream) {
 }
 
 
-inline void XarcGet( XStream* stream, const char* key, int &value )		{ 
+template< class T >
+inline void XarcGet( XStream* stream, const char* key, T &value )		{ 
 	GLASSERT( stream->Loading() );
 	const StreamReader::Attribute* attr = stream->Loading()->Get( key );
-	value = attr->Int();
+	attr->Value( &value );
 }
 
+template< class T >
+inline void XarcGetArr( XStream* stream, const char* key, T* value, int n )		{ 
+	GLASSERT( stream->Loading() );
+	const StreamReader::Attribute* attr = stream->Loading()->Get( key );
+	attr->Value( value, n );
+}
 
-inline void XarcSet( XStream* stream, const char* key, int value ) {
+template< class T >
+void XarcSet( XStream* stream, const char* key, T value ) {
 	GLASSERT( stream->Saving() );
 	stream->Saving()->Set( key, value );
 }
 
-#define XARC_SER( stream, name ) { if ( stream->Saving() ) XarcSet( stream, #name, name ); else XarcGet( stream, #name, name ); }
+template< class T >
+void XarcSetArr( XStream* stream, const char* key, const T* value, int n ) {
+	GLASSERT( stream->Saving() );
+	stream->Saving()->SetArr( key, value, n );
+}
+
+#define XARC_SER( stream, name ) {			\
+	if ( stream->Saving() )					\
+		XarcSet( stream, #name, name );		\
+	else									\
+		XarcGet( stream, #name, name );		\
+}
+
+#define XARC_SER_ARR( stream, name, n ) {		\
+	if ( stream->Saving() )						\
+		XarcSetArr( stream, #name, name, n );	\
+	else										\
+		XarcGetArr( stream, #name, name, n );		\
+}
 
 
 #endif // GRINLIZ_STREAMER_INCLUDED
