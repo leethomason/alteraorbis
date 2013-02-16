@@ -31,8 +31,7 @@ void MetaData( XStream* xs )
 	XARC_SER( xs, x );
 	XARC_SER( xs, y );
 	XARC_SER( xs, z );
-
-	/*
+	
 	int iArr[2] = { 0, 1 };
 	float fArr[2] = { 0, 1 };
 	float dArr[2] = { 0, 1 };
@@ -42,7 +41,7 @@ void MetaData( XStream* xs )
 	XARC_SER_ARR( xs, fArr, 2 );
 	XARC_SER_ARR( xs, dArr, 2 );
 	XARC_SER_ARR( xs, bArr, 2 );
-	*/
+	
 	XarcClose( xs );
 }
 

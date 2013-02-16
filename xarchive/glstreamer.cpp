@@ -27,7 +27,8 @@ void StreamWriter::WriteInt( int value )
 void StreamWriter::WriteU16( int value )
 {
 	GLASSERT( value >= 0 && value < 0x10000 );
-	fwrite( &value, 2, 1, fp );
+	U16 v = value;
+	fwrite( &v, 2, 1, fp );
 }
 
 
@@ -90,6 +91,7 @@ void StreamWriter::FlushAttributes()
 		for( int i=0; i<attribs.Size(); ++i ) {
 			const Attrib& a = attribs[i];
 			WriteU16( a.keyIndex );
+			GLASSERT( a.type == ATTRIB_INT || a.type == ATTRIB_FLOAT || a.type == ATTRIB_DOUBLE || a.type == ATTRIB_BYTE );
 			WriteByte( a.type );
 			WriteByte( a.index );
 			WriteByte( a.size );
@@ -141,42 +143,30 @@ StreamWriter::Attrib* StreamWriter::LowerSet( const char* key, int type, int n )
 
 void StreamWriter::Set( const char* key, int value )
 {
-	Attrib* a = LowerSet( key, ATTRIB_INT, 1 );
-
-	a->index = intData.Size();
-	intData.Push( value );
+	SetArr( key, &value, 1 );
 }
 
 
 void StreamWriter::Set( const char* key, float value )
 {
-	Attrib* a = LowerSet( key, ATTRIB_FLOAT, 1 );
-
-	a->index = floatData.Size();
-	floatData.Push( value );
+	SetArr( key, &value, 1 );
 }
 
 
 void StreamWriter::Set( const char* key, double value )
 {
-	Attrib* a = LowerSet( key, ATTRIB_DOUBLE, 1 );
-
-	a->index = doubleData.Size();
-	doubleData.Push( value );
+	SetArr( key, &value, 1 );
 }
 
 
 void StreamWriter::Set( const char* key, U8 value )
 {
-	Attrib* a = LowerSet( key, ATTRIB_BYTE, 1 );
-
-	a->index = byteData.Size();
-	byteData.Push( value );
+	SetArr( key, &value, 1 );
 }
 
 void StreamWriter::SetArr( const char* key, const int* value, int n )
 {
-	Attrib* a = LowerSet( key, ATTRIB_INT | ATTRIB_ARRAY, n );
+	Attrib* a = LowerSet( key, ATTRIB_INT, n );
 
 	a->index = intData.Size();
 	int* mem = intData.PushArr( n );
@@ -186,7 +176,7 @@ void StreamWriter::SetArr( const char* key, const int* value, int n )
 
 void StreamWriter::SetArr( const char* key, const float* value, int n )
 {
-	Attrib* a = LowerSet( key, ATTRIB_FLOAT | ATTRIB_ARRAY, n );
+	Attrib* a = LowerSet( key, ATTRIB_FLOAT, n );
 
 	a->index = floatData.Size();
 	float* mem = floatData.PushArr( n );
@@ -196,7 +186,7 @@ void StreamWriter::SetArr( const char* key, const float* value, int n )
 
 void StreamWriter::SetArr( const char* key, const double* value, int n )
 {
-	Attrib* a = LowerSet( key, ATTRIB_DOUBLE | ATTRIB_ARRAY, n );
+	Attrib* a = LowerSet( key, ATTRIB_DOUBLE, n );
 
 	a->index = doubleData.Size();
 	double* mem = doubleData.PushArr( n );
@@ -206,7 +196,7 @@ void StreamWriter::SetArr( const char* key, const double* value, int n )
 
 void StreamWriter::SetArr( const char* key, const U8* value, int n )
 {
-	Attrib* a = LowerSet( key, ATTRIB_BYTE | ATTRIB_ARRAY, n );
+	Attrib* a = LowerSet( key, ATTRIB_BYTE, n );
 
 	a->index = byteData.Size();
 	U8* mem = byteData.PushArr( n );
@@ -283,61 +273,55 @@ const char* StreamReader::OpenElement()
 		char* stringPool = names.PushArr( stringPoolSize );
 		fread( stringPool, stringPoolSize, 1, fp );
 
-		// Int pool
+		// pools
 		if ( types & ATTRIB_INT ) {
 			int size = ReadByte();
 			int* data = intData.PushArr( size );
 			fread( data, sizeof(int), size, fp );
+		}
+		if ( types & ATTRIB_FLOAT ) {
+			int size = ReadByte();
+			float* data = floatData.PushArr( size );
+			fread( data, sizeof(float), size, fp );
+		}
+		if ( types & ATTRIB_DOUBLE ) {
+			int size = ReadByte();
+			double* data = doubleData.PushArr( size );
+			fread( data, sizeof(double), size, fp );
+		}
+		if ( types & ATTRIB_BYTE ) {
+			int size = ReadByte();
+			U8* data = byteData.PushArr( size );
+			fread( data, sizeof(U8), size, fp );
 		}
 
 		// Attributes
 		int nAttrib = ReadByte();
 		for( int i=0; i<nAttrib; ++i ) {
 			Attribute* a = attributes.PushArr(1);
-			a->key = &stringPool[ ReadU16() ];
+
+			int keyIndex = ReadU16();
+			a->key = &stringPool[ keyIndex ];
 			a->type = ReadByte();
+			
 			switch ( a->type ) {
 
-			case ATTRIB_INT:
-				a->intValue = intData[ ReadByte() ];
-				a->n = ReadByte();	// size
-				GLASSERT( a->n == 1 );
-				break;
-			
-			case ATTRIB_FLOAT:
-				a->floatValue = floatData[ ReadByte() ];
-				a->n = ReadByte();	// size
-				GLASSERT( a->n == 1 );
-				break;
-
-			case ATTRIB_DOUBLE:
-				a->doubleValue = doubleData[ ReadByte() ];
-				a->n = ReadByte();	// size
-				GLASSERT( a->n == 1 );
-				break;
-
-			case ATTRIB_BYTE:
-				a->byteValue = byteData[ ReadByte() ];
-				a->n = ReadByte();	// size
-				GLASSERT( a->n == 1 );
-				break;
-
-			case (ATTRIB_INT | ATTRIB_ARRAY):
+			case (ATTRIB_INT):
 				a->intArr = &intData[ ReadByte() ];
 				a->n = ReadByte();
 				break;
 
-			case (ATTRIB_FLOAT | ATTRIB_ARRAY):
+			case (ATTRIB_FLOAT):
 				a->floatArr = &floatData[ ReadByte() ];
 				a->n = ReadByte();
 				break;
 
-			case (ATTRIB_DOUBLE | ATTRIB_ARRAY):
+			case (ATTRIB_DOUBLE):
 				a->doubleArr = &doubleData[ ReadByte() ];
 				a->n = ReadByte();
 				break;
 
-			case (ATTRIB_BYTE | ATTRIB_ARRAY):
+			case (ATTRIB_BYTE):
 				a->byteArr = &byteData[ ReadByte() ];
 				a->n = ReadByte();
 				break;
@@ -391,45 +375,55 @@ void DumpStream( StreamReader* reader, int depth )
 		const StreamReader::Attribute* attr = attrs + i;
 		switch( attr->type ) {
 		case XStream::ATTRIB_INT:
-			printf( "%s=%d ", attr->key, attr->intValue );
+			if ( attr->n == 1 ) {
+				printf( "%s=%d ", attr->key, attr->intArr[0] );
+			}
+			else {
+				printf( "%s=(", attr->key );
+				for( int i=0; i<attr->n; ++i ) {
+					printf( "%d ", *(attr->intArr+i) );
+				}
+				printf( ") " );
+			}
 			break;
+		
 		case XStream::ATTRIB_FLOAT:
-			printf( "%s=%f ", attr->key, attr->floatValue );
+			if ( attr->n == 1 ) {
+				printf( "%s=%f ", attr->key, attr->floatArr[0] );
+			}
+			else {
+				printf( "%s=(", attr->key );
+				for( int i=0; i<attr->n; ++i ) {
+					printf( "%f ", *(attr->floatArr+i) );
+				}
+				printf( ") " );
+			}
 			break;
+		
 		case XStream::ATTRIB_DOUBLE:
-			printf( "%s=%f ", attr->key, attr->doubleValue );
-			break;
-		case XStream::ATTRIB_BYTE:
-			printf( "%s=%d ", attr->key, attr->byteValue );
+			if ( attr->n == 1 ) {
+				printf( "%s=%f ", attr->key, attr->doubleArr[0] );
+			}
+			else {
+				printf( "%s=(", attr->key );
+				for( int i=0; i<attr->n; ++i ) {
+					printf( "%f ", *(attr->doubleArr+i) );
+				}
+				printf( ") " );
+			}
 			break;
 
-		case (XStream::ATTRIB_INT | XStream::ATTRIB_ARRAY):
-			printf( "%s=(", attr->key );
-			for( int i=0; i<attr->n; ++i ) {
-				printf( "%d ", *(attr->intArr+i) );
+		case XStream::ATTRIB_BYTE:
+			if ( attr->n == 1 ) {
+				printf( "%s=%d ", attr->key, attr->byteArr[0] );
 			}
-			printf( ") " );
-			break;
-		case (XStream::ATTRIB_FLOAT | XStream::ATTRIB_ARRAY):
-			printf( "%s=(", attr->key );
-			for( int i=0; i<attr->n; ++i ) {
-				printf( "%f ", *(attr->floatArr+i) );
+			else {
+				printf( "%s=(", attr->key );
+				for( int i=0; i<attr->n; ++i ) {
+					printf( "%d ", *(attr->byteArr+i) );
+				}
+				printf( ") " );
 			}
-			printf( ") " );
-			break;
-		case (XStream::ATTRIB_DOUBLE | XStream::ATTRIB_ARRAY):
-			printf( "%s=(", attr->key );
-			for( int i=0; i<attr->n; ++i ) {
-				printf( "%f ", *(attr->doubleArr+i) );
-			}
-			printf( ") " );
-			break;
-		case (XStream::ATTRIB_BYTE | XStream::ATTRIB_ARRAY):
-			printf( "%s=(", attr->key );
-			for( int i=0; i<attr->n; ++i ) {
-				printf( "%d ", *(attr->byteArr+i) );
-			}
-			printf( ") " );
 			break;
 
 		default:

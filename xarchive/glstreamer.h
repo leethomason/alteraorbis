@@ -56,7 +56,6 @@ public:
 		ATTRIB_FLOAT			= 0x02,
 		ATTRIB_DOUBLE			= 0x04,
 		ATTRIB_BYTE				= 0x08,
-		ATTRIB_ARRAY			= 0x10
 	};
 
 	virtual StreamWriter* Saving() { return 0; }
@@ -67,7 +66,7 @@ protected:
 	grinliz::CDynArray< U8 >		byteData;
 	grinliz::CDynArray< int >		intData;
 	grinliz::CDynArray< float >		floatData;
-	grinliz::CDynArray< double >		doubleData;
+	grinliz::CDynArray< double >	doubleData;
 };
 
 
@@ -131,10 +130,10 @@ public:
 		int n;
 
 		union {
-			int intValue;
-			float floatValue;
-			double doubleValue;
-			U8 byteValue;
+			//int intValue;
+			//float floatValue;
+			//double doubleValue;
+			//U8 byteValue;
 
 			const int* intArr;
 			const float* floatArr;
@@ -142,21 +141,21 @@ public:
 			const U8* byteArr;
 		};
 
-		void Value( int* value ) const		{ GLASSERT( type == ATTRIB_INT );		*value = intValue; }
-		void Value( float* value ) const	{ GLASSERT( type == ATTRIB_FLOAT );		*value = floatValue; }
-		void Value( double* value ) const	{ GLASSERT( type == ATTRIB_DOUBLE );	*value = doubleValue; }
-		void Value( U8* value ) const		{ GLASSERT( type == ATTRIB_BYTE );		*value = byteValue; }
+		void Value( int* value ) const		{ GLASSERT( type == ATTRIB_INT );	GLASSERT( n == 1 );	*value = intArr[0]; }
+		void Value( float* value ) const	{ GLASSERT( type == ATTRIB_FLOAT );	GLASSERT( n == 1 );	*value = floatArr[0]; }
+		void Value( double* value ) const	{ GLASSERT( type == ATTRIB_DOUBLE );GLASSERT( n == 1 ); *value = doubleArr[0]; }
+		void Value( U8* value ) const		{ GLASSERT( type == ATTRIB_BYTE );	GLASSERT( n == 1 ); *value = byteArr[0]; }
 
-		void Value( int* value, int size ) const	{	GLASSERT( type == (ATTRIB_INT | ATTRIB_ARRAY) ); 
+		void Value( int* value, int size ) const	{	GLASSERT( type == (ATTRIB_INT) ); 
 														GLASSERT( n == size );		
 														memcpy( value, intArr, n*sizeof(int) ); }
-		void Value( float* value, int size ) const	{	GLASSERT( type == (ATTRIB_FLOAT | ATTRIB_ARRAY) ); 
+		void Value( float* value, int size ) const	{	GLASSERT( type == (ATTRIB_FLOAT) ); 
 														GLASSERT( n == size );		
 														memcpy( value, floatArr, n*sizeof(float) ); }
-		void Value( double* value, int size ) const	{	GLASSERT( type == (ATTRIB_DOUBLE | ATTRIB_ARRAY) ); 
+		void Value( double* value, int size ) const	{	GLASSERT( type == (ATTRIB_DOUBLE) ); 
 														GLASSERT( n == size );		
 														memcpy( value, doubleArr, n*sizeof(double) ); }
-		void Value( U8* value, int size ) const		{	GLASSERT( type == (ATTRIB_BYTE | ATTRIB_ARRAY) ); 
+		void Value( U8* value, int size ) const		{	GLASSERT( type == (ATTRIB_BYTE) ); 
 														GLASSERT( n == size );		
 														memcpy( value, byteArr, n ); }
 
