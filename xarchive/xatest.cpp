@@ -41,6 +41,15 @@ void MetaData( XStream* xs )
 	XARC_SER_ARR( xs, fArr, 2 );
 	XARC_SER_ARR( xs, dArr, 2 );
 	XARC_SER_ARR( xs, bArr, 2 );
+
+	if ( xs->Saving() ) {
+		xs->Saving()->Set( "foo0", "bar0" );
+		xs->Saving()->Set( "foo1", "bar1" );
+	}
+	else {
+		xs->Loading()->Get( "foo0" );
+		xs->Loading()->Get( "foo1" );
+	}
 	
 	XarcClose( xs );
 }
@@ -68,7 +77,8 @@ int main( int argc, const char* argv[] )
 {
 	printf( "Xarchive test.\n" );
 
-	{
+
+	if ( argc == 1 ) {
 		FILE* fp = 0;
 		fopen_s( &fp, "test.dat", "wb" );
 
@@ -81,7 +91,7 @@ int main( int argc, const char* argv[] )
 		fclose( fp );
 	}
 
-	{
+	if ( argc == 1 ) {
 		FILE* fp = 0;
 		fopen_s( &fp, "test.dat", "rb" );
 
@@ -97,7 +107,11 @@ int main( int argc, const char* argv[] )
 
 	{
 		FILE* fp = 0;
-		fopen_s( &fp, "test.dat", "rb" );
+		const char* fname = "test.dat";
+		if ( argc >= 2 ) {
+			fname = argv[1];
+		}
+		fopen_s( &fp, fname, "rb" );
 
 		StreamReader reader( fp );
 		printf( "version=%d\n", reader.Version() );

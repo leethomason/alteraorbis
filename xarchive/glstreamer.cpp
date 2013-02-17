@@ -91,7 +91,6 @@ void StreamWriter::FlushAttributes()
 		for( int i=0; i<attribs.Size(); ++i ) {
 			const Attrib& a = attribs[i];
 			WriteU16( a.keyIndex );
-			GLASSERT( a.type == ATTRIB_INT || a.type == ATTRIB_FLOAT || a.type == ATTRIB_DOUBLE || a.type == ATTRIB_BYTE );
 			WriteByte( a.type );
 			WriteByte( a.index );
 			WriteByte( a.size );
@@ -123,6 +122,25 @@ void StreamWriter::CloseElement()
 	GLASSERT( depth > 0 );
 	--depth;
 	WriteByte( END_ELEMENT );
+}
+
+
+void StreamWriter::Set( const char* key, const char* value )
+{
+	Attrib* a = attribs.PushArr(1);
+	a->type = ATTRIB_STRING;
+
+	a->keyIndex = names.Size();
+	int len = strlen( key );
+	char* name = names.PushArr( len+1 );
+	memcpy( name, key, len+1 );
+
+	a->index = names.Size() - a->keyIndex;
+	len = strlen( value );
+	name = names.PushArr( len+1 );
+	memcpy( name, value, len+1 );
+
+	a->size = 1;
 }
 
 
@@ -227,7 +245,7 @@ int StreamReader::ReadInt()
 
 int StreamReader::ReadU16()
 {
-	int i=0;
+	U16 i=0;
 	fread( &i, 2, 1, fp );
 	return i;
 }
@@ -261,6 +279,9 @@ const char* StreamReader::OpenElement()
 	attributes.Clear();
 	names.Clear();
 	intData.Clear();
+	floatData.Clear();
+	doubleData.Clear();
+	byteData.Clear();
 
 	// Attributes:
 	U8 b = PeekByte();
@@ -326,6 +347,12 @@ const char* StreamReader::OpenElement()
 				a->n = ReadByte();
 				break;
 
+			case ATTRIB_STRING:
+				a->str = &stringPool[ keyIndex + ReadByte() ];
+				a->n = ReadByte();
+				GLASSERT( a->n == 1 );
+				break;
+
 			default:
 				GLASSERT(0);
 			}
@@ -376,10 +403,10 @@ void DumpStream( StreamReader* reader, int depth )
 		switch( attr->type ) {
 		case XStream::ATTRIB_INT:
 			if ( attr->n == 1 ) {
-				printf( "%s=%d ", attr->key, attr->intArr[0] );
+				printf( "%s=i:%d ", attr->key, attr->intArr[0] );
 			}
 			else {
-				printf( "%s=(", attr->key );
+				printf( "%s=(i:", attr->key );
 				for( int i=0; i<attr->n; ++i ) {
 					printf( "%d ", *(attr->intArr+i) );
 				}
@@ -389,10 +416,10 @@ void DumpStream( StreamReader* reader, int depth )
 		
 		case XStream::ATTRIB_FLOAT:
 			if ( attr->n == 1 ) {
-				printf( "%s=%f ", attr->key, attr->floatArr[0] );
+				printf( "%s=f:%f ", attr->key, attr->floatArr[0] );
 			}
 			else {
-				printf( "%s=(", attr->key );
+				printf( "%s=(f:", attr->key );
 				for( int i=0; i<attr->n; ++i ) {
 					printf( "%f ", *(attr->floatArr+i) );
 				}
@@ -402,10 +429,10 @@ void DumpStream( StreamReader* reader, int depth )
 		
 		case XStream::ATTRIB_DOUBLE:
 			if ( attr->n == 1 ) {
-				printf( "%s=%f ", attr->key, attr->doubleArr[0] );
+				printf( "%s=d:%f ", attr->key, attr->doubleArr[0] );
 			}
 			else {
-				printf( "%s=(", attr->key );
+				printf( "%s=(d:", attr->key );
 				for( int i=0; i<attr->n; ++i ) {
 					printf( "%f ", *(attr->doubleArr+i) );
 				}
@@ -415,15 +442,19 @@ void DumpStream( StreamReader* reader, int depth )
 
 		case XStream::ATTRIB_BYTE:
 			if ( attr->n == 1 ) {
-				printf( "%s=%d ", attr->key, attr->byteArr[0] );
+				printf( "%s=b:%d ", attr->key, attr->byteArr[0] );
 			}
 			else {
-				printf( "%s=(", attr->key );
+				printf( "%s=(b:", attr->key );
 				for( int i=0; i<attr->n; ++i ) {
 					printf( "%d ", *(attr->byteArr+i) );
 				}
 				printf( ") " );
 			}
+			break;
+
+		case XStream::ATTRIB_STRING:
+			printf( "%s=%s ", attr->key, attr->str );
 			break;
 
 		default:

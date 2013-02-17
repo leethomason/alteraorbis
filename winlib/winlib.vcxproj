@@ -95,6 +95,7 @@
     <ClCompile Include="..\shared\gamedbwriter.cpp" />
     <ClCompile Include="..\shared\lodepng.cpp" />
     <ClCompile Include="..\tinyxml2\tinyxml2.cpp" />
+    <ClCompile Include="..\xarchive\glstreamer.cpp" />
     <ClCompile Include="..\zlib\adler32.c" />
     <ClCompile Include="..\zlib\compress.c" />
     <ClCompile Include="..\zlib\crc32.c" />
@@ -134,6 +135,7 @@
     <ClInclude Include="..\shared\gamedbwriter.h" />
     <ClInclude Include="..\shared\lodepng.h" />
     <ClInclude Include="..\tinyxml2\tinyxml2.h" />
+    <ClInclude Include="..\xarchive\glstreamer.h" />
     <ClInclude Include="..\zlib\crc32.h" />
     <ClInclude Include="..\zlib\deflate.h" />
     <ClInclude Include="..\zlib\inffast.h" />

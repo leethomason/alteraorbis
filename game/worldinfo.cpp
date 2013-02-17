@@ -19,13 +19,22 @@ void WorldInfo::Save( tinyxml2::XMLPrinter* printer )
 }
 
 
-void WorldInfo::Serialize( DBItem parent )
+void WorldInfo::Serialize( XStream* xs )
 {
-	DBItem info = DBChild( parent, "WorldInfo" );
-	DBItem features = DBChild( info, "WorldFeatures" );
-	for( int i=0; i<featureArr.Size(); ++i ) {
-		featureArr[i].Serialize( features, i );
+	XarcOpen( xs, "WorldInfo" );
+
+	int nFeatures = featureArr.Size();
+	XARC_SER( xs, nFeatures );
+
+	if ( xs->Loading() ) {
+		featureArr.Clear();
+		featureArr.PushArr( nFeatures );
 	}
+	for( int i=0; i<featureArr.Size(); ++i ) {
+		featureArr[i].Serialize( xs );
+	}
+
+	XarcClose( xs );
 }
 
 

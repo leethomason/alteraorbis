@@ -114,6 +114,7 @@ void Sim::Save( const char* mapDAT, const char* mapXML, const char* gameXML )
 		fclose( fp );
 	}
 
+	/*
 	{
 		QuickProfile qp( "Sim::SaveDB" );
 
@@ -129,6 +130,7 @@ void Sim::Save( const char* mapDAT, const char* mapXML, const char* gameXML )
 
 		writer.Save( "simsave.dat" );
 	}
+	*/
 }
 
 

@@ -9,7 +9,7 @@
 #include "../xegame/xegamelimits.h"
 
 #include "../tinyxml2/tinyxml2.h"
-#include "../shared/dbhelper.h"
+#include "../xarchive/glstreamer.h"
 
 namespace grinliz {
 class PerlinNoise;
@@ -22,7 +22,7 @@ struct WorldFeature {
 	int area;						// actual area
 
 	void Save( tinyxml2::XMLPrinter* );
-	void Serialize( DBItem parent, int i );
+	void Serialize( XStream* );
 	void Load( const tinyxml2::XMLElement& element );
 
 	class Compare

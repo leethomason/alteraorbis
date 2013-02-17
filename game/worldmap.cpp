@@ -24,7 +24,7 @@
 #include "../grinliz/glcolor.h"
 #include "../grinliz/glperformance.h"
 #include "../shared/lodepng.h"
-#include "../shared/dbhelper.h"
+#include "../xarchive/glstreamer.h"
 
 #include "../engine/engine.h"
 #include "../engine/texture.h"
@@ -144,18 +144,21 @@ void WorldMap::Save( const char* pathToDAT, const char* pathToXML )
 		}
 	}
 	{
-		QuickProfile qp( "WorldMap::Save DB" );
+		QuickProfile qp( "WorldMap::Save Xarc" );
 
-		gamedb::Writer writer;
-		gamedb::WItem* root = writer.Root();
+		FILE* fp = fopen( "mapsave.dat", "wb" );
+		if ( fp ) {
+			StreamWriter writer(fp);
 
-		gamedb::WItem* mapItem = root->FetchChild( "Map" );
-		DB_SET( mapItem, width );
-		DB_SET( mapItem, height );
+			XarcOpen( &writer, "Map" );
+			XARC_SER( &writer, width );
+			XARC_SER( &writer, height );
 		
-		worldInfo->Serialize( DBItem(mapItem) );
+			worldInfo->Serialize( &writer );
+			XarcClose( &writer );
 
-		writer.Save( "testsave.db" );
+			fclose( fp );
+		}
 	}
 }
 

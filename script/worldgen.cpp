@@ -34,25 +34,14 @@ void WorldFeature::Save( tinyxml2::XMLPrinter* printer )
 }
 
 
-/*
-void WorldFeature::Save( gamedb::WItem* item )
+void WorldFeature::Serialize( XStream* xs )
 {
-	gamedb::WItem* f = item->FetchChild( "WorldFeature" );
-	DB_SET( f, id );
-	DB_SET( f, land );
-	DB_SET( f, area );
-	DB_SET( f, bounds );
-}
-*/
-
-
-void WorldFeature::Serialize( DBItem parent, int i )
-{
-	DBItem f = DBChild( parent, i );
-	DB_SERIAL( f, id );
-	DB_SERIAL( f, land );
-	DB_SERIAL( f, area );
-	DB_SERIAL( f, bounds );
+	XarcOpen( xs, "WorldFeature" );
+	XARC_SER( xs, id );
+	XARC_SER( xs, land );
+	XARC_SER( xs, area );
+	XARC_SER( xs, bounds );
+	XarcClose( xs );
 }
 
 

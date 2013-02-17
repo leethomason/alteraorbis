@@ -9,6 +9,8 @@
 #include "../grinliz/glcontainer.h"
 #include "../grinliz/glstringutil.h"
 
+// adaptors
+#include "../grinliz/glrectangle.h"
 
 class StreamReader;
 class StreamWriter;
@@ -56,6 +58,7 @@ public:
 		ATTRIB_FLOAT			= 0x02,
 		ATTRIB_DOUBLE			= 0x04,
 		ATTRIB_BYTE				= 0x08,
+		ATTRIB_STRING			= 0x10,
 	};
 
 	virtual StreamWriter* Saving() { return 0; }
@@ -84,6 +87,8 @@ public:
 	void Set( const char* key, float value );
 	void Set( const char* key, double value );
 	void Set( const char* key, U8 value );
+	void Set( const char* key, const char* str );
+
 	void SetArr( const char* key, const int* value, int n );
 	void SetArr( const char* key, const float* value, int n );
 	void SetArr( const char* key, const double* value, int n );
@@ -130,21 +135,18 @@ public:
 		int n;
 
 		union {
-			//int intValue;
-			//float floatValue;
-			//double doubleValue;
-			//U8 byteValue;
-
-			const int* intArr;
-			const float* floatArr;
-			const double* doubleArr;
-			const U8* byteArr;
+			const int*		intArr;
+			const float*	floatArr;
+			const double*	doubleArr;
+			const U8*		byteArr;
+			const char*		str;
 		};
 
 		void Value( int* value ) const		{ GLASSERT( type == ATTRIB_INT );	GLASSERT( n == 1 );	*value = intArr[0]; }
 		void Value( float* value ) const	{ GLASSERT( type == ATTRIB_FLOAT );	GLASSERT( n == 1 );	*value = floatArr[0]; }
 		void Value( double* value ) const	{ GLASSERT( type == ATTRIB_DOUBLE );GLASSERT( n == 1 ); *value = doubleArr[0]; }
 		void Value( U8* value ) const		{ GLASSERT( type == ATTRIB_BYTE );	GLASSERT( n == 1 ); *value = byteArr[0]; }
+		//void Value( const char** value ) const	{ GLASSERT( type == ATTRIB_STRING );					*value = str; }
 
 		void Value( int* value, int size ) const	{	GLASSERT( type == (ATTRIB_INT) ); 
 														GLASSERT( n == size );		
@@ -210,14 +212,18 @@ template< class T >
 inline void XarcGet( XStream* stream, const char* key, T &value )		{ 
 	GLASSERT( stream->Loading() );
 	const StreamReader::Attribute* attr = stream->Loading()->Get( key );
-	attr->Value( &value );
+	if ( attr ) {
+		attr->Value( &value );
+	}
 }
 
 template< class T >
 inline void XarcGetArr( XStream* stream, const char* key, T* value, int n )		{ 
 	GLASSERT( stream->Loading() );
 	const StreamReader::Attribute* attr = stream->Loading()->Get( key );
-	attr->Value( value, n );
+	if ( attr ) {
+		attr->Value( value, n );
+	}
 }
 
 template< class T >
@@ -232,15 +238,39 @@ void XarcSetArr( XStream* stream, const char* key, const T* value, int n ) {
 	stream->Saving()->SetArr( key, value, n );
 }
 
+
+// Adaptors.
+// bool
+inline void XarcGet( XStream* stream, const char* key, bool &value ) {
+	U8 b = 0;
+	XarcGet( stream, key, b );
+	value = b ? true : false;
+}
+
+inline void XarcSet( XStream* stream, const char* key, bool value ) {
+	U8 b = (value) ? 1 : 0;
+	XarcSet( stream, key, b );
+}
+
+// Rectangle2I
+inline void XarcGet( XStream* stream, const char* key, grinliz::Rectangle2I &value ) {
+	XarcGetArr( stream, key, &value.min.x, 4 );
+}
+
+inline void XarcSet( XStream* stream, const char* key, const grinliz::Rectangle2I& value ) {
+	XarcSetArr( stream, key, &value.min.x, 4 );
+}
+
+	
 #define XARC_SER( stream, name ) {			\
-	if ( stream->Saving() )					\
+	if ( (stream)->Saving() )					\
 		XarcSet( stream, #name, name );		\
 	else									\
 		XarcGet( stream, #name, name );		\
 }
 
 #define XARC_SER_ARR( stream, name, n ) {		\
-	if ( stream->Saving() )						\
+	if ( (stream)->Saving() )						\
 		XarcSetArr( stream, #name, name, n );	\
 	else										\
 		XarcGetArr( stream, #name, name, n );		\

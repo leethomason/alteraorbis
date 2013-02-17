@@ -17,6 +17,9 @@
     <Filter Include="Source Files\gamedb">
       <UniqueIdentifier>{31288942-2d01-40af-a8e3-021e8862dd72}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\xarchive">
+      <UniqueIdentifier>{6672e3ce-a9eb-46cc-8adb-45ccdd362dc4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
@@ -114,6 +117,9 @@
     </ClCompile>
     <ClCompile Include="..\shared\gamedbwriter.cpp">
       <Filter>Source Files\gamedb</Filter>
+    </ClCompile>
+    <ClCompile Include="..\xarchive\glstreamer.cpp">
+      <Filter>Source Files\xarchive</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -224,6 +230,9 @@
     </ClInclude>
     <ClInclude Include="..\shared\gamedbwriter.h">
       <Filter>Source Files\gamedb</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xarchive\glstreamer.h">
+      <Filter>Source Files\xarchive</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
