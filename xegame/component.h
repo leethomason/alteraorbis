@@ -50,7 +50,8 @@ public:
 
 	virtual const char* Name() const = 0;
 	virtual Component* ToComponent( const char* name ) {
-		if ( grinliz::StrEqual( name, Name() ) ) return this;
+		//if ( grinliz::StrEqual( name, Name() ) ) return this;
+		if ( strstr( Name(), name )) return this;
 		return 0;
 	}
 

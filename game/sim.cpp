@@ -18,12 +18,13 @@
 #include "pathmovecomponent.h"
 #include "debugstatecomponent.h"
 #include "healthcomponent.h"
-
 #include "lumosgame.h"
 #include "worldmap.h"
 #include "lumoschitbag.h"
 #include "weather.h"
 #include "mapspatialcomponent.h"
+
+#include "../xarchive/glstreamer.h"
 
 using namespace grinliz;
 using namespace tinyxml2;
@@ -114,23 +115,26 @@ void Sim::Save( const char* mapDAT, const char* mapXML, const char* gameXML )
 		fclose( fp );
 	}
 
-	/*
 	{
-		QuickProfile qp( "Sim::SaveDB" );
+		QuickProfile qp( "Sim::SaveXarc" );
 
 		ComponentFactory factory( this, engine, worldMap, weather, lumosGame );
-		gamedb::Writer writer;
-		gamedb::WItem* root = writer.Root();
-		DBSet( root, "playerID", playerID );
-		DBSet( root, "minuteClock", minuteClock );
-		DBSet( root, "timeInMinutes", timeInMinutes );
-		
-		// engine->camera
-		chitBag->Serialize( &factory, root );
 
-		writer.Save( "simsave.dat" );
+		FILE* fp = fopen( "simsave.dat", "wb" );
+		if ( fp ) {
+			StreamWriter writer( fp );
+			XarcOpen( &writer, "Sim" );
+			XARC_SER( &writer, playerID );
+			XARC_SER( &writer, minuteClock );
+			XARC_SER( &writer, timeInMinutes );
+
+			// engine->camera
+			chitBag->Serialize( &factory, &writer );
+
+			XarcClose( &writer );
+			fclose( fp );
+		}
 	}
-	*/
 }
 
 

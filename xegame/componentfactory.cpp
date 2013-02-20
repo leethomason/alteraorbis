@@ -21,6 +21,7 @@ using namespace grinliz;
 
 Component* ComponentFactory::Factory( const char* name, Chit* chit ) const
 {
+	GLASSERT( name && *name );
 	if ( StrEqual( name, "SpatialComponent" )) {
 		return new SpatialComponent();
 	}

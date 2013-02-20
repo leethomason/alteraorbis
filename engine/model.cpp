@@ -323,8 +323,8 @@ void Model::Serialize( XStream* xs, SpaceTree* tree )
 		}
 		if ( aux ) {
 			save->OpenElement( "aux" );
-			aux->boneData.Serialize( xs );
 			XARC_SER_KEY( xs, "procMat", aux->procMat );
+			aux->boneData.Serialize( xs );
 			save->CloseElement();
 		}
 	}
@@ -342,8 +342,8 @@ void Model::Serialize( XStream* xs, SpaceTree* tree )
 		if ( load->HasChild() ) {
 			load->OpenElement();	// aux
 			aux = ModelResourceManager::Instance()->modelAuxPool.New();
-			aux->boneData.Serialize( xs );
 			XARC_SER_KEY( xs, "procMat", aux->procMat );
+			aux->boneData.Serialize( xs );
 			load->CloseElement();
 		}
 	}
