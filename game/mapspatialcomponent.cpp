@@ -108,15 +108,16 @@ void MapSpatialComponent::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XM
 }
 
 
-void MapSpatialComponent::Serialize( DBItem parent )
+void MapSpatialComponent::Serialize( XStream* xs )
 {
-	if ( parent.Loading() ) {
+	if ( xs->Loading() ) {
 		justLoaded = true;
 	}
 
-	DBItem item = BeginSerialize( parent, "MapSpatialComponent" );
-	super::Serialize( item );
-	DB_SERIAL( item, mode );
+	this->BeginSerialize( xs, Name() );
+	super::Serialize( xs );
+	XARC_SER( xs, mode );
+	this->EndSerialize( xs );
 }
 
 

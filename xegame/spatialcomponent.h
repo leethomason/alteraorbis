@@ -44,17 +44,14 @@ public:
 		rotation.FromAxisAngle( UP, 0 );
 	}
 
-	virtual Component*          ToComponent( const char* name ) {
-		if ( grinliz::StrEqual( name, "SpatialComponent" ) ) return this;
-		return Component::ToComponent( name );
-	}
+	virtual const char* Name() const { return "SpatialComponent"; }
 	virtual SpatialComponent*	ToSpatial()			{ return this; }
 	virtual RelativeSpatialComponent* ToRelative()	{ return 0; }
 	virtual void DebugStr( grinliz::GLString* str );
 
 	virtual void Load( const tinyxml2::XMLElement* element );
 	virtual void Save( tinyxml2::XMLPrinter* printer );
-	virtual void Serialize( DBItem parent );
+	virtual void Serialize( XStream* );
 
 	virtual void OnAdd( Chit* chit );
 	virtual void OnRemove();

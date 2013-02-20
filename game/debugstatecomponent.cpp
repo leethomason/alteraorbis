@@ -62,9 +62,10 @@ void DebugStateComponent::Save( tinyxml2::XMLPrinter* printer )
 }
 
 
-void DebugStateComponent::Serialize( DBItem parent )
+void DebugStateComponent::Serialize( XStream* xs )
 {
-	DBItem item = BeginSerialize( parent, "DebugStateComponent" );
+	this->BeginSerialize( xs, Name() );
+	this->EndSerialize( xs );
 }
 
 

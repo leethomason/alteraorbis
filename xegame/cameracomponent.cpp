@@ -50,14 +50,15 @@ void CameraComponent::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLEle
 }
 
 
-void CameraComponent::Serialize( DBItem parent )
+void CameraComponent::Serialize( XStream* xs )
 {
-	DBItem item = BeginSerialize( parent, "CameraComponent" );
-	DB_SERIAL( item, autoDelete );
-	DB_SERIAL( item, mode );
-	DB_SERIAL( item, targetChitID );
-	DB_SERIAL( item, speed );
-	DB_SERIAL( item, dest );
+	this->BeginSerialize( xs, Name() );
+	XARC_SER( xs, autoDelete );
+	XARC_SER( xs, mode );
+	XARC_SER( xs, targetChitID );
+	XARC_SER( xs, speed );
+	XARC_SER( xs, dest );
+	this->EndSerialize( xs );
 }
 
 

@@ -7,6 +7,7 @@
 #include "../xegame/chitbag.h"
 
 #include "../game/worldmap.h"
+#include "../xarchive/glstreamer.h"
 
 using namespace grinliz;
 using namespace tinyxml2;
@@ -43,11 +44,12 @@ void VolcanoScript::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLEleme
 }
 
 
-void VolcanoScript::Serialize( const ScriptContext& ctx, DBItem parent )
+void VolcanoScript::Serialize( const ScriptContext& ctx, XStream* xs )
 {
-	DBItem item = DBChild( parent, "VolcanoScript" );
-	DB_SERIAL( item, size );
-	DB_SERIAL( item, maxSize );
+	XarcOpen( xs, "VolcanoScript" );
+	XARC_SER( xs, size );
+	XARC_SER( xs, maxSize );
+	XarcClose( xs );
 }
 
 

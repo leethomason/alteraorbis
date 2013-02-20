@@ -15,18 +15,20 @@ void ScriptComponent::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLEle
 }
 
 
-void ScriptComponent::Serialize( DBItem parent )
+void ScriptComponent::Serialize( XStream* xs )
 {
-	DBItem item = BeginSerialize( parent, "ScriptComponent" );
-	DB_SERIAL( item, context.initialized );
-	DB_SERIAL( item, context.time );
+	this->BeginSerialize( xs, Name() );
+	XARC_SER( xs, context.initialized );
+	XARC_SER( xs, context.time );
 
-	if ( item.Loading() ) {
+	if ( xs->Saving() ) {
+		xs->Saving()->Set( "ScriptName", script->ScriptName() );
+	}
+	else {
 		GLASSERT( !script );
 		GLASSERT( factory );
 
-		const gamedb::Item* scriptItem = item.item->ChildAt( 0 );
-		const char* name = scriptItem->Name();
+		const char* name = xs->Loading()->Get( "ScriptName" )->Str();
 
 		if ( StrEqual( name, "VolcanoScript" )) {
 			script = new VolcanoScript( factory->GetWorldMap(), 0 );
@@ -39,7 +41,8 @@ void ScriptComponent::Serialize( DBItem parent )
 		}
 		GLASSERT( script );
 	}
-	script->Serialize( context, item );	// note parent 'item' is used for saving and loading.
+	script->Serialize( context, xs );
+	this->EndSerialize( xs );
 }
 
 	

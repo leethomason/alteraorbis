@@ -22,6 +22,7 @@
 #include "componentfactory.h"
 
 #include "../grinliz/glstringutil.h"
+#include "../xarchive/glstreamer.h"
 
 using namespace grinliz;
 using namespace tinyxml2;
@@ -78,41 +79,46 @@ void Chit::Free()
 }
 
 
-void Chit::Serialize( const ComponentFactory* factory, DBItem item )
+void Chit::Serialize( const ComponentFactory* factory, XStream* xs )
 {
-	DB_SERIAL( item, id );
-	DB_SERIAL( item, timeSince );
+	XarcOpen( xs, "Chit" );
+	XARC_SER( xs, id );
+	XARC_SER( xs, timeSince );
 
-	if ( item.Saving() ) {
+	if ( xs->Saving() ) {
 		if ( shelf ) {
-			DBItem shelfItem = DBChild( item, "Shelf" );
-			shelf->Serialize( shelfItem );
+			XarcOpen( xs, "Shelf" );
+			XarcOpen( xs, shelf->Name() );
+			shelf->Serialize( xs );
+			XarcClose( xs );
+			XarcClose( xs );
 		}
 		for( int i=0; i<NUM_SLOTS; ++i ) {
 			if ( slot[i] ) {
-				slot[i]->Serialize( item );
+				XarcOpen( xs, slot[i]->Name() );
+				slot[i]->Serialize( xs );
+				XarcClose( xs );
 			}
 		}
 	}
 	else {
-		for( int i=0; true; ++i ) {
-			const gamedb::Item* compItem = item.item->ChildAt( i );
-			if ( !compItem )
-				break;
-			if ( StrEqual( compItem->Name(), "Shelf" ) ) {
-				const gamedb::Item* shelfItem = compItem->ChildAt(0);
-
-				shelf = factory->Factory( shelfItem->Name(),  this );
-				shelf->Serialize( shelfItem );
+		while ( xs->Loading()->HasChild() ) {
+			const char* n = xs->Loading()->OpenElement();
+			if ( StrEqual( n, "Shelf" ) ) {
+				n = xs->Loading()->OpenElement();
+				shelf = factory->Factory( n, this );
+				shelf->Serialize( xs );
+				xs->Loading()->CloseElement();
 			}
 			else {
-				Component* component = factory->Factory( compItem->Name(), this ); 
-				component->Serialize( compItem );
+				Component* component = factory->Factory( n, this ); 
+				component->Serialize( xs );
 				this->Add( component );
 			}
+			xs->Loading()->CloseElement();
 		}
-
 	}
+	XarcClose( xs );
 }
 
 

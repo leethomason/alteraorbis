@@ -15,10 +15,7 @@ public:
 	}
 	virtual ~GameMoveComponent()	{}
 
-	virtual Component* ToComponent( const char* name ) {
-		if ( grinliz::StrEqual( name, "GameMoveComponent" ) ) return this;
-		return super::ToComponent( name );
-	}
+	virtual const char* Name() const { return "GameMoveComponent"; }
 
 	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
 

@@ -40,11 +40,15 @@ ChitBag* Component::GetChitBag()
 }
 
 
-DBItem Component::BeginSerialize( DBItem parent, const char* name )
+void Component::BeginSerialize( XStream* xs, const char* name )
 {
-	DBItem i = DBChild( parent, name );
-	DB_SERIAL( i, id );
-	return i;
+	XarcOpen( xs, name );
+}
+
+
+void Component::EndSerialize( XStream* xs )
+{
+	XarcClose( xs );
 }
 
 
@@ -90,9 +94,10 @@ void MoveComponent::Save( tinyxml2::XMLPrinter* printer )
 }
 
 
-void MoveComponent::Serialize( DBItem parent )
+void MoveComponent::Serialize( XStream* xs )
 {
-	DBItem item = this->BeginSerialize( parent, "MoveComponent" );
+	XarcOpen( xs, "MoveComponent" );
+	XarcClose( xs );
 }
 
 

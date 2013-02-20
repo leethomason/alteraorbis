@@ -23,6 +23,7 @@
 #include "../engine/model.h"
 #include "../grinliz/glperformance.h"
 #include "../tinyxml2/tinyxml2.h"
+#include "../xarchive/glstreamer.h"
 
 using namespace grinliz;
 using namespace tinyxml2;
@@ -54,48 +55,50 @@ void ChitBag::DeleteAll()
 }
 
 
-void ChitBag::Serialize( const ComponentFactory* factory, DBItem parent )
+void ChitBag::Serialize( const ComponentFactory* factory, XStream* xs )
 {
-	DBItem item = DBChild( parent, "ChitBag" );
+	XarcOpen( xs, "ChitBag" );
 
-	if ( item.Saving() ) {
-		gamedb::WItem* chitItem = item.witem->FetchChild( "Chits" );
+	if ( xs->Saving() ) {
+		XarcOpen( xs, "Chits" );
 		Chit** chits = chitID.GetValues();
 		for( int i=0; i<chitID.NumValues(); ++i ) {
-			gamedb::WItem* child = chitItem->FetchChild( i );
-			chits[i]->Serialize( factory, DBItem(child) );
+			XarcOpen( xs, "id" );
+			xs->Saving()->Set( "id", chits[i]->ID() );
+			XarcClose( xs );
+			chits[i]->Serialize( factory, xs  );
 		}
+		XarcClose( xs );
 
-		gamedb::WItem* boltItem = item.witem->FetchChild( "Bolts" );
+		XarcOpen( xs, "Bolts" );
 		for( int i=0; i<bolts.Size(); ++i ) {
-			bolts[i].Serialize( DBItem(boltItem) );
+			bolts[i].Serialize( xs );
 		}
+		XarcClose( xs );
 	}
 	else {
-		const gamedb::Item* chitsItem = item.item->Child( "Chits" );
 		idPool = 0;
 
-		for( int i=0; true; ++i ) {
-			const gamedb::Item* chitItem = chitsItem->ChildAt(i);
-			if ( !chitItem )
-				break;
-			int id = chitItem->GetInt( "id" );
-			GLASSERT( id > 0 );
-			idPool = Max( id, idPool );
+		XarcOpen( xs, "Chits" );
+		while( xs->Loading()->HasChild() ) {
+
+			int id = 0;
+			XarcOpen( xs, "id" );
+			XARC_SER_KEY( xs, "id", id );	
+			XarcClose( xs );
 
 			Chit* c = this->NewChit( id );
-			c->Serialize( factory, chitItem );
+			c->Serialize( factory, xs );
 		}
 
-		const gamedb::Item* boltsItem = item.item->Child( "Bolts" );
-		for( int i=0; true; ++i ) {
-			const gamedb::Item* boltItem = boltsItem->ChildAt(i);
-			if ( !boltItem )
-				break;
+		XarcOpen( xs, "Bolts" );
+		while( xs->Loading()->HasChild() ) {
 			Bolt* b = bolts.PushArr( 1 );
-			b->Serialize( boltItem );			
+			b->Serialize( xs );			
 		}
+		XarcClose( xs );
 	}
+	XarcClose( xs );
 }
 
 

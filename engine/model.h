@@ -23,8 +23,6 @@
 #include "../grinliz/glcontainer.h"
 #include "../grinliz/glstringutil.h"
 
-#include "../shared/dbhelper.h"
-
 #include "../tinyxml2/tinyxml2.h"
 
 #include "vertex.h"
@@ -42,6 +40,7 @@ struct GPUStreamData;
 class EngineShaders;
 class Chit;
 class AnimationResource;
+class XStream;
 
 
 /*
@@ -237,7 +236,7 @@ public:
 
 	void Load( const tinyxml2::XMLElement* element, SpaceTree* tree );
 	void Save( tinyxml2::XMLPrinter* printer );
-	void Serialize( DBItem item, SpaceTree* tree );
+	void Serialize( XStream* xs, SpaceTree* tree );
 
 	void Queue( RenderQueue* queue, EngineShaders* shaders, int requiredShaderFlag, int excludedShaderFlag );
 

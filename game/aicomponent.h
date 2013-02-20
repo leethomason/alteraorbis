@@ -61,14 +61,11 @@ public:
 	AIComponent( Engine* _engine, WorldMap* _worldMap );
 	virtual ~AIComponent();
 
-	virtual Component* ToComponent( const char* name ) {
-		if ( grinliz::StrEqual( name, "AIComponent" ) ) return this;
-		return super::ToComponent( name );
-	}
+	virtual const char* Name() const { return "AIComponent"; }
 
 	virtual void Load( const tinyxml2::XMLElement* element );
 	virtual void Save( tinyxml2::XMLPrinter* printer );
-	virtual void Serialize( DBItem parent );
+	virtual void Serialize( XStream* xs );
 
 	virtual int  DoTick( U32 delta, U32 timeSince );
 	virtual void DebugStr( grinliz::GLString* str );

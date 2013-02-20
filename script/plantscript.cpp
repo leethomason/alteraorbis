@@ -105,15 +105,16 @@ void PlantScript::Init( const ScriptContext& ctx )
 }
 
 
-void PlantScript::Serialize( const ScriptContext& ctx, DBItem parent )
+void PlantScript::Serialize( const ScriptContext& ctx, XStream* xs )
 {
-	DBItem item = DBChild( parent, "PlantScript" );
-	DB_SERIAL( item, type );
-	DB_SERIAL( item, stage );
-	DB_SERIAL( item, age );
-	DB_SERIAL( item, ageAtStage );
-	DB_SERIAL( item, growTimer );
-	DB_SERIAL( item, sporeTimer );
+	XarcOpen( xs, ScriptName() );
+	XARC_SER( xs, type );
+	XARC_SER( xs, stage );
+	XARC_SER( xs, age );
+	XARC_SER( xs, ageAtStage );
+	XARC_SER( xs, growTimer );
+	XARC_SER( xs, sporeTimer );
+	XarcClose( xs );
 }
 
 

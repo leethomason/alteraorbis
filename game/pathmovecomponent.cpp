@@ -50,13 +50,14 @@ void PathMoveComponent::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLE
 }
 
 
-void PathMoveComponent::Serialize( DBItem parent )
+void PathMoveComponent::Serialize( XStream* item )
 {
-	DBItem item = BeginSerialize( parent, "PathMoveComponent" );
-	DB_SERIAL( item, queued.pos );
-	DB_SERIAL( item, queued.rotation );
-	DB_SERIAL( item, dest.pos );
-	DB_SERIAL( item, dest.rotation );
+	this->BeginSerialize( item, Name() );
+	XARC_SER( item, queued.pos );
+	XARC_SER( item, queued.rotation );
+	XARC_SER( item, dest.pos );
+	XARC_SER( item, dest.rotation );
+	this->EndSerialize( item );
 }
 
 

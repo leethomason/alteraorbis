@@ -30,10 +30,11 @@
 using namespace grinliz;
 
 
-void ItemComponent::Serialize( DBItem parent )
+void ItemComponent::Serialize( XStream* xs )
 {
-	DBItem it = this->BeginSerialize( parent, "ItemComponent" );
-	item.Serialize( DBChild( it, "Item" ));
+	this->BeginSerialize( xs, "ItemComponent" );
+	item.Serialize( xs );
+	this->EndSerialize( xs );
 }
 
 

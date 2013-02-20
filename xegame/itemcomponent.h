@@ -30,10 +30,7 @@ public:
 	ItemComponent( const GameItem& _item ) : item( _item ), slowTickTimer(0) {}
 	virtual ~ItemComponent() {}
 
-	virtual Component* ToComponent( const char* name ) {
-		if ( grinliz::StrEqual( name, "ItemComponent" ) ) return this;
-		return super::ToComponent( name );
-	}
+	virtual const char* Name() const { return "ItemComponent"; }
 
 	virtual void DebugStr( grinliz::GLString* str ) {
 		str->Format( "[Item] %s ", item.Name() );
@@ -45,7 +42,7 @@ public:
 
 	virtual void Load( const tinyxml2::XMLElement* element );
 	virtual void Save( tinyxml2::XMLPrinter* printer );
-	virtual void Serialize( DBItem item );
+	virtual void Serialize( XStream* xs );
 
 	virtual int DoTick( U32 delta, U32 since );
 	virtual void OnChitEvent( const ChitEvent& event );

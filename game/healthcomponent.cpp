@@ -41,10 +41,11 @@ void HealthComponent::Save( tinyxml2::XMLPrinter* printer )
 }
 
 
-void HealthComponent::Serialize( DBItem parent )
+void HealthComponent::Serialize( XStream* xs )
 {
-	DBItem item = BeginSerialize( parent, "HealthComponent" );
-	DB_SERIAL( item, destroyed );
+	this->BeginSerialize( xs, Name() );
+	XARC_SER( xs, destroyed );
+	this->EndSerialize( xs );
 }
 
 

@@ -59,15 +59,20 @@ void GameStat::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* e
 
 
 
-void GameStat::Serialize( DBItem item )
+void GameStat::Serialize( XStream* xs )
 {
-	if ( item.Saving() ) {
-		item.witem->SetIntArray( "trait", trait, NUM_TRAITS );
+	XarcOpen( xs, "stat" );
+	if ( xs->Saving() ) {
+		xs->Saving()->SetArr( "trait", trait, NUM_TRAITS );
 	}
 	else {
-		item.item->GetIntArray( "trait", NUM_TRAITS, trait );
+		const StreamReader::Attribute* attr = xs->Loading()->Get( "trait" );
+		GLASSERT( attr );
+		memcpy( trait, attr->intArr, sizeof(int)*NUM_TRAITS );
 	}
-	DB_SERIAL( item, exp );
+	XARC_SER( xs, exp );
+
+	XarcClose( xs );
 }
 
 
@@ -97,28 +102,33 @@ void GameStat::Roll( U32 seed )
 }
 
 
-void GameItem::Serialize( DBItem item )
+void GameItem::Serialize( XStream* xs )
 {
-	DB_SERIAL( item, name );
-	DB_SERIAL( item, desc );
-	DB_SERIAL( item, resource );
+	XarcOpen( xs, "GameItem" );
 
-	DB_SERIAL( item, mass );
-	DB_SERIAL( item, hpRegen );
-	DB_SERIAL( item, primaryTeam );
-	DB_SERIAL( item, cooldown );
-	DB_SERIAL( item, cooldownTime );
-	DB_SERIAL( item, reload );
-	DB_SERIAL( item, reloadTime );
-	DB_SERIAL( item, clipCap );
-	DB_SERIAL( item, rounds );
-	DB_SERIAL( item, meleeDamage );
-	DB_SERIAL( item, rangedDamage );
-	DB_SERIAL( item, absorbsDamage );
-	DB_SERIAL( item, accruedFire );
-	DB_SERIAL( item, accruedShock );
+	XARC_SER( xs, name );
+	XARC_SER( xs, desc );
+	XARC_SER( xs, resource );
+	XARC_SER( xs, mass );
+	XARC_SER( xs, hpRegen );
+	XARC_SER( xs, primaryTeam );
+	XARC_SER( xs, cooldown );
+	XARC_SER( xs, cooldownTime );
+	XARC_SER( xs, reload );
+	XARC_SER( xs, reloadTime );
+	XARC_SER( xs, clipCap );
+	XARC_SER( xs, rounds );
+	XARC_SER( xs, meleeDamage );
+	XARC_SER( xs, rangedDamage );
+	XARC_SER( xs, absorbsDamage );
+	XARC_SER( xs, accruedFire );
+	XARC_SER( xs, accruedShock );
 
-	if ( item.Saving() ) {
+	XARC_SER( xs, hardpoint );
+	XARC_SER( xs, procedural );
+	XARC_SER( xs, hp );
+
+	if ( xs->Saving() ) {
 		CStr<512> f;
 		APPEND_FLAG( flags, f, CHARACTER );
 		APPEND_FLAG( flags, f, MELEE_WEAPON );
@@ -135,16 +145,13 @@ void GameItem::Serialize( DBItem item )
 		APPEND_FLAG( flags, f, EFFECT_FIRE );
 		APPEND_FLAG( flags, f, EFFECT_SHOCK );
 		APPEND_FLAG( flags, f, RENDER_TRAIL );
-		item.witem->SetString( "flags", f.c_str() );
 
-		gamedb::WItem* kvItem = item.witem->FetchChild( "keyValues" );
-		for( int i=0; i<keyValues.Size(); ++i ) {
-			kvItem->SetFloat( keyValues[i].key.c_str(), (float)keyValues[i].value );
-		}
+		xs->Saving()->Set( "flags", f.c_str() );
 	}
 	else {
-		const char* f = item.item->GetString( "flags" );
-		if ( f ) {
+		const StreamReader::Attribute* attr = xs->Loading()->Get( "flags" );
+		if ( attr ) {
+			const char* f = attr->Str();
 			READ_FLAG( flags, f, CHARACTER );
 			READ_FLAG( flags, f, MELEE_WEAPON );
 			READ_FLAG( flags, f, RANGED_WEAPON );
@@ -160,20 +167,26 @@ void GameItem::Serialize( DBItem item )
 			READ_FLAG( flags, f, EFFECT_FIRE );
 			READ_FLAG( flags, f, EFFECT_SHOCK );
 			READ_FLAG( flags, f, RENDER_TRAIL );
-
-			const gamedb::Item* kvItem = item.item->Child( "keyValues" );
-			for( int i=0; i<kvItem->NumChildren(); ++i ) {
-				KeyValue kv = { StringPool::Intern( kvItem->AttributeName(i)), kvItem->GetFloat(i) };
-				keyValues.Push( kv );
-			}
 		}
 	}
 
-	DB_SERIAL( item, hardpoint );
-	DB_SERIAL( item, procedural );
-	DB_SERIAL( item, hp );
+	XarcOpen( xs, "keyval" );
+	int n = keyValues.Size();
+	XARC_SER( xs, n );
+	if ( xs->Loading() ) {
+		GLASSERT( keyValues.Empty() );
+		keyValues.PushArr( n );
+	}
+	for( int i=0; i<n; ++i ) {
+		XarcOpen( xs, "key" );
+		XARC_SER_KEY( xs, "k", keyValues[i].key   );
+		XARC_SER_KEY( xs, "v", keyValues[i].value );
+		XarcClose( xs );
+	}
+	XarcClose( xs );
 
-	stats.Serialize( DBChild( item, "stats") );
+	stats.Serialize( xs );
+	XarcClose( xs );
 }
 
 

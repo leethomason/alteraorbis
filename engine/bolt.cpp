@@ -19,6 +19,7 @@
 #include "texture.h"
 #include "gpustatemanager.h"
 #include "../game/gameitem.h"
+#include "../xarchive/glstreamer.h"
 
 using namespace grinliz;
 
@@ -38,19 +39,20 @@ void Bolt::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele )
 }
 
 
-void Bolt::Serialize( DBItem parent )
+void Bolt::Serialize( XStream* xs )
 {
-	DBItem item = DBChild( parent, "bolt" );
-	DB_SERIAL( item, len );
-	DB_SERIAL( item, impact );
-	DB_SERIAL( item, speed );
-	DB_SERIAL( item, particle );
-	DB_SERIAL( item, chitID );
-	DB_SERIAL( item, damage );
-	DB_SERIAL( item, effect );
-	DB_SERIAL( item, head );
-	DB_SERIAL( item, dir );
-	DB_SERIAL( item, color );
+	XarcOpen( xs, "bolt" );
+	XARC_SER( xs, len );
+	XARC_SER( xs, impact );
+	XARC_SER( xs, speed );
+	XARC_SER( xs, particle );
+	XARC_SER( xs, chitID );
+	XARC_SER( xs, damage );
+	XARC_SER( xs, effect );
+	XARC_SER( xs, head );
+	XARC_SER( xs, dir );
+	XARC_SER( xs, color );
+	XarcClose( xs );
 }
 
 

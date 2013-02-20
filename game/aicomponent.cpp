@@ -59,9 +59,10 @@ AIComponent::~AIComponent()
 }
 
 
-void AIComponent::Serialize( DBItem parent )
+void AIComponent::Serialize( XStream* xs )
 {
-	DBItem item = BeginSerialize( parent, "AIComponent" );
+	this->BeginSerialize( xs, Name() );
+	this->EndSerialize( xs );
 }
 
 void AIComponent::Load( const tinyxml2::XMLElement* element )

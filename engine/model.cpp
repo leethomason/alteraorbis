@@ -25,6 +25,7 @@
 #include "../grinliz/glvector.h"
 #include "../grinliz/glstringutil.h"
 #include "../grinliz/glperformance.h"
+#include "../xarchive/glstreamer.h"
 
 #include <float.h>
 
@@ -294,59 +295,63 @@ void Model::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele 
 }
 
 
-void Model::Serialize( DBItem item, SpaceTree* tree )
+void Model::Serialize( XStream* xs, SpaceTree* tree )
 {
-	DB_SERIAL( item, debugScale );
-	DB_SERIAL( item, animationRate );
-	DB_SERIAL( item, totalCrossFadeTime );
-	DB_SERIAL( item, crossFadeTime );
-	DB_SERIAL( item, hasParticles );
-	DB_SERIAL( item, flags );
-	DB_SERIAL( item, currentAnim.time );
-	DB_SERIAL( item, currentAnim.id );
+	XarcOpen( xs, "Model" );
 
-	DB_SERIAL( item, prevAnim.time );
-	DB_SERIAL( item, prevAnim.id );
+	XARC_SER( xs, debugScale );
+	XARC_SER( xs, animationRate );
+	XARC_SER( xs, totalCrossFadeTime );
+	XARC_SER( xs, crossFadeTime );
+	XARC_SER( xs, hasParticles );
+	XARC_SER( xs, flags );
+	XARC_SER( xs, currentAnim.time );
+	XARC_SER( xs, currentAnim.id );
+	XARC_SER( xs, prevAnim.time );
+	XARC_SER( xs, prevAnim.id );
+	XARC_SER( xs, pos );
+	XARC_SER( xs, rot );
+	XARC_SER( xs, color );
+	XARC_SER( xs, boneFilter );
+	XARC_SER( xs, control );
 
-	DB_SERIAL( item, pos );
-	DB_SERIAL( item, rot );
-
-	DB_SERIAL( item, color );
-	DB_SERIAL( item, boneFilter );
-	DB_SERIAL( item, control );
-
-	if ( item.Saving() ) {
-		item.witem->SetString( "resource", resource->Name() );
+	if ( xs->Saving() ) {
+		StreamWriter* save = xs->Saving();
+		XarcSet( xs, "resource", resource->header.name );
 		if ( animationResource ) {
-			item.witem->SetString( "animationResource", animationResource->ResourceName() );
+			save->Set( "animationResource", animationResource->ResourceName() );
 		}
 		if ( aux ) {
-			gamedb::WItem* auxItem = item.witem->FetchChild( "aux" );
-			aux->boneData.Serialize( auxItem );
-			DBSet( auxItem, "procMat", aux->procMat );
+			save->OpenElement( "aux" );
+			aux->boneData.Serialize( xs );
+			XARC_SER_KEY( xs, "procMat", aux->procMat );
+			save->CloseElement();
 		}
 	}
 	else {
-		const char* name = item.item->GetString( "resource" );
-		resource = ModelResourceManager::Instance()->GetModelResource( name );
-		GLASSERT( resource );
-	
-		const char* animResName = item.item->GetString( "animationResource" );
-		if ( animResName ) {
-			animationResource = AnimationResourceManager::Instance()->GetResource( animResName );
+		StreamReader* load = xs->Loading();
+		IString name;
+		XarcGet( xs, "resource", name );
+		resource = ModelResourceManager::Instance()->GetModelResource( name.c_str() );
+		
+		const StreamReader::Attribute* attr = load->Get( "animationResource" );
+		if ( attr ) {
+			animationResource = AnimationResourceManager::Instance()->GetResource( attr->Str() );
 			GLASSERT( animationResource );
 		}
-		const gamedb::Item* auxItem = item.item->Child( "aux" );
-		if ( auxItem ) {
+		if ( load->HasChild() ) {
+			load->OpenElement();	// aux
 			aux = ModelResourceManager::Instance()->modelAuxPool.New();
-			aux->boneData.Serialize( auxItem );
-			DBRead( auxItem, "procMat", aux->procMat );
+			aux->boneData.Serialize( xs );
+			XARC_SER_KEY( xs, "procMat", aux->procMat );
+			load->CloseElement();
 		}
 	}
 
 	if ( tree ) {
 		tree->Update( this );
 	}
+	XarcClose( xs );
 }
 
 

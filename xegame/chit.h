@@ -25,7 +25,6 @@
 #include "../grinliz/glrandom.h"
 
 #include "../tinyxml2/tinyxml2.h"
-#include "../shared/dbhelper.h"
 
 class Component;
 class SpatialComponent;
@@ -39,6 +38,7 @@ class Chit;
 class ChitEvent;
 class GameItem;
 class ComponentFactory;
+class XStream;
 
 // Synchronous. Can be sub-classed.
 class ChitMsg
@@ -120,7 +120,7 @@ public:
 
 	void Save( tinyxml2::XMLPrinter* );
 	void Load( const ComponentFactory* factory, const tinyxml2::XMLElement* );
-	void Serialize( const ComponentFactory* factory, DBItem item );
+	void Serialize( const ComponentFactory* factory, XStream* xs );
 
 	int ID() const { return id; }
 	void Add( Component* );

@@ -41,15 +41,12 @@ public:
 	}
 	virtual ~PathMoveComponent() {}
 
-	virtual Component* ToComponent( const char* name ) {
-		if ( grinliz::StrEqual( name, "PathMoveComponent" ) ) return this;
-		return super::ToComponent( name );
-	}
+	virtual const char* Name() const { return "PathMoveComponent"; }
 	virtual void DebugStr( grinliz::GLString* str );
 
 	virtual void Load( const tinyxml2::XMLElement* element );
 	virtual void Save( tinyxml2::XMLPrinter* printer );
-	virtual void Serialize( DBItem parent );
+	virtual void Serialize( XStream* xs );
 
 	virtual void OnAdd( Chit* chit );
 	virtual void OnRemove();

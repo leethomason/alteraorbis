@@ -22,12 +22,13 @@ void PhysicsMoveComponent::DebugStr( grinliz::GLString* str )
 }
 
 
-void PhysicsMoveComponent::Serialize( DBItem parent )
+void PhysicsMoveComponent::Serialize( XStream* xs )
 {
-	DBItem item = BeginSerialize( parent, "PhysicsMoveComponent" );
-	DB_SERIAL( item, rotation );
-	DB_SERIAL( item, deleteWhenDone );
-	DB_SERIAL( item, velocity );
+	this->BeginSerialize( xs, Name() );
+	XARC_SER( xs, rotation );
+	XARC_SER( xs, deleteWhenDone );
+	XARC_SER( xs, velocity );
+	this->EndSerialize( xs );
 }
 
 

@@ -38,16 +38,13 @@ public:
 	}
 	virtual ~InventoryComponent()	{}
 
-	virtual Component* ToComponent( const char* name ) {
-		if ( grinliz::StrEqual( name, "InventoryComponent" ) ) return this;
-		return super::ToComponent( name );
-	}
+	virtual const char* Name() const { return "InventoryComponent"; }
 
 	virtual void DebugStr( grinliz::GLString* str );
 
 	virtual void Load( const tinyxml2::XMLElement* element );
 	virtual void Save( tinyxml2::XMLPrinter* printer );
-	virtual void Serialize( DBItem parent );
+	virtual void Serialize( XStream*);
 
 	virtual void OnAdd( Chit* chit );
 	virtual void OnRemove();

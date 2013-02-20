@@ -21,7 +21,7 @@
 #include "../grinliz/glstringutil.h"
 #include "../grinliz/glvector.h"
 #include "../tinyxml2/tinyxml2.h"
-#include "../shared/dbhelper.h"
+#include "../xarchive/glstreamer.h"
 #include "xegamelimits.h"
 
 // The primary components:
@@ -46,10 +46,11 @@ public:
 
 	virtual void Load( const tinyxml2::XMLElement* element ) = 0;
 	virtual void Save( tinyxml2::XMLPrinter* printer ) = 0;
-	virtual void Serialize( DBItem item ) = 0;
+	virtual void Serialize( XStream* xs ) = 0;
 
-	virtual Component* ToComponent( const char* name ) = 0 {
-		if ( grinliz::StrEqual( name, "Component" ) ) return this;
+	virtual const char* Name() const = 0;
+	virtual Component* ToComponent( const char* name ) {
+		if ( grinliz::StrEqual( name, Name() ) ) return this;
 		return 0;
 	}
 
@@ -74,7 +75,8 @@ protected:
 	void BeginLoad( const tinyxml2::XMLElement* element, const char* name ); 
 	void EndLoad( const tinyxml2::XMLElement* element )	{}
 
-	DBItem BeginSerialize( DBItem parent, const char* name );
+	void BeginSerialize( XStream* xs, const char* name );
+	void EndSerialize( XStream* sx );
 
 	ChitBag* GetChitBag();
 	Chit* parentChit;
@@ -92,14 +94,11 @@ private:
 public:
 	virtual MoveComponent*		ToMove()		{ return this; }
 
-	virtual Component*          ToComponent( const char* name ) {
-		if ( grinliz::StrEqual( name, "MoveComponent" ) ) return this;
-		return super::ToComponent( name );
-	}
+	virtual const char* Name() const { return "MoveComponent"; }
 
 	virtual void Load( const tinyxml2::XMLElement* element );
 	virtual void Save( tinyxml2::XMLPrinter* printer );
-	virtual void Serialize( DBItem parent );
+	virtual void Serialize( XStream* xs );
 
 	virtual bool IsMoving() const				{ return false; }
 	// approximate, may lag, etc. useful for AI

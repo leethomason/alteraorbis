@@ -22,7 +22,6 @@
 #include "../grinliz/glcolor.h"
 #include "../grinliz/glcontainer.h"
 #include "../tinyxml2/tinyxml2.h"
-#include "../shared/dbhelper.h"
 
 #include "vertex.h"
 
@@ -52,7 +51,7 @@ struct Bolt {
 
 	void Save( tinyxml2::XMLPrinter* );
 	void Load( const tinyxml2::XMLElement* );
-	void Serialize( DBItem item );
+	void Serialize( XStream* );
 
 	grinliz::Vector3F	head;
 	float				len;

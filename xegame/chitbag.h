@@ -27,10 +27,9 @@
 #include "xegamelimits.h"
 #include "chitevent.h"
 
-#include "../shared/dbhelper.h"
-
 class Engine;
 class ComponentFactory;
+class XStream;
 
 class ChitBag : public IBoltImpactHandler
 {
@@ -46,7 +45,7 @@ public:
 
 	void Save( tinyxml2::XMLPrinter* );
 	void Load( const ComponentFactory* factory, const tinyxml2::XMLElement* );
-	void Serialize( const ComponentFactory* factory, DBItem parent );
+	void Serialize( const ComponentFactory* factory, XStream* xs );
 
 	// Bolts are a special kind of chit. Just easier
 	// and faster to treat them as a 2nd stage.

@@ -37,7 +37,7 @@ public:
 	virtual void Init( const ScriptContext& heap )	= 0;
 	virtual void Load( const ScriptContext& ctx, const tinyxml2::XMLElement* element ) = 0;
 	virtual void Save( const ScriptContext& ctx, tinyxml2::XMLPrinter* printer )       = 0;
-	virtual void Serialize( const ScriptContext& ctx, DBItem item )	= 0;
+	virtual void Serialize( const ScriptContext& ctx, XStream* xs )	= 0;
 	virtual int DoTick( const ScriptContext& ctx, U32 delta, U32 since ) = 0;
 	virtual const char* ScriptName() = 0;
 };
@@ -53,14 +53,11 @@ public:
 	ScriptComponent( const ComponentFactory* f ) : script( 0 ), factory( f )	{}
 	virtual ~ScriptComponent()									{ delete script; }
 
-	virtual Component* ToComponent( const char* name ) {
-		if ( grinliz::StrEqual( name, "ScriptComponent" ) ) return this;
-		return super::ToComponent( name );
-	}
+	virtual const char* Name() const { return "ScriptComponent"; }
 
 	virtual void Load( const tinyxml2::XMLElement* element );
 	virtual void Save( tinyxml2::XMLPrinter* printer );
-	virtual void Serialize( DBItem parent );
+	virtual void Serialize( XStream* xs );
 
 	virtual void OnAdd( Chit* chit );
 	virtual void OnRemove();

@@ -129,11 +129,12 @@ void SpatialComponent::Save( tinyxml2::XMLPrinter* printer )
 }
 
 
-void SpatialComponent::Serialize( DBItem parent )
+void SpatialComponent::Serialize( XStream* xs )
 {
-	DBItem item = BeginSerialize( parent, "SpatialComponent" );
-	DB_SERIAL( item, position );
-	DB_SERIAL( item, rotation );
+	BeginSerialize( xs, "SpatialComponent" );
+	XARC_SER( xs, position );
+	XARC_SER( xs, rotation );
+	EndSerialize( xs );
 }
 
 

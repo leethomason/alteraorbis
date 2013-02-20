@@ -15,6 +15,7 @@
 
 #include "vertex.h"
 #include "../grinliz/glstringutil.h"
+#include "../xarchive/glstreamer.h"
 
 using namespace grinliz;
 
@@ -66,16 +67,18 @@ void BoneData::Save( tinyxml2::XMLPrinter* printer )
 }
 
 
-void BoneData::Serialize( DBItem parent )
+void BoneData::Serialize( XStream* xs )
 {
-	DBItem item = DBChild( parent, "BoneData" );
+	XarcOpen( xs, "BoneData" );
 	for( int i=0; i<EL_MAX_BONES; ++i ) {
-		DBItem boneItem = DBChild( parent, i );
-		DB_SERIAL( boneItem, bone[i].name );
-		DB_SERIAL( boneItem, bone[i].angleRadians );
-		DB_SERIAL( boneItem, bone[i].dy );
-		DB_SERIAL( boneItem, bone[i].dz );
+		XarcOpen( xs, "bone" );
+		XARC_SER_KEY( xs, "name", bone[i].name );
+		XARC_SER_KEY( xs, "angle", bone[i].angleRadians );
+		XARC_SER_KEY( xs, "dy", bone[i].dy );
+		XARC_SER_KEY( xs, "dz", bone[i].dz );
+		XarcClose( xs );
 	}
+	XarcClose( xs );
 }
 
 

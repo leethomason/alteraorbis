@@ -25,31 +25,29 @@
 using namespace grinliz;
 using namespace tinyxml2;
 
-void InventoryComponent::Serialize( DBItem parent ) 
+void InventoryComponent::Serialize( XStream* xs ) 
 {
-	DBItem item = this->BeginSerialize( parent, "InventoryComponent" );
-	DB_SERIAL( item, hardpoints );
+	this->BeginSerialize( xs, "InventoryComponent" );
+	XARC_SER( xs, hardpoints );
 
 	{
 		static const char* arrNames[2] = { "intrinsicAt", "heldAt" };
 		GameItem** arrAt[2] = { intrinsicAt, heldAt };
 
 		for( int pass=0; pass<2; ++pass ) {
-			DBItem arrayItem = DBChild( item, arrNames[pass] );
+			XarcOpen( xs, arrNames[pass] );
 			for( int i=0; i<NUM_HARDPOINTS; ++i ) {
-				if ( item.Loading() ) {
-					const gamedb::Item* it = arrayItem.item->Child(i);
-					if ( it ) {
-						arrAt[pass][i] = new GameItem();
-						arrAt[pass][i]->Serialize( it );
-					}
+				XarcOpen( xs, "item" );
+				if ( xs->Saving() && arrAt[pass][i] ) {
+					arrAt[pass][i]->Serialize( xs );
 				}
-				else {
-					if ( arrAt[pass][i] ) {
-						arrAt[pass][i]->Serialize( item.witem->FetchChild( i ));
-					}
+				else if ( xs->Loading() && xs->Loading()->HasChild() ) {
+					arrAt[pass][i] = new GameItem();
+					arrAt[pass][i]->Serialize( xs );
 				}
+				XarcClose( xs );
 			}
+			XarcClose( xs );
 		}
 	}
 	{
@@ -57,32 +55,24 @@ void InventoryComponent::Serialize( DBItem parent )
 		CDynArray< GameItem*, grinliz::OwnedPtrSem >* arrAt[2] = { &freeItems, &packItems };
 
 		for( int pass=0; pass<2; ++pass ) {
-			DBItem arrayItem = DBChild( item, arrNames[pass] );
-			int i=0;
-			while( true ) {
-				if ( item.Loading() ) {
-					const gamedb::Item* it = arrayItem.item->Child(i);
-					if ( it ) {
-						GameItem* gi = new GameItem();
-						arrAt[i]->Push( gi );
-						gi->Serialize( it );
-					}
-					else {
-						break;
-					}
+			XarcOpen( xs, arrNames[pass] );
+			int n = arrAt[pass]->Size();
+			XARC_SER( xs, n );
+
+			for( int i=0; i<n; ++i ) {
+				if ( xs->Saving() ) {
+					(*arrAt[pass])[i]->Serialize( xs );
 				}
 				else {
-					if ( i < arrAt[pass]->Size() ) {
-						(*arrAt[pass])[i]->Serialize( item.witem->FetchChild( i ));
-					}
-					else {
-						break;
-					}
+					GameItem* gi = new GameItem();
+					arrAt[i]->Push( gi );
+					gi->Serialize( xs );
 				}
 			}
+			XarcClose( xs );
 		}
 	}
-
+	this->EndSerialize( xs );
 }
 
 

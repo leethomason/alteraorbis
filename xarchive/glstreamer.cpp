@@ -383,6 +383,7 @@ const StreamReader::Attribute* StreamReader::Get( const char* key )
 	if ( index >= 0 ) {
 		return &attributes[index];
 	}
+	GLASSERT( 0 );	// return is safe, but unexpected
 	return 0;
 }
 
@@ -470,3 +471,21 @@ void DumpStream( StreamReader* reader, int depth )
 	reader->CloseElement();
 }
 
+
+void XarcGet( XStream* xs, const char* key, grinliz::IString& i )
+{
+	GLASSERT( xs->Loading() );
+	const StreamReader::Attribute* attr = xs->Loading()->Get( key );
+	if ( attr ) {
+		i = StringPool::Intern( attr->Str() );
+	}
+	else {
+		i = IString();
+	}
+}
+
+void XarcSet( XStream* xs, const char* key, const grinliz::IString& i )
+{
+	GLASSERT( xs->Saving() );
+	xs->Saving()->Set( key, i.empty() ? "" : i.c_str() );
+}

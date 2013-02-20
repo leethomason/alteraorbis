@@ -57,64 +57,42 @@ RenderComponent::~RenderComponent()
 }
 
 
-void RenderComponent::Serialize( DBItem parent )
+void RenderComponent::Serialize( XStream* xs )
 {
-	bool loading = parent.Loading();
-	DBItem item = BeginSerialize( parent, "RenderComponent" );
+	BeginSerialize( xs, "RenderComponent" );
 
-	DBItem resItem = DBChild( item, "resources" );
+	XarcOpen( xs, "resources" );
 	for( int i=0; i<NUM_MODELS; ++i ) {
-		if ( loading ) {
-			resource[i] = 0;
-			const gamedb::Item* it = resItem.item->Child( i );
-			if ( it ) {
-				const char* asset = it->GetString( "name" );
-				resource[i] = ModelResourceManager::Instance()->GetModelResource( asset );
+		XarcOpen( xs, "res-mod" );
+		IString asset = resource[i] ? resource[i]->IName() : IString();
+		XARC_SER( xs, asset );
+
+		if ( xs->Loading() ) {
+			if ( !asset.empty() ) {
+				resource[i] = ModelResourceManager::Instance()->GetModelResource( asset.c_str() );
+				model[i] = engine->AllocModel( resource[i] );
+				model[i]->Serialize( xs, engine->GetSpaceTree() );
 			}
 		}
 		else {
 			if ( resource[i] ) {
-				gamedb::WItem* it = resItem.witem->FetchChild( i );
-				it->SetString( "name", resource[i]->header.name.c_str() );
+				GLASSERT( model[i] );
+				model[i]->Serialize( xs, engine->GetSpaceTree() );
 			}
 		}
+		XarcClose( xs );
 	}
+	XarcClose( xs );
 
-	DBItem modelItem = DBChild( item, "models" );
-	for( int i=0; i<NUM_MODELS; ++i ) {
-		if ( loading ) {
-			model[i] = 0;
-			const gamedb::Item* it = modelItem.item->Child( i );
-			if ( it ) {
-				GLASSERT( resource[i] );
-				model[i] = engine->AllocModel( resource[i] );
-				model[i]->Serialize( DBItem(it), engine->GetSpaceTree() );
-			}
-		}
-		else {
-			if ( model[i] ) {
-				gamedb::WItem* it = modelItem.witem->FetchChild( i );
-				model[i]->Serialize( DBItem(it), engine->GetSpaceTree() );
-			}
-		}
-	}
-
-	DBItem nameItem = DBChild( item, "metaDataNames" );
+	XarcOpen( xs, "metaDataNames" );
 	for( int i=0; i<EL_MAX_METADATA; ++i ) {
-		if ( loading ) {
-			metaDataName[i] = IString();
-			const gamedb::Item* it = nameItem.item->Child( i );
-			if ( it ) {
-				metaDataName[i] = StringPool::Intern( it->GetString( "name" ));
-			}
-		}
-		else {
-			if ( !metaDataName[i].empty() ) {
-				gamedb::WItem* it = nameItem.witem->FetchChild( i );
-				it->SetString( "metaname", metaDataName[i].c_str() );
-			}
-		}
+		XarcOpen( xs, "meta" );
+		XARC_SER( xs, metaDataName[i] );
+		XarcClose( xs );
 	}
+	XarcClose( xs );
+
+	EndSerialize( xs );
 }
 
 
