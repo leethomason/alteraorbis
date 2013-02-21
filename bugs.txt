@@ -387,3 +387,13 @@ Save file (flora)
 Save/load time (debug)
 Sim::Load 31.6 MClocks
 Sim::Save 13.4 MClocks
+
+Sim::SaveXarc 10.1 MClocks, 17.9 MB
+			   9.2 MClocks
+
+New baseline:
+	SaveXML		956k, 0.7 MClocks
+	SaveXarc	960k, 0.5 MClocks
+				917k, 0.5 MClocks	zero support
+				841k				default in GameItem
+				711,  0.40			default in Model

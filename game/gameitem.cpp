@@ -30,7 +30,7 @@ using namespace tinyxml2;
 #define READ_FLOAT_ATTR( n )			else if ( name == #n ) { n = attr->FloatValue(); }
 #define READ_INT_ATTR( n )				else if ( name == #n ) { n = attr->IntValue(); }
 
-#define APPEND_FLAG( flags, cstr, name )	{ if ( flags & name ) f += #name; f += " "; }
+#define APPEND_FLAG( flags, cstr, name )	{ if ( flags & name ) { f += #name; f += " "; } }
 #define PUSH_ATTRIBUTE( prnt, name )		{ prnt->PushAttribute( #name, name ); }
 
 // FIXME: make this way, way simpler
@@ -110,19 +110,19 @@ void GameItem::Serialize( XStream* xs )
 	XARC_SER( xs, desc );
 	XARC_SER( xs, resource );
 	XARC_SER( xs, mass );
-	XARC_SER( xs, hpRegen );
-	XARC_SER( xs, primaryTeam );
-	XARC_SER( xs, cooldown );
-	XARC_SER( xs, cooldownTime );
-	XARC_SER( xs, reload );
-	XARC_SER( xs, reloadTime );
-	XARC_SER( xs, clipCap );
-	XARC_SER( xs, rounds );
-	XARC_SER( xs, meleeDamage );
-	XARC_SER( xs, rangedDamage );
-	XARC_SER( xs, absorbsDamage );
-	XARC_SER( xs, accruedFire );
-	XARC_SER( xs, accruedShock );
+	XARC_SER_DEF( xs, hpRegen, 0.0f );
+	XARC_SER_DEF( xs, primaryTeam, 0 );
+	XARC_SER_DEF( xs, cooldown, 0 );
+	XARC_SER_DEF( xs, cooldownTime, 0 );
+	XARC_SER_DEF( xs, reload, 0 );
+	XARC_SER_DEF( xs, reloadTime, 0 );
+	XARC_SER_DEF( xs, clipCap, 0 );
+	XARC_SER_DEF( xs, rounds, 0 );
+	XARC_SER_DEF( xs, meleeDamage, 1.0f );
+	XARC_SER_DEF( xs, rangedDamage, 0.0f );
+	XARC_SER_DEF( xs, absorbsDamage, 0 );
+	XARC_SER_DEF( xs, accruedFire, 0 );
+	XARC_SER_DEF( xs, accruedShock, 0 );
 
 	XARC_SER( xs, hardpoint );
 	XARC_SER( xs, procedural );

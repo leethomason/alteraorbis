@@ -299,21 +299,24 @@ void Model::Serialize( XStream* xs, SpaceTree* tree )
 {
 	XarcOpen( xs, "Model" );
 
-	XARC_SER( xs, debugScale );
-	XARC_SER( xs, animationRate );
-	XARC_SER( xs, totalCrossFadeTime );
-	XARC_SER( xs, crossFadeTime );
-	XARC_SER( xs, hasParticles );
+	static const Vector4F WHITE = { 1, 1, 1, 1 };
+	static const Vector4F ONE   = { 1, 1, 1, 1 };
+
+	XARC_SER_DEF( xs, debugScale, 1.0f );
+	XARC_SER_DEF( xs, animationRate, 1.0f );
+	XARC_SER_DEF( xs, totalCrossFadeTime, 0 );
+	XARC_SER_DEF( xs, crossFadeTime, 0 );
+	XARC_SER_DEF( xs, hasParticles, false );
 	XARC_SER( xs, flags );
-	XARC_SER( xs, currentAnim.time );
-	XARC_SER( xs, currentAnim.id );
-	XARC_SER( xs, prevAnim.time );
-	XARC_SER( xs, prevAnim.id );
+	XARC_SER_DEF( xs, currentAnim.time, 0 );
+	XARC_SER_DEF( xs, currentAnim.id, ANIM_OFF );
+	XARC_SER_DEF( xs, prevAnim.time, 0 );
+	XARC_SER_DEF( xs, prevAnim.id, ANIM_OFF );
 	XARC_SER( xs, pos );
 	XARC_SER( xs, rot );
-	XARC_SER( xs, color );
+	XARC_SER_DEF( xs, color, WHITE );
 	XARC_SER( xs, boneFilter );
-	XARC_SER( xs, control );
+	XARC_SER_DEF( xs, control, ONE );
 
 	if ( xs->Saving() ) {
 		StreamWriter* save = xs->Saving();

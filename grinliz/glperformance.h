@@ -87,7 +87,13 @@ public:
 
 	~QuickProfile()	{ 
 		U64 endTime = FastTime();	
-		GLOUTPUT (( "%s %.1f MClocks\n", name, ((double)(endTime-startTime)/(double)(1000*1000)) ));
+		double delta = ((double)(endTime-startTime)/(double)(1000*1000));
+		if ( delta < 10 ) {
+			GLOUTPUT (( "%s %.2f MClocks\n", name, delta ));
+		}
+		else {
+			GLOUTPUT (( "%s %.1f MClocks\n", name, delta ));
+		}
 	}
 
 private:

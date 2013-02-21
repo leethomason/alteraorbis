@@ -133,7 +133,9 @@ void SpatialComponent::Serialize( XStream* xs )
 {
 	BeginSerialize( xs, "SpatialComponent" );
 	XARC_SER( xs, position );
-	XARC_SER( xs, rotation );
+
+	static const Quaternion DEFQUAT; 
+	XARC_SER_DEF( xs, rotation, DEFQUAT );
 	EndSerialize( xs );
 }
 

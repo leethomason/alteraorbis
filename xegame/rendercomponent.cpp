@@ -87,7 +87,7 @@ void RenderComponent::Serialize( XStream* xs )
 	XarcOpen( xs, "metaDataNames" );
 	for( int i=0; i<EL_MAX_METADATA; ++i ) {
 		XarcOpen( xs, "meta" );
-		XARC_SER( xs, metaDataName[i] );
+		XARC_SER_KEY( xs, "meta", metaDataName[i] );
 		XarcClose( xs );
 	}
 	XarcClose( xs );

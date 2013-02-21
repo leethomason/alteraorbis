@@ -62,6 +62,8 @@ void Map( XStream* xs )
 	if ( xs->Saving() ) {
 		int b[] = { -1, -2, -3, -4 };
 		xs->Saving()->SetArr( "bounds", b, 4 );
+		float f[] = { 0, 0, 0, 0 };
+		xs->Saving()->SetArr( "zero", f, 4 );
 	}
 
 	int nData = 4;

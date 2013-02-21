@@ -62,6 +62,7 @@ public:
 		ATTRIB_DOUBLE			= 0x04,
 		ATTRIB_BYTE				= 0x08,
 		ATTRIB_STRING			= 0x10,
+		ATTRIB_ZERO				= 0x20,	 // a numerical value that is zeros
 	};
 
 	virtual StreamWriter* Saving() { return 0; }
@@ -104,6 +105,15 @@ private:
 	void WriteString( const char* str );
 	void FlushAttributes();
 
+	template< class T >
+	bool CheckZero( const T* data, int n ) {
+		for( int i=0; i<n; ++i ) {
+			if ( data[i] != 0 ) 
+				return false;
+		}
+		return true;
+	}
+
 	struct Attrib {
 		int type;
 		int keyIndex;
@@ -145,24 +155,16 @@ public:
 			const char*		str;
 		};
 
-		void Value( int* value ) const		{ GLASSERT( type == ATTRIB_INT );	GLASSERT( n == 1 );	*value = intArr[0]; }
-		void Value( float* value ) const	{ GLASSERT( type == ATTRIB_FLOAT );	GLASSERT( n == 1 );	*value = floatArr[0]; }
-		void Value( double* value ) const	{ GLASSERT( type == ATTRIB_DOUBLE );GLASSERT( n == 1 ); *value = doubleArr[0]; }
-		void Value( U8* value ) const		{ GLASSERT( type == ATTRIB_BYTE );	GLASSERT( n == 1 ); *value = byteArr[0]; }
-		const char* Str() const				{ GLASSERT( type == ATTRIB_STRING ); return str; }
+		void Value( int* value ) const;
+		void Value( float* value ) const;
+		void Value( double* value ) const;
+		void Value( U8* value ) const;
+		const char* Str() const;
 
-		void Value( int* value, int size ) const	{	GLASSERT( type == (ATTRIB_INT) ); 
-														GLASSERT( n == size );		
-														memcpy( value, intArr, n*sizeof(int) ); }
-		void Value( float* value, int size ) const	{	GLASSERT( type == (ATTRIB_FLOAT) ); 
-														GLASSERT( n == size );		
-														memcpy( value, floatArr, n*sizeof(float) ); }
-		void Value( double* value, int size ) const	{	GLASSERT( type == (ATTRIB_DOUBLE) ); 
-														GLASSERT( n == size );		
-														memcpy( value, doubleArr, n*sizeof(double) ); }
-		void Value( U8* value, int size ) const		{	GLASSERT( type == (ATTRIB_BYTE) ); 
-														GLASSERT( n == size );		
-														memcpy( value, byteArr, n ); }
+		void Value( int* value, int size ) const;
+		void Value( float* value, int size ) const;
+		void Value( double* value, int size ) const;
+		void Value( U8* value, int size ) const;
 
 		bool operator==( const Attribute& a ) const { return strcmp( key, a.key ) == 0; }
 		bool operator<( const Attribute& a ) const	{ return strcmp( key, a.key ) < 0; }
@@ -212,21 +214,25 @@ inline void XarcClose( XStream* stream) {
 
 
 template< class T >
-inline void XarcGet( XStream* stream, const char* key, T &value )		{ 
+inline bool XarcGet( XStream* stream, const char* key, T &value )		{ 
 	GLASSERT( stream->Loading() );
 	const StreamReader::Attribute* attr = stream->Loading()->Get( key );
 	if ( attr ) {
 		attr->Value( &value );
+		return true;
 	}
+	return false;
 }
 
 template< class T >
-inline void XarcGetArr( XStream* stream, const char* key, T* value, int n )		{ 
+inline bool XarcGetArr( XStream* stream, const char* key, T* value, int n )		{ 
 	GLASSERT( stream->Loading() );
 	const StreamReader::Attribute* attr = stream->Loading()->Get( key );
 	if ( attr ) {
 		attr->Value( value, n );
+		return true;
 	}
+	return false;
 }
 
 template< class T >
@@ -244,10 +250,13 @@ void XarcSetArr( XStream* stream, const char* key, const T* value, int n ) {
 
 // Adaptors.
 // Basic types.
-inline void XarcGet( XStream* stream, const char* key, bool &value ) {
+inline bool XarcGet( XStream* stream, const char* key, bool &value ) {
 	U8 b = 0;
-	XarcGet( stream, key, b );
-	value = b ? true : false;
+	if ( XarcGet( stream, key, b ) ) {
+		value = b ? true : false;
+		return true;
+	}
+	return false;
 }
 
 inline void XarcSet( XStream* stream, const char* key, bool value ) {
@@ -255,10 +264,13 @@ inline void XarcSet( XStream* stream, const char* key, bool value ) {
 	XarcSet( stream, key, b );
 }
 
-inline void XarcGet( XStream* stream, const char* key, U32 &value ) {
+inline bool XarcGet( XStream* stream, const char* key, U32 &value ) {
 	int v = 0;
-	XarcGet( stream, key, v );
-	value = (U32)v;
+	if ( XarcGet( stream, key, v )) {
+		value = (U32)v;
+		return true;
+	}
+	return false;
 }
 
 inline void XarcSet( XStream* stream, const char* key, U32 value ) {
@@ -267,34 +279,45 @@ inline void XarcSet( XStream* stream, const char* key, U32 value ) {
 
 // Strings
 // Can serialize a null string.
-void XarcGet( XStream* xs, const char* key, grinliz::IString& i );
+bool XarcGet( XStream* xs, const char* key, grinliz::IString& i );
 void XarcSet( XStream* xs, const char* key, const grinliz::IString& i );
 
 // Vector
-inline void XarcGet( XStream* xs, const char* key, grinliz::Vector2I& v )			{ XarcGetArr( xs, key, &v.x, 2  ); }
+inline bool XarcGet( XStream* xs, const char* key, grinliz::Vector2I& v )			{ return XarcGetArr( xs, key, &v.x, 2  ); }
 inline void XarcSet( XStream* xs, const char* key, const grinliz::Vector2I& v )		{ XarcSetArr( xs, key, &v.x, 2  ); }
-inline void XarcGet( XStream* xs, const char* key, grinliz::Vector2F& v )			{ XarcGetArr( xs, key, &v.x, 2  ); }
+inline bool XarcGet( XStream* xs, const char* key, grinliz::Vector2F& v )			{ return XarcGetArr( xs, key, &v.x, 2  ); }
 inline void XarcSet( XStream* xs, const char* key, const grinliz::Vector2F& v )		{ XarcSetArr( xs, key, &v.x, 2  ); }
-inline void XarcGet( XStream* xs, const char* key, grinliz::Vector3F& v )			{ XarcGetArr( xs, key, &v.x, 3  ); }
+inline bool XarcGet( XStream* xs, const char* key, grinliz::Vector3F& v )			{ return XarcGetArr( xs, key, &v.x, 3  ); }
 inline void XarcSet( XStream* xs, const char* key, const grinliz::Vector3F& v )		{ XarcSetArr( xs, key, &v.x, 3  ); }
-inline void XarcGet( XStream* xs, const char* key, grinliz::Vector4F& v )			{ XarcGetArr( xs, key, &v.x, 4  ); }
+inline bool XarcGet( XStream* xs, const char* key, grinliz::Vector4F& v )			{ return XarcGetArr( xs, key, &v.x, 4  ); }
 inline void XarcSet( XStream* xs, const char* key, const grinliz::Vector4F& v )		{ XarcSetArr( xs, key, &v.x, 4  ); }
-inline void XarcGet( XStream* xs, const char* key, grinliz::Quaternion& v )			{ XarcGetArr( xs, key, &v.x, 4  ); }
+inline bool XarcGet( XStream* xs, const char* key, grinliz::Quaternion& v )			{ return XarcGetArr( xs, key, &v.x, 4  ); }
 inline void XarcSet( XStream* xs, const char* key, const grinliz::Quaternion& v )	{ XarcSetArr( xs, key, &v.x, 4  ); }
 
 // Rectangle2I
-inline void XarcGet( XStream* xs, const char* key, grinliz::Rectangle2I &v )		{	XarcGetArr( xs, key, &v.min.x, 4 );}
-inline void XarcSet( XStream* xs, const char* key, const grinliz::Rectangle2I& v )	{	XarcSetArr( xs, key, &v.min.x, 4 );}
+inline bool XarcGet( XStream* xs, const char* key, grinliz::Rectangle2I &v )		{ return XarcGetArr( xs, key, &v.min.x, 4 );}
+inline void XarcSet( XStream* xs, const char* key, const grinliz::Rectangle2I& v )	{ XarcSetArr( xs, key, &v.min.x, 4 );}
 
 // Matrix
-inline void XarcGet( XStream* xs, const char* key, grinliz::Matrix4 &v )			{	XarcGetArr( xs, key, v.x, 16 );}
-inline void XarcSet( XStream* xs, const char* key, const grinliz::Matrix4& v )		{	XarcSetArr( xs, key, v.x, 16 );}
+inline bool XarcGet( XStream* xs, const char* key, grinliz::Matrix4 &v )			{ return XarcGetArr( xs, key, v.x, 16 );}
+inline void XarcSet( XStream* xs, const char* key, const grinliz::Matrix4& v )		{ XarcSetArr( xs, key, v.x, 16 );}
 
 #define XARC_SER( stream, name ) {			\
 	if ( (stream)->Saving() )				\
 		XarcSet( stream, #name, name );		\
 	else									\
 		XarcGet( stream, #name, name );		\
+}
+
+#define XARC_SER_DEF( stream, name, defaultVal ) {	\
+	if ( (stream)->Saving() ) {						\
+		if ( name != defaultVal )					\
+			XarcSet( stream, #name, name );			\
+	}												\
+	else {											\
+		name = defaultVal;							\
+		XarcGet( stream, #name, name );				\
+	}												\
 }
 
 #define XARC_SER_KEY( stream, key, name ) {		\

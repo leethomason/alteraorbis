@@ -114,7 +114,7 @@ void MapSpatialComponent::Serialize( XStream* xs )
 		justLoaded = true;
 	}
 
-	this->BeginSerialize( xs, Name() );
+	this->BeginSerialize( xs, "MapSpatialComponent" );
 	XARC_SER( xs, mode );
 	super::Serialize( xs );
 	this->EndSerialize( xs );
