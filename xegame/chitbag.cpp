@@ -86,10 +86,13 @@ void ChitBag::Serialize( const ComponentFactory* factory, XStream* xs )
 			XarcOpen( xs, "id" );
 			XARC_SER_KEY( xs, "id", id );	
 			XarcClose( xs );
+			idPool = Max( id, idPool );
 
+			GLOUTPUT(( "loading chit id=%d\n", id ));
 			Chit* c = this->NewChit( id );
 			c->Serialize( factory, xs );
 		}
+		XarcClose( xs );
 
 		XarcOpen( xs, "Bolts" );
 		while( xs->Loading()->HasChild() ) {

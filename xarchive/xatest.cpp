@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "glstreamer.h"
+#include "squisher.h"
 
 using namespace grinliz;
 
@@ -81,29 +82,57 @@ int main( int argc, const char* argv[] )
 
 
 	if ( argc == 1 ) {
-		FILE* fp = 0;
-		fopen_s( &fp, "test.dat", "wb" );
+		{
+			Squisher* s = new Squisher();
+			static const char* line[4] = {	"Hello, World",
+											"Hello, World v2.",
+											"I'm mad, you're mad, we're all mad here.",
+											"Hello Alice. Welcome to a mad world." };
 
-		StreamWriter writer( fp );
-		writer.OpenElement( "root" );
-		Map( &writer );
-		MetaData( &writer );
-		writer.CloseElement();
+			CDynArray<U8> buf;
 
-		fclose( fp );
-	}
+			for( int i=0; i<4; ++i ) {
+				int n = 0;
+				const U8* str = s->Encode( (const U8*)line[i], strlen(line[i])+1, &n );
+				U8* mem = buf.PushArr( n );
+				memcpy( mem, str, n );
+			}
+			printf( "in:%d out:%d ratio=%.2f\n", s->totalIn, s->totalOut, s->Ratio() );
 
-	if ( argc == 1 ) {
-		FILE* fp = 0;
-		fopen_s( &fp, "test.dat", "rb" );
+			delete s; s = new Squisher();
 
-		StreamReader reader( fp );
-		reader.OpenElement();
-		Map( &reader );
-		MetaData( &reader );
-		reader.CloseElement();
+			int start = 0;
+			for( int i=0; i<4; ++i ) {
+				int n = 0;
+				const char* str = (const char*) s->Decode( (const U8*) &buf[start], strlen(line[i])+1, &n );
+				printf( "Line %d: %s\n", i, str );
+				start += n;
+			}
+		}
+		{
+			FILE* fp = 0;
+			fopen_s( &fp, "test.dat", "wb" );
+
+			StreamWriter writer( fp );
+			writer.OpenElement( "root" );
+			Map( &writer );
+			MetaData( &writer );
+			writer.CloseElement();
+
+			fclose( fp );
+		}
+		{
+			FILE* fp = 0;
+			fopen_s( &fp, "test.dat", "rb" );
+
+			StreamReader reader( fp );
+			reader.OpenElement();
+			Map( &reader );
+			MetaData( &reader );
+			reader.CloseElement();
 	
-		fclose( fp );
+			fclose( fp );
+		}
 	}
 
 

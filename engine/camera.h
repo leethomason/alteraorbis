@@ -23,6 +23,8 @@
 #include "../grinliz/glgeometry.h"
 #include "../tinyxml2/tinyxml2.h"
 
+class XStream;
+
 /*	By default, the camera is looking down the -z axis with y up.
 	View rotation is handled by this class to account for device
 	turning.
@@ -63,6 +65,7 @@ public:
 
 	virtual void Load( const tinyxml2::XMLElement* element );
 	virtual void Save( tinyxml2::XMLPrinter* printer );
+	void Serialize( XStream* xs );
 
 private:
 	// Position of the camera in the world - no view rotation, no inverse.

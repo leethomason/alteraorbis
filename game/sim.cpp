@@ -64,18 +64,36 @@ Sim::~Sim()
 }
 
 
-void Sim::Load( const char* mapDAT, const char* mapXML, const char* gameXML )
+void Sim::Load( const char* mapDAT, const char* mapXML, const char* gameDAT )
 {
 	chitBag->DeleteAll();
 	worldMap->Load( mapDAT, mapXML );
 
-	if ( !gameXML ) {
+	if ( !gameDAT ) {
 		Vector2I v = worldMap->FindEmbark();
 		CreatePlayer( v, "humanFemale" );
 	}
 	else {
 		QuickProfile qp( "Sim::Load" );
 		ComponentFactory factory( this, engine, worldMap, weather, lumosGame );
+
+		FILE* fp = fopen( gameDAT, "rb" );
+		GLASSERT( fp );
+		if ( fp ) {
+			StreamReader reader( fp );
+			XarcOpen( &reader, "Sim" );
+			XARC_SER( &reader, playerID );
+			XARC_SER( &reader, minuteClock );
+			XARC_SER( &reader, timeInMinutes );
+
+			engine->camera.Serialize( &reader );
+			chitBag->Serialize( &factory, &reader );
+
+			XarcClose( &reader );
+
+			fclose( fp );
+		}
+#if 0
 		XMLDocument doc;
 		doc.LoadFile( gameXML );
 		GLASSERT( !doc.Error() );
@@ -86,6 +104,7 @@ void Sim::Load( const char* mapDAT, const char* mapXML, const char* gameXML )
 			engine->camera.Load( root );
 			chitBag->Load( &factory, root );
 		}
+#endif
 	}
 }
 
@@ -98,10 +117,11 @@ void Sim::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele )
 }
 
 
-void Sim::Save( const char* mapDAT, const char* mapXML, const char* gameXML )
+void Sim::Save( const char* mapDAT, const char* mapXML, const char* gameDAT )
 {
 	worldMap->Save( mapDAT, mapXML );
 
+#if 0
 	FILE* fp = fopen( gameXML, "w" );
 	GLASSERT( fp );
 	if ( fp ) {
@@ -114,13 +134,14 @@ void Sim::Save( const char* mapDAT, const char* mapXML, const char* gameXML )
 		printer.CloseElement();
 		fclose( fp );
 	}
+#endif
 
 	{
 		QuickProfile qp( "Sim::SaveXarc" );
 
 		ComponentFactory factory( this, engine, worldMap, weather, lumosGame );
 
-		FILE* fp = fopen( "simsave.dat", "wb" );
+		FILE* fp = fopen( gameDAT, "wb" );
 		if ( fp ) {
 			StreamWriter writer( fp );
 			XarcOpen( &writer, "Sim" );
@@ -128,7 +149,7 @@ void Sim::Save( const char* mapDAT, const char* mapXML, const char* gameXML )
 			XARC_SER( &writer, minuteClock );
 			XARC_SER( &writer, timeInMinutes );
 
-			// engine->camera
+			engine->camera.Serialize( &writer );
 			chitBag->Serialize( &factory, &writer );
 
 			XarcClose( &writer );

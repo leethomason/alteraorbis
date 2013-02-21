@@ -1,6 +1,21 @@
 #include "glstreamer.h"
+#include "squisher.h"
 
 using namespace grinliz;
+
+
+XStream::XStream()
+{
+	squisher = 0;
+	//squisher = new Squisher();
+}
+
+
+XStream::~XStream()
+{
+	delete squisher;
+}
+
 
 StreamWriter::StreamWriter( FILE* p_fp ) : fp( p_fp ), depth( 0 ) 
 {
@@ -9,6 +24,13 @@ StreamWriter::StreamWriter( FILE* p_fp ) : fp( p_fp ), depth( 0 )
 	WriteInt( version );
 }
 
+
+StreamWriter::~StreamWriter()
+{
+	if ( squisher ) {
+		GLOUTPUT(( "Squisher: in:%d out:%d ratio=%.2f\n", squisher->totalIn, squisher->totalOut, squisher->Ratio() ));
+	}
+}
 
 void StreamWriter::WriteByte( int value ) 
 {
@@ -65,8 +87,14 @@ void StreamWriter::FlushAttributes()
 
 		// Write the string pool.
 		GLASSERT( names.Size() < 0x10000 );
-		WriteU16( names.Size() );
-		fwrite( names.Mem(), names.Size(), 1, fp );
+		int ncomp = names.Size();
+		const U8* encoded = (const U8*)names.Mem();
+		if ( squisher ) {
+			encoded = squisher->Encode( (const U8*)names.Mem(), names.Size(), &ncomp );
+		}
+		WriteU16( names.Size() );	// uncompressed
+		WriteU16( ncomp );			// compressed
+		fwrite( encoded, ncomp, 1, fp );
 
 		// Write the int pool
 		if ( types & ATTRIB_INT ) {
@@ -305,10 +333,23 @@ const char* StreamReader::OpenElement()
 		int types = ReadByte();
 
 		// String Pool
-		int stringPoolSize = ReadU16();
-		char* stringPool = names.PushArr( stringPoolSize );
-		fread( stringPool, stringPoolSize, 1, fp );
+		char* stringPool = 0;
+		{
+			int size = ReadU16();
+			int compSize = ReadU16();
+			stringPool = names.PushArr( compSize );
+			fread( stringPool, compSize, 1, fp );
 
+			if ( squisher ) {
+				int decomp = compSize;
+				const U8* str = squisher->Decode( (const U8*)stringPool, size, &decomp );
+				GLASSERT( decomp == compSize );
+
+				names.Clear();
+				stringPool = names.PushArr( size );
+				memcpy( stringPool, str, size );
+			}
+		}
 		// pools
 		if ( types & ATTRIB_INT ) {
 			int size = ReadByte();
@@ -403,7 +444,6 @@ const StreamReader::Attribute* StreamReader::Get( const char* key )
 	if ( index >= 0 ) {
 		return &attributes[index];
 	}
-	GLASSERT( 0 );	// return is safe, but unexpected
 	return 0;
 }
 

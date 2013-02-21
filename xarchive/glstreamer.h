@@ -17,11 +17,12 @@
 
 class StreamReader;
 class StreamWriter;
+class Squisher;
 
 class XStream {
 public:
-	XStream() {}
-	virtual ~XStream() {}
+	XStream();
+	virtual ~XStream();
 
 	//	version:int
 	//	BeginNode [Attributes]
@@ -69,6 +70,7 @@ public:
 	virtual StreamReader* Loading() { return 0; }
 
 protected:
+	Squisher* squisher;
 	grinliz::CDynArray< char >		names;
 	grinliz::CDynArray< U8 >		byteData;
 	grinliz::CDynArray< int >		intData;
@@ -80,7 +82,7 @@ protected:
 class StreamWriter : public XStream {
 public:
 	StreamWriter( FILE* p_fp );
-	~StreamWriter()					{}
+	~StreamWriter();
 
 	virtual StreamWriter* Saving() { return this; }
 

@@ -397,3 +397,9 @@ New baseline:
 				917k, 0.5 MClocks	zero support
 				841k				default in GameItem
 				711,  0.40			default in Model
+			Squisher
+				637k  1.10 MClocks	Wow - super slow down. ratio=55% which is great. Disabling
+									for now, may turn back on. May be able to optimize, but
+									not sure what is slow. (Memory access? Bit manipulation?)
+				XML   0.75 MClocks
+				745,  0.60 MClocks	not sure why it went up. But okay.

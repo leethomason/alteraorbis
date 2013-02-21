@@ -18,6 +18,7 @@
 #include "../grinliz/glgeometry.h"
 #include "../grinliz/glmatrix.h"
 #include "serialize.h"
+#include "../xarchive/glstreamer.h"
 
 using namespace grinliz;
 
@@ -46,6 +47,15 @@ void Camera::Save( tinyxml2::XMLPrinter* printer )
 	XEArchive( printer, 0, "posWC", posWC );
 	XEArchive( printer, 0, "quat",  quat );
 	printer->CloseElement();
+}
+
+
+void Camera::Serialize( XStream* xs )
+{
+	XarcOpen( xs, "Camera" );
+	XARC_SER( xs, posWC );
+	XARC_SER( xs, quat );
+	XarcClose( xs );
 }
 
 
