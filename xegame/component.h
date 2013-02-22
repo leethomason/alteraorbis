@@ -20,7 +20,6 @@
 #include "../grinliz/gldebug.h"
 #include "../grinliz/glstringutil.h"
 #include "../grinliz/glvector.h"
-#include "../tinyxml2/tinyxml2.h"
 #include "../xarchive/glstreamer.h"
 #include "xegamelimits.h"
 
@@ -43,9 +42,6 @@ public:
 
 	virtual void OnAdd( Chit* chit )	{	parentChit = chit; }
 	virtual void OnRemove()				{	parentChit = 0;    }
-
-	virtual void Load( const tinyxml2::XMLElement* element ) = 0;
-	virtual void Save( tinyxml2::XMLPrinter* printer ) = 0;
 	virtual void Serialize( XStream* xs ) = 0;
 
 	virtual const char* Name() const = 0;
@@ -71,11 +67,6 @@ protected:
 		return rate * ((float)time) * 0.001f;
 	}
 
-	void BeginSave( tinyxml2::XMLPrinter* printer, const char* name );
-	void EndSave( tinyxml2::XMLPrinter* printer );
-	void BeginLoad( const tinyxml2::XMLElement* element, const char* name ); 
-	void EndLoad( const tinyxml2::XMLElement* element )	{}
-
 	void BeginSerialize( XStream* xs, const char* name );
 	void EndSerialize( XStream* sx );
 
@@ -97,8 +88,6 @@ public:
 
 	virtual const char* Name() const { return "MoveComponent"; }
 
-	virtual void Load( const tinyxml2::XMLElement* element );
-	virtual void Save( tinyxml2::XMLPrinter* printer );
 	virtual void Serialize( XStream* xs );
 
 	virtual bool IsMoving() const				{ return false; }

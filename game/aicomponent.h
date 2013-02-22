@@ -63,8 +63,6 @@ public:
 
 	virtual const char* Name() const { return "AIComponent"; }
 
-	virtual void Load( const tinyxml2::XMLElement* element );
-	virtual void Save( tinyxml2::XMLPrinter* printer );
 	virtual void Serialize( XStream* xs );
 
 	virtual int  DoTick( U32 delta, U32 timeSince );

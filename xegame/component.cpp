@@ -52,45 +52,11 @@ void Component::EndSerialize( XStream* xs )
 }
 
 
-void Component::BeginSave( tinyxml2::XMLPrinter* printer, const char* name )
-{
-	printer->OpenElement( name );
-	printer->PushAttribute( "id", id );
-}
-
-
-void Component::EndSave( tinyxml2::XMLPrinter* printer )
-{
-	printer->CloseElement();
-}
-
-
-void Component::BeginLoad( const tinyxml2::XMLElement* element, const char* name )
-{
-	GLASSERT( StrEqual( element->Value(), name ));
-	id = 0;
-	element->QueryIntAttribute( "id", &id );
-}
-
-
 void Component::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {
 	if ( msg.ID() == ChitMsg::CHIT_DESTROYED_START ) {
 		parentChit->GetChitBag()->QueueDeleteComponent( this );
 	}
-}
-
-
-void MoveComponent::Load( const tinyxml2::XMLElement* element )
-{
-	GLASSERT( 0 );
-}
-
-
-void MoveComponent::Save( tinyxml2::XMLPrinter* printer )
-{
-	this->BeginSave( printer, "MoveComponent" );
-	this->EndSave( printer );
 }
 
 

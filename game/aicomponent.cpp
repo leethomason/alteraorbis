@@ -65,21 +65,6 @@ void AIComponent::Serialize( XStream* xs )
 	this->EndSerialize( xs );
 }
 
-void AIComponent::Load( const tinyxml2::XMLElement* element )
-{
-	GLASSERT( 0 );
-}
-
-
-void AIComponent::Save( tinyxml2::XMLPrinter* printer )
-{
-	// note that no state is saved - AI will recompute. Maybe this
-	// is okay, maybe not.
-	this->BeginSave( printer, "AIComponent" );
-	this->EndSave( printer );
-}
-
-
 int AIComponent::GetTeamStatus( Chit* other )
 {
 	// FIXME: placeholder friend/enemy logic

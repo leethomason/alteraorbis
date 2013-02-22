@@ -37,38 +37,12 @@ void VolcanoScript::Init( const ScriptContext& heap )
 }
 
 
-void VolcanoScript::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele )
-{
-	XE_ARCHIVE( size );
-	XE_ARCHIVE( maxSize );
-}
-
-
 void VolcanoScript::Serialize( const ScriptContext& ctx, XStream* xs )
 {
 	XarcOpen( xs, "VolcanoScript" );
 	XARC_SER( xs, size );
 	XARC_SER( xs, maxSize );
 	XarcClose( xs );
-}
-
-
-void VolcanoScript::Load( const ScriptContext& ctx, const tinyxml2::XMLElement* child )
-{
-	size = maxSize = 0;
-	GLASSERT( child );
-	
-	if ( child ) {
-		Archive( 0, child );
-	}
-}
-
-
-void VolcanoScript::Save( const ScriptContext& ctx, tinyxml2::XMLPrinter* printer )
-{
-	printer->OpenElement( "VolcanoScript" );
-	Archive( printer, 0 );
-	printer->CloseElement();
 }
 
 

@@ -33,8 +33,6 @@ public:
 
 	virtual const char* Name() const { return "HealthComponent"; }
 
-	virtual void Load( const tinyxml2::XMLElement* element );
-	virtual void Save( tinyxml2::XMLPrinter* printer );
 	virtual void Serialize( XStream* xs );
 
 	virtual void DebugStr( grinliz::GLString* str )		{ str->Format( "[Health] " ); }

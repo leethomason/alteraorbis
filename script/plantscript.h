@@ -18,8 +18,6 @@ public:
 	virtual ~PlantScript()	{}
 
 	virtual void Init( const ScriptContext& heap );
-	virtual void Load( const ScriptContext& ctx, const tinyxml2::XMLElement* element );
-	virtual void Save( const ScriptContext& ctx, tinyxml2::XMLPrinter* printer );
 	virtual void Serialize( const ScriptContext& ctx, XStream* xs );
 
 	virtual int DoTick( const ScriptContext& ctx, U32 delta, U32 since );
@@ -31,7 +29,6 @@ public:
 	int Stage() const	{ return stage; }
 
 private:
-	void Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele );
 	void SetRenderComponent( Chit* chit );
 	const GameItem* GetResource();
 

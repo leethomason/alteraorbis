@@ -102,12 +102,6 @@ void MapSpatialComponent::OnRemove()
 }
 
 
-void MapSpatialComponent::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele )
-{
-	XE_ARCHIVE( mode );
-}
-
-
 void MapSpatialComponent::Serialize( XStream* xs )
 {
 	if ( xs->Loading() ) {
@@ -119,56 +113,4 @@ void MapSpatialComponent::Serialize( XStream* xs )
 	super::Serialize( xs );
 	this->EndSerialize( xs );
 }
-
-
-void MapSpatialComponent::Load( const tinyxml2::XMLElement* element )
-{
-	mode = USES_GRID;
-	justLoaded = true;
-
-	this->BeginLoad( element, "MapSpatialComponent" );
-	Archive( 0, element );
-	super::Load( element->FirstChildElement( "SpatialComponent" ));
-	this->EndLoad( element );
-
-	/* Oops: this will be done by OnAdd
-	Vector2I m = MapPosition();
-	worldMap->SetInUse( m.x, m.y, true );
-	if ( mode == BLOCKS_GRID ) {
-		worldMap->SetBlocked( m.x, m.y );
-	}
-	*/
-}
-
-
-void MapSpatialComponent::Save( tinyxml2::XMLPrinter* printer )
-{
-	Vector2I pos = MapPosition();
-	const WorldGrid& wg = worldMap->GetWorldGrid( pos.x, pos.y );
-	GLASSERT( worldMap->InUse( pos.x, pos.y ));
-	GLASSERT( wg.InUse() );
-	if ( mode == BLOCKS_GRID ) {
-		GLASSERT( wg.IsBlocked() );
-		GLASSERT( worldMap->IsBlocked( pos.x, pos.y ));
-	}
-
-	this->BeginSave( printer, "MapSpatialComponent" );
-	Archive( printer, 0 );
-	super::Save( printer );
-	this->EndSave( printer );
-}
-
-
-Vector2I MapSpatialComponent::MapPosition() const
-{
-	Vector2F pos = this->GetPosition2D();
-	Vector2I v = { (int)pos.x, (int)pos.y };
-	return v;
-}
-
-
-
-
-
-
 

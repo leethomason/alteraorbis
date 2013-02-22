@@ -118,8 +118,6 @@ public:
 	void Init( int id, ChitBag* chitBag );
 	void Free();
 
-	void Save( tinyxml2::XMLPrinter* );
-	void Load( const ComponentFactory* factory, const tinyxml2::XMLElement* );
 	void Serialize( const ComponentFactory* factory, XStream* xs );
 
 	int ID() const { return id; }

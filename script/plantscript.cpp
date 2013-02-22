@@ -118,36 +118,6 @@ void PlantScript::Serialize( const ScriptContext& ctx, XStream* xs )
 }
 
 
-void PlantScript::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele )
-{
-	XE_ARCHIVE( type );
-	XE_ARCHIVE( stage );
-	XE_ARCHIVE( age );
-	XE_ARCHIVE( ageAtStage );
-	XE_ARCHIVE( growTimer );
-	XE_ARCHIVE( sporeTimer );
-}
-
-
-void PlantScript::Load( const ScriptContext& ctx, const tinyxml2::XMLElement* element )
-{
-	stage = 0;
-	age = 0;
-	ageAtStage = 0;
-	growTimer = sporeTimer = 0;
-	GLASSERT( element );
-	Archive( 0, element );
-}
-
-
-void PlantScript::Save( const ScriptContext& ctx, tinyxml2::XMLPrinter* printer )
-{
-	printer->OpenElement( "PlantScript" );
-	Archive( printer, 0 );
-	printer->CloseElement();
-}
-
-
 int PlantScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 {
 	static const float	HP_PER_SECOND = 10.0f;

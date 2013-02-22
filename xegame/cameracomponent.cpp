@@ -39,17 +39,6 @@ void CameraComponent::OnRemove()
 	}
 }
 
-
-void CameraComponent::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele )
-{
-	XE_ARCHIVE( autoDelete );
-	XE_ARCHIVE( mode );
-	XE_ARCHIVE( targetChitID );
-	XE_ARCHIVE( speed );
-	XEArchive( prn, ele, "dest", dest );
-}
-
-
 void CameraComponent::Serialize( XStream* xs )
 {
 	this->BeginSerialize( xs, Name() );
@@ -59,21 +48,6 @@ void CameraComponent::Serialize( XStream* xs )
 	XARC_SER( xs, speed );
 	XARC_SER( xs, dest );
 	this->EndSerialize( xs );
-}
-
-
-void CameraComponent::Load( const tinyxml2::XMLElement* element )
-{
-	this->BeginLoad( element, "CameraComponent" );
-	Archive( 0, element );
-	this->EndLoad( element );
-}
-
-void CameraComponent::Save( tinyxml2::XMLPrinter* printer )
-{
-	this->BeginSave( printer, "CameraComponent" );
-	Archive( printer, 0 );
-	this->EndSave( printer );
 }
 
 

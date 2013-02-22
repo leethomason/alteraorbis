@@ -16,8 +16,6 @@ public:
 	virtual const char* Name() const { return "PhysicsMoveComponent"; }
 	virtual void DebugStr( grinliz::GLString* str );
 
-	virtual void Load( const tinyxml2::XMLElement* element );
-	virtual void Save( tinyxml2::XMLPrinter* printer );
 	virtual void Serialize( XStream* xs );
 
 	virtual void OnAdd( Chit* chit );
@@ -32,8 +30,6 @@ public:
 	void DeleteWhenDone( bool _deleteWhenDone )			{ deleteWhenDone = _deleteWhenDone; }
 
 private:
-	void Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele );
-
 	grinliz::Vector3F velocity;
 	float rotation;
 	bool deleteWhenDone;

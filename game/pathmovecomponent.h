@@ -44,8 +44,6 @@ public:
 	virtual const char* Name() const { return "PathMoveComponent"; }
 	virtual void DebugStr( grinliz::GLString* str );
 
-	virtual void Load( const tinyxml2::XMLElement* element );
-	virtual void Save( tinyxml2::XMLPrinter* printer );
 	virtual void Serialize( XStream* xs );
 
 	virtual void OnAdd( Chit* chit );
@@ -74,8 +72,6 @@ public:
 	} 
 
 private:
-	void Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele );
-
 	// Commit the 'queued' to the 'dest', if possible. 
 	void ComputeDest();
 	bool NeedComputeDest();

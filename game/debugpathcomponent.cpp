@@ -101,14 +101,3 @@ void DebugPathComponent::Serialize( XStream* xs )
 	this->EndSerialize( xs );
 }
 
-void DebugPathComponent::Load( const tinyxml2::XMLElement* element )
-{
-	GLASSERT( 0 );
-}
-
-
-void DebugPathComponent::Save( tinyxml2::XMLPrinter* printer )
-{
-	this->BeginSave( printer, "DebugPathComponent" );
-	this->EndSave( printer );
-}

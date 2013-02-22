@@ -105,66 +105,6 @@ void ChitBag::Serialize( const ComponentFactory* factory, XStream* xs )
 }
 
 
-void ChitBag::Save( XMLPrinter* printer )
-{
-	printer->OpenElement( "ChitBag" );
-
-	printer->OpenElement( "Chits" );
-	Chit** chits = chitID.GetValues();
-	for( int i=0; i<chitID.NumValues(); ++i ) {
-		chits[i]->Save( printer );
-	}
-	printer->CloseElement();	// Chits
-
-	printer->OpenElement( "Bolts" );
-	for( int i=0; i<bolts.Size(); ++i ) {
-		bolts[i].Save( printer );
-	}
-	printer->CloseElement();
-
-	printer->CloseElement();	// ChitBag
-}
-
-
-void ChitBag::Load( const ComponentFactory* factory, const XMLElement* ele )
-{
-	const XMLElement* child = ele->FirstChildElement( "ChitBag" );
-	GLASSERT( child );
-	if ( child ) {
-		idPool = 0;
-
-		const XMLElement* chits = child->FirstChildElement( "Chits" );
-		GLASSERT( chits );
-		if ( chits ) {
-			for( const XMLElement* chit = chits->FirstChildElement( "Chit" );
-				 chit;
-				 chit = chit->NextSiblingElement( "Chit" ) ) 
-			{
-				int id = 0;
-				chit->QueryIntAttribute( "id", &id );
-				GLASSERT( id > 0 );
-				idPool = Max( id, idPool );
-
-				Chit* c = this->NewChit( id );
-				c->Load( factory, chit );
-			}
-		}
-
-		const XMLElement* boltsEle = child->FirstChildElement( "Bolts" );
-		if ( boltsEle ) {
-			for( const XMLElement* boltEle = boltsEle->FirstChildElement( "Bolt" );
-				 boltEle;
-				 boltEle = boltEle->NextSiblingElement( "Bolt" ))
-			{
-				Bolt* b = bolts.PushArr( 1 );
-				b->Load( boltEle );
-			}
-		}
-	}
-}
-
-
-
 Chit* ChitBag::NewChit( int id )
 {
 	if ( !memRoot ) {

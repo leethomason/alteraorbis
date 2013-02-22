@@ -38,26 +38,6 @@ void ItemComponent::Serialize( XStream* xs )
 }
 
 
-void ItemComponent::Save( tinyxml2::XMLPrinter* printer )
-{
-	BeginSave( printer, "ItemComponent" );
-	item.Save( printer );
-	EndSave( printer );
-}
-
-
-void ItemComponent::Load( const tinyxml2::XMLElement* element )
-{
-	this->BeginLoad( element, "ItemComponent" );
-	const tinyxml2::XMLElement* itemElement = element->FirstChildElement( "item" );
-	GLASSERT( itemElement );
-	if ( itemElement ) {
-		item.Load( itemElement );
-	}
-	this->EndLoad( element );
-}
-
-
 // FIXME: very character specific code. Move to Script? make more specific so it actually works? (filters non-characters)
 void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {

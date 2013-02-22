@@ -38,18 +38,6 @@ static const float MOVE_SPEED		= 1.2f;			// grid/second
 static const float ROTATION_SPEED	= 360.f;		// degrees/second
 
 
-void PathMoveComponent::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele )
-{
-	XE_ARCHIVE( queued.pos.x );
-	XE_ARCHIVE( queued.pos.y );
-	XE_ARCHIVE( queued.rotation );
-
-	XE_ARCHIVE( dest.pos.x );
-	XE_ARCHIVE( dest.pos.y );
-	XE_ARCHIVE( dest.rotation );
-}
-
-
 void PathMoveComponent::Serialize( XStream* item )
 {
 	this->BeginSerialize( item, Name() );
@@ -58,23 +46,6 @@ void PathMoveComponent::Serialize( XStream* item )
 	XARC_SER( item, dest.pos );
 	XARC_SER( item, dest.rotation );
 	this->EndSerialize( item );
-}
-
-
-void PathMoveComponent::Load( const tinyxml2::XMLElement* element )
-{
-	this->BeginLoad( element, "PathMoveComponent" );
-	Archive( 0, element );
-	this->EndLoad( element );
-}
-
-
-void PathMoveComponent::Save( tinyxml2::XMLPrinter* printer )
-{
-	// note that save/load causes re-path. Too much data to save otherwise.
-	this->BeginSave( printer, "PathMoveComponent" );
-	Archive( printer, 0 );	
-	this->EndSave( printer );
 }
 
 

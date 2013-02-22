@@ -25,22 +25,6 @@
 using namespace grinliz;
 
 
-void HealthComponent::Load( const tinyxml2::XMLElement* element )
-{
-	this->BeginLoad( element, "HealthComponent" );
-	element->QueryUnsignedAttribute( "destroyed", &destroyed );
-	this->EndLoad( element );
-}
-
-
-void HealthComponent::Save( tinyxml2::XMLPrinter* printer )
-{
-	this->BeginSave( printer, "HealthComponent" );
-	printer->PushAttribute( "destroyed", destroyed );
-	this->EndSave( printer );
-}
-
-
 void HealthComponent::Serialize( XStream* xs )
 {
 	this->BeginSerialize( xs, Name() );

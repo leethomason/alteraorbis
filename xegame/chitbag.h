@@ -43,8 +43,6 @@ public:
 	void  DeleteChit( Chit* );
 	Chit* GetChit( int id );
 
-	void Save( tinyxml2::XMLPrinter* );
-	void Load( const ComponentFactory* factory, const tinyxml2::XMLElement* );
 	void Serialize( const ComponentFactory* factory, XStream* xs );
 
 	// Bolts are a special kind of chit. Just easier

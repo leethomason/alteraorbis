@@ -35,8 +35,6 @@ class IScript
 {
 public:
 	virtual void Init( const ScriptContext& heap )	= 0;
-	virtual void Load( const ScriptContext& ctx, const tinyxml2::XMLElement* element ) = 0;
-	virtual void Save( const ScriptContext& ctx, tinyxml2::XMLPrinter* printer )       = 0;
 	virtual void Serialize( const ScriptContext& ctx, XStream* xs )	= 0;
 	virtual int DoTick( const ScriptContext& ctx, U32 delta, U32 since ) = 0;
 	virtual const char* ScriptName() = 0;
@@ -55,8 +53,6 @@ public:
 
 	virtual const char* Name() const { return "ScriptComponent"; }
 
-	virtual void Load( const tinyxml2::XMLElement* element );
-	virtual void Save( tinyxml2::XMLPrinter* printer );
 	virtual void Serialize( XStream* xs );
 
 	virtual void OnAdd( Chit* chit );
@@ -68,8 +64,6 @@ public:
 	// Obviously dangerous; used for casting.	
 	IScript* Script() { return script; }
 private:
-	void Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele );
-
 	ScriptContext context;
 	IScript* script;
 	const ComponentFactory* factory;

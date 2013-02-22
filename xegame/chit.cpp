@@ -122,55 +122,6 @@ void Chit::Serialize( const ComponentFactory* factory, XStream* xs )
 }
 
 
-void Chit::Save( tinyxml2::XMLPrinter* printer )
-{
-	printer->OpenElement( "Chit" );
-	printer->PushAttribute( "id", id );
-	printer->PushAttribute( "timeSince", timeSince );
-
-	if ( shelf ) {
-		printer->OpenElement( "Shelf" );
-		shelf->Save( printer );
-		printer->CloseElement();
-	}
-	for( int i=0; i<NUM_SLOTS; ++i ) {
-		if ( slot[i] ) {
-			slot[i]->Save( printer );
-		}
-	}
-
-	printer->CloseElement();	// Chit
-}
-
-
-void Chit::Load( const ComponentFactory* factory, const XMLElement* ele ) 
-{
-	timeSince = 0;
-	timeToTick = 0;
-	GLASSERT( StrEqual( ele->Value(), "Chit" ));
-	ele->QueryAttribute( "id", &id );
-	ele->QueryAttribute( "timeSince", &timeSince );
-
-	const XMLElement* shelfEle = ele->FirstChildElement( "Shelf" );
-	if ( shelfEle ) {
-		const XMLElement* slotEle = shelfEle->FirstChildElement();
-		GLASSERT( slotEle );
-		shelf = factory->Factory( slotEle->Name(),  this );
-		shelf->Load( slotEle );
-	}
-
-	for( const XMLElement* slotEle = ele->FirstChildElement();
-		 slotEle;
-		 slotEle = slotEle->NextSiblingElement() )
-	{
-		Component* component = factory->Factory( slotEle->Name(), this ); 
-		GLASSERT( component );
-		component->Load( slotEle );
-		this->Add( component );
-	}
-}
-
-
 int Chit::Slot( Component* c )
 {
 	int s = -1;

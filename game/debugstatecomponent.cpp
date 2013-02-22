@@ -48,20 +48,6 @@ DebugStateComponent::DebugStateComponent( WorldMap* _map ) : map( _map )
 }
 
 
-void DebugStateComponent::Load( const tinyxml2::XMLElement* element )
-{
-	this->BeginLoad( element, "DebugStateComponent" );
-	this->EndLoad( element );
-}
-
-
-void DebugStateComponent::Save( tinyxml2::XMLPrinter* printer )
-{
-	this->BeginSave( printer, "DebugStateComponent" );
-	this->EndSave( printer );
-}
-
-
 void DebugStateComponent::Serialize( XStream* xs )
 {
 	this->BeginSerialize( xs, Name() );

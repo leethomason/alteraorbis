@@ -39,18 +39,18 @@ public:
 
 	virtual void OnAdd( Chit* chit );
 	virtual void OnRemove();
-	virtual void Load( const tinyxml2::XMLElement* element );
-	virtual void Save( tinyxml2::XMLPrinter* printer );
 	virtual void Serialize( XStream* xs );
 
 	// WARNING must be called before OnAdd
 	void SetMapPosition( int x, int y );
 
-	grinliz::Vector2I MapPosition() const;
+	grinliz::Vector2I MapPosition() const { 
+		grinliz::Vector2I v = { (int) position.x, (int)position.z };
+		return v;
+	}
 	void SetMode( int mode );
 
 private:
-	void Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele );
 	bool justLoaded;
 	int mode;
 	WorldMap* worldMap;
