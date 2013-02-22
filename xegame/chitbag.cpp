@@ -88,7 +88,7 @@ void ChitBag::Serialize( const ComponentFactory* factory, XStream* xs )
 			XarcClose( xs );
 			idPool = Max( id, idPool );
 
-			GLOUTPUT(( "loading chit id=%d\n", id ));
+			//GLOUTPUT(( "loading chit id=%d\n", id ));
 			Chit* c = this->NewChit( id );
 			c->Serialize( factory, xs );
 		}
