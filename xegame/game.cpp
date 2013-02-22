@@ -414,10 +414,10 @@ void Game::SavePathTimeStamp( int slot, GLString* stamp )
 	}
 }
 */
-
+/*
 void Game::SaveGame( int slot )
 {
-	const char* path = GamePath( "game", 0, "xml" );
+	const char* path = GamePath( "game", 0, "dat" );
 	FILE* fp = fopen( path, "w" );
 	GLASSERT( fp );
 	if ( fp ) {
@@ -447,7 +447,7 @@ void Game::SaveGame( int slot )
 
 void Game::LoadGame()
 {
-	const char* path = GamePath( "game", 0, "xml" );
+	const char* path = GamePath( "game", 0, "dat" );
 	FILE* fp = fopen( path, "r" );
 	GLASSERT( fp );
 	if ( fp ) {
@@ -464,7 +464,7 @@ void Game::LoadGame()
 		fclose( fp );
 	}
 }
-
+*/
 
 void Game::PrintPerf( int depth, const PerfData& data )
 {

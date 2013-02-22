@@ -232,13 +232,3 @@ void LumosGame::PositionStd( gamui::PushButton* okay, gamui::PushButton* cancel 
 	if ( cancel )
 		layout.PosAbs( cancel, LumosGame::CANCEL_X, -1 );
 }
-
-
-void LumosGame::Save( tinyxml2::XMLPrinter* printer )
-{
-}
-
-
-void LumosGame::Load( const tinyxml2::XMLElement& parent )
-{
-}

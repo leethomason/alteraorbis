@@ -99,12 +99,6 @@ public:
 	bool HasFile( const char* file ) const;
 	void DeleteFile( const char* file );
 
-	void SaveGame( int slot=0 );
-	void LoadGame();
-
-	virtual void Save( tinyxml2::XMLPrinter* ) {}
-	virtual void Load( const tinyxml2::XMLElement& parent )	{}
-
 	bool PopSound( int* database, int* offset, int* size );
 
 	const gamedb::Reader* GetDatabase()	{ return database0; }

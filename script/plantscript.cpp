@@ -101,7 +101,6 @@ void PlantScript::Init( const ScriptContext& ctx )
 	float norm = Max( fabs( light.x ), fabs( light.z ));
 	lightTap.x = LRintf( light.x / norm );
 	lightTap.y = LRintf( light.z / norm );
-	lightTapYMult = sqrtf( light.x*light.x + light.z*light.z ) / light.y;
 }
 
 
@@ -145,27 +144,63 @@ int PlantScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 	if ( !item ) return tick;
 
 	Vector2I pos = sc->MapPosition();
-
 	float h = (float)(stage+1);
 
 	float rainFraction	= weather->RainFraction( pos.x, pos.y );
+	Rectangle2I bounds = worldMap->Bounds();
 
-	// rain,sun = [0,1]
+	// ------ Sun -------- //
+	float sunHeight		= h;	
+	Vector2I tap = pos + lightTap;
 
-	// Shadows.
-	
+	if ( bounds.Contains( tap )) {
+		// Check for model or rock. If looking at a model, take 1/2 the
+		// height of the first thing we find.
+		const WorldGrid& wg = worldMap->GetWorldGrid( tap.x, tap.y );
+		if ( wg.RockHeight() > 0 ) {
+			sunHeight = Min( sunHeight, (float)wg.RockHeight() * 0.5f );
+		}
+		else {
+			Rectangle2F r;
+			r.Set( (float)tap.x, (float)tap.y, (float)(tap.x+1), (float)(tap.y+1) );
+			const grinliz::CDynArray<Chit*>& query = ctx.chit->GetChitBag()->QuerySpatialHash( r, 0, 0 );
+			for( int i=0; i<query.Size(); ++i ) {
+				RenderComponent* rc = query[i]->GetRenderComponent();
+				if ( rc ) {
+					Rectangle3F aabb = rc->MainModel()->AABB();
+					sunHeight = Min( aabb.max.z * 0.5f, sunHeight );
+					break;
+				}
+			}
+		}
+	}
 
-	// FIXME: account for shadows
-	float sunHeight		= h;												
-	float sun			= sunHeight * (1.0f-rainFraction) / h;
+	float sun = sunHeight * (1.0f-rainFraction) / h;
 
-	// FIXME: account for pools, sea edge
-	// FIXME: account for nearby rock limiting root depth
-	// FIXME: model root depth
-	float rain = rainFraction; // * maxdepth / depth
+	// ---------- Rain ------- //
+	float rootDepth = h;
 
+	for( int j=-1; j<=1; ++j ) {
+		for( int i=-1; i<=1; ++i ) {
+			tap.Set( pos.x+i, pos.y+j );
+			if ( bounds.Contains( tap )) {
+				const WorldGrid& wg = worldMap->GetWorldGrid( tap.x, tap.y );
+				// Underground rocks limit root dethp.
+				rootDepth = Min( rootDepth, (float)MAX_HEIGHT - wg.RockHeight() );
+				if ( wg.IsWater() ) {
+					rainFraction += 0.25f;
+				}
+			}
+		}
+	}
+	float rain = Clamp( rainFraction * rootDepth / h, 0.0f, 1.0f );
+	rootDepth = Clamp( rootDepth, 0.1f, h );
+
+	// ------- Temperature ----- //
 	float temp = weather->Temperature( pos.x, pos.y );
 
+
+	// ------- calc ------- //
 	Vector3F actual = { sun, rain, temp };
 	Vector3F optimal = { 0.5f, 0.5f, 0.5f };
 
@@ -173,10 +208,7 @@ int PlantScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 	item->GetValue( "rain", &optimal.y );
 	item->GetValue( "temp", &optimal.z );
 
-	float distance = ( optimal - actual ).Length();
-
-	// FIXME adjust distance for size.
-	// FIXME scale hp for size2
+	float distance = ( optimal - actual ).LengthSquared();
 
 	if ( distance < 0.4f ) {
 		// Heal.
@@ -184,7 +216,7 @@ int PlantScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 		healMsg.dataF = HP_PER_SECOND*seconds;
 		ctx.chit->SendMessage( healMsg );
 
-		sporeTimer += 1000;
+		sporeTimer += since;
 		int nStage = 4;
 		item->GetValue( "nStage", &nStage );
 
@@ -208,8 +240,8 @@ int PlantScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 		// Spore
 		if ( sporeTimer > TIME_TO_SPORE ) {
 			sporeTimer -= TIME_TO_SPORE;
-			int dx = ctx.chit->random.Sign();
-			int dy = ctx.chit->random.Sign();
+			int dx = -1 + ctx.chit->random.Rand(4);	// [-1,2]
+			int dy = -1 + ctx.chit->random.Rand(3);	// [-1,1]
 
 			sim->CreatePlant( pos.x+dx, pos.y+dy, -1 );
 		}

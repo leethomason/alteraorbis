@@ -59,14 +59,13 @@ void WorldGenScene::Resize()
 void WorldGenScene::ItemTapped( const gamui::UIItem* item )
 {
 	if ( item == &okay ) {
-		const char* gameXML = game->GamePath( "game", 0, "xml" );
+		const char* gameXML = game->GamePath( "game", 0, "dat" );
 		const char* mapPNG  = game->GamePath( "map", 0, "png" );
 		const char* mapDAT  = game->GamePath( "map", 0, "dat" );
-		const char* mapXML  = game->GamePath( "map", 0, "xml" );
 
 		game->DeleteFile( gameXML );
 		game->DeleteFile( mapDAT );
-		worldMap->Save( mapDAT, mapXML );
+		worldMap->Save( mapDAT );
 		worldMap->SavePNG( mapPNG );
 		game->PopScene();
 	}

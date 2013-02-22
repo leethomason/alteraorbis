@@ -21,7 +21,7 @@ class Squisher;
 
 class XStream {
 public:
-	XStream();
+	XStream( bool squish );
 	virtual ~XStream();
 
 	//	version:int

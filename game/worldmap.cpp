@@ -109,7 +109,7 @@ void WorldMap::SavePNG( const char* path )
 }
 
 
-void WorldMap::Save( const char* pathToDAT, const char* pathToXML )
+void WorldMap::Save( const char* pathToDAT )
 {
 	// Debug or laptap, about 4.5MClock
 	// smaller window size: 3.8MClock
@@ -119,89 +119,51 @@ void WorldMap::Save( const char* pathToDAT, const char* pathToXML )
 	FILE* fp = fopen( pathToDAT, "wb" );
 	GLASSERT( fp );
 	if ( fp ) {
-		U32 version = 0;
-		fwrite( &version, 4, 1, fp );
+
+		StreamWriter writer(fp);
+
+		XarcOpen( &writer, "Map" );
+		XARC_SER( &writer, width );
+		XARC_SER( &writer, height );
+		
+		worldInfo->Serialize( &writer );
+		XarcClose( &writer );
+
+		// Tack on the grid so that the dat file can still be inspected.
 		fwrite( grid, sizeof(WorldGrid), width*height, fp );
 		fclose( fp );
-	}
-
-	{
-		QuickProfile qp( "WorldMap::Save XML" );
-		fp = fopen( pathToXML, "w" );
-		GLASSERT( fp );
-		if ( fp ) {
-			XMLPrinter printer( fp );
-		
-			printer.OpenElement( "Map" );
-			printer.PushAttribute( "width", width );
-			printer.PushAttribute( "height", height );
-
-			worldInfo->Save( &printer );
-
-			printer.CloseElement();
-		
-			fclose( fp );
-		}
-	}
-	{
-		QuickProfile qp( "WorldMap::Save Xarc" );
-
-		FILE* fp = fopen( "mapsave.dat", "wb" );
-		if ( fp ) {
-			StreamWriter writer(fp);
-
-			XarcOpen( &writer, "Map" );
-			XARC_SER( &writer, width );
-			XARC_SER( &writer, height );
-		
-			worldInfo->Serialize( &writer );
-			XarcClose( &writer );
-
-			fclose( fp );
-		}
 	}
 }
 
 
-void WorldMap::Load( const char* pathToDAT, const char* pathToXML )
+void WorldMap::Load( const char* pathToDAT )
 {
-	QuickProfile qp( "WorldMap::Load" );
-	XMLDocument doc;
-	doc.LoadFile( pathToXML );
-	GLASSERT( !doc.Error() );
-	if ( !doc.Error() ) {
+	FILE* fp = fopen( pathToDAT, "rb" );
+	GLASSERT( fp );
+	if ( fp ) {
+		StreamReader reader( fp );
 		
-		const XMLElement* mapEle = doc.FirstChildElement( "Map" );
-		GLASSERT( mapEle );
-		if ( mapEle ) {
-			int w = 64;
-			int h = 64;
-			mapEle->QueryIntAttribute( "width", &w );
-			mapEle->QueryIntAttribute( "height", &h );
-			Init( w, h );
+		XarcOpen( &reader, "Map" );
 
-			unsigned int pngW=0, pngH=0;
-			worldInfo->Load( *mapEle );
+		XARC_SER( &reader, width );
+		XARC_SER( &reader, height );
+		Init( width, height );
 
-			memset( grid, 0, sizeof(WorldGrid)*width*height );
-			FILE* datFP = fopen( pathToDAT, "rb" );
-			GLASSERT( datFP );
-			if ( datFP ) {
-				U32 version = 0;
-				fread( &version, 4, 1, datFP );
-				fread( grid, sizeof(WorldGrid), width*height, datFP );
-				fclose( datFP );
-			}
-			Tessellate();
+		worldInfo->Serialize( &reader );
+		XarcClose( &reader );
 
-			for( int j=0; j<height; ++j ) {
-				for( int i=0; i<width; ++i ) {
-					int index = INDEX( i, j );
-					// Clear the block, which is serialized, because the SetRock() will set it.
-					if ( grid[index].IsBlocked() )
-						grid[index].SetBlocked( false );
-					SetRock( i, j, -2, 0, grid[index].Magma() );
-				}
+		fread( grid, sizeof(WorldGrid), width*height, fp );
+		fclose( fp );
+		
+		Tessellate();
+
+		for( int j=0; j<height; ++j ) {
+			for( int i=0; i<width; ++i ) {
+				int index = INDEX( i, j );
+				// Clear the block, which is serialized, because the SetRock() will set it.
+				if ( grid[index].IsBlocked() )
+					grid[index].SetBlocked( false );
+				SetRock( i, j, -2, 0, grid[index].Magma() );
 			}
 		}
 	}

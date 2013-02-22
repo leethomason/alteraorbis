@@ -4,10 +4,12 @@
 using namespace grinliz;
 
 
-XStream::XStream()
+XStream::XStream( bool squish )
 {
 	squisher = 0;
-	//squisher = new Squisher();
+	if ( squish ) {
+		squisher = new Squisher();
+	}
 }
 
 
@@ -17,7 +19,7 @@ XStream::~XStream()
 }
 
 
-StreamWriter::StreamWriter( FILE* p_fp ) : fp( p_fp ), depth( 0 ) 
+StreamWriter::StreamWriter( FILE* p_fp ) : XStream( false ), fp( p_fp ), depth( 0 ) 
 {
 	// Write the header:
 	int version = 1;
@@ -264,7 +266,7 @@ void StreamWriter::SetArr( const char* key, const U8* value, int n )
 	}
 }
 
-StreamReader::StreamReader( FILE* p_fp ) : fp( p_fp ), depth(0), version(0)
+StreamReader::StreamReader( FILE* p_fp ) : XStream( false ), fp( p_fp ), depth(0), version(0)
 {
 	version = ReadInt();
 }

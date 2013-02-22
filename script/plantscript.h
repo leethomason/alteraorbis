@@ -32,12 +32,16 @@ private:
 	void SetRenderComponent( Chit* chit );
 	const GameItem* GetResource();
 
+	enum {
+		NUM_STAGE = 4,
+		MAX_HEIGHT = NUM_STAGE
+	};
+
 	Sim*		sim;
 	Engine*		engine;
 	WorldMap*	worldMap;
 	Weather*	weather;
 	grinliz::Vector2I	lightTap;		// where to check for a shadow. (only check one spot.)
-	float				lightTapYMult;	// y multiple to get shadow height
 	int			type;		// 0-7, fern, tree, etc.
 	int			stage;		// 0-3
 	U32			age;

@@ -89,10 +89,10 @@ public:
 		U64 endTime = FastTime();	
 		double delta = ((double)(endTime-startTime)/(double)(1000*1000));
 		if ( delta < 10 ) {
-			GLOUTPUT (( "%s %.2f MClocks\n", name, delta ));
+			GLOUTPUT_REL(( "%s %.2f MClocks\n", name, delta ));
 		}
 		else {
-			GLOUTPUT (( "%s %.1f MClocks\n", name, delta ));
+			GLOUTPUT_REL(( "%s %.1f MClocks\n", name, delta ));
 		}
 	}
 

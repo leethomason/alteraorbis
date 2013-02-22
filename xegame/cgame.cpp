@@ -93,7 +93,8 @@ void GameSave( void* handle ) {
 
 	GLOUTPUT(( "GameSave. handle=%x\n", handle ));
 	Game* game = (Game*)handle;
-	game->SaveGame( 0 );
+	// FIXME
+//	game->SaveGame( 0 );
 }
 
 

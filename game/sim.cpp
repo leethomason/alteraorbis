@@ -64,10 +64,10 @@ Sim::~Sim()
 }
 
 
-void Sim::Load( const char* mapDAT, const char* mapXML, const char* gameDAT )
+void Sim::Load( const char* mapDAT, const char* gameDAT )
 {
 	chitBag->DeleteAll();
-	worldMap->Load( mapDAT, mapXML );
+	worldMap->Load( mapDAT );
 
 	if ( !gameDAT ) {
 		CreatePlayer();
@@ -108,17 +108,9 @@ void Sim::Load( const char* mapDAT, const char* mapXML, const char* gameDAT )
 }
 
 
-void Sim::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele )
+void Sim::Save( const char* mapDAT, const char* gameDAT )
 {
-	XE_ARCHIVE( playerID );
-	XE_ARCHIVE( minuteClock );
-	XE_ARCHIVE( timeInMinutes );
-}
-
-
-void Sim::Save( const char* mapDAT, const char* mapXML, const char* gameDAT )
-{
-	worldMap->Save( mapDAT, mapXML );
+	worldMap->Save( mapDAT );
 
 #if 0
 	FILE* fp = fopen( gameXML, "w" );
@@ -228,38 +220,31 @@ void Sim::DoTick( U32 delta )
 
 	// Logic that will probably need to be broken out.
 	// What happens in a given age?
-	int age = minuteClock / AGE;
+	int age = minuteClock / MINUTES_IN_AGE;
 	volcTimer += delta;
 
-	// Age of Fire
+	// Age of Fire. Needs lots of volcanoes to seed the world.
 	static const int VOLC_RAD = 9;
 	static const int VOLC_DIAM = VOLC_RAD*2+1;
 	static const int NUM_VOLC = MAX_MAP_SIZE*MAX_MAP_SIZE / (VOLC_DIAM*VOLC_DIAM);
-	static const int MSEC_TO_VOLC = AGE / NUM_VOLC;
+	int MSEC_TO_VOLC = AGE / NUM_VOLC;
 
-	switch( age ) {
-	case 0:
-		// The Age of Fire
-		// Essentially want to get the world covered.
-		while( volcTimer >= MSEC_TO_VOLC ) {
-			volcTimer -= MSEC_TO_VOLC;
+	// NOT Age of Fire:
+	if ( age > 0 ) {
+		MSEC_TO_VOLC *= 10;
+	}
 
-			for( int i=0; i<5; ++i ) {
-				int x = random.Rand(worldMap->Width());
-				int y = random.Rand(worldMap->Height());
-				if ( worldMap->IsLand( x, y ) ) {
-					CreateVolcano( x, y, VOLC_RAD );
-					break;
-				}
+	while( volcTimer >= MSEC_TO_VOLC ) {
+		volcTimer -= MSEC_TO_VOLC;
+
+		for( int i=0; i<5; ++i ) {
+			int x = random.Rand(worldMap->Width());
+			int y = random.Rand(worldMap->Height());
+			if ( worldMap->IsLand( x, y ) ) {
+				CreateVolcano( x, y, VOLC_RAD );
+				break;
 			}
 		}
-		break;
-
-	default:
-		if ( minuteTick && random.Rand(3)==0 ) {
-			CreateVolcano( random.Rand(worldMap->Width()), random.Rand(worldMap->Height()), VOLC_RAD );
-		}
-		break;
 	}
 
 	if ( secondTick ) {
@@ -328,7 +313,7 @@ void Sim::CreatePlant( int x, int y, int type )
 					int stage, type;
 					GameItem* item = PlantScript::IsPlant( c, &type, &stage );
 					if ( item ) {
-						float weight = (float)((stage+1)*(stage+1)) / ( c->GetSpatialComponent()->GetPosition() - pos ).Length();
+						float weight = (float)((stage+1)*(stage+1));
 						chance[type] += weight;
 					}
 				}

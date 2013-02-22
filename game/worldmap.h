@@ -83,8 +83,8 @@ public:
 	void Init( const U8* land, const U8* color, grinliz::CDynArray< WorldFeature >& featureArr );
 
 	void SavePNG( const char* path );
-	void Save( const char* pathToData, const char* pathToXML );
-	void Load( const char* pathtoData, const char* pathToXML );
+	void Save( const char* pathToData );
+	void Load( const char* pathtoData );
 
 	// Set the rock to h. 
 	//		h=-1 sets to nominal value.
