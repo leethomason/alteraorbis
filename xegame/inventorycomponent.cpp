@@ -289,22 +289,26 @@ void InventoryComponent::GetChain( GameItem* item, grinliz::CArray< GameItem*, 4
 }
 
 
-void InventoryComponent::EmitEffect( Engine* engine, U32 delta )
+bool InventoryComponent::EmitEffect( Engine* engine, U32 delta )
 {
+	bool emitted = false;
 	for( int i=0; i<NUM_HARDPOINTS; ++i ) {
 		if ( intrinsicAt[i] ) {
-			LowerEmitEffect( engine, *intrinsicAt[i], delta );
+			bool e = LowerEmitEffect( engine, *intrinsicAt[i], delta );
+			emitted |= e;
 		}
 		if ( heldAt[i] ) {
-			LowerEmitEffect( engine, *heldAt[i], delta );
+			bool e = LowerEmitEffect( engine, *heldAt[i], delta );
+			emitted |= e;
 		}
 	}
+	return emitted;
 }
 
 
 int InventoryComponent::DoTick( U32 delta, U32 since )
 {
-	int callback = VERY_LONG_TICK;
+	int tick = VERY_LONG_TICK;
 	CArray<GameItem*, NUM_HARDPOINTS*2> work;
 	RenderComponent* rc = parentChit->GetRenderComponent();
 
@@ -317,7 +321,7 @@ int InventoryComponent::DoTick( U32 delta, U32 since )
 
 	for( int i=0; i<work.Size(); ++i ) {
 		GameItem* gi = work[i];
-		callback = Min( gi->DoTick(delta, since), callback );
+		tick = Min( gi->DoTick(delta, since), tick );
 		
 		if ( rc && (gi->hardpoint != NO_HARDPOINT) && (gi->procedural & PROCEDURAL_TICK_MASK) ) {
 			ProcRenderInfo info;
@@ -332,16 +336,20 @@ int InventoryComponent::DoTick( U32 delta, U32 since )
 
 	for( int i=0; i<freeItems.Size(); ++i ) {
 		if ( freeItems[i] ) {
-			callback = Min( freeItems[i]->DoTick(delta,since), callback );
+			tick = Min( freeItems[i]->DoTick(delta,since), tick );
 		}
 	}
 	for( int i=0; i<packItems.Size(); ++i ) {
 		if ( packItems[i] ) {
-			callback = Min( packItems[i]->DoTick(delta,since), callback );
+			tick = Min( packItems[i]->DoTick(delta,since), tick );
 		}
 	}
 
-	return callback;
+	if ( EmitEffect( engine, delta )) {
+		tick = 0;
+	}
+
+	return tick;
 }
 
 

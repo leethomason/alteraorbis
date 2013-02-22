@@ -32,7 +32,8 @@ private:
 	typedef ItemBaseComponent super;
 
 public:
-	InventoryComponent() : hardpoints(-1) {
+	InventoryComponent( Engine* e ) : ItemBaseComponent( e ), hardpoints(-1) 
+	{
 		memset( intrinsicAt, 0, sizeof(GameItem*)*NUM_HARDPOINTS );
 		memset( heldAt, 0, sizeof(GameItem*)*NUM_HARDPOINTS );
 	}
@@ -76,9 +77,8 @@ public:
 	static grinliz::IString HardpointFlagToName( int f );
 	static int HardpointNameToFlag( const char* name );
 
-	void EmitEffect( Engine* engine, U32 deltaTime );
-
 private:
+	bool EmitEffect( Engine* engine, U32 deltaTime );
 	int hardpoints;			// which ones do we have?? If we have the hardpoint, intrinsicAt or heldAt may be used.
 	GameItem* intrinsicAt[NUM_HARDPOINTS];
 	GameItem* heldAt[NUM_HARDPOINTS];

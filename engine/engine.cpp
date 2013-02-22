@@ -471,8 +471,7 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 	// ------ Particle system ------------- //
 	boltRenderer->DrawAll( bolts, nBolts, this );
 
-	const Vector3F* eyeDir = camera.EyeDir3();
-	particleSystem->Update( deltaTime, eyeDir );
+	particleSystem->Update( deltaTime, &camera );
 	particleSystem->Draw();
 
 	// ---- Debugging ---

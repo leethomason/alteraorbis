@@ -9,8 +9,15 @@ class Engine;
 
 class ItemBaseComponent : public Component
 {
+public:
+	ItemBaseComponent( Engine* _engine ) : engine( _engine ) {}
+
 protected:
-	void LowerEmitEffect( Engine* engine, const GameItem& item, U32 deltaTime );
+	// Returns true if effect emitted.
+	bool LowerEmitEffect( Engine* engine, const GameItem& item, U32 deltaTime );
+
+	Engine* engine;
 };
+
 
 #endif // ITEM_BASE_COMPONENT_INCLUDED

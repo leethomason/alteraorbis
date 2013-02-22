@@ -181,13 +181,11 @@ int ItemComponent::DoTick( U32 delta, U32 since )
 		DoSlowTick();
 	}
 	int tick = item.DoTick( delta, since );
+
+	if ( LowerEmitEffect( engine, item, delta )) {
+		tick = 0;
+	}
 	return tick;
-}
-
-
-void ItemComponent::EmitEffect( Engine* engine, U32 deltaTime )
-{
-	LowerEmitEffect( engine, item, deltaTime );
 }
 
 

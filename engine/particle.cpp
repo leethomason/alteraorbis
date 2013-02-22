@@ -73,10 +73,21 @@ void ParticleSystem::Clear()
 }
 
 
-void ParticleSystem::Process( U32 delta, const grinliz::Vector3F eyeDir[] )
+void ParticleSystem::Process( U32 delta, Camera* camera )
 {
 	// 8.4 ms (debug) in process. 0.8 in release (wow.)
-	GRINLIZ_PERFTRACK
+	GRINLIZ_PERFTRACK;
+
+	const Vector3F* eyeDir = camera->EyeDir3();
+	const Vector3F origin = camera->PosWC();
+	float RAD2 = EL_FAR*EL_FAR;
+
+	if ( nParticles > MAX_PARTICLES/2 ) {
+		RAD2 /= 16;
+	}
+	else if ( nParticles > MAX_PARTICLES/4 ) {
+		RAD2 /= 8;
+	}
 
 	time += delta;
 	float deltaF = (float)delta * 0.001f;	// convert to seconds.
@@ -94,7 +105,7 @@ void ParticleSystem::Process( U32 delta, const grinliz::Vector3F eyeDir[] )
 		*pd = *srcPD;
 		Vector4F color = srcPS->color + pd->colorVel * deltaF;
 
-		if ( color.w <= 0 ) {
+		if ( color.w <= 0 || (pd->pos - origin).LengthSquared() > RAD2 ) {
 			nParticles--;
 		}
 		else { 
@@ -136,10 +147,10 @@ void ParticleSystem::Process( U32 delta, const grinliz::Vector3F eyeDir[] )
 }
 
 
-void ParticleSystem::Update( U32 deltaTime, const grinliz::Vector3F eyeDir[] )
+void ParticleSystem::Update( U32 deltaTime, Camera* camera )
 {
 	//GRINLIZ_PERFTRACK
-	Process( deltaTime, eyeDir );
+	Process( deltaTime, camera );
 }
 
 

@@ -184,10 +184,10 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos, const char* assetName )
 	item.primaryTeam = 1;
 	item.stats.SetExpFromLevel( 4 );
 	item.InitState();
-	chit->Add( new ItemComponent( item ));
+	chit->Add( new ItemComponent( engine, item ));
 
 	chit->Add( new HealthComponent());
-	chit->Add( new InventoryComponent());
+	chit->Add( new InventoryComponent( engine ));
 
 	chit->GetSpatialComponent()->SetPosYRot( (float)pos.x+0.5f, 0, (float)pos.y+0.5f, 0 );
 }

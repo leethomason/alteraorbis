@@ -29,11 +29,11 @@ Component* ComponentFactory::Factory( const char* name, Chit* chit ) const
 		return new PathMoveComponent( worldMap );
 	}
 	else if ( StrEqual( name, "InventoryComponent" )) {
-		return new InventoryComponent();
+		return new InventoryComponent( engine );
 	}
 	else if ( StrEqual( name, "ItemComponent" )) {
 		GameItem item;
-		return new ItemComponent( item );
+		return new ItemComponent( engine, item );
 	}
 	else if ( StrEqual( name, "DebugStateComponent" )) {
 		return new DebugStateComponent( worldMap );

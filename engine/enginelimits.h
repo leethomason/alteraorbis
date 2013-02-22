@@ -52,7 +52,7 @@ enum {
 
 static const float EL_FOV  = 40.0f;
 static const float EL_NEAR = 2.0f;
-static const float EL_FAR  = 240.0f;
+static const float EL_FAR  = 140.0f;
 static const float EL_CAMERA_MIN = 4.0f;
 static const float EL_CAMERA_MAX = 40.0f;
 

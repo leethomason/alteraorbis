@@ -334,11 +334,6 @@ int RenderComponent::DoTick( U32 deltaTime, U32 since )
 		}
 	}
 
-	if ( parentChit->GetItemComponent() ) 
-		parentChit->GetItemComponent()->EmitEffect( engine, deltaTime );
-	if ( parentChit->GetInventoryComponent() ) 
-		parentChit->GetInventoryComponent()->EmitEffect( engine, deltaTime );
-
 	return tick;
 }
 

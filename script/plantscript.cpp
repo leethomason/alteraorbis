@@ -94,7 +94,7 @@ const GameItem* PlantScript::GetResource()
 void PlantScript::Init( const ScriptContext& ctx )
 {
 	const GameItem* resource = GetResource();
-	ctx.chit->Add( new ItemComponent( *resource ));
+	ctx.chit->Add( new ItemComponent( engine, *resource ));
 	SetRenderComponent( ctx.chit );
 
 	const Vector3F& light = engine->lighting.direction;

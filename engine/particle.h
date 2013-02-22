@@ -27,7 +27,7 @@
 
 class Texture;
 struct ParticleDef;
-
+class Camera;
 
 // Full GPU system. Cool. Probably fast. But shader hell.
 /*
@@ -152,7 +152,7 @@ public:
 
 	const ParticleDef& GetPD( const char* name );
 
-	void Update( U32 deltaTime, const grinliz::Vector3F eyeDir[] );
+	void Update( U32 deltaTime, Camera* camera );
 	void Draw();
 	void Clear();
 	int NumParticles() const { return nParticles; }
@@ -161,7 +161,7 @@ public:
 
 private:
 
-	void Process( unsigned msec, const grinliz::Vector3F eyeDir[] );
+	void Process( unsigned msec, Camera* camera );
 
 	enum {
 		MAX_PARTICLES = 2000	// don't want to re-allocate vertex buffers

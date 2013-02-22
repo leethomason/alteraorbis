@@ -27,7 +27,10 @@ private:
 	typedef ItemBaseComponent super;
 
 public:
-	ItemComponent( const GameItem& _item ) : item( _item ), slowTickTimer(0) {}
+	ItemComponent( Engine* _engine, const GameItem& _item ) : 
+		ItemBaseComponent( _engine ),
+		item( _item ), slowTickTimer(0) 
+		{}
 	virtual ~ItemComponent() {}
 
 	virtual const char* Name() const { return "ItemComponent"; }
@@ -46,7 +49,7 @@ public:
 	virtual void OnChitEvent( const ChitEvent& event );
 
 	GameItem* GetItem() { return &item; }
-	void EmitEffect( Engine* engine, U32 deltaTime );
+	//void EmitEffect( Engine* engine, U32 deltaTime );
 
 private:
 	void DoSlowTick();

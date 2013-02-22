@@ -243,7 +243,7 @@ void BattleTestScene::LoadMap()
 		msc->SetMode( MapSpatialComponent::BLOCKS_GRID );
 		chit->Add( msc );
 		chit->Add( new RenderComponent( engine, "plant1.3" ));
-		chit->Add( new ItemComponent( treeItem ));
+		chit->Add( new ItemComponent( engine, treeItem ));
 		chit->Add( new HealthComponent());
 	}
 
@@ -351,10 +351,10 @@ void BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int 
 	item.primaryTeam = team;
 	item.stats.SetExpFromLevel( level );
 	item.InitState();
-	chit->Add( new ItemComponent( item ));
+	chit->Add( new ItemComponent( engine, item ));
 
 	chit->Add( new HealthComponent());
-	InventoryComponent* inv = new InventoryComponent();
+	InventoryComponent* inv = new InventoryComponent( engine );
 	chit->Add( inv );
 
 	chit->GetSpatialComponent()->SetPosYRot( (float)p.x+0.5f, 0, (float)p.y+0.5f, (float)random.Rand( 360 ) );
