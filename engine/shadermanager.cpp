@@ -57,6 +57,10 @@ static const char* gUniformName[ShaderManager::MAX_UNIFORM] =
 	"u_controlParam",
 	"u_param4",
 	"u_boneXForm",
+
+	// Samplers:
+	"texture0",
+	"texture1"
 };
 
 
@@ -261,11 +265,10 @@ void ShaderManager::SetTexture( int index, Texture* texture )
 	GLASSERT( texture );
 	char name[9] = "texture0";
 	name[7] = '0' + index;
-	int loc = glGetUniformLocation( active->prog, name );
-	//GLASSERT( loc >= 0 );
-	if ( loc >= 0 ) {
-		glUniform1i( loc, index );
-	}
+
+	int loc = active->GetUniformLocation( U_TEXTURE0 + index );
+	GLASSERT( loc >= 0 );
+	glUniform1i( loc, index );
 	CHECK_GL_ERROR;
 }
 

@@ -387,9 +387,6 @@ int GameItem::DoTick( U32 delta, U32 sinec )
 	}
 
 	float savedHP = hp;
-	if ( accruedFire > 0 ) {
-		int debug=1;
-	}
 	if ( flags & IMMUNE_FIRE )
 		accruedFire = 0;
 	if ( flags & IMMUNE_SHOCK )

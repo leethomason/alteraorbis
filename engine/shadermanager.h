@@ -121,6 +121,10 @@ public:
 		U_CONTROL_PARAM,
 		U_PARAM4,
 		U_BONEXFORM,
+
+		U_TEXTURE0,
+		U_TEXTURE1,
+
 		MAX_UNIFORM
 	};
 

@@ -70,8 +70,7 @@ void Sim::Load( const char* mapDAT, const char* mapXML, const char* gameDAT )
 	worldMap->Load( mapDAT, mapXML );
 
 	if ( !gameDAT ) {
-		Vector2I v = worldMap->FindEmbark();
-		CreatePlayer( v, "humanFemale" );
+		CreatePlayer();
 	}
 	else {
 		QuickProfile qp( "Sim::Load" );
@@ -156,6 +155,13 @@ void Sim::Save( const char* mapDAT, const char* mapXML, const char* gameDAT )
 			fclose( fp );
 		}
 	}
+}
+
+
+void Sim::CreatePlayer()
+{
+	Vector2I v = worldMap->FindEmbark();
+	CreatePlayer( v, "humanFemale" );
 }
 
 

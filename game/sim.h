@@ -49,6 +49,7 @@ public:
 	void CreatePlant( int x, int y, int type );
 
 	double DateInAge() const { return (double)timeInMinutes / (double)MINUTES_IN_AGE; }
+	void CreatePlayer();
 
 private:
 	void CreatePlayer( const grinliz::Vector2I& pos, const char* assetName );

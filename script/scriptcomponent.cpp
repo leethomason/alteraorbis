@@ -64,7 +64,7 @@ int ScriptComponent::DoTick( U32 delta, U32 since )
 		context.initialized = true;
 	}
 	int result = script->DoTick( context, delta, since );
-	context.time += delta;
+	context.time += since;
 	return result;
 }
 

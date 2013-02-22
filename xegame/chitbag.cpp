@@ -182,8 +182,7 @@ void ChitBag::DoTick( U32 delta, Engine* engine )
 
 	// Process in order, and remember event queue can mutate as we go.
 	while ( !events.Empty() ) {
-		ChitEvent e = events[0];
-		events.Remove( 0 );
+		ChitEvent e = events.Pop();
 
 		QuerySpatialHash( &hashQuery, e.AreaOfEffect(), 0, e.ItemFilter() );
 		for( int j=0; j<hashQuery.Size(); ++j ) {
