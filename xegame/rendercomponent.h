@@ -77,7 +77,7 @@ public:
 	// Play the special animations: MELEE, IMPACT, etc.
 	// Walk, stand, etc. are played automatically.
 	bool	PlayAnimation( int type );
-	int CurrentAnimation() const;
+	int		CurrentAnimation() const;
 
 	// A render component has one primary, animated model. Additional
 	// assets (guns, shields, etc.) can be Attached and Detatched
@@ -85,6 +85,7 @@ public:
 	void Attach(   grinliz::IString hardpoint, const char* asset );
 	void SetColor( grinliz::IString hardpoint, const grinliz::Vector4F& colorMult );
 	void SetProcedural( grinliz::IString hardpoint, const ProcRenderInfo& info );
+	void SetSaturation( float s );
 	void Detach(   grinliz::IString hardpoint );
 
 private:

@@ -249,6 +249,18 @@ void RenderComponent::SetColor( IString hardpoint, const grinliz::Vector4F& colo
 }
 
 
+void RenderComponent::SetSaturation( float s )
+{
+	for( int i=0; i<NUM_MODELS; ++i ) {
+		if ( model[i] ) {
+			Vector4F v = model[i]->Control();
+			v.y = s;
+			model[i]->SetControl( v );
+		}
+	}
+}
+
+
 void RenderComponent::SetProcedural( IString hardpoint, const ProcRenderInfo& info )
 {
 	if ( !hardpoint.empty() ) {

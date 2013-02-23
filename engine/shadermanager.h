@@ -73,10 +73,11 @@ public:
 
 		COLOR_PARAM			= (1<<11),		// Apply per model color.
 		BONE_FILTER			= (1<<12),		// Apply per model bone filtering
+		SATURATION			= (1<<13),		// Per pixel saturation effect. Uses control.y
 
 		// Features:
-		PROCEDURAL			= (1<<13),		// Engage the procedural renderer, and use a Matrix param.
-		BONE_XFORM			= (1<<14),
+		PROCEDURAL			= (1<<14),		// Engage the procedural renderer, and use a Matrix param.
+		BONE_XFORM			= (1<<15),
 	};
 
 	void DeviceLoss();

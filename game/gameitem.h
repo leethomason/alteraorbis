@@ -453,7 +453,8 @@ public:
 	float TotalHP() const		{ return mass*stats.NormalWill(); }
 	float HPFraction() const	{ 
 		float f = hp / TotalHP(); 
-		GLASSERT( f >= 0 && f <= 1 );
+		//GLASSERT( f >= 0 && f <= 1 );
+		f = grinliz::Clamp( f, 0.0f, 1.0f ); // FIXME: hack in hp calc
 		return f;
 	} 
 

@@ -26,13 +26,14 @@ x chits should have "update time" not boolean flag
 	- Flora
 		x plants
 			x growth, spread
-			- rotation
-			- saturation to hp
+			x rotation
+			x saturation to hp
 		- fix the stupid camera
-		- weather
+		- fix annoying hp out of range bug
+		x weather
 		- aging of stone
 		- avatar face display
-		- player recreation
+		x player recreation
 		- disable buttons on main ui when no game saved
 	- Intermission: regions
 		- generate regions

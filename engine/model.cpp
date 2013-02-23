@@ -677,6 +677,9 @@ void Model::Queue( RenderQueue* queue, EngineShaders* engineShaders, int require
 			if ( flags & MODEL_PROCEDURAL ) {
 				mod |= ShaderManager::PROCEDURAL;
 			}
+			if ( control.y != 1 ) {
+				mod |= ShaderManager::SATURATION;
+			}
 
 			GPUState state;
 			engineShaders->GetState( base, mod, &state );
@@ -695,7 +698,6 @@ void Model::Queue( RenderQueue* queue, EngineShaders* engineShaders, int require
 				GLASSERT( aux );
 				pMat = &aux->procMat;
 			}
-
 			queue->Add( this,									// reference back
 						&resource->atom[i],						// model atom to render
 						state,

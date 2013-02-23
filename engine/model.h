@@ -323,6 +323,8 @@ public:
 	}
 
 	void SetProcedural( bool on, const grinliz::Color4F* colors, const float* v );
+
+	const grinliz::Vector4F& Control() const		{ return control; }
 	void SetControl( const grinliz::Vector4F& v )	{ control = v; }
 
 	// AABB for user selection (bigger than the true AABB)

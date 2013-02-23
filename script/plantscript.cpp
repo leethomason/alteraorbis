@@ -89,6 +89,8 @@ void PlantScript::SetRenderComponent( Chit* chit )
 
 		census->plants[type][stage] += 1;
 	}
+	GameItem* item = chit->GetItem();
+	chit->GetRenderComponent()->SetSaturation( item->HPFraction() );
 }
 
 
@@ -281,7 +283,8 @@ int PlantScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 		sporeTimer = 0;
 	}
 
-	// If healthy create other plants.
+	ctx.chit->GetRenderComponent()->SetSaturation( item->HPFraction() );
+
 	return tick;
 }
 

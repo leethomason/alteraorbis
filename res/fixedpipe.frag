@@ -21,6 +21,10 @@
 
 varying vec4 v_color;
 
+#if SATURATION
+	varying float v_saturation;
+#endif
+
 void main() 
 {
 	vec4 color = v_color;
@@ -90,6 +94,11 @@ void main()
 	#endif
 	#if PREMULT == 1
 		color = vec4( color.r*color.a, color.g*color.a, color.b*color.a, color.a );
+	#endif
+	#if SATURATION == 1
+		float g = (color.r + color.g + color.b) * 0.33;
+		vec4 gray = vec4( g, g, g, color.a );
+		color = mix( gray, color, v_saturation );
 	#endif
 	gl_FragColor = color;
 }

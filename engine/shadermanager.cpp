@@ -386,6 +386,7 @@ FIXME: need to handle driver updates invalidating cache.
 	AppendFlag( &header, "EMISSIVE_EXCLUSIVE",	flags & EMISSIVE_EXCLUSIVE );
 	AppendFlag( &header, "COLOR_PARAM",			flags & COLOR_PARAM );
 	AppendFlag( &header, "BONE_FILTER",			flags & BONE_FILTER );
+	AppendFlag( &header, "SATURATION",			flags & SATURATION );
 	AppendFlag( &header, "PROCEDURAL",			flags & PROCEDURAL );	// both are triggered off procedural. deserves a clean-up.
 	AppendFlag( &header, "PARAM4",				flags & PROCEDURAL );
 	AppendFlag( &header, "BONE_XFORM",			flags & BONE_XFORM );

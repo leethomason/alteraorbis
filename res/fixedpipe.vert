@@ -79,6 +79,10 @@ attribute vec3 a_pos;				// vertex position
 	attribute vec3 a_normal;		// vertex normal
 #endif
 
+#if SATURATION
+	varying float v_saturation;
+#endif
+
 varying vec4 v_color;
 
 void main() {
@@ -87,6 +91,9 @@ void main() {
 		vec4 controlParam 	= u_controlParamArr[int(a_instanceID)];
 	#else
 		vec4 controlParam 	= u_controlParam;
+	#endif
+	#if SATURATION
+		v_saturation = controlParam.y;
 	#endif
 	#if COLOR_PARAM == 1
 		// Don't go insane with #if syntax later:
