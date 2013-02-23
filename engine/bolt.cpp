@@ -24,21 +24,6 @@
 using namespace grinliz;
 
 
-void Bolt::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele )
-{
-	XE_ARCHIVE( len );
-	XE_ARCHIVE( impact );
-	XE_ARCHIVE( speed );
-	XE_ARCHIVE( particle );
-	XE_ARCHIVE( chitID );
-	XE_ARCHIVE( damage );
-	XE_ARCHIVE( effect );
-	XEArchive( prn, ele, "head", head );
-	XEArchive( prn, ele, "dir", dir );
-	XEArchive( prn, ele, "color", color );
-}
-
-
 void Bolt::Serialize( XStream* xs )
 {
 	XarcOpen( xs, "bolt" );
@@ -53,21 +38,6 @@ void Bolt::Serialize( XStream* xs )
 	XARC_SER( xs, dir );
 	XARC_SER( xs, color );
 	XarcClose( xs );
-}
-
-
-void Bolt::Save( tinyxml2::XMLPrinter* printer )
-{
-	printer->OpenElement( "Bolt" );
-	Archive( printer, 0 );
-	printer->CloseElement();
-}
-
-
-void Bolt::Load( const tinyxml2::XMLElement* element )
-{
-	GLASSERT( StrEqual( element->Name(), "Bolt" ));
-	Archive( 0, element );
 }
 
 

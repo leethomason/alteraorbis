@@ -21,7 +21,6 @@
 #include "../grinliz/glvector.h"
 #include "../grinliz/glmatrix.h"
 #include "../grinliz/glgeometry.h"
-#include "../tinyxml2/tinyxml2.h"
 
 class XStream;
 
@@ -63,8 +62,6 @@ public:
 	const grinliz::Vector3F* EyeDir3()				{ if ( !valid ) CalcWorldXForm();
 													  return eyeDir3; }
 
-	virtual void Load( const tinyxml2::XMLElement* element );
-	virtual void Save( tinyxml2::XMLPrinter* printer );
 	void Serialize( XStream* xs );
 
 private:

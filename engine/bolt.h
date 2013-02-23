@@ -21,7 +21,6 @@
 #include "../grinliz/glvector.h"
 #include "../grinliz/glcolor.h"
 #include "../grinliz/glcontainer.h"
-#include "../tinyxml2/tinyxml2.h"
 
 #include "vertex.h"
 
@@ -49,8 +48,6 @@ struct Bolt {
 		chitID = 0;
 	} 
 
-	void Save( tinyxml2::XMLPrinter* );
-	void Load( const tinyxml2::XMLElement* );
 	void Serialize( XStream* );
 
 	grinliz::Vector3F	head;

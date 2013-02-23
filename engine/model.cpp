@@ -268,33 +268,6 @@ void Model::Free()
 }
 
 
-void Model::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele )
-{
-	XE_ARCHIVE( debugScale );
-	XE_ARCHIVE( animationRate );
-	XE_ARCHIVE( totalCrossFadeTime );
-	XE_ARCHIVE( crossFadeTime );
-	XE_ARCHIVE( hasParticles );
-	XE_ARCHIVE( flags );
-	XE_ARCHIVE( currentAnim.time );
-	
-	// Trick to do casting: if save, will write int. If load, will read int.
-	XEArchiveT( prn, ele, "currentAnim.id", currentAnim.id );
-	XE_ARCHIVE( prevAnim.time );
-	XEArchiveT( prn, ele, "prevAnim.id", prevAnim.id );
-
-	XEArchive( prn, ele, "pos", pos );
-	XEArchive( prn, ele, "rot", rot );
-
-	static const Vector4F DEF_ONE = { 1, 1, 1, 1 };
-	static const Vector4F DEF_ZERO = { 0, 0, 0, 0 };
-
-	XEArchive( prn, ele, "color", color, &DEF_ONE );
-	XEArchive( prn, ele, "boneFilter", boneFilter, &DEF_ZERO );
-	XEArchive( prn, ele, "control", control, &DEF_ONE );
-}
-
-
 void Model::Serialize( XStream* xs, SpaceTree* tree )
 {
 	XarcOpen( xs, "Model" );
@@ -355,60 +328,6 @@ void Model::Serialize( XStream* xs, SpaceTree* tree )
 		tree->Update( this );
 	}
 	XarcClose( xs );
-}
-
-
-
-void Model::Load( const tinyxml2::XMLElement* element, SpaceTree* tree )
-{
-	GLASSERT( StrEqual( element->Name(), "Model" ));
-
-	const char* resName = element->Attribute( "resource" );
-	if ( resource ) {
-		GLASSERT( resource->header.name == resName );
-	}
-	else {
-		resource = ModelResourceManager::Instance()->GetModelResource( resName );
-		GLASSERT( resource );
-	}
-
-	const char* animResName = element->Attribute( "animationResource" );
-	if ( animResName ) {
-		animationResource = AnimationResourceManager::Instance()->GetResource( animResName );
-		GLASSERT( animationResource );
-	}
-
-	Archive( 0, element );
-	const tinyxml2::XMLElement* auxEle = element->FirstChildElement( "aux" );
-	if ( auxEle ) {
-		aux = ModelResourceManager::Instance()->modelAuxPool.New();
-		aux->boneData.Load( auxEle );
-		XEArchive( 0, auxEle, "procMat", aux->procMat );
-	}
-
-	if ( tree ) {
-		tree->Update( this );
-	}
-}
-
-
-void Model::Save( tinyxml2::XMLPrinter* printer )
-{
-	printer->OpenElement( "Model" );
-
-	printer->PushAttribute( "resource", resource->header.name.c_str() );
-	if ( animationResource ) {
-		printer->PushAttribute( "animationResource", animationResource->ResourceName() );
-	}
-
-	Archive( printer, 0 );
-	if ( aux ) {
-		printer->OpenElement( "aux" );
-		aux->boneData.Save( printer );
-		XEArchive( printer, 0, "procMat", aux->procMat );
-		printer->CloseElement();	// aux
-	}
-	printer->CloseElement();	// model
 }
 
 
