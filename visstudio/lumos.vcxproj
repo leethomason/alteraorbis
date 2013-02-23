@@ -188,6 +188,7 @@
     <ClInclude Include="..\engine\uirendering.h" />
     <ClInclude Include="..\engine\vertex.h" />
     <ClInclude Include="..\game\aicomponent.h" />
+    <ClInclude Include="..\game\census.h" />
     <ClInclude Include="..\game\debugpathcomponent.h" />
     <ClInclude Include="..\game\debugstatecomponent.h" />
     <ClInclude Include="..\game\gameitem.h" />

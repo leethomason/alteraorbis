@@ -6,7 +6,6 @@
 #include "../grinliz/glvector.h"
 #include "../grinliz/glrandom.h"
 #include "../grinliz/glcontainer.h"
-#include "../tinyxml2/tinyxml2.h"
 
 #include "gamelimits.h"
 
@@ -49,11 +48,11 @@ public:
 	void CreatePlant( int x, int y, int type );
 
 	double DateInAge() const { return (double)timeInMinutes / (double)MINUTES_IN_AGE; }
+	
 	void CreatePlayer();
+	void CreatePlayer( const grinliz::Vector2I& pos, const char* assetName );
 
 private:
-	void CreatePlayer( const grinliz::Vector2I& pos, const char* assetName );
-	void Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele );
 
 	Engine*			engine;
 	LumosGame*		lumosGame;

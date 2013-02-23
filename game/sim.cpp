@@ -159,6 +159,10 @@ void Sim::CreatePlayer()
 
 void Sim::CreatePlayer( const grinliz::Vector2I& pos, const char* assetName )
 {
+	if ( !assetName ) {
+		assetName = "humanFemale";
+	}
+
 	ItemDefDB* itemDefDB = ItemDefDB::Instance();
 	ItemDefDB::GameItemArr itemDefArr;
 	itemDefDB->Get( assetName, &itemDefArr );
@@ -282,6 +286,12 @@ void Sim::CreateVolcano( int x, int y, int size )
 void Sim::CreatePlant( int x, int y, int type )
 {
 	if ( !worldMap->Bounds().Contains( x, y ) ) {
+		return;
+	}
+
+	// Only allow about 10% of the world to be plants.
+	int count = chitBag->census.CountPlants();
+	if ( count > worldMap->Bounds().Area() / 10 ) {
 		return;
 	}
 

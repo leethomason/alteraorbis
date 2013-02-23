@@ -119,7 +119,7 @@ public:
 	int Strength() const		{ return trait[STR]; }
 	int Will() const			{ return trait[WILL]; }
 	int Charisma() const		{ return trait[CHR]; }
-	int Intelligent() const		{ return trait[INT]; }
+	int Intelligence() const		{ return trait[INT]; }
 	int Dexterity() const		{ return trait[DEX]; }
 
 	int Experience() const		{ return exp; }
@@ -134,7 +134,11 @@ public:
 	// 1.0 is normal, 0.1 very low, 2+ exceptional.
 	float Accuracy() const		{ return NormalLeveledSkill( Dexterity() ); }
 	float Damage() const		{ return NormalLeveledSkill( Strength() ); }
+	
+	float NormalStr() const		{ return NormalLeveledSkill( Strength() ); }
 	float NormalWill() const	{ return NormalLeveledSkill( Will() ); }
+	float NormalInt() const		{ return NormalLeveledSkill( Intelligence() ); }
+	float NormalDex() const		{ return NormalLeveledSkill( Dexterity() ); }
 
 	U32 Hash() const			{ 
 		U32 h = 0;

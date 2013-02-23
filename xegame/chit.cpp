@@ -94,7 +94,7 @@ void Chit::Serialize( const ComponentFactory* factory, XStream* xs )
 			XarcClose( xs );
 		}
 		for( int i=0; i<NUM_SLOTS; ++i ) {
-			if ( slot[i] ) {
+			if ( slot[i] && slot[i]->WillSerialize() ) {
 				XarcOpen( xs, slot[i]->Name() );
 				slot[i]->Serialize( xs );
 				XarcClose( xs );

@@ -540,6 +540,9 @@
     <ClInclude Include="..\shared\dbhelper.h">
       <Filter>Source Files\shared</Filter>
     </ClInclude>
+    <ClInclude Include="..\game\census.h">
+      <Filter>Source Files\game</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\engine\sources.mk">

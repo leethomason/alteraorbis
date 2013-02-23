@@ -17,6 +17,7 @@
 #include "../game/worldmap.h"
 #include "../game/sim.h"
 #include "../game/mapspatialcomponent.h"
+#include "../game//lumoschitbag.h"
 
 using namespace grinliz;
 
@@ -67,14 +68,26 @@ void PlantScript::SetRenderComponent( Chit* chit )
 		}
 	}
 
+	Census* census = &(static_cast<LumosChitBag*>( chit->GetChitBag())->census);
+
 	if ( chit->GetRenderComponent() ) {
 		RenderComponent* rc = chit->GetRenderComponent();
+		const char* name = rc->MainResource()->Name();
+		GLASSERT( strlen( name ) == 8 );
+		int t = name[5] - '0';
+		int s = name[7] - '0';
+		census->plants[t][s] -= 1;
+
 		chit->Remove( rc );
 		delete rc;
 	}
 
 	if ( !chit->GetRenderComponent() ) {
-		chit->Add( new RenderComponent( engine, str.c_str() ));
+		RenderComponent* rc = new RenderComponent( engine, str.c_str() );
+		rc->SetSerialize( false );
+		chit->Add( rc );
+
+		census->plants[type][stage] += 1;
 	}
 }
 
@@ -95,12 +108,10 @@ void PlantScript::Init( const ScriptContext& ctx )
 {
 	const GameItem* resource = GetResource();
 	ctx.chit->Add( new ItemComponent( engine, *resource ));
+	ctx.chit->GetItem()->stats.Roll( ctx.chit->random.Rand() );
 	SetRenderComponent( ctx.chit );
 
-	const Vector3F& light = engine->lighting.direction;
-	float norm = Max( fabs( light.x ), fabs( light.z ));
-	lightTap.x = LRintf( light.x / norm );
-	lightTap.y = LRintf( light.z / norm );
+	ctx.chit->GetSpatialComponent()->SetYRotation( (float)ctx.chit->random.Rand( 360 ));
 }
 
 
@@ -122,6 +133,11 @@ int PlantScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 	static const float	HP_PER_SECOND = 10.0f;
 	static const int	TIME_TO_GROW  = 4 * (1000 * 60);	// minutes
 	static const int	TIME_TO_SPORE = 1 * (1000 * 60); 
+
+	// Need to generate when the PlantScript loads. (It doesn't save
+	// the render component.) This is over-checking, but currently
+	// don't have an onAdd.
+	SetRenderComponent( ctx.chit );
 
 	age += since;
 	ageAtStage += since;
@@ -150,7 +166,12 @@ int PlantScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 	Rectangle2I bounds = worldMap->Bounds();
 
 	// ------ Sun -------- //
-	float sunHeight		= h;	
+	const Vector3F& light = engine->lighting.direction;
+	float norm = Max( fabs( light.x ), fabs( light.z ));
+	lightTap.x = LRintf( light.x / norm );
+	lightTap.y = LRintf( light.z / norm );
+
+	float sunHeight		= h * item->stats.NormalInt();	
 	Vector2I tap = pos + lightTap;
 
 	if ( bounds.Contains( tap )) {
@@ -168,7 +189,7 @@ int PlantScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 				RenderComponent* rc = query[i]->GetRenderComponent();
 				if ( rc ) {
 					Rectangle3F aabb = rc->MainModel()->AABB();
-					sunHeight = Min( aabb.max.z * 0.5f, sunHeight );
+					sunHeight = Min( h - aabb.max.y*0.5f, sunHeight );
 					break;
 				}
 			}
@@ -176,9 +197,10 @@ int PlantScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 	}
 
 	float sun = sunHeight * (1.0f-rainFraction) / h;
+	sun = Clamp( sun, 0.0f, 1.0f );
 
 	// ---------- Rain ------- //
-	float rootDepth = h;
+	float rootDepth = h * item->stats.NormalDex();
 
 	for( int j=-1; j<=1; ++j ) {
 		for( int i=-1; i<=1; ++i ) {
@@ -208,12 +230,17 @@ int PlantScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 	item->GetValue( "rain", &optimal.y );
 	item->GetValue( "temp", &optimal.z );
 
-	float distance = ( optimal - actual ).LengthSquared();
+	float distance = ( optimal - actual ).Length();
 
-	if ( distance < 0.4f ) {
+	float GROW = Lerp( 0.2f, 0.1f, (float)stage / (float)(NUM_STAGE-1) );
+	float DIE  = 0.4f;
+
+	float constitution = item->stats.NormalWill();
+
+	if ( distance < GROW * constitution ) {
 		// Heal.
 		ChitMsg healMsg( ChitMsg::CHIT_HEAL );
-		healMsg.dataF = HP_PER_SECOND*seconds;
+		healMsg.dataF = HP_PER_SECOND*seconds*item->stats.NormalStr();
 		ctx.chit->SendMessage( healMsg );
 
 		sporeTimer += since;
@@ -246,7 +273,7 @@ int PlantScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 			sim->CreatePlant( pos.x+dx, pos.y+dy, -1 );
 		}
 	}
-	else if ( distance > 0.8f ) {
+	else if ( distance > DIE * constitution ) {
 		DamageDesc dd( HP_PER_SECOND * seconds, 0 );
 		ChitMsg damage( ChitMsg::CHIT_DAMAGE, 0, &dd );
 		ctx.chit->SendMessage( damage );

@@ -35,7 +35,7 @@ class ChitMsg;
 class Component
 {
 public:
-	Component() : parentChit( 0 ), id( idPool++ )	{}
+	Component() : parentChit( 0 ), id( idPool++ ), willSerialize(true)	{}
 	virtual ~Component()			{}
 
 	int ID() const { return id; }
@@ -55,6 +55,9 @@ public:
 	Chit* ParentChit() { return parentChit; }
 	Chit* GetChit( int id );
 
+	bool WillSerialize() const							{ return willSerialize; }
+	void SetSerialize( bool s )							{ willSerialize = s; }
+
 	virtual int DoTick( U32 delta, U32 since )			{ return VERY_LONG_TICK; }
 	virtual void DoUpdate()								{}
 	virtual void DebugStr( grinliz::GLString* str )		{}
@@ -73,6 +76,7 @@ protected:
 	ChitBag* GetChitBag();
 	Chit* parentChit;
 	int id;
+	bool willSerialize;
 
 	static int idPool;
 };

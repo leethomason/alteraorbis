@@ -3,17 +3,20 @@
 
 #include "../xegame/chitbag.h"
 #include "../grinliz/glrandom.h"
+#include "census.h"
 
 class LumosChitBag : public ChitBag
 {
 public:
-	LumosChitBag() : engine(0)	{}
+	LumosChitBag();
 	virtual ~LumosChitBag() {}
 
 	void SetEngine( Engine* e ) { engine = e; }
 
 	// IBoltImpactHandler
 	virtual void HandleBolt( const Bolt& bolt, Model* m, const grinliz::Vector3F& at );
+
+	Census census;
 
 private:
 	grinliz::CDynArray<Chit*> chitList;

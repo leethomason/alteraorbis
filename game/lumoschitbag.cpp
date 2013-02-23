@@ -1,6 +1,7 @@
 #include "lumoschitbag.h"
 #include "gameitem.h"
 #include "gamelimits.h"
+#include "census.h"
 
 #include "../xegame/rendercomponent.h"
 #include "../xegame/itemcomponent.h"
@@ -15,6 +16,12 @@
 //#define DEBUG_EXPLOSION
 
 using namespace grinliz;
+
+LumosChitBag::LumosChitBag() : engine( 0 )
+{
+	memset( &census, 0, sizeof(census));
+}
+
 
 void LumosChitBag::HandleBolt( const Bolt& bolt, Model* modelHit, const grinliz::Vector3F& at )
 {

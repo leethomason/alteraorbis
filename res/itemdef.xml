@@ -144,7 +144,7 @@
         mass ="5"
         sun="0.4"
         rain="0.6"
-        temperature="0.7"
+        temperature="0.8"
         />
 
   <item name="plant1"
@@ -171,7 +171,7 @@
         mass ="5"
         sun="0.7"
         rain="0.3"
-        temperature="0.2"
+        temperature="0.1"
         />
 
   <item name="plant4"
@@ -206,7 +206,7 @@
         desc="MoonBloom"
         flags="FLAMMABLE"
         mass ="1.5"
-        sun="0.7"
+        sun="0.5"
         rain="0.3"
         temperature="0.5"
         nStage="2"

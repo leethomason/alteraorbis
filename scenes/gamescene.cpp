@@ -185,7 +185,8 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 			}
 			else if ( tapMod == GAME_TAP_MOD_CTRL ) {
 				if ( sim->GetPlayerChit() == 0 ) {
-					sim->CreatePlayer(); 
+					Vector2I v = { (int)at.x, (int)at.z };
+					sim->CreatePlayer( v, 0 ); 
 				}
 #if 0
 				sim->CreateVolcano( (int)at.x, (int)at.z, 6 );
@@ -350,7 +351,7 @@ void GameScene::DrawDebugText()
 	UFOText* ufoText = UFOText::Instance();
 	Chit* chit = sim->GetPlayerChit();
 	Engine* engine = sim->GetEngine();
-	ChitBag* chitBag = sim->GetChitBag();
+	LumosChitBag* chitBag = sim->GetChitBag();
 
 	if ( chit && chit->GetSpatialComponent() ) {
 		const Vector3F& v = chit->GetSpatialComponent()->GetPosition();
@@ -358,6 +359,7 @@ void GameScene::DrawDebugText()
 			           v.x, v.y, v.z,
 					   engine->camera.PosWC().x, engine->camera.PosWC().y, engine->camera.PosWC().z );
 	}
+
 	ufoText->Draw( 0, 48, "Tap world or map to go to location. End/Home rotate, PgUp/Down zoom." );
 
 	if ( simTimer > 1000 ) {
@@ -372,4 +374,23 @@ void GameScene::DrawDebugText()
 							simPS,
 							simPS / 30.0f,
 							chitBag->NumTicked(), chitBag->NumChits() ); 
+
+	int typeCount[NUM_PLANT_TYPES];
+	for( int i=0; i<NUM_PLANT_TYPES; ++i ) {
+		typeCount[i] = 0;
+		for( int j=0; j<MAX_PLANT_STAGES; ++j ) {
+			typeCount[i] += chitBag->census.plants[i][j];
+		}
+	}
+	int stageCount[MAX_PLANT_STAGES];
+	for( int i=0; i<MAX_PLANT_STAGES; ++i ) {
+		stageCount[i] = 0;
+		for( int j=0; j<NUM_PLANT_TYPES; ++j ) {
+			stageCount[i] += chitBag->census.plants[j][i];
+		}
+	}
+
+	ufoText->Draw( 0, 80,	"Plants type: %d %d %d %d %d %d %d %d stage: %d %d %d %d", 
+									typeCount[0], typeCount[1], typeCount[2], typeCount[3], typeCount[4], typeCount[5], typeCount[6], typeCount[7],
+									stageCount[0], stageCount[1], stageCount[2], stageCount[3] ); 
 }
