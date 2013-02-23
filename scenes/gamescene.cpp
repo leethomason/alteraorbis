@@ -38,15 +38,11 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	Vector3F target = { (float)sim->GetWorldMap()->Width() *0.5f, 0.0f, (float)sim->GetWorldMap()->Height() * 0.5f };
 	if ( sim->GetPlayerChit() ) {
 		target = sim->GetPlayerChit()->GetSpatialComponent()->GetPosition();
+		CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
+		cc->SetTrack( sim->GetPlayerChit()->ID() );
 	}
 	sim->GetEngine()->CameraLookAt( target + delta, target );
 	
-	if ( !sim->GetChitBag()->ActiveCamera() ) {
-		Chit* camChit = sim->GetChitBag()->NewChit();
-		CameraComponent* cameraComp = new CameraComponent( &sim->GetEngine()->camera );
-		camChit->Add( cameraComp );
-		cameraComp->SetTrack( sim->GetPlayerChit()->ID() );
-	}
 	RenderAtom atom;
 	minimap.Init( &gamui2D, atom, false );
 	minimap.SetSize( MINI_MAP_SIZE, MINI_MAP_SIZE );
@@ -184,10 +180,9 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 				}
 			}
 			else if ( tapMod == GAME_TAP_MOD_CTRL ) {
-				if ( sim->GetPlayerChit() == 0 ) {
-					Vector2I v = { (int)at.x, (int)at.z };
-					sim->CreatePlayer( v, 0 ); 
-				}
+
+				Vector2I v = { (int)at.x, (int)at.z };
+				sim->CreatePlayer( v, 0 ); 
 #if 0
 				sim->CreateVolcano( (int)at.x, (int)at.z, 6 );
 				sim->CreatePlant( (int)at.x, (int)at.z, -1 );

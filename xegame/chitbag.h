@@ -30,6 +30,7 @@
 class Engine;
 class ComponentFactory;
 class XStream;
+class CameraComponent;
 
 class ChitBag : public IBoltImpactHandler
 {
@@ -94,8 +95,8 @@ public:
 	virtual void HandleBolt( const Bolt& bolt, Model* m, const grinliz::Vector3F& at );
 
 	// There can only be one camera actually in use:
-	void SetActiveCamera( int id )	{ activeCamera = id; }
-	int  ActiveCamera() const		{ return activeCamera; }
+	CameraComponent* GetCamera( Engine* engine );
+	int GetCameraChitID() const { return activeCamera; }
 
 private:
 	enum {

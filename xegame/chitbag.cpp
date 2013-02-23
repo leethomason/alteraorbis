@@ -19,8 +19,10 @@
 #include "spatialcomponent.h"
 #include "rendercomponent.h"
 #include "itemcomponent.h"
+#include "cameracomponent.h"
 
 #include "../engine/model.h"
+#include "../engine/engine.h"
 #include "../grinliz/glperformance.h"
 #include "../tinyxml2/tinyxml2.h"
 #include "../xarchive/glstreamer.h"
@@ -58,6 +60,7 @@ void ChitBag::DeleteAll()
 void ChitBag::Serialize( const ComponentFactory* factory, XStream* xs )
 {
 	XarcOpen( xs, "ChitBag" );
+	XARC_SER( xs, activeCamera );
 
 	if ( xs->Saving() ) {
 		XarcOpen( xs, "Chits" );
@@ -166,6 +169,25 @@ void ChitBag::QueueDeleteComponent( Component* comp )
 Bolt* ChitBag::NewBolt()
 {
 	return bolts.PushArr(1);
+}
+
+
+CameraComponent* ChitBag::GetCamera( Engine* engine )
+{
+	Chit* c = GetChit( activeCamera );
+	if( c ) {
+		CameraComponent* cc = GET_COMPONENT( c, CameraComponent );
+		if ( cc )
+			return cc;
+	}
+	if ( c ) { 
+		c->QueueDelete(); 
+	}
+	c = NewChit();
+	activeCamera = c->ID();
+	CameraComponent* cc = new CameraComponent( &engine->camera );
+	c->Add( cc );
+	return cc;
 }
 
 

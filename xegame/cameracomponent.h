@@ -22,7 +22,9 @@
 
 class Camera;
 
-// Also needs other modes.
+// Got sick of dealing with "zombie" cameras.
+// So now all the non-main camera components
+// will self-delete.
 class CameraComponent : public Component
 {
 private:
@@ -30,7 +32,6 @@ private:
 public:
 	CameraComponent( Camera* _camera ) 
 		:	camera( _camera ),
-			autoDelete( false ),
 			mode( DONE ),
 			speed( 0 )
 	{
@@ -47,13 +48,11 @@ public:
 	virtual void DebugStr( grinliz::GLString* str );
 	virtual int DoTick( U32 delta, U32 since );
 
-	void SetAutoDelete( bool ad )									{ autoDelete = ad; }
 	void SetPanTo( grinliz::Vector3F& dest, float speed = 40.0f );
 	void SetTrack( int targetChitID );
 
 private:
 	Camera* camera;
-	bool autoDelete;
 
 	enum {
 		DONE,	// will delete

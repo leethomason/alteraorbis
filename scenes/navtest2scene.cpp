@@ -236,10 +236,7 @@ void NavTest2Scene::Tap( int action, const grinliz::Vector2F& view, const grinli
 			Rectangle2I mapBounds = map->Bounds();
 
 			//GLOUTPUT(( "Mini-map %d,%d\n", int(x), int(y) ));
-			Chit* chit = chitBag.NewChit();
-			CameraComponent* cc = new CameraComponent( &engine->camera );
-			chit->Add( cc );
-			cc->SetAutoDelete( true );
+			CameraComponent* cc = chitBag.GetCamera( engine );
 
 			engine->CameraLookingAt( &at );
 			if ( at.x >= 0 && at.z >= 0 && at.x < (float)mapBounds.max.x && at.z < (float)mapBounds.max.y ) {

@@ -26,23 +26,16 @@ using namespace grinliz;
 void CameraComponent::OnAdd( Chit* c )
 {
 	super::OnAdd( c );
-	if ( GetChitBag()->ActiveCamera() == 0 ) {
-		GetChitBag()->SetActiveCamera( this->ID() );
-	}
 }
 
 
 void CameraComponent::OnRemove()
 {
-	if ( GetChitBag()->ActiveCamera() == this->ID() ) {
-		GetChitBag()->SetActiveCamera( 0 );
-	}
 }
 
 void CameraComponent::Serialize( XStream* xs )
 {
 	this->BeginSerialize( xs, Name() );
-	XARC_SER( xs, autoDelete );
 	XARC_SER( xs, mode );
 	XARC_SER( xs, targetChitID );
 	XARC_SER( xs, speed );
@@ -79,17 +72,13 @@ void CameraComponent::SetTrack( int targetID )
 
 int CameraComponent::DoTick( U32 delta, U32 since ) 
 {
-	if ( GetChitBag()->ActiveCamera() != this->ID() ) {
-		return 100;
+	if ( GetChitBag()->GetCameraChitID() != parentChit->ID() ) {
+		parentChit->QueueDelete();
+		return VERY_LONG_TICK;
 	}
 
 	switch ( mode ) {
-	case DONE:
-		if ( autoDelete ) {
-			parentChit->GetChitBag()->QueueDelete( parentChit );
-		}
-		break;
-		
+
 	case PAN:
 		{
 			float travel = Travel( speed, delta );

@@ -9,6 +9,7 @@
 #include "../xegame/chitbag.h"
 #include "../xegame/inventorycomponent.h"
 #include "../xegame/componentfactory.h"
+#include "../xegame/cameracomponent.h"
 
 #include "../script/itemscript.h"
 #include "../script/scriptcomponent.h"
@@ -170,6 +171,7 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos, const char* assetName )
 
 	Chit* chit = chitBag->NewChit();
 	playerID = chit->ID();
+	chitBag->GetCamera( engine )->SetTrack( playerID );
 
 	chit->Add( new SpatialComponent());
 	chit->Add( new RenderComponent( engine, assetName ));

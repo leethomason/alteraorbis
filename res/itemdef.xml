@@ -142,8 +142,8 @@
         desc="Orbstalk"
         flags="FLAMMABLE"
         mass ="5"
-        sun="0.4"
-        rain="0.6"
+        sun="0.6"
+        rain="0.4"
         temperature="0.8"
         />
 
@@ -151,8 +151,8 @@
         desc="Tree"
         flags="FLAMMABLE"
         mass ="8"
-        sun="0.6"
-        rain="0.4"
+        sun="0.5"
+        rain="0.5"
         temperature="0.5"
         />
 
@@ -169,7 +169,7 @@
         desc="CrystalGrass"
         flags="IMMUNE_FIRE SHOCKABLE"
         mass ="5"
-        sun="0.7"
+        sun="0.5"
         rain="0.3"
         temperature="0.1"
         />

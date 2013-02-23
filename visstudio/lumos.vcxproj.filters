@@ -157,29 +157,17 @@
     <ClCompile Include="..\xegame\chitbag.cpp">
       <Filter>Source Files\xegame</Filter>
     </ClCompile>
-    <ClCompile Include="..\xegame\rendercomponent.cpp">
-      <Filter>Source Files\xegame</Filter>
-    </ClCompile>
     <ClCompile Include="..\xegame\component.cpp">
       <Filter>Source Files\xegame</Filter>
     </ClCompile>
     <ClCompile Include="..\engine\engineshaders.cpp">
       <Filter>Source Files\engine</Filter>
     </ClCompile>
-    <ClCompile Include="..\xegame\spatialcomponent.cpp">
-      <Filter>Source Files\xegame</Filter>
-    </ClCompile>
     <ClCompile Include="..\scenes\navtest2scene.cpp">
       <Filter>Source Files\scenes</Filter>
     </ClCompile>
-    <ClCompile Include="..\xegame\cameracomponent.cpp">
-      <Filter>Source Files\xegame</Filter>
-    </ClCompile>
     <ClCompile Include="..\scenes\battletestscene.cpp">
       <Filter>Source Files\scenes</Filter>
-    </ClCompile>
-    <ClCompile Include="..\xegame\inventorycomponent.cpp">
-      <Filter>Source Files\xegame</Filter>
     </ClCompile>
     <ClCompile Include="..\game\gameitem.cpp">
       <Filter>Source Files\game</Filter>
@@ -201,9 +189,6 @@
     </ClCompile>
     <ClCompile Include="..\engine\bolt.cpp">
       <Filter>Source Files\engine</Filter>
-    </ClCompile>
-    <ClCompile Include="..\xegame\itemcomponent.cpp">
-      <Filter>Source Files\xegame</Filter>
     </ClCompile>
     <ClCompile Include="..\game\lumoschitbag.cpp">
       <Filter>Source Files\game</Filter>
@@ -273,6 +258,21 @@
     </ClCompile>
     <ClCompile Include="..\script\plantscript.cpp">
       <Filter>Source Files\script</Filter>
+    </ClCompile>
+    <ClCompile Include="..\xegame\cameracomponent.cpp">
+      <Filter>Source Files\components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\xegame\inventorycomponent.cpp">
+      <Filter>Source Files\components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\xegame\itemcomponent.cpp">
+      <Filter>Source Files\components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\xegame\rendercomponent.cpp">
+      <Filter>Source Files\components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\xegame\spatialcomponent.cpp">
+      <Filter>Source Files\components</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -405,12 +405,6 @@
     <ClInclude Include="..\xegame\component.h">
       <Filter>Source Files\xegame</Filter>
     </ClInclude>
-    <ClInclude Include="..\xegame\spatialcomponent.h">
-      <Filter>Source Files\xegame</Filter>
-    </ClInclude>
-    <ClInclude Include="..\xegame\rendercomponent.h">
-      <Filter>Source Files\xegame</Filter>
-    </ClInclude>
     <ClInclude Include="..\xegame\chitbag.h">
       <Filter>Source Files\xegame</Filter>
     </ClInclude>
@@ -426,23 +420,14 @@
     <ClInclude Include="..\scenes\navtest2scene.h">
       <Filter>Source Files\scenes</Filter>
     </ClInclude>
-    <ClInclude Include="..\xegame\cameracomponent.h">
-      <Filter>Source Files\xegame</Filter>
-    </ClInclude>
     <ClInclude Include="..\scenes\battletestscene.h">
       <Filter>Source Files\scenes</Filter>
-    </ClInclude>
-    <ClInclude Include="..\xegame\inventorycomponent.h">
-      <Filter>Source Files\xegame</Filter>
     </ClInclude>
     <ClInclude Include="..\xegame\xeitem.h">
       <Filter>Source Files\xegame</Filter>
     </ClInclude>
     <ClInclude Include="..\game\gameitem.h">
       <Filter>Source Files\game</Filter>
-    </ClInclude>
-    <ClInclude Include="..\xegame\itemcomponent.h">
-      <Filter>Source Files\xegame</Filter>
     </ClInclude>
     <ClInclude Include="..\script\battlemechanics.h">
       <Filter>Source Files\script</Filter>
@@ -542,6 +527,21 @@
     </ClInclude>
     <ClInclude Include="..\game\census.h">
       <Filter>Source Files\game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xegame\cameracomponent.h">
+      <Filter>Source Files\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xegame\inventorycomponent.h">
+      <Filter>Source Files\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xegame\itemcomponent.h">
+      <Filter>Source Files\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xegame\rendercomponent.h">
+      <Filter>Source Files\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xegame\spatialcomponent.h">
+      <Filter>Source Files\components</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

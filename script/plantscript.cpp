@@ -132,7 +132,7 @@ void PlantScript::Serialize( const ScriptContext& ctx, XStream* xs )
 
 int PlantScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 {
-	static const float	HP_PER_SECOND = 10.0f;
+	static const float	HP_PER_SECOND = 1.0f;
 	static const int	TIME_TO_GROW  = 4 * (1000 * 60);	// minutes
 	static const int	TIME_TO_SPORE = 1 * (1000 * 60); 
 
