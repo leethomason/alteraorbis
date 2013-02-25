@@ -24,7 +24,7 @@ uniform mat4 	u_mvpMatrix;		// model-view-projection.
 		uniform vec4	u_filterParam;
 	#endif
 	#if PARAM4 == 1
-		uniform mat4	u_param;					// Used for procedural rendering. Could be made arbitrary.
+		uniform mat4	u_param4;					// Used for procedural rendering. Could be made arbitrary.
 	#endif
 #endif
 

@@ -76,7 +76,7 @@ public:
 		SATURATION			= (1<<13),		// Per pixel saturation effect. Uses control.y
 
 		// Features:
-		PROCEDURAL			= (1<<14),		// Engage the procedural renderer, and use a Matrix param.
+		PROCEDURAL			= (1<<14),		// Engage the procedural renderer, and use a param4.
 		BONE_XFORM			= (1<<15),
 	};
 
@@ -142,6 +142,9 @@ public:
 	void SetUniformArray( int id, int count, const grinliz::Matrix4* mat );
 	void SetUniformArray( int id, int count, const grinliz::Vector4F* params );
 	void SetUniformArray( int id, int count, const grinliz::Vector3F* params );
+
+	// Encode the data used by procedural rendering. 4 each of colors and texture offset.
+	static void EncodeProceduralMat( const grinliz::Color4F* colors, const float* textureV, grinliz::Matrix4* mat );
 
 private:
 	static ShaderManager* instance;

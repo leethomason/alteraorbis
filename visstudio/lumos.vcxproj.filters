@@ -333,9 +333,6 @@
     <ClInclude Include="..\engine\uirendering.h">
       <Filter>Source Files\engine</Filter>
     </ClInclude>
-    <ClInclude Include="..\engine\vertex.h">
-      <Filter>Source Files\engine</Filter>
-    </ClInclude>
     <ClInclude Include="..\xegame\cgame.h">
       <Filter>Source Files\xegame</Filter>
     </ClInclude>
@@ -542,6 +539,9 @@
     </ClInclude>
     <ClInclude Include="..\xegame\spatialcomponent.h">
       <Filter>Source Files\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\engine\vertex.h">
+      <Filter>Source Files\game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

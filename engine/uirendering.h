@@ -33,6 +33,7 @@ public:
 		RENDERSTATE_UI_TEXT_DISABLED,
 		RENDERSTATE_UI_DECO,			// deco rendering
 		RENDERSTATE_UI_DECO_DISABLED,
+		RENDERSTATE_UI_PROCEDURAL,
 		RENDERSTATE_COUNT
 	};
 
@@ -54,6 +55,7 @@ public:
 private:
 	CompositingShader shader;
 	float textRed, textGreen, textBlue;
+	grinliz::Matrix4 procMat;
 	Texture* texture;
 };
 

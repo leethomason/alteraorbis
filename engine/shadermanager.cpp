@@ -488,3 +488,21 @@ void ShaderManager::DeleteProgram( Shader* shader )
 }
 
 	
+
+/*static*/ void ShaderManager::EncodeProceduralMat( const grinliz::Color4F* colors, const float* textureV, grinliz::Matrix4* mat )
+{
+	for( int r=0; r<4; ++r ) {
+		// red, green: 1st and 2nd column
+		mat->m( r, 0 ) = colors[r].r;
+		mat->m( r, 1 ) = colors[r].g;
+			
+		// Encode both blue and alpha into the 3rd column.
+		GLASSERT( InRange( colors[r].b, 0.0f, 1.0f ));
+		GLASSERT( InRange( colors[r].a, 0.0f, 1.0f ));
+		mat->m( r, 2 ) = floor(colors[r].b * 256.0f) + colors[r].a*0.5f;
+
+		// Offset into texture encoding in the 4th column.
+		mat->m( r, 3 ) = textureV[r];
+	}
+}
+

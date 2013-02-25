@@ -66,13 +66,17 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	allRockButton.Init( &gamui2D, game->GetButtonLook(0) );
 	allRockButton.SetText( "All Rock" );
 
-	//nextPool.Init( &gamui2D, game->GetButtonLook(0) );
-	//nextPool.SetText( "Pool" );
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
 		newsButton[i].Init( &gamui2D, game->GetButtonLook(0) );
 		newsButton[i].SetSize( NEWS_BUTTON_WIDTH, NEWS_BUTTON_HEIGHT );
 		newsButton[i].SetText( "news" );
 	}
+
+	RenderAtom procAtom( (const void*) UIRenderer::RENDERSTATE_UI_PROCEDURAL, 
+						 TextureManager::Instance()->GetTexture( "humanFemaleFace" ), 
+						 0, 0, 1.f/4.f, 1.f/16.f );	// fixme: hardcoded texture
+	faceImage.Init( &gamui2D, procAtom, true );
+	faceImage.SetSize( 100, 100 );
 }
 
 
@@ -97,6 +101,8 @@ void GameScene::Resize()
 
 	const Screenport& port = lumosGame->GetScreenport();
 	minimap.SetPos( port.UIWidth()-MINI_MAP_SIZE, 0 );
+
+	faceImage.SetPos( minimap.X()-faceImage.Width(), 0 );
 
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
 		newsButton[i].SetPos( port.UIWidth()- (NEWS_BUTTON_WIDTH), MINI_MAP_SIZE + (NEWS_BUTTON_HEIGHT+2)*i );

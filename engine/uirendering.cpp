@@ -13,10 +13,14 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "../grinliz/glvector.h"
+
 #include "uirendering.h"
 #include "texture.h"
-#include "../grinliz/glvector.h"
 #include "text.h"
+#include "shadermanager.h"
+
+#include "../game/lumosgame.h"	// FIXME: used to get colors
 
 using namespace grinliz;
 using namespace gamui;
@@ -36,6 +40,8 @@ void UIRenderer::EndRender()
 
 void UIRenderer::BeginRenderState( const void* renderState )
 {
+	shader.ClearShaderFlag( ShaderManager::PROCEDURAL );
+
 	switch ( (int)renderState )
 	{
 	case RENDERSTATE_UI_NORMAL:
@@ -73,6 +79,22 @@ void UIRenderer::BeginRenderState( const void* renderState )
 		shader.SetBlendMode( GPUState::BLEND_NORMAL );
 		break;
 
+	case RENDERSTATE_UI_PROCEDURAL:
+		shader.SetColor( 1, 1, 1, 1 );
+		shader.SetBlendMode( GPUState::BLEND_NORMAL );
+		shader.SetShaderFlag( ShaderManager::PROCEDURAL );
+		{
+			// FIXME: test and hardcoded color
+			// skin, highlight, glasses, hair
+			Color4F c[4] = { LumosGame::GetMainPalette()->Get4F( 5, 6 ),
+							 LumosGame::GetMainPalette()->Get4F( 1, 6 ),
+							 LumosGame::GetMainPalette()->Get4F( 1, 5 ),
+							 LumosGame::GetMainPalette()->Get4F( 1, 4 ) };
+			float v[4] = { 0, 0, 0, 0 };
+			ShaderManager::EncodeProceduralMat( c, v, &procMat );
+		}
+		break;
+
 	default:
 		GLASSERT( 0 );
 		break;
@@ -89,7 +111,14 @@ void UIRenderer::BeginTexture( const void* textureHandle )
 void UIRenderer::Render( const void* renderState, const void* textureHandle, int nIndex, const uint16_t* index, int nVertex, const Gamui::Vertex* vertex )
 {
 	GPUStream stream( GPUStream::kGamuiType );
-	shader.Draw( stream, texture, vertex, nIndex, index );
+	
+	GPUStreamData data;
+	data.streamPtr = vertex;
+	data.indexPtr = index;
+	data.texture0 = (Texture*)textureHandle;
+	data.param4 = &procMat;
+
+	shader.Draw( stream, data, nIndex );
 }
 
 

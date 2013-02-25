@@ -60,6 +60,7 @@ private:
 	gamui::PushButton	newsButton[NUM_NEWS_BUTTONS];
 	gamui::Image		minimap;
 	gamui::Image		playerMark;
+	gamui::Image		faceImage;
 };
 
 
