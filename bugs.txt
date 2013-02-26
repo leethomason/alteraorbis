@@ -31,9 +31,16 @@ x chits should have "update time" not boolean flag
 		x fix the stupid camera
 		x weather
 		x player recreation
-		- avatar face display
+		x avatar face display
+		x debug UI toggle
+		- new assets from Shroom
 		- overnight test
+	- Fauna 1
+		- monster ecology
+		- monsters to fight
+		- battles!
 	- Flora 2
+		- pony-unicorn-pegasus
 		- fix annoying hp out of range bug
 		- rain, general de-saturation
 		- aging of stone
@@ -44,9 +51,7 @@ x chits should have "update time" not boolean flag
 		- burn to map
 		- update zones
 		- update pathfinder
-	- Fauna
-		- monster ecology
-		- monsters to fight
+	- Fauna 2
 		- visitors
 		- inventory screen
 	- Building
@@ -76,6 +81,7 @@ x chits should have "update time" not boolean flag
 
 	- serialization
 
+- faces are using too much memory, or too low res...hmmm. 
 - handle device loss in live preview
 - particles aren't additive correctly
 d GT bug: reconsider auto-mip. review texture upload. 

@@ -68,11 +68,23 @@ void TitleScene::Resize()
 	background.SetPos( 0, 0 );
 	background.SetSize( port.UIWidth(), port.UIHeight() );
 
+	static const bool VIS[NUM_TESTS] = {
+		false, true, false, true, false, false, false,
+		true, true, true, true, false
+	};
+	bool visible = game->DebugUIEnabled();
+
 	LayoutCalculator layout = lumosGame->DefaultLayout();
+	int c = 0;
 	for( int i=0; i<NUM_TESTS; ++i ) {
-		int y = i / TESTS_PER_ROW;
-		int x = i - y*TESTS_PER_ROW;
-		layout.PosAbs( &testScene[i], x, y );
+		bool v = visible || VIS[i];
+		testScene[i].SetVisible( v );
+		if ( v ) {
+			int y = c / TESTS_PER_ROW;
+			int x = c - y*TESTS_PER_ROW;
+			layout.PosAbs( &testScene[i], x, y );
+			++c;
+		}
 	}
 	for( int i=0; i<NUM_GAME; ++i ) {
 		layout.PosAbs( &gameScene[i], i*2, -1 );

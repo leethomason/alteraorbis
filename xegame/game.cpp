@@ -60,6 +60,12 @@ Game::Game( int width, int height, int rotation, int uiHeight, const char* path 
 	previousTime( 0 ),
 	isDragging( false )
 {
+#ifdef DEBUG
+	debugUIEnabled = true;
+#else
+	debugUIEnabled = false;
+#endif
+
 	savePath = path;
 	char c = savePath[savePath.size()-1];
 	if ( c != '\\' && c != '/' ) {	
@@ -664,6 +670,10 @@ void Game::HandleHotKey( int key )
 {
 	if ( key == GAME_HK_TOGGLE_UI ) {
 		renderUI = !renderUI;
+	}
+	if ( key == GAME_HK_DEBUG_UI ) {
+		debugUIEnabled = !debugUIEnabled;
+		sceneStack.Top()->scene->Resize();
 	}
 	if ( key == GAME_HK_TOGGLE_DEBUG_TEXT ) {
 		SetDebugLevel( GetDebugLevel() + 1 );

@@ -312,6 +312,10 @@ int main( int argc, char **argv )
 						GameHotKey( game, GAME_HK_TOGGLE_UI );
 						break;
 
+					case SDLK_i:
+						GameHotKey( game, GAME_HK_DEBUG_UI );
+						break;
+
 					case SDLK_g:
 						GameHotKey( game, GAME_HK_TOGGLE_GLOW );
 						break;

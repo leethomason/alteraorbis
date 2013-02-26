@@ -62,8 +62,17 @@ private:
 
 
 struct NewsEvent {
+	// News priority:
+	enum {
+		PONY,
+		UNICORN,
+		PEGASUS
+	};
+
+	int					priority;
 	grinliz::Vector2F	pos;
 	grinliz::IString	name;
+	U32					time;			// set by the Add
 };
 
 

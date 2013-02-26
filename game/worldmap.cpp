@@ -518,7 +518,7 @@ void WorldMap::ProcessWater( ChitBag* cb )
 								GLOUTPUT(( "pool found. zone=%d,%d area=%d waterFall=%d\n", zx, zy, poolGrids.Size(), water ));
 								
 								Vector2F posF = { (float)poolGrids[0].x+0.5f, (float)poolGrids[0].y+0.5f };
-								NewsEvent poolNews = { posF, StringPool::Intern( "water", true ) };
+								NewsEvent poolNews = { NewsEvent::UNICORN, posF, StringPool::Intern( "water", true ) };
 								cb->AddNews( poolNews );
 
 								for( int i=0; i<poolGrids.Size(); ++i ) {
@@ -532,7 +532,7 @@ void WorldMap::ProcessWater( ChitBag* cb )
 											waterfalls.Push( poolGrids[i] );
 
 											posF.Set( (float)poolGrids[i].x+0.5f, (float)poolGrids[i].y+0.5f );
-											NewsEvent we = { posF, StringPool::Intern( "waterfall" ) };
+											NewsEvent we = { NewsEvent::PEGASUS, posF, StringPool::Intern( "waterfall" ) };
 											cb->AddNews( we );
 											
 											break;

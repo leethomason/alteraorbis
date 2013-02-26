@@ -94,6 +94,7 @@ public:
 	void SetPerfLevel( int level )		{ perfLevel = (level%2); }
 	int GetPerfLevel() const			{ return perfLevel; }
 	int GetTapMod() const				{ return tapMod; }
+	bool DebugUIEnabled() const			{ return debugUIEnabled; }
 
 	const char* GamePath( const char* type, int slot, const char* extension ) const;
 	bool HasFile( const char* file ) const;
@@ -174,6 +175,7 @@ private:
 	int perfFrameCount;
 	bool suppressText;
 	bool renderUI;
+	bool debugUIEnabled;
 	int perfY;
 
 	ModelLoader* modelLoader;

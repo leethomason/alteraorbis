@@ -2,9 +2,11 @@
 #define LUMOS_GAME_SCENE_INCLUDED
 
 #include "../xegame/scene.h"
+#include "../xegame/chitevent.h"
 
 class LumosGame;
 class Sim;
+struct NewsEvent;
 
 class GameScene : public Scene
 {
@@ -61,6 +63,8 @@ private:
 	gamui::Image		minimap;
 	gamui::Image		playerMark;
 	gamui::Image		faceImage;
+
+	//grinliz::CDynArray< NewsEvent > localNews;
 };
 
 

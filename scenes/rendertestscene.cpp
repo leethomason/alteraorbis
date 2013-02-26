@@ -94,7 +94,9 @@ void RenderTestScene::Resize()
 	LayoutCalculator layout = lumosGame->DefaultLayout();
 	layout.PosAbs( &glowButton, 1, -1 );
 	layout.PosAbs( &refreshButton, 2, -1 );
+
 	for( int i=0; i<NUM_CONTROL; ++i ) {
+		control[i].SetVisible( game->DebugUIEnabled() );
 		layout.PosAbs( &control[i], i, -2 );
 	}
 }

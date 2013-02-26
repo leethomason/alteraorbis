@@ -73,9 +73,6 @@ public:
 	virtual void Rotate( float degrees )						{}
 	virtual void CancelInput()									{}
 
-	virtual bool CanSave()										{ return false; }
-	virtual void Save( tinyxml2::XMLPrinter* )					{}
-	virtual void Load( const tinyxml2::XMLElement* doc )		{}
 	virtual void HandleHotKey( int mask )						{}
 	virtual void Resize()										{}
 

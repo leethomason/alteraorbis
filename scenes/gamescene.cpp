@@ -74,7 +74,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 
 	RenderAtom procAtom( (const void*) UIRenderer::RENDERSTATE_UI_PROCEDURAL, 
 						 TextureManager::Instance()->GetTexture( "humanFemaleFace" ), 
-						 0, 0, 1.f/4.f, 1.f/16.f );	// fixme: hardcoded texture
+						 0, 0, 1.f/4.f, 1.f/16.f );	// fixme: hardcoded texture coordinates, etc.
 	faceImage.Init( &gamui2D, procAtom, true );
 	faceImage.SetSize( 100, 100 );
 }
@@ -107,6 +107,10 @@ void GameScene::Resize()
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
 		newsButton[i].SetPos( port.UIWidth()- (NEWS_BUTTON_WIDTH), MINI_MAP_SIZE + (NEWS_BUTTON_HEIGHT+2)*i );
 	}
+
+	bool visible = game->DebugUIEnabled();
+	allRockButton.SetVisible( visible );
+	serialButton[CYCLE].SetVisible( visible );
 }
 
 
@@ -241,10 +245,10 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
 		if ( item == &newsButton[i] ) {
-			const NewsEvent* news = sim->GetChitBag()->News();
-			int nNews = sim->GetChitBag()->NumNews();
-			GLASSERT( i < nNews );
-			dest = news[i].pos;
+			//GLASSERT( i < localNews.Size() );
+			//dest = localNews[i].pos;
+			GLASSERT( i < sim->GetChitBag()->NumNews() );
+			dest = (sim->GetChitBag()->News() + i)->pos;
 		}
 	}
 
@@ -280,6 +284,18 @@ void GameScene::HandleHotKey( int mask )
 	}
 }
 
+/*
+class NewsSorter
+{
+public:
+	static bool Less( const NewsEvent& v0, const NewsEvent& v1 )	
+	{ 
+		int score0 = v0.priority * 30*1000 - (int)v0.time;
+		int score1 = v1.priority * 30*1000 - (int)v1.time;
+		return score0 < score1; 
+	}
+};
+*/
 
 void GameScene::DoTick( U32 delta )
 {
@@ -298,8 +314,16 @@ void GameScene::DoTick( U32 delta )
 	const NewsEvent* news = sim->GetChitBag()->News();
 	int nNews = sim->GetChitBag()->NumNews();
 
+	/*
+	localNews.Clear();
+	for( int i=0; i<nNews; ++i ) {
+		localNews.Push( news[i] );
+	}
+	Sort<NewsEvent, NewsSorter>( localNews.Mem(), localNews.Size() );
+	*/
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
 		if ( i < nNews ) {
+			//newsButton[i].SetText( localNews[i].name.c_str() );
 			newsButton[i].SetText( news[i].name.c_str() );
 			newsButton[i].SetEnabled( true );
 		}

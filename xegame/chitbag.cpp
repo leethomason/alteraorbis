@@ -267,7 +267,9 @@ void ChitBag::HandleBolt( const Bolt& bolt, Model* m, const grinliz::Vector3F& a
 void ChitBag::AddNews( const NewsEvent& event )
 {
 	news.PushFront( event );
-	if ( news.Size() > 20 ) {
+	news[0].time = bagTime;
+
+	if ( news.Size() > 40 ) {
 		news.Pop();
 	}
 }
