@@ -40,7 +40,7 @@
   <texture assetName="map_land" filename="map_land2.png"   />
   <texture filename="map_water.png"  filename2="map_water_em.png"  emissive="true"/>
   <texture filename="procedural.png" />
-  <texture filename="ring.png" maxSize="512" emissive="true"/>"
+  <texture filename="ring.png" maxSize="1024" emissive="true"/>"
 
   <!-- UI elements -->
   <texture filename="intro.png" width="64" height="64" />

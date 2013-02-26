@@ -10,6 +10,9 @@ It may require the microsoft redistributables. (Although if you installed Xenowa
 are already installed.)
 http://www.microsoft.com/en-us/download/details.aspx?id=5555
 
+
+NOTE, at this time, there is NO save game compatibility. Be sure to delete old games.
+
 Filing a Bug
 ------------
 If you find an issue,
@@ -39,8 +42,13 @@ Home / End rotate.
 
 - 'Save' saves the game (there is only one save slot)
 - 'Load' loads the game
-- 'Cycle' saves, tears down the game objects, constructs, and loads. Very useful to test save/load.
 
+- 'Track' walks places, 'Teleport' teleports there.
+- shift-click to create a new player
+- Space-Bar will flip it to fast mode.
+
+The buttons on the right side of the game scene are interesting world features. Tap
+to walk or teleport there.
 
 Features
 --------
@@ -58,14 +66,10 @@ Shows the face and ring art as they will appear in the game. The texture is
 pulled from the database file.
 
 Other scenes:
-* dialog: simple drag & drop test
 * render: rendering tests, glow, atlasing
 * particle: particle editing and playback
-* nav: nav mesh and pathfinding tests
-* blue smoke: test of the full system on a game-sized world
 * battle: battle test scene. the main work-in-progress is to get this fulling implemented
 * animation: animation preview utiliti
-* weapon stat: in development, dumps weapon statistics to disk
 
 http://grinninglizard.com/altera/
 

@@ -117,7 +117,7 @@ public:
 		GLOW,
 
 		NUM_COLORS = 11,
-		NUM_ROWS = 4
+		NUM_ROWS = 8
 	};
 
 	WeaponGen( const Game::Palette* p_palette ) : ItemGen( p_palette ) {}

@@ -1,28 +1,7 @@
-x volcano delayed on save/load cycle (size getting set to zero?)
-x water creation seems deferred to save/load cycle. SetRock() not quite correct?
 - health is awkward: keeps copy of HP (oops). move hp to health component? (TotalHP() on item?)
-x chits should have "update time" not boolean flag
 - need free camera mode
 
 - game
-	x Land and Water
-		x generate a random world
-		x save / load
-			x 'shelf'
-			x save, load, cycle buttons
-			x optimize cycle time (fast png write?): not much to do here, without swapping out the encoder
-			x save bolts
-		x walk around it
-			x where is world origin? mini-map origin? save/load origin? line all that up
-			x mark location on mini-map
-	- Rock and Stream
-		x rock formation
-			x need more local height variation
-		x cave
-		x pools
-		x waterfall
-		x lava gen
-		x fast-step world sim
 	- Flora
 		x plants
 			x growth, spread
@@ -34,13 +13,16 @@ x chits should have "update time" not boolean flag
 		x avatar face display
 		x debug UI toggle
 		- new assets from Shroom
+		- change main face
 		- overnight test
+		- date on main screen
+		- move down buttons
 	- Fauna 1
 		- monster ecology
 		- monsters to fight
 		- battles!
 	- Flora 2
-		- pony-unicorn-pegasus
+		- pony-unicorn-pegasus news prioritization
 		- fix annoying hp out of range bug
 		- rain, general de-saturation
 		- aging of stone
@@ -81,7 +63,7 @@ x chits should have "update time" not boolean flag
 
 	- serialization
 
-- faces are using too much memory, or too low res...hmmm. 
+- faces are using too much memory, or too low res...hmmm. Should really use texture packer and store a lookup.
 - handle device loss in live preview
 - particles aren't additive correctly
 d GT bug: reconsider auto-mip. review texture upload. 
@@ -153,6 +135,27 @@ x shadows should be part of space-tree bounds
 
 ----------- FIXED -------------
 
+x Land and Water
+	x generate a random world
+	x save / load
+		x 'shelf'
+		x save, load, cycle buttons
+		x optimize cycle time (fast png write?): not much to do here, without swapping out the encoder
+		x save bolts
+	x walk around it
+		x where is world origin? mini-map origin? save/load origin? line all that up
+		x mark location on mini-map
+- Rock and Stream
+	x rock formation
+		x need more local height variation
+	x cave
+	x pools
+	x waterfall
+	x lava gen
+	x fast-step world sim
+x chits should have "update time" not boolean flag
+x volcano delayed on save/load cycle (size getting set to zero?)
+x water creation seems deferred to save/load cycle. SetRock() not quite correct?
 x assert when clicking on location player can't go
 x crash on exit
 x really must fix the shadow popping bug. and bounds calc for that.
