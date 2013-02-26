@@ -13,6 +13,23 @@ http://www.microsoft.com/en-us/download/details.aspx?id=5555
 
 NOTE, at this time, there is NO save game compatibility. Be sure to delete old games.
 
+Getting Started
+---------------
+Start by tapping "Generate" to create a world. You can re-try if you don't like the 
+result. (And if you are a programmer interested in improving the world gen code, it
+runs as a stand alone utility.) Back on the title screen, tap "Continue" to start 
+in the world.
+
+It is very empty.
+
+Tap the spacebar to toggle on 'fast mode'. Volcanoes, plants, water, and (rarely) 
+waterfalls will form in the world. The date is in the upper right. Usually the
+world is an interesting place around the end of the 2nd age.
+
+All there is to do at this point is take a look, explore, share some screenshots,
+and share what you think.
+
+
 Filing a Bug
 ------------
 If you find an issue,
@@ -34,9 +51,9 @@ A basic map can be created, you can walk around, save, and load.
 [Bug: you can 'continue' without generating the world, which will crash the game]
 
 In the main game screen:
-[Control feedback appreciated! These work on my laptop.]
+[Control feedback appreciated!]
 
-Left-click the world or mini-map to walk there.
+Left-click the world or mini-map to walk (or teleport) there.
 PageUp / PageDown zoom.
 Home / End rotate.
 
@@ -44,14 +61,16 @@ Home / End rotate.
 - 'Load' loads the game
 
 - 'Track' walks places, 'Teleport' teleports there.
-- shift-click to create a new player
-- Space-Bar will flip it to fast mode.
+- ctrl-click to create a new player.
+- Space-Bar toggles between fast sim mode and normal mode. (Fast mode is intended
+  for world creation, not a "play the game at 2x" mode. It's very fast.)
 
 The buttons on the right side of the game scene are interesting world features. Tap
-to walk or teleport there.
+to walk or teleport there. (You'll generally need to teleport, unless the feature
+is unusually close.)
 
-Features
---------
+Test Scenes
+-----------
 
 The are a variety of test scenes, in different states. The important one for this release;
 

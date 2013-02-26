@@ -14,7 +14,7 @@
 		x debug UI toggle
 		x new assets from Shroom
 		x change main face
-		x overnight test
+		x long test
 		x date on main screen
 		x move down buttons
 	- Fauna 1
@@ -33,6 +33,7 @@
 		- burn to map
 		- update zones
 		- update pathfinder
+		- overnight test
 	- Fauna 2
 		- visitors
 		- inventory screen
