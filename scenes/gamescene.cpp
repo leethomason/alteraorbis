@@ -72,11 +72,12 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 		newsButton[i].SetText( "news" );
 	}
 
-	RenderAtom procAtom( (const void*) UIRenderer::RENDERSTATE_UI_PROCEDURAL, 
-						 TextureManager::Instance()->GetTexture( "humanFemaleFace" ), 
-						 0, 0, 1.f/4.f, 1.f/16.f );	// fixme: hardcoded texture coordinates, etc.
-	faceImage.Init( &gamui2D, procAtom, true );
+	RenderAtom nullAtom;
+	faceImage.Init( &gamui2D, nullAtom, true );
 	faceImage.SetSize( 100, 100 );
+	SetFace();
+
+	dateLabel.Init( &gamui2D );
 }
 
 
@@ -95,7 +96,7 @@ void GameScene::Resize()
 		layout.PosAbs( &serialButton[i], i, -2 );
 	}
 	for( int i=0; i<NUM_CAM_MODES; ++i ) {
-		layout.PosAbs( &camModeButton[i], i, 2 );
+		layout.PosAbs( &camModeButton[i], i, -3 );
 	}
 	layout.PosAbs( &allRockButton, 0, 1 );
 
@@ -103,6 +104,7 @@ void GameScene::Resize()
 	minimap.SetPos( port.UIWidth()-MINI_MAP_SIZE, 0 );
 
 	faceImage.SetPos( minimap.X()-faceImage.Width(), 0 );
+	dateLabel.SetPos( faceImage.X()-faceImage.Width(), 0 );
 
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
 		newsButton[i].SetPos( port.UIWidth()- (NEWS_BUTTON_WIDTH), MINI_MAP_SIZE + (NEWS_BUTTON_HEIGHT+2)*i );
@@ -111,6 +113,19 @@ void GameScene::Resize()
 	bool visible = game->DebugUIEnabled();
 	allRockButton.SetVisible( visible );
 	serialButton[CYCLE].SetVisible( visible );
+}
+
+
+void GameScene::SetFace()
+{
+	int id = 0;
+	if ( sim->GetPlayerChit() ) {
+		id = sim->GetPlayerChit()->ID();
+	}
+	RenderAtom procAtom( (const void*) (UIRenderer::RENDERSTATE_UI_PROCEDURAL + (id<<16)), 
+						 TextureManager::Instance()->GetTexture( "humanFemaleFace" ), 
+						 0, 0, 1.f/4.f, 1.f/16.f );	// fixme: hardcoded texture coordinates, etc.
+	faceImage.SetAtom( procAtom );
 }
 
 
@@ -133,6 +148,7 @@ void GameScene::Load()
 	else {
 		sim->Load( datPath, 0 );
 	}
+	SetFace();
 }
 
 
@@ -193,6 +209,7 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 
 				Vector2I v = { (int)at.x, (int)at.z };
 				sim->CreatePlayer( v, 0 ); 
+				SetFace();
 #if 0
 				sim->CreateVolcano( (int)at.x, (int)at.z, 6 );
 				sim->CreatePlant( (int)at.x, (int)at.z, -1 );
@@ -335,6 +352,10 @@ void GameScene::DoTick( U32 delta )
 
 	clock_t endTime = clock();
 	simTimer += (int)(endTime-startTime);
+
+	CStr<12> str;
+	str.Format( "%.2f", sim->DateInAge() );
+	dateLabel.SetText( str.c_str() );
 }
 
 

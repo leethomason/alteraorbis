@@ -41,8 +41,10 @@ void UIRenderer::EndRender()
 void UIRenderer::BeginRenderState( const void* renderState )
 {
 	shader.ClearShaderFlag( ShaderManager::PROCEDURAL );
+	int state = ((int)renderState) & 0xffff;
+	int data  = ((int)renderState) >> 16;
 
-	switch ( (int)renderState )
+	switch ( state )
 	{
 	case RENDERSTATE_UI_NORMAL:
 		shader.SetColor( 1, 1, 1, 1 );
@@ -90,7 +92,8 @@ void UIRenderer::BeginRenderState( const void* renderState )
 							 LumosGame::GetMainPalette()->Get4F( 1, 6 ),
 							 LumosGame::GetMainPalette()->Get4F( 1, 5 ),
 							 LumosGame::GetMainPalette()->Get4F( 1, 4 ) };
-			float v[4] = { 0, 0, 0, 0 };
+			Random r( data );
+			float v[4] = { (float)r.Rand(16)/16.f, (float)r.Rand(16)/16.f, (float)r.Rand(16)/16.f, (float)r.Rand(16)/16.f };
 			ShaderManager::EncodeProceduralMat( c, v, &procMat );
 		}
 		break;

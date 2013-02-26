@@ -226,7 +226,7 @@ void Sim::DoTick( U32 delta )
 
 	// Logic that will probably need to be broken out.
 	// What happens in a given age?
-	int age = minuteClock / MINUTES_IN_AGE;
+	int age = timeInMinutes / MINUTES_IN_AGE;
 	volcTimer += delta;
 
 	// Age of Fire. Needs lots of volcanoes to seed the world.
@@ -253,9 +253,9 @@ void Sim::DoTick( U32 delta )
 		}
 	}
 
-	if ( secondTick ) {
+//	if ( secondTick ) {
 		CreatePlant( random.Rand(worldMap->Width()), random.Rand(worldMap->Height()), -1 );
-	}
+//	}
 }
 
 
@@ -291,11 +291,16 @@ void Sim::CreatePlant( int x, int y, int type )
 		return;
 	}
 
-	// Only allow about 10% of the world to be plants.
+	// About 50,000 plants seems about right.
 	int count = chitBag->census.CountPlants();
-	if ( count > worldMap->Bounds().Area() / 10 ) {
+	if ( count > worldMap->Bounds().Area() / 20 ) {
 		return;
 	}
+
+	// And space them out a little.
+	Random r( x+y*1024 );
+	if ( r.Rand(4) == 0 )
+		return;
 
 	const WorldGrid& wg = worldMap->GetWorldGrid( x, y );
 

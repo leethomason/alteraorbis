@@ -60,11 +60,7 @@ Game::Game( int width, int height, int rotation, int uiHeight, const char* path 
 	previousTime( 0 ),
 	isDragging( false )
 {
-#ifdef DEBUG
-	debugUIEnabled = true;
-#else
 	debugUIEnabled = false;
-#endif
 
 	savePath = path;
 	char c = savePath[savePath.size()-1];

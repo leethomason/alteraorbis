@@ -12,11 +12,11 @@
 		x player recreation
 		x avatar face display
 		x debug UI toggle
-		- new assets from Shroom
-		- change main face
-		- overnight test
-		- date on main screen
-		- move down buttons
+		x new assets from Shroom
+		x change main face
+		x overnight test
+		x date on main screen
+		x move down buttons
 	- Fauna 1
 		- monster ecology
 		- monsters to fight

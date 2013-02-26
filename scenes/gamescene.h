@@ -31,6 +31,7 @@ public:
 private:
 	void Save();
 	void Load();
+	void SetFace();
 
 	enum {
 		SAVE,
@@ -63,6 +64,7 @@ private:
 	gamui::Image		minimap;
 	gamui::Image		playerMark;
 	gamui::Image		faceImage;
+	gamui::TextLabel	dateLabel;
 
 	//grinliz::CDynArray< NewsEvent > localNews;
 };
