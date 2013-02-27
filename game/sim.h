@@ -53,6 +53,7 @@ public:
 	void CreatePlayer( const grinliz::Vector2I& pos, const char* assetName );
 
 private:
+	void CreateCores();
 
 	Engine*			engine;
 	LumosGame*		lumosGame;

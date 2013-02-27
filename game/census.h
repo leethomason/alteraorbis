@@ -18,6 +18,8 @@ struct Census
 		}
 		return c;
 	}
+
+	grinliz::CArray< int, MAX_CORES > cores; 
 };
 
 #endif 

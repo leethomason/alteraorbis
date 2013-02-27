@@ -134,6 +134,11 @@
         mass ="400"
         />
 
+  <item name="core"
+        resource="obelisk"
+        flags="INDESTRUCTABLE"
+        />
+
   <!-- The plant items describe the plants at the smallest height. Scaled from there,
        remembering largest plant is 4x the height, 16x the surface area, and 64x the mass.
        A plant standing alone will have sun+rain = 1.0 in the absense of other effects.

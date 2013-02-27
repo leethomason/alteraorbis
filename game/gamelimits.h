@@ -25,11 +25,12 @@ static const int MAX_ACTIVE_ITEMS	= 8;
 static const int MAX_ITEM_NAME		= 24;
 static const int NUM_PLANT_TYPES	= 8;
 static const int MAX_PLANT_STAGES	= 4;
+static const int MAX_CORES			= 100;	// Number of domains that can have active cores.
+											// FIXME: too low? Should map to # domains.
 
 static const U32 MINUTE				= 1000*60;						// game time and real time
 static const U32 MINUTES_IN_AGE		= 100;
 static const U32 AGE				= MINUTE * MINUTES_IN_AGE;		// 1st age, 2nd age, etc.
-
 
 static const int MODEL_USER	= 0x1000;				// from model.h
 

@@ -130,7 +130,7 @@ void GameItem::Serialize( XStream* xs )
 
 	if ( xs->Saving() ) {
 		CStr<512> f;
-		APPEND_FLAG( flags, f, CHARACTER );
+		//APPEND_FLAG( flags, f, CHARACTER );
 		APPEND_FLAG( flags, f, MELEE_WEAPON );
 		APPEND_FLAG( flags, f, RANGED_WEAPON );
 		APPEND_FLAG( flags, f, INTRINSIC_AT_HARDPOINT );
@@ -145,6 +145,7 @@ void GameItem::Serialize( XStream* xs )
 		APPEND_FLAG( flags, f, EFFECT_FIRE );
 		APPEND_FLAG( flags, f, EFFECT_SHOCK );
 		APPEND_FLAG( flags, f, RENDER_TRAIL );
+		APPEND_FLAG( flags, f, INDESTRUCTABLE );
 
 		xs->Saving()->Set( "flags", f.c_str() );
 	}
@@ -152,7 +153,7 @@ void GameItem::Serialize( XStream* xs )
 		const StreamReader::Attribute* attr = xs->Loading()->Get( "flags" );
 		if ( attr ) {
 			const char* f = attr->Str();
-			READ_FLAG( flags, f, CHARACTER );
+			//READ_FLAG( flags, f, CHARACTER );
 			READ_FLAG( flags, f, MELEE_WEAPON );
 			READ_FLAG( flags, f, RANGED_WEAPON );
 			READ_FLAG( flags, f, INTRINSIC_AT_HARDPOINT );
@@ -167,6 +168,7 @@ void GameItem::Serialize( XStream* xs )
 			READ_FLAG( flags, f, EFFECT_FIRE );
 			READ_FLAG( flags, f, EFFECT_SHOCK );
 			READ_FLAG( flags, f, RENDER_TRAIL );
+			READ_FLAG( flags, f, INDESTRUCTABLE );
 		}
 	}
 
@@ -202,7 +204,7 @@ void GameItem::Save( tinyxml2::XMLPrinter* printer )
 		printer->PushAttribute( "resource", resource.c_str() );
 	}
 	CStr<512> f;
-	APPEND_FLAG( flags, f, CHARACTER );
+//	APPEND_FLAG( flags, f, CHARACTER );
 	APPEND_FLAG( flags, f, MELEE_WEAPON );
 	APPEND_FLAG( flags, f, RANGED_WEAPON );
 	APPEND_FLAG( flags, f, INTRINSIC_AT_HARDPOINT );
@@ -217,6 +219,7 @@ void GameItem::Save( tinyxml2::XMLPrinter* printer )
 	APPEND_FLAG( flags, f, EFFECT_FIRE );
 	APPEND_FLAG( flags, f, EFFECT_SHOCK );
 	APPEND_FLAG( flags, f, RENDER_TRAIL );
+	APPEND_FLAG( flags, f, INDESTRUCTABLE );
 	printer->PushAttribute( "flags", f.c_str() );
 	
 	PUSH_ATTRIBUTE( printer, mass );
@@ -265,7 +268,7 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 	const char* f = ele->Attribute( "flags" );
 
 	if ( f ) {
-		READ_FLAG( flags, f, CHARACTER );
+//		READ_FLAG( flags, f, CHARACTER );
 		READ_FLAG( flags, f, MELEE_WEAPON );
 		READ_FLAG( flags, f, RANGED_WEAPON );
 		READ_FLAG( flags, f, INTRINSIC_AT_HARDPOINT );
@@ -280,6 +283,7 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 		READ_FLAG( flags, f, EFFECT_FIRE );
 		READ_FLAG( flags, f, EFFECT_SHOCK );
 		READ_FLAG( flags, f, RENDER_TRAIL );
+		READ_FLAG( flags, f, INDESTRUCTABLE );
 	}
 	for( const tinyxml2::XMLAttribute* attr = ele->FirstAttribute();
 		 attr;
@@ -407,6 +411,10 @@ int GameItem::DoTick( U32 delta, U32 sinec )
 
 	hp += Delta( delta, hpRegen );
 	hp = Clamp( hp, 0.0f, TotalHP() );
+
+	if ( flags & INDESTRUCTABLE ) {
+		hp = TotalHP();
+	}
 
 	tick = tick || (savedHP != hp);
 

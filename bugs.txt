@@ -1,32 +1,12 @@
+- does fire affect plants??
 - health is awkward: keeps copy of HP (oops). move hp to health component? (TotalHP() on item?)
 - need free camera mode
 
 - game
-	- Flora
-		x plants
-			x growth, spread
-			x rotation
-			x saturation to hp
-		x fix the stupid camera
-		x weather
-		x player recreation
-		x avatar face display
-		x debug UI toggle
-		x new assets from Shroom
-		x change main face
-		x long test
-		x date on main screen
-		x move down buttons
 	- Fauna 1
 		- monster ecology
 		- monsters to fight
 		- battles!
-	- Flora 2
-		- pony-unicorn-pegasus news prioritization
-		- fix annoying hp out of range bug
-		- rain, general de-saturation
-		- aging of stone
-		- disable buttons on main ui when no game saved
 	- Intermission: regions
 		- generate regions
 		- generate roads
@@ -34,6 +14,12 @@
 		- update zones
 		- update pathfinder
 		- overnight test
+	- Flora 2
+		- pony-unicorn-pegasus news prioritization
+		- fix annoying hp out of range bug
+		- rain, general de-saturation
+		- aging of stone
+		- disable buttons on main ui when no game saved
 	- Fauna 2
 		- visitors
 		- inventory screen
@@ -136,6 +122,21 @@ x shadows should be part of space-tree bounds
 
 ----------- FIXED -------------
 
+x Flora
+	x plants
+		x growth, spread
+		x rotation
+		x saturation to hp
+	x fix the stupid camera
+	x weather
+	x player recreation
+	x avatar face display
+	x debug UI toggle
+	x new assets from Shroom
+	x change main face
+	x long test
+	x date on main screen
+	x move down buttons
 x Land and Water
 	x generate a random world
 	x save / load

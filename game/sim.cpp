@@ -71,7 +71,9 @@ void Sim::Load( const char* mapDAT, const char* gameDAT )
 	worldMap->Load( mapDAT );
 
 	if ( !gameDAT ) {
+		// Fresh start 
 		CreatePlayer();
+		CreateCores();
 	}
 	else {
 		QuickProfile qp( "Sim::Load" );
@@ -146,6 +148,36 @@ void Sim::Save( const char* mapDAT, const char* gameDAT )
 
 			XarcClose( &writer );
 			fclose( fp );
+		}
+	}
+}
+
+
+void Sim::CreateCores()
+{
+	ItemDefDB* itemDefDB = ItemDefDB::Instance();
+	ItemDefDB::GameItemArr itemDefArr;
+	itemDefDB->Get( "core", &itemDefArr );
+	GLASSERT( itemDefArr.Size() > 0 );
+
+	// FIXME: use zones
+	for( int i=0; i<MAX_CORES; ++i ) {
+		int x = random.Rand( worldMap->Width() );
+		int y = random.Rand( worldMap->Height() );
+
+		const WorldGrid& wg = worldMap->GetWorldGrid( x, y );
+		if ( wg.IsLand() && !wg.InUse() && wg.IsPassable() ) {
+			Chit* chit = chitBag->NewChit();
+
+			MapSpatialComponent* ms = new MapSpatialComponent( worldMap );
+			ms->SetMapPosition( x, y );
+			ms->SetMode( MapSpatialComponent::BLOCKS_GRID ); 
+			chit->Add( ms );
+			GLASSERT( wg.InUse() );
+
+			chit->Add( new ScriptComponent( new CoreScript( worldMap )));
+			chit->Add( new ItemComponent( engine, itemDefArr[0] ));
+			chit->Add( new RenderComponent( engine, itemDefArr[0]->resource ));
 		}
 	}
 }

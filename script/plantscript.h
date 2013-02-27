@@ -23,6 +23,7 @@ public:
 	virtual int DoTick( const ScriptContext& ctx, U32 delta, U32 since );
 	virtual const char* ScriptName() { return "PlantScript"; }
 
+	// Plant specific:
 	static GameItem* IsPlant( Chit* chit, int* type, int* stage );
 
 	int Type() const	{ return type; }

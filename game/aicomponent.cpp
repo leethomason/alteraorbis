@@ -124,7 +124,15 @@ void AIComponent::UpdateCombatInfo( const Rectangle2F* _zone )
 	}
 
 	// Sort in by as-the-crow-flies range. Not correct, but don't want to deal with arbitrarily long query.
-	GetChitBag()->QuerySpatialHash( &chitArr, zone, parentChit, GameItem::CHARACTER );
+	GetChitBag()->QuerySpatialHash( &chitArr, zone, parentChit, 0 );
+	for( int i=0; i<chitArr.Size(); /* */ ) {
+		if ( chitArr[i]->GetSpatialComponent() ) {
+			chitArr.SwapRemove( i );
+		}
+		else {
+			++i;
+		}
+	}
 
 	// This is surprisingly subtle. On the one hand, if we don't find anything, we
 	// don't want to clear existing targets. (Guys just stand around.) On the other

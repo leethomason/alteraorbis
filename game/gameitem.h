@@ -240,8 +240,9 @@ public:
 	int AttachmentFlags() const			{ return flags & (HELD|HARDPOINT); }
 
 	enum {
+		//CHARACTER		= (1<<0),
+
 		// Type(s) of the item
-		CHARACTER			= (1),
 		MELEE_WEAPON		= (1<<1),
 		RANGED_WEAPON		= (1<<2),
 
@@ -264,11 +265,13 @@ public:
 		SHOCKABLE			= (1<<9),
 
 		EFFECT_EXPLOSIVE	= (1<<10),
-		EFFECT_FIRE			= (1<<11),
+		EFFECT_FIRE			= (1<<11),	
 		EFFECT_SHOCK		= (1<<12),
 		EFFECT_MASK			= EFFECT_EXPLOSIVE | EFFECT_FIRE | EFFECT_SHOCK,
 
 		RENDER_TRAIL		= (1<<13),				// render a bolt with a 'smoketrail' vs. regular bolt
+
+		INDESTRUCTABLE		= (1<<14),
 	};
 
 	// ------ description ------

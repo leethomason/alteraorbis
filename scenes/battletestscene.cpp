@@ -279,9 +279,11 @@ void BattleTestScene::GoScene()
 	b.Set( 0, 0, (float)map->Width(), (float)map->Height() );
 
 	// Remove everything that is currently on the board that is some sort of character.
-	chitBag.QuerySpatialHash( &chitArr, b, 0, GameItem::CHARACTER );
+	chitBag.QuerySpatialHash( &chitArr, b, 0, 0 );
 	for( int i=0; i<chitArr.Size(); ++i ) {
-		chitBag.DeleteChit( chitArr[i] );
+		if ( chitArr[i]->GetMoveComponent() ) {
+			chitBag.DeleteChit( chitArr[i] );
+		}
 	}
 
 	static const int LEVEL[4] = { 0, 2, 4, 8 };
@@ -305,7 +307,7 @@ void BattleTestScene::GoScene()
 
 	// Trigger the AI to do something.
 	for( int i=LEFT; i<=RIGHT; ++i ) {
-		ChitEvent event( ChitEvent::AWARENESS, b, GameItem::CHARACTER );
+		ChitEvent event( ChitEvent::AWARENESS, b, 0 );
 		chitBag.QueueEvent( event );
 	}
 }
@@ -518,7 +520,7 @@ void BattleTestScene::DoTick( U32 deltaTime )
 		Rectangle2F b;
 		b.Set( 0, 0, (float)map->Width(), (float)map->Height() );
 
-		chitBag.QuerySpatialHash( &chitArr, b, 0, GameItem::CHARACTER );
+		chitBag.QuerySpatialHash( &chitArr, b, 0, 0 );
 		for( int i=0; i<chitArr.Size(); ++i ) {
 			Chit* c = chitArr[i];
 
@@ -529,7 +531,7 @@ void BattleTestScene::DoTick( U32 deltaTime )
 			}
 		}
 		if ( !aware ) {
-			ChitEvent event( ChitEvent::AWARENESS, b, GameItem::CHARACTER );
+			ChitEvent event( ChitEvent::AWARENESS, b, 0 );
 			event.team = LEFT;
 			chitBag.QueueEvent( event );
 		}
