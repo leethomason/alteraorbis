@@ -236,7 +236,10 @@ void Sim::DoTick( U32 delta )
 	int MSEC_TO_VOLC = AGE / NUM_VOLC;
 
 	// NOT Age of Fire:
-	if ( age > 0 ) {
+	if ( age > 1 ) {
+		MSEC_TO_VOLC *= 20;
+	}
+	else if ( age > 0 ) {
 		MSEC_TO_VOLC *= 10;
 	}
 
