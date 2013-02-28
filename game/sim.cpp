@@ -96,18 +96,6 @@ void Sim::Load( const char* mapDAT, const char* gameDAT )
 
 			fclose( fp );
 		}
-#if 0
-		XMLDocument doc;
-		doc.LoadFile( gameXML );
-		GLASSERT( !doc.Error() );
-		if ( !doc.Error() ) {
-			const XMLElement* root = doc.FirstChildElement( "Sim" );
-			playerID = 0;
-			Archive( 0, root );
-			engine->camera.Load( root );
-			chitBag->Load( &factory, root );
-		}
-#endif
 	}
 }
 
@@ -115,21 +103,6 @@ void Sim::Load( const char* mapDAT, const char* gameDAT )
 void Sim::Save( const char* mapDAT, const char* gameDAT )
 {
 	worldMap->Save( mapDAT );
-
-#if 0
-	FILE* fp = fopen( gameXML, "w" );
-	GLASSERT( fp );
-	if ( fp ) {
-		QuickProfile qp( "Sim::SaveXML" );
-		XMLPrinter printer( fp );
-		printer.OpenElement( "Sim" );
-		Archive( &printer, 0 );
-		engine->camera.Save( &printer );
-		chitBag->Save( &printer );
-		printer.CloseElement();
-		fclose( fp );
-	}
-#endif
 
 	{
 		QuickProfile qp( "Sim::SaveXarc" );

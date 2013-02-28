@@ -32,6 +32,13 @@ class ChitBag;
 class ChitEvent;
 class ChitMsg;
 
+/*
+class CTicker
+{
+
+};
+*/
+
 class Component
 {
 public:

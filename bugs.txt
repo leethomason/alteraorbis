@@ -73,6 +73,9 @@ x shadows should be part of space-tree bounds
 - analyze/optimize what causes component update: DoTick(), etc. Likely many DoTicks() getting called that aren't needed. (especially rendering...)
 - add rez effect for item switch?
 - animation generation
+- volcanoes: taper at the end
+- zoom way out
+- peaks news
 
 ** Art **
 - Cyclops
