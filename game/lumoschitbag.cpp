@@ -2,15 +2,22 @@
 #include "gameitem.h"
 #include "gamelimits.h"
 #include "census.h"
+#include "pathmovecomponent.h"
+#include "aicomponent.h"
+#include "debugstatecomponent.h"
+#include "healthcomponent.h"
 
 #include "../xegame/rendercomponent.h"
 #include "../xegame/itemcomponent.h"
+#include "../xegame/spatialcomponent.h"
+#include "../xegame/inventorycomponent.h"
 
 #include "../engine/model.h"
 #include "../engine/engine.h"
 #include "../engine/loosequadtree.h"
 
 #include "../script/battlemechanics.h"
+#include "../script/itemscript.h"
 
 
 //#define DEBUG_EXPLOSION
@@ -19,6 +26,40 @@ using namespace grinliz;
 
 LumosChitBag::LumosChitBag() : engine( 0 )
 {
+}
+
+
+Chit* LumosChitBag::NewMonsterChit( const Vector3F& pos, const char* name, int team )
+{
+	ItemDefDB::GameItemArr itemDefArr;
+	ItemDefDB* itemDefDB = ItemDefDB::Instance();
+	itemDefDB->Get( name, &itemDefArr );
+	GLASSERT( itemDefArr.Size() > 0 );
+
+	Chit* chit = NewChit();
+
+	chit->Add( new SpatialComponent());
+	chit->Add( new RenderComponent( engine, name ));
+	chit->Add( new PathMoveComponent( worldMap ));
+	chit->Add( new AIComponent( engine, worldMap ));
+	//chit->Add( new DebugStateComponent( worldMap ));
+
+	chit->GetSpatialComponent()->SetPosition( pos );
+
+	GameItem item( *(itemDefArr[0]));
+	item.primaryTeam = team;
+	item.stats.Roll( chit->random.Rand() );
+	item.InitState();
+	chit->Add( new ItemComponent( engine, item ));
+
+	chit->Add( new HealthComponent());
+	InventoryComponent* inv = new InventoryComponent( engine );
+	chit->Add( inv );
+
+	for( int i=1; i<itemDefArr.Size(); ++i ) {
+		inv->AddToInventory( new GameItem( *(itemDefArr[i]) ), true );
+	}
+	return chit;
 }
 
 

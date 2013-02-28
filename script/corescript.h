@@ -2,6 +2,7 @@
 #define CORESCRIPT_INCLUDED
 
 #include "scriptcomponent.h"
+#include "../xegame/cticker.h"
 
 class WorldMap;
 
@@ -21,6 +22,7 @@ public:
 
 private:
 	WorldMap* worldMap;
+	CTicker spawnTick;
 };
 
 #endif // CORESCRIPT_INCLUDED

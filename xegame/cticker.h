@@ -1,0 +1,33 @@
+#ifndef CTICKER_INCLUDED
+#define CTICKER_INCLUDED
+
+#include "../grinliz/glrandom.h"
+
+class CTicker
+{
+public:
+	CTicker( int _period ) : period(_period), time(0) {}
+
+	int Delta( U32 d ) {
+		int n = 0;
+		time -= d;
+		while ( time <= 0 ) {
+			++n;
+			time += period;
+		}
+		return n;
+	}
+
+	int Next() const { return time; }
+	void Randomize( int seed ) {
+		grinliz::Random r(seed);
+		r.Rand();
+		time = r.Rand( period );
+	}
+
+private:
+	int period;
+	int time;
+};
+
+#endif

@@ -5,13 +5,17 @@
 #include "../grinliz/glrandom.h"
 #include "census.h"
 
+class WorldMap;
+
 class LumosChitBag : public ChitBag
 {
 public:
 	LumosChitBag();
 	virtual ~LumosChitBag() {}
 
-	void SetEngine( Engine* e ) { engine = e; }
+	void SetContext( Engine* e, WorldMap* wm ) { engine = e; worldMap = wm; }
+
+	Chit* NewMonsterChit( const grinliz::Vector3F& pos, const char* name, int team );
 
 	// IBoltImpactHandler
 	virtual void HandleBolt( const Bolt& bolt, Model* m, const grinliz::Vector3F& at );
@@ -21,6 +25,7 @@ public:
 private:
 	grinliz::CDynArray<Chit*> chitList;
 	Engine* engine;
+	WorldMap* worldMap;
 };
 
 

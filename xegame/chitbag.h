@@ -32,6 +32,7 @@ class ComponentFactory;
 class XStream;
 class CameraComponent;
 
+
 class ChitBag : public IBoltImpactHandler
 {
 public:
@@ -77,17 +78,21 @@ public:
 	void RemoveFromSpatialHash( Chit*, int x, int y );
 	void UpdateSpatialHash( Chit*, int x0, int y0, int x1, int y1 );
 
+	static bool AcceptAll( Chit* ) {
+		return true;
+	}
+
 	void QuerySpatialHash(	grinliz::CDynArray<Chit*>* array, 
 							const grinliz::Rectangle2F& r, 
 		                    const Chit* ignoreMe,
-							int itemFilter );
+							bool (*accept)(Chit*) = AcceptAll );	// function ptr: see NoFilter
 
 	// Use with caution: the array returned can change if a sub-function calls this.
 	const grinliz::CDynArray<Chit*>& QuerySpatialHash(	const grinliz::Rectangle2F& r, 
 														const Chit* ignoreMe,
-														int itemFilter )
+														bool (*accept)(Chit*) = AcceptAll )
 	{
-		QuerySpatialHash( &cachedQuery, r, ignoreMe, itemFilter );
+		QuerySpatialHash( &cachedQuery, r, ignoreMe, accept );
 		return cachedQuery;
 	}
 

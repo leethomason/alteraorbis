@@ -549,6 +549,9 @@
     <ClInclude Include="..\script\corescript.h">
       <Filter>Source Files\script</Filter>
     </ClInclude>
+    <ClInclude Include="..\xegame\cticker.h">
+      <Filter>Source Files\xegame</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\engine\sources.mk">

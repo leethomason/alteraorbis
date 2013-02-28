@@ -92,7 +92,6 @@ private:
 };
 
 
-
 class IChitListener
 {
 public:

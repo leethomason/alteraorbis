@@ -46,6 +46,7 @@ Sim::Sim( LumosGame* g )
 	engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
 
 	chitBag = new LumosChitBag();
+	chitBag->SetContext( engine, worldMap );
 	playerID = 0;
 	minuteClock = 0;
 	timeInMinutes = 0;

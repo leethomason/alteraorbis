@@ -241,6 +241,7 @@
     <ClInclude Include="..\xegame\chitevent.h" />
     <ClInclude Include="..\xegame\component.h" />
     <ClInclude Include="..\xegame\componentfactory.h" />
+    <ClInclude Include="..\xegame\cticker.h" />
     <ClInclude Include="..\xegame\game.h" />
     <ClInclude Include="..\xegame\inventorycomponent.h" />
     <ClInclude Include="..\xegame\itembasecomponent.h" />

@@ -32,12 +32,6 @@ class ChitBag;
 class ChitEvent;
 class ChitMsg;
 
-/*
-class CTicker
-{
-
-};
-*/
 
 class Component
 {
@@ -53,7 +47,7 @@ public:
 
 	virtual const char* Name() const = 0;
 	virtual Component* ToComponent( const char* name ) {
-		//if ( grinliz::StrEqual( name, Name() ) ) return this;
+		// Used to detect for subclasses: a MapSpatialComponent is a SpatialComponent.
 		if ( strstr( Name(), name )) return this;
 		return 0;
 	}
