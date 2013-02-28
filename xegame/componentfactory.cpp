@@ -51,7 +51,7 @@ Component* ComponentFactory::Factory( const char* name, Chit* chit ) const
 		return new CameraComponent( &engine->camera );
 	}
 	else if ( StrEqual( name, "ScriptComponent" )) {
-		return new ScriptComponent( this );
+		return new ScriptComponent( this, census );
 	}
 	else if ( StrEqual( name, "MapSpatialComponent" )) {
 		return new MapSpatialComponent( worldMap );

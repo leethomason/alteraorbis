@@ -5,8 +5,12 @@
 #include "../grinliz/gldebug.h"
 #include "../game/gamelimits.h"
 
-struct Census
+class Census
 {
+public:
+	Census() {
+		memset( plants, 0, sizeof(int)*NUM_PLANT_TYPES*MAX_PLANT_STAGES );
+	}
 	int plants[NUM_PLANT_TYPES][MAX_PLANT_STAGES];
 
 	int CountPlants() const {

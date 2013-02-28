@@ -19,7 +19,6 @@ using namespace grinliz;
 
 LumosChitBag::LumosChitBag() : engine( 0 )
 {
-	memset( &census, 0, sizeof(census));
 }
 
 

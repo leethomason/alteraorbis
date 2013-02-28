@@ -5,9 +5,15 @@
 #include "scriptcomponent.h"
 #include "volcanoscript.h"
 #include "plantscript.h"
+#include "corescript.h"
 
 using namespace grinliz;
 
+
+ScriptComponent::ScriptComponent( const ComponentFactory* f, Census* c ) : script( 0 ), factory( f )
+{
+	context.census = c;
+}
 
 void ScriptComponent::Serialize( XStream* xs )
 {
@@ -30,6 +36,9 @@ void ScriptComponent::Serialize( XStream* xs )
 		else if ( StrEqual( name, "PlantScript" )) {
 			script = new PlantScript( factory->GetSim(), factory->GetEngine(), factory->GetWorldMap(), factory->GetWeather(), 0 );
 		}
+		else if ( StrEqual( name, "CoreScript" )) {
+			script = new CoreScript( factory->GetWorldMap() );
+		}
 		else {
 			GLASSERT( 0 );
 		}
@@ -48,11 +57,13 @@ void ScriptComponent::OnAdd( Chit* chit )
 	//context.initialized = false;
 	//context.time = 0;
 	context.chit = chit;
+	script->OnAdd( context );
 }
 
 
 void ScriptComponent::OnRemove()
 {
+	script->OnRemove( context );
 	super::OnRemove();
 }
 

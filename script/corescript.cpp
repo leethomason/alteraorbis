@@ -16,25 +16,28 @@ CoreScript::~CoreScript()
 
 void CoreScript::Init( const ScriptContext& ctx )
 {
-	Census* census = &(static_cast<LumosChitBag*>( ctx.chit->GetChitBag())->census);
-	census->cores.Push( ctx.chit->ID() );
+	ctx.census->cores.Push( ctx.chit->ID() );
 }
 
 
 void CoreScript::Serialize( const ScriptContext& ctx, XStream* xs )
 {
 	XarcOpen( xs, ScriptName() );
-	if ( xs->Loading() ) {
-		Census* census = &(static_cast<LumosChitBag*>( ctx.chit->GetChitBag())->census);
-		census->cores.Push( ctx.chit->ID() );
-	}
 	XarcClose( xs );
+}
+
+
+void CoreScript::OnAdd( const ScriptContext& ctx )
+{
+	ctx.census->cores.Push( ctx.chit->ID() );
+	// Cores are indestructable. They don't get removed.
 }
 
 
 int CoreScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 {
 	// spawn stuff.
+	return 100;
 }
 
 

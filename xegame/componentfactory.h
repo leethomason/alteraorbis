@@ -8,11 +8,13 @@ class WorldMap;
 class LumosGame;
 class Weather;
 class Sim;
+class Census;
 
 class ComponentFactory {
 public:
-	ComponentFactory( Sim* p_sim, Engine* p_engine, WorldMap* p_worldMap, Weather* p_weather, LumosGame* p_lumosGame ) 
+	ComponentFactory( Sim* p_sim, Census* p_census, Engine* p_engine, WorldMap* p_worldMap, Weather* p_weather, LumosGame* p_lumosGame ) 
 		: sim( p_sim ),
+		  census( p_census ),
 		  engine( p_engine ),
 		  worldMap( p_worldMap ),
 		  weather( p_weather ),
@@ -25,9 +27,11 @@ public:
 	Engine*	GetEngine() const		{ return engine; }
 	WorldMap* GetWorldMap() const	{ return worldMap; }
 	Weather* GetWeather() const		{ return weather; }
+	LumosGame* GetGame() const		{ return lumosGame; }
 
 private:
 	Sim*		sim;
+	Census*		census;
 	Engine*		engine;
 	WorldMap*	worldMap;
 	Weather*	weather;

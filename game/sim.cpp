@@ -15,6 +15,7 @@
 #include "../script/scriptcomponent.h"
 #include "../script/volcanoscript.h"
 #include "../script/plantscript.h"
+#include "../script/corescript.h"
 
 #include "pathmovecomponent.h"
 #include "debugstatecomponent.h"
@@ -77,7 +78,7 @@ void Sim::Load( const char* mapDAT, const char* gameDAT )
 	}
 	else {
 		QuickProfile qp( "Sim::Load" );
-		ComponentFactory factory( this, engine, worldMap, weather, lumosGame );
+		ComponentFactory factory( this, &chitBag->census, engine, worldMap, weather, lumosGame );
 
 		FILE* fp = fopen( gameDAT, "rb" );
 		GLASSERT( fp );
@@ -133,7 +134,7 @@ void Sim::Save( const char* mapDAT, const char* gameDAT )
 	{
 		QuickProfile qp( "Sim::SaveXarc" );
 
-		ComponentFactory factory( this, engine, worldMap, weather, lumosGame );
+		ComponentFactory factory( this, &chitBag->census, engine, worldMap, weather, lumosGame );
 
 		FILE* fp = fopen( gameDAT, "wb" );
 		if ( fp ) {
@@ -159,6 +160,8 @@ void Sim::CreateCores()
 	ItemDefDB::GameItemArr itemDefArr;
 	itemDefDB->Get( "core", &itemDefArr );
 	GLASSERT( itemDefArr.Size() > 0 );
+	const GameItem* gameItem = itemDefArr[0];
+	const char* asset = gameItem->resource.c_str();
 
 	// FIXME: use zones
 	for( int i=0; i<MAX_CORES; ++i ) {
@@ -175,9 +178,9 @@ void Sim::CreateCores()
 			chit->Add( ms );
 			GLASSERT( wg.InUse() );
 
-			chit->Add( new ScriptComponent( new CoreScript( worldMap )));
-			chit->Add( new ItemComponent( engine, itemDefArr[0] ));
-			chit->Add( new RenderComponent( engine, itemDefArr[0]->resource ));
+			chit->Add( new ScriptComponent( new CoreScript( worldMap ), &chitBag->census ));
+			chit->Add( new ItemComponent( engine, *gameItem ));
+			chit->Add( new RenderComponent( engine, asset ));
 		}
 	}
 }
@@ -311,7 +314,7 @@ void Sim::CreateVolcano( int x, int y, int size )
 {
 	Chit* chit = chitBag->NewChit();
 	chit->Add( new SpatialComponent() );
-	chit->Add( new ScriptComponent( new VolcanoScript( worldMap, size )));
+	chit->Add( new ScriptComponent( new VolcanoScript( worldMap, size ), &chitBag->census ));
 
 	chit->GetSpatialComponent()->SetPosition( (float)x+0.5f, 0.0f, (float)y+0.5f );
 }
@@ -376,7 +379,7 @@ void Sim::CreatePlant( int x, int y, int type )
 			GLASSERT( wg.InUse() );
 
 			chit->Add( new HealthComponent() );
-			chit->Add( new ScriptComponent( new PlantScript( this, engine, worldMap, weather, type )));
+			chit->Add( new ScriptComponent( new PlantScript( this, engine, worldMap, weather, type ), &chitBag->census ));
 		}
 	}
 }
