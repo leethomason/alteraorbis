@@ -151,6 +151,7 @@
     <ClCompile Include="..\xegame\chitbag.cpp" />
     <ClCompile Include="..\xegame\component.cpp" />
     <ClCompile Include="..\xegame\componentfactory.cpp" />
+    <ClCompile Include="..\xegame\cticker.cpp" />
     <ClCompile Include="..\xegame\game.cpp" />
     <ClCompile Include="..\xegame\inventorycomponent.cpp" />
     <ClCompile Include="..\xegame\itembasecomponent.cpp" />

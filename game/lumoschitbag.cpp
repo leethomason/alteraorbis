@@ -52,7 +52,7 @@ Chit* LumosChitBag::NewMonsterChit( const Vector3F& pos, const char* name, int t
 	item.InitState();
 	chit->Add( new ItemComponent( engine, item ));
 
-	chit->Add( new HealthComponent());
+	chit->Add( new HealthComponent( engine ));
 	InventoryComponent* inv = new InventoryComponent( engine );
 	chit->Add( inv );
 

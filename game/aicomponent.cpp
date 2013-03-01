@@ -45,12 +45,14 @@ static const float HIGH_UTILITY			= 0.8f;
 
 //#define AI_OUTPUT
 
-AIComponent::AIComponent( Engine* _engine, WorldMap* _map )
+AIComponent::AIComponent( Engine* _engine, WorldMap* _map ) : thinkTicker( 400 )
 {
 	engine = _engine;
 	map = _map;
 	currentAction = 0;
-	slowTick = 0;
+	currentTarget = 0;
+	focusOnTarget = false;
+	aiMode = NORMAL_MODE;
 }
 
 
@@ -62,6 +64,11 @@ AIComponent::~AIComponent()
 void AIComponent::Serialize( XStream* xs )
 {
 	this->BeginSerialize( xs, Name() );
+	XARC_SER( xs, aiMode );
+	XARC_SER( xs, currentAction );
+	XARC_SER( xs, currentTarget );
+	XARC_SER( xs, focusOnTarget );
+	thinkTicker.Serialize( xs, "thinkTicker" );
 	this->EndSerialize( xs );
 }
 
@@ -79,13 +86,9 @@ int AIComponent::GetTeamStatus( Chit* other )
 }
 
 
-bool AIComponent::LineOfSight( Chit* src, Chit* t )
+bool AIComponent::LineOfSight( const ComponentSet& thisComp, Chit* t )
 {
-	ComponentSet thisComp( src, Chit::SPATIAL_BIT | Chit::RENDER_BIT | ComponentSet::IS_ALIVE );
 	ComponentSet target( t, Chit::SPATIAL_BIT | Chit::RENDER_BIT | ComponentSet::IS_ALIVE );
-
-	if ( !thisComp.okay || !target.okay )
-		return false;
 
 	Vector3F origin, dest;
 	thisComp.render->GetMetaData( "trigger", &origin );		// FIXME: not necessarily trigger; get correct hardpoint. 
@@ -106,77 +109,54 @@ bool AIComponent::LineOfSight( Chit* src, Chit* t )
 }
 
 
-void AIComponent::UpdateCombatInfo( const Rectangle2F* _zone )
+static bool HasAI( Chit* c ) {
+	return GET_COMPONENT( c, AIComponent ) != 0;
+}
+
+void AIComponent::GetFriendEnemyLists( const Rectangle2F* area )
 {
 	SpatialComponent* sc = parentChit->GetSpatialComponent();
 	if ( !sc ) return;
 	Vector2F center = sc->GetPosition2D();
 
 	Rectangle2F zone;
-	if ( !_zone ) {
-		// Generate the default zone.
-		zone.min = center; zone.max = center;
-		zone.Outset( LONGEST_WEAPON_RANGE );
+	if ( area ) {
+		zone = *area;
 	}
 	else {
-		// Use the passed in info, add to the existing.
-		zone = *_zone;
+		zone.min = zone.max = center;
+		zone.Outset( LONGEST_WEAPON_RANGE );
 	}
 
-	// Sort in by as-the-crow-flies range. Not correct, but don't want to deal with arbitrarily long query.
-	GetChitBag()->QuerySpatialHash( &chitArr, zone, parentChit, 0 );
-	for( int i=0; i<chitArr.Size(); /* */ ) {
-		if ( chitArr[i]->GetSpatialComponent() ) {
-			chitArr.SwapRemove( i );
-		}
-		else {
-			++i;
-		}
-	}
+	friendList.Clear();
+	enemyList.Clear();
 
-	// This is surprisingly subtle. On the one hand, if we don't find anything, we
-	// don't want to clear existing targets. (Guys just stand around.) On the other
-	// hand, we don't want old info in there.
-	if ( !chitArr.Empty() ) {
-		bool friendClear = false;
-		bool enemyClear = false;
-
-		for( int i=0; i<chitArr.Size(); ++i ) {
-			Chit* chit = chitArr[i];
-
-			int teamStatus = GetTeamStatus( chit );
-
-			if ( teamStatus == FRIENDLY ) {
-				if (!friendClear ) {
-					friendList.Clear();
-					friendClear = true;
-				}
-				if ( friendList.HasCap() )
-					friendList.Push( chit->ID() );
+	const CDynArray<Chit*>& chitArr = GetChitBag()->QuerySpatialHash( zone, parentChit, HasAI );
+	for( int i=0; i<chitArr.Size(); ++i ) {
+		int status = GetTeamStatus( chitArr[i] );
+		if ( status == ENEMY ) {
+			if ( enemyList.HasCap() ) {
+				enemyList.Push( chitArr[i]->ID());
 			}
-			else if ( teamStatus == ENEMY ) {
-				if (!enemyClear ) {
-					enemyList.Clear();
-					enemyClear = true;
-				}
-				if ( enemyList.HasCap() )
-					enemyList.Push( chit->ID() );
+		}
+		else if ( status == FRIENDLY ) {
+			if ( friendList.HasCap() ) {
+				friendList.Push( chitArr[i]->ID());
 			}
 		}
 	}
-	Think();
+
 }
 
 
-void AIComponent::DoShoot()
+void AIComponent::DoMove( const ComponentSet& thisComp )
 {
-	ComponentSet thisComp( parentChit, Chit::RENDER_BIT | 
-		                               Chit::SPATIAL_BIT |
-									   Chit::INVENTORY_BIT |		// need to be carrying a melee weapon
-									   ComponentSet::IS_ALIVE );
-	if ( !thisComp.okay )
-		return;
 
+}
+
+
+void AIComponent::DoShoot( const ComponentSet& thisComp )
+{
 	// FIXME: rotation should be continuous, not just when not pointed the correct way
 	bool pointed = false;
 	Chit* targetChit = 0;
@@ -237,16 +217,8 @@ void AIComponent::DoShoot()
 }
 
 
-void AIComponent::DoMelee()
+void AIComponent::DoMelee( const ComponentSet& thisComp )
 {
-	ComponentSet thisComp( parentChit, Chit::RENDER_BIT | 
-		                               Chit::SPATIAL_BIT |
-									   Chit::INVENTORY_BIT |		// need to be carrying a melee weapon
-									   ComponentSet::IS_ALIVE |
-									   ComponentSet::NOT_IN_IMPACT );
-	if ( !thisComp.okay )
-		return;
-	
 	IMeleeWeaponItem* weapon = thisComp.inventory->GetMeleeWeapon();
 	if ( !weapon ) 
 		return;
@@ -303,28 +275,32 @@ void AIComponent::DoMelee()
 void AIComponent::OnChitEvent( const ChitEvent& event )
 {
 	if ( event.ID() == ChitEvent::AWARENESS ) {
-		ItemComponent* itemComp = GET_COMPONENT( parentChit, ItemComponent );
-		if ( itemComp ) {
-			if ( event.team == itemComp->GetItem()->primaryTeam ) 
-			{
-				UpdateCombatInfo( &event.AreaOfEffect() );
-			}
-		}
+		GetFriendEnemyLists( &event.AreaOfEffect() );
 	}
 }
 
 
-void AIComponent::Think()
+void AIComponent::Think( const ComponentSet& thisComp )
+{
+	if ( aiMode == NORMAL_MODE ) {
+		ThinkWander( thisComp );
+	}
+	else if ( aiMode == BATTLE_MODE ) {
+		ThinkBattle( thisComp );
+	}
+};
+
+
+void AIComponent::ThinkWander( const ComponentSet& thisComp )
+{
+
+}
+
+
+void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 {
 	// This may get called when there is an action, and update.
 	// Or there may be no action.
-
-	ComponentSet thisComp( parentChit,	Chit::SPATIAL_BIT | 
-										Chit::ITEM_BIT | 
-										ComponentSet::IS_ALIVE |
-										ComponentSet::NOT_IN_IMPACT );
-	if ( !thisComp.okay )
-		return;
 
 	const Vector3F& pos = thisComp.spatial->GetPosition();
 
@@ -385,7 +361,7 @@ void AIComponent::Think()
 
 				Chit* enemyChit = GetChit( enemyList[i] );
 				ComponentSet enemy( enemyChit, Chit::SPATIAL_BIT | Chit::ITEM_BIT | ComponentSet::IS_ALIVE );
-				if ( enemy.okay && LineOfSight( parentChit, enemy.chit )) {
+				if ( enemy.okay && LineOfSight( thisComp, enemy.chit )) {
 					const Vector3F enemyPos = enemy.spatial->GetPosition();
 					float range = (enemyPos - pos).Length();
 					float normalizedRange = 0.5f * range / bestRange;
@@ -418,19 +394,18 @@ void AIComponent::Think()
 }
 
 
-void AIComponent::DoSlowTick()
-{
-	UpdateCombatInfo();
-}
-
-
-// FIXME: don't need to tick this often.
 int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 {
-	slowTick += timeSince;
-	if ( slowTick > SLOW_TICK ) {
-		slowTick = 0;
-		DoSlowTick();
+	if ( thinkTicker.Delta( timeSince ) == 0 ) {
+		return thinkTicker.Next();
+	}
+	ComponentSet thisComp( parentChit, Chit::RENDER_BIT | 
+		                               Chit::SPATIAL_BIT |
+									   Chit::INVENTORY_BIT |		// need to be carrying a melee weapon
+									   ComponentSet::IS_ALIVE |
+									   ComponentSet::NOT_IN_IMPACT );
+	if ( !thisComp.okay ) {
+		return ABOUT_1_SEC;
 	}
 
 	// If we are in some action, do nothing and return.
@@ -440,21 +415,46 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 		return 0;
 	}
 
+	ChitBag* chitBag = this->GetChitBag();
+
+	// If focused, make sure we have a target.
+	if ( currentTarget && !chitBag->GetChit( currentTarget )) {
+		currentTarget = 0;
+	}
+	if ( !currentTarget ) {
+		focusOnTarget = false;
+	}
+
+	GetFriendEnemyLists( 0 );
+
+	// High level mode switch?
+	if ( aiMode == NORMAL_MODE && !enemyList.Empty() ) {
+		aiMode = BATTLE_MODE;
+		currentAction = 0;
+	}
+	else if ( aiMode == BATTLE_MODE && currentTarget == 0 && enemyList.Empty() ) {
+		aiMode = NORMAL_MODE;
+		currentAction = 0;
+	}
+
+	if ( !currentAction ) {
+		Think( thisComp );
+	}
+
 	// Are we doing something? Then do that; if not, look for
 	// something else to do.
-	if ( currentAction ) {
+	switch( currentAction ) {
 
-		switch( currentAction ) {
-
-		case MELEE:		DoMelee();	break;
-		case SHOOT:		DoShoot();	break;
+		case MOVE:		DoMove( thisComp );		break;
+		case MELEE:		DoMelee( thisComp );	break;
+		case SHOOT:		DoShoot( thisComp );	break;
 
 		default:
 			GLASSERT( 0 );
 			currentAction = 0;
-		}
+			break;
 	}
-	return 0;
+	return thinkTicker.Next();
 }
 
 
@@ -464,31 +464,9 @@ void AIComponent::DebugStr( grinliz::GLString* str )
 }
 
 
-// FIXME: move out of AI!
 void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {
-	if ( chit == parentChit && msg.ID() == ChitMsg::RENDER_IMPACT ) {
-		
-		RenderComponent* render = parentChit->GetRenderComponent();
-		GLASSERT( render );	// it is a message from the render component, after all.
-		InventoryComponent* inventory = parentChit->GetInventoryComponent();
-		GLASSERT( inventory );	// need to be  holding a melee weapon. possible the weapon
-								// was lost before impact, in which case this assert should
-								// be removed.
-
-		IMeleeWeaponItem* item=inventory->GetMeleeWeapon();
-		if ( render && inventory && item  ) { /* okay */ }
-		else return;
-
-		Matrix4 xform;
-		render->GetMetaData( "trigger", &xform );
-		Vector3F pos = xform * V3F_ZERO;
-
-		engine->particleSystem->EmitPD( "derez", pos, V3F_UP, engine->camera.EyeDir3(), 0 );
-		
-		battleMechanics.MeleeAttack( engine, parentChit, item );
-	}
-	else {
-		super::OnChitMsg( chit, msg );
-	}
+	super::OnChitMsg( chit, msg );
 }
+
+

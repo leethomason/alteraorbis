@@ -3,6 +3,8 @@
 
 #include "../grinliz/glrandom.h"
 
+class XStream;
+
 class CTicker
 {
 public:
@@ -24,6 +26,8 @@ public:
 		r.Rand();
 		time = r.Rand( period );
 	}
+
+	void Serialize( XStream* xs, const char* name );
 
 private:
 	int period;

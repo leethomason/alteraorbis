@@ -193,7 +193,7 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos, const char* assetName )
 	item.InitState();
 	chit->Add( new ItemComponent( engine, item ));
 
-	chit->Add( new HealthComponent());
+	chit->Add( new HealthComponent( engine ));
 	chit->Add( new InventoryComponent( engine ));
 
 	chit->GetSpatialComponent()->SetPosYRot( (float)pos.x+0.5f, 0, (float)pos.y+0.5f, 0 );
@@ -352,7 +352,7 @@ void Sim::CreatePlant( int x, int y, int type )
 			chit->Add( ms );
 			GLASSERT( wg.InUse() );
 
-			chit->Add( new HealthComponent() );
+			chit->Add( new HealthComponent( engine ) );
 			chit->Add( new ScriptComponent( new PlantScript( this, engine, worldMap, weather, type ), &chitBag->census ));
 		}
 	}

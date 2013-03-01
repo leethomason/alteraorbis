@@ -17,12 +17,14 @@
 #define AI_COMPONENT_INCLUDED
 
 #include "../xegame/component.h"
+#include "../xegame/cticker.h"
 #include "../grinliz/glcontainer.h"
 #include "../grinliz/glrectangle.h"
 #include "../script/battlemechanics.h"
 
 class WorldMap;
 class Engine;
+struct ComponentSet;
 
 inline float UtilityCubic( float y0, float y1, float x ) {
 	x = grinliz::Clamp( x, 0.0f, 1.0f );
@@ -73,6 +75,12 @@ public:
 	// Approximate. enemyList may not be flushed.
 	bool AwareOfEnemy() const { return enemyList.Size() > 0; }
 
+	// Top level AI modes.
+	enum {
+		NORMAL_MODE,
+		BATTLE_MODE
+	};
+
 private:
 	enum {
 		FRIENDLY,
@@ -82,15 +90,16 @@ private:
 		MAX_TRACK = 8,
 	};
 
-	void DoSlowTick();
-	void UpdateCombatInfo( const grinliz::Rectangle2F* _zone=0 );
+	void GetFriendEnemyLists( const grinliz::Rectangle2F* area );
 	int GetTeamStatus( Chit* other );
-	bool LineOfSight( Chit* src, Chit* target );
-	void Think();	// Choose a new action.
+	bool LineOfSight( const ComponentSet& thisComp, Chit* target );
+
+	void Think( const ComponentSet& thisComp );	// Choose a new action.
+	void ThinkWander( const ComponentSet& thisComp );
+	void ThinkBattle( const ComponentSet& thisComp );
 
 	Engine*		engine;
 	WorldMap*	map;
-	int			slowTick;
 
 	enum {
 		/*
@@ -108,17 +117,22 @@ private:
 		MELEE,			// Go to the target and hit it. The basic combat action.
 						// Possibly run-and-gun on the way in.
 		SHOOT,			// Stand ground and shoot.
-		//MOVE			// Move to a better location. Possibly reload.
+		MOVE,			// Move to a better location. Possibly reload.
 		NUM_ACTIONS,
 	};
-	int currentAction;
 
-	void DoMelee();
-	void DoShoot();
+	int aiMode;
+	int currentAction;
+	int currentTarget;
+	bool focusOnTarget;
+	CTicker		thinkTicker;
+
+	void DoMelee( const ComponentSet& thisComp );
+	void DoShoot( const ComponentSet& thisComp );
+	void DoMove( const ComponentSet& thisComp );
 
 	grinliz::CArray<int, MAX_TRACK> friendList;
 	grinliz::CArray<int, MAX_TRACK> enemyList;
-	grinliz::CDynArray<Chit*>		chitArr;
 	BattleMechanics battleMechanics;
 };
 

@@ -33,6 +33,7 @@ void CoreScript::Init( const ScriptContext& ctx )
 void CoreScript::Serialize( const ScriptContext& ctx, XStream* xs )
 {
 	XarcOpen( xs, ScriptName() );
+	spawnTick.Serialize( xs, "spawn" );
 	XarcClose( xs );
 }
 
@@ -68,7 +69,9 @@ int CoreScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 			const CDynArray<Chit*>& arr = ctx.chit->GetChitBag()->QuerySpatialHash( r, 0, Accept );
 			if ( arr.Empty() ) {
 				Vector3F pf = { (float)pos.x+0.5f, 0, (float)pos.y+0.5f };
-				((LumosChitBag*)(ctx.chit->GetChitBag()))->NewMonsterChit( pf, "mantis", ctx.chit->ID() );
+				// FIXME: proper team
+				// FIXME safe downcast
+				((LumosChitBag*)(ctx.chit->GetChitBag()))->NewMonsterChit( pf, "mantis", 100 );
 			}
 		}
 	}

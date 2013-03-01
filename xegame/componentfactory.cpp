@@ -43,7 +43,7 @@ Component* ComponentFactory::Factory( const char* name, Chit* chit ) const
 		return new DebugPathComponent( engine, worldMap, lumosGame );
 	}
 	else if ( StrEqual( name, "HealthComponent" )) {
-		return new HealthComponent();
+		return new HealthComponent( engine );
 	}
 	else if ( StrEqual( name, "RenderComponent" )) {
 		return new RenderComponent( engine, 0 );

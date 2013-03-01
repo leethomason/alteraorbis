@@ -244,7 +244,7 @@ void BattleTestScene::LoadMap()
 		chit->Add( msc );
 		chit->Add( new RenderComponent( engine, "plant1.3" ));
 		chit->Add( new ItemComponent( engine, treeItem ));
-		chit->Add( new HealthComponent());
+		chit->Add( new HealthComponent( engine ));
 	}
 
 	Vector2I unit = { 2, 16 };
@@ -355,7 +355,7 @@ void BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int 
 	item.InitState();
 	chit->Add( new ItemComponent( engine, item ));
 
-	chit->Add( new HealthComponent());
+	chit->Add( new HealthComponent( engine ));
 	InventoryComponent* inv = new InventoryComponent( engine );
 	chit->Add( inv );
 
