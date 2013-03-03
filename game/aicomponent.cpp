@@ -35,13 +35,7 @@
 
 using namespace grinliz;
 
-static const float PRIMARY_UTILITY		= 10.0f;
-static const float SECONDARY_UTILITY	= 3.0f;
-static const float TERTIARY_UTILITY		= 1.0f;
-
-static const float LOW_UTILITY			= 0.2f;
-static const float MED_UTILITY			= 0.5f;
-static const float HIGH_UTILITY			= 0.8f;
+static const float NORMAL_AWARENESS		= 12.0f;
 
 //#define AI_OUTPUT
 
@@ -125,7 +119,7 @@ void AIComponent::GetFriendEnemyLists( const Rectangle2F* area )
 	}
 	else {
 		zone.min = zone.max = center;
-		zone.Outset( LONGEST_WEAPON_RANGE );
+		zone.Outset( NORMAL_AWARENESS );
 	}
 
 	friendList.Clear();
@@ -145,21 +139,61 @@ void AIComponent::GetFriendEnemyLists( const Rectangle2F* area )
 			}
 		}
 	}
+	if ( currentTarget && GetChitBag()->GetChit( currentTarget )) {
+		int i = enemyList.Find( currentTarget );
+		if ( i < 0 && enemyList.HasCap() ) {
+			enemyList.Push( currentTarget );
+		}
+	}
+}
 
+
+Chit* AIComponent::Closest( const ComponentSet& thisComp, CArray<int, MAX_TRACK>* list )
+{
+	float best = FLT_MAX;
+	Chit* chit = 0;
+
+	for( int i=0; i<list->Size(); ++i ) {
+		Chit* enemyChit = GetChit( *(list)[i] );
+		ComponentSet enemy( enemyChit, Chit::SPATIAL_BIT | Chit::ITEM_BIT | ComponentSet::IS_ALIVE );
+		if ( enemy.okay ) 
+		{
+			int len2 = (enemy.spatial->GetPosition() - thisComp.spatial->GetPosition()).LengthSquared();
+			if ( len2 < best ) {
+				best = len2;
+				chit = enemy.chit;
+			}
+		}
+	}
+	return chit;
 }
 
 
 void AIComponent::DoMove( const ComponentSet& thisComp )
 {
-
+	
 }
 
 
 void AIComponent::DoShoot( const ComponentSet& thisComp )
 {
-	// FIXME: rotation should be continuous, not just when not pointed the correct way
 	bool pointed = false;
 	Chit* targetChit = 0;
+
+	// Use the current target, or find a new one.
+	if ( !GetChitBag()->GetChit( currentTarget ) ) {
+
+		float bestGolfScore = 1000.0f;
+
+		for( int i=0; i<enemyList.Size(); ++i ) {
+			ComponentSet target( GetChit( enemyList[0] ), Chit::RENDER_BIT | Chit::SPATIAL_BIT | ComponentSet::IS_ALIVE );
+			if ( !target.okay ) {
+				continue;
+			}
+
+			float 
+		}
+	}
 
 	while ( !enemyList.Empty() ) {
 		ComponentSet target( GetChit( enemyList[0] ), Chit::RENDER_BIT |
@@ -299,93 +333,135 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 
 void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 {
-	// This may get called when there is an action, and update.
-	// Or there may be no action.
-
+	PathMoveComponent* pmc = GET_COMPONENT( thisComp.chit, PathMoveComponent );
+	if ( !pmc ) {
+		currentAction = NO_ACTION;
+		return;
+	}
 	const Vector3F& pos = thisComp.spatial->GetPosition();
-
+	
+	// The current ranged weapon.
 	CArray< InventoryComponent::RangedInfo, NUM_HARDPOINTS > rangedWeapons;
-	if ( parentChit->GetInventoryComponent() ) {
-		parentChit->GetInventoryComponent()->GetRangedWeapons( &rangedWeapons );
-	}
+	thisComp.inventory->GetRangedWeapons( &rangedWeapons );
 
-	currentAction = NO_ACTION;
-	if ( !enemyList.Empty() ) {
+	// The current melee weapon.
+	IMeleeWeaponItem* meleeWeapon = thisComp.inventory->GetMeleeWeapon();
 
-		// Primary:   Distance: cubic, closer is better
-		// Secondary: Strength: linear, more is better 
-		// could add:
-		//   damage done by enemy (higher is better)
-		//   weakness to effects
+	enum {
+		OPTION_FLOCK_MOVE,
+		OPTION_MOVE_TO_RANGE,
+		OPTION_MELEE,
+		OPTION_SHOOT,
+		NUM_OPTIONS
+	};
 
-		float bestUtility = 0;
-		int   bestIndex = -1;
-		int	  meleeInRange = 0;
-		int	  bestAction = 0;
+	float utility[NUM_OPTIONS] = { 0,0,0,0 };
+	Chit* target[NUM_OPTIONS]  = { 0,0,0,0 };
+	int rangedWeaponIndex      = -1;
+	Vector2F moveToRange;
 
-		for( int i=0; i<enemyList.Size(); ++i ) {
-			Chit* enemyChit = GetChit( enemyList[i] );
-			ComponentSet enemy( enemyChit, Chit::SPATIAL_BIT | Chit::ITEM_BIT | ComponentSet::IS_ALIVE );
-			if ( enemy.okay ) 
-			{
-				const Vector3F enemyPos = enemy.spatial->GetPosition();
-				float range = (enemyPos - pos).Length();
-				if ( range < BattleMechanics::MeleeRange( parentChit, enemyChit ) ) {
-					++meleeInRange;
-				}
-				float normalizedRange = range / LONGEST_WEAPON_RANGE;
-				float utilityDistance = UtilityCubic( 1.0f, LOW_UTILITY, normalizedRange );
+	// Consider flocking.
+	Vector2F heading = thisComp.spatial->GetHeading2D();
+	Vector2F flockDir = heading;
+	utility[OPTION_FLOCK_MOVE] = CalcFlockMove( &flockDir );
+	// Give this a little utility in case everything else is 0:
+	utility[OPTION_FLOCK_MOVE] = Max( utility[OPTION_FLOCK_MOVE], 0.01f );
 
-				float normalizedDamage = enemy.item->hp / thisComp.item->mass;	// basic melee advantage 
-				float utilityDamage = UtilityLinear( 1.f, 0.f, normalizedDamage );
+	for( int k=0; k<enemyList.Size(); ++k ) {
 
-				float utility = (utilityDistance*PRIMARY_UTILITY + utilityDamage*SECONDARY_UTILITY)/(PRIMARY_UTILITY+SECONDARY_UTILITY);
-				GLASSERT( utility >= 0 && utility <= 1.0f );
-				if ( utility > bestUtility ) {
-					bestIndex = i;
-					bestUtility = utility;
-					bestAction = MELEE;
-				}
-			}
+		ComponentSet enemy( enemyList[k], Chit::SPATIAL_BIT | Chit::ITEM_BIT | ComponentSet::IS_ALIVE );
+		if ( !enemy.okay ) {
+			continue;
 		}
-		// If there are melee targets in range, always go melee.
-		// Else look for a shooting target that may be better.
-		if ( !meleeInRange && rangedWeapons.Size() ) {
-			// It would be nice to go through the loop twice. Integrate with above?
-			for( int i=0; i<enemyList.Size(); ++i ) {
+		const Vector3F enemyPos = enemy.spatial->GetPosition();
+		float range = (enemyPos - pos).Length();
+		Vector2F normalToEnemy = (enemyPos - pos).Normalize();
+		float dot = DotProduct( normalToEnemy, heading );
 
-				const float bestRange = 10.0f;	// fixme: placeholder, depends on weapon
-				// fixme: should account for:
-				//		ranged weapons available (can be more than one?)
-				//		whether needs re-load, or wait
-
-				Chit* enemyChit = GetChit( enemyList[i] );
-				ComponentSet enemy( enemyChit, Chit::SPATIAL_BIT | Chit::ITEM_BIT | ComponentSet::IS_ALIVE );
-				if ( enemy.okay && LineOfSight( thisComp, enemy.chit )) {
-					const Vector3F enemyPos = enemy.spatial->GetPosition();
-					float range = (enemyPos - pos).Length();
-					float normalizedRange = 0.5f * range / bestRange;
-					float utility = UtilityParabolic( 0, 1, 0, normalizedRange );
-					if ( utility > bestUtility ) {
-						bestIndex = i;
-						bestUtility = utility;
-						bestAction = SHOOT;
-					}
-				}
+		float q = 1.0f + dot;
+		if ( enemyList[k] == currentTarget ) {
+			q *= 2;
+			if ( focusedOtTarget ) {
+				q *= 2;
 			}
 		}
 
-		if ( bestIndex >= 0 ) {
-			currentAction = bestAction;
-			// Make the best target the 1st in the list.
-			Swap( &enemyList[bestIndex], &enemyList[0] );
+		// Consider ranged weapon options: OPTION_SHOOT, OPTION_MOVE_TO_RANGE
+		for( int i=0; i<rangedWeapons.Size(); ++i ) {
+			IRangedWeaponItem* pw = rangedWeapons[i].weapon;
+			if ( pw->Ready() && pw->HasRound() ) {
+				float effectiveRange = rangedWeapons[i].weapon->EffectiveRange();
+				float u = 1.0f - fabs(range - effectiveRange) / effectiveRange; 
+				u *= q;
+				if ( currentAction == SHOOT ) {
+					u *= 0.5f;
+				} 
+
+				if ( u > utility[OPTION_SHOOT] && LineOfSight( thisComp, enemy.chit ) ) {
+					utility[OPTION_SHOOT] = u;
+					target[OPTION_SHOOT] = enemy.chit;
+					rangedWeaponIndex = i;
+				}
+			}
+			// Close to effect range?
+			float u = 1.0f - (range - effectiveRange ) / effectiveRange;
+			u *= q;
+			if ( pw->Ready() && pw->HasRound() ) {
+				// okay;
+			}
+			else {
+				u *= 0.5f;
+			}
+			if ( u > utility[OPTION_MOVE_TO_RANGE] ) {
+				moveToRange = pos + enemyHeading * (range - effectiveRange);
+				target[OPTION_MOVE_TO_RANGE] = enemy.chit;
+			}
 		}
-		else {
-			// Nothing with utility found. Clear out the enemy list,
-			// so the AwareOfEnemy() will be false.
-			enemyList.Clear();
+
+		// Consider Melee
+		if ( meleeWeapon ) {
+			float u = BattleMechanics::MeleeRange( parentChit, enemy.chit ) / range;
+			u *= q;
+			if ( u > utility[MELEE_OPTION] ) {
+				utility[OPTION_MELEE] = u;
+				target[OPTION_MELEE] = enemy.chit;
+			}
 		}
 	}
+
+	int index = MaxValue( utility, NUM_OPTIONS );
+	// Translate to action system:
+	switch ( index ) {
+		case OPTION_FLOCK_MOVE:
+		{
+			currentAction = MOVE;
+			Vector2F dest = pos + flockDir;
+			pmc->QueueDest( dest );
+		}
+		break;
+
+		case OPTION_MOVE_TO_RANGE:
+		{
+			currentAction = MOVE;
+			pmc->QueueDest( moveToRange );
+		}
+		break;
+
+		case OPTION_MELEE:
+		{
+			currentAction = MELEE;
+		}
+		break;
+		
+		case OPTION_SHOOT:
+		{
+			currentAction = SHOOT;
+		}
+		break;
+
+		default:
+			GLASSERT( 0 );
+	};
 
 #ifdef AI_OUTPUT
 	static const char* actionName[NUM_ACTIONS] = { "noaction", "melee", "shoot" };

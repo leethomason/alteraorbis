@@ -91,8 +91,11 @@ private:
 	};
 
 	void GetFriendEnemyLists( const grinliz::Rectangle2F* area );
+	Chit* Closest( const ComponentSet& thisComp, CArray<int, MAX_TRACK>* list );
+
 	int GetTeamStatus( Chit* other );
 	bool LineOfSight( const ComponentSet& thisComp, Chit* target );
+	float CalcFlockMove( grinliz::Vector2F* dir );
 
 	void Think( const ComponentSet& thisComp );	// Choose a new action.
 	void ThinkWander( const ComponentSet& thisComp );
@@ -102,22 +105,11 @@ private:
 	WorldMap*	map;
 
 	enum {
-		/*
-			move,			get to shot, closer to friends, further from friends, close with enemy
-			move & shoot	
-			move & reload
-			move & melee	going in for the hit (ignore friends)
-			stand & shoot	good shot, good range, want aim bonus
-			stand & reload	
-			stand			stuck?
-		*/
-
 		// Possible actions:
 		NO_ACTION,
-		MELEE,			// Go to the target and hit it. The basic combat action.
-						// Possibly run-and-gun on the way in.
+		MOVE,			// Movement, will reload and run&gun if possible.
+		MELEE,			// Go to the target and hit it. Melee charge.
 		SHOOT,			// Stand ground and shoot.
-		MOVE,			// Move to a better location. Possibly reload.
 		NUM_ACTIONS,
 	};
 
