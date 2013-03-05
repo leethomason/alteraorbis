@@ -60,6 +60,7 @@ public:
 		if ( queued.pos.x >= 0 ) { *dest = queued.pos; return true; }
 		return false;
 	}
+	void Stop() { SetNoPath(); }
 
 	void SetPathDebugging( bool d )	{ pathDebugging = d; }
 

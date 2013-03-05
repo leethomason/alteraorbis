@@ -238,7 +238,7 @@ void BattleMechanics::Shoot( ChitBag* bag, Chit* src, Chit* target, IRangedWeapo
 	Vector3F dir = FuzzyAim( p0, p1, radAt1 );
 
 	Bolt* bolt = bag->NewBolt();
-	bolt->head = p0;
+	bolt->head = p0 + dir;
 	bolt->len = 1.0f;
 	bolt->dir = dir;
 	if ( item->flags & GameItem::EFFECT_FIRE )
@@ -273,9 +273,9 @@ float BattleMechanics::EffectiveRange( float radAt1, float targetDiameter )
 	float c = 0;
 	float r = 0;
 
-	while( fabs(c-C) > 0.02f ) {
-		float m  = (c1-c0) / (r1-r0); 
-		r = ( C - c0 ) / m;
+	for( int i=0; i<5; ++i ) {
+		// Cliffs make me nervous using a N-R search.
+		r = Mean(r0,r1);
 		c = ChanceToHit( r, radAt1, targetDiameter );
 
 		if ( c < C ) {
@@ -345,11 +345,11 @@ Vector3F BattleMechanics::FuzzyAim( const Vector3F& pos, const Vector3F& aimAt, 
 		   Choosing a random direction and a random length, however, biases the sphere
 		   to the center. This is necessarily bad, but it's a different result.
 		*/
-		float len = 2.0f;
+		float t = FLT_MAX;
 		Vector3F rv = { 0, 0, 0 };
-		while ( len > 1.0f ) {
+		while ( t > 1.0f ) {
 			rv.Set( -1.0f+random.Uniform()*2.0f, -1.0f+random.Uniform()*2.0f, -1.0f+random.Uniform()*2.0f );
-			len = rv.LengthSquared();
+			t = rv.LengthSquared();
 		}
 
 		Vector3F aimAtPrim = aimAt + rv * radiusAt1 * len;

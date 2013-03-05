@@ -400,7 +400,9 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 		normalToEnemy.Normalize();
 		float dot = DotProduct( normalToEnemy, heading );
 
-		float q = 1.0f + dot;
+		// Prefer targets we are pointed at.
+		static const float DOT_BIAS = 0.5f;
+		float q = 1.0f + dot * DOT_BIAS;
 		if ( enemyList[k] == currentTarget ) {
 			q *= 2;
 			if ( focusOnTarget ) {
@@ -413,8 +415,8 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 			GameItem* pw = rangedWeapons[i].weapon->GetItem();
 			float radAt1 = BattleMechanics::ComputeRadAt1(	thisComp.chit->GetItem(),
 															rangedWeapons[i].weapon,
-															thisComp.move->IsMoving(),
-															enemy.move->IsMoving() );
+															false,	// SHOOT implies stopping.
+															enemy.move && enemy.move->IsMoving() );
 			float effectiveRange = BattleMechanics::EffectiveRange( radAt1 );
 
 			if ( pw->Ready() && pw->HasRound() ) {
@@ -431,7 +433,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 				}
 			}
 			// Close to effect range?
-			float u = 1.0f - (range - effectiveRange ) / effectiveRange;
+			float u = ( range - effectiveRange ) / effectiveRange;
 			u *= q;
 			if ( pw->Ready() && pw->HasRound() ) {
 				// okay;
@@ -499,6 +501,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 		
 		case OPTION_SHOOT:
 		{
+			pmc->Stop();
 			currentAction = SHOOT;
 			currentTarget = target[OPTION_SHOOT]->ID();
 		}
@@ -522,7 +525,8 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 {
 	ComponentSet thisComp( parentChit, Chit::RENDER_BIT | 
 		                               Chit::SPATIAL_BIT |
-									   Chit::INVENTORY_BIT |		// need to be carrying a melee weapon
+									   Chit::MOVE_BIT |
+									   Chit::INVENTORY_BIT |
 									   ComponentSet::IS_ALIVE |
 									   ComponentSet::NOT_IN_IMPACT );
 	if ( !thisComp.okay ) {
