@@ -74,7 +74,7 @@ inline int CombSortGap( int gap )
 	return gap;
 }
 
-template <class T, class KCOMPARE=CompValue >
+template <class T, class KCOMPARE >
 inline void Sort( T* mem, int size )
 {
 	int gap = size;
@@ -95,12 +95,12 @@ inline void Sort( T* mem, int size )
 	}
 }
 
-template <class T, class KCOMPARE=CompValue >
+template <class T, class KCOMPARE >
 inline int MaxValue( T* mem, int size )
 {
 	int r = 0;
 	for( int i=1; i<size; ++i ) {
-		if ( KCOMPARE::Less(mem[r],mem[i] ) {
+		if ( KCOMPARE::Less(mem[r],mem[i] )) {
 			r = i;
 		}
 	}

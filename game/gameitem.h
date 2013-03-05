@@ -96,9 +96,6 @@ static const float SKILL_NORMALIZE = 0.1f;	// skill of 10 is a multiple 1.0
 static const float LEVEL_BONUS     = 0.5f;
 
 
-float AbilityCurve( float yAt0, float yAt1, float yAt16, float yAt32, float x );
-
-
 class GameStat
 {
 public:
@@ -316,7 +313,7 @@ public:
 	};
 	grinliz::CDynArray<KeyValue>	keyValues;
 
-	bool GetValue( const char* name, double* value ) { 
+	bool GetValue( const char* name, double* value ) const { 
 		for( int i=0; i<keyValues.Size(); ++i ) {
 			if ( keyValues[i].key == name ) {
 				*value = keyValues[i].value;
@@ -325,7 +322,7 @@ public:
 		}
 		return false;
 	}
-	bool GetValue( const char* name, float* value ) {
+	bool GetValue( const char* name, float* value ) const {
 		double d;
 		if ( GetValue( name, &d )) {
 			*value = (float)d;
@@ -333,13 +330,20 @@ public:
 		}
 		return false;
 	}
-	bool GetValue( const char* name, int* value ) {
+	bool GetValue( const char* name, int* value ) const {
 		double d;
 		if ( GetValue( name, &d )) {
 			*value = (int)d;
 			return true;
 		}
 		return false;
+	}
+
+	float CalcBoltSpeed() const {
+		static const float SPEED = 10.0f;
+		float speed = 1.0f;
+		GetValue( "speed", &speed );
+		return SPEED * speed;
 	}
 
 	Chit* parentChit;		// only set when attached to a Component

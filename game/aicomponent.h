@@ -90,8 +90,8 @@ private:
 		MAX_TRACK = 8,
 	};
 
-	void GetFriendEnemyLists( const grinliz::Rectangle2F* area );
-	Chit* Closest( const ComponentSet& thisComp, CArray<int, MAX_TRACK>* list );
+	void GetFriendEnemyLists();
+	Chit* Closest( const ComponentSet& thisComp, grinliz::CArray<int, MAX_TRACK>* list );
 
 	int GetTeamStatus( Chit* other );
 	bool LineOfSight( const ComponentSet& thisComp, Chit* target );
@@ -117,7 +117,8 @@ private:
 	int currentAction;
 	int currentTarget;
 	bool focusOnTarget;
-	CTicker		thinkTicker;
+	grinliz::Rectangle2F awareness;
+	CTicker rethink;
 
 	void DoMelee( const ComponentSet& thisComp );
 	void DoShoot( const ComponentSet& thisComp );

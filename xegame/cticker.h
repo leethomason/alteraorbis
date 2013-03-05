@@ -21,6 +21,7 @@ public:
 	}
 
 	int Next() const { return time; }
+	void Reset() { time = period; }
 	void Randomize( int seed ) {
 		grinliz::Random r(seed);
 		r.Rand();

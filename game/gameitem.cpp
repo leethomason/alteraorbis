@@ -33,19 +33,6 @@ using namespace tinyxml2;
 #define APPEND_FLAG( flags, cstr, name )	{ if ( flags & name ) { f += #name; f += " "; } }
 #define PUSH_ATTRIBUTE( prnt, name )		{ prnt->PushAttribute( #name, name ); }
 
-// FIXME: make this way, way simpler
-float AbilityCurve( float yAt0, float yAt1, float yAt16, float yAt32, float x )
-{
-	GLASSERT( grinliz::InRange( x, 0.0f, 32.0f ));
-	if ( x < 1 ) {
-		return grinliz::Lerp( yAt0, yAt1, x );
-	}
-	else if ( x < 16 ) {
-		return grinliz::Lerp( yAt1, yAt16, (x-1.0f)/15.0f );
-	}
-	return grinliz::Lerp( yAt16, yAt32, (x-16.0f)/16.0f );
-}
-
 
 void GameStat::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele )
 {

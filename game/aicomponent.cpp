@@ -37,9 +37,9 @@ using namespace grinliz;
 
 static const float NORMAL_AWARENESS		= 12.0f;
 
-//#define AI_OUTPUT
+#define AI_OUTPUT
 
-AIComponent::AIComponent( Engine* _engine, WorldMap* _map ) : thinkTicker( 400 )
+AIComponent::AIComponent( Engine* _engine, WorldMap* _map ) : rethink( 1200 )
 {
 	engine = _engine;
 	map = _map;
@@ -47,6 +47,7 @@ AIComponent::AIComponent( Engine* _engine, WorldMap* _map ) : thinkTicker( 400 )
 	currentTarget = 0;
 	focusOnTarget = false;
 	aiMode = NORMAL_MODE;
+	awareness.Zero();
 }
 
 
@@ -62,7 +63,7 @@ void AIComponent::Serialize( XStream* xs )
 	XARC_SER( xs, currentAction );
 	XARC_SER( xs, currentTarget );
 	XARC_SER( xs, focusOnTarget );
-	thinkTicker.Serialize( xs, "thinkTicker" );
+	//thinkTicker.Serialize( xs, "thinkTicker" );
 	this->EndSerialize( xs );
 }
 
@@ -103,29 +104,37 @@ bool AIComponent::LineOfSight( const ComponentSet& thisComp, Chit* t )
 }
 
 
-static bool HasAI( Chit* c ) {
-	return GET_COMPONENT( c, AIComponent ) != 0;
+static bool FEFilter( Chit* c ) {
+	// Tricky stuff. This will return F/E units:
+	if( GET_COMPONENT( c, AIComponent ))
+		return true;
+	// This probably isn't quite right. But
+	// automated things?
+	if ( c->GetMoveComponent() && c->GetItem() ) {
+		return true;
+	}
+	return false;
 }
 
-void AIComponent::GetFriendEnemyLists( const Rectangle2F* area )
+void AIComponent::GetFriendEnemyLists()
 {
 	SpatialComponent* sc = parentChit->GetSpatialComponent();
 	if ( !sc ) return;
 	Vector2F center = sc->GetPosition2D();
 
-	Rectangle2F zone;
-	if ( area ) {
-		zone = *area;
-	}
-	else {
+	Rectangle2F zone = awareness;
+	if ( zone.Area() == 0 ) {
 		zone.min = zone.max = center;
 		zone.Outset( NORMAL_AWARENESS );
+	}
+	else {
+		int debug=1;
 	}
 
 	friendList.Clear();
 	enemyList.Clear();
 
-	const CDynArray<Chit*>& chitArr = GetChitBag()->QuerySpatialHash( zone, parentChit, HasAI );
+	const CDynArray<Chit*>& chitArr = GetChitBag()->QuerySpatialHash( zone, parentChit, FEFilter );
 	for( int i=0; i<chitArr.Size(); ++i ) {
 		int status = GetTeamStatus( chitArr[i] );
 		if ( status == ENEMY ) {
@@ -148,17 +157,45 @@ void AIComponent::GetFriendEnemyLists( const Rectangle2F* area )
 }
 
 
+// Won't write output if there isn't a result.
+float AIComponent::CalcFlockMove( grinliz::Vector2F* dir )
+{
+	if ( friendList.Empty() ) {
+		return 0;
+	}
+
+	// FIXME: Consider only the friends in front of us?
+	Vector2F d = { 0, 0 };
+	int count = 0;
+
+	for( int i=0; i<friendList.Size(); ++i ) {
+		Chit* c = GetChitBag()->GetChit( friendList[i] );
+		if ( c && c->GetSpatialComponent() ) {
+			d += c->GetSpatialComponent()->GetHeading2D();
+			++count;
+		}
+	}
+	float len = d.Length();
+	if ( len > 0.01f ) {
+		d.Normalize();
+		*dir = d;
+		return len / (float)(count);
+	}
+	return 0.0f;
+}
+
+
 Chit* AIComponent::Closest( const ComponentSet& thisComp, CArray<int, MAX_TRACK>* list )
 {
 	float best = FLT_MAX;
 	Chit* chit = 0;
 
 	for( int i=0; i<list->Size(); ++i ) {
-		Chit* enemyChit = GetChit( *(list)[i] );
+		Chit* enemyChit = GetChit( (*list)[i] );
 		ComponentSet enemy( enemyChit, Chit::SPATIAL_BIT | Chit::ITEM_BIT | ComponentSet::IS_ALIVE );
 		if ( enemy.okay ) 
 		{
-			int len2 = (enemy.spatial->GetPosition() - thisComp.spatial->GetPosition()).LengthSquared();
+			float len2 = (enemy.spatial->GetPosition() - thisComp.spatial->GetPosition()).LengthSquared();
 			if ( len2 < best ) {
 				best = len2;
 				chit = enemy.chit;
@@ -171,80 +208,61 @@ Chit* AIComponent::Closest( const ComponentSet& thisComp, CArray<int, MAX_TRACK>
 
 void AIComponent::DoMove( const ComponentSet& thisComp )
 {
-	
+	// FIXME: run & gun
+	// FIXME: reload
+	// FIXME: move needs "wandered off" timer check. Or getting stuck, etc.
 }
 
 
 void AIComponent::DoShoot( const ComponentSet& thisComp )
 {
 	bool pointed = false;
-	Chit* targetChit = 0;
-
-	// Use the current target, or find a new one.
-	if ( !GetChitBag()->GetChit( currentTarget ) ) {
-
-		float bestGolfScore = 1000.0f;
-
-		for( int i=0; i<enemyList.Size(); ++i ) {
-			ComponentSet target( GetChit( enemyList[0] ), Chit::RENDER_BIT | Chit::SPATIAL_BIT | ComponentSet::IS_ALIVE );
-			if ( !target.okay ) {
-				continue;
-			}
-
-			float 
-		}
+	ComponentSet target( GetChitBag()->GetChit( currentTarget ), Chit::SPATIAL_BIT | Chit::ITEM_BIT | ComponentSet::IS_ALIVE );
+	if ( !target.okay ) {
+		currentAction = NO_ACTION;
+		return;
 	}
 
-	while ( !enemyList.Empty() ) {
-		ComponentSet target( GetChit( enemyList[0] ), Chit::RENDER_BIT |
-													  Chit::SPATIAL_BIT |
-													  ComponentSet::IS_ALIVE );
-		if ( !target.okay ) {
-			enemyList.SwapRemove( 0 );
-			continue;
-		}
-		targetChit = target.chit;
-	
+	Vector3F leading = battleMechanics.ComputeLeadingShot( thisComp.chit, target.chit, 0, 0 );
+	Vector2F leading2D = { leading.x, leading.z };
+
+	// Rotate to target.
+	Vector2F heading = thisComp.spatial->GetHeading2D();
+	float headingAngle = RotationXZDegrees( heading.x, heading.y );
+
+	Vector2F normalToTarget = leading2D - thisComp.spatial->GetPosition2D();
+	float distanceToTarget = normalToTarget.Length();
+	normalToTarget.Normalize();
+	float angleToTarget = RotationXZDegrees( normalToTarget.x, normalToTarget.y );
+
+	static const float ANGLE = 10.0f;
+	if ( fabsf( headingAngle - angleToTarget ) < ANGLE ) {
+		// all good.
+	}
+	else {
 		// Rotate to target.
-		// FIXME: normal to target should be based on 'trigger'
-		Vector2F heading = thisComp.spatial->GetHeading2D();
-		float headingAngle = RotationXZDegrees( heading.x, heading.y );
-
-		Vector2F normalToTarget = target.spatial->GetPosition2D() - thisComp.spatial->GetPosition2D();
-		float distanceToTarget = normalToTarget.Length();
-		normalToTarget.Normalize();
-		float angleToTarget = RotationXZDegrees( normalToTarget.x, normalToTarget.y );
-
-		static const float ANGLE = 10.0f;
-		if ( fabsf( headingAngle - angleToTarget ) < ANGLE ) {
-			pointed = true;
+		PathMoveComponent* pmc = GET_COMPONENT( parentChit, PathMoveComponent );
+		if ( pmc ) {
+			pmc->QueueDest( thisComp.spatial->GetPosition2D(), angleToTarget );
 		}
-		else {
-			PathMoveComponent* pmc = GET_COMPONENT( parentChit, PathMoveComponent );
-			if ( pmc ) {
-				pmc->QueueDest( thisComp.spatial->GetPosition2D(), angleToTarget );
-			}
-		}
-		break;
+		return;
 	}
 
-	if ( pointed ) {
-		CArray< InventoryComponent::RangedInfo, NUM_HARDPOINTS > weapons;
-		thisComp.inventory->GetRangedWeapons( &weapons );
+	CArray< InventoryComponent::RangedInfo, NUM_HARDPOINTS > weapons;
+	thisComp.inventory->GetRangedWeapons( &weapons );
 
-		// FIXME: choose best weapon, not just first one that works.
-		for( int i=0; i<weapons.Size(); ++i ) {
-			GameItem* item = weapons[i].weapon->GetItem();
-			if ( item->Ready() ) {
-				if ( item->HasRound() ) {
-					battleMechanics.Shoot(	GetChitBag(), 
-											parentChit, targetChit, 
-											weapons[i].weapon, weapons[i].trigger );
-				}
-				else {
-					item->Reload();
-				}
-				break;
+	for( int i=0; i<weapons.Size(); ++i ) {
+		GameItem* item = weapons[i].weapon->GetItem();
+		if ( item->Ready() ) {
+			if ( item->HasRound() ) {
+				battleMechanics.Shoot(	GetChitBag(), 
+										parentChit, target.chit, 
+										weapons[i].weapon );
+				return;
+			}
+			else {
+				currentAction = NO_ACTION;
+				return;
 			}
 		}
 	}
@@ -254,32 +272,16 @@ void AIComponent::DoShoot( const ComponentSet& thisComp )
 void AIComponent::DoMelee( const ComponentSet& thisComp )
 {
 	IMeleeWeaponItem* weapon = thisComp.inventory->GetMeleeWeapon();
-	if ( !weapon ) 
-		return;
-	GameItem* item = weapon->GetItem();
+	ComponentSet target( GetChitBag()->GetChit( currentTarget ), Chit::SPATIAL_BIT | Chit::ITEM_BIT | ComponentSet::IS_ALIVE );
 
-	// Are we close enough to hit? Then swing. Else move to target.
-	Chit* targetChit = 0;
-	bool repath = false;
-
-	while ( !enemyList.Empty() ) {
-		targetChit = parentChit->GetChitBag()->GetChit( enemyList[0] );
-		if ( targetChit )
-			break;
-		enemyList.SwapRemove(0);
-		repath = true;
-	}
-	ComponentSet target( targetChit, Chit::SPATIAL_BIT | ComponentSet::IS_ALIVE );
-	if ( !target.okay ) {
-		PathMoveComponent* pmc = GET_COMPONENT( parentChit, PathMoveComponent );
-		if ( pmc ) {
-			pmc->QueueDest( parentChit );	// stop moving.
-		}
+	if ( !weapon || !target.okay ) {
 		currentAction = NO_ACTION;
 		return;
 	}
+	GameItem* item = weapon->GetItem();
 
-	if ( battleMechanics.InMeleeZone( engine, parentChit, targetChit ) ) {
+	// Are we close enough to hit? Then swing. Else move to target.
+	if ( battleMechanics.InMeleeZone( engine, parentChit, target.chit ) ) {
 		if ( item->Ready() ) {
 			GLASSERT( parentChit->GetRenderComponent()->AnimationReady() );
 			parentChit->GetRenderComponent()->PlayAnimation( ANIM_MELEE );
@@ -298,9 +300,13 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 			float distanceToTarget = (targetPos - pos).Length();
 
 			// If the error is greater than distance to, then re-path.
-			if ( repath || delta > distanceToTarget * 0.25f ) {
-				pmc->QueueDest( targetChit );
+			if ( delta > distanceToTarget * 0.25f ) {
+				pmc->QueueDest( target.chit );
 			}
+		}
+		else {
+			currentAction = NO_ACTION;
+			return;
 		}
 	}
 }
@@ -308,8 +314,21 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 
 void AIComponent::OnChitEvent( const ChitEvent& event )
 {
+	ComponentSet thisComp( parentChit, Chit::RENDER_BIT | 
+		                               Chit::SPATIAL_BIT |
+									   Chit::INVENTORY_BIT |		// need to be carrying a melee weapon
+									   ComponentSet::IS_ALIVE |
+									   ComponentSet::NOT_IN_IMPACT );
+	if ( !thisComp.okay ) {
+		return;
+	}
+
 	if ( event.ID() == ChitEvent::AWARENESS ) {
-		GetFriendEnemyLists( &event.AreaOfEffect() );
+		awareness = event.AreaOfEffect();
+		parentChit->SetTickNeeded();
+	}
+	else {
+		super::OnChitEvent( event );
 	}
 }
 
@@ -339,6 +358,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 		return;
 	}
 	const Vector3F& pos = thisComp.spatial->GetPosition();
+	Vector2F pos2 = { pos.x, pos.z };
 	
 	// The current ranged weapon.
 	CArray< InventoryComponent::RangedInfo, NUM_HARDPOINTS > rangedWeapons;
@@ -369,28 +389,35 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 
 	for( int k=0; k<enemyList.Size(); ++k ) {
 
-		ComponentSet enemy( enemyList[k], Chit::SPATIAL_BIT | Chit::ITEM_BIT | ComponentSet::IS_ALIVE );
+		ComponentSet enemy( GetChitBag()->GetChit(enemyList[k]), Chit::SPATIAL_BIT | Chit::ITEM_BIT | ComponentSet::IS_ALIVE );
 		if ( !enemy.okay ) {
 			continue;
 		}
 		const Vector3F enemyPos = enemy.spatial->GetPosition();
 		float range = (enemyPos - pos).Length();
-		Vector2F normalToEnemy = (enemyPos - pos).Normalize();
+		Vector3F toEnemy = (enemyPos - pos);
+		Vector2F normalToEnemy = { toEnemy.x, toEnemy.z };
+		normalToEnemy.Normalize();
 		float dot = DotProduct( normalToEnemy, heading );
 
 		float q = 1.0f + dot;
 		if ( enemyList[k] == currentTarget ) {
 			q *= 2;
-			if ( focusedOtTarget ) {
+			if ( focusOnTarget ) {
 				q *= 2;
 			}
 		}
 
 		// Consider ranged weapon options: OPTION_SHOOT, OPTION_MOVE_TO_RANGE
 		for( int i=0; i<rangedWeapons.Size(); ++i ) {
-			IRangedWeaponItem* pw = rangedWeapons[i].weapon;
+			GameItem* pw = rangedWeapons[i].weapon->GetItem();
+			float radAt1 = BattleMechanics::ComputeRadAt1(	thisComp.chit->GetItem(),
+															rangedWeapons[i].weapon,
+															thisComp.move->IsMoving(),
+															enemy.move->IsMoving() );
+			float effectiveRange = BattleMechanics::EffectiveRange( radAt1 );
+
 			if ( pw->Ready() && pw->HasRound() ) {
-				float effectiveRange = rangedWeapons[i].weapon->EffectiveRange();
 				float u = 1.0f - fabs(range - effectiveRange) / effectiveRange; 
 				u *= q;
 				if ( currentAction == SHOOT ) {
@@ -413,29 +440,44 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 				u *= 0.5f;
 			}
 			if ( u > utility[OPTION_MOVE_TO_RANGE] ) {
-				moveToRange = pos + enemyHeading * (range - effectiveRange);
+				utility[OPTION_MOVE_TO_RANGE] = u;
+				moveToRange = pos2 + normalToEnemy * (range - effectiveRange);
 				target[OPTION_MOVE_TO_RANGE] = enemy.chit;
 			}
 		}
 
 		// Consider Melee
 		if ( meleeWeapon ) {
-			float u = BattleMechanics::MeleeRange( parentChit, enemy.chit ) / range;
+			float meleeRange = BattleMechanics::MeleeRange( parentChit, enemy.chit );
+			float u = meleeRange / range;
 			u *= q;
-			if ( u > utility[MELEE_OPTION] ) {
+			// Utility of the actual charge vs. moving closer.
+			if ( range > meleeRange * 3.0f ) {
+				if ( u > utility[OPTION_MOVE_TO_RANGE] ) {
+					utility[OPTION_MOVE_TO_RANGE] = u;
+					moveToRange = pos2 + normalToEnemy * (range - meleeRange*2.0f);
+					target[OPTION_MOVE_TO_RANGE] = enemy.chit;
+				}
+			}
+			u *= 0.99f;	// a little less utility than the move_to_range
+			if ( u > utility[OPTION_MELEE] ) {
 				utility[OPTION_MELEE] = u;
 				target[OPTION_MELEE] = enemy.chit;
 			}
+			// Utility of getting closer. Need to be careful this has less utility 
+			// when in actual melee range, and higher further out.
+			u = meleeRange / (range+2.0f);
+			u *= q;
 		}
 	}
 
-	int index = MaxValue( utility, NUM_OPTIONS );
+	int index = MaxValue<float, CompValue>( utility, NUM_OPTIONS );
 	// Translate to action system:
 	switch ( index ) {
 		case OPTION_FLOCK_MOVE:
 		{
 			currentAction = MOVE;
-			Vector2F dest = pos + flockDir;
+			Vector2F dest = pos2 + flockDir;
 			pmc->QueueDest( dest );
 		}
 		break;
@@ -443,6 +485,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 		case OPTION_MOVE_TO_RANGE:
 		{
 			currentAction = MOVE;
+			currentTarget = target[OPTION_MOVE_TO_RANGE]->ID();
 			pmc->QueueDest( moveToRange );
 		}
 		break;
@@ -450,31 +493,33 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 		case OPTION_MELEE:
 		{
 			currentAction = MELEE;
+			currentTarget = target[OPTION_MELEE]->ID();
 		}
 		break;
 		
 		case OPTION_SHOOT:
 		{
 			currentAction = SHOOT;
+			currentTarget = target[OPTION_SHOOT]->ID();
 		}
 		break;
 
 		default:
 			GLASSERT( 0 );
 	};
+	rethink.Reset();
 
 #ifdef AI_OUTPUT
-	static const char* actionName[NUM_ACTIONS] = { "noaction", "melee", "shoot" };
-	GLOUTPUT(( "ID=%d Think: action=%s\n", parentChit->ID(), actionName[currentAction] ));
+	static const char* optionName[NUM_OPTIONS] = { "flock", "mtrange", "melee", "shoot" };
+	GLOUTPUT(( "ID=%d Think: flock=%.2f mtrange=%.2f melee=%.2f shoot=%.2f -> %s\n",
+		       thisComp.chit->ID(), utility[OPTION_FLOCK_MOVE], utility[OPTION_MOVE_TO_RANGE], utility[OPTION_MELEE], utility[OPTION_SHOOT],
+			   optionName[index] ));
 #endif
 }
 
 
 int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 {
-	if ( thinkTicker.Delta( timeSince ) == 0 ) {
-		return thinkTicker.Next();
-	}
 	ComponentSet thisComp( parentChit, Chit::RENDER_BIT | 
 		                               Chit::SPATIAL_BIT |
 									   Chit::INVENTORY_BIT |		// need to be carrying a melee weapon
@@ -501,36 +546,55 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 		focusOnTarget = false;
 	}
 
-	GetFriendEnemyLists( 0 );
+	GetFriendEnemyLists();
 
 	// High level mode switch?
 	if ( aiMode == NORMAL_MODE && !enemyList.Empty() ) {
 		aiMode = BATTLE_MODE;
 		currentAction = 0;
+#ifdef AI_OUTPUT
+		GLOUTPUT(( "ID=%d Mode to Battle\n", thisComp.chit->ID() ));
+#endif
 	}
 	else if ( aiMode == BATTLE_MODE && currentTarget == 0 && enemyList.Empty() ) {
 		aiMode = NORMAL_MODE;
 		currentAction = 0;
+#ifdef AI_OUTPUT
+		GLOUTPUT(( "ID=%d Mode to Normal\n", thisComp.chit->ID() ));
+#endif
 	}
 
-	if ( !currentAction ) {
+	if ( !currentAction || rethink.Delta(timeSince)) {
 		Think( thisComp );
 	}
 
 	// Are we doing something? Then do that; if not, look for
 	// something else to do.
+	int tick = 0;
 	switch( currentAction ) {
 
-		case MOVE:		DoMove( thisComp );		break;
-		case MELEE:		DoMelee( thisComp );	break;
-		case SHOOT:		DoShoot( thisComp );	break;
+		case MOVE:		
+			DoMove( thisComp );
+			tick = (aiMode == BATTLE_MODE) ? 0 : 400;	// wait for message callback from pather. slow tick in case something goes wrong.
+			break;
+		case MELEE:		
+			DoMelee( thisComp );	
+			tick = 0;
+			break;
+		case SHOOT:		
+			DoShoot( thisComp );
+			tick = 0;
+			break;
+		case NO_ACTION:
+			tick = 400;
+			break;
 
 		default:
 			GLASSERT( 0 );
 			currentAction = 0;
 			break;
 	}
-	return thinkTicker.Next();
+	return tick;
 }
 
 
@@ -542,7 +606,17 @@ void AIComponent::DebugStr( grinliz::GLString* str )
 
 void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {
-	super::OnChitMsg( chit, msg );
+	switch ( msg.ID() ) {
+	case ChitMsg::PATHMOVE_DESTINATION_REACHED:
+	case ChitMsg::PATHMOVE_DESTINATION_BLOCKED:
+		currentAction = NO_ACTION;
+		parentChit->SetTickNeeded();
+		break;
+
+	default:
+		super::OnChitMsg( chit, msg );
+		break;
+	}
 }
 
 

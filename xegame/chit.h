@@ -58,7 +58,6 @@ public:
 								// the rendering component.	
 
 		// ---- Component ---- //
-		// Game
 		PATHMOVE_DESTINATION_REACHED,
 		PATHMOVE_DESTINATION_BLOCKED,
 

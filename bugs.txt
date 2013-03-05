@@ -1,3 +1,7 @@
+- The item / weapon system really isn't working, and it's complex. Needs coordination between
+  renderer, item, and weapon system to know the current weapon. (!!) Would rather have a one
+  weapon system (where the current weapon can be switched out.) See ComuteLeadingShot()
+
 - does fire affect plants??
 - health is awkward: keeps copy of HP (oops). move hp to health component? (TotalHP() on item?)
 - need free camera mode
