@@ -84,10 +84,10 @@
         hardpoint="trigger"
         mass="1.5"
         cooldown="500"
-        reload="1000"
+        reload="2500"
         clipCap="6"
         meleeDamage="1.1"
-        rangedDamage="30"
+        rangedDamage="20"
         >
   </item>
 

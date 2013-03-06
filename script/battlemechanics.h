@@ -66,7 +66,7 @@ public:
 	// 1m is assumed the default target diameter.
 	static float EffectiveRange( float radAt1, float targetDiameter=0.5f );
 	
-	// Computes an accurate leading shot. Returns a direction. The origin and dest of the shot are optional.
+	// Computes an accurate leading shot. Returns a target. The origin and dest of the shot are optional (and p1 dupes the return)
 	static grinliz::Vector3F ComputeLeadingShot( Chit* origin, Chit* target, grinliz::Vector3F* p0, grinliz::Vector3F* p1 );
 
 	// Other --------------------- //

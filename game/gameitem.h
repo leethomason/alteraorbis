@@ -177,12 +177,7 @@ private:
 class IWeaponItem 
 {
 public:
-	virtual bool Ready() const = 0;
-	virtual bool Use() = 0;
 	virtual GameItem* GetItem() = 0;
-	virtual bool Reload() = 0;
-	virtual bool CanReload() const = 0;
-	virtual bool Reloading() const = 0;
 };
 
 class IMeleeWeaponItem : virtual public IWeaponItem
@@ -398,9 +393,9 @@ public:
 			rangedDamage = 0;
 			absorbsDamage = 0;
 			cooldown = 1000;
-			cooldownTime = cooldown;
+			cooldownTime = 0;
 			reload = 2000;
-			reloadTime = reload;
+			reloadTime = 0;
 			clipCap = 0;			// default to no clip and unlimited ammo
 			rounds = clipCap;
 			stats.Init();
@@ -418,8 +413,8 @@ public:
 		hp = TotalHP();
 		accruedFire = 0;
 		accruedShock = 0;
-		cooldownTime = cooldown;
-		reloadTime = reload;
+		cooldownTime = 0;
+		reloadTime = 0;
 		rounds = clipCap;
 	}
 
@@ -434,17 +429,22 @@ public:
 	int Effects() const { return flags & EFFECT_MASK; }
 	int DoTick( U32 delta, U32 since );
 	
-	// 'Ready' and 'Rounds' are orthogonal. You are Ready()
-	// if the cooldown is passed. You HasRound() if the
-	// weapon has (possibly unlimited) rounds.
-	virtual bool Ready() const {
-		return cooldownTime >= cooldown;
-	}
+	// States:
+	//		Ready
 
-	virtual bool Use();
-	virtual bool Reload();
-	virtual bool CanReload() const { return Ready() && !Reloading() && (rounds < clipCap); }
-	virtual bool Reloading() const { return clipCap > 0 && reloadTime < reload; }
+	//		Cooldown (just used)
+	//		Reloading
+	//		Out of rounds
+
+
+	bool CanUse()					{ return !CoolingDown() && !Reloading() && HasRound(); }
+	bool Use();
+
+	bool CoolingDown() const		{ return cooldownTime > 0; }
+
+	bool Reloading() const			{ return clipCap > 0 && reloadTime > 0; }
+	bool Reload();
+	bool CanReload() const			{ return !CoolingDown() && !Reloading() && (rounds < clipCap); }
 
 	int Rounds() const { return rounds; }
 	int ClipCap() const { return clipCap; }

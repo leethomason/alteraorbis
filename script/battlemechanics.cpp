@@ -98,10 +98,6 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* 
 	GLASSERT( chitBag );
 
 	U32 absTime = chitBag->AbsTime();
-	if( !weapon->Ready()) {
-		return;
-	}
-	weapon->Use();
 	
 	int primaryTeam = PrimaryTeam( src );
 
@@ -221,8 +217,9 @@ float BattleMechanics::ComputeRadAt1(	GameItem* shooter,
 
 void BattleMechanics::Shoot( ChitBag* bag, Chit* src, Chit* target, IRangedWeaponItem* weapon )
 {
-	GLASSERT( weapon->Ready() );
-	bool okay = weapon->Use();
+	GameItem* weaponItem = weapon->GetItem();
+	GLASSERT( weaponItem->CanUse() );
+	bool okay = weaponItem->Use();
 	if ( !okay ) {
 		return;
 	}

@@ -373,12 +373,13 @@ void AnimationResource::GetMetaData(	int type,
 
 	int i=0;
 	while( delta > 0 ) {
-		if (    t0 >= sequence[type].frame[i].start 
-			 && t0 < sequence[type].frame[i].end ) 
+		if (    sequence[type].frame[i].start >= t0
+			 && sequence[type].frame[i].start <  t0 + delta ) 
 		{
 			for( int j=0; j<EL_MAX_METADATA;  ++j ) {
 				int m = sequence[type].frame[i].metaData[j];
 				if ( m > 0 ) {
+					//GLOUTPUT(( "Meta push %d [%d,%d]\n", m, t0, t1 ));
 					data->Push( m ); 
 				}
 			}

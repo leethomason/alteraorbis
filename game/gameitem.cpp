@@ -329,9 +329,9 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 
 
 bool GameItem::Use() {
-	if ( Ready() && HasRound() ) {
+	if ( CanUse() ) {
 		UseRound();
-		cooldownTime = 0;
+		cooldownTime = cooldown;
 		if ( parentChit ) {
 			parentChit->SetTickNeeded();
 		}
@@ -343,7 +343,7 @@ bool GameItem::Use() {
 
 bool GameItem::Reload() {
 	if ( CanReload()) {
-		reloadTime = 0;
+		reloadTime = reload;
 		if ( parentChit ) {
 			parentChit->SetTickNeeded();
 		}
@@ -367,12 +367,16 @@ int GameItem::DoTick( U32 delta, U32 sinec )
 {
 	bool tick = false;
 
-	cooldownTime += delta;
-	if ( reloadTime < reload ) {
-		reloadTime += delta;
+	if ( cooldownTime > 0 ) {
+		cooldownTime = Max( cooldownTime-(int)delta, 0 );
+		tick = true;
+	}
+
+	if ( reloadTime > 0 ) {
+		reloadTime = Max( reloadTime-(int)delta, 0 );
 		tick = true;
 
-		if ( reloadTime >= reload ) {
+		if ( reloadTime == 0 ) {
 			rounds = clipCap;
 		}
 	}
@@ -439,7 +443,7 @@ void GameItem::AbsorbDamage( bool inInventory, DamageDesc dd, DamageDesc* remain
 		// Items in the inventory don't take damage. They
 		// may reduce damage for their parent.
 		if ( ToShield() ) {
-			reloadTime = 0;
+			reloadTime = reload;
 			absorbed = Min( dd.damage * absorbsDamage, (float)rounds );
 			rounds -= LRintf( absorbed );
 			// Shock does extra damage to shields.

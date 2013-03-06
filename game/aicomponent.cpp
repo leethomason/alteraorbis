@@ -232,16 +232,16 @@ void AIComponent::DoMove( const ComponentSet& thisComp )
 
 		CArray< InventoryComponent::RangedInfo, NUM_HARDPOINTS > weapons;
 		thisComp.inventory->GetRangedWeapons( &weapons );
-		IRangedWeaponItem* ranged = 0;
+		GameItem* ranged = 0;
 		if ( weapons.Size() ) {
-			ranged = weapons[0].weapon;
+			ranged = weapons[0].weapon->GetItem();
 		}
 		if ( ranged ) {
 			Vector3F heading = thisComp.spatial->GetHeading();
 
-			if ( ranged->Ready() && ranged->GetItem()->HasRound() ) {
+			if ( ranged->CanUse() ) {
 				float radAt1 = BattleMechanics::ComputeRadAt1( thisComp.chit->GetItem(), 
-															   ranged,
+															   ranged->ToRangedWeapon(),
 															   true,
 															   true );	// Doesn't matter to utility.
 
@@ -251,8 +251,11 @@ void AIComponent::DoMove( const ComponentSet& thisComp )
 						continue;
 					}
 					Vector3F p0, p1;
-					Vector3F dir = BattleMechanics::ComputeLeadingShot( thisComp.chit, enemy.chit, &p0, &p1 );
-					if ( DotProduct( dir, heading ) <= SHOOT_ANGLE_DOT ) {
+					BattleMechanics::ComputeLeadingShot( thisComp.chit, enemy.chit, &p0, &p1 );
+					Vector3F normal = p1 - p0;
+					normal.Normalize();
+
+					if ( DotProduct( normal, heading ) > SHOOT_ANGLE_DOT ) {
 						// Wow - can take the shot!
 						float u = BattleMechanics::ChanceToHit( (p0-p1).Length(), radAt1 );
 						if ( u > utilityRunAndGun ) {
@@ -263,8 +266,9 @@ void AIComponent::DoMove( const ComponentSet& thisComp )
 				}
 			}
 			float utilityReload = 0.0f;
-			if ( !ranged->Reloading() ) {
-				utilityReload = 1.0f - ranged->GetItem()->RoundsFraction();
+			GameItem* rangedItem = ranged->GetItem();
+			if ( rangedItem->CanReload() ) {
+				utilityReload = 1.0f - rangedItem->RoundsFraction();
 			}
 			if ( utilityReload > 0 || utilityRunAndGun > 0 ) {
 				#ifdef AI_OUTPUT
@@ -275,7 +279,7 @@ void AIComponent::DoMove( const ComponentSet& thisComp )
 					battleMechanics.Shoot(	GetChitBag(), 
 											thisComp.chit, 
 											targetRunAndGun, 
-											ranged );
+											ranged->ToRangedWeapon() );
 					#ifdef AI_OUTPUT
 					GLOUTPUT(( "->RunAndGun\n" ));
 					#endif
@@ -327,20 +331,20 @@ void AIComponent::DoShoot( const ComponentSet& thisComp )
 
 	CArray< InventoryComponent::RangedInfo, NUM_HARDPOINTS > weapons;
 	thisComp.inventory->GetRangedWeapons( &weapons );
-
-	for( int i=0; i<weapons.Size(); ++i ) {
-		GameItem* item = weapons[i].weapon->GetItem();
-		if ( item->Ready() ) {
-			if ( item->HasRound() ) {
+	if ( !weapons.Empty() ) {
+		GameItem* item = weapons[0].weapon->GetItem();
+		if ( item->HasRound() ) {
+			// Has round. May be in cooldown.
+			if ( item->CanUse() ) {
 				battleMechanics.Shoot(	GetChitBag(), 
-										parentChit, target.chit, 
-										weapons[i].weapon );
-				return;
+										parentChit, 
+										target.chit, 
+										weapons[0].weapon );
 			}
-			else {
-				currentAction = NO_ACTION;
-				return;
-			}
+		}
+		else {
+			// Out of ammo - do something else.
+			currentAction = NO_ACTION;
 		}
 	}
 }
@@ -359,10 +363,8 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 
 	// Are we close enough to hit? Then swing. Else move to target.
 	if ( battleMechanics.InMeleeZone( engine, parentChit, target.chit ) ) {
-		if ( item->Ready() ) {
-			GLASSERT( parentChit->GetRenderComponent()->AnimationReady() );
-			parentChit->GetRenderComponent()->PlayAnimation( ANIM_MELEE );
-		}
+		GLASSERT( parentChit->GetRenderComponent()->AnimationReady() );
+		parentChit->GetRenderComponent()->PlayAnimation( ANIM_MELEE );
 	}
 	else {
 		// Move to target.
@@ -470,15 +472,17 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 		if ( !enemy.okay ) {
 			continue;
 		}
-		const Vector3F enemyPos = enemy.spatial->GetPosition();
-		float range = (enemyPos - pos).Length();
-		Vector3F toEnemy = (enemyPos - pos);
-		Vector2F normalToEnemy = { toEnemy.x, toEnemy.z };
+		const Vector3F	enemyPos		= enemy.spatial->GetPosition();
+		float			range			= (enemyPos - pos).Length();
+		Vector3F		toEnemy			= (enemyPos - pos);
+		Vector2F		normalToEnemy	= { toEnemy.x, toEnemy.z };
+		float			meleeRange		= BattleMechanics::MeleeRange( parentChit, enemy.chit );
+
 		normalToEnemy.Normalize();
 		float dot = DotProduct( normalToEnemy, heading );
 
 		// Prefer targets we are pointed at.
-		static const float DOT_BIAS = 0.5f;
+		static const float DOT_BIAS = 0.25f;
 		float q = 1.0f + dot * DOT_BIAS;
 		if ( enemyList[k] == currentTarget ) {
 			q *= 2;
@@ -496,8 +500,11 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 															enemy.move && enemy.move->IsMoving() );
 			float effectiveRange = BattleMechanics::EffectiveRange( radAt1 );
 
-			if ( pw->Ready() && pw->HasRound() ) {
-				float u = 1.0f - fabs(range - effectiveRange) / effectiveRange; 
+			// 1.5f gives spacing for bolt to start.
+			// The HasRound() && !Reloading() is really important: if the gun
+			// is in cooldown, don't give up on shooting!
+			if ( pw->HasRound() && !pw->Reloading() && range > 1.5f ) {
+				float u = 1.0f - (range - effectiveRange) / effectiveRange; 
 				u *= q;
 				if ( currentAction == SHOOT ) {
 					u *= 0.5f;
@@ -512,7 +519,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 			// Close to effect range?
 			float u = ( range - effectiveRange ) / effectiveRange;
 			u *= q;
-			if ( pw->Ready() && pw->HasRound() ) {
+			if ( pw->CanUse() && pw->HasRound() ) {
 				// okay;
 			}
 			else {
@@ -527,7 +534,6 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 
 		// Consider Melee
 		if ( meleeWeapon ) {
-			float meleeRange = BattleMechanics::MeleeRange( parentChit, enemy.chit );
 			float u = meleeRange / range;
 			u *= q;
 			// Utility of the actual charge vs. moving closer.
@@ -538,7 +544,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 					target[OPTION_MOVE_TO_RANGE] = enemy.chit;
 				}
 			}
-			u *= 0.99f;	// a little less utility than the move_to_range
+			u *= 0.95f;	// a little less utility than the move_to_range
 			if ( u > utility[OPTION_MELEE] ) {
 				utility[OPTION_MELEE] = u;
 				target[OPTION_MELEE] = enemy.chit;
