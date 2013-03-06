@@ -60,11 +60,7 @@ public:
 	// effects, etc.) So this is called before the actual chit->item->absorb
 	void AbsorbDamage( DamageDesc dd, DamageDesc* remain, const char* logstr );
 
-	struct RangedInfo {
-		IRangedWeaponItem* weapon;
-		grinliz::Vector3F  trigger;
-	};
-	void GetRangedWeapons( grinliz::CArray< RangedInfo, NUM_HARDPOINTS >* weapons );
+	IRangedWeaponItem* GetRangedWeapon( grinliz::Vector3F* trigger );
 
 	// The current melee weapon. There is only ever 1 (or 0)
 	IMeleeWeaponItem* GetMeleeWeapon();

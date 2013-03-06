@@ -230,12 +230,9 @@ void AIComponent::DoMove( const ComponentSet& thisComp )
 		float utilityRunAndGun = 0.0f;
 		Chit* targetRunAndGun = 0;
 
-		CArray< InventoryComponent::RangedInfo, NUM_HARDPOINTS > weapons;
-		thisComp.inventory->GetRangedWeapons( &weapons );
-		GameItem* ranged = 0;
-		if ( weapons.Size() ) {
-			ranged = weapons[0].weapon->GetItem();
-		}
+		IRangedWeaponItem* rangedWeapon = thisComp.inventory->GetRangedWeapon( 0 );
+		GameItem* ranged = rangedWeapon ? rangedWeapon->GetItem() : 0;
+
 		if ( ranged ) {
 			Vector3F heading = thisComp.spatial->GetHeading();
 
@@ -329,17 +326,16 @@ void AIComponent::DoShoot( const ComponentSet& thisComp )
 		return;
 	}
 
-	CArray< InventoryComponent::RangedInfo, NUM_HARDPOINTS > weapons;
-	thisComp.inventory->GetRangedWeapons( &weapons );
-	if ( !weapons.Empty() ) {
-		GameItem* item = weapons[0].weapon->GetItem();
+	IRangedWeaponItem* weapon = thisComp.inventory->GetRangedWeapon( 0 );
+	if ( weapon ) {
+		GameItem* item = weapon->GetItem();
 		if ( item->HasRound() ) {
 			// Has round. May be in cooldown.
 			if ( item->CanUse() ) {
 				battleMechanics.Shoot(	GetChitBag(), 
 										parentChit, 
 										target.chit, 
-										weapons[0].weapon );
+										weapon );
 			}
 		}
 		else {
@@ -440,24 +436,21 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 	Vector2F pos2 = { pos.x, pos.z };
 	
 	// The current ranged weapon.
-	CArray< InventoryComponent::RangedInfo, NUM_HARDPOINTS > rangedWeapons;
-	thisComp.inventory->GetRangedWeapons( &rangedWeapons );
-
+	IRangedWeaponItem* rangedWeapon = thisComp.inventory->GetRangedWeapon( 0 );
 	// The current melee weapon.
 	IMeleeWeaponItem* meleeWeapon = thisComp.inventory->GetMeleeWeapon();
 
 	enum {
-		OPTION_FLOCK_MOVE,
-		OPTION_MOVE_TO_RANGE,
-		OPTION_MELEE,
-		OPTION_SHOOT,
+		OPTION_FLOCK_MOVE,		// Move to better position with allies (not too close, not too far)
+		OPTION_MOVE_TO_RANGE,	// Move to shooting range or striking range
+		OPTION_MELEE,			// Focused melee attack
+		OPTION_SHOOT,			// Stand and shoot. (Don't pay run-n-gun accuracy penalty.)
 		NUM_OPTIONS
 	};
 
 	float utility[NUM_OPTIONS] = { 0,0,0,0 };
 	Chit* target[NUM_OPTIONS]  = { 0,0,0,0 };
-	int rangedWeaponIndex      = -1;
-	Vector2F moveToRange;
+	Vector2F moveToRange;		// Destination of move.
 
 	// Consider flocking.
 	Vector2F heading = thisComp.spatial->GetHeading2D();
@@ -484,6 +477,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 		// Prefer targets we are pointed at.
 		static const float DOT_BIAS = 0.25f;
 		float q = 1.0f + dot * DOT_BIAS;
+		// Prefer the current target & focused target.
 		if ( enemyList[k] == currentTarget ) {
 			q *= 2;
 			if ( focusOnTarget ) {
@@ -492,20 +486,25 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 		}
 
 		// Consider ranged weapon options: OPTION_SHOOT, OPTION_MOVE_TO_RANGE
-		for( int i=0; i<rangedWeapons.Size(); ++i ) {
-			GameItem* pw = rangedWeapons[i].weapon->GetItem();
+		if ( rangedWeapon ) {
+			GameItem* pw = rangedWeapon->GetItem();
 			float radAt1 = BattleMechanics::ComputeRadAt1(	thisComp.chit->GetItem(),
-															rangedWeapons[i].weapon,
+															rangedWeapon,
 															false,	// SHOOT implies stopping.
 															enemy.move && enemy.move->IsMoving() );
+			
 			float effectiveRange = BattleMechanics::EffectiveRange( radAt1 );
 
 			// 1.5f gives spacing for bolt to start.
 			// The HasRound() && !Reloading() is really important: if the gun
-			// is in cooldown, don't give up on shooting!
+			// is in cooldown, don't give up on shooting and do something else!
 			if ( pw->HasRound() && !pw->Reloading() && range > 1.5f ) {
 				float u = 1.0f - (range - effectiveRange) / effectiveRange; 
 				u *= q;
+
+				// This needs tuning.
+				// If the unit has been shooting, time to do something else.
+				// Stand around and shoot battles are boring and look crazy.
 				if ( currentAction == SHOOT ) {
 					u *= 0.5f;
 				} 
@@ -513,16 +512,17 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 				if ( u > utility[OPTION_SHOOT] && LineOfSight( thisComp, enemy.chit ) ) {
 					utility[OPTION_SHOOT] = u;
 					target[OPTION_SHOOT] = enemy.chit;
-					rangedWeaponIndex = i;
 				}
 			}
-			// Close to effect range?
+			// Move to the effective range?
 			float u = ( range - effectiveRange ) / effectiveRange;
 			u *= q;
-			if ( pw->CanUse() && pw->HasRound() ) {
+			if ( pw->CanUse() ) {
 				// okay;
 			}
 			else {
+				// Moving to effective range is less interesting if the
+				// gun isn't ready.
 				u *= 0.5f;
 			}
 			if ( u > utility[OPTION_MOVE_TO_RANGE] ) {
@@ -536,7 +536,8 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 		if ( meleeWeapon ) {
 			float u = meleeRange / range;
 			u *= q;
-			// Utility of the actual charge vs. moving closer.
+			// Utility of the actual charge vs. moving closer. This
+			// seems to work with an if case.
 			if ( range > meleeRange * 3.0f ) {
 				if ( u > utility[OPTION_MOVE_TO_RANGE] ) {
 					utility[OPTION_MOVE_TO_RANGE] = u;
@@ -549,10 +550,6 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 				utility[OPTION_MELEE] = u;
 				target[OPTION_MELEE] = enemy.chit;
 			}
-			// Utility of getting closer. Need to be careful this has less utility 
-			// when in actual melee range, and higher further out.
-			u = meleeRange / (range+2.0f);
-			u *= q;
 		}
 	}
 

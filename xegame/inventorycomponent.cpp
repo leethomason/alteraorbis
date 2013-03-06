@@ -228,9 +228,8 @@ void InventoryComponent::AbsorbDamage( DamageDesc dd, DamageDesc* remain, const 
 
 // FIXME: write queries to get all held and/or intrinsic and/or free and/or carried items
 
-void InventoryComponent::GetRangedWeapons( grinliz::CArray< RangedInfo, NUM_HARDPOINTS >* weapons )
+IRangedWeaponItem* InventoryComponent::GetRangedWeapon( Vector3F* trigger )
 {
-	weapons->Clear();
 	for( int i=0; i<NUM_HARDPOINTS; ++i ) {
 		IRangedWeaponItem* ranged = 0;
 		if ( heldAt[i] ) {
@@ -247,11 +246,14 @@ void InventoryComponent::GetRangedWeapons( grinliz::CArray< RangedInfo, NUM_HARD
 				IString name = HardpointFlagToName(i);
 				rc->GetMetaData( name.c_str(), &xform );
 				Vector3F pos = xform * V3F_ZERO;
-				RangedInfo info = { ranged, pos };
-				weapons->Push( info );
+				if ( trigger ) {
+					*trigger = pos;
+				}
+				return ranged;
 			}
 		}
 	}
+	return 0;
 }
 
 
