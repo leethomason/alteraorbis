@@ -95,7 +95,7 @@ private:
 
 	int GetTeamStatus( Chit* other );
 	bool LineOfSight( const ComponentSet& thisComp, Chit* target );
-	float CalcFlockMove( grinliz::Vector2F* dir );
+	float CalcFlockMove( const ComponentSet& thisComp, grinliz::Vector2F* dir );
 
 	void Think( const ComponentSet& thisComp );	// Choose a new action.
 	void ThinkWander( const ComponentSet& thisComp );

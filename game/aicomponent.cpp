@@ -36,6 +36,8 @@
 using namespace grinliz;
 
 static const float NORMAL_AWARENESS		= 12.0f;
+static const float SHOOT_ANGLE			= 10.0f;	// variation from heading that we can shoot
+static const float SHOOT_ANGLE_DOT		=  0.985f;	// same number, as dot product.
 
 #define AI_OUTPUT
 
@@ -158,7 +160,7 @@ void AIComponent::GetFriendEnemyLists()
 
 
 // Won't write output if there isn't a result.
-float AIComponent::CalcFlockMove( grinliz::Vector2F* dir )
+float AIComponent::CalcFlockMove( const ComponentSet& thisComp, grinliz::Vector2F* dir )
 {
 	if ( friendList.Empty() ) {
 		return 0;
@@ -168,13 +170,28 @@ float AIComponent::CalcFlockMove( grinliz::Vector2F* dir )
 	Vector2F d = { 0, 0 };
 	int count = 0;
 
+	static const float TOO_CLOSE = 1.0f;
+	static const float TOO_CLOSE_2 = TOO_CLOSE*TOO_CLOSE;
+	Vector2F pos = thisComp.spatial->GetPosition2D();
+
 	for( int i=0; i<friendList.Size(); ++i ) {
 		Chit* c = GetChitBag()->GetChit( friendList[i] );
 		if ( c && c->GetSpatialComponent() ) {
-			d += c->GetSpatialComponent()->GetHeading2D();
+			SpatialComponent*  sc = c->GetSpatialComponent();
+
+			Vector2F delta = pos - sc->GetPosition2D();
+			
+			if ( delta.LengthSquared() < TOO_CLOSE_2 ) {
+				delta.Normalize();
+				d += delta;				// move away - not heading.
+			}
+			else {
+				d += c->GetSpatialComponent()->GetHeading2D();
+			}
 			++count;
 		}
 	}
+
 	float len = d.Length();
 	if ( len > 0.01f ) {
 		d.Normalize();
@@ -208,9 +225,70 @@ Chit* AIComponent::Closest( const ComponentSet& thisComp, CArray<int, MAX_TRACK>
 
 void AIComponent::DoMove( const ComponentSet& thisComp )
 {
-	// FIXME: run & gun
-	// FIXME: reload
-	// FIXME: move needs "wandered off" timer check. Or getting stuck, etc.
+	if ( aiMode == BATTLE_MODE ) {
+		// Run & Gun
+		float utilityRunAndGun = 0.0f;
+		Chit* targetRunAndGun = 0;
+
+		CArray< InventoryComponent::RangedInfo, NUM_HARDPOINTS > weapons;
+		thisComp.inventory->GetRangedWeapons( &weapons );
+		IRangedWeaponItem* ranged = 0;
+		if ( weapons.Size() ) {
+			ranged = weapons[0].weapon;
+		}
+		if ( ranged ) {
+			Vector3F heading = thisComp.spatial->GetHeading();
+
+			if ( ranged->Ready() && ranged->GetItem()->HasRound() ) {
+				float radAt1 = BattleMechanics::ComputeRadAt1( thisComp.chit->GetItem(), 
+															   ranged,
+															   true,
+															   true );	// Doesn't matter to utility.
+
+				for( int k=0; k<enemyList.Size(); ++k ) {
+					ComponentSet enemy( GetChitBag()->GetChit(enemyList[k]), Chit::SPATIAL_BIT | Chit::ITEM_BIT | ComponentSet::IS_ALIVE );
+					if ( !enemy.okay ) {
+						continue;
+					}
+					Vector3F p0, p1;
+					Vector3F dir = BattleMechanics::ComputeLeadingShot( thisComp.chit, enemy.chit, &p0, &p1 );
+					if ( DotProduct( dir, heading ) <= SHOOT_ANGLE_DOT ) {
+						// Wow - can take the shot!
+						float u = BattleMechanics::ChanceToHit( (p0-p1).Length(), radAt1 );
+						if ( u > utilityRunAndGun ) {
+							utilityRunAndGun = u;
+							targetRunAndGun = enemy.chit;
+						}
+					}
+				}
+			}
+			float utilityReload = 0.0f;
+			if ( !ranged->Reloading() ) {
+				utilityReload = 1.0f - ranged->GetItem()->RoundsFraction();
+			}
+			if ( utilityReload > 0 || utilityRunAndGun > 0 ) {
+				#ifdef AI_OUTPUT
+					GLOUTPUT(( "ID=%d Move: RunAndGun=%.2f Reload=%.2f ", thisComp.chit->ID(), utilityRunAndGun, utilityReload ));
+				#endif
+				if ( utilityRunAndGun > utilityReload ) {
+					GLASSERT( targetRunAndGun );
+					battleMechanics.Shoot(	GetChitBag(), 
+											thisComp.chit, 
+											targetRunAndGun, 
+											ranged );
+					#ifdef AI_OUTPUT
+					GLOUTPUT(( "->RunAndGun\n" ));
+					#endif
+				}
+				else {
+					ranged->Reload();
+					#ifdef AI_OUTPUT
+					GLOUTPUT(( "->Reload\n" ));
+					#endif
+				}
+			}
+		}
+	}
 }
 
 
@@ -235,8 +313,7 @@ void AIComponent::DoShoot( const ComponentSet& thisComp )
 	normalToTarget.Normalize();
 	float angleToTarget = RotationXZDegrees( normalToTarget.x, normalToTarget.y );
 
-	static const float ANGLE = 10.0f;
-	if ( fabsf( headingAngle - angleToTarget ) < ANGLE ) {
+	if ( fabsf( headingAngle - angleToTarget ) < SHOOT_ANGLE ) {
 		// all good.
 	}
 	else {
@@ -383,7 +460,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 	// Consider flocking.
 	Vector2F heading = thisComp.spatial->GetHeading2D();
 	Vector2F flockDir = heading;
-	utility[OPTION_FLOCK_MOVE] = CalcFlockMove( &flockDir );
+	utility[OPTION_FLOCK_MOVE] = CalcFlockMove( thisComp, &flockDir );
 	// Give this a little utility in case everything else is 0:
 	utility[OPTION_FLOCK_MOVE] = Max( utility[OPTION_FLOCK_MOVE], 0.01f );
 

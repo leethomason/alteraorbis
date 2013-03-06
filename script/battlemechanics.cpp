@@ -39,7 +39,7 @@ using namespace grinliz;
 
 static const float SHOOTER_MOVE_MULT = 0.5f;
 static const float TARGET_MOVE_MULT  = 0.8f;
-static const float BASE_ACCURACY  = 0.04f;
+static const float BASE_ACCURACY     = 0.03f;
 
 
 /*static*/ int BattleMechanics::PrimaryTeam( Chit* src )

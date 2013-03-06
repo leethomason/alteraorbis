@@ -61,12 +61,12 @@ public:
 								bool shooterMoving,
 								bool targetMoving );
 	// Returns the chance of hitting, between 0 and 1.
-	static float ChanceToHit( float range, float radAt1, float targetDiameter );
+	static float ChanceToHit( float range, float radAt1, float targetDiameter=0.5f );
 	// Returns the range at which the weapon has a 50% chance to hit.
 	// 1m is assumed the default target diameter.
 	static float EffectiveRange( float radAt1, float targetDiameter=0.5f );
 	
-	// Computes an accurate leading shot.
+	// Computes an accurate leading shot. Returns a direction. The origin and dest of the shot are optional.
 	static grinliz::Vector3F ComputeLeadingShot( Chit* origin, Chit* target, grinliz::Vector3F* p0, grinliz::Vector3F* p1 );
 
 	// Other --------------------- //
