@@ -81,25 +81,26 @@ void HealthComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		DeltaHealth();
 	}
 	else if ( chit == parentChit && msg.ID() == ChitMsg::RENDER_IMPACT ) {
+		if ( !destroyed ) {
+			RenderComponent* render = parentChit->GetRenderComponent();
+			GLASSERT( render );	// it is a message from the render component, after all.
+			InventoryComponent* inventory = parentChit->GetInventoryComponent();
+			GLASSERT( inventory );	// need to be  holding a melee weapon. possible the weapon
+									// was lost before impact, in which case this assert should
+									// be removed.
+
+			IMeleeWeaponItem* item=inventory->GetMeleeWeapon();
+			if ( render && inventory && item  ) { /* okay */ }
+			else return;
+
+			Matrix4 xform;
+			render->GetMetaData( "trigger", &xform );
+			Vector3F pos = xform * V3F_ZERO;
+
+			engine->particleSystem->EmitPD( "derez", pos, V3F_UP, engine->camera.EyeDir3(), 0 );
 		
-		RenderComponent* render = parentChit->GetRenderComponent();
-		GLASSERT( render );	// it is a message from the render component, after all.
-		InventoryComponent* inventory = parentChit->GetInventoryComponent();
-		GLASSERT( inventory );	// need to be  holding a melee weapon. possible the weapon
-								// was lost before impact, in which case this assert should
-								// be removed.
-
-		IMeleeWeaponItem* item=inventory->GetMeleeWeapon();
-		if ( render && inventory && item  ) { /* okay */ }
-		else return;
-
-		Matrix4 xform;
-		render->GetMetaData( "trigger", &xform );
-		Vector3F pos = xform * V3F_ZERO;
-
-		engine->particleSystem->EmitPD( "derez", pos, V3F_UP, engine->camera.EyeDir3(), 0 );
-		
-		battleMechanics.MeleeAttack( engine, parentChit, item );
+			battleMechanics.MeleeAttack( engine, parentChit, item );
+		}
 	}
 	else {
 		super::OnChitMsg( chit, msg );

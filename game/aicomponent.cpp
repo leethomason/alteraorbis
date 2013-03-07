@@ -166,39 +166,48 @@ float AIComponent::CalcFlockMove( const ComponentSet& thisComp, grinliz::Vector2
 		return 0;
 	}
 
-	// FIXME: Consider only the friends in front of us?
+	// Only the friends in front of us. Keeps Chits
+	// from wandering off into space.
 	Vector2F d = { 0, 0 };
 	int count = 0;
 
-	static const float TOO_CLOSE = 1.0f;
-	static const float TOO_CLOSE_2 = TOO_CLOSE*TOO_CLOSE;
+	static const float TOO_CLOSE		= 1.0f;
+	static const float JUST_RIGHT		= 2.0f;
+	static const float IGNORE_ENEMY		= NORMAL_AWARENESS*0.5f;	// enemies don't effect flocking if other mechanisms will dominate.
+	static const float MIN_ANGLE_DOT	= 0.26f;	// 75 degree
+
 	Vector2F pos = thisComp.spatial->GetPosition2D();
+	Vector2F heading = thisComp.spatial->GetHeading2D();
 
 	for( int i=0; i<friendList.Size(); ++i ) {
 		Chit* c = GetChitBag()->GetChit( friendList[i] );
 		if ( c && c->GetSpatialComponent() ) {
 			SpatialComponent*  sc = c->GetSpatialComponent();
 
-			Vector2F delta = pos - sc->GetPosition2D();
-			
-			if ( delta.LengthSquared() < TOO_CLOSE_2 ) {
-				delta.Normalize();
-				d += delta;				// move away - not heading.
+			Vector2F delta = sc->GetPosition2D() - pos;
+			float len = delta.Length();
+			delta.Normalize();
+			//float dot = DotProduct( delta, heading );
+
+			float effect = 0;
+			if ( len < JUST_RIGHT ) {
+				effect = -1.f + len/JUST_RIGHT;
 			}
 			else {
-				d += c->GetSpatialComponent()->GetHeading2D();
+				effect = JUST_RIGHT / len;
 			}
-			++count;
+			d = d + effect * delta;
 		}
 	}
 
 	float len = d.Length();
-	if ( len > 0.01f ) {
-		d.Normalize();
-		*dir = d;
-		return len / (float)(count);
-	}
-	return 0.0f;
+//	if ( len > 0.01f ) {
+//		d.Normalize();
+//		*dir = d;
+//		return len / (float)(count);
+//	}
+//	return 0.0f;
+	return Clamp( len, 0.0f, 1.0f );
 }
 
 
@@ -247,8 +256,8 @@ void AIComponent::DoMove( const ComponentSet& thisComp )
 					if ( !enemy.okay ) {
 						continue;
 					}
-					Vector3F p0, p1;
-					BattleMechanics::ComputeLeadingShot( thisComp.chit, enemy.chit, &p0, &p1 );
+					Vector3F p0;
+					Vector3F p1 = BattleMechanics::ComputeLeadingShot( thisComp.chit, enemy.chit, &p0 );
 					Vector3F normal = p1 - p0;
 					normal.Normalize();
 
@@ -302,7 +311,7 @@ void AIComponent::DoShoot( const ComponentSet& thisComp )
 		return;
 	}
 
-	Vector3F leading = battleMechanics.ComputeLeadingShot( thisComp.chit, target.chit, 0, 0 );
+	Vector3F leading = battleMechanics.ComputeLeadingShot( thisComp.chit, target.chit, 0 );
 	Vector2F leading2D = { leading.x, leading.z };
 
 	// Rotate to target.
@@ -450,14 +459,17 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 
 	float utility[NUM_OPTIONS] = { 0,0,0,0 };
 	Chit* target[NUM_OPTIONS]  = { 0,0,0,0 };
-	Vector2F moveToRange;		// Destination of move.
+	Vector2F moveToRange;			// Destination of move (uses final destination).
+	float    moveToTime = 1.0f;	// Seconds to the desired location is reached.
 
 	// Consider flocking.
+	static  float FLOCK_MOVE_BIAS = 0.2f;
 	Vector2F heading = thisComp.spatial->GetHeading2D();
 	Vector2F flockDir = heading;
-	utility[OPTION_FLOCK_MOVE] = CalcFlockMove( thisComp, &flockDir );
+	//utility[OPTION_FLOCK_MOVE] = CalcFlockMove( thisComp, &flockDir ) * FLOCK_MOVE_BIAS;
 	// Give this a little utility in case everything else is 0:
-	utility[OPTION_FLOCK_MOVE] = Max( utility[OPTION_FLOCK_MOVE], 0.01f );
+	//utility[OPTION_FLOCK_MOVE] = Max( utility[OPTION_FLOCK_MOVE], 0.001f );
+	utility[OPTION_FLOCK_MOVE] = 0.001f;
 
 	for( int k=0; k<enemyList.Size(); ++k ) {
 
@@ -466,6 +478,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 			continue;
 		}
 		const Vector3F	enemyPos		= enemy.spatial->GetPosition();
+		const Vector2F	enemyPos2		= { enemyPos.x, enemyPos.z };
 		float			range			= (enemyPos - pos).Length();
 		Vector3F		toEnemy			= (enemyPos - pos);
 		Vector2F		normalToEnemy	= { toEnemy.x, toEnemy.z };
@@ -527,7 +540,8 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 			}
 			if ( u > utility[OPTION_MOVE_TO_RANGE] ) {
 				utility[OPTION_MOVE_TO_RANGE] = u;
-				moveToRange = pos2 + normalToEnemy * (range - effectiveRange);
+				moveToRange = enemyPos2;//pos2 + normalToEnemy * (range - effectiveRange);
+				moveToTime  = (range - effectiveRange ) / pmc->Speed();
 				target[OPTION_MOVE_TO_RANGE] = enemy.chit;
 			}
 		}
@@ -541,7 +555,9 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 			if ( range > meleeRange * 3.0f ) {
 				if ( u > utility[OPTION_MOVE_TO_RANGE] ) {
 					utility[OPTION_MOVE_TO_RANGE] = u;
-					moveToRange = pos2 + normalToEnemy * (range - meleeRange*2.0f);
+					//moveToRange = pos2 + normalToEnemy * (range - meleeRange*2.0f);
+					moveToRange = enemyPos2;
+					moveToTime = (range - meleeRange*2.0f) / pmc->Speed();
 					target[OPTION_MOVE_TO_RANGE] = enemy.chit;
 				}
 			}
@@ -554,6 +570,8 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 	}
 
 	int index = MaxValue<float, CompValue>( utility, NUM_OPTIONS );
+	rethink.Reset();
+
 	// Translate to action system:
 	switch ( index ) {
 		case OPTION_FLOCK_MOVE:
@@ -568,6 +586,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 		{
 			currentAction = MOVE;
 			currentTarget = target[OPTION_MOVE_TO_RANGE]->ID();
+			rethink.Within( (U32)(moveToTime*1000.0f) );
 			pmc->QueueDest( moveToRange );
 		}
 		break;
@@ -590,7 +609,6 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 		default:
 			GLASSERT( 0 );
 	};
-	rethink.Reset();
 
 #ifdef AI_OUTPUT
 	static const char* optionName[NUM_OPTIONS] = { "flock", "mtrange", "melee", "shoot" };

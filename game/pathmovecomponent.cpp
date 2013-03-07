@@ -80,6 +80,12 @@ void PathMoveComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 }
 
 
+float PathMoveComponent::Speed() const
+{
+	return MOVE_SPEED;
+}
+
+
 void PathMoveComponent::CalcVelocity( grinliz::Vector3F* v )
 {
 	v->Zero();
@@ -144,6 +150,12 @@ void PathMoveComponent::ComputeDest()
 		return;
 
 	const Vector2F& posVec = thisComp.spatial->GetPosition2D();
+
+	if ( queued.pos.x <= 0 || queued.pos.y <= 0 || queued.pos.x >= (float)map->Width() || queued.pos.y >= (float)map->Height() ) {
+		this->Stop();
+		return;
+	}
+
 
 	GLASSERT( queued.pos.x >= 0 && queued.pos.y >= 0 );
 	dest = queued;

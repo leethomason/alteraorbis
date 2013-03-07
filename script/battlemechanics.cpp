@@ -228,11 +228,11 @@ void BattleMechanics::Shoot( ChitBag* bag, Chit* src, Chit* target, IRangedWeapo
 	}
 	GameItem* item = weapon->GetItem();
 
-	Vector3F p0, p1;
-	Vector3F aimAt = ComputeLeadingShot( src, target, &p0, &p1 );
+	Vector3F p0;
+	Vector3F aimAt = ComputeLeadingShot( src, target, &p0 );
 	
 	float radAt1 = ComputeRadAt1( src->GetItem(), weapon, src->GetMoveComponent()->IsMoving(), target->GetMoveComponent()->IsMoving() );
-	Vector3F dir = FuzzyAim( p0, p1, radAt1 );
+	Vector3F dir = FuzzyAim( p0, aimAt, radAt1 );
 
 	Bolt* bolt = bag->NewBolt();
 	bolt->head = p0 + dir;
@@ -357,7 +357,7 @@ Vector3F BattleMechanics::FuzzyAim( const Vector3F& pos, const Vector3F& aimAt, 
 }
 
 
-Vector3F BattleMechanics::ComputeLeadingShot( Chit* origin, Chit* target, Vector3F* p0, Vector3F* p1 )
+Vector3F BattleMechanics::ComputeLeadingShot( Chit* origin, Chit* target, Vector3F* p0 )
 {
 	Vector3F trigger = { 0, 0, 0 };
 	Vector3F t = { 0, 0, 0 };
@@ -400,10 +400,6 @@ Vector3F BattleMechanics::ComputeLeadingShot( Chit* origin, Chit* target, Vector
 	if ( p0 ) {
 		*p0 = trigger;
 	}
-	if ( p1 ) {
-		*p1 = t;
-	}
-
 	return ComputeLeadingShot( trigger, t, v, speed );
 }
 

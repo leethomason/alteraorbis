@@ -27,6 +27,9 @@ public:
 		r.Rand();
 		time = r.Rand( period );
 	}
+	void Within( int t ) { 
+		if ( t < time ) time = t;
+	}
 
 	void Serialize( XStream* xs, const char* name );
 
