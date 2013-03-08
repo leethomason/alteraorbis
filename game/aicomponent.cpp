@@ -260,10 +260,17 @@ void AIComponent::DoMove( const ComponentSet& thisComp )
 					Vector3F p1 = BattleMechanics::ComputeLeadingShot( thisComp.chit, enemy.chit, &p0 );
 					Vector3F normal = p1 - p0;
 					normal.Normalize();
+					float range = (p0-p1).Length();
+
+					if ( range < EXPLOSIVE_RANGE*3.0f ) {
+						// Don't run & gun explosives if too close.
+						continue;
+					}
 
 					if ( DotProduct( normal, heading ) > SHOOT_ANGLE_DOT ) {
 						// Wow - can take the shot!
-						float u = BattleMechanics::ChanceToHit( (p0-p1).Length(), radAt1 );
+						float u = BattleMechanics::ChanceToHit( range, radAt1 );
+
 						if ( u > utilityRunAndGun ) {
 							utilityRunAndGun = u;
 							targetRunAndGun = enemy.chit;
@@ -459,10 +466,17 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 
 	float utility[NUM_OPTIONS] = { 0,0,0,0 };
 	Chit* target[NUM_OPTIONS]  = { 0,0,0,0 };
-	Vector2F moveToRange;			// Destination of move (uses final destination).
+
+	// Moves are always to the target location, since intermediate location could
+	// cause very strange pathing. Time is set to when to "rethink". If we are moving
+	// to melee for example, the time is set to when we should actually switch to
+	// melee. Same applies to effective range. If it isn't a straight path, we will
+	// rethink too soon, which is okay.
+	Vector2F moveToRange;		// Destination of move (uses final destination).
 	float    moveToTime = 1.0f;	// Seconds to the desired location is reached.
 
-	// Consider flocking.
+	// Consider flocking. This wasn't really working in a combat situation.
+	// May reconsider later, or just use for spreading out.
 	static  float FLOCK_MOVE_BIAS = 0.2f;
 	Vector2F heading = thisComp.spatial->GetHeading2D();
 	Vector2F flockDir = heading;
@@ -522,6 +536,13 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 					u *= 0.5f;
 				} 
 
+				// Don't blow ourself up:
+				if ( pw->flags & GameItem::EFFECT_EXPLOSIVE ) {
+					if ( range < EXPLOSIVE_RANGE * 2.0f ) {
+						u *= 0.1f;	// blowing ourseves up is bad.
+					}
+				}
+
 				if ( u > utility[OPTION_SHOOT] && LineOfSight( thisComp, enemy.chit ) ) {
 					utility[OPTION_SHOOT] = u;
 					target[OPTION_SHOOT] = enemy.chit;
@@ -534,8 +555,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 				// okay;
 			}
 			else {
-				// Moving to effective range is less interesting if the
-				// gun isn't ready.
+				// Moving to effective range is less interesting if the gun isn't ready.
 				u *= 0.5f;
 			}
 			if ( u > utility[OPTION_MOVE_TO_RANGE] ) {

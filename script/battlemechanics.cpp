@@ -230,6 +230,11 @@ void BattleMechanics::Shoot( ChitBag* bag, Chit* src, Chit* target, IRangedWeapo
 
 	Vector3F p0;
 	Vector3F aimAt = ComputeLeadingShot( src, target, &p0 );
+
+	// Explosives shoot at feet.
+	if ( weaponItem->flags & GameItem::EFFECT_EXPLOSIVE ) {
+		aimAt.y = 0;
+	}
 	
 	float radAt1 = ComputeRadAt1( src->GetItem(), weapon, src->GetMoveComponent()->IsMoving(), target->GetMoveComponent()->IsMoving() );
 	Vector3F dir = FuzzyAim( p0, aimAt, radAt1 );

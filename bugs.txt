@@ -1,3 +1,6 @@
+- need different particle effect for melee impact
+- run & gun and explosive weapons is probably a bad idea. But shoot for explosive should
+  be much more likely.
 - The item / weapon system really isn't working, and it's complex. Needs coordination between
   renderer, item, and weapon system to know the current weapon. (!!) Would rather have a one
   weapon system (where the current weapon can be switched out.) See ComuteLeadingShot()
