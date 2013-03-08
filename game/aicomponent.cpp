@@ -65,7 +65,7 @@ void AIComponent::Serialize( XStream* xs )
 	XARC_SER( xs, currentAction );
 	XARC_SER( xs, currentTarget );
 	XARC_SER( xs, focusOnTarget );
-	//thinkTicker.Serialize( xs, "thinkTicker" );
+	rethink.Serialize( xs, "rethink" );
 	this->EndSerialize( xs );
 }
 

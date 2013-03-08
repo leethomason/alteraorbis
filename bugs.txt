@@ -9,8 +9,8 @@
 
 - game
 	- Fauna 1
-		- monster ecology
 		- monsters to fight
+		- motion around cores
 		- battles!
 	- Intermission: regions
 		- generate regions
@@ -26,6 +26,8 @@
 		- aging of stone
 		- disable buttons on main ui when no game saved
 	- Fauna 2
+		- teams. friend-enemy-neutral logic.
+		- monster ecology
 		- visitors
 		- inventory screen
 	- Building

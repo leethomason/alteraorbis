@@ -51,6 +51,7 @@ public:
 	
 	void CreatePlayer();
 	void CreatePlayer( const grinliz::Vector2I& pos, const char* assetName );
+	grinliz::Vector2F FindCore( const grinliz::Vector2F& pos );
 
 private:
 	void CreateCores();

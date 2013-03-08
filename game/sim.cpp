@@ -160,6 +160,32 @@ void Sim::CreateCores()
 }
 
 
+grinliz::Vector2F Sim::FindCore( const grinliz::Vector2F& pos )
+{
+	Census* census = &chitBag->census;
+
+	Chit* best = 0;
+	float close = FLT_MAX;
+
+	for( int i=0; i<census->cores.Size(); ++i ) {
+		int id = census->cores[i];
+		Chit* chit = chitBag->GetChit( id );
+		if ( chit ) {
+			float len2 = ( pos - chit->GetSpatialComponent()->GetPosition2D() ).LengthSquared();
+			if ( len2 < close ) {
+				close = len2;
+				best = chit;
+			}
+		}
+	}
+	Vector2F r = { pos.x, pos.y };
+	if ( best ) {
+		r = best->GetSpatialComponent()->GetPosition2D();
+	}
+	return r;
+}
+
+
 void Sim::CreatePlayer()
 {
 	Vector2I v = worldMap->FindEmbark();

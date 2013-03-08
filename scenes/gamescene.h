@@ -60,6 +60,7 @@ private:
 	gamui::PushButton	serialButton[NUM_SERIAL_BUTTONS];
 	gamui::ToggleButton camModeButton[NUM_CAM_MODES];
 	gamui::PushButton	allRockButton;
+	gamui::PushButton	coreButton;
 	gamui::PushButton	newsButton[NUM_NEWS_BUTTONS];
 	gamui::Image		minimap;
 	gamui::Image		playerMark;

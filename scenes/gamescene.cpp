@@ -66,6 +66,9 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	allRockButton.Init( &gamui2D, game->GetButtonLook(0) );
 	allRockButton.SetText( "All Rock" );
 
+	coreButton.Init( &gamui2D, game->GetButtonLook(0) );
+	coreButton.SetText( "Core" );
+
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
 		newsButton[i].Init( &gamui2D, game->GetButtonLook(0) );
 		newsButton[i].SetSize( NEWS_BUTTON_WIDTH, NEWS_BUTTON_HEIGHT );
@@ -99,6 +102,7 @@ void GameScene::Resize()
 		layout.PosAbs( &camModeButton[i], i, -3 );
 	}
 	layout.PosAbs( &allRockButton, 0, 1 );
+	layout.PosAbs( &coreButton, 1, 1 );
 
 	const Screenport& port = lumosGame->GetScreenport();
 	minimap.SetPos( port.UIWidth()-MINI_MAP_SIZE, 0 );
@@ -258,6 +262,15 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 	}
 	else if ( item == &allRockButton ) {
 		sim->SetAllRock();
+	}
+	else if ( item == &coreButton ) {
+		Vector3F lookAt = { 0, 0, 0 };
+		sim->GetEngine()->CameraLookingAt( &lookAt );
+		Vector2F in = { lookAt.x, lookAt.z };
+
+		Vector2F v = sim->FindCore( in );
+		dest.x = v.x + 1.0f;
+		dest.y = v.y + 1.0f;
 	}
 
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
