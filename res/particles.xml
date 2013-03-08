@@ -9,6 +9,14 @@
     <colorVelocity alpha="-1.4" />
   </particle>
 
+  <particle name="meleeImpact"
+            time="once" size="0.1" count="10" config="sphere"
+            posFuzz="0.0" velocity="0.3" velocityFuzz="0.3"
+            texMin="3" texMax="3">
+    <color red="1" green="0" blue="0" alpha="1.0"/>
+    <colorVelocity alpha="-1.4" />
+  </particle>
+
   <particle name="embers"
             time="continuous" size="0.05" count="5" config="ray"
             posFuzz="0.0" velocity="1.2" velocityFuzz="0.1" >

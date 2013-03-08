@@ -97,7 +97,7 @@ void HealthComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			render->GetMetaData( "trigger", &xform );
 			Vector3F pos = xform * V3F_ZERO;
 
-			engine->particleSystem->EmitPD( "derez", pos, V3F_UP, engine->camera.EyeDir3(), 0 );
+			engine->particleSystem->EmitPD( "meleeImpact", pos, V3F_UP, engine->camera.EyeDir3(), 0 );
 		
 			battleMechanics.MeleeAttack( engine, parentChit, item );
 		}
