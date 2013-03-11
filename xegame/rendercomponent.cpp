@@ -181,7 +181,7 @@ int RenderComponent::CurrentAnimation() const
 bool RenderComponent::AnimationReady() const
 {
 	int type = model[0]->GetAnimation();
-	if ( type == ANIM_MELEE || type == ANIM_HEAVY_IMPACT ) {
+	if ( type == ANIM_MELEE || type == ANIM_IMPACT ) {
 		return model[0]->AnimationDone();
 	}
 	return true;
@@ -190,9 +190,9 @@ bool RenderComponent::AnimationReady() const
 
 bool RenderComponent::PlayAnimation( int type )
 {
-	if ( type == ANIM_HEAVY_IMPACT ) {
+	if ( type == ANIM_IMPACT ) {
 		// *always* overrides
-		model[0]->SetAnimation( ANIM_HEAVY_IMPACT, CROSS_FADE_TIME, true );
+		model[0]->SetAnimation( ANIM_IMPACT, CROSS_FADE_TIME, true );
 	}
 	else if ( type == ANIM_MELEE ) {
 		// melee if we can

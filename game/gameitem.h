@@ -239,12 +239,12 @@ public:
 		MELEE_WEAPON		= (1<<1),
 		RANGED_WEAPON		= (1<<2),
 
-		// How items are equipped. These 2 flags are much clearer as the descriptive values below.
-		HELD				= (1<<3),
+		// ALL items have to be at hardpoints, for effect rendering if nothing else.
+		// Also the current weapons/shields/active things is scanned from a fixed 
+		// array of hardpoints, on the renderer.
+		HELD				= (1<<3),					// If this flag is set
 		HARDPOINT			= (1<<4),
 
-		// ALL weapons have to be at hardpoints, for effect rendering if nothing else.
-		// Also the current weapons are scanned from a fixed array of hardpoints.
 		// May be able to pull out the "FREE" case.
 		INTRINSIC_AT_HARDPOINT	= HARDPOINT,		//	a hand. built in, but located at a hardpoint
 		INTRINSIC_FREE			= 0,				//  pincer. built in, no hardpoint

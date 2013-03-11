@@ -454,7 +454,7 @@ ComponentSet::ComponentSet( Chit* _chit, int bits )
 
 			if ( bits & NOT_IN_IMPACT ) {
 				int type = render->CurrentAnimation();
-				if ( type == ANIM_HEAVY_IMPACT )
+				if ( type == ANIM_IMPACT )
 					++error;
 			}
 		}

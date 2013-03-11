@@ -99,7 +99,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 				bool knockback = dd->damage > (mainItem.TotalHP() * ( explosion ? 0.1f : 0.4f ));
 
 				if ( knockback ) {
-					thisComp.render->PlayAnimation( ANIM_HEAVY_IMPACT );
+					thisComp.render->PlayAnimation( ANIM_IMPACT );
 
 					// Immediately reflect off the ground.
 					Vector3F v = msg.vector;
@@ -199,10 +199,14 @@ int ItemComponent::DoTick( U32 delta, U32 since )
 	if ( slowTick.Delta( since )) {
 		DoSlowTick();
 	}
-	int tick = mainItem.DoTick( delta, since );
+	int tick = VERY_LONG_TICK;
+	for( int i=0; i<itemArr.Size(); ++i ) {	
+		int t = itemArr[i]->DoTick( delta, since );
+		tick = Min( t, tick );
 
-	if ( EmitEffect( mainItem, delta )) {
-		tick = 0;
+		if ( itemArr[i]->Active() && EmitEffect( mainItem, delta )) {
+			tick = 0;
+		}
 	}
 	return tick;
 }
@@ -210,7 +214,7 @@ int ItemComponent::DoTick( U32 delta, U32 since )
 
 void ItemComponent::OnAdd( Chit* chit )
 {
-	GLASSERT( itemArr.Size() == 1 );	// the one true item
+	GLASSERT( itemArr.Size() >= 1 );	// the one true item
 	super::OnAdd( chit );
 	GLASSERT( !mainItem.parentChit );
 	mainItem.parentChit = parentChit;
@@ -318,7 +322,10 @@ bool ItemComponent::AddToInventory( GameItem* item, bool equip )
 GameItem* ItemComponent::IsCarrying()
 {
 	for( int i=1; i<itemArr.Size(); ++i ) {
-		if ( itemArr[i]->Active() && itemArr[i]->hardpoint == HARDPOINT_TRIGGER ) {
+		if (    itemArr[i]->Active() 
+			 && itemArr[i]->hardpoint == HARDPOINT_TRIGGER
+			 && (itemArr[i]->flags & GameItem::HELD ) ) 
+		{
 			return itemArr[i];
 		}
 	}
