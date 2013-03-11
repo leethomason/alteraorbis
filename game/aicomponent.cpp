@@ -646,6 +646,7 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 	ComponentSet thisComp( parentChit, Chit::RENDER_BIT | 
 		                               Chit::SPATIAL_BIT |
 									   Chit::MOVE_BIT |
+									   Chit::ITEM_BIT |
 									   ComponentSet::IS_ALIVE |
 									   ComponentSet::NOT_IN_IMPACT );
 	if ( !thisComp.okay ) {

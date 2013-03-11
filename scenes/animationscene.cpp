@@ -308,7 +308,7 @@ void AnimationScene::ItemTapped( const gamui::UIItem* item )
 		Screenport* port = engine->GetScreenportMutable();
 		if ( ortho.Down() ) {
 			port->SetOrthoCamera( true, 0, 3.0f );
-			static const Vector3F DIR = { -1, 0, 0 };	// FIXME: bug in camera code. (EEK.) Why is the direction negative???
+			static const Vector3F DIR = { 1, 0, 0 };
 			static const Vector3F UP  = { 0, 1, 0 };
 			engine->camera.SetPosWC( -5, 0.55f, 1 );
 			engine->camera.SetDir( DIR, UP ); 
@@ -477,7 +477,7 @@ void AnimationScene::DoTick( U32 deltaTime )
 
 			if ( triggerModel ) {
 				Matrix4 xform;
-				model[0]->CalcMetaData( IStringConst::ktarget, &xform );
+				model[0]->CalcMetaData( IStringConst::ktrigger, &xform );
 				triggerModel->SetTransform( xform );
 			}
 		}

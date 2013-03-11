@@ -530,10 +530,10 @@ void Model::CalcAnimation( BoneData* boneData ) const
 
 
 
-void Model::CalcAnimation( BoneData::Bone* bone, const char* _boneName ) const
+void Model::CalcAnimation( BoneData::Bone* bone, IString boneName ) const
 {
 	GLASSERT( HasAnimation() );
-	IString boneName = StringPool::Intern( _boneName );
+	//IString boneName = StringPool::Intern( _boneName );
 	animationResource->GetTransform( currentAnim.id, boneName, resource->header, currentAnim.time, bone );
 
 	if ( crossFadeTime < totalCrossFadeTime && (prevAnim.id >= 0) ) {
@@ -559,7 +559,7 @@ void Model::CalcMetaData( grinliz::IString name, grinliz::Matrix4* meta ) const
 	}
 	else {
 		BoneData::Bone bone;
-		CalcAnimation( &bone, data->boneName.c_str() );
+		CalcAnimation( &bone, data->boneName );
 
 		Matrix4 local;
 		bone.ToMatrix( &local );

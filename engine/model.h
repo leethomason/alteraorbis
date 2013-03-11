@@ -23,8 +23,6 @@
 #include "../grinliz/glcontainer.h"
 #include "../grinliz/glstringutil.h"
 
-#include "../tinyxml2/tinyxml2.h"
-
 #include "vertex.h"
 #include "enginelimits.h"
 #include "serialize.h"
@@ -383,7 +381,7 @@ private:
 	const grinliz::Matrix4& InvXForm() const;
 
 	void CalcAnimation( BoneData* boneData ) const;	// compute the animition, accounting for crossfade, etc.
-	void CalcAnimation( BoneData::Bone* bone, const char* boneName ) const;	// compute the animition, accounting for crossfade, etc.
+	void CalcAnimation( BoneData::Bone* bone, grinliz::IString boneName ) const;	// compute the animition, accounting for crossfade, etc.
 	void CrossFade( float fraction, BoneData::Bone* inOut, const BoneData::Bone& prev ) const;
 
 	SpaceTree* tree;
