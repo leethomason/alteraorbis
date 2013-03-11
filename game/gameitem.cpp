@@ -121,13 +121,9 @@ void GameItem::Serialize( XStream* xs )
 
 	if ( xs->Saving() ) {
 		CStr<512> f;
-		//APPEND_FLAG( flags, f, CHARACTER );
 		APPEND_FLAG( flags, f, MELEE_WEAPON );
 		APPEND_FLAG( flags, f, RANGED_WEAPON );
-		APPEND_FLAG( flags, f, INTRINSIC_AT_HARDPOINT );
-		APPEND_FLAG( flags, f, INTRINSIC_FREE );
-		APPEND_FLAG( flags, f, HELD_AT_HARDPOINT );
-		APPEND_FLAG( flags, f, HELD_FREE );
+		APPEND_FLAG( flags, f, INTRINSIC );
 		APPEND_FLAG( flags, f, IMMUNE_FIRE );
 		APPEND_FLAG( flags, f, FLAMMABLE );
 		APPEND_FLAG( flags, f, IMMUNE_SHOCK );
@@ -144,13 +140,9 @@ void GameItem::Serialize( XStream* xs )
 		const StreamReader::Attribute* attr = xs->Loading()->Get( "flags" );
 		if ( attr ) {
 			const char* f = attr->Str();
-			//READ_FLAG( flags, f, CHARACTER );
 			READ_FLAG( flags, f, MELEE_WEAPON );
 			READ_FLAG( flags, f, RANGED_WEAPON );
-			READ_FLAG( flags, f, INTRINSIC_AT_HARDPOINT );
-			READ_FLAG( flags, f, INTRINSIC_FREE );
-			READ_FLAG( flags, f, HELD_AT_HARDPOINT );
-			READ_FLAG( flags, f, HELD_FREE );
+			READ_FLAG( flags, f, INTRINSIC );
 			READ_FLAG( flags, f, IMMUNE_FIRE );
 			READ_FLAG( flags, f, FLAMMABLE );
 			READ_FLAG( flags, f, IMMUNE_SHOCK );
@@ -195,13 +187,9 @@ void GameItem::Save( tinyxml2::XMLPrinter* printer )
 		printer->PushAttribute( "resource", resource.c_str() );
 	}
 	CStr<512> f;
-//	APPEND_FLAG( flags, f, CHARACTER );
 	APPEND_FLAG( flags, f, MELEE_WEAPON );
 	APPEND_FLAG( flags, f, RANGED_WEAPON );
-	APPEND_FLAG( flags, f, INTRINSIC_AT_HARDPOINT );
-	APPEND_FLAG( flags, f, INTRINSIC_FREE );
-	APPEND_FLAG( flags, f, HELD_AT_HARDPOINT );
-	APPEND_FLAG( flags, f, HELD_FREE );
+	APPEND_FLAG( flags, f, INTRINSIC );
 	APPEND_FLAG( flags, f, IMMUNE_FIRE );
 	APPEND_FLAG( flags, f, FLAMMABLE );
 	APPEND_FLAG( flags, f, IMMUNE_SHOCK );
@@ -260,13 +248,9 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 	const char* f = ele->Attribute( "flags" );
 
 	if ( f ) {
-//		READ_FLAG( flags, f, CHARACTER );
 		READ_FLAG( flags, f, MELEE_WEAPON );
 		READ_FLAG( flags, f, RANGED_WEAPON );
-		READ_FLAG( flags, f, INTRINSIC_AT_HARDPOINT );
-		READ_FLAG( flags, f, INTRINSIC_FREE );
-		READ_FLAG( flags, f, HELD_AT_HARDPOINT );
-		READ_FLAG( flags, f, HELD_FREE );
+		READ_FLAG( flags, f, INTRINSIC );
 		READ_FLAG( flags, f, IMMUNE_FIRE );
 		READ_FLAG( flags, f, FLAMMABLE );
 		READ_FLAG( flags, f, IMMUNE_SHOCK );

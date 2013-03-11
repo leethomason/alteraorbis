@@ -230,8 +230,6 @@ public:
 	const char* Desc() const			{ return desc.c_str(); }
 	const char* ResourceName() const	{ return resource.c_str(); }
 
-	int AttachmentFlags() const			{ return flags & (HELD|HARDPOINT); }
-
 	enum {
 		//CHARACTER		= (1<<0),
 
@@ -239,17 +237,7 @@ public:
 		MELEE_WEAPON		= (1<<1),
 		RANGED_WEAPON		= (1<<2),
 
-		// ALL items have to be at hardpoints, for effect rendering if nothing else.
-		// Also the current weapons/shields/active things is scanned from a fixed 
-		// array of hardpoints, on the renderer.
-		HELD				= (1<<3),					// If this flag is set
-		HARDPOINT			= (1<<4),
-
-		// May be able to pull out the "FREE" case.
-		INTRINSIC_AT_HARDPOINT	= HARDPOINT,		//	a hand. built in, but located at a hardpoint
-		INTRINSIC_FREE			= 0,				//  pincer. built in, no hardpoint
-		HELD_AT_HARDPOINT		= HARDPOINT | HELD,	// 	sword, shield. at hardpoint, overrides built in.
-		HELD_FREE				= HELD,				//	amulet, ring. held, put not at a hardpoint, and not rendered
+		INTRINSIC			= (1<<3),				// built in item: pinters for example. Always "held".
 
 		IMMUNE_FIRE			= (1<<6),				// doesn't burn *at all*
 		FLAMMABLE			= (1<<7),				// burns until gone (wood)
@@ -421,7 +409,8 @@ public:
 		rounds = clipCap;
 	}
 
-	bool Active() const	{ return isHeld || ((flags & HELD) == 0); }
+	bool Active() const		{ return isHeld || (flags & INTRINSIC); }
+	bool Intrinsic() const	{ return (flags & INTRINSIC) != 0; }
 
 	virtual IMeleeWeaponItem*	ToMeleeWeapon()		{ return (flags & MELEE_WEAPON) ? this : 0; }
 	virtual IRangedWeaponItem*	ToRangedWeapon()	{ return (flags & RANGED_WEAPON) ? this : 0; }

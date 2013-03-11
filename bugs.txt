@@ -1,5 +1,5 @@
 - explosion is in the wrong direction. Units walk through explosions?? (Balrog vs. Human.)
-- check that shields and damage absorbing is working correctly
+- check that shields and damage absorbing is working correctly. something seems wrong with shields - recharge?
 - does fire affect plants??
 - health is awkward: keeps copy of HP (oops). move hp to health component? (TotalHP() on item?)
 - need free camera mode

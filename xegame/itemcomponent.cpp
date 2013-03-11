@@ -56,16 +56,15 @@ void ItemComponent::Serialize( XStream* xs )
 	int nItems = itemArr.Size();
 	XARC_SER( xs, nItems );
 
-	for( int i=0; i<nItems; ++i ) {
-		GameItem* pItem = 0;
-		if ( xs->Loading() ) {
-			pItem = new GameItem();
+	if ( xs->Loading() ) {
+		GLASSERT( itemArr.Size() == 1 );
+		for ( int i=1; i<nItems; ++i  ) {
+			GameItem* pItem = new GameItem();	
 			itemArr.Push( pItem );
 		}
-		else {
-			pItem = itemArr[i];
-		}
-		pItem->Serialize( xs );
+	}
+	for( int i=0; i<nItems; ++i ) {
+		itemArr[i]->Serialize( xs );
 	}
 	this->EndSerialize( xs );
 }
@@ -255,14 +254,41 @@ class InventorySorter
 public:
 	// "Less" in this case means "closer to center"
 	static bool Less( GameItem* i0, GameItem* i1 ) {
-		// Pack items are the furthest out:
-		if ( i0->Active() != i1->Active() ) {
-			return i1->Active();
+
+		// Pack
+		// Held + hardpoint
+		// Held 
+		// Intrinsic + hardpoint
+		// Intrinsic
+		// (core)
+
+		enum {
+			CORE,
+			INTRINSIC	= 2,
+			HELD		= 4,
+			PACK		= 6
+		};
+
+		int s[2] = { 0, 0 };
+		for( int i=0; i<2; ++i ) {
+			GameItem* item = (i==0) ? i0 : i1;
+
+			if ( item->Intrinsic() ) {
+				s[i] = INTRINSIC;
+			}
+			else if ( item->Active() ) {
+				s[i] = HELD;
+			}
+			else {
+				s[i] = PACK;
+				GLASSERT( !item->Active() );
+			}
+			if ( item->hardpoint ) {
+				s[i] += 1;
+			}
 		}
-		int i0flags = i0->flags & (GameItem::HELD | GameItem::HARDPOINT);
-		int i1flags = i1->flags & (GameItem::HELD | GameItem::HARDPOINT);
-		if ( i0flags != i1flags ) {
-			return i0flags < i1flags;
+		if ( s[0] != s[1] ) {
+			return s[0] < s[1];
 		}
 		return strcmp( i0->Name(), i1->Name() ) < 0;
 	}
@@ -276,31 +302,33 @@ bool ItemComponent::AddToInventory( GameItem* item, bool equip )
 		hardpointOpen = rc->HardpointAvailable( item->hardpoint );
 	}
 
-	int attachment = item->AttachmentFlags();
 	bool equipped = false;
 	
-	if ( attachment == GameItem::INTRINSIC_AT_HARDPOINT ) {
+	if ( item->Intrinsic() ) {
 		equipped = true;
 	}
-	else if (    attachment == GameItem::INTRINSIC_FREE || attachment == GameItem::HELD_FREE) {
+	else if ( equip && item->hardpoint == 0 ) {
+		// Held, but doesn't consume a hardpoint.
 		equipped = true;
 	} 
-	else if ( attachment == GameItem::HELD_AT_HARDPOINT && equip && hardpointOpen ) {
-		equipped = true;
+	else if ( equip ) {
 		GLASSERT( item->hardpoint );
-
 		// Tell the render component to render.
 		GLASSERT( rc );
+
 		if ( rc ) {
-			bool okay = rc->Attach( item->hardpoint, item->ResourceName() );
-			GLASSERT( okay );
+			if ( rc->HardpointAvailable( item->hardpoint )) {
+				equipped = true;
+				bool okay = rc->Attach( item->hardpoint, item->ResourceName() );
+				GLASSERT( okay );
 
-			if ( item->procedural & PROCEDURAL_INIT_MASK ) {
-				ProcRenderInfo info;
-				int result = ItemGen::RenderItem( Game::GetMainPalette(), *item, &info );
+				if ( item->procedural & PROCEDURAL_INIT_MASK ) {
+					ProcRenderInfo info;
+					int result = ItemGen::RenderItem( Game::GetMainPalette(), *item, &info );
 
-				if ( result == ItemGen::PROC4 ) {
-					rc->SetProcedural( item->hardpoint, info );
+					if ( result == ItemGen::PROC4 ) {
+						rc->SetProcedural( item->hardpoint, info );
+					}
 				}
 			}
 		}
@@ -322,9 +350,9 @@ bool ItemComponent::AddToInventory( GameItem* item, bool equip )
 GameItem* ItemComponent::IsCarrying()
 {
 	for( int i=1; i<itemArr.Size(); ++i ) {
-		if (    itemArr[i]->Active() 
-			 && itemArr[i]->hardpoint == HARDPOINT_TRIGGER
-			 && (itemArr[i]->flags & GameItem::HELD ) ) 
+		if (    itemArr[i]->Active()							// in use (not in pack)
+			 && itemArr[i]->hardpoint == HARDPOINT_TRIGGER		// at the hardpoint of interest
+			 && !itemArr[i]->Intrinsic() )						// not a built-in
 		{
 			return itemArr[i];
 		}
