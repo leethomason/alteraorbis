@@ -18,25 +18,23 @@
 
 // Hack. It begins. Engine code including game code.
 #include "../game/gameitem.h"
+#include "cticker.h"
 
 #include "itembasecomponent.h"
 
-class ItemComponent : public ItemBaseComponent
+class ItemComponent : public Component
 {
 private:
-	typedef ItemBaseComponent super;
+	typedef Component super;
 
 public:
-	ItemComponent( Engine* _engine, const GameItem& _item ) : 
-		ItemBaseComponent( _engine ),
-		item( _item ), slowTickTimer(0) 
-		{}
-	virtual ~ItemComponent() {}
+	ItemComponent( Engine* _engine, const GameItem& _item );
+	virtual ~ItemComponent();
 
 	virtual const char* Name() const { return "ItemComponent"; }
 
 	virtual void DebugStr( grinliz::GLString* str ) {
-		str->Format( "[Item] %s ", item.Name() );
+		str->Format( "[Item] %s ", mainItem.Name() );
 	}
 
 	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
@@ -48,14 +46,28 @@ public:
 	virtual int DoTick( U32 delta, U32 since );
 	virtual void OnChitEvent( const ChitEvent& event );
 
-	GameItem* GetItem() { return &item; }
-	//void EmitEffect( Engine* engine, U32 deltaTime );
+	GameItem* GetItem() { return &mainItem; }
+	// Is carrying anything - primarily a query for the animation system.
+	GameItem* IsCarrying();
+
+	// Gets the ranged weapon, optionally returns the trigger.
+	IRangedWeaponItem*	GetRangedWeapon( grinliz::Vector3F* trigger );
+	IMeleeWeaponItem*	GetMeleeWeapon();
+	IShield*			GetShield();
+
+	bool AddToInventory( GameItem* item, bool equip );
 
 private:
 	void DoSlowTick();
+	bool EmitEffect( const GameItem& it, U32 deltaTime );
 
-	GameItem item;
-	int slowTickTimer;
+	CTicker slowTick;
+
+	Engine *engine;
+	// The first item is what this *is*.
+	// Following items are inventory: held items, intrinsic, pack.
+	GameItem mainItem;	// What we are. Always first in the array.
+	grinliz::CDynArray< GameItem* > itemArr;
 };
 
 #endif // ITEMCOMPONENT_INCLUDED

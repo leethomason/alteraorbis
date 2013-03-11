@@ -262,9 +262,6 @@
     <ClCompile Include="..\xegame\cameracomponent.cpp">
       <Filter>Source Files\components</Filter>
     </ClCompile>
-    <ClCompile Include="..\xegame\inventorycomponent.cpp">
-      <Filter>Source Files\components</Filter>
-    </ClCompile>
     <ClCompile Include="..\xegame\itemcomponent.cpp">
       <Filter>Source Files\components</Filter>
     </ClCompile>
@@ -278,6 +275,9 @@
       <Filter>Source Files\script</Filter>
     </ClCompile>
     <ClCompile Include="..\xegame\cticker.cpp">
+      <Filter>Source Files\xegame</Filter>
+    </ClCompile>
+    <ClCompile Include="..\xegame\istringconst.cpp">
       <Filter>Source Files\xegame</Filter>
     </ClCompile>
   </ItemGroup>
@@ -534,9 +534,6 @@
     <ClInclude Include="..\xegame\cameracomponent.h">
       <Filter>Source Files\components</Filter>
     </ClInclude>
-    <ClInclude Include="..\xegame\inventorycomponent.h">
-      <Filter>Source Files\components</Filter>
-    </ClInclude>
     <ClInclude Include="..\xegame\itemcomponent.h">
       <Filter>Source Files\components</Filter>
     </ClInclude>
@@ -553,6 +550,9 @@
       <Filter>Source Files\script</Filter>
     </ClInclude>
     <ClInclude Include="..\xegame\cticker.h">
+      <Filter>Source Files\xegame</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xegame\istringconst.h">
       <Filter>Source Files\xegame</Filter>
     </ClInclude>
   </ItemGroup>

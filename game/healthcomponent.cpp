@@ -19,7 +19,6 @@
 #include "../xegame/chit.h"
 #include "../xegame/chitbag.h"
 #include "../xegame/itemcomponent.h"
-#include "../xegame/inventorycomponent.h"
 #include "../xegame/rendercomponent.h"
 
 #include "../grinliz/glutil.h"
@@ -84,7 +83,7 @@ void HealthComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		if ( !destroyed ) {
 			RenderComponent* render = parentChit->GetRenderComponent();
 			GLASSERT( render );	// it is a message from the render component, after all.
-			InventoryComponent* inventory = parentChit->GetInventoryComponent();
+			ItemComponent* inventory = parentChit->GetItemComponent();
 			GLASSERT( inventory );	// need to be  holding a melee weapon. possible the weapon
 									// was lost before impact, in which case this assert should
 									// be removed.
@@ -93,9 +92,8 @@ void HealthComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			if ( render && inventory && item  ) { /* okay */ }
 			else return;
 
-			Matrix4 xform;
-			render->GetMetaData( "trigger", &xform );
-			Vector3F pos = xform * V3F_ZERO;
+			Vector3F pos;
+			render->CalcTrigger( &pos, 0 );
 
 			engine->particleSystem->EmitPD( "meleeImpact", pos, V3F_UP, engine->camera.EyeDir3(), 0 );
 		

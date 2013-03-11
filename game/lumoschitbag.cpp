@@ -10,7 +10,6 @@
 #include "../xegame/rendercomponent.h"
 #include "../xegame/itemcomponent.h"
 #include "../xegame/spatialcomponent.h"
-#include "../xegame/inventorycomponent.h"
 
 #include "../engine/model.h"
 #include "../engine/engine.h"
@@ -50,11 +49,10 @@ Chit* LumosChitBag::NewMonsterChit( const Vector3F& pos, const char* name, int t
 	item.primaryTeam = team;
 	item.stats.Roll( chit->random.Rand() );
 	item.InitState();
-	chit->Add( new ItemComponent( engine, item ));
+	ItemComponent* inv = new ItemComponent( engine, item );
+	chit->Add( inv );
 
 	chit->Add( new HealthComponent( engine ));
-	InventoryComponent* inv = new InventoryComponent( engine );
-	chit->Add( inv );
 
 	for( int i=1; i<itemDefArr.Size(); ++i ) {
 		inv->AddToInventory( new GameItem( *(itemDefArr[i]) ), true );

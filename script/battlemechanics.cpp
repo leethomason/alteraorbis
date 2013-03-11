@@ -25,7 +25,7 @@
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/rendercomponent.h"
 #include "../xegame/itemcomponent.h"
-#include "../xegame/inventorycomponent.h"
+#include "../xegame/istringconst.h"
 
 #include "../grinliz/glvector.h"
 #include "../grinliz/glgeometry.h"
@@ -147,44 +147,30 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* 
 void BattleMechanics::CalcMeleeDamage( Chit* src, IMeleeWeaponItem* weapon, DamageDesc* dd )
 {
 	GameItem* item = weapon->GetItem();
+	GameItem* mainItem = src->GetItem();
+	ItemComponent* inv = src->GetItemComponent();
 
-	InventoryComponent* inv = src->GetInventoryComponent();
-	GLASSERT( inv && item );
-	if ( !inv ) return;
+	GLASSERT( inv && item && mainItem );
+	if ( !inv || !mainItem || !item ) return;
 
-	// A chain is: sword[0] -> claw[1] -> creature[2]
-	grinliz::CArray< GameItem*, 4 > chain;
-	inv->GetChain( item, &chain );
-	GLASSERT( !chain.Empty() );
-	GLASSERT( chain.Size() == 2 || chain.Size() == 3 );
+	// The effect is the union of the item and the mainItem.
+	// A fire creature imparts fire to the sword it holds.
+	// ...I think that makes sense.
+	int effect = (item->flags | mainItem->flags) & GameItem::EFFECT_MASK;
 
-	// Now that we have a chain, how do effects commute?
-	// Generally left:
-	//		A flaming creature will impart FIRE to a regular sword.
-	// But not right:
-	//		A flaming sword won't light up the creature.
-	// 
-	// Or at least that is the theory so far.
-
-	int effect = 0;
-	for( int i=chain.Size()-1; i>=0; --i ) {
-		effect |= ( chain[i]->flags & GameItem::EFFECT_MASK );
-	}
 	// Remove explosive melee effect. It would only be funny 10 or 20 times.
 	effect ^= GameItem::EFFECT_EXPLOSIVE;
 
 	// Now about mass.
 	// Use the sum; using another approach can yield surprising damage calc.
-	float mass = 0;
-	for( int i=0; i<chain.Size(); ++i ) {
-		mass += chain[i]->mass;
-	}
+	float mass = item->mass + mainItem->mass;
+
 	static const float STRIKE_RATIO_INV = 1.0f / 5.0f;
 
-	float trait0 = chain[0]->stats.Damage();
-	float trait2 = chain[chain.Size()-1]->stats.Damage(); 
+	float trait0 = item->stats.Damage();
+	float trait2 = mainItem->stats.Damage(); 
 
-	dd->damage = mass * chain[0]->meleeDamage * STRIKE_RATIO_INV * trait0 * trait2;
+	dd->damage = mass * item->meleeDamage * STRIKE_RATIO_INV * trait0 * trait2;
 	dd->effects = effect;
 }
 
@@ -388,7 +374,7 @@ Vector3F BattleMechanics::ComputeLeadingShot( Chit* origin, Chit* target, Vector
 
 	if ( origin->GetRenderComponent() ) {
 		RenderComponent* rc = origin->GetRenderComponent();
-		if ( rc && rc->GetMetaData( "trigger", &trigger )) {
+		if ( rc && rc->GetMetaData( IStringConst::ktrigger, &trigger )) {
 			// have value;
 		}
 		else if ( rc ) {

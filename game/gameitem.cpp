@@ -16,11 +16,13 @@
 #include "gameitem.h"
 
 #include "../grinliz/glstringutil.h"
+
 #include "../tinyxml2/tinyxml2.h"
+#include "../xarchive/glstreamer.h"
 #include "../script/procedural.h"
 
-#include "../xegame/inventorycomponent.h"
 #include "../xegame/chit.h"
+#include "../xegame/istringconst.h"
 
 using namespace grinliz;
 using namespace tinyxml2;
@@ -29,6 +31,7 @@ using namespace tinyxml2;
 
 #define READ_FLOAT_ATTR( n )			else if ( name == #n ) { n = attr->FloatValue(); }
 #define READ_INT_ATTR( n )				else if ( name == #n ) { n = attr->IntValue(); }
+#define READ_BOOL_ATTR( n )				else if ( name == #n ) { n = attr->BoolValue(); }
 
 #define APPEND_FLAG( flags, cstr, name )	{ if ( flags & name ) { f += #name; f += " "; } }
 #define PUSH_ATTRIBUTE( prnt, name )		{ prnt->PushAttribute( #name, name ); }
@@ -113,6 +116,7 @@ void GameItem::Serialize( XStream* xs )
 
 	XARC_SER( xs, hardpoint );
 	XARC_SER( xs, procedural );
+	XARC_SER( xs, isHeld );
 	XARC_SER( xs, hp );
 
 	if ( xs->Saving() ) {
@@ -228,12 +232,13 @@ void GameItem::Save( tinyxml2::XMLPrinter* printer )
 		printer->PushAttribute( keyValues[i].key.c_str(), keyValues[i].value );
 	}
 
-	if ( hardpoint != NO_HARDPOINT ) {
-		printer->PushAttribute( "hardpoint", InventoryComponent::HardpointFlagToName( hardpoint ).c_str() );
+	if ( hardpoint != 0 ) {
+		printer->PushAttribute( "hardpoint", IStringConst::Hardpoint( hardpoint ).c_str() );
 	}
 	if ( procedural != PROCEDURAL_NONE ) {
 		printer->PushAttribute( "procedural", ItemGen::ToName( procedural ).c_str() );
 	}
+	printer->PushAttribute( "isHeld", isHeld );
 	GLASSERT( hp <= TotalHP() );
 	printer->PushAttribute( "hp", hp );
 
@@ -297,6 +302,7 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 		READ_INT_ATTR( rounds )
 		READ_FLOAT_ATTR( accruedFire )
 		READ_FLOAT_ATTR( accruedShock )
+		READ_BOOL_ATTR( isHeld )
 		else {
 			KeyValue kv = { name, attr->DoubleValue() };
 			keyValues.Push( kv );
@@ -305,11 +311,11 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 
 	if ( flags & EFFECT_FIRE )	flags |= IMMUNE_FIRE;
 
-	hardpoint = NO_HARDPOINT;
+	hardpoint = 0;
 	const char* h = ele->Attribute( "hardpoint" );
 	if ( h ) {
-		hardpoint = InventoryComponent::HardpointNameToFlag( h );
-		GLASSERT( hardpoint >= 0 );
+		hardpoint = IStringConst::Hardpoint( StringPool::Intern( h ) );
+		GLASSERT( hardpoint > 0 );
 	}
 	procedural = PROCEDURAL_NONE;
 	const char* p = ele->Attribute( "procedural" );
@@ -478,6 +484,9 @@ void GameItem::AbsorbDamage( bool inInventory, DamageDesc dd, DamageDesc* remain
 		else {
 			GLLOG(( "Damage %s total=%.1f hp=%.1f accFire=%.1f accShock=%.1f ", name.c_str(), absorbed, hp, accruedFire, accruedShock ));
 		}
+	}
+	if ( parentChit ) {
+		parentChit->SetTickNeeded();
 	}
 }
 

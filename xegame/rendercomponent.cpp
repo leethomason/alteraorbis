@@ -15,10 +15,10 @@
 
 #include "rendercomponent.h"
 #include "spatialcomponent.h"
-#include "inventorycomponent.h"
 #include "chit.h"
 #include "chitevent.h"
 #include "itemcomponent.h"
+#include "istringconst.h"
 
 #include "../engine/animation.h"
 #include "../engine/model.h"
@@ -152,7 +152,7 @@ int RenderComponent::CalcAnimation() const
 
 	MoveComponent* move = parentChit->GetMoveComponent();
 	bool isMoving = move && move->IsMoving();
-	InventoryComponent* inv = GET_COMPONENT( parentChit, InventoryComponent );
+	ItemComponent* inv = parentChit->GetItemComponent();
 	bool isCarrying = inv && inv->IsCarrying();
 
 	if ( isMoving ) {
@@ -208,8 +208,13 @@ bool RenderComponent::PlayAnimation( int type )
 }
 
 
+bool RenderComponent::Attach( int hardpoint, const char* asset )
+{
+	IString n = IStringConst::Hardpoint( hardpoint );
+	return Attach( n, asset );
+}
 
-void RenderComponent::Attach( IString metaData, const char* asset )
+bool RenderComponent::Attach( IString metaData, const char* asset )
 {
 	for( int j=1; j<NUM_MODELS; ++j ) {
 		if ( metaDataName[j-1].empty() ) {
@@ -223,9 +228,17 @@ void RenderComponent::Attach( IString metaData, const char* asset )
 				model[j] = engine->AllocModel( resource[j] );
 				model[j]->userData = parentChit;
 			}
-			break;
+			return true;
 		}
 	}
+	return false;
+}
+
+
+void RenderComponent::SetColor( int hardpoint, const grinliz::Vector4F& colorMult )
+{
+	IString n = IStringConst::Hardpoint( hardpoint );
+	SetColor( n, colorMult );
 }
 
 
@@ -261,6 +274,13 @@ void RenderComponent::SetSaturation( float s )
 }
 
 
+void RenderComponent::SetProcedural( int hardpoint, const ProcRenderInfo& info )
+{
+	IString n = IStringConst::Hardpoint( hardpoint );
+	SetProcedural( n, info );
+}
+
+
 void RenderComponent::SetProcedural( IString hardpoint, const ProcRenderInfo& info )
 {
 	if ( !hardpoint.empty() ) {
@@ -283,6 +303,13 @@ void RenderComponent::SetProcedural( IString hardpoint, const ProcRenderInfo& in
 }
 
 
+void RenderComponent::Detach( int metaData )
+{
+	IString n = IStringConst::Hardpoint( metaData );
+	Detach( n );
+}
+
+	
 void RenderComponent::Detach( IString metaData )
 {
 	for( int i=1; i<NUM_MODELS; ++i ) {
@@ -342,12 +369,34 @@ int RenderComponent::DoTick( U32 deltaTime, U32 since )
 		if ( model[i] ) {
 			GLASSERT( !metaDataName[i-1].empty() );
 			Matrix4 xform;
-			model[0]->CalcMetaData( metaDataName[i-1].c_str(), &xform );
+			model[0]->CalcMetaData( metaDataName[i-1], &xform );
 			model[i]->SetTransform( xform );
 		}
 	}
 
 	return tick;
+}
+
+
+bool RenderComponent::HardpointAvailable( int hardpoint )
+{
+	int has = 0;
+	int use = 0;
+	IString n = IStringConst::Hardpoint( hardpoint );
+
+	const ModelHeader& header = model[0]->GetResource()->header;
+	for( int i=0; i<EL_MAX_METADATA; ++i ) {
+		if ( header.metaData[i].name == n ) {
+			// have the slot - is it in use?
+			for( int k=0;  k<EL_MAX_METADATA; ++k ) {
+				if ( metaDataName[k] == n ) {
+					return false;
+				}
+			}
+			return true;
+		}
+	}
+	return false;
 }
 
 
@@ -374,7 +423,7 @@ const char* RenderComponent::GetMetaData( int i )
 }
 
 
-bool RenderComponent::HasMetaData( const char* name )
+bool RenderComponent::HasMetaData( grinliz::IString name )
 {
 	for( int i=0; i<EL_MAX_METADATA; ++i ) {
 		if ( resource[0] ) {
@@ -386,7 +435,7 @@ bool RenderComponent::HasMetaData( const char* name )
 }
 
 
-bool RenderComponent::GetMetaData( const char* name, grinliz::Matrix4* xform )
+bool RenderComponent::GetMetaData( grinliz::IString name, grinliz::Matrix4* xform )
 {
 	if ( model[0] ) {
 		SyncToSpatial();
@@ -397,7 +446,7 @@ bool RenderComponent::GetMetaData( const char* name, grinliz::Matrix4* xform )
 }
 
 
-bool RenderComponent::GetMetaData( const char* name, grinliz::Vector3F* pos )
+bool RenderComponent::GetMetaData( grinliz::IString name, grinliz::Vector3F* pos )
 {
 	Matrix4 xform;
 	if ( GetMetaData( name, &xform ) ) {
@@ -411,8 +460,9 @@ bool RenderComponent::GetMetaData( const char* name, grinliz::Vector3F* pos )
 bool RenderComponent::CalcTarget( grinliz::Vector3F* pos )
 {
 	if ( model[0] ) {
-		if ( HasMetaData( "target" )) {
-			GetMetaData( "target", pos );
+		IString target = IStringConst::ktarget;
+		if ( HasMetaData( target )) {
+			GetMetaData( target, pos );
 		}
 		else {
 			*pos = model[0]->AABB().Center();
@@ -423,7 +473,23 @@ bool RenderComponent::CalcTarget( grinliz::Vector3F* pos )
 }
 
 
-void RenderComponent::GetModelList( grinliz::CArray<const Model*, NUM_HARDPOINTS+2> *ignore )
+bool RenderComponent::CalcTrigger( grinliz::Vector3F* pos, grinliz::Matrix4* xform )
+{
+	if ( model[0] ) {
+		IString trigger = IStringConst::ktrigger;
+		if ( HasMetaData( trigger )) { 
+			if ( pos ) 
+				GetMetaData( trigger, pos );
+			if ( xform )
+				GetMetaData( trigger, xform );
+			return true;
+		}
+	}
+	return false;
+}
+
+
+void RenderComponent::GetModelList( grinliz::CArray<const Model*, NUM_MODELS+1> *ignore )
 {
 	ignore->Clear();
 	for( int i=0; i<NUM_MODELS; ++i ) {

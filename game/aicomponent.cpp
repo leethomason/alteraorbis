@@ -28,7 +28,7 @@
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/rendercomponent.h"
 #include "../xegame/itemcomponent.h"
-#include "../xegame/inventorycomponent.h"
+#include "../xegame/istringconst.h"
 
 #include "../grinliz/glrectangle.h"
 #include <climits>
@@ -88,8 +88,11 @@ bool AIComponent::LineOfSight( const ComponentSet& thisComp, Chit* t )
 	ComponentSet target( t, Chit::SPATIAL_BIT | Chit::RENDER_BIT | ComponentSet::IS_ALIVE );
 
 	Vector3F origin, dest;
-	thisComp.render->GetMetaData( "trigger", &origin );		// FIXME: not necessarily trigger; get correct hardpoint. 
-	target.render->GetMetaData( "target", &dest );
+	IRangedWeaponItem* weapon = thisComp.itemComponent->GetRangedWeapon( &origin );
+	GLASSERT( weapon );
+
+	target.render->GetMetaData( IStringConst::ktarget, &dest );
+
 	Vector3F dir = dest - origin;
 	float length = dir.Length() + 1.0f;	// a little extra just in case
 	CArray<const Model*, EL_MAX_METADATA+2> ignore, targetModels;
@@ -239,7 +242,7 @@ void AIComponent::DoMove( const ComponentSet& thisComp )
 		float utilityRunAndGun = 0.0f;
 		Chit* targetRunAndGun = 0;
 
-		IRangedWeaponItem* rangedWeapon = thisComp.inventory->GetRangedWeapon( 0 );
+		IRangedWeaponItem* rangedWeapon = thisComp.itemComponent->GetRangedWeapon( 0 );
 		GameItem* ranged = rangedWeapon ? rangedWeapon->GetItem() : 0;
 
 		if ( ranged ) {
@@ -342,7 +345,7 @@ void AIComponent::DoShoot( const ComponentSet& thisComp )
 		return;
 	}
 
-	IRangedWeaponItem* weapon = thisComp.inventory->GetRangedWeapon( 0 );
+	IRangedWeaponItem* weapon = thisComp.itemComponent->GetRangedWeapon( 0 );
 	if ( weapon ) {
 		GameItem* item = weapon->GetItem();
 		if ( item->HasRound() ) {
@@ -364,7 +367,7 @@ void AIComponent::DoShoot( const ComponentSet& thisComp )
 
 void AIComponent::DoMelee( const ComponentSet& thisComp )
 {
-	IMeleeWeaponItem* weapon = thisComp.inventory->GetMeleeWeapon();
+	IMeleeWeaponItem* weapon = thisComp.itemComponent->GetMeleeWeapon();
 	ComponentSet target( GetChitBag()->GetChit( currentTarget ), Chit::SPATIAL_BIT | Chit::ITEM_BIT | ComponentSet::IS_ALIVE );
 
 	if ( !weapon || !target.okay ) {
@@ -407,7 +410,6 @@ void AIComponent::OnChitEvent( const ChitEvent& event )
 {
 	ComponentSet thisComp( parentChit, Chit::RENDER_BIT | 
 		                               Chit::SPATIAL_BIT |
-									   Chit::INVENTORY_BIT |		// need to be carrying a melee weapon
 									   ComponentSet::IS_ALIVE |
 									   ComponentSet::NOT_IN_IMPACT );
 	if ( !thisComp.okay ) {
@@ -452,9 +454,9 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 	Vector2F pos2 = { pos.x, pos.z };
 	
 	// The current ranged weapon.
-	IRangedWeaponItem* rangedWeapon = thisComp.inventory->GetRangedWeapon( 0 );
+	IRangedWeaponItem* rangedWeapon = thisComp.itemComponent->GetRangedWeapon( 0 );
 	// The current melee weapon.
-	IMeleeWeaponItem* meleeWeapon = thisComp.inventory->GetMeleeWeapon();
+	IMeleeWeaponItem* meleeWeapon = thisComp.itemComponent->GetMeleeWeapon();
 
 	enum {
 		OPTION_FLOCK_MOVE,		// Move to better position with allies (not too close, not too far)
@@ -644,7 +646,6 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 	ComponentSet thisComp( parentChit, Chit::RENDER_BIT | 
 		                               Chit::SPATIAL_BIT |
 									   Chit::MOVE_BIT |
-									   Chit::INVENTORY_BIT |
 									   ComponentSet::IS_ALIVE |
 									   ComponentSet::NOT_IN_IMPACT );
 	if ( !thisComp.okay ) {

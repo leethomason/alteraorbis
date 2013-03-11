@@ -97,7 +97,7 @@ struct ModelMetaData {
 	grinliz::Vector3F		pos;		// position
 	grinliz::Vector3F		axis;		// axis of rotation (if any)
 	float					rotation;	// amount of rotation (if any)
-	grinliz::IString		boneName;	// name of the bone this metadat is attached to (if any)
+	grinliz::IString		boneName;	// name of the bone this metadata is attached to (if any)
 };
 
 
@@ -158,7 +158,7 @@ public:
 					const grinliz::Vector3F& dir,
 					grinliz::Vector3F* intersect ) const;
 
-	const ModelMetaData* GetMetaData( const char* name ) const;
+	const ModelMetaData* GetMetaData( grinliz::IString name ) const;
 	const ModelMetaData* GetMetaData( int i ) const { GLASSERT( i>= 0 && i < EL_MAX_METADATA ); return &header.metaData[i]; }
 
 	const char*			Name() const	{ return header.name.c_str(); }
@@ -354,7 +354,7 @@ public:
 		return b;
 	}
 
-	void CalcMetaData( const char* name, grinliz::Matrix4* xform ) const;
+	void CalcMetaData( grinliz::IString name, grinliz::Matrix4* xform ) const;
 	bool HasParticles() const {  return hasParticles; }
 	void EmitParticles( ParticleSystem* system, const grinliz::Vector3F* eyeDir, U32 deltaTime ) const;
 	void CalcTargetSize( float* width, float* height ) const;

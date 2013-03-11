@@ -6,7 +6,7 @@ class Engine;
 
 #include "component.h"
 
-
+#if 0
 class ItemBaseComponent : public Component
 {
 public:
@@ -18,6 +18,7 @@ protected:
 
 	Engine* engine;
 };
+#endif
 
 
 #endif // ITEM_BASE_COMPONENT_INCLUDED

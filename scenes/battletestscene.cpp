@@ -28,7 +28,6 @@
 
 #include "../xegame/chit.h"
 #include "../xegame/rendercomponent.h"
-#include "../xegame/inventorycomponent.h"
 #include "../xegame/itemcomponent.h"
 
 #include "../engine/engine.h"
@@ -353,11 +352,10 @@ void BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int 
 	item.primaryTeam = team;
 	item.stats.SetExpFromLevel( level );
 	item.InitState();
-	chit->Add( new ItemComponent( engine, item ));
+	ItemComponent* inv = new ItemComponent( engine, item );
+	chit->Add( inv );
 
 	chit->Add( new HealthComponent( engine ));
-	InventoryComponent* inv = new InventoryComponent( engine );
-	chit->Add( inv );
 
 	chit->GetSpatialComponent()->SetPosYRot( (float)p.x+0.5f, 0, (float)p.y+0.5f, (float)random.Rand( 360 ) );
 

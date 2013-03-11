@@ -50,16 +50,12 @@ static const float EFFECT_DAMAGE_PER_SEC = 20.0f;
 static const float EFFECT_RADIUS = 1.5f;
 static const float EFFECT_ACCRUED_MAX = EFFECT_DAMAGE_PER_SEC;
 
-// This arrangement breaks the case where something can attach
-// to multiple hardpoints. Fine; fix later.
+// hardpoint & metadata names/bitfields
 enum {
-	NO_HARDPOINT = -1,
-	// The set of hardpoints	
-	HARDPOINT_TRIGGER = 0,	// this attaches to the trigger hardpoint
-	HARDPOINT_ALTHAND,		// this attaches to the alternate hand (non-trigger) hardpoint
-	HARDPOINT_HEAD,			// this attaches to the head hardpoint
-	HARDPOINT_SHIELD,		// this attaches to the shield hardpoint
-	NUM_HARDPOINTS,
+	HARDPOINT_TRIGGER	= 0x01,	// this attaches to the trigger hardpoint
+	HARDPOINT_ALTHAND	= 0x02,	// this attaches to the alternate hand (non-trigger) hardpoint
+	HARDPOINT_HEAD		= 0x04,	// this attaches to the head hardpoint
+	HARDPOINT_SHIELD	= 0x08,	// this attaches to the shield hardpoint
 };
 
 enum {

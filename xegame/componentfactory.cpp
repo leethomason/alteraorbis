@@ -1,5 +1,4 @@
 #include "spatialcomponent.h"
-#include "inventorycomponent.h"
 #include "itemcomponent.h"
 #include "rendercomponent.h"
 #include "cameracomponent.h"
@@ -28,9 +27,6 @@ Component* ComponentFactory::Factory( const char* name, Chit* chit ) const
 	}
 	else if ( StrEqual( name, "PathMoveComponent" )) {
 		return new PathMoveComponent( worldMap );
-	}
-	else if ( StrEqual( name, "InventoryComponent" )) {
-		return new InventoryComponent( engine );
 	}
 	else if ( StrEqual( name, "ItemComponent" )) {
 		GameItem item;

@@ -7,7 +7,6 @@
 #include "../xegame/itemcomponent.h"
 #include "../xegame/rendercomponent.h"
 #include "../xegame/chitbag.h"
-#include "../xegame/inventorycomponent.h"
 #include "../xegame/componentfactory.h"
 #include "../xegame/cameracomponent.h"
 
@@ -220,7 +219,6 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos, const char* assetName )
 	chit->Add( new ItemComponent( engine, item ));
 
 	chit->Add( new HealthComponent( engine ));
-	chit->Add( new InventoryComponent( engine ));
 
 	chit->GetSpatialComponent()->SetPosYRot( (float)pos.x+0.5f, 0, (float)pos.y+0.5f, 0 );
 }

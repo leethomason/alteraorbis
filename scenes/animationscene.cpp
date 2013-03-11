@@ -18,6 +18,7 @@
 #include "../engine/engine.h"
 #include "../engine/model.h"
 #include "../engine/animation.h"
+#include "../xegame/istringconst.h"
 
 #include <direct.h>
 
@@ -444,11 +445,11 @@ void AnimationScene::DoTick( U32 deltaTime )
 		model[i]->EmitParticles( engine->particleSystem, engine->camera.EyeDir3(), deltaTime );
 	}
 
-	if ( model[0]->HasAnimation() && model[0]->GetResource()->GetMetaData( "trigger" )) {
+	if ( model[0]->HasAnimation() && model[0]->GetResource()->GetMetaData( IStringConst::ktrigger )) {
 		static const Vector3F UP = { 0, 1, 0 };
 		static const Vector3F POS = { 0,0,0 };
 		Matrix4 xform;
-		model[0]->CalcMetaData( "trigger", &xform );
+		model[0]->CalcMetaData( IStringConst::ktrigger, &xform );
 		Vector3F p = xform * POS;
 
 		for( int i=0; i<metaDataEvents.Size(); ++i ) {
@@ -476,7 +477,7 @@ void AnimationScene::DoTick( U32 deltaTime )
 
 			if ( triggerModel ) {
 				Matrix4 xform;
-				model[0]->CalcMetaData( "trigger", &xform );
+				model[0]->CalcMetaData( IStringConst::ktarget, &xform );
 				triggerModel->SetTransform( xform );
 			}
 		}

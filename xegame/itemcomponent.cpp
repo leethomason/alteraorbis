@@ -18,97 +18,118 @@
 #include "chitevent.h"
 #include "chitbag.h"
 
+#include "../engine/engine.h"
+#include "../engine/particle.h"
+
 #include "../grinliz/glrandom.h"
 
 #include "../game/healthcomponent.h"
 #include "../game/physicsmovecomponent.h"
 
+#include "../script/procedural.h"
+
 #include "../xegame/rendercomponent.h"
 #include "../xegame/spatialcomponent.h"
-#include "../xegame/inventorycomponent.h"
+#include "../xegame/istringconst.h"
 
 using namespace grinliz;
+
+
+ItemComponent::ItemComponent( Engine* _engine, const GameItem& _item ) : engine(_engine), mainItem(_item), slowTick( 500 )
+{
+	itemArr.Push( &mainItem );	
+}
+
+
+ItemComponent::~ItemComponent()
+{
+	for( int i=1; i<itemArr.Size(); ++i ) {
+		delete itemArr[i];
+	}
+}
+
 
 
 void ItemComponent::Serialize( XStream* xs )
 {
 	this->BeginSerialize( xs, "ItemComponent" );
-	item.Serialize( xs );
+	int nItems = itemArr.Size();
+	XARC_SER( xs, nItems );
+
+	for( int i=0; i<nItems; ++i ) {
+		GameItem* pItem = 0;
+		if ( xs->Loading() ) {
+			pItem = new GameItem();
+			itemArr.Push( pItem );
+		}
+		else {
+			pItem = itemArr[i];
+		}
+		pItem->Serialize( xs );
+	}
 	this->EndSerialize( xs );
 }
 
 
-// FIXME: very character specific code. Move to Script? make more specific so it actually works? (filters non-characters)
 void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {
 	if ( msg.ID() == ChitMsg::CHIT_DAMAGE ) {
 		parentChit->SetTickNeeded();
 		const DamageDesc* dd = (const DamageDesc*) msg.Ptr();
 		GLASSERT( dd );
-		GLLOG(( "Chit %3d '%s' (origin=%d) ", parentChit->ID(), item.Name(), msg.originID ));
+		GLLOG(( "Chit %3d '%s' (origin=%d) ", parentChit->ID(), mainItem.Name(), msg.originID ));
 
-		// See what is in the inventory that can absorb damage.
-		// The inventory can't handle the message, because it has
-		// to come first, and this code needs the return value.
-		// Messy.
+		// Run through the inventory, looking for modifiers.
 
-		float delta = 0;
-
-		InventoryComponent* ic = parentChit->GetInventoryComponent();
 		DamageDesc dd2 = *dd;
-		if ( ic ) {
-			ic->AbsorbDamage( *dd, &dd2, "DAMAGE" );
-			delta += dd->damage - dd2.damage;
+
+		for( int i=itemArr.Size()-1; i >= 0; --i ) {
+			if ( i==0 || itemArr[i]->Active() ) {
+				itemArr[i]->AbsorbDamage( i>0, dd2, &dd2, "DAMAGE" );
+			}
 		}
 
-		float hp = item.hp;	
-		item.AbsorbDamage( false, dd2, 0, "DAMAGE" );
-		GLLOG(( "\n" ));
-		delta += hp - item.hp;
+		HealthComponent* hc = GET_COMPONENT( parentChit, HealthComponent );
+		if ( hc ) {
+			// Can this be knocked back??
+			ComponentSet thisComp( chit, ComponentSet::IS_ALIVE | Chit::SPATIAL_BIT | Chit::RENDER_BIT );
+			if ( thisComp.okay ) {
+				// Do we apply knockback?
+				bool explosion = msg.Data() != 0;
+				bool knockback = dd->damage > (mainItem.TotalHP() * ( explosion ? 0.1f : 0.4f ));
 
-		if ( delta || (item.hp != hp) ) {
-			HealthComponent* hc = GET_COMPONENT( parentChit, HealthComponent );
-			if ( hc ) {
-				// Can this be knocked back??
-				ComponentSet thisComp( chit, ComponentSet::IS_ALIVE | Chit::SPATIAL_BIT | Chit::RENDER_BIT );
-				if ( thisComp.okay ) {
-					// Do we apply knockback?
-					bool explosion = msg.Data() != 0;
-					bool knockback = delta > item.TotalHP() * ( explosion ? 0.1f : 0.4f );
+				if ( knockback ) {
+					thisComp.render->PlayAnimation( ANIM_HEAVY_IMPACT );
 
-					if ( knockback ) {
-						thisComp.render->PlayAnimation( ANIM_HEAVY_IMPACT );
+					// Immediately reflect off the ground.
+					Vector3F v = msg.vector;
 
-						// Immediately reflect off the ground.
-						Vector3F v = msg.vector;
+					if ( thisComp.spatial->GetPosition().y < 0.1f ) {
+						if ( v.y < 0 )
+							v.y = -v.y;
+						if ( v.y < 3.0f )
+							v.y = 3.0f;		// make more interesting
+					}
+					// Rotation
+					Random random( ((int)v.x*1000)^((int)v.y*1000)^((int)v.z*1000) );
+					random.Rand();
+					float r = -400.0f + (float)random.Rand( 800 );
 
-						if ( thisComp.spatial->GetPosition().y < 0.1f ) {
-							if ( v.y < 0 )
-								v.y = -v.y;
-							if ( v.y < 3.0f )
-								v.y = 3.0f;		// make more interesting
-						}
-						// Rotation
-						Random random( ((int)v.x*1000)^((int)v.y*1000)^((int)v.z*1000) );
-						random.Rand();
-						float r = -400.0f + (float)random.Rand( 800 );
+					PhysicsMoveComponent* pmc = GET_COMPONENT( parentChit, PhysicsMoveComponent );
+					if ( pmc ) {
+						pmc->Add( v, r );
+					}
+					else {
+						GameMoveComponent* gmc = GET_COMPONENT( parentChit, GameMoveComponent );
+						if ( gmc ) {
+							WorldMap* map = gmc->GetWorldMap();
+							parentChit->Shelve( gmc );
 
-						PhysicsMoveComponent* pmc = GET_COMPONENT( parentChit, PhysicsMoveComponent );
-						if ( pmc ) {
-							pmc->Add( v, r );
-						}
-						else {
-							GameMoveComponent* gmc = GET_COMPONENT( parentChit, GameMoveComponent );
-							if ( gmc ) {
-								WorldMap* map = gmc->GetWorldMap();
-								parentChit->Shelve( gmc );
+							pmc = new PhysicsMoveComponent( map );
+							parentChit->Add( pmc );
 
-								pmc = new PhysicsMoveComponent( map );
-								parentChit->Add( pmc );
-
-								pmc->Set( v, r );
-								pmc->DeleteWhenDone( true );
-							}
+							pmc->Set( v, r );
+							pmc->DeleteWhenDone( true );
 						}
 					}
 				}
@@ -120,9 +141,9 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		float heal = msg.dataF;
 		GLASSERT( heal >= 0 );
 
-		item.hp += heal;
-		if ( item.hp > item.TotalHP() ) {
-			item.hp = item.TotalHP();
+		mainItem.hp += heal;
+		if ( mainItem.hp > mainItem.TotalHP() ) {
+			mainItem.hp = mainItem.TotalHP();
 		}
 	}
 	else {
@@ -157,15 +178,15 @@ void ItemComponent::OnChitEvent( const ChitEvent& event )
 void ItemComponent::DoSlowTick()
 {
 	// Look around for fire or shock spread.
-	if ( item.accruedFire > 0 || item.accruedShock > 0 ) {
+	if ( mainItem.accruedFire > 0 || mainItem.accruedShock > 0 ) {
 		SpatialComponent* sc = parentChit->GetSpatialComponent();
 		if ( sc ) {
-			if ( item.accruedFire ) {
-				ChitEvent event = ChitEvent::EffectEvent( sc->GetPosition2D(), EFFECT_RADIUS, GameItem::EFFECT_FIRE, item.accruedFire );
+			if ( mainItem.accruedFire ) {
+				ChitEvent event = ChitEvent::EffectEvent( sc->GetPosition2D(), EFFECT_RADIUS, GameItem::EFFECT_FIRE, mainItem.accruedFire );
 				GetChitBag()->QueueEvent( event );
 			}
-			if ( item.accruedShock ) {
-				ChitEvent event = ChitEvent::EffectEvent( sc->GetPosition2D(), EFFECT_RADIUS, GameItem::EFFECT_SHOCK, item.accruedShock );
+			if ( mainItem.accruedShock ) {
+				ChitEvent event = ChitEvent::EffectEvent( sc->GetPosition2D(), EFFECT_RADIUS, GameItem::EFFECT_SHOCK, mainItem.accruedShock );
 				GetChitBag()->QueueEvent( event );
 			}
 		}
@@ -175,14 +196,12 @@ void ItemComponent::DoSlowTick()
 
 int ItemComponent::DoTick( U32 delta, U32 since )
 {
-	slowTickTimer += delta;
-	if ( slowTickTimer > SLOW_TICK ) {
-		slowTickTimer = 0;
+	if ( slowTick.Delta( since )) {
 		DoSlowTick();
 	}
-	int tick = item.DoTick( delta, since );
+	int tick = mainItem.DoTick( delta, since );
 
-	if ( LowerEmitEffect( engine, item, delta )) {
+	if ( EmitEffect( mainItem, delta )) {
 		tick = 0;
 	}
 	return tick;
@@ -191,16 +210,161 @@ int ItemComponent::DoTick( U32 delta, U32 since )
 
 void ItemComponent::OnAdd( Chit* chit )
 {
+	GLASSERT( itemArr.Size() == 1 );	// the one true item
 	super::OnAdd( chit );
-	GLASSERT( !item.parentChit );
-	item.parentChit = parentChit;
+	GLASSERT( !mainItem.parentChit );
+	mainItem.parentChit = parentChit;
 }
 
 
 void ItemComponent::OnRemove() 
 {
-	GLASSERT( item.parentChit == parentChit );
-	item.parentChit = 0;
+	GLASSERT( mainItem.parentChit == parentChit );
+	mainItem.parentChit = 0;
 	super::OnRemove();
+}
+
+
+bool ItemComponent::EmitEffect( const GameItem& it, U32 delta )
+{
+	ParticleSystem* ps = engine->particleSystem;
+	bool emitted = false;
+
+	ComponentSet compSet( parentChit, Chit::ITEM_BIT | Chit::SPATIAL_BIT | ComponentSet::IS_ALIVE );
+
+	if ( compSet.okay ) {
+		if ( it.accruedFire > 0 ) {
+			ps->EmitPD( "fire", compSet.spatial->GetPosition(), V3F_UP, engine->camera.EyeDir3(), delta );
+			ps->EmitPD( "smoke", compSet.spatial->GetPosition(), V3F_UP, engine->camera.EyeDir3(), delta );
+			emitted = true;
+		}
+		if ( it.accruedShock > 0 ) {
+			ps->EmitPD( "shock", compSet.spatial->GetPosition(), V3F_UP, engine->camera.EyeDir3(), delta );
+			emitted = true;
+		}
+	}
+	return emitted;
+}
+
+class InventorySorter
+{
+public:
+	// "Less" in this case means "closer to center"
+	static bool Less( GameItem* i0, GameItem* i1 ) {
+		// Pack items are the furthest out:
+		if ( i0->Active() != i1->Active() ) {
+			return i1->Active();
+		}
+		int i0flags = i0->flags & (GameItem::HELD | GameItem::HARDPOINT);
+		int i1flags = i1->flags & (GameItem::HELD | GameItem::HARDPOINT);
+		if ( i0flags != i1flags ) {
+			return i0flags < i1flags;
+		}
+		return strcmp( i0->Name(), i1->Name() ) < 0;
+	}
+};
+
+bool ItemComponent::AddToInventory( GameItem* item, bool equip )
+{
+	bool hardpointOpen = false;
+	RenderComponent* rc = parentChit->GetRenderComponent();
+	if ( rc ) {
+		hardpointOpen = rc->HardpointAvailable( item->hardpoint );
+	}
+
+	int attachment = item->AttachmentFlags();
+	bool equipped = false;
+	
+	if ( attachment == GameItem::INTRINSIC_AT_HARDPOINT ) {
+		equipped = true;
+	}
+	else if (    attachment == GameItem::INTRINSIC_FREE || attachment == GameItem::HELD_FREE) {
+		equipped = true;
+	} 
+	else if ( attachment == GameItem::HELD_AT_HARDPOINT && equip && hardpointOpen ) {
+		equipped = true;
+		GLASSERT( item->hardpoint );
+
+		// Tell the render component to render.
+		GLASSERT( rc );
+		if ( rc ) {
+			bool okay = rc->Attach( item->hardpoint, item->ResourceName() );
+			GLASSERT( okay );
+
+			if ( item->procedural & PROCEDURAL_INIT_MASK ) {
+				ProcRenderInfo info;
+				int result = ItemGen::RenderItem( Game::GetMainPalette(), *item, &info );
+
+				if ( result == ItemGen::PROC4 ) {
+					rc->SetProcedural( item->hardpoint, info );
+				}
+			}
+		}
+	}
+	GLASSERT( item->parentChit == 0 );
+	item->parentChit = parentChit;
+	item->isHeld = equipped;
+	itemArr.Push( item );
+
+	if ( itemArr.Size() > 2 ) {
+		// remember, the 1st item is special. don't move it about.
+		Sort<GameItem*, InventorySorter>( itemArr.Mem()+1, itemArr.Size()-1 );
+	}
+
+	return equipped;
+}
+
+
+GameItem* ItemComponent::IsCarrying()
+{
+	for( int i=1; i<itemArr.Size(); ++i ) {
+		if ( itemArr[i]->Active() && itemArr[i]->hardpoint == HARDPOINT_TRIGGER ) {
+			return itemArr[i];
+		}
+	}
+	return 0;
+}
+
+
+IRangedWeaponItem* ItemComponent::GetRangedWeapon( grinliz::Vector3F* trigger )
+{
+	for( int i=itemArr.Size()-1; i>=0; --i ) {
+		if ( itemArr[i]->ToRangedWeapon() ) {
+			if ( trigger ) {
+				RenderComponent* rc = parentChit->GetRenderComponent();
+				GLASSERT( rc );
+				if ( rc ) {
+					Matrix4 xform;
+					rc->GetMetaData( IStringConst::Hardpoint( itemArr[i]->hardpoint ), &xform ); 
+					Vector3F pos = xform * V3F_ZERO;
+					*trigger = pos;
+				}
+			}
+			return itemArr[i]->ToRangedWeapon();
+		}
+	}
+	return 0;
+}
+
+
+IMeleeWeaponItem* ItemComponent::GetMeleeWeapon()
+{
+	for( int i=itemArr.Size()-1; i>=0; --i ) {
+		if ( itemArr[i]->ToMeleeWeapon() ) {
+			return itemArr[i]->ToMeleeWeapon();
+		}
+	}
+	return 0;
+}
+
+
+IShield* ItemComponent::GetShield()
+{
+	for( int i=itemArr.Size()-1; i>=0; --i ) {
+		if ( itemArr[i]->ToShield() ) {
+			return itemArr[i]->ToShield();
+		}
+	}
+	return 0;
 }
 

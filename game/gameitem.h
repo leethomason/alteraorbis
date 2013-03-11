@@ -193,6 +193,7 @@ public:
 class IShield
 {
 public:
+	virtual GameItem* GetItem() = 0;
 };
 
 
@@ -241,7 +242,6 @@ public:
 		// How items are equipped. These 2 flags are much clearer as the descriptive values below.
 		HELD				= (1<<3),
 		HARDPOINT			= (1<<4),
-		PACK				= (1<<5),	// in inventory; not carried or activated
 
 		// ALL weapons have to be at hardpoints, for effect rendering if nothing else.
 		// Also the current weapons are scanned from a fixed array of hardpoints.
@@ -287,6 +287,7 @@ public:
 	GameStat stats;
 
 	// ------- current --------
+	bool	isHeld;			// if true, a held item is "in hand", else it is in the pack.
 	float	hp;				// current hp for this item
 	int		cooldownTime;	// counting UP to ready state
 	int		reloadTime;		// counting UP to ready state
@@ -367,6 +368,7 @@ public:
 			rounds			= rhs->rounds;
 			stats			= rhs->stats;
 
+			isHeld			= rhs->isHeld;
 			hp				= rhs->hp;
 			accruedFire		= rhs->accruedFire;
 			accruedShock	= rhs->accruedShock;
@@ -384,7 +386,7 @@ public:
 			key  = grinliz::IString();
 			resource = grinliz::IString();
 			flags = 0;
-			hardpoint = NO_HARDPOINT;
+			hardpoint  = 0;
 			procedural = PROCEDURAL_NONE;
 			mass = 1;
 			hpRegen = 0;
@@ -401,6 +403,7 @@ public:
 			stats.Init();
 			keyValues.Clear();
 
+			isHeld = false;
 			hp = TotalHP();
 			accruedFire = 0;
 			accruedShock = 0;
@@ -417,6 +420,8 @@ public:
 		reloadTime = 0;
 		rounds = clipCap;
 	}
+
+	bool Active() const	{ return isHeld || ((flags & HELD) == 0); }
 
 	virtual IMeleeWeaponItem*	ToMeleeWeapon()		{ return (flags & MELEE_WEAPON) ? this : 0; }
 	virtual IRangedWeaponItem*	ToRangedWeapon()	{ return (flags & RANGED_WEAPON) ? this : 0; }
@@ -435,8 +440,6 @@ public:
 	//		Cooldown (just used)
 	//		Reloading
 	//		Out of rounds
-
-
 	bool CanUse()					{ return !CoolingDown() && !Reloading() && HasRound(); }
 	bool Use();
 

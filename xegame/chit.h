@@ -30,7 +30,6 @@ class Component;
 class SpatialComponent;
 class RenderComponent;
 class MoveComponent;
-class InventoryComponent;
 class ItemComponent;
 
 class ChitBag;
@@ -130,7 +129,6 @@ public:
 
 	SpatialComponent*	GetSpatialComponent()	{ return spatialComponent; }
 	MoveComponent*		GetMoveComponent()		{ return moveComponent; }
-	InventoryComponent*	GetInventoryComponent()	{ return inventoryComponent; }
 	ItemComponent*		GetItemComponent()		{ return itemComponent; }
 	RenderComponent*	GetRenderComponent()	{ return renderComponent; }
 	Component*			GetComponent( const char* name );
@@ -183,7 +181,6 @@ private:
 	enum {
 		SPATIAL,
 		MOVE,
-		INVENTORY,
 		ITEM,
 		GENERAL_0,
 		GENERAL_1,
@@ -201,7 +198,6 @@ public:
 	enum {
 		SPATIAL_BIT		= (1<<SPATIAL),
 		MOVE_BIT		= (1<<MOVE),
-		INVENTORY_BIT	= (1<<INVENTORY),
 		ITEM_BIT		= (1<<ITEM),
 		RENDER_BIT		= (1<<RENDER)
 	};
@@ -212,7 +208,6 @@ private:
 		struct {
 			SpatialComponent*	spatialComponent;
 			MoveComponent*		moveComponent;
-			InventoryComponent*	inventoryComponent;
 			ItemComponent*		itemComponent;
 			Component*			general0;
 			Component*			general1;
@@ -242,7 +237,6 @@ struct ComponentSet
 
 	SpatialComponent*	spatial;
 	MoveComponent*		move;
-	InventoryComponent*	inventory;
 	ItemComponent*		itemComponent;
 	GameItem*			item;
 	RenderComponent*	render;
