@@ -48,11 +48,13 @@ AIComponent::AIComponent( Engine* _engine, WorldMap* _map ) : rethink( 1200 )
 	currentAction = 0;
 	currentTarget = 0;
 	focusOnTarget = false;
+	focusedMove = false;
 	aiMode = NORMAL_MODE;
 	awareness.Zero();
 	wanderOrigin.Zero();
 	wanderRadius = 0;
 	wanderTime = 0;
+	debugFlag = false;
 }
 
 
@@ -68,6 +70,11 @@ void AIComponent::Serialize( XStream* xs )
 	XARC_SER( xs, currentAction );
 	XARC_SER( xs, currentTarget );
 	XARC_SER( xs, focusOnTarget );
+	XARC_SER( xs, focusedMove );
+	XARC_SER( xs, wanderRadius );
+	XARC_SER( xs, wanderTime );
+
+	XARC_SER( xs, wanderOrigin );
 	rethink.Serialize( xs, "rethink" );
 	this->EndSerialize( xs );
 }
@@ -165,6 +172,7 @@ void AIComponent::GetFriendEnemyLists()
 }
 
 
+#if 0
 // Won't write output if there isn't a result.
 float AIComponent::CalcFlockMove( const ComponentSet& thisComp, grinliz::Vector2F* dir )
 {
@@ -215,6 +223,7 @@ float AIComponent::CalcFlockMove( const ComponentSet& thisComp, grinliz::Vector2
 //	return 0.0f;
 	return Clamp( len, 0.0f, 1.0f );
 }
+#endif
 
 
 Chit* AIComponent::Closest( const ComponentSet& thisComp, CArray<int, MAX_TRACK>* list )
@@ -291,7 +300,9 @@ void AIComponent::DoMove( const ComponentSet& thisComp )
 			}
 			if ( utilityReload > 0 || utilityRunAndGun > 0 ) {
 				#ifdef AI_OUTPUT
-					GLOUTPUT(( "ID=%d Move: RunAndGun=%.2f Reload=%.2f ", thisComp.chit->ID(), utilityRunAndGun, utilityReload ));
+					if ( debugFlag ) {
+						GLOUTPUT(( "ID=%d Move: RunAndGun=%.2f Reload=%.2f ", thisComp.chit->ID(), utilityRunAndGun, utilityReload ));
+					}
 				#endif
 				if ( utilityRunAndGun > utilityReload ) {
 					GLASSERT( targetRunAndGun );
@@ -300,13 +311,17 @@ void AIComponent::DoMove( const ComponentSet& thisComp )
 											targetRunAndGun, 
 											ranged->ToRangedWeapon() );
 					#ifdef AI_OUTPUT
-					GLOUTPUT(( "->RunAndGun\n" ));
+					if ( debugFlag ) {
+						GLOUTPUT(( "->RunAndGun\n" ));
+					}
 					#endif
 				}
 				else {
 					ranged->Reload();
 					#ifdef AI_OUTPUT
-					GLOUTPUT(( "->Reload\n" ));
+					if ( debugFlag ) {
+						GLOUTPUT(( "->Reload\n" ));
+					}
 					#endif
 				}
 			}
@@ -440,6 +455,17 @@ void AIComponent::Think( const ComponentSet& thisComp )
 };
 
 
+void AIComponent::FocusedMove( const grinliz::Vector2F& dest )
+{
+	PathMoveComponent* pmc = GET_COMPONENT( parentChit, PathMoveComponent );
+	if ( pmc ) {
+		pmc->QueueDest( dest );
+		currentAction = NO_ACTION;
+		focusedMove = true;
+	}
+}
+
+
 void AIComponent::SetWanderParams( const grinliz::Vector2F& pos, float radius )
 {
 	wanderOrigin = pos;
@@ -519,9 +545,6 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 	static  float FLOCK_MOVE_BIAS = 0.2f;
 	Vector2F heading = thisComp.spatial->GetHeading2D();
 	Vector2F flockDir = heading;
-	//utility[OPTION_FLOCK_MOVE] = CalcFlockMove( thisComp, &flockDir ) * FLOCK_MOVE_BIAS;
-	// Give this a little utility in case everything else is 0:
-	//utility[OPTION_FLOCK_MOVE] = Max( utility[OPTION_FLOCK_MOVE], 0.001f );
 	utility[OPTION_FLOCK_MOVE] = 0.001f;
 
 	for( int k=0; k<enemyList.Size(); ++k ) {
@@ -670,10 +693,12 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 	};
 
 #ifdef AI_OUTPUT
-	static const char* optionName[NUM_OPTIONS] = { "flock", "mtrange", "melee", "shoot" };
-	GLOUTPUT(( "ID=%d Think: flock=%.2f mtrange=%.2f melee=%.2f shoot=%.2f -> %s\n",
-		       thisComp.chit->ID(), utility[OPTION_FLOCK_MOVE], utility[OPTION_MOVE_TO_RANGE], utility[OPTION_MELEE], utility[OPTION_SHOOT],
-			   optionName[index] ));
+	if ( debugFlag ) {
+		static const char* optionName[NUM_OPTIONS] = { "flock", "mtrange", "melee", "shoot" };
+		GLOUTPUT(( "ID=%d Think: flock=%.2f mtrange=%.2f melee=%.2f shoot=%.2f -> %s\n",
+				   thisComp.chit->ID(), utility[OPTION_FLOCK_MOVE], utility[OPTION_MOVE_TO_RANGE], utility[OPTION_MELEE], utility[OPTION_SHOOT],
+				   optionName[index] ));
+	}
 #endif
 }
 
@@ -701,6 +726,11 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 
 	ChitBag* chitBag = this->GetChitBag();
 
+	// Focuesd move check
+	if ( focusedMove ) {
+		return 200;
+	}
+
 	// If focused, make sure we have a target.
 	if ( currentTarget && !chitBag->GetChit( currentTarget )) {
 		currentTarget = 0;
@@ -716,14 +746,18 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 		aiMode = BATTLE_MODE;
 		currentAction = 0;
 #ifdef AI_OUTPUT
-		GLOUTPUT(( "ID=%d Mode to Battle\n", thisComp.chit->ID() ));
+		if ( debugFlag ) {
+			GLOUTPUT(( "ID=%d Mode to Battle\n", thisComp.chit->ID() ));
+		}
 #endif
 	}
 	else if ( aiMode == BATTLE_MODE && currentTarget == 0 && enemyList.Empty() ) {
 		aiMode = NORMAL_MODE;
 		currentAction = 0;
 #ifdef AI_OUTPUT
-		GLOUTPUT(( "ID=%d Mode to Normal\n", thisComp.chit->ID() ));
+		if ( debugFlag ) {
+			GLOUTPUT(( "ID=%d Mode to Normal\n", thisComp.chit->ID() ));
+		}
 #endif
 	}
 
@@ -776,6 +810,7 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 	switch ( msg.ID() ) {
 	case ChitMsg::PATHMOVE_DESTINATION_REACHED:
 	case ChitMsg::PATHMOVE_DESTINATION_BLOCKED:
+		focusedMove = false;
 		currentAction = NO_ACTION;
 		parentChit->SetTickNeeded();
 		break;

@@ -24,6 +24,7 @@
 #include "lumoschitbag.h"
 #include "weather.h"
 #include "mapspatialcomponent.h"
+#include "aicomponent.h"
 
 #include "../xarchive/glstreamer.h"
 
@@ -212,11 +213,18 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos, const char* assetName )
 	chit->Add( new PathMoveComponent( worldMap ));
 	chit->Add( new DebugStateComponent( worldMap ));
 
+	AIComponent* ai = new AIComponent( engine, worldMap );
+	ai->EnableDebug( true );
+	chit->Add( ai );
+
 	GameItem item( *(itemDefArr[0]));
 	item.primaryTeam = 1;
 	item.stats.SetExpFromLevel( 4 );
 	item.InitState();
 	chit->Add( new ItemComponent( engine, item ));
+	for( int i=1; i<itemDefArr.Size(); ++i ) {
+		chit->GetItemComponent()->AddToInventory( new GameItem( *(itemDefArr[i]) ), true );
+	}
 
 	chit->Add( new HealthComponent( engine ));
 

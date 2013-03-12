@@ -9,6 +9,7 @@
 #include "../game/sim.h"
 #include "../game/pathmovecomponent.h"
 #include "../game/worldmap.h"
+#include "../game/aicomponent.h"
 
 #include "../engine/engine.h"
 #include "../engine/text.h"
@@ -193,10 +194,16 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 				Chit* chit = sim->GetPlayerChit();
 				if ( chit ) {
 					if ( camModeButton[TRACK].Down() ) {
-						PathMoveComponent* pmc = GET_COMPONENT( chit, PathMoveComponent );
-						if ( pmc ) {
-							Vector2F dest = { at.x, at.z };
-							pmc->QueueDest( dest );
+						Vector2F dest = { at.x, at.z };
+						AIComponent* ai = GET_COMPONENT( chit, AIComponent );
+						if ( ai ) {
+							ai->FocusedMove( dest );
+						}
+						else {
+							PathMoveComponent* pmc = GET_COMPONENT( chit, PathMoveComponent );
+							if ( pmc ) {
+								pmc->QueueDest( dest );
+							}
 						}
 					}
 					else if ( camModeButton[TELEPORT].Down() ) {
@@ -286,9 +293,15 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		Chit* chit = sim->GetPlayerChit();
 		if ( chit ) {
 			if ( camModeButton[TRACK].Down() ) {
-				PathMoveComponent* pmc = GET_COMPONENT( chit, PathMoveComponent );
-				if ( pmc ) {
-					pmc->QueueDest( dest );
+				AIComponent* ai = GET_COMPONENT( chit, AIComponent );
+				if ( ai ) {
+					ai->FocusedMove( dest );
+				}
+				else {
+					PathMoveComponent* pmc = GET_COMPONENT( chit, PathMoveComponent );
+					if ( pmc ) {
+						pmc->QueueDest( dest );
+					}
 				}
 			}
 			else if ( camModeButton[TELEPORT].Down() ) {

@@ -26,32 +26,6 @@ class WorldMap;
 class Engine;
 struct ComponentSet;
 
-inline float UtilityCubic( float y0, float y1, float x ) {
-	x = grinliz::Clamp( x, 0.0f, 1.0f );
-	float a = grinliz::Lerp( y0, y1, x*x*x );
-	return a;
-}
-
-inline float UtilityFade( float y0, float y1, float x ) {
-	x = grinliz::Clamp( x, 0.0f, 1.0f );
-	float a = grinliz::Lerp( y0, y1, grinliz::Fade5( x ) );
-	return a;
-}
-
-inline float UtilityLinear( float y0, float y1, float x ) {
-	x = grinliz::Clamp( x, 0.0f, 1.0f );
-	float a = grinliz::Lerp( y0, y1, x );
-	return a;
-}
-
-// Highest at x=0.5
-inline float UtilityParabolic( float y0, float maxY, float y1, float x ) {
-	x = grinliz::Clamp( x, 0.0f, 1.0f );
-	float xp = x - 0.5f;
-	float a = 1.0f - ( xp*xp )*4.f;
-	return a;
-}
-
 
 // Combat AI: needs refactoring
 class AIComponent : public Component
@@ -75,6 +49,8 @@ public:
 	// Approximate. enemyList may not be flushed.
 	bool AwareOfEnemy() const { return enemyList.Size() > 0; }
 	void SetWanderParams( const grinliz::Vector2F& pos, float radius ); 
+	void FocusedMove( const grinliz::Vector2F& dest );
+	void EnableDebug( bool enable ) { debugFlag = enable; }
 
 	// Top level AI modes.
 	enum {
@@ -96,7 +72,7 @@ private:
 
 	int GetTeamStatus( Chit* other );
 	bool LineOfSight( const ComponentSet& thisComp, Chit* target );
-	float CalcFlockMove( const ComponentSet& thisComp, grinliz::Vector2F* dir );
+	//float CalcFlockMove( const ComponentSet& thisComp, grinliz::Vector2F* dir );
 
 	void Think( const ComponentSet& thisComp );	// Choose a new action.
 	void ThinkWander( const ComponentSet& thisComp );
@@ -119,11 +95,13 @@ private:
 	int currentAction;
 	int currentTarget;
 	bool focusOnTarget;
+	bool focusedMove;
 	grinliz::Rectangle2F awareness;
 	CTicker rethink;
 	grinliz::Vector2F	wanderOrigin;
 	float				wanderRadius;
 	U32					wanderTime;
+	bool				debugFlag;
 
 	void DoMelee( const ComponentSet& thisComp );
 	void DoShoot( const ComponentSet& thisComp );
