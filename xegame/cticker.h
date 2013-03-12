@@ -30,6 +30,9 @@ public:
 	void Within( int t ) { 
 		if ( t < time ) time = t;
 	}
+	void Set( int t ) {
+		time = t;
+	}
 
 	void Serialize( XStream* xs, const char* name );
 

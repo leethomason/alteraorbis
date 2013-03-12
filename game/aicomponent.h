@@ -74,6 +74,7 @@ public:
 
 	// Approximate. enemyList may not be flushed.
 	bool AwareOfEnemy() const { return enemyList.Size() > 0; }
+	void SetWanderParams( const grinliz::Vector2F& pos, float radius ); 
 
 	// Top level AI modes.
 	enum {
@@ -110,7 +111,8 @@ private:
 		MOVE,			// Movement, will reload and run&gun if possible.
 		MELEE,			// Go to the target and hit it. Melee charge.
 		SHOOT,			// Stand ground and shoot.
-		NUM_ACTIONS,
+
+		WANDER,
 	};
 
 	int aiMode;
@@ -119,6 +121,9 @@ private:
 	bool focusOnTarget;
 	grinliz::Rectangle2F awareness;
 	CTicker rethink;
+	grinliz::Vector2F	wanderOrigin;
+	float				wanderRadius;
+	U32					wanderTime;
 
 	void DoMelee( const ComponentSet& thisComp );
 	void DoShoot( const ComponentSet& thisComp );

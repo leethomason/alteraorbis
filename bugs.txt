@@ -6,8 +6,8 @@
 
 - game
 	- Fauna 1
-		- monsters to fight
 		- motion around cores
+		- monsters to fight
 		- battles!
 	- Intermission: regions
 		- generate regions

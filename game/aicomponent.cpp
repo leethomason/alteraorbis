@@ -50,6 +50,9 @@ AIComponent::AIComponent( Engine* _engine, WorldMap* _map ) : rethink( 1200 )
 	focusOnTarget = false;
 	aiMode = NORMAL_MODE;
 	awareness.Zero();
+	wanderOrigin.Zero();
+	wanderRadius = 0;
+	wanderTime = 0;
 }
 
 
@@ -437,9 +440,43 @@ void AIComponent::Think( const ComponentSet& thisComp )
 };
 
 
+void AIComponent::SetWanderParams( const grinliz::Vector2F& pos, float radius )
+{
+	wanderOrigin = pos;
+	wanderRadius = radius;
+}
+
+
 void AIComponent::ThinkWander( const ComponentSet& thisComp )
 {
+	// Wander in some sort of directed fashion.
+	// In a circle?
 
+	if ( wanderRadius > 0 ) {
+		Random random( thisComp.chit->ID() );
+
+		float angleUniform = random.Uniform();
+		float lenUniform   = 0.25f + 0.75f*random.Uniform();
+
+		static const U32 PERIOD = 40*1000;
+		U32 t = wanderTime % PERIOD;
+		float timeUniform = (float)t / (float)PERIOD;
+
+		angleUniform += timeUniform;
+		float angle = angleUniform * 2.0f * PI;
+		Vector2F v = { cosf(angle), sinf(angle) };
+		
+		v = v * (lenUniform * wanderRadius);
+
+		Vector2F dest = wanderOrigin + v;
+
+		PathMoveComponent* pmc = GET_COMPONENT( thisComp.chit, PathMoveComponent );
+		if ( pmc ) {
+			pmc->QueueDest( dest );
+		}
+		rethink.Set( thisComp.chit->random.Rand( PERIOD/4 ));
+		currentAction = WANDER;
+	}
 }
 
 
@@ -660,6 +697,8 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 		return 0;
 	}
 
+	wanderTime += timeSince;
+
 	ChitBag* chitBag = this->GetChitBag();
 
 	// If focused, make sure we have a target.
@@ -699,7 +738,7 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 
 		case MOVE:		
 			DoMove( thisComp );
-			tick = (aiMode == BATTLE_MODE) ? 0 : 400;	// wait for message callback from pather. slow tick in case something goes wrong.
+			tick = 0;
 			break;
 		case MELEE:		
 			DoMelee( thisComp );	
@@ -713,12 +752,16 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 			tick = 400;
 			break;
 
+		case WANDER:
+			tick = VERY_LONG_TICK;
+			break;
+
 		default:
 			GLASSERT( 0 );
 			currentAction = 0;
 			break;
 	}
-	return tick;
+	return Min( tick, rethink.Next() );
 }
 
 

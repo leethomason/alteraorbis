@@ -28,7 +28,7 @@ LumosChitBag::LumosChitBag() : engine( 0 )
 }
 
 
-Chit* LumosChitBag::NewMonsterChit( const Vector3F& pos, const char* name, int team )
+Chit* LumosChitBag::NewMonsterChit( const Vector3F& pos, const char* name, int team, const Vector2F* wander )
 {
 	ItemDefDB::GameItemArr itemDefArr;
 	ItemDefDB* itemDefDB = ItemDefDB::Instance();
@@ -56,6 +56,9 @@ Chit* LumosChitBag::NewMonsterChit( const Vector3F& pos, const char* name, int t
 
 	for( int i=1; i<itemDefArr.Size(); ++i ) {
 		inv->AddToInventory( new GameItem( *(itemDefArr[i]) ), true );
+	}
+	if ( wander ) {
+		GET_COMPONENT( chit, AIComponent )->SetWanderParams( *wander, 12.0f );
 	}
 	return chit;
 }

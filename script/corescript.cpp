@@ -71,7 +71,8 @@ int CoreScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 				Vector3F pf = { (float)pos.x+0.5f, 0, (float)pos.y+0.5f };
 				// FIXME: proper team
 				// FIXME safe downcast
-				((LumosChitBag*)(ctx.chit->GetChitBag()))->NewMonsterChit( pf, "mantis", 100 );
+				Vector2F p2 = ctx.chit->GetSpatialComponent()->GetPosition2D();
+				((LumosChitBag*)(ctx.chit->GetChitBag()))->NewMonsterChit( pf, "mantis", 100, &p2 );
 			}
 		}
 	}
