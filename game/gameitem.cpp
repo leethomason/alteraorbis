@@ -449,7 +449,6 @@ void GameItem::AbsorbDamage( bool inInventory, DamageDesc dd, DamageDesc* remain
 				if ( flags & EFFECT_SHOCK )
 					effect &= (~EFFECT_SHOCK);
 			}
-
 		}
 		else {
 			// Something that straight up reduces damage.

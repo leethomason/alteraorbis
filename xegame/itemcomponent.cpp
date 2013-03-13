@@ -85,6 +85,24 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		for( int i=itemArr.Size()-1; i >= 0; --i ) {
 			if ( i==0 || itemArr[i]->Active() ) {
 				itemArr[i]->AbsorbDamage( i>0, dd2, &dd2, "DAMAGE" );
+
+				if ( itemArr[i]->ToShield() ) {
+					GameItem* shield = itemArr[i]->ToShield()->GetItem();
+					RenderComponent* rc = parentChit->GetRenderComponent();
+
+					if ( rc && shield->RoundsFraction() > 0 ) {
+						ParticleDef def = engine->particleSystem->GetPD( "shield" );
+						Vector3F shieldPos = { 0, 0, 0 };
+						rc->GetMetaData( IStringConst::kshield, &shieldPos );
+					
+						float f = shield->RoundsFraction();
+						def.color.x *= f;
+						def.color.y *= f;
+						def.color.z *= f;
+						engine->particleSystem->EmitPD( def, shieldPos, V3F_UP, engine->camera.EyeDir3(), 0 );
+					}
+				}
+
 			}
 		}
 

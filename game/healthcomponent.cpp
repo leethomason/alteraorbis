@@ -20,10 +20,13 @@
 #include "../xegame/chitbag.h"
 #include "../xegame/itemcomponent.h"
 #include "../xegame/rendercomponent.h"
+#include "../xegame/game.h"
 
 #include "../grinliz/glutil.h"
 
 #include "../engine/engine.h"
+
+#include "../script/procedural.h"
 
 using namespace grinliz;
 
@@ -97,9 +100,9 @@ void HealthComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			Vector3F pos;
 			render->CalcTrigger( &pos, 0 );
 
+			battleMechanics.MeleeAttack( engine, parentChit, item );
 			engine->particleSystem->EmitPD( "meleeImpact", pos, V3F_UP, engine->camera.EyeDir3(), 0 );
 		
-			battleMechanics.MeleeAttack( engine, parentChit, item );
 		}
 	}
 	else {
