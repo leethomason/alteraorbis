@@ -19,8 +19,8 @@
 // Hack. It begins. Engine code including game code.
 #include "../game/gameitem.h"
 #include "cticker.h"
-
-#include "itembasecomponent.h"
+#include "component.h"
+#include "../engine/engine.h"
 
 class ItemComponent : public Component
 {
