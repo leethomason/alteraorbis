@@ -457,6 +457,13 @@ public:
 		return f;
 	} 
 
+	float ReloadFraction() const {
+		if ( Reloading() ) {
+			return (float)reloadTime / (float)reload;
+		}
+		return 1.0f;
+	}
+
 	float RoundsFraction() const {
 		if ( clipCap ) {
 			return (float)rounds / (float)clipCap;

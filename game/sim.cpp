@@ -208,6 +208,7 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos, const char* assetName )
 	chit->Add( new PathMoveComponent( worldMap ));
 	chit->Add( new DebugStateComponent( worldMap ));
 	chitBag->AddItem( assetName, chit, engine, 1, 4 );
+	chitBag->AddItem( "shield", chit, engine );
 
 	AIComponent* ai = new AIComponent( engine, worldMap );
 	ai->EnableDebug( true );

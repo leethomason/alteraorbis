@@ -1,9 +1,11 @@
+- mantis tribes - whos fighting who?
 - explosion is in the wrong direction. Units walk through explosions?? (Balrog vs. Human.)
 - check that shields and damage absorbing is working correctly. something seems wrong with shields - recharge?
 - does fire affect plants??
 - health is awkward: keeps copy of HP (oops). move hp to health component? (TotalHP() on item?)
 - need free camera mode
 - remove temporary arbitrary AI limit in corescript
+- shield glow broken. so hard to tell not sure it's worth doing.
 
 - game
 	- Fauna 1

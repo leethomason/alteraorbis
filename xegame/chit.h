@@ -63,7 +63,7 @@ public:
 
 		HEALTH_CHANGED,
 		
-		GAMEITEM_TICK,			// Ptr = &GameItem
+		//GAMEITEM_TICK,			// Ptr = &GameItem
 
 		// XE
 		SPATIAL_CHANGED,		// the position or rotation has changed, sender: spatial

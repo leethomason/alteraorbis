@@ -38,6 +38,7 @@ void HealthComponent::Serialize( XStream* xs )
 
 int HealthComponent::DoTick( U32 delta, U32 since )
 {
+	DeltaHealth();
 	if ( destroyed ) {
 		destroyed += delta;
 		GLASSERT( parentChit );
@@ -76,10 +77,11 @@ void HealthComponent::DeltaHealth()
 
 void HealthComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {
-	if ( msg.ID() == ChitMsg::GAMEITEM_TICK ) {
-		DeltaHealth();
-	}
-	else if ( chit == parentChit && msg.ID() == ChitMsg::RENDER_IMPACT ) {
+	//if ( msg.ID() == ChitMsg::GAMEITEM_TICK ) {
+	//	DeltaHealth();
+	//}
+	//else 
+	if ( chit == parentChit && msg.ID() == ChitMsg::RENDER_IMPACT ) {
 		if ( !destroyed ) {
 			RenderComponent* render = parentChit->GetRenderComponent();
 			GLASSERT( render );	// it is a message from the render component, after all.
