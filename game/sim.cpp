@@ -199,11 +199,6 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos, const char* assetName )
 		assetName = "humanFemale";
 	}
 
-	ItemDefDB* itemDefDB = ItemDefDB::Instance();
-	ItemDefDB::GameItemArr itemDefArr;
-	itemDefDB->Get( assetName, &itemDefArr );
-	GLASSERT( itemDefArr.Size() > 0 );
-
 	Chit* chit = chitBag->NewChit();
 	playerID = chit->ID();
 	chitBag->GetCamera( engine )->SetTrack( playerID );
@@ -212,22 +207,13 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos, const char* assetName )
 	chit->Add( new RenderComponent( engine, assetName ));
 	chit->Add( new PathMoveComponent( worldMap ));
 	chit->Add( new DebugStateComponent( worldMap ));
+	chitBag->AddItem( assetName, chit, engine, 1, 4 );
 
 	AIComponent* ai = new AIComponent( engine, worldMap );
 	ai->EnableDebug( true );
 	chit->Add( ai );
 
-	GameItem item( *(itemDefArr[0]));
-	item.primaryTeam = 1;
-	item.stats.SetExpFromLevel( 4 );
-	item.InitState();
-	chit->Add( new ItemComponent( engine, item ));
-	for( int i=1; i<itemDefArr.Size(); ++i ) {
-		chit->GetItemComponent()->AddToInventory( new GameItem( *(itemDefArr[i]) ), true );
-	}
-
 	chit->Add( new HealthComponent( engine ));
-
 	chit->GetSpatialComponent()->SetPosYRot( (float)pos.x+0.5f, 0, (float)pos.y+0.5f, 0 );
 }
 

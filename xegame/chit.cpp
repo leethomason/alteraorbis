@@ -79,6 +79,13 @@ void Chit::Free()
 }
 
 
+LumosChitBag* Chit::GetLumosChitBag()
+{
+	return chitBag->ToLumos();
+}
+
+
+
 void Chit::Serialize( const ComponentFactory* factory, XStream* xs )
 {
 	XarcOpen( xs, "Chit" );

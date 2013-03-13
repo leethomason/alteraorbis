@@ -18,6 +18,7 @@
 #include "gamelimits.h"
 #include "pathmovecomponent.h"
 #include "gameitem.h"
+#include "lumoschitbag.h"
 
 #include "../script/battlemechanics.h"
 
@@ -78,6 +79,25 @@ void AIComponent::Serialize( XStream* xs )
 	rethink.Serialize( xs, "rethink" );
 	this->EndSerialize( xs );
 }
+
+
+void AIComponent::OnAdd( Chit* chit )
+{
+	super::OnAdd( chit );
+	if ( parentChit->GetLumosChitBag() ) {
+		parentChit->GetLumosChitBag()->census.ais += 1;
+	}
+}
+
+
+void AIComponent::OnRemove()
+{
+	if ( parentChit->GetLumosChitBag() ) {
+		parentChit->GetLumosChitBag()->census.ais -= 1;
+	}
+	super::OnRemove();
+}
+
 
 int AIComponent::GetTeamStatus( Chit* other )
 {

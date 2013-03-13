@@ -3,6 +3,7 @@
 - does fire affect plants??
 - health is awkward: keeps copy of HP (oops). move hp to health component? (TotalHP() on item?)
 - need free camera mode
+- remove temporary arbitrary AI limit in corescript
 
 - game
 	- Fauna 1

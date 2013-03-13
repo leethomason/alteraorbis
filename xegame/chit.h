@@ -38,6 +38,7 @@ class ChitEvent;
 class GameItem;
 class ComponentFactory;
 class XStream;
+class LumosChitBag;
 
 // Synchronous. Can be sub-classed.
 class ChitMsg
@@ -134,7 +135,9 @@ public:
 	Component*			GetComponent( const char* name );
 	Component*			GetComponent( int id );
 
-	ChitBag* GetChitBag() { return chitBag; }
+	ChitBag* GetChitBag()						{ return chitBag; }
+	virtual LumosChitBag* GetLumosChitBag();
+
 	// Returns the item if this has the ItemComponent.
 	GameItem* GetItem();
 	void QueueDelete();

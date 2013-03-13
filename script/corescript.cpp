@@ -25,7 +25,6 @@ CoreScript::~CoreScript()
 
 void CoreScript::Init( const ScriptContext& ctx )
 {
-	ctx.census->cores.Push( ctx.chit->ID() );
 	spawnTick.Randomize( ctx.chit->ID() );
 }
 
@@ -55,7 +54,10 @@ int CoreScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 {
 	static const int RADIUS = 4;
 
-	if ( spawnTick.Delta( since )) {
+	// FIXME: arbitrary limit to the AIs to contain performance for tech demo.
+	// The problem isn't even AI, it's the pathfinding. Possibly fails in the
+	// pathfinder?
+	if ( spawnTick.Delta( since ) && ctx.census->ais < 500 ) {
 		// spawn stuff.
 		MapSpatialComponent* ms = ( GET_COMPONENT( ctx.chit, MapSpatialComponent ));
 		GLASSERT( ms );

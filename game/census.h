@@ -11,7 +11,11 @@ public:
 	Census() {
 		memset( plants, 0, sizeof(int)*NUM_PLANT_TYPES*MAX_PLANT_STAGES );
 	}
-	int plants[NUM_PLANT_TYPES][MAX_PLANT_STAGES];
+
+	int									plants[NUM_PLANT_TYPES][MAX_PLANT_STAGES];
+	grinliz::CArray< int, MAX_CORES >	cores; 
+	int									ais;	// the number of AIs.
+
 
 	int CountPlants() const {
 		int c =  0;
@@ -22,8 +26,6 @@ public:
 		}
 		return c;
 	}
-
-	grinliz::CArray< int, MAX_CORES > cores; 
 };
 
 #endif 

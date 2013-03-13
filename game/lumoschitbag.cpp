@@ -28,35 +28,30 @@ LumosChitBag::LumosChitBag() : engine( 0 )
 }
 
 
+LumosChitBag::~LumosChitBag()
+{
+	// Call the parent function so that chits aren't 
+	// aren't using deleted memory.
+	DeleteChits();
+}
+
+
+
 Chit* LumosChitBag::NewMonsterChit( const Vector3F& pos, const char* name, int team, const Vector2F* wander )
 {
-	ItemDefDB::GameItemArr itemDefArr;
-	ItemDefDB* itemDefDB = ItemDefDB::Instance();
-	itemDefDB->Get( name, &itemDefArr );
-	GLASSERT( itemDefArr.Size() > 0 );
-
 	Chit* chit = NewChit();
 
 	chit->Add( new SpatialComponent());
 	chit->Add( new RenderComponent( engine, name ));
 	chit->Add( new PathMoveComponent( worldMap ));
 	chit->Add( new AIComponent( engine, worldMap ));
-	//chit->Add( new DebugStateComponent( worldMap ));
 
 	chit->GetSpatialComponent()->SetPosition( pos );
 
-	GameItem item( *(itemDefArr[0]));
-	item.primaryTeam = team;
-	item.stats.Roll( chit->random.Rand() );
-	item.InitState();
-	ItemComponent* inv = new ItemComponent( engine, item );
-	chit->Add( inv );
+	AddItem( name, chit, engine, team );
 
 	chit->Add( new HealthComponent( engine ));
 
-	for( int i=1; i<itemDefArr.Size(); ++i ) {
-		inv->AddToInventory( new GameItem( *(itemDefArr[i]) ), true );
-	}
 	if ( wander ) {
 		GET_COMPONENT( chit, AIComponent )->SetWanderParams( *wander, 12.0f );
 	}
@@ -115,5 +110,30 @@ void LumosChitBag::HandleBolt( const Bolt& bolt, Model* modelHit, const grinliz:
 
 		DamageDesc dd( bolt.damage, bolt.effect );
 		BattleMechanics::GenerateExplosionMsgs( dd, origin, bolt.chitID, engine, &chitList );
+	}
+}
+
+
+void LumosChitBag::AddItem( const char* name, Chit* chit, Engine* engine, int team, int level )
+{
+	ItemDefDB* itemDefDB = ItemDefDB::Instance();
+	ItemDefDB::GameItemArr itemDefArr;
+	itemDefDB->Get( name, &itemDefArr );
+	GLASSERT( itemDefArr.Size() > 0 );
+
+	GameItem item = *(itemDefArr[0]);
+	item.primaryTeam = team;
+	item.stats.SetExpFromLevel( level );
+
+	if ( !chit->GetItemComponent() ) {
+		ItemComponent* ic = new ItemComponent( engine, item );
+		chit->Add( ic );
+		for( int i=1; i<itemDefArr.Size(); ++i ) {
+			ic->AddToInventory( new GameItem( *(itemDefArr[i]) ), true );
+		}
+	}
+	else {
+		GLASSERT( itemDefArr.Size() == 1 );
+		chit->GetItemComponent()->AddToInventory( new GameItem( item ), true );
 	}
 }

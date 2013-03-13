@@ -103,6 +103,11 @@ public:
 	CameraComponent* GetCamera( Engine* engine );
 	int GetCameraChitID() const { return activeCamera; }
 
+	virtual LumosChitBag* ToLumos() { return 0; }
+
+protected:
+	void DeleteChits() { chitID.RemoveAll(); }
+
 private:
 	enum {
 		SHIFT = 2,	// a little tuning done; seems reasonable
@@ -132,7 +137,6 @@ private:
 	// may be fine.
 	grinliz::CDynArray< Chit* >		  blocks;
 	grinliz::HashTable< int, Chit* >  chitID;
-
 	grinliz::CDynArray<int>			deleteList;	
 	grinliz::CDynArray<CompID>		compDeleteList;	
 	grinliz::CDynArray<Chit*>		hashQuery;			// local data, cached at class level

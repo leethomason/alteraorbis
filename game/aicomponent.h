@@ -40,6 +40,8 @@ public:
 	virtual const char* Name() const { return "AIComponent"; }
 
 	virtual void Serialize( XStream* xs );
+	virtual void OnAdd( Chit* chit );
+	virtual void OnRemove();
 
 	virtual int  DoTick( U32 delta, U32 timeSince );
 	virtual void DebugStr( grinliz::GLString* str );
