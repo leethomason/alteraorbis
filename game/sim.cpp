@@ -207,8 +207,15 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos, const char* assetName )
 	chit->Add( new RenderComponent( engine, assetName ));
 	chit->Add( new PathMoveComponent( worldMap ));
 	chit->Add( new DebugStateComponent( worldMap ));
+
 	chitBag->AddItem( assetName, chit, engine, 1, 4 );
 	chitBag->AddItem( "shield", chit, engine );
+	if ( chit->random.Bit() ) {
+		chitBag->AddItem( "blaster", chit, engine, 4 );
+	}
+	else {
+		chitBag->AddItem( "ring", chit, engine, 4 );
+	}
 
 	AIComponent* ai = new AIComponent( engine, worldMap );
 	ai->EnableDebug( true );
@@ -289,7 +296,7 @@ void Sim::DoTick( U32 delta )
 
 void Sim::Draw3D( U32 deltaTime )
 {
-	engine->Draw( deltaTime );
+	engine->Draw( deltaTime, chitBag->BoltMem(), chitBag->NumBolts() );
 }
 
 
