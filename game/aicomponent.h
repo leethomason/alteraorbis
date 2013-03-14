@@ -52,7 +52,15 @@ public:
 	bool AwareOfEnemy() const { return enemyList.Size() > 0; }
 	void SetWanderParams( const grinliz::Vector2F& pos, float radius ); 
 	void FocusedMove( const grinliz::Vector2F& dest );
+	void FocusedTarget( Chit* chit );
 	void EnableDebug( bool enable ) { debugFlag = enable; }
+
+	enum {
+		FRIENDLY,
+		ENEMY,
+		NEUTRAL
+	};
+	int GetTeamStatus( Chit* other );
 
 	// Top level AI modes.
 	enum {
@@ -61,18 +69,14 @@ public:
 	};
 
 private:
+
 	enum {
-		FRIENDLY,
-		ENEMY,
-		NEUTRAL,
-		
 		MAX_TRACK = 8,
 	};
 
 	void GetFriendEnemyLists();
 	Chit* Closest( const ComponentSet& thisComp, grinliz::CArray<int, MAX_TRACK>* list );
 
-	int GetTeamStatus( Chit* other );
 	bool LineOfSight( const ComponentSet& thisComp, Chit* target );
 	//float CalcFlockMove( const ComponentSet& thisComp, grinliz::Vector2F* dir );
 

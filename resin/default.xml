@@ -32,6 +32,7 @@
   <texture filename="debugging.png" noMip="true" />
   <texture filename="rock.png" />
   <texture filename="magma.png" filename2="magma_em.png" emissive="true"/>
+  <texture filename="flags.png" />
 
   <!-- note this makes textures and materials the same thing, to have the emissive
        behavior defined like this. That's okay for now.
@@ -65,6 +66,9 @@
   <model filename="unitPlateHumanFemaleFace.ac" shading="flat" />
   <model filename="unitPlateArrow.ac" shading="flat" />
   <model filename="unitCube.ac" shading="flat" />
+  <model filename="targetFlag.ac" shading="flat" shadowCastec="false" />
+  <model filename="possibleTargetFlag.ac" shading="flat" shadowCastec="false" />
+
   <model filename="obelisk.ac" shading="flat" />
 
   <model filename="rock.ac" modelName="rock.1" origin="0 0 0" shading="flat" />

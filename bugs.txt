@@ -7,9 +7,13 @@
 
 - game
 	- Fauna 1
-		- motion around cores
-		- monsters to fight
-		- battles!
+		x motion around cores
+		x monsters to fight
+		x battles!
+		- control of target
+		- target highlight
+		- level up
+		- item screeen
 	- Intermission: regions
 		- generate regions
 		- generate roads

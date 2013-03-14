@@ -3,6 +3,7 @@
 #include "../xegame/chit.h"
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/cameracomponent.h"
+#include "../xegame/rendercomponent.h"
 
 #include "../game/lumosgame.h"
 #include "../game/lumoschitbag.h"
@@ -29,6 +30,8 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	simTimer = 0;
 	simPS = 1.0f;
 	simCount = 0;
+	targetChit = 0;
+	possibleChit = 0;
 	lumosGame = game;
 	game->InitStd( &gamui2D, &okay, 0 );
 	sim = new Sim( lumosGame );
@@ -173,6 +176,84 @@ void GameScene::Rotate( float degrees )
 }
 
 
+void GameScene::MouseMove( const grinliz::Vector2F& view, const grinliz::Ray& world )
+{
+	Matrix4 mvpi;
+	Ray ray;
+	Vector3F at, atModel;
+	game->GetScreenport().ViewProjectionInverse3D( &mvpi );
+	sim->GetEngine()->RayFromViewToYPlane( view, mvpi, &ray, &at );
+	Model* model = sim->GetEngine()->IntersectModel( ray.origin, ray.direction, 10000.0f, TEST_HIT_AABB, 0, 0, 0, &atModel );
+	MoveModel( model ? model->userData : 0 );
+}
+
+
+void GameScene::ClearTargetFlags()
+{
+	Chit* target = sim->GetChitBag()->GetChit( targetChit );
+	if ( target && target->GetRenderComponent() ) {
+		target->GetRenderComponent()->Deco( 0, 0, 0 );
+	}
+	target = sim->GetChitBag()->GetChit( possibleChit );
+	if ( target && target->GetRenderComponent() ) {
+		target->GetRenderComponent()->Deco( 0, 0, 0 );
+	}
+	targetChit = possibleChit = 0;
+}
+
+
+void GameScene::MoveModel( Chit* target )
+{
+	Chit* player = sim->GetPlayerChit();
+	if ( !player ) {
+		ClearTargetFlags();
+		return;
+	}
+	Chit* oldTarget = sim->GetChitBag()->GetChit( possibleChit );
+	if ( oldTarget ) {
+		RenderComponent* rc = oldTarget->GetRenderComponent();
+		if ( rc ) {
+			rc->Deco( 0, 0, 0 );
+		}
+	}
+	if ( target ) {
+		AIComponent* ai = GET_COMPONENT( player, AIComponent );
+		if ( ai && ai->GetTeamStatus( target ) == AIComponent::ENEMY ) {
+			possibleChit = 0;
+			RenderComponent* rc = target->GetRenderComponent();
+			if ( rc ) {
+				rc->Deco( "possibleTargetFlag", 0, INT_MAX );
+				possibleChit = target->ID();
+			}
+		}
+	}
+}
+
+
+void GameScene::TapModel( Chit* target )
+{
+	if ( !target ) {
+		return;
+	}
+	Chit* player = sim->GetPlayerChit();
+	if ( !player ) {
+		ClearTargetFlags();
+		return;
+	}
+	AIComponent* ai = GET_COMPONENT( player, AIComponent );
+	if ( ai && ai->GetTeamStatus( target ) == AIComponent::ENEMY ) {
+		ai->FocusedTarget( target );
+		ClearTargetFlags();
+
+		RenderComponent* rc = target->GetRenderComponent();
+		if ( rc ) {
+			rc->Deco( "targetFlag", 0, INT_MAX );
+			targetChit = target->ID();
+		}
+	}
+}
+
+
 void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::Ray& world )
 {
 	bool uiHasTap = ProcessTap( action, view, world );
@@ -184,15 +265,19 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 		if ( tap ) {
 			Matrix4 mvpi;
 			Ray ray;
-			Vector3F at;
+			Vector3F at, atModel;
 			game->GetScreenport().ViewProjectionInverse3D( &mvpi );
 			sim->GetEngine()->RayFromViewToYPlane( view, mvpi, &ray, &at );
+			Model* model = sim->GetEngine()->IntersectModel( ray.origin, ray.direction, 10000.0f, TEST_HIT_AABB, 0, 0, 0, &atModel );
 
 			int tapMod = lumosGame->GetTapMod();
 
 			if ( tapMod == 0 ) {
 				Chit* chit = sim->GetPlayerChit();
-				if ( chit ) {
+				if ( model ) {
+					TapModel( model->userData );
+				}
+				else if ( chit ) {
 					if ( camModeButton[TRACK].Down() ) {
 						Vector2F dest = { at.x, at.z };
 						AIComponent* ai = GET_COMPONENT( chit, AIComponent );

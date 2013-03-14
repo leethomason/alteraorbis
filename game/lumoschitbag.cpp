@@ -72,25 +72,26 @@ void LumosChitBag::HandleBolt( const Bolt& bolt, Model* modelHit, const grinliz:
 	if ( !explosive ) {
 		if ( modelHit ) {
 			Chit* chitHit = modelHit->userData;
-			GLASSERT( chitHit );
-			GLASSERT( GetChit( chitHit->ID() ) == chitHit );
-			if ( chitHit->GetItemComponent() &&
-				 chitHit->GetItemComponent()->GetItem()->primaryTeam == shooterTeam ) 
-			{
-				// do nothing. don't shoot own team.
-			}
-			else {
-				DamageDesc dd( bolt.damage, bolt.effect );
+			if ( chitHit ) {
+				GLASSERT( GetChit( chitHit->ID() ) == chitHit );
+				if ( chitHit->GetItemComponent() &&
+					 chitHit->GetItemComponent()->GetItem()->primaryTeam == shooterTeam ) 
+				{
+					// do nothing. don't shoot own team.
+				}
+				else {
+					DamageDesc dd( bolt.damage, bolt.effect );
 		
-				ChitMsg msg( ChitMsg::CHIT_DAMAGE, 0, &dd );
-				// 'vector' copied from BattleMechanics::GenerateExplosionMsgs
-				// This code is strange: the vector doesn't contain the origin,
-				// but the impulse (velocity). Weird.
-				msg.vector = bolt.dir;
-				msg.vector.Normalize();
-				msg.vector.Multiply( 2.0f );
-				msg.originID = bolt.chitID;
-				chitHit->SendMessage( msg, 0 );
+					ChitMsg msg( ChitMsg::CHIT_DAMAGE, 0, &dd );
+					// 'vector' copied from BattleMechanics::GenerateExplosionMsgs
+					// This code is strange: the vector doesn't contain the origin,
+					// but the impulse (velocity). Weird.
+					msg.vector = bolt.dir;
+					msg.vector.Normalize();
+					msg.vector.Multiply( 2.0f );
+					msg.originID = bolt.chitID;
+					chitHit->SendMessage( msg, 0 );
+				}
 			}
 		}
 	}

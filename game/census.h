@@ -10,6 +10,7 @@ class Census
 public:
 	Census() {
 		memset( plants, 0, sizeof(int)*NUM_PLANT_TYPES*MAX_PLANT_STAGES );
+		ais = 0;
 	}
 
 	int									plants[NUM_PLANT_TYPES][MAX_PLANT_STAGES];

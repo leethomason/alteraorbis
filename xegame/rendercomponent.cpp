@@ -45,6 +45,9 @@ RenderComponent::RenderComponent( Engine* _engine, const char* _asset )
 		resource[i] = 0;
 		model[i] = 0;
 	}
+	for( int i=0; i<NUM_DECO; ++i ) {
+		deco[i] = 0;
+	}
 	radiusOfBase = 0;
 }
 
@@ -54,11 +57,15 @@ RenderComponent::~RenderComponent()
 	for( int i=0; i<NUM_MODELS; ++i ) {
 		GLASSERT( model[i] == 0 );
 	}
+	for( int i=0; i<NUM_DECO; ++i ) {
+		GLASSERT( deco[i] == 0 );
+	}
 }
 
 
 void RenderComponent::Serialize( XStream* xs )
 {
+	// FIXME serialize deco
 	BeginSerialize( xs, "RenderComponent" );
 
 	XarcOpen( xs, "resources" );
@@ -99,6 +106,7 @@ void RenderComponent::Serialize( XStream* xs )
 void RenderComponent::OnAdd( Chit* chit )
 {
 	Component::OnAdd( chit );
+
 	for( int i=0; i<NUM_MODELS; ++i ) {
 		if ( resource[i] ) {
 			if ( !model[i] ) {
@@ -124,6 +132,13 @@ void RenderComponent::OnRemove()
 	for( int i=0; i<EL_MAX_METADATA; ++i ) {
 		metaDataName[i] = IString();
 	}
+	for( int i=0; i<NUM_DECO; ++i ) {
+		if ( deco[i] ) {
+			engine->FreeModel( deco[i] );
+			deco[i] = 0;
+		}
+	}
+
 }
 
 
@@ -374,7 +389,30 @@ int RenderComponent::DoTick( U32 deltaTime, U32 since )
 		}
 	}
 
+	// The decos:
+	if ( deco[0] ) {
+		Vector3F pos = model[0]->Pos();
+		pos.y = 0.01f;
+		deco[0]->SetPos( pos );
+	}
 	return tick;
+}
+
+
+void RenderComponent::Deco( const char* asset, int slot, int duration )
+{
+	GLASSERT( slot < NUM_DECO );
+	if ( deco[slot] ) {
+		engine->FreeModel( deco[slot] );
+		deco[slot] = 0;
+	}
+	if ( duration > 0 ) {
+		const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( asset );
+		deco[slot] = engine->AllocModel( res );
+		Vector3F pos = model[0]->Pos();
+		pos.y = 0.01f;
+		deco[slot]->SetPos( pos );	
+	}
 }
 
 

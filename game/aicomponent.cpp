@@ -66,6 +66,7 @@ AIComponent::~AIComponent()
 
 void AIComponent::Serialize( XStream* xs )
 {
+	// FIXME check
 	this->BeginSerialize( xs, Name() );
 	XARC_SER( xs, aiMode );
 	XARC_SER( xs, currentAction );
@@ -483,6 +484,14 @@ void AIComponent::FocusedMove( const grinliz::Vector2F& dest )
 		currentAction = NO_ACTION;
 		focusedMove = true;
 	}
+}
+
+
+void AIComponent::FocusedTarget( Chit* chit )
+{
+	aiMode = BATTLE_MODE;
+	currentTarget = chit->ID();
+	focusOnTarget = true;
 }
 
 
