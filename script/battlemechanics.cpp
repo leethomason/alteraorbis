@@ -209,7 +209,7 @@ void BattleMechanics::Shoot( ChitBag* bag, Chit* src, Chit* target, IRangedWeapo
 	if ( !okay ) {
 		return;
 	}
-	if ( !target->GetRenderComponent() ) {
+	if ( !target->GetRenderComponent() || !target->GetMoveComponent() ) {
 		return;
 	}
 	GameItem* item = weapon->GetItem();

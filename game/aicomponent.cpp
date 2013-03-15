@@ -104,12 +104,17 @@ void AIComponent::OnRemove()
 int AIComponent::GetTeamStatus( Chit* other )
 {
 	// FIXME: placeholder friend/enemy logic
-	ItemComponent* thisItem  = GET_COMPONENT( parentChit, ItemComponent );
-	ItemComponent* otherItem = GET_COMPONENT( other, ItemComponent );
-	if ( thisItem && otherItem ) {
-		if ( thisItem->GetItem()->primaryTeam != otherItem->GetItem()->primaryTeam ) {
-			return ENEMY;
-		}
+	GameItem* thisItem  = parentChit->GetItem();
+	GameItem* otherItem = other->GetItem();
+
+	int thisTeam = thisItem ? thisItem->primaryTeam : 0;
+	int otherTeam = otherItem ? otherItem->primaryTeam : 0;
+
+	if ( thisTeam == 0 || otherTeam == 0 ) {
+		return NEUTRAL;
+	}
+	if ( thisTeam != otherTeam ) {
+		return ENEMY;
 	}
 	return FRIENDLY;
 }
@@ -191,7 +196,9 @@ void AIComponent::GetFriendEnemyLists()
 	Chit* currentTargetChit = GetChitBag()->GetChit( currentTarget );
 	if ( currentTargetChit && currentTargetChit->GetSpatialComponent() ) {
 		Vector2F targetCenter = currentTargetChit->GetSpatialComponent()->GetPosition2D();
-		if ( (targetCenter - center).LengthSquared() < LOSE_AWARENESS*LOSE_AWARENESS ) {
+		if (    (targetCenter - center).LengthSquared() < LOSE_AWARENESS*LOSE_AWARENESS			// close enough OR
+			 || focusOnTarget )																// focused
+		{
 			int i = enemyList.Find( currentTarget );
 			if ( i < 0 && enemyList.HasCap() ) {
 				enemyList.Push( currentTarget );
