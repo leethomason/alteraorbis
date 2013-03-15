@@ -113,7 +113,11 @@
   <model filename="mantis.ac" animation="mantisAnimation" shading="flat" polyRemoval="pre">
     <meta name="trigger" pos="-0.08 0.26 0.47" boneName="arm.lower.right"/>
     <meta name="target"  pos="0 0.30 0" />
-  </model>  
+  </model>
+  <model filename="redMantis.ac" animation="mantisAnimation" shading="flat" polyRemoval="pre">
+    <meta name="trigger" pos="-0.08 0.26 0.47" boneName="arm.lower.right"/>
+    <meta name="target"  pos="0 0.30 0" />
+  </model>
   <model filename="balrog.ac" animation="balrogAnimation" shading="flat" polyRemoval="pre">
     <meta name="trigger" pos="0.40 0.45 0.004" rot="1 0 0 -90" boneName="arm.lower.left" />
     <meta name="target"  pos="0 1.40 0" />

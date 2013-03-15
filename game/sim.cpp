@@ -74,8 +74,8 @@ void Sim::Load( const char* mapDAT, const char* gameDAT )
 
 	if ( !gameDAT ) {
 		// Fresh start 
-		CreatePlayer();
 		CreateCores();
+		CreatePlayer();
 	}
 	else {
 		QuickProfile qp( "Sim::Load" );
@@ -189,6 +189,18 @@ grinliz::Vector2F Sim::FindCore( const grinliz::Vector2F& pos )
 void Sim::CreatePlayer()
 {
 	Vector2I v = worldMap->FindEmbark();
+	if ( chitBag->census.cores.Size() ) {
+		int id = chitBag->census.cores[0];
+		Chit* chit = chitBag->GetChit( id );
+		if ( chit ) {
+			MapSpatialComponent* msc = GET_COMPONENT( chit, MapSpatialComponent );
+			if ( msc ) {
+				v = msc->MapPosition();
+				v.x += 2;
+				v.y += 2;
+			}
+		}
+	}
 	CreatePlayer( v, "humanFemale" );
 }
 
@@ -210,12 +222,12 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos, const char* assetName )
 
 	chitBag->AddItem( assetName, chit, engine, 1, 4 );
 	chitBag->AddItem( "shield", chit, engine );
-	if ( chit->random.Bit() ) {
+	//if ( chit->random.Bit() ) {
 		chitBag->AddItem( "blaster", chit, engine, 4 );
-	}
-	else {
-		chitBag->AddItem( "ring", chit, engine, 4 );
-	}
+	//}
+	//else {
+	//	chitBag->AddItem( "ring", chit, engine, 4 );
+	//}
 
 	AIComponent* ai = new AIComponent( engine, worldMap );
 	ai->EnableDebug( true );

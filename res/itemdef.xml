@@ -19,11 +19,24 @@
       <item name="pincer"
             flags="MELEE_WEAPON INTRINSIC"
             hardpoint="trigger"
-            meleeDamageMult="2">
+            meleeDamageMult="1.8">
       </item>
     </intrinsics>
   </item>
 
+  <item name="redMantis"
+        resource="redMantis"
+        mass="35">
+    <intrinsics>
+      <item name="pincer"
+            flags="MELEE_WEAPON INTRINSIC"
+            hardpoint="trigger"
+            meleeDamageMult="2.0">
+      </item>
+    </intrinsics>
+  </item>
+
+  
   <!-- Base effects, FIRE, in this case, are part of the Balrog
        model. Combination effects SMOKE=FIRE+WATER are 
        procedurally generated at run time.

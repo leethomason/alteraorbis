@@ -412,6 +412,7 @@ void RenderComponent::Deco( const char* asset, int slot, int duration )
 		Vector3F pos = model[0]->Pos();
 		pos.y = 0.01f;
 		deco[slot]->SetPos( pos );	
+		deco[slot]->userData = parentChit;
 	}
 }
 

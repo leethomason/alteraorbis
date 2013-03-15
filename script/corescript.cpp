@@ -74,7 +74,14 @@ int CoreScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 				// FIXME: proper team
 				// FIXME safe downcast
 				Vector2F p2 = ctx.chit->GetSpatialComponent()->GetPosition2D();
-				((LumosChitBag*)(ctx.chit->GetChitBag()))->NewMonsterChit( pf, "mantis", 100, &p2 );
+
+				int team = 100;
+				const char* asset = "mantis";
+				if ( ctx.chit->ID() & 1 ) {
+					team = 101;
+					asset = "redMantis";
+				}
+				((LumosChitBag*)(ctx.chit->GetChitBag()))->NewMonsterChit( pf, asset, team, &p2 );
 			}
 		}
 	}

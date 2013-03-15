@@ -36,7 +36,8 @@
 
 using namespace grinliz;
 
-static const float NORMAL_AWARENESS		= 12.0f;
+static const float NORMAL_AWARENESS		= 10.0f;
+static const float LOSE_AWARENESS		= 16.0f;
 static const float SHOOT_ANGLE			= 10.0f;	// variation from heading that we can shoot
 static const float SHOOT_ANGLE_DOT		=  0.985f;	// same number, as dot product.
 
@@ -184,10 +185,17 @@ void AIComponent::GetFriendEnemyLists()
 			}
 		}
 	}
-	if ( currentTarget && GetChitBag()->GetChit( currentTarget )) {
-		int i = enemyList.Find( currentTarget );
-		if ( i < 0 && enemyList.HasCap() ) {
-			enemyList.Push( currentTarget );
+
+	// Add the currentTarget back in, if we lost it. But only if
+	// it hasn't gone too far away.
+	Chit* currentTargetChit = GetChitBag()->GetChit( currentTarget );
+	if ( currentTargetChit && currentTargetChit->GetSpatialComponent() ) {
+		Vector2F targetCenter = currentTargetChit->GetSpatialComponent()->GetPosition2D();
+		if ( (targetCenter - center).LengthSquared() < LOSE_AWARENESS*LOSE_AWARENESS ) {
+			int i = enemyList.Find( currentTarget );
+			if ( i < 0 && enemyList.HasCap() ) {
+				enemyList.Push( currentTarget );
+			}
 		}
 	}
 }
@@ -492,6 +500,7 @@ void AIComponent::FocusedTarget( Chit* chit )
 	aiMode = BATTLE_MODE;
 	currentTarget = chit->ID();
 	focusOnTarget = true;
+	focusedMove = false;
 }
 
 

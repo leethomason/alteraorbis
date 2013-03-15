@@ -121,6 +121,7 @@ void GameScene::Resize()
 	bool visible = game->DebugUIEnabled();
 	allRockButton.SetVisible( visible );
 	serialButton[CYCLE].SetVisible( visible );
+	coreButton.SetVisible( visible );
 }
 
 

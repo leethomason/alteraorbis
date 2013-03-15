@@ -1,4 +1,4 @@
-- mantis tribes - whos fighting who?
+x control key is terrible...sometimes.
 - explosion is in the wrong direction. Units walk through explosions?? (Balrog vs. Human.)
 - does fire affect plants??
 - health is awkward: keeps copy of HP (oops). move hp to health component? (TotalHP() on item?)
@@ -10,10 +10,8 @@
 		x motion around cores
 		x monsters to fight
 		x battles!
-		- control of target
-		- target highlight
-		- level up
-		- item screeen
+		x control of target
+		x target highlight
 	- Intermission: regions
 		- generate regions
 		- generate roads
@@ -22,6 +20,9 @@
 		- update pathfinder
 		- overnight test
 	- Flora 2
+		- weapon toggle / selection
+		- level up
+		- character screeen
 		- pony-unicorn-pegasus news prioritization
 		- fix annoying hp out of range bug
 		- rain, general de-saturation
@@ -134,6 +135,8 @@ x shadows should be part of space-tree bounds
 
 ----------- FIXED -------------
 
+x mantis tribes - whos fighting who?
+x awareness range is a little high. dobule the awareness (?) should forget even a focused target.
 x check that shields and damage absorbing is working correctly. something seems wrong with shields - recharge?
 x shield glow broken. so hard to tell not sure it's worth doing.
 x The item / weapon system really isn't working, and it's complex. Needs coordination between
