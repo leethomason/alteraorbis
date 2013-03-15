@@ -6,12 +6,6 @@ x control key is terrible...sometimes.
 - remove temporary arbitrary AI limit in corescript
 
 - game
-	- Fauna 1
-		x motion around cores
-		x monsters to fight
-		x battles!
-		x control of target
-		x target highlight
 	- Intermission: regions
 		- generate regions
 		- generate roads
@@ -135,6 +129,12 @@ x shadows should be part of space-tree bounds
 
 ----------- FIXED -------------
 
+x Fauna 1
+	x motion around cores
+	x monsters to fight
+	x battles!
+	x control of target
+	x target highlight
 x mantis tribes - whos fighting who?
 x awareness range is a little high. dobule the awareness (?) should forget even a focused target.
 x check that shields and damage absorbing is working correctly. something seems wrong with shields - recharge?
