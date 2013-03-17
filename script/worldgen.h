@@ -65,6 +65,7 @@ public:
 		}
 	}
 
+	void CutRoads( U32 seed );
 	bool CalColor( grinliz::CDynArray<WorldFeature>* featureArr );
 
 	// SIZExSIZE
@@ -72,12 +73,15 @@ public:
 	const U8* Color() const						{ return color; }
 
 	enum {
-		SIZE = MAX_MAP_SIZE
+		SIZE			= MAX_MAP_SIZE,
+		REGION_SIZE		= 64,
+		NUM_REGIONS		= SIZE / REGION_SIZE
 	};
 
 private:
 	int CountFlixelsAboveCutoff( const float* flixels, float cutoff, float* maxh );
 	void DrawCanal( grinliz::Vector2I v, int radius, int dx, int dy, const grinliz::Rectangle2I& wf );
+	void Draw( const grinliz::Rectangle2I& r, int land );
 
 	float* flixels;
 	grinliz::PerlinNoise* noise0;
@@ -85,7 +89,6 @@ private:
 
 	U8* land;	// 0: water, 1: last
 	U8* color;	// 0: not processed, >0 color
-	//grinliz::CDynArray< WorldFeature > featureArr;
 };
 
 #endif // LUMOS_WORLDGEN_INCLUDED

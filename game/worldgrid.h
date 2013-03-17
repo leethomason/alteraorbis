@@ -37,7 +37,7 @@ public:
 		grinliz::Color4U8 c = { 0, 0, 0, 255 };
 #if 1
 		if ( isLand && nominalRockHeight > 0 ) {
-			U8 gr = 80*nominalRockHeight;
+			U8 gr = 120+20*nominalRockHeight;
 			c.Set( gr, gr, gr, 255 );
 		}
 		else

@@ -17,7 +17,7 @@
 using namespace grinliz;
 
 static const int COUNT = 5;
-static const float FRACTION_LAND = 0.4f;
+static const float FRACTION_LAND = 0.3f;
 static const int WIDTH  = WorldGen::SIZE;
 static const int HEIGHT = WorldGen::SIZE;
 
@@ -33,7 +33,6 @@ int main(int argc, const char* argv[])
 		seed0 = atoi( argv[1] );
 		printf( "seed0=%d\n", seed0 );
 		seed1 = seed0 + 4321;
-		count = 1;
 	}
 	if ( argc >= 3 ) {
 		seed1 = atoi( argv[2] );
@@ -67,13 +66,18 @@ int main(int argc, const char* argv[])
 			continue;
 		}
 
+		worldGen.WriteMarker();
+		worldGen.CutRoads( seed0 );
+
 		CDynArray<WorldFeature> featureArr;
+		/*
 		result = worldGen.CalColor( &featureArr );
 		if ( !result ) {
 			printf( "CalcColor failed. Retry.\n" );
 			--i;
 			continue;
 		}
+		*/
 
 		clock_t endTime = clock();
 		printf( "loop %d: %dms\n", i, endTime - loopTime );

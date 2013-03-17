@@ -7,6 +7,7 @@
 #include "../grinliz/glrandom.h"
 #include "../grinliz/glcolor.h"
 #include "../grinliz/glstringutil.h"
+#include "../grinliz/glbitarray.h"
 
 #include "../shared/lodepng.h"
 #include "../game/gamelimits.h"
@@ -292,6 +293,130 @@ void WorldGen::DrawCanal( Vector2I v, int radius, int dx, int dy, const Rectangl
 		if ( random.Rand(3) == 0 ) v.x -= dy; 
 		if ( random.Rand(3) == 0 ) v.y += dx; 
 		if ( random.Rand(3) == 0 ) v.y -= dx; 
+	}
+}
+
+
+void WorldGen::Draw( const Rectangle2I& r, int isLand )
+{
+	GLASSERT( r.min.x >= 0 && r.max.x < SIZE );
+	GLASSERT( r.min.y >= 0 && r.max.y < SIZE );
+	for( int y=r.min.y; y<=r.max.y; ++y ) {
+		for( int x=r.min.x; x<=r.max.x; ++x ) {
+			land[y*SIZE+x] = isLand;
+		}
+	}
+}
+
+
+void WorldGen::CutRoads( U32 seed )
+{
+	// Each sector is represented by one pather,
+	// so they can't connect. First pass: split
+	// up the world.
+	for( int pass=0; pass<2; ++pass ) {
+		for( int j=0; j<NUM_REGIONS-1; ++j ) {
+			Rectangle2I r;
+			r.Set( 0,	   (j+1)*REGION_SIZE-1, 
+				   SIZE-1, (j+1)*REGION_SIZE );
+			if ( pass == 1 ) {
+				Swap( &r.min.x, &r.min.y );
+				Swap( &r.max.x, &r.max.y );
+			}
+
+			Draw( r, 0 );
+		}
+	}
+
+	// Set which sectors are on the road. When roads are
+	// everything which can be a road is a road.
+	BitArray< NUM_REGIONS, NUM_REGIONS, 1 > sectors;
+	Random random( seed );
+
+	Vector2I center = { NUM_REGIONS/2, NUM_REGIONS/2 };
+	int rad = NUM_REGIONS/2;
+
+	for( int j=1; j<NUM_REGIONS-2; ++j ) {
+		int dy = j - center.x;
+		int d2 = rad*rad - dy*dy;
+		int dx = d2 ? LRintf( sqrt( (float)(d2) )) : 1;
+
+		int dx0 = random.Rand( dx )/2 + dx/2;
+		int dx1 = random.Rand( dx )/2 + dx/2;
+
+		if ( dx0 == 0 && dx1 == 0 ) {
+			if ( random.Bit() )
+				dx0 = 1;
+			else
+				dx1 = 1;
+		}
+
+		int x0 = center.x - dx0;
+		int x1 = center.x + dx1;
+		x0 = Clamp( x0, 1, NUM_REGIONS-2 );
+		x1 = Clamp( x1, 1, NUM_REGIONS-2 );
+
+		Rectangle2I r;
+		r.Set( x0, j, x1, j );
+		sectors.SetRect( r );
+	}
+
+	// Now fill in roads.
+	for( int j=1; j<NUM_REGIONS-1; ++j ) {
+		for( int i=1; i<NUM_REGIONS-1; ++i ) {
+			if ( sectors.IsSet( i, j )) {
+				Rectangle2I r;
+
+				int x0 = i*REGION_SIZE;
+				int x1 = (i+1)*REGION_SIZE-1;
+				int y0 = j*REGION_SIZE;
+				int y1 = (j+1)*REGION_SIZE-1;
+
+				bool left   = sectors.IsSet(i-1,j) ? true : false;
+				bool right  = sectors.IsSet(i+1,j) ? true : false;
+				bool up     = sectors.IsSet(i,j-1) ? true : false;
+				bool down   = sectors.IsSet(i,j+1) ? true : false;
+
+				// Make sure we are connected in.
+				if ( i < rad ) {
+					if ( j < rad ) {
+						down = true;
+						right = true;
+					}
+					else { 
+						up = true;
+						right = true;
+					}
+				}
+				else {
+					if ( j < rad ) {
+						down = true;
+						left = true;
+					}
+					else {	
+						up = true;
+						left = true;
+					}
+				}
+
+				if ( left ) {
+					r.Set( x0-1, y0-1, x0, y1+1 );
+					Draw( r, 1 );
+				}
+				if ( right ) {
+					r.Set( x1, y0+1, x1+1, y1+1 );
+					Draw( r, 1 );
+				}
+				if ( up ) {
+					r.Set( x0-1, y0-1, x1+1, y0 );
+					Draw( r, 1 );
+				}
+				if ( down ) {
+					r.Set( x0-1, y1, x1+1, y1+1 );
+					Draw( r, 1 );
+				}
+			}
+		}
 	}
 }
 
