@@ -23,8 +23,6 @@
 #include "../grinliz/glcontainer.h"
 #include "../grinliz/glstringutil.h"
 
-#include "../tinyxml2/tinyxml2.h"
-
 #include "vertex.h"
 #include "enginelimits.h"
 #include "serialize.h"
@@ -97,7 +95,7 @@ struct ModelMetaData {
 	grinliz::Vector3F		pos;		// position
 	grinliz::Vector3F		axis;		// axis of rotation (if any)
 	float					rotation;	// amount of rotation (if any)
-	grinliz::IString		boneName;	// name of the bone this metadat is attached to (if any)
+	grinliz::IString		boneName;	// name of the bone this metadata is attached to (if any)
 };
 
 
@@ -158,7 +156,7 @@ public:
 					const grinliz::Vector3F& dir,
 					grinliz::Vector3F* intersect ) const;
 
-	const ModelMetaData* GetMetaData( const char* name ) const;
+	const ModelMetaData* GetMetaData( grinliz::IString name ) const;
 	const ModelMetaData* GetMetaData( int i ) const { GLASSERT( i>= 0 && i < EL_MAX_METADATA ); return &header.metaData[i]; }
 
 	const char*			Name() const	{ return header.name.c_str(); }
@@ -354,7 +352,7 @@ public:
 		return b;
 	}
 
-	void CalcMetaData( const char* name, grinliz::Matrix4* xform ) const;
+	void CalcMetaData( grinliz::IString name, grinliz::Matrix4* xform ) const;
 	bool HasParticles() const {  return hasParticles; }
 	void EmitParticles( ParticleSystem* system, const grinliz::Vector3F* eyeDir, U32 deltaTime ) const;
 	void CalcTargetSize( float* width, float* height ) const;
@@ -383,7 +381,7 @@ private:
 	const grinliz::Matrix4& InvXForm() const;
 
 	void CalcAnimation( BoneData* boneData ) const;	// compute the animition, accounting for crossfade, etc.
-	void CalcAnimation( BoneData::Bone* bone, const char* boneName ) const;	// compute the animition, accounting for crossfade, etc.
+	void CalcAnimation( BoneData::Bone* bone, grinliz::IString boneName ) const;	// compute the animition, accounting for crossfade, etc.
 	void CrossFade( float fraction, BoneData::Bone* inOut, const BoneData::Bone& prev ) const;
 
 	SpaceTree* tree;

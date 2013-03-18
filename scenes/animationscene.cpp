@@ -18,6 +18,7 @@
 #include "../engine/engine.h"
 #include "../engine/model.h"
 #include "../engine/animation.h"
+#include "../xegame/istringconst.h"
 
 #include <direct.h>
 
@@ -307,7 +308,7 @@ void AnimationScene::ItemTapped( const gamui::UIItem* item )
 		Screenport* port = engine->GetScreenportMutable();
 		if ( ortho.Down() ) {
 			port->SetOrthoCamera( true, 0, 3.0f );
-			static const Vector3F DIR = { -1, 0, 0 };	// FIXME: bug in camera code. (EEK.) Why is the direction negative???
+			static const Vector3F DIR = { 1, 0, 0 };
 			static const Vector3F UP  = { 0, 1, 0 };
 			engine->camera.SetPosWC( -5, 0.55f, 1 );
 			engine->camera.SetDir( DIR, UP ); 
@@ -444,11 +445,11 @@ void AnimationScene::DoTick( U32 deltaTime )
 		model[i]->EmitParticles( engine->particleSystem, engine->camera.EyeDir3(), deltaTime );
 	}
 
-	if ( model[0]->HasAnimation() && model[0]->GetResource()->GetMetaData( "trigger" )) {
+	if ( model[0]->HasAnimation() && model[0]->GetResource()->GetMetaData( IStringConst::ktrigger )) {
 		static const Vector3F UP = { 0, 1, 0 };
 		static const Vector3F POS = { 0,0,0 };
 		Matrix4 xform;
-		model[0]->CalcMetaData( "trigger", &xform );
+		model[0]->CalcMetaData( IStringConst::ktrigger, &xform );
 		Vector3F p = xform * POS;
 
 		for( int i=0; i<metaDataEvents.Size(); ++i ) {
@@ -476,7 +477,7 @@ void AnimationScene::DoTick( U32 deltaTime )
 
 			if ( triggerModel ) {
 				Matrix4 xform;
-				model[0]->CalcMetaData( "trigger", &xform );
+				model[0]->CalcMetaData( IStringConst::ktrigger, &xform );
 				triggerModel->SetTransform( xform );
 			}
 		}

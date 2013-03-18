@@ -7,6 +7,7 @@
 class LumosGame;
 class Sim;
 struct NewsEvent;
+class Chit;
 
 class GameScene : public Scene
 {
@@ -24,6 +25,7 @@ public:
 	virtual void Tap( int action, const grinliz::Vector2F& screen, const grinliz::Ray& world );
 	virtual void ItemTapped( const gamui::UIItem* item );
 	virtual void HandleHotKey( int mask );
+	virtual void MouseMove( const grinliz::Vector2F& view, const grinliz::Ray& world );
 
 	virtual void Draw3D( U32 deltaTime );
 	virtual void DrawDebugText();
@@ -32,6 +34,10 @@ private:
 	void Save();
 	void Load();
 	void SetFace();
+
+	void TapModel( Chit* chit );
+	void MoveModel( Chit* chit );
+	void ClearTargetFlags();
 
 	enum {
 		SAVE,
@@ -56,17 +62,19 @@ private:
 	int			simCount;
 	float		simPS;
 
+	int targetChit;
+	int possibleChit;
+
 	gamui::PushButton	okay;
 	gamui::PushButton	serialButton[NUM_SERIAL_BUTTONS];
 	gamui::ToggleButton camModeButton[NUM_CAM_MODES];
 	gamui::PushButton	allRockButton;
+	gamui::PushButton	coreButton;
 	gamui::PushButton	newsButton[NUM_NEWS_BUTTONS];
 	gamui::Image		minimap;
 	gamui::Image		playerMark;
 	gamui::Image		faceImage;
 	gamui::TextLabel	dateLabel;
-
-	//grinliz::CDynArray< NewsEvent > localNews;
 };
 
 

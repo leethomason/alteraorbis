@@ -1,5 +1,4 @@
 #include "spatialcomponent.h"
-#include "inventorycomponent.h"
 #include "itemcomponent.h"
 #include "rendercomponent.h"
 #include "cameracomponent.h"
@@ -9,6 +8,7 @@
 #include "../game/debugpathcomponent.h"
 #include "../game/healthcomponent.h"
 #include "../game/mapspatialcomponent.h"
+#include "../game/aicomponent.h"
 
 #include "../script/scriptcomponent.h"
 
@@ -28,9 +28,6 @@ Component* ComponentFactory::Factory( const char* name, Chit* chit ) const
 	else if ( StrEqual( name, "PathMoveComponent" )) {
 		return new PathMoveComponent( worldMap );
 	}
-	else if ( StrEqual( name, "InventoryComponent" )) {
-		return new InventoryComponent( engine );
-	}
 	else if ( StrEqual( name, "ItemComponent" )) {
 		GameItem item;
 		return new ItemComponent( engine, item );
@@ -42,7 +39,7 @@ Component* ComponentFactory::Factory( const char* name, Chit* chit ) const
 		return new DebugPathComponent( engine, worldMap, lumosGame );
 	}
 	else if ( StrEqual( name, "HealthComponent" )) {
-		return new HealthComponent();
+		return new HealthComponent( engine );
 	}
 	else if ( StrEqual( name, "RenderComponent" )) {
 		return new RenderComponent( engine, 0 );
@@ -51,10 +48,13 @@ Component* ComponentFactory::Factory( const char* name, Chit* chit ) const
 		return new CameraComponent( &engine->camera );
 	}
 	else if ( StrEqual( name, "ScriptComponent" )) {
-		return new ScriptComponent( this );
+		return new ScriptComponent( this, census );
 	}
 	else if ( StrEqual( name, "MapSpatialComponent" )) {
 		return new MapSpatialComponent( worldMap );
+	}
+	else if ( StrEqual( name, "AIComponent" )) {
+		return new AIComponent( engine, worldMap );
 	}
 
 	GLASSERT( 0 );

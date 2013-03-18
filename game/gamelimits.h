@@ -25,11 +25,14 @@ static const int MAX_ACTIVE_ITEMS	= 8;
 static const int MAX_ITEM_NAME		= 24;
 static const int NUM_PLANT_TYPES	= 8;
 static const int MAX_PLANT_STAGES	= 4;
+static const int MAX_CORES			= 100;	// Number of domains that can have active cores.
+											// FIXME: too low? Should map to # domains.
 
 static const U32 MINUTE				= 1000*60;						// game time and real time
 static const U32 MINUTES_IN_AGE		= 100;
 static const U32 AGE				= MINUTE * MINUTES_IN_AGE;		// 1st age, 2nd age, etc.
-
+static const float MIN_EFFECTIVE_RANGE = 2.0f;
+static const float MAX_EFFECTIVE_RANGE = 25.0f;	
 
 static const int MODEL_USER	= 0x1000;				// from model.h
 
@@ -47,25 +50,19 @@ static const float EFFECT_DAMAGE_PER_SEC = 20.0f;
 static const float EFFECT_RADIUS = 1.5f;
 static const float EFFECT_ACCRUED_MAX = EFFECT_DAMAGE_PER_SEC;
 
-// This arrangement breaks the case where something can attach
-// to multiple hardpoints. Fine; fix later.
+// hardpoint & metadata names/bitfields
 enum {
-	NO_HARDPOINT = -1,
-	// The set of hardpoints	
-	HARDPOINT_TRIGGER = 0,	// this attaches to the trigger hardpoint
-	HARDPOINT_ALTHAND,		// this attaches to the alternate hand (non-trigger) hardpoint
-	HARDPOINT_HEAD,			// this attaches to the head hardpoint
-	HARDPOINT_SHIELD,		// this attaches to the shield hardpoint
-	NUM_HARDPOINTS,
+	HARDPOINT_TRIGGER	= 0x01,	// this attaches to the trigger hardpoint
+	HARDPOINT_ALTHAND	= 0x02,	// this attaches to the alternate hand (non-trigger) hardpoint
+	HARDPOINT_HEAD		= 0x04,	// this attaches to the head hardpoint
+	HARDPOINT_SHIELD	= 0x08,	// this attaches to the shield hardpoint
 };
 
 enum {
 	PROCEDURAL_NONE,
-	PROCEDURAL_ROUNDS_TO_GLOW,	// rounds -> glow intensity
 	PROCEDURAL_RING,			// layers, etc.
 
 	PROCEDURAL_INIT_MASK = PROCEDURAL_RING,				// mask of procedural rendering done at init time
-	PROCEDURAL_TICK_MASK = PROCEDURAL_ROUNDS_TO_GLOW,	// mask of procedural rendering done per tick
 };
 
 

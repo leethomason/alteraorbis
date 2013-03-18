@@ -493,6 +493,8 @@ typedef Vector3< float > Vector3F;
 typedef Vector4< int > Vector4I;
 typedef Vector4< float > Vector4F;
 
+static const Vector3F V3F_ZERO = { 0, 0, 0 };
+static const Vector4F V4F_ZERO = { 0, 0, 0, 0 };
 
 };	// namespace grinliz
 

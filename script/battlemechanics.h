@@ -50,10 +50,28 @@ public:
 	void Shoot( ChitBag* bag, 
 				Chit* src, 
 				Chit* target, 
-				IRangedWeaponItem* weapon, 
-				const grinliz::Vector3F& pos );
+				IRangedWeaponItem* weapon );
 
-	float TestFire( float range, float targetDiameter );
+
+	// Radius at 1 unit distance. The shot is randomly placed within the sphere
+	// at that distance. The shere part is tricky - doing volume calc for hit
+	// chances.
+	static float ComputeRadAt1(	GameItem* shooter, 
+								IRangedWeaponItem* weapon,
+								bool shooterMoving,
+								bool targetMoving );
+	// Returns the chance of hitting, between 0 and 1.
+	static float ChanceToHit( float range, float radAt1, float targetDiameter=0.5f );
+	// Returns the range at which the weapon has a 50% chance to hit.
+	// 1m is assumed the default target diameter.
+	static float EffectiveRange( float radAt1, float targetDiameter=0.5f );
+	
+	// Computes an accurate leading shot. Returns a target. 
+	// The trigger is optional.
+	// Returns the leading target.
+	static grinliz::Vector3F ComputeLeadingShot(	Chit* origin, 
+													Chit* target, 
+													grinliz::Vector3F* trigger );
 
 	// Other --------------------- //
 
@@ -62,13 +80,12 @@ public:
 	static int PrimaryTeam( Chit* src );
 
 private:
-	float ComputeRadAt1( Chit* shooter, IRangedWeaponItem* weapon, Chit* target );
 	grinliz::Vector3F FuzzyAim( const grinliz::Vector3F& origin, const grinliz::Vector3F& target, float radiusAt1 );
 
-	grinliz::Vector3F ComputeLeadingShot( const grinliz::Vector3F& origin,
-										  const grinliz::Vector3F& target,
-										  const grinliz::Vector3F& velocity,
-										  float speed );
+	static grinliz::Vector3F ComputeLeadingShot(	const grinliz::Vector3F& origin,
+													const grinliz::Vector3F& target,
+													const grinliz::Vector3F& velocity,
+													float speed );
 
 	grinliz::CDynArray<Chit*> hashQuery;
 	grinliz::Random random;

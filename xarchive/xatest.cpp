@@ -84,14 +84,16 @@ int main( int argc, const char* argv[] )
 	if ( argc == 1 ) {
 		{
 			Squisher* s = new Squisher();
-			static const char* line[4] = {	"Hello, World",
-											"Hello, World v2.",
-											"I'm mad, you're mad, we're all mad here.",
-											"Hello Alice. Welcome to a mad world." };
+			static const int NLINES = 5;
+			static const char* line[NLINES] = {	"Hello, World",
+												"Hello, World v2.",
+												"I'm mad, you're mad, we're all mad here.",
+												"Hello Alice. Welcome to an all mad World.",
+												"Component. MapComponent. SpatialComponent. MapSpatialComponent." };
 
 			CDynArray<U8> buf;
 
-			for( int i=0; i<4; ++i ) {
+			for( int i=0; i<NLINES; ++i ) {
 				int n = 0;
 				const U8* str = s->Encode( (const U8*)line[i], strlen(line[i])+1, &n );
 				U8* mem = buf.PushArr( n );
@@ -102,7 +104,7 @@ int main( int argc, const char* argv[] )
 			delete s; s = new Squisher();
 
 			int start = 0;
-			for( int i=0; i<4; ++i ) {
+			for( int i=0; i<NLINES; ++i ) {
 				int n = 0;
 				const char* str = (const char*) s->Decode( (const U8*) &buf[start], strlen(line[i])+1, &n );
 				printf( "Line %d: %s\n", i, str );

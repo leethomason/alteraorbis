@@ -206,7 +206,7 @@ void ChitBag::DoTick( U32 delta, Engine* engine )
 	while ( !events.Empty() ) {
 		ChitEvent e = events.Pop();
 
-		QuerySpatialHash( &hashQuery, e.AreaOfEffect(), 0, e.ItemFilter() );
+		QuerySpatialHash( &hashQuery, e.AreaOfEffect(), 0 );
 		for( int j=0; j<hashQuery.Size(); ++j ) {
 			hashQuery[j]->OnChitEvent( e );
 		}
@@ -324,8 +324,10 @@ void ChitBag::UpdateSpatialHash( Chit* c, int x0, int y0, int x1, int y1 )
 void ChitBag::QuerySpatialHash(	grinliz::CDynArray<Chit*>* array, 
 								const grinliz::Rectangle2F& rf, 
 								const Chit* ignore,
-								int itemFilter )
+								bool (*accept)(Chit*) )
 {
+	if ( !accept ) accept = AcceptAll;
+
 	Rectangle2I b;
 	b.Set( 0, 0, SIZE-1, SIZE-1 );
 
@@ -344,13 +346,8 @@ void ChitBag::QuerySpatialHash(	grinliz::CDynArray<Chit*>* array,
 			unsigned index = y*SIZE+x;
 			for( Chit* it=spatialHash[ index ]; it; it=it->next ) {
 				if ( it != ignore ) {
-					if ( itemFilter ) {
-						if ( it->GetItemComponent() && (it->GetItemComponent()->GetItem()->flags & itemFilter )) {
-							// okay!
-						}
-						else {
-							continue;
-						}
+					if ( !accept( it ) ) {
+						continue;
 					}
 					const Vector3F& pos = it->GetSpatialComponent()->GetPosition();
 					if ( rf.Contains( pos.x, pos.z ) ) {

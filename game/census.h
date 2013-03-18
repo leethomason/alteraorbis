@@ -5,9 +5,18 @@
 #include "../grinliz/gldebug.h"
 #include "../game/gamelimits.h"
 
-struct Census
+class Census
 {
-	int plants[NUM_PLANT_TYPES][MAX_PLANT_STAGES];
+public:
+	Census() {
+		memset( plants, 0, sizeof(int)*NUM_PLANT_TYPES*MAX_PLANT_STAGES );
+		ais = 0;
+	}
+
+	int									plants[NUM_PLANT_TYPES][MAX_PLANT_STAGES];
+	grinliz::CArray< int, MAX_CORES >	cores; 
+	int									ais;	// the number of AIs.
+
 
 	int CountPlants() const {
 		int c =  0;

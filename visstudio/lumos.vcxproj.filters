@@ -202,9 +202,6 @@
     <ClCompile Include="..\script\procedural.cpp">
       <Filter>Source Files\script</Filter>
     </ClCompile>
-    <ClCompile Include="..\xegame\itembasecomponent.cpp">
-      <Filter>Source Files\xegame</Filter>
-    </ClCompile>
     <ClCompile Include="..\script\worldgen.cpp">
       <Filter>Source Files\script</Filter>
     </ClCompile>
@@ -262,9 +259,6 @@
     <ClCompile Include="..\xegame\cameracomponent.cpp">
       <Filter>Source Files\components</Filter>
     </ClCompile>
-    <ClCompile Include="..\xegame\inventorycomponent.cpp">
-      <Filter>Source Files\components</Filter>
-    </ClCompile>
     <ClCompile Include="..\xegame\itemcomponent.cpp">
       <Filter>Source Files\components</Filter>
     </ClCompile>
@@ -273,6 +267,15 @@
     </ClCompile>
     <ClCompile Include="..\xegame\spatialcomponent.cpp">
       <Filter>Source Files\components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\script\corescript.cpp">
+      <Filter>Source Files\script</Filter>
+    </ClCompile>
+    <ClCompile Include="..\xegame\cticker.cpp">
+      <Filter>Source Files\xegame</Filter>
+    </ClCompile>
+    <ClCompile Include="..\xegame\istringconst.cpp">
+      <Filter>Source Files\xegame</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -456,9 +459,6 @@
     <ClInclude Include="..\script\procedural.h">
       <Filter>Source Files\script</Filter>
     </ClInclude>
-    <ClInclude Include="..\xegame\itembasecomponent.h">
-      <Filter>Source Files\xegame</Filter>
-    </ClInclude>
     <ClInclude Include="..\script\worldgen.h">
       <Filter>Source Files\script</Filter>
     </ClInclude>
@@ -528,9 +528,6 @@
     <ClInclude Include="..\xegame\cameracomponent.h">
       <Filter>Source Files\components</Filter>
     </ClInclude>
-    <ClInclude Include="..\xegame\inventorycomponent.h">
-      <Filter>Source Files\components</Filter>
-    </ClInclude>
     <ClInclude Include="..\xegame\itemcomponent.h">
       <Filter>Source Files\components</Filter>
     </ClInclude>
@@ -542,6 +539,15 @@
     </ClInclude>
     <ClInclude Include="..\engine\vertex.h">
       <Filter>Source Files\game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\script\corescript.h">
+      <Filter>Source Files\script</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xegame\cticker.h">
+      <Filter>Source Files\xegame</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xegame\istringconst.h">
+      <Filter>Source Files\xegame</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

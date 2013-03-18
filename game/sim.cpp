@@ -7,7 +7,6 @@
 #include "../xegame/itemcomponent.h"
 #include "../xegame/rendercomponent.h"
 #include "../xegame/chitbag.h"
-#include "../xegame/inventorycomponent.h"
 #include "../xegame/componentfactory.h"
 #include "../xegame/cameracomponent.h"
 
@@ -15,6 +14,7 @@
 #include "../script/scriptcomponent.h"
 #include "../script/volcanoscript.h"
 #include "../script/plantscript.h"
+#include "../script/corescript.h"
 
 #include "pathmovecomponent.h"
 #include "debugstatecomponent.h"
@@ -24,6 +24,7 @@
 #include "lumoschitbag.h"
 #include "weather.h"
 #include "mapspatialcomponent.h"
+#include "aicomponent.h"
 
 #include "../xarchive/glstreamer.h"
 
@@ -45,6 +46,7 @@ Sim::Sim( LumosGame* g )
 	engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
 
 	chitBag = new LumosChitBag();
+	chitBag->SetContext( engine, worldMap );
 	playerID = 0;
 	minuteClock = 0;
 	timeInMinutes = 0;
@@ -71,11 +73,13 @@ void Sim::Load( const char* mapDAT, const char* gameDAT )
 	worldMap->Load( mapDAT );
 
 	if ( !gameDAT ) {
+		// Fresh start 
+		CreateCores();
 		CreatePlayer();
 	}
 	else {
 		QuickProfile qp( "Sim::Load" );
-		ComponentFactory factory( this, engine, worldMap, weather, lumosGame );
+		ComponentFactory factory( this, &chitBag->census, engine, worldMap, weather, lumosGame );
 
 		FILE* fp = fopen( gameDAT, "rb" );
 		GLASSERT( fp );
@@ -93,18 +97,6 @@ void Sim::Load( const char* mapDAT, const char* gameDAT )
 
 			fclose( fp );
 		}
-#if 0
-		XMLDocument doc;
-		doc.LoadFile( gameXML );
-		GLASSERT( !doc.Error() );
-		if ( !doc.Error() ) {
-			const XMLElement* root = doc.FirstChildElement( "Sim" );
-			playerID = 0;
-			Archive( 0, root );
-			engine->camera.Load( root );
-			chitBag->Load( &factory, root );
-		}
-#endif
 	}
 }
 
@@ -113,25 +105,10 @@ void Sim::Save( const char* mapDAT, const char* gameDAT )
 {
 	worldMap->Save( mapDAT );
 
-#if 0
-	FILE* fp = fopen( gameXML, "w" );
-	GLASSERT( fp );
-	if ( fp ) {
-		QuickProfile qp( "Sim::SaveXML" );
-		XMLPrinter printer( fp );
-		printer.OpenElement( "Sim" );
-		Archive( &printer, 0 );
-		engine->camera.Save( &printer );
-		chitBag->Save( &printer );
-		printer.CloseElement();
-		fclose( fp );
-	}
-#endif
-
 	{
 		QuickProfile qp( "Sim::SaveXarc" );
 
-		ComponentFactory factory( this, engine, worldMap, weather, lumosGame );
+		ComponentFactory factory( this, &chitBag->census, engine, worldMap, weather, lumosGame );
 
 		FILE* fp = fopen( gameDAT, "wb" );
 		if ( fp ) {
@@ -151,9 +128,79 @@ void Sim::Save( const char* mapDAT, const char* gameDAT )
 }
 
 
+void Sim::CreateCores()
+{
+	ItemDefDB* itemDefDB = ItemDefDB::Instance();
+	ItemDefDB::GameItemArr itemDefArr;
+	itemDefDB->Get( "core", &itemDefArr );
+	GLASSERT( itemDefArr.Size() > 0 );
+	const GameItem* gameItem = itemDefArr[0];
+	const char* asset = gameItem->resource.c_str();
+
+	// FIXME: use zones
+	for( int i=0; i<MAX_CORES; ++i ) {
+		int x = random.Rand( worldMap->Width() );
+		int y = random.Rand( worldMap->Height() );
+
+		const WorldGrid& wg = worldMap->GetWorldGrid( x, y );
+		if ( wg.IsLand() && !wg.InUse() && wg.IsPassable() ) {
+			Chit* chit = chitBag->NewChit();
+
+			MapSpatialComponent* ms = new MapSpatialComponent( worldMap );
+			ms->SetMapPosition( x, y );
+			ms->SetMode( MapSpatialComponent::BLOCKS_GRID ); 
+			chit->Add( ms );
+			GLASSERT( wg.InUse() );
+
+			chit->Add( new ScriptComponent( new CoreScript( worldMap ), &chitBag->census ));
+			chit->Add( new ItemComponent( engine, *gameItem ));
+			chit->Add( new RenderComponent( engine, asset ));
+		}
+	}
+}
+
+
+grinliz::Vector2F Sim::FindCore( const grinliz::Vector2F& pos )
+{
+	Census* census = &chitBag->census;
+
+	Chit* best = 0;
+	float close = FLT_MAX;
+
+	for( int i=0; i<census->cores.Size(); ++i ) {
+		int id = census->cores[i];
+		Chit* chit = chitBag->GetChit( id );
+		if ( chit ) {
+			float len2 = ( pos - chit->GetSpatialComponent()->GetPosition2D() ).LengthSquared();
+			if ( len2 < close ) {
+				close = len2;
+				best = chit;
+			}
+		}
+	}
+	Vector2F r = { pos.x, pos.y };
+	if ( best ) {
+		r = best->GetSpatialComponent()->GetPosition2D();
+	}
+	return r;
+}
+
+
 void Sim::CreatePlayer()
 {
 	Vector2I v = worldMap->FindEmbark();
+	if ( chitBag->census.cores.Size() ) {
+		int id = chitBag->census.cores[0];
+		Chit* chit = chitBag->GetChit( id );
+		if ( chit ) {
+			MapSpatialComponent* msc = GET_COMPONENT( chit, MapSpatialComponent );
+			if ( msc ) {
+				v = msc->MapPosition();
+				v.x += 2;
+				v.y += 2;
+			}
+		}
+	}
 	CreatePlayer( v, "humanFemale" );
 }
 
@@ -164,11 +211,6 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos, const char* assetName )
 		assetName = "humanFemale";
 	}
 
-	ItemDefDB* itemDefDB = ItemDefDB::Instance();
-	ItemDefDB::GameItemArr itemDefArr;
-	itemDefDB->Get( assetName, &itemDefArr );
-	GLASSERT( itemDefArr.Size() > 0 );
-
 	Chit* chit = chitBag->NewChit();
 	playerID = chit->ID();
 	chitBag->GetCamera( engine )->SetTrack( playerID );
@@ -178,15 +220,15 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos, const char* assetName )
 	chit->Add( new PathMoveComponent( worldMap ));
 	chit->Add( new DebugStateComponent( worldMap ));
 
-	GameItem item( *(itemDefArr[0]));
-	item.primaryTeam = 1;
-	item.stats.SetExpFromLevel( 4 );
-	item.InitState();
-	chit->Add( new ItemComponent( engine, item ));
+	chitBag->AddItem( assetName, chit, engine, 1, 4 );
+	chitBag->AddItem( "shield", chit, engine );
+	chitBag->AddItem( "blaster", chit, engine, 4 );
 
-	chit->Add( new HealthComponent());
-	chit->Add( new InventoryComponent( engine ));
+	AIComponent* ai = new AIComponent( engine, worldMap );
+	ai->EnableDebug( true );
+	chit->Add( ai );
 
+	chit->Add( new HealthComponent( engine ));
 	chit->GetSpatialComponent()->SetPosYRot( (float)pos.x+0.5f, 0, (float)pos.y+0.5f, 0 );
 }
 
@@ -264,7 +306,7 @@ void Sim::DoTick( U32 delta )
 
 void Sim::Draw3D( U32 deltaTime )
 {
-	engine->Draw( deltaTime );
+	engine->Draw( deltaTime, chitBag->BoltMem(), chitBag->NumBolts() );
 }
 
 
@@ -282,7 +324,7 @@ void Sim::CreateVolcano( int x, int y, int size )
 {
 	Chit* chit = chitBag->NewChit();
 	chit->Add( new SpatialComponent() );
-	chit->Add( new ScriptComponent( new VolcanoScript( worldMap, size )));
+	chit->Add( new ScriptComponent( new VolcanoScript( worldMap, size ), &chitBag->census ));
 
 	chit->GetSpatialComponent()->SetPosition( (float)x+0.5f, 0.0f, (float)y+0.5f );
 }
@@ -346,8 +388,8 @@ void Sim::CreatePlant( int x, int y, int type )
 			chit->Add( ms );
 			GLASSERT( wg.InUse() );
 
-			chit->Add( new HealthComponent() );
-			chit->Add( new ScriptComponent( new PlantScript( this, engine, worldMap, weather, type )));
+			chit->Add( new HealthComponent( engine ) );
+			chit->Add( new ScriptComponent( new PlantScript( this, engine, worldMap, weather, type ), &chitBag->census ));
 		}
 	}
 }

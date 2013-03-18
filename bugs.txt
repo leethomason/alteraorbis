@@ -1,32 +1,11 @@
+x control key is terrible...sometimes.
+- explosion is in the wrong direction. Units walk through explosions?? (Balrog vs. Human.)
+- does fire affect plants??
 - health is awkward: keeps copy of HP (oops). move hp to health component? (TotalHP() on item?)
 - need free camera mode
+- remove temporary arbitrary AI limit in corescript
 
 - game
-	- Flora
-		x plants
-			x growth, spread
-			x rotation
-			x saturation to hp
-		x fix the stupid camera
-		x weather
-		x player recreation
-		x avatar face display
-		x debug UI toggle
-		x new assets from Shroom
-		x change main face
-		x long test
-		x date on main screen
-		x move down buttons
-	- Fauna 1
-		- monster ecology
-		- monsters to fight
-		- battles!
-	- Flora 2
-		- pony-unicorn-pegasus news prioritization
-		- fix annoying hp out of range bug
-		- rain, general de-saturation
-		- aging of stone
-		- disable buttons on main ui when no game saved
 	- Intermission: regions
 		- generate regions
 		- generate roads
@@ -34,7 +13,18 @@
 		- update zones
 		- update pathfinder
 		- overnight test
+	- Flora 2
+		- weapon toggle / selection
+		- level up
+		- character screeen
+		- pony-unicorn-pegasus news prioritization
+		- fix annoying hp out of range bug
+		- rain, general de-saturation
+		- aging of stone
+		- disable buttons on main ui when no game saved
 	- Fauna 2
+		- teams. friend-enemy-neutral logic.
+		- monster ecology
 		- visitors
 		- inventory screen
 	- Building
@@ -87,6 +77,9 @@ x shadows should be part of space-tree bounds
 - analyze/optimize what causes component update: DoTick(), etc. Likely many DoTicks() getting called that aren't needed. (especially rendering...)
 - add rez effect for item switch?
 - animation generation
+- volcanoes: taper at the end
+- zoom way out
+- peaks news
 
 ** Art **
 - Cyclops
@@ -136,6 +129,34 @@ x shadows should be part of space-tree bounds
 
 ----------- FIXED -------------
 
+x Fauna 1
+	x motion around cores
+	x monsters to fight
+	x battles!
+	x control of target
+	x target highlight
+x mantis tribes - whos fighting who?
+x awareness range is a little high. dobule the awareness (?) should forget even a focused target.
+x check that shields and damage absorbing is working correctly. something seems wrong with shields - recharge?
+x shield glow broken. so hard to tell not sure it's worth doing.
+x The item / weapon system really isn't working, and it's complex. Needs coordination between
+  renderer, item, and weapon system to know the current weapon. (!!) Would rather have a one
+  weapon system (where the current weapon can be switched out.) See ComuteLeadingShot()
+x Flora
+	x plants
+		x growth, spread
+		x rotation
+		x saturation to hp
+	x fix the stupid camera
+	x weather
+	x player recreation
+	x avatar face display
+	x debug UI toggle
+	x new assets from Shroom
+	x change main face
+	x long test
+	x date on main screen
+	x move down buttons
 x Land and Water
 	x generate a random world
 	x save / load
@@ -154,6 +175,9 @@ x Land and Water
 	x waterfall
 	x lava gen
 	x fast-step world sim
+x need different particle effect for melee impact
+x run & gun and explosive weapons is probably a bad idea. But shoot for explosive should
+  be much more likely.
 x chits should have "update time" not boolean flag
 x volcano delayed on save/load cycle (size getting set to zero?)
 x water creation seems deferred to save/load cycle. SetRock() not quite correct?

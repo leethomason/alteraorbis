@@ -82,6 +82,54 @@ void DebugStateComponent::OnRemove()
 }
 
 
+int DebugStateComponent::DoTick( U32 delta, U32 since )
+{
+	GameItem* pItem = parentChit->GetItem();
+	if ( !pItem )
+		return VERY_LONG_TICK;
+
+	GameItem* weapon = 0;
+	GameItem* shield = 0;
+
+	if ( parentChit->GetItemComponent() ) {
+		IShield* ishield = parentChit->GetItemComponent()->GetShield();
+		IRangedWeaponItem* iweapon = parentChit->GetItemComponent()->GetRangedWeapon(0);
+
+		if ( ishield )
+			shield = ishield->GetItem();
+		if ( iweapon )
+			weapon = iweapon->GetItem();
+	}
+
+	healthBar.SetRange( pItem->HPFraction() );
+
+	RenderAtom grey   = LumosGame::CalcPaletteAtom( 0, 6 );
+	RenderAtom blue   = LumosGame::CalcPaletteAtom( 8, 0 );	
+	RenderAtom orange = LumosGame::CalcPaletteAtom( 4, 0 );
+
+	if ( weapon ) {			
+		float r = 1;
+		if ( weapon->Reloading() ) {
+			r = weapon->ReloadFraction();
+			ammoBar.SetLowerAtom( orange );
+			ammoBar.SetHigherAtom( grey );
+		}
+		else {
+			r = weapon->RoundsFraction();
+			ammoBar.SetLowerAtom( blue );
+			ammoBar.SetHigherAtom( grey );
+		}
+		ammoBar.SetRange( Clamp( r, 0.f, 1.f ) );
+	}
+	if ( shield ) {
+		// will tweak out if there are multiple absorbers.
+		float r = shield->RoundsFraction();
+		shieldBar.SetRange( Clamp( r, 0.f, 1.0f ));
+	}
+	return VERY_LONG_TICK;
+}
+
+
 void DebugStateComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {
 	if ( msg.ID() == ChitMsg::SPATIAL_CHANGED ) {
@@ -90,6 +138,7 @@ void DebugStateComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		shieldBar.SetPos( pos.x, pos.y + SIZE_Y*1.5f );
 		ammoBar.SetPos(   pos.x, pos.y + SIZE_Y*3.0f );
 	}
+	/*
 	else if ( msg.ID() == ChitMsg::GAMEITEM_TICK ) {
 		GameItem* pItem = (GameItem*)msg.Ptr();
 
@@ -126,6 +175,7 @@ void DebugStateComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			shieldBar.SetRange( Clamp( r, 0.f, 1.0f ));
 		}
 	}
+	*/
 	else {
 		super::OnChitMsg( chit, msg );
 	}

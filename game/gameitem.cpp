@@ -16,11 +16,13 @@
 #include "gameitem.h"
 
 #include "../grinliz/glstringutil.h"
+
 #include "../tinyxml2/tinyxml2.h"
+#include "../xarchive/glstreamer.h"
 #include "../script/procedural.h"
 
-#include "../xegame/inventorycomponent.h"
 #include "../xegame/chit.h"
+#include "../xegame/istringconst.h"
 
 using namespace grinliz;
 using namespace tinyxml2;
@@ -29,22 +31,10 @@ using namespace tinyxml2;
 
 #define READ_FLOAT_ATTR( n )			else if ( name == #n ) { n = attr->FloatValue(); }
 #define READ_INT_ATTR( n )				else if ( name == #n ) { n = attr->IntValue(); }
+#define READ_BOOL_ATTR( n )				else if ( name == #n ) { n = attr->BoolValue(); }
 
 #define APPEND_FLAG( flags, cstr, name )	{ if ( flags & name ) { f += #name; f += " "; } }
 #define PUSH_ATTRIBUTE( prnt, name )		{ prnt->PushAttribute( #name, name ); }
-
-// FIXME: make this way, way simpler
-float AbilityCurve( float yAt0, float yAt1, float yAt16, float yAt32, float x )
-{
-	GLASSERT( grinliz::InRange( x, 0.0f, 32.0f ));
-	if ( x < 1 ) {
-		return grinliz::Lerp( yAt0, yAt1, x );
-	}
-	else if ( x < 16 ) {
-		return grinliz::Lerp( yAt1, yAt16, (x-1.0f)/15.0f );
-	}
-	return grinliz::Lerp( yAt16, yAt32, (x-16.0f)/16.0f );
-}
 
 
 void GameStat::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele )
@@ -126,17 +116,14 @@ void GameItem::Serialize( XStream* xs )
 
 	XARC_SER( xs, hardpoint );
 	XARC_SER( xs, procedural );
+	XARC_SER( xs, isHeld );
 	XARC_SER( xs, hp );
 
 	if ( xs->Saving() ) {
 		CStr<512> f;
-		APPEND_FLAG( flags, f, CHARACTER );
 		APPEND_FLAG( flags, f, MELEE_WEAPON );
 		APPEND_FLAG( flags, f, RANGED_WEAPON );
-		APPEND_FLAG( flags, f, INTRINSIC_AT_HARDPOINT );
-		APPEND_FLAG( flags, f, INTRINSIC_FREE );
-		APPEND_FLAG( flags, f, HELD_AT_HARDPOINT );
-		APPEND_FLAG( flags, f, HELD_FREE );
+		APPEND_FLAG( flags, f, INTRINSIC );
 		APPEND_FLAG( flags, f, IMMUNE_FIRE );
 		APPEND_FLAG( flags, f, FLAMMABLE );
 		APPEND_FLAG( flags, f, IMMUNE_SHOCK );
@@ -145,6 +132,7 @@ void GameItem::Serialize( XStream* xs )
 		APPEND_FLAG( flags, f, EFFECT_FIRE );
 		APPEND_FLAG( flags, f, EFFECT_SHOCK );
 		APPEND_FLAG( flags, f, RENDER_TRAIL );
+		APPEND_FLAG( flags, f, INDESTRUCTABLE );
 
 		xs->Saving()->Set( "flags", f.c_str() );
 	}
@@ -152,13 +140,9 @@ void GameItem::Serialize( XStream* xs )
 		const StreamReader::Attribute* attr = xs->Loading()->Get( "flags" );
 		if ( attr ) {
 			const char* f = attr->Str();
-			READ_FLAG( flags, f, CHARACTER );
 			READ_FLAG( flags, f, MELEE_WEAPON );
 			READ_FLAG( flags, f, RANGED_WEAPON );
-			READ_FLAG( flags, f, INTRINSIC_AT_HARDPOINT );
-			READ_FLAG( flags, f, INTRINSIC_FREE );
-			READ_FLAG( flags, f, HELD_AT_HARDPOINT );
-			READ_FLAG( flags, f, HELD_FREE );
+			READ_FLAG( flags, f, INTRINSIC );
 			READ_FLAG( flags, f, IMMUNE_FIRE );
 			READ_FLAG( flags, f, FLAMMABLE );
 			READ_FLAG( flags, f, IMMUNE_SHOCK );
@@ -167,6 +151,7 @@ void GameItem::Serialize( XStream* xs )
 			READ_FLAG( flags, f, EFFECT_FIRE );
 			READ_FLAG( flags, f, EFFECT_SHOCK );
 			READ_FLAG( flags, f, RENDER_TRAIL );
+			READ_FLAG( flags, f, INDESTRUCTABLE );
 		}
 	}
 
@@ -202,13 +187,9 @@ void GameItem::Save( tinyxml2::XMLPrinter* printer )
 		printer->PushAttribute( "resource", resource.c_str() );
 	}
 	CStr<512> f;
-	APPEND_FLAG( flags, f, CHARACTER );
 	APPEND_FLAG( flags, f, MELEE_WEAPON );
 	APPEND_FLAG( flags, f, RANGED_WEAPON );
-	APPEND_FLAG( flags, f, INTRINSIC_AT_HARDPOINT );
-	APPEND_FLAG( flags, f, INTRINSIC_FREE );
-	APPEND_FLAG( flags, f, HELD_AT_HARDPOINT );
-	APPEND_FLAG( flags, f, HELD_FREE );
+	APPEND_FLAG( flags, f, INTRINSIC );
 	APPEND_FLAG( flags, f, IMMUNE_FIRE );
 	APPEND_FLAG( flags, f, FLAMMABLE );
 	APPEND_FLAG( flags, f, IMMUNE_SHOCK );
@@ -217,6 +198,7 @@ void GameItem::Save( tinyxml2::XMLPrinter* printer )
 	APPEND_FLAG( flags, f, EFFECT_FIRE );
 	APPEND_FLAG( flags, f, EFFECT_SHOCK );
 	APPEND_FLAG( flags, f, RENDER_TRAIL );
+	APPEND_FLAG( flags, f, INDESTRUCTABLE );
 	printer->PushAttribute( "flags", f.c_str() );
 	
 	PUSH_ATTRIBUTE( printer, mass );
@@ -238,12 +220,13 @@ void GameItem::Save( tinyxml2::XMLPrinter* printer )
 		printer->PushAttribute( keyValues[i].key.c_str(), keyValues[i].value );
 	}
 
-	if ( hardpoint != NO_HARDPOINT ) {
-		printer->PushAttribute( "hardpoint", InventoryComponent::HardpointFlagToName( hardpoint ).c_str() );
+	if ( hardpoint != 0 ) {
+		printer->PushAttribute( "hardpoint", IStringConst::Hardpoint( hardpoint ).c_str() );
 	}
 	if ( procedural != PROCEDURAL_NONE ) {
 		printer->PushAttribute( "procedural", ItemGen::ToName( procedural ).c_str() );
 	}
+	printer->PushAttribute( "isHeld", isHeld );
 	GLASSERT( hp <= TotalHP() );
 	printer->PushAttribute( "hp", hp );
 
@@ -265,13 +248,9 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 	const char* f = ele->Attribute( "flags" );
 
 	if ( f ) {
-		READ_FLAG( flags, f, CHARACTER );
 		READ_FLAG( flags, f, MELEE_WEAPON );
 		READ_FLAG( flags, f, RANGED_WEAPON );
-		READ_FLAG( flags, f, INTRINSIC_AT_HARDPOINT );
-		READ_FLAG( flags, f, INTRINSIC_FREE );
-		READ_FLAG( flags, f, HELD_AT_HARDPOINT );
-		READ_FLAG( flags, f, HELD_FREE );
+		READ_FLAG( flags, f, INTRINSIC );
 		READ_FLAG( flags, f, IMMUNE_FIRE );
 		READ_FLAG( flags, f, FLAMMABLE );
 		READ_FLAG( flags, f, IMMUNE_SHOCK );
@@ -280,6 +259,7 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 		READ_FLAG( flags, f, EFFECT_FIRE );
 		READ_FLAG( flags, f, EFFECT_SHOCK );
 		READ_FLAG( flags, f, RENDER_TRAIL );
+		READ_FLAG( flags, f, INDESTRUCTABLE );
 	}
 	for( const tinyxml2::XMLAttribute* attr = ele->FirstAttribute();
 		 attr;
@@ -306,6 +286,7 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 		READ_INT_ATTR( rounds )
 		READ_FLOAT_ATTR( accruedFire )
 		READ_FLOAT_ATTR( accruedShock )
+		READ_BOOL_ATTR( isHeld )
 		else {
 			KeyValue kv = { name, attr->DoubleValue() };
 			keyValues.Push( kv );
@@ -314,11 +295,11 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 
 	if ( flags & EFFECT_FIRE )	flags |= IMMUNE_FIRE;
 
-	hardpoint = NO_HARDPOINT;
+	hardpoint = 0;
 	const char* h = ele->Attribute( "hardpoint" );
 	if ( h ) {
-		hardpoint = InventoryComponent::HardpointNameToFlag( h );
-		GLASSERT( hardpoint >= 0 );
+		hardpoint = IStringConst::Hardpoint( StringPool::Intern( h ) );
+		GLASSERT( hardpoint > 0 );
 	}
 	procedural = PROCEDURAL_NONE;
 	const char* p = ele->Attribute( "procedural" );
@@ -338,9 +319,9 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 
 
 bool GameItem::Use() {
-	if ( Ready() && HasRound() ) {
+	if ( CanUse() ) {
 		UseRound();
-		cooldownTime = 0;
+		cooldownTime = cooldown;
 		if ( parentChit ) {
 			parentChit->SetTickNeeded();
 		}
@@ -352,7 +333,7 @@ bool GameItem::Use() {
 
 bool GameItem::Reload() {
 	if ( CanReload()) {
-		reloadTime = 0;
+		reloadTime = reload;
 		if ( parentChit ) {
 			parentChit->SetTickNeeded();
 		}
@@ -376,12 +357,16 @@ int GameItem::DoTick( U32 delta, U32 sinec )
 {
 	bool tick = false;
 
-	cooldownTime += delta;
-	if ( reloadTime < reload ) {
-		reloadTime += delta;
+	if ( cooldownTime > 0 ) {
+		cooldownTime = Max( cooldownTime-(int)delta, 0 );
+		tick = true;
+	}
+
+	if ( reloadTime > 0 ) {
+		reloadTime = Max( reloadTime-(int)delta, 0 );
 		tick = true;
 
-		if ( reloadTime >= reload ) {
+		if ( reloadTime == 0 ) {
 			rounds = clipCap;
 		}
 	}
@@ -408,11 +393,15 @@ int GameItem::DoTick( U32 delta, U32 sinec )
 	hp += Delta( delta, hpRegen );
 	hp = Clamp( hp, 0.0f, TotalHP() );
 
+	if ( flags & INDESTRUCTABLE ) {
+		hp = TotalHP();
+	}
+
 	tick = tick || (savedHP != hp);
 
-	if ( parentChit ) {
-		parentChit->SendMessage( ChitMsg( ChitMsg::GAMEITEM_TICK, 0, this ), 0 );
-	}
+//	if ( parentChit ) {
+//		parentChit->SendMessage( ChitMsg( ChitMsg::GAMEITEM_TICK, 0, this ), 0 );
+//	}
 	return tick ? 0 : VERY_LONG_TICK;	
 }
 
@@ -444,7 +433,7 @@ void GameItem::AbsorbDamage( bool inInventory, DamageDesc dd, DamageDesc* remain
 		// Items in the inventory don't take damage. They
 		// may reduce damage for their parent.
 		if ( ToShield() ) {
-			reloadTime = 0;
+			reloadTime = reload;
 			absorbed = Min( dd.damage * absorbsDamage, (float)rounds );
 			rounds -= LRintf( absorbed );
 			// Shock does extra damage to shields.
@@ -460,7 +449,6 @@ void GameItem::AbsorbDamage( bool inInventory, DamageDesc dd, DamageDesc* remain
 				if ( flags & EFFECT_SHOCK )
 					effect &= (~EFFECT_SHOCK);
 			}
-
 		}
 		else {
 			// Something that straight up reduces damage.
@@ -479,6 +467,9 @@ void GameItem::AbsorbDamage( bool inInventory, DamageDesc dd, DamageDesc* remain
 		else {
 			GLLOG(( "Damage %s total=%.1f hp=%.1f accFire=%.1f accShock=%.1f ", name.c_str(), absorbed, hp, accruedFire, accruedShock ));
 		}
+	}
+	if ( parentChit ) {
+		parentChit->SetTickNeeded();
 	}
 }
 

@@ -255,6 +255,7 @@ int main( int argc, char **argv )
 	SDL_TimerID timerID = SDL_AddTimer( TIME_BETWEEN_FRAMES, TimerCallback, 0 );
 #endif
 
+	int modKeys = SDL_GetModState();
 
 	// ---- Main Loop --- //
 #ifdef TEST_FULLSPEED	
@@ -288,11 +289,26 @@ int main( int argc, char **argv )
 				GameResize( game, event.resize.w, event.resize.h, rotation );
 				break;
 
-			case SDL_KEYDOWN:
-			{
-				SDLMod sdlMod = SDL_GetModState();
+			case SDL_KEYUP:
 				switch ( event.key.keysym.sym )
 				{
+					case SDLK_LCTRL:	modKeys = modKeys & (~KMOD_LCTRL );		break;
+					case SDLK_RCTRL:	modKeys = modKeys & (~KMOD_RCTRL );		break;
+					case SDLK_LSHIFT:	modKeys = modKeys & (~KMOD_LSHIFT );	break;
+					case SDLK_RSHIFT:	modKeys = modKeys & (~KMOD_RSHIFT );	break;
+					default:
+						break;
+				}
+				break;
+			case SDL_KEYDOWN:
+			{
+				switch ( event.key.keysym.sym )
+				{
+					case SDLK_LCTRL:	modKeys = modKeys | KMOD_LCTRL;		break;
+					case SDLK_RCTRL:	modKeys = modKeys | KMOD_RCTRL;		break;
+					case SDLK_LSHIFT:	modKeys = modKeys | KMOD_LSHIFT;	break;
+					case SDLK_RSHIFT:	modKeys = modKeys | KMOD_RSHIFT;	break;
+
 					case SDLK_ESCAPE:
 						{
 #ifdef DEBUG
@@ -304,8 +320,11 @@ int main( int argc, char **argv )
 						break;
 
 					case SDLK_F4:
-						if ( sdlMod & ( KMOD_RALT | KMOD_LALT ) )
-							done = true;
+						{
+							int sdlMod = SDL_GetModState();
+							if ( sdlMod & ( KMOD_RALT | KMOD_LALT ) )
+								done = true;
+						}
 						break;
 
 					case SDLK_u:
@@ -352,13 +371,13 @@ int main( int argc, char **argv )
 			{
 				int x, y;
 				TransformXY( event.button.x, event.button.y, &x, &y );
+				GLOUTPUT(( "Mouse down %d %d\n", x, y ));
 
 				mouseDown.Set( event.button.x, event.button.y );
 
-				SDLMod modSDL = SDL_GetModState();
-				int mod = 0;
-				if ( modSDL & ( KMOD_LSHIFT | KMOD_RSHIFT ))    mod = GAME_TAP_MOD_SHIFT;
-				else if ( modSDL & ( KMOD_LCTRL | KMOD_RCTRL )) mod = GAME_TAP_MOD_CTRL;
+				int mod=0;
+				if ( modKeys & ( KMOD_LSHIFT | KMOD_RSHIFT ))    mod = GAME_TAP_MOD_SHIFT;
+				else if ( modKeys & ( KMOD_LCTRL | KMOD_RCTRL )) mod = GAME_TAP_MOD_CTRL;
 
 				if ( event.button.button == 1 ) {
 					GameTap( game, GAME_TAP_DOWN, x, y, mod );
@@ -381,10 +400,9 @@ int main( int argc, char **argv )
 					zooming = false;
 				}
 				if ( event.button.button == 1 ) {
-					SDLMod modSDL = SDL_GetModState();
 					int mod = 0;
-					if ( modSDL & ( KMOD_LSHIFT | KMOD_RSHIFT ))    mod = GAME_TAP_MOD_SHIFT;
-					else if ( modSDL & ( KMOD_LCTRL | KMOD_RCTRL )) mod = GAME_TAP_MOD_CTRL;
+					if ( modKeys & ( KMOD_LSHIFT | KMOD_RSHIFT ))    mod = GAME_TAP_MOD_SHIFT;
+					else if ( modKeys & ( KMOD_LCTRL | KMOD_RCTRL )) mod = GAME_TAP_MOD_CTRL;
 					GameTap( game, GAME_TAP_UP, x, y, mod );
 				}
 			}
@@ -397,10 +415,9 @@ int main( int argc, char **argv )
 				int x, y;
 				TransformXY( event.button.x, event.button.y, &x, &y );
 
-				SDLMod modSDL = SDL_GetModState();
 				int mod = 0;
-				if ( modSDL & ( KMOD_LSHIFT | KMOD_RSHIFT ))    mod = GAME_TAP_MOD_SHIFT;
-				else if ( modSDL & ( KMOD_LCTRL | KMOD_RCTRL )) mod = GAME_TAP_MOD_CTRL;
+				if ( modKeys & ( KMOD_LSHIFT | KMOD_RSHIFT ))    mod = GAME_TAP_MOD_SHIFT;
+				else if ( modKeys & ( KMOD_LCTRL | KMOD_RCTRL )) mod = GAME_TAP_MOD_CTRL;
 
 				if ( state & SDL_BUTTON(1) ) {
 					GameTap( game, GAME_TAP_MOVE, x, y, mod );

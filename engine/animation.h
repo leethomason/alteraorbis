@@ -36,8 +36,7 @@ enum  {
 	ANIM_GUN_WALK,
 	ANIM_GUN_STAND,
 	ANIM_MELEE,
-	//ANIM_LIGHT_IMPACT,	// adds "impact", which is hard to see at the top down scale
-	ANIM_HEAVY_IMPACT,
+	ANIM_IMPACT,
 	ANIM_COUNT
 };
 

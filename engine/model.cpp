@@ -84,10 +84,10 @@ int ModelResource::Intersect(	const grinliz::Vector3F& point,
 }
 
 
-const ModelMetaData* ModelResource::GetMetaData( const char* name ) const
+const ModelMetaData* ModelResource::GetMetaData( grinliz::IString name ) const
 {
 	for( int i=0; i<EL_MAX_METADATA; ++i ) {
-		if ( StrEqual( name, header.metaData[i].name.c_str() )) {
+		if ( name == header.metaData[i].name ) {
 			return &header.metaData[i];
 		}
 	}
@@ -530,10 +530,10 @@ void Model::CalcAnimation( BoneData* boneData ) const
 
 
 
-void Model::CalcAnimation( BoneData::Bone* bone, const char* _boneName ) const
+void Model::CalcAnimation( BoneData::Bone* bone, IString boneName ) const
 {
 	GLASSERT( HasAnimation() );
-	IString boneName = StringPool::Intern( _boneName );
+	//IString boneName = StringPool::Intern( _boneName );
 	animationResource->GetTransform( currentAnim.id, boneName, resource->header, currentAnim.time, bone );
 
 	if ( crossFadeTime < totalCrossFadeTime && (prevAnim.id >= 0) ) {
@@ -545,7 +545,7 @@ void Model::CalcAnimation( BoneData::Bone* bone, const char* _boneName ) const
 }
 
 
-void Model::CalcMetaData( const char* name, grinliz::Matrix4* meta ) const
+void Model::CalcMetaData( grinliz::IString name, grinliz::Matrix4* meta ) const
 {
 	const Matrix4& xform = XForm();	// xform of this model
 	const ModelMetaData* data = resource->GetMetaData( name );
@@ -559,7 +559,7 @@ void Model::CalcMetaData( const char* name, grinliz::Matrix4* meta ) const
 	}
 	else {
 		BoneData::Bone bone;
-		CalcAnimation( &bone, data->boneName.c_str() );
+		CalcAnimation( &bone, data->boneName );
 
 		Matrix4 local;
 		bone.ToMatrix( &local );
@@ -617,7 +617,7 @@ void Model::EmitParticles( ParticleSystem* system, const Vector3F* eyeDir, U32 d
 		const ModelParticleEffect& effect = resource->header.effectData[i];
 		if ( !effect.name.empty() ) {
 			Matrix4 xform;
-			CalcMetaData( effect.metaData.c_str(), &xform );
+			CalcMetaData( effect.metaData, &xform );
 			Vector3F pos = xform.Col(3);
 			static const Vector3F UP = { 0, 1, 0 };
 			system->EmitPD( effect.name.c_str(), pos, UP, eyeDir, deltaTime );
