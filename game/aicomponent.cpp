@@ -19,8 +19,10 @@
 #include "pathmovecomponent.h"
 #include "gameitem.h"
 #include "lumoschitbag.h"
+#include "mapspatialcomponent.h"
 
 #include "../script/battlemechanics.h"
+#include "../script/plantscript.h"
 
 #include "../engine/engine.h"
 #include "../engine/particle.h"
@@ -51,6 +53,7 @@ AIComponent::AIComponent( Engine* _engine, WorldMap* _map ) : rethink( 1200 )
 	currentTarget = 0;
 	focusOnTarget = false;
 	focusedMove = false;
+	randomWander = false;
 	aiMode = NORMAL_MODE;
 	awareness.Zero();
 	wanderOrigin.Zero();
@@ -514,8 +517,68 @@ void AIComponent::SetWanderParams( const grinliz::Vector2F& pos, float radius )
 void AIComponent::ThinkWander( const ComponentSet& thisComp )
 {
 	// Wander in some sort of directed fashion.
-	// In a circle?
+	// - get close to friends
+	// - but not too close
+	// - given a choice, get close to plants.
+	// - occasionally randomly wander about
 
+	Vector2F dest = thisComp.spatial->GetPosition2D();
+	if ( randomWander ) {
+		dest = wanderOrigin;
+		dest.x += parentChit->random.Uniform() * wanderRadius * parentChit->random.Sign();
+		dest.y += parentChit->random.Uniform() * wanderRadius * parentChit->random.Sign();
+	}
+	else {
+		// +1 for origin, +4 for plants
+		CArray<Vector2F, MAX_TRACK+1+5> pos;
+		for( int i=0; i<friendList.Size(); ++i ) {
+			Chit* c = parentChit->GetChitBag()->GetChit( friendList[i] );
+			if ( c && c->GetSpatialComponent() ) {
+				Vector2F v = c->GetSpatialComponent()->GetPosition2D();
+				pos.Push( v );
+			}
+		}
+		pos.Push( wanderOrigin );	// the origin is a friend.
+
+		Vector2F mean = thisComp.spatial->GetPosition2D();
+
+		// And plants are friends.
+		Rectangle2F r;
+		r.min = r.max = mean;
+		r.Outset( 3 );
+
+		const CDynArray<Chit*>& plants = parentChit->GetChitBag()->QuerySpatialHash( r, 0, PlantScript::PassablePlantFilter );
+		for( int i=0; i<plants.Size() && i<4; ++i ) {
+			pos.Push( plants[i]->GetSpatialComponent()->GetPosition2D() );
+		}
+
+		// Get close to friends.
+		for( int i=0; i<pos.Size(); ++i ) {
+			mean = mean + pos[i];
+		}
+		dest = mean * (1.0f/(float)(1+pos.Size()));
+		Vector2F heading = thisComp.spatial->GetHeading2D();
+
+		// But not too close.
+		for( int pass=0; pass<2; ++pass ) {
+			for( int i=0; i<pos.Size(); ++i ) {
+				if ( (pos[i] - dest).LengthSquared() < 4.0f ) {
+					dest += heading * 2.0f;
+				}
+			}
+		}
+	}
+	PathMoveComponent* pmc = GET_COMPONENT( thisComp.chit, PathMoveComponent );
+	if ( pmc ) {
+		pmc->QueueDest( dest );
+	}
+	rethink.Set( 10*1000 + thisComp.chit->random.Rand( 10*1000 ));
+	currentAction = WANDER;
+
+#if 0
+	// In a circle?
+	// This turns out to be creepy. Worth keeping for something that is,
+	// in fact, creepy.
 	if ( wanderRadius > 0 ) {
 		Random random( thisComp.chit->ID() );
 
@@ -541,6 +604,7 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 		rethink.Set( thisComp.chit->random.Rand( PERIOD/4 ));
 		currentAction = WANDER;
 	}
+#endif
 }
 
 
@@ -847,10 +911,25 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {
 	switch ( msg.ID() ) {
 	case ChitMsg::PATHMOVE_DESTINATION_REACHED:
+		if ( currentAction != WANDER ) {
+			focusedMove = false;
+			currentAction = NO_ACTION;
+			parentChit->SetTickNeeded();
+		}
+		else {
+			randomWander = false;
+		}
+		break;
+
 	case ChitMsg::PATHMOVE_DESTINATION_BLOCKED:
-		focusedMove = false;
-		currentAction = NO_ACTION;
-		parentChit->SetTickNeeded();
+		if ( currentAction != WANDER ) {
+			focusedMove = false;
+			currentAction = NO_ACTION;
+			parentChit->SetTickNeeded();
+		}
+		else {
+			randomWander = true;
+		}
 		break;
 
 	default:

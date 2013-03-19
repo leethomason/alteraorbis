@@ -107,6 +107,7 @@ private:
 	grinliz::Vector2F	wanderOrigin;
 	float				wanderRadius;
 	U32					wanderTime;
+	bool				randomWander;
 	bool				debugFlag;
 
 	void DoMelee( const ComponentSet& thisComp );
