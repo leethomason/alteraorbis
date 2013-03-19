@@ -210,6 +210,7 @@ void GameScene::MoveModel( Chit* target )
 		ClearTargetFlags();
 		return;
 	}
+
 	Chit* oldTarget = sim->GetChitBag()->GetChit( possibleChit );
 	if ( oldTarget ) {
 		RenderComponent* rc = oldTarget->GetRenderComponent();
@@ -217,7 +218,8 @@ void GameScene::MoveModel( Chit* target )
 			rc->Deco( 0, 0, 0 );
 		}
 	}
-	if ( target ) {
+	Chit* focusedTarget = sim->GetChitBag()->GetChit( targetChit );
+	if ( target && target != focusedTarget ) {
 		AIComponent* ai = GET_COMPONENT( player, AIComponent );
 		if ( ai && ai->GetTeamStatus( target ) == AIComponent::ENEMY ) {
 			possibleChit = 0;

@@ -10,8 +10,13 @@ It may require the microsoft redistributables. (Although if you installed Xenowa
 are already installed.)
 http://www.microsoft.com/en-us/download/details.aspx?id=5555
 
+Important Notes
+---------------
 
-NOTE, at this time, there is NO save game compatibility. Be sure to delete old games.
+* There is NO save game compatibility. Be sure to delete old games.
+* If your avatar gets killed, ctrl-click will create a new one. (You can create a 
+  bunch if you wish).
+* "Fast Mode" doesn't work very well. This will be the focus of the next version.
 
 Getting Started
 ---------------
@@ -20,15 +25,18 @@ result. (And if you are a programmer interested in improving the world gen code,
 runs as a stand alone utility.) Back on the title screen, tap "Continue" to start 
 in the world.
 
-It is very empty.
+You start near a Domain Core. (Placeholder art: it's a monolith.) Mantis will
+spawn from the core, your avatar will automatically respond. You can click to move,
+or click to focus attention on a particular target.
+
+Red Mantis and Green Mantis will fight one another, as well as you.
 
 Tap the spacebar to toggle on 'fast mode'. Volcanoes, plants, water, and (rarely) 
 waterfalls will form in the world. The date is in the upper right. Usually the
 world is an interesting place around the end of the 2nd age.
 
-All there is to do at this point is take a look, explore, share some screenshots,
-and share what you think.
-
+I would like feedback on the combat, the look, and the controls. And anything else,
+of course.
 
 Filing a Bug
 ------------
