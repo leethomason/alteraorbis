@@ -48,7 +48,7 @@ public:
 private:
 
 	void LoadMap();
-	void CreateChit( const grinliz::Vector2I& p, int type, int loadout, int team, int level );
+	Chit* CreateChit( const grinliz::Vector2I& p, int type, int loadout, int team, int level );
 	void GoScene();
 	int ButtonDownID( int group );
 
@@ -96,7 +96,10 @@ private:
 		RIGHT_COUNT,
 		RIGHT_MOB,
 		RIGHT_WEAPON,
-		RIGHT_LEVEL
+		RIGHT_LEVEL,
+
+		LEFT_TEAM,
+		RIGHT_TEAM
 	};
 	gamui::ToggleButton optionButton[NUM_BUTTONS];
 	gamui::TextLabel label[2];

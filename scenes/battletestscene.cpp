@@ -298,10 +298,14 @@ void BattleTestScene::GoScene()
 	int rightLevel   = LEVEL[ ButtonDownID( RIGHT_LEVEL ) - LEVEL_0  ];
 
 	for( int i=0; i<leftCount; ++i ) {
-		CreateChit( waypoints[LEFT][i], leftMoB, leftWeapon, LEFT, leftLevel );
+		Chit* c = CreateChit( waypoints[LEFT][i], leftMoB, leftWeapon, LEFT_TEAM, leftLevel );
+		if ( i==0 ) {
+			GET_COMPONENT( c, AIComponent )->EnableDebug( true );
+		}
+
 	}
 	for( int i=0; i<rightCount; ++i ) {
-		CreateChit( waypoints[rightLoc][i], rightMoB, rightWeapon, rightLoc, rightLevel );
+		CreateChit( waypoints[rightLoc][i], rightMoB, rightWeapon, RIGHT_TEAM, rightLevel );
 	}
 
 	// Trigger the AI to do something.
@@ -312,7 +316,7 @@ void BattleTestScene::GoScene()
 }
 
 		
-void BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int team, int level )
+Chit* BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int team, int level )
 {
 	const char* asset = "humanFemale";
 	switch ( type ) {
@@ -366,10 +370,10 @@ void BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int 
 	if ( type == HUMAN ) {
 		Color4F tangerine = game->GetPalette()->Get4F( PAL_TANGERINE*2, PAL_TANGERINE );
 		Color4F blue      = game->GetPalette()->Get4F( PAL_BLUE*2, PAL_BLUE );
-		if ( team == RIGHT ) {
+		if ( team == RIGHT_TEAM ) {
 			chit->GetRenderComponent()->SetColor( IString(), tangerine.ToVector() );
 		}
-		if ( team == LEFT ) {
+		if ( team == LEFT_TEAM ) {
 			chit->GetRenderComponent()->SetColor( IString(), blue.ToVector() );
 		}
 
@@ -408,6 +412,7 @@ void BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int 
 			inv->AddToInventory( gi, true );
 		}
 	}
+	return chit;
 }
 
 
@@ -530,7 +535,7 @@ void BattleTestScene::DoTick( U32 deltaTime )
 		}
 		if ( !aware ) {
 			ChitEvent event( ChitEvent::AWARENESS, b, 0 );
-			event.team = LEFT;
+			event.team = LEFT_TEAM;
 			chitBag.QueueEvent( event );
 		}
 	}

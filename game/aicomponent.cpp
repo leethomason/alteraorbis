@@ -59,6 +59,7 @@ AIComponent::AIComponent( Engine* _engine, WorldMap* _map ) : rethink( 1200 )
 	wanderOrigin.Zero();
 	wanderRadius = 0;
 	wanderTime = 0;
+	wanderFlags = 0;
 	debugFlag = false;
 }
 
@@ -79,6 +80,7 @@ void AIComponent::Serialize( XStream* xs )
 	XARC_SER( xs, focusedMove );
 	XARC_SER( xs, wanderRadius );
 	XARC_SER( xs, wanderTime );
+	XARC_SER( xs, wanderFlags );
 
 	XARC_SER( xs, wanderOrigin );
 	rethink.Serialize( xs, "rethink" );
@@ -514,8 +516,9 @@ void AIComponent::FocusedTarget( Chit* chit )
 }
 
 
-void AIComponent::SetWanderParams( const grinliz::Vector2F& pos, float radius )
+void AIComponent::SetWanderParams( int mode, const grinliz::Vector2F& pos, float radius )
 {
+	wanderFlags = mode;
 	wanderOrigin = pos;
 	wanderRadius = radius;
 }
@@ -617,11 +620,19 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 	// - occasionally randomly wander about
 
 	Vector2F dest = { 0, 0 };
+	if ( wanderFlags == WANDER_NONE ) {
+		rethink.Set( 2000 );
+		currentAction = WANDER;
+		return;
+	}
 	if ( randomWander ) {
 		dest = ThinkWanderRandom( thisComp );
 	}
-	else {
+	else if ( wanderFlags == WANDER_HERD ) {
 		dest = ThinkWanderFlock( thisComp );
+	}
+	else if ( wanderFlags == WANDER_CIRCLE ) {
+		dest = ThinkWanderCircle( thisComp );
 	}
 
 	PathMoveComponent* pmc = GET_COMPONENT( thisComp.chit, PathMoveComponent );

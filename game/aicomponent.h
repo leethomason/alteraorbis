@@ -50,9 +50,15 @@ public:
 
 	// Approximate. enemyList may not be flushed.
 	bool AwareOfEnemy() const { return enemyList.Size() > 0; }
-	void SetWanderParams( const grinliz::Vector2F& pos, float radius ); 
 	void FocusedMove( const grinliz::Vector2F& dest );
 	void FocusedTarget( Chit* chit );
+
+	enum {
+		WANDER_NONE,
+		WANDER_HERD,
+		WANDER_CIRCLE
+	};
+	void SetWanderParams( int mode, const grinliz::Vector2F& pos, float radius ); 
 	void EnableDebug( bool enable ) { debugFlag = enable; }
 
 	enum {
@@ -116,6 +122,7 @@ private:
 	float				wanderRadius;
 	U32					wanderTime;
 	bool				randomWander;
+	int					wanderFlags;
 	bool				debugFlag;
 
 	void DoMelee( const ComponentSet& thisComp );
