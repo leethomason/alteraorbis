@@ -19,8 +19,14 @@
 #include "../xegame/chit.h"
 #include "../xegame/chitbag.h"
 #include "../xegame/itemcomponent.h"
+#include "../xegame/rendercomponent.h"
+#include "../xegame/game.h"
 
 #include "../grinliz/glutil.h"
+
+#include "../engine/engine.h"
+
+#include "../script/procedural.h"
 
 using namespace grinliz;
 
@@ -33,19 +39,9 @@ void HealthComponent::Serialize( XStream* xs )
 }
 
 
-void HealthComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
-{
-	if ( msg.ID() == ChitMsg::GAMEITEM_TICK ) {
-		DeltaHealth();
-	}
-	else {
-		super::OnChitMsg( chit, msg );
-	}
-}
-
-
 int HealthComponent::DoTick( U32 delta, U32 since )
 {
+	DeltaHealth();
 	if ( destroyed ) {
 		destroyed += delta;
 		GLASSERT( parentChit );
@@ -78,5 +74,38 @@ void HealthComponent::DeltaHealth()
 			GLLOG(( "Chit %3d destroyed.\n", parentChit->ID() ));
 			destroyed = 1;
 		}
+	}
+}
+
+
+void HealthComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
+{
+	//if ( msg.ID() == ChitMsg::GAMEITEM_TICK ) {
+	//	DeltaHealth();
+	//}
+	//else 
+	if ( chit == parentChit && msg.ID() == ChitMsg::RENDER_IMPACT ) {
+		if ( !destroyed ) {
+			RenderComponent* render = parentChit->GetRenderComponent();
+			GLASSERT( render );	// it is a message from the render component, after all.
+			ItemComponent* inventory = parentChit->GetItemComponent();
+			GLASSERT( inventory );	// need to be  holding a melee weapon. possible the weapon
+									// was lost before impact, in which case this assert should
+									// be removed.
+
+			IMeleeWeaponItem* item=inventory->GetMeleeWeapon();
+			if ( render && inventory && item  ) { /* okay */ }
+			else return;
+
+			Vector3F pos;
+			render->CalcTrigger( &pos, 0 );
+
+			battleMechanics.MeleeAttack( engine, parentChit, item );
+			engine->particleSystem->EmitPD( "meleeImpact", pos, V3F_UP, engine->camera.EyeDir3(), 0 );
+		
+		}
+	}
+	else {
+		super::OnChitMsg( chit, msg );
 	}
 }

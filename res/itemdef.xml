@@ -1,11 +1,11 @@
 <items>
   <item name="humanFemale"
         resource="humanFemale"
-			  flags="CHARACTER"
+			  flags=""
 			  mass ="50">
     <intrinsics>
       <item name="hand"
-            flags="MELEE_WEAPON INTRINSIC_AT_HARDPOINT"
+            flags="MELEE_WEAPON INTRINSIC"
             hardpoint="trigger"
             meleeDamageMult="1">
       </item>>
@@ -14,17 +14,29 @@
 
   <item name="mantis"
         resource="mantis"
-        flags="CHARACTER"
         mass="40">
     <intrinsics>
       <item name="pincer"
-            flags="MELEE_WEAPON INTRINSIC_AT_HARDPOINT"
+            flags="MELEE_WEAPON INTRINSIC"
             hardpoint="trigger"
-            meleeDamageMult="2">
+            meleeDamageMult="1.8">
       </item>
     </intrinsics>
   </item>
 
+  <item name="redMantis"
+        resource="redMantis"
+        mass="35">
+    <intrinsics>
+      <item name="pincer"
+            flags="MELEE_WEAPON INTRINSIC"
+            hardpoint="trigger"
+            meleeDamageMult="2.0">
+      </item>
+    </intrinsics>
+  </item>
+
+  
   <!-- Base effects, FIRE, in this case, are part of the Balrog
        model. Combination effects SMOKE=FIRE+WATER are 
        procedurally generated at run time.
@@ -35,17 +47,17 @@
   -->
   <item name="balrog"
         resource="balrog"
-        flags="CHARACTER EFFECT_FIRE IMMUNE_FIRE"
+        flags="EFFECT_FIRE IMMUNE_FIRE"
         mass="400">
     <intrinsics>
       <!-- since intrinsic, also grants fire immunity -->
       <item name="claw"
-            flags="MELEE_WEAPON INTRINSIC_AT_HARDPOINT EFFECT_FIRE"
+            flags="MELEE_WEAPON INTRINSIC EFFECT_FIRE"
             hardpoint="trigger"
             meleeDamageMult="1.2">
       </item>
       <item name="breath"
-            flags="RANGED_WEAPON INTRINSIC_AT_HARDPOINT EFFECT_FIRE EFFECT_EXPLOSIVE RENDER_TRAIL"
+            flags="RANGED_WEAPON INTRINSIC EFFECT_FIRE EFFECT_EXPLOSIVE RENDER_TRAIL"
             hardpoint="head"
             cooldown="1000"
             reload="3000"
@@ -59,13 +71,12 @@
  
   <item name="dummytarget"
         resource="dummytarget"
-        flags="CHARACTER"
         mass="30"
         />
 
   <item name="ring"
         resource="ring"
-        flags="MELEE_WEAPON HELD_AT_HARDPOINT"
+        flags="MELEE_WEAPON"
         procedural="ring"
         hardpoint="trigger">
     <melee kinetic="2" />
@@ -73,40 +84,40 @@
   
   <item name="ax"
         resource="ax"
-        flags="MELEE_WEAPON HELD_AT_HARDPOINT"
+        flags="MELEE_WEAPON"
         hardpoint="trigger">
         <melee kinetic="2" />
   </item>
 
   <item name="testgun"
         resource="testgun"
-        flags="MELEE_WEAPON RANGED_WEAPON HELD_AT_HARDPOINT"
+        flags="MELEE_WEAPON RANGED_WEAPON"
         hardpoint="trigger"
         mass="1.5"
         cooldown="500"
-        reload="1000"
+        reload="2500"
         clipCap="6"
         meleeDamage="1.1"
-        rangedDamage="30"
+        rangedDamage="20"
         >
   </item>
 
   <item name="blaster"
         resource="testgun"
-        flags="MELEE_WEAPON RANGED_WEAPON HELD_AT_HARDPOINT"
+        flags="MELEE_WEAPON RANGED_WEAPON"
         hardpoint="trigger"
         mass="1.5"
         cooldown="500"
-        reload="1000"
+        reload="2000"
         clipCap="6"
         meleeDamage="1.1"
-        rangedDamage="30"
+        rangedDamage="20"
         >
   </item>
 
   <item name="shotgun"
         resource="testgun"
-        flags="MELEE_WEAPON RANGED_WEAPON HELD_AT_HARDPOINT"
+        flags="MELEE_WEAPON RANGED_WEAPON"
         hardpoint="trigger"
         mass="1.5"
         cooldown="500"
@@ -132,6 +143,11 @@
         resource="tree"
         flags="FLAMMABLE"
         mass ="400"
+        />
+
+  <item name="core"
+        resource="obelisk"
+        flags="INDESTRUCTABLE"
         />
 
   <!-- The plant items describe the plants at the smallest height. Scaled from there,

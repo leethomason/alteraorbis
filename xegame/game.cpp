@@ -35,6 +35,7 @@
 #include "../version.h"
 
 #include "ufosound.h"
+#include "istringconst.h"
 
 #include <time.h>
 #include <direct.h>	// for _mkdir
@@ -60,6 +61,7 @@ Game::Game( int width, int height, int rotation, int uiHeight, const char* path 
 	previousTime( 0 ),
 	isDragging( false )
 {
+	IStringConst::Init();
 	debugUIEnabled = false;
 
 	savePath = path;

@@ -19,22 +19,27 @@
 #include "../xegame/component.h"
 
 class ComponentFactory;
+class Census;
 
 struct ScriptContext
 {
-	ScriptContext() : initialized(false), time( 0 ), chit( 0 ) {}
+	ScriptContext() : initialized(false), lastTime( 0 ), time( 0 ), chit( 0 ), census( 0 ) {}
 
 	bool	initialized;
 	U32		lastTime;		// time at last tick
 	U32		time;			// time at this tick
-	Chit*	chit;
+	Chit*	chit;			// null at load
+	Census* census;			// valid at load
 };
 
 
 class IScript
 {
 public:
+	// The first time this is turned on:
 	virtual void Init( const ScriptContext& heap )	= 0;
+	virtual void OnAdd( const ScriptContext& ctx ) = 0;
+	virtual void OnRemove( const ScriptContext& ctx ) = 0;
 	virtual void Serialize( const ScriptContext& ctx, XStream* xs )	= 0;
 	virtual int DoTick( const ScriptContext& ctx, U32 delta, U32 since ) = 0;
 	virtual const char* ScriptName() = 0;
@@ -47,8 +52,10 @@ private:
 	typedef Component super;
 
 public:
-	ScriptComponent( IScript* p_script ) : script( p_script ), factory( 0 )	{}
-	ScriptComponent( const ComponentFactory* f ) : script( 0 ), factory( f )	{}
+	ScriptComponent( IScript* p_script, Census* p_census ) : script( p_script ), factory( 0 )	{
+		context.census = p_census;
+	}
+	ScriptComponent( const ComponentFactory* f, Census* p_census );
 	virtual ~ScriptComponent()									{ delete script; }
 
 	virtual const char* Name() const { return "ScriptComponent"; }

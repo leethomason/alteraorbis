@@ -28,7 +28,6 @@ static const char* gAnimationName[ ANIM_COUNT ] = {
 	"gunrun",
 	"gunstand",
 	"melee",
-	//"impactlight",
 	"impactheavy"
 };
 
@@ -38,7 +37,6 @@ static const bool gAnimationLooping[ ANIM_COUNT ] = {
 	true,
 	false,
 	false,
-	//false,
 	false
 };
 
@@ -48,7 +46,6 @@ static const bool gAnimationSync[ ANIM_COUNT ] = {
 	true,
 	false,
 	false,
-	//false,
 	false
 };
 
@@ -58,7 +55,6 @@ static const bool gAnimationMotion[ ANIM_COUNT ] = {
 	true,
 	false,
 	false,
-	//true,
 	true
 };
 
@@ -373,12 +369,13 @@ void AnimationResource::GetMetaData(	int type,
 
 	int i=0;
 	while( delta > 0 ) {
-		if (    t0 >= sequence[type].frame[i].start 
-			 && t0 < sequence[type].frame[i].end ) 
+		if (    sequence[type].frame[i].start >= t0
+			 && sequence[type].frame[i].start <  t0 + delta ) 
 		{
 			for( int j=0; j<EL_MAX_METADATA;  ++j ) {
 				int m = sequence[type].frame[i].metaData[j];
 				if ( m > 0 ) {
+					//GLOUTPUT(( "Meta push %d [%d,%d]\n", m, t0, t1 ));
 					data->Push( m ); 
 				}
 			}

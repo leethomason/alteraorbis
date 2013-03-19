@@ -52,6 +52,7 @@ public:
 	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
 
 	virtual void CalcVelocity( grinliz::Vector3F* v );
+	float Speed() const;	// The speed of motion - returns a constant.
 
 	void QueueDest( grinliz::Vector2F dest,
 					float rotation = -1.f );		// if specified, the rotation we wish to get to
@@ -60,6 +61,7 @@ public:
 		if ( queued.pos.x >= 0 ) { *dest = queued.pos; return true; }
 		return false;
 	}
+	void Stop() { SetNoPath(); }
 
 	void SetPathDebugging( bool d )	{ pathDebugging = d; }
 

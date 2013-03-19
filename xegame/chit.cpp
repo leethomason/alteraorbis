@@ -79,6 +79,13 @@ void Chit::Free()
 }
 
 
+LumosChitBag* Chit::GetLumosChitBag()
+{
+	return chitBag->ToLumos();
+}
+
+
+
 void Chit::Serialize( const ComponentFactory* factory, XStream* xs )
 {
 	XarcOpen( xs, "Chit" );
@@ -130,9 +137,6 @@ int Chit::Slot( Component* c )
 	}
 	else if ( c->ToComponent( "MoveComponent" )) {
 		s = MOVE;
-	}
-	else if ( c->ToComponent( "InventoryComponent" )) {
-		s = INVENTORY;
 	}
 	else if ( c->ToComponent( "ItemComponent" )) {
 		s = ITEM;
@@ -431,10 +435,6 @@ ComponentSet::ComponentSet( Chit* _chit, int bits )
 			move = chit->GetMoveComponent();
 			if ( !move ) ++error;
 		}
-		if ( bits & Chit::INVENTORY_BIT ) {
-			inventory = chit->GetInventoryComponent();
-			if ( !inventory ) ++error;
-		}
 		if ( bits & Chit::ITEM_BIT ) {
 			itemComponent = chit->GetItemComponent();
 			if ( !itemComponent ) 
@@ -461,7 +461,7 @@ ComponentSet::ComponentSet( Chit* _chit, int bits )
 
 			if ( bits & NOT_IN_IMPACT ) {
 				int type = render->CurrentAnimation();
-				if ( type == ANIM_HEAVY_IMPACT )
+				if ( type == ANIM_IMPACT )
 					++error;
 			}
 		}
@@ -479,7 +479,6 @@ void ComponentSet::Zero()
 	chit = 0;
 	spatial = 0;
 	move = 0;
-	inventory = 0;
 	itemComponent = 0;
 	item = 0;
 	render = 0;

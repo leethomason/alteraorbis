@@ -38,6 +38,9 @@ class RenderComponent : public Component
 private:
 	typedef Component super;
 public:
+	enum {	NUM_MODELS	= EL_MAX_METADATA+1,	// slot[0] is the main model; others are hardpoint attach
+			NUM_DECO	= 2 };
+
 	// spacetree probably  sufficient, but 'engine' easier to keep track of
 	// asset can be null if followed by a Load()
 	RenderComponent( Engine* engine, const char* asset );
@@ -63,15 +66,21 @@ public:
 
 	const char* GetMetaData( int i );
 
-	bool HasMetaData( const char* name );
-	bool GetMetaData( const char* name, grinliz::Matrix4* xform );
-	bool GetMetaData( const char* name, grinliz::Vector3F* pos );	
+	// --- MetaData -- //
+	bool HasMetaData( grinliz::IString name );
+	bool GetMetaData( grinliz::IString name, grinliz::Matrix4* xform );
+	bool GetMetaData( grinliz::IString name, grinliz::Vector3F* pos );	
+	// Useful metadata access.
 	bool CalcTarget( grinliz::Vector3F* pos );	// manufacture a target if there isn't metadata
+	bool CalcTrigger( grinliz::Vector3F* pos, grinliz::Matrix4* xform );	// either can be null
 	
-	void GetModelList( grinliz::CArray<const Model*, EL_MAX_METADATA+2> *ignore  );
+	// --- Model Info --- //
+	void GetModelList( grinliz::CArray<const Model*, NUM_MODELS+1> *ignore  );
 	const Model* MainModel() const				{ return model[0]; }	// used to map back from world to chits
 	const ModelResource* MainResource() const	{ return resource[0]; }
 
+
+	// --- Animation -- //
 	// Is the animation ready to change?
 	bool	AnimationReady() const;
 	// Play the special animations: MELEE, IMPACT, etc.
@@ -79,27 +88,39 @@ public:
 	bool	PlayAnimation( int type );
 	int		CurrentAnimation() const;
 
+	// --- Hardpoint control -- //
 	// A render component has one primary, animated model. Additional
 	// assets (guns, shields, etc.) can be Attached and Detatched
 	// to "metadata hardpoints".
-	void Attach(   grinliz::IString hardpoint, const char* asset );
-	void SetColor( grinliz::IString hardpoint, const grinliz::Vector4F& colorMult );
-	void SetProcedural( grinliz::IString hardpoint, const ProcRenderInfo& info );
+	bool HardpointAvailable( int hardpoint );
+
+	bool Attach( int hardpoint, const char* asset );
+	bool Attach( grinliz::IString metadata, const char* asset );
+
+	void SetColor( int hardpoint, const grinliz::Vector4F& colorMult );
+	void SetColor( grinliz::IString metadata, const grinliz::Vector4F& colorMult );
+
+	void SetProcedural( int hardpoint, const ProcRenderInfo& info );
+	void SetProcedural( grinliz::IString metadata, const ProcRenderInfo& info );
+
 	void SetSaturation( float s );
-	void Detach(   grinliz::IString hardpoint );
+	void Detach( int hardpoint );
+	void Detach( grinliz::IString metadata );
+
+	// --- Decoration --- //
+	void Deco( const char* asset, int slot, int duration );
 
 private:
 	int CalcAnimation() const;
 	SpatialComponent* SyncToSpatial();	// this a scary function: location is stored in both the model and the spatialcomponent
-
-	enum { NUM_MODELS = EL_MAX_METADATA+1 };	// slot[0] is the main model; others are hardpoint attach
 
 	Engine* engine;
 	float	radiusOfBase;
 
 	const ModelResource*	resource[ NUM_MODELS ];
 	Model*					model[ NUM_MODELS ];
-	grinliz::IString		metaDataName[EL_MAX_METADATA];
+	Model*					deco[ NUM_DECO ];
+	grinliz::IString		metaDataName[EL_MAX_METADATA];	// the name of the metadata - one smaller than the NUM_MODELS
 };
 
 #endif // RENDER_COMPONENT_INCLUDED

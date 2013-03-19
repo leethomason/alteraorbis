@@ -37,6 +37,19 @@ distribution.
 namespace grinliz
 {
 
+class CompValue {
+public:
+	// Hash table:
+	template <class T>
+	static U32 Hash( const T& v)					{ return (U32)(v); }
+	template <class T>
+	static bool Equal( const T& v0, const T& v1 )	{ return v0 == v1; }
+
+	// Sort, FindMax:
+	template <class T>
+	static bool Less( const T& v0, const T& v1 )	{ return v0 < v1; }
+};
+
 
 // I'm completely intriqued by CombSort. QuickSort is
 // fast, but an intricate algorithm that is easy to
@@ -81,6 +94,19 @@ inline void Sort( T* mem, int size )
 		}
 	}
 }
+
+template <class T, class KCOMPARE >
+inline int MaxValue( T* mem, int size )
+{
+	int r = 0;
+	for( int i=1; i<size; ++i ) {
+		if ( KCOMPARE::Less(mem[r],mem[i] )) {
+			r = i;
+		}
+	}
+	return r;
+}
+
 
 class ValueSem {
 public:
@@ -324,20 +350,6 @@ public:
 private:
 	T mem[CAPACITY];
 	int size;
-};
-
-
-class CompValue {
-public:
-	// Hash table:
-	template <class T>
-	static U32 Hash( const T& v)					{ return (U32)(v); }
-	template <class T>
-	static bool Equal( const T& v0, const T& v1 )	{ return v0 == v1; }
-
-	// Sort:
-	template <class T>
-	static bool Less( const T& v0, const T& v1 )	{ return v0 < v1; }
 };
 
 

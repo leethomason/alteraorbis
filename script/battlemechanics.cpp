@@ -25,7 +25,7 @@
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/rendercomponent.h"
 #include "../xegame/itemcomponent.h"
-#include "../xegame/inventorycomponent.h"
+#include "../xegame/istringconst.h"
 
 #include "../grinliz/glvector.h"
 #include "../grinliz/glgeometry.h"
@@ -38,7 +38,8 @@
 using namespace grinliz;
 
 static const float SHOOTER_MOVE_MULT = 0.5f;
-static const float TARGET_MOVE_MULT  = 0.7f;
+static const float TARGET_MOVE_MULT  = 0.8f;
+static const float BASE_ACCURACY     = 0.03f;
 
 
 /*static*/ int BattleMechanics::PrimaryTeam( Chit* src )
@@ -97,10 +98,6 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* 
 	GLASSERT( chitBag );
 
 	U32 absTime = chitBag->AbsTime();
-	if( !weapon->Ready()) {
-		return;
-	}
-	weapon->Use();
 	
 	int primaryTeam = PrimaryTeam( src );
 
@@ -150,80 +147,65 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* 
 void BattleMechanics::CalcMeleeDamage( Chit* src, IMeleeWeaponItem* weapon, DamageDesc* dd )
 {
 	GameItem* item = weapon->GetItem();
+	GameItem* mainItem = src->GetItem();
+	ItemComponent* inv = src->GetItemComponent();
 
-	InventoryComponent* inv = src->GetInventoryComponent();
-	GLASSERT( inv && item );
-	if ( !inv ) return;
+	GLASSERT( inv && item && mainItem );
+	if ( !inv || !mainItem || !item ) return;
 
-	// A chain is: sword[0] -> claw[1] -> creature[2]
-	grinliz::CArray< GameItem*, 4 > chain;
-	inv->GetChain( item, &chain );
-	GLASSERT( !chain.Empty() );
-	GLASSERT( chain.Size() == 2 || chain.Size() == 3 );
+	// The effect is the union of the item and the mainItem.
+	// A fire creature imparts fire to the sword it holds.
+	// ...I think that makes sense.
+	int effect = (item->flags | mainItem->flags) & GameItem::EFFECT_MASK;
 
-	// Now that we have a chain, how do effects commute?
-	// Generally left:
-	//		A flaming creature will impart FIRE to a regular sword.
-	// But not right:
-	//		A flaming sword won't light up the creature.
-	// 
-	// Or at least that is the theory so far.
-
-	int effect = 0;
-	for( int i=chain.Size()-1; i>=0; --i ) {
-		effect |= ( chain[i]->flags & GameItem::EFFECT_MASK );
-	}
 	// Remove explosive melee effect. It would only be funny 10 or 20 times.
 	effect ^= GameItem::EFFECT_EXPLOSIVE;
 
 	// Now about mass.
 	// Use the sum; using another approach can yield surprising damage calc.
-	float mass = 0;
-	for( int i=0; i<chain.Size(); ++i ) {
-		mass += chain[i]->mass;
-	}
+	float mass = item->mass + mainItem->mass;
+
 	static const float STRIKE_RATIO_INV = 1.0f / 5.0f;
 
-	float trait0 = chain[0]->stats.Damage();
-	float trait2 = chain[chain.Size()-1]->stats.Damage(); 
+	float trait0 = item->stats.Damage();
+	float trait2 = mainItem->stats.Damage(); 
 
-	dd->damage = mass * chain[0]->meleeDamage * STRIKE_RATIO_INV * trait0 * trait2;
+	dd->damage = mass * item->meleeDamage * STRIKE_RATIO_INV * trait0 * trait2;
 	dd->effects = effect;
 }
 
 
-float BattleMechanics::ComputeRadAt1( Chit* shooter, IRangedWeaponItem* weapon, Chit* target )
+float BattleMechanics::ComputeRadAt1(	GameItem* shooter, 
+										IRangedWeaponItem* weapon,
+										bool shooterMoving,
+										bool targetMoving )
 {
-	float accShooter = 1;
-	float accWeapon = 1;
-	float accMod = 1;
+	float accuracy = 1;
 
-	if ( shooter && shooter->GetMoveComponent() && shooter->GetMoveComponent()->IsMoving() ) {
-		accMod *= SHOOTER_MOVE_MULT;
+	if ( shooterMoving ) {
+		accuracy *= SHOOTER_MOVE_MULT;
 	}
-	if ( shooter && shooter->GetItemComponent() ) {
-		accShooter = shooter->GetItemComponent()->GetItem()->stats.Accuracy();
+	if ( targetMoving ) {
+		accuracy *= TARGET_MOVE_MULT;
+	}
+
+	if ( shooter  ) {
+		accuracy *= shooter->stats.Accuracy();
 	}
 	if ( weapon ) {
-		accWeapon = weapon->GetItem()->stats.Accuracy();
-	}
-	if ( target && target->GetMoveComponent() && target->GetMoveComponent()->IsMoving() ) {
-		accMod = TARGET_MOVE_MULT;
+		accuracy *= weapon->GetItem()->stats.Accuracy();
 	}
 
-	// 0.10: can't hit a barn
-	// 0.05: bad shot - untrained?
-	// Untuned. 
-	float acc = accShooter * accWeapon * accMod;
-	float radAt1 = AbilityCurve( 0.12f, 0.05f, 0.01f, 0.001f, acc );
+ 	float radAt1 = BASE_ACCURACY / accuracy;
 	return radAt1;
 }
 
 
-void BattleMechanics::Shoot( ChitBag* bag, Chit* src, Chit* target, IRangedWeaponItem* weapon, const Vector3F& pos )
+void BattleMechanics::Shoot( ChitBag* bag, Chit* src, Chit* target, IRangedWeaponItem* weapon )
 {
-	GLASSERT( weapon->Ready() );
-	bool okay = weapon->Use();
+	GameItem* weaponItem = weapon->GetItem();
+	GLASSERT( weaponItem->CanUse() );
+	bool okay = weaponItem->Use();
 	if ( !okay ) {
 		return;
 	}
@@ -231,25 +213,20 @@ void BattleMechanics::Shoot( ChitBag* bag, Chit* src, Chit* target, IRangedWeapo
 		return;
 	}
 	GameItem* item = weapon->GetItem();
-	
-	Vector3F t = { 0, 0, 0 };
-	Vector3F v = { 0, 0, 0 };
-	target->GetRenderComponent()->CalcTarget( &t );
-	if ( target->GetMoveComponent() ) {
-		target->GetMoveComponent()->CalcVelocity( &v );
+
+	Vector3F p0;
+	Vector3F aimAt = ComputeLeadingShot( src, target, &p0 );
+
+	// Explosives shoot at feet.
+	if ( weaponItem->flags & GameItem::EFFECT_EXPLOSIVE ) {
+		aimAt.y = 0;
 	}
-
-	static const float SPEED = 8.0f;
-	float itemSpeed = 1.0f;
-	item->GetValue( "speed", &itemSpeed );
-	float speed = SPEED * itemSpeed;
-
-	Vector3F aimAt = ComputeLeadingShot( pos, t, v, speed );
-	float radAt1 = ComputeRadAt1( src, weapon, target );
-	Vector3F dir = FuzzyAim( pos, aimAt, radAt1 );
+	
+	float radAt1 = ComputeRadAt1( src->GetItem(), weapon, src->GetMoveComponent()->IsMoving(), target->GetMoveComponent()->IsMoving() );
+	Vector3F dir = FuzzyAim( p0, aimAt, radAt1 );
 
 	Bolt* bolt = bag->NewBolt();
-	bolt->head = pos + dir;			// FIXME: use team ignore, not offset
+	bolt->head = p0 + dir;
 	bolt->len = 1.0f;
 	bolt->dir = dir;
 	if ( item->flags & GameItem::EFFECT_FIRE )
@@ -260,52 +237,82 @@ void BattleMechanics::Shoot( ChitBag* bag, Chit* src, Chit* target, IRangedWeapo
 	bolt->damage = item->rangedDamage * item->stats.Damage();
 	bolt->effect = item->Effects();
 	bolt->particle  = (item->flags & GameItem::RENDER_TRAIL) ? true : false;
-	bolt->speed = speed;
+	bolt->speed = item->CalcBoltSpeed();
 }
 
 
-float BattleMechanics::TestFire( float range, float targetDiameter )
+float BattleMechanics::EffectiveRange( float radAt1, float targetDiameter )
 {
-	float hit = 0;
+	float r0 = MIN_EFFECTIVE_RANGE;
+	float r1 = MAX_EFFECTIVE_RANGE;
+	float c0 = ChanceToHit( r0, radAt1, targetDiameter );
+	float c1 = ChanceToHit( r1, radAt1, targetDiameter );
+	static const float C = 0.5f;
 
-#if 0
-	Random random( seed );
-	Vector3F target = { range, 0, 0 };
-	Vector3F src = { 0, 0, 0 };
+	if ( c0 <= C ) {
+		return MIN_EFFECTIVE_RANGE;
+	}
+	if ( c1 >= C ) {
+		return MAX_EFFECTIVE_RANGE;
+	}
 
-	for( int i=0; i<nTests; ++i ) {
-		Vector3F aimAt = target;
-		float accuracy = ComputeAccuracy( 0, 0, 0 );
-		Vector3F dir = FuzzyAim( src, aimAt, accuracy );
+	// c = c0 + m*r;
+	// r = (c - c0) / m;
+	float c = 0;
+	float r = 0;
 
-		Vector3F at;
-		IntersectRayPlane( src, dir, 0, range, &at );
-		float len = sqrtf( at.y*at.y + at.z*at.z );
-		if ( len < targetDiameter * 0.5f ) {
-			++hit;
+	for( int i=0; i<5; ++i ) {
+		// Cliffs make me nervous using a N-R search.
+		r = Mean(r0,r1);
+		c = ChanceToHit( r, radAt1, targetDiameter );
+
+		if ( c < C ) {
+			r1 = r;
+			c1 = c;
+		}
+		else {
+			r0 = r;
+			c0 = c;
 		}
 	}
+	return r;
+}
 
-#else
 
+float BattleMechanics::ChanceToHit( float range, float radAt1, float targetDiameter )
+{
+	/*
+		There is real math to be done here. The computation below assumes
+		that any point on the sphere is equally likely.
+	*/
+
+	// Volume of a sphere:
 	// V = (4/3)PI r^3
+	//
+	// Partial sphere volume:
+	//	http://mathworld.wolfram.com/SphericalCap.html
+	//
+	// Vcap = (PI/3) * h^2 * (3*R - h)
+	//
 
-	float radAt1 = ComputeRadAt1( 0, 0, 0 );
+	float rSphere = radAt1 * range;
+	float rCyl    = targetDiameter * 0.5f;
 
-	float rOuter = range * radAt1;
-	float vOuter = 4.f / 3.f * PI * rOuter * rOuter * rOuter;
-
-	float rInner = targetDiameter * 0.5f;
-	float vInner = 4.f / 3.f * PI * rInner * rInner * rInner;
-
-	if ( rOuter <= rInner ) {
-		hit = 1.0f;
+	if ( rSphere <= rCyl ) {
+		return 1.0f;
 	}
-	else {
-		hit = vInner / vOuter;
+	if ( rCyl == 0.0f ) {
+		return 0.0f;
 	}
-#endif
-	return hit;
+
+	float lenCyl = 2.0f * sqrtf( rSphere*rSphere - rCyl*rCyl );
+	float hCap = rSphere - 0.5f*lenCyl;
+
+	float vCap = (PI/3.0f) * hCap*hCap * (3.0f*rCyl - hCap); 
+	float vInside = PI*rCyl*rCyl*lenCyl + 2.0f*vCap;
+	float vSphere = (4.0f/3.0f)*PI*rSphere*rSphere*rSphere;
+	float result = vInside / vSphere;
+	return result;
 }
 
 
@@ -317,14 +324,74 @@ Vector3F BattleMechanics::FuzzyAim( const Vector3F& pos, const Vector3F& aimAt, 
 
 	if ( radiusAt1 > 0 && len > 0 ) {
 
-		Vector3F rv;
-		random.NormalVector3D( &rv.x );
+		/* Compute a point in the sphere. All points should be equally likely,
+		   remembering the target is the 2 projection, this makes the center
+		   of the sphere more likely than the outside.
+
+		   I'm not convined this algorithm achieves the desired randomness, however.
+
+		   Choosing a random direction and a random length, however, biases the sphere
+		   to the center. This is necessarily bad, but it's a different result.
+		*/
+		float t = FLT_MAX;
+		Vector3F rv = { 0, 0, 0 };
+		while ( t > 1.0f ) {
+			rv.Set( -1.0f+random.Uniform()*2.0f, -1.0f+random.Uniform()*2.0f, -1.0f+random.Uniform()*2.0f );
+			t = rv.LengthSquared();
+		}
 
 		Vector3F aimAtPrim = aimAt + rv * radiusAt1 * len;
 		dir = aimAtPrim - pos;
 	}
 	dir.Normalize();
 	return dir;
+}
+
+
+Vector3F BattleMechanics::ComputeLeadingShot( Chit* origin, Chit* target, Vector3F* p0 )
+{
+	Vector3F trigger = { 0, 0, 0 };
+	Vector3F t = { 0, 0, 0 };
+	Vector3F v = { 0, 0, 0 };
+	if ( target->GetRenderComponent() ) {
+		target->GetRenderComponent()->CalcTarget( &t );
+	}
+	else if ( target->GetSpatialComponent() ) {
+		t = target->GetSpatialComponent()->GetPosition();
+		t.y += 0.5f;
+	}
+	else {
+		GLASSERT( 0 );
+	}
+
+	if ( target->GetMoveComponent() ) {
+		target->GetMoveComponent()->CalcVelocity( &v );
+	}
+
+	GameItem* item = origin->GetItem();
+	GLASSERT( item );
+	float speed = item->CalcBoltSpeed();
+
+	if ( origin->GetRenderComponent() ) {
+		RenderComponent* rc = origin->GetRenderComponent();
+		if ( rc && rc->GetMetaData( IStringConst::ktrigger, &trigger )) {
+			// have value;
+		}
+		else if ( rc ) {
+			rc->CalcTarget( &trigger );
+		}
+		else if ( origin->GetSpatialComponent() ) {
+			trigger = origin->GetSpatialComponent()->GetPosition();
+			trigger.y += 0.5f;
+		}
+		else {
+			GLASSERT( 0 );
+		}
+	}
+	if ( p0 ) {
+		*p0 = trigger;
+	}
+	return ComputeLeadingShot( trigger, t, v, speed );
 }
 
 

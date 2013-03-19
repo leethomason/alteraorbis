@@ -75,9 +75,6 @@ public:
 	void InitStd( gamui::Gamui* g, gamui::PushButton* okay, gamui::PushButton* cancel );
 	void PositionStd( gamui::PushButton* okay, gamui::PushButton* cancel );
 
-	//virtual void Save( tinyxml2::XMLPrinter* );
-	//virtual void Load( const tinyxml2::XMLElement& parent );
-
 protected:
 
 private:

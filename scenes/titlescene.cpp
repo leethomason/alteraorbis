@@ -43,8 +43,7 @@ TitleScene::TitleScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 													"battle", 
 													"animation", 
 													"Live\nPreview", 
-													"Asset\nPreview", 
-													"Weapon\nStat" };
+													"Asset\nPreview" };
 
 	for( int i=0; i<NUM_TESTS; ++i ) {
 		testScene[i].Init( &gamui2D, lumosGame->GetButtonLook( LumosGame::BUTTON_LOOK_STD ) );
@@ -70,7 +69,7 @@ void TitleScene::Resize()
 
 	static const bool VIS[NUM_TESTS] = {
 		false, true, false, true, false, false, false,
-		true, true, true, true, false
+		true, true, true, true
 	};
 	bool visible = game->DebugUIEnabled();
 
@@ -132,17 +131,6 @@ void TitleScene::ItemTapped( const gamui::UIItem* item )
 	}
 	else if ( item == &gameScene[CONTINUE] ) {
 		game->PushScene( LumosGame::SCENE_GAME, 0 );
-	}
-	else if ( item == &testScene[TEST_WEAPON_STAT] ) {
-		BattleMechanics battle;
-		FILE* fp = fopen( "weapons.txt", "w" );
-
-		fprintf( fp, "Unit 0 Weapon 0 Range\n" );
-		for( int range=2; range<=10; range += 2 ) {
-			float hits = battle.TestFire( (float)range, 0.4f );
-			fprintf( fp, "  %2d  %d%%\n", range, (int)(hits*100.0f) );
-		}
-		fclose( fp );
 	}
 }
 

@@ -116,12 +116,6 @@ class Random
 	*/
 	int Select( const float* scores, int nItems );
 
-	// Return a random unit normal vector. 'dimension' is usual 2 (2D) or 3 (3D)
-	// This is hard to get correct. Generating a random x,y,z favors the corners of the 
-	// box. Geometrically easy to see if you think that there is more length - and therefore
-	// more likelihood in the corners as opposed to the centers. Trig is slow.
-	// void NormalVector( float* v, int dimension );
-
 	void NormalVector2D( float* v );
 	void NormalVector3D( float* v );
 

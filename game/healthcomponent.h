@@ -17,6 +17,9 @@
 #define HEALTH_COMPONENT_INCLUDED
 
 #include "../xegame/component.h"
+#include "../script/battlemechanics.h"
+
+class Engine;
 
 /*
 	Binds to the Item component for values; essentually the script that
@@ -28,7 +31,7 @@ private:
 	typedef Component super;
 
 public:
-	HealthComponent() : destroyed(0)	{}
+	HealthComponent( Engine* e) : engine(e), destroyed(0)	{}
 	virtual ~HealthComponent()	{}
 
 	virtual const char* Name() const { return "HealthComponent"; }
@@ -43,7 +46,11 @@ public:
 private:
 	enum { COUNTDOWN = 800 };
 	void DeltaHealth();
+
+	Engine* engine;
 	U32 destroyed;
+
+	BattleMechanics battleMechanics;
 };
 
 
