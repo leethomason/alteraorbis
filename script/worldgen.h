@@ -33,6 +33,23 @@ struct WorldFeature {
 };
 
 
+class SectorData
+{
+public:
+	SectorData() : x(0), y(0), slots(0), hasCore(false), area(0) {}
+	enum { 
+		NEG_X	=1, 
+		POS_X	=2, 
+		NEG_Y	=4,		
+		POS_Y	=8 
+	};
+	int  x, y;		// grid position (not sector position)
+	int  slots;		// if attached to the grid, has slots. 
+	bool hasCore;
+	int  area;
+};
+
+
 class WorldGen
 {
 public:
@@ -65,12 +82,20 @@ public:
 		}
 	}
 
-	void CutRoads( U32 seed );
-	bool CalColor( grinliz::CDynArray<WorldFeature>* featureArr );
+	void CutRoads( U32 seed, SectorData* data );
+	void ProcessSectors( U32 seed, SectorData* data );
+//	bool CalColor( grinliz::CDynArray<WorldFeature>* featureArr );
 
 	// SIZExSIZE
+
+	enum {
+		WATER,
+		LAND,
+		GRID = 16,
+		LANDING
+	};
+
 	const U8* Land() const						{ return land; }
-	const U8* Color() const						{ return color; }
 
 	enum {
 		SIZE			= MAX_MAP_SIZE,
@@ -79,16 +104,16 @@ public:
 	};
 
 private:
-	int CountFlixelsAboveCutoff( const float* flixels, float cutoff, float* maxh );
-	void DrawCanal( grinliz::Vector2I v, int radius, int dx, int dy, const grinliz::Rectangle2I& wf );
+	int  CountFlixelsAboveCutoff( const float* flixels, float cutoff, float* maxh );
 	void Draw( const grinliz::Rectangle2I& r, int land );
+	int  CalcSectorArea( int x, int y );
+	void AddSlots( SectorData* sector );
 
 	float* flixels;
 	grinliz::PerlinNoise* noise0;
 	grinliz::PerlinNoise* noise1;
 
-	U8* land;	// 0: water, 1: last
-	U8* color;	// 0: not processed, >0 color
+	U8* land;
 };
 
 #endif // LUMOS_WORLDGEN_INCLUDED

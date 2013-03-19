@@ -67,7 +67,10 @@ int main(int argc, const char* argv[])
 		}
 
 		worldGen.WriteMarker();
-		worldGen.CutRoads( seed0 );
+
+		SectorData* sectorData = new SectorData[WorldGen::REGION_SIZE*WorldGen::REGION_SIZE];
+		worldGen.CutRoads( seed0, sectorData );
+		worldGen.ProcessSectors( seed0, sectorData );
 
 		CDynArray<WorldFeature> featureArr;
 		/*
@@ -106,11 +109,11 @@ int main(int argc, const char* argv[])
 			memset( &grid, 0, sizeof(grid) );
 
 			grid.SetLandAndRock( *(worldGen.Land() + i) );
-			grid.SetPathColor( *(worldGen.Color() + i) );
 			pixels[i] = grid.ToColor();
 		}
 		lodepng_encode32_file( fname.c_str(), (const unsigned char*)pixels, WorldGen::SIZE, WorldGen::SIZE );
 		delete [] pixels;
+		delete [] sectorData;
 	}
 	printf( "total time %dms\n", clock()-startTime );
 	return 0;

@@ -68,8 +68,6 @@ WorldGen::WorldGen()
 {
 	land = new U8[SIZE*SIZE];
 	memset( land, 0, SIZE*SIZE );
-	color = new U8[SIZE*SIZE];
-	memset( color, 0, SIZE*SIZE );
 	flixels = 0;
 	noise0 = 0;
 	noise1 = 0;
@@ -79,7 +77,6 @@ WorldGen::WorldGen()
 WorldGen::~WorldGen()
 {
 	delete [] land;
-	delete [] color;
 	delete [] flixels;
 	delete noise0;
 	delete noise1;
@@ -207,7 +204,7 @@ int WorldGen::CountFlixelsAboveCutoff( const float* flixels, float cutoff, float
 	return count;
 }
 
-
+/*
 bool WorldGen::CalColor( CDynArray<WorldFeature>* featureArr )
 {
 	memset( color, 0, SIZE*SIZE );
@@ -262,39 +259,7 @@ bool WorldGen::CalColor( CDynArray<WorldFeature>* featureArr )
 
 	return c < 255;	// [0,254], need 255 for color-zone encoding in Save()
 }
-
-
-void WorldGen::DrawCanal( Vector2I v, int radius, int dx, int dy, const Rectangle2I& wf )
-{
-	Rectangle2I bounds;
-	bounds.Set( 0, 0, SIZE-1, SIZE-1 );
-	int bx = abs(dy)*radius;
-	int by = abs(dx)*radius;
-	Random random( v.x * v.y );
-	
-	while ( true ) {
-		Rectangle2I brush;
-		brush.Set( v.x-bx, v.y-by, v.x+bx, v.y+by );
-		// Outside of world bounds, break.
-		if ( !bounds.Contains( brush ) )
-			break;
-		// Outside of feature bounds and hit water, break.
-		if ( !wf.Contains( brush ) && land[v.y*SIZE+v.x] == 0 )
-			break;
-		for( int y=brush.min.y; y<=brush.max.y; ++y ) {
-			for( int x=brush.min.x; x<=brush.max.x; ++x ) {
-				land[y*SIZE+x] = 0;
-			}
-		}
-		v.x += dx;
-		v.y += dy;
-
-		if ( random.Rand(3) == 0 ) v.x += dy; 
-		if ( random.Rand(3) == 0 ) v.x -= dy; 
-		if ( random.Rand(3) == 0 ) v.y += dx; 
-		if ( random.Rand(3) == 0 ) v.y -= dx; 
-	}
-}
+*/
 
 
 void WorldGen::Draw( const Rectangle2I& r, int isLand )
@@ -309,7 +274,7 @@ void WorldGen::Draw( const Rectangle2I& r, int isLand )
 }
 
 
-void WorldGen::CutRoads( U32 seed )
+void WorldGen::CutRoads( U32 seed, SectorData* sectorData )
 {
 	// Each sector is represented by one pather,
 	// so they can't connect. First pass: split
@@ -401,22 +366,113 @@ void WorldGen::CutRoads( U32 seed )
 
 				if ( left ) {
 					r.Set( x0-1, y0-1, x0, y1+1 );
-					Draw( r, 1 );
+					Draw( r, 2 );
+					sectorData[j*NUM_REGIONS+i].slots |= SectorData::NEG_X;
 				}
 				if ( right ) {
 					r.Set( x1, y0+1, x1+1, y1+1 );
-					Draw( r, 1 );
+					Draw( r, 2 );
+					sectorData[j*NUM_REGIONS+i].slots |= SectorData::POS_X;
 				}
 				if ( up ) {
 					r.Set( x0-1, y0-1, x1+1, y0 );
-					Draw( r, 1 );
+					Draw( r, 2 );
+					sectorData[j*NUM_REGIONS+i].slots |= SectorData::NEG_Y;
 				}
 				if ( down ) {
 					r.Set( x0-1, y1, x1+1, y1+1 );
-					Draw( r, 1 );
+					Draw( r, 2 );
+					sectorData[j*NUM_REGIONS+i].slots |= SectorData::POS_Y;
 				}
 			}
 		}
+	}
+}
+
+
+int WorldGen::CalcSectorArea( int sx, int sy )
+{
+	int area = 0;
+	for( int j=sy*REGION_SIZE+1;
+		 j < (sy+1)*REGION_SIZE-1;
+		 ++j )
+	{
+		for( int i=sx*REGION_SIZE+1;
+			 i < (sx+1)*REGION_SIZE-1;
+			 ++i )
+		{
+			if ( land[j*SIZE+i] ) {
+				++area;
+			}
+		}
+	}
+	return area;
+}
+
+
+void WorldGen::AddSlots( SectorData* s )
+{
+	int x = s->x;
+	int y = s->y;
+
+	Rectangle2I r;
+	static const int LONG  = 4;
+	static const int OFFSET = (REGION_SIZE-LONG)/2;
+	static const int SHORT = 2;
+
+	if ( s->slots & SectorData::NEG_X ) {
+		r.Set( x+1, y+OFFSET, x+SHORT, y+OFFSET+LONG-1 ); 
+		Draw( r, LANDING );
+	}
+	if ( s->slots & SectorData::POS_X ) {
+		r.Set( x+REGION_SIZE-SHORT-1, y+OFFSET, x+REGION_SIZE-2, y+OFFSET+LONG-1 ); 
+		Draw( r, LANDING );
+	}
+	/*
+	if ( s->slots & SectorData::NEG_Y ) {
+		r.Set( x+1, y+OFFSET, x+HEIGHT, y+OFFSET+WIDTH-1 ); 
+	}
+	if ( s->slots & SectorData::POS_Y ) {
+		r.Set( x+1, y+OFFSET, x+HEIGHT, y+OFFSET+WIDTH-1 ); 
+	}
+	*/
+}
+
+
+class SectorPtrArea
+{
+public:
+	static bool Less( const SectorData* s0, const SectorData* s1 ) {
+		return s0->area < s1->area;
+	}
+};
+
+void WorldGen::ProcessSectors( U32 seed, SectorData* sectorData )
+{
+	// Calc the area.
+	// Sort by area.
+	// Choose N and fill in for cores.
+
+	static const int NCORES = 100;
+
+	for( int j=0; j<NUM_REGIONS; ++j ) {
+		for( int i=0; i<NUM_REGIONS; ++i ) {
+			sectorData[j*NUM_REGIONS+i].x = i*REGION_SIZE;
+			sectorData[j*NUM_REGIONS+i].y = j*REGION_SIZE;
+			sectorData[j*NUM_REGIONS+i].area = CalcSectorArea( i, j );
+		}
+	}
+
+	CDynArray<SectorData*> sectors;
+	for( int i=0; i<NUM_REGIONS*NUM_REGIONS; ++i ) {
+		if ( sectorData[i].slots ) {
+			sectors.Push( sectorData + i );
+		}
+	}
+	Sort< SectorData*, SectorPtrArea >( sectors.Mem(), sectors.Size() );
+
+	for( int i=0; i<sectors.Size(); ++i ) {
+		AddSlots( sectors[i] );
 	}
 }
 
