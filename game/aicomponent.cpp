@@ -514,71 +514,12 @@ void AIComponent::SetWanderParams( const grinliz::Vector2F& pos, float radius )
 }
 
 
-void AIComponent::ThinkWander( const ComponentSet& thisComp )
+Vector2F AIComponent::ThinkWanderCircle( const ComponentSet& thisComp )
 {
-	// Wander in some sort of directed fashion.
-	// - get close to friends
-	// - but not too close
-	// - given a choice, get close to plants.
-	// - occasionally randomly wander about
-
-	Vector2F dest = thisComp.spatial->GetPosition2D();
-	if ( randomWander ) {
-		dest = wanderOrigin;
-		dest.x += parentChit->random.Uniform() * wanderRadius * parentChit->random.Sign();
-		dest.y += parentChit->random.Uniform() * wanderRadius * parentChit->random.Sign();
-	}
-	else {
-		// +1 for origin, +4 for plants
-		CArray<Vector2F, MAX_TRACK+1+5> pos;
-		for( int i=0; i<friendList.Size(); ++i ) {
-			Chit* c = parentChit->GetChitBag()->GetChit( friendList[i] );
-			if ( c && c->GetSpatialComponent() ) {
-				Vector2F v = c->GetSpatialComponent()->GetPosition2D();
-				pos.Push( v );
-			}
-		}
-		pos.Push( wanderOrigin );	// the origin is a friend.
-
-		Vector2F mean = thisComp.spatial->GetPosition2D();
-
-		// And plants are friends.
-		Rectangle2F r;
-		r.min = r.max = mean;
-		r.Outset( 3 );
-
-		const CDynArray<Chit*>& plants = parentChit->GetChitBag()->QuerySpatialHash( r, 0, PlantScript::PassablePlantFilter );
-		for( int i=0; i<plants.Size() && i<4; ++i ) {
-			pos.Push( plants[i]->GetSpatialComponent()->GetPosition2D() );
-		}
-
-		// Get close to friends.
-		for( int i=0; i<pos.Size(); ++i ) {
-			mean = mean + pos[i];
-		}
-		dest = mean * (1.0f/(float)(1+pos.Size()));
-		Vector2F heading = thisComp.spatial->GetHeading2D();
-
-		// But not too close.
-		for( int pass=0; pass<2; ++pass ) {
-			for( int i=0; i<pos.Size(); ++i ) {
-				if ( (pos[i] - dest).LengthSquared() < 4.0f ) {
-					dest += heading * 2.0f;
-				}
-			}
-		}
-	}
-	PathMoveComponent* pmc = GET_COMPONENT( thisComp.chit, PathMoveComponent );
-	if ( pmc ) {
-		pmc->QueueDest( dest );
-	}
-	rethink.Set( 10*1000 + thisComp.chit->random.Rand( 10*1000 ));
-	currentAction = WANDER;
-
-#if 0
 	// In a circle?
 	// This turns out to be creepy. Worth keeping for something that is,
 	// in fact, creepy.
+	Vector2F dest = wanderOrigin;
 	if ( wanderRadius > 0 ) {
 		Random random( thisComp.chit->ID() );
 
@@ -595,16 +536,93 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 		
 		v = v * (lenUniform * wanderRadius);
 
-		Vector2F dest = wanderOrigin + v;
-
-		PathMoveComponent* pmc = GET_COMPONENT( thisComp.chit, PathMoveComponent );
-		if ( pmc ) {
-			pmc->QueueDest( dest );
-		}
-		rethink.Set( thisComp.chit->random.Rand( PERIOD/4 ));
-		currentAction = WANDER;
+		dest = wanderOrigin + v;
 	}
-#endif
+	return dest;
+}
+
+
+Vector2F AIComponent::ThinkWanderRandom( const ComponentSet& thisComp )
+{
+
+	Vector2F dest = wanderOrigin;
+	dest.x += parentChit->random.Uniform() * wanderRadius * parentChit->random.Sign();
+	dest.y += parentChit->random.Uniform() * wanderRadius * parentChit->random.Sign();
+	return dest;
+}
+
+
+Vector2F AIComponent::ThinkWanderFlock( const ComponentSet& thisComp )
+{
+	Vector2F origin = thisComp.spatial->GetPosition2D();
+
+	static const int NPLANTS = 4;
+	static const float PLANT_AWARE = 3.0f;
+	static const float TOO_CLOSE = 2.0f;
+
+	// +1 for origin, +4 for plants
+	CArray<Vector2F, MAX_TRACK+1+NPLANTS> pos;
+	for( int i=0; i<friendList.Size(); ++i ) {
+		Chit* c = parentChit->GetChitBag()->GetChit( friendList[i] );
+		if ( c && c->GetSpatialComponent() ) {
+			Vector2F v = c->GetSpatialComponent()->GetPosition2D();
+			pos.Push( v );
+		}
+	}
+	pos.Push( wanderOrigin );	// the origin is a friend.
+
+	// And plants are friends.
+	Rectangle2F r;
+	r.min = r.max = origin;
+	r.Outset( PLANT_AWARE );
+
+	const CDynArray<Chit*>& plants = parentChit->GetChitBag()->QuerySpatialHash( r, 0, PlantScript::PassablePlantFilter );
+	for( int i=0; i<plants.Size() && i<NPLANTS; ++i ) {
+		pos.Push( plants[i]->GetSpatialComponent()->GetPosition2D() );
+	}
+
+	Vector2F mean = origin;
+	// Get close to friends.
+	for( int i=0; i<pos.Size(); ++i ) {
+		mean = mean + pos[i];
+	}
+	Vector2F dest = mean * (1.0f/(float)(1+pos.Size()));
+	Vector2F heading = thisComp.spatial->GetHeading2D();
+
+	// But not too close.
+	for( int pass=0; pass<2; ++pass ) {
+		for( int i=0; i<pos.Size(); ++i ) {
+			if ( (pos[i] - dest).LengthSquared() < TOO_CLOSE*TOO_CLOSE ) {
+				dest += heading * TOO_CLOSE;
+			}
+		}
+	}
+	return dest;
+}
+
+
+void AIComponent::ThinkWander( const ComponentSet& thisComp )
+{
+	// Wander in some sort of directed fashion.
+	// - get close to friends
+	// - but not too close
+	// - given a choice, get close to plants.
+	// - occasionally randomly wander about
+
+	Vector2F dest = { 0, 0 };
+	if ( randomWander ) {
+		dest = ThinkWanderRandom( thisComp );
+	}
+	else {
+		dest = ThinkWanderFlock( thisComp );
+	}
+
+	PathMoveComponent* pmc = GET_COMPONENT( thisComp.chit, PathMoveComponent );
+	if ( pmc ) {
+		pmc->QueueDest( dest );
+	}
+	rethink.Set( 10*1000 + thisComp.chit->random.Rand( 10*1000 ));
+	currentAction = WANDER;
 }
 
 

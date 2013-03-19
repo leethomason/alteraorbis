@@ -84,6 +84,14 @@ private:
 	void ThinkWander( const ComponentSet& thisComp );
 	void ThinkBattle( const ComponentSet& thisComp );
 
+	// What happens when no other move is working.
+	grinliz::Vector2F ThinkWanderRandom( const ComponentSet& thisComp );
+	// pseudo-flocking
+	grinliz::Vector2F ThinkWanderFlock( const ComponentSet& thisComp );
+	// creepy circle pacing
+	grinliz::Vector2F ThinkWanderCircle( const ComponentSet& thisComp );
+
+
 	Engine*		engine;
 	WorldMap*	map;
 
