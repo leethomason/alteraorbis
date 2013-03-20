@@ -2,6 +2,8 @@
 *.exe
 *.zip
 *.user
+*.dat
+*.db
 Debug
 Release
 cap??.bmp
@@ -9,5 +11,7 @@ cap??.png
 atlas*.bmp
 worldgen/*.png
 rockgen/*.png
+Altera
+
 
 
