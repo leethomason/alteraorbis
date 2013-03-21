@@ -17,6 +17,7 @@ private:
 	unsigned isLand				: 1;
 	unsigned isGrid				: 1;
 	unsigned isPort				: 1;
+	unsigned isCore				: 1;
 
 	unsigned isBlocked			: 1;	// blocks the pather; implies inUse
 	unsigned inUse				: 1;	// used, but the pather isn't blocked
@@ -56,6 +57,7 @@ public:
 
 	void SetGrid()				{ isLand = 1; isBlocked = 1; isGrid = 1; }
 	void SetPort()				{ isLand = 1; inUse = 1; isPort = 1; }
+	void SetCore()				{ isLand = 1; isBlocked = 1; isCore = 1; }
 	void SetLandAndRock( U8 h )	{
 		// So confusing. Max rock height=3, but land goes from 1-4 to be distinct from water.
 		// Subtract here.

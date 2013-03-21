@@ -121,6 +121,9 @@ int main(int argc, const char* argv[])
 			else if ( h == WorldGen::PORT ) {
 				grid.SetPort();
 			}
+			else if ( h == WorldGen::CORE ) {
+				grid.SetCore();
+			}
 			else {
 				GLASSERT( 0 );
 			}

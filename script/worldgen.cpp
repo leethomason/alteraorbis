@@ -364,22 +364,22 @@ void WorldGen::CutRoads( U32 seed, SectorData* sectorData )
 				if ( left ) {
 					r.Set( x0-1, y0-1, x0, y1+1 );
 					Draw( r, GRID );
-					sectorData[j*NUM_REGIONS+i].slots |= SectorData::NEG_X;
+					sectorData[j*NUM_REGIONS+i].ports |= SectorData::NEG_X;
 				}
 				if ( right ) {
 					r.Set( x1, y0+1, x1+1, y1+1 );
 					Draw( r, GRID );
-					sectorData[j*NUM_REGIONS+i].slots |= SectorData::POS_X;
+					sectorData[j*NUM_REGIONS+i].ports |= SectorData::POS_X;
 				}
 				if ( up ) {
 					r.Set( x0-1, y0-1, x1+1, y0 );
 					Draw( r, GRID );
-					sectorData[j*NUM_REGIONS+i].slots |= SectorData::NEG_Y;
+					sectorData[j*NUM_REGIONS+i].ports |= SectorData::NEG_Y;
 				}
 				if ( down ) {
 					r.Set( x0-1, y1, x1+1, y1+1 );
 					Draw( r, GRID );
-					sectorData[j*NUM_REGIONS+i].slots |= SectorData::POS_Y;
+					sectorData[j*NUM_REGIONS+i].ports |= SectorData::POS_Y;
 				}
 			}
 		}
@@ -407,31 +407,44 @@ int WorldGen::CalcSectorArea( int sx, int sy )
 }
 
 
-void WorldGen::AddSlots( SectorData* s )
+Rectangle2I SectorData::GetPortLoc( int port )
+{
+	Rectangle2I r;
+	static const int LONG  = 4;
+	static const int REGION_SIZE = WorldGen::REGION_SIZE;
+	static const int OFFSET = (REGION_SIZE-LONG)/2;
+	static const int SHORT = 2;
+
+	if ( port == NEG_X ) {
+		r.Set( x+1, y+OFFSET, x+SHORT, y+OFFSET+LONG-1 ); 
+	}
+	else if ( port == POS_X ) {
+		r.Set( x+REGION_SIZE-SHORT-1, y+OFFSET, x+REGION_SIZE-2, y+OFFSET+LONG-1 ); 
+	}
+	else if ( port == NEG_Y ) {
+		r.Set( x+OFFSET, y+1, x+OFFSET+LONG-1, y+SHORT ); 
+	}
+	else if ( port == SectorData::POS_Y ) {
+		r.Set( x+OFFSET, y+REGION_SIZE-SHORT-1, x+OFFSET+LONG-1, y+REGION_SIZE-2 ); 
+	}
+	else {
+		GLASSERT( 0 );
+	}
+	return r;
+}
+
+
+void WorldGen::AddPorts( SectorData* s )
 {
 	int x = s->x;
 	int y = s->y;
 
-	Rectangle2I r;
-	static const int LONG  = 4;
-	static const int OFFSET = (REGION_SIZE-LONG)/2;
-	static const int SHORT = 2;
-
-	if ( s->slots & SectorData::NEG_X ) {
-		r.Set( x+1, y+OFFSET, x+SHORT, y+OFFSET+LONG-1 ); 
-		Draw( r, PORT );
-	}
-	if ( s->slots & SectorData::POS_X ) {
-		r.Set( x+REGION_SIZE-SHORT-1, y+OFFSET, x+REGION_SIZE-2, y+OFFSET+LONG-1 ); 
-		Draw( r, PORT );
-	}
-	if ( s->slots & SectorData::NEG_Y ) {
-		r.Set( x+OFFSET, y+1, x+OFFSET+LONG-1, y+SHORT ); 
-		Draw( r, PORT );
-	}
-	if ( s->slots & SectorData::POS_Y ) {
-		r.Set( x+OFFSET, y+REGION_SIZE-SHORT-1, x+OFFSET+LONG-1, y+REGION_SIZE-2 ); 
-		Draw( r, PORT );
+	for( int i=0; i<4; ++i ) {
+		int port = 1 << i;
+		if ( s->ports & port ) {
+			Rectangle2I r = s->GetPortLoc( port );
+			Draw( r, PORT );
+		}
 	}
 }
 
@@ -451,25 +464,53 @@ void WorldGen::ProcessSectors( U32 seed, SectorData* sectorData )
 	// Choose N and fill in for cores.
 
 	static const int NCORES = 100;
+	CDynArray<SectorData*> sectors;
 
 	for( int j=0; j<NUM_REGIONS; ++j ) {
 		for( int i=0; i<NUM_REGIONS; ++i ) {
-			sectorData[j*NUM_REGIONS+i].x = i*REGION_SIZE;
-			sectorData[j*NUM_REGIONS+i].y = j*REGION_SIZE;
-			sectorData[j*NUM_REGIONS+i].area = CalcSectorArea( i, j );
+			SectorData* s = &sectorData[j*NUM_REGIONS+i];
+			s->x = i*REGION_SIZE;
+			s->y = j*REGION_SIZE;
+
+			if ( s->ports ) {
+				AddPorts( s );
+				sectors.Push( s );
+			}
+			s->area = CalcSectorArea( i, j );
 		}
 	}
 
-	CDynArray<SectorData*> sectors;
-	for( int i=0; i<NUM_REGIONS*NUM_REGIONS; ++i ) {
-		if ( sectorData[i].slots ) {
-			sectors.Push( sectorData + i );
-		}
-	}
 	Sort< SectorData*, SectorPtrArea >( sectors.Mem(), sectors.Size() );
-
-	for( int i=0; i<sectors.Size(); ++i ) {
-		AddSlots( sectors[i] );
+	for( int i=0; i<sectors.Size() && i<NCORES; ++i ) {
+		GenerateTerrain( seed+i, sectors[i] );
 	}
 }
+
+
+void WorldGen::GenerateTerrain( U32 seed, SectorData* s )
+{
+	static const int AREA = INNER_REGION_SIZE*INNER_REGION_SIZE / 2;
+
+	Random random( seed );
+
+	// Place core
+	Vector2I c = {	s->x + REGION_SIZE/2 - 10 + random.Dice( 3, 6 ),
+					s->y + REGION_SIZE/2 - 10 + random.Dice( 3, 6 )  };
+
+	Rectangle2I r;
+	r.max = r.min = c;
+	r.Outset( 2 );
+
+	Draw( r, LAND0 );
+	land[c.y*SIZE+c.x] = CORE;
+
+	/*
+	while( true ) {
+		int a = CalcSectorAreaFromFill( c );
+		bool portsColored = true;
+		for( 
+
+	}*/
+}
+
 
