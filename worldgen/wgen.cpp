@@ -108,7 +108,22 @@ int main(int argc, const char* argv[])
 			WorldGrid grid;
 			memset( &grid, 0, sizeof(grid) );
 
-			grid.SetLandAndRock( *(worldGen.Land() + i) );
+			int h = *(worldGen.Land() + i);
+			if ( h >= WorldGen::WATER && h <= WorldGen::LAND3 ) {
+				if ( h == WorldGen::LAND3 ) {
+					int debug=1;
+				}
+				grid.SetLandAndRock( h );
+			}
+			else if ( h == WorldGen::GRID ) {
+				grid.SetGrid();
+			}
+			else if ( h == WorldGen::PORT ) {
+				grid.SetPort();
+			}
+			else {
+				GLASSERT( 0 );
+			}
 			pixels[i] = grid.ToColor();
 		}
 		lodepng_encode32_file( fname.c_str(), (const unsigned char*)pixels, WorldGen::SIZE, WorldGen::SIZE );

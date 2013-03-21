@@ -10,17 +10,17 @@
 static const int MAX_ROCK_HEIGHT		= 3;
 
 struct WorldGrid {
+
 private:
 	// memset(0) should work, and make it water.
 
-	U8 pathColor;
-	U8 pad0;
-	U8 pad1;
-	U8 pad2;
-
 	unsigned isLand				: 1;
+	unsigned isGrid				: 1;
+	unsigned isPort				: 1;
+
 	unsigned isBlocked			: 1;	// blocks the pather; implies inUse
 	unsigned inUse				: 1;	// used, but the pather isn't blocked
+
 	unsigned magma				: 1;	// land, rock, or water can be set to magma
 
 	unsigned zoneSize			: 6;	// 0-31
@@ -35,45 +35,41 @@ private:
 public:
 	grinliz::Color4U8 ToColor() const {
 		grinliz::Color4U8 c = { 0, 0, 0, 255 };
-#if 1
-		if ( isLand && nominalRockHeight > 0 ) {
-			U8 gr = 120+20*nominalRockHeight;
-			c.Set( gr, gr, gr, 255 );
+
+		if ( isGrid ) {
+			c.Set( 120, 180, 180, 255 );
 		}
-		else
-#endif
-		{
-			c.Set(	(17*pathColor) & 127,	
-					(isLand * 0xc0),		//| (pathColor & 0x3f),
-					(1-isLand) * 0xff,
-					255 );
+		else if ( isPort ) {
+			c.Set( 0, 120, 0, 255 );
+		}
+		else if ( isLand ) {
+			c.Set( 0, 140+nominalRockHeight*20, 0, 255 );
+		}
+		else {
+			c.Set( 0, 0, 200, 255 );
 		}
 		return c;
 	}
 
 	bool IsLand() const			{ return isLand != 0; }
 	void SetLand( bool land )	{ if ( land ) SetLand(); else SetWater(); }
+
+	void SetGrid()				{ isLand = 1; isBlocked = 1; isGrid = 1; }
+	void SetPort()				{ isLand = 1; inUse = 1; isPort = 1; }
 	void SetLandAndRock( U8 h )	{
+		// So confusing. Max rock height=3, but land goes from 1-4 to be distinct from water.
+		// Subtract here.
 		if ( !h ) {
 			SetWater();	
 		}
 		else {
 			SetLand();
-			SetNominalRockHeight( 0 );
-			if ( h > 1 ) {
-				// 2-85    -> 1
-				// 86-170  -> 2
-				// 171-255 -> 3
-				static const int DELTA = 255 / MAX_ROCK_HEIGHT; // 63
-				static const int BIAS = DELTA / 2;
-
-				SetNominalRockHeight( 1 + (h-1)/DELTA );
-			}
+			SetNominalRockHeight( h-1 );
 		}
 	}
 
 	void SetLand()				{ 
-		GLASSERT( sizeof(WorldGrid) == 2*sizeof(U32) ); 
+		GLASSERT( sizeof(WorldGrid) == sizeof(U32) ); 
 		isLand = 1;
 	}
 
@@ -100,19 +96,12 @@ public:
 
 	bool IsWater() const		{ return !IsLand(); }
 	void SetWater()				{ 
-		GLASSERT( sizeof(WorldGrid) == 2*sizeof(U32) );
 		isLand = 0;
 		nominalRockHeight = 0;
 	}
 
 	bool Magma() const			{ return magma != 0; }
 	void SetMagma( bool m )		{ magma = m ? 1 : 0; }
-
-	U32  PathColor() const		{ return pathColor; }
-	void SetPathColor( int c )	{ 
-		GLASSERT( c >= 0 && c <= 255 ); 
-		pathColor = c;
-	}
 
 	bool IsPassable() const { 
 		return IsLand() && !IsBlocked(); 

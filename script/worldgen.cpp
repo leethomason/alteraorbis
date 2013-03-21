@@ -150,13 +150,10 @@ bool WorldGen::EndLandAndWater( float fractionLand )
 	for( int j=0; j<SIZE; ++j ) {
 		for( int i=0; i<SIZE; ++i ) {
 			if ( flixels[j*SIZE+i] > cutoff ) {
-				float flix = flixels[j*SIZE+i];
-				float f = Lerp( 1.0f, 255.0f, (flix-cutoff)/(maxh-cutoff) );
-				int h = LRintf( f );
-				GLASSERT( h >= 1 && h <= 255 );
-//				if ( h == 255 )
-//					int debug = 1;
-				h = Clamp( h, 1, 255 );
+				float flix = (flixels[j*SIZE+i] - cutoff) / (maxh-cutoff);
+				GLASSERT( flix >= 0 && flix <= 1 );
+				int h = LAND0 + (int)(flix*3.5f);
+				GLASSERT( h > 0 && h <= 4 );
 				land[j*SIZE+i] = h;
 			}
 			else {
@@ -366,22 +363,22 @@ void WorldGen::CutRoads( U32 seed, SectorData* sectorData )
 
 				if ( left ) {
 					r.Set( x0-1, y0-1, x0, y1+1 );
-					Draw( r, 2 );
+					Draw( r, GRID );
 					sectorData[j*NUM_REGIONS+i].slots |= SectorData::NEG_X;
 				}
 				if ( right ) {
 					r.Set( x1, y0+1, x1+1, y1+1 );
-					Draw( r, 2 );
+					Draw( r, GRID );
 					sectorData[j*NUM_REGIONS+i].slots |= SectorData::POS_X;
 				}
 				if ( up ) {
 					r.Set( x0-1, y0-1, x1+1, y0 );
-					Draw( r, 2 );
+					Draw( r, GRID );
 					sectorData[j*NUM_REGIONS+i].slots |= SectorData::NEG_Y;
 				}
 				if ( down ) {
 					r.Set( x0-1, y1, x1+1, y1+1 );
-					Draw( r, 2 );
+					Draw( r, GRID );
 					sectorData[j*NUM_REGIONS+i].slots |= SectorData::POS_Y;
 				}
 			}
@@ -422,20 +419,20 @@ void WorldGen::AddSlots( SectorData* s )
 
 	if ( s->slots & SectorData::NEG_X ) {
 		r.Set( x+1, y+OFFSET, x+SHORT, y+OFFSET+LONG-1 ); 
-		Draw( r, LANDING );
+		Draw( r, PORT );
 	}
 	if ( s->slots & SectorData::POS_X ) {
 		r.Set( x+REGION_SIZE-SHORT-1, y+OFFSET, x+REGION_SIZE-2, y+OFFSET+LONG-1 ); 
-		Draw( r, LANDING );
+		Draw( r, PORT );
 	}
-	/*
 	if ( s->slots & SectorData::NEG_Y ) {
-		r.Set( x+1, y+OFFSET, x+HEIGHT, y+OFFSET+WIDTH-1 ); 
+		r.Set( x+OFFSET, y+1, x+OFFSET+LONG-1, y+SHORT ); 
+		Draw( r, PORT );
 	}
 	if ( s->slots & SectorData::POS_Y ) {
-		r.Set( x+1, y+OFFSET, x+HEIGHT, y+OFFSET+WIDTH-1 ); 
+		r.Set( x+OFFSET, y+REGION_SIZE-SHORT-1, x+OFFSET+LONG-1, y+REGION_SIZE-2 ); 
+		Draw( r, PORT );
 	}
-	*/
 }
 
 

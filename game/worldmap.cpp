@@ -289,25 +289,21 @@ bool WorldMap::InitPNG( const char* filename,
 			Vector2I p = { x, y };
 			if ( c == BLACK ) {
 				grid[i].SetLand();
-				grid[i].SetPathColor( color );
 				blocks->Push( p );
 			}
 			else if ( c.r == c.g && c.g == c.b ) {
 				grid[i].SetLand();
 				color = c.r;
-				grid[i].SetPathColor( color );
 			}
 			else if ( c == BLUE ) {
 				grid[i].SetWater();
 			}
 			else if ( c == RED ) {
 				grid[i].SetLand();
-				grid[i].SetPathColor( color );
 				wayPoints->Push( p );
 			}
 			else if ( c == GREEN ) {
 				grid[i].SetLand();
-				grid[i].SetPathColor( color );
 				features->Push( p );
 			}
 			++x;
@@ -323,12 +319,12 @@ bool WorldMap::InitPNG( const char* filename,
 }
 
 
-void WorldMap::Init( const U8* land, const U8* color, grinliz::CDynArray< WorldFeature >& arr )
+void WorldMap::Init( const U8* land, grinliz::CDynArray< WorldFeature >& arr )
 {
 	GLASSERT( grid );
 	for( int i=0; i<width*height; ++i ) {
 		grid[i].SetLandAndRock( land[i] );
-		grid[i].SetPathColor( color[i] );
+		//grid[i].SetPathColor( color[i] );
 	}
 	worldInfo->featureArr.Clear();
 	for( int i=0; i<arr.Size(); ++i ) {
@@ -1180,14 +1176,6 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 
 	Vector2I starti = { (int)start.x, (int)start.y };
 	Vector2I endi   = { (int)end.x,   (int)end.y };
-
-	// Check color:
-	U32 c0 = grid[INDEX(starti)].PathColor();
-	U32 c1 = grid[INDEX(endi)].PathColor();
-
-	if ( c0 != c1 ) {
-		return false;
-	}
 
 	// Flush out regions that aren't valid.
 	for( int j=0; j<height; j+= ZONE_SIZE ) {

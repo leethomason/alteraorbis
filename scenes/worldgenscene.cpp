@@ -87,7 +87,7 @@ void WorldGenScene::CreateTexture( Texture* t )
 		if ( !pix16 ) {
 			pix16 = new U16[SIZE2];
 		}
-		worldMap->Init( worldGen.Land(), worldGen.Color(), featureArr );
+		worldMap->Init( worldGen.Land(), featureArr );
 
 		int i=0;
 		for( int y=0; y<WorldGen::SIZE; ++y ) {
@@ -215,7 +215,6 @@ void WorldGenScene::DoTick( U32 delta )
 		if ( okay ) {
 			worldGen.WriteMarker();
 			featureArr.Clear();
-			worldGen.CalColor( &featureArr );
 		}
 		if ( okay ) {
 			sendTexture = true;

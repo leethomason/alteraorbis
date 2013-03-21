@@ -84,15 +84,15 @@ public:
 
 	void CutRoads( U32 seed, SectorData* data );
 	void ProcessSectors( U32 seed, SectorData* data );
-//	bool CalColor( grinliz::CDynArray<WorldFeature>* featureArr );
-
-	// SIZExSIZE
 
 	enum {
 		WATER,
-		LAND,
-		GRID = 16,
-		LANDING
+		LAND0,
+		LAND1,
+		LAND2,
+		LAND3,
+		GRID,
+		PORT
 	};
 
 	const U8* Land() const						{ return land; }
