@@ -49,6 +49,8 @@ public:
 	int  area;
 
 	grinliz::Rectangle2I GetPortLoc( int port );
+	grinliz::Rectangle2I Bounds();
+	grinliz::Rectangle2I InnerBounds();
 };
 
 
@@ -113,6 +115,8 @@ private:
 	void Draw( const grinliz::Rectangle2I& r, int land );
 	int  CalcSectorArea( int x, int y );
 	void AddPorts( SectorData* sector );
+	int CalcSectorAreaFromFill( SectorData* s, const grinliz::Vector2I& origin, bool* allPortsColored );
+	void DepositLand( SectorData* s, int n );
 
 	float* flixels;
 	grinliz::PerlinNoise* noise0;

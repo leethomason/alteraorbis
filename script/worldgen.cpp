@@ -68,6 +68,7 @@ WorldGen::WorldGen()
 {
 	land = new U8[SIZE*SIZE];
 	memset( land, 0, SIZE*SIZE );
+	color = new U8[SIZE*SIZE];
 	flixels = 0;
 	noise0 = 0;
 	noise1 = 0;
@@ -77,6 +78,7 @@ WorldGen::WorldGen()
 WorldGen::~WorldGen()
 {
 	delete [] land;
+	delete [] color;
 	delete [] flixels;
 	delete noise0;
 	delete noise1;
@@ -201,62 +203,106 @@ int WorldGen::CountFlixelsAboveCutoff( const float* flixels, float cutoff, float
 	return count;
 }
 
-/*
-bool WorldGen::CalColor( CDynArray<WorldFeature>* featureArr )
+
+int WorldGen::CalcSectorAreaFromFill( SectorData* s, const grinliz::Vector2I& origin, bool* allPortsColored )
 {
 	memset( color, 0, SIZE*SIZE );
 	int c = 1;
 
-	Vector2I v;
 	CDynArray<Vector2I> stack;
-	Rectangle2I bounds;
-	bounds.Set( 0, 0, SIZE-1, SIZE-1 );
+	Rectangle2I bounds = s->InnerBounds();
 
-	for( int j=0; j<SIZE; ++j ) {
-		for( int i=0; i<SIZE; ++i ) {
-			if ( color[j*SIZE+i] == 0 ) {
-				bool isLand = land[j*SIZE+i] ? true : false;
-				v.Set( i, j );
-				stack.Push( v );
+	GLASSERT( land[origin.y*SIZE+origin.x] );
 
-				WorldFeature wf;
-				wf.id = c;
-				wf.land = isLand ? true : false;
-				wf.bounds.min = wf.bounds.max = v;
-				wf.area = 0;
+	stack.Push( origin );
+	int area = 0;
 
-				while( !stack.Empty() ) {
-					v = stack.Pop();
-					if (    (color[v.y*SIZE+v.x] == 0)
-						 && ((land[v.y*SIZE+v.x] > 0 ? true : false) == isLand) ) 
-					{
-						color[v.y*SIZE+v.x] = c;
+	while( !stack.Empty() ) {
+		Vector2I v = stack.Pop();
+		if (    (color[v.y*SIZE+v.x] == 0)
+			 && land[v.y*SIZE+v.x] ) 
+		{
+			color[v.y*SIZE+v.x] = 1;
+			++area;
 
-						wf.bounds.DoUnion( v );
-						wf.area++;
-						
-						Vector2I v0 = { v.x-1, v.y };
-						Vector2I v1 = { v.x+1, v.y };
-						Vector2I v2 = { v.x, v.y-1 };
-						Vector2I v3 = { v.x, v.y+1 };
+			Vector2I v0 = { v.x-1, v.y };
+			Vector2I v1 = { v.x+1, v.y };
+			Vector2I v2 = { v.x, v.y-1 };
+			Vector2I v3 = { v.x, v.y+1 };
 
-						if ( bounds.Contains( v0 ) ) stack.Push( v0 );
-						if ( bounds.Contains( v1 ) ) stack.Push( v1 );
-						if ( bounds.Contains( v2 ) ) stack.Push( v2 );
-						if ( bounds.Contains( v3 ) ) stack.Push( v3 );
-					}
+			if ( bounds.Contains( v0 ) ) stack.Push( v0 );
+			if ( bounds.Contains( v1 ) ) stack.Push( v1 );
+			if ( bounds.Contains( v2 ) ) stack.Push( v2 );
+			if ( bounds.Contains( v3 ) ) stack.Push( v3 );
+		}
+	}
+	if ( allPortsColored ) {
+		*allPortsColored = true;
+		for( int i=0; i<4; ++i ) {
+			int port = 1<<i;
+			if ( s->ports & port ) {
+				Rectangle2I r = s->GetPortLoc( port );
+				if ( color[r.min.y*SIZE+r.min.x] == 0 ) {
+					*allPortsColored = false;
+					break;
 				}
-				++c;
-				featureArr->Push( wf );
+			}
+		}
+	}
+	return area;
+}
+
+
+void WorldGen::DepositLand( SectorData* s, int n )
+{
+	Rectangle2I bounds = s->InnerBounds();
+	CDynArray<Vector2I> stack;
+
+	// Inset one more, so that checks can be in all directions.
+	for( int y=bounds.min.y+1; y<=bounds.max.y-1; ++y ) {
+		for( int x=bounds.min.x+1; x<=bounds.max.x-1; ++x ) {
+			if (    land[y*SIZE+x]		// is land
+			     && (    land[y*SIZE+x+1] == 0
+					  || land[y*SIZE+x-1] == 0
+					  || land[(y+1)*SIZE+x] == 0
+					  || land[(y-1)*SIZE+x] == 0 ))
+			{
+				Vector2I v = { x, y };
+				stack.Push( v );
 			}
 		}
 	}
 
-	Sort<WorldFeature, WorldFeature::Compare>( featureArr->Mem(), featureArr->Size() );
+	// now grow
+	Random random;
+	Vector2I dir[4] = { {-1,0}, {1,0}, {0,-1}, {0,1} };
 
-	return c < 255;	// [0,254], need 255 for color-zone encoding in Save()
+	ShuffleArray( stack.Mem(), stack.Size(), &random );
+
+	while( !stack.Empty() && n ) {
+		GLASSERT( stack.Size() < REGION_SIZE*REGION_SIZE );
+		int d = Min( 4, stack.Size()-1 );
+		int index = d > 1 ? (stack.Size()-1-random.Rand(d)) : (stack.Size()-1);
+		Vector2I origin = stack[index];
+		GLASSERT( land[origin.y*SIZE+origin.x] );
+
+		bool deposit = false;
+		for( int i=0; i<4; ++i ) {
+			Vector2I c = origin + dir[i];
+			if ( bounds.Contains(c) && land[c.y*SIZE+c.x] == 0 ) {
+				land[c.y*SIZE+c.x] = LAND0;
+				deposit = true;
+				stack.Push( c );
+				--n;
+				break;
+			}
+		}
+		if ( !deposit ) {
+			stack.SwapRemove( index );
+		}
+		ShuffleArray( dir, 4, &random );
+	}
 }
-*/
 
 
 void WorldGen::Draw( const Rectangle2I& r, int isLand )
@@ -407,6 +453,19 @@ int WorldGen::CalcSectorArea( int sx, int sy )
 }
 
 
+Rectangle2I SectorData::Bounds() { 
+	grinliz::Rectangle2I r; 
+	r.Set( x, y, x+WorldGen::REGION_SIZE-1, y+WorldGen::REGION_SIZE-1 ); 
+	return r; 
+}
+
+
+Rectangle2I SectorData::InnerBounds() { 
+	grinliz::Rectangle2I r = Bounds();
+	r.Outset( -1 );
+	return r;
+}
+
 Rectangle2I SectorData::GetPortLoc( int port )
 {
 	Rectangle2I r;
@@ -504,13 +563,12 @@ void WorldGen::GenerateTerrain( U32 seed, SectorData* s )
 	Draw( r, LAND0 );
 	land[c.y*SIZE+c.x] = CORE;
 
-	/*
-	while( true ) {
-		int a = CalcSectorAreaFromFill( c );
-		bool portsColored = true;
-		for( 
-
-	}*/
+	bool portsColored = false;
+	int a = CalcSectorAreaFromFill( s, c, &portsColored );
+	while ( a < AREA || !portsColored ) {
+		DepositLand( s, Max( AREA-a, (int)INNER_REGION_SIZE ));
+		a = CalcSectorAreaFromFill( s, c, &portsColored );
+	}
 }
 
 
