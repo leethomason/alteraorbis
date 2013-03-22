@@ -253,7 +253,7 @@ int WorldGen::CalcSectorAreaFromFill( SectorData* s, const grinliz::Vector2I& or
 }
 
 
-void WorldGen::DepositLand( SectorData* s, int n )
+void WorldGen::DepositLand( SectorData* s, U32 seed, int n )
 {
 	Rectangle2I bounds = s->InnerBounds();
 	CDynArray<Vector2I> stack;
@@ -274,7 +274,7 @@ void WorldGen::DepositLand( SectorData* s, int n )
 	}
 
 	// now grow
-	Random random;
+	Random random( seed );
 	Vector2I dir[4] = { {-1,0}, {1,0}, {0,-1}, {0,1} };
 
 	ShuffleArray( stack.Mem(), stack.Size(), &random );
@@ -566,9 +566,10 @@ void WorldGen::GenerateTerrain( U32 seed, SectorData* s )
 	bool portsColored = false;
 	int a = CalcSectorAreaFromFill( s, c, &portsColored );
 	while ( a < AREA || !portsColored ) {
-		DepositLand( s, Max( AREA-a, (int)INNER_REGION_SIZE ));
+		DepositLand( s, seed, Max( AREA-a, (int)INNER_REGION_SIZE ));
 		a = CalcSectorAreaFromFill( s, c, &portsColored );
 	}
+	s->area = CalcSectorArea( s->x/REGION_SIZE, s->y/REGION_SIZE );
 }
 
 

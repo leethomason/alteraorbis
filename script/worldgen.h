@@ -116,7 +116,7 @@ private:
 	int  CalcSectorArea( int x, int y );
 	void AddPorts( SectorData* sector );
 	int CalcSectorAreaFromFill( SectorData* s, const grinliz::Vector2I& origin, bool* allPortsColored );
-	void DepositLand( SectorData* s, int n );
+	void DepositLand( SectorData* s, U32 seed, int n );
 
 	float* flixels;
 	grinliz::PerlinNoise* noise0;
