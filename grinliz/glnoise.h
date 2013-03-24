@@ -32,11 +32,11 @@ public:
 		return Clamp( n, -1.0f, 1.0f );
 	}
 
-	float Noise2( float x, float y, float size, int octave0, int octave1, float octave1Amount ) const
+	float Noise2( float x, float y, float size, float octave0, float octave1, float octave1Amount ) const
 	{
 		const float INV      = 1.0f / size;
-		const float OCTAVE_0 = (float)octave0;
-		const float OCTAVE_1 = (float)octave1;
+		const float OCTAVE_0 = octave0;
+		const float OCTAVE_1 = octave1;
 
 		float nx0 = OCTAVE_0 * (float)x * INV;
 		float ny0 = OCTAVE_0 * (float)y * INV;

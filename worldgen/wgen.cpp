@@ -13,6 +13,7 @@
 
 #include "../script/worldgen.h"
 #include "../game/worldgrid.h"
+#include "../game/gamelimits.h"
 
 using namespace grinliz;
 
@@ -68,34 +69,13 @@ int main(int argc, const char* argv[])
 
 		worldGen.WriteMarker();
 
-		SectorData* sectorData = new SectorData[WorldGen::REGION_SIZE*WorldGen::REGION_SIZE];
+		SectorData* sectorData = new SectorData[SECTOR_SIZE*SECTOR_SIZE];
 		worldGen.CutRoads( seed0, sectorData );
 		worldGen.ProcessSectors( seed0, sectorData );
-
-		CDynArray<WorldFeature> featureArr;
-		/*
-		result = worldGen.CalColor( &featureArr );
-		if ( !result ) {
-			printf( "CalcColor failed. Retry.\n" );
-			--i;
-			continue;
-		}
-		*/
 
 		clock_t endTime = clock();
 		printf( "loop %d: %dms\n", i, endTime - loopTime );
 		loopTime = endTime;
-
-		for( int j=0; j<Min(featureArr.Size(),10); ++j ) {
-			const WorldFeature& wf = featureArr[j];
-			if ( wf.land ) {
-				printf( "%d  %s area=%d (%d,%d)-(%d,%d)\n", 
-						wf.id, 
-						wf.land ? "land" : "water", 
-						wf.area,
-						wf.bounds.min.x, wf.bounds.min.y, wf.bounds.max.x, wf.bounds.max.y );
-			}
-		}
 
 		CStr<32> fname;
 		fname.Format( "worldgen%02d.png", i );

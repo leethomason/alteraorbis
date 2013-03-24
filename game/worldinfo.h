@@ -3,17 +3,19 @@
 
 #include "../script/worldgen.h"
 #include "../xarchive/glstreamer.h"
+#include "gamelimits.h"
 
 class WorldInfo
 {
 public:
-	grinliz::CDynArray< WorldFeature > featureArr;	// continents & oceans
+	SectorData sectorData[NUM_SECTORS*NUM_SECTORS];
+
 	void Serialize( XStream* );
 	void Save( tinyxml2::XMLPrinter* printer );
 	void Load( const tinyxml2::XMLElement& parent );
 
 private:
-	void Clear() { featureArr.Clear(); }
+	
 };
 
 #endif // LUMOS_WORLDINFO_INCLUDED

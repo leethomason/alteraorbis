@@ -33,10 +33,9 @@
 
 class Texture;
 class WorldInfo;
-struct WorldFeature;
 class Model;
 class ChitBag;
-
+class SectorData;
 
 /*
 	Remembering Y is up and we are in the xz plane:
@@ -80,7 +79,7 @@ public:
 				  grinliz::CDynArray<grinliz::Vector2I>* wayPoints,
 				  grinliz::CDynArray<grinliz::Vector2I>* features );
 	// Init from WorldGen data:
-	void Init( const U8* land, grinliz::CDynArray< WorldFeature >& featureArr );
+	void MapInit( const U8* land );
 
 	void SavePNG( const char* path );
 	void Save( const char* pathToData );
@@ -170,6 +169,7 @@ public:
 
 	// --- MetaData --- //
 	const WorldInfo& GetWorldInfo()			{ return *worldInfo; }
+	SectorData* GetSectorDataMutable();
 
 	// Find random land on the largest continent
 	grinliz::Vector2I FindEmbark();
@@ -326,8 +326,6 @@ private:
 	// Temporaries to avoid allocation
 	grinliz::CDynArray< grinliz::Vector2I > waterStack;
 	grinliz::CDynArray< grinliz::Vector2I > poolGrids;
-
-	//ZoneInfo zoneInfo[ DZONE*DZONE ];
 };
 
 #endif // LUMOS_WORLD_MAP_INCLUDED

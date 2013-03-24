@@ -20,6 +20,10 @@
 
 static const int MAX_MOVE_PATH = MAX_MAP_SIZE/2;	// repath if we need to
 
+static const int SECTOR_SIZE		= 64;
+static const int INNER_SECTOR_SIZE	= (SECTOR_SIZE-2);
+static const int NUM_SECTORS		= MAX_MAP_SIZE / SECTOR_SIZE;
+
 static const float METERS_PER_GRID	= 2.0f;
 static const int MAX_ACTIVE_ITEMS	= 8;
 static const int MAX_ITEM_NAME		= 24;

@@ -12,26 +12,37 @@
 
 using namespace grinliz;
 
-static const int DOMAIN_SIZE = 256;
-static const int NUM_TESTS = 5;
+static const int DOMAIN_SIZE = 1024;
 
 int main(int argc, const char* argv[])
 {
+	static const int NUM_TESTS  = 1;
 	bool applyThreshold			= true;
 	const float FRACTION_CLEAR	= 0.55f;
-	const int style				= RockGen::BOULDERY;
-	const int height			= RockGen::NOISE_HIGH_HEIGHT;
+	const int style				= RockGen::CAVEY;
+	const int height			= RockGen::NOISE_HEIGHT;
 
 	Color4U8* pixels = new Color4U8[ DOMAIN_SIZE*DOMAIN_SIZE ];
 
 	for( int test=0; test<NUM_TESTS; ++test ) {
 		printf( "Test %d starting.\n", test );
 		RockGen rockGen( DOMAIN_SIZE );
-		rockGen.DoCalc( 12+7*test, style );
+
+		printf( "Calc" );
+		rockGen.StartCalc( 0 );
+		for( int y=0; y<DOMAIN_SIZE; ++y ) {
+			rockGen.DoCalc( y );
+			if ( y%32 == 0 ) {
+				printf( "." ); fflush(stdout);
+			}
+		}
+		rockGen.EndCalc();
+		printf( "Done. Threshold...\n" );
 
 		if ( applyThreshold ) {
 			rockGen.DoThreshold( 14+33*test, FRACTION_CLEAR, height );
 		}
+		printf( "Done.\n" );
 
 		const U8* heightMap = rockGen.Height();
 
@@ -41,11 +52,13 @@ int main(int argc, const char* argv[])
 				WorldGrid grid;
 				memset( &grid, 0, sizeof(WorldGrid) );
 
-				int v = heightMap[y*DOMAIN_SIZE+x];
-				if ( v == 0 )
-					v = 1;
-				grid.SetLandAndRock( v );
-				pixels[y*DOMAIN_SIZE+x] = grid.ToColor();
+				int v = heightMap[y*DOMAIN_SIZE+x]/57;
+				GLASSERT( v >= 0 && v <= 4 );
+				Color4U8 c = { 0, 180, 0, 255 };
+				if ( v ) {
+					c.Set( 100+v*35, 100+v*35, 100+v*35, 255 );
+				}
+				pixels[y*DOMAIN_SIZE+x] = c;
 			}
 		}
 

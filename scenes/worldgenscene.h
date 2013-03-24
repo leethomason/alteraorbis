@@ -4,7 +4,9 @@
 #include "../xegame/scene.h"
 #include "../gamui/gamui.h"
 #include "../engine/texture.h"
+
 #include "../script/worldgen.h"
+#include "../script/rockgen.h"
 
 class LumosGame;
 class WorldMap;
@@ -31,17 +33,24 @@ private:
 		NUM_ZONES = NZONE*NZONE
 	};
 
-	void BlendZone( int zone );
+	void BlendLine( int y );
 
-	WorldGen	worldGen;
+	WorldGen*	worldGen;
+	RockGen*	rockGen;
 	WorldMap*	worldMap;
 	U16*		pix16;
-	grinliz::CDynArray< WorldFeature > featureArr;
 
 	struct GenState {
-		void Clear() { scanline=-1; zone=-1; }
-		int scanline;	// -1: not started, [0,y-1] scanning, y done scanning
-		int zone;		// 0: first zone, NUM_ZONE done
+		void Clear() { mode=NOT_STARTED; y=0; }
+		enum {
+			NOT_STARTED,
+			WORLDGEN,
+			ROCKGEN_START,
+			ROCKGEN,
+			DONE
+		};
+		int mode;
+		int y;
 	};
 	GenState genState;
 	gamui::PushButton	okay, cancel, tryAgain;

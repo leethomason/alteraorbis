@@ -19,6 +19,9 @@ WorldGenScene::WorldGenScene( LumosGame* game ) : Scene( game )
 	TextureManager* texman = TextureManager::Instance();
 	texman->CreateTexture( "worldGenPreview", MAX_MAP_SIZE, MAX_MAP_SIZE, Surface::RGB16, Texture::PARAM_NONE, this );
 
+	worldGen = new WorldGen();
+	rockGen = new RockGen( WorldGen::SIZE );
+
 	RenderAtom atom( (const void*)UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, texman->GetTexture( "worldGenPreview" ), 
 					 0, 1, 1, 0 );	// y-flip: image to texture coordinate conversion
 	worldImage.Init( &gamui2D, atom, false );
@@ -37,6 +40,8 @@ WorldGenScene::~WorldGenScene()
 	TextureManager::Instance()->TextureCreatorInvalid( this );
 	delete [] worldMap;
 	delete [] pix16;
+	delete worldGen;
+	delete rockGen;
 }
 
 
@@ -87,7 +92,8 @@ void WorldGenScene::CreateTexture( Texture* t )
 		if ( !pix16 ) {
 			pix16 = new U16[SIZE2];
 		}
-		worldMap->Init( worldGen.Land(), featureArr );
+		// Must also set SectorData, which is done elsewhere.
+		worldMap->MapInit( worldGen->Land() );
 
 		int i=0;
 		for( int y=0; y<WorldGen::SIZE; ++y ) {
@@ -103,75 +109,25 @@ void WorldGenScene::CreateTexture( Texture* t )
 }
 
 
-void WorldGenScene::BlendZone( int zone )
+void WorldGenScene::BlendLine( int y )
 {
-	int y = genState.zone / NZONE;
-	int x = genState.zone - y*NZONE;
+	for( int x=0; x<WorldGen::SIZE; ++x ) {
+		int h = *(worldGen->Land()  + y*WorldGen::SIZE + x);
+		int r = *(rockGen->Height() + y*WorldGen::SIZE + x);
 
-	Random random;
-	random.SetSeedFromTime();
+		if ( h >= WorldGen::LAND0 && h <= WorldGen::LAND3 ) {
+			if ( r ) {
+				// It is land. The World land is the minimum;
+				// apply the rockgen value.
 
-#if 1
-	const int rockArr[3] = {		RockGen::CAVEY_ROUGH, 
-									RockGen::CAVEY_SMOOTH, 
-									RockGen::BOULDERY };
-	const float rockScore[3] = {	(float)(NZONE-y),
-									0.5f*(float)(NZONE-y),
-									(float)y
-	};
-	int rock = rockArr[ random.Select( rockScore, 3 ) ];
-
-	float fractionLand = (x==0 || x==(NZONE-1) || y ==0 || y==(NZONE-1)) ? 0.55f : 0.65f;
-
-	const int heightArr[3] = {		RockGen::NOISE_HEIGHT, 
-									RockGen::NOISE_HIGH_HEIGHT, 
-									RockGen::KEEP_HEIGHT };
-	const float heightScore[3] = {	2.0f, 
-									1.0f, 
-									0.5f };
-	const int height = heightArr[ random.Select( heightScore, 3 ) ];
-
-	const bool blendExisting = false;	// doesn't work (random.Rand(4) == 0);
-#else
-	const int   rock = RockGen::CAVEY_ROUGH;
-	const float fractionLand = 0.55f;
-	const int   height = RockGen::NOISE_HEIGHT;
-	const bool  blendExisting = false;
-#endif
-
-	static const int BORDER = 30;
-	static const int S  = WorldGen::SIZE / NZONE;
-	static const int SB = S + BORDER*2;
-	
-	RockGen rockGen( SB );
-	rockGen.DoCalc( random.Rand(), rock );
-	rockGen.DoThreshold( random.Rand(), fractionLand, height );
-
-	int x0 = x*S - BORDER;
-	int y0 = y*S - BORDER;
-
-	Rectangle2I bounds;
-	bounds.Set( 0, 0, WorldGen::SIZE-1, WorldGen::SIZE-1 );
-
-	for( int j=0; j<SB; ++j ) {
-		for( int i=0; i<SB; ++i ) {
-			Vector2I dst = { x0 + i, y0 + j };
-			Vector2I src = { i, j };
-
-			if ( bounds.Contains( dst ) ) {
-				int delta = Min( i, j, SB-1-i, SB-1-j );
-				int blend = 256;
-				if ( delta < BORDER ) {
-					blend = 256*delta/BORDER;
-				}
-				if ( blendExisting ) {
-					blend /= 2;
-				}
-				worldGen.ApplyHeight( dst.x, dst.y, 
-					                  *(rockGen.Height() + src.y*SB + src.x),
-									  blend );
+				h = Max( h, WorldGen::LAND1 + r / 102 );
+				GLASSERT( h >= WorldGen::LAND0 && h <= WorldGen::LAND3 );
+			}
+			else {
+				h = WorldGen::LAND0;
 			}
 		}
+		worldGen->SetHeight( x, y, h );
 	}
 }
 
@@ -180,58 +136,105 @@ void WorldGenScene::DoTick( U32 delta )
 {
 	bool sendTexture = false;
 
-	if ( genState.scanline < WorldGen::SIZE ) {
-		okay.SetEnabled( false );
-		tryAgain.SetEnabled( false );
-	}
-	else {
-		okay.SetEnabled( true );
-		tryAgain.SetEnabled( true );
-	}
+	switch ( genState.mode ) {
+	case GenState::NOT_STARTED:
+		{
+			okay.SetEnabled( false );
+			tryAgain.SetEnabled( false );
 
-	if ( genState.scanline == -1 ) {
-		Random random;
-		random.SetSeedFromTime();
-		U32 seed0 = random.Rand();
-		U32 seed1 = delta ^ random.Rand();
+			Random random;
+			random.SetSeedFromTime();
+			U32 seed0 = random.Rand();
+			U32 seed1 = delta ^ random.Rand();
 
-		worldGen.StartLandAndWater( seed0, seed1 );
-		genState.scanline = 0;
-	}
-	else if ( genState.scanline < WorldGen::SIZE ) {
-		clock_t start = clock();
-		while( ( genState.scanline < WorldGen::SIZE) && (clock() - start < 30) ) {
-			for( int i=0; i<16; ++i ) {
-				worldGen.DoLandAndWater( genState.scanline );
-				++genState.scanline;
+			worldGen->StartLandAndWater( seed0, seed1 );
+			genState.y = 0;
+			genState.mode = GenState::WORLDGEN;
+		}
+		break;
+	case GenState::WORLDGEN:
+		{
+			clock_t start = clock();
+			while( ( genState.y < WorldGen::SIZE) && (clock() - start < 30) ) {
+				for( int i=0; i<16; ++i ) {
+					worldGen->DoLandAndWater( genState.y++ );
+				}
+			}
+			CStr<16> str;
+			str.Format( "Land: %d%%", (int)(100.0f*(float)genState.y/(float)WorldGen::SIZE) );
+			label.SetText( str.c_str() );
+
+			if ( genState.y == WorldGen::SIZE ) {
+				bool okay = worldGen->EndLandAndWater( 0.4f );
+				if ( okay ) {
+					worldGen->WriteMarker();
+					SectorData* sectorData = worldMap->GetSectorDataMutable();
+					Random random;
+					random.SetSeedFromTime();
+					worldGen->CutRoads( random.Rand(), sectorData );
+					worldGen->ProcessSectors( random.Rand(), sectorData );
+					sendTexture = true;
+					genState.mode = GenState::ROCKGEN_START;
+				}
+				else {
+					genState.y = 0;
+					genState.mode = GenState::WORLDGEN;
+				}
+			}	
+		}
+		break;
+
+	case GenState::ROCKGEN_START:
+		{
+			Random random;
+			random.SetSeedFromTime();
+			rockGen->StartCalc( random.Rand() );
+			genState.y = 0;
+			genState.mode = GenState::ROCKGEN;
+		}
+		break;
+
+	case GenState::ROCKGEN:
+		{
+			clock_t start = clock();
+			while( ( genState.y < WorldGen::SIZE) && (clock() - start < 30) ) {
+				for( int i=0; i<16; ++i ) {
+					rockGen->DoCalc( genState.y );
+					genState.y++;
+				}
+			}
+			CStr<16> str;
+			str.Format( "Rock: %d%%", (int)(100.0f*(float)genState.y/(float)WorldGen::SIZE) );
+			label.SetText( str.c_str() );
+
+			if ( genState.y == WorldGen::SIZE ) {
+				rockGen->EndCalc();
+
+				Random random;
+				random.SetSeedFromTime();
+
+				rockGen->DoThreshold( random.Rand(), 0.55f, RockGen::NOISE_HEIGHT );
+				for( int y=0; y<WorldGen::SIZE; ++y ) {
+					BlendLine( y );
+				}
+				sendTexture = true;
+				genState.Clear();
+				genState.mode = GenState::DONE;
+				label.SetText( "Done" );
 			}
 		}
-		CStr<16> str;
-		str.Format( "%d%%", (int)(100.0f*(float)genState.scanline/(float)WorldGen::SIZE) );
-		label.SetText( str.c_str() );
-	}
-	else if ( genState.scanline == WorldGen::SIZE && genState.zone < 0 ) {
-		bool okay = worldGen.EndLandAndWater( 0.4f );
-		if ( okay ) {
-			worldGen.WriteMarker();
-			featureArr.Clear();
+		break;
+
+	case GenState::DONE:
+		{
+			okay.SetEnabled( true );
+			tryAgain.SetEnabled( true );
 		}
-		if ( okay ) {
-			sendTexture = true;
-			label.SetText( "Land/Water\nDone" );
-			genState.zone = 0;
-		}
-		else {
-			genState.Clear();	// around again.
-		}
-	}
-	else if ( genState.scanline == WorldGen::SIZE && genState.zone < NUM_ZONES ) {
-		BlendZone( genState.zone );
-		sendTexture = true;
-		genState.zone++;
-		if ( genState.zone == NUM_ZONES ) {
-			label.SetText( "Done" );
-		}
+		break;
+
+	default:
+		GLASSERT( 0 );
+		break;
 	}
 
 	if ( sendTexture ) {

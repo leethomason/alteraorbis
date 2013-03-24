@@ -20,47 +20,15 @@ static const float BASE1 = 64.f;
 static const float EDGE = 0.1f;
 static const float OCTAVE = 0.18f;
 
-
-void WorldFeature::Save( tinyxml2::XMLPrinter* printer )
+void SectorData::Serialize( XStream* xs )
 {
-	printer->OpenElement( "WorldFeature" );
-	printer->PushAttribute( "id", id );
-	printer->PushAttribute( "land", land );
-	printer->PushAttribute( "bounds.min.x", bounds.min.x );
-	printer->PushAttribute( "bounds.min.y", bounds.min.y );
-	printer->PushAttribute( "bounds.max.x", bounds.max.x );
-	printer->PushAttribute( "bounds.max.y", bounds.max.y );
-	printer->PushAttribute( "area", area );
-	printer->CloseElement();
-}
-
-
-void WorldFeature::Serialize( XStream* xs )
-{
-	XarcOpen( xs, "WorldFeature" );
-	XARC_SER( xs, id );
-	XARC_SER( xs, land );
+	XarcOpen( xs, "SectorData" );
+	XARC_SER( xs, x );
+	XARC_SER( xs, y );
+	XARC_SER( xs, ports );
 	XARC_SER( xs, area );
-	XARC_SER( xs, bounds );
+	XARC_SER( xs, core );
 	XarcClose( xs );
-}
-
-
-void WorldFeature::Load( const tinyxml2::XMLElement& ele )
-{
-	GLASSERT( StrEqual( ele.Name(), "WorldFeature" ));
-	id = 0;
-	land = 0;
-	bounds.Set( 0, 0, 0, 0 );
-	area = 0;
-
-	ele.QueryIntAttribute( "id", &id );
-	ele.QueryBoolAttribute( "land", &land );
-	ele.QueryIntAttribute( "bounds.min.x", &bounds.min.x );
-	ele.QueryIntAttribute( "bounds.min.y", &bounds.min.y );
-	ele.QueryIntAttribute( "bounds.max.x", &bounds.max.x );
-	ele.QueryIntAttribute( "bounds.max.y", &bounds.max.y );
-	ele.QueryIntAttribute( "area", &area );
 }
 
 
@@ -280,7 +248,7 @@ void WorldGen::DepositLand( SectorData* s, U32 seed, int n )
 	ShuffleArray( stack.Mem(), stack.Size(), &random );
 
 	while( !stack.Empty() && n ) {
-		GLASSERT( stack.Size() < REGION_SIZE*REGION_SIZE );
+		GLASSERT( stack.Size() < SECTOR_SIZE*SECTOR_SIZE );
 		int d = Min( 4, stack.Size()-1 );
 		int index = d > 1 ? (stack.Size()-1-random.Rand(d)) : (stack.Size()-1);
 		Vector2I origin = stack[index];
@@ -323,10 +291,10 @@ void WorldGen::CutRoads( U32 seed, SectorData* sectorData )
 	// so they can't connect. First pass: split
 	// up the world.
 	for( int pass=0; pass<2; ++pass ) {
-		for( int j=0; j<NUM_REGIONS-1; ++j ) {
+		for( int j=0; j<NUM_SECTORS-1; ++j ) {
 			Rectangle2I r;
-			r.Set( 0,	   (j+1)*REGION_SIZE-1, 
-				   SIZE-1, (j+1)*REGION_SIZE );
+			r.Set( 0,	   (j+1)*SECTOR_SIZE-1, 
+				   SIZE-1, (j+1)*SECTOR_SIZE );
 			if ( pass == 1 ) {
 				Swap( &r.min.x, &r.min.y );
 				Swap( &r.max.x, &r.max.y );
@@ -338,13 +306,13 @@ void WorldGen::CutRoads( U32 seed, SectorData* sectorData )
 
 	// Set which sectors are on the road. When roads are
 	// everything which can be a road is a road.
-	BitArray< NUM_REGIONS, NUM_REGIONS, 1 > sectors;
+	BitArray< NUM_SECTORS, NUM_SECTORS, 1 > sectors;
 	Random random( seed );
 
-	Vector2I center = { NUM_REGIONS/2, NUM_REGIONS/2 };
-	int rad = NUM_REGIONS/2;
+	Vector2I center = { NUM_SECTORS/2, NUM_SECTORS/2 };
+	int rad = NUM_SECTORS/2;
 
-	for( int j=1; j<NUM_REGIONS-2; ++j ) {
+	for( int j=1; j<NUM_SECTORS-2; ++j ) {
 		int dy = j - center.x;
 		int d2 = rad*rad - dy*dy;
 		int dx = d2 ? LRintf( sqrt( (float)(d2) )) : 1;
@@ -361,8 +329,8 @@ void WorldGen::CutRoads( U32 seed, SectorData* sectorData )
 
 		int x0 = center.x - dx0;
 		int x1 = center.x + dx1;
-		x0 = Clamp( x0, 1, NUM_REGIONS-2 );
-		x1 = Clamp( x1, 1, NUM_REGIONS-2 );
+		x0 = Clamp( x0, 1, NUM_SECTORS-2 );
+		x1 = Clamp( x1, 1, NUM_SECTORS-2 );
 
 		Rectangle2I r;
 		r.Set( x0, j, x1, j );
@@ -370,15 +338,15 @@ void WorldGen::CutRoads( U32 seed, SectorData* sectorData )
 	}
 
 	// Now fill in roads.
-	for( int j=1; j<NUM_REGIONS-1; ++j ) {
-		for( int i=1; i<NUM_REGIONS-1; ++i ) {
+	for( int j=1; j<NUM_SECTORS-1; ++j ) {
+		for( int i=1; i<NUM_SECTORS-1; ++i ) {
 			if ( sectors.IsSet( i, j )) {
 				Rectangle2I r;
 
-				int x0 = i*REGION_SIZE;
-				int x1 = (i+1)*REGION_SIZE-1;
-				int y0 = j*REGION_SIZE;
-				int y1 = (j+1)*REGION_SIZE-1;
+				int x0 = i*SECTOR_SIZE;
+				int x1 = (i+1)*SECTOR_SIZE-1;
+				int y0 = j*SECTOR_SIZE;
+				int y1 = (j+1)*SECTOR_SIZE-1;
 
 				bool left   = sectors.IsSet(i-1,j) ? true : false;
 				bool right  = sectors.IsSet(i+1,j) ? true : false;
@@ -410,22 +378,22 @@ void WorldGen::CutRoads( U32 seed, SectorData* sectorData )
 				if ( left ) {
 					r.Set( x0-1, y0-1, x0, y1+1 );
 					Draw( r, GRID );
-					sectorData[j*NUM_REGIONS+i].ports |= SectorData::NEG_X;
+					sectorData[j*NUM_SECTORS+i].ports |= SectorData::NEG_X;
 				}
 				if ( right ) {
 					r.Set( x1, y0+1, x1+1, y1+1 );
 					Draw( r, GRID );
-					sectorData[j*NUM_REGIONS+i].ports |= SectorData::POS_X;
+					sectorData[j*NUM_SECTORS+i].ports |= SectorData::POS_X;
 				}
 				if ( up ) {
 					r.Set( x0-1, y0-1, x1+1, y0 );
 					Draw( r, GRID );
-					sectorData[j*NUM_REGIONS+i].ports |= SectorData::NEG_Y;
+					sectorData[j*NUM_SECTORS+i].ports |= SectorData::NEG_Y;
 				}
 				if ( down ) {
 					r.Set( x0-1, y1, x1+1, y1+1 );
 					Draw( r, GRID );
-					sectorData[j*NUM_REGIONS+i].ports |= SectorData::POS_Y;
+					sectorData[j*NUM_SECTORS+i].ports |= SectorData::POS_Y;
 				}
 			}
 		}
@@ -436,12 +404,12 @@ void WorldGen::CutRoads( U32 seed, SectorData* sectorData )
 int WorldGen::CalcSectorArea( int sx, int sy )
 {
 	int area = 0;
-	for( int j=sy*REGION_SIZE+1;
-		 j < (sy+1)*REGION_SIZE-1;
+	for( int j=sy*SECTOR_SIZE+1;
+		 j < (sy+1)*SECTOR_SIZE-1;
 		 ++j )
 	{
-		for( int i=sx*REGION_SIZE+1;
-			 i < (sx+1)*REGION_SIZE-1;
+		for( int i=sx*SECTOR_SIZE+1;
+			 i < (sx+1)*SECTOR_SIZE-1;
 			 ++i )
 		{
 			if ( land[j*SIZE+i] ) {
@@ -453,38 +421,37 @@ int WorldGen::CalcSectorArea( int sx, int sy )
 }
 
 
-Rectangle2I SectorData::Bounds() { 
+Rectangle2I SectorData::Bounds() const { 
 	grinliz::Rectangle2I r; 
-	r.Set( x, y, x+WorldGen::REGION_SIZE-1, y+WorldGen::REGION_SIZE-1 ); 
+	r.Set( x, y, x+SECTOR_SIZE-1, y+SECTOR_SIZE-1 ); 
 	return r; 
 }
 
 
-Rectangle2I SectorData::InnerBounds() { 
+Rectangle2I SectorData::InnerBounds() const { 
 	grinliz::Rectangle2I r = Bounds();
 	r.Outset( -1 );
 	return r;
 }
 
-Rectangle2I SectorData::GetPortLoc( int port )
+Rectangle2I SectorData::GetPortLoc( int port ) const
 {
 	Rectangle2I r;
 	static const int LONG  = 4;
-	static const int REGION_SIZE = WorldGen::REGION_SIZE;
-	static const int OFFSET = (REGION_SIZE-LONG)/2;
+	static const int OFFSET = (SECTOR_SIZE-LONG)/2;
 	static const int SHORT = 2;
 
 	if ( port == NEG_X ) {
 		r.Set( x+1, y+OFFSET, x+SHORT, y+OFFSET+LONG-1 ); 
 	}
 	else if ( port == POS_X ) {
-		r.Set( x+REGION_SIZE-SHORT-1, y+OFFSET, x+REGION_SIZE-2, y+OFFSET+LONG-1 ); 
+		r.Set( x+SECTOR_SIZE-SHORT-1, y+OFFSET, x+SECTOR_SIZE-2, y+OFFSET+LONG-1 ); 
 	}
 	else if ( port == NEG_Y ) {
 		r.Set( x+OFFSET, y+1, x+OFFSET+LONG-1, y+SHORT ); 
 	}
 	else if ( port == SectorData::POS_Y ) {
-		r.Set( x+OFFSET, y+REGION_SIZE-SHORT-1, x+OFFSET+LONG-1, y+REGION_SIZE-2 ); 
+		r.Set( x+OFFSET, y+SECTOR_SIZE-SHORT-1, x+OFFSET+LONG-1, y+SECTOR_SIZE-2 ); 
 	}
 	else {
 		GLASSERT( 0 );
@@ -525,11 +492,11 @@ void WorldGen::ProcessSectors( U32 seed, SectorData* sectorData )
 	static const int NCORES = 100;
 	CDynArray<SectorData*> sectors;
 
-	for( int j=0; j<NUM_REGIONS; ++j ) {
-		for( int i=0; i<NUM_REGIONS; ++i ) {
-			SectorData* s = &sectorData[j*NUM_REGIONS+i];
-			s->x = i*REGION_SIZE;
-			s->y = j*REGION_SIZE;
+	for( int j=0; j<NUM_SECTORS; ++j ) {
+		for( int i=0; i<NUM_SECTORS; ++i ) {
+			SectorData* s = &sectorData[j*NUM_SECTORS+i];
+			s->x = i*SECTOR_SIZE;
+			s->y = j*SECTOR_SIZE;
 
 			if ( s->ports ) {
 				AddPorts( s );
@@ -548,13 +515,13 @@ void WorldGen::ProcessSectors( U32 seed, SectorData* sectorData )
 
 void WorldGen::GenerateTerrain( U32 seed, SectorData* s )
 {
-	static const int AREA = INNER_REGION_SIZE*INNER_REGION_SIZE / 2;
+	static const int AREA = INNER_SECTOR_SIZE*INNER_SECTOR_SIZE / 2;
 
 	Random random( seed );
 
 	// Place core
-	Vector2I c = {	s->x + REGION_SIZE/2 - 10 + random.Dice( 3, 6 ),
-					s->y + REGION_SIZE/2 - 10 + random.Dice( 3, 6 )  };
+	Vector2I c = {	s->x + SECTOR_SIZE/2 - 10 + random.Dice( 3, 6 ),
+					s->y + SECTOR_SIZE/2 - 10 + random.Dice( 3, 6 )  };
 
 	Rectangle2I r;
 	r.max = r.min = c;
@@ -566,10 +533,10 @@ void WorldGen::GenerateTerrain( U32 seed, SectorData* s )
 	bool portsColored = false;
 	int a = CalcSectorAreaFromFill( s, c, &portsColored );
 	while ( a < AREA || !portsColored ) {
-		DepositLand( s, seed, Max( AREA-a, (int)INNER_REGION_SIZE ));
+		DepositLand( s, seed, Max( AREA-a, (int)INNER_SECTOR_SIZE ));
 		a = CalcSectorAreaFromFill( s, c, &portsColored );
 	}
-	s->area = CalcSectorArea( s->x/REGION_SIZE, s->y/REGION_SIZE );
+	s->area = CalcSectorArea( s->x/SECTOR_SIZE, s->y/SECTOR_SIZE );
 }
 
 

@@ -15,28 +15,16 @@ namespace grinliz {
 class PerlinNoise;
 };
 
-struct WorldFeature {
-	int  id;						// unique id
-	bool land;						// true: continent or island, false: ocean
-	grinliz::Rectangle2I bounds;	// bounds
-	int area;						// actual area
-
-	void Save( tinyxml2::XMLPrinter* );
-	void Serialize( XStream* );
-	void Load( const tinyxml2::XMLElement& element );
-
-	class Compare
-	{
-	public:
-		static bool Less( const WorldFeature& s0, const WorldFeature& s1 ) { return s0.area > s1.area; }
-	};
-};
-
 
 class SectorData
 {
 public:
-	SectorData() : x(0), y(0), ports(0), hasCore(false), area(0) {}
+	SectorData() : x(0), y(0), ports(0), area(0) {
+		core.Zero();
+	}
+
+	void Serialize( XStream* xs );
+
 	enum { 
 		NEG_X	=1, 
 		POS_X	=2, 
@@ -45,12 +33,13 @@ public:
 	};
 	int  x, y;		// grid position (not sector position)
 	int  ports;		// if attached to the grid, has ports. 
-	bool hasCore;
+	grinliz::Vector2I core;
 	int  area;
 
-	grinliz::Rectangle2I GetPortLoc( int port );
-	grinliz::Rectangle2I Bounds();
-	grinliz::Rectangle2I InnerBounds();
+	bool HasCore() const { return core.x > 0 && core.y > 0; }
+	grinliz::Rectangle2I GetPortLoc( int port ) const;
+	grinliz::Rectangle2I Bounds() const;
+	grinliz::Rectangle2I InnerBounds() const;
 };
 
 
@@ -70,26 +59,6 @@ public:
 	bool EndLandAndWater( float fractionLand );
 	void WriteMarker();
 
-	void ApplyHeight( int x, int y, int h, int blend ) {
-		int index = y*SIZE+x;
-		GLASSERT( blend >= 0 && blend <= 256 );
-		if ( land[index] ) {
-			if ( blend >= 0 ) {
-				land[index] = ((land[index] * (256-blend)) + (h * blend)) >> 8;
-			}
-			else {
-				if ( land[index] ) 
-					land[index] = h;
-			}
-			if ( land[index] == 0 )
-				land[index] = 1;
-		}
-	}
-
-	void CutRoads( U32 seed, SectorData* data );
-	void ProcessSectors( U32 seed, SectorData* data );
-	void GenerateTerrain( U32 seed, SectorData* data );
-
 	enum {
 		WATER,
 		LAND0,
@@ -98,16 +67,25 @@ public:
 		LAND3,
 		GRID,
 		PORT,
-		CORE
+		CORE,
+		NUM_TYPES
 	};
+
+	void SetHeight( int x, int y, int h ) {
+		int index = y*SIZE+x;
+		GLASSERT( x >= 0 && x < SIZE && y >= 0 && y < SIZE );
+		GLASSERT( h >= WATER && h < NUM_TYPES );
+		land[index] = h;
+	}
+
+	void CutRoads( U32 seed, SectorData* data );
+	void ProcessSectors( U32 seed, SectorData* data );
+	void GenerateTerrain( U32 seed, SectorData* data );
 
 	const U8* Land() const						{ return land; }
 
 	enum {
-		SIZE			= MAX_MAP_SIZE,
-		REGION_SIZE		= 64,
-		INNER_REGION_SIZE = (REGION_SIZE-2),
-		NUM_REGIONS		= SIZE / REGION_SIZE
+		SIZE			= MAX_MAP_SIZE
 	};
 
 private:

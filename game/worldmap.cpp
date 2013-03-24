@@ -78,6 +78,12 @@ WorldMap::~WorldMap()
 }
 
 
+SectorData* WorldMap::GetSectorDataMutable()
+{
+	return worldInfo->sectorData;
+}
+
+
 void WorldMap::AttachEngine( Engine* e ) 
 {
 	GLASSERT( (e==0 && engine !=0) || (e!=0 && engine==0) );
@@ -319,16 +325,26 @@ bool WorldMap::InitPNG( const char* filename,
 }
 
 
-void WorldMap::Init( const U8* land, grinliz::CDynArray< WorldFeature >& arr )
+void WorldMap::MapInit( const U8* land )
 {
 	GLASSERT( grid );
 	for( int i=0; i<width*height; ++i ) {
-		grid[i].SetLandAndRock( land[i] );
-		//grid[i].SetPathColor( color[i] );
-	}
-	worldInfo->featureArr.Clear();
-	for( int i=0; i<arr.Size(); ++i ) {
-		worldInfo->featureArr.Push( arr[i] );
+		int h = *(land + i);
+		if ( h >= WorldGen::WATER && h <= WorldGen::LAND3 ) {
+			grid[i].SetLandAndRock( h );
+		}
+		else if ( h == WorldGen::GRID ) {
+			grid[i].SetGrid();
+		}
+		else if ( h == WorldGen::PORT ) {
+			grid[i].SetPort();
+		}
+		else if ( h == WorldGen::CORE ) {
+			grid[i].SetCore();
+		}
+		else {
+			GLASSERT( 0 );
+		}
 	}
 }
 
@@ -382,25 +398,26 @@ void WorldMap::Tessellate()
 
 Vector2I WorldMap::FindEmbark()
 {
-	const WorldFeature* wf = 0;
-	for( int i=0; i<worldInfo->featureArr.Size(); ++i ) {
-		wf = &worldInfo->featureArr[i];
-		if ( wf->land ) {
-			break;
-		}
-	}
-	GLASSERT( wf );
-	
 	Random random;
 
-	int w = wf->bounds.Width();
-	int h = wf->bounds.Height();
+	const SectorData* s = 0;
+	while( !s ) {
+		s = &worldInfo->sectorData[random.Rand(NUM_SECTORS*NUM_SECTORS)];
+		if ( !s->HasCore() ) {
+			s = 0;
+		}
+	}
+
+	Rectangle2I bounds = s->InnerBounds();
+
+	int w = bounds.Width();
+	int h = bounds.Height();
 
 	while( true ) {
 		int dx = random.Rand( w );
 		int dy = random.Rand( h );
-		int x = wf->bounds.min.x + dx;
-		int y = wf->bounds.min.y + dy;
+		int x = bounds.min.x + dx;
+		int y = bounds.min.y + dy;
 
 		if ( IsPassable(x,y) ) {
 			Vector2I v = { x, y };

@@ -24,19 +24,24 @@ public:
 	// ROCK style
 	enum {
 		BOULDERY,			// plasma noise
-		CAVEY_SMOOTH,		// fractal noise
-		CAVEY_ROUGH
+		CAVEY
 	};
 
 	// Do basic computation.
-	void DoCalc( int seed, int rockStyle );
+	void StartCalc( int seed );
+	void DoCalc( int y );
+	void EndCalc();
+
 	// Seperate flat land from rock.
 	void DoThreshold( int seed, float fractionLand, int heightStyle );
 
 	const U8* Height() const { return heightMap; }
 
 private:
-	float Fractal( const grinliz::PerlinNoise* noise, int x, int y, int octave0, int octave1, float octave1Amount );
+	float Fractal( int x, int y, float octave0, float octave1, float octave1Amount );
+
+	grinliz::PerlinNoise* noise0;
+	grinliz::PerlinNoise* noise1;
 
 	int size;
 	U8*	heightMap;

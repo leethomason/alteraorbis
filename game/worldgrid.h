@@ -43,8 +43,17 @@ public:
 		else if ( isPort ) {
 			c.Set( 0, 120, 0, 255 );
 		}
+		else if ( isCore ) {
+			c.Set( 200, 100, 100, 255 );
+		}
 		else if ( isLand ) {
-			c.Set( 0, 140+nominalRockHeight*20, 0, 255 );
+			if ( nominalRockHeight == 0 ) {
+				c.Set( 0, 140, 0, 255 );
+			}
+			else {
+				int add = nominalRockHeight*40;
+				c.Set( add, 100+add, add, 255 );
+			}
 		}
 		else {
 			c.Set( 0, 0, 200, 255 );
