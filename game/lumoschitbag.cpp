@@ -53,7 +53,7 @@ Chit* LumosChitBag::NewMonsterChit( const Vector3F& pos, const char* name, int t
 	chit->Add( new HealthComponent( engine ));
 
 	if ( wander ) {
-		GET_COMPONENT( chit, AIComponent )->SetWanderParams( *wander, 12.0f );
+		GET_COMPONENT( chit, AIComponent )->SetWanderParams( AIComponent::WANDER_HERD, *wander, 5.0f );
 	}
 	return chit;
 }

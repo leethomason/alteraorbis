@@ -31,8 +31,10 @@ using namespace grinliz;
 	if ( item && sc && StrEqual( sc->Script()->ScriptName(), "PlantScript" )) {
 		GLASSERT( sc->Script() );
 		PlantScript* plantScript = static_cast< PlantScript* >( sc->Script() );
-		*type = plantScript->Type();
-		*stage = plantScript->Stage();
+		if ( type )
+			*type = plantScript->Type();
+		if ( stage )
+			*stage = plantScript->Stage();
 		return item;
 	}
 	return 0;

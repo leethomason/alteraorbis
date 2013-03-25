@@ -50,9 +50,15 @@ public:
 
 	// Approximate. enemyList may not be flushed.
 	bool AwareOfEnemy() const { return enemyList.Size() > 0; }
-	void SetWanderParams( const grinliz::Vector2F& pos, float radius ); 
 	void FocusedMove( const grinliz::Vector2F& dest );
 	void FocusedTarget( Chit* chit );
+
+	enum {
+		WANDER_NONE,
+		WANDER_HERD,
+		WANDER_CIRCLE
+	};
+	void SetWanderParams( int mode, const grinliz::Vector2F& pos, float radius ); 
 	void EnableDebug( bool enable ) { debugFlag = enable; }
 
 	enum {
@@ -84,6 +90,14 @@ private:
 	void ThinkWander( const ComponentSet& thisComp );
 	void ThinkBattle( const ComponentSet& thisComp );
 
+	// What happens when no other move is working.
+	grinliz::Vector2F ThinkWanderRandom( const ComponentSet& thisComp );
+	// pseudo-flocking
+	grinliz::Vector2F ThinkWanderFlock( const ComponentSet& thisComp );
+	// creepy circle pacing
+	grinliz::Vector2F ThinkWanderCircle( const ComponentSet& thisComp );
+
+
 	Engine*		engine;
 	WorldMap*	map;
 
@@ -107,6 +121,8 @@ private:
 	grinliz::Vector2F	wanderOrigin;
 	float				wanderRadius;
 	U32					wanderTime;
+	bool				randomWander;
+	int					wanderFlags;
 	bool				debugFlag;
 
 	void DoMelee( const ComponentSet& thisComp );

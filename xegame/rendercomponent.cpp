@@ -549,6 +549,13 @@ void RenderComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {
 	if ( msg.ID() == ChitMsg::CHIT_DESTROYED_START ) {
 		// Don't self delete.
+
+		static const Vector3F UP = { 0, 1, 0 };
+		static const Vector3F DOWN = { 0, -1, 0 };
+		static const Vector3F RIGHT = { 1, 0, 0 };
+		const Vector3F* eyeDir = engine->camera.EyeDir3();
+		engine->particleSystem->EmitPD( "derez", model[0]->AABB().Center(), UP, eyeDir, 0 );
+		engine->particleSystem->EmitPD( "derez", model[0]->AABB().Center(), DOWN, eyeDir, 0 );
 	}
 	else if ( msg.ID() == ChitMsg::CHIT_DESTROYED_TICK ) {
 		float f = msg.dataF;
@@ -560,12 +567,6 @@ void RenderComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		}
 	}
 	else if ( msg.ID() == ChitMsg::CHIT_DESTROYED_END ) {
-		static const Vector3F UP = { 0, 1, 0 };
-		static const Vector3F DOWN = { 0, -1, 0 };
-		static const Vector3F RIGHT = { 1, 0, 0 };
-		const Vector3F* eyeDir = engine->camera.EyeDir3();
-		engine->particleSystem->EmitPD( "derez", model[0]->AABB().Center(), UP, eyeDir, 0 );
-		engine->particleSystem->EmitPD( "derez", model[0]->AABB().Center(), DOWN, eyeDir, 0 );
 	}
 	else {
 		super::OnChitMsg( chit, msg );
