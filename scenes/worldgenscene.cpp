@@ -121,6 +121,7 @@ void WorldGenScene::BlendLine( int y )
 				// apply the rockgen value.
 
 				h = Max( h, WorldGen::LAND1 + r / 102 );
+				//h = WorldGen::LAND1 + r / 102;
 				GLASSERT( h >= WorldGen::LAND0 && h <= WorldGen::LAND3 );
 			}
 			else {
