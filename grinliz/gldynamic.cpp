@@ -25,6 +25,15 @@ distribution.
 #ifdef _MSC_VER
 #pragma warning( disable : 4530 )
 #pragma warning( disable : 4786 )
+
+#if !defined(WINAPI)
+#  ifndef WIN32_LEAN_AND_MEAN
+#    define WIN32_LEAN_AND_MEAN 1
+#  endif
+#include <windows.h>
+#  undef WIN32_LEAN_AND_MEAN
+#endif
+
 #endif
 
 #ifndef __APPLE__
@@ -49,12 +58,8 @@ void* grinliz::grinlizLoadLibrary( const char* name )
 
 	#if defined( _WIN32 )
 		libraryName = name;
-		handle = SDL_LoadObject( libraryName.c_str() );
+		handle = LoadLibraryA( libraryName.c_str() );
 		GLASSERT( handle );
-		
-		//if ( !handle ) {
-		//	GLLOG(( "ERROR: could not load %s. Reason: %s\n", libraryName.c_str(), SDL_GetError() ));
-		//}
 	#elif defined(__APPLE__)
 		libraryName = name;
 		handle = dlopen ( libraryName.c_str(), RTLD_LAZY);
@@ -73,7 +78,7 @@ void* grinliz::grinlizLoadFunction( void* handle, const char* functionName )
 	#ifdef __APPLE__
 		func = dlsym( handle, functionName );
 	#else
-		func = SDL_LoadFunction( handle, functionName );
+		func = GetProcAddress( (HMODULE) handle, functionName );
 	#endif
 
 	return func;
