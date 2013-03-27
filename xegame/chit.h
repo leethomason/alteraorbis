@@ -30,7 +30,6 @@ class Component;
 class SpatialComponent;
 class RenderComponent;
 class MoveComponent;
-class InventoryComponent;
 class ItemComponent;
 
 class ChitBag;
@@ -39,6 +38,7 @@ class ChitEvent;
 class GameItem;
 class ComponentFactory;
 class XStream;
+class LumosChitBag;
 
 // Synchronous. Can be sub-classed.
 class ChitMsg
@@ -58,13 +58,12 @@ public:
 								// the rendering component.	
 
 		// ---- Component ---- //
-		// Game
 		PATHMOVE_DESTINATION_REACHED,
 		PATHMOVE_DESTINATION_BLOCKED,
 
 		HEALTH_CHANGED,
 		
-		GAMEITEM_TICK,			// Ptr = &GameItem
+		//GAMEITEM_TICK,			// Ptr = &GameItem
 
 		// XE
 		SPATIAL_CHANGED,		// the position or rotation has changed, sender: spatial
@@ -90,7 +89,6 @@ private:
 	int data;
 	const void* ptr;
 };
-
 
 
 class IChitListener
@@ -132,13 +130,14 @@ public:
 
 	SpatialComponent*	GetSpatialComponent()	{ return spatialComponent; }
 	MoveComponent*		GetMoveComponent()		{ return moveComponent; }
-	InventoryComponent*	GetInventoryComponent()	{ return inventoryComponent; }
 	ItemComponent*		GetItemComponent()		{ return itemComponent; }
 	RenderComponent*	GetRenderComponent()	{ return renderComponent; }
 	Component*			GetComponent( const char* name );
 	Component*			GetComponent( int id );
 
-	ChitBag* GetChitBag() { return chitBag; }
+	ChitBag* GetChitBag()						{ return chitBag; }
+	virtual LumosChitBag* GetLumosChitBag();
+
 	// Returns the item if this has the ItemComponent.
 	GameItem* GetItem();
 	void QueueDelete();
@@ -185,7 +184,6 @@ private:
 	enum {
 		SPATIAL,
 		MOVE,
-		INVENTORY,
 		ITEM,
 		GENERAL_0,
 		GENERAL_1,
@@ -203,7 +201,6 @@ public:
 	enum {
 		SPATIAL_BIT		= (1<<SPATIAL),
 		MOVE_BIT		= (1<<MOVE),
-		INVENTORY_BIT	= (1<<INVENTORY),
 		ITEM_BIT		= (1<<ITEM),
 		RENDER_BIT		= (1<<RENDER)
 	};
@@ -214,7 +211,6 @@ private:
 		struct {
 			SpatialComponent*	spatialComponent;
 			MoveComponent*		moveComponent;
-			InventoryComponent*	inventoryComponent;
 			ItemComponent*		itemComponent;
 			Component*			general0;
 			Component*			general1;
@@ -244,7 +240,6 @@ struct ComponentSet
 
 	SpatialComponent*	spatial;
 	MoveComponent*		move;
-	InventoryComponent*	inventory;
 	ItemComponent*		itemComponent;
 	GameItem*			item;
 	RenderComponent*	render;

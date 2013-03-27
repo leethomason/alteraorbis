@@ -31,8 +31,10 @@ using namespace grinliz;
 	if ( item && sc && StrEqual( sc->Script()->ScriptName(), "PlantScript" )) {
 		GLASSERT( sc->Script() );
 		PlantScript* plantScript = static_cast< PlantScript* >( sc->Script() );
-		*type = plantScript->Type();
-		*stage = plantScript->Stage();
+		if ( type )
+			*type = plantScript->Type();
+		if ( stage )
+			*stage = plantScript->Stage();
 		return item;
 	}
 	return 0;
@@ -53,44 +55,42 @@ PlantScript::PlantScript( Sim* p_sim, Engine* p_engine, WorldMap* p_map, Weather
 }
 
 
-void PlantScript::SetRenderComponent( Chit* chit )
+void PlantScript::SetRenderComponent( const ScriptContext& ctx )
 {
 	CStr<10> str = "plant0.0";
 	str[5] = '0' + type;
 	str[7] = '0' + stage;
 
-	GLASSERT( chit );
-	if ( chit->GetRenderComponent() ) {
-		const ModelResource* res = chit->GetRenderComponent()->MainResource();
+	GLASSERT( ctx.chit );
+	if ( ctx.chit->GetRenderComponent() ) {
+		const ModelResource* res = ctx.chit->GetRenderComponent()->MainResource();
 		if ( res && res->header.name == str.c_str() ) {
 			// No change!
 			return;
 		}
 	}
 
-	Census* census = &(static_cast<LumosChitBag*>( chit->GetChitBag())->census);
-
-	if ( chit->GetRenderComponent() ) {
-		RenderComponent* rc = chit->GetRenderComponent();
+	if ( ctx.chit->GetRenderComponent() ) {
+		RenderComponent* rc = ctx.chit->GetRenderComponent();
 		const char* name = rc->MainResource()->Name();
 		GLASSERT( strlen( name ) == 8 );
 		int t = name[5] - '0';
 		int s = name[7] - '0';
-		census->plants[t][s] -= 1;
+		ctx.census->plants[t][s] -= 1;
 
-		chit->Remove( rc );
+		ctx.chit->Remove( rc );
 		delete rc;
 	}
 
-	if ( !chit->GetRenderComponent() ) {
+	if ( !ctx.chit->GetRenderComponent() ) {
 		RenderComponent* rc = new RenderComponent( engine, str.c_str() );
 		rc->SetSerialize( false );
-		chit->Add( rc );
+		ctx.chit->Add( rc );
 
-		census->plants[type][stage] += 1;
+		ctx.census->plants[type][stage] += 1;
 	}
-	GameItem* item = chit->GetItem();
-	chit->GetRenderComponent()->SetSaturation( item->HPFraction() );
+	GameItem* item = ctx.chit->GetItem();
+	ctx.chit->GetRenderComponent()->SetSaturation( item->HPFraction() );
 }
 
 
@@ -111,7 +111,7 @@ void PlantScript::Init( const ScriptContext& ctx )
 	const GameItem* resource = GetResource();
 	ctx.chit->Add( new ItemComponent( engine, *resource ));
 	ctx.chit->GetItem()->stats.Roll( ctx.chit->random.Rand() );
-	SetRenderComponent( ctx.chit );
+	SetRenderComponent( ctx );
 
 	ctx.chit->GetSpatialComponent()->SetYRotation( (float)ctx.chit->random.Rand( 360 ));
 }
@@ -139,7 +139,7 @@ int PlantScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 	// Need to generate when the PlantScript loads. (It doesn't save
 	// the render component.) This is over-checking, but currently
 	// don't have an onAdd.
-	SetRenderComponent( ctx.chit );
+	SetRenderComponent( ctx );
 
 	age += since;
 	ageAtStage += since;
@@ -256,7 +256,7 @@ int PlantScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 		{
 			++stage;
 			ageAtStage = 0;
-			SetRenderComponent( ctx.chit );
+			SetRenderComponent( ctx );
 
 			// Set the mass to be consistent with rendering.
 			const GameItem* resource = GetResource();

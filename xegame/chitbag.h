@@ -32,6 +32,7 @@ class ComponentFactory;
 class XStream;
 class CameraComponent;
 
+
 class ChitBag : public IBoltImpactHandler
 {
 public:
@@ -77,17 +78,21 @@ public:
 	void RemoveFromSpatialHash( Chit*, int x, int y );
 	void UpdateSpatialHash( Chit*, int x0, int y0, int x1, int y1 );
 
+	static bool AcceptAll( Chit* ) {
+		return true;
+	}
+
 	void QuerySpatialHash(	grinliz::CDynArray<Chit*>* array, 
 							const grinliz::Rectangle2F& r, 
 		                    const Chit* ignoreMe,
-							int itemFilter );
+							bool (*accept)(Chit*) = AcceptAll );	// function ptr: see NoFilter
 
 	// Use with caution: the array returned can change if a sub-function calls this.
 	const grinliz::CDynArray<Chit*>& QuerySpatialHash(	const grinliz::Rectangle2F& r, 
 														const Chit* ignoreMe,
-														int itemFilter )
+														bool (*accept)(Chit*) = AcceptAll )
 	{
-		QuerySpatialHash( &cachedQuery, r, ignoreMe, itemFilter );
+		QuerySpatialHash( &cachedQuery, r, ignoreMe, accept );
 		return cachedQuery;
 	}
 
@@ -97,6 +102,11 @@ public:
 	// There can only be one camera actually in use:
 	CameraComponent* GetCamera( Engine* engine );
 	int GetCameraChitID() const { return activeCamera; }
+
+	virtual LumosChitBag* ToLumos() { return 0; }
+
+protected:
+	void DeleteChits() { chitID.RemoveAll(); }
 
 private:
 	enum {
@@ -127,7 +137,6 @@ private:
 	// may be fine.
 	grinliz::CDynArray< Chit* >		  blocks;
 	grinliz::HashTable< int, Chit* >  chitID;
-
 	grinliz::CDynArray<int>			deleteList;	
 	grinliz::CDynArray<CompID>		compDeleteList;	
 	grinliz::CDynArray<Chit*>		hashQuery;			// local data, cached at class level

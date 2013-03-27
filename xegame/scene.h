@@ -72,6 +72,8 @@ public:
 	virtual void Zoom( int style, float normal )				{}
 	virtual void Rotate( float degrees )						{}
 	virtual void CancelInput()									{}
+	// Only with mouse/kbd input.
+	virtual void MouseMove( const grinliz::Vector2F& view, const grinliz::Ray& world )	{}
 
 	virtual void HandleHotKey( int mask )						{}
 	virtual void Resize()										{}
@@ -102,9 +104,6 @@ public:
 
 	// 2D overlay rendering.
 	virtual void DrawDebugText()								{}
-
-	// Debugging
-	virtual void MouseMove( const grinliz::Vector2F& view, const grinliz::Ray& world )	{}
 
 protected:
 

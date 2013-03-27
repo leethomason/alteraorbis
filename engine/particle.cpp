@@ -312,7 +312,6 @@ void ParticleDef::Load( const tinyxml2::XMLElement* ele )
 	config = ParticleSystem::PARTICLE_RAY;
 	if ( ele->Attribute( "config", "sphere" ) ) config = ParticleSystem::PARTICLE_SPHERE;
 	if ( ele->Attribute( "config", "hemi" ) ) config = ParticleSystem::PARTICLE_HEMISPHERE;
-//	if ( ele->Attribute( "config", "world" ) ) config = ParticleSystem::PARTICLE_WORLD;
 
 	posFuzz = 0;
 	ele->QueryFloatAttribute( "posFuzz", &posFuzz );

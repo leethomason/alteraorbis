@@ -15,10 +15,10 @@
 
 #include "rendercomponent.h"
 #include "spatialcomponent.h"
-#include "inventorycomponent.h"
 #include "chit.h"
 #include "chitevent.h"
 #include "itemcomponent.h"
+#include "istringconst.h"
 
 #include "../engine/animation.h"
 #include "../engine/model.h"
@@ -45,6 +45,9 @@ RenderComponent::RenderComponent( Engine* _engine, const char* _asset )
 		resource[i] = 0;
 		model[i] = 0;
 	}
+	for( int i=0; i<NUM_DECO; ++i ) {
+		deco[i] = 0;
+	}
 	radiusOfBase = 0;
 }
 
@@ -54,11 +57,15 @@ RenderComponent::~RenderComponent()
 	for( int i=0; i<NUM_MODELS; ++i ) {
 		GLASSERT( model[i] == 0 );
 	}
+	for( int i=0; i<NUM_DECO; ++i ) {
+		GLASSERT( deco[i] == 0 );
+	}
 }
 
 
 void RenderComponent::Serialize( XStream* xs )
 {
+	// FIXME serialize deco
 	BeginSerialize( xs, "RenderComponent" );
 
 	XarcOpen( xs, "resources" );
@@ -99,6 +106,7 @@ void RenderComponent::Serialize( XStream* xs )
 void RenderComponent::OnAdd( Chit* chit )
 {
 	Component::OnAdd( chit );
+
 	for( int i=0; i<NUM_MODELS; ++i ) {
 		if ( resource[i] ) {
 			if ( !model[i] ) {
@@ -124,6 +132,13 @@ void RenderComponent::OnRemove()
 	for( int i=0; i<EL_MAX_METADATA; ++i ) {
 		metaDataName[i] = IString();
 	}
+	for( int i=0; i<NUM_DECO; ++i ) {
+		if ( deco[i] ) {
+			engine->FreeModel( deco[i] );
+			deco[i] = 0;
+		}
+	}
+
 }
 
 
@@ -152,7 +167,7 @@ int RenderComponent::CalcAnimation() const
 
 	MoveComponent* move = parentChit->GetMoveComponent();
 	bool isMoving = move && move->IsMoving();
-	InventoryComponent* inv = GET_COMPONENT( parentChit, InventoryComponent );
+	ItemComponent* inv = parentChit->GetItemComponent();
 	bool isCarrying = inv && inv->IsCarrying();
 
 	if ( isMoving ) {
@@ -181,7 +196,7 @@ int RenderComponent::CurrentAnimation() const
 bool RenderComponent::AnimationReady() const
 {
 	int type = model[0]->GetAnimation();
-	if ( type == ANIM_MELEE || type == ANIM_HEAVY_IMPACT ) {
+	if ( type == ANIM_MELEE || type == ANIM_IMPACT ) {
 		return model[0]->AnimationDone();
 	}
 	return true;
@@ -190,9 +205,9 @@ bool RenderComponent::AnimationReady() const
 
 bool RenderComponent::PlayAnimation( int type )
 {
-	if ( type == ANIM_HEAVY_IMPACT ) {
+	if ( type == ANIM_IMPACT ) {
 		// *always* overrides
-		model[0]->SetAnimation( ANIM_HEAVY_IMPACT, CROSS_FADE_TIME, true );
+		model[0]->SetAnimation( ANIM_IMPACT, CROSS_FADE_TIME, true );
 	}
 	else if ( type == ANIM_MELEE ) {
 		// melee if we can
@@ -208,8 +223,13 @@ bool RenderComponent::PlayAnimation( int type )
 }
 
 
+bool RenderComponent::Attach( int hardpoint, const char* asset )
+{
+	IString n = IStringConst::Hardpoint( hardpoint );
+	return Attach( n, asset );
+}
 
-void RenderComponent::Attach( IString metaData, const char* asset )
+bool RenderComponent::Attach( IString metaData, const char* asset )
 {
 	for( int j=1; j<NUM_MODELS; ++j ) {
 		if ( metaDataName[j-1].empty() ) {
@@ -223,9 +243,17 @@ void RenderComponent::Attach( IString metaData, const char* asset )
 				model[j] = engine->AllocModel( resource[j] );
 				model[j]->userData = parentChit;
 			}
-			break;
+			return true;
 		}
 	}
+	return false;
+}
+
+
+void RenderComponent::SetColor( int hardpoint, const grinliz::Vector4F& colorMult )
+{
+	IString n = IStringConst::Hardpoint( hardpoint );
+	SetColor( n, colorMult );
 }
 
 
@@ -261,6 +289,13 @@ void RenderComponent::SetSaturation( float s )
 }
 
 
+void RenderComponent::SetProcedural( int hardpoint, const ProcRenderInfo& info )
+{
+	IString n = IStringConst::Hardpoint( hardpoint );
+	SetProcedural( n, info );
+}
+
+
 void RenderComponent::SetProcedural( IString hardpoint, const ProcRenderInfo& info )
 {
 	if ( !hardpoint.empty() ) {
@@ -283,6 +318,13 @@ void RenderComponent::SetProcedural( IString hardpoint, const ProcRenderInfo& in
 }
 
 
+void RenderComponent::Detach( int metaData )
+{
+	IString n = IStringConst::Hardpoint( metaData );
+	Detach( n );
+}
+
+	
 void RenderComponent::Detach( IString metaData )
 {
 	for( int i=1; i<NUM_MODELS; ++i ) {
@@ -320,6 +362,7 @@ int RenderComponent::DoTick( U32 deltaTime, U32 since )
 
 		for( int i=0; i<metaData.Size(); ++i ) {
 			if ( metaData[i] == ANIM_META_IMPACT ) {
+				//GLOUTPUT(( "Sending impact.\n" ));
 				parentChit->SendMessage( ChitMsg( ChitMsg::RENDER_IMPACT ), this );
 			}
 			else {
@@ -341,12 +384,58 @@ int RenderComponent::DoTick( U32 deltaTime, U32 since )
 		if ( model[i] ) {
 			GLASSERT( !metaDataName[i-1].empty() );
 			Matrix4 xform;
-			model[0]->CalcMetaData( metaDataName[i-1].c_str(), &xform );
+			model[0]->CalcMetaData( metaDataName[i-1], &xform );
 			model[i]->SetTransform( xform );
 		}
 	}
 
+	// The decos:
+	if ( deco[0] ) {
+		Vector3F pos = model[0]->Pos();
+		pos.y = 0.01f;
+		deco[0]->SetPos( pos );
+	}
 	return tick;
+}
+
+
+void RenderComponent::Deco( const char* asset, int slot, int duration )
+{
+	GLASSERT( slot < NUM_DECO );
+	if ( deco[slot] ) {
+		engine->FreeModel( deco[slot] );
+		deco[slot] = 0;
+	}
+	if ( duration > 0 ) {
+		const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( asset );
+		deco[slot] = engine->AllocModel( res );
+		Vector3F pos = model[0]->Pos();
+		pos.y = 0.01f;
+		deco[slot]->SetPos( pos );	
+		deco[slot]->userData = parentChit;
+	}
+}
+
+
+bool RenderComponent::HardpointAvailable( int hardpoint )
+{
+	int has = 0;
+	int use = 0;
+	IString n = IStringConst::Hardpoint( hardpoint );
+
+	const ModelHeader& header = model[0]->GetResource()->header;
+	for( int i=0; i<EL_MAX_METADATA; ++i ) {
+		if ( header.metaData[i].name == n ) {
+			// have the slot - is it in use?
+			for( int k=0;  k<EL_MAX_METADATA; ++k ) {
+				if ( metaDataName[k] == n ) {
+					return false;
+				}
+			}
+			return true;
+		}
+	}
+	return false;
 }
 
 
@@ -373,7 +462,7 @@ const char* RenderComponent::GetMetaData( int i )
 }
 
 
-bool RenderComponent::HasMetaData( const char* name )
+bool RenderComponent::HasMetaData( grinliz::IString name )
 {
 	for( int i=0; i<EL_MAX_METADATA; ++i ) {
 		if ( resource[0] ) {
@@ -385,7 +474,7 @@ bool RenderComponent::HasMetaData( const char* name )
 }
 
 
-bool RenderComponent::GetMetaData( const char* name, grinliz::Matrix4* xform )
+bool RenderComponent::GetMetaData( grinliz::IString name, grinliz::Matrix4* xform )
 {
 	if ( model[0] ) {
 		SyncToSpatial();
@@ -396,7 +485,7 @@ bool RenderComponent::GetMetaData( const char* name, grinliz::Matrix4* xform )
 }
 
 
-bool RenderComponent::GetMetaData( const char* name, grinliz::Vector3F* pos )
+bool RenderComponent::GetMetaData( grinliz::IString name, grinliz::Vector3F* pos )
 {
 	Matrix4 xform;
 	if ( GetMetaData( name, &xform ) ) {
@@ -410,8 +499,9 @@ bool RenderComponent::GetMetaData( const char* name, grinliz::Vector3F* pos )
 bool RenderComponent::CalcTarget( grinliz::Vector3F* pos )
 {
 	if ( model[0] ) {
-		if ( HasMetaData( "target" )) {
-			GetMetaData( "target", pos );
+		IString target = IStringConst::ktarget;
+		if ( HasMetaData( target )) {
+			GetMetaData( target, pos );
 		}
 		else {
 			*pos = model[0]->AABB().Center();
@@ -422,7 +512,23 @@ bool RenderComponent::CalcTarget( grinliz::Vector3F* pos )
 }
 
 
-void RenderComponent::GetModelList( grinliz::CArray<const Model*, NUM_HARDPOINTS+2> *ignore )
+bool RenderComponent::CalcTrigger( grinliz::Vector3F* pos, grinliz::Matrix4* xform )
+{
+	if ( model[0] ) {
+		IString trigger = IStringConst::ktrigger;
+		if ( HasMetaData( trigger )) { 
+			if ( pos ) 
+				GetMetaData( trigger, pos );
+			if ( xform )
+				GetMetaData( trigger, xform );
+			return true;
+		}
+	}
+	return false;
+}
+
+
+void RenderComponent::GetModelList( grinliz::CArray<const Model*, NUM_MODELS+1> *ignore )
 {
 	ignore->Clear();
 	for( int i=0; i<NUM_MODELS; ++i ) {
@@ -443,6 +549,13 @@ void RenderComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {
 	if ( msg.ID() == ChitMsg::CHIT_DESTROYED_START ) {
 		// Don't self delete.
+
+		static const Vector3F UP = { 0, 1, 0 };
+		static const Vector3F DOWN = { 0, -1, 0 };
+		static const Vector3F RIGHT = { 1, 0, 0 };
+		const Vector3F* eyeDir = engine->camera.EyeDir3();
+		engine->particleSystem->EmitPD( "derez", model[0]->AABB().Center(), UP, eyeDir, 0 );
+		engine->particleSystem->EmitPD( "derez", model[0]->AABB().Center(), DOWN, eyeDir, 0 );
 	}
 	else if ( msg.ID() == ChitMsg::CHIT_DESTROYED_TICK ) {
 		float f = msg.dataF;
@@ -454,12 +567,6 @@ void RenderComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		}
 	}
 	else if ( msg.ID() == ChitMsg::CHIT_DESTROYED_END ) {
-		static const Vector3F UP = { 0, 1, 0 };
-		static const Vector3F DOWN = { 0, -1, 0 };
-		static const Vector3F RIGHT = { 1, 0, 0 };
-		const Vector3F* eyeDir = engine->camera.EyeDir3();
-		engine->particleSystem->EmitPD( "derez", model[0]->AABB().Center(), UP, eyeDir, 0 );
-		engine->particleSystem->EmitPD( "derez", model[0]->AABB().Center(), DOWN, eyeDir, 0 );
 	}
 	else {
 		super::OnChitMsg( chit, msg );

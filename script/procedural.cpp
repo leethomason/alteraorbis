@@ -192,10 +192,7 @@ void WeaponGen::Render( const GameItem& item, ProcRenderInfo* info )
 
 int ItemGen::ToID( IString name )
 {
-	if ( name == "roundsToGlow" ) {
-		return PROCEDURAL_ROUNDS_TO_GLOW;
-	}
-	else if ( name == "ring" ) {
+	if ( name == "ring" ) {
 		return PROCEDURAL_RING;
 	}
 	return PROCEDURAL_NONE;
@@ -205,7 +202,6 @@ int ItemGen::ToID( IString name )
 grinliz::IString ItemGen::ToName( int id )
 {
 	switch( id ) {
-	case PROCEDURAL_ROUNDS_TO_GLOW:	return StringPool::Intern( "roundsToGlow", true );
 	case PROCEDURAL_RING:			return StringPool::Intern( "ring", true );
 	default:
 		break;
@@ -218,13 +214,6 @@ grinliz::IString ItemGen::ToName( int id )
 {
 	int result = NONE;
 	switch ( item.procedural ) {
-		case PROCEDURAL_ROUNDS_TO_GLOW:
-		{
-			info->color[0].Set( 1, 1, 1, item.RoundsFraction() );
-			result = COLOR_XFORM;
-		}
-		break;
-
 		case PROCEDURAL_RING:
 		{
 			WeaponGen gen( palette );

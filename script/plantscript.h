@@ -19,17 +19,28 @@ public:
 
 	virtual void Init( const ScriptContext& heap );
 	virtual void Serialize( const ScriptContext& ctx, XStream* xs );
+	virtual void OnAdd( const ScriptContext& ctx )	{}
+	virtual void OnRemove( const ScriptContext& ctx )	{}
 
 	virtual int DoTick( const ScriptContext& ctx, U32 delta, U32 since );
 	virtual const char* ScriptName() { return "PlantScript"; }
 
+	// Plant specific:
 	static GameItem* IsPlant( Chit* chit, int* type, int* stage );
+	static bool PlantFilter( Chit* chit ) { return IsPlant( chit, 0, 0 ) != 0; }
+	static bool PassablePlantFilter( Chit* chit ) {
+		int stage=0;
+		if( IsPlant( chit, 0, &stage )) {
+			return stage < 2;
+		}
+		return false;
+	}
 
 	int Type() const	{ return type; }
 	int Stage() const	{ return stage; }
 
 private:
-	void SetRenderComponent( Chit* chit );
+	void SetRenderComponent( const ScriptContext& ctx );
 	const GameItem* GetResource();
 
 	enum {

@@ -1,5 +1,62 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 
+<!--
+  Particles can be previewed from the "particle" screen.
+  The file is loaded every time you hit a button on that
+  screen, so if you save the particle XML you can see it
+  change the next time you play the effect.
+  
+  Note that if you add a particle effect, you will need
+  to back up to the title screen, and re-open the particle
+  screen for the button to appear.
+
+  Particle attributes:
+    name: Name of the effect. Used by the source code,
+          should not be renamed.
+    time = once | continuous
+          once: the particle effect is triggered
+          continuous: the particle effect is ongoing
+          Used by source code, should not be changed.
+    size = number
+          The size of the particle texture.
+    count = integer
+          if time="once", the number of particles to spawn.
+          if type="continuous", the numbers of particles per second.
+    texMin, texMax = integer
+          The particle that will be selected from particles. 
+          If texMax>texMin, a random image is chosen in the range.
+          0: circular, alpha faded (default)
+          1: smoke #1
+          2: smoke #2
+          3: rounded rectangle
+          4: alpha faded cylinder (generally not useful)
+          5: ring
+    config = ray | hemi | sphere
+          How the particles burst from the origin.
+    posFuzz = number
+          Amount of randomness in the initial position.
+    velocity = number
+          Initial speed
+    velocityFuzz = number
+          Amount of randomness in the initial speed.
+    
+  Sub-Elements:
+    <color red="number" blue="number" green="number" alpha="number" />
+        The initial color. When the alpha of the particle is less
+        than 0, it is deleted. 
+        
+    <colorVelocity> 
+        The rate the color changes. 
+        If there is one colorVelocity tag, then alpha must be negative.
+        If there is two, the first must have a positive alpha, and the
+           second a negative alpha. The first colorVelocity tag will
+           be used until alpha=1, then the 2nd is used. This allows for
+           a fade-in effect.
+           
+    <colorFuzz>
+        Randomness in the initial color.
+-->
+
 <particles>
 
   <particle name="boltImpact" 
@@ -7,6 +64,22 @@
             posFuzz="0.0" velocity="2.2" velocityFuzz="0.1" >
     <color red="1" green="0" blue="0" alpha="1.5"/>
     <colorVelocity alpha="-1.4" />
+  </particle>
+
+  <particle name="meleeImpact"
+            time="once" size="0.1" count="6" config="sphere"
+            posFuzz="0.0" velocity="0.3" velocityFuzz="0.3"
+            texMin="3" texMax="3">
+    <color red="1" green="0" blue="0" alpha="1.0"/>
+    <colorVelocity alpha="-1.4" />
+  </particle>
+
+  <particle name="shield"
+            time="once" size="0.15" count="5" config="sphere"
+            posFuzz="0.1" velocity="0.2" velocityFuzz="0.2"
+            texMin="5" texMax="5">
+    <color red="0" green="0" blue="1" alpha="0.8"/>
+    <colorVelocity alpha="-1.2" />
   </particle>
 
   <particle name="embers"
@@ -66,10 +139,10 @@
 
 
   <particle name="derez" size="0.1" count="15" config="ray" 
-            velocity="1.2" velocityFuzz="0.5" posFuzz="0.3"
+            velocity="0.2" velocityFuzz="0.5" posFuzz="0.3"
             texMin="3" texMax="3">
     <color red="0" green="0" blue="1" alpha="1"/>
-    <colorVelocity red="0" green="0.8" blue="0" alpha="-1.5"/>
+    <colorVelocity red="0" green="0.8" blue="0" alpha="-0.8"/>
     <colorFuzz red="0.2" green="0.2" blue="0.2" alpha="0" />
   </particle>
 

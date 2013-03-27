@@ -17,38 +17,14 @@
 #define AI_COMPONENT_INCLUDED
 
 #include "../xegame/component.h"
+#include "../xegame/cticker.h"
 #include "../grinliz/glcontainer.h"
 #include "../grinliz/glrectangle.h"
 #include "../script/battlemechanics.h"
 
 class WorldMap;
 class Engine;
-
-inline float UtilityCubic( float y0, float y1, float x ) {
-	x = grinliz::Clamp( x, 0.0f, 1.0f );
-	float a = grinliz::Lerp( y0, y1, x*x*x );
-	return a;
-}
-
-inline float UtilityFade( float y0, float y1, float x ) {
-	x = grinliz::Clamp( x, 0.0f, 1.0f );
-	float a = grinliz::Lerp( y0, y1, grinliz::Fade5( x ) );
-	return a;
-}
-
-inline float UtilityLinear( float y0, float y1, float x ) {
-	x = grinliz::Clamp( x, 0.0f, 1.0f );
-	float a = grinliz::Lerp( y0, y1, x );
-	return a;
-}
-
-// Highest at x=0.5
-inline float UtilityParabolic( float y0, float maxY, float y1, float x ) {
-	x = grinliz::Clamp( x, 0.0f, 1.0f );
-	float xp = x - 0.5f;
-	float a = 1.0f - ( xp*xp )*4.f;
-	return a;
-}
+struct ComponentSet;
 
 
 // Combat AI: needs refactoring
@@ -64,6 +40,8 @@ public:
 	virtual const char* Name() const { return "AIComponent"; }
 
 	virtual void Serialize( XStream* xs );
+	virtual void OnAdd( Chit* chit );
+	virtual void OnRemove();
 
 	virtual int  DoTick( U32 delta, U32 timeSince );
 	virtual void DebugStr( grinliz::GLString* str );
@@ -72,53 +50,87 @@ public:
 
 	// Approximate. enemyList may not be flushed.
 	bool AwareOfEnemy() const { return enemyList.Size() > 0; }
+	void FocusedMove( const grinliz::Vector2F& dest );
+	void FocusedTarget( Chit* chit );
 
-private:
+	enum {
+		WANDER_NONE,
+		WANDER_HERD,
+		WANDER_CIRCLE
+	};
+	void SetWanderParams( int mode, const grinliz::Vector2F& pos, float radius ); 
+	void EnableDebug( bool enable ) { debugFlag = enable; }
+
 	enum {
 		FRIENDLY,
 		ENEMY,
-		NEUTRAL,
-		
+		NEUTRAL
+	};
+	int GetTeamStatus( Chit* other );
+
+	// Top level AI modes.
+	enum {
+		NORMAL_MODE,
+		BATTLE_MODE
+	};
+
+private:
+
+	enum {
 		MAX_TRACK = 8,
 	};
 
-	void DoSlowTick();
-	void UpdateCombatInfo( const grinliz::Rectangle2F* _zone=0 );
-	int GetTeamStatus( Chit* other );
-	bool LineOfSight( Chit* src, Chit* target );
-	void Think();	// Choose a new action.
+	void GetFriendEnemyLists();
+	Chit* Closest( const ComponentSet& thisComp, grinliz::CArray<int, MAX_TRACK>* list );
+
+	bool LineOfSight( const ComponentSet& thisComp, Chit* target );
+	//float CalcFlockMove( const ComponentSet& thisComp, grinliz::Vector2F* dir );
+
+	void Think( const ComponentSet& thisComp );	// Choose a new action.
+	void ThinkWander( const ComponentSet& thisComp );
+	void ThinkBattle( const ComponentSet& thisComp );
+
+	// What happens when no other move is working.
+	grinliz::Vector2F ThinkWanderRandom( const ComponentSet& thisComp );
+	// pseudo-flocking
+	grinliz::Vector2F ThinkWanderFlock( const ComponentSet& thisComp );
+	// creepy circle pacing
+	grinliz::Vector2F ThinkWanderCircle( const ComponentSet& thisComp );
+
 
 	Engine*		engine;
 	WorldMap*	map;
-	int			slowTick;
 
 	enum {
-		/*
-			move,			get to shot, closer to friends, further from friends, close with enemy
-			move & shoot	
-			move & reload
-			move & melee	going in for the hit (ignore friends)
-			stand & shoot	good shot, good range, want aim bonus
-			stand & reload	
-			stand			stuck?
-		*/
-
 		// Possible actions:
 		NO_ACTION,
-		MELEE,			// Go to the target and hit it. The basic combat action.
-						// Possibly run-and-gun on the way in.
+		MOVE,			// Movement, will reload and run&gun if possible.
+		MELEE,			// Go to the target and hit it. Melee charge.
 		SHOOT,			// Stand ground and shoot.
-		//MOVE			// Move to a better location. Possibly reload.
-		NUM_ACTIONS,
-	};
-	int currentAction;
 
-	void DoMelee();
-	void DoShoot();
+		WANDER,
+	};
+
+	int aiMode;
+	int currentAction;
+	int currentTarget;
+	bool focusOnTarget;
+	bool focusedMove;
+	grinliz::Rectangle2F awareness;
+	CTicker rethink;
+	grinliz::Vector2F	wanderOrigin;
+	float				wanderRadius;
+	U32					wanderTime;
+	bool				randomWander;
+	int					wanderFlags;
+	bool				debugFlag;
+
+	void DoMelee( const ComponentSet& thisComp );
+	void DoShoot( const ComponentSet& thisComp );
+	void DoMove( const ComponentSet& thisComp );
 
 	grinliz::CArray<int, MAX_TRACK> friendList;
 	grinliz::CArray<int, MAX_TRACK> enemyList;
-	grinliz::CDynArray<Chit*>		chitArr;
 	BattleMechanics battleMechanics;
 };
 

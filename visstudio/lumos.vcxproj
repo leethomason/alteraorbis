@@ -132,6 +132,7 @@
     <ClCompile Include="..\scenes\rendertestscene.cpp" />
     <ClCompile Include="..\scenes\worldgenscene.cpp" />
     <ClCompile Include="..\script\battlemechanics.cpp" />
+    <ClCompile Include="..\script\corescript.cpp" />
     <ClCompile Include="..\script\itemscript.cpp" />
     <ClCompile Include="..\script\plantscript.cpp" />
     <ClCompile Include="..\script\procedural.cpp" />
@@ -150,9 +151,9 @@
     <ClCompile Include="..\xegame\chitbag.cpp" />
     <ClCompile Include="..\xegame\component.cpp" />
     <ClCompile Include="..\xegame\componentfactory.cpp" />
+    <ClCompile Include="..\xegame\cticker.cpp" />
     <ClCompile Include="..\xegame\game.cpp" />
-    <ClCompile Include="..\xegame\inventorycomponent.cpp" />
-    <ClCompile Include="..\xegame\itembasecomponent.cpp" />
+    <ClCompile Include="..\xegame\istringconst.cpp" />
     <ClCompile Include="..\xegame\itemcomponent.cpp" />
     <ClCompile Include="..\xegame\rendercomponent.cpp" />
     <ClCompile Include="..\xegame\scene.cpp" />
@@ -219,6 +220,7 @@
     <ClInclude Include="..\scenes\titlescene.h" />
     <ClInclude Include="..\scenes\worldgenscene.h" />
     <ClInclude Include="..\script\battlemechanics.h" />
+    <ClInclude Include="..\script\corescript.h" />
     <ClInclude Include="..\script\itemscript.h" />
     <ClInclude Include="..\script\plantscript.h" />
     <ClInclude Include="..\script\procedural.h" />
@@ -239,9 +241,9 @@
     <ClInclude Include="..\xegame\chitevent.h" />
     <ClInclude Include="..\xegame\component.h" />
     <ClInclude Include="..\xegame\componentfactory.h" />
+    <ClInclude Include="..\xegame\cticker.h" />
     <ClInclude Include="..\xegame\game.h" />
-    <ClInclude Include="..\xegame\inventorycomponent.h" />
-    <ClInclude Include="..\xegame\itembasecomponent.h" />
+    <ClInclude Include="..\xegame\istringconst.h" />
     <ClInclude Include="..\xegame\itemcomponent.h" />
     <ClInclude Include="..\xegame\rendercomponent.h" />
     <ClInclude Include="..\xegame\scene.h" />

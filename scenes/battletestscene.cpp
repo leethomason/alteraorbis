@@ -28,7 +28,6 @@
 
 #include "../xegame/chit.h"
 #include "../xegame/rendercomponent.h"
-#include "../xegame/inventorycomponent.h"
 #include "../xegame/itemcomponent.h"
 
 #include "../engine/engine.h"
@@ -219,7 +218,7 @@ void BattleTestScene::LoadMap()
 	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase(), map );	
 	engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
 	engine->SetGlow( true );
-	chitBag.SetEngine( engine );
+	chitBag.SetContext( engine, map );
 
 	for ( int i=0; i<blocks.Size(); ++i ) {
 		Chit* chit = chitBag.NewChit();
@@ -244,7 +243,7 @@ void BattleTestScene::LoadMap()
 		chit->Add( msc );
 		chit->Add( new RenderComponent( engine, "plant1.3" ));
 		chit->Add( new ItemComponent( engine, treeItem ));
-		chit->Add( new HealthComponent());
+		chit->Add( new HealthComponent( engine ));
 	}
 
 	Vector2I unit = { 2, 16 };
@@ -279,9 +278,11 @@ void BattleTestScene::GoScene()
 	b.Set( 0, 0, (float)map->Width(), (float)map->Height() );
 
 	// Remove everything that is currently on the board that is some sort of character.
-	chitBag.QuerySpatialHash( &chitArr, b, 0, GameItem::CHARACTER );
+	chitBag.QuerySpatialHash( &chitArr, b, 0, 0 );
 	for( int i=0; i<chitArr.Size(); ++i ) {
-		chitBag.DeleteChit( chitArr[i] );
+		if ( chitArr[i]->GetMoveComponent() ) {
+			chitBag.DeleteChit( chitArr[i] );
+		}
 	}
 
 	static const int LEVEL[4] = { 0, 2, 4, 8 };
@@ -297,21 +298,25 @@ void BattleTestScene::GoScene()
 	int rightLevel   = LEVEL[ ButtonDownID( RIGHT_LEVEL ) - LEVEL_0  ];
 
 	for( int i=0; i<leftCount; ++i ) {
-		CreateChit( waypoints[LEFT][i], leftMoB, leftWeapon, LEFT, leftLevel );
+		Chit* c = CreateChit( waypoints[LEFT][i], leftMoB, leftWeapon, LEFT_TEAM, leftLevel );
+		if ( i==0 ) {
+			GET_COMPONENT( c, AIComponent )->EnableDebug( true );
+		}
+
 	}
 	for( int i=0; i<rightCount; ++i ) {
-		CreateChit( waypoints[rightLoc][i], rightMoB, rightWeapon, rightLoc, rightLevel );
+		CreateChit( waypoints[rightLoc][i], rightMoB, rightWeapon, RIGHT_TEAM, rightLevel );
 	}
 
 	// Trigger the AI to do something.
 	for( int i=LEFT; i<=RIGHT; ++i ) {
-		ChitEvent event( ChitEvent::AWARENESS, b, GameItem::CHARACTER );
+		ChitEvent event( ChitEvent::AWARENESS, b, 0 );
 		chitBag.QueueEvent( event );
 	}
 }
 
 		
-void BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int team, int level )
+Chit* BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int team, int level )
 {
 	const char* asset = "humanFemale";
 	switch ( type ) {
@@ -351,11 +356,10 @@ void BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int 
 	item.primaryTeam = team;
 	item.stats.SetExpFromLevel( level );
 	item.InitState();
-	chit->Add( new ItemComponent( engine, item ));
-
-	chit->Add( new HealthComponent());
-	InventoryComponent* inv = new InventoryComponent( engine );
+	ItemComponent* inv = new ItemComponent( engine, item );
 	chit->Add( inv );
+
+	chit->Add( new HealthComponent( engine ));
 
 	chit->GetSpatialComponent()->SetPosYRot( (float)p.x+0.5f, 0, (float)p.y+0.5f, (float)random.Rand( 360 ) );
 
@@ -366,10 +370,10 @@ void BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int 
 	if ( type == HUMAN ) {
 		Color4F tangerine = game->GetPalette()->Get4F( PAL_TANGERINE*2, PAL_TANGERINE );
 		Color4F blue      = game->GetPalette()->Get4F( PAL_BLUE*2, PAL_BLUE );
-		if ( team == RIGHT ) {
+		if ( team == RIGHT_TEAM ) {
 			chit->GetRenderComponent()->SetColor( IString(), tangerine.ToVector() );
 		}
-		if ( team == LEFT ) {
+		if ( team == LEFT_TEAM ) {
 			chit->GetRenderComponent()->SetColor( IString(), blue.ToVector() );
 		}
 
@@ -408,6 +412,7 @@ void BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int 
 			inv->AddToInventory( gi, true );
 		}
 	}
+	return chit;
 }
 
 
@@ -518,7 +523,7 @@ void BattleTestScene::DoTick( U32 deltaTime )
 		Rectangle2F b;
 		b.Set( 0, 0, (float)map->Width(), (float)map->Height() );
 
-		chitBag.QuerySpatialHash( &chitArr, b, 0, GameItem::CHARACTER );
+		chitBag.QuerySpatialHash( &chitArr, b, 0, 0 );
 		for( int i=0; i<chitArr.Size(); ++i ) {
 			Chit* c = chitArr[i];
 
@@ -529,8 +534,8 @@ void BattleTestScene::DoTick( U32 deltaTime )
 			}
 		}
 		if ( !aware ) {
-			ChitEvent event( ChitEvent::AWARENESS, b, GameItem::CHARACTER );
-			event.team = LEFT;
+			ChitEvent event( ChitEvent::AWARENESS, b, 0 );
+			event.team = LEFT_TEAM;
 			chitBag.QueueEvent( event );
 		}
 	}

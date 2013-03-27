@@ -96,9 +96,6 @@ static const float SKILL_NORMALIZE = 0.1f;	// skill of 10 is a multiple 1.0
 static const float LEVEL_BONUS     = 0.5f;
 
 
-float AbilityCurve( float yAt0, float yAt1, float yAt16, float yAt32, float x );
-
-
 class GameStat
 {
 public:
@@ -180,12 +177,7 @@ private:
 class IWeaponItem 
 {
 public:
-	virtual bool Ready() const = 0;
-	virtual bool Use() = 0;
 	virtual GameItem* GetItem() = 0;
-	virtual bool Reload() = 0;
-	virtual bool CanReload() const = 0;
-	virtual bool Reloading() const = 0;
 };
 
 class IMeleeWeaponItem : virtual public IWeaponItem
@@ -201,6 +193,7 @@ public:
 class IShield
 {
 public:
+	virtual GameItem* GetItem() = 0;
 };
 
 
@@ -237,26 +230,14 @@ public:
 	const char* Desc() const			{ return desc.c_str(); }
 	const char* ResourceName() const	{ return resource.c_str(); }
 
-	int AttachmentFlags() const			{ return flags & (HELD|HARDPOINT); }
-
 	enum {
+		//CHARACTER		= (1<<0),
+
 		// Type(s) of the item
-		CHARACTER			= (1),
 		MELEE_WEAPON		= (1<<1),
 		RANGED_WEAPON		= (1<<2),
 
-		// How items are equipped. These 2 flags are much clearer as the descriptive values below.
-		HELD				= (1<<3),
-		HARDPOINT			= (1<<4),
-		PACK				= (1<<5),	// in inventory; not carried or activated
-
-		// ALL weapons have to be at hardpoints, for effect rendering if nothing else.
-		// Also the current weapons are scanned from a fixed array of hardpoints.
-		// May be able to pull out the "FREE" case.
-		INTRINSIC_AT_HARDPOINT	= HARDPOINT,		//	a hand. built in, but located at a hardpoint
-		INTRINSIC_FREE			= 0,				//  pincer. built in, no hardpoint
-		HELD_AT_HARDPOINT		= HARDPOINT | HELD,	// 	sword, shield. at hardpoint, overrides built in.
-		HELD_FREE				= HELD,				//	amulet, ring. held, put not at a hardpoint, and not rendered
+		INTRINSIC			= (1<<3),				// built in item: pinters for example. Always "held".
 
 		IMMUNE_FIRE			= (1<<6),				// doesn't burn *at all*
 		FLAMMABLE			= (1<<7),				// burns until gone (wood)
@@ -264,11 +245,13 @@ public:
 		SHOCKABLE			= (1<<9),
 
 		EFFECT_EXPLOSIVE	= (1<<10),
-		EFFECT_FIRE			= (1<<11),
+		EFFECT_FIRE			= (1<<11),	
 		EFFECT_SHOCK		= (1<<12),
 		EFFECT_MASK			= EFFECT_EXPLOSIVE | EFFECT_FIRE | EFFECT_SHOCK,
 
 		RENDER_TRAIL		= (1<<13),				// render a bolt with a 'smoketrail' vs. regular bolt
+
+		INDESTRUCTABLE		= (1<<14),
 	};
 
 	// ------ description ------
@@ -292,6 +275,7 @@ public:
 	GameStat stats;
 
 	// ------- current --------
+	bool	isHeld;			// if true, a held item is "in hand", else it is in the pack.
 	float	hp;				// current hp for this item
 	int		cooldownTime;	// counting UP to ready state
 	int		reloadTime;		// counting UP to ready state
@@ -313,7 +297,7 @@ public:
 	};
 	grinliz::CDynArray<KeyValue>	keyValues;
 
-	bool GetValue( const char* name, double* value ) { 
+	bool GetValue( const char* name, double* value ) const { 
 		for( int i=0; i<keyValues.Size(); ++i ) {
 			if ( keyValues[i].key == name ) {
 				*value = keyValues[i].value;
@@ -322,7 +306,7 @@ public:
 		}
 		return false;
 	}
-	bool GetValue( const char* name, float* value ) {
+	bool GetValue( const char* name, float* value ) const {
 		double d;
 		if ( GetValue( name, &d )) {
 			*value = (float)d;
@@ -330,13 +314,20 @@ public:
 		}
 		return false;
 	}
-	bool GetValue( const char* name, int* value ) {
+	bool GetValue( const char* name, int* value ) const {
 		double d;
 		if ( GetValue( name, &d )) {
 			*value = (int)d;
 			return true;
 		}
 		return false;
+	}
+
+	float CalcBoltSpeed() const {
+		static const float SPEED = 10.0f;
+		float speed = 1.0f;
+		GetValue( "speed", &speed );
+		return SPEED * speed;
 	}
 
 	Chit* parentChit;		// only set when attached to a Component
@@ -365,6 +356,7 @@ public:
 			rounds			= rhs->rounds;
 			stats			= rhs->stats;
 
+			isHeld			= rhs->isHeld;
 			hp				= rhs->hp;
 			accruedFire		= rhs->accruedFire;
 			accruedShock	= rhs->accruedShock;
@@ -382,7 +374,7 @@ public:
 			key  = grinliz::IString();
 			resource = grinliz::IString();
 			flags = 0;
-			hardpoint = NO_HARDPOINT;
+			hardpoint  = 0;
 			procedural = PROCEDURAL_NONE;
 			mass = 1;
 			hpRegen = 0;
@@ -391,14 +383,15 @@ public:
 			rangedDamage = 0;
 			absorbsDamage = 0;
 			cooldown = 1000;
-			cooldownTime = cooldown;
+			cooldownTime = 0;
 			reload = 2000;
-			reloadTime = reload;
+			reloadTime = 0;
 			clipCap = 0;			// default to no clip and unlimited ammo
 			rounds = clipCap;
 			stats.Init();
 			keyValues.Clear();
 
+			isHeld = false;
 			hp = TotalHP();
 			accruedFire = 0;
 			accruedShock = 0;
@@ -411,10 +404,13 @@ public:
 		hp = TotalHP();
 		accruedFire = 0;
 		accruedShock = 0;
-		cooldownTime = cooldown;
-		reloadTime = reload;
+		cooldownTime = 0;
+		reloadTime = 0;
 		rounds = clipCap;
 	}
+
+	bool Active() const		{ return isHeld || (flags & INTRINSIC); }
+	bool Intrinsic() const	{ return (flags & INTRINSIC) != 0; }
 
 	virtual IMeleeWeaponItem*	ToMeleeWeapon()		{ return (flags & MELEE_WEAPON) ? this : 0; }
 	virtual IRangedWeaponItem*	ToRangedWeapon()	{ return (flags & RANGED_WEAPON) ? this : 0; }
@@ -427,17 +423,20 @@ public:
 	int Effects() const { return flags & EFFECT_MASK; }
 	int DoTick( U32 delta, U32 since );
 	
-	// 'Ready' and 'Rounds' are orthogonal. You are Ready()
-	// if the cooldown is passed. You HasRound() if the
-	// weapon has (possibly unlimited) rounds.
-	virtual bool Ready() const {
-		return cooldownTime >= cooldown;
-	}
+	// States:
+	//		Ready
 
-	virtual bool Use();
-	virtual bool Reload();
-	virtual bool CanReload() const { return Ready() && !Reloading() && (rounds < clipCap); }
-	virtual bool Reloading() const { return clipCap > 0 && reloadTime < reload; }
+	//		Cooldown (just used)
+	//		Reloading
+	//		Out of rounds
+	bool CanUse()					{ return !CoolingDown() && !Reloading() && HasRound(); }
+	bool Use();
+
+	bool CoolingDown() const		{ return cooldownTime > 0; }
+
+	bool Reloading() const			{ return clipCap > 0 && reloadTime > 0; }
+	bool Reload();
+	bool CanReload() const			{ return !CoolingDown() && !Reloading() && (rounds < clipCap); }
 
 	int Rounds() const { return rounds; }
 	int ClipCap() const { return clipCap; }
@@ -457,6 +456,13 @@ public:
 		f = grinliz::Clamp( f, 0.0f, 1.0f ); // FIXME: hack in hp calc
 		return f;
 	} 
+
+	float ReloadFraction() const {
+		if ( Reloading() ) {
+			return (float)reloadTime / (float)reload;
+		}
+		return 1.0f;
+	}
 
 	float RoundsFraction() const {
 		if ( clipCap ) {
