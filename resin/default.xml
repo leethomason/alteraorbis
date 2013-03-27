@@ -39,6 +39,10 @@
   <texture filename="emchartest.png" filename2="emchartest_em.png" emissive="true"/>
   <texture assetName="map_land" filename="map_land2.png"   />
   <texture filename="map_water.png"  filename2="map_water_em.png"  emissive="true"/>
+  <texture filename="map_grid.png" />
+  <texture filename="map_core.png" />
+  <texture filename="map_port.png" />
+  
   <texture filename="procedural.png" />
   <texture filename="ring.png" maxSize="1024" emissive="true"/>"
 

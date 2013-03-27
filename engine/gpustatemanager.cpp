@@ -610,6 +610,8 @@ void GPUState::Draw( const GPUStream& stream, const GPUStreamData& data, int nIn
 	trianglesDrawn += instances * nIndex / 3;
 	++drawCalls;
 
+	//glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+
 	if ( data.indexPtr ) {	
 		GLASSERT( data.indexBuffer == 0 );
 		if ( data.vertexBuffer ) {

@@ -62,6 +62,27 @@ public:
 	}
 
 	bool IsLand() const			{ return isLand != 0; }
+	bool IsPort() const			{ return isPort != 0; }
+	bool IsCore() const			{ return isCore != 0; }
+	bool IsGrid() const			{ return isGrid != 0; }
+
+	enum {
+		WATER,
+		GRID,
+		PORT,
+		CORE,
+		LAND,
+		NUM_LAYERS
+	};
+	int Layer() const			{ 
+		int layer = WATER;
+		if ( isGrid ) layer = GRID;
+		else if ( isPort ) layer = PORT;
+		else if ( isCore ) layer = CORE;
+		else if ( isLand ) layer = LAND;
+		return layer;
+	}
+
 	void SetLand( bool land )	{ if ( land ) SetLand(); else SetWater(); }
 
 	void SetGrid()				{ isLand = 1; isBlocked = 1; isGrid = 1; }

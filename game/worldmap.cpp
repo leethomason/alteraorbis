@@ -61,7 +61,10 @@ WorldMap::WorldMap( int width, int height ) : Map( width, height )
 	slowTick = SLOW_TICK;
 
 	texture[0] = TextureManager::Instance()->GetTexture( "map_water" );
-	texture[1] = TextureManager::Instance()->GetTexture( "map_land" );
+	texture[1] = TextureManager::Instance()->GetTexture( "map_grid" );
+	texture[2] = TextureManager::Instance()->GetTexture( "map_port" );
+	texture[3] = TextureManager::Instance()->GetTexture( "map_core" );
+	texture[4] = TextureManager::Instance()->GetTexture( "map_land" );
 
 	debugRegionOverlay = false;
 }
@@ -75,6 +78,15 @@ WorldMap::~WorldMap()
 	delete [] grid;
 	delete pather;
 	delete worldInfo;
+}
+
+
+void WorldMap::FreeVBOs()
+{
+	for( int i=0; i<WorldGrid::NUM_LAYERS; ++i ) {
+		vertexVBO[i].Destroy();
+		indexVBO[i].Destroy();
+	}
 }
 
 
@@ -349,49 +361,128 @@ void WorldMap::MapInit( const U8* land )
 }
 
 
+bool WorldMap::Similar( const grinliz::Rectangle2I& r, int layer, const BitArray<MAX_MAP_SIZE, MAX_MAP_SIZE, 1 >& setmap )
+{
+	if ( !setmap.IsRectEmpty( r ) ) {
+		return false;
+	}
+
+	for( int y=r.min.y; y<=r.max.y; ++y ) {
+		for( int x=r.min.x; x<=r.max.x; ++x ) {
+			const WorldGrid& wg = grid[INDEX(x,y)];
+			if ( wg.Layer() != layer )
+				return false;
+		}
+	}
+	return true;
+}
+
+
+void WorldMap::PushQuad( int layer, int x, int y, int w, int h, CDynArray<PTVertex>* vertex, CDynArray<U16>* index ) 
+{
+	U16* pi = index->PushArr( 6 );
+	int base = vertex->Size();
+
+	pi[0] = base;
+	pi[1] = base+3;
+	pi[2] = base+2;
+	pi[3] = base;
+	pi[4] = base+1;
+	pi[5] = base+3;
+
+	PTVertex* pv = vertex->PushArr( 4 );
+	pv[0].pos.Set( (float)x, 0, (float)y );
+	pv[0].tex.Set( 0, 0 );
+
+	pv[1].pos.Set( (float)x, 0, (float)(y+h) );
+	pv[1].tex.Set( 0, (float)h );
+
+	pv[2].pos.Set( (float)(x+w), 0, (float)(y) );
+	pv[2].tex.Set( (float)w, 0 );
+
+	pv[3].pos.Set( (float)(x+w), 0, (float)(y+h) );
+	pv[3].tex.Set( (float)w, (float)h );
+}
+
+
+// Wow: Tessallate: land:87720,131580 water:73236,109854
+// Filtering:
+// Tessallate:      land:76504,114756 water:60944, 91416
+// Growing v/h:
+// Tessallate:		land:46448, 69672 water:39296, 58944
+// NCORES 100->60
+// Tessallate:		land:41056, 61584 water:34464, 51696
+// Still 2/3 the limit. But seems reasonably stable.
+//
 void WorldMap::Tessellate()
 {
-	for( int i=0; i<LOWER_TYPES; ++i ) {
-		vertex[i].Clear();
-		index[i].Clear();
+	CDynArray<PTVertex>*	vertex[WorldGrid::NUM_LAYERS];
+	CDynArray<U16>*			index[WorldGrid::NUM_LAYERS];
+	for( int i=0; i<WorldGrid::NUM_LAYERS; ++i ) {
+		vertex[i] = new CDynArray<PTVertex>();
+		index[i]  = new CDynArray<U16>();
 	}
-	// Could be much fancier: instead of just strips,
-	// expand into 2 directions.
-	//
-	// 1   3
-	// 0   2
+
+	BitArray<MAX_MAP_SIZE, MAX_MAP_SIZE, 1 >* setmap = new BitArray<MAX_MAP_SIZE, MAX_MAP_SIZE, 1>();
+	Rectangle2I r, r0, r1;
+
 	for( int j=0; j<height; ++j ) {
-		int i=0;
-		while ( i < width ) {
-			bool layer = grid[INDEX(i,j)].IsLand();
+		for( int i=0; i<width; ++i ) {
+			if ( !setmap->IsSet( i, j ) ) {
+				int x = i;	int y = j; int w = 1; int h = 1;
+				int layer = grid[INDEX(i,j)].Layer();
 
-			U16* pi = index[layer].PushArr( 6 );
-			int base = vertex[layer].Size();
-			pi[0] = base;
-			pi[1] = base+3;
-			pi[2] = base+2;
-			pi[3] = base;
-			pi[4] = base+1;
-			pi[5] = base+3;
+				// Try to grow square.
+				while( x+w < width && y+h < height ) {
+					r0.Set( x+w, y, x+w, y+h );
+					r1.Set( x, y+h, x+w, y+h );
 
-			PTVertex* pv = vertex[layer].PushArr( 2 );
-			pv[0].pos.Set( (float)i, 0, (float)j );
-			pv[0].tex.Set( 0, 0 );
-			pv[1].pos.Set( (float)i, 0, (float)(j+1) );
-			pv[1].tex.Set( 0, 1 );
-
-			int w = 1;
-			++i;
-			while( i<width && grid[INDEX(i,j)].IsLand() == layer ) {
-				++i;
-				++w;
+					if ( Similar( r0, layer, *setmap ) && Similar( r1, layer, *setmap ) ) {
+						++w;
+						++h;
+					}
+					else {
+						break;
+					}
+				}
+				// Grow to the right.
+				while( x+w < width ) {
+					r0.Set( x+w, y, x+w, y+h-1 );
+					if ( Similar( r0, layer, *setmap ) ) {
+						++w;
+					}
+					else {
+						break;
+					}
+				}
+				// Grow down.
+				while( y+h < height ) {
+					r0.Set( x, y+h, x+w-1, y+h );
+					if ( Similar( r0, layer, *setmap ) ) {
+						++h;
+					}
+					else {
+						break;
+					}
+				}
+				r.Set( x, y, x+w-1, y+h-1 );
+				setmap->SetRect( r );
+				PushQuad( layer, x, y, w, h, vertex[layer], index[layer] ); 
 			}
-			pv = vertex[layer].PushArr( 2 );
-			pv[0].pos.Set( (float)i, 0, (float)j );
-			pv[0].tex.Set( (float)w, 0 );
-			pv[1].pos.Set( (float)i, 0, (float)(j+1) );
-			pv[1].tex.Set( (float)w, 1 );
 		}
+	}
+	delete setmap;
+
+	FreeVBOs();
+
+	GLOUTPUT(( "Tessallate: land:%d,%d water:%d,%d\n", vertex[WorldGrid::LAND]->Size(),  index[WorldGrid::LAND]->Size(),
+													   vertex[WorldGrid::WATER]->Size(), index[WorldGrid::WATER]->Size() ));
+	for( int i=0; i<WorldGrid::NUM_LAYERS; ++i ) {
+		vertexVBO[i] = GPUVertexBuffer::Create( vertex[i]->Mem(), sizeof(PTVertex), vertex[i]->Size() );
+		indexVBO[i]  = GPUIndexBuffer::Create( index[i]->Mem(), index[i]->Size() );
+		nIndex[i] = index[i]->Size();
+		delete vertex[i];
+		delete index[i];
 	}
 }
 
@@ -1387,12 +1478,13 @@ void WorldMap::DrawZones()
 
 void WorldMap::Submit( GPUState* shader, bool emissiveOnly )
 {
-	for( int i=0; i<LOWER_TYPES; ++i ) {
+	for( int i=0; i<WorldGrid::NUM_LAYERS; ++i ) {
 		if ( emissiveOnly && !texture[i]->Emissive() )
 			continue;
-		if ( vertex[i].Size() > 0 ) {
-			GPUStream stream( vertex[i][0] );
-			shader->Draw( stream, texture[i], vertex[i].Mem(), index[i].Size(), index[i].Mem() );
+		if ( vertexVBO[i].IsValid() && indexVBO[i].IsValid() ) {
+			PTVertex pt;
+			GPUStream stream( pt );
+			shader->Draw( stream, texture[i], vertexVBO[i], nIndex[i], indexVBO[i] );
 		}
 	}
 }

@@ -229,6 +229,9 @@ private:
 
 	void Init( int w, int h );
 	void Tessellate();
+	void FreeVBOs();
+
+	bool Similar( const grinliz::Rectangle2I& r, int layer, const grinliz::BitArray<MAX_MAP_SIZE, MAX_MAP_SIZE, 1 >& setmap );
 	void CalcZone( int x, int y );
 	void DeleteAllRegions();
 
@@ -291,6 +294,7 @@ private:
 		return grid+v;
 	}
 
+	void PushQuad( int layer, int x, int y, int w, int h, grinliz::CDynArray<PTVertex>* vertex, grinliz::CDynArray<U16>* index );
 	WorldGrid*					grid;
 	Engine*						engine;
 	int							slowTick;
@@ -310,12 +314,10 @@ private:
 	};
 	grinliz::HashTable< grinliz::Vector2I, Model*, CompValue > voxels;
 
-	enum {
-		LOWER_TYPES = 2		// land or water
-	};
-	Texture*						texture[LOWER_TYPES];
-	grinliz::CDynArray<PTVertex>	vertex[LOWER_TYPES];
-	grinliz::CDynArray<U16>			index[LOWER_TYPES];
+	GPUVertexBuffer					vertexVBO[WorldGrid::NUM_LAYERS];
+	GPUIndexBuffer					indexVBO[WorldGrid::NUM_LAYERS];
+	Texture*						texture[WorldGrid::NUM_LAYERS];
+	int								nIndex[WorldGrid::NUM_LAYERS];
 
 	grinliz::CDynArray< grinliz::Vector2I > waterfalls;
 	grinliz::CDynArray< grinliz::Vector2I > magmaGrids;

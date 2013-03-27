@@ -256,9 +256,7 @@ void Sim::DoTick( U32 delta )
 		}
 	}
 
-//	if ( secondTick ) {
-		CreatePlant( random.Rand(worldMap->Width()), random.Rand(worldMap->Height()), -1 );
-//	}
+	CreatePlant( random.Rand(worldMap->Width()), random.Rand(worldMap->Height()), -1 );
 }
 
 

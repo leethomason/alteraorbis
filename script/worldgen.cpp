@@ -489,7 +489,10 @@ void WorldGen::ProcessSectors( U32 seed, SectorData* sectorData )
 	// Sort by area.
 	// Choose N and fill in for cores.
 
-	static const int NCORES = 100;
+	// This impacts the look of the world,
+	// complexity, run cost. Change, but
+	// change with caution.
+	static const int NCORES = 60;
 	CDynArray<SectorData*> sectors;
 
 	for( int j=0; j<NUM_SECTORS; ++j ) {
@@ -513,6 +516,23 @@ void WorldGen::ProcessSectors( U32 seed, SectorData* sectorData )
 }
 
 
+void WorldGen::Filter( const Rectangle2I& bounds )
+{
+	for( int y=bounds.min.y; y<=bounds.max.y; ++y ) {
+		for( int x=bounds.min.x; x<=bounds.max.x; ++x ) {
+			if (    land[y*SIZE+x] == WATER 
+				 && land[(y-1)*SIZE+x] == LAND0
+				 && land[(y+1)*SIZE+x] == LAND0
+				 && land[y*SIZE+(x+1)] == LAND0
+				 && land[y*SIZE+(x-1)] == LAND0 )
+			{
+				land[y*SIZE+x] = LAND0;
+			}
+		}
+	}
+}
+
+
 void WorldGen::GenerateTerrain( U32 seed, SectorData* s )
 {
 	static const int AREA = INNER_SECTOR_SIZE*INNER_SECTOR_SIZE / 2;
@@ -522,6 +542,7 @@ void WorldGen::GenerateTerrain( U32 seed, SectorData* s )
 	// Place core
 	Vector2I c = {	s->x + SECTOR_SIZE/2 - 10 + random.Dice( 3, 6 ),
 					s->y + SECTOR_SIZE/2 - 10 + random.Dice( 3, 6 )  };
+	s->core = c;
 
 	Rectangle2I r;
 	r.max = r.min = c;
@@ -536,6 +557,9 @@ void WorldGen::GenerateTerrain( U32 seed, SectorData* s )
 		DepositLand( s, seed, Max( AREA-a, (int)INNER_SECTOR_SIZE ));
 		a = CalcSectorAreaFromFill( s, c, &portsColored );
 	}
+	// Filter 1x1 zones.
+	Filter( s->InnerBounds() );
+
 	s->area = CalcSectorArea( s->x/SECTOR_SIZE, s->y/SECTOR_SIZE );
 }
 
