@@ -1,4 +1,5 @@
 x control key is terrible...sometimes.
+- remove 'inUse' flag
 - explosion is in the wrong direction. Units walk through explosions?? (Balrog vs. Human.)
 - does fire affect plants??
 - health is awkward: keeps copy of HP (oops). move hp to health component? (TotalHP() on item?)
@@ -7,9 +8,9 @@ x control key is terrible...sometimes.
 
 - game
 	- Intermission: regions
-		- generate regions
-		- generate roads
-		- burn to map
+		x generate regions
+		x generate roads
+		x burn to map
 		- update zones
 		- update pathfinder
 		- overnight test
@@ -60,7 +61,7 @@ x control key is terrible...sometimes.
 d GT bug: reconsider auto-mip. review texture upload. 
 - bone filter in reverse. more efficient and useful.
 - put metadata in model (authoring  time)
-- rationalize hardpoints: array index or flag? lookt at RenderComponent
+x rationalize hardpoints: array index or flag? lookt at RenderComponent
 x mantis trigger broken
 - switch to ImageMagick for texture scaling
 - credits scene

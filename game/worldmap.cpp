@@ -175,13 +175,17 @@ void WorldMap::Load( const char* pathToDAT )
 		
 		Tessellate();
 
+		// Set up the rocks.
 		for( int j=0; j<height; ++j ) {
 			for( int i=0; i<width; ++i ) {
 				int index = INDEX( i, j );
-				// Clear the block, which is serialized, because the SetRock() will set it.
-				if ( grid[index].IsBlocked() )
-					grid[index].SetBlocked( false );
-				SetRock( i, j, -2, 0, grid[index].Magma() );
+				const WorldGrid& wg = grid[index];
+				if ( wg.RockHeight() ) {
+					// Clear the block, which is serialized, because the SetRock() will set it.
+					if ( grid[index].IsBlocked() )
+						grid[index].SetBlocked( false );
+					SetRock( i, j, -2, 0, grid[index].Magma() );
+				}
 			}
 		}
 	}
