@@ -20,7 +20,7 @@ x control key is terrible...sometimes.
 		- grid motion
 		- herding across grids
 			- herding notification
-		- fix inUse. wow. fix inUse. Then only isBlocked will be an aweful hack.
+		- fix inUse. wow. fix inUse. Then only isBlocked will be an awful hack.
 		- test fast mode
 		- textures
 			- grid

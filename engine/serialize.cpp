@@ -21,6 +21,7 @@
 #include "../grinliz/glstringutil.h"
 #include "model.h"
 #include "../shared/dbhelper.h"
+#include "../xegame/game.h"
 
 using namespace grinliz;
 using namespace tinyxml2;
@@ -144,6 +145,18 @@ void LoadColorBase( const tinyxml2::XMLElement* element, float* r, float* g, flo
 		if ( g ) *g = gray;
 		if ( b ) *b = gray;
 		if ( a ) *a = 1.0f;
+	}
+	else if ( element->Attribute( "palx" ) || element->Attribute( "paly" )) {
+		int palx = 0;
+		int paly = 0;
+		element->QueryAttribute( "palx", &palx );
+		element->QueryAttribute( "paly", &paly );
+		const Game::Palette* palette = Game::GetMainPalette();
+		Color4F c = palette->Get4F( palx, paly );
+		*r = c.r;
+		*g = c.g;
+		*b = c.b;
+		*a = 1;
 	}
 	else {
 		if ( r ) element->QueryFloatAttribute( "red", r );

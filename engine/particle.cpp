@@ -28,25 +28,6 @@
 
 using namespace grinliz;
 
-#if 0
-/*static*/ void ParticleSystem::Create()
-{
-	GLASSERT( instance == 0 );
-	instance = new ParticleSystem();
-}
-
-
-/*static*/ void ParticleSystem::Destroy()
-{
-	GLASSERT( instance );
-	delete instance;
-	instance = 0;
-}
-
-
-ParticleSystem* ParticleSystem::instance = 0;
-#endif
-
 ParticleSystem::ParticleSystem() : texture( 0 ), time( 0 ), nParticles( 0 )
 {
 	for( int i=0; i<MAX_PARTICLES; ++i ) {
