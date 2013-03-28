@@ -433,6 +433,25 @@ Rectangle2I SectorData::InnerBounds() const {
 	return r;
 }
 
+
+/*static*/ Vector2I SectorData::SectorID( float fx, float fy )
+{
+	int x = (int)fx;
+	int y = (int)fy;
+	Vector2I v = { x/SECTOR_SIZE, y/SECTOR_SIZE };
+	return v;
+}
+
+
+/*static*/ Rectangle2I SectorData::SectorBounds( float fx, float fy )
+{
+	Vector2I s = SectorID( fx, fy );
+	Rectangle2I r;
+	r.Set( s.x*SECTOR_SIZE, s.y*SECTOR_SIZE, (s.x+1)*SECTOR_SIZE-1, (s.y+1)*SECTOR_SIZE-1 );
+	return r;
+}
+
+
 Rectangle2I SectorData::GetPortLoc( int port ) const
 {
 	Rectangle2I r;

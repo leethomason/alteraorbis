@@ -818,7 +818,12 @@ void MicroPather::GetCacheData( CacheData* data )
 
 		data->hit = pathCache->hit;
 		data->miss = pathCache->miss;
-		data->hitFraction = (float)( (double)(data->hit) / (double)(data->hit + data->miss) );
+		if ( data->hit + data->miss ) {
+			data->hitFraction = (float)( (double)(data->hit) / (double)(data->hit + data->miss) );
+		}
+		else {
+			data->hitFraction = 0;
+		}
 	}
 }
 

@@ -11,8 +11,21 @@ x control key is terrible...sometimes.
 		x generate regions
 		x generate roads
 		x burn to map
-		- update zones
-		- update pathfinder
+		x update zones
+		x update pathfinder. limit to sectors.
+		x limit AI
+			x detection and awareness to sector bounds
+		x fix cores to work with sectors
+		- limit bolts / collisions
+		- grid motion
+		- herding across grids
+			- herding notification
+		- fix inUse. wow. fix inUse. Then only isBlocked will be an aweful hack.
+		- test fast mode
+		- textures
+			- grid
+			- port
+		- load existing world
 		- overnight test
 	- Flora 2
 		- weapon toggle / selection
@@ -55,6 +68,7 @@ x control key is terrible...sometimes.
 
 	- serialization
 
+- add target portrait
 - faces are using too much memory, or too low res...hmmm. Should really use texture packer and store a lookup.
 - handle device loss in live preview
 - particles aren't additive correctly
@@ -86,7 +100,8 @@ x shadows should be part of space-tree bounds
 - Cyclops
     - http://grinninglizard.com/altera/forum/index.php?topic=8.msg172#msg172
 	- replace balrog
-	- model
+	- model.
+		- double size of arms
 	- animation
 	- variant: fire
 	- variant: shock
@@ -127,6 +142,10 @@ x shadows should be part of space-tree bounds
 - effects
 	- environment: water contains fire, spreads shock
 	- down chain: a fire creature should catch things on fire that it holds
+
+V2 ideas:
+- content popups when you are near a kiosk (email from GT)
+
 
 ----------- FIXED -------------
 

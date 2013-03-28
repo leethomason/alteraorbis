@@ -51,7 +51,6 @@ public:
 	void SetMode( int mode );
 
 private:
-	bool justLoaded;
 	int mode;
 	WorldMap* worldMap;
 };

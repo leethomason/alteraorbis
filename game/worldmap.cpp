@@ -59,6 +59,7 @@ WorldMap::WorldMap( int width, int height ) : Map( width, height )
 	worldInfo = new WorldInfo();
 	Init( width, height );
 	slowTick = SLOW_TICK;
+	usingSectors = false;
 
 	texture[0] = TextureManager::Instance()->GetTexture( "map_water" );
 	texture[1] = TextureManager::Instance()->GetTexture( "map_grid" );
@@ -91,6 +92,12 @@ void WorldMap::FreeVBOs()
 
 
 SectorData* WorldMap::GetSectorDataMutable()
+{
+	return worldInfo->sectorData;
+}
+
+
+const SectorData* WorldMap::GetSectorData() const
 {
 	return worldInfo->sectorData;
 }
@@ -174,18 +181,16 @@ void WorldMap::Load( const char* pathToDAT )
 		fclose( fp );
 		
 		Tessellate();
-
+		usingSectors = true;
+		if ( pather ) {
+			pather->Reset();
+		}
 		// Set up the rocks.
 		for( int j=0; j<height; ++j ) {
 			for( int i=0; i<width; ++i ) {
 				int index = INDEX( i, j );
 				const WorldGrid& wg = grid[index];
-				if ( wg.RockHeight() ) {
-					// Clear the block, which is serialized, because the SetRock() will set it.
-					if ( grid[index].IsBlocked() )
-						grid[index].SetBlocked( false );
-					SetRock( i, j, -2, 0, grid[index].Magma() );
-				}
+				SetRock( i, j, -2, 0, grid[index].Magma() );
 			}
 		}
 	}
@@ -240,14 +245,6 @@ void WorldMap::Init( int w, int h )
 		AttachEngine( 0 );
 		AttachEngine( savedEngine );
 	}
-
-//	memset( zoneInfo, 0, sizeof(ZoneInfo)*DZONE );
-//	for( int y=0; y<DZONE; ++y ) {
-//		for( int x=0; x<DZONE; ++x ) {
-//			zoneInfo[y*DZONE+x].x = x*ZONE_SIZE;
-//			zoneInfo[y*DZONE+x].y = y*ZONE_SIZE;
-//		}
-//	}
 
 	waterInit.ClearAll();
 	DeleteAllRegions();
@@ -827,10 +824,12 @@ void WorldMap::SetRock( int x, int y, int h, int pool, bool magma )
 		bool isBlocked  = (h>0) || (pool>0);
 
 		if ( !wasBlocked && isBlocked ) {
-			SetBlocked( vec.x, vec.y );
+			if ( !this->IsBlocked( vec.x, vec.y ) )
+				SetBlocked( vec.x, vec.y );
 		}
 		else if ( wasBlocked && !isBlocked ) {
-			ClearBlocked( vec.x, vec.y );
+			if ( this->IsBlocked( vec.x, vec.y ) )
+				ClearBlocked( vec.x, vec.y );
 		}
 	}
 }
@@ -841,6 +840,8 @@ void WorldMap::SetBlocked( const grinliz::Rectangle2I& pos )
 	for( int y=pos.min.y; y<=pos.max.y; ++y ) {
 		for( int x=pos.min.x; x<=pos.max.x; ++x ) {
 			int i = INDEX( x, y );
+			GLASSERT( grid[i].IsGrid() == false );
+			GLASSERT( grid[i].IsPort() == false );
 			GLASSERT( grid[i].IsBlocked() == false );
 			grid[i].SetBlocked( true );
 			zoneInit.Clear( x>>ZONE_SHIFT, y>>ZONE_SHIFT );

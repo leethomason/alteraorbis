@@ -163,12 +163,15 @@ public:
 	// --- Debugging -- //
 	void ShowAdjacentRegions( float x, float y );
 	void ShowRegionPath( float x0, float y0, float x1, float y1 );
+	bool IsShowingRegionOverlay() const { return debugRegionOverlay; }
 	void ShowRegionOverlay( bool over ) { debugRegionOverlay = over; }
 	void PatherCacheHitMiss( micropather::CacheData* data )	{ pather->GetCacheData( data ); }
 	int CalcNumRegions();
 
 	// --- MetaData --- //
 	const WorldInfo& GetWorldInfo()			{ return *worldInfo; }
+	bool UsingSectors() const				{ return usingSectors; }
+	const SectorData* GetSectorData() const;
 	SectorData* GetSectorDataMutable();
 
 	// Find random land on the largest continent
@@ -301,6 +304,7 @@ private:
 
 	WorldInfo*					worldInfo;
 	micropather::MicroPather*	pather;
+	bool						usingSectors;
 	bool						debugRegionOverlay;
 
 	MP_VECTOR< void* >						pathRegions;

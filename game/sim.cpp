@@ -15,6 +15,7 @@
 #include "../script/volcanoscript.h"
 #include "../script/plantscript.h"
 #include "../script/corescript.h"
+#include "../script/worldgen.h"
 
 #include "pathmovecomponent.h"
 #include "debugstatecomponent.h"
@@ -136,27 +137,25 @@ void Sim::CreateCores()
 	GLASSERT( itemDefArr.Size() > 0 );
 	const GameItem* gameItem = itemDefArr[0];
 	const char* asset = gameItem->resource.c_str();
+	const SectorData* sectorDataArr = worldMap->GetSectorData();
 
-	// FIXME: use zones
-	for( int i=0; i<MAX_CORES; ++i ) {
-		int x = random.Rand( worldMap->Width() );
-		int y = random.Rand( worldMap->Height() );
-
-		const WorldGrid& wg = worldMap->GetWorldGrid( x, y );
-		if ( wg.IsLand() && !wg.InUse() && wg.IsPassable() ) {
+	int ncores = 0;
+	for( int i=0; i<NUM_SECTORS*NUM_SECTORS; ++i ) {
+		const SectorData& sd = sectorDataArr[i];
+		if ( sd.HasCore() ) {
 			Chit* chit = chitBag->NewChit();
 
 			MapSpatialComponent* ms = new MapSpatialComponent( worldMap );
-			ms->SetMapPosition( x, y );
+			ms->SetMapPosition( sd.core.x, sd.core.y );
 			ms->SetMode( MapSpatialComponent::BLOCKS_GRID ); 
 			chit->Add( ms );
-			GLASSERT( wg.InUse() );
-
 			chit->Add( new ScriptComponent( new CoreScript( worldMap ), &chitBag->census ));
 			chit->Add( new ItemComponent( engine, *gameItem ));
 			chit->Add( new RenderComponent( engine, asset ));
+			++ncores;
 		}
 	}
+	GLOUTPUT(( "nCores=%d\n", ncores ));
 }
 
 

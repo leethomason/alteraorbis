@@ -410,6 +410,9 @@ void GameScene::HandleHotKey( int mask )
 	if ( mask == GAME_HK_SPACE ) {
 		fastMode = !fastMode;
 	}
+	else if ( mask == GAME_HK_TOGGLE_PATHING ) {
+		sim->GetWorldMap()->ShowRegionOverlay( !sim->GetWorldMap()->IsShowingRegionOverlay() );
+	}
 	else {
 		super::HandleHotKey( mask );
 	}
@@ -552,5 +555,14 @@ void GameScene::DrawDebugText()
 
 	ufoText->Draw( 0, 80,	"Plants type: %d %d %d %d %d %d %d %d stage: %d %d %d %d", 
 									typeCount[0], typeCount[1], typeCount[2], typeCount[3], typeCount[4], typeCount[5], typeCount[6], typeCount[7],
-									stageCount[0], stageCount[1], stageCount[2], stageCount[3] ); 
+									stageCount[0], stageCount[1], stageCount[2], stageCount[3] );
+	micropather::CacheData cacheData;
+	sim->GetWorldMap()->PatherCacheHitMiss( &cacheData );
+	ufoText->Draw( 0, 96, "Pather kb=%d/%d %.2f cache h:m=%d:%d %.2f", 
+						  cacheData.nBytesUsed/1024,
+						  cacheData.nBytesAllocated/1024,
+						  cacheData.memoryFraction,
+						  cacheData.hit,
+						  cacheData.miss,
+						  cacheData.hitFraction );
 }

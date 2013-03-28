@@ -356,6 +356,11 @@ int main( int argc, char **argv )
 					case SDLK_d:
 						GameHotKey( game, GAME_HK_TOGGLE_DEBUG_TEXT );
 						break;
+
+					case SDLK_a:
+						GameHotKey( game, GAME_HK_TOGGLE_PATHING );
+						break;
+
 					default:
 						break;
 				}

@@ -68,6 +68,7 @@ void GameDoTick( void* handle, unsigned int timeInMSec );
 #define GAME_HK_TOGGLE_GLOW				0x0008
 #define GAME_HK_SPACE					0x0010	// general action
 #define GAME_HK_DEBUG_UI				0x0020
+#define GAME_HK_TOGGLE_PATHING			0x0040
 
 void GameHotKey( void* handle, int mask );
 

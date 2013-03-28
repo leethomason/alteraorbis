@@ -40,6 +40,16 @@ public:
 	grinliz::Rectangle2I GetPortLoc( int port ) const;
 	grinliz::Rectangle2I Bounds() const;
 	grinliz::Rectangle2I InnerBounds() const;
+
+	// Get the cx, cy of the sector from an arbitrary coordinate.
+	static grinliz::Vector2I	SectorID( float x, float y );
+	// Get the bounds of the sector from an arbitrary coordinate
+	static grinliz::Rectangle2I	SectorBounds( float x, float y );
+	static grinliz::Rectangle2I InnerSectorBounds( float x, float y ) {
+		grinliz::Rectangle2I r = SectorBounds( x, y );
+		r.Outset( -1 );
+		return r;
+	}
 };
 
 

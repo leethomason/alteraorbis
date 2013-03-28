@@ -21,7 +21,6 @@ using namespace grinliz;
 
 MapSpatialComponent::MapSpatialComponent( WorldMap* _map ) : SpatialComponent()
 {
-	justLoaded = false;
 	worldMap = _map;
 	mode = USES_GRID;
 }
@@ -70,19 +69,18 @@ void MapSpatialComponent::OnAdd( Chit* chit )
 	// Messy - since this interacts with the map (which
 	// is saved as a straight block of data.) Needs the "just loaded"
 	// flag.
-	if ( justLoaded ) {
-		GLASSERT( worldMap->InUse( pos.x, pos.y ));
-		if ( mode == BLOCKS_GRID ) {
-			// This is not preserved - the SetRock() is clearing it.
-			// Fragile code.
+	// Fragile, nasty code.
+	if ( !worldMap->InUse( pos.x, pos.y ) ) {
+		worldMap->SetInUse( pos.x, pos.y, true );
+	}
+	if ( mode == BLOCKS_GRID ) {
+		if ( !worldMap->IsBlocked( pos.x, pos.y ) ) {
 			worldMap->SetBlocked( pos.x, pos.y );
 		}
-		justLoaded = false;
 	}
 	else {
-		worldMap->SetInUse( pos.x, pos.y, true );
-		if ( mode == BLOCKS_GRID ) {
-			worldMap->SetBlocked( pos.x, pos.y );
+		if ( worldMap->IsBlocked( pos.x, pos.y ) ) {
+			worldMap->ClearBlocked( pos.x, pos.y );
 		}
 	}
 }
@@ -104,10 +102,6 @@ void MapSpatialComponent::OnRemove()
 
 void MapSpatialComponent::Serialize( XStream* xs )
 {
-	if ( xs->Loading() ) {
-		justLoaded = true;
-	}
-
 	this->BeginSerialize( xs, "MapSpatialComponent" );
 	XARC_SER( xs, mode );
 	super::Serialize( xs );

@@ -25,6 +25,8 @@
 
 #include "../grinliz/glperformance.h"
 
+#include "../script/worldgen.h"
+
 #include <cstring>
 #include <cmath>
 
@@ -150,8 +152,17 @@ void PathMoveComponent::ComputeDest()
 		return;
 
 	const Vector2F& posVec = thisComp.spatial->GetPosition2D();
+	bool sameSector = true;
+	if ( map->UsingSectors() ) {
+		Vector2I v0 = SectorData::SectorID( posVec.x, posVec.y );
+		Vector2I v1 = SectorData::SectorID( queued.pos.x, queued.pos.y );
+		sameSector = (v0 == v1);
+	}
 
-	if ( queued.pos.x <= 0 || queued.pos.y <= 0 || queued.pos.x >= (float)map->Width() || queued.pos.y >= (float)map->Height() ) {
+	if (	!sameSector
+	     || queued.pos.x <= 0 || queued.pos.y <= 0 
+		 || queued.pos.x >= (float)map->Width() || queued.pos.y >= (float)map->Height() ) 
+	{
 		this->Stop();
 		return;
 	}

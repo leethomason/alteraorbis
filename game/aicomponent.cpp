@@ -23,6 +23,7 @@
 
 #include "../script/battlemechanics.h"
 #include "../script/plantscript.h"
+#include "../script/worldgen.h"
 
 #include "../engine/engine.h"
 #include "../engine/particle.h"
@@ -174,8 +175,12 @@ void AIComponent::GetFriendEnemyLists()
 		zone.min = zone.max = center;
 		zone.Outset( NORMAL_AWARENESS );
 	}
-	else {
-		int debug=1;
+	if ( map->UsingSectors() ) {
+		Rectangle2I ri = SectorData::InnerSectorBounds( center.x, center.y );
+		Rectangle2F rf;
+		rf.Set( (float)ri.min.x, (float)ri.min.y, (float)ri.max.x, (float)ri.max.y );
+
+		zone.DoIntersection( rf );
 	}
 
 	friendList.Clear();
