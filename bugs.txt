@@ -79,7 +79,7 @@ x rationalize hardpoints: array index or flag? lookt at RenderComponent
 x mantis trigger broken
 - switch to ImageMagick for texture scaling
 - credits scene
-- particles should use palette. <color palette="2 3 1.0"/> possibly
+x particles should use palette. <color palette="2 3 1.0"/> possibly
 - remove normalization in shader
 - print uniform count for shaders
 - animition aware hit testing

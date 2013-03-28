@@ -11,52 +11,10 @@
 #include "../tinyxml2/tinyxml2.h"
 #include "../xarchive/glstreamer.h"
 #include "../engine/enginelimits.h"
+#include "../game/worldinfo.h"
 
 namespace grinliz {
 class PerlinNoise;
-};
-
-
-class SectorData
-{
-public:
-	SectorData() : x(0), y(0), ports(0), area(0) {
-		core.Zero();
-	}
-
-	void Serialize( XStream* xs );
-
-	enum { 
-		NEG_X	=1, 
-		POS_X	=2, 
-		NEG_Y	=4,		
-		POS_Y	=8 
-	};
-	int  x, y;		// grid position (not sector position)
-	int  ports;		// if attached to the grid, has ports. 
-	grinliz::Vector2I core;
-	int  area;
-
-	bool HasCore() const { return core.x > 0 && core.y > 0; }
-	grinliz::Rectangle2I GetPortLoc( int port ) const;
-	grinliz::Rectangle2I Bounds() const;
-	grinliz::Rectangle2I InnerBounds() const;
-
-	// Get the cx, cy of the sector from an arbitrary coordinate.
-	static grinliz::Vector2I	SectorID( float x, float y );
-	// Get the bounds of the sector from an arbitrary coordinate
-	static grinliz::Rectangle2I	SectorBounds( float x, float y );
-	static grinliz::Rectangle3F	SectorBounds3( float x, float y ) {
-		grinliz::Rectangle2I r = SectorBounds( x, y );
-		grinliz::Rectangle3F r3;
-		r3.Set( (float)r.min.x, 0, (float)r.min.y, (float)r.max.x, MAP_HEIGHT, (float)r.max.y );
-		return r3;
-	}
-	static grinliz::Rectangle2I InnerSectorBounds( float x, float y ) {
-		grinliz::Rectangle2I r = SectorBounds( x, y );
-		r.Outset( -1 );
-		return r;
-	}
 };
 
 

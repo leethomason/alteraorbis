@@ -33,6 +33,7 @@
 
 #include "worldinfo.h"
 #include "gameitem.h"
+#include "../script/worldgen.h"
 
 using namespace grinliz;
 using namespace micropather;
