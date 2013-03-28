@@ -49,6 +49,8 @@ enum {
 	EL_TUNE_INSTANCE_MEM	= 8*1024	// Max memory per model.
 };
 
+static const float MAP_HEIGHT = 4.0f;
+
 
 static const float EL_FOV  = 40.0f;
 static const float EL_NEAR = 2.0f;

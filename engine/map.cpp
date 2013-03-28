@@ -41,7 +41,7 @@ const float DIAGONAL_COST = 1.414f;
 
 Map::Map( int w, int h )
 {
-
+	usingSectors = false;
 	width = w;
 	height = h;
 	texture = 0;

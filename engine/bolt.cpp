@@ -20,6 +20,7 @@
 #include "gpustatemanager.h"
 #include "../game/gameitem.h"
 #include "../xarchive/glstreamer.h"
+#include "../script/worldgen.h"
 
 using namespace grinliz;
 
@@ -46,16 +47,21 @@ void Bolt::TickAll( grinliz::CDynArray<Bolt>* bolts, U32 delta, Engine* engine, 
 	GLASSERT( engine->GetMap() );
 	Map* map = engine->GetMap();
 
-	Rectangle3F bounds;
-	bounds.Set( 0, 0, 0, (float)(map->Width()), (float)(map->Width())*0.25f, (float)(map->Height()) ); 
 	float timeSlice = (float)delta / 1000.0f;
 
 	int i=0;	
 	ParticleSystem* ps = engine->particleSystem;
+	Rectangle3F bounds = map->Bounds3();
+	bool usingSectors = map->UsingSectors();
 
 	while ( i < bolts->Size() ) {
 		Bolt& b = (*bolts)[i];
  
+		if ( usingSectors ) {
+			// Get bounds before moving, so it can't "tunnel" through.
+			bounds = SectorData::SectorBounds3( b.head.x, b.head.z );
+		}
+		
 		float distance = b.speed * timeSlice;
 		Vector3F travel = b.dir * distance;
 		Vector3F normal = { 0, 1, 0 };
@@ -116,7 +122,7 @@ void Bolt::TickAll( grinliz::CDynArray<Bolt>* bolts, U32 delta, Engine* engine, 
 		}
 		
 		Vector3F tail = b.head - b.len*b.dir;
-		
+
 		if ( !bounds.Contains( b.head ) && !bounds.Contains( tail ) ) {
 			bolts->SwapRemove( i );
 		}

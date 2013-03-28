@@ -59,7 +59,6 @@ WorldMap::WorldMap( int width, int height ) : Map( width, height )
 	worldInfo = new WorldInfo();
 	Init( width, height );
 	slowTick = SLOW_TICK;
-	usingSectors = false;
 
 	texture[0] = TextureManager::Instance()->GetTexture( "map_water" );
 	texture[1] = TextureManager::Instance()->GetTexture( "map_grid" );

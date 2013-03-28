@@ -16,7 +16,7 @@ x control key is terrible...sometimes.
 		x limit AI
 			x detection and awareness to sector bounds
 		x fix cores to work with sectors
-		- limit bolts / collisions
+		x limit bolts / collisions
 		- grid motion
 		- herding across grids
 			- herding notification

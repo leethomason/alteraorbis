@@ -20,6 +20,7 @@
 #include "../grinliz/gldebug.h"
 #include "../grinliz/glvector.h"
 #include "../grinliz/glrandom.h"
+#include "../grinliz/glrectangle.h"
 
 #include "../game/gameitem.h"
 

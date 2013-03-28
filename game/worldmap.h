@@ -170,7 +170,6 @@ public:
 
 	// --- MetaData --- //
 	const WorldInfo& GetWorldInfo()			{ return *worldInfo; }
-	bool UsingSectors() const				{ return usingSectors; }
 	const SectorData* GetSectorData() const;
 	SectorData* GetSectorDataMutable();
 
@@ -304,7 +303,6 @@ private:
 
 	WorldInfo*					worldInfo;
 	micropather::MicroPather*	pather;
-	bool						usingSectors;
 	bool						debugRegionOverlay;
 
 	MP_VECTOR< void* >						pathRegions;
