@@ -18,6 +18,7 @@ x control key is terrible...sometimes.
 		x fix cores to work with sectors
 		x limit bolts / collisions
 		- grid motion
+		- refactor gamescene - map and mini-map clicking should use the same code
 		- herding across grids
 			- herding notification
 		- fix inUse. wow. fix inUse. Then only isBlocked will be an awful hack.
@@ -26,6 +27,8 @@ x control key is terrible...sometimes.
 			- grid
 			- port
 		- load existing world
+		- fix AI to not charge into melee if ranged is a better idea
+		- fix camera dragging bug
 		- overnight test
 	- Flora 2
 		- weapon toggle / selection
@@ -68,6 +71,7 @@ x control key is terrible...sometimes.
 
 	- serialization
 
+- render-through for player behind objects
 - add target portrait
 - faces are using too much memory, or too low res...hmmm. Should really use texture packer and store a lookup.
 - handle device loss in live preview

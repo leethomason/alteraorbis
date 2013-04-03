@@ -110,6 +110,7 @@
     <ClCompile Include="..\game\debugstatecomponent.cpp" />
     <ClCompile Include="..\game\gameitem.cpp" />
     <ClCompile Include="..\game\gamemovecomponent.cpp" />
+    <ClCompile Include="..\game\GridMoveComponent.cpp" />
     <ClCompile Include="..\game\healthcomponent.cpp" />
     <ClCompile Include="..\game\lumoschitbag.cpp" />
     <ClCompile Include="..\game\lumosgame.cpp" />
@@ -195,6 +196,7 @@
     <ClInclude Include="..\game\gameitem.h" />
     <ClInclude Include="..\game\gamelimits.h" />
     <ClInclude Include="..\game\gamemovecomponent.h" />
+    <ClInclude Include="..\game\gridmovecomponent.h" />
     <ClInclude Include="..\game\healthcomponent.h" />
     <ClInclude Include="..\game\lumoschitbag.h" />
     <ClInclude Include="..\game\lumosgame.h" />

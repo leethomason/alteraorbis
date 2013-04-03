@@ -35,7 +35,8 @@ public:
 
 	// ------- Utility -------- //
 	// Get the cx, cy of the sector from an arbitrary coordinate.
-	static grinliz::Vector2I	SectorID( float x, float y );
+	// 'axis' is optional, and returns NEG_X, etc.
+	static grinliz::Vector2I	SectorID( float x, float y, int* axis=0 );
 	// Get the bounds of the sector from an arbitrary coordinate
 	static grinliz::Rectangle2I	SectorBounds( float x, float y );
 	static grinliz::Rectangle3F	SectorBounds3( float x, float y ) {
@@ -52,10 +53,37 @@ public:
 };
 
 
+// Passed to the pather as a 32 bit value (not a pointer.)
+struct GridEdge
+{
+	enum {
+		HORIZONTAL,
+		VERTICAL
+	};
+	U8 alignment;
+	S8 x;
+	S16 y;	// could be U8, but don't want undefined bits.
+
+	grinliz::Vector2F Center() const {
+		grinliz::Vector2F c = { 0, 0 };
+		if ( alignment == HORIZONTAL ) {
+			c.Set( (float)x + 0.5f, (float)y );
+		}
+		else {
+			c.Set( (float)x, (float)y + 0.5f );
+		}
+		return c;
+	}
+};
+
+
 class WorldInfo : public micropather::Graph
 {
 public:
 	SectorData sectorData[NUM_SECTORS*NUM_SECTORS];
+
+	WorldInfo();
+	~WorldInfo();
 
 	void Serialize( XStream* );
 	void Save( tinyxml2::XMLPrinter* printer );
@@ -65,15 +93,26 @@ public:
 	virtual void  AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > *adjacent );
 	virtual void  PrintStateInfo( void* state );
 
+	int Solve( GridEdge start, GridEdge end, grinliz::CDynArray<GridEdge>* path );
+
+	bool HasGridEdge( GridEdge g ) const;
+	const SectorData& GetSector( int x, int y ) const {
+		grinliz::Vector2I v = SectorData::SectorID( (float)x, (float)y );
+		return sectorData[NUM_SECTORS*v.y+v.x];
+	}
+
 private:
-	grinliz::Vector2<S16> FromState( void* state ) {
-		grinliz::Vector2<S16> v = *((grinliz::Vector2<S16>*)state);
+	GridEdge FromState( void* state ) {
+		GLASSERT( sizeof(GridEdge) == sizeof(void*) );
+		GridEdge v = *((GridEdge*)state);
 		return v;
 	}
-	void* ToState( grinliz::Vector2<S16> v ) {
+	void* ToState( GridEdge v ) {
 		void* r = (void*)(*((U32*)&v));
 		return r;
 	}
+	micropather::MPVector< void* > patherVector;
+	micropather::MicroPather* pather;
 };
 
 #endif // LUMOS_WORLDINFO_INCLUDED

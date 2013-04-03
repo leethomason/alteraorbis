@@ -20,6 +20,11 @@
 
 static const int MAX_MOVE_PATH = MAX_MAP_SIZE/2;	// repath if we need to
 
+// 4 miles/hour = 6000m/hr = 1.6m/s = 0.8grid/s
+// Which looks like a mellow walk.
+static const float MOVE_SPEED		= 1.2f;			// grid/second
+static const float ROTATION_SPEED	= 360.f;		// degrees/second
+
 static const int SECTOR_SIZE		= 64;
 static const int INNER_SECTOR_SIZE	= (SECTOR_SIZE-2);
 static const int NUM_SECTORS		= MAX_MAP_SIZE / SECTOR_SIZE;

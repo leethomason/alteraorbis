@@ -15,6 +15,8 @@
 
 #include "pathmovecomponent.h"
 #include "worldmap.h"
+#include "worldgrid.h"
+#include "gamelimits.h"
 
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/rendercomponent.h"
@@ -34,12 +36,6 @@ using namespace grinliz;
 
 //#define DEBUG_PMC
 
-// 4 miles/hour = 6000m/hr = 1.6m/s = 0.8grid/s
-// Which looks like a mellow walk.
-static const float MOVE_SPEED		= 1.2f;			// grid/second
-static const float ROTATION_SPEED	= 360.f;		// degrees/second
-
-
 void PathMoveComponent::Serialize( XStream* item )
 {
 	this->BeginSerialize( item, Name() );
@@ -47,6 +43,7 @@ void PathMoveComponent::Serialize( XStream* item )
 	XARC_SER( item, queued.rotation );
 	XARC_SER( item, dest.pos );
 	XARC_SER( item, dest.rotation );
+	XARC_SER( item, dest.sector );
 	this->EndSerialize( item );
 }
 
@@ -61,10 +58,10 @@ void PathMoveComponent::OnAdd( Chit* chit )
 	// Serialization case:
 	// if there is a queue location, use that, else use the current location.
 	if ( queued.pos.x >= 0 ) {
-		QueueDest( queued.pos, queued.rotation );
+		QueueDest( queued.pos, queued.rotation, &queued.sector );
 	}
 	else if ( dest.pos.x >= 0 ) {
-		QueueDest( dest.pos, dest.rotation );
+		QueueDest( dest.pos, dest.rotation, &dest.sector );
 	}
 }
 
@@ -98,12 +95,16 @@ void PathMoveComponent::CalcVelocity( grinliz::Vector3F* v )
 }
 
 
-void PathMoveComponent::QueueDest( grinliz::Vector2F d, float r /*, int doNotAvoid*/ )
+void PathMoveComponent::QueueDest( grinliz::Vector2F d, float r, const Vector2I* sector )
 {
 	GLASSERT(  d.x >= 0 && d.y >= 0 );
 
 	queued.pos = d;
 	queued.rotation = r;
+	queued.sector.Zero();
+	if ( sector ) {
+		queued.sector = *sector;
+	}
 }
 
 
@@ -464,6 +465,13 @@ int PathMoveComponent::DoTick( U32 delta, U32 since )
 #endif
 				// actually reached the end!
 				parentChit->SendMessage( ChitMsg( ChitMsg::PATHMOVE_DESTINATION_REACHED), this );
+				if ( dest.sector.x > 0 || dest.sector.y > 0 ) {
+					GLOUTPUT(( "Sector specified.\n" ));
+					const WorldGrid& wg = map->GetWorldGrid( (int)pos2.x, (int)pos2.y );
+					if ( wg.IsPort() ) {
+						GLOUTPUT(( "Port found! Do something.\n" ));
+					}
+				}
 				SetNoPath();
 			}
 			else {
@@ -479,7 +487,6 @@ int PathMoveComponent::DoTick( U32 delta, U32 since )
 		ApplyBlocks( &pos2, &this->blockForceApplied, &this->isStuck );
 		SetPosRot( pos2, rot );
 	};
-//	GLASSERT( (pathPos < nPathPos ) || queuedDest.x >= 0 );
 	return 0;
 }
 

@@ -10,6 +10,7 @@
 #include "../game/sim.h"
 #include "../game/pathmovecomponent.h"
 #include "../game/worldmap.h"
+#include "../game/worldinfo.h"
 #include "../game/aicomponent.h"
 
 #include "../engine/engine.h"
@@ -285,7 +286,7 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 						Vector2F dest = { at.x, at.z };
 						AIComponent* ai = GET_COMPONENT( chit, AIComponent );
 						if ( ai ) {
-							ai->FocusedMove( dest );
+							ai->FocusedMove( dest, 0 );
 						}
 						else {
 							PathMoveComponent* pmc = GET_COMPONENT( chit, PathMoveComponent );
@@ -339,7 +340,6 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		Engine* engine = sim->GetEngine();
 		dest.x = x*(float)engine->GetMap()->Width();
 		dest.y = y*(float)engine->GetMap()->Height();
-
 	}
 	else if ( item == &serialButton[SAVE] ) {
 		Save();
@@ -382,14 +382,26 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		if ( chit ) {
 			if ( camModeButton[TRACK].Down() ) {
 				AIComponent* ai = GET_COMPONENT( chit, AIComponent );
+				GLASSERT( ai );
 				if ( ai ) {
-					ai->FocusedMove( dest );
-				}
-				else {
-					PathMoveComponent* pmc = GET_COMPONENT( chit, PathMoveComponent );
-					if ( pmc ) {
-						pmc->QueueDest( dest );
+					Vector2F pos = chit->GetSpatialComponent()->GetPosition2D();
+					// Is this grid travel or normal travel?
+					Vector2I currentSector = SectorData::SectorID( pos.x, pos.y );
+					Vector2I destSector    = SectorData::SectorID( dest.x, dest.y );
+					Vector2I sector = { 0, 0 };
+					
+					if ( currentSector != destSector ) {
+						// Find the nearest port.
+						int id = chit->ID();
+						Rectangle2I portRect = sim->GetWorldMap()->NearestPort( pos );
+						if ( portRect.max.x > 0 && portRect.max.y > 0 ) {
+							dest.x = (float)(portRect.min.x + (id%portRect.Width() )) + 0.5f;
+							dest.y = (float)(portRect.min.y + (id%portRect.Height())) + 0.5f;
+							sector = destSector;
+						}
 					}
+
+					ai->FocusedMove( dest, sector.IsZero() ? 0 : &sector );
 				}
 			}
 			else if ( camModeButton[TELEPORT].Down() ) {
