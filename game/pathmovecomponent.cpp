@@ -17,6 +17,7 @@
 #include "worldmap.h"
 #include "worldgrid.h"
 #include "gamelimits.h"
+#include "gridmovecomponent.h"
 
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/rendercomponent.h"
@@ -394,6 +395,8 @@ int PathMoveComponent::DoTick( U32 delta, U32 since )
 	blockForceApplied = false;
 	avoidForceApplied = false;
 	isMoving = false;
+	Vector2I portJump = { 0, 0 };
+	int portJumpPort = 0;
 
 	if ( HasPath() ) {
 		// We should be doing something!
@@ -466,10 +469,16 @@ int PathMoveComponent::DoTick( U32 delta, U32 since )
 				// actually reached the end!
 				parentChit->SendMessage( ChitMsg( ChitMsg::PATHMOVE_DESTINATION_REACHED), this );
 				if ( dest.sector.x > 0 || dest.sector.y > 0 ) {
-					GLOUTPUT(( "Sector specified.\n" ));
 					const WorldGrid& wg = map->GetWorldGrid( (int)pos2.x, (int)pos2.y );
 					if ( wg.IsPort() ) {
 						GLOUTPUT(( "Port found! Do something.\n" ));
+						portJump = dest.sector;
+						// Nearest port to current location. This looks a little weird.
+						portJumpPort = map->GetWorldInfo().NearestPort( dest.sector, pos2 );
+						// Debugging;
+						if ( portJumpPort ) {
+							map->GetWorldInfo().GetGridEdge( portJump, portJumpPort );
+						}
 					}
 				}
 				SetNoPath();
@@ -487,6 +496,16 @@ int PathMoveComponent::DoTick( U32 delta, U32 since )
 		ApplyBlocks( &pos2, &this->blockForceApplied, &this->isStuck );
 		SetPosRot( pos2, rot );
 	};
+
+	if ( !portJump.IsZero() && portJumpPort ) {
+		GridMoveComponent* gmc = new GridMoveComponent( map );
+		gmc->SetDest( portJump.x, portJump.y, portJumpPort );
+		Chit* chit = parentChit;	// parentChit=0 after Remove()
+		chit->Remove( this );
+		chit->Add( gmc );
+		delete this;
+	}
+
 	return 0;
 }
 

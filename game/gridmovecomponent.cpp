@@ -2,6 +2,7 @@
 #include "worldinfo.h"
 #include "gamelimits.h"
 #include "worldmap.h"
+#include "pathmovecomponent.h"
 
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/rendercomponent.h"
@@ -15,6 +16,8 @@ GridMoveComponent::GridMoveComponent( WorldMap* wm ) : GameMoveComponent( wm )
 {
 	worldMap = wm;
 	state = NOT_INIT;
+	velocity.Zero();
+	speed = MOVE_SPEED;
 }
 
 
@@ -32,7 +35,11 @@ void GridMoveComponent::DebugStr( grinliz::GLString* str )
 void GridMoveComponent::Serialize( XStream* xs )
 {
 	this->BeginSerialize( xs, Name() );
-	GLASSERT( 0 );
+	XARC_SER( xs, state );
+	XARC_SER( xs, portDest );
+	XARC_SER( xs, deleteWhenDone );
+	XARC_SER( xs, speed );
+	XARC_SER( xs, sectorDest );
 	this->EndSerialize( xs );
 }
 
@@ -51,75 +58,23 @@ void GridMoveComponent::OnRemove()
 
 bool GridMoveComponent::IsMoving() const
 {
-	return true;
-}
-
-
-GridEdge GridMoveComponent::ToGridEdge( int sectorX, int sectorY, int port )
-{
-	GridEdge g = { -1, -1, -1 };
-	if ( port == SectorData::NEG_X ) {
-		g.x = sectorX;
-		g.y = sectorY;
-		g.alignment = GridEdge::HORIZONTAL;
-	}
-	else if ( port == SectorData::POS_X ) {
-		g.x = sectorX+1;
-		g.y = sectorY;
-		g.alignment = GridEdge::HORIZONTAL;
-	}
-	else if ( port == SectorData::NEG_Y ) {
-		g.x = sectorX;
-		g.y = sectorY;
-		g.alignment = GridEdge::VERTICAL;
-	}
-	else if ( port == SectorData::POS_Y ) {
-		g.x = sectorX;
-		g.y = sectorY+1;
-		g.alignment = GridEdge::VERTICAL;
-	}
-	return g;
+	// This is something of a problem. Are we moving
+	// if on transit? Mainly used by the animation system,
+	// so the answer is 'no', but not quite what you
+	// might expect.
+	return false;
 }
 
 
 void GridMoveComponent::SetDest( int sectorX, int sectorY, int port )
 {
 	GLASSERT( state == NOT_INIT );
-
-	SpatialComponent* sc = parentChit->GetSpatialComponent();
-	GLASSERT( sc );
-	if ( !sc ) return;
-
-	Vector2F pos = sc->GetPosition2D();
-	int axis = 0;
-	Vector2I sectorPos = SectorData::SectorID( pos.x, pos.y, &axis );
-
-	WorldInfo* worldInfo = worldMap->GetWorldInfoMutable();
-	current = ToGridEdge( sectorPos.x, sectorPos.y, axis );
-	if ( !worldInfo->HasGridEdge( current )) {
-		GLASSERT( 0 );
-		return;
-	}
-
 	sectorDest.Set( sectorX, sectorY );
 	portDest = port;
-	GridEdge dest = ToGridEdge( sectorX, sectorY, port );
-	if ( !worldInfo->HasGridEdge( dest )) {
-		GLASSERT( 0 );
-		return;
-	}
-
-	int result = worldInfo->Solve( current, dest, &path );
-	GLASSERT( result == micropather::MicroPather::START_END_SAME || 
-			  result == micropather::MicroPather::SOLVED );
-
 	state = ON_BOARD;
 
-	RenderComponent* rc = parentChit->GetRenderComponent();
-	if ( rc ) {
-		rc->PlayAnimation( ANIM_STAND );
-	}
-	parentChit->SetTickNeeded();
+	// Error check:
+	worldMap->GetWorldInfo().GetGridEdge( sectorDest, portDest );
 }
 
 
@@ -127,7 +82,9 @@ int GridMoveComponent::DoTick( U32 delta, U32 since )
 {
 	if ( state == DONE ) {
 		if ( deleteWhenDone ) {
-			parentChit->Remove( this );
+			Chit* chit = parentChit;	// gets nulled in Remove()
+			chit->Remove( this );
+			chit->Add( new PathMoveComponent( map ));
 			delete this;
 		}
 		return VERY_LONG_TICK;
@@ -138,11 +95,12 @@ int GridMoveComponent::DoTick( U32 delta, U32 since )
 
 	SpatialComponent* sc = parentChit->GetSpatialComponent();
 	if ( !sc ) return VERY_LONG_TICK;
-	RenderComponent* rc = parentChit->GetRenderComponent();
 
 	int tick = 0;
 	Vector2F pos = sc->GetPosition2D();
 
+	// Speed up or slow down, depending
+	// on on or off board.
 	if ( state != OFF_BOARD ) {
 		if ( speed < GRID_SPEED ) {
 			speed += Travel( GRID_ACCEL, since );
@@ -154,33 +112,101 @@ int GridMoveComponent::DoTick( U32 delta, U32 since )
 		if ( speed < 0 ) speed = 0;
 	}
 
+	Vector2F dest = { 0, 0 };
+	int stateIfDestReached = DONE;
+	bool goToDest = true;
+
 	switch ( state ) 
 	{
 	case ON_BOARD:
 		// Presume we started somewhere rational. Move to grid.
 		{
-			Vector2F dir = { 0, 0 };
-			Vector2F center = current.Center();
-			float distance = 0;
-			if ( current.alignment == GridEdge::HORIZONTAL ) {
-				distance = fabs( center.y - pos.y );
-				if ( center.y < pos.y ) dir.Set( 0, -1 );
-				else dir.Set( 0, 1 );
+			GridEdge gridEdge;
+			worldMap->GetWorldInfo().GetSectorInfo( pos.x, pos.y, 0, &gridEdge );
+
+			GLASSERT( gridEdge.IsValid() );
+
+			dest = gridEdge.GridCenter();
+			stateIfDestReached = TRAVELLING;
+		}
+		break;
+
+	case TRAVELLING:
+		{	
+			GridEdge destEdge = worldMap->GetWorldInfo().GetGridEdge( sectorDest, portDest );
+			GridEdge current  = worldMap->GetWorldInfo().GetGridEdge( pos.x, pos.y );
+
+			if ( destEdge == current ) {
+				// travel to center!
+				dest = destEdge.GridCenter();
+				stateIfDestReached = OFF_BOARD;
 			}
 			else {
-				distance = fabs( center.x - pos.y );
-				if ( center.x < pos.x ) dir.Set( -1, 0 );
-				else dir.Set( 1, 0 );
-			}
-			float travel = Travel( speed, since );
-			if ( travel > distance ) travel = distance;
-			pos = pos + dir * travel;
-			if ( travel >= distance ) {
-				//state = TRAVELLING;
-				state = DONE;
+				goToDest = false;
+				if ( path.Size() == 0 ) {
+					int result = worldMap->GetWorldInfoMutable()->Solve( current, destEdge, &path );
+					GLASSERT( result == micropather::MicroPather::SOLVED );
+				}
+				if ( path.Size() < 2 ) {
+					GLASSERT( 0 );
+					state = DONE;
+					return 0;
+				}
+
+				float travel = Travel( speed, since );
+				while ( travel > 0 ) {
+					GridEdge ge   = path[0];
+					GridEdge next = path[1];
+					Vector2F corner = { 0, 0 };
+					if ( ge.alignment == GridEdge::HORIZONTAL ) {
+						if ( next.x < ge.x )	corner.Set( (float)ge.x, (float)ge.y );
+						else					corner.Set( (float)next.x, (float)ge.y );
+					}
+					else {
+						if ( next.y < ge.y )	corner.Set( (float)ge.x, (float)ge.y );
+						else					corner.Set( (float)ge.x, (float)next.y );
+					}
+
+					Vector2F delta = corner - pos;
+					float len = delta.Length();
+					if ( len <= travel ) {
+						travel -= len;
+						pos = corner;
+						path.Remove( 0 );	// FIXME: potentially expensive - use index
+					}
+					else {
+						Vector2F dir = { Sign( delta.x ), Sign( delta.y ) };
+						pos = pos + dir * travel;
+						travel = 0;
+					}
+				}
+
 			}
 		}
 		break;
+
 	};
+
+	if ( goToDest ) {
+		Vector2F dir = dest - pos;
+		float distance = dir.Length();
+		if ( distance > 0 ) {
+			dir.Multiply( 1.0f / distance );	// Normalize.
+
+			float travel = Travel( speed, since );
+			velocity.Set( dir.x*speed, 0, dir.y*speed );
+
+			if ( travel > distance ) travel = distance;
+			pos = pos + dir * travel;
+			if ( travel >= distance ) {
+				state = stateIfDestReached;
+				pos = dest;
+			}
+			sc->SetPosition( pos.x, 0, pos.y );
+		}
+		else {
+			state = stateIfDestReached;
+		}
+	}
 	return tick;
 }

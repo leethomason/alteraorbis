@@ -121,7 +121,6 @@ public:
 	int ID() const { return id; }
 	void Add( Component* );
 	void Remove( Component* );
-	void Shelve( Component* c );
 
 	void SetTickNeeded()		{ timeToTick = 0; }
 	void DoTick( U32 delta );
@@ -171,7 +170,6 @@ private:
 
 	ChitBag* chitBag;
 	int		 id;
-	Component* shelf;
 	grinliz::CDynArray<IChitListener*> listeners;
 
 	struct CList

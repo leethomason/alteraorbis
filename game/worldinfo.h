@@ -34,9 +34,10 @@ public:
 	grinliz::Rectangle2I InnerBounds() const;
 
 	// ------- Utility -------- //
-	// Get the cx, cy of the sector from an arbitrary coordinate.
-	// 'axis' is optional, and returns NEG_X, etc.
-	static grinliz::Vector2I	SectorID( float x, float y, int* axis=0 );
+	static grinliz::Vector2I SectorID( float x, float y ) {
+		grinliz::Vector2I v = { (int)x/SECTOR_SIZE, (int)y/SECTOR_SIZE };
+		return v;
+	}
 	// Get the bounds of the sector from an arbitrary coordinate
 	static grinliz::Rectangle2I	SectorBounds( float x, float y );
 	static grinliz::Rectangle3F	SectorBounds3( float x, float y ) {
@@ -54,6 +55,7 @@ public:
 
 
 // Passed to the pather as a 32 bit value (not a pointer.)
+// The GridEdge is always "round down", so there is only the "neg-x" and "neg-y" flavor.
 struct GridEdge
 {
 	enum {
@@ -61,19 +63,23 @@ struct GridEdge
 		VERTICAL
 	};
 	U8 alignment;
-	S8 x;
+	S8 x;	// *sector* coordinates, not grid.
 	S16 y;	// could be U8, but don't want undefined bits.
 
-	grinliz::Vector2F Center() const {
+	bool operator==( const GridEdge& rhs ) const { return ( x == rhs.x && y == rhs.y && alignment == rhs.alignment ); }
+
+	grinliz::Vector2F GridCenter() const {
 		grinliz::Vector2F c = { 0, 0 };
 		if ( alignment == HORIZONTAL ) {
-			c.Set( (float)x + 0.5f, (float)y );
+			c.Set( (float)(x*SECTOR_SIZE + SECTOR_SIZE/2), (float)(y*SECTOR_SIZE) );
 		}
 		else {
-			c.Set( (float)x, (float)y + 0.5f );
+			c.Set( (float)(x*SECTOR_SIZE), (float)(y*SECTOR_SIZE + SECTOR_SIZE/2));
 		}
 		return c;
 	}
+
+	bool IsValid() const { return x > 0 || y > 0; }
 };
 
 
@@ -95,16 +101,34 @@ public:
 
 	int Solve( GridEdge start, GridEdge end, grinliz::CDynArray<GridEdge>* path );
 
-	bool HasGridEdge( GridEdge g ) const;
+	// Get the current sector from the grid coordinates.
 	const SectorData& GetSector( int x, int y ) const {
-		grinliz::Vector2I v = SectorData::SectorID( (float)x, (float)y );
-		return sectorData[NUM_SECTORS*v.y+v.x];
+		int sx = x / SECTOR_SIZE;
+		int sy = y / SECTOR_SIZE;
+		GLASSERT( sx >= 0 && sy >= 0 && sx < NUM_SECTORS && sy < NUM_SECTORS );
+		return sectorData[NUM_SECTORS*sy+sx];
 	}
 
+	// Get the grid edge from the sector and the axis.
+	GridEdge GetGridEdge( const grinliz::Vector2I& sector, int axis ) const;
+
+	// Get the current gridedge from the grid coordinates.
+	// Will be !Valid() if there is an error, or if the pos isn't on the grid.
+	GridEdge GetGridEdge( float x, float y ) const;
+
+	// Get the cx, cy of the sector from an arbitrary coordinate.
+	// 'axis' is optional, and returns NEG_X, etc.
+	// GridEdge is optional, and returns the gridEdge at that axis, if it exists.
+	const SectorData& GetSectorInfo( float x, float y, int* axis=0, GridEdge* edge=0 ) const;
+
+	int NearestPort( const grinliz::Vector2I& sector, const grinliz::Vector2F& p ) const;
+
 private:
+	bool HasGridEdge( GridEdge g ) const;
+
 	GridEdge FromState( void* state ) {
 		GLASSERT( sizeof(GridEdge) == sizeof(void*) );
-		GridEdge v = *((GridEdge*)state);
+		GridEdge v = *((GridEdge*)&state);
 		return v;
 	}
 	void* ToState( GridEdge v ) {

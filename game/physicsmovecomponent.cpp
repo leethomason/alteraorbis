@@ -1,6 +1,7 @@
 #include "physicsmovecomponent.h"
 #include "worldmap.h"
 #include "gamelimits.h"
+#include "pathmovecomponent.h"
 
 #include "../engine/serialize.h"
 
@@ -101,6 +102,7 @@ int PhysicsMoveComponent::DoTick( U32 delta, U32 since )
 	bool isMoving = IsMoving();
 	if ( !isMoving && deleteWhenDone ) {
 		parentChit->Remove( this );
+		parentChit->Add( new PathMoveComponent( map ));
 		delete this;
 	}
 	return isMoving ? 0 : VERY_LONG_TICK;

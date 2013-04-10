@@ -434,26 +434,6 @@ Rectangle2I SectorData::InnerBounds() const {
 }
 
 
-/*static*/ Vector2I SectorData::SectorID( float fx, float fy, int *axis )
-{
-	int x = (int)fx;
-	int y = (int)fy;
-	Vector2I v = { x/SECTOR_SIZE, y/SECTOR_SIZE };
-
-	if ( axis ) {
-		int dx = x - (v.x*SECTOR_SIZE + SECTOR_SIZE/2);
-		int dy = y - (v.y*SECTOR_SIZE + SECTOR_SIZE/2);
-		if ( abs(dx) > abs(dy) ) {
-			*axis = ( dx > 0 ) ? POS_X : NEG_X;
-		}
-		else {
-			*axis = ( dy > 0 ) ? POS_Y : NEG_Y;
-		}
-	}
-	return v;
-}
-
-
 /*static*/ Rectangle2I SectorData::SectorBounds( float fx, float fy )
 {
 	Vector2I s = SectorID( fx, fy );

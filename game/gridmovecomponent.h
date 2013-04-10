@@ -21,14 +21,12 @@ public:
 	virtual void OnRemove();
 	virtual int DoTick( U32 delta, U32 since );
 	virtual bool IsMoving() const;
-	virtual void CalcVelocity( grinliz::Vector3F* v ) { v->Zero(); }	// FIXME
+	virtual void CalcVelocity( grinliz::Vector3F* v ) { *v = velocity; }
 
 	void SetDest( int sectorX, int sectorY, int port );
-	void DeleteWhenDone( bool _deleteWhenDone )			{ deleteWhenDone = _deleteWhenDone; }
+	void DeleteAndRestorePathMCWhenDone( bool _deleteWhenDone )			{ deleteWhenDone = _deleteWhenDone; }
 
 private:
-	GridEdge ToGridEdge( int sectorX, int sectorY, int port );
-
 	enum {
 		NOT_INIT,
 		ON_BOARD,
@@ -38,11 +36,13 @@ private:
 	};
 	WorldMap*			worldMap;
 	int					state;
-	GridEdge			current;
 	grinliz::Vector2I	sectorDest;
 	int					portDest;
 	bool				deleteWhenDone;
 	float				speed;
+
+	// Not serialized:
+	grinliz::Vector3F velocity;
 	grinliz::CDynArray< GridEdge > path;
 };
 
