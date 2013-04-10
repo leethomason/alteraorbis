@@ -27,7 +27,7 @@
 using namespace grinliz;
 using namespace tinyxml2;
 
-Chit::Chit( int _id, ChitBag* bag ) : next( 0 ), chitBag( bag ), id( _id ), timeToTick( 0 ), timeSince( 0 ), shelf( 0 )
+Chit::Chit( int _id, ChitBag* bag ) : next( 0 ), chitBag( bag ), id( _id ), timeToTick( 0 ), timeSince( 0 )
 {
 	Init( _id, bag );
 }
@@ -67,11 +67,6 @@ void Chit::Free()
 			slot[i] = 0;
 		}
 	}
-	if ( shelf ) {
-		delete shelf; 
-		shelf = 0;
-	}
-
 	id = 0;
 	next = 0;
 	chitBag = 0;
@@ -93,13 +88,6 @@ void Chit::Serialize( const ComponentFactory* factory, XStream* xs )
 	XARC_SER( xs, timeSince );
 
 	if ( xs->Saving() ) {
-		if ( shelf ) {
-			XarcOpen( xs, "Shelf" );
-			XarcOpen( xs, shelf->Name() );
-			shelf->Serialize( xs );
-			XarcClose( xs );
-			XarcClose( xs );
-		}
 		for( int i=0; i<NUM_SLOTS; ++i ) {
 			if ( slot[i] && slot[i]->WillSerialize() ) {
 				XarcOpen( xs, slot[i]->Name() );
@@ -111,17 +99,9 @@ void Chit::Serialize( const ComponentFactory* factory, XStream* xs )
 	else {
 		while ( xs->Loading()->HasChild() ) {
 			const char* n = xs->Loading()->OpenElement();
-			if ( StrEqual( n, "Shelf" ) ) {
-				n = xs->Loading()->OpenElement();
-				shelf = factory->Factory( n, this );
-				shelf->Serialize( xs );
-				xs->Loading()->CloseElement();
-			}
-			else {
-				Component* component = factory->Factory( n, this ); 
-				component->Serialize( xs );
-				this->Add( component );
-			}
+			Component* component = factory->Factory( n, this ); 
+			component->Serialize( xs );
+			this->Add( component );
 			xs->Loading()->CloseElement();
 		}
 	}
@@ -175,24 +155,12 @@ void Chit::Remove( Component* c )
 		if ( slot[i] == c ) {
 			c->OnRemove();
 			slot[i] = 0;
-
-			if ( shelf && Slot(shelf) == i ) {
-				Add( shelf );
-				shelf = 0;
-			}
 			return;
 		}
 	}
 	GLASSERT( 0 );	// not found
 }
 
-
-void Chit::Shelve( Component* c )
-{
-	GLASSERT( !shelf );
-	Remove( c );
-	shelf = c;
-}
 
 
 Component* Chit::GetComponent( const char* name )

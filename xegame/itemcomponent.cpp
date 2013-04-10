@@ -139,14 +139,17 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 					else {
 						GameMoveComponent* gmc = GET_COMPONENT( parentChit, GameMoveComponent );
 						if ( gmc ) {
+							parentChit->Remove( gmc );
+							delete gmc;
+							gmc = 0;
+							
 							WorldMap* map = gmc->GetWorldMap();
-							parentChit->Shelve( gmc );
 
 							pmc = new PhysicsMoveComponent( map );
 							parentChit->Add( pmc );
 
 							pmc->Set( v, r );
-							pmc->DeleteWhenDone( true );
+							pmc->DeleteAndRestorePathMCWhenDone( true );
 						}
 					}
 				}

@@ -115,6 +115,10 @@ struct Vector2
 		y = (T)0;
 	}
 
+	bool IsZero()  const { 
+		return x == 0 && y == 0;
+	}
+
 	T Length() const { return grinliz::Length( x, y ); };
 	T LengthSquared() const { return x*x + y*y; }
 

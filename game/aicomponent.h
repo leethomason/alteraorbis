@@ -50,7 +50,7 @@ public:
 
 	// Approximate. enemyList may not be flushed.
 	bool AwareOfEnemy() const { return enemyList.Size() > 0; }
-	void FocusedMove( const grinliz::Vector2F& dest );
+	void FocusedMove( const grinliz::Vector2F& dest, const grinliz::Vector2I* sector );
 	void FocusedTarget( Chit* chit );
 
 	enum {
@@ -84,7 +84,6 @@ private:
 	Chit* Closest( const ComponentSet& thisComp, grinliz::CArray<int, MAX_TRACK>* list );
 
 	bool LineOfSight( const ComponentSet& thisComp, Chit* target );
-	//float CalcFlockMove( const ComponentSet& thisComp, grinliz::Vector2F* dir );
 
 	void Think( const ComponentSet& thisComp );	// Choose a new action.
 	void ThinkWander( const ComponentSet& thisComp );
@@ -111,13 +110,13 @@ private:
 		WANDER,
 	};
 
-	int aiMode;
-	int currentAction;
-	int currentTarget;
-	bool focusOnTarget;
-	bool focusedMove;
+	int					aiMode;
+	int					currentAction;
+	int					currentTarget;
+	bool				focusOnTarget;
+	bool				focusedMove;
 	grinliz::Rectangle2F awareness;
-	CTicker rethink;
+	CTicker				rethink;
 	grinliz::Vector2F	wanderOrigin;
 	float				wanderRadius;
 	U32					wanderTime;

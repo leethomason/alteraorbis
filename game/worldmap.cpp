@@ -1253,6 +1253,35 @@ bool WorldMap::GridPath( const grinliz::Vector2F& p0, const grinliz::Vector2F& p
 }
 
 
+Rectangle2I WorldMap::NearestPort( const Vector2F& pos )
+{
+	const SectorData& sd = worldInfo->GetSector( (int)pos.x, (int)pos.y );
+
+	int   bestPort = 0;
+	float bestCost = FLT_MAX;
+
+	for( int i=0; i<4; ++i ) {
+		int port = (1<<i);
+		if ( sd.ports & port ) {
+			Vector2I desti = sd.GetPortLoc( port ).Center();
+			Vector2F dest = { (float)desti.x, (float)desti.y };
+			float cost = 0;
+			if ( CalcPath( pos, dest, 0, &cost, false ) ) {
+				if ( cost < bestCost ) {
+					bestCost = cost;
+					bestPort = port;
+				}
+			}
+		}
+	}
+	Rectangle2I result;
+	if ( bestPort ) {
+		result = sd.GetPortLoc( bestPort );
+	}
+	return result;
+}
+
+
 bool WorldMap::CalcPath(	const grinliz::Vector2F& start, 
 							const grinliz::Vector2F& end, 
 							grinliz::Vector2F *path,
@@ -1284,7 +1313,9 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 							bool debugging )
 {
 	debugPathVector.Clear();
-	path->Clear();
+	if ( path ) { 
+		path->Clear();
+	}
 	bool okay = false;
 
 	Vector2I starti = { (int)start.x, (int)start.y };
@@ -1306,8 +1337,10 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 
 	if ( regionStart == regionEnd ) {
 		okay = true;
-		path->Push( start );
-		path->Push( end );
+		if ( path ) {
+			path->Push( start );
+			path->Push( end );
+		}
 		*totalCost = (end-start).Length();
 	}
 
@@ -1315,9 +1348,10 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 	if ( !okay ) {
 		okay = GridPath( start, end );
 		if ( okay ) {
-			//GLOUTPUT(( "Ray succeeded.\n" ));
-			path->Push( start );
-			path->Push( end );
+			if ( path ) { 
+				path->Push( start );
+				path->Push( end );
+			}
 			*totalCost = (end-start).Length();
 		}
 	}
@@ -1329,7 +1363,9 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 		if ( result == micropather::MicroPather::SOLVED ) {
 			//GLOUTPUT(( "Region succeeded len=%d.\n", pathRegions.size() ));
 			Vector2F from = start;
-			path->Push( start );
+			if ( path ) { 
+				path->Push( start );
+			}
 			okay = true;
 			//Vector2F pos = start;
 
@@ -1366,21 +1402,27 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 						break;
 					}
 				}
-				path->Push( v );
+				if ( path ) {
+					path->Push( v );
+				}
 				from = v;
 			}
-			path->Push( end );
+			if ( path ) {
+				path->Push( end );
+			}
 		}
 	}
 
 	if ( okay ) {
-		if ( debugging ) {
+		if ( debugging && path ) {
 			for( int i=0; i<path->Size(); ++i )
 				debugPathVector.Push( (*path)[i] );
 		}
 	}
 	else {
-		path->Clear();
+		if ( path ) {
+			path->Clear();
+		}
 	}
 	return okay;
 }

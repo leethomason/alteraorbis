@@ -434,15 +434,6 @@ Rectangle2I SectorData::InnerBounds() const {
 }
 
 
-/*static*/ Vector2I SectorData::SectorID( float fx, float fy )
-{
-	int x = (int)fx;
-	int y = (int)fy;
-	Vector2I v = { x/SECTOR_SIZE, y/SECTOR_SIZE };
-	return v;
-}
-
-
 /*static*/ Rectangle2I SectorData::SectorBounds( float fx, float fy )
 {
 	Vector2I s = SectorID( fx, fy );

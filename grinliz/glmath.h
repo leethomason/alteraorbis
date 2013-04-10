@@ -133,39 +133,6 @@ inline float Length( float x, float y, float z, float w )
 }
 
 
-/// Approximate length, but fast. NOTE: Length is faster for float. 
-template <class T> inline T FastLength( T x, T y, T z )
-{
-	float a = (float) fabs( x );
-	float b = (float) fabs( y );
-	float c = (float) fabs( z );
-
-	if ( b > a ) Swap( &b, &a );
-	if ( c > a ) Swap( &c, &a );
-
-	// a, b, and c are now meaningless, but
-	// a is the max.
-
-	float ret = a + ( b + c ) / 4;
-	return ret;
-}
-
-
-/// Approximate length, but fast. NOTE: Length is faster for float.
-template <class T> inline T FastLength( T x, T y )
-{
-	float a = (float) fabs( x );
-	float b = (float) fabs( y );
-
-	if ( b > a ) grinliz::Swap( &b, &a );
-
-	// a and b are now meaningless, but
-	// a is the max.
-
-	float ret = a + b / 4;
-	return ret;
-}
-
 /// Template to return the average of 2 numbers.
 template <class T> inline T Average( T y0, T y1 )
 {
@@ -187,6 +154,13 @@ public:
 
 	T vec[SIZE];
 };
+
+
+template <class T> inline T Sign( T x ) {
+	if ( x > 0 ) return 1;
+	if ( x < 0 ) return -1;
+	return 0;
+}
 
 };	// namespace grinliz
 

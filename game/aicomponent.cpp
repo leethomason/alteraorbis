@@ -501,11 +501,11 @@ void AIComponent::Think( const ComponentSet& thisComp )
 };
 
 
-void AIComponent::FocusedMove( const grinliz::Vector2F& dest )
+void AIComponent::FocusedMove( const grinliz::Vector2F& dest, const Vector2I* sector )
 {
 	PathMoveComponent* pmc = GET_COMPONENT( parentChit, PathMoveComponent );
 	if ( pmc ) {
-		pmc->QueueDest( dest );
+		pmc->QueueDest( dest, -1, sector );
 		currentAction = NO_ACTION;
 		focusedMove = true;
 	}
@@ -639,6 +639,13 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 	else if ( wanderFlags == WANDER_CIRCLE ) {
 		dest = ThinkWanderCircle( thisComp );
 	}
+
+	/*
+	Vector2F pos = thisComp.spatial->GetPosition2D();
+	Rectangle2I sectorBounds = map->GetWorldInfo().GetSector( (int)pos.x, (int)pos.y ).InnerBounds();
+	dest.x = Clamp( dest.x, (float)sectorBounds.min.x, (float)(sectorBounds.max.x-1) );
+	dest.y = Clamp( dest.y, (float)sectorBounds.min.y, (float)(sectorBounds.max.y-1) );
+	*/
 
 	PathMoveComponent* pmc = GET_COMPONENT( thisComp.chit, PathMoveComponent );
 	if ( pmc ) {

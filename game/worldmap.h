@@ -131,6 +131,8 @@ public:
 					int maxPath,
 					float* totalCost,
 					bool showDebugging = false );
+	// Returns the nearest pathable port. Returns (0,0) on failure.
+	grinliz::Rectangle2I NearestPort( const grinliz::Vector2F& pos );
 
 	enum BlockResult {
 		NO_EFFECT,
@@ -170,6 +172,7 @@ public:
 
 	// --- MetaData --- //
 	const WorldInfo& GetWorldInfo()			{ return *worldInfo; }
+	WorldInfo* GetWorldInfoMutable()		{ return worldInfo; }
 	const SectorData* GetSectorData() const;
 	SectorData* GetSectorDataMutable();
 
