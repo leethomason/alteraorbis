@@ -121,12 +121,13 @@ int GridMoveComponent::DoTick( U32 delta, U32 since )
 	case ON_BOARD:
 		// Presume we started somewhere rational. Move to grid.
 		{
-			GridEdge gridEdge;
-			worldMap->GetWorldInfo().GetSectorInfo( pos.x, pos.y, 0, &gridEdge );
+			int port = 0;
+			const SectorData& sd = worldMap->GetWorldInfo().GetSectorInfo( pos.x, pos.y, &port );
+			Vector2I s = { sd.x / SECTOR_SIZE, sd.y / SECTOR_SIZE };
+			GridEdge gridEdge = worldMap->GetWorldInfo().GetGridEdge( s, port );
+			GLASSERT( worldMap->GetWorldInfo().HasGridEdge( gridEdge ));
 
-			GLASSERT( gridEdge.IsValid() );
-
-			dest = gridEdge.GridCenter();
+			dest.Set( (float)gridEdge.x * 0.5f, (float)gridEdge.y * 0.5f );
 			stateIfDestReached = TRAVELLING;
 		}
 		break;
@@ -134,16 +135,18 @@ int GridMoveComponent::DoTick( U32 delta, U32 since )
 	case TRAVELLING:
 		{	
 			GridEdge destEdge = worldMap->GetWorldInfo().GetGridEdge( sectorDest, portDest );
-			GridEdge current  = worldMap->GetWorldInfo().GetGridEdge( pos.x, pos.y );
+			Rectangle2F destRect;
+			destRect.min.Set( (float)destEdge.x * 0.5f, (float)destEdge.y * 0.5f );
+			destRect.max.x = destRect.min.x + 2.0f;
+			destRect.max.y = destRect.min.y + 2.0f;
 
-			if ( destEdge == current ) {
-				// travel to center!
-				dest = destEdge.GridCenter();
-				stateIfDestReached = OFF_BOARD;
+			goToDest = false;
+			if ( destRect.Contains( pos )) {
+				state = OFF_BOARD;
 			}
 			else {
-				goToDest = false;
 				if ( path.Size() == 0 ) {
+					GridEdge current = worldMap->GetWorldInfo().MapToGridEdge( (int)pos.x, (int)pos.y );
 					int result = worldMap->GetWorldInfoMutable()->Solve( current, destEdge, &path );
 					GLASSERT( result == micropather::MicroPather::SOLVED );
 				}
@@ -156,22 +159,13 @@ int GridMoveComponent::DoTick( U32 delta, U32 since )
 				float travel = Travel( speed, since );
 				while ( travel > 0 ) {
 					GridEdge ge   = path[0];
-					GridEdge next = path[1];
-					Vector2F corner = { 0, 0 };
-					if ( ge.alignment == GridEdge::HORIZONTAL ) {
-						if ( next.x < ge.x )	corner.Set( (float)ge.x, (float)ge.y );
-						else					corner.Set( (float)next.x, (float)ge.y );
-					}
-					else {
-						if ( next.y < ge.y )	corner.Set( (float)ge.x, (float)ge.y );
-						else					corner.Set( (float)ge.x, (float)next.y );
-					}
+					Vector2F target = { (float)ge.x * 0.5f, (float)ge.y * 0.5f };
 
-					Vector2F delta = corner - pos;
+					Vector2F delta = target - pos;
 					float len = delta.Length();
 					if ( len <= travel ) {
 						travel -= len;
-						pos = corner;
+						pos = target;
 						path.Remove( 0 );	// FIXME: potentially expensive - use index
 					}
 					else {

@@ -1,13 +1,17 @@
 #include "worldinfo.h"
+#include "worldgrid.h"
 
 #include "../grinliz/glrandom.h"
 
 using namespace tinyxml2;
 using namespace grinliz;
 
-WorldInfo::WorldInfo()
+WorldInfo::WorldInfo( const WorldGrid* grid, int mw, int mh )
 {
 	pather = new micropather::MicroPather( this, NUM_SECTORS*NUM_SECTORS, 4, true );
+	worldGrid = grid;
+	mapWidth = mw;
+	mapHeight = mh;
 }
 
 
@@ -19,8 +23,8 @@ WorldInfo::~WorldInfo()
 
 int WorldInfo::Solve( GridEdge start, GridEdge end, grinliz::CDynArray<GridEdge>* path )
 {
-	GLASSERT( HasGridEdge( start ));
-	GLASSERT( HasGridEdge( end ));
+	GLASSERT( HasGridEdge( start.x, start.y ));
+	GLASSERT( HasGridEdge( end.x, end.y ));
 
 	path->Clear();
 	float cost = 0;
@@ -44,72 +48,41 @@ void WorldInfo::Serialize( XStream* xs )
 }
 
 
-bool WorldInfo::HasGridEdge( GridEdge g ) const
+bool WorldInfo::HasGridEdge( int geX, int geY ) const
 {
-	if ( g.x < 0 || g.x >= NUM_SECTORS || g.y < 0 || g.y >= NUM_SECTORS )
-		return false;
-	const SectorData& sd = sectorData[g.y+NUM_SECTORS+g.x];
-
-	// GridEdge H at 0,0 and V at 0,0 is the origin.
-	if ( g.alignment == GridEdge::HORIZONTAL ) {
-		return ( sd.ports & SectorData::NEG_Y ) != 0;
-	}
-	return ( sd.ports & SectorData::NEG_X ) != 0;
+	Vector2I m = GridEdgeToMap( geX, geY );
+	return worldGrid[m.y*mapWidth + m.x].IsGrid();
 }
 
 
-GridEdge WorldInfo::GetGridEdge( const grinliz::Vector2I& sector, int axis ) const
+GridEdge WorldInfo::GetGridEdge( const grinliz::Vector2I& sector, int port ) const
 {
 	GLASSERT( sector.x >= 0 && sector.x < NUM_SECTORS && sector.y >= 0 && sector.y < NUM_SECTORS );
 	const SectorData& sd = sectorData[sector.y*NUM_SECTORS+sector.x];
-	GridEdge g = { 0, 0, 0 };
+	GridEdge g = { 0, 0 };
 
-	if ( sd.ports & axis ) {
-		if ( axis == SectorData::NEG_X ) {
-			g.alignment = GridEdge::VERTICAL;
-			g.x = sector.x;
-			g.y = sector.y;
+	if ( sd.ports & port ) {
+		if ( port == SectorData::NEG_X ) {
+			g.x = sector.x*2;
+			g.y = sector.y*2 + 1;
 		}
-		else if ( axis == SectorData::POS_X ) {
-			g.alignment = GridEdge::VERTICAL;
-			g.x = sector.x + 1;
-			g.y = sector.y;
+		else if ( port == SectorData::POS_X ) {
+			g.x = (sector.x+1)*2;
+			g.y = sector.y*2 + 1;
 		}
-		else if ( axis == SectorData::NEG_Y ) {
-			g.alignment = GridEdge::HORIZONTAL;
-			g.x = sector.x;
-			g.y = sector.y;
+		else if ( port == SectorData::NEG_Y ) {
+			g.x = sector.x*2 + 1;
+			g.y = sector.y*2;
 		}
-		else if ( axis == SectorData::POS_Y ) {
-			g.alignment = GridEdge::HORIZONTAL;
-			g.x = sector.x;
-			g.y = sector.y + 1;
+		else if ( port == SectorData::POS_Y ) {
+			g.x = sector.x*2 + 1;
+			g.y = (sector.y+1)*2;
 		}
 		else {
 			GLASSERT( 0 );
 		}
 	}
-	GLASSERT( HasGridEdge( g ));
 	return g;
-}
-
-
-GridEdge WorldInfo::GetGridEdge( float x, float y ) const
-{
-	int gx = (int)x / SECTOR_SIZE;
-	int gy = (int)y / SECTOR_SIZE;
-	int align = 0;
-
-	// Horizontal.
-	if ( y == (float)(gy*SECTOR_SIZE) ) {
-		align = GridEdge::HORIZONTAL;
-	}
-	else {
-		align = GridEdge::VERTICAL;
-	}
-	GridEdge ge = { align, gx, gy };
-	GLASSERT( HasGridEdge( ge ));
-	return ge;
 }
 
 
@@ -135,29 +108,21 @@ int WorldInfo::NearestPort( const grinliz::Vector2I& sector, const grinliz::Vect
 }
 
 
-const SectorData& WorldInfo::GetSectorInfo( float fx, float fy, int *p_axis, GridEdge* p_edge ) const
+const SectorData& WorldInfo::GetSectorInfo( float fx, float fy, int *port ) const
 {
 	const SectorData& sd = GetSector( (int)fx, (int)fy );
 	Vector2I v = { sd.x/SECTOR_SIZE, sd.y/SECTOR_SIZE };
 
 	int axis = 0;
-	if ( p_axis || p_edge ) {
+	if ( port ) {
 		int dx = (int)fx - (v.x*SECTOR_SIZE + SECTOR_SIZE/2);
 		int dy = (int)fy - (v.y*SECTOR_SIZE + SECTOR_SIZE/2);
 		if ( abs(dx) > abs(dy) ) {
-			axis = ( dx > 0 ) ? SectorData::POS_X : SectorData::NEG_X;
+			*port = ( dx > 0 ) ? SectorData::POS_X : SectorData::NEG_X;
 		}
 		else {
-			axis = ( dy > 0 ) ? SectorData::POS_Y : SectorData::NEG_Y;
+			*port = ( dy > 0 ) ? SectorData::POS_Y : SectorData::NEG_Y;
 		}
-	}
-	if ( p_edge && axis ) {
-		p_edge->x = 0;
-		p_edge->y = 0;
-		*p_edge = GetGridEdge( v, axis );
-	}
-	if ( p_axis ) {
-		*p_axis = axis;
 	}
 	return sd;
 }
@@ -171,11 +136,8 @@ float WorldInfo::LeastCostEstimate( void* stateStart, void* stateEnd )
 	GLASSERT( HasGridEdge( start ));
 	GLASSERT( HasGridEdge( end ));
 
-	Vector2F cStart = start.GridCenter();
-	Vector2F cEnd   = end.GridCenter();
-
-	float len = fabs( cStart.x - cEnd.x ) + fabs( cStart.y - cEnd.y );
-	return len;
+	int len = abs( start.x - end.x ) + abs( start.y - end.y );
+	return (float)len;
 }
 
 
@@ -185,47 +147,15 @@ void  WorldInfo::AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > 
 	const GridEdge g = FromState( state );
 	GLASSERT( HasGridEdge( g ));
 
-	/*
-	 	  |	V1,0  |    V2,0
-	 	--+-------+--- H2,1
-	H 0,1 |	1,1   |    V2,1
-	V 1,1
-	*/
-	const GridEdge alth[6] = {
-		{ GridEdge::VERTICAL,   g.x,   g.y-1 },
-		{ GridEdge::HORIZONTAL, g.x-1, g.y },
-		{ GridEdge::VERTICAL,   g.x,   g.y },
+	static const GridEdge alt[] = {
+		{ g.x + 1, g.y },
+		{ g.x - 1, g.y },
+		{ g.x, g.y + 1 },
+		{ g.x, g.y - 1 } };
 
-		{ GridEdge::VERTICAL,	g.x+1, g.y-1 },
-		{ GridEdge::HORIZONTAL,	g.x+1, g.y },
-		{ GridEdge::VERTICAL,	g.x+1, g.y } 
-	};
-
-	/*
-		|V1,0
-   H0,1-+- H1,1
-		|
-		| 1,1
-		|
-		+
-
-	*/
-
-	const GridEdge altv[6] = {
-		{ GridEdge::HORIZONTAL, g.x-1, g.y },
-		{ GridEdge::VERTICAL,	g.x,   g.y-1 },
-		{ GridEdge::HORIZONTAL, g.x,   g.y },
-
-		{ GridEdge::HORIZONTAL,	g.x-1, g.y+1 },
-		{ GridEdge::VERTICAL,	g.x,   g.y+1 },
-		{ GridEdge::HORIZONTAL,	g.x,   g.y+1 } 
-	};
-
-	const GridEdge* alt = ( g.alignment == GridEdge::HORIZONTAL ) ? alth : altv;
-
-	for( int i=0; i<6; ++i ) {
+	for( int i=0; i<4; ++i ) {
 		if ( HasGridEdge( alt[i] )) {
-			micropather::StateCost sc = { ToState(alt[i]), 1.0f };
+			micropather::StateCost sc = { ToState( alt[i] ), 0.5f };
 			adjacent->push_back( sc );
 		}
 	}
@@ -235,6 +165,6 @@ void  WorldInfo::AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > 
 void  WorldInfo::PrintStateInfo( void* state )
 {
 	GridEdge v = FromState( state );
-	GLOUTPUT(( "%s %d,%d ", v.alignment == GridEdge::HORIZONTAL ? "H" : "V", v.x, v.y ));
+	GLOUTPUT(( "%d,%d ", v.x, v.y ));
 }
 

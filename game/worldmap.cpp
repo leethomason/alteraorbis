@@ -57,7 +57,7 @@ WorldMap::WorldMap( int width, int height ) : Map( width, height )
 	grid = 0;
 	engine = 0;
 	pather = 0;
-	worldInfo = new WorldInfo();
+	worldInfo = 0;
 	Init( width, height );
 	slowTick = SLOW_TICK;
 
@@ -256,6 +256,9 @@ void WorldMap::Init( int w, int h )
 	this->height = h;
 	grid = new WorldGrid[width*height];
 	memset( grid, 0, width*height*sizeof(WorldGrid) );
+	
+	delete worldInfo;
+	worldInfo = new WorldInfo( grid, width, height );
 
 	delete pather;
 	pather = new micropather::MicroPather( this, width*height/16, 8, true );

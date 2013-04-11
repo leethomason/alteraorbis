@@ -7,6 +7,7 @@
 #include "gamelimits.h"
 #include "../engine/enginelimits.h"
 
+struct WorldGrid;
 
 class SectorData
 {
@@ -53,44 +54,25 @@ public:
 	}
 };
 
+/*
+	Double the sector coordinates.
+	2 3 4
+	+---+
+	|1,1|
+	|	|
+	+---+
 
-// Passed to the pather as a 32 bit value (not a pointer.)
-// The GridEdge is always "round down", so there is only the "neg-x" and "neg-y" flavor.
-struct GridEdge
-{
-	enum {
-		HORIZONTAL,
-		VERTICAL
-	};
-	U8 alignment;
-	S8 x;	// *sector* coordinates, not grid.
-	S16 y;	// could be U8, but don't want undefined bits.
-
-	bool operator==( const GridEdge& rhs ) const { return ( x == rhs.x && y == rhs.y && alignment == rhs.alignment ); }
-
-	grinliz::Vector2F GridCenter() const {
-		grinliz::Vector2F c = { 0, 0 };
-		if ( alignment == HORIZONTAL ) {
-			c.Set( (float)(x*SECTOR_SIZE + SECTOR_SIZE/2), (float)(y*SECTOR_SIZE) );
-		}
-		else {
-			c.Set( (float)(x*SECTOR_SIZE), (float)(y*SECTOR_SIZE + SECTOR_SIZE/2));
-		}
-		return c;
-	}
-
-	bool IsValid() const { return x > 0 || y > 0; }
-};
-
+*/
+typedef grinliz::Vector2<S16> GridEdge;
 
 class WorldInfo : public micropather::Graph
 {
 public:
 	SectorData sectorData[NUM_SECTORS*NUM_SECTORS];
 
-	WorldInfo();
+	WorldInfo( const WorldGrid* worldGrid, int mapWidth, int mapHeight );
 	~WorldInfo();
-
+	
 	void Serialize( XStream* );
 	void Save( tinyxml2::XMLPrinter* printer );
 	void Load( const tinyxml2::XMLElement& parent );
@@ -109,22 +91,38 @@ public:
 		return sectorData[NUM_SECTORS*sy+sx];
 	}
 
-	// Get the grid edge from the sector and the axis.
-	GridEdge GetGridEdge( const grinliz::Vector2I& sector, int axis ) const;
-
-	// Get the current gridedge from the grid coordinates.
-	// Will be !Valid() if there is an error, or if the pos isn't on the grid.
-	GridEdge GetGridEdge( float x, float y ) const;
+	// Get the grid edge from the sector and the port.
+	// Return 0,0 if it doesn't exist.
+	GridEdge GetGridEdge( const grinliz::Vector2I& sector, int port ) const;
 
 	// Get the cx, cy of the sector from an arbitrary coordinate.
-	// 'axis' is optional, and returns NEG_X, etc.
-	// GridEdge is optional, and returns the gridEdge at that axis, if it exists.
-	const SectorData& GetSectorInfo( float x, float y, int* axis=0, GridEdge* edge=0 ) const;
+	// 'nearestPort' is optional.
+	const SectorData& GetSectorInfo( float x, float y, int* nearestPort ) const;
 
 	int NearestPort( const grinliz::Vector2I& sector, const grinliz::Vector2F& p ) const;
 
+	grinliz::Vector2I GridEdgeToSector( int x, int y ) const {
+		grinliz::Vector2I s = { x/2, y/2 };
+		GLASSERT( x >= 0 && x < NUM_SECTORS && y >=0 && y < NUM_SECTORS );
+		return s;
+	}
+	grinliz::Vector2I GridEdgeToMap( int x, int y ) const {
+		grinliz::Vector2I m = { x * SECTOR_SIZE / 2, y * SECTOR_SIZE / 2 };
+		GLASSERT( x >= 0 && x < MAX_MAP_SIZE && y >= 0 && y < MAX_MAP_SIZE );
+		return m;
+	}
+
+	GridEdge MapToGridEdge( int x, int y ) const {
+		GridEdge ge = { x*2 / SECTOR_SIZE, y*2 / SECTOR_SIZE };
+		return ge;
+	}
+
+	bool HasGridEdge( const GridEdge& ge ) const {
+		return HasGridEdge( ge.x, ge.y );
+	}
+	bool HasGridEdge( int geX, int geY ) const;
+
 private:
-	bool HasGridEdge( GridEdge g ) const;
 
 	GridEdge FromState( void* state ) {
 		GLASSERT( sizeof(GridEdge) == sizeof(void*) );
@@ -137,6 +135,10 @@ private:
 	}
 	micropather::MPVector< void* > patherVector;
 	micropather::MicroPather* pather;
+
+	int mapWidth;
+	int mapHeight;
+	const WorldGrid* worldGrid;
 };
 
 #endif // LUMOS_WORLDINFO_INCLUDED
