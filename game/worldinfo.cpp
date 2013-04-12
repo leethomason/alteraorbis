@@ -50,7 +50,8 @@ void WorldInfo::Serialize( XStream* xs )
 
 bool WorldInfo::HasGridEdge( int geX, int geY ) const
 {
-	Vector2I m = GridEdgeToMap( geX, geY );
+	GridEdge e = { geX, geY };
+	Vector2I m = GridEdgeToMap( e );
 	return worldGrid[m.y*mapWidth + m.x].IsGrid();
 }
 
@@ -88,7 +89,7 @@ GridEdge WorldInfo::GetGridEdge( const grinliz::Vector2I& sector, int port ) con
 
 int WorldInfo::NearestPort( const grinliz::Vector2I& sector, const grinliz::Vector2F& p ) const
 {
-	const SectorData& sd = GetSector( sector.x, sector.y );
+	const SectorData& sd = GetSector( sector );
 	int best = 0;
 	if ( sd.ports ) {
 		int shortest = INT_MAX;
@@ -110,8 +111,8 @@ int WorldInfo::NearestPort( const grinliz::Vector2I& sector, const grinliz::Vect
 
 const SectorData& WorldInfo::GetSectorInfo( float fx, float fy, int *port ) const
 {
-	const SectorData& sd = GetSector( (int)fx, (int)fy );
-	Vector2I v = { sd.x/SECTOR_SIZE, sd.y/SECTOR_SIZE };
+	Vector2I v = { (int)fx / SECTOR_SIZE, (int)fy / SECTOR_SIZE };
+	const SectorData& sd = GetSector( v );
 
 	int axis = 0;
 	if ( port ) {
@@ -147,7 +148,7 @@ void  WorldInfo::AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > 
 	const GridEdge g = FromState( state );
 	GLASSERT( HasGridEdge( g ));
 
-	static const GridEdge alt[] = {
+	const GridEdge alt[] = {
 		{ g.x + 1, g.y },
 		{ g.x - 1, g.y },
 		{ g.x, g.y + 1 },

@@ -9,7 +9,7 @@
 
 using namespace grinliz;
 
-static const float GRID_SPEED = MOVE_SPEED * 2.0f;
+static const float GRID_SPEED = MOVE_SPEED * 4.0f;
 static const float GRID_ACCEL = 1.0f;
 
 GridMoveComponent::GridMoveComponent( WorldMap* wm ) : GameMoveComponent( wm )
@@ -109,36 +109,48 @@ int GridMoveComponent::DoTick( U32 delta, U32 since )
 	}
 	else {
 		speed -= Travel( GRID_ACCEL, since );
-		if ( speed < 0 ) speed = 0;
+		if ( speed < MOVE_SPEED ) speed = MOVE_SPEED;
 	}
 
 	Vector2F dest = { 0, 0 };
 	int stateIfDestReached = DONE;
 	bool goToDest = true;
+	const WorldInfo& worldInfo = worldMap->GetWorldInfo();
 
 	switch ( state ) 
 	{
+	
 	case ON_BOARD:
 		// Presume we started somewhere rational. Move to grid.
 		{
 			int port = 0;
-			const SectorData& sd = worldMap->GetWorldInfo().GetSectorInfo( pos.x, pos.y, &port );
-			Vector2I s = { sd.x / SECTOR_SIZE, sd.y / SECTOR_SIZE };
-			GridEdge gridEdge = worldMap->GetWorldInfo().GetGridEdge( s, port );
-			GLASSERT( worldMap->GetWorldInfo().HasGridEdge( gridEdge ));
+			const SectorData& sd = worldInfo.GetSectorInfo( pos.x, pos.y, &port );
+			Vector2I sector = { sd.x / SECTOR_SIZE, sd.y / SECTOR_SIZE };
+			GridEdge gridEdge = worldInfo.GetGridEdge( sector, port );
+			GLASSERT( worldInfo.HasGridEdge( gridEdge ));
 
-			dest.Set( (float)gridEdge.x * 0.5f, (float)gridEdge.y * 0.5f );
+			dest = worldInfo.GridEdgeToMapF( gridEdge );
 			stateIfDestReached = TRAVELLING;
+		}
+		break;
+
+	case OFF_BOARD:
+		{
+			const SectorData& sd = worldInfo.GetSector( sectorDest );
+			Rectangle2I portBounds = sd.GetPortLoc( portDest );
+			dest = SectorData::PortPos( portBounds, parentChit->ID() );
+			stateIfDestReached = DONE;
 		}
 		break;
 
 	case TRAVELLING:
 		{	
-			GridEdge destEdge = worldMap->GetWorldInfo().GetGridEdge( sectorDest, portDest );
+			GridEdge destEdge = worldInfo.GetGridEdge( sectorDest, portDest );
+			Vector2F destPt   = worldInfo.GridEdgeToMapF( destEdge ); 
+			
 			Rectangle2F destRect;
-			destRect.min.Set( (float)destEdge.x * 0.5f, (float)destEdge.y * 0.5f );
-			destRect.max.x = destRect.min.x + 2.0f;
-			destRect.max.y = destRect.min.y + 2.0f;
+			destRect.min = destRect.max = destPt;
+			destRect.Outset( 0.2f );
 
 			goToDest = false;
 			if ( destRect.Contains( pos )) {
@@ -150,16 +162,11 @@ int GridMoveComponent::DoTick( U32 delta, U32 since )
 					int result = worldMap->GetWorldInfoMutable()->Solve( current, destEdge, &path );
 					GLASSERT( result == micropather::MicroPather::SOLVED );
 				}
-				if ( path.Size() < 2 ) {
-					GLASSERT( 0 );
-					state = DONE;
-					return 0;
-				}
 
 				float travel = Travel( speed, since );
 				while ( travel > 0 ) {
 					GridEdge ge   = path[0];
-					Vector2F target = { (float)ge.x * 0.5f, (float)ge.y * 0.5f };
+					Vector2F target = worldInfo.GridEdgeToMapF( ge );
 
 					Vector2F delta = target - pos;
 					float len = delta.Length();
@@ -196,11 +203,11 @@ int GridMoveComponent::DoTick( U32 delta, U32 since )
 				state = stateIfDestReached;
 				pos = dest;
 			}
-			sc->SetPosition( pos.x, 0, pos.y );
 		}
 		else {
 			state = stateIfDestReached;
 		}
 	}
+	sc->SetPosition( pos.x, 0, pos.y );
 	return tick;
 }

@@ -52,6 +52,7 @@ public:
 		r.Outset( -1 );
 		return r;
 	}
+	static grinliz::Vector2F PortPos( const grinliz::Rectangle2I portBounds, U32 seed );
 };
 
 /*
@@ -84,11 +85,9 @@ public:
 	int Solve( GridEdge start, GridEdge end, grinliz::CDynArray<GridEdge>* path );
 
 	// Get the current sector from the grid coordinates.
-	const SectorData& GetSector( int x, int y ) const {
-		int sx = x / SECTOR_SIZE;
-		int sy = y / SECTOR_SIZE;
-		GLASSERT( sx >= 0 && sy >= 0 && sx < NUM_SECTORS && sy < NUM_SECTORS );
-		return sectorData[NUM_SECTORS*sy+sx];
+	const SectorData& GetSector( const grinliz::Vector2I& sector ) const {
+		GLASSERT( sector.x >= 0 && sector.y >= 0 && sector.x < NUM_SECTORS && sector.y < NUM_SECTORS );
+		return sectorData[NUM_SECTORS*sector.y+sector.x];
 	}
 
 	// Get the grid edge from the sector and the port.
@@ -101,15 +100,22 @@ public:
 
 	int NearestPort( const grinliz::Vector2I& sector, const grinliz::Vector2F& p ) const;
 
-	grinliz::Vector2I GridEdgeToSector( int x, int y ) const {
-		grinliz::Vector2I s = { x/2, y/2 };
-		GLASSERT( x >= 0 && x < NUM_SECTORS && y >=0 && y < NUM_SECTORS );
+	grinliz::Vector2I GridEdgeToSector( GridEdge e ) const {
+		grinliz::Vector2I s = { e.x/2, e.y/2 };
+		GLASSERT( s.x >= 0 && s.x < NUM_SECTORS && s.y >=0 && s.y < NUM_SECTORS );
 		return s;
 	}
-	grinliz::Vector2I GridEdgeToMap( int x, int y ) const {
-		grinliz::Vector2I m = { x * SECTOR_SIZE / 2, y * SECTOR_SIZE / 2 };
-		GLASSERT( x >= 0 && x < MAX_MAP_SIZE && y >= 0 && y < MAX_MAP_SIZE );
+
+	grinliz::Vector2I GridEdgeToMap( GridEdge e ) const {
+		grinliz::Vector2I m = { e.x * SECTOR_SIZE / 2, e.y * SECTOR_SIZE / 2 };
+		GLASSERT( m.x >= 0 && m.x < MAX_MAP_SIZE && m.y >= 0 && m.y < MAX_MAP_SIZE );
 		return m;
+	}
+
+	grinliz::Vector2F GridEdgeToMapF( GridEdge e ) const {
+		grinliz::Vector2I m = GridEdgeToMap( e );
+		grinliz::Vector2F v = { (float)m.x, (float)m.y };
+		return v;
 	}
 
 	GridEdge MapToGridEdge( int x, int y ) const {

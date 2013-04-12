@@ -469,6 +469,17 @@ Rectangle2I SectorData::GetPortLoc( int port ) const
 }
 
 
+Vector2F SectorData::PortPos( const grinliz::Rectangle2I portRect, U32 seed )
+{
+	Random random( seed );
+	Vector2F dest;
+	dest.x = (float)(portRect.min.x + random.Rand( portRect.Width() )) + 0.5f;
+	dest.y = (float)(portRect.min.y + random.Rand( portRect.Height())) + 0.5f;
+	return dest;
+}
+
+
+
 void WorldGen::AddPorts( SectorData* s )
 {
 	int x = s->x;

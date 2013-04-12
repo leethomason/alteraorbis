@@ -640,13 +640,6 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 		dest = ThinkWanderCircle( thisComp );
 	}
 
-	/*
-	Vector2F pos = thisComp.spatial->GetPosition2D();
-	Rectangle2I sectorBounds = map->GetWorldInfo().GetSector( (int)pos.x, (int)pos.y ).InnerBounds();
-	dest.x = Clamp( dest.x, (float)sectorBounds.min.x, (float)(sectorBounds.max.x-1) );
-	dest.y = Clamp( dest.y, (float)sectorBounds.min.y, (float)(sectorBounds.max.y-1) );
-	*/
-
 	PathMoveComponent* pmc = GET_COMPONENT( thisComp.chit, PathMoveComponent );
 	if ( pmc ) {
 		pmc->QueueDest( dest );

@@ -395,8 +395,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 						int id = chit->ID();
 						Rectangle2I portRect = sim->GetWorldMap()->NearestPort( pos );
 						if ( portRect.max.x > 0 && portRect.max.y > 0 ) {
-							dest.x = (float)(portRect.min.x + (id%portRect.Width() )) + 0.5f;
-							dest.y = (float)(portRect.min.y + (id%portRect.Height())) + 0.5f;
+							dest = SectorData::PortPos( portRect, chit->ID() );
 							sector = destSector;
 						}
 					}

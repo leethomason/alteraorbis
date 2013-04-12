@@ -1258,7 +1258,8 @@ bool WorldMap::GridPath( const grinliz::Vector2F& p0, const grinliz::Vector2F& p
 
 Rectangle2I WorldMap::NearestPort( const Vector2F& pos )
 {
-	const SectorData& sd = worldInfo->GetSector( (int)pos.x, (int)pos.y );
+	Vector2I secPos = { (int)pos.x / SECTOR_SIZE, (int)pos.y / SECTOR_SIZE };
+	const SectorData& sd = worldInfo->GetSector( secPos );
 
 	int   bestPort = 0;
 	float bestCost = FLT_MAX;
