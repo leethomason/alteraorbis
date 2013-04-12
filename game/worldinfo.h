@@ -8,13 +8,17 @@
 #include "../engine/enginelimits.h"
 
 struct WorldGrid;
+namespace micropather {
+	class MicroPather;
+}
 
 class SectorData
 {
 public:
-	SectorData() : x(0), y(0), ports(0), area(0) {
+	SectorData() : x(0), y(0), ports(0), area(0), pather(0) {
 		core.Zero();
 	}
+	~SectorData();
 
 	void Serialize( XStream* xs );
 
@@ -28,6 +32,7 @@ public:
 	int  ports;		// if attached to the grid, has ports. 
 	grinliz::Vector2I core;
 	int  area;
+	micropather::MicroPather* pather;
 
 	bool HasCore() const { return core.x > 0 && core.y > 0; }
 	grinliz::Rectangle2I GetPortLoc( int port ) const;

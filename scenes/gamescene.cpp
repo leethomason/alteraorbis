@@ -282,8 +282,9 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 					TapModel( model->userData );
 				}
 				else if ( chit ) {
-					if ( camModeButton[TRACK].Down() ) {
-						Vector2F dest = { at.x, at.z };
+					Vector2F dest = { at.x, at.z };
+					DoDestTapped( dest );
+					/*if ( camModeButton[TRACK].Down() ) {
 						AIComponent* ai = GET_COMPONENT( chit, AIComponent );
 						if ( ai ) {
 							ai->FocusedMove( dest, 0 );
@@ -299,7 +300,7 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 						SpatialComponent* sc = chit->GetSpatialComponent();
 						GLASSERT( sc );
 						sc->SetPosition( at.x, 0, at.z );
-					}
+					}*/
 				}
 				else {
 					sim->GetEngine()->CameraLookAt( at.x, at.z );
@@ -378,42 +379,51 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 	}
 
 	if ( dest.x >= 0 ) {
-		Chit* chit = sim->GetPlayerChit();
-		if ( chit ) {
-			if ( camModeButton[TRACK].Down() ) {
-				AIComponent* ai = GET_COMPONENT( chit, AIComponent );
-				GLASSERT( ai );
-				if ( ai ) {
-					Vector2F pos = chit->GetSpatialComponent()->GetPosition2D();
-					// Is this grid travel or normal travel?
-					Vector2I currentSector = SectorData::SectorID( pos.x, pos.y );
-					Vector2I destSector    = SectorData::SectorID( dest.x, dest.y );
-					Vector2I sector = { 0, 0 };
-					
-					if ( currentSector != destSector ) {
-						// Find the nearest port.
-						int id = chit->ID();
-						Rectangle2I portRect = sim->GetWorldMap()->NearestPort( pos );
-						if ( portRect.max.x > 0 && portRect.max.y > 0 ) {
-							dest = SectorData::PortPos( portRect, chit->ID() );
-							sector = destSector;
-						}
-					}
-
-					ai->FocusedMove( dest, sector.IsZero() ? 0 : &sector );
-				}
-			}
-			else if ( camModeButton[TELEPORT].Down() ) {
-				SpatialComponent* sc = chit->GetSpatialComponent();
-				GLASSERT( sc );
-				sc->SetPosition( dest.x, 0, dest.y );
-			}
-		}
-		else {
-			sim->GetEngine()->CameraLookAt( dest.x, dest.y );
-		}
+		DoDestTapped( dest );
 	}
 }
+
+
+void GameScene::DoDestTapped( const Vector2F& _dest )
+{
+	Vector2F dest = _dest;
+
+	Chit* chit = sim->GetPlayerChit();
+	if ( chit ) {
+		if ( camModeButton[TRACK].Down() ) {
+			AIComponent* ai = GET_COMPONENT( chit, AIComponent );
+			GLASSERT( ai );
+			if ( ai ) {
+				Vector2F pos = chit->GetSpatialComponent()->GetPosition2D();
+				// Is this grid travel or normal travel?
+				Vector2I currentSector = SectorData::SectorID( pos.x, pos.y );
+				Vector2I destSector    = SectorData::SectorID( dest.x, dest.y );
+				Vector2I sector = { 0, 0 };
+					
+				if ( currentSector != destSector ) {
+					// Find the nearest port.
+					int id = chit->ID();
+					Rectangle2I portRect = sim->GetWorldMap()->NearestPort( pos );
+					if ( portRect.max.x > 0 && portRect.max.y > 0 ) {
+						dest = SectorData::PortPos( portRect, chit->ID() );
+						sector = destSector;
+					}
+				}
+
+				ai->FocusedMove( dest, sector.IsZero() ? 0 : &sector );
+			}
+		}
+		else if ( camModeButton[TELEPORT].Down() ) {
+			SpatialComponent* sc = chit->GetSpatialComponent();
+			GLASSERT( sc );
+			sc->SetPosition( dest.x, 0, dest.y );
+		}
+	}
+	else {
+		sim->GetEngine()->CameraLookAt( dest.x, dest.y );
+	}
+}
+
 
 
 void GameScene::HandleHotKey( int mask )
@@ -526,12 +536,17 @@ void GameScene::DrawDebugText()
 	Chit* chit = sim->GetPlayerChit();
 	Engine* engine = sim->GetEngine();
 	LumosChitBag* chitBag = sim->GetChitBag();
+	Vector3F at = { 0, 0, 0 };
 
 	if ( chit && chit->GetSpatialComponent() ) {
 		const Vector3F& v = chit->GetSpatialComponent()->GetPosition();
+		at = v;
 		ufoText->Draw( 0, 32, "Player: %.1f, %.1f, %.1f  Camera: %.1f %.1f %.1f", 
 			           v.x, v.y, v.z,
 					   engine->camera.PosWC().x, engine->camera.PosWC().y, engine->camera.PosWC().z );
+	}
+	else {
+		engine->CameraLookingAt( &at );
 	}
 
 	ufoText->Draw( 0, 48, "Tap world or map to go to location. End/Home rotate, PgUp/Down zoom." );
@@ -567,9 +582,12 @@ void GameScene::DrawDebugText()
 	ufoText->Draw( 0, 80,	"Plants type: %d %d %d %d %d %d %d %d stage: %d %d %d %d", 
 									typeCount[0], typeCount[1], typeCount[2], typeCount[3], typeCount[4], typeCount[5], typeCount[6], typeCount[7],
 									stageCount[0], stageCount[1], stageCount[2], stageCount[3] );
+
 	micropather::CacheData cacheData;
-	sim->GetWorldMap()->PatherCacheHitMiss( &cacheData );
-	ufoText->Draw( 0, 96, "Pather kb=%d/%d %.2f cache h:m=%d:%d %.2f", 
+	Vector2I sector = { (int)at.x/SECTOR_SIZE, (int)at.z/SECTOR_SIZE };
+	sim->GetWorldMap()->PatherCacheHitMiss( sector, &cacheData );
+	ufoText->Draw( 0, 96, "Pather(%d,%d) kb=%d/%d %.2f cache h:m=%d:%d %.2f", 
+						  sector.x, sector.y,
 						  cacheData.nBytesUsed/1024,
 						  cacheData.nBytesAllocated/1024,
 						  cacheData.memoryFraction,

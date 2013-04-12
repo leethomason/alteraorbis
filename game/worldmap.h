@@ -167,7 +167,7 @@ public:
 	void ShowRegionPath( float x0, float y0, float x1, float y1 );
 	bool IsShowingRegionOverlay() const { return debugRegionOverlay; }
 	void ShowRegionOverlay( bool over ) { debugRegionOverlay = over; }
-	void PatherCacheHitMiss( micropather::CacheData* data )	{ pather->GetCacheData( data ); }
+	void PatherCacheHitMiss( const grinliz::Vector2I& sector, micropather::CacheData* data );
 	int CalcNumRegions();
 
 	// --- MetaData --- //
@@ -305,8 +305,14 @@ private:
 	int							slowTick;
 
 	WorldInfo*					worldInfo;
-	micropather::MicroPather*	pather;
 	bool						debugRegionOverlay;
+
+	micropather::MicroPather*	currentPather;
+	micropather::MicroPather* PushPather( const grinliz::Vector2I& sector );
+	void PopPather() {
+		GLASSERT( currentPather );
+		currentPather = 0;
+	}
 
 	MP_VECTOR< void* >						pathRegions;
 	grinliz::CDynArray< grinliz::Vector2F >	debugPathVector;

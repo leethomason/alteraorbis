@@ -90,6 +90,8 @@ GridEdge WorldInfo::GetGridEdge( const grinliz::Vector2I& sector, int port ) con
 int WorldInfo::NearestPort( const grinliz::Vector2I& sector, const grinliz::Vector2F& p ) const
 {
 	const SectorData& sd = GetSector( sector );
+	Vector2I pi = { LRintf( p.x ), LRintf( p.y ) };
+
 	int best = 0;
 	if ( sd.ports ) {
 		int shortest = INT_MAX;
@@ -97,7 +99,7 @@ int WorldInfo::NearestPort( const grinliz::Vector2I& sector, const grinliz::Vect
 		for( int i=0; i<4; ++i ) {
 			int port = 1<<i;
 			if ( sd.ports & port ) {
-				int len2 = (sd.GetPortLoc(port).Center() - sector).LengthSquared();
+				int len2 = (sd.GetPortLoc(port).Center() - pi).LengthSquared();
 				if ( len2 < shortest ) {
 					shortest = len2;
 					best = port;

@@ -421,7 +421,8 @@ void BattleTestScene::DrawDebugText()
 	UFOText* ufoText = UFOText::Instance();
 
 	micropather::CacheData cacheData;
-	map->PatherCacheHitMiss( &cacheData );
+	Vector2I sector = { 0, 0 };
+	map->PatherCacheHitMiss( sector, &cacheData );
 
 	ufoText->Draw( 0, 16, "PathCache mem=%%=%d hit%%=%d chits:ticked/total=%d/%d regions=%d", 
 		(int)(cacheData.memoryFraction * 100.0f),

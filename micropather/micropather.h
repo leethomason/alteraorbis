@@ -403,6 +403,7 @@ namespace micropather
 	};
 
 	struct CacheData {
+		CacheData() : nBytesAllocated(0), nBytesUsed(0), memoryFraction(0), hit(0), miss(0), hitFraction(0) {}
 		int nBytesAllocated;
 		int nBytesUsed;
 		float memoryFraction;

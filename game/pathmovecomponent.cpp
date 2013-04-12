@@ -475,10 +475,6 @@ int PathMoveComponent::DoTick( U32 delta, U32 since )
 						portJump = dest.sector;
 						// Nearest port to current location. This looks a little weird.
 						portJumpPort = map->GetWorldInfo().NearestPort( dest.sector, pos2 );
-						// Debugging;
-						if ( portJumpPort ) {
-							map->GetWorldInfo().GetGridEdge( portJump, portJumpPort );
-						}
 					}
 				}
 				SetNoPath();

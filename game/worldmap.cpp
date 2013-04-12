@@ -56,7 +56,7 @@ WorldMap::WorldMap( int width, int height ) : Map( width, height )
 
 	grid = 0;
 	engine = 0;
-	pather = 0;
+	currentPather = 0;
 	worldInfo = 0;
 	Init( width, height );
 	slowTick = SLOW_TICK;
@@ -77,7 +77,6 @@ WorldMap::~WorldMap()
 
 	DeleteAllRegions();
 	delete [] grid;
-	delete pather;
 	delete worldInfo;
 }
 
@@ -182,9 +181,6 @@ void WorldMap::Load( const char* pathToDAT )
 		
 		Tessellate();
 		usingSectors = true;
-		if ( pather ) {
-			pather->Reset();
-		}
 		// Set up the rocks.
 		for( int j=0; j<height; ++j ) {
 			for( int i=0; i<width; ++i ) {
@@ -193,6 +189,15 @@ void WorldMap::Load( const char* pathToDAT )
 				SetRock( i, j, -2, 0, grid[index].Magma() );
 			}
 		}
+	}
+}
+
+
+void WorldMap::PatherCacheHitMiss( const grinliz::Vector2I& sector, micropather::CacheData* data )
+{
+	const SectorData& sd = worldInfo->GetSector( sector );
+	if ( sd.pather ) {
+		sd.pather->GetCacheData( data );
 	}
 }
 
@@ -249,9 +254,6 @@ void WorldMap::Init( int w, int h )
 	waterInit.ClearAll();
 	DeleteAllRegions();
 	delete [] grid;
-	if ( pather ) {
-		pather->Reset();
-	}	
 	this->width = w;
 	this->height = h;
 	grid = new WorldGrid[width*height];
@@ -259,9 +261,6 @@ void WorldMap::Init( int w, int h )
 	
 	delete worldInfo;
 	worldInfo = new WorldInfo( grid, width, height );
-
-	delete pather;
-	pather = new micropather::MicroPather( this, width*height/16, 8, true );
 }
 
 
@@ -840,6 +839,9 @@ void WorldMap::SetRock( int x, int y, int h, int pool, bool magma )
 
 void WorldMap::SetBlocked( const grinliz::Rectangle2I& pos )
 {
+	GLASSERT( pos.min.x / SECTOR_SIZE == pos.max.x / SECTOR_SIZE );
+	GLASSERT( pos.min.y / SECTOR_SIZE == pos.max.y / SECTOR_SIZE );
+
 	for( int y=pos.min.y; y<=pos.max.y; ++y ) {
 		for( int x=pos.min.x; x<=pos.max.x; ++x ) {
 			int i = INDEX( x, y );
@@ -851,12 +853,20 @@ void WorldMap::SetBlocked( const grinliz::Rectangle2I& pos )
 			//GLOUTPUT(( "Block (%d,%d) index=%d zone=%d set\n", x, y, i, ZDEX(x,y) ));
 		}
 	}
-	pather->Reset();
+
+	Vector2I sector = { pos.min.x/SECTOR_SIZE, pos.min.y/SECTOR_SIZE };
+	micropather::MicroPather* pather = worldInfo->GetSector( sector ).pather;
+	if ( pather ) {
+		pather->Reset();
+	}
 }
 
 
 void WorldMap::ClearBlocked( const grinliz::Rectangle2I& pos )
 {
+	GLASSERT( pos.min.x / SECTOR_SIZE == pos.max.x / SECTOR_SIZE );
+	GLASSERT( pos.min.y / SECTOR_SIZE == pos.max.y / SECTOR_SIZE );
+
 	for( int y=pos.min.y; y<=pos.max.y; ++y ) {
 		for( int x=pos.min.x; x<=pos.max.x; ++x ) {
 			int i = INDEX( x, y );
@@ -865,7 +875,11 @@ void WorldMap::ClearBlocked( const grinliz::Rectangle2I& pos )
 			zoneInit.Clear( x>>ZONE_SHIFT, y>>ZONE_SHIFT );
 		}
 	}
-	pather->Reset();
+	Vector2I sector = { pos.min.x/SECTOR_SIZE, pos.min.y/SECTOR_SIZE };
+	micropather::MicroPather* pather = worldInfo->GetSector( sector ).pather;
+	if ( pather ) {
+		pather->Reset();
+	}
 }
 
 
@@ -1310,6 +1324,21 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 }
 
 
+micropather::MicroPather* WorldMap::PushPather( const Vector2I& sector )
+{
+	GLASSERT( currentPather == 0 );
+	GLASSERT( sector.x >= 0 && sector.x < NUM_SECTORS );
+	GLASSERT( sector.y >= 0 && sector.y < NUM_SECTORS );
+	SectorData* sd = &worldInfo->sectorData[sector.y*NUM_SECTORS+sector.x];
+	if ( !sd->pather ) {
+		sd->pather = new micropather::MicroPather( this, sd->area, 7, true );
+	}
+	currentPather = sd->pather;
+	GLASSERT( currentPather );
+	return currentPather;
+}
+
+
 bool WorldMap::CalcPath(	const grinliz::Vector2F& start, 
 							const grinliz::Vector2F& end, 
 							CDynArray<grinliz::Vector2F> *path,
@@ -1324,6 +1353,7 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 
 	Vector2I starti = { (int)start.x, (int)start.y };
 	Vector2I endi   = { (int)end.x,   (int)end.y };
+	Vector2I sector = { starti.x/SECTOR_SIZE, starti.y/SECTOR_SIZE };
 
 	// Flush out regions that aren't valid.
 	for( int j=0; j<height; j+= ZONE_SIZE ) {
@@ -1362,6 +1392,8 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 
 	// Use the region solver.
 	if ( !okay ) {
+		micropather::MicroPather* pather = PushPather( sector );
+
 		int result = pather->Solve( ToState( starti.x, starti.y ), ToState( endi.x, endi.y ), 
 								    &pathRegions, totalCost );
 		if ( result == micropather::MicroPather::SOLVED ) {
@@ -1415,6 +1447,7 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 				path->Push( end );
 			}
 		}
+		PopPather();
 	}
 
 	if ( okay ) {
@@ -1448,17 +1481,21 @@ void WorldMap::ShowRegionPath( float x0, float y0, float x1, float y1 )
 	ClearDebugDrawing();
 
 	void* start = ToState( (int)x0, (int)y0 );
-	void* end   = ToState( (int)x1, (int)y1 );;
+	void* end   = ToState( (int)x1, (int)y1 );
+	Vector2I sector = { (int)x0/SECTOR_SIZE, (int)y0/SECTOR_SIZE };
 	
 	if ( start && end ) {
 		float cost=0;
+		micropather::MicroPather* pather = PushPather( sector );
 		int result = pather->Solve( start, end, &pathRegions, &cost );
+
 		if ( result == micropather::MicroPather::SOLVED ) {
 			for( unsigned i=0; i<pathRegions.size(); ++i ) {
 				WorldGrid* vp = ToGrid( pathRegions[i], 0 );
 				vp->SetDebugPath( true );
 			}
 		}
+		PopPather();
 	}
 }
 

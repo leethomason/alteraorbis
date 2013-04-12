@@ -34,6 +34,7 @@ private:
 	void Save();
 	void Load();
 	void SetFace();
+	void DoDestTapped( const grinliz::Vector2F& grid );
 
 	void TapModel( Chit* chit );
 	void MoveModel( Chit* chit );

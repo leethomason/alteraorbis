@@ -11,6 +11,7 @@
 
 #include "../shared/lodepng.h"
 #include "../game/gamelimits.h"
+#include "../micropather/micropather.h"
 
 using namespace grinliz;
 
@@ -18,6 +19,11 @@ static const float BASE0 = 8.f;
 static const float BASE1 = 64.f;
 static const float EDGE = 0.1f;
 static const float OCTAVE = 0.18f;
+
+SectorData::~SectorData()
+{
+	delete pather;
+}
 
 void SectorData::Serialize( XStream* xs )
 {
@@ -28,6 +34,11 @@ void SectorData::Serialize( XStream* xs )
 	XARC_SER( xs, area );
 	XARC_SER( xs, core );
 	XarcClose( xs );
+
+	if ( xs->Loading() ) {
+		delete pather;
+		pather = 0;
+	}
 }
 
 

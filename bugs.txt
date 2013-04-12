@@ -16,16 +16,17 @@ x control key is terrible...sometimes.
 		x limit AI
 			x detection and awareness to sector bounds
 		x fix cores to work with sectors
-		x limit bolts / collisions
-		- grid motion
-		- refactor gamescene - map and mini-map clicking should use the same code
+		- limit bolts / collisions
+		x grid motion
+		x refactor gamescene - map and mini-map clicking should use the same code
+		x pather per sector
 		- herding across grids
 			- herding notification
 		- fix inUse. wow. fix inUse. Then only isBlocked will be an awful hack.
 		- test fast mode
 		- textures
-			- grid
-			- port
+			x grid
+			- port. bake lighting.
 		- load existing world
 		- fix AI to not charge into melee if ranged is a better idea
 		- fix camera dragging bug
