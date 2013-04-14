@@ -56,6 +56,9 @@ void PutPixel(SDL_Surface *surface, int x, int y, const Color4U8& c )
 
 int main( int argc, char* argv[] )
 {
+	static const int NUM_IMAGES = 10;
+	static const char* SRC_PATH = "../resin/humanMaleFace.png";
+
 	void *handle = 0;
 	handle = grinliz::grinlizLoadLibrary( "SDL_image" );
 	if ( !handle )
@@ -66,12 +69,11 @@ int main( int argc, char* argv[] )
 	libIMG_Load = (PFN_IMG_LOAD) grinliz::grinlizLoadFunction( handle, "IMG_Load" );
 	GLASSERT( libIMG_Load );
 
-	SDL_Surface* surface = libIMG_Load( "../resin/humanMaleFace.png" );
+	SDL_Surface* surface = libIMG_Load( SRC_PATH );
 	GLASSERT( surface );
 	if ( !surface ) exit(1);
 	SDL_Surface* outSurf = SDL_CreateRGBSurface( SDL_SWSURFACE, 256, 256, 32, surface->format->Rmask, surface->format->Gmask, surface->format->Bmask, surface->format->Amask );
 
-	static const int NUM_IMAGES = 100;
 	std::set<int> outset;
 
 	int row0 = 0;

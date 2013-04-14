@@ -20,7 +20,12 @@ x control key is terrible...sometimes.
 		x grid motion
 		x refactor gamescene - map and mini-map clicking should use the same code
 		x pather per sector
-		- fix inUse. wow. fix inUse. Then only isBlocked will be an awful hack.
+		x fix inUse. wow. fix inUse. Then only isBlocked will be an awful hack.
+		  Note: fixed. Switched both inUse and isBlocked to callback. May require
+		  future optimazation.
+		- simpler shaders
+		- new start location
+		- make sure cores are in correct place
 		- herding across grids
 			- herding notification
 		- test fast mode
@@ -30,7 +35,6 @@ x control key is terrible...sometimes.
 		- load existing world
 		- fix AI to not charge into melee if ranged is a better idea
 		- fix camera dragging bug
-		- simpler shaders
 		- overnight test
 	- Flora 2
 		- weapon toggle / selection
