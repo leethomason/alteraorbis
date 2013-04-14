@@ -18,7 +18,7 @@
 
 #include "../grinliz/glrandom.h"
 #include "../xegame/scene.h"
-#include "../xegame/chitbag.h"
+#include "../game/lumoschitbag.h"
 
 class LumosGame;
 class Engine;
@@ -72,7 +72,7 @@ private:
 	int nChits;
 	int creationTick;
 
-	ChitBag chitBag;
+	LumosChitBag chitBag;
 };
 
 

@@ -39,7 +39,6 @@ void CoreScript::Serialize( const ScriptContext& ctx, XStream* xs )
 
 void CoreScript::OnAdd( const ScriptContext& ctx )
 {
-	ctx.census->cores.Push( ctx.chit->ID() );
 	// Cores are indestructable. They don't get removed.
 }
 

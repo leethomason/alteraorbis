@@ -14,7 +14,6 @@ public:
 	}
 
 	int									plants[NUM_PLANT_TYPES][MAX_PLANT_STAGES];
-	grinliz::CArray< int, MAX_CORES >	cores; 
 	int									ais;	// the number of AIs.
 
 

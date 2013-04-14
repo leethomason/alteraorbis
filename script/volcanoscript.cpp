@@ -75,9 +75,8 @@ int VolcanoScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 				if ( b.Contains( x, y ) ) {
 					worldMap->SetMagma( x, y, false );
 					const WorldGrid& g = worldMap->GetWorldGrid( x, y );
-					if ( g.IsLand() && !g.IsBlocked() ) {
-						worldMap->SetRock( x, y, g.NominalRockHeight(), 0, false );
-					}
+					// Does lots of error checking. Can set without checks:
+					worldMap->SetRock( x, y, g.NominalRockHeight(), 0, false );
 				}
 			}
 		}

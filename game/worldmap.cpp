@@ -60,6 +60,7 @@ WorldMap::WorldMap( int width, int height ) : Map( width, height )
 	worldInfo = 0;
 	Init( width, height );
 	slowTick = SLOW_TICK;
+	iMapGridUse = 0;
 
 	texture[0] = TextureManager::Instance()->GetTexture( "map_water" );
 	texture[1] = TextureManager::Instance()->GetTexture( "map_grid" );
@@ -102,9 +103,9 @@ const SectorData* WorldMap::GetSectorData() const
 }
 
 
-void WorldMap::AttachEngine( Engine* e ) 
+void WorldMap::AttachEngine( Engine* e, IMapGridUse* imap ) 
 {
-	GLASSERT( (e==0 && engine !=0) || (e!=0 && engine==0) );
+	GLASSERT( (e==0) || (e!=0 && engine==0) );
 
 	if ( !e ) {
 		for( int j=0; j<height; ++j ) {
@@ -117,6 +118,7 @@ void WorldMap::AttachEngine( Engine* e )
 	}
 	GLASSERT( voxels.Empty() );
 	engine = e;
+	iMapGridUse = imap;
 }
 
 
@@ -247,8 +249,9 @@ void WorldMap::Init( int w, int h )
 	// Reset the voxels
 	if ( engine ) {
 		Engine* savedEngine = engine;
-		AttachEngine( 0 );
-		AttachEngine( savedEngine );
+		IMapGridUse* savedIMap = iMapGridUse;
+		AttachEngine( 0, 0 );
+		AttachEngine( savedEngine, savedIMap );
 	}
 
 	waterInit.ClearAll();
@@ -740,12 +743,19 @@ void WorldMap::SetRock( int x, int y, int h, int pool, bool magma )
 	Vector2I vec = { x, y };
 	int index = INDEX(x,y);
 
+	if ( !grid[index].IsLand() ) {
+		return;
+	}
+
 	int  hWas = grid[index].RockHeight();
 	int  pWas = grid[index].PoolHeight();	
 	bool mWas = grid[index].Magma();
 
 	if ( h == -1 ) {
 		h = grid[index].NominalRockHeight();
+		if ( iMapGridUse ) {
+			GLASSERT( iMapGridUse->MapGridUse( x, y ) == 0 );
+		}
 	}
 	else if ( h == -2 ) {
 		hWas = 0;
@@ -754,10 +764,17 @@ void WorldMap::SetRock( int x, int y, int h, int pool, bool magma )
 		h     = grid[index].RockHeight();
 		pool  = grid[index].PoolHeight();
 		magma = grid[index].Magma();
+		if ( iMapGridUse ) {
+			GLASSERT( iMapGridUse->MapGridUse( x, y ) == 0 );
+		}
 	}
-
-	if ( grid[index].InUse() ) {
-		h = 0;	// can't set rock when grid is locked
+	else {
+		if ( iMapGridUse ) {
+			if ( iMapGridUse->MapGridUse( x, y )) {
+				GLASSERT( hWas == 0 && pWas == 0 );
+				return;
+			}
+		}
 	}
 
 	CStr<12> name; 
@@ -786,6 +803,8 @@ void WorldMap::SetRock( int x, int y, int h, int pool, bool magma )
 #endif
 
 	if ( h != hWas || pool != pWas || magma != mWas ) {
+		ResetPather( x, y );
+
 		if ( engine ) {
 			if ( modelWas ) {
 				Model* m = voxels.Remove( vec );
@@ -821,65 +840,32 @@ void WorldMap::SetRock( int x, int y, int h, int pool, bool magma )
 				magmaGrids.Push( vec );
 			}
 		}
-
-		bool wasBlocked = (hWas>0) || (pWas>0);
-		bool isBlocked  = (h>0) || (pool>0);
-
-		if ( !wasBlocked && isBlocked ) {
-			if ( !this->IsBlocked( vec.x, vec.y ) )
-				SetBlocked( vec.x, vec.y );
-		}
-		else if ( wasBlocked && !isBlocked ) {
-			if ( this->IsBlocked( vec.x, vec.y ) )
-				ClearBlocked( vec.x, vec.y );
-		}
 	}
 }
 
 
-void WorldMap::SetBlocked( const grinliz::Rectangle2I& pos )
+void WorldMap::ResetPather( int x, int y )
 {
-	GLASSERT( pos.min.x / SECTOR_SIZE == pos.max.x / SECTOR_SIZE );
-	GLASSERT( pos.min.y / SECTOR_SIZE == pos.max.y / SECTOR_SIZE );
-
-	for( int y=pos.min.y; y<=pos.max.y; ++y ) {
-		for( int x=pos.min.x; x<=pos.max.x; ++x ) {
-			int i = INDEX( x, y );
-			GLASSERT( grid[i].IsGrid() == false );
-			GLASSERT( grid[i].IsPort() == false );
-			GLASSERT( grid[i].IsBlocked() == false );
-			grid[i].SetBlocked( true );
-			zoneInit.Clear( x>>ZONE_SHIFT, y>>ZONE_SHIFT );
-			//GLOUTPUT(( "Block (%d,%d) index=%d zone=%d set\n", x, y, i, ZDEX(x,y) ));
-		}
-	}
-
-	Vector2I sector = { pos.min.x/SECTOR_SIZE, pos.min.y/SECTOR_SIZE };
+	Vector2I sector = { x/SECTOR_SIZE, y/SECTOR_SIZE };
 	micropather::MicroPather* pather = worldInfo->GetSector( sector ).pather;
 	if ( pather ) {
 		pather->Reset();
 	}
+	zoneInit.Clear( x>>ZONE_SHIFT, y>>ZONE_SHIFT);
 }
 
 
-void WorldMap::ClearBlocked( const grinliz::Rectangle2I& pos )
+bool WorldMap::IsPassable( int x, int y ) const
 {
-	GLASSERT( pos.min.x / SECTOR_SIZE == pos.max.x / SECTOR_SIZE );
-	GLASSERT( pos.min.y / SECTOR_SIZE == pos.max.y / SECTOR_SIZE );
-
-	for( int y=pos.min.y; y<=pos.max.y; ++y ) {
-		for( int x=pos.min.x; x<=pos.max.x; ++x ) {
-			int i = INDEX( x, y );
-			GLASSERT( grid[i].IsBlocked() );
-			grid[i].SetBlocked( false );
-			zoneInit.Clear( x>>ZONE_SHIFT, y>>ZONE_SHIFT );
+	int index = INDEX(x,y);
+	if ( grid[index].IsPassable() ) {
+		int flags = 0;
+		if ( iMapGridUse ) {
+			flags = iMapGridUse->MapGridUse( x, y );
 		}
+		return ( flags & GRID_BLOCKED ) == 0;
 	}
-	Vector2I sector = { pos.min.x/SECTOR_SIZE, pos.min.y/SECTOR_SIZE };
-	micropather::MicroPather* pather = worldInfo->GetSector( sector ).pather;
-	if ( pather ) {
-		pather->Reset();
-	}
+	return false;
 }
 
 
@@ -896,7 +882,7 @@ Vector2I WorldMap::FindPassable( int x, int y )
 		for( int j=y0; j<=y1; ++j ) {
 			for( int i=x0; i<=x1; ++i ) {
 				if ( j==y0 || j==y1 || i==x0 || i==x1 ) {
-					if ( grid[INDEX(i,j)].IsPassable() ) {
+					if ( IsPassable(i,j) ) {
 						Vector2I v = { i, j };
 						return v;
 					}
@@ -1047,7 +1033,7 @@ void WorldMap::CalcZone( int zx, int zy )
 		for( int y=zy; y<zy+ZONE_SIZE; ++y ) {
 			for( int x=zx; x<zx+ZONE_SIZE; ++x ) {
 				int index = INDEX(x,y);
-				grid[index].SetZoneSize( grid[index].IsPassable() ? 1 : 0 );
+				grid[index].SetZoneSize( IsPassable(x,y) ? 1 : 0 );
 			}
 		}
 
@@ -1062,7 +1048,7 @@ void WorldMap::CalcZone( int zx, int zy )
 						for( int i=x; i<x+size; i+=half ) {
 							int index = INDEX(i,j);
 							const WorldGrid& g	= grid[index]; 
-							if ( !g.IsPassable() || g.ZoneSize() != half ) {
+							if ( !IsPassable(i,j) || g.ZoneSize() != half ) {
 								okay = false;
 								break;
 							}
@@ -1331,7 +1317,8 @@ micropather::MicroPather* WorldMap::PushPather( const Vector2I& sector )
 	GLASSERT( sector.y >= 0 && sector.y < NUM_SECTORS );
 	SectorData* sd = &worldInfo->sectorData[sector.y*NUM_SECTORS+sector.x];
 	if ( !sd->pather ) {
-		sd->pather = new micropather::MicroPather( this, sd->area, 7, true );
+		int area = sd->area ? sd->area : 1000;
+		sd->pather = new micropather::MicroPather( this, area, 7, true );
 	}
 	currentPather = sd->pather;
 	GLASSERT( currentPather );

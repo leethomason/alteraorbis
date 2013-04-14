@@ -69,8 +69,8 @@ public:
 	WorldMap( int width, int height );
 	~WorldMap();
 
-	// Call to turn on rock rendering.
-	void AttachEngine( Engine* engine );
+	// Call to turn on rock rendering and make map aware of "InUse"
+	void AttachEngine( Engine* engine, IMapGridUse* iMapInUse  );
 
 	// Test initiliazation:
 	void InitCircle();
@@ -94,24 +94,11 @@ public:
 		SetRock( x, y, grid[index].RockHeight(), grid[index].PoolHeight(), magma );
 	}
 	const WorldGrid& GetWorldGrid( int x, int y ) { return grid[INDEX(x,y)]; }
-	void SetBlocked( int x, int y )	{ grinliz::Rectangle2I pos; pos.Set( x, y, x, y ); SetBlocked( pos ); }
-	void SetBlocked( const grinliz::Rectangle2I& pos );
-	void ClearBlocked( int x, int y )	{ grinliz::Rectangle2I pos; pos.Set( x, y, x, y ); ClearBlocked( pos ); }
-	void ClearBlocked( const grinliz::Rectangle2I& pos );
-	void SetInUse( int x, int y, bool use ) { grid[INDEX(x,y)].SetInUse( use ); }
-	bool InUse( int x, int y )				{ return grid[INDEX(x,y)].InUse(); }
 
 	grinliz::Vector2I FindPassable( int x, int y );
 
-	bool IsBlocked( int x, int y ) const	{ 
-		int i = INDEX(x,y);
-		return grid[i].IsBlocked();
-	}
-
-	bool IsPassable( int x, int y ) const {
-		int index = INDEX(x,y);
-		return grid[index].IsPassable();
-	}
+	void ResetPather( int x, int y );
+	bool IsPassable( int x, int y ) const;
 	
 	bool IsLand( int x, int y )		{ 
 		int i = INDEX(x,y);
@@ -302,6 +289,7 @@ private:
 	void PushQuad( int layer, int x, int y, int w, int h, grinliz::CDynArray<PTVertex>* vertex, grinliz::CDynArray<U16>* index );
 	WorldGrid*					grid;
 	Engine*						engine;
+	IMapGridUse*				iMapGridUse;
 	int							slowTick;
 
 	WorldInfo*					worldInfo;

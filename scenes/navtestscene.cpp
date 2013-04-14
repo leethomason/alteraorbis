@@ -78,10 +78,11 @@ NavTestScene::NavTestScene( LumosGame* game ) : Scene( game )
 
 	textLabel.Init( &gamui2D );
 
-	map = new WorldMap( 32, 32 );
+	map = new WorldMap( SIZE, SIZE );
 	map->InitCircle();
 	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase(), map );
 	engine->SetGlow( false );
+	map->AttachEngine( engine, this );
 
 	map->ShowRegionOverlay( true );
 
@@ -107,6 +108,7 @@ NavTestScene::~NavTestScene()
 {
 	chitBag.DeleteAll();
 	delete engine;
+	map->AttachEngine( 0, 0 );
 	delete map;
 }
 
@@ -149,6 +151,12 @@ void NavTestScene::MouseMove( const grinliz::Vector2F& view, const grinliz::Ray&
 }
 
 
+int NavTestScene::MapGridUse( int x, int y )
+{
+	return blocks.IsSet(x,y) ? GRID_BLOCKED : 0;
+}
+
+
 void NavTestScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::Ray& world )				
 {
 	bool uiHasTap = ProcessTap( action, view, world );
@@ -169,10 +177,11 @@ void NavTestScene::Tap( int action, const grinliz::Vector2F& view, const grinliz
 
 			if ( toggleBlock.Down() ) {
 				Vector2I d = { (int)tapMark.x, (int)tapMark.z };
-				if ( map->IsBlocked( d.x, d.y ) ) 
-					map->ClearBlocked( d.x, d.y );
+				if ( blocks.IsSet( d.x, d.y ) )
+					blocks.Clear( d.x, d.y );
 				else
-					map->SetBlocked( d.x, d.y );
+					blocks.Set( d.x, d.y );
+				map->ResetPather( d.x, d.y);
 			}
 			else {
 				// Move to the marked location.
@@ -216,9 +225,10 @@ void NavTestScene::ItemTapped( const gamui::UIItem* item )
 		Rectangle2I b = map->Bounds();
 		int x = random.Rand( b.Width() );
 		int y = random.Rand( b.Height() );
-		if ( map->IsLand( x, y ) && !map->IsBlocked( x, y ) ) {
-			map->SetBlocked( x, y );
+		if ( map->IsLand( x, y ) && !blocks.IsSet(x,y) ) {
+			blocks.Set( x, y );
 			--makeBlocks;
+			map->ResetPather( x, y );
 		}
 	}
 }

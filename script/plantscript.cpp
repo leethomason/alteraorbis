@@ -263,7 +263,7 @@ int PlantScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 			item->mass = resource->mass * (float)((stage+1)*(stage+1));
 			item->hp   = item->TotalHP() * 0.5f;
 
-			sc->SetMode( stage < 2 ? MapSpatialComponent::USES_GRID : MapSpatialComponent::BLOCKS_GRID );
+			sc->SetMode( stage < 2 ? GRID_IN_USE : GRID_BLOCKED );
 		}
 
 		// Spore

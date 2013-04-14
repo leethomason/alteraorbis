@@ -22,7 +22,7 @@ using namespace grinliz;
 MapSpatialComponent::MapSpatialComponent( WorldMap* _map ) : SpatialComponent()
 {
 	worldMap = _map;
-	mode = USES_GRID;
+	mode = GRID_IN_USE;
 }
 
 
@@ -36,26 +36,11 @@ void MapSpatialComponent::SetMapPosition( int x, int y )
 void MapSpatialComponent::SetMode( int newMode ) 
 {
 	GLASSERT( worldMap );
-	GLASSERT( newMode == USES_GRID || newMode == BLOCKS_GRID );
-	GLASSERT( mode == USES_GRID || mode == BLOCKS_GRID );
-	Vector2I pos = MapPosition();
-
-	if ( parentChit && ( newMode != mode )) {
-		GLASSERT( worldMap->InUse( pos.x, pos.y ));
-		if ( newMode == USES_GRID ) {
-			worldMap->ClearBlocked( pos.x, pos.y );
-		}
-		else if ( newMode == BLOCKS_GRID ) {
-			worldMap->SetBlocked( pos.x, pos.y );
-		}
-	}
+	GLASSERT( newMode == GRID_IN_USE || newMode == GRID_BLOCKED );
 
 	mode = newMode;
-	if ( parentChit ) {
-		GLASSERT( (mode != BLOCKS_GRID) || worldMap->IsBlocked( pos.x, pos.y ));
-		GLASSERT( (mode == BLOCKS_GRID) || !worldMap->IsBlocked( pos.x, pos.y ));
-		GLASSERT( worldMap->InUse( pos.x, pos.y ));
-	}
+	Vector2I pos = MapPosition();
+	worldMap->ResetPather( pos.x, pos.y );
 }
 
 
@@ -64,37 +49,14 @@ void MapSpatialComponent::OnAdd( Chit* chit )
 	super::OnAdd( chit );
 
 	Vector2I pos = MapPosition();
-	const WorldGrid& wg = worldMap->GetWorldGrid( pos.x, pos.y );
-
-	// Messy - since this interacts with the map (which
-	// is saved as a straight block of data.) Needs the "just loaded"
-	// flag.
-	// Fragile, nasty code.
-	if ( !worldMap->InUse( pos.x, pos.y ) ) {
-		worldMap->SetInUse( pos.x, pos.y, true );
-	}
-	if ( mode == BLOCKS_GRID ) {
-		if ( !worldMap->IsBlocked( pos.x, pos.y ) ) {
-			worldMap->SetBlocked( pos.x, pos.y );
-		}
-	}
-	else {
-		if ( worldMap->IsBlocked( pos.x, pos.y ) ) {
-			worldMap->ClearBlocked( pos.x, pos.y );
-		}
-	}
+	worldMap->ResetPather( pos.x, pos.y );
 }
 
 
 void MapSpatialComponent::OnRemove()
 {
 	Vector2I pos = MapPosition();
-	const WorldGrid& wg = worldMap->GetWorldGrid( pos.x, pos.y );
-
-	worldMap->SetInUse( pos.x, pos.y, false );
-	if ( mode == BLOCKS_GRID ) {
-		worldMap->ClearBlocked( pos.x, pos.y );
-	}
+	worldMap->ResetPather( pos.x, pos.y );
 
 	super::OnRemove();
 }

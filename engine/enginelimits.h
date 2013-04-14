@@ -65,6 +65,12 @@ static const float GAME_ZOOM_MIN = 0.1f;
 static const float GAME_ZOOM_MAX = 5.0f;
 
 
+enum {
+	// Note that map objects - rock, water - are tracked automatically.
+	GRID_IN_USE		= 0x01,		// something is at this map location (can't place something else)
+	GRID_BLOCKED	= 0x02		// something is at this map location that blocks pather.
+};
+
 // --- Debugging --- //
 //#define SHOW_FOW			// visual debugging
 //#define EL_SHOW_MODELS

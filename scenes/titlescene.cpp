@@ -38,7 +38,8 @@ TitleScene::TitleScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 	static const char* testSceneName[NUM_TESTS] = { "dialog", 
 													"render0", "render1", 
 													"particle", 
-													"nav", "nav2", "Blue\nSmoke", 
+													"nav", "nav2", 
+													//"Blue\nSmoke", 
 													//"noise", 
 													"battle", 
 													"animation", 
@@ -68,7 +69,7 @@ void TitleScene::Resize()
 	background.SetSize( port.UIWidth(), port.UIHeight() );
 
 	static const bool VIS[NUM_TESTS] = {
-		false, true, false, true, false, false, false,
+		false, true, false, true, false, false,
 		true, true, true, true
 	};
 	bool visible = game->DebugUIEnabled();
@@ -110,9 +111,6 @@ void TitleScene::ItemTapped( const gamui::UIItem* item )
 	}
 	else if ( item == &testScene[TEST_NAV2] ) {
 		game->PushScene( LumosGame::SCENE_NAVTEST2, new NavTest2SceneData( "./res/testnav.png", 100 ) );
-	}
-	else if ( item == &testScene[TEST_NAV_WORLD] ) {
-		game->PushScene( LumosGame::SCENE_NAVTEST2, new NavTest2SceneData( "./res/testnav1024.png", 2000, 40 ) );
 	}
 	else if ( item == &testScene[TEST_BATTLE] ) {
 		game->PushScene( LumosGame::SCENE_BATTLETEST, 0 );

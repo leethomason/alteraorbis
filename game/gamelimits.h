@@ -34,8 +34,9 @@ static const int MAX_ACTIVE_ITEMS	= 8;
 static const int MAX_ITEM_NAME		= 24;
 static const int NUM_PLANT_TYPES	= 8;
 static const int MAX_PLANT_STAGES	= 4;
-static const int MAX_CORES			= 100;	// Number of domains that can have active cores.
-											// FIXME: too low? Should map to # domains.
+// Currently an InUse object needs to be 1x1.
+// Can be fixed in LumosChitBag::InUse
+//static const int MAX_GRID_OBJECT_RAD = 1;	// a 3x3 object
 
 static const U32 MINUTE				= 1000*60;						// game time and real time
 static const U32 MINUTES_IN_AGE		= 100;

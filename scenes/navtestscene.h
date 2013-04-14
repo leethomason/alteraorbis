@@ -18,13 +18,17 @@
 
 #include "../xegame/scene.h"
 #include "../grinliz/glrandom.h"
+#include "../grinliz/glbitarray.h"
 #include "../xegame/chitbag.h"
+#include "../engine/map.h"
 
 class LumosGame;
 class Engine;
 class WorldMap;
 
-class NavTestScene : public Scene, public IChitListener
+class NavTestScene : public Scene, 
+					 public IChitListener,
+					 public IMapGridUse
 {
 public:
 	NavTestScene( LumosGame* game );
@@ -44,6 +48,7 @@ public:
 
 	virtual void DrawDebugText();
 	virtual void MouseMove( const grinliz::Vector2F& view, const grinliz::Ray& world );
+	virtual int MapGridUse( int x, int y );
 
 private:
 	gamui::PushButton okay,
@@ -62,9 +67,11 @@ private:
 	grinliz::Ray debugRay;
 
 	enum { NUM_CHITS = 5 };
+	enum { SIZE = 32 };
 	Chit* chit[NUM_CHITS];
 
 	ChitBag chitBag;
+	grinliz::BitArray< SIZE, SIZE, 1 > blocks;
 };
 
 

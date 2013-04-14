@@ -47,7 +47,7 @@ private:
 		TEST_PARTICLE,
 		TEST_NAV,
 		TEST_NAV2,
-		TEST_NAV_WORLD,
+		//TEST_NAV_WORLD,	Worlds this large aren't supported with sectors/grid
 		TEST_BATTLE,
 		TEST_ANIMATION,
 		TEST_LIVEPREVIEW,

@@ -27,6 +27,16 @@
 #include "enginelimits.h"
 #include "gpustatemanager.h"
 
+// Allows the Map to call out for the state of locations.
+// The tricky bit is to remember to call the pather->Reset()
+// if the isBlocked changes.
+class IMapGridUse
+{
+public:
+	// Mask of: GRID_IN_USE, GRID_BLOCKED
+	virtual int MapGridUse( int x, int y ) = 0;
+};
+
 
 class Map : public gamui::IGamuiRenderer
 {

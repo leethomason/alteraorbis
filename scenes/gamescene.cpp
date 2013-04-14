@@ -71,9 +71,6 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	allRockButton.Init( &gamui2D, game->GetButtonLook(0) );
 	allRockButton.SetText( "All Rock" );
 
-	coreButton.Init( &gamui2D, game->GetButtonLook(0) );
-	coreButton.SetText( "Core" );
-
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
 		newsButton[i].Init( &gamui2D, game->GetButtonLook(0) );
 		newsButton[i].SetSize( NEWS_BUTTON_WIDTH, NEWS_BUTTON_HEIGHT );
@@ -107,7 +104,6 @@ void GameScene::Resize()
 		layout.PosAbs( &camModeButton[i], i, -3 );
 	}
 	layout.PosAbs( &allRockButton, 0, 1 );
-	layout.PosAbs( &coreButton, 1, 1 );
 
 	const Screenport& port = lumosGame->GetScreenport();
 	minimap.SetPos( port.UIWidth()-MINI_MAP_SIZE, 0 );
@@ -122,7 +118,6 @@ void GameScene::Resize()
 	bool visible = game->DebugUIEnabled();
 	allRockButton.SetVisible( visible );
 	serialButton[CYCLE].SetVisible( visible );
-	coreButton.SetVisible( visible );
 }
 
 
@@ -284,23 +279,6 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 				else if ( chit ) {
 					Vector2F dest = { at.x, at.z };
 					DoDestTapped( dest );
-					/*if ( camModeButton[TRACK].Down() ) {
-						AIComponent* ai = GET_COMPONENT( chit, AIComponent );
-						if ( ai ) {
-							ai->FocusedMove( dest, 0 );
-						}
-						else {
-							PathMoveComponent* pmc = GET_COMPONENT( chit, PathMoveComponent );
-							if ( pmc ) {
-								pmc->QueueDest( dest );
-							}
-						}
-					}
-					else if ( camModeButton[TELEPORT].Down() ) {
-						SpatialComponent* sc = chit->GetSpatialComponent();
-						GLASSERT( sc );
-						sc->SetPosition( at.x, 0, at.z );
-					}*/
 				}
 				else {
 					sim->GetEngine()->CameraLookAt( at.x, at.z );
@@ -358,15 +336,6 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 	}
 	else if ( item == &allRockButton ) {
 		sim->SetAllRock();
-	}
-	else if ( item == &coreButton ) {
-		Vector3F lookAt = { 0, 0, 0 };
-		sim->GetEngine()->CameraLookingAt( &lookAt );
-		Vector2F in = { lookAt.x, lookAt.z };
-
-		Vector2F v = sim->FindCore( in );
-		dest.x = v.x + 1.0f;
-		dest.y = v.y + 1.0f;
 	}
 
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {

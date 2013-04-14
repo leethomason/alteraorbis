@@ -28,10 +28,6 @@ class MapSpatialComponent : public SpatialComponent
 private:
 	typedef SpatialComponent super;
 public:
-	enum {
-		USES_GRID = 1,
-		BLOCKS_GRID
-	};
 	MapSpatialComponent( WorldMap* map );
 	virtual ~MapSpatialComponent()	{}
 
@@ -49,6 +45,7 @@ public:
 		return v;
 	}
 	void SetMode( int mode );
+	int Mode() const { return mode; }
 
 private:
 	int mode;

@@ -98,6 +98,7 @@ void NavTest2Scene::LoadMap()
 	delete map;
 
 	map = new WorldMap( 32, 32 );
+	map->AttachEngine( 0, &chitBag );	// connect up the pather, but we do the render.
 	grinliz::CDynArray<Vector2I> blocks, features;
 	map->InitPNG( data->worldFilename, &blocks, &waypoints, &features );
 
@@ -108,7 +109,7 @@ void NavTest2Scene::LoadMap()
 		const Vector2I& v = blocks[i];
 		MapSpatialComponent* msc = new MapSpatialComponent( map );
 		msc->SetMapPosition( v.x, v.y );
-		msc->SetMode( MapSpatialComponent::BLOCKS_GRID );
+		msc->SetMode( GRID_BLOCKED );
 		chit->Add( msc );
 		chit->Add( new RenderComponent( engine, "unitCube" ));
 	}
@@ -117,7 +118,7 @@ void NavTest2Scene::LoadMap()
 		const Vector2I& v = features[i];
 		MapSpatialComponent* msc = new MapSpatialComponent( map );
 		msc->SetMapPosition( v.x, v.y );
-		msc->SetMode( MapSpatialComponent::BLOCKS_GRID );
+		msc->SetMode( GRID_BLOCKED );
 		chit->Add( msc );
 		chit->Add( new RenderComponent( engine, "tree" ));
 	}

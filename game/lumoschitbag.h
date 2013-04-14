@@ -4,10 +4,12 @@
 #include "../xegame/chitbag.h"
 #include "../grinliz/glrandom.h"
 #include "census.h"
+#include "../engine/map.h"
 
 class WorldMap;
 
-class LumosChitBag : public ChitBag
+class LumosChitBag : public ChitBag,
+					 public IMapGridUse
 {
 public:
 	LumosChitBag();
@@ -23,9 +25,13 @@ public:
 	// IBoltImpactHandler
 	virtual void HandleBolt( const Bolt& bolt, Model* m, const grinliz::Vector3F& at );
 
+	virtual int MapGridUse( int x, int y );
+
 	Census census;
 
 private:
+	static bool HasMapSpatialInUse( Chit* );
+	grinliz::CDynArray<Chit*> inUseArr;
 	grinliz::CDynArray<Chit*> chitList;
 	Engine* engine;
 	WorldMap* worldMap;

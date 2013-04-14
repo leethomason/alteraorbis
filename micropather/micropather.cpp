@@ -468,6 +468,8 @@ MicroPather::MicroPather( Graph* _graph, unsigned allocate, unsigned typicalAdja
 		graph( _graph ),
 		frame( 0 )
 {
+	MPASSERT( allocate );
+	MPASSERT( typicalAdjacent );
 	if ( cache ) {
 		pathCache = new PathCache( allocate*4 );	// untuned arbitrary constant	
 	}
@@ -767,6 +769,7 @@ int PathCache::Solve( void* start, void* end, MP_VECTOR< void* >* path, float* t
 
 void PathCache::AddItem( const Item& item )
 {
+	MPASSERT( allocated );
 	unsigned index = item.Hash() % allocated;
 	while( true ) {
 		if ( mem[index].Empty() ) {
@@ -791,6 +794,7 @@ void PathCache::AddItem( const Item& item )
 
 const PathCache::Item* PathCache::Find( void* start, void* end )
 {
+	MPASSERT( allocated );
 	Item fake = { start, end, 0, 0 };
 	unsigned index = fake.Hash() % allocated;
 	while( true ) {

@@ -40,7 +40,6 @@ Sim::Sim( LumosGame* g )
 
 	worldMap = new WorldMap( MAX_MAP_SIZE, MAX_MAP_SIZE );
 	engine = new Engine( port, database, worldMap );
-	worldMap->AttachEngine( engine );
 	weather = new Weather( MAX_MAP_SIZE, MAX_MAP_SIZE );
 
 	engine->SetGlow( true );
@@ -48,6 +47,7 @@ Sim::Sim( LumosGame* g )
 
 	chitBag = new LumosChitBag();
 	chitBag->SetContext( engine, worldMap );
+	worldMap->AttachEngine( engine, chitBag );
 	playerID = 0;
 	minuteClock = 0;
 	timeInMinutes = 0;
@@ -61,7 +61,7 @@ Sim::Sim( LumosGame* g )
 Sim::~Sim()
 {
 	delete weather;
-	worldMap->AttachEngine( 0 );
+	worldMap->AttachEngine( 0, 0 );
 	delete chitBag;
 	delete engine;
 	delete worldMap;
@@ -147,7 +147,7 @@ void Sim::CreateCores()
 
 			MapSpatialComponent* ms = new MapSpatialComponent( worldMap );
 			ms->SetMapPosition( sd.core.x, sd.core.y );
-			ms->SetMode( MapSpatialComponent::BLOCKS_GRID ); 
+			ms->SetMode( GRID_BLOCKED ); 
 			chit->Add( ms );
 			chit->Add( new ScriptComponent( new CoreScript( worldMap ), &chitBag->census ));
 			chit->Add( new ItemComponent( engine, *gameItem ));
@@ -159,47 +159,9 @@ void Sim::CreateCores()
 }
 
 
-grinliz::Vector2F Sim::FindCore( const grinliz::Vector2F& pos )
-{
-	Census* census = &chitBag->census;
-
-	Chit* best = 0;
-	float close = FLT_MAX;
-
-	for( int i=0; i<census->cores.Size(); ++i ) {
-		int id = census->cores[i];
-		Chit* chit = chitBag->GetChit( id );
-		if ( chit ) {
-			float len2 = ( pos - chit->GetSpatialComponent()->GetPosition2D() ).LengthSquared();
-			if ( len2 < close ) {
-				close = len2;
-				best = chit;
-			}
-		}
-	}
-	Vector2F r = { pos.x, pos.y };
-	if ( best ) {
-		r = best->GetSpatialComponent()->GetPosition2D();
-	}
-	return r;
-}
-
-
 void Sim::CreatePlayer()
 {
 	Vector2I v = worldMap->FindEmbark();
-	if ( chitBag->census.cores.Size() ) {
-		int id = chitBag->census.cores[0];
-		Chit* chit = chitBag->GetChit( id );
-		if ( chit ) {
-			MapSpatialComponent* msc = GET_COMPONENT( chit, MapSpatialComponent );
-			if ( msc ) {
-				v = msc->MapPosition();
-				v.x += 2;
-				v.y += 2;
-			}
-		}
-	}
 	CreatePlayer( v, "humanFemale" );
 }
 
@@ -346,48 +308,43 @@ void Sim::CreatePlant( int x, int y, int type )
 
 	const WorldGrid& wg = worldMap->GetWorldGrid( x, y );
 
-	if ( wg.IsPassable() && !wg.InUse() ) {
-		// check for a plant already there.
-		// At this point, check for *anything* there. Could relax in future.
-		Rectangle2F r;
-		r.Set( (float)x, (float)y, (float)(x+1), (float)(y+1) );
-		chitBag->QuerySpatialHash( &queryArr, r, 0, 0 );
+	// check for a plant already there.
+	if ( wg.IsPassable() && !chitBag->MapGridUse(x,y) ) {
 
-		if ( queryArr.Empty() ) {
+		if ( type < 0 ) {
+			// Scan for a good type!
+			Rectangle2F r;
+			r.min.Set( (float)x+0.5f, (float)y+0.5f );
+			r.max = r.min;
+			r.Outset( 3.0f );
+			chitBag->QuerySpatialHash( &queryArr, r, 0, 0 );
 
-			if ( type < 0 ) {
-				// Scan for a good type!
-				r.Outset( 3.0f );
-				chitBag->QuerySpatialHash( &queryArr, r, 0, 0 );
-
-				float chance[NUM_PLANT_TYPES];
-				for( int i=0; i<NUM_PLANT_TYPES; ++i ) {
-					chance[i] = 1.0f;
-				}
-
-				for( int i=0; i<queryArr.Size(); ++i ) {
-					Vector3F pos = { (float)x+0.5f, 0, (float)y+0.5f };
-					Chit* c = queryArr[i];
-
-					int stage, type;
-					GameItem* item = PlantScript::IsPlant( c, &type, &stage );
-					if ( item ) {
-						float weight = (float)((stage+1)*(stage+1));
-						chance[type] += weight;
-					}
-				}
-				type = random.Select( chance, NUM_PLANT_TYPES );
+			float chance[NUM_PLANT_TYPES];
+			for( int i=0; i<NUM_PLANT_TYPES; ++i ) {
+				chance[i] = 1.0f;
 			}
 
-			Chit* chit = chitBag->NewChit();
-			MapSpatialComponent* ms = new MapSpatialComponent( worldMap );
-			ms->SetMapPosition( x, y );
-			chit->Add( ms );
-			GLASSERT( wg.InUse() );
+			for( int i=0; i<queryArr.Size(); ++i ) {
+				Vector3F pos = { (float)x+0.5f, 0, (float)y+0.5f };
+				Chit* c = queryArr[i];
 
-			chit->Add( new HealthComponent( engine ) );
-			chit->Add( new ScriptComponent( new PlantScript( this, engine, worldMap, weather, type ), &chitBag->census ));
+				int stage, type;
+				GameItem* item = PlantScript::IsPlant( c, &type, &stage );
+				if ( item ) {
+					float weight = (float)((stage+1)*(stage+1));
+					chance[type] += weight;
+				}
+			}
+			type = random.Select( chance, NUM_PLANT_TYPES );
 		}
+
+		Chit* chit = chitBag->NewChit();
+		MapSpatialComponent* ms = new MapSpatialComponent( worldMap );
+		ms->SetMapPosition( x, y );
+		chit->Add( ms );
+
+		chit->Add( new HealthComponent( engine ) );
+		chit->Add( new ScriptComponent( new PlantScript( this, engine, worldMap, weather, type ), &chitBag->census ));
 	}
 }
 

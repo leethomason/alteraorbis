@@ -6,6 +6,7 @@
 #include "aicomponent.h"
 #include "debugstatecomponent.h"
 #include "healthcomponent.h"
+#include "mapspatialcomponent.h"
 
 #include "../xegame/rendercomponent.h"
 #include "../xegame/itemcomponent.h"
@@ -139,3 +140,32 @@ void LumosChitBag::AddItem( const char* name, Chit* chit, Engine* engine, int te
 		chit->GetItemComponent()->AddToInventory( new GameItem( item ), true );
 	}
 }
+
+
+bool LumosChitBag::HasMapSpatialInUse( Chit* chit ) {
+	MapSpatialComponent* ms = GET_COMPONENT( chit, MapSpatialComponent );
+	if ( ms ) {
+		return true;
+	}
+	return false;
+}
+
+
+int LumosChitBag::MapGridUse( int x, int y )
+{
+	Rectangle2F r;
+	r.min.x = (float)x;
+	r.min.y = (float)y;
+	r.max.x = r.min.x + 1.0f;
+	r.max.y = r.min.y + 1.0f;
+
+	QuerySpatialHash( &inUseArr, r, 0, HasMapSpatialInUse );
+	int flags = 0;
+	for( int i=0; i<inUseArr.Size(); ++i ) {
+		MapSpatialComponent* ms = GET_COMPONENT( inUseArr[i], MapSpatialComponent );
+		GLASSERT( ms );
+		flags |= ms->Mode();
+	}
+	return flags;
+}
+

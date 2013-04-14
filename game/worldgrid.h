@@ -19,9 +19,6 @@ private:
 	unsigned isPort				: 1;
 	unsigned isCore				: 1;
 
-	unsigned isBlocked			: 1;	// blocks the pather; implies inUse
-	unsigned inUse				: 1;	// used, but the pather isn't blocked
-
 	unsigned magma				: 1;	// land, rock, or water can be set to magma
 
 	unsigned zoneSize			: 6;	// 0-31
@@ -32,6 +29,8 @@ private:
 	unsigned debugAdjacent		: 1;
 	unsigned debugPath			: 1;
 	unsigned debugOrigin		: 1;
+
+	bool IsBlocked() const			{ return (!isLand) || isGrid || rockHeight || poolHeight; }
 
 public:
 	grinliz::Color4U8 ToColor() const {
@@ -85,9 +84,9 @@ public:
 
 	void SetLand( bool land )	{ if ( land ) SetLand(); else SetWater(); }
 
-	void SetGrid()				{ isLand = 1; isBlocked = 1; isGrid = 1; }
-	void SetPort()				{ isLand = 1; inUse = 1; isPort = 1; }
-	void SetCore()				{ isLand = 1; isBlocked = 1; isCore = 1; }
+	void SetGrid()				{ isLand = 1; isGrid = 1; }
+	void SetPort()				{ isLand = 1; isPort = 1; }
+	void SetCore()				{ isLand = 1; isCore = 1; }
 	void SetLandAndRock( U8 h )	{
 		// So confusing. Max rock height=3, but land goes from 1-4 to be distinct from water.
 		// Subtract here.
@@ -147,30 +146,6 @@ public:
 
 	bool DebugPath() const			{ return debugPath != 0; }
 	void SetDebugPath( bool v )		{ debugPath = v ? 1 : 0; }
-
-	bool IsBlocked() const			{ return isBlocked != 0; }
-	void SetBlocked( bool block )	{ 
-		GLASSERT( IsLand() );
-		if (block) {
-			GLASSERT( IsPassable() );
-			isBlocked = 1;
-		}
-		else { 
-			isBlocked = 0;
-		}
-	}
-
-	bool InUse() const				{ return inUse != 0; }
-	void SetInUse( bool use )		{
-		if ( use ) {
-			GLASSERT( !InUse() );
-			inUse = 1;
-		}
-		else {
-			GLASSERT( InUse() );
-			inUse = 0;
-		}
-	}
 
 	U32 ZoneSize() const			{ return zoneSize;}
 
