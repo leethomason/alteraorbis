@@ -44,7 +44,9 @@ static const char* gUniformName[ShaderManager::MAX_UNIFORM] =
 	"u_colorParamArr",
 	"u_filterParamArr",
 	"u_controlParamArr",
-	"u_param4Arr",
+	"u_texture0XFormArr",
+	"u_texture0ClipArr",
+	"u_colorMapArr",
 
 	"u_normalMatrix",
 	"u_colorMult",
@@ -55,7 +57,10 @@ static const char* gUniformName[ShaderManager::MAX_UNIFORM] =
 	"u_colorParam",
 	"u_filterParam",
 	"u_controlParam",
-	"u_param4",
+	"u_texture0XForm",
+	"u_texture0Clip",
+	"u_colorMap",
+
 	"u_boneXForm",
 
 	// Samplers:
@@ -372,12 +377,9 @@ FIXME: need to handle driver updates invalidating cache.
 	AppendFlag( &header, "TEXTURE0",			flags & TEXTURE0 );
 	if ( flags & TEXTURE0 ) {
 		AppendFlag( &header, "TEXTURE0_ALPHA_ONLY",	flags & TEXTURE0_ALPHA_ONLY );
-		//AppendFlag( &header, "TEXTURE0_TRANSFORM",	flags & TEXTURE0_TRANSFORM );
-	}
-	AppendFlag( &header, "TEXTURE1",			flags & TEXTURE1 );
-	if ( flags & TEXTURE1 ) {
-		AppendFlag( &header, "TEXTURE1_ALPHA_ONLY",	flags & TEXTURE1_ALPHA_ONLY );
-		//AppendFlag( &header, "TEXTURE1_TRANSFORM",	flags & TEXTURE1_TRANSFORM );
+		AppendFlag( &header, "TEXTURE0_XFORM",		flags & TEXTURE0_XFORM );
+		AppendFlag( &header, "TEXTURE0_CLIP",		flags & TEXTURE0_CLIP );
+		AppendFlag( &header, "TEXTURE0_COLORMAP",	flags & TEXTURE0_COLORMAP );
 	}
 	AppendFlag( &header, "INSTANCE",			flags & INSTANCE );
 	AppendFlag( &header, "COLORS",				flags & COLORS );
@@ -387,8 +389,6 @@ FIXME: need to handle driver updates invalidating cache.
 	AppendFlag( &header, "COLOR_PARAM",			flags & COLOR_PARAM );
 	AppendFlag( &header, "BONE_FILTER",			flags & BONE_FILTER );
 	AppendFlag( &header, "SATURATION",			flags & SATURATION );
-	AppendFlag( &header, "PROCEDURAL",			flags & PROCEDURAL );	// both are triggered off procedural. deserves a clean-up.
-	AppendFlag( &header, "PARAM4",				flags & PROCEDURAL );
 	AppendFlag( &header, "BONE_XFORM",			flags & BONE_XFORM );
 
 	if ( flags & LIGHTING_DIFFUSE )

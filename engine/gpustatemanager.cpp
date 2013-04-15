@@ -323,6 +323,8 @@ void GPUState::Weld( const GPUState& state, const GPUStream& stream, const GPUSt
 		GLASSERT( stream.instanceIDOffset > 0 );
 		shadman->SetStreamData( ShaderManager::A_INSTANCE_ID, 1, GL_UNSIGNED_SHORT, 
 			                    stream.stride, PTR( data.streamPtr, stream.instanceIDOffset ) );
+		
+		if ( flags & ShaderManager::TEXTURE0_XFORM ) 
 		if ( flags & ShaderManager::COLOR_PARAM ) {
 			GLASSERT( data.colorParam );
 			shadman->SetUniformArray( ShaderManager::U_COLOR_PARAM_ARR, EL_MAX_INSTANCE, data.colorParam );
@@ -335,6 +337,7 @@ void GPUState::Weld( const GPUState& state, const GPUStream& stream, const GPUSt
 			GLASSERT( data.param4 );
 			shadman->SetUniformArray( ShaderManager::U_PARAM4_ARR, EL_MAX_INSTANCE, data.param4 );
 		}
+
 		GLASSERT( data.controlParam );
 		shadman->SetUniformArray( ShaderManager::U_CONTROL_PARAM_ARR, EL_MAX_INSTANCE, data.controlParam );
 	}

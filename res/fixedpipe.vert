@@ -11,9 +11,17 @@ uniform mat4 	u_mvpMatrix;		// model-view-projection.
 	#if BONE_FILTER == 1
 		uniform vec4	u_filterParamArr[EL_MAX_INSTANCE];
 	#endif
-	#if PARAM4 == 1
-		uniform mat4	u_param4Arr[EL_MAX_INSTANCE];	// Used for procedural rendering. Could be made arbitrary.
+
+	#if TEXTURE0_XFORM == 1
+		uniform vec4 	u_texture0XFormArr[EL_MAX_INSTANCE];
 	#endif
+	#if TEXTURE0_CLIP == 1
+		uniform vec4	u_texture0ClipArr[EL_MAX_INSTANCE];
+	#endif
+	#if TEXTURE0_COLORMAP == 1
+		uniform mat4	u_colorMapArr[EL_MAX_INSTANCE];
+	#endif
+
 	attribute float a_instanceID;					// Index into the transformation.
 #else
 	uniform vec4 		u_controlParam;				// Controls fade.
@@ -25,6 +33,15 @@ uniform mat4 	u_mvpMatrix;		// model-view-projection.
 	#endif
 	#if PARAM4 == 1
 		uniform mat4	u_param4;					// Used for procedural rendering. Could be made arbitrary.
+	#endif
+	#if TEXTURE0_XFORM == 1
+		uniform vec4 	u_texture0XForm;
+	#endif
+	#if TEXTURE0_CLIP == 1
+		uniform vec4	u_texture0Clip;
+	#endif
+	#if TEXTURE0_COLORMAP == 1
+		uniform mat4	u_colorMap;
 	#endif
 #endif
 
@@ -38,24 +55,19 @@ attribute vec3 a_pos;				// vertex position
 #if TEXTURE0 == 1
 	attribute vec2 a_uv0;
 	varying vec2 v_uv0;
-	#if PROCEDURAL == 1
-		varying vec2 v_uv1;
-		varying vec2 v_uv2;
-		varying vec2 v_uv3;
-
+	#if TEXTURE0_CLIP == 1
+		varying vec4 v_texture0Clip;
+	#endif
+	#if TEXTURE0_COLORMAP == 1
 		varying vec4 v_color0;
 		varying vec4 v_color1;
 		varying vec4 v_color2;
-		varying vec4 v_color3;
 	#endif
 #endif
 
 #if TEXTURE1 == 1
 	attribute vec2 a_uv1;
 	varying vec2 v_uv1;
-	#if PROCEDURAL > 0
-		#error Only one texture if procedural.
-	#endif
 #endif
 
 #if BONE_XFORM == 1 || BONE_FILTER == 1
@@ -110,11 +122,26 @@ void main() {
 			vec4 filterParam 	= u_filterParam;
 		#endif
 	#endif
-	#if PARAM4 == 1
+	#if TEXTURE0_XFORM == 1
 		#if INSTANCE == 1
-			mat4 param4 	= u_param4Arr[int(a_instanceID)];
+			vec4 texture0XForm 	= u_texture0XFormArr[int(a_instanceID)];
 		#else
-			mat4 param4 	= u_param4;
+			vec4 texture0XForm 	= u_texture0XForm;
+		#endif
+	#endif
+	#if TEXTURE0_CLIP == 1
+		#if INSTANCE == 1
+			v_texture0Clip 		= u_texture0ClipArr[int(a_instanceID)];
+		#else
+			v_texture0Clip 		= u_texture0Clip;
+
+		#endif
+	#endif
+	#if TEXTURE0_COLORMAP == 1
+		#if INSTANCE == 1
+			mat4 colorMap 		= u_colorMapArr[int(a_instanceID)];
+		#else
+			mat4 colorMap 		= u_colorMap;
 		#endif
 	#endif
 
@@ -129,33 +156,20 @@ void main() {
 	#endif
 
 	#if TEXTURE0 == 1
-//		#if TEXTURE0_TRANSFORM == 1
-//			v_uv0 = vec2( a_uv0.x*param.x + param.z, a_uv0.y*param.y + param.w );
-//			#if PROCEDURAL > 0
-//				#error not supported: texture0_transform and procedural
-//			#endif
-//		#endif	
-		#if PROCEDURAL == 0
-			v_uv0 = a_uv0;
-		#else
-			// column, row
-			v_uv0 = a_uv0 + vec2( 0,    param4[3][0] );
-			v_uv1 = a_uv0 + vec2( 0.25, param4[3][1] );
-			v_uv2 = a_uv0 + vec2( 0.50, param4[3][2] );
-			v_uv3 = a_uv0 + vec2( 0.75, param4[3][3] );
+		#if TEXTURE0_XFORM == 1
+			v_uv0 = vec2( a_uv0.x*texture0XForm.x + texture0XForm.z, a_uv0.y*texture0XForm.y + texture0XForm.w );
+		#endif	
+		#if TEXTURE0_CLIP == 1
 
-			v_color0 = vec4( param4[0][0], param4[1][0], floor(param4[2][0])/256.0, fract(param4[2][0])*2.0 );
-			v_color1 = vec4( param4[0][1], param4[1][1], floor(param4[2][1])/256.0, fract(param4[2][1])*2.0 );
-			v_color2 = vec4( param4[0][2], param4[1][2], floor(param4[2][2])/256.0, fract(param4[2][2])*2.0 );
-			v_color3 = vec4( param4[0][3], param4[1][3], floor(param4[2][3])/256.0, fract(param4[2][3])*2.0 );
+		#endif
+		#if TEXTURE0_COLORMAP == 1
+			v_color0 = u_colorMap[0];
+			v_color1 = u_colorMap[1];
+			v_color2 = u_colorMap[2];
 		#endif
 	#endif
 	#if TEXTURE1 == 1
-//		#if TEXTURE1_TRANSFORM == 1
-//			v_uv1 = vec2( a_uv1.x*param.x + param.z, a_uv1.y*param.y + param.w );
-//		#else
-			v_uv1 = a_uv1;
-//		#endif
+		v_uv1 = a_uv1;
 	#endif
 
 	mat4 xform = mat4( 1.0 );	

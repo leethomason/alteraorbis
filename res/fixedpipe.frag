@@ -2,16 +2,13 @@
 #if TEXTURE0 == 1
 	uniform sampler2D texture0;
 	varying vec2 v_uv0;
-	#if PROCEDURAL == 1
-		varying vec2 v_uv1;
-		varying vec2 v_uv2;
-		varying vec2 v_uv3;
-
-		// A single texture that is procedural pretty much eats up all the varying data
+	#if TEXTURE0_CLIP
+		varying vec4 v_texture0Clip;
+	#endif
+	#if TEXTURE0_COLORMAP == 1
 		varying vec4 v_color0;
 		varying vec4 v_color1;
 		varying vec4 v_color2;
-		varying vec4 v_color3;
 	#endif
 #endif
 #if TEXTURE1 == 1
@@ -29,39 +26,18 @@ void main()
 {
 	vec4 color = v_color;
 	#if TEXTURE0 == 1
-		#if  PROCEDURAL == 0
-			vec4 sample = texture2D( texture0, v_uv0 );
-		#elif PROCEDURAL == 1
-			vec4 base = vec4(0,0,0,0);
-			vec4 s0 = texture2D( texture0, v_uv0 );
-			vec4 s1 = texture2D( texture0, v_uv1 );
-			vec4 s2 = texture2D( texture0, v_uv2 );
-			vec4 s3 = texture2D( texture0, v_uv3 );
-			
-			vec4  a = vec4( s0.a, s1.a, s2.a, s3.a );
+		vec4 sample = texture2D( texture0, v_uv0 );
 
-			// red->C0
-			// green->C3
-			// on layer 0 and 1, blue->C1
-			// on layer 2 and 3, blue->C2 (alpha channel used)
-			s0.a = 0.0;
-			s1.a = 0.0;
-			s2.a = s2.b;
-			s2.b = 0.0;
-			s3.a = s3.b;
-			s3.b = 0.0;
-			
-			// Composite together the color layes based on the (recorded) alphas
-			vec4 t = mix( mix( mix(  mix( base, s0, a[0] ), s1, a[1] ), s2, a[2] ), s3, a[3] );
-			// Now that the color layers are composited, convert from false color to correct color.
-			// Note that the alpha channel is being used as a color, not alpha.
-			vec4 sample = t.r*v_color0 + t.g*v_color3 + t.b*v_color1 + t.a*v_color2;
-			#if EMISSIVE == 0
-				// Compute alpha. This is an approximation of transparency.
-				sample.a = clamp( a[0]+a[1]+a[2]+a[3], 0.0, 1.0 );
-			#else
-				//sample.a = 0.0f;
-			#endif
+		#if TEXTURE0_CLIP == 1
+			// step( edge, x ) = 0 if x < edge
+			float inRange = step( v_texture0Clip.x, v_uv0.x ) * step( v_uv0.x, v_texture0Clip.z ) * step( v_texture0Clip.y, v_uv0.y ) * step( v_uv0.y, v_texture0Clip.w );
+			sample = sample * inRange;
+		#endif
+
+		#if TEXTURE0_COLORMAP == 1
+			float a = sample.a;
+			sample = sample.r*v_color0 + sample.g*v_color1 + sample.b*v_color2;
+			sample.a = a;
 		#endif
 
 		#if TEXTURE0_ALPHA_ONLY == 1

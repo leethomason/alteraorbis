@@ -55,28 +55,30 @@ public:
 		// Texture state.
 		TEXTURE0			= (1<<1),		// Texture is in use. Note that the sampling state (linear, nearest) is saved with the texture.
 		TEXTURE0_ALPHA_ONLY = (1<<2),		// Texture is only alpha, which composites differently.
+		TEXTURE0_XFORM		= (1<<3),		// u' = u*x + z, v' = v*.y + w	(instanced, vec4)
+		TEXTURE0_CLIP		= (1<<4),		// clip to (x0,y0), (x1,y1) (instanced, vec4)
+		TEXTURE0_COLORMAP	= (1<<5),		// remap colors (instanced, matrix)
 
-		TEXTURE1			= (1<<3),
-		TEXTURE1_ALPHA_ONLY	= (1<<4),
+		//TEXTURE1				= (1<<3),
+		//TEXTURE1_ALPHA_ONLY	= (1<<4),
 		
 		// Colors and Lighting
-		COLORS				= (1<<5),		// Per-vertex colors.
-		LIGHTING_DIFFUSE	= (1<<6),		// Diffuse lighting. Requires per vertex normals, 
+		COLORS				= (1<<6),		// Per-vertex colors.
+		LIGHTING_DIFFUSE	= (1<<7),		// Diffuse lighting. Requires per vertex normals, 
 											// light direction, ambient color, and diffuse color.
-		LIGHTING_HEMI		= (1<<7),		// Hemisperical lighting. Like diffuse, but uses a 
+		LIGHTING_HEMI		= (1<<8),		// Hemisperical lighting. Like diffuse, but uses a 
 											// different light model.
 
 		// Color features.
-		PREMULT				= (1<<8),		// convert to pre-multiplied in the fragment shader
-		EMISSIVE			= (1<<9),		// interpret the alpha channel as emission.
-		EMISSIVE_EXCLUSIVE  = (1<<10),		// everything not emissive is black
+		PREMULT				= (1<<9),		// convert to pre-multiplied in the fragment shader
+		EMISSIVE			= (1<<10),		// interpret the alpha channel as emission.
+		EMISSIVE_EXCLUSIVE  = (1<<11),		// everything not emissive is black
 
-		COLOR_PARAM			= (1<<11),		// Apply per model color.
-		BONE_FILTER			= (1<<12),		// Apply per model bone filtering
-		SATURATION			= (1<<13),		// Per pixel saturation effect. Uses control.y
+		COLOR_PARAM			= (1<<12),		// Apply per model color.
+		BONE_FILTER			= (1<<13),		// Apply per model bone filtering
+		SATURATION			= (1<<14),		// Per pixel saturation effect. Uses control.y
 
 		// Features:
-		PROCEDURAL			= (1<<14),		// Engage the procedural renderer, and use a param4.
 		BONE_XFORM			= (1<<15),
 	};
 
@@ -105,11 +107,13 @@ public:
 	// Warning: must match gUniformName
 	enum {
 		U_MVP_MAT,		
-		U_M_MAT_ARR,	// array for instancing
-		U_COLOR_PARAM_ARR,	// params for instancing
+		U_M_MAT_ARR,			// array for instancing
+		U_COLOR_PARAM_ARR,		// params for instancing color 
 		U_FILTER_PARAM_ARR,
 		U_CONTROL_PARAM_ARR,
-		U_PARAM4_ARR,	// params for instancing
+		U_TEXTURE0_XFORM_ARR,
+		U_TEXTURE0_CLIP_ARR,
+		U_TEXTURE0_COLORMAP_ARR,
 
 		U_NORMAL_MAT,
 		U_COLOR_MULT,
@@ -120,8 +124,11 @@ public:
 		U_COLOR_PARAM,
 		U_FILTER_PARAM,
 		U_CONTROL_PARAM,
-		U_PARAM4,
-		U_BONEXFORM,
+		U_TEXTURE0_XFORM,
+		U_TEXTURE0_CLIP,
+		U_TEXTURE0_COLORMAP,
+
+		U_BONEXFORM,			// the instance and normal mode use the same name.
 
 		U_TEXTURE0,
 		U_TEXTURE1,

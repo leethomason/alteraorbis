@@ -40,7 +40,6 @@ void UIRenderer::EndRender()
 
 void UIRenderer::BeginRenderState( const void* renderState )
 {
-	shader.ClearShaderFlag( ShaderManager::PROCEDURAL );
 	int state = ((int)renderState) & 0xffff;
 	int data  = ((int)renderState) >> 16;
 
@@ -81,6 +80,7 @@ void UIRenderer::BeginRenderState( const void* renderState )
 		shader.SetBlendMode( GPUState::BLEND_NORMAL );
 		break;
 
+/*
 	case RENDERSTATE_UI_PROCEDURAL:
 		shader.SetColor( 1, 1, 1, 1 );
 		shader.SetBlendMode( GPUState::BLEND_NORMAL );
@@ -97,7 +97,7 @@ void UIRenderer::BeginRenderState( const void* renderState )
 			ShaderManager::EncodeProceduralMat( c, v, &procMat );
 		}
 		break;
-
+*/
 	default:
 		GLASSERT( 0 );
 		break;

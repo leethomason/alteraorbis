@@ -242,7 +242,9 @@ public:
 		MODEL_HAS_BONE_FILTER		= (1<<2),
 		MODEL_NO_SHADOW				= (1<<3),
 		MODEL_INVISIBLE				= (1<<4),
-		MODEL_PROCEDURAL			= (1<<5),
+		MODEL_TEXTURE0_XFORM		= (1<<5),
+		MODEL_TEXTURE0_CLIP			= (1<<6),
+		MODEL_TEXTURE0_COLORMAP		= (1<<7),
 
 		MODEL_USER					= (1<<16)		// reserved for user code.
 	};
@@ -320,7 +322,10 @@ public:
 		return IsFlagSet( MODEL_HAS_BONE_FILTER ) != 0;
 	}
 
-	void SetProcedural( bool on, const grinliz::Color4F* colors, const float* v );
+	void SetTextureXForm( float a=1, float d=1, float tx=0, float ty=0 );
+	void SetTextureClip( float x0=0, float y0=0, float x1=1, float y1=1 );
+	void SetColorMap( const Vector4F& red, const Vector4F& green, const Vector4F& blue );
+	void ClearColorMap();
 
 	const grinliz::Vector4F& Control() const		{ return control; }
 	void SetControl( const grinliz::Vector4F& v )	{ control = v; }

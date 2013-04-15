@@ -662,9 +662,11 @@ void Model::Queue( RenderQueue* queue, EngineShaders* engineShaders, int require
 			if ( HasAnimation() ) {
 				mod |= ShaderManager::BONE_XFORM;
 			}
-			if ( flags & MODEL_PROCEDURAL ) {
-				mod |= ShaderManager::PROCEDURAL;
-			}
+
+			if ( flags & MODEL_TEXTURE0_XFORM )		mod |= ShaderManager::TEXTURE0_XFORM;
+			if ( flags & MODEL_TEXTURE0_CLIP )		mod |= ShaderManager::TEXTURE0_CLIP;
+			if ( flags & MODEL_TEXTURE0_COLORMAP )	mod |= ShaderManager::TEXTURE0_COLORMAP;
+
 			if ( control.y != 1 ) {
 				mod |= ShaderManager::SATURATION;
 			}

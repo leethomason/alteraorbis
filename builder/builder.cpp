@@ -686,6 +686,7 @@ void ProcessTexture( XMLElement* texture )
 	btexture.ToBuffer();
 	gamedb::WItem* witem = btexture.InsertTextureToDB( writer->Root()->FetchChild( "textures" ) );
 
+	// If present, write the texture packer data about the image.
 	const char* tableName = texture->Attribute( "table" );
 	if ( tableName ) {
 		gamedb::WItem* table = witem->FetchChild( "table" );
