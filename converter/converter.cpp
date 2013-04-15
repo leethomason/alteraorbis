@@ -56,8 +56,10 @@ void PutPixel(SDL_Surface *surface, int x, int y, const Color4U8& c )
 
 int main( int argc, char* argv[] )
 {
-	static const int NUM_IMAGES = 10;
+	static const int NUM_IMAGES = 120;
 	static const char* SRC_PATH = "../resin/humanMaleFace.png";
+	static const int GLASSES_START = 1;
+	static const int GLASSES_END   = 11;
 
 	void *handle = 0;
 	handle = grinliz::grinlizLoadLibrary( "SDL_image" );
@@ -88,7 +90,10 @@ int main( int argc, char* argv[] )
 
 		while(true) {
 			row1 = random.Rand( rows );
-			row2 = random.Rand( rows );
+			row2 = 0;
+			if ( random.Bit() ) {
+				row2 = GLASSES_START + random.Rand( GLASSES_END - GLASSES_START  );
+			}
 			row3 = random.Rand( rows );
 
 			int hash = row0 | (row1<<8) | (row2<<16) | (row3<<24);
@@ -120,7 +125,7 @@ int main( int argc, char* argv[] )
 		}
 
 		CStr<200> buf;
-		buf.Format( "./files/out%02d.png", n );
+		buf.Format( "./files/out%03d.png", n );
 		lodepng_encode32_file( buf.c_str(), (const unsigned char*)outSurf->pixels, outSurf->w, outSurf->h );
 	}
 	printf( "goodbye\n" );
