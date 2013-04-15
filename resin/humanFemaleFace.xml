@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with TexturePacker http://texturepacker.com-->
+<!-- $TexturePacker:SmartUpdate:06193e9eeda7f55b65d9fba1996d54cd$ -->
+<!--Format:
+n  => name of the sprite
+x  => sprite x pos in texture
+y  => sprite y pos in texture
+w  => sprite width (may be trimmed)
+h  => sprite height (may be trimmed)
+oX => sprite's x-corner offset (only available if trimmed)
+oY => sprite's y-corner offset (only available if trimmed)
+oW => sprite's original width (only available if trimmed)
+oH => sprite's original height (only available if trimmed)
+r => 'y' only set if sprite is rotated
+-->
+<TextureAtlas imagePath="humanFemaleFaceAtlas.png" width="2048" height="2048">
+    <sprite n="out001.png" x="676" y="920" w="238" h="230" oX="9" oY="12" oW="256" oH="256"/>
+    <sprite n="out002.png" x="1716" y="1800" w="178" h="228" oX="23" oY="2" oW="256" oH="256"/>
+    <sprite n="out003.png" x="1716" y="1588" w="204" h="210" oX="24" oY="20" oW="256" oH="256"/>
+    <sprite n="out004.png" x="1188" y="1598" w="166" h="228" oX="35" oY="2" oW="256" oH="256"/>
+    <sprite n="out005.png" x="1528" y="928" w="204" h="210" oX="24" oY="20" oW="256" oH="256"/>
+    <sprite n="out006.png" x="1156" y="1366" w="202" h="230" oX="22" oY="0" oW="256" oH="256"/>
+    <sprite n="out007.png" x="916" y="1380" w="238" h="228" oX="8" oY="13" oW="256" oH="256"/>
+    <sprite n="out008.png" x="1150" y="450" w="222" h="218" oX="30" oY="12" oW="256" oH="256"/>
+    <sprite n="out015.png" x="436" y="1152" w="238" h="230" oX="9" oY="12" oW="256" oH="256"/>
+    <sprite n="out018.png" x="1738" y="1132" w="196" h="222" oX="28" oY="8" oW="256" oH="256"/>
+    <sprite n="out019.png" x="436" y="920" w="238" h="230" oX="9" oY="12" oW="256" oH="256"/>
+    <sprite n="out020.png" x="1010" y="0" w="252" h="222" oX="0" oY="8" oW="256" oH="256"/>
+    <sprite n="out021.png" x="910" y="688" w="238" h="230" oX="9" oY="12" oW="256" oH="256"/>
+    <sprite n="out022.png" x="1536" y="1602" w="178" h="228" oX="23" oY="2" oW="256" oH="256"/>
+    <sprite n="out024.png" x="1738" y="1356" w="178" h="230" oX="23" oY="0" oW="256" oH="256"/>
+    <sprite n="out025.png" x="1012" y="1842" w="176" h="198" oX="24" oY="32" oW="256" oH="256"/>
+    <sprite n="out027.png" x="1156" y="1134" w="202" h="230" oX="22" oY="0" oW="256" oH="256"/>
+    <sprite n="out028.png" x="832" y="1842" w="178" h="200" oX="23" oY="30" oW="256" oH="256"/>
+    <sprite n="out029.png" x="1360" y="908" w="166" h="230" oX="34" oY="0" oW="256" oH="256"/>
+    <sprite n="out031.png" x="666" y="1614" w="200" h="210" oX="28" oY="20" oW="256" oH="256"/>
+    <sprite n="out034.png" x="1540" y="1364" w="196" h="222" oX="28" oY="8" oW="256" oH="256"/>
+    <sprite n="out036.png" x="1360" y="1140" w="178" h="230" oX="23" oY="0" oW="256" oH="256"/>
+    <sprite n="out038.png" x="670" y="688" w="238" h="230" oX="9" oY="12" oW="256" oH="256"/>
+    <sprite n="out039.png" x="1036" y="1610" w="150" h="228" oX="51" oY="2" oW="256" oH="256"/>
+    <sprite n="out041.png" x="240" y="1504" w="194" h="250" oX="24" oY="6" oW="256" oH="256"/>
+    <sprite n="out043.png" x="1734" y="908" w="200" h="222" oX="24" oY="8" oW="256" oH="256"/>
+    <sprite n="out044.png" x="1356" y="1602" w="178" h="228" oX="23" oY="2" oW="256" oH="256"/>
+    <sprite n="out047.png" x="430" y="688" w="238" h="230" oX="9" oY="12" oW="256" oH="256"/>
+    <sprite n="out048.png" x="1156" y="902" w="202" h="230" oX="22" oY="0" oW="256" oH="256"/>
+    <sprite n="out049.png" x="756" y="0" w="252" h="222" oX="0" oY="8" oW="256" oH="256"/>
+    <sprite n="out050.png" x="916" y="1150" w="238" h="228" oX="8" oY="13" oW="256" oH="256"/>
+    <sprite n="out051.png" x="910" y="456" w="238" h="230" oX="9" oY="12" oW="256" oH="256"/>
+    <sprite n="out052.png" x="1374" y="230" w="186" h="250" oX="32" oY="6" oW="256" oH="256"/>
+    <sprite n="out053.png" x="1190" y="1832" w="166" h="198" oX="34" oY="32" oW="256" oH="256"/>
+    <sprite n="out054.png" x="1360" y="1372" w="178" h="228" oX="23" oY="2" oW="256" oH="256"/>
+    <sprite n="out055.png" x="670" y="456" w="238" h="230" oX="9" oY="12" oW="256" oH="256"/>
+    <sprite n="out056.png" x="436" y="1614" w="228" h="218" oX="24" oY="12" oW="256" oH="256"/>
+    <sprite n="out060.png" x="240" y="1756" w="178" h="230" oX="23" oY="0" oW="256" oH="256"/>
+    <sprite n="out065.png" x="430" y="456" w="238" h="230" oX="9" oY="12" oW="256" oH="256"/>
+    <sprite n="out066.png" x="1540" y="1140" w="196" h="222" oX="28" oY="8" oW="256" oH="256"/>
+    <sprite n="out067.png" x="240" y="744" w="188" h="254" oX="23" oY="2" oW="256" oH="256"/>
+    <sprite n="out068.png" x="910" y="224" w="238" h="230" oX="9" oY="12" oW="256" oH="256"/>
+    <sprite n="out069.png" x="1528" y="716" w="204" h="210" oX="24" oY="20" oW="256" oH="256"/>
+    <sprite n="out070.png" x="670" y="224" w="238" h="230" oX="9" oY="12" oW="256" oH="256"/>
+    <sprite n="out071.png" x="240" y="488" w="188" h="254" oX="23" oY="2" oW="256" oH="256"/>
+    <sprite n="out072.png" x="502" y="0" w="252" h="222" oX="0" oY="8" oW="256" oH="256"/>
+    <sprite n="out073.png" x="1728" y="232" w="202" h="230" oX="22" oY="0" oW="256" oH="256"/>
+    <sprite n="out076.png" x="916" y="920" w="238" h="228" oX="8" oY="13" oW="256" oH="256"/>
+    <sprite n="out077.png" x="626" y="1834" w="204" h="210" oX="24" oY="20" oW="256" oH="256"/>
+    <sprite n="out079.png" x="430" y="224" w="238" h="230" oX="9" oY="12" oW="256" oH="256"/>
+    <sprite n="out080.png" x="1744" y="0" w="238" h="230" oX="9" oY="12" oW="256" oH="256"/>
+    <sprite n="out081.png" x="1554" y="486" w="178" h="228" oX="23" oY="2" oW="256" oH="256"/>
+    <sprite n="out082.png" x="0" y="1624" w="238" h="230" oX="9" oY="12" oW="256" oH="256"/>
+    <sprite n="out084.png" x="0" y="1392" w="238" h="230" oX="9" oY="12" oW="256" oH="256"/>
+    <sprite n="out085.png" x="0" y="1160" w="238" h="230" oX="9" oY="12" oW="256" oH="256"/>
+    <sprite n="out087.png" x="1734" y="696" w="200" h="210" oX="28" oY="20" oW="256" oH="256"/>
+    <sprite n="out088.png" x="1896" y="1800" w="148" h="228" oX="53" oY="2" oW="256" oH="256"/>
+    <sprite n="out089.png" x="0" y="928" w="238" h="230" oX="9" oY="12" oW="256" oH="256"/>
+    <sprite n="out090.png" x="1734" y="464" w="200" h="230" oX="1" oY="0" oW="256" oH="256"/>
+    <sprite n="out091.png" x="1562" y="230" w="164" h="254" oX="47" oY="2" oW="256" oH="256"/>
+    <sprite n="out092.png" x="248" y="0" w="252" h="222" oX="0" oY="8" oW="256" oH="256"/>
+    <sprite n="out097.png" x="420" y="1834" w="204" h="210" oX="24" oY="20" oW="256" oH="256"/>
+    <sprite n="out099.png" x="1150" y="670" w="202" h="230" oX="22" oY="0" oW="256" oH="256"/>
+    <sprite n="out100.png" x="676" y="1382" w="238" h="228" oX="8" oY="13" oW="256" oH="256"/>
+    <sprite n="out101.png" x="868" y="1612" w="166" h="228" oX="34" oY="2" oW="256" oH="256"/>
+    <sprite n="out103.png" x="0" y="696" w="238" h="230" oX="9" oY="12" oW="256" oH="256"/>
+    <sprite n="out104.png" x="1374" y="482" w="178" h="228" oX="23" oY="2" oW="256" oH="256"/>
+    <sprite n="out105.png" x="0" y="464" w="238" h="230" oX="9" oY="12" oW="256" oH="256"/>
+    <sprite n="out106.png" x="0" y="0" w="246" h="230" oX="1" oY="12" oW="256" oH="256"/>
+    <sprite n="out107.png" x="240" y="1252" w="194" h="250" oX="24" oY="6" oW="256" oH="256"/>
+    <sprite n="out108.png" x="0" y="232" w="238" h="230" oX="9" oY="12" oW="256" oH="256"/>
+    <sprite n="out109.png" x="1150" y="230" w="222" h="218" oX="30" oY="12" oW="256" oH="256"/>
+    <sprite n="out111.png" x="676" y="1152" w="238" h="228" oX="8" oY="13" oW="256" oH="256"/>
+    <sprite n="out114.png" x="240" y="232" w="188" h="254" oX="23" oY="2" oW="256" oH="256"/>
+    <sprite n="out116.png" x="436" y="1384" w="238" h="228" oX="8" oY="13" oW="256" oH="256"/>
+    <sprite n="out117.png" x="1504" y="0" w="238" h="228" oX="8" oY="13" oW="256" oH="256"/>
+    <sprite n="out118.png" x="1264" y="0" w="238" h="228" oX="8" oY="13" oW="256" oH="256"/>
+    <sprite n="out119.png" x="240" y="1000" w="194" h="250" oX="24" oY="6" oW="256" oH="256"/>
+</TextureAtlas>

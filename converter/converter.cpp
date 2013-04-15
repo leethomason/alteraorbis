@@ -57,9 +57,14 @@ void PutPixel(SDL_Surface *surface, int x, int y, const Color4U8& c )
 int main( int argc, char* argv[] )
 {
 	static const int NUM_IMAGES = 120;
+	/*
 	static const char* SRC_PATH = "../resin/humanMaleFace.png";
 	static const int GLASSES_START = 1;
 	static const int GLASSES_END   = 11;
+	*/
+	static const char* SRC_PATH = "../resin/humanFemaleFace.png";
+	static const int GLASSES_START = 1;
+	static const int GLASSES_END   = 16;
 
 	void *handle = 0;
 	handle = grinliz::grinlizLoadLibrary( "SDL_image" );
