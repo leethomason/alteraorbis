@@ -356,7 +356,7 @@ bool BTexture::ToBuffer()
 }
 
 
-void BTexture::InsertTextureToDB( gamedb::WItem* parent )
+gamedb::WItem* BTexture::InsertTextureToDB( gamedb::WItem* parent )
 {
 	gamedb::WItem* witem = parent->FetchChild( assetName.c_str() );
 
@@ -382,4 +382,6 @@ void BTexture::InsertTextureToDB( gamedb::WItem* parent )
 	witem->SetInt( "height", surface->h );
 	witem->SetBool( "noMip", noMip );
 	witem->SetBool( "emissive", emissive );
+
+	return witem;
 }

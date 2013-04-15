@@ -670,120 +670,6 @@ void ProcessModel( XMLElement* model )
 	delete builder;
 }
 
-#if 0
-bool BarIsBlack( SDL_Surface* surface, int x, int y0, int y1 )
-{
-	bool black = true;
-
-	for( int y=y0; y<=y1; ++y ) {
-		Color4U8 c = GetPixel( surface, x, y );
-		if ( c.a == 0 || ( c.r==0 && c.g==0 && c.b==0 ) ) {
-			// do nothing.
-		}
-		else {
-			black = false;
-			break;
-		}
-	}
-	return black;
-}
-#endif
-
-#if 0
-void CalcFontWidths( SDL_Surface* surface )
-{
-	// Walk all the glyphs, calculate the minimum width
-	for( int gy=0; gy<GLYPH_CY; ++gy ) {
-		for( int gx=0; gx<GLYPH_CX; ++gx ) {
-	
-			// In image space.
-			int y0 = gy*GLYPH_HEIGHT;
-			int y1 = y0 + GLYPH_HEIGHT - 1;
-			int x0 = gx*GLYPH_WIDTH;
-			int x1 = x0 + GLYPH_WIDTH-1;
-
-			int x0p = x0;
-			while( x0p < x1 && BarIsBlack( surface, x0p, y0, y1 ) ) {
-				++x0p;
-			}
-			int x1p = x1;
-			while ( x1p >= x0p && BarIsBlack( surface, x1p, y0, y1 ) ) {
-				--x1p;
-			}
-			GlyphMetric* g = &gGlyphMetric[gy*GLYPH_CX+gx];
-			g->offset = x0p - x0;
-			g->width = x1p - x0p + 1;
-			GLASSERT( g->offset >= 0 && g->offset < GLYPH_WIDTH );
-			GLASSERT( g->width >= 0 && g->width <= GLYPH_WIDTH );
-			//GLOUTPUT(( "glyph %d offset=%d width=%d\n", gy*GLYPH_CX+gx, g->offset, g->width ));
-		}
-	}
-}
-#endif
-
-
-
-#if 0
-void BlitTexture( const XMLElement* element, SDL_Surface* target )
-{
-	int sx=0, sy=0, sw=0, sh=0, tx=0, ty=0, tw=target->w, th=target->h;
-	element->QueryIntAttribute( "sx", &sx );
-	element->QueryIntAttribute( "sy", &sy );
-	element->QueryIntAttribute( "sw", &sw );
-	element->QueryIntAttribute( "sh", &sh );
-	element->QueryIntAttribute( "tx", &tx );
-	element->QueryIntAttribute( "ty", &ty );
-	element->QueryIntAttribute( "tw", &tw );
-	element->QueryIntAttribute( "th", &th );
-
-	GLString pathName;
-	ParseNames( element, 0, &pathName, 0 );
-
-	SDL_Surface* surface = libIMG_Load( pathName.c_str() );
-	if ( !surface ) {
-		ExitError( "Blit Tag", pathName.c_str(), "Blit", "Could not load asset file." );
-	}
-
-	for( int j=0; j<th; ++j ) {
-		for( int i=0; i<tw; ++i ) {
-			int targetX = tx+i;
-			int targetY = ty+j;
-
-			float srcX = (float)sx + (float)i*(float)sw/(float)tw;
-			float srcY = (float)sy + (float)j*(float)sh/(float)th;
-
-			if (    srcX >= 0 && srcX <= (float)(surface->w - 2)
-				 && srcY >= 0 && srcY <= (float)(surface->h - 2)) 
-			{
-				int x = (int)srcX;
-				int y = (int)srcY;
-				Color4U8 c00 = GetPixel( surface, x, y );
-				Color4U8 c10 = GetPixel( surface, x+1, y );
-				Color4U8 c01 = GetPixel( surface, x, y+1 );
-				Color4U8 c11 = GetPixel( surface, x+1, y+1 );
-				Color4U8 c;
-				for( int i=0; i<4; ++i ) {
-					c[i] = (U8)BilinearInterpolate( (float)c00[i], 
-													(float)c10[i], 
-													(float)c01[i], 
-													(float)c11[i], 
-													srcX-(float)x, srcY-(float)y );
-				}
-				PutPixel( target, targetX, targetY, c );
-			}
-			else {
-				int x = Clamp( (int)srcX, 0, surface->w-1 );
-				int y = Clamp( (int)srcY, 0, surface->h-1 );
-
-				Color4U8 c = GetPixel( surface, x, y );
-				PutPixel( target, targetX, targetY, c );
-			}
-		}
-	}
-	SDL_FreeSurface( surface );
-}
-#endif
-
 
 void ProcessTexture( XMLElement* texture )
 {
@@ -798,7 +684,54 @@ void ProcessTexture( XMLElement* texture )
 	btexture.Scale();
 
 	btexture.ToBuffer();
-	btexture.InsertTextureToDB( writer->Root()->FetchChild( "textures" ) );
+	gamedb::WItem* witem = btexture.InsertTextureToDB( writer->Root()->FetchChild( "textures" ) );
+
+	const char* tableName = texture->Attribute( "table" );
+	if ( tableName ) {
+		gamedb::WItem* table = witem->FetchChild( "table" );
+
+		XMLDocument doc;
+		std::string tpath = inputDirectory + tableName;
+		doc.LoadFile( tpath.c_str() );
+		if ( doc.Error() ) {
+			ExitError( "ProcessTexture", tableName, 0, "Failed to load texture table." );
+		}
+
+		const XMLElement* atlasEle = doc.FirstChildElement( "TextureAtlas" );
+		if ( !atlasEle ) {
+			ExitError( "ProcessTexture", tableName, 0, "Failed to load texture table." );
+		}
+		float width = 1;
+		float height = 1;
+		atlasEle->QueryAttribute( "width", &width );
+		atlasEle->QueryAttribute( "height", &height );
+		for( const XMLElement* spriteEle = atlasEle->FirstChildElement( "sprite" );
+			 spriteEle;
+			 spriteEle = spriteEle->NextSiblingElement( "sprite" ))
+		{
+			const char* name = spriteEle->Attribute( "n" );
+			gamedb::WItem* entry = table->FetchChild( name );
+			
+			float x=0, y=0, w=0, h=0, oX=0, oY=0, oW=0, oH=0;
+			spriteEle->QueryAttribute( "x",  &x );
+			spriteEle->QueryAttribute( "y",  &y );
+			spriteEle->QueryAttribute( "w",  &w );
+			spriteEle->QueryAttribute( "h",  &h );
+			spriteEle->QueryAttribute( "oX", &oX );
+			spriteEle->QueryAttribute( "oY", &oY );
+			spriteEle->QueryAttribute( "oW", &oW );
+			spriteEle->QueryAttribute( "oH", &oH );
+
+			entry->SetFloat( "x",  x / width );
+			entry->SetFloat( "y",  y / height );
+			entry->SetFloat( "w",  w / width );
+			entry->SetFloat( "h",  h / height );
+			entry->SetFloat( "oX", oX / width );
+			entry->SetFloat( "oY", oY / height );
+			entry->SetFloat( "oW", oW / width );
+			entry->SetFloat( "oH", oH / height );
+		}
+	}
 }
 
 

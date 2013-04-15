@@ -41,7 +41,7 @@ public:
 	bool Load();		// do the load (can use create instad)
 	bool Scale();		// scale, if targetW/H not asset W/H
 	bool ToBuffer();	// dither, flip, process, etc. to memory buffer
-	void InsertTextureToDB( gamedb::WItem* parent );
+	gamedb::WItem* InsertTextureToDB( gamedb::WItem* parent );
 	// ---- normal functions follow.
 	void Create( int w, int h, int format );
 
