@@ -331,6 +331,16 @@ public:
 						const grinliz::Vector4F& red, 
 						const grinliz::Vector4F& green, 
 						const grinliz::Vector4F& blue );
+	void SetColorMap(	bool enable, 
+						const grinliz::Color4F& red, 
+						const grinliz::Color4F& green, 
+						const grinliz::Color4F& blue )
+	{
+		grinliz::Vector4F r = { red.r, red.g, red.b, red.a };
+		grinliz::Vector4F g = { green.r, green.g, green.b, green.a };
+		grinliz::Vector4F b = { blue.r, blue.g, blue.b, blue.a };
+		SetColorMap( enable, r, g, b );
+	}
 
 	const grinliz::Vector4F& Control() const		{ return control; }
 	void SetControl( const grinliz::Vector4F& v )	{ control = v; }

@@ -161,9 +161,9 @@ void main() {
 
 		#endif
 		#if TEXTURE0_COLORMAP == 1
-			v_color0 = u_colorMap[0];
-			v_color1 = u_colorMap[1];
-			v_color2 = u_colorMap[2];
+			v_color0 = colorMap[0];
+			v_color1 = colorMap[1];
+			v_color2 = colorMap[2];
 		#endif
 	#endif
 	#if TEXTURE1 == 1

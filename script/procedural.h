@@ -92,12 +92,12 @@ public:
 		FEMALE_GLASSES_ROWS	= 15,
 		HAIR_ROWS			= 16
 	};
-	void GetSkinColor( int index0, int index1, float fade, grinliz::Color4F* c, grinliz::Color4F* highlight );
+	void GetSkinColor( int index0, int index1, float fade, grinliz::Color4F* c );
 	void GetHairColor( int index0, grinliz::Color4F* c );
 	void GetGlassesColor( int index0, int index1, float fade, grinliz::Color4F* c );
 	
 	enum {
-		SKIN, HIGHLIGHT, GLASSES, HAIR
+		SKIN, GLASSES, HAIR
 	};
 	void GetColors( U32 seed, grinliz::Color4F* c );
 	virtual void Render( const GameItem& item, ProcRenderInfo* info );

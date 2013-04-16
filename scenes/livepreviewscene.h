@@ -69,9 +69,7 @@ private:
 	gamui::ToggleButton rowButton[ROWS];
 	gamui::ToggleButton typeButton[NUM_TYPES];
 
-	U32 fileTimer;
 	U32 timer;
-	time_t fileTime;
 
 	int			currentType;
 	Engine*		engine;

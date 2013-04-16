@@ -55,8 +55,6 @@ LivePreviewScene::LivePreviewScene( LumosGame* game, const LivePreviewSceneData*
 	currentType = HUMAN_MALE_FACE;
 	GenerateAndCreate( true );
 	game->InitStd( &gamui2D, &okay, 0 );
-	fileTimer = 0;
-	fileTime = 0;
 }
 
 
@@ -109,7 +107,6 @@ void LivePreviewScene::GenerateFaces( int mainRow )
 
 	FaceGen faceGen( currentType == HUMAN_FEMALE_FACE, game->GetPalette() );
 
-	float tex[4] = { 0, 0, 0, 0 };
 	Random random( mainRow );
 	random.Rand();
 
@@ -128,8 +125,8 @@ void LivePreviewScene::GenerateFaces( int mainRow )
 			model[i] = 0;
 		}
 
-		Color4F skin, highlight, hair, glasses;
-		faceGen.GetSkinColor( i, random.Rand(), random.Uniform(), &skin, &highlight ); 
+		Color4F skin, hair, glasses;
+		faceGen.GetSkinColor( i, random.Rand(), random.Uniform(), &skin ); 
 		faceGen.GetHairColor( i, &hair );
 		faceGen.GetGlassesColor( i, random.Rand(), random.Uniform(), &glasses );
 
@@ -139,43 +136,28 @@ void LivePreviewScene::GenerateFaces( int mainRow )
 		float x = START_X + float(col);
 		float z = START_Z + float(row);
 		float current = 1.0f - rowMult * (float)(mainRow);
+		
+		int index = mainRow * NUM_MODEL + i;
 
 		switch ( row ) {
 		case 0:
-			faceGen.GetSkinColor( col, col, 0, &skin, &highlight ); 
+			faceGen.GetSkinColor( col, col, 0, &skin ); 
 			faceGen.GetHairColor( col, &hair );
-			tex[0] = tex[1] = tex[2] = tex[3] = current;
 			break;
 
 		default:
-			tex[0] = rowMult * (float)random.Rand(srcRows);
-			tex[1] = rowMult * (float)random.Rand(srcRows);
-			tex[2] = rowMult * (float)random.Rand(srcRows);
-
-			// glasses handled special:
-			if ( random.Bit() )
-				tex[2] = rowMult * (float)(srcRows);
-			else
-				tex[2] = rowMult * (float)( srcRows - random.Rand( Max( FaceGen::MALE_GLASSES_ROWS, FaceGen::FEMALE_GLASSES_ROWS ) ));
-			tex[3] = rowMult * (float)random.Rand(srcRows);
 			break;
 		}
 
-		const Color4F color[4] = {
-			skin,						// (r) skin
-			highlight,					// (b0) highlight
-			glasses,					// (b1) glasses / tattoo
-			hair						// (g) hair
-		};
-
 		model[i]->SetPos( x, 0.1f, z );
-		//model[i]->SetProcedural( true, color, tex );
-		if ( i==0 ) {
-			Texture::TableEntry te;
-			model[i]->GetResource()->atom[0].texture->GetTableEntry( "out028.png", &te );
-			model[i]->SetTextureXForm( te.uvXForm.x, te.uvXForm.y, te.uvXForm.z, te.uvXForm.w );
-			model[i]->SetTextureClip( te.clip.x, te.clip.y, te.clip.z, te.clip.w );
-		}
+
+		Texture::TableEntry te;
+		Texture* texture = model[i]->GetResource()->atom[0].texture;
+		int n = index % texture->NumTableEntries();
+		texture->GetTableEntry( n, &te );
+		model[i]->SetTextureXForm( te.uvXForm.x, te.uvXForm.y, te.uvXForm.z, te.uvXForm.w );
+		model[i]->SetTextureClip( te.clip.x, te.clip.y, te.clip.z, te.clip.w );
+		model[i]->SetColorMap( true, skin, hair, glasses );
 	}
 }
 

@@ -18,7 +18,7 @@ using namespace grinliz;
 }
 
 
-void FaceGen::GetSkinColor( int index0, int index1, float fade, Color4F* color, Color4F* highlight )
+void FaceGen::GetSkinColor( int index0, int index1, float fade, Color4F* color )
 {
 	static const Vector2I c[NUM_SKIN_COLORS] = {
 		{ PAL_PURPLE*2, PAL_TANGERINE },
@@ -33,7 +33,6 @@ void FaceGen::GetSkinColor( int index0, int index1, float fade, Color4F* color, 
 	*color = Lerp( palette->Get4F( c[index0].x, c[index0].y ),
 				   palette->Get4F( c[index1].x, c[index1].y ),
 				   fade );
-	*highlight = palette->Get4F( PAL_GRAY*2+1, PAL_GRAY );
 }
 
 
@@ -87,7 +86,7 @@ void FaceGen::GetColors( U32 seed, grinliz::Color4F* c )
 	GetSkinColor(	random.Rand( NUM_SKIN_COLORS ), 
 					random.Rand( NUM_SKIN_COLORS ),
 					random.Uniform(), 
-					c+SKIN, c+HIGHLIGHT );
+					c+SKIN );
 	GetHairColor( random.Rand( NUM_HAIR_COLORS ), c+HAIR );
 	GetGlassesColor( random.Rand( NUM_GLASSES_COLORS ),
 					 random.Rand( NUM_GLASSES_COLORS ),
