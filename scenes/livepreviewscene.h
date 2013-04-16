@@ -46,12 +46,10 @@ public:
 	}
 	virtual void ItemTapped( const gamui::UIItem* item );
 	virtual void Draw3D( U32 deltaTime );
-	virtual void DoTick( U32 deltaTime );
 	virtual grinliz::Color4F ClearColor();
 	virtual void DrawDebugText();
 
 private:
-	void CreateTexture( int type );
 	void GenerateAndCreate( bool createTexture );
 	void GenerateFaces( int mainRow );
 	void GenerateRing( int mainRow );
@@ -75,7 +73,6 @@ private:
 	U32 timer;
 	time_t fileTime;
 
-	bool		live;
 	int			currentType;
 	Engine*		engine;
 	Model*		model[NUM_MODEL];

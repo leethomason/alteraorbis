@@ -422,3 +422,71 @@ U32 TextureManager::CalcTextureMem() const
 	}
 	return mem;
 }
+
+
+int Texture::NumTableEntries() const
+{
+	if ( item ) {
+		const gamedb::Item* table = item->Child( "table" );
+		if ( table ) {
+			return table->NumChildren();
+		}
+	}
+	return 0;
+}
+
+
+void Texture::GetTableEntry( int i, TableEntry* te ) const
+{
+	te->name = IString();
+	if ( item ) {
+		const gamedb::Item* table = item->Child( "table" );
+		if ( table ) {
+			const gamedb::Item* child = table->ChildAt( i );
+			GetTE( child, te );
+		}
+	}
+}
+
+
+void Texture::GetTableEntry( const char* name, TableEntry* te ) const
+{
+	te->name = IString();
+	if ( item ) {
+		const gamedb::Item* table = item->Child( "table" );
+		if ( table ) {
+			const gamedb::Item* child = table->Child( name );
+			GetTE( child, te );
+		}
+	}
+}
+
+
+void Texture::GetTE( const gamedb::Item* child, TableEntry* te ) const
+{
+	te->name = StringPool::Intern( child->Name(), true );
+
+	float x = child->GetFloat( "x" );
+	float y = child->GetFloat( "y" );
+	float w = child->GetFloat( "w" );
+	float h = child->GetFloat( "h" );
+	float oX = child->GetFloat( "oX" );
+	float oY = child->GetFloat( "oY" );
+	float oW = child->GetFloat( "oW" );
+	float oH = child->GetFloat( "oH" );
+
+	float x0 = x-oX;
+	float y0 = 1.0f - (y-oY+oH);	// stupid opengl inverted coordinates.
+	float x1 = x-oX+oW;
+	float y1 = 1.0f - (y-oY);
+
+	te->uv.Set( x0, y0, x1, y1 );
+	te->clip.Set( x, 1.0f - (y-h), x+w, 1.0f - y );
+
+	float a = x1-x0;
+	float d = y1-y0;
+	float tx = x0;
+	float ty = y0;
+
+	te->uvXForm.Set( a, d, tx, ty );
+}

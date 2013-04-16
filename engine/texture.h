@@ -90,8 +90,19 @@ public:
 										else
 											flags &= (~PARAM_SOFTWARE_MIP);
 										}
-								
+	struct TableEntry {
+		grinliz::IString	name;
+		grinliz::Vector4F	uv;
+		grinliz::Vector4F	clip;
+
+		grinliz::Vector4F	uvXForm;		// a,d,tx,ty
+	};
+	int NumTableEntries() const;
+	void GetTableEntry( int i, TableEntry* te ) const;
+	void GetTableEntry( const char* name, TableEntry* te ) const;
+
 private:
+	void GetTE( const gamedb::Item* item, TableEntry* te ) const;
 	void Set( const char* name, int w, int h, int format, int flags );
 
 	grinliz::CStr< MAX_TEXTURE_NAME > name;

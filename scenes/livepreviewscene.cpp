@@ -18,7 +18,6 @@ using namespace grinliz;
 LivePreviewScene::LivePreviewScene( LumosGame* game, const LivePreviewSceneData* data ) : Scene( game )
 {
 	TestMap* map = 0;
-	live = data->live;
 	timer = 0;
 	
 	//map = new TestMap( 8, 8 );
@@ -118,10 +117,7 @@ void LivePreviewScene::GenerateFaces( int mainRow )
 	GLASSERT( currentType >= 0 && currentType < 2 );
 
 	const ModelResource* modelResource = 0;
-	if ( live ) 
-		modelResource = ModelResourceManager::Instance()->GetModelResource( "unitPlateProcedural" );
-	else
-		modelResource = ModelResourceManager::Instance()->GetModelResource( resName[currentType] );
+	modelResource = ModelResourceManager::Instance()->GetModelResource( resName[currentType] );
 
 	int srcRows = modelResource->atom[0].texture->Height() / modelResource->atom[0].texture->Width() * 4;
 	float rowMult = 1.0f / (float)srcRows;
@@ -146,9 +142,6 @@ void LivePreviewScene::GenerateFaces( int mainRow )
 
 		switch ( row ) {
 		case 0:
-			if ( live ) {
-				model[i]->SetScale( Lerp( 1.0f, 0.25f, (float)(col)/(float)COLS ));
-			}
 			faceGen.GetSkinColor( col, col, 0, &skin, &highlight ); 
 			faceGen.GetHairColor( col, &hair );
 			tex[0] = tex[1] = tex[2] = tex[3] = current;
@@ -158,17 +151,13 @@ void LivePreviewScene::GenerateFaces( int mainRow )
 			tex[0] = rowMult * (float)random.Rand(srcRows);
 			tex[1] = rowMult * (float)random.Rand(srcRows);
 			tex[2] = rowMult * (float)random.Rand(srcRows);
-			if ( !live ) {
-				// glasses handled special:
-				if ( random.Bit() )
-					tex[2] = rowMult * (float)(srcRows);
-				else
-					tex[2] = rowMult * (float)( srcRows - random.Rand( Max( FaceGen::MALE_GLASSES_ROWS, FaceGen::FEMALE_GLASSES_ROWS ) ));
-			}
+
+			// glasses handled special:
+			if ( random.Bit() )
+				tex[2] = rowMult * (float)(srcRows);
+			else
+				tex[2] = rowMult * (float)( srcRows - random.Rand( Max( FaceGen::MALE_GLASSES_ROWS, FaceGen::FEMALE_GLASSES_ROWS ) ));
 			tex[3] = rowMult * (float)random.Rand(srcRows);
-			if ( live ) {
-				tex[col%4] = current;
-			}
 			break;
 		}
 
@@ -181,6 +170,12 @@ void LivePreviewScene::GenerateFaces( int mainRow )
 
 		model[i]->SetPos( x, 0.1f, z );
 		//model[i]->SetProcedural( true, color, tex );
+		if ( i==0 ) {
+			Texture::TableEntry te;
+			model[i]->GetResource()->atom[0].texture->GetTableEntry( "out028.png", &te );
+			model[i]->SetTextureXForm( te.uvXForm.x, te.uvXForm.y, te.uvXForm.z, te.uvXForm.w );
+			//model[i]->SetTextureClip( te.clip.x, te.clip.y, te.clip.z, te.clip.w );
+		}
 	}
 }
 
@@ -202,7 +197,7 @@ void LivePreviewScene::GenerateRing( int mainRow )
 	random.Rand();
 
 	const ModelResource* modelResource = 0;
-	modelResource = ModelResourceManager::Instance()->GetModelResource( live ? "ringProc" : "ring" );
+	modelResource = ModelResourceManager::Instance()->GetModelResource( "ring" );
 
 	int srcRows = modelResource->atom[0].texture->Height() / modelResource->atom[0].texture->Width() * 4;
 	float rowMult = 1.0f / (float)srcRows;
@@ -230,9 +225,6 @@ void LivePreviewScene::GenerateRing( int mainRow )
 			tex[1] = rowMult * (float)random.Rand(srcRows);
 			tex[2] = rowMult * (float)random.Rand(srcRows);
 			tex[3] = rowMult * (float)random.Rand(srcRows);
-			if ( live ) {
-				tex[col%4] = current;
-			}
 			break;
 		}
 
@@ -276,9 +268,6 @@ void LivePreviewScene::GenerateRing( int mainRow )
 
 void LivePreviewScene::GenerateAndCreate( bool createTexture )
 {
-	if ( createTexture && live ) {
-		CreateTexture( currentType );
-	}
 	for( int i=0; i<ROWS; ++i ) {
 		if ( rowButton[i].Down() ) {
 			switch ( currentType ) {
@@ -332,101 +321,6 @@ void LivePreviewScene::Draw3D( U32 deltaTime )
 	engine->Draw( deltaTime );
 }
 
-
-void LivePreviewScene::DoTick( U32 deltaTime )
-{
-	if ( live ) {
-		fileTimer += deltaTime;
-		if ( fileTimer > 1000 ) {
-			fileTimer = 0;
-			CreateTexture( currentType );
-		}
-	}
-}
-
-
-void LivePreviewScene::CreateTexture( int type )
-{
-	if ( !live ) 
-		return;
-
-	const char* filename = 0;
-	switch( type ) {
-		case HUMAN_MALE_FACE:	filename = "./res/humanMaleFace.png";	break;
-		case HUMAN_FEMALE_FACE:	filename = "./res/humanFemaleFace.png";	break;
-		case RING:				filename = "./res/ring.png";			break;
-		default:	GLASSERT( 0 );							break;
-	}
-
-	static const int SIZE = 256;
-	static const int ICOLS = 4;
-	static const int IROWS = 4;
-	static const int PIXWIDTH = SIZE*ICOLS;
-	static const int PIXHEIGHT = SIZE*IROWS;
-
-	struct _stat buf;
-
-	_stat( filename, &buf );
-	if ( fileTime == buf.st_mtime ) {
-		return;
-	}
-	fileTime = buf.st_mtime;
-
-	TextureManager* texman = TextureManager::Instance();
-
-	Texture* t = texman->GetTexture( "procedural" );
-	GLASSERT( t );
-	GLASSERT( t->Alpha() );
-	GLASSERT( t->Width() == SIZE*ICOLS );
-	GLASSERT( t->Height() == SIZE*IROWS );
-	//t->SetSoftwareMip( true );
-
-	unsigned w=0, h=0;
-	U8* pixels = 0;
-	int error = lodepng_decode32_file( &pixels, &w, &h, filename );
-	GLASSERT( error == 0 );
-	GLASSERT( w == SIZE*ICOLS );
-	GLASSERT( h == SIZE*IROWS );
-	static const int BUFFER_SIZE = PIXWIDTH*PIXHEIGHT;
-	U16* buffer = new U16[BUFFER_SIZE];
-
-	// Test code to stress the upload. Annoying, annoying driver bugs.
-	memset( buffer, 0xaaaa, BUFFER_SIZE*sizeof(U16) );
-	t->Upload( buffer, BUFFER_SIZE*sizeof(U16) );
-
-	if ( error == 0 ) {
-		int scanline = PIXWIDTH*4;
-		int dstScan  = PIXWIDTH;
-
-		for( int j=0; j<PIXHEIGHT; ++j ) {
-			for( int i=0; i<PIXWIDTH; ++i ) {
-				const U8* p = pixels + scanline*j + i*4;
-				Color4U8 color = { p[0], p[1], p[2], p[3] };
-
-				U16 c = Surface::CalcRGBA16( color );
-				int offset = dstScan*(PIXHEIGHT-1-j)+i;
-				GLASSERT( offset >= 0 && offset < BUFFER_SIZE );
-				buffer[offset] = c;
-			}
-		}
-		t->Upload( buffer, BUFFER_SIZE*sizeof(U16) );
-		free( pixels );
-	}
-	else {
-		GLASSERT( 0 );
-	}	
-	delete [] buffer;
-
-
-	if ( type == HUMAN_MALE_FACE ) 
-		t->SetEmissive( false );	// alpha is transparency
-	else if ( type == HUMAN_FEMALE_FACE )
-		t->SetEmissive( false );	// alpha is transparency
-	else
-		t->SetEmissive( true );		// alpha is emissive
-
-	//t->SetSoftwareMip( false );
-}
 
 void LivePreviewScene::DrawDebugText()
 {
