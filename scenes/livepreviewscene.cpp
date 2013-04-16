@@ -180,7 +180,7 @@ void LivePreviewScene::GenerateFaces( int mainRow )
 		};
 
 		model[i]->SetPos( x, 0.1f, z );
-		model[i]->SetProcedural( true, color, tex );
+		//model[i]->SetProcedural( true, color, tex );
 	}
 }
 
@@ -268,7 +268,7 @@ void LivePreviewScene::GenerateRing( int mainRow )
 		weaponGen.GetColors( i+mainRow*NUM_MODEL, col==2, col==3, color );
 
 		model[i]->SetPos( 3.0f, y, x );
-		model[i]->SetProcedural( true, color, tex );
+		//model[i]->SetProcedural( true, color, tex );
 		model[i]->SetBoneFilter( ids );
 	}
 }

@@ -150,7 +150,17 @@ struct GPUStream {
 */
 struct GPUStreamData
 {
-	GPUStreamData() : streamPtr(0), indexPtr(0), vertexBuffer(0), indexBuffer(0), texture0(0), matrix(0), colorParam(0), boneFilter(0), controlParam(0), param4(0), bones(0) {}
+	GPUStreamData() : streamPtr(0), indexPtr(0), vertexBuffer(0), indexBuffer(0), 
+					  texture0(0), 
+					  matrix(0), 
+					  colorParam(0), 
+					  boneFilter(0), 
+					  controlParam(0),
+					  texture0XForm(0),
+					  texture0Clip(0),
+					  texture0ColorMap(0),
+					  bones(0)
+	{}
 
 	const void*			streamPtr;
 	const uint16_t*		indexPtr;
@@ -162,7 +172,9 @@ struct GPUStreamData
 	grinliz::Vector4F*	colorParam;
 	grinliz::Vector4F*	boneFilter;
 	grinliz::Vector4F*  controlParam;
-	grinliz::Matrix4*	param4;
+	grinliz::Vector4F*	texture0XForm;
+	grinliz::Vector4F*	texture0Clip;
+	grinliz::Matrix4*	texture0ColorMap;	// 3 vec4 per instance
 	BoneData*			bones;
 };
 

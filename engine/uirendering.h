@@ -55,7 +55,6 @@ public:
 private:
 	CompositingShader shader;
 	float textRed, textGreen, textBlue;
-	grinliz::Matrix4 procMat;
 	Texture* texture;
 };
 

@@ -381,6 +381,7 @@ FIXME: need to handle driver updates invalidating cache.
 		AppendFlag( &header, "TEXTURE0_CLIP",		flags & TEXTURE0_CLIP );
 		AppendFlag( &header, "TEXTURE0_COLORMAP",	flags & TEXTURE0_COLORMAP );
 	}
+	AppendFlag( &header, "TEXTURE1",			0 );
 	AppendFlag( &header, "INSTANCE",			flags & INSTANCE );
 	AppendFlag( &header, "COLORS",				flags & COLORS );
 	AppendFlag( &header, "PREMULT",				flags & PREMULT );

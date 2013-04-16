@@ -289,13 +289,15 @@ void RenderComponent::SetSaturation( float s )
 }
 
 
+/*
 void RenderComponent::SetProcedural( int hardpoint, const ProcRenderInfo& info )
 {
 	IString n = IStringConst::Hardpoint( hardpoint );
 	SetProcedural( n, info );
 }
+*/
 
-
+/*
 void RenderComponent::SetProcedural( IString hardpoint, const ProcRenderInfo& info )
 {
 	if ( !hardpoint.empty() ) {
@@ -316,6 +318,7 @@ void RenderComponent::SetProcedural( IString hardpoint, const ProcRenderInfo& in
 		model[0]->SetBoneFilter( info.filterName, info.filter );
 	}
 }
+*/
 
 
 void RenderComponent::Detach( int metaData )

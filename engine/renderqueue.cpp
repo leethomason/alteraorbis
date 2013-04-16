@@ -57,8 +57,7 @@ void RenderQueue::Add(	Model* model,
 						const Vector4F& color,
 						const Vector4F& filter,
 						const Vector4F& control,
-						const Matrix4* param4,
-						const BoneData* boneData  )
+						const ModelAux* aux )
 {
 	GLASSERT( model );
 	GLASSERT( atom );
@@ -70,8 +69,7 @@ void RenderQueue::Add(	Model* model,
 	item->color = color;
 	item->boneFilter = filter;
 	item->control = control;
-	item->param4 = param4;
-	item->boneData = boneData;
+	item->aux = aux;
 
 	GLASSERT( itemPool.Size() < 10*1000 );	// sanity, infinite loop detection
 }
@@ -130,7 +128,9 @@ void RenderQueue::Submit(	int modelRequired,
 			Vector4F	instanceColorParam[EL_MAX_INSTANCE];
 			Vector4F	instanceBoneFilter[EL_MAX_INSTANCE];
 			Vector4F	instanceControlParam[EL_MAX_INSTANCE];
-			Matrix4		instanceParam4[EL_MAX_INSTANCE];
+			Vector4F	instanceTexture0XForm[EL_MAX_INSTANCE];
+			Vector4F	instanceTexture0Clip[EL_MAX_INSTANCE];
+			Matrix4		instanceTexture0ColorMap[EL_MAX_INSTANCE];
 			BoneData	instanceBone[EL_MAX_INSTANCE];
 
 			atom->Bind( &stream, &data );
@@ -138,7 +138,9 @@ void RenderQueue::Submit(	int modelRequired,
 			data.colorParam = instanceColorParam;
 			data.boneFilter = instanceBoneFilter;
 			data.controlParam = instanceControlParam;
-			data.param4 = instanceParam4;
+			data.texture0XForm = instanceTexture0XForm;
+			data.texture0Clip = instanceTexture0Clip;
+			data.texture0ColorMap = instanceTexture0ColorMap;
 			data.bones  = instanceBone;
 			GLASSERT( data.texture0 );	// not required, but not sure it works without
 
@@ -158,11 +160,14 @@ void RenderQueue::Submit(	int modelRequired,
 					instanceBoneFilter[index] = item->boneFilter;
 					instanceControlParam[index] = item->control;
 
-					if ( item->param4 ) {
-						instanceParam4[index] = *item->param4;
-					}
-					if ( item->boneData ) {
-						instanceBone[index] = *item->boneData;
+					if ( item->aux ) {
+						instanceBone[index]				= item->aux->boneData;
+						instanceTexture0XForm[index]	= item->aux->texture0XForm;
+						instanceTexture0Clip[index]		= item->aux->texture0Clip;
+						instanceTexture0ColorMap[index].SetIdentity();
+						instanceTexture0ColorMap[index].SetCol( 0, item->aux->texture0ColorMap[0] );
+						instanceTexture0ColorMap[index].SetCol( 1, item->aux->texture0ColorMap[1] );
+						instanceTexture0ColorMap[index].SetCol( 2, item->aux->texture0ColorMap[2] );
 					}
 				}
 				state->Draw( stream, data, atom->nIndex, delta );

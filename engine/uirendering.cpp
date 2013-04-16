@@ -119,7 +119,6 @@ void UIRenderer::Render( const void* renderState, const void* textureHandle, int
 	data.streamPtr = vertex;
 	data.indexPtr = index;
 	data.texture0 = (Texture*)textureHandle;
-	data.param4 = &procMat;
 
 	shader.Draw( stream, data, nIndex );
 }

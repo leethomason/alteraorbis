@@ -31,9 +31,6 @@ uniform mat4 	u_mvpMatrix;		// model-view-projection.
 	#if BONE_FILTER == 1
 		uniform vec4	u_filterParam;
 	#endif
-	#if PARAM4 == 1
-		uniform mat4	u_param4;					// Used for procedural rendering. Could be made arbitrary.
-	#endif
 	#if TEXTURE0_XFORM == 1
 		uniform vec4 	u_texture0XForm;
 	#endif
@@ -74,7 +71,6 @@ attribute vec3 a_pos;				// vertex position
 	attribute float a_boneID;
 	#if BONE_XFORM == 1
 		#if INSTANCE == 1
-			// FIXME: Can (and should) pack into floats and use a scaling term. Currently: xform.x:rotation, xform.y:y, xform.z:z
 			uniform vec3 u_boneXForm[EL_MAX_BONES*EL_MAX_INSTANCE];
 		#else
 			uniform vec3 u_boneXForm[EL_MAX_BONES];	
@@ -158,6 +154,8 @@ void main() {
 	#if TEXTURE0 == 1
 		#if TEXTURE0_XFORM == 1
 			v_uv0 = vec2( a_uv0.x*texture0XForm.x + texture0XForm.z, a_uv0.y*texture0XForm.y + texture0XForm.w );
+		#else
+			v_uv0 = a_uv0;
 		#endif	
 		#if TEXTURE0_CLIP == 1
 

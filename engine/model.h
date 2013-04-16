@@ -173,8 +173,11 @@ public:
 
 struct ModelAux {
 	BoneData			boneData;
-	grinliz::Matrix4	procMat;
+	grinliz::Vector4F	texture0XForm;
+	grinliz::Vector4F	texture0Clip;
+	grinliz::Vector4F	texture0ColorMap[3];
 };
+
 
 class ModelResourceManager
 {
@@ -324,8 +327,10 @@ public:
 
 	void SetTextureXForm( float a=1, float d=1, float tx=0, float ty=0 );
 	void SetTextureClip( float x0=0, float y0=0, float x1=1, float y1=1 );
-	void SetColorMap( const Vector4F& red, const Vector4F& green, const Vector4F& blue );
-	void ClearColorMap();
+	void SetColorMap(	bool enable, 
+						const grinliz::Vector4F& red, 
+						const grinliz::Vector4F& green, 
+						const grinliz::Vector4F& blue );
 
 	const grinliz::Vector4F& Control() const		{ return control; }
 	void SetControl( const grinliz::Vector4F& v )	{ control = v; }

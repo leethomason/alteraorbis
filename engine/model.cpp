@@ -299,7 +299,11 @@ void Model::Serialize( XStream* xs, SpaceTree* tree )
 		}
 		if ( aux ) {
 			save->OpenElement( "aux" );
-			XARC_SER_KEY( xs, "procMat", aux->procMat );
+			XARC_SER_KEY( xs, "texture0XForm", aux->texture0XForm );
+			XARC_SER_KEY( xs, "texture0Clip", aux->texture0Clip );
+			XARC_SER_KEY( xs, "texture0ColorMap0", aux->texture0ColorMap[0] );
+			XARC_SER_KEY( xs, "texture0ColorMap1", aux->texture0ColorMap[1] );
+			XARC_SER_KEY( xs, "texture0ColorMap2", aux->texture0ColorMap[2] );
 			aux->boneData.Serialize( xs );
 			save->CloseElement();
 		}
@@ -318,7 +322,11 @@ void Model::Serialize( XStream* xs, SpaceTree* tree )
 		if ( load->HasChild() ) {
 			load->OpenElement();	// aux
 			aux = ModelResourceManager::Instance()->modelAuxPool.New();
-			XARC_SER_KEY( xs, "procMat", aux->procMat );
+			XARC_SER_KEY( xs, "texture0XForm", aux->texture0XForm );
+			XARC_SER_KEY( xs, "texture0Clip", aux->texture0Clip );
+			XARC_SER_KEY( xs, "texture0ColorMap0", aux->texture0ColorMap[0] );
+			XARC_SER_KEY( xs, "texture0ColorMap1", aux->texture0ColorMap[1] );
+			XARC_SER_KEY( xs, "texture0ColorMap2", aux->texture0ColorMap[2] );
 			aux->boneData.Serialize( xs );
 			load->CloseElement();
 		}
@@ -397,17 +405,48 @@ void Model::SetRotation( const Quaternion& q )
 }
 
 
-void Model::SetProcedural( bool on, const Color4F* colors, const float* v ) {
-	if ( on ) { 
+void Model::SetTextureXForm( float a, float d, float tx, float ty )
+{
+	if ( a != 1 || d != 1 || tx != 0 || ty != 0 ) {
+		SetFlag( MODEL_TEXTURE0_XFORM );
 		if ( !aux ) {
 			aux = ModelResourceManager::Instance()->modelAuxPool.New();
 		}
-
-		SetFlag( MODEL_PROCEDURAL );
-		ShaderManager::EncodeProceduralMat( colors, v, &aux->procMat );
+		aux->texture0XForm.Set( a, d, tx, ty );
 	}
 	else {
-		ClearFlag( MODEL_PROCEDURAL );
+		ClearFlag( MODEL_TEXTURE0_XFORM );
+	}
+}
+
+
+void Model::SetTextureClip( float x0, float y0, float x1, float y1 )
+{
+	if ( x0 != 0 || y0 != 0 || x1 != 1 || y1 != 1 ) {
+		SetFlag( MODEL_TEXTURE0_CLIP );
+		if ( !aux ) {
+			aux = ModelResourceManager::Instance()->modelAuxPool.New();
+		}
+		aux->texture0Clip.Set( x0, y0, x1, y1 );
+	}
+	else {
+		ClearFlag( MODEL_TEXTURE0_CLIP );
+	}
+}
+
+void Model::SetColorMap( bool enable, const Vector4F& red, const Vector4F& green, const Vector4F& blue )
+{
+	if ( enable ) {
+		SetFlag( MODEL_TEXTURE0_COLORMAP );
+		if ( !aux ) {
+			aux = ModelResourceManager::Instance()->modelAuxPool.New();
+		}
+		aux->texture0ColorMap[0] = red;
+		aux->texture0ColorMap[1] = green;
+		aux->texture0ColorMap[2] = blue;
+	}
+	else {
+		ClearFlag( MODEL_TEXTURE0_COLORMAP );
 	}
 }
 
@@ -674,19 +713,22 @@ void Model::Queue( RenderQueue* queue, EngineShaders* engineShaders, int require
 			GPUState state;
 			engineShaders->GetState( base, mod, &state );
 
-			const BoneData* pBD = 0;
-			const Matrix4* pMat = 0;
+			const ModelAux* modelAux = 0;
 
 			if ( HasAnimation() ) {
 				if ( !aux ) {
 					aux = ModelResourceManager::Instance()->modelAuxPool.New();
 				}
 				CalcAnimation( &aux->boneData ); 
-				pBD = &aux->boneData;
+				modelAux = aux;
 			}
-			if ( flags & MODEL_PROCEDURAL ) {
+			if (     (flags & MODEL_TEXTURE0_XFORM)
+				  || (flags & MODEL_TEXTURE0_CLIP)
+				  || (flags & MODEL_TEXTURE0_COLORMAP)
+				  || (flags & MODEL_TEXTURE0_XFORM) )
+			{
 				GLASSERT( aux );
-				pMat = &aux->procMat;
+				modelAux = aux;
 			}
 			queue->Add( this,									// reference back
 						&resource->atom[i],						// model atom to render
@@ -694,8 +736,7 @@ void Model::Queue( RenderQueue* queue, EngineShaders* engineShaders, int require
 						color,
 						boneFilter,
 						control,								// parameter to the shader #2
-						pMat,
-						pBD );
+						modelAux );
 		}
 	}
 }

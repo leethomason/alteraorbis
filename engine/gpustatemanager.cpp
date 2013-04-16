@@ -333,9 +333,17 @@ void GPUState::Weld( const GPUState& state, const GPUStream& stream, const GPUSt
 			GLASSERT( data.boneFilter );
 			shadman->SetUniformArray( ShaderManager::U_FILTER_PARAM_ARR, EL_MAX_INSTANCE, data.boneFilter );
 		}
-		if ( flags & ShaderManager::PROCEDURAL ) {
-			GLASSERT( data.param4 );
-			shadman->SetUniformArray( ShaderManager::U_PARAM4_ARR, EL_MAX_INSTANCE, data.param4 );
+		if ( flags & ShaderManager::TEXTURE0_XFORM ) {
+			GLASSERT( data.texture0XForm );
+			shadman->SetUniformArray( ShaderManager::U_TEXTURE0_XFORM_ARR, EL_MAX_INSTANCE, data.texture0XForm );
+		}
+		if ( flags & ShaderManager::TEXTURE0_CLIP ) {
+			GLASSERT( data.texture0Clip );
+			shadman->SetUniformArray( ShaderManager::U_TEXTURE0_CLIP_ARR, EL_MAX_INSTANCE, data.texture0Clip );
+		}
+		if ( flags & ShaderManager::TEXTURE0_COLORMAP ) {
+			GLASSERT( data.texture0ColorMap );
+			shadman->SetUniformArray( ShaderManager::U_TEXTURE0_COLORMAP_ARR, EL_MAX_INSTANCE, data.texture0ColorMap );
 		}
 
 		GLASSERT( data.controlParam );
@@ -353,16 +361,24 @@ void GPUState::Weld( const GPUState& state, const GPUStream& stream, const GPUSt
 			GLASSERT( data.boneFilter );
 			shadman->SetUniform( ShaderManager::U_COLOR_PARAM, data.boneFilter[0] );
 		}
-		if ( flags & ShaderManager::PROCEDURAL ) {
-			GLASSERT( data.param4 );
-			shadman->SetUniform( ShaderManager::U_PARAM4, data.param4[0] );
-		}
 		if ( data.controlParam ) {
 			shadman->SetUniform( ShaderManager::U_CONTROL_PARAM, data.controlParam[0] );
 		}
 		else {
 			Vector4F v = { 1, 1, 1, 1 };
 			shadman->SetUniform( ShaderManager::U_CONTROL_PARAM, v );
+		}
+		if ( flags & ShaderManager::TEXTURE0_XFORM ) {
+			GLASSERT( data.texture0XForm );
+			shadman->SetUniform( ShaderManager::U_TEXTURE0_XFORM, data.texture0XForm[0] );
+		}
+		if ( flags & ShaderManager::TEXTURE0_CLIP ) {
+			GLASSERT( data.texture0Clip );
+			shadman->SetUniform( ShaderManager::U_TEXTURE0_CLIP, data.texture0Clip[0] );
+		}
+		if ( flags & ShaderManager::TEXTURE0_COLORMAP ) {
+			GLASSERT( data.texture0ColorMap );
+			shadman->SetUniform( ShaderManager::U_TEXTURE0_COLORMAP, data.texture0ColorMap[0] );
 		}
 	}
 
