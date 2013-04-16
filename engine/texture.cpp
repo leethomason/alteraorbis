@@ -481,7 +481,7 @@ void Texture::GetTE( const gamedb::Item* child, TableEntry* te ) const
 	float y1 = 1.0f - (y-oY);
 
 	te->uv.Set( x0, y0, x1, y1 );
-	te->clip.Set( x, 1.0f - (y-h), x+w, 1.0f - y );
+	te->clip.Set( x, 1.0f - (y+h), x+w, 1.0f - y );
 
 	float a = x1-x0;
 	float d = y1-y0;

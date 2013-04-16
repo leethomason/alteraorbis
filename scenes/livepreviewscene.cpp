@@ -174,7 +174,7 @@ void LivePreviewScene::GenerateFaces( int mainRow )
 			Texture::TableEntry te;
 			model[i]->GetResource()->atom[0].texture->GetTableEntry( "out028.png", &te );
 			model[i]->SetTextureXForm( te.uvXForm.x, te.uvXForm.y, te.uvXForm.z, te.uvXForm.w );
-			//model[i]->SetTextureClip( te.clip.x, te.clip.y, te.clip.z, te.clip.w );
+			model[i]->SetTextureClip( te.clip.x, te.clip.y, te.clip.z, te.clip.w );
 		}
 	}
 }
