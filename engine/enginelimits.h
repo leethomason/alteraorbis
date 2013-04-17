@@ -30,13 +30,12 @@ enum HitTestMethod
 
 
 enum {
-	//EL_RES_NAME_LEN			= 24,
 	EL_MAX_VERTEX_IN_GROUP	= 4096,
 	EL_MAX_INDEX_IN_GROUP	= 4096,
 	EL_MAX_MODEL_GROUPS		= 4,
 	EL_MAX_VERTEX_IN_MODEL	= EL_MAX_VERTEX_IN_GROUP * EL_MAX_MODEL_GROUPS,
 	EL_MAX_INDEX_IN_MODEL	= EL_MAX_INDEX_IN_GROUP * EL_MAX_MODEL_GROUPS,
-	EL_FILE_STRING_LEN		= 24,
+	EL_FILE_STRING_LEN		= 30,
 	EL_MAX_METADATA			= 4,		// both animation and model
 	EL_MAX_MODEL_EFFECTS	= 4,		// max # of particle effects emitted by model
 	EL_MAX_BONES			= 12,		// could be 16?

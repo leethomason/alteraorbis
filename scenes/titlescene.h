@@ -50,7 +50,6 @@ private:
 		//TEST_NAV_WORLD,	Worlds this large aren't supported with sectors/grid
 		TEST_BATTLE,
 		TEST_ANIMATION,
-		TEST_LIVEPREVIEW,
 		TEST_ASSETPREVIEW,
 		//TEST_WEAPON_STAT,
 		NUM_TESTS,

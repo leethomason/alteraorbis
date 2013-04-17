@@ -157,6 +157,7 @@ void LivePreviewScene::GenerateFaces( int mainRow )
 		texture->GetTableEntry( n, &te );
 		model[i]->SetTextureXForm( te.uvXForm.x, te.uvXForm.y, te.uvXForm.z, te.uvXForm.w );
 		model[i]->SetTextureClip( te.clip.x, te.clip.y, te.clip.z, te.clip.w );
+
 		model[i]->SetColorMap( true, skin, hair, glasses );
 	}
 }

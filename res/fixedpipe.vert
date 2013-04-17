@@ -245,9 +245,8 @@ void main() {
 		// Just gives weird lighting here in low poly world. Sort of dramatic - worth considering
 		// as an "outline" effect.
 		color *= light * mix( 1.0-normal.z, 1.0, controlParam.x );
-	#else
-		color *= controlParam.x;
 	#endif
+	color *= controlParam.x;
 
 	#if BONE_FILTER == 1
 		float mult = ( filterParam.x == a_boneID || filterParam.y == a_boneID || filterParam.z == a_boneID || filterParam.w == a_boneID ) ? 1.0 : 0.0; 

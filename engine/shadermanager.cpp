@@ -375,12 +375,10 @@ FIXME: need to handle driver updates invalidating cache.
 
 	header = "";
 	AppendFlag( &header, "TEXTURE0",			flags & TEXTURE0 );
-	if ( flags & TEXTURE0 ) {
-		AppendFlag( &header, "TEXTURE0_ALPHA_ONLY",	flags & TEXTURE0_ALPHA_ONLY );
-		AppendFlag( &header, "TEXTURE0_XFORM",		flags & TEXTURE0_XFORM );
-		AppendFlag( &header, "TEXTURE0_CLIP",		flags & TEXTURE0_CLIP );
-		AppendFlag( &header, "TEXTURE0_COLORMAP",	flags & TEXTURE0_COLORMAP );
-	}
+	AppendFlag( &header, "TEXTURE0_ALPHA_ONLY",	flags & TEXTURE0_ALPHA_ONLY );
+	AppendFlag( &header, "TEXTURE0_XFORM",		flags & TEXTURE0_XFORM );
+	AppendFlag( &header, "TEXTURE0_CLIP",		flags & TEXTURE0_CLIP );
+	AppendFlag( &header, "TEXTURE0_COLORMAP",	flags & TEXTURE0_COLORMAP );
 	AppendFlag( &header, "TEXTURE1",			0 );
 	AppendFlag( &header, "INSTANCE",			flags & INSTANCE );
 	AppendFlag( &header, "COLORS",				flags & COLORS );

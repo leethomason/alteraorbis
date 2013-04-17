@@ -65,7 +65,7 @@ void FaceGen::GetHairColor( int index0, Color4F* color )
 		{ PAL_PURPLE*2, PAL_TANGERINE },
 		{ PAL_RED*2+1, PAL_GREEN },
 		{ PAL_TANGERINE*2+1, PAL_PURPLE },
-		{ PAL_TANGERINE*2+1, PAL_GRAY },
+//		{ PAL_TANGERINE*2+1, PAL_GRAY },
 		// intense
 		{ PAL_RED*2+1, PAL_RED },
 		{ PAL_ZERO*2+1, PAL_TANGERINE },

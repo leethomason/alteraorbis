@@ -43,7 +43,6 @@ TitleScene::TitleScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 													//"noise", 
 													"battle", 
 													"animation", 
-													"Live\nPreview", 
 													"Asset\nPreview" };
 
 	for( int i=0; i<NUM_TESTS; ++i ) {
@@ -70,7 +69,7 @@ void TitleScene::Resize()
 
 	static const bool VIS[NUM_TESTS] = {
 		false, true, false, true, false, false,
-		true, true, true, true
+		true, true, true
 	};
 	bool visible = game->DebugUIEnabled();
 
@@ -117,9 +116,6 @@ void TitleScene::ItemTapped( const gamui::UIItem* item )
 	}
 	else if ( item == &testScene[TEST_ANIMATION] ) {
 		game->PushScene( LumosGame::SCENE_ANIMATION, 0 );
-	}
-	else if ( item == &testScene[TEST_LIVEPREVIEW] ) {
-		game->PushScene( LumosGame::SCENE_LIVEPREVIEW, new LivePreviewSceneData( true ) );
 	}
 	else if ( item == &testScene[TEST_ASSETPREVIEW] ) {
 		game->PushScene( LumosGame::SCENE_LIVEPREVIEW, new LivePreviewSceneData( false ) );
