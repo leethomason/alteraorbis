@@ -189,7 +189,7 @@
 
   <model filename="weapons.ac"          modelName="testgun"     origin="0 0 0"      shadowCaster="false" />
   <model filename="weapons.ac"          modelName="ring"        origin="0.20 0 0"   shadowCaster="false" bones="true" />
-  <model                                filename="ax.ac"        origin="0 0 0"      shadowCaster="true" />
+  <model filename="weapons.ac"          modelName="largeRing"   origin="0.40 0 0"   shadowCaster="false" bones="true"/>
   <model                                filename="shield.ac"    origin="0 0 0"      shadowCaster="false" />
 
   <model filename="chess_weapons.ac"    modelName="RAY-1"        origin="0 0 0"/>

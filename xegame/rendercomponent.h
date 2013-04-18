@@ -100,8 +100,8 @@ public:
 	void SetColor( int hardpoint, const grinliz::Vector4F& colorMult );
 	void SetColor( grinliz::IString metadata, const grinliz::Vector4F& colorMult );
 
-	//void SetProcedural( int hardpoint, const ProcRenderInfo& info );
-	//void SetProcedural( grinliz::IString metadata, const ProcRenderInfo& info );
+	void SetProcedural( int hardpoint, const ProcRenderInfo& info );
+	void SetProcedural( grinliz::IString metadata, const ProcRenderInfo& info );
 
 	void SetSaturation( float s );
 	void Detach( int hardpoint );

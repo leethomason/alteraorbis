@@ -129,12 +129,9 @@ void FaceGen::Render( int seed, ProcRenderInfo* info )
 	}
 	GLASSERT( texture );
 
-	Texture::TableEntry te;
-	texture->GetTableEntry( random.Rand( texture->NumTableEntries() ), &te );
-
 	info->texture = texture;
-	info->uv   = te.uv;
-	info->clip = te.clip;
+	texture->GetTableEntry( random.Rand( texture->NumTableEntries() ), &info->te );
+
 	info->color.SetCol( 0, vcol[0] );
 	info->color.SetCol( 1, vcol[1] );
 	info->color.SetCol( 2, vcol[2] );
@@ -199,17 +196,16 @@ void WeaponGen::Render( int seed, const GameItem& item, ProcRenderInfo* info )
 		Vector4F v = { c[i].r, c[i].g, c[i].b, c[i].a };
 		info->color.SetCol( i, v );
 	}
+	info->color.m44 = 0;
 
-	/*
-	FIXME
 	const ModelResource* resource = ModelResourceManager::Instance()->GetModelResource( item.ResourceName() );
-	Texture* texture
+	GLASSERT( resource );
+	Texture* texture = resource->atom[0].texture;
+	GLASSERT( texture );
 
-	info->vOffset[0] = (float)( NUM_ROWS - random.Rand(NUM_ROWS)) / (float)(NUM_ROWS);
-	info->vOffset[1] = (float)( NUM_ROWS - random.Rand(NUM_ROWS)) / (float)(NUM_ROWS);
-	info->vOffset[2] = (float)( NUM_ROWS - random.Rand(NUM_ROWS)) / (float)(NUM_ROWS);
-	info->vOffset[3] = (float)( NUM_ROWS - random.Rand(NUM_ROWS)) / (float)(NUM_ROWS);	
-	*/
+	info->texture = texture;
+	texture->GetTableEntry( random.Rand( texture->NumTableEntries() ), &info->te );
+	
 	info->filter[PROC_RING_MAIN] = true;
 	info->filter[PROC_RING_GUARD] = random.Boolean();
 	info->filter[PROC_RING_TRIAD] = random.Boolean();
@@ -242,22 +238,14 @@ grinliz::IString ItemGen::ToName( int id )
 }
 
 
-/* static */ int ItemGen::RenderItem( int seed, const GameItem& item, ProcRenderInfo* info )
+/*static*/ bool ItemGen::ProceduralRender( int seed, const GameItem& item, ProcRenderInfo* info )
 {
-	int result = NONE;
-	switch ( item.procedural ) {
-		case PROCEDURAL_RING:
-		{
-			GLASSERT( 0 );	// FIXME this path is hacked
-			WeaponGen gen;
-			gen.Render( seed, item, info );
-			result = XFORM_CLIP_MAP;
-		}
-		break;
-
-		default:
-			GLASSERT( 0 );
-			break;
+	if (    item.resource == IStringConst::kring 
+		 || item.resource == IStringConst::klargeRing ) 
+	{
+		WeaponGen wg;
+		wg.Render( seed, item, info );
+		return true;
 	}
-	return result;
+	return false;
 }

@@ -231,8 +231,6 @@ public:
 	const char* ResourceName() const	{ return resource.c_str(); }
 
 	enum {
-		//CHARACTER		= (1<<0),
-
 		// Type(s) of the item
 		MELEE_WEAPON		= (1<<1),
 		RANGED_WEAPON		= (1<<2),
@@ -261,7 +259,6 @@ public:
 	grinliz::IString		resource;	// resource used to  render the item
 	int		flags;			// flags that define this item; 'constant'
 	int		hardpoint;		// id of hardpoint this item attaches to
-	int		procedural;		// uses a procedural renderer: PROCEDURAL_SHIELD, etc.
 	float	mass;			// mass (kg)
 	float	hpRegen;		// hp / second regenerated (or lost) by this item
 	int		primaryTeam;	// who owns this items
@@ -341,7 +338,6 @@ public:
 			resource		= rhs->resource;
 			flags			= rhs->flags;
 			hardpoint		= rhs->hardpoint;
-			procedural		= rhs->procedural;
 			mass			= rhs->mass;
 			hpRegen			= rhs->hpRegen;
 			primaryTeam		= rhs->primaryTeam;
@@ -375,7 +371,6 @@ public:
 			resource = grinliz::IString();
 			flags = 0;
 			hardpoint  = 0;
-			procedural = PROCEDURAL_NONE;
 			mass = 1;
 			hpRegen = 0;
 			primaryTeam = 0;

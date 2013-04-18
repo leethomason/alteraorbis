@@ -91,6 +91,8 @@ public:
 											flags &= (~PARAM_SOFTWARE_MIP);
 										}
 	struct TableEntry {
+		TableEntry() { uv.Zero(); clip.Zero(); }
+
 		grinliz::IString	name;
 		grinliz::Vector4F	uv;
 		grinliz::Vector4F	clip;

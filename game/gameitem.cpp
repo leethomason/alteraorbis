@@ -115,7 +115,6 @@ void GameItem::Serialize( XStream* xs )
 	XARC_SER_DEF( xs, accruedShock, 0 );
 
 	XARC_SER( xs, hardpoint );
-	XARC_SER( xs, procedural );
 	XARC_SER( xs, isHeld );
 	XARC_SER( xs, hp );
 
@@ -223,9 +222,6 @@ void GameItem::Save( tinyxml2::XMLPrinter* printer )
 	if ( hardpoint != 0 ) {
 		printer->PushAttribute( "hardpoint", IStringConst::Hardpoint( hardpoint ).c_str() );
 	}
-	if ( procedural != PROCEDURAL_NONE ) {
-		printer->PushAttribute( "procedural", ItemGen::ToName( procedural ).c_str() );
-	}
 	printer->PushAttribute( "isHeld", isHeld );
 	GLASSERT( hp <= TotalHP() );
 	printer->PushAttribute( "hp", hp );
@@ -301,12 +297,6 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 		hardpoint = IStringConst::Hardpoint( StringPool::Intern( h ) );
 		GLASSERT( hardpoint > 0 );
 	}
-	procedural = PROCEDURAL_NONE;
-	const char* p = ele->Attribute( "procedural" );
-	if ( p ) {
-		procedural = ItemGen::ToID( StringPool::Intern( p ) );
-	}
-
 	stats.Load( ele );
 
 	hp = this->TotalHP();

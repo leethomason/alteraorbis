@@ -74,7 +74,7 @@ private:
 
 	gamui::ToggleButton ortho;
 	gamui::ToggleButton instance;
-	enum { PARTICLE, GUN, KNIFE, AX, NUM_TRIGGERS };
+	enum { PARTICLE, GUN, RING, LARGE_RING, NUM_TRIGGERS };
 	gamui::ToggleButton triggerToggle[NUM_TRIGGERS];
 
 	gamui::TextLabel boneName, animName, modelName;

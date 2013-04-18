@@ -14,8 +14,12 @@ public:
 	static grinliz::IString kalthand;
 	static grinliz::IString khead;
 	static grinliz::IString kshield;
+
 	static grinliz::IString khumanFemale;
 	static grinliz::IString khumanMale;
+
+	static grinliz::IString kring;
+	static grinliz::IString klargeRing;
 
 	static int Hardpoint( grinliz::IString str ) {
 		if		( str == ktrigger ) return HARDPOINT_TRIGGER;

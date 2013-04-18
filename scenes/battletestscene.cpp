@@ -406,7 +406,7 @@ Chit* BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int
 	}
 	else if ( type == BALROG ) {
 		if ( loadout == MELEE_WEAPON ) {
-			const GameItem& ax = itemDefDB->Get( "ax" );
+			const GameItem& ax = itemDefDB->Get( "largeRing" );
 			GameItem* gi = new GameItem( ax );
 			gi->stats.SetExpFromLevel( level );
 			gi->InitState();

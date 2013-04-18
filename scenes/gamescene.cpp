@@ -135,12 +135,12 @@ void GameScene::SetFace()
 
 		RenderAtom procAtom( (const void*) (UIRenderer::RENDERSTATE_UI_CLIP_XFORM_MAP), 
 							 info.texture,
-							 info.uv.x, info.uv.y, info.uv.z, info.uv.w );
+							 info.te.uv.x, info.te.uv.y, info.te.uv.z, info.te.uv.w );
 		faceImage.SetAtom( procAtom );
 		faceImage.SetVisible( true );
 
-		uiRenderer.uv[0]			= info.uv;
-		uiRenderer.uvClip[0]		= info.clip;
+		uiRenderer.uv[0]			= info.te.uv;
+		uiRenderer.uvClip[0]		= info.te.clip;
 		uiRenderer.colorXForm[0]	= info.color;
 	}
 	else {

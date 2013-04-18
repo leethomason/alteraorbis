@@ -81,7 +81,7 @@ AnimationScene::AnimationScene( LumosGame* game ) : Scene( game )
 	instance.SetText( "3x" );
 
 	static const char* triggerLabels[NUM_TRIGGERS] = {
-		"particle", "gun", "knife", "ax"
+		"particle", "gun", "ring", "largeRing"
 	};
 
 	for( int i=0; i<NUM_TRIGGERS; ++i ) {
@@ -462,9 +462,9 @@ void AnimationScene::DoTick( U32 deltaTime )
 		}
 		else {
 			const ModelResource* res = 0;
-			if		( triggerToggle[GUN].Down() )	{ res = ModelResourceManager::Instance()->GetModelResource( "testgun" ); }
-			else if ( triggerToggle[KNIFE].Down() )	{ res = ModelResourceManager::Instance()->GetModelResource( "ring" ); }
-			else if ( triggerToggle[AX].Down() )	{ res = ModelResourceManager::Instance()->GetModelResource( "ax" ); }
+			if		( triggerToggle[GUN].Down() )			{ res = ModelResourceManager::Instance()->GetModelResource( "testgun" ); }
+			else if ( triggerToggle[RING].Down() )			{ res = ModelResourceManager::Instance()->GetModelResource( "ring" ); }
+			else if ( triggerToggle[LARGE_RING].Down() )	{ res = ModelResourceManager::Instance()->GetModelResource( "largeRing" ); }
 
 			if ( triggerModel && triggerModel->GetResource() != res ) {
 				engine->FreeModel( triggerModel );

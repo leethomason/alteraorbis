@@ -4,6 +4,7 @@
 #include "../grinliz/gldebug.h"
 #include "../grinliz/gltypes.h"
 #include "../grinliz/glstringutil.h"
+#include "../engine/texture.h"
 #include "../xegame/game.h"
 
 
@@ -36,17 +37,13 @@ struct ProcRenderInfo
 	ProcRenderInfo() {
 		texture = 0;
 		for( int i=0; i<4; ++i ) {
-			filterName[i] = grinliz::IString();
 			filter[i] = true;
 		}
-		uv.Zero();
-		clip.Zero();
 	}
 
 	Texture*			texture;
-	grinliz::Matrix4	color;			// color of the layers
-	grinliz::Vector4F	uv;				// texture uv
-	grinliz::Vector4F	clip;			// texture clip
+	Texture::TableEntry	te;
+	grinliz::Matrix4	color;
 	grinliz::IString	filterName[4];
 	bool				filter[4];		// item filters - maps to PROC_RING_MAIN, etc.
 };
@@ -60,16 +57,11 @@ public:
 	static int ToID( grinliz::IString name );
 	static grinliz::IString ToName( int id );
 
-	// Could be a factory and all that, but just uses a switch.
-	enum {
-		NONE,
-		COLOR_XFORM,
-		XFORM_CLIP_MAP
-	};
-	static int RenderItem( int seed, const GameItem& item, ProcRenderInfo* info );
 	// PROC_RING_GUARD -> "guard"
 	static grinliz::IString ProcIDToName( int id );
 
+	// Returns true if this item is procedural, and fills out 'info'
+	static bool ProceduralRender( int seed, const GameItem& item, ProcRenderInfo* info );
 	virtual void Render( int seed, const GameItem& item, ProcRenderInfo* info ) = 0;
 
 protected:

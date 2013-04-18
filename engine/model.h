@@ -326,6 +326,10 @@ public:
 	}
 
 	void SetTextureXForm( float a=1, float d=1, float tx=0, float ty=0 );
+	void SetTextureXForm( const grinliz::Vector4F& v ) {
+		SetTextureXForm( v.x, v.y, v.z, v.w );
+	}
+
 	void SetTextureClip( float x0=0, float y0=0, float x1=1, float y1=1 );
 	void SetColorMap(	bool enable, 
 						const grinliz::Vector4F& red, 
@@ -343,6 +347,7 @@ public:
 		grinliz::Vector4F b = { blue.r, blue.g, blue.b, blue.a };
 		SetColorMap( enable, r, g, b, alpha );
 	}
+	void SetColorMap( bool enable, const grinliz::Matrix4& mat );
 
 	const grinliz::Vector4F& Control() const		{ return control; }
 	void SetControl( const grinliz::Vector4F& v )	{ control = v; }

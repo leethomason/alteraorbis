@@ -9,6 +9,8 @@ IString IStringConst::khead;
 IString IStringConst::kshield;
 IString IStringConst::khumanFemale;
 IString IStringConst::khumanMale;
+IString IStringConst::kring;
+IString IStringConst::klargeRing;
 
 void IStringConst::Init()
 {
@@ -19,4 +21,6 @@ void IStringConst::Init()
 	kshield = StringPool::Intern( "shield", true );
 	khumanFemale = StringPool::Intern( "humanFemale", true );
 	khumanMale = StringPool::Intern( "humanMale", true );
+	kring = StringPool::Intern( "ring", true );
+	klargeRing = StringPool::Intern( "largeRing", true );
 }

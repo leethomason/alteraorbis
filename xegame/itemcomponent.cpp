@@ -343,16 +343,10 @@ bool ItemComponent::AddToInventory( GameItem* item, bool equip )
 				bool okay = rc->Attach( item->hardpoint, item->ResourceName() );
 				GLASSERT( okay );
 
-				/*
-				if ( item->procedural & PROCEDURAL_INIT_MASK ) {
-					ProcRenderInfo info;
-					int result = ItemGen::RenderItem( Game::GetMainPalette(), *item, &info );
-
-					if ( result == ItemGen::PROC4 ) {
-						rc->SetProcedural( item->hardpoint, info );
-					}
+				ProcRenderInfo info;
+				if ( ItemGen::ProceduralRender( item->stats.Hash(), *item, &info )) {
+					rc->SetProcedural( item->hardpoint, info );
 				}
-				*/
 			}
 		}
 	}

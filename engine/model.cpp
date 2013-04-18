@@ -430,6 +430,22 @@ void Model::SetTextureClip( float x0, float y0, float x1, float y1 )
 	}
 }
 
+
+void Model::SetColorMap( bool enable, const grinliz::Matrix4& mat )
+{
+	if ( enable ) {
+		SetFlag( MODEL_TEXTURE0_COLORMAP );
+		if ( !aux ) {
+			aux = ModelResourceManager::Instance()->modelAuxPool.New();
+		}
+		aux->texture0ColorMap = mat;
+	}
+	else {
+		ClearFlag( MODEL_TEXTURE0_COLORMAP );
+	}
+}
+
+
 void Model::SetColorMap( bool enable, const Vector4F& red, const Vector4F& green, const Vector4F& blue, float alpha )
 {
 	if ( enable ) {
@@ -699,9 +715,12 @@ void Model::Queue( RenderQueue* queue, EngineShaders* engineShaders, int require
 				mod |= ShaderManager::BONE_XFORM;
 			}
 
-			if ( flags & MODEL_TEXTURE0_XFORM )		mod |= ShaderManager::TEXTURE0_XFORM;
-			if ( flags & MODEL_TEXTURE0_CLIP )		mod |= ShaderManager::TEXTURE0_CLIP;
-			if ( flags & MODEL_TEXTURE0_COLORMAP )	mod |= ShaderManager::TEXTURE0_COLORMAP;
+			if ( flags & MODEL_TEXTURE0_XFORM )		
+				mod |= ShaderManager::TEXTURE0_XFORM;
+			if ( flags & MODEL_TEXTURE0_CLIP )		
+				mod |= ShaderManager::TEXTURE0_CLIP;
+			if ( flags & MODEL_TEXTURE0_COLORMAP )	
+				mod |= ShaderManager::TEXTURE0_COLORMAP;
 
 			if ( control.y != 1 ) {
 				mod |= ShaderManager::SATURATION;

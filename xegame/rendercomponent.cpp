@@ -289,24 +289,24 @@ void RenderComponent::SetSaturation( float s )
 }
 
 
-/*
+
 void RenderComponent::SetProcedural( int hardpoint, const ProcRenderInfo& info )
 {
 	IString n = IStringConst::Hardpoint( hardpoint );
 	SetProcedural( n, info );
 }
-*/
 
-/*
 void RenderComponent::SetProcedural( IString hardpoint, const ProcRenderInfo& info )
 {
 	if ( !hardpoint.empty() ) {
 		for( int i=0; i<EL_MAX_METADATA; ++i ) {
 			if ( metaDataName[i] == hardpoint ) {
 				GLASSERT( model[i+1] );
-				if ( model[i+1] ) {
-					model[i+1]->SetProcedural( true, info.color, info.vOffset );
-					model[i+1]->SetBoneFilter( info.filterName, info.filter );
+				Model* m = model[i+1];	// the +1 is very easy to screw up.
+				if ( m ) {
+					m->SetTextureXForm( info.te.uvXForm );
+					m->SetColorMap( true, info.color );
+					m->SetBoneFilter( info.filterName, info.filter );
 					return;
 				}
 			}
@@ -314,11 +314,11 @@ void RenderComponent::SetProcedural( IString hardpoint, const ProcRenderInfo& in
 		GLASSERT( 0 );	// safe, but we meant to find something.
 	}
 	else {
-		model[0]->SetProcedural( true, info.color, info.vOffset );
+		model[0]->SetTextureXForm();
+		model[0]->SetColorMap( false, info.color );
 		model[0]->SetBoneFilter( info.filterName, info.filter );
 	}
 }
-*/
 
 
 void RenderComponent::Detach( int metaData )

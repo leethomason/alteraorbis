@@ -77,13 +77,12 @@
   <item name="ring"
         resource="ring"
         flags="MELEE_WEAPON"
-        procedural="ring"
         hardpoint="trigger">
     <melee kinetic="2" />
   </item>
   
-  <item name="ax"
-        resource="ax"
+  <item name="largeRing"
+        resource="largeRing"
         flags="MELEE_WEAPON"
         hardpoint="trigger">
         <melee kinetic="2" />
