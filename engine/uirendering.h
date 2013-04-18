@@ -33,7 +33,7 @@ public:
 		RENDERSTATE_UI_TEXT_DISABLED,
 		RENDERSTATE_UI_DECO,			// deco rendering
 		RENDERSTATE_UI_DECO_DISABLED,
-		RENDERSTATE_UI_PROCEDURAL,
+		RENDERSTATE_UI_CLIP_XFORM_MAP,
 		RENDERSTATE_COUNT
 	};
 
@@ -52,6 +52,12 @@ public:
 	static void LayoutListOnScreen( gamui::UIItem* items, int nItems, int stride, float x, float y, float vSpace, const Screenport& port );
 	virtual void GamuiGlyph( int c, int c1, float lineHeight, gamui::IGamuiText::GlyphMetrics* metric );
 	
+	// Rendering parameters:
+	enum { NUM_DATA = 4 };
+	grinliz::Vector4F uv[NUM_DATA];
+	grinliz::Vector4F uvClip[NUM_DATA];
+	grinliz::Matrix4  colorXForm[NUM_DATA];
+
 private:
 	CompositingShader shader;
 	float textRed, textGreen, textBlue;

@@ -175,7 +175,7 @@ struct ModelAux {
 	BoneData			boneData;
 	grinliz::Vector4F	texture0XForm;
 	grinliz::Vector4F	texture0Clip;
-	grinliz::Vector4F	texture0ColorMap[3];
+	grinliz::Matrix4	texture0ColorMap;
 };
 
 
@@ -330,16 +330,18 @@ public:
 	void SetColorMap(	bool enable, 
 						const grinliz::Vector4F& red, 
 						const grinliz::Vector4F& green, 
-						const grinliz::Vector4F& blue );
+						const grinliz::Vector4F& blue,
+						float alpha );	// 0: use passed in channels, 1: use sampler
 	void SetColorMap(	bool enable, 
 						const grinliz::Color4F& red, 
 						const grinliz::Color4F& green, 
-						const grinliz::Color4F& blue )
+						const grinliz::Color4F& blue,
+						float alpha )	// 0: use passed in channels, 1: use sampler
 	{
 		grinliz::Vector4F r = { red.r, red.g, red.b, red.a };
 		grinliz::Vector4F g = { green.r, green.g, green.b, green.a };
 		grinliz::Vector4F b = { blue.r, blue.g, blue.b, blue.a };
-		SetColorMap( enable, r, g, b );
+		SetColorMap( enable, r, g, b, alpha );
 	}
 
 	const grinliz::Vector4F& Control() const		{ return control; }

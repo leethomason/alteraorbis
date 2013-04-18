@@ -20,7 +20,6 @@
 #include "text.h"
 #include "shadermanager.h"
 
-#include "../game/lumosgame.h"	// FIXME: used to get colors
 
 using namespace grinliz;
 using namespace gamui;
@@ -42,6 +41,7 @@ void UIRenderer::BeginRenderState( const void* renderState )
 {
 	int state = ((int)renderState) & 0xffff;
 	int data  = ((int)renderState) >> 16;
+	shader = CompositingShader();
 
 	switch ( state )
 	{
@@ -80,24 +80,16 @@ void UIRenderer::BeginRenderState( const void* renderState )
 		shader.SetBlendMode( GPUState::BLEND_NORMAL );
 		break;
 
-/*
-	case RENDERSTATE_UI_PROCEDURAL:
-		shader.SetColor( 1, 1, 1, 1 );
-		shader.SetBlendMode( GPUState::BLEND_NORMAL );
-		shader.SetShaderFlag( ShaderManager::PROCEDURAL );
+	case RENDERSTATE_UI_CLIP_XFORM_MAP:
 		{
-			// FIXME: test and hardcoded color
-			// skin, highlight, glasses, hair
-			Color4F c[4] = { LumosGame::GetMainPalette()->Get4F( 5, 6 ),
-							 LumosGame::GetMainPalette()->Get4F( 1, 6 ),
-							 LumosGame::GetMainPalette()->Get4F( 1, 5 ),
-							 LumosGame::GetMainPalette()->Get4F( 1, 4 ) };
-			Random r( data );
-			float v[4] = { (float)r.Rand(16)/16.f, (float)r.Rand(16)/16.f, (float)r.Rand(16)/16.f, (float)r.Rand(16)/16.f };
-			ShaderManager::EncodeProceduralMat( c, v, &procMat );
+			shader.SetColor( 1, 1, 1, 1 );
+			shader.SetBlendMode( GPUState::BLEND_NORMAL );
+			shader.SetShaderFlag( ShaderManager::TEXTURE0_CLIP);
+			shader.SetShaderFlag( ShaderManager::TEXTURE0_XFORM );
+			shader.SetShaderFlag( ShaderManager::TEXTURE0_COLORMAP );
 		}
 		break;
-*/
+
 	default:
 		GLASSERT( 0 );
 		break;
@@ -119,6 +111,9 @@ void UIRenderer::Render( const void* renderState, const void* textureHandle, int
 	data.streamPtr = vertex;
 	data.indexPtr = index;
 	data.texture0 = (Texture*)textureHandle;
+	data.texture0XForm = uv;
+	data.texture0Clip  = uvClip;
+	data.texture0ColorMap = colorXForm;
 
 	shader.Draw( stream, data, nIndex );
 }

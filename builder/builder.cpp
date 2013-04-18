@@ -713,11 +713,12 @@ void ProcessTexture( XMLElement* texture )
 			const char* name = spriteEle->Attribute( "n" );
 			gamedb::WItem* entry = table->FetchChild( name );
 			
-			float x=0, y=0, w=0, h=0, oX=0, oY=0, oW=0, oH=0;
+			float x=0, y=0, w=0, h=0;
 			spriteEle->QueryAttribute( "x",  &x );
 			spriteEle->QueryAttribute( "y",  &y );
 			spriteEle->QueryAttribute( "w",  &w );
 			spriteEle->QueryAttribute( "h",  &h );
+			float oX=0, oY=0, oW=w, oH=h;
 			spriteEle->QueryAttribute( "oX", &oX );
 			spriteEle->QueryAttribute( "oY", &oY );
 			spriteEle->QueryAttribute( "oW", &oW );

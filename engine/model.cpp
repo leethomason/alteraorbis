@@ -301,9 +301,7 @@ void Model::Serialize( XStream* xs, SpaceTree* tree )
 			save->OpenElement( "aux" );
 			XARC_SER_KEY( xs, "texture0XForm", aux->texture0XForm );
 			XARC_SER_KEY( xs, "texture0Clip", aux->texture0Clip );
-			XARC_SER_KEY( xs, "texture0ColorMap0", aux->texture0ColorMap[0] );
-			XARC_SER_KEY( xs, "texture0ColorMap1", aux->texture0ColorMap[1] );
-			XARC_SER_KEY( xs, "texture0ColorMap2", aux->texture0ColorMap[2] );
+			XARC_SER_KEY( xs, "texture0ColorMap", aux->texture0ColorMap );
 			aux->boneData.Serialize( xs );
 			save->CloseElement();
 		}
@@ -324,9 +322,7 @@ void Model::Serialize( XStream* xs, SpaceTree* tree )
 			aux = ModelResourceManager::Instance()->modelAuxPool.New();
 			XARC_SER_KEY( xs, "texture0XForm", aux->texture0XForm );
 			XARC_SER_KEY( xs, "texture0Clip", aux->texture0Clip );
-			XARC_SER_KEY( xs, "texture0ColorMap0", aux->texture0ColorMap[0] );
-			XARC_SER_KEY( xs, "texture0ColorMap1", aux->texture0ColorMap[1] );
-			XARC_SER_KEY( xs, "texture0ColorMap2", aux->texture0ColorMap[2] );
+			XARC_SER_KEY( xs, "texture0ColorMap", aux->texture0ColorMap );
 			aux->boneData.Serialize( xs );
 			load->CloseElement();
 		}
@@ -434,16 +430,17 @@ void Model::SetTextureClip( float x0, float y0, float x1, float y1 )
 	}
 }
 
-void Model::SetColorMap( bool enable, const Vector4F& red, const Vector4F& green, const Vector4F& blue )
+void Model::SetColorMap( bool enable, const Vector4F& red, const Vector4F& green, const Vector4F& blue, float alpha )
 {
 	if ( enable ) {
 		SetFlag( MODEL_TEXTURE0_COLORMAP );
 		if ( !aux ) {
 			aux = ModelResourceManager::Instance()->modelAuxPool.New();
 		}
-		aux->texture0ColorMap[0] = red;
-		aux->texture0ColorMap[1] = green;
-		aux->texture0ColorMap[2] = blue;
+		aux->texture0ColorMap.SetCol( 0, red );
+		aux->texture0ColorMap.SetCol( 1, green );
+		aux->texture0ColorMap.SetCol( 2, blue );
+		aux->texture0ColorMap.m44 = alpha;
 	}
 	else {
 		ClearFlag( MODEL_TEXTURE0_COLORMAP );

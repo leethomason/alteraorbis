@@ -105,7 +105,7 @@ void LivePreviewScene::GenerateFaces( int mainRow )
 	engine->camera.SetDir( V3F_DOWN, out );		// look straight down. This works! cool.
 	engine->camera.Orbit( 180.0f );
 
-	FaceGen faceGen( currentType == HUMAN_FEMALE_FACE, game->GetPalette() );
+	FaceGen faceGen( currentType == HUMAN_FEMALE_FACE );
 
 	Random random( mainRow );
 	random.Rand();
@@ -157,8 +157,7 @@ void LivePreviewScene::GenerateFaces( int mainRow )
 		texture->GetTableEntry( n, &te );
 		model[i]->SetTextureXForm( te.uvXForm.x, te.uvXForm.y, te.uvXForm.z, te.uvXForm.w );
 		model[i]->SetTextureClip( te.clip.x, te.clip.y, te.clip.z, te.clip.w );
-
-		model[i]->SetColorMap( true, skin, hair, glasses );
+		model[i]->SetColorMap( true, skin, hair, glasses, 1 );
 	}
 }
 
@@ -175,7 +174,6 @@ void LivePreviewScene::GenerateRing( int mainRow )
 	static const Vector3F out = { 1, 0, 0 };
 	engine->camera.SetDir( out, V3F_UP );
 
-	float tex[4] = { 0, 0, 0, 0 };
 	Random random( mainRow );
 	random.Rand();
 
@@ -198,19 +196,6 @@ void LivePreviewScene::GenerateRing( int mainRow )
 		float y = float(ROWS-1-row) * DELTA;
 		float current = 1.0f - rowMult * (float)(mainRow);
 
-		switch ( row ) {
-		case 0:
-			tex[0] = tex[1] = tex[2] = tex[3] = current;
-			break;
-		
-		default:
-			tex[0] = rowMult * (float)random.Rand(srcRows);
-			tex[1] = rowMult * (float)random.Rand(srcRows);
-			tex[2] = rowMult * (float)random.Rand(srcRows);
-			tex[3] = rowMult * (float)random.Rand(srcRows);
-			break;
-		}
-
 		// NOT in order.
 		static const char* parts[4] = {
 			"main",
@@ -231,20 +216,27 @@ void LivePreviewScene::GenerateRing( int mainRow )
 			}
 		}
 
-		WeaponGen weaponGen( game->GetPalette() );
-		Color4F color[4] = {	// Test color. Comment out assignment below.
+		WeaponGen weaponGen;
+		Color4F color[3] = {	// Test color. Comment out assignment below.
 			{ 1, 0, 0, 0 },		// base:		red
-			{ 1, 1, 0, 0 },		// contrast:	yellow
-			{ 0, 1, 0, 1 },		// effect:		blue
-			{ 1, 0.5f, 0, 1 }	// glow:		orange
+			{ 0, 1, 0, 0 },		// contrast:	yellow
+			{ 0, 0, 1, 0 }		// effect:		blue
 		};
-		// r,    b0,       b1,     g
-		// base, contrast, effect, glow
+		// r,    g,			b
+		// base, contrast,  effect-glow
 		weaponGen.GetColors( i+mainRow*NUM_MODEL, col==2, col==3, color );
 
 		model[i]->SetPos( 3.0f, y, x );
-		//model[i]->SetProcedural( true, color, tex );
 		model[i]->SetBoneFilter( ids );
+
+		Texture::TableEntry te;
+		Texture* texture = model[i]->GetResource()->atom[0].texture;
+		GLASSERT( texture );
+		int index = mainRow * NUM_MODEL + i;
+		int n = index % texture->NumTableEntries();
+		texture->GetTableEntry( n, &te );
+		model[i]->SetTextureXForm( te.uvXForm.x, te.uvXForm.y, te.uvXForm.z, te.uvXForm.w );
+		model[i]->SetColorMap( true, color[0], color[1], color[2], 0 );
 	}
 }
 

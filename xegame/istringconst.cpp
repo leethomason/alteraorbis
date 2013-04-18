@@ -7,6 +7,8 @@ IString IStringConst::ktarget;
 IString IStringConst::kalthand;
 IString IStringConst::khead;
 IString IStringConst::kshield;
+IString IStringConst::khumanFemale;
+IString IStringConst::khumanMale;
 
 void IStringConst::Init()
 {
@@ -15,4 +17,6 @@ void IStringConst::Init()
 	kalthand = StringPool::Intern( "althand", true );
 	khead = StringPool::Intern( "head", true );
 	kshield = StringPool::Intern( "shield", true );
+	khumanFemale = StringPool::Intern( "humanFemale", true );
+	khumanMale = StringPool::Intern( "humanMale", true );
 }

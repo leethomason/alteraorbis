@@ -56,9 +56,7 @@ attribute vec3 a_pos;				// vertex position
 		varying vec4 v_texture0Clip;
 	#endif
 	#if TEXTURE0_COLORMAP == 1
-		varying vec4 v_color0;
-		varying vec4 v_color1;
-		varying vec4 v_color2;
+		varying mat4 v_colorMap;
 	#endif
 #endif
 
@@ -157,13 +155,8 @@ void main() {
 		#else
 			v_uv0 = a_uv0;
 		#endif	
-		#if TEXTURE0_CLIP == 1
-
-		#endif
 		#if TEXTURE0_COLORMAP == 1
-			v_color0 = colorMap[0];
-			v_color1 = colorMap[1];
-			v_color2 = colorMap[2];
+			v_colorMap = colorMap;
 		#endif
 	#endif
 	#if TEXTURE1 == 1

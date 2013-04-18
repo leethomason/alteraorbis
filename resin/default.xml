@@ -44,8 +44,7 @@
   <texture filename="map_core.png" maxSize="128" />
   <texture filename="map_port.png" maxSize="128" />
   
-  <texture filename="procedural.png" />
-  <texture filename="ring.png" maxSize="1024" emissive="true"/>"
+  <texture filename="ringAtlas.png" maxSize="1024" emissive="true" table="ring.xml"/>"
 
   <!-- UI elements -->
   <texture filename="intro.png" width="64" height="64" />
@@ -65,7 +64,6 @@
   <model filename="teststructures.ac" modelName="testStruct0"  origin="0 0 0"  shading="flat" polyRemoval="pre" />
   <model filename="teststructures.ac" modelName="testStruct1"  origin="2 0 0"  shading="flat" polyRemoval="pre" />
   <model filename="unitPlateCentered.ac" shading="flat" />
-  <model filename="unitPlateProcedural.ac" shading="flat" />
   <model filename="unitPlateHumanMaleFace.ac" shading="flat" />
   <model filename="unitPlateHumanFemaleFace.ac" shading="flat" />
   <model filename="unitPlateArrow.ac" shading="flat" />
@@ -193,8 +191,6 @@
   <model filename="weapons.ac"          modelName="ring"        origin="0.20 0 0"   shadowCaster="false" bones="true" />
   <model                                filename="ax.ac"        origin="0 0 0"      shadowCaster="true" />
   <model                                filename="shield.ac"    origin="0 0 0"      shadowCaster="false" />
-
-  <model filename="weaponsProc.ac"      modelName="ringProc"    origin="0.20 0 0"   shadowCaster="false" bones="true" />
 
   <model filename="chess_weapons.ac"    modelName="RAY-1"        origin="0 0 0"/>
   <model filename="chess_weapons.ac"    modelName="PLS-1"        origin="1 0 0"/>

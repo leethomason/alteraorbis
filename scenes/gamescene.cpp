@@ -123,14 +123,29 @@ void GameScene::Resize()
 
 void GameScene::SetFace()
 {
-	int id = 0;
-	if ( sim->GetPlayerChit() ) {
-		id = sim->GetPlayerChit()->ID();
+	Chit* chit = sim->GetPlayerChit();
+	if ( chit ) {
+		int id = chit->ID();
+		GLASSERT( chit->GetItem() );
+		const GameItem& item = *chit->GetItem();
+		
+		ProcRenderInfo info;
+		FaceGen faceGen( true );
+		faceGen.Render( id, &info );
+
+		RenderAtom procAtom( (const void*) (UIRenderer::RENDERSTATE_UI_CLIP_XFORM_MAP), 
+							 info.texture,
+							 info.uv.x, info.uv.y, info.uv.z, info.uv.w );
+		faceImage.SetAtom( procAtom );
+		faceImage.SetVisible( true );
+
+		uiRenderer.uv[0]			= info.uv;
+		uiRenderer.uvClip[0]		= info.clip;
+		uiRenderer.colorXForm[0]	= info.color;
 	}
-	RenderAtom procAtom( (const void*) (UIRenderer::RENDERSTATE_UI_PROCEDURAL + (id<<16)), 
-						 TextureManager::Instance()->GetTexture( "humanFemaleFace" ), 
-						 0, 0, 1.f/4.f, 1.f/16.f );	// fixme: hardcoded texture coordinates, etc.
-	faceImage.SetAtom( procAtom );
+	else {
+		faceImage.SetVisible( false );
+	}
 }
 
 

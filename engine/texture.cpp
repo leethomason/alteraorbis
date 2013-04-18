@@ -439,8 +439,10 @@ int Texture::NumTableEntries() const
 void Texture::GetTableEntry( int i, TableEntry* te ) const
 {
 	te->name = IString();
+	GLASSERT( item );
 	if ( item ) {
 		const gamedb::Item* table = item->Child( "table" );
+		GLASSERT( table );
 		if ( table ) {
 			const gamedb::Item* child = table->ChildAt( i );
 			GetTE( child, te );

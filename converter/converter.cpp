@@ -62,9 +62,14 @@ int main( int argc, char* argv[] )
 	static const int GLASSES_START = 1;
 	static const int GLASSES_END   = 11;
 	*/
+	/*
 	static const char* SRC_PATH = "../resin/humanFemaleFace.png";
 	static const int GLASSES_START = 1;
 	static const int GLASSES_END   = 16;
+	*/
+	static const char* SRC_PATH = "../resin/ring.png";
+	static const int GLASSES_START = 0;
+	static const int GLASSES_END   = 8;
 
 	void *handle = 0;
 	handle = grinliz::grinlizLoadLibrary( "SDL_image" );

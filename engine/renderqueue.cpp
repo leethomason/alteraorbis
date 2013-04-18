@@ -164,10 +164,7 @@ void RenderQueue::Submit(	int modelRequired,
 						instanceBone[index]				= item->aux->boneData;
 						instanceTexture0XForm[index]	= item->aux->texture0XForm;
 						instanceTexture0Clip[index]		= item->aux->texture0Clip;
-						instanceTexture0ColorMap[index].SetIdentity();
-						instanceTexture0ColorMap[index].SetCol( 0, item->aux->texture0ColorMap[0] );
-						instanceTexture0ColorMap[index].SetCol( 1, item->aux->texture0ColorMap[1] );
-						instanceTexture0ColorMap[index].SetCol( 2, item->aux->texture0ColorMap[2] );
+						instanceTexture0ColorMap[index] = item->aux->texture0ColorMap;
 					}
 				}
 				state->Draw( stream, data, atom->nIndex, delta );

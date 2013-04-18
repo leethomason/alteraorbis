@@ -34,16 +34,19 @@ class GameItem;
 struct ProcRenderInfo
 {
 	ProcRenderInfo() {
+		texture = 0;
 		for( int i=0; i<4; ++i ) {
-			color[i].Set( 1,1,1,1 );
-			vOffset[i] = 0;
 			filterName[i] = grinliz::IString();
 			filter[i] = true;
 		}
+		uv.Zero();
+		clip.Zero();
 	}
 
-	grinliz::Color4F	color[4];		// color of the layers
-	float				vOffset[4];		// texture offset
+	Texture*			texture;
+	grinliz::Matrix4	color;			// color of the layers
+	grinliz::Vector4F	uv;				// texture uv
+	grinliz::Vector4F	clip;			// texture clip
 	grinliz::IString	filterName[4];
 	bool				filter[4];		// item filters - maps to PROC_RING_MAIN, etc.
 };
@@ -61,36 +64,30 @@ public:
 	enum {
 		NONE,
 		COLOR_XFORM,
-		PROC4
+		XFORM_CLIP_MAP
 	};
-	static int RenderItem( const Game::Palette* palette, const GameItem& item, ProcRenderInfo* info );
+	static int RenderItem( int seed, const GameItem& item, ProcRenderInfo* info );
 	// PROC_RING_GUARD -> "guard"
 	static grinliz::IString ProcIDToName( int id );
 
-	virtual void Render( const GameItem& item, ProcRenderInfo* info ) = 0;
+	virtual void Render( int seed, const GameItem& item, ProcRenderInfo* info ) = 0;
 
 protected:
-	ItemGen( const Game::Palette* p_palette ) : palette( p_palette ) {}
-	const Game::Palette* palette;
+	ItemGen() {}
 };
 
 
-class FaceGen : public ItemGen
+// NOT a subclass. Face rendering is different from the other modes.
+class FaceGen
 {
 public:
 
-	FaceGen( bool p_female, const Game::Palette* p_palette ) : ItemGen( p_palette ), female(p_female) {}
+	FaceGen( bool p_female ) : female(p_female) {}
 
 	enum { 
 		NUM_SKIN_COLORS = 4,
-		NUM_HAIR_COLORS	= 10,
+		NUM_HAIR_COLORS	= 9,
 		NUM_GLASSES_COLORS = 6,
-
-		FACE_ROWS			= 16,
-		EYE_ROWS			= 16,
-		MALE_GLASSES_ROWS	= 11,
-		FEMALE_GLASSES_ROWS	= 15,
-		HAIR_ROWS			= 16
 	};
 	void GetSkinColor( int index0, int index1, float fade, grinliz::Color4F* c );
 	void GetHairColor( int index0, grinliz::Color4F* c );
@@ -100,7 +97,8 @@ public:
 		SKIN, GLASSES, HAIR
 	};
 	void GetColors( U32 seed, grinliz::Color4F* c );
-	virtual void Render( const GameItem& item, ProcRenderInfo* info );
+	void GetColors( U32 seed, grinliz::Vector4F* v );
+	void Render( int seed, ProcRenderInfo* info );
 
 private:
 	bool female;
@@ -114,14 +112,13 @@ public:
 		BASE,
 		CONTRAST,
 		EFFECT,
-		GLOW,
 
 		NUM_COLORS = 11,
 		NUM_ROWS = 8
 	};
 
-	WeaponGen( const Game::Palette* p_palette ) : ItemGen( p_palette ) {}
-	virtual void Render( const GameItem& item, ProcRenderInfo* info );
+	WeaponGen() : ItemGen() {}
+	virtual void Render( int seed, const GameItem& item, ProcRenderInfo* info );
 
 	// [base, contrast, effect, glow]
 	void GetColors( int i, bool fire, bool shock, grinliz::Color4F* array );

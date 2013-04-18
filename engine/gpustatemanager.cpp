@@ -218,32 +218,12 @@ void MatrixStack::Multiply( const grinliz::Matrix4& m )
 
 /*static */ void GPUState::ResetState()
 {
-	// Texture unit 1
-	//glActiveTexture( GL_TEXTURE1 );
-	//glClientActiveTexture( GL_TEXTURE1 );
-	//glDisable( GL_TEXTURE_2D );
-	//glDisableClientState( GL_TEXTURE_COORD_ARRAY );
-
 	// Texture unit 0
 	glActiveTexture( GL_TEXTURE0 );
-	//glClientActiveTexture( GL_TEXTURE0 );
-	//glDisable( GL_TEXTURE_2D );
-	//glDisableClientState( GL_TEXTURE_COORD_ARRAY );
-
-	// Client state
-	//glDisableClientState( GL_VERTEX_ARRAY );
-	//glDisableClientState( GL_NORMAL_ARRAY );
-	//glDisableClientState( GL_COLOR_ARRAY );
-	//glDisableClientState( GL_TEXTURE_COORD_ARRAY );
 
 	// Blend/Alpha
 	glDisable( GL_BLEND );
 	glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-	//glDisable( GL_ALPHA_TEST );
-	//glAlphaFunc( GL_GREATER, 0.5f );
-
-	// Ligting
-	//glDisable( GL_LIGHTING );
 
 	// Depth
 	glDepthMask( GL_TRUE );
@@ -257,11 +237,7 @@ void MatrixStack::Multiply( const grinliz::Matrix4& m )
 	glStencilOp( GL_KEEP, GL_KEEP, GL_KEEP );
 
 	// Matrix
-	//glMatrixMode( GL_MODELVIEW );
 	matrixMode = MODELVIEW_MATRIX;
-
-	// Color
-	//glColor4f( 1, 1, 1, 1 );
 
 	// General config:
 	glCullFace( GL_BACK );
@@ -589,7 +565,6 @@ void GPUState::Clear( float r, float g, float b, float a )
 
 /*static*/ void GPUState::SetCameraTransform( const grinliz::Matrix4& camera )
 {
-	//glMatrixMode(GL_MODELVIEW);
 	// In normalized coordinates.
 	GLASSERT( mvStack.NumMatrix() == 1 );
 	mvStack.Set( camera );

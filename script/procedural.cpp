@@ -1,6 +1,7 @@
 #include "procedural.h"
 #include "../grinliz/glvector.h"
 #include "../game/gameitem.h"
+#include "../xegame/istringconst.h"
 
 using namespace grinliz;
 
@@ -30,6 +31,8 @@ void FaceGen::GetSkinColor( int index0, int index1, float fade, Color4F* color )
 	index0 = abs(index0) % NUM_SKIN_COLORS;
 	index1 = abs(index1) % NUM_SKIN_COLORS;
 
+	const Game::Palette* palette = Game::GetMainPalette();
+		
 	*color = Lerp( palette->Get4F( c[index0].x, c[index0].y ),
 				   palette->Get4F( c[index1].x, c[index1].y ),
 				   fade );
@@ -49,6 +52,8 @@ void FaceGen::GetGlassesColor( int index0, int index1, float fade, Color4F* colo
 
 	index0 = abs(index0) % NUM_GLASSES_COLORS;
 	index1 = abs(index1) % NUM_GLASSES_COLORS; 
+
+	const Game::Palette* palette = Game::GetMainPalette();
 
 	*color = Lerp( palette->Get4F( c[index0].x, c[index0].y ),
 				   palette->Get4F( c[index1].x, c[index1].y ),
@@ -73,11 +78,22 @@ void FaceGen::GetHairColor( int index0, Color4F* color )
 		{ PAL_GRAY*2, PAL_GRAY }
 	};
 
+	const Game::Palette* palette = Game::GetMainPalette();
 	index0 = abs(index0) % NUM_HAIR_COLORS;
 	*color = palette->Get4F( c[index0].x, c[index0].y );
 }
 
 
+void FaceGen::GetColors( U32 seed, grinliz::Vector4F* v )
+{
+	Color4F c[3];
+	GetColors( seed, c );
+	for( int i=0; i<3; ++i ) {
+		v[i].Set( c[i].r, c[i].g, c[i].b, c[i].a );
+	}
+}
+
+	
 void FaceGen::GetColors( U32 seed, grinliz::Color4F* c )
 {
 	Random random( seed );
@@ -95,26 +111,33 @@ void FaceGen::GetColors( U32 seed, grinliz::Color4F* c )
 }
 
 
-void FaceGen::Render( const GameItem& item, ProcRenderInfo* info )
+void FaceGen::Render( int seed, ProcRenderInfo* info )
 {
-	U32 seed = item.stats.Hash();
 	Random random( seed );
 	random.Rand();
 
-	GetColors( random.Rand(), info->color );
+	Vector4F vcol[3];
+	GetColors( random.Rand(), vcol );
 
-	info->vOffset[0] = (float)(FACE_ROWS - random.Rand(FACE_ROWS)) / (float)FACE_ROWS;
-	info->vOffset[1] = (float)(EYE_ROWS - random.Rand(EYE_ROWS)) / (float)EYE_ROWS;
-	
-	// 50% chance of having glasses.
-	const int glassesRows = female ? FEMALE_GLASSES_ROWS : MALE_GLASSES_ROWS;
+	// Get the texture to get the the metadata
+	Texture* texture = 0;
+	if ( female ) {
+		texture = TextureManager::Instance()->GetTexture( "humanFemaleFaceAtlas" );
+	}
+	else {
+		texture = TextureManager::Instance()->GetTexture( "humanMaleFaceAtlas" );
+	}
+	GLASSERT( texture );
 
-	if ( random.Bit() )
-		info->vOffset[2] = 1.0f;
-	else
-		info->vOffset[2] = (float)(glassesRows - random.Rand(glassesRows)) / (float)glassesRows;
+	Texture::TableEntry te;
+	texture->GetTableEntry( random.Rand( texture->NumTableEntries() ), &te );
 
-	info->vOffset[3] = (float)(HAIR_ROWS - random.Rand(HAIR_ROWS)) / (float)HAIR_ROWS;
+	info->texture = texture;
+	info->uv   = te.uv;
+	info->clip = te.clip;
+	info->color.SetCol( 0, vcol[0] );
+	info->color.SetCol( 1, vcol[1] );
+	info->color.SetCol( 2, vcol[2] );
 }
 
 
@@ -149,34 +172,44 @@ void WeaponGen::GetColors( int i, bool fire, bool shock, grinliz::Color4F* array
 		effect.Set( 1, PAL_GREEN );
 	}
 
+	const Game::Palette* palette = Game::GetMainPalette();
+
 	array[BASE]		= palette->Get4F( c[i*3+0].x, c[i*3+0].y );
 	array[CONTRAST] = palette->Get4F( c[i*3+1].x, c[i*3+1].y );
 	array[EFFECT]	= palette->Get4F( effect.x, effect.y );
-	array[GLOW]		= palette->Get4F( c[i*3+2].x, c[i*3+2].y );
 
 	array[BASE].a		= 0;
 	array[CONTRAST].a	= 0;
 	array[EFFECT].a		= (fire || shock) ? 0.7f : 0.0f;
-	array[GLOW].a		= 0.7f;
 }
 
 
-void WeaponGen::Render( const GameItem& item, ProcRenderInfo* info )
+void WeaponGen::Render( int seed, const GameItem& item, ProcRenderInfo* info )
 {
-	U32 seed = item.stats.Hash();
 	Random random( seed );
 	random.Rand();
 
+	Color4F c[3];
 	GetColors(	random.Rand(), 
 				(item.flags & GameItem::EFFECT_FIRE) != 0, 
 				(item.flags & GameItem::EFFECT_SHOCK) != 0, 
-				info->color );
+				c );
+
+	for( int i=0; i<3; ++i ) {
+		Vector4F v = { c[i].r, c[i].g, c[i].b, c[i].a };
+		info->color.SetCol( i, v );
+	}
+
+	/*
+	FIXME
+	const ModelResource* resource = ModelResourceManager::Instance()->GetModelResource( item.ResourceName() );
+	Texture* texture
 
 	info->vOffset[0] = (float)( NUM_ROWS - random.Rand(NUM_ROWS)) / (float)(NUM_ROWS);
 	info->vOffset[1] = (float)( NUM_ROWS - random.Rand(NUM_ROWS)) / (float)(NUM_ROWS);
 	info->vOffset[2] = (float)( NUM_ROWS - random.Rand(NUM_ROWS)) / (float)(NUM_ROWS);
 	info->vOffset[3] = (float)( NUM_ROWS - random.Rand(NUM_ROWS)) / (float)(NUM_ROWS);	
-
+	*/
 	info->filter[PROC_RING_MAIN] = true;
 	info->filter[PROC_RING_GUARD] = random.Boolean();
 	info->filter[PROC_RING_TRIAD] = random.Boolean();
@@ -209,15 +242,16 @@ grinliz::IString ItemGen::ToName( int id )
 }
 
 
-/* static */ int ItemGen::RenderItem( const Game::Palette* palette, const GameItem& item, ProcRenderInfo* info )
+/* static */ int ItemGen::RenderItem( int seed, const GameItem& item, ProcRenderInfo* info )
 {
 	int result = NONE;
 	switch ( item.procedural ) {
 		case PROCEDURAL_RING:
 		{
-			WeaponGen gen( palette );
-			gen.Render( item, info );
-			result = PROC4;
+			GLASSERT( 0 );	// FIXME this path is hacked
+			WeaponGen gen;
+			gen.Render( seed, item, info );
+			result = XFORM_CLIP_MAP;
 		}
 		break;
 

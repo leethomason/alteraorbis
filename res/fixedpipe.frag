@@ -6,9 +6,7 @@
 		varying vec4 v_texture0Clip;
 	#endif
 	#if TEXTURE0_COLORMAP == 1
-		varying vec4 v_color0;
-		varying vec4 v_color1;
-		varying vec4 v_color2;
+		varying mat4 v_colorMap;
 	#endif
 #endif
 #if TEXTURE1 == 1
@@ -36,8 +34,8 @@ void main()
 
 		#if TEXTURE0_COLORMAP == 1
 			float a = sample.a;
-			sample = sample.r*v_color0 + sample.g*v_color1 + sample.b*v_color2;
-			sample.a = a;
+			sample = sample.r*v_colorMap[0] + sample.g*v_colorMap[1] + sample.b*v_colorMap[2];
+			sample.a = mix( sample.a, a, v_colorMap[3][3] );
 		#endif
 
 		#if TEXTURE0_ALPHA_ONLY == 1
