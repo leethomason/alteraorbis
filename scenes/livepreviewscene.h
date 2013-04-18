@@ -50,7 +50,7 @@ public:
 	virtual void DrawDebugText();
 
 private:
-	void GenerateAndCreate( bool createTexture );
+	void GenerateAndCreate();
 	void GenerateFaces( int mainRow );
 	void GenerateRing( int mainRow );
 
@@ -68,6 +68,7 @@ private:
 	gamui::PushButton okay;
 	gamui::ToggleButton rowButton[ROWS];
 	gamui::ToggleButton typeButton[NUM_TYPES];
+	gamui::ToggleButton electricButton;
 
 	U32 timer;
 

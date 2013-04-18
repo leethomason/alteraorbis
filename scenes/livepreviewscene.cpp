@@ -42,6 +42,10 @@ LivePreviewScene::LivePreviewScene( LumosGame* game, const LivePreviewSceneData*
 		rowButton[0].AddToToggleGroup( &rowButton[i] );
 	}
 
+	electricButton.Init( &gamui2D, look );
+	electricButton.SetSize( width, height );
+	electricButton.SetText( "Electric" );
+
 	static const char* typeName[NUM_TYPES] = { "Male\nFace", "Female\nFace", "Ring" };
 	for( int i=0; i<NUM_TYPES; ++i ) {
 		typeButton[i].Init( &gamui2D, look );
@@ -53,7 +57,7 @@ LivePreviewScene::LivePreviewScene( LumosGame* game, const LivePreviewSceneData*
 	memset( model, 0, sizeof(model[0])*NUM_MODEL );
 
 	currentType = HUMAN_MALE_FACE;
-	GenerateAndCreate( true );
+	GenerateAndCreate();
 	game->InitStd( &gamui2D, &okay, 0 );
 }
 
@@ -80,6 +84,7 @@ void LivePreviewScene::Resize()
 	for( int i=0; i<NUM_TYPES; ++i ) {
 		layout.PosAbs( &typeButton[i], -1, i );
 	}
+	layout.PosAbs( &electricButton, 0, 4 );
 }
 
 
@@ -157,6 +162,12 @@ void LivePreviewScene::GenerateFaces( int mainRow )
 		texture->GetTableEntry( n, &te );
 		model[i]->SetTextureXForm( te.uvXForm.x, te.uvXForm.y, te.uvXForm.z, te.uvXForm.w );
 		model[i]->SetTextureClip( te.clip.x, te.clip.y, te.clip.z, te.clip.w );
+
+		if ( electricButton.Down() ) {
+			skin = skin + hair*0.5f + glasses*0.5f;
+			hair = hair + glasses*0.5f;
+		}
+
 		model[i]->SetColorMap( true, skin, hair, glasses, 1 );
 	}
 }
@@ -226,7 +237,12 @@ void LivePreviewScene::GenerateRing( int mainRow )
 		// base, contrast,  effect-glow
 		weaponGen.GetColors( i+mainRow*NUM_MODEL, col==2, col==3, color );
 
-		model[i]->SetPos( 3.0f, y, x );
+		if ( i == NUM_MODEL-1 ) {
+			model[i]->SetPos( 3.0f, y, x+0.15f );
+		}
+		else {
+			model[i]->SetPos( 3.0f, y, x );
+		}
 		model[i]->SetBoneFilter( ids );
 
 		Texture::TableEntry te;
@@ -241,7 +257,7 @@ void LivePreviewScene::GenerateRing( int mainRow )
 }
 
 
-void LivePreviewScene::GenerateAndCreate( bool createTexture )
+void LivePreviewScene::GenerateAndCreate()
 {
 	for( int i=0; i<ROWS; ++i ) {
 		if ( rowButton[i].Down() ) {
@@ -265,25 +281,27 @@ void LivePreviewScene::ItemTapped( const gamui::UIItem* item )
 	else if ( item == &typeButton[HUMAN_MALE_FACE] ) {
 		currentType = HUMAN_MALE_FACE;
 		//rowButton[0].SetDown();
-		GenerateAndCreate( true );
+		GenerateAndCreate(  );
 	}
 	else if ( item == &typeButton[HUMAN_FEMALE_FACE] ) {
 		currentType = HUMAN_FEMALE_FACE;
 		//rowButton[0].SetDown();
-		GenerateAndCreate( true );
+		GenerateAndCreate( );
 	}
 	else if ( item == &typeButton[RING] ) {
 		currentType = RING;
 		//rowButton[0].SetDown();
-		GenerateAndCreate( true );
+		GenerateAndCreate();
 	}
 
 	for( int i=0; i<ROWS; ++i ) {
 		if ( item == &rowButton[i] ) {
-			GenerateAndCreate( false );
+			GenerateAndCreate();
 		}
 	}
-
+	if ( item == &electricButton ) {
+		GenerateAndCreate();
+	}
 }
 
 

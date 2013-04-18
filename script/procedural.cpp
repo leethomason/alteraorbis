@@ -171,9 +171,16 @@ void WeaponGen::GetColors( int i, bool fire, bool shock, grinliz::Color4F* array
 
 	const Game::Palette* palette = Game::GetMainPalette();
 
-	array[BASE]		= palette->Get4F( c[i*3+0].x, c[i*3+0].y );
-	array[CONTRAST] = palette->Get4F( c[i*3+1].x, c[i*3+1].y );
-	array[EFFECT]	= palette->Get4F( effect.x, effect.y );
+	Color4F base		= palette->Get4F( c[i*3+0].x, c[i*3+0].y );
+	array[BASE]			= base;
+	Color4F contrast	= palette->Get4F( c[i*3+1].x, c[i*3+1].y );
+	static const float LERP = 0.65f;
+	array[CONTRAST].Set(	Lerp( base.r, contrast.r, LERP ),
+							Lerp( base.g, contrast.g, LERP ),
+							Lerp( base.b, contrast.b, LERP ),
+							Lerp( base.a, contrast.a, LERP ) );
+							
+	array[EFFECT]		= palette->Get4F( effect.x, effect.y );
 
 	array[BASE].a		= 0;
 	array[CONTRAST].a	= 0;
