@@ -85,7 +85,6 @@ void UIRenderer::BeginRenderState( const void* renderState )
 			shader.SetColor( 1, 1, 1, 1 );
 			shader.SetBlendMode( GPUState::BLEND_NORMAL );
 			shader.SetShaderFlag( ShaderManager::TEXTURE0_CLIP);
-			shader.SetShaderFlag( ShaderManager::TEXTURE0_XFORM );
 			shader.SetShaderFlag( ShaderManager::TEXTURE0_COLORMAP );
 		}
 		break;
