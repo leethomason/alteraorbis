@@ -505,23 +505,9 @@ Vector2I WorldMap::FindEmbark()
 		}
 	}
 
-	Rectangle2I bounds = s->InnerBounds();
-
-	int w = bounds.Width();
-	int h = bounds.Height();
-
-	while( true ) {
-		int dx = random.Rand( w );
-		int dy = random.Rand( h );
-		int x = bounds.min.x + dx;
-		int y = bounds.min.y + dy;
-
-		if ( IsPassable(x,y) ) {
-			Vector2I v = { x, y };
-			return v;
-		}
-	}
-	Vector2I v = { 0, 0 };
+	Vector2I v = s->core;
+	v.x += 2;
+	v.y += 2;
 	return v;
 }
 

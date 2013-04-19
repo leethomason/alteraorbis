@@ -1,5 +1,5 @@
 x control key is terrible...sometimes.
-- remove 'inUse' flag
+x remove 'inUse' flag
 - explosion is in the wrong direction. Units walk through explosions?? (Balrog vs. Human.)
 - does fire affect plants??
 - health is awkward: keeps copy of HP (oops). move hp to health component? (TotalHP() on item?)
@@ -23,9 +23,9 @@ x control key is terrible...sometimes.
 		x fix inUse. wow. fix inUse. Then only isBlocked will be an awful hack.
 		  Note: fixed. Switched both inUse and isBlocked to callback. May require
 		  future optimazation.
-		- simpler shaders
-		- new start location
-		- make sure cores are in correct place
+		x simpler shaders
+		x new start location
+		x make sure cores are in correct place
 		- herding across grids
 			- herding notification
 		- test fast mode
