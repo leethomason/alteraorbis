@@ -410,12 +410,20 @@ void RenderComponent::Deco( const char* asset, int slot, int duration )
 		deco[slot] = 0;
 	}
 	if ( duration > 0 ) {
-		const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( asset );
+		const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( "iconPlate" );
 		deco[slot] = engine->AllocModel( res );
 		Vector3F pos = model[0]->Pos();
 		pos.y = 0.01f;
 		deco[slot]->SetPos( pos );	
 		deco[slot]->userData = parentChit;
+
+		Texture* texture = deco[slot]->GetResource()->atom[0].texture;
+		Texture::TableEntry te;
+		texture->GetTableEntry( asset, &te );
+		GLASSERT( !te.name.empty() );
+
+		deco[slot]->SetTextureXForm( te.uvXForm.x, te.uvXForm.y, te.uvXForm.z, te.uvXForm.w );
+		deco[slot]->SetTextureClip( te.clip.x, te.clip.y, te.clip.z, te.clip.w );
 	}
 }
 

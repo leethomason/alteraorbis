@@ -39,7 +39,10 @@ private:
 	typedef Component super;
 public:
 	enum {	NUM_MODELS	= EL_MAX_METADATA+1,	// slot[0] is the main model; others are hardpoint attach
-			NUM_DECO	= 2 };
+
+			DECO_FOOT	= 0,
+			DECO_HEAD,
+			NUM_DECO };
 
 	// spacetree probably  sufficient, but 'engine' easier to keep track of
 	// asset can be null if followed by a Load()

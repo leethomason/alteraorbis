@@ -21,6 +21,8 @@
   <texture filename="title.png" />
   <texture filename="icons.png" dither="false"/>
   <texture filename="iconDeco.png" dither="false" />
+  <!-- new, atlased home of all icons, decos, etc. -->
+  <texture filename="icon.png" table="icon.xml" />
 
   <!-- Model textures -->
   <texture filename="palette.png" />
@@ -67,6 +69,7 @@
   <model filename="unitPlateHumanMaleFace.ac" shading="flat" />
   <model filename="unitPlateHumanFemaleFace.ac" shading="flat" />
   <model filename="unitPlateArrow.ac" shading="flat" />
+  <model filename="iconPlate.ac" shading="flat" />
   <model filename="unitCube.ac" shading="flat" />
   <model filename="targetFlag.ac" shading="flat" shadowCastec="false" />
   <model filename="possibleTargetFlag.ac" shading="flat" shadowCastec="false" />

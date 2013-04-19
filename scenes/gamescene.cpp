@@ -236,7 +236,7 @@ void GameScene::MoveModel( Chit* target )
 			possibleChit = 0;
 			RenderComponent* rc = target->GetRenderComponent();
 			if ( rc ) {
-				rc->Deco( "possibleTargetFlag", 0, INT_MAX );
+				rc->Deco( "possibleTarget", RenderComponent::DECO_FOOT, INT_MAX );
 				possibleChit = target->ID();
 			}
 		}
@@ -261,7 +261,7 @@ void GameScene::TapModel( Chit* target )
 
 		RenderComponent* rc = target->GetRenderComponent();
 		if ( rc ) {
-			rc->Deco( "targetFlag", 0, INT_MAX );
+			rc->Deco( "target", RenderComponent::DECO_FOOT, INT_MAX );
 			targetChit = target->ID();
 		}
 	}
