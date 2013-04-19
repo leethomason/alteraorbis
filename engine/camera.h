@@ -50,6 +50,7 @@ public:
 	const grinliz::Matrix4& ViewMatrix()			{ if ( !valid ) CalcWorldXForm();
 													  return viewMatrix;
 													}
+	const grinliz::Quaternion& Quat() const			{ return quat; }
 								
 	enum {
 		NORMAL,

@@ -58,10 +58,7 @@ AIComponent::AIComponent( Engine* _engine, WorldMap* _map ) : rethink( 1200 )
 	randomWander = false;
 	aiMode = NORMAL_MODE;
 	awareness.Zero();
-	//wanderOrigin.Zero();
-	//wanderRadius = 0;
 	wanderTime = 0;
-	//wanderFlags = 0;
 	debugFlag = false;
 }
 
@@ -80,11 +77,7 @@ void AIComponent::Serialize( XStream* xs )
 	XARC_SER( xs, currentTarget );
 	XARC_SER( xs, focusOnTarget );
 	XARC_SER( xs, focusedMove );
-	//XARC_SER( xs, wanderRadius );
 	XARC_SER( xs, wanderTime );
-//	XARC_SER( xs, wanderFlags );
-
-	//XARC_SER( xs, wanderOrigin );
 	rethink.Serialize( xs, "rethink" );
 	this->EndSerialize( xs );
 }
@@ -217,60 +210,6 @@ void AIComponent::GetFriendEnemyLists()
 		}
 	}
 }
-
-
-#if 0
-// Won't write output if there isn't a result.
-float AIComponent::CalcFlockMove( const ComponentSet& thisComp, grinliz::Vector2F* dir )
-{
-	if ( friendList.Empty() ) {
-		return 0;
-	}
-
-	// Only the friends in front of us. Keeps Chits
-	// from wandering off into space.
-	Vector2F d = { 0, 0 };
-	int count = 0;
-
-	static const float TOO_CLOSE		= 1.0f;
-	static const float JUST_RIGHT		= 2.0f;
-	static const float IGNORE_ENEMY		= NORMAL_AWARENESS*0.5f;	// enemies don't effect flocking if other mechanisms will dominate.
-	static const float MIN_ANGLE_DOT	= 0.26f;	// 75 degree
-
-	Vector2F pos = thisComp.spatial->GetPosition2D();
-	Vector2F heading = thisComp.spatial->GetHeading2D();
-
-	for( int i=0; i<friendList.Size(); ++i ) {
-		Chit* c = GetChitBag()->GetChit( friendList[i] );
-		if ( c && c->GetSpatialComponent() ) {
-			SpatialComponent*  sc = c->GetSpatialComponent();
-
-			Vector2F delta = sc->GetPosition2D() - pos;
-			float len = delta.Length();
-			delta.Normalize();
-			//float dot = DotProduct( delta, heading );
-
-			float effect = 0;
-			if ( len < JUST_RIGHT ) {
-				effect = -1.f + len/JUST_RIGHT;
-			}
-			else {
-				effect = JUST_RIGHT / len;
-			}
-			d = d + effect * delta;
-		}
-	}
-
-	float len = d.Length();
-//	if ( len > 0.01f ) {
-//		d.Normalize();
-//		*dir = d;
-//		return len / (float)(count);
-//	}
-//	return 0.0f;
-	return Clamp( len, 0.0f, 1.0f );
-}
-#endif
 
 
 Chit* AIComponent::Closest( const ComponentSet& thisComp, CArray<int, MAX_TRACK>* list )

@@ -123,6 +123,7 @@ private:
 	const ModelResource*	resource[ NUM_MODELS ];
 	Model*					model[ NUM_MODELS ];
 	Model*					deco[ NUM_DECO ];
+	int						decoDuration[ NUM_DECO ];
 	grinliz::IString		metaDataName[EL_MAX_METADATA];	// the name of the metadata - one smaller than the NUM_MODELS
 };
 

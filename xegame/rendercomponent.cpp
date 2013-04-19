@@ -47,6 +47,7 @@ RenderComponent::RenderComponent( Engine* _engine, const char* _asset )
 	}
 	for( int i=0; i<NUM_DECO; ++i ) {
 		deco[i] = 0;
+		decoDuration[i] = 0;
 	}
 	radiusOfBase = 0;
 }
@@ -393,10 +394,35 @@ int RenderComponent::DoTick( U32 deltaTime, U32 since )
 	}
 
 	// The decos:
-	if ( deco[0] ) {
+	for( int i=0; i<NUM_DECO; ++i ) {
+		if ( deco[i] ) {
+			decoDuration[i] -= since;
+			if ( decoDuration[i] < 0 ) {
+				engine->FreeModel( deco[i] );
+				deco[i] = 0;
+				decoDuration[i] = 0;
+			}
+		}
+	}
+
+	if ( deco[DECO_FOOT] ) {
 		Vector3F pos = model[0]->Pos();
-		pos.y = 0.01f;
-		deco[0]->SetPos( pos );
+		pos.y += 0.01f;
+		deco[DECO_FOOT]->SetPos( pos );
+		tick = 0;
+	}
+	if ( deco[DECO_HEAD] ) {
+		Vector3F pos = model[0]->Pos();
+		pos.y += model[0]->AABB().SizeY() + 0.4f;
+
+		Quaternion camera = engine->camera.Quat();
+		Matrix4 camMat;
+		camera.ToMatrix( &camMat );
+		float degrees = camMat.CalcRotationAroundAxis( 1 );
+	
+		deco[DECO_HEAD]->SetPos( pos );
+		deco[DECO_HEAD]->SetYRotation( degrees );
+		tick = 0;
 	}
 	return tick;
 }
@@ -410,7 +436,9 @@ void RenderComponent::Deco( const char* asset, int slot, int duration )
 		deco[slot] = 0;
 	}
 	if ( duration > 0 ) {
-		const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( "iconPlate" );
+		decoDuration[slot] = duration;
+		const ModelResource* res = ModelResourceManager::Instance()
+			->GetModelResource( slot == DECO_FOOT ? "iconPlate" : "iconHeadPlate" );
 		deco[slot] = engine->AllocModel( res );
 		Vector3F pos = model[0]->Pos();
 		pos.y = 0.01f;

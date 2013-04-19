@@ -236,7 +236,7 @@ void GameScene::MoveModel( Chit* target )
 			possibleChit = 0;
 			RenderComponent* rc = target->GetRenderComponent();
 			if ( rc ) {
-				rc->Deco( "possibleTarget", RenderComponent::DECO_FOOT, INT_MAX );
+				rc->Deco( "possibleTarget", RenderComponent::DECO_HEAD, INT_MAX );
 				possibleChit = target->ID();
 			}
 		}
