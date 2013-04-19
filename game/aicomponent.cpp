@@ -43,6 +43,7 @@ static const float NORMAL_AWARENESS		= 10.0f;
 static const float LOSE_AWARENESS		= 16.0f;
 static const float SHOOT_ANGLE			= 10.0f;	// variation from heading that we can shoot
 static const float SHOOT_ANGLE_DOT		=  0.985f;	// same number, as dot product.
+static const float WANDER_RADIUS		=  5.0f;
 
 #define AI_OUTPUT
 
@@ -57,10 +58,10 @@ AIComponent::AIComponent( Engine* _engine, WorldMap* _map ) : rethink( 1200 )
 	randomWander = false;
 	aiMode = NORMAL_MODE;
 	awareness.Zero();
-	wanderOrigin.Zero();
-	wanderRadius = 0;
+	//wanderOrigin.Zero();
+	//wanderRadius = 0;
 	wanderTime = 0;
-	wanderFlags = 0;
+	//wanderFlags = 0;
 	debugFlag = false;
 }
 
@@ -79,11 +80,11 @@ void AIComponent::Serialize( XStream* xs )
 	XARC_SER( xs, currentTarget );
 	XARC_SER( xs, focusOnTarget );
 	XARC_SER( xs, focusedMove );
-	XARC_SER( xs, wanderRadius );
+	//XARC_SER( xs, wanderRadius );
 	XARC_SER( xs, wanderTime );
-	XARC_SER( xs, wanderFlags );
+//	XARC_SER( xs, wanderFlags );
 
-	XARC_SER( xs, wanderOrigin );
+	//XARC_SER( xs, wanderOrigin );
 	rethink.Serialize( xs, "rethink" );
 	this->EndSerialize( xs );
 }
@@ -521,11 +522,16 @@ void AIComponent::FocusedTarget( Chit* chit )
 }
 
 
-void AIComponent::SetWanderParams( int mode, const grinliz::Vector2F& pos, float radius )
+Vector2F AIComponent::WanderOrigin( const ComponentSet& thisComp ) const
 {
-	wanderFlags = mode;
-	wanderOrigin = pos;
-	wanderRadius = radius;
+	Vector2F pos = thisComp.spatial->GetPosition2D();
+	Vector2I m = { (int)pos.x/SECTOR_SIZE, (int)pos.y/SECTOR_SIZE };
+	const SectorData& sd = map->GetWorldInfo().GetSector( m );
+	Vector2F center = { (float)(sd.x+SECTOR_SIZE/2), (float)(sd.y+SECTOR_SIZE/2) };
+	if ( sd.HasCore() )	{
+		center.Set( (float)sd.core.x + 0.5f, (float)sd.core.y + 0.5f );
+	}
+	return center;
 }
 
 
@@ -534,35 +540,32 @@ Vector2F AIComponent::ThinkWanderCircle( const ComponentSet& thisComp )
 	// In a circle?
 	// This turns out to be creepy. Worth keeping for something that is,
 	// in fact, creepy.
-	Vector2F dest = wanderOrigin;
-	if ( wanderRadius > 0 ) {
-		Random random( thisComp.chit->ID() );
+	Vector2F dest = WanderOrigin( thisComp );
+	Random random( thisComp.chit->ID() );
 
-		float angleUniform = random.Uniform();
-		float lenUniform   = 0.25f + 0.75f*random.Uniform();
+	float angleUniform = random.Uniform();
+	float lenUniform   = 0.25f + 0.75f*random.Uniform();
 
-		static const U32 PERIOD = 40*1000;
-		U32 t = wanderTime % PERIOD;
-		float timeUniform = (float)t / (float)PERIOD;
+	static const U32 PERIOD = 40*1000;
+	U32 t = wanderTime % PERIOD;
+	float timeUniform = (float)t / (float)PERIOD;
 
-		angleUniform += timeUniform;
-		float angle = angleUniform * 2.0f * PI;
-		Vector2F v = { cosf(angle), sinf(angle) };
+	angleUniform += timeUniform;
+	float angle = angleUniform * 2.0f * PI;
+	Vector2F v = { cosf(angle), sinf(angle) };
 		
-		v = v * (lenUniform * wanderRadius);
+	v = v * (lenUniform * WANDER_RADIUS);
 
-		dest = wanderOrigin + v;
-	}
+	dest = WanderOrigin( thisComp ) + v;
 	return dest;
 }
 
 
 Vector2F AIComponent::ThinkWanderRandom( const ComponentSet& thisComp )
 {
-
-	Vector2F dest = wanderOrigin;
-	dest.x += parentChit->random.Uniform() * wanderRadius * parentChit->random.Sign();
-	dest.y += parentChit->random.Uniform() * wanderRadius * parentChit->random.Sign();
+	Vector2F dest = WanderOrigin( thisComp );
+	dest.x += parentChit->random.Uniform() * WANDER_RADIUS * parentChit->random.Sign();
+	dest.y += parentChit->random.Uniform() * WANDER_RADIUS * parentChit->random.Sign();
 	return dest;
 }
 
@@ -584,7 +587,7 @@ Vector2F AIComponent::ThinkWanderFlock( const ComponentSet& thisComp )
 			pos.Push( v );
 		}
 	}
-	pos.Push( wanderOrigin );	// the origin is a friend.
+	pos.Push( WanderOrigin( thisComp ) );	// the origin is a friend.
 
 	// And plants are friends.
 	Rectangle2F r;
@@ -625,7 +628,9 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 	// - occasionally randomly wander about
 
 	Vector2F dest = { 0, 0 };
-	if ( wanderFlags == WANDER_NONE ) {
+
+	int flags = parentChit->GetItem() ? (parentChit->GetItem()->flags & GameItem::AI_WANDER_MASK) : 0;
+	if ( flags == 0 ) {
 		rethink.Set( 2000 );
 		currentAction = WANDER;
 		return;
@@ -633,10 +638,10 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 	if ( randomWander ) {
 		dest = ThinkWanderRandom( thisComp );
 	}
-	else if ( wanderFlags == WANDER_HERD ) {
+	else if ( flags == GameItem::AI_WANDER_HERD ) {
 		dest = ThinkWanderFlock( thisComp );
 	}
-	else if ( wanderFlags == WANDER_CIRCLE ) {
+	else if ( flags == GameItem::AI_WANDER_CIRCLE ) {
 		dest = ThinkWanderCircle( thisComp );
 	}
 

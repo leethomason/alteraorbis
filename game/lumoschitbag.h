@@ -19,8 +19,8 @@ public:
 
 	void SetContext( Engine* e, WorldMap* wm ) { engine = e; worldMap = wm; }
 
-	Chit* NewMonsterChit( const grinliz::Vector3F& pos, const char* name, int team, const grinliz::Vector2F* wander );
-	void AddItem( const char* name, Chit* chit, Engine* engine, int team=0, int level=0 );
+	Chit* NewMonsterChit( const grinliz::Vector3F& pos, const char* name, int team );
+	void AddItem( const char* name, Chit* chit, Engine* engine, int team, int level );
 
 	// IBoltImpactHandler
 	virtual void HandleBolt( const Bolt& bolt, Model* m, const grinliz::Vector3F& at );

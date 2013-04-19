@@ -80,7 +80,7 @@ int CoreScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 					team = 101;
 					asset = "redMantis";
 				}
-				((LumosChitBag*)(ctx.chit->GetChitBag()))->NewMonsterChit( pf, asset, team, &p2 );
+				((LumosChitBag*)(ctx.chit->GetChitBag()))->NewMonsterChit( pf, asset, team );
 			}
 		}
 	}

@@ -14,6 +14,7 @@
 
   <item name="mantis"
         resource="mantis"
+        flags="AI_WANDER_HERD AI_EAT_PLANTS AI_SECTOR_HERD"
         mass="40">
     <intrinsics>
       <item name="pincer"
@@ -26,6 +27,7 @@
 
   <item name="redMantis"
         resource="redMantis"
+        flags="AI_WANDER_HERD AI_EAT_PLANTS"
         mass="35">
     <intrinsics>
       <item name="pincer"
@@ -107,23 +109,10 @@
         hardpoint="trigger"
         mass="1.5"
         cooldown="500"
-        reload="2000"
+        reload="2500"
         clipCap="6"
         meleeDamage="1.1"
         rangedDamage="20"
-        >
-  </item>
-
-  <item name="shotgun"
-        resource="testgun"
-        flags="MELEE_WEAPON RANGED_WEAPON"
-        hardpoint="trigger"
-        mass="1.5"
-        cooldown="500"
-        reload="1000"
-        clipCap="2"
-        meleeDamage="1.1"
-        rangedDamage="30"
         >
   </item>
 
@@ -131,7 +120,6 @@
         resource="shield"
         flags="HELD_AT_HARDPOINT"
         hardpoint="shield"
-        procedural="roundsToGlow"
         reload ="3000"
         clipCap="20"
         mass="1.0"

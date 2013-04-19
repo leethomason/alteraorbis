@@ -26,7 +26,8 @@ x remove 'inUse' flag
 		x simpler shaders
 		x new start location
 		x make sure cores are in correct place
-		- herding across grids
+		- herding
+			- fix health
 			- herding notification
 		- test fast mode
 		- textures

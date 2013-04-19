@@ -247,9 +247,16 @@ public:
 		EFFECT_SHOCK		= (1<<12),
 		EFFECT_MASK			= EFFECT_EXPLOSIVE | EFFECT_FIRE | EFFECT_SHOCK,
 
-		RENDER_TRAIL		= (1<<13),				// render a bolt with a 'smoketrail' vs. regular bolt
+		RENDER_TRAIL		= (1<<13),		// render a bolt with a 'smoketrail' vs. regular bolt
 
 		INDESTRUCTABLE		= (1<<14),
+
+		AI_WANDER_HERD		= (1<<15),		// basic herding
+		AI_WANDER_CIRCLE	= (1<<16),		// creepy circle herding
+		AI_WANDER_MASK      = AI_WANDER_HERD | AI_WANDER_CIRCLE,
+
+		AI_EAT_PLANTS		= (1<<17),		// eats plants to regain health
+		AI_SECTOR_HERD		= (1<<18),		// will herd across sectors
 	};
 
 	// ------ description ------

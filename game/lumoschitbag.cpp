@@ -38,7 +38,7 @@ LumosChitBag::~LumosChitBag()
 
 
 
-Chit* LumosChitBag::NewMonsterChit( const Vector3F& pos, const char* name, int team, const Vector2F* wander )
+Chit* LumosChitBag::NewMonsterChit( const Vector3F& pos, const char* name, int team )
 {
 	Chit* chit = NewChit();
 
@@ -49,13 +49,9 @@ Chit* LumosChitBag::NewMonsterChit( const Vector3F& pos, const char* name, int t
 
 	chit->GetSpatialComponent()->SetPosition( pos );
 
-	AddItem( name, chit, engine, team );
+	AddItem( name, chit, engine, team, 0 );
 
 	chit->Add( new HealthComponent( engine ));
-
-	if ( wander ) {
-		GET_COMPONENT( chit, AIComponent )->SetWanderParams( AIComponent::WANDER_HERD, *wander, 5.0f );
-	}
 	return chit;
 }
 

@@ -132,6 +132,10 @@ void GameItem::Serialize( XStream* xs )
 		APPEND_FLAG( flags, f, EFFECT_SHOCK );
 		APPEND_FLAG( flags, f, RENDER_TRAIL );
 		APPEND_FLAG( flags, f, INDESTRUCTABLE );
+		APPEND_FLAG( flags, f, AI_WANDER_HERD );
+		APPEND_FLAG( flags, f, AI_WANDER_CIRCLE );
+		APPEND_FLAG( flags, f, AI_EAT_PLANTS );
+		APPEND_FLAG( flags, f, AI_SECTOR_HERD );
 
 		xs->Saving()->Set( "flags", f.c_str() );
 	}
@@ -151,6 +155,10 @@ void GameItem::Serialize( XStream* xs )
 			READ_FLAG( flags, f, EFFECT_SHOCK );
 			READ_FLAG( flags, f, RENDER_TRAIL );
 			READ_FLAG( flags, f, INDESTRUCTABLE );
+			READ_FLAG( flags, f, AI_WANDER_HERD );
+			READ_FLAG( flags, f, AI_WANDER_CIRCLE );
+			READ_FLAG( flags, f, AI_EAT_PLANTS );
+			READ_FLAG( flags, f, AI_SECTOR_HERD );
 		}
 	}
 
@@ -198,6 +206,10 @@ void GameItem::Save( tinyxml2::XMLPrinter* printer )
 	APPEND_FLAG( flags, f, EFFECT_SHOCK );
 	APPEND_FLAG( flags, f, RENDER_TRAIL );
 	APPEND_FLAG( flags, f, INDESTRUCTABLE );
+	APPEND_FLAG( flags, f, AI_WANDER_HERD );
+	APPEND_FLAG( flags, f, AI_WANDER_CIRCLE );
+	APPEND_FLAG( flags, f, AI_EAT_PLANTS );
+	APPEND_FLAG( flags, f, AI_SECTOR_HERD );
 	printer->PushAttribute( "flags", f.c_str() );
 	
 	PUSH_ATTRIBUTE( printer, mass );
@@ -256,6 +268,10 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 		READ_FLAG( flags, f, EFFECT_SHOCK );
 		READ_FLAG( flags, f, RENDER_TRAIL );
 		READ_FLAG( flags, f, INDESTRUCTABLE );
+		READ_FLAG( flags, f, AI_WANDER_HERD );
+		READ_FLAG( flags, f, AI_WANDER_CIRCLE );
+		READ_FLAG( flags, f, AI_EAT_PLANTS );
+		READ_FLAG( flags, f, AI_SECTOR_HERD );
 	}
 	for( const tinyxml2::XMLAttribute* attr = ele->FirstAttribute();
 		 attr;

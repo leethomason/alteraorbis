@@ -53,12 +53,6 @@ public:
 	void FocusedMove( const grinliz::Vector2F& dest, const grinliz::Vector2I* sector );
 	void FocusedTarget( Chit* chit );
 
-	enum {
-		WANDER_NONE,
-		WANDER_HERD,
-		WANDER_CIRCLE
-	};
-	void SetWanderParams( int mode, const grinliz::Vector2F& pos, float radius ); 
 	void EnableDebug( bool enable ) { debugFlag = enable; }
 
 	enum {
@@ -88,6 +82,7 @@ private:
 	void Think( const ComponentSet& thisComp );	// Choose a new action.
 	void ThinkWander( const ComponentSet& thisComp );
 	void ThinkBattle( const ComponentSet& thisComp );
+	grinliz::Vector2F WanderOrigin( const ComponentSet& thisComp ) const;
 
 	// What happens when no other move is working.
 	grinliz::Vector2F ThinkWanderRandom( const ComponentSet& thisComp );
@@ -117,11 +112,11 @@ private:
 	bool				focusedMove;
 	grinliz::Rectangle2F awareness;
 	CTicker				rethink;
-	grinliz::Vector2F	wanderOrigin;
-	float				wanderRadius;
+//	grinliz::Vector2F	wanderOrigin;
+//	float				wanderRadius;
 	U32					wanderTime;
 	bool				randomWander;
-	int					wanderFlags;
+	//int					wanderFlags;
 	bool				debugFlag;
 
 	void DoMelee( const ComponentSet& thisComp );
