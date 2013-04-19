@@ -26,13 +26,13 @@ x remove 'inUse' flag
 		x simpler shaders
 		x new start location
 		x make sure cores are in correct place
+		x textures
+			x grid
+			x port. bake lighting.
 		- herding
 			- fix health
 			- herding notification
 		- test fast mode
-		- textures
-			x grid
-			- port. bake lighting.
 		- load existing world
 		- fix AI to not charge into melee if ranged is a better idea
 		- fix camera dragging bug
