@@ -34,7 +34,7 @@ public:
 	virtual const char* Name() const { return "ItemComponent"; }
 
 	virtual void DebugStr( grinliz::GLString* str ) {
-		str->Format( "[Item] %s ", mainItem.Name() );
+		str->Format( "[Item] %s hp=%.1f/%.1f ", mainItem.Name(), mainItem.hp, mainItem.TotalHP() );
 	}
 
 	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );

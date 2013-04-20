@@ -451,7 +451,7 @@ public:
 	bool OnShock() const { return (!(flags & IMMUNE_SHOCK)) && accruedShock > 0; }
 
 	// Note that the current HP, if it has one, 
-	float TotalHP() const		{ return mass*stats.NormalWill(); }
+	float TotalHP() const		{ return ceilf( mass*stats.NormalWill() ); }
 	float HPFraction() const	{ 
 		float f = hp / TotalHP(); 
 		//GLASSERT( f >= 0 && f <= 1 );

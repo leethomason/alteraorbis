@@ -165,6 +165,11 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		if ( mainItem.hp > mainItem.TotalHP() ) {
 			mainItem.hp = mainItem.TotalHP();
 		}
+
+		if ( parentChit->GetSpatialComponent() ) {
+			Vector3F v = parentChit->GetSpatialComponent()->GetPosition();
+			engine->particleSystem->EmitPD( "heal", v, V3F_UP, engine->camera.EyeDir3(), 30 );
+		}
 	}
 	else {
 		super::OnChitMsg( chit, msg );

@@ -65,6 +65,7 @@ private:
 
 	int targetChit;
 	int possibleChit;
+	int infoID;
 
 	gamui::PushButton	okay;
 	gamui::PushButton	serialButton[NUM_SERIAL_BUTTONS];

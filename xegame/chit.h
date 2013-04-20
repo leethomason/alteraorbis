@@ -63,8 +63,6 @@ public:
 
 		HEALTH_CHANGED,
 		
-		//GAMEITEM_TICK,			// Ptr = &GameItem
-
 		// XE
 		SPATIAL_CHANGED,		// the position or rotation has changed, sender: spatial
 		RENDER_IMPACT,			// impact metadata event has occured, sender: render component

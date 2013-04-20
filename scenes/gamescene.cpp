@@ -33,6 +33,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	simCount = 0;
 	targetChit = 0;
 	possibleChit = 0;
+	infoID = 0;
 	lumosGame = game;
 	game->InitStd( &gamui2D, &okay, 0 );
 	sim = new Sim( lumosGame );
@@ -197,6 +198,9 @@ void GameScene::MouseMove( const grinliz::Vector2F& view, const grinliz::Ray& wo
 	sim->GetEngine()->RayFromViewToYPlane( view, mvpi, &ray, &at );
 	Model* model = sim->GetEngine()->IntersectModel( ray.origin, ray.direction, 10000.0f, TEST_HIT_AABB, 0, 0, 0, &atModel );
 	MoveModel( model ? model->userData : 0 );
+	if ( model && model->userData ) {
+		infoID = model->userData->ID();
+	}
 }
 
 
@@ -236,7 +240,7 @@ void GameScene::MoveModel( Chit* target )
 			possibleChit = 0;
 			RenderComponent* rc = target->GetRenderComponent();
 			if ( rc ) {
-				rc->Deco( "possibleTarget", RenderComponent::DECO_HEAD, INT_MAX );
+				rc->Deco( "possibleTarget", RenderComponent::DECO_FOOT, INT_MAX );
 				possibleChit = target->ID();
 			}
 		}
@@ -252,6 +256,11 @@ void GameScene::TapModel( Chit* target )
 	Chit* player = sim->GetPlayerChit();
 	if ( !player ) {
 		ClearTargetFlags();
+
+		AIComponent* ai = GET_COMPONENT( target, AIComponent );
+		if ( ai ) {
+			ai->EnableDebug( true );
+		}
 		return;
 	}
 	AIComponent* ai = GET_COMPONENT( player, AIComponent );
@@ -578,4 +587,11 @@ void GameScene::DrawDebugText()
 						  cacheData.hit,
 						  cacheData.miss,
 						  cacheData.hitFraction );
+
+	Chit* info = sim->GetChitBag()->GetChit( infoID );
+	if ( info ) {
+		GLString str;
+		info->DebugStr( &str );
+		ufoText->Draw( 0, 112, "id=%d: %s", infoID, str.c_str() );
+	}
 }

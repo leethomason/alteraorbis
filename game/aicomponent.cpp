@@ -44,6 +44,8 @@ static const float LOSE_AWARENESS		= 16.0f;
 static const float SHOOT_ANGLE			= 10.0f;	// variation from heading that we can shoot
 static const float SHOOT_ANGLE_DOT		=  0.985f;	// same number, as dot product.
 static const float WANDER_RADIUS		=  5.0f;
+static const float EAT_HP_PER_SEC		=  2.0f;
+static const float EAT_HP_HEAL_MULT		=  5.0f;	// eating really tears up plants. heal the critter more than damage the plant.
 
 #define AI_OUTPUT
 
@@ -410,6 +412,44 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 }
 
 
+int AIComponent::DoStand( const ComponentSet& thisComp, U32 since )
+{
+	const GameItem* item	= parentChit->GetItem();
+	int itemFlags			= item ? item->flags : 0;
+	float totalHP			= item ? item->TotalHP() : 0;
+	int tick = 400;
+
+	// Plant eater
+	if (	!thisComp.move->IsMoving()    
+		 && (itemFlags & GameItem::AI_EAT_PLANTS) 
+		 && (item->hp < totalHP ))  
+	{
+		// Are we on a plant?
+		Vector2F pos = thisComp.spatial->GetPosition2D();
+		// Note that currently only support eating stage 0-1 plants.
+		const CDynArray<Chit*>& plants = parentChit->GetChitBag()->QuerySpatialHash( pos, 0.4f, 0, PlantScript::PassablePlantFilter );
+		if ( !plants.Empty() ) {
+			// We are standing on a plant.
+			float hp = Travel( EAT_HP_PER_SEC, since );
+			ChitMsg heal( ChitMsg::CHIT_HEAL );
+			heal.dataF = hp * EAT_HP_HEAL_MULT;
+
+			if ( debugFlag ) {
+				GLOUTPUT(( "ID=%d Eating plants itemHp=%.1f total=%.1f hp=%.1f\n", thisComp.chit->ID(),
+					item->hp, item->TotalHP(), hp ));
+			}
+
+			DamageDesc dd( hp, 0 );
+			ChitMsg damage( ChitMsg::CHIT_DAMAGE, 0, &dd );
+			parentChit->SendMessage( heal, this );
+			plants[0]->SendMessage( damage );
+			tick = 0;
+		}
+	}
+	return tick;
+}
+
+
 void AIComponent::OnChitEvent( const ChitEvent& event )
 {
 	ComponentSet thisComp( parentChit, Chit::RENDER_BIT | 
@@ -567,29 +607,69 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 	// - occasionally randomly wander about
 
 	Vector2F dest = { 0, 0 };
+	const GameItem* item	= parentChit->GetItem();
+	int itemFlags			= item ? item->flags : 0;
+	int wanderFlags			= itemFlags & GameItem::AI_WANDER_MASK;
+	int actionToTake		= WANDER;
 
-	int flags = parentChit->GetItem() ? (parentChit->GetItem()->flags & GameItem::AI_WANDER_MASK) : 0;
-	if ( flags == 0 ) {
-		rethink.Set( 2000 );
-		currentAction = WANDER;
-		return;
-	}
-	if ( randomWander ) {
-		dest = ThinkWanderRandom( thisComp );
-	}
-	else if ( flags == GameItem::AI_WANDER_HERD ) {
-		dest = ThinkWanderFlock( thisComp );
-	}
-	else if ( flags == GameItem::AI_WANDER_CIRCLE ) {
-		dest = ThinkWanderCircle( thisComp );
+	// Plant eater
+	if ( (itemFlags & GameItem::AI_EAT_PLANTS) && (item->hp < item->TotalHP()))  {
+		// Are we near a plant?
+		Vector2F pos = thisComp.spatial->GetPosition2D();
+		// Note that currently only support eating stage 0-1 plants.
+		const CDynArray<Chit*>& plants = parentChit->GetChitBag()->QuerySpatialHash( pos, 3.0f, 0, PlantScript::PassablePlantFilter );
+		if ( !plants.Empty() ) {
+			// We are standing on a plant?
+			float bestDist = FLT_MAX;
+			int best = -1;
+			for( int i=0; i<plants.Size(); ++i ) {
+				float dist2 = ( pos - plants[i]->GetSpatialComponent()->GetPosition2D() ).LengthSquared();
+				if ( dist2 < bestDist ) {
+					bestDist = dist2;
+					best = i;
+				}
+			}
+			if ( best >= 0 ) {
+				if ( bestDist > (0.2f*0.2f) ) {
+					dest = plants[best]->GetSpatialComponent()->GetPosition2D();
+					actionToTake = MOVE;
+				}
+				else {
+					// Already where we need to be		
+					if ( debugFlag ) {
+						GLOUTPUT(( "ID=%d Stand\n", thisComp.chit->ID() ));
+					}
+					currentAction = STAND;
+					return;
+				}
+			}
+		}
 	}
 
-	PathMoveComponent* pmc = GET_COMPONENT( thisComp.chit, PathMoveComponent );
-	if ( pmc ) {
-		pmc->QueueDest( dest );
+	if ( dest.IsZero() ) {
+		if ( wanderFlags == 0 ) {
+			rethink.Set( 2000 );
+			currentAction = WANDER;
+			return;
+		}
+		if ( randomWander ) {
+			dest = ThinkWanderRandom( thisComp );
+		}
+		else if ( wanderFlags == GameItem::AI_WANDER_HERD ) {
+			dest = ThinkWanderFlock( thisComp );
+		}
+		else if ( wanderFlags == GameItem::AI_WANDER_CIRCLE ) {
+			dest = ThinkWanderCircle( thisComp );
+		}
 	}
-	rethink.Set( 10*1000 + thisComp.chit->random.Rand( 10*1000 ));
-	currentAction = WANDER;
+	if ( !dest.IsZero() ) {
+		PathMoveComponent* pmc = GET_COMPONENT( thisComp.chit, PathMoveComponent );
+		if ( pmc ) {
+			pmc->QueueDest( dest );
+		}
+		rethink.Set( 10*1000 + thisComp.chit->random.Rand( 10*1000 ));
+		currentAction = actionToTake;
+	}
 }
 
 
@@ -810,6 +890,7 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 	}
 
 	wanderTime += timeSince;
+	int oldAction = currentAction;
 
 	ChitBag* chitBag = this->GetChitBag();
 
@@ -869,6 +950,10 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 			DoShoot( thisComp );
 			tick = 0;
 			break;
+		case STAND:
+			tick = DoStand( thisComp, timeSince );
+			break;
+
 		case NO_ACTION:
 			tick = 400;
 			break;
@@ -882,7 +967,12 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 			currentAction = 0;
 			break;
 	}
-	return Min( tick, rethink.Next() );
+	tick = Min( tick, rethink.Next() );
+	if ( debugFlag && (currentAction != oldAction) ) {
+		const char* actions[NUM_ACTIONS] = { "none", "move", "melee", "shoot", "wander", "stand" };
+		GLOUTPUT(( "ID=%d action=%s tick=%d\n", thisComp.chit->ID(), actions[currentAction], tick ));
+	}
+	return tick;
 }
 
 

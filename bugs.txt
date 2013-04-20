@@ -30,7 +30,7 @@ x remove 'inUse' flag
 			x grid
 			x port. bake lighting.
 		- herding
-			- fix health
+			x fix health
 			- herding notification
 		- test fast mode
 		- load existing world

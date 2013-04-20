@@ -103,6 +103,8 @@ private:
 		SHOOT,			// Stand ground and shoot.
 
 		WANDER,
+		STAND,			// used to eat plants, reload
+		NUM_ACTIONS
 	};
 
 	int					aiMode;
@@ -112,16 +114,14 @@ private:
 	bool				focusedMove;
 	grinliz::Rectangle2F awareness;
 	CTicker				rethink;
-//	grinliz::Vector2F	wanderOrigin;
-//	float				wanderRadius;
 	U32					wanderTime;
 	bool				randomWander;
-	//int					wanderFlags;
 	bool				debugFlag;
 
 	void DoMelee( const ComponentSet& thisComp );
 	void DoShoot( const ComponentSet& thisComp );
 	void DoMove( const ComponentSet& thisComp );
+	int  DoStand( const ComponentSet& thisComp, U32 since );
 
 	grinliz::CArray<int, MAX_TRACK> friendList;
 	grinliz::CArray<int, MAX_TRACK> enemyList;

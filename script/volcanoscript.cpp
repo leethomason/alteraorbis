@@ -28,7 +28,7 @@ void VolcanoScript::Init( const ScriptContext& heap )
 	GLASSERT( sc );
 	if ( sc ) {
 		Vector2F pos = sc->GetPosition2D();
-		GLOUTPUT(( "VolcanoScript::Init. pos=%d,%d\n", (int)pos.x, (int)pos.y ));
+		//GLOUTPUT(( "VolcanoScript::Init. pos=%d,%d\n", (int)pos.x, (int)pos.y ));
 		worldMap->SetMagma( (int)pos.x, (int)pos.y, true );
 
 		NewsEvent event = { 0, pos, StringPool::Intern( "volcano", true ) };

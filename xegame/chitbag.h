@@ -95,6 +95,17 @@ public:
 		QuerySpatialHash( &cachedQuery, r, ignoreMe, accept );
 		return cachedQuery;
 	}
+	// Use with caution: the array returned can change if a sub-function calls this.
+	const grinliz::CDynArray<Chit*>& QuerySpatialHash(	const grinliz::Vector2F& origin, 
+														float rad,
+														const Chit* ignoreMe,
+														bool (*accept)(Chit*) = AcceptAll )
+	{
+		grinliz::Rectangle2F r;
+		r.Set( origin.x-rad, origin.y-rad, origin.x+rad, origin.y+rad );
+		QuerySpatialHash( &cachedQuery, r, ignoreMe, accept );
+		return cachedQuery;
+	}
 
 	// IBoltImpactHandler
 	virtual void HandleBolt( const Bolt& bolt, Model* m, const grinliz::Vector3F& at );
