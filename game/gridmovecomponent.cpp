@@ -164,7 +164,7 @@ int GridMoveComponent::DoTick( U32 delta, U32 since )
 				}
 
 				float travel = Travel( speed, since );
-				while ( travel > 0 ) {
+				while ( travel > 0 && !path.Empty() ) {
 					GridEdge ge   = path[0];
 					Vector2F target = worldInfo.GridEdgeToMapF( ge );
 

@@ -31,12 +31,18 @@ x remove 'inUse' flag
 			x port. bake lighting.
 		- herding
 			x fix health
-			- herding notification
-		- test fast mode
+			x herding notification
+			x herding doesn't check for valid dest sector
+			- try herding (at 100%) on path fail + lots of friends. hopefully
+			  solves super-crowing.
+			- clear news tracking
 		- load existing world
+		- move health/ammo/shield to face pic
+		- test fast mode
 		- fix AI to not charge into melee if ranged is a better idea
 		- fix camera dragging bug
 		- overnight test
+		- test serialization of grid move
 	- Flora 2
 		- weapon toggle / selection
 		- level up

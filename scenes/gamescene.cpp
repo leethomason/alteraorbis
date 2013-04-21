@@ -366,8 +366,21 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		if ( item == &newsButton[i] ) {
 			//GLASSERT( i < localNews.Size() );
 			//dest = localNews[i].pos;
-			GLASSERT( i < sim->GetChitBag()->NumNews() );
-			dest = (sim->GetChitBag()->News() + i)->pos;
+			CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
+			if ( cc ) {
+				cc->SetTrack( 0 );
+			}
+
+			const NewsEvent* ne = sim->GetChitBag()->News() + i;
+			if ( !sim->GetPlayerChit() && ne->chitID ) {
+				if ( cc ) {
+					cc->SetTrack( ne->chitID );
+				}
+			}
+			else {
+				GLASSERT( i < sim->GetChitBag()->NumNews() );
+				dest = ne->pos;
+			}
 		}
 	}
 
@@ -462,6 +475,22 @@ void GameScene::DoTick( U32 delta )
 	const NewsEvent* news = sim->GetChitBag()->News();
 	int nNews = sim->GetChitBag()->NumNews();
 
+#if 0
+	for( int i=0; i<nNews; ++i ) {
+		//float h = sim->GetEngine()->camera.PosWC().y;
+		if (    news[i].processed == false 
+			 && news[i].name == "SectorHerd" 
+			 && !sim->GetPlayerChit() ) 
+		{
+			CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
+			if ( cc ) {
+				cc->SetTrack( 0 );
+				cc->SetTrack( news[i].chitID );
+			}
+		}
+	}
+#endif
+	sim->GetChitBag()->SetNewsProcessed();
 	/*
 	localNews.Clear();
 	for( int i=0; i<nNews; ++i ) {

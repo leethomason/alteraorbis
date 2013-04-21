@@ -49,13 +49,13 @@ public:
 		CHIT_DESTROYED_START,	// sender: health. *starts* the countdown sequence.
 		CHIT_DESTROYED_TICK,	// dataF = fraction
 		CHIT_DESTROYED_END,		// sender: health. ends the sequence, next step is the chit delete
-		CHIT_DAMAGE,			// sender: chitBag, Data=isExplosion 
-								//					Ptr = &DamageDesc, 
+		CHIT_DAMAGE,			// sender: chitBag, data=isExplosion 
+								//					ptr = &DamageDesc, 
 								//					vector=origin of impact
 								//					dataF=rotation
 		CHIT_HEAL,				//					dataF = hitpoints
-		CHIT_PROCEDURAL,		// Data for procedural rendering. Loose coupling between items and
-								// the rendering component.	
+		CHIT_SECTOR_HERD,		// AI message: a lead unit is telling other units to herd to a different sector.
+								//					data = index of dst sector
 
 		// ---- Component ---- //
 		PATHMOVE_DESTINATION_REACHED,

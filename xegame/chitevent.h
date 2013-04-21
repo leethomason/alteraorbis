@@ -62,6 +62,13 @@ private:
 
 
 struct NewsEvent {
+	NewsEvent() : priority(0), chitID(0), age(0), processed(false) {
+		pos.Zero();
+	}
+	NewsEvent( int p_priority, const grinliz::Vector2F& p_pos, grinliz::IString p_name, int p_chitID=0 ) :
+		priority(p_priority), pos(p_pos), name(p_name), chitID(p_chitID), age(0), processed(false)
+	{}
+
 	// News priority:
 	enum {
 		PONY,
@@ -72,7 +79,9 @@ struct NewsEvent {
 	int					priority;
 	grinliz::Vector2F	pos;
 	grinliz::IString	name;
-	U32					time;			// set by the Add
+	int					chitID;			// if there is one
+	U32					age;			// set by the Add
+	bool				processed;
 };
 
 

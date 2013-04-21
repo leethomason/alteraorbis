@@ -471,7 +471,7 @@ int PathMoveComponent::DoTick( U32 delta, U32 since )
 				if ( dest.sector.x > 0 || dest.sector.y > 0 ) {
 					const WorldGrid& wg = map->GetWorldGrid( (int)pos2.x, (int)pos2.y );
 					if ( wg.IsPort() ) {
-						GLOUTPUT(( "Port found! Do something.\n" ));
+						//GLOUTPUT(( "Port found! Do something.\n" ));
 						portJump = dest.sector;
 						// Nearest port to current location. This looks a little weird.
 						portJumpPort = map->GetWorldInfo().NearestPort( dest.sector, pos2 );

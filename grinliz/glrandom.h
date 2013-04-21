@@ -122,6 +122,16 @@ class Random
 	/// Fast hash
 	static U32 Hash( const void* data, U32 len );
 
+	template< class T >
+	void ShuffleArray( T* mem, int size ) {
+		for( int i=0; i<size; ++i ) {
+			int j = Rand(size);
+			T temp = mem[i];
+			mem[i] = mem[j];
+			mem[j] = temp;
+		}
+	}
+
 private:
 	U32 x, y, z, c, lowCount;
 	enum { 

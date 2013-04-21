@@ -9,6 +9,7 @@
 #include "../game/healthcomponent.h"
 #include "../game/mapspatialcomponent.h"
 #include "../game/aicomponent.h"
+#include "../game/gridmovecomponent.h"
 
 #include "../script/scriptcomponent.h"
 
@@ -55,6 +56,9 @@ Component* ComponentFactory::Factory( const char* name, Chit* chit ) const
 	}
 	else if ( StrEqual( name, "AIComponent" )) {
 		return new AIComponent( engine, worldMap );
+	}
+	else if ( StrEqual( name, "GridMoveComponent" )) {
+		return new GridMoveComponent( worldMap );
 	}
 
 	GLASSERT( 0 );

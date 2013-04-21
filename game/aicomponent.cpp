@@ -46,6 +46,7 @@ static const float SHOOT_ANGLE_DOT		=  0.985f;	// same number, as dot product.
 static const float WANDER_RADIUS		=  5.0f;
 static const float EAT_HP_PER_SEC		=  2.0f;
 static const float EAT_HP_HEAL_MULT		=  5.0f;	// eating really tears up plants. heal the critter more than damage the plant.
+static const int   WANDER_ODDS			= 100;		// as in 1 in WANDER_ODDS
 
 #define AI_OUTPUT
 
@@ -652,7 +653,43 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 			currentAction = WANDER;
 			return;
 		}
-		if ( randomWander ) {
+		if (	itemFlags & GameItem::AI_SECTOR_HERD
+ 			 && friendList.Size() >= (MAX_TRACK*3/4)
+			 && (thisComp.chit->random.Rand( WANDER_ODDS ) == 0) ) 
+		{
+			Vector2I delta[4] = { {-1,0}, {1,0}, {0,-1}, {0,1} };
+			parentChit->random.ShuffleArray( delta, 4 );
+			Vector2F pos = thisComp.spatial->GetPosition2D();
+
+			for( int i=0; i<4; ++i ) {
+				Vector2I sector = { (int)pos.x/SECTOR_SIZE, (int)pos.y/SECTOR_SIZE };
+				if ( sector.x >= 0 && sector.x < NUM_SECTORS && sector.y >= 0 && sector.y < NUM_SECTORS ) {
+					const SectorData& sd = map->GetWorldInfo().GetSector( sector );
+					if ( sd.ports ) {			
+						Vector2I dst = sector + delta[thisComp.chit->random.Rand(4)];
+						int index = dst.y*NUM_SECTORS+dst.x;
+
+						RenderComponent* rc = parentChit->GetRenderComponent();
+						if ( rc ) {
+							rc->Deco( "horn", RenderComponent::DECO_HEAD, 10*1000 );
+						}
+						NewsEvent news( NewsEvent::PONY, pos, StringPool::Intern( "SectorHerd" ), parentChit->ID() );
+						GetChitBag()->AddNews( news );
+
+						ChitMsg msg( ChitMsg::CHIT_SECTOR_HERD, index );
+						for( int i=0; i<friendList.Size(); ++i ) {
+							Chit* c = GetChitBag()->GetChit( friendList[i] );
+							if ( c ) {
+								c->SendMessage( msg );
+							}
+						}
+						parentChit->SendMessage( msg );
+						return;
+					}
+				}
+			}
+		}
+		else if ( randomWander ) {
 			dest = ThinkWanderRandom( thisComp );
 		}
 		else if ( wanderFlags == GameItem::AI_WANDER_HERD ) {
@@ -1004,6 +1041,22 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		}
 		else {
 			randomWander = true;
+		}
+		break;
+
+	case ChitMsg::CHIT_SECTOR_HERD:
+		{
+			if ( parentChit->GetSpatialComponent() ) {
+				Vector2I sector;
+				sector.y = msg.Data() / NUM_SECTORS;
+				sector.x = msg.Data() - sector.y*NUM_SECTORS;
+				Vector2F pos = parentChit->GetSpatialComponent()->GetPosition2D();
+				Rectangle2I portRect = map->NearestPort( pos );
+				if ( portRect.max.x > 0 && portRect.max.y > 0 ) {
+					Vector2F dest = SectorData::PortPos( portRect, chit->ID() );
+					this->FocusedMove( dest, &sector );
+				}
+			}
 		}
 		break;
 

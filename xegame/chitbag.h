@@ -71,6 +71,7 @@ public:
 	void AddNews( const NewsEvent& event );
 	const NewsEvent* News() const { return news.Mem(); }
 	int NumNews() const { return news.Size(); }
+	void SetNewsProcessed();
 
 	// Hashes based on integer coordinates. No need to call
 	// if they don't change.

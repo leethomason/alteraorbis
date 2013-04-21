@@ -252,9 +252,12 @@ void ChitBag::DoTick( U32 delta, Engine* engine )
 	}
 	compDeleteList.Clear();
 
-
 	if ( engine ) {
 		Bolt::TickAll( &bolts, delta, engine, this );
+	}
+
+	for( int i=0; i<news.Size(); ++i ) {
+		news[i].age += delta;
 	}
 }
 
@@ -267,10 +270,18 @@ void ChitBag::HandleBolt( const Bolt& bolt, Model* m, const grinliz::Vector3F& a
 void ChitBag::AddNews( const NewsEvent& event )
 {
 	news.PushFront( event );
-	news[0].time = bagTime;
+	news[0].age = 0;
 
 	if ( news.Size() > 40 ) {
 		news.Pop();
+	}
+}
+
+
+void ChitBag::SetNewsProcessed()
+{
+	for( int i=0; i<news.Size(); ++i ) {
+		news[i].processed = true;
 	}
 }
 
