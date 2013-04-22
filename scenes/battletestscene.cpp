@@ -89,23 +89,18 @@ BattleTestScene::BattleTestScene( LumosGame* game ) : Scene( game )
 	LayoutCalculator layout = game->DefaultLayout();
 
 	const ButtonLook& look = game->GetButtonLook( LumosGame::BUTTON_LOOK_STD );
-	const float width  = layout.Width();
-	const float height = layout.Height();
 
 	goButton.Init( &gamui2D, look );
 	goButton.SetText( "Go!" );
-	goButton.SetSize( width, height );
 
 	regionButton.Init( &gamui2D, look );
 	regionButton.SetText( "region" );
-	regionButton.SetSize( width, height );
 
 	int currentGroup = -1;
 	ToggleButton* toggle = 0;
 
 	for( int i=0; i<NUM_BUTTONS; ++i ) {
 		optionButton[i].Init( &gamui2D, look );
-		optionButton[i].SetSize( width, height*0.5f );
 		optionButton[i].SetText( buttonDef[i].label );
 		if ( currentGroup != buttonDef[i].group ) {
 			currentGroup = buttonDef[i].group;
@@ -152,7 +147,7 @@ void BattleTestScene::Resize()
 	layout.PosAbs( &goButton, 0, -2 );
 	layout.PosAbs( &regionButton, 1, -2 );
 
-	layout.SetSize( layout.Width(), layout.Height()*0.5f );
+	layout.SetSize( LAYOUT_SIZE, LAYOUT_SIZE*0.5f );
 
 	int currentGroup = -1;
 	int y = -1;

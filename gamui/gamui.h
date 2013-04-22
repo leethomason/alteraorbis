@@ -52,7 +52,7 @@ class ToggleButton;
 class TextLabel;
 class PushButton;
 class ToggleButton;
-
+class Image;
 
 /*
 template < class T > 
@@ -200,7 +200,9 @@ public:
 		LEVEL_BACKGROUND = 0,
 		LEVEL_FOREGROUND = 1,
 		LEVEL_DECO		 = 2,
-		LEVEL_TEXT		 = 3
+		LEVEL_ICON		 = 3,
+		LEVEL_TEXT		 = 4,
+		LEVEL_FOCUS		 = 5
 	};
 
 	/// Description of a vertex used by Gamui.
@@ -249,11 +251,6 @@ public:
 	void SetTextHeight( float h )			{ m_textHeight = h; }
 	float GetTextHeight() const				{ return m_textHeight; }
 
-	// fixme: the 'static' is problem. need to work through initialization
-	static void SetDefaultSize( float x, float y )  { m_defaultXSize =x; m_defaultYSize = y; }
-	static float DefaultWidth() 					{ return m_defaultXSize; }
-	static float DefaultHeight() 					{ return m_defaultYSize; }
-
 	/** Feed touch/mouse events to Gamui. You should use TapDown/TapUp as a pair, OR just use Tap. TapDown/Up
 		is richer, but you need device support. (Mice certainly, fingers possibly.) 
 		* TapDown return the item tapped on. This does not activate anything except capture.
@@ -296,6 +293,14 @@ public:
 							float originX, float originY,
 							float width );
 
+	void			SetFocusLook( const RenderAtom& atom, float zRotation );
+	void			AddToFocusGroup( const UIItem* item, int id );
+	void			SetFocus( const UIItem* item );
+	const UIItem*	GetFocus() const;
+	void			MoveFocus( float x, float y );
+	float			GetFocusX();
+	float			GetFocusY();
+
 private:
 	static int SortItems( const void* a, const void* b );
 
@@ -311,8 +316,10 @@ private:
 	const UIItem*	m_dragStart;
 	const UIItem*	m_dragEnd;
 	float			m_textHeight;
-	float			m_relativeX, m_relativeY;
-	static float	m_defaultXSize, m_defaultYSize;
+	float			m_relativeX;
+	float			m_relativeY;
+	int				m_focus;
+	Image*			m_focusImage;
 
 	struct State {
 		uint16_t	vertexStart;
@@ -323,9 +330,15 @@ private:
 		const void* textureHandle;
 	};
 
-	grinliz::CDynArray< State >			m_stateBuffer;
-	grinliz::CDynArray< uint16_t >		m_indexBuffer;
-	grinliz::CDynArray< Vertex >		m_vertexBuffer;
+	struct FocusItem {
+		const UIItem*	item;
+		int				group;
+	};
+
+	grinliz::CDynArray< FocusItem >			m_focusItems;
+	grinliz::CDynArray< State >				m_stateBuffer;
+	grinliz::CDynArray< uint16_t >			m_indexBuffer;
+	grinliz::CDynArray< Vertex >				m_vertexBuffer;
 };
 
 
@@ -379,6 +392,11 @@ public:
 	float Y() const								{ return m_y; }
 	virtual float Width() const = 0;
 	virtual float Height() const = 0;
+	float CenterX() const						{ return X() + Width()*0.5f; }
+	float CenterY() const						{ return Y() + Height()*0.5f; }
+
+	// Not always supported.
+	virtual void SetSize( float sx, float sy )	{}
 
 	int Level() const							{ return m_level; }
 
@@ -671,6 +689,7 @@ public:
 	void SetDeco( const RenderAtom& atom, const RenderAtom& atomD )			{ m_atoms[DECO] = atom; m_atoms[DECO_D] = atomD; SetState(); Modify(); }
 	void GetDeco( RenderAtom* atom, RenderAtom* atomD )						{ if ( atom ) *atom = m_atoms[DECO]; if ( atomD ) *atomD = m_atoms[DECO_D]; }
 	void SetDecoRotationY( float degrees )									{ m_deco.SetRotationY( degrees ); }
+	void SetIcon( const RenderAtom& atom, const RenderAtom& atomD )			{ m_atoms[ICON] = atom; m_atoms[ICON_D] = atomD; SetState(); Modify(); }
 
 	void SetText( const char* text );
 	const char* GetText() const { return m_label[0].GetText(); }
@@ -722,12 +741,15 @@ private:
 		DOWN_D,
 		DECO,
 		DECO_D,
+		ICON,
+		ICON_D,
 		COUNT
 	};
 	RenderAtom m_atoms[COUNT];
 	
 	Image		m_face;
 	Image		m_deco;
+	Image		m_icon;
 
 	bool		m_usingText1;
 	int			m_textLayout;
@@ -862,7 +884,7 @@ public:
 
 				const RenderAtom& atomLower,		// lit
 				const RenderAtom& atomHigher )		// un-lit
-		: UIItem( Gamui::LEVEL_FOREGROUND ), SPACING( 0.1f )
+		: UIItem( Gamui::LEVEL_FOREGROUND )
 	{
 		Init( gamui, nTicks, atomLower, atomHigher );
 	}
@@ -892,7 +914,6 @@ public:
 
 private:
 	enum { MAX_TICKS = 10 };
-	const float	SPACING;
 	int			m_nTicks;
 	float		m_t;
 	RenderAtom	m_atomLower;
@@ -906,37 +927,46 @@ class LayoutCalculator
 {
 public:
 	LayoutCalculator( float screenWidth, float screenHeight );
-	~LayoutCalculator()	{}
+	~LayoutCalculator();
 
-	void SetSize( float width, float height )	{ this->width = width; this->height = height; }
-	void SetGutter( float gutter )				{ this->gutter = gutter; }
-	void SetSpacing( float spacing )			{ this->spacing = spacing; }
+	void SetSize( float width, float height )			{ this->width = width; this->height = height; }
+	void SetGutter( float gutterX, float gutterY )		{ this->gutterX = gutterX; this->gutterY = gutterY; }
+	void SetSpacing( float spacing )					{ this->spacingX = this->spacingY = spacing; }
+	void SetSpacing( float spacingX, float spacingY )	{ this->spacingX = spacingX; this->spacingY = spacingY; }
 
 	void SetOffset( float x, float y )			{ this->offsetX = x; this->offsetY = y; }
 	void SetTextOffset( float x, float y )		{ this->textOffsetX = x; this->textOffsetY = y; }
 
-	void PosAbs( UIItem* item, int x, int y );
+	void PosAbs( UIItem* item, int x, int y, bool setSize=true );
 	void PosAbs( TextLabel* label, int x, int y ) {
 		useTextOffset = true;
 		PosAbs( (UIItem*) label, x, y ); 
 		useTextOffset = false;
 	}
-
-	float Width() const  { return width; }
-	float Height() const { return height; }
+	// Consume the inner space (should be last call)
+	void PosInner( UIItem* item, float widthDivHeight=0 );
 
 private:
+	float Max( float a, float b ) const { return a > b ? a : b; }
+	float Min( float a, float b ) const { return a < b ? a : b; }
+
 	float screenWidth;
 	float screenHeight;
 	float width;
 	float height;
-	float gutter;
-	float spacing;
+	float gutterX;
+	float gutterY;
+	float spacingX;
+	float spacingY;
 	float textOffsetX;
 	float textOffsetY;
 	float offsetX;
 	float offsetY;
 	bool  useTextOffset;
+	float innerX0;
+	float innerY0;
+	float innerX1;
+	float innerY1;
 };
 
 class Matrix

@@ -34,6 +34,7 @@ private:
 	void Save();
 	void Load();
 	void SetFace();
+	void SetBars();
 	void DoDestTapped( const grinliz::Vector2F& grid );
 
 	void TapModel( Chit* chit );
@@ -72,9 +73,12 @@ private:
 	gamui::ToggleButton camModeButton[NUM_CAM_MODES];
 	gamui::PushButton	allRockButton;
 	gamui::PushButton	newsButton[NUM_NEWS_BUTTONS];
+	gamui::PushButton	clearButton;
 	gamui::Image		minimap;
 	gamui::Image		playerMark;
+
 	gamui::Image		faceImage;
+	gamui::DigitalBar	healthBar, ammoBar, shieldBar;
 	gamui::TextLabel	dateLabel;
 };
 

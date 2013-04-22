@@ -67,7 +67,6 @@ NavTest2Scene::NavTest2Scene( LumosGame* game, const NavTest2SceneData* _data ) 
 
 	LayoutCalculator layout = game->DefaultLayout();
 	regionButton.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
-	regionButton.SetSize( layout.Width(), layout.Height() );
 	regionButton.SetText( "region" );
 }
 

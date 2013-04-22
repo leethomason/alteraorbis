@@ -36,10 +36,11 @@ void GridMoveComponent::Serialize( XStream* xs )
 {
 	this->BeginSerialize( xs, Name() );
 	XARC_SER( xs, state );
+	XARC_SER( xs, sectorDest );
 	XARC_SER( xs, portDest );
 	XARC_SER( xs, deleteWhenDone );
 	XARC_SER( xs, speed );
-	XARC_SER( xs, sectorDest );
+
 	this->EndSerialize( xs );
 }
 
@@ -158,9 +159,14 @@ int GridMoveComponent::DoTick( U32 delta, U32 since )
 			}
 			else {
 				if ( path.Size() == 0 ) {
-					GridEdge current = worldMap->GetWorldInfo().MapToGridEdge( (int)pos.x, (int)pos.y );
+					Vector2I mapPos = { (int)pos.x, (int)pos.y };
+					GridEdge current = worldMap->GetWorldInfo().MapToGridEdge( mapPos.x, mapPos.y );
 					int result = worldMap->GetWorldInfoMutable()->Solve( current, destEdge, &path );
 					GLASSERT( result == micropather::MicroPather::SOLVED );
+					if ( result != micropather::MicroPather::SOLVED ) {
+						path.Clear();
+						path.Push( destEdge );
+					}
 				}
 
 				float travel = Travel( speed, since );

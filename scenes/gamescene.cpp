@@ -4,6 +4,7 @@
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/cameracomponent.h"
 #include "../xegame/rendercomponent.h"
+#include "../xegame/itemcomponent.h"
 
 #include "../game/lumosgame.h"
 #include "../game/lumoschitbag.h"
@@ -77,11 +78,22 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 		newsButton[i].SetSize( NEWS_BUTTON_WIDTH, NEWS_BUTTON_HEIGHT );
 		newsButton[i].SetText( "news" );
 	}
+	clearButton.Init( &gamui2D, game->GetButtonLook(0) );
+	clearButton.SetSize( NEWS_BUTTON_WIDTH, NEWS_BUTTON_HEIGHT );
+	clearButton.SetText( "Clear" );
 
 	RenderAtom nullAtom;
 	faceImage.Init( &gamui2D, nullAtom, true );
 	faceImage.SetSize( 100, 100 );
 	SetFace();
+
+	RenderAtom green = LumosGame::CalcPaletteAtom( 1, 3 );	
+	RenderAtom grey  = LumosGame::CalcPaletteAtom( 0, 6 );
+	RenderAtom blue   = LumosGame::CalcPaletteAtom( 8, 0 );	
+
+	healthBar.Init( &gamui2D, 10, green, grey );
+	ammoBar.Init( &gamui2D, 10, blue, grey );
+	shieldBar.Init( &gamui2D, 10, blue, grey );
 
 	dateLabel.Init( &gamui2D );
 }
@@ -110,11 +122,22 @@ void GameScene::Resize()
 	minimap.SetPos( port.UIWidth()-MINI_MAP_SIZE, 0 );
 
 	faceImage.SetPos( minimap.X()-faceImage.Width(), 0 );
+
+	layout.SetSize( faceImage.Width(), 10.0f );
+	layout.SetSpacing( 5.0f );
+	layout.SetOffset( faceImage.X(), faceImage.Y()+faceImage.Height() );
+	layout.SetGutter( 0, 5.0f );
+
+	layout.PosAbs( &healthBar,	0, 0 );
+	layout.PosAbs( &ammoBar,	0, 1 );
+	layout.PosAbs( &shieldBar,  0, 2 );
+
 	dateLabel.SetPos( faceImage.X()-faceImage.Width(), 0 );
 
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
 		newsButton[i].SetPos( port.UIWidth()- (NEWS_BUTTON_WIDTH), MINI_MAP_SIZE + (NEWS_BUTTON_HEIGHT+2)*i );
 	}
+	clearButton.SetPos( newsButton[0].X() - clearButton.Width(), newsButton[0].Y() );
 
 	bool visible = game->DebugUIEnabled();
 	allRockButton.SetVisible( visible );
@@ -147,8 +170,64 @@ void GameScene::SetFace()
 	else {
 		faceImage.SetVisible( false );
 	}
+
+#if 0 
+	faceImage.SetVisible( true );
+	RenderAtom atom = LumosGame::CalcPaletteAtom( 0, 0 );
+	faceImage.SetAtom( atom );
+#endif
 }
 
+
+void GameScene::SetBars()
+{
+	RenderAtom orange = LumosGame::CalcPaletteAtom( 4, 0 );
+	RenderAtom grey   = LumosGame::CalcPaletteAtom( 0, 6 );
+	RenderAtom blue   = LumosGame::CalcPaletteAtom( 8, 0 );	
+
+	Chit* chit = sim->GetPlayerChit();
+	if ( chit && chit->GetItem() ) {
+		const GameItem* item = chit->GetItem();
+		healthBar.SetRange( item->HPFraction() );
+
+		IShield* ishield			= 0;
+		IRangedWeaponItem* iweapon	= 0;
+
+		ItemComponent* itemComp = chit->GetItemComponent();
+		if ( itemComp ) {
+			ishield	= itemComp->GetShield();
+			iweapon	= itemComp->GetRangedWeapon(0);
+		}
+
+		if ( iweapon ) {
+			float r = 0;
+			if ( iweapon->GetItem()->Reloading() ) {
+				r = iweapon->GetItem()->ReloadFraction();
+				ammoBar.SetLowerAtom( orange );
+			}
+			else {
+				r = iweapon->GetItem()->RoundsFraction();
+				ammoBar.SetLowerAtom( blue );
+			}
+			ammoBar.SetRange( Clamp( r, 0.f, 1.f ) );
+		}
+		else {
+			ammoBar.SetRange( 0 );
+		}
+
+		if ( ishield ) {
+			float r = ishield->GetItem()->RoundsFraction();
+			shieldBar.SetRange( Clamp( r, 0.f, 1.0f ));
+		}
+		else {
+			shieldBar.SetRange( 0 );
+		}
+	}
+
+	healthBar.SetVisible( chit != 0 );
+	ammoBar.SetVisible( chit != 0 );
+	shieldBar.SetVisible( chit != 0 );
+}
 
 void GameScene::Save()
 {
@@ -383,6 +462,14 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 			}
 		}
 	}
+	if ( item == &clearButton ) {
+		if ( !sim->GetPlayerChit() ) {
+			CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
+			if ( cc  ) {
+				cc->SetTrack( 0 );
+			}
+		}
+	}
 
 	if ( dest.x >= 0 ) {
 		DoDestTapped( dest );
@@ -516,6 +603,8 @@ void GameScene::DoTick( U32 delta )
 	CStr<12> str;
 	str.Format( "%.2f", sim->DateInAge() );
 	dateLabel.SetText( str.c_str() );
+
+	SetBars();
 }
 
 

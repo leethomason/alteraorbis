@@ -138,44 +138,6 @@ void DebugStateComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		shieldBar.SetPos( pos.x, pos.y + SIZE_Y*1.5f );
 		ammoBar.SetPos(   pos.x, pos.y + SIZE_Y*3.0f );
 	}
-	/*
-	else if ( msg.ID() == ChitMsg::GAMEITEM_TICK ) {
-		GameItem* pItem = (GameItem*)msg.Ptr();
-
-		healthBar.SetRange( pItem->HPFraction() );
-
-		RenderAtom grey   = LumosGame::CalcPaletteAtom( 0, 6 );
-		RenderAtom blue   = LumosGame::CalcPaletteAtom( 8, 0 );	
-		RenderAtom orange = LumosGame::CalcPaletteAtom( 4, 0 );
-
-		if ( pItem->ToRangedWeapon() ) {			
-			float r = 1;
-			if ( pItem->Reloading() ) {
-				if ( pItem->reload ) {
-					r = (float)pItem->reloadTime / (float)pItem->reload;
-				}
-				ammoBar.SetLowerAtom( orange );
-				ammoBar.SetHigherAtom( grey );
-			}
-			else {
-				if ( pItem->clipCap ) {
-					r = (float)pItem->rounds / (float)pItem->clipCap;
-				}
-				ammoBar.SetLowerAtom( blue );
-				ammoBar.SetHigherAtom( grey );
-			}
-			ammoBar.SetRange( Clamp( r, 0.f, 1.f ) );
-		}
-		if ( pItem->ToShield() ) {
-			// will tweak out if there are multiple absorbers.
-			float r = 1;
-			if ( pItem->clipCap ) {
-				r = (float)pItem->rounds / (float)pItem->clipCap;
-			}
-			shieldBar.SetRange( Clamp( r, 0.f, 1.0f ));
-		}
-	}
-	*/
 	else {
 		super::OnChitMsg( chit, msg );
 	}

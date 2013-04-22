@@ -5,6 +5,7 @@ x remove 'inUse' flag
 - health is awkward: keeps copy of HP (oops). move hp to health component? (TotalHP() on item?)
 - need free camera mode
 - remove temporary arbitrary AI limit in corescript
+- when loading during grid travel, you sometimes back up. (Regen path on load; chooses wrong starting point. annoying to fix).
 
 - game
 	- Intermission: regions
@@ -33,16 +34,17 @@ x remove 'inUse' flag
 			x fix health
 			x herding notification
 			x herding doesn't check for valid dest sector
-			- try herding (at 100%) on path fail + lots of friends. hopefully
+			x try herding (at 100%) on path fail + lots of friends. hopefully
 			  solves super-crowing.
-			- clear news tracking
-		- load existing world
+			x clear news tracking
+		x test serialization of grid move
 		- move health/ammo/shield to face pic
-		- test fast mode
-		- fix AI to not charge into melee if ranged is a better idea
+		- no flora on ports. or buildings, etc.
 		- fix camera dragging bug
+		- fix AI to not charge into melee if ranged is a better idea
+		- load existing world
+		- test fast mode
 		- overnight test
-		- test serialization of grid move
 	- Flora 2
 		- weapon toggle / selection
 		- level up

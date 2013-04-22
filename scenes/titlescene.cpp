@@ -48,14 +48,14 @@ TitleScene::TitleScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 	for( int i=0; i<NUM_TESTS; ++i ) {
 		testScene[i].Init( &gamui2D, lumosGame->GetButtonLook( LumosGame::BUTTON_LOOK_STD ) );
 		testScene[i].SetText( testSceneName[i] );
-		testScene[i].SetSize( layout.Width(), layout.Height() );
+		//testScene[i].SetSize( layout.Width(), layout.Height() );
 	}
 
 	static const char* gameSceneName[NUM_GAME] = { "Generate", "Continue" };
 	for( int i=0; i<NUM_GAME; ++i ) {
 		gameScene[i].Init( &gamui2D, lumosGame->GetButtonLook( LumosGame::BUTTON_LOOK_STD ) );
 		gameScene[i].SetText( gameSceneName[i] );
-		gameScene[i].SetSize( layout.Width()*2.0f, layout.Height() );
+		//gameScene[i].SetSize( layout.Width()*2.0f, layout.Height() );
 	}
 }
 
@@ -85,8 +85,9 @@ void TitleScene::Resize()
 			++c;
 		}
 	}
+	layout.SetSize( LAYOUT_SIZE*2.0f, LAYOUT_SIZE );
 	for( int i=0; i<NUM_GAME; ++i ) {
-		layout.PosAbs( &gameScene[i], i*2, -1 );
+		layout.PosAbs( &gameScene[i], i, -1 );
 	}
 }
 

@@ -30,12 +30,9 @@ LivePreviewScene::LivePreviewScene( LumosGame* game, const LivePreviewSceneData*
 
 	LayoutCalculator layout = game->DefaultLayout();
 	const ButtonLook& look = game->GetButtonLook(0);
-	const float width  = layout.Width();
-	const float height = layout.Height();
 
 	for( int i=0; i<ROWS; ++i ) {
 		rowButton[i].Init( &gamui2D, look );
-		rowButton[i].SetSize( width, height );
 		CStr< 16 > t;
 		t.Format( "%d", i+1 );
 		rowButton[i].SetText( t.c_str() );
@@ -43,13 +40,11 @@ LivePreviewScene::LivePreviewScene( LumosGame* game, const LivePreviewSceneData*
 	}
 
 	electricButton.Init( &gamui2D, look );
-	electricButton.SetSize( width, height );
 	electricButton.SetText( "Electric" );
 
 	static const char* typeName[NUM_TYPES] = { "Male\nFace", "Female\nFace", "Ring" };
 	for( int i=0; i<NUM_TYPES; ++i ) {
 		typeButton[i].Init( &gamui2D, look );
-		typeButton[i].SetSize( width, height );
 		typeButton[i].SetText( typeName[i] );
 		typeButton[0].AddToToggleGroup( &typeButton[i] );
 	}

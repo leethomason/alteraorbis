@@ -703,11 +703,13 @@ void Button::Init(	Gamui* gamui,
 	m_deco.Init( gamui, decoEnabled, false );	// does nothing; we set the level to deco
 	m_deco.SetLevel( Gamui::LEVEL_DECO );
 
+	RenderAtom nullAtom;
+	m_icon.Init( gamui, nullAtom, false );
+	m_icon.SetLevel( Gamui::LEVEL_ICON );
+
 	m_label[0].Init( gamui );
 	m_label[1].Init( gamui );
 	gamui->Add( this );
-
-	SetSize( gamui->DefaultWidth(), gamui->DefaultHeight() );
 }
 
 
@@ -779,6 +781,13 @@ void Button::PositionChildren()
 		m_label[1].SetVisible( Visible() );
 	}
 
+	// --- icon -- //
+	float iconSize = Min( m_face.Height(), m_face.Width() ) * 0.5f;
+	m_icon.SetSize( iconSize, iconSize );
+	m_icon.SetPos( m_face.X() + m_face.Width() - iconSize, m_face.Y() + m_face.Height() - iconSize );
+
+	// --- text --- //
+
 	float w = m_label[0].Width();
 	if ( m_usingText1 ) {
 		w = Max( w, m_label[1].Width() );
@@ -804,6 +813,8 @@ void Button::PositionChildren()
 	m_label[0].SetVisible( Visible() );
 	m_deco.SetVisible( Visible() );
 	m_face.SetVisible( Visible() );
+	m_icon.SetVisible( Visible() );
+
 	// Modify(); don't call let sub-functions check
 }
 
@@ -813,6 +824,7 @@ void Button::SetPos( float x, float y )
 	UIItem::SetPos( x, y );
 	m_face.SetPos( x, y );
 	m_deco.SetPos( x, y );
+	m_icon.SetPos( x, y );
 	m_label[0].SetPos( x, y );
 	m_label[1].SetPos( x, y );
 	// Modify(); don't call let sub-functions check
@@ -823,16 +835,9 @@ void Button::SetSize( float width, float height )
 	m_face.SetSize( width, height );
 	float size = Min( width, height );
 	m_deco.SetSize( size, size );
+	m_icon.SetSize( size*0.5f, size*0.5f );
 	// Modify(); don't call let sub-functions check
 }
-
-/*
-void Button::SetSizeByScale( float sx, float sy )
-{
-	m_face.SetSize( m_face.GetRenderAtom()->srcWidth*sx, m_face.GetRenderAtom()->srcHeight*sy );
-	// Modify(); don't call let sub-functions check
-}
-*/
 
 
 void Button::SetText( const char* text )
@@ -860,6 +865,7 @@ void Button::SetState()
 {
 	int faceIndex = UP;
 	int decoIndex = DECO;
+	int iconIndex = ICON;
 	if ( m_enabled ) {
 		if ( m_up ) {
 			// defaults set
@@ -872,14 +878,17 @@ void Button::SetState()
 		if ( m_up ) {
 			faceIndex = UP_D;
 			decoIndex = DECO_D;
+			iconIndex = ICON_D;
 		}
 		else {
 			faceIndex = DOWN_D;
 			decoIndex = DECO_D;
+			iconIndex = ICON_D;
 		}
 	}
 	m_face.SetAtom( m_atoms[faceIndex] );
 	m_deco.SetAtom( m_atoms[decoIndex] );
+	m_icon.SetAtom( m_atoms[iconIndex] );
 	m_label[0].SetEnabled( m_enabled );
 	m_label[1].SetEnabled( m_enabled );
 	//Modify(); sub functions should call
@@ -1036,7 +1045,6 @@ bool ToggleButton::HandleTap( TapAction action, float x, float y )
 
 
 DigitalBar::DigitalBar() : UIItem( Gamui::LEVEL_FOREGROUND ),
-	SPACING( 0.15f ),
 	m_nTicks( 0 ),
 	m_width( DEFAULT_SIZE ),
 	m_height( DEFAULT_SIZE )
@@ -1150,12 +1158,16 @@ const RenderAtom* DigitalBar::GetRenderAtom() const
 
 bool DigitalBar::DoLayout()
 {
-	float perItemWidth = m_width*(1.0f-SPACING) / (float)m_nTicks;
-	float space = m_width*SPACING / (float)m_nTicks;
+	//
+	// a space b space c
+	//
+	float totalSpace = m_width * 0.10f;
+	float space = totalSpace / (float)(m_nTicks-1);
+	float perItemWidth = 0.90f * m_width / (float)m_nTicks;
 
 	for( int i=0; i<m_nTicks; ++i ) {
 		m_image[i].SetSize( perItemWidth, m_height );
-		m_image[i].SetPos( X() + (float)i*perItemWidth + (float)i*space,
+		m_image[i].SetPos( X() + (float)i*(perItemWidth + space),
 						   Y() );
 	}
 	return false;
@@ -1168,9 +1180,6 @@ void DigitalBar::Queue( CDynArray< uint16_t > *indexBuf, CDynArray< Gamui::Verte
 }
 
 
-float Gamui::m_defaultXSize = 20.0f;
-float Gamui::m_defaultYSize = 20.0f;
-
 Gamui::Gamui()
 	:	m_itemTapped( 0 ),
 		m_iText( 0 ),
@@ -1180,7 +1189,9 @@ Gamui::Gamui()
 		m_dragEnd( 0 ),
 		m_textHeight( 16 ),
 		m_relativeX( 0 ),
-		m_relativeY( 0 )
+		m_relativeY( 0 ),
+		m_focus( -1 ),
+		m_focusImage( 0 )
 {
 }
 
@@ -1193,7 +1204,9 @@ Gamui::Gamui(	IGamuiRenderer* renderer,
 		m_iText( 0 ),
 		m_orderChanged( true ),
 		m_modified( true ),
-		m_textHeight( 16 )
+		m_textHeight( 16 ),
+		m_focus( -1 ),
+		m_focusImage( 0 )
 {
 	Init( renderer, textEnabled, textDisabled, iText );
 }
@@ -1201,6 +1214,7 @@ Gamui::Gamui(	IGamuiRenderer* renderer,
 
 Gamui::~Gamui()
 {
+	delete m_focusImage;
 	for( int i=0; i<m_itemArr.Size(); ++i ) {
 		m_itemArr[i]->Clear();
 	}
@@ -1358,6 +1372,18 @@ int Gamui::SortItems( const void* _a, const void* _b )
 
 void Gamui::Render()
 {
+	if ( m_focusImage ) {
+		const UIItem* focused = GetFocus();
+		if ( focused ) {
+			m_focusImage->SetVisible( true );
+			m_focusImage->SetSize( GetTextHeight()*2.5f, GetTextHeight()*2.5f );
+			m_focusImage->SetCenterPos( focused->X() + focused->Width()*0.5f, focused->Y() + focused->Height()*0.5f );
+		}
+		else {
+			m_focusImage->SetVisible( false );
+		}
+	}
+
 	if ( m_orderChanged ) {
 		qsort( m_itemArr.Mem(), m_itemArr.Size(), sizeof(UIItem*), SortItems );
 		m_orderChanged = false;
@@ -1565,39 +1591,147 @@ void Gamui::LayoutTextBlock(	const char* text,
 }
 
 
+void Gamui::AddToFocusGroup( const UIItem* item, int id )
+{
+	FocusItem* fi = m_focusItems.PushArr(1);
+	fi->item = item;
+	fi->group = id;
+}
+
+
+void Gamui::SetFocus( const UIItem* item )
+{
+	m_focus = -1;
+	for( int i=0; i<m_focusItems.Size(); ++i ) {
+		if ( m_focusItems[i].item == item ) {
+			m_focus = i;
+			break;
+		}
+	}
+}
+
+
+const UIItem* Gamui::GetFocus() const
+{
+	if ( m_focus >= 0 && m_focus < m_focusItems.Size() ) {
+		return m_focusItems[m_focus].item;
+	}
+	return 0;
+}
+
+
+float Gamui::GetFocusX()
+{
+	const UIItem* item = GetFocus();
+	if ( item ) {
+		return item->CenterX();
+	}
+	return -1;
+}
+
+
+float Gamui::GetFocusY()
+{
+	const UIItem* item = GetFocus();
+	if ( item ) {
+		return item->CenterY();
+	}
+	return -1;
+}
+
+
+void Gamui::SetFocusLook( const RenderAtom& atom, float zRotation )
+{
+	if ( !m_focusImage ) {
+		m_focusImage = new Image( this, atom, true );
+		m_focusImage->SetLevel( LEVEL_FOCUS );
+	}
+	m_focusImage->SetAtom( atom );
+	m_focusImage->SetRotationZ( zRotation );
+}
+
+
+void Gamui::MoveFocus( float x, float y )
+{
+	if ( m_focusItems.Size() == 0 ) return;
+	if ( m_focusItems.Size() == 1 ) SetFocus( m_focusItems[0].item );
+
+	float bestDist = 1000000.0f;
+	int bestIndex  = -1;
+
+	const UIItem* focused = GetFocus();
+	for( int i=0; i<m_focusItems.Size(); ++i ) {
+		const UIItem* item = m_focusItems[i].item;
+		if ( item == focused ) {
+			continue;
+		}
+		if ( !item->Enabled() || !item->Visible() ) {
+			continue; 
+		}
+		float dx = item->CenterX() - focused->CenterX();
+		float dy = item->CenterY() - focused->CenterY();
+
+		float score = dx*x + dy*y;
+		if ( score > 0 ) {
+			float dist = sqrt( dx*dx + dy*dy );
+			if ( dist < bestDist ) {
+				bestDist = dist;
+				bestIndex = i;
+			}
+		}
+	}
+	if ( bestIndex >= 0 ) {
+		SetFocus( m_focusItems[bestIndex].item );
+	}
+}
+
+
 LayoutCalculator::LayoutCalculator( float w, float h ) 
 	: screenWidth( w ),
 	  screenHeight( h ),
 	  width( 10 ),
 	  height( 10 ),
-	  gutter( 0 ), 
-	  spacing( 0 ),
+	  gutterX( 0 ), 
+	  gutterY( 0 ), 
+	  spacingX( 0 ),
+	  spacingY( 0 ),
 	  textOffsetX( 0 ),
 	  textOffsetY( 0 ),
 	  offsetX( 0 ),
 	  offsetY( 0 ),
-	  useTextOffset( false )
+	  useTextOffset( false ),
+	  innerX0( 0 ),
+	  innerY0( 0 ),
+	  innerX1( w ),
+	  innerY1( h )
 {
 }
 
 
-void LayoutCalculator::PosAbs( UIItem* item, int _x, int _y )
+LayoutCalculator::~LayoutCalculator()
+{
+}
+
+
+void LayoutCalculator::PosAbs( UIItem* item, int _x, int _y, bool setSize )
 {
 	float pos[2] = { 0, 0 };
 	int xArr[2] = { _x, _y };
 	float size[2] = { width, height };
 	float screen[2] = { screenWidth, screenHeight };
+	float gutter[2] = { gutterX, gutterY };
+	float spacing[2] = { spacingX, spacingY };
 
 	for( int i=0; i<2; ++i ) {
 		if ( xArr[i] >= 0 ) {
 			float x = (float)xArr[i];	// 0 based
-			float space = spacing*x;
-			pos[i] = gutter + space + size[i]*x;
+			float space = spacing[i]*x;
+			pos[i] = gutter[i] + space + size[i]*x;
 		}
 		else {
 			float x = -(float)xArr[i]; // 1 based
-			float space = spacing*(x-1.0f);
-			pos[i] = screen[i] - gutter - space - size[i]*x; 
+			float space = spacing[i]*(x-1.0f);
+			pos[i] = screen[i] - gutter[i] - space - size[i]*x; 
 		}
 	}
 	if ( useTextOffset ) {
@@ -1605,5 +1739,77 @@ void LayoutCalculator::PosAbs( UIItem* item, int _x, int _y )
 		pos[1] += textOffsetY;
 	}
 	item->SetPos( pos[0]+offsetX, pos[1]+offsetY );
+
+	if ( setSize ) {
+		item->SetSize( width, height );
+	}
+
+	if ( item->Visible() ) {
+		// Track the inner rectangle.
+		float x0, x1, y0, y1;
+
+		if ( _x >= 0 ) {
+			x0 = item->X() + item->Width() + gutter[0];
+			x1 = screenWidth;
+		}
+		else {
+			x0 = 0;
+			x1 = item->X() - gutter[0];
+		}
+		if ( _y >= 0 ) {
+			y0 = item->Y() + item->Height() + gutter[1];
+			y1 = screenHeight;
+		}
+		else {
+			y0 = 0;
+			y1 = item->Y() - gutter[1];
+		}
+	
+		innerX0 = Max( innerX0, gutter[0] );
+		innerY0 = Max( innerY0, gutter[1] );
+		innerX1 = Min( innerX1, screenWidth  - gutter[0] );
+		innerY1 = Min( innerY1, screenHeight - gutter[1] );
+
+		// Can trim to y or x. Which one?
+		float areaX = ( Min( innerX1, x1 ) - Max( innerX0, x0 ) ) * ( innerY1 - innerY0 );
+		float areaY = ( innerX1 - innerX0 ) * ( Min( innerY1, y1 ) - Max( innerY0, y0 ));
+		if ( areaX > areaY ) {
+			innerX0 = Max( innerX0, x0 );
+			innerX1 = Min( innerX1, x1 );
+		}
+		else {
+			innerY0 = Max( innerY0, y0 );
+			innerY1 = Min( innerY1, y1 );
+		}
+	}
+}
+
+
+void LayoutCalculator::PosInner( UIItem* item, float wDivH )
+{
+	innerX0 = Max( innerX0, gutterX );
+	innerX1 = Min( innerX1, screenWidth - gutterX );
+	innerY0 = Max( innerY0, gutterY );
+	innerY1 = Min( innerY1, screenHeight - gutterY );
+
+	float dx = innerX1 - innerX0;
+	float dy = innerY1 - innerY0;
+
+	if ( wDivH == 0 ) {
+		item->SetPos( innerX0, innerY0 );
+		item->SetSize( dx, dy );
+	}
+	else {
+		if ( wDivH > (dx/dy) ) {
+			float cy = dx / wDivH;
+			item->SetPos( innerX0, innerY0 + (dy-cy)*0.5f );
+			item->SetSize( dx, cy );
+		}
+		else {
+			float cx = dy * wDivH;
+			item->SetPos( innerX0 + (dx-cx)*0.5f, innerY0 );
+			item->SetSize( cx, dy );
+		}
+	}
 }
 

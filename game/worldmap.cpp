@@ -116,7 +116,7 @@ void WorldMap::AttachEngine( Engine* e, IMapGridUse* imap )
 			}
 		}
 	}
-	GLASSERT( voxels.Empty() );
+	GLASSERT( e==0 || voxels.Empty() );
 	engine = e;
 	iMapGridUse = imap;
 }

@@ -123,6 +123,8 @@ private:
 	void DoMove( const ComponentSet& thisComp );
 	int  DoStand( const ComponentSet& thisComp, U32 since );
 
+	bool SectorHerd( const ComponentSet& thisComp );
+
 	grinliz::CArray<int, MAX_TRACK> friendList;
 	grinliz::CArray<int, MAX_TRACK> enemyList;
 	BattleMechanics battleMechanics;

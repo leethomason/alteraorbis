@@ -40,44 +40,36 @@ AnimationScene::AnimationScene( LumosGame* game ) : Scene( game )
 	LayoutCalculator layout = game->DefaultLayout();
 
 	boneLeft.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
-	boneLeft.SetSize( layout.Width(), layout.Height() );
 	boneLeft.SetText( "<" );
 
 	boneRight.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
-	boneRight.SetSize( layout.Width(), layout.Height() );
 	boneRight.SetText( ">" );	
 
 	boneName.Init( &gamui2D );
 	boneName.SetText( "all" );
 
 	animLeft.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
-	animLeft.SetSize( layout.Width(), layout.Height() );
 	animLeft.SetText( "<" );
 
 	animRight.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
-	animRight.SetSize( layout.Width(), layout.Height() );
 	animRight.SetText( ">" );	
 
 	animName.Init( &gamui2D );
 	animName.SetText( "no animation" );
 
 	modelLeft.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
-	modelLeft.SetSize( layout.Width(), layout.Height() );
 	modelLeft.SetText( "<-" );
 
 	modelRight.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
-	modelRight.SetSize( layout.Width(), layout.Height() );
 	modelRight.SetText( "->" );	
 
 	modelName.Init( &gamui2D );
 	modelName.SetText( "no model" );
 
 	ortho.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
-	ortho.SetSize( layout.Width(), layout.Height() );
 	ortho.SetText( "ortho" );
 
 	instance.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
-	instance.SetSize( layout.Width(), layout.Height() );
 	instance.SetText( "3x" );
 
 	static const char* triggerLabels[NUM_TRIGGERS] = {
@@ -86,7 +78,6 @@ AnimationScene::AnimationScene( LumosGame* game ) : Scene( game )
 
 	for( int i=0; i<NUM_TRIGGERS; ++i ) {
 		triggerToggle[i].Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
-		triggerToggle[i].SetSize( layout.Width(), layout.Height() );
 		triggerToggle[i].SetText( triggerLabels[i] );
 		if ( i > 0 ) {
 			triggerToggle[0].AddToToggleGroup( &triggerToggle[i] );
@@ -94,7 +85,6 @@ AnimationScene::AnimationScene( LumosGame* game ) : Scene( game )
 	}
 
 	exportSCML.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
-	exportSCML.SetSize( layout.Width(), layout.Height() );
 	exportSCML.SetText( "export" );
 
 	pixelUnitRatio.Init( &gamui2D );

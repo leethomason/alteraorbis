@@ -6,6 +6,7 @@
 #include "../micropather/micropather.h"
 #include "gamelimits.h"
 #include "../engine/enginelimits.h"
+#include "../grinliz/glutil.h"
 
 struct WorldGrid;
 namespace micropather {
@@ -124,7 +125,9 @@ public:
 	}
 
 	GridEdge MapToGridEdge( int x, int y ) const {
-		GridEdge ge = { x*2 / SECTOR_SIZE, y*2 / SECTOR_SIZE };
+		float fx = (float)x*2.0f / (float)SECTOR_SIZE;
+		float fy = (float)y*2.0f / (float)SECTOR_SIZE;
+		GridEdge ge = { (S16)grinliz::LRintf(fx), (S16)grinliz::LRintf(fy) };
 		return ge;
 	}
 

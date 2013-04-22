@@ -52,28 +52,22 @@ NavTestScene::NavTestScene( LumosGame* game ) : Scene( game )
 
 	LayoutCalculator layout = game->DefaultLayout();
 	block.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
-	block.SetSize( layout.Width(), layout.Height() );
 	block.SetText( "block" );
 
 	block20.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
-	block20.SetSize( layout.Width(), layout.Height() );
 	block20.SetText( "block20" );
 
 	showOverlay.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
-	showOverlay.SetSize( layout.Width(), layout.Height() );
 	showOverlay.SetText( "Over" );
 	showOverlay.SetDown();
 
 	toggleBlock.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
-	toggleBlock.SetSize( layout.Width(), layout.Height() );
 	toggleBlock.SetText( "TogBlock" );
 
 	showAdjacent.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
-	showAdjacent.SetSize( layout.Width(), layout.Height() );
 	showAdjacent.SetText( "Adj" );
 
 	showZonePath.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
-	showZonePath.SetSize( layout.Width(), layout.Height() );
 	showZonePath.SetText( "Region\nPath" );
 
 	textLabel.Init( &gamui2D );

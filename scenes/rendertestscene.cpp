@@ -53,16 +53,13 @@ RenderTestScene::RenderTestScene( LumosGame* game, const RenderTestSceneData* da
 
 	lumosGame->InitStd( &gamui2D, &okay, 0 );
 	glowButton.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ) );
-	glowButton.SetSize( layout.Width(), layout.Height() );
 	glowButton.SetText( "glow" );
 
 	refreshButton.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
-	refreshButton.SetSize( layout.Width(), layout.Height() );
 	refreshButton.SetText( "refresh" );
 
 	for( int i=0; i<NUM_CONTROL; ++i ) {
 		control[i].Init( &gamui2D, game->GetButtonLook( 0 ) );
-		control[i].SetSize( layout.Width(), layout.Height() );
 		CStr<16> str;
 		str.Format( "%.2f", (float)i/(float)(NUM_CONTROL-1) );
 		control[i].SetText( str.c_str() );

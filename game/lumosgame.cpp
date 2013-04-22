@@ -32,8 +32,6 @@
 using namespace grinliz;
 using namespace gamui;
 
-static const float LAYOUT_SIZE = 75.0f;
-
 LumosGame::LumosGame(  int width, int height, int rotation, const char* savepath ) 
 	: Game( width, height, rotation, 600, savepath )
 {
@@ -42,8 +40,6 @@ LumosGame::LumosGame(  int width, int height, int rotation, const char* savepath
 
 	PushScene( SCENE_TITLE, 0 );
 	PushPopScene();
-
-	Gamui::SetDefaultSize( LAYOUT_SIZE, LAYOUT_SIZE );
 }
 
 
@@ -197,7 +193,7 @@ gamui::LayoutCalculator LumosGame::DefaultLayout()
 {
 	const Screenport& port = GetScreenport();
 	LayoutCalculator layout( port.UIWidth(), port.UIHeight() );
-	layout.SetGutter( 10.0f );
+	layout.SetGutter( 10.0f, 10.0f );
 	layout.SetSize( LAYOUT_SIZE, LAYOUT_SIZE );
 	layout.SetSpacing( 5.0f );
 	return layout;
@@ -211,12 +207,12 @@ void LumosGame::InitStd( gamui::Gamui* g, gamui::PushButton* okay, gamui::PushBu
 
 	if ( okay ) {
 		okay->Init( g, stdBL );
-		okay->SetSize( layout.Width(), layout.Height() );
+		okay->SetSize( LAYOUT_SIZE, LAYOUT_SIZE );
 		okay->SetDeco( CalcDecoAtom( DECO_OKAY, true ), CalcDecoAtom( DECO_OKAY, false ) );
 	}
 	if ( cancel ) {
 		cancel->Init( g, stdBL );
-		cancel->SetSize( layout.Width(), layout.Height() );
+		cancel->SetSize( LAYOUT_SIZE, LAYOUT_SIZE );
 		cancel->SetDeco( CalcDecoAtom( DECO_CANCEL, true ), CalcDecoAtom( DECO_CANCEL, false ) );
 	}
 }
