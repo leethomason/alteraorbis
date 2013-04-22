@@ -40,7 +40,8 @@ x remove 'inUse' flag
 		x test serialization of grid move
 		x move health/ammo/shield to face pic
 		x no flora on ports. or buildings, etc.
-		- fix camera dragging bug
+		x improved Uniform() RNG
+		x fix camera dragging bug
 		- fix AI to not charge into melee if ranged is a better idea
 		- load existing world
 		- test fast mode

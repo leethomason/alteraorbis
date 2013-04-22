@@ -83,11 +83,18 @@ class Random
 	float DiceUniform( U32 nDice, U32 sides );
 
 	/// Return a random number from 0 to upper: [0.0,1.0].
+	float Uniform11()	{
+		// http://stackoverflow.com/questions/1557208/generating-random-number-between-1-1-in-c
+		// http://www.rgba.org/articles/sfrand/sfrand.htm
+		U32 a = Rand();
+		a = (a & 0x007fffff) | 0x40000000;  
+	    float v = ( *((float*)&a) - 3.0f );
+		return v;
+	}
+
 	float Uniform()	{
-		// Be careful of using a number small enough to convert to a float
-		// (many year bug in Random, that)
-		const float INV = 1.0f / 1023.f;	
-		return (float)( Rand()&0x3ff ) * INV;
+		float v = (Uniform11() + 1.0f) * 0.5f;
+		return v;
 	}
 
 	/// Return 0 or 1
