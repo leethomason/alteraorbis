@@ -30,7 +30,7 @@ x remove 'inUse' flag
 		x textures
 			x grid
 			x port. bake lighting.
-		- herding
+		x herding
 			x fix health
 			x herding notification
 			x herding doesn't check for valid dest sector
@@ -38,8 +38,8 @@ x remove 'inUse' flag
 			  solves super-crowing.
 			x clear news tracking
 		x test serialization of grid move
-		- move health/ammo/shield to face pic
-		- no flora on ports. or buildings, etc.
+		x move health/ammo/shield to face pic
+		x no flora on ports. or buildings, etc.
 		- fix camera dragging bug
 		- fix AI to not charge into melee if ranged is a better idea
 		- load existing world

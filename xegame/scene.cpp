@@ -34,6 +34,7 @@ Scene::Scene( Game* _game )
 	RenderAtom nullAtom;
 	dragImage.Init( &gamui2D, nullAtom, true );
 	threeDTapDown = false;
+	enable3DDragging = true;
 }
 
 
@@ -131,7 +132,9 @@ bool Scene::Process3DTap( int action, const grinliz::Vector2F& view, const grinl
 						result = true;
 				}
 
-				engine->camera.SetPosWC( dragData3D.startCameraWC - delta );
+				if ( enable3DDragging ) {
+					engine->camera.SetPosWC( dragData3D.startCameraWC - delta );
+				}
 			}
 			break;
 		}

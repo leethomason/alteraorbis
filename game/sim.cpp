@@ -309,8 +309,10 @@ void Sim::CreatePlant( int x, int y, int type )
 	const WorldGrid& wg = worldMap->GetWorldGrid( x, y );
 
 	// check for a plant already there.
-	if ( wg.IsPassable() && !chitBag->MapGridUse(x,y) ) {
-
+	if (    wg.IsPassable() 
+		 && wg.Layer() == WorldGrid::LAND 
+		 && !chitBag->MapGridUse(x,y) ) 
+	{
 		if ( type < 0 ) {
 			// Scan for a good type!
 			Rectangle2F r;

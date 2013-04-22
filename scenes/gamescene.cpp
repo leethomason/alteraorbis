@@ -360,6 +360,7 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 {
 	bool uiHasTap = ProcessTap( action, view, world );
 	Engine* engine = sim->GetEngine();
+	enable3DDragging = (sim->GetPlayerChit() == 0);
 
 	if ( !uiHasTap ) {
 		bool tap = Process3DTap( action, view, world, sim->GetEngine() );

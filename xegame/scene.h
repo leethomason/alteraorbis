@@ -116,6 +116,7 @@ protected:
 	gamui::Image	dragImage;
 	bool			dragStarted;
 	bool			threeDTapDown;
+	bool			enable3DDragging;
 
 	DragData		dragData3D;
 };
