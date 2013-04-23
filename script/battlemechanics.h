@@ -65,7 +65,7 @@ public:
 	static float ChanceToHit( float range, float radAt1, float targetDiameter=0.5f );
 	// Returns the range at which the weapon has a 50% chance to hit.
 	// 1m is assumed the default target diameter.
-	static float EffectiveRange( float radAt1, float targetDiameter=0.5f );
+	static float EffectiveRange( float radAt1, float targetDiameter=0.5f, float chanceToHit=0.5f );
 	
 	// Computes an accurate leading shot. Returns a target. 
 	// The trigger is optional.

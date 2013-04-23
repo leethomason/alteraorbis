@@ -105,6 +105,14 @@ struct Rectangle2
 		return true;
 	}
 
+	grinliz::Vector2<T> Clamp( grinliz::Vector2<T> in ) const {
+		Vector2<T> out = in;
+		if ( out.x < min.x ) out.x = min.x;
+		if ( out.y < min.y ) out.y = min.y;
+		if ( out.x > max.x ) out.x = max.x;
+		if ( out.y > max.y ) out.y = max.y;
+		return out;
+	}
 
 	/// Return true if 'rect' is inside this.
 	bool Contains( const Rectangle2<T>& rect ) const

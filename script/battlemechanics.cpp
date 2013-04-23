@@ -241,13 +241,13 @@ void BattleMechanics::Shoot( ChitBag* bag, Chit* src, Chit* target, IRangedWeapo
 }
 
 
-float BattleMechanics::EffectiveRange( float radAt1, float targetDiameter )
+float BattleMechanics::EffectiveRange( float radAt1, float targetDiameter, float chance )
 {
 	float r0 = MIN_EFFECTIVE_RANGE;
 	float r1 = MAX_EFFECTIVE_RANGE;
 	float c0 = ChanceToHit( r0, radAt1, targetDiameter );
 	float c1 = ChanceToHit( r1, radAt1, targetDiameter );
-	static const float C = 0.5f;
+	const float C = chance;
 
 	if ( c0 <= C ) {
 		return MIN_EFFECTIVE_RANGE;

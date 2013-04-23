@@ -365,6 +365,7 @@ void AIComponent::DoShoot( const ComponentSet& thisComp )
 			}
 		}
 		else {
+			item->Reload();
 			// Out of ammo - do something else.
 			currentAction = NO_ACTION;
 		}
@@ -762,6 +763,14 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 	Vector2F flockDir = heading;
 	utility[OPTION_FLOCK_MOVE] = 0.001f;
 
+	int nRangedEnemies = 0;
+	for( int k=0; k<enemyList.Size(); ++k ) {
+		Chit* chit = GetChitBag()->GetChit( enemyList[k] );
+		if ( chit && chit->GetItemComponent() && chit->GetItemComponent()->GetRangedWeapon(0) ) {
+			++nRangedEnemies;
+		}
+	}
+
 	for( int k=0; k<enemyList.Size(); ++k ) {
 
 		ComponentSet enemy( GetChitBag()->GetChit(enemyList[k]), Chit::SPATIAL_BIT | Chit::ITEM_BIT | ComponentSet::IS_ALIVE );
@@ -798,11 +807,15 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 															enemy.move && enemy.move->IsMoving() );
 			
 			float effectiveRange = BattleMechanics::EffectiveRange( radAt1 );
+			float longShot       = BattleMechanics::EffectiveRange( radAt1, 0.5f, 0.35f );
 
 			// 1.5f gives spacing for bolt to start.
 			// The HasRound() && !Reloading() is really important: if the gun
 			// is in cooldown, don't give up on shooting and do something else!
-			if ( pw->HasRound() && !pw->Reloading() && range > 1.5f ) {
+			if (    range > 1.5f 
+				 &&    ( ( pw->HasRound() && !pw->Reloading() )							// we have ammod
+				    || ( nRangedEnemies == 0 && range > 2.0f && range < longShot ) ) )	// we need to reload
+			{
 				float u = 1.0f - (range - effectiveRange) / effectiveRange; 
 				u *= q;
 

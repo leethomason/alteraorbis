@@ -6,6 +6,7 @@ x remove 'inUse' flag
 - need free camera mode
 - remove temporary arbitrary AI limit in corescript
 - when loading during grid travel, you sometimes back up. (Regen path on load; chooses wrong starting point. annoying to fix).
+- redo utility to be based on a set of curves
 
 - game
 	- Intermission: regions

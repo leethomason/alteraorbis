@@ -281,8 +281,8 @@ public:
 	// ------- current --------
 	bool	isHeld;			// if true, a held item is "in hand", else it is in the pack.
 	float	hp;				// current hp for this item
-	int		cooldownTime;	// counting UP to ready state
-	int		reloadTime;		// counting UP to ready state
+	int		cooldownTime;	// counting down to ready state
+	int		reloadTime;		// counting down to ready state
 	int		rounds;			// current rounds in the clip
 	float	accruedFire;	// how much fire damage built up, not yet applied
 	float	accruedShock;	// how much shock damage built up, not yet applied

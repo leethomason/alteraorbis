@@ -49,6 +49,7 @@ public:
 	int Height() const { return height; }
 	int Width()  const { return width; }
 	grinliz::Rectangle2I Bounds() const		{	return grinliz::Rectangle2I( 0, 0, width-1, height-1 ); }
+	grinliz::Rectangle2F BoundsF() const	{	return grinliz::Rectangle2F( 0, 0, (float)width, (float)height ); }
 	grinliz::Rectangle3F Bounds3() const	{	
 		grinliz::Rectangle3F r;
 		r.Set( 0, 0, 0, (float)width, MAP_HEIGHT, (float)height );
