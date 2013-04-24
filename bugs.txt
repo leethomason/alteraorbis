@@ -7,6 +7,7 @@ x remove 'inUse' flag
 - remove temporary arbitrary AI limit in corescript
 - when loading during grid travel, you sometimes back up. (Regen path on load; chooses wrong starting point. annoying to fix).
 - redo utility to be based on a set of curves
+- flower colors (too saturated flowers)
 
 - game
 	- Intermission: regions
@@ -43,8 +44,8 @@ x remove 'inUse' flag
 		x no flora on ports. or buildings, etc.
 		x improved Uniform() RNG
 		x fix camera dragging bug
-		- fix AI to not charge into melee if ranged is a better idea
-		- load existing world
+		x fix AI to not charge into melee if ranged is a better idea
+		x load existing world
 		- test fast mode
 		- overnight test
 	- Flora 2
@@ -55,7 +56,7 @@ x remove 'inUse' flag
 		- fix annoying hp out of range bug
 		- rain, general de-saturation
 		- aging of stone
-		- disable buttons on main ui when no game saved
+		x disable buttons on main ui when no game saved
 	- Fauna 2
 		- teams. friend-enemy-neutral logic.
 		- monster ecology
@@ -81,20 +82,21 @@ x remove 'inUse' flag
 		- establish friend vs. enemy
 		- basic states
 		- CA to handle friends and enemies
-		- refactor code - if needed? - in AIComponent (the fixmes)
+		x refactor code - if needed? - in AIComponent (the fixmes)
 	- UI
 		x set up different battles
 		- battle results
 
-	- serialization
+	x serialization
 
 - render-through for player behind objects
 - add target portrait
-- faces are using too much memory, or too low res...hmmm. Should really use texture packer and store a lookup.
-- handle device loss in live preview
+x faces are using too much memory, or too low res...hmmm. Should really use texture packer and store a lookup.
+- review all atlases for texture mem usage
+x handle device loss in live preview
 - particles aren't additive correctly
 d GT bug: reconsider auto-mip. review texture upload. 
-- bone filter in reverse. more efficient and useful.
+d bone filter in reverse. more efficient and useful.
 - put metadata in model (authoring  time)
 x rationalize hardpoints: array index or flag? lookt at RenderComponent
 x mantis trigger broken

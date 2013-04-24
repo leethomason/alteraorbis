@@ -35,27 +35,23 @@ TitleScene::TitleScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 	RenderAtom batom = game->CreateRenderAtom( UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, "title" );
 	background.Init( &gamui2D, batom, false );
 
-	static const char* testSceneName[NUM_TESTS] = { "dialog", 
-													"render0", "render1", 
-													"particle", 
-													"nav", "nav2", 
-													//"Blue\nSmoke", 
-													//"noise", 
-													"battle", 
-													"animation", 
+	static const char* testSceneName[NUM_TESTS] = { "Dialog", 
+													"Render0", "Render1", 
+													"Particle", 
+													"Nav", "Nav2", 
+													"Battle", 
+													"Animation", 
 													"Asset\nPreview" };
 
 	for( int i=0; i<NUM_TESTS; ++i ) {
 		testScene[i].Init( &gamui2D, lumosGame->GetButtonLook( LumosGame::BUTTON_LOOK_STD ) );
 		testScene[i].SetText( testSceneName[i] );
-		//testScene[i].SetSize( layout.Width(), layout.Height() );
 	}
 
-	static const char* gameSceneName[NUM_GAME] = { "Generate", "Continue" };
+	static const char* gameSceneName[NUM_GAME] = { "Generate\nNew", "Load\n3rd Age", "Continue" };
 	for( int i=0; i<NUM_GAME; ++i ) {
 		gameScene[i].Init( &gamui2D, lumosGame->GetButtonLook( LumosGame::BUTTON_LOOK_STD ) );
 		gameScene[i].SetText( gameSceneName[i] );
-		//gameScene[i].SetSize( layout.Width()*2.0f, layout.Height() );
 	}
 }
 
@@ -89,6 +85,15 @@ void TitleScene::Resize()
 	for( int i=0; i<NUM_GAME; ++i ) {
 		layout.PosAbs( &gameScene[i], i, -1 );
 	}
+
+	gameScene[CONTINUE].SetEnabled( false );
+	const char* datPath = game->GamePath( "game", 0, "dat" );
+	const char* mapPath = game->GamePath( "map",  0, "dat" );
+	if (    game->HasFile( datPath )
+		 && game->HasFile( mapPath ))
+	{
+		gameScene[CONTINUE].SetEnabled( true );
+	}
 }
 
 
@@ -116,13 +121,28 @@ void TitleScene::ItemTapped( const gamui::UIItem* item )
 		game->PushScene( LumosGame::SCENE_BATTLETEST, 0 );
 	}
 	else if ( item == &testScene[TEST_ANIMATION] ) {
-		game->PushScene( LumosGame::SCENE_ANIMATION, 0 );
+		game->PushScene( LumosGame::SCENE_ANIMATION, 0 );	
 	}
 	else if ( item == &testScene[TEST_ASSETPREVIEW] ) {
 		game->PushScene( LumosGame::SCENE_LIVEPREVIEW, new LivePreviewSceneData( false ) );
 	}
 	else if ( item == &gameScene[GENERATE_WORLD] ) {
 		game->PushScene( LumosGame::SCENE_WORLDGEN, 0 );
+	}
+	else if ( item == &gameScene[DEFAULT_WORLD] ) {
+		const char* datPath = game->GamePath( "game_def", 0, "dat" );
+		const char* mapPath = game->GamePath( "map_def", 0, "dat" );
+		const char* pngPath = game->GamePath( "map_def", 0, "png" );
+
+		const char* targetDatPath = game->GamePath( "game", 0, "dat" );
+		const char* targetMapPath = game->GamePath( "map", 0, "dat" );
+		const char* targetPNGPath = game->GamePath( "map", 0, "png" );
+
+		lumosGame->CopyFile( datPath, targetDatPath );
+		lumosGame->CopyFile( mapPath, targetMapPath );
+		lumosGame->CopyFile( pngPath, targetPNGPath );
+
+		game->PushScene( LumosGame::SCENE_GAME, 0 );
 	}
 	else if ( item == &gameScene[CONTINUE] ) {
 		game->PushScene( LumosGame::SCENE_GAME, 0 );

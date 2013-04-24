@@ -228,3 +228,31 @@ void LumosGame::PositionStd( gamui::PushButton* okay, gamui::PushButton* cancel 
 	if ( cancel )
 		layout.PosAbs( cancel, LumosGame::CANCEL_X, -1 );
 }
+
+
+void LumosGame::CopyFile( const char* src, const char* target )
+{
+	FILE* fp = fopen( src, "rb" );
+	GLASSERT( fp );
+	if ( fp ) {
+		FILE* tp = fopen( target, "wb" );
+		GLASSERT( tp );
+
+		if ( fp && tp ) {
+			CDynArray<U8> buf;
+			fseek( fp, 0, SEEK_END );
+			int size = ftell( fp );
+			buf.PushArr( size );
+
+			fseek( fp, 0, SEEK_SET );
+			fread( &buf[0], 1, size, fp );
+
+			fwrite( buf.Mem(), 1, size, tp );
+
+			fclose( tp );
+		}
+		fclose( fp );
+	}
+}
+
+

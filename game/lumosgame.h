@@ -51,6 +51,8 @@ public:
 	virtual Scene* CreateScene( int id, SceneData* data );
 	virtual void CreateTexture( Texture* t );
 
+	void CopyFile( const char* src, const char* target );
+
 	enum {
 		DECO_OKAY = 15,
 		DECO_CANCEL = 22
