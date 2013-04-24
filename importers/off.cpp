@@ -35,7 +35,7 @@ bool ImportOFF( const std::string& filename, ModelBuilder* builder )
 	builder->SetTexture( "" );
 
 	char buf[256];
-	StrToken tokens[4];
+	CDynArray< StrToken > tokens;
 	
 	int vertexCount = 0;
 	int faceCount = 0;
@@ -48,10 +48,9 @@ bool ImportOFF( const std::string& filename, ModelBuilder* builder )
 			continue;
 		}
 		GLString str( buf );
-		int nTokens;
-		StrTokenize( str, 4, tokens, &nTokens );
+		StrTokenize( str, &tokens );
 
-		if ( nTokens == 0 ) {
+		if ( tokens.Size() == 0 ) {
 			continue;
 		}
 
@@ -59,7 +58,7 @@ bool ImportOFF( const std::string& filename, ModelBuilder* builder )
 			continue;
 		}
 		if ( vertexCount == 0 ) {
-			GLASSERT( nTokens == 3 );
+			GLASSERT( tokens.Size() == 3 );
 			GLASSERT( tokens[0].type == StrToken::NUMBER );
 			GLASSERT( tokens[1].type == StrToken::NUMBER );
 			GLASSERT( tokens[2].type == StrToken::NUMBER );
@@ -80,12 +79,11 @@ bool ImportOFF( const std::string& filename, ModelBuilder* builder )
 			continue;
 		}
 		GLString str( buf );
-		int nTokens;
-		StrTokenize( str, 4, tokens, &nTokens );
-		if ( nTokens == 0 ) {
+		StrTokenize( str, &tokens );
+		if ( tokens.Size() == 0 ) {
 			continue;
 		}
-		GLASSERT( nTokens == 3 );
+		GLASSERT( tokens.Size() == 3 );
 		GLASSERT( tokens[0].type == StrToken::NUMBER );
 		GLASSERT( tokens[1].type == StrToken::NUMBER );
 		GLASSERT( tokens[2].type == StrToken::NUMBER );
@@ -109,7 +107,7 @@ bool ImportOFF( const std::string& filename, ModelBuilder* builder )
 		}
 		GLString str( buf );
 		int nTokens;
-		StrTokenize( str, 4, tokens, &nTokens );
+		StrTokenize( str, &tokens );
 		if ( nTokens == 0 ) {
 			continue;
 		}

@@ -315,15 +315,17 @@ static const char* FindWhiteSpace( const char* p )
 }
 
 
-void grinliz::StrTokenize( const GLString& in, int maxTokens, StrToken *tokens, int* nTokens )
+void grinliz::StrTokenize( const GLString& in, CDynArray<StrToken>* tokens, bool append )
 {
 	const char* p = in.c_str();
 	p = SkipWhiteSpace( p );
 	const char* q = FindWhiteSpace( p );
 
-	*nTokens = 0;
+	if ( !append ) {
+		tokens->Clear();
+	}
 
-	while ( p && *p && q && (*nTokens < maxTokens )) {
+	while ( p && *p && q ) {
 		StrToken token;
 
 		GLString str;
@@ -337,8 +339,7 @@ void grinliz::StrTokenize( const GLString& in, int maxTokens, StrToken *tokens, 
 				  || *p == '+' ) {
 			token.InitNumber( atof( str.c_str() ) );
 		}
-		tokens[*nTokens] = token;
-		*nTokens += 1;
+		tokens->Push( token );
 
 		p = SkipWhiteSpace( q );
 		q = FindWhiteSpace( p );

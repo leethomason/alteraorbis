@@ -381,7 +381,7 @@ struct StrToken {
 	}
 };
 
-void StrTokenize( const GLString& in, int maxTokens, StrToken *tokens, int* nTokens );
+void StrTokenize( const GLString& in, CDynArray<StrToken>* tokens, bool append=false );
 
 };	// namespace grinliz
 

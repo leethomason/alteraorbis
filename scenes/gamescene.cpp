@@ -649,19 +649,19 @@ void GameScene::DrawDebugText()
 	Engine* engine = sim->GetEngine();
 	LumosChitBag* chitBag = sim->GetChitBag();
 	Vector3F at = { 0, 0, 0 };
+	int y = 32;
 
 	if ( chit && chit->GetSpatialComponent() ) {
 		const Vector3F& v = chit->GetSpatialComponent()->GetPosition();
 		at = v;
-		ufoText->Draw( 0, 32, "Player: %.1f, %.1f, %.1f  Camera: %.1f %.1f %.1f", 
+		ufoText->Draw( 0, y, "Player: %.1f, %.1f, %.1f  Camera: %.1f %.1f %.1f", 
 			           v.x, v.y, v.z,
 					   engine->camera.PosWC().x, engine->camera.PosWC().y, engine->camera.PosWC().z );
+		y += 16;
 	}
 	else {
 		engine->CameraLookingAt( &at );
 	}
-
-	ufoText->Draw( 0, 48, "Tap world or map to go to location. End/Home rotate, PgUp/Down zoom." );
 
 	if ( simTimer > 1000 ) {
 		simPS = 1000.0f * (float)simCount / (float)simTimer;
@@ -669,12 +669,13 @@ void GameScene::DrawDebugText()
 		simCount = 0;
 	}
 
-	ufoText->Draw( 0, 64,	"Date=%.2f %s mode. Sim/S=%.1f x%.1f ticks=%d/%d", 
+	ufoText->Draw( 0, y,	"Date=%.2f %s mode. Sim/S=%.1f x%.1f ticks=%d/%d", 
 							sim->DateInAge(),
 							fastMode ? "fast" : "normal", 
 							simPS,
 							simPS / 30.0f,
 							chitBag->NumTicked(), chitBag->NumChits() ); 
+	y += 16;
 
 	int typeCount[NUM_PLANT_TYPES];
 	for( int i=0; i<NUM_PLANT_TYPES; ++i ) {
@@ -691,14 +692,15 @@ void GameScene::DrawDebugText()
 		}
 	}
 
-	ufoText->Draw( 0, 80,	"Plants type: %d %d %d %d %d %d %d %d stage: %d %d %d %d", 
+	ufoText->Draw( 0, y,	"Plants type: %d %d %d %d %d %d %d %d stage: %d %d %d %d", 
 									typeCount[0], typeCount[1], typeCount[2], typeCount[3], typeCount[4], typeCount[5], typeCount[6], typeCount[7],
 									stageCount[0], stageCount[1], stageCount[2], stageCount[3] );
+	y += 16;
 
 	micropather::CacheData cacheData;
 	Vector2I sector = { (int)at.x/SECTOR_SIZE, (int)at.z/SECTOR_SIZE };
 	sim->GetWorldMap()->PatherCacheHitMiss( sector, &cacheData );
-	ufoText->Draw( 0, 96, "Pather(%d,%d) kb=%d/%d %.2f cache h:m=%d:%d %.2f", 
+	ufoText->Draw( 0, y, "Pather(%d,%d) kb=%d/%d %.2f cache h:m=%d:%d %.2f", 
 						  sector.x, sector.y,
 						  cacheData.nBytesUsed/1024,
 						  cacheData.nBytesAllocated/1024,
@@ -706,11 +708,13 @@ void GameScene::DrawDebugText()
 						  cacheData.hit,
 						  cacheData.miss,
 						  cacheData.hitFraction );
+	y += 16;
 
 	Chit* info = sim->GetChitBag()->GetChit( infoID );
 	if ( info ) {
 		GLString str;
 		info->DebugStr( &str );
-		ufoText->Draw( 0, 112, "id=%d: %s", infoID, str.c_str() );
+		ufoText->Draw( 0, y, "id=%d: %s", infoID, str.c_str() );
+		y += 16;
 	}
 }

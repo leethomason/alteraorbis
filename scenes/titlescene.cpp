@@ -89,9 +89,7 @@ void TitleScene::Resize()
 	gameScene[CONTINUE].SetEnabled( false );
 	const char* datPath = game->GamePath( "game", 0, "dat" );
 	const char* mapPath = game->GamePath( "map",  0, "dat" );
-	if (    game->HasFile( datPath )
-		 && game->HasFile( mapPath ))
-	{
+	if ( game->HasFile( mapPath )) {
 		gameScene[CONTINUE].SetEnabled( true );
 	}
 }
