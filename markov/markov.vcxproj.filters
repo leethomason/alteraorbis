@@ -3,4 +3,7 @@
   <ItemGroup>
     <ClCompile Include="namegen.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="markov.h" />
+  </ItemGroup>
 </Project>
