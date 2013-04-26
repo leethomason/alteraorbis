@@ -16,27 +16,25 @@ Important Notes
 * There is NO save game compatibility. Be sure to delete old games.
 * If your avatar gets killed, ctrl-click will create a new one. (You can create a 
   bunch if you wish).
-* "Fast Mode" doesn't work very well. This will be the focus of the next version.
+* "Fast Mode" doesn't work very well. This will probably get removed.
 
 Getting Started
 ---------------
-Start by tapping "Generate" to create a world. You can re-try if you don't like the 
-result. (And if you are a programmer interested in improving the world gen code, it
-runs as a stand alone utility.) Back on the title screen, tap "Continue" to start 
-in the world.
+Tap "Load Established" to bring in a pre-generated world, well populated. Or,
+if you prefer, tap "Generate" to create a world. You can re-try if you don't like the 
+result. Back on the title screen, tap "Continue" to start in the world or continue
+with the last saved game.
 
 You start near a Domain Core. (Placeholder art: it's a monolith.) Mantis will
 spawn from the core, your avatar will automatically respond. You can click to move,
 or click to focus attention on a particular target.
 
-Red Mantis and Green Mantis will fight one another, as well as you.
+You can tap on the ground or mini-map to move. If you move between sectors on the
+Grid, you will use automatically use the grid travel system.
 
-Tap the spacebar to toggle on 'fast mode'. Volcanoes, plants, water, and (rarely) 
-waterfalls will form in the world. The date is in the upper right. Usually the
-world is an interesting place around the end of the 2nd age.
+Red Mantis and Green Mantis will fight one another, as well as you. Green mantis
+will travel around the world.
 
-I would like feedback on the combat, the look, and the controls. And anything else,
-of course.
 
 Filing a Bug
 ------------
@@ -50,51 +48,28 @@ If you find an issue,
    run the game, so be sure to include the log that show the problem you are submitting.
 
 
-Game Tech
----------
-A basic map can be created, you can walk around, save, and load.
+Known Issues:
+------------
+The current bug lists that I'm personally tracking:
+https://code.google.com/p/alteraorbis/source/browse/bugs.txt
 
-'Generate' or the title screen will generate a new map.
-'Continue' will load the last saved game or start a newly generated map.
-[Bug: you can 'continue' without generating the world, which will crash the game]
-
-In the main game screen:
-[Control feedback appreciated!]
-
-Left-click the world or mini-map to walk (or teleport) there.
-PageUp / PageDown zoom.
-Home / End rotate.
-
-- 'Save' saves the game (there is only one save slot)
-- 'Load' loads the game
-
-- 'Track' walks places, 'Teleport' teleports there.
-- ctrl-click to create a new player.
-- Space-Bar toggles between fast sim mode and normal mode. (Fast mode is intended
-  for world creation, not a "play the game at 2x" mode. It's very fast.)
-
-The buttons on the right side of the game scene are interesting world features. Tap
-to walk or teleport there. (You'll generally need to teleport, unless the feature
-is unusually close.)
+And reported issues:
+https://code.google.com/p/alteraorbis/issues/list
 
 Test Scenes
 -----------
 
 The are a variety of test scenes, in different states. The important one for this release;
 
-* Live Preview *
-This scene allows you to edit face art and ring (melee weapon) art and see the result as
-soon as you save the .png file.
-
-http://code.google.com/p/alteraorbis/wiki/ProceduralRendering
-
 * Asset Preview *
-Shows the face and ring art as they will appear in the game. The texture is 
-pulled from the database file.
+Shows the face and ring art as they will appear in the game.
+
+* Particle *
+The particle scene is both preview and a particle editor. Check out res/particles.xml
+if you are interested in editing.
 
 Other scenes:
 * render: rendering tests, glow, atlasing
-* particle: particle editing and playback
 * battle: battle test scene. the main work-in-progress is to get this fulling implemented
 * animation: animation preview utiliti
 

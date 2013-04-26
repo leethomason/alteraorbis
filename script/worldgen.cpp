@@ -31,13 +31,16 @@ void SectorData::Serialize( XStream* xs )
 	XARC_SER( xs, x );
 	XARC_SER( xs, y );
 	XARC_SER( xs, ports );
-	XARC_SER( xs, area );
 	XARC_SER( xs, core );
+	XARC_SER( xs, area );
+	XARC_SER( xs, name );
 	XarcClose( xs );
 
 	if ( xs->Loading() ) {
 		delete pather;
 		pather = 0;
+
+		GLASSERT( !name.empty() );
 	}
 }
 

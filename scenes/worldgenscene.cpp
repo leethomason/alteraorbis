@@ -184,13 +184,15 @@ void WorldGenScene::DoTick( U32 delta )
 						for( int i=0; i<NUM_SECTORS; ++i ) {
 							name = "sector";
 							const char* n = static_cast<LumosGame*>(game)->GenName( "sector", random.Rand(), 4, 10 );
+							GLASSERT( n );
 							if ( n ) {
 								name = n;
 							}
 							GLASSERT( NUM_SECTORS == 16 );	// else the printing below won't be correct.
+							postfix = "";
 							postfix.Format( "-%02x", j*16+i );
 							name += postfix;
-							sectorData->name = StringPool::Intern( name.c_str() );
+							sectorData[j*NUM_SECTORS+i].name = StringPool::Intern( name.c_str() );
 						}
 					}
 
