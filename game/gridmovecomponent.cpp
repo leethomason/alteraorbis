@@ -28,7 +28,8 @@ GridMoveComponent::~GridMoveComponent()
 
 void GridMoveComponent::DebugStr( grinliz::GLString* str )
 {
-	str->Format( "[GridMove] " );
+	static const char* STATE[] = { "NOT_INIT", "ON_BOARD", "TRAVELLING", "OFF_BOARD", "DONE" };
+	str->Format( "[GridMove state=%s] ", STATE[state] );
 }
 
 
