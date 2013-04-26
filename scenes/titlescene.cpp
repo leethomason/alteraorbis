@@ -48,7 +48,7 @@ TitleScene::TitleScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 		testScene[i].SetText( testSceneName[i] );
 	}
 
-	static const char* gameSceneName[NUM_GAME] = { "Generate\nNew", "Load\n3rd Age", "Continue" };
+	static const char* gameSceneName[NUM_GAME] = { "Generate\nNew", "Load\nEstablished", "Continue" };
 	for( int i=0; i<NUM_GAME; ++i ) {
 		gameScene[i].Init( &gamui2D, lumosGame->GetButtonLook( LumosGame::BUTTON_LOOK_STD ) );
 		gameScene[i].SetText( gameSceneName[i] );
