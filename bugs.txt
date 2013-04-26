@@ -2,14 +2,12 @@ User facing:
 - explosion is in the wrong direction. Units walk through explosions?? (Balrog vs. Human.)
 - flower colors (too saturated flowers)
 x touching buttons clears tracking and can leave in weird state where camera doesn't track player
-- animation sync is generally flakey - lock to vsync?
-- resize in game screen wipes out textures
+- animation sync is generally flakey - lock to vsync? Not aware of any way to solve this.
 - update the "procedural rendering" wiki
 
 Internal:
 - does fire affect plants??
 - remove temporary arbitrary AI limit in corescript
-- when loading during grid travel, you sometimes back up. (Regen path on load; chooses wrong starting point. annoying to fix).
 - redo AI utility to be based on a set of curves
 - health is awkward: keeps copy of HP (oops). move hp to health component? (TotalHP() on item?)
 
@@ -48,7 +46,6 @@ Internal:
 		- establish friend vs. enemy
 		- basic states
 		- CA to handle friends and enemies
-		x refactor code - if needed? - in AIComponent (the fixmes)
 	- UI
 		x set up different battles
 		- battle results
@@ -57,31 +54,21 @@ Internal:
 
 - render-through for player behind objects
 - add target portrait
-x faces are using too much memory, or too low res...hmmm. Should really use texture packer and store a lookup.
 - review all atlases for texture mem usage
-x handle device loss in live preview
 - particles aren't additive correctly
-d GT bug: reconsider auto-mip. review texture upload. 
-d bone filter in reverse. more efficient and useful.
 - put metadata in model (authoring  time)
-x rationalize hardpoints: array index or flag? lookt at RenderComponent
-x mantis trigger broken
 - switch to ImageMagick for texture scaling
 - credits scene
-x particles should use palette. <color palette="2 3 1.0"/> possibly
 - remove normalization in shader
 - print uniform count for shaders
 - animition aware hit testing
 - bounds need to be adjusted to account for animation
-- cameras only self-delete if they reach destination; should do better. Probably
-  should only be one camera in existence. (BlueSmoke, NavTest2)
 - record perf max/min. surprisingly hard.
-x shadows should be part of space-tree bounds
 - memory pool everything in the chit/component system
 - analyze/optimize what causes component update: DoTick(), etc. Likely many DoTicks() getting called that aren't needed. (especially rendering...)
 - add rez effect for item switch?
 - animation generation
-- volcanoes: taper at the end
+- volcanos: taper at the end
 - zoom way out
 - peaks news
 
@@ -123,7 +110,10 @@ x shadows should be part of space-tree bounds
 - filter face colors to matching effect
 - more natural skin tones
 
-** Defer **
+---------- Defer ----------
+d when loading during grid travel, you sometimes back up. (Regen path on load; chooses wrong starting point. annoying to fix).
+d GT bug: reconsider auto-mip. review texture upload. 
+d bone filter in reverse. more efficient and useful.
 - use optimizer to pre-process shaders
 - bolt: glow around white core? end caps?
 - particles that aren't quads (beziers)
@@ -138,6 +128,16 @@ V2 ideas:
 
 ----------- FIXED -------------
 
+x cameras only self-delete if they reach destination; should do better. Probably
+  should only be one camera in existence. (BlueSmoke, NavTest2)
+x refactor code - if needed? - in AIComponent (the fixmes)
+x faces are using too much memory, or too low res...hmmm. Should really use texture packer and store a lookup.
+x handle device loss in live preview
+x rationalize hardpoints: array index or flag? lookt at RenderComponent
+x mantis trigger broken
+x particles should use palette. <color palette="2 3 1.0"/> possibly
+x shadows should be part of space-tree bounds
+x resize in game screen wipes out textures
 x GridMoveComponent: deleteWhenDone in uninitialized. Remove API altogether? Or at least default true.
 x lock camera (no slop) when in grid mode? Hides vsync problem
 x need free camera mode
