@@ -63,6 +63,8 @@ public:
 	static gamui::RenderAtom CalcIcon2Atom( int id, bool enabled=true );
 	static gamui::RenderAtom CalcPaletteAtom( int x, int y );
 
+	const char* GenName( const char* dataset, int seed, int minLen, int maxLen );
+
 	enum {
 		BUTTON_LOOK_STD,
 		BUTTON_LOOK_COUNT
@@ -81,6 +83,7 @@ protected:
 
 private:
 	void InitButtonLooks();
+	grinliz::GLString nameBuffer;
 
 	gamui::ButtonLook buttonLookArr[BUTTON_LOOK_COUNT];
 };

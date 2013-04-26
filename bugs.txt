@@ -8,6 +8,7 @@ x remove 'inUse' flag
 - when loading during grid travel, you sometimes back up. (Regen path on load; chooses wrong starting point. annoying to fix).
 - redo utility to be based on a set of curves
 - flower colors (too saturated flowers)
+- GridMoveComponent: deleteWhenDone in uninitialized. Remove API altogether? Or at least default true.
 
 - game
 	- Intermission: regions

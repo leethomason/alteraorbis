@@ -161,7 +161,6 @@ public:
 	const WorldInfo& GetWorldInfo()			{ return *worldInfo; }
 	WorldInfo* GetWorldInfoMutable()		{ return worldInfo; }
 	const SectorData* GetSectorData() const;
-	SectorData* GetSectorDataMutable();
 
 	// Find random land on the largest continent
 	grinliz::Vector2I FindEmbark();

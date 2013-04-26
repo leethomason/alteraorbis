@@ -166,7 +166,7 @@ void Game::LoadModel( const char* name )
 {
 	GLASSERT( modelLoader );
 
-	const gamedb::Item* item = database0->Root()->Child( "models" )->Child( name );
+	const gamedb::Item* item = GetDatabase()->Root()->Child( "models" )->Child( name );
 	GLASSERT( item );
 
 	ModelResource* res = new ModelResource();

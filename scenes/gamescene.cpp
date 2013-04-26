@@ -601,8 +601,13 @@ void GameScene::DoTick( U32 delta )
 	clock_t endTime = clock();
 	simTimer += (int)(endTime-startTime);
 
-	CStr<12> str;
-	str.Format( "%.2f", sim->DateInAge() );
+	Vector3F lookAt = { 0, 0, 0 };
+	sim->GetEngine()->CameraLookingAt( &lookAt );
+	Vector2I sector = { (int)lookAt.x / SECTOR_SIZE, (int)lookAt.z / SECTOR_SIZE };
+	const SectorData& sd = sim->GetWorldMap()->GetWorldInfo().GetSector( sector );
+
+	CStr<18> str;
+	str.Format( "%.2f %s", sim->DateInAge(), sd.name.c_str() );
 	dateLabel.SetText( str.c_str() );
 
 	SetBars();

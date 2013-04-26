@@ -50,6 +50,8 @@ private:
 class MarkovGenerator
 {
 public:
+	// This class operates on a pointer to the data - no
+	// local copy - good to be aware.
 	MarkovGenerator( const char* data, int nBytes, int seed );
 	bool Name( grinliz::GLString* name, int maxLen );
 
@@ -57,7 +59,9 @@ private:
 	void FindPair( char a, char b, int* start, int* count );
 
 	grinliz::Random random;
-	grinliz::CDynArray< MarkovBuilder::Triplet > sortedArr;
+	//grinliz::CDynArray< MarkovBuilder::Triplet > sortedArr;
+	const MarkovBuilder::Triplet* arr;
+	int nTriplets;
 };
 
 #endif // MARKOV_INCLUDED

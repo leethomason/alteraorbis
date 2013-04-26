@@ -29,11 +29,12 @@ public:
 		NEG_Y	=4,		
 		POS_Y	=8 
 	};
-	int  x, y;		// grid position (not sector position)
-	int  ports;		// if attached to the grid, has ports. 
-	grinliz::Vector2I core;
-	int  area;
-	micropather::MicroPather* pather;
+	int							x, y;		// grid position (not sector position)
+	int							ports;		// if attached to the grid, has ports. 
+	grinliz::Vector2I			core;
+	int							area;
+	micropather::MicroPather*	pather;
+	grinliz::IString			name;
 
 	bool HasCore() const { return core.x > 0 && core.y > 0; }
 	grinliz::Rectangle2I GetPortLoc( int port ) const;
@@ -75,8 +76,6 @@ typedef grinliz::Vector2<S16> GridEdge;
 class WorldInfo : public micropather::Graph
 {
 public:
-	SectorData sectorData[NUM_SECTORS*NUM_SECTORS];
-
 	WorldInfo( const WorldGrid* worldGrid, int mapWidth, int mapHeight );
 	~WorldInfo();
 	
@@ -136,6 +135,9 @@ public:
 	}
 	bool HasGridEdge( int geX, int geY ) const;
 
+	const SectorData* SectorDataMem() const { return sectorData; }
+	SectorData* SectorDataMemMutable()		{ return sectorData; }
+
 private:
 
 	GridEdge FromState( void* state ) {
@@ -153,6 +155,8 @@ private:
 	int mapWidth;
 	int mapHeight;
 	const WorldGrid* worldGrid;
+
+	SectorData sectorData[NUM_SECTORS*NUM_SECTORS];
 };
 
 #endif // LUMOS_WORLDINFO_INCLUDED

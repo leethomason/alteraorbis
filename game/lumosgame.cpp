@@ -16,6 +16,7 @@
 #include "lumosgame.h"
 #include "gamelimits.h"
 #include "worldinfo.h"
+#include "../markov/markov.h"
 
 #include "../scenes/titlescene.h"
 #include "../scenes/dialogscene.h"
@@ -255,4 +256,27 @@ void LumosGame::CopyFile( const char* src, const char* target )
 	}
 }
 
+
+
+const char* LumosGame::GenName( const char* dataset, int seed, int min, int max )
+{
+	const gamedb::Item* parent = this->GetDatabase()->Root()->Child( "markovName" );
+	GLASSERT( parent );
+	const gamedb::Item* item = parent->Child( dataset );
+	GLASSERT( item );
+	if ( !item ) return 0;
+
+	int size=0;
+	const void* data = this->GetDatabase()->AccessData( item, "triplets", &size );
+	MarkovGenerator gen( (const char*)data, size, seed );
+
+	int len = max+1;
+	int error = 100;
+	while ( error-- ) {
+		if ( gen.Name( &nameBuffer, max ) && (int)nameBuffer.size() >= min ) {
+			return nameBuffer.c_str();
+		}
+	}
+	return 0;
+}
 

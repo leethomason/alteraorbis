@@ -91,15 +91,9 @@ void WorldMap::FreeVBOs()
 }
 
 
-SectorData* WorldMap::GetSectorDataMutable()
-{
-	return worldInfo->sectorData;
-}
-
-
 const SectorData* WorldMap::GetSectorData() const
 {
-	return worldInfo->sectorData;
+	return worldInfo->SectorDataMem();
 }
 
 
@@ -499,7 +493,7 @@ Vector2I WorldMap::FindEmbark()
 
 	const SectorData* s = 0;
 	while( !s ) {
-		s = &worldInfo->sectorData[random.Rand(NUM_SECTORS*NUM_SECTORS)];
+		s = worldInfo->SectorDataMem() + random.Rand(NUM_SECTORS*NUM_SECTORS);
 		if ( !s->HasCore() ) {
 			s = 0;
 		}
@@ -1301,7 +1295,7 @@ micropather::MicroPather* WorldMap::PushPather( const Vector2I& sector )
 	GLASSERT( currentPather == 0 );
 	GLASSERT( sector.x >= 0 && sector.x < NUM_SECTORS );
 	GLASSERT( sector.y >= 0 && sector.y < NUM_SECTORS );
-	SectorData* sd = &worldInfo->sectorData[sector.y*NUM_SECTORS+sector.x];
+	SectorData* sd = worldInfo->SectorDataMemMutable() + sector.y*NUM_SECTORS+sector.x;
 	if ( !sd->pather ) {
 		int area = sd->area ? sd->area : 1000;
 		sd->pather = new micropather::MicroPather( this, area, 7, true );

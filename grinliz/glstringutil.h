@@ -55,7 +55,14 @@ inline int HexLowerCharToInt( int c ) {
 	//const int bit6 = (c&0x40) >> 6;
 	//return bit6*( c - 'a' + 10 ) + (1-bit6)*( c - '0');
 }
+
+inline char IntToHexLower( int i ) {
+	GLASSERT( i >= 0 && i < 16 );
+	if ( i < 10 ) return '0' + i;
+	return 'a' + (i-10);
+}
 #endif
+
 
 inline bool StrEqual( const char* a, const char* b ) 
 {

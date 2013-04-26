@@ -164,16 +164,36 @@ void WorldGenScene::DoTick( U32 delta )
 			CStr<16> str;
 			str.Format( "Land: %d%%", (int)(100.0f*(float)genState.y/(float)WorldGen::SIZE) );
 			label.SetText( str.c_str() );
+			GLString name;
 
 			if ( genState.y == WorldGen::SIZE ) {
 				bool okay = worldGen->EndLandAndWater( 0.4f );
 				if ( okay ) {
 					worldGen->WriteMarker();
-					SectorData* sectorData = worldMap->GetSectorDataMutable();
+					SectorData* sectorData = worldMap->GetWorldInfoMutable()->SectorDataMemMutable();
 					Random random;
-					random.SetSeedFromTime();
+					random.SetSeedFromTime();;
+
 					worldGen->CutRoads( random.Rand(), sectorData );
 					worldGen->ProcessSectors( random.Rand(), sectorData );
+
+					GLString name;
+					GLString postfix;
+
+					for( int j=0; j<NUM_SECTORS; ++j ) {
+						for( int i=0; i<NUM_SECTORS; ++i ) {
+							name = "sector";
+							const char* n = static_cast<LumosGame*>(game)->GenName( "sector", random.Rand(), 4, 10 );
+							if ( n ) {
+								name = n;
+							}
+							GLASSERT( NUM_SECTORS == 16 );	// else the printing below won't be correct.
+							postfix.Format( "-%02x", j*16+i );
+							name += postfix;
+							sectorData->name = StringPool::Intern( name.c_str() );
+						}
+					}
+
 					sendTexture = true;
 					genState.mode = GenState::ROCKGEN_START;
 				}

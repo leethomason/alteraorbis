@@ -380,7 +380,7 @@ void ProcessMarkov( XMLElement* data )
 	builder.Process();
 
 	gamedb::WItem* witem = writer->Root()->FetchChild( "markovName" )->FetchChild( assetName.c_str() );
-	witem->SetData( "triplets", builder.Data(), builder.NumBytes(), true );
+	witem->SetData( "triplets", builder.Data(), builder.NumBytes(), false );	// prefer fast access to size
 
 	printf( "markovName '%s' memory=%dk\n", assetName.c_str(), builder.NumBytes()/1024 );
 	totalDataMem += builder.NumBytes();
