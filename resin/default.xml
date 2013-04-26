@@ -17,6 +17,9 @@
 
 <resource>
 
+  <!-- Name generators -->
+  <markov filename="sectorNames.txt" assetName="sector" />
+  
   <!-- Icon and UI -->
   <texture filename="title.png" />
   <texture filename="icons.png" dither="false"/>

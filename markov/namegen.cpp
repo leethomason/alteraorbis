@@ -6,60 +6,9 @@
 #include "../grinliz/glstringutil.h"
 #include "../grinliz/glrandom.h"
 
+#include "markov.h"
+
 using namespace grinliz;
-
-class MarkovArray
-{
-public:
-	struct Entry {
-		char a;
-		char b;
-		char c;
-	};
-
-};
-
-
-struct Triplet
-{
-	static U32 Hash( const Triplet& v)							{ return v.All(); }
-	static bool Equal( const Triplet& v0, const Triplet& v1 )	{ return v0.All() == v1.All(); }
-
-	Triplet() {
-		for( int i=0; i<4; ++i ) value[i] = 0;
-	}
-
-	char value[4];	// a,b,c,0
-	U32 All() const { return *((U32*)value); }
-};
-
-
-struct Doublet
-{
-	static bool Less( const Triplet& v0, const Triplet& v1 )	{ 
-		U32 a = (v0.value[0] << 8) + v0.value[1];
-		U32 b = (v1.value[0] << 8) + v1.value[1];
-		return a < b; 
-	}
-};
-
-
-void FindPair( const Triplet* mem, int n, char a, char b, int* start, int* count )
-{
-	*start = 0;
-	*count = 0;
-	for( int i=0; i<n; ++i ) {
-		while ( mem[i].value[0] == a && mem[i].value[1] == b ) {
-			if ( *count == 0 ) 
-				*start = i;
-			*count += 1;
-			++i;
-		}
-		if ( *count ) {
-			return;
-		}
-	}
-}
 
 
 int main( int argc, const char* argv[] ) 
@@ -80,9 +29,9 @@ int main( int argc, const char* argv[] )
 		exit( 2 );
 	}
 
-	char buffer[256];
-	CDynArray< StrToken > tokens;
+	MarkovBuilder builder;
 
+	char buffer[256];
 	while( fgets( buffer, 256, fp ) ) {
 		const char* p = buffer;
 		while ( *p && isspace( *p )) {
@@ -92,89 +41,47 @@ int main( int argc, const char* argv[] )
 			continue;
 		
 		GLString str = buffer;
-		
-		StrTokenize( str, &tokens, true );
-	}
+		CDynArray< StrToken > tokens;		
+		StrTokenize( str, &tokens );
 
-	HashTable< Triplet, Triplet, Triplet > table;
-
-	for( int i=0; i<tokens.Size(); ++i ) {
-		//printf( "%s\n", tokens[i].str.c_str() );
-
-		const GLString& token = tokens[i].str;
-
-		if ( token.size() > 2 ) {
-			{
-				Triplet t;
-				t.value[2] = token[0];
-				table.Add( t,t );
-			}
-			{ 
-				Triplet t;
-				t.value[1] = token[0];
-				t.value[2] = token[1];
-				table.Add( t,t );
-			}
-			{ 
-				Triplet t;
-				t.value[0] = token[token.size()-2];
-				t.value[1] = token[token.size()-1];
-				table.Add( t,t );
-			}
-			for( unsigned k=0; k<token.size()-2; ++k ) {
-				Triplet  t;
-				t.value[0] = token[k];
-				t.value[1] = token[k+1];
-				t.value[2] = token[k+2];
-				table.Add( t,t );
-			}
+		for( int i=0; i<tokens.Size(); ++i ) {
+			builder.Push( tokens[i].str );
 		}
 	}
+	builder.Process();
 
-	Triplet* arr = table.GetValues();
-	CDynArray< Triplet > sortedArr;
-	for( int i=0; i<table.NumValues(); ++i ) {
-		sortedArr.Push( arr[i] );
-	}
-
-	Sort< Triplet, Doublet >( &sortedArr[0], sortedArr.Size() );
+	const CDynArray< MarkovBuilder::Triplet >& sortedArr = builder.Triplets();
+	int line = 0;
 	for( int i=0; i<sortedArr.Size(); ++i ) {
-		Triplet t = sortedArr[i];
+		MarkovBuilder::Triplet t = sortedArr[i];
 		if ( t.value[0] == 0 ) t.value[0] = '_';
 		if ( t.value[1] == 0 ) t.value[1] = '_';
-		printf( "%s\n", t.value );
+		printf( "%s ", t.value );
+
+		++line;
+		if ( line == 18 ) {
+			printf( "\n" );
+			line = 0;
+		}
 	}
-
-	int start=0, count=0;
-
-	FindPair( sortedArr.Mem(), sortedArr.Size(), 0, 0, &start, &count );
-	printf( "00 start=%d, count=%d\n", start, count );
-
-	FindPair( sortedArr.Mem(), sortedArr.Size(), 'a', 'n', &start, &count );
-	printf( "an start=%d, count=%d\n", start, count );
+	printf( "\n" );
 
 	Random random;
 	random.SetSeedFromTime();
+	MarkovGenerator generator( builder.Data(), builder.NumBytes(), random.Rand() );
+	GLString name;
 
-	for( int k=0; k<8; ++k ) {
-		GLString name;
-		char a=0;
-		char b=0;
-		while( true ) {
-			FindPair( sortedArr.Mem(), sortedArr.Size(), a, b, &start, &count );
-			if ( count == 0 )
-				break;
-			int index = start + random.Rand( count );
-			char c = sortedArr[index].value[2];
-			if ( c ) {
-				name.append( &c, 1 );
-				a = b;
-				b = c;
-				c = 0;
+	line = 0;
+	for( int k=0; k<800; ++k ) {
+		if ( generator.Name( &name, 11 )) {
+			int len = name.size();
+			if ( len > 3 ) {
+				printf( "%s ", name.c_str() );
+				line += len + 2;
 			}
-			else {
-				printf( "%s\n", name.c_str() );
-				break;
+			if ( line > 70 ) {
+				printf( "\n" );
+				line = 0;
 			}
 		}
 	}

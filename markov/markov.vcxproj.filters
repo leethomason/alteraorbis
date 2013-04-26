@@ -2,6 +2,7 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="namegen.cpp" />
+    <ClCompile Include="markov.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="markov.h" />

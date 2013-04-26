@@ -48,6 +48,8 @@
 #include "atlas.h"
 #include "animationbuilder.h"
 
+#include "../markov/markov.h"
+
 using namespace std;
 using namespace grinliz;
 using namespace tinyxml2;
@@ -340,6 +342,51 @@ void ProcessTree( XMLElement* data )
 }
 
 
+void ProcessMarkov( XMLElement* data ) 
+{
+	GLString assetName, pathName;
+	ParseNames( data, &assetName, &pathName, 0 );
+
+	// copy the entire file.
+#pragma warning ( push )
+#pragma warning ( disable : 4996 )	// fopen is unsafe. For video games that seems extreme.
+	FILE* read = fopen( pathName.c_str(), "r" );
+#pragma warning (pop)
+
+	if ( !read ) {
+		ExitError( "Markov", pathName.c_str(), assetName.c_str(), "Could not load file." );
+	}
+
+	MarkovBuilder builder;
+
+	char buffer[256];
+	while( fgets( buffer, 256, read )) {
+		// Filter out comments.
+		const char* p = buffer;
+		while ( *p && isspace( *p )) {
+			++p;
+		}
+		if ( *p == '#' )
+			continue;
+
+		GLString str = buffer;
+		CDynArray< StrToken > tokens;		
+		StrTokenize( str, &tokens );
+
+		for( int i=0; i<tokens.Size(); ++i ) {
+			builder.Push( tokens[i].str );
+		}
+	}
+	builder.Process();
+
+	gamedb::WItem* witem = writer->Root()->FetchChild( "markovName" )->FetchChild( assetName.c_str() );
+	witem->SetData( "triplets", builder.Data(), builder.NumBytes(), true );
+
+	printf( "markovName '%s' memory=%dk\n", assetName.c_str(), builder.NumBytes()/1024 );
+	totalDataMem += builder.NumBytes();
+
+	fclose( read );
+}
 
 
 void ProcessData( XMLElement* data )
@@ -1038,8 +1085,12 @@ int main( int argc, char* argv[] )
 		else if ( StrEqual( child->Value(), "atlas" )) {
 			ProcessAtlas( child );
 		}
+		else if ( StrEqual( child->Value(), "markov" )) {
+			ProcessMarkov( child );
+		}
 		else {
 			printf( "Unrecognized element: %s\n", child->Value() );
+			ExitError( 0, 0, 0, "Unrecognized Element." );
 		}
 	}
 
