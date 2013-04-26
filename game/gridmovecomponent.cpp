@@ -39,7 +39,6 @@ void GridMoveComponent::Serialize( XStream* xs )
 	XARC_SER( xs, state );
 	XARC_SER( xs, sectorDest );
 	XARC_SER( xs, portDest );
-	XARC_SER( xs, deleteWhenDone );
 	XARC_SER( xs, speed );
 
 	this->EndSerialize( xs );
@@ -83,12 +82,10 @@ void GridMoveComponent::SetDest( int sectorX, int sectorY, int port )
 int GridMoveComponent::DoTick( U32 delta, U32 since )
 {
 	if ( state == DONE ) {
-		if ( deleteWhenDone ) {
-			Chit* chit = parentChit;	// gets nulled in Remove()
-			chit->Remove( this );
-			chit->Add( new PathMoveComponent( map ));
-			delete this;
-		}
+		Chit* chit = parentChit;	// gets nulled in Remove()
+		chit->Remove( this );
+		chit->Add( new PathMoveComponent( map ));
+		delete this;
 		return VERY_LONG_TICK;
 	}
 	if ( state == NOT_INIT ) {

@@ -11,7 +11,7 @@
 using namespace grinliz;
 
 
-int main( int argc, const char* argv[] ) 
+int main( int argc, const char* argv[] )
 {
 	if ( argc != 2 ) {
 		printf( "Usage: markov path/in.txt\n" );

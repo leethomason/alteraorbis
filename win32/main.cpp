@@ -42,7 +42,7 @@
 //#define TEST_FULLSPEED
 //#define SEND_CRASH_LOGS
 
-#define TIME_BETWEEN_FRAMES	30
+#define TIME_BETWEEN_FRAMES	1000/30
 
 #define IPOD_SCREEN_WIDTH	320
 #define IPOD_SCREEN_HEIGHT	480
@@ -198,12 +198,13 @@ int main( int argc, char **argv )
 	GLASSERT( r == GL_NO_ERROR );
 
 	// Calling this seems to confuse my ATI driver and cause lag / event back up?
-//#ifdef TEST_FULLSPEED	
-//	wglSwapIntervalEXT( 0 );	// vsync
-//#else
-//	wglSwapIntervalEXT( 1 );	// vsync
-//#endif
-
+#if 0
+#ifdef TEST_FULLSPEED	
+	wglSwapIntervalEXT( 0 );	// vsync
+#else
+	wglSwapIntervalEXT( 1 );	// vsync
+#endif
+#endif
 	const unsigned char* vendor   = glGetString( GL_VENDOR );
 	const unsigned char* renderer = glGetString( GL_RENDERER );
 	const unsigned char* version  = glGetString( GL_VERSION );

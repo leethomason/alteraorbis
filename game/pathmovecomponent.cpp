@@ -495,7 +495,6 @@ int PathMoveComponent::DoTick( U32 delta, U32 since )
 
 	if ( !portJump.IsZero() && portJumpPort ) {
 		GridMoveComponent* gmc = new GridMoveComponent( map );
-		gmc->DeleteAndRestorePathMCWhenDone( true );
 		gmc->SetDest( portJump.x, portJump.y, portJumpPort );
 		Chit* chit = parentChit;	// parentChit=0 after Remove()
 		chit->Remove( this );

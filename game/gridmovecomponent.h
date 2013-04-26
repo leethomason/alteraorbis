@@ -24,7 +24,8 @@ public:
 	virtual void CalcVelocity( grinliz::Vector3F* v ) { *v = velocity; }
 
 	void SetDest( int sectorX, int sectorY, int port );
-	void DeleteAndRestorePathMCWhenDone( bool _deleteWhenDone )			{ deleteWhenDone = _deleteWhenDone; }
+	// Always does; may need to restore as an option.
+	//void DeleteAndRestorePathMCWhenDone( bool _deleteWhenDone )			{ deleteWhenDone = _deleteWhenDone; }
 
 private:
 	enum {
@@ -38,7 +39,7 @@ private:
 	int					state;
 	grinliz::Vector2I	sectorDest;
 	int					portDest;
-	bool				deleteWhenDone;
+	//bool				deleteWhenDone;
 	float				speed;
 
 	// Not serialized:
