@@ -1,10 +1,8 @@
 User facing:
-x GridMoveComponent: deleteWhenDone in uninitialized. Remove API altogether? Or at least default true.
 - explosion is in the wrong direction. Units walk through explosions?? (Balrog vs. Human.)
 - flower colors (too saturated flowers)
-- touching buttons clears tracking and can leave in weird state where camera doesn't track player
+x touching buttons clears tracking and can leave in weird state where camera doesn't track player
 - animation sync is generally flakey - lock to vsync?
-	d lock camera (no slop) when in grid mode? Problem is primarily vsync
 - resize in game screen wipes out textures
 - update the "procedural rendering" wiki
 
@@ -140,6 +138,8 @@ V2 ideas:
 
 ----------- FIXED -------------
 
+x GridMoveComponent: deleteWhenDone in uninitialized. Remove API altogether? Or at least default true.
+x lock camera (no slop) when in grid mode? Hides vsync problem
 x need free camera mode
 x control key is terrible...sometimes.
 x remove 'inUse' flag

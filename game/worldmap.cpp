@@ -53,6 +53,7 @@ WorldMap::WorldMap( int width, int height ) : Map( width, height )
 {
 	GLASSERT( width % ZONE_SIZE == 0 );
 	GLASSERT( height % ZONE_SIZE == 0 );
+	ShaderManager::Instance()->AddDeviceLossHandler( this );
 
 	grid = 0;
 	engine = 0;
@@ -75,12 +76,19 @@ WorldMap::WorldMap( int width, int height ) : Map( width, height )
 WorldMap::~WorldMap()
 {
 	GLASSERT( engine == 0 );
+	ShaderManager::Instance()->RemoveDeviceLossHandler( this );
 
 	DeleteAllRegions();
 	delete [] grid;
 	delete worldInfo;
 }
 
+
+void WorldMap::DeviceLoss()
+{
+	FreeVBOs();
+	Tessellate();
+}
 
 void WorldMap::FreeVBOs()
 {

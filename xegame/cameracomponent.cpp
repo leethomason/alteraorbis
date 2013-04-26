@@ -17,6 +17,7 @@
 #include "chit.h"
 #include "chitbag.h"
 #include "spatialcomponent.h"
+#include "../game/gridmovecomponent.h"
 #include "../engine/camera.h"
 #include "../engine/engine.h"
 
@@ -116,7 +117,12 @@ int CameraComponent::DoTick( U32 delta, U32 since )
 					//camera->SetPosWC( pos + t );
 					Vector3F c = camera->PosWC();
 					Vector3F d = (pos+t) - c;
-					static const float EASE = 0.5f;
+					float EASE = 0.5f;
+
+					// If grid moving, the EASE contributes to jitter.
+					if ( GET_COMPONENT( chit, GridMoveComponent )) {
+						EASE = 1.0f;
+					}
 					camera->SetPosWC( c.x+EASE*d.x, pos.y+t.y, c.z+EASE*d.z );
 				}
 			}

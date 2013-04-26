@@ -21,6 +21,7 @@
 
 #include "../engine/map.h"
 #include "../engine/rendertarget.h"
+#include "../engine/shadermanager.h"
 
 #include "../micropather/micropather.h"
 
@@ -63,7 +64,8 @@ class SectorData;
 	further optimized to use regions.
 */
 class WorldMap : public Map, 
-	             public micropather::Graph
+	             public micropather::Graph,
+				 public IDeviceLossHandler
 {
 public:
 	WorldMap( int width, int height );
@@ -140,6 +142,8 @@ public:
 	// ---- Map ---- //
 	virtual void Submit( GPUState* shader, bool emissiveOnly );
 	virtual void Draw3D(  const grinliz::Color3F& colorMult, GPUState::StencilMode );
+	// ---- Device Loss --- //
+	virtual void DeviceLoss();
 
 	// Brings water & waterfalls current
 	void DoTick( U32 delta, ChitBag* chitBag );

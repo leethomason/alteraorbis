@@ -444,15 +444,10 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
 		if ( item == &newsButton[i] ) {
-			//GLASSERT( i < localNews.Size() );
-			//dest = localNews[i].pos;
-			CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
-			if ( cc ) {
-				cc->SetTrack( 0 );
-			}
 
 			const NewsEvent* ne = sim->GetChitBag()->News() + i;
 			if ( !sim->GetPlayerChit() && ne->chitID ) {
+				CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
 				if ( cc ) {
 					cc->SetTrack( ne->chitID );
 				}
