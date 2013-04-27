@@ -117,7 +117,7 @@ int CameraComponent::DoTick( U32 delta, U32 since )
 					//camera->SetPosWC( pos + t );
 					Vector3F c = camera->PosWC();
 					Vector3F d = (pos+t) - c;
-					float EASE = 0.5f;
+					float EASE = 0.2f;
 
 					// If grid moving, the EASE contributes to jitter.
 					if ( GET_COMPONENT( chit, GridMoveComponent )) {

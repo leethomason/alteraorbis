@@ -2,8 +2,7 @@ User facing:
 - explosion is in the wrong direction. Units walk through explosions?? (Balrog vs. Human.)
 - flower colors (too saturated flowers)
 x touching buttons clears tracking and can leave in weird state where camera doesn't track player
-- animation sync is generally flakey - lock to vsync? Not aware of any way to solve this.
-- update the "procedural rendering" wiki
+x update the "procedural rendering" wiki
 
 Internal:
 - does fire affect plants??
@@ -111,6 +110,7 @@ Internal:
 - more natural skin tones
 
 ---------- Defer ----------
+- animation sync is generally flakey - lock to vsync? Not aware of any way to solve this.
 d when loading during grid travel, you sometimes back up. (Regen path on load; chooses wrong starting point. annoying to fix).
 d GT bug: reconsider auto-mip. review texture upload. 
 d bone filter in reverse. more efficient and useful.

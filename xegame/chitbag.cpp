@@ -216,7 +216,8 @@ void ChitBag::DoTick( U32 delta, Engine* engine )
 		Chit* block = blocks[i];
 		for( int j=0; j<BLOCK_SIZE; ++j ) {
 			Chit* c = block + j;
-			if ( c->ID() ) {
+			int id = c->ID();
+			if ( id && id != activeCamera ) {
 				
 				c->timeToTick -= delta;
 				c->timeSince  += delta;
@@ -229,6 +230,14 @@ void ChitBag::DoTick( U32 delta, Engine* engine )
 			}
 		}
 	}
+	// Make sure the camera is updated last so it doesn't "drag"
+	// what it's tracking. The next time this happens I should
+	// put in a priority system.
+	Chit* camera = GetChit( activeCamera );
+	if ( camera ) {
+		camera->DoTick( delta );
+	}
+
 	for( int i=0; i<deleteList.Size(); ++i ) {
 		Chit* chit = 0;
 		chitID.Query( deleteList[i], &chit );
