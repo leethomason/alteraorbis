@@ -1,11 +1,11 @@
 User facing:
-- explosion is in the wrong direction. Units walk through explosions?? (Balrog vs. Human.)
+x explosion is in the wrong direction. Units walk through explosions?? (Balrog vs. Human.)
 - flower colors (too saturated flowers)
 x touching buttons clears tracking and can leave in weird state where camera doesn't track player
 x update the "procedural rendering" wiki
 
 Internal:
-- does fire affect plants??
+x does fire affect plants??
 - remove temporary arbitrary AI limit in corescript
 - redo AI utility to be based on a set of curves
 - health is awkward: keeps copy of HP (oops). move hp to health component? (TotalHP() on item?)
