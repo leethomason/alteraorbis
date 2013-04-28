@@ -238,7 +238,7 @@ void BattleTestScene::LoadMap()
 		msc->SetMode( GRID_BLOCKED );
 		chit->Add( msc );
 		chit->Add( new RenderComponent( engine, "plant1.3" ));
-		chit->Add( new ItemComponent( engine, treeItem ));
+		chit->Add( new ItemComponent( engine, map, treeItem ));
 		chit->Add( new HealthComponent( engine ));
 	}
 
@@ -352,7 +352,7 @@ Chit* BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int
 	item.primaryTeam = team;
 	item.stats.SetExpFromLevel( level );
 	item.InitState();
-	ItemComponent* inv = new ItemComponent( engine, item );
+	ItemComponent* inv = new ItemComponent( engine, map, item );
 	chit->Add( inv );
 
 	chit->Add( new HealthComponent( engine ));
@@ -467,7 +467,7 @@ void BattleTestScene::Tap( int action, const grinliz::Vector2F& view, const grin
 	if ( !uiHasTap ) {
 		bool tap = Process3DTap( action, view, world, engine );
 		if ( action == GAME_TAP_DOWN ) {
-#if 0
+#if 1
 			Vector3F at;
 			IntersectRayPlane( debugRay.origin, debugRay.direction, 1, 0, &at );
 			at.y = 0.01f;

@@ -25,6 +25,7 @@
 
 #include "../game/healthcomponent.h"
 #include "../game/physicsmovecomponent.h"
+#include "../game/pathmovecomponent.h"
 
 #include "../script/procedural.h"
 
@@ -35,7 +36,7 @@
 using namespace grinliz;
 
 
-ItemComponent::ItemComponent( Engine* _engine, const GameItem& _item ) : engine(_engine), mainItem(_item), slowTick( 500 )
+ItemComponent::ItemComponent( Engine* _engine, WorldMap* wm, const GameItem& _item ) : engine(_engine), worldMap(wm), mainItem(_item), slowTick( 500 )
 {
 	itemArr.Push( &mainItem );	
 }
@@ -74,17 +75,58 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {
 	if ( msg.ID() == ChitMsg::CHIT_DAMAGE ) {
 		parentChit->SetTickNeeded();
-		const DamageDesc* dd = (const DamageDesc*) msg.Ptr();
-		GLASSERT( dd );
+
+		const DamageDesc* pdd = (const DamageDesc*) msg.Ptr();
+		GLASSERT( pdd );
+		DamageDesc dd = *pdd;
+		bool isExplosion = msg.Data() ? true : false;
+
+		// Scale damage to distance, if explosion. And check for impact.
+		if ( isExplosion ) {
+			RenderComponent* rc = parentChit->GetRenderComponent();
+			if ( rc ) {
+				// First scale damage.
+				Vector3F target;
+				rc->CalcTarget( &target );
+				Vector3F v = (target - msg.vector); 
+				float len = v.Length();
+				dd.damage = Lerp( dd.damage, dd.damage*0.5f, len / EXPLOSIVE_RANGE );
+				v.Normalize();
+
+				bool knockback = dd.damage > (mainItem.TotalHP() *0.25f);
+
+				// Ony apply for phyisics or pathmove
+				PhysicsMoveComponent* physics  = GET_COMPONENT( parentChit, PhysicsMoveComponent );
+				PathMoveComponent*    pathMove = GET_COMPONENT( parentChit, PathMoveComponent );
+
+				if ( knockback && (physics || pathMove) ) {
+					rc->PlayAnimation( ANIM_IMPACT );
+
+					// Rotation
+					float r = -300.0f + (float)chit->random.Rand( 600 );
+
+					if ( pathMove ) {
+						parentChit->Remove( pathMove );
+						delete pathMove;
+						pathMove = 0;
+
+						physics = new PhysicsMoveComponent( worldMap );
+						parentChit->Add( physics );
+						physics->DeleteAndRestorePathMCWhenDone( true );
+					}
+					static const float FORCE = 4.0f;
+					physics->Add( v*FORCE, r );
+				}
+			}
+		}
+
 		GLLOG(( "Chit %3d '%s' (origin=%d) ", parentChit->ID(), mainItem.Name(), msg.originID ));
 
 		// Run through the inventory, looking for modifiers.
 
-		DamageDesc dd2 = *dd;
-
 		for( int i=itemArr.Size()-1; i >= 0; --i ) {
 			if ( i==0 || itemArr[i]->Active() ) {
-				itemArr[i]->AbsorbDamage( i>0, dd2, &dd2, "DAMAGE" );
+				itemArr[i]->AbsorbDamage( i>0, dd, &dd, "DAMAGE" );
 
 				if ( itemArr[i]->ToShield() ) {
 					GameItem* shield = itemArr[i]->ToShield()->GetItem();
@@ -103,56 +145,6 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 					}
 				}
 
-			}
-		}
-
-		HealthComponent* hc = GET_COMPONENT( parentChit, HealthComponent );
-		if ( hc ) {
-			// Can this be knocked back??
-			ComponentSet thisComp( chit, ComponentSet::IS_ALIVE | Chit::SPATIAL_BIT | Chit::RENDER_BIT );
-			if ( thisComp.okay ) {
-				// Do we apply knockback?
-				bool explosion = msg.Data() != 0;
-				bool knockback = dd->damage > (mainItem.TotalHP() * ( explosion ? 0.1f : 0.4f ));
-
-				if ( knockback ) {
-					thisComp.render->PlayAnimation( ANIM_IMPACT );
-
-					// Immediately reflect off the ground.
-					Vector3F v = msg.vector;
-
-					if ( thisComp.spatial->GetPosition().y < 0.1f ) {
-						if ( v.y < 0 )
-							v.y = -v.y;
-						if ( v.y < 3.0f )
-							v.y = 3.0f;		// make more interesting
-					}
-					// Rotation
-					Random random( ((int)v.x*1000)^((int)v.y*1000)^((int)v.z*1000) );
-					random.Rand();
-					float r = -400.0f + (float)random.Rand( 800 );
-
-					PhysicsMoveComponent* pmc = GET_COMPONENT( parentChit, PhysicsMoveComponent );
-					if ( pmc ) {
-						pmc->Add( v, r );
-					}
-					else {
-						GameMoveComponent* gmc = GET_COMPONENT( parentChit, GameMoveComponent );
-						if ( gmc ) {
-							parentChit->Remove( gmc );
-							delete gmc;
-							gmc = 0;
-							
-							WorldMap* map = gmc->GetWorldMap();
-
-							pmc = new PhysicsMoveComponent( map );
-							parentChit->Add( pmc );
-
-							pmc->Set( v, r );
-							pmc->DeleteAndRestorePathMCWhenDone( true );
-						}
-					}
-				}
 			}
 		}
 	}
@@ -229,7 +221,7 @@ int ItemComponent::DoTick( U32 delta, U32 since )
 		int t = itemArr[i]->DoTick( delta, since );
 		tick = Min( t, tick );
 
-		if ( itemArr[i]->Active() && EmitEffect( mainItem, delta )) {
+		if ( ( i==0 || itemArr[i]->Active()) && EmitEffect( mainItem, delta )) {
 			tick = 0;
 		}
 	}

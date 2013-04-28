@@ -31,7 +31,7 @@ Component* ComponentFactory::Factory( const char* name, Chit* chit ) const
 	}
 	else if ( StrEqual( name, "ItemComponent" )) {
 		GameItem item;
-		return new ItemComponent( engine, item );
+		return new ItemComponent( engine, worldMap, item );
 	}
 	else if ( StrEqual( name, "DebugStateComponent" )) {
 		return new DebugStateComponent( worldMap );

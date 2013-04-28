@@ -24,8 +24,8 @@ public:
 	virtual bool IsMoving() const;
 	virtual void CalcVelocity( grinliz::Vector3F* v )	{ *v = velocity; }
 
-	void Set( const grinliz::Vector3F& _velocity, float _rotation )		{ velocity = _velocity; rotation = _rotation; }
-	void Add( const grinliz::Vector3F& _velocity, float _rotation )		{ velocity += _velocity; rotation += _rotation; }
+	void Set( const grinliz::Vector3F& _velocity, float _rotation );
+	void Add( const grinliz::Vector3F& _velocity, float _rotation );
 
 	void DeleteAndRestorePathMCWhenDone( bool _deleteWhenDone )			{ deleteWhenDone = _deleteWhenDone; }
 

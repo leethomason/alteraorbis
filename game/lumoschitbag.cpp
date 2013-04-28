@@ -125,7 +125,7 @@ void LumosChitBag::AddItem( const char* name, Chit* chit, Engine* engine, int te
 	item.InitState();
 
 	if ( !chit->GetItemComponent() ) {
-		ItemComponent* ic = new ItemComponent( engine, item );
+		ItemComponent* ic = new ItemComponent( engine, worldMap, item );
 		chit->Add( ic );
 		for( int i=1; i<itemDefArr.Size(); ++i ) {
 			ic->AddToInventory( new GameItem( *(itemDefArr[i]) ), true );

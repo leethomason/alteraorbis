@@ -13,6 +13,8 @@ using namespace grinliz;
 
 PhysicsMoveComponent::PhysicsMoveComponent( WorldMap* _map ) : GameMoveComponent( _map ), deleteWhenDone( false )
 {
+	rotation = 0;
+	deleteWhenDone = true;
 	velocity.Zero();
 }
 
@@ -42,6 +44,20 @@ void PhysicsMoveComponent::OnAdd( Chit* chit )
 void PhysicsMoveComponent::OnRemove()
 {
 	super::OnRemove();
+}
+
+
+void PhysicsMoveComponent::Set( const grinliz::Vector3F& _velocity, float _rotation )		{ 
+	velocity = _velocity; 
+	rotation = _rotation; 
+	parentChit->SetTickNeeded();
+}
+
+
+void PhysicsMoveComponent::Add( const grinliz::Vector3F& _velocity, float _rotation )		{ 
+	velocity += _velocity; 
+	rotation += _rotation; 
+	parentChit->SetTickNeeded();
 }
 
 
@@ -101,8 +117,9 @@ int PhysicsMoveComponent::DoTick( U32 delta, U32 since )
 	}
 	bool isMoving = IsMoving();
 	if ( !isMoving && deleteWhenDone ) {
-		parentChit->Remove( this );
-		parentChit->Add( new PathMoveComponent( map ));
+		Chit* chit = parentChit;
+		chit->Remove( this );
+		chit->Add( new PathMoveComponent( map ));
 		delete this;
 	}
 	return isMoving ? 0 : VERY_LONG_TICK;

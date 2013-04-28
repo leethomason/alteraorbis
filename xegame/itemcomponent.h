@@ -22,13 +22,15 @@
 #include "component.h"
 #include "../engine/engine.h"
 
+class WorldMap;
+
 class ItemComponent : public Component
 {
 private:
 	typedef Component super;
 
 public:
-	ItemComponent( Engine* _engine, const GameItem& _item );
+	ItemComponent( Engine* _engine, WorldMap* map, const GameItem& _item );
 	virtual ~ItemComponent();
 
 	virtual const char* Name() const { return "ItemComponent"; }
@@ -64,6 +66,7 @@ private:
 	CTicker slowTick;
 
 	Engine *engine;
+	WorldMap* worldMap;
 	// The first item is what this *is*.
 	// Following items are inventory: held items, intrinsic, pack.
 	GameItem mainItem;	// What we are. Always first in the array.

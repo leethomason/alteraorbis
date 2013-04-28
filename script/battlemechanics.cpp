@@ -430,7 +430,7 @@ Vector3F BattleMechanics::ComputeLeadingShot(	const grinliz::Vector3F& origin,
 }
 
 
-void BattleMechanics::GenerateExplosionMsgs( const DamageDesc& _dd, const Vector3F& origin, int originID, Engine* engine, CDynArray<Chit*>* hashQuery )
+void BattleMechanics::GenerateExplosionMsgs( const DamageDesc& dd, const Vector3F& origin, int originID, Engine* engine, CDynArray<Chit*>* hashQuery )
 {
 	Rectangle2F rect;
 	rect.Set( origin.x, origin.z, origin.x, origin.z );
@@ -464,22 +464,22 @@ void BattleMechanics::GenerateExplosionMsgs( const DamageDesc& _dd, const Vector
 				rc->GetModelList( &targetList );
 				if ( targetList.Find( m ) >= 0 ) {
 	#else
-			Vector3F hit = target;
+			//Vector3F hit = target;
 			{
 				{
 	#endif
 					// HIT!
-					float len = (hit-origin).Length();
-					// Scale the damage based on the range.
+					float len = (target-origin).Length();
 					if ( len < EXPLOSIVE_RANGE ) {
-						DamageDesc dd = _dd;
-						float t = (EXPLOSIVE_RANGE-len)/EXPLOSIVE_RANGE;
-						dd.damage *= t;
+						//DamageDesc dd = _dd;
+						//float t = (EXPLOSIVE_RANGE-len)/EXPLOSIVE_RANGE;
+						//dd.damage *= t;
 
 						ChitMsg msg( ChitMsg::CHIT_DAMAGE, 1, &dd );
-						msg.vector = target - origin;
-						msg.vector.Normalize();
-						msg.vector.Multiply( Lerp( 2.f, 4.f, t ));
+						//msg.vector = target - origin;
+						//msg.vector.Normalize();
+						//msg.vector.Multiply( Lerp( 2.f, 4.f, t ));
+						msg.vector = origin;
 						msg.originID = originID;
 						chit->SendMessage( msg, 0 );
 					}

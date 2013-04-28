@@ -109,7 +109,7 @@ const GameItem* PlantScript::GetResource()
 void PlantScript::Init( const ScriptContext& ctx )
 {
 	const GameItem* resource = GetResource();
-	ctx.chit->Add( new ItemComponent( engine, *resource ));
+	ctx.chit->Add( new ItemComponent( engine, worldMap, *resource ));
 	ctx.chit->GetItem()->stats.Roll( ctx.chit->random.Rand() );
 	SetRenderComponent( ctx );
 

@@ -150,7 +150,7 @@ void Sim::CreateCores()
 			ms->SetMode( GRID_BLOCKED ); 
 			chit->Add( ms );
 			chit->Add( new ScriptComponent( new CoreScript( worldMap ), &chitBag->census ));
-			chit->Add( new ItemComponent( engine, *gameItem ));
+			chit->Add( new ItemComponent( engine, worldMap, *gameItem ));
 			chit->Add( new RenderComponent( engine, asset ));
 			++ncores;
 		}
