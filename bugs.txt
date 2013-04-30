@@ -3,6 +3,7 @@ x explosion is in the wrong direction. Units walk through explosions?? (Balrog v
 - flower colors (too saturated flowers)
 x touching buttons clears tracking and can leave in weird state where camera doesn't track player
 x update the "procedural rendering" wiki
+- sector-herding still getting stuck. Go back to random re-herd?
 
 Internal:
 x does fire affect plants??

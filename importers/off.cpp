@@ -106,9 +106,8 @@ bool ImportOFF( const std::string& filename, ModelBuilder* builder )
 			continue;
 		}
 		GLString str( buf );
-		int nTokens;
 		StrTokenize( str, &tokens );
-		if ( nTokens == 0 ) {
+		if ( tokens.Empty() ) {
 			continue;
 		}
 
