@@ -20,6 +20,7 @@ public:
 	void SetContext( Engine* e, WorldMap* wm ) { engine = e; worldMap = wm; }
 
 	Chit* NewMonsterChit( const grinliz::Vector3F& pos, const char* name, int team );
+	Chit* NewGoldChit( const grinliz::Vector3F& pos, int amount );
 	void AddItem( const char* name, Chit* chit, Engine* engine, int team, int level );
 
 	// IBoltImpactHandler
@@ -28,8 +29,10 @@ public:
 	virtual int MapGridUse( int x, int y );
 
 	Census census;
+	static bool GoldFilter( Chit* chit );
 
 private:
+
 	static bool HasMapSpatialInUse( Chit* );
 	grinliz::CDynArray<Chit*> inUseArr;
 	grinliz::CDynArray<Chit*> chitList;

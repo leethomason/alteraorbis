@@ -240,7 +240,6 @@ public:
 	void Queue( RenderQueue* queue, EngineShaders* shaders, int requiredShaderFlag, int excludedShaderFlag );
 
 	enum {
-		MODEL_SELECTABLE			= (1<<0),
 		MODEL_HAS_COLOR				= (1<<1),
 		MODEL_HAS_BONE_FILTER		= (1<<2),
 		MODEL_NO_SHADOW				= (1<<3),

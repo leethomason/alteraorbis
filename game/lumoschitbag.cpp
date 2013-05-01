@@ -7,6 +7,7 @@
 #include "debugstatecomponent.h"
 #include "healthcomponent.h"
 #include "mapspatialcomponent.h"
+//#include "physicsmovecomponent.h"
 
 #include "../xegame/rendercomponent.h"
 #include "../xegame/itemcomponent.h"
@@ -50,8 +51,38 @@ Chit* LumosChitBag::NewMonsterChit( const Vector3F& pos, const char* name, int t
 	chit->GetSpatialComponent()->SetPosition( pos );
 
 	AddItem( name, chit, engine, team, 0 );
+	chit->GetItemComponent()->AddGold( 10 );
 
 	chit->Add( new HealthComponent( engine ));
+	return chit;
+}
+
+
+bool LumosChitBag::GoldFilter( Chit* chit )
+{
+	return ( chit->GetItem() && chit->GetItem()->name == "gold" );
+}
+
+
+Chit* LumosChitBag::NewGoldChit( const grinliz::Vector3F& pos, int amount )
+{
+	Vector2F v2 = { pos.x, pos.z };
+	this->QuerySpatialHash( &chitList, v2, 1.0f, 0, GoldFilter );
+	Chit* chit = 0;
+	if ( chitList.Size() ) {
+		chit = chitList[0];
+	}
+	if ( !chit ) {
+		chit = this->NewChit();
+		chit->Add( new SpatialComponent());
+		chit->Add( new RenderComponent( engine, "gold" ));
+		//chit->Add( new PhysicsMoveComponent() );
+
+		chit->GetSpatialComponent()->SetPosition( pos );
+
+		AddItem( "gold", chit, engine, 0, 0 );
+	}
+	chit->GetItemComponent()->AddGold( amount );
 	return chit;
 }
 

@@ -26,6 +26,7 @@
 #include "../game/healthcomponent.h"
 #include "../game/physicsmovecomponent.h"
 #include "../game/pathmovecomponent.h"
+#include "../game/lumoschitbag.h"
 
 #include "../script/procedural.h"
 
@@ -36,9 +37,12 @@
 using namespace grinliz;
 
 
-ItemComponent::ItemComponent( Engine* _engine, WorldMap* wm, const GameItem& _item ) : engine(_engine), worldMap(wm), mainItem(_item), slowTick( 500 )
+ItemComponent::ItemComponent( Engine* _engine, WorldMap* wm, const GameItem& _item ) 
+	: engine(_engine), worldMap(wm), mainItem(_item), slowTick( 500 )
 {
 	itemArr.Push( &mainItem );	
+	gold = 0;
+	pickupMode = 0;
 }
 
 
@@ -54,6 +58,9 @@ ItemComponent::~ItemComponent()
 void ItemComponent::Serialize( XStream* xs )
 {
 	this->BeginSerialize( xs, "ItemComponent" );
+	XARC_SER( xs, gold );
+	XARC_SER( xs, pickupMode );
+
 	int nItems = itemArr.Size();
 	XARC_SER( xs, nItems );
 
@@ -68,6 +75,13 @@ void ItemComponent::Serialize( XStream* xs )
 		itemArr[i]->Serialize( xs );
 	}
 	this->EndSerialize( xs );
+}
+
+
+void ItemComponent::AddGold( int delta )
+{
+	gold += delta;
+	parentChit->SetTickNeeded();
 }
 
 
@@ -110,9 +124,8 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 						delete pathMove;
 						pathMove = 0;
 
-						physics = new PhysicsMoveComponent( worldMap );
+						physics = new PhysicsMoveComponent( worldMap, true );
 						parentChit->Add( physics );
-						physics->DeleteAndRestorePathMCWhenDone( true );
 					}
 					static const float FORCE = 4.0f;
 					physics->Add( v*FORCE, r );
@@ -162,6 +175,12 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			Vector3F v = parentChit->GetSpatialComponent()->GetPosition();
 			engine->particleSystem->EmitPD( "heal", v, V3F_UP, engine->camera.EyeDir3(), 30 );
 		}
+	}
+	else if ( msg.ID() == ChitMsg::CHIT_DESTROYED_START ) {
+		// FIXME: send to reserve if no pos
+		GLASSERT( parentChit->GetSpatialComponent() );
+		parentChit->GetLumosChitBag()->NewGoldChit( parentChit->GetSpatialComponent()->GetPosition(), gold );
+		gold = 0;
 	}
 	else {
 		super::OnChitMsg( chit, msg );
@@ -223,6 +242,34 @@ int ItemComponent::DoTick( U32 delta, U32 since )
 
 		if ( ( i==0 || itemArr[i]->Active()) && EmitEffect( mainItem, delta )) {
 			tick = 0;
+		}
+	}
+
+
+	static const float PICKUP_RANGE = 0.5f;
+	static const float HOOVER_RANGE = 2.0f;
+
+	if ( parentChit->GetSpatialComponent() ) {
+		Vector2F pos = parentChit->GetSpatialComponent()->GetPosition2D();
+		if ( pickupMode == GOLD_PICKUP || pickupMode == GOLD_HOOVER ) {
+			const CDynArray< Chit* >& arr = GetChitBag()->QuerySpatialHash( pos, PICKUP_RANGE, 0, LumosChitBag::GoldFilter );
+			for( int i=0; i<arr.Size(); ++i ) {
+				gold += arr[i]->GetItemComponent()->TakeGold();
+				arr[i]->QueueDelete();
+			}
+		}
+		if ( pickupMode == GOLD_HOOVER ) {
+			const CDynArray< Chit* >& arr = GetChitBag()->QuerySpatialHash( pos, HOOVER_RANGE, 0, LumosChitBag::GoldFilter );
+			for( int i=0; i<arr.Size(); ++i ) {
+				Chit* gold = arr[i];
+				GLASSERT( parentChit != gold );
+				TrackingMoveComponent* tc = GET_COMPONENT( gold, TrackingMoveComponent );
+				if ( !tc ) {
+					tc = new TrackingMoveComponent( worldMap );
+					tc->SetTarget( parentChit->ID() );
+					gold->Add( tc );
+				}
+			}
 		}
 	}
 	return tick;

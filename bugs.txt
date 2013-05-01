@@ -1,17 +1,34 @@
-User facing:
-x explosion is in the wrong direction. Units walk through explosions?? (Balrog vs. Human.)
 - flower colors (too saturated flowers)
-x touching buttons clears tracking and can leave in weird state where camera doesn't track player
-x update the "procedural rendering" wiki
 - sector-herding still getting stuck. Go back to random re-herd?
-
-Internal:
-x does fire affect plants??
+- change shield to have cooldown then charge-up (rather than cooldown then reset)
+- rings deflect bolts
 - remove temporary arbitrary AI limit in corescript
 - redo AI utility to be based on a set of curves
 - health is awkward: keeps copy of HP (oops). move hp to health component? (TotalHP() on item?)
+- integers for discrete values (hp, gold)
+- remove UI button for track - only teleport (or at least hide)
+- fix / disable right mouse behavior
+- add portals
+- more critters
+- space around ports
+- sector herding: more aggressive? wider range?
+- UI on minimap. Target, show highlight of domain.
+- arrays in spatial query much, much too dangerous. Support CArray?
 
 - game
+	- Gold
+		x drop gold
+		- pickup gold
+		- reserve to distribute gold to denizens
+		- drop items
+		- pickup items
+		- item screen
+		- bind to core
+		- build something
+		- visitors warp in, travel warp out
+		- visitors visit interesting buildings
+		- visitors create energy, buildings consume energy
+		- leave core
 	- Flora 2
 		- weapon toggle / selection
 		- level up
@@ -129,6 +146,10 @@ V2 ideas:
 
 ----------- FIXED -------------
 
+x explosion is in the wrong direction. Units walk through explosions?? (Balrog vs. Human.)
+x touching buttons clears tracking and can leave in weird state where camera doesn't track player
+x update the "procedural rendering" wiki
+x does fire affect plants??
 x cameras only self-delete if they reach destination; should do better. Probably
   should only be one camera in existence. (BlueSmoke, NavTest2)
 x refactor code - if needed? - in AIComponent (the fixmes)

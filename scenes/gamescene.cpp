@@ -96,6 +96,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	shieldBar.Init( &gamui2D, 10, blue, grey );
 
 	dateLabel.Init( &gamui2D );
+	goldLabel.Init( &gamui2D );
 }
 
 
@@ -133,6 +134,7 @@ void GameScene::Resize()
 	layout.PosAbs( &shieldBar,  0, 2 );
 
 	dateLabel.SetPos( faceImage.X()-faceImage.Width(), 0 );
+	goldLabel.SetPos( dateLabel.X(), dateLabel.Y() + gamui2D.GetTextHeight() );
 
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
 		newsButton[i].SetPos( port.UIWidth()- (NEWS_BUTTON_WIDTH), MINI_MAP_SIZE + (NEWS_BUTTON_HEIGHT+2)*i );
@@ -372,6 +374,11 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 			game->GetScreenport().ViewProjectionInverse3D( &mvpi );
 			sim->GetEngine()->RayFromViewToYPlane( view, mvpi, &ray, &at );
 			Model* model = sim->GetEngine()->IntersectModel( ray.origin, ray.direction, 10000.0f, TEST_HIT_AABB, 0, 0, 0, &atModel );
+			
+			// FIXME: need a generic solution here. How to handle stuff that isn't tappable?
+			if ( model && model->userData && LumosChitBag::GoldFilter( model->userData )) {
+				model = 0;	// don't tap on gold.
+			}
 
 			int tapMod = lumosGame->GetTapMod();
 
@@ -604,6 +611,15 @@ void GameScene::DoTick( U32 delta )
 	CStr<18> str;
 	str.Format( "%.2f %s", sim->DateInAge(), sd.name.c_str() );
 	dateLabel.SetText( str.c_str() );
+
+	Chit* playerChit = sim->GetPlayerChit();
+	str.Clear();
+	int gold = 0;
+	if ( playerChit && playerChit->GetItemComponent() ) {
+		gold = playerChit->GetItemComponent()->Gold();
+	}
+	str.Format( "Au:%d", gold );
+	goldLabel.SetText( str.c_str() );
 
 	SetBars();
 }

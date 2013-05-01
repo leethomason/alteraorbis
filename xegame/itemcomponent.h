@@ -37,6 +37,9 @@ public:
 
 	virtual void DebugStr( grinliz::GLString* str ) {
 		str->Format( "[Item] %s hp=%.1f/%.1f ", mainItem.Name(), mainItem.hp, mainItem.TotalHP() );
+		if ( gold ) {
+			str->Format( "Au=%d ", gold );
+		}
 	}
 
 	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
@@ -57,6 +60,21 @@ public:
 	IMeleeWeaponItem*	GetMeleeWeapon();
 	IShield*			GetShield();
 
+	void AddGold( int delta );
+	int TakeGold() {
+		int g = gold;
+		gold = 0;
+		return g;
+	}
+	int Gold() const						{ return gold; }
+
+	enum {
+		NO_AUTO_PICKUP,
+		GOLD_PICKUP,
+		GOLD_HOOVER
+	};
+	void SetPickup( int mode )	{ pickupMode = mode; }
+
 	bool AddToInventory( GameItem* item, bool equip );
 
 private:
@@ -64,6 +82,8 @@ private:
 	bool EmitEffect( const GameItem& it, U32 deltaTime );
 
 	CTicker slowTick;
+	int gold;
+	int pickupMode;
 
 	Engine *engine;
 	WorldMap* worldMap;

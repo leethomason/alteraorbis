@@ -10,7 +10,7 @@ class PhysicsMoveComponent : public GameMoveComponent
 private:
 	typedef GameMoveComponent super;
 public:
-	PhysicsMoveComponent( WorldMap* _map );
+	PhysicsMoveComponent( WorldMap* _map, bool deleteWhenDone );
 	virtual ~PhysicsMoveComponent() {}
 
 	virtual const char* Name() const { return "PhysicsMoveComponent"; }
@@ -33,6 +33,31 @@ private:
 	grinliz::Vector3F velocity;
 	float rotation;
 	bool deleteWhenDone;
+};
+
+
+class TrackingMoveComponent : public GameMoveComponent
+{
+private:
+	typedef GameMoveComponent super;
+public:
+	TrackingMoveComponent( WorldMap* map ) : GameMoveComponent( map ), target( 0 )	{}
+	virtual ~TrackingMoveComponent()		{}
+
+	virtual const char* Name() const { return "TrackingMoveComponent"; }
+	virtual void DebugStr( grinliz::GLString* str ) {
+		str->Format( "[TrackingMove] target=%d ", target );
+	}
+
+	virtual void Serialize( XStream* xs );
+	virtual int DoTick( U32 delta, U32 since );
+	virtual bool IsMoving();
+	virtual void CalcVelocity( grinliz::Vector3F* v );
+
+	void SetTarget( int chitID )	{ target = chitID; }
+
+private:
+	int target;
 };
 
 

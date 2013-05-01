@@ -116,7 +116,7 @@ public:
 	int Strength() const		{ return trait[STR]; }
 	int Will() const			{ return trait[WILL]; }
 	int Charisma() const		{ return trait[CHR]; }
-	int Intelligence() const		{ return trait[INT]; }
+	int Intelligence() const	{ return trait[INT]; }
 	int Dexterity() const		{ return trait[DEX]; }
 
 	int Experience() const		{ return exp; }

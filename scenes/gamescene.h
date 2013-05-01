@@ -79,7 +79,9 @@ private:
 
 	gamui::Image		faceImage;
 	gamui::DigitalBar	healthBar, ammoBar, shieldBar;
+
 	gamui::TextLabel	dateLabel;
+	gamui::TextLabel	goldLabel;
 };
 
 

@@ -66,6 +66,7 @@
     <texture filename="testwrap.png" />
   </atlas>
 
+  <model filename="gold.ac" modelName="gold" origin="0 0 0"/>
   <model filename="teststructures.ac" modelName="testStruct0"  origin="0 0 0"  shading="flat" polyRemoval="pre" />
   <model filename="teststructures.ac" modelName="testStruct1"  origin="2 0 0"  shading="flat" polyRemoval="pre" />
   <model filename="unitPlateCentered.ac" shading="flat" />

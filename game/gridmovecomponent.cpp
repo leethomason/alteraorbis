@@ -9,7 +9,6 @@
 
 using namespace grinliz;
 
-static const float GRID_SPEED = MOVE_SPEED * 6.0f;
 static const float GRID_ACCEL = 1.0f;
 
 GridMoveComponent::GridMoveComponent( WorldMap* wm ) : GameMoveComponent( wm )

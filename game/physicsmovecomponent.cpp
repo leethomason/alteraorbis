@@ -11,10 +11,11 @@
 
 using namespace grinliz;
 
-PhysicsMoveComponent::PhysicsMoveComponent( WorldMap* _map ) : GameMoveComponent( _map ), deleteWhenDone( false )
+static const float TRACK_SPEED	= MOVE_SPEED * 4.0f;
+
+PhysicsMoveComponent::PhysicsMoveComponent( WorldMap* _map, bool _deleteWhenDone ) : GameMoveComponent( _map ), deleteWhenDone( _deleteWhenDone )
 {
 	rotation = 0;
-	deleteWhenDone = true;
 	velocity.Zero();
 }
 
@@ -125,4 +126,65 @@ int PhysicsMoveComponent::DoTick( U32 delta, U32 since )
 	return isMoving ? 0 : VERY_LONG_TICK;
 }
 
+
+
+void TrackingMoveComponent::Serialize( XStream* xs )
+{
+	this->BeginSerialize( xs, Name() );
+	XARC_SER( xs, target );
+	this->EndSerialize( xs );
+}
+
+
+void TrackingMoveComponent::CalcVelocity( grinliz::Vector3F* v )
+{
+	v->Zero();
+
+	Chit* chit = GetChitBag()->GetChit( target );
+	if ( !chit || !chit->GetSpatialComponent() || !parentChit->GetSpatialComponent() ) 
+		return;
+
+	Vector3F targetPos = chit->GetSpatialComponent()->GetPosition();
+	Vector3F pos = parentChit->GetSpatialComponent()->GetPosition();
+
+	Vector3F delta = targetPos - pos;
+	delta.SafeNormalize( 1,0,0 );
+	*v = delta * TRACK_SPEED;
+}
+
+
+bool TrackingMoveComponent::IsMoving()
+{
+	Chit* chit = GetChitBag()->GetChit( target );
+	if ( !chit || !chit->GetSpatialComponent() || !parentChit->GetSpatialComponent() ) 
+		return false;
+
+	Vector3F targetPos = chit->GetSpatialComponent()->GetPosition();
+	Vector3F pos = parentChit->GetSpatialComponent()->GetPosition();
+	return targetPos != pos;
+}
+
+
+int TrackingMoveComponent::DoTick( U32 deltaTime, U32 since )
+{
+	Chit* chit = GetChitBag()->GetChit( target );
+	if ( !chit || !chit->GetSpatialComponent() || !parentChit->GetSpatialComponent() ) 
+		return VERY_LONG_TICK;
+
+	Vector3F targetPos = chit->GetSpatialComponent()->GetPosition();
+	Vector3F pos = parentChit->GetSpatialComponent()->GetPosition();
+
+	Vector3F delta = targetPos - pos;
+	float len = delta.Length();
+	float travel = this->Travel( TRACK_SPEED, deltaTime );
+
+	if ( travel >= len ) {
+		parentChit->GetSpatialComponent()->SetPosition( targetPos );
+	}
+	else {
+		delta.Normalize();
+		parentChit->GetSpatialComponent()->SetPosition( pos + delta*travel );
+	}
+	return 0;
+}
 

@@ -23,6 +23,7 @@ static const int MAX_MOVE_PATH = MAX_MAP_SIZE/2;	// repath if we need to
 // 4 miles/hour = 6000m/hr = 1.6m/s = 0.8grid/s
 // Which looks like a mellow walk.
 static const float MOVE_SPEED		= 1.2f;			// grid/second
+static const float GRID_SPEED		= MOVE_SPEED * 6.0f;
 static const float ROTATION_SPEED	= 360.f;		// degrees/second
 
 static const int SECTOR_SIZE		= 64;
@@ -44,7 +45,7 @@ static const U32 AGE				= MINUTE * MINUTES_IN_AGE;		// 1st age, 2nd age, etc.
 static const float MIN_EFFECTIVE_RANGE = 2.0f;
 static const float MAX_EFFECTIVE_RANGE = 25.0f;	
 
-static const int MODEL_USER	= 0x1000;				// from model.h
+static const int MODEL_USER		= (1<<16);				// from model.h
 
 // Debugging values:
 static const float ROTATION_LIMIT	= 45.0f;

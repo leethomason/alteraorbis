@@ -99,6 +99,10 @@ void Sim::Load( const char* mapDAT, const char* gameDAT )
 			fclose( fp );
 		}
 	}
+	Chit* player = GetPlayerChit();
+	if ( player && player->GetItemComponent() ) {
+		player->GetItemComponent()->SetPickup( ItemComponent::GOLD_HOOVER );
+	}
 }
 
 
@@ -179,11 +183,12 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos, const char* assetName )
 	chit->Add( new SpatialComponent());
 	chit->Add( new RenderComponent( engine, assetName ));
 	chit->Add( new PathMoveComponent( worldMap ));
-	//chit->Add( new DebugStateComponent( worldMap ));
 
 	chitBag->AddItem( assetName, chit, engine, 1, 4 );
 	chitBag->AddItem( "shield", chit, engine, 0, 4 );
 	chitBag->AddItem( "blaster", chit, engine, 0, 4 );
+	chit->GetItemComponent()->AddGold( 100 );
+	chit->GetItemComponent()->SetPickup( ItemComponent::GOLD_HOOVER );
 
 	AIComponent* ai = new AIComponent( engine, worldMap );
 	ai->EnableDebug( true );
