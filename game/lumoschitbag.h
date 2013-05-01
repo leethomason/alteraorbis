@@ -29,7 +29,10 @@ public:
 	virtual int MapGridUse( int x, int y );
 
 	Census census;
+	// Is this gold?
 	static bool GoldFilter( Chit* chit );
+	// Is this something to pick up?
+	static bool LootFilter( Chit* chit );
 
 private:
 

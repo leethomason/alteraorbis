@@ -67,7 +67,8 @@ int CoreScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 		if ( worldMap->Bounds().Contains( pos ) && worldMap->IsPassable( pos.x, pos.y )) {
 			Rectangle2F r;
 			r.Set( (float)pos.x, (float)(pos.y), (float)(pos.x+1), (float)(pos.y+1) );
-			const CDynArray<Chit*>& arr = ctx.chit->GetChitBag()->QuerySpatialHash( r, 0, Accept );
+			CChitArray arr;
+			ctx.chit->GetChitBag()->QuerySpatialHash( &arr, r, 0, Accept );
 			if ( arr.Empty() ) {
 				Vector3F pf = { (float)pos.x+0.5f, 0, (float)pos.y+0.5f };
 				// FIXME: proper team

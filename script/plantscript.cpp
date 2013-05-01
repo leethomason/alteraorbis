@@ -186,7 +186,8 @@ int PlantScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 		else {
 			Rectangle2F r;
 			r.Set( (float)tap.x, (float)tap.y, (float)(tap.x+1), (float)(tap.y+1) );
-			const grinliz::CDynArray<Chit*>& query = ctx.chit->GetChitBag()->QuerySpatialHash( r, 0, 0 );
+			CChitArray query;
+			ctx.chit->GetChitBag()->QuerySpatialHash( &query, r, 0, 0 );
 			for( int i=0; i<query.Size(); ++i ) {
 				RenderComponent* rc = query[i]->GetRenderComponent();
 				if ( rc ) {

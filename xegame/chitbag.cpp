@@ -378,3 +378,16 @@ void ChitBag::QuerySpatialHash(	grinliz::CDynArray<Chit*>* array,
 		}
 	}
 }
+
+
+void ChitBag::QuerySpatialHash(	CChitArray* arr,
+								const grinliz::Rectangle2F& r, 
+								const Chit* ignoreMe,
+								bool (*accept)(Chit*) )
+{
+	QuerySpatialHash( &cachedQuery, r, ignoreMe, accept );
+	arr->Clear();
+	for( int i=0; i<cachedQuery.Size(); ++i ) {
+		arr->Push( cachedQuery[i] );
+	}
+}

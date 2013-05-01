@@ -32,6 +32,7 @@ class ComponentFactory;
 class XStream;
 class CameraComponent;
 
+#define CChitArray grinliz::CArray<Chit*, 32 >
 
 class ChitBag : public IBoltImpactHandler
 {
@@ -89,13 +90,10 @@ public:
 							bool (*accept)(Chit*) = AcceptAll );	// function ptr: see NoFilter
 
 	// Use with caution: the array returned can change if a sub-function calls this.
-	const grinliz::CDynArray<Chit*>& QuerySpatialHash(	const grinliz::Rectangle2F& r, 
-														const Chit* ignoreMe,
-														bool (*accept)(Chit*) = AcceptAll )
-	{
-		QuerySpatialHash( &cachedQuery, r, ignoreMe, accept );
-		return cachedQuery;
-	}
+	void QuerySpatialHash(	CChitArray* arr,
+							const grinliz::Rectangle2F& r, 
+							const Chit* ignoreMe,
+							bool (*accept)(Chit*) = AcceptAll );
 
 	void QuerySpatialHash(	grinliz::CDynArray<Chit*>* array,
 							const grinliz::Vector2F& origin, 
@@ -108,15 +106,15 @@ public:
 		QuerySpatialHash( array, r, ignoreMe, accept );
 	}
 	// Use with caution: the array returned can change if a sub-function calls this.
-	const grinliz::CDynArray<Chit*>& QuerySpatialHash(	const grinliz::Vector2F& origin, 
-														float rad,
-														const Chit* ignoreMe,
-														bool (*accept)(Chit*) = AcceptAll )
+	void QuerySpatialHash(	CChitArray* array,
+							const grinliz::Vector2F& origin, 
+							float rad,
+							const Chit* ignoreMe,
+							bool (*accept)(Chit*) = AcceptAll )
 	{
 		grinliz::Rectangle2F r;
 		r.Set( origin.x-rad, origin.y-rad, origin.x+rad, origin.y+rad );
-		QuerySpatialHash( &cachedQuery, r, ignoreMe, accept );
-		return cachedQuery;
+		QuerySpatialHash( array, r, ignoreMe, accept );
 	}
 
 	// IBoltImpactHandler

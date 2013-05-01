@@ -250,16 +250,18 @@ int ItemComponent::DoTick( U32 delta, U32 since )
 	static const float HOOVER_RANGE = 2.0f;
 
 	if ( parentChit->GetSpatialComponent() ) {
+		CChitArray arr;
+
 		Vector2F pos = parentChit->GetSpatialComponent()->GetPosition2D();
 		if ( pickupMode == GOLD_PICKUP || pickupMode == GOLD_HOOVER ) {
-			const CDynArray< Chit* >& arr = GetChitBag()->QuerySpatialHash( pos, PICKUP_RANGE, 0, LumosChitBag::GoldFilter );
+			GetChitBag()->QuerySpatialHash( &arr, pos, PICKUP_RANGE, 0, LumosChitBag::GoldFilter );
 			for( int i=0; i<arr.Size(); ++i ) {
 				gold += arr[i]->GetItemComponent()->TakeGold();
 				arr[i]->QueueDelete();
 			}
 		}
 		if ( pickupMode == GOLD_HOOVER ) {
-			const CDynArray< Chit* >& arr = GetChitBag()->QuerySpatialHash( pos, HOOVER_RANGE, 0, LumosChitBag::GoldFilter );
+			GetChitBag()->QuerySpatialHash( &arr, pos, HOOVER_RANGE, 0, LumosChitBag::GoldFilter );
 			for( int i=0; i<arr.Size(); ++i ) {
 				Chit* gold = arr[i];
 				GLASSERT( parentChit != gold );

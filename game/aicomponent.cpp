@@ -183,7 +183,8 @@ void AIComponent::GetFriendEnemyLists()
 	friendList.Clear();
 	enemyList.Clear();
 
-	const CDynArray<Chit*>& chitArr = GetChitBag()->QuerySpatialHash( zone, parentChit, FEFilter );
+	CChitArray chitArr;
+	GetChitBag()->QuerySpatialHash( &chitArr, zone, parentChit, FEFilter );
 	for( int i=0; i<chitArr.Size(); ++i ) {
 		int status = GetTeamStatus( chitArr[i] );
 		if ( status == ENEMY ) {
@@ -429,7 +430,8 @@ int AIComponent::DoStand( const ComponentSet& thisComp, U32 since )
 		// Are we on a plant?
 		Vector2F pos = thisComp.spatial->GetPosition2D();
 		// Note that currently only support eating stage 0-1 plants.
-		const CDynArray<Chit*>& plants = parentChit->GetChitBag()->QuerySpatialHash( pos, 0.4f, 0, PlantScript::PassablePlantFilter );
+		CChitArray plants;
+		parentChit->GetChitBag()->QuerySpatialHash( &plants, pos, 0.4f, 0, PlantScript::PassablePlantFilter );
 		if ( !plants.Empty() ) {
 			// We are standing on a plant.
 			float hp = Travel( EAT_HP_PER_SEC, since );
@@ -575,7 +577,8 @@ Vector2F AIComponent::ThinkWanderFlock( const ComponentSet& thisComp )
 	r.min = r.max = origin;
 	r.Outset( PLANT_AWARE );
 
-	const CDynArray<Chit*>& plants = parentChit->GetChitBag()->QuerySpatialHash( r, 0, PlantScript::PassablePlantFilter );
+	CChitArray plants;
+	parentChit->GetChitBag()->QuerySpatialHash( &plants, r, 0, PlantScript::PassablePlantFilter );
 	for( int i=0; i<plants.Size() && i<NPLANTS; ++i ) {
 		pos.Push( plants[i]->GetSpatialComponent()->GetPosition2D() );
 	}
@@ -656,7 +659,8 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 		// Are we near a plant?
 		Vector2F pos = thisComp.spatial->GetPosition2D();
 		// Note that currently only support eating stage 0-1 plants.
-		const CDynArray<Chit*>& plants = parentChit->GetChitBag()->QuerySpatialHash( pos, 3.0f, 0, PlantScript::PassablePlantFilter );
+		CChitArray plants;
+		parentChit->GetChitBag()->QuerySpatialHash( &plants, pos, 3.0f, 0, PlantScript::PassablePlantFilter );
 		if ( !plants.Empty() ) {
 			// We are standing on a plant?
 			float bestDist = FLT_MAX;
@@ -684,6 +688,8 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 			}
 		}
 	}
+	// Is there stuff around to pick up?
+
 
 	if ( dest.IsZero() ) {
 		if ( wanderFlags == 0 ) {

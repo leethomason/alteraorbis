@@ -18,7 +18,8 @@
 - game
 	- Gold
 		x drop gold
-		- pickup gold
+		x player picks up gold
+		- ai picks up gold
 		- reserve to distribute gold to denizens
 		- drop items
 		- pickup items
