@@ -75,7 +75,8 @@ private:
 	};
 
 	void GetFriendEnemyLists();
-	Chit* Closest( const ComponentSet& thisComp, grinliz::CArray<int, MAX_TRACK>* list );
+	Chit* Closest( const ComponentSet& thisComp, Chit* arr[], int n, 
+				   grinliz::Vector2F* pos, float* distance );
 
 	bool LineOfSight( const ComponentSet& thisComp, Chit* target );
 

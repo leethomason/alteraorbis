@@ -47,6 +47,8 @@ static const float WANDER_RADIUS		=  5.0f;
 static const float EAT_HP_PER_SEC		=  2.0f;
 static const float EAT_HP_HEAL_MULT		=  5.0f;	// eating really tears up plants. heal the critter more than damage the plant.
 static const int   WANDER_ODDS			= 50;		// as in 1 in WANDER_ODDS
+static const float PLANT_AWARE			=  3.0f;
+static const float GOLD_AWARE			=  3.5f;
 
 #define AI_OUTPUT
 
@@ -216,21 +218,32 @@ void AIComponent::GetFriendEnemyLists()
 }
 
 
-Chit* AIComponent::Closest( const ComponentSet& thisComp, CArray<int, MAX_TRACK>* list )
+Chit* AIComponent::Closest( const ComponentSet& thisComp, Chit* arr[], int n, Vector2F* outPos, float* distance )
 {
 	float best = FLT_MAX;
 	Chit* chit = 0;
+	Vector3F pos = thisComp.spatial->GetPosition();
 
-	for( int i=0; i<list->Size(); ++i ) {
-		Chit* enemyChit = GetChit( (*list)[i] );
-		ComponentSet enemy( enemyChit, Chit::SPATIAL_BIT | Chit::ITEM_BIT | ComponentSet::IS_ALIVE );
-		if ( enemy.okay ) 
-		{
-			float len2 = (enemy.spatial->GetPosition() - thisComp.spatial->GetPosition()).LengthSquared();
+	for( int i=0; i<n; ++i ) {
+		Chit* c = arr[i];
+		SpatialComponent* sc = c->GetSpatialComponent();
+		if ( sc ) {
+			float len2 = (sc->GetPosition() - pos).LengthSquared();
 			if ( len2 < best ) {
 				best = len2;
-				chit = enemy.chit;
+				chit = c;
 			}
+		}
+	}
+	if ( distance ) {
+		*distance = chit ? sqrtf( best ) : 0;
+	}
+	if ( outPos ) {
+		if ( chit ) {
+			*outPos = chit->GetSpatialComponent()->GetPosition2D();
+		}
+		else {
+			outPos->Zero();
 		}
 	}
 	return chit;
@@ -558,7 +571,6 @@ Vector2F AIComponent::ThinkWanderFlock( const ComponentSet& thisComp )
 	Vector2F origin = thisComp.spatial->GetPosition2D();
 
 	static const int NPLANTS = 4;
-	static const float PLANT_AWARE = 3.0f;
 	static const float TOO_CLOSE = 2.0f;
 
 	// +1 for origin, +4 for plants
@@ -653,43 +665,43 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 	int itemFlags			= item ? item->flags : 0;
 	int wanderFlags			= itemFlags & GameItem::AI_WANDER_MASK;
 	int actionToTake		= WANDER;
+	Vector2F pos = thisComp.spatial->GetPosition2D();
 
 	// Plant eater
 	if ( (itemFlags & GameItem::AI_EAT_PLANTS) && (item->hp < item->TotalHP()))  {
 		// Are we near a plant?
-		Vector2F pos = thisComp.spatial->GetPosition2D();
 		// Note that currently only support eating stage 0-1 plants.
 		CChitArray plants;
-		parentChit->GetChitBag()->QuerySpatialHash( &plants, pos, 3.0f, 0, PlantScript::PassablePlantFilter );
-		if ( !plants.Empty() ) {
-			// We are standing on a plant?
-			float bestDist = FLT_MAX;
-			int best = -1;
-			for( int i=0; i<plants.Size(); ++i ) {
-				float dist2 = ( pos - plants[i]->GetSpatialComponent()->GetPosition2D() ).LengthSquared();
-				if ( dist2 < bestDist ) {
-					bestDist = dist2;
-					best = i;
-				}
+		parentChit->GetChitBag()->QuerySpatialHash( &plants, pos, PLANT_AWARE, 0, PlantScript::PassablePlantFilter );
+
+		Vector2F plantPos =  { 0, 0 };
+		float plantDist = 0;
+		if ( Closest( thisComp, plants.Mem(), plants.Size(), &plantPos, &plantDist )) {
+			if ( plantDist > 0.2f ) {
+				actionToTake = MOVE;
+				dest = plantPos;
 			}
-			if ( best >= 0 ) {
-				if ( bestDist > (0.2f*0.2f) ) {
-					dest = plants[best]->GetSpatialComponent()->GetPosition2D();
-					actionToTake = MOVE;
-				}
-				else {
-					// Already where we need to be		
-					if ( debugFlag ) {
-						GLOUTPUT(( "ID=%d Stand\n", thisComp.chit->ID() ));
+			else {
+				// Already where we need to be		
+				if ( debugFlag ) {
+					GLOUTPUT(( "ID=%d Stand\n", thisComp.chit->ID() ));
 					}
-					currentAction = STAND;
-					return;
-				}
+				currentAction = STAND;
+				return;
 			}
 		}
 	}
 	// Is there stuff around to pick up?
+	if ( dest.IsZero() && thisComp.itemComponent->Pickup() == ItemComponent::GOLD_PICKUP ) {
+		CChitArray gold;
+		parentChit->GetChitBag()->QuerySpatialHash( &gold, pos, GOLD_AWARE, 0, LumosChitBag::GoldFilter );
 
+		Vector2F goldPos;
+		if ( Closest( thisComp, gold.Mem(), gold.Size(), &goldPos, 0 ) ) {
+			actionToTake = MOVE;
+			dest = goldPos;
+		}
+	}
 
 	if ( dest.IsZero() ) {
 		if ( wanderFlags == 0 ) {

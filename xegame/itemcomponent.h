@@ -74,6 +74,7 @@ public:
 		GOLD_HOOVER
 	};
 	void SetPickup( int mode )	{ pickupMode = mode; }
+	int Pickup() const			{ return pickupMode; }
 
 	bool AddToInventory( GameItem* item, bool equip );
 
