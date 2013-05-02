@@ -176,11 +176,15 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			engine->particleSystem->EmitPD( "heal", v, V3F_UP, engine->camera.EyeDir3(), 30 );
 		}
 	}
-	else if ( msg.ID() == ChitMsg::CHIT_DESTROYED_START ) {
+	else if ( msg.ID() >= ChitMsg::CHIT_DESTROYED_START && msg.ID() <= ChitMsg::CHIT_DESTROYED_END ) {
 		// FIXME: send to reserve if no pos
 		GLASSERT( parentChit->GetSpatialComponent() );
-		parentChit->GetLumosChitBag()->NewGoldChit( parentChit->GetSpatialComponent()->GetPosition(), gold );
-		gold = 0;
+		if ( gold ) {
+			parentChit->GetLumosChitBag()->NewGoldChit( parentChit->GetSpatialComponent()->GetPosition(), gold );
+			gold = 0;
+		}
+		// Stop picking up things after destroy sequence started.
+		this->SetPickup( 0 );
 	}
 	else {
 		super::OnChitMsg( chit, msg );
@@ -274,6 +278,7 @@ int ItemComponent::DoTick( U32 delta, U32 since )
 			}
 		}
 	}
+	
 	return tick;
 }
 

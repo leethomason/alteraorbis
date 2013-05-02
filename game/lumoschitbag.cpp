@@ -7,7 +7,7 @@
 #include "debugstatecomponent.h"
 #include "healthcomponent.h"
 #include "mapspatialcomponent.h"
-//#include "physicsmovecomponent.h"
+#include "reservebank.h"
 
 #include "../xegame/rendercomponent.h"
 #include "../xegame/itemcomponent.h"
@@ -51,7 +51,7 @@ Chit* LumosChitBag::NewMonsterChit( const Vector3F& pos, const char* name, int t
 	chit->GetSpatialComponent()->SetPosition( pos );
 
 	AddItem( name, chit, engine, team, 0 );
-	chit->GetItemComponent()->AddGold( 10 );
+	chit->GetItemComponent()->AddGold( ReserveBank::Instance()->WithdrawMonster() );
 	// Assume all AIs pick up gold, for now.
 	chit->GetItemComponent()->SetPickup( ItemComponent::GOLD_PICKUP );
 
@@ -68,6 +68,10 @@ bool LumosChitBag::GoldFilter( Chit* chit )
 
 Chit* LumosChitBag::NewGoldChit( const grinliz::Vector3F& pos, int amount )
 {
+	GLASSERT( amount );
+	if ( !amount )
+		return 0;
+
 	Vector2F v2 = { pos.x, pos.z };
 	this->QuerySpatialHash( &chitList, v2, 1.0f, 0, GoldFilter );
 	Chit* chit = 0;
@@ -78,8 +82,6 @@ Chit* LumosChitBag::NewGoldChit( const grinliz::Vector3F& pos, int amount )
 		chit = this->NewChit();
 		chit->Add( new SpatialComponent());
 		chit->Add( new RenderComponent( engine, "gold" ));
-		//chit->Add( new PhysicsMoveComponent() );
-
 		chit->GetSpatialComponent()->SetPosition( pos );
 
 		AddItem( "gold", chit, engine, 0, 0 );

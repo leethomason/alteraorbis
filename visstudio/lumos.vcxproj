@@ -117,6 +117,7 @@
     <ClCompile Include="..\game\mapspatialcomponent.cpp" />
     <ClCompile Include="..\game\pathmovecomponent.cpp" />
     <ClCompile Include="..\game\physicsmovecomponent.cpp" />
+    <ClCompile Include="..\game\reservebank.cpp" />
     <ClCompile Include="..\game\sim.cpp" />
     <ClCompile Include="..\game\worldinfo.cpp" />
     <ClCompile Include="..\game\worldmap.cpp" />
@@ -204,6 +205,7 @@
     <ClInclude Include="..\game\mapspatialcomponent.h" />
     <ClInclude Include="..\game\pathmovecomponent.h" />
     <ClInclude Include="..\game\physicsmovecomponent.h" />
+    <ClInclude Include="..\game\reservebank.h" />
     <ClInclude Include="..\game\sim.h" />
     <ClInclude Include="..\game\weather.h" />
     <ClInclude Include="..\game\worldgrid.h" />

@@ -16,7 +16,7 @@ class LumosChitBag;
 class Texture;
 class Chit;
 class Weather;
-
+class ReserveBank;
 
 class Sim
 {
@@ -59,6 +59,7 @@ private:
 	LumosGame*		lumosGame;
 	WorldMap*		worldMap;
 	Weather*		weather;
+	ReserveBank*	reserveBank;
 	LumosChitBag*	chitBag;
 
 	grinliz::Random	random;

@@ -26,6 +26,7 @@
 #include "weather.h"
 #include "mapspatialcomponent.h"
 #include "aicomponent.h"
+#include "reservebank.h"
 
 #include "../xarchive/glstreamer.h"
 
@@ -41,6 +42,7 @@ Sim::Sim( LumosGame* g )
 	worldMap = new WorldMap( MAX_MAP_SIZE, MAX_MAP_SIZE );
 	engine = new Engine( port, database, worldMap );
 	weather = new Weather( MAX_MAP_SIZE, MAX_MAP_SIZE );
+	reserveBank = new ReserveBank();
 
 	engine->SetGlow( true );
 	engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
@@ -61,6 +63,7 @@ Sim::Sim( LumosGame* g )
 Sim::~Sim()
 {
 	delete weather;
+	delete reserveBank;
 	worldMap->AttachEngine( 0, 0 );
 	delete chitBag;
 	delete engine;
@@ -91,6 +94,7 @@ void Sim::Load( const char* mapDAT, const char* gameDAT )
 			XARC_SER( &reader, minuteClock );
 			XARC_SER( &reader, timeInMinutes );
 
+			reserveBank->Serialize( &reader );
 			engine->camera.Serialize( &reader );
 			chitBag->Serialize( &factory, &reader );
 
@@ -123,6 +127,7 @@ void Sim::Save( const char* mapDAT, const char* gameDAT )
 			XARC_SER( &writer, minuteClock );
 			XARC_SER( &writer, timeInMinutes );
 
+			reserveBank->Serialize( &writer );
 			engine->camera.Serialize( &writer );
 			chitBag->Serialize( &factory, &writer );
 
@@ -187,7 +192,7 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos, const char* assetName )
 	chitBag->AddItem( assetName, chit, engine, 1, 4 );
 	chitBag->AddItem( "shield", chit, engine, 0, 4 );
 	chitBag->AddItem( "blaster", chit, engine, 0, 4 );
-	chit->GetItemComponent()->AddGold( 100 );
+	chit->GetItemComponent()->AddGold( ReserveBank::Instance()->WithdrawDenizen() );
 	chit->GetItemComponent()->SetPickup( ItemComponent::GOLD_HOOVER );
 
 	AIComponent* ai = new AIComponent( engine, worldMap );

@@ -35,6 +35,20 @@ static const int MAX_ACTIVE_ITEMS	= 8;
 static const int MAX_ITEM_NAME		= 24;
 static const int NUM_PLANT_TYPES	= 8;
 static const int MAX_PLANT_STAGES	= 4;
+
+// General guidelines to the # of things in the world.
+static const int TYPICAL_DOMAINS	= 100;
+static const int TYPICAL_DENIZENS	= TYPICAL_DOMAINS * 20;
+static const int TYPICAL_BEASTMEN	= TYPICAL_DOMAINS * 10;
+static const int TYPICAL_MONSTERS	= TYPICAL_DOMAINS * 15;
+
+enum {
+	CRYSTAL_RED,
+	CRYSTAL_GREEN,
+	CRYSTAL_VIOLET,
+	NUM_CRYSTAL_TYPES
+};
+
 // Currently an InUse object needs to be 1x1.
 // Can be fixed in LumosChitBag::InUse
 //static const int MAX_GRID_OBJECT_RAD = 1;	// a 3x3 object
