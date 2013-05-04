@@ -13,17 +13,41 @@ static const int ALL_GOLD =   TYPICAL_DENIZENS*GOLD_PER_DENIZEN
 
 ReserveBank* ReserveBank::instance = 0;
 
+
+bool Wallet::IsEmpty() const {
+	if ( gold == 0 ) {
+		for( int i=0; i<NUM_CRYSTAL_TYPES; ++i ) {
+			if ( crystal[i] )
+				return false;
+		}
+		return true;
+	}
+	return false;
+}
+
+
+void Wallet::Serialize( XStream* xs )
+{
+	XarcOpen( xs, "Wallet" );
+	XARC_SER( xs, gold );
+	XARC_SER( xs, crystal[CRYSTAL_RED] );
+	XARC_SER( xs, crystal[CRYSTAL_GREEN] );
+	XARC_SER( xs, crystal[CRYSTAL_VIOLET] );
+	XarcClose( xs );
+}
+
+
 ReserveBank::ReserveBank()
 {
 	GLASSERT( instance == 0 );
 	instance = this;
 
 	// All the gold in the world.
-	gold = ALL_GOLD;
+	bank.gold = ALL_GOLD;
 
-	crystal[CRYSTAL_RED]		= TYPICAL_DOMAINS * 10;
-	crystal[CRYSTAL_GREEN]		= TYPICAL_DOMAINS * 2;
-	crystal[CRYSTAL_VIOLET]		= TYPICAL_DOMAINS / 2;
+	bank.crystal[CRYSTAL_RED]		= TYPICAL_DOMAINS * 10;
+	bank.crystal[CRYSTAL_GREEN]		= TYPICAL_DOMAINS * 2;
+	bank.crystal[CRYSTAL_VIOLET]		= TYPICAL_DOMAINS / 2;
 }
 
 
@@ -37,25 +61,59 @@ ReserveBank::~ReserveBank()
 void ReserveBank::Serialize( XStream* xs )
 {
 	XarcOpen( xs, "ReserveBank" );
-	XARC_SER( xs, gold );
-	XARC_SER( xs, crystal[CRYSTAL_RED] );
-	XARC_SER( xs, crystal[CRYSTAL_GREEN] );
-	XARC_SER( xs, crystal[CRYSTAL_VIOLET] );
+	bank.Serialize( xs );
 	XarcClose( xs );
 }
 
 
 int ReserveBank::WithdrawDenizen()
 {
-	int g = Min( GOLD_PER_DENIZEN, gold );
-	gold -= g;
+	int g = Min( GOLD_PER_DENIZEN, bank.gold );
+	bank.gold -= g;
 	return g;
 }
 
 
-int ReserveBank::WithdrawMonster()
+Wallet ReserveBank::WithdrawMonster()
 {
-	int g = Min( GOLD_PER_MONSTER, gold );
-	gold -= g;
+	Wallet w;
+	w.gold = WithdrawGold( GOLD_PER_MONSTER );
+	if ( random.Rand(10) == 0 ) {
+		w.AddCrystal( WithdrawRandomCrystal() );
+	}
+	return w;
+}
+
+
+int ReserveBank::WithdrawVolcanoGold()
+{
+	int g = Min( (int)random.Rand( GOLD_PER_MONSTER), bank.gold );
+	bank.gold -= g;
 	return g;
 }
+
+
+int ReserveBank::WithdrawRandomCrystal()
+{
+	int r = random.Rand( 100 );
+	int c = NO_CRYSTAL;
+	if ( r == 0 )		c = CRYSTAL_VIOLET;
+	else if ( r < 8 )	c = CRYSTAL_GREEN;
+	else				c = CRYSTAL_RED;
+
+	if ( c != NO_CRYSTAL && bank.crystal[c] ) {
+		bank.crystal[c] -= 1;
+		return c;
+	}
+	return NO_CRYSTAL;
+}
+
+
+Wallet ReserveBank::WithdrawVolcano()
+{
+	Wallet w;
+	w.gold		= WithdrawVolcanoGold();
+	w.AddCrystal( WithdrawRandomCrystal() );
+	return w;
+}
+

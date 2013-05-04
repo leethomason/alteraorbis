@@ -2,8 +2,12 @@
 #define RESERVE_BANK_INCLUDED
 
 #include "gamelimits.h"
+#include "../grinliz/glrandom.h"
+#include "../grinliz/glutil.h"
+#include "wallet.h"
 
 class XStream;
+
 
 class ReserveBank
 {
@@ -13,18 +17,26 @@ public:
 
 	void Serialize( XStream* xs );
 
+	int Gold() const					{ return bank.gold; }
+	const Wallet& GetWallet() const		{ return bank; }
+
 	int WithdrawDenizen();
-	int WithdrawMonster();
-	//int WithdrawBeastman();
-	//int WithdrawVolcano( const SectorData& sd );
+	Wallet WithdrawMonster();
+
+	int WithdrawVolcanoGold();
+	Wallet WithdrawVolcano();
+
+	// Withdraws 1 or 0 crystals. type is returned.
+	int WithdrawRandomCrystal();
+	int WithdrawGold( int g ) { g = grinliz::Min( g, bank.gold ); bank.gold -= g; return g; }
 
 	static ReserveBank* Instance() { return instance; }
 
 private:
 	static ReserveBank* instance;
+	grinliz::Random random;
 
-	int gold;	// can technically go zero, although the bank tries to avoid that
-	int crystal[NUM_CRYSTAL_TYPES];
+	Wallet bank;
 };
 
 #endif // RESERVE_BANK_INCLUDED

@@ -46,7 +46,8 @@ enum {
 	CRYSTAL_RED,
 	CRYSTAL_GREEN,
 	CRYSTAL_VIOLET,
-	NUM_CRYSTAL_TYPES
+	NUM_CRYSTAL_TYPES,
+	NO_CRYSTAL = NUM_CRYSTAL_TYPES
 };
 
 // Currently an InUse object needs to be 1x1.

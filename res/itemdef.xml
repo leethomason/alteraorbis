@@ -17,6 +17,16 @@
         mass="10">
   </item>
 
+  <item name="crystal_red"
+        resource="crystal_red"
+        mass="1" />
+  <item name="crystal_green"
+        resource="crystal_green"
+        mass="1" />
+  <item name="crystal_violet"
+        resource="crystal_violet"
+        mass="1" />
+
   <item name="mantis"
         resource="mantis"
         flags="AI_WANDER_HERD AI_EAT_PLANTS AI_SECTOR_HERD"

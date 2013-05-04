@@ -7,6 +7,7 @@
 #include "../engine/map.h"
 
 class WorldMap;
+struct Wallet;
 
 class LumosChitBag : public ChitBag,
 					 public IMapGridUse
@@ -21,6 +22,10 @@ public:
 
 	Chit* NewMonsterChit( const grinliz::Vector3F& pos, const char* name, int team );
 	Chit* NewGoldChit( const grinliz::Vector3F& pos, int amount );
+	Chit* NewCrystalChit( const grinliz::Vector3F& pos, int crystal, bool fuzzPos );
+
+	// Creates enough chits to empty the wallet.
+	void NewWalletChits( const grinliz::Vector3F& pos, const Wallet& wallet );
 	void AddItem( const char* name, Chit* chit, Engine* engine, int team, int level );
 
 	// IBoltImpactHandler
@@ -29,18 +34,19 @@ public:
 	virtual int MapGridUse( int x, int y );
 
 	Census census;
-	// Is this gold?
-	static bool GoldFilter( Chit* chit );
-	// Is this something to pick up?
-	static bool LootFilter( Chit* chit );
+	static bool GoldFilter( Chit* chit );			// Is this gold?
+	static bool GoldCrystalFilter( Chit* chit );	// Is this gold or crystal? (wallet items)
+
 
 private:
 
 	static bool HasMapSpatialInUse( Chit* );
+
 	grinliz::CDynArray<Chit*> inUseArr;
 	grinliz::CDynArray<Chit*> chitList;
 	Engine* engine;
 	WorldMap* worldMap;
+	grinliz::Random random;	// use the chit version, if possible, generally want to avoid high level random
 };
 
 

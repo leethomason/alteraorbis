@@ -12,6 +12,7 @@
 #include "../xegame/rendercomponent.h"
 #include "../xegame/itemcomponent.h"
 #include "../xegame/spatialcomponent.h"
+#include "../xegame/istringconst.h"
 
 #include "../engine/model.h"
 #include "../engine/engine.h"
@@ -62,13 +63,21 @@ Chit* LumosChitBag::NewMonsterChit( const Vector3F& pos, const char* name, int t
 
 bool LumosChitBag::GoldFilter( Chit* chit )
 {
-	return ( chit->GetItem() && chit->GetItem()->name == "gold" );
+	return ( chit->GetItem() && chit->GetItem()->name == IStringConst::kgold );
+}
+
+
+bool LumosChitBag::GoldCrystalFilter( Chit* chit )
+{
+	return (    chit->GetItem() && chit->GetItem()->name == IStringConst::kgold
+		     || chit->GetItem() && chit->GetItem()->name == IStringConst::kcrystal_red
+			 || chit->GetItem() && chit->GetItem()->name == IStringConst::kcrystal_green
+			 || chit->GetItem() && chit->GetItem()->name == IStringConst::kcrystal_violet );
 }
 
 
 Chit* LumosChitBag::NewGoldChit( const grinliz::Vector3F& pos, int amount )
 {
-	GLASSERT( amount );
 	if ( !amount )
 		return 0;
 
@@ -81,13 +90,53 @@ Chit* LumosChitBag::NewGoldChit( const grinliz::Vector3F& pos, int amount )
 	if ( !chit ) {
 		chit = this->NewChit();
 		chit->Add( new SpatialComponent());
-		chit->Add( new RenderComponent( engine, "gold" ));
+		AddItem( "gold", chit, engine, 0, 0 );
+		chit->Add( new RenderComponent( engine, chit->GetItem()->ResourceName() ));
 		chit->GetSpatialComponent()->SetPosition( pos );
 
-		AddItem( "gold", chit, engine, 0, 0 );
 	}
 	chit->GetItemComponent()->AddGold( amount );
 	return chit;
+}
+
+
+Chit* LumosChitBag::NewCrystalChit( const grinliz::Vector3F& pos, int crystal, bool fuzz )
+{
+	Vector2F v2 = { pos.x, pos.z };
+	if ( fuzz ) {
+		v2.x += random.Uniform11() * 0.2f;
+		v2.y += random.Uniform11() * 0.2f;
+	}
+
+	const char* name = 0;
+	switch ( crystal ) {
+	case CRYSTAL_RED:		name="crystal_red";		break;
+	case CRYSTAL_GREEN:		name="crystal_green";	break;
+	case CRYSTAL_VIOLET:	name="crystal_violet";	break;
+	}
+
+	Chit* chit = this->NewChit();
+	chit->Add( new SpatialComponent());
+	AddItem( name, chit, engine, 0, 0 );
+	chit->Add( new RenderComponent( engine, chit->GetItem()->ResourceName() ));
+	chit->GetSpatialComponent()->SetPosition( pos );
+	
+	Wallet w;
+	w.AddCrystal( crystal );
+	chit->GetItemComponent()->AddGold( w );
+
+	return chit;
+}
+
+
+void LumosChitBag::NewWalletChits( const grinliz::Vector3F& pos, const Wallet& wallet )
+{
+	NewGoldChit( pos, wallet.gold );
+	for( int i=0; i<NUM_CRYSTAL_TYPES; ++i ) {
+		for( int j=0; j<wallet.crystal[i]; ++j ) {
+			NewCrystalChit( pos, i, true );
+		}
+	}
 }
 
 

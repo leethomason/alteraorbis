@@ -567,6 +567,9 @@
     <ClInclude Include="..\game\reservebank.h">
       <Filter>Source Files\game</Filter>
     </ClInclude>
+    <ClInclude Include="..\game\wallet.h">
+      <Filter>Source Files\game</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\engine\sources.mk">

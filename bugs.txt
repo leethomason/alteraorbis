@@ -21,8 +21,8 @@
 		x player picks up gold
 		x ai picks up gold
 		x reserve to distribute gold to denizens
-		- core vs spawn points
 		- gold & crystal to volcanos
+		- core vs spawn points
 		- drop items
 		- pickup items
 		- item screen

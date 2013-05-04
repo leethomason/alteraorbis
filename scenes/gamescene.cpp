@@ -13,6 +13,7 @@
 #include "../game/worldmap.h"
 #include "../game/worldinfo.h"
 #include "../game/aicomponent.h"
+#include "../game/reservebank.h"
 
 #include "../engine/engine.h"
 #include "../engine/text.h"
@@ -133,7 +134,7 @@ void GameScene::Resize()
 	layout.PosAbs( &ammoBar,	0, 1 );
 	layout.PosAbs( &shieldBar,  0, 2 );
 
-	dateLabel.SetPos( faceImage.X()-faceImage.Width(), 0 );
+	dateLabel.SetPos( faceImage.X()-faceImage.Width()*2.0f, 0 );
 	goldLabel.SetPos( dateLabel.X(), dateLabel.Y() + gamui2D.GetTextHeight() );
 
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
@@ -376,7 +377,7 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 			Model* model = sim->GetEngine()->IntersectModel( ray.origin, ray.direction, 10000.0f, TEST_HIT_AABB, 0, 0, 0, &atModel );
 			
 			// FIXME: need a generic solution here. How to handle stuff that isn't tappable?
-			if ( model && model->userData && LumosChitBag::GoldFilter( model->userData )) {
+			if ( model && model->userData && LumosChitBag::GoldCrystalFilter( model->userData )) {
 				model = 0;	// don't tap on gold.
 			}
 
@@ -608,17 +609,22 @@ void GameScene::DoTick( U32 delta )
 	Vector2I sector = { (int)lookAt.x / SECTOR_SIZE, (int)lookAt.z / SECTOR_SIZE };
 	const SectorData& sd = sim->GetWorldMap()->GetWorldInfo().GetSector( sector );
 
-	CStr<18> str;
+	CStr<64> str;
 	str.Format( "%.2f %s", sim->DateInAge(), sd.name.c_str() );
 	dateLabel.SetText( str.c_str() );
 
 	Chit* playerChit = sim->GetPlayerChit();
 	str.Clear();
-	int gold = 0;
+
+	Wallet wallet;
 	if ( playerChit && playerChit->GetItemComponent() ) {
-		gold = playerChit->GetItemComponent()->Gold();
+		wallet = playerChit->GetItemComponent()->GetWallet();
 	}
-	str.Format( "Au:%d", gold );
+	str.Format( "Au:%d r:%d g:%d v:%d", 
+				wallet.gold, 
+				wallet.crystal[CRYSTAL_RED], 
+				wallet.crystal[CRYSTAL_GREEN], 
+				wallet.crystal[CRYSTAL_VIOLET] );
 	goldLabel.SetText( str.c_str() );
 
 	SetBars();
@@ -685,12 +691,14 @@ void GameScene::DrawDebugText()
 		simCount = 0;
 	}
 
-	ufoText->Draw( 0, y,	"Date=%.2f %s mode. Sim/S=%.1f x%.1f ticks=%d/%d", 
+	Wallet w = ReserveBank::Instance()->GetWallet();
+	ufoText->Draw( 0, y,	"Date=%.2f %s mode. Sim/S=%.1f x%.1f ticks=%d/%d Reserve Au=%d r%dg%dv%d", 
 							sim->DateInAge(),
 							fastMode ? "fast" : "normal", 
 							simPS,
 							simPS / 30.0f,
-							chitBag->NumTicked(), chitBag->NumChits() ); 
+							chitBag->NumTicked(), chitBag->NumChits(),
+							w.gold, w.crystal[0], w.crystal[1], w.crystal[2] ); 
 	y += 16;
 
 	int typeCount[NUM_PLANT_TYPES];

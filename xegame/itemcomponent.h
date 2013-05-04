@@ -21,6 +21,7 @@
 #include "cticker.h"
 #include "component.h"
 #include "../engine/engine.h"
+#include "../game/wallet.h"
 
 class WorldMap;
 
@@ -37,8 +38,8 @@ public:
 
 	virtual void DebugStr( grinliz::GLString* str ) {
 		str->Format( "[Item] %s hp=%.1f/%.1f ", mainItem.Name(), mainItem.hp, mainItem.TotalHP() );
-		if ( gold ) {
-			str->Format( "Au=%d ", gold );
+		if ( !wallet.IsEmpty() ) {
+			str->Format( "Au=%d Cy=r%dg%dv%d ", wallet.gold, wallet.crystal[CRYSTAL_RED], wallet.crystal[CRYSTAL_GREEN], wallet.crystal[CRYSTAL_VIOLET]);
 		}
 	}
 
@@ -61,12 +62,10 @@ public:
 	IShield*			GetShield();
 
 	void AddGold( int delta );
-	int TakeGold() {
-		int g = gold;
-		gold = 0;
-		return g;
-	}
-	int Gold() const						{ return gold; }
+	void AddGold( const Wallet& wallet );
+
+	void EmptyWallet() { wallet.MakeEmpty(); }
+	const Wallet& GetWallet() const			{ return wallet; }
 
 	enum {
 		NO_AUTO_PICKUP,
@@ -83,7 +82,7 @@ private:
 	bool EmitEffect( const GameItem& it, U32 deltaTime );
 
 	CTicker slowTick;
-	int gold;
+	Wallet wallet;
 	int pickupMode;
 
 	Engine *engine;
