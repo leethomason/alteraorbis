@@ -105,6 +105,13 @@ const SectorData* WorldMap::GetSectorData() const
 }
 
 
+const SectorData& WorldMap::GetSector( int x, int y ) const
+{
+	Vector2I sector = { x / SECTOR_SIZE, y/SECTOR_SIZE };
+	return worldInfo->GetSector( sector );
+}
+
+
 void WorldMap::AttachEngine( Engine* e, IMapGridUse* imap ) 
 {
 	GLASSERT( (e==0) || (e!=0 && engine==0) );

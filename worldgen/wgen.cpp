@@ -25,7 +25,6 @@ static const int HEIGHT = WorldGen::SIZE;
 
 int main(int argc, const char* argv[])
 {
-
 	U32 seed0 = 0;
 	U32 seed1 = 4321;
 	int count = COUNT;

@@ -21,10 +21,8 @@
 		x player picks up gold
 		x ai picks up gold
 		x reserve to distribute gold to denizens
-		- gold & crystal to volcanos
-		- core vs spawn points
-		- drop items
-		- pickup items
+		x gold & crystal to volcanos
+		x core vs spawn points
 		- item screen
 		- bind to core
 		- build something
@@ -32,6 +30,8 @@
 		- visitors visit interesting buildings
 		- visitors create energy, buildings consume energy
 		- leave core
+		- drop items
+		- pickup items
 	- Flora 2
 		- weapon toggle / selection
 		- level up
@@ -523,3 +523,5 @@ New baseline:
 									not sure what is slow. (Memory access? Bit manipulation?)
 				XML   0.75 MClocks
 				745,  0.60 MClocks	not sure why it went up. But okay.
+end of battle:
+15.1 baseline

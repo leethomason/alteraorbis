@@ -234,6 +234,21 @@ int WorldGen::CalcSectorAreaFromFill( SectorData* s, const grinliz::Vector2I& or
 }
 
 
+void WorldGen::RemoveUncoloredLand( SectorData* s )
+{
+	Rectangle2I bounds = s->InnerBounds();
+
+	// Inset one more, so that checks can be in all directions.
+	for( int y=bounds.min.y+1; y<=bounds.max.y-1; ++y ) {
+		for( int x=bounds.min.x+1; x<=bounds.max.x-1; ++x ) {
+			if ( color[y*SIZE+x] == 0 ) {
+				land[y*SIZE+x] = 0;
+			}
+		}
+	}
+}
+
+
 void WorldGen::DepositLand( SectorData* s, U32 seed, int n )
 {
 	Rectangle2I bounds = s->InnerBounds();
@@ -301,8 +316,12 @@ void WorldGen::Draw( const Rectangle2I& r, int isLand )
 void WorldGen::CutRoads( U32 seed, SectorData* sectorData )
 {
 	// Each sector is represented by one pather,
-	// so they can't connect. First pass: split
-	// up the world.
+	// so they can't connect. However, this also
+	// means that each sector should be fully connected,
+	// or not connected at all. (Future water/pirate
+	// expansion.)
+	
+	//First pass: split up the world.
 	for( int pass=0; pass<2; ++pass ) {
 		for( int j=0; j<NUM_SECTORS-1; ++j ) {
 			Rectangle2I r;
@@ -526,7 +545,6 @@ void WorldGen::ProcessSectors( U32 seed, SectorData* sectorData )
 	// This impacts the look of the world,
 	// complexity, run cost. Change, but
 	// change with caution.
-	static const int NCORES = 60;
 	CDynArray<SectorData*> sectors;
 
 	for( int j=0; j<NUM_SECTORS; ++j ) {
@@ -543,8 +561,8 @@ void WorldGen::ProcessSectors( U32 seed, SectorData* sectorData )
 		}
 	}
 
-	Sort< SectorData*, SectorPtrArea >( sectors.Mem(), sectors.Size() );
-	for( int i=0; i<sectors.Size() && i<NCORES; ++i ) {
+	GLOUTPUT(( "nSectors=%d\n", sectors.Size() ));
+	for( int i=0; i<sectors.Size(); ++i ) {
 		GenerateTerrain( seed+i, sectors[i] );
 	}
 }
@@ -590,6 +608,7 @@ void WorldGen::GenerateTerrain( U32 seed, SectorData* s )
 	while ( a < AREA || !portsColored ) {
 		DepositLand( s, seed, Max( AREA-a, (int)INNER_SECTOR_SIZE ));
 		a = CalcSectorAreaFromFill( s, c, &portsColored );
+		RemoveUncoloredLand( s );
 	}
 	// Filter 1x1 zones.
 	Filter( s->InnerBounds() );

@@ -54,6 +54,7 @@ public:
 
 private:
 	void CreateCores();
+	void CreateRockInOutland();
 
 	Engine*			engine;
 	LumosGame*		lumosGame;

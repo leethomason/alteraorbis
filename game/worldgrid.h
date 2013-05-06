@@ -40,7 +40,7 @@ public:
 			c.Set( 120, 180, 180, 255 );
 		}
 		else if ( isPort ) {
-			c.Set( 0, 120, 0, 255 );
+			c.Set( 180, 180, 0, 255 );
 		}
 		else if ( isCore ) {
 			c.Set( 200, 100, 100, 255 );

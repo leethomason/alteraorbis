@@ -77,7 +77,8 @@ void Sim::Load( const char* mapDAT, const char* gameDAT )
 	worldMap->Load( mapDAT );
 
 	if ( !gameDAT ) {
-		// Fresh start 
+		// Fresh start
+		CreateRockInOutland();
 		CreateCores();
 		CreatePlayer();
 	}
@@ -279,6 +280,22 @@ void Sim::Draw3D( U32 deltaTime )
 }
 
 
+void Sim::CreateRockInOutland()
+{
+	const SectorData* sectorDataArr = worldMap->GetSectorData();
+	for( int i=0; i<NUM_SECTORS*NUM_SECTORS; ++i ) {
+		const SectorData& sd = sectorDataArr[i];
+		if ( !sd.HasCore() ) {
+			for( int j=sd.y; j<sd.y+SECTOR_SIZE; ++j ) {
+				for( int i=sd.x; i<sd.x+SECTOR_SIZE; ++i ) {
+					worldMap->SetRock( i, j, -1, 0, false );
+				}
+			}
+		}
+	}
+}
+
+
 void Sim::SetAllRock()
 {
 	for( int j=0; j<worldMap->Height(); ++j ) {
@@ -291,6 +308,12 @@ void Sim::SetAllRock()
 
 void Sim::CreateVolcano( int x, int y, int size )
 {
+	const SectorData& sd = worldMap->GetSector( x, y );
+	if ( sd.ports == 0 ) {
+		// no point to volcanoes in the outland
+		return;
+	}
+
 	Chit* chit = chitBag->NewChit();
 	chit->Add( new SpatialComponent() );
 	chit->Add( new ScriptComponent( new VolcanoScript( worldMap, size ), &chitBag->census ));
@@ -302,6 +325,11 @@ void Sim::CreateVolcano( int x, int y, int size )
 void Sim::CreatePlant( int x, int y, int type )
 {
 	if ( !worldMap->Bounds().Contains( x, y ) ) {
+		return;
+	}
+	const SectorData& sd = worldMap->GetSector( x, y );
+	if ( sd.ports == 0 ) {
+		// no point to plants in the outland
 		return;
 	}
 
