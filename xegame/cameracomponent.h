@@ -39,6 +39,7 @@ public:
 	}
 
 	virtual const char* Name() const { return "CameraComponent"; }
+	virtual CameraComponent* ToCameraComponent() { return this; }
 
 	virtual void OnAdd( Chit* );
 	virtual void OnRemove();

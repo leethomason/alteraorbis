@@ -119,8 +119,8 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 				bool knockback = dd.damage > (mainItem.TotalHP() *0.25f);
 
 				// Ony apply for phyisics or pathmove
-				PhysicsMoveComponent* physics  = GET_COMPONENT( parentChit, PhysicsMoveComponent );
-				PathMoveComponent*    pathMove = GET_COMPONENT( parentChit, PathMoveComponent );
+				PhysicsMoveComponent* physics  = GET_SUB_COMPONENT( parentChit, MoveComponent, PhysicsMoveComponent );
+				PathMoveComponent*    pathMove = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
 
 				if ( knockback && (physics || pathMove) ) {
 					rc->PlayAnimation( ANIM_IMPACT );
@@ -279,7 +279,7 @@ int ItemComponent::DoTick( U32 delta, U32 since )
 			for( int i=0; i<arr.Size(); ++i ) {
 				Chit* gold = arr[i];
 				GLASSERT( parentChit != gold );
-				TrackingMoveComponent* tc = GET_COMPONENT( gold, TrackingMoveComponent );
+				TrackingMoveComponent* tc = GET_SUB_COMPONENT( gold, MoveComponent, TrackingMoveComponent );
 				if ( !tc ) {
 					tc = new TrackingMoveComponent( worldMap );
 					tc->SetTarget( parentChit->ID() );

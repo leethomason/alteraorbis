@@ -153,8 +153,9 @@ bool AIComponent::LineOfSight( const ComponentSet& thisComp, Chit* t )
 
 static bool FEFilter( Chit* c ) {
 	// Tricky stuff. This will return F/E units:
-	if( GET_COMPONENT( c, AIComponent ))
+	if( c->GetAIComponent() )
 		return true;
+	// Dummy targets, enemy structures.
 	// This probably isn't quite right. But
 	// automated things?
 	if ( c->GetMoveComponent() && c->GetItem() ) {
@@ -359,7 +360,7 @@ void AIComponent::DoShoot( const ComponentSet& thisComp )
 	}
 	else {
 		// Rotate to target.
-		PathMoveComponent* pmc = GET_COMPONENT( parentChit, PathMoveComponent );
+		PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
 		if ( pmc ) {
 			pmc->QueueDest( thisComp.spatial->GetPosition2D(), angleToTarget );
 		}
@@ -405,7 +406,7 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 	}
 	else {
 		// Move to target.
-		PathMoveComponent* pmc = GET_COMPONENT( parentChit, PathMoveComponent );
+		PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
 		if ( pmc ) {
 			Vector2F targetPos = target.spatial->GetPosition2D();
 			Vector2F pos = thisComp.spatial->GetPosition2D();
@@ -500,7 +501,7 @@ void AIComponent::Think( const ComponentSet& thisComp )
 
 void AIComponent::FocusedMove( const grinliz::Vector2F& dest, const Vector2I* sector )
 {
-	PathMoveComponent* pmc = GET_COMPONENT( parentChit, PathMoveComponent );
+	PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
 	if ( pmc ) {
 		pmc->QueueDest( dest, -1, sector );
 		currentAction = NO_ACTION;
@@ -730,7 +731,7 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 		}
 	}
 	if ( !dest.IsZero() ) {
-		PathMoveComponent* pmc = GET_COMPONENT( thisComp.chit, PathMoveComponent );
+		PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
 		if ( pmc ) {
 			pmc->QueueDest( dest );
 		}
@@ -742,7 +743,7 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 
 void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 {
-	PathMoveComponent* pmc = GET_COMPONENT( thisComp.chit, PathMoveComponent );
+	PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
 	if ( !pmc ) {
 		currentAction = NO_ACTION;
 		return;

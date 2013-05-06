@@ -317,7 +317,7 @@ void GameScene::MoveModel( Chit* target )
 	}
 	Chit* focusedTarget = sim->GetChitBag()->GetChit( targetChit );
 	if ( target && target != focusedTarget ) {
-		AIComponent* ai = GET_COMPONENT( player, AIComponent );
+		AIComponent* ai = player->GetAIComponent();
 		if ( ai && ai->GetTeamStatus( target ) == AIComponent::ENEMY ) {
 			possibleChit = 0;
 			RenderComponent* rc = target->GetRenderComponent();
@@ -339,13 +339,13 @@ void GameScene::TapModel( Chit* target )
 	if ( !player ) {
 		ClearTargetFlags();
 
-		AIComponent* ai = GET_COMPONENT( target, AIComponent );
+		AIComponent* ai = target->GetAIComponent();
 		if ( ai ) {
 			ai->EnableDebug( true );
 		}
 		return;
 	}
-	AIComponent* ai = GET_COMPONENT( player, AIComponent );
+	AIComponent* ai = player->GetAIComponent();
 	if ( ai && ai->GetTeamStatus( target ) == AIComponent::ENEMY ) {
 		ai->FocusedTarget( target );
 		ClearTargetFlags();
@@ -488,7 +488,7 @@ void GameScene::DoDestTapped( const Vector2F& _dest )
 	Chit* chit = sim->GetPlayerChit();
 	if ( chit ) {
 		if ( camModeButton[TRACK].Down() ) {
-			AIComponent* ai = GET_COMPONENT( chit, AIComponent );
+			AIComponent* ai = chit->GetAIComponent();
 			GLASSERT( ai );
 			if ( ai ) {
 				Vector2F pos = chit->GetSpatialComponent()->GetPosition2D();

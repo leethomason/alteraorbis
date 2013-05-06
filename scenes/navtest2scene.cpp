@@ -200,7 +200,7 @@ void NavTest2Scene::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		const Vector2I& dest = waypoints[random.Rand(waypoints.Size())];
 		Vector2F d = { (float)dest.x+0.5f, (float)dest.y+0.5f };
 		//GLOUTPUT(( "OnChitMsg %x dest=%.1f,%.1f\n", chit, d.x, d.y ));
-		GET_COMPONENT( chit, PathMoveComponent )->QueueDest(d); 
+		GET_SUB_COMPONENT( chit, MoveComponent, PathMoveComponent )->QueueDest(d); 
 	}
 }
 

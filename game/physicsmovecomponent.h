@@ -14,6 +14,7 @@ public:
 	virtual ~PhysicsMoveComponent() {}
 
 	virtual const char* Name() const { return "PhysicsMoveComponent"; }
+	virtual PhysicsMoveComponent* ToPhysicsMoveComponent() { return this; }
 	virtual void DebugStr( grinliz::GLString* str );
 
 	virtual void Serialize( XStream* xs );
@@ -45,6 +46,7 @@ public:
 	virtual ~TrackingMoveComponent()		{}
 
 	virtual const char* Name() const { return "TrackingMoveComponent"; }
+	virtual TrackingMoveComponent* ToTrackingMoveComponent() { return this; }
 	virtual void DebugStr( grinliz::GLString* str ) {
 		str->Format( "[TrackingMove] target=%d ", target );
 	}

@@ -32,6 +32,7 @@ public:
 	virtual ~MapSpatialComponent()	{}
 
 	virtual const char* Name() const { return "MapSpatialComponent"; }
+	virtual MapSpatialComponent*	ToMapSpatialComponent()			{ return this; }
 
 	virtual void OnAdd( Chit* chit );
 	virtual void OnRemove();

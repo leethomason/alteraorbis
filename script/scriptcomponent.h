@@ -59,6 +59,7 @@ public:
 	virtual ~ScriptComponent()									{ delete script; }
 
 	virtual const char* Name() const { return "ScriptComponent"; }
+	virtual ScriptComponent* ToScriptComponent() { return this; }
 
 	virtual void Serialize( XStream* xs );
 

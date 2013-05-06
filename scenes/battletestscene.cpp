@@ -296,7 +296,7 @@ void BattleTestScene::GoScene()
 	for( int i=0; i<leftCount; ++i ) {
 		Chit* c = CreateChit( waypoints[LEFT][i], leftMoB, leftWeapon, LEFT_TEAM, leftLevel );
 		if ( i==0 ) {
-			GET_COMPONENT( c, AIComponent )->EnableDebug( true );
+			c->GetAIComponent()->EnableDebug( true );
 		}
 
 	}
@@ -524,7 +524,7 @@ void BattleTestScene::DoTick( U32 deltaTime )
 		for( int i=0; i<chitArr.Size(); ++i ) {
 			Chit* c = chitArr[i];
 
-			AIComponent* ai = GET_COMPONENT( c, AIComponent );
+			AIComponent* ai = c->GetAIComponent();
 			if ( ai && ai->AwareOfEnemy() ) {
 				aware = true;
 				break;

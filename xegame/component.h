@@ -27,6 +27,12 @@
 class SpatialComponent;
 class RenderComponent;
 class MoveComponent;
+class ItemComponent;
+class ScriptComponent;
+class AIComponent;
+class CameraComponent;
+class HealthComponent;
+
 class Chit;
 class ChitBag;
 class ChitEvent;
@@ -46,11 +52,6 @@ public:
 	virtual void Serialize( XStream* xs ) = 0;
 
 	virtual const char* Name() const = 0;
-	virtual Component* ToComponent( const char* name ) {
-		// Used to detect for subclasses: a MapSpatialComponent is a SpatialComponent.
-		if ( strstr( Name(), name )) return this;
-		return 0;
-	}
 
 	// Utility
 	Chit* ParentChit() { return parentChit; }
@@ -65,6 +66,15 @@ public:
 
 	virtual void OnChitEvent( const ChitEvent& event )			{}
 	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
+
+	// Top level:
+	virtual SpatialComponent*	ToSpatialComponent()		{ return 0; }
+	virtual ItemComponent*		ToItemComponent()			{ return 0; }
+	virtual RenderComponent*	ToRenderComponent()			{ return 0; }
+	virtual MoveComponent*		ToMoveComponent()			{ return 0; }
+	virtual ScriptComponent*	ToScriptComponent()			{ return 0; }
+	virtual AIComponent*		ToAIComponent()				{ return 0; }
+	virtual HealthComponent*	ToHealthComponent()			{ return 0; }
 
 protected:
 	float Travel( float rate, U32 time ) const {
@@ -82,6 +92,10 @@ protected:
 	static int idPool;
 };
 
+class PhysicsMoveComponent;
+class PathMoveComponent;
+class TrackingMoveComponent;
+class GridMoveComponent;
 
 // Abstract at the XenoEngine level.
 class MoveComponent : public Component
@@ -94,6 +108,11 @@ public:
 	virtual const char* Name() const { return "MoveComponent"; }
 
 	virtual void Serialize( XStream* xs );
+	virtual MoveComponent* ToMoveComponent()					{ return this; }
+	virtual PhysicsMoveComponent*	ToPhysicsMoveComponent()	{ return 0; }
+	virtual PathMoveComponent*		ToPathMoveComponent()		{ return 0; }
+	virtual TrackingMoveComponent*	ToTrackingMoveComponent()	{ return 0; }
+	virtual GridMoveComponent*		ToGridMoveComponent()		{ return 0; }
 
 	virtual bool IsMoving() const				{ return false; }
 	// approximate, may lag, etc. useful for AI

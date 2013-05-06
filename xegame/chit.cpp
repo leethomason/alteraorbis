@@ -112,16 +112,25 @@ void Chit::Serialize( const ComponentFactory* factory, XStream* xs )
 int Chit::Slot( Component* c )
 {
 	int s = -1;
-	if ( c->ToComponent( "SpatialComponent" )) {
+	if ( c->ToSpatialComponent()) {
 		s = SPATIAL;
 	}
-	else if ( c->ToComponent( "MoveComponent" )) {
+	else if ( c->ToMoveComponent()) {
 		s = MOVE;
 	}
-	else if ( c->ToComponent( "ItemComponent" )) {
+	else if ( c->ToItemComponent()) {
 		s = ITEM;
 	}
-	else if ( c->ToComponent( "RenderComponent" )) {
+	else if ( c->ToScriptComponent()) {
+		s = SCRIPT;
+	}
+	else if ( c->ToAIComponent()) {
+		s = AI;
+	}
+	else if ( c->ToHealthComponent()) {
+		s = HEALTH;
+	}
+	else if ( c->ToRenderComponent()) {
 		s = RENDER;
 	}
 
@@ -162,11 +171,10 @@ void Chit::Remove( Component* c )
 }
 
 
-
 Component* Chit::GetComponent( const char* name )
 {
 	for( int i=0; i<NUM_SLOTS; ++i ) {
-		if ( slot[i] && slot[i]->ToComponent( name )) {
+		if ( slot[i] && StrEqual( name, slot[i]->Name())) {
 			return slot[i];
 		}
 	}

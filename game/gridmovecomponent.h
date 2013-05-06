@@ -13,6 +13,8 @@ public:
 	virtual ~GridMoveComponent();
 
 	virtual const char* Name() const { return "GridMoveComponent"; }
+	virtual GridMoveComponent* ToGridMoveComponent() { return this; }
+
 	virtual void DebugStr( grinliz::GLString* str );
 
 	virtual void Serialize( XStream* xs );

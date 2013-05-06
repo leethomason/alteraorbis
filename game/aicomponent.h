@@ -38,6 +38,7 @@ public:
 	virtual ~AIComponent();
 
 	virtual const char* Name() const { return "AIComponent"; }
+	virtual AIComponent* ToAIComponent() { return this; }
 
 	virtual void Serialize( XStream* xs );
 	virtual void OnAdd( Chit* chit );

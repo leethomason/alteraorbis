@@ -26,7 +26,7 @@ using namespace grinliz;
 {
 	GLASSERT( chit );
 	GameItem* item = chit->GetItem();
-	ScriptComponent* sc = GET_COMPONENT( chit, ScriptComponent );
+	ScriptComponent* sc = chit->GetScriptComponent();
 
 	if ( item && sc && StrEqual( sc->Script()->ScriptName(), "PlantScript" )) {
 		GLASSERT( sc->Script() );
@@ -153,7 +153,7 @@ int PlantScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 	growTimer = 0;
 	float seconds = (float)since / 1000.0f;
 
-	MapSpatialComponent* sc = GET_COMPONENT( ctx.chit, MapSpatialComponent );
+	MapSpatialComponent* sc = GET_SUB_COMPONENT( ctx.chit, SpatialComponent, MapSpatialComponent );
 	GLASSERT( sc );
 	if ( !sc ) return tick;
 

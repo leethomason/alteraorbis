@@ -26,7 +26,7 @@
 
 #include "../engine/enginelimits.h"
 
-class RelativeSpatialComponent;
+class MapSpatialComponent;
 
 /* Chits with a SpatialComponent are in the map world as there own entity. (Hardpoint
    items do not have SpatialComponents.
@@ -45,8 +45,9 @@ public:
 	}
 
 	virtual const char* Name() const { return "SpatialComponent"; }
-	virtual SpatialComponent*	ToSpatial()			{ return this; }
-	virtual RelativeSpatialComponent* ToRelative()	{ return 0; }
+	virtual SpatialComponent*		ToSpatialComponent()			{ return this; }
+	virtual MapSpatialComponent*	ToMapSpatialComponent()			{ return 0; }
+
 	virtual void DebugStr( grinliz::GLString* str );
 
 	virtual void Serialize( XStream* );

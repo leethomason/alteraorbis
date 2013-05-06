@@ -176,7 +176,7 @@ CameraComponent* ChitBag::GetCamera( Engine* engine )
 {
 	Chit* c = GetChit( activeCamera );
 	if( c ) {
-		CameraComponent* cc = GET_COMPONENT( c, CameraComponent );
+		CameraComponent* cc = GET_GENERAL_COMPONENT( c, CameraComponent );
 		if ( cc )
 			return cc;
 	}

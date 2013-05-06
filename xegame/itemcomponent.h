@@ -35,6 +35,7 @@ public:
 	virtual ~ItemComponent();
 
 	virtual const char* Name() const { return "ItemComponent"; }
+	virtual ItemComponent* ToItemComponent() { return this; }
 
 	virtual void DebugStr( grinliz::GLString* str ) {
 		str->Format( "[Item] %s hp=%.1f/%.1f ", mainItem.Name(), mainItem.hp, mainItem.TotalHP() );

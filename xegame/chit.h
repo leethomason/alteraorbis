@@ -31,6 +31,9 @@ class SpatialComponent;
 class RenderComponent;
 class MoveComponent;
 class ItemComponent;
+class ScriptComponent;
+class AIComponent;
+class HealthComponent;
 
 class ChitBag;
 class Chit;
@@ -95,9 +98,9 @@ public:
 	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg ) = 0;
 };
 
-// MyComponent* mc = GET_COMPONENT( chit, MyComponent );
-#define GET_COMPONENT( chit, name ) static_cast<name*>( chit->GetComponent( #name ) )
-
+// Gets a component that is a direct child of the general component.
+#define GET_GENERAL_COMPONENT( chit, name ) static_cast<name*>( chit->GetComponent( #name ) )
+#define GET_SUB_COMPONENT( chit, top, sub ) ( chit->Get##top() ? chit->Get##top()->To##sub() : 0 )
 
 /*	General purpose GameObject.
 	A class to hold Components.
@@ -128,9 +131,13 @@ public:
 	SpatialComponent*	GetSpatialComponent()	{ return spatialComponent; }
 	MoveComponent*		GetMoveComponent()		{ return moveComponent; }
 	ItemComponent*		GetItemComponent()		{ return itemComponent; }
+	ScriptComponent*	GetScriptComponent()	{ return scriptComponent; }
+	AIComponent*		GetAIComponent()		{ return aiComponent; }
+	HealthComponent*	GetHealthComponent()	{ return healthComponent; }
 	RenderComponent*	GetRenderComponent()	{ return renderComponent; }
-	Component*			GetComponent( const char* name );
-	Component*			GetComponent( int id );
+
+	Component* GetComponent( int id );
+	Component* GetComponent( const char* name );
 
 	ChitBag* GetChitBag()						{ return chitBag; }
 	virtual LumosChitBag* GetLumosChitBag();
@@ -181,11 +188,11 @@ private:
 		SPATIAL,
 		MOVE,
 		ITEM,
-		GENERAL_0,
+		SCRIPT,
+		AI,
+		HEALTH,
+		GENERAL_0,	// debugging, other
 		GENERAL_1,
-		GENERAL_2,
-		GENERAL_3,
-		GENERAL_4,	// FIXME: fragile system
 		RENDER,
 		NUM_SLOTS,
 
@@ -198,6 +205,9 @@ public:
 		SPATIAL_BIT		= (1<<SPATIAL),
 		MOVE_BIT		= (1<<MOVE),
 		ITEM_BIT		= (1<<ITEM),
+		SCRIPT_BIT		= (1<<SCRIPT),
+		AI_BIT			= (1<<AI),
+		HEALTH_BIT		= (1<<HEALTH),
 		RENDER_BIT		= (1<<RENDER)
 	};
 
@@ -208,11 +218,11 @@ private:
 			SpatialComponent*	spatialComponent;
 			MoveComponent*		moveComponent;
 			ItemComponent*		itemComponent;
+			ScriptComponent*	scriptComponent;
+			AIComponent*		aiComponent;
+			HealthComponent*	healthComponent;
 			Component*			general0;
 			Component*			general1;
-			Component*			general2;
-			Component*			general3;
-			Component*			general4;
 			RenderComponent*	renderComponent;		// should be last
 		};
 		Component*			slot[NUM_SLOTS];
@@ -241,33 +251,5 @@ struct ComponentSet
 	RenderComponent*	render;
 };
 
-
-/*
-// A list presentation of chits; stores IDs, not pointers,
-// so is safe to deletes.
-class SafeChitList
-{
-public:
-	SafeChitList( ChitBag* bag=0 ) : chitBag( bag ), it( 0 )	{}
-	~SafeChitList()	{}
-
-	void Init( ChitBag* bag );
-	void Free();	// free everything, null the chitbag pointer
-
-	Chit* Add( Chit* c );		// returns chit added
-	Chit* Remove( Chit* c );	// returns chit removed or null
-	Chit* First() const;	
-	Chit* Next() const;
-
-	// Some or all of the chit pointers may be invalid,
-	// so the structure can only return the approximate size
-	int ApproxSize() const { return array.Size(); }
-	
-public:
-	ChitBag* chitBag;
-	mutable int it;
-	mutable grinliz::CDynArray<int> array;
-};
-*/
 
 #endif // XENOENGINE_CHIT_INCLUDED

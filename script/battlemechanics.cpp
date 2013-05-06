@@ -123,7 +123,7 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* 
 		if ( InMeleeZone( engine, src, target )) {
 			// FIXME: account for armor, shields, etc. etc.
 			// FIXME: account for knockback (physics move), catching fire, etc.
-			HealthComponent* targetHealth = GET_COMPONENT( target, HealthComponent );
+			HealthComponent* targetHealth = target->GetHealthComponent();
 			ComponentSet targetComp( target, Chit::ITEM_BIT | ComponentSet::IS_ALIVE );
 
 			if ( targetHealth && targetComp.okay ) {

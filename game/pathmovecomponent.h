@@ -42,6 +42,8 @@ public:
 	virtual ~PathMoveComponent() {}
 
 	virtual const char* Name() const { return "PathMoveComponent"; }
+	virtual PathMoveComponent* ToPathMoveComponent() { return this; }
+
 	virtual void DebugStr( grinliz::GLString* str );
 
 	virtual void Serialize( XStream* xs );

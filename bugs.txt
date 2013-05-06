@@ -524,4 +524,5 @@ New baseline:
 				XML   0.75 MClocks
 				745,  0.60 MClocks	not sure why it went up. But okay.
 end of battle:
-15.1 baseline
+15 baseline
+23 switched over to a better component type system

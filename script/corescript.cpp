@@ -45,7 +45,7 @@ void CoreScript::OnAdd( const ScriptContext& ctx )
 
 static bool Accept( Chit* c ) 
 {
-	AIComponent* ai = GET_COMPONENT( c, AIComponent );
+	AIComponent* ai = c->GetAIComponent();
 	return ai != 0;
 }
 
@@ -58,7 +58,7 @@ int CoreScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 	// pathfinder?
 	if ( spawnTick.Delta( since ) && ctx.census->ais < TYPICAL_MONSTERS ) {
 		// spawn stuff.
-		MapSpatialComponent* ms = ( GET_COMPONENT( ctx.chit, MapSpatialComponent ));
+		MapSpatialComponent* ms = GET_SUB_COMPONENT( ctx.chit, SpatialComponent, MapSpatialComponent );
 		GLASSERT( ms );
 		Vector2I pos = ms->MapPosition();
 		pos.x += -RADIUS + ctx.chit->random.Rand( RADIUS*2 );

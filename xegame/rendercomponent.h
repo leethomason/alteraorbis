@@ -51,7 +51,7 @@ public:
 
 	// ------ Component functionality: -------
 	virtual const char* Name() const { return "RenderComponent"; }
-	virtual RenderComponent*	ToRender()		{ return this; }
+	virtual RenderComponent* ToRenderComponent() { return this; }
 	virtual void DebugStr( grinliz::GLString* str );
 
 	virtual void Serialize( XStream* xs );

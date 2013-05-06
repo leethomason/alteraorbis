@@ -223,7 +223,7 @@ void LumosChitBag::AddItem( const char* name, Chit* chit, Engine* engine, int te
 
 
 bool LumosChitBag::HasMapSpatialInUse( Chit* chit ) {
-	MapSpatialComponent* ms = GET_COMPONENT( chit, MapSpatialComponent );
+	MapSpatialComponent* ms = GET_SUB_COMPONENT( chit, SpatialComponent, MapSpatialComponent );
 	if ( ms ) {
 		return true;
 	}
@@ -242,7 +242,7 @@ int LumosChitBag::MapGridUse( int x, int y )
 	QuerySpatialHash( &inUseArr, r, 0, HasMapSpatialInUse );
 	int flags = 0;
 	for( int i=0; i<inUseArr.Size(); ++i ) {
-		MapSpatialComponent* ms = GET_COMPONENT( inUseArr[i], MapSpatialComponent );
+		MapSpatialComponent* ms = GET_SUB_COMPONENT( inUseArr[i], SpatialComponent, MapSpatialComponent );
 		GLASSERT( ms );
 		flags |= ms->Mode();
 	}

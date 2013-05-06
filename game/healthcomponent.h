@@ -35,6 +35,7 @@ public:
 	virtual ~HealthComponent()	{}
 
 	virtual const char* Name() const { return "HealthComponent"; }
+	virtual HealthComponent* ToHealthComponent() { return this; }
 
 	virtual void Serialize( XStream* xs );
 
