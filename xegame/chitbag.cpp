@@ -366,11 +366,8 @@ void ChitBag::QuerySpatialHash(	grinliz::CDynArray<Chit*>* array,
 			unsigned index = y*SIZE+x;
 			for( Chit* it=spatialHash[ index ]; it; it=it->next ) {
 				if ( it != ignore ) {
-					if ( !accept( it ) ) {
-						continue;
-					}
 					const Vector3F& pos = it->GetSpatialComponent()->GetPosition();
-					if ( rf.Contains( pos.x, pos.z ) ) {
+					if ( rf.Contains( pos.x, pos.z ) && accept( it )) {
 						array->Push( it );
 					}
 				}

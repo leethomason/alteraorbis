@@ -20,6 +20,7 @@
 #include "gameitem.h"
 #include "lumoschitbag.h"
 #include "mapspatialcomponent.h"
+#include "gridmovecomponent.h"
 
 #include "../script/battlemechanics.h"
 #include "../script/plantscript.h"
@@ -61,6 +62,7 @@ AIComponent::AIComponent( Engine* _engine, WorldMap* _map ) : rethink( 1200 )
 	focusOnTarget = false;
 	focusedMove = false;
 	randomWander = false;
+	friendEnemyAge = 0;
 	aiMode = NORMAL_MODE;
 	awareness.Zero();
 	wanderTime = 0;
@@ -83,6 +85,7 @@ void AIComponent::Serialize( XStream* xs )
 	XARC_SER( xs, focusOnTarget );
 	XARC_SER( xs, focusedMove );
 	XARC_SER( xs, wanderTime );
+	XARC_SER( xs, friendEnemyAge );
 	rethink.Serialize( xs, "rethink" );
 	this->EndSerialize( xs );
 }
@@ -503,6 +506,20 @@ void AIComponent::FocusedMove( const grinliz::Vector2F& dest, const Vector2I* se
 {
 	PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
 	if ( pmc ) {
+		// Special case: if on a port, go straight to grid move. This avoids
+		// trying to do crowded pathing.
+		if ( sector && parentChit->GetSpatialComponent() ) {
+			Vector2F pos = parentChit->GetSpatialComponent()->GetPosition2D();
+			Vector2I m = { (int)pos.x, (int)pos.y };
+			if ( map->GetWorldGrid( m.x, m.y ).IsPort() ) {
+				GridMoveComponent* gmc = new GridMoveComponent( map );
+				int portJumpPort = map->GetWorldInfo().NearestPort( *sector, pos );
+				gmc->SetDest( sector->x, sector->y, portJumpPort );
+				parentChit->Remove( pmc );
+				parentChit->Add( gmc );
+				return;
+			}
+		}
 		pmc->QueueDest( dest, -1, sector );
 		currentAction = NO_ACTION;
 		focusedMove = true;
@@ -970,6 +987,7 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 	}
 
 	wanderTime += timeSince;
+	friendEnemyAge += timeSince;
 	int oldAction = currentAction;
 
 	ChitBag* chitBag = this->GetChitBag();
@@ -987,7 +1005,10 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 		focusOnTarget = false;
 	}
 
-	GetFriendEnemyLists();
+	if ( friendEnemyAge > 750 ) {
+		GetFriendEnemyLists();
+		friendEnemyAge = parentChit->ID() & 63;	// a little randomness
+	}
 
 	// High level mode switch?
 	if ( aiMode == NORMAL_MODE && !enemyList.Empty() ) {

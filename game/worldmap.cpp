@@ -742,6 +742,7 @@ void WorldMap::SetRock( int x, int y, int h, int pool, bool magma )
 		return;
 	}
 
+	bool wasPassable = grid[index].IsPassable();
 	int  hWas = grid[index].RockHeight();
 	int  pWas = grid[index].PoolHeight();	
 	bool mWas = grid[index].Magma();
@@ -798,7 +799,6 @@ void WorldMap::SetRock( int x, int y, int h, int pool, bool magma )
 #endif
 
 	if ( h != hWas || pool != pWas || magma != mWas ) {
-		ResetPather( x, y );
 
 		if ( engine ) {
 			if ( modelWas ) {
@@ -817,6 +817,9 @@ void WorldMap::SetRock( int x, int y, int h, int pool, bool magma )
 		grid[index].SetRockHeight( h );
 		grid[index].SetPoolHeight( pool );
 		grid[index].SetMagma( magma );
+		if ( wasPassable != grid[index].IsPassable() ) {
+			ResetPather( x, y );
+		}
 
 		if ( h != hWas ) {
 			waterInit.Clear( vec.x >> ZONE_SHIFT, vec.y >> ZONE_SHIFT );
@@ -1018,47 +1021,70 @@ WorldMap::BlockResult WorldMap::ApplyBlockEffect(	const Vector2F inPos,
 
 void WorldMap::CalcZone( int zx, int zy )
 {
+	struct SZ {
+		U8 x;
+		U8 y;
+		U8 size;
+	};
+
 	zx = zx & (~(ZONE_SIZE-1));
 	zy = zy & (~(ZONE_SIZE-1));
 
 	if ( !zoneInit.IsSet( zx>>ZONE_SHIFT, zy>>ZONE_SHIFT) ) {
+		int mask[ZONE_SIZE];
+		memset( mask, 0, sizeof(int)*ZONE_SIZE );
+		CArray< SZ, ZONE_SIZE*ZONE_SIZE > stack;
+
 		//GLOUTPUT(( "CalcZone (%d,%d) %d\n", zx, zy, ZDEX(zx,zy) ));
 		zoneInit.Set( zx>>ZONE_SHIFT, zy>>ZONE_SHIFT);
 
-		for( int y=zy; y<zy+ZONE_SIZE; ++y ) {
-			for( int x=zx; x<zx+ZONE_SIZE; ++x ) {
-				int index = INDEX(x,y);
-				grid[index].SetZoneSize( IsPassable(x,y) ? 1 : 0 );
+		// Build up a bit pattern to analyze.
+		for( int y=0; y<ZONE_SIZE; ++y ) {
+			for( int x=0; x<ZONE_SIZE; ++x ) {
+				if ( IsPassable(zx+x,zy+y) ) {
+					mask[y] |= 1 << x;
+				}
+				else {
+					grid[INDEX(zx+x, zy+y)].SetZoneSize(0);
+				}
 			}
 		}
 
-		// Could be much more elegant and efficent. Re-walks
-		// and re-writes the same data.
-		for( int size=2; size<=ZONE_SIZE; size*=2 ) {
-			for( int y=zy; y<zy+ZONE_SIZE; y+=size ) {
-				for( int x=zx; x<zx+ZONE_SIZE; x+=size ) {
-					int half = size >> 1;
-					bool okay = true;
-					for( int j=y; j<y+size; j+=half ) {
-						for( int i=x; i<x+size; i+=half ) {
-							int index = INDEX(i,j);
-							const WorldGrid& g	= grid[index]; 
-							if ( !IsPassable(i,j) || g.ZoneSize() != half ) {
-								okay = false;
-								break;
-							}
-						}
-					}
-					if ( okay ) {
-						for( int j=y; j<y+size; j++ ) {
-							for( int i=x; i<x+size; i++ ) {
-								int index = INDEX(i,j);
-								grid[index].SetZoneSize( size );
-							}
-						}
+		SZ start = { 0, 0, ZONE_SIZE };
+		stack.Push( start );
+
+		while( !stack.Empty() ) {
+			const SZ sz = stack.Pop();
+			
+			// So we can quickly check for everything set,
+			// create a mask to iterate over the bitf
+			int m = (1<<sz.size)-1;
+			m <<= sz.x;
+
+			int j=sz.y;
+			for( ; j<sz.y+sz.size; ++j ) {
+				if ( (mask[j] & m) != m )
+					break;
+			}
+
+			if ( j == sz.y + sz.size ) {
+				// Match.
+				for( int y=sz.y; y<sz.y+sz.size; ++y ) {
+					for( int x=sz.x; x<sz.x+sz.size; ++x ) {
+						grid[INDEX(zx+x, zy+y)].SetZoneSize(sz.size);
 					}
 				}
-			}				
+			}
+			else if ( sz.size > 1 ) {
+				SZ sz00 = { sz.x, sz.y, sz.size/2 };
+				SZ sz10 = { sz.x+sz.size/2, sz.y, sz.size/2 };
+				SZ sz01 = { sz.x, sz.y+sz.size/2, sz.size/2 };
+				SZ sz11 = { sz.x+sz.size/2, sz.y+sz.size/2, sz.size/2 };
+				stack.Push( sz00 );
+				stack.Push( sz10 );
+				stack.Push( sz01 );
+				stack.Push( sz11 );
+			}
 		}
 	}
 }
@@ -1082,7 +1108,18 @@ void WorldMap::AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > *a
 {
 	Vector2I start;
 	const WorldGrid* startGrid = ToGrid( state, &start );
-	GLASSERT( zoneInit.IsSet( start.x>>ZONE_SHIFT, start.y>>ZONE_SHIFT ));
+
+	// Flush out the neighbors.
+	for( int j=-1; j<=1; ++j ) {
+		for( int i=-1; i<=1; ++i ) {
+			int x = start.x + i*ZONE_SIZE;
+			int y = start.y + j*ZONE_SIZE;
+			if ( x >= 0 && x < width && y >= 0 && y < height ) {
+				CalcZone( x, y ); 
+			}
+		}
+	}
+
 	GLASSERT( startGrid->IsPassable() );
 	Vector2F startC = ZoneCenter( start.x, start.y );
 	
@@ -1338,11 +1375,12 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 	Vector2I sector = { starti.x/SECTOR_SIZE, starti.y/SECTOR_SIZE };
 
 	// Flush out regions that aren't valid.
-	for( int j=0; j<height; j+= ZONE_SIZE ) {
-		for( int i=0; i<width; i+=ZONE_SIZE ) {
-			CalcZone( i, j );
-		}
-	}
+	// Don't do this. Use the AdjacentCost for this.
+	//for( int j=0; j<height; j+= ZONE_SIZE ) {
+	//	for( int i=0; i<width; i+=ZONE_SIZE ) {
+	//		CalcZone( i, j );
+	//	}
+	//}
 
 	WorldGrid* regionStart = grid + INDEX( starti.x, starti.y );
 	WorldGrid* regionEnd   = grid + INDEX( endi.x, endi.y );

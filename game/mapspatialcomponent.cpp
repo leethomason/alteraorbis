@@ -38,9 +38,11 @@ void MapSpatialComponent::SetMode( int newMode )
 	GLASSERT( worldMap );
 	GLASSERT( newMode == GRID_IN_USE || newMode == GRID_BLOCKED );
 
-	mode = newMode;
-	Vector2I pos = MapPosition();
-	worldMap->ResetPather( pos.x, pos.y );
+	if ( newMode != mode ) {
+		mode = newMode;
+		Vector2I pos = MapPosition();
+		worldMap->ResetPather( pos.x, pos.y );
+	}
 }
 
 
@@ -48,16 +50,19 @@ void MapSpatialComponent::OnAdd( Chit* chit )
 {
 	super::OnAdd( chit );
 
-	Vector2I pos = MapPosition();
-	worldMap->ResetPather( pos.x, pos.y );
+	if ( mode == GRID_BLOCKED ) {
+		Vector2I pos = MapPosition();
+		worldMap->ResetPather( pos.x, pos.y );
+	}
 }
 
 
 void MapSpatialComponent::OnRemove()
 {
-	Vector2I pos = MapPosition();
-	worldMap->ResetPather( pos.x, pos.y );
-
+	if ( mode == GRID_BLOCKED ) {
+		Vector2I pos = MapPosition();
+		worldMap->ResetPather( pos.x, pos.y );
+	}
 	super::OnRemove();
 }
 

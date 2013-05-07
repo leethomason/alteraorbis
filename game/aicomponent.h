@@ -93,7 +93,6 @@ private:
 	// creepy circle pacing
 	grinliz::Vector2F ThinkWanderCircle( const ComponentSet& thisComp );
 
-
 	Engine*		engine;
 	WorldMap*	map;
 
@@ -116,6 +115,7 @@ private:
 	bool				focusedMove;
 	grinliz::Rectangle2F awareness;
 	CTicker				rethink;
+	int					friendEnemyAge;
 	U32					wanderTime;
 	bool				randomWander;
 	bool				debugFlag;
