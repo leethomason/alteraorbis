@@ -516,6 +516,7 @@ void AIComponent::FocusedMove( const grinliz::Vector2F& dest, const Vector2I* se
 				int portJumpPort = map->GetWorldInfo().NearestPort( *sector, pos );
 				gmc->SetDest( sector->x, sector->y, portJumpPort );
 				parentChit->Remove( pmc );
+				delete pmc;
 				parentChit->Add( gmc );
 				return;
 			}
@@ -1109,10 +1110,17 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			parentChit->SetTickNeeded();
 		}
 		else {
+			bool wanderOdds = (parentChit->random.Rand( WANDER_ODDS ) == 0);
+			PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
+			if ( pmc && pmc->ForceCount() > 10 ) {
+				// Really really want to herd. This is a stuck unit.
+				wanderOdds = true;
+			}
+
 			if (	parentChit->GetItem()
 				 && (parentChit->GetItem()->flags & GameItem::AI_SECTOR_HERD)
  				 && friendList.Size() >= (MAX_TRACK*3/4)
-				 && parentChit->random.Rand( WANDER_ODDS ) == 0 
+				 && wanderOdds  
 				 && thisComp.okay )
 			{
 				SectorHerd( thisComp );

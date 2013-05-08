@@ -33,7 +33,7 @@ private:
 public:
 
 	PathMoveComponent(	WorldMap* _map )				// required; used to avoids blocks when moving. 
-		: GameMoveComponent( _map ), nPathPos( 0 ), pathPos( 0 ), pathDebugging( false ) 
+		: GameMoveComponent( _map ), nPathPos( 0 ), pathPos( 0 ), pathDebugging( false ), adjust( 0 )
 	{ 
 		queued.Clear();
 		dest.Clear();
@@ -72,6 +72,7 @@ public:
 	int BlockForceApplied() const	{ return blockForceApplied; }
 	bool IsStuck() const			{ return isStuck; }
 	bool IsAvoiding() const			{ return avoidForceApplied; }
+	int ForceCount() const			{ return adjust; }
 	virtual bool IsMoving() const	{ 
 		return isMoving; 
 	} 
@@ -123,6 +124,7 @@ private:
 	bool avoidForceApplied;
 	bool isStuck;
 	bool isMoving;
+	int adjust;
 
 	grinliz::CDynArray< Chit* > chitArr;
 	grinliz::Vector2F path[MAX_MOVE_PATH];

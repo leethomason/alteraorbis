@@ -132,7 +132,7 @@ class CDynArray
 {
 	enum { CACHE = 4 };
 public:
-	CDynArray() : size( 0 ), capacity( 0 ), nAlloc(0) {
+	CDynArray() : size( 0 ), capacity( CACHE ), nAlloc(0) {
 		mem = reinterpret_cast<T*>(cache);
 		GLASSERT( CACHE_SIZE*sizeof(int) >= CACHE*sizeof(T) );
 	}
@@ -237,6 +237,7 @@ public:
 			capacity = Max( CeilPowerOf2( count ), (U32) 16 );
 			if ( mem == reinterpret_cast<T*>(cache) ) {
 				mem = (T*)Malloc( capacity*sizeof(T) );
+				memcpy( mem, cache, size*sizeof(T) );
 			}
 			else {
 				mem = (T*)Realloc( mem, capacity*sizeof(T) );

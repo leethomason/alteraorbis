@@ -18,6 +18,7 @@
 #include "worldgrid.h"
 #include "gamelimits.h"
 #include "gridmovecomponent.h"
+#include "lumoschitbag.h"
 
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/rendercomponent.h"
@@ -315,7 +316,7 @@ bool PathMoveComponent::AvoidOthers( U32 delta )
 	bounds.Set( pos2.x-PATH_AVOID_DISTANCE, pos2.y-PATH_AVOID_DISTANCE, 
 		        pos2.x+PATH_AVOID_DISTANCE, pos2.y+PATH_AVOID_DISTANCE );
 	
-	GetChitBag()->QuerySpatialHash( &chitArr, bounds, parentChit );
+	GetChitBag()->QuerySpatialHash( &chitArr, bounds, parentChit, LumosChitBag::HasMoveComponentFilter );
 
 	if ( !chitArr.Empty() ) {
 		Vector3F pos3    = { pos2.x, 0, pos2.y };
@@ -331,12 +332,6 @@ bool PathMoveComponent::AvoidOthers( U32 delta )
 			Chit* chit = chitArr[i];
 			GLASSERT( chit != parentChit );
 			
-			// Only avoid things with move components. This is
-			// a little dicey logic. May need to re-visit.
-			if ( !chit->GetMoveComponent()) {
-				continue;
-			}
-				
 			Vector3F itPos3 = chit->GetSpatialComponent()->GetPosition();
 			float itRadius  = chit->GetRenderComponent()->RadiusOfBase(); 
 
@@ -502,6 +497,12 @@ int PathMoveComponent::DoTick( U32 delta, U32 since )
 		delete this;
 	}
 
+	if ( blockForceApplied || avoidForceApplied ) {
+		++adjust;
+	}
+	else {
+		--adjust;
+	}
 	return 0;
 }
 

@@ -34,9 +34,10 @@ public:
 	virtual int MapGridUse( int x, int y );
 
 	Census census;
+
 	static bool GoldFilter( Chit* chit );			// Is this gold?
 	static bool GoldCrystalFilter( Chit* chit );	// Is this gold or crystal? (wallet items)
-
+	static bool HasMoveComponentFilter( Chit* chit );
 
 private:
 

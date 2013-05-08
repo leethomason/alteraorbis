@@ -76,6 +76,12 @@ bool LumosChitBag::GoldCrystalFilter( Chit* chit )
 }
 
 
+bool LumosChitBag::HasMoveComponentFilter( Chit* chit )
+{
+	return chit->GetMoveComponent() != 0;
+}
+
+
 Chit* LumosChitBag::NewGoldChit( const grinliz::Vector3F& pos, int amount )
 {
 	if ( !amount )
