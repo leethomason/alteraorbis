@@ -527,3 +527,4 @@ end of battle:
 15 baseline
 23 switched over to a better component type system
 25 fixed over-computing zones. path cache still not working.
+33...because I had frame limiting on. Not sure what fixed what.

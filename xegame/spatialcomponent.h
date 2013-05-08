@@ -36,7 +36,6 @@ class SpatialComponent : public Component
 private:
 	typedef Component super;
 public:
-	//  track: should this be tracked in the ChitBag's spatial hash?
 	SpatialComponent() {
 		position.Zero();
 

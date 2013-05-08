@@ -109,49 +109,45 @@ void Chit::Serialize( const ComponentFactory* factory, XStream* xs )
 }
 
 
-int Chit::Slot( Component* c )
-{
-	int s = -1;
-	if ( c->ToSpatialComponent()) {
-		s = SPATIAL;
-	}
-	else if ( c->ToMoveComponent()) {
-		s = MOVE;
-	}
-	else if ( c->ToItemComponent()) {
-		s = ITEM;
-	}
-	else if ( c->ToScriptComponent()) {
-		s = SCRIPT;
-	}
-	else if ( c->ToAIComponent()) {
-		s = AI;
-	}
-	else if ( c->ToHealthComponent()) {
-		s = HEALTH;
-	}
-	else if ( c->ToRenderComponent()) {
-		s = RENDER;
-	}
-
-	if ( s < 0 ) {
-		for( int i=GENERAL_START; i<GENERAL_END; ++i ) {
-			if ( slot[i] == 0 ) {
-				s = i;
-				break;
-			}
-		}
-		GLASSERT( s < GENERAL_END );
-	}
-
-	return s;
-}
-	
 void Chit::Add( Component* c )
 {
-	int s = Slot( c );
-	GLASSERT( slot[s] == 0 );
-	slot[s] = c;
+	if ( c->ToSpatialComponent()) {
+		GLASSERT( spatialComponent == 0 );
+		spatialComponent = c->ToSpatialComponent();
+	}
+	else if ( c->ToMoveComponent()) {
+		GLASSERT( moveComponent == 0 );
+		moveComponent = c->ToMoveComponent();
+	}
+	else if ( c->ToItemComponent()) {
+		GLASSERT( itemComponent == 0 );
+		itemComponent = c->ToItemComponent();
+	}
+	else if ( c->ToScriptComponent()) {
+		GLASSERT( scriptComponent == 0 );
+		scriptComponent = c->ToScriptComponent();
+	}
+	else if ( c->ToAIComponent()) {
+		GLASSERT( aiComponent == 0 );
+		aiComponent = c->ToAIComponent();
+	}
+	else if ( c->ToHealthComponent()) {
+		GLASSERT( healthComponent == 0 );
+		healthComponent = c->ToHealthComponent();
+	}
+	else if ( c->ToRenderComponent()) {
+		GLASSERT( renderComponent == 0 );
+		renderComponent = c->ToRenderComponent();
+	}
+	else if ( !general0 ) {
+		general0 = c;
+	}
+	else if ( !general1 ) {
+		general1 = c;
+	}
+	else {
+		GLASSERT( 0 );
+	}
 	c->OnAdd( this );
 	timeToTick = 0;
 }

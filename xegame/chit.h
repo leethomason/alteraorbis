@@ -171,7 +171,6 @@ public:
 
 private:
 	bool CarryMsg( int componentID, Chit* src, const ChitMsg& msg );
-	int Slot( Component* c );
 
 	ChitBag* chitBag;
 	int		 id;
@@ -184,6 +183,7 @@ private:
 	};
 	grinliz::CDynArray<CList> cListeners;
 
+	/*
 	enum {
 		SPATIAL,
 		MOVE,
@@ -199,19 +199,20 @@ private:
 		GENERAL_START = GENERAL_0,
 		GENERAL_END   = RENDER,
 	};
-
+	*/
 public:
 	enum {
-		SPATIAL_BIT		= (1<<SPATIAL),
-		MOVE_BIT		= (1<<MOVE),
-		ITEM_BIT		= (1<<ITEM),
-		SCRIPT_BIT		= (1<<SCRIPT),
-		AI_BIT			= (1<<AI),
-		HEALTH_BIT		= (1<<HEALTH),
-		RENDER_BIT		= (1<<RENDER)
+		SPATIAL_BIT		= (1<<0),
+		MOVE_BIT		= (1<<1),
+		ITEM_BIT		= (1<<2),
+		SCRIPT_BIT		= (1<<3),
+		AI_BIT			= (1<<4),
+		HEALTH_BIT		= (1<<5),
+		RENDER_BIT		= (1<<6)
 	};
 
 private:
+	enum { NUM_SLOTS = 9 };
 	union {
 		// Update ordering is tricky. Defined by the order of the slots;
 		struct {

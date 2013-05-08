@@ -13,6 +13,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#define WINDOWS_LEAN_AND_MEAN
+#include <crtdbg.h>
+
 #include "chitbag.h"
 #include "chit.h"
 
@@ -224,8 +227,10 @@ void ChitBag::DoTick( U32 delta, Engine* engine )
 
 				if ( c->timeToTick <= 0 ) {
 					++nTicked;
+					//_CrtCheckMemory();
 					c->DoTick( delta );
 					GLASSERT( c->timeToTick >= 0 );
+					//_CrtCheckMemory();
 				}
 			}
 		}
