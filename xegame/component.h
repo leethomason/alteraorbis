@@ -43,7 +43,9 @@ class Component
 {
 public:
 	Component() : parentChit( 0 ), id( idPool++ ), willSerialize(true)	{}
-	virtual ~Component()			{}
+	virtual ~Component()			{
+		GLASSERT( parentChit == 0 );	// if this fires, this is being deleted without being Removed()
+	}
 
 	int ID() const { return id; }
 

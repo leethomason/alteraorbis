@@ -64,7 +64,8 @@ public:
 	// Due to events, changes, etc. a chit may need an update, possibily in addition to, the tick.
 	// Normally called automatically.
 	void QueueDelete( Chit* chit );
-	void QueueDeleteComponent( Component* comp );
+	void QueueRemoveAndDeleteComponent( Component* comp );
+	void DeferredDelete( Component* comp );
 
 	// passes ownership
 	void QueueEvent( const ChitEvent& event )			{ events.Push( event ); }
@@ -159,7 +160,8 @@ private:
 	grinliz::CDynArray< Chit* >		  blocks;
 	grinliz::HashTable< int, Chit* >  chitID;
 	grinliz::CDynArray<int>			deleteList;	
-	grinliz::CDynArray<CompID>		compDeleteList;	
+	grinliz::CDynArray<CompID>		compDeleteList;		// delete and remove list
+	grinliz::CDynArray<Component*>	zombieDeleteList;	// just delete
 	grinliz::CDynArray<Chit*>		hashQuery;			// local data, cached at class level
 	grinliz::CDynArray<Chit*>		cachedQuery;		// local data, cached at class level
 	grinliz::CDynArray<ChitEvent>	events;

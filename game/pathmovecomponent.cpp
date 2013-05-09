@@ -492,9 +492,11 @@ int PathMoveComponent::DoTick( U32 delta, U32 since )
 		GridMoveComponent* gmc = new GridMoveComponent( map );
 		gmc->SetDest( portJump.x, portJump.y, portJumpPort );
 		Chit* chit = parentChit;	// parentChit=0 after Remove()
+		ChitBag* chitBag = parentChit->GetChitBag();
 		chit->Remove( this );
 		chit->Add( gmc );
-		delete this;
+		chitBag->DeferredDelete( this );
+		return 0;
 	}
 
 	if ( blockForceApplied || avoidForceApplied ) {

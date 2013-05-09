@@ -6,6 +6,7 @@
 
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/rendercomponent.h"
+#include "../xegame/chitbag.h"
 
 using namespace grinliz;
 
@@ -82,9 +83,12 @@ int GridMoveComponent::DoTick( U32 delta, U32 since )
 {
 	if ( state == DONE ) {
 		Chit* chit = parentChit;	// gets nulled in Remove()
+		ChitBag* chitBag = parentChit->GetChitBag();
+
+		GLASSERT( chit );
 		chit->Remove( this );
 		chit->Add( new PathMoveComponent( map ));
-		delete this;
+		chitBag->DeferredDelete( this );
 		return VERY_LONG_TICK;
 	}
 	if ( state == NOT_INIT ) {

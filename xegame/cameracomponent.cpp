@@ -32,6 +32,7 @@ void CameraComponent::OnAdd( Chit* c )
 
 void CameraComponent::OnRemove()
 {
+	super::OnRemove();
 }
 
 void CameraComponent::Serialize( XStream* xs )

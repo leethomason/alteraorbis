@@ -183,23 +183,6 @@ private:
 	};
 	grinliz::CDynArray<CList> cListeners;
 
-	/*
-	enum {
-		SPATIAL,
-		MOVE,
-		ITEM,
-		SCRIPT,
-		AI,
-		HEALTH,
-		GENERAL_0,	// debugging, other
-		GENERAL_1,
-		RENDER,
-		NUM_SLOTS,
-
-		GENERAL_START = GENERAL_0,
-		GENERAL_END   = RENDER,
-	};
-	*/
 public:
 	enum {
 		SPATIAL_BIT		= (1<<0),

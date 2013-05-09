@@ -161,11 +161,18 @@ void ChitBag::QueueDelete( Chit* chit )
 }
 
 
-void ChitBag::QueueDeleteComponent( Component* comp )
+void ChitBag::QueueRemoveAndDeleteComponent( Component* comp )
 {
 	CompID* c = compDeleteList.PushArr(1);
 	c->chitID = comp->ParentChit()->ID();
 	c->compID = comp->ID();
+}
+
+
+void ChitBag::DeferredDelete( Component* comp )
+{
+	GLASSERT( comp->ParentChit() == 0 );	// already removed.
+	zombieDeleteList.Push( comp );
 }
 
 
@@ -265,6 +272,12 @@ void ChitBag::DoTick( U32 delta, Engine* engine )
 		}
 	}
 	compDeleteList.Clear();
+
+	while ( !zombieDeleteList.Empty() ) {
+		Component* c = zombieDeleteList.Pop();
+		GLASSERT( c->ParentChit() == 0 );
+		delete c;
+	}
 
 	if ( engine ) {
 		Bolt::TickAll( &bolts, delta, engine, this );
