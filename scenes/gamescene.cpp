@@ -495,19 +495,26 @@ void GameScene::DoDestTapped( const Vector2F& _dest )
 				// Is this grid travel or normal travel?
 				Vector2I currentSector = SectorData::SectorID( pos.x, pos.y );
 				Vector2I destSector    = SectorData::SectorID( dest.x, dest.y );
-				Vector2I sector = { 0, 0 };
+				SectorPort sectorPort;
+
+				// Are we on the grid?
+				GridMoveComponent* gmc = GET_SUB_COMPONENT( chit, MoveComponent, GridMoveComponent );
 					
-				if ( currentSector != destSector ) {
+				if (    currentSector != destSector		// we want to get on the grid
+					 || gmc )							// we are on the grid, and want to change coordinates.
+				{
 					// Find the nearest port.
 					int id = chit->ID();
-					Rectangle2I portRect = sim->GetWorldMap()->NearestPort( pos );
-					if ( portRect.max.x > 0 && portRect.max.y > 0 ) {
+					SectorPort local = sim->GetWorldMap()->NearestPort( pos );
+					if ( local.IsValid() ) {
+						Rectangle2I portRect = sim->GetWorldMap()->GetSector( local.sector ).GetPortLoc( local.port );
 						dest = SectorData::PortPos( portRect, chit->ID() );
-						sector = destSector;
+						sectorPort.sector = destSector;
+						sectorPort.port   = sim->GetWorldMap()->GetSector( sectorPort.sector ).NearestPort( pos );
 					}
 				}
 
-				ai->FocusedMove( dest, sector.IsZero() ? 0 : &sector );
+				ai->FocusedMove( dest, sectorPort.IsValid() ? &sectorPort : 0 );
 			}
 		}
 		else if ( camModeButton[TELEPORT].Down() ) {

@@ -58,7 +58,7 @@ public:
 								//					dataF=rotation
 		CHIT_HEAL,				//					dataF = hitpoints
 		CHIT_SECTOR_HERD,		// AI message: a lead unit is telling other units to herd to a different sector.
-								//					data = index of dst sector
+								//					ptr = &SectorPort
 
 		// ---- Component ---- //
 		PATHMOVE_DESTINATION_REACHED,

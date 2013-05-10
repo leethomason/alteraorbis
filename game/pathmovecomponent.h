@@ -20,6 +20,7 @@
 #include "../grinliz/glcontainer.h"
 #include "gamelimits.h"
 #include "gamemovecomponent.h"
+#include "sectorport.h"
 
 class WorldMap;
 
@@ -58,7 +59,7 @@ public:
 
 	void QueueDest( grinliz::Vector2F dest,
 					float rotation = -1.f,			// if specified, the rotation we wish to get to
-					const grinliz::Vector2I* sector=0 );	// if specified, the sector travel target
+					const SectorPort* sector=0 );	// if specified, the sector travel target
 	void QueueDest( Chit* targetChit );
 	bool QueuedDest( grinliz::Vector2F* dest ) const {
 		if ( queued.pos.x >= 0 ) { *dest = queued.pos; return true; }
@@ -105,11 +106,11 @@ private:
 	int repath;					// counter to see if we are stuck
 
 	struct Dest {
-		void Clear() { pos.Set( -1, -1 ); rotation = -1.f; sector.Zero(); }
+		void Clear() { pos.Set( -1, -1 ); rotation = -1.f; sectorPort.Zero(); }
 
 		grinliz::Vector2F	pos;
 		float				rotation;	// <0 means ignore
-		grinliz::Vector2I	sector;		// (0,0) no sector dest
+		SectorPort			sectorPort;
 	};
 
 	Dest queued;	// queued up, 

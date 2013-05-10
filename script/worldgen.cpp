@@ -248,6 +248,94 @@ void WorldGen::RemoveUncoloredLand( SectorData* s )
 	}
 }
 
+#if 0
+float WorldGen::LeastCostEstimate( void* stateStart, void* stateEnd ) {
+	grinliz::Vector2I start = FromState( stateStart );
+	grinliz::Vector2I end   = FromState( stateEnd );
+//	float len2 = (float)((start.x-end.x)*(start.x-end.x) + (start.y-end.y)*(start.y-end.y));
+//	return sqrtf( len2 );
+	float len = (float)(abs(start.x-end.x) + abs(start.y-end.y));
+	return len;
+}
+
+
+void WorldGen::AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > *adjacent ) {
+	Vector2I start = FromState( state );
+	GLASSERT( patherBounds.Contains( start ));
+
+	static const Vector2I delta[4] = {
+		{ -1, 0 },
+		{ 1, 0 },
+		{ 0, -1 },
+		{ 0, 1 }
+	};
+	for( int i=0; i<4; ++i ) {
+		Vector2I v = start + delta[i];
+		if ( patherBounds.Contains( v ) ) {
+			int type = land[v.y*SIZE+v.x];
+			if ( type != WATER ) {
+				float cost = (type >= LAND1 && type <= LAND3) ? 8.0f : 1.0f;	// prefer existing paths.
+				micropather::StateCost sc = { ToState( v ), cost };
+				adjacent->push_back( sc );
+			}
+		}
+	}
+}
+
+
+void WorldGen::PathToCore( SectorData* s )
+{
+	if ( !s->HasCore() )
+		return;
+
+	// Clear land around core.
+	Rectangle2I b;
+	b.min = b.max = s->core;
+	b.Outset( 2 );
+	for( int y=b.min.y; y<=b.max.y; ++y ) {
+		for( int x=b.min.x; x<=b.max.x; ++x ) {
+			int type = land[y*SIZE+x];
+			if ( type >= LAND1 && type <= LAND3 ) {
+				type = LAND0;
+			}
+		}
+	}
+
+	// Now make sure there is a LAND0 route from
+	// each port to the core. This keeps critters
+	// from piling up on the ports quite so much.
+	micropather::MicroPather* pather = new micropather::MicroPather( this, SIZE*SIZE, 4, false );
+	MP_VECTOR< void* > path;
+	patherBounds = s->InnerBounds();
+
+	for( int i=0; i<4; ++i ) {
+		int port = (1<<i);
+		if ( s->ports & port ) {
+			Vector2I startVec = s->core;
+			Vector2I endVec   = s->GetPortLoc( port ).Center();
+			GLASSERT( color[startVec.y*SIZE+startVec.x] == color[endVec.y*SIZE+endVec.x] );
+
+			void* start = ToState( startVec );
+			void* end   = ToState( endVec );
+
+			float cost = 0;
+			path.clear();
+			int result = pather->Solve( start, end, &path, &cost );
+			GLASSERT( result == micropather::MicroPather::SOLVED );	// else coloring failed?
+			
+			for( unsigned k=0; k<path.size(); ++k ) {
+				Vector2I v = FromState( path[i] );
+				int type = land[v.y*SIZE+v.x];
+				if ( type >= LAND1 && type <= LAND3 ) {
+					land[v.y*SIZE+v.x] = LAND0;
+				}
+			}
+		}
+	}
+	delete pather;
+}
+#endif
+
 
 void WorldGen::DepositLand( SectorData* s, U32 seed, int n )
 {
@@ -476,6 +564,25 @@ Rectangle2I SectorData::InnerBounds() const {
 }
 
 
+int SectorData::NearestPort( const grinliz::Vector2I& pos ) const
+{
+	int bestDist = INT_MAX;
+	int bestPort = 0;
+	for( int i=0; i<4; ++i ) {
+		int port = (1<<i);
+		if ( ports & port ) {
+			Vector2I center = GetPortLoc( port ).Center();
+			int dist = abs(center.x-pos.x) + abs(center.y-pos.y);
+			if ( dist < bestDist ) {
+				bestDist = dist;
+				bestPort = port;
+			}
+		}
+	}
+	return bestPort;
+}
+
+
 Rectangle2I SectorData::GetPortLoc( int port ) const
 {
 	Rectangle2I r;
@@ -484,16 +591,20 @@ Rectangle2I SectorData::GetPortLoc( int port ) const
 	static const int SHORT = 2;
 
 	if ( port == NEG_X ) {
-		r.Set( x+1, y+OFFSET, x+SHORT, y+OFFSET+LONG-1 ); 
+		r.Set( x+1, y+OFFSET, 
+			   x+SHORT, y+OFFSET+LONG-1 ); 
 	}
 	else if ( port == POS_X ) {
-		r.Set( x+SECTOR_SIZE-SHORT-1, y+OFFSET, x+SECTOR_SIZE-2, y+OFFSET+LONG-1 ); 
+		r.Set( x+SECTOR_SIZE-SHORT-1, y+OFFSET, 
+			   x+SECTOR_SIZE-2, y+OFFSET+LONG-1 ); 
 	}
 	else if ( port == NEG_Y ) {
-		r.Set( x+OFFSET, y+1, x+OFFSET+LONG-1, y+SHORT ); 
+		r.Set( x+OFFSET,        y+1, 
+			   x+OFFSET+LONG-1, y+SHORT ); 
 	}
-	else if ( port == SectorData::POS_Y ) {
-		r.Set( x+OFFSET, y+SECTOR_SIZE-SHORT-1, x+OFFSET+LONG-1, y+SECTOR_SIZE-2 ); 
+	else if ( port == POS_Y ) {
+		r.Set( x+OFFSET,        y+SECTOR_SIZE-SHORT-1, 
+			   x+OFFSET+LONG-1, y+SECTOR_SIZE-2 ); 
 	}
 	else {
 		GLASSERT( 0 );
@@ -608,10 +719,10 @@ void WorldGen::GenerateTerrain( U32 seed, SectorData* s )
 	while ( a < AREA || !portsColored ) {
 		DepositLand( s, seed, Max( AREA-a, (int)INNER_SECTOR_SIZE ));
 		a = CalcSectorAreaFromFill( s, c, &portsColored );
-		RemoveUncoloredLand( s );
 	}
 	// Filter 1x1 zones.
 	Filter( s->InnerBounds() );
+	RemoveUncoloredLand( s );
 
 	s->area = CalcSectorArea( s->x/SECTOR_SIZE, s->y/SECTOR_SIZE );
 }

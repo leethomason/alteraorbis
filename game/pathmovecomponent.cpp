@@ -43,9 +43,12 @@ void PathMoveComponent::Serialize( XStream* item )
 	this->BeginSerialize( item, Name() );
 	XARC_SER( item, queued.pos );
 	XARC_SER( item, queued.rotation );
+	XARC_SER( item, queued.sectorPort.sector );
+	XARC_SER( item, queued.sectorPort.port );
 	XARC_SER( item, dest.pos );
 	XARC_SER( item, dest.rotation );
-	XARC_SER( item, dest.sector );
+	XARC_SER( item, dest.sectorPort.sector );
+	XARC_SER( item, dest.sectorPort.port );
 	this->EndSerialize( item );
 }
 
@@ -60,10 +63,10 @@ void PathMoveComponent::OnAdd( Chit* chit )
 	// Serialization case:
 	// if there is a queue location, use that, else use the current location.
 	if ( queued.pos.x >= 0 ) {
-		QueueDest( queued.pos, queued.rotation, &queued.sector );
+		QueueDest( queued.pos, queued.rotation, &queued.sectorPort );
 	}
 	else if ( dest.pos.x >= 0 ) {
-		QueueDest( dest.pos, dest.rotation, &dest.sector );
+		QueueDest( dest.pos, dest.rotation, &dest.sectorPort );
 	}
 }
 
@@ -97,15 +100,15 @@ void PathMoveComponent::CalcVelocity( grinliz::Vector3F* v )
 }
 
 
-void PathMoveComponent::QueueDest( grinliz::Vector2F d, float r, const Vector2I* sector )
+void PathMoveComponent::QueueDest( grinliz::Vector2F d, float r, const SectorPort* sector )
 {
 	GLASSERT(  d.x >= 0 && d.y >= 0 );
 
 	queued.pos = d;
 	queued.rotation = r;
-	queued.sector.Zero();
+	queued.sectorPort.Zero();
 	if ( sector ) {
-		queued.sector = *sector;
+		queued.sectorPort = *sector;
 	}
 }
 
@@ -390,8 +393,7 @@ int PathMoveComponent::DoTick( U32 delta, U32 since )
 	blockForceApplied = false;
 	avoidForceApplied = false;
 	isMoving = false;
-	Vector2I portJump = { 0, 0 };
-	int portJumpPort = 0;
+	SectorPort portJump;
 
 	if ( HasPath() ) {
 		// We should be doing something!
@@ -463,13 +465,11 @@ int PathMoveComponent::DoTick( U32 delta, U32 since )
 #endif
 				// actually reached the end!
 				parentChit->SendMessage( ChitMsg( ChitMsg::PATHMOVE_DESTINATION_REACHED), this );
-				if ( dest.sector.x > 0 || dest.sector.y > 0 ) {
+				if ( dest.sectorPort.IsValid() ) {
 					const WorldGrid& wg = map->GetWorldGrid( (int)pos2.x, (int)pos2.y );
 					if ( wg.IsPort() ) {
 						//GLOUTPUT(( "Port found! Do something.\n" ));
-						portJump = dest.sector;
-						// Nearest port to current location. This looks a little weird.
-						portJumpPort = map->GetWorldInfo().NearestPort( dest.sector, pos2 );
+						portJump = dest.sectorPort;
 					}
 				}
 				SetNoPath();
@@ -488,9 +488,9 @@ int PathMoveComponent::DoTick( U32 delta, U32 since )
 		SetPosRot( pos2, rot );
 	};
 
-	if ( !portJump.IsZero() && portJumpPort ) {
+	if ( portJump.IsValid() ) {
 		GridMoveComponent* gmc = new GridMoveComponent( map );
-		gmc->SetDest( portJump.x, portJump.y, portJumpPort );
+		gmc->SetDest( portJump );
 		Chit* chit = parentChit;	// parentChit=0 after Remove()
 		ChitBag* chitBag = parentChit->GetChitBag();
 		chit->Remove( this );

@@ -12,6 +12,7 @@
 #include "../xarchive/glstreamer.h"
 #include "../engine/enginelimits.h"
 #include "../game/worldinfo.h"
+#include "../micropather/micropather.h"
 
 namespace grinliz {
 class PerlinNoise;
@@ -62,6 +63,25 @@ public:
 	enum {
 		SIZE			= MAX_MAP_SIZE
 	};
+
+	grinliz::Vector2I FromState( void* s ) {
+		int i = (int)s;
+		int y = i / SIZE;
+		int x = i - y*SIZE;
+		grinliz::Vector2I v = { x, y };
+		return v;
+	}
+
+	void* ToState( const grinliz::Vector2I& v ) {
+		int i = v.y*SIZE + v.x;
+		return (void*)i;
+	}
+
+	/*
+	virtual float LeastCostEstimate( void* stateStart, void* stateEnd );
+	virtual void AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > *adjacent );
+	virtual void  PrintStateInfo( void* state ) { GLASSERT( 0 ); }
+	*/
 
 private:
 	int  CountFlixelsAboveCutoff( const float* flixels, float cutoff, float* maxh );

@@ -87,6 +87,7 @@ GridEdge WorldInfo::GetGridEdge( const grinliz::Vector2I& sector, int port ) con
 }
 
 
+/*
 int WorldInfo::NearestPort( const grinliz::Vector2I& sector, const grinliz::Vector2F& p ) const
 {
 	const SectorData& sd = GetSector( sector );
@@ -109,13 +110,15 @@ int WorldInfo::NearestPort( const grinliz::Vector2I& sector, const grinliz::Vect
 	}
 	return best;
 }
+*/
 
 
-const SectorData& WorldInfo::GetSectorInfo( float fx, float fy, int *port ) const
+const SectorData& WorldInfo::GetSectorInfo( float fx, float fy ) const
 {
 	Vector2I v = { (int)fx / SECTOR_SIZE, (int)fy / SECTOR_SIZE };
 	const SectorData& sd = GetSector( v );
 
+	/*
 	int axis = 0;
 	if ( port ) {
 		int dx = (int)fx - (v.x*SECTOR_SIZE + SECTOR_SIZE/2);
@@ -127,6 +130,7 @@ const SectorData& WorldInfo::GetSectorInfo( float fx, float fy, int *port ) cons
 			*port = ( dy > 0 ) ? SectorData::POS_Y : SectorData::NEG_Y;
 		}
 	}
+	*/
 	return sd;
 }
 

@@ -3,6 +3,7 @@
 
 #include "gamemovecomponent.h"
 #include "worldinfo.h"
+#include "sectorport.h"
 
 class GridMoveComponent : public GameMoveComponent
 {
@@ -25,7 +26,7 @@ public:
 	virtual bool IsMoving() const;
 	virtual void CalcVelocity( grinliz::Vector3F* v ) { *v = velocity; }
 
-	void SetDest( int sectorX, int sectorY, int port );
+	void SetDest( const SectorPort& sp );
 	// Always does; may need to restore as an option.
 	//void DeleteAndRestorePathMCWhenDone( bool _deleteWhenDone )			{ deleteWhenDone = _deleteWhenDone; }
 
@@ -39,8 +40,7 @@ private:
 	};
 	WorldMap*			worldMap;
 	int					state;
-	grinliz::Vector2I	sectorDest;
-	int					portDest;
+	SectorPort			destSectorPort;
 	//bool				deleteWhenDone;
 	float				speed;
 

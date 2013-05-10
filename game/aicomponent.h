@@ -25,7 +25,7 @@
 class WorldMap;
 class Engine;
 struct ComponentSet;
-
+struct SectorPort;
 
 // Combat AI: needs refactoring
 class AIComponent : public Component
@@ -51,7 +51,7 @@ public:
 
 	// Approximate. enemyList may not be flushed.
 	bool AwareOfEnemy() const { return enemyList.Size() > 0; }
-	void FocusedMove( const grinliz::Vector2F& dest, const grinliz::Vector2I* sector );
+	void FocusedMove( const grinliz::Vector2F& dest, const SectorPort* sector );
 	void FocusedTarget( Chit* chit );
 
 	void EnableDebug( bool enable ) { debugFlag = enable; }

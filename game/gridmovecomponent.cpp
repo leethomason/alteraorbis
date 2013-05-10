@@ -37,8 +37,8 @@ void GridMoveComponent::Serialize( XStream* xs )
 {
 	this->BeginSerialize( xs, Name() );
 	XARC_SER( xs, state );
-	XARC_SER( xs, sectorDest );
-	XARC_SER( xs, portDest );
+	XARC_SER( xs, destSectorPort.sector );
+	XARC_SER( xs, destSectorPort.port );
 	XARC_SER( xs, speed );
 
 	this->EndSerialize( xs );
@@ -67,15 +67,22 @@ bool GridMoveComponent::IsMoving() const
 }
 
 
-void GridMoveComponent::SetDest( int sectorX, int sectorY, int port )
+void GridMoveComponent::SetDest( const SectorPort& sp )
 {
-	GLASSERT( state == NOT_INIT );
-	sectorDest.Set( sectorX, sectorY );
-	portDest = port;
-	state = ON_BOARD;
+	switch( state ) {
+	case NOT_INIT:
+	case ON_BOARD:
+	case OFF_BOARD:
+		state = ON_BOARD;
+		break;
+	case TRAVELLING:
+		path.Clear();
+		break;
+	}
 
+	destSectorPort = sp;
 	// Error check:
-	worldMap->GetWorldInfo().GetGridEdge( sectorDest, portDest );
+	worldMap->GetWorldInfo().GetGridEdge( destSectorPort.sector, destSectorPort.port );
 }
 
 
@@ -125,8 +132,8 @@ int GridMoveComponent::DoTick( U32 delta, U32 since )
 	case ON_BOARD:
 		// Presume we started somewhere rational. Move to grid.
 		{
-			int port = 0;
-			const SectorData& sd = worldInfo.GetSectorInfo( pos.x, pos.y, &port );
+			const SectorData& sd = worldInfo.GetSectorInfo( pos.x, pos.y );
+			int port = sd.NearestPort( pos );
 			Vector2I sector = { sd.x / SECTOR_SIZE, sd.y / SECTOR_SIZE };
 			GridEdge gridEdge = worldInfo.GetGridEdge( sector, port );
 			GLASSERT( worldInfo.HasGridEdge( gridEdge ));
@@ -138,8 +145,8 @@ int GridMoveComponent::DoTick( U32 delta, U32 since )
 
 	case OFF_BOARD:
 		{
-			const SectorData& sd = worldInfo.GetSector( sectorDest );
-			Rectangle2I portBounds = sd.GetPortLoc( portDest );
+			const SectorData& sd = worldInfo.GetSector( destSectorPort.sector );
+			Rectangle2I portBounds = sd.GetPortLoc( destSectorPort.port );
 			dest = SectorData::PortPos( portBounds, parentChit->ID() );
 			stateIfDestReached = DONE;
 		}
@@ -147,7 +154,7 @@ int GridMoveComponent::DoTick( U32 delta, U32 since )
 
 	case TRAVELLING:
 		{	
-			GridEdge destEdge = worldInfo.GetGridEdge( sectorDest, portDest );
+			GridEdge destEdge = worldInfo.GetGridEdge( destSectorPort.sector, destSectorPort.port );
 			Vector2F destPt   = worldInfo.GridEdgeToMapF( destEdge ); 
 			
 			Rectangle2F destRect;
@@ -162,6 +169,7 @@ int GridMoveComponent::DoTick( U32 delta, U32 since )
 				if ( path.Size() == 0 ) {
 					Vector2I mapPos = { (int)pos.x, (int)pos.y };
 					GridEdge current = worldMap->GetWorldInfo().MapToGridEdge( mapPos.x, mapPos.y );
+					GLASSERT( worldMap->GetWorldInfo().HasGridEdge( current ));
 					int result = worldMap->GetWorldInfoMutable()->Solve( current, destEdge, &path );
 					GLASSERT( result == micropather::MicroPather::SOLVED );
 					if ( result != micropather::MicroPather::SOLVED ) {

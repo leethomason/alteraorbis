@@ -206,6 +206,7 @@
     <ClInclude Include="..\game\pathmovecomponent.h" />
     <ClInclude Include="..\game\physicsmovecomponent.h" />
     <ClInclude Include="..\game\reservebank.h" />
+    <ClInclude Include="..\game\sectorport.h" />
     <ClInclude Include="..\game\sim.h" />
     <ClInclude Include="..\game\wallet.h" />
     <ClInclude Include="..\game\weather.h" />

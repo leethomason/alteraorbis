@@ -112,6 +112,12 @@ const SectorData& WorldMap::GetSector( int x, int y ) const
 }
 
 
+const SectorData& WorldMap::GetSector( const Vector2I& sector ) const
+{
+	return worldInfo->GetSector( sector );
+}
+
+
 void WorldMap::AttachEngine( Engine* e, IMapGridUse* imap ) 
 {
 	GLASSERT( (e==0) || (e!=0 && engine==0) );
@@ -1288,7 +1294,7 @@ bool WorldMap::GridPath( const grinliz::Vector2F& p0, const grinliz::Vector2F& p
 }
 
 
-Rectangle2I WorldMap::NearestPort( const Vector2F& pos )
+SectorPort WorldMap::NearestPort( const Vector2F& pos )
 {
 	Vector2I secPos = { (int)pos.x / SECTOR_SIZE, (int)pos.y / SECTOR_SIZE };
 	const SectorData& sd = worldInfo->GetSector( secPos );
@@ -1301,7 +1307,8 @@ Rectangle2I WorldMap::NearestPort( const Vector2F& pos )
 		if ( sd.ports & port ) {
 			Vector2I desti = sd.GetPortLoc( port ).Center();
 			Vector2F dest = { (float)desti.x, (float)desti.y };
-			float cost = 0;
+			float cost = FLT_MAX;
+
 			if ( CalcPath( pos, dest, 0, &cost, false ) ) {
 				if ( cost < bestCost ) {
 					bestCost = cost;
@@ -1310,9 +1317,10 @@ Rectangle2I WorldMap::NearestPort( const Vector2F& pos )
 			}
 		}
 	}
-	Rectangle2I result;
+	SectorPort result;
 	if ( bestPort ) {
-		result = sd.GetPortLoc( bestPort );
+		result.port = bestPort;
+		result.sector = secPos;
 	}
 	return result;
 }

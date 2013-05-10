@@ -18,6 +18,7 @@
 
 #include "gamelimits.h"
 #include "worldgrid.h"
+#include "sectorport.h"
 
 #include "../engine/map.h"
 #include "../engine/rendertarget.h"
@@ -120,8 +121,8 @@ public:
 					int maxPath,
 					float* totalCost,
 					bool showDebugging = false );
-	// Returns the nearest pathable port. Returns (0,0) on failure.
-	grinliz::Rectangle2I NearestPort( const grinliz::Vector2F& pos );
+	// Returns the nearest pathable port to 'pos'. Returns (0,0) on failure.
+	SectorPort NearestPort( const grinliz::Vector2F& pos );
 
 	enum BlockResult {
 		NO_EFFECT,
@@ -165,7 +166,8 @@ public:
 	const WorldInfo& GetWorldInfo()			{ return *worldInfo; }
 	WorldInfo* GetWorldInfoMutable()		{ return worldInfo; }
 	const SectorData* GetSectorData() const;
-	const SectorData& GetSector( int x, int y ) const;
+	const SectorData& GetSector( int mapx, int mapy ) const;
+	const SectorData& GetSector( const grinliz::Vector2I& sector ) const;
 
 	// Find random land on the largest continent
 	grinliz::Vector2I FindEmbark();

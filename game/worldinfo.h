@@ -37,6 +37,12 @@ public:
 	grinliz::IString			name;
 
 	bool HasCore() const { return core.x > 0 && core.y > 0; }
+	// Nearest port to 'pos'. There are no limits on pos.
+	int NearestPort( const grinliz::Vector2I& pos ) const;	
+	int NearestPort( const grinliz::Vector2F pos ) const {
+		grinliz::Vector2I p = { grinliz::LRintf(pos.x), grinliz::LRintf(pos.y) };
+		return NearestPort( p );
+	}
 	grinliz::Rectangle2I GetPortLoc( int port ) const;
 	grinliz::Rectangle2I Bounds() const;
 	grinliz::Rectangle2I InnerBounds() const;
@@ -100,10 +106,7 @@ public:
 	GridEdge GetGridEdge( const grinliz::Vector2I& sector, int port ) const;
 
 	// Get the cx, cy of the sector from an arbitrary coordinate.
-	// 'nearestPort' is optional.
-	const SectorData& GetSectorInfo( float x, float y, int* nearestPort ) const;
-
-	int NearestPort( const grinliz::Vector2I& sector, const grinliz::Vector2F& p ) const;
+	const SectorData& GetSectorInfo( float x, float y ) const;
 
 	grinliz::Vector2I GridEdgeToSector( GridEdge e ) const {
 		grinliz::Vector2I s = { e.x/2, e.y/2 };
@@ -124,9 +127,11 @@ public:
 	}
 
 	GridEdge MapToGridEdge( int x, int y ) const {
-		float fx = (float)x*2.0f / (float)SECTOR_SIZE;
-		float fy = (float)y*2.0f / (float)SECTOR_SIZE;
-		GridEdge ge = { (S16)grinliz::LRintf(fx), (S16)grinliz::LRintf(fy) };
+		GridEdge ge;
+
+		ge.x = 2*x / SECTOR_SIZE;
+		ge.y = 2*y / SECTOR_SIZE;
+
 		return ge;
 	}
 
@@ -158,5 +163,6 @@ private:
 
 	SectorData sectorData[NUM_SECTORS*NUM_SECTORS];
 };
+
 
 #endif // LUMOS_WORLDINFO_INCLUDED

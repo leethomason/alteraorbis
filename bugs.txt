@@ -13,12 +13,13 @@
 - integers for discrete values (hp, gold)
 - remove UI button for track - only teleport (or at least hide)
 - fix / disable right mouse behavior
-- add portals
+x add portals
 - more critters
 - space around ports
 - sector herding: more aggressive? wider range?
 - UI on minimap. Target, show highlight of domain.
 - consider removing chit listeners
+- unify rockgen and worldgen. frustrating they are separate steps.
 x arrays in spatial query much, much too dangerous. Support CArray?
 
 - game

@@ -470,6 +470,7 @@ MicroPather::MicroPather( Graph* _graph, unsigned allocate, unsigned typicalAdja
 {
 	MPASSERT( allocate );
 	MPASSERT( typicalAdjacent );
+	pathCache = 0;
 	if ( cache ) {
 		pathCache = new PathCache( allocate*4 );	// untuned arbitrary constant	
 	}

@@ -21,6 +21,7 @@
 #include "lumoschitbag.h"
 #include "mapspatialcomponent.h"
 #include "gridmovecomponent.h"
+#include "sectorport.h"
 
 #include "../script/battlemechanics.h"
 #include "../script/plantscript.h"
@@ -50,6 +51,7 @@ static const float EAT_HP_HEAL_MULT		=  5.0f;	// eating really tears up plants. 
 static const int   WANDER_ODDS			= 50;		// as in 1 in WANDER_ODDS
 static const float PLANT_AWARE			=  3.0f;
 static const float GOLD_AWARE			=  3.5f;
+static const int   FORCE_COUNT_STUCK	=  8;
 
 #define AI_OUTPUT
 
@@ -502,26 +504,36 @@ void AIComponent::Think( const ComponentSet& thisComp )
 };
 
 
-void AIComponent::FocusedMove( const grinliz::Vector2F& dest, const Vector2I* sector )
+void AIComponent::FocusedMove( const grinliz::Vector2F& dest, const SectorPort* sectorPort )
 {
-	PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
-	if ( pmc ) {
-		// Special case: if on a port, go straight to grid move. This avoids
-		// trying to do crowded pathing.
-		if ( sector && parentChit->GetSpatialComponent() ) {
+	PathMoveComponent* pmc    = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
+	GridMoveComponent* gridMC = GET_SUB_COMPONENT( parentChit, MoveComponent, GridMoveComponent );
+
+	// Special case: if on a port, go straight to grid move. This avoids
+	// trying to do crowded pathing. OR, if a move is requested, and 
+	// we are on a GridMove, update.
+	if ( sectorPort ) {
+		if ( parentChit->GetSpatialComponent() ) {
 			Vector2F pos = parentChit->GetSpatialComponent()->GetPosition2D();
 			Vector2I m = { (int)pos.x, (int)pos.y };
-			if ( map->GetWorldGrid( m.x, m.y ).IsPort() ) {
+
+			if ( pmc && map->GetWorldGrid( m.x, m.y ).IsPort() ) {
 				GridMoveComponent* gmc = new GridMoveComponent( map );
-				int portJumpPort = map->GetWorldInfo().NearestPort( *sector, pos );
-				gmc->SetDest( sector->x, sector->y, portJumpPort );
+				gmc->SetDest( *sectorPort );
 				parentChit->Remove( pmc );
 				delete pmc;
 				parentChit->Add( gmc );
 				return;
 			}
+			else if ( gridMC ) {
+				gridMC->SetDest( *sectorPort );
+				return;
+			}
 		}
-		pmc->QueueDest( dest, -1, sector );
+	}
+
+	if ( pmc ) {
+		pmc->QueueDest( dest, -1, sectorPort );
 		currentAction = NO_ACTION;
 		focusedMove = true;
 	}
@@ -636,17 +648,22 @@ Vector2F AIComponent::ThinkWanderFlock( const ComponentSet& thisComp )
 
 bool AIComponent::SectorHerd( const ComponentSet& thisComp )
 {
-	Vector2I delta[4] = { {-1,0}, {1,0}, {0,-1}, {0,1} };
-	parentChit->random.ShuffleArray( delta, 4 );
+	static const int NDELTA = 8;
+	Vector2I delta[NDELTA] = { 
+		{-1,0}, {1,0}, {0,-1}, {0,1},
+		{-1,-1}, {1,-1}, {-1,1}, {1,1}
+	};
+	parentChit->random.ShuffleArray( delta, NDELTA );
 	Vector2F pos = thisComp.spatial->GetPosition2D();
 
-	for( int i=0; i<4; ++i ) {
-		Vector2I sector = { (int)pos.x/SECTOR_SIZE, (int)pos.y/SECTOR_SIZE };
-		if ( sector.x >= 0 && sector.x < NUM_SECTORS && sector.y >= 0 && sector.y < NUM_SECTORS ) {
-			const SectorData& sd = map->GetWorldInfo().GetSector( sector );
-			if ( sd.ports ) {			
-				Vector2I dst = sector + delta[thisComp.chit->random.Rand(4)];
-				int index = dst.y*NUM_SECTORS+dst.x;
+	SectorPort start = map->NearestPort( pos );
+	if ( start.IsValid() ) {
+		for( int i=0; i<NDELTA; ++i ) {
+			SectorPort dest;
+			dest.sector = start.sector + delta[i];
+			const SectorData& destSD = map->GetSector( dest.sector );
+			if ( destSD.ports ) {
+				dest.port = destSD.NearestPort( pos );
 
 				RenderComponent* rc = parentChit->GetRenderComponent();
 				if ( rc ) {
@@ -655,7 +672,7 @@ bool AIComponent::SectorHerd( const ComponentSet& thisComp )
 				NewsEvent news( NewsEvent::PONY, pos, StringPool::Intern( "SectorHerd" ), parentChit->ID() );
 				GetChitBag()->AddNews( news );
 
-				ChitMsg msg( ChitMsg::CHIT_SECTOR_HERD, index );
+				ChitMsg msg( ChitMsg::CHIT_SECTOR_HERD, 0, &dest );
 				for( int i=0; i<friendList.Size(); ++i ) {
 					Chit* c = GetChitBag()->GetChit( friendList[i] );
 					if ( c ) {
@@ -728,17 +745,18 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 			currentAction = WANDER;
 			return;
 		}
-#if 0 
-		if (	itemFlags & GameItem::AI_SECTOR_HERD
+		PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
+
+		if (    pmc 
+			 && pmc->ForceCount() > FORCE_COUNT_STUCK 
+			 && itemFlags & GameItem::AI_SECTOR_HERD
  			 && friendList.Size() >= (MAX_TRACK*3/4)
 			 && (thisComp.chit->random.Rand( WANDER_ODDS ) == 0) ) 
 		{
 			if ( SectorHerd( thisComp ) )
 				return;
 		}
-		else 
-#endif
-		if ( randomWander ) {
+		else if ( randomWander ) {
 			dest = ThinkWanderRandom( thisComp );
 		}
 		else if ( wanderFlags == GameItem::AI_WANDER_HERD ) {
@@ -1112,7 +1130,7 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		else {
 			bool wanderOdds = (parentChit->random.Rand( WANDER_ODDS ) == 0);
 			PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
-			if ( pmc && pmc->ForceCount() > 10 ) {
+			if ( pmc && pmc->ForceCount() > FORCE_COUNT_STUCK ) {
 				// Really really want to herd. This is a stuck unit.
 				wanderOdds = true;
 			}
@@ -1134,15 +1152,10 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 	case ChitMsg::CHIT_SECTOR_HERD:
 		{
 			if ( parentChit->GetSpatialComponent() ) {
-				Vector2I sector;
-				sector.y = msg.Data() / NUM_SECTORS;
-				sector.x = msg.Data() - sector.y*NUM_SECTORS;
-				Vector2F pos = parentChit->GetSpatialComponent()->GetPosition2D();
-				Rectangle2I portRect = map->NearestPort( pos );
-				if ( portRect.max.x > 0 && portRect.max.y > 0 ) {
-					Vector2F dest = SectorData::PortPos( portRect, chit->ID() );
-					this->FocusedMove( dest, &sector );
-				}
+				const SectorPort* sectorPort = (const SectorPort*) msg.Ptr();
+				const SectorData& sd = map->GetSector( sectorPort->sector );
+				Vector2F dest = SectorData::PortPos( sd.GetPortLoc( sectorPort->port ), parentChit->ID() );
+				this->FocusedMove( dest, sectorPort );
 			}
 		}
 		break;
