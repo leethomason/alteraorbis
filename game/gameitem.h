@@ -24,6 +24,7 @@
 #include "../grinliz/glstringutil.h"
 #include "../grinliz/glmath.h"
 #include "../grinliz/glutil.h"
+#include "../grinliz/glrandom.h"
 
 #include "../tinyxml2/tinyxml2.h"
 
@@ -126,7 +127,11 @@ public:
 		exp = LevelToExperience( level );
 		GLASSERT( level == ExperienceToLevel( exp ));
 	}
+	// Roll the initial values.
 	void Roll( U32 seed );
+
+	void AddExpHit()						{ exp += 1; }
+	void AddExpKillShot( int targetLevel )	{ exp += targetLevel; }
 
 	// 1.0 is normal, 0.1 very low, 2+ exceptional.
 	float Accuracy() const		{ return NormalLeveledSkill( Dexterity() ); }
@@ -138,11 +143,7 @@ public:
 	float NormalDex() const		{ return NormalLeveledSkill( Dexterity() ); }
 
 	U32 Hash() const			{ 
-		U32 h = 0;
-		for( int i=0; i<NUM_TRAITS; ++i ) {
-			h |= trait[i] << (5*i);
-		}
-		return h;
+		return grinliz::Random::Hash( trait, sizeof(trait[0])*NUM_TRAITS );
 	}
 
 	// exp: 0  lev: 0
