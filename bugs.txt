@@ -1,26 +1,17 @@
 - flower colors (too saturated flowers)
-- sector-herding still getting stuck. Go back to random re-herd?
-	- guarentee path to core
-	- clear space around core
 - use arrays to track components and component update time.
   switch to calling the components vs. calling the chit. coherence is good!
   each component stores its location in the array so it can null itself on remove
 - change shield to have cooldown then charge-up (rather than cooldown then reset)
 - rings deflect bolts
-- remove temporary arbitrary AI limit in corescript
 - redo AI utility to be based on a set of curves
 - health is awkward: keeps copy of HP (oops). move hp to health component? (TotalHP() on item?)
 - integers for discrete values (hp, gold)
 - remove UI button for track - only teleport (or at least hide)
 - fix / disable right mouse behavior
-x add portals
-- more critters
-- space around ports
-- sector herding: more aggressive? wider range?
 - UI on minimap. Target, show highlight of domain.
 - consider removing chit listeners
 - unify rockgen and worldgen. frustrating they are separate steps.
-x arrays in spatial query much, much too dangerous. Support CArray?
 
 - game
 	- Gold
@@ -30,6 +21,7 @@ x arrays in spatial query much, much too dangerous. Support CArray?
 		x reserve to distribute gold to denizens
 		x gold & crystal to volcanos
 		x core vs spawn points
+		- critters level up
 		- item screen
 		- bind to core
 		- build something
@@ -156,6 +148,15 @@ V2 ideas:
 
 ----------- FIXED -------------
 
+x sector-herding still getting stuck. Go back to random re-herd?
+	x guarentee path to core
+	x clear space around core
+x remove temporary arbitrary AI limit in corescript
+x add portals
+x more critters
+x space around ports
+x sector herding: more aggressive? wider range?
+x arrays in spatial query much, much too dangerous. Support CArray?
 x explosion is in the wrong direction. Units walk through explosions?? (Balrog vs. Human.)
 x touching buttons clears tracking and can leave in weird state where camera doesn't track player
 x update the "procedural rendering" wiki

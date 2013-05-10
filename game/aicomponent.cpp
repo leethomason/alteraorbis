@@ -1152,10 +1152,16 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 	case ChitMsg::CHIT_SECTOR_HERD:
 		{
 			if ( parentChit->GetSpatialComponent() ) {
+				// Read our destination port information:
 				const SectorPort* sectorPort = (const SectorPort*) msg.Ptr();
 				const SectorData& sd = map->GetSector( sectorPort->sector );
-				Vector2F dest = SectorData::PortPos( sd.GetPortLoc( sectorPort->port ), parentChit->ID() );
-				this->FocusedMove( dest, sectorPort );
+				
+				// Read our local get-on-the-grid info
+				SectorPort local = map->NearestPort( parentChit->GetSpatialComponent()->GetPosition2D() );
+				const SectorData& localSD = map->GetSector( local.sector );
+
+				// Local path to remote dst
+				this->FocusedMove( SectorData::PortPos( localSD.GetPortLoc(local.port), parentChit->ID() ), sectorPort );
 			}
 		}
 		break;
