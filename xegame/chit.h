@@ -42,8 +42,23 @@ class GameItem;
 class ComponentFactory;
 class XStream;
 class LumosChitBag;
+class DamageDesc;
 
-// Synchronous. Can be sub-classed.
+struct ChitDamageInfo
+{
+	ChitDamageInfo( const DamageDesc& _dd ) : dd(_dd), originID(0), awardXP(false), isMelee(true), isExplosion(false) {
+		originOfImpact.Zero();
+	}
+
+	int					originID;		// chitID of who caused damage
+	bool				awardXP;
+	bool				isMelee;
+	bool				isExplosion;
+	const DamageDesc&	dd;
+	grinliz::Vector3F	originOfImpact;
+};
+
+// Synchronous.
 class ChitMsg
 {
 public:
@@ -52,10 +67,7 @@ public:
 		CHIT_DESTROYED_START,	// sender: health. *starts* the countdown sequence.
 		CHIT_DESTROYED_TICK,	// dataF = fraction
 		CHIT_DESTROYED_END,		// sender: health. ends the sequence, next step is the chit delete
-		CHIT_DAMAGE,			// sender: chitBag, data=isExplosion 
-								//					ptr = &DamageDesc, 
-								//					vector=origin of impact
-								//					dataF=rotation
+		CHIT_DAMAGE,			// sender: chitBag, ptr=&ChitDamageInfo
 		CHIT_HEAL,				//					dataF = hitpoints
 		CHIT_SECTOR_HERD,		// AI message: a lead unit is telling other units to herd to a different sector.
 								//					ptr = &SectorPort

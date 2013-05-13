@@ -13,6 +13,7 @@
 - consider removing chit listeners
 - unify rockgen and worldgen. frustrating they are separate steps.
 - rethink spawning. spawn based on need? what's around?
+- need to "ding" on level up
 
 - game
 	- Gold
@@ -22,7 +23,8 @@
 		x reserve to distribute gold to denizens
 		x gold & crystal to volcanos
 		x core vs spawn points
-		- critters level up
+		x critters level up
+		- fix crystal types
 		- item screen
 		- bind to core
 		- build something

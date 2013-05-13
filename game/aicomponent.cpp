@@ -463,7 +463,15 @@ int AIComponent::DoStand( const ComponentSet& thisComp, U32 since )
 			}
 
 			DamageDesc dd( hp, 0 );
-			ChitMsg damage( ChitMsg::CHIT_DAMAGE, 0, &dd );
+			ChitDamageInfo info( dd );
+
+			info.originID = parentChit->ID();
+			info.awardXP  = false;
+			info.isMelee  = true;
+			info.isExplosion = false;
+			info.originOfImpact = thisComp.spatial->GetPosition();
+
+			ChitMsg damage( ChitMsg::CHIT_DAMAGE, 0, &info );
 			parentChit->SendMessage( heal, this );
 			plants[0]->SendMessage( damage );
 			tick = 0;

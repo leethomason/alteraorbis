@@ -98,6 +98,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 
 	dateLabel.Init( &gamui2D );
 	goldLabel.Init( &gamui2D );
+	xpLabel.Init( &gamui2D );
 }
 
 
@@ -136,6 +137,7 @@ void GameScene::Resize()
 
 	dateLabel.SetPos( faceImage.X()-faceImage.Width()*2.0f, 0 );
 	goldLabel.SetPos( dateLabel.X(), dateLabel.Y() + gamui2D.GetTextHeight() );
+	xpLabel.SetPos(   goldLabel.X(), goldLabel.Y() + gamui2D.GetTextHeight() );
 
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
 		newsButton[i].SetPos( port.UIWidth()- (NEWS_BUTTON_WIDTH), MINI_MAP_SIZE + (NEWS_BUTTON_HEIGHT+2)*i );
@@ -634,6 +636,13 @@ void GameScene::DoTick( U32 delta )
 				wallet.crystal[CRYSTAL_VIOLET] );
 	goldLabel.SetText( str.c_str() );
 
+	str.Clear();
+	if ( playerChit && playerChit->GetItem() ) {
+		const GameStat& stat = playerChit->GetItem()->stats;
+		str.Format( "XP:%d Level:%d", stat.Experience(), stat.Level() );
+	}
+	xpLabel.SetText( str.c_str() );
+
 	SetBars();
 }
 
@@ -699,9 +708,9 @@ void GameScene::DrawDebugText()
 	}
 
 	Wallet w = ReserveBank::Instance()->GetWallet();
-	ufoText->Draw( 0, y,	"Date=%.2f %s mode. Sim/S=%.1f x%.1f ticks=%d/%d Reserve Au=%d r%dg%dv%d", 
+	ufoText->Draw( 0, y,	"Date=%.2f %s. Sim/S=%.1f x%.1f ticks=%d/%d Reserve Au=%d r%dg%dv%d", 
 							sim->DateInAge(),
-							fastMode ? "fast" : "normal", 
+							fastMode ? "fast" : "norm", 
 							simPS,
 							simPS / 30.0f,
 							chitBag->NumTicked(), chitBag->NumChits(),

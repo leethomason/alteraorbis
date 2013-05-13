@@ -78,6 +78,9 @@ public:
 
 	bool AddToInventory( GameItem* item, bool equip );
 
+	// add XP to current item and its weapon
+	void AddBattleXP( bool meleeAttack, int killshotLevel );
+
 private:
 	void DoSlowTick();
 	bool EmitEffect( const GameItem& it, U32 deltaTime );

@@ -278,7 +278,15 @@ int PlantScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 	}
 	else if ( distance > DIE * constitution ) {
 		DamageDesc dd( HP_PER_SECOND * seconds, 0 );
-		ChitMsg damage( ChitMsg::CHIT_DAMAGE, 0, &dd );
+
+		ChitDamageInfo info( dd );
+		info.originID = ctx.chit->ID();
+		info.awardXP  = false;
+		info.isMelee  = true;
+		info.isExplosion = false;
+		info.originOfImpact.Zero();
+
+		ChitMsg damage( ChitMsg::CHIT_DAMAGE, 0, &info );
 		ctx.chit->SendMessage( damage );
 
 		sporeTimer = 0;

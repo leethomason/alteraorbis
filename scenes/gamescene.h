@@ -64,9 +64,9 @@ private:
 	int			simCount;
 	float		simPS;
 
-	int targetChit;
-	int possibleChit;
-	int infoID;
+	int			targetChit;
+	int			possibleChit;
+	int			infoID;
 
 	gamui::PushButton	okay;
 	gamui::PushButton	serialButton[NUM_SERIAL_BUTTONS];
@@ -82,6 +82,7 @@ private:
 
 	gamui::TextLabel	dateLabel;
 	gamui::TextLabel	goldLabel;
+	gamui::TextLabel	xpLabel;
 };
 
 

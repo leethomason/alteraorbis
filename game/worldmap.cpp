@@ -1126,7 +1126,7 @@ void WorldMap::AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > *a
 		}
 	}
 
-	GLASSERT( startGrid->IsPassable() );
+	GLASSERT( IsPassable( start.x, start.y ));
 	Vector2F startC = ZoneCenter( start.x, start.y );
 	
 	Rectangle2I bounds = this->Bounds();

@@ -136,7 +136,13 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* 
 						weapon->GetItem()->Name(),
 						target->ID(), targetComp.item->Name() ));
 
-				target->SendMessage( ChitMsg( ChitMsg::CHIT_DAMAGE, 0, &dd ), 0 );
+				ChitDamageInfo info( dd );
+				info.originID = src->ID();
+				info.awardXP  = true;
+				info.isMelee  = true;
+				info.isExplosion = false;
+				info.originOfImpact = src->GetSpatialComponent()->GetPosition();
+				target->SendMessage( ChitMsg( ChitMsg::CHIT_DAMAGE, 0, &info ), 0 );
 			}
 		}
 	}
@@ -471,16 +477,15 @@ void BattleMechanics::GenerateExplosionMsgs( const DamageDesc& dd, const Vector3
 					// HIT!
 					float len = (target-origin).Length();
 					if ( len < EXPLOSIVE_RANGE ) {
-						//DamageDesc dd = _dd;
-						//float t = (EXPLOSIVE_RANGE-len)/EXPLOSIVE_RANGE;
-						//dd.damage *= t;
 
-						ChitMsg msg( ChitMsg::CHIT_DAMAGE, 1, &dd );
-						//msg.vector = target - origin;
-						//msg.vector.Normalize();
-						//msg.vector.Multiply( Lerp( 2.f, 4.f, t ));
-						msg.vector = origin;
-						msg.originID = originID;
+						ChitDamageInfo info( dd );
+						info.originID = originID;
+						info.awardXP  = true;
+						info.isMelee  = false;
+						info.isExplosion = true;
+						info.originOfImpact = origin;
+
+						ChitMsg msg( ChitMsg::CHIT_DAMAGE, 1, &info );
 						chit->SendMessage( msg, 0 );
 					}
 				}

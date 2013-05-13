@@ -190,9 +190,9 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos, const char* assetName )
 	chit->Add( new RenderComponent( engine, assetName ));
 	chit->Add( new PathMoveComponent( worldMap ));
 
-	chitBag->AddItem( assetName, chit, engine, 1, 4 );
-	chitBag->AddItem( "shield", chit, engine, 0, 4 );
-	chitBag->AddItem( "blaster", chit, engine, 0, 4 );
+	chitBag->AddItem( assetName, chit, engine, 1, 0 );
+	chitBag->AddItem( "shield", chit, engine, 0, 2 );
+	chitBag->AddItem( "blaster", chit, engine, 0, 2 );
 	chit->GetItemComponent()->AddGold( ReserveBank::Instance()->WithdrawDenizen() );
 	chit->GetItemComponent()->SetPickup( ItemComponent::GOLD_HOOVER );
 

@@ -130,8 +130,7 @@ public:
 	// Roll the initial values.
 	void Roll( U32 seed );
 
-	void AddExpHit()						{ exp += 1; }
-	void AddExpKillShot( int targetLevel )	{ exp += targetLevel; }
+	void AddBattleXP( int killshotLevel )	{ exp += 1 + killshotLevel; }
 
 	// 1.0 is normal, 0.1 very low, 2+ exceptional.
 	float Accuracy() const		{ return NormalLeveledSkill( Dexterity() ); }
@@ -141,19 +140,17 @@ public:
 	float NormalWill() const	{ return NormalLeveledSkill( Will() ); }
 	float NormalInt() const		{ return NormalLeveledSkill( Intelligence() ); }
 	float NormalDex() const		{ return NormalLeveledSkill( Dexterity() ); }
-
+	
 	U32 Hash() const			{ 
 		return grinliz::Random::Hash( trait, sizeof(trait[0])*NUM_TRAITS );
 	}
 
-	// exp: 0  lev: 0
-	//      1       0
-	//      2       1
-	//      3       1
-	//      4       2
-	static int ExperienceToLevel( int ep )	{ return grinliz::LogBase2( ep >> 4 ); } 
-	static int LevelToExperience( int lp )	{ int base = (lp > 0) ? (1 << lp) : 0; 
-											  return 16 * base; }
+	// Log base 2: 1 -> 0		exp: 0-31  -> 0 level
+	//			   2 -> 1           32-63  -> 1
+	//             4 -> 2           64-127 -> 2
+	//			   8 -> 3          128-255 -> 3
+	static int ExperienceToLevel( int ep )	{ return grinliz::LogBase2( ep/16 ); } 
+	static int LevelToExperience( int lp )	{ return 16*(1<<lp); }
 
 private:
 	float NormalLeveledSkill( int value ) const {

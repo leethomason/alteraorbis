@@ -94,24 +94,54 @@ void ItemComponent::AddGold( const Wallet& w )
 }
 
 
+void ItemComponent::AddBattleXP( bool isMelee, int killshotLevel )
+{
+	int level = mainItem.stats.Level();
+	mainItem.stats.AddBattleXP( killshotLevel );
+	if ( mainItem.stats.Level() > level ) {
+		// Level up!
+		// FIXME: show an icon
+		mainItem.hp = mainItem.TotalHP();
+	}
+
+	GameItem* weapon = 0;
+	if ( isMelee ) {
+		IMeleeWeaponItem*  melee  = GetMeleeWeapon();
+		if ( melee ) 
+			weapon = melee->GetItem();
+	}
+	else {
+		IRangedWeaponItem* ranged = GetRangedWeapon( 0 );
+		if ( ranged )
+			weapon = ranged->GetItem();
+	}
+	if ( weapon ) {
+		// instrinsic parts don't level up...that is just
+		// really an extension of the main item.
+		if (( weapon->flags & GameItem::INTRINSIC) == 0 ) {
+			weapon->stats.AddBattleXP( killshotLevel );
+		}
+	}
+}
+
+
 void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {
 	if ( msg.ID() == ChitMsg::CHIT_DAMAGE ) {
 		parentChit->SetTickNeeded();
 
-		const DamageDesc* pdd = (const DamageDesc*) msg.Ptr();
-		GLASSERT( pdd );
-		DamageDesc dd = *pdd;
-		bool isExplosion = msg.Data() ? true : false;
+		const ChitDamageInfo* info = (const ChitDamageInfo*) msg.Ptr();
+		GLASSERT( info );
+		DamageDesc dd = info->dd;
 
 		// Scale damage to distance, if explosion. And check for impact.
-		if ( isExplosion ) {
+		if ( info->isExplosion ) {
 			RenderComponent* rc = parentChit->GetRenderComponent();
 			if ( rc ) {
 				// First scale damage.
 				Vector3F target;
 				rc->CalcTarget( &target );
-				Vector3F v = (target - msg.vector); 
+				Vector3F v = (target - info->originOfImpact); 
 				float len = v.Length();
 				dd.damage = Lerp( dd.damage, dd.damage*0.5f, len / EXPLOSIVE_RANGE );
 				v.Normalize();
@@ -130,7 +160,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 
 					if ( pathMove ) {
 						parentChit->Remove( pathMove );
-						delete pathMove;
+						GetChitBag()->DeferredDelete( pathMove );
 						pathMove = 0;
 
 						physics = new PhysicsMoveComponent( worldMap, true );
@@ -142,7 +172,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			}
 		}
 
-		GLLOG(( "Chit %3d '%s' (origin=%d) ", parentChit->ID(), mainItem.Name(), msg.originID ));
+		GLLOG(( "Chit %3d '%s' (origin=%d) ", parentChit->ID(), mainItem.Name(), info->originID ));
 
 		// Run through the inventory, looking for modifiers.
 
@@ -169,6 +199,15 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 
 			}
 		}
+
+		// report XP back to what hit us.
+		int originID = info->originID;
+		Chit* origin = GetChitBag()->GetChit( originID );
+		if ( origin && origin->GetItemComponent() ) {
+			bool killshot = mainItem.hp == 0 && !(mainItem.flags & GameItem::INDESTRUCTABLE);
+			origin->GetItemComponent()->AddBattleXP( info->isMelee, killshot ? mainItem.stats.Level() : 0 ); 
+		}
+
 	}
 	else if ( msg.ID() == ChitMsg::CHIT_HEAL ) {
 		parentChit->SetTickNeeded();
@@ -213,11 +252,15 @@ void ItemComponent::OnChitEvent( const ChitEvent& event )
 			 && parentChit->GetSpatialComponent() ) 
 		{
 			DamageDesc dd( event.factor, event.data );
-			ChitMsg msg( ChitMsg::CHIT_DAMAGE, 0, &dd );
+			ChitDamageInfo info( dd );
 
-			Vector2F v = parentChit->GetSpatialComponent()->GetPosition2D() - event.AreaOfEffect().Center();
-			msg.vector.Set( v.x, 0, v.y );
-			msg.vector.SafeNormalize( 0,1,0 );
+			info.originID = parentChit->ID();
+			info.awardXP  = false;
+			info.isMelee  = true;
+			info.isExplosion = false;
+			info.originOfImpact.Zero();
+
+			ChitMsg msg( ChitMsg::CHIT_DAMAGE, 0, &info );
 			parentChit->SendMessage( msg );
 		}
 	}
