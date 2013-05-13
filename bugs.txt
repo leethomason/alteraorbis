@@ -14,6 +14,7 @@
 - unify rockgen and worldgen. frustrating they are separate steps.
 - rethink spawning. spawn based on need? what's around?
 - need to "ding" on level up
+- add rez-in animation
 
 - game
 	- Gold
