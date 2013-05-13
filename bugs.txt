@@ -24,6 +24,7 @@
 		x gold & crystal to volcanos
 		x core vs spawn points
 		x critters level up
+		- remove rock ray
 		- fix crystal types
 		- item screen
 		- bind to core
