@@ -15,6 +15,8 @@
 - rethink spawning. spawn based on need? what's around?
 - need to "ding" on level up
 - add rez-in animation
+- show rock damage
+- support melee attack on rocks
 
 - game
 	- Gold
@@ -25,7 +27,7 @@
 		x gold & crystal to volcanos
 		x core vs spawn points
 		x critters level up
-		- remove rock ray
+		x remove rock ray
 		- fix crystal types
 		- item screen
 		- bind to core

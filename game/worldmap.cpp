@@ -144,6 +144,21 @@ Model* WorldMap::GetVoxel( int x, int y )
 }
 
 
+void WorldMap::VoxelHit( Model* m, const DamageDesc& dd )
+{
+	Vector3F pos = m->Pos();
+	Vector2I map = { (int)pos.x, (int)pos.z };
+	int index = INDEX(map.x, map.y);
+	
+	GLASSERT( grid[index].RockHeight() );
+	grid[index].DeltaHP( (int)(-dd.damage) );
+	if ( grid[index].HP() == 0 ) {
+		engine->particleSystem->EmitPD( "derez", pos, V3F_UP, engine->camera.EyeDir3(), 0 );
+		SetRock( map.x, map.y, 0, 0, false );
+	}
+}
+
+
 void WorldMap::SavePNG( const char* path )
 {
 	Color4U8* pixels = new Color4U8[width*height];
@@ -834,7 +849,7 @@ void WorldMap::SetRock( int x, int y, int h, int pool, bool magma )
 		grid[index].SetRockHeight( h );
 		grid[index].SetPoolHeight( pool );
 		grid[index].SetMagma( magma );
-		grid[index].DeltaMHP( grid[index].TotalMHP() );
+		grid[index].DeltaHP( grid[index].TotalHP() );
 
 		if ( wasPassable != grid[index].IsPassable() ) {
 			ResetPather( x, y );

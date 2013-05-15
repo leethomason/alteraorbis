@@ -8,7 +8,7 @@
 #include "../grinliz/glcolor.h"
 
 static const int MAX_ROCK_HEIGHT		= 3;
-static const int MHP_PER_HEIGHT			= 40;
+static const int HP_PER_HEIGHT			= 150;	// 511 is the max value, 1/3 of this
 static const int POOL_HEIGHT			= 2;
 
 struct WorldGrid {
@@ -28,7 +28,7 @@ private:
 	unsigned rockHeight			: 2;
 	unsigned hasPool			: 1;
 
-	unsigned mhp				: 7;	// 0-127, want something in the 0-100 range. Mega HP
+	unsigned hp					: 9;	// 0-511, want something in the 0-100 range. Mega HP
 
 	unsigned debugAdjacent		: 1;
 	unsigned debugPath			: 1;
@@ -139,15 +139,15 @@ public:
 	bool Magma() const			{ return magma != 0; }
 	void SetMagma( bool m )		{ magma = m ? 1 : 0; }
 
-	int TotalMHP() const		{ return rockHeight * MHP_PER_HEIGHT; }
-	int MHP() const				{ return mhp; }
-	void DeltaMHP( int delta ) {
-		int points = mhp;
+	int TotalHP() const			{ return rockHeight * HP_PER_HEIGHT; }
+	int HP() const				{ return hp; }
+	void DeltaHP( int delta ) {
+		int points = hp;
 		points += delta;
 		if ( points < 0 ) points = 0;
-		if ( points > TotalMHP() ) points = TotalMHP();
-		mhp = points;
-		GLASSERT( mhp == points );
+		if ( points > TotalHP() ) points = TotalHP();
+		hp = points;
+		GLASSERT( hp == points );
 	}
 
 	bool IsPassable() const { 

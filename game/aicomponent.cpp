@@ -1142,7 +1142,7 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 	}
 
 	// High level mode switch?
-	if ( aiMode == NORMAL_MODE && !enemyList.Empty() ) {
+	if ( (aiMode == NORMAL_MODE || aiMode == ROCKBREAK_MODE) && !enemyList.Empty() ) {
 		aiMode = BATTLE_MODE;
 		currentAction = 0;
 		if ( debugFlag ) {

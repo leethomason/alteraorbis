@@ -38,6 +38,7 @@ class WorldInfo;
 class Model;
 class ChitBag;
 class SectorData;
+class DamageDesc;
 
 /*
 	Remembering Y is up and we are in the xz plane:
@@ -100,6 +101,7 @@ public:
 	// Need this to actually go away if it switches to voxels, but important
 	// to figure out how to do world queries.
 	Model* GetVoxel( int x, int y );
+	void VoxelHit( Model* m, const DamageDesc& dd );
 
 	grinliz::Vector2I FindPassable( int x, int y );
 

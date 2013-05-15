@@ -8,6 +8,7 @@
 #include "healthcomponent.h"
 #include "mapspatialcomponent.h"
 #include "reservebank.h"
+#include "worldmap.h"
 
 #include "../xegame/rendercomponent.h"
 #include "../xegame/itemcomponent.h"
@@ -159,6 +160,8 @@ void LumosChitBag::HandleBolt( const Bolt& bolt, Model* modelHit, const grinliz:
 	if ( !explosive ) {
 		if ( modelHit ) {
 			Chit* chitHit = modelHit->userData;
+			DamageDesc dd( bolt.damage, bolt.effect );
+
 			if ( chitHit ) {
 				GLASSERT( GetChit( chitHit->ID() ) == chitHit );
 				if ( chitHit->GetItemComponent() &&
@@ -167,7 +170,6 @@ void LumosChitBag::HandleBolt( const Bolt& bolt, Model* modelHit, const grinliz:
 					// do nothing. don't shoot own team.
 				}
 				else {
-					DamageDesc dd( bolt.damage, bolt.effect );
 		
 					ChitDamageInfo info( dd );
 					info.originID = bolt.chitID;
@@ -180,17 +182,19 @@ void LumosChitBag::HandleBolt( const Bolt& bolt, Model* modelHit, const grinliz:
 					chitHit->SendMessage( msg, 0 );
 				}
 			}
+			else {
+				worldMap->VoxelHit( modelHit, dd );
+			}
 		}
 	}
 	else {
-		// Here don't worry about the chit hit. Just ray cast to see
-		// who is in range of the explosion and takes damage.
+		// How it used to work. Now only uses radius:
+			// Here don't worry about the chit hit. Just ray cast to see
+			// who is in range of the explosion and takes damage.
 		
-		// Back up the origin of the bolt just a bit, so it doesn't keep
-		// intersecting the model it hit. Then do ray checks around to 
-		// see what gets hit by the explosion.
-
-		//GLLOG(( "Explosion: " ));
+			// Back up the origin of the bolt just a bit, so it doesn't keep
+			// intersecting the model it hit. Then do ray checks around to 
+			// see what gets hit by the explosion.
 
 		float rewind = Min( 0.1f, 0.5f*bolt.len );
 		GLASSERT( Equal( bolt.dir.Length(), 1.f, 0.001f ));
@@ -198,6 +202,11 @@ void LumosChitBag::HandleBolt( const Bolt& bolt, Model* modelHit, const grinliz:
 
 		DamageDesc dd( bolt.damage, bolt.effect );
 		BattleMechanics::GenerateExplosionMsgs( dd, origin, bolt.chitID, engine, &chitList );
+
+		if ( modelHit && !modelHit->userData ) {
+			// FIXME: doesn't splash exlposion damage. only direct hit
+			worldMap->VoxelHit( modelHit, dd );
+		}
 	}
 }
 
