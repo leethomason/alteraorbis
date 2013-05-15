@@ -50,7 +50,8 @@ public:
 	// Shooting ------------------- //
 	void Shoot( ChitBag* bag, 
 				Chit* src, 
-				Chit* target, 
+				const grinliz::Vector3F& target,
+				bool targetMoving,
 				IRangedWeaponItem* weapon );
 
 

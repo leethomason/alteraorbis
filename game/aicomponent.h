@@ -127,6 +127,8 @@ private:
 		FOCUS_TARGET
 	};
 
+	// A description of the current target, which
+	// can either be a chit or a location on the map.
 	struct TargetDesc
 	{
 		TargetDesc() { Clear(); }
@@ -135,13 +137,19 @@ private:
 		int id;
 		grinliz::Vector2I mapPos;
 
+		grinliz::Vector3F MapTarget() const {
+			GLASSERT( !mapPos.IsZero() );
+			grinliz::Vector3F v = { (float)mapPos.x+0.5f, 0.5f, (float)mapPos.y+0.5f };
+			return v;
+		}
+
 		void Clear() { id = 0; mapPos.Zero(); }
 		void Set( int _id ) { id = _id; mapPos.Zero(); }
 		void Set( const grinliz::Vector2I& _mapPos ) { mapPos = _mapPos; id = 0; }
 	};
 
 	int					aiMode;
-	TargetDesc			target;
+	TargetDesc			targetDesc;
 	int					currentAction;
 	int					focus;
 	grinliz::Rectangle2F awareness;

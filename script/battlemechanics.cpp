@@ -207,28 +207,27 @@ float BattleMechanics::ComputeRadAt1(	GameItem* shooter,
 }
 
 
-void BattleMechanics::Shoot( ChitBag* bag, Chit* src, Chit* target, IRangedWeaponItem* weapon )
+void BattleMechanics::Shoot( ChitBag* bag, Chit* src, const grinliz::Vector3F& _target, bool targetMoving, IRangedWeaponItem* weapon )
 {
+	Vector3F aimAt = _target;
 	GameItem* weaponItem = weapon->GetItem();
 	GLASSERT( weaponItem->CanUse() );
 	bool okay = weaponItem->Use();
 	if ( !okay ) {
 		return;
 	}
-	if ( !target->GetRenderComponent() || !target->GetMoveComponent() ) {
-		return;
-	}
 	GameItem* item = weapon->GetItem();
 
 	Vector3F p0;
-	Vector3F aimAt = ComputeLeadingShot( src, target, &p0 );
+	GLASSERT( src->GetRenderComponent() );
+	src->GetRenderComponent()->CalcTrigger( &p0, 0 );
 
 	// Explosives shoot at feet.
 	if ( weaponItem->flags & GameItem::EFFECT_EXPLOSIVE ) {
 		aimAt.y = 0;
 	}
 	
-	float radAt1 = ComputeRadAt1( src->GetItem(), weapon, src->GetMoveComponent()->IsMoving(), target->GetMoveComponent()->IsMoving() );
+	float radAt1 = ComputeRadAt1( src->GetItem(), weapon, src->GetMoveComponent()->IsMoving(), targetMoving );
 	Vector3F dir = FuzzyAim( p0, aimAt, radAt1 );
 
 	Bolt* bolt = bag->NewBolt();

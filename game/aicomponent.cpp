@@ -80,8 +80,8 @@ void AIComponent::Serialize( XStream* xs )
 	this->BeginSerialize( xs, Name() );
 	XARC_SER( xs, aiMode );
 	XARC_SER( xs, currentAction );
-	XARC_SER( xs, target.id );
-	XARC_SER( xs, target.mapPos );
+	XARC_SER( xs, targetDesc.id );
+	XARC_SER( xs, targetDesc.mapPos );
 	XARC_SER( xs, focus );
 	XARC_SER( xs, wanderTime );
 	XARC_SER( xs, friendEnemyAge );
@@ -230,15 +230,15 @@ void AIComponent::GetFriendEnemyLists()
 
 	// Add the currentTarget back in, if we lost it. But only if
 	// it hasn't gone too far away.
-	Chit* currentTargetChit = GetChitBag()->GetChit( target.id );
+	Chit* currentTargetChit = GetChitBag()->GetChit( targetDesc.id );
 	if ( currentTargetChit && currentTargetChit->GetSpatialComponent() ) {
 		Vector2F targetCenter = currentTargetChit->GetSpatialComponent()->GetPosition2D();
 		if (    (targetCenter - center).LengthSquared() < LOOSE_AWARENESS*LOOSE_AWARENESS		// close enough OR
 			 || (focus == FOCUS_TARGET) )														// focused
 		{
-			int i = enemyList.Find( target.id );
+			int i = enemyList.Find( targetDesc.id );
 			if ( i < 0 && enemyList.HasCap() ) {
-				enemyList.Push( target.id );
+				enemyList.Push( targetDesc.id );
 			}
 		}
 	}
@@ -334,9 +334,11 @@ void AIComponent::DoMove( const ComponentSet& thisComp )
 					}
 				if ( utilityRunAndGun > utilityReload ) {
 					GLASSERT( targetRunAndGun );
+					Vector3F leading = battleMechanics.ComputeLeadingShot( thisComp.chit, targetRunAndGun, 0 );
 					battleMechanics.Shoot(	GetChitBag(), 
 											thisComp.chit, 
-											targetRunAndGun, 
+											leading, 
+											targetRunAndGun->GetMoveComponent() ? targetRunAndGun->GetMoveComponent()->IsMoving() : false,
 											ranged->ToRangedWeapon() );
 					if ( debugFlag ) {
 						GLOUTPUT(( "->RunAndGun\n" ));
@@ -357,15 +359,24 @@ void AIComponent::DoMove( const ComponentSet& thisComp )
 void AIComponent::DoShoot( const ComponentSet& thisComp )
 {
 	bool pointed = false;
-	ComponentSet target( GetChitBag()->GetChit( currentTarget ), Chit::SPATIAL_BIT | Chit::ITEM_BIT | ComponentSet::IS_ALIVE );
-	if ( !target.okay ) {
-		currentAction = NO_ACTION;
-		return;
+	Vector3F leading = { 0, 0, 0 };
+	bool isMoving = false;
+
+	if ( targetDesc.id ) {
+		ComponentSet target( GetChitBag()->GetChit( targetDesc.id ), Chit::SPATIAL_BIT | Chit::ITEM_BIT | ComponentSet::IS_ALIVE );
+		if ( !target.okay ) {
+			currentAction = NO_ACTION;
+			return;
+		}
+
+		leading = battleMechanics.ComputeLeadingShot( thisComp.chit, target.chit, 0 );
+		isMoving = target.chit->GetMoveComponent() ? target.chit->GetMoveComponent()->IsMoving() : false;
 	}
-
-	Vector3F leading = battleMechanics.ComputeLeadingShot( thisComp.chit, target.chit, 0 );
+	else {
+		GLASSERT( !targetDesc.mapPos.IsZero() );
+		leading.Set( (float)targetDesc.mapPos.x + 0.5f, 0.5f, (float)targetDesc.mapPos.y + 0.5f );
+	}
 	Vector2F leading2D = { leading.x, leading.z };
-
 	// Rotate to target.
 	Vector2F heading = thisComp.spatial->GetHeading2D();
 	float headingAngle = RotationXZDegrees( heading.x, heading.y );
@@ -395,7 +406,8 @@ void AIComponent::DoShoot( const ComponentSet& thisComp )
 			if ( item->CanUse() ) {
 				battleMechanics.Shoot(	GetChitBag(), 
 										parentChit, 
-										target.chit, 
+										leading,
+										isMoving,
 										weapon );
 			}
 		}
@@ -411,7 +423,7 @@ void AIComponent::DoShoot( const ComponentSet& thisComp )
 void AIComponent::DoMelee( const ComponentSet& thisComp )
 {
 	IMeleeWeaponItem* weapon = thisComp.itemComponent->GetMeleeWeapon();
-	ComponentSet target( GetChitBag()->GetChit( currentTarget ), Chit::SPATIAL_BIT | Chit::ITEM_BIT | ComponentSet::IS_ALIVE );
+	ComponentSet target( GetChitBag()->GetChit( targetDesc.id ), Chit::SPATIAL_BIT | Chit::ITEM_BIT | ComponentSet::IS_ALIVE );
 
 	if ( !weapon || !target.okay ) {
 		currentAction = NO_ACTION;
@@ -565,7 +577,7 @@ void AIComponent::Move( const grinliz::Vector2F& dest, const SectorPort* sectorP
 void AIComponent::Target( Chit* chit, bool focused )
 {
 	aiMode = BATTLE_MODE;
-	currentTarget = chit->ID();
+	targetDesc.Set( chit->ID() );
 	focus = focused ? FOCUS_TARGET : 0;
 }
 
@@ -586,7 +598,7 @@ void AIComponent::Melt( const grinliz::Vector2I& rock )
 
 	aiMode = ROCKBREAK_MODE;
 	currentAction = NO_ACTION;
-	targetPos.Set( (float)rock.x, (float)rock.y );
+	targetDesc.Set( rock );
 	parentChit->SetTickNeeded();
 }
 
@@ -594,7 +606,7 @@ void AIComponent::Melt( const grinliz::Vector2I& rock )
 void AIComponent::ThinkRockBreak( const ComponentSet& thisComp )
 {
 	PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
-	const WorldGrid& wg = map->GetWorldGrid( targetMapPos.x, targetMapPos.y );
+	const WorldGrid& wg = map->GetWorldGrid( targetDesc.mapPos.x, targetDesc.mapPos.y );
 
 	if ( wg.RockHeight() == 0 || !pmc ) {
 		currentAction = NO_ACTION;
@@ -604,7 +616,7 @@ void AIComponent::ThinkRockBreak( const ComponentSet& thisComp )
 
 	const Vector3F& pos = thisComp.spatial->GetPosition();
 	Vector2F pos2 = { pos.x, pos.z };
-	Vector3F rockTarget = { (float)targetMapPos.x+0.5f, 0.5f, (float)targetMapPos.y+0.5f };
+	Vector3F rockTarget = targetDesc.MapTarget();
 	
 	// FIXME: code limitation. Only bolts can damage rock.
 	// This is only because the object has 4 sides, and positioning for
@@ -614,8 +626,8 @@ void AIComponent::ThinkRockBreak( const ComponentSet& thisComp )
 	// The current ranged weapon.
 	IRangedWeaponItem* rangedWeapon = thisComp.itemComponent->GetRangedWeapon( 0 );
 
-	if ( rangedWeapon && LineOfSight( thisComp, 0, rockTarget ) ) {
-		action = SHOOT;
+	if ( rangedWeapon && LineOfSight( thisComp, targetDesc.mapPos ) ) {
+		currentAction = SHOOT;
 		return;
 	}
 	else {
@@ -629,8 +641,8 @@ void AIComponent::ThinkRockBreak( const ComponentSet& thisComp )
 		Vector2I bestDest = { 0, 0 };
 
 		for( int i=0; i<4; ++i ) {
-			Vector2I desti = rock + delta[i];
-			Vector2F dest = { (float)rock.x + 0.5f, (float)rock.y + 0.5f };
+			Vector2I desti = targetDesc.mapPos + delta[i];
+			Vector2F dest = { (float)desti.x + 0.5f, (float)desti.y + 0.5f };
 			float cost = FLT_MAX;
 			if ( map->CalcPath( thisComp.spatial->GetPosition2D(), dest, 0, &cost, false )) {
 				if ( cost < bestCost ) {
@@ -948,7 +960,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 		static const float DOT_BIAS = 0.25f;
 		float q = 1.0f + dot * DOT_BIAS;
 		// Prefer the current target & focused target.
-		if ( enemyList[k] == currentTarget ) {
+		if ( enemyList[k] == targetDesc.id ) {
 			q *= 2;
 			if ( focus == FOCUS_TARGET ) {
 				q *= 2;
@@ -1052,7 +1064,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 		case OPTION_MOVE_TO_RANGE:
 		{
 			currentAction = MOVE;
-			currentTarget = target[OPTION_MOVE_TO_RANGE]->ID();
+			targetDesc.Set( target[OPTION_MOVE_TO_RANGE]->ID() );
 			rethink.Within( (U32)(moveToTime*1000.0f) );
 			pmc->QueueDest( moveToRange );
 		}
@@ -1061,7 +1073,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 		case OPTION_MELEE:
 		{
 			currentAction = MELEE;
-			currentTarget = target[OPTION_MELEE]->ID();
+			targetDesc.Set( target[OPTION_MELEE]->ID() );
 		}
 		break;
 		
@@ -1069,7 +1081,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 		{
 			pmc->Stop();
 			currentAction = SHOOT;
-			currentTarget = target[OPTION_SHOOT]->ID();
+			targetDesc.Set( target[OPTION_SHOOT]->ID() );
 		}
 		break;
 
@@ -1117,10 +1129,10 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 	}
 
 	// If focused, make sure we have a target.
-	if ( currentTarget && !chitBag->GetChit( currentTarget )) {
-		currentTarget = 0;
+	if ( targetDesc.id && !chitBag->GetChit( targetDesc.id )) {
+		targetDesc.Clear();
 	}
-	if ( !currentTarget ) {
+	if ( !targetDesc.id ) {
 		focus = FOCUS_NONE;
 	}
 
@@ -1137,7 +1149,7 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 			GLOUTPUT(( "ID=%d Mode to Battle\n", thisComp.chit->ID() ));
 		}
 	}
-	else if ( aiMode == BATTLE_MODE && currentTarget == 0 && enemyList.Empty() ) {
+	else if ( aiMode == BATTLE_MODE && targetDesc.id == 0 && enemyList.Empty() ) {
 		aiMode = NORMAL_MODE;
 		currentAction = 0;
 		if ( debugFlag ) {

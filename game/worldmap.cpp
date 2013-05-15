@@ -137,6 +137,15 @@ void WorldMap::AttachEngine( Engine* e, IMapGridUse* imap )
 }
 
 
+Model* WorldMap::GetVoxel( int x, int y )
+{
+	Model* m = 0;
+	Vector2I vec = { x, y };
+	voxels.Query( vec, &m );
+	return m;
+}
+
+
 void WorldMap::SavePNG( const char* path )
 {
 	Color4U8* pixels = new Color4U8[width*height];
