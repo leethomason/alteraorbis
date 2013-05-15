@@ -329,11 +329,26 @@ inline void XarcSet( XStream* xs, const char* key, const grinliz::Matrix4& v )		
 		XarcGet( stream, key, name );			\
 }
 
-#define XARC_SER_ARR( stream, name, n ) {		\
+#define XARC_SER_ARR( stream, name, n ) {			\
 	if ( (stream)->Saving() )						\
-		XarcSetArr( stream, #name, name, n );	\
-	else										\
+		XarcSetArr( stream, #name, name, n );		\
+	else											\
 		XarcGetArr( stream, #name, name, n );		\
+}
+
+#define XARC_SER_CARRAY( stream, arr ) {					\
+	if ( (stream)->Saving() ) {								\
+		(stream)->Saving()->Set( "size", arr.Size() );		\
+	}														\
+	else {													\
+		int _size = 0;										\
+		XarcGet( stream, "size", _size );					\
+		arr.Clear();										\
+		arr.PushArr( _size );								\
+	}														\
+	for( int _i=0; _i<arr.Size(); ++_i ) {					\
+		arr[_i].Serialize( stream );						\
+	}														\
 }
 
 

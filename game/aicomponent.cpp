@@ -42,7 +42,7 @@
 using namespace grinliz;
 
 static const float NORMAL_AWARENESS		= 10.0f;
-static const float LOSE_AWARENESS		= 16.0f;
+static const float LOOSE_AWARENESS		= 16.0f;
 static const float SHOOT_ANGLE			= 10.0f;	// variation from heading that we can shoot
 static const float SHOOT_ANGLE_DOT		=  0.985f;	// same number, as dot product.
 static const float WANDER_RADIUS		=  5.0f;
@@ -53,16 +53,13 @@ static const float PLANT_AWARE			=  3.0f;
 static const float GOLD_AWARE			=  3.5f;
 static const int   FORCE_COUNT_STUCK	=  8;
 
-#define AI_OUTPUT
 
 AIComponent::AIComponent( Engine* _engine, WorldMap* _map ) : rethink( 1200 )
 {
 	engine = _engine;
 	map = _map;
 	currentAction = 0;
-	currentTarget = 0;
-	focusOnTarget = false;
-	focusedMove = false;
+	focus = 0;
 	randomWander = false;
 	friendEnemyAge = 0;
 	aiMode = NORMAL_MODE;
@@ -83,9 +80,9 @@ void AIComponent::Serialize( XStream* xs )
 	this->BeginSerialize( xs, Name() );
 	XARC_SER( xs, aiMode );
 	XARC_SER( xs, currentAction );
-	XARC_SER( xs, currentTarget );
-	XARC_SER( xs, focusOnTarget );
-	XARC_SER( xs, focusedMove );
+	XARC_SER( xs, target.id );
+	XARC_SER( xs, target.mapPos );
+	XARC_SER( xs, focus );
 	XARC_SER( xs, wanderTime );
 	XARC_SER( xs, friendEnemyAge );
 	rethink.Serialize( xs, "rethink" );
@@ -132,12 +129,12 @@ int AIComponent::GetTeamStatus( Chit* other )
 
 bool AIComponent::LineOfSight( const ComponentSet& thisComp, Chit* t )
 {
-	ComponentSet target( t, Chit::SPATIAL_BIT | Chit::RENDER_BIT | ComponentSet::IS_ALIVE );
 
 	Vector3F origin, dest;
 	IRangedWeaponItem* weapon = thisComp.itemComponent->GetRangedWeapon( &origin );
 	GLASSERT( weapon );
 
+	ComponentSet target( t, Chit::SPATIAL_BIT | Chit::RENDER_BIT | ComponentSet::IS_ALIVE );
 	target.render->GetMetaData( IStringConst::ktarget, &dest );
 
 	Vector3F dir = dest - origin;
@@ -154,6 +151,30 @@ bool AIComponent::LineOfSight( const ComponentSet& thisComp, Chit* t )
 	}
 	return false;
 }
+
+
+bool AIComponent::LineOfSight( const ComponentSet& thisComp, const grinliz::Vector2I& mapPos )
+{
+	Vector3F origin;
+	IRangedWeaponItem* weapon = thisComp.itemComponent->GetRangedWeapon( &origin );
+	GLASSERT( weapon );
+	CArray<const Model*, EL_MAX_METADATA+2> ignore;
+	thisComp.render->GetModelList( &ignore );
+
+	Vector3F dest = { (float)mapPos.x+0.5f, 0.5f, (float)mapPos.y+0.5f };
+	Vector3F dir = dest - origin;
+	float length = dir.Length() + 1.0f;	// a little extra just in case
+
+	Model* voxel = map->GetVoxel( mapPos.x, mapPos.y );
+
+	Vector3F at;
+	Model* m = engine->IntersectModel( origin, dir, length, TEST_TRI, 0, 0, ignore.Mem(), &at );
+	if ( m && m == voxel ) {
+		return true;
+	}
+	return false;
+}
+
 
 
 static bool FEFilter( Chit* c ) {
@@ -209,15 +230,15 @@ void AIComponent::GetFriendEnemyLists()
 
 	// Add the currentTarget back in, if we lost it. But only if
 	// it hasn't gone too far away.
-	Chit* currentTargetChit = GetChitBag()->GetChit( currentTarget );
+	Chit* currentTargetChit = GetChitBag()->GetChit( target.id );
 	if ( currentTargetChit && currentTargetChit->GetSpatialComponent() ) {
 		Vector2F targetCenter = currentTargetChit->GetSpatialComponent()->GetPosition2D();
-		if (    (targetCenter - center).LengthSquared() < LOSE_AWARENESS*LOSE_AWARENESS			// close enough OR
-			 || focusOnTarget )																// focused
+		if (    (targetCenter - center).LengthSquared() < LOOSE_AWARENESS*LOOSE_AWARENESS		// close enough OR
+			 || (focus == FOCUS_TARGET) )														// focused
 		{
-			int i = enemyList.Find( currentTarget );
+			int i = enemyList.Find( target.id );
 			if ( i < 0 && enemyList.HasCap() ) {
-				enemyList.Push( currentTarget );
+				enemyList.Push( target.id );
 			}
 		}
 	}
@@ -308,30 +329,24 @@ void AIComponent::DoMove( const ComponentSet& thisComp )
 				utilityReload = 1.0f - rangedItem->RoundsFraction();
 			}
 			if ( utilityReload > 0 || utilityRunAndGun > 0 ) {
-				#ifdef AI_OUTPUT
 					if ( debugFlag ) {
 						GLOUTPUT(( "ID=%d Move: RunAndGun=%.2f Reload=%.2f ", thisComp.chit->ID(), utilityRunAndGun, utilityReload ));
 					}
-				#endif
 				if ( utilityRunAndGun > utilityReload ) {
 					GLASSERT( targetRunAndGun );
 					battleMechanics.Shoot(	GetChitBag(), 
 											thisComp.chit, 
 											targetRunAndGun, 
 											ranged->ToRangedWeapon() );
-					#ifdef AI_OUTPUT
 					if ( debugFlag ) {
 						GLOUTPUT(( "->RunAndGun\n" ));
 					}
-					#endif
 				}
 				else {
 					ranged->Reload();
-					#ifdef AI_OUTPUT
 					if ( debugFlag ) {
 						GLOUTPUT(( "->Reload\n" ));
 					}
-					#endif
 				}
 			}
 		}
@@ -503,16 +518,15 @@ void AIComponent::OnChitEvent( const ChitEvent& event )
 
 void AIComponent::Think( const ComponentSet& thisComp )
 {
-	if ( aiMode == NORMAL_MODE ) {
-		ThinkWander( thisComp );
-	}
-	else if ( aiMode == BATTLE_MODE ) {
-		ThinkBattle( thisComp );
+	switch( aiMode ) {
+	case NORMAL_MODE:		ThinkWander( thisComp );	break;
+	case ROCKBREAK_MODE:	ThinkRockBreak( thisComp );	break;
+	case BATTLE_MODE:		ThinkBattle( thisComp );	break;
 	}
 };
 
 
-void AIComponent::FocusedMove( const grinliz::Vector2F& dest, const SectorPort* sectorPort )
+void AIComponent::Move( const grinliz::Vector2F& dest, const SectorPort* sectorPort, bool focused )
 {
 	PathMoveComponent* pmc    = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
 	GridMoveComponent* gridMC = GET_SUB_COMPONENT( parentChit, MoveComponent, GridMoveComponent );
@@ -543,17 +557,97 @@ void AIComponent::FocusedMove( const grinliz::Vector2F& dest, const SectorPort* 
 	if ( pmc ) {
 		pmc->QueueDest( dest, -1, sectorPort );
 		currentAction = NO_ACTION;
-		focusedMove = true;
+		focus = focused ? FOCUS_MOVE : 0;
 	}
 }
 
 
-void AIComponent::FocusedTarget( Chit* chit )
+void AIComponent::Target( Chit* chit, bool focused )
 {
 	aiMode = BATTLE_MODE;
 	currentTarget = chit->ID();
-	focusOnTarget = true;
-	focusedMove = false;
+	focus = focused ? FOCUS_TARGET : 0;
+}
+
+
+void AIComponent::Melt( const grinliz::Vector2I& rock )
+{
+	GLOUTPUT(( "Melt something at %d,%d\n", rock.x, rock.y ));
+	ComponentSet thisComp( parentChit, Chit::RENDER_BIT | 
+		                               Chit::SPATIAL_BIT |
+									   ComponentSet::IS_ALIVE |
+									   ComponentSet::NOT_IN_IMPACT );
+	if ( !thisComp.okay ) 
+		return;
+
+	const WorldGrid& wg = map->GetWorldGrid( rock.x, rock.y );
+	if ( wg.RockHeight() == 0 )
+		return;
+
+	aiMode = ROCKBREAK_MODE;
+	currentAction = NO_ACTION;
+	targetPos.Set( (float)rock.x, (float)rock.y );
+	parentChit->SetTickNeeded();
+}
+
+
+void AIComponent::ThinkRockBreak( const ComponentSet& thisComp )
+{
+	PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
+	const WorldGrid& wg = map->GetWorldGrid( targetMapPos.x, targetMapPos.y );
+
+	if ( wg.RockHeight() == 0 || !pmc ) {
+		currentAction = NO_ACTION;
+		aiMode = NORMAL_MODE;
+		return;
+	}
+
+	const Vector3F& pos = thisComp.spatial->GetPosition();
+	Vector2F pos2 = { pos.x, pos.z };
+	Vector3F rockTarget = { (float)targetMapPos.x+0.5f, 0.5f, (float)targetMapPos.y+0.5f };
+	
+	// FIXME: code limitation. Only bolts can damage rock.
+	// This is only because the object has 4 sides, and positioning for
+	// melee attack is tricky. And detecting melee hits is tricky. But
+	// do-able if it becomes an issue.
+
+	// The current ranged weapon.
+	IRangedWeaponItem* rangedWeapon = thisComp.itemComponent->GetRangedWeapon( 0 );
+
+	if ( rangedWeapon && LineOfSight( thisComp, 0, rockTarget ) ) {
+		action = SHOOT;
+		return;
+	}
+	else {
+		// Move to target
+		static const Vector2I delta[4] = {
+			{ -1, 0 }, { 1, 0 }, { 0, 1 }, { 0, -1 }
+		};
+
+		float bestCost = FLT_MAX;
+		int best = -1;
+		Vector2I bestDest = { 0, 0 };
+
+		for( int i=0; i<4; ++i ) {
+			Vector2I desti = rock + delta[i];
+			Vector2F dest = { (float)rock.x + 0.5f, (float)rock.y + 0.5f };
+			float cost = FLT_MAX;
+			if ( map->CalcPath( thisComp.spatial->GetPosition2D(), dest, 0, &cost, false )) {
+				if ( cost < bestCost ) {
+					bestCost = cost;
+					best = i;
+					bestDest = desti;
+				}
+			}
+		}
+		if ( best >= 0 ) {
+			Vector2F dest = { (float)bestDest.x+0.5f, (float)bestDest.y+0.5f };
+			pmc->QueueDest( dest );
+			return;
+		}
+	}
+	aiMode = NORMAL_MODE;
+	currentAction = NO_ACTION;
 }
 
 
@@ -856,7 +950,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 		// Prefer the current target & focused target.
 		if ( enemyList[k] == currentTarget ) {
 			q *= 2;
-			if ( focusOnTarget ) {
+			if ( focus == FOCUS_TARGET ) {
 				q *= 2;
 			}
 		}
@@ -983,14 +1077,12 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 			GLASSERT( 0 );
 	};
 
-#ifdef AI_OUTPUT
 	if ( debugFlag ) {
 		static const char* optionName[NUM_OPTIONS] = { "flock", "mtrange", "melee", "shoot" };
 		GLOUTPUT(( "ID=%d Think: flock=%.2f mtrange=%.2f melee=%.2f shoot=%.2f -> %s\n",
 				   thisComp.chit->ID(), utility[OPTION_FLOCK_MOVE], utility[OPTION_MOVE_TO_RANGE], utility[OPTION_MELEE], utility[OPTION_SHOOT],
 				   optionName[index] ));
 	}
-#endif
 }
 
 
@@ -1020,7 +1112,7 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 	ChitBag* chitBag = this->GetChitBag();
 
 	// Focuesd move check
-	if ( focusedMove ) {
+	if ( focus == FOCUS_MOVE ) {
 		return 200;
 	}
 
@@ -1029,7 +1121,7 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 		currentTarget = 0;
 	}
 	if ( !currentTarget ) {
-		focusOnTarget = false;
+		focus = FOCUS_NONE;
 	}
 
 	if ( friendEnemyAge > 750 ) {
@@ -1041,20 +1133,16 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 	if ( aiMode == NORMAL_MODE && !enemyList.Empty() ) {
 		aiMode = BATTLE_MODE;
 		currentAction = 0;
-#ifdef AI_OUTPUT
 		if ( debugFlag ) {
 			GLOUTPUT(( "ID=%d Mode to Battle\n", thisComp.chit->ID() ));
 		}
-#endif
 	}
 	else if ( aiMode == BATTLE_MODE && currentTarget == 0 && enemyList.Empty() ) {
 		aiMode = NORMAL_MODE;
 		currentAction = 0;
-#ifdef AI_OUTPUT
 		if ( debugFlag ) {
 			GLOUTPUT(( "ID=%d Mode to Normal\n", thisComp.chit->ID() ));
 		}
-#endif
 	}
 
 	if ( !currentAction || rethink.Delta(timeSince)) {
@@ -1120,7 +1208,7 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 	switch ( msg.ID() ) {
 	case ChitMsg::PATHMOVE_DESTINATION_REACHED:
 		if ( currentAction != WANDER ) {
-			focusedMove = false;
+			focus = 0;
 			currentAction = NO_ACTION;
 			parentChit->SetTickNeeded();
 		}
@@ -1131,7 +1219,7 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 
 	case ChitMsg::PATHMOVE_DESTINATION_BLOCKED:
 		if ( currentAction != WANDER ) {
-			focusedMove = false;
+			focus = 0;
 			currentAction = NO_ACTION;
 			parentChit->SetTickNeeded();
 		}
@@ -1169,7 +1257,7 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 				const SectorData& localSD = map->GetSector( local.sector );
 
 				// Local path to remote dst
-				this->FocusedMove( SectorData::PortPos( localSD.GetPortLoc(local.port), parentChit->ID() ), sectorPort );
+				this->Move( SectorData::PortPos( localSD.GetPortLoc(local.port), parentChit->ID() ), sectorPort, true );
 			}
 		}
 		break;

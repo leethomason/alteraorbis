@@ -51,8 +51,15 @@ public:
 
 	// Approximate. enemyList may not be flushed.
 	bool AwareOfEnemy() const { return enemyList.Size() > 0; }
-	void FocusedMove( const grinliz::Vector2F& dest, const SectorPort* sector );
-	void FocusedTarget( Chit* chit );
+
+	// Tell the AI to take actions. If the "focused" is set,
+	// it is given extra priority.
+	// Move: move to a location in the sector, or to a different sector.
+	void Move( const grinliz::Vector2F& dest, const SectorPort* sector, bool focused );
+	// Targets a particular enemy.
+	void Target( Chit* chit, bool focused );
+	// Melt rock in the sector.
+	void Melt( const grinliz::Vector2I& rock );
 
 	void EnableDebug( bool enable ) { debugFlag = enable; }
 
@@ -63,9 +70,11 @@ public:
 	};
 	int GetTeamStatus( Chit* other );
 
-	// Top level AI modes.
+	// Top level AI modes. Higher level goals.
+	// Translated to immediate goals: MOVE, SHOOT, MELEE
 	enum {
 		NORMAL_MODE,
+		ROCKBREAK_MODE,
 		BATTLE_MODE
 	};
 
@@ -79,11 +88,15 @@ private:
 	Chit* Closest( const ComponentSet& thisComp, Chit* arr[], int n, 
 				   grinliz::Vector2F* pos, float* distance );
 
+	// Compute the line of site
 	bool LineOfSight( const ComponentSet& thisComp, Chit* target );
+	bool LineOfSight( const ComponentSet& thisComp, const grinliz::Vector2I& mapPos );
 
 	void Think( const ComponentSet& thisComp );	// Choose a new action.
 	void ThinkWander( const ComponentSet& thisComp );
 	void ThinkBattle( const ComponentSet& thisComp );
+	void ThinkRockBreak( const ComponentSet& thisComp );
+
 	grinliz::Vector2F WanderOrigin( const ComponentSet& thisComp ) const;
 
 	// What happens when no other move is working.
@@ -108,11 +121,29 @@ private:
 		NUM_ACTIONS
 	};
 
+	enum { 
+		FOCUS_NONE,
+		FOCUS_MOVE,
+		FOCUS_TARGET
+	};
+
+	struct TargetDesc
+	{
+		TargetDesc() { Clear(); }
+	
+
+		int id;
+		grinliz::Vector2I mapPos;
+
+		void Clear() { id = 0; mapPos.Zero(); }
+		void Set( int _id ) { id = _id; mapPos.Zero(); }
+		void Set( const grinliz::Vector2I& _mapPos ) { mapPos = _mapPos; id = 0; }
+	};
+
 	int					aiMode;
+	TargetDesc			target;
 	int					currentAction;
-	int					currentTarget;
-	bool				focusOnTarget;
-	bool				focusedMove;
+	int					focus;
 	grinliz::Rectangle2F awareness;
 	CTicker				rethink;
 	int					friendEnemyAge;
@@ -124,7 +155,6 @@ private:
 	void DoShoot( const ComponentSet& thisComp );
 	void DoMove( const ComponentSet& thisComp );
 	int  DoStand( const ComponentSet& thisComp, U32 since );
-
 	bool SectorHerd( const ComponentSet& thisComp );
 
 	grinliz::CArray<int, MAX_TRACK> friendList;

@@ -8,6 +8,7 @@
 #include "../grinliz/glcolor.h"
 
 static const int MAX_ROCK_HEIGHT		= 3;
+static const int MHP_PER_HEIGHT			= 40;
 
 struct WorldGrid {
 
@@ -21,10 +22,12 @@ private:
 
 	unsigned magma				: 1;	// land, rock, or water can be set to magma
 
-	unsigned zoneSize			: 6;	// 0-31
+	unsigned zoneSize			: 5;	// 0-31 (need 0-16)
 	unsigned nominalRockHeight	: 2;	// 0-3
 	unsigned rockHeight			: 2;
 	unsigned poolHeight			: 2;
+
+	unsigned mhp				: 7;	// 0-127, want something in the 0-100 range. Mega HP
 
 	unsigned debugAdjacent		: 1;
 	unsigned debugPath			: 1;
@@ -133,6 +136,17 @@ public:
 
 	bool Magma() const			{ return magma != 0; }
 	void SetMagma( bool m )		{ magma = m ? 1 : 0; }
+
+	int TotalMHP() const		{ return rockHeight * MHP_PER_HEIGHT; }
+	int MHP() const				{ return mhp; }
+	void DeltaMHP( int delta ) {
+		int points = mhp;
+		points += delta;
+		if ( points < 0 ) points = 0;
+		if ( points > TotalMHP() ) points = TotalMHP();
+		mhp = points;
+		GLASSERT( mhp == points );
+	}
 
 	bool IsPassable() const { 
 		return IsLand() && !IsBlocked(); 

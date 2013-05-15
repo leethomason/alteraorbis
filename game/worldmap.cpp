@@ -823,6 +823,8 @@ void WorldMap::SetRock( int x, int y, int h, int pool, bool magma )
 		grid[index].SetRockHeight( h );
 		grid[index].SetPoolHeight( pool );
 		grid[index].SetMagma( magma );
+		grid[index].DeltaMHP( grid[index].TotalMHP() );
+
 		if ( wasPassable != grid[index].IsPassable() ) {
 			ResetPather( x, y );
 		}
@@ -1025,7 +1027,7 @@ WorldMap::BlockResult WorldMap::ApplyBlockEffect(	const Vector2F inPos,
 }
 
 
-void WorldMap::CalcZone( int zx, int zy )
+void WorldMap::CalcZone( int mapX, int mapY )
 {
 	struct SZ {
 		U8 x;
@@ -1033,8 +1035,8 @@ void WorldMap::CalcZone( int zx, int zy )
 		U8 size;
 	};
 
-	zx = zx & (~(ZONE_SIZE-1));
-	zy = zy & (~(ZONE_SIZE-1));
+	int zx = mapX & (~(ZONE_SIZE-1));
+	int zy = mapY & (~(ZONE_SIZE-1));
 
 	if ( !zoneInit.IsSet( zx>>ZONE_SHIFT, zy>>ZONE_SHIFT) ) {
 		int mask[ZONE_SIZE];
@@ -1276,8 +1278,9 @@ bool WorldMap::GridPath( const grinliz::Vector2F& p0, const grinliz::Vector2F& p
         error -= (p0.y - floor(p0.y)) * dx;
     }
 
-    for (; n > 0; --n)
-    {
+    for (; n > 0; --n) {
+		CalcZone( x,y );
+
         if ( !IsPassable(x,y) )
 			return false;
 
@@ -1390,6 +1393,10 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 	//	}
 	//}
 
+	// But do flush the current region.
+	CalcZone( starti.x, starti.x );
+	CalcZone( endi.x,   endi.y );
+
 	WorldGrid* regionStart = grid + INDEX( starti.x, starti.y );
 	WorldGrid* regionEnd   = grid + INDEX( endi.x, endi.y );
 
@@ -1397,6 +1404,7 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 		return false;
 	}
 
+	// Regions are convex. If in the same region, it is passable.
 	if ( regionStart == regionEnd ) {
 		okay = true;
 		if ( path ) {
