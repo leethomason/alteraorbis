@@ -9,6 +9,7 @@
 
 static const int MAX_ROCK_HEIGHT		= 3;
 static const int MHP_PER_HEIGHT			= 40;
+static const int POOL_HEIGHT			= 2;
 
 struct WorldGrid {
 
@@ -25,7 +26,7 @@ private:
 	unsigned zoneSize			: 5;	// 0-31 (need 0-16)
 	unsigned nominalRockHeight	: 2;	// 0-3
 	unsigned rockHeight			: 2;
-	unsigned poolHeight			: 2;
+	unsigned hasPool			: 1;
 
 	unsigned mhp				: 7;	// 0-127, want something in the 0-100 range. Mega HP
 
@@ -33,7 +34,7 @@ private:
 	unsigned debugPath			: 1;
 	unsigned debugOrigin		: 1;
 
-	bool IsBlocked() const			{ return (!isLand) || isGrid || rockHeight || poolHeight; }
+	bool IsBlocked() const			{ return (!isLand) || isGrid || rockHeight || hasPool; }
 
 public:
 	grinliz::Color4U8 ToColor() const {
@@ -121,11 +122,12 @@ public:
 		rockHeight = h;
 	}
 
-	int PoolHeight() const { return poolHeight; }
+	int PoolHeight() const { return hasPool ? POOL_HEIGHT : 0; }
 	void SetPoolHeight( int p ) {
 		GLASSERT( IsLand() || (p==0) );
+		GLASSERT( p==0 || p==POOL_HEIGHT );
 		GLASSERT( !p || p > (int)rockHeight );
-		poolHeight = p;
+		hasPool = (p == POOL_HEIGHT) ? 1 : 0;
 	}
 
 	bool IsWater() const		{ return !IsLand(); }

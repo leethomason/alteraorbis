@@ -213,8 +213,8 @@ private:
 		if ( !isLand ) return;
 
 		if ( poolHeight > rockHeight ) {
-			*str = "pool.1";
-			(*str)[5] = '0' + poolHeight;
+			GLASSERT( poolHeight == POOL_HEIGHT );
+			*str = "pool.2";
 		}
 		else if ( magma ) {
 			*str = "magma.0";

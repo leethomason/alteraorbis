@@ -39,8 +39,6 @@ using namespace grinliz;
 using namespace micropather;
 using namespace tinyxml2;
 
-static const int POOL_HEIGHT = 2;
-
 // Startup for test world
 // Baseline:				15,000
 // Coloring regions:		 2,300
@@ -763,9 +761,13 @@ void WorldMap::SetRock( int x, int y, int h, int pool, bool magma )
 	bool mWas = grid[index].Magma();
 
 	if ( h == -1 ) {
-		h = grid[index].NominalRockHeight();
-		if ( iMapGridUse ) {
-			GLASSERT( iMapGridUse->MapGridUse( x, y ) == 0 );
+		if (    ( iMapGridUse && !iMapGridUse->MapGridUse( x, y ))
+			 || ( !iMapGridUse ) )
+		{
+			h = grid[index].NominalRockHeight();
+		}
+		else {
+			h = hWas;
 		}
 	}
 	else if ( h == -2 ) {
