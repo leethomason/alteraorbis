@@ -67,8 +67,9 @@
   </atlas>
 
   <model filename="gold.ac"         modelName="gold"            origin="0 0 0" shading="flat"/>
-  <model filename="dodecahedron.ac" modelName="crystal_red"     origin="0 0 0" shading="flat" />
   <model filename="dodecahedron.ac" modelName="crystal_green"   origin="1 0 0" shading="flat" />
+  <model filename="dodecahedron.ac" modelName="crystal_red"     origin="0 0 0" shading="flat" />
+  <model filename="dodecahedron.ac" modelName="crystal_blue"    origin="3 0 0" shading="flat" />
   <model filename="dodecahedron.ac" modelName="crystal_violet"  origin="2 0 0" shading="flat" />
   
   <model filename="teststructures.ac" modelName="testStruct0"  origin="0 0 0"  shading="flat" polyRemoval="pre" />

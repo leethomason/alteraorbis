@@ -43,9 +43,10 @@ static const int TYPICAL_BEASTMEN	= TYPICAL_DOMAINS * 10;
 static const int TYPICAL_MONSTERS	= TYPICAL_DOMAINS * 15;
 
 enum {
-	CRYSTAL_RED,
-	CRYSTAL_GREEN,
-	CRYSTAL_VIOLET,
+	CRYSTAL_GREEN,			// basic weapon crystal
+	CRYSTAL_RED,			// fire weapon
+	CRYSTAL_BLUE,			// shock weapon
+	CRYSTAL_VIOLET,			// advanced weapon, combo fire/shock, explosive, etc.
 	NUM_CRYSTAL_TYPES,
 	NO_CRYSTAL = NUM_CRYSTAL_TYPES
 };

@@ -71,8 +71,9 @@ bool LumosChitBag::GoldFilter( Chit* chit )
 bool LumosChitBag::GoldCrystalFilter( Chit* chit )
 {
 	return (    chit->GetItem() && chit->GetItem()->name == IStringConst::kgold
-		     || chit->GetItem() && chit->GetItem()->name == IStringConst::kcrystal_red
 			 || chit->GetItem() && chit->GetItem()->name == IStringConst::kcrystal_green
+		     || chit->GetItem() && chit->GetItem()->name == IStringConst::kcrystal_red
+		     || chit->GetItem() && chit->GetItem()->name == IStringConst::kcrystal_blue
 			 || chit->GetItem() && chit->GetItem()->name == IStringConst::kcrystal_violet );
 }
 
@@ -117,8 +118,9 @@ Chit* LumosChitBag::NewCrystalChit( const grinliz::Vector3F& pos, int crystal, b
 
 	const char* name = 0;
 	switch ( crystal ) {
-	case CRYSTAL_RED:		name="crystal_red";		break;
 	case CRYSTAL_GREEN:		name="crystal_green";	break;
+	case CRYSTAL_RED:		name="crystal_red";		break;
+	case CRYSTAL_BLUE:		name="crystal_blue";	break;
 	case CRYSTAL_VIOLET:	name="crystal_violet";	break;
 	}
 

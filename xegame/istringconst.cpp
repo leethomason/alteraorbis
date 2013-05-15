@@ -12,8 +12,9 @@ IString IStringConst::khumanMale;
 IString IStringConst::kring;
 IString IStringConst::klargeRing;
 IString IStringConst::kgold;
-IString IStringConst::kcrystal_red;
 IString IStringConst::kcrystal_green;
+IString IStringConst::kcrystal_red;
+IString IStringConst::kcrystal_blue;
 IString IStringConst::kcrystal_violet;
 
 void IStringConst::Init()
@@ -28,7 +29,8 @@ void IStringConst::Init()
 	kring = StringPool::Intern( "ring", true );
 	klargeRing = StringPool::Intern( "largeRing", true );
 	kgold = StringPool::Intern( "gold", true );
-	kcrystal_red = StringPool::Intern( "crystal_red", true );
 	kcrystal_green = StringPool::Intern( "crystal_green", true );
+	kcrystal_red = StringPool::Intern( "crystal_red", true );
+	kcrystal_blue = StringPool::Intern( "crystal_blue", true );
 	kcrystal_violet = StringPool::Intern( "crystal_violet", true );
 }

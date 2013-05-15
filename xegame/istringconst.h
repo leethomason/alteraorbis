@@ -21,8 +21,9 @@ public:
 	static grinliz::IString kring;
 	static grinliz::IString klargeRing;
 	static grinliz::IString kgold;
-	static grinliz::IString kcrystal_red;
 	static grinliz::IString kcrystal_green;
+	static grinliz::IString kcrystal_red;
+	static grinliz::IString kcrystal_blue;
 	static grinliz::IString kcrystal_violet;
 
 	static int Hardpoint( grinliz::IString str ) {

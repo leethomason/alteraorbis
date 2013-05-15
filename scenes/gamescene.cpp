@@ -640,10 +640,11 @@ void GameScene::DoTick( U32 delta )
 	if ( playerChit && playerChit->GetItemComponent() ) {
 		wallet = playerChit->GetItemComponent()->GetWallet();
 	}
-	str.Format( "Au:%d r:%d g:%d v:%d", 
+	str.Format( "Au:%d g: r:%d b:%d v:%d", 
 				wallet.gold, 
-				wallet.crystal[CRYSTAL_RED], 
 				wallet.crystal[CRYSTAL_GREEN], 
+				wallet.crystal[CRYSTAL_RED], 
+				wallet.crystal[CRYSTAL_BLUE], 
 				wallet.crystal[CRYSTAL_VIOLET] );
 	goldLabel.SetText( str.c_str() );
 

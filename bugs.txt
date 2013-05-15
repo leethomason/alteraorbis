@@ -28,8 +28,7 @@
 		x core vs spawn points
 		x critters level up
 		x remove rock ray
-		- fix crystal types
-		- item screen
+		x fix crystal types
 		- bind to core
 		- build something
 		- visitors warp in, travel warp out
@@ -38,6 +37,9 @@
 		- leave core
 		- drop items
 		- pickup items
+	- Art
+		- item screen
+		- proper animation system
 	- Flora 2
 		- weapon toggle / selection
 		- level up
