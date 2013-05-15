@@ -823,6 +823,8 @@ void WorldMap::SetRock( int x, int y, int h, int pool, bool magma )
 		grid[index].SetRockHeight( h );
 		grid[index].SetPoolHeight( pool );
 		grid[index].SetMagma( magma );
+		grid[index].DeltaMHP( grid[index].TotalMHP() );
+
 		if ( wasPassable != grid[index].IsPassable() ) {
 			ResetPather( x, y );
 		}

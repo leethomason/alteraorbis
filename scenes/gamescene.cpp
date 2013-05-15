@@ -349,7 +349,7 @@ void GameScene::TapModel( Chit* target )
 	}
 	AIComponent* ai = player->GetAIComponent();
 	if ( ai && ai->GetTeamStatus( target ) == AIComponent::ENEMY ) {
-		ai->FocusedTarget( target );
+		ai->Target( target, true );
 		ClearTargetFlags();
 
 		RenderComponent* rc = target->GetRenderComponent();
@@ -368,19 +368,30 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 	enable3DDragging = (sim->GetPlayerChit() == 0);
 
 	if ( !uiHasTap ) {
+		// FIXME: worst boilerplate code ever. Should only need the last line.
+		Matrix4 mvpi;
+		Ray ray;
+		Vector3F at, atModel;
+		game->GetScreenport().ViewProjectionInverse3D( &mvpi );
+		sim->GetEngine()->RayFromViewToYPlane( view, mvpi, &ray, &at );
+		Model* model = sim->GetEngine()->IntersectModel( ray.origin, ray.direction, 10000.0f, TEST_HIT_AABB, 0, 0, 0, &atModel );
+
 		bool tap = Process3DTap( action, view, world, sim->GetEngine() );
 
 		if ( tap ) {
-			Matrix4 mvpi;
-			Ray ray;
-			Vector3F at, atModel;
-			game->GetScreenport().ViewProjectionInverse3D( &mvpi );
-			sim->GetEngine()->RayFromViewToYPlane( view, mvpi, &ray, &at );
-			Model* model = sim->GetEngine()->IntersectModel( ray.origin, ray.direction, 10000.0f, TEST_HIT_AABB, 0, 0, 0, &atModel );
 			
 			// FIXME: need a generic solution here. How to handle stuff that isn't tappable?
 			if ( model && model->userData && LumosChitBag::GoldCrystalFilter( model->userData )) {
 				model = 0;	// don't tap on gold.
+			}
+			else if ( model && strstr( model->GetResource()->Name(), "rock." )) {
+				// clicked on a rock. Melt away!
+				Chit* player = sim->GetPlayerChit();
+				if ( player && player->GetAIComponent() ) {
+					Vector2I rock = { (int)model->Pos().x, (int)model->Pos().z };
+					player->GetAIComponent()->Melt( rock );
+					return;
+				}
 			}
 
 			int tapMod = lumosGame->GetTapMod();
@@ -516,7 +527,7 @@ void GameScene::DoDestTapped( const Vector2F& _dest )
 					}
 				}
 
-				ai->FocusedMove( dest, sectorPort.IsValid() ? &sectorPort : 0 );
+				ai->Move( dest, sectorPort.IsValid() ? &sectorPort : 0, true );
 			}
 		}
 		else if ( camModeButton[TELEPORT].Down() ) {

@@ -97,6 +97,9 @@ public:
 		SetRock( x, y, grid[index].RockHeight(), grid[index].PoolHeight(), magma );
 	}
 	const WorldGrid& GetWorldGrid( int x, int y ) { return grid[INDEX(x,y)]; }
+	// Need this to actually go away if it switches to voxels, but important
+	// to figure out how to do world queries.
+	Model* GetVoxel( int x, int y );
 
 	grinliz::Vector2I FindPassable( int x, int y );
 
