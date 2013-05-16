@@ -465,7 +465,7 @@ int AIComponent::DoStand( const ComponentSet& thisComp, U32 since )
 {
 	const GameItem* item	= parentChit->GetItem();
 	int itemFlags			= item ? item->flags : 0;
-	float totalHP			= item ? item->TotalHP() : 0;
+	float totalHP			= item ? item->TotalHPF() : 0;
 	int tick = 400;
 
 	// Plant eater

@@ -315,7 +315,7 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 	}
 	stats.Load( ele );
 
-	hp = this->TotalHP();
+	hp = this->TotalHPF();
 	ele->QueryFloatAttribute( "hp", &hp );
 	GLASSERT( hp <= TotalHP() );
 
@@ -397,10 +397,10 @@ int GameItem::DoTick( U32 delta, U32 sinec )
 	accruedShock = Max( 0.0f, accruedShock );
 
 	hp += Delta( delta, hpRegen );
-	hp = Clamp( hp, 0.0f, TotalHP() );
+	hp = Clamp( hp, 0.0f, TotalHPF() );
 
 	if ( flags & INDESTRUCTABLE ) {
-		hp = TotalHP();
+		hp = TotalHPF();
 	}
 
 	tick = tick || (savedHP != hp);
