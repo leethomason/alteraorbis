@@ -5,7 +5,7 @@
 - change shield to have cooldown then charge-up (rather than cooldown then reset)
 - rings deflect bolts
 - redo AI utility to be based on a set of curves
-- health is awkward: keeps copy of HP (oops). move hp to health component? (TotalHP() on item?)
+x health is awkward: keeps copy of HP (oops). move hp to health component? (TotalHP() on item?)
 x integers for discrete values (hp, gold)
 - remove UI button for track - only teleport (or at least hide)
 - fix / disable right mouse behavior

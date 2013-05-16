@@ -29,6 +29,8 @@
 
   <!-- Model textures -->
   <texture filename="palette.png" />
+  <texture filename="palette_50.png" emissive="true" />
+  <texture filename="palette_100.png" emissive="true"/>
   <texture filename="charSwatch.png" width="128" height="8" /> 
   <texture filename="characters.png" />
   <texture filename="treetextures.png" />
@@ -81,8 +83,8 @@
   <model filename="iconPlate.ac" shading="flat" />
   <model filename="iconHeadPlate.ac" shading="flat" />
   <model filename="unitCube.ac" shading="flat" />
-  <model filename="targetFlag.ac" shading="flat" shadowCastec="false" />
-  <model filename="possibleTargetFlag.ac" shading="flat" shadowCastec="false" />
+  <model filename="targetFlag.ac" shading="flat" shadowCaster="false" />
+  <model filename="possibleTargetFlag.ac" shading="flat" shadowCaster="false" />
 
   <model filename="obelisk.ac" shading="flat" />
 
