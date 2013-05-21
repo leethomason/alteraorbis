@@ -260,6 +260,7 @@ public:
 
 		AI_EAT_PLANTS		= (1<<17),		// eats plants to regain health
 		AI_SECTOR_HERD		= (1<<18),		// will herd across sectors
+		AI_BINDS_TO_CORE	= (1<<19),
 	};
 
 	// ------ description ------

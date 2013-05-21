@@ -19,10 +19,15 @@ public:
 
 	virtual int DoTick( const ScriptContext& ctx, U32 delta, U32 since );
 	virtual const char* ScriptName() { return "CoreScript"; }
+	virtual CoreScript* ToCoreScript() { return this; }
+
+	bool AttachToCore( Chit* chit );
+	Chit* GetAttached();
 
 private:
-	WorldMap* worldMap;
-	CTicker spawnTick;
+	WorldMap*	worldMap;
+	CTicker		spawnTick;
+	int			boundID;
 };
 
 #endif // CORESCRIPT_INCLUDED

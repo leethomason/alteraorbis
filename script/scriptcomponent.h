@@ -20,6 +20,7 @@
 
 class ComponentFactory;
 class Census;
+class CoreScript;
 
 struct ScriptContext
 {
@@ -36,6 +37,11 @@ struct ScriptContext
 class IScript
 {
 public:
+	IScript() : scriptContext( 0 ) {}
+	virtual ~IScript() {}
+
+	void SetContext( const ScriptContext* context ) { scriptContext = context; }
+
 	// The first time this is turned on:
 	virtual void Init( const ScriptContext& heap )	= 0;
 	virtual void OnAdd( const ScriptContext& ctx ) = 0;
@@ -43,6 +49,12 @@ public:
 	virtual void Serialize( const ScriptContext& ctx, XStream* xs )	= 0;
 	virtual int DoTick( const ScriptContext& ctx, U32 delta, U32 since ) = 0;
 	virtual const char* ScriptName() = 0;
+
+	// Safe casting.
+	virtual CoreScript* ToCoreScript() { return 0; }
+
+protected:
+	const ScriptContext* scriptContext;
 };
 
 
@@ -69,8 +81,8 @@ public:
 	virtual void DebugStr( grinliz::GLString* str )		{ str->Format( "[Script] " ); }
 	virtual int DoTick( U32 delta, U32 since );
 
-	// Obviously dangerous; used for casting.	
 	IScript* Script() { return script; }
+
 private:
 	ScriptContext context;
 	IScript* script;

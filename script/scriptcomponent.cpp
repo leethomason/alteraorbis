@@ -57,6 +57,7 @@ void ScriptComponent::OnAdd( Chit* chit )
 	//context.initialized = false;
 	//context.time = 0;
 	context.chit = chit;
+	script->SetContext( &context );
 	script->OnAdd( context );
 }
 
@@ -71,6 +72,7 @@ void ScriptComponent::OnRemove()
 int ScriptComponent::DoTick( U32 delta, U32 since )
 {
 	if ( !context.initialized ) {
+		script->SetContext( &context );
 		script->Init( context );
 		context.initialized = true;
 	}

@@ -78,6 +78,12 @@ bool LumosChitBag::GoldCrystalFilter( Chit* chit )
 }
 
 
+bool LumosChitBag::CoreFilter( Chit* chit )
+{
+	return ( chit->GetItem() && chit->GetItem()->name == IStringConst::kcore );
+}
+
+
 bool LumosChitBag::HasMoveComponentFilter( Chit* chit )
 {
 	return chit->GetMoveComponent() != 0;

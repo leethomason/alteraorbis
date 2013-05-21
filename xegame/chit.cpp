@@ -241,7 +241,12 @@ void Chit::SendMessage( const ChitMsg& msg, Component* exclude )
 	// Components
 	for( int i=0; i<NUM_SLOTS; ++i ) {
 		if ( slot[i] && slot[i] != exclude ) {
-			//GLOUTPUT(( "Sending message to %d from chit %d %x\n", i, ID(), this ));
+			/*
+			if ( i==4 && ID()==240 && ((U32)this & 0xfff) == 0x314 ) {
+				int debug=1;
+			}
+			GLOUTPUT(( "Sending message to %d from chit %d %x\n", i, ID(), this ));
+			*/
 			slot[i]->OnChitMsg( this, msg );
 			//GLOUTPUT(( "return\n" ));
 		}

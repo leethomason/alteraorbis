@@ -157,7 +157,7 @@ void Sim::CreateCores()
 
 			MapSpatialComponent* ms = new MapSpatialComponent( worldMap );
 			ms->SetMapPosition( sd.core.x, sd.core.y );
-			ms->SetMode( GRID_BLOCKED ); 
+			ms->SetMode( GRID_IN_USE ); 
 			chit->Add( ms );
 			chit->Add( new ScriptComponent( new CoreScript( worldMap ), &chitBag->census ));
 			chit->Add( new ItemComponent( engine, worldMap, *gameItem ));

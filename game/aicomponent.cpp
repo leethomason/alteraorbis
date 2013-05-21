@@ -26,6 +26,7 @@
 #include "../script/battlemechanics.h"
 #include "../script/plantscript.h"
 #include "../script/worldgen.h"
+#include "../script/corescript.h"
 
 #include "../engine/engine.h"
 #include "../engine/particle.h"
@@ -1226,6 +1227,23 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		}
 		else {
 			randomWander = false;
+		}
+		// FIXME: when should an AI bind to core? This just does
+		// it at the end of a move, irrespective of the current
+		// action or mode.
+		if ( chit->GetItem() && ( chit->GetItem()->flags & GameItem::AI_BINDS_TO_CORE )) {
+			Vector2F center = thisComp.spatial->GetPosition2D();
+			center.x = floorf( center.x ) + 0.5f;
+			center.y = floorf( center.y ) + 0.5f;
+			CChitArray arr;
+			GetChitBag()->QuerySpatialHash( &arr, center, 0.1f, parentChit, LumosChitBag::CoreFilter );
+			if ( arr.Size() ) {
+				ScriptComponent* sc = arr[0]->GetScriptComponent();
+				GLASSERT( sc && sc->Script() );
+				CoreScript* coreScript = sc->Script()->ToCoreScript();
+				GLASSERT( coreScript );
+				coreScript->AttachToCore( parentChit );
+			}
 		}
 		break;
 

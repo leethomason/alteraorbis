@@ -148,7 +148,7 @@
         />
 
   <item name="core"
-        resource="obelisk"
+        resource="core"
         flags="INDESTRUCTABLE"
         />
 

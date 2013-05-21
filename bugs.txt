@@ -30,24 +30,24 @@ x integers for discrete values (hp, gold)
 		x remove rock ray
 		x fix crystal types
 		- bind to core
-		- build something
+		- remove rock
+		- add ice
+		- build kiosk
 		- visitors warp in, travel warp out
 		- visitors visit interesting buildings
 		- visitors create energy, buildings consume energy
 		- leave core
-		- drop items
-		- pickup items
 	- Art
 		- item screen
 		- proper animation system
-	- Flora 2
-		- weapon toggle / selection
-		- level up
-		- character screeen
-		- pony-unicorn-pegasus news prioritization
-		- fix annoying hp out of range bug
 		- rain, general de-saturation
 		- aging of stone
+	- Loot
+		- drop items
+		- pickup items
+		- weapon toggle / selection
+		x level up
+		- character screeen
 		x disable buttons on main ui when no game saved
 	- Fauna 2
 		- teams. friend-enemy-neutral logic.

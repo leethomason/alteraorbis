@@ -64,8 +64,7 @@ WorldMap::WorldMap( int width, int height ) : Map( width, height )
 	texture[0] = TextureManager::Instance()->GetTexture( "map_water" );
 	texture[1] = TextureManager::Instance()->GetTexture( "map_grid" );
 	texture[2] = TextureManager::Instance()->GetTexture( "map_port" );
-	texture[3] = TextureManager::Instance()->GetTexture( "map_core" );
-	texture[4] = TextureManager::Instance()->GetTexture( "map_land" );
+	texture[3] = TextureManager::Instance()->GetTexture( "map_land" );
 
 	debugRegionOverlay = false;
 }
