@@ -62,6 +62,7 @@ static const float MIN_EFFECTIVE_RANGE = 2.0f;
 static const float MAX_EFFECTIVE_RANGE = 25.0f;	
 
 static const int MODEL_USER		= (1<<16);				// from model.h
+static const int MODEL_CLICK_THROUGH	= (MODEL_USER<<1);
 
 // Debugging values:
 static const float ROTATION_LIMIT	= 45.0f;

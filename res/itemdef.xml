@@ -14,17 +14,21 @@
 
   <item name="gold"
         resource="gold"
+        flags="CLICK_THROUGH"
         mass="10">
   </item>
 
   <item name="crystal_red"
         resource="crystal_red"
+        flags="CLICK_THROUGH"
         mass="1" />
   <item name="crystal_green"
         resource="crystal_green"
+        flags="CLICK_THROUGH"
         mass="1" />
   <item name="crystal_violet"
         resource="crystal_violet"
+        flags="CLICK_THROUGH"
         mass="1" />
 
   <item name="mantis"
@@ -149,7 +153,7 @@
 
   <item name="core"
         resource="core"
-        flags="INDESTRUCTABLE"
+        flags="INDESTRUCTABLE CLICK_THROUGH"
         />
 
   <!-- The plant items describe the plants at the smallest height. Scaled from there,

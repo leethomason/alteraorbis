@@ -114,9 +114,11 @@ public:
 	void Deco( const char* asset, int slot, int duration );
 
 private:
+	void FirstInit();
 	int CalcAnimation() const;
 	SpatialComponent* SyncToSpatial();	// this a scary function: location is stored in both the model and the spatialcomponent
 
+	bool	firstInit;
 	Engine* engine;
 	float	radiusOfBase;
 

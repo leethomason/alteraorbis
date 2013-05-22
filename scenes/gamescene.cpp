@@ -374,17 +374,13 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 		Vector3F at, atModel;
 		game->GetScreenport().ViewProjectionInverse3D( &mvpi );
 		sim->GetEngine()->RayFromViewToYPlane( view, mvpi, &ray, &at );
-		Model* model = sim->GetEngine()->IntersectModel( ray.origin, ray.direction, 10000.0f, TEST_HIT_AABB, 0, 0, 0, &atModel );
+		Model* model = sim->GetEngine()->IntersectModel( ray.origin, ray.direction, 10000.0f, TEST_HIT_AABB, 0, MODEL_CLICK_THROUGH, 0, &atModel );
 
 		bool tap = Process3DTap( action, view, world, sim->GetEngine() );
 
 		if ( tap ) {
 			
-			// FIXME: need a generic solution here. How to handle stuff that isn't tappable?
-			if ( model && model->userData && LumosChitBag::GoldCrystalFilter( model->userData )) {
-				model = 0;	// don't tap on gold.
-			}
-			else if ( model && strstr( model->GetResource()->Name(), "rock." )) {
+			if ( model && strstr( model->GetResource()->Name(), "rock." )) {
 				// clicked on a rock. Melt away!
 				Chit* player = sim->GetPlayerChit();
 				if ( player && player->GetAIComponent() ) {
@@ -640,7 +636,7 @@ void GameScene::DoTick( U32 delta )
 	if ( playerChit && playerChit->GetItemComponent() ) {
 		wallet = playerChit->GetItemComponent()->GetWallet();
 	}
-	str.Format( "Au:%d g: r:%d b:%d v:%d", 
+	str.Format( "Au:%d g:%d r:%d b:%d v:%d", 
 				wallet.gold, 
 				wallet.crystal[CRYSTAL_GREEN], 
 				wallet.crystal[CRYSTAL_RED], 

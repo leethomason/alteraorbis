@@ -33,7 +33,8 @@ using namespace grinliz;
 using namespace tinyxml2;
 
 RenderComponent::RenderComponent( Engine* _engine, const char* _asset ) 
-	: engine( _engine )
+	: engine( _engine ),
+	  firstInit( false )
 {
 	resource[0] = 0;
 	if ( _asset ) {
@@ -143,6 +144,21 @@ void RenderComponent::OnRemove()
 }
 
 
+void RenderComponent::FirstInit()
+{
+	GameItem* item = parentChit->GetItem();
+	if ( item ) {
+		if (item->flags & GameItem::CLICK_THROUGH) {
+			for( int i=0; i<NUM_MODELS; ++i ) {
+				if ( model[i] ) {
+					model[i]->SetFlag( MODEL_CLICK_THROUGH );
+				}
+			}
+		}
+	}
+}
+
+
 SpatialComponent* RenderComponent::SyncToSpatial()
 {
 	SpatialComponent* spatial = parentChit->GetSpatialComponent();
@@ -150,6 +166,7 @@ SpatialComponent* RenderComponent::SyncToSpatial()
 		model[0]->SetPos( spatial->GetPosition() );
 		model[0]->SetRotation( spatial->GetRotation() );
 	}
+
 	return spatial;
 }
 
@@ -350,6 +367,11 @@ int RenderComponent::DoTick( U32 deltaTime, U32 since )
 
 	SpatialComponent* spatial = SyncToSpatial();
 
+	if ( !firstInit ) {
+		FirstInit();
+		firstInit = true;
+	}
+
 	// Animate the primary model.
 	if ( spatial && model[0] && model[0]->GetAnimationResource() ) {
 		tick = 0;	
@@ -444,6 +466,7 @@ void RenderComponent::Deco( const char* asset, int slot, int duration )
 		pos.y = 0.01f;
 		deco[slot]->SetPos( pos );	
 		deco[slot]->userData = parentChit;
+		deco[slot]->SetFlag( MODEL_CLICK_THROUGH );
 
 		Texture* texture = deco[slot]->GetResource()->atom[0].texture;
 		Texture::TableEntry te;
