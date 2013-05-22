@@ -21,16 +21,19 @@
 class ComponentFactory;
 class Census;
 class CoreScript;
+class Engine;
+
 
 struct ScriptContext
 {
-	ScriptContext() : initialized(false), lastTime( 0 ), time( 0 ), chit( 0 ), census( 0 ) {}
+	ScriptContext() : initialized(false), lastTime(0), time(0), chit(0), census(0), engine(0) {}
 
 	bool	initialized;
 	U32		lastTime;		// time at last tick
 	U32		time;			// time at this tick
 	Chit*	chit;			// null at load
 	Census* census;			// valid at load
+	Engine* engine;
 };
 
 
@@ -64,10 +67,9 @@ private:
 	typedef Component super;
 
 public:
-	ScriptComponent( IScript* p_script, Census* p_census ) : script( p_script ), factory( 0 )	{
-		context.census = p_census;
-	}
+	ScriptComponent( IScript* p_script, Engine* engine, Census* p_census );
 	ScriptComponent( const ComponentFactory* f, Census* p_census );
+
 	virtual ~ScriptComponent()									{ delete script; }
 
 	virtual const char* Name() const { return "ScriptComponent"; }

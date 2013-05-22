@@ -2,6 +2,8 @@
 
 #include "../grinliz/glvector.h"
 
+#include "../engine/engine.h"
+
 #include "../game/census.h"
 #include "../game/lumoschitbag.h"
 #include "../game/mapspatialcomponent.h"
@@ -83,6 +85,7 @@ bool CoreScript::AttachToCore( Chit* chit )
 		Component* c = chit->GetMoveComponent();
 		chit->Remove( c );
 		chit->GetChitBag()->DeferredDelete( c );
+		scriptContext->chit->SetTickNeeded();
 
 		return true;
 	}
@@ -93,8 +96,9 @@ bool CoreScript::AttachToCore( Chit* chit )
 int CoreScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 {
 	static const int RADIUS = 4;
+	Chit* attached = GetAttached();
 
-	if ( spawnTick.Delta( since ) && ctx.census->ais < TYPICAL_MONSTERS ) {
+	if ( spawnTick.Delta( since ) && ctx.census->ais < TYPICAL_MONSTERS && !attached ) {
 		// spawn stuff.
 		MapSpatialComponent* ms = GET_SUB_COMPONENT( ctx.chit, SpatialComponent, MapSpatialComponent );
 		GLASSERT( ms );
@@ -119,7 +123,11 @@ int CoreScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 			((LumosChitBag*)(ctx.chit->GetChitBag()))->NewMonsterChit( pf, asset, team );
 		}
 	}
-	return spawnTick.Next();
+	if ( attached && ctx.chit->GetSpatialComponent() ) {
+		Vector3F pos3 = ctx.chit->GetSpatialComponent()->GetPosition();
+		ctx.engine->particleSystem->EmitPD( "core", pos3, V3F_UP, ctx.engine->camera.EyeDir3(), delta );
+	}
+	return attached ? 0 : spawnTick.Next();
 }
 
 

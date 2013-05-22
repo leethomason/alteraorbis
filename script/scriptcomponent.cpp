@@ -10,9 +10,19 @@
 using namespace grinliz;
 
 
+ScriptComponent::ScriptComponent( IScript* p_script, Engine* engine, Census* p_census ) : script( p_script ), factory( 0 )	
+{
+	context.census = p_census;
+	context.engine = engine;
+	GLASSERT( context.engine );
+}
+
+
 ScriptComponent::ScriptComponent( const ComponentFactory* f, Census* c ) : script( 0 ), factory( f )
 {
 	context.census = c;
+	context.engine = f->GetEngine();
+	GLASSERT( context.engine );
 }
 
 void ScriptComponent::Serialize( XStream* xs )
