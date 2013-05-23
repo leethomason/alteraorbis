@@ -18,6 +18,7 @@
 #include "../grinliz/glstringutil.h"
 #include "../engine/engine.h"			// used for 3D dragging and debugging. Scene should *not* have an engine requirement.
 #include "../engine/text.h"
+#include "../game/layout.h"			// used for the text height
 
 using namespace grinliz;
 using namespace gamui;
@@ -28,8 +29,8 @@ Scene::Scene( Game* _game )
 {
 	gamui2D.Init( &uiRenderer, game->GetRenderAtom( Game::ATOM_TEXT ), game->GetRenderAtom( Game::ATOM_TEXT_D ), &uiRenderer );
 	gamui3D.Init( &uiRenderer, game->GetRenderAtom( Game::ATOM_TEXT ), game->GetRenderAtom( Game::ATOM_TEXT_D ), &uiRenderer );
-	gamui2D.SetTextHeight( 24 );
-	gamui3D.SetTextHeight( 24 );
+	gamui2D.SetTextHeight( TEXT_HEIGHT );
+	gamui3D.SetTextHeight( TEXT_HEIGHT );
 	
 	RenderAtom nullAtom;
 	dragImage.Init( &gamui2D, nullAtom, true );
@@ -89,6 +90,27 @@ bool Scene::ProcessTap( int action, const grinliz::Vector2F& screen, const grinl
 		ItemTapped( uiItem );
 	}
 	return tapCaptured;
+}
+
+
+Model* Scene::ModelAtMouse( const grinliz::Vector2F& view, 		
+							Engine* engine,
+							HitTestMethod method,
+							int required, int exclude, 
+							const Model * const * ignore, 
+							Vector3F* planeIntersection,
+							Vector3F* intersection ) const
+{
+	Matrix4 mvpi;
+	Ray ray;
+	Vector3F at = { 0,0,0 };
+	game->GetScreenport().ViewProjectionInverse3D( &mvpi );
+	engine->RayFromViewToYPlane( view, mvpi, &ray, &at );
+	Model* model = engine->IntersectModel( ray.origin, ray.direction, 10000.0f, method, required, exclude, ignore, intersection );
+	if ( planeIntersection ) {
+		*planeIntersection = at;
+	}
+	return model;
 }
 
 

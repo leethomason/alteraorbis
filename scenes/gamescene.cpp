@@ -71,6 +71,12 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 		camModeButton[i].SetText( camModeText[i] );
 		camModeButton[0].AddToToggleGroup( &camModeButton[i] );
 	}
+	static const char* buildButtonText[NUM_BUILD_BUTTONS] = { "None", "Clear", "Ice", "Kiosk" };
+	for( int i=0; i<NUM_BUILD_BUTTONS; ++i ) {
+		buildButton[i].Init( &gamui2D, game->GetButtonLook(0) );
+		buildButton[i].SetText( buildButtonText[i] );
+		buildButton[0].AddToToggleGroup( &buildButton[i] );
+	}
 	allRockButton.Init( &gamui2D, game->GetButtonLook(0) );
 	allRockButton.SetText( "All Rock" );
 
@@ -118,6 +124,9 @@ void GameScene::Resize()
 	}
 	for( int i=0; i<NUM_CAM_MODES; ++i ) {
 		layout.PosAbs( &camModeButton[i], i, -3 );
+	}
+	for( int i=0; i<NUM_BUILD_BUTTONS; ++i ) {
+		layout.PosAbs( &buildButton[i], 0, i+2 );
 	}
 	layout.PosAbs( &allRockButton, 0, 1 );
 
@@ -366,19 +375,27 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 	bool uiHasTap = ProcessTap( action, view, world );
 	Engine* engine = sim->GetEngine();
 	enable3DDragging = (sim->GetPlayerChit() == 0);
+	bool coreMode = sim->GetChitBag()->IsBoundToCore( sim->GetPlayerChit() );
+	int  buildActive = 0;
+	for( int i=1; i<NUM_BUILD_BUTTONS; ++i ) {
+		if ( buildButton[i].Down() ) {
+			buildActive = i;
+			break;
+		}
+	}
 
 	if ( !uiHasTap ) {
-		// FIXME: worst boilerplate code ever. Should only need the last line.
-		Matrix4 mvpi;
-		Ray ray;
-		Vector3F at, atModel;
-		game->GetScreenport().ViewProjectionInverse3D( &mvpi );
-		sim->GetEngine()->RayFromViewToYPlane( view, mvpi, &ray, &at );
-		Model* model = sim->GetEngine()->IntersectModel( ray.origin, ray.direction, 10000.0f, TEST_HIT_AABB, 0, MODEL_CLICK_THROUGH, 0, &atModel );
+		Vector3F at = { 0, 0, 0 };
+		Vector3F plane = { 0, 0, 0 };
+		Model* model = ModelAtMouse( view, sim->GetEngine(), TEST_HIT_AABB, 0, MODEL_CLICK_THROUGH, 0, &plane, &at );
 
 		bool tap = Process3DTap( action, view, world, sim->GetEngine() );
 
 		if ( tap ) {
+
+			if ( coreMode && buildActive ) {
+				int debug = 1;
+			}
 			
 			if ( model && strstr( model->GetResource()->Name(), "rock." )) {
 				// clicked on a rock. Melt away!
@@ -402,12 +419,12 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 					DoDestTapped( dest );
 				}
 				else {
-					sim->GetEngine()->CameraLookAt( at.x, at.z );
+					sim->GetEngine()->CameraLookAt( plane.x, plane.z );
 				}
 			}
 			else if ( tapMod == GAME_TAP_MOD_CTRL ) {
 
-				Vector2I v = { (int)at.x, (int)at.z };
+				Vector2I v = { (int)plane.x, (int)plane.z };
 				sim->CreatePlayer( v, 0 ); 
 				SetFace();
 #if 0

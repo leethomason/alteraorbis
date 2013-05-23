@@ -22,6 +22,7 @@
 #include "../engine/texture.h"
 
 #include "../game/lumosgame.h"
+#include "../game/layout.h"
 
 #include "../script/battlemechanics.h"
 
@@ -81,7 +82,7 @@ void TitleScene::Resize()
 			++c;
 		}
 	}
-	layout.SetSize( LAYOUT_SIZE*2.0f, LAYOUT_SIZE );
+	layout.SetSize( LAYOUT_SIZE_X, LAYOUT_SIZE_Y );
 	for( int i=0; i<NUM_GAME; ++i ) {
 		layout.PosAbs( &gameScene[i], i, -1 );
 	}

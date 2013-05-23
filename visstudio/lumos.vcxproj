@@ -200,6 +200,7 @@
     <ClInclude Include="..\game\gamemovecomponent.h" />
     <ClInclude Include="..\game\gridmovecomponent.h" />
     <ClInclude Include="..\game\healthcomponent.h" />
+    <ClInclude Include="..\game\layout.h" />
     <ClInclude Include="..\game\lumoschitbag.h" />
     <ClInclude Include="..\game\lumosgame.h" />
     <ClInclude Include="..\game\mapspatialcomponent.h" />

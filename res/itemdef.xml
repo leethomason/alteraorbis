@@ -18,12 +18,16 @@
         mass="10">
   </item>
 
+  <item name="crystal_green"
+        resource="crystal_green"
+        flags="CLICK_THROUGH"
+        mass="1" />
   <item name="crystal_red"
         resource="crystal_red"
         flags="CLICK_THROUGH"
         mass="1" />
-  <item name="crystal_green"
-        resource="crystal_green"
+  <item name="crystal_blue"
+        resource="crystal_blue"
         flags="CLICK_THROUGH"
         mass="1" />
   <item name="crystal_violet"

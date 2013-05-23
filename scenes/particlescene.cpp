@@ -14,11 +14,16 @@
 */
 
 #include "particlescene.h"
-#include "../game/lumosgame.h"
+
 #include "../engine/engine.h"
+
 #include "../xegame/testmap.h"
+
 #include "../tinyxml2/tinyxml2.h"
+
 #include "../game/gamelimits.h"
+#include "../game/layout.h"
+#include "../game/lumosgame.h"
 
 using namespace gamui;
 using namespace grinliz;
@@ -62,7 +67,7 @@ void ParticleScene::Resize()
 	lumosGame->PositionStd( &okay, 0 );
 
 	LayoutCalculator layout = lumosGame->DefaultLayout();
-	layout.SetSize( LAYOUT_SIZE*0.75f, LAYOUT_SIZE*0.5f );
+	layout.SetSize( LAYOUT_SIZE_X*0.75f, LAYOUT_SIZE_Y*0.5f );
 	int x=0;
 	int y=0;
 	for( int i=0; i<buttonArr.Size(); ++i ) {

@@ -78,9 +78,6 @@ static const float EFFECT_DAMAGE_PER_SEC = 20.0f;
 static const float EFFECT_RADIUS = 1.5f;
 static const float EFFECT_ACCRUED_MAX = EFFECT_DAMAGE_PER_SEC;
 
-static const float LAYOUT_SIZE = 75.0f;
-
-
 // hardpoint & metadata names/bitfields
 enum {
 	HARDPOINT_TRIGGER	= 0x01,	// this attaches to the trigger hardpoint

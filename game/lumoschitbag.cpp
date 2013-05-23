@@ -21,6 +21,8 @@
 
 #include "../script/battlemechanics.h"
 #include "../script/itemscript.h"
+#include "../script/scriptcomponent.h"
+#include "../script/corescript.h"
 
 
 //#define DEBUG_EXPLOSION
@@ -272,3 +274,25 @@ int LumosChitBag::MapGridUse( int x, int y )
 	return flags;
 }
 
+
+
+bool LumosChitBag::IsBoundToCore( Chit* chit )
+{
+	if ( chit && chit->GetSpatialComponent() ) {
+		Vector2F pos2 = chit->GetSpatialComponent()->GetPosition2D();
+
+		CChitArray array;
+		QuerySpatialHash( &array, pos2, 0.1f, 0, CoreFilter );
+		if ( !array.Empty() ) {
+			Chit* cc = array[0];
+			ScriptComponent* sc = cc->GetScriptComponent();
+			GLASSERT( sc );
+			IScript* script = sc->Script();
+			GLASSERT( script );
+			CoreScript* coreScript = script->ToCoreScript();
+			GLASSERT( coreScript );
+			return coreScript->GetAttached() == chit;
+		}
+	}
+	return false;
+}

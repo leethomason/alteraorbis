@@ -1284,10 +1284,12 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 				
 				// Read our local get-on-the-grid info
 				SectorPort local = map->NearestPort( parentChit->GetSpatialComponent()->GetPosition2D() );
-				const SectorData& localSD = map->GetSector( local.sector );
-
-				// Local path to remote dst
-				this->Move( SectorData::PortPos( localSD.GetPortLoc(local.port), parentChit->ID() ), sectorPort, true );
+				// Completely possible this chit can't actually path anywhere.
+				if ( local.IsValid() ) {
+					const SectorData& localSD = map->GetSector( local.sector );
+					// Local path to remote dst
+					this->Move( SectorData::PortPos( localSD.GetPortLoc(local.port), parentChit->ID() ), sectorPort, true );
+				}
 			}
 		}
 		break;
