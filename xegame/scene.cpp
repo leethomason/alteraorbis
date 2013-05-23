@@ -106,7 +106,10 @@ Model* Scene::ModelAtMouse( const grinliz::Vector2F& view,
 	Vector3F at = { 0,0,0 };
 	game->GetScreenport().ViewProjectionInverse3D( &mvpi );
 	engine->RayFromViewToYPlane( view, mvpi, &ray, &at );
-	Model* model = engine->IntersectModel( ray.origin, ray.direction, 10000.0f, method, required, exclude, ignore, intersection );
+	GLASSERT( at.x != 0 && at.z != 0 );
+	Model* model = engine->IntersectModel( ray.origin, ray.direction, 10000.0f, 
+										   method, required, exclude, ignore, 
+										   intersection );
 	if ( planeIntersection ) {
 		*planeIntersection = at;
 	}

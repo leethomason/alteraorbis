@@ -5,6 +5,7 @@
 #include "../xegame/cticker.h"
 
 class WorldMap;
+class WorkQueue;
 
 class CoreScript : public IScript
 {
@@ -15,7 +16,7 @@ public:
 	virtual void Init( const ScriptContext& heap );
 	virtual void Serialize( const ScriptContext& ctx, XStream* xs );
 	virtual void OnAdd( const ScriptContext& ctx );
-	virtual void OnRemove( const ScriptContext& ctx )	{}
+	virtual void OnRemove( const ScriptContext& ctx );
 
 	virtual int DoTick( const ScriptContext& ctx, U32 delta, U32 since );
 	virtual const char* ScriptName() { return "CoreScript"; }
@@ -23,9 +24,11 @@ public:
 
 	bool AttachToCore( Chit* chit );
 	Chit* GetAttached();
+	WorkQueue* GetWorkQueue()	{ return workQueue; }
 
 private:
 	WorldMap*	worldMap;
+	WorkQueue*	workQueue;
 	CTicker		spawnTick;
 	int			boundID;
 };

@@ -276,7 +276,7 @@ int LumosChitBag::MapGridUse( int x, int y )
 
 
 
-bool LumosChitBag::IsBoundToCore( Chit* chit )
+CoreScript* LumosChitBag::IsBoundToCore( Chit* chit )
 {
 	if ( chit && chit->GetSpatialComponent() ) {
 		Vector2F pos2 = chit->GetSpatialComponent()->GetPosition2D();
@@ -291,7 +291,7 @@ bool LumosChitBag::IsBoundToCore( Chit* chit )
 			GLASSERT( script );
 			CoreScript* coreScript = script->ToCoreScript();
 			GLASSERT( coreScript );
-			return coreScript->GetAttached() == chit;
+			return coreScript->GetAttached() == chit ? coreScript : 0;
 		}
 	}
 	return false;

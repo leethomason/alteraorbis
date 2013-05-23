@@ -14,11 +14,13 @@
 #include "../game/worldinfo.h"
 #include "../game/aicomponent.h"
 #include "../game/reservebank.h"
+#include "../game/workqueue.h"
 
 #include "../engine/engine.h"
 #include "../engine/text.h"
 
 #include "../script/procedural.h"
+#include "../script/corescript.h"
 
 using namespace grinliz;
 using namespace gamui;
@@ -375,7 +377,7 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 	bool uiHasTap = ProcessTap( action, view, world );
 	Engine* engine = sim->GetEngine();
 	enable3DDragging = (sim->GetPlayerChit() == 0);
-	bool coreMode = sim->GetChitBag()->IsBoundToCore( sim->GetPlayerChit() );
+	CoreScript* coreMode = sim->GetChitBag()->IsBoundToCore( sim->GetPlayerChit() );
 	int  buildActive = 0;
 	for( int i=1; i<NUM_BUILD_BUTTONS; ++i ) {
 		if ( buildButton[i].Down() ) {
@@ -385,16 +387,20 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 	}
 
 	if ( !uiHasTap ) {
-		Vector3F at = { 0, 0, 0 };
-		Vector3F plane = { 0, 0, 0 };
-		Model* model = ModelAtMouse( view, sim->GetEngine(), TEST_HIT_AABB, 0, MODEL_CLICK_THROUGH, 0, &plane, &at );
+		Vector3F atModel = { 0, 0, 0 };
+		Vector3F plane   = { 0, 0, 0 };
+
+		Model* model = ModelAtMouse( view, sim->GetEngine(), TEST_HIT_AABB, 0, MODEL_CLICK_THROUGH, 0, &plane, &atModel );
+		GLASSERT( plane.x > 0 && plane.z > 0 );
 
 		bool tap = Process3DTap( action, view, world, sim->GetEngine() );
 
 		if ( tap ) {
 
 			if ( coreMode && buildActive ) {
-				int debug = 1;
+				WorkQueue* wq = coreMode->GetWorkQueue();
+				Vector2I v = { (int)plane.x, (int)plane.z };
+				wq->Add( WorkQueue::CLEAR, v );
 			}
 			
 			if ( model && strstr( model->GetResource()->Name(), "rock." )) {
@@ -410,12 +416,12 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 			int tapMod = lumosGame->GetTapMod();
 
 			if ( tapMod == 0 ) {
-				Chit* chit = sim->GetPlayerChit();
+				Chit* playerChit = sim->GetPlayerChit();
 				if ( model ) {
 					TapModel( model->userData );
 				}
-				else if ( chit ) {
-					Vector2F dest = { at.x, at.z };
+				else if ( playerChit ) {
+					Vector2F dest = { plane.x, plane.z };
 					DoDestTapped( dest );
 				}
 				else {
@@ -434,7 +440,7 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 			}
 			else if ( tapMod == GAME_TAP_MOD_SHIFT ) {
 				for( int i=0; i<NUM_PLANT_TYPES; ++i ) {
-					sim->CreatePlant( (int)at.x+i, (int)at.z, i );
+					sim->CreatePlant( (int)plane.x+i, (int)plane.z, i );
 				}
 			}
 		}

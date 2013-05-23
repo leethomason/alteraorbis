@@ -9,6 +9,7 @@
 #include "../game/mapspatialcomponent.h"
 #include "../game/worldmap.h"
 #include "../game/aicomponent.h"
+#include "../game/workqueue.h"
 
 #include "../xegame/chit.h"
 #include "../xegame/spatialcomponent.h"
@@ -18,13 +19,16 @@ using namespace grinliz;
 CoreScript::CoreScript( WorldMap* map ) 
 	: worldMap( map ), 
 	  spawnTick( 10*1000 ), 
-	  boundID( 0 )
+	  boundID( 0 ),
+	  workQueue( 0 )
 {
+	workQueue = new WorkQueue( worldMap );
 }
 
 
 CoreScript::~CoreScript()
 {
+	delete workQueue;
 }
 
 
@@ -39,6 +43,7 @@ void CoreScript::Serialize( const ScriptContext& ctx, XStream* xs )
 	XarcOpen( xs, ScriptName() );
 	XARC_SER( xs, boundID );
 	spawnTick.Serialize( xs, "spawn" );
+	workQueue->Serialize( xs );
 	XarcClose( xs );
 }
 
@@ -46,6 +51,11 @@ void CoreScript::Serialize( const ScriptContext& ctx, XStream* xs )
 void CoreScript::OnAdd( const ScriptContext& ctx )
 {
 	// Cores are indestructable. They don't get removed.
+}
+
+
+void CoreScript::OnRemove( const ScriptContext& ctx )
+{
 }
 
 

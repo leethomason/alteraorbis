@@ -8,6 +8,7 @@
 
 class WorldMap;
 struct Wallet;
+class CoreScript;
 
 class LumosChitBag : public ChitBag,
 					 public IMapGridUse
@@ -32,7 +33,7 @@ public:
 	virtual void HandleBolt( const Bolt& bolt, Model* m, const grinliz::Vector3F& at );
 
 	virtual int MapGridUse( int x, int y );
-	bool IsBoundToCore( Chit* );
+	CoreScript* IsBoundToCore( Chit* );
 
 	Census census;
 
