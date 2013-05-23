@@ -29,6 +29,8 @@ private:
 		grinliz::Vector2I pos;
 	};
 
+	void InitImage( const QueueItem& item );
+
 	WorldMap*						worldMap;
 	grinliz::CDynArray< QueueItem > queue;
 	grinliz::CDynArray< gamui::Image* > images;

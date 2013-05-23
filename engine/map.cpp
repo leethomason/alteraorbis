@@ -69,22 +69,6 @@ void Map::DrawOverlay( int id )
 }
 
 
-/*
-void Map::Save( XMLPrinter* printer )
-{
-	printer->OpenElement( "Map" );
-	printer->PushAttribute( "sizeX", width );
-	printer->PushAttribute( "sizeY", height );
-	printer->CloseElement();
-}
-
-
-void Map::Load( const XMLElement* mapElement )
-{
-	GLASSERT( mapElement );
-}
-*/
-
 void Map::BeginRender()
 {
 	gamuiShader.PushMatrix( GPUState::MODELVIEW_MATRIX );

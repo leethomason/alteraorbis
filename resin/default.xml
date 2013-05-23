@@ -151,7 +151,9 @@
   <model filename="dummytarget.ac"                                         shading="flat" polyRemoval="pre">
     <meta name="target" pos="0 0.5 0" />
   </model>
- 
+
+  <model filename="worker.ac" />
+  
   <model filename="chess_characters.ac" modelName="hornet"  origin="2 0 0" shading="flat" polyRemoval="pre"> 
   </model>
   <model filename="chess_characters.ac" modelName="prime"   origin="1 0 0" shading="flat" polyRemoval="pre">
