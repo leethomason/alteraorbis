@@ -37,14 +37,14 @@ DebugStateComponent::DebugStateComponent( WorldMap* _map ) : map( _map )
 {
 	RenderAtom a1 = LumosGame::CalcPaletteAtom( 1, 3 );	
 	RenderAtom a2 = LumosGame::CalcPaletteAtom( 1, 1 );
-	healthBar.Init( &map->overlay, 10, a1, a2 ); 
+	healthBar.Init( &map->overlay0, 10, a1, a2 ); 
 
 	RenderAtom blue   = LumosGame::CalcPaletteAtom( 8, 0 );	
-	ammoBar.Init( &map->overlay, 10, blue, blue );
+	ammoBar.Init( &map->overlay0, 10, blue, blue );
 
 	RenderAtom purple = LumosGame::CalcPaletteAtom( 10, 0 );
 	RenderAtom grey   = LumosGame::CalcPaletteAtom( 0, 6 );
-	shieldBar.Init( &map->overlay, 10, purple, grey );
+	shieldBar.Init( &map->overlay0, 10, purple, grey );
 }
 
 
@@ -58,16 +58,16 @@ void DebugStateComponent::Serialize( XStream* xs )
 void DebugStateComponent::OnAdd( Chit* chit )
 {
 	super::OnAdd( chit );
-	map->overlay.Add( &healthBar );
+	map->overlay0.Add( &healthBar );
 
 	healthBar.SetSize( SIZE_X, SIZE_Y );
 	healthBar.SetRange( 1.0f );
 
-	map->overlay.Add( &ammoBar );
+	map->overlay0.Add( &ammoBar );
 	ammoBar.SetSize( SIZE_X, SIZE_Y );
 	ammoBar.SetRange( 1.0f );
 
-	map->overlay.Add( &shieldBar );
+	map->overlay0.Add( &shieldBar );
 	shieldBar.SetSize( SIZE_X, SIZE_Y );
 	shieldBar.SetRange( 1.0f );
 }
@@ -75,9 +75,9 @@ void DebugStateComponent::OnAdd( Chit* chit )
 
 void DebugStateComponent::OnRemove()
 {
-	map->overlay.Remove( &healthBar );
-	map->overlay.Remove( &ammoBar );
-	map->overlay.Remove( &shieldBar );
+	map->overlay0.Remove( &healthBar );
+	map->overlay0.Remove( &ammoBar );
+	map->overlay0.Remove( &shieldBar );
 	super::OnRemove();
 }
 

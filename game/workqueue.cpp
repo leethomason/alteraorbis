@@ -25,8 +25,8 @@ void WorkQueue::Add( int action, grinliz::Vector2I& pos )
 	QueueItem item = { action, pos };
 	queue.Push( item );
 	
-	RenderAtom atom = LumosGame::CalcIconAtom( 11, true );	// fixme. switch to new icon texture
-	Image* image = new Image( &worldMap->overlay, atom, true );
+	RenderAtom atom = LumosGame::CalcIconAtom( 10+action, true );	// fixme. switch to new icon texture
+	Image* image = new Image( &worldMap->overlay1, atom, true );
 	images.Push( image );
 	image->SetSize( 1, 1 );
 	image->SetPos( (float)pos.x, (float)pos.y );

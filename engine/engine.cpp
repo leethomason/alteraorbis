@@ -415,7 +415,7 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 		map->Draw3D( lighted, GPUState::STENCIL_OFF );
 #endif
 
-		map->DrawOverlay();
+		map->DrawOverlay(0);
 #endif
 	}
 
@@ -433,6 +433,10 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 
 	engineShaders.PopAll();
 	renderQueue->Clear();
+
+	if ( map ) {
+		map->DrawOverlay(1);
+	}
 
 	// --------- Composite Glow -------- //
 #ifdef ENGINE_RENDER_GLOW

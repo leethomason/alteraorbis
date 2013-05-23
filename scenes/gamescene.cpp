@@ -400,7 +400,7 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 			if ( coreMode && buildActive ) {
 				WorkQueue* wq = coreMode->GetWorkQueue();
 				Vector2I v = { (int)plane.x, (int)plane.z };
-				wq->Add( WorkQueue::CLEAR, v );
+				wq->Add( buildActive, v );
 			}
 			
 			if ( model && strstr( model->GetResource()->Name(), "rock." )) {
