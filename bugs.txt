@@ -151,7 +151,8 @@ d bone filter in reverse. more efficient and useful.
 
 V2 ideas:
 - content popups when you are near a kiosk (email from GT)
-
+- "populous style" rocks. diagonals, points.
+- level up grid and special skills
 
 ----------- FIXED -------------
 
