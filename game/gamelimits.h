@@ -43,9 +43,10 @@ static const int TYPICAL_BEASTMEN	= TYPICAL_DOMAINS * 10;
 static const int TYPICAL_MONSTERS	= TYPICAL_DOMAINS * 15;
 
 enum {
-	CRYSTAL_RED,
-	CRYSTAL_GREEN,
-	CRYSTAL_VIOLET,
+	CRYSTAL_GREEN,			// basic weapon crystal
+	CRYSTAL_RED,			// fire weapon
+	CRYSTAL_BLUE,			// shock weapon
+	CRYSTAL_VIOLET,			// advanced weapon, combo fire/shock, explosive, etc.
 	NUM_CRYSTAL_TYPES,
 	NO_CRYSTAL = NUM_CRYSTAL_TYPES
 };
@@ -61,6 +62,7 @@ static const float MIN_EFFECTIVE_RANGE = 2.0f;
 static const float MAX_EFFECTIVE_RANGE = 25.0f;	
 
 static const int MODEL_USER		= (1<<16);				// from model.h
+static const int MODEL_CLICK_THROUGH	= (MODEL_USER<<1);
 
 // Debugging values:
 static const float ROTATION_LIMIT	= 45.0f;
@@ -75,9 +77,6 @@ static const float LONGEST_WEAPON_RANGE = 20.0f;	// effects AI logic, queries
 static const float EFFECT_DAMAGE_PER_SEC = 20.0f;
 static const float EFFECT_RADIUS = 1.5f;
 static const float EFFECT_ACCRUED_MAX = EFFECT_DAMAGE_PER_SEC;
-
-static const float LAYOUT_SIZE = 75.0f;
-
 
 // hardpoint & metadata names/bitfields
 enum {

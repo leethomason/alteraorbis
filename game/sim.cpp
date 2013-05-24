@@ -157,9 +157,9 @@ void Sim::CreateCores()
 
 			MapSpatialComponent* ms = new MapSpatialComponent( worldMap );
 			ms->SetMapPosition( sd.core.x, sd.core.y );
-			ms->SetMode( GRID_BLOCKED ); 
+			ms->SetMode( GRID_IN_USE ); 
 			chit->Add( ms );
-			chit->Add( new ScriptComponent( new CoreScript( worldMap ), &chitBag->census ));
+			chit->Add( new ScriptComponent( new CoreScript( worldMap ), engine, &chitBag->census ));
 			chit->Add( new ItemComponent( engine, worldMap, *gameItem ));
 			chit->Add( new RenderComponent( engine, asset ));
 			++ncores;
@@ -195,6 +195,7 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos, const char* assetName )
 	chitBag->AddItem( "blaster", chit, engine, 0, 2 );
 	chit->GetItemComponent()->AddGold( ReserveBank::Instance()->WithdrawDenizen() );
 	chit->GetItemComponent()->SetPickup( ItemComponent::GOLD_HOOVER );
+	chit->GetItem()->flags |= GameItem::AI_BINDS_TO_CORE;
 
 	AIComponent* ai = new AIComponent( engine, worldMap );
 	ai->EnableDebug( true );
@@ -316,7 +317,7 @@ void Sim::CreateVolcano( int x, int y, int size )
 
 	Chit* chit = chitBag->NewChit();
 	chit->Add( new SpatialComponent() );
-	chit->Add( new ScriptComponent( new VolcanoScript( worldMap, size ), &chitBag->census ));
+	chit->Add( new ScriptComponent( new VolcanoScript( worldMap, size ), engine, &chitBag->census ));
 
 	chit->GetSpatialComponent()->SetPosition( (float)x+0.5f, 0.0f, (float)y+0.5f );
 }
@@ -384,7 +385,7 @@ void Sim::CreatePlant( int x, int y, int type )
 		chit->Add( ms );
 
 		chit->Add( new HealthComponent( engine ) );
-		chit->Add( new ScriptComponent( new PlantScript( this, engine, worldMap, weather, type ), &chitBag->census ));
+		chit->Add( new ScriptComponent( new PlantScript( this, engine, worldMap, weather, type ), engine, &chitBag->census ));
 	}
 }
 

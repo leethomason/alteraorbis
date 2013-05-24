@@ -16,6 +16,7 @@
 #include "lumosgame.h"
 #include "gamelimits.h"
 #include "worldinfo.h"
+#include "layout.h"
 #include "../markov/markov.h"
 
 #include "../scenes/titlescene.h"
@@ -195,7 +196,7 @@ gamui::LayoutCalculator LumosGame::DefaultLayout()
 	const Screenport& port = GetScreenport();
 	LayoutCalculator layout( port.UIWidth(), port.UIHeight() );
 	layout.SetGutter( 10.0f, 10.0f );
-	layout.SetSize( LAYOUT_SIZE, LAYOUT_SIZE );
+	layout.SetSize( LAYOUT_SIZE_X, LAYOUT_SIZE_Y );
 	layout.SetSpacing( 5.0f );
 	return layout;
 }
@@ -208,12 +209,12 @@ void LumosGame::InitStd( gamui::Gamui* g, gamui::PushButton* okay, gamui::PushBu
 
 	if ( okay ) {
 		okay->Init( g, stdBL );
-		okay->SetSize( LAYOUT_SIZE, LAYOUT_SIZE );
+		okay->SetSize( LAYOUT_SIZE_X, LAYOUT_SIZE_Y );
 		okay->SetDeco( CalcDecoAtom( DECO_OKAY, true ), CalcDecoAtom( DECO_OKAY, false ) );
 	}
 	if ( cancel ) {
 		cancel->Init( g, stdBL );
-		cancel->SetSize( LAYOUT_SIZE, LAYOUT_SIZE );
+		cancel->SetSize( LAYOUT_SIZE_X, LAYOUT_SIZE_Y );
 		cancel->SetDeco( CalcDecoAtom( DECO_CANCEL, true ), CalcDecoAtom( DECO_CANCEL, false ) );
 	}
 }

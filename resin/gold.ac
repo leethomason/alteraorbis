@@ -5,7 +5,7 @@ kids 3
 OBJECT poly
 name "gold.10"
 loc 1 0.3 -6.44804e-008
-texture "palette.png"
+texture "palette_50.png"
 crease 45.000000
 numvert 8
 0 0.0527208 -0.307279
@@ -63,7 +63,7 @@ kids 0
 OBJECT poly
 name "gold"
 loc 0 0.35 0
-texture "palette.png"
+texture "palette_50.png"
 crease 45.000000
 numvert 5
 -0.2 -0.2 -0.2
@@ -107,7 +107,7 @@ kids 0
 OBJECT poly
 name "gold.100"
 loc 2 0.3 0
-texture "palette.png"
+texture "palette_50.png"
 crease 45.000000
 numvert 58
 0 0.2 0

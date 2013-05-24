@@ -53,8 +53,9 @@ public:
 	bool AwareOfEnemy() const { return enemyList.Size() > 0; }
 
 	// Tell the AI to take actions. If the "focused" is set,
-	// it is given extra priority.
-	// Move: move to a location in the sector, or to a different sector.
+	// it is given extra priority. The 'dest' must be in the same
+	// sector. If 'sector' is also specfied, will do grid travel
+	// after the move.
 	void Move( const grinliz::Vector2F& dest, const SectorPort* sector, bool focused );
 	// Targets a particular enemy.
 	void Target( Chit* chit, bool focused );

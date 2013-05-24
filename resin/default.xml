@@ -29,6 +29,8 @@
 
   <!-- Model textures -->
   <texture filename="palette.png" />
+  <texture filename="palette_50.png" emissive="true" />
+  <texture filename="palette_100.png" emissive="true"/>
   <texture filename="charSwatch.png" width="128" height="8" /> 
   <texture filename="characters.png" />
   <texture filename="treetextures.png" />
@@ -67,8 +69,9 @@
   </atlas>
 
   <model filename="gold.ac"         modelName="gold"            origin="0 0 0" shading="flat"/>
-  <model filename="dodecahedron.ac" modelName="crystal_red"     origin="0 0 0" shading="flat" />
   <model filename="dodecahedron.ac" modelName="crystal_green"   origin="1 0 0" shading="flat" />
+  <model filename="dodecahedron.ac" modelName="crystal_red"     origin="0 0 0" shading="flat" />
+  <model filename="dodecahedron.ac" modelName="crystal_blue"    origin="3 0 0" shading="flat" />
   <model filename="dodecahedron.ac" modelName="crystal_violet"  origin="2 0 0" shading="flat" />
   
   <model filename="teststructures.ac" modelName="testStruct0"  origin="0 0 0"  shading="flat" polyRemoval="pre" />
@@ -80,10 +83,10 @@
   <model filename="iconPlate.ac" shading="flat" />
   <model filename="iconHeadPlate.ac" shading="flat" />
   <model filename="unitCube.ac" shading="flat" />
-  <model filename="targetFlag.ac" shading="flat" shadowCastec="false" />
-  <model filename="possibleTargetFlag.ac" shading="flat" shadowCastec="false" />
+  <model filename="targetFlag.ac" shading="flat" shadowCaster="false" />
+  <model filename="possibleTargetFlag.ac" shading="flat" shadowCaster="false" />
 
-  <model filename="obelisk.ac" shading="flat" />
+  <model filename="core.ac" shading="flat" />
 
   <model filename="rock.ac" modelName="rock.1" origin="0 0 0" shading="flat" />
   <model filename="rock.ac" modelName="rock.2" origin="2 0 0" shading="flat" />
@@ -148,7 +151,9 @@
   <model filename="dummytarget.ac"                                         shading="flat" polyRemoval="pre">
     <meta name="target" pos="0 0.5 0" />
   </model>
- 
+
+  <model filename="worker.ac" />
+  
   <model filename="chess_characters.ac" modelName="hornet"  origin="2 0 0" shading="flat" polyRemoval="pre"> 
   </model>
   <model filename="chess_characters.ac" modelName="prime"   origin="1 0 0" shading="flat" polyRemoval="pre">

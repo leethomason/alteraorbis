@@ -87,7 +87,7 @@ public:
 	DamageDesc( float _damage, int _effects ) : damage(_damage), effects(_effects) {}
 
 	float damage;
-	int   effects;
+	int effects;
 
 	void Log();
 };
@@ -133,13 +133,15 @@ public:
 	void AddBattleXP( int killshotLevel )	{ exp += 1 + killshotLevel; }
 
 	// 1.0 is normal, 0.1 very low, 2+ exceptional.
+	float NormalLeveledTrait( int t ) const { GLASSERT( t>=0 && t<NUM_TRAITS ); return NormalLeveledSkill( trait[t] ); }
 	float Accuracy() const		{ return NormalLeveledSkill( Dexterity() ); }
 	float Damage() const		{ return NormalLeveledSkill( Strength() ); }
+	float Toughness() const		{ return NormalLeveledSkill( Will() ); }
 	
-	float NormalStr() const		{ return NormalLeveledSkill( Strength() ); }
-	float NormalWill() const	{ return NormalLeveledSkill( Will() ); }
-	float NormalInt() const		{ return NormalLeveledSkill( Intelligence() ); }
-	float NormalDex() const		{ return NormalLeveledSkill( Dexterity() ); }
+	int LevelStr() const		{ return grinliz::LRintf( LeveledSkill( Strength() )); }
+	int LevelWill() const		{ return grinliz::LRintf( LeveledSkill( Will() )); }
+	int LevelInt() const		{ return grinliz::LRintf( LeveledSkill( Intelligence() )); }
+	int LevelDex() const		{ return grinliz::LRintf( LeveledSkill( Dexterity() )); }
 	
 	U32 Hash() const			{ 
 		return grinliz::Random::Hash( trait, sizeof(trait[0])*NUM_TRAITS );
@@ -152,13 +154,6 @@ public:
 	static int ExperienceToLevel( int ep )	{ return grinliz::LogBase2( ep/16 ); } 
 	static int LevelToExperience( int lp )	{ return 16*(1<<lp); }
 
-private:
-	float NormalLeveledSkill( int value ) const {
-		return ((float)value + (float)Level() * LEVEL_BONUS) * SKILL_NORMALIZE;
-	}
-	void Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele );
-
-	// Group. Sometimes accessed as array.
 	enum {	STR,
 			WILL,
 			CHR,
@@ -166,6 +161,16 @@ private:
 			DEX,
 			NUM_TRAITS
 		};
+
+private:
+	float LeveledSkill( int value ) const { 
+		return ((float)value + (float)Level() * LEVEL_BONUS);
+	}
+	float NormalLeveledSkill( int value ) const {
+		return LeveledSkill( value ) * SKILL_NORMALIZE;
+	}
+	void Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele );
+
 	int trait[NUM_TRAITS];
 	int exp;
 };
@@ -255,6 +260,10 @@ public:
 
 		AI_EAT_PLANTS		= (1<<17),		// eats plants to regain health
 		AI_SECTOR_HERD		= (1<<18),		// will herd across sectors
+		AI_BINDS_TO_CORE	= (1<<19),
+		AI_DOES_WORK		= (1<<20),
+
+		CLICK_THROUGH		= (1<<21),		// model is created with flags to ignore world clicking
 	};
 
 	// ------ description ------
@@ -392,7 +401,7 @@ public:
 			keyValues.Clear();
 
 			isHeld = false;
-			hp = TotalHP();
+			hp = TotalHPF();
 			accruedFire = 0;
 			accruedShock = 0;
 
@@ -401,7 +410,7 @@ public:
 	}
 
 	void InitState() {
-		hp = TotalHP();
+		hp = TotalHPF();
 		accruedFire = 0;
 		accruedShock = 0;
 		cooldownTime = 0;
@@ -449,9 +458,11 @@ public:
 	bool OnShock() const { return (!(flags & IMMUNE_SHOCK)) && accruedShock > 0; }
 
 	// Note that the current HP, if it has one, 
-	float TotalHP() const		{ return ceilf( mass*stats.NormalWill() ); }
+	int TotalHP() const		{ return grinliz::LRintf( mass*stats.Toughness() ); }
+	float TotalHPF() const	{ return (float)TotalHP(); }
+
 	float HPFraction() const	{ 
-		float f = hp / TotalHP(); 
+		float f = hp / TotalHPF(); 
 		//GLASSERT( f >= 0 && f <= 1 );
 		f = grinliz::Clamp( f, 0.0f, 1.0f ); // FIXME: hack in hp calc
 		return f;

@@ -20,22 +20,31 @@
 
 class ComponentFactory;
 class Census;
+class CoreScript;
+class Engine;
+
 
 struct ScriptContext
 {
-	ScriptContext() : initialized(false), lastTime( 0 ), time( 0 ), chit( 0 ), census( 0 ) {}
+	ScriptContext() : initialized(false), lastTime(0), time(0), chit(0), census(0), engine(0) {}
 
 	bool	initialized;
 	U32		lastTime;		// time at last tick
 	U32		time;			// time at this tick
 	Chit*	chit;			// null at load
 	Census* census;			// valid at load
+	Engine* engine;
 };
 
 
 class IScript
 {
 public:
+	IScript() : scriptContext( 0 ) {}
+	virtual ~IScript() {}
+
+	void SetContext( const ScriptContext* context ) { scriptContext = context; }
+
 	// The first time this is turned on:
 	virtual void Init( const ScriptContext& heap )	= 0;
 	virtual void OnAdd( const ScriptContext& ctx ) = 0;
@@ -43,6 +52,12 @@ public:
 	virtual void Serialize( const ScriptContext& ctx, XStream* xs )	= 0;
 	virtual int DoTick( const ScriptContext& ctx, U32 delta, U32 since ) = 0;
 	virtual const char* ScriptName() = 0;
+
+	// Safe casting.
+	virtual CoreScript* ToCoreScript() { return 0; }
+
+protected:
+	const ScriptContext* scriptContext;
 };
 
 
@@ -52,10 +67,9 @@ private:
 	typedef Component super;
 
 public:
-	ScriptComponent( IScript* p_script, Census* p_census ) : script( p_script ), factory( 0 )	{
-		context.census = p_census;
-	}
+	ScriptComponent( IScript* p_script, Engine* engine, Census* p_census );
 	ScriptComponent( const ComponentFactory* f, Census* p_census );
+
 	virtual ~ScriptComponent()									{ delete script; }
 
 	virtual const char* Name() const { return "ScriptComponent"; }
@@ -69,8 +83,8 @@ public:
 	virtual void DebugStr( grinliz::GLString* str )		{ str->Format( "[Script] " ); }
 	virtual int DoTick( U32 delta, U32 since );
 
-	// Obviously dangerous; used for casting.	
 	IScript* Script() { return script; }
+
 private:
 	ScriptContext context;
 	IScript* script;

@@ -25,6 +25,7 @@
 #include "../game/gameitem.h"
 #include "../game/aicomponent.h"
 #include "../game/healthcomponent.h"
+#include "../game/layout.h"
 
 #include "../xegame/chit.h"
 #include "../xegame/rendercomponent.h"
@@ -147,7 +148,7 @@ void BattleTestScene::Resize()
 	layout.PosAbs( &goButton, 0, -2 );
 	layout.PosAbs( &regionButton, 1, -2 );
 
-	layout.SetSize( LAYOUT_SIZE, LAYOUT_SIZE*0.5f );
+	layout.SetSize( LAYOUT_SIZE_X, LAYOUT_SIZE_Y*0.5f );
 
 	int currentGroup = -1;
 	int y = -1;

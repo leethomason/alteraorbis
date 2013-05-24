@@ -14,11 +14,13 @@
 #include "../game/worldinfo.h"
 #include "../game/aicomponent.h"
 #include "../game/reservebank.h"
+#include "../game/workqueue.h"
 
 #include "../engine/engine.h"
 #include "../engine/text.h"
 
 #include "../script/procedural.h"
+#include "../script/corescript.h"
 
 using namespace grinliz;
 using namespace gamui;
@@ -71,6 +73,12 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 		camModeButton[i].SetText( camModeText[i] );
 		camModeButton[0].AddToToggleGroup( &camModeButton[i] );
 	}
+	static const char* buildButtonText[NUM_BUILD_BUTTONS] = { "None", "Clear", "Ice", "Kiosk" };
+	for( int i=0; i<NUM_BUILD_BUTTONS; ++i ) {
+		buildButton[i].Init( &gamui2D, game->GetButtonLook(0) );
+		buildButton[i].SetText( buildButtonText[i] );
+		buildButton[0].AddToToggleGroup( &buildButton[i] );
+	}
 	allRockButton.Init( &gamui2D, game->GetButtonLook(0) );
 	allRockButton.SetText( "All Rock" );
 
@@ -118,6 +126,9 @@ void GameScene::Resize()
 	}
 	for( int i=0; i<NUM_CAM_MODES; ++i ) {
 		layout.PosAbs( &camModeButton[i], i, -3 );
+	}
+	for( int i=0; i<NUM_BUILD_BUTTONS; ++i ) {
+		layout.PosAbs( &buildButton[i], 0, i+2 );
 	}
 	layout.PosAbs( &allRockButton, 0, 1 );
 
@@ -366,25 +377,33 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 	bool uiHasTap = ProcessTap( action, view, world );
 	Engine* engine = sim->GetEngine();
 	enable3DDragging = (sim->GetPlayerChit() == 0);
+	CoreScript* coreMode = sim->GetChitBag()->IsBoundToCore( sim->GetPlayerChit() );
+	int  buildActive = 0;
+	for( int i=1; i<NUM_BUILD_BUTTONS; ++i ) {
+		if ( buildButton[i].Down() ) {
+			buildActive = i;
+			break;
+		}
+	}
 
 	if ( !uiHasTap ) {
-		// FIXME: worst boilerplate code ever. Should only need the last line.
-		Matrix4 mvpi;
-		Ray ray;
-		Vector3F at, atModel;
-		game->GetScreenport().ViewProjectionInverse3D( &mvpi );
-		sim->GetEngine()->RayFromViewToYPlane( view, mvpi, &ray, &at );
-		Model* model = sim->GetEngine()->IntersectModel( ray.origin, ray.direction, 10000.0f, TEST_HIT_AABB, 0, 0, 0, &atModel );
+		Vector3F atModel = { 0, 0, 0 };
+		Vector3F plane   = { 0, 0, 0 };
+
+		Model* model = ModelAtMouse( view, sim->GetEngine(), TEST_HIT_AABB, 0, MODEL_CLICK_THROUGH, 0, &plane, &atModel );
+		GLASSERT( plane.x > 0 && plane.z > 0 );
 
 		bool tap = Process3DTap( action, view, world, sim->GetEngine() );
 
 		if ( tap ) {
-			
-			// FIXME: need a generic solution here. How to handle stuff that isn't tappable?
-			if ( model && model->userData && LumosChitBag::GoldCrystalFilter( model->userData )) {
-				model = 0;	// don't tap on gold.
+
+			if ( coreMode && buildActive ) {
+				WorkQueue* wq = coreMode->GetWorkQueue();
+				Vector2I v = { (int)plane.x, (int)plane.z };
+				wq->Add( buildActive, v );
 			}
-			else if ( model && strstr( model->GetResource()->Name(), "rock." )) {
+			
+			if ( model && strstr( model->GetResource()->Name(), "rock." )) {
 				// clicked on a rock. Melt away!
 				Chit* player = sim->GetPlayerChit();
 				if ( player && player->GetAIComponent() ) {
@@ -397,21 +416,21 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 			int tapMod = lumosGame->GetTapMod();
 
 			if ( tapMod == 0 ) {
-				Chit* chit = sim->GetPlayerChit();
+				Chit* playerChit = sim->GetPlayerChit();
 				if ( model ) {
 					TapModel( model->userData );
 				}
-				else if ( chit ) {
-					Vector2F dest = { at.x, at.z };
+				else if ( playerChit ) {
+					Vector2F dest = { plane.x, plane.z };
 					DoDestTapped( dest );
 				}
 				else {
-					sim->GetEngine()->CameraLookAt( at.x, at.z );
+					sim->GetEngine()->CameraLookAt( plane.x, plane.z );
 				}
 			}
 			else if ( tapMod == GAME_TAP_MOD_CTRL ) {
 
-				Vector2I v = { (int)at.x, (int)at.z };
+				Vector2I v = { (int)plane.x, (int)plane.z };
 				sim->CreatePlayer( v, 0 ); 
 				SetFace();
 #if 0
@@ -421,7 +440,7 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 			}
 			else if ( tapMod == GAME_TAP_MOD_SHIFT ) {
 				for( int i=0; i<NUM_PLANT_TYPES; ++i ) {
-					sim->CreatePlant( (int)at.x+i, (int)at.z, i );
+					sim->CreatePlant( (int)plane.x+i, (int)plane.z, i );
 				}
 			}
 		}
@@ -640,10 +659,11 @@ void GameScene::DoTick( U32 delta )
 	if ( playerChit && playerChit->GetItemComponent() ) {
 		wallet = playerChit->GetItemComponent()->GetWallet();
 	}
-	str.Format( "Au:%d r:%d g:%d v:%d", 
+	str.Format( "Au:%d g:%d r:%d b:%d v:%d", 
 				wallet.gold, 
-				wallet.crystal[CRYSTAL_RED], 
 				wallet.crystal[CRYSTAL_GREEN], 
+				wallet.crystal[CRYSTAL_RED], 
+				wallet.crystal[CRYSTAL_BLUE], 
 				wallet.crystal[CRYSTAL_VIOLET] );
 	goldLabel.SetText( str.c_str() );
 

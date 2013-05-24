@@ -21,6 +21,8 @@
 
 #include "../script/battlemechanics.h"
 #include "../script/itemscript.h"
+#include "../script/scriptcomponent.h"
+#include "../script/corescript.h"
 
 
 //#define DEBUG_EXPLOSION
@@ -38,7 +40,6 @@ LumosChitBag::~LumosChitBag()
 	// aren't using deleted memory.
 	DeleteChits();
 }
-
 
 
 Chit* LumosChitBag::NewMonsterChit( const Vector3F& pos, const char* name, int team )
@@ -62,6 +63,22 @@ Chit* LumosChitBag::NewMonsterChit( const Vector3F& pos, const char* name, int t
 }
 
 
+Chit* LumosChitBag::NewWorkerChit( const Vector3F& pos, int team )
+{
+	Chit* chit = NewChit();
+	static const char* name = "worker";
+
+	chit->Add( new SpatialComponent());
+	chit->Add( new RenderComponent( engine, name ));
+	chit->Add( new PathMoveComponent( worldMap ));
+	chit->Add( new AIComponent( engine, worldMap ));
+	chit->GetSpatialComponent()->SetPosition( pos );
+	AddItem( name, chit, engine, team, 0 );
+	chit->Add( new HealthComponent( engine ));
+	return chit;
+}
+
+
 bool LumosChitBag::GoldFilter( Chit* chit )
 {
 	return ( chit->GetItem() && chit->GetItem()->name == IStringConst::kgold );
@@ -71,9 +88,16 @@ bool LumosChitBag::GoldFilter( Chit* chit )
 bool LumosChitBag::GoldCrystalFilter( Chit* chit )
 {
 	return (    chit->GetItem() && chit->GetItem()->name == IStringConst::kgold
-		     || chit->GetItem() && chit->GetItem()->name == IStringConst::kcrystal_red
 			 || chit->GetItem() && chit->GetItem()->name == IStringConst::kcrystal_green
+		     || chit->GetItem() && chit->GetItem()->name == IStringConst::kcrystal_red
+		     || chit->GetItem() && chit->GetItem()->name == IStringConst::kcrystal_blue
 			 || chit->GetItem() && chit->GetItem()->name == IStringConst::kcrystal_violet );
+}
+
+
+bool LumosChitBag::CoreFilter( Chit* chit )
+{
+	return ( chit->GetItem() && chit->GetItem()->name == IStringConst::kcore );
 }
 
 
@@ -117,8 +141,9 @@ Chit* LumosChitBag::NewCrystalChit( const grinliz::Vector3F& pos, int crystal, b
 
 	const char* name = 0;
 	switch ( crystal ) {
-	case CRYSTAL_RED:		name="crystal_red";		break;
 	case CRYSTAL_GREEN:		name="crystal_green";	break;
+	case CRYSTAL_RED:		name="crystal_red";		break;
+	case CRYSTAL_BLUE:		name="crystal_blue";	break;
 	case CRYSTAL_VIOLET:	name="crystal_violet";	break;
 	}
 
@@ -264,3 +289,25 @@ int LumosChitBag::MapGridUse( int x, int y )
 	return flags;
 }
 
+
+
+CoreScript* LumosChitBag::IsBoundToCore( Chit* chit )
+{
+	if ( chit && chit->GetSpatialComponent() ) {
+		Vector2F pos2 = chit->GetSpatialComponent()->GetPosition2D();
+
+		CChitArray array;
+		QuerySpatialHash( &array, pos2, 0.1f, 0, CoreFilter );
+		if ( !array.Empty() ) {
+			Chit* cc = array[0];
+			ScriptComponent* sc = cc->GetScriptComponent();
+			GLASSERT( sc );
+			IScript* script = sc->Script();
+			GLASSERT( script );
+			CoreScript* coreScript = script->ToCoreScript();
+			GLASSERT( coreScript );
+			return coreScript->GetAttached() == chit ? coreScript : 0;
+		}
+	}
+	return false;
+}

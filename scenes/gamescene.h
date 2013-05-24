@@ -56,6 +56,13 @@ private:
 		TELEPORT,
 		NUM_CAM_MODES
 	};
+	enum {
+		NO_BUILD,
+		CLEAR_ROCK,
+		BUILD_ICE,
+		BUILD_KIOSK,
+		NUM_BUILD_BUTTONS
+	};
 
 	LumosGame*	lumosGame;
 	Sim*		sim;
@@ -71,6 +78,7 @@ private:
 	gamui::PushButton	okay;
 	gamui::PushButton	serialButton[NUM_SERIAL_BUTTONS];
 	gamui::ToggleButton camModeButton[NUM_CAM_MODES];
+	gamui::ToggleButton	buildButton[NUM_BUILD_BUTTONS];
 	gamui::PushButton	allRockButton;
 	gamui::PushButton	newsButton[NUM_NEWS_BUTTONS];
 	gamui::PushButton	clearButton;

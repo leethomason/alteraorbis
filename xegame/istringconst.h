@@ -21,9 +21,11 @@ public:
 	static grinliz::IString kring;
 	static grinliz::IString klargeRing;
 	static grinliz::IString kgold;
-	static grinliz::IString kcrystal_red;
 	static grinliz::IString kcrystal_green;
+	static grinliz::IString kcrystal_red;
+	static grinliz::IString kcrystal_blue;
 	static grinliz::IString kcrystal_violet;
+	static grinliz::IString kcore;
 
 	static int Hardpoint( grinliz::IString str ) {
 		if		( str == ktrigger ) return HARDPOINT_TRIGGER;
@@ -31,7 +33,7 @@ public:
 		else if ( str == khead )	return HARDPOINT_HEAD;
 		else if ( str == kshield )	return HARDPOINT_SHIELD;
 		GLASSERT( 0 );
-		return 0;
+		return 0;\
 	}
 	static grinliz::IString Hardpoint( int i ) {
 		switch ( i ) {

@@ -92,7 +92,7 @@ int GridMoveComponent::DoTick( U32 delta, U32 since )
 		Chit* chit = parentChit;	// gets nulled in Remove()
 		ChitBag* chitBag = parentChit->GetChitBag();
 
-		GLASSERT( chit );
+		GLASSERT( chit && chitBag );
 		chit->Remove( this );
 		chit->Add( new PathMoveComponent( map ));
 		chitBag->DeferredDelete( this );
@@ -124,7 +124,9 @@ int GridMoveComponent::DoTick( U32 delta, U32 since )
 	Vector2F dest = { 0, 0 };
 	int stateIfDestReached = DONE;
 	bool goToDest = true;
+	GLASSERT( worldMap );
 	const WorldInfo& worldInfo = worldMap->GetWorldInfo();
+	GLASSERT( &worldInfo );
 
 	switch ( state ) 
 	{
@@ -145,6 +147,7 @@ int GridMoveComponent::DoTick( U32 delta, U32 since )
 
 	case OFF_BOARD:
 		{
+			GLASSERT( destSectorPort.IsValid() );
 			const SectorData& sd = worldInfo.GetSector( destSectorPort.sector );
 			Rectangle2I portBounds = sd.GetPortLoc( destSectorPort.port );
 			dest = SectorData::PortPos( portBounds, parentChit->ID() );
@@ -154,7 +157,9 @@ int GridMoveComponent::DoTick( U32 delta, U32 since )
 
 	case TRAVELLING:
 		{	
+			GLASSERT( destSectorPort.IsValid() );
 			GridEdge destEdge = worldInfo.GetGridEdge( destSectorPort.sector, destSectorPort.port );
+			GLASSERT( worldInfo.HasGridEdge( destEdge ));
 			Vector2F destPt   = worldInfo.GridEdgeToMapF( destEdge ); 
 			
 			Rectangle2F destRect;
@@ -223,6 +228,7 @@ int GridMoveComponent::DoTick( U32 delta, U32 since )
 			state = stateIfDestReached;
 		}
 	}
+	GLASSERT( sc );
 	sc->SetPosition( pos.x, 0, pos.y );
 	return tick;
 }

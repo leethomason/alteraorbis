@@ -173,7 +173,7 @@ int PlantScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 	lightTap.x = LRintf( light.x / norm );
 	lightTap.y = LRintf( light.z / norm );
 
-	float sunHeight		= h * item->stats.NormalInt();	
+	float sunHeight		= h * item->stats.NormalLeveledTrait( GameStat::INT );	
 	Vector2I tap = pos + lightTap;
 
 	if ( bounds.Contains( tap )) {
@@ -203,7 +203,7 @@ int PlantScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 	sun = Clamp( sun, 0.0f, 1.0f );
 
 	// ---------- Rain ------- //
-	float rootDepth = h * item->stats.NormalDex();
+	float rootDepth = h * item->stats.NormalLeveledTrait( GameStat::DEX );
 
 	for( int j=-1; j<=1; ++j ) {
 		for( int i=-1; i<=1; ++i ) {
@@ -238,12 +238,12 @@ int PlantScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 	float GROW = Lerp( 0.2f, 0.1f, (float)stage / (float)(NUM_STAGE-1) );
 	float DIE  = 0.4f;
 
-	float constitution = item->stats.NormalWill();
+	float toughness = item->stats.Toughness();
 
-	if ( distance < GROW * constitution ) {
+	if ( distance < GROW * toughness ) {
 		// Heal.
 		ChitMsg healMsg( ChitMsg::CHIT_HEAL );
-		healMsg.dataF = HP_PER_SECOND*seconds*item->stats.NormalStr();
+		healMsg.dataF = HP_PER_SECOND*seconds*item->stats.NormalLeveledTrait( GameStat::STR );
 		ctx.chit->SendMessage( healMsg );
 
 		sporeTimer += since;
@@ -276,7 +276,7 @@ int PlantScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 			sim->CreatePlant( pos.x+dx, pos.y+dy, -1 );
 		}
 	}
-	else if ( distance > DIE * constitution ) {
+	else if ( distance > DIE * toughness ) {
 		DamageDesc dd( HP_PER_SECOND * seconds, 0 );
 
 		ChitDamageInfo info( dd );

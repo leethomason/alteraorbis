@@ -136,6 +136,7 @@ void GameItem::Serialize( XStream* xs )
 		APPEND_FLAG( flags, f, AI_WANDER_CIRCLE );
 		APPEND_FLAG( flags, f, AI_EAT_PLANTS );
 		APPEND_FLAG( flags, f, AI_SECTOR_HERD );
+		APPEND_FLAG( flags, f, CLICK_THROUGH );
 
 		xs->Saving()->Set( "flags", f.c_str() );
 	}
@@ -159,6 +160,7 @@ void GameItem::Serialize( XStream* xs )
 			READ_FLAG( flags, f, AI_WANDER_CIRCLE );
 			READ_FLAG( flags, f, AI_EAT_PLANTS );
 			READ_FLAG( flags, f, AI_SECTOR_HERD );
+			READ_FLAG( flags, f, CLICK_THROUGH );
 		}
 	}
 
@@ -210,6 +212,7 @@ void GameItem::Save( tinyxml2::XMLPrinter* printer )
 	APPEND_FLAG( flags, f, AI_WANDER_CIRCLE );
 	APPEND_FLAG( flags, f, AI_EAT_PLANTS );
 	APPEND_FLAG( flags, f, AI_SECTOR_HERD );
+	APPEND_FLAG( flags, f, CLICK_THROUGH );
 	printer->PushAttribute( "flags", f.c_str() );
 	
 	PUSH_ATTRIBUTE( printer, mass );
@@ -272,6 +275,7 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 		READ_FLAG( flags, f, AI_WANDER_CIRCLE );
 		READ_FLAG( flags, f, AI_EAT_PLANTS );
 		READ_FLAG( flags, f, AI_SECTOR_HERD );
+		READ_FLAG( flags, f, CLICK_THROUGH );
 	}
 	for( const tinyxml2::XMLAttribute* attr = ele->FirstAttribute();
 		 attr;
@@ -315,7 +319,7 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 	}
 	stats.Load( ele );
 
-	hp = this->TotalHP();
+	hp = this->TotalHPF();
 	ele->QueryFloatAttribute( "hp", &hp );
 	GLASSERT( hp <= TotalHP() );
 
@@ -397,10 +401,10 @@ int GameItem::DoTick( U32 delta, U32 sinec )
 	accruedShock = Max( 0.0f, accruedShock );
 
 	hp += Delta( delta, hpRegen );
-	hp = Clamp( hp, 0.0f, TotalHP() );
+	hp = Clamp( hp, 0.0f, TotalHPF() );
 
 	if ( flags & INDESTRUCTABLE ) {
-		hp = TotalHP();
+		hp = TotalHPF();
 	}
 
 	tick = tick || (savedHP != hp);

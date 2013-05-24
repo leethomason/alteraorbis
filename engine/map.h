@@ -56,7 +56,7 @@ public:
 		return r;
 	}
 
-	void DrawOverlay();
+	void DrawOverlay( int layer );
 	virtual void Submit( GPUState* shader, bool emissiveOnly )	{}
 	virtual void Draw3D( const grinliz::Color3F& colorMult, GPUState::StencilMode )	{}
 
@@ -73,7 +73,8 @@ public:
 	virtual void BeginTexture( const void* textureHandle );
 	virtual void Render( const void* renderState, const void* textureHandle, int nIndex, const uint16_t* index, int nVertex, const gamui::Gamui::Vertex* vertex );
 
-	gamui::Gamui overlay;
+	gamui::Gamui overlay0;	// overlay map, under models
+	gamui::Gamui overlay1;	// overlay map, over models
 
 	bool UsingSectors() const				{ return usingSectors; }
 

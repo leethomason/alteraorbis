@@ -117,20 +117,6 @@ const SectorData& WorldInfo::GetSectorInfo( float fx, float fy ) const
 {
 	Vector2I v = { (int)fx / SECTOR_SIZE, (int)fy / SECTOR_SIZE };
 	const SectorData& sd = GetSector( v );
-
-	/*
-	int axis = 0;
-	if ( port ) {
-		int dx = (int)fx - (v.x*SECTOR_SIZE + SECTOR_SIZE/2);
-		int dy = (int)fy - (v.y*SECTOR_SIZE + SECTOR_SIZE/2);
-		if ( abs(dx) > abs(dy) ) {
-			*port = ( dx > 0 ) ? SectorData::POS_X : SectorData::NEG_X;
-		}
-		else {
-			*port = ( dy > 0 ) ? SectorData::POS_Y : SectorData::NEG_Y;
-		}
-	}
-	*/
 	return sd;
 }
 

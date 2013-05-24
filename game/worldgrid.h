@@ -73,7 +73,6 @@ public:
 		WATER,
 		GRID,
 		PORT,
-		CORE,
 		LAND,
 		NUM_LAYERS
 	};
@@ -81,7 +80,6 @@ public:
 		int layer = WATER;
 		if ( isGrid ) layer = GRID;
 		else if ( isPort ) layer = PORT;
-		else if ( isCore ) layer = CORE;
 		else if ( isLand ) layer = LAND;
 		return layer;
 	}

@@ -30,8 +30,9 @@ void Wallet::Serialize( XStream* xs )
 {
 	XarcOpen( xs, "Wallet" );
 	XARC_SER( xs, gold );
-	XARC_SER( xs, crystal[CRYSTAL_RED] );
 	XARC_SER( xs, crystal[CRYSTAL_GREEN] );
+	XARC_SER( xs, crystal[CRYSTAL_RED] );
+	XARC_SER( xs, crystal[CRYSTAL_BLUE] );
 	XARC_SER( xs, crystal[CRYSTAL_VIOLET] );
 	XarcClose( xs );
 }
@@ -45,9 +46,10 @@ ReserveBank::ReserveBank()
 	// All the gold in the world.
 	bank.gold = ALL_GOLD;
 
-	bank.crystal[CRYSTAL_RED]		= TYPICAL_DOMAINS * 10;
-	bank.crystal[CRYSTAL_GREEN]		= TYPICAL_DOMAINS * 2;
-	bank.crystal[CRYSTAL_VIOLET]		= TYPICAL_DOMAINS / 2;
+	bank.crystal[CRYSTAL_GREEN]		= TYPICAL_DOMAINS * 10;
+	bank.crystal[CRYSTAL_RED]		= TYPICAL_DOMAINS * 4;
+	bank.crystal[CRYSTAL_BLUE]		= TYPICAL_DOMAINS * 2;
+	bank.crystal[CRYSTAL_VIOLET]	= TYPICAL_DOMAINS / 2;
 }
 
 
@@ -95,15 +97,12 @@ int ReserveBank::WithdrawVolcanoGold()
 
 int ReserveBank::WithdrawRandomCrystal()
 {
-	int r = random.Rand( 100 );
-	int c = NO_CRYSTAL;
-	if ( r == 0 )		c = CRYSTAL_VIOLET;
-	else if ( r < 8 )	c = CRYSTAL_GREEN;
-	else				c = CRYSTAL_RED;
+	static const float score[NUM_CRYSTAL_TYPES] = { 512,64,8,1 };
+	int type = random.Select( score, NUM_CRYSTAL_TYPES );
 
-	if ( c != NO_CRYSTAL && bank.crystal[c] ) {
-		bank.crystal[c] -= 1;
-		return c;
+	if ( bank.crystal[type] ) {
+		bank.crystal[type] -= 1;
+		return type;
 	}
 	return NO_CRYSTAL;
 }

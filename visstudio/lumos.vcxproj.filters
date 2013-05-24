@@ -286,6 +286,9 @@
     <ClCompile Include="..\game\reservebank.cpp">
       <Filter>Source Files\game</Filter>
     </ClCompile>
+    <ClCompile Include="..\game\workqueue.cpp">
+      <Filter>Source Files\game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\camera.h">
@@ -571,6 +574,12 @@
       <Filter>Source Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\game\sectorport.h">
+      <Filter>Source Files\game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\game\layout.h">
+      <Filter>Source Files\game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\game\workqueue.h">
       <Filter>Source Files\game</Filter>
     </ClInclude>
   </ItemGroup>

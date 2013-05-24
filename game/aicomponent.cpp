@@ -26,6 +26,7 @@
 #include "../script/battlemechanics.h"
 #include "../script/plantscript.h"
 #include "../script/worldgen.h"
+#include "../script/corescript.h"
 
 #include "../engine/engine.h"
 #include "../engine/particle.h"
@@ -465,7 +466,7 @@ int AIComponent::DoStand( const ComponentSet& thisComp, U32 since )
 {
 	const GameItem* item	= parentChit->GetItem();
 	int itemFlags			= item ? item->flags : 0;
-	float totalHP			= item ? item->TotalHP() : 0;
+	float totalHP			= item ? item->TotalHPF() : 0;
 	int tick = 400;
 
 	// Plant eater
@@ -1227,6 +1228,23 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		else {
 			randomWander = false;
 		}
+		// FIXME: when should an AI bind to core? This just does
+		// it at the end of a move, irrespective of the current
+		// action or mode.
+		if ( chit->GetItem() && ( chit->GetItem()->flags & GameItem::AI_BINDS_TO_CORE )) {
+			Vector2F center = thisComp.spatial->GetPosition2D();
+			center.x = floorf( center.x ) + 0.5f;
+			center.y = floorf( center.y ) + 0.5f;
+			CChitArray arr;
+			GetChitBag()->QuerySpatialHash( &arr, center, 0.1f, parentChit, LumosChitBag::CoreFilter );
+			if ( arr.Size() ) {
+				ScriptComponent* sc = arr[0]->GetScriptComponent();
+				GLASSERT( sc && sc->Script() );
+				CoreScript* coreScript = sc->Script()->ToCoreScript();
+				GLASSERT( coreScript );
+				coreScript->AttachToCore( parentChit );
+			}
+		}
 		break;
 
 	case ChitMsg::PATHMOVE_DESTINATION_BLOCKED:
@@ -1266,10 +1284,12 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 				
 				// Read our local get-on-the-grid info
 				SectorPort local = map->NearestPort( parentChit->GetSpatialComponent()->GetPosition2D() );
-				const SectorData& localSD = map->GetSector( local.sector );
-
-				// Local path to remote dst
-				this->Move( SectorData::PortPos( localSD.GetPortLoc(local.port), parentChit->ID() ), sectorPort, true );
+				// Completely possible this chit can't actually path anywhere.
+				if ( local.IsValid() ) {
+					const SectorData& localSD = map->GetSector( local.sector );
+					// Local path to remote dst
+					this->Move( SectorData::PortPos( localSD.GetPortLoc(local.port), parentChit->ID() ), sectorPort, true );
+				}
 			}
 		}
 		break;

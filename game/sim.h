@@ -36,6 +36,7 @@ public:
 	Texture*		GetMiniMapTexture();
 	Chit*			GetPlayerChit();
 
+
 	// use with caution: not a clear separation between sim and game
 	Engine*			GetEngine()		{ return engine; }
 	LumosChitBag*	GetChitBag()	{ return chitBag; }

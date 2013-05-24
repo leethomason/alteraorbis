@@ -50,7 +50,8 @@ Map::Map( int w, int h )
 	GLOUTPUT(( "Map created. %dK\n", sizeof( *this )/1024 ));
 
 	gamui::RenderAtom nullAtom;
-	overlay.Init( this, nullAtom, nullAtom, 0 );
+	overlay0.Init( this, nullAtom, nullAtom, 0 );
+	overlay1.Init( this, nullAtom, nullAtom, 0 );
 }
 
 
@@ -59,27 +60,14 @@ Map::~Map()
 }
 
 
-void Map::DrawOverlay()
+void Map::DrawOverlay( int id )
 {
-	overlay.Render();
+	if ( id == 0 ) 
+		overlay0.Render();
+	else
+		overlay1.Render();
 }
 
-
-/*
-void Map::Save( XMLPrinter* printer )
-{
-	printer->OpenElement( "Map" );
-	printer->PushAttribute( "sizeX", width );
-	printer->PushAttribute( "sizeY", height );
-	printer->CloseElement();
-}
-
-
-void Map::Load( const XMLElement* mapElement )
-{
-	GLASSERT( mapElement );
-}
-*/
 
 void Map::BeginRender()
 {

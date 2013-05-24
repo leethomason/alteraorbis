@@ -101,7 +101,7 @@ void ItemComponent::AddBattleXP( bool isMelee, int killshotLevel )
 	if ( mainItem.stats.Level() > level ) {
 		// Level up!
 		// FIXME: show an icon
-		mainItem.hp = mainItem.TotalHP();
+		mainItem.hp = mainItem.TotalHPF();
 	}
 
 	GameItem* weapon = 0;
@@ -215,8 +215,8 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		GLASSERT( heal >= 0 );
 
 		mainItem.hp += heal;
-		if ( mainItem.hp > mainItem.TotalHP() ) {
-			mainItem.hp = mainItem.TotalHP();
+		if ( mainItem.hp > mainItem.TotalHPF() ) {
+			mainItem.hp = mainItem.TotalHPF();
 		}
 
 		if ( parentChit->GetSpatialComponent() ) {

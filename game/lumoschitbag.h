@@ -8,6 +8,7 @@
 
 class WorldMap;
 struct Wallet;
+class CoreScript;
 
 class LumosChitBag : public ChitBag,
 					 public IMapGridUse
@@ -23,6 +24,7 @@ public:
 	Chit* NewMonsterChit( const grinliz::Vector3F& pos, const char* name, int team );
 	Chit* NewGoldChit( const grinliz::Vector3F& pos, int amount );
 	Chit* NewCrystalChit( const grinliz::Vector3F& pos, int crystal, bool fuzzPos );
+	Chit* NewWorkerChit( const grinliz::Vector3F& pos, int team );
 
 	// Creates enough chits to empty the wallet.
 	void NewWalletChits( const grinliz::Vector3F& pos, const Wallet& wallet );
@@ -32,11 +34,13 @@ public:
 	virtual void HandleBolt( const Bolt& bolt, Model* m, const grinliz::Vector3F& at );
 
 	virtual int MapGridUse( int x, int y );
+	CoreScript* IsBoundToCore( Chit* );
 
 	Census census;
 
 	static bool GoldFilter( Chit* chit );			// Is this gold?
 	static bool GoldCrystalFilter( Chit* chit );	// Is this gold or crystal? (wallet items)
+	static bool CoreFilter( Chit* chit );
 	static bool HasMoveComponentFilter( Chit* chit );
 
 private:

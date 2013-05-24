@@ -5,7 +5,7 @@ kids 4
 OBJECT poly
 name "crystal_blue"
 loc 2.99777 0.234723 0
-texture "palette.png"
+texture "palette_50.png"
 crease 45.000000
 numvert 20
 0.144338 0.144338 0.144338
@@ -129,7 +129,7 @@ kids 0
 OBJECT poly
 name "crystal_violet"
 loc 1.99223 0.241854 0
-texture "palette.png"
+texture "palette_50.png"
 crease 45.000000
 numvert 20
 -0.233543 0 -0.0892055
@@ -253,7 +253,7 @@ kids 0
 OBJECT poly
 name "crystal_green"
 loc 1.00449 0.241854 0
-texture "palette.png"
+texture "palette_50.png"
 crease 45.000000
 numvert 20
 0.144338 0.144338 0.144338
@@ -377,7 +377,7 @@ kids 0
 OBJECT poly
 name "crystal_red"
 loc -0.0167415 0.233483 0
-texture "palette.png"
+texture "palette_50.png"
 crease 45.000000
 numvert 20
 -0.233543 0 -0.0892055
