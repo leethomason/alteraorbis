@@ -261,8 +261,9 @@ public:
 		AI_EAT_PLANTS		= (1<<17),		// eats plants to regain health
 		AI_SECTOR_HERD		= (1<<18),		// will herd across sectors
 		AI_BINDS_TO_CORE	= (1<<19),
+		AI_DOES_WORK		= (1<<20),
 
-		CLICK_THROUGH		= (1<<20),		// model is created with flags to ignore world clicking
+		CLICK_THROUGH		= (1<<21),		// model is created with flags to ignore world clicking
 	};
 
 	// ------ description ------

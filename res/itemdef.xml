@@ -8,9 +8,15 @@
             flags="MELEE_WEAPON INTRINSIC"
             hardpoint="trigger"
             meleeDamageMult="1">
-      </item>>
+      </item>
     </intrinsics>
-  </item>>
+  </item>
+
+  <item name="worker"
+        resource="worker"
+        flags="AI_DOES_WORK"
+        mass="30" >
+  </item>
 
   <item name="gold"
         resource="gold"

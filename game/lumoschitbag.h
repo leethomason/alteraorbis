@@ -24,6 +24,7 @@ public:
 	Chit* NewMonsterChit( const grinliz::Vector3F& pos, const char* name, int team );
 	Chit* NewGoldChit( const grinliz::Vector3F& pos, int amount );
 	Chit* NewCrystalChit( const grinliz::Vector3F& pos, int crystal, bool fuzzPos );
+	Chit* NewWorkerChit( const grinliz::Vector3F& pos, int team );
 
 	// Creates enough chits to empty the wallet.
 	void NewWalletChits( const grinliz::Vector3F& pos, const Wallet& wallet );

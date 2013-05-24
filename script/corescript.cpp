@@ -97,6 +97,15 @@ bool CoreScript::AttachToCore( Chit* chit )
 		chit->GetChitBag()->DeferredDelete( c );
 		scriptContext->chit->SetTickNeeded();
 
+		// FIXME: check for existing workers
+		// FIXME: connect to energy system
+		int team = 0;
+		if ( chit && chit->GetItem() ) {
+			team = chit->GetItem()->primaryTeam;
+		}
+		scriptContext->chit->GetLumosChitBag()->NewWorkerChit( pos, team );
+		scriptContext->chit->GetLumosChitBag()->NewWorkerChit( pos, team );
+
 		return true;
 	}
 	return false;

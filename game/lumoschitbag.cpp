@@ -42,7 +42,6 @@ LumosChitBag::~LumosChitBag()
 }
 
 
-
 Chit* LumosChitBag::NewMonsterChit( const Vector3F& pos, const char* name, int team )
 {
 	Chit* chit = NewChit();
@@ -59,6 +58,22 @@ Chit* LumosChitBag::NewMonsterChit( const Vector3F& pos, const char* name, int t
 	// Assume all AIs pick up gold, for now.
 	chit->GetItemComponent()->SetPickup( ItemComponent::GOLD_PICKUP );
 
+	chit->Add( new HealthComponent( engine ));
+	return chit;
+}
+
+
+Chit* LumosChitBag::NewWorkerChit( const Vector3F& pos, int team )
+{
+	Chit* chit = NewChit();
+	static const char* name = "worker";
+
+	chit->Add( new SpatialComponent());
+	chit->Add( new RenderComponent( engine, name ));
+	chit->Add( new PathMoveComponent( worldMap ));
+	chit->Add( new AIComponent( engine, worldMap ));
+	chit->GetSpatialComponent()->SetPosition( pos );
+	AddItem( name, chit, engine, team, 0 );
 	chit->Add( new HealthComponent( engine ));
 	return chit;
 }
