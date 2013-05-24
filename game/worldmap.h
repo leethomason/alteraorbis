@@ -73,6 +73,8 @@ public:
 	WorldMap( int width, int height );
 	~WorldMap();
 
+	virtual WorldMap* ToWorldMap() { return this; }
+
 	// Call to turn on rock rendering and make map aware of "InUse"
 	void AttachEngine( Engine* engine, IMapGridUse* iMapInUse  );
 

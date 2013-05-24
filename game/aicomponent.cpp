@@ -335,8 +335,8 @@ void AIComponent::DoMove( const ComponentSet& thisComp )
 					}
 				if ( utilityRunAndGun > utilityReload ) {
 					GLASSERT( targetRunAndGun );
-					Vector3F leading = battleMechanics.ComputeLeadingShot( thisComp.chit, targetRunAndGun, 0 );
-					battleMechanics.Shoot(	GetChitBag(), 
+					Vector3F leading = BattleMechanics::ComputeLeadingShot( thisComp.chit, targetRunAndGun, 0 );
+					BattleMechanics::Shoot(	GetChitBag(), 
 											thisComp.chit, 
 											leading, 
 											targetRunAndGun->GetMoveComponent() ? targetRunAndGun->GetMoveComponent()->IsMoving() : false,
@@ -370,7 +370,7 @@ void AIComponent::DoShoot( const ComponentSet& thisComp )
 			return;
 		}
 
-		leading = battleMechanics.ComputeLeadingShot( thisComp.chit, target.chit, 0 );
+		leading = BattleMechanics::ComputeLeadingShot( thisComp.chit, target.chit, 0 );
 		isMoving = target.chit->GetMoveComponent() ? target.chit->GetMoveComponent()->IsMoving() : false;
 	}
 	else {
@@ -405,7 +405,7 @@ void AIComponent::DoShoot( const ComponentSet& thisComp )
 		if ( item->HasRound() ) {
 			// Has round. May be in cooldown.
 			if ( item->CanUse() ) {
-				battleMechanics.Shoot(	GetChitBag(), 
+				BattleMechanics::Shoot(	GetChitBag(), 
 										parentChit, 
 										leading,
 										isMoving,
@@ -426,14 +426,20 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 	IMeleeWeaponItem* weapon = thisComp.itemComponent->GetMeleeWeapon();
 	ComponentSet target( GetChitBag()->GetChit( targetDesc.id ), Chit::SPATIAL_BIT | Chit::ITEM_BIT | ComponentSet::IS_ALIVE );
 
-	if ( !weapon || !target.okay ) {
+	bool targetOkay = (targetDesc.id && target.okay) || (!targetDesc.id && !targetDesc.mapPos.IsZero());
+
+	if ( !weapon || !targetOkay ) {
 		currentAction = NO_ACTION;
 		return;
 	}
 	GameItem* item = weapon->GetItem();
 
 	// Are we close enough to hit? Then swing. Else move to target.
-	if ( battleMechanics.InMeleeZone( engine, parentChit, target.chit ) ) {
+	if ( targetDesc.id && BattleMechanics::InMeleeZone( engine, parentChit, target.chit )) {
+		GLASSERT( parentChit->GetRenderComponent()->AnimationReady() );
+		parentChit->GetRenderComponent()->PlayAnimation( ANIM_MELEE );
+	}
+	else if ( !targetDesc.id && BattleMechanics::InMeleeZone( engine, parentChit, targetDesc.mapPos )) {
 		GLASSERT( parentChit->GetRenderComponent()->AnimationReady() );
 		parentChit->GetRenderComponent()->PlayAnimation( ANIM_MELEE );
 	}
@@ -618,16 +624,18 @@ void AIComponent::ThinkRockBreak( const ComponentSet& thisComp )
 	const Vector3F& pos = thisComp.spatial->GetPosition();
 	Vector2F pos2 = { pos.x, pos.z };
 	Vector3F rockTarget = targetDesc.MapTarget();
+	Vector2I rock2i = { (int)rockTarget.x, (int)rockTarget.z };
 	
-	// FIXME: code limitation. Only bolts can damage rock.
-	// This is only because the object has 4 sides, and positioning for
-	// melee attack is tricky. And detecting melee hits is tricky. But
-	// do-able if it becomes an issue.
-
-	// The current ranged weapon.
+	// The current weapons.
 	IRangedWeaponItem* rangedWeapon = thisComp.itemComponent->GetRangedWeapon( 0 );
+	IMeleeWeaponItem*  meleeWeapon  = thisComp.itemComponent->GetMeleeWeapon();
 
-	if ( rangedWeapon && LineOfSight( thisComp, targetDesc.mapPos ) ) {
+	// Always use melee first because bolts tend to "shoot through" in close quarters.
+	if ( meleeWeapon && BattleMechanics::InMeleeZone( engine, thisComp.chit, rock2i )) {
+		currentAction = MELEE;
+		return;
+	}
+	else if ( rangedWeapon && LineOfSight( thisComp, targetDesc.mapPos ) ) {
 		currentAction = SHOOT;
 		return;
 	}

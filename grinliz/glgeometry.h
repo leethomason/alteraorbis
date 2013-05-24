@@ -379,6 +379,23 @@ enum
 };
 
 
+/*	The shortest distance between a point and an AABB. 
+	Returns 0 if on or inside.
+*/
+float PointAABBDistance( const grinliz::Vector3F& point, const grinliz::Rectangle3F& aabb, grinliz::Vector3F* nearest );
+
+inline float PointAABBDistance( const grinliz::Vector2F& point, const grinliz::Rectangle2F& aabb, grinliz::Vector2F* nearest ) {
+	grinliz::Vector3F point3 = { point.x, point.y, 0 };
+	grinliz::Rectangle3F aabb3;
+	aabb3.min.Set( aabb.min.x, aabb.min.y, 0 );
+	aabb3.max.Set( aabb.max.x, aabb.max.y, 0 );
+	Vector3F near = { 0, 0, 0 };
+	float len = PointAABBDistance( point3, aabb3, &near );
+	if ( nearest ) 
+		nearest->Set( near.x, near.y );
+	return len;
+}
+
 /** @page intersection Intersection Functions
 
 	Intersection functions use the following conventions:

@@ -19,6 +19,7 @@
 #include "../game/gameitem.h"
 #include "../game/gamelimits.h"
 #include "../game/healthcomponent.h"
+#include "../game/worldmap.h"
 
 #include "../xegame/chitbag.h"
 #include "../xegame/chit.h"
@@ -40,6 +41,10 @@ using namespace grinliz;
 static const float SHOOTER_MOVE_MULT = 0.5f;
 static const float TARGET_MOVE_MULT  = 0.8f;
 static const float BASE_ACCURACY     = 0.03f;
+static const float MELEE_DOT_PRODUCT = 0.7f;
+
+
+/*static*/ Random BattleMechanics::random;
 
 
 /*static*/ int BattleMechanics::PrimaryTeam( Chit* src )
@@ -55,10 +60,16 @@ static const float BASE_ACCURACY     = 0.03f;
 /*static*/ float BattleMechanics::MeleeRange( Chit* src, Chit* target )
 {
 	RenderComponent* srcRender = src->GetRenderComponent();
-	RenderComponent* targetRender = target->GetRenderComponent();
+	RenderComponent* targetRender = target ? target->GetRenderComponent() : 0;
 
-	if ( srcRender && targetRender ) {
-		float meleeRange = srcRender->RadiusOfBase()*1.5f + targetRender->RadiusOfBase();
+	if ( srcRender  ) {
+		float meleeRange = srcRender->RadiusOfBase()*1.5f;
+		if ( targetRender ) {
+			meleeRange += targetRender->RadiusOfBase();
+		}
+		else {
+			meleeRange *= 1.2f;
+		}
 		return meleeRange;
 	}
 	return 0;
@@ -91,6 +102,34 @@ bool BattleMechanics::InMeleeZone(	Engine* engine,
 }
 
 
+bool BattleMechanics::InMeleeZone(	Engine* engine,
+									Chit* src,
+									const Vector2I& mapPos )
+{
+	ComponentSet srcComp( src, Chit::SPATIAL_BIT | Chit::RENDER_BIT | ComponentSet::IS_ALIVE );
+
+	if ( !srcComp.okay  )
+		return false;
+
+	// Check range up front and early out.
+	const float meleeRange = MeleeRange( src, 0 );
+	Rectangle2F aabb;
+	aabb.Set( (float)mapPos.x, (float)mapPos.y, (float)(mapPos.x+1), (float)(mapPos.y+1) );
+	Vector2F nearest = { 0, 0 };
+	const float range = PointAABBDistance( srcComp.spatial->GetPosition2D(), aabb, &nearest );
+	if ( range > meleeRange )
+		return false;
+
+	int test = IntersectRayCircle( aabb.Center(),
+								   0.72f,
+								   srcComp.spatial->GetPosition2D(),
+								   srcComp.spatial->GetHeading2D() );
+
+	bool intersect = ( test == INTERSECT || test == INSIDE );
+	return intersect;
+}
+
+
 void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* weapon )
 {
 	GLASSERT( engine && src && weapon );
@@ -110,8 +149,20 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* 
 	Rectangle2F b;
 	b.min = srcPos; b.max = srcPos;
 	b.Outset( MELEE_RANGE + MAX_BASE_RADIUS );
+
+	CChitArray hashQuery;
 	chitBag->QuerySpatialHash( &hashQuery, b, src, 0 );
 
+	DamageDesc dd;
+	CalcMeleeDamage( src, weapon, &dd );
+	ChitDamageInfo info( dd );
+	info.originID = src->ID();
+	info.awardXP  = true;
+	info.isMelee  = true;
+	info.isExplosion = false;
+	info.originOfImpact = src->GetSpatialComponent()->GetPosition();
+
+	// Check for chit impacts.
 	for( int i=0; i<hashQuery.Size(); ++i ) {
 		Chit* target = hashQuery[i];
 
@@ -121,28 +172,36 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* 
 		}
 
 		if ( InMeleeZone( engine, src, target )) {
-			// FIXME: account for armor, shields, etc. etc.
-			// FIXME: account for knockback (physics move), catching fire, etc.
 			HealthComponent* targetHealth = target->GetHealthComponent();
 			ComponentSet targetComp( target, Chit::ITEM_BIT | ComponentSet::IS_ALIVE );
 
 			if ( targetHealth && targetComp.okay ) {
 				target->SetTickNeeded();	// Fire up tick to handle health effects over time
-				DamageDesc dd;
-				CalcMeleeDamage( src, weapon, &dd );
 
 				GLLOG(( "Chit %3d '%s' using '%s' hit %3d '%s'\n", 
 						src->ID(), src->GetItemComponent()->GetItem()->Name(),
 						weapon->GetItem()->Name(),
 						target->ID(), targetComp.item->Name() ));
 
-				ChitDamageInfo info( dd );
-				info.originID = src->ID();
-				info.awardXP  = true;
-				info.isMelee  = true;
-				info.isExplosion = false;
-				info.originOfImpact = src->GetSpatialComponent()->GetPosition();
 				target->SendMessage( ChitMsg( ChitMsg::CHIT_DAMAGE, 0, &info ), 0 );
+			}
+		}
+	}
+
+	// Check for block impacts.
+	Rectangle2I bi;
+	bi.Set( (int)b.min.x, (int)b.min.y, (int)ceilf(b.max.x), (int)ceilf(b.max.y) );
+	WorldMap* wm = engine->GetMap()->ToWorldMap();
+	GLASSERT( wm );
+
+	for( int y=bi.min.y; y<=bi.max.y; ++y ) {
+		for( int x=bi.min.x; x<=bi.max.x; ++x ) {
+			Vector2I mapPos = { x, y };
+			if ( InMeleeZone( engine, src, mapPos )) {
+				Model* m = wm->GetVoxel( x, y );
+				if ( m ) {
+					wm->VoxelHit( m, dd );
+				}
 			}
 		}
 	}

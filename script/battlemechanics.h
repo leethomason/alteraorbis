@@ -36,23 +36,29 @@ public:
 	void MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* weapon );
 
 	// Returns the melee range of 2 chits, or 0 if none.
+	// 'target' can be null if targeting a point or block.
 	static float MeleeRange( Chit* src, Chit* target );
 
 	// Returns true the melee attack can/does succeed. Note that any animation
 	// is pure decoration, melee success is just based on relative positions.
 	// This is simple, but could be improved.
-	bool InMeleeZone( Engine* engine,
-					  Chit* src,
-					  Chit* target );
+	static bool InMeleeZone(	Engine* engine,
+								Chit* src,
+								Chit* target );
 
-	void CalcMeleeDamage( Chit* src, IMeleeWeaponItem* weapon, DamageDesc* );
+	// Returns true if the melee attack - against a block - can/does succeed.
+	static bool InMeleeZone(	Engine* engine,
+								Chit* src,
+								const grinliz::Vector2I& mapPos );
+
+	static void CalcMeleeDamage( Chit* src, IMeleeWeaponItem* weapon, DamageDesc* );
 	
 	// Shooting ------------------- //
-	void Shoot( ChitBag* bag, 
-				Chit* src, 
-				const grinliz::Vector3F& target,
-				bool targetMoving,
-				IRangedWeaponItem* weapon );
+	static void Shoot(	ChitBag* bag, 
+						Chit* src, 
+						const grinliz::Vector3F& target,
+						bool targetMoving,
+						IRangedWeaponItem* weapon );
 
 
 	// Radius at 1 unit distance. The shot is randomly placed within the sphere
@@ -82,15 +88,14 @@ public:
 	static int PrimaryTeam( Chit* src );
 
 private:
-	grinliz::Vector3F FuzzyAim( const grinliz::Vector3F& origin, const grinliz::Vector3F& target, float radiusAt1 );
+	static grinliz::Vector3F FuzzyAim( const grinliz::Vector3F& origin, const grinliz::Vector3F& target, float radiusAt1 );
 
 	static grinliz::Vector3F ComputeLeadingShot(	const grinliz::Vector3F& origin,
 													const grinliz::Vector3F& target,
 													const grinliz::Vector3F& velocity,
 													float speed );
 
-	grinliz::CDynArray<Chit*> hashQuery;
-	grinliz::Random random;
+	static grinliz::Random random;
 };
 
 

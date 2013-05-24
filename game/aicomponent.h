@@ -168,7 +168,6 @@ private:
 
 	grinliz::CArray<int, MAX_TRACK> friendList;
 	grinliz::CArray<int, MAX_TRACK> enemyList;
-	BattleMechanics battleMechanics;
 };
 
 

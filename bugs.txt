@@ -16,7 +16,9 @@ x integers for discrete values (hp, gold)
 - need to "ding" on level up
 - add rez-in animation
 - show rock damage
-- support melee attack on rocks
+x support melee attack on rocks
+- Move after shooting target, continue to hit after destroying rock. need more awareness
+  of the overall AI state.
 
 - game
 	- Gold
@@ -29,10 +31,10 @@ x integers for discrete values (hp, gold)
 		x critters level up
 		x remove rock ray
 		x fix crystal types
-		- bind to core
-		- remove rock
-		- add ice
-		- build kiosk
+		x bind to core
+		- workers remove rock
+		- workers add ice
+		- workers build kiosk
 		- visitors warp in, travel warp out
 		- visitors visit interesting buildings
 		- visitors create energy, buildings consume energy

@@ -881,6 +881,30 @@ void Quaternion::Decompose( const Matrix4& tr, Vector3F* pos,  Quaternion* rot )
 }
 
 
+float grinliz::PointAABBDistance( const grinliz::Vector3F& point, const grinliz::Rectangle3F& aabb, Vector3F* nearest )
+{
+	if ( aabb.Contains( point )) {
+		if ( nearest )
+			*nearest = point;
+		return 0;
+	}
+
+	Vector3F near;
+	for( int i=0; i<3; ++i ) {
+		if ( point.X(i) < aabb.min.X(i) )
+			near.X(i) = aabb.min.X(i);
+		else if ( point.X(i) > aabb.max.X(i) )
+			near.X(i) = aabb.max.X(i);
+		else
+			near.X(i) = point.X(i);
+	}
+	float len = (point-near).Length();
+	if ( nearest ) 
+		*nearest = near;
+	return len;
+}
+
+
 int grinliz::ComparePlaneAABB( const Plane& plane, const Rectangle3F& aabb )
 {
 	// Only need to check the most positive and most negative point,

@@ -27,6 +27,8 @@
 #include "enginelimits.h"
 #include "gpustatemanager.h"
 
+class WorldMap;
+
 // Allows the Map to call out for the state of locations.
 // The tricky bit is to remember to call the pather->Reset()
 // if the isBlocked changes.
@@ -55,6 +57,7 @@ public:
 		r.Set( 0, 0, 0, (float)width, MAP_HEIGHT, (float)height );
 		return r;
 	}
+	virtual WorldMap* ToWorldMap() { return 0; }
 
 	void DrawOverlay( int layer );
 	virtual void Submit( GPUState* shader, bool emissiveOnly )	{}
