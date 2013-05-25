@@ -31,7 +31,7 @@ public:
 	};
 	int							x, y;		// grid position (not sector position)
 	int							ports;		// if attached to the grid, has ports. 
-	grinliz::Vector2I			core;
+	grinliz::Vector2I			core;		// core location, in map coordinates
 	int							area;
 	micropather::MicroPather*	pather;
 	grinliz::IString			name;

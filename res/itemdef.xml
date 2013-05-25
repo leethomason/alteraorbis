@@ -12,10 +12,24 @@
     </intrinsics>
   </item>
 
+  <!-- FIXME: need stats to make the accuracy of this very low,
+       else it's a pretty nasty weapons platform.
+  -->
   <item name="worker"
         resource="worker"
         flags="AI_WANDER_HERD AI_DOES_WORK"
-        mass="30" >
+        mass="20" >
+    <intrinsics>
+      <item name="claw"
+            flags="MELEE_WEAPON RANGED_WEAPON INTRINSIC"
+            hardpoint="trigger"
+            meleeDamageMult="10"
+            cooldown="500"
+            reload="1000"
+            clipCap="10"
+            speed ="1.5"
+            rangedDamage="10"/>
+    </intrinsics>
   </item>
 
   <item name="gold"

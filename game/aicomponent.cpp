@@ -824,14 +824,15 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 	int itemFlags			= item ? item->flags : 0;
 	int wanderFlags			= itemFlags & GameItem::AI_WANDER_MASK;
 	int actionToTake		= WANDER;
-	Vector2F pos = thisComp.spatial->GetPosition2D();
+	Vector2F pos2 = thisComp.spatial->GetPosition2D();
+	Vector2I pos2i = { (int)pos2.x, (int)pos2.y };
 
 	// Plant eater
 	if ( (itemFlags & GameItem::AI_EAT_PLANTS) && (item->hp < item->TotalHP()))  {
 		// Are we near a plant?
 		// Note that currently only support eating stage 0-1 plants.
 		CChitArray plants;
-		parentChit->GetChitBag()->QuerySpatialHash( &plants, pos, PLANT_AWARE, 0, PlantScript::PassablePlantFilter );
+		parentChit->GetChitBag()->QuerySpatialHash( &plants, pos2, PLANT_AWARE, 0, PlantScript::PassablePlantFilter );
 
 		Vector2F plantPos =  { 0, 0 };
 		float plantDist = 0;
@@ -850,18 +851,27 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 			}
 		}
 	}
-	// Is there stuff around to pick up?
-	if ( dest.IsZero() && thisComp.itemComponent->Pickup() == ItemComponent::GOLD_PICKUP ) {
-		CChitArray gold;
-		parentChit->GetChitBag()->QuerySpatialHash( &gold, pos, GOLD_AWARE, 0, LumosChitBag::GoldFilter );
+	if ( dest.IsZero() ) {
+		// Is there stuff around to pick up?
+		if( thisComp.itemComponent->Pickup() == ItemComponent::GOLD_PICKUP ) {
+			CChitArray gold;
+			parentChit->GetChitBag()->QuerySpatialHash( &gold, pos2, GOLD_AWARE, 0, LumosChitBag::GoldFilter );
 
-		Vector2F goldPos;
-		if ( Closest( thisComp, gold.Mem(), gold.Size(), &goldPos, 0 ) ) {
-			actionToTake = MOVE;
-			dest = goldPos;
+			Vector2F goldPos;
+			if ( Closest( thisComp, gold.Mem(), gold.Size(), &goldPos, 0 ) ) {
+				actionToTake = MOVE;
+				dest = goldPos;
+			}
 		}
+		// Is there work to do?
+		/*
+		if ( itemFlags & GameItem::AI_DOES_WORK ) {
+			map->GetWorkQueue( pos2i.x, pos2i.y );
+		}
+		*/
 	}
 
+	// Wander....
 	if ( dest.IsZero() ) {
 		if ( wanderFlags == 0 ) {
 			rethink.Set( 2000 );
