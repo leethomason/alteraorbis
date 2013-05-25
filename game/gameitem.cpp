@@ -136,6 +136,8 @@ void GameItem::Serialize( XStream* xs )
 		APPEND_FLAG( flags, f, AI_WANDER_CIRCLE );
 		APPEND_FLAG( flags, f, AI_EAT_PLANTS );
 		APPEND_FLAG( flags, f, AI_SECTOR_HERD );
+		APPEND_FLAG( flags, f, AI_BINDS_TO_CORE );
+		APPEND_FLAG( flags, f, AI_DOES_WORK );
 		APPEND_FLAG( flags, f, CLICK_THROUGH );
 
 		xs->Saving()->Set( "flags", f.c_str() );
@@ -160,6 +162,8 @@ void GameItem::Serialize( XStream* xs )
 			READ_FLAG( flags, f, AI_WANDER_CIRCLE );
 			READ_FLAG( flags, f, AI_EAT_PLANTS );
 			READ_FLAG( flags, f, AI_SECTOR_HERD );
+			READ_FLAG( flags, f, AI_BINDS_TO_CORE );
+			READ_FLAG( flags, f, AI_DOES_WORK );
 			READ_FLAG( flags, f, CLICK_THROUGH );
 		}
 	}
@@ -212,6 +216,8 @@ void GameItem::Save( tinyxml2::XMLPrinter* printer )
 	APPEND_FLAG( flags, f, AI_WANDER_CIRCLE );
 	APPEND_FLAG( flags, f, AI_EAT_PLANTS );
 	APPEND_FLAG( flags, f, AI_SECTOR_HERD );
+	APPEND_FLAG( flags, f, AI_BINDS_TO_CORE );
+	APPEND_FLAG( flags, f, AI_DOES_WORK );
 	APPEND_FLAG( flags, f, CLICK_THROUGH );
 	printer->PushAttribute( "flags", f.c_str() );
 	
@@ -275,6 +281,8 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 		READ_FLAG( flags, f, AI_WANDER_CIRCLE );
 		READ_FLAG( flags, f, AI_EAT_PLANTS );
 		READ_FLAG( flags, f, AI_SECTOR_HERD );
+		READ_FLAG( flags, f, AI_BINDS_TO_CORE );
+		READ_FLAG( flags, f, AI_DOES_WORK );
 		READ_FLAG( flags, f, CLICK_THROUGH );
 	}
 	for( const tinyxml2::XMLAttribute* attr = ele->FirstAttribute();

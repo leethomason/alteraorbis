@@ -14,7 +14,7 @@
 
   <item name="worker"
         resource="worker"
-        flags="AI_DOES_WORK"
+        flags="AI_WANDER_HERD AI_DOES_WORK"
         mass="30" >
   </item>
 
