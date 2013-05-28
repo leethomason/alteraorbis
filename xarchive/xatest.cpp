@@ -61,18 +61,36 @@ void Map( XStream* xs )
 	XarcOpen( xs, "Map" );
 
 	if ( xs->Saving() ) {
-		int b[] = { -1, -2, -3, -4 };
-		xs->Saving()->SetArr( "bounds", b, 4 );
-		float f[] = { 0, 0, 0, 0 };
-		xs->Saving()->SetArr( "zero", f, 4 );
+		int vInt[] = { -20, 20 };
+		float vFloat[] = { -20.2f, 20.2f };
+		double vDouble[] = { -20.4, 20.4 };
+		const char* meta[] = { "foo", "bar" };
+
+		xs->Saving()->SetArr( "size-i", vInt, 2);
+		xs->Saving()->SetArr( "size-f", vFloat, 2);
+		xs->Saving()->SetArr( "size-d", vDouble, 2);
+		xs->Saving()->SetArr( "meta", meta, 2 );
 	}
 
+	/*
 	int nData = 4;
 	XARC_SER( xs, nData );
 	for( int i=0; i<nData; ++i ) {
 		MapData( xs, i );
 	}
+	*/
 	XarcClose( xs );
+}
+
+
+void KeyAttributes( XStream* xs )
+{
+	if ( xs->Saving() ) {
+		static const int pos[13] = { 0, 1, 2, 3, 7, 8, 9, 15, 16, 17, 1023, 1024, 10000 };
+		static const int neg[12] = { -1, -2, -3, -7, -8, -9, -15, -16, -17, -1023, -1024, -10000 };
+		xs->Saving()->SetArr( "positive", pos, 13 );
+		xs->Saving()->SetArr( "negative", neg, 12 );
+	}
 }
 
 
@@ -83,42 +101,14 @@ int main( int argc, const char* argv[] )
 
 	if ( argc == 1 ) {
 		{
-			Squisher* s = new Squisher();
-			static const int NLINES = 5;
-			static const char* line[NLINES] = {	"Hello, World",
-												"Hello, World v2.",
-												"I'm mad, you're mad, we're all mad here.",
-												"Hello Alice. Welcome to an all mad World.",
-												"Component. MapComponent. SpatialComponent. MapSpatialComponent." };
-
-			CDynArray<U8> buf;
-
-			for( int i=0; i<NLINES; ++i ) {
-				int n = 0;
-				const U8* str = s->Encode( (const U8*)line[i], strlen(line[i])+1, &n );
-				U8* mem = buf.PushArr( n );
-				memcpy( mem, str, n );
-			}
-			printf( "in:%d out:%d ratio=%.2f\n", s->totalIn, s->totalOut, s->Ratio() );
-
-			delete s; s = new Squisher();
-
-			int start = 0;
-			for( int i=0; i<NLINES; ++i ) {
-				int n = 0;
-				const char* str = (const char*) s->Decode( (const U8*) &buf[start], strlen(line[i])+1, &n );
-				printf( "Line %d: %s\n", i, str );
-				start += n;
-			}
-		}
-		{
 			FILE* fp = 0;
 			fopen_s( &fp, "test.dat", "wb" );
 
 			StreamWriter writer( fp );
 			writer.OpenElement( "root" );
+			KeyAttributes( &writer );
 			Map( &writer );
-			MetaData( &writer );
+			//MetaData( &writer );
 			writer.CloseElement();
 
 			fclose( fp );
@@ -130,7 +120,7 @@ int main( int argc, const char* argv[] )
 			StreamReader reader( fp );
 			reader.OpenElement();
 			Map( &reader );
-			MetaData( &reader );
+			//MetaData( &reader );
 			reader.CloseElement();
 	
 			fclose( fp );

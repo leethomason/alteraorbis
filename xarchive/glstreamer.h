@@ -17,11 +17,10 @@
 
 class StreamReader;
 class StreamWriter;
-class Squisher;
 
 class XStream {
 public:
-	XStream( bool squish );
+	XStream();
 	virtual ~XStream();
 
 	//	version:int
@@ -38,9 +37,14 @@ public:
 	enum {
 		READER_EOF = 0,
 		BEGIN_ELEMENT,		// name:String,
-		BEGIN_ATTRIBUTES,
-		END_ATTRIBUTES,
-		END_ELEMENT
+		END_ELEMENT,
+		ATTRIB_INT,
+		ATTRIB_FLOAT,
+		ATTRIB_DOUBLE,
+		ATTRIB_STRING,
+
+		ATTRIB_START = ATTRIB_INT,
+		ATTRIB_END = ATTRIB_STRING+1
 	};
 
 	// Attribute:
@@ -58,24 +62,19 @@ public:
 	//				index:U16
 	//				(optional) size:byte
 	enum {
-		ATTRIB_INT				= 0x01,
-		ATTRIB_FLOAT			= 0x02,
-		ATTRIB_DOUBLE			= 0x04,
-		ATTRIB_BYTE				= 0x08,
-		ATTRIB_STRING			= 0x10,
-		ATTRIB_ZERO				= 0x20,	 // a numerical value that is zeros
 	};
 
 	virtual StreamWriter* Saving() { return 0; }
 	virtual StreamReader* Loading() { return 0; }
 
 protected:
-	Squisher* squisher;
-	grinliz::CDynArray< char >		names;
-	grinliz::CDynArray< U8 >		byteData;
-	grinliz::CDynArray< int >		intData;
-	grinliz::CDynArray< float >		floatData;
-	grinliz::CDynArray< double >	doubleData;
+	//grinliz::CDynArray< char >		names;
+	//grinliz::CDynArray< U8 >		byteData;
+	//grinliz::CDynArray< int >		intData;
+	//grinliz::CDynArray< float >		floatData;
+	//grinliz::CDynArray< double >	doubleData;
+	grinliz::HashTable< int, const char* >							indexToStr;
+	grinliz::HashTable< const char*, int, grinliz::CompCharPtr >	strToIndex;
 };
 
 
@@ -89,49 +88,47 @@ public:
 	void OpenElement( const char* name );
 	void CloseElement();
 
-	void Set( const char* key, int value );
-	void Set( const char* key, float value );
-	void Set( const char* key, double value );
-	void Set( const char* key, U8 value );
-	void Set( const char* key, const char* str );
+	void Set( const char* key, int value )			{ SetArr( key, &value, 1 ); }
+	void Set( const char* key, float value )		{ SetArr( key, &value, 1 ); }
+	void Set( const char* key, double value )		{ SetArr( key, &value, 1 ); }
+	void Set( const char* key, const char* str )	{ SetArr( key, &str, 1 ); }
 
 	void SetArr( const char* key, const int* value, int n );
+	void SetArr( const char* key, const U8* value, int n );
 	void SetArr( const char* key, const float* value, int n );
 	void SetArr( const char* key, const double* value, int n );
-	void SetArr( const char* key, const U8* value, int n );
+	void SetArr( const char* key, const char* value[], int n );
 
 private:
-	void WriteByte( int byte );
-	void WriteU16( int value );
 	void WriteInt( int value );
 	void WriteString( const char* str );
-	void FlushAttributes();
+	void WriteFloat( float value );
+	void WriteDouble( double value );
+	//void FlushAttributes();
 
-	template< class T >
-	bool CheckZero( const T* data, int n ) {
-		for( int i=0; i<n; ++i ) {
-			if ( data[i] != 0 ) 
-				return false;
-		}
-		return true;
-	}
+	// Attrib:
+	//		int: type
+	//		string: name
+	//		int: count
+	//		type: values[count]
 
+	/*
 	struct Attrib {
 		int type;
-		int keyIndex;
+		const char* name;
 		int index;
 		int size;
 	};
 
 	struct CompAttrib {
-		static const char* data;
-		static bool Less( const Attrib& v0, const Attrib& v1 )	{ return strcmp( data+v0.keyIndex, data+v1.keyIndex ) < 0; }
+		static bool Less( const Attrib& v0, const Attrib& v1 )	{ return strcmp( v0.name, v1.name ) < 0; }
 	};
-
-	Attrib* LowerSet( const char* key, int type, int n );
-	grinliz::CDynArray< Attrib > attribs;
+	*/
+//	Attrib* LowerSet( const char* key, int type, int n );
+//	grinliz::CDynArray< Attrib > attribs;
 
 	FILE* fp;
+	int idPool;
 	int depth;
 };
 
@@ -148,29 +145,18 @@ public:
 		int type;
 		const char* key;
 		int n;
-
-		union {
-			const int*		intArr;
-			const float*	floatArr;
-			const double*	doubleArr;
-			const U8*		byteArr;
-			const char*		str;
-		};
-
-		void Value( int* value ) const;
-		void Value( float* value ) const;
-		void Value( double* value ) const;
-		void Value( U8* value ) const;
-		const char* Str() const;
-
-		void Value( int* value, int size ) const;
-		void Value( float* value, int size ) const;
-		void Value( double* value, int size ) const;
-		void Value( U8* value, int size ) const;
+		int offset;
 
 		bool operator==( const Attribute& a ) const { return strcmp( key, a.key ) == 0; }
 		bool operator<( const Attribute& a ) const	{ return strcmp( key, a.key ) < 0; }
 	};
+
+	void Value( const Attribute* a, int* value, int size, int offset=0 ) const;
+	void Value( const Attribute* a, float* value, int size, int offset=0 ) const;
+	void Value( const Attribute* a, double* value, int size, int offset=0 ) const;
+	void Value( const Attribute* a, U8* value, int size, int offset=0 ) const;
+
+	const char* Value( const Attribute* a, int index ) const;
 
 	const char*			OpenElement();
 	const Attribute*	Attributes() const			{ return attributes.Mem(); }
@@ -181,14 +167,18 @@ public:
 	const Attribute*	Get( const char* key );
 
 private:
-	int ReadByte();
 	int ReadInt();
-	int ReadU16();
+	float ReadFloat();
+	double ReadDouble();
+	const char* ReadString();
 	int PeekByte();
-	void ReadString( grinliz::CDynArray<char>* target );
 
-	grinliz::CDynArray<char> elementName;
-	grinliz::CDynArray< Attribute >	attributes;
+	grinliz::CDynArray< char > strBuf;
+	grinliz::CDynArray< int > intData;
+	grinliz::CDynArray< float > floatData;
+	grinliz::CDynArray< double > doubleData;
+	grinliz::CDynArray< const char* > stringData;	// they are interned. can use const char*
+	grinliz::CDynArray< Attribute > attributes;
 
 	FILE* fp;
 	int depth;
@@ -220,7 +210,7 @@ inline bool XarcGet( XStream* stream, const char* key, T &value )		{
 	GLASSERT( stream->Loading() );
 	const StreamReader::Attribute* attr = stream->Loading()->Get( key );
 	if ( attr ) {
-		attr->Value( &value );
+		stream->Loading()->Value( attr, &value, 1 );
 		return true;
 	}
 	return false;
@@ -231,7 +221,7 @@ inline bool XarcGetArr( XStream* stream, const char* key, T* value, int n )		{
 	GLASSERT( stream->Loading() );
 	const StreamReader::Attribute* attr = stream->Loading()->Get( key );
 	if ( attr ) {
-		attr->Value( value, n );
+		stream->Loading()->Value( attr, value, n );
 		return true;
 	}
 	return false;
