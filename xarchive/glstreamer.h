@@ -47,20 +47,12 @@ public:
 		ATTRIB_END = ATTRIB_STRING+1
 	};
 
-	// Attribute:
-	//		BEGIN_ATTRIBUTES
-	//		typeflags:byte
-	//
-	//		key characters:U16
-	//		char array of keys
-	//
-	//		if ( INT ) size:byte, int array
-	//		if ( FLOAT ) size:byte, float array
-	//		numAttributes:byte
-	//			[]	keyIndex:
-	//				type:byte
-	//				index:U16
-	//				(optional) size:byte
+
+	// Attrib:
+	//		type: int
+	//		name: string
+	//		count: int
+	//		values[count] of type
 	enum {
 	};
 
@@ -68,11 +60,6 @@ public:
 	virtual StreamReader* Loading() { return 0; }
 
 protected:
-	//grinliz::CDynArray< char >		names;
-	//grinliz::CDynArray< U8 >		byteData;
-	//grinliz::CDynArray< int >		intData;
-	//grinliz::CDynArray< float >		floatData;
-	//grinliz::CDynArray< double >	doubleData;
 	grinliz::HashTable< int, const char* >							indexToStr;
 	grinliz::HashTable< const char*, int, grinliz::CompCharPtr >	strToIndex;
 };
@@ -98,38 +85,25 @@ public:
 	void SetArr( const char* key, const float* value, int n );
 	void SetArr( const char* key, const double* value, int n );
 	void SetArr( const char* key, const char* value[], int n );
+	void SetArr( const char* key, const grinliz::IString* value, int n );
 
 private:
 	void WriteInt( int value );
 	void WriteString( const char* str );
 	void WriteFloat( float value );
 	void WriteDouble( double value );
-	//void FlushAttributes();
-
-	// Attrib:
-	//		int: type
-	//		string: name
-	//		int: count
-	//		type: values[count]
-
-	/*
-	struct Attrib {
-		int type;
-		const char* name;
-		int index;
-		int size;
-	};
-
-	struct CompAttrib {
-		static bool Less( const Attrib& v0, const Attrib& v1 )	{ return strcmp( v0.name, v1.name ) < 0; }
-	};
-	*/
-//	Attrib* LowerSet( const char* key, int type, int n );
-//	grinliz::CDynArray< Attrib > attribs;
 
 	FILE* fp;
 	int idPool;
 	int depth;
+
+	// Integers include integer values, markers in the stream, and string IDs
+	int nCompInt;	
+	int nInt;
+	// Number of string bytes. Does not include integer reference.
+	int nStr;
+	// Raw number data.
+	int nNumber;
 };
 
 
@@ -155,6 +129,7 @@ public:
 	void Value( const Attribute* a, float* value, int size, int offset=0 ) const;
 	void Value( const Attribute* a, double* value, int size, int offset=0 ) const;
 	void Value( const Attribute* a, U8* value, int size, int offset=0 ) const;
+	void Value( const Attribute* a, grinliz::IString* value, int size, int offset=0 ) const;
 
 	const char* Value( const Attribute* a, int index ) const;
 
@@ -235,6 +210,12 @@ void XarcSet( XStream* stream, const char* key, const T& value ) {
 
 template< class T >
 void XarcSetArr( XStream* stream, const char* key, const T* value, int n ) {
+	GLASSERT( stream->Saving() );
+	stream->Saving()->SetArr( key, value, n );
+}
+
+
+inline void XarcSetArr( XStream* stream, const char* key, const grinliz::IString* value, int n ) {
 	GLASSERT( stream->Saving() );
 	stream->Saving()->SetArr( key, value, n );
 }

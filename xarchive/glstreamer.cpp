@@ -13,7 +13,14 @@ XStream::~XStream()
 }
 
 
-StreamWriter::StreamWriter( FILE* p_fp ) : XStream(), fp( p_fp ), depth( 0 ) 
+StreamWriter::StreamWriter( FILE* p_fp ) 
+	:	XStream(), 
+		fp( p_fp ), 
+		depth( 0 ),
+		nCompInt( 0 ),
+		nInt( 0 ),
+		nStr( 0 ),
+		nNumber( 0 )
 {
 	// Write the header:
 	int version = 1;
@@ -24,6 +31,8 @@ StreamWriter::StreamWriter( FILE* p_fp ) : XStream(), fp( p_fp ), depth( 0 )
 
 StreamWriter::~StreamWriter()
 {
+	GLOUTPUT(( "StreamWriter Bytes. nCompInt=%d (nInt=%d) nStr=%d nNumber=%d\n",
+		       nCompInt, nInt, nStr, nNumber ));
 }
 
 void StreamWriter::WriteInt( int value )
@@ -53,6 +62,9 @@ void StreamWriter::WriteInt( int value )
 		fputc( value & 0xff, fp );
 		value >>= 8;
 	}
+
+	nCompInt += nBytes + 1;
+	nInt += 4;
 }
 
 
@@ -107,6 +119,7 @@ void StreamWriter::WriteString( const char* str )
 		int len = strlen( str );
 		WriteInt( len );
 		fwrite( str, len, 1, fp );
+		nStr += len + 1;
 
 		IString istr = StringPool::Intern( str );
 		indexToStr.Add( idPool, istr.c_str() );
@@ -145,6 +158,7 @@ const char* StreamReader::ReadString()
 
 void StreamWriter::WriteFloat( float value )
 {
+	nNumber += sizeof(value);
 	fwrite( &value, sizeof(value), 1, fp );
 }
 
@@ -159,6 +173,7 @@ float StreamReader::ReadFloat()
 
 void StreamWriter::WriteDouble( double value )
 {
+	nNumber += sizeof(value);
 	fwrite( &value, sizeof(value), 1, fp );
 }
 
@@ -198,6 +213,15 @@ void StreamWriter::SetArr( const char* key, const char* value[], int n )
 }
 
 
+void StreamWriter::SetArr( const char* key, const grinliz::IString* value, int n )
+{
+	WriteInt( ATTRIB_STRING );
+	WriteString( key );
+	WriteInt( n );
+	for( int i=0; i<n; ++i ) {
+		WriteString( value[i].c_str() );
+	}
+}
 
 
 void StreamWriter::SetArr( const char* key, const U8* value, int n )
@@ -376,6 +400,14 @@ void StreamReader::Value( const Attribute* a, U8* value, int size, int offset ) 
 }
 
 
+void StreamReader::Value( const Attribute* a, IString* value, int size, int offset ) const	
+{	
+	GLASSERT( a->type == ATTRIB_STRING );
+	for( int i=0; i<size; ++i ) {
+		const char* s = stringData[a->offset+i+offset];
+		value[i] = StringPool::Intern( s );
+	}
+}
 
 const char* StreamReader::Value( const Attribute* a, int index ) const
 {

@@ -21,37 +21,38 @@ void MapData( XStream* xs, int i )
 void MetaData( XStream* xs )
 {
 	XarcOpen( xs, "Meta" );
-	int i=1, j=2, k=3;
+
+	int     i = 1;
+	float   j = 2;
+	double  k = 3;
+	IString s = StringPool::Intern( "istring" );
+
 	XARC_SER( xs, j );
 	XARC_SER( xs, i );
 	XARC_SER( xs, k );
+	XARC_SER( xs, s );
 
-	float x = 1;
-	double y = 1;
-	U8 z = 1;
-	XARC_SER( xs, x );
-	XARC_SER( xs, y );
-	XARC_SER( xs, z );
-	
-	int iArr[2] = { 0, 1 };
-	float fArr[2] = { 0, 1 };
-	float dArr[2] = { 0, 1 };
-	U8 bArr[2] = { 0, 1 };
+	// Asserts do nothing on save(). checks load() worked.
+	GLASSERT( i == 1 );
+	GLASSERT( j == 2 );
+	GLASSERT( k == 3 );
+	GLASSERT( s == "istring" );
+
+	int     iArr[] = { 1, -1000 };
+	float   jArr[] = { 2, -2000.0f };
+	double  kArr[] = { 3, -3000.0 };
+	IString sArr[] = { StringPool::Intern( "istring0" ), StringPool::Intern( "istring" ) };
 
 	XARC_SER_ARR( xs, iArr, 2 );
-	XARC_SER_ARR( xs, fArr, 2 );
-	XARC_SER_ARR( xs, dArr, 2 );
-	XARC_SER_ARR( xs, bArr, 2 );
+	XARC_SER_ARR( xs, jArr, 2 );
+	XARC_SER_ARR( xs, kArr, 2 );
+	XARC_SER_ARR( xs, sArr, 2 );
 
-	if ( xs->Saving() ) {
-		xs->Saving()->Set( "foo0", "bar0" );
-		xs->Saving()->Set( "foo1", "bar1" );
-	}
-	else {
-		xs->Loading()->Get( "foo0" );
-		xs->Loading()->Get( "foo1" );
-	}
-	
+	GLASSERT( iArr[1] == -1000 );
+	GLASSERT( jArr[1] == -2000.0f );
+	GLASSERT( kArr[1] == -3000.0 );
+	GLASSERT( sArr[1] == "istring" );
+
 	XarcClose( xs );
 }
 
@@ -72,13 +73,11 @@ void Map( XStream* xs )
 		xs->Saving()->SetArr( "meta", meta, 2 );
 	}
 
-	/*
 	int nData = 4;
 	XARC_SER( xs, nData );
 	for( int i=0; i<nData; ++i ) {
 		MapData( xs, i );
 	}
-	*/
 	XarcClose( xs );
 }
 
@@ -108,7 +107,7 @@ int main( int argc, const char* argv[] )
 			writer.OpenElement( "root" );
 			KeyAttributes( &writer );
 			Map( &writer );
-			//MetaData( &writer );
+			MetaData( &writer );
 			writer.CloseElement();
 
 			fclose( fp );
@@ -120,7 +119,7 @@ int main( int argc, const char* argv[] )
 			StreamReader reader( fp );
 			reader.OpenElement();
 			Map( &reader );
-			//MetaData( &reader );
+			MetaData( &reader );
 			reader.CloseElement();
 	
 			fclose( fp );
