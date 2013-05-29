@@ -43,6 +43,8 @@ StreamWriter::~StreamWriter()
 {
 	GLOUTPUT(( "StreamWriter Bytes. nCompInt=%d (nInt=%d) nStr=%d nNumber=%d\n",
 		       nCompInt, nInt, nStr, nNumber ));
+	GLOUTPUT(( "             KB.    nCompInt=%d (nInt=%d) nStr=%d nNumber=%d\n",
+		       nCompInt/1024, nInt/1024, nStr/1024, nNumber/1024 ));
 }
 
 void StreamWriter::WriteInt( int value )
