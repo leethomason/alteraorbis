@@ -400,7 +400,7 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 			if ( coreMode && buildActive ) {
 				WorkQueue* wq = coreMode->GetWorkQueue();
 				Vector2I v = { (int)plane.x, (int)plane.z };
-				wq->Add( buildActive, v );
+				wq->Add( buildActive-1, v );
 			}
 			
 			if ( model && strstr( model->GetResource()->Name(), "rock." )) {
@@ -408,7 +408,7 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 				Chit* player = sim->GetPlayerChit();
 				if ( player && player->GetAIComponent() ) {
 					Vector2I rock = { (int)model->Pos().x, (int)model->Pos().z };
-					player->GetAIComponent()->Melt( rock );
+					player->GetAIComponent()->RockBreak( rock );
 					return;
 				}
 			}

@@ -153,11 +153,11 @@ const char* StreamReader::ReadString()
 	if ( id < 0 ) {
 		int len = ReadInt();
 		strBuf.Clear();
-		char* buf = strBuf.PushArr( len );
-		fread( buf, len, 1, fp );
+		char* p = strBuf.PushArr( len );
+		fread( p, len, 1, fp );
 		strBuf.Push(0);
 
-		IString istr = StringPool::Intern( buf );
+		IString istr = StringPool::Intern( strBuf.Mem() );
 		indexToStr.Add( -id, istr.c_str() );
 		r = istr.c_str();
 	}

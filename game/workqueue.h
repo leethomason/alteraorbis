@@ -15,19 +15,21 @@ public:
 	~WorkQueue();
 
 	enum {
-		CLEAR,
-		ICE
+		CLEAR_GRID,
+		BUILD_ICE
 	};
 
 	void Serialize( XStream* xs );
 	void Add( int action, grinliz::Vector2I& pos );
 
-private:
 	struct QueueItem {
 		void Serialize( XStream* xs );
 		int action;
 		grinliz::Vector2I pos;
 	};
+	const grinliz::CDynArray< WorkQueue::QueueItem >& Queue() const { return queue; };	
+
+private:
 
 	void InitImage( const QueueItem& item );
 

@@ -60,7 +60,7 @@ public:
 	// Targets a particular enemy.
 	void Target( Chit* chit, bool focused );
 	// Melt rock in the sector.
-	void Melt( const grinliz::Vector2I& rock );
+	bool RockBreak( const grinliz::Vector2I& rock );
 
 	void EnableDebug( bool enable ) { debugFlag = enable; }
 

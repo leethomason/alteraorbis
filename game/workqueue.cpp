@@ -22,7 +22,7 @@ WorkQueue::~WorkQueue()
 
 void WorkQueue::InitImage( const QueueItem& item )
 {
-	RenderAtom atom = LumosGame::CalcIconAtom( 10+item.action, true );	// fixme. switch to new icon texture
+	RenderAtom atom = LumosGame::CalcIconAtom( 11+item.action, true );	// fixme. switch to new icon texture
 	Image* image = new Image( &worldMap->overlay1, atom, true );
 	images.Push( image );
 	image->SetSize( 1, 1 );

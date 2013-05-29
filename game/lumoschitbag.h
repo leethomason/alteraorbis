@@ -35,6 +35,8 @@ public:
 
 	virtual int MapGridUse( int x, int y );
 	CoreScript* IsBoundToCore( Chit* );
+	// Get the core for this sector.
+	CoreScript* GetCore( const grinliz::Vector2I& sector );
 
 	Census census;
 

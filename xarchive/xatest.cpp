@@ -82,6 +82,21 @@ void Map( XStream* xs )
 }
 
 
+void Limits( XStream* xs ) 
+{
+	XarcOpen( xs, "limits" );
+
+	int maxint = INT_MAX;
+	int minint = INT_MIN;
+	XARC_SER( xs, maxint );
+	XARC_SER( xs, minint );
+	GLASSERT( maxint == INT_MAX );
+	GLASSERT( minint == INT_MIN );
+
+	XarcClose( xs );
+}
+
+
 void KeyAttributes( XStream* xs )
 {
 	if ( xs->Saving() ) {
@@ -108,6 +123,7 @@ int main( int argc, const char* argv[] )
 			KeyAttributes( &writer );
 			Map( &writer );
 			MetaData( &writer );
+			Limits( &writer );
 			writer.CloseElement();
 
 			fclose( fp );
@@ -120,6 +136,7 @@ int main( int argc, const char* argv[] )
 			reader.OpenElement();
 			Map( &reader );
 			MetaData( &reader );
+			Limits( &reader );
 			reader.CloseElement();
 	
 			fclose( fp );

@@ -9,6 +9,8 @@
 #include "mapspatialcomponent.h"
 #include "reservebank.h"
 #include "worldmap.h"
+#include "worldgrid.h"
+#include "worldinfo.h"
 
 #include "../xegame/rendercomponent.h"
 #include "../xegame/itemcomponent.h"
@@ -311,3 +313,30 @@ CoreScript* LumosChitBag::IsBoundToCore( Chit* chit )
 	}
 	return false;
 }
+
+
+CoreScript* LumosChitBag::GetCore( const grinliz::Vector2I& sector )
+{
+	const SectorData& sd = worldMap->GetSector( sector );
+	if ( sd.HasCore() ) {
+		Vector2I pos2i = sd.core;
+		Vector2F pos2 = { (float)pos2i.x+0.5f, (float)pos2i.y+0.5f };
+
+		CChitArray array;
+		QuerySpatialHash( &array, pos2, 0.1f, 0, CoreFilter );
+		GLASSERT( !array.Empty() );
+
+		if ( !array.Empty() ) {
+			Chit* cc = array[0];
+			ScriptComponent* sc = cc->GetScriptComponent();
+			GLASSERT( sc );
+			IScript* script = sc->Script();
+			GLASSERT( script );
+			CoreScript* coreScript = script->ToCoreScript();
+			GLASSERT( coreScript );
+			return coreScript;
+		}
+	}
+	return 0;
+}
+

@@ -22,6 +22,7 @@
 #include "mapspatialcomponent.h"
 #include "gridmovecomponent.h"
 #include "sectorport.h"
+#include "workqueue.h"
 
 #include "../script/battlemechanics.h"
 #include "../script/plantscript.h"
@@ -589,7 +590,7 @@ void AIComponent::Target( Chit* chit, bool focused )
 }
 
 
-void AIComponent::Melt( const grinliz::Vector2I& rock )
+bool AIComponent::RockBreak( const grinliz::Vector2I& rock )
 {
 	GLOUTPUT(( "Melt something at %d,%d\n", rock.x, rock.y ));
 	ComponentSet thisComp( parentChit, Chit::RENDER_BIT | 
@@ -597,16 +598,17 @@ void AIComponent::Melt( const grinliz::Vector2I& rock )
 									   ComponentSet::IS_ALIVE |
 									   ComponentSet::NOT_IN_IMPACT );
 	if ( !thisComp.okay ) 
-		return;
+		return false;
 
 	const WorldGrid& wg = map->GetWorldGrid( rock.x, rock.y );
 	if ( wg.RockHeight() == 0 )
-		return;
+		return false;
 
 	aiMode = ROCKBREAK_MODE;
 	currentAction = NO_ACTION;
 	targetDesc.Set( rock );
 	parentChit->SetTickNeeded();
+	return true;
 }
 
 
@@ -863,14 +865,36 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 				dest = goldPos;
 			}
 		}
-		// Is there work to do?
-		/*
-		if ( itemFlags & GameItem::AI_DOES_WORK ) {
-			map->GetWorkQueue( pos2i.x, pos2i.y );
-		}
-		*/
 	}
+	if ( dest.IsZero() && (itemFlags & GameItem::AI_DOES_WORK) ) {
+		// Is there work to do?
 
+		Vector2I sector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
+		CoreScript* coreScript = GetChitBag()->ToLumos()->GetCore( sector );
+		if ( coreScript ) {
+			WorkQueue* workQueue = coreScript->GetWorkQueue();
+			// FIXME: need to not pile up workers.
+			// FIXME: need to "check out" a job and not switch until job gone, get stuck, etc.
+			const grinliz::CDynArray< WorkQueue::QueueItem >& queue = workQueue->Queue();
+			if ( !queue.Empty() ) {
+				const WorkQueue::QueueItem& item = queue[0];
+				switch ( item.action )
+				{
+				case WorkQueue::CLEAR_GRID:
+					if ( RockBreak( item.pos ) )
+						return;
+					break;
+
+				case WorkQueue::BUILD_ICE:
+					break;
+
+				default:
+					GLASSERT( 0 );
+					break;
+				}
+			}
+		}
+	}
 	// Wander....
 	if ( dest.IsZero() ) {
 		if ( wanderFlags == 0 ) {
