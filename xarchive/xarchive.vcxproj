@@ -75,12 +75,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="glstreamer.cpp" />
-    <ClCompile Include="squisher.cpp" />
     <ClCompile Include="xatest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="glstreamer.h" />
-    <ClInclude Include="squisher.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\winlib\winlib.vcxproj">

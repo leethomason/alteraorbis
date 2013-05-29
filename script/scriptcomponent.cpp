@@ -38,7 +38,9 @@ void ScriptComponent::Serialize( XStream* xs )
 		GLASSERT( !script );
 		GLASSERT( factory );
 
-		const char* name = xs->Loading()->Get( "ScriptName" )->Str();
+		const StreamReader::Attribute* attr = xs->Loading()->Get( "ScriptName" );
+		GLASSERT( attr );
+		const char* name = xs->Loading()->Value( attr, 0 );
 
 		if ( StrEqual( name, "VolcanoScript" )) {
 			script = new VolcanoScript( factory->GetWorldMap(), 0 );
