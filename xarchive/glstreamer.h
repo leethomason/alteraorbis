@@ -61,6 +61,7 @@ public:
 
 protected:
 	grinliz::HashTable< int, const char* >							indexToStr;
+	// The string is not interned on lookup. Need the CompCharPtr
 	grinliz::HashTable< const char*, int, grinliz::CompCharPtr >	strToIndex;
 };
 
