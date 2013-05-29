@@ -3,6 +3,16 @@
 using namespace grinliz;
 
 
+template < class T > bool IsZeroArray( T* mem, int n ) {
+	bool zero = true;
+	for( int i=0; i<n; ++i ) {
+		if ( mem[i] ) {
+			return false;
+		}
+	}
+	return true;
+}
+
 XStream::XStream()
 {
 }
@@ -206,9 +216,17 @@ void StreamWriter::SetArr( const char* key, const char* value[], int n )
 {
 	WriteInt( ATTRIB_STRING );
 	WriteString( key );
-	WriteInt( n );
-	for( int i=0; i<n; ++i ) {
-		WriteString( value[i] );
+
+	bool zero = IsZeroArray( value, n );
+
+	if ( zero ) {
+		WriteInt( -n );
+	}
+	else {
+		WriteInt( n );
+		for( int i=0; i<n; ++i ) {
+			WriteString( value[i] );
+		}
 	}
 }
 
@@ -217,9 +235,23 @@ void StreamWriter::SetArr( const char* key, const grinliz::IString* value, int n
 {
 	WriteInt( ATTRIB_STRING );
 	WriteString( key );
-	WriteInt( n );
+
+	bool zero = true;
 	for( int i=0; i<n; ++i ) {
-		WriteString( value[i].c_str() );
+		if ( !value[i].empty() ) {
+			zero = false;
+			break;
+		}
+	}
+
+	if ( zero ) {
+		WriteInt( -n );
+	}
+	else {
+		WriteInt( n );
+		for( int i=0; i<n; ++i ) {
+			WriteString( value[i].c_str() );
+		}
 	}
 }
 
@@ -228,9 +260,17 @@ void StreamWriter::SetArr( const char* key, const U8* value, int n )
 {
 	WriteInt( ATTRIB_INT );
 	WriteString( key );
-	WriteInt( n );
-	for( int i=0; i<n; ++i ) {
-		WriteInt( value[i] );
+
+	bool zero = IsZeroArray( value, n );
+
+	if ( zero ) {
+		WriteInt( -n );
+	}
+	else {
+		WriteInt( n );
+		for( int i=0; i<n; ++i ) {
+			WriteInt( value[i] );
+		}
 	}
 }
 
@@ -239,9 +279,17 @@ void StreamWriter::SetArr( const char* key, const int* value, int n )
 {
 	WriteInt( ATTRIB_INT );
 	WriteString( key );
-	WriteInt( n );
-	for( int i=0; i<n; ++i ) {
-		WriteInt( value[i] );
+
+	bool zero = IsZeroArray( value, n );
+
+	if ( zero ) {
+		WriteInt( -n );
+	}
+	else {
+		WriteInt( n );
+		for( int i=0; i<n; ++i ) {
+			WriteInt( value[i] );
+		}
 	}
 }
 
@@ -250,9 +298,17 @@ void StreamWriter::SetArr( const char* key, const float* value, int n )
 {
 	WriteInt( ATTRIB_FLOAT );
 	WriteString( key );
-	WriteInt( n );
-	for( int i=0; i<n; ++i ) {
-		WriteFloat( value[i] );
+
+	bool zero = IsZeroArray( value, n );
+
+	if ( zero ) {
+		WriteInt( -n );
+	}
+	else {
+		WriteInt( n );
+		for( int i=0; i<n; ++i ) {
+			WriteFloat( value[i] );
+		}
 	}
 }
 
@@ -261,9 +317,17 @@ void StreamWriter::SetArr( const char* key, const double* value, int n )
 {
 	WriteInt( ATTRIB_DOUBLE );
 	WriteString( key );
-	WriteInt( n );
-	for( int i=0; i<n; ++i ) {
-		WriteDouble( value[i] );
+
+	bool zero = IsZeroArray( value, n );
+
+	if ( zero ) {
+		WriteInt( -n );
+	}
+	else {
+		WriteInt( n );
+		for( int i=0; i<n; ++i ) {
+			WriteDouble( value[i] );
+		}
 	}
 }
 
@@ -293,32 +357,38 @@ const char* StreamReader::OpenElement()
 			a.key  = ReadString();
 			a.n    = ReadInt();
 
+			bool zero = false;
+			if ( a.n < 0 ) { 
+				a.n = -a.n;
+				zero = true;
+			}
+
 			switch ( a.type ) {
 			case ATTRIB_INT:
 				a.offset = intData.Size();
 				for( int i=0; i<a.n; ++i ) {
-					intData.Push( ReadInt() );
+					intData.Push( zero ? 0 : ReadInt() );
 				}
 				break;
 
 			case ATTRIB_FLOAT:
 				a.offset = floatData.Size();
 				for( int i=0; i<a.n; ++i ) {
-					floatData.Push( ReadFloat() );
+					floatData.Push( zero ? 0 : ReadFloat() );
 				}
 				break;
 
 			case ATTRIB_DOUBLE:
 				a.offset = doubleData.Size();
 				for( int i=0; i<a.n; ++i ) {
-					doubleData.Push( ReadDouble() );
+					doubleData.Push( zero ? 0 : ReadDouble() );
 				}
 				break;
 
 			case ATTRIB_STRING:
 				a.offset = stringData.Size();
 				for( int i=0; i<a.n; ++i ) {
-					stringData.Push( ReadString() );
+					stringData.Push( zero ? "" : ReadString() );
 				}
 				break;
 		
@@ -413,7 +483,8 @@ const char* StreamReader::Value( const Attribute* a, int index ) const
 {
 	GLASSERT( a->type == ATTRIB_STRING );
 	GLASSERT( index < a->n );
-	return stringData[a->offset+index];
+	const char* s = stringData[a->offset+index];
+	return s;
 }
 
 
