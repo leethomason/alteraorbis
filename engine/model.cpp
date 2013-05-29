@@ -314,7 +314,8 @@ void Model::Serialize( XStream* xs, SpaceTree* tree )
 		
 		const StreamReader::Attribute* attr = load->Get( "animationResource" );
 		if ( attr ) {
-			animationResource = AnimationResourceManager::Instance()->GetResource( attr->Str() );
+			const char* name = load->Value( attr, 0 );
+			animationResource = AnimationResourceManager::Instance()->GetResource( name );
 			GLASSERT( animationResource );
 		}
 		if ( load->HasChild() ) {

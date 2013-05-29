@@ -58,7 +58,7 @@ void GameStat::Serialize( XStream* xs )
 	else {
 		const StreamReader::Attribute* attr = xs->Loading()->Get( "trait" );
 		GLASSERT( attr );
-		memcpy( trait, attr->intArr, sizeof(int)*NUM_TRAITS );
+		xs->Loading()->Value( attr, trait, NUM_TRAITS );
 	}
 	XARC_SER( xs, exp );
 
@@ -145,7 +145,7 @@ void GameItem::Serialize( XStream* xs )
 	else {
 		const StreamReader::Attribute* attr = xs->Loading()->Get( "flags" );
 		if ( attr ) {
-			const char* f = attr->Str();
+			const char* f = xs->Loading()->Value( attr, 0 );
 			READ_FLAG( flags, f, MELEE_WEAPON );
 			READ_FLAG( flags, f, RANGED_WEAPON );
 			READ_FLAG( flags, f, INTRINSIC );
