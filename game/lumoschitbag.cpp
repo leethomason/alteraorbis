@@ -97,6 +97,16 @@ bool LumosChitBag::GoldCrystalFilter( Chit* chit )
 }
 
 
+bool LumosChitBag::WorkerFilter( Chit* chit )
+{
+	GameItem* item = chit->GetItem();
+	if ( item && (item->flags & GameItem::AI_DOES_WORK) ) {
+		return true;
+	}
+	return false;
+}
+
+
 bool LumosChitBag::CoreFilter( Chit* chit )
 {
 	return ( chit->GetItem() && chit->GetItem()->name == IStringConst::kcore );

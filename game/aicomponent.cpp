@@ -1336,6 +1336,13 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		}
 		break;
 
+	case ChitMsg::WORKQUEUE_UPDATE:
+		if ( aiMode == NORMAL_MODE && currentAction == WANDER ) {
+			currentAction = NO_ACTION;
+			parentChit->SetTickNeeded();
+		}
+		break;
+
 	default:
 		super::OnChitMsg( chit, msg );
 		break;

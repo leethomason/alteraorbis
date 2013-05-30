@@ -84,7 +84,7 @@ void Sim::Load( const char* mapDAT, const char* gameDAT )
 	}
 	else {
 		QuickProfile qp( "Sim::Load" );
-		ComponentFactory factory( this, &chitBag->census, engine, worldMap, weather, lumosGame );
+		ComponentFactory factory( this, &chitBag->census, engine, worldMap, chitBag, weather, lumosGame );
 
 		FILE* fp = fopen( gameDAT, "rb" );
 		GLASSERT( fp );
@@ -118,7 +118,7 @@ void Sim::Save( const char* mapDAT, const char* gameDAT )
 	{
 		QuickProfile qp( "Sim::SaveXarc" );
 
-		ComponentFactory factory( this, &chitBag->census, engine, worldMap, weather, lumosGame );
+		ComponentFactory factory( this, &chitBag->census, engine, worldMap, chitBag, weather, lumosGame );
 
 		FILE* fp = fopen( gameDAT, "wb" );
 		if ( fp ) {
@@ -159,7 +159,7 @@ void Sim::CreateCores()
 			ms->SetMapPosition( sd.core.x, sd.core.y );
 			ms->SetMode( GRID_IN_USE ); 
 			chit->Add( ms );
-			chit->Add( new ScriptComponent( new CoreScript( worldMap ), engine, &chitBag->census ));
+			chit->Add( new ScriptComponent( new CoreScript( worldMap, chitBag ), engine, &chitBag->census ));
 			chit->Add( new ItemComponent( engine, worldMap, *gameItem ));
 			chit->Add( new RenderComponent( engine, asset ));
 			++ncores;

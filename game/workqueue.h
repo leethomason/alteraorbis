@@ -7,11 +7,12 @@
 
 class WorldMap;
 class XStream;
+class LumosChitBag;
 
 class WorkQueue
 {
 public:
-	WorkQueue( WorldMap* );
+	WorkQueue( WorldMap*, LumosChitBag* );
 	~WorkQueue();
 
 	enum {
@@ -21,6 +22,7 @@ public:
 
 	void Serialize( XStream* xs );
 	void Add( int action, grinliz::Vector2I& pos );
+	void DoTick();	// mostly looks for work being complete.
 
 	struct QueueItem {
 		void Serialize( XStream* xs );
@@ -33,7 +35,8 @@ private:
 
 	void InitImage( const QueueItem& item );
 
-	WorldMap*						worldMap;
+	WorldMap*		worldMap;
+	LumosChitBag*	chitBag;
 	grinliz::CDynArray< QueueItem > queue;
 	grinliz::CDynArray< gamui::Image* > images;
 };

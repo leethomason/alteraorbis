@@ -6,11 +6,12 @@
 
 class WorldMap;
 class WorkQueue;
+class LumosChitBag;
 
 class CoreScript : public IScript
 {
 public:
-	CoreScript( WorldMap* map );
+	CoreScript( WorldMap* map, LumosChitBag* chitBag );
 	virtual ~CoreScript();
 
 	virtual void Init( const ScriptContext& heap );

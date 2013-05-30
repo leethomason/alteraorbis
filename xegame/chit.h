@@ -81,6 +81,7 @@ public:
 		// XE
 		SPATIAL_CHANGED,		// the position or rotation has changed, sender: spatial
 		RENDER_IMPACT,			// impact metadata event has occured, sender: render component
+		WORKQUEUE_UPDATE,
 	};
 
 	ChitMsg( int _id, int _data=0, const void* _ptr=0 ) : id(_id), data(_data), ptr(_ptr), dataF(0), originID(0) {

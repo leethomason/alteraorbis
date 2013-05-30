@@ -1,12 +1,17 @@
 #include "workqueue.h"
 #include "worldmap.h"
 #include "lumosgame.h"
+#include "lumoschitbag.h"
+#include "gameitem.h"
+
 #include "../xarchive/glstreamer.h"
 
 using namespace grinliz;
 using namespace gamui;
 
-WorkQueue::WorkQueue( WorldMap* wm ) : worldMap( wm )
+static const float NOTIFICATION_RAD = 5.0f;
+
+WorkQueue::WorkQueue( WorldMap* wm, LumosChitBag* lcb ) : worldMap( wm ), chitBag( lcb )
 {
 }
 
@@ -31,13 +36,28 @@ void WorkQueue::InitImage( const QueueItem& item )
 }
 
 
-void WorkQueue::Add( int action, grinliz::Vector2I& pos )
+void WorkQueue::Add( int action, grinliz::Vector2I& pos2i )
 {
-	QueueItem item = { action, pos };
+	QueueItem item = { action, pos2i };
 	queue.Push( item );
 	InitImage( item );
+
+	Vector2F pos2 = { (float)pos2i.x+0.5f, (float)pos2i.y+0.5f };
+
+	// Notify near.
+	CChitArray array;
+	chitBag->QuerySpatialHash( &array, pos2, NOTIFICATION_RAD, 0, LumosChitBag::WorkerFilter );
+	for( int i=0; i<array.Size(); ++i ) {
+		ChitMsg msg( ChitMsg::WORKQUEUE_UPDATE );
+		array[i]->SendMessage( msg );
+	}
 }
 
+
+void WorkQueue::DoTick()
+{
+	
+}
 
 
 void WorkQueue::QueueItem::Serialize( XStream* xs )

@@ -16,13 +16,13 @@
 
 using namespace grinliz;
 
-CoreScript::CoreScript( WorldMap* map ) 
+CoreScript::CoreScript( WorldMap* map, LumosChitBag* chitBag ) 
 	: worldMap( map ), 
 	  spawnTick( 10*1000 ), 
 	  boundID( 0 ),
 	  workQueue( 0 )
 {
-	workQueue = new WorkQueue( worldMap );
+	workQueue = new WorkQueue( worldMap, chitBag );
 }
 
 
