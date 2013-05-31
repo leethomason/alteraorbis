@@ -87,7 +87,6 @@ x support melee attack on rocks
 - review all atlases for texture mem usage
 - particles aren't additive correctly
 - put metadata in model (authoring  time)
-- switch to ImageMagick for texture scaling
 - credits scene
 - remove normalization in shader
 - print uniform count for shaders
@@ -141,6 +140,7 @@ x support melee attack on rocks
 - more natural skin tones
 
 ---------- Defer ----------
+d switch to ImageMagick for texture scaling
 - animation sync is generally flakey - lock to vsync? Not aware of any way to solve this.
 d when loading during grid travel, you sometimes back up. (Regen path on load; chooses wrong starting point. annoying to fix).
 d GT bug: reconsider auto-mip. review texture upload. 
@@ -548,3 +548,12 @@ end of battle:
 23 switched over to a better component type system
 25 fixed over-computing zones. path cache still not working.
 33...because I had frame limiting on. Not sure what fixed what.
+
+
+StreamWriter string	=1832747 
+			 data   = 860574
+			 int	= 279856 
+			 float	= 188752 
+			 double	=  35784 
+			 byte   =      0 
+			 attrib =   2564 

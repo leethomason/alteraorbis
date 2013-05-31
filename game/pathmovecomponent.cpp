@@ -385,6 +385,8 @@ int PathMoveComponent::DoTick( U32 delta, U32 since )
 {
 	GRINLIZ_PERFTRACK;
 
+	int id = parentChit->ID();
+
 	if ( NeedComputeDest() ) {
 		pathPos = nPathPos = 0;	// clear the old path.
 		ComputeDest();			// ComputeDest can fail, send message, then cause re-queue
@@ -491,11 +493,7 @@ int PathMoveComponent::DoTick( U32 delta, U32 since )
 	if ( portJump.IsValid() ) {
 		GridMoveComponent* gmc = new GridMoveComponent( map );
 		gmc->SetDest( portJump );
-		Chit* chit = parentChit;	// parentChit=0 after Remove()
-		ChitBag* chitBag = parentChit->GetChitBag();
-		chit->Remove( this );
-		chit->Add( gmc );
-		chitBag->DeferredDelete( this );
+		parentChit->Swap( this, gmc );
 		return 0;
 	}
 

@@ -63,7 +63,6 @@ AIComponent::AIComponent( Engine* _engine, WorldMap* _map ) : rethink( 1200 )
 	map = _map;
 	currentAction = 0;
 	focus = 0;
-	randomWander = false;
 	friendEnemyAge = 0;
 	aiMode = NORMAL_MODE;
 	awareness.Zero();
@@ -924,7 +923,7 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 			if ( SectorHerd( thisComp ) )
 				return;
 		}
-		else if ( randomWander ) {
+		else if ( parentChit->random.Rand(3) == 0 ) {
 			dest = ThinkWanderRandom( thisComp );
 		}
 		else if ( wanderFlags == GameItem::AI_WANDER_HERD ) {
@@ -1007,7 +1006,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 		Vector2F		normalToEnemy	= { toEnemy.x, toEnemy.z };
 		float			meleeRange		= BattleMechanics::MeleeRange( parentChit, enemy.chit );
 
-		normalToEnemy.Normalize();
+		normalToEnemy.SafeNormalize( 1, 0 );
 		float dot = DotProduct( normalToEnemy, heading );
 
 		// Prefer targets we are pointed at.
@@ -1268,6 +1267,9 @@ void AIComponent::DebugStr( grinliz::GLString* str )
 
 void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {
+	/* Remember this is a *synchronous* function.
+	   Not safe to reach back and change other components.
+	*/
 	ComponentSet thisComp( parentChit, Chit::RENDER_BIT | 
 		                               Chit::SPATIAL_BIT |
 									   ComponentSet::IS_ALIVE |
@@ -1279,9 +1281,6 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			focus = 0;
 			currentAction = NO_ACTION;
 			parentChit->SetTickNeeded();
-		}
-		else {
-			randomWander = false;
 		}
 		// FIXME: when should an AI bind to core? This just does
 		// it at the end of a move, irrespective of the current
@@ -1303,31 +1302,9 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		break;
 
 	case ChitMsg::PATHMOVE_DESTINATION_BLOCKED:
-		if ( currentAction != WANDER ) {
-			focus = 0;
-			currentAction = NO_ACTION;
-			parentChit->SetTickNeeded();
-		}
-		else {
-			bool wanderOdds = (parentChit->random.Rand( WANDER_ODDS ) == 0);
-			PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
-			if ( pmc && pmc->ForceCount() > FORCE_COUNT_STUCK ) {
-				// Really really want to herd. This is a stuck unit.
-				wanderOdds = true;
-			}
-
-			if (	parentChit->GetItem()
-				 && (parentChit->GetItem()->flags & GameItem::AI_SECTOR_HERD)
- 				 && friendList.Size() >= (MAX_TRACK*3/4)
-				 && wanderOdds  
-				 && thisComp.okay )
-			{
-				SectorHerd( thisComp );
-			}
-			else {
-				randomWander = true;
-			}
-		}
+		focus = 0;
+		currentAction = NO_ACTION;
+		parentChit->SetTickNeeded();
 		break;
 
 	case ChitMsg::CHIT_SECTOR_HERD:

@@ -157,7 +157,6 @@ private:
 	CTicker				rethink;
 	int					friendEnemyAge;
 	U32					wanderTime;
-	bool				randomWander;
 	bool				debugFlag;
 
 	void DoMelee( const ComponentSet& thisComp );
