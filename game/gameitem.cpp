@@ -373,16 +373,16 @@ void GameItem::UseRound() {
 // The body affects the claw. Environment (water) affects the body.
 int GameItem::DoTick( U32 delta, U32 sinec )
 {
-	bool tick = false;
+	int tick = VERY_LONG_TICK;
 
 	if ( cooldownTime > 0 ) {
 		cooldownTime = Max( cooldownTime-(int)delta, 0 );
-		tick = true;
+		tick = 0;
 	}
 
 	if ( reloadTime > 0 ) {
 		reloadTime = Max( reloadTime-(int)delta, 0 );
-		tick = true;
+		tick = 0;
 
 		if ( reloadTime == 0 ) {
 			rounds = clipCap;
@@ -415,12 +415,10 @@ int GameItem::DoTick( U32 delta, U32 sinec )
 		hp = TotalHPF();
 	}
 
-	tick = tick || (savedHP != hp);
-
-//	if ( parentChit ) {
-//		parentChit->SendMessage( ChitMsg( ChitMsg::GAMEITEM_TICK, 0, this ), 0 );
-//	}
-	return tick ? 0 : VERY_LONG_TICK;	
+	if ( savedHP != hp ) {
+		tick = 0;
+	}
+	return tick;	
 }
 
 

@@ -33,7 +33,8 @@ public:
 
 private:
 
-	void InitImage( const QueueItem& item );
+	void AddImage( const QueueItem& item );
+	void RemoveImage( const QueueItem& item );
 
 	WorldMap*		worldMap;
 	LumosChitBag*	chitBag;

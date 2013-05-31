@@ -296,7 +296,9 @@ int ItemComponent::DoTick( U32 delta, U32 since )
 		int t = itemArr[i]->DoTick( delta, since );
 		tick = Min( t, tick );
 
-		if ( ( i==0 || itemArr[i]->Active()) && EmitEffect( mainItem, delta )) {
+		if (    ( i==0 || itemArr[i]->Active()) 
+			 && EmitEffect( mainItem, delta )) 
+		{
 			tick = 0;
 		}
 	}

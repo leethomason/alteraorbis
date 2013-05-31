@@ -39,6 +39,7 @@
 #include "../xegame/istringconst.h"
 
 #include "../grinliz/glrectangle.h"
+#include "../grinliz/glperformance.h"
 #include <climits>
 
 using namespace grinliz;
@@ -614,12 +615,13 @@ bool AIComponent::RockBreak( const grinliz::Vector2I& rock )
 
 void AIComponent::ThinkRockBreak( const ComponentSet& thisComp )
 {
+	GRINLIZ_PERFTRACK;
 	PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
 	const WorldGrid& wg = map->GetWorldGrid( targetDesc.mapPos.x, targetDesc.mapPos.y );
 
 	if ( wg.RockHeight() == 0 || !pmc ) {
-		currentAction = NO_ACTION;
-		aiMode = NORMAL_MODE;
+		currentAction	= NO_ACTION;
+		aiMode			= NORMAL_MODE;
 		return;
 	}
 
@@ -635,10 +637,12 @@ void AIComponent::ThinkRockBreak( const ComponentSet& thisComp )
 	// Always use melee first because bolts tend to "shoot through" in close quarters.
 	if ( meleeWeapon && BattleMechanics::InMeleeZone( engine, thisComp.chit, rock2i )) {
 		currentAction = MELEE;
+		rethink.Reset();
 		return;
 	}
-	else if ( rangedWeapon && LineOfSight( thisComp, targetDesc.mapPos ) ) {
+	else if ( rangedWeapon && rangedWeapon->GetItem()->CanUse() && LineOfSight( thisComp, targetDesc.mapPos ) ) {
 		currentAction = SHOOT;
+		rethink.Reset();
 		return;
 	}
 	else {
@@ -665,7 +669,9 @@ void AIComponent::ThinkRockBreak( const ComponentSet& thisComp )
 		}
 		if ( best >= 0 ) {
 			Vector2F dest = { (float)bestDest.x+0.5f, (float)bestDest.y+0.5f };
+			currentAction = MOVE;
 			pmc->QueueDest( dest );
+			rethink.Reset();
 			return;
 		}
 	}
@@ -828,6 +834,11 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 	int actionToTake		= WANDER;
 	Vector2F pos2 = thisComp.spatial->GetPosition2D();
 	Vector2I pos2i = { (int)pos2.x, (int)pos2.y };
+
+	IRangedWeaponItem* ranged = thisComp.itemComponent->GetRangedWeapon( 0 );
+	if ( ranged && ranged->GetItem()->CanReload() ) {
+		ranged->GetItem()->Reload();
+	}
 
 	// Plant eater
 	if ( (itemFlags & GameItem::AI_EAT_PLANTS) && (item->hp < item->TotalHP()))  {
@@ -1143,6 +1154,8 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 
 int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 {
+	GRINLIZ_PERFTRACK;
+
 	ComponentSet thisComp( parentChit, Chit::RENDER_BIT | 
 		                               Chit::SPATIAL_BIT |
 									   Chit::MOVE_BIT |

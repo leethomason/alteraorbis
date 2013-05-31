@@ -77,6 +77,7 @@ Chit* LumosChitBag::NewWorkerChit( const Vector3F& pos, int team )
 	chit->GetSpatialComponent()->SetPosition( pos );
 	AddItem( name, chit, engine, team, 0 );
 	chit->Add( new HealthComponent( engine ));
+	chit->Add( new DebugStateComponent( worldMap ));
 	return chit;
 }
 
