@@ -189,6 +189,9 @@ Component* Chit::GetComponent( int id )
 }
 
 
+Component* Chit::swapOut = 0;
+Component* Chit::swapIn  = 0;
+
 void Chit::DoTick( U32 delta )
 {
 	timeToTick = VERY_LONG_TICK;
@@ -196,8 +199,18 @@ void Chit::DoTick( U32 delta )
 
 	for( int i=0; i<NUM_SLOTS; ++i ) {
 		if ( slot[i] ) { 
+			GLASSERT( swapOut == 0 );
+			GLASSERT( swapIn == 0 );
 			int t = slot[i]->DoTick( delta, timeSince );
 			timeToTick = Min( timeToTick, t );
+
+			if ( swapOut ) {
+				GLASSERT( swapIn );
+				this->Remove( swapOut );
+				delete swapOut;
+				this->Add( swapIn );
+				swapOut = swapIn = 0;
+			}
 		}
 	}
 

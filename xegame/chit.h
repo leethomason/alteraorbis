@@ -139,6 +139,7 @@ public:
 	void DoTick( U32 delta );
 
 	void OnChitEvent( const ChitEvent& event );
+	void Swap( Component* removeAndDelete, Component* addThis )	{ GLASSERT( swapOut == 0 ); GLASSERT( swapIn == 0 ); swapOut = removeAndDelete; swapIn = addThis; }
 
 	SpatialComponent*	GetSpatialComponent()	{ return spatialComponent; }
 	MoveComponent*		GetMoveComponent()		{ return moveComponent; }
@@ -223,6 +224,9 @@ private:
 		};
 		Component*			slot[NUM_SLOTS];
 	};
+
+	static Component* swapOut;
+	static Component* swapIn;
 };
 
 

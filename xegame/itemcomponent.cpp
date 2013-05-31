@@ -159,12 +159,8 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 					float r = -300.0f + (float)chit->random.Rand( 600 );
 
 					if ( pathMove ) {
-						parentChit->Remove( pathMove );
-						GetChitBag()->DeferredDelete( pathMove );
-						pathMove = 0;
-
 						physics = new PhysicsMoveComponent( worldMap, true );
-						parentChit->Add( physics );
+						parentChit->Swap( pathMove, physics );
 					}
 					static const float FORCE = 4.0f;
 					physics->Add( v*FORCE, r );

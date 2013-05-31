@@ -111,6 +111,7 @@ U32 logBase2( U32 v )
 	return r;
 }
 
+#ifdef GRINLIZ_DEBUG_MEM
 
 void TrackMalloc( const void* mem, size_t size )
 {
@@ -242,7 +243,7 @@ void DebugDelete( void* mem, bool arrayType )
 		free(head);
 	}
 }
-
+#endif
 
 void* operator new( size_t size ) 
 {

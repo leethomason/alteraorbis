@@ -89,13 +89,7 @@ void GridMoveComponent::SetDest( const SectorPort& sp )
 int GridMoveComponent::DoTick( U32 delta, U32 since )
 {
 	if ( state == DONE ) {
-		Chit* chit = parentChit;	// gets nulled in Remove()
-		ChitBag* chitBag = parentChit->GetChitBag();
-
-		GLASSERT( chit && chitBag );
-		chit->Remove( this );
-		chit->Add( new PathMoveComponent( map ));
-		chitBag->DeferredDelete( this );
+		parentChit->Swap( this, new PathMoveComponent( map ));
 		return VERY_LONG_TICK;
 	}
 	if ( state == NOT_INIT ) {
@@ -176,10 +170,16 @@ int GridMoveComponent::DoTick( U32 delta, U32 since )
 					GridEdge current = worldMap->GetWorldInfo().MapToGridEdge( mapPos.x, mapPos.y );
 					GLASSERT( worldMap->GetWorldInfo().HasGridEdge( current ));
 					int result = worldMap->GetWorldInfoMutable()->Solve( current, destEdge, &path );
-					GLASSERT( result == micropather::MicroPather::SOLVED );
-					if ( result != micropather::MicroPather::SOLVED ) {
+					if ( result == micropather::MicroPather::START_END_SAME ) {
+						path.Clear();
+						path.Push( current );
+					}
+					else if ( result != micropather::MicroPather::SOLVED ) {
 						path.Clear();
 						path.Push( destEdge );
+					}
+					else {
+						GLASSERT( result == micropather::MicroPather::SOLVED );
 					}
 				}
 
