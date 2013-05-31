@@ -441,6 +441,11 @@ Model* SpaceTree::QueryRay( const Vector3F& _origin,
 							Vector3F* intersection ) 
 {
 	// FIXME: can optimize for 'length'
+	/* Reading through this there seem to be 2 ways to make this faster:
+		1. Can the space tree query be faster since the input is an AABB itself?
+		   There are a lot of ComparePlane calls.
+		2. [fixed] The length itself can create an AABB for testing.
+	*/
 
 	//GLOUTPUT(( "query ray\n" ));
 	modelRoot = 0;
@@ -473,6 +478,8 @@ Model* SpaceTree::QueryRay( const Vector3F& _origin,
 	Rectangle3F rect;
 	rect.FromPair( p0, p1 );
 	Plane::CreatePlanes( rect, planes );
+	Rectangle3F rayBounds;
+	rayBounds.FromPair( _origin, _origin+dir*length );
 
 	Model* modelRoot = Query( planes, 6, required, excluded );
 
@@ -485,7 +492,11 @@ Model* SpaceTree::QueryRay( const Vector3F& _origin,
 	float t;
 
 	for( Model* root=modelRoot; root; root=root->next ) {
+
 		if ( Ignore( root, ignore ) )
+			continue;
+
+		if ( !rayBounds.Intersect( root->AABB() ))
 			continue;
 
 		//GLOUTPUT(( "Consider: %s\n", root->GetResource()->header.name ));

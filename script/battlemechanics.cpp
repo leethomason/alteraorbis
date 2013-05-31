@@ -290,7 +290,7 @@ void BattleMechanics::Shoot( ChitBag* bag, Chit* src, const grinliz::Vector3F& _
 	Vector3F dir = FuzzyAim( p0, aimAt, radAt1 );
 
 	Bolt* bolt = bag->NewBolt();
-	bolt->head = p0 + dir;
+	bolt->head = p0 + dir*0.5f;
 	bolt->len = 1.0f;
 	bolt->dir = dir;
 	if ( item->flags & GameItem::EFFECT_FIRE )

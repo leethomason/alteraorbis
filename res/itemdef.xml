@@ -12,8 +12,7 @@
     </intrinsics>
   </item>
 
-  <!-- FIXME: need stats to make the accuracy of this very low,
-       else it's a pretty nasty weapons platform.
+  <!-- FIXME: remove ranged weapon, add melee weapon
   -->
   <item name="worker"
         resource="worker"
@@ -21,7 +20,7 @@
         mass="20" >
     <intrinsics>
       <item name="claw"
-            flags="MELEE_WEAPON RANGED_WEAPON INTRINSIC"
+            flags=" RANGED_WEAPON INTRINSIC"
             hardpoint="trigger"
             meleeDamageMult="10"
             cooldown="500"

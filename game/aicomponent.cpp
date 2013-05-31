@@ -639,12 +639,13 @@ void AIComponent::ThinkRockBreak( const ComponentSet& thisComp )
 		rethink.Reset();
 		return;
 	}
-	else if ( rangedWeapon && rangedWeapon->GetItem()->CanUse() && LineOfSight( thisComp, targetDesc.mapPos ) ) {
+	bool lineOfSight = LineOfSight( thisComp, targetDesc.mapPos );
+	if ( rangedWeapon && rangedWeapon->GetItem()->CanUse() && lineOfSight ) {
 		currentAction = SHOOT;
 		rethink.Reset();
 		return;
 	}
-	else {
+	else if ( !lineOfSight || meleeWeapon ) {
 		// Move to target
 		static const Vector2I delta[4] = {
 			{ -1, 0 }, { 1, 0 }, { 0, 1 }, { 0, -1 }

@@ -27,24 +27,25 @@ void SCMLParser::ReadPartNames( const tinyxml2::XMLDocument* doc )
 {
 	XMLConstHandle h( doc );
 	const XMLElement* folderEle = h.FirstChildElement( "spriter_data" ).FirstChildElement( "folder" ).ToElement();
-	GLASSERT( folderEle );
 
-	for( const XMLElement* fileEle=folderEle->FirstChildElement( "file" ); fileEle; fileEle=fileEle->NextSiblingElement( "file" ) )
-	{
-		int id=0;
-		fileEle->QueryIntAttribute( "id", &id );
-		const char* fullName = fileEle->Attribute( "name" );
-		GLASSERT( fullName );
-		const char* name = strstr( fullName, "/" );
-		GLASSERT( name );
-		name++;
-		char* end = (char*)strrchr( name, '.' );
-		GLASSERT( end );
-		*end = 0;
+	if ( folderEle ) {
+		for( const XMLElement* fileEle=folderEle->FirstChildElement( "file" ); fileEle; fileEle=fileEle->NextSiblingElement( "file" ) )
+		{
+			int id=0;
+			fileEle->QueryIntAttribute( "id", &id );
+			const char* fullName = fileEle->Attribute( "name" );
+			GLASSERT( fullName );
+			const char* name = strstr( fullName, "/" );
+			GLASSERT( name );
+			name++;
+			char* end = (char*)strrchr( name, '.' );
+			GLASSERT( end );
+			*end = 0;
 
-		GLString str( name );
-		//GLOUTPUT(( "adding [%d]=%s\n", id, str.c_str() ));
-		partIDNameMap.Add( id, str );
+			GLString str( name );
+			//GLOUTPUT(( "adding [%d]=%s\n", id, str.c_str() ));
+			partIDNameMap.Add( id, str );
+		}
 	}
 }
 
@@ -65,12 +66,13 @@ void SCMLParser::ReadAnimations( const tinyxml2::XMLDocument* doc )
 		//GLOUTPUT(( "Animation: %s len=%d id=%d\n", a.name.c_str(), a.length, a.id ));
 		a.nFrames = 0;
 		const XMLElement* mainlineEle = animationEle->FirstChildElement( "mainline" );
-		GLASSERT( mainlineEle );
-		for( const XMLElement* keyEle=mainlineEle->FirstChildElement( "key" ); keyEle; keyEle=keyEle->NextSiblingElement( "key" ))
-		{
-			a.nFrames++;
+		if ( mainlineEle ) {
+			for( const XMLElement* keyEle=mainlineEle->FirstChildElement( "key" ); keyEle; keyEle=keyEle->NextSiblingElement( "key" ))
+			{
+				a.nFrames++;
+			}
+			animationArr.Push( a );
 		}
-		animationArr.Push( a );
 	}
 }
 
