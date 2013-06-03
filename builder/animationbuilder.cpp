@@ -191,18 +191,15 @@ void SCMLParser::WriteAnimation( gamedb::WItem* witem, const Animation& a, const
 	gamedb::WItem* animationItem = witem->FetchChild( a.name.c_str() );
 	animationItem->SetInt( "totalDuration", a.length );
 
+	if ( !a.metaName.empty() ) {
+		animationItem->SetString( "metaData", a.metaName.c_str() );
+		animationItem->SetInt( "metaDataTime", a.metaTime );
+	}
+
 	for( int i=0; i<a.nFrames; ++i ) {
 		const Frame& f = a.frames[i];
 		gamedb::WItem* frameItem = animationItem->FetchChild( i );
 		frameItem->SetInt( "time", f.time );
-
-		for( int k=0; k<EL_MAX_METADATA; ++k ) {
-			if ( f.meta[k].size() > 0 ) {
-				GLString str;
-				str.Format( "event%d", k );
-				frameItem->SetString( str.c_str(), f.meta[k].c_str() );
-			}
-		}
 
 		for( int k=0; k<EL_MAX_BONES; ++k ) {
 			GLString name;
@@ -310,21 +307,11 @@ void SCMLParser::Parse( const XMLElement* element, const XMLDocument* doc, gamed
 
 		for( int i=0; i<animationArr.Size(); ++i ) {
 			if ( animationArr[i].name == animationName ) {
-				for( int j=animationArr[i].nFrames-1; j>=0; --j ) {
-					if ( time >= animationArr[i].frames[j].time ) {
-						for( int k=0; k<EL_MAX_METADATA; ++k ) {
-							if ( animationArr[i].frames[j].meta[k].size() == 0 ) {
-								animationArr[i].frames[j].meta[k] = metaName;
-								goto done;
-							}
-						}
-					}
-				}
-				goto done;
+				animationArr[i].metaName = metaName;
+				animationArr[i].metaTime = time;
+				break;
 			}
 		}
-done:
-		continue;
 	}
 
 	for( int i=0; i<animationArr.Size(); ++i ) {

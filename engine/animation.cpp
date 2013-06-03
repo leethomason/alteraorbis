@@ -104,11 +104,13 @@ void AnimationResourceManager::Destroy()
 
 AnimationResourceManager::AnimationResourceManager()
 {
+	nullAnimation = 0;
 }
 
 
 AnimationResourceManager::~AnimationResourceManager()
 {
+	delete nullAnimation;
 }
 
 
@@ -133,6 +135,12 @@ const AnimationResource* AnimationResourceManager::GetResource( const char* name
 	if ( !name || !(*name) ) {
 		return 0;
 	}
+	if ( StrEqual( name, "nullAnimation" )) {
+		if ( !nullAnimation ) {
+			nullAnimation = new AnimationResource(0);
+		}
+		return nullAnimation; 
+	}
 	return resArr.Get( name );
 }
 
@@ -141,6 +149,9 @@ bool AnimationResourceManager::HasResource( const char* name )
 {
 	if ( !name || !(*name) ) {
 		return false;
+	}
+	if ( StrEqual( name, "nullAnimation" )) {
+		return true; 
 	}
 	return resArr.Query( name, 0 );
 }
@@ -158,63 +169,93 @@ bool AnimationResourceManager::HasResource( const char* name )
 */
 AnimationResource::AnimationResource( const gamedb::Item* _item )
 {
-	item = _item;
-	resName = item->Name();
-	nAnimations = item->NumChildren();
-	GLASSERT( nAnimations <= ANIM_COUNT );
-	memset( sequence, 0, sizeof(Sequence)*ANIM_COUNT );
+	if ( _item ) {
+		item = _item;
+		resName = item->Name();
+		nAnimations = item->NumChildren();
+		GLASSERT( nAnimations <= ANIM_COUNT );
+		memset( sequence, 0, sizeof(Sequence)*ANIM_COUNT );
 
-	for( int i=0; i<nAnimations; ++i ) {
-		const gamedb::Item* animItem = item->ChildAt(i);		// "gunrun" in the example
-		int type = NameToType( animItem->Name() );
+		for( int i=0; i<nAnimations; ++i ) {
+			const gamedb::Item* animItem = item->ChildAt(i);		// "gunrun" in the example
+			int type = NameToType( animItem->Name() );
 		
-		sequence[type].item = animItem;
-		sequence[type].totalDuration = animItem->GetInt( "totalDuration" );
+			sequence[type].item = animItem;
+			sequence[type].totalDuration = animItem->GetInt( "totalDuration" );
 
-		int nFrames = animItem->NumChildren();
-		GLASSERT( nFrames >= 1 );
-		sequence[type].nFrames = nFrames;
+			if ( animItem->HasAttribute( "metaData" )) {
+				static const char* metaNames[ANIM_META_COUNT] = { "none", "impact" };
+				const char* mdName = animItem->GetString( "metaData" );
 
-		for( int frame=0; frame<nFrames; ++frame ) {
-			const gamedb::Item* frameItem = animItem->Child( frame );	// frame[0]
-			
-			sequence[type].frame[frame].start = frameItem->GetInt( "time" );
-			
-			static const char* events[EL_MAX_METADATA] = { "event0", "event1", "event2", "event3" };
-			static const char* metaNames[ANIM_META_COUNT] = { "none", "impact" };
+				for( int k=1; k<ANIM_META_COUNT; ++k ) {
+					if ( StrEqual( metaNames[k], mdName )) {
+						int time = animItem->GetInt( "metaDataTime" );
 
-			for( int k=0; k<EL_MAX_METADATA; ++k ) {
-				if ( frameItem->HasAttribute( events[k] ) ) {
-					const char* metaName = frameItem->GetString( events[k] );
-					for( int n=0; n<ANIM_META_COUNT; ++n ) {
-						if ( StrEqual( metaNames[n], metaName ) ) {
-							sequence[type].frame[frame].metaData[k] = n;
-							break;
-						}
+						sequence[type].metaDataID = k;
+						sequence[type].metaDataTime = time;
+						break;
 					}
 				}
 			}
 
-			int nBones = frameItem->NumChildren();
-			sequence[type].nBones = nBones;
+			int nFrames = animItem->NumChildren();
+			GLASSERT( nFrames >= 1 );
+			sequence[type].nFrames = nFrames;
 
-			for( int bone=0; bone<nBones; ++bone ) {
-				const gamedb::Item* boneItem = frameItem->ChildAt( bone );
-				IString boneName = StringPool::Intern( boneItem->Name(), true );
+			for( int frame=0; frame<nFrames; ++frame ) {
+				const gamedb::Item* frameItem = animItem->Child( frame );	// frame[0]
+			
+				sequence[type].frame[frame].start = frameItem->GetInt( "time" );
+			
+				int nBones = frameItem->NumChildren();
+				sequence[type].nBones = nBones;
+
+				for( int bone=0; bone<nBones; ++bone ) {
+					const gamedb::Item* boneItem = frameItem->ChildAt( bone );
+					IString boneName = StringPool::Intern( boneItem->Name(), true );
 				
-				sequence[type].frame[frame].boneData.bone[bone].name = boneName;
-				sequence[type].frame[frame].boneData.bone[bone].angleRadians = boneItem->GetFloat( "anglePrime" );
-				sequence[type].frame[frame].boneData.bone[bone].dy = boneItem->GetFloat( "dy" );
-				sequence[type].frame[frame].boneData.bone[bone].dz = boneItem->GetFloat( "dz" );
+					sequence[type].frame[frame].boneData.bone[bone].name = boneName;
+					sequence[type].frame[frame].boneData.bone[bone].angleRadians = boneItem->GetFloat( "anglePrime" );
+					sequence[type].frame[frame].boneData.bone[bone].dy = boneItem->GetFloat( "dy" );
+					sequence[type].frame[frame].boneData.bone[bone].dz = boneItem->GetFloat( "dz" );
+				}
 			}
+			for( int frame=0; frame<nFrames; ++frame ) {
+				if ( frame+1 < nFrames )
+					sequence[type].frame[frame].end = sequence[type].frame[frame+1].start;
+				else
+					sequence[type].frame[frame].end = sequence[type].totalDuration;
+			}
+
 		}
-		for( int frame=0; frame<nFrames; ++frame ) {
-			if ( frame+1 < nFrames )
-				sequence[type].frame[frame].end = sequence[type].frame[frame+1].start;
-			else
-				sequence[type].frame[frame].end = sequence[type].totalDuration;
+	}
+	else {
+		// Set up a null animation.
+		item = 0;
+		resName = "reference";
+		nAnimations = ANIM_COUNT;
+		memset( sequence, 0, sizeof(Sequence)*ANIM_COUNT );
+		
+		static const int DURATION[ANIM_COUNT] = { 
+			1000, // reference
+			1000, // walk
+			1000, // gun walk
+			1000, // gun stand
+			600,  // melee,
+			200,  // count
+		};
+
+		for( int i=0; i<ANIM_COUNT; ++i ) {
+			sequence[i].totalDuration = DURATION[i];
+			sequence[i].item = 0;
+			sequence[i].nFrames = 1;
+			sequence[i].nBones = 0;
+			sequence[i].frame[0].start = 0;
+			sequence[i].frame[0].end   = DURATION[i];
 		}
 
+		sequence[ANIM_MELEE].metaDataID = ANIM_META_IMPACT;
+		sequence[ANIM_MELEE].metaDataTime = DURATION[ANIM_MELEE]/2;
 	}
 }
 
@@ -222,14 +263,16 @@ AnimationResource::AnimationResource( const gamedb::Item* _item )
 const char* AnimationResource::AnimationName( int index ) const
 {
 	GLASSERT( index >= 0 && index < nAnimations );
-	return item->ChildAt( index )->Name();
+	if ( item ) 
+		return item->ChildAt( index )->Name();
+	return gAnimationName[index];
 }
 
 
 bool AnimationResource::HasAnimation( int type ) const
 {
-	const char* name = TypeToName( type );
-	return item->Child( name ) != 0;
+	GLASSERT( type >= 0 && type < ANIM_COUNT );
+	return sequence[type].nFrames > 0;
 }
 
 
@@ -356,37 +399,27 @@ bool AnimationResource::GetTransform(	int type,
 }
 
 
-void AnimationResource::GetMetaData(	int type,
-										U32 t0, U32 t1,				// t1 > t0
-										grinliz::CArray<int, EL_MAX_METADATA>* data ) const
+int AnimationResource::GetMetaData(	int type, U32 t0, U32 t1 ) const
 {
-	data->Clear();
+	if ( sequence[type].metaDataID == 0 )
+		return 0;
 
 	GLASSERT( t1 >= t0 );
 	int delta = int(t1 - t0);
 	
 	t0 = TimeInRange( type, t0 );
 
-	int i=0;
-	while( delta > 0 ) {
-		if (    sequence[type].frame[i].start >= t0
-			 && sequence[type].frame[i].start <  t0 + delta ) 
-		{
-			for( int j=0; j<EL_MAX_METADATA;  ++j ) {
-				int m = sequence[type].frame[i].metaData[j];
-				if ( m > 0 ) {
-					//GLOUTPUT(( "Meta push %d [%d,%d]\n", m, t0, t1 ));
-					data->Push( m ); 
-				}
-			}
-			delta -= sequence[type].frame[i].end - t0;
-			t0 = sequence[type].frame[i].end;
-		}
-		++i;
-		if ( i==sequence[type].nFrames ) {
-			i = 0;
-			t0 = 0;
+	U32 tEvent = sequence[type].metaDataTime;
+
+	if ( tEvent >= t0 && tEvent < t0 + delta ) {
+		return sequence[type].metaDataID;
+	}
+	if ( t0 + delta >= sequence[type].totalDuration ) {
+		U32 t = (t0+delta) - sequence[type].totalDuration;
+		if ( tEvent < t ) {
+			return sequence[type].metaDataID;
 		}
 	}
+	return 0;
 }
 

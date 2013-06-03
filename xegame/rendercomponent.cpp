@@ -383,11 +383,11 @@ int RenderComponent::DoTick( U32 deltaTime, U32 since )
 			model[0]->SetAnimation( n, CROSS_FADE_TIME, false );
 		}
 
-		grinliz::CArray<int, EL_MAX_METADATA> metaData;
+		int metaData=0;
 		model[0]->DeltaAnimation( deltaTime, &metaData, 0 );
 
-		for( int i=0; i<metaData.Size(); ++i ) {
-			if ( metaData[i] == ANIM_META_IMPACT ) {
+		if ( metaData ) {
+			if ( metaData == ANIM_META_IMPACT ) {
 				//GLOUTPUT(( "Sending impact.\n" ));
 				parentChit->SendMessage( ChitMsg( ChitMsg::RENDER_IMPACT ), this );
 			}

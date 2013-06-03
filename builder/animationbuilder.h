@@ -53,15 +53,16 @@ private:
 
 	struct Frame {
 		int					time;
-		grinliz::GLString	meta[EL_MAX_METADATA];
 		PartXForm			xforms[EL_MAX_BONES];
 	};
 	
 	struct Animation {
-		grinliz::GLString name;
-		int id;
-		U32 length;
-		int nFrames;
+		grinliz::GLString	name;
+		int					id;
+		U32					length;
+		int					nFrames;
+		grinliz::GLString	metaName;
+		int					metaTime;
 
 		Frame frames[EL_MAX_ANIM_FRAMES];
 

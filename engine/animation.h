@@ -78,9 +78,8 @@ public:
 						U32 time,					// time for this animation
 						BoneData::Bone* bone ) const;
 
-	void GetMetaData(	int type,
-						U32 t0, U32 t1,				// t1 > t0
-						grinliz::CArray< int, EL_MAX_METADATA>* data ) const;
+	int GetMetaData(	int type,
+						U32 t0, U32 t1 ) const;	// t1 > t0
 
 	// does this animation loop?
 	static bool Looping( int type );
@@ -107,7 +106,6 @@ private:
 	struct Frame {
 		U32			start;
 		U32			end;
-		int			metaData[EL_MAX_METADATA];
 		BoneData	boneData;
 	};
 
@@ -117,6 +115,8 @@ private:
 		int					nFrames;
 		int					nBones;
 		Frame				frame[EL_MAX_ANIM_FRAMES];
+		int					metaDataID;
+		U32					metaDataTime;
 	};
 	Sequence sequence[ANIM_COUNT];
 };
@@ -141,6 +141,7 @@ private:
 
 	static AnimationResourceManager* instance;
 	
+	AnimationResource* nullAnimation;
 	grinliz::HashTable< const char*, AnimationResource*, grinliz::CompCharPtr, grinliz::OwnedPtrSem > resArr;
 };
 

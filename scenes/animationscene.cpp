@@ -429,9 +429,9 @@ void AnimationScene::WriteXML()
 
 void AnimationScene::DoTick( U32 deltaTime )
 {
-	grinliz::CArray<int, EL_MAX_METADATA> metaDataEvents;
+	int metaDataEvent=0;
 	for( int i=0; i<NUM_MODELS; ++i ) {
-		model[i]->DeltaAnimation( deltaTime, (i==0) ? &metaDataEvents : 0, 0 );
+		model[i]->DeltaAnimation( deltaTime, (i==0) ? &metaDataEvent : 0, 0 );
 		model[i]->EmitParticles( engine->particleSystem, engine->camera.EyeDir3(), deltaTime );
 	}
 
@@ -442,7 +442,7 @@ void AnimationScene::DoTick( U32 deltaTime )
 		model[0]->CalcMetaData( IStringConst::ktrigger, &xform );
 		Vector3F p = xform * POS;
 
-		for( int i=0; i<metaDataEvents.Size(); ++i ) {
+		if ( metaDataEvent ) {
 			engine->particleSystem->EmitPD( "derez", p, UP, engine->camera.EyeDir3(), 0 );	
 		}
 

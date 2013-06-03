@@ -288,7 +288,7 @@ public:
 
 	// Update the time and animation rendering.
 	void DeltaAnimation(	U32 time, 
-							grinliz::CArray<int, EL_MAX_METADATA> *metaData,
+							int *metaData,
 							bool *done );
 
 	void SetAnimationRate( float rate )						{ animationRate = rate; }

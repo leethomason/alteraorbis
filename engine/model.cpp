@@ -515,7 +515,7 @@ void Model::SetAnimation( int id, U32 crossFade, bool restart )
 }
 
 
-void Model::DeltaAnimation( U32 _time, grinliz::CArray<int, EL_MAX_METADATA> *metaData, bool *done )
+void Model::DeltaAnimation( U32 _time, int *metaData, bool *done )
 {
 	if ( !HasAnimation() )
 		return;
@@ -525,7 +525,7 @@ void Model::DeltaAnimation( U32 _time, grinliz::CArray<int, EL_MAX_METADATA> *me
 	}
 
 	if ( metaData ) {
-		animationResource->GetMetaData( currentAnim.id, currentAnim.time, currentAnim.time+_time, metaData );
+		*metaData = animationResource->GetMetaData( currentAnim.id, currentAnim.time, currentAnim.time+_time );
 	}
 
 	if ( done && !AnimationResource::Looping( currentAnim.id) ) {

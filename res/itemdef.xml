@@ -12,15 +12,13 @@
     </intrinsics>
   </item>
 
-  <!-- FIXME: remove ranged weapon, add melee weapon
-  -->
   <item name="worker"
         resource="worker"
         flags="AI_WANDER_HERD AI_DOES_WORK"
         mass="20" >
     <intrinsics>
       <item name="claw"
-            flags=" RANGED_WEAPON INTRINSIC"
+            flags="MELEE_WEAPON RANGED_WEAPON INTRINSIC"
             hardpoint="trigger"
             meleeDamageMult="10"
             cooldown="500"
