@@ -232,7 +232,7 @@ AnimationResource::AnimationResource( const gamedb::Item* _item )
 	else {
 		// Set up a null animation.
 		item = 0;
-		resName = "reference";
+		resName = "nullAnimation";
 		nAnimations = ANIM_COUNT;
 		memset( sequence, 0, sizeof(Sequence)*ANIM_COUNT );
 		

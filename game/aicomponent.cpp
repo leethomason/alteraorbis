@@ -884,15 +884,19 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 		CoreScript* coreScript = GetChitBag()->ToLumos()->GetCore( sector );
 		if ( coreScript ) {
 			WorkQueue* workQueue = coreScript->GetWorkQueue();
-			// FIXME: need to not pile up workers.
-			// FIXME: need to "check out" a job and not switch until job gone, get stuck, etc.
-			const grinliz::CDynArray< WorkQueue::QueueItem >& queue = workQueue->Queue();
-			if ( !queue.Empty() ) {
-				const WorkQueue::QueueItem& item = queue[0];
-				switch ( item.action )
+
+			const WorkQueue::QueueItem* item = workQueue->GetJob( parentChit->ID() );
+			if ( !item ) {
+				item = workQueue->Find( pos2i );
+				if ( item ) {
+					workQueue->Assign( parentChit->ID(), item );
+				}
+			}
+			if ( item ) {
+				switch ( item->action )
 				{
 				case WorkQueue::CLEAR_GRID:
-					if ( RockBreak( item.pos ) )
+					if ( RockBreak( item->pos ) )
 						return;
 					break;
 
