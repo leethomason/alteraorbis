@@ -91,14 +91,18 @@ public:
 	void Save( const char* pathToData );
 	void Load( const char* pathtoData );
 
-	// Set the rock to h. 
+	// Set the rock to h.
+	//		h= 1 to 3 rock
+	//		h= 0 no rock
 	//		h=-1 sets to nominal value.
 	//		h=-2 sets to initial value, used when loading
-	void SetRock( int x, int y, int h, int poolHeight, bool magma );
-	void SetMagma( int x, int y, bool magma ) { 
+	void SetRock( int x, int y, int h, bool magma, int rockType );
+	void SetMagma( int x, int y, bool magma ) {
 		int index = INDEX( x, y );
-		SetRock( x, y, grid[index].RockHeight(), grid[index].PoolHeight(), magma );
+		WorldGrid wg = grid[index];
+		SetRock( x, y, wg.RockHeight(), magma, wg.RockType() );
 	}
+
 	const WorldGrid& GetWorldGrid( int x, int y ) { return grid[INDEX(x,y)]; }
 	// Need this to actually go away if it switches to voxels, but important
 	// to figure out how to do world queries.
@@ -158,7 +162,7 @@ public:
 
 	// ---- MicroPather ---- //
 	virtual float LeastCostEstimate( void* stateStart, void* stateEnd );
-	virtual void AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > *adjacent );
+	virtual void  AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > *adjacent );
 	virtual void  PrintStateInfo( void* state );
 
 	// --- Debugging -- //
@@ -212,24 +216,8 @@ private:
 		return (y*width/ZONE_SIZE) + x; 
 	} 
 
-	void GridResName( bool isLand, int rockHeight, int poolHeight, bool magma, grinliz::CStr<12>* str ) {
-		str->Clear();
-		if ( !isLand ) return;
-
-		if ( poolHeight > rockHeight ) {
-			GLASSERT( poolHeight == POOL_HEIGHT );
-			*str = "pool.2";
-		}
-		else if ( magma ) {
-			*str = "magma.0";
-			(*str)[6] = '0' + rockHeight;
-		}
-		else if ( rockHeight > 0 ) {
-			*str = "rock.1";
-			(*str)[5] = '0' + rockHeight;
-		}
-	}
-	void ProcessWater( ChitBag* cb );
+	void GridResName( const WorldGrid& wg, grinliz::CStr<12>* str );
+	void ProcessZone( ChitBag* cb );
 	void EmitWaterfalls( U32 delta );	// particle systems
 
 	void Init( int w, int h );
@@ -334,8 +322,9 @@ private:
 	grinliz::CDynArray< grinliz::Vector2I > waterfalls;
 	grinliz::CDynArray< grinliz::Vector2I > magmaGrids;
 
-	grinliz::BitArray< DZONE, DZONE, 1 > zoneInit;
-	grinliz::BitArray< DZONE, DZONE, 1 > waterInit;
+	grinliz::BitArray< DZONE, DZONE, 1 > zoneInit;		// pather
+	grinliz::BitArray< DZONE, DZONE, 1 > voxelInit;		// rendering
+	void ModifyVoxel( int x, int y ) { voxelInit.Clear( x/ZONE_SIZE, y/ZONE_SIZE ); }
 
 	// Temporaries to avoid allocation
 	grinliz::CDynArray< grinliz::Vector2I > waterStack;

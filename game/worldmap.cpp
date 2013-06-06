@@ -123,7 +123,7 @@ void WorldMap::AttachEngine( Engine* e, IMapGridUse* imap )
 		for( int j=0; j<height; ++j ) {
 			for( int i=0; i<width; ++i ) {
 				if ( grid[INDEX(i,j)].IsLand() ) {
-					SetRock( i, j, 0, 0, false );
+					SetRock( i, j, 0, false, 0 );
 				}
 			}
 		}
@@ -153,7 +153,7 @@ void WorldMap::VoxelHit( Model* m, const DamageDesc& dd )
 	grid[index].DeltaHP( (int)(-dd.damage) );
 	if ( grid[index].HP() == 0 ) {
 		engine->particleSystem->EmitPD( "derez", pos, V3F_UP, engine->camera.EyeDir3(), 0 );
-		SetRock( map.x, map.y, 0, 0, false );
+		SetRock( map.x, map.y, 0, false, 0 );
 	}
 }
 
@@ -224,7 +224,7 @@ void WorldMap::Load( const char* pathToDAT )
 			for( int i=0; i<width; ++i ) {
 				int index = INDEX( i, j );
 				const WorldGrid& wg = grid[index];
-				SetRock( i, j, -2, 0, grid[index].Magma() );
+				SetRock( i, j, -2, grid[index].Magma(), grid[index].RockType() );
 			}
 		}
 	}
@@ -290,7 +290,7 @@ void WorldMap::Init( int w, int h )
 		AttachEngine( savedEngine, savedIMap );
 	}
 
-	waterInit.ClearAll();
+	voxelInit.ClearAll();
 	DeleteAllRegions();
 	delete [] grid;
 	this->width = w;
@@ -549,12 +549,12 @@ Vector2I WorldMap::FindEmbark()
 
 
 
-void WorldMap::ProcessWater( ChitBag* cb )
+void WorldMap::ProcessZone( ChitBag* cb )
 {
 	//QuickProfile qp( "WorldMap::ProcessWater" );
 	static const Vector2I next[4] = { {1,0}, {-1,0}, {0,1}, {0,-1} };
-	int zoneWidth  = width / ZONE_SIZE;
-	int zoneHeight = height / ZONE_SIZE;
+	const int zoneWidth  = width / ZONE_SIZE;
+	const int zoneHeight = height / ZONE_SIZE;
 
 	waterStack.Clear();
 	poolGrids.Clear();
@@ -562,19 +562,33 @@ void WorldMap::ProcessWater( ChitBag* cb )
 	// Walk each zone, look for something that needs update.
 	for( int zy=0; zy<zoneHeight; ++zy ) {
 		for( int zx=0; zx<zoneWidth; ++zx ) {
-			if ( !waterInit.IsSet( zx, zy )) {
+			if ( !voxelInit.IsSet( zx, zy )) {
 
-				waterInit.Set( zx, zy, 0, true );
-				//zoneInfo[zy*DZONE+zx].pools = 0;
+				// Mark up to date. Will be after all this!
+				voxelInit.Set( zx, zy );
+
+				// Walk the zone, clear everything out.
+				// Add back in what we need.
 				const int baseX = zx*ZONE_SIZE;
 				const int baseY = zy*ZONE_SIZE;
-				
-				CArray<U8, ZONE_SIZE2> color;
-				color.PushArr( ZONE_SIZE2 );
-				memset( color.Mem(), 0, ZONE_SIZE2 );
-
 				Rectangle2I zbounds;
 				zbounds.Set( baseX, baseY, baseX+ZONE_SIZE-1, baseY+ZONE_SIZE-1 );
+
+				// Clear:
+				//	- Pools (in the data structure)
+				//  - Models
+				for( int y=baseY; y<baseY+ZONE_SIZE; ++y ) {
+					for( int x=baseX; x<baseX+ZONE_SIZE; ++x ) {
+						grid[INDEX(x,y)].SetPool( false );
+
+						Model* m=0;
+						Vector2I v = {x,y};
+						if ( voxels.Query( v, &m )) {
+							voxels.Remove( v );
+							engine->FreeModel( m );
+						}
+					}
+				}
 
 				// Clear the waterfalls for this zone.
 				for( int i=0; i<waterfalls.Size(); ++i ) {
@@ -584,13 +598,17 @@ void WorldMap::ProcessWater( ChitBag* cb )
 					}
 				}
 
+
+				// Find the waterfalls.				
+				CArray<U8, ZONE_SIZE2> color;
+				color.PushArr( ZONE_SIZE2 );
+				memset( color.Mem(), 0, ZONE_SIZE2 );
+
 				// Scan for possible pools. This is a color fill. Look
 				// for colors that don't touch the border, or too much
 				// water.
-				for( int dy=1; dy<ZONE_SIZE-1; ++dy ) {
-					for( int dx=1; dx<ZONE_SIZE-1; ++dx ) {
-						const int x = baseX + dx;
-						const int y = baseY + dy;
+				for( int y=baseY+1; y<baseY+ZONE_SIZE-1; ++y ) {
+					for( int x=baseX+1; x<baseX+ZONE_SIZE-1; ++x ) {
 
 						// Do a fill of everything land rockHeight < POOL_HEIGHT
 						// Note boundary conditions
@@ -601,7 +619,7 @@ void WorldMap::ProcessWater( ChitBag* cb )
 
 						if (    grid[index].IsLand() 
 							 && grid[index].RockHeight() < POOL_HEIGHT	// need space for the pool
-							 && color[dy*ZONE_SIZE+dx] == 0 )			// don't revisit
+							 && color[(y-baseY)*ZONE_SIZE+(x-baseX)] == 0 )			// don't revisit
 						{
 							// Try a fill!
 							Vector2I start = { x, y };
@@ -655,7 +673,7 @@ void WorldMap::ProcessWater( ChitBag* cb )
 
 								for( int i=0; i<poolGrids.Size(); ++i ) {
 									int idx = INDEX( poolGrids[i] );
-									SetRock( poolGrids[i].x, poolGrids[i].y, grid[idx].RockHeight(), POOL_HEIGHT, grid[idx].Magma() );	
+									grid[idx].SetPool( true );
 
 									for( int k=0; k<4; ++k ) {
 										Vector2I v = poolGrids[i] + next[k];
@@ -666,15 +684,29 @@ void WorldMap::ProcessWater( ChitBag* cb )
 											posF.Set( (float)poolGrids[i].x+0.5f, (float)poolGrids[i].y+0.5f );
 											NewsEvent we( NewsEvent::PEGASUS, posF, StringPool::Intern( "waterfall" ));
 											cb->AddNews( we );
-											
-											break;
 										}
 									}
 								}
-								//zoneInfo[zy*DZONE+zx].pools += 1;
 							}
 							++currentColor;
 							poolGrids.Clear();
+						}
+					}
+				}
+
+				// Now add the models we need.
+				// FIXME: switch to voxel renderer.
+				for( int y=baseY; y<baseY+ZONE_SIZE; ++y ) {
+					for( int x=baseX; x<baseX+ZONE_SIZE; ++x ) {
+						CStr<12> resName;
+						GridResName( grid[INDEX(x,y)], &resName );
+						if ( !resName.empty() ) {
+							const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( resName.c_str() );
+							Model* m = engine->AllocModel( res );
+							Vector2F pos2 = { (float)x+0.5f, (float)y+0.5f };
+							m->SetPos( pos2.x, 0, pos2.y );
+							Vector2I pos2i = { x, y };
+							voxels.Add( pos2i, m );
 						}
 					}
 				}
@@ -719,7 +751,7 @@ void WorldMap::EmitWaterfalls( U32 delta )
 
 void WorldMap::DoTick( U32 delta, ChitBag* chitBag )
 {
-	ProcessWater( chitBag );
+	ProcessZone( chitBag );
 	EmitWaterfalls( delta );
 
 	slowTick -= (int)(delta);
@@ -744,8 +776,8 @@ void WorldMap::DoTick( U32 delta, ChitBag* chitBag )
 		r.max.x += 1.0f; r.max.z += 1.0f;
 		
 		int index = INDEX(magmaGrids[i]);
-		if ( grid[index].IsWater() || grid[index].PoolHeight() ) {
-			r.min.y =  r.max.y = (float)grid[index].PoolHeight();
+		if ( grid[index].IsWater() || grid[index].Pool() ) {
+			r.min.y =  r.max.y = (float)POOL_HEIGHT;
 			engine->particleSystem->EmitPD( pdSmoke, r, V3F_UP, engine->camera.EyeDir3(), delta );
 		}
 		else {
@@ -756,23 +788,38 @@ void WorldMap::DoTick( U32 delta, ChitBag* chitBag )
 }
 
 
-void WorldMap::SetRock( int x, int y, int h, int pool, bool magma )
+void WorldMap::GridResName( const WorldGrid& wg, grinliz::CStr<12>* str )
 {
-	// what is there now? h=[1,3]
-	// does it need to be changed removed?
-	// do blocks need to be set/removed?
+	str->Clear();
+	if ( !wg.IsLand() ) return;
 
-	Vector2I vec = { x, y };
-	int index = INDEX(x,y);
+	if ( wg.Pool() ) {
+		*str = "pool.2";
+	}
+	else if ( wg.Magma() ) {
+		*str = "magma.0";
+		(*str)[6] = '0' + wg.RockHeight();
+	}
+	else if ( wg.RockHeight() > 0 ) {
+		if ( wg.RockType() == WorldGrid::ICE )
+			*str = "ice.1";
+		else
+			*str = "rock.1";
+		(*str)[str->size()-1] = '0' + wg.RockHeight();
+	}
+}
 
-	if ( !grid[index].IsLand() ) {
+
+void WorldMap::SetRock( int x, int y, int h, bool magma, int rockType )
+{
+	Vector2I vec	= { x, y };
+	int index		= INDEX(x,y);
+	bool loading	= (h==-2);
+	const WorldGrid was = grid[index];
+
+	if ( !was.IsLand() ) {
 		return;
 	}
-
-	bool wasPassable = grid[index].IsPassable();
-	int  hWas = grid[index].RockHeight();
-	int  pWas = grid[index].PoolHeight();	
-	bool mWas = grid[index].Magma();
 
 	if ( h == -1 ) {
 		if (    ( iMapGridUse && !iMapGridUse->MapGridUse( x, y ))
@@ -781,16 +828,11 @@ void WorldMap::SetRock( int x, int y, int h, int pool, bool magma )
 			h = grid[index].NominalRockHeight();
 		}
 		else {
-			h = hWas;
+			h = was.RockHeight();
 		}
 	}
 	else if ( h == -2 ) {
-		hWas = 0;
-		pWas = 0;
-		mWas = false;
 		h     = grid[index].RockHeight();
-		pool  = grid[index].PoolHeight();
-		magma = grid[index].Magma();
 		if ( iMapGridUse ) {
 			GLASSERT( iMapGridUse->MapGridUse( x, y ) == 0 );
 		}
@@ -798,78 +840,33 @@ void WorldMap::SetRock( int x, int y, int h, int pool, bool magma )
 	else {
 		if ( iMapGridUse ) {
 			if ( iMapGridUse->MapGridUse( x, y )) {
-				GLASSERT( hWas == 0 && pWas == 0 );
+				GLASSERT( was.RockHeight() == 0 && was.Pool() == false );
 				return;
 			}
 		}
 	}
+	WorldGrid wg = was;
+	wg.SetRockHeight( h );
+	wg.SetMagma( magma );
+	wg.SetRockType( rockType );
 
-	CStr<12> name; 
-	bool modelWas = false;
-
-	GridResName( grid[index].IsLand(), hWas, pWas, mWas, &name );
-	if ( name.Length() ) {
-		modelWas = true;
+	if ( !was.Equal( wg )) {
+		ModifyVoxel( x, y );
+		grid[INDEX(x,y)] = wg;
 	}
 
-
-#ifdef DEBUG
-	if ( pool > 0 )
-		GLASSERT( pool > h );
-	if ( engine ) {
-		if ( modelWas ) {
-			Model* m = 0;
-			voxels.Query( vec, &m );
-			GridResName( grid[index].IsLand(), hWas, pWas, mWas, &name );
-			GLASSERT( m && m->GetResource()->header.name == name.c_str() );
+	if ( was.Magma() != wg.Magma() ) {
+		if ( was.Magma() ) {
+			// Magma going away.
+			int i = magmaGrids.Find( vec );
+			GLASSERT( i >= 0 );
+			if ( i >= 0 ) {
+				magmaGrids.Remove( i );
+			}
 		}
 		else {
-			GLASSERT( voxels.Query( vec, 0 ) == false );
-		}
-	}
-#endif
-
-	if ( h != hWas || pool != pWas || magma != mWas ) {
-
-		if ( engine ) {
-			if ( modelWas ) {
-				Model* m = voxels.Remove( vec );
-				engine->FreeModel( m );
-			}
-			GridResName( grid[index].IsLand(), h, pool, magma, &name );
-			if ( name.Length() ) {
-				const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( name.c_str() );
-				Model* m = engine->AllocModel( res );
-				m->SetPos( (float)vec.x+0.5f, 0.0f, (float)vec.y+0.5f );
-				GLASSERT( m );
-				voxels.Add( vec, m );
-			}
-		}
-		grid[index].SetRockHeight( h );
-		grid[index].SetPoolHeight( pool );
-		grid[index].SetMagma( magma );
-		grid[index].DeltaHP( grid[index].TotalHP() );
-
-		if ( wasPassable != grid[index].IsPassable() ) {
-			ResetPather( x, y );
-		}
-
-		if ( h != hWas ) {
-			waterInit.Clear( vec.x >> ZONE_SHIFT, vec.y >> ZONE_SHIFT );
-		}
-		if ( magma != mWas ) {
-			if ( mWas ) {
-				// Magma going away.
-				int i = magmaGrids.Find( vec );
-				GLASSERT( i >= 0 );
-				if ( i >= 0 ) {
-					magmaGrids.Remove( i );
-				}
-			}
-			else {
-				// Magma adding.
-				magmaGrids.Push( vec );
-			}
+			// Magma adding.
+			magmaGrids.Push( vec );
 		}
 	}
 }

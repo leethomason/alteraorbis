@@ -20,12 +20,12 @@
       <item name="claw"
             flags="MELEE_WEAPON RANGED_WEAPON INTRINSIC"
             hardpoint="trigger"
-            meleeDamageMult="10"
+            meleeDamage="10"
+            rangedDamage="5"
             cooldown="500"
             reload="1000"
             clipCap="10"
-            speed ="1.5"
-            rangedDamage="10"/>
+            speed ="1.5"/>
     </intrinsics>
   </item>
 
@@ -60,7 +60,7 @@
       <item name="pincer"
             flags="MELEE_WEAPON INTRINSIC"
             hardpoint="trigger"
-            meleeDamageMult="1.8">
+            meleeDamage="1.8">
       </item>
     </intrinsics>
   </item>
@@ -73,7 +73,7 @@
       <item name="pincer"
             flags="MELEE_WEAPON INTRINSIC"
             hardpoint="trigger"
-            meleeDamageMult="2.0">
+            meleeDamage="2.0">
       </item>
     </intrinsics>
   </item>
@@ -96,7 +96,7 @@
       <item name="claw"
             flags="MELEE_WEAPON INTRINSIC EFFECT_FIRE"
             hardpoint="trigger"
-            meleeDamageMult="1.2">
+            meleeDamage="1.2">
       </item>
       <item name="breath"
             flags="RANGED_WEAPON INTRINSIC EFFECT_FIRE EFFECT_EXPLOSIVE RENDER_TRAIL"

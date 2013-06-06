@@ -91,6 +91,9 @@
   <model filename="rock.ac" modelName="rock.1" origin="0 0 0" shading="flat" />
   <model filename="rock.ac" modelName="rock.2" origin="2 0 0" shading="flat" />
   <model filename="rock.ac" modelName="rock.3" origin="4 0 0" shading="flat" />
+  <model filename="ice.ac"  modelName="ice.1"  origin="0 0 0" shading="flat" />
+  <model filename="ice.ac"  modelName="ice.2"  origin="2 0 0" shading="flat" />
+  <model filename="ice.ac"  modelName="ice.3"  origin="4 0 0" shading="flat" />
 
   <model filename="pool.ac" modelName="pool.2" origin="2 0 0" shading="flat" />
 

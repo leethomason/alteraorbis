@@ -80,7 +80,7 @@ int VolcanoScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 					worldMap->SetMagma( x, y, false );
 					const WorldGrid& g = worldMap->GetWorldGrid( x, y );
 					// Does lots of error checking. Can set without checks:
-					worldMap->SetRock( x, y, g.NominalRockHeight(), 0, false );
+					worldMap->SetRock( x, y, g.NominalRockHeight(), false, 0 );
 				}
 			}
 		}
@@ -108,7 +108,7 @@ int VolcanoScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 					int x = r.min.x + ctx.chit->random.Rand( r.Width() );
 					int y = r.min.y + ctx.chit->random.Rand( r.Height() );
 					if (    worldMap->GetWorldGrid( x, y ).RockHeight()
-						 || worldMap->GetWorldGrid( x, y ).PoolHeight()) 
+						 || worldMap->GetWorldGrid( x, y ).Pool()) 
 					{
 						int gold = ReserveBank::Instance()->WithdrawVolcanoGold();
 						Vector3F v3 = { (float)x+0.5f, 0, (float)y+0.5f };
@@ -116,7 +116,7 @@ int VolcanoScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 					}
 				}
 				if (    worldMap->GetWorldGrid( pos.x, pos.y ).RockHeight()
-					 || worldMap->GetWorldGrid( pos.x, pos.y ).PoolHeight()) 
+					 || worldMap->GetWorldGrid( pos.x, pos.y ).Pool()) 
 				{	
 					int gold = 0;
 					int crystal = NO_CRYSTAL;

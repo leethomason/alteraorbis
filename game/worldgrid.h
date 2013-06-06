@@ -21,14 +21,14 @@ private:
 	unsigned isPort				: 1;
 	unsigned isCore				: 1;
 
-	unsigned magma				: 1;	// land, rock, or water can be set to magma
-
-	unsigned zoneSize			: 5;	// 0-31 (need 0-16)
 	unsigned nominalRockHeight	: 2;	// 0-3
+	unsigned rockType			: 1;	// ROCK, ICE
+	unsigned magma				: 1;	// land, rock, or water can be set to magma
 	unsigned rockHeight			: 2;
 	unsigned hasPool			: 1;
 
-	unsigned hp					: 9;	// 0-511, want something in the 0-100 range. Mega HP
+	unsigned zoneSize			: 5;	// 0-31 (need 0-16)
+	unsigned hp					: 9;	// 0-511
 
 	unsigned debugAdjacent		: 1;
 	unsigned debugPath			: 1;
@@ -37,6 +37,24 @@ private:
 	bool IsBlocked() const			{ return (!isLand) || isGrid || rockHeight || hasPool; }
 
 public:
+	// Not a full compare; more "equal type"
+	bool Equal( const WorldGrid& wg ) const {
+		return    isLand == wg.isLand
+			   && isGrid == wg.isGrid
+			   && isPort == wg.isPort
+			   && isCore == wg.isCore
+			   && nominalRockHeight == wg.nominalRockHeight
+			   && rockType == wg.rockType
+			   && magma == wg.magma
+			   && rockHeight == wg.rockHeight
+			   && hasPool == wg.hasPool;
+	}
+
+	enum {
+		ROCK,
+		ICE
+	};
+
 	grinliz::Color4U8 ToColor() const {
 		grinliz::Color4U8 c = { 0, 0, 0, 255 };
 
@@ -120,12 +138,17 @@ public:
 		rockHeight = h;
 	}
 
-	int PoolHeight() const { return hasPool ? POOL_HEIGHT : 0; }
-	void SetPoolHeight( int p ) {
-		GLASSERT( IsLand() || (p==0) );
-		GLASSERT( p==0 || p==POOL_HEIGHT );
-		GLASSERT( !p || p > (int)rockHeight );
-		hasPool = (p == POOL_HEIGHT) ? 1 : 0;
+	int RockType() const { return rockType; }
+	void SetRockType( int type ) {
+		GLASSERT( type >=0 && type <= ICE );
+		rockType = type;
+	}
+
+	bool Pool() const { return hasPool ? true : false; }
+	void SetPool( bool p ) {
+		GLASSERT( IsLand() || (p==false) );
+		GLASSERT( !p || POOL_HEIGHT > (int)rockHeight );
+		hasPool = p ? 1 : 0;
 	}
 
 	bool IsWater() const		{ return !IsLand(); }

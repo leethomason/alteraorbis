@@ -19,6 +19,8 @@ x integers for discrete values (hp, gold)
 x support melee attack on rocks
 - Move after shooting target, continue to hit after destroying rock. need more awareness
   of the overall AI state.
+- Melee should rotate to target (both rock and chit)
+- How does Ice and magma interact?
 
 - game
 	- Gold
@@ -32,7 +34,7 @@ x support melee attack on rocks
 		x remove rock ray
 		x fix crystal types
 		x bind to core
-		- workers remove rock
+		x workers remove rock
 		- workers add ice
 		- workers build kiosk
 		- visitors warp in, travel warp out

@@ -289,7 +289,7 @@ void Sim::CreateRockInOutland()
 		if ( !sd.HasCore() ) {
 			for( int j=sd.y; j<sd.y+SECTOR_SIZE; ++j ) {
 				for( int i=sd.x; i<sd.x+SECTOR_SIZE; ++i ) {
-					worldMap->SetRock( i, j, -1, 0, false );
+					worldMap->SetRock( i, j, -1, false, 0 );
 				}
 			}
 		}
@@ -301,7 +301,7 @@ void Sim::SetAllRock()
 {
 	for( int j=0; j<worldMap->Height(); ++j ) {
 		for( int i=0; i<worldMap->Width(); ++i ) {
-			worldMap->SetRock( i, j, -1, 0, false );
+			worldMap->SetRock( i, j, -1, false, 0 );
 		}
 	}
 }
