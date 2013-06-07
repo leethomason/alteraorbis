@@ -50,6 +50,8 @@ public:
 
 	// Returns all the models in the planes.
 	Model* Query( const grinliz::Plane* planes, int nPlanes, int requiredFlags, int excludedFlags );
+	// Returns all the valid areas from the last query. (used by voxel engine.)
+	const grinliz::CArray<grinliz::Rectangle2I, 256>& Zones( int *n )	{ return zones; }
 
 	// Returns all the models in the 2D bounds.
 	Model* QueryRect( const grinliz::Rectangle2F& rect, int required, int excluded );
@@ -96,10 +98,10 @@ private:
 
 	struct Node
 	{
-		grinliz::Rectangle3F aabb;
+		grinliz::Rectangle3F aabb;	// for testing
+		grinliz::Vector2I origin;	// for voxels
 
 		int depth;
-		int queryID;
 		int nModels;
 		Item* root;
 		Node* parent;
@@ -145,8 +147,8 @@ private:
 
 	int requiredFlags;
 	int excludedFlags;
-	int queryID;
 
+	grinliz::CArray<grinliz::Rectangle2I, 256> zones;
 	grinliz::MemoryPool modelPool;
 
 	enum {

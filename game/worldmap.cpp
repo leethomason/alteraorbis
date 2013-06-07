@@ -30,6 +30,7 @@
 #include "../engine/texture.h"
 #include "../engine/ufoutil.h"
 #include "../engine/surface.h"
+#include "../engine/loosequadtree.h"
 
 #include "worldinfo.h"
 #include "gameitem.h"
@@ -93,6 +94,7 @@ void WorldMap::FreeVBOs()
 		vertexVBO[i].Destroy();
 		indexVBO[i].Destroy();
 	}
+	voxelVertexVBO.Destroy();
 }
 
 
@@ -128,12 +130,16 @@ void WorldMap::AttachEngine( Engine* e, IMapGridUse* imap )
 			}
 		}
 	}
-	GLASSERT( e==0 || voxels.Empty() );
 	engine = e;
 	iMapGridUse = imap;
+
+	if ( e == 0 && voxelVertexVBO.IsValid() ) {
+		voxelVertexVBO.Destroy();
+	}
 }
 
 
+/*
 Model* WorldMap::GetVoxel( int x, int y )
 {
 	Model* m = 0;
@@ -156,6 +162,7 @@ void WorldMap::VoxelHit( Model* m, const DamageDesc& dd )
 		SetRock( map.x, map.y, 0, false, 0 );
 	}
 }
+*/
 
 
 void WorldMap::SavePNG( const char* path )
@@ -580,13 +587,6 @@ void WorldMap::ProcessZone( ChitBag* cb )
 				for( int y=baseY; y<baseY+ZONE_SIZE; ++y ) {
 					for( int x=baseX; x<baseX+ZONE_SIZE; ++x ) {
 						grid[INDEX(x,y)].SetPool( false );
-
-						Model* m=0;
-						Vector2I v = {x,y};
-						if ( voxels.Query( v, &m )) {
-							voxels.Remove( v );
-							engine->FreeModel( m );
-						}
 					}
 				}
 
@@ -690,23 +690,6 @@ void WorldMap::ProcessZone( ChitBag* cb )
 							}
 							++currentColor;
 							poolGrids.Clear();
-						}
-					}
-				}
-
-				// Now add the models we need.
-				// FIXME: switch to voxel renderer.
-				for( int y=baseY; y<baseY+ZONE_SIZE; ++y ) {
-					for( int x=baseX; x<baseX+ZONE_SIZE; ++x ) {
-						CStr<12> resName;
-						GridResName( grid[INDEX(x,y)], &resName );
-						if ( !resName.empty() ) {
-							const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( resName.c_str() );
-							Model* m = engine->AllocModel( res );
-							Vector2F pos2 = { (float)x+0.5f, (float)y+0.5f };
-							m->SetPos( pos2.x, 0, pos2.y );
-							Vector2I pos2i = { x, y };
-							voxels.Add( pos2i, m );
 						}
 					}
 				}
@@ -1633,6 +1616,95 @@ void WorldMap::Submit( GPUState* shader, bool emissiveOnly )
 			shader->Draw( stream, texture[i], vertexVBO[i], nIndex[i], indexVBO[i] );
 		}
 	}
+}
+
+
+void WorldMap::PushVoxel( int id, float x, float z, float h, const float* walls )
+{
+	Rectangle3F r;
+
+	r.Set( x, h, z,	x+1.0f, h, z+1.0f );
+	PushVoxelQuad( id, r );
+
+	// duplicated in PrepVoxels
+	static const Vector2F delta[4] = { {1,0}, {0,1}, {-1,0}, {0,-1} };
+
+	for( int i=0; i<4; ++i ) {
+		if ( walls[i] >= 0 ) {
+			r.Set(	x+delta[i].x, walls[i], y FIXME add delta[i+1 % 4],	
+					x+delta[i].x, h,		y+1.f );
+			PushVoxelQuad( id, r );
+		}
+	}
+}
+
+
+void WorldMap::PrepVoxels( SpaceTree* spaceTree )
+{
+	// For each region of the spaceTree that is visible,
+	// generate voxels.
+	if ( !voxelVertexVBO.IsValid()) {
+		voxelVertexVBO.Create( 0, sizeof(Vertex), MAX_VOXEL_QUADS*4 );
+	}
+	GLASSERT( voxelVertexVBO.IsValid());
+	voxelBuffer.Clear();
+	
+	const CArray<Rectangle2I, 256>& zones = spaceTree->Zones();
+	for( int i=0; i<zones.Size(); ++i ) {
+		Rectangle2I b = zones[i];
+		// Don't reach into the edge, which is used as an always-0 pad.
+		if ( b.min.x == 0 ) b.min.x = 1;
+		if ( b.max.x == width-1) b.max.x = width-2;
+		if ( b.min.y == 0 ) b.min.y = 1;
+		if ( b.max.y == height-1) b.max.y = height-2;
+
+		for( int y=b.min.y; y<=b.max.y; ++y ) {
+			for( int x=b.min.x; x<=b.max.x; ++x ) {
+
+			// Generate rock, magma, or water.
+			// Generate vericles down (but not up.)
+			float wall[4] = { -1, -1, -1, -1 };
+			float h = 0;
+			int id = ROCK;
+			const WorldGrid& wg = grid[INDEX(x,y)];
+			if ( wg.Pool() ) {
+				id = POOL;
+				h = (float)POOL_HEIGHT - 0.2f;
+			}
+			else if ( wg.Magma() ) {
+				id = MAGMA;
+				h = (float)wg.RockHeight();
+				if ( h < 0.1f ) h = 0.1f;
+				// Draw all walls:
+				wall[0] = wall[1] = wall[2] = wall[3] = 0;
+			}
+			else {
+				id = ROCK;
+				h = (float)wg.RockHeight();
+				// duplicated in PushVoxel
+				static const Vector2I delta[4] = { {1,0}, {0,1}, {-1,0}, {0,-1} };
+				for( int k=0; k<4; ++k ) {
+					const WorldGrid& next = grid[INDEX(x+delta[k].x, y+delta[k].y)];
+					if ( !next.Pool() && !next.Magma() ) {
+						// draw wall or nothing.
+						if ( next.RockHeight() < wg.RockHeight() ) {
+							wall[k] = (float)next.RockHeight();
+						}
+					}
+					else {
+						wall[k] = 0;
+					}
+				}
+			}
+			PushCube( id, h, wall ); 
+		}
+	}
+}
+
+
+void WorldMap::DrawVoxels( const grinliz::Matrix4* xform )
+{
+
 }
 
 

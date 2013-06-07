@@ -305,6 +305,9 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 	// Get the working set of models.
 	int exclude = Model::MODEL_INVISIBLE;
 	Model* modelRoot = spaceTree->Query( planes, 6, 0, exclude );
+	if ( map ) {
+		map->PrepVoxels( spaceTree );
+	}
 	
 	Color4F ambient, diffuse;
 	Vector4F dir;
@@ -350,6 +353,9 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 		QueueSet( &engineShaders, modelRoot, 0, 0, 0, EngineShaders::EMISSIVE );
 		{
 			modelDrawCalls[GLOW_BLACK] = GPUState::DrawCalls();
+			if ( map ) {
+				map->DrawVoxels();
+			}
 			renderQueue->Submit( 0, 0, 0 );
 			modelDrawCalls[GLOW_BLACK] = GPUState::DrawCalls() - modelDrawCalls[GLOW_BLACK];
 		}
@@ -368,6 +374,9 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 		// And throw the emissive shader to exclusive:
 		{
 			modelDrawCalls[GLOW_EMISSIVE] = GPUState::DrawCalls();
+			if ( map ) {
+				map->DrawVoxels();
+			}
 			renderQueue->Submit( 0, 0, 0 );
 			modelDrawCalls[GLOW_EMISSIVE] = GPUState::DrawCalls() - modelDrawCalls[GLOW_EMISSIVE];
 		}
@@ -403,6 +412,9 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 
 			{
 				modelDrawCalls[SHADOW] = GPUState::DrawCalls();
+				if ( map ) {
+					map->DrawVoxels( &shadowMatrix );
+				}
 				renderQueue->Submit( 0, 0, &shadowMatrix );
 				modelDrawCalls[SHADOW] = GPUState::DrawCalls() - modelDrawCalls[SHADOW];
 			}
@@ -422,6 +434,9 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 	// -------- Models ---------- //
 #ifdef ENGINE_RENDER_MODELS
 	{
+		if ( map ) {
+			map->DrawVoxels();
+		}
 		QueueSet( &engineShaders, modelRoot, 0, 0, 0, 0  );
 		{
 			modelDrawCalls[MODELS] = GPUState::DrawCalls();

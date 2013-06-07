@@ -38,7 +38,6 @@ SpaceTree::SpaceTree( float yMin, float yMax, int _size )
 {
 	size = Max( (int)CeilPowerOf2( _size ), 64 );
 	treeBounds.Set( 0, yMin, 0, (float)size, yMax, (float)size );
-	queryID = 0;
 	lightXPerY = 0;
 	lightZPerY = 0;
 
@@ -64,7 +63,6 @@ void SpaceTree::InitNode()
 			for( int i=0; i<size; i+=nodeSize ) 
 			{
 				Node* node = GetNode( depth, i, j );
-				node->queryID = 0;
 				node->parent = 0;
 				node->nModels = 0;
 				if ( depth > 0 ) {
@@ -73,6 +71,7 @@ void SpaceTree::InitNode()
 
 				node->aabb.Set( (float)(i), treeBounds.min.y, (float)(j),
 								(float)(i+nodeSize), treeBounds.max.y, (float)(j+nodeSize) );
+				node->origin.Set( i, j );
 
 				node->depth = depth;
 				node->root = 0;
@@ -252,6 +251,7 @@ Model* SpaceTree::Query( const Plane* planes, int nPlanes, int required, int exc
 	modelsFound = 0;
 	requiredFlags = required;
 	excludedFlags = excluded;
+	zones.Clear();
 
 #ifdef DEBUG
 	for( int i=0; i<NUM_NODES; ++i ) {
@@ -371,6 +371,17 @@ void SpaceTree::QueryPlanesRec(	const Plane* planes, int nPlanes, int intersecti
 	}
 	if ( intersection != grinliz::NEGATIVE ) 
 	{
+		if ( node->depth == DEPTH-1 ) {
+			// Write the data for the voxel test. It
+			// needs a record of all the nodes in view.
+			Rectangle2I voxel;
+			voxel.min = voxel.max = node->origin;
+			int c = ( size >> (node->depth-1));
+			voxel.max.x += c-1;
+			voxel.max.y += c-1;
+			zones.Push( voxel );
+		}
+
 #ifdef DEBUG
 		if ( intersection == grinliz::INTERSECT )
 			node->hit = 1;
@@ -453,7 +464,6 @@ Model* SpaceTree::QueryRay( const Vector3F& _origin,
 	modelsFound = 0;
 	requiredFlags = required;
 	excludedFlags = excluded;
-	++queryID;
 
 	Vector3F dummy;
 	if ( !intersection ) {

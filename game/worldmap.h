@@ -104,10 +104,6 @@ public:
 	}
 
 	const WorldGrid& GetWorldGrid( int x, int y ) { return grid[INDEX(x,y)]; }
-	// Need this to actually go away if it switches to voxels, but important
-	// to figure out how to do world queries.
-	Model* GetVoxel( int x, int y );
-	void VoxelHit( Model* m, const DamageDesc& dd );
 
 	grinliz::Vector2I FindPassable( int x, int y );
 
@@ -152,7 +148,16 @@ public:
 									grinliz::Vector2F* outPos );
 
 	// ---- Map ---- //
+	// Texture positions
+	enum {
+		ROCK,
+		POOL,
+		MAGMA,
+		ICE
+	};
 	virtual void Submit( GPUState* shader, bool emissiveOnly );
+	virtual void PrepVoxels( SpaceTree* );
+	virtual void DrawVoxels( const grinliz::Matrix4* xform );
 	virtual void Draw3D(  const grinliz::Color3F& colorMult, GPUState::StencilMode );
 	// ---- Device Loss --- //
 	virtual void DeviceLoss();
@@ -198,8 +203,9 @@ public:
 		ZONE_SIZE	= 16,		// adjust size of bit fields to be big enough to represent this
 		ZONE_SHIFT  = 4,
 		ZONE_SIZE2  = ZONE_SIZE*ZONE_SIZE,
-		DZONE		= MAX_MAP_SIZE/ZONE_SIZE,	// fixme: misleading. make private.
-	    DZONE2		= DZONE*DZONE,
+		NUM_ZONES	= MAX_MAP_SIZE/ZONE_SIZE,
+	    NUM_ZONES2	= NUM_ZONES*NUM_ZONES,
+		MAX_VOXEL_QUADS  = 4000		// actually uses quads, so the vertex=4*MAX_VOXEL_QUADS
 	};
 
 private:
@@ -288,6 +294,9 @@ private:
 	}
 
 	void PushQuad( int layer, int x, int y, int w, int h, grinliz::CDynArray<PTVertex>* vertex, grinliz::CDynArray<U16>* index );
+	void PushVoxel( int id, float x, float y, float h, const float* walls );
+	void PushVoxelQuad( int id, const grinliz::Rectangle3F& pos );
+
 	WorldGrid*					grid;
 	Engine*						engine;
 	IMapGridUse*				iMapGridUse;
@@ -312,23 +321,26 @@ private:
 		static U32 Hash( const grinliz::Vector2I& v)			{ return (U32)(v.y*MAX_MAP_SIZE+v.x); }
 		static bool Equal( const grinliz::Vector2I& v0, const grinliz::Vector2I& v1 )	{ return v0 == v1; }
 	};
-	grinliz::HashTable< grinliz::Vector2I, Model*, CompValue > voxels;
-
 	GPUVertexBuffer					vertexVBO[WorldGrid::NUM_LAYERS];
 	GPUIndexBuffer					indexVBO[WorldGrid::NUM_LAYERS];
 	Texture*						texture[WorldGrid::NUM_LAYERS];
 	int								nIndex[WorldGrid::NUM_LAYERS];
 
+	GPUVertexBuffer					voxelVertexVBO;
+	Texture*						voxelTexture;
+
 	grinliz::CDynArray< grinliz::Vector2I > waterfalls;
 	grinliz::CDynArray< grinliz::Vector2I > magmaGrids;
 
-	grinliz::BitArray< DZONE, DZONE, 1 > zoneInit;		// pather
-	grinliz::BitArray< DZONE, DZONE, 1 > voxelInit;		// rendering
+	grinliz::BitArray< NUM_ZONES, NUM_ZONES, 1 > zoneInit;		// pather
+	grinliz::BitArray< NUM_ZONES, NUM_ZONES, 1 > voxelInit;		// rendering
 	void ModifyVoxel( int x, int y ) { voxelInit.Clear( x/ZONE_SIZE, y/ZONE_SIZE ); }
 
 	// Temporaries to avoid allocation
 	grinliz::CDynArray< grinliz::Vector2I > waterStack;
 	grinliz::CDynArray< grinliz::Vector2I > poolGrids;
+	// Temporary - big one - last in class
+	grinliz::CArray< Vertex, MAX_VOXEL_QUADS*4 > voxelBuffer;
 };
 
 #endif // LUMOS_WORLD_MAP_INCLUDED

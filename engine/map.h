@@ -28,6 +28,7 @@
 #include "gpustatemanager.h"
 
 class WorldMap;
+class SpaceTree;
 
 // Allows the Map to call out for the state of locations.
 // The tricky bit is to remember to call the pather->Reset()
@@ -61,6 +62,9 @@ public:
 
 	void DrawOverlay( int layer );
 	virtual void Submit( GPUState* shader, bool emissiveOnly )	{}
+
+	virtual void PrepVoxels( SpaceTree* )											{}
+	virtual void DrawVoxels( const grinliz::Matrix4* xform )						{}
 	virtual void Draw3D( const grinliz::Color3F& colorMult, GPUState::StencilMode )	{}
 
 	// IGamuiRenderer
