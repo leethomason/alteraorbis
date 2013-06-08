@@ -72,7 +72,7 @@ class GPUVertexBuffer : public GPUBuffer
 public:
 	// a null value for vertex will create an empty buffer
 	static GPUVertexBuffer Create( const void* vertex, int size, int nVertex );
-	//void Upload( const Vertex* data, int size, int start );
+	void Upload( const Vertex* data, int size, int start );
 
 	GPUVertexBuffer() : GPUBuffer() {}
 	void Destroy();
@@ -283,6 +283,7 @@ public:
 	static grinliz::Color4F		diffuse;
 
 	void Draw( const GPUStream& stream, const GPUStreamData& data, int nIndex, int nInstance=0 );
+	void DrawQuads( const GPUStream& stream, const GPUStreamData& data, int nQuad );
 
 	void Draw( const GPUStream& stream, Texture* texture, const void* vertex,				int nIndex, const uint16_t* indices );
 	void Draw( const GPUStream& stream, Texture* texture, const GPUVertexBuffer& vertex,	int nIndex, const uint16_t* index );

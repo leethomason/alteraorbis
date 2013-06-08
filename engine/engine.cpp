@@ -353,9 +353,6 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 		QueueSet( &engineShaders, modelRoot, 0, 0, 0, EngineShaders::EMISSIVE );
 		{
 			modelDrawCalls[GLOW_BLACK] = GPUState::DrawCalls();
-			if ( map ) {
-				map->DrawVoxels();
-			}
 			renderQueue->Submit( 0, 0, 0 );
 			modelDrawCalls[GLOW_BLACK] = GPUState::DrawCalls() - modelDrawCalls[GLOW_BLACK];
 		}
@@ -375,7 +372,7 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 		{
 			modelDrawCalls[GLOW_EMISSIVE] = GPUState::DrawCalls();
 			if ( map ) {
-				map->DrawVoxels();
+				map->DrawVoxels( &ex, 0 );
 			}
 			renderQueue->Submit( 0, 0, 0 );
 			modelDrawCalls[GLOW_EMISSIVE] = GPUState::DrawCalls() - modelDrawCalls[GLOW_EMISSIVE];
@@ -413,7 +410,7 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 			{
 				modelDrawCalls[SHADOW] = GPUState::DrawCalls();
 				if ( map ) {
-					map->DrawVoxels( &shadowMatrix );
+					map->DrawVoxels( &shadowShader, &shadowMatrix );
 				}
 				renderQueue->Submit( 0, 0, &shadowMatrix );
 				modelDrawCalls[SHADOW] = GPUState::DrawCalls() - modelDrawCalls[SHADOW];
@@ -435,7 +432,9 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 #ifdef ENGINE_RENDER_MODELS
 	{
 		if ( map ) {
-			map->DrawVoxels();
+			GPUState state;
+			engineShaders.GetState( EngineShaders::LIGHT, 0, &state );
+			map->DrawVoxels( &state, 0 );
 		}
 		QueueSet( &engineShaders, modelRoot, 0, 0, 0, 0  );
 		{

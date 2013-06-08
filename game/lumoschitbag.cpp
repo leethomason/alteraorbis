@@ -221,7 +221,9 @@ void LumosChitBag::HandleBolt( const Bolt& bolt, Model* modelHit, const grinliz:
 				}
 			}
 			else {
+				/* FIXMEVOX
 				worldMap->VoxelHit( modelHit, dd );
+				*/
 			}
 		}
 	}
@@ -243,7 +245,9 @@ void LumosChitBag::HandleBolt( const Bolt& bolt, Model* modelHit, const grinliz:
 
 		if ( modelHit && !modelHit->userData ) {
 			// FIXME: doesn't splash exlposion damage. only direct hit
+			/* FIXMEVOX
 			worldMap->VoxelHit( modelHit, dd );
+			*/
 		}
 	}
 }

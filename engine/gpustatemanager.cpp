@@ -49,7 +49,7 @@ grinliz::Color4F	GPUState::diffuse;
 	return buffer;
 }
 
-/*
+
 void GPUVertexBuffer::Upload( const Vertex* data, int count, int start )
 {
 	GLASSERT( GPUState::SupportsVBOs() );
@@ -60,7 +60,7 @@ void GPUVertexBuffer::Upload( const Vertex* data, int count, int start )
 	glBindBufferX( GL_ARRAY_BUFFER, 0 );
 	CHECK_GL_ERROR;
 }
-*/
+
 
 void GPUVertexBuffer::Destroy() 
 {
@@ -583,6 +583,21 @@ void GPUState::Clear( float r, float g, float b, float a )
 	}
 }
 #endif
+
+
+void GPUState::DrawQuads( const GPUStream& stream, const GPUStreamData& data, int nQuad )
+{
+	ClearShaderFlag( ShaderManager::INSTANCE );
+	trianglesDrawn += nQuad * 2;
+	++drawCalls;
+
+	GLASSERT( data.vertexBuffer );
+
+	glBindBufferX( GL_ARRAY_BUFFER, data.vertexBuffer );
+	Weld( *this, stream, data );
+	glDrawArrays( GL_QUADS, 0, nQuad*4 );
+	glBindBufferX( GL_ARRAY_BUFFER, 0 );
+}
 
 
 void GPUState::Draw( const GPUStream& stream, const GPUStreamData& data, int nIndex, int instances )

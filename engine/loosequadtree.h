@@ -51,7 +51,7 @@ public:
 	// Returns all the models in the planes.
 	Model* Query( const grinliz::Plane* planes, int nPlanes, int requiredFlags, int excludedFlags );
 	// Returns all the valid areas from the last query. (used by voxel engine.)
-	const grinliz::CArray<grinliz::Rectangle2I, 256>& Zones( int *n )	{ return zones; }
+	const grinliz::CArray<grinliz::Rectangle2I, 256>& Zones() const	{ return zones; }
 
 	// Returns all the models in the 2D bounds.
 	Model* QueryRect( const grinliz::Rectangle2F& rect, int required, int excluded );

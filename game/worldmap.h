@@ -156,8 +156,8 @@ public:
 		ICE
 	};
 	virtual void Submit( GPUState* shader, bool emissiveOnly );
-	virtual void PrepVoxels( SpaceTree* );
-	virtual void DrawVoxels( const grinliz::Matrix4* xform );
+	virtual void PrepVoxels( const SpaceTree* );
+	virtual void DrawVoxels( GPUState* shader, const grinliz::Matrix4* xform );
 	virtual void Draw3D(  const grinliz::Color3F& colorMult, GPUState::StencilMode );
 	// ---- Device Loss --- //
 	virtual void DeviceLoss();
@@ -295,7 +295,7 @@ private:
 
 	void PushQuad( int layer, int x, int y, int w, int h, grinliz::CDynArray<PTVertex>* vertex, grinliz::CDynArray<U16>* index );
 	void PushVoxel( int id, float x, float y, float h, const float* walls );
-	void PushVoxelQuad( int id, const grinliz::Rectangle3F& pos );
+	Vertex* PushVoxelQuad( int id, const grinliz::Vector3F& normal );
 
 	WorldGrid*					grid;
 	Engine*						engine;

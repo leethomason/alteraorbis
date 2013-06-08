@@ -198,10 +198,12 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* 
 		for( int x=bi.min.x; x<=bi.max.x; ++x ) {
 			Vector2I mapPos = { x, y };
 			if ( InMeleeZone( engine, src, mapPos )) {
+				/* FIXMEVOX
 				Model* m = wm->GetVoxel( x, y );
 				if ( m ) {
 					wm->VoxelHit( m, dd );
 				}
+				*/
 			}
 		}
 	}

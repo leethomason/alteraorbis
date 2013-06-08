@@ -61,6 +61,8 @@ WorldMap::WorldMap( int width, int height ) : Map( width, height )
 	Init( width, height );
 	slowTick = SLOW_TICK;
 	iMapGridUse = 0;
+	
+	voxelTexture = 0;
 
 	texture[0] = TextureManager::Instance()->GetTexture( "map_water" );
 	texture[1] = TextureManager::Instance()->GetTexture( "map_grid" );
@@ -1619,32 +1621,62 @@ void WorldMap::Submit( GPUState* shader, bool emissiveOnly )
 }
 
 
+Vertex* WorldMap::PushVoxelQuad( int id, const Vector3F& normal )
+{
+	Vertex* vArr = voxelBuffer.PushArr( 4 );
+	float u = (float)id / 4.0f;
+	static const float du = 0.25f;
+
+	vArr[0].tex.Set( u, 0 );
+	vArr[1].tex.Set( u+du, 0 );
+	vArr[2].tex.Set( u+du, 1 );
+	vArr[3].tex.Set( u, 1 );
+
+	for( int i=0; i<4; ++i ) {
+		vArr[i].normal = normal;
+		vArr[i].boneID = 0;
+	}
+	return vArr;
+}
+
 void WorldMap::PushVoxel( int id, float x, float z, float h, const float* walls )
 {
-	Rectangle3F r;
-
-	r.Set( x, h, z,	x+1.0f, h, z+1.0f );
-	PushVoxelQuad( id, r );
+	Vertex* v = PushVoxelQuad( id, V3F_UP );
+	v[0].pos.Set( x, h, z );
+	v[1].pos.Set( x+1.f, h, z );
+	v[2].pos.Set( x+1.f, h, z+1.f );
+	v[3].pos.Set( x, h, z+1.f );
 
 	// duplicated in PrepVoxels
-	static const Vector2F delta[4] = { {1,0}, {0,1}, {-1,0}, {0,-1} };
+	static const float H = 0.5f;
+	static const Vector2F delta[4] = { {H,0}, {0,H}, {-H,0}, {0,-H} };
+
+	const Vector2F c = { x+0.5f, z+0.5f };
 
 	for( int i=0; i<4; ++i ) {
 		if ( walls[i] >= 0 ) {
-			r.Set(	x+delta[i].x, walls[i], y FIXME add delta[i+1 % 4],	
-					x+delta[i].x, h,		y+1.f );
-			PushVoxelQuad( id, r );
+			int j = (i+1)%4;
+
+			Vector2F min = c + delta[i] - delta[j];
+			Vector2F max = c + delta[i] + delta[j];
+
+			Vector3F normal = { delta[i].x*2.0f, 0.0f, delta[i].y*2.0f };
+			Vertex* v = PushVoxelQuad( id, normal );
+			v[0].pos.Set( min.x, walls[i], min.y );
+			v[1].pos.Set( max.x, walls[i], min.y );
+			v[2].pos.Set( max.x, h, max.y );
+			v[3].pos.Set( min.x, h, max.y );
 		}
 	}
 }
 
 
-void WorldMap::PrepVoxels( SpaceTree* spaceTree )
+void WorldMap::PrepVoxels( const SpaceTree* spaceTree )
 {
 	// For each region of the spaceTree that is visible,
 	// generate voxels.
 	if ( !voxelVertexVBO.IsValid()) {
-		voxelVertexVBO.Create( 0, sizeof(Vertex), MAX_VOXEL_QUADS*4 );
+		voxelVertexVBO = GPUVertexBuffer::Create( 0, sizeof(Vertex), MAX_VOXEL_QUADS*4 );
 	}
 	GLASSERT( voxelVertexVBO.IsValid());
 	voxelBuffer.Clear();
@@ -1661,50 +1693,67 @@ void WorldMap::PrepVoxels( SpaceTree* spaceTree )
 		for( int y=b.min.y; y<=b.max.y; ++y ) {
 			for( int x=b.min.x; x<=b.max.x; ++x ) {
 
-			// Generate rock, magma, or water.
-			// Generate vericles down (but not up.)
-			float wall[4] = { -1, -1, -1, -1 };
-			float h = 0;
-			int id = ROCK;
-			const WorldGrid& wg = grid[INDEX(x,y)];
-			if ( wg.Pool() ) {
-				id = POOL;
-				h = (float)POOL_HEIGHT - 0.2f;
-			}
-			else if ( wg.Magma() ) {
-				id = MAGMA;
-				h = (float)wg.RockHeight();
-				if ( h < 0.1f ) h = 0.1f;
-				// Draw all walls:
-				wall[0] = wall[1] = wall[2] = wall[3] = 0;
-			}
-			else {
-				id = ROCK;
-				h = (float)wg.RockHeight();
-				// duplicated in PushVoxel
-				static const Vector2I delta[4] = { {1,0}, {0,1}, {-1,0}, {0,-1} };
-				for( int k=0; k<4; ++k ) {
-					const WorldGrid& next = grid[INDEX(x+delta[k].x, y+delta[k].y)];
-					if ( !next.Pool() && !next.Magma() ) {
-						// draw wall or nothing.
-						if ( next.RockHeight() < wg.RockHeight() ) {
-							wall[k] = (float)next.RockHeight();
+				// Generate rock, magma, or water.
+				// Generate vericles down (but not up.)
+				float wall[4] = { -1, -1, -1, -1 };
+				float h = 0;
+				int id = ROCK;
+				const WorldGrid& wg = grid[INDEX(x,y)];
+				if ( wg.Pool() ) {
+					id = POOL;
+					h = (float)POOL_HEIGHT - 0.2f;
+				}
+				else if ( wg.Magma() ) {
+					id = MAGMA;
+					h = (float)wg.RockHeight();
+					if ( h < 0.1f ) h = 0.1f;
+					// Draw all walls:
+					wall[0] = wall[1] = wall[2] = wall[3] = 0;
+				}
+				else if ( wg.RockHeight() ) {
+					id = ROCK;
+					h = (float)wg.RockHeight();
+					// duplicated in PushVoxel
+					static const Vector2I delta[4] = { {1,0}, {0,1}, {-1,0}, {0,-1} };
+					for( int k=0; k<4; ++k ) {
+						const WorldGrid& next = grid[INDEX(x+delta[k].x, y+delta[k].y)];
+						if ( !next.Pool() && !next.Magma() ) {
+							// draw wall or nothing.
+							if ( next.RockHeight() < wg.RockHeight() ) {
+								wall[k] = (float)next.RockHeight();
+							}
+						}
+						else {
+							wall[k] = 0;
 						}
 					}
-					else {
-						wall[k] = 0;
-					}
 				}
+				PushVoxel( id, (float)x, (float)y, h, wall ); 
 			}
-			PushCube( id, h, wall ); 
 		}
 	}
+	voxelVertexVBO.Upload( voxelBuffer.Mem(), voxelBuffer.Size(), 0 );
 }
 
 
-void WorldMap::DrawVoxels( const grinliz::Matrix4* xform )
+void WorldMap::DrawVoxels( GPUState* state, const grinliz::Matrix4* xform )
 {
+	if ( !voxelTexture ) {
+		voxelTexture = TextureManager::Instance()->GetTexture( "voxel" );
+	}
+	Vertex v;
+	GPUStream stream( v );
+	Matrix4 m;
+	if ( xform ) {
+		m = *xform;
+	}
 
+	GPUStreamData data;
+	data.vertexBuffer = voxelVertexVBO.ID();
+	data.texture0 = voxelTexture;
+	data.matrix = &m;
+
+	state->DrawQuads( stream, data, voxelBuffer.Size()/4 );
 }
 
 

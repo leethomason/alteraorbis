@@ -167,7 +167,7 @@ bool AIComponent::LineOfSight( const ComponentSet& thisComp, const grinliz::Vect
 	Vector3F dir = dest - origin;
 	float length = dir.Length() + 1.0f;	// a little extra just in case
 
-	Model* voxel = map->GetVoxel( mapPos.x, mapPos.y );
+	Model* voxel = 0; // FIXMEVOX map->GetVoxel( mapPos.x, mapPos.y );
 
 	Vector3F at;
 	Model* m = engine->IntersectModel( origin, dir, length, TEST_TRI, 0, 0, ignore.Mem(), &at );

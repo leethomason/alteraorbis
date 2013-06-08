@@ -63,8 +63,8 @@ public:
 	void DrawOverlay( int layer );
 	virtual void Submit( GPUState* shader, bool emissiveOnly )	{}
 
-	virtual void PrepVoxels( SpaceTree* )											{}
-	virtual void DrawVoxels( const grinliz::Matrix4* xform )						{}
+	virtual void PrepVoxels( const SpaceTree* )											{}
+	virtual void DrawVoxels( GPUState* state, const grinliz::Matrix4* xform )		{}
 	virtual void Draw3D( const grinliz::Color3F& colorMult, GPUState::StencilMode )	{}
 
 	// IGamuiRenderer
