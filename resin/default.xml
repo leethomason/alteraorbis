@@ -39,7 +39,7 @@
   <texture filename="debugging.png" noMip="true" />
   <texture filename="rock.png" />
   <texture filename="magma.png" filename2="magma_em.png" emissive="true"/>
-  <texture filename="voxel.png" filename2="voxel_em.png" emissive="true"/>
+  <texture filename="voxel.png" filename2="voxel_em.png" emissive="true" width="256" height="64"/>
   <texture filename="flags.png" />
 
   <!-- note this makes textures and materials the same thing, to have the emissive

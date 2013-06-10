@@ -844,7 +844,6 @@ void WorldMap::SetRock( int x, int y, int h, bool magma, int rockType )
 		if ( was.Magma() ) {
 			// Magma going away.
 			int i = magmaGrids.Find( vec );
-			GLASSERT( i >= 0 );
 			if ( i >= 0 ) {
 				magmaGrids.Remove( i );
 			}
@@ -1628,9 +1627,9 @@ Vertex* WorldMap::PushVoxelQuad( int id, const Vector3F& normal )
 	static const float du = 0.25f;
 
 	vArr[0].tex.Set( u, 0 );
-	vArr[1].tex.Set( u+du, 0 );
+	vArr[1].tex.Set( u, 1 );
 	vArr[2].tex.Set( u+du, 1 );
-	vArr[3].tex.Set( u, 1 );
+	vArr[3].tex.Set( u+du, 0 );
 
 	for( int i=0; i<4; ++i ) {
 		vArr[i].normal = normal;
@@ -1643,9 +1642,9 @@ void WorldMap::PushVoxel( int id, float x, float z, float h, const float* walls 
 {
 	Vertex* v = PushVoxelQuad( id, V3F_UP );
 	v[0].pos.Set( x, h, z );
-	v[1].pos.Set( x+1.f, h, z );
+	v[1].pos.Set( x, h, z+1.f );
 	v[2].pos.Set( x+1.f, h, z+1.f );
-	v[3].pos.Set( x, h, z+1.f );
+	v[3].pos.Set( x+1.f, h, z );
 
 	// duplicated in PrepVoxels
 	static const float H = 0.5f;
@@ -1657,15 +1656,15 @@ void WorldMap::PushVoxel( int id, float x, float z, float h, const float* walls 
 		if ( walls[i] >= 0 ) {
 			int j = (i+1)%4;
 
-			Vector2F min = c + delta[i] - delta[j];
-			Vector2F max = c + delta[i] + delta[j];
+			const Vector2F v0 = c + delta[i] - delta[j];
+			const Vector2F v1 = c + delta[i] + delta[j];
 
 			Vector3F normal = { delta[i].x*2.0f, 0.0f, delta[i].y*2.0f };
 			Vertex* v = PushVoxelQuad( id, normal );
-			v[0].pos.Set( min.x, walls[i], min.y );
-			v[1].pos.Set( max.x, walls[i], min.y );
-			v[2].pos.Set( max.x, h, max.y );
-			v[3].pos.Set( min.x, h, max.y );
+			v[0].pos.Set( v0.x, walls[i],	v0.y );
+			v[1].pos.Set( v0.x, h,			v0.y );
+			v[2].pos.Set( v1.x, h,			v1.y );
+			v[3].pos.Set( v1.x, walls[i],	v1.y );
 		}
 	}
 }
@@ -1673,6 +1672,7 @@ void WorldMap::PushVoxel( int id, float x, float z, float h, const float* walls 
 
 void WorldMap::PrepVoxels( const SpaceTree* spaceTree )
 {
+	GRINLIZ_PERFTRACK
 	// For each region of the spaceTree that is visible,
 	// generate voxels.
 	if ( !voxelVertexVBO.IsValid()) {
@@ -1702,6 +1702,7 @@ void WorldMap::PrepVoxels( const SpaceTree* spaceTree )
 				if ( wg.Pool() ) {
 					id = POOL;
 					h = (float)POOL_HEIGHT - 0.2f;
+					PushVoxel( id, (float)x, (float)y, h, wall ); 
 				}
 				else if ( wg.Magma() ) {
 					id = MAGMA;
@@ -1709,6 +1710,7 @@ void WorldMap::PrepVoxels( const SpaceTree* spaceTree )
 					if ( h < 0.1f ) h = 0.1f;
 					// Draw all walls:
 					wall[0] = wall[1] = wall[2] = wall[3] = 0;
+					PushVoxel( id, (float)x, (float)y, h, wall ); 
 				}
 				else if ( wg.RockHeight() ) {
 					id = ROCK;
@@ -1727,8 +1729,8 @@ void WorldMap::PrepVoxels( const SpaceTree* spaceTree )
 							wall[k] = 0;
 						}
 					}
+					PushVoxel( id, (float)x, (float)y, h, wall ); 
 				}
-				PushVoxel( id, (float)x, (float)y, h, wall ); 
 			}
 		}
 	}
@@ -1743,17 +1745,20 @@ void WorldMap::DrawVoxels( GPUState* state, const grinliz::Matrix4* xform )
 	}
 	Vertex v;
 	GPUStream stream( v );
-	Matrix4 m;
 	if ( xform ) {
-		m = *xform;
+		state->PushMatrix( GPUState::MODELVIEW_MATRIX );
+		state->MultMatrix( GPUState::MODELVIEW_MATRIX, *xform );
 	}
 
 	GPUStreamData data;
 	data.vertexBuffer = voxelVertexVBO.ID();
 	data.texture0 = voxelTexture;
-	data.matrix = &m;
 
 	state->DrawQuads( stream, data, voxelBuffer.Size()/4 );
+
+	if ( xform ) {
+		state->PopMatrix( GPUState::MODELVIEW_MATRIX );
+	}
 }
 
 

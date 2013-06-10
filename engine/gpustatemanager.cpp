@@ -259,7 +259,6 @@ void MatrixStack::Multiply( const grinliz::Matrix4& m )
 //static 
 void GPUState::Weld( const GPUState& state, const GPUStream& stream, const GPUStreamData& data )
 {
-	//GRINLIZ_PERFTRACK
 	CHECK_GL_ERROR;
 	GLASSERT( stream.stride > 0 );
 
