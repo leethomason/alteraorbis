@@ -50,6 +50,17 @@ void DebugLine(	const grinliz::Vector3F& tail,
 
 void DrawDebugLines( U32 delta );
 
+struct ModelVoxel {
+	ModelVox() { model=0; voxel.Set(-1,-1); at.Zero(); }
+	bool ModelHit() const { return model != 0; };
+	bool VoxelHit() const { return voxel.x >= 0; }
+	bool Hit() const	  { return ModelHit() || VoxelHit(); }
+
+	Model*				model;
+	grinliz::Vector2I	voxel;
+	grinliz::Vector3F	at;
+};
+
 /*
 	Standard state:
 	Z-Write		enabled
@@ -130,6 +141,12 @@ public:
 							HitTestMethod testMethod,
 							int required, int exclude, const Model* const * ignore,
 							grinliz::Vector3F* intersection );
+
+	ModelVoxel IntersectModelVoxel( const grinliz::Vector3F& origin,
+									const grinliz::Vector3F& dir,
+									float length, 
+									HitTestMethod testMethod,
+									int required, int exclude, const Model* const * ignore );
 
 	enum {
 		NEAR,

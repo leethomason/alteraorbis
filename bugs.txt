@@ -1,3 +1,4 @@
+- texture bleeding in voxel renderer
 - flower colors (too saturated flowers)
 - use arrays to track components and component update time.
   switch to calling the components vs. calling the chit. coherence is good!

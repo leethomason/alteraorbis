@@ -216,8 +216,14 @@ bool BTexture::Scale()
 		SDL_FreeSurface( old );
 
 		printf( " Scaled" );
+		printf( " w=%d h=%d", surface->w, surface->h );
+
+		GLString path = "./resin/scaled/";
+		path += this->assetName;
+		path += ".bmp";
+
+		SDL_SaveBMP( surface, path.c_str() );
 	}
-	printf( " w=%d h=%d", surface->w, surface->h );
 	return true;
 }
 

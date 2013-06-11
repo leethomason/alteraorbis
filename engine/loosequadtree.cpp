@@ -484,7 +484,7 @@ Model* SpaceTree::QueryRay( const Vector3F& _origin,
 		// Can click outside of AABB pretty commonly, actually.
 		return 0;
 	}
-	Plane planes[6];
+	Plane planes[6];z
 	Rectangle3F rect;
 	rect.FromPair( p0, p1 );
 	Plane::CreatePlanes( rect, planes );

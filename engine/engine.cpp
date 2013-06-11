@@ -652,6 +652,18 @@ Model* Engine::IntersectModel( const Vector3F& origin, const Vector3F& dir, floa
 }
 
 
+ModelVoxel Engine::IntersectModelVoxel( const Vector3F& origin,
+										const Vector3F& dir,
+										float length, 
+										HitTestMethod testMethod,
+										int required, int exclude, const Model* const * ignore )
+{
+	ModelVoxel modelVoxel;
+
+	// Check voxel first; intersections limit the length.
+}
+
+
 void Engine::RestrictCamera()
 {
 	const Vector3F* eyeDir = camera.EyeDir3();

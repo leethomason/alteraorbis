@@ -1620,6 +1620,7 @@ void WorldMap::Submit( GPUState* shader, bool emissiveOnly )
 }
 
 
+
 Vertex* WorldMap::PushVoxelQuad( int id, const Vector3F& normal )
 {
 	Vertex* vArr = voxelBuffer.PushArr( 4 );
@@ -1658,6 +1659,8 @@ void WorldMap::PushVoxel( int id, float x, float z, float h, const float* walls 
 
 			const Vector2F v0 = c + delta[i] - delta[j];
 			const Vector2F v1 = c + delta[i] + delta[j];
+			float dH = h - walls[i];
+			GLASSERT( dH > 0 );
 
 			Vector3F normal = { delta[i].x*2.0f, 0.0f, delta[i].y*2.0f };
 			Vertex* v = PushVoxelQuad( id, normal );
@@ -1665,6 +1668,9 @@ void WorldMap::PushVoxel( int id, float x, float z, float h, const float* walls 
 			v[1].pos.Set( v0.x, h,			v0.y );
 			v[2].pos.Set( v1.x, h,			v1.y );
 			v[3].pos.Set( v1.x, walls[i],	v1.y );
+
+			//v[1].tex.y = dH;
+			//v[2].tex.y = dH;
 		}
 	}
 }
@@ -1692,6 +1698,14 @@ void WorldMap::PrepVoxels( const SpaceTree* spaceTree )
 
 		for( int y=b.min.y; y<=b.max.y; ++y ) {
 			for( int x=b.min.x; x<=b.max.x; ++x ) {
+
+				// Check for memory exceeded and break.
+				if ( voxelBuffer.Size()+(6*4) >= voxelBuffer.Capacity() ) {
+					GLASSERT(0);	// not a problem, but may need to adjust capacity
+					y = b.max.y+1;
+					x = b.max.x+1;
+					break;
+				}
 
 				// Generate rock, magma, or water.
 				// Generate vericles down (but not up.)
