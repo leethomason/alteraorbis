@@ -80,6 +80,15 @@ public:
 	virtual void BeginTexture( const void* textureHandle );
 	virtual void Render( const void* renderState, const void* textureHandle, int nIndex, const uint16_t* index, int nVertex, const gamui::Gamui::Vertex* vertex );
 
+	virtual grinliz::Vector3I IntersectVoxel(	const grinliz::Vector3F& origin,
+												const grinliz::Vector3F& dir,
+												float length,				
+												grinliz::Vector3F* intersection ) 
+	{ 
+		grinliz::Vector3I v = { -1, -1, -1 }; 
+		return v; 
+	}
+
 	gamui::Gamui overlay0;	// overlay map, under models
 	gamui::Gamui overlay1;	// overlay map, over models
 

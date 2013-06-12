@@ -661,6 +661,20 @@ ModelVoxel Engine::IntersectModelVoxel( const Vector3F& origin,
 	ModelVoxel modelVoxel;
 
 	// Check voxel first; intersections limit the length.
+	if ( map ) {
+		modelVoxel.voxel = map->IntersectVoxel( origin, dir, length, &modelVoxel.at );
+		if ( modelVoxel.voxel.x >= 0 ) {
+			// We did hit a voxel.
+			float voxelLength = ( origin - modelVoxel.at ).Length();
+			length = Min( length, voxelLength );	// don't need to check past the voxel.
+		}
+	}
+	modelVoxel.model = IntersectModel( origin, dir, length, testMethod, required, exclude, ignore, &modelVoxel.at );
+	if ( modelVoxel.model ) {
+		// Clear the voxel.
+		modelVoxel.voxel.Set( -1, -1, -1 );
+	}
+	return modelVoxel;
 }
 
 

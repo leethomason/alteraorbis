@@ -1244,6 +1244,94 @@ void WorldMap::PrintStateInfo( void* state )
 	GLOUTPUT(( "(%d,%d)s=%d ", vec.x, vec.y, size ));	
 }
 
+// The paper: "A Fast Voxel Traversal Algorithm for Ray Tracing" by Amanatides and Woo
+// based on code at: http://www.xnawiki.com/index.php?title=Voxel_traversal
+
+Vector3I WorldMap::IntersectVoxel(	const Vector3F& origin,
+									const Vector3F& dir,
+									float length,				
+									Vector3F* at )
+{
+	GLASSERT( Equal( dir.Length(), 1.0f, 0.0001f ));
+	static const Vector3I noResult = { -1, -1, -1 };
+
+	Vector3F p0, p1;
+	int test0, test1;
+	Rectangle3F bounds;
+	bounds.Set( 0, 0, 0, (float)width, (float)MAX_ROCK_HEIGHT, (float)height );
+	Rectangle3I ibounds;
+	ibounds.Set( 0, 0, 0, width-1, MAX_ROCK_HEIGHT-1, height-1 );
+
+	// Where this comes in and out of the world voxels.
+	IntersectRayAllAABB( origin, dir, bounds, &test0, &p0, &test1, &p1 );
+
+	if ( test0 == REJECT || test1 == REJECT ) {
+		// voxel grid isn't intersected.
+		return noResult;
+	}
+
+	// Keep in mind floating point issues. Certainly can have p values
+	// greater than the cell coordinates (y=3.0 rounds to 3) and probably
+	// possible to get small negative as well.
+	Vector3I startCell = { (int)p0.x, (int)p0.y, (int)p0.z };
+	Vector3I endCell   = { (int)p1.x, (int)p1.y, (int)p1.z };
+
+	Vector3I step = { (int)Sign(dir.x), (int)Sign(dir.y), (int)Sign(dir.z) };
+	Vector3F boundary = { (float)startCell.x + (step.x>0) ? 1.f : 0,
+						  (float)startCell.y + (step.y>0) ? 1.f : 0,
+						  (float)startCell.z + (step.z>0) ? 1.f : 0 };
+
+	// Distance, in t, to the next boundary. Being careful of straight lines.
+	Vector3F tMax = { 0, 0, 0 };
+	Vector3F tDelta = { 0, 0, 0 };
+
+	int n = 0;
+	for( int i=0; i<3; ++i ) {
+		if ( dir.X(i) ) {
+			tMax.X(i)   = (boundary.X(i) - p0.X(i)) / dir.X(i);	// how far before voxel boundary
+			tDelta.X(i) = ((float)step.X(i)) / dir.X(i);		// how far to cross a voxel
+			n += 1 + abs(startCell.X(i) - endCell.X(i));
+		}
+	}
+
+	Vector3I cell = startCell;
+	for( int i=0; i<n; ++i ) {
+
+		// The only part specific to the map.
+		if ( ibounds.Contains( cell )) {
+			const WorldGrid& wg = this->GetWorldGrid( cell.x, cell.z );
+			if (    (wg.Pool() && cell.y < POOL_HEIGHT)
+				|| (cell.y < wg.RockHeight() )) 
+			{
+				int result = INTERSECT;
+				if ( at ) {
+					Rectangle3F c;
+					c.Set( (float)cell.x, (float)cell.y, (float)cell.z, (float)(cell.x+1), (float)(cell.y+1), (float)(cell.z+1));
+					result = IntersectRayAABB( origin, dir, c, at, 0 );
+					GLASSERT( result == INSIDE || result == INTERSECT );
+				}
+				if ( result == INTERSECT || result == INSIDE ) {
+					return cell;
+				}
+			}
+		}
+
+		if ( tMax.x < tMax.y && tMax.y < tMax.z ) {
+			cell.x += step.x;
+			tMax.x += tDelta.x;
+		}
+		else if ( tMax.y < tMax.z ) {
+			cell.y += step.y;
+			tMax.y += tDelta.y;
+		}
+		else {
+			cell.z += step.z;
+			tMax.z += tDelta.z;
+		}
+	}
+
+	return noResult;
+}
 
 
 // Such a good site, for many years: http://www-cs-students.stanford.edu/~amitp/gameprog.html

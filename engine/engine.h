@@ -38,6 +38,7 @@ class EngineShaders;
 
 struct Bolt;
 class BoltRenderer;
+class Model;
 
 static const grinliz::Vector3F V3F_UP   = { 0, 1, 0 };
 static const grinliz::Vector3F V3F_DOWN = { 0, -1, 0 };
@@ -51,13 +52,14 @@ void DebugLine(	const grinliz::Vector3F& tail,
 void DrawDebugLines( U32 delta );
 
 struct ModelVoxel {
-	ModelVox() { model=0; voxel.Set(-1,-1); at.Zero(); }
+	ModelVoxel() { model=0; voxel.Set(-1,-1,-1); at.Zero(); }
 	bool ModelHit() const { return model != 0; };
 	bool VoxelHit() const { return voxel.x >= 0; }
 	bool Hit() const	  { return ModelHit() || VoxelHit(); }
+	grinliz::Vector2I Voxel2() const { grinliz::Vector2I v = { voxel.x, voxel.y }; return v; }
 
 	Model*				model;
-	grinliz::Vector2I	voxel;
+	grinliz::Vector3I	voxel;
 	grinliz::Vector3F	at;
 };
 

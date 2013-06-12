@@ -159,6 +159,11 @@ public:
 	virtual void PrepVoxels( const SpaceTree* );
 	virtual void DrawVoxels( GPUState* shader, const grinliz::Matrix4* xform );
 	virtual void Draw3D(  const grinliz::Color3F& colorMult, GPUState::StencilMode );
+	virtual grinliz::Vector3I IntersectVoxel(	const grinliz::Vector3F& origin,
+												const grinliz::Vector3F& dir,
+												float length,				
+												grinliz::Vector3F* at ); 
+
 	// ---- Device Loss --- //
 	virtual void DeviceLoss();
 

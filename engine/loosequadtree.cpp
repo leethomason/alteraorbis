@@ -484,7 +484,7 @@ Model* SpaceTree::QueryRay( const Vector3F& _origin,
 		// Can click outside of AABB pretty commonly, actually.
 		return 0;
 	}
-	Plane planes[6];z
+	Plane planes[6];
 	Rectangle3F rect;
 	rect.FromPair( p0, p1 );
 	Plane::CreatePlanes( rect, planes );
@@ -532,7 +532,7 @@ Model* SpaceTree::QueryRay( const Vector3F& _origin,
 		if ( result == grinliz::INTERSECT ) {
 			// Ugly little bug: check for t>=0, else could collide with objects
 			// that touch the bounding box but are before the ray starts.
-			if ( t >= 0.0f && t < close ) {
+			if ( t >= 0.0f && t <= close ) {
 				closeModel = root;
 				*intersection = testInt;
 				close = t;
