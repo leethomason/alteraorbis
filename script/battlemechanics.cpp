@@ -198,12 +198,11 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* 
 		for( int x=bi.min.x; x<=bi.max.x; ++x ) {
 			Vector2I mapPos = { x, y };
 			if ( InMeleeZone( engine, src, mapPos )) {
-				/* FIXMEVOX
-				Model* m = wm->GetVoxel( x, y );
-				if ( m ) {
-					wm->VoxelHit( m, dd );
+				int h = wm->GetVoxelHeight( x, y );
+				if ( h ) {
+					Vector3I voxel = { x, 0, y };
+					wm->VoxelHit( voxel, dd );
 				}
-				*/
 			}
 		}
 	}
@@ -516,7 +515,7 @@ void BattleMechanics::GenerateExplosionMsgs( const DamageDesc& dd, const Vector3
 			// This is correct, and keeps explosions from going through walls.
 			// But is unsitifying, too, since models stope explosions.
 			Vector3F hit;
-			Model* m = engine->IntersectModel( origin, target-origin, RANGE, TEST_TRI, 0, 0, 0, &hit );
+			Model* m = engine->IntersectModelVoxel( origin, target-origin, RANGE, TEST_TRI, 0, 0, 0, &hit );
 	#ifdef DEBUG_EXPLOSION
 			if ( m ) 
 				DebugLine( origin, hit, 1, 0, 0 );

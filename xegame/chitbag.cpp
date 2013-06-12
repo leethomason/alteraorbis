@@ -289,7 +289,7 @@ void ChitBag::DoTick( U32 delta, Engine* engine )
 }
 
 
-void ChitBag::HandleBolt( const Bolt& bolt, Model* m, const grinliz::Vector3F& at )
+void ChitBag::HandleBolt( const Bolt& bolt, const ModelVoxel& mv )
 {
 }
 

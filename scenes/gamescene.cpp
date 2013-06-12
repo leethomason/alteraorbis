@@ -403,6 +403,7 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 				wq->Add( buildActive, v );
 			}
 			
+			/* FIXMEVOX need to select voxels too
 			if ( model && strstr( model->GetResource()->Name(), "rock." )) {
 				// clicked on a rock. Melt away!
 				Chit* player = sim->GetPlayerChit();
@@ -412,6 +413,7 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 					return;
 				}
 			}
+			*/
 
 			int tapMod = lumosGame->GetTapMod();
 

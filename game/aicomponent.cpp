@@ -140,16 +140,14 @@ bool AIComponent::LineOfSight( const ComponentSet& thisComp, Chit* t )
 	target.render->GetMetaData( IStringConst::ktarget, &dest );
 
 	Vector3F dir = dest - origin;
-	float length = dir.Length() + 1.0f;	// a little extra just in case
+	float length = dir.Length() + 0.01f;	// a little extra just in case
 	CArray<const Model*, EL_MAX_METADATA+2> ignore, targetModels;
 	thisComp.render->GetModelList( &ignore );
 
-	Vector3F at;
-
-	Model* m = engine->IntersectModel( origin, dir, length, TEST_TRI, 0, 0, ignore.Mem(), &at );
-	if ( m ) {
+	ModelVoxel mv = engine->IntersectModelVoxel( origin, dir, length, TEST_TRI, 0, 0, ignore.Mem() );
+	if ( mv.model ) {
 		target.render->GetModelList( &targetModels );
-		return targetModels.Find( m ) >= 0;
+		return targetModels.Find( mv.model ) >= 0;
 	}
 	return false;
 }
@@ -165,13 +163,10 @@ bool AIComponent::LineOfSight( const ComponentSet& thisComp, const grinliz::Vect
 
 	Vector3F dest = { (float)mapPos.x+0.5f, 0.5f, (float)mapPos.y+0.5f };
 	Vector3F dir = dest - origin;
-	float length = dir.Length() + 1.0f;	// a little extra just in case
+	float length = dir.Length() + 0.01f;	// a little extra just in case
 
-	Model* voxel = 0; // FIXMEVOX map->GetVoxel( mapPos.x, mapPos.y );
-
-	Vector3F at;
-	Model* m = engine->IntersectModel( origin, dir, length, TEST_TRI, 0, 0, ignore.Mem(), &at );
-	if ( m && m == voxel ) {
+	ModelVoxel mv = engine->IntersectModelVoxel( origin, dir, length, TEST_TRI, 0, 0, ignore.Mem() );
+	if ( mv.Hit() && mv.Voxel2() == mapPos ) {
 		return true;
 	}
 	return false;

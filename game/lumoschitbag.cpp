@@ -185,7 +185,7 @@ void LumosChitBag::NewWalletChits( const grinliz::Vector3F& pos, const Wallet& w
 }
 
 
-void LumosChitBag::HandleBolt( const Bolt& bolt, Model* modelHit, const grinliz::Vector3F& at )
+void LumosChitBag::HandleBolt( const Bolt& bolt, const ModelVoxel& mv )
 {
 	GLASSERT( engine );
 	Chit* chitShooter = GetChit( bolt.chitID );	// may be null
@@ -196,8 +196,8 @@ void LumosChitBag::HandleBolt( const Bolt& bolt, Model* modelHit, const grinliz:
 	int explosive = bolt.effect & GameItem::EFFECT_EXPLOSIVE;
  
 	if ( !explosive ) {
-		if ( modelHit ) {
-			Chit* chitHit = modelHit->userData;
+		if ( mv.Hit() ) {
+			Chit* chitHit = mv.ModelHit() ? mv.model->userData : 0;
 			DamageDesc dd( bolt.damage, bolt.effect );
 
 			if ( chitHit ) {
@@ -214,16 +214,14 @@ void LumosChitBag::HandleBolt( const Bolt& bolt, Model* modelHit, const grinliz:
 					info.awardXP  = true;
 					info.isMelee  = false;
 					info.isExplosion = false;
-					info.originOfImpact = at;
+					info.originOfImpact = mv.at;
 
 					ChitMsg msg( ChitMsg::CHIT_DAMAGE, 0, &info );
 					chitHit->SendMessage( msg, 0 );
 				}
 			}
 			else {
-				/* FIXMEVOX
-				worldMap->VoxelHit( modelHit, dd );
-				*/
+				worldMap->VoxelHit( mv.voxel, dd );
 			}
 		}
 	}
@@ -238,16 +236,13 @@ void LumosChitBag::HandleBolt( const Bolt& bolt, Model* modelHit, const grinliz:
 
 		float rewind = Min( 0.1f, 0.5f*bolt.len );
 		GLASSERT( Equal( bolt.dir.Length(), 1.f, 0.001f ));
-		Vector3F origin = at - bolt.dir * rewind;
+		Vector3F origin = mv.at - bolt.dir * rewind;
 
 		DamageDesc dd( bolt.damage, bolt.effect );
 		BattleMechanics::GenerateExplosionMsgs( dd, origin, bolt.chitID, engine, &chitList );
 
-		if ( modelHit && !modelHit->userData ) {
-			// FIXME: doesn't splash exlposion damage. only direct hit
-			/* FIXMEVOX
-			worldMap->VoxelHit( modelHit, dd );
-			*/
+		if ( mv.VoxelHit() ) {
+			worldMap->VoxelHit( mv.voxel, dd );
 		}
 	}
 }

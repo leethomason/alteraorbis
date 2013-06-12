@@ -31,7 +31,7 @@ public:
 	void AddItem( const char* name, Chit* chit, Engine* engine, int team, int level );
 
 	// IBoltImpactHandler
-	virtual void HandleBolt( const Bolt& bolt, Model* m, const grinliz::Vector3F& at );
+	virtual void HandleBolt( const Bolt& bolt, const ModelVoxel& mv );
 
 	virtual int MapGridUse( int x, int y );
 	CoreScript* IsBoundToCore( Chit* );

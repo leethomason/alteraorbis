@@ -119,7 +119,7 @@ public:
 	}
 
 	// IBoltImpactHandler
-	virtual void HandleBolt( const Bolt& bolt, Model* m, const grinliz::Vector3F& at );
+	virtual void HandleBolt( const Bolt& bolt, const ModelVoxel& mv );
 
 	// There can only be one camera actually in use:
 	CameraComponent* GetCamera( Engine* engine );

@@ -169,6 +169,8 @@ public:
 
 	// Brings water & waterfalls current
 	void DoTick( U32 delta, ChitBag* chitBag );
+	void VoxelHit( const grinliz::Vector3I& voxel, const DamageDesc& dd );
+	int GetVoxelHeight( int x, int y );
 
 	// ---- MicroPather ---- //
 	virtual float LeastCostEstimate( void* stateStart, void* stateEnd );
@@ -227,7 +229,6 @@ private:
 		return (y*width/ZONE_SIZE) + x; 
 	} 
 
-	void GridResName( const WorldGrid& wg, grinliz::CStr<12>* str );
 	void ProcessZone( ChitBag* cb );
 	void EmitWaterfalls( U32 delta );	// particle systems
 
@@ -240,6 +241,7 @@ private:
 	void DeleteAllRegions();
 
 	void DrawZones();			// debugging
+	void DrawTreeZones();
 	void ClearDebugDrawing();	// debugging
 	void DumpRegions();
 

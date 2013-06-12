@@ -653,12 +653,14 @@ Model* Engine::IntersectModel( const Vector3F& origin, const Vector3F& dir, floa
 
 
 ModelVoxel Engine::IntersectModelVoxel( const Vector3F& origin,
-										const Vector3F& dir,
+										const Vector3F& _dir,
 										float length, 
 										HitTestMethod testMethod,
 										int required, int exclude, const Model* const * ignore )
 {
 	ModelVoxel modelVoxel;
+	Vector3F dir = _dir;
+	dir.Normalize();
 
 	// Check voxel first; intersections limit the length.
 	if ( map ) {

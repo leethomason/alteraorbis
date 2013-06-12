@@ -141,30 +141,28 @@ void WorldMap::AttachEngine( Engine* e, IMapGridUse* imap )
 }
 
 
-/*
-Model* WorldMap::GetVoxel( int x, int y )
+int WorldMap::GetVoxelHeight( int x, int y )
 {
-	Model* m = 0;
-	Vector2I vec = { x, y };
-	voxels.Query( vec, &m );
-	return m;
+	const WorldGrid& wg = GetWorldGrid( x, y );
+	if ( wg.Pool() ) {
+		return POOL_HEIGHT;
+	}
+	return wg.RockHeight();
 }
 
 
-void WorldMap::VoxelHit( Model* m, const DamageDesc& dd )
+void WorldMap::VoxelHit( const Vector3I& v, const DamageDesc& dd )
 {
-	Vector3F pos = m->Pos();
-	Vector2I map = { (int)pos.x, (int)pos.z };
-	int index = INDEX(map.x, map.y);
+	int index = INDEX(v.x, v.z);
 	
 	GLASSERT( grid[index].RockHeight() );
 	grid[index].DeltaHP( (int)(-dd.damage) );
 	if ( grid[index].HP() == 0 ) {
+		Vector3F pos = { (float)v.x+0.5f, (float)v.y+0.5f, (float)v.z+0.5f };
 		engine->particleSystem->EmitPD( "derez", pos, V3F_UP, engine->camera.EyeDir3(), 0 );
-		SetRock( map.x, map.y, 0, false, 0 );
+		SetRock( v.x, v.y, 0, false, 0 );
 	}
 }
-*/
 
 
 void WorldMap::SavePNG( const char* path )
@@ -773,28 +771,6 @@ void WorldMap::DoTick( U32 delta, ChitBag* chitBag )
 }
 
 
-void WorldMap::GridResName( const WorldGrid& wg, grinliz::CStr<12>* str )
-{
-	str->Clear();
-	if ( !wg.IsLand() ) return;
-
-	if ( wg.Pool() ) {
-		*str = "pool.2";
-	}
-	else if ( wg.Magma() ) {
-		*str = "magma.0";
-		(*str)[6] = '0' + wg.RockHeight();
-	}
-	else if ( wg.RockHeight() > 0 ) {
-		if ( wg.RockType() == WorldGrid::ICE )
-			*str = "ice.1";
-		else
-			*str = "rock.1";
-		(*str)[str->size()-1] = '0' + wg.RockHeight();
-	}
-}
-
-
 void WorldMap::SetRock( int x, int y, int h, bool magma, int rockType )
 {
 	Vector2I vec	= { x, y };
@@ -1253,6 +1229,7 @@ Vector3I WorldMap::IntersectVoxel(	const Vector3F& origin,
 									Vector3F* at )
 {
 	GLASSERT( Equal( dir.Length(), 1.0f, 0.0001f ));
+	GLASSERT( length >= 0 );
 	static const Vector3I noResult = { -1, -1, -1 };
 
 	Vector3F p0, p1;
@@ -1651,6 +1628,23 @@ void WorldMap::ShowAdjacentRegions( float fx, float fy )
 }
 
 
+void WorldMap::DrawTreeZones()
+{
+	CompositingShader debug( GPUState::BLEND_NORMAL );
+	debug.SetColor( 0.2f, 0.8f, 0.6f, 0.5f );
+	if ( engine ) {
+		const CArray<Rectangle2I, 256>& zones = engine->GetSpaceTree()->Zones();
+
+		for( int i=0; i<zones.Size(); ++i ) {
+			Rectangle2I r = zones[i];
+			Vector3F p0 = { (float)r.min.x, 0.05f, (float)r.min.y };
+			Vector3F p1 = { (float)r.max.x+0.95f, 0.05f, (float)r.max.y+0.95f };
+			debug.DrawQuad( 0, p0, p1, false );
+		}
+	}
+}
+
+
 void WorldMap::DrawZones()
 {
 	CompositingShader debug( GPUState::BLEND_NORMAL );
@@ -1879,6 +1873,12 @@ void WorldMap::Draw3D(  const grinliz::Color3F& colorMult, GPUState::StencilMode
 			DrawZones();
 		}
 	}
+
+	bool debugVoxel = false;
+	if ( debugVoxel && mode == GPUState::STENCIL_CLEAR ) {
+		DrawTreeZones();
+	}
+
 	if ( debugPathVector.Size() > 0 ) {
 		FlatShader debug;
 		debug.SetColor( 1, 0, 0, 1 );

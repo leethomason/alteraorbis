@@ -131,6 +131,7 @@ BattleTestScene::BattleTestScene( LumosGame* game ) : Scene( game )
 
 BattleTestScene::~BattleTestScene()
 {
+	map->AttachEngine( 0, 0 );
 	chitBag.DeleteAll();
 	delete engine;
 	delete map;
@@ -189,6 +190,7 @@ void BattleTestScene::LoadMap()
 	delete map;
 
 	map = new WorldMap( 32, 32 );
+
 	grinliz::CDynArray<Vector2I> blocks, features, wp;
 	map->InitPNG( "./res/testarena32.png", &blocks, &wp, &features );
 
@@ -215,16 +217,11 @@ void BattleTestScene::LoadMap()
 	engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
 	engine->SetGlow( true );
 	chitBag.SetContext( engine, map );
-	map->AttachEngine( 0, &chitBag );	// we render, map needs pathing info
+	map->AttachEngine( engine, &chitBag );
 
 	for ( int i=0; i<blocks.Size(); ++i ) {
-		Chit* chit = chitBag.NewChit();
 		const Vector2I& v = blocks[i];
-		MapSpatialComponent* msc = new MapSpatialComponent( map );
-		msc->SetMapPosition( v.x, v.y );
-		msc->SetMode( GRID_BLOCKED );
-		chit->Add( msc );
-		chit->Add( new RenderComponent( engine, "unitCube" ));
+		map->SetRock( v.x, v.y, 1, false, 0 );
 	}
 
 	ItemDefDB* itemDefDB = ItemDefDB::Instance();

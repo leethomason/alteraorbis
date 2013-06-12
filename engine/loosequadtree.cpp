@@ -36,7 +36,8 @@ int SpaceTree::nModelsAtDepth[DEPTH] = { 0 };
 SpaceTree::SpaceTree( float yMin, float yMax, int _size ) 
 	:	modelPool( "SpaceTreeModelPool", sizeof( Item ), MODEL_BLOCK*sizeof( Item ), false )
 {
-	size = Max( (int)CeilPowerOf2( _size ), 64 );
+	GLASSERT( _size >> DEPTH );
+	size = _size;
 	treeBounds.Set( 0, yMin, 0, (float)size, yMax, (float)size );
 	lightXPerY = 0;
 	lightZPerY = 0;
@@ -376,7 +377,7 @@ void SpaceTree::QueryPlanesRec(	const Plane* planes, int nPlanes, int intersecti
 			// needs a record of all the nodes in view.
 			Rectangle2I voxel;
 			voxel.min = voxel.max = node->origin;
-			int c = ( size >> (node->depth-1));
+			int c = ( size >> (node->depth));
 			voxel.max.x += c-1;
 			voxel.max.y += c-1;
 			zones.Push( voxel );
@@ -433,8 +434,18 @@ void SpaceTree::QueryPlanesRec(	const Plane* planes, int nPlanes, int intersecti
 		
 		if ( node->child[0] )  {
 			for( int i=0; i<4; ++i ) {
-				if ( node->child[i]->nModels )
+				if ( node->child[i]->nModels ) {
 					QueryPlanesRec( planes, nPlanes, intersection, node->child[i], positive );
+				}
+				else {
+					// Still need to mark the zone as visible.
+					Rectangle2I voxel;
+					voxel.min = voxel.max = node->child[i]->origin;
+					int c = ( size >> (node->child[i]->depth));
+					voxel.max.x += c-1;
+					voxel.max.y += c-1;
+					zones.Push( voxel );
+				}
 			}
 		}
 	}

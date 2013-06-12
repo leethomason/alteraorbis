@@ -84,10 +84,10 @@ void Bolt::TickAll( grinliz::CDynArray<Bolt>* bolts, U32 delta, Engine* engine, 
 			}
 
 			// Check model hit.
-			Model* m = 0;
+			ModelVoxel mv;
 			if ( !b.impact ) {
-				m = engine->IntersectModel( b.head, b.dir, distance, TEST_TRI, 0, 0, 0, &at );
-				if ( m ) {
+				mv = engine->IntersectModelVoxel( b.head, b.dir, distance, TEST_TRI, 0, 0, 0 );
+				if ( mv.Hit() ) {
 					b.impact = true;
 					normal = b.dir;
 				}
@@ -95,7 +95,7 @@ void Bolt::TickAll( grinliz::CDynArray<Bolt>* bolts, U32 delta, Engine* engine, 
 
 			if ( b.impact ) {
 				if ( handler ) {
-					handler->HandleBolt( b, m, at );
+					handler->HandleBolt( b, mv );
 				}
 				b.head = at;
 

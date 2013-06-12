@@ -26,12 +26,12 @@
 
 class Engine;
 struct Bolt;
-class Model;
+struct ModelVoxel;
 
 class IBoltImpactHandler
 {
 public:
-	virtual void HandleBolt( const Bolt& bolt, Model* m, const grinliz::Vector3F& at ) = 0;
+	virtual void HandleBolt( const Bolt& bolt, const ModelVoxel& mv ) = 0;
 };
 
 
