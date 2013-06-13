@@ -292,7 +292,7 @@ void BattleMechanics::Shoot( ChitBag* bag, Chit* src, const grinliz::Vector3F& _
 
 	Bolt* bolt = bag->NewBolt();
 	bolt->head = p0 + dir*0.5f;
-	bolt->len = 1.0f;
+	bolt->len = 0.5f;
 	bolt->dir = dir;
 	if ( item->flags & GameItem::EFFECT_FIRE )
 		bolt->color.Set( 1, 0, 0, 1 );	// FIXME: real color based on item

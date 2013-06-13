@@ -178,7 +178,10 @@ void ChitBag::DeferredDelete( Component* comp )
 
 Bolt* ChitBag::NewBolt()
 {
-	return bolts.PushArr(1);
+	Bolt bolt;
+	Bolt* b = bolts.PushArr(1);
+	*b = bolt;
+	return b;
 }
 
 

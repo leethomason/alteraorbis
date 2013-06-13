@@ -1283,20 +1283,22 @@ Vector3I WorldMap::IntersectVoxel(	const Vector3F& origin,
 			if (    (wg.Pool() && cell.y < POOL_HEIGHT)
 				|| (cell.y < wg.RockHeight() )) 
 			{
-				int result = INTERSECT;
-				if ( at ) {
-					if ( lastStep < 0 ) {
-						*at = origin;
-					}
-					else {
-						// The ray always hits the near wall.
-						float x = (dir.X(lastStep) > 0 ) ? (float)cell.X(lastStep) : (float)cell.X(lastStep)+1;
-						IntersectRayPlane( origin, dir, lastStep, x, at );
-					}
+				Vector3F v;
+				if ( lastStep < 0 ) {
+					v = origin;
 				}
-				if ( result == INTERSECT || result == INSIDE ) {
+				else {
+					// The ray always hits the near wall.
+					float x = (dir.X(lastStep) > 0 ) ? (float)cell.X(lastStep) : (float)cell.X(lastStep)+1;
+					IntersectRayPlane( origin, dir, lastStep, x, &v );
+				}
+				if ( (v-origin).LengthSquared() <= length*length ) {
+					if ( at ) {
+						*at = v;
+					}
 					return cell;
 				}
+				return noResult;
 			}
 		}
 

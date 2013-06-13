@@ -671,9 +671,10 @@ ModelVoxel Engine::IntersectModelVoxel( const Vector3F& origin,
 			length = Min( length, voxelLength );	// don't need to check past the voxel.
 		}
 	}
-	modelVoxel.model = IntersectModel( origin, dir, length, testMethod, required, exclude, ignore, &modelVoxel.at );
-	if ( modelVoxel.model ) {
-		// Clear the voxel.
+	Model* m = IntersectModel( origin, dir, length, testMethod, required, exclude, ignore, &modelVoxel.at );
+	if ( m ) {
+		// Clear the voxel! can only have one state.
+		modelVoxel.model = m;
 		modelVoxel.voxel.Set( -1, -1, -1 );
 	}
 	return modelVoxel;

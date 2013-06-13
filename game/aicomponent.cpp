@@ -137,6 +137,9 @@ bool AIComponent::LineOfSight( const ComponentSet& thisComp, Chit* t )
 	GLASSERT( weapon );
 
 	ComponentSet target( t, Chit::SPATIAL_BIT | Chit::RENDER_BIT | ComponentSet::IS_ALIVE );
+	if ( !target.okay ) {
+		return false;
+	}
 	target.render->GetMetaData( IStringConst::ktarget, &dest );
 
 	Vector3F dir = dest - origin;
@@ -166,7 +169,10 @@ bool AIComponent::LineOfSight( const ComponentSet& thisComp, const grinliz::Vect
 	float length = dir.Length() + 0.01f;	// a little extra just in case
 
 	ModelVoxel mv = engine->IntersectModelVoxel( origin, dir, length, TEST_TRI, 0, 0, ignore.Mem() );
-	if ( mv.Hit() && mv.Voxel2() == mapPos ) {
+
+	// A little tricky; we hit the 'mapPos' if nothing is hit (which gets to the center)
+	// or if voxel at that pos is hit.
+	if ( !mv.Hit() || ( mv.Hit() && mv.Voxel2() == mapPos )) {
 		return true;
 	}
 	return false;
