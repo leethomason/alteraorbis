@@ -425,17 +425,24 @@ void BattleTestScene::DrawDebugText()
 		map->CalcNumRegions() );
 
 	if ( debugRay.direction.x ) {
-		Vector3F at;
-		Model* root = engine->IntersectModel( debugRay.origin, debugRay.direction, FLT_MAX, TEST_TRI, 0, 0, 0, &at );
+		ModelVoxel mv = engine->IntersectModelVoxel( debugRay.origin, debugRay.direction, 1000.0f, TEST_TRI, 0, 0, 0 );
 
-		if ( root ) {
-			engine->particleSystem->EmitPD( "spell", at, V3F_UP, engine->camera.EyeDir3(), 0 );
+		if ( mv.Hit() ) {
+			engine->particleSystem->EmitPD( "spell", mv.at, V3F_UP, engine->camera.EyeDir3(), 0 );
 
-			int y = 32;
-			Chit* chit = root->userData;
-			if ( chit ) {
-				GLString str;
-				chit->DebugStr( &str );
+			GLString str;
+			if ( mv.ModelHit() ) {
+				Chit* chit = mv.model->userData;
+				if ( chit ) {
+					chit->DebugStr( &str );
+				}
+			}
+			else {
+				str.Format( "Voxel %d %d %d", mv.voxel.x, mv.voxel.y, mv.voxel.z );
+			}
+
+			if ( !str.empty() ) {
+				int y = 32;
 				ufoText->Draw( 0, y, "%s ", str.c_str() );
 				y += 16;
 			}

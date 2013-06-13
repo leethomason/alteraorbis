@@ -160,7 +160,9 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 
 					if ( pathMove ) {
 						physics = new PhysicsMoveComponent( worldMap, true );
-						parentChit->Swap( pathMove, physics );
+						parentChit->Remove( pathMove );
+						GetChitBag()->DeferredDelete( pathMove );
+						parentChit->Add( physics );
 					}
 					static const float FORCE = 4.0f;
 					physics->Add( v*FORCE, r );

@@ -1145,7 +1145,9 @@ int grinliz::IntersectRayAABB(	const Vector3F& origin,
 	if( inside )	
 	{
 		*intersect = origin;
-		*t = 0.0f;
+		if ( t ) {
+			*t = 0.0f;
+		}
 		return INSIDE;
 	}
 
@@ -1187,7 +1189,9 @@ int grinliz::IntersectRayAABB(	const Vector3F& origin,
 			pIntersect[i] = candidatePlane[i];
 		}
 	}
-	*t = maxT[whichPlane];
+	if ( t ) {
+		*t = maxT[whichPlane];
+	}
 	return INTERSECT;
 }	
 

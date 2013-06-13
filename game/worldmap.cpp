@@ -1254,9 +1254,9 @@ Vector3I WorldMap::IntersectVoxel(	const Vector3F& origin,
 	Vector3I endCell   = { (int)p1.x, (int)p1.y, (int)p1.z };
 
 	Vector3I step = { (int)Sign(dir.x), (int)Sign(dir.y), (int)Sign(dir.z) };
-	Vector3F boundary = { (float)startCell.x + (step.x>0) ? 1.f : 0,
-						  (float)startCell.y + (step.y>0) ? 1.f : 0,
-						  (float)startCell.z + (step.z>0) ? 1.f : 0 };
+	Vector3F boundary = { (float)startCell.x + ((step.x>0) ? 1.f : 0),
+						  (float)startCell.y + ((step.y>0) ? 1.f : 0),
+						  (float)startCell.z + ((step.z>0) ? 1.f : 0) };
 
 	// Distance, in t, to the next boundary. Being careful of straight lines.
 	Vector3F tMax = { 0, 0, 0 };
@@ -1268,10 +1268,13 @@ Vector3I WorldMap::IntersectVoxel(	const Vector3F& origin,
 			tMax.X(i)   = (boundary.X(i) - p0.X(i)) / dir.X(i);	// how far before voxel boundary
 			tDelta.X(i) = ((float)step.X(i)) / dir.X(i);		// how far to cross a voxel
 			n += 1 + abs(startCell.X(i) - endCell.X(i));
+			GLASSERT( tMax.X(i) >= 0 && tDelta.X(i) >= 0 );
 		}
 	}
 
 	Vector3I cell = startCell;
+	int lastStep = -1;
+
 	for( int i=0; i<n; ++i ) {
 
 		// The only part specific to the map.
@@ -1282,10 +1285,14 @@ Vector3I WorldMap::IntersectVoxel(	const Vector3F& origin,
 			{
 				int result = INTERSECT;
 				if ( at ) {
-					Rectangle3F c;
-					c.Set( (float)cell.x, (float)cell.y, (float)cell.z, (float)(cell.x+1), (float)(cell.y+1), (float)(cell.z+1));
-					result = IntersectRayAABB( origin, dir, c, at, 0 );
-					GLASSERT( result == INSIDE || result == INTERSECT );
+					if ( lastStep < 0 ) {
+						*at = origin;
+					}
+					else {
+						// The ray always hits the near wall.
+						float x = (dir.X(lastStep) > 0 ) ? (float)cell.X(lastStep) : (float)cell.X(lastStep)+1;
+						IntersectRayPlane( origin, dir, lastStep, x, at );
+					}
 				}
 				if ( result == INTERSECT || result == INSIDE ) {
 					return cell;
@@ -1293,17 +1300,20 @@ Vector3I WorldMap::IntersectVoxel(	const Vector3F& origin,
 			}
 		}
 
-		if ( tMax.x < tMax.y && tMax.y < tMax.z ) {
+		if ( tMax.x < tMax.y && tMax.x < tMax.z ) {
 			cell.x += step.x;
 			tMax.x += tDelta.x;
+			lastStep = 0;
 		}
 		else if ( tMax.y < tMax.z ) {
 			cell.y += step.y;
 			tMax.y += tDelta.y;
+			lastStep = 1;
 		}
 		else {
 			cell.z += step.z;
 			tMax.z += tDelta.z;
+			lastStep = 2;
 		}
 	}
 
