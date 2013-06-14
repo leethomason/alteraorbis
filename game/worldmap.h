@@ -212,7 +212,7 @@ public:
 		ZONE_SIZE2  = ZONE_SIZE*ZONE_SIZE,
 		NUM_ZONES	= MAX_MAP_SIZE/ZONE_SIZE,
 	    NUM_ZONES2	= NUM_ZONES*NUM_ZONES,
-		MAX_VOXEL_QUADS  = 16000		// actually uses quads, so the vertex=4*MAX_VOXEL_QUADS
+		MAX_VOXEL_QUADS  = 8000		// actually uses quads, so the vertex=4*MAX_VOXEL_QUADS
 	};
 
 private:
@@ -341,7 +341,6 @@ private:
 
 	grinliz::BitArray< NUM_ZONES, NUM_ZONES, 1 > zoneInit;		// pather
 	grinliz::BitArray< NUM_ZONES, NUM_ZONES, 1 > voxelInit;		// rendering
-	void ModifyVoxel( int x, int y ) { voxelInit.Clear( x/ZONE_SIZE, y/ZONE_SIZE ); }
 
 	// Temporaries to avoid allocation
 	grinliz::CDynArray< grinliz::Vector2I > waterStack;

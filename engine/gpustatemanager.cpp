@@ -189,6 +189,7 @@ void MatrixStack::Multiply( const grinliz::Matrix4& m )
 
 /*static*/ int			GPUState::primitive = GL_TRIANGLES; 
 /*static*/ int			GPUState::trianglesDrawn = 0;
+/*static*/ int			GPUState::quadsDrawn = 0;
 /*static*/ int			GPUState::drawCalls = 0;
 /*static*/ uint32_t		GPUState::uid = 0;
 /*static*/ GPUState::MatrixType GPUState::matrixMode = MODELVIEW_MATRIX;
@@ -587,7 +588,7 @@ void GPUState::Clear( float r, float g, float b, float a )
 void GPUState::DrawQuads( const GPUStream& stream, const GPUStreamData& data, int nQuad )
 {
 	ClearShaderFlag( ShaderManager::INSTANCE );
-	trianglesDrawn += nQuad * 2;
+	quadsDrawn += nQuad;
 	++drawCalls;
 
 	GLASSERT( data.vertexBuffer );

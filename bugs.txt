@@ -1,3 +1,4 @@
+- not showing bolt impacts
 - texture bleeding in voxel renderer
 - flower colors (too saturated flowers)
 - use arrays to track components and component update time.

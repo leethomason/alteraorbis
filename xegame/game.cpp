@@ -475,12 +475,12 @@ void Game::DoTick( U32 _currentTime )
 	UFOText* ufoText = UFOText::Instance();
 	if ( !suppressText ) {
 		if ( debugLevel >= 1 ) {
-			ufoText->Draw(	0,  Y, "#%d %5.1ffps vbo=%d %4.1fK/f %3ddc/f", 
+			ufoText->Draw(	0,  Y, "#%d %5.1ffps %4.1fK/f %3ddc/f quads=%.1fK/f", 
 							VERSION, 
 							framesPerSecond, 
-							GPUState::SupportsVBOs() ? 1 : 0,
 							(float)GPUState::TrianglesDrawn()/1000.0f,
-							GPUState::DrawCalls() );
+							GPUState::DrawCalls(),
+							(float)GPUState::QuadsDrawn()/1000.0f );
 			sceneStack.Top()->scene->DrawDebugText();
 		}
 	}

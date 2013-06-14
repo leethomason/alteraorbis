@@ -390,7 +390,7 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 		Vector3F atModel = { 0, 0, 0 };
 		Vector3F plane   = { 0, 0, 0 };
 
-		Model* model = ModelAtMouse( view, sim->GetEngine(), TEST_HIT_AABB, 0, MODEL_CLICK_THROUGH, 0, &plane, &atModel );
+		ModelVoxel mv = ModelAtMouse( view, sim->GetEngine(), TEST_HIT_AABB, 0, MODEL_CLICK_THROUGH, 0, &plane );
 		GLASSERT( plane.x > 0 && plane.z > 0 );
 
 		bool tap = Process3DTap( action, view, world, sim->GetEngine() );
@@ -403,24 +403,21 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 				wq->Add( buildActive, v );
 			}
 			
-			/* FIXMEVOX need to select voxels too
-			if ( model && strstr( model->GetResource()->Name(), "rock." )) {
+			if ( mv.VoxelHit() ) {
 				// clicked on a rock. Melt away!
 				Chit* player = sim->GetPlayerChit();
 				if ( player && player->GetAIComponent() ) {
-					Vector2I rock = { (int)model->Pos().x, (int)model->Pos().z };
-					player->GetAIComponent()->RockBreak( rock );
+					player->GetAIComponent()->RockBreak( mv.Voxel2() );
 					return;
 				}
 			}
-			*/
 
 			int tapMod = lumosGame->GetTapMod();
 
 			if ( tapMod == 0 ) {
 				Chit* playerChit = sim->GetPlayerChit();
-				if ( model ) {
-					TapModel( model->userData );
+				if ( mv.model ) {
+					TapModel( mv.model->userData );
 				}
 				else if ( playerChit ) {
 					Vector2F dest = { plane.x, plane.z };

@@ -25,6 +25,7 @@
 #include "../gamui/gamui.h"
 
 #include "../engine/uirendering.h"
+#include "../engine/modelvoxel.h"
 
 #include <stdio.h>
 
@@ -94,13 +95,12 @@ public:
 	bool ProcessTap( int action, const grinliz::Vector2F& view, const grinliz::Ray& world );
 	// Call to handle 3D events. Returns true if an actual tap (on the y=0 plane) occurs.
 	bool Process3DTap( int action, const grinliz::Vector2F& view, const grinliz::Ray& world, Engine* engine );
-	Model* ModelAtMouse( const grinliz::Vector2F& view, 
-						 Engine* engine,
-						 HitTestMethod method = TEST_TRI,
-						 int required=0, int exclude=0, 
-						 const Model * const * ignore=0, 
-						 grinliz::Vector3F* planeIntersection = 0,
-						 grinliz::Vector3F* intersection=0 ) const;
+	ModelVoxel ModelAtMouse( const grinliz::Vector2F& view, 
+							 Engine* engine,
+							 HitTestMethod method = TEST_TRI,
+							 int required=0, int exclude=0, 
+							 const Model * const * ignore=0, 
+							 grinliz::Vector3F* planeIntersection = 0 ) const;
 
 	virtual void ItemTapped( const gamui::UIItem* item )							{}
 	virtual gamui::RenderAtom DragStart( const gamui::UIItem* item )				{ gamui::RenderAtom atom; return atom; }	// null atom

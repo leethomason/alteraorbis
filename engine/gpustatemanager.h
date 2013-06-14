@@ -293,8 +293,9 @@ public:
 	void DrawQuad( Texture* texture, const grinliz::Vector3F p0, const grinliz::Vector3F p1, bool positiveWinding=true );
 	void DrawArrow( const grinliz::Vector3F p0, const grinliz::Vector3F p1, bool positiveWinding=true, float width=0.4f );
 
-	static void ResetTriCount()	{ trianglesDrawn = 0; drawCalls = 0; }
+	static void ResetTriCount()	{ quadsDrawn = 0; trianglesDrawn = 0; drawCalls = 0; }
 	static int TrianglesDrawn() { return trianglesDrawn; }
+	static int QuadsDrawn()		{ return quadsDrawn; }
 	static int DrawCalls()		{ return drawCalls; }
 
 	static bool SupportsVBOs();
@@ -328,6 +329,7 @@ private:
 protected:
 	static int		primitive;
 	static int		trianglesDrawn;
+	static int		quadsDrawn;
 	static int		drawCalls;
 	static uint32_t uid;
 	static int		matrixDepth[3];

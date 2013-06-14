@@ -23,6 +23,7 @@
 #include "../grinliz/glmatrix.h"
 #include "../grinliz/glbitarray.h"
 
+#include "modelvoxel.h"
 #include "map.h"
 #include "camera.h"
 #include "enginelimits.h"
@@ -50,18 +51,6 @@ void DebugLine(	const grinliz::Vector3F& tail,
 				U32 time=1000 );
 
 void DrawDebugLines( U32 delta );
-
-struct ModelVoxel {
-	ModelVoxel() { model=0; voxel.Set(-1,-1,-1); at.Zero(); }
-	bool ModelHit() const { return model != 0; };
-	bool VoxelHit() const { return voxel.x >= 0; }
-	bool Hit() const	  { return ModelHit() || VoxelHit(); }
-	grinliz::Vector2I Voxel2() const { grinliz::Vector2I v = { voxel.x, voxel.y }; return v; }
-
-	Model*				model;
-	grinliz::Vector3I	voxel;
-	grinliz::Vector3F	at;
-};
 
 /*
 	Standard state:

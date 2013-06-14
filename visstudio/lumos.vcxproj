@@ -178,6 +178,7 @@
     <ClInclude Include="..\engine\loosequadtree.h" />
     <ClInclude Include="..\engine\map.h" />
     <ClInclude Include="..\engine\model.h" />
+    <ClInclude Include="..\engine\modelvoxel.h" />
     <ClInclude Include="..\engine\particle.h" />
     <ClInclude Include="..\engine\platformgl.h" />
     <ClInclude Include="..\engine\renderqueue.h" />

@@ -586,6 +586,8 @@ void WorldMap::ProcessZone( ChitBag* cb )
 				//  - Models
 				for( int y=baseY; y<baseY+ZONE_SIZE; ++y ) {
 					for( int x=baseX; x<baseX+ZONE_SIZE; ++x ) {
+						// FIXME: does setting a pool impact the pather?? 
+						// Or should pool be removed from the isPassable check??
 						grid[INDEX(x,y)].SetPool( false );
 					}
 				}
@@ -799,6 +801,7 @@ void WorldMap::SetRock( int x, int y, int h, bool magma, int rockType )
 		}
 	}
 	else {
+		// Essentially bail if the mapgrid is in use.
 		if ( iMapGridUse ) {
 			if ( iMapGridUse->MapGridUse( x, y )) {
 				GLASSERT( was.RockHeight() == 0 && was.Pool() == false );
@@ -812,8 +815,11 @@ void WorldMap::SetRock( int x, int y, int h, bool magma, int rockType )
 	wg.SetRockType( rockType );
 
 	if ( !was.Equal( wg )) {
-		ModifyVoxel( x, y );
+		voxelInit.Clear( x/ZONE_SIZE, y/ZONE_SIZE );
 		grid[INDEX(x,y)] = wg;
+	}
+	if ( was.IsPassable() != wg.IsPassable() ) {
+		ResetPather( x, y );
 	}
 
 	if ( was.Magma() != wg.Magma() ) {
@@ -1645,7 +1651,7 @@ void WorldMap::DrawTreeZones()
 	CompositingShader debug( GPUState::BLEND_NORMAL );
 	debug.SetColor( 0.2f, 0.8f, 0.6f, 0.5f );
 	if ( engine ) {
-		const CArray<Rectangle2I, 256>& zones = engine->GetSpaceTree()->Zones();
+		const CArray<Rectangle2I, SpaceTree::MAX_ZONES>& zones = engine->GetSpaceTree()->Zones();
 
 		for( int i=0; i<zones.Size(); ++i ) {
 			Rectangle2I r = zones[i];
@@ -1781,7 +1787,7 @@ void WorldMap::PrepVoxels( const SpaceTree* spaceTree )
 	GLASSERT( voxelVertexVBO.IsValid());
 	voxelBuffer.Clear();
 	
-	const CArray<Rectangle2I, 256>& zones = spaceTree->Zones();
+	const CArray<Rectangle2I, SpaceTree::MAX_ZONES>& zones = spaceTree->Zones();
 	for( int i=0; i<zones.Size(); ++i ) {
 		Rectangle2I b = zones[i];
 		// Don't reach into the edge, which is used as an always-0 pad.
@@ -1886,10 +1892,11 @@ void WorldMap::Draw3D(  const grinliz::Color3F& colorMult, GPUState::StencilMode
 		}
 	}
 
-	bool debugVoxel = false;
-	if ( debugVoxel && mode == GPUState::STENCIL_CLEAR ) {
+#if 0
+	if ( mode == GPUState::STENCIL_CLEAR ) {
 		DrawTreeZones();
 	}
+#endif
 
 	if ( debugPathVector.Size() > 0 ) {
 		FlatShader debug;

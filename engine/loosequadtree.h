@@ -36,6 +36,11 @@ class SpaceTree
 {
 
 public:
+	enum {
+		DEPTH = 6,
+		MAX_ZONES = 1024,
+		NUM_NODES = 1+4+16+64+256+1024
+	};
 
 	SpaceTree( float yMin, float yMax, int size );
 	~SpaceTree();
@@ -51,7 +56,7 @@ public:
 	// Returns all the models in the planes.
 	Model* Query( const grinliz::Plane* planes, int nPlanes, int requiredFlags, int excludedFlags );
 	// Returns all the valid areas from the last query. (used by voxel engine.)
-	const grinliz::CArray<grinliz::Rectangle2I, 256>& Zones() const	{ return zones; }
+	const grinliz::CArray<grinliz::Rectangle2I, MAX_ZONES>& Zones() const	{ return zones; }
 
 	// Returns all the models in the 2D bounds.
 	Model* QueryRect( const grinliz::Rectangle2F& rect, int required, int excluded );
@@ -148,15 +153,11 @@ private:
 	int requiredFlags;
 	int excludedFlags;
 
-	grinliz::CArray<grinliz::Rectangle2I, 256> zones;
 	grinliz::MemoryPool modelPool;
 
-	enum {
-		DEPTH = 5,
-		NUM_NODES = 1+4+16+64+256
-	};
 	Node* GetNode( int depth, int x, int z ); 
 	Node nodeArr[NUM_NODES];
+	grinliz::CArray<grinliz::Rectangle2I, MAX_ZONES> zones;
 
 public:
 	// hacky debugging info

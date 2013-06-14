@@ -93,13 +93,12 @@ bool Scene::ProcessTap( int action, const grinliz::Vector2F& screen, const grinl
 }
 
 
-Model* Scene::ModelAtMouse( const grinliz::Vector2F& view, 		
-							Engine* engine,
-							HitTestMethod method,
-							int required, int exclude, 
-							const Model * const * ignore, 
-							Vector3F* planeIntersection,
-							Vector3F* intersection ) const
+ModelVoxel Scene::ModelAtMouse( const grinliz::Vector2F& view, 		
+								Engine* engine,
+								HitTestMethod method,
+								int required, int exclude, 
+								const Model * const * ignore, 
+								Vector3F* planeIntersection ) const
 {
 	Matrix4 mvpi;
 	Ray ray;
@@ -107,13 +106,12 @@ Model* Scene::ModelAtMouse( const grinliz::Vector2F& view,
 	game->GetScreenport().ViewProjectionInverse3D( &mvpi );
 	engine->RayFromViewToYPlane( view, mvpi, &ray, &at );
 	GLASSERT( at.x != 0 && at.z != 0 );
-	Model* model = engine->IntersectModel( ray.origin, ray.direction, 10000.0f, 
-										   method, required, exclude, ignore, 
-										   intersection );
+	ModelVoxel mv = engine->IntersectModelVoxel( ray.origin, ray.direction, 10000.0f, 
+												method, required, exclude, ignore );
 	if ( planeIntersection ) {
 		*planeIntersection = at;
 	}
-	return model;
+	return mv;
 }
 
 

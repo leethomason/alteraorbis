@@ -582,6 +582,9 @@
     <ClInclude Include="..\game\workqueue.h">
       <Filter>Source Files\game</Filter>
     </ClInclude>
+    <ClInclude Include="..\engine\modelvoxel.h">
+      <Filter>Source Files\engine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\engine\sources.mk">

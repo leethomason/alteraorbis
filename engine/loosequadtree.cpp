@@ -183,7 +183,7 @@ SpaceTree::Node* SpaceTree::GetNode( int depth, int x, int z )
 	int nx = x / size;
 	int nz = z / size;
 
-	const int base[DEPTH] = { 0, 1, 1+4, 1+4+16, 1+4+16+64 };
+	static const int base[DEPTH] = { 0, 1, 1+4, 1+4+16, 1+4+16+64, 1+4+16+64+256 };
 	int dx = (1<<depth);
 
 	nx = Clamp( nx, 0, dx-1 );	// error correction...
@@ -433,19 +433,10 @@ void SpaceTree::QueryPlanesRec(	const Plane* planes, int nPlanes, int intersecti
 		}
 		
 		if ( node->child[0] )  {
+			// We could, in theory, early out using the number of models. But this makes the
+			// zones for the voxel system super-big, which is a big problem.
 			for( int i=0; i<4; ++i ) {
-				if ( node->child[i]->nModels ) {
-					QueryPlanesRec( planes, nPlanes, intersection, node->child[i], positive );
-				}
-				else {
-					// Still need to mark the zone as visible.
-					Rectangle2I voxel;
-					voxel.min = voxel.max = node->child[i]->origin;
-					int c = ( size >> (node->child[i]->depth));
-					voxel.max.x += c-1;
-					voxel.max.y += c-1;
-					zones.Push( voxel );
-				}
+				QueryPlanesRec( planes, nPlanes, intersection, node->child[i], positive );
 			}
 		}
 	}
