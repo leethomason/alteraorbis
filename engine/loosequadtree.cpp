@@ -243,7 +243,7 @@ void SpaceTree::QueryRectRec( const grinliz::Rectangle3F& rect, const Node* node
 
 Model* SpaceTree::Query( const Plane* planes, int nPlanes, int required, int excluded )
 {
-	//GRINLIZ_PERFTRACK
+	GRINLIZ_PERFTRACK
 	
 	modelRoot = 0;
 	nodesVisited = 0;

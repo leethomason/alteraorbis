@@ -10,7 +10,7 @@ struct ModelVoxel {
 	bool ModelHit() const { return model != 0; };
 	bool VoxelHit() const { return voxel.x >= 0; }
 	bool Hit() const	  { return ModelHit() || VoxelHit(); }
-	grinliz::Vector2I Voxel2() const { grinliz::Vector2I v = { voxel.x, voxel.y }; return v; }
+	grinliz::Vector2I Voxel2() const { grinliz::Vector2I v = { voxel.x, voxel.z }; return v; }
 
 	Model*				model;
 	grinliz::Vector3I	voxel;
