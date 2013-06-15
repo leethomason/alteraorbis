@@ -44,7 +44,6 @@ public:
 	static bool GoldCrystalFilter( Chit* chit );	// Is this gold or crystal? (wallet items)
 	static bool CoreFilter( Chit* chit );
 	static bool WorkerFilter( Chit* chit );
-	static bool HasMoveComponentFilter( Chit* chit );
 
 private:
 

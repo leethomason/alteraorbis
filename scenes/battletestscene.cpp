@@ -301,12 +301,6 @@ void BattleTestScene::GoScene()
 	for( int i=0; i<rightCount; ++i ) {
 		CreateChit( waypoints[rightLoc][i], rightMoB, rightWeapon, RIGHT_TEAM, rightLevel );
 	}
-
-	// Trigger the AI to do something.
-	for( int i=LEFT; i<=RIGHT; ++i ) {
-		ChitEvent event( ChitEvent::AWARENESS, b, 0 );
-		chitBag.QueueEvent( event );
-	}
 }
 
 		
@@ -520,27 +514,33 @@ void BattleTestScene::DoTick( U32 deltaTime )
 
 	chitBag.DoTick( deltaTime, engine );
 
+	/*
 	if ( battleStarted ) {
 		bool aware = false;
 		Rectangle2F b;
 		b.Set( 0, 0, (float)map->Width(), (float)map->Height() );
 
-		chitBag.QuerySpatialHash( &chitArr, b, 0, 0 );
+		chitBag.QuerySpatialHash( &chitArr, b, 0, ChitBag::HasAIComponentFilter );
+		Chit* enemy = 0;
+		Chit* left  = 0;
 		for( int i=0; i<chitArr.Size(); ++i ) {
-			Chit* c = chitArr[i];
-
-			AIComponent* ai = c->GetAIComponent();
-			if ( ai && ai->AwareOfEnemy() ) {
-				aware = true;
-				break;
+			AIComponent* ai = chitArr[i]->GetAIComponent();
+			if ( !ai->AwareOfEnemy() ) {
+				if ( chitArr[i]->GetItem()->primaryTeam == LEFT_TEAM ) {
+					left = chitArr[i];
+				}
+				else {
+					enemy = chitArr[i];
+				}
 			}
 		}
-		if ( !aware ) {
-			ChitEvent event( ChitEvent::AWARENESS, b, 0 );
-			event.team = LEFT_TEAM;
-			chitBag.QueueEvent( event );
+		// Are both sides unaware?
+		if ( enemy && left ) {
+			enemy->GetAIComponent()->Target( left, false );
+			left->GetAIComponent()->Target( enemy, false );
 		}
 	}
+	*/
 }
 
 

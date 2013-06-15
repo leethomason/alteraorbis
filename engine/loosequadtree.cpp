@@ -36,7 +36,7 @@ int SpaceTree::nModelsAtDepth[DEPTH] = { 0 };
 SpaceTree::SpaceTree( float yMin, float yMax, int _size ) 
 	:	modelPool( "SpaceTreeModelPool", sizeof( Item ), MODEL_BLOCK*sizeof( Item ), false )
 {
-	GLASSERT( _size >> DEPTH );
+	GLASSERT( _size >> (DEPTH-1) );
 	size = _size;
 	treeBounds.Set( 0, yMin, 0, (float)size, yMax, (float)size );
 	lightXPerY = 0;

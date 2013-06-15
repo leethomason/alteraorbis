@@ -362,6 +362,20 @@ void ChitBag::UpdateSpatialHash( Chit* c, int x0, int y0, int x1, int y1 )
 }
 
 
+
+bool ChitBag::HasMoveComponentFilter( Chit* chit )
+{
+	return chit->GetMoveComponent() != 0;
+}
+
+
+bool ChitBag::HasAIComponentFilter( Chit* chit )
+{
+	return chit->GetAIComponent() != 0;
+}
+
+
+
 void ChitBag::QuerySpatialHash(	grinliz::CDynArray<Chit*>* array, 
 								const grinliz::Rectangle2F& rf, 
 								const Chit* ignore,

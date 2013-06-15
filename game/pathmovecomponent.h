@@ -65,6 +65,8 @@ public:
 		if ( queued.pos.x >= 0 ) { *dest = queued.pos; return true; }
 		return false;
 	}
+	const grinliz::Vector2F& DestPos() const { return dest.pos; }
+
 	void Stop() { SetNoPath(); }
 
 	void SetPathDebugging( bool d )	{ pathDebugging = d; }
@@ -74,6 +76,7 @@ public:
 	bool IsStuck() const			{ return isStuck; }
 	bool IsAvoiding() const			{ return avoidForceApplied; }
 	int ForceCount() const			{ return adjust; }
+	bool ForceCountHigh() const		{ return adjust > 10; }
 	virtual bool IsMoving() const	{ 
 		return isMoving; 
 	} 

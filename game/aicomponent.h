@@ -57,9 +57,7 @@ public:
 	// sector. If 'sector' is also specfied, will do grid travel
 	// after the move.
 	void Move( const grinliz::Vector2F& dest, const SectorPort* sector, bool focused );
-	// Targets a particular enemy.
 	void Target( Chit* chit, bool focused );
-	// Melt rock in the sector.
 	bool RockBreak( const grinliz::Vector2I& rock );
 
 	void EnableDebug( bool enable ) { debugFlag = enable; }
@@ -76,7 +74,8 @@ public:
 	enum {
 		NORMAL_MODE,
 		ROCKBREAK_MODE,
-		BATTLE_MODE
+		BATTLE_MODE,
+		NUM_MODES
 	};
 
 private:
@@ -91,14 +90,15 @@ private:
 
 	// Compute the line of site
 	bool LineOfSight( const ComponentSet& thisComp, Chit* target );
-	bool LineOfSight( const ComponentSet& thisComp, const grinliz::Vector2I& mapPos );
+	bool LineOfSight( const ComponentSet& thisComp, const grinliz::Vector2I& voxel );
 
 	void Think( const ComponentSet& thisComp );	// Choose a new action.
 	void ThinkWander( const ComponentSet& thisComp );
 	void ThinkBattle( const ComponentSet& thisComp );
 	void ThinkRockBreak( const ComponentSet& thisComp );
 
-	grinliz::Vector2F WanderOrigin( const ComponentSet& thisComp ) const;
+	grinliz::Vector2F GetWanderOrigin( const ComponentSet& thisComp ) const;
+	int GetThinkTime() const { return 500; }
 
 	// What happens when no other move is working.
 	grinliz::Vector2F ThinkWanderRandom( const ComponentSet& thisComp );
@@ -133,7 +133,6 @@ private:
 	struct TargetDesc
 	{
 		TargetDesc() { Clear(); }
-	
 
 		int id;
 		grinliz::Vector2I mapPos;
@@ -153,10 +152,9 @@ private:
 	TargetDesc			targetDesc;
 	int					currentAction;
 	int					focus;
-	grinliz::Rectangle2F awareness;
-	CTicker				rethink;
 	int					friendEnemyAge;
 	U32					wanderTime;
+	int					rethink;
 	bool				debugFlag;
 
 	void DoMelee( const ComponentSet& thisComp );

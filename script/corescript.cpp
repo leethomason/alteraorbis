@@ -118,6 +118,7 @@ int CoreScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 	Chit* attached = GetAttached();
 
 	if ( spawnTick.Delta( since ) && ctx.census->ais < TYPICAL_MONSTERS && !attached ) {
+#if 0
 		// spawn stuff.
 		MapSpatialComponent* ms = GET_SUB_COMPONENT( ctx.chit, SpatialComponent, MapSpatialComponent );
 		GLASSERT( ms );
@@ -141,6 +142,7 @@ int CoreScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 			}
 			((LumosChitBag*)(ctx.chit->GetChitBag()))->NewMonsterChit( pf, asset, team );
 		}
+#endif
 	}
 	if ( attached && ctx.chit->GetSpatialComponent() ) {
 		Vector3F pos3 = ctx.chit->GetSpatialComponent()->GetPosition();

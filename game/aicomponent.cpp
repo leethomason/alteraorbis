@@ -57,7 +57,7 @@ static const float GOLD_AWARE			=  3.5f;
 static const int   FORCE_COUNT_STUCK	=  8;
 
 
-AIComponent::AIComponent( Engine* _engine, WorldMap* _map ) : rethink( 1200 )
+AIComponent::AIComponent( Engine* _engine, WorldMap* _map )
 {
 	engine = _engine;
 	map = _map;
@@ -65,9 +65,9 @@ AIComponent::AIComponent( Engine* _engine, WorldMap* _map ) : rethink( 1200 )
 	focus = 0;
 	friendEnemyAge = 0;
 	aiMode = NORMAL_MODE;
-	awareness.Zero();
 	wanderTime = 0;
 	debugFlag = false;
+	rethink = 0;
 }
 
 
@@ -87,7 +87,6 @@ void AIComponent::Serialize( XStream* xs )
 	XARC_SER( xs, focus );
 	XARC_SER( xs, wanderTime );
 	XARC_SER( xs, friendEnemyAge );
-	rethink.Serialize( xs, "rethink" );
 	this->EndSerialize( xs );
 }
 
@@ -199,11 +198,10 @@ void AIComponent::GetFriendEnemyLists()
 	if ( !sc ) return;
 	Vector2F center = sc->GetPosition2D();
 
-	Rectangle2F zone = awareness;
-	if ( zone.Area() == 0 ) {
-		zone.min = zone.max = center;
-		zone.Outset( NORMAL_AWARENESS );
-	}
+	Rectangle2F zone;
+	zone.min = zone.max = center;
+	zone.Outset( NORMAL_AWARENESS );
+
 	if ( map->UsingSectors() ) {
 		Rectangle2I ri = SectorData::InnerSectorBounds( center.x, center.y );
 		Rectangle2F rf;
@@ -282,8 +280,29 @@ Chit* AIComponent::Closest( const ComponentSet& thisComp, Chit* arr[], int n, Ve
 
 void AIComponent::DoMove( const ComponentSet& thisComp )
 {
-	if ( aiMode == BATTLE_MODE ) {
-		// Run & Gun
+	PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
+	if ( !pmc ) {
+		currentAction = NO_ACTION;
+		return;
+	}
+
+	// Generally speaking, moving is done by the PathMoveComponent. When
+	// not in battle, this is essentially "do nothing." If in battle mode,
+	// we look for opportunity fire and such.
+	if ( aiMode != BATTLE_MODE ) {
+		// Check for motion done, stuck, etc.
+		if ( !pmc->IsMoving() || pmc->ForceCountHigh() ) {
+			currentAction = NO_ACTION;
+			return;
+		}
+		// Reloading is always a good background task.
+		IRangedWeaponItem* rangedWeapon = thisComp.itemComponent->GetRangedWeapon( 0 );
+		if ( rangedWeapon && rangedWeapon->GetItem()->CanReload() ) {
+			rangedWeapon->GetItem()->Reload();
+		}
+	}
+	else {
+		// Battle mode! Run & Gun
 		float utilityRunAndGun = 0.0f;
 		Chit* targetRunAndGun = 0;
 
@@ -292,6 +311,7 @@ void AIComponent::DoMove( const ComponentSet& thisComp )
 
 		if ( ranged ) {
 			Vector3F heading = thisComp.spatial->GetHeading();
+			bool explosive = (ranged->GetItem()->flags & GameItem::EFFECT_EXPLOSIVE) != 0;
 
 			if ( ranged->CanUse() ) {
 				float radAt1 = BattleMechanics::ComputeRadAt1( thisComp.chit->GetItem(), 
@@ -310,7 +330,7 @@ void AIComponent::DoMove( const ComponentSet& thisComp )
 					normal.Normalize();
 					float range = (p0-p1).Length();
 
-					if ( range < EXPLOSIVE_RANGE*3.0f ) {
+					if ( explosive && range < EXPLOSIVE_RANGE*3.0f ) {
 						// Don't run & gun explosives if too close.
 						continue;
 					}
@@ -332,9 +352,9 @@ void AIComponent::DoMove( const ComponentSet& thisComp )
 				utilityReload = 1.0f - rangedItem->RoundsFraction();
 			}
 			if ( utilityReload > 0 || utilityRunAndGun > 0 ) {
-					if ( debugFlag ) {
-						GLOUTPUT(( "ID=%d Move: RunAndGun=%.2f Reload=%.2f ", thisComp.chit->ID(), utilityRunAndGun, utilityReload ));
-					}
+				if ( debugFlag ) {
+					GLOUTPUT(( "ID=%d Move: RunAndGun=%.2f Reload=%.2f ", thisComp.chit->ID(), utilityRunAndGun, utilityReload ));
+				}
 				if ( utilityRunAndGun > utilityReload ) {
 					GLASSERT( targetRunAndGun );
 					Vector3F leading = BattleMechanics::ComputeLeadingShot( thisComp.chit, targetRunAndGun, 0 );
@@ -527,13 +547,7 @@ void AIComponent::OnChitEvent( const ChitEvent& event )
 		return;
 	}
 
-	if ( event.ID() == ChitEvent::AWARENESS ) {
-		awareness = event.AreaOfEffect();
-		parentChit->SetTickNeeded();
-	}
-	else {
-		super::OnChitEvent( event );
-	}
+	super::OnChitEvent( event );
 }
 
 
@@ -550,8 +564,9 @@ void AIComponent::Think( const ComponentSet& thisComp )
 void AIComponent::Move( const grinliz::Vector2F& dest, const SectorPort* sectorPort, bool focused )
 {
 	PathMoveComponent* pmc    = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
-	GridMoveComponent* gridMC = GET_SUB_COMPONENT( parentChit, MoveComponent, GridMoveComponent );
+	//GridMoveComponent* gridMC = GET_SUB_COMPONENT( parentChit, MoveComponent, GridMoveComponent );
 
+	/* FIXME should be handled by PMC
 	// Special case: if on a port, go straight to grid move. This avoids
 	// trying to do crowded pathing. OR, if a move is requested, and 
 	// we are on a GridMove, update.
@@ -574,10 +589,11 @@ void AIComponent::Move( const grinliz::Vector2F& dest, const SectorPort* sectorP
 			}
 		}
 	}
+	*/
 
 	if ( pmc ) {
 		pmc->QueueDest( dest, -1, sectorPort );
-		currentAction = NO_ACTION;
+		currentAction = MOVE;
 		focus = focused ? FOCUS_MOVE : 0;
 	}
 }
@@ -637,13 +653,11 @@ void AIComponent::ThinkRockBreak( const ComponentSet& thisComp )
 	// Always use melee first because bolts tend to "shoot through" in close quarters.
 	if ( meleeWeapon && BattleMechanics::InMeleeZone( engine, thisComp.chit, rock2i )) {
 		currentAction = MELEE;
-		rethink.Reset();
 		return;
 	}
 	bool lineOfSight = LineOfSight( thisComp, targetDesc.mapPos );
 	if ( rangedWeapon && rangedWeapon->GetItem()->CanUse() && lineOfSight ) {
 		currentAction = SHOOT;
-		rethink.Reset();
 		return;
 	}
 	else if ( !lineOfSight || meleeWeapon ) {
@@ -672,7 +686,6 @@ void AIComponent::ThinkRockBreak( const ComponentSet& thisComp )
 			Vector2F dest = { (float)bestDest.x+0.5f, (float)bestDest.y+0.5f };
 			currentAction = MOVE;
 			pmc->QueueDest( dest );
-			rethink.Reset();
 			return;
 		}
 	}
@@ -681,7 +694,7 @@ void AIComponent::ThinkRockBreak( const ComponentSet& thisComp )
 }
 
 
-Vector2F AIComponent::WanderOrigin( const ComponentSet& thisComp ) const
+Vector2F AIComponent::GetWanderOrigin( const ComponentSet& thisComp ) const
 {
 	Vector2F pos = thisComp.spatial->GetPosition2D();
 	Vector2I m = { (int)pos.x/SECTOR_SIZE, (int)pos.y/SECTOR_SIZE };
@@ -699,7 +712,7 @@ Vector2F AIComponent::ThinkWanderCircle( const ComponentSet& thisComp )
 	// In a circle?
 	// This turns out to be creepy. Worth keeping for something that is,
 	// in fact, creepy.
-	Vector2F dest = WanderOrigin( thisComp );
+	Vector2F dest = GetWanderOrigin( thisComp );
 	Random random( thisComp.chit->ID() );
 
 	float angleUniform = random.Uniform();
@@ -715,14 +728,14 @@ Vector2F AIComponent::ThinkWanderCircle( const ComponentSet& thisComp )
 		
 	v = v * (lenUniform * WANDER_RADIUS);
 
-	dest = WanderOrigin( thisComp ) + v;
+	dest = GetWanderOrigin( thisComp ) + v;
 	return dest;
 }
 
 
 Vector2F AIComponent::ThinkWanderRandom( const ComponentSet& thisComp )
 {
-	Vector2F dest = WanderOrigin( thisComp );
+	Vector2F dest = GetWanderOrigin( thisComp );
 	dest.x += parentChit->random.Uniform() * WANDER_RADIUS * parentChit->random.Sign();
 	dest.y += parentChit->random.Uniform() * WANDER_RADIUS * parentChit->random.Sign();
 	return dest;
@@ -745,7 +758,7 @@ Vector2F AIComponent::ThinkWanderFlock( const ComponentSet& thisComp )
 			pos.Push( v );
 		}
 	}
-	pos.Push( WanderOrigin( thisComp ) );	// the origin is a friend.
+	pos.Push( GetWanderOrigin( thisComp ) );	// the origin is a friend.
 
 	// And plants are friends.
 	Rectangle2F r;
@@ -859,7 +872,7 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 				// Already where we need to be		
 				if ( debugFlag ) {
 					GLOUTPUT(( "ID=%d Stand\n", thisComp.chit->ID() ));
-					}
+				}
 				currentAction = STAND;
 				return;
 			}
@@ -914,7 +927,6 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 	// Wander....
 	if ( dest.IsZero() ) {
 		if ( wanderFlags == 0 ) {
-			rethink.Set( 2000 );
 			currentAction = WANDER;
 			return;
 		}
@@ -944,7 +956,6 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 		if ( pmc ) {
 			pmc->QueueDest( dest );
 		}
-		rethink.Set( 10*1000 + thisComp.chit->random.Rand( 10*1000 ));
 		currentAction = actionToTake;
 	}
 }
@@ -1108,7 +1119,6 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 	}
 
 	int index = MaxValue<float, CompValue>( utility, NUM_OPTIONS );
-	rethink.Reset();
 
 	// Translate to action system:
 	switch ( index ) {
@@ -1124,7 +1134,6 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 		{
 			currentAction = MOVE;
 			targetDesc.Set( target[OPTION_MOVE_TO_RANGE]->ID() );
-			rethink.Within( (U32)(moveToTime*1000.0f) );
 			pmc->QueueDest( moveToRange );
 		}
 		break;
@@ -1186,7 +1195,7 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 
 	// Focuesd move check
 	if ( focus == FOCUS_MOVE ) {
-		return 200;
+		return GetThinkTime();
 	}
 
 	// If focused, make sure we have a target.
@@ -1203,7 +1212,7 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 	}
 
 	// High level mode switch?
-	if ( (aiMode == NORMAL_MODE || aiMode == ROCKBREAK_MODE) && !enemyList.Empty() ) {
+	if ( aiMode != BATTLE_MODE && enemyList.Size() ) {
 		aiMode = BATTLE_MODE;
 		currentAction = 0;
 		if ( debugFlag ) {
@@ -1218,37 +1227,33 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 		}
 	}
 
-	if ( !currentAction || rethink.Delta(timeSince)) {
+	if ( !currentAction || (rethink > 1000 ) ) {
 		Think( thisComp );
+		rethink = 0;
 	}
 
 	// Are we doing something? Then do that; if not, look for
 	// something else to do.
-	int tick = 0;
 	switch( currentAction ) {
 
 		case MOVE:		
 			DoMove( thisComp );
-			tick = 0;
+			rethink += deltaTime;
 			break;
 		case MELEE:		
 			DoMelee( thisComp );	
-			tick = 0;
 			break;
 		case SHOOT:		
 			DoShoot( thisComp );
-			tick = 0;
 			break;
 		case STAND:
-			tick = DoStand( thisComp, timeSince );
+			DoStand( thisComp, timeSince );
 			break;
 
 		case NO_ACTION:
-			tick = 400;
 			break;
 
 		case WANDER:
-			tick = VERY_LONG_TICK;
 			break;
 
 		default:
@@ -1256,12 +1261,12 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 			currentAction = 0;
 			break;
 	}
-	tick = Min( tick, rethink.Next() );
 	if ( debugFlag && (currentAction != oldAction) ) {
-		const char* actions[NUM_ACTIONS] = { "none", "move", "melee", "shoot", "wander", "stand" };
-		GLOUTPUT(( "ID=%d action=%s tick=%d\n", thisComp.chit->ID(), actions[currentAction], tick ));
+		static const char* modes[NUM_MODES]     = { "normal", "rockbreak", "battle" };
+		static const char* actions[NUM_ACTIONS] = { "none", "move", "melee", "shoot", "wander", "stand" };
+		GLOUTPUT(( "ID=%d mode=%s action=%s\n", thisComp.chit->ID(), modes[aiMode], actions[currentAction] ));
 	}
-	return tick;
+	return (currentAction != NO_ACTION) ? GetThinkTime() : 0;
 }
 
 

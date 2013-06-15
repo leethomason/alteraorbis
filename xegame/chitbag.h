@@ -84,6 +84,8 @@ public:
 	static bool AcceptAll( Chit* ) {
 		return true;
 	}
+	static bool HasMoveComponentFilter( Chit* chit );
+	static bool HasAIComponentFilter( Chit* chit );
 
 	void QuerySpatialHash(	grinliz::CDynArray<Chit*>* array, 
 							const grinliz::Rectangle2F& r, 

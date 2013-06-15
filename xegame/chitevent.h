@@ -27,7 +27,6 @@ class ChitEvent
 {
 public:
 	enum { 
-		AWARENESS,
 		EFFECT					// data: EFFECT_xyz, factor: strength of effect at AOE center
 	};
 
