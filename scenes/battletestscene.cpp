@@ -329,7 +329,9 @@ Chit* BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int
 	chit->Add( new RenderComponent( engine, asset ));
 	if ( type != DUMMY ) {
 		chit->Add( new PathMoveComponent( map ));
-		chit->Add( new AIComponent( engine, map ));
+		AIComponent* ai = new AIComponent( engine, map );
+		ai->SetSectorAwareness( true );
+		chit->Add( ai );
 		//chit->Add( new DebugPathComponent( engine, map, static_cast<LumosGame*>(game) ));
 	}
 	else {

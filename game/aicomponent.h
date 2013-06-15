@@ -60,7 +60,8 @@ public:
 	void Target( Chit* chit, bool focused );
 	bool RockBreak( const grinliz::Vector2I& rock );
 
-	void EnableDebug( bool enable ) { debugFlag = enable; }
+	void EnableDebug( bool enable )			{ debugFlag = enable; }
+	void SetSectorAwareness( bool aware )	{ fullSectorAware = aware; }
 
 	enum {
 		FRIENDLY,
@@ -155,6 +156,7 @@ private:
 	int					friendEnemyAge;
 	U32					wanderTime;
 	int					rethink;
+	bool				fullSectorAware;
 	bool				debugFlag;
 
 	void DoMelee( const ComponentSet& thisComp );

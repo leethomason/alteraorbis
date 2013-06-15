@@ -66,8 +66,9 @@ AIComponent::AIComponent( Engine* _engine, WorldMap* _map )
 	friendEnemyAge = 0;
 	aiMode = NORMAL_MODE;
 	wanderTime = 0;
-	debugFlag = false;
 	rethink = 0;
+	fullSectorAware = false;
+	debugFlag = false;
 }
 
 
@@ -86,6 +87,8 @@ void AIComponent::Serialize( XStream* xs )
 	XARC_SER( xs, targetDesc.mapPos );
 	XARC_SER( xs, focus );
 	XARC_SER( xs, wanderTime );
+	XARC_SER( xs, rethink );
+	XARC_SER( xs, fullSectorAware );
 	XARC_SER( xs, friendEnemyAge );
 	this->EndSerialize( xs );
 }
@@ -200,7 +203,7 @@ void AIComponent::GetFriendEnemyLists()
 
 	Rectangle2F zone;
 	zone.min = zone.max = center;
-	zone.Outset( NORMAL_AWARENESS );
+	zone.Outset( fullSectorAware ? SECTOR_SIZE : NORMAL_AWARENESS );
 
 	if ( map->UsingSectors() ) {
 		Rectangle2I ri = SectorData::InnerSectorBounds( center.x, center.y );
