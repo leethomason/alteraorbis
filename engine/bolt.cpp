@@ -69,7 +69,7 @@ void Bolt::TickAll( grinliz::CDynArray<Bolt>* bolts, U32 delta, Engine* engine, 
 		if ( !b.impact ) {
 			// Check if we hit something in the world.
 			// FIXME: add ignore list of the shooter, or move head away from model?
-			Vector3F at;
+			Vector3F at = { 0, 0, 0 };
 
 			// Check ground hit.
 			if ( (b.head + travel).y <= 0 ) {
@@ -90,6 +90,7 @@ void Bolt::TickAll( grinliz::CDynArray<Bolt>* bolts, U32 delta, Engine* engine, 
 				if ( mv.Hit() ) {
 					b.impact = true;
 					normal = b.dir;
+					at = mv.at;
 				}
 			}
 
@@ -101,12 +102,12 @@ void Bolt::TickAll( grinliz::CDynArray<Bolt>* bolts, U32 delta, Engine* engine, 
 
 				ParticleDef def = ps->GetPD( "boltImpact" );
 				def.color = b.color;
-				ps->EmitPD( def, at, normal, engine->camera.EyeDir3(), delta );
+				ps->EmitPD( def, at, -normal, engine->camera.EyeDir3(), delta );
 
 				if ( b.effect & GameItem::EFFECT_EXPLOSIVE ) {
 					def = ps->GetPD( "explosion" );
 					def.color = b.color;
-					ps->EmitPD( def, at, normal, engine->camera.EyeDir3(), delta );
+					ps->EmitPD( def, at, V3F_UP, engine->camera.EyeDir3(), delta );
 				}
 			}
 		}
