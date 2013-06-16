@@ -645,9 +645,9 @@ void AIComponent::ThinkRockBreak( const ComponentSet& thisComp )
 	}
 
 	const Vector3F& pos = thisComp.spatial->GetPosition();
-	Vector2F pos2 = { pos.x, pos.z };
-	Vector3F rockTarget = targetDesc.MapTarget();
-	Vector2I rock2i = { (int)rockTarget.x, (int)rockTarget.z };
+	Vector2F pos2		= { pos.x, pos.z };
+	Vector3F rockTarget	= targetDesc.MapTarget();
+	Vector2I rock2i		= { (int)rockTarget.x, (int)rockTarget.z };
 	
 	// The current weapons.
 	IRangedWeaponItem* rangedWeapon = thisComp.itemComponent->GetRangedWeapon( 0 );
@@ -1024,7 +1024,6 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 		float			range			= (enemyPos - pos).Length();
 		Vector3F		toEnemy			= (enemyPos - pos);
 		Vector2F		normalToEnemy	= { toEnemy.x, toEnemy.z };
-		float			meleeRange		= BattleMechanics::MeleeRange( parentChit, enemy.chit );
 
 		normalToEnemy.SafeNormalize( 1, 0 );
 		float dot = DotProduct( normalToEnemy, heading );
@@ -1100,16 +1099,16 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 
 		// Consider Melee
 		if ( meleeWeapon ) {
-			float u = meleeRange / range;
+			float u = MELEE_RANGE / range;
 			u *= q;
 			// Utility of the actual charge vs. moving closer. This
 			// seems to work with an if case.
-			if ( range > meleeRange * 3.0f ) {
+			if ( range > MELEE_RANGE * 3.0f ) {
 				if ( u > utility[OPTION_MOVE_TO_RANGE] ) {
 					utility[OPTION_MOVE_TO_RANGE] = u;
 					//moveToRange = pos2 + normalToEnemy * (range - meleeRange*2.0f);
 					moveToRange = enemyPos2;
-					moveToTime = (range - meleeRange*2.0f) / pmc->Speed();
+					moveToTime = (range - MELEE_RANGE*2.0f) / pmc->Speed();
 					target[OPTION_MOVE_TO_RANGE] = enemy.chit;
 				}
 			}

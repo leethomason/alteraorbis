@@ -57,25 +57,6 @@ static const float MELEE_DOT_PRODUCT = 0.7f;
 }
 
 
-/*static*/ float BattleMechanics::MeleeRange( Chit* src, Chit* target )
-{
-	RenderComponent* srcRender = src->GetRenderComponent();
-	RenderComponent* targetRender = target ? target->GetRenderComponent() : 0;
-
-	if ( srcRender  ) {
-		float meleeRange = srcRender->RadiusOfBase()*1.5f;
-		if ( targetRender ) {
-			meleeRange += targetRender->RadiusOfBase();
-		}
-		else {
-			meleeRange *= 1.2f;
-		}
-		return meleeRange;
-	}
-	return 0;
-}
-
-
 bool BattleMechanics::InMeleeZone(	Engine* engine,
 									Chit* src,
 									Chit* target )
@@ -87,9 +68,8 @@ bool BattleMechanics::InMeleeZone(	Engine* engine,
 		return false;
 
 	// Check range up front and early out.
-	const float meleeRange = MeleeRange( src, target );
 	const float range = ( targetComp.spatial->GetPosition2D() - srcComp.spatial->GetPosition2D() ).Length();
-	if ( range > meleeRange )
+	if ( range > MELEE_RANGE )
 		return false;
 
 	int test = IntersectRayCircle( targetComp.spatial->GetPosition2D(),
@@ -112,12 +92,11 @@ bool BattleMechanics::InMeleeZone(	Engine* engine,
 		return false;
 
 	// Check range up front and early out.
-	const float meleeRange = MeleeRange( src, 0 );
 	Rectangle2F aabb;
 	aabb.Set( (float)mapPos.x, (float)mapPos.y, (float)(mapPos.x+1), (float)(mapPos.y+1) );
 	Vector2F nearest = { 0, 0 };
 	const float range = PointAABBDistance( srcComp.spatial->GetPosition2D(), aabb, &nearest );
-	if ( range > meleeRange )
+	if ( range > MELEE_RANGE )
 		return false;
 
 	int test = IntersectRayCircle( aabb.Center(),
