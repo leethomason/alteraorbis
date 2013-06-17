@@ -385,15 +385,6 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 	}
 	enable3DDragging = (sim->GetPlayerChit() == 0) || (coreMode != 0);
 	
-	Rectangle2F coreBounds;
-	coreBounds.Set( 0, 0, 0, 0 );
-	if ( coreMode ) {
-		Vector2F pos2 = sim->GetPlayerChit()->GetSpatialComponent()->GetPosition2D();
-		int sectorX = (int)pos2.x / SECTOR_SIZE;
-		int sectorY = (int)pos2.y / SECTOR_SIZE;
-		coreBounds.Set( (float)(sectorX*SECTOR_SIZE), (float)(sectorY*SECTOR_SIZE), (float)((sectorX+1)*SECTOR_SIZE), (float)((sectorY+1)*SECTOR_SIZE) );
-	}
-
 	int  buildActive = 0;
 	for( int i=1; i<NUM_BUILD_BUTTONS; ++i ) {
 		if ( buildButton[i].Down() ) {
@@ -459,9 +450,6 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 				}
 			}
 		}
-	}
-	if ( coreMode ) {
-		sim->GetEngine()->RestrictCamera( &coreBounds );
 	}
 }
 
@@ -693,6 +681,19 @@ void GameScene::DoTick( U32 delta )
 	xpLabel.SetText( str.c_str() );
 
 	SetBars();
+
+	Rectangle2F coreBounds;
+	coreBounds.Set( 0, 0, 0, 0 );
+
+	CoreScript* coreMode = sim->GetChitBag()->IsBoundToCore( sim->GetPlayerChit() );
+	if ( coreMode ) {
+		Vector2F pos2 = sim->GetPlayerChit()->GetSpatialComponent()->GetPosition2D();
+		int sectorX = (int)pos2.x / SECTOR_SIZE;
+		int sectorY = (int)pos2.y / SECTOR_SIZE;
+		coreBounds.Set( (float)(sectorX*SECTOR_SIZE), (float)(sectorY*SECTOR_SIZE), (float)((sectorX+1)*SECTOR_SIZE), (float)((sectorY+1)*SECTOR_SIZE) );
+	}
+
+	sim->GetEngine()->RestrictCamera( coreMode ? &coreBounds : 0 );
 }
 
 

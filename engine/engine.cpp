@@ -696,13 +696,13 @@ void Engine::RestrictCamera( const grinliz::Rectangle2F* bounds )
 	}
 
 	if ( intersect.x < b.min.x ) {
-		camera.DeltaPosWC( (intersect.x - b.min.x), 0.0f, 0.0f );
+		camera.DeltaPosWC( (b.min.x - intersect.x), 0.0f, 0.0f );
 	}
 	if ( intersect.x > b.max.x ) {
 		camera.DeltaPosWC( (b.max.x - intersect.x), 0.0f, 0.0f );
 	}
 	if ( intersect.z < b.min.y ) {
-		camera.DeltaPosWC( 0.0f, 0.0f, (intersect.z - b.min.y) );
+		camera.DeltaPosWC( 0.0f, 0.0f, ( b.min.y - intersect.z) );
 	}
 	if ( intersect.z > b.max.y ) {
 		camera.DeltaPosWC( 0.0f, 0.0f, ( b.max.y - intersect.z) );
