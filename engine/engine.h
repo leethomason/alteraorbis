@@ -155,7 +155,7 @@ public:
 	void SetScreenport( Screenport* port )	{ screenport = port; }
 	const Screenport& GetScreenport()		{ return *screenport; }
 	Screenport* GetScreenportMutable()		{ return screenport; }
-	void RestrictCamera();
+	void RestrictCamera( const grinliz::Rectangle2F* bounds = 0 );
 
 	Texture* GetRenderTargetTexture( int id=0 );
 
