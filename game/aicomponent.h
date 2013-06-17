@@ -162,7 +162,7 @@ private:
 	void DoMelee( const ComponentSet& thisComp );
 	void DoShoot( const ComponentSet& thisComp );
 	void DoMove( const ComponentSet& thisComp );
-	int  DoStand( const ComponentSet& thisComp, U32 since );
+	bool DoStand( const ComponentSet& thisComp, U32 since );	// return true if doing something
 	bool SectorHerd( const ComponentSet& thisComp );
 
 	grinliz::CArray<int, MAX_TRACK> friendList;

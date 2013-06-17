@@ -451,7 +451,14 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 	IMeleeWeaponItem* weapon = thisComp.itemComponent->GetMeleeWeapon();
 	ComponentSet target( GetChitBag()->GetChit( targetDesc.id ), Chit::SPATIAL_BIT | Chit::ITEM_BIT | ComponentSet::IS_ALIVE );
 
-	bool targetOkay = (targetDesc.id && target.okay) || (!targetDesc.id && !targetDesc.mapPos.IsZero());
+	bool targetOkay = false;
+	if ( targetDesc.id ) {
+		targetOkay = target.okay;
+	}
+	else if ( !targetDesc.mapPos.IsZero() ) {
+		// make sure we aren't swinging at an empty voxel.
+		targetOkay = map->GetWorldGrid( targetDesc.mapPos.x, targetDesc.mapPos.y ).RockHeight() > 0;
+	}
 
 	if ( !weapon || !targetOkay ) {
 		currentAction = NO_ACTION;
@@ -493,7 +500,7 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 }
 
 
-int AIComponent::DoStand( const ComponentSet& thisComp, U32 since )
+bool AIComponent::DoStand( const ComponentSet& thisComp, U32 since )
 {
 	const GameItem* item	= parentChit->GetItem();
 	int itemFlags			= item ? item->flags : 0;
@@ -533,10 +540,10 @@ int AIComponent::DoStand( const ComponentSet& thisComp, U32 since )
 			ChitMsg damage( ChitMsg::CHIT_DAMAGE, 0, &info );
 			parentChit->SendMessage( heal, this );
 			plants[0]->SendMessage( damage );
-			tick = 0;
+			return true;
 		}
 	}
-	return tick;
+	return false;
 }
 
 
@@ -1249,13 +1256,25 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 			DoShoot( thisComp );
 			break;
 		case STAND:
-			DoStand( thisComp, timeSince );
+			if ( !DoStand( thisComp, timeSince ) ) {
+				rethink += deltaTime;
+			}
 			break;
 
 		case NO_ACTION:
 			break;
 
 		case WANDER:
+			{
+				PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
+				if ( pmc && pmc->IsMoving() && !pmc->ForceCountHigh() ) {
+					// okay
+				}
+				else {
+					// not actually wandering
+					currentAction = STAND;
+				}
+			}
 			break;
 
 		default:

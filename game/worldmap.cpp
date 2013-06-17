@@ -160,7 +160,7 @@ void WorldMap::VoxelHit( const Vector3I& v, const DamageDesc& dd )
 	if ( grid[index].HP() == 0 ) {
 		Vector3F pos = { (float)v.x+0.5f, (float)v.y+0.5f, (float)v.z+0.5f };
 		engine->particleSystem->EmitPD( "derez", pos, V3F_UP, engine->camera.EyeDir3(), 0 );
-		SetRock( v.x, v.y, 0, false, 0 );
+		SetRock( v.x, v.z, 0, false, 0 );
 	}
 }
 
@@ -813,6 +813,7 @@ void WorldMap::SetRock( int x, int y, int h, bool magma, int rockType )
 	wg.SetRockHeight( h );
 	wg.SetMagma( magma );
 	wg.SetRockType( rockType );
+	wg.DeltaHP( wg.TotalHP() );	// always repair. Correct?
 
 	if ( !was.Equal( wg )) {
 		voxelInit.Clear( x/ZONE_SIZE, y/ZONE_SIZE );
