@@ -681,7 +681,7 @@ ModelVoxel Engine::IntersectModelVoxel( const Vector3F& origin,
 }
 
 
-void Engine::RestrictCamera()
+void Engine::RestrictCamera( const grinliz::Rectangle2F* bounds )
 {
 	const Vector3F* eyeDir = camera.EyeDir3();
 
@@ -689,20 +689,23 @@ void Engine::RestrictCamera()
 	IntersectRayPlane( camera.PosWC(), eyeDir[0], XZ_PLANE, 0.0f, &intersect );
 //	GLOUTPUT(( "Intersect %.1f, %.1f, %.1f\n", intersect.x, intersect.y, intersect.z ));
 
-	const float SIZEX = (float)map->Width();
-	const float SIZEZ = (float)map->Height();
+	Rectangle2F b;
+	b.Set( 0, 0, (float)map->Width(), (float)map->Height() );
+	if ( bounds ) {
+		b = *bounds;
+	}
 
-	if ( intersect.x < 0.0f ) {
-		camera.DeltaPosWC( -intersect.x, 0.0f, 0.0f );
+	if ( intersect.x < b.min.x ) {
+		camera.DeltaPosWC( (intersect.x - b.min.x), 0.0f, 0.0f );
 	}
-	if ( intersect.x > SIZEX ) {
-		camera.DeltaPosWC( -(intersect.x-SIZEX), 0.0f, 0.0f );
+	if ( intersect.x > b.max.x ) {
+		camera.DeltaPosWC( (b.max.x - intersect.x), 0.0f, 0.0f );
 	}
-	if ( intersect.z < 0.0f ) {
-		camera.DeltaPosWC( 0.0f, 0.0f, -intersect.z );
+	if ( intersect.z < b.min.y ) {
+		camera.DeltaPosWC( 0.0f, 0.0f, (intersect.z - b.min.y) );
 	}
-	if ( intersect.z > SIZEZ ) {
-		camera.DeltaPosWC( 0.0f, 0.0f, -(intersect.z-SIZEZ) );
+	if ( intersect.z > b.max.y ) {
+		camera.DeltaPosWC( 0.0f, 0.0f, ( b.max.y - intersect.z) );
 	}
 }
 

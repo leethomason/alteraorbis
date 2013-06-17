@@ -73,7 +73,8 @@ private:
 
 	int			targetChit;
 	int			possibleChit;
-	int			infoID;
+	int					infoID;
+	grinliz::Vector2I	voxelInfoID;
 
 	gamui::PushButton	okay;
 	gamui::PushButton	serialButton[NUM_SERIAL_BUTTONS];

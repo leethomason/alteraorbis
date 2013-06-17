@@ -38,6 +38,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	targetChit = 0;
 	possibleChit = 0;
 	infoID = 0;
+	voxelInfoID.Zero();
 	lumosGame = game;
 	game->InitStd( &gamui2D, &okay, 0 );
 	sim = new Sim( lumosGame );
@@ -286,15 +287,14 @@ void GameScene::Rotate( float degrees )
 
 void GameScene::MouseMove( const grinliz::Vector2F& view, const grinliz::Ray& world )
 {
-	Matrix4 mvpi;
-	Ray ray;
-	Vector3F at, atModel;
-	game->GetScreenport().ViewProjectionInverse3D( &mvpi );
-	sim->GetEngine()->RayFromViewToYPlane( view, mvpi, &ray, &at );
-	Model* model = sim->GetEngine()->IntersectModel( ray.origin, ray.direction, 10000.0f, TEST_HIT_AABB, 0, 0, 0, &atModel );
-	MoveModel( model ? model->userData : 0 );
-	if ( model && model->userData ) {
-		infoID = model->userData->ID();
+	ModelVoxel mv = this->ModelAtMouse( view, sim->GetEngine() );
+	MoveModel( mv.model ? mv.model->userData : 0 );
+
+	if ( mv.model && mv.model->userData ) {
+		infoID = mv.model->userData->ID();
+	}
+	if ( mv.VoxelHit() ) {
+		voxelInfoID = mv.Voxel2();
 	}
 }
 
@@ -376,8 +376,24 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 {
 	bool uiHasTap = ProcessTap( action, view, world );
 	Engine* engine = sim->GetEngine();
-	enable3DDragging = (sim->GetPlayerChit() == 0);
 	CoreScript* coreMode = sim->GetChitBag()->IsBoundToCore( sim->GetPlayerChit() );
+	if ( coreMode ) {
+		CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
+		if ( cc ) {
+			cc->SetTrack( 0 );
+		}
+	}
+	enable3DDragging = (sim->GetPlayerChit() == 0) || (coreMode != 0);
+	
+	Rectangle2F coreBounds;
+	coreBounds.Set( 0, 0, 0, 0 );
+	if ( coreMode ) {
+		Vector2F pos2 = sim->GetPlayerChit()->GetSpatialComponent()->GetPosition2D();
+		int sectorX = (int)pos2.x / SECTOR_SIZE;
+		int sectorY = (int)pos2.y / SECTOR_SIZE;
+		coreBounds.Set( (float)(sectorX*SECTOR_SIZE), (float)(sectorY*SECTOR_SIZE), (float)((sectorX+1)*SECTOR_SIZE), (float)((sectorY+1)*SECTOR_SIZE) );
+	}
+
 	int  buildActive = 0;
 	for( int i=1; i<NUM_BUILD_BUTTONS; ++i ) {
 		if ( buildButton[i].Down() ) {
@@ -443,6 +459,9 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 				}
 			}
 		}
+	}
+	if ( coreMode ) {
+		sim->GetEngine()->RestrictCamera( &coreBounds );
 	}
 }
 
@@ -785,6 +804,11 @@ void GameScene::DrawDebugText()
 		GLString str;
 		info->DebugStr( &str );
 		ufoText->Draw( 0, y, "id=%d: %s", infoID, str.c_str() );
+		y += 16;
+	}
+	if ( !voxelInfoID.IsZero() ) {
+		const WorldGrid& wg = sim->GetWorldMap()->GetWorldGrid( voxelInfoID.x, voxelInfoID.y );
+		ufoText->Draw( 0, y, "voxel=%d,%d hp=%d/%d", voxelInfoID.x, voxelInfoID.y, wg.HP(), wg.TotalHP() );
 		y += 16;
 	}
 }
