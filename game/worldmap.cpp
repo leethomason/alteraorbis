@@ -1828,7 +1828,7 @@ void WorldMap::PrepVoxels( const SpaceTree* spaceTree )
 					PushVoxel( id, (float)x, (float)y, h, wall ); 
 				}
 				else if ( wg.RockHeight() ) {
-					id = ROCK;
+					id = (wg.RockType() == WorldGrid::ROCK) ? ROCK : ICE;
 					h = (float)wg.RockHeight();
 					// duplicated in PushVoxel
 					static const Vector2I delta[4] = { {1,0}, {0,1}, {-1,0}, {0,-1} };

@@ -58,7 +58,8 @@ public:
 	// after the move.
 	void Move( const grinliz::Vector2F& dest, const SectorPort* sector, bool focused );
 	void Target( Chit* chit, bool focused );
-	bool RockBreak( const grinliz::Vector2I& rock );
+	bool RockBreak( const grinliz::Vector2I& pos );
+	bool BuildIce( const grinliz::Vector2I& pos );
 
 	void EnableDebug( bool enable )			{ debugFlag = enable; }
 	void SetSectorAwareness( bool aware )	{ fullSectorAware = aware; }
@@ -75,11 +76,23 @@ public:
 	enum {
 		NORMAL_MODE,
 		ROCKBREAK_MODE,
+		BUILD_MODE,
 		BATTLE_MODE,
 		NUM_MODES
 	};
 
 private:
+	// Secondary AI modes.
+	enum {
+		NO_ACTION,
+		MOVE,			// Movement, will reload and run&gun if possible.
+		MELEE,			// Go to the target and hit it. Melee charge.
+		SHOOT,			// Stand ground and shoot.
+
+		WANDER,
+		STAND,			// used to eat plants, reload
+		NUM_ACTIONS
+	};
 
 	enum {
 		MAX_TRACK = 8,
@@ -97,6 +110,7 @@ private:
 	void ThinkWander( const ComponentSet& thisComp );
 	void ThinkBattle( const ComponentSet& thisComp );
 	void ThinkRockBreak( const ComponentSet& thisComp );
+	void ThinkBuild( const ComponentSet& thisComp );
 
 	grinliz::Vector2F GetWanderOrigin( const ComponentSet& thisComp ) const;
 	int GetThinkTime() const { return 500; }
@@ -110,18 +124,6 @@ private:
 
 	Engine*		engine;
 	WorldMap*	map;
-
-	enum {
-		// Possible actions:
-		NO_ACTION,
-		MOVE,			// Movement, will reload and run&gun if possible.
-		MELEE,			// Go to the target and hit it. Melee charge.
-		SHOOT,			// Stand ground and shoot.
-
-		WANDER,
-		STAND,			// used to eat plants, reload
-		NUM_ACTIONS
-	};
 
 	enum { 
 		FOCUS_NONE,

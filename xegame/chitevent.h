@@ -38,7 +38,6 @@ public:
 		: id(p_id), aoe( areaOfEffect ), itemFilter(filter), data(0), team(0) {}
 
 	const grinliz::Rectangle2F& AreaOfEffect() const	{ return aoe; }
-	//int ItemFilter() const								{ return itemFilter; }
 	int ID() const										{ return id; }
 
 	// Utility:

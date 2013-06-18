@@ -23,12 +23,13 @@ public:
 	};
 
 	struct QueueItem {
-		QueueItem() : action(NO_ACTION), assigned(0) { pos.Zero(); }
+		QueueItem() : action(NO_ACTION), building(0), assigned(0) { pos.Zero(); }
 		QueueItem( int p_action, const grinliz::Vector2I& p_pos ) : action(p_action), pos(p_pos), assigned(0) {}
 
 		void Serialize( XStream* xs );
 
 		int					action;		// CLEAR_GRID, etc.
+		int					building;	// what to construct
 		grinliz::Vector2I	pos;
 		int					assigned;	// id of worker assigned this task.			
 	};

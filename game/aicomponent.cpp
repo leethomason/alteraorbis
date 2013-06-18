@@ -566,6 +566,7 @@ void AIComponent::Think( const ComponentSet& thisComp )
 	switch( aiMode ) {
 	case NORMAL_MODE:		ThinkWander( thisComp );	break;
 	case ROCKBREAK_MODE:	ThinkRockBreak( thisComp );	break;
+	case BUILD_MODE:		ThinkBuild( thisComp );		break;
 	case BATTLE_MODE:		ThinkBattle( thisComp );	break;
 	}
 };
@@ -639,9 +640,81 @@ bool AIComponent::RockBreak( const grinliz::Vector2I& rock )
 }
 
 
+bool AIComponent::BuildIce( const grinliz::Vector2I& pos )
+{
+	GLOUTPUT(( "Ice at %d,%d\n", pos.x, pos.y ));
+	ComponentSet thisComp( parentChit, Chit::RENDER_BIT | 
+		                               Chit::SPATIAL_BIT |
+									   ComponentSet::IS_ALIVE |
+									   ComponentSet::NOT_IN_IMPACT );
+	if ( !thisComp.okay ) 
+		return false;
+
+	if ( map->IsPassable( pos.x, pos.y )) {
+		aiMode = BUILD_MODE;
+		currentAction = NO_ACTION;
+		targetDesc.Set( pos );
+		parentChit->SetTickNeeded();
+		return true;
+	}
+	return false;
+}
+
+
+void AIComponent::ThinkBuild( const ComponentSet& thisComp )
+{
+	if ( !thisComp.okay ) {
+		currentAction = NO_ACTION;
+		return;
+	}
+
+	// Make sure:
+	//	- there is an item in the WorkQueue
+	//	- the destination is availabe
+	//	- we are going (or at) the destination.
+	// FIXME: not accounting for getting stuck trying to get to destination.
+
+	Vector2F pos2			= thisComp.spatial->GetPosition2D();
+	Vector2I pos2i			= { (int)pos2.x, (int)pos2.y };
+	Vector2I sector			= { pos2i.x / SECTOR_SIZE, pos2i.y / SECTOR_SIZE };
+	CoreScript* coreScript	= GetChitBag()->ToLumos()->GetCore( sector );
+	if ( !coreScript ) { currentAction = NO_ACTION; return; }
+
+	WorkQueue* workQueue	= coreScript->GetWorkQueue();
+	if ( !workQueue ) { currentAction = NO_ACTION; return; }
+
+	const WorkQueue::QueueItem* item = workQueue->GetJob( parentChit->ID() );
+	if ( !item ) { currentAction = NO_ACTION; return; }
+
+	// Is the item where we are going?
+	if ( item->pos == pos2i ) {
+		// WE ARRIVE! Build. No delay. Maybe in the future.
+		//GetChitBag()->ToLumos()->NewBuilding( item->building );
+		if ( map->IsPassable( pos2i.x, pos2i.y )) {
+			map->SetRock( pos2i.x, pos2i.y, 1, false, WorldGrid::ICE );
+			aiMode = NORMAL_MODE;
+			currentAction = NO_ACTION;
+		}
+		return;
+	}
+
+	// Can we go there?
+	PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
+	if ( !pmc ) { currentAction = NO_ACTION; return; }
+
+	Vector2F dest = pmc->DestPos();
+	Vector2I desti = { (int)dest.x, (int)dest.y };
+	if ( desti != item->pos ) {
+		dest.Set( (float)item->pos.x + 0.5f, (float)item->pos.y+0.5f );
+		pmc->QueueDest( dest );
+		currentAction = MOVE;
+	}
+}
+
+	
 void AIComponent::ThinkRockBreak( const ComponentSet& thisComp )
 {
-	GRINLIZ_PERFTRACK;
+	//GRINLIZ_PERFTRACK;
 	PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
 	const WorldGrid& wg = map->GetWorldGrid( targetDesc.mapPos.x, targetDesc.mapPos.y );
 
@@ -790,6 +863,7 @@ Vector2F AIComponent::ThinkWanderFlock( const ComponentSet& thisComp )
 	Vector2F heading = thisComp.spatial->GetHeading2D();
 
 	// But not too close.
+	// FIXME: why is this 2-pass? Left over code?
 	for( int pass=0; pass<2; ++pass ) {
 		for( int i=0; i<pos.Size(); ++i ) {
 			if ( (pos[i] - dest).LengthSquared() < TOO_CLOSE*TOO_CLOSE ) {
@@ -925,6 +999,8 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 					break;
 
 				case WorkQueue::BUILD_ICE:
+					if ( BuildIce( item->pos )) 
+						return;
 					break;
 
 				default:

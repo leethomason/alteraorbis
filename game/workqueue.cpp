@@ -120,16 +120,22 @@ void WorkQueue::DoTick()
 			}
 		}
 
+		const WorldGrid& wg = worldMap->GetWorldGrid( queue[i].pos.x, queue[i].pos.y );
 		switch ( queue[i].action )
 		{
 		case CLEAR_GRID:
-			{
-				const WorldGrid& wg = worldMap->GetWorldGrid( queue[i].pos.x, queue[i].pos.y );
-				if ( wg.RockHeight() == 0 ) {
-					RemoveImage( queue[i] );
-					queue.Remove( i );
-					--i;
-				}
+			if ( wg.RockHeight() == 0 ) {
+				RemoveImage( queue[i] );
+				queue.Remove( i );
+				--i;
+			}
+			break;
+
+		case BUILD_ICE:
+			if ( !worldMap->IsPassable( queue[i].pos.x, queue[i].pos.y )) {
+				RemoveImage( queue[i] );
+				queue.Remove( i );
+				--i;
 			}
 			break;
 
