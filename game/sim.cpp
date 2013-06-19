@@ -159,7 +159,7 @@ void Sim::CreateCores()
 			ms->SetMapPosition( sd.core.x, sd.core.y );
 			ms->SetMode( GRID_IN_USE ); 
 			chit->Add( ms );
-			chit->Add( new ScriptComponent( new CoreScript( worldMap, chitBag ), engine, &chitBag->census ));
+			chit->Add( new ScriptComponent( new CoreScript( worldMap, chitBag, engine ), engine, &chitBag->census ));
 			chit->Add( new ItemComponent( engine, worldMap, *gameItem ));
 			chit->Add( new RenderComponent( engine, asset ));
 			++ncores;

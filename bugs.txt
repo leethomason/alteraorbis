@@ -45,7 +45,7 @@ x support melee attack on rocks
 		- visitors create energy, buildings consume energy
 		- create new workers (they get wiped out)
 		- decent clear dragging
-		- actually tell what you have tagged to clear
+		x actually tell what you have tagged to clear
 		- build 2 height ice
 		- clear vegetation
 		- cancel orders

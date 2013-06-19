@@ -144,6 +144,11 @@ public:
 		rockType = type;
 	}
 
+	int Height() const {
+		if ( Pool() ) return POOL_HEIGHT;
+		return RockHeight();
+	}
+
 	bool Pool() const { return hasPool ? true : false; }
 	void SetPool( bool p ) {
 		GLASSERT( IsLand() || (p==false) );

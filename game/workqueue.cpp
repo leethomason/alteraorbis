@@ -4,6 +4,8 @@
 #include "lumoschitbag.h"
 #include "gameitem.h"
 
+#include "../engine/engine.h"
+
 #include "../xarchive/glstreamer.h"
 
 using namespace grinliz;
@@ -11,7 +13,7 @@ using namespace gamui;
 
 static const float NOTIFICATION_RAD = 5.0f;
 
-WorkQueue::WorkQueue( WorldMap* wm, LumosChitBag* lcb ) : worldMap( wm ), chitBag( lcb )
+WorkQueue::WorkQueue( WorldMap* wm, LumosChitBag* lcb, Engine* e ) : worldMap( wm ), chitBag( lcb ), engine( e )
 {
 }
 
@@ -22,16 +24,33 @@ WorkQueue::~WorkQueue()
 		Image* image = images.Pop();
 		delete image;
 	}
+	while ( !models.Empty() ) {
+		Model* m = models.Pop();
+		engine->FreeModel( m );
+	}
 }
 
 
 void WorkQueue::AddImage( const QueueItem& item )
 {
-	RenderAtom atom = LumosGame::CalcIconAtom( 10+item.action, true );	// fixme. switch to new icon texture
-	Image* image = new Image( &worldMap->overlay1, atom, true );
-	images.Push( image );
-	image->SetSize( 1, 1 );
-	image->SetPos( (float)item.pos.x, (float)item.pos.y );
+	if ( item.action == CLEAR_GRID ) {
+		const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( "unitPlateCentered" );
+		GLASSERT( res );
+		Model* m = engine->AllocModel( res );
+		GLASSERT( m );
+		const WorldGrid& wg = worldMap->GetWorldGrid( item.pos.x, item.pos.y );
+		int h = wg.Height();
+		m->SetPos( (float)item.pos.x + 0.5f, (float)h + 0.1f, (float)item.pos.y+0.5f );
+		models.Push( m );
+	}
+	else {
+		RenderAtom atom = LumosGame::CalcIconAtom( 10+item.action, true );	// fixme. switch to new icon texture
+		Image* image = new Image( &worldMap->overlay1, atom, true );
+		images.Push( image );
+		image->SetSize( 1, 1 );
+		image->SetPos( (float)item.pos.x, (float)item.pos.y );
+	}
+
 }
 
 
@@ -42,6 +61,14 @@ void WorkQueue::RemoveImage( const QueueItem& item )
 		if ( v == item.pos ) {
 			delete images[i];
 			images.Remove(i);
+			return;
+		}
+	}
+	for( int i=0; i<models.Size(); ++i ) {
+		Vector2I v = { (int)models[i]->Pos().x, (int)models[i]->Pos().z };
+		if ( v == item.pos ) {
+			engine->FreeModel( models[i] );
+			models.Remove(i);
 			return;
 		}
 	}

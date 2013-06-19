@@ -49,7 +49,7 @@ void ScriptComponent::Serialize( XStream* xs )
 			script = new PlantScript( factory->GetSim(), factory->GetEngine(), factory->GetWorldMap(), factory->GetWeather(), 0 );
 		}
 		else if ( StrEqual( name, "CoreScript" )) {
-			script = new CoreScript( factory->GetWorldMap(), factory->GetChitBag() );
+			script = new CoreScript( factory->GetWorldMap(), factory->GetChitBag(), factory->GetEngine() );
 		}
 		else {
 			GLASSERT( 0 );

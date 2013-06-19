@@ -406,8 +406,17 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 
 			if ( coreMode && buildActive ) {
 				WorkQueue* wq = coreMode->GetWorkQueue();
-				Vector2I v = { (int)plane.x, (int)plane.z };
-				wq->Add( buildActive, v );
+				GLASSERT( wq );
+
+				if ( buildActive == CLEAR_ROCK ) {
+					if ( mv.VoxelHit() ) {
+						wq->Add( buildActive, mv.Voxel2() );
+					}
+				}
+				else if ( !mv.VoxelHit() ) {
+					Vector2I v = { (int)plane.x, (int)plane.z };
+					wq->Add( buildActive, v );
+				}
 			}
 			
 			if ( mv.VoxelHit() ) {

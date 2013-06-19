@@ -11,7 +11,7 @@ class LumosChitBag;
 class CoreScript : public IScript
 {
 public:
-	CoreScript( WorldMap* map, LumosChitBag* chitBag );
+	CoreScript( WorldMap* map, LumosChitBag* chitBag, Engine* engine );
 	virtual ~CoreScript();
 
 	virtual void Init( const ScriptContext& heap );

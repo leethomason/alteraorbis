@@ -8,11 +8,13 @@
 class WorldMap;
 class XStream;
 class LumosChitBag;
+class Model;
+class Engine;
 
 class WorkQueue
 {
 public:
-	WorkQueue( WorldMap*, LumosChitBag* );
+	WorkQueue( WorldMap*, LumosChitBag*, Engine* );
 	~WorkQueue();
 
 	enum {
@@ -50,10 +52,12 @@ private:
 	void AddImage( const QueueItem& item );
 	void RemoveImage( const QueueItem& item );
 
+	Engine*			engine;
 	WorldMap*		worldMap;
 	LumosChitBag*	chitBag;
-	grinliz::CDynArray< QueueItem > queue;
-	grinliz::CDynArray< gamui::Image* > images;
+	grinliz::CDynArray< QueueItem >		queue;	// work to do
+	grinliz::CDynArray< gamui::Image* > images;	// images to tag the work
+	grinliz::CDynArray< Model* >		models;	// models to tag the work
 };
 
 #endif // WORKQUEUE_ALTERA_INCLUDED
