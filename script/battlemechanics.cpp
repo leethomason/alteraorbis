@@ -96,16 +96,8 @@ bool BattleMechanics::InMeleeZone(	Engine* engine,
 	aabb.Set( (float)mapPos.x, (float)mapPos.y, (float)(mapPos.x+1), (float)(mapPos.y+1) );
 	Vector2F nearest = { 0, 0 };
 	const float range = PointAABBDistance( srcComp.spatial->GetPosition2D(), aabb, &nearest );
-	if ( range > MELEE_RANGE )
-		return false;
 
-	int test = IntersectRayCircle( aabb.Center(),
-								   0.72f,
-								   srcComp.spatial->GetPosition2D(),
-								   srcComp.spatial->GetHeading2D() );
-
-	bool intersect = ( test == INTERSECT || test == INSIDE );
-	return intersect;
+	return range < MELEE_RANGE;
 }
 
 

@@ -77,6 +77,16 @@ void WorkQueue::Assign( int id, const WorkQueue::QueueItem* item )
 }
 
 
+void WorkQueue::ReleaseJob( int chitID )
+{
+	for( int i=0; i<queue.Size(); ++i ) {
+		if ( queue[i].assigned == chitID ) {
+			queue[i].assigned = 0;
+		}
+	}
+}
+
+
 const WorkQueue::QueueItem* WorkQueue::GetJob( int id )
 {
 	for( int i=0; i<queue.Size(); ++i ) {

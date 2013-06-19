@@ -43,6 +43,13 @@ x support melee attack on rocks
 		- visitors warp in, travel warp out
 		- visitors visit interesting buildings
 		- visitors create energy, buildings consume energy
+		- create new workers (they get wiped out)
+		- decent clear dragging
+		- actually tell what you have tagged to clear
+		- build 2 height ice
+		- clear vegetation
+		- cancel orders
+		- melee only hits one voxel
 		- leave core
 	- Art
 		- item screen

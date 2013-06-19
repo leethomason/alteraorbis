@@ -26,6 +26,7 @@ class WorldMap;
 class Engine;
 struct ComponentSet;
 struct SectorPort;
+class WorkQueue;
 
 // Combat AI: needs refactoring
 class AIComponent : public Component
@@ -114,6 +115,7 @@ private:
 
 	grinliz::Vector2F GetWanderOrigin( const ComponentSet& thisComp ) const;
 	int GetThinkTime() const { return 500; }
+	WorkQueue* GetWorkQueue();
 
 	// What happens when no other move is working.
 	grinliz::Vector2F ThinkWanderRandom( const ComponentSet& thisComp );

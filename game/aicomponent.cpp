@@ -479,7 +479,12 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 		// Move to target.
 		PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
 		if ( pmc ) {
-			Vector2F targetPos = target.spatial->GetPosition2D();
+			Vector2F targetPos = { 0, 0 };
+			if ( targetDesc.id )
+				targetPos = target.spatial->GetPosition2D();
+			else 
+				targetPos.Set( (float)targetDesc.mapPos.x + 0.5f, (float)targetDesc.mapPos.y + 0.5f );
+
 			Vector2F pos = thisComp.spatial->GetPosition2D();
 			Vector2F dest = { -1, -1 };
 			pmc->QueuedDest( &dest );
@@ -489,7 +494,7 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 
 			// If the error is greater than distance to, then re-path.
 			if ( delta > distanceToTarget * 0.25f ) {
-				pmc->QueueDest( target.chit );
+				pmc->QueueDest( targetPos );
 			}
 		}
 		else {
@@ -661,6 +666,22 @@ bool AIComponent::BuildIce( const grinliz::Vector2I& pos )
 }
 
 
+WorkQueue* AIComponent::GetWorkQueue()
+{
+	SpatialComponent* sc = parentChit->GetSpatialComponent();
+	if ( !sc )
+		return 0;
+
+	Vector2I sector = sc->GetSector();
+	CoreScript* coreScript	= GetChitBag()->ToLumos()->GetCore( sector );
+	if ( !coreScript )
+		return 0;
+
+	WorkQueue* workQueue = coreScript->GetWorkQueue();
+	return workQueue;
+}
+
+
 void AIComponent::ThinkBuild( const ComponentSet& thisComp )
 {
 	if ( !thisComp.okay ) {
@@ -677,14 +698,16 @@ void AIComponent::ThinkBuild( const ComponentSet& thisComp )
 	Vector2F pos2			= thisComp.spatial->GetPosition2D();
 	Vector2I pos2i			= { (int)pos2.x, (int)pos2.y };
 	Vector2I sector			= { pos2i.x / SECTOR_SIZE, pos2i.y / SECTOR_SIZE };
-	CoreScript* coreScript	= GetChitBag()->ToLumos()->GetCore( sector );
-	if ( !coreScript ) { currentAction = NO_ACTION; return; }
 
-	WorkQueue* workQueue	= coreScript->GetWorkQueue();
+	WorkQueue* workQueue	= GetWorkQueue();
 	if ( !workQueue ) { currentAction = NO_ACTION; return; }
 
 	const WorkQueue::QueueItem* item = workQueue->GetJob( parentChit->ID() );
-	if ( !item ) { currentAction = NO_ACTION; return; }
+	if ( !item ) { 
+		aiMode = NORMAL_MODE;
+		currentAction = NO_ACTION; 
+		return; 
+	}
 
 	// Is the item where we are going?
 	if ( item->pos == pos2i ) {
@@ -745,30 +768,12 @@ void AIComponent::ThinkRockBreak( const ComponentSet& thisComp )
 	}
 	else if ( !lineOfSight || meleeWeapon ) {
 		// Move to target
-		static const Vector2I delta[4] = {
-			{ -1, 0 }, { 1, 0 }, { 0, 1 }, { 0, -1 }
-		};
-
-		float bestCost = FLT_MAX;
-		int best = -1;
-		Vector2I bestDest = { 0, 0 };
-
-		for( int i=0; i<4; ++i ) {
-			Vector2I desti = targetDesc.mapPos + delta[i];
-			Vector2F dest = { (float)desti.x + 0.5f, (float)desti.y + 0.5f };
-			float cost = FLT_MAX;
-			if ( map->CalcPath( thisComp.spatial->GetPosition2D(), dest, 0, &cost, false )) {
-				if ( cost < bestCost ) {
-					bestCost = cost;
-					best = i;
-					bestDest = desti;
-				}
-			}
-		}
-		if ( best >= 0 ) {
-			Vector2F dest = { (float)bestDest.x+0.5f, (float)bestDest.y+0.5f };
+		Vector2F dest = { (float)targetDesc.mapPos.x + 0.5f, (float)targetDesc.mapPos.y + 0.5f };
+		Vector2F end;
+		float cost = 0;
+		if ( map->CalcPathBeside( thisComp.spatial->GetPosition2D(), dest, &end, &cost )) {
 			currentAction = MOVE;
-			pmc->QueueDest( dest );
+			pmc->QueueDest( end );
 			return;
 		}
 	}
@@ -1414,6 +1419,13 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		focus = 0;
 		currentAction = NO_ACTION;
 		parentChit->SetTickNeeded();
+
+		{
+			WorkQueue* workQueue = GetWorkQueue();
+			if ( workQueue && workQueue->GetJob( parentChit->ID() )) {
+				workQueue->ReleaseJob( parentChit->ID() );
+			}
+		}
 		break;
 
 	case ChitMsg::CHIT_SECTOR_HERD:
