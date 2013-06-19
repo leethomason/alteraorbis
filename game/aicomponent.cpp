@@ -284,7 +284,7 @@ Chit* AIComponent::Closest( const ComponentSet& thisComp, Chit* arr[], int n, Ve
 void AIComponent::DoMove( const ComponentSet& thisComp )
 {
 	PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
-	if ( !pmc ) {
+	if ( !pmc || pmc->ForceCountHigh() ) {
 		currentAction = NO_ACTION;
 		return;
 	}
@@ -704,7 +704,7 @@ void AIComponent::ThinkBuild( const ComponentSet& thisComp )
 
 	Vector2F dest = pmc->DestPos();
 	Vector2I desti = { (int)dest.x, (int)dest.y };
-	if ( desti != item->pos ) {
+	if ( desti != item->pos || pmc->ForceCountHigh() ) {
 		dest.Set( (float)item->pos.x + 0.5f, (float)item->pos.y+0.5f );
 		pmc->QueueDest( dest );
 		currentAction = MOVE;
@@ -738,8 +738,8 @@ void AIComponent::ThinkRockBreak( const ComponentSet& thisComp )
 		currentAction = MELEE;
 		return;
 	}
-	bool lineOfSight = LineOfSight( thisComp, targetDesc.mapPos );
-	if ( rangedWeapon && rangedWeapon->GetItem()->CanUse() && lineOfSight ) {
+	bool lineOfSight = rangedWeapon && LineOfSight( thisComp, targetDesc.mapPos );
+	if ( lineOfSight && rangedWeapon->GetItem()->CanUse() ) {
 		currentAction = SHOOT;
 		return;
 	}
@@ -972,41 +972,6 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 			if ( Closest( thisComp, gold.Mem(), gold.Size(), &goldPos, 0 ) ) {
 				actionToTake = MOVE;
 				dest = goldPos;
-			}
-		}
-	}
-	if ( dest.IsZero() && (itemFlags & GameItem::AI_DOES_WORK) ) {
-		// Is there work to do?
-
-		Vector2I sector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
-		CoreScript* coreScript = GetChitBag()->ToLumos()->GetCore( sector );
-		if ( coreScript ) {
-			WorkQueue* workQueue = coreScript->GetWorkQueue();
-
-			const WorkQueue::QueueItem* item = workQueue->GetJob( parentChit->ID() );
-			if ( !item ) {
-				item = workQueue->Find( pos2i );
-				if ( item ) {
-					workQueue->Assign( parentChit->ID(), item );
-				}
-			}
-			if ( item ) {
-				switch ( item->action )
-				{
-				case WorkQueue::CLEAR_GRID:
-					if ( RockBreak( item->pos ) )
-						return;
-					break;
-
-				case WorkQueue::BUILD_ICE:
-					if ( BuildIce( item->pos )) 
-						return;
-					break;
-
-				default:
-					GLASSERT( 0 );
-					break;
-				}
 			}
 		}
 	}
@@ -1296,7 +1261,7 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 		friendEnemyAge = parentChit->ID() & 63;	// a little randomness
 	}
 
-	// High level mode switch?
+	// High level mode switch, in/out of battle?
 	if ( aiMode != BATTLE_MODE && enemyList.Size() ) {
 		aiMode = BATTLE_MODE;
 		currentAction = 0;
@@ -1309,6 +1274,42 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 		currentAction = 0;
 		if ( debugFlag ) {
 			GLOUTPUT(( "ID=%d Mode to Normal\n", thisComp.chit->ID() ));
+		}
+	}
+
+	// Is there work to do?
+	if ( aiMode == NORMAL_MODE && (thisComp.item->flags & GameItem::AI_DOES_WORK) ) {
+		// Is there work to do?
+
+		Vector2I sector = thisComp.spatial->GetSector();
+		CoreScript* coreScript = GetChitBag()->ToLumos()->GetCore( sector );
+		if ( coreScript ) {
+			WorkQueue* workQueue = coreScript->GetWorkQueue();
+
+			// Get the current job, or find a new one.
+			const WorkQueue::QueueItem* item = workQueue->GetJob( parentChit->ID() );
+			if ( !item ) {
+				item = workQueue->Find( thisComp.spatial->GetPosition2DI() );
+				if ( item ) {
+					workQueue->Assign( parentChit->ID(), item );
+				}
+			}
+			if ( item ) {
+				switch ( item->action )
+				{
+				case WorkQueue::CLEAR_GRID:
+					RockBreak( item->pos );
+					break;
+
+				case WorkQueue::BUILD_ICE:
+					BuildIce( item->pos );
+					break;
+
+				default:
+					GLASSERT( 0 );
+					break;
+				}
+			}
 		}
 	}
 

@@ -39,6 +39,7 @@ public:
 	const QueueItem* Find( const grinliz::Vector2I& chitPos );	// find something to do. don't hold pointer!
 	void Assign( int id, const QueueItem* item );
 	const QueueItem* GetJob( int id );							// don't hold pointer!
+	bool JobLocation( const QueueItem& item, const grinliz::Vector2I& from, grinliz::Vector2I* dest );
 
 	void DoTick();	// mostly looks for work being complete.
 	const grinliz::CDynArray< WorkQueue::QueueItem >& Queue() const { return queue; };	

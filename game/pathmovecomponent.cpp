@@ -134,7 +134,8 @@ bool PathMoveComponent::NeedComputeDest()
 	// Optimize - can tweak existing path? 
 	// - If there is a path, and this doesn't change it, do nothing.
 	// - If there is a path, and this only changes the end rotation, just do that.
-	if ( HasPath() ) {
+	// But if the force count is high, don't optimize. We may be stuck.
+	if ( HasPath() && !ForceCountHigh() ) {
 		static const float EPS = 0.01f;
 		if ( dest.pos.Equal( queued.pos, EPS ) && Equal( dest.rotation, queued.rotation, EPS ) ) {
 			queued.Clear();
@@ -501,7 +502,8 @@ int PathMoveComponent::DoTick( U32 delta, U32 since )
 		++adjust;
 	}
 	else {
-		--adjust;
+		if ( adjust > 0 ) 
+			--adjust;
 	}
 	return 0;
 }

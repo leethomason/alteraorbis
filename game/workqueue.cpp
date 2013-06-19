@@ -91,15 +91,32 @@ const WorkQueue::QueueItem* WorkQueue::GetJob( int id )
 const WorkQueue::QueueItem* WorkQueue::Find( const grinliz::Vector2I& chitPos )
 {
 	int best=-1;
-	int golfScore = INT_MAX;
+	float bestCost = FLT_MAX;
+	const Vector2F start = { (float)chitPos.x+0.5f, (float)chitPos.y+0.5f };
 
 	for( int i=0; i<queue.Size(); ++i ) {
 		if ( queue[i].assigned == 0 ) {
-			// Length + penalty-if-assigned
-			int gs = (chitPos - queue[i].pos).LengthSquared();
-			if ( gs < golfScore ) {
-				golfScore = gs;
-				best = i;
+
+			float cost = 0;
+			Vector2F end = { (float)queue[i].pos.x+0.5f, (float)queue[i].pos.y+0.5f };
+
+			if ( queue[i].action == CLEAR_GRID ) {
+				Vector2F bestEnd = { 0, 0 };
+
+				if ( worldMap->CalcPathBeside( start, end, &bestEnd, &cost )) {
+					if ( cost < bestCost ) {
+						bestCost = cost;
+						best = i;
+					}
+				}
+			}
+			else {
+				if ( worldMap->CalcPath( start, end, 0, 0, 0, &cost )) {
+					if ( cost < bestCost ) {
+						bestCost = cost;
+						best = i;
+					}
+				}
 			}
 		}
 	}

@@ -121,6 +121,14 @@ public:
 					grinliz::CDynArray<grinliz::Vector2F> *path,
 					float* totalCost,
 					bool showDebugging = false );
+
+	// Calculate a path assuming that the position at 'end' is blocked,
+	// but we can get to a neighbor.
+	bool CalcPathBeside(	const grinliz::Vector2F& start, 
+							const grinliz::Vector2F& end, 
+							grinliz::Vector2F* bestEnd,
+							float* totalCost );
+
 	bool CalcPath(	const grinliz::Vector2F& start, 
 					const grinliz::Vector2F& end, 
 					grinliz::Vector2F *path,

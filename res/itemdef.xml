@@ -18,7 +18,7 @@
         mass="20" >
     <intrinsics>
       <item name="claw"
-            flags="MELEE_WEAPON RANGED_WEAPON INTRINSIC"
+            flags="MELEE_WEAPON INTRINSIC"
             hardpoint="trigger"
             meleeDamage="10"
             rangedDamage="5"

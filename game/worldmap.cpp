@@ -1459,6 +1459,34 @@ micropather::MicroPather* WorldMap::PushPather( const Vector2I& sector )
 }
 
 
+bool WorldMap::CalcPathBeside(	const grinliz::Vector2F& start, 
+								const grinliz::Vector2F& end, 
+								grinliz::Vector2F* bestEnd,
+								float* totalCost )
+{
+	static const Vector2F delta[4] = { {-1,0}, {1,0}, {0,-1}, {0,1} };
+
+	int best = -1;
+	float bestCost = FLT_MAX;
+
+	for( int i=0; i<4; ++i ) {
+		float cost = 0;
+		if ( CalcPath( start, end + delta[i], 0, &cost, false )) {
+			if ( cost < bestCost ) {
+				bestCost = cost;
+				best = i;
+			}
+		}
+	}
+	if ( best >= 0 ) {
+		*bestEnd = end + delta[best];
+		*totalCost = bestCost;
+		return true;
+	}
+	return false;
+}
+
+
 bool WorldMap::CalcPath(	const grinliz::Vector2F& start, 
 							const grinliz::Vector2F& end, 
 							CDynArray<grinliz::Vector2F> *path,

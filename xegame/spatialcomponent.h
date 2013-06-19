@@ -25,6 +25,7 @@
 #include "../grinliz/glgeometry.h"
 
 #include "../engine/enginelimits.h"
+#include "../game/gamelimits.h"
 
 class MapSpatialComponent;
 
@@ -72,7 +73,9 @@ public:
 	grinliz::Vector3F GetHeading() const;
 
 	grinliz::Vector2F GetPosition2D() const			{ grinliz::Vector2F v = { position.x, position.z }; return v; }
+	grinliz::Vector2I GetPosition2DI() const		{ grinliz::Vector2I v = { (int)position.x, (int)position.z }; return v; }
 	grinliz::Vector2F GetHeading2D() const;
+	grinliz::Vector2I GetSector() const				{ grinliz::Vector2I s = { (int)position.x/SECTOR_SIZE, (int)position.z/SECTOR_SIZE }; return s; }
 
 protected:
 	grinliz::Vector3F	position;

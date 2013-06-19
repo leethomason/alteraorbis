@@ -1,4 +1,5 @@
-- not showing bolt impacts
+- redo AvoidOthers(). Full crunch stops break the game.
+x not showing bolt impacts
 - texture bleeding in voxel renderer
 - flower colors (too saturated flowers)
 - use arrays to track components and component update time.
@@ -37,7 +38,7 @@ x support melee attack on rocks
 		x fix crystal types
 		x bind to core
 		x workers remove rock
-		- workers add ice
+		x workers add ice
 		- workers build kiosk
 		- visitors warp in, travel warp out
 		- visitors visit interesting buildings
