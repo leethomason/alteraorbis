@@ -80,6 +80,10 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 		buildButton[i].SetText( buildButtonText[i] );
 		buildButton[0].AddToToggleGroup( &buildButton[i] );
 	}
+
+	createWorkerButton.Init( &gamui2D, game->GetButtonLook(0) );
+	createWorkerButton.SetText( "Create\nWorker" );
+
 	allRockButton.Init( &gamui2D, game->GetButtonLook(0) );
 	allRockButton.SetText( "All Rock" );
 
@@ -131,6 +135,7 @@ void GameScene::Resize()
 	for( int i=0; i<NUM_BUILD_BUTTONS; ++i ) {
 		layout.PosAbs( &buildButton[i], 0, i+2 );
 	}
+	layout.PosAbs( &createWorkerButton, 0, 6 );
 	layout.PosAbs( &allRockButton, 0, 1 );
 
 	const Screenport& port = lumosGame->GetScreenport();
@@ -495,6 +500,14 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 	}
 	else if ( item == &allRockButton ) {
 		sim->SetAllRock();
+	}
+	else if ( item == &createWorkerButton ) {
+		Chit* playerChit = sim->GetPlayerChit();
+		CoreScript* coreMode = sim->GetChitBag()->IsBoundToCore( playerChit );
+		if ( coreMode ) {
+			int team = playerChit->GetItem()->primaryTeam;
+			sim->GetChitBag()->NewWorkerChit( playerChit->GetSpatialComponent()->GetPosition(), team );
+		}
 	}
 
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {

@@ -80,6 +80,7 @@ private:
 	gamui::PushButton	serialButton[NUM_SERIAL_BUTTONS];
 	gamui::ToggleButton camModeButton[NUM_CAM_MODES];
 	gamui::ToggleButton	buildButton[NUM_BUILD_BUTTONS];
+	gamui::PushButton	createWorkerButton;
 	gamui::PushButton	allRockButton;
 	gamui::PushButton	newsButton[NUM_NEWS_BUTTONS];
 	gamui::PushButton	clearButton;

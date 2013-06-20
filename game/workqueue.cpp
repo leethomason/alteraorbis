@@ -40,7 +40,7 @@ void WorkQueue::AddImage( const QueueItem& item )
 		GLASSERT( m );
 		const WorldGrid& wg = worldMap->GetWorldGrid( item.pos.x, item.pos.y );
 		int h = wg.Height();
-		m->SetPos( (float)item.pos.x + 0.5f, (float)h + 0.1f, (float)item.pos.y+0.5f );
+		m->SetPos( (float)item.pos.x + 0.5f, (float)h + 0.01f, (float)item.pos.y+0.5f );
 		models.Push( m );
 	}
 	else {
