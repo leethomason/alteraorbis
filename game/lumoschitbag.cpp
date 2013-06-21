@@ -44,6 +44,28 @@ LumosChitBag::~LumosChitBag()
 }
 
 
+
+Chit* LumosChitBag::NewBuilding( const Vector2I& pos, const char* name, int team )
+{
+	Chit* chit = NewChit();
+
+	ItemDefDB* itemDefDB = ItemDefDB::Instance();
+	ItemDefDB::GameItemArr itemDefArr;
+	itemDefDB->Get( name, &itemDefArr );
+	GLASSERT( !itemDefArr.Empty() );
+	const GameItem* gameItem = itemDefArr[0];
+
+	MapSpatialComponent* msc = new MapSpatialComponent( worldMap );
+	msc->SetMapPosition( pos.x, pos.y );
+	msc->SetMode( GRID_BLOCKED );
+	
+	chit->Add( msc );
+	chit->Add( new RenderComponent( engine, gameItem->ResourceName() ));
+	chit->Add( new HealthComponent( engine ));
+	return chit;
+}
+
+
 Chit* LumosChitBag::NewMonsterChit( const Vector3F& pos, const char* name, int team )
 {
 	Chit* chit = NewChit();

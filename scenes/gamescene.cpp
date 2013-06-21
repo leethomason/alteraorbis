@@ -415,12 +415,17 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 
 				if ( buildActive == CLEAR_ROCK ) {
 					if ( mv.VoxelHit() ) {
-						wq->Add( buildActive, mv.Voxel2() );
+						wq->Add( buildActive, mv.Voxel2(), IString() );
 					}
 				}
 				else if ( !mv.VoxelHit() ) {
 					Vector2I v = { (int)plane.x, (int)plane.z };
-					wq->Add( buildActive, v );
+					switch ( buildActive ) {
+					case BUILD_ICE:			wq->Add( buildActive, v, IString() );	break;
+					case BUILD_KIOSK:		wq->Add( buildActive, v, StringPool::Intern( "kiosk" ));	break;
+					default: GLASSERT( 0 ); break;
+					};
+					
 				}
 			}
 			

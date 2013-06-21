@@ -60,7 +60,8 @@ public:
 	void Move( const grinliz::Vector2F& dest, const SectorPort* sector, bool focused );
 	void Target( Chit* chit, bool focused );
 	bool RockBreak( const grinliz::Vector2I& pos );
-	bool BuildIce( const grinliz::Vector2I& pos );
+	// Use a null IString for ICE.
+	bool Build( const grinliz::Vector2I& pos, grinliz::IString structure );
 
 	void EnableDebug( bool enable )			{ debugFlag = enable; }
 	void SetSectorAwareness( bool aware )	{ fullSectorAware = aware; }
@@ -141,6 +142,7 @@ private:
 
 		int id;
 		grinliz::Vector2I mapPos;
+		grinliz::IString  name;		// what structure to build
 
 		grinliz::Vector3F MapTarget() const {
 			GLASSERT( !mapPos.IsZero() );
@@ -148,9 +150,10 @@ private:
 			return v;
 		}
 
-		void Clear() { id = 0; mapPos.Zero(); }
-		void Set( int _id ) { id = _id; mapPos.Zero(); }
-		void Set( const grinliz::Vector2I& _mapPos ) { mapPos = _mapPos; id = 0; }
+		void Clear() { id = 0; mapPos.Zero(); name = grinliz::IString(); }
+		void Set( int _id ) { id = _id; mapPos.Zero(); name = grinliz::IString(); }
+		void Set( const grinliz::Vector2I& _mapPos, grinliz::IString _name = grinliz::IString() ) 
+			{ mapPos = _mapPos; id = 0; name = _name; }
 	};
 
 	int					aiMode;

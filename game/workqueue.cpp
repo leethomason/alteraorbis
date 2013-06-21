@@ -76,10 +76,10 @@ void WorkQueue::RemoveImage( const QueueItem& item )
 }
 
 
-void WorkQueue::Add( int action, const grinliz::Vector2I& pos2i )
+void WorkQueue::Add( int action, const grinliz::Vector2I& pos2i, IString structure )
 {
 	GLASSERT( action >= CLEAR_GRID && action < NUM_ACTIONS );
-	QueueItem item( action, pos2i );
+	QueueItem item( action, pos2i, structure );
 	queue.Push( item );
 	AddImage( item );
 
@@ -186,6 +186,7 @@ void WorkQueue::DoTick()
 			break;
 
 		case BUILD_ICE:
+		case BUILD_STRUCTURE:
 			if ( !worldMap->IsPassable( queue[i].pos.x, queue[i].pos.y )) {
 				RemoveImage( queue[i] );
 				queue.Remove( i );

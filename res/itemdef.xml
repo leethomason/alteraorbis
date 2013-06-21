@@ -52,6 +52,10 @@
         flags="CLICK_THROUGH"
         mass="1" />
 
+  <item name="kiosk"
+        resource="kiosk0"
+        mass="50" />
+
   <item name="mantis"
         resource="mantis"
         flags="AI_WANDER_HERD AI_EAT_PLANTS AI_SECTOR_HERD"

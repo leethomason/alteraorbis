@@ -645,7 +645,7 @@ bool AIComponent::RockBreak( const grinliz::Vector2I& rock )
 }
 
 
-bool AIComponent::BuildIce( const grinliz::Vector2I& pos )
+bool AIComponent::Build( const grinliz::Vector2I& pos, IString structure )
 {
 	GLOUTPUT(( "Ice at %d,%d\n", pos.x, pos.y ));
 	ComponentSet thisComp( parentChit, Chit::RENDER_BIT | 
@@ -658,7 +658,7 @@ bool AIComponent::BuildIce( const grinliz::Vector2I& pos )
 	if ( map->IsPassable( pos.x, pos.y )) {
 		aiMode = BUILD_MODE;
 		currentAction = NO_ACTION;
-		targetDesc.Set( pos );
+		targetDesc.Set( pos, structure );
 		parentChit->SetTickNeeded();
 		return true;
 	}
@@ -708,13 +708,26 @@ void AIComponent::ThinkBuild( const ComponentSet& thisComp )
 		currentAction = NO_ACTION; 
 		return; 
 	}
+	if ( item->action < WorkQueue::BUILD_START || item->action >= WorkQueue::BUILD_END ) {
+		// not sure how this happened.
+		workQueue->ReleaseJob( parentChit->ID() );
+		aiMode = NORMAL_MODE;
+		currentAction = NO_ACTION; 
+		return; 
+	}
 
 	// Is the item where we are going?
 	if ( item->pos == pos2i ) {
 		// WE ARRIVE! Build. No delay. Maybe in the future.
 		//GetChitBag()->ToLumos()->NewBuilding( item->building );
 		if ( map->IsPassable( pos2i.x, pos2i.y )) {
-			map->SetRock( pos2i.x, pos2i.y, 1, false, WorldGrid::ICE );
+			if ( item->action == WorkQueue::BUILD_ICE ) {
+				map->SetRock( pos2i.x, pos2i.y, 1, false, WorldGrid::ICE );
+			}
+			else if ( item->action == WorkQueue::BUILD_STRUCTURE ) {
+				GLASSERT( !item->structure.empty() );
+				GetChitBag()->ToLumos()->NewBuilding( pos2i, item->structure.c_str(), thisComp.item->primaryTeam );
+			}
 			aiMode = NORMAL_MODE;
 			currentAction = NO_ACTION;
 		}
@@ -1307,7 +1320,11 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 					break;
 
 				case WorkQueue::BUILD_ICE:
-					BuildIce( item->pos );
+					Build( item->pos, IString() );
+					break;
+
+				case WorkQueue::BUILD_STRUCTURE:
+					Build( item->pos, item->structure );
 					break;
 
 				default:
