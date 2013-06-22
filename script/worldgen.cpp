@@ -32,6 +32,7 @@ void SectorData::Serialize( XStream* xs )
 	XARC_SER( xs, y );
 	XARC_SER( xs, ports );
 	XARC_SER( xs, core );
+	XARC_SER( xs, isPortal );
 	XARC_SER( xs, area );
 	XARC_SER( xs, name );
 	XarcClose( xs );
@@ -731,10 +732,6 @@ void WorldGen::GenerateTerrain( U32 seed, SectorData* s )
 	// Place core
 	Vector2I c = {	s->x + SECTOR_SIZE/2 - 10 + random.Dice( 3, 6 ),
 					s->y + SECTOR_SIZE/2 - 10 + random.Dice( 3, 6 )  };
-	if ( s->isPortal ) {
-		// Put ports in direct center.
-		c.Set( s->x + SECTOR_SIZE/2, s->y + SECTOR_SIZE/2 );
-	}
 	s->core = c;
 
 	Rectangle2I r;
@@ -743,19 +740,6 @@ void WorldGen::GenerateTerrain( U32 seed, SectorData* s )
 
 	Draw( r, LAND0 );
 
-	if ( s->isPortal ) {
-		// Make sure there is an unobstructed path in to portals.
-		Rectangle2I port0, port1;
-		port0 = s->GetPortLoc( SectorData::NEG_X );
-		port1 = s->GetPortLoc( SectorData::POS_X );
-		r.Set( port0.max.x+1, port0.min.y, port1.min.x-1, port0.max.y );
-		Draw( r, LAND0 );
-
-		port0 = s->GetPortLoc( SectorData::NEG_Y );
-		port1 = s->GetPortLoc( SectorData::POS_Y );
-		r.Set( port0.min.x, port0.max.y+1, port1.max.x, port1.min.y-1 );
-		Draw( r, LAND0 );
-	}
 	land[c.y*SIZE+c.x] = s->isPortal ? PORTAL : CORE;
 
 	bool portsColored = false;

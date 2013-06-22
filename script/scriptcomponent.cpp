@@ -6,6 +6,7 @@
 #include "volcanoscript.h"
 #include "plantscript.h"
 #include "corescript.h"
+#include "portalscript.h"
 
 using namespace grinliz;
 
@@ -50,6 +51,9 @@ void ScriptComponent::Serialize( XStream* xs )
 		}
 		else if ( StrEqual( name, "CoreScript" )) {
 			script = new CoreScript( factory->GetWorldMap(), factory->GetChitBag(), factory->GetEngine() );
+		}
+		else if ( StrEqual( name, "PortalScript" )) {
+			script = new PortalScript( factory->GetWorldMap(), factory->GetChitBag(), factory->GetEngine() );
 		}
 		else {
 			GLASSERT( 0 );

@@ -39,7 +39,9 @@ x support melee attack on rocks
 		x bind to core
 		x workers remove rock
 		x workers add ice
-		- workers build kiosk
+		x workers build kiosk
+		- portals have gameplay issues: what if visitors can never get anywhere? should visitors enter
+		  on the grid itself? Always come in from world center?
 		- visitors warp in, travel warp out
 		- visitors visit interesting buildings
 		- visitors create energy, buildings consume energy
@@ -48,7 +50,9 @@ x support melee attack on rocks
 		x actually tell what you have tagged to clear
 		- clear vegetation
 		- new Core model
-	- Gold 2
+		- new Portal model
+		- fix rockgen to give space around portals
+	- Silver
 		- build 2 height ice
 		- decent UI
 		- leave core

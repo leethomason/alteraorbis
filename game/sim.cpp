@@ -16,6 +16,7 @@
 #include "../script/plantscript.h"
 #include "../script/corescript.h"
 #include "../script/worldgen.h"
+#include "../script/portalscript.h"
 
 #include "pathmovecomponent.h"
 #include "debugstatecomponent.h"
@@ -142,30 +143,41 @@ void Sim::Save( const char* mapDAT, const char* gameDAT )
 void Sim::CreateCores()
 {
 	ItemDefDB* itemDefDB = ItemDefDB::Instance();
-	ItemDefDB::GameItemArr itemDefArr;
-	itemDefDB->Get( "core", &itemDefArr );
-	GLASSERT( itemDefArr.Size() > 0 );
-	const GameItem* gameItem = itemDefArr[0];
-	const char* asset = gameItem->resource.c_str();
+	const GameItem& coreItem = itemDefDB->Get( "core" );
+	const GameItem& portalItem = itemDefDB->Get( "portal" );
+
 	const SectorData* sectorDataArr = worldMap->GetSectorData();
 
 	int ncores = 0;
+	int nportals = 0;
+
 	for( int i=0; i<NUM_SECTORS*NUM_SECTORS; ++i ) {
 		const SectorData& sd = sectorDataArr[i];
-		if ( sd.HasCore() ) {
+		if ( sd.HasCore() || sd.HasPortal()) {
 			Chit* chit = chitBag->NewChit();
 
 			MapSpatialComponent* ms = new MapSpatialComponent( worldMap );
 			ms->SetMapPosition( sd.core.x, sd.core.y );
 			ms->SetMode( GRID_IN_USE ); 
 			chit->Add( ms );
-			chit->Add( new ScriptComponent( new CoreScript( worldMap, chitBag, engine ), engine, &chitBag->census ));
-			chit->Add( new ItemComponent( engine, worldMap, *gameItem ));
+
+			const char* asset = 0;
+			if ( sd.HasCore() ) {
+				chit->Add( new ScriptComponent( new CoreScript( worldMap, chitBag, engine ), engine, &chitBag->census ));
+				asset = coreItem.ResourceName();
+				chit->Add( new ItemComponent( engine, worldMap, coreItem ));
+				++ncores;
+			}
+			else {
+				chit->Add( new ScriptComponent( new PortalScript( worldMap, chitBag, engine ), engine, &chitBag->census ));
+				asset = portalItem.ResourceName();
+				chit->Add( new ItemComponent( engine, worldMap, portalItem ));
+				++nportals;
+			}
 			chit->Add( new RenderComponent( engine, asset ));
-			++ncores;
 		}
 	}
-	GLOUTPUT(( "nCores=%d\n", ncores ));
+	GLOUTPUT(( "nCores=%d nPortals=%d\n", ncores, nportals ));
 }
 
 

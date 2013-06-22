@@ -98,14 +98,12 @@ public:
 		GRID,
 		PORT,
 		LAND,
-		PORTAL,
 		NUM_LAYERS
 	};
 	int Layer() const			{ 
 		int layer = WATER;
 		if ( isGrid ) layer = GRID;
 		else if ( isPort ) layer = PORT;
-		else if ( isPortal ) layer = PORTAL;
 		else if ( isLand ) layer = LAND;
 		return layer;
 	}
