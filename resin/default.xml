@@ -90,6 +90,7 @@
   <model filename="possibleTargetFlag.ac" shading="flat" shadowCaster="false" />
 
   <model filename="core.ac" shading="flat" />
+  <model filename="portal.ac" shading="flat" />
   <model filename="kiosk.ac" modelName="kiosk0" origin="-8.50 0 -0.50" shading="flat" polyRemoval="pre" />
   
   <!-- Creating animation

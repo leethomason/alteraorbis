@@ -139,6 +139,7 @@
     <ClCompile Include="..\script\corescript.cpp" />
     <ClCompile Include="..\script\itemscript.cpp" />
     <ClCompile Include="..\script\plantscript.cpp" />
+    <ClCompile Include="..\script\portalscript.cpp" />
     <ClCompile Include="..\script\procedural.cpp" />
     <ClCompile Include="..\script\rockgen.cpp" />
     <ClCompile Include="..\script\scriptcomponent.cpp" />
@@ -235,6 +236,7 @@
     <ClInclude Include="..\script\corescript.h" />
     <ClInclude Include="..\script\itemscript.h" />
     <ClInclude Include="..\script\plantscript.h" />
+    <ClInclude Include="..\script\portalscript.h" />
     <ClInclude Include="..\script\procedural.h" />
     <ClInclude Include="..\script\rockgen.h" />
     <ClInclude Include="..\script\scriptcomponent.h" />

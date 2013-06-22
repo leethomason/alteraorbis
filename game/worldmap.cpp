@@ -403,6 +403,9 @@ void WorldMap::MapInit( const U8* land )
 		else if ( h == WorldGen::CORE ) {
 			grid[i].SetCore();
 		}
+		else if ( h == WorldGen::PORTAL ) {
+			grid[i].SetPortal();
+		}
 		else {
 			GLASSERT( 0 );
 		}
@@ -539,6 +542,7 @@ void WorldMap::Tessellate()
 Vector2I WorldMap::FindEmbark()
 {
 	Random random;
+	random.SetSeedFromTime();
 
 	const SectorData* s = 0;
 	while( !s ) {

@@ -21,6 +21,7 @@
 class ComponentFactory;
 class Census;
 class CoreScript;
+class PortalScript;
 class Engine;
 
 
@@ -55,6 +56,8 @@ public:
 
 	// Safe casting.
 	virtual CoreScript* ToCoreScript() { return 0; }
+	virtual PortalScript* ToPortalScript() { return 0; }
+
 
 protected:
 	const ScriptContext* scriptContext;

@@ -137,14 +137,6 @@ void ModelHeader::Save( gamedb::WItem* parent )
 	}
 
 	DBSet( node, "bounds", bounds ); 
-/*	gamedb::WItem* boundNode = node->FetchChild( "bounds" );
-	boundNode->SetFloat( "min.x", bounds.min.x );
-	boundNode->SetFloat( "min.y", bounds.min.y );
-	boundNode->SetFloat( "min.z", bounds.min.z );
-	boundNode->SetFloat( "max.x", bounds.max.x );
-	boundNode->SetFloat( "max.y", bounds.max.y );
-	boundNode->SetFloat( "max.z", bounds.max.z );
-*/
 	gamedb::WItem* metaNode = node->FetchChild( "metaData" );
 	for( int i=0; i<EL_MAX_METADATA; ++i ) {
 		if ( !metaData[i].name.empty() ) {
@@ -670,6 +662,9 @@ void ProcessModel( XMLElement* model )
 		group.Set( vertexGroup[i].textureName.c_str(), vertexGroup[i].nVertex, vertexGroup[i].nIndex );
 
 		gamedb::WItem* witemGroup = witem->FetchChild( i );
+		if ( group.textureName.empty() ) {
+			ExitError( "Model", pathName.c_str(), assetName.c_str(), "no texture specified" );
+		}
 		witemGroup->SetString( "textureName", group.textureName.c_str() );
 		witemGroup->SetInt( "nVertex", group.nVertex );
 		witemGroup->SetInt( "nIndex", group.nIndex );

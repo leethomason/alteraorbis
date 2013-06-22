@@ -44,6 +44,7 @@ public:
 		GRID,
 		PORT,
 		CORE,
+		PORTAL,
 		NUM_TYPES
 	};
 
@@ -56,6 +57,7 @@ public:
 
 	void CutRoads( U32 seed, SectorData* data );
 	void ProcessSectors( U32 seed, SectorData* data );
+	// Connect up portal or core.
 	void GenerateTerrain( U32 seed, SectorData* data );
 
 	const U8* Land() const						{ return land; }

@@ -649,6 +649,8 @@ public:
 
 void WorldGen::ProcessSectors( U32 seed, SectorData* sectorData )
 {
+	Random random( seed );
+
 	// Calc the area.
 	// Sort by area.
 	// Choose N and fill in for cores.
@@ -665,6 +667,7 @@ void WorldGen::ProcessSectors( U32 seed, SectorData* sectorData )
 			s->y = j*SECTOR_SIZE;
 
 			if ( s->ports ) {
+				GLASSERT( s->isPortal == false );
 				AddPorts( s );
 				sectors.Push( s );
 			}
@@ -672,9 +675,32 @@ void WorldGen::ProcessSectors( U32 seed, SectorData* sectorData )
 		}
 	}
 
+	// There are roughly 120 cores. 24 cores are within 2
+	// steps of a given portal. Try 5 portals.
+	static const int NUM_PORTALS = 5;
+	static const Vector2I quad[NUM_PORTALS] = {
+		{ 0, 0 },
+		{ NUM_SECTORS/2, 0 },
+		{ 0, NUM_SECTORS/2 },
+		{ NUM_SECTORS/2, NUM_SECTORS/2 },
+		{ NUM_SECTORS/4, NUM_SECTORS/4 }
+	};
+	for( int i=0; i<NUM_PORTALS; i++ ) {
+		// Randomly find a valid location.
+		while( true ) {
+			int sx = quad[i].x + random.Rand( NUM_SECTORS/2 );
+			int sy = quad[i].y + random.Rand( NUM_SECTORS/2 );
+			SectorData* s = &sectorData[sy*NUM_SECTORS+sx];
+			if ( s->ports && !s->isPortal ) {
+				s->isPortal = true;
+				break;
+			}
+		}
+	}
+
 	GLOUTPUT(( "nSectors=%d\n", sectors.Size() ));
 	for( int i=0; i<sectors.Size(); ++i ) {
-		GenerateTerrain( seed+i, sectors[i] );
+		GenerateTerrain( random.Rand(), sectors[i] );
 	}
 }
 
@@ -705,6 +731,10 @@ void WorldGen::GenerateTerrain( U32 seed, SectorData* s )
 	// Place core
 	Vector2I c = {	s->x + SECTOR_SIZE/2 - 10 + random.Dice( 3, 6 ),
 					s->y + SECTOR_SIZE/2 - 10 + random.Dice( 3, 6 )  };
+	if ( s->isPortal ) {
+		// Put ports in direct center.
+		c.Set( s->x + SECTOR_SIZE/2, s->y + SECTOR_SIZE/2 );
+	}
 	s->core = c;
 
 	Rectangle2I r;
@@ -712,7 +742,21 @@ void WorldGen::GenerateTerrain( U32 seed, SectorData* s )
 	r.Outset( 2 );
 
 	Draw( r, LAND0 );
-	land[c.y*SIZE+c.x] = CORE;
+
+	if ( s->isPortal ) {
+		// Make sure there is an unobstructed path in to portals.
+		Rectangle2I port0, port1;
+		port0 = s->GetPortLoc( SectorData::NEG_X );
+		port1 = s->GetPortLoc( SectorData::POS_X );
+		r.Set( port0.max.x+1, port0.min.y, port1.min.x-1, port0.max.y );
+		Draw( r, LAND0 );
+
+		port0 = s->GetPortLoc( SectorData::NEG_Y );
+		port1 = s->GetPortLoc( SectorData::POS_Y );
+		r.Set( port0.min.x, port0.max.y+1, port1.max.x, port1.min.y-1 );
+		Draw( r, LAND0 );
+	}
+	land[c.y*SIZE+c.x] = s->isPortal ? PORTAL : CORE;
 
 	bool portsColored = false;
 	int a = CalcSectorAreaFromFill( s, c, &portsColored );
