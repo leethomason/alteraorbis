@@ -29,6 +29,12 @@
     </intrinsics>
   </item>
 
+  <item name="visitor"
+        resource="prime"
+        flags="VISITOR"
+        mass="35" >
+  </item>
+
   <item name="gold"
         resource="gold"
         flags="CLICK_THROUGH"
@@ -180,11 +186,7 @@
         resource="core"
         flags="INDESTRUCTABLE CLICK_THROUGH"
         />
-  <item name="portal"
-        resource="portal"
-        flags="INDESTRUCTABLE CLICK_THROUGH"
-        />
-        
+
   <!-- The plant items describe the plants at the smallest height. Scaled from there,
        remembering largest plant is 4x the height, 16x the surface area, and 64x the mass.
        A plant standing alone will have sun+rain = 1.0 in the absense of other effects.

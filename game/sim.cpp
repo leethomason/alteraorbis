@@ -56,6 +56,7 @@ Sim::Sim( LumosGame* g )
 	timeInMinutes = 0;
 	volcTimer = 0;
 	secondClock = 1000;
+	currentVisitor = 0;
 
 	random.SetSeedFromTime();
 }
@@ -149,11 +150,10 @@ void Sim::CreateCores()
 	const SectorData* sectorDataArr = worldMap->GetSectorData();
 
 	int ncores = 0;
-	int nportals = 0;
 
 	for( int i=0; i<NUM_SECTORS*NUM_SECTORS; ++i ) {
 		const SectorData& sd = sectorDataArr[i];
-		if ( sd.HasCore() || sd.HasPortal()) {
+		if ( sd.HasCore() ) {
 			Chit* chit = chitBag->NewChit();
 
 			MapSpatialComponent* ms = new MapSpatialComponent( worldMap );
@@ -162,22 +162,14 @@ void Sim::CreateCores()
 			chit->Add( ms );
 
 			const char* asset = 0;
-			if ( sd.HasCore() ) {
-				chit->Add( new ScriptComponent( new CoreScript( worldMap, chitBag, engine ), engine, &chitBag->census ));
-				asset = coreItem.ResourceName();
-				chit->Add( new ItemComponent( engine, worldMap, coreItem ));
-				++ncores;
-			}
-			else {
-				chit->Add( new ScriptComponent( new PortalScript( worldMap, chitBag, engine ), engine, &chitBag->census ));
-				asset = portalItem.ResourceName();
-				chit->Add( new ItemComponent( engine, worldMap, portalItem ));
-				++nportals;
-			}
+			chit->Add( new ScriptComponent( new CoreScript( worldMap, chitBag, engine ), engine, &chitBag->census ));
+			asset = coreItem.ResourceName();
+			chit->Add( new ItemComponent( engine, worldMap, coreItem ));
+			++ncores;
 			chit->Add( new RenderComponent( engine, asset ));
 		}
 	}
-	GLOUTPUT(( "nCores=%d nPortals=%d\n", ncores, nportals ));
+	GLOUTPUT(( "nCores=%d\n", ncores ));
 }
 
 
@@ -280,6 +272,25 @@ void Sim::DoTick( U32 delta )
 				CreateVolcano( x, y, VOLC_RAD );
 				break;
 			}
+		}
+	}
+
+	if ( secondTick ) {
+		// Check if the visitor is still in the world.
+		if ( visitorData[currentVisitor].id ) {
+			if ( !chitBag->GetChit( visitorData[currentVisitor].id )) {
+				visitorData[currentVisitor].id = 0;
+			}
+		}
+
+		if ( visitorData[currentVisitor].id == 0 ) {
+			Chit* chit = chitBag->NewVisitor( &visitorData[currentVisitor] );
+			visitorData[currentVisitor].id = chit->ID();
+		}
+
+		currentVisitor++;
+		if ( currentVisitor == NUM_VISITORS ) {
+			currentVisitor = 0;
 		}
 	}
 

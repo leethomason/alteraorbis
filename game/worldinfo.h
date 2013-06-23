@@ -16,7 +16,7 @@ namespace micropather {
 class SectorData
 {
 public:
-	SectorData() : x(0), y(0), ports(0), isPortal(false), area(0), pather(0) {
+	SectorData() : x(0), y(0), ports(0), area(0), pather(0) {
 		core.Zero();
 	}
 	~SectorData();
@@ -32,13 +32,11 @@ public:
 	int							x, y;		// grid position (not sector position)
 	int							ports;		// if attached to the grid, has ports. 
 	grinliz::Vector2I			core;		// core location, in map coordinates
-	bool						isPortal;	// the portal variant, not the core
 	int							area;
 	micropather::MicroPather*	pather;
 	grinliz::IString			name;
 
-	bool HasCore() const	{ return core.x > 0 && core.y > 0 && !isPortal; }
-	bool HasPortal() const	{ return core.x > 0 && core.y > 0 && isPortal; }
+	bool HasCore() const	{ return core.x > 0 && core.y > 0; }
 
 	// Nearest port to 'pos'. There are no limits on pos.
 	int NearestPort( const grinliz::Vector2I& pos ) const;	

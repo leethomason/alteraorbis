@@ -103,9 +103,6 @@ int main(int argc, const char* argv[])
 			else if ( h == WorldGen::CORE ) {
 				grid.SetCore();
 			}
-			else if ( h == WorldGen::PORTAL ) {
-				grid.SetPortal();
-			}
 			else {
 				GLASSERT( 0 );
 			}

@@ -90,7 +90,6 @@
   <model filename="possibleTargetFlag.ac" shading="flat" shadowCaster="false" />
 
   <model filename="core.ac" shading="flat" />
-  <model filename="portal.ac" shading="flat" />
   <model filename="kiosk.ac" modelName="kiosk0" origin="-8.50 0 -0.50" shading="flat" polyRemoval="pre" />
   
   <!-- Creating animation
@@ -153,10 +152,9 @@
     <particle name="spark" meta="trigger" />
   </model>
   
-  <model filename="chess_characters.ac" modelName="hornet"  origin="2 0 0" shading="flat" polyRemoval="pre"> 
-  </model>
-  <model filename="chess_characters.ac" modelName="prime"   origin="1 0 0" shading="flat" polyRemoval="pre">
-    <meta trigger="0.8 0.56 0" target="1 0.54 0" />
+  <model filename="chess_characters.ac" modelName="prime" origin="1 0 0" shading="flat" polyRemoval="pre">
+    <meta name="trigger" pos="0.8 0.56 0" />
+    <meta name="target"  pos="1 0.54 0" />
   </model>
 
   <!-- orb plant -->

@@ -11,6 +11,7 @@
 #include "worldmap.h"
 #include "worldgrid.h"
 #include "worldinfo.h"
+#include "gridmovecomponent.h"
 
 #include "../xegame/rendercomponent.h"
 #include "../xegame/itemcomponent.h"
@@ -49,19 +50,16 @@ Chit* LumosChitBag::NewBuilding( const Vector2I& pos, const char* name, int team
 {
 	Chit* chit = NewChit();
 
-	ItemDefDB* itemDefDB = ItemDefDB::Instance();
-	ItemDefDB::GameItemArr itemDefArr;
-	itemDefDB->Get( name, &itemDefArr );
-	GLASSERT( !itemDefArr.Empty() );
-	const GameItem* gameItem = itemDefArr[0];
+	const GameItem& rootItem = ItemDefDB::Instance()->Get( name );
 
 	MapSpatialComponent* msc = new MapSpatialComponent( worldMap );
 	msc->SetMapPosition( pos.x, pos.y );
 	msc->SetMode( GRID_BLOCKED );
 	
 	chit->Add( msc );
-	chit->Add( new RenderComponent( engine, gameItem->ResourceName() ));
+	chit->Add( new RenderComponent( engine, rootItem.ResourceName() ));
 	chit->Add( new HealthComponent( engine ));
+	AddItem( name, chit, engine, team, 0 );
 	return chit;
 }
 
@@ -90,16 +88,57 @@ Chit* LumosChitBag::NewMonsterChit( const Vector3F& pos, const char* name, int t
 Chit* LumosChitBag::NewWorkerChit( const Vector3F& pos, int team )
 {
 	Chit* chit = NewChit();
-	static const char* name = "worker";
+	const GameItem& rootItem = ItemDefDB::Instance()->Get( "worker" );
 
 	chit->Add( new SpatialComponent());
-	chit->Add( new RenderComponent( engine, name ));
+	chit->Add( new RenderComponent( engine, rootItem.ResourceName() ));
 	chit->Add( new PathMoveComponent( worldMap ));
 	chit->Add( new AIComponent( engine, worldMap ));
 	chit->GetSpatialComponent()->SetPosition( pos );
-	AddItem( name, chit, engine, team, 0 );
+	AddItem( rootItem.Name(), chit, engine, team, 0 );
 	chit->Add( new HealthComponent( engine ));
 	chit->Add( new DebugStateComponent( worldMap ));
+	return chit;
+}
+
+
+Chit* LumosChitBag::NewVisitor( VisitorData* data )
+{
+	Chit* chit = NewChit();
+	const GameItem& rootItem = ItemDefDB::Instance()->Get( "visitor" );
+
+	chit->Add( new SpatialComponent());
+	chit->Add( new RenderComponent( engine, rootItem.ResourceName() ));
+	chit->Add( new AIComponent( engine, worldMap ));
+
+	// Visitors start at world center, with gridMove, and go from there.
+	Vector3F pos = { (float)worldMap->Width()*0.5f, 0.0f, (float)worldMap->Height()*0.5f };
+	chit->GetSpatialComponent()->SetPosition( pos );
+
+	GridMoveComponent* gmc = new GridMoveComponent( worldMap );
+	chit->Add( gmc );
+
+	SectorPort sp;
+	while ( true ) {
+		Vector2I sector = { random.Rand( NUM_SECTORS ), random.Rand( NUM_SECTORS ) };
+		const SectorData& sd = worldMap->GetSector( sector );
+		if ( sd.HasCore() ) {
+			GLASSERT( sd.ports );
+			sp.sector.Set( sd.x / SECTOR_SIZE, sd.y / SECTOR_SIZE );
+			for( int i=0; i<4; ++i ) {
+				int port = 1 << i;
+				if ( sd.ports & port ) {
+					sp.port = port;
+					break;
+				}
+			}
+			break;
+		}
+	}
+	gmc->SetDest( sp );
+
+	AddItem( rootItem.Name(), chit, engine, 42, 0 );
+	chit->Add( new HealthComponent( engine ));
 	return chit;
 }
 

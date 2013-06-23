@@ -32,7 +32,6 @@ void SectorData::Serialize( XStream* xs )
 	XARC_SER( xs, y );
 	XARC_SER( xs, ports );
 	XARC_SER( xs, core );
-	XARC_SER( xs, isPortal );
 	XARC_SER( xs, area );
 	XARC_SER( xs, name );
 	XarcClose( xs );
@@ -668,34 +667,10 @@ void WorldGen::ProcessSectors( U32 seed, SectorData* sectorData )
 			s->y = j*SECTOR_SIZE;
 
 			if ( s->ports ) {
-				GLASSERT( s->isPortal == false );
 				AddPorts( s );
 				sectors.Push( s );
 			}
 			s->area = CalcSectorArea( i, j );
-		}
-	}
-
-	// There are roughly 120 cores. 24 cores are within 2
-	// steps of a given portal. Try 5 portals.
-	static const int NUM_PORTALS = 5;
-	static const Vector2I quad[NUM_PORTALS] = {
-		{ 0, 0 },
-		{ NUM_SECTORS/2, 0 },
-		{ 0, NUM_SECTORS/2 },
-		{ NUM_SECTORS/2, NUM_SECTORS/2 },
-		{ NUM_SECTORS/4, NUM_SECTORS/4 }
-	};
-	for( int i=0; i<NUM_PORTALS; i++ ) {
-		// Randomly find a valid location.
-		while( true ) {
-			int sx = quad[i].x + random.Rand( NUM_SECTORS/2 );
-			int sy = quad[i].y + random.Rand( NUM_SECTORS/2 );
-			SectorData* s = &sectorData[sy*NUM_SECTORS+sx];
-			if ( s->ports && !s->isPortal ) {
-				s->isPortal = true;
-				break;
-			}
 		}
 	}
 
@@ -740,7 +715,7 @@ void WorldGen::GenerateTerrain( U32 seed, SectorData* s )
 
 	Draw( r, LAND0 );
 
-	land[c.y*SIZE+c.x] = s->isPortal ? PORTAL : CORE;
+	land[c.y*SIZE+c.x] = CORE;
 
 	bool portsColored = false;
 	int a = CalcSectorAreaFromFill( s, c, &portsColored );

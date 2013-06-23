@@ -3,8 +3,9 @@
 
 #include "../xegame/chitbag.h"
 #include "../grinliz/glrandom.h"
-#include "census.h"
 #include "../engine/map.h"
+#include "census.h"
+#include "visitor.h"
 
 class WorldMap;
 struct Wallet;
@@ -26,6 +27,7 @@ public:
 	Chit* NewCrystalChit( const grinliz::Vector3F& pos, int crystal, bool fuzzPos );
 	Chit* NewWorkerChit( const grinliz::Vector3F& pos, int team );
 	Chit* NewBuilding( const grinliz::Vector2I& pos, const char* name, int team );
+	Chit* NewVisitor( VisitorData* data );
 
 	// Creates enough chits to empty the wallet.
 	void NewWalletChits( const grinliz::Vector3F& pos, const Wallet& wallet );

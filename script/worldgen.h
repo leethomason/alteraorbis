@@ -44,7 +44,6 @@ public:
 		GRID,
 		PORT,
 		CORE,
-		PORTAL,
 		NUM_TYPES
 	};
 

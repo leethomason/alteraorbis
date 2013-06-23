@@ -53,6 +53,7 @@ x support melee attack on rocks
 		- new Portal model
 		- fix rockgen to give space around portals
 	- Silver
+		- fix team logic
 		- build 2 height ice
 		- decent UI
 		- leave core

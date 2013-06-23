@@ -20,7 +20,6 @@ private:
 	unsigned isGrid				: 1;
 	unsigned isPort				: 1;
 	unsigned isCore				: 1;
-	unsigned isPortal			: 1;
 
 	unsigned nominalRockHeight	: 2;	// 0-3
 	unsigned rockType			: 1;	// ROCK, ICE
@@ -44,7 +43,6 @@ public:
 			   && isGrid == wg.isGrid
 			   && isPort == wg.isPort
 			   && isCore == wg.isCore
-			   && isPortal == wg.isPortal
 			   && nominalRockHeight == wg.nominalRockHeight
 			   && rockType == wg.rockType
 			   && magma == wg.magma
@@ -69,9 +67,6 @@ public:
 		else if ( isCore ) {
 			c.Set( 200, 100, 100, 255 );
 		}
-		else if ( isPortal ) {
-			c.Set( 255, 0, 0, 255 );
-		}
 		else if ( isLand ) {
 			if ( nominalRockHeight == 0 ) {
 				c.Set( 0, 140, 0, 255 );
@@ -91,7 +86,6 @@ public:
 	bool IsPort() const			{ return isPort != 0; }
 	bool IsGrid() const			{ return isGrid != 0; }
 	bool IsCore() const			{ return isCore != 0; }
-	bool IsPortal() const		{ return isPortal != 0; }
 
 	enum {
 		WATER,
@@ -113,7 +107,6 @@ public:
 	void SetGrid()				{ isLand = 1; isGrid = 1; }
 	void SetPort()				{ isLand = 1; isPort = 1; }
 	void SetCore()				{ isLand = 1; isCore = 1; }
-	void SetPortal()			{ isLand = 1; isPortal = 1; }
 	void SetLandAndRock( U8 h )	{
 		// So confusing. Max rock height=3, but land goes from 1-4 to be distinct from water.
 		// Subtract here.

@@ -591,6 +591,9 @@
     <ClInclude Include="..\script\portalscript.h">
       <Filter>Source Files\script</Filter>
     </ClInclude>
+    <ClInclude Include="..\game\visitor.h">
+      <Filter>Source Files\game</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\engine\sources.mk">
