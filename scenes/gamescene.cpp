@@ -68,12 +68,10 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 		serialButton[i].Init( &gamui2D, game->GetButtonLook(0) );
 		serialButton[i].SetText( serialText[i] );
 	}
-	static const char* camModeText[NUM_CAM_MODES] = { "Track", "Teleport" };
-	for( int i=0; i<NUM_CAM_MODES; ++i ) {
-		camModeButton[i].Init( &gamui2D, game->GetButtonLook(0) );
-		camModeButton[i].SetText( camModeText[i] );
-		camModeButton[0].AddToToggleGroup( &camModeButton[i] );
-	}
+
+	freeCameraButton.Init( &gamui2D, game->GetButtonLook(0) );
+	freeCameraButton.SetText( "Free\nCamera" );
+
 	static const char* buildButtonText[NUM_BUILD_BUTTONS] = { "None", "Clear", "Ice", "Kiosk" };
 	for( int i=0; i<NUM_BUILD_BUTTONS; ++i ) {
 		buildButton[i].Init( &gamui2D, game->GetButtonLook(0) );
@@ -129,9 +127,7 @@ void GameScene::Resize()
 	for( int i=0; i<NUM_SERIAL_BUTTONS; ++i ) {
 		layout.PosAbs( &serialButton[i], i, -2 );
 	}
-	for( int i=0; i<NUM_CAM_MODES; ++i ) {
-		layout.PosAbs( &camModeButton[i], i, -3 );
-	}
+	layout.PosAbs( &freeCameraButton, 0, -3 );
 	for( int i=0; i<NUM_BUILD_BUTTONS; ++i ) {
 		layout.PosAbs( &buildButton[i], 0, i+2 );
 	}
@@ -519,23 +515,37 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		if ( item == &newsButton[i] ) {
 
 			const NewsEvent* ne = sim->GetChitBag()->News() + i;
-			if ( !sim->GetPlayerChit() && ne->chitID ) {
+			if ( FreeCamera() ) {
 				CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
-				if ( cc ) {
+				if ( cc && ne->chitID ) {
 					cc->SetTrack( ne->chitID );
 				}
-			}
-			else {
-				GLASSERT( i < sim->GetChitBag()->NumNews() );
-				dest = ne->pos;
+				else {
+					sim->GetEngine()->CameraLookAt( ne->pos.x, ne->pos.y );
+				}
 			}
 		}
 	}
 	if ( item == &clearButton ) {
-		if ( !sim->GetPlayerChit() ) {
+		if ( FreeCamera() ) {
 			CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
 			if ( cc  ) {
 				cc->SetTrack( 0 );
+			}
+		}
+	}
+	if ( item == &freeCameraButton ) {
+		CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
+		if ( cc  ) {
+			if ( freeCameraButton.Down() ) {
+				cc->SetTrack( 0 );
+			}
+			else {
+				Chit* playerChit = sim->GetPlayerChit();
+				CoreScript* coreMode = sim->GetChitBag()->IsBoundToCore( playerChit );
+				if ( playerChit && !coreMode ) {
+					cc->SetTrack( playerChit->ID() );
+				}
 			}
 		}
 	}
@@ -546,13 +556,20 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 }
 
 
+bool GameScene::FreeCamera() const
+{
+	return freeCameraButton.Down() || (!sim->GetPlayerChit() );
+}
+
+
 void GameScene::DoDestTapped( const Vector2F& _dest )
 {
 	Vector2F dest = _dest;
+	bool freeCamera = FreeCamera();
 
-	Chit* chit = sim->GetPlayerChit();
-	if ( chit ) {
-		if ( camModeButton[TRACK].Down() ) {
+	if ( !freeCamera ) {
+		Chit* chit = sim->GetPlayerChit();
+		if ( chit ) {
 			AIComponent* ai = chit->GetAIComponent();
 			GLASSERT( ai );
 			if ( ai ) {
@@ -581,11 +598,6 @@ void GameScene::DoDestTapped( const Vector2F& _dest )
 
 				ai->Move( dest, sectorPort.IsValid() ? &sectorPort : 0, true );
 			}
-		}
-		else if ( camModeButton[TELEPORT].Down() ) {
-			SpatialComponent* sc = chit->GetSpatialComponent();
-			GLASSERT( sc );
-			sc->SetPosition( dest.x, 0, dest.y );
 		}
 	}
 	else {
@@ -720,7 +732,9 @@ void GameScene::DoTick( U32 delta )
 		coreBounds.Set( (float)(sectorX*SECTOR_SIZE), (float)(sectorY*SECTOR_SIZE), (float)((sectorX+1)*SECTOR_SIZE), (float)((sectorY+1)*SECTOR_SIZE) );
 	}
 
-	sim->GetEngine()->RestrictCamera( coreMode ? &coreBounds : 0 );
+	if ( !FreeCamera() ) {
+		sim->GetEngine()->RestrictCamera( coreMode ? &coreBounds : 0 );
+	}
 }
 
 
@@ -740,12 +754,6 @@ void GameScene::Draw3D( U32 deltaTime )
 	minimap.SetAtom( atom );
 	Vector3F lookAt = { 0, 0, 0 };
 	sim->GetEngine()->CameraLookingAt( &lookAt );
-
-	Chit* chit = sim->GetPlayerChit();
-	if ( chit && chit->GetSpatialComponent() ) {
-		lookAt = chit->GetSpatialComponent()->GetPosition();
-	}
-
 	Map* map = sim->GetEngine()->GetMap();
 	
 	float x = minimap.X() + Lerp( 0.f, minimap.Width(),  lookAt.x / (float)map->Width() );

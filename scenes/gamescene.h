@@ -40,6 +40,7 @@ private:
 	void TapModel( Chit* chit );
 	void MoveModel( Chit* chit );
 	void ClearTargetFlags();
+	bool FreeCamera() const;
 
 	enum {
 		SAVE,
@@ -50,11 +51,6 @@ private:
 		NUM_NEWS_BUTTONS = 16,
 		NEWS_BUTTON_WIDTH  = 60,
 		NEWS_BUTTON_HEIGHT = 25
-	};
-	enum {
-		TRACK,
-		TELEPORT,
-		NUM_CAM_MODES
 	};
 	enum {
 		NO_BUILD,
@@ -78,7 +74,7 @@ private:
 
 	gamui::PushButton	okay;
 	gamui::PushButton	serialButton[NUM_SERIAL_BUTTONS];
-	gamui::ToggleButton camModeButton[NUM_CAM_MODES];
+	gamui::ToggleButton freeCameraButton;
 	gamui::ToggleButton	buildButton[NUM_BUILD_BUTTONS];
 	gamui::PushButton	createWorkerButton;
 	gamui::PushButton	allRockButton;
