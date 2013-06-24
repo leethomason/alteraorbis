@@ -40,10 +40,11 @@ Sim::Sim( LumosGame* g )
 	Screenport* port = lumosGame->GetScreenportMutable();
 	const gamedb::Reader* database = lumosGame->GetDatabase();
 
-	worldMap = new WorldMap( MAX_MAP_SIZE, MAX_MAP_SIZE );
-	engine = new Engine( port, database, worldMap );
-	weather = new Weather( MAX_MAP_SIZE, MAX_MAP_SIZE );
+	worldMap	= new WorldMap( MAX_MAP_SIZE, MAX_MAP_SIZE );
+	engine		= new Engine( port, database, worldMap );
+	weather		= new Weather( MAX_MAP_SIZE, MAX_MAP_SIZE );
 	reserveBank = new ReserveBank();
+	visitors	= new Visitors();
 
 	engine->SetGlow( true );
 	engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
@@ -64,6 +65,7 @@ Sim::Sim( LumosGame* g )
 
 Sim::~Sim()
 {
+	delete visitors;
 	delete weather;
 	delete reserveBank;
 	worldMap->AttachEngine( 0, 0 );
@@ -98,6 +100,7 @@ void Sim::Load( const char* mapDAT, const char* gameDAT )
 			XARC_SER( &reader, timeInMinutes );
 
 			reserveBank->Serialize( &reader );
+			visitors->Serialize( &reader );
 			engine->camera.Serialize( &reader );
 			chitBag->Serialize( &factory, &reader );
 
@@ -131,6 +134,7 @@ void Sim::Save( const char* mapDAT, const char* gameDAT )
 			XARC_SER( &writer, timeInMinutes );
 
 			reserveBank->Serialize( &writer );
+			visitors->Serialize( &writer );
 			engine->camera.Serialize( &writer );
 			chitBag->Serialize( &factory, &writer );
 
@@ -276,6 +280,8 @@ void Sim::DoTick( U32 delta )
 	}
 
 	if ( secondTick ) {
+		VisitorData* visitorData = Visitors::Instance()->visitorData;
+
 		// Check if the visitor is still in the world.
 		if ( visitorData[currentVisitor].id ) {
 			if ( !chitBag->GetChit( visitorData[currentVisitor].id )) {
@@ -289,7 +295,7 @@ void Sim::DoTick( U32 delta )
 		}
 
 		currentVisitor++;
-		if ( currentVisitor == NUM_VISITORS ) {
+		if ( currentVisitor == Visitors::NUM_VISITORS ) {
 			currentVisitor = 0;
 		}
 	}

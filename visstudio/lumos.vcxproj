@@ -119,6 +119,7 @@
     <ClCompile Include="..\game\physicsmovecomponent.cpp" />
     <ClCompile Include="..\game\reservebank.cpp" />
     <ClCompile Include="..\game\sim.cpp" />
+    <ClCompile Include="..\game\visitor.cpp" />
     <ClCompile Include="..\game\workqueue.cpp" />
     <ClCompile Include="..\game\worldinfo.cpp" />
     <ClCompile Include="..\game\worldmap.cpp" />

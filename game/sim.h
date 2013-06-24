@@ -54,8 +54,6 @@ public:
 	void CreatePlayer();
 	void CreatePlayer( const grinliz::Vector2I& pos, const char* assetName );
 
-	enum { NUM_VISITORS = 200 };
-
 private:
 	void CreateCores();
 	void CreateRockInOutland();
@@ -66,6 +64,7 @@ private:
 	Weather*		weather;
 	ReserveBank*	reserveBank;
 	LumosChitBag*	chitBag;
+	Visitors*		visitors;
 
 	grinliz::Random	random;
 	int playerID;
@@ -76,7 +75,6 @@ private:
 	int currentVisitor;
 
 	grinliz::CDynArray< Chit* >	queryArr;	// local; cached at object.
-	VisitorData visitorData[NUM_VISITORS];
 };
 
 
