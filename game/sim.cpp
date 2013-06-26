@@ -149,7 +149,6 @@ void Sim::CreateCores()
 {
 	ItemDefDB* itemDefDB = ItemDefDB::Instance();
 	const GameItem& coreItem = itemDefDB->Get( "core" );
-	const GameItem& portalItem = itemDefDB->Get( "portal" );
 
 	const SectorData* sectorDataArr = worldMap->GetSectorData();
 
@@ -290,7 +289,7 @@ void Sim::DoTick( U32 delta )
 		}
 
 		if ( visitorData[currentVisitor].id == 0 ) {
-			Chit* chit = chitBag->NewVisitor( &visitorData[currentVisitor] );
+			Chit* chit = chitBag->NewVisitor( currentVisitor );
 			visitorData[currentVisitor].id = chit->ID();
 		}
 

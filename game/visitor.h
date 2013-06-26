@@ -1,6 +1,9 @@
 #ifndef LUMOS_VISITOR_INCLUDED
 #define LUMOS_VISITOR_INCLUDED
 
+#include "../grinliz/glvector.h"
+#include "../grinliz/glcontainer.h"
+
 class XStream;
 
 // Each visitor has their own personality and memory, seperate
@@ -9,7 +12,18 @@ struct VisitorData
 {
 	VisitorData() : id( 0 ) {}
 	void Serialize( XStream* xs );
-	int id;	// chit id, and whether in-world or not.
+
+	void Connect() {
+		sectorVisited.Clear();
+		kioskTime = 0;
+	}
+
+	enum {	NUM_VISITS = 4, 					// how many domains would like to be visited before disconnect
+			KIOSK_TIME = 5000
+	};
+	int id;											// chit id, and whether in-world or not.
+	U32 kioskTime;									// time spent standing at current kiosk
+	grinliz::CArray< grinliz::Vector2I, NUM_VISITS > sectorVisited;	// which sectors we have visited a kiosk at. 
 };
 
 

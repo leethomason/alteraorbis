@@ -57,7 +57,10 @@ public:
 	// it is given extra priority. The 'dest' must be in the same
 	// sector. If 'sector' is also specfied, will do grid travel
 	// after the move.
-	void Move( const grinliz::Vector2F& dest, const SectorPort* sector, bool focused );
+	void Move( const grinliz::Vector2F& dest, bool focused );
+	// Returns true if the move is possible.
+	bool Move( const SectorPort& sectorport, bool focused );
+
 	void Target( Chit* chit, bool focused );
 	bool RockBreak( const grinliz::Vector2I& pos );
 	// Use a null IString for ICE.
@@ -65,6 +68,7 @@ public:
 
 	void EnableDebug( bool enable )			{ debugFlag = enable; }
 	void SetSectorAwareness( bool aware )	{ fullSectorAware = aware; }
+	void SetVisitorIndex( int i )			{ visitorIndex = i; }
 
 	enum {
 		FRIENDLY,
@@ -113,6 +117,7 @@ private:
 	void ThinkBattle( const ComponentSet& thisComp );
 	void ThinkRockBreak( const ComponentSet& thisComp );
 	void ThinkBuild( const ComponentSet& thisComp );
+	void ThinkVisitor( const ComponentSet& thisComp );
 
 	grinliz::Vector2F GetWanderOrigin( const ComponentSet& thisComp ) const;
 	int GetThinkTime() const { return 500; }
@@ -164,6 +169,7 @@ private:
 	U32					wanderTime;
 	int					rethink;
 	bool				fullSectorAware;
+	int					visitorIndex;
 	bool				debugFlag;
 
 	void DoMelee( const ComponentSet& thisComp );

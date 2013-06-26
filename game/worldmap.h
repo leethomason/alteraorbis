@@ -138,6 +138,7 @@ public:
 					bool showDebugging = false );
 	// Returns the nearest pathable port to 'pos'. Returns (0,0) on failure.
 	SectorPort NearestPort( const grinliz::Vector2F& pos );
+	SectorPort RandomPort( grinliz::Random* random );
 
 	enum BlockResult {
 		NO_EFFECT,

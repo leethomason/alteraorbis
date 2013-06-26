@@ -595,8 +595,12 @@ void GameScene::DoDestTapped( const Vector2F& _dest )
 						sectorPort.port   = sim->GetWorldMap()->GetSector( sectorPort.sector ).NearestPort( pos );
 					}
 				}
-
-				ai->Move( dest, sectorPort.IsValid() ? &sectorPort : 0, true );
+				if ( sectorPort.IsValid() ) {
+					ai->Move( sectorPort, true );
+				}
+				else {
+					ai->Move( dest, true );
+				}
 			}
 		}
 	}

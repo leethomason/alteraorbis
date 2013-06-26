@@ -1388,6 +1388,29 @@ bool WorldMap::GridPath( const grinliz::Vector2F& p0, const grinliz::Vector2F& p
 }
 
 
+SectorPort WorldMap::RandomPort( grinliz::Random* random )
+{
+	SectorPort sp;
+	while ( true ) {
+		Vector2I sector = { random->Rand( NUM_SECTORS ), random->Rand( NUM_SECTORS ) };
+		const SectorData& sd = GetSector( sector );
+		if ( sd.HasCore() ) {
+			GLASSERT( sd.ports );
+			sp.sector.Set( sd.x / SECTOR_SIZE, sd.y / SECTOR_SIZE );
+			for( int i=0; i<4; ++i ) {
+				int port = 1 << i;
+				if ( sd.ports & port ) {
+					sp.port = port;
+					break;
+				}
+			}
+			break;
+		}
+	}
+	return sp;
+}
+
+
 SectorPort WorldMap::NearestPort( const Vector2F& pos )
 {
 	Vector2I secPos = { (int)pos.x / SECTOR_SIZE, (int)pos.y / SECTOR_SIZE };

@@ -204,6 +204,18 @@ inline bool XarcGetArr( XStream* stream, const char* key, T* value, int n )		{
 }
 
 template< class T >
+inline bool XarcGetVectorArr( XStream* stream, const char* key, grinliz::Vector2<T>* value, int n ) {
+	GLASSERT( stream->Loading() );
+	const StreamReader::Attribute* attr = stream->Loading()->Get( key );
+	if ( attr ) {
+		stream->Loading()->Value( attr, &value->x, n*2 );
+		return true;
+	}
+	return false;
+}
+
+
+template< class T >
 void XarcSet( XStream* stream, const char* key, const T& value ) {
 	GLASSERT( stream->Saving() );
 	stream->Saving()->Set( key, value );
@@ -221,6 +233,11 @@ inline void XarcSetArr( XStream* stream, const char* key, const grinliz::IString
 	stream->Saving()->SetArr( key, value, n );
 }
 
+template< class T >
+inline void XarcSetVectorArr( XStream* stream, const char* key, const grinliz::Vector2<T>* value, int n ) {
+	GLASSERT( stream->Saving() );
+	stream->Saving()->SetArr( key, &value->x, n*2 );
+}
 
 // Adaptors.
 // Basic types.

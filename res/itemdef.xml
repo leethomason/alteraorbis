@@ -31,7 +31,7 @@
 
   <item name="visitor"
         resource="prime"
-        flags="VISITOR"
+        flags="CLICK_THROUGH"
         mass="35" >
   </item>
 
@@ -60,6 +60,7 @@
 
   <item name="kiosk"
         resource="kiosk0"
+        porch="1"
         mass="50" />
 
   <item name="mantis"
