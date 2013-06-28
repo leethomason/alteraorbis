@@ -8,6 +8,7 @@ void VisitorData::Serialize( XStream* xs )
 {
 	XarcOpen( xs, "VisitorData" );
 	XARC_SER( xs, id );
+	XARC_SER( xs, kioskTime );
 
 	if ( xs->Saving() ) {
 		XarcSet( xs, "sectorVisited.size", sectorVisited.Size() );

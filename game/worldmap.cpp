@@ -1390,6 +1390,8 @@ bool WorldMap::GridPath( const grinliz::Vector2F& p0, const grinliz::Vector2F& p
 
 SectorPort WorldMap::RandomPort( grinliz::Random* random )
 {
+	if ( randomPortDebug.IsValid() ) return randomPortDebug;
+
 	SectorPort sp;
 	while ( true ) {
 		Vector2I sector = { random->Rand( NUM_SECTORS ), random->Rand( NUM_SECTORS ) };
@@ -1522,6 +1524,8 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 		path->Clear();
 	}
 	bool okay = false;
+	float dummyCost = 0;
+	if ( !totalCost ) totalCost = &dummyCost;	// prevent crash later.
 
 	Vector2I starti = { (int)start.x, (int)start.y };
 	Vector2I endi   = { (int)end.x,   (int)end.y };

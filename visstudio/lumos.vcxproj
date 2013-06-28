@@ -213,6 +213,7 @@
     <ClInclude Include="..\game\reservebank.h" />
     <ClInclude Include="..\game\sectorport.h" />
     <ClInclude Include="..\game\sim.h" />
+    <ClInclude Include="..\game\team.h" />
     <ClInclude Include="..\game\visitor.h" />
     <ClInclude Include="..\game\wallet.h" />
     <ClInclude Include="..\game\weather.h" />

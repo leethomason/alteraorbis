@@ -28,6 +28,7 @@
 #include "mapspatialcomponent.h"
 #include "aicomponent.h"
 #include "reservebank.h"
+#include "team.h"
 
 #include "../xarchive/glstreamer.h"
 
@@ -197,7 +198,7 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos, const char* assetName )
 	chit->Add( new RenderComponent( engine, assetName ));
 	chit->Add( new PathMoveComponent( worldMap ));
 
-	chitBag->AddItem( assetName, chit, engine, 1, 0 );
+	chitBag->AddItem( assetName, chit, engine, TEAM_HOUSE0, 0 );
 	chitBag->AddItem( "shield", chit, engine, 0, 2 );
 	chitBag->AddItem( "blaster", chit, engine, 0, 2 );
 	chit->GetItemComponent()->AddGold( ReserveBank::Instance()->WithdrawDenizen() );
@@ -291,9 +292,14 @@ void Sim::DoTick( U32 delta )
 		if ( visitorData[currentVisitor].id == 0 ) {
 			Chit* chit = chitBag->NewVisitor( currentVisitor );
 			visitorData[currentVisitor].id = chit->ID();
+
+			NewsEvent news( NewsEvent::PONY, chit->GetSpatialComponent()->GetPosition2D(), 
+							StringPool::Intern( "Visitor" ), chit->ID() );
+			chitBag->AddNews( news );
+			chit->GetAIComponent()->EnableDebug( true );
 		}
 
-		currentVisitor++;
+		//currentVisitor++;
 		if ( currentVisitor == Visitors::NUM_VISITORS ) {
 			currentVisitor = 0;
 		}

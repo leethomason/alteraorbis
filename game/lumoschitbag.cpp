@@ -12,6 +12,7 @@
 #include "worldgrid.h"
 #include "worldinfo.h"
 #include "gridmovecomponent.h"
+#include "team.h"
 
 #include "../xegame/rendercomponent.h"
 #include "../xegame/itemcomponent.h"
@@ -61,6 +62,14 @@ Chit* LumosChitBag::NewBuilding( const Vector2I& pos, const char* name, int team
 	chit->Add( new RenderComponent( engine, rootItem.ResourceName() ));
 	chit->Add( new HealthComponent( engine ));
 	AddItem( name, chit, engine, team, 0 );
+
+#if 1	// debugging
+	SectorPort sp;
+	sp.sector.Set( pos.x/SECTOR_SIZE, pos.y/SECTOR_SIZE );
+	sp.port = 1;
+	worldMap->SetRandomPort( sp );
+#endif
+
 	return chit;
 }
 
@@ -127,7 +136,7 @@ Chit* LumosChitBag::NewVisitor( int visitorIndex )
 	SectorPort sp = worldMap->RandomPort( &random );
 	gmc->SetDest( sp );
 
-	AddItem( rootItem.Name(), chit, engine, 42, 0 );
+	AddItem( rootItem.Name(), chit, engine, TEAM_VISITOR, 0 );
 	chit->Add( new HealthComponent( engine ));
 	return chit;
 }

@@ -85,10 +85,10 @@ Vector2I MapSpatialComponent::PorchPos() const
 	// FIXME: only works for 1x1
 
 	switch (r) {
-	case 0:		v.x += 1;	break;
-	case 90:	v.y += 1;	break;
-	case 180:	v.x -= 1;	break;
-	case 270:	v.y -= 1;	break;
+	case 0:		v.y += 1;	break;
+	case 90:	v.x += 1;	break;
+	case 180:	v.y -= 1;	break;
+	case 270:	v.x -= 1;	break;
 	default: GLASSERT(0);	break;
 	}
 	return v;

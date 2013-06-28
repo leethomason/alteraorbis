@@ -18,11 +18,11 @@ struct VisitorData
 		kioskTime = 0;
 	}
 
-	enum {	NUM_VISITS = 4, 					// how many domains would like to be visited before disconnect
+	enum {	NUM_VISITS = 4, 			// how many domains would like to be visited before disconnect
 			KIOSK_TIME = 5000
 	};
-	int id;											// chit id, and whether in-world or not.
-	U32 kioskTime;									// time spent standing at current kiosk
+	int id;								// chit id, and whether in-world or not.
+	U32 kioskTime;						// time spent standing at current kiosk
 	grinliz::CArray< grinliz::Vector2I, NUM_VISITS > sectorVisited;	// which sectors we have visited a kiosk at. 
 };
 

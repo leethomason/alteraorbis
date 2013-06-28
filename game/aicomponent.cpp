@@ -23,6 +23,7 @@
 #include "gridmovecomponent.h"
 #include "sectorport.h"
 #include "workqueue.h"
+#include "team.h"
 
 #include "../script/battlemechanics.h"
 #include "../script/plantscript.h"
@@ -120,16 +121,22 @@ int AIComponent::GetTeamStatus( Chit* other )
 	GameItem* thisItem  = parentChit->GetItem();
 	GameItem* otherItem = other->GetItem();
 
-	int thisTeam = thisItem ? thisItem->primaryTeam : 0;
-	int otherTeam = otherItem ? otherItem->primaryTeam : 0;
+	int t0  = thisItem ? thisItem->primaryTeam : 0;
+	int t1 = otherItem ? otherItem->primaryTeam : 0;
 
-	if ( thisTeam == 0 || otherTeam == 0 ) {
-		return NEUTRAL;
+	// t0 <= t1 to keep the logic simple.
+	if ( t0 > t1 ) Swap( &t0, &t1 );
+
+	if ( t0 == TEAM_NEUTRAL ) return NEUTRAL;
+	if ( t0 == t1 ) return FRIENDLY;
+
+	if ( t0 == TEAM_VISITOR ) {
+		if ( t1 == TEAM_HOUSE0 )
+			return FRIENDLY;
+		else
+			return ENEMY;
 	}
-	if ( thisTeam != otherTeam ) {
-		return ENEMY;
-	}
-	return FRIENDLY;
+	return ENEMY;
 }
 
 
@@ -774,8 +781,7 @@ void AIComponent::ThinkBuild( const ComponentSet& thisComp )
 	Vector2I desti = { (int)dest.x, (int)dest.y };
 	if ( desti != item->pos || pmc->ForceCountHigh() ) {
 		dest.Set( (float)item->pos.x + 0.5f, (float)item->pos.y+0.5f );
-		pmc->QueueDest( dest );
-		currentAction = MOVE;
+		this->Move( dest, false );
 	}
 }
 
@@ -817,8 +823,7 @@ void AIComponent::ThinkRockBreak( const ComponentSet& thisComp )
 		Vector2F end;
 		float cost = 0;
 		if ( map->CalcPathBeside( thisComp.spatial->GetPosition2D(), dest, &end, &cost )) {
-			currentAction = MOVE;
-			pmc->QueueDest( end );
+			this->Move( dest, false );
 			return;
 		}
 	}
@@ -995,6 +1000,9 @@ void AIComponent::ThinkVisitor( const ComponentSet& thisComp )
 
 	if ( !vd->sectorVisited.HasCap() ) {
 		disconnect = true;
+		if ( debugFlag ) {
+			GLOUTPUT(( "ID=%d Visitor travel done.\n", thisComp.chit->ID() ));
+		}
 	}
 	else {
 		// Move on,
@@ -1021,6 +1029,9 @@ void AIComponent::ThinkVisitor( const ComponentSet& thisComp )
 			if ( arr.Empty() ) {
 				// Done here.
 				vd->sectorVisited.Push( sector );
+				if ( debugFlag ) {
+					GLOUTPUT(( "ID=%d Visitor: no kiosk.\n", thisComp.chit->ID() ));
+				}
 			}
 			else {
 				// Random!
@@ -1042,6 +1053,9 @@ void AIComponent::ThinkVisitor( const ComponentSet& thisComp )
 				if ( !found ) {
 					// Done here.
 					vd->sectorVisited.Push( sector );
+					if ( debugFlag ) {
+						GLOUTPUT(( "ID=%d Visitor: no path to kiosk.\n", thisComp.chit->ID() ));
+					}
 				}
 			}
 		}
@@ -1310,17 +1324,15 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 	switch ( index ) {
 		case OPTION_FLOCK_MOVE:
 		{
-			currentAction = MOVE;
 			Vector2F dest = pos2 + flockDir;
-			pmc->QueueDest( dest );
+			this->Move( dest, false );
 		}
 		break;
 
 		case OPTION_MOVE_TO_RANGE:
 		{
-			currentAction = MOVE;
 			targetDesc.Set( target[OPTION_MOVE_TO_RANGE]->ID() );
-			pmc->QueueDest( moveToRange );
+			this->Move( moveToRange, false );
 		}
 		break;
 
