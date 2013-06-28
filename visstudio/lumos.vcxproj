@@ -120,6 +120,7 @@
     <ClCompile Include="..\game\reservebank.cpp" />
     <ClCompile Include="..\game\sim.cpp" />
     <ClCompile Include="..\game\visitor.cpp" />
+    <ClCompile Include="..\game\visitorstatecomponent.cpp" />
     <ClCompile Include="..\game\workqueue.cpp" />
     <ClCompile Include="..\game\worldinfo.cpp" />
     <ClCompile Include="..\game\worldmap.cpp" />
@@ -215,6 +216,7 @@
     <ClInclude Include="..\game\sim.h" />
     <ClInclude Include="..\game\team.h" />
     <ClInclude Include="..\game\visitor.h" />
+    <ClInclude Include="..\game\visitorstatecomponent.h" />
     <ClInclude Include="..\game\wallet.h" />
     <ClInclude Include="..\game\weather.h" />
     <ClInclude Include="..\game\workqueue.h" />

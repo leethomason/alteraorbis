@@ -60,6 +60,7 @@ public:
 	static gamui::RenderAtom CalcDecoAtom( int id, bool enabled=true );
 	static gamui::RenderAtom CalcParticleAtom( int id, bool enabled=true );
 	static gamui::RenderAtom CalcIconAtom( int id, bool enabled=true );
+	static gamui::RenderAtom CalcIconAtom( const char* name );
 	static gamui::RenderAtom CalcIcon2Atom( int id, bool enabled=true );
 	static gamui::RenderAtom CalcPaletteAtom( int x, int y );
 

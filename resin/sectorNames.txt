@@ -33,9 +33,11 @@ Hyporis
 Illium
 Juveck
 Jules
+Jukaara
 Jalara
 Kalarba
 Kastolar
+Kazad
 Kessel
 Korrigan
 Koruja
@@ -49,7 +51,7 @@ Norska
 Calamar
 Shadda
 Valhalgar
-Vilgaard
+Valgaard
 Mantell
 Quence
 Ravnek
@@ -68,3 +70,4 @@ Tython
 Vivendia
 Velucia
 Venusia
+Zarell

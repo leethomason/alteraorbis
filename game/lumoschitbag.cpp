@@ -13,6 +13,7 @@
 #include "worldinfo.h"
 #include "gridmovecomponent.h"
 #include "team.h"
+#include "visitorstatecomponent.h"
 
 #include "../xegame/rendercomponent.h"
 #include "../xegame/itemcomponent.h"
@@ -138,6 +139,7 @@ Chit* LumosChitBag::NewVisitor( int visitorIndex )
 
 	AddItem( rootItem.Name(), chit, engine, TEAM_VISITOR, 0 );
 	chit->Add( new HealthComponent( engine ));
+	chit->Add( new VisitorStateComponent( worldMap ));
 	return chit;
 }
 
