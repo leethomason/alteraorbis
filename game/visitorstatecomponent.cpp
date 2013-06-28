@@ -2,6 +2,7 @@
 #include "../grinliz/glvector.h"
 #include "lumosgame.h"
 #include "worldmap.h"
+#include "aicomponent.h"
 #include "../script/procedural.h"
 #include "../xegame/chit.h"
 #include "../xegame/spatialcomponent.h"
@@ -61,7 +62,25 @@ void VisitorStateComponent::OnRemove()
 
 int VisitorStateComponent::DoTick( U32 delta, U32 since )
 {
-
+	AIComponent* ai = parentChit->GetAIComponent();
+	if ( ai ) {
+		int index = ai->VisitorIndex();
+		if ( index >= 0 ) {
+			const VisitorData* vd = Visitors::Get( index );
+			int wantsVisible = VisitorData::NUM_VISITS - vd->sectorVisited.Size(); 
+			for( int i=0; i<VisitorData::NUM_VISITS; ++i ) {
+				wants[i].SetVisible( wantsVisible > i );
+			}
+			if ( vd->kioskTime ) {
+				float t = (float)vd->kioskTime / (float)VisitorData::KIOSK_TIME;
+				bar.SetVisible( true );
+				bar.SetRange( t );
+			}
+			else {
+				bar.SetVisible( false );
+			}
+		}
+	}
 	return VERY_LONG_TICK;
 }
 

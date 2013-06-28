@@ -38,6 +38,7 @@ public:
 	enum { NUM_VISITORS = 200 };
 	VisitorData visitorData[NUM_VISITORS];
 
+	static VisitorData* Get( int index );
 	// only returns existing; doesn't create.
 	static Visitors* Instance()	{ return instance; }
 

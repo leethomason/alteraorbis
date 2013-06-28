@@ -50,6 +50,15 @@ void Visitors::Serialize( XStream* xs )
 }
 
 
+VisitorData* Visitors::Get( int index )
+{
+	GLASSERT( instance );
+	GLASSERT( index >=0 && index <NUM_VISITORS );
+	return &instance->visitorData[index];
+}
+
+
+
 
 
 

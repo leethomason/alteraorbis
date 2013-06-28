@@ -69,6 +69,7 @@ public:
 	void EnableDebug( bool enable )			{ debugFlag = enable; }
 	void SetSectorAwareness( bool aware )	{ fullSectorAware = aware; }
 	void SetVisitorIndex( int i )			{ visitorIndex = i; }
+	int  VisitorIndex() const				{ return visitorIndex; }
 
 	enum {
 		FRIENDLY,
