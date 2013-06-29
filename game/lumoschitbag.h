@@ -27,7 +27,7 @@ public:
 	Chit* NewCrystalChit( const grinliz::Vector3F& pos, int crystal, bool fuzzPos );
 	Chit* NewWorkerChit( const grinliz::Vector3F& pos, int team );
 	Chit* NewBuilding( const grinliz::Vector2I& pos, const char* name, int team );
-	Chit* NewVisitor( VisitorData* data );
+	Chit* NewVisitor( int visitorIndex );
 
 	// Creates enough chits to empty the wallet.
 	void NewWalletChits( const grinliz::Vector3F& pos, const Wallet& wallet );
@@ -47,6 +47,11 @@ public:
 	static bool GoldCrystalFilter( Chit* chit );	// Is this gold or crystal? (wallet items)
 	static bool CoreFilter( Chit* chit );
 	static bool WorkerFilter( Chit* chit );
+	static bool BuildingFilter( Chit* chit );
+	static bool BuildingWithPorchFilter( Chit* chit );
+	static bool KioskFilter( Chit* chit );
+
+	Chit* QueryBuilding( const grinliz::Vector2I& pos, bool orPorch );
 
 private:
 

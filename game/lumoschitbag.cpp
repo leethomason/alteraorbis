@@ -12,6 +12,8 @@
 #include "worldgrid.h"
 #include "worldinfo.h"
 #include "gridmovecomponent.h"
+#include "team.h"
+#include "visitorstatecomponent.h"
 
 #include "../xegame/rendercomponent.h"
 #include "../xegame/itemcomponent.h"
@@ -55,11 +57,20 @@ Chit* LumosChitBag::NewBuilding( const Vector2I& pos, const char* name, int team
 	MapSpatialComponent* msc = new MapSpatialComponent( worldMap );
 	msc->SetMapPosition( pos.x, pos.y );
 	msc->SetMode( GRID_BLOCKED );
+	msc->SetBuilding( true );
 	
 	chit->Add( msc );
 	chit->Add( new RenderComponent( engine, rootItem.ResourceName() ));
 	chit->Add( new HealthComponent( engine ));
 	AddItem( name, chit, engine, team, 0 );
+
+#if 0	// debugging
+	SectorPort sp;
+	sp.sector.Set( pos.x/SECTOR_SIZE, pos.y/SECTOR_SIZE );
+	sp.port = 1;
+	worldMap->SetRandomPort( sp );
+#endif
+
 	return chit;
 }
 
@@ -102,14 +113,19 @@ Chit* LumosChitBag::NewWorkerChit( const Vector3F& pos, int team )
 }
 
 
-Chit* LumosChitBag::NewVisitor( VisitorData* data )
+Chit* LumosChitBag::NewVisitor( int visitorIndex )
 {
 	Chit* chit = NewChit();
 	const GameItem& rootItem = ItemDefDB::Instance()->Get( "visitor" );
 
 	chit->Add( new SpatialComponent());
 	chit->Add( new RenderComponent( engine, rootItem.ResourceName() ));
-	chit->Add( new AIComponent( engine, worldMap ));
+
+	AIComponent* ai = new AIComponent( engine, worldMap );
+	chit->Add( ai );
+	GLASSERT( visitorIndex >= 0 && visitorIndex < Visitors::NUM_VISITORS );
+	ai->SetVisitorIndex( visitorIndex );
+	Visitors::Instance()->visitorData[visitorIndex].Connect();	// initialize.
 
 	// Visitors start at world center, with gridMove, and go from there.
 	Vector3F pos = { (float)worldMap->Width()*0.5f, 0.0f, (float)worldMap->Height()*0.5f };
@@ -118,27 +134,12 @@ Chit* LumosChitBag::NewVisitor( VisitorData* data )
 	GridMoveComponent* gmc = new GridMoveComponent( worldMap );
 	chit->Add( gmc );
 
-	SectorPort sp;
-	while ( true ) {
-		Vector2I sector = { random.Rand( NUM_SECTORS ), random.Rand( NUM_SECTORS ) };
-		const SectorData& sd = worldMap->GetSector( sector );
-		if ( sd.HasCore() ) {
-			GLASSERT( sd.ports );
-			sp.sector.Set( sd.x / SECTOR_SIZE, sd.y / SECTOR_SIZE );
-			for( int i=0; i<4; ++i ) {
-				int port = 1 << i;
-				if ( sd.ports & port ) {
-					sp.port = port;
-					break;
-				}
-			}
-			break;
-		}
-	}
+	SectorPort sp = worldMap->RandomPort( &random );
 	gmc->SetDest( sp );
 
-	AddItem( rootItem.Name(), chit, engine, 42, 0 );
+	AddItem( rootItem.Name(), chit, engine, TEAM_VISITOR, 0 );
 	chit->Add( new HealthComponent( engine ));
+	chit->Add( new VisitorStateComponent( worldMap ));
 	return chit;
 }
 
@@ -166,6 +167,66 @@ bool LumosChitBag::WorkerFilter( Chit* chit )
 		return true;
 	}
 	return false;
+}
+
+
+bool LumosChitBag::BuildingFilter( Chit* chit )
+{
+	MapSpatialComponent* msc = GET_SUB_COMPONENT( chit, SpatialComponent, MapSpatialComponent );
+	return msc && msc->Building();
+}
+
+
+bool LumosChitBag::BuildingWithPorchFilter( Chit* chit )
+{
+	MapSpatialComponent* msc = GET_SUB_COMPONENT( chit, SpatialComponent, MapSpatialComponent );
+	const GameItem* item = chit->GetItem();
+	int porch = 0;
+	if ( item ) {
+		item->GetValue( "porch", &porch );
+	}
+	return msc && msc->Building() && porch;
+}
+
+
+bool LumosChitBag::KioskFilter( Chit* chit )
+{
+	if ( BuildingWithPorchFilter( chit ) ) {
+		if ( chit->GetItem()->name == "kiosk" ) {
+			return true;
+		}
+	}
+	return false;
+}
+
+Chit* LumosChitBag::QueryBuilding( const grinliz::Vector2I& pos2i, bool orPorch )
+{
+	// Building can be up to MAX_BUILDING_SIZE
+	float rad = 0.1f + (float)MAX_BUILDING_SIZE * 0.5f;	// actually a little big.
+	if ( orPorch ) {
+		rad += 1.0f;
+	}
+	Vector2F pos2 = { (float)pos2i.x+0.5f, (float)pos2i.y+0.5f };
+
+	Chit* porch = 0;
+	CChitArray arr;
+
+	this->QuerySpatialHash( &arr, pos2, rad, 0, BuildingFilter );
+	for( int i=0; i<arr.Size(); ++i ) {
+		Chit* chit = arr[i];
+		MapSpatialComponent* msc = GET_SUB_COMPONENT( chit, SpatialComponent, MapSpatialComponent );
+		GLASSERT( msc );	// all buildings should be msc's
+		if ( msc ) {
+			if ( msc->Bounds().Contains( pos2i )) {
+				return chit;
+			}
+			if ( orPorch && !porch && msc->PorchPos() == pos2i ) {
+				porch = chit;
+			}
+		}
+	}
+	// If we didn't find a building, but did (and should) find a porch
+	return porch;
 }
 
 

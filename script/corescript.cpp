@@ -10,6 +10,7 @@
 #include "../game/worldmap.h"
 #include "../game/aicomponent.h"
 #include "../game/workqueue.h"
+#include "../game/team.h"
 
 #include "../xegame/chit.h"
 #include "../xegame/spatialcomponent.h"
@@ -118,7 +119,7 @@ int CoreScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 	Chit* attached = GetAttached();
 
 	if ( spawnTick.Delta( since ) && ctx.census->ais < TYPICAL_MONSTERS && !attached ) {
-#if 0
+#if 1
 		// spawn stuff.
 		MapSpatialComponent* ms = GET_SUB_COMPONENT( ctx.chit, SpatialComponent, MapSpatialComponent );
 		GLASSERT( ms );
@@ -134,10 +135,10 @@ int CoreScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 			// FIXME safe downcast
 			Vector2F p2 = ctx.chit->GetSpatialComponent()->GetPosition2D();
 
-			int team = 100;
+			int team = TEAM_GREEN_MANTIS;
 			const char* asset = "mantis";
 			if ( ctx.chit->ID() & 1 ) {
-				team = 101;
+				team = TEAM_RED_MANTIS;
 				asset = "redMantis";
 			}
 			((LumosChitBag*)(ctx.chit->GetChitBag()))->NewMonsterChit( pf, asset, team );

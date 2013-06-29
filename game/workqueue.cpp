@@ -206,7 +206,9 @@ void WorkQueue::QueueItem::Serialize( XStream* xs )
 {
 	XarcOpen( xs, "QueueItem" );
 	XARC_SER( xs, action );
+	XARC_SER( xs, structure );
 	XARC_SER( xs, pos );
+	XARC_SER( xs, assigned );
 	XarcClose( xs );
 }
 

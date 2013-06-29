@@ -23,6 +23,7 @@
 #include "gridmovecomponent.h"
 #include "sectorport.h"
 #include "workqueue.h"
+#include "team.h"
 
 #include "../script/battlemechanics.h"
 #include "../script/plantscript.h"
@@ -69,6 +70,7 @@ AIComponent::AIComponent( Engine* _engine, WorldMap* _map )
 	rethink = 0;
 	fullSectorAware = false;
 	debugFlag = false;
+	visitorIndex = -1;
 }
 
 
@@ -90,6 +92,7 @@ void AIComponent::Serialize( XStream* xs )
 	XARC_SER( xs, rethink );
 	XARC_SER( xs, fullSectorAware );
 	XARC_SER( xs, friendEnemyAge );
+	XARC_SER( xs, visitorIndex );
 	this->EndSerialize( xs );
 }
 
@@ -118,16 +121,22 @@ int AIComponent::GetTeamStatus( Chit* other )
 	GameItem* thisItem  = parentChit->GetItem();
 	GameItem* otherItem = other->GetItem();
 
-	int thisTeam = thisItem ? thisItem->primaryTeam : 0;
-	int otherTeam = otherItem ? otherItem->primaryTeam : 0;
+	int t0  = thisItem ? thisItem->primaryTeam : 0;
+	int t1 = otherItem ? otherItem->primaryTeam : 0;
 
-	if ( thisTeam == 0 || otherTeam == 0 ) {
-		return NEUTRAL;
+	// t0 <= t1 to keep the logic simple.
+	if ( t0 > t1 ) Swap( &t0, &t1 );
+
+	if ( t0 == TEAM_NEUTRAL ) return NEUTRAL;
+	if ( t0 == t1 ) return FRIENDLY;
+
+	if ( t0 == TEAM_VISITOR ) {
+		if ( t1 == TEAM_HOUSE0 )
+			return FRIENDLY;
+		else
+			return ENEMY;
 	}
-	if ( thisTeam != otherTeam ) {
-		return ENEMY;
-	}
-	return FRIENDLY;
+	return ENEMY;
 }
 
 
@@ -548,6 +557,32 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 since )
 			return true;
 		}
 	}
+	else if (    visitorIndex >= 0
+		      && !thisComp.move->IsMoving() )
+	{
+		// Visitors at a kiosk.
+		// Are we on a kiosk?
+		Vector2I pos2i = thisComp.spatial->GetPosition2DI();
+		Chit* chit = this->GetChitBag()->ToLumos()->QueryBuilding( pos2i, true );
+		if ( chit && chit->GetItem()->name == "kiosk" ) {
+			VisitorData* vd = &Visitors::Instance()->visitorData[visitorIndex];
+			vd->kioskTime += since;
+			if ( vd->kioskTime > VisitorData::KIOSK_TIME ) {
+				Vector2I sector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
+				vd->sectorVisited.Push( sector );
+				vd->kioskTime = 0;
+				currentAction = NO_ACTION;	// done here - move on!
+				return false;
+			}
+			// else keep standing.
+			return true;
+		}
+		else {
+			// Oops...
+			currentAction = NO_ACTION;
+			return false;
+		}
+	}
 	return false;
 }
 
@@ -569,7 +604,12 @@ void AIComponent::OnChitEvent( const ChitEvent& event )
 void AIComponent::Think( const ComponentSet& thisComp )
 {
 	switch( aiMode ) {
-	case NORMAL_MODE:		ThinkWander( thisComp );	break;
+	case NORMAL_MODE:
+		if ( visitorIndex >= 0 )
+			ThinkVisitor( thisComp );
+		else
+			ThinkWander( thisComp );	
+		break;
 	case ROCKBREAK_MODE:	ThinkRockBreak( thisComp );	break;
 	case BUILD_MODE:		ThinkBuild( thisComp );		break;
 	case BATTLE_MODE:		ThinkBattle( thisComp );	break;
@@ -577,38 +617,37 @@ void AIComponent::Think( const ComponentSet& thisComp )
 };
 
 
-void AIComponent::Move( const grinliz::Vector2F& dest, const SectorPort* sectorPort, bool focused )
+
+bool AIComponent::Move( const SectorPort& sp, bool focused )
 {
 	PathMoveComponent* pmc    = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
-	//GridMoveComponent* gridMC = GET_SUB_COMPONENT( parentChit, MoveComponent, GridMoveComponent );
-
-	/* FIXME should be handled by PMC
-	// Special case: if on a port, go straight to grid move. This avoids
-	// trying to do crowded pathing. OR, if a move is requested, and 
-	// we are on a GridMove, update.
-	if ( sectorPort ) {
-		if ( parentChit->GetSpatialComponent() ) {
-			Vector2F pos = parentChit->GetSpatialComponent()->GetPosition2D();
-			Vector2I m = { (int)pos.x, (int)pos.y };
-
-			if ( pmc && map->GetWorldGrid( m.x, m.y ).IsPort() ) {
-				GridMoveComponent* gmc = new GridMoveComponent( map );
-				gmc->SetDest( *sectorPort );
-				parentChit->Remove( pmc );
-				delete pmc;
-				parentChit->Add( gmc );
-				return;
-			}
-			else if ( gridMC ) {
-				gridMC->SetDest( *sectorPort );
-				return;
-			}
+	SpatialComponent*  sc	  = parentChit->GetSpatialComponent();
+	if ( pmc && sc ) {
+		// Read our destination port information:
+		const SectorData& sd = map->GetSector( sp.sector );
+				
+		// Read our local get-on-the-grid info
+		SectorPort local = map->NearestPort( sc->GetPosition2D() );
+		// Completely possible this chit can't actually path anywhere.
+		if ( local.IsValid() ) {
+			const SectorData& localSD = map->GetSector( local.sector );
+			// Local path to remote dst
+			Vector2F dest2 = SectorData::PortPos( localSD.GetPortLoc(local.port), parentChit->ID() );
+			pmc->QueueDest( dest2, -1, &sp );
+			currentAction = MOVE;
+			focus = focused ? FOCUS_MOVE : 0;
+			return true;
 		}
 	}
-	*/
+	return false;
+}
 
+
+void AIComponent::Move( const grinliz::Vector2F& dest, bool focused )
+{
+	PathMoveComponent* pmc    = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
 	if ( pmc ) {
-		pmc->QueueDest( dest, -1, sectorPort );
+		pmc->QueueDest( dest, -1 );
 		currentAction = MOVE;
 		focus = focused ? FOCUS_MOVE : 0;
 	}
@@ -742,8 +781,7 @@ void AIComponent::ThinkBuild( const ComponentSet& thisComp )
 	Vector2I desti = { (int)dest.x, (int)dest.y };
 	if ( desti != item->pos || pmc->ForceCountHigh() ) {
 		dest.Set( (float)item->pos.x + 0.5f, (float)item->pos.y+0.5f );
-		pmc->QueueDest( dest );
-		currentAction = MOVE;
+		this->Move( dest, false );
 	}
 }
 
@@ -785,8 +823,7 @@ void AIComponent::ThinkRockBreak( const ComponentSet& thisComp )
 		Vector2F end;
 		float cost = 0;
 		if ( map->CalcPathBeside( thisComp.spatial->GetPosition2D(), dest, &end, &cost )) {
-			currentAction = MOVE;
-			pmc->QueueDest( end );
+			this->Move( dest, false );
 			return;
 		}
 	}
@@ -932,6 +969,101 @@ bool AIComponent::SectorHerd( const ComponentSet& thisComp )
 		}
 	}
 	return false;
+}
+
+
+void AIComponent::ThinkVisitor( const ComponentSet& thisComp )
+{
+	// Visitors can:
+	// - go to kiosks, stand, then move on to a different domain
+	// - disconnect
+	// - grid travel to a new domain
+
+	if ( !thisComp.okay ) return;
+
+	PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
+	if ( !pmc ) return;											// strange state,  can't do anything
+	if ( pmc->IsMoving() && !pmc->ForceCountHigh() ) return;	// everything is okay. move along.
+
+	bool disconnect = false;
+
+	Vector2I pos2i = thisComp.spatial->GetPosition2DI();
+	Vector2I sector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
+	VisitorData* vd = &Visitors::Instance()->visitorData[visitorIndex];	// FIXME ugly
+	Chit* kiosk = GetChitBag()->ToLumos()->QueryBuilding( pos2i, true );
+	if ( kiosk && kiosk->GetItem()->name == "kiosk" ) {
+		// all good
+	}
+	else {
+		kiosk = 0;
+	}
+
+	if ( !vd->sectorVisited.HasCap() ) {
+		disconnect = true;
+		if ( debugFlag ) {
+			GLOUTPUT(( "ID=%d Visitor travel done.\n", thisComp.chit->ID() ));
+		}
+	}
+	else {
+		// Move on,
+		// Stand, or
+		// Move to a kiosk
+		if ( vd->sectorVisited.Find( sector ) >= 0 ) {
+			// Head out!
+			// FIXME: smart destination.
+			SectorPort sp = map->RandomPort( &parentChit->random );
+			bool okay = this->Move( sp, true );
+			if ( !okay ) disconnect = true;
+		}
+		else if ( !pmc->IsMoving() && kiosk ) {
+			currentAction = STAND;
+		}
+		else {
+			// Find a kiosk.
+			CChitArray arr;
+			Rectangle2I inneri = map->GetSector( sector ).InnerBounds();
+			Rectangle2F inner;
+			inner.Set( (float)inneri.min.x, (float)inneri.min.y, (float)(inneri.max.x+1), (float)(inneri.max.y+1) );
+
+			parentChit->GetChitBag()->QuerySpatialHash( &arr, inner, 0, LumosChitBag::KioskFilter );
+			if ( arr.Empty() ) {
+				// Done here.
+				vd->sectorVisited.Push( sector );
+				if ( debugFlag ) {
+					GLOUTPUT(( "ID=%d Visitor: no kiosk.\n", thisComp.chit->ID() ));
+				}
+			}
+			else {
+				// Random!
+				parentChit->random.ShuffleArray( arr.Mem(), arr.Size() );
+				bool found = false;
+
+				for( int i=0; i<arr.Size(); ++i ) {
+					Chit* kiosk = arr[i];
+					MapSpatialComponent* msc = GET_SUB_COMPONENT( kiosk, SpatialComponent, MapSpatialComponent );
+					GLASSERT( msc );
+					Vector2I porchi = msc->PorchPos();
+					Vector2F porch = { (float)porchi.x+0.5f, (float)porchi.y+0.5f };
+					if ( map->CalcPath( thisComp.spatial->GetPosition2D(), porch, 0, 0, 0, 0 ) ) {
+						this->Move( porch, false );
+						found = true;
+						break;
+					}
+				}
+				if ( !found ) {
+					// Done here.
+					vd->sectorVisited.Push( sector );
+					if ( debugFlag ) {
+						GLOUTPUT(( "ID=%d Visitor: no path to kiosk.\n", thisComp.chit->ID() ));
+					}
+				}
+			}
+		}
+	}
+	if ( disconnect ) {
+		parentChit->GetItem()->hp = 0;
+		parentChit->SetTickNeeded();
+	}
 }
 
 
@@ -1192,17 +1324,15 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 	switch ( index ) {
 		case OPTION_FLOCK_MOVE:
 		{
-			currentAction = MOVE;
 			Vector2F dest = pos2 + flockDir;
-			pmc->QueueDest( dest );
+			this->Move( dest, false );
 		}
 		break;
 
 		case OPTION_MOVE_TO_RANGE:
 		{
-			currentAction = MOVE;
 			targetDesc.Set( target[OPTION_MOVE_TO_RANGE]->ID() );
-			pmc->QueueDest( moveToRange );
+			this->Move( moveToRange, false );
 		}
 		break;
 
@@ -1447,20 +1577,9 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 
 	case ChitMsg::CHIT_SECTOR_HERD:
 		{
-			if ( parentChit->GetSpatialComponent() ) {
-				// Read our destination port information:
-				const SectorPort* sectorPort = (const SectorPort*) msg.Ptr();
-				const SectorData& sd = map->GetSector( sectorPort->sector );
-				
-				// Read our local get-on-the-grid info
-				SectorPort local = map->NearestPort( parentChit->GetSpatialComponent()->GetPosition2D() );
-				// Completely possible this chit can't actually path anywhere.
-				if ( local.IsValid() ) {
-					const SectorData& localSD = map->GetSector( local.sector );
-					// Local path to remote dst
-					this->Move( SectorData::PortPos( localSD.GetPortLoc(local.port), parentChit->ID() ), sectorPort, true );
-				}
-			}
+			// Read our destination port information:
+			const SectorPort* sectorPort = (const SectorPort*) msg.Ptr();
+			this->Move( *sectorPort, true );
 		}
 		break;
 

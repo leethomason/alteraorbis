@@ -23,6 +23,7 @@ MapSpatialComponent::MapSpatialComponent( WorldMap* _map ) : SpatialComponent()
 {
 	worldMap = _map;
 	mode = GRID_IN_USE;
+	building = false;
 }
 
 
@@ -71,7 +72,26 @@ void MapSpatialComponent::Serialize( XStream* xs )
 {
 	this->BeginSerialize( xs, "MapSpatialComponent" );
 	XARC_SER( xs, mode );
+	XARC_SER( xs, building );
 	super::Serialize( xs );
 	this->EndSerialize( xs );
+}
+
+
+Vector2I MapSpatialComponent::PorchPos() const
+{
+	Vector2I v = MapPosition();
+
+	int r = LRintf( this->GetYRotation() / 90.0f );
+	// FIXME: only works for 1x1
+
+	switch (r) {
+	case 0:		v.y += 1;	break;
+	case 1:		v.x += 1;	break;
+	case 2:		v.y -= 1;	break;
+	case 3:		v.x -= 1;	break;
+	default:	GLASSERT(0);	break;
+	}
+	return v;
 }
 

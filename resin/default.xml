@@ -25,7 +25,7 @@
   <texture filename="icons.png" dither="false"/>
   <texture filename="iconDeco.png" dither="false" />
   <!-- new, atlased home of all icons, decos, etc. -->
-  <texture filename="icon.png" table="icon.xml" />
+  <texture filename="icon.png" table="icon.xml" maxSize="512"/>
 
   <!-- Model textures -->
   <texture filename="palette.png" />

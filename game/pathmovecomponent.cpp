@@ -201,6 +201,8 @@ void PathMoveComponent::ComputeDest()
 		GLASSERT( nPathPos > 0 );
 		GLASSERT( pathPos == 0 );
 		GLASSERT( dest.pos.x >= 0 && dest.pos.y >= 0 );
+		// We are back on track:
+		adjust /= 2;
 	}
 	// If pos < nPathPos, then pathing happens!
 }

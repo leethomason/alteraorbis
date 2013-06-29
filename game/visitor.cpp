@@ -2,11 +2,24 @@
 #include "../grinliz/gldebug.h"
 #include "../xarchive/glstreamer.h"
 
+using namespace grinliz;
 
 void VisitorData::Serialize( XStream* xs )
 {
 	XarcOpen( xs, "VisitorData" );
 	XARC_SER( xs, id );
+	XARC_SER( xs, kioskTime );
+
+	if ( xs->Saving() ) {
+		XarcSet( xs, "sectorVisited.size", sectorVisited.Size() );
+		XarcSetVectorArr( xs, "sectorVisited.mem",  sectorVisited.Mem(), sectorVisited.Size() );
+	}
+	else {
+		int size = 0;
+		XarcGet( xs, "sectorVisited.size", size );
+		Vector2I* mem = sectorVisited.PushArr( size );
+		XarcGetVectorArr( xs, "sectorVisited.mem", mem, size );
+	}
 	XarcClose( xs );
 }
 
@@ -35,6 +48,15 @@ void Visitors::Serialize( XStream* xs )
 	}
 	XarcClose( xs );
 }
+
+
+VisitorData* Visitors::Get( int index )
+{
+	GLASSERT( instance );
+	GLASSERT( index >=0 && index <NUM_VISITORS );
+	return &instance->visitorData[index];
+}
+
 
 
 

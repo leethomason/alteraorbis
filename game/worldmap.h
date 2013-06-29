@@ -138,6 +138,9 @@ public:
 					bool showDebugging = false );
 	// Returns the nearest pathable port to 'pos'. Returns (0,0) on failure.
 	SectorPort NearestPort( const grinliz::Vector2F& pos );
+	SectorPort RandomPort( grinliz::Random* random );
+	// Debugging. Makes the 'RandomPort' not random.
+	void SetRandomPort( SectorPort sp ) { randomPortDebug = sp; }
 
 	enum BlockResult {
 		NO_EFFECT,
@@ -319,6 +322,7 @@ private:
 
 	WorldInfo*					worldInfo;
 	bool						debugRegionOverlay;
+	SectorPort					randomPortDebug;
 
 	micropather::MicroPather*	currentPather;
 	micropather::MicroPather* PushPather( const grinliz::Vector2I& sector );

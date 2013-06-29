@@ -45,11 +45,23 @@ public:
 		grinliz::Vector2I v = { (int) position.x, (int)position.z };
 		return v;
 	}
+	// FIXME: currently always 1x1
+	grinliz::Rectangle2I Bounds() const {
+		grinliz::Rectangle2I b;
+		b.min = b.max = MapPosition();
+		return b;
+	}
+
 	void SetMode( int mode );
 	int Mode() const { return mode; }
+	void SetBuilding( bool b )	{ building = b; }
+	bool Building() const		{ return building; }
+
+	grinliz::Vector2I PorchPos() const;
 
 private:
 	int mode;
+	bool building;			// is this a building?
 	WorldMap* worldMap;
 };
 

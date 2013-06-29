@@ -186,6 +186,18 @@ RenderAtom LumosGame::CalcPaletteAtom( int x, int y )
 }
 
 
+RenderAtom LumosGame::CalcIconAtom( const char* asset )
+{
+	Texture* texture = TextureManager::Instance()->GetTexture( "icon" );
+	Texture::TableEntry te;
+	texture->GetTableEntry( asset, &te );
+	GLASSERT( !te.name.empty() );
+
+	RenderAtom atom( (const void*)(UIRenderer::RENDERSTATE_UI_NORMAL), (const void*)texture, te.uv.x, te.uv.y, te.uv.z, te.uv.w );
+	return atom;
+}
+
+
 /*
 	640x480 mininum screen.
 	6 buttons

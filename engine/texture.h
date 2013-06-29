@@ -94,7 +94,7 @@ public:
 		TableEntry() { uv.Zero(); clip.Zero(); }
 
 		grinliz::IString	name;
-		grinliz::Vector4F	uv;
+		grinliz::Vector4F	uv;				// x0, y0, x1, y1
 		grinliz::Vector4F	clip;
 
 		grinliz::Vector4F	uvXForm;		// a,d,tx,ty

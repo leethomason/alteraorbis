@@ -51,9 +51,7 @@ enum {
 	NO_CRYSTAL = NUM_CRYSTAL_TYPES
 };
 
-// Currently an InUse object needs to be 1x1.
-// Can be fixed in LumosChitBag::InUse
-//static const int MAX_GRID_OBJECT_RAD = 1;	// a 3x3 object
+static const int MAX_BUILDING_SIZE	= 2;	// 2x2 building. All other objects must be 1x1.
 
 static const U32 MINUTE				= 1000*60;						// game time and real time
 static const U32 MINUTES_IN_AGE		= 100;
