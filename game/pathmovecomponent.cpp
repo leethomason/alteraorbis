@@ -364,7 +364,11 @@ bool PathMoveComponent::AvoidOthers( U32 delta )
 						squattingDest = true;
 					}
 				}
-				float mag = Min( r-d, Travel( MOVE_SPEED, delta ) ); 
+				// Not getting stuck forever is very important. It breaks
+				// pathing where a CalcPath() is expected to get there.
+				// Limiting the magnitute to a fraction of the travel 
+				// speed avoids deadlocks.
+				float mag = Min( r-d, 0.5f * Travel( MOVE_SPEED, delta ) ); 
 				normal.Multiply( mag );
 				avoid += normal;
 				
