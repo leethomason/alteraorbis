@@ -152,8 +152,9 @@ x support melee attack on rocks
 	- model 
 	- animation
 - Flora
-	- concept
-	- models
+	x concept
+	x models
+	- redo texturing
 
 - wilder, more digital face colors
 - filter face colors to matching effect
