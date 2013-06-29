@@ -10,6 +10,7 @@
 #include "../game/worldmap.h"
 #include "../game/aicomponent.h"
 #include "../game/workqueue.h"
+#include "../game/team.h"
 
 #include "../xegame/chit.h"
 #include "../xegame/spatialcomponent.h"
@@ -118,7 +119,7 @@ int CoreScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 	Chit* attached = GetAttached();
 
 	if ( spawnTick.Delta( since ) && ctx.census->ais < TYPICAL_MONSTERS && !attached ) {
-#if 0
+#if 1
 		// spawn stuff.
 		MapSpatialComponent* ms = GET_SUB_COMPONENT( ctx.chit, SpatialComponent, MapSpatialComponent );
 		GLASSERT( ms );

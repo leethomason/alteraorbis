@@ -293,13 +293,15 @@ void Sim::DoTick( U32 delta )
 			Chit* chit = chitBag->NewVisitor( currentVisitor );
 			visitorData[currentVisitor].id = chit->ID();
 
+#if 0
 			NewsEvent news( NewsEvent::PONY, chit->GetSpatialComponent()->GetPosition2D(), 
 							StringPool::Intern( "Visitor" ), chit->ID() );
 			chitBag->AddNews( news );
 			chit->GetAIComponent()->EnableDebug( true );
+#endif
 		}
 
-		//currentVisitor++;
+		currentVisitor++;
 		if ( currentVisitor == Visitors::NUM_VISITORS ) {
 			currentVisitor = 0;
 		}

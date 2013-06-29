@@ -614,8 +614,8 @@ void GameScene::DoDestTapped( const Vector2F& _dest )
 void GameScene::HandleHotKey( int mask )
 {
 	if ( mask == GAME_HK_SPACE ) {
-		// FIXME
-		//fastMode = !fastMode;
+		fastMode = !fastMode;
+#if 0
 		if ( FreeCamera() ) {
 			Chit* visitor = sim->GetChitBag()->GetChit( Visitors::Instance()->visitorData[0].id );
 			CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
@@ -623,6 +623,7 @@ void GameScene::HandleHotKey( int mask )
 				cc->SetTrack( visitor->ID() );
 			}
 		}
+#endif
 	}
 	else if ( mask == GAME_HK_TOGGLE_PATHING ) {
 		sim->GetWorldMap()->ShowRegionOverlay( !sim->GetWorldMap()->IsShowingRegionOverlay() );

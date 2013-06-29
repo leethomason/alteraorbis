@@ -64,7 +64,7 @@ Chit* LumosChitBag::NewBuilding( const Vector2I& pos, const char* name, int team
 	chit->Add( new HealthComponent( engine ));
 	AddItem( name, chit, engine, team, 0 );
 
-#if 1	// debugging
+#if 0	// debugging
 	SectorPort sp;
 	sp.sector.Set( pos.x/SECTOR_SIZE, pos.y/SECTOR_SIZE );
 	sp.port = 1;

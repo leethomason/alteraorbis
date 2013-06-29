@@ -23,6 +23,7 @@ MapSpatialComponent::MapSpatialComponent( WorldMap* _map ) : SpatialComponent()
 {
 	worldMap = _map;
 	mode = GRID_IN_USE;
+	building = false;
 }
 
 
@@ -86,10 +87,10 @@ Vector2I MapSpatialComponent::PorchPos() const
 
 	switch (r) {
 	case 0:		v.y += 1;	break;
-	case 90:	v.x += 1;	break;
-	case 180:	v.y -= 1;	break;
-	case 270:	v.x -= 1;	break;
-	default: GLASSERT(0);	break;
+	case 1:		v.x += 1;	break;
+	case 2:		v.y -= 1;	break;
+	case 3:		v.x -= 1;	break;
+	default:	GLASSERT(0);	break;
 	}
 	return v;
 }

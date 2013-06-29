@@ -10,6 +10,7 @@
 #include "../game/mapspatialcomponent.h"
 #include "../game/aicomponent.h"
 #include "../game/gridmovecomponent.h"
+#include "../game/visitorstatecomponent.h"
 
 #include "../script/scriptcomponent.h"
 
@@ -59,6 +60,9 @@ Component* ComponentFactory::Factory( const char* name, Chit* chit ) const
 	}
 	else if ( StrEqual( name, "GridMoveComponent" )) {
 		return new GridMoveComponent( worldMap );
+	}
+	else if ( StrEqual( name, "VisitorStateComponent" )) {
+		return new VisitorStateComponent( worldMap );
 	}
 
 	GLASSERT( 0 );
