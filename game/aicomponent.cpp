@@ -306,7 +306,7 @@ void AIComponent::DoMove( const ComponentSet& thisComp )
 	// we look for opportunity fire and such.
 	if ( aiMode != BATTLE_MODE ) {
 		// Check for motion done, stuck, etc.
-		if ( !pmc->IsMoving() || pmc->ForceCountHigh() ) {
+		if ( pmc->Stopped() || pmc->ForceCountHigh() ) {
 			currentAction = NO_ACTION;
 			return;
 		}
@@ -646,11 +646,11 @@ bool AIComponent::Move( const SectorPort& sp, bool focused )
 }
 
 
-void AIComponent::Move( const grinliz::Vector2F& dest, bool focused )
+void AIComponent::Move( const grinliz::Vector2F& dest, bool focused, float rotation )
 {
 	PathMoveComponent* pmc    = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
 	if ( pmc ) {
-		pmc->QueueDest( dest, -1 );
+		pmc->QueueDest( dest, rotation );
 		currentAction = MOVE;
 		focus = focused ? FOCUS_MOVE : 0;
 	}
@@ -800,11 +800,10 @@ void AIComponent::ThinkRockBreak( const ComponentSet& thisComp )
 		aiMode			= NORMAL_MODE;
 		return;
 	}
-	// Travel
-	//if ( pmc->IsMoving() ) return;
 
 	const Vector3F& pos = thisComp.spatial->GetPosition();
 	Vector2F pos2		= { pos.x, pos.z };
+	Vector2I pos2i		= { (int)pos2.x, (int)pos2.y };
 	Vector3F rockTarget	= targetDesc.MapTarget();
 	Vector2I rock2i		= { (int)rockTarget.x, (int)rockTarget.z };
 	
@@ -823,13 +822,30 @@ void AIComponent::ThinkRockBreak( const ComponentSet& thisComp )
 		return;
 	}
 	else if ( !lineOfSight || meleeWeapon ) {
-		// Move to target
-		Vector2F dest = { (float)targetDesc.mapPos.x + 0.5f, (float)targetDesc.mapPos.y + 0.5f };
-		Vector2F end;
-		float cost = 0;
-		if ( map->CalcPathBeside( thisComp.spatial->GetPosition2D(), dest, &end, &cost )) {
-			this->Move( dest, false );
-			return;
+		// Are we beside the target?
+		int dx = rock2i.x - pos2i.x;
+		int dy = rock2i.y - pos2i.y;
+		if ( dx == 1 && dy == 0 ) {
+			this->Move( pos2, false, 0 );
+		}
+		else if ( dx == -1 && dy == 0 ) {
+			this->Move( pos2, false,  180.f );
+		}
+		else if ( dx == 0 && dy == 1 ) {
+			this->Move( pos2, false, 90.f );
+		}
+		else if ( dx == 0 && dy == -1 ) {
+			this->Move( pos2, false, -90.f );
+		}
+		else {
+			// Move to target
+			Vector2F dest = { (float)targetDesc.mapPos.x + 0.5f, (float)targetDesc.mapPos.y + 0.5f };
+			Vector2F end;
+			float cost = 0;
+			if ( map->CalcPathBeside( thisComp.spatial->GetPosition2D(), dest, &end, &cost )) {
+				this->Move( end, false );
+				return;
+			}
 		}
 	}
 	aiMode = NORMAL_MODE;
@@ -988,7 +1004,7 @@ void AIComponent::ThinkVisitor( const ComponentSet& thisComp )
 
 	PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
 	if ( !pmc ) return;											// strange state,  can't do anything
-	if ( pmc->IsMoving() && !pmc->ForceCountHigh() ) return;	// everything is okay. move along.
+	if ( !pmc->Stopped() && !pmc->ForceCountHigh() ) return;	// everything is okay. move along.
 
 	bool disconnect = false;
 
@@ -1020,7 +1036,7 @@ void AIComponent::ThinkVisitor( const ComponentSet& thisComp )
 			bool okay = this->Move( sp, true );
 			if ( !okay ) disconnect = true;
 		}
-		else if ( !pmc->IsMoving() && kiosk ) {
+		else if ( pmc->Stopped() && kiosk ) {
 			currentAction = STAND;
 		}
 		else {
@@ -1501,7 +1517,7 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 		case WANDER:
 			{
 				PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
-				if ( pmc && pmc->IsMoving() && !pmc->ForceCountHigh() ) {
+				if ( pmc && !pmc->Stopped() && !pmc->ForceCountHigh() ) {
 					// okay
 				}
 				else {

@@ -50,12 +50,14 @@ x support melee attack on rocks
 		x fix rockgen to give space around portals
 		x visitors warp in, travel warp out
 		x visitors visit interesting buildings
-		- need pass through for avoid; current system is too buggy.
+		x need pass through for avoid; current system is too buggy.
 		- visitors remember, have friends
 		- clear vegetation
 		- free camera: doesn't go to sector herd
 		- free camera: turning off doesn't go back to player
+		- can put build orders in other domains
 	- Silver
+		- vertical voxels are stretched
 		- decent clear dragging
 		- new Core model
 		- visitors create energy, buildings consume energy
@@ -64,7 +66,8 @@ x support melee attack on rocks
 		- decent UI
 		- leave core
 		- cancel orders
-		- melee only hits one voxel
+		- melee should onl hit one voxel
+		- 1x1 filtering isn't working
 	- Art
 		- item screen
 		- proper animation system

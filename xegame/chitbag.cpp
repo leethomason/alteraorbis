@@ -420,6 +420,8 @@ void ChitBag::QuerySpatialHash(	CChitArray* arr,
 	QuerySpatialHash( &cachedQuery, r, ignoreMe, accept );
 	arr->Clear();
 	for( int i=0; i<cachedQuery.Size(); ++i ) {
+		if ( !arr->HasCap() )
+			break;
 		arr->Push( cachedQuery[i] );
 	}
 }

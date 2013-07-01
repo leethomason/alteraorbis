@@ -686,10 +686,10 @@ void WorldGen::Filter( const Rectangle2I& bounds )
 	for( int y=bounds.min.y; y<=bounds.max.y; ++y ) {
 		for( int x=bounds.min.x; x<=bounds.max.x; ++x ) {
 			if (    land[y*SIZE+x] == WATER 
-				 && land[(y-1)*SIZE+x] == LAND0
-				 && land[(y+1)*SIZE+x] == LAND0
-				 && land[y*SIZE+(x+1)] == LAND0
-				 && land[y*SIZE+(x-1)] == LAND0 )
+				 && land[(y-1)*SIZE+x] != WATER
+				 && land[(y+1)*SIZE+x] != WATER
+				 && land[y*SIZE+(x+1)] != WATER
+				 && land[y*SIZE+(x-1)] != WATER )
 			{
 				land[y*SIZE+x] = LAND0;
 			}

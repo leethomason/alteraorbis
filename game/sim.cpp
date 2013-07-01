@@ -206,7 +206,7 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos, const char* assetName )
 	chit->GetItem()->flags |= GameItem::AI_BINDS_TO_CORE;
 
 	AIComponent* ai = new AIComponent( engine, worldMap );
-	ai->EnableDebug( true );
+	//ai->EnableDebug( true );
 	chit->Add( ai );
 
 	chit->Add( new HealthComponent( engine ));

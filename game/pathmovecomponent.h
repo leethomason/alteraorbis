@@ -67,7 +67,8 @@ public:
 	}
 	const grinliz::Vector2F& DestPos() const { return dest.pos; }
 
-	void Stop() { SetNoPath(); }
+	void Stop()				{ SetNoPath(); }
+	bool Stopped() const	{ return !HasPath() && queued.pos.x < 0; }
 
 	void SetPathDebugging( bool d )	{ pathDebugging = d; }
 
@@ -77,7 +78,9 @@ public:
 
 	int ForceCount() const			{ return forceCount; }
 	bool ForceCountHigh() const		{ return forceCount > FORCE_COUNT_HIGH; }
-	virtual bool IsMoving() const	{ return isMoving; } 
+	// Mainly an animation query. Since it responds to what happened - not 
+	// the actual state - should not be used for AI queries.
+	virtual bool IsMoving() const	{ return isMoving; }
 	
 private:
 	enum {
@@ -97,7 +100,7 @@ private:
 		nPathPos = pathPos = forceCount = 0;
 		dest.Clear();
 	}
-	bool HasPath() {
+	bool HasPath() const {
 		return dest.pos.x >= 0 && nPathPos > 0;
 	}
 
