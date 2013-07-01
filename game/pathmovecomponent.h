@@ -34,7 +34,7 @@ private:
 public:
 
 	PathMoveComponent(	WorldMap* _map )				// required; used to avoids blocks when moving. 
-		: GameMoveComponent( _map ), nPathPos( 0 ), pathPos( 0 ), pathDebugging( false ), adjust( 0 )
+		: GameMoveComponent( _map ), nPathPos( 0 ), pathPos( 0 ), pathDebugging( false ), forceCount( 0 )
 	{ 
 		queued.Clear();
 		dest.Clear();
@@ -73,15 +73,18 @@ public:
 
 	// Status info
 	int BlockForceApplied() const	{ return blockForceApplied; }
-	bool IsStuck() const			{ return isStuck; }
 	bool IsAvoiding() const			{ return avoidForceApplied; }
-	int ForceCount() const			{ return adjust; }
-	bool ForceCountHigh() const		{ return adjust > 10; }
-	virtual bool IsMoving() const	{ 
-		return isMoving; 
-	} 
 
+	int ForceCount() const			{ return forceCount; }
+	bool ForceCountHigh() const		{ return forceCount > FORCE_COUNT_HIGH; }
+	virtual bool IsMoving() const	{ return isMoving; } 
+	
 private:
+	enum {
+		FORCE_COUNT_HIGH = 10,
+		FORCE_COUNT_EXCESSIVE = 120
+	};
+
 	// Commit the 'queued' to the 'dest', if possible. 
 	void ComputeDest();
 	bool NeedComputeDest();
@@ -91,7 +94,7 @@ private:
 	float GetDistToNext2( const grinliz::Vector2F& currentPos );
 
 	void SetNoPath() {
-		nPathPos = pathPos = repath = 0;
+		nPathPos = pathPos = forceCount = 0;
 		dest.Clear();
 	}
 	bool HasPath() {
@@ -106,7 +109,6 @@ private:
 
 	int nPathPos;				// size of path
 	int pathPos;				// index of where we are on path
-	int repath;					// counter to see if we are stuck
 
 	struct Dest {
 		void Clear() { pos.Set( -1, -1 ); rotation = -1.f; sectorPort.Zero(); }
@@ -126,9 +128,8 @@ private:
 
 	bool blockForceApplied;		
 	bool avoidForceApplied;
-	bool isStuck;
 	bool isMoving;
-	int adjust;
+	int  forceCount;
 
 	grinliz::CDynArray< Chit* > chitArr;
 	grinliz::Vector2F path[MAX_MOVE_PATH];

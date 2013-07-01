@@ -12,7 +12,7 @@ void GameMoveComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 }
 
 
-void GameMoveComponent::ApplyBlocks( Vector2F* pos, bool* forceApplied, bool* isStuck )
+void GameMoveComponent::ApplyBlocks( Vector2F* pos, bool* forceApplied )
 {
 	GRINLIZ_PERFTRACK;
 	RenderComponent* render = parentChit->GetRenderComponent();
@@ -25,7 +25,7 @@ void GameMoveComponent::ApplyBlocks( Vector2F* pos, bool* forceApplied, bool* is
 
 	WorldMap::BlockResult result = map->ApplyBlockEffect( *pos, radius, &newPos );
 	if ( forceApplied ) *forceApplied = ( result == WorldMap::FORCE_APPLIED );
-	if ( isStuck )		*isStuck = ( result == WorldMap::STUCK );
+	bool isStuck = ( result == WorldMap::STUCK );
 
 	if ( forceApplied || isStuck ) {
 		int x = (int)newPos.x;

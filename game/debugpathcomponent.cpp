@@ -85,8 +85,6 @@ int DebugPathComponent::DoTick( U32 delta, U32 timeSince )
 				color.Set( 1, 1, 0, 1 );
 			if ( pmc->IsAvoiding() ) 
 				color.z = 1;
-			if ( pmc->IsStuck() )
-				color.Set( 1, 0, 0, 1 );
 		}
 
 		model->SetColor( color );

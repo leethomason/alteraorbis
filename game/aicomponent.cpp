@@ -57,6 +57,9 @@ static const float PLANT_AWARE			=  3.0f;
 static const float GOLD_AWARE			=  3.5f;
 static const int   FORCE_COUNT_STUCK	=  8;
 
+const char* AIComponent::MODE_NAMES[NUM_MODES]     = { "normal", "rockbreak", "battle" };
+const char* AIComponent::ACTION_NAMES[NUM_ACTIONS] = { "none", "move", "melee", "shoot", "wander", "stand" };
+
 
 AIComponent::AIComponent( Engine* _engine, WorldMap* _map )
 {
@@ -797,6 +800,8 @@ void AIComponent::ThinkRockBreak( const ComponentSet& thisComp )
 		aiMode			= NORMAL_MODE;
 		return;
 	}
+	// Travel
+	//if ( pmc->IsMoving() ) return;
 
 	const Vector3F& pos = thisComp.spatial->GetPosition();
 	Vector2F pos2		= { pos.x, pos.z };
@@ -1512,9 +1517,7 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 			break;
 	}
 	if ( debugFlag && (currentAction != oldAction) ) {
-		static const char* modes[NUM_MODES]     = { "normal", "rockbreak", "battle" };
-		static const char* actions[NUM_ACTIONS] = { "none", "move", "melee", "shoot", "wander", "stand" };
-		GLOUTPUT(( "ID=%d mode=%s action=%s\n", thisComp.chit->ID(), modes[aiMode], actions[currentAction] ));
+		GLOUTPUT(( "ID=%d mode=%s action=%s\n", thisComp.chit->ID(), MODE_NAMES[aiMode], ACTION_NAMES[currentAction] ));
 	}
 	return (currentAction != NO_ACTION) ? GetThinkTime() : 0;
 }
@@ -1522,7 +1525,7 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 
 void AIComponent::DebugStr( grinliz::GLString* str )
 {
-	str->Format( "[AI] " );
+	str->Format( "[AI] %s %s ", MODE_NAMES[aiMode], ACTION_NAMES[currentAction] );
 }
 
 
@@ -1571,6 +1574,8 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			WorkQueue* workQueue = GetWorkQueue();
 			if ( workQueue && workQueue->GetJob( parentChit->ID() )) {
 				workQueue->ReleaseJob( parentChit->ID() );
+				// total re-think.
+				aiMode = NORMAL_MODE;
 			}
 		}
 		break;

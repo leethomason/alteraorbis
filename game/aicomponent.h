@@ -172,6 +172,8 @@ private:
 	bool				fullSectorAware;
 	int					visitorIndex;
 	bool				debugFlag;
+	static const char*	MODE_NAMES[NUM_MODES];
+	static const char*	ACTION_NAMES[NUM_ACTIONS];
 
 	void DoMelee( const ComponentSet& thisComp );
 	void DoShoot( const ComponentSet& thisComp );
