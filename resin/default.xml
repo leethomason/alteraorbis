@@ -37,10 +37,7 @@
   <texture filename="bluestone.png" />
   <texture filename="shield.png" filename2="shield_em.png" emissive="true" />
   <texture filename="debugging.png" noMip="true" />
-  <!--
-  <texture filename="rock.png" />
-  <texture filename="magma.png" filename2="magma_em.png" emissive="true"/>
-  -->
+
   <texture filename="voxel.png" filename2="voxel_em.png" emissive="true" width="256" height="64"/>
   <texture filename="flags.png" />
 
@@ -155,6 +152,10 @@
   <model filename="chess_characters.ac" modelName="prime" origin="1 0 0" shading="flat" polyRemoval="pre">
     <meta name="trigger" pos="0.8 0.56 0" />
     <meta name="target"  pos="1 0.54 0" />
+  </model>
+  <model filename="chess_characters.ac" modelName="hornet" origin="2 0 0" shading="flat" polyRemoval="pre">
+    <meta name="trigger" pos="1.8 0.56 0" />
+    <meta name="target"  pos="2 0.54 0" />
   </model>
 
   <!-- orb plant -->

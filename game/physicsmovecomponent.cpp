@@ -112,7 +112,7 @@ int PhysicsMoveComponent::DoTick( U32 delta, U32 since )
 
 		// FIXME: rebound off blocks?
 		Vector2F pos2 = { pos.x, pos.z };
-		ApplyBlocks( &pos2, 0, 0 );
+		ApplyBlocks( &pos2, 0 );
 		pos.XZ( pos2 );
 		thisComp.spatial->SetPosYRot( pos, rot );
 	}

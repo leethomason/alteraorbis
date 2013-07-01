@@ -21,7 +21,7 @@ public:
 
 protected:
 	// Keep from hitting world objects.
-	void ApplyBlocks( grinliz::Vector2F* pos, bool* forceApplied, bool* isStuck );
+	void ApplyBlocks( grinliz::Vector2F* pos, bool* forceApplied );
 
 	WorldMap* map;
 };

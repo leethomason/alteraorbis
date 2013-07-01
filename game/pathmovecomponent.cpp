@@ -58,7 +58,7 @@ void PathMoveComponent::OnAdd( Chit* chit )
 	super::OnAdd( chit );
 	blockForceApplied = false;
 	avoidForceApplied = false;
-	isStuck = false;
+	forceCount = 0;
 	
 	// Serialization case:
 	// if there is a queue location, use that, else use the current location.
@@ -202,7 +202,7 @@ void PathMoveComponent::ComputeDest()
 		GLASSERT( pathPos == 0 );
 		GLASSERT( dest.pos.x >= 0 && dest.pos.y >= 0 );
 		// We are back on track:
-		adjust /= 2;
+		forceCount /= 2;
 	}
 	// If pos < nPathPos, then pathing happens!
 }
@@ -364,7 +364,11 @@ bool PathMoveComponent::AvoidOthers( U32 delta )
 						squattingDest = true;
 					}
 				}
-				float mag = Min( r-d, Travel( MOVE_SPEED, delta ) ); 
+				// Not getting stuck forever is very important. It breaks
+				// pathing where a CalcPath() is expected to get there.
+				// Limiting the magnitute to a fraction of the travel 
+				// speed avoids deadlocks.
+				float mag = Min( r-d, 0.5f * Travel( MOVE_SPEED, delta ) ); 
 				normal.Multiply( mag );
 				avoid += normal;
 				
@@ -431,7 +435,7 @@ int PathMoveComponent::DoTick( U32 delta, U32 since )
 			RotationFirst( delta );
 
 			squattingDest = AvoidOthers( delta );
-			ApplyBlocks( &pos2, &this->blockForceApplied, &this->isStuck );
+			ApplyBlocks( &pos2, &this->blockForceApplied );
 			SetPosRot( pos2, rot );
 		}
 
@@ -439,26 +443,6 @@ int PathMoveComponent::DoTick( U32 delta, U32 since )
 		if ( squattingDest ) {
 			GLASSERT( pathPos >= nPathPos-1 );
 			pathPos = nPathPos;
-		}
-		else {
-			// Do we need to repath because we're stuck?
-			if (    blockForceApplied  
-				 && startPathPos == pathPos
-				 && GetDistToNext2( pos2 ) >= distToNext2 ) 
-			{ 
-				++repath;
-			}
-			else {
-				repath = 0;
-			}
-			if ( repath == 3 ) {
-#ifdef DEBUG_PMC
-				GLOUTPUT(( "Repath\n" ));
-#endif
-				GLASSERT( dest.pos.x >= 0 );
-				QueueDest( dest.pos, dest.rotation );
-				repath = 0;
-			}
 		}
 		// Are we at the end of the path data?
 		if (    pathPos == nPathPos
@@ -485,11 +469,18 @@ int PathMoveComponent::DoTick( U32 delta, U32 since )
 				QueueDest( dest.pos, dest.rotation );
 			}
 		}
+		else if ( forceCount > FORCE_COUNT_EXCESSIVE ) {
+#ifdef DEBUG_PMC
+			GLOUTPUT(( "Block force excessive. forceCount=%d\n", forceCount ));
+#endif
+			SetNoPath();
+			parentChit->SendMessage( ChitMsg( ChitMsg::PATHMOVE_DESTINATION_BLOCKED), this );
+		}
 	}
 	else {
 		GetPosRot( &pos2, &rot );
 		AvoidOthers( delta );
-		ApplyBlocks( &pos2, &this->blockForceApplied, &this->isStuck );
+		ApplyBlocks( &pos2, &this->blockForceApplied );
 		SetPosRot( pos2, rot );
 	};
 
@@ -501,11 +492,11 @@ int PathMoveComponent::DoTick( U32 delta, U32 since )
 	}
 
 	if ( blockForceApplied || avoidForceApplied ) {
-		++adjust;
+		++forceCount;
 	}
 	else {
-		if ( adjust > 0 ) 
-			--adjust;
+		if ( forceCount > 0 ) 
+			--forceCount;
 	}
 	return 0;
 }
