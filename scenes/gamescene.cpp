@@ -547,8 +547,13 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 			else {
 				Chit* playerChit = sim->GetPlayerChit();
 				CoreScript* coreMode = sim->GetChitBag()->IsBoundToCore( playerChit );
-				if ( playerChit && !coreMode ) {
-					cc->SetTrack( playerChit->ID() );
+				if ( playerChit ) {
+					if ( coreMode ) {
+						cc->SetPanTo( playerChit->GetSpatialComponent()->GetPosition() );
+					}
+					else {
+						cc->SetTrack( playerChit->ID() );
+					}
 				}
 			}
 		}

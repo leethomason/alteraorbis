@@ -38,7 +38,7 @@ public:
 	virtual ItemComponent* ToItemComponent() { return this; }
 
 	virtual void DebugStr( grinliz::GLString* str ) {
-		str->Format( "[Item] %s hp=%.1f/%.1f ", mainItem.Name(), mainItem.hp, mainItem.TotalHP() );
+		str->Format( "[Item] %s hp=%.1f/%d ", mainItem.Name(), mainItem.hp, mainItem.TotalHP() );
 		if ( !wallet.IsEmpty() ) {
 			str->Format( "Au=%d Cy=g%dr%db%dv%d ", wallet.gold, 
 				          wallet.crystal[CRYSTAL_GREEN], wallet.crystal[CRYSTAL_RED], 

@@ -63,6 +63,7 @@ public:
 
 	void Target( Chit* chit, bool focused );
 	bool RockBreak( const grinliz::Vector2I& pos );
+	
 	// Use a null IString for ICE.
 	bool Build( const grinliz::Vector2I& pos, grinliz::IString structure );
 
@@ -82,8 +83,7 @@ public:
 	// Translated to immediate goals: MOVE, SHOOT, MELEE
 	enum {
 		NORMAL_MODE,
-		ROCKBREAK_MODE,
-		BUILD_MODE,
+		ROCKBREAK_MODE,		// weird special mode for attacking rocks
 		BATTLE_MODE,
 		NUM_MODES
 	};
@@ -98,11 +98,61 @@ private:
 
 		WANDER,
 		STAND,			// used to eat plants, reload
-		NUM_ACTIONS
+		NUM_ACTIONS,
+
+		// These are special events:
+		TASK_REMOVE,
+		TASK_BUILD
 	};
 
 	enum {
 		MAX_TRACK = 8,
+	};
+
+	/*	Attempt to put in a meta-language:
+		Worker:		MOVE x,y
+					STAND 1000
+					REMOVE rock
+	*/
+	struct Task
+	{
+		Task() { Clear(); }
+		Task( int _action, const grinliz::Vector2I _pos ) {
+			Clear();
+			action = _action;
+			pos2i = _pos;
+		}
+		Task( int _action, const grinliz::Vector2F _pos ) {
+			Clear();
+			action = _action;
+			pos2i.Set( (int)_pos.x, (int)_pos.y );
+		}
+		Task( int _action, int _timer, int _data ) {
+			Clear();
+			action = _action;
+			timer  = _timer;
+			data   = _data;
+		}
+		Task( int _action, const grinliz::Vector2I _pos, grinliz::IString _structure ) {
+			Clear();
+			pos2i = _pos;
+			action = _action;
+			structure = _structure;
+		}
+
+		void Clear() {
+			action = 0;
+			pos2i.Zero();
+			timer = 0;
+			data = 0;
+			structure = grinliz::IString();
+		}
+
+		int					action;		// move, stand, etc.
+		grinliz::Vector2I	pos2i;
+		int					timer;
+		int					data;
+		grinliz::IString	structure;
 	};
 
 	void GetFriendEnemyLists();
@@ -119,6 +169,9 @@ private:
 	void ThinkRockBreak( const ComponentSet& thisComp );
 	void ThinkBuild( const ComponentSet& thisComp );
 	void ThinkVisitor( const ComponentSet& thisComp );
+
+	void WorkQueueToTask(  const ComponentSet& thisComp );	// turn a work item into a task
+	void FlushTaskList( const ComponentSet& thisComp );	// moves tasks along, mark tasks completed, do special actions
 
 	grinliz::Vector2F GetWanderOrigin( const ComponentSet& thisComp ) const;
 	int GetThinkTime() const { return 500; }
@@ -183,6 +236,7 @@ private:
 
 	grinliz::CArray<int, MAX_TRACK> friendList;
 	grinliz::CArray<int, MAX_TRACK> enemyList;
+	grinliz::CArray< Task, 4 >		taskList;
 };
 
 

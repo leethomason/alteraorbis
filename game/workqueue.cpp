@@ -33,7 +33,7 @@ WorkQueue::~WorkQueue()
 
 void WorkQueue::AddImage( const QueueItem& item )
 {
-	if ( item.action == CLEAR_GRID ) {
+	if ( item.action == CLEAR ) {
 		const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( "unitPlateCentered" );
 		GLASSERT( res );
 		Model* m = engine->AllocModel( res );
@@ -78,7 +78,7 @@ void WorkQueue::RemoveImage( const QueueItem& item )
 
 void WorkQueue::Add( int action, const grinliz::Vector2I& pos2i, IString structure )
 {
-	GLASSERT( action >= CLEAR_GRID && action < NUM_ACTIONS );
+	GLASSERT( action >= CLEAR && action < NUM_ACTIONS );
 
 /*	// Toggle existing, for now.
 	for( int i=0; i<queue.Size(); ++i ) {
@@ -146,7 +146,7 @@ const WorkQueue::QueueItem* WorkQueue::Find( const grinliz::Vector2I& chitPos )
 			float cost = 0;
 			Vector2F end = { (float)queue[i].pos.x+0.5f, (float)queue[i].pos.y+0.5f };
 
-			if ( queue[i].action == CLEAR_GRID ) {
+			if ( queue[i].action == CLEAR ) {
 				Vector2F bestEnd = { 0, 0 };
 
 				if ( worldMap->CalcPathBeside( start, end, &bestEnd, &cost )) {
@@ -188,7 +188,7 @@ void WorkQueue::DoTick()
 		const WorldGrid& wg = worldMap->GetWorldGrid( pos2i.x, pos2i.x );
 		switch ( queue[i].action )
 		{
-		case CLEAR_GRID:
+		case CLEAR:
 			if ( worldMap->IsPassable( pos2i.x, pos2i.y )) {
 				// FIXME wrong query for non 1x1 buildings
 				CChitArray array;
@@ -201,8 +201,7 @@ void WorkQueue::DoTick()
 			}
 			break;
 
-		case BUILD_ICE:
-		case BUILD_STRUCTURE:
+		case BUILD:
 			if ( !worldMap->IsPassable( queue[i].pos.x, queue[i].pos.y )) {
 				RemoveImage( queue[i] );
 				queue.Remove( i );

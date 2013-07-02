@@ -21,13 +21,9 @@ public:
 
 	enum {
 		NO_ACTION,
-		CLEAR_GRID,
-		BUILD_ICE,
-		BUILD_STRUCTURE,
+		CLEAR,
+		BUILD,
 		NUM_ACTIONS,
-
-		BUILD_START = BUILD_ICE,
-		BUILD_END = BUILD_STRUCTURE+1,
 	};
 
 	struct QueueItem {

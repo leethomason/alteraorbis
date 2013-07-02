@@ -57,7 +57,7 @@ void CameraComponent::DebugStr( grinliz::GLString* str )
 }
 
 	
-void CameraComponent::SetPanTo( grinliz::Vector3F& _dest, float _speed )
+void CameraComponent::SetPanTo( const grinliz::Vector3F& _dest, float _speed )
 {
 	mode = PAN;
 	dest = _dest;

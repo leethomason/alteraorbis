@@ -470,14 +470,6 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 	else if ( !targetDesc.mapPos.IsZero() ) {
 		// make sure we aren't swinging at an empty voxel.
 		targetOkay = map->GetWorldGrid( targetDesc.mapPos.x, targetDesc.mapPos.y ).RockHeight() > 0;
-
-		if ( !targetOkay ) {
-			// FIXME wrong query for non 1x1 buildings
-			Vector2F pos2 = { (float)targetDesc.mapPos.x+0.5f, (float)targetDesc.mapPos.y+0.5f };
-			CChitArray array;
-			GetChitBag()->QuerySpatialHash( &array, pos2, 0.1f, 0, LumosChitBag::RemovableFilter );
-			targetOkay = !array.Empty();
-		}
 	}
 
 	if ( !weapon || !targetOkay ) {
@@ -594,6 +586,10 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 since )
 			return false;
 		}
 	}
+	else if ( !taskList.Empty() && taskList[0].action == STAND ) {
+		taskList[0].timer -= since;
+		return true;	// keep standing
+	}
 	return false;
 }
 
@@ -622,7 +618,6 @@ void AIComponent::Think( const ComponentSet& thisComp )
 			ThinkWander( thisComp );	
 		break;
 	case ROCKBREAK_MODE:	ThinkRockBreak( thisComp );	break;
-	case BUILD_MODE:		ThinkBuild( thisComp );		break;
 	case BATTLE_MODE:		ThinkBattle( thisComp );	break;
 	}
 };
@@ -684,13 +679,7 @@ bool AIComponent::RockBreak( const grinliz::Vector2I& rock )
 		return false;
 
 	const WorldGrid& wg = map->GetWorldGrid( rock.x, rock.y );
-
-	// FIXME wrong query for non 1x1 buildings
-	Vector2F pos2 = { (float)rock.x+0.5f, (float)rock.y+0.5f };
-	CChitArray array;
-	GetChitBag()->QuerySpatialHash( &array, pos2, 0.1f, 0, LumosChitBag::RemovableFilter );
-
-	if ( wg.RockHeight() == 0 && array.Empty() )
+	if ( wg.RockHeight() == 0 )
 		return false;
 
 	aiMode = ROCKBREAK_MODE;
@@ -698,27 +687,6 @@ bool AIComponent::RockBreak( const grinliz::Vector2I& rock )
 	targetDesc.Set( rock );
 	parentChit->SetTickNeeded();
 	return true;
-}
-
-
-bool AIComponent::Build( const grinliz::Vector2I& pos, IString structure )
-{
-	GLOUTPUT(( "Ice at %d,%d\n", pos.x, pos.y ));
-	ComponentSet thisComp( parentChit, Chit::RENDER_BIT | 
-		                               Chit::SPATIAL_BIT |
-									   ComponentSet::IS_ALIVE |
-									   ComponentSet::NOT_IN_IMPACT );
-	if ( !thisComp.okay ) 
-		return false;
-
-	if ( map->IsPassable( pos.x, pos.y )) {
-		aiMode = BUILD_MODE;
-		currentAction = NO_ACTION;
-		targetDesc.Set( pos, structure );
-		parentChit->SetTickNeeded();
-		return true;
-	}
-	return false;
 }
 
 
@@ -737,71 +705,6 @@ WorkQueue* AIComponent::GetWorkQueue()
 	return workQueue;
 }
 
-
-void AIComponent::ThinkBuild( const ComponentSet& thisComp )
-{
-	if ( !thisComp.okay ) {
-		currentAction = NO_ACTION;
-		return;
-	}
-
-	// Make sure:
-	//	- there is an item in the WorkQueue
-	//	- the destination is availabe
-	//	- we are going (or at) the destination.
-	// FIXME: not accounting for getting stuck trying to get to destination.
-
-	Vector2F pos2			= thisComp.spatial->GetPosition2D();
-	Vector2I pos2i			= { (int)pos2.x, (int)pos2.y };
-	Vector2I sector			= { pos2i.x / SECTOR_SIZE, pos2i.y / SECTOR_SIZE };
-
-	WorkQueue* workQueue	= GetWorkQueue();
-	if ( !workQueue ) { currentAction = NO_ACTION; return; }
-
-	const WorkQueue::QueueItem* item = workQueue->GetJob( parentChit->ID() );
-	if ( !item ) { 
-		aiMode = NORMAL_MODE;
-		currentAction = NO_ACTION; 
-		return; 
-	}
-	if ( item->action < WorkQueue::BUILD_START || item->action >= WorkQueue::BUILD_END ) {
-		// not sure how this happened.
-		workQueue->ReleaseJob( parentChit->ID() );
-		aiMode = NORMAL_MODE;
-		currentAction = NO_ACTION; 
-		return; 
-	}
-
-	// Is the item where we are going?
-	if ( item->pos == pos2i ) {
-		// WE ARRIVE! Build. No delay. Maybe in the future.
-		//GetChitBag()->ToLumos()->NewBuilding( item->building );
-		if ( map->IsPassable( pos2i.x, pos2i.y )) {
-			if ( item->action == WorkQueue::BUILD_ICE ) {
-				map->SetRock( pos2i.x, pos2i.y, 1, false, WorldGrid::ICE );
-			}
-			else if ( item->action == WorkQueue::BUILD_STRUCTURE ) {
-				GLASSERT( !item->structure.empty() );
-				GetChitBag()->ToLumos()->NewBuilding( pos2i, item->structure.c_str(), thisComp.item->primaryTeam );
-			}
-			aiMode = NORMAL_MODE;
-			currentAction = NO_ACTION;
-		}
-		return;
-	}
-
-	// Can we go there?
-	PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
-	if ( !pmc ) { currentAction = NO_ACTION; return; }
-
-	Vector2F dest = pmc->DestPos();
-	Vector2I desti = { (int)dest.x, (int)dest.y };
-	if ( desti != item->pos || pmc->ForceCountHigh() ) {
-		dest.Set( (float)item->pos.x + 0.5f, (float)item->pos.y+0.5f );
-		this->Move( dest, false );
-	}
-}
-
 	
 void AIComponent::ThinkRockBreak( const ComponentSet& thisComp )
 {
@@ -816,10 +719,7 @@ void AIComponent::ThinkRockBreak( const ComponentSet& thisComp )
 	Vector2I rock2i		= { (int)rockTarget.x, (int)rockTarget.z };
 	Vector2F rock2		= { (float)rock2i.x + 0.5f, (float)rock2i.y + 0.5f };
 	
-	// FIXME wrong query for non 1x1 buildings
-	CChitArray array;
-	GetChitBag()->QuerySpatialHash( &array, rock2, 0.1f, 0, LumosChitBag::RemovableFilter );
-	if ( (wg.RockHeight() == 0 && array.Empty()) || !pmc ) {
+	if ( !pmc || wg.RockHeight() == 0 ) {
 		currentAction	= NO_ACTION;
 		aiMode			= NORMAL_MODE;
 		return;
@@ -840,30 +740,13 @@ void AIComponent::ThinkRockBreak( const ComponentSet& thisComp )
 		return;
 	}
 	else if ( !lineOfSight || meleeWeapon ) {
-		// Are we beside the target?
-		int dx = rock2i.x - pos2i.x;
-		int dy = rock2i.y - pos2i.y;
-		if ( dx == 1 && dy == 0 ) {
-			this->Move( pos2, false, 0 );
-		}
-		else if ( dx == -1 && dy == 0 ) {
-			this->Move( pos2, false,  180.f );
-		}
-		else if ( dx == 0 && dy == 1 ) {
-			this->Move( pos2, false, 90.f );
-		}
-		else if ( dx == 0 && dy == -1 ) {
-			this->Move( pos2, false, -90.f );
-		}
-		else {
-			// Move to target
-			Vector2F dest = { (float)targetDesc.mapPos.x + 0.5f, (float)targetDesc.mapPos.y + 0.5f };
-			Vector2F end;
-			float cost = 0;
-			if ( map->CalcPathBeside( thisComp.spatial->GetPosition2D(), dest, &end, &cost )) {
-				this->Move( end, false );
-				return;
-			}
+		// Move to target
+		Vector2F dest = { (float)targetDesc.mapPos.x + 0.5f, (float)targetDesc.mapPos.y + 0.5f };
+		Vector2F end;
+		float cost = 0;
+		if ( map->CalcPathBeside( thisComp.spatial->GetPosition2D(), dest, &end, &cost )) {
+			this->Move( end, false );
+			return;
 		}
 	}
 	aiMode = NORMAL_MODE;
@@ -1403,6 +1286,156 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 }
 
 
+void AIComponent::FlushTaskList( const ComponentSet& thisComp )
+{
+	if ( taskList.Empty() ) return;
+	PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
+	if ( !pmc ) {
+		taskList.Clear();
+		return;
+	}
+
+	Task* task = &taskList[0];
+	Vector2I pos2i = thisComp.spatial->GetPosition2DI();
+	Vector2F taskPos2 = { (float)task->pos2i.x + 0.5f, (float)task->pos2i.y + 0.5f };
+
+	switch ( task->action ) {
+	case MOVE:
+		if ( pmc->Stopped() ) {
+			if ( pos2i == task->pos2i ) {
+				// arived!
+				taskList.PopFront();
+			}
+			else {
+				Vector2F dest = { (float)task->pos2i.x + 0.5f, (float)task->pos2i.y + 0.5f };
+				Move( dest, false );
+			}
+		}
+		break;
+
+	case MELEE:
+	case SHOOT:
+	case WANDER:
+		GLASSERT( 0 );
+		taskList.PopFront();
+		break;
+
+	case STAND:
+		if ( pmc->Stopped() ) {
+			currentAction = STAND;
+			// DoStand will decrement timer.
+			if ( task->timer <= 0 ) {
+				taskList.PopFront();
+			}
+		}
+		break;
+
+	case TASK_REMOVE:
+		{
+			if ( task->structure.empty() ) {
+				const WorldGrid& wg = map->GetWorldGrid( task->pos2i.x, task->pos2i.y );
+				if ( wg.RockHeight() ) {
+					DamageDesc dd( 10000, 0 );	// FIXME need constant
+					Vector3I voxel = { task->pos2i.x, 0, task->pos2i.y };
+					map->VoxelHit( voxel, dd );
+				}
+			}
+			else {
+				// FIXME: not correct for non-1x1 structures.
+				CChitArray array;
+				parentChit->GetChitBag()->QuerySpatialHash( &array, taskPos2, 0.1f, 0, LumosChitBag::RemovableFilter );
+				for( int i=0; i<array.Size(); ++i ) {
+					if ( array[i]->GetItem() && array[i]->GetItem()->name == task->structure ) {
+
+						DamageDesc dd( 10000, 0 );
+						ChitDamageInfo info( dd );
+						info.originID = 0;
+						info.awardXP  = false;
+						info.isMelee  = true;
+						info.isExplosion = false;
+						info.originOfImpact = thisComp.spatial->GetPosition();
+						array[i]->SendMessage( ChitMsg( ChitMsg::CHIT_DAMAGE, 0, &info ), 0 );
+						break;
+					}
+				}
+			}
+			taskList.PopFront();
+		}
+		break;
+
+	case TASK_BUILD:
+		{
+			const WorldGrid& wg = map->GetWorldGrid( task->pos2i.x, task->pos2i.y );
+			CChitArray array;
+			parentChit->GetChitBag()->QuerySpatialHash( &array, taskPos2, 0.1f, 0, LumosChitBag::RemovableFilter );
+			// FIXME: not correct for non-1x1 structures.
+			if ( wg.RockHeight() == 0 && array.Empty() ) {
+				if ( task->structure.empty() ) {
+					map->SetRock( task->pos2i.x, task->pos2i.y, 1, false, WorldGrid::ICE );
+				}
+				else {
+					GetChitBag()->ToLumos()->NewBuilding( task->pos2i, task->structure.c_str(), thisComp.item->primaryTeam );
+				}
+			}
+			taskList.PopFront();
+		}
+		break;
+
+	}
+}
+
+
+void AIComponent::WorkQueueToTask(  const ComponentSet& thisComp )
+{
+	// Is there work to do?		
+	Vector2I sector = thisComp.spatial->GetSector();
+	CoreScript* coreScript = GetChitBag()->ToLumos()->GetCore( sector );
+	if ( coreScript ) {
+		WorkQueue* workQueue = coreScript->GetWorkQueue();
+
+		// Get the current job, or find a new one.
+		const WorkQueue::QueueItem* item = workQueue->GetJob( parentChit->ID() );
+		if ( !item ) {
+			item = workQueue->Find( thisComp.spatial->GetPosition2DI() );
+			if ( item ) {
+				workQueue->Assign( parentChit->ID(), item );
+			}
+		}
+		if ( item ) {
+			switch ( item->action )
+			{
+			case WorkQueue::CLEAR:
+				{
+					Vector2F dest = { (float)item->pos.x + 0.5f, (float)item->pos.y + 0.5f };
+					Vector2F end;
+					float cost = 0;
+					if ( map->CalcPathBeside( thisComp.spatial->GetPosition2D(), dest, &end, &cost )) {
+						
+						taskList.Push( Task( MOVE, end ));
+						taskList.Push( Task( STAND, 1000, 0 ));
+						taskList.Push( Task( TASK_REMOVE, item->pos, item->structure ));
+					}
+				}
+				break;
+
+			case WorkQueue::BUILD:
+				{
+					taskList.Push( Task( MOVE, item->pos ));
+					taskList.Push( Task( STAND, 1000, 0 ));
+					taskList.Push( Task( TASK_BUILD, item->pos, item->structure ));
+				}
+				break;
+
+			default:
+				GLASSERT( 0 );
+				break;
+			}
+		}
+	}
+}
+
+
+
 int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 {
 	GRINLIZ_PERFTRACK;
@@ -1452,6 +1485,7 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 	if ( aiMode != BATTLE_MODE && enemyList.Size() ) {
 		aiMode = BATTLE_MODE;
 		currentAction = 0;
+		taskList.Clear();
 		if ( debugFlag ) {
 			GLOUTPUT(( "ID=%d Mode to Battle\n", thisComp.chit->ID() ));
 		}
@@ -1465,46 +1499,17 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 	}
 
 	// Is there work to do?
-	if ( aiMode == NORMAL_MODE && (thisComp.item->flags & GameItem::AI_DOES_WORK) ) {
-		// Is there work to do?
-
-		Vector2I sector = thisComp.spatial->GetSector();
-		CoreScript* coreScript = GetChitBag()->ToLumos()->GetCore( sector );
-		if ( coreScript ) {
-			WorkQueue* workQueue = coreScript->GetWorkQueue();
-
-			// Get the current job, or find a new one.
-			const WorkQueue::QueueItem* item = workQueue->GetJob( parentChit->ID() );
-			if ( !item ) {
-				item = workQueue->Find( thisComp.spatial->GetPosition2DI() );
-				if ( item ) {
-					workQueue->Assign( parentChit->ID(), item );
-				}
-			}
-			if ( item ) {
-				switch ( item->action )
-				{
-				case WorkQueue::CLEAR_GRID:
-					RockBreak( item->pos );
-					break;
-
-				case WorkQueue::BUILD_ICE:
-					Build( item->pos, IString() );
-					break;
-
-				case WorkQueue::BUILD_STRUCTURE:
-					Build( item->pos, item->structure );
-					break;
-
-				default:
-					GLASSERT( 0 );
-					break;
-				}
-			}
-		}
+	if (    aiMode == NORMAL_MODE 
+		 && (thisComp.item->flags & GameItem::AI_DOES_WORK)
+		 && taskList.Empty () ) 
+	{
+		WorkQueueToTask( thisComp );
 	}
 
-	if ( !currentAction || (rethink > 1000 ) ) {
+	if ( aiMode == NORMAL_MODE && !taskList.Empty() ) {
+		FlushTaskList( thisComp );
+	}
+	else if ( !currentAction || (rethink > 1000 ) ) {
 		Think( thisComp );
 		rethink = 0;
 	}
