@@ -470,6 +470,14 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 	else if ( !targetDesc.mapPos.IsZero() ) {
 		// make sure we aren't swinging at an empty voxel.
 		targetOkay = map->GetWorldGrid( targetDesc.mapPos.x, targetDesc.mapPos.y ).RockHeight() > 0;
+
+		if ( !targetOkay ) {
+			// FIXME wrong query for non 1x1 buildings
+			Vector2F pos2 = { (float)targetDesc.mapPos.x+0.5f, (float)targetDesc.mapPos.y+0.5f };
+			CChitArray array;
+			GetChitBag()->QuerySpatialHash( &array, pos2, 0.1f, 0, LumosChitBag::RemovableFilter );
+			targetOkay = !array.Empty();
+		}
 	}
 
 	if ( !weapon || !targetOkay ) {
@@ -801,18 +809,22 @@ void AIComponent::ThinkRockBreak( const ComponentSet& thisComp )
 	PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
 	const WorldGrid& wg = map->GetWorldGrid( targetDesc.mapPos.x, targetDesc.mapPos.y );
 
-	if ( wg.RockHeight() == 0 || !pmc ) {
-		currentAction	= NO_ACTION;
-		aiMode			= NORMAL_MODE;
-		return;
-	}
-
 	const Vector3F& pos = thisComp.spatial->GetPosition();
 	Vector2F pos2		= { pos.x, pos.z };
 	Vector2I pos2i		= { (int)pos2.x, (int)pos2.y };
 	Vector3F rockTarget	= targetDesc.MapTarget();
 	Vector2I rock2i		= { (int)rockTarget.x, (int)rockTarget.z };
+	Vector2F rock2		= { (float)rock2i.x + 0.5f, (float)rock2i.y + 0.5f };
 	
+	// FIXME wrong query for non 1x1 buildings
+	CChitArray array;
+	GetChitBag()->QuerySpatialHash( &array, rock2, 0.1f, 0, LumosChitBag::RemovableFilter );
+	if ( (wg.RockHeight() == 0 && array.Empty()) || !pmc ) {
+		currentAction	= NO_ACTION;
+		aiMode			= NORMAL_MODE;
+		return;
+	}
+
 	// The current weapons.
 	IRangedWeaponItem* rangedWeapon = thisComp.itemComponent->GetRangedWeapon( 0 );
 	IMeleeWeaponItem*  meleeWeapon  = thisComp.itemComponent->GetMeleeWeapon();

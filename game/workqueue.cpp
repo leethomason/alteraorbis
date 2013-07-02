@@ -80,14 +80,14 @@ void WorkQueue::Add( int action, const grinliz::Vector2I& pos2i, IString structu
 {
 	GLASSERT( action >= CLEAR_GRID && action < NUM_ACTIONS );
 
-	// Toggle existing, for now.
+/*	// Toggle existing, for now.
 	for( int i=0; i<queue.Size(); ++i ) {
 		if ( queue[i].pos == pos2i ) {
 			queue.Remove( i );
 			return;
 		}
 	}
-
+*/
 	QueueItem item( action, pos2i, structure );
 	queue.Push( item );
 	AddImage( item );
@@ -190,8 +190,8 @@ void WorkQueue::DoTick()
 		{
 		case CLEAR_GRID:
 			if ( worldMap->IsPassable( pos2i.x, pos2i.y )) {
-				CChitArray array;
 				// FIXME wrong query for non 1x1 buildings
+				CChitArray array;
 				chitBag->QuerySpatialHash( &array, pos2, 0.1f, 0, LumosChitBag::RemovableFilter );
 				if ( array.Empty() ) {
 					RemoveImage( queue[i] );
