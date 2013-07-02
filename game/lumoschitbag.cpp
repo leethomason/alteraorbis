@@ -28,6 +28,7 @@
 #include "../script/itemscript.h"
 #include "../script/scriptcomponent.h"
 #include "../script/corescript.h"
+#include "../script/plantscript.h"
 
 
 //#define DEBUG_EXPLOSION
@@ -169,6 +170,11 @@ bool LumosChitBag::WorkerFilter( Chit* chit )
 	return false;
 }
 
+
+bool LumosChitBag::RemovableFilter( Chit* chit )
+{
+	return BuildingFilter( chit ) || PlantScript::PlantFilter( chit );
+}
 
 bool LumosChitBag::BuildingFilter( Chit* chit )
 {

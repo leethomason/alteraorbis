@@ -79,6 +79,15 @@ void WorkQueue::RemoveImage( const QueueItem& item )
 void WorkQueue::Add( int action, const grinliz::Vector2I& pos2i, IString structure )
 {
 	GLASSERT( action >= CLEAR_GRID && action < NUM_ACTIONS );
+
+	// Toggle existing, for now.
+	for( int i=0; i<queue.Size(); ++i ) {
+		if ( queue[i].pos == pos2i ) {
+			queue.Remove( i );
+			return;
+		}
+	}
+
 	QueueItem item( action, pos2i, structure );
 	queue.Push( item );
 	AddImage( item );
@@ -174,14 +183,21 @@ void WorkQueue::DoTick()
 			}
 		}
 
-		const WorldGrid& wg = worldMap->GetWorldGrid( queue[i].pos.x, queue[i].pos.y );
+		Vector2I pos2i = { queue[i].pos.x, queue[i].pos.y };
+		Vector2F pos2  = { (float)pos2i.x + 0.5f, (float)pos2i.y+0.5f };
+		const WorldGrid& wg = worldMap->GetWorldGrid( pos2i.x, pos2i.x );
 		switch ( queue[i].action )
 		{
 		case CLEAR_GRID:
-			if ( wg.RockHeight() == 0 ) {
-				RemoveImage( queue[i] );
-				queue.Remove( i );
-				--i;
+			if ( worldMap->IsPassable( pos2i.x, pos2i.y )) {
+				CChitArray array;
+				// FIXME wrong query for non 1x1 buildings
+				chitBag->QuerySpatialHash( &array, pos2, 0.1f, 0, LumosChitBag::RemovableFilter );
+				if ( array.Empty() ) {
+					RemoveImage( queue[i] );
+					queue.Remove( i );
+					--i;
+				}
 			}
 			break;
 

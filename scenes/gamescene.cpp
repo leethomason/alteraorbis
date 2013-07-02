@@ -410,8 +410,12 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 				GLASSERT( wq );
 
 				if ( buildActive == CLEAR_ROCK ) {
-					if ( mv.VoxelHit() ) {
+					if ( mv.VoxelHit()) {
 						wq->Add( buildActive, mv.Voxel2(), IString() );
+					}
+					else if ( mv.ModelHit() && LumosChitBag::RemovableFilter( mv.model->userData )) {
+						Vector2I pos2i = { (int)mv.model->Pos().x, (int)mv.model->Pos().z };
+						wq->Add( buildActive, pos2i, IString() );
 					}
 				}
 				else if ( !mv.VoxelHit() ) {

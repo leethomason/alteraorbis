@@ -49,6 +49,7 @@ public:
 	static bool WorkerFilter( Chit* chit );
 	static bool BuildingFilter( Chit* chit );
 	static bool BuildingWithPorchFilter( Chit* chit );
+	static bool RemovableFilter( Chit* chit );			// something that can be removed - building, plant
 	static bool KioskFilter( Chit* chit );
 
 	Chit* QueryBuilding( const grinliz::Vector2I& pos, bool orPorch );

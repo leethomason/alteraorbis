@@ -667,7 +667,7 @@ void AIComponent::Target( Chit* chit, bool focused )
 
 bool AIComponent::RockBreak( const grinliz::Vector2I& rock )
 {
-	GLOUTPUT(( "Melt something at %d,%d\n", rock.x, rock.y ));
+	GLOUTPUT(( "Destroy something at %d,%d\n", rock.x, rock.y ));
 	ComponentSet thisComp( parentChit, Chit::RENDER_BIT | 
 		                               Chit::SPATIAL_BIT |
 									   ComponentSet::IS_ALIVE |
@@ -676,7 +676,13 @@ bool AIComponent::RockBreak( const grinliz::Vector2I& rock )
 		return false;
 
 	const WorldGrid& wg = map->GetWorldGrid( rock.x, rock.y );
-	if ( wg.RockHeight() == 0 )
+
+	// FIXME wrong query for non 1x1 buildings
+	Vector2F pos2 = { (float)rock.x+0.5f, (float)rock.y+0.5f };
+	CChitArray array;
+	GetChitBag()->QuerySpatialHash( &array, pos2, 0.1f, 0, LumosChitBag::RemovableFilter );
+
+	if ( wg.RockHeight() == 0 && array.Empty() )
 		return false;
 
 	aiMode = ROCKBREAK_MODE;
