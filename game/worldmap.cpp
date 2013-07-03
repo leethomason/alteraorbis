@@ -805,7 +805,7 @@ void WorldMap::SetRock( int x, int y, int h, bool magma, int rockType )
 		// Essentially bail if the mapgrid is in use.
 		if ( iMapGridUse ) {
 			if ( iMapGridUse->MapGridUse( x, y )) {
-				GLASSERT( was.RockHeight() == 0 && was.Pool() == false );
+				GLASSERT( was.RockHeight() == 0 );
 				return;
 			}
 		}

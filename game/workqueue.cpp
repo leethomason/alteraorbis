@@ -222,10 +222,14 @@ void WorkQueue::DoTick()
 			break;
 
 		case BUILD:
-			if ( !worldMap->IsPassable( queue[i].pos.x, queue[i].pos.y )) {
-				RemoveImage( queue[i] );
-				queue.Remove( i );
-				--i;
+			{
+				CChitArray array;
+				chitBag->QuerySpatialHash( &array, pos2, 0.1f, 0, LumosChitBag::RemovableFilter );
+				if ( !worldMap->IsPassable( queue[i].pos.x, queue[i].pos.y ) || !array.Empty() ) {
+					RemoveImage( queue[i] );
+					queue.Remove( i );
+					--i;
+				}
 			}
 			break;
 
