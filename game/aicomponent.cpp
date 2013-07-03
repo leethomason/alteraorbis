@@ -932,8 +932,7 @@ void AIComponent::ThinkVisitor( const ComponentSet& thisComp )
 		// Move to a kiosk
 		if ( vd->sectorVisited.Find( sector ) >= 0 ) {
 			// Head out!
-			// FIXME: smart destination.
-			SectorPort sp = map->RandomPort( &parentChit->random );
+			SectorPort sp = Visitors::Instance()->ChooseDestination( visitorIndex, map );
 			bool okay = this->Move( sp, true );
 			if ( !okay ) disconnect = true;
 		}

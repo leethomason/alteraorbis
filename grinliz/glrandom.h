@@ -128,6 +128,8 @@ class Random
 
 	/// Fast hash
 	static U32 Hash( const void* data, U32 len );
+	/// Fast hash that returns an 8-bit result
+	static U8 Hash8( U32 data );
 
 	template< class T >
 	void ShuffleArray( T* mem, int size ) {

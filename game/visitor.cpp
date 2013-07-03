@@ -1,6 +1,7 @@
 #include "visitor.h"
 #include "../grinliz/gldebug.h"
 #include "../xarchive/glstreamer.h"
+#include "worldmap.h"
 
 using namespace grinliz;
 
@@ -58,7 +59,12 @@ VisitorData* Visitors::Get( int index )
 }
 
 
-
-
+SectorPort Visitors::ChooseDestination( int visitorIndex, WorldMap* map )
+{
+	Random r;
+	r.SetSeedFromTime();
+	SectorPort sp = map->RandomPort( &r );
+	return sp;
+}
 
 

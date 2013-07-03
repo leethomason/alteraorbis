@@ -3,8 +3,10 @@
 
 #include "../grinliz/glvector.h"
 #include "../grinliz/glcontainer.h"
+#include "sectorport.h"
 
 class XStream;
+class WorldMap;
 
 // Each visitor has their own personality and memory, seperate
 // from the chit AI.
@@ -41,6 +43,8 @@ public:
 	static VisitorData* Get( int index );
 	// only returns existing; doesn't create.
 	static Visitors* Instance()	{ return instance; }
+
+	SectorPort ChooseDestination( int visitorIndex, WorldMap* map );
 
 private:
 	static Visitors* instance;

@@ -208,6 +208,12 @@ void Random::NormalVector( float* v, int dim )
 }
 
 
+/*static*/ U8 Random::Hash8( U32 data )
+{
+	return series[ data ^ (data>>8) ^ (data>>16) ^ (data>>24) ];
+}
+
+
 const float Random::normal2D[COUNT_2D*2] = {
 	0.000000f, 1.000000f, 0.024541f, 0.999699f, 0.049068f, 0.998795f, 0.073565f, 0.997290f, 
 	0.098017f, 0.995185f, 0.122411f, 0.992480f, 0.146730f, 0.989177f, 0.170962f, 0.985278f, 

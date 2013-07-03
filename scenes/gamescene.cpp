@@ -411,18 +411,22 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 
 				if ( buildActive == CLEAR_ROCK ) {
 					if ( mv.VoxelHit()) {
-						wq->Add( buildActive, mv.Voxel2(), IString() );
+						wq->Add( WorkQueue::CLEAR, mv.Voxel2(), IString() );
 					}
 					else if ( mv.ModelHit() && LumosChitBag::RemovableFilter( mv.model->userData )) {
 						Vector2I pos2i = { (int)mv.model->Pos().x, (int)mv.model->Pos().z };
-						wq->Add( buildActive, pos2i, IString() );
+						GameItem* gameItem = mv.model->userData->GetItem();
+						GLASSERT( gameItem );
+						if ( gameItem ) {
+							wq->Add( WorkQueue::CLEAR, pos2i, gameItem->name );
+						}
 					}
 				}
 				else if ( !mv.VoxelHit() ) {
 					Vector2I v = { (int)plane.x, (int)plane.z };
 					switch ( buildActive ) {
-					case BUILD_ICE:			wq->Add( buildActive, v, IString() );	break;
-					case BUILD_KIOSK:		wq->Add( buildActive, v, StringPool::Intern( "kiosk" ));	break;
+					case BUILD_ICE:			wq->Add( WorkQueue::BUILD, v, IString() );	break;
+					case BUILD_KIOSK:		wq->Add( WorkQueue::BUILD, v, StringPool::Intern( "kiosk" ));	break;
 					default: GLASSERT( 0 ); break;
 					};
 					

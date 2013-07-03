@@ -16,7 +16,7 @@ class Engine;
 class WorkQueue
 {
 public:
-	WorkQueue( WorldMap*, LumosChitBag*, Engine* );
+	WorkQueue( WorldMap*, LumosChitBag*, Engine*, const grinliz::Vector2I& sector );
 	~WorkQueue();
 
 	enum {
@@ -55,9 +55,10 @@ private:
 	void AddImage( const QueueItem& item );
 	void RemoveImage( const QueueItem& item );
 
-	Engine*			engine;
-	WorldMap*		worldMap;
-	LumosChitBag*	chitBag;
+	Engine*				engine;
+	WorldMap*			worldMap;
+	LumosChitBag*		chitBag;
+	grinliz::Vector2I	sector;
 	grinliz::CDynArray< QueueItem >		queue;	// work to do
 	grinliz::CDynArray< gamui::Image* > images;	// images to tag the work
 	grinliz::CDynArray< Model* >		models;	// models to tag the work

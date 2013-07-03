@@ -13,7 +13,7 @@ using namespace gamui;
 
 static const float NOTIFICATION_RAD = 5.0f;
 
-WorkQueue::WorkQueue( WorldMap* wm, LumosChitBag* lcb, Engine* e ) : worldMap( wm ), chitBag( lcb ), engine( e )
+WorkQueue::WorkQueue( WorldMap* wm, LumosChitBag* lcb, Engine* e, const grinliz::Vector2I& s ) : worldMap( wm ), chitBag( lcb ), engine( e ), sector( s )
 {
 }
 
@@ -80,6 +80,18 @@ void WorkQueue::Add( int action, const grinliz::Vector2I& pos2i, IString structu
 {
 	GLASSERT( action >= CLEAR && action < NUM_ACTIONS );
 
+	if ( pos2i.x / SECTOR_SIZE == sector.x && pos2i.y / SECTOR_SIZE == sector.y ) {
+		// okay!
+	}
+	else {
+		// wrong sector.
+		return;
+	}
+
+	// FIXME: doesn't cancel, or replace actions. Need to fix. Account for:
+	// - Images
+	// - cancelling existing workers
+
 /*	// Toggle existing, for now.
 	for( int i=0; i<queue.Size(); ++i ) {
 		if ( queue[i].pos == pos2i ) {
@@ -88,6 +100,13 @@ void WorkQueue::Add( int action, const grinliz::Vector2I& pos2i, IString structu
 		}
 	}
 */
+
+	for( int i=0; i<queue.Size(); ++i ) {
+		if ( queue[i].pos == pos2i ) {
+			return;
+		}
+	}
+
 	QueueItem item( action, pos2i, structure );
 	queue.Push( item );
 	AddImage( item );
@@ -231,6 +250,7 @@ void WorkQueue::QueueItem::Serialize( XStream* xs )
 void WorkQueue::Serialize( XStream* xs ) 
 {
 	XarcOpen( xs, "WorkQueue" );
+	XARC_SER( xs, sector );
 	XARC_SER_CARRAY( xs, queue );
 
 	if ( xs->Loading() ) {

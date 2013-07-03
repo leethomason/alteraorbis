@@ -23,7 +23,6 @@ CoreScript::CoreScript( WorldMap* map, LumosChitBag* chitBag, Engine* engine )
 	  boundID( 0 ),
 	  workQueue( 0 )
 {
-	workQueue = new WorkQueue( worldMap, chitBag, engine );
 }
 
 
@@ -52,6 +51,13 @@ void CoreScript::Serialize( const ScriptContext& ctx, XStream* xs )
 void CoreScript::OnAdd( const ScriptContext& ctx )
 {
 	// Cores are indestructable. They don't get removed.
+	GLASSERT( ctx.chit->GetSpatialComponent() );
+	GLASSERT( ctx.chit->GetChitBag() );
+	GLASSERT( ctx.engine->GetMap() );
+
+	Vector2I mapPos = ctx.chit->GetSpatialComponent()->GetPosition2DI();
+	Vector2I sector = { mapPos.x/SECTOR_SIZE, mapPos.y/SECTOR_SIZE };
+	workQueue = new WorkQueue( ctx.engine->GetMap()->ToWorldMap(), ctx.chit->GetChitBag()->ToLumos(), ctx.engine, sector );
 }
 
 
