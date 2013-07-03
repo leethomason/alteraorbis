@@ -13,8 +13,9 @@ using namespace gamui;
 
 static const float NOTIFICATION_RAD = 5.0f;
 
-WorkQueue::WorkQueue( WorldMap* wm, LumosChitBag* lcb, Engine* e, const grinliz::Vector2I& s ) : worldMap( wm ), chitBag( lcb ), engine( e ), sector( s )
+WorkQueue::WorkQueue( WorldMap* wm, LumosChitBag* lcb, Engine* e ) : worldMap( wm ), chitBag( lcb ), engine( e )
 {
+	sector.Zero();
 }
 
 

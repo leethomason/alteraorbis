@@ -211,4 +211,13 @@
     <colorFuzz red="0.1" green="0.1" blue="0.1" alpha="0.1" />
   </particle>
 
+  <particle name="construction" size="0.05" count="15" config="ray"
+            time="continuous"
+            velocity="1.6" velocityFuzz="0.2" posFuzz="0.1"
+            texMin="3" texMax="3">
+    <color palx="1" paly="2"  alpha="0.5"/>
+    <colorVelocity red="0" green="0.2" blue="0" alpha="-0.3"/>
+    <colorFuzz red="0.1" green="0.1" blue="0.1" alpha="0.1" />
+  </particle>
+
 </particles>

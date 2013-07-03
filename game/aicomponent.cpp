@@ -572,6 +572,7 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 since )
 			vd->kioskTime += since;
 			if ( vd->kioskTime > VisitorData::KIOSK_TIME ) {
 				Vector2I sector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
+				vd->DidVisitKiosk( sector );
 				vd->sectorVisited.Push( sector );
 				vd->kioskTime = 0;
 				currentAction = NO_ACTION;	// done here - move on!
@@ -587,6 +588,9 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 since )
 		}
 	}
 	else if ( !taskList.Empty() && taskList[0].action == STAND ) {
+		const Vector2I& pos2i = taskList[0].pos2i;
+		Vector3F pos = { (float)pos2i.x+0.5f, 0.0f, (float)pos2i.y+0.5f };
+		engine->particleSystem->EmitPD( "construction", pos, V3F_UP, engine->camera.EyeDir3(), 30 );	// FIXME: standard delta constant
 		taskList[0].timer -= since;
 		return true;	// keep standing
 	}
@@ -949,6 +953,7 @@ void AIComponent::ThinkVisitor( const ComponentSet& thisComp )
 			parentChit->GetChitBag()->QuerySpatialHash( &arr, inner, 0, LumosChitBag::KioskFilter );
 			if ( arr.Empty() ) {
 				// Done here.
+				vd->NoKiosk( sector );
 				vd->sectorVisited.Push( sector );
 				if ( debugFlag ) {
 					GLOUTPUT(( "ID=%d Visitor: no kiosk.\n", thisComp.chit->ID() ));
@@ -1297,6 +1302,7 @@ void AIComponent::FlushTaskList( const ComponentSet& thisComp )
 	Task* task = &taskList[0];
 	Vector2I pos2i = thisComp.spatial->GetPosition2DI();
 	Vector2F taskPos2 = { (float)task->pos2i.x + 0.5f, (float)task->pos2i.y + 0.5f };
+	Vector3F taskPos3 = { taskPos2.x, 0, taskPos2.y };
 
 	switch ( task->action ) {
 	case MOVE:
@@ -1411,7 +1417,7 @@ void AIComponent::WorkQueueToTask(  const ComponentSet& thisComp )
 					if ( map->CalcPathBeside( thisComp.spatial->GetPosition2D(), dest, &end, &cost )) {
 						
 						taskList.Push( Task( MOVE, end ));
-						taskList.Push( Task( STAND, 1000, 0 ));
+						taskList.Push( Task( STAND, 1000, item->pos ));
 						taskList.Push( Task( TASK_REMOVE, item->pos, item->structure ));
 					}
 				}
@@ -1420,7 +1426,7 @@ void AIComponent::WorkQueueToTask(  const ComponentSet& thisComp )
 			case WorkQueue::BUILD:
 				{
 					taskList.Push( Task( MOVE, item->pos ));
-					taskList.Push( Task( STAND, 1000, 0 ));
+					taskList.Push( Task( STAND, 1000, item->pos ));
 					taskList.Push( Task( TASK_BUILD, item->pos, item->structure ));
 				}
 				break;

@@ -29,16 +29,18 @@ using namespace gamui;
 using namespace grinliz;
 using namespace tinyxml2;
 
+static const int SIZE = 64;
+
 
 ParticleScene::ParticleScene( LumosGame* game ) : Scene( game )
 {
 	game->InitStd( &gamui2D, &okay, 0 );
 
-	testMap = new TestMap( 12, 12 );
+	testMap = new TestMap( SIZE, SIZE );
 	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase(), testMap );
 	Color3F c = { 0.5f, 0.5f, 0.5f };
 	testMap->SetColor( c );
-	engine->CameraLookAt( 6, 6, 10 );
+	engine->CameraLookAt( SIZE/2, SIZE/2, 10 );
 
 	Load();
 }
@@ -140,7 +142,7 @@ void ParticleScene::ItemTapped( const gamui::UIItem* item )
 			Rescan();
 
 			if ( buttonArr[i]->ToPushButton() ) {
-				Vector3F pos = { 6.f, 0.f, 6.f };
+				Vector3F pos = { SIZE/2, 0.f, SIZE/2 };
 				Vector3F normal = { 0, 1, 0 };
 				Vector3F dir = { 1, 0, 0 };
 //				if ( def->config == ParticleSystem::PARTICLE_WORLD ) {
@@ -158,7 +160,7 @@ void ParticleScene::DoTick( U32 deltaTime )
 	for( int i=0; i<buttonArr.Size(); ++i ) {
 		ToggleButton* toggle = buttonArr[i]->ToToggleButton();
 		if ( toggle && toggle->Down() ) {
-			Vector3F pos = { 6.f, 0.f, 6.f };
+			Vector3F pos = { SIZE/2, 0.f, SIZE/2 };
 			Vector3F normal = { 0, 1, 0 };
 			Vector3F dir = { 1, 0, 0 };
 			ParticleDef* def = &particleDefArr[i];

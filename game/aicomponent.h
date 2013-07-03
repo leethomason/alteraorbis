@@ -111,7 +111,7 @@ private:
 
 	/*	Attempt to put in a meta-language:
 		Worker:		MOVE x,y
-					STAND 1000
+					STAND 1000 x,y	NOTE: x,y is of *task* not where standing
 					REMOVE rock
 	*/
 	struct Task
@@ -127,11 +127,11 @@ private:
 			action = _action;
 			pos2i.Set( (int)_pos.x, (int)_pos.y );
 		}
-		Task( int _action, int _timer, int _data ) {
+		Task( int _action, int _timer, const grinliz::Vector2I& _pos ) {
 			Clear();
 			action = _action;
 			timer  = _timer;
-			data   = _data;
+			pos2i = _pos;
 		}
 		Task( int _action, const grinliz::Vector2I _pos, grinliz::IString _structure ) {
 			Clear();

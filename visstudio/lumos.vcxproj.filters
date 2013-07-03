@@ -611,9 +611,6 @@
     <None Include="..\engine\sources.mk">
       <Filter>Source Files\engine</Filter>
     </None>
-    <None Include="..\particles.xml">
-      <Filter>Source Files\game</Filter>
-    </None>
     <None Include="..\bugs.txt">
       <Filter>Source Files</Filter>
     </None>

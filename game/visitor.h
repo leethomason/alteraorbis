@@ -1,6 +1,8 @@
 #ifndef LUMOS_VISITOR_INCLUDED
 #define LUMOS_VISITOR_INCLUDED
 
+#include "../grinliz/gldebug.h"
+#include "../grinliz/glrandom.h"
 #include "../grinliz/glvector.h"
 #include "../grinliz/glcontainer.h"
 #include "sectorport.h"
@@ -21,11 +23,24 @@ struct VisitorData
 	}
 
 	enum {	NUM_VISITS = 4, 			// how many domains would like to be visited before disconnect
-			KIOSK_TIME = 5000
+			KIOSK_TIME = 5000,
+			MEMORY = 4
 	};
 	int id;								// chit id, and whether in-world or not.
 	U32 kioskTime;						// time spent standing at current kiosk
 	grinliz::CArray< grinliz::Vector2I, NUM_VISITS > sectorVisited;	// which sectors we have visited a kiosk at. 
+
+	struct Memory {
+		Memory() { sector.Zero(); rating=0; }
+
+		grinliz::Vector2I	sector;
+		int					rating;		
+		void Serialize( XStream* xs );
+	};
+	grinliz::CArray< Memory, MEMORY > memoryArr;
+
+	void NoKiosk( const grinliz::Vector2I& sector );
+	void DidVisitKiosk( const grinliz::Vector2I& sector );
 };
 
 
@@ -48,6 +63,7 @@ public:
 
 private:
 	static Visitors* instance;
+	grinliz::Random random;
 };
 
 #endif // LUMOS_VISITOR_INCLUDED

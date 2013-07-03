@@ -23,6 +23,7 @@ CoreScript::CoreScript( WorldMap* map, LumosChitBag* chitBag, Engine* engine )
 	  boundID( 0 ),
 	  workQueue( 0 )
 {
+	workQueue = new WorkQueue( map, chitBag, engine );
 }
 
 
@@ -57,7 +58,7 @@ void CoreScript::OnAdd( const ScriptContext& ctx )
 
 	Vector2I mapPos = ctx.chit->GetSpatialComponent()->GetPosition2DI();
 	Vector2I sector = { mapPos.x/SECTOR_SIZE, mapPos.y/SECTOR_SIZE };
-	workQueue = new WorkQueue( ctx.engine->GetMap()->ToWorldMap(), ctx.chit->GetChitBag()->ToLumos(), ctx.engine, sector );
+	workQueue->InitSector( sector );
 }
 
 

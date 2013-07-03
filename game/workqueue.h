@@ -16,8 +16,9 @@ class Engine;
 class WorkQueue
 {
 public:
-	WorkQueue( WorldMap*, LumosChitBag*, Engine*, const grinliz::Vector2I& sector );
+	WorkQueue( WorldMap*, LumosChitBag*, Engine* );
 	~WorkQueue();
+	void InitSector( const grinliz::Vector2I& _sector ) { sector = _sector; }
 
 	enum {
 		NO_ACTION,

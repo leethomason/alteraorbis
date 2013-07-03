@@ -52,10 +52,10 @@ x support melee attack on rocks
 		x visitors visit interesting buildings
 		x need pass through for avoid; current system is too buggy.
 		x clear vegetation
-		- visitors remember, have friends
+		x visitors remember, have friends
+		x can put build orders in other domains
 		- free camera: doesn't go to sector herd
 		- free camera: turning off doesn't go back to player
-		- can put build orders in other domains
 		- construction particles
 	- Silver
 		- vertical voxels are stretched

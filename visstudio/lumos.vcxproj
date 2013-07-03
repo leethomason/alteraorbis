@@ -278,9 +278,6 @@
     <ClCompile Include="..\scenes\titlescene.cpp">
       <FileType>Document</FileType>
     </ClCompile>
-    <None Include="..\particles.xml">
-      <SubType>Designer</SubType>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\winlib\winlib.vcxproj">
