@@ -51,6 +51,7 @@ public:
 
 	void SetPanTo( const grinliz::Vector3F& dest, float speed = 40.0f );
 	void SetTrack( int targetChitID );
+	int  Tracking() const { return targetChitID; }
 
 private:
 	Camera* camera;

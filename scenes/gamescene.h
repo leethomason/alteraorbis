@@ -40,7 +40,6 @@ private:
 	void TapModel( Chit* chit );
 	void MoveModel( Chit* chit );
 	void ClearTargetFlags();
-	bool FreeCamera() const;
 
 	enum {
 		SAVE,
@@ -67,8 +66,8 @@ private:
 	int			simCount;
 	float		simPS;
 
-	int			targetChit;
-	int			possibleChit;
+	int					targetChit;
+	int					possibleChit;
 	int					infoID;
 	grinliz::Vector2I	voxelInfoID;
 

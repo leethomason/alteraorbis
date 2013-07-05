@@ -130,6 +130,9 @@ int CameraComponent::DoTick( U32 delta, U32 since )
 		}
 		break;
 
+	case DONE:
+		break;
+
 	default:
 		GLASSERT( 0 );
 	}

@@ -378,9 +378,11 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 	bool uiHasTap = ProcessTap( action, view, world );
 	Engine* engine = sim->GetEngine();
 	CoreScript* coreMode = sim->GetChitBag()->IsBoundToCore( sim->GetPlayerChit() );
+	
 	if ( coreMode ) {
 		CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
-		if ( cc ) {
+		int playerID =  sim->GetPlayerChit() ?  sim->GetPlayerChit()->ID() : 0;
+		if ( cc && cc->Tracking() && cc->Tracking() == playerID ) {
 			cc->SetTrack( 0 );
 		}
 	}
@@ -520,10 +522,10 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 	}
 
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
-		if ( item == &newsButton[i] ) {
 
-			const NewsEvent* ne = sim->GetChitBag()->News() + i;
-			if ( FreeCamera() ) {
+		if ( item == &newsButton[i] ) {
+			if ( freeCameraButton.Down() ) {
+				const NewsEvent* ne = sim->GetChitBag()->News() + i;
 				CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
 				if ( cc && ne->chitID ) {
 					cc->SetTrack( ne->chitID );
@@ -535,7 +537,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		}
 	}
 	if ( item == &clearButton ) {
-		if ( FreeCamera() ) {
+		if ( freeCameraButton.Down() ) {
 			CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
 			if ( cc  ) {
 				cc->SetTrack( 0 );
@@ -544,7 +546,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 	}
 	if ( item == &freeCameraButton ) {
 		CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
-		if ( cc  ) {
+		if ( cc ) {
 			if ( freeCameraButton.Down() ) {
 				cc->SetTrack( 0 );
 			}
@@ -553,7 +555,10 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 				CoreScript* coreMode = sim->GetChitBag()->IsBoundToCore( playerChit );
 				if ( playerChit ) {
 					if ( coreMode ) {
-						cc->SetPanTo( playerChit->GetSpatialComponent()->GetPosition() );
+						Vector3F pos = playerChit->GetSpatialComponent()->GetPosition();
+						pos.y = sim->GetEngine()->camera.PosWC().y;
+						//cc->SetPanTo( pos, 100.0f );
+						sim->GetEngine()->CameraLookAt( pos.x, pos.z );
 					}
 					else {
 						cc->SetTrack( playerChit->ID() );
@@ -569,18 +574,11 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 }
 
 
-bool GameScene::FreeCamera() const
-{
-	return freeCameraButton.Down() || (!sim->GetPlayerChit() );
-}
-
-
 void GameScene::DoDestTapped( const Vector2F& _dest )
 {
 	Vector2F dest = _dest;
-	bool freeCamera = FreeCamera();
 
-	if ( !freeCamera ) {
+	if ( !freeCameraButton.Down() ) {
 		Chit* chit = sim->GetPlayerChit();
 		if ( chit ) {
 			AIComponent* ai = chit->GetAIComponent();
@@ -758,10 +756,7 @@ void GameScene::DoTick( U32 delta )
 		coreBounds.Set( (float)(sectorX*SECTOR_SIZE), (float)(sectorY*SECTOR_SIZE), (float)((sectorX+1)*SECTOR_SIZE), (float)((sectorY+1)*SECTOR_SIZE) );
 	}
 
-	if ( !FreeCamera() ) {
-//		sim->GetEngine()->RestrictCamera( coreMode ? &coreBounds : 0 );
-		sim->GetEngine()->RestrictCamera( 0 );
-	}
+	sim->GetEngine()->RestrictCamera( 0 );
 }
 
 
