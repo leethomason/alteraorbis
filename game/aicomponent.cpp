@@ -296,7 +296,7 @@ Chit* AIComponent::Closest( const ComponentSet& thisComp, Chit* arr[], int n, Ve
 void AIComponent::DoMove( const ComponentSet& thisComp )
 {
 	PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
-	if ( !pmc || pmc->ForceCountHigh() ) {
+	if ( !pmc || pmc->ForceCountHigh() || pmc->Stopped() ) {
 		currentAction = NO_ACTION;
 		return;
 	}
@@ -1038,6 +1038,9 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 			}
 		}
 	}
+	/*
+	FIXME: need to pick up gold. But need to make sure we have a valid, fast path.
+		   add a "straight line" check that doesn't hit the pather?
 	if ( dest.IsZero() ) {
 		// Is there stuff around to pick up?
 		if( thisComp.itemComponent->Pickup() == ItemComponent::GOLD_PICKUP ) {
@@ -1051,6 +1054,7 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 			}
 		}
 	}
+	*/
 	// Wander....
 	if ( dest.IsZero() ) {
 		if ( wanderFlags == 0 ) {
@@ -1058,6 +1062,7 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 			return;
 		}
 		PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
+		int r = parentChit->random.Rand(4);
 
 		if (    pmc 
 			 && pmc->ForceCount() > FORCE_COUNT_STUCK 
@@ -1068,9 +1073,10 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 			if ( SectorHerd( thisComp ) )
 				return;
 		}
-		else if ( parentChit->random.Rand(3) == 0 ) {
+		else if ( r == 0 ) {
 			dest = ThinkWanderRandom( thisComp );
 		}
+		// FIXME add stand. stand doesn't "stick" at this point.
 		else if ( wanderFlags == GameItem::AI_WANDER_HERD ) {
 			dest = ThinkWanderFlock( thisComp );
 		}
@@ -1079,11 +1085,7 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 		}
 	}
 	if ( !dest.IsZero() ) {
-		PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
-		if ( pmc ) {
-			pmc->QueueDest( dest );
-		}
-		currentAction = actionToTake;
+		this->Move( dest, false );
 	}
 }
 
