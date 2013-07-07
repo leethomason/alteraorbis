@@ -1,4 +1,4 @@
-- redo AvoidOthers(). Full crunch stops break the game.
+x redo AvoidOthers(). Full crunch stops break the game.
 x not showing bolt impacts
 - texture bleeding in voxel renderer
 - flower colors (too saturated flowers)
@@ -10,7 +10,7 @@ x not showing bolt impacts
 - redo AI utility to be based on a set of curves
 x health is awkward: keeps copy of HP (oops). move hp to health component? (TotalHP() on item?)
 x integers for discrete values (hp, gold)
-- remove UI button for track - only teleport (or at least hide)
+x remove UI button for track - only teleport (or at least hide)
 - fix / disable right mouse behavior
 - UI on minimap. Target, show highlight of domain.
 - consider removing chit listeners

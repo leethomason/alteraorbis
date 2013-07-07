@@ -61,7 +61,7 @@ Important Notes
 3. There is NO save game compatibility. Be sure to delete old games.
 4. If your avatar gets killed, ctrl-click will create a new one. (You can create a bunch if you wish).
 5. “Fast Mode" doesn't work very well. This will probably get removed.
-
+6. There are some rendering bugs (edge noise, stretching) in the voxel renderer that will get cleaned up soon.
 
 Getting Started
 ---------------
