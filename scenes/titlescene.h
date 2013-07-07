@@ -47,11 +47,9 @@ private:
 		TEST_PARTICLE,
 		TEST_NAV,
 		TEST_NAV2,
-		//TEST_NAV_WORLD,	Worlds this large aren't supported with sectors/grid
 		TEST_BATTLE,
 		TEST_ANIMATION,
 		TEST_ASSETPREVIEW,
-		//TEST_WEAPON_STAT,
 		NUM_TESTS,
 
 		TESTS_PER_ROW = 6,
@@ -63,6 +61,7 @@ private:
 	};
 	gamui::PushButton	testScene[NUM_TESTS];
 	gamui::PushButton	gameScene[NUM_GAME];
+	gamui::TextBox		note;
 };
 
 #endif // TITLESCENE_INCLUDED

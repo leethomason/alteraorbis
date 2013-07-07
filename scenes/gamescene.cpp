@@ -614,6 +614,9 @@ void GameScene::DoDestTapped( const Vector2F& _dest )
 				}
 			}
 		}
+		else {
+			sim->GetEngine()->CameraLookAt( dest.x, dest.y );
+		}
 	}
 	else {
 		sim->GetEngine()->CameraLookAt( dest.x, dest.y );

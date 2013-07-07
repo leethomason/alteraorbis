@@ -55,8 +55,8 @@ x support melee attack on rocks
 		x visitors remember, have friends
 		x can put build orders in other domains
 		x construction particles
-		- free camera: doesn't go to sector herd
-		- free camera: turning off doesn't go back to player
+		x free camera: doesn't go to sector herd
+		x free camera: turning off doesn't go back to player
 	- Silver
 		- vertical voxels are stretched
 		- decent clear dragging

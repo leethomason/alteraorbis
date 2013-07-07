@@ -54,6 +54,9 @@ TitleScene::TitleScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 		gameScene[i].Init( &gamui2D, lumosGame->GetButtonLook( LumosGame::BUTTON_LOOK_STD ) );
 		gameScene[i].SetText( gameSceneName[i] );
 	}
+
+	note.Init( &gamui2D );
+	note.SetText( "Thanks for playing this tech demo of Altera. Please do read the README.txt. There is a lot of placeholder art and issues to be aware of in this build." );
 }
 
 
@@ -93,6 +96,9 @@ void TitleScene::Resize()
 	if ( game->HasFile( mapPath )) {
 		gameScene[CONTINUE].SetEnabled( true );
 	}
+
+	layout.PosAbs( &note, 0, 1 );
+	note.SetSize( port.UIWidth()/2, port.UIHeight()/2 );
 }
 
 

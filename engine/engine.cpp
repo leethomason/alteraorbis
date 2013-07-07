@@ -129,7 +129,7 @@ void Engine::CameraLookAt( float x, float z )
 	Vector3F target = { x, 0, z };
 	Vector3F at = { 0, 0, 0 };
 	CameraLookingAt( &at );
-	if ( at.y == 0 ) {
+	if ( Equal( at.y, 0.0f, 0.01f )) {
 		Vector3F delta = target - at;
 		camera.DeltaPosWC( delta.x, 0, delta.z );
 	}
