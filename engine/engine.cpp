@@ -466,9 +466,8 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 	#endif
 
 	#ifdef EL_USE_MRT_BLUR
-		const float intensity = 1.0f;// / BLUR_COUNT;
 		for( int i=0; i<BLUR_COUNT; ++i ) {
-			shader.SetColor( lighting.glow.r*intensity, lighting.glow.g*intensity, lighting.glow.b*intensity, 0 );
+			shader.SetColor( lighting.glow.r, lighting.glow.g, lighting.glow.b, 0 );
 			Vector3F p0 = { 0, screenport->UIHeight(), 0 };
 			Vector3F p1 = { screenport->UIWidth(), 0, 0 };
 			shader.DrawQuad( renderTarget[RT_BLUR_0+i]->GetTexture(), p0, p1 );

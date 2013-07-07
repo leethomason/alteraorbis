@@ -60,6 +60,7 @@ private:
 	void LoadLighting();
 
 	int testID;
+	int glowLayer;
 	LumosGame* lumosGame;
 	gamui::PushButton okay;
 	gamui::PushButton glowButton;

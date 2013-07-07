@@ -25,10 +25,13 @@ using namespace gamui;
 using namespace tinyxml2;
 using namespace grinliz;
 
+const static int SIZE = 64;
+
 RenderTestScene::RenderTestScene( LumosGame* game, const RenderTestSceneData* data ) : Scene( game ), lumosGame( game )
 {
-	testMap = new TestMap( 8, 8 );
+	testMap = new TestMap( SIZE, SIZE );
 	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase(), testMap );
+	glowLayer = -1;
 
 	for( int i=0; i<NUM_MODELS; ++i )
 		model[i] = 0;
@@ -37,6 +40,7 @@ RenderTestScene::RenderTestScene( LumosGame* game, const RenderTestSceneData* da
 	testMap->SetColor( c );
 
 	engine->SetGlow( true );
+	engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
 	
 	switch( data->id ) {
 	case 0:
@@ -213,6 +217,13 @@ void RenderTestScene::HandleHotKey( int mask )
 			refreshButton.SetVisible( visible );
 		}
 		break;
+
+	case GAME_HK_SPACE:
+		glowLayer++;
+		if ( glowLayer == Engine::RT_COUNT ) {
+			glowLayer = -1;
+		}
+		break;
 	}
 }
 
@@ -225,12 +236,20 @@ void RenderTestScene::Draw3D( U32 deltaTime )
 		}
 	}
 	engine->Draw( deltaTime );
+	
+	if ( glowLayer >= 0 ) {
+		rtImage.SetVisible( true );
+		const Screenport& port = engine->GetScreenport();
 
-#if 0
-	RenderAtom atom( (const void*)UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, 
-		(const void*)engine->GetRenderTargetTexture(Engine::RT_BLUR_3), 0.25f, 0.25f, 0.75f, 0.75f );
-	rtImage.SetAtom( atom );
-#endif
+		RenderAtom atom( (const void*)UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, 
+			(const void*)engine->GetRenderTargetTexture(glowLayer), 0, 0, 1, 1 );
+		rtImage.SetAtom( atom );
+		rtImage.SetSize( port.UIWidth(), port.UIHeight() );
+		rtImage.SetPos( 0, 0 );
+	}
+	else {
+		rtImage.SetVisible( false );
+	}
 }
 
 

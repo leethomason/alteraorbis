@@ -172,8 +172,9 @@ public:
 		RT_BLUR_1,
 		RT_BLUR_2,
 		RT_BLUR_3,
+		RT_BLUR_4,
 		RT_COUNT,
-		BLUR_COUNT = 4
+		BLUR_COUNT = 5
 	};
 
 private:
