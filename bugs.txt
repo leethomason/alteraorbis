@@ -1,16 +1,9 @@
-x redo AvoidOthers(). Full crunch stops break the game.
-x not showing bolt impacts
-- texture bleeding in voxel renderer
-- flower colors (too saturated flowers)
 - use arrays to track components and component update time.
   switch to calling the components vs. calling the chit. coherence is good!
   each component stores its location in the array so it can null itself on remove
 - change shield to have cooldown then charge-up (rather than cooldown then reset)
 - rings deflect bolts
 - redo AI utility to be based on a set of curves
-x health is awkward: keeps copy of HP (oops). move hp to health component? (TotalHP() on item?)
-x integers for discrete values (hp, gold)
-x remove UI button for track - only teleport (or at least hide)
 - fix / disable right mouse behavior
 - UI on minimap. Target, show highlight of domain.
 - consider removing chit listeners
@@ -19,45 +12,20 @@ x remove UI button for track - only teleport (or at least hide)
 - need to "ding" on level up
 - add rez-in animation
 - show rock damage
-x support melee attack on rocks
 - Move after shooting target, continue to hit after destroying rock. need more awareness
   of the overall AI state.
 - Melee should rotate to target (both rock and chit)
 - How does Ice and magma interact?
 - move GOLD_PICKUP to flag in Item
 - pools that are waterfalls need side rendering
+- remove squisher. nifty but outdated.
+- SectorHerd seems a little aggressive. Switch over to using ForceCount, check conditions to trigger.
 
 - game
-	- Gold
-		x drop gold
-		x player picks up gold
-		x ai picks up gold
-		x reserve to distribute gold to denizens
-		x gold & crystal to volcanos
-		x core vs spawn points
-		x critters level up
-		x remove rock ray
-		x fix crystal types
-		x bind to core
-		x workers remove rock
-		x workers add ice
-		x workers build kiosk
-		x portals have gameplay iss ues: what if visitors can never get anywhere? should visitors enter
-		  on the grid itself? Always come in from world center?
-		x actually tell what you have tagged to clear
-		x create new workers (they get wiped out)
-		x new Portal model
-		x fix rockgen to give space around portals
-		x visitors warp in, travel warp out
-		x visitors visit interesting buildings
-		x need pass through for avoid; current system is too buggy.
-		x clear vegetation
-		x visitors remember, have friends
-		x can put build orders in other domains
-		x construction particles
-		x free camera: doesn't go to sector herd
-		x free camera: turning off doesn't go back to player
+
 	- Silver
+		- texture bleeding in voxel renderer
+		- flower colors (too saturated flowers)
 		- vertical voxels are stretched
 		- decent clear dragging
 		- new Core model
@@ -67,14 +35,14 @@ x support melee attack on rocks
 		- decent UI
 		- leave core
 		- cancel orders
-		- melee should onl hit one voxel
 		- 1x1 filtering isn't working
-	- Art
-		- item screen
+		- consider moving ground to voxel gen system, so that ground can vary?
 		- proper animation system
 		- rain, general de-saturation
 		- aging of stone
+		- rework glow to reduce artifacts
 	- Loot
+		- item screen
 		- drop items
 		- pickup items
 		- weapon toggle / selection
@@ -120,7 +88,7 @@ x support melee attack on rocks
 - credits scene
 - remove normalization in shader
 - print uniform count for shaders
-- animition aware hit testing
+- animation aware hit testing
 - bounds need to be adjusted to account for animation
 - record perf max/min. surprisingly hard.
 - memory pool everything in the chit/component system
@@ -170,6 +138,19 @@ x support melee attack on rocks
 - filter face colors to matching effect
 - more natural skin tones
 
+** Releasing **
+- build release/debug
+- build assets
+- set version
+- test
+- def save:
+	- let the game run until 3rd age+
+	- place player
+	- use writedefsave.bat to create files
+- test def-start
+- test new-start
+- create release!
+
 ---------- Defer ----------
 d switch to ImageMagick for texture scaling
 - animation sync is generally flakey - lock to vsync? Not aware of any way to solve this.
@@ -191,6 +172,40 @@ V2 ideas:
 
 ----------- FIXED -------------
 
+x Gold
+	x drop gold
+	x player picks up gold
+	x ai picks up gold
+	x reserve to distribute gold to denizens
+	x gold & crystal to volcanos
+	x core vs spawn points
+	x critters level up
+	x remove rock ray
+	x fix crystal types
+	x bind to core
+	x workers remove rock
+	x workers add ice
+	x workers build kiosk
+	x portals have gameplay iss ues: what if visitors can never get anywhere? should visitors enter
+		on the grid itself? Always come in from world center?
+	x actually tell what you have tagged to clear
+	x create new workers (they get wiped out)
+	x new Portal model
+	x fix rockgen to give space around portals
+	x visitors warp in, travel warp out
+	x visitors visit interesting buildings
+	x need pass through for avoid; current system is too buggy.
+	x clear vegetation
+	x visitors remember, have friends
+	x can put build orders in other domains
+	x construction particles
+	x free camera: doesn't go to sector herd
+	x free camera: turning off doesn't go back to playerx redo AvoidOthers(). Full crunch stops break the game.
+x not showing bolt impacts
+x health is awkward: keeps copy of HP (oops). move hp to health component? (TotalHP() on item?)
+x integers for discrete values (hp, gold)
+x remove UI button for track - only teleport (or at least hide)
+x support melee attack on rocks
 x sector-herding still getting stuck. Go back to random re-herd?
 	x guarentee path to core
 	x clear space around core
