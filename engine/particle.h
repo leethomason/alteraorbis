@@ -24,6 +24,7 @@
 #include "vertex.h"
 #include "ufoutil.h"
 #include "map.h"
+#include "shadermanager.h"
 
 class Texture;
 struct ParticleDef;
@@ -108,7 +109,7 @@ struct ParticleDef
 
 /*	Class to render all sorts of particle effects.
 */
-class ParticleSystem
+class ParticleSystem : public IDeviceLossHandler
 {
 public:
 	ParticleSystem();
@@ -130,24 +131,21 @@ public:
 	void EmitPD(	const ParticleDef& pd,
 					const grinliz::Rectangle3F& pos,
 					const grinliz::Vector3F& normal,
-					const grinliz::Vector3F eyeDir[],
 					U32 deltaTime );					// needed for pd.config == continuous
 
 	void EmitPD(	const ParticleDef& pd,
 					const grinliz::Vector3F& pos,
 					const grinliz::Vector3F& normal,
-					const grinliz::Vector3F eyeDir[],
 					U32 deltaTime )
 	{
 		grinliz::Rectangle3F r3;
 		r3.min = r3.max = pos;
-		EmitPD( pd, r3, normal, eyeDir, deltaTime );
+		EmitPD( pd, r3, normal, deltaTime );
 	}
 
 	void EmitPD(	const char* name,
 					const grinliz::Vector3F& initPos,
 					const grinliz::Vector3F& normal, 
-					const grinliz::Vector3F eyeDir[],
 					U32 deltaTime );
 
 	const ParticleDef& GetPD( const char* name );
@@ -158,6 +156,8 @@ public:
 	int NumParticles() const { return nParticles; }
 
 	void LoadParticleDefs( const char* filename );
+	void SetRain( float _rain )		{ rain = _rain; }
+	virtual void DeviceLoss();
 
 private:
 
@@ -170,13 +170,15 @@ private:
 	grinliz::Random random;
 	Texture* texture;
 	U32 time;
-	
+	float rain;
+
+	GPUVertexBuffer vbo;
+
 	int nParticles;
 	grinliz::CDynArray<ParticleDef> particleDefArr;
 	ParticleData	particleData[MAX_PARTICLES];
 	ParticleStream	vertexBuffer[MAX_PARTICLES*4];
-	U16				indexBuffer[MAX_PARTICLES*6];
-	// fixme: use vbos
+
 };
 
 

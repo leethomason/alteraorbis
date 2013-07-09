@@ -424,7 +424,7 @@ void BattleTestScene::DrawDebugText()
 		ModelVoxel mv = engine->IntersectModelVoxel( debugRay.origin, debugRay.direction, 1000.0f, TEST_TRI, 0, 0, 0 );
 
 		if ( mv.Hit() ) {
-			engine->particleSystem->EmitPD( "spell", mv.at, V3F_UP, engine->camera.EyeDir3(), 0 );
+			engine->particleSystem->EmitPD( "spell", mv.at, V3F_UP, 0 );
 
 			GLString str;
 			if ( mv.ModelHit() ) {

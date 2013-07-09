@@ -101,7 +101,7 @@ void HealthComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			render->CalcTrigger( &pos, 0 );
 
 			battleMechanics.MeleeAttack( engine, parentChit, item );
-			engine->particleSystem->EmitPD( "meleeImpact", pos, V3F_UP, engine->camera.EyeDir3(), 0 );
+			engine->particleSystem->EmitPD( "meleeImpact", pos, V3F_UP, 0 );
 		
 		}
 	}

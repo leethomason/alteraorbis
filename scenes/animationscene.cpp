@@ -443,11 +443,11 @@ void AnimationScene::DoTick( U32 deltaTime )
 		Vector3F p = xform * POS;
 
 		if ( metaDataEvent ) {
-			engine->particleSystem->EmitPD( "derez", p, UP, engine->camera.EyeDir3(), 0 );	
+			engine->particleSystem->EmitPD( "derez", p, UP, 0 );	
 		}
 
 		if ( triggerToggle[PARTICLE].Down() ) {
-			engine->particleSystem->EmitPD( "spell", p, UP, engine->camera.EyeDir3(), 0 ); 
+			engine->particleSystem->EmitPD( "spell", p, UP, 0 ); 
 			if ( triggerModel ) { engine->FreeModel( triggerModel ); triggerModel = 0;	}
 		}
 		else {

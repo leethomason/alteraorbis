@@ -72,7 +72,7 @@ class GPUVertexBuffer : public GPUBuffer
 public:
 	// a null value for vertex will create an empty buffer
 	static GPUVertexBuffer Create( const void* vertex, int size, int nVertex );
-	void Upload( const Vertex* data, int size, int start );
+	void Upload( const void* data, int nBytes, int start );
 
 	GPUVertexBuffer() : GPUBuffer() {}
 	void Destroy();

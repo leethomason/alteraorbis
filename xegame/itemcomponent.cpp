@@ -191,7 +191,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 						def.color.x *= f;
 						def.color.y *= f;
 						def.color.z *= f;
-						engine->particleSystem->EmitPD( def, shieldPos, V3F_UP, engine->camera.EyeDir3(), 0 );
+						engine->particleSystem->EmitPD( def, shieldPos, V3F_UP, 0 );
 					}
 				}
 
@@ -219,7 +219,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 
 		if ( parentChit->GetSpatialComponent() ) {
 			Vector3F v = parentChit->GetSpatialComponent()->GetPosition();
-			engine->particleSystem->EmitPD( "heal", v, V3F_UP, engine->camera.EyeDir3(), 30 );
+			engine->particleSystem->EmitPD( "heal", v, V3F_UP, 30 );
 		}
 	}
 	else if ( msg.ID() >= ChitMsg::CHIT_DESTROYED_START && msg.ID() <= ChitMsg::CHIT_DESTROYED_END ) {
@@ -362,12 +362,12 @@ bool ItemComponent::EmitEffect( const GameItem& it, U32 delta )
 
 	if ( compSet.okay ) {
 		if ( it.accruedFire > 0 ) {
-			ps->EmitPD( "fire", compSet.spatial->GetPosition(), V3F_UP, engine->camera.EyeDir3(), delta );
-			ps->EmitPD( "smoke", compSet.spatial->GetPosition(), V3F_UP, engine->camera.EyeDir3(), delta );
+			ps->EmitPD( "fire", compSet.spatial->GetPosition(), V3F_UP, delta );
+			ps->EmitPD( "smoke", compSet.spatial->GetPosition(), V3F_UP, delta );
 			emitted = true;
 		}
 		if ( it.accruedShock > 0 ) {
-			ps->EmitPD( "shock", compSet.spatial->GetPosition(), V3F_UP, engine->camera.EyeDir3(), delta );
+			ps->EmitPD( "shock", compSet.spatial->GetPosition(), V3F_UP, delta );
 			emitted = true;
 		}
 	}

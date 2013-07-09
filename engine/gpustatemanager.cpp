@@ -50,12 +50,12 @@ grinliz::Color4F	GPUState::diffuse;
 }
 
 
-void GPUVertexBuffer::Upload( const Vertex* data, int count, int start )
+void GPUVertexBuffer::Upload( const void* data, int nBytes, int start )
 {
 	GLASSERT( GPUState::SupportsVBOs() );
 	glBindBufferX( GL_ARRAY_BUFFER, id );
 	// target, offset, size, data
-	glBufferSubDataX( GL_ARRAY_BUFFER, start*sizeof(Vertex), count*sizeof(Vertex), data );
+	glBufferSubDataX( GL_ARRAY_BUFFER, start, nBytes, data );
 	CHECK_GL_ERROR;
 	glBindBufferX( GL_ARRAY_BUFFER, 0 );
 	CHECK_GL_ERROR;

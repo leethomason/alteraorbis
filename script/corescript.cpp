@@ -154,7 +154,7 @@ int CoreScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 	}
 	if ( attached && ctx.chit->GetSpatialComponent() ) {
 		Vector3F pos3 = ctx.chit->GetSpatialComponent()->GetPosition();
-		ctx.engine->particleSystem->EmitPD( "core", pos3, V3F_UP, ctx.engine->camera.EyeDir3(), delta );
+		ctx.engine->particleSystem->EmitPD( "core", pos3, V3F_UP, delta );
 	}
 	workQueue->DoTick();
 	return attached ? 0 : spawnTick.Next();

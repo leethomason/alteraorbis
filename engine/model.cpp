@@ -673,7 +673,7 @@ void Model::EmitParticles( ParticleSystem* system, const Vector3F* eyeDir, U32 d
 			CalcMetaData( effect.metaData, &xform );
 			Vector3F pos = xform.Col(3);
 			static const Vector3F UP = { 0, 1, 0 };
-			system->EmitPD( effect.name.c_str(), pos, UP, eyeDir, deltaTime );
+			system->EmitPD( effect.name.c_str(), pos, UP, deltaTime );
 		}
 	}
 }

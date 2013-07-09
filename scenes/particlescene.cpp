@@ -148,7 +148,7 @@ void ParticleScene::ItemTapped( const gamui::UIItem* item )
 //				if ( def->config == ParticleSystem::PARTICLE_WORLD ) {
 //					pos.y = 0.1f;
 //				}
-				engine->particleSystem->EmitPD( *def, pos, normal, engine->camera.EyeDir3(), 0 );
+				engine->particleSystem->EmitPD( *def, pos, normal, 0 );
 			}
 		}
 	}
@@ -164,7 +164,7 @@ void ParticleScene::DoTick( U32 deltaTime )
 			Vector3F normal = { 0, 1, 0 };
 			Vector3F dir = { 1, 0, 0 };
 			ParticleDef* def = &particleDefArr[i];
-			engine->particleSystem->EmitPD( *def, pos, normal, engine->camera.EyeDir3(), deltaTime );
+			engine->particleSystem->EmitPD( *def, pos, normal, deltaTime );
 		}
 	}
 }

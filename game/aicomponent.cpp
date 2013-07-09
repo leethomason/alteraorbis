@@ -590,7 +590,7 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 since )
 	else if ( !taskList.Empty() && taskList[0].action == STAND ) {
 		const Vector2I& pos2i = taskList[0].pos2i;
 		Vector3F pos = { (float)pos2i.x+0.5f, 0.0f, (float)pos2i.y+0.5f };
-		engine->particleSystem->EmitPD( "construction", pos, V3F_UP, engine->camera.EyeDir3(), 30 );	// FIXME: standard delta constant
+		engine->particleSystem->EmitPD( "construction", pos, V3F_UP, 30 );	// FIXME: standard delta constant
 		taskList[0].timer -= since;
 		return true;	// keep standing
 	}

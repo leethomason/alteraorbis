@@ -159,7 +159,7 @@ void WorldMap::VoxelHit( const Vector3I& v, const DamageDesc& dd )
 	grid[index].DeltaHP( (int)(-dd.damage) );
 	if ( grid[index].HP() == 0 ) {
 		Vector3F pos = { (float)v.x+0.5f, (float)v.y+0.5f, (float)v.z+0.5f };
-		engine->particleSystem->EmitPD( "derez", pos, V3F_UP, engine->camera.EyeDir3(), 0 );
+		engine->particleSystem->EmitPD( "derez", pos, V3F_UP, 0 );
 		SetRock( v.x, v.z, 0, false, 0 );
 	}
 }
@@ -724,12 +724,12 @@ void WorldMap::EmitWaterfalls( U32 delta )
 				r3.FromPair( v3-half, v3+half );
 
 				static const Vector3F DOWN = { 0, -1, 0 };
-				engine->particleSystem->EmitPD( pdWater, r3, DOWN, engine->camera.EyeDir3(), delta ); 
+				engine->particleSystem->EmitPD( pdWater, r3, DOWN, delta ); 
 
 				r3.min.y = r3.max.y = (float)POOL_HEIGHT - 0.2f;
-				engine->particleSystem->EmitPD( pdMist, r3, V3F_UP, engine->camera.EyeDir3(), delta ); 
+				engine->particleSystem->EmitPD( pdMist, r3, V3F_UP, delta ); 
 				r3.min.y = r3.max.y = 0.0f;
-				engine->particleSystem->EmitPD( pdMist, r3, V3F_UP, engine->camera.EyeDir3(), delta ); 
+				engine->particleSystem->EmitPD( pdMist, r3, V3F_UP, delta ); 
 			}
 		}
 	}
@@ -764,11 +764,11 @@ void WorldMap::DoTick( U32 delta, ChitBag* chitBag )
 		int index = INDEX(magmaGrids[i]);
 		if ( grid[index].IsWater() || grid[index].Pool() ) {
 			r.min.y =  r.max.y = (float)POOL_HEIGHT;
-			engine->particleSystem->EmitPD( pdSmoke, r, V3F_UP, engine->camera.EyeDir3(), delta );
+			engine->particleSystem->EmitPD( pdSmoke, r, V3F_UP, delta );
 		}
 		else {
 			r.min.y = r.max.y = (float)grid[index].RockHeight();
-			engine->particleSystem->EmitPD( pdSmoke, r, V3F_UP, engine->camera.EyeDir3(), delta );
+			engine->particleSystem->EmitPD( pdSmoke, r, V3F_UP, delta );
 		}
 	}
 }
@@ -1905,7 +1905,7 @@ void WorldMap::PrepVoxels( const SpaceTree* spaceTree )
 			}
 		}
 	}
-	voxelVertexVBO.Upload( voxelBuffer.Mem(), voxelBuffer.Size(), 0 );
+	voxelVertexVBO.Upload( voxelBuffer.Mem(), voxelBuffer.Size()*sizeof(Vertex), 0 );
 }
 
 

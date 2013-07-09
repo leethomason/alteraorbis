@@ -30,15 +30,7 @@ using namespace grinliz;
 
 ParticleSystem::ParticleSystem() : texture( 0 ), time( 0 ), nParticles( 0 )
 {
-	for( int i=0; i<MAX_PARTICLES; ++i ) {
-		U16* p = &indexBuffer[i*6];
-		*(p+0) = i*4+0;
-		*(p+1) = i*4+1;
-		*(p+2) = i*4+2;
-		*(p+3) = i*4+0;
-		*(p+4) = i*4+2;
-		*(p+5) = i*4+3;
-	}
+	rain = 0;
 }
 
 
@@ -51,6 +43,15 @@ ParticleSystem::~ParticleSystem()
 void ParticleSystem::Clear()
 {
 	nParticles = 0;
+	if ( vbo.IsValid() ) {
+		vbo.Destroy();
+	}
+}
+
+
+void ParticleSystem::DeviceLoss()
+{
+	Clear();
 }
 
 
@@ -100,12 +101,10 @@ void ParticleSystem::Process( U32 delta, Camera* camera )
 			const Vector3F pos = pd->pos;
 			const float size = pd->size;
 
-			if ( size != FLT_MAX ) {
-				ps[0].pos = pos - up*size - right*size;
-				ps[1].pos = pos - up*size + right*size;
-				ps[2].pos = pos + up*size + right*size;
-				ps[3].pos = pos + up*size - right*size;
-			}
+			ps[0].pos = pos - up*size - right*size;
+			ps[1].pos = pos - up*size + right*size;
+			ps[2].pos = pos + up*size + right*size;
+			ps[3].pos = pos + up*size - right*size;
 
 			ps[0].color = color;
 			ps[0].uv = srcPS[0].uv;
@@ -150,29 +149,25 @@ const ParticleDef& ParticleSystem::GetPD( const char* name )
 void ParticleSystem::EmitPD(	const char* name,
 								const grinliz::Vector3F& initPos,
 								const grinliz::Vector3F& normal, 
-								const grinliz::Vector3F eyeDir[],
 								U32 deltaTime )
 {
 	const ParticleDef& pd = GetPD( name );
 	Rectangle3F r;
 	r.min = initPos;
 	r.max = initPos;
-	EmitPD( pd, r, normal, eyeDir, deltaTime );
+	EmitPD( pd, r, normal, deltaTime );
 }
 
 
 void ParticleSystem::EmitPD(	const ParticleDef& def,
 								const grinliz::Rectangle3F& initPos,
 								const grinliz::Vector3F& normal, 
-								const grinliz::Vector3F eyeDir[],
 								U32 deltaTime )
 {
 	Vector3F velocity = normal * def.velocity;
 
 	static const float TEXTURE_SIZE = ParticleDef::NUM_TEX;
 	static const Vector2F uv[4] = {{0,0},{1.f/TEXTURE_SIZE,0},{1.f/TEXTURE_SIZE,1},{0,1}};
-	const Vector3F& up = eyeDir[1];
-	const Vector3F& right = eyeDir[2];
 	int count = def.count;
 
 	if ( def.time == ParticleDef::CONTINUOUS ) {
@@ -233,10 +228,10 @@ void ParticleSystem::EmitPD(	const ParticleDef& def,
 			};
 			const float size = def.size;
 
-			ps[0].pos = pos - up*size - right*size;
-			ps[1].pos = pos - up*size + right*size;
-			ps[2].pos = pos + up*size + right*size;
-			ps[3].pos = pos + up*size - right*size;
+			ps[0].pos = pos;
+			ps[1].pos = pos;
+			ps[2].pos = pos;
+			ps[3].pos = pos;
 
 			++nParticles;
 		}
@@ -255,6 +250,11 @@ void ParticleSystem::Draw()
 	if ( !texture ) {
 		texture = TextureManager::Instance()->GetTexture( "particle" );
 	}
+	if ( !vbo.IsValid() ) {
+		vbo = GPUVertexBuffer::Create( 0, sizeof( ParticleStream ), MAX_PARTICLES*4 );
+	}
+	GLASSERT( vbo.IsValid() );
+	vbo.Upload( vertexBuffer, sizeof(ParticleStream)*nParticles*4, 0 );
 	
 	GPUStream stream;
 	stream.stride = sizeof( ParticleStream );
@@ -265,8 +265,12 @@ void ParticleSystem::Draw()
 	stream.nColor = 4;
 	stream.colorOffset = ParticleStream::COLOR_OFFSET;
 
+	GPUStreamData data;
+	data.vertexBuffer = vbo.ID();
+	data.texture0 = texture;
+
 	ParticleShader shader;
-	shader.Draw( stream, texture, vertexBuffer, 6*nParticles, indexBuffer );
+	shader.DrawQuads( stream, data, nParticles );
 }
 
 
