@@ -308,6 +308,19 @@ void Sim::DoTick( U32 delta )
 	}
 
 	CreatePlant( random.Rand(worldMap->Width()), random.Rand(worldMap->Height()), -1 );
+
+	ParticleDef pd = engine->particleSystem->GetPD( "rain" );
+	static const float RAIN_RAD = 10.0f;
+	static const float RAIN_AREA = RAIN_RAD*RAIN_RAD;
+	pd.count *= (int)RAIN_AREA;
+
+	Rectangle3F rainBounds;
+	Vector3F at;
+	engine->CameraLookingAt( &at );
+	at.y = engine->camera.PosWC().y + pd.size.y;
+
+	rainBounds.Set( at.x-RAIN_RAD, at.y, at.z-RAIN_RAD, at.x+RAIN_RAD, at.y, at.z+RAIN_RAD );
+	engine->particleSystem->EmitPD( pd, rainBounds, V3F_DOWN, delta );
 }
 
 

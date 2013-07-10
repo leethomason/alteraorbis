@@ -71,11 +71,11 @@ void ParticleScene::Resize()
 	LayoutCalculator layout = lumosGame->DefaultLayout();
 	layout.SetSize( LAYOUT_SIZE_X*0.75f, LAYOUT_SIZE_Y*0.5f );
 	int x=0;
-	int y=0;
+	int y=1;
 	for( int i=0; i<buttonArr.Size(); ++i ) {
 		layout.PosAbs( buttonArr[i], x*2, y );
 		++x;
-		if ( x == 5 ) {
+		if ( x == 6 ) {
 			++y; x = 0;
 		}
 	}
@@ -145,9 +145,6 @@ void ParticleScene::ItemTapped( const gamui::UIItem* item )
 				Vector3F pos = { SIZE/2, 0.f, SIZE/2 };
 				Vector3F normal = { 0, 1, 0 };
 				Vector3F dir = { 1, 0, 0 };
-//				if ( def->config == ParticleSystem::PARTICLE_WORLD ) {
-//					pos.y = 0.1f;
-//				}
 				engine->particleSystem->EmitPD( *def, pos, normal, 0 );
 			}
 		}
@@ -164,7 +161,15 @@ void ParticleScene::DoTick( U32 deltaTime )
 			Vector3F normal = { 0, 1, 0 };
 			Vector3F dir = { 1, 0, 0 };
 			ParticleDef* def = &particleDefArr[i];
-			engine->particleSystem->EmitPD( *def, pos, normal, deltaTime );
+
+			if ( def->spread == ParticleDef::SPREAD_POINT ) {
+				engine->particleSystem->EmitPD( *def, pos, normal, deltaTime );
+			}
+			else {
+				Rectangle3F r;
+				r.Set( pos.x-0.5f, pos.y, pos.z-0.5f, pos.x+0.5f, pos.y, pos.z+0.5f ); 
+				engine->particleSystem->EmitPD( *def, r, normal, deltaTime );
+			}
 		}
 	}
 }
@@ -174,3 +179,12 @@ void ParticleScene::Draw3D( U32 deltaTime )
 {
 	engine->Draw( deltaTime );
 }
+
+
+
+void ParticleScene::DrawDebugText()
+{
+	this->DrawDebugTextDrawCalls( 16, engine );
+}
+
+

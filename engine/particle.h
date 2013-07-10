@@ -50,7 +50,8 @@ struct Particle
 // CPU part.
 struct ParticleData
 {
-	float				size;
+	grinliz::Vector2F	size;
+	grinliz::Vector2F	sizeVel;
 	grinliz::Vector4F	colorVel;		// units / second added to color. particle dead when a<=0
 	grinliz::Vector4F	colorVel1;
 	grinliz::Vector3F	velocity;		// units / second added to origin
@@ -88,6 +89,8 @@ struct ParticleDef
 
 	enum { ONCE, CONTINUOUS };
 	int time;		// "once" "continuous"
+	enum { SPREAD_POINT, SPREAD_SQUARE };
+	int spread;
 
 	int count;
 	int config;		// "sphere" "hemi" "ray"
@@ -96,7 +99,9 @@ struct ParticleDef
 	float posFuzz;
 	float velocity;
 	float velocityFuzz;
-	float size;		
+
+	grinliz::Vector2F size;		
+	grinliz::Vector2F sizeVelocity;
 
 	grinliz::Vector4F color;
 	grinliz::Vector4F colorVelocity0;
@@ -156,7 +161,6 @@ public:
 	int NumParticles() const { return nParticles; }
 
 	void LoadParticleDefs( const char* filename );
-	void SetRain( float _rain )		{ rain = _rain; }
 	virtual void DeviceLoss();
 
 private:
@@ -170,7 +174,6 @@ private:
 	grinliz::Random random;
 	Texture* texture;
 	U32 time;
-	float rain;
 
 	GPUVertexBuffer vbo;
 

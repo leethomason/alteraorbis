@@ -30,13 +30,14 @@ using namespace grinliz;
 
 ParticleSystem::ParticleSystem() : texture( 0 ), time( 0 ), nParticles( 0 )
 {
-	rain = 0;
+	ShaderManager::Instance()->AddDeviceLossHandler( this );
 }
 
 
 ParticleSystem::~ParticleSystem()
 {
 	Clear();
+	ShaderManager::Instance()->RemoveDeviceLossHandler( this );
 }
 
 
@@ -87,7 +88,11 @@ void ParticleSystem::Process( U32 delta, Camera* camera )
 		*pd = *srcPD;
 		Vector4F color = srcPS->color + pd->colorVel * deltaF;
 
-		if ( color.w <= 0 || (pd->pos - origin).LengthSquared() > RAD2 ) {
+		if (    color.w <= 0 
+			 || ((pd->pos - origin).LengthSquared() > RAD2)
+			 || (pd->velocity.y < 0 && pd->pos.y < 0)
+			 || (pd->velocity.y > 0 && pd->pos.y > EL_CAMERA_MAX) )
+		{
 			nParticles--;
 		}
 		else { 
@@ -97,14 +102,15 @@ void ParticleSystem::Process( U32 delta, Camera* camera )
 				pd->colorVel = pd->colorVel1;
 			}
 
-			pd->pos += pd->velocity * deltaF;
-			const Vector3F pos = pd->pos;
-			const float size = pd->size;
+			pd->pos  += pd->velocity * deltaF;
+			pd->size += pd->sizeVel * deltaF;
+			const Vector3F pos  = pd->pos;
+			const Vector2F size = pd->size;
 
-			ps[0].pos = pos - up*size - right*size;
-			ps[1].pos = pos - up*size + right*size;
-			ps[2].pos = pos + up*size + right*size;
-			ps[3].pos = pos + up*size - right*size;
+			ps[0].pos = pos - up*size.y - right*size.x;
+			ps[1].pos = pos - up*size.y + right*size.x;
+			ps[2].pos = pos + up*size.y + right*size.x;
+			ps[3].pos = pos + up*size .y- right*size.x;
 
 			ps[0].color = color;
 			ps[0].uv = srcPS[0].uv;
@@ -204,6 +210,7 @@ void ParticleSystem::EmitPD(	const ParticleDef& def,
 			pd->velocity = velocity + vFuzz*def.velocityFuzz;
 
 			pd->size = def.size;
+			pd->sizeVel = def.sizeVelocity;
 			
 			Vector4F cFuzz = { 0, 0, 0, 0 };
 			random.NormalVector3D( &cFuzz.x );
@@ -226,7 +233,6 @@ void ParticleSystem::EmitPD(	const ParticleDef& def,
 				ps[k].uv = uv[k];
 				ps[k].uv.x += uOffset;
 			};
-			const float size = def.size;
 
 			ps[0].pos = pos;
 			ps[1].pos = pos;
@@ -279,12 +285,36 @@ void ParticleDef::Load( const tinyxml2::XMLElement* ele )
 	name = ele->Attribute( "name" );
 	
 	time = ONCE;
-	if ( ele->Attribute( "time", "continuous" ) ) {
+	if ( ele->Attribute( "time", "continuous" )) {
 		time = CONTINUOUS;
 	}
-	size = 1.0f;
+	spread = SPREAD_POINT;
+	if ( ele->Attribute( "spread", "square" )) {
+		spread = SPREAD_SQUARE;
+	}
+
+	size.Set( 1, 1 );
 	if ( ele->Attribute( "size" )) {
-		ele->QueryFloatAttribute( "size", &size );
+		ele->QueryFloatAttribute( "size", &size.x );
+		size.y = size.x;
+	}
+	if ( ele->Attribute( "sizeX" )) {
+		ele->QueryAttribute( "sizeX", &size.x );
+	}
+	if ( ele->Attribute( "sizeY" )) {
+		ele->QueryAttribute( "sizeY", &size.y );
+	}
+
+	sizeVelocity.Set( 0, 0 );
+	if ( ele->Attribute( "sizeVelocity" )) {
+		ele->QueryFloatAttribute( "sizeVelocity", &sizeVelocity.x );
+		sizeVelocity.y = sizeVelocity.x;
+	}
+	if ( ele->Attribute( "sizeVelocityX" )) {
+		ele->QueryAttribute( "sizeVelocityX", &sizeVelocity.x );
+	}
+	if ( ele->Attribute( "sizeVelocityY" )) {
+		ele->QueryAttribute( "sizeVelocityY", &sizeVelocity.y );
 	}
 
 	count = 1;
