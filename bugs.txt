@@ -1,3 +1,7 @@
+- GT: tiny bug with faces, teeth turns the same colour as hair
+- GT: needs pick up effect for gold (single yellow glow of the avatar?)
+- GT: needs pick up effect for kiosks or visitors (like a gold triangle or chest can float over the kiosk when the visitor spends money)
+- GT: ui to show idle and busy workers
 - use arrays to track components and component update time.
   switch to calling the components vs. calling the chit. coherence is good!
   each component stores its location in the array so it can null itself on remove
