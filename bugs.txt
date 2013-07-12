@@ -28,9 +28,17 @@
 - game
 
 	- Silver
-		- texture bleeding in voxel renderer
+		x texture bleeding in voxel renderer
+		x vertical voxels are stretched
+		d 1x1 filtering isn't working
+		x rain, general de-saturation
+		x rework glow to reduce artifacts
+		- ground texture
+		- new 1x1 models
+		- support for mxn models
+		- new nxn models
+		- tree textures
 		- flower colors (too saturated flowers)
-		- vertical voxels are stretched
 		- decent clear dragging
 		- new Core model
 		- visitors create energy, buildings consume energy
@@ -39,12 +47,9 @@
 		- decent UI
 		- leave core
 		- cancel orders
-		d 1x1 filtering isn't working
 		- consider moving ground to voxel gen system, so that ground can vary?
 		- proper animation system
-		x rain, general de-saturation
 		- aging of stone
-		x rework glow to reduce artifacts
 	- Loot
 		- item screen
 		- drop items
