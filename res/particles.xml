@@ -220,20 +220,12 @@
     <colorFuzz red="0.1" green="0.1" blue="0.1" alpha="0.1" />
   </particle>
 
-  <particle name="rain" sizeX="0.015" sizeY="1.0" count="2" config="ray"
-            time ="continuous" spread="square"
-            velocity="9.0" velocityFuzz="0.1" posFuzz="0.1"
-            texMin="4" texMax="4" >
-    <color palx="0" paly="6"  alpha="0.3"/>
-    <colorVelocity red="0" green="0.2" blue="0" alpha="-0.001"/>
-    <colorFuzz red="0.1" green="0.1" blue="0.1" />
-  </particle>
-
-  <particle name="splash" size="0.2" config="ray"
-            velocity="0" texMin="5" texMax="5"
-            alignment="up ">
-    <color palx="0" paly="6"  alpha="0.3"/>
-    <colorVelocity red="0" green="0.2" blue="0" alpha="-0.1"/>
+  <particle name="splash" size="0.01" config="ray"
+            sizeVelocity="0.5"
+            velocity="0" texMin="6" texMax="6"
+            alignment="y">
+    <color palx="0" paly="6"  alpha="0.7"/>
+    <colorVelocity red="0" green="0" blue="0" alpha="-0.5"/>
   </particle>
  
 </particles>

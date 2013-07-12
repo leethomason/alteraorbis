@@ -65,7 +65,12 @@ public:
 
 	virtual void PrepVoxels( const SpaceTree* )											{}
 	virtual void DrawVoxels( GPUState* state, const grinliz::Matrix4* xform )		{}
-	virtual void Draw3D( const grinliz::Color3F& colorMult, GPUState::StencilMode )	{}
+	virtual void Draw3D( const grinliz::Color3F& colorMult, GPUState::StencilMode, bool saturation )	{}
+
+	// Sets the current saturation 0:grey, 1:full color
+	void SetSaturation( float p_saturation )	{ saturation = p_saturation; }
+	float Saturation() const					{ return saturation; }
+
 
 	// IGamuiRenderer
 	enum {
@@ -100,6 +105,8 @@ protected:
 	int height;
 	CompositingShader	gamuiShader;
 	Texture* texture;
+private:
+	float				saturation;
 };
 
 #endif // UFOATTACK_MAP_INCLUDED

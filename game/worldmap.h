@@ -169,7 +169,7 @@ public:
 	virtual void Submit( GPUState* shader, bool emissiveOnly );
 	virtual void PrepVoxels( const SpaceTree* );
 	virtual void DrawVoxels( GPUState* shader, const grinliz::Matrix4* xform );
-	virtual void Draw3D(  const grinliz::Color3F& colorMult, GPUState::StencilMode );
+	virtual void Draw3D(  const grinliz::Color3F& colorMult, GPUState::StencilMode, bool useSaturation );
 	virtual grinliz::Vector3I IntersectVoxel(	const grinliz::Vector3F& origin,
 												const grinliz::Vector3F& dir,
 												float length,				

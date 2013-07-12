@@ -299,9 +299,7 @@ void RenderComponent::SetSaturation( float s )
 {
 	for( int i=0; i<NUM_MODELS; ++i ) {
 		if ( model[i] ) {
-			Vector4F v = model[i]->Control();
-			v.y = s;
-			model[i]->SetControl( v );
+			model[i]->SetSaturation( s );
 		}
 	}
 }
@@ -620,10 +618,9 @@ void RenderComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 	}
 	else if ( msg.ID() == ChitMsg::CHIT_DESTROYED_TICK ) {
 		float f = msg.dataF;
-		Vector4F v = { f, 1, 1, 1 };
 		for( int i=0; i<NUM_MODELS; ++i ) {
 			if ( model[i] ) {
-				model[i]->SetControl( v );
+				model[i]->SetFadeFX( f );
 			}
 		}
 	}

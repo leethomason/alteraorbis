@@ -1,6 +1,7 @@
 #include "sim.h"
 
 #include "../engine/engine.h"
+#include "../engine/particle.h"
 
 #include "../xegame/xegamelimits.h"
 #include "../xegame/spatialcomponent.h"
@@ -309,18 +310,44 @@ void Sim::DoTick( U32 delta )
 
 	CreatePlant( random.Rand(worldMap->Width()), random.Rand(worldMap->Height()), -1 );
 
-	ParticleDef pd = engine->particleSystem->GetPD( "rain" );
-	static const float RAIN_RAD = 10.0f;
-	static const float RAIN_AREA = RAIN_RAD*RAIN_RAD;
-	pd.count *= (int)RAIN_AREA;
+	DoWeatherEffects( delta );
+}
 
-	Rectangle3F rainBounds;
+
+void Sim::DoWeatherEffects( U32 delta )
+{
 	Vector3F at;
 	engine->CameraLookingAt( &at );
-	at.y = engine->camera.PosWC().y + pd.size.y;
 
-	rainBounds.Set( at.x-RAIN_RAD, at.y, at.z-RAIN_RAD, at.x+RAIN_RAD, at.y, at.z+RAIN_RAD );
-	engine->particleSystem->EmitPD( pd, rainBounds, V3F_DOWN, delta );
+	Vector2I sector = { (int)at.x/SECTOR_SIZE, (int)at.z/SECTOR_SIZE };
+	// Sample from the center of the sector.
+	Vector2I sample = { sector.x*SECTOR_SIZE + SECTOR_SIZE/2, sector.y*SECTOR_SIZE + SECTOR_SIZE/2 };
+
+	float rain = weather->RainFraction( sample.x, sample.y );
+
+	if ( rain > 0.5f ) {
+		float rainEffect = (rain-0.5f)*2.0f;	// 0-1
+
+		ParticleDef pd = engine->particleSystem->GetPD( "splash" );
+		const float rad = (at - engine->camera.PosWC()).Length() * sinf( ToRadian( EL_FOV ));
+		const float RAIN_AREA = rad * rad;
+		pd.count = (int)(RAIN_AREA * rainEffect * 0.05f );
+
+		/*
+			x rain splash	
+			x desaturation
+			- fog
+		*/
+
+		Rectangle3F rainBounds;
+		rainBounds.Set( at.x-rad, 0.01f, at.z-rad, at.x+rad, 0.01f, at.z+rad );
+		worldMap->SetSaturation( 1.0f - 0.50f*rainEffect );
+
+		engine->particleSystem->EmitPD( pd, rainBounds, V3F_UP, delta );
+	}
+	else {
+		worldMap->SetSaturation( 1 );
+	}
 }
 
 

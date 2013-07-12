@@ -31,6 +31,7 @@
 #include "../engine/ufoutil.h"
 #include "../engine/surface.h"
 #include "../engine/loosequadtree.h"
+#include "../engine/particle.h"
 
 #include "worldinfo.h"
 #include "gameitem.h"
@@ -1771,7 +1772,13 @@ void WorldMap::Submit( GPUState* shader, bool emissiveOnly )
 		if ( vertexVBO[i].IsValid() && indexVBO[i].IsValid() ) {
 			PTVertex pt;
 			GPUStream stream( pt );
-			shader->Draw( stream, texture[i], vertexVBO[i], nIndex[i], indexVBO[i] );
+			Vector4F control = { 1, Saturation(), 1, 1 };
+			GPUStreamData data;
+			data.vertexBuffer = vertexVBO[i].ID();
+			data.indexBuffer  = indexVBO[i].ID();
+			data.texture0	  = texture[i];
+			data.controlParam = &control;
+			shader->Draw( stream, data, nIndex[i] );
 		}
 	}
 }
@@ -1921,9 +1928,12 @@ void WorldMap::DrawVoxels( GPUState* state, const grinliz::Matrix4* xform )
 		state->MultMatrix( GPUState::MODELVIEW_MATRIX, *xform );
 	}
 
+	Vector4F control = { 1, Saturation(), 1, 1 };
+
 	GPUStreamData data;
-	data.vertexBuffer = voxelVertexVBO.ID();
-	data.texture0 = voxelTexture;
+	data.vertexBuffer	= voxelVertexVBO.ID();
+	data.texture0		= voxelTexture;
+	data.controlParam	= &control;
 
 	state->DrawQuads( stream, data, voxelBuffer.Size()/4 );
 
@@ -1933,13 +1943,16 @@ void WorldMap::DrawVoxels( GPUState* state, const grinliz::Matrix4* xform )
 }
 
 
-void WorldMap::Draw3D(  const grinliz::Color3F& colorMult, GPUState::StencilMode mode )
+void WorldMap::Draw3D(  const grinliz::Color3F& colorMult, GPUState::StencilMode mode, bool useSaturation )
 {
 
 	// Real code to draw the map:
 	FlatShader shader;
 	shader.SetColor( colorMult.r, colorMult.g, colorMult.b );
 	shader.SetStencilMode( mode );
+	if ( useSaturation ) {
+		shader.SetShaderFlag( ShaderManager::SATURATION );
+	}
 	Submit( &shader, false );
 
 	if ( debugRegionOverlay ) {

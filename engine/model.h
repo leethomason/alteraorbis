@@ -39,6 +39,7 @@ class EngineShaders;
 class Chit;
 class AnimationResource;
 class XStream;
+class ParticleSystem;
 
 
 /*
@@ -348,8 +349,9 @@ public:
 	}
 	void SetColorMap( bool enable, const grinliz::Matrix4& mat );
 
-	const grinliz::Vector4F& Control() const		{ return control; }
-	void SetControl( const grinliz::Vector4F& v )	{ control = v; }
+	// 1.0 is normal color
+	void SetFadeFX( float v )						{ control.x = v; }
+	void SetSaturation( float v )					{ control.y = v; }
 
 	// AABB for user selection (bigger than the true AABB)
 	void CalcHitAABB( grinliz::Rectangle3F* aabb ) const;

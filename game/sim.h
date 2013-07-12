@@ -72,7 +72,8 @@ public:
 private:
 	void CreateCores();
 	void CreateRockInOutland();
-
+	void DoWeatherEffects( U32 delta );
+	
 	Engine*			engine;
 	LumosGame*		lumosGame;
 	WorldMap*		worldMap;

@@ -53,7 +53,7 @@ TestMap::~TestMap()
 }
 
 
-void TestMap::Draw3D(  const Color3F& colorMult, GPUState::StencilMode mode )
+void TestMap::Draw3D(  const Color3F& colorMult, GPUState::StencilMode mode, bool /*useSaturation*/ )
 {
 	GPUStream stream;
 	stream.posOffset = 0;

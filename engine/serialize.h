@@ -32,7 +32,6 @@
 #include "../shared/gamedbreader.h"
 #include "../tinyxml2/tinyxml2.h"
 #include "enginelimits.h"
-#include "particle.h"
 
 struct SDL_RWops;
 
@@ -47,7 +46,6 @@ struct ModelGroup
 	void Load( const gamedb::Item* item );
 };
 
-void LoadParticles( grinliz::CDynArray< ParticleDef >* array, const char* path );
 
 // Count the non-zero section of an array.
 template< class T >

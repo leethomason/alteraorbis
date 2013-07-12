@@ -19,6 +19,7 @@
 #include "../grinliz/gldebug.h"
 #include "../grinliz/gltypes.h"
 #include "../grinliz/glutil.h"
+#include "../grinliz/glrandom.h"
 
 class Weather
 {
@@ -29,17 +30,16 @@ public:
 		float x = (float)p_x;
 		float y = (float)p_y;
 
-		static const float MIN_RAIN = 0.10f;
-		static const float MAX_RAIN = 0.90f;
-		static const float FUZZ = 0.05f;
+		static const float MIN_RAIN = 0.05f;
+		static const float MAX_RAIN = 0.95f;
+		static const float FUZZ     = 0.05f;
 
 		// More rain in the West.
 		// Prevailing wind from West to East.
 		float r = grinliz::Lerp( MAX_RAIN, MIN_RAIN, x / width );
-
-		int m = p_x ^ p_y;
 		static const float delta[8] = { -1.0f, -0.75f, -0.50f, -0.25f, 0.25f, 0.50f, 0.75f, 1.0f };
-		r += delta[m&7] * FUZZ;
+		int m = grinliz::Random::Hash8( p_x | (p_y<<10) ) & 7;
+		r += delta[m] * FUZZ;
 
 		return r;
 	}

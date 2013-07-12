@@ -22,6 +22,7 @@
 #include "model.h"
 #include "../shared/dbhelper.h"
 #include "../xegame/game.h"
+#include "../engine/particle.h"
 
 using namespace grinliz;
 using namespace tinyxml2;

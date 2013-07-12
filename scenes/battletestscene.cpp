@@ -34,6 +34,7 @@
 #include "../engine/engine.h"
 #include "../engine/text.h"
 #include "../engine/loosequadtree.h"
+#include "../engine/particle.h"
 
 #include "../script/worldscript.h"
 #include "../script/procedural.h"

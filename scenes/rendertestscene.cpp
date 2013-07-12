@@ -163,8 +163,8 @@ void RenderTestScene::ItemTapped( const gamui::UIItem* item )
 		if ( item == &control[i] ) {
 			for( int k=0; k<NUM_MODELS; ++k ) {
 				if ( model[k] ) {
-					Vector4F v = { (float)i/(float)(NUM_CONTROL-1), 1, 1, 1 };
-					model[k]->SetControl( v );
+					float v = (float)i/(float)(NUM_CONTROL-1);
+					model[k]->SetFadeFX( v );
 				}
 			}
 			break;

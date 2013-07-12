@@ -30,6 +30,9 @@ class Texture;
 struct ParticleDef;
 class Camera;
 
+// Here to fix rebuild hell.
+void LoadParticles( grinliz::CDynArray< ParticleDef >* array, const char* path );
+
 // Full GPU system. Cool. Probably fast. But shader hell.
 /*
 struct Particle
@@ -50,6 +53,7 @@ struct Particle
 // CPU part.
 struct ParticleData
 {
+	int					alignment;
 	grinliz::Vector2F	size;
 	grinliz::Vector2F	sizeVel;
 	grinliz::Vector4F	colorVel;		// units / second added to color. particle dead when a<=0
@@ -74,14 +78,6 @@ struct ParticleStream
 };
 
 
-/*
-struct ParticleGroup
-{
-	enum { MAX_DEFS = 4 };
-	grinliz::CStr<16> name[MAX_DEFS];
-};
-*/
-
 // SHALLOW
 struct ParticleDef
 {
@@ -91,6 +87,8 @@ struct ParticleDef
 	int time;		// "once" "continuous"
 	enum { SPREAD_POINT, SPREAD_SQUARE };
 	int spread;
+	enum { ALIGN_CAMERA, ALIGN_Y };
+	int alignment;
 
 	int count;
 	int config;		// "sphere" "hemi" "ray"
@@ -112,6 +110,7 @@ struct ParticleDef
 };
 
 
+
 /*	Class to render all sorts of particle effects.
 */
 class ParticleSystem : public IDeviceLossHandler
@@ -119,6 +118,26 @@ class ParticleSystem : public IDeviceLossHandler
 public:
 	ParticleSystem();
 	~ParticleSystem();
+
+	class IRegion {
+	public:
+		virtual grinliz::Vector3F CalcPoint( grinliz::Random* random ) = 0;
+	};
+
+	class RectangleRegion : public IRegion {
+	public:
+		RectangleRegion( const grinliz::Rectangle3F& r ) : rect( r ) {};
+		virtual grinliz::Vector3F CalcPoint( grinliz::Random* random );
+		const grinliz::Rectangle3F& rect;
+	};
+
+	class LineRegion : public IRegion {
+	public:
+		LineRegion( const grinliz::Vector3F& _p0, const grinliz::Vector3F& _p1 ) : p0(_p0), p1(_p1) {}
+		virtual grinliz::Vector3F CalcPoint( grinliz::Random* random );
+		const grinliz::Vector3F& p0;
+		const grinliz::Vector3F& p1;
+	};
 
 	// Texture particles. Location in texture follows.
 	enum {
@@ -134,9 +153,29 @@ public:
 	};
 
 	void EmitPD(	const ParticleDef& pd,
+					IRegion* region,
+					const grinliz::Vector3F& normal,
+					U32 deltaTime );
+
+	void EmitPD(	const ParticleDef& pd,
 					const grinliz::Rectangle3F& pos,
 					const grinliz::Vector3F& normal,
-					U32 deltaTime );					// needed for pd.config == continuous
+					U32 deltaTime )
+	{
+		RectangleRegion rr( pos );
+		EmitPD( pd, &rr, normal, deltaTime );
+	}
+
+	void EmitPD(	const ParticleDef& pd,
+					const grinliz::Vector3F& p0,
+					const grinliz::Vector3F& p1,
+					const grinliz::Vector3F& normal,
+					U32 deltaTime )
+	{
+		LineRegion rr( p0, p1 );
+		EmitPD( pd, &rr, normal, deltaTime );
+	}
+
 
 	void EmitPD(	const ParticleDef& pd,
 					const grinliz::Vector3F& pos,
@@ -145,7 +184,8 @@ public:
 	{
 		grinliz::Rectangle3F r3;
 		r3.min = r3.max = pos;
-		EmitPD( pd, r3, normal, deltaTime );
+		RectangleRegion rr( r3 );
+		EmitPD( pd, &rr, normal, deltaTime );
 	}
 
 	void EmitPD(	const char* name,

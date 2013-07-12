@@ -280,7 +280,7 @@ void GPUState::Weld( const GPUState& state, const GPUStream& stream, const GPUSt
 
 	// Stream Flags
 	flags |= stream.HasColor() ? ShaderManager::COLORS : 0;
-	
+
 	// Actual shader option flags:
 	flags |= state.shaderFlags;	
 

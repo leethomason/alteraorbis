@@ -14,10 +14,14 @@
 */
 
 #include "animationscene.h"
+
 #include "../game/lumosgame.h"
+
 #include "../engine/engine.h"
 #include "../engine/model.h"
 #include "../engine/animation.h"
+#include "../engine/particle.h"
+
 #include "../xegame/istringconst.h"
 
 #include <direct.h>
@@ -92,10 +96,10 @@ AnimationScene::AnimationScene( LumosGame* game ) : Scene( game )
 	engine = new Engine( port, game->GetDatabase(), 0 );
 	engine->particleSystem->LoadParticleDefs( "./res/particles.xml" );
 
-	engine->lighting.ambient.Set( 0.5f, 0.5f, 0.5f );
+	engine->lighting.midLight.ambient.Set( 0.5f, 0.5f, 0.5f );
 	engine->lighting.direction.Set( -1, 1, 1 );
 	engine->lighting.direction.Normalize();
-	engine->lighting.diffuse.Set( 0.5f, 0.5f, 0.5f );
+	engine->lighting.midLight.diffuse.Set( 0.5f, 0.5f, 0.5f );
 
 	int count=0;
 	for( int i=0; i<NUM_MODELS; ++i ) {

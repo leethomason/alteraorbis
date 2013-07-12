@@ -3,6 +3,7 @@
 #include "../grinliz/glvector.h"
 
 #include "../engine/engine.h"
+#include "../engine/particle.h"
 
 #include "../game/census.h"
 #include "../game/lumoschitbag.h"

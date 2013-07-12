@@ -19,6 +19,7 @@
 #include "../engine/engine.h"			// used for 3D dragging and debugging. Scene should *not* have an engine requirement.
 #include "../engine/text.h"
 #include "../game/layout.h"			// used for the text height
+#include "../engine/particle.h"
 
 using namespace grinliz;
 using namespace gamui;

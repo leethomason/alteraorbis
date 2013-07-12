@@ -142,7 +142,7 @@ void ParticleScene::ItemTapped( const gamui::UIItem* item )
 			Rescan();
 
 			if ( buttonArr[i]->ToPushButton() ) {
-				Vector3F pos = { SIZE/2, 0.f, SIZE/2 };
+				Vector3F pos = { SIZE/2, 0.01f, SIZE/2 };
 				Vector3F normal = { 0, 1, 0 };
 				Vector3F dir = { 1, 0, 0 };
 				engine->particleSystem->EmitPD( *def, pos, normal, 0 );
@@ -157,7 +157,7 @@ void ParticleScene::DoTick( U32 deltaTime )
 	for( int i=0; i<buttonArr.Size(); ++i ) {
 		ToggleButton* toggle = buttonArr[i]->ToToggleButton();
 		if ( toggle && toggle->Down() ) {
-			Vector3F pos = { SIZE/2, 0.f, SIZE/2 };
+			Vector3F pos = { SIZE/2, 0.01f, SIZE/2 };
 			Vector3F normal = { 0, 1, 0 };
 			Vector3F dir = { 1, 0, 0 };
 			ParticleDef* def = &particleDefArr[i];

@@ -76,6 +76,8 @@ void ParticleSystem::Process( U32 delta, Camera* camera )
 	float deltaF = (float)delta * 0.001f;	// convert to seconds.
 	const Vector3F& up = eyeDir[1];
 	const Vector3F& right = eyeDir[2];
+	const Vector3F xaxis = { 1, 0, 0 };
+	const Vector3F zaxis = { 0, 0, 1 };
 
 	ParticleData*   pd = particleData;
 	ParticleStream* ps = vertexBuffer;
@@ -107,10 +109,18 @@ void ParticleSystem::Process( U32 delta, Camera* camera )
 			const Vector3F pos  = pd->pos;
 			const Vector2F size = pd->size;
 
-			ps[0].pos = pos - up*size.y - right*size.x;
-			ps[1].pos = pos - up*size.y + right*size.x;
-			ps[2].pos = pos + up*size.y + right*size.x;
-			ps[3].pos = pos + up*size .y- right*size.x;
+			if ( pd->alignment == ParticleDef::ALIGN_CAMERA ) {
+				ps[0].pos = pos - up*size.y - right*size.x;
+				ps[1].pos = pos - up*size.y + right*size.x;
+				ps[2].pos = pos + up*size.y + right*size.x;
+				ps[3].pos = pos + up*size .y- right*size.x;
+			}
+			else {
+				ps[0].pos = pos - xaxis*size.y - zaxis*size.x;
+				ps[1].pos = pos - xaxis*size.y + zaxis*size.x;
+				ps[2].pos = pos + xaxis*size.y + zaxis*size.x;
+				ps[3].pos = pos + xaxis*size .y- zaxis*size.x;
+			}
 
 			ps[0].color = color;
 			ps[0].uv = srcPS[0].uv;
@@ -165,8 +175,26 @@ void ParticleSystem::EmitPD(	const char* name,
 }
 
 
+grinliz::Vector3F ParticleSystem::RectangleRegion::CalcPoint( grinliz::Random* random )
+{
+	Vector3F v = {
+		rect.min.x + random->Uniform() * rect.SizeX(),
+		rect.min.y + random->Uniform() * rect.SizeY(),
+		rect.min.z + random->Uniform() * rect.SizeZ()
+	};
+	return v;
+}
+
+
+grinliz::Vector3F ParticleSystem::LineRegion::CalcPoint( grinliz::Random* random )
+{
+	Vector3F v = p0 + random->Uniform() * (p1-p0);
+	return v;
+}
+
+
 void ParticleSystem::EmitPD(	const ParticleDef& def,
-								const grinliz::Rectangle3F& initPos,
+								ParticleSystem::IRegion* region,
 								const grinliz::Vector3F& normal, 
 								U32 deltaTime )
 {
@@ -209,8 +237,9 @@ void ParticleSystem::EmitPD(	const ParticleDef& def,
 			random.NormalVector3D( &vFuzz.x );
 			pd->velocity = velocity + vFuzz*def.velocityFuzz;
 
-			pd->size = def.size;
-			pd->sizeVel = def.sizeVelocity;
+			pd->alignment	= def.alignment;
+			pd->size		= def.size;
+			pd->sizeVel		= def.sizeVelocity;
 			
 			Vector4F cFuzz = { 0, 0, 0, 0 };
 			random.NormalVector3D( &cFuzz.x );
@@ -218,9 +247,7 @@ void ParticleSystem::EmitPD(	const ParticleDef& def,
 
 			Vector3F pFuzz;
 			random.NormalVector3D( &pFuzz.x );
-			Vector3F pos = {	initPos.min.x + random.Uniform() * (initPos.max.x - initPos.min.x),
-								initPos.min.y + random.Uniform() * (initPos.max.y - initPos.min.y),
-								initPos.min.z + random.Uniform() * (initPos.max.z - initPos.min.z) };
+			Vector3F pos = region->CalcPoint( &random );
 			pos = pos + pFuzz*def.posFuzz;
 			pd->pos = pos;
 
@@ -291,6 +318,10 @@ void ParticleDef::Load( const tinyxml2::XMLElement* ele )
 	spread = SPREAD_POINT;
 	if ( ele->Attribute( "spread", "square" )) {
 		spread = SPREAD_SQUARE;
+	}
+	alignment = ALIGN_CAMERA;
+	if ( ele->Attribute( "alignment", "y" )) {
+		alignment = ALIGN_Y;
 	}
 
 	size.Set( 1, 1 );

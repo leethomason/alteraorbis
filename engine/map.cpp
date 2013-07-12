@@ -48,6 +48,7 @@ Map::Map( int w, int h )
 	GLASSERT( w <= EL_MAX_MAP_SIZE );
 	GLASSERT( h <= EL_MAX_MAP_SIZE );
 	GLOUTPUT(( "Map created. %dK\n", sizeof( *this )/1024 ));
+	saturation = 1.0f;
 
 	gamui::RenderAtom nullAtom;
 	overlay0.Init( this, nullAtom, nullAtom, 0 );

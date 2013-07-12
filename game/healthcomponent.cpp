@@ -25,6 +25,7 @@
 #include "../grinliz/glutil.h"
 
 #include "../engine/engine.h"
+#include "../engine/particle.h"
 
 #include "../script/procedural.h"
 

@@ -18,6 +18,8 @@
 #include "enginelimits.h"
 #include "texture.h"
 #include "gpustatemanager.h"
+#include "particle.h"
+
 #include "../game/gameitem.h"
 #include "../xarchive/glstreamer.h"
 #include "../script/worldgen.h"

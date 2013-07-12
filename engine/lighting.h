@@ -25,34 +25,41 @@ class Lighting
 public:
 	Lighting();
 
-	grinliz::Color3F	diffuse;		// main diffuse light
-	grinliz::Color3F	ambient;		// ambient or key light
-	grinliz::Color3F	shadow;			// color of stuff in shadow (which is only flat planes)
+	struct Light {
+		grinliz::Color3F	diffuse;		// main diffuse light
+		grinliz::Color3F	ambient;		// ambient or key light
+		grinliz::Color3F	shadow;			// color of stuff in shadow (which is only flat planes)
+	};
+
+	Light midLight;
+	Light warm;
+	Light cool;
+
 	grinliz::Vector3F	direction;		// normal vector
 	bool hemispheric;
 	grinliz::Color3F	glow;			// additive glow multiplier
-	// FIXME: glowRadius can be bound into the shader, and removes
-	// a decent amount of multiplies. Consider removing this.
-	float				glowRadius;		// the glow radius, in texture coordinates [0,1]
 
 	// Direction from world TO sun. (y is positive). If null, sets the default.
 	void SetLightDirection( const grinliz::Vector3F* lightDir );
 
 	// Calculate the light hitting a point with the given surface normal
+	// temp: -1 cool, 0 mid, 1 warm
 	void CalcLight(	const grinliz::Vector3F& surfaceNormal,
 					float shadowAmount,				// 1.0: fully in shadow
 					grinliz::Color3F* light, 
-					grinliz::Color3F* shadow  );
+					grinliz::Color3F* shadow,
+					float temp );
 	
 	// query the values for shader setup
-	void Query( grinliz::Color4F* _ambient, grinliz::Vector4F* _dir, grinliz::Color4F* _diffuse )
-	{
-		_ambient->Set( ambient.r, ambient.g, ambient.b, 1.f );
-		_dir->Set( direction.x, direction.y, direction.z, 0 );
-		_diffuse->Set( diffuse.r, diffuse.g, diffuse.b, 1.f );
-	}
-
+	void Query( grinliz::Color4F* diffuse,
+				grinliz::Color4F* ambient,
+				grinliz::Color4F* shadow,
+				float temperature,
+				grinliz::Vector4F* _dir );
 	void Load( const tinyxml2::XMLElement* element );
+
+private:
+	void LoadDAS( const tinyxml2::XMLElement* element, Light* light );
 };
 
 

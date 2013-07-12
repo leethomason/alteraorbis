@@ -23,14 +23,16 @@ using namespace tinyxml2;
 
 Lighting::Lighting() 
 {
-	diffuse.Set( 0.7f, 0.7f, 0.7f );
-	ambient.Set( 0.3f, 0.3f, 0.3f );
-	shadow.Set( 0.3f, 0.3f, 0.3f );
+	midLight.diffuse.Set( 0.7f, 0.7f, 0.7f );
+	midLight.ambient.Set( 0.3f, 0.3f, 0.3f );
+	midLight.shadow.Set( 0.3f, 0.3f, 0.3f );
+
+	warm = cool = midLight;
+
 	direction.Set( 2.0f, 3.0f, 1.0f );
 	direction.Normalize();
 	hemispheric = false;
 	glow.Set( 1, 1, 1 );
-	glowRadius = 0.01f;
 }
 
 
@@ -46,8 +48,11 @@ void Lighting::SetLightDirection( const grinliz::Vector3F* lightDir )
 }
 
 
-void Lighting::CalcLight( const Vector3F& normal, float shadowAmount, Color3F* light, Color3F* shadowResult )
+void Lighting::CalcLight( const Vector3F& normal, float shadowAmount, Color3F* light, Color3F* shadowResult, float temp )
 {
+	Color4F ambient, diffuse, shadow;
+	Query( &diffuse, &ambient, &shadow, temp, 0 );
+
 	if ( hemispheric ) {
 		float nDotL = DotProduct( normal, direction );
 		for( int i=0; i<3; ++i ) {
@@ -65,6 +70,40 @@ void Lighting::CalcLight( const Vector3F& normal, float shadowAmount, Color3F* l
 }
 
 
+void Lighting::Query(	grinliz::Color4F* diffuse,
+						grinliz::Color4F* ambient,
+						grinliz::Color4F* shadow,
+						float temperature,
+						grinliz::Vector4F* _dir )
+{
+	if ( temperature == 0 ) {
+		diffuse->Set( midLight.diffuse.r, midLight.diffuse.g, midLight.diffuse.b, 1 );
+		ambient->Set( midLight.ambient.r, midLight.ambient.g, midLight.ambient.b, 1 );
+		shadow->Set(  midLight.shadow.r,  midLight.shadow.g,  midLight.shadow.b,  1 );
+	}
+	else if ( temperature < 0 ) {
+		for( int i=0; i<3; ++i ) {
+			diffuse->X(i) = Lerp( midLight.diffuse.X(i), cool.diffuse.X(i), -temperature );
+			ambient->X(i) = Lerp( midLight.ambient.X(i), cool.ambient.X(i), -temperature );
+			shadow->X(i)  = Lerp( midLight.shadow.X(i),	 cool.shadow.X(i),  -temperature );
+		}
+	}
+	else {
+		for( int i=0; i<3; ++i ) {
+			diffuse->X(i) = Lerp( midLight.diffuse.X(i), warm.diffuse.X(i), temperature );
+			ambient->X(i) = Lerp( midLight.ambient.X(i), warm.ambient.X(i), temperature );
+			shadow->X(i)  = Lerp( midLight.shadow.X(i),	 warm.shadow.X(i),  temperature );
+		}
+	}
+	diffuse->a = 1;
+	ambient->a = 1;
+	shadow->a = 1;
+
+	_dir->Set( direction.x, direction.y, direction.z, 0 );
+}
+
+
+
 
 void Lighting::Load( const tinyxml2::XMLElement* ele )
 {
@@ -77,18 +116,15 @@ void Lighting::Load( const tinyxml2::XMLElement* ele )
 	const tinyxml2::XMLElement* child = 0;
 
 	if ( modeEle ) {
-		child = modeEle->FirstChildElement( "ambient" );
-		if ( child ) {
-			LoadColor( child, &ambient );
-		}
-		child = modeEle->FirstChildElement( "diffuse" );
-		if ( child ) {
-			LoadColor( child, &diffuse );
-		}
-		child = modeEle->FirstChildElement( "shadow" );
-		if ( child ) {
-			LoadColor( child, &shadow );
-		}
+		LoadDAS( modeEle, &midLight );
+	}
+	warm = cool = midLight;
+
+	if ( modeEle->FirstChildElement( "warm" ) ) {
+		LoadDAS( modeEle->FirstChildElement( "warm" ), &warm );
+	}
+	if ( modeEle->FirstChildElement( "cool" ) ) {
+		LoadDAS( modeEle->FirstChildElement( "cool" ), &cool );
 	}
 
 	child = ele->FirstChildElement( "direction" );
@@ -99,7 +135,25 @@ void Lighting::Load( const tinyxml2::XMLElement* ele )
 	child = ele->FirstChildElement( "glow" );
 	if ( child ) {
 		LoadColor( child, &glow );
-		child->QueryFloatAttribute( "radius", &glowRadius );
 	}
 }
+
+
+void Lighting::LoadDAS( const tinyxml2::XMLElement* element, Light* light )
+{
+	const XMLElement* child = element->FirstChildElement( "ambient" );
+	if ( child ) {
+		LoadColor( child, &light->ambient );
+	}
+	child = element->FirstChildElement( "diffuse" );
+	if ( child ) {
+		LoadColor( child, &light->diffuse );
+	}
+	child = element->FirstChildElement( "shadow" );
+	if ( child ) {
+		LoadColor( child, &light->shadow );
+	}
+}
+
+
 

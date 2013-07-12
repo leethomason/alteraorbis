@@ -21,6 +21,7 @@
 #include "shadermanager.h"
 #include "animation.h"
 #include "serialize.h"
+#include "particle.h"
 
 #include "../grinliz/glvector.h"
 #include "../grinliz/glstringutil.h"

@@ -210,7 +210,7 @@ void Random::NormalVector( float* v, int dim )
 
 /*static*/ U8 Random::Hash8( U32 data )
 {
-	return series[ data ^ (data>>8) ^ (data>>16) ^ (data>>24) ];
+	return series[ (data ^ (data>>8) ^ (data>>16) ^ (data>>24))&255 ];
 }
 
 

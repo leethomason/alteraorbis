@@ -236,7 +236,8 @@ void Engine::CreateMiniMap()
 	Color3F color = { 1, 1, 1 };
 	GPUState::PushMatrix( GPUState::MODELVIEW_MATRIX );
 	GPUState::MultMatrix( GPUState::MODELVIEW_MATRIX, scaleMat );
-	map->Draw3D( color, GPUState::STENCIL_OFF );
+
+	map->Draw3D( color, GPUState::STENCIL_OFF, false );
 	GPUState::PopMatrix( GPUState::MODELVIEW_MATRIX );
 
 	miniMapRenderTarget->SetActive( false, this );
@@ -309,9 +310,9 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 		map->PrepVoxels( spaceTree );
 	}
 	
-	Color4F ambient, diffuse;
+	Color4F ambient, diffuse, shadow;
 	Vector4F dir;
-	lighting.Query( &ambient, &dir, &diffuse );
+	lighting.Query( &diffuse, &ambient, &shadow, 0, &dir );
 	GPUState::ambient = ambient;
 	GPUState::directionWC = dir;
 	GPUState::diffuse = diffuse;
@@ -388,7 +389,7 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 		float shadowAmount = 1.0f;
 		Color3F shadow, lighted;
 		static const Vector3F groundNormal = { 0, 1, 0 };
-		lighting.CalcLight( groundNormal, 1.0f, &lighted, &shadow );
+		lighting.CalcLight( groundNormal, 1.0f, &lighted, &shadow, 0 );
 
 #ifdef ENGINE_RENDER_SHADOWS
 		if ( shadowAmount > 0.0f ) {
@@ -417,9 +418,9 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 			}
 			engineShaders.PopAll();
 
-			map->Draw3D( shadow, GPUState::STENCIL_SET );
+			map->Draw3D( shadow, GPUState::STENCIL_SET, true );
 		}
-		map->Draw3D( lighted, GPUState::STENCIL_CLEAR );
+		map->Draw3D( lighted, GPUState::STENCIL_CLEAR, true );
 #else
 		map->Draw3D( lighted, GPUState::STENCIL_OFF );
 #endif
@@ -434,6 +435,8 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 		if ( map ) {
 			GPUState state;
 			engineShaders.GetState( EngineShaders::LIGHT, 0, &state );
+
+			state.SetShaderFlag( ShaderManager::SATURATION );
 			map->DrawVoxels( &state, 0 );
 		}
 		QueueSet( &engineShaders, modelRoot, 0, 0, 0, 0  );
