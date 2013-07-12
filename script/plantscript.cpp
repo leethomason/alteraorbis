@@ -164,7 +164,7 @@ int PlantScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 	Vector2I pos = sc->MapPosition();
 	float h = (float)(stage+1);
 
-	float rainFraction	= weather->RainFraction( pos.x, pos.y );
+	float rainFraction	= weather->RainFraction( (float)pos.x+0.5f, (float)pos.y+0.5f );
 	Rectangle2I bounds = worldMap->Bounds();
 
 	// ------ Sun -------- //
@@ -222,8 +222,7 @@ int PlantScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 	rootDepth = Clamp( rootDepth, 0.1f, h );
 
 	// ------- Temperature ----- //
-	float temp = weather->Temperature( pos.x, pos.y );
-
+	float temp = weather->Temperature( (float)pos.x+0.5f, (float)pos.y+0.5f );
 
 	// ------- calc ------- //
 	Vector3F actual = { sun, rain, temp };

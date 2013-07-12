@@ -26,9 +26,7 @@ class Weather
 public:
 	Weather( int p_width, int p_height ) : width((float)p_width), height((float)p_height) {}
 
-	float RainFraction( int p_x, int p_y ) {
-		float x = (float)p_x;
-		float y = (float)p_y;
+	float RainFraction( float x, float y ) {
 
 		static const float MIN_RAIN = 0.05f;
 		static const float MAX_RAIN = 0.95f;
@@ -38,14 +36,27 @@ public:
 		// Prevailing wind from West to East.
 		float r = grinliz::Lerp( MAX_RAIN, MIN_RAIN, x / width );
 		static const float delta[8] = { -1.0f, -0.75f, -0.50f, -0.25f, 0.25f, 0.50f, 0.75f, 1.0f };
-		int m = grinliz::Random::Hash8( p_x | (p_y<<10) ) & 7;
-		r += delta[m] * FUZZ;
+		
+		int xi = (int)x;
+		int yi = (int)y;
+		int sx = xi / SECTOR_SIZE;
+		int sy = yi / SECTOR_SIZE;
+		int m00 = grinliz::Random::Hash8( sy*NUM_SECTORS    +sx ) & 7;
+		int m10 = grinliz::Random::Hash8( (sy+1)*NUM_SECTORS+sx ) & 7;
+		int m01 = grinliz::Random::Hash8( sy*NUM_SECTORS    +(sx+1) ) & 7;
+		int m11 = grinliz::Random::Hash8( (sy+1)*NUM_SECTORS+(sx+1) ) & 7;
 
-		return r;
+		float q[4] = {
+			r + delta[m00]*FUZZ,
+			r + delta[m10]*FUZZ,
+			r + delta[m01]*FUZZ,
+			r + delta[m11]*FUZZ,
+		};
+		float rain = grinliz::BilinearInterpolate( q[0], q[1], q[2], q[3], x-(float)xi, y-(float)yi );
+		return rain;
 	}
 
-	float Temperature( int, int p_y ) {
-		float y = (float)p_y;
+	float Temperature( float, float y ) {
 		return grinliz::Lerp( 0.0f, 1.0f, y/height );
 	}
 

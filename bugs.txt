@@ -39,12 +39,12 @@
 		- decent UI
 		- leave core
 		- cancel orders
-		- 1x1 filtering isn't working
+		d 1x1 filtering isn't working
 		- consider moving ground to voxel gen system, so that ground can vary?
 		- proper animation system
-		- rain, general de-saturation
+		x rain, general de-saturation
 		- aging of stone
-		- rework glow to reduce artifacts
+		x rework glow to reduce artifacts
 	- Loot
 		- item screen
 		- drop items

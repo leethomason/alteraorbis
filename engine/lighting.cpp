@@ -99,7 +99,9 @@ void Lighting::Query(	grinliz::Color4F* diffuse,
 	ambient->a = 1;
 	shadow->a = 1;
 
-	_dir->Set( direction.x, direction.y, direction.z, 0 );
+	if ( _dir ) {
+		_dir->Set( direction.x, direction.y, direction.z, 0 );
+	}
 }
 
 

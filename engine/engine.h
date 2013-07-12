@@ -161,6 +161,7 @@ public:
 
 	void SetGlow( bool b ) { glow = b; }
 	bool Glow() const { return glow; }
+	void SetTemperature( float temp ) { temperature = temp; }
 
 	virtual void DeviceLoss();
 
@@ -195,6 +196,7 @@ private:
 	float	initZoom;
 	int		initZoomDistance;
 	bool	glow;
+	float	temperature;
 	
 	Map*	map;
 	SpaceTree* spaceTree;

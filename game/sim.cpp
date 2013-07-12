@@ -319,11 +319,7 @@ void Sim::DoWeatherEffects( U32 delta )
 	Vector3F at;
 	engine->CameraLookingAt( &at );
 
-	Vector2I sector = { (int)at.x/SECTOR_SIZE, (int)at.z/SECTOR_SIZE };
-	// Sample from the center of the sector.
-	Vector2I sample = { sector.x*SECTOR_SIZE + SECTOR_SIZE/2, sector.y*SECTOR_SIZE + SECTOR_SIZE/2 };
-
-	float rain = weather->RainFraction( sample.x, sample.y );
+	float rain = weather->RainFraction( at.x, at.z );
 
 	if ( rain > 0.5f ) {
 		float rainEffect = (rain-0.5f)*2.0f;	// 0-1
@@ -348,6 +344,8 @@ void Sim::DoWeatherEffects( U32 delta )
 	else {
 		worldMap->SetSaturation( 1 );
 	}
+	float normalTemp = weather->Temperature( at.x, at.z ) * 2.0f - 1.0f;
+	engine->SetTemperature( normalTemp );
 }
 
 

@@ -53,6 +53,7 @@ Engine::Engine( Screenport* port, const gamedb::Reader* database, Map* m )
 		map( 0 )
 {
 	map = m;
+	temperature = 0;
 	if ( map ) 
 		spaceTree = new SpaceTree( -0.1f, 3.1f, Max( m->Width(), m->Height() ) );
 	else
@@ -312,7 +313,7 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 	
 	Color4F ambient, diffuse, shadow;
 	Vector4F dir;
-	lighting.Query( &diffuse, &ambient, &shadow, 0, &dir );
+	lighting.Query( &diffuse, &ambient, &shadow, temperature, &dir );
 	GPUState::ambient = ambient;
 	GPUState::directionWC = dir;
 	GPUState::diffuse = diffuse;
@@ -389,7 +390,7 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 		float shadowAmount = 1.0f;
 		Color3F shadow, lighted;
 		static const Vector3F groundNormal = { 0, 1, 0 };
-		lighting.CalcLight( groundNormal, 1.0f, &lighted, &shadow, 0 );
+		lighting.CalcLight( groundNormal, 1.0f, &lighted, &shadow, temperature );
 
 #ifdef ENGINE_RENDER_SHADOWS
 		if ( shadowAmount > 0.0f ) {
