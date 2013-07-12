@@ -38,7 +38,7 @@
   <texture filename="shield.png" filename2="shield_em.png" emissive="true" />
   <texture filename="debugging.png" noMip="true" />
 
-  <texture filename="voxel.png" filename2="voxel_em.png" emissive="true" width="256" height="64"/>
+  <texture assetName="voxel" filename="voxelalt.png" filename2="voxelalt_em.png" emissive="true" width="256" height="64"/>
   <texture filename="flags.png" />
 
   <!-- note this makes textures and materials the same thing, to have the emissive

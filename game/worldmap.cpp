@@ -1788,8 +1788,8 @@ void WorldMap::Submit( GPUState* shader, bool emissiveOnly )
 Vertex* WorldMap::PushVoxelQuad( int id, const Vector3F& normal )
 {
 	Vertex* vArr = voxelBuffer.PushArr( 4 );
-	float u = (float)id / 4.0f;
-	static const float du = 0.25f;
+	const float u = 2.0f*(float)id / 8.0f;
+	static const float du = 0.125f;
 
 	vArr[0].tex.Set( u, 0 );
 	vArr[1].tex.Set( u, 1 );
@@ -1833,8 +1833,8 @@ void WorldMap::PushVoxel( int id, float x, float z, float h, const float* walls 
 			v[2].pos.Set( v1.x, h,			v1.y );
 			v[3].pos.Set( v1.x, walls[i],	v1.y );
 
-			//v[1].tex.y = dH;
-			//v[2].tex.y = dH;
+			v[1].tex.y = dH;
+			v[2].tex.y = dH;
 		}
 	}
 }
@@ -1880,6 +1880,8 @@ void WorldMap::PrepVoxels( const SpaceTree* spaceTree )
 				if ( wg.Pool() ) {
 					id = POOL;
 					h = (float)POOL_HEIGHT - 0.2f;
+					// Draw all walls:
+					wall[0] = wall[1] = wall[2] = wall[3] = 0;
 					PushVoxel( id, (float)x, (float)y, h, wall ); 
 				}
 				else if ( wg.Magma() ) {
