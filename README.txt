@@ -61,7 +61,8 @@ Important Notes
 3. There is NO save game compatibility. Be sure to delete old games.
 4. If your avatar gets killed, ctrl-click will create a new one. (You can create a bunch if you wish).
 5. “Fast Mode" doesn't work very well. This will probably get removed.
-6. There are some rendering bugs (edge noise, stretching) in the voxel renderer that will get cleaned up soon.
+6. Rendering artifacts in voxel renderer need to be fixed.
+
 
 Getting Started
 ---------------
@@ -82,6 +83,9 @@ Grid, you will use automatically use the grid travel system.
 
 Red Mantis and Green Mantis will fight one another, as well as you. Green mantis
 will travel around the world.
+
+
+You can collect gold and crystal from enemies you defeat. (And remember, control-click will respawn if you are defeated.)
 
 
 If you step onto a domain core, you will immediately take control of it. 2 worker bots appear and wander about, waiting for you bidding. You can clear rock or vegetation. Build Ice, which is manufactured rock. And you can build a kiosk.
