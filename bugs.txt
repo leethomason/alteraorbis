@@ -33,12 +33,12 @@
 		d 1x1 filtering isn't working
 		x rain, general de-saturation
 		x rework glow to reduce artifacts
-		- ground texture
+		x ground texture
+		x tree textures
+		x flower colors (too saturated flowers)
 		- new 1x1 models
 		- support for mxn models
 		- new nxn models
-		- tree textures
-		- flower colors (too saturated flowers)
 		- decent clear dragging
 		- new Core model
 		- visitors create energy, buildings consume energy

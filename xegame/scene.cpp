@@ -100,7 +100,7 @@ ModelVoxel Scene::ModelAtMouse( const grinliz::Vector2F& view,
 								int required, int exclude, 
 								const Model * const * ignore, 
 								Vector3F* planeIntersection ) const
-{
+{ 
 	Matrix4 mvpi;
 	Ray ray;
 	Vector3F at = { 0,0,0 };

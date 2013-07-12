@@ -33,7 +33,6 @@
   <texture filename="palette_100.png" emissive="true"/>
   <texture filename="charSwatch.png" width="128" height="8" /> 
   <texture filename="characters.png" />
-  <texture filename="treetextures.png" />
   <texture filename="bluestone.png" />
   <texture filename="shield.png" filename2="shield_em.png" emissive="true" />
   <texture filename="debugging.png" noMip="true" />
@@ -165,10 +164,10 @@
   <model filename="plant0.ac" modelName="plant0.3"    origin="0 0 0"   shading="smooth" polyRemoval="pre" />
 
   <!-- tree -->
-  <model filename="plant1.ac" modelName="plant1.0"    origin="-7 0 0"  shading="smooth" polyRemoval="pre" />
-  <model filename="plant1.ac" modelName="plant1.1"    origin="-5 0 0"  shading="smooth" polyRemoval="pre" />
-  <model filename="plant1.ac" modelName="plant1.2"    origin="-3 0 0"  shading="smooth" polyRemoval="pre" />
-  <model filename="plant1.ac" modelName="plant1.3"    origin="0 0 0"   shading="smooth" polyRemoval="pre" />
+  <model filename="plant1.ac" modelName="plant1.0"    origin="-7 0 0"  shading="flat" polyRemoval="pre" />
+  <model filename="plant1.ac" modelName="plant1.1"    origin="-5 0 0"  shading="flat" polyRemoval="pre" />
+  <model filename="plant1.ac" modelName="plant1.2"    origin="-3 0 0"  shading="flat" polyRemoval="pre" />
+  <model filename="plant1.ac" modelName="plant1.3"    origin="0 0 0"   shading="flat" polyRemoval="pre" />
 
   <!-- fern -->
   <model filename="plant2.ac" modelName="plant2.0"    origin="-5 0 0"  shading="smooth" polyRemoval="pre" />
@@ -177,10 +176,10 @@
   <model filename="plant2.ac" modelName="plant2.3"    origin= "0 0 0"  shading="smooth" polyRemoval="pre" />
 
   <!-- crystal grass -->
-  <model filename="plant3.ac" modelName="plant3.0"    origin="-6 0 0"  shading="smooth" polyRemoval="pre" />
-  <model filename="plant3.ac" modelName="plant3.1"    origin="-4 0 0"  shading="smooth" polyRemoval="pre" />
-  <model filename="plant3.ac" modelName="plant3.2"    origin="-2 0 0"  shading="smooth" polyRemoval="pre" />
-  <model filename="plant3.ac" modelName="plant3.3"    origin= "0 0 0"  shading="smooth" polyRemoval="pre" />
+  <model filename="plant3.ac" modelName="plant3.0"    origin="-6 0 0"  shading="flat" polyRemoval="pre" />
+  <model filename="plant3.ac" modelName="plant3.1"    origin="-4 0 0"  shading="flat" polyRemoval="pre" />
+  <model filename="plant3.ac" modelName="plant3.2"    origin="-2 0 0"  shading="flat" polyRemoval="pre" />
+  <model filename="plant3.ac" modelName="plant3.3"    origin= "0 0 0"  shading="flat" polyRemoval="pre" />
 
   <!-- bamboo -->
   <model filename="plant4.ac" modelName="plant4.0"    origin="-9 0 0"  shading="smooth" polyRemoval="pre" />
