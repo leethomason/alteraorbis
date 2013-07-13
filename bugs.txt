@@ -47,9 +47,7 @@
 		- decent UI
 		- leave core
 		- cancel orders
-		- consider moving ground to voxel gen system, so that ground can vary?
 		- proper animation system
-		- aging of stone
 	- Loot
 		- item screen
 		- drop items
@@ -59,6 +57,8 @@
 		- character screeen
 		x disable buttons on main ui when no game saved
 	- Fauna 2
+		- aging of stone
+		- consider moving ground to voxel gen system, so that ground can vary?
 		- teams. friend-enemy-neutral logic.
 		- monster ecology
 		- visitors
