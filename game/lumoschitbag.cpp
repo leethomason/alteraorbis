@@ -198,7 +198,7 @@ bool LumosChitBag::BuildingWithPorchFilter( Chit* chit )
 bool LumosChitBag::KioskFilter( Chit* chit )
 {
 	if ( BuildingWithPorchFilter( chit ) ) {
-		if ( chit->GetItem()->name == "kiosk" ) {
+		if ( chit->GetItem()->name == "kiosk.m" ) {
 			return true;
 		}
 	}

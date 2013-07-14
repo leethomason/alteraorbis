@@ -37,6 +37,7 @@
 		x tree textures
 		x flower colors (too saturated flowers)
 		- new 1x1 models
+		- grid travel from port (no position selection)
 		- support for mxn models
 		- new nxn models
 		- decent clear dragging

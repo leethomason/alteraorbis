@@ -564,10 +564,10 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 since )
 		      && !thisComp.move->IsMoving() )
 	{
 		// Visitors at a kiosk.
-		// Are we on a kiosk?
+		// FIXME: kiosk type
 		Vector2I pos2i = thisComp.spatial->GetPosition2DI();
 		Chit* chit = this->GetChitBag()->ToLumos()->QueryBuilding( pos2i, true );
-		if ( chit && chit->GetItem()->name == "kiosk" ) {
+		if ( chit && chit->GetItem()->name == "kiosk.m" ) {
 			VisitorData* vd = &Visitors::Instance()->visitorData[visitorIndex];
 			vd->kioskTime += since;
 			if ( vd->kioskTime > VisitorData::KIOSK_TIME ) {
@@ -917,7 +917,7 @@ void AIComponent::ThinkVisitor( const ComponentSet& thisComp )
 	Vector2I sector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
 	VisitorData* vd = &Visitors::Instance()->visitorData[visitorIndex];	// FIXME ugly
 	Chit* kiosk = GetChitBag()->ToLumos()->QueryBuilding( pos2i, true );
-	if ( kiosk && kiosk->GetItem()->name == "kiosk" ) {
+	if ( kiosk && kiosk->GetItem()->name == "kiosk.m" ) {
 		// all good
 	}
 	else {

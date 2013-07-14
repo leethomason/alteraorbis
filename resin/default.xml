@@ -86,7 +86,10 @@
   <model filename="possibleTargetFlag.ac" shading="flat" shadowCaster="false" />
 
   <model filename="core.ac" shading="flat" />
-  <model filename="kiosk.ac" modelName="kiosk0" origin="-8.50 0 -0.50" shading="flat" polyRemoval="pre" />
+  <model filename="kiosk.ac" modelName="kiosk.n" origin="-6.50 0 -0.50" shading="flat" polyRemoval="pre" />
+  <model filename="kiosk.ac" modelName="kiosk.m" origin="-8.50 0 -0.50" shading="flat" polyRemoval="pre" />
+  <model filename="kiosk.ac" modelName="kiosk.c" origin="-1.50 0 -0.50" shading="flat" polyRemoval="pre" />
+  <model filename="kiosk.ac" modelName="kiosk.s" origin="-4.50 0 -0.50" shading="flat" polyRemoval="pre" />
   
   <!-- Creating animation
     1. Add a model resource, with the usual flags, plus: animatimation="create"

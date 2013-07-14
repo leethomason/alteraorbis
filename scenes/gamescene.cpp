@@ -72,7 +72,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	freeCameraButton.Init( &gamui2D, game->GetButtonLook(0) );
 	freeCameraButton.SetText( "Free\nCamera" );
 
-	static const char* buildButtonText[NUM_BUILD_BUTTONS] = { "None", "Clear", "Ice", "Kiosk" };
+	static const char* buildButtonText[NUM_BUILD_BUTTONS] = { "None", "Clear", "Ice", "Media\nKiosk", "Commerce\nKiosk", "Social\nKiosk", "News\nKiosk" };
 	for( int i=0; i<NUM_BUILD_BUTTONS; ++i ) {
 		buildButton[i].Init( &gamui2D, game->GetButtonLook(0) );
 		buildButton[i].SetText( buildButtonText[i] );
@@ -81,7 +81,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 
 	createWorkerButton.Init( &gamui2D, game->GetButtonLook(0) );
 	createWorkerButton.SetText( "Create\nWorker" );
-
+	
 	allRockButton.Init( &gamui2D, game->GetButtonLook(0) );
 	allRockButton.SetText( "All Rock" );
 
@@ -129,7 +129,9 @@ void GameScene::Resize()
 	}
 	layout.PosAbs( &freeCameraButton, 0, -3 );
 	for( int i=0; i<NUM_BUILD_BUTTONS; ++i ) {
-		layout.PosAbs( &buildButton[i], 0, i+2 );
+		int x = i/4;
+		int y = i - x*4;
+		layout.PosAbs( &buildButton[i], x, y+2 );
 	}
 	layout.PosAbs( &createWorkerButton, 0, 6 );
 	layout.PosAbs( &allRockButton, 0, 1 );
@@ -428,7 +430,10 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 					Vector2I v = { (int)plane.x, (int)plane.z };
 					switch ( buildActive ) {
 					case BUILD_ICE:			wq->Add( WorkQueue::BUILD, v, IString() );	break;
-					case BUILD_KIOSK:		wq->Add( WorkQueue::BUILD, v, StringPool::Intern( "kiosk" ));	break;
+					case BUILD_KIOSK_M:		wq->Add( WorkQueue::BUILD, v, StringPool::Intern( "kiosk.m" ));	break;
+					case BUILD_KIOSK_C:		wq->Add( WorkQueue::BUILD, v, StringPool::Intern( "kiosk.c" ));	break;
+					case BUILD_KIOSK_S:		wq->Add( WorkQueue::BUILD, v, StringPool::Intern( "kiosk.s" ));	break;
+					case BUILD_KIOSK_N:		wq->Add( WorkQueue::BUILD, v, StringPool::Intern( "kiosk.n" ));	break;
 					default: GLASSERT( 0 ); break;
 					};
 					
