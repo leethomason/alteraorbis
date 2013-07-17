@@ -187,7 +187,9 @@ int PlantScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 			Rectangle2F r;
 			r.Set( (float)tap.x, (float)tap.y, (float)(tap.x+1), (float)(tap.y+1) );
 			CChitArray query;
-			ctx.chit->GetChitBag()->QuerySpatialHash( &query, r, 0, 0 );
+
+			ChitAcceptAll all;
+			ctx.chit->GetChitBag()->QuerySpatialHash( &query, r, 0, &all );
 			for( int i=0; i<query.Size(); ++i ) {
 				RenderComponent* rc = query[i]->GetRenderComponent();
 				if ( rc ) {

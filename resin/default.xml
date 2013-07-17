@@ -36,6 +36,8 @@
   <texture filename="bluestone.png" />
   <texture filename="shield.png" filename2="shield_em.png" emissive="true" />
   <texture filename="debugging.png" noMip="true" />
+  <texture filename="structure.png"/>
+  <texture filename="kioskscreen.png"/>
 
   <texture assetName="voxel" filename="voxelalt.png" filename2="voxelalt_em.png" emissive="true" width="256" height="64"/>
   <texture filename="flags.png" />
