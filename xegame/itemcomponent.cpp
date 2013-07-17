@@ -304,13 +304,14 @@ int ItemComponent::DoTick( U32 delta, U32 since )
 
 	static const float PICKUP_RANGE = 0.5f;
 	static const float HOOVER_RANGE = 2.0f;
+	GoldCrystalFilter goldCrystalFilter;
 
 	if ( parentChit->GetSpatialComponent() ) {
 		CChitArray arr;
 
 		Vector2F pos = parentChit->GetSpatialComponent()->GetPosition2D();
 		if ( pickupMode == GOLD_PICKUP || pickupMode == GOLD_HOOVER ) {
-			GetChitBag()->QuerySpatialHash( &arr, pos, PICKUP_RANGE, 0, LumosChitBag::GoldCrystalFilter );
+			GetChitBag()->QuerySpatialHash( &arr, pos, PICKUP_RANGE, 0, &goldCrystalFilter );
 			for( int i=0; i<arr.Size(); ++i ) {
 				wallet.Add( arr[i]->GetItemComponent()->GetWallet() );
 				arr[i]->GetItemComponent()->EmptyWallet();
@@ -318,7 +319,7 @@ int ItemComponent::DoTick( U32 delta, U32 since )
 			}
 		}
 		if ( pickupMode == GOLD_HOOVER ) {
-			GetChitBag()->QuerySpatialHash( &arr, pos, HOOVER_RANGE, 0, LumosChitBag::GoldCrystalFilter );
+			GetChitBag()->QuerySpatialHash( &arr, pos, HOOVER_RANGE, 0, &goldCrystalFilter );
 			for( int i=0; i<arr.Size(); ++i ) {
 				Chit* gold = arr[i];
 				GLASSERT( parentChit != gold );

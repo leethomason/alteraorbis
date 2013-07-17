@@ -32,6 +32,7 @@ public:
 
 	static grinliz::IString khumanFemale;
 	static grinliz::IString khumanMale;
+	static grinliz::IString kworker;
 
 	static grinliz::IString kring;
 	static grinliz::IString klargeRing;
@@ -42,13 +43,19 @@ public:
 	static grinliz::IString kcrystal_violet;
 	static grinliz::IString kcore;
 
+	// double underscore -> '.'
+	static grinliz::IString kkiosk__n;
+	static grinliz::IString kkiosk__m;
+	static grinliz::IString kkiosk__c;
+	static grinliz::IString kkiosk__s;
+
 	static int Hardpoint( grinliz::IString str ) {
 		if		( str == ktrigger ) return HARDPOINT_TRIGGER;
 		else if ( str == kalthand ) return HARDPOINT_ALTHAND;
 		else if ( str == khead )	return HARDPOINT_HEAD;
 		else if ( str == kshield )	return HARDPOINT_SHIELD;
 		GLASSERT( 0 );
-		return 0;\
+		return 0;
 	}
 	static grinliz::IString Hardpoint( int i ) {
 		switch ( i ) {

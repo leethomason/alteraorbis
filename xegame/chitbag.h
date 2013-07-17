@@ -34,6 +34,32 @@ class CameraComponent;
 
 #define CChitArray grinliz::CArray<Chit*, 32 >
 
+class IChitAccept
+{
+public:
+	virtual bool Accept( Chit* chit ) = 0;
+};
+
+
+class ChitAcceptAll : public IChitAccept
+{
+public:
+	virtual bool Accept( Chit* chit ) { return true; }
+};
+
+class ChitHasMoveComponent : public IChitAccept
+{
+public:
+	virtual bool Accept( Chit* chit );
+};
+
+class ChitHasAIComponent : public IChitAccept
+{
+public:
+	virtual bool Accept( Chit* chit );
+};
+
+
 class ChitBag : public IBoltImpactHandler
 {
 public:
@@ -81,28 +107,22 @@ public:
 	void RemoveFromSpatialHash( Chit*, int x, int y );
 	void UpdateSpatialHash( Chit*, int x0, int y0, int x1, int y1 );
 
-	static bool AcceptAll( Chit* ) {
-		return true;
-	}
-	static bool HasMoveComponentFilter( Chit* chit );
-	static bool HasAIComponentFilter( Chit* chit );
-
 	void QuerySpatialHash(	grinliz::CDynArray<Chit*>* array, 
 							const grinliz::Rectangle2F& r, 
 		                    const Chit* ignoreMe,
-							bool (*accept)(Chit*) = AcceptAll );	// function ptr: see NoFilter
+							IChitAccept* filter );
 
 	// Use with caution: the array returned can change if a sub-function calls this.
 	void QuerySpatialHash(	CChitArray* arr,
 							const grinliz::Rectangle2F& r, 
 							const Chit* ignoreMe,
-							bool (*accept)(Chit*) = AcceptAll );
+							IChitAccept* filter );
 
 	void QuerySpatialHash(	grinliz::CDynArray<Chit*>* array,
 							const grinliz::Vector2F& origin, 
 							float rad,
 							const Chit* ignoreMe,
-							bool (*accept)(Chit*) = AcceptAll )
+							IChitAccept* accept )
 	{
 		grinliz::Rectangle2F r;
 		r.Set( origin.x-rad, origin.y-rad, origin.x+rad, origin.y+rad );
@@ -113,7 +133,7 @@ public:
 							const grinliz::Vector2F& origin, 
 							float rad,
 							const Chit* ignoreMe,
-							bool (*accept)(Chit*) = AcceptAll )
+							IChitAccept* accept )
 	{
 		grinliz::Rectangle2F r;
 		r.Set( origin.x-rad, origin.y-rad, origin.x+rad, origin.y+rad );

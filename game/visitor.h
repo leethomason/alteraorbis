@@ -20,6 +20,7 @@
 #include "../grinliz/glrandom.h"
 #include "../grinliz/glvector.h"
 #include "../grinliz/glcontainer.h"
+#include "../grinliz/glstringutil.h"
 #include "sectorport.h"
 
 class XStream;
@@ -29,7 +30,7 @@ class WorldMap;
 // from the chit AI.
 struct VisitorData
 {
-	VisitorData() : id( 0 ) {}
+	VisitorData();
 	void Serialize( XStream* xs );
 
 	void Connect() {
@@ -39,16 +40,25 @@ struct VisitorData
 
 	enum {	NUM_VISITS = 4, 			// how many domains would like to be visited before disconnect
 			KIOSK_TIME = 5000,
-			MEMORY = 4
+			MEMORY = 4,
+			NUM_KIOSK_TYPES = 4,
+			KIOSK_N = 0,				// News, red
+			KIOSK_M,					// Media, blue
+			KIOSK_C,					// Commerce, green
+			KIOSK_S						// Social, violet
+
 	};
+
 	int id;								// chit id, and whether in-world or not.
 	U32 kioskTime;						// time spent standing at current kiosk
+	int wants[NUM_VISITS];
 	grinliz::CArray< grinliz::Vector2I, NUM_VISITS > sectorVisited;	// which sectors we have visited a kiosk at. 
 
 	struct Memory {
 		Memory() { sector.Zero(); rating=0; }
 
 		grinliz::Vector2I	sector;
+		int					kioskType;
 		int					rating;		
 		void Serialize( XStream* xs );
 	};
@@ -56,6 +66,7 @@ struct VisitorData
 
 	void NoKiosk( const grinliz::Vector2I& sector );
 	void DidVisitKiosk( const grinliz::Vector2I& sector );
+	grinliz::IString CurrentKioskWant();
 };
 
 

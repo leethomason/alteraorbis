@@ -145,66 +145,6 @@ Chit* LumosChitBag::NewVisitor( int visitorIndex )
 }
 
 
-bool LumosChitBag::GoldFilter( Chit* chit )
-{
-	return ( chit->GetItem() && chit->GetItem()->name == IStringConst::kgold );
-}
-
-
-bool LumosChitBag::GoldCrystalFilter( Chit* chit )
-{
-	return (    chit->GetItem() && chit->GetItem()->name == IStringConst::kgold
-			 || chit->GetItem() && chit->GetItem()->name == IStringConst::kcrystal_green
-		     || chit->GetItem() && chit->GetItem()->name == IStringConst::kcrystal_red
-		     || chit->GetItem() && chit->GetItem()->name == IStringConst::kcrystal_blue
-			 || chit->GetItem() && chit->GetItem()->name == IStringConst::kcrystal_violet );
-}
-
-
-bool LumosChitBag::WorkerFilter( Chit* chit )
-{
-	GameItem* item = chit->GetItem();
-	if ( item && (item->flags & GameItem::AI_DOES_WORK) ) {
-		return true;
-	}
-	return false;
-}
-
-
-bool LumosChitBag::RemovableFilter( Chit* chit )
-{
-	return BuildingFilter( chit ) || PlantScript::PlantFilter( chit );
-}
-
-bool LumosChitBag::BuildingFilter( Chit* chit )
-{
-	MapSpatialComponent* msc = GET_SUB_COMPONENT( chit, SpatialComponent, MapSpatialComponent );
-	return msc && msc->Building();
-}
-
-
-bool LumosChitBag::BuildingWithPorchFilter( Chit* chit )
-{
-	MapSpatialComponent* msc = GET_SUB_COMPONENT( chit, SpatialComponent, MapSpatialComponent );
-	const GameItem* item = chit->GetItem();
-	int porch = 0;
-	if ( item ) {
-		item->GetValue( "porch", &porch );
-	}
-	return msc && msc->Building() && porch;
-}
-
-
-bool LumosChitBag::KioskFilter( Chit* chit )
-{
-	if ( BuildingWithPorchFilter( chit ) ) {
-		if ( chit->GetItem()->name == "kiosk.m" ) {
-			return true;
-		}
-	}
-	return false;
-}
-
 Chit* LumosChitBag::QueryBuilding( const grinliz::Vector2I& pos2i, bool orPorch )
 {
 	// Building can be up to MAX_BUILDING_SIZE
@@ -217,7 +157,8 @@ Chit* LumosChitBag::QueryBuilding( const grinliz::Vector2I& pos2i, bool orPorch 
 	Chit* porch = 0;
 	CChitArray arr;
 
-	this->QuerySpatialHash( &arr, pos2, rad, 0, BuildingFilter );
+	BuildingFilter buildingFilter;
+	this->QuerySpatialHash( &arr, pos2, rad, 0, &buildingFilter );
 	for( int i=0; i<arr.Size(); ++i ) {
 		Chit* chit = arr[i];
 		MapSpatialComponent* msc = GET_SUB_COMPONENT( chit, SpatialComponent, MapSpatialComponent );
@@ -236,11 +177,12 @@ Chit* LumosChitBag::QueryBuilding( const grinliz::Vector2I& pos2i, bool orPorch 
 }
 
 
+/*
 bool LumosChitBag::CoreFilter( Chit* chit )
 {
 	return ( chit->GetItem() && chit->GetItem()->name == IStringConst::kcore );
 }
-
+*/
 
 Chit* LumosChitBag::NewGoldChit( const grinliz::Vector3F& pos, int amount )
 {
@@ -248,7 +190,9 @@ Chit* LumosChitBag::NewGoldChit( const grinliz::Vector3F& pos, int amount )
 		return 0;
 
 	Vector2F v2 = { pos.x, pos.z };
-	this->QuerySpatialHash( &chitList, v2, 1.0f, 0, GoldFilter );
+
+	ItemNameFilter goldFilter( IStringConst::kgold );
+	this->QuerySpatialHash( &chitList, v2, 1.0f, 0, &goldFilter );
 	Chit* chit = 0;
 	if ( chitList.Size() ) {
 		chit = chitList[0];
@@ -396,6 +340,7 @@ void LumosChitBag::AddItem( const char* name, Chit* chit, Engine* engine, int te
 }
 
 
+/*
 bool LumosChitBag::HasMapSpatialInUse( Chit* chit ) {
 	MapSpatialComponent* ms = GET_SUB_COMPONENT( chit, SpatialComponent, MapSpatialComponent );
 	if ( ms ) {
@@ -403,6 +348,7 @@ bool LumosChitBag::HasMapSpatialInUse( Chit* chit ) {
 	}
 	return false;
 }
+*/
 
 
 int LumosChitBag::MapGridUse( int x, int y )
@@ -413,7 +359,8 @@ int LumosChitBag::MapGridUse( int x, int y )
 	r.max.x = r.min.x + 1.0f;
 	r.max.y = r.min.y + 1.0f;
 
-	QuerySpatialHash( &inUseArr, r, 0, HasMapSpatialInUse );
+	ChitHasMapSpatial hasMapSpatial;
+	QuerySpatialHash( &inUseArr, r, 0, &hasMapSpatial );
 	int flags = 0;
 	for( int i=0; i<inUseArr.Size(); ++i ) {
 		MapSpatialComponent* ms = GET_SUB_COMPONENT( inUseArr[i], SpatialComponent, MapSpatialComponent );
@@ -431,7 +378,9 @@ CoreScript* LumosChitBag::IsBoundToCore( Chit* chit )
 		Vector2F pos2 = chit->GetSpatialComponent()->GetPosition2D();
 
 		CChitArray array;
-		QuerySpatialHash( &array, pos2, 0.1f, 0, CoreFilter );
+		ItemNameFilter coreFilter( IStringConst::kcore );
+
+		QuerySpatialHash( &array, pos2, 0.1f, 0, &coreFilter );
 		if ( !array.Empty() ) {
 			Chit* cc = array[0];
 			ScriptComponent* sc = cc->GetScriptComponent();
@@ -455,7 +404,8 @@ CoreScript* LumosChitBag::GetCore( const grinliz::Vector2I& sector )
 		Vector2F pos2 = { (float)pos2i.x+0.5f, (float)pos2i.y+0.5f };
 
 		CChitArray array;
-		QuerySpatialHash( &array, pos2, 0.1f, 0, CoreFilter );
+		ItemNameFilter coreFilter( IStringConst::kcore );
+		QuerySpatialHash( &array, pos2, 0.1f, 0, &coreFilter );
 		GLASSERT( !array.Empty() );
 
 		if ( !array.Empty() ) {
@@ -472,3 +422,122 @@ CoreScript* LumosChitBag::GetCore( const grinliz::Vector2I& sector )
 	return 0;
 }
 
+
+ItemNameFilter::ItemNameFilter()
+{
+	cNames = 0;
+	iNames = 0;
+	count  = 0;
+}
+
+
+ItemNameFilter::ItemNameFilter( const char* name )
+{
+	cNames = &name;
+	iNames = 0;
+	count = 1;
+}
+
+
+ItemNameFilter::ItemNameFilter( const char* arr[], int n )
+{
+	cNames = arr;
+	iNames = 0;
+	count  = n;
+}
+
+
+ItemNameFilter::ItemNameFilter( const grinliz::IString& istring )
+{
+	cNames = 0;
+	iNames = &istring;
+	count  = 1;
+}
+
+
+ItemNameFilter::ItemNameFilter( const grinliz::IString* arr, int n )
+{
+	cNames = 0;
+	iNames = arr;
+	count  = n;
+}
+
+
+bool ItemNameFilter::Accept( Chit* chit )
+{
+	const GameItem* item = chit->GetItem();
+	if ( item ) {
+		if ( cNames ) {
+			const char* key = item->Name();
+			for( int i=0; i<count; ++i ) {
+				if ( StrEqual( cNames[i], key ))
+					return true;
+			}
+		}
+		else if ( iNames ) {
+			const IString& key = item->name;
+			for( int i=0; i<count; ++i ) {
+				if ( key == iNames[i] )
+					return true;
+			}
+		}
+	}
+	return false;
+}
+
+
+GoldCrystalFilter::GoldCrystalFilter()
+{
+	arr[0] = IStringConst::kgold;
+	arr[1] = IStringConst::kcrystal_green;
+	arr[2] = IStringConst::kcrystal_red;
+	arr[3] = IStringConst::kcrystal_blue;
+	arr[4] = IStringConst::kcrystal_violet;
+	iNames = arr;
+	count = 5;
+}
+
+
+bool BuildingFilter::Accept( Chit* chit ) 
+{
+	// Assumed to be MapSpatial with "building" flagged on.
+	MapSpatialComponent* msc = GET_SUB_COMPONENT( chit, SpatialComponent, MapSpatialComponent );
+	return msc && msc->Building();
+}
+
+
+PlantFilter::PlantFilter( int type, int max )
+{
+	typeFilter = type;
+	maxStage = max;
+}
+
+
+bool PlantFilter::Accept( Chit* chit )
+{
+	int type = 0;
+	int stage = 0;
+	bool okay = PlantScript::IsPlant( chit, &type, &stage ) != 0;
+	if ( okay ) {
+		if ( typeFilter >= 0 && (type != typeFilter)) {
+			okay = false;
+		}
+	}
+	if ( okay && stage > maxStage ) {
+		okay = false;
+	}
+	return okay;
+}
+
+
+bool RemovableFilter::Accept( Chit* chit )
+{
+	return buildingFilter.Accept( chit ) || plantFilter.Accept( chit );
+}
+
+
+bool ChitHasMapSpatial::Accept( Chit* chit ) 
+{
+	MapSpatialComponent* msc = GET_SUB_COMPONENT( chit, SpatialComponent, MapSpatialComponent );
+	return msc != 0;
+}

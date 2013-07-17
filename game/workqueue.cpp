@@ -6,6 +6,8 @@
 
 #include "../engine/engine.h"
 
+#include "../xegame/istringconst.h"
+
 #include "../xarchive/glstreamer.h"
 
 using namespace grinliz;
@@ -116,7 +118,8 @@ void WorkQueue::Add( int action, const grinliz::Vector2I& pos2i, IString structu
 
 	// Notify near.
 	CChitArray array;
-	chitBag->QuerySpatialHash( &array, pos2, NOTIFICATION_RAD, 0, LumosChitBag::WorkerFilter );
+	ItemNameFilter workerFilter( IStringConst::kworker );
+	chitBag->QuerySpatialHash( &array, pos2, NOTIFICATION_RAD, 0, &workerFilter );
 	for( int i=0; i<array.Size(); ++i ) {
 		ChitMsg msg( ChitMsg::WORKQUEUE_UPDATE );
 		array[i]->SendMessage( msg );
@@ -206,13 +209,15 @@ void WorkQueue::DoTick()
 		Vector2I pos2i = { queue[i].pos.x, queue[i].pos.y };
 		Vector2F pos2  = { (float)pos2i.x + 0.5f, (float)pos2i.y+0.5f };
 		const WorldGrid& wg = worldMap->GetWorldGrid( pos2i.x, pos2i.x );
+		RemovableFilter removableFilter;
+
 		switch ( queue[i].action )
 		{
 		case CLEAR:
 			if ( worldMap->IsPassable( pos2i.x, pos2i.y )) {
 				// FIXME wrong query for non 1x1 buildings
 				CChitArray array;
-				chitBag->QuerySpatialHash( &array, pos2, 0.1f, 0, LumosChitBag::RemovableFilter );
+				chitBag->QuerySpatialHash( &array, pos2, 0.1f, 0, &removableFilter );
 				if ( array.Empty() ) {
 					RemoveImage( queue[i] );
 					queue.Remove( i );
@@ -224,7 +229,7 @@ void WorkQueue::DoTick()
 		case BUILD:
 			{
 				CChitArray array;
-				chitBag->QuerySpatialHash( &array, pos2, 0.1f, 0, LumosChitBag::RemovableFilter );
+				chitBag->QuerySpatialHash( &array, pos2, 0.1f, 0, &removableFilter );
 				if ( !worldMap->IsPassable( queue[i].pos.x, queue[i].pos.y ) || !array.Empty() ) {
 					RemoveImage( queue[i] );
 					queue.Remove( i );

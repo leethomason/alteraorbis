@@ -68,13 +68,6 @@ void CoreScript::OnRemove( const ScriptContext& ctx )
 }
 
 
-static bool Accept( Chit* c ) 
-{
-	AIComponent* ai = c->GetAIComponent();
-	return ai != 0;
-}
-
-
 Chit* CoreScript::GetAttached()
 {
 	Chit* c = 0;
@@ -136,7 +129,8 @@ int CoreScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 		Rectangle2F r;
 		r.Set( (float)pos.x, (float)(pos.y), (float)(pos.x+1), (float)(pos.y+1) );
 		CChitArray arr;
-		ctx.chit->GetChitBag()->QuerySpatialHash( &arr, r, 0, Accept );
+		ChitHasAIComponent hasAIComponent;
+		ctx.chit->GetChitBag()->QuerySpatialHash( &arr, r, 0, &hasAIComponent );
 		if ( arr.Size() < 2 ) {
 			Vector3F pf = { (float)pos.x+0.5f, 0, (float)pos.y+0.5f };
 			// FIXME: proper team

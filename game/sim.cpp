@@ -432,7 +432,9 @@ void Sim::CreatePlant( int x, int y, int type )
 			r.min.Set( (float)x+0.5f, (float)y+0.5f );
 			r.max = r.min;
 			r.Outset( 3.0f );
-			chitBag->QuerySpatialHash( &queryArr, r, 0, 0 );
+
+			PlantFilter plantFilter;
+			chitBag->QuerySpatialHash( &queryArr, r, 0, &plantFilter );
 
 			float chance[NUM_PLANT_TYPES];
 			for( int i=0; i<NUM_PLANT_TYPES; ++i ) {

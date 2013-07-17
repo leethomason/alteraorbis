@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with TexturePacker http://texturepacker.com-->
-<!-- $TexturePacker:SmartUpdate:028e351f7d21a6cd03771bc586935ba3$ -->
+<!-- $TexturePacker:SmartUpdate:95ff0c28495b29b2f3957d10546c09e9$ -->
 <!--Format:
 n  => name of the sprite
 x  => sprite x pos in texture
@@ -14,10 +14,13 @@ oH => sprite's original height (only available if trimmed)
 r => 'y' only set if sprite is rotated
 -->
 <TextureAtlas imagePath="icon.png" width="512" height="1024">
-    <sprite n="horn" x="226" y="462" w="170" h="196" oX="41" oY="33" oW="256" oH="256"/>
-    <sprite n="icon" x="400" y="462" w="90" h="42" oX="16" oY="45" oW="128" oH="128"/>
-    <sprite n="levelup" x="242" y="0" w="234" h="232" oX="17" oY="9" oW="256" oH="256"/>
-    <sprite n="news" x="0" y="0" w="238" h="240" oX="8" oY="8" oW="256" oH="256"/>
-    <sprite n="possibleTarget" x="0" y="244" w="222" h="222" oX="16" oY="16" oW="256" oH="256"/>
-    <sprite n="target" x="242" y="236" w="222" h="222" oX="16" oY="16" oW="256" oH="256"/>
+    <sprite n="commerce" x="246" y="248" w="238" h="240" oX="8" oY="8" oW="256" oH="256"/>
+    <sprite n="horn" x="0" y="736" w="170" h="196" oX="41" oY="33" oW="256" oH="256"/>
+    <sprite n="icon" x="0" y="956" w="90" h="42" oX="16" oY="45" oW="128" oH="128"/>
+    <sprite n="levelup" x="0" y="496" w="234" h="232" oX="17" oY="9" oW="256" oH="256"/>
+    <sprite n="media" x="0" y="248" w="238" h="240" oX="8" oY="8" oW="256" oH="256"/>
+    <sprite n="news" x="246" y="0" w="238" h="240" oX="8" oY="8" oW="256" oH="256"/>
+    <sprite n="possibleTarget" x="242" y="726" w="222" h="222" oX="16" oY="16" oW="256" oH="256"/>
+    <sprite n="social" x="0" y="0" w="238" h="240" oX="8" oY="8" oW="256" oH="256"/>
+    <sprite n="target" x="242" y="496" w="222" h="222" oX="16" oY="16" oW="256" oH="256"/>
 </TextureAtlas>

@@ -26,6 +26,67 @@ class WorldMap;
 struct Wallet;
 class CoreScript;
 
+class BuildingFilter : public IChitAccept
+{
+public:
+	virtual bool Accept( Chit* chit );
+};
+
+
+class PlantFilter : public IChitAccept
+{
+public:
+	PlantFilter( int type=-1, int maxStage=3 );
+	virtual bool Accept( Chit* chit );
+private:
+	int typeFilter;
+	int maxStage;
+};
+
+
+class RemovableFilter : public IChitAccept
+{
+public:
+	virtual bool Accept( Chit* chit );
+private:
+	BuildingFilter buildingFilter;
+	PlantFilter    plantFilter;
+};
+
+
+class ChitHasMapSpatial : public IChitAccept
+{
+public:
+	virtual bool Accept( Chit* chit );
+};
+
+class ItemNameFilter : public IChitAccept
+{
+public:
+	ItemNameFilter( const char* name );
+	ItemNameFilter( const char* names[], int n );
+	ItemNameFilter( const grinliz::IString& name );
+	ItemNameFilter( const grinliz::IString* names, int n );
+
+	virtual bool Accept( Chit* chit );
+
+protected:
+	ItemNameFilter();
+	const char**			cNames;
+	const grinliz::IString* iNames;
+	int						count;
+};
+
+
+class GoldCrystalFilter : public ItemNameFilter
+{
+public:
+	GoldCrystalFilter();
+private:
+	grinliz::IString arr[5];
+};
+
+
 class LumosChitBag : public ChitBag,
 					 public IMapGridUse
 {
@@ -57,15 +118,6 @@ public:
 	CoreScript* GetCore( const grinliz::Vector2I& sector );
 
 	Census census;
-
-	static bool GoldFilter( Chit* chit );			// Is this gold?
-	static bool GoldCrystalFilter( Chit* chit );	// Is this gold or crystal? (wallet items)
-	static bool CoreFilter( Chit* chit );
-	static bool WorkerFilter( Chit* chit );
-	static bool BuildingFilter( Chit* chit );
-	static bool BuildingWithPorchFilter( Chit* chit );
-	static bool RemovableFilter( Chit* chit );			// something that can be removed - building, plant
-	static bool KioskFilter( Chit* chit );
 
 	Chit* QueryBuilding( const grinliz::Vector2I& pos, bool orPorch );
 

@@ -2,6 +2,8 @@
 #include "../xarchive/glstreamer.h"
 #include "worldmap.h"
 #include "worldinfo.h"
+#include "../grinliz/glrandom.h"
+#include "../xegame/istringconst.h"
 
 using namespace grinliz;
 
@@ -10,6 +12,7 @@ void VisitorData::Serialize( XStream* xs )
 	XarcOpen( xs, "VisitorData" );
 	XARC_SER( xs, id );
 	XARC_SER( xs, kioskTime );
+	XARC_SER_ARR( xs, wants, NUM_VISITS );
 
 	if ( xs->Saving() ) {
 		XarcSet( xs, "sectorVisited.size", sectorVisited.Size() );
@@ -23,6 +26,14 @@ void VisitorData::Serialize( XStream* xs )
 	}
 	XARC_SER_CARRAY( xs, memoryArr );
 	XarcClose( xs );
+}
+
+
+VisitorData::VisitorData()
+{
+	id = 0;
+	kioskTime = 0;
+	for( int i=0; i<NUM_VISITS; ++i ) wants[i] = 0;
 }
 
 
@@ -42,6 +53,12 @@ Visitors::Visitors()
 {
 	GLASSERT( instance == 0 );
 	instance = this;
+	Random random;
+	for( int i=0; i<NUM_VISITORS; ++i ) {
+		for( int k=0; k<VisitorData::NUM_VISITS; ++k ) {
+			visitorData[i].wants[k] = random.Rand(VisitorData::NUM_KIOSK_TYPES);
+		}
+	}
 }
 
 
@@ -75,6 +92,7 @@ SectorPort Visitors::ChooseDestination( int index, WorldMap* map )
 	GLASSERT( instance );
 	GLASSERT( index >=0 && index <NUM_VISITORS );
 	Vector2I sector = { 0, 0 };
+	int kioskType = visitorData[index].wants[ visitorData[index].sectorVisited.Size() ];
 	
 	if ( random.Bit() ) {
 		Random notRandom( index );
@@ -89,7 +107,9 @@ SectorPort Visitors::ChooseDestination( int index, WorldMap* map )
 		for( int k=0; k<3; ++k ) {
 			VisitorData* vd = Visitors::Get( idx[k] );
 			for( int i=0; i<vd->memoryArr.Size(); ++i ) {
-				if ( vd->memoryArr[i].rating > 0 ) {
+				if (    vd->memoryArr[i].kioskType == kioskType
+					 && vd->memoryArr[i].rating > 0 ) 
+				{
 					score[ideas.Size()] = (float)vd->memoryArr[i].rating;
 					ideas.Push( vd->memoryArr[i] );
 				}
@@ -133,9 +153,12 @@ SectorPort Visitors::ChooseDestination( int index, WorldMap* map )
 void VisitorData::DidVisitKiosk( const grinliz::Vector2I& sector )
 {
 	bool added = false;
+	int kioskType = wants[ sectorVisited.Size() ];
+
 	for( int i=0; i<memoryArr.Size(); ++i ) {
 		if ( memoryArr[i].sector == sector ) {
 			memoryArr[i].rating = 1;
+			memoryArr[i].kioskType = kioskType;
 			added = true;
 			break;
 		}
@@ -143,6 +166,7 @@ void VisitorData::DidVisitKiosk( const grinliz::Vector2I& sector )
 	if ( !added && memoryArr.HasCap() ) {
 		Memory m;
 		m.rating = 1;
+		m.kioskType = kioskType;
 		m.sector = sector;
 		memoryArr.Push( m );
 	}
@@ -158,4 +182,21 @@ void VisitorData::NoKiosk( const grinliz::Vector2I& sector )
 		}
 	}
 }
+
+
+grinliz::IString VisitorData::CurrentKioskWant()
+{
+	if ( sectorVisited.Size() >= NUM_VISITS )
+		return IString();
+
+	switch ( wants[sectorVisited.Size()] ) {
+	case KIOSK_N:	return IStringConst::kkiosk__n;
+	case KIOSK_M:	return IStringConst::kkiosk__m;
+	case KIOSK_C:	return IStringConst::kkiosk__c;
+	case KIOSK_S:	return IStringConst::kkiosk__s;
+	}
+	GLASSERT( 0 );	// Bad values?
+	return IString();
+}
+
 

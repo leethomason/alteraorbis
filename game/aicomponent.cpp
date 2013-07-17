@@ -194,7 +194,8 @@ bool AIComponent::LineOfSight( const ComponentSet& thisComp, const grinliz::Vect
 
 
 
-static bool FEFilter( Chit* c ) {
+bool FEFilter::Accept( Chit* c ) 
+{
 	// Tricky stuff. This will return F/E units:
 	if( c->GetAIComponent() )
 		return true;
@@ -229,7 +230,9 @@ void AIComponent::GetFriendEnemyLists()
 	enemyList.Clear();
 
 	CChitArray chitArr;
-	GetChitBag()->QuerySpatialHash( &chitArr, zone, parentChit, FEFilter );
+	FEFilter feFilter;
+
+	GetChitBag()->QuerySpatialHash( &chitArr, zone, parentChit, &feFilter );
 	for( int i=0; i<chitArr.Size(); ++i ) {
 		int status = GetTeamStatus( chitArr[i] );
 		if ( status == ENEMY ) {
@@ -533,7 +536,9 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 since )
 		Vector2F pos = thisComp.spatial->GetPosition2D();
 		// Note that currently only support eating stage 0-1 plants.
 		CChitArray plants;
-		parentChit->GetChitBag()->QuerySpatialHash( &plants, pos, 0.4f, 0, PlantScript::PassablePlantFilter );
+		PlantFilter plantFilter( -1, MAX_PASSABLE_PLANT_STAGE );
+
+		parentChit->GetChitBag()->QuerySpatialHash( &plants, pos, 0.4f, 0, &plantFilter );
 		if ( !plants.Empty() ) {
 			// We are standing on a plant.
 			float hp = Travel( EAT_HP_PER_SEC, since );
@@ -567,8 +572,11 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 since )
 		// FIXME: kiosk type
 		Vector2I pos2i = thisComp.spatial->GetPosition2DI();
 		Chit* chit = this->GetChitBag()->ToLumos()->QueryBuilding( pos2i, true );
-		if ( chit && chit->GetItem()->name == "kiosk.m" ) {
-			VisitorData* vd = &Visitors::Instance()->visitorData[visitorIndex];
+		
+		VisitorData* vd = &Visitors::Instance()->visitorData[visitorIndex];
+		IString kioskName = vd->CurrentKioskWant();
+
+		if ( chit && chit->GetItem()->name == kioskName ) {
 			vd->kioskTime += since;
 			if ( vd->kioskTime > VisitorData::KIOSK_TIME ) {
 				Vector2I sector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
@@ -830,7 +838,8 @@ Vector2F AIComponent::ThinkWanderFlock( const ComponentSet& thisComp )
 	r.Outset( PLANT_AWARE );
 
 	CChitArray plants;
-	parentChit->GetChitBag()->QuerySpatialHash( &plants, r, 0, PlantScript::PassablePlantFilter );
+	PlantFilter plantFilter( -1, MAX_PASSABLE_PLANT_STAGE );
+	parentChit->GetChitBag()->QuerySpatialHash( &plants, r, 0, &plantFilter );
 	for( int i=0; i<plants.Size() && i<NPLANTS; ++i ) {
 		pos.Push( plants[i]->GetSpatialComponent()->GetPosition2D() );
 	}
@@ -915,9 +924,10 @@ void AIComponent::ThinkVisitor( const ComponentSet& thisComp )
 
 	Vector2I pos2i = thisComp.spatial->GetPosition2DI();
 	Vector2I sector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
-	VisitorData* vd = &Visitors::Instance()->visitorData[visitorIndex];	// FIXME ugly
+	VisitorData* vd = Visitors::Get( visitorIndex );
 	Chit* kiosk = GetChitBag()->ToLumos()->QueryBuilding( pos2i, true );
-	if ( kiosk && kiosk->GetItem()->name == "kiosk.m" ) {
+	IString kioskName = vd->CurrentKioskWant();
+	if ( kiosk && kiosk->GetItem()->name == kioskName ) {
 		// all good
 	}
 	else {
@@ -950,7 +960,15 @@ void AIComponent::ThinkVisitor( const ComponentSet& thisComp )
 			Rectangle2F inner;
 			inner.Set( (float)inneri.min.x, (float)inneri.min.y, (float)(inneri.max.x+1), (float)(inneri.max.y+1) );
 
-			parentChit->GetChitBag()->QuerySpatialHash( &arr, inner, 0, LumosChitBag::KioskFilter );
+			IString kiosks[4] = {
+				IStringConst::kkiosk__n,
+				IStringConst::kkiosk__m,
+				IStringConst::kkiosk__c,
+				IStringConst::kkiosk__s
+			};
+			ItemNameFilter kioskFilter( kiosks, 4 );
+
+			parentChit->GetChitBag()->QuerySpatialHash( &arr, inner, 0, &kioskFilter );
 			if ( arr.Empty() ) {
 				// Done here.
 				vd->NoKiosk( sector );
@@ -1019,7 +1037,8 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 		// Are we near a plant?
 		// Note that currently only support eating stage 0-1 plants.
 		CChitArray plants;
-		parentChit->GetChitBag()->QuerySpatialHash( &plants, pos2, PLANT_AWARE, 0, PlantScript::PassablePlantFilter );
+		PlantFilter plantFilter( -1, MAX_PASSABLE_PLANT_STAGE );
+		parentChit->GetChitBag()->QuerySpatialHash( &plants, pos2, PLANT_AWARE, 0, &plantFilter );
 
 		Vector2F plantPos =  { 0, 0 };
 		float plantDist = 0;
@@ -1350,7 +1369,8 @@ void AIComponent::FlushTaskList( const ComponentSet& thisComp )
 			else {
 				// FIXME: not correct for non-1x1 structures.
 				CChitArray array;
-				parentChit->GetChitBag()->QuerySpatialHash( &array, taskPos2, 0.1f, 0, LumosChitBag::RemovableFilter );
+				RemovableFilter removableFilter;
+				parentChit->GetChitBag()->QuerySpatialHash( &array, taskPos2, 0.1f, 0, &removableFilter );
 				for( int i=0; i<array.Size(); ++i ) {
 					if ( array[i]->GetItem() && array[i]->GetItem()->name == task->structure ) {
 
@@ -1374,7 +1394,8 @@ void AIComponent::FlushTaskList( const ComponentSet& thisComp )
 		{
 			const WorldGrid& wg = map->GetWorldGrid( task->pos2i.x, task->pos2i.y );
 			CChitArray array;
-			parentChit->GetChitBag()->QuerySpatialHash( &array, taskPos2, 0.1f, 0, LumosChitBag::RemovableFilter );
+			RemovableFilter removableFilter;
+			parentChit->GetChitBag()->QuerySpatialHash( &array, taskPos2, 0.1f, 0, &removableFilter );
 			// FIXME: not correct for non-1x1 structures.
 			if ( wg.RockHeight() == 0 && array.Empty() ) {
 				if ( task->structure.empty() ) {
@@ -1600,7 +1621,8 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			center.x = floorf( center.x ) + 0.5f;
 			center.y = floorf( center.y ) + 0.5f;
 			CChitArray arr;
-			GetChitBag()->QuerySpatialHash( &arr, center, 0.1f, parentChit, LumosChitBag::CoreFilter );
+			ItemNameFilter coreFilter( IStringConst::kcore );
+			GetChitBag()->QuerySpatialHash( &arr, center, 0.1f, parentChit, &coreFilter );
 			if ( arr.Size() ) {
 				ScriptComponent* sc = arr[0]->GetScriptComponent();
 				GLASSERT( sc && sc->Script() );

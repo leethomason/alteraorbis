@@ -9,6 +9,7 @@ IString IStringConst::khead;
 IString IStringConst::kshield;
 IString IStringConst::khumanFemale;
 IString IStringConst::khumanMale;
+IString IStringConst::kworker;
 IString IStringConst::kring;
 IString IStringConst::klargeRing;
 IString IStringConst::kgold;
@@ -17,6 +18,10 @@ IString IStringConst::kcrystal_red;
 IString IStringConst::kcrystal_blue;
 IString IStringConst::kcrystal_violet;
 IString IStringConst::kcore;
+IString IStringConst::kkiosk__n;
+IString IStringConst::kkiosk__m;
+IString IStringConst::kkiosk__c;
+IString IStringConst::kkiosk__s;
 
 void IStringConst::Init()
 {
@@ -27,6 +32,7 @@ void IStringConst::Init()
 	kshield = StringPool::Intern( "shield", true );
 	khumanFemale = StringPool::Intern( "humanFemale", true );
 	khumanMale = StringPool::Intern( "humanMale", true );
+	kworker = StringPool::Intern( "worker", true );
 	kring = StringPool::Intern( "ring", true );
 	klargeRing = StringPool::Intern( "largeRing", true );
 	kgold = StringPool::Intern( "gold", true );
@@ -35,4 +41,8 @@ void IStringConst::Init()
 	kcrystal_blue = StringPool::Intern( "crystal_blue", true );
 	kcrystal_violet = StringPool::Intern( "crystal_violet", true );
 	kcore = StringPool::Intern( "core", true );
+	kkiosk__n = StringPool::Intern( "kiosk.n", true );
+	kkiosk__m = StringPool::Intern( "kiosk.m", true );
+	kkiosk__c = StringPool::Intern( "kiosk.c", true );
+	kkiosk__s = StringPool::Intern( "kiosk.s", true );
 }

@@ -18,6 +18,7 @@
 
 #include "../xegame/component.h"
 #include "../xegame/cticker.h"
+#include "../xegame/chitbag.h"
 #include "../grinliz/glcontainer.h"
 #include "../grinliz/glrectangle.h"
 #include "../script/battlemechanics.h"
@@ -27,6 +28,12 @@ class Engine;
 struct ComponentSet;
 struct SectorPort;
 class WorkQueue;
+
+class FEFilter : public IChitAccept
+{
+public:
+	virtual bool Accept( Chit* chit );
+};
 
 // Combat AI: needs refactoring
 class AIComponent : public Component

@@ -15,10 +15,11 @@ static const Vector2F OFFSET = { -0.5f, -0.5f };
 
 VisitorStateComponent::VisitorStateComponent( WorldMap* _map ) : worldMap( _map )
 {
-	RenderAtom needAtom = LumosGame::CalcIconAtom( "news" );
 	for( int i=0; i<VisitorData::NUM_VISITS; ++i ) {
-		wants[i].Init( &worldMap->overlay0, needAtom, true );
+		RenderAtom nullAtom;
+		wants[i].Init( &worldMap->overlay0, nullAtom, true );
 	}
+
 
 	RenderAtom gray = LumosGame::CalcPaletteAtom( PAL_GRAY*2, 0 );
 	RenderAtom green = LumosGame::CalcPaletteAtom( PAL_GREEN*2, 0 );
@@ -42,6 +43,7 @@ void VisitorStateComponent::Serialize( XStream* xs )
 void VisitorStateComponent::OnAdd( Chit* chit )
 {
 	super::OnAdd( chit );
+	needsInit = true;
 
 	for( int i=0; i<VisitorData::NUM_VISITS; ++i ) {
 		worldMap->overlay0.Add( &wants[i] );
@@ -67,6 +69,21 @@ int VisitorStateComponent::DoTick( U32 delta, U32 since )
 		int index = ai->VisitorIndex();
 		if ( index >= 0 ) {
 			const VisitorData* vd = Visitors::Get( index );
+
+			if ( needsInit ) {
+				static const char* ICON[VisitorData::NUM_KIOSK_TYPES] = {
+					"news",
+					"media",
+					"commerce",
+					"social"
+				};
+				for( int i=0; i<VisitorData::NUM_VISITS; ++i ) {
+					int need = vd->wants[i];
+					RenderAtom atom = LumosGame::CalcIconAtom( ICON[need] );
+					wants[i].SetAtom( atom );
+				}
+			}
+
 			int wantsVisible = VisitorData::NUM_VISITS - vd->sectorVisited.Size(); 
 			for( int i=0; i<VisitorData::NUM_VISITS; ++i ) {
 				wants[i].SetVisible( wantsVisible > i );

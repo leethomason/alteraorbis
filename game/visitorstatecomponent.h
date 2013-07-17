@@ -44,6 +44,7 @@ private:
 	WorldMap* worldMap;
 	gamui::Image		wants[VisitorData::NUM_VISITS];
 	gamui::DigitalBar	bar;	// FIXME: this is a pretty general need to have here. Probably should be head decos.
+	bool needsInit;
 };
 
 

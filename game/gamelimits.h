@@ -35,6 +35,7 @@ static const int MAX_ACTIVE_ITEMS	= 8;
 static const int MAX_ITEM_NAME		= 24;
 static const int NUM_PLANT_TYPES	= 8;
 static const int MAX_PLANT_STAGES	= 4;
+static const int MAX_PASSABLE_PLANT_STAGE = 1;	// 0,1 passable, 2,3 are not
 
 // General guidelines to the # of things in the world.
 static const int TYPICAL_DOMAINS	= 100;
