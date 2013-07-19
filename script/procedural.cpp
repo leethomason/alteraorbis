@@ -276,13 +276,15 @@ void TeamGen::Assign( int seed, ProcRenderInfo* info )
 	Vector4F base		= palette->GetV4F( colors[index].x, colors[index].y );
 	Vector4F contrast	= palette->GetV4F( colors[index].z, colors[index].w );
 	Vector4F glow		= base;
+	Vector4F zero		= { 0, 0, 0, 0 };
 
-	base.w = 0;
-	contrast.w = 0;
-	glow.w = 1;
+	base.w		= 0;
+	contrast.w	= 0;
+	glow.w		= 0.7f;
 
 	info->color.SetCol( 0, base );
 	info->color.SetCol( 1, contrast );
 	info->color.SetCol( 2, glow );
+	info->color.m44 = 0;
 }
 
