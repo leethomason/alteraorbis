@@ -31,6 +31,7 @@
   <texture filename="palette.png" />
   <texture filename="palette_50.png" emissive="true" />
   <texture filename="palette_100.png" emissive="true"/>
+  <texture filename="paletteglow.png" filename2="paletteglow_em.png" emissive="true" />
   <texture filename="charSwatch.png" width="128" height="8" /> 
   <texture filename="characters.png" />
   <texture filename="bluestone.png" />
