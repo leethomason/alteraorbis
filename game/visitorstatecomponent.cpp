@@ -82,11 +82,11 @@ int VisitorStateComponent::DoTick( U32 delta, U32 since )
 					RenderAtom atom = LumosGame::CalcIconAtom( ICON[need] );
 					wants[i].SetAtom( atom );
 				}
+				needsInit = false;
 			}
 
-			int wantsVisible = VisitorData::NUM_VISITS - vd->sectorVisited.Size(); 
 			for( int i=0; i<VisitorData::NUM_VISITS; ++i ) {
-				wants[i].SetVisible( wantsVisible > i );
+				wants[i].SetVisible( i >= vd->nWants );
 			}
 			if ( vd->kioskTime ) {
 				float t = (float)vd->kioskTime / (float)VisitorData::KIOSK_TIME;

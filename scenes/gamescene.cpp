@@ -422,7 +422,7 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 					if ( mv.VoxelHit()) {
 						wq->Add( WorkQueue::CLEAR, mv.Voxel2(), IString() );
 					}
-					else if ( mv.ModelHit() && removableFilter.Accept( mv.model->userData )) {
+					else if ( mv.ModelHit() && mv.model->userData && removableFilter.Accept( mv.model->userData )) {
 						Vector2I pos2i = { (int)mv.model->Pos().x, (int)mv.model->Pos().z };
 						GameItem* gameItem = mv.model->userData->GetItem();
 						GLASSERT( gameItem );

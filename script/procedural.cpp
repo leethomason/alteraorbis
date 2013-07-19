@@ -260,11 +260,13 @@ grinliz::IString ItemGen::ToName( int id )
 
 void TeamGen::Assign( int seed, ProcRenderInfo* info )
 {
-	static const int NUM = 4;
+	static const int NUM = 6;
 	static const Vector4I colors[NUM] = {
 		// approved
 		{ PAL_BLUE*2, PAL_GREEN,			PAL_GREEN*2, PAL_GREEN },
 		{ PAL_TANGERINE*2, PAL_TANGERINE,	PAL_GREEN*2, PAL_TANGERINE },
+		{ PAL_GREEN*2, PAL_TANGERINE,		PAL_TANGERINE*2, PAL_TANGERINE },
+		{ PAL_RED*2, PAL_RED,				PAL_GREEN*2, PAL_RED },
 
 		// fail
 		{ PAL_RED*2, PAL_RED,				PAL_TANGERINE*2, PAL_RED },

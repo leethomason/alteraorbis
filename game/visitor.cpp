@@ -13,17 +13,9 @@ void VisitorData::Serialize( XStream* xs )
 	XARC_SER( xs, id );
 	XARC_SER( xs, kioskTime );
 	XARC_SER_ARR( xs, wants, NUM_VISITS );
-
-	if ( xs->Saving() ) {
-		XarcSet( xs, "sectorVisited.size", sectorVisited.Size() );
-		XarcSetVectorArr( xs, "sectorVisited.mem",  sectorVisited.Mem(), sectorVisited.Size() );
-	}
-	else {
-		int size = 0;
-		XarcGet( xs, "sectorVisited.size", size );
-		Vector2I* mem = sectorVisited.PushArr( size );
-		XarcGetVectorArr( xs, "sectorVisited.mem", mem, size );
-	}
+	XARC_SER( xs, nWants );
+	XARC_SER( xs, nVisits );
+	XARC_SER( xs, doneWith );
 	XARC_SER_CARRAY( xs, memoryArr );
 	XarcClose( xs );
 }
@@ -41,6 +33,7 @@ void VisitorData::Memory::Serialize( XStream* xs )
 {
 	XarcOpen( xs, "Memory" );
 	XARC_SER( xs, sector );
+	XARC_SER( xs, kioskType );
 	XARC_SER( xs, rating );
 	XarcClose( xs );
 }
@@ -92,9 +85,9 @@ SectorPort Visitors::ChooseDestination( int index, WorldMap* map )
 	GLASSERT( instance );
 	GLASSERT( index >=0 && index <NUM_VISITORS );
 	Vector2I sector = { 0, 0 };
-	int kioskType = visitorData[index].wants[ visitorData[index].sectorVisited.Size() ];
+	int kioskType = visitorData[index].CurrentKioskWantID();
 	
-	if ( random.Bit() ) {
+	if ( random.Rand(3)) {
 		Random notRandom( index );
 
 		grinliz::CArray< VisitorData::Memory, VisitorData::MEMORY*3 > ideas;
@@ -153,7 +146,7 @@ SectorPort Visitors::ChooseDestination( int index, WorldMap* map )
 void VisitorData::DidVisitKiosk( const grinliz::Vector2I& sector )
 {
 	bool added = false;
-	int kioskType = wants[ sectorVisited.Size() ];
+	int kioskType = CurrentKioskWantID();
 
 	for( int i=0; i<memoryArr.Size(); ++i ) {
 		if ( memoryArr[i].sector == sector ) {
@@ -170,11 +163,17 @@ void VisitorData::DidVisitKiosk( const grinliz::Vector2I& sector )
 		m.sector = sector;
 		memoryArr.Push( m );
 	}
+	++nWants;
+	++nVisits;
+	doneWith = sector;
 }
 
 
 void VisitorData::NoKiosk( const grinliz::Vector2I& sector )
 {
+	++nVisits;
+	doneWith = sector;
+
 	for( int i=0; i<memoryArr.Size(); ++i ) {
 		if ( memoryArr[i].sector == sector ) {
 			memoryArr.SwapRemove( i );
@@ -186,10 +185,10 @@ void VisitorData::NoKiosk( const grinliz::Vector2I& sector )
 
 grinliz::IString VisitorData::CurrentKioskWant()
 {
-	if ( sectorVisited.Size() >= NUM_VISITS )
+	if ( nWants >= NUM_VISITS )
 		return IString();
 
-	switch ( wants[sectorVisited.Size()] ) {
+	switch ( wants[nWants] ) {
 	case KIOSK_N:	return IStringConst::kkiosk__n;
 	case KIOSK_M:	return IStringConst::kkiosk__m;
 	case KIOSK_C:	return IStringConst::kkiosk__c;

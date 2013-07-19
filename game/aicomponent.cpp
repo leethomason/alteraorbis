@@ -569,7 +569,6 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 since )
 		      && !thisComp.move->IsMoving() )
 	{
 		// Visitors at a kiosk.
-		// FIXME: kiosk type
 		Vector2I pos2i = thisComp.spatial->GetPosition2DI();
 		Chit* chit = this->GetChitBag()->ToLumos()->QueryBuilding( pos2i, true );
 		
@@ -581,7 +580,6 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 since )
 			if ( vd->kioskTime > VisitorData::KIOSK_TIME ) {
 				Vector2I sector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
 				vd->DidVisitKiosk( sector );
-				vd->sectorVisited.Push( sector );
 				vd->kioskTime = 0;
 				currentAction = NO_ACTION;	// done here - move on!
 				return false;
@@ -934,7 +932,9 @@ void AIComponent::ThinkVisitor( const ComponentSet& thisComp )
 		kiosk = 0;
 	}
 
-	if ( !vd->sectorVisited.HasCap() ) {
+	if (    vd->nVisits >= VisitorData::MAX_VISITS
+		 || vd->nWants  >= VisitorData::NUM_VISITS ) 
+	{
 		disconnect = true;
 		if ( debugFlag ) {
 			GLOUTPUT(( "ID=%d Visitor travel done.\n", thisComp.chit->ID() ));
@@ -944,7 +944,7 @@ void AIComponent::ThinkVisitor( const ComponentSet& thisComp )
 		// Move on,
 		// Stand, or
 		// Move to a kiosk
-		if ( vd->sectorVisited.Find( sector ) >= 0 ) {
+		if ( vd->doneWith == sector ) {
 			// Head out!
 			SectorPort sp = Visitors::Instance()->ChooseDestination( visitorIndex, map );
 			bool okay = this->Move( sp, true );
@@ -960,19 +960,12 @@ void AIComponent::ThinkVisitor( const ComponentSet& thisComp )
 			Rectangle2F inner;
 			inner.Set( (float)inneri.min.x, (float)inneri.min.y, (float)(inneri.max.x+1), (float)(inneri.max.y+1) );
 
-			IString kiosks[4] = {
-				IStringConst::kkiosk__n,
-				IStringConst::kkiosk__m,
-				IStringConst::kkiosk__c,
-				IStringConst::kkiosk__s
-			};
-			ItemNameFilter kioskFilter( kiosks, 4 );
-
+			ItemNameFilter kioskFilter( vd->CurrentKioskWant() );
 			parentChit->GetChitBag()->QuerySpatialHash( &arr, inner, 0, &kioskFilter );
+
 			if ( arr.Empty() ) {
 				// Done here.
 				vd->NoKiosk( sector );
-				vd->sectorVisited.Push( sector );
 				if ( debugFlag ) {
 					GLOUTPUT(( "ID=%d Visitor: no kiosk.\n", thisComp.chit->ID() ));
 				}
@@ -996,7 +989,7 @@ void AIComponent::ThinkVisitor( const ComponentSet& thisComp )
 				}
 				if ( !found ) {
 					// Done here.
-					vd->sectorVisited.Push( sector );
+					vd->doneWith = sector;
 					if ( debugFlag ) {
 						GLOUTPUT(( "ID=%d Visitor: no path to kiosk.\n", thisComp.chit->ID() ));
 					}
