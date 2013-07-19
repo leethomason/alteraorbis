@@ -315,10 +315,13 @@ void RenderComponent::SetProcedural( int hardpoint, const ProcRenderInfo& info )
 void RenderComponent::SetProcedural( IString hardpoint, const ProcRenderInfo& info )
 {
 	if ( !hardpoint.empty() ) {
-		for( int i=0; i<EL_MAX_METADATA; ++i ) {
-			if ( metaDataName[i] == hardpoint ) {
-				GLASSERT( model[i+1] );
-				Model* m = model[i+1];	// the +1 is very easy to screw up.
+		for( int i=0; i<EL_MAX_METADATA+1; ++i ) {
+			// Model[0] is the main model, model[1] is the first hardpoint
+			if (    ( i==0 && hardpoint == IStringConst::kmain )
+				 || ( i>0  && metaDataName[i-1] == hardpoint ))
+			{
+				GLASSERT( model[i] );
+				Model* m = model[i];
 				if ( m ) {
 					m->SetTextureXForm( info.te.uvXForm );
 					m->SetColorMap( true, info.color );

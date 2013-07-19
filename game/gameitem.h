@@ -300,40 +300,14 @@ public:
 		bool operator==( const KeyValue& rhs ) const { return key == rhs.key; }
 
 		grinliz::IString	key;
-		double				value;	// cast as needed - preserves int range
-
-		const char* Key() const		{ return key.c_str(); }
-		U32	Unsigned() const		{ return (U32)( value ); }
-		int Int() const				{ return (int) value; }
-		float Float() const			{ return (float) value; }
+		grinliz::IString	value;
 	};
 	grinliz::CDynArray<KeyValue>	keyValues;
 
-	bool GetValue( const char* name, double* value ) const { 
-		for( int i=0; i<keyValues.Size(); ++i ) {
-			if ( keyValues[i].key == name ) {
-				*value = keyValues[i].value;
-				return true;
-			}
-		}
-		return false;
-	}
-	bool GetValue( const char* name, float* value ) const {
-		double d;
-		if ( GetValue( name, &d )) {
-			*value = (float)d;
-			return true;
-		}
-		return false;
-	}
-	bool GetValue( const char* name, int* value ) const {
-		double d;
-		if ( GetValue( name, &d )) {
-			*value = (int)d;
-			return true;
-		}
-		return false;
-	}
+	grinliz::IString GetValue( const char* name ) const;
+	bool GetValue( const char* name, double* value ) const;
+	bool GetValue( const char* name, float* value ) const;
+	bool GetValue( const char* name, int* value ) const;
 
 	float CalcBoltSpeed() const {
 		static const float SPEED = 10.0f;

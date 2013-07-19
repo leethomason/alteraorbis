@@ -29,6 +29,7 @@
 #include "../script/scriptcomponent.h"
 #include "../script/corescript.h"
 #include "../script/plantscript.h"
+#include "../script/procedural.h"
 
 
 //#define DEBUG_EXPLOSION
@@ -64,6 +65,14 @@ Chit* LumosChitBag::NewBuilding( const Vector2I& pos, const char* name, int team
 	chit->Add( new RenderComponent( engine, rootItem.ResourceName() ));
 	chit->Add( new HealthComponent( engine ));
 	AddItem( name, chit, engine, team, 0 );
+
+	IString proc = rootItem.GetValue( "procedural" );
+	if ( !proc.empty() ) {
+		TeamGen gen;
+		ProcRenderInfo info;
+		gen.Assign( team, &info );
+		chit->GetRenderComponent()->SetProcedural( IStringConst::kmain, info );
+	}
 
 #if 0	// debugging
 	SectorPort sp;

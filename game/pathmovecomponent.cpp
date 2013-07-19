@@ -446,36 +446,52 @@ int PathMoveComponent::DoTick( U32 delta, U32 since )
 			pathPos = nPathPos;
 		}
 		// Are we at the end of the path data?
-		if (    pathPos == nPathPos
-			 && ( dest.rotation < 0 || Equal( dest.rotation, rot, 0.01f ))) 
-		{
-			if ( squattingDest || dest.pos.Equal( path[nPathPos-1], parentChit->GetRenderComponent()->RadiusOfBase()*0.2f ) ) {
-#ifdef DEBUG_PMC
-				GLOUTPUT(( "Dest reached. squatted=%s\n", squattingDest ? "true" : "false" ));
-#endif
-				// actually reached the end!
+
+		bool portFound = false;
+		if ( dest.sectorPort.IsValid() ) {
+			Vector2I pos2i = { (int)pos2.x, (int)pos2.y };
+
+			// Sector and Port of departure:
+			Vector2I departureSector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
+			const SectorData& sd = map->GetWorldInfo().GetSector( departureSector );
+			int departurePort = sd.NearestPort( dest.pos );
+
+			Rectangle2I portBounds = sd.GetPortLoc( departurePort );
+			if ( portBounds.Contains( pos2i )) {
+				// Close enough. Too much jugging on the ports is a real hassle.
+				portFound = true;
+				portJump = dest.sectorPort;
 				parentChit->SendMessage( ChitMsg( ChitMsg::PATHMOVE_DESTINATION_REACHED), this );
-				if ( dest.sectorPort.IsValid() ) {
-					const WorldGrid& wg = map->GetWorldGrid( (int)pos2.x, (int)pos2.y );
-					if ( wg.IsPort() ) {
-						//GLOUTPUT(( "Port found! Do something.\n" ));
-						portJump = dest.sectorPort;
-					}
-				}
 				SetNoPath();
 			}
-			else {
-				// continue path:
-				GLASSERT( dest.pos.x >= 0 );
-				QueueDest( dest.pos, dest.rotation );
-			}
+
 		}
-		else if ( forceCount > FORCE_COUNT_EXCESSIVE ) {
-#ifdef DEBUG_PMC
-			GLOUTPUT(( "Block force excessive. forceCount=%d\n", forceCount ));
-#endif
-			SetNoPath();
-			parentChit->SendMessage( ChitMsg( ChitMsg::PATHMOVE_DESTINATION_BLOCKED), this );
+
+		if ( !portFound ) {
+			if (    ( pathPos == nPathPos )
+				 && ( dest.rotation < 0 || Equal( dest.rotation, rot, 0.01f ))) 
+			{
+				if ( squattingDest || dest.pos.Equal( path[nPathPos-1], parentChit->GetRenderComponent()->RadiusOfBase()*0.2f ) ) {
+	#ifdef DEBUG_PMC
+					GLOUTPUT(( "Dest reached. squatted=%s\n", squattingDest ? "true" : "false" ));
+	#endif
+					// actually reached the end!
+					parentChit->SendMessage( ChitMsg( ChitMsg::PATHMOVE_DESTINATION_REACHED), this );
+					SetNoPath();
+				}
+				else {
+					// continue path:
+					GLASSERT( dest.pos.x >= 0 );
+					QueueDest( dest.pos, dest.rotation );
+				}
+			}
+			else if ( forceCount > FORCE_COUNT_EXCESSIVE ) {
+	#ifdef DEBUG_PMC
+				GLOUTPUT(( "Block force excessive. forceCount=%d\n", forceCount ));
+	#endif
+				SetNoPath();
+				parentChit->SendMessage( ChitMsg( ChitMsg::PATHMOVE_DESTINATION_BLOCKED), this );
+			}
 		}
 	}
 	else {

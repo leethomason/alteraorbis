@@ -256,3 +256,33 @@ grinliz::IString ItemGen::ToName( int id )
 	}
 	return false;
 }
+
+
+void TeamGen::Assign( int seed, ProcRenderInfo* info )
+{
+	static const int NUM = 4;
+	static const Vector4I colors[NUM] = {
+		{ PAL_GREEN*2, PAL_GREEN,			PAL_BLUE*2, PAL_GREEN },
+		{ PAL_RED*2, PAL_RED,				PAL_TANGERINE*2, PAL_RED },
+		{ PAL_TANGERINE*2, PAL_TANGERINE,	PAL_GREEN*2, PAL_TANGERINE },
+		{ PAL_BLUE*2, PAL_BLUE,				PAL_PURPLE*2, PAL_BLUE }
+	};
+
+	info->texture = TextureManager::Instance()->GetTexture( "structure" );
+
+	int index = seed % NUM;
+	const Game::Palette* palette = Game::GetMainPalette();
+
+	Vector4F base		= palette->GetV4F( colors[index].x, colors[index].y );
+	Vector4F contrast	= palette->GetV4F( colors[index].z, colors[index].w );
+	Vector4F glow		= base;
+
+	base.w = 0;
+	contrast.w = 0;
+	glow.w = 1;
+
+	info->color.SetCol( 0, base );
+	info->color.SetCol( 1, contrast );
+	info->color.SetCol( 2, glow );
+}
+

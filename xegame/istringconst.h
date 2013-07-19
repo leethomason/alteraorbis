@@ -23,7 +23,8 @@ class IStringConst
 {
 public:
 	static void Init();
-
+	
+	static grinliz::IString kmain;
 	static grinliz::IString ktrigger;
 	static grinliz::IString ktarget;
 	static grinliz::IString kalthand;

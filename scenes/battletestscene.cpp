@@ -273,7 +273,8 @@ void BattleTestScene::GoScene()
 	b.Set( 0, 0, (float)map->Width(), (float)map->Height() );
 
 	// Remove everything that is currently on the board that is some sort of character.
-	chitBag.QuerySpatialHash( &chitArr, b, 0, 0 );
+	ChitAcceptAll acceptAll;
+	chitBag.QuerySpatialHash( &chitArr, b, 0, &acceptAll );
 	for( int i=0; i<chitArr.Size(); ++i ) {
 		if ( chitArr[i]->GetMoveComponent() ) {
 			chitBag.DeleteChit( chitArr[i] );

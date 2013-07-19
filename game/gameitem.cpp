@@ -16,10 +16,10 @@
 #include "gameitem.h"
 
 #include "../grinliz/glstringutil.h"
+#include "../engine/serialize.h"
 
 #include "../tinyxml2/tinyxml2.h"
 #include "../xarchive/glstreamer.h"
-#include "../script/procedural.h"
 
 #include "../xegame/chit.h"
 #include "../xegame/istringconst.h"
@@ -240,7 +240,7 @@ void GameItem::Save( tinyxml2::XMLPrinter* printer )
 	PUSH_ATTRIBUTE( printer, accruedShock );
 
 	for( int i=0; i<keyValues.Size(); ++i ) {
-		printer->PushAttribute( keyValues[i].key.c_str(), keyValues[i].value );
+		printer->PushAttribute( keyValues[i].key.c_str(), keyValues[i].value.c_str() );
 	}
 
 	if ( hardpoint != 0 ) {
@@ -254,6 +254,51 @@ void GameItem::Save( tinyxml2::XMLPrinter* printer )
 
 	printer->CloseElement();	// item
 }
+
+
+grinliz::IString GameItem::GetValue( const char* name ) const
+{
+	for( int i=0; i<keyValues.Size(); ++i ) {
+		if ( keyValues[i].key == name ) {
+			return keyValues[i].value;
+		}
+	}
+	return IString();
+}
+
+
+bool GameItem::GetValue( const char* name, double* value ) const 
+{ 
+	IString v = GetValue( name );
+	if ( !v.empty() ) {
+		*value = atof( v.c_str() );
+		return true;
+	}
+	return false;
+}
+
+
+bool GameItem::GetValue( const char* name, float* value ) const 
+{
+	IString v = GetValue( name );
+	if ( !v.empty() ) {
+		*value = (float)atof( v.c_str() );
+		return true;
+	}
+	return false;
+}
+
+
+bool GameItem::GetValue( const char* name, int* value ) const 
+{
+	IString v = GetValue( name );
+	if ( !v.empty() ) {
+		*value = (int) atof( v.c_str() );
+		return true;
+	}
+	return false;
+}
+
 	
 void GameItem::Load( const tinyxml2::XMLElement* ele )
 {
@@ -297,7 +342,7 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 		if ( name == "name" || name == "desc" || name == "resource" || name == "flags" ) {
 			// handled above.
 		}
-		else if ( name == "hardpoint" || name == "procedural" || name == "hp" ) {
+		else if ( name == "hardpoint" || name == "hp" ) {
 			// handled below
 		}
 		READ_FLOAT_ATTR( mass )
@@ -316,7 +361,7 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 		READ_FLOAT_ATTR( accruedShock )
 		READ_BOOL_ATTR( isHeld )
 		else {
-			KeyValue kv = { name, attr->DoubleValue() };
+			KeyValue kv = { name, StringPool::Intern( attr->Value() ) };
 			keyValues.Push( kv );
 		}
 	}

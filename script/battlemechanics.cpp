@@ -122,7 +122,8 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* 
 	b.Outset( MELEE_RANGE + MAX_BASE_RADIUS );
 
 	CChitArray hashQuery;
-	chitBag->QuerySpatialHash( &hashQuery, b, src, 0 );
+	ChitAcceptAll accept;
+	chitBag->QuerySpatialHash( &hashQuery, b, src, &accept );
 
 	DamageDesc dd;
 	CalcMeleeDamage( src, weapon, &dd );

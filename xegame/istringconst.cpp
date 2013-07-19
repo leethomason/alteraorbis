@@ -2,6 +2,7 @@
 #include "istringconst.h"
 using namespace grinliz;
 
+IString IStringConst::kmain;
 IString IStringConst::ktrigger;
 IString IStringConst::ktarget;
 IString IStringConst::kalthand;
@@ -25,6 +26,7 @@ IString IStringConst::kkiosk__s;
 
 void IStringConst::Init()
 {
+	kmain = StringPool::Intern( "main", true );
 	ktrigger = StringPool::Intern( "trigger", true );
 	ktarget = StringPool::Intern( "target", true );
 	kalthand = StringPool::Intern( "althand", true );

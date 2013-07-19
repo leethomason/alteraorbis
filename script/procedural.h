@@ -132,4 +132,10 @@ public:
 };
 
 
+class TeamGen
+{
+public:
+	void Assign( int seed, ProcRenderInfo* info );
+};
+
 #endif // LUMOS_PROCEDURAL_INCLUDED

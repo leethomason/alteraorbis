@@ -134,6 +134,12 @@ public:
 			int i = y*dx + x;
 			return grinliz::Convert_4U8_4F( colors[i] );
 		}
+
+		grinliz::Vector4F GetV4F( int x, int y ) const {
+			grinliz::Color4F c = Get4F( x, y );
+			grinliz::Vector4F v = { c.r, c.g, c.b, c.a };
+			return v;
+		}
 	};
 	const Palette* GetPalette( const char* name=0 ) const;
 
