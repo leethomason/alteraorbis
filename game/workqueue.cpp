@@ -146,6 +146,14 @@ void WorkQueue::ReleaseJob( int chitID )
 }
 
 
+void WorkQueue::ClearJobs()
+{
+	while( queue.Size() ) {
+		RemoveItem( queue.Size()-1 );
+	}
+}
+
+
 const WorkQueue::QueueItem* WorkQueue::GetJob( int id )
 {
 	for( int i=0; i<queue.Size(); ++i ) {
@@ -196,6 +204,13 @@ const WorkQueue::QueueItem* WorkQueue::Find( const grinliz::Vector2I& chitPos )
 }
 
 
+void WorkQueue::RemoveItem( int index )
+{
+	RemoveImage( queue[index] );
+	queue.Remove( index );
+}
+
+
 void WorkQueue::DoTick()
 {
 	for( int i=0; i<queue.Size(); ++i ) {
@@ -219,8 +234,7 @@ void WorkQueue::DoTick()
 				CChitArray array;
 				chitBag->QuerySpatialHash( &array, pos2, 0.1f, 0, &removableFilter );
 				if ( array.Empty() ) {
-					RemoveImage( queue[i] );
-					queue.Remove( i );
+					RemoveItem( i );
 					--i;
 				}
 			}
@@ -231,8 +245,7 @@ void WorkQueue::DoTick()
 				CChitArray array;
 				chitBag->QuerySpatialHash( &array, pos2, 0.1f, 0, &removableFilter );
 				if ( !worldMap->IsPassable( queue[i].pos.x, queue[i].pos.y ) || !array.Empty() ) {
-					RemoveImage( queue[i] );
-					queue.Remove( i );
+					RemoveItem( i );
 					--i;
 				}
 			}

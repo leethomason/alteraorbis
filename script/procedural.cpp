@@ -262,7 +262,7 @@ void TeamGen::Assign( int seed, ProcRenderInfo* info )
 {
 	static const int NUM = 4;
 	static const Vector4I colors[NUM] = {
-		{ PAL_GREEN*2, PAL_GREEN,			PAL_BLUE*2, PAL_GREEN },
+		{ PAL_BLUE*2, PAL_GREEN,			PAL_GREEN*2, PAL_GREEN },
 		{ PAL_RED*2, PAL_RED,				PAL_TANGERINE*2, PAL_RED },
 		{ PAL_TANGERINE*2, PAL_TANGERINE,	PAL_GREEN*2, PAL_TANGERINE },
 		{ PAL_BLUE*2, PAL_BLUE,				PAL_PURPLE*2, PAL_BLUE }

@@ -5,6 +5,7 @@
 #include "../xegame/cameracomponent.h"
 #include "../xegame/rendercomponent.h"
 #include "../xegame/itemcomponent.h"
+#include "../xegame/istringconst.h"
 
 #include "../game/lumosgame.h"
 #include "../game/lumoschitbag.h"
@@ -72,7 +73,10 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	freeCameraButton.Init( &gamui2D, game->GetButtonLook(0) );
 	freeCameraButton.SetText( "Free\nCamera" );
 
-	static const char* buildButtonText[NUM_BUILD_BUTTONS] = { "None", "Clear", "Ice", "Media\nKiosk", "Commerce\nKiosk", "Social\nKiosk", "News\nKiosk" };
+	static const char* buildButtonText[NUM_BUILD_BUTTONS] = { 
+		"None", "Clear", "Ice", 
+		"News\nKiosk", "Media\nKiosk", "Commerce\nKiosk", "Social\nKiosk" 
+	};
 	for( int i=0; i<NUM_BUILD_BUTTONS; ++i ) {
 		buildButton[i].Init( &gamui2D, game->GetButtonLook(0) );
 		buildButton[i].SetText( buildButtonText[i] );
@@ -644,6 +648,24 @@ void GameScene::HandleHotKey( int mask )
 			}
 		}
 #endif
+	}
+	else if ( mask == GAME_HK_TOGGLE_COLORS ) {
+		static int colorSeed = 0;
+		static const char* NAMES[4] = { "kiosk.m", "kiosk.n", "kiosk.c", "kiosk.s" };
+		ItemNameFilter filter( NAMES, 4 );
+		Vector3F at;
+		sim->GetEngine()->CameraLookingAt( &at );
+		Vector2F at2 = { at.x, at.z };
+		CChitArray queryArr;
+		sim->GetChitBag()->QuerySpatialHash( &queryArr, at2, 10.f, 0, &filter );
+		for( int i=0; i<queryArr.Size(); ++i ) {
+			RenderComponent* rc = queryArr[i]->GetRenderComponent();
+			TeamGen gen;
+			ProcRenderInfo info;
+			gen.Assign( colorSeed, &info );
+			rc->SetProcedural( IStringConst::kmain, info );
+		}
+		++colorSeed;
 	}
 	else if ( mask == GAME_HK_TOGGLE_PATHING ) {
 		sim->GetWorldMap()->ShowRegionOverlay( !sim->GetWorldMap()->IsShowingRegionOverlay() );

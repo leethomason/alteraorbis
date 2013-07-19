@@ -62,6 +62,7 @@ public:
 	void				Assign( int id, const QueueItem* item );	// associate this chit with a job.
 	const QueueItem*	GetJob( int chitID );						// get the current job, don't hold pointer!
 	void				ReleaseJob( int chitID );
+	void				ClearJobs();
 
 	void DoTick();	// mostly looks for work being complete.
 	const grinliz::CDynArray< WorkQueue::QueueItem >& Queue() const { return queue; };	
@@ -70,6 +71,7 @@ private:
 
 	void AddImage( const QueueItem& item );
 	void RemoveImage( const QueueItem& item );
+	void RemoveItem( int index );
 
 	Engine*				engine;
 	WorldMap*			worldMap;

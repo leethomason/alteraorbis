@@ -362,6 +362,10 @@ int main( int argc, char **argv )
 						GameHotKey( game, GAME_HK_TOGGLE_PATHING );
 						break;
 
+					case SDLK_c:
+						GameHotKey( game, GAME_HK_TOGGLE_COLORS );
+						break;
+
 					default:
 						break;
 				}
