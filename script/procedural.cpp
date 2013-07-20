@@ -260,7 +260,7 @@ grinliz::IString ItemGen::ToName( int id )
 
 void TeamGen::Assign( int seed, ProcRenderInfo* info )
 {
-	static const int NUM = 6;
+	static const int NUM = 4;
 	static const Vector4I colors[NUM] = {
 		// approved
 		{ PAL_BLUE*2, PAL_GREEN,			PAL_GREEN*2, PAL_GREEN },
@@ -269,8 +269,8 @@ void TeamGen::Assign( int seed, ProcRenderInfo* info )
 		{ PAL_RED*2, PAL_RED,				PAL_GREEN*2, PAL_RED },
 
 		// fail
-		{ PAL_RED*2, PAL_RED,				PAL_TANGERINE*2, PAL_RED },
-		{ PAL_BLUE*2, PAL_BLUE,				PAL_PURPLE*2, PAL_BLUE }
+		//{ PAL_RED*2, PAL_RED,				PAL_TANGERINE*2, PAL_RED },
+		//{ PAL_BLUE*2, PAL_BLUE,				PAL_PURPLE*2, PAL_BLUE }
 	};
 
 	info->texture = TextureManager::Instance()->GetTexture( "structure" );
@@ -280,7 +280,7 @@ void TeamGen::Assign( int seed, ProcRenderInfo* info )
 
 	Vector4F base		= palette->GetV4F( colors[index].x, colors[index].y );
 	Vector4F contrast	= palette->GetV4F( colors[index].z, colors[index].w );
-	Vector4F glow		= base;
+	Vector4F glow		= ((seed/NUM)&1) ? base : contrast;
 	Vector4F zero		= { 0, 0, 0, 0 };
 
 	base.w		= 0;
