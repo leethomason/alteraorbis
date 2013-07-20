@@ -276,12 +276,20 @@ void TeamGen::Assign( int seed, ProcRenderInfo* info )
 	info->texture = TextureManager::Instance()->GetTexture( "structure" );
 
 	int index = seed % NUM;
+	bool select = (seed / NUM) & 1 ? true : false; 
+
 	const Game::Palette* palette = Game::GetMainPalette();
 
 	Vector4F base		= palette->GetV4F( colors[index].x, colors[index].y );
 	Vector4F contrast	= palette->GetV4F( colors[index].z, colors[index].w );
-	Vector4F glow		= ((seed/NUM)&1) ? base : contrast;
-	Vector4F zero		= { 0, 0, 0, 0 };
+	Vector4F glow		= select ? base : contrast;
+
+	// Grey colors for neutral:
+	if ( seed == 0 ) {
+		base		= palette->GetV4F( PAL_GRAY*2, PAL_GRAY );
+		contrast	= palette->GetV4F( 0, PAL_GRAY );
+		glow		= base;
+	}
 
 	base.w		= 0;
 	contrast.w	= 0;

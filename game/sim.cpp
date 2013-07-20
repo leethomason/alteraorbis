@@ -159,19 +159,14 @@ void Sim::CreateCores()
 	for( int i=0; i<NUM_SECTORS*NUM_SECTORS; ++i ) {
 		const SectorData& sd = sectorDataArr[i];
 		if ( sd.HasCore() ) {
-			Chit* chit = chitBag->NewChit();
+			Chit* chit = chitBag->NewBuilding( sd.core, "core", 0 );
 
-			MapSpatialComponent* ms = new MapSpatialComponent( worldMap );
-			ms->SetMapPosition( sd.core.x, sd.core.y );
+			// 'in use' instead of blocking.
+			MapSpatialComponent* ms = GET_SUB_COMPONENT( chit, SpatialComponent, MapSpatialComponent );
+			GLASSERT( ms );
 			ms->SetMode( GRID_IN_USE ); 
-			chit->Add( ms );
-
-			const char* asset = 0;
 			chit->Add( new ScriptComponent( new CoreScript( worldMap, chitBag, engine ), engine, &chitBag->census ));
-			asset = coreItem.ResourceName();
-			chit->Add( new ItemComponent( engine, worldMap, coreItem ));
 			++ncores;
-			chit->Add( new RenderComponent( engine, asset ));
 		}
 	}
 	GLOUTPUT(( "nCores=%d\n", ncores ));

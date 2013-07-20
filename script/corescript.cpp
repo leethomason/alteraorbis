@@ -15,6 +15,10 @@
 
 #include "../xegame/chit.h"
 #include "../xegame/spatialcomponent.h"
+#include "../xegame/rendercomponent.h"
+#include "../xegame/istringconst.h"
+
+#include "../script/procedural.h"
 
 using namespace grinliz;
 
@@ -105,8 +109,14 @@ bool CoreScript::AttachToCore( Chit* chit )
 		if ( chit && chit->GetItem() ) {
 			team = chit->GetItem()->primaryTeam;
 		}
+
 		scriptContext->chit->GetLumosChitBag()->NewWorkerChit( pos, team );
 		scriptContext->chit->GetLumosChitBag()->NewWorkerChit( pos, team );
+
+		TeamGen gen;
+		ProcRenderInfo info;
+		gen.Assign( team, &info );
+		scriptContext->chit->GetRenderComponent()->SetProcedural( IStringConst::kmain, info );
 
 		return true;
 	}

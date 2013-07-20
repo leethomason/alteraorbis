@@ -204,6 +204,7 @@
 
   <item name="core"
         resource="core"
+        procedural="team"
         flags="INDESTRUCTABLE CLICK_THROUGH"
         />
 
