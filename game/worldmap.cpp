@@ -1005,15 +1005,15 @@ WorldMap::BlockResult WorldMap::ApplyBlockEffect(	const Vector2F inPos,
 	// Can't think of a case where it's possible to overlap more than 2,
 	// but there probably is. Don't worry about it. Go with fast & 
 	// usually good enough.
-	for( int i=0; i<2; ++i ) {
+	//for( int i=0; i<2; ++i ) {
 		BlockResult result = CalcBlockEffect( *outPos, radius, &force );
 		if ( result == STUCK )
 			return STUCK;
 		if ( result == FORCE_APPLIED )
 			*outPos += force;	
-		if ( result == NO_EFFECT )
-			break;
-	}
+		//if ( result == NO_EFFECT )
+		//	break;
+	//}
 	return ( *outPos == inPos ) ? NO_EFFECT : FORCE_APPLIED;
 }
 
