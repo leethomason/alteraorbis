@@ -121,9 +121,6 @@
     <ClCompile Include="..\xarchive\glstreamer.cpp">
       <Filter>Source Files\xarchive</Filter>
     </ClCompile>
-    <ClCompile Include="..\xarchive\squisher.cpp">
-      <Filter>Source Files\xarchive</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\zlib\crc32.h">
@@ -235,9 +232,6 @@
       <Filter>Source Files\gamedb</Filter>
     </ClInclude>
     <ClInclude Include="..\xarchive\glstreamer.h">
-      <Filter>Source Files\xarchive</Filter>
-    </ClInclude>
-    <ClInclude Include="..\xarchive\squisher.h">
       <Filter>Source Files\xarchive</Filter>
     </ClInclude>
   </ItemGroup>

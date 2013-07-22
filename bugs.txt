@@ -21,9 +21,11 @@
 - Melee should rotate to target (both rock and chit)
 - How does Ice and magma interact?
 - move GOLD_PICKUP to flag in Item
-- pools that are waterfalls need side rendering
-- remove squisher. nifty but outdated.
+x pools that are waterfalls need side rendering
+x remove squisher. nifty but outdated.
 - SectorHerd seems a little aggressive. Switch over to using ForceCount, check conditions to trigger.
+- Only call ApplyBlocks once. 
+- Probably don't need squatting logic in PathMoveComponent
 
 - game
 
@@ -41,7 +43,7 @@
 		- support for mxn models
 		- new nxn models
 		- decent clear dragging
-		- new Core model
+		x new Core model
 		- visitors create energy, buildings consume energy
 		- fix team logic
 		- build 2 height ice

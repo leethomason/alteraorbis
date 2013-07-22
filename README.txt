@@ -4,7 +4,7 @@
 More at: grinninglizard.com/altera
 
 
-Version "Gold" is a big change, long in development. The plan is to switch back to a series of smaller releases with target fixes.
+The “Silver” release is cleaning up issues with the prior (giant) “Gold” release.
 
 
 Game Fiction (in brief)
@@ -32,8 +32,16 @@ Note: you can collect gold and crystals, but the economy isn’t connected. Noth
 Energy is used to power buildings and keep a domain operating. Visitors bring energy; they enter the world looking for domains that have interesting News, Commerce, Media, or Social, any of which they get at kiosks. If the domain has what the Visitor is looking for, energy is transferred to the domain. Visitors keep track of their favorite domains, and share the links with their friends.
 
 
-Major Changes
--------------
+Changes (Silver)
+-------------------
+1. Buildings, rocks, plants, workers, and the ground are now production art. There will be tweaks, but the basic look of the game is in place.
+2. Animated things - the player, monsters - are still placeholder.
+3. Visitors have specific interest: News, Media, Commerce, and Social and will seek out Kiosks to fulfill that interest.
+4. Fun tip: to cycle through the colors used to render buildings (only a few is this inital release) press the ‘c’ key.
+
+
+Major Changes (Gold)
+-------------------
 1. Visitors arrive, search for kiosks, travel the world, and leave.
 2. Visitors share information about domain with friends.
 3. Much improved shared AI code for building more complex behaviors. Workqueues to get the work of the domain done. Tasks to schedule a series of behaviors.
@@ -56,12 +64,9 @@ Important Notes
 ---------------
 
 
-1. There is a lot of placeholder art in this version, and release art that isn't textured. Getting in the production assets will be a near term goal.
-2. Especially note that the placeholder Visitor model is the “Prime” model from Xenowar.
-3. There is NO save game compatibility. Be sure to delete old games.
-4. If your avatar gets killed, ctrl-click will create a new one. (You can create a bunch if you wish).
-5. “Fast Mode" doesn't work very well. This will probably get removed.
-6. Rendering artifacts in voxel renderer need to be fixed.
+1. There is NO save game compatibility. Be sure to delete old games.
+2. If your avatar gets killed, ctrl-click will create a new one. (You can create a bunch if you wish).
+3. “Fast Mode" doesn't work very well. This will probably get removed.
 
 
 Getting Started
