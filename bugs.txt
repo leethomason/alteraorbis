@@ -615,3 +615,18 @@ StreamWriter string	=1832747
 			 double	=  35784 
 			 byte   =      0 
 			 attrib =   2564 
+
+13 fps	spatial query
+Switching to fast 'block' calc helps a bit. (Key issue on I7, though.)
+
+AI::QuerySpatialHash 6.5
+	re-order hash:	meh
+	size:	16		8
+			64		7
+			128		4.6
+			256		4
+	size 64, improved hash->5
+	size 128, improved hash->4.5
+	size 64, prime # hash ->4
+All that to about 15fps
+

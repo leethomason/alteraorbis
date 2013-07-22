@@ -153,12 +153,31 @@ protected:
 	void DeleteChits() { chitID.RemoveAll(); }
 
 private:
+
+// Neither approach really matters. Still spending
+// way too much time finding out what is around a 
+// given chit. SPATIAL_VAR, with Hash tuning, may
+// come out a little ahead?
+#define SPATIAL_VAR
+
 	enum {
+#ifdef SPATIAL_VAR
+		SIZE2 = 1024*64	// 16 bits
+#else
 		SHIFT = 2,	// a little tuning done; seems reasonable
-		SIZE = MAX_MAP_SIZE >> SHIFT
+		SIZE = MAX_MAP_SIZE >> SHIFT,
+		SIZE2 = SIZE*SIZE,
+#endif
 	};
+
 	U32 HashIndex( U32 x, U32 y ) const {
+#ifdef SPATIAL_VAR
+		//return (y*MAX_MAP_SIZE + x) & (SIZE2-1);
+		//return (x ^ (y<<6)) & (SIZE2-1);				// 16 bit variation
+		return (y*137 +x ) & (SIZE2-1);
+#else
 		return ( (y>>SHIFT)*SIZE + (x>>SHIFT) );
+#endif
 	}
 
 	int idPool;
@@ -191,7 +210,7 @@ private:
 	
 	grinliz::CDynArray<Bolt>		bolts;
 	
-	Chit* spatialHash[SIZE*SIZE];
+	Chit* spatialHash[SIZE2];
 };
 
 

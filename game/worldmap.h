@@ -108,6 +108,7 @@ public:
 	grinliz::Vector2I FindPassable( int x, int y );
 
 	void ResetPather( int x, int y );
+	void UpdateBlock( int x, int y );	// tell the map to check for blocks. will call ResetPather() if needed
 	bool IsPassable( int x, int y ) const;
 	
 	bool IsLand( int x, int y )		{ 

@@ -37,7 +37,7 @@ ChitBag::ChitBag()
 {
 	idPool = 0;
 	bagTime = 0;
-	memset( spatialHash, 0, sizeof(*spatialHash)*SIZE*SIZE );
+	memset( spatialHash, 0, sizeof(*spatialHash)*SIZE2 );
 	memRoot = 0;
 	activeCamera = 0;
 }
@@ -356,10 +356,17 @@ void ChitBag::RemoveFromSpatialHash( Chit* chit, int x, int y )
 
 void ChitBag::UpdateSpatialHash( Chit* c, int x0, int y0, int x1, int y1 )
 {
+#ifdef SPATIAL_VAR
+	if ( x0 != x1 || y0 != y1 ) {
+		RemoveFromSpatialHash( c, x0, y0 );
+		AddToSpatialHash( c, x1, y1 );
+	}
+#else
 	if ( (x0>>SHIFT)!=(x1>>SHIFT) || (y0>>SHIFT)!=(y1>>SHIFT) ) {
 		RemoveFromSpatialHash( c, x0, y0 );
 		AddToSpatialHash( c, x1, y1 );
 	}
+#endif
 }
 
 
@@ -380,20 +387,38 @@ void ChitBag::QuerySpatialHash(	grinliz::CDynArray<Chit*>* array,
 								const Chit* ignore,
 								IChitAccept* accept )
 {
+	//GRINLIZ_PERFTRACK;
 	GLASSERT( accept );
+	Rectangle2I r;
+	r.Set( (int)rf.min.x, (int)rf.min.y, (int)rf.max.x, (int)rf.max.y );
+	array->Clear();
+
+
+#ifdef SPATIAL_VAR
+
+	for( int y=r.min.y; y<=r.max.y; ++y ) {
+		for( int x=r.min.x; x<=r.max.x; ++x ) {
+			U32 index = HashIndex( x, y );
+			for( Chit* it=spatialHash[ index ]; it; it=it->next ) {
+				if ( it != ignore ) {
+					const Vector3F& pos = it->GetSpatialComponent()->GetPosition();
+					if ( rf.Contains( pos.x, pos.z ) && accept->Accept( it )) {
+						array->Push( it );
+					}
+				}
+			}
+		}
+	}
+#else
 	Rectangle2I b;
 	b.Set( 0, 0, SIZE-1, SIZE-1 );
 
-	Rectangle2I r;
-
-	r.Set( (int)rf.min.x, (int)rf.min.y, (int)ceilf(rf.max.x), (int)ceilf(rf.max.y) );
 	r.min.x >>= SHIFT;
 	r.min.y >>= SHIFT;
 	r.max.x >>= SHIFT;
 	r.max.y >>= SHIFT;
 	r.DoIntersection( b );
 
-	array->Clear();
 	for( int y=r.min.y; y<=r.max.y; ++y ) {
 		for( int x=r.min.x; x<=r.max.x; ++x ) {
 			unsigned index = y*SIZE+x;
@@ -407,6 +432,7 @@ void ChitBag::QuerySpatialHash(	grinliz::CDynArray<Chit*>* array,
 			}
 		}
 	}
+#endif
 }
 
 

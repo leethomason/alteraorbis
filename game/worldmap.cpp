@@ -231,6 +231,7 @@ void WorldMap::Load( const char* pathToDAT )
 		for( int j=0; j<height; ++j ) {
 			for( int i=0; i<width; ++i ) {
 				int index = INDEX( i, j );
+				grid[index].extBlock = 0;	// clear out the block. will be set by callback later.
 				const WorldGrid& wg = grid[index];
 				SetRock( i, j, -2, grid[index].Magma(), grid[index].RockType() );
 			}
@@ -841,6 +842,28 @@ void WorldMap::SetRock( int x, int y, int h, bool magma, int rockType )
 }
 
 
+void WorldMap::UpdateBlock( int x, int y )
+{
+	WorldGrid* wg = &grid[INDEX(x,y)];
+	int use = 0;
+	if ( iMapGridUse ) {
+		use = iMapGridUse->MapGridUse( x, y );
+	}
+	if ( use & GRID_BLOCKED ) {
+		if ( !wg->extBlock ) {
+			wg->extBlock = 1;
+			ResetPather( x, y );
+		}
+	}
+	else {
+		if ( wg->extBlock ) {
+			wg->extBlock = 0;
+			ResetPather( x, y );
+		}
+	}
+}
+
+
 void WorldMap::ResetPather( int x, int y )
 {
 	Vector2I sector = { x/SECTOR_SIZE, y/SECTOR_SIZE };
@@ -855,14 +878,8 @@ void WorldMap::ResetPather( int x, int y )
 bool WorldMap::IsPassable( int x, int y ) const
 {
 	int index = INDEX(x,y);
-	if ( grid[index].IsPassable() ) {
-		int flags = 0;
-		if ( iMapGridUse ) {
-			flags = iMapGridUse->MapGridUse( x, y );
-		}
-		return ( flags & GRID_BLOCKED ) == 0;
-	}
-	return false;
+	const WorldGrid& wg = grid[index];
+	return wg.IsPassable() && (wg.extBlock == 0);
 }
 
 
