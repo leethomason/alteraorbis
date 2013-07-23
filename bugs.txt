@@ -24,8 +24,8 @@
 x pools that are waterfalls need side rendering
 x remove squisher. nifty but outdated.
 - SectorHerd seems a little aggressive. Switch over to using ForceCount, check conditions to trigger.
-- Only call ApplyBlocks once. 
-- Probably don't need squatting logic in PathMoveComponent
+x Only call ApplyBlocks once. 
+x Probably don't need squatting logic in PathMoveComponent. (Actually do)
 
 - game
 
@@ -38,12 +38,12 @@ x remove squisher. nifty but outdated.
 		x ground texture
 		x tree textures
 		x flower colors (too saturated flowers)
-		- new 1x1 models
 		x grid travel from port (no position selection)
+		x new Core model
+		- new 1x1 models
 		- support for mxn models
 		- new nxn models
 		- decent clear dragging
-		x new Core model
 		- visitors create energy, buildings consume energy
 		- fix team logic
 		- build 2 height ice
@@ -51,6 +51,7 @@ x remove squisher. nifty but outdated.
 		- leave core
 		- cancel orders
 		- proper animation system
+		- wait states on wander
 	- Loot
 		- item screen
 		- drop items
@@ -64,10 +65,10 @@ x remove squisher. nifty but outdated.
 		- consider moving ground to voxel gen system, so that ground can vary?
 		- teams. friend-enemy-neutral logic.
 		- monster ecology
-		- visitors
+		x visitors
 		- inventory screen
 	- Building
-		- construction
+		x construction
 		- economics
 		- domain building
 	- AI
@@ -629,4 +630,8 @@ AI::QuerySpatialHash 6.5
 	size 128, improved hash->4.5
 	size 64, prime # hash ->4
 All that to about 15fps
+
+Release:
+outer tick: 24.2
+inner tick: 25
 

@@ -226,6 +226,12 @@ void ChitBag::DoTick( U32 delta, Engine* engine )
 		}
 	}
 
+#ifdef OUTER_TICK
+	for( int i=0; i<Chit::NUM_SLOTS; ++i ) {
+		tickList[i].Clear();
+	}
+#endif
+
 	for( int i=0; i<blocks.Size(); ++i ) {
 		Chit* block = blocks[i];
 		for( int j=0; j<BLOCK_SIZE; ++j ) {
@@ -238,14 +244,47 @@ void ChitBag::DoTick( U32 delta, Engine* engine )
 
 				if ( c->timeToTick <= 0 ) {
 					++nTicked;
-					//_CrtCheckMemory();
+
+#ifdef OUTER_TICK
+					for( int i=1; i<Chit::NUM_SLOTS; ++i ) {
+						if ( c->slot[i] ) {
+							tickList[i].Push( c->slot[i] );
+						}
+					}
+					c->timeToTick = VERY_LONG_TICK;
+#else
 					c->DoTick( delta );
 					GLASSERT( c->timeToTick >= 0 );
-					//_CrtCheckMemory();
+#endif
 				}
 			}
 		}
 	}
+
+#ifdef OUTER_TICK
+	for( int i=0; i<Chit::NUM_SLOTS; ++i ) {
+		int len = tickList[i].Size();
+		const CDynArray<Component*>& arr = tickList[i];
+		for( int k=0; k<len; ++k ) {
+			GLASSERT( arr[k]->ParentChit() );
+			Chit* c = arr[k]->ParentChit();
+			arr[k]->DoTick( delta, c->timeSince );
+
+			if ( c->swapOut ) {
+				GLASSERT( c->swapIn );
+				c->Remove( c->swapOut );
+				delete c->swapOut;
+				c->Add( c->swapIn );
+				c->swapOut = c->swapIn = 0;
+			}
+
+			if ( i == Chit::NUM_SLOTS-1 ) {
+				c->timeSince = 0;
+			}
+		}
+	}
+#endif
+
 	// Make sure the camera is updated last so it doesn't "drag"
 	// what it's tracking. The next time this happens I should
 	// put in a priority system.

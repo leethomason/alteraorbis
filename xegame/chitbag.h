@@ -34,6 +34,16 @@ class CameraComponent;
 
 #define CChitArray grinliz::CArray<Chit*, 32 >
 
+// Controls tuning of spatial hash. Helps, but 
+// still spending way too much time finding out 
+// what is around a given chit.
+#define SPATIAL_VAR
+
+// This ticks per-component instead of per-chit.
+// Rather expected this to make a difference
+// (cache use) but doesn't.
+//#define OUTER_TICK
+
 class IChitAccept
 {
 public:
@@ -154,12 +164,6 @@ protected:
 
 private:
 
-// Neither approach really matters. Still spending
-// way too much time finding out what is around a 
-// given chit. SPATIAL_VAR, with Hash tuning, may
-// come out a little ahead?
-#define SPATIAL_VAR
-
 	enum {
 #ifdef SPATIAL_VAR
 		SIZE2 = 1024*64	// 16 bits
@@ -174,7 +178,7 @@ private:
 #ifdef SPATIAL_VAR
 		//return (y*MAX_MAP_SIZE + x) & (SIZE2-1);
 		//return (x ^ (y<<6)) & (SIZE2-1);				// 16 bit variation
-		return (y*137 +x ) & (SIZE2-1);
+		return (y*137 +x ) & (SIZE2-1);					// prime # wins the day.
 #else
 		return ( (y>>SHIFT)*SIZE + (x>>SHIFT) );
 #endif
@@ -207,8 +211,10 @@ private:
 	grinliz::CDynArray<Chit*>		cachedQuery;		// local data, cached at class level
 	grinliz::CDynArray<ChitEvent>	events;
 	grinliz::CDynArray<NewsEvent>	news;
-	
 	grinliz::CDynArray<Bolt>		bolts;
+#ifdef OUTER_TICK
+	grinliz::CDynArray<Component*>	tickList[Chit::NUM_SLOTS];
+#endif
 	
 	Chit* spatialHash[SIZE2];
 };
