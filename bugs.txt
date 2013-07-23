@@ -41,8 +41,9 @@ x Probably don't need squatting logic in PathMoveComponent. (Actually do)
 		x grid travel from port (no position selection)
 		x new Core model
 		- new 1x1 models
+		- building rotation
 		- support for mxn models
-		- new nxn models
+		- new mxn models
 		- decent clear dragging
 		- visitors create energy, buildings consume energy
 		- fix team logic
