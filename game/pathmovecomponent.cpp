@@ -491,6 +491,10 @@ int PathMoveComponent::DoTick( U32 delta, U32 since )
 	#endif
 				SetNoPath();
 				parentChit->SendMessage( ChitMsg( ChitMsg::PATHMOVE_DESTINATION_BLOCKED), this );
+
+				NewsEvent news( NewsEvent::PONY, pos2, StringPool::Intern( "FC Exec" ), parentChit->ID() );
+				GetChitBag()->AddNews( news );
+				forceCount = 0;
 			}
 		}
 	}
@@ -508,7 +512,7 @@ int PathMoveComponent::DoTick( U32 delta, U32 since )
 		return 0;
 	}
 
-	if ( blockForceApplied || avoidForceApplied ) {
+	if ( blockForceApplied /*|| avoidForceApplied*/ ) {
 		++forceCount;
 	}
 	else {
