@@ -71,7 +71,8 @@ public:
 		CHIT_HEAL,				//					dataF = hitpoints
 		CHIT_SECTOR_HERD,		// AI message: a lead unit is telling other units to herd to a different sector.
 								//					ptr = &SectorPort
-
+		CHIT_TRACKING_ARRIVED,	// A tracking component arrived at its target.
+								//					ptr = Chit* that arrived
 		// ---- Component ---- //
 		PATHMOVE_DESTINATION_REACHED,
 		PATHMOVE_DESTINATION_BLOCKED,

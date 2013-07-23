@@ -98,8 +98,6 @@ Chit* LumosChitBag::NewMonsterChit( const Vector3F& pos, const char* name, int t
 
 	AddItem( name, chit, engine, team, 0 );
 	chit->GetItemComponent()->AddGold( ReserveBank::Instance()->WithdrawMonster() );
-	// Assume all AIs pick up gold, for now.
-	chit->GetItemComponent()->SetPickup( ItemComponent::GOLD_PICKUP );
 
 	chit->Add( new HealthComponent( engine ));
 	return chit;

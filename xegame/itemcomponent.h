@@ -70,14 +70,6 @@ public:
 	void EmptyWallet() { wallet.MakeEmpty(); }
 	const Wallet& GetWallet() const			{ return wallet; }
 
-	enum {
-		NO_AUTO_PICKUP,
-		GOLD_PICKUP,
-		GOLD_HOOVER
-	};
-	void SetPickup( int mode )	{ pickupMode = mode; }
-	int Pickup() const			{ return pickupMode; }
-
 	bool AddToInventory( GameItem* item, bool equip );
 
 	// add XP to current item and its weapon

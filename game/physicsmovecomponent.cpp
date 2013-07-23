@@ -168,8 +168,10 @@ bool TrackingMoveComponent::IsMoving()
 int TrackingMoveComponent::DoTick( U32 deltaTime, U32 since )
 {
 	Chit* chit = GetChitBag()->GetChit( target );
-	if ( !chit || !chit->GetSpatialComponent() || !parentChit->GetSpatialComponent() ) 
+	if ( !chit || !chit->GetSpatialComponent() || !parentChit->GetSpatialComponent() ) {
+		GetChitBag()->QueueRemoveAndDeleteComponent( this );
 		return VERY_LONG_TICK;
+	}
 
 	Vector3F targetPos = chit->GetSpatialComponent()->GetPosition();
 	Vector3F pos = parentChit->GetSpatialComponent()->GetPosition();
@@ -180,6 +182,9 @@ int TrackingMoveComponent::DoTick( U32 deltaTime, U32 since )
 
 	if ( travel >= len ) {
 		parentChit->GetSpatialComponent()->SetPosition( targetPos );
+		ChitMsg msg( ChitMsg::CHIT_TRACKING_ARRIVED, 0, parentChit );
+		chit->SendMessage( msg );
+		GetChitBag()->QueueRemoveAndDeleteComponent( this );
 	}
 	else {
 		delta.Normalize();

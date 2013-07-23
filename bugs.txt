@@ -20,12 +20,13 @@
   of the overall AI state.
 - Melee should rotate to target (both rock and chit)
 - How does Ice and magma interact?
-- move GOLD_PICKUP to flag in Item
+x move GOLD_PICKUP to flag in Item
 x pools that are waterfalls need side rendering
 x remove squisher. nifty but outdated.
 - SectorHerd seems a little aggressive. Switch over to using ForceCount, check conditions to trigger.
 x Only call ApplyBlocks once. 
 x Probably don't need squatting logic in PathMoveComponent. (Actually do)
+- make sure gold/crystal gets returned to the Reserve when the Chit is destroyed
 
 - game
 

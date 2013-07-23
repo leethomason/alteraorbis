@@ -171,7 +171,7 @@ void ChitBag::QueueRemoveAndDeleteComponent( Component* comp )
 
 void ChitBag::DeferredDelete( Component* comp )
 {
-	GLASSERT( comp->ParentChit() == 0 );	// already removed.
+	GLASSERT( comp->ParentChit() == 0 );	// already removed. Did you mean QueueRemoveAndDeleteComponent()?
 	zombieDeleteList.Push( comp );
 }
 

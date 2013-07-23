@@ -222,6 +222,20 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			engine->particleSystem->EmitPD( "heal", v, V3F_UP, 30 );
 		}
 	}
+	else if ( msg.ID() == ChitMsg::CHIT_TRACKING_ARRIVED ) {
+		Chit* gold = (Chit*)msg.Ptr();
+		GoldCrystalFilter filter;
+		if (    filter.Accept( gold )		// it really is gold/crystal
+			 && gold->GetItemComponent()	// it has an item component
+			 && mainItem.hp > 0 )			// this item is alive
+		{
+			wallet.Add( gold->GetItemComponent()->GetWallet() );
+			gold->GetItemComponent()->EmptyWallet();
+
+			// Need to delete the gold, else it will track to us again!
+			gold->QueueDelete();
+		}
+	}
 	else if ( msg.ID() >= ChitMsg::CHIT_DESTROYED_START && msg.ID() <= ChitMsg::CHIT_DESTROYED_END ) {
 		// FIXME: send to reserve if no pos
 		GLASSERT( parentChit->GetSpatialComponent() );
@@ -229,8 +243,6 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			parentChit->GetLumosChitBag()->NewWalletChits( parentChit->GetSpatialComponent()->GetPosition(), wallet );
 			wallet.MakeEmpty();
 		}
-		// Stop picking up things after destroy sequence started.
-		this->SetPickup( 0 );
 	}
 	else {
 		super::OnChitMsg( chit, msg );
@@ -302,24 +314,16 @@ int ItemComponent::DoTick( U32 delta, U32 since )
 	}
 
 
-	static const float PICKUP_RANGE = 0.5f;
-	static const float HOOVER_RANGE = 2.0f;
-	GoldCrystalFilter goldCrystalFilter;
+	static const float PICKUP_RANGE = 1.0f;
 
-	if ( parentChit->GetSpatialComponent() ) {
-		CChitArray arr;
+	if ( mainItem.flags & GameItem::GOLD_PICKUP ) {
+		ComponentSet thisComp( parentChit, Chit::SPATIAL_BIT | ComponentSet::IS_ALIVE );
+		if ( thisComp.okay ) {
+			CChitArray arr;
 
-		Vector2F pos = parentChit->GetSpatialComponent()->GetPosition2D();
-		if ( pickupMode == GOLD_PICKUP || pickupMode == GOLD_HOOVER ) {
+			Vector2F pos = parentChit->GetSpatialComponent()->GetPosition2D();
+			GoldCrystalFilter goldCrystalFilter;
 			GetChitBag()->QuerySpatialHash( &arr, pos, PICKUP_RANGE, 0, &goldCrystalFilter );
-			for( int i=0; i<arr.Size(); ++i ) {
-				wallet.Add( arr[i]->GetItemComponent()->GetWallet() );
-				arr[i]->GetItemComponent()->EmptyWallet();
-				arr[i]->QueueDelete();
-			}
-		}
-		if ( pickupMode == GOLD_HOOVER ) {
-			GetChitBag()->QuerySpatialHash( &arr, pos, HOOVER_RANGE, 0, &goldCrystalFilter );
 			for( int i=0; i<arr.Size(); ++i ) {
 				Chit* gold = arr[i];
 				GLASSERT( parentChit != gold );

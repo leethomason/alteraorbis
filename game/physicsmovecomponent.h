@@ -67,7 +67,7 @@ public:
 	}
 
 	virtual void Serialize( XStream* xs );
-	virtual int DoTick( U32 delta, U32 since );
+	virtual int  DoTick( U32 delta, U32 since );
 	virtual bool IsMoving();
 	virtual void CalcVelocity( grinliz::Vector3F* v );
 

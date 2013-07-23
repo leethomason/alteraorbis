@@ -262,7 +262,7 @@ public:
 		AI_SECTOR_HERD		= (1<<18),		// will herd across sectors
 		AI_BINDS_TO_CORE	= (1<<19),
 		AI_DOES_WORK		= (1<<20),
-		//VISITOR				= (1<<21),		// AI, behavior, etc. One of the few truly special flags.
+		GOLD_PICKUP			= (1<<21),
 
 		CLICK_THROUGH		= (1<<22),		// model is created with flags to ignore world clicking
 	};

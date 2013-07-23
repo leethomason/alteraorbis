@@ -1,7 +1,7 @@
 <items>
   <item name="humanFemale"
         resource="humanFemale"
-			  flags=""
+			  flags="GOLD_PICKUP"
 			  mass ="50">
     <intrinsics>
       <item name="hand"
@@ -84,7 +84,7 @@
 
   <item name="mantis"
         resource="mantis"
-        flags="AI_WANDER_HERD AI_EAT_PLANTS AI_SECTOR_HERD"
+        flags="AI_WANDER_HERD AI_EAT_PLANTS AI_SECTOR_HERD GOLD_PICKUP"
         mass="40">
     <intrinsics>
       <item name="pincer"
@@ -97,7 +97,7 @@
 
   <item name="redMantis"
         resource="redMantis"
-        flags="AI_WANDER_HERD AI_EAT_PLANTS"
+        flags="AI_WANDER_HERD AI_EAT_PLANTS GOLD_PICKUP"
         mass="35">
     <intrinsics>
       <item name="pincer"
@@ -119,7 +119,7 @@
   -->
   <item name="balrog"
         resource="balrog"
-        flags="EFFECT_FIRE IMMUNE_FIRE"
+        flags="EFFECT_FIRE IMMUNE_FIRE GOLD_PICKUP"
         mass="400">
     <intrinsics>
       <!-- since intrinsic, also grants fire immunity -->

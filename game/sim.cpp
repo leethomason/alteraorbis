@@ -111,10 +111,6 @@ void Sim::Load( const char* mapDAT, const char* gameDAT )
 			fclose( fp );
 		}
 	}
-	Chit* player = GetPlayerChit();
-	if ( player && player->GetItemComponent() ) {
-		player->GetItemComponent()->SetPickup( ItemComponent::GOLD_HOOVER );
-	}
 }
 
 
@@ -198,7 +194,6 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos, const char* assetName )
 	chitBag->AddItem( "shield", chit, engine, 0, 2 );
 	chitBag->AddItem( "blaster", chit, engine, 0, 2 );
 	chit->GetItemComponent()->AddGold( ReserveBank::Instance()->WithdrawDenizen() );
-	chit->GetItemComponent()->SetPickup( ItemComponent::GOLD_HOOVER );
 	chit->GetItem()->flags |= GameItem::AI_BINDS_TO_CORE;
 
 	AIComponent* ai = new AIComponent( engine, worldMap );
