@@ -82,6 +82,12 @@
         procedural="team"
         mass="50" />
 
+  <item name="vault"
+        resource="vault2"
+        porch="1"
+        procedural="team"
+        mass="200" />
+
   <item name="mantis"
         resource="mantis"
         flags="AI_WANDER_HERD AI_EAT_PLANTS AI_SECTOR_HERD GOLD_PICKUP"

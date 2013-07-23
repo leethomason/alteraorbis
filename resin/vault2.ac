@@ -2,7 +2,7 @@ AC3Db
 MATERIAL "ac3dmat1" rgb 1 1 1  amb 0.2 0.2 0.2  emis 0 0 0  spec 0.2 0.2 0.2  shi 128  trans 0
 MATERIAL "ac3dmat2" rgb 0.627451 0.25098 0.25098  amb 0.2 0.2 0.2  emis 0 0 0  spec 0.2 0.2 0.2  shi 128  trans 0
 OBJECT world
-kids 24
+kids 23
 OBJECT poly
 name "box"
 loc -5.94019 0.166198 -1.31012
@@ -932,18 +932,6 @@ refs 4
 3 0 0.375
 kids 0
 OBJECT poly
-name "line"
-loc -1.82015 1.0815 0
-crease 45.000000
-numvert 1
-0 0 0
-numsurf 1
-SURF 0x32
-mat 0
-refs 1
-0 0 0
-kids 0
-OBJECT poly
 name "box"
 loc -5.0079 0.0598362 -0.994882
 texture "structure.png"
@@ -1178,6 +1166,7 @@ kids 0
 OBJECT poly
 name "block"
 loc -5.00229 1.57567 -1.19471
+texture "structure.png"
 crease 45.000000
 numvert 16
 0.148741 -0.140269 0.185029
