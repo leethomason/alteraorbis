@@ -1361,22 +1361,7 @@ void AIComponent::FlushTaskList( const ComponentSet& thisComp )
 				}
 			}
 			else {
-				CChitArray array;
-				RemovableFilter removableFilter;
-				parentChit->GetChitBag()->QuerySpatialHash( &array, taskPos2, 0.1f, 0, &removableFilter );
-
-				Chit* found = 0;
-				// First pass: plants & 1x1 buildings.
-				for( int i=0; i<array.Size(); ++i ) {
-					if ( array[i]->GetItem() && array[i]->GetItem()->name == task->structure ) {
-						found = array[i];
-						break;
-					}
-				}
-				// Check for 2x2 buildings.
-				if ( !found ) {
-					found = GetChitBag()->ToLumos()->QueryBuilding( pos2i );
-				}
+				Chit* found = GetChitBag()->ToLumos()->QueryRemovable( task->pos2i );
 				if ( found ) {
 					DamageDesc dd( 10000, 0 );
 					ChitDamageInfo info( dd );

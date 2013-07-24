@@ -128,6 +128,7 @@ public:
 		return QueryBuilding( r );
 	}
 	Chit* QueryBuilding( const grinliz::Rectangle2I& bounds );
+	Chit* QueryRemovable( const grinliz::Vector2I& pos );
 
 private:
 

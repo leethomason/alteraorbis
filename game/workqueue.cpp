@@ -229,32 +229,16 @@ void WorkQueue::DoTick()
 		switch ( queue[i].action )
 		{
 		case CLEAR:
-			if ( worldMap->IsPassable( pos2i.x, pos2i.y )) {
-				GLASSERT( MAX_BUILDING_SIZE == 2 );
-				Rectangle2F r;
-				r.Set( pos2.x-0.1f, pos2.y-0.1f, pos2.x+0.6f, pos2.y+0.6f );
-
-				CChitArray array;
-				chitBag->QuerySpatialHash( &array, r, 0, &removableFilter );
-				if ( array.Empty() ) {
-					RemoveItem( i );
-					--i;
-				}
+			if ( worldMap->IsPassable( pos2i.x, pos2i.y ) && !chitBag->QueryRemovable( pos2i )) {
+				RemoveItem( i );
+				--i;
 			}
 			break;
 
 		case BUILD:
-			{
-				GLASSERT( MAX_BUILDING_SIZE == 2 );
-				Rectangle2F r;
-				r.Set( pos2.x-0.1f, pos2.y-0.1f, pos2.x+0.6f, pos2.y+0.6f );
-
-				CChitArray array;
-				chitBag->QuerySpatialHash( &array, r, 0, &removableFilter );
-				if ( !array.Empty() ) {
-					RemoveItem( i );
-					--i;
-				}
+			if ( !worldMap->IsPassable( pos2i.x, pos2i.y ) || chitBag->QueryBuilding( pos2i )) {
+				RemoveItem( i );
+				--i;
 			}
 			break;
 

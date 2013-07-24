@@ -75,6 +75,7 @@ void MapSpatialComponent::OnAdd( Chit* chit )
 
 void MapSpatialComponent::OnRemove()
 {
+	super::OnRemove();
 	if ( mode == GRID_BLOCKED ) {
 		Vector2I pos = MapPosition();
 		for( int y=bounds.min.y; y<=bounds.max.y; ++y ) {
@@ -83,7 +84,6 @@ void MapSpatialComponent::OnRemove()
 			}
 		}
 	}
-	super::OnRemove();
 }
 
 
