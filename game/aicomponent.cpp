@@ -570,7 +570,7 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 since )
 	{
 		// Visitors at a kiosk.
 		Vector2I pos2i = thisComp.spatial->GetPosition2DI();
-		Chit* chit = this->GetChitBag()->ToLumos()->QueryBuilding( pos2i, true );
+		Chit* chit = this->GetChitBag()->ToLumos()->QueryPorch( pos2i );
 		
 		VisitorData* vd = &Visitors::Instance()->visitorData[visitorIndex];
 		IString kioskName = vd->CurrentKioskWant();
@@ -923,7 +923,7 @@ void AIComponent::ThinkVisitor( const ComponentSet& thisComp )
 	Vector2I pos2i = thisComp.spatial->GetPosition2DI();
 	Vector2I sector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
 	VisitorData* vd = Visitors::Get( visitorIndex );
-	Chit* kiosk = GetChitBag()->ToLumos()->QueryBuilding( pos2i, true );
+	Chit* kiosk = GetChitBag()->ToLumos()->QueryPorch( pos2i );
 	IString kioskName = vd->CurrentKioskWant();
 	if ( kiosk && kiosk->GetItem()->name == kioskName ) {
 		// all good
@@ -1322,7 +1322,7 @@ void AIComponent::FlushTaskList( const ComponentSet& thisComp )
 	case MOVE:
 		if ( pmc->Stopped() ) {
 			if ( pos2i == task->pos2i ) {
-				// arived!
+				// arrived!
 				taskList.PopFront();
 			}
 			else {
@@ -1364,6 +1364,7 @@ void AIComponent::FlushTaskList( const ComponentSet& thisComp )
 				CChitArray array;
 				RemovableFilter removableFilter;
 				parentChit->GetChitBag()->QuerySpatialHash( &array, taskPos2, 0.1f, 0, &removableFilter );
+				bool found = false;
 				for( int i=0; i<array.Size(); ++i ) {
 					if ( array[i]->GetItem() && array[i]->GetItem()->name == task->structure ) {
 
@@ -1375,6 +1376,7 @@ void AIComponent::FlushTaskList( const ComponentSet& thisComp )
 						info.isExplosion = false;
 						info.originOfImpact = thisComp.spatial->GetPosition();
 						array[i]->SendMessage( ChitMsg( ChitMsg::CHIT_DAMAGE, 0, &info ), 0 );
+						found = true;
 						break;
 					}
 				}
@@ -1389,6 +1391,7 @@ void AIComponent::FlushTaskList( const ComponentSet& thisComp )
 			CChitArray array;
 			RemovableFilter removableFilter;
 			parentChit->GetChitBag()->QuerySpatialHash( &array, taskPos2, 0.1f, 0, &removableFilter );
+			
 			// FIXME: not correct for non-1x1 structures.
 			if ( wg.RockHeight() == 0 && array.Empty() ) {
 				if ( task->structure.empty() ) {

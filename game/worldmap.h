@@ -192,8 +192,8 @@ public:
 	// --- Debugging -- //
 	void ShowAdjacentRegions( float x, float y );
 	void ShowRegionPath( float x0, float y0, float x1, float y1 );
-	bool IsShowingRegionOverlay() const { return debugRegionOverlay; }
-	void ShowRegionOverlay( bool over ) { debugRegionOverlay = over; }
+	bool IsShowingRegionOverlay() const							{ return debugRegionOverlay.Area() > 1; }
+	void ShowRegionOverlay( const grinliz::Rectangle2I& over )	{ debugRegionOverlay = over; }
 	void PatherCacheHitMiss( const grinliz::Vector2I& sector, micropather::CacheData* data );
 	int CalcNumRegions();
 
@@ -322,7 +322,7 @@ private:
 	int							slowTick;
 
 	WorldInfo*					worldInfo;
-	bool						debugRegionOverlay;
+	grinliz::Rectangle2I		debugRegionOverlay;
 	SectorPort					randomPortDebug;
 
 	micropather::MicroPather*	currentPather;

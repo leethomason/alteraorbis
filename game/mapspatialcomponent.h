@@ -39,7 +39,7 @@ public:
 	virtual void Serialize( XStream* xs );
 
 	// WARNING must be called before OnAdd
-	void SetMapPosition( int x, int y );
+	void SetMapPosition( int x, int y, int cx, int cy );
 
 	grinliz::Vector2I MapPosition() const { 
 		grinliz::Vector2I v = { (int) position.x, (int)position.z };
@@ -62,6 +62,7 @@ public:
 private:
 	int mode;
 	bool building;			// is this a building?
+	grinliz::Rectangle2I bounds;
 	WorldMap* worldMap;
 };
 

@@ -233,7 +233,7 @@ void BattleTestScene::LoadMap()
 		const Vector2I& v = features[i];
 
 		MapSpatialComponent* msc = new MapSpatialComponent( map );
-		msc->SetMapPosition( v.x, v.y );
+		msc->SetMapPosition( v.x, v.y, 1, 1 );
 		msc->SetMode( GRID_BLOCKED );
 		chit->Add( msc );
 		chit->Add( new RenderComponent( engine, "plant1.3" ));
@@ -492,8 +492,12 @@ void BattleTestScene::ItemTapped( const gamui::UIItem* item )
 		GoScene();
 	}
 	else if ( item == &regionButton ) {
-		bool showRegions = regionButton.Down();
-		map->ShowRegionOverlay( showRegions );
+		Rectangle2I b;
+		if ( regionButton.Down() )
+			b.Set( 0, 0, map->Width()-1, map->Height()-1 );
+		else
+			b.Set( 0, 0, 0, 0 );
+		map->ShowRegionOverlay( b );
 	}
 }
 

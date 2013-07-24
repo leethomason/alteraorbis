@@ -107,7 +107,7 @@ void NavTest2Scene::LoadMap()
 		Chit* chit = chitBag.NewChit();
 		const Vector2I& v = blocks[i];
 		MapSpatialComponent* msc = new MapSpatialComponent( map );
-		msc->SetMapPosition( v.x, v.y );
+		msc->SetMapPosition( v.x, v.y, 1, 1 );
 		msc->SetMode( GRID_BLOCKED );
 		chit->Add( msc );
 		chit->Add( new RenderComponent( engine, "unitCube" ));
@@ -116,7 +116,7 @@ void NavTest2Scene::LoadMap()
 		Chit* chit = chitBag.NewChit();
 		const Vector2I& v = features[i];
 		MapSpatialComponent* msc = new MapSpatialComponent( map );
-		msc->SetMapPosition( v.x, v.y );
+		msc->SetMapPosition( v.x, v.y, 1, 1 );
 		msc->SetMode( GRID_BLOCKED );
 		chit->Add( msc );
 		chit->Add( new RenderComponent( engine, "tree" ));
@@ -264,7 +264,12 @@ void NavTest2Scene::ItemTapped( const gamui::UIItem* item )
 		game->PopScene();
 	}
 	else if ( item == &regionButton ) {
-		map->ShowRegionOverlay( regionButton.Down() );
+		Rectangle2I b;
+		if ( regionButton.Down() )
+			b.Set( 0, 0, map->Width()-1, map->Height()-1 );
+		else
+			b.Set( 0, 0, 0, 0 );
+		map->ShowRegionOverlay( b );
 	}
 }
 

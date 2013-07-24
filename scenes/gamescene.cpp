@@ -75,7 +75,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 
 	static const char* buildButtonText[NUM_BUILD_BUTTONS] = { 
 		"None", "Clear", "Ice", 
-		"News\nKiosk", "Media\nKiosk", "Commerce\nKiosk", "Social\nKiosk" 
+		"News\nKiosk", "Media\nKiosk", "Commerce\nKiosk", "Social\nKiosk", "Vault" 
 	};
 	for( int i=0; i<NUM_BUILD_BUTTONS; ++i ) {
 		buildButton[i].Init( &gamui2D, game->GetButtonLook(0) );
@@ -440,6 +440,7 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 					case BUILD_KIOSK_C:		wq->Add( WorkQueue::BUILD, v, StringPool::Intern( "kiosk.c" ));	break;
 					case BUILD_KIOSK_S:		wq->Add( WorkQueue::BUILD, v, StringPool::Intern( "kiosk.s" ));	break;
 					case BUILD_KIOSK_N:		wq->Add( WorkQueue::BUILD, v, StringPool::Intern( "kiosk.n" ));	break;
+					case BUILD_VAULT:		wq->Add( WorkQueue::BUILD, v, StringPool::Intern( "vault" ));	break;
 					default: GLASSERT( 0 ); break;
 					};
 					
@@ -669,7 +670,17 @@ void GameScene::HandleHotKey( int mask )
 		++colorSeed;
 	}
 	else if ( mask == GAME_HK_TOGGLE_PATHING ) {
-		sim->GetWorldMap()->ShowRegionOverlay( !sim->GetWorldMap()->IsShowingRegionOverlay() );
+		Rectangle2I r;
+		if ( sim->GetWorldMap()->IsShowingRegionOverlay() ) {
+			r.Set( 0, 0, 0, 0 );
+		}
+		else {
+			Vector3F at;
+			sim->GetEngine()->CameraLookingAt( &at );
+			Vector2I sector = { (int)at.x / SECTOR_SIZE, (int)at.z / SECTOR_SIZE };
+			r.Set( sector.x*SECTOR_SIZE, sector.y*SECTOR_SIZE, (sector.x+1)*SECTOR_SIZE-1, (sector.y+1)*SECTOR_SIZE-1 );
+		}
+		sim->GetWorldMap()->ShowRegionOverlay( r );
 	}
 	else {
 		super::HandleHotKey( mask );

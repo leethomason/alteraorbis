@@ -93,7 +93,7 @@
   <model filename="kiosk.ac" modelName="kiosk.m" origin="-8.50 0 -0.50" shading="flat" polyRemoval="pre" />
   <model filename="kiosk.ac" modelName="kiosk.c" origin="-1.50 0 -0.50" shading="flat" polyRemoval="pre" />
   <model filename="kiosk.ac" modelName="kiosk.s" origin="-4.50 0 -0.50" shading="flat" polyRemoval="pre" />
-  <model assetName="vault"   filename="vault2.ac" origin="1 0 1"         shading="flat" polyRemoval="pre" />
+  <model assetName="vault"   filename="vault2.ac" origin="-5 0 -1"      shading="flat" polyRemoval="pre" />
   
   <!-- Creating animation
     1. Add a model resource, with the usual flags, plus: animatimation="create"

@@ -27,10 +27,17 @@ MapSpatialComponent::MapSpatialComponent( WorldMap* _map ) : SpatialComponent()
 }
 
 
-void MapSpatialComponent::SetMapPosition( int x, int y )
+void MapSpatialComponent::SetMapPosition( int x, int y, int cx, int cy )
 {
 	GLASSERT( parentChit == 0 );
-	SetPosition( (float)x + 0.5f, 0.0f, (float)y + 0.5f );
+	bounds.Set( x, y, x+cx-1, y+cy-1 );
+	GLASSERT( cx <= MAX_BUILDING_SIZE );
+	GLASSERT( cy <= MAX_BUILDING_SIZE );
+	
+	float px = (float)x + (float)cx*0.5f;
+	float py = (float)y + (float)cy*0.5f;
+
+	SetPosition( px, 0, py );
 }
 
 
@@ -41,8 +48,12 @@ void MapSpatialComponent::SetMode( int newMode )
 
 	if ( newMode != mode ) {
 		mode = newMode;
-		Vector2I pos = MapPosition();
-		worldMap->UpdateBlock( pos.x, pos.y );
+
+		for( int y=bounds.min.y; y<=bounds.max.y; ++y ) {
+			for( int x=bounds.min.x; x<=bounds.max.x; ++x ) {
+				worldMap->UpdateBlock( x, y );
+			}
+		}
 	}
 }
 
@@ -53,7 +64,11 @@ void MapSpatialComponent::OnAdd( Chit* chit )
 
 	if ( mode == GRID_BLOCKED ) {
 		Vector2I pos = MapPosition();
-		worldMap->UpdateBlock( pos.x, pos.y );
+		for( int y=bounds.min.y; y<=bounds.max.y; ++y ) {
+			for( int x=bounds.min.x; x<=bounds.max.x; ++x ) {
+				worldMap->UpdateBlock( x, y );
+			}
+		}
 	}
 }
 
@@ -62,7 +77,11 @@ void MapSpatialComponent::OnRemove()
 {
 	if ( mode == GRID_BLOCKED ) {
 		Vector2I pos = MapPosition();
-		worldMap->UpdateBlock( pos.x, pos.y );
+		for( int y=bounds.min.y; y<=bounds.max.y; ++y ) {
+			for( int x=bounds.min.x; x<=bounds.max.x; ++x ) {
+				worldMap->UpdateBlock( x, y );
+			}
+		}
 	}
 	super::OnRemove();
 }
@@ -73,6 +92,7 @@ void MapSpatialComponent::Serialize( XStream* xs )
 	this->BeginSerialize( xs, "MapSpatialComponent" );
 	XARC_SER( xs, mode );
 	XARC_SER( xs, building );
+	XARC_SER( xs, bounds );
 	super::Serialize( xs );
 	this->EndSerialize( xs );
 }
@@ -80,13 +100,14 @@ void MapSpatialComponent::Serialize( XStream* xs )
 
 Vector2I MapSpatialComponent::PorchPos() const
 {
-	Vector2I v = MapPosition();
+	Vector2I v = bounds.min;
 
 	int r = LRintf( this->GetYRotation() / 90.0f );
 	// FIXME: only works for 1x1
+	GLASSERT( r == 0 );
 
 	switch (r) {
-	case 0:		v.y += 1;	break;
+	case 0:		v.y = bounds.max.y + 1;	break;
 	case 1:		v.x += 1;	break;
 	case 2:		v.y -= 1;	break;
 	case 3:		v.x -= 1;	break;

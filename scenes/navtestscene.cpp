@@ -78,7 +78,9 @@ NavTestScene::NavTestScene( LumosGame* game ) : Scene( game )
 	engine->SetGlow( false );
 	map->AttachEngine( engine, this );
 
-	map->ShowRegionOverlay( true );
+	Rectangle2I b;
+	b.Set( 0, 0, map->Width()-1, map->Height()-1 );
+	map->ShowRegionOverlay( b );
 
 	engine->CameraLookAt( 10, 10, 40 );
 	tapMark.Zero();
@@ -212,7 +214,13 @@ void NavTestScene::ItemTapped( const gamui::UIItem* item )
 			pmc->SetPathDebugging( showZonePath.Down() );
 	}
 	else if ( item == &showOverlay ) {
-		map->ShowRegionOverlay( showOverlay.Down() );
+		Rectangle2I b;
+		if ( showOverlay.Down() )
+			b.Set( 0, 0, map->Width()-1, map->Height()-1 );
+		else
+			b.Set( 0, 0, 0, 0 );
+
+		map->ShowRegionOverlay( b );
 	}
 
 	while ( makeBlocks ) {

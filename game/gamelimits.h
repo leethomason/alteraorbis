@@ -52,7 +52,10 @@ enum {
 	NO_CRYSTAL = NUM_CRYSTAL_TYPES
 };
 
-static const int MAX_BUILDING_SIZE	= 2;	// 2x2 building. All other objects must be 1x1.
+// Objects can be 1x1 or 2x2. Simplifies code. Either 1x1 or 2x2 objects can have
+// porches, which essentially adds an extra space at the front door. But that
+// doesn't impact the pather. Plants must be 1x1
+static const int MAX_BUILDING_SIZE	= 2;	
 
 static const U32 MINUTE				= 1000*60;						// game time and real time
 static const U32 MINUTES_IN_AGE		= 100;

@@ -56,8 +56,13 @@ Chit* LumosChitBag::NewBuilding( const Vector2I& pos, const char* name, int team
 
 	const GameItem& rootItem = ItemDefDB::Instance()->Get( name );
 
+	int cx=1;
+	int cy=1;
+	rootItem.GetValue( "sizeX", &cx );
+	rootItem.GetValue( "sizeY", &cy );
+
 	MapSpatialComponent* msc = new MapSpatialComponent( worldMap );
-	msc->SetMapPosition( pos.x, pos.y );
+	msc->SetMapPosition( pos.x, pos.y, cx, cy );
 	msc->SetMode( GRID_BLOCKED );
 	msc->SetBuilding( true );
 	
@@ -152,44 +157,69 @@ Chit* LumosChitBag::NewVisitor( int visitorIndex )
 }
 
 
-Chit* LumosChitBag::QueryBuilding( const grinliz::Vector2I& pos2i, bool orPorch )
+Chit* LumosChitBag::QueryBuilding( const grinliz::Rectangle2I& bounds )
 {
-	// Building can be up to MAX_BUILDING_SIZE
-	float rad = 0.1f + (float)MAX_BUILDING_SIZE * 0.5f;	// actually a little big.
-	if ( orPorch ) {
-		rad += 1.0f;
-	}
-	Vector2F pos2 = { (float)pos2i.x+0.5f, (float)pos2i.y+0.5f };
+	GLASSERT( MAX_BUILDING_SIZE == 2 );	// else adjust logic
+	static const float EPS   = 0.1f;
 
-	Chit* porch = 0;
-	CChitArray arr;
+	Rectangle2F r;
+	r.min.x = (float)bounds.min.x - EPS;
+	r.min.y = (float)bounds.min.y - EPS;
+	r.max.x = (float)(bounds.max.x+1) + EPS;
+	r.max.y = (float)(bounds.max.y+1) + EPS;
 
 	BuildingFilter buildingFilter;
-	this->QuerySpatialHash( &arr, pos2, rad, 0, &buildingFilter );
+	CChitArray arr;
+	this->QuerySpatialHash( &arr, r, 0, &buildingFilter );
+
+	Chit* building = 0;
+	if ( arr.Size() > 0 ) {
+		building = arr[0];
+
+#ifdef DEBUG
+		MapSpatialComponent* msc = GET_SUB_COMPONENT( building, SpatialComponent, MapSpatialComponent );
+		GLASSERT( msc->Bounds().Intersect( bounds ));		
+#endif
+	}
+	return building;
+}
+
+
+Chit* LumosChitBag::QueryPorch( const grinliz::Vector2I& pos )
+{
+	GLASSERT( MAX_BUILDING_SIZE == 2 );	// else adjust logic
+	static const float EPS   = 0.1f;
+	static const float DELTA = 1.5f;
+	static const float OFFSET = DELTA + EPS;
+
+	Rectangle2F r;
+	r.min.x = (float)pos.x + 0.5f - OFFSET;
+	r.min.y = (float)pos.y + 0.5f - OFFSET;
+	r.max.x = (float)pos.x + 0.5f + OFFSET;
+	r.max.y = (float)pos.y + 0.5f + OFFSET;
+
+	BuildingFilter buildingFilter;
+	CChitArray arr;
+	this->QuerySpatialHash( &arr, r, 0, &buildingFilter );
+
 	for( int i=0; i<arr.Size(); ++i ) {
 		Chit* chit = arr[i];
 		MapSpatialComponent* msc = GET_SUB_COMPONENT( chit, SpatialComponent, MapSpatialComponent );
 		GLASSERT( msc );	// all buildings should be msc's
-		if ( msc ) {
-			if ( msc->Bounds().Contains( pos2i )) {
-				return chit;
-			}
-			if ( orPorch && !porch && msc->PorchPos() == pos2i ) {
-				porch = chit;
+		GameItem* item = chit->GetItem();
+		if ( item ) {
+			int porch = 0;
+			item->GetValue( "porch", &porch );
+			if ( msc && porch ) {
+				if ( msc->PorchPos() == pos ) {
+					return chit;
+				}
 			}
 		}
 	}
-	// If we didn't find a building, but did (and should) find a porch
-	return porch;
+	return 0;
 }
 
-
-/*
-bool LumosChitBag::CoreFilter( Chit* chit )
-{
-	return ( chit->GetItem() && chit->GetItem()->name == IStringConst::kcore );
-}
-*/
 
 Chit* LumosChitBag::NewGoldChit( const grinliz::Vector3F& pos, int amount )
 {
@@ -345,17 +375,6 @@ void LumosChitBag::AddItem( const char* name, Chit* chit, Engine* engine, int te
 		chit->GetItemComponent()->AddToInventory( new GameItem( item ), true );
 	}
 }
-
-
-/*
-bool LumosChitBag::HasMapSpatialInUse( Chit* chit ) {
-	MapSpatialComponent* ms = GET_SUB_COMPONENT( chit, SpatialComponent, MapSpatialComponent );
-	if ( ms ) {
-		return true;
-	}
-	return false;
-}
-*/
 
 
 int LumosChitBag::MapGridUse( int x, int y )

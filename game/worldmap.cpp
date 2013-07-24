@@ -70,7 +70,7 @@ WorldMap::WorldMap( int width, int height ) : Map( width, height )
 	texture[2] = TextureManager::Instance()->GetTexture( "map_port" );
 	texture[3] = TextureManager::Instance()->GetTexture( "map_land" );
 
-	debugRegionOverlay = false;
+	debugRegionOverlay.Set( 0, 0, 0, 0 );
 }
 
 
@@ -1749,8 +1749,8 @@ void WorldMap::DrawZones()
 	CompositingShader debugPath( GPUState::BLEND_NORMAL );
 	debugPath.SetColor( 0.5f, 0.5f, 1, 0.5f );
 
-	for( int j=0; j<height; ++j ) {
-		for( int i=0; i<width; ++i ) {
+	for( int j=debugRegionOverlay.min.y; j<=debugRegionOverlay.max.y; ++j ) {
+		for( int i=debugRegionOverlay.min.x; i<=debugRegionOverlay.max.x; ++i ) {
 			CalcZone( i, j );
 
 			static const float offset = 0.1f;
@@ -1974,7 +1974,7 @@ void WorldMap::Draw3D(  const grinliz::Color3F& colorMult, GPUState::StencilMode
 	}
 	Submit( &shader, false );
 
-	if ( debugRegionOverlay ) {
+	if ( debugRegionOverlay.Area() > 0 ) {
 		if ( mode == GPUState::STENCIL_CLEAR ) {
 			// Debugging pathing zones:
 			DrawZones();
