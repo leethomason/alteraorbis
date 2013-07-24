@@ -41,29 +41,23 @@ public:
 	// WARNING must be called before OnAdd
 	void SetMapPosition( int x, int y, int cx, int cy );
 
-	grinliz::Vector2I MapPosition() const { 
-		grinliz::Vector2I v = { (int) position.x, (int)position.z };
-		return v;
-	}
-	// FIXME: currently always 1x1
-	grinliz::Rectangle2I Bounds() const {
-		grinliz::Rectangle2I b;
-		b.min = b.max = MapPosition();
-		return b;
-	}
+	grinliz::Vector2I MapPosition() const	{ return bounds.min; }
+	grinliz::Rectangle2I Bounds() const		{ return bounds; }
 
 	void SetMode( int mode );
-	int Mode() const { return mode; }
+	int Mode() const			{ return mode; }
 	void SetBuilding( bool b )	{ building = b; }
 	bool Building() const		{ return building; }
 
+	// Assumes there is a porch; to actually query,
+	// use the 'porch' property on the GameItem
 	grinliz::Vector2I PorchPos() const;
 
 private:
-	int mode;
-	bool building;			// is this a building?
-	grinliz::Rectangle2I bounds;
-	WorldMap* worldMap;
+	int						mode;
+	bool					building;	// is this a building?
+	grinliz::Rectangle2I	bounds;
+	WorldMap*				worldMap;
 };
 
 
