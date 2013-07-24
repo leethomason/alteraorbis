@@ -380,7 +380,6 @@ int LumosChitBag::MapGridUse( int x, int y )
 }
 
 
-
 CoreScript* LumosChitBag::IsBoundToCore( Chit* chit )
 {
 	if ( chit && chit->GetSpatialComponent() ) {

@@ -21,9 +21,11 @@
 - Melee should rotate to target (both rock and chit)
 - How does Ice and magma interact?
 - move GOLD_PICKUP to flag in Item
-- pools that are waterfalls need side rendering
-- remove squisher. nifty but outdated.
+x pools that are waterfalls need side rendering
+x remove squisher. nifty but outdated.
 - SectorHerd seems a little aggressive. Switch over to using ForceCount, check conditions to trigger.
+x Only call ApplyBlocks once. 
+x Probably don't need squatting logic in PathMoveComponent. (Actually do)
 
 - game
 
@@ -36,12 +38,13 @@
 		x ground texture
 		x tree textures
 		x flower colors (too saturated flowers)
-		- new 1x1 models
 		x grid travel from port (no position selection)
+		x new Core model
+		- new 1x1 models
+		- building rotation
 		- support for mxn models
-		- new nxn models
+		- new mxn models
 		- decent clear dragging
-		- new Core model
 		- visitors create energy, buildings consume energy
 		- fix team logic
 		- build 2 height ice
@@ -49,6 +52,7 @@
 		- leave core
 		- cancel orders
 		- proper animation system
+		- wait states on wander
 	- Loot
 		- item screen
 		- drop items
@@ -62,10 +66,10 @@
 		- consider moving ground to voxel gen system, so that ground can vary?
 		- teams. friend-enemy-neutral logic.
 		- monster ecology
-		- visitors
+		x visitors
 		- inventory screen
 	- Building
-		- construction
+		x construction
 		- economics
 		- domain building
 	- AI
@@ -613,3 +617,22 @@ StreamWriter string	=1832747
 			 double	=  35784 
 			 byte   =      0 
 			 attrib =   2564 
+
+13 fps	spatial query
+Switching to fast 'block' calc helps a bit. (Key issue on I7, though.)
+
+AI::QuerySpatialHash 6.5
+	re-order hash:	meh
+	size:	16		8
+			64		7
+			128		4.6
+			256		4
+	size 64, improved hash->5
+	size 128, improved hash->4.5
+	size 64, prime # hash ->4
+All that to about 15fps
+
+Release:
+outer tick: 24.2
+inner tick: 25
+

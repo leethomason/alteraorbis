@@ -28,6 +28,8 @@ static const int POOL_HEIGHT			= 2;
 
 struct WorldGrid {
 
+public:
+	unsigned extBlock			: 1;	// used by the map. prevents allocating another structure.
 private:
 	// memset(0) should work, and make it water.
 

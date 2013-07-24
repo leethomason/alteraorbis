@@ -34,6 +34,16 @@ class CameraComponent;
 
 #define CChitArray grinliz::CArray<Chit*, 32 >
 
+// Controls tuning of spatial hash. Helps, but 
+// still spending way too much time finding out 
+// what is around a given chit.
+#define SPATIAL_VAR
+
+// This ticks per-component instead of per-chit.
+// Rather expected this to make a difference
+// (cache use) but doesn't.
+//#define OUTER_TICK
+
 class IChitAccept
 {
 public:
@@ -153,12 +163,25 @@ protected:
 	void DeleteChits() { chitID.RemoveAll(); }
 
 private:
+
 	enum {
+#ifdef SPATIAL_VAR
+		SIZE2 = 1024*64	// 16 bits
+#else
 		SHIFT = 2,	// a little tuning done; seems reasonable
-		SIZE = MAX_MAP_SIZE >> SHIFT
+		SIZE = MAX_MAP_SIZE >> SHIFT,
+		SIZE2 = SIZE*SIZE,
+#endif
 	};
+
 	U32 HashIndex( U32 x, U32 y ) const {
+#ifdef SPATIAL_VAR
+		//return (y*MAX_MAP_SIZE + x) & (SIZE2-1);
+		//return (x ^ (y<<6)) & (SIZE2-1);				// 16 bit variation
+		return (y*137 +x ) & (SIZE2-1);					// prime # wins the day.
+#else
 		return ( (y>>SHIFT)*SIZE + (x>>SHIFT) );
+#endif
 	}
 
 	int idPool;
@@ -188,10 +211,12 @@ private:
 	grinliz::CDynArray<Chit*>		cachedQuery;		// local data, cached at class level
 	grinliz::CDynArray<ChitEvent>	events;
 	grinliz::CDynArray<NewsEvent>	news;
-	
 	grinliz::CDynArray<Bolt>		bolts;
+#ifdef OUTER_TICK
+	grinliz::CDynArray<Component*>	tickList[Chit::NUM_SLOTS];
+#endif
 	
-	Chit* spatialHash[SIZE*SIZE];
+	Chit* spatialHash[SIZE2];
 };
 
 

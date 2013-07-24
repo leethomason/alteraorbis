@@ -331,7 +331,7 @@ void Sim::DoWeatherEffects( U32 delta )
 		*/
 
 		Rectangle3F rainBounds;
-		rainBounds.Set( at.x-rad, 0.01f, at.z-rad, at.x+rad, 0.01f, at.z+rad );
+		rainBounds.Set( at.x-rad, 0.02f, at.z-rad, at.x+rad, 0.02f, at.z+rad );
 		worldMap->SetSaturation( 1.0f - 0.50f*rainEffect );
 
 		engine->particleSystem->EmitPD( pd, rainBounds, V3F_UP, delta );

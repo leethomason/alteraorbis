@@ -121,6 +121,7 @@ public:
 */
 class Chit
 {
+	friend class ChitBag;	// used for the OUTER_TICK optimization
 public:
 	// Should always use Create from ChitBag
 	Chit( int id=0, ChitBag* chitBag=0 );

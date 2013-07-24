@@ -131,14 +131,15 @@ void GameScene::Resize()
 	for( int i=0; i<NUM_SERIAL_BUTTONS; ++i ) {
 		layout.PosAbs( &serialButton[i], i, -2 );
 	}
+	layout.PosAbs( &allRockButton, NUM_SERIAL_BUTTONS, -2 );
 	layout.PosAbs( &freeCameraButton, 0, -3 );
+
 	for( int i=0; i<NUM_BUILD_BUTTONS; ++i ) {
 		int x = i/4;
 		int y = i - x*4;
 		layout.PosAbs( &buildButton[i], x, y+2 );
 	}
 	layout.PosAbs( &createWorkerButton, 0, 6 );
-	layout.PosAbs( &allRockButton, 0, 1 );
 
 	const Screenport& port = lumosGame->GetScreenport();
 	minimap.SetPos( port.UIWidth()-MINI_MAP_SIZE, 0 );
@@ -753,6 +754,9 @@ void GameScene::DoTick( U32 delta )
 	dateLabel.SetText( str.c_str() );
 
 	Chit* playerChit = sim->GetPlayerChit();
+	if ( !playerChit ) {
+		SetFace();
+	}
 	str.Clear();
 
 	Wallet wallet;
@@ -776,16 +780,11 @@ void GameScene::DoTick( U32 delta )
 
 	SetBars();
 
-	Rectangle2F coreBounds;
-	coreBounds.Set( 0, 0, 0, 0 );
-
 	CoreScript* coreMode = sim->GetChitBag()->IsBoundToCore( sim->GetPlayerChit() );
-	if ( coreMode ) {
-		Vector2F pos2 = sim->GetPlayerChit()->GetSpatialComponent()->GetPosition2D();
-		int sectorX = (int)pos2.x / SECTOR_SIZE;
-		int sectorY = (int)pos2.y / SECTOR_SIZE;
-		coreBounds.Set( (float)(sectorX*SECTOR_SIZE), (float)(sectorY*SECTOR_SIZE), (float)((sectorX+1)*SECTOR_SIZE), (float)((sectorY+1)*SECTOR_SIZE) );
+	for( int i=0; i<NUM_BUILD_BUTTONS; ++i ) {
+		buildButton[i].SetVisible( coreMode != 0 );
 	}
+	createWorkerButton.SetVisible( coreMode != 0 );
 
 	sim->GetEngine()->RestrictCamera( 0 );
 }
