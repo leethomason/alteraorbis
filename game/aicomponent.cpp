@@ -1360,25 +1360,31 @@ void AIComponent::FlushTaskList( const ComponentSet& thisComp )
 				}
 			}
 			else {
-				// FIXME: not correct for non-1x1 structures.
 				CChitArray array;
 				RemovableFilter removableFilter;
 				parentChit->GetChitBag()->QuerySpatialHash( &array, taskPos2, 0.1f, 0, &removableFilter );
-				bool found = false;
+
+				Chit* found = 0;
+				// First pass: plants & 1x1 buildings.
 				for( int i=0; i<array.Size(); ++i ) {
 					if ( array[i]->GetItem() && array[i]->GetItem()->name == task->structure ) {
-
-						DamageDesc dd( 10000, 0 );
-						ChitDamageInfo info( dd );
-						info.originID = 0;
-						info.awardXP  = false;
-						info.isMelee  = true;
-						info.isExplosion = false;
-						info.originOfImpact = thisComp.spatial->GetPosition();
-						array[i]->SendMessage( ChitMsg( ChitMsg::CHIT_DAMAGE, 0, &info ), 0 );
-						found = true;
+						chit = array[i];
 						break;
 					}
+				}
+				// Check for 2x2 buildings.
+				if ( !found ) {
+					found = GetChitBag()->ToLumos()->QueryBuilding( pos2i );
+				}
+				if ( found ) {
+					DamageDesc dd( 10000, 0 );
+					ChitDamageInfo info( dd );
+					info.originID = 0;
+					info.awardXP  = false;
+					info.isMelee  = true;
+					info.isExplosion = false;
+					info.originOfImpact = thisComp.spatial->GetPosition();
+					found->SendMessage( ChitMsg( ChitMsg::CHIT_DAMAGE, 0, &info ), 0 );
 				}
 			}
 			taskList.PopFront();
