@@ -29,6 +29,7 @@
 #include "../script/plantscript.h"
 #include "../script/worldgen.h"
 #include "../script/corescript.h"
+#include "../script/itemscript.h"
 
 #include "../engine/engine.h"
 #include "../engine/particle.h"
@@ -1368,7 +1369,7 @@ void AIComponent::FlushTaskList( const ComponentSet& thisComp )
 				// First pass: plants & 1x1 buildings.
 				for( int i=0; i<array.Size(); ++i ) {
 					if ( array[i]->GetItem() && array[i]->GetItem()->name == task->structure ) {
-						chit = array[i];
+						found = array[i];
 						break;
 					}
 				}
@@ -1393,24 +1394,55 @@ void AIComponent::FlushTaskList( const ComponentSet& thisComp )
 
 	case TASK_BUILD:
 		{
-			const WorldGrid& wg = map->GetWorldGrid( task->pos2i.x, task->pos2i.y );
-			CChitArray array;
-			RemovableFilter removableFilter;
-			parentChit->GetChitBag()->QuerySpatialHash( &array, taskPos2, 0.1f, 0, &removableFilter );
-			
-			// FIXME: not correct for non-1x1 structures.
-			if ( wg.RockHeight() == 0 && array.Empty() ) {
+			// IsPassable (isLand, noRocks)
+			// No plants
+			// No buildings
+			const GameItem& rootItem = ItemDefDB::Instance()->Get( task->structure.c_str() );
+			int cx=1, cy=1;
+			rootItem.GetValue( "sizeX", &cx );
+			rootItem.GetValue( "siveY", &cy );
+			Rectangle2I bounds;
+			bounds.Set( task->pos2i.x, task->pos2i.y, task->pos2i.x+cx-1, task->pos2i.y+cy-1 );
+
+			// Check for rock, water, etc.
+			for( int y=bounds.min.y; y<=bounds.max.y; ++y ) {
+				for( int x=bounds.min.x; x<=bounds.max.x; ++x ) {
+					if ( !map->IsPassable( x, y )) {
+						taskList.Clear();
+						break;
+					}
+				}
+			}
+
+			// Plants.
+			if ( taskList.Size() ) {
+				Rectangle2F r;
+				r.Set( (float)bounds.min.x + 0.2f, (float)bounds.min.y + 0.2f, (float)bounds.max.x + 0.8f, (float)bounds.max.y + 0.8f );
+
+				CChitArray array;
+				RemovableFilter removableFilter;
+				parentChit->GetChitBag()->QuerySpatialHash( &array, r, 0, &removableFilter );
+				if ( array.Size() ) {
+					taskList.Clear();
+				}
+			}
+
+			// Buildings.
+			if ( GetChitBag()->ToLumos()->QueryBuilding( bounds )) {
+				taskList.Clear();
+			}
+
+			if ( !taskList.Empty() ) {
 				if ( task->structure.empty() ) {
 					map->SetRock( task->pos2i.x, task->pos2i.y, 1, false, WorldGrid::ICE );
 				}
 				else {
 					GetChitBag()->ToLumos()->NewBuilding( task->pos2i, task->structure.c_str(), thisComp.item->primaryTeam );
 				}
+				taskList.PopFront();
 			}
-			taskList.PopFront();
 		}
 		break;
-
 	}
 }
 

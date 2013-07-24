@@ -230,9 +230,12 @@ void WorkQueue::DoTick()
 		{
 		case CLEAR:
 			if ( worldMap->IsPassable( pos2i.x, pos2i.y )) {
-				// FIXME wrong query for non 1x1 buildings
+				GLASSERT( MAX_BUILDING_SIZE == 2 );
+				Rectangle2F r;
+				r.Set( pos2.x-0.1f, pos2.y-0.1f, pos2.x+0.6f, pos2.y+0.6f );
+
 				CChitArray array;
-				chitBag->QuerySpatialHash( &array, pos2, 0.1f, 0, &removableFilter );
+				chitBag->QuerySpatialHash( &array, r, 0, &removableFilter );
 				if ( array.Empty() ) {
 					RemoveItem( i );
 					--i;
@@ -242,9 +245,13 @@ void WorkQueue::DoTick()
 
 		case BUILD:
 			{
+				GLASSERT( MAX_BUILDING_SIZE == 2 );
+				Rectangle2F r;
+				r.Set( pos2.x-0.1f, pos2.y-0.1f, pos2.x+0.6f, pos2.y+0.6f );
+
 				CChitArray array;
-				chitBag->QuerySpatialHash( &array, pos2, 0.1f, 0, &removableFilter );
-				if ( !worldMap->IsPassable( queue[i].pos.x, queue[i].pos.y ) || !array.Empty() ) {
+				chitBag->QuerySpatialHash( &array, r, 0, &removableFilter );
+				if ( !array.Empty() ) {
 					RemoveItem( i );
 					--i;
 				}

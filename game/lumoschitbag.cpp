@@ -379,11 +379,17 @@ void LumosChitBag::AddItem( const char* name, Chit* chit, Engine* engine, int te
 
 int LumosChitBag::MapGridUse( int x, int y )
 {
+	GLASSERT( MAX_BUILDING_SIZE == 2 );
+	// An object is either at the center or influence by
+	// something with 0.5 + EPS radius.
+
+	static const float OFFSET = 0.6f;
+
 	Rectangle2F r;
-	r.min.x = (float)x;
-	r.min.y = (float)y;
-	r.max.x = r.min.x + 1.0f;
-	r.max.y = r.min.y + 1.0f;
+	r.min.x = (float)x + 0.5f - OFFSET;
+	r.min.y = (float)y + 0.5f - OFFSET;
+	r.max.x = (float)x + 0.5f + OFFSET;
+	r.max.y = (float)y + 0.5f + OFFSET;
 
 	ChitHasMapSpatial hasMapSpatial;
 	QuerySpatialHash( &inUseArr, r, 0, &hasMapSpatial );
@@ -391,7 +397,9 @@ int LumosChitBag::MapGridUse( int x, int y )
 	for( int i=0; i<inUseArr.Size(); ++i ) {
 		MapSpatialComponent* ms = GET_SUB_COMPONENT( inUseArr[i], SpatialComponent, MapSpatialComponent );
 		GLASSERT( ms );
-		flags |= ms->Mode();
+		if ( ms->Bounds().Contains( x, y )) {
+			flags |= ms->Mode();
+		}
 	}
 	return flags;
 }
