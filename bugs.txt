@@ -41,17 +41,17 @@ x Probably don't need squatting logic in PathMoveComponent. (Actually do)
 		x flower colors (too saturated flowers)
 		x grid travel from port (no position selection)
 		x new Core model
-		- new 1x1 models
+		x new 1x1 models
+		x support for mxn models
+		x new mxn models
+		- cancel orders
 		- building rotation
-		- support for mxn models
-		- new mxn models
 		- decent clear dragging
 		- visitors create energy, buildings consume energy
 		- fix team logic
 		- build 2 height ice
 		- decent UI
 		- leave core
-		- cancel orders
 		- proper animation system
 		- wait states on wander
 	- Loot

@@ -25,6 +25,7 @@
 
 class XStream;
 class WorldMap;
+class LumosChitBag;
 
 // Each visitor has their own personality and memory, seperate
 // from the chit AI.
@@ -92,7 +93,7 @@ public:
 	// only returns existing; doesn't create.
 	static Visitors* Instance()	{ return instance; }
 
-	SectorPort ChooseDestination( int visitorIndex, WorldMap* map );
+	SectorPort ChooseDestination( int visitorIndex, WorldMap* map, LumosChitBag* chitBag );
 
 private:
 	static Visitors* instance;

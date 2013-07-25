@@ -2,6 +2,8 @@
 #include "../xarchive/glstreamer.h"
 #include "worldmap.h"
 #include "worldinfo.h"
+#include "lumoschitbag.h"
+#include "../script/corescript.h"
 #include "../grinliz/glrandom.h"
 #include "../xegame/istringconst.h"
 
@@ -80,7 +82,7 @@ VisitorData* Visitors::Get( int index )
 }
 
 
-SectorPort Visitors::ChooseDestination( int index, WorldMap* map )
+SectorPort Visitors::ChooseDestination( int index, WorldMap* map, LumosChitBag* chitBag )
 {
 	GLASSERT( instance );
 	GLASSERT( index >=0 && index <NUM_VISITORS );
@@ -115,12 +117,28 @@ SectorPort Visitors::ChooseDestination( int index, WorldMap* map )
 	}
 
 
-	while( true ) {
+	// Go to a random sector with a core.
+	static const int ATTEMPTS = 6;
+	for( int i=0; i<ATTEMPTS; ++i ) {
+		sector.Set( random.Rand( NUM_SECTORS ), random.Rand( NUM_SECTORS ));
+		const SectorData& sd = map->GetSector( sector );
+		CoreScript* cs = chitBag->GetCore( sector );
+		if ( sd.ports && cs && cs->GetAttached() ) {
+			break;
+		}
+		sector.Zero();
+	}
+
+	// Go to any random sector.
+	while( sector.IsZero() ) {
+		sector.Set( random.Rand( NUM_SECTORS ), random.Rand( NUM_SECTORS ));
 		const SectorData& sd = map->GetSector( sector );
 		if ( sd.ports ) 
 			break;
-		sector.Set( random.Rand( NUM_SECTORS ), random.Rand( NUM_SECTORS ));
+		sector.Zero();
 	}
+
+	GLASSERT( !sector.IsZero() );
 
 	const SectorData& sd = map->GetSector( sector );
 	GLASSERT( sd.ports );

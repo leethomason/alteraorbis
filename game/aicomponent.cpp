@@ -947,7 +947,7 @@ void AIComponent::ThinkVisitor( const ComponentSet& thisComp )
 		// Move to a kiosk
 		if ( vd->doneWith == sector ) {
 			// Head out!
-			SectorPort sp = Visitors::Instance()->ChooseDestination( visitorIndex, map );
+			SectorPort sp = Visitors::Instance()->ChooseDestination( visitorIndex, map, GetChitBag()->ToLumos() );
 			bool okay = this->Move( sp, true );
 			if ( !okay ) disconnect = true;
 		}
@@ -1382,41 +1382,27 @@ void AIComponent::FlushTaskList( const ComponentSet& thisComp )
 			// IsPassable (isLand, noRocks)
 			// No plants
 			// No buildings
-			const GameItem& rootItem = ItemDefDB::Instance()->Get( task->structure.c_str() );
 			int cx=1, cy=1;
-			rootItem.GetValue( "sizeX", &cx );
-			rootItem.GetValue( "siveY", &cy );
+			if ( !task->structure.empty() ) {
+				const GameItem& rootItem = ItemDefDB::Instance()->Get( task->structure.c_str() );
+				rootItem.GetValue( "sizeX", &cx );
+				rootItem.GetValue( "siveY", &cy );
+			}
 			Rectangle2I bounds;
 			bounds.Set( task->pos2i.x, task->pos2i.y, task->pos2i.x+cx-1, task->pos2i.y+cy-1 );
 
 			// Check for rock, water, etc.
 			for( int y=bounds.min.y; y<=bounds.max.y; ++y ) {
 				for( int x=bounds.min.x; x<=bounds.max.x; ++x ) {
-					if ( !map->IsPassable( x, y )) {
+					if (    !map->IsPassable( pos2i.x, pos2i.y ) 
+						 || GetChitBag()->ToLumos()->QueryRemovable( pos2i )) 
+					{
+						// Found a plant or building in the way.
 						taskList.Clear();
 						break;
 					}
 				}
 			}
-
-			// Plants.
-			if ( taskList.Size() ) {
-				Rectangle2F r;
-				r.Set( (float)bounds.min.x + 0.2f, (float)bounds.min.y + 0.2f, (float)bounds.max.x + 0.8f, (float)bounds.max.y + 0.8f );
-
-				CChitArray array;
-				RemovableFilter removableFilter;
-				parentChit->GetChitBag()->QuerySpatialHash( &array, r, 0, &removableFilter );
-				if ( array.Size() ) {
-					taskList.Clear();
-				}
-			}
-
-			// Buildings.
-			if ( GetChitBag()->ToLumos()->QueryBuilding( bounds )) {
-				taskList.Clear();
-			}
-
 			if ( !taskList.Empty() ) {
 				if ( task->structure.empty() ) {
 					map->SetRock( task->pos2i.x, task->pos2i.y, 1, false, WorldGrid::ICE );
