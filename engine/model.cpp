@@ -721,7 +721,9 @@ void Model::Queue( RenderQueue* queue, EngineShaders* engineShaders, int require
 				mod |= ShaderManager::TEXTURE0_XFORM;
 			if ( flags & MODEL_TEXTURE0_CLIP )		
 				mod |= ShaderManager::TEXTURE0_CLIP;
-			if ( flags & MODEL_TEXTURE0_COLORMAP )	
+			// test both the existance of a color map, and that
+			// this particular texture supports it.
+			if ( (flags & MODEL_TEXTURE0_COLORMAP) && t->ColorMap() )	
 				mod |= ShaderManager::TEXTURE0_COLORMAP;
 
 			if ( control.y != 1 ) {

@@ -24,7 +24,6 @@ using namespace grinliz;
 
 void ModelBuilder::SetTexture( const char* _textureName )
 {
-	GLASSERT( nGroup < EL_MAX_MODEL_GROUPS );
 	CStr< EL_FILE_STRING_LEN >  textureName( _textureName );
 	current = -1;
 

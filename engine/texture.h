@@ -54,6 +54,7 @@ public:
 		PARAM_LINEAR	= 0x02,
 		PARAM_EMISSIVE	= 0x04,
 		PARAM_SOFTWARE_MIP = 0x08,	// work around driver bug.
+		PARAM_COLORMAP	= 0x10		// supports color mapping
 	};
 
 	Texture()					{ creator = 0; } 
@@ -63,6 +64,7 @@ public:
 	bool Alpha() const			{ return (format != RGB16); };
 	// Is the alpha channel emissive?
 	bool Emissive() const		{ return (flags & PARAM_EMISSIVE) != 0; }
+	bool ColorMap() const		{ return (flags & PARAM_COLORMAP) != 0; }
 
 	float AspectRatio() const	{ return (float)w / (float)h; }
 

@@ -37,8 +37,8 @@
   <texture filename="bluestone.png" />
   <texture filename="shield.png" filename2="shield_em.png" emissive="true" />
   <texture filename="debugging.png" noMip="true" />
-  <texture filename="structure.png"   filename2="black512.png" emissive="true"/>
-  <texture filename="kioskscreen.png" filename2="black512.png" emissive="true"/>
+  <texture filename="structure.png"   filename2="black512.png" emissive="true" colorMap="true"/>
+  <texture filename="kioskscreen.png" filename2="black512.png" emissive="true" colorMap="true"/>
 
   <texture assetName="voxel" filename="voxelalt.png" filename2="voxelalt_em.png" emissive="true" width="256" height="64"/>
   <texture filename="flags.png" />
@@ -53,12 +53,12 @@
   <texture filename="map_core.png" maxSize="128" />
   <texture filename="map_port.png" maxSize="128" />
   
-  <texture filename="ringAtlas.png" maxSize="1024" emissive="true" table="ring.xml"/>"
+  <texture filename="ringAtlas.png" maxSize="1024" emissive="true" table="ring.xml" colorMap="true"/>
 
   <!-- UI elements -->
   <texture filename="intro.png" width="64" height="64" />
-  <texture filename="humanMaleFaceAtlas.png"    maxSize="1024" table="humanMaleFace.xml"/>
-  <texture filename="humanFemaleFaceAtlas.png"  maxSize="1024" table="humanFemaleFace.xml"/>
+  <texture filename="humanMaleFaceAtlas.png"    maxSize="1024" table="humanMaleFace.xml" colorMap="true"/>
+  <texture filename="humanFemaleFaceAtlas.png"  maxSize="1024" table="humanFemaleFace.xml" colorMap="true"/>
   <palette assetName="mainPalette" filename="palette.png" dx="14" dy="7" sx="0.5" sy="0.5" />
   
   <!-- Particles -->

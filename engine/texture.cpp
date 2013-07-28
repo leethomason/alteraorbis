@@ -118,6 +118,9 @@ Texture* TextureManager::GetTexture( const char* name, bool reload )
 			if ( item->GetBool( "noMip" )) {
 				flags = Texture::PARAM_LINEAR;
 			}
+			if ( item->GetBool( "colorMap" )) {
+				flags |= Texture::PARAM_COLORMAP;
+			}
 			if ( item->GetBool( "emissive" )) {
 				flags |= Texture::PARAM_EMISSIVE;
 			}

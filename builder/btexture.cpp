@@ -37,6 +37,7 @@ BTexture::BTexture()
 	: isImage( false ),
 	  dither( false ),
 	  noMip( false ),
+	  colorMap( false ),
 	  doPreMult( false ),
 	  invert( true ),
 	  emissive( false ),
@@ -80,6 +81,7 @@ bool BTexture::ParseTag( const tinyxml2::XMLElement* element )
 	}
 	element->QueryBoolAttribute( "dither", &dither );
 	element->QueryBoolAttribute( "noMip", &noMip );
+	element->QueryBoolAttribute( "colorMap", &colorMap );
 	element->QueryIntAttribute( "width", &targetWidth );
 	element->QueryIntAttribute( "height", &targetHeight );
 	element->QueryIntAttribute( "maxSize", &targetMax );
@@ -387,6 +389,7 @@ gamedb::WItem* BTexture::InsertTextureToDB( gamedb::WItem* parent )
 	witem->SetInt( "width", surface->w );
 	witem->SetInt( "height", surface->h );
 	witem->SetBool( "noMip", noMip );
+	witem->SetBool( "colorMap", colorMap );
 	witem->SetBool( "emissive", emissive );
 
 	return witem;

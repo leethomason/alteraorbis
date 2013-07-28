@@ -63,6 +63,7 @@ public:
 	bool isImage;
 	bool dither;
 	bool noMip;
+	bool colorMap;
 	bool doPreMult;
 	bool invert;
 	bool emissive;	// if set, the alpha channel is emissiveness, not transparency
