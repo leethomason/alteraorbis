@@ -44,8 +44,8 @@ public:
 
 	struct QueueItem {
 		QueueItem() : action(NO_ACTION), assigned(0) { pos.Zero(); }
-		QueueItem( int p_action, const grinliz::Vector2I& p_pos, grinliz::IString p_structure ) 
-			: action(p_action), pos(p_pos), assigned(0), structure(p_structure) {}
+		QueueItem( int p_action, const grinliz::Vector2I& p_pos, grinliz::IString p_structure, int p_id ) 
+			: action(p_action), pos(p_pos), assigned(0), structure(p_structure), taskID(p_id) {}
 
 		void Serialize( XStream* xs );
 
@@ -53,14 +53,17 @@ public:
 		grinliz::IString	structure;	// what to construct
 		grinliz::Vector2I	pos;
 		int					assigned;	// id of worker assigned this task.			
+		int					taskID;		// id # of this task
 	};
 
 	void Serialize( XStream* xs );
 	void Add( int action, const grinliz::Vector2I& pos, grinliz::IString structure );	// add an action to do
+	void Remove( const grinliz::Vector2I& pos );
 	
 	const QueueItem*	Find( const grinliz::Vector2I& chitPos );	// find something to do. don't hold pointer!
 	void				Assign( int id, const QueueItem* item );	// associate this chit with a job.
 	const QueueItem*	GetJob( int chitID );						// get the current job, don't hold pointer!
+	const QueueItem*	GetJobByTaskID( int taskID );
 	void				ReleaseJob( int chitID );
 	void				ClearJobs();
 
@@ -76,6 +79,7 @@ private:
 	Engine*				engine;
 	WorldMap*			worldMap;
 	LumosChitBag*		chitBag;
+	int					idPool;
 	grinliz::Vector2I	sector;
 	grinliz::CDynArray< QueueItem >		queue;	// work to do
 	grinliz::CDynArray< gamui::Image* > images;	// images to tag the work

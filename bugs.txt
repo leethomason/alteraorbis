@@ -27,6 +27,7 @@ x remove squisher. nifty but outdated.
 x Only call ApplyBlocks once. 
 x Probably don't need squatting logic in PathMoveComponent. (Actually do)
 - make sure gold/crystal gets returned to the Reserve when the Chit is destroyed
+- GT: lightning
 
 - game
 
@@ -44,17 +45,22 @@ x Probably don't need squatting logic in PathMoveComponent. (Actually do)
 		x new 1x1 models
 		x support for mxn models
 		x new mxn models
-		- cancel orders
+		x cancel orders
 		- building rotation
 		- decent clear dragging
-		- visitors create energy, buildings consume energy
 		- fix team logic
 		- build 2 height ice
 		- decent UI
+		- show "clear" mark on top
+		- double layer for "build" marks
 		- leave core
 		- proper animation system
 		- wait states on wander
-	- Loot
+		- fix "mole behavior" where player, workers, Core-Binders can tunnel through rock
+		- proper build and clear ui
+	- Econ
+		- external constant file
+		- visitors create energy, buildings consume energy
 		- item screen
 		- drop items
 		- pickup items
@@ -70,8 +76,6 @@ x Probably don't need squatting logic in PathMoveComponent. (Actually do)
 		x visitors
 		- inventory screen
 	- Building
-		x construction
-		- economics
 		- domain building
 	- AI
 		- other cores doing the same

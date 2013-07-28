@@ -18,6 +18,7 @@ static const float NOTIFICATION_RAD = 5.0f;
 WorkQueue::WorkQueue( WorldMap* wm, LumosChitBag* lcb, Engine* e ) : worldMap( wm ), chitBag( lcb ), engine( e )
 {
 	sector.Zero();
+	idPool = 0;
 }
 
 
@@ -40,6 +41,7 @@ void WorkQueue::AddImage( const QueueItem& item )
 		const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( "unitPlateCentered" );
 		GLASSERT( res );
 		Model* m = engine->AllocModel( res );
+		m->SetFlag( MODEL_CLICK_THROUGH );
 		GLASSERT( m );
 		const WorldGrid& wg = worldMap->GetWorldGrid( item.pos.x, item.pos.y );
 		int h = wg.Height();
@@ -79,6 +81,17 @@ void WorkQueue::RemoveImage( const QueueItem& item )
 }
 
 
+void WorkQueue::Remove( const grinliz::Vector2I& pos )
+{
+	for( int i=0; i<queue.Size(); ++i ) {
+		if ( queue[i].pos == pos ) {
+			RemoveItem( i );
+		}
+	}
+}
+
+
+
 void WorkQueue::Add( int action, const grinliz::Vector2I& pos2i, IString structure )
 {
 	GLASSERT( action >= CLEAR && action < NUM_ACTIONS );
@@ -91,26 +104,10 @@ void WorkQueue::Add( int action, const grinliz::Vector2I& pos2i, IString structu
 		return;
 	}
 
-	// FIXME: doesn't cancel, or replace actions. Need to fix. Account for:
-	// - Images
-	// - cancelling existing workers
+	// Clear out existing.
+	Remove( pos2i );
 
-/*	// Toggle existing, for now.
-	for( int i=0; i<queue.Size(); ++i ) {
-		if ( queue[i].pos == pos2i ) {
-			queue.Remove( i );
-			return;
-		}
-	}
-*/
-
-	for( int i=0; i<queue.Size(); ++i ) {
-		if ( queue[i].pos == pos2i ) {
-			return;
-		}
-	}
-
-	QueueItem item( action, pos2i, structure );
+	QueueItem item( action, pos2i, structure, ++idPool );
 	queue.Push( item );
 	AddImage( item );
 
@@ -151,6 +148,17 @@ void WorkQueue::ClearJobs()
 	while( queue.Size() ) {
 		RemoveItem( queue.Size()-1 );
 	}
+}
+
+
+const WorkQueue::QueueItem* WorkQueue::GetJobByTaskID( int taskID )
+{
+	for( int i=0; i<queue.Size(); ++i ) {
+		if ( queue[i].taskID == taskID ) {
+			return &queue[i];
+		}
+	}
+	return 0;
 }
 
 
@@ -257,6 +265,7 @@ void WorkQueue::QueueItem::Serialize( XStream* xs )
 	XARC_SER( xs, structure );
 	XARC_SER( xs, pos );
 	XARC_SER( xs, assigned );
+	XARC_SER( xs, taskID );
 	XarcClose( xs );
 }
 
@@ -270,6 +279,7 @@ void WorkQueue::Serialize( XStream* xs )
 	if ( xs->Loading() ) {
 		for( int i=0; i<queue.Size(); ++i ) {
 			AddImage( queue[i] );
+			idPool = Max( idPool, queue[i].taskID+1 );
 		}
 	}
 	XarcClose( xs );

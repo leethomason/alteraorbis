@@ -124,27 +124,31 @@ private:
 	struct Task
 	{
 		Task() { Clear(); }
-		Task( int _action, const grinliz::Vector2I _pos ) {
+		Task( int _action, const grinliz::Vector2I _pos, int _taskID ) {
 			Clear();
 			action = _action;
 			pos2i = _pos;
+			taskID = _taskID;
 		}
-		Task( int _action, const grinliz::Vector2F _pos ) {
+		Task( int _action, const grinliz::Vector2F _pos, int _taskID ) {
 			Clear();
 			action = _action;
 			pos2i.Set( (int)_pos.x, (int)_pos.y );
+			taskID = _taskID;
 		}
-		Task( int _action, int _timer, const grinliz::Vector2I& _pos ) {
+		Task( int _action, int _timer, const grinliz::Vector2I& _pos, int _taskID ) {
 			Clear();
 			action = _action;
 			timer  = _timer;
 			pos2i = _pos;
+			taskID = _taskID;
 		}
-		Task( int _action, const grinliz::Vector2I _pos, grinliz::IString _structure ) {
+		Task( int _action, const grinliz::Vector2I _pos, grinliz::IString _structure, int _taskID ) {
 			Clear();
 			pos2i = _pos;
 			action = _action;
 			structure = _structure;
+			taskID = _taskID;
 		}
 
 		void Clear() {
@@ -153,6 +157,7 @@ private:
 			timer = 0;
 			data = 0;
 			structure = grinliz::IString();
+			taskID = 0;
 		}
 
 		int					action;		// move, stand, etc.
@@ -160,6 +165,7 @@ private:
 		int					timer;
 		int					data;
 		grinliz::IString	structure;
+		int					taskID;		// if !0, then attached to a workqueue task
 	};
 
 	void GetFriendEnemyLists();

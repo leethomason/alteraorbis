@@ -118,6 +118,7 @@ SectorPort Visitors::ChooseDestination( int index, WorldMap* map, LumosChitBag* 
 
 
 	// Go to a random sector with a core.
+	// I'm not quite sure what the correct # of attempts is.
 	static const int ATTEMPTS = 6;
 	for( int i=0; i<ATTEMPTS; ++i ) {
 		sector.Set( random.Rand( NUM_SECTORS ), random.Rand( NUM_SECTORS ));

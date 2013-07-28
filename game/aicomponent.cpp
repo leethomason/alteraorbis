@@ -1318,6 +1318,25 @@ void AIComponent::FlushTaskList( const ComponentSet& thisComp )
 	Vector2I pos2i = thisComp.spatial->GetPosition2DI();
 	Vector2F taskPos2 = { (float)task->pos2i.x + 0.5f, (float)task->pos2i.y + 0.5f };
 	Vector3F taskPos3 = { taskPos2.x, 0, taskPos2.y };
+	Vector2I sector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
+
+	// If this is a task associated with a work item, make
+	// sure that work item still exists.
+	if ( task->taskID ) {
+		const WorkQueue::QueueItem* queueItem = 0;
+		CoreScript* coreScript = GetChitBag()->ToLumos()->GetCore( sector );
+		if ( coreScript ) {
+			WorkQueue* workQueue = coreScript->GetWorkQueue();
+			if ( workQueue ) {
+				queueItem = workQueue->GetJobByTaskID( task->taskID );
+			}
+		}
+		if ( !queueItem ) {
+			// This task it attached to a work item that expired.
+			taskList.Clear();
+			return;
+		}
+	}
 
 	switch ( task->action ) {
 	case MOVE:
@@ -1444,18 +1463,18 @@ void AIComponent::WorkQueueToTask(  const ComponentSet& thisComp )
 					float cost = 0;
 					if ( map->CalcPathBeside( thisComp.spatial->GetPosition2D(), dest, &end, &cost )) {
 						
-						taskList.Push( Task( MOVE, end ));
-						taskList.Push( Task( STAND, 1000, item->pos ));
-						taskList.Push( Task( TASK_REMOVE, item->pos, item->structure ));
+						taskList.Push( Task( MOVE, end, item->taskID ));
+						taskList.Push( Task( STAND, 1000, item->pos, item->taskID ));
+						taskList.Push( Task( TASK_REMOVE, item->pos, item->structure, item->taskID ));
 					}
 				}
 				break;
 
 			case WorkQueue::BUILD:
 				{
-					taskList.Push( Task( MOVE, item->pos ));
-					taskList.Push( Task( STAND, 1000, item->pos ));
-					taskList.Push( Task( TASK_BUILD, item->pos, item->structure ));
+					taskList.Push( Task( MOVE, item->pos, item->taskID ));
+					taskList.Push( Task( STAND, 1000, item->pos, item->taskID ));
+					taskList.Push( Task( TASK_BUILD, item->pos, item->structure, item->taskID ));
 				}
 				break;
 
@@ -1534,7 +1553,7 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 	// Is there work to do?
 	if (    aiMode == NORMAL_MODE 
 		 && (thisComp.item->flags & GameItem::AI_DOES_WORK)
-		 && taskList.Empty () ) 
+		 && taskList.Empty() ) 
 	{
 		WorkQueueToTask( thisComp );
 	}

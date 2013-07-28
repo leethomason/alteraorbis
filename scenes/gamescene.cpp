@@ -16,6 +16,7 @@
 #include "../game/aicomponent.h"
 #include "../game/reservebank.h"
 #include "../game/workqueue.h"
+#include "../game/mapspatialcomponent.h"
 
 #include "../engine/engine.h"
 #include "../engine/text.h"
@@ -75,7 +76,8 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 
 	static const char* buildButtonText[NUM_BUILD_BUTTONS] = { 
 		"None", "Clear", "Ice", 
-		"News\nKiosk", "Media\nKiosk", "Commerce\nKiosk", "Social\nKiosk", "Vault" 
+		"News\nKiosk", "Media\nKiosk", "Commerce\nKiosk", "Social\nKiosk", "Vault",
+		"Rotate"
 	};
 	for( int i=0; i<NUM_BUILD_BUTTONS; ++i ) {
 		buildButton[i].Init( &gamui2D, game->GetButtonLook(0) );
@@ -414,7 +416,7 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 
 		if ( tap ) {
 
-			if ( coreMode && buildActive ) {
+			if ( coreMode ) {
 				WorkQueue* wq = coreMode->GetWorkQueue();
 				GLASSERT( wq );
 				RemovableFilter removableFilter;
@@ -424,11 +426,34 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 						wq->Add( WorkQueue::CLEAR, mv.Voxel2(), IString() );
 					}
 					else if ( mv.ModelHit() && mv.model->userData && removableFilter.Accept( mv.model->userData )) {
-						Vector2I pos2i = { (int)mv.model->Pos().x, (int)mv.model->Pos().z };
+						MapSpatialComponent* msc = GET_SUB_COMPONENT( mv.model->userData, SpatialComponent, MapSpatialComponent );
 						GameItem* gameItem = mv.model->userData->GetItem();
-						GLASSERT( gameItem );
-						if ( gameItem ) {
-							wq->Add( WorkQueue::CLEAR, pos2i, gameItem->name );
+						GLASSERT( msc );
+						if ( msc && gameItem  ) {
+							wq->Add( WorkQueue::CLEAR, msc->MapPosition(), gameItem->name );
+						}
+					}
+				}
+				else if ( buildActive == NO_BUILD ) {
+					if ( mv.VoxelHit() ) {
+						// Clear a voxel.
+						wq->Remove( mv.Voxel2() );
+					}
+					else if ( mv.ModelHit() ) {
+						MapSpatialComponent* msc = GET_SUB_COMPONENT( mv.model->userData, SpatialComponent, MapSpatialComponent );
+						if ( msc ) {
+							wq->Remove( msc->MapPosition() );
+						}
+					}
+				}
+				else if ( buildActive == ROTATE ) {
+					if ( mv.ModelHit() ) {
+						MapSpatialComponent* msc = GET_SUB_COMPONENT( mv.model->userData, SpatialComponent, MapSpatialComponent );
+						if ( msc ) {
+							float r = msc->GetYRotation();
+							r += 90.0f;
+							r = NormalizeAngleDegrees( r );
+							msc->SetYRotation( r );
 						}
 					}
 				}

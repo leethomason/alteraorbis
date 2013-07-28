@@ -75,6 +75,7 @@ private:
 		BUILD_KIOSK_C,
 		BUILD_KIOSK_S,
 		BUILD_VAULT,
+		ROTATE,
 		NUM_BUILD_BUTTONS
 	};
 

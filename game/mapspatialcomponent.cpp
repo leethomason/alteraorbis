@@ -103,14 +103,12 @@ Vector2I MapSpatialComponent::PorchPos() const
 	Vector2I v = bounds.min;
 
 	int r = LRintf( this->GetYRotation() / 90.0f );
-	// FIXME: only works for 1x1
-	GLASSERT( r == 0 );
 
 	switch (r) {
 	case 0:		v.y = bounds.max.y + 1;	break;
-	case 1:		v.x += 1;	break;
-	case 2:		v.y -= 1;	break;
-	case 3:		v.x -= 1;	break;
+	case 1:		v.x = bounds.max.x + 1;	break;
+	case 2:		v.y = bounds.min.y - 1;	break;
+	case 3:		v.x = bounds.min.x - 1;	break;
 	default:	GLASSERT(0);	break;
 	}
 	return v;
