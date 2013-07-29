@@ -29,6 +29,9 @@ x Probably don't need squatting logic in PathMoveComponent. (Actually do)
 - make sure gold/crystal gets returned to the Reserve when the Chit is destroyed
 - GT: lightning
 - GT: rez-in for structures
+- SpatialHash: one stressed structure.
+	- MOB list (FE determination)
+	- Building list (FE determination)
 
 
 - game

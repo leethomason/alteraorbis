@@ -105,7 +105,7 @@
 
   <item name="redMantis"
         resource="redMantis"
-        flags="AI_WANDER_HERD AI_EAT_PLANTS GOLD_PICKUP"
+        flags="AI_WANDER_HERD AI_EAT_PLANTS AI_SECTOR_HERD GOLD_PICKUP"
         mass="35">
     <intrinsics>
       <item name="pincer"
