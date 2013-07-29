@@ -48,7 +48,7 @@ x Probably don't need squatting logic in PathMoveComponent. (Actually do)
 		x support for mxn models
 		x new mxn models
 		x cancel orders
-		- building rotation
+		x building rotation
 		- decent clear dragging
 		- fix team logic
 		- build 2 height ice
