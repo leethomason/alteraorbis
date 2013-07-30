@@ -72,13 +72,23 @@ void CoreScript::OnRemove( const ScriptContext& ctx )
 }
 
 
-Chit* CoreScript::GetAttached()
+Chit* CoreScript::GetAttached( bool* standing )
 {
 	Chit* c = 0;
 	if ( boundID ) {
 		c = scriptContext->chit->GetChitBag()->GetChit( boundID );
 		if ( !c ) {
 			boundID = 0;
+		}
+		if ( c && standing ) {
+			if (    !c->GetMoveComponent()
+				&& (c->GetSpatialComponent()->GetPosition2DI() == scriptContext->chit->GetSpatialComponent()->GetPosition2DI() ))
+			{
+				*standing = true;
+			}
+			else {
+				*standing = false;
+			}
 		}
 	}
 	return c;
@@ -87,12 +97,13 @@ Chit* CoreScript::GetAttached()
 
 bool CoreScript::AttachToCore( Chit* chit )
 {
-	Chit* bound = GetAttached();
+	Chit* bound = GetAttached(0);
 
 	ComponentSet chitset( chit, Chit::SPATIAL_BIT | Chit::RENDER_BIT | ComponentSet::IS_ALIVE );
-	if ( chitset.okay && !bound ) {
+	if ( chitset.okay && (!bound || bound == chit) ) {
 		// Set the position of the bound item to the core.
 		Vector3F pos = scriptContext->chit->GetSpatialComponent()->GetPosition();
+		Vector2F pos2 = { pos.x, pos.z };
 		chitset.spatial->SetPosition( pos );
 		boundID = chit->ID();
 
@@ -110,8 +121,16 @@ bool CoreScript::AttachToCore( Chit* chit )
 			team = chit->GetItem()->primaryTeam;
 		}
 
-		scriptContext->chit->GetLumosChitBag()->NewWorkerChit( pos, team );
-		scriptContext->chit->GetLumosChitBag()->NewWorkerChit( pos, team );
+		// FIXME: worker hack until economy is in place.
+		CChitArray arr;
+		static const char* WORKER[] = { "worker" };
+		ItemNameFilter filter( WORKER, 1 );
+		chit->GetChitBag()->QuerySpatialHash( &arr, pos2, 10.0f, 0, &filter );
+
+		int count = 2 - arr.Size();
+		for( int i=0; i<count; ++i ) {
+			scriptContext->chit->GetLumosChitBag()->NewWorkerChit( pos, team );
+		}
 
 		TeamGen gen;
 		ProcRenderInfo info;
@@ -127,7 +146,7 @@ bool CoreScript::AttachToCore( Chit* chit )
 int CoreScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 {
 	static const int RADIUS = 4;
-	Chit* attached = GetAttached();
+	Chit* attached = GetAttached(0);
 
 	if ( spawnTick.Delta( since ) && ctx.census->ais < TYPICAL_MONSTERS && !attached ) {
 #if 1

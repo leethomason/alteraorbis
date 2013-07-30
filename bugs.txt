@@ -33,9 +33,7 @@ x Probably don't need squatting logic in PathMoveComponent. (Actually do)
 	- MOB list (FE determination)
 	- Building list (FE determination)
 
-
 - game
-
 	- Silver
 		x texture bleeding in voxel renderer
 		x vertical voxels are stretched

@@ -427,7 +427,7 @@ int LumosChitBag::MapGridUse( int x, int y )
 }
 
 
-CoreScript* LumosChitBag::IsBoundToCore( Chit* chit )
+CoreScript* LumosChitBag::IsBoundToCore( Chit* chit, bool mustBeStanding )
 {
 	if ( chit && chit->GetSpatialComponent() ) {
 		Vector2F pos2 = chit->GetSpatialComponent()->GetPosition2D();
@@ -444,7 +444,11 @@ CoreScript* LumosChitBag::IsBoundToCore( Chit* chit )
 			GLASSERT( script );
 			CoreScript* coreScript = script->ToCoreScript();
 			GLASSERT( coreScript );
-			return coreScript->GetAttached() == chit ? coreScript : 0;
+			bool standing = false;
+			Chit* chit = coreScript->GetAttached(&standing);
+
+			if ( mustBeStanding ) return (standing && chit) ? coreScript : 0;
+			return coreScript;
 		}
 	}
 	return false;
@@ -483,14 +487,6 @@ ItemNameFilter::ItemNameFilter()
 	cNames = 0;
 	iNames = 0;
 	count  = 0;
-}
-
-
-ItemNameFilter::ItemNameFilter( const char* name )
-{
-	cNames = &name;
-	iNames = 0;
-	count = 1;
 }
 
 

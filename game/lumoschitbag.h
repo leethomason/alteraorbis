@@ -63,7 +63,6 @@ public:
 class ItemNameFilter : public IChitAccept
 {
 public:
-	ItemNameFilter( const char* name );
 	ItemNameFilter( const char* names[], int n );
 	ItemNameFilter( const grinliz::IString& name );
 	ItemNameFilter( const grinliz::IString* names, int n );
@@ -113,7 +112,7 @@ public:
 	virtual void HandleBolt( const Bolt& bolt, const ModelVoxel& mv );
 
 	virtual int MapGridUse( int x, int y );
-	CoreScript* IsBoundToCore( Chit* );
+	CoreScript* IsBoundToCore( Chit*, bool mustBeStandingOnCore );
 	// Get the core for this sector.
 	CoreScript* GetCore( const grinliz::Vector2I& sector );
 

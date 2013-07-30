@@ -96,6 +96,7 @@ private:
 	gamui::ToggleButton freeCameraButton;
 	gamui::ToggleButton	buildButton[NUM_BUILD_BUTTONS];
 	gamui::PushButton	createWorkerButton;
+	gamui::PushButton	ejectButton;
 	gamui::PushButton	allRockButton;
 	gamui::PushButton	newsButton[NUM_NEWS_BUTTONS];
 	gamui::PushButton	clearButton;

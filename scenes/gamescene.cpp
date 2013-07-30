@@ -87,6 +87,9 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 
 	createWorkerButton.Init( &gamui2D, game->GetButtonLook(0) );
 	createWorkerButton.SetText( "Create\nWorker" );
+
+	ejectButton.Init( &gamui2D, game->GetButtonLook(0) );
+	ejectButton.SetText( "Eject\nCore" );
 	
 	allRockButton.Init( &gamui2D, game->GetButtonLook(0) );
 	allRockButton.SetText( "All Rock" );
@@ -142,6 +145,7 @@ void GameScene::Resize()
 		layout.PosAbs( &buildButton[i], x, y+2 );
 	}
 	layout.PosAbs( &createWorkerButton, 0, 6 );
+	layout.PosAbs( &ejectButton, 1, 6 );
 
 	const Screenport& port = lumosGame->GetScreenport();
 	minimap.SetPos( port.UIWidth()-MINI_MAP_SIZE, 0 );
@@ -386,7 +390,7 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 {
 	bool uiHasTap = ProcessTap( action, view, world );
 	Engine* engine = sim->GetEngine();
-	CoreScript* coreMode = sim->GetChitBag()->IsBoundToCore( sim->GetPlayerChit() );
+	CoreScript* coreMode = sim->GetChitBag()->IsBoundToCore( sim->GetPlayerChit(), true );
 	
 	if ( coreMode ) {
 		CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
@@ -551,10 +555,21 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 	}
 	else if ( item == &createWorkerButton ) {
 		Chit* playerChit = sim->GetPlayerChit();
-		CoreScript* coreMode = sim->GetChitBag()->IsBoundToCore( playerChit );
+		CoreScript* coreMode = sim->GetChitBag()->IsBoundToCore( playerChit, true );
 		if ( coreMode ) {
 			int team = playerChit->GetItem()->primaryTeam;
 			sim->GetChitBag()->NewWorkerChit( playerChit->GetSpatialComponent()->GetPosition(), team );
+		}
+	}
+	else if ( item == &ejectButton ) {
+		// Should be disabled unless we are bound to a core.
+		Chit* playerChit = sim->GetPlayerChit();
+		if ( playerChit ) {
+			CoreScript* coreMode   = sim->GetChitBag()->IsBoundToCore( playerChit, true );
+			if ( coreMode ) {
+				GLASSERT( !playerChit->GetMoveComponent() );
+				playerChit->Add( new PathMoveComponent( sim->GetWorldMap() ));
+			}
 		}
 	}
 
@@ -589,7 +604,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 			}
 			else {
 				Chit* playerChit = sim->GetPlayerChit();
-				CoreScript* coreMode = sim->GetChitBag()->IsBoundToCore( playerChit );
+				CoreScript* coreMode = sim->GetChitBag()->IsBoundToCore( playerChit, true );
 				if ( playerChit ) {
 					if ( coreMode ) {
 						Vector3F pos = playerChit->GetSpatialComponent()->GetPosition();
@@ -816,11 +831,12 @@ void GameScene::DoTick( U32 delta )
 
 	SetBars();
 
-	CoreScript* coreMode = sim->GetChitBag()->IsBoundToCore( sim->GetPlayerChit() );
+	CoreScript* coreMode = sim->GetChitBag()->IsBoundToCore( sim->GetPlayerChit(), true );
 	for( int i=0; i<NUM_BUILD_BUTTONS; ++i ) {
 		buildButton[i].SetVisible( coreMode != 0 );
 	}
 	createWorkerButton.SetVisible( coreMode != 0 );
+	ejectButton.SetVisible( coreMode != 0 );
 
 	sim->GetEngine()->RestrictCamera( 0 );
 }

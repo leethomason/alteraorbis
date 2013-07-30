@@ -38,8 +38,12 @@ public:
 	virtual const char* ScriptName() { return "CoreScript"; }
 	virtual CoreScript* ToCoreScript() { return this; }
 
+	// Once attached, can't detach. There for good.
+	// Can however move around again if the Chit 'ejects'.
+	// In this case the chit is attached, but !standing
 	bool AttachToCore( Chit* chit );
-	Chit* GetAttached();
+	Chit* GetAttached( bool* standing );
+
 	WorkQueue* GetWorkQueue()	{ return workQueue; }
 
 private:
