@@ -53,6 +53,9 @@ x Probably don't need squatting logic in PathMoveComponent. (Actually do)
 		- cancel orders
 		- proper animation system
 		- wait states on wander
+		- factory
+		- turret
+		- power
 	- Loot
 		- item screen
 		- drop items
