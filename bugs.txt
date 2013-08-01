@@ -50,13 +50,13 @@ x Probably don't need squatting logic in PathMoveComponent. (Actually do)
 		x new mxn models
 		x cancel orders
 		x building rotation
+		x leave core
 		- decent clear dragging
 		- fix team logic
 		- build 2 height ice
 		- decent UI
 		- show "clear" mark on top
 		- double layer for "build" marks
-		- leave core
 		- proper animation system
 		- wait states on wander
 		- fix "mole behavior" where player, workers, Core-Binders can tunnel through rock
