@@ -59,11 +59,13 @@ x Probably don't need squatting logic in PathMoveComponent. (Actually do)
 		- double layer for "build" marks
 		- proper animation system
 		- wait states on wander
-		- fix "mole behavior" where player, workers, Core-Binders can tunnel through rock
-		- proper build and clear ui
 	- Econ
 		- external constant file
 		- visitors create energy, buildings consume energy
+		- factory
+		- turret
+		- power
+	- Loot
 		- item screen
 		- drop items
 		- pickup items
