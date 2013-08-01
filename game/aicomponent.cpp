@@ -1641,18 +1641,25 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		// it at the end of a move, irrespective of the current
 		// action or mode.
 		if ( chit->GetItem() && ( chit->GetItem()->flags & GameItem::AI_BINDS_TO_CORE )) {
-			Vector2F center = thisComp.spatial->GetPosition2D();
-			center.x = floorf( center.x ) + 0.5f;
-			center.y = floorf( center.y ) + 0.5f;
-			CChitArray arr;
-			ItemNameFilter coreFilter( IStringConst::kcore );
-			GetChitBag()->QuerySpatialHash( &arr, center, 0.1f, parentChit, &coreFilter );
-			if ( arr.Size() ) {
-				ScriptComponent* sc = arr[0]->GetScriptComponent();
-				GLASSERT( sc && sc->Script() );
-				CoreScript* coreScript = sc->Script()->ToCoreScript();
-				GLASSERT( coreScript );
-				coreScript->AttachToCore( parentChit );
+
+			Vector2I mapPos = thisComp.spatial->GetPosition2DI();
+			Vector2I sector = { mapPos.x/SECTOR_SIZE, mapPos.y/SECTOR_SIZE };
+			bool standingOnCore = map->GetWorldGrid( mapPos.x, mapPos.y ).IsCore();
+
+			if ( standingOnCore ) {
+				CoreScript* boundCore = GetChitBag()->ToLumos()->IsBoundToCore( parentChit, false );
+				CoreScript* thisCore  = GetChitBag()->ToLumos()->GetCore( sector );
+
+				// If the MOB is bound to a core in a different sector it can't bind here. BUT,
+				// it can re-bind to this core if needed.
+				if ( boundCore && (boundCore != thisCore )) {
+					// Do nothing. Bound somewhere else.
+				}
+				else {
+					// Bind or re-bind
+					GLASSERT( thisCore );	// we should be standing on one. 
+					thisCore->AttachToCore( parentChit );
+				}
 			}
 		}
 		break;

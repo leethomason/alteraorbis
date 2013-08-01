@@ -22,7 +22,7 @@
 class WorldMap;
 class WorkQueue;
 class LumosChitBag;
-
+#if 0
 class PortalScript : public IScript
 {
 public:
@@ -42,6 +42,6 @@ private:
 	WorldMap*	worldMap;
 	WorkQueue*	workQueue;
 };
-
+#endif
 
 #endif // PORTAL_SCRIPT_INCLUDED

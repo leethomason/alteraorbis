@@ -26,9 +26,9 @@ VolcanoScript::VolcanoScript( WorldMap* p_map, int p_size )
 }
 
 
-void VolcanoScript::Init( const ScriptContext& heap )
+void VolcanoScript::Init()
 {
-	SpatialComponent* sc = heap.chit->GetSpatialComponent();
+	SpatialComponent* sc = scriptContext->chit->GetSpatialComponent();
 	GLASSERT( sc );
 	if ( sc ) {
 		Vector2F pos = sc->GetPosition2D();
@@ -36,12 +36,12 @@ void VolcanoScript::Init( const ScriptContext& heap )
 		worldMap->SetMagma( (int)pos.x, (int)pos.y, true );
 
 		NewsEvent event( 0, pos, StringPool::Intern( "volcano", true ));
-		heap.chit->GetChitBag()->AddNews( event );
+		scriptContext->chitBag->AddNews( event );
 	}
 }
 
 
-void VolcanoScript::Serialize( const ScriptContext& ctx, XStream* xs )
+void VolcanoScript::Serialize( XStream* xs )
 {
 	XarcOpen( xs, "VolcanoScript" );
 	XARC_SER( xs, size );
@@ -50,9 +50,9 @@ void VolcanoScript::Serialize( const ScriptContext& ctx, XStream* xs )
 }
 
 
-int VolcanoScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
+int VolcanoScript::DoTick( U32 delta, U32 since )
 {
-	SpatialComponent* sc = ctx.chit->GetSpatialComponent();
+	SpatialComponent* sc = scriptContext->chit->GetSpatialComponent();
 	Vector2I pos = { 0,  0 };
 	GLASSERT( sc );
 	if ( sc ) {
@@ -60,11 +60,11 @@ int VolcanoScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 		pos.Set( (int)posF.x, (int)posF.y );
 	}
 	else {
-		ctx.chit->QueueDelete();
+		scriptContext->chit->QueueDelete();
 	}
 
 	Rectangle2I b = worldMap->Bounds();
-	int rad = ctx.time / SPREAD_RATE;
+	int rad = scriptContext->time / SPREAD_RATE;
 	if ( rad > size ) {
 		// Cool (and set) the inner rectangle, make the new rectangle magma.
 		// The origin stays magma until we're done.
@@ -105,14 +105,14 @@ int VolcanoScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 			const SectorData& sd = worldMap->GetWorldInfo().GetSector( sector );
 			if ( sd.ports ) {
 				for( int i=0; i<4; ++i ) {
-					int x = r.min.x + ctx.chit->random.Rand( r.Width() );
-					int y = r.min.y + ctx.chit->random.Rand( r.Height() );
+					int x = r.min.x + scriptContext->chit->random.Rand( r.Width() );
+					int y = r.min.y + scriptContext->chit->random.Rand( r.Height() );
 					if (    worldMap->GetWorldGrid( x, y ).RockHeight()
 						 || worldMap->GetWorldGrid( x, y ).Pool()) 
 					{
 						int gold = ReserveBank::Instance()->WithdrawVolcanoGold();
 						Vector3F v3 = { (float)x+0.5f, 0, (float)y+0.5f };
-						ctx.chit->GetLumosChitBag()->NewGoldChit( v3, gold );
+						scriptContext->chitBag->NewGoldChit( v3, gold );
 					}
 				}
 				if (    worldMap->GetWorldGrid( pos.x, pos.y ).RockHeight()
@@ -122,15 +122,15 @@ int VolcanoScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 					int crystal = NO_CRYSTAL;
 					Vector3F v3 = { (float)pos.x+0.5f, 0, (float)pos.y+0.5f };
 					Wallet wallet = ReserveBank::Instance()->WithdrawVolcano();
-					ctx.chit->GetLumosChitBag()->NewWalletChits( v3, wallet );
+					scriptContext->chitBag->NewWalletChits( v3, wallet );
 				}
 			}
-			ctx.chit->QueueDelete();
+			scriptContext->chit->QueueDelete();
 		}
 	}
 	// Only need to be called back as often as it spreads,
 	// but give a little more resolution for loading, etc.
-	return SPREAD_RATE / 2 + ctx.chit->random.Rand( SPREAD_RATE / 4 );
+	return SPREAD_RATE / 2 + scriptContext->chit->random.Rand( SPREAD_RATE / 4 );
 }
 
 

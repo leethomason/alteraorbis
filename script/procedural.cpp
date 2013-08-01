@@ -286,7 +286,7 @@ void TeamGen::Assign( int seed, ProcRenderInfo* info )
 
 	// Grey colors for neutral:
 	if ( seed == 0 ) {
-		base		= palette->GetV4F( PAL_GRAY*2, PAL_GRAY );
+		base		= palette->GetV4F( 0, PAL_GRAY );	// dark gray
 		contrast	= palette->GetV4F( 0, PAL_GRAY );
 		glow		= base;
 	}

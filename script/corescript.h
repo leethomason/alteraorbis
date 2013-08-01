@@ -29,12 +29,12 @@ public:
 	CoreScript( WorldMap* map, LumosChitBag* chitBag, Engine* engine );
 	virtual ~CoreScript();
 
-	virtual void Init( const ScriptContext& heap );
-	virtual void Serialize( const ScriptContext& ctx, XStream* xs );
-	virtual void OnAdd( const ScriptContext& ctx );
-	virtual void OnRemove( const ScriptContext& ctx );
+	virtual void Init();
+	virtual void Serialize( XStream* xs );
+	virtual void OnAdd();
+	virtual void OnRemove();
 
-	virtual int DoTick( const ScriptContext& ctx, U32 delta, U32 since );
+	virtual int DoTick( U32 delta, U32 since );
 	virtual const char* ScriptName() { return "CoreScript"; }
 	virtual CoreScript* ToCoreScript() { return this; }
 

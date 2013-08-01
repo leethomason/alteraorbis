@@ -2,6 +2,7 @@
 
 using namespace grinliz;
 
+#if 0
 PortalScript::PortalScript( WorldMap* map, LumosChitBag* chitBag, Engine* engine ) 
 	: worldMap( map )
 {
@@ -38,3 +39,4 @@ int PortalScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 {
 	return 0;
 }
+#endif

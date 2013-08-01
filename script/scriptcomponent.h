@@ -23,17 +23,18 @@ class Census;
 class CoreScript;
 class PortalScript;
 class Engine;
-
+class LumosChitBag;
 
 struct ScriptContext
 {
-	ScriptContext() : initialized(false), lastTime(0), time(0), chit(0), census(0), engine(0) {}
+	ScriptContext() : initialized(false), lastTime(0), time(0), chit(0), census(0), chitBag(0), engine(0) {}
 
 	bool	initialized;
 	U32		lastTime;		// time at last tick
 	U32		time;			// time at this tick
 	Chit*	chit;			// null at load
 	Census* census;			// valid at load
+	LumosChitBag* chitBag;
 	Engine* engine;
 };
 
@@ -47,11 +48,11 @@ public:
 	void SetContext( const ScriptContext* context ) { scriptContext = context; }
 
 	// The first time this is turned on:
-	virtual void Init( const ScriptContext& heap )	= 0;
-	virtual void OnAdd( const ScriptContext& ctx ) = 0;
-	virtual void OnRemove( const ScriptContext& ctx ) = 0;
-	virtual void Serialize( const ScriptContext& ctx, XStream* xs )	= 0;
-	virtual int DoTick( const ScriptContext& ctx, U32 delta, U32 since ) = 0;
+	virtual void Init()	= 0;
+	virtual void OnAdd() = 0;
+	virtual void OnRemove() = 0;
+	virtual void Serialize( XStream* xs )	= 0;
+	virtual int DoTick( U32 delta, U32 since ) = 0;
 	virtual const char* ScriptName() = 0;
 
 	// Safe casting.

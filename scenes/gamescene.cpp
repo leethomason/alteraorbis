@@ -570,6 +570,10 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 				GLASSERT( !playerChit->GetMoveComponent() );
 				playerChit->Add( new PathMoveComponent( sim->GetWorldMap() ));
 			}
+			CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
+			if ( cc ) {
+				cc->SetTrack( playerChit->ID() );
+			}
 		}
 	}
 

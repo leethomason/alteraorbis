@@ -45,7 +45,7 @@ LumosChitBag::~LumosChitBag()
 {
 	// Call the parent function so that chits aren't 
 	// aren't using deleted memory.
-	DeleteChits();
+	DeleteAll();
 }
 
 
@@ -427,17 +427,15 @@ int LumosChitBag::MapGridUse( int x, int y )
 }
 
 
+
 CoreScript* LumosChitBag::IsBoundToCore( Chit* chit, bool mustBeStanding )
 {
-	if ( chit && chit->GetSpatialComponent() ) {
-		Vector2F pos2 = chit->GetSpatialComponent()->GetPosition2D();
-
-		CChitArray array;
-		ItemNameFilter coreFilter( IStringConst::kcore );
-
-		QuerySpatialHash( &array, pos2, 0.1f, 0, &coreFilter );
-		if ( !array.Empty() ) {
-			Chit* cc = array[0];
+	// Since the player can eject and walk around, the core
+	// the player is bound to can be anywhere in the world.
+	int coreID = 0;
+	if ( chit && chitToCoreTable.Query( chit->ID(), &coreID )) {
+		Chit* cc = GetChit( coreID );
+		if ( cc ) {
 			ScriptComponent* sc = cc->GetScriptComponent();
 			GLASSERT( sc );
 			IScript* script = sc->Script();
@@ -447,11 +445,12 @@ CoreScript* LumosChitBag::IsBoundToCore( Chit* chit, bool mustBeStanding )
 			bool standing = false;
 			Chit* chit = coreScript->GetAttached(&standing);
 
-			if ( mustBeStanding ) return (standing && chit) ? coreScript : 0;
+			if ( mustBeStanding ) 
+				return (standing && chit) ? coreScript : 0;
 			return coreScript;
 		}
 	}
-	return false;
+	return 0;
 }
 
 

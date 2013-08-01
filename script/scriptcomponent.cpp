@@ -1,6 +1,8 @@
 #include "../engine/serialize.h"
 
 #include "../xegame/componentfactory.h"
+#include "../xegame/chit.h"
+#include "../xegame/chitbag.h"
 
 #include "scriptcomponent.h"
 #include "volcanoscript.h"
@@ -52,15 +54,12 @@ void ScriptComponent::Serialize( XStream* xs )
 		else if ( StrEqual( name, "CoreScript" )) {
 			script = new CoreScript( factory->GetWorldMap(), factory->GetChitBag(), factory->GetEngine() );
 		}
-		else if ( StrEqual( name, "PortalScript" )) {
-			script = new PortalScript( factory->GetWorldMap(), factory->GetChitBag(), factory->GetEngine() );
-		}
 		else {
 			GLASSERT( 0 );
 		}
 		GLASSERT( script );
 	}
-	script->Serialize( context, xs );
+	script->Serialize( xs );
 	this->EndSerialize( xs );
 }
 
@@ -73,14 +72,15 @@ void ScriptComponent::OnAdd( Chit* chit )
 	//context.initialized = false;
 	//context.time = 0;
 	context.chit = chit;
+	context.chitBag = chit->GetChitBag()->ToLumos();
 	script->SetContext( &context );
-	script->OnAdd( context );
+	script->OnAdd();
 }
 
 
 void ScriptComponent::OnRemove()
 {
-	script->OnRemove( context );
+	script->OnRemove();
 	super::OnRemove();
 }
 
@@ -89,10 +89,10 @@ int ScriptComponent::DoTick( U32 delta, U32 since )
 {
 	if ( !context.initialized ) {
 		script->SetContext( &context );
-		script->Init( context );
+		script->Init();
 		context.initialized = true;
 	}
-	int result = script->DoTick( context, delta, since );
+	int result = script->DoTick( delta, since );
 	context.time += since;
 	return result;
 }

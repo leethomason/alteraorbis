@@ -159,9 +159,6 @@ public:
 
 	virtual LumosChitBag* ToLumos() { return 0; }
 
-protected:
-	void DeleteChits() { chitID.RemoveAll(); }
-
 private:
 
 	enum {

@@ -38,13 +38,13 @@ CoreScript::~CoreScript()
 }
 
 
-void CoreScript::Init( const ScriptContext& ctx )
+void CoreScript::Init()
 {
-	spawnTick.Randomize( ctx.chit->ID() );
+	spawnTick.Randomize( scriptContext->chit->ID() );
 }
 
 
-void CoreScript::Serialize( const ScriptContext& ctx, XStream* xs )
+void CoreScript::Serialize( XStream* xs )
 {
 	XarcOpen( xs, ScriptName() );
 	XARC_SER( xs, boundID );
@@ -54,21 +54,29 @@ void CoreScript::Serialize( const ScriptContext& ctx, XStream* xs )
 }
 
 
-void CoreScript::OnAdd( const ScriptContext& ctx )
+void CoreScript::OnAdd()
 {
 	// Cores are indestructable. They don't get removed.
-	GLASSERT( ctx.chit->GetSpatialComponent() );
-	GLASSERT( ctx.chit->GetChitBag() );
-	GLASSERT( ctx.engine->GetMap() );
+	GLASSERT( scriptContext->chit->GetSpatialComponent() );
+	GLASSERT( scriptContext->chitBag );
+	GLASSERT( scriptContext->engine->GetMap() );
 
-	Vector2I mapPos = ctx.chit->GetSpatialComponent()->GetPosition2DI();
+	Vector2I mapPos = scriptContext->chit->GetSpatialComponent()->GetPosition2DI();
 	Vector2I sector = { mapPos.x/SECTOR_SIZE, mapPos.y/SECTOR_SIZE };
 	workQueue->InitSector( sector );
+
+	if ( boundID ) {
+		scriptContext->chitBag->chitToCoreTable.Add( boundID, scriptContext->chit->ID() );
+	}
 }
 
 
-void CoreScript::OnRemove( const ScriptContext& ctx )
+void CoreScript::OnRemove()
 {
+	if ( boundID ) {
+	GLASSERT( scriptContext->chitBag );
+	scriptContext->chitBag->chitToCoreTable.Remove( boundID );
+	}
 }
 
 
@@ -101,6 +109,10 @@ bool CoreScript::AttachToCore( Chit* chit )
 
 	ComponentSet chitset( chit, Chit::SPATIAL_BIT | Chit::RENDER_BIT | ComponentSet::IS_ALIVE );
 	if ( chitset.okay && (!bound || bound == chit) ) {
+
+		LumosChitBag* bag = scriptContext->chit->GetChitBag()->ToLumos();
+		bag->chitToCoreTable.Add( chit->ID(), scriptContext->chit->ID() );
+
 		// Set the position of the bound item to the core.
 		Vector3F pos = scriptContext->chit->GetSpatialComponent()->GetPosition();
 		Vector2F pos2 = { pos.x, pos.z };
@@ -143,15 +155,15 @@ bool CoreScript::AttachToCore( Chit* chit )
 }
 
 
-int CoreScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
+int CoreScript::DoTick( U32 delta, U32 since )
 {
 	static const int RADIUS = 4;
 	Chit* attached = GetAttached(0);
 
-	if ( spawnTick.Delta( since ) && ctx.census->ais < TYPICAL_MONSTERS && !attached ) {
+	if ( spawnTick.Delta( since ) && scriptContext->census->ais < TYPICAL_MONSTERS && !attached ) {
 #if 1
 		// spawn stuff.
-		MapSpatialComponent* ms = GET_SUB_COMPONENT( ctx.chit, SpatialComponent, MapSpatialComponent );
+		MapSpatialComponent* ms = GET_SUB_COMPONENT( scriptContext->chit, SpatialComponent, MapSpatialComponent );
 		GLASSERT( ms );
 		Vector2I pos = ms->MapPosition();
 
@@ -159,30 +171,35 @@ int CoreScript::DoTick( const ScriptContext& ctx, U32 delta, U32 since )
 		r.Set( (float)pos.x, (float)(pos.y), (float)(pos.x+1), (float)(pos.y+1) );
 		CChitArray arr;
 		ChitHasAIComponent hasAIComponent;
-		ctx.chit->GetChitBag()->QuerySpatialHash( &arr, r, 0, &hasAIComponent );
+		scriptContext->chitBag->QuerySpatialHash( &arr, r, 0, &hasAIComponent );
 		if ( arr.Size() < 2 ) {
 			Vector3F pf = { (float)pos.x+0.5f, 0, (float)pos.y+0.5f };
 			// FIXME: proper team
 			// FIXME safe downcast
-			Vector2F p2 = ctx.chit->GetSpatialComponent()->GetPosition2D();
+			Vector2F p2 = scriptContext->chit->GetSpatialComponent()->GetPosition2D();
 
 			int team = TEAM_GREEN_MANTIS;
 			const char* asset = "mantis";
-			if ( ctx.chit->ID() & 1 ) {
+			if ( scriptContext->chit->ID() & 1 ) {
 				team = TEAM_RED_MANTIS;
 				asset = "redMantis";
 			}
-			((LumosChitBag*)(ctx.chit->GetChitBag()))->NewMonsterChit( pf, asset, team );
+			scriptContext->chitBag->NewMonsterChit( pf, asset, team );
 		}
 #endif
 	}
-	if ( attached && ctx.chit->GetSpatialComponent() ) {
-		Vector3F pos3 = ctx.chit->GetSpatialComponent()->GetPosition();
-		ctx.engine->particleSystem->EmitPD( "core", pos3, V3F_UP, delta );
+	if ( attached && scriptContext->chit->GetSpatialComponent() ) {
+		Vector3F pos3 = scriptContext->chit->GetSpatialComponent()->GetPosition();
+		scriptContext->engine->particleSystem->EmitPD( "core", pos3, V3F_UP, delta );
 	}
 	if ( !attached ) {
 		// Clear the work queue - chit is gone that controls this.
 		workQueue->ClearJobs();
+
+		TeamGen gen;
+		ProcRenderInfo info;
+		gen.Assign( 0, &info );
+		scriptContext->chit->GetRenderComponent()->SetProcedural( IStringConst::kmain, info );
 	}
 	workQueue->DoTick();
 	return attached ? 0 : spawnTick.Next();

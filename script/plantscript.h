@@ -32,12 +32,12 @@ public:
 	PlantScript( Sim* sim, Engine* engine, WorldMap* map, Weather* weather, int type );
 	virtual ~PlantScript()	{}
 
-	virtual void Init( const ScriptContext& heap );
-	virtual void Serialize( const ScriptContext& ctx, XStream* xs );
-	virtual void OnAdd( const ScriptContext& ctx )	{}
-	virtual void OnRemove( const ScriptContext& ctx )	{}
+	virtual void Init();
+	virtual void Serialize( XStream* xs );
+	virtual void OnAdd()	{}
+	virtual void OnRemove()	{}
 
-	virtual int DoTick( const ScriptContext& ctx, U32 delta, U32 since );
+	virtual int DoTick( U32 delta, U32 since );
 	virtual const char* ScriptName() { return "PlantScript"; }
 
 	// Plant specific:
@@ -58,7 +58,7 @@ public:
 	int Stage() const	{ return stage; }
 
 private:
-	void SetRenderComponent( const ScriptContext& ctx );
+	void SetRenderComponent();
 	const GameItem* GetResource();
 
 	enum {
