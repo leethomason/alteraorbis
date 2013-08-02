@@ -15,6 +15,7 @@
 
 #include "animationbuilder.h"
 #include "builder.h"
+#include "xfileparser.h"
 #include "../tinyxml2/tinyxml2.h"
 #include "../grinliz/glmatrix.h"
 #include "../engine/enginelimits.h"
@@ -338,20 +339,28 @@ void ProcessAnimation( const tinyxml2::XMLElement* element, gamedb::WItem* witem
 	ParseNames( element, &assetName, &pathName, &extension );
 
 	printf( "Animation path='%s' name='%s'\n", pathName.c_str(), assetName.c_str() );
-
-	// -- Process the SCML file --- //
-	XMLDocument doc;
-	doc.LoadFile( pathName.c_str() );
-	if ( doc.Error() ) {
-		ExitError( "Animation", pathName.c_str(), assetName.c_str(), "tinyxml-2 could not parse scml" );
-	}
-	float pur = 1;
-	element->QueryFloatAttribute( "pur", &pur );
-
 	gamedb::WItem* root = witem->FetchChild( assetName.c_str() );	// "humanFemaleAnimation" 
 
-	SCMLParser parser;
-	parser.Parse( element, &doc, root, pur );
+	if ( extension == ".scml" ) {
+		// -- Process the SCML file --- //
+		XMLDocument doc;
+		doc.LoadFile( pathName.c_str() );
+		if ( doc.Error() ) {
+			ExitError( "Animation", pathName.c_str(), assetName.c_str(), "tinyxml-2 could not parse scml" );
+		}
+		float pur = 1;
+		element->QueryFloatAttribute( "pur", &pur );
+
+		SCMLParser parser;
+		parser.Parse( element, &doc, root, pur );
+	}
+	else if ( extension == ".x" ) {
+		XAnimationParser parser;
+		parser.Parse( pathName.c_str(), root );
+	}
+	else {
+		ExitError( "Animation", pathName.c_str(), assetName.c_str(), "file extension not recognized" );
+	}
 
 //	fclose( fp );
 }

@@ -86,6 +86,7 @@
     <ClCompile Include="builder.cpp" />
     <ClCompile Include="dither.cpp" />
     <ClCompile Include="modelbuilder.cpp" />
+    <ClCompile Include="xfileparser.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\importers\ac3d.h" />
@@ -98,6 +99,7 @@
     <ClInclude Include="builder.h" />
     <ClInclude Include="dither.h" />
     <ClInclude Include="modelbuilder.h" />
+    <ClInclude Include="xfileparser.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\winlib\winlib.vcxproj">

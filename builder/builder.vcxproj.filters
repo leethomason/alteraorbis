@@ -40,6 +40,9 @@
     <ClCompile Include="..\markov\markov.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="xfileparser.cpp">
+      <Filter>Source Files\importers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="builder.h">
@@ -71,6 +74,9 @@
     </ClInclude>
     <ClInclude Include="..\markov\markov.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="xfileparser.h">
+      <Filter>Source Files\importers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

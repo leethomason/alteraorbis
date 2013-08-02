@@ -29,6 +29,14 @@
 
   <!-- Model textures -->
   <texture filename="palette.png" />
+
+  <!-- animation v2
+       FIXME: still needs metadata
+  -->
+  <model filename="human2.ac" modelName="humanMale2" origin="0 0 0" shading="flat" polyRemoval="pre" />
+  <animation filename="human2_male.x" assetName="humanMale2Animation" />
+
+
   <texture filename="palette_50.png" emissive="true" />
   <texture filename="palette_100.png" emissive="true"/>
   <texture filename="paletteglow.png" filename2="paletteglow_em.png" emissive="true" />
@@ -94,6 +102,7 @@
   <model filename="kiosk.ac" modelName="kiosk.c" origin="-1.50 0 -0.50" shading="flat" polyRemoval="pre" />
   <model filename="kiosk.ac" modelName="kiosk.s" origin="-4.50 0 -0.50" shading="flat" polyRemoval="pre" />
   <model assetName="vault"   filename="vault2.ac" origin="-5 0 -1"      shading="flat" polyRemoval="pre" />
+
   
   <!-- Creating animation
     1. Add a model resource, with the usual flags, plus: animatimation="create"
