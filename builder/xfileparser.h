@@ -20,6 +20,8 @@ public:
 				gamedb::WItem* witem );
 
 private:
+	bool GetLine( FILE* fp, char* buf, int size );
+
 	grinliz::CDynArray< grinliz::GLString > lines;
 };
 

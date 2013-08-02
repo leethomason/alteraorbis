@@ -1,9 +1,9 @@
-xof 0303txt 0032
+#xof 0303txt 0032
 
-template AnimTicksPerSecond {
-  <9E415A43-7BA6-4a73-8743-B73D47E88476>
-  DWORD AnimTicksPerSecond;
-}
+#template AnimTicksPerSecond {
+#  <9E415A43-7BA6-4a73-8743-B73D47E88476>
+#  DWORD AnimTicksPerSecond;
+#}
 
 Frame Root {
   FrameTransformMatrix {
