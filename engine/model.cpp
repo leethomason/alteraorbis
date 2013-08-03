@@ -553,16 +553,15 @@ void Model::CalcHitAABB( Rectangle3F* aabb ) const
 
 void Model::CrossFade( float fraction, BoneData::Bone* inOut, const BoneData::Bone& prev ) const
 {
-	float angle1 = inOut->angleRadians;
-	float angle2 = prev.angleRadians;
-	if ( fabsf( angle1-angle2 ) > PI ) {
-		if ( angle1 < angle2 ) angle2 -= TWO_PI;
-		else				   angle2 += TWO_PI;
-	}
+	Quaternion angle1 = inOut->rot;
+	Quaternion angle2 = prev.rot;
+	Quaternion angle;
+	Quaternion::SLERP( angle1, angle2, fraction, &angle );
 
-	inOut->angleRadians = Lerp( angle2, angle1, fraction ); 
-	inOut->dy = Lerp( prev.dy, inOut->dy, fraction ); 
-	inOut->dz = Lerp( prev.dz, inOut->dz, fraction ); 
+	inOut->rot = angle;
+	for( int i=0; i<3; ++i ) {
+		inOut->pos.X(i) = Lerp( prev.pos.X(i), inOut->pos.X(i), fraction );
+	}
 }
 
 

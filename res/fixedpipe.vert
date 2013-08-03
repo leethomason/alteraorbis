@@ -69,9 +69,9 @@ attribute vec3 a_pos;				// vertex position
 	attribute float a_boneID;
 	#if BONE_XFORM == 1
 		#if INSTANCE == 1
-			uniform vec3 u_boneXForm[EL_MAX_BONES*EL_MAX_INSTANCE];
+			uniform mat4 u_boneXForm[EL_MAX_BONES*EL_MAX_INSTANCE];
 		#else
-			uniform vec3 u_boneXForm[EL_MAX_BONES];	
+			uniform mat4 u_boneXForm[EL_MAX_BONES];	
 		#endif
 	#endif
 #endif
@@ -166,37 +166,10 @@ void main() {
 	mat4 xform = mat4( 1.0 );	
 	#if BONE_XFORM == 1
 		#if INSTANCE == 1
-		vec3 bone = u_boneXForm[int(a_boneID + a_instanceID*float(EL_MAX_BONES))];
+		xform = u_boneXForm[int(a_boneID + a_instanceID*float(EL_MAX_BONES))];
 		#else
-		vec3 bone = u_boneXForm[int(a_boneID)];
+		xform = u_boneXForm[int(a_boneID)];
 		#endif
-		float sinTheta = sin( bone.x );
-		float cosTheta = cos( bone.x );
-
-		/*
-			// COLUMN 1
-			x[0] = 1.0f;
-			x[1] = 0.0f;
-			x[2] = 0.0f;
-			
-			// COLUMN 2
-			x[4] = 0.0f;
-			x[5] = cosTheta;
-			x[6] = sinTheta;
-
-			// COLUMN 3
-			x[8] = 0.0f;
-			x[9] = -sinTheta;
-			x[10] = cosTheta;
-		*/			
-		// column, row (grr)
-		xform[1][1] = cosTheta;
-		xform[1][2] = sinTheta;
-		xform[2][1] = -sinTheta;
-		xform[2][2] = cosTheta;
-		
-		xform[3][1] = bone.y;
-		xform[3][2] = bone.z;
 	#endif
 	
 	#if INSTANCE == 0 

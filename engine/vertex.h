@@ -19,6 +19,7 @@
 #include "../grinliz/glvector.h"
 #include "../grinliz/glmatrix.h"
 #include "../grinliz/glstringutil.h"
+#include "../grinliz/glgeometry.h"
 #include "../tinyxml2/tinyxml2.h"
 #include "enginelimits.h"
 
@@ -135,9 +136,8 @@ struct BoneData
 	// maps to Vector3F
 	struct Bone {
 		grinliz::IString name;	
-		float angleRadians;
-		float dy;
-		float dz;
+		grinliz::Quaternion rot;
+		grinliz::Vector3F	pos;
 
 		void ToMatrix( grinliz::Matrix4* mat ) const;
 	};

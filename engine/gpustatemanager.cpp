@@ -399,11 +399,20 @@ void GPUState::Weld( const GPUState& state, const GPUStream& stream, const GPUSt
 			count *= EL_MAX_INSTANCE;
 		}
 
-		Vector3F d[EL_MAX_BONES*EL_MAX_INSTANCE];
+		// FIXME
+		// This could be much better packed (by a factor of 2) by using pos/rot as 2 vector4 instead
+		// of expanding to a matrix. And less work for the CPU as well. Disadvantages to keep in mind:
+		// - easier to debug a set of matrices
+		// - simpler shader code
+
+		Matrix4 d[EL_MAX_BONES*EL_MAX_INSTANCE*2];	// pos & rot per bone per instance. Big number.
 		for( int i=0; i<EL_MAX_INSTANCE; ++i ) {
 			for( int j=0; j<EL_MAX_BONES; ++j ) {
 				const BoneData::Bone& bone = data.bones[i].bone[j];
-				d[i*EL_MAX_BONES+j].Set( bone.angleRadians, bone.dy, bone.dz );
+				Matrix4* m = &d[i*EL_MAX_BONES+j];
+				m->SetIdentity();
+				bone.rot.ToMatrix( m );
+				m->SetTranslation( bone.pos );
 			}
 		}
 		shadman->SetUniformArray( ShaderManager::U_BONEXFORM, count, d );

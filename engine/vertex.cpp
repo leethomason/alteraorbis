@@ -22,11 +22,12 @@ using namespace grinliz;
 void BoneData::Bone::ToMatrix( grinliz::Matrix4* mat ) const
 {
 	mat->SetIdentity();
-	mat->SetXRotation( grinliz::ToDegree( angleRadians ));
-	mat->SetTranslation( 0, dy, dz );
+	rot.ToMatrix( mat );
+	mat->SetTranslation( pos );
 }
 
 
+#if 0
 void BoneData::Load( const tinyxml2::XMLElement* element )
 {
 	Clear();
@@ -48,8 +49,10 @@ void BoneData::Load( const tinyxml2::XMLElement* element )
 		}
 	}
 }
+#endif
 
 
+#if 0
 void BoneData::Save( tinyxml2::XMLPrinter* printer )
 {
 	printer->OpenElement( "BoneData" );
@@ -65,6 +68,7 @@ void BoneData::Save( tinyxml2::XMLPrinter* printer )
 	}
 	printer->CloseElement();
 }
+#endif
 
 
 void BoneData::Serialize( XStream* xs )
@@ -73,9 +77,8 @@ void BoneData::Serialize( XStream* xs )
 	for( int i=0; i<EL_MAX_BONES; ++i ) {
 		XarcOpen( xs, "bone" );
 		XARC_SER_KEY( xs, "name", bone[i].name );
-		XARC_SER_KEY( xs, "angle", bone[i].angleRadians );
-		XARC_SER_KEY( xs, "dy", bone[i].dy );
-		XARC_SER_KEY( xs, "dz", bone[i].dz );
+		XARC_SER_KEY( xs, "rot", bone[i].rot );
+		XARC_SER_KEY( xs, "pos", bone[i].pos );
 		XarcClose( xs );
 	}
 	XarcClose( xs );

@@ -213,11 +213,19 @@ AnimationResource::AnimationResource( const gamedb::Item* _item )
 				for( int bone=0; bone<nBones; ++bone ) {
 					const gamedb::Item* boneItem = frameItem->ChildAt( bone );
 					IString boneName = StringPool::Intern( boneItem->Name(), true );
+
+					float rad = boneItem->GetFloat( "anglePrime" );
+					Quaternion q;
+					Vector3F X_AXIS = { 1, 0, 0 };
+					q.FromAxisAngle( X_AXIS, ToDegree( rad ));
+
+					Vector3F pos = { 0, 0, 0 };
+					pos.y = boneItem->GetFloat( "dy" );
+					pos.z = boneItem->GetFloat( "dz" );
 				
 					sequence[type].frame[frame].boneData.bone[bone].name = boneName;
-					sequence[type].frame[frame].boneData.bone[bone].angleRadians = boneItem->GetFloat( "anglePrime" );
-					sequence[type].frame[frame].boneData.bone[bone].dy = boneItem->GetFloat( "dy" );
-					sequence[type].frame[frame].boneData.bone[bone].dz = boneItem->GetFloat( "dz" );
+					sequence[type].frame[frame].boneData.bone[bone].rot = q;
+					sequence[type].frame[frame].boneData.bone[bone].pos = pos;
 				}
 			}
 			for( int frame=0; frame<nFrames; ++frame ) {
@@ -336,26 +344,18 @@ void AnimationResource::ComputeBone( int type,
 	const BoneData::Bone* bone0 = sequence[type].frame[frame0].boneData.GetBone( boneName );
 	const BoneData::Bone* bone1 = sequence[type].frame[frame1].boneData.GetBone( boneName );
 
-	float angle0 = bone0->angleRadians;
-	float angle1 = bone1->angleRadians;
+	Quaternion angle0 = bone0->rot;
+	Quaternion angle1 = bone1->rot;
+	Quaternion angle;
+	Quaternion::SLERP( angle0, angle1, fraction, &angle );
 
-	if ( fabsf( angle0-angle1 ) > 180.0f ) {
-		if ( angle1 < angle0 ) angle1 += 360.0f;
-		else				   angle1 -= 360.0f;
+	Vector3F pos;
+	for( int i=0; i<3; ++i ) {
+		pos.X(i) = Lerp( bone0->pos.X(i), bone1->pos.X(i), fraction );
 	}
-	float angle = Lerp( angle0, angle1, fraction );
 
-	float dy0 = bone0->dy;
-	float dy1 = bone1->dy;
-	float dy  = Lerp( dy0, dy1, fraction );
-
-	float dz0 = bone0->dz;
-	float dz1 = bone1->dz;
-	float dz  = Lerp( dz0, dz1, fraction );
-
-	bone->angleRadians	= ToRadian( angle );
-	bone->dy			= dy;
-	bone->dz			= dz;
+	bone->rot	= angle;
+	bone->pos	= pos;
 }
 
 
