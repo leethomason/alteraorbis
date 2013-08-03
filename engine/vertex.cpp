@@ -27,50 +27,6 @@ void BoneData::Bone::ToMatrix( grinliz::Matrix4* mat ) const
 }
 
 
-#if 0
-void BoneData::Load( const tinyxml2::XMLElement* element )
-{
-	Clear();
-	const tinyxml2::XMLElement* boneEle = element->FirstChildElement( "BoneData" );
-	if ( boneEle ) {
-		int i=0;
-		for( const tinyxml2::XMLElement* ele = boneEle->FirstChildElement( "Bone" );
-			 ele && i < EL_MAX_BONES;
-			 ++i, ele = ele->NextSiblingElement( "Bone" ))
-		{
-			if ( ele->FirstAttribute() ) {
-				const char* name = ele->Attribute( "name" );
-				GLASSERT( name );
-				bone[i].name = StringPool::Intern( name );
-				ele->QueryAttribute( "angleRadians", &bone[i].angleRadians );
-				ele->QueryAttribute( "dy", &bone[i].dy );
-				ele->QueryAttribute( "dz", &bone[i].dz );
-			}
-		}
-	}
-}
-#endif
-
-
-#if 0
-void BoneData::Save( tinyxml2::XMLPrinter* printer )
-{
-	printer->OpenElement( "BoneData" );
-	for( int i=0; i<EL_MAX_BONES; ++i ) {
-		if ( !bone[i].name.empty() ) {
-			printer->OpenElement( "Bone" );
-			printer->PushAttribute( "name", bone[i].name.c_str() );
-			printer->PushAttribute( "angleRadians", bone[i].angleRadians );
-			printer->PushAttribute( "dy", bone[i].dy );
-			printer->PushAttribute( "dz", bone[i].dz );
-			printer->CloseElement();
-		}
-	}
-	printer->CloseElement();
-}
-#endif
-
-
 void BoneData::Serialize( XStream* xs )
 {
 	XarcOpen( xs, "BoneData" );

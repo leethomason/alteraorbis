@@ -405,14 +405,22 @@ void GPUState::Weld( const GPUState& state, const GPUStream& stream, const GPUSt
 		// - easier to debug a set of matrices
 		// - simpler shader code
 
-		Matrix4 d[EL_MAX_BONES*EL_MAX_INSTANCE*2];	// pos & rot per bone per instance. Big number.
+		Matrix4 d[EL_MAX_BONES*EL_MAX_INSTANCE];	// pos & rot per bone per instance. Big number.
 		for( int i=0; i<EL_MAX_INSTANCE; ++i ) {
 			for( int j=0; j<EL_MAX_BONES; ++j ) {
 				const BoneData::Bone& bone = data.bones[i].bone[j];
 				Matrix4* m = &d[i*EL_MAX_BONES+j];
 				m->SetIdentity();
-				bone.rot.ToMatrix( m );
-				m->SetTranslation( bone.pos );
+				if ( !bone.name.empty() ) {
+					// FIXME: should be able to direct-assign rot/trans components.
+
+					Matrix4 rot;
+					Matrix4 tran;
+
+					bone.rot.ToMatrix( &rot );
+					tran.SetTranslation( bone.pos );
+					*m = rot * tran;
+				}
 			}
 		}
 		shadman->SetUniformArray( ShaderManager::U_BONEXFORM, count, d );

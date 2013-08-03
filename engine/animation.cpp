@@ -217,7 +217,7 @@ AnimationResource::AnimationResource( const gamedb::Item* _item )
 					float rad = boneItem->GetFloat( "anglePrime" );
 					Quaternion q;
 					Vector3F X_AXIS = { 1, 0, 0 };
-					q.FromAxisAngle( X_AXIS, ToDegree( rad ));
+					q.FromAxisAngle( X_AXIS, rad );
 
 					Vector3F pos = { 0, 0, 0 };
 					pos.y = boneItem->GetFloat( "dy" );
@@ -346,8 +346,8 @@ void AnimationResource::ComputeBone( int type,
 
 	Quaternion angle0 = bone0->rot;
 	Quaternion angle1 = bone1->rot;
-	Quaternion angle;
-	Quaternion::SLERP( angle0, angle1, fraction, &angle );
+	Quaternion angle = angle0;
+	//Quaternion::SLERP( angle0, angle1, fraction, &angle );
 
 	Vector3F pos;
 	for( int i=0; i<3; ++i ) {

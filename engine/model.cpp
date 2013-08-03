@@ -555,8 +555,8 @@ void Model::CrossFade( float fraction, BoneData::Bone* inOut, const BoneData::Bo
 {
 	Quaternion angle1 = inOut->rot;
 	Quaternion angle2 = prev.rot;
-	Quaternion angle;
-	Quaternion::SLERP( angle1, angle2, fraction, &angle );
+	Quaternion angle = angle1;
+	//Quaternion::SLERP( angle1, angle2, fraction, &angle );
 
 	inOut->rot = angle;
 	for( int i=0; i<3; ++i ) {
