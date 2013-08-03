@@ -21,8 +21,14 @@ public:
 
 private:
 	bool GetLine( FILE* fp, char* buf, int size );
+	const char* SkipWhiteSpace( const char* p ) { while( p && *p && isspace(*p)) ++p; return p; }
+	const char* ParseDataObject( const char* p, int depth ); 
+	bool IsIdent( char p ) {
+		return isalnum(p) || p == '_';
+	}
 
 	grinliz::CDynArray< grinliz::GLString > lines;
+	grinliz::GLString str;
 };
 
 
