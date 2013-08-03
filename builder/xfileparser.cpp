@@ -115,7 +115,7 @@ void XAnimationParser::Parse( const char* filename, gamedb::WItem* witem )
 	FILE* fp = fopen( filename, "r" );
 	GLASSERT( fp );
 
-	// Read the lines, but them in the main buffer.
+	// Read the lines, put them in the main buffer.
 	char buf[256];
 	while ( GetLine( fp, buf, 256 )) {
 		str.append( buf );

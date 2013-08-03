@@ -1,9 +1,3 @@
-#xof 0303txt 0032
-
-#template AnimTicksPerSecond {
-#  <9E415A43-7BA6-4a73-8743-B73D47E88476>
-#  DWORD AnimTicksPerSecond;
-#}
 
 Frame Root {
   FrameTransformMatrix {
@@ -104,7 +98,7 @@ Frame Root {
 AnimTicksPerSecond {
   24;
 }
-AnimationSet Global {
+AnimationSet ArmatureAction {
   Animation {
     {Armature}
     AnimationKey { // Rotation
@@ -930,4 +924,4 @@ AnimationSet Global {
       19;3; 0.000000, 0.651800, 0.000000;;;
     }
   }
-} // End of AnimationSet Global
+} // End of AnimationSet ArmatureAction
