@@ -34,7 +34,7 @@
        FIXME: still needs metadata
   -->
   <model filename="human2.ac" modelName="humanMale2" origin="0 0 0" shading="flat" polyRemoval="pre" />
-  <animation filename="human2_male.x" assetName="humanMale2Animation" />
+  <animation filename="human2_male/human2_male_walk.x" assetName="humanMale2Animation" />
 
 
   <texture filename="palette_50.png" emissive="true" />

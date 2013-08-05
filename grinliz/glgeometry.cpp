@@ -881,6 +881,24 @@ void Quaternion::Decompose( const Matrix4& tr, Vector3F* pos,  Quaternion* rot )
 }
 
 
+void Quaternion::Test()
+{
+	// Testing
+	Quaternion q;
+	Vector3F X_AXIS = { 1,0,0 };
+	q.FromAxisAngle( X_AXIS, 90 );
+	Matrix4 m;
+	q.ToMatrix( &m );
+
+	Vector3F test = { 1, 0.5, 0.2 };
+	Vector3F prime = m * test;
+
+	GLASSERT( Equal( prime.x, 1.0f, 0.01f ));
+	GLASSERT( Equal( prime.y, -0.2f, 0.01f ));
+	GLASSERT( Equal( prime.z, 0.5f, 0.01f ));
+}
+
+
 float grinliz::PointAABBDistance( const grinliz::Vector3F& point, const grinliz::Rectangle3F& aabb, Vector3F* nearest )
 {
 	if ( aabb.Contains( point )) {

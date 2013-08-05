@@ -358,6 +358,8 @@ public:
 	bool operator!=( const Quaternion& rhs ) const { return !(*this == rhs); }
 
 	float x, y, z, w;
+
+	static void Test();
 };
 
 

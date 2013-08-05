@@ -92,19 +92,7 @@ void AnimationResourceManager::Create()
 	GLASSERT( !instance );
 	instance = new AnimationResourceManager();
 
-	// Testing
-	Quaternion q;
-	Vector3F X_AXIS = { 1,0,0 };
-	q.FromAxisAngle( X_AXIS, 90 );
-	Matrix4 m;
-	q.ToMatrix( &m );
-
-	Vector3F test = { 1, 0.5, 0.2 };
-	Vector3F prime = m * test;
-
-	GLASSERT( Equal( prime.x, 1.0f, 0.01f ));
-	GLASSERT( Equal( prime.y, -0.2f, 0.01f ));
-	GLASSERT( Equal( prime.z, 0.5f, 0.01f ));
+	Quaternion::Test();
 }
 
 
