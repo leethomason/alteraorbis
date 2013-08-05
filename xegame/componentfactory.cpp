@@ -11,6 +11,7 @@
 #include "../game/aicomponent.h"
 #include "../game/gridmovecomponent.h"
 #include "../game/visitorstatecomponent.h"
+#include "../game/physicsmovecomponent.h"
 
 #include "../script/scriptcomponent.h"
 
@@ -63,6 +64,9 @@ Component* ComponentFactory::Factory( const char* name, Chit* chit ) const
 	}
 	else if ( StrEqual( name, "VisitorStateComponent" )) {
 		return new VisitorStateComponent( worldMap );
+	}
+	else if ( StrEqual( name, "TrackingMoveComponent" )) {
+		return new TrackingMoveComponent( worldMap );
 	}
 
 	GLASSERT( 0 );
