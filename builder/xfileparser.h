@@ -6,6 +6,7 @@
 #include "../grinliz/glcontainer.h"
 #include "../grinliz/glstringutil.h"
 #include "../grinliz/glmatrix.h"
+#include "../grinliz/glgeometry.h"
 
 #include "../tinyxml2/tinyxml2.h"
 #include "../shared/gamedbwriter.h"
@@ -20,6 +21,16 @@ public:
 	void Parse( const char* filename,
 				gamedb::WItem* witem );
 
+	struct Node {
+		Node* parent;
+		grinliz::GLString	ident;
+		grinliz::GLString	name;
+		grinliz::CDynArray< Node*, grinliz::OwnedPtrSem > childArr;
+		grinliz::CDynArray< float >	floatArr;
+	};
+
+	/*
+	// Tree structure.
 	struct FrameNode {
 		FrameNode() : parent(0)	{}
 		~FrameNode();
@@ -34,24 +45,35 @@ public:
 		grinliz::Matrix4	xform;
 	};
 
+	// Flat
+	struct AnimationNode {
+		AnimationNode() : nFrames(0) {}
+
+		int nFrames;
+		grinliz::GLString	name;
+		grinliz::Quaternion rotation[EL_MAX_ANIM_FRAMES];
+		grinliz::Vector3F	scale[EL_MAX_ANIM_FRAMES];
+		grinliz::Vector3F	pos[EL_MAX_ANIM_FRAMES];
+	};
+	*/
+
 private:
 	bool GetLine( FILE* fp, char* buf, int size );
 	const char* SkipWhiteSpace( const char* p ) { while( p && *p && isspace(*p)) ++p; return p; }
-	const char* ParseDataObject( const char* p, int depth ); 
+	const char* ParseDataObject( const char* p, Node* parent ); 
 	bool IsIdent( char p ) {
 		return isalnum(p) || p == '_';
 	}
 	bool IsNum( char p ) {
-		return isdigit(p) || p == '-';
+		return isdigit(p) || p == '-' || p == '.';
 	}
 
-	void Push( const grinliz::GLString& ident, const grinliz::GLString& name );
-	void Pop(  const grinliz::GLString& ident, const grinliz::GLString& name );
-	void Scan( const grinliz::GLString& ident, const char* );
-	void ScanFloats( float* arr, int count, const char* p );
+	const char* ScanFloat( float* v, const char* p );
 
-	FrameNode* rootFrameNode;
-	FrameNode* currentFrameNode;
+	void DumpNode( Node* node, int depth );
+
+	Node* root;
+	Node* currentNode;
 	int scanDepth;
 
 	grinliz::CDynArray< grinliz::GLString > lines;

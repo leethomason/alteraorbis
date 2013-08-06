@@ -250,7 +250,7 @@ public:
 	unsigned rfind( char c )	const				{	const char* p = strrchr( m_buf, c );
 														return ( p ) ? (p-m_buf) : size();
 													}
-	GLString substr( unsigned pos, unsigned n );
+	GLString substr( unsigned pos, unsigned n ) const;
 
 	void append( const GLString& str );
 	void append( const char* );
@@ -268,9 +268,9 @@ private:
 	void init( const GLString& str );
 	void init( const char* );
 #ifdef DEBUG	
-	void validate();
+	void validate() const;
 #else
-	void validate()	{}
+	void validate() const	{}
 #endif
 
 	static const char* nullBuf;

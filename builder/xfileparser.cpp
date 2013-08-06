@@ -4,21 +4,17 @@
 using namespace grinliz;
 
 
-XAnimationParser::FrameNode::~FrameNode()
-{
-}
-
 
 XAnimationParser::XAnimationParser()
 {
-	rootFrameNode = 0;
+	root = new Node();
 	scanDepth = 0;
 }
 
 
 XAnimationParser::~XAnimationParser()
 {
-	delete rootFrameNode;
+	delete root;
 }
 
 
@@ -50,13 +46,13 @@ bool XAnimationParser::GetLine( FILE* fp, char* buf, int size )
 }
 
 
-const char* XAnimationParser::ParseDataObject( const char* p, int depth )
+const char* XAnimationParser::ParseDataObject( const char* p, Node* parent )
 {
 	p = SkipWhiteSpace( p );
 	if ( *p == '{' ) {
 		// annoying mini-object reference thing.
 		++p;
-		p = ParseDataObject( p, depth+1 );
+		p = ParseDataObject( p, parent );
 		p = SkipWhiteSpace( p );
 	}
 	if ( !*p )
@@ -100,23 +96,36 @@ const char* XAnimationParser::ParseDataObject( const char* p, int depth )
 	++p;
 	p = SkipWhiteSpace( p );
 
-	Push( identifier, name );
+	Node* node = new Node();
+	parent->childArr.Push( node );
+	node->ident = identifier;
+	node->name  = name;
 
 	while( true ) {
 		// Numbers; leaf node.
 		if ( isdigit( *p ) || (*p=='-')) {
 
-			Scan( identifier, p );
+			while( true ) {
+				float v = 0;
+				p = SkipWhiteSpace( p );
+				if ( IsNum( *p )) {
+					p = ScanFloat( &v, p );
+					node->floatArr.Push( v );
+				}
+				else {
+					break;
+				}
+			}
+
 			while ( *p != '}' )
 				++p;
-			p = SkipWhiteSpace( p );
 			GLASSERT( *p == '}' );
 			++p;
 			break;
 		}
 		else {
 			// Sub-object
-			p = ParseDataObject( p, depth+1 );
+			p = ParseDataObject( p, node );
 			p = SkipWhiteSpace( p );
 			if ( *p == '}' ) {
 				++p;
@@ -125,79 +134,34 @@ const char* XAnimationParser::ParseDataObject( const char* p, int depth )
 		}
 	}
 
-	Pop( identifier, name );
 	return p;
 }
 
-void XAnimationParser::Push( const grinliz::GLString& ident, const grinliz::GLString& name )
+
+void XAnimationParser::DumpNode( Node* node, int depth )
 {
-	if ( ident == "FrameTransformMatrix" ) {
-		// This gets applied to the frame as an xform; it does NOT create a new frame.
-		// Scan() does the work.
-		return;
-	}
-	if ( ident != "Frame" ) {
-		return;
-	}
-
-	FrameNode* fm = new FrameNode();
-	if ( rootFrameNode ) {
-		fm->parent = currentFrameNode;
-		currentFrameNode->childArr.Push( fm );
-	}
-	else {
-		rootFrameNode = fm;
-	}
-	fm->ident = ident;
-	fm->name = name;
-
-	for( int i=0; i<scanDepth; ++i ) {
+	for( int i=0; i<depth; ++i ) {
 		GLOUTPUT(( "  " ));
 	}
-	GLOUTPUT(( "  %s %s\n", name.c_str(), ident.c_str() ));
+	GLOUTPUT(( "  %s %s\n", node->ident.c_str(), node->name.c_str() ));
 	
-	++scanDepth;
-	currentFrameNode = fm;
+	for( int i=0; i<node->childArr.Size(); ++i ) {
+		DumpNode( node->childArr[i], depth+1 );
+	}
 }
 
 
-void XAnimationParser::Pop( const grinliz::GLString& ident, const grinliz::GLString& name )
+const char* XAnimationParser::ScanFloat( float* v, const char* p )
 {
-	if ( ident == "FrameTransformMatrix" ) {
-		return;
-	}
-	if ( ident != "Frame" ) {
-		return;
-	}
-
-	currentFrameNode = currentFrameNode->parent;
-	--scanDepth;
-}
-
-
-void XAnimationParser::ScanFloats( float* arr, int count, const char* p )
-{
-	int i=0;
-	while( i<count ) {
-		if ( IsNum( *p ) ) {
-			arr[i] = (float)atof( p );
-			++i;
-			while( IsNum( *p )) {
-				p++;
-			}
-		}
-		else { 
+	p = SkipWhiteSpace( p );
+	if ( IsNum( *p ) ) {
+		*v = (float)atof( p );
+		++p;
+		while( IsNum( *p )) {
 			p++;
 		}
 	}
-}
-
-
-void XAnimationParser::Scan( const GLString& ident, const char* p )
-{
-	if ( ident == "FrameTransformMatrix" ) {
-		ScanFloats( currentFrameNode->xform.x, 16, p );
-	}
+	return p;
 }
 
 
@@ -224,8 +188,9 @@ void XAnimationParser::Parse( const char* filename, gamedb::WItem* witem )
 	const char* end = p + str.size();
 
 	while( p < end ) {
-		p = ParseDataObject( p, 0 );
+		p = ParseDataObject( p, root );
 	}
-
+	DumpNode( root, 0 );
+	return;
 }
 

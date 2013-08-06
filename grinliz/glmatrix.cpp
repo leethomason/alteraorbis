@@ -284,6 +284,17 @@ void Matrix4::Transpose( Matrix4* transpose ) const
     }
 }
 
+void Matrix4::Transpose()
+{
+	Matrix4 m = *this;
+	for (int r = 0; r < 4; ++r) {
+        for (int c = 0; c < 4; ++c) {
+			this->x[INDEX(c,r)] = m.x[INDEX(r,c)];
+        }
+    }
+}
+
+
 float Matrix4::Determinant() const
 {
 	//	11 12 13 14

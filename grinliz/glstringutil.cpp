@@ -105,7 +105,7 @@ void GLString::append( const char* str, int n )
 }
 
 
-GLString GLString::substr( unsigned pos, unsigned n )
+GLString GLString::substr( unsigned pos, unsigned n ) const
 {
 	GLString str;
 	if ( pos < size()-1 ) {
@@ -167,7 +167,7 @@ void GLString::ensureSize( unsigned s )
 
 
 #ifdef DEBUG
-void GLString::validate()
+void GLString::validate() const
 {
 	if ( m_buf != nullBuf ) {
 		GLASSERT( m_allocated );

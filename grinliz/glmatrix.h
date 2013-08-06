@@ -168,6 +168,7 @@ class Matrix4
 
 	/// Transpose 
 	void Transpose( Matrix4* transpose ) const;
+	void Transpose();
 	/// Determinant
 	float Determinant() const;
 	/// Adjoint
