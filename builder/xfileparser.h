@@ -48,13 +48,14 @@ public:
 		AnimationNode() : nFrames(0) {}
 
 		int nFrames;
-		grinliz::GLString	name;
+		grinliz::GLString	reference;
 		grinliz::Quaternion rotation[EL_MAX_ANIM_FRAMES];
 		grinliz::Vector3F	scale[EL_MAX_ANIM_FRAMES];
 		grinliz::Vector3F	pos[EL_MAX_ANIM_FRAMES];
 	};
 
 	FrameNode* frameNodeRoot;
+	grinliz::CDynArray< AnimationNode*, grinliz::OwnedPtrSem > animationArr;
 
 private:
 	bool GetLine( FILE* fp, char* buf, int size );
@@ -80,11 +81,14 @@ private:
 
 	const char* ScanFloat( float* v, const char* p );
 	void WalkFrameNodes( FrameNode* fn, Node* n );
+	void ReadAnimation( Node* node, AnimationNode* anim );
 	
 	void DumpNode( Node* node, int depth );
 	void DumpFrameNode( FrameNode* node, int depth );
+	void DumpAnimation( AnimationNode* );
 
 	Node* root;
+	int frameSkip;
 
 	grinliz::CDynArray< grinliz::GLString > lines;
 	grinliz::GLString str;

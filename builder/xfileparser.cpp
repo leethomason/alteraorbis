@@ -8,6 +8,7 @@ using namespace grinliz;
 XAnimationParser::XAnimationParser()
 {
 	root = new Node();
+	frameSkip = 0;
 }
 
 
@@ -92,6 +93,7 @@ const char* XAnimationParser::ParseDataObject( const char* p, Node* parent )
 	parent->childArr.Push( node );
 	node->ident = identifier;
 	node->name  = name;
+	node->parent = parent;
 
 	if ( *p == '}' ) {
 		++p;
@@ -179,6 +181,12 @@ const char* XAnimationParser::ScanFloat( float* v, const char* p )
 }
 
 
+void XAnimationParser::DumpAnimation( AnimationNode* an )
+{
+	GLOUTPUT(( "AN: %s nFrames=%d\n", an->reference.c_str(), an->nFrames ));
+}
+
+
 void XAnimationParser::WalkFrameNodes( FrameNode* fn, Node* node )
 {
 	fn->ident = node->ident;
@@ -201,6 +209,66 @@ void XAnimationParser::WalkFrameNodes( FrameNode* fn, Node* node )
 			fn->childArr.Push( child );
 			WalkFrameNodes( child,n );
 		}
+	}
+}
+
+
+void XAnimationParser::ReadAnimation( Node* node, AnimationNode* anim )
+{
+	GLASSERT( node->ident == "Animation" );
+	
+	// is first: determine number of frames & skip
+	// then read in name, values
+
+	// 3 keys and a reference
+	GLASSERT( node->childArr.Size() == 4 );
+	anim->reference = node->childArr[0]->ident;		// reference
+
+	Node* key0 = node->childArr[1];
+	Node* key1 = node->childArr[2];
+	Node* key2 = node->childArr[3];
+	int nFrames = (int)key0->floatArr[1];
+
+	if ( frameSkip == 0 ) {
+		GLASSERT( nFrames > 0 );
+		frameSkip = 1;
+		while( nFrames / frameSkip > EL_MAX_ANIM_FRAMES )
+			++frameSkip;
+	}
+	anim->nFrames = nFrames / frameSkip;
+
+	GLASSERT( key0->floatArr[0] == 0 );	// rotation
+	GLASSERT( key0->floatArr.Size() == 2 + nFrames*6 );
+	int f = 0;
+	for( int i=0; i<nFrames; i+=frameSkip, ++f ) {
+		Quaternion q;
+		q.x = key0->floatArr[2+i*6+0];
+		q.y = key0->floatArr[2+i*6+1];
+		q.z = key0->floatArr[2+i*6+2];
+		q.w = key0->floatArr[2+i*6+3];
+		anim->rotation[f] = q;
+	}
+
+	GLASSERT( key1->floatArr[0] == 1 ); // scale
+	GLASSERT( key1->floatArr.Size() == 2 + nFrames*5 );
+	f = 0;
+	for( int i=0; i<nFrames; i+=frameSkip, ++f ) {
+		Vector3F v;
+		v.x = key1->floatArr[2+i*5+0];
+		v.y = key1->floatArr[2+i*5+1];
+		v.z = key1->floatArr[2+i*5+2];
+		anim->scale[f] = v;
+	}
+
+	GLASSERT( key2->floatArr[0] == 2 ); // position
+	GLASSERT( key2->floatArr.Size() == 2 + nFrames*5 );
+	f = 0;
+	for( int i=0; i<nFrames; i+=frameSkip, ++f ) {
+		Vector3F v;
+		v.x = key2->floatArr[2+i*5+0];
+		v.y = key2->floatArr[2+i*5+1];
+		v.z = key2->floatArr[2+i*5+2];
+		anim->pos[f] = v;
 	}
 }
 
@@ -242,6 +310,22 @@ void XAnimationParser::Parse( const char* filename, gamedb::WItem* witem )
 		}
 	}
 	DumpFrameNode( frameNodeRoot, 0 );
+
+	// -- Animation nodes -- //
+	for( int i=0; i<root->childArr.Size(); ++i ) {
+		Node* node = root->childArr[i];
+		if ( node->ident == "AnimationSet" ) {
+			for( int j=0; j<node->childArr.Size(); ++j ) {
+				AnimationNode* anim = new AnimationNode();
+				ReadAnimation( node->childArr[j], anim );
+				animationArr.Push( anim );
+			}
+		}
+	}
+
+	for( int i=0; i<animationArr.Size(); ++i ) {
+		DumpAnimation( animationArr[i] );
+	}
 
 	return;
 }
