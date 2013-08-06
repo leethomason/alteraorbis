@@ -29,11 +29,9 @@ public:
 		grinliz::CDynArray< float >	floatArr;
 	};
 
-	/*
 	// Tree structure.
 	struct FrameNode {
 		FrameNode() : parent(0)	{}
-		~FrameNode();
 
 		FrameNode*			parent;
 		grinliz::GLString	ident;	// Frame
@@ -55,12 +53,24 @@ public:
 		grinliz::Vector3F	scale[EL_MAX_ANIM_FRAMES];
 		grinliz::Vector3F	pos[EL_MAX_ANIM_FRAMES];
 	};
-	*/
+
+	FrameNode* frameNodeRoot;
 
 private:
 	bool GetLine( FILE* fp, char* buf, int size );
 	const char* SkipWhiteSpace( const char* p ) { while( p && *p && isspace(*p)) ++p; return p; }
+	const char* SkipNumDelimiter( const char* p ) 
+	{ 
+		while(    p 
+			   && *p 
+			   && (isspace(*p) || (*p==',') || (*p==';') ))
+		{
+			++p;
+		}
+		return p; 
+	}
 	const char* ParseDataObject( const char* p, Node* parent ); 
+
 	bool IsIdent( char p ) {
 		return isalnum(p) || p == '_';
 	}
@@ -69,12 +79,12 @@ private:
 	}
 
 	const char* ScanFloat( float* v, const char* p );
-
+	void WalkFrameNodes( FrameNode* fn, Node* n );
+	
 	void DumpNode( Node* node, int depth );
+	void DumpFrameNode( FrameNode* node, int depth );
 
 	Node* root;
-	Node* currentNode;
-	int scanDepth;
 
 	grinliz::CDynArray< grinliz::GLString > lines;
 	grinliz::GLString str;

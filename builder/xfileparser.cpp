@@ -8,7 +8,6 @@ using namespace grinliz;
 XAnimationParser::XAnimationParser()
 {
 	root = new Node();
-	scanDepth = 0;
 }
 
 
@@ -88,6 +87,12 @@ const char* XAnimationParser::ParseDataObject( const char* p, Node* parent )
 
 	if ( *p == 0 ) 
 		return p;
+
+	Node* node = new Node();
+	parent->childArr.Push( node );
+	node->ident = identifier;
+	node->name  = name;
+
 	if ( *p == '}' ) {
 		++p;
 		return p;
@@ -96,18 +101,13 @@ const char* XAnimationParser::ParseDataObject( const char* p, Node* parent )
 	++p;
 	p = SkipWhiteSpace( p );
 
-	Node* node = new Node();
-	parent->childArr.Push( node );
-	node->ident = identifier;
-	node->name  = name;
-
 	while( true ) {
 		// Numbers; leaf node.
 		if ( isdigit( *p ) || (*p=='-')) {
 
 			while( true ) {
 				float v = 0;
-				p = SkipWhiteSpace( p );
+				p = SkipNumDelimiter( p );
 				if ( IsNum( *p )) {
 					p = ScanFloat( &v, p );
 					node->floatArr.Push( v );
@@ -151,6 +151,20 @@ void XAnimationParser::DumpNode( Node* node, int depth )
 }
 
 
+void XAnimationParser::DumpFrameNode( FrameNode* node, int depth )
+{
+	for( int i=0; i<depth; ++i ) {
+		GLOUTPUT(( "  " ));
+	}
+	GLOUTPUT(( "  %s %s\n", node->ident.c_str(), node->name.c_str() ));
+	node->xform.Dump( "xform" );
+	
+	for( int i=0; i<node->childArr.Size(); ++i ) {
+		DumpFrameNode( node->childArr[i], depth+1 );
+	}
+}
+
+
 const char* XAnimationParser::ScanFloat( float* v, const char* p )
 {
 	p = SkipWhiteSpace( p );
@@ -162,6 +176,32 @@ const char* XAnimationParser::ScanFloat( float* v, const char* p )
 		}
 	}
 	return p;
+}
+
+
+void XAnimationParser::WalkFrameNodes( FrameNode* fn, Node* node )
+{
+	fn->ident = node->ident;
+	fn->name = node->name;
+
+	GLASSERT( node->childArr.Size() );
+	Node* frameXForm = node->childArr[0];
+	GLASSERT( frameXForm->ident == "FrameTransformMatrix" );
+	GLASSERT( frameXForm->floatArr.Size() == 16 );
+	for( int i=0; i<16; ++i ) {
+		fn->xform.x[i] = frameXForm->floatArr[i];
+	}
+	fn->xform.Transpose();
+
+	for( int i=0; i<node->childArr.Size(); ++i ) {
+		Node* n = node->childArr[i];
+		if ( n->ident == "Frame" ) {
+			FrameNode* child = new FrameNode();
+			child->parent = fn;
+			fn->childArr.Push( child );
+			WalkFrameNodes( child,n );
+		}
+	}
 }
 
 
@@ -191,6 +231,18 @@ void XAnimationParser::Parse( const char* filename, gamedb::WItem* witem )
 		p = ParseDataObject( p, root );
 	}
 	DumpNode( root, 0 );
+
+	// -- Coordinate frames -- //
+	for( int i=0; i<root->childArr.Size(); ++i ) {
+		Node* node = root->childArr[i];
+		if ( node->ident == "Frame" && node->name == "Root" ) {
+			frameNodeRoot = new FrameNode();
+			WalkFrameNodes( frameNodeRoot, node );
+			break;
+		}
+	}
+	DumpFrameNode( frameNodeRoot, 0 );
+
 	return;
 }
 
