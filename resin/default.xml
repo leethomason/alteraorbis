@@ -32,8 +32,9 @@
 
   <!-- animation v2
        FIXME: still needs metadata
+    <animation filename="human2_male/human2_male_walk.x" assetName="humanMale2Animation" />
   -->
-  <animation filename="human2_male/human2_male_walk.x" assetName="humanMale2Animation" />
+  <animation filename="human2_male/human2_male_walk.bvh" assetName="humanMale2AnimationB" />
   <model filename="human2.ac" modelName="humanMale2" animation="humanMale2Animation" origin="0 0 0" shading="flat" polyRemoval="pre" />
 
   <texture filename="palette_50.png" emissive="true" />

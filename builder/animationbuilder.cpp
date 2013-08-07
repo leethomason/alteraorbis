@@ -346,6 +346,10 @@ void ProcessAnimation( const tinyxml2::XMLElement* element, gamedb::WItem* witem
 		XAnimationParser parser;
 		parser.Parse( pathName.c_str(), root );
 	}
+	else if ( extension == ".bvh" ) {
+		XAnimationParser parser;
+		parser.ParseBVH( pathName.c_str(), root );
+	}
 	else {
 		ExitError( "Animation", pathName.c_str(), assetName.c_str(), "file extension not recognized" );
 	}

@@ -12,14 +12,18 @@
 #include "../shared/gamedbwriter.h"
 #include "../engine/enginelimits.h"
 
+/* Parses both .x and .bvh files.
+   Similar parser, and only the armiture is read from the .x, so
+   they produce exactly the same output.
+*/
 class XAnimationParser
 {
 public:
 	XAnimationParser();
 	~XAnimationParser();
 
-	void Parse( const char* filename,
-				gamedb::WItem* witem );
+	void Parse(    const char* filename, gamedb::WItem* witem );
+	void ParseBVH( const char* filename, gamedb::WItem* witem );
 
 	struct Node {
 		Node* parent;	
@@ -54,8 +58,31 @@ public:
 		grinliz::Vector3F	pos[EL_MAX_ANIM_FRAMES];
 	};
 
+	// Tree Structure
+	struct BNode {
+		BNode() : parent(0)	{}
+
+		BNode*				parent;
+		grinliz::GLString	name;	// torso
+
+		grinliz::CDynArray< BNode*, grinliz::OwnedPtrSem > 
+							childArr;	// use semantics to call delete on child nodes
+
+		grinliz::Vector3F	pos;		// the position of the bone
+		grinliz::Vector3F	xformTrans;	// translation	
+		grinliz::Vector3F	xformRot;	// rotation (euler, 3 component)
+	};
+
+
+	struct Channel {
+		BNode*	node;
+		int		select;	// 0-2: pos, 3-5: rot
+	};
+
 	FrameNode* frameNodeRoot;
 	grinliz::CDynArray< AnimationNode*, grinliz::OwnedPtrSem > animationArr;
+	BNode* bNodeRoot;
+	grinliz::CDynArray< Channel > channelArr;
 
 private:
 	bool GetLine( FILE* fp, char* buf, int size );
@@ -70,20 +97,27 @@ private:
 		}
 		return p; 
 	}
+
+	// Parsers. Note that the X version takes the parent, the BVH version parses the parent.
 	const char* ParseDataObject( const char* p, Node* parent ); 
+	const char* ParseJoint( const char* p, BNode* node );
 
 	bool IsIdent( char p ) {
-		return isalnum(p) || p == '_';
+		return isalnum(p) || p == '_' || p == '.';
 	}
 	bool IsNum( char p ) {
 		return isdigit(p) || p == '-' || p == '.';
 	}
+
+	grinliz::GLString GetAnimationType( const char* filename );
+	void ReadFile( const char* filename );	// reads in the text and normalizes the lines
 
 	const char* ScanFloat( float* v, const char* p );
 	void WalkFrameNodes( FrameNode* fn, Node* n );
 	void ReadAnimation( Node* node, AnimationNode* anim );
 	
 	void DumpNode( Node* node, int depth );
+	void DumpBNode( BNode* node, int depth );
 	void DumpFrameNode( FrameNode* node, int depth );
 	void DumpAnimation( AnimationNode* );
 

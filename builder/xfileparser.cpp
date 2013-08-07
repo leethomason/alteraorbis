@@ -46,6 +46,86 @@ bool XAnimationParser::GetLine( FILE* fp, char* buf, int size )
 }
 
 
+const char* XAnimationParser::ParseJoint( const char* p, BNode* node )
+{
+	p = SkipWhiteSpace( p );
+	GLString name;
+	while( *p && IsIdent(*p) ) {
+		name.append( p, 1 );
+		++p;
+	}
+	node->name = name;
+
+	p = SkipWhiteSpace( p );
+	GLASSERT( *p == '{' );
+	++p;
+
+	while( true ) {
+		p = SkipWhiteSpace( p );
+		if ( memcmp( p, "OFFSET", strlen( "OFFSET" ) ) == 0) {
+			p += strlen( "OFFSET" );
+			p = ScanFloat( &node->pos.x, p );
+			p = SkipWhiteSpace( p );
+			p = ScanFloat( &node->pos.y, p );
+			p = SkipWhiteSpace( p );
+			p = ScanFloat( &node->pos.z, p );
+			p = SkipWhiteSpace( p );
+		}
+		else if ( memcmp( p, "CHANNELS", strlen( "CHANNELS" ) ) == 0) {
+			p += strlen( "CHANNELS" );
+			p = SkipWhiteSpace( p );
+			int nChannels = *p - '0';
+			++p;
+
+			for( int ch=0; ch<nChannels; ++ch ) {
+				p = SkipWhiteSpace( p );
+
+				int select = 0;
+				if ( *p == 'X' ) select = 0;
+				else if ( *p == 'Y' ) select = 1;
+				else if ( *p == 'Z' ) select = 2;
+				else GLASSERT( 0 );
+
+				++p;
+				if ( memcmp( p, "position", strlen( "position" ) )) {
+					p += strlen( "position" );
+				}
+				else if ( memcmp( p, "rotation", strlen( "rotation" ))) {
+					p += strlen( "rotation" );
+					select +=3;
+				}
+				else {
+					GLASSERT( 0 );
+				}
+
+				Channel c = { node, select};
+				channelArr.Push( c );
+
+			}
+		}
+		else if ( memcmp( p, "End Site", strlen( "End Site" ) ) == 0 ) {
+			// Safe to skip over, I think.
+			while ( *p != '}' )
+				++p;
+			++p;
+		}
+		else if ( memcmp( p, "JOINT", strlen("JOINT") ) == 0 ) {
+			p += strlen( "JOINT" );
+			BNode* n = new BNode();
+			n->parent = node;
+			node->childArr.Push( n );
+			p = ParseJoint( p, n );
+		}
+		else if ( *p == '}' ) {
+			return p + 1;
+		}
+		else {
+			GLASSERT( 0 );
+		}
+	}
+	return p;
+}
+
 const char* XAnimationParser::ParseDataObject( const char* p, Node* parent )
 {
 	p = SkipWhiteSpace( p );
@@ -137,6 +217,19 @@ const char* XAnimationParser::ParseDataObject( const char* p, Node* parent )
 	}
 
 	return p;
+}
+
+
+void XAnimationParser::DumpBNode( BNode* node, int depth )
+{
+	for( int i=0; i<depth; ++i ) {
+		GLOUTPUT(( "  " ));
+	}
+	GLOUTPUT(( "  %s %.1f,%.1f,%.1f\n", node->name.c_str(), node->pos.x, node->pos.y, node->pos.z ));
+	
+	for( int i=0; i<node->childArr.Size(); ++i ) {
+		DumpBNode( node->childArr[i], depth+1 );
+	}
 }
 
 
@@ -311,24 +404,32 @@ void XAnimationParser::Write( const GLString& type, gamedb::WItem* witem )
 }
 
 
-void XAnimationParser::Parse( const char* filename, gamedb::WItem* witem )
+
+GLString XAnimationParser::GetAnimationType( const char* filename )
 {
 	GLString type;
-	{
-		// Find the name postfix.
-		const char* end = strstr( filename, ".x" );
-		const char* p = end;
-		GLASSERT( p );
-		--p;
-		while ( p > filename && *p != '_' ) {
-			--p;
-		}
-		GLASSERT( p > filename );
-		type.append( p+1, end-p-1 );
+	// Find the name postfix.
+	const char* end = strstr( filename, ".x" );
+	if ( !end ) { 
+		end = strstr( filename, ".bvh" );
 	}
-	GLOUTPUT(( "Parsing %s action=%s\n", filename, type.c_str() ));
-	
-	// --- Read in from the file -- //
+	GLASSERT( end );
+	if ( !end ) return "stand";
+
+	const char* p = end;
+	GLASSERT( p );
+	--p;
+	while ( p > filename && *p != '_' ) {
+		--p;
+	}
+	GLASSERT( p > filename );
+	type.append( p+1, end-p-1 );
+	return type;
+}
+
+
+void XAnimationParser::ReadFile( const char* filename )
+{
 	FILE* fp = fopen( filename, "r" );
 	GLASSERT( fp );
 
@@ -337,10 +438,40 @@ void XAnimationParser::Parse( const char* filename, gamedb::WItem* witem )
 	// Throw away header:
 	GetLine( fp, buf, 256 );
 	// Read file into buffer
+	str = "";
 	while ( GetLine( fp, buf, 256 )) {
 		str.append( buf );
 	}
 	fclose( fp );
+}
+
+
+void XAnimationParser::ParseBVH( const char* filename, gamedb::WItem* witem )
+{
+	GLString type = GetAnimationType( filename );
+	GLOUTPUT(( "Parsing BVH %s action=%s\n", filename, type.c_str() ));
+	ReadFile( filename );
+
+	const char* p = str.c_str();
+
+	bNodeRoot = new BNode();
+
+	p = SkipWhiteSpace( p );
+	GLASSERT( memcmp( p, "ROOT", strlen("ROOT") ) == 0 );
+	p += 4;
+	p = SkipWhiteSpace( p );
+	p = ParseJoint( p, bNodeRoot );
+	DumpBNode( bNodeRoot, 0 );
+}
+
+
+void XAnimationParser::Parse( const char* filename, gamedb::WItem* witem )
+{
+	GLString type = GetAnimationType( filename );
+	GLOUTPUT(( "Parsing X %s action=%s\n", filename, type.c_str() ));
+	
+	// --- Read in from the file -- //
+	ReadFile( filename );
 
 	// -- Parse the data objects -- //
 	const char* p = str.c_str();
