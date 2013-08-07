@@ -323,13 +323,35 @@ void SCMLParser::Parse( const XMLElement* element, const XMLDocument* doc, gamed
 
 
 /*
-  animations []
-    humanFemale []
-      gunrun [ totalDuration=1200.000000]
-        0 [ duration=200.000000]
-          arm.lower.left [ angle=27.083555 dy=-0.000076 dz=0.000340]
-          arm.lower.right [ angle=268.449707 dy=0.000445 dz=-0.000228]
-          arm.upper.left [ angle=28.810850 dy=-0.000000 dz=0.000000]
+  V1
+    mantisAnimation []
+      melee [ metaData='impact' metaDataTime=300 totalDuration=598]
+        0000 [ time=0]
+          arm.lower.left [ anglePrime=0.000000 dy=0.000000 dz=0.000000]
+          arm.lower.right [ anglePrime=0.000000 dy=0.000000 dz=0.000000]
+          arm.upper.left [ anglePrime=0.000000 dy=0.000000 dz=0.000000]
+		  ...
+        0001 [ time=72]
+          arm.lower.left [ anglePrime=0.000000 dy=0.020558 dz=0.079295]
+          arm.lower.right [ anglePrime=0.000000 dy=0.000000 dz=0.000000]
+          arm.upper.left [ anglePrime=354.709930 dy=-0.020194 dz=0.052289]
+		  ...
+*/
+
+
+/*
+  V2
+    mantisAnimation []
+      melee [ metaData='impact' metaDataTime=300 totalDuration=598]
+        0000 [ time=0]
+          arm.lower.left [ rotation= scale= pos=]
+          arm.lower.right [ anglePrime=0.000000 dy=0.000000 dz=0.000000]
+          arm.upper.left [ anglePrime=0.000000 dy=0.000000 dz=0.000000]
+		  ...
+        0001 [ time=72]
+          arm.lower.left [ anglePrime=0.000000 dy=0.020558 dz=0.079295]
+          arm.lower.right [ anglePrime=0.000000 dy=0.000000 dz=0.000000]
+          arm.upper.left [ anglePrime=354.709930 dy=-0.020194 dz=0.052289]
 		  ...
 */
 

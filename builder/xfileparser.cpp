@@ -242,10 +242,10 @@ void XAnimationParser::ReadAnimation( Node* node, AnimationNode* anim )
 	int f = 0;
 	for( int i=0; i<nFrames; i+=frameSkip, ++f ) {
 		Quaternion q;
-		q.x = key0->floatArr[2+i*6+0];
-		q.y = key0->floatArr[2+i*6+1];
-		q.z = key0->floatArr[2+i*6+2];
-		q.w = key0->floatArr[2+i*6+3];
+		q.x = key0->floatArr[4+i*6+0];
+		q.y = key0->floatArr[4+i*6+1];
+		q.z = key0->floatArr[4+i*6+2];
+		q.w = key0->floatArr[4+i*6+3];
 		anim->rotation[f] = q;
 	}
 
@@ -254,9 +254,9 @@ void XAnimationParser::ReadAnimation( Node* node, AnimationNode* anim )
 	f = 0;
 	for( int i=0; i<nFrames; i+=frameSkip, ++f ) {
 		Vector3F v;
-		v.x = key1->floatArr[2+i*5+0];
-		v.y = key1->floatArr[2+i*5+1];
-		v.z = key1->floatArr[2+i*5+2];
+		v.x = key1->floatArr[4+i*5+0];
+		v.y = key1->floatArr[4+i*5+1];
+		v.z = key1->floatArr[4+i*5+2];
 		anim->scale[f] = v;
 	}
 
@@ -265,17 +265,59 @@ void XAnimationParser::ReadAnimation( Node* node, AnimationNode* anim )
 	f = 0;
 	for( int i=0; i<nFrames; i+=frameSkip, ++f ) {
 		Vector3F v;
-		v.x = key2->floatArr[2+i*5+0];
-		v.y = key2->floatArr[2+i*5+1];
-		v.z = key2->floatArr[2+i*5+2];
+		v.x = key2->floatArr[4+i*5+0];
+		v.y = key2->floatArr[4+i*5+1];
+		v.z = key2->floatArr[4+i*5+2];
 		anim->pos[f] = v;
+	}
+}
+
+
+void XAnimationParser::Write( const GLString& type, gamedb::WItem* witem )
+{
+	GLASSERT( animationArr.Size() );
+	gamedb::WItem* animationItem = witem->FetchChild( type.c_str() );
+
+	int nFrames = (int)animationArr[0]->nFrames;
+	int totalDuration = (int)((float)(frameSkip*nFrames*1000)/ticksPerSecond);
+	animationItem->SetInt( "totalDuration", totalDuration );
+
+	for( int i=0; i<nFrames; ++i ) {
+		gamedb::WItem* frameItem = animationItem->FetchChild( i );
+		frameItem->SetInt( "time", (int)((float)(i*frameSkip) * 1000.f / ticksPerSecond));
+
+		for( int j=0; j<animationArr.Size(); ++j ) {
+			AnimationNode* an = animationArr[j];
+			const char* name = an->reference.c_str();
+			name = strstr( name, "_" );
+			if ( !name ) continue;		// hopefully won't need this Armiture root node.	q	
+			++name;
+
+			gamedb::WItem* boneItem = frameItem->FetchChild( name );
+			boneItem->SetFloatArray( "rotation", &an->rotation[i].x, 4 );
+			boneItem->SetFloatArray( "scale",    &an->scale[i].x,    3 );
+			boneItem->SetFloatArray( "position", &an->pos[i].x,      3 );
+		}
 	}
 }
 
 
 void XAnimationParser::Parse( const char* filename, gamedb::WItem* witem )
 {
-	GLOUTPUT(( "Parsing %s\n", filename ));
+	GLString type;
+	{
+		// Find the name postfix.
+		const char* end = strstr( filename, ".x" );
+		const char* p = end;
+		GLASSERT( p );
+		--p;
+		while ( p > filename && *p != '_' ) {
+			--p;
+		}
+		GLASSERT( p > filename );
+		type.append( p+1, end-p-1 );
+	}
+	GLOUTPUT(( "Parsing %s action=%s\n", filename, type.c_str() ));
 	
 	// --- Read in from the file -- //
 	FILE* fp = fopen( filename, "r" );
@@ -326,6 +368,18 @@ void XAnimationParser::Parse( const char* filename, gamedb::WItem* witem )
 	for( int i=0; i<animationArr.Size(); ++i ) {
 		DumpAnimation( animationArr[i] );
 	}
+
+	// Get the timing:
+	ticksPerSecond = 24.0f;
+	for( int i=0; i<root->childArr.Size(); ++i ) {
+		Node* node = root->childArr[i];
+		if ( node->ident == "AnimTicksPerSecond" ) {
+			ticksPerSecond = node->floatArr[0];
+		}
+	}
+
+	// Finally write:
+	Write( type, witem );
 
 	return;
 }

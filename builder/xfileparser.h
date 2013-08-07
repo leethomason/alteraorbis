@@ -22,7 +22,7 @@ public:
 				gamedb::WItem* witem );
 
 	struct Node {
-		Node* parent;
+		Node* parent;	
 		grinliz::GLString	ident;
 		grinliz::GLString	name;
 		grinliz::CDynArray< Node*, grinliz::OwnedPtrSem > childArr;
@@ -87,8 +87,11 @@ private:
 	void DumpFrameNode( FrameNode* node, int depth );
 	void DumpAnimation( AnimationNode* );
 
+	void Write( const grinliz::GLString& type, gamedb::WItem* witem );
+
 	Node* root;
 	int frameSkip;
+	float ticksPerSecond;
 
 	grinliz::CDynArray< grinliz::GLString > lines;
 	grinliz::GLString str;
