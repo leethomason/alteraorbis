@@ -321,40 +321,6 @@ void SCMLParser::Parse( const XMLElement* element, const XMLDocument* doc, gamed
 }
 
 
-
-/*
-  V1
-    mantisAnimation []
-      melee [ metaData='impact' metaDataTime=300 totalDuration=598]
-        0000 [ time=0]
-          arm.lower.left [ anglePrime=0.000000 dy=0.000000 dz=0.000000]
-          arm.lower.right [ anglePrime=0.000000 dy=0.000000 dz=0.000000]
-          arm.upper.left [ anglePrime=0.000000 dy=0.000000 dz=0.000000]
-		  ...
-        0001 [ time=72]
-          arm.lower.left [ anglePrime=0.000000 dy=0.020558 dz=0.079295]
-          arm.lower.right [ anglePrime=0.000000 dy=0.000000 dz=0.000000]
-          arm.upper.left [ anglePrime=354.709930 dy=-0.020194 dz=0.052289]
-		  ...
-*/
-
-
-/*
-  V2
-    mantisAnimation []
-      melee [ metaData='impact' metaDataTime=300 totalDuration=598]
-        0000 [ time=0]
-          arm.lower.left [ rotation= scale= pos=]
-          arm.lower.right [ anglePrime=0.000000 dy=0.000000 dz=0.000000]
-          arm.upper.left [ anglePrime=0.000000 dy=0.000000 dz=0.000000]
-		  ...
-        0001 [ time=72]
-          arm.lower.left [ anglePrime=0.000000 dy=0.020558 dz=0.079295]
-          arm.lower.right [ anglePrime=0.000000 dy=0.000000 dz=0.000000]
-          arm.upper.left [ anglePrime=354.709930 dy=-0.020194 dz=0.052289]
-		  ...
-*/
-
 void ProcessAnimation( const tinyxml2::XMLElement* element, gamedb::WItem* witem )
 {
 	GLString pathName, assetName, extension;

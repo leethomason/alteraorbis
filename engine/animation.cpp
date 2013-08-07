@@ -160,15 +160,38 @@ bool AnimationResourceManager::HasResource( const char* name )
 
 
 /*
-  animations []
-    humanFemale []
-      gunrun [ totalDuration=1200.000000]
-        0 [ duration=200.000000]
-          arm.lower.left [ angle=27.083555 dy=-0.000076 dz=0.000340]
-          arm.lower.right [ angle=268.449707 dy=0.000445 dz=-0.000228]
-          arm.upper.left [ angle=28.810850 dy=-0.000000 dz=0.000000]
+  V1
+    mantisAnimation []
+      melee [ metaData='impact' metaDataTime=300 totalDuration=598]
+        0000 [ time=0]
+          arm.lower.left [ anglePrime=0.000000 dy=0.000000 dz=0.000000]
+          arm.lower.right [ anglePrime=0.000000 dy=0.000000 dz=0.000000]
+          arm.upper.left [ anglePrime=0.000000 dy=0.000000 dz=0.000000]
+		  ...
+        0001 [ time=72]
+          arm.lower.left [ anglePrime=0.000000 dy=0.020558 dz=0.079295]
+          arm.lower.right [ anglePrime=0.000000 dy=0.000000 dz=0.000000]
+          arm.upper.left [ anglePrime=354.709930 dy=-0.020194 dz=0.052289]
 		  ...
 */
+
+
+/*
+  V2
+    mantisAnimation []
+      melee [ metaData='impact' metaDataTime=300 totalDuration=598]
+        0000 [ time=0]
+          arm_lower_left [ position=(-0.000000 0.705308 0.000000 ) rotation=(-0.999816 -0.002501 -0.019020 -0.000032 ) scale=(1.000001 1.000001 1.000000 )]
+          arm_lower_right [ position=(-0.000000 0.705307 0.000000 ) rotation=(-0.999816 -0.002501 0.019020 0.000032 ) scale=(1.000000 1.000001 1.000000 )]
+          arm_upper_left [ position=(0.523577 0.957259 -0.000000 ) rotation=(0.120858 0.992521 0.014339 -0.009501 ) scale=(1.000000 1.000000 1.000001 )]
+		  ...
+        0001 [ time=72]
+          arm_lower_left [ position=(-0.000000 0.705308 0.000000 ) rotation=(-0.999816 -0.002501 -0.019020 -0.000032 ) scale=(1.000001 1.000001 1.000000 )]
+          arm_lower_right [ position=(-0.000000 0.705307 0.000000 ) rotation=(-0.999816 -0.002501 0.019020 0.000032 ) scale=(1.000000 1.000001 1.000000 )]
+          arm_upper_left [ position=(0.523577 0.957259 -0.000000 ) rotation=(0.120858 0.992521 0.014339 -0.009501 ) scale=(1.000000 1.000000 1.000001 )]
+		  ...
+*/
+
 AnimationResource::AnimationResource( const gamedb::Item* _item )
 {
 	if ( _item ) {
@@ -214,17 +237,33 @@ AnimationResource::AnimationResource( const gamedb::Item* _item )
 
 				for( int bone=0; bone<nBones; ++bone ) {
 					const gamedb::Item* boneItem = frameItem->ChildAt( bone );
-					IString boneName = StringPool::Intern( boneItem->Name(), true );
+					IString boneName = StringPool::Intern( boneItem->Name() );
 
-					float rad = boneItem->GetFloat( "anglePrime" );
 					Quaternion q;
-					Vector3F X_AXIS = { 1, 0, 0 };
-					q.FromAxisAngle( X_AXIS, rad );
+					Vector3F   pos = { 0, 0, 0 };
 
-					Vector3F pos = { 0, 0, 0 };
-					pos.y = boneItem->GetFloat( "dy" );
-					pos.z = boneItem->GetFloat( "dz" );
-				
+					if ( boneItem->HasAttribute( "anglePrime" )) {
+						float rad = boneItem->GetFloat( "anglePrime" );
+						Vector3F X_AXIS = { 1, 0, 0 };
+						q.FromAxisAngle( X_AXIS, rad );
+					}
+					if ( boneItem->HasAttribute( "rotation" )) {
+						boneItem->GetFloatArray( "rotation", 4, &q.x );
+					}
+					if ( boneItem->HasAttribute( "dy" )) {
+						pos.y = boneItem->GetFloat( "dy" );
+						pos.z = boneItem->GetFloat( "dz" );
+					}
+					if ( boneItem->HasAttribute( "position" )) {
+						boneItem->GetFloatArray( "position", 3, &pos.x );
+					}
+
+#ifdef DEBUG
+					float len = q.x*q.x + q.y*q.y + q.z*q.z + q.w*q.w;
+					GLASSERT( Equal( len, 1.0f, 0.1f ));
+					q.Normalize();
+#endif
+
 					sequence[type].frame[frame].boneData.bone[bone].name = boneName;
 					sequence[type].frame[frame].boneData.bone[bone].rot = q;
 					sequence[type].frame[frame].boneData.bone[bone].pos = pos;

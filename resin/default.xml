@@ -33,9 +33,8 @@
   <!-- animation v2
        FIXME: still needs metadata
   -->
-  <model filename="human2.ac" modelName="humanMale2" origin="0 0 0" shading="flat" polyRemoval="pre" />
   <animation filename="human2_male/human2_male_walk.x" assetName="humanMale2Animation" />
-
+  <model filename="human2.ac" modelName="humanMale2" animation="humanMale2Animation" origin="0 0 0" shading="flat" polyRemoval="pre" />
 
   <texture filename="palette_50.png" emissive="true" />
   <texture filename="palette_100.png" emissive="true"/>

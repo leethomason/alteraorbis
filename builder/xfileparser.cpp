@@ -289,11 +289,20 @@ void XAnimationParser::Write( const GLString& type, gamedb::WItem* witem )
 		for( int j=0; j<animationArr.Size(); ++j ) {
 			AnimationNode* an = animationArr[j];
 			const char* name = an->reference.c_str();
+			
+			// Pull off the Armature_
 			name = strstr( name, "_" );
-			if ( !name ) continue;		// hopefully won't need this Armiture root node.	q	
+			if ( !name ) continue;		// hopefully won't need this Armiture root node.
 			++name;
 
-			gamedb::WItem* boneItem = frameItem->FetchChild( name );
+			// Convert the underscores back to .
+			GLString nStr = name;
+			for( unsigned k=0; k<nStr.size(); ++k ) {
+				if ( nStr[k] == '_' )
+					nStr[k] = '.';
+			}
+
+			gamedb::WItem* boneItem = frameItem->FetchChild( nStr.c_str() );
 			boneItem->SetFloatArray( "rotation", &an->rotation[i].x, 4 );
 			boneItem->SetFloatArray( "scale",    &an->scale[i].x,    3 );
 			boneItem->SetFloatArray( "position", &an->pos[i].x,      3 );
