@@ -164,9 +164,10 @@ const char* XAnimationParser::ParseMotion( const char* p )
 		for( int j=0; j<nChannels; ++j ) {
 			p = SkipWhiteSpace( p );
 			float v = 0;
-			ScanFloat( &v, p );
+			p = ScanFloat( &v, p );
 			if ( skip == 0 ) {
-				channelArr[j].node->channel[frame][channelArr[j].select] = v;
+				int select = channelArr[j].select;
+				channelArr[j].node->channel[frame][select] = v;
 			}
 		}
 		++skip;
@@ -216,8 +217,8 @@ void XAnimationParser::WriteBVHRec( gamedb::WItem* frameItem, int n, BNode* node
 
 	Matrix4 xRot, yRot, zRot;
 	xRot.SetXRotation( node->channel[n][3] );
-	xRot.SetYRotation( node->channel[n][4] );
-	xRot.SetZRotation( node->channel[n][5] );
+	yRot.SetYRotation( node->channel[n][4] );
+	zRot.SetZRotation( node->channel[n][5] );
 
 	Matrix4 rot = xRot * yRot * zRot;	// Order?
 	Quaternion q;
@@ -228,6 +229,13 @@ void XAnimationParser::WriteBVHRec( gamedb::WItem* frameItem, int n, BNode* node
 	}
 	boneItem->SetFloatArray( "rotation", &q.x, 4 );
 	boneItem->SetFloatArray( "position", &pos.x, 3 );
+
+	if ( node->childArr.Size() ) {
+		gamedb::WItem* subItem = frameItem->FetchChild( node->name.c_str() );
+		for( int i=0; i<node->childArr.Size(); ++i ) {
+			WriteBVHRec( subItem, n, node->childArr[i] );
+		}
+	}
 }
 
 
