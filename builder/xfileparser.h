@@ -60,7 +60,10 @@ public:
 
 	// Tree Structure
 	struct BNode {
-		BNode() : parent(0)	{}
+		BNode() : parent(0)	{
+			pos.Zero();
+			memset( channel, 0, sizeof(float)*EL_MAX_ANIM_FRAMES*6 );
+		}
 
 		BNode*				parent;
 		grinliz::GLString	name;	// torso
@@ -69,14 +72,13 @@ public:
 							childArr;	// use semantics to call delete on child nodes
 
 		grinliz::Vector3F	pos;		// the position of the bone
-		grinliz::Vector3F	xformTrans;	// translation	
-		grinliz::Vector3F	xformRot;	// rotation (euler, 3 component)
+		float				channel[EL_MAX_ANIM_FRAMES][6];	// 0-2 pos xyz, 3-5 rot xyz
 	};
 
 
 	struct Channel {
 		BNode*	node;
-		int		select;	// 0-2: pos, 3-5: rot
+		int		select;
 	};
 
 	FrameNode* frameNodeRoot;
@@ -101,6 +103,7 @@ private:
 	// Parsers. Note that the X version takes the parent, the BVH version parses the parent.
 	const char* ParseDataObject( const char* p, Node* parent ); 
 	const char* ParseJoint( const char* p, BNode* node );
+	const char* ParseMotion( const char* p );
 
 	bool IsIdent( char p ) {
 		return isalnum(p) || p == '_' || p == '.';
@@ -122,6 +125,11 @@ private:
 	void DumpAnimation( AnimationNode* );
 
 	void Write( const grinliz::GLString& type, gamedb::WItem* witem );
+	void WriteBVH( const grinliz::GLString& type, gamedb::WItem* witem );
+	void WriteBVHRec( gamedb::WItem* witem, int n, BNode* node );
+
+	int nFrames;
+	float frameTime;
 
 	Node* root;
 	int frameSkip;

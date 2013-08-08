@@ -126,6 +126,60 @@ const char* XAnimationParser::ParseJoint( const char* p, BNode* node )
 	return p;
 }
 
+
+const char* XAnimationParser::ParseMotion( const char* p )
+{
+	p = SkipWhiteSpace( p );
+	GLASSERT( memcmp( p, "MOTION", strlen( "MOTION" )) == 0 );
+	p += strlen( "MOTION" );
+
+	p = SkipWhiteSpace( p );
+	GLASSERT( memcmp( p, "Frames:", strlen( "Frames:" )) == 0 );
+	p += strlen( "Frames:" );
+	p = SkipWhiteSpace( p );
+	
+	float nFramesF = 0;
+	p = ScanFloat( &nFramesF, p );
+	nFrames = (int)nFramesF;
+	GLASSERT( nFrames );
+
+	p = SkipWhiteSpace( p );
+	GLASSERT( memcmp( p, "Frame Time:", strlen( "Frame Time:" )) == 0 );
+	p += strlen( "Frame Time:" );
+	p = SkipWhiteSpace( p );
+	p = ScanFloat( &frameTime, p );
+
+	frameSkip = 1;
+	while ( nFrames / frameSkip > EL_MAX_ANIM_FRAMES ) {
+		++frameSkip;
+	}
+	frameTime *= (float)frameSkip;
+	int nFramesInFile = nFrames;
+	nFrames /= frameSkip;
+
+	int nChannels = channelArr.Size();
+	int skip = 0;
+	int frame = 0;
+
+	for( int i=0; i<nFramesInFile; ++i, ++skip ) {
+		for( int j=0; j<nChannels; ++j ) {
+			p = SkipWhiteSpace( p );
+			float v = 0;
+			ScanFloat( &v, p );
+			if ( skip == 0 ) {
+				channelArr[j].node->channel[frame][channelArr[j].select] = v;
+			}
+		}
+		++skip;
+		if ( skip == frameSkip ) {
+			skip = 0;
+			++frame;
+		}
+	}
+	return p;
+}
+
+
 const char* XAnimationParser::ParseDataObject( const char* p, Node* parent )
 {
 	p = SkipWhiteSpace( p );
@@ -366,6 +420,45 @@ void XAnimationParser::ReadAnimation( Node* node, AnimationNode* anim )
 }
 
 
+void XAnimationParser::WriteBVHRec( gamedb::WItem* frameItem, int n, BNode* node )
+{
+	gamedb::WItem* boneItem = frameItem->FetchChild( node->name.c_str() );
+
+	Vector3F pos = {	node->channel[n][0],
+						node->channel[n][1],
+						node->channel[n][2] };
+
+	Matrix4 xRot, yRot, zRot;
+	xRot.SetXRotation( node->channel[n][3] );
+	xRot.SetYRotation( node->channel[n][4] );
+	xRot.SetZRotation( node->channel[n][5] );
+
+	Matrix4 rot = xRot * yRot * zRot;	// Order?
+	Quaternion q;
+	q.FromRotationMatrix( rot );
+
+	boneItem->SetFloatArray( "rotation", &q.x, 4 );
+	boneItem->SetFloatArray( "position", &pos.x, 3 );
+}
+
+
+void XAnimationParser::WriteBVH( const grinliz::GLString& type, gamedb::WItem* witem )
+{
+	GLASSERT( bNodeRoot );
+	gamedb::WItem* animationItem = witem->FetchChild( type.c_str() );
+
+	float totalDurationF = (float)nFrames * frameTime;
+	int totalDuration = (int)(totalDurationF * 1000.0f);
+	animationItem->SetInt( "totalDuration", totalDuration );
+
+	for( int i=0; i<nFrames; ++i ) {
+		gamedb::WItem* frameItem = animationItem->FetchChild( i );
+		frameItem->SetInt( "time", totalDuration*i/nFrames );
+		WriteBVHRec( frameItem, i, bNodeRoot );
+	}
+}
+
+
 void XAnimationParser::Write( const GLString& type, gamedb::WItem* witem )
 {
 	GLASSERT( animationArr.Size() );
@@ -462,6 +555,10 @@ void XAnimationParser::ParseBVH( const char* filename, gamedb::WItem* witem )
 	p = SkipWhiteSpace( p );
 	p = ParseJoint( p, bNodeRoot );
 	DumpBNode( bNodeRoot, 0 );
+
+	ParseMotion( p );
+
+	WriteBVH( type, witem );
 }
 
 
