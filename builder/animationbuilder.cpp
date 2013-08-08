@@ -342,10 +342,6 @@ void ProcessAnimation( const tinyxml2::XMLElement* element, gamedb::WItem* witem
 		SCMLParser parser;
 		parser.Parse( element, &doc, root, pur );
 	}
-	else if ( extension == ".x" ) {
-		XAnimationParser parser;
-		parser.Parse( pathName.c_str(), root );
-	}
 	else if ( extension == ".bvh" ) {
 		XAnimationParser parser;
 		parser.ParseBVH( pathName.c_str(), root );

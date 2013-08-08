@@ -22,41 +22,7 @@ public:
 	XAnimationParser();
 	~XAnimationParser();
 
-	void Parse(    const char* filename, gamedb::WItem* witem );
 	void ParseBVH( const char* filename, gamedb::WItem* witem );
-
-	struct Node {
-		Node* parent;	
-		grinliz::GLString	ident;
-		grinliz::GLString	name;
-		grinliz::CDynArray< Node*, grinliz::OwnedPtrSem > childArr;
-		grinliz::CDynArray< float >	floatArr;
-	};
-
-	// Tree structure.
-	struct FrameNode {
-		FrameNode() : parent(0)	{}
-
-		FrameNode*			parent;
-		grinliz::GLString	ident;	// Frame
-		grinliz::GLString	name;	// Armature_torso
-
-		grinliz::CDynArray< FrameNode*, grinliz::OwnedPtrSem > 
-							childArr;	// use semantics to call delete on child nodes
-
-		grinliz::Matrix4	xform;
-	};
-
-	// Flat
-	struct AnimationNode {
-		AnimationNode() : nFrames(0) {}
-
-		int nFrames;
-		grinliz::GLString	reference;
-		grinliz::Quaternion rotation[EL_MAX_ANIM_FRAMES];
-		grinliz::Vector3F	scale[EL_MAX_ANIM_FRAMES];
-		grinliz::Vector3F	pos[EL_MAX_ANIM_FRAMES];
-	};
 
 	// Tree Structure
 	struct BNode {
@@ -81,11 +47,6 @@ public:
 		int		select;
 	};
 
-	FrameNode* frameNodeRoot;
-	grinliz::CDynArray< AnimationNode*, grinliz::OwnedPtrSem > animationArr;
-	BNode* bNodeRoot;
-	grinliz::CDynArray< Channel > channelArr;
-
 private:
 	bool GetLine( FILE* fp, char* buf, int size );
 	const char* SkipWhiteSpace( const char* p ) { while( p && *p && isspace(*p)) ++p; return p; }
@@ -101,7 +62,6 @@ private:
 	}
 
 	// Parsers. Note that the X version takes the parent, the BVH version parses the parent.
-	const char* ParseDataObject( const char* p, Node* parent ); 
 	const char* ParseJoint( const char* p, BNode* node );
 	const char* ParseMotion( const char* p );
 
@@ -116,25 +76,18 @@ private:
 	void ReadFile( const char* filename );	// reads in the text and normalizes the lines
 
 	const char* ScanFloat( float* v, const char* p );
-	void WalkFrameNodes( FrameNode* fn, Node* n );
-	void ReadAnimation( Node* node, AnimationNode* anim );
 	
-	void DumpNode( Node* node, int depth );
 	void DumpBNode( BNode* node, int depth );
-	void DumpFrameNode( FrameNode* node, int depth );
-	void DumpAnimation( AnimationNode* );
 
-	void Write( const grinliz::GLString& type, gamedb::WItem* witem );
 	void WriteBVH( const grinliz::GLString& type, gamedb::WItem* witem );
 	void WriteBVHRec( gamedb::WItem* witem, int n, BNode* node );
 
-	int nFrames;
+	int   nFrames;
 	float frameTime;
+	int   frameSkip;
+	BNode* bNodeRoot;
 
-	Node* root;
-	int frameSkip;
-	float ticksPerSecond;
-
+	grinliz::CDynArray< Channel > channelArr;
 	grinliz::CDynArray< grinliz::GLString > lines;
 	grinliz::GLString str;
 };
