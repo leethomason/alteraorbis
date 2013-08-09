@@ -133,13 +133,18 @@ struct PTVertex2
 
 struct BoneData
 {
-	// maps to Vector3F
 	struct Bone {
-		grinliz::IString name;	
+		grinliz::IString	name;	
+		int					parent;		// -1 if no parent, else index
+		// Reference values:
+		// These are duplicated per-bone, only needed for the reference
+		// skeleton. If it matters, this can be cleaned up.
+		grinliz::Vector3F	refPos;
+		grinliz::Vector3F	refConcat;
+
+		// Animation values:
 		grinliz::Quaternion rot;
 		grinliz::Vector3F	pos;
-
-		void ToMatrix( grinliz::Matrix4* mat ) const;
 	};
 
 	const Bone* GetBone( const grinliz::IString& internedName ) const {

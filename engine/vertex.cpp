@@ -19,16 +19,18 @@
 
 using namespace grinliz;
 
+/*
 void BoneData::Bone::ToMatrix( grinliz::Matrix4* mat ) const
 {
 	mat->SetIdentity();
 	rot.ToMatrix( mat );
 	mat->SetTranslation( pos );
 }
-
+*/
 
 void BoneData::Serialize( XStream* xs )
 {
+	FIXME
 	XarcOpen( xs, "BoneData" );
 	for( int i=0; i<EL_MAX_BONES; ++i ) {
 		XarcOpen( xs, "bone" );

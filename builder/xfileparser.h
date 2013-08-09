@@ -24,10 +24,11 @@ public:
 
 	void ParseBVH( const char* filename, gamedb::WItem* witem );
 
+private:
 	// Tree Structure
 	struct BNode {
 		BNode() : parent(0)	{
-			pos.Zero();
+			refPos.Zero();
 			memset( channel, 0, sizeof(float)*EL_MAX_ANIM_FRAMES*6 );
 		}
 
@@ -37,7 +38,7 @@ public:
 		grinliz::CDynArray< BNode*, grinliz::OwnedPtrSem > 
 							childArr;	// use semantics to call delete on child nodes
 
-		grinliz::Vector3F	pos;		// the position of the bone
+		grinliz::Vector3F	refPos;		// the position of the bone
 		float				channel[EL_MAX_ANIM_FRAMES][6];	// 0-2 pos xyz, 3-5 rot xyz
 	};
 
@@ -47,7 +48,6 @@ public:
 		int		select;
 	};
 
-private:
 	bool GetLine( FILE* fp, char* buf, int size );
 	const char* SkipWhiteSpace( const char* p ) { while( p && *p && isspace(*p)) ++p; return p; }
 	const char* SkipNumDelimiter( const char* p ) 

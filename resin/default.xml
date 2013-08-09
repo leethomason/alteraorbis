@@ -111,7 +111,7 @@
     5. Add the animation tag with the obvious values, including the PUR just used.
     6. Make the resource, should now have basic animation. Can add additional in Spriter.
   -->
-
+<!--
   <animation filename="humanFemale/humanFemale.scml" assetName="humanFemaleAnimation" pur="235.9" >
     <meta animation="melee" name="impact" time="400.0" />
   </animation>
@@ -121,11 +121,12 @@
   <animation filename="balrog/balrog.scml" assetName="balrogAnimation" pur="339">
     <meta animation="melee" name="impact" time="800.0" />
   </animation>
- 
+ -->
   <!-- Tactical Sprite models are centered at (0,0,0) 
        ALL sprites must have a 'trigger' and a 'target' to work correctly.
        'trigger' should be first.
   -->
+<!--
   <model filename="human.ac" modelName="humanFemale" animation="humanFemaleAnimation" origin="1 0 0" shading="flat" polyRemoval="pre">
     <meta name="trigger" pos="0.84 0.43 -0.003" rot="1 0 0 -90" boneName="arm.lower.right" />
     <meta name="target"  pos="1 0.68 0"/>
@@ -150,7 +151,7 @@
     <particle name="balfire"  meta="head" />
     <particle name="balsmoke" meta="head" />
   </model>
-  
+-->  
   <model filename="human.ac"        modelName="humanMale"   origin="0 0 0" shading="crease" polyRemoval="pre" />
   <model filename="dummytarget.ac"                                         shading="flat" polyRemoval="pre">
     <meta name="target" pos="0 0.5 0" />

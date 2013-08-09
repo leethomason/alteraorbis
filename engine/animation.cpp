@@ -178,18 +178,16 @@ bool AnimationResourceManager::HasResource( const char* name )
 
 /*
   V2
-    mantisAnimation []
-      melee [ metaData='impact' metaDataTime=300 totalDuration=598]
+    humanMale2Animation []
+      walk [ totalDuration=833]
         0000 [ time=0]
-          arm_lower_left [ position=(-0.000000 0.705308 0.000000 ) rotation=(-0.999816 -0.002501 -0.019020 -0.000032 ) scale=(1.000001 1.000001 1.000000 )]
-          arm_lower_right [ position=(-0.000000 0.705307 0.000000 ) rotation=(-0.999816 -0.002501 0.019020 0.000032 ) scale=(1.000000 1.000001 1.000000 )]
-          arm_upper_left [ position=(0.523577 0.957259 -0.000000 ) rotation=(0.120858 0.992521 0.014339 -0.009501 ) scale=(1.000000 1.000000 1.000001 )]
-		  ...
-        0001 [ time=72]
-          arm_lower_left [ position=(-0.000000 0.705308 0.000000 ) rotation=(-0.999816 -0.002501 -0.019020 -0.000032 ) scale=(1.000001 1.000001 1.000000 )]
-          arm_lower_right [ position=(-0.000000 0.705307 0.000000 ) rotation=(-0.999816 -0.002501 0.019020 0.000032 ) scale=(1.000000 1.000001 1.000000 )]
-          arm_upper_left [ position=(0.523577 0.957259 -0.000000 ) rotation=(0.120858 0.992521 0.014339 -0.009501 ) scale=(1.000000 1.000000 1.000001 )]
-		  ...
+          base [ position=(0.000000 -0.000000 -0.000000 ) rotation=(0.000000 0.000000 0.000000 1.000000 )]
+            leg.upper.left [ parent='base' position=(0.108094 0.160939 38.067875 ) rotation=(-0.001098 0.004170 -0.254688 0.967014 )]
+              leg.lower.left [ parent='leg.upper.left' position=(-0.273515 -0.014067 -0.077826 ) rotation=(0.000000 0.000000 0.000000 1.000000 )]
+            leg.upper.right [ parent='base' position=(0.694870 0.011449 0.346949 ) rotation=(0.000642 0.004264 0.148850 0.988850 )]
+              leg.lower.right [ parent='leg.upper.right' position=(-1.273861 -0.075174 0.000000 ) rotation=(0.000000 0.000000 0.000000 1.000000 )]
+            torso [ parent='base' position=(0.000000 -0.000000 -0.000000 ) rotation=(0.000000 0.000000 0.000000 1.000000 )]
+			...
 */
 
 AnimationResource::AnimationResource( const gamedb::Item* _item )
@@ -232,41 +230,30 @@ AnimationResource::AnimationResource( const gamedb::Item* _item )
 			
 				sequence[type].frame[frame].start = frameItem->GetInt( "time" );
 			
-				int nBones = frameItem->NumChildren();
-				sequence[type].nBones = nBones;
+				// Set up and perform a recursive walk to generate a list
+				// of bones from the tree. Dependent bones are further
+				// down the list than their parents.
+				int boneIndex = 0;
+				const gamedb::Item* boneItem = frameItem->ChildAt( bone );
+				RecBoneWalk( boneItem, &boneIndex, &sequence[type].frame[frame].boneData );
+				sequence[type].nBones = boneIndex+1;
 
-				for( int bone=0; bone<nBones; ++bone ) {
-					const gamedb::Item* boneItem = frameItem->ChildAt( bone );
-					IString boneName = StringPool::Intern( boneItem->Name() );
-
-					Quaternion q;
-					Vector3F   pos = { 0, 0, 0 };
-
-					if ( boneItem->HasAttribute( "anglePrime" )) {
-						float rad = boneItem->GetFloat( "anglePrime" );
-						Vector3F X_AXIS = { 1, 0, 0 };
-						q.FromAxisAngle( X_AXIS, rad );
+				// Walk and compute the reference matrices.
+				for( int i=0; i<nBones; ++i ) {
+					BoneData::Bone* bone = &sequence[type].frame[frame].boneData.bone[i];
+					BoneData::Bone* parentBone = 0;
+					if ( bone->parent >= 0 ) {
+						parentBone = &sequence[type].frame[frame].boneData.bone[bone->parent];
 					}
-					if ( boneItem->HasAttribute( "rotation" )) {
-						boneItem->GetFloatArray( "rotation", 4, &q.x );
+					Matrix4 t;
+					t.SetTranslation( bone->refPos );
+					if ( parentBone ) {
+						bone->refConcatXForm = parentBone->refConcatXForm * t;
 					}
-					if ( boneItem->HasAttribute( "dy" )) {
-						pos.y = boneItem->GetFloat( "dy" );
-						pos.z = boneItem->GetFloat( "dz" );
+					else {
+						bone->refConcatXForm = t;
 					}
-					if ( boneItem->HasAttribute( "position" )) {
-						boneItem->GetFloatArray( "position", 3, &pos.x );
-					}
-
-#ifdef DEBUG
-					float len = q.x*q.x + q.y*q.y + q.z*q.z + q.w*q.w;
-					GLASSERT( Equal( len, 1.0f, 0.1f ));
-					q.Normalize();
-#endif
-
-					sequence[type].frame[frame].boneData.bone[bone].name = boneName;
-					sequence[type].frame[frame].boneData.bone[bone].rot = q;
-					sequence[type].frame[frame].boneData.bone[bone].pos = pos;
+					bone->refConcatXForm.Invert( &bone->refInvXForm );
 				}
 			}
 			for( int frame=0; frame<nFrames; ++frame ) {
@@ -275,7 +262,6 @@ AnimationResource::AnimationResource( const gamedb::Item* _item )
 				else
 					sequence[type].frame[frame].end = sequence[type].totalDuration;
 			}
-
 		}
 	}
 	else {
@@ -306,6 +292,36 @@ AnimationResource::AnimationResource( const gamedb::Item* _item )
 		sequence[ANIM_MELEE].metaDataID = ANIM_META_IMPACT;
 		sequence[ANIM_MELEE].metaDataTime = DURATION[ANIM_MELEE]/2;
 	}
+}
+
+
+void AnimationResource::RecBoneWalk( const gamedb::Item* boneItem, int *boneIndex, BoneData* boneData )
+{
+	int index = *boneindex;
+	*boneIndex += 1;
+	BoneData::Bone* bone = boneData->bone[index];
+	
+	bone->name = StringPool::Intern( boneItem->Name() );
+
+	bone->parent = -1;
+	if ( boneItem->HasAttribute( "parent" )) {
+		const char* parent = boneItem->GetString( "parent" );
+		for( int i=0; i<index; ++i ) {
+			if ( boneData->bone[i].name == parent ) {
+				bone->parent = i;
+				break;
+			}
+		}
+		GLASSERT( bone->parent >= 0 );	// should always be higher in the list.
+	}
+
+	boneItem->GetFloatArray( "refPosition", &bone->refPos.x, 3 );
+	bone->refConcatXForm.SetIdentity();
+	bone->refinvXForm.SetIdentity();
+
+	boneItem->GetFloatArray( "rotation", 4, &bone->rot.x );
+	bone->rot.Normalize();
+	boneItem->GetFloatArray( "position", 3, &bone->pos.x );
 }
 
 

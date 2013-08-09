@@ -136,6 +136,8 @@ public:
 	bool HasResource( const char* name );
 
 private:
+	void RecBoneWalk( const gamedb::Item* boneItem, int *boneIndex, BoneData* boneData );
+
 	AnimationResourceManager();
 	~AnimationResourceManager();
 

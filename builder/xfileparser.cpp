@@ -63,11 +63,11 @@ const char* XAnimationParser::ParseJoint( const char* p, BNode* node )
 		p = SkipWhiteSpace( p );
 		if ( memcmp( p, "OFFSET", strlen( "OFFSET" ) ) == 0) {
 			p += strlen( "OFFSET" );
-			p = ScanFloat( &node->pos.x, p );
+			p = ScanFloat( &node->refPos.x, p );
 			p = SkipWhiteSpace( p );
-			p = ScanFloat( &node->pos.y, p );
+			p = ScanFloat( &node->refPos.y, p );
 			p = SkipWhiteSpace( p );
-			p = ScanFloat( &node->pos.z, p );
+			p = ScanFloat( &node->refPos.z, p );
 			p = SkipWhiteSpace( p );
 		}
 		else if ( memcmp( p, "CHANNELS", strlen( "CHANNELS" ) ) == 0) {
@@ -185,7 +185,7 @@ void XAnimationParser::DumpBNode( BNode* node, int depth )
 	for( int i=0; i<depth; ++i ) {
 		GLOUTPUT(( "  " ));
 	}
-	GLOUTPUT(( "  %s %.1f,%.1f,%.1f\n", node->name.c_str(), node->pos.x, node->pos.y, node->pos.z ));
+	GLOUTPUT(( "  %s %.1f,%.1f,%.1f\n", node->name.c_str(), node->refPos.x, node->refPos.y, node->refPos.z ));
 	
 	for( int i=0; i<node->childArr.Size(); ++i ) {
 		DumpBNode( node->childArr[i], depth+1 );
@@ -229,6 +229,7 @@ void XAnimationParser::WriteBVHRec( gamedb::WItem* frameItem, int n, BNode* node
 	}
 	boneItem->SetFloatArray( "rotation", &q.x, 4 );
 	boneItem->SetFloatArray( "position", &pos.x, 3 );
+	boneItem->SetFloatArray( "refPosition", &node->refPos.x, 3 );
 
 	if ( node->childArr.Size() ) {
 		gamedb::WItem* subItem = frameItem->FetchChild( node->name.c_str() );
@@ -312,9 +313,10 @@ void XAnimationParser::ParseBVH( const char* filename, gamedb::WItem* witem )
 	p += 4;
 	p = SkipWhiteSpace( p );
 	p = ParseJoint( p, bNodeRoot );
-	DumpBNode( bNodeRoot, 0 );
+	//DumpBNode( bNodeRoot, 0 );
 
 	ParseMotion( p );
 
+	witem->SetInt( "version", 2 );
 	WriteBVH( type, witem );
 }
