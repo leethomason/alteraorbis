@@ -89,6 +89,7 @@ public:
 	static bool Motion( int type );
 
 private:
+	void RecBoneWalk( const gamedb::Item* boneItem, int *boneIndex, BoneData* boneData );
 	U32 TimeInRange( int type, U32 t ) const;	
 	void ComputeFrame( int type,
 					   U32 time,
@@ -136,7 +137,6 @@ public:
 	bool HasResource( const char* name );
 
 private:
-	void RecBoneWalk( const gamedb::Item* boneItem, int *boneIndex, BoneData* boneData );
 
 	AnimationResourceManager();
 	~AnimationResourceManager();

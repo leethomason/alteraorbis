@@ -234,26 +234,23 @@ AnimationResource::AnimationResource( const gamedb::Item* _item )
 				// of bones from the tree. Dependent bones are further
 				// down the list than their parents.
 				int boneIndex = 0;
-				const gamedb::Item* boneItem = frameItem->ChildAt( bone );
+				const gamedb::Item* boneItem = frameItem->ChildAt( 0 );
 				RecBoneWalk( boneItem, &boneIndex, &sequence[type].frame[frame].boneData );
 				sequence[type].nBones = boneIndex+1;
 
 				// Walk and compute the reference matrices.
-				for( int i=0; i<nBones; ++i ) {
+				for( int i=0; i<sequence[type].nBones; ++i ) {
 					BoneData::Bone* bone = &sequence[type].frame[frame].boneData.bone[i];
 					BoneData::Bone* parentBone = 0;
 					if ( bone->parent >= 0 ) {
 						parentBone = &sequence[type].frame[frame].boneData.bone[bone->parent];
 					}
-					Matrix4 t;
-					t.SetTranslation( bone->refPos );
 					if ( parentBone ) {
-						bone->refConcatXForm = parentBone->refConcatXForm * t;
+						bone->refConcat = parentBone->refConcat + bone->refPos;
 					}
 					else {
-						bone->refConcatXForm = t;
+						bone->refConcat = bone->refPos;
 					}
-					bone->refConcatXForm.Invert( &bone->refInvXForm );
 				}
 			}
 			for( int frame=0; frame<nFrames; ++frame ) {
@@ -297,9 +294,9 @@ AnimationResource::AnimationResource( const gamedb::Item* _item )
 
 void AnimationResource::RecBoneWalk( const gamedb::Item* boneItem, int *boneIndex, BoneData* boneData )
 {
-	int index = *boneindex;
+	int index = *boneIndex;
 	*boneIndex += 1;
-	BoneData::Bone* bone = boneData->bone[index];
+	BoneData::Bone* bone = &boneData->bone[index];
 	
 	bone->name = StringPool::Intern( boneItem->Name() );
 
@@ -315,13 +312,12 @@ void AnimationResource::RecBoneWalk( const gamedb::Item* boneItem, int *boneInde
 		GLASSERT( bone->parent >= 0 );	// should always be higher in the list.
 	}
 
-	boneItem->GetFloatArray( "refPosition", &bone->refPos.x, 3 );
-	bone->refConcatXForm.SetIdentity();
-	bone->refinvXForm.SetIdentity();
+	boneItem->GetFloatArray( "refPosition", 3, &bone->refPos.x );
+	bone->refConcat.Zero();
 
-	boneItem->GetFloatArray( "rotation", 4, &bone->rot.x );
-	bone->rot.Normalize();
-	boneItem->GetFloatArray( "position", 3, &bone->pos.x );
+	boneItem->GetFloatArray( "rotation", 4, &bone->rotation.x );
+	bone->rotation.Normalize();
+	boneItem->GetFloatArray( "position", 3, &bone->position.x );
 }
 
 
@@ -401,22 +397,22 @@ void AnimationResource::ComputeBone( int type,
 	const BoneData::Bone* bone0 = sequence[type].frame[frame0].boneData.GetBone( boneName );
 	const BoneData::Bone* bone1 = sequence[type].frame[frame1].boneData.GetBone( boneName );
 
-	Quaternion angle0 = bone0->rot;
-	Quaternion angle1 = bone1->rot;
+	Quaternion angle0 = bone0->rotation;
+	Quaternion angle1 = bone1->rotation;
 	Quaternion angle = angle0;
 	//Quaternion::SLERP( angle0, angle1, fraction, &angle );
 
 	Vector3F pos;
 	for( int i=0; i<3; ++i ) {
-		pos.X(i) = Lerp( bone0->pos.X(i), bone1->pos.X(i), fraction );
+		pos.X(i) = Lerp( bone0->position.X(i), bone1->position.X(i), fraction );
 	}
 
-	bone->rot	= angle;
-	bone->pos	= pos;
+	bone->rotation	= angle;
+	bone->position	= pos;
 }
 
 
-bool AnimationResource::GetTransform(	int type,	// which animation to play: "reference", "gunrun", etc.
+bool AnimationResource::GetTransform(	int type,					// which animation to play: "reference", "gunrun", etc.
 										IString boneName,
 										const ModelHeader& header,	// used to get the bone IDs
 										U32 time,					// time for this animation

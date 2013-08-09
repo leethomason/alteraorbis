@@ -380,9 +380,9 @@ public:
 		return b;
 	}
 
-	void CalcMetaData( grinliz::IString name, grinliz::Matrix4* xform ) const;
+	void CalcMetaData( grinliz::IString name, grinliz::Matrix4* xform );
 	bool HasParticles() const {  return hasParticles; }
-	void EmitParticles( ParticleSystem* system, const grinliz::Vector3F* eyeDir, U32 deltaTime ) const;
+	void EmitParticles( ParticleSystem* system, const grinliz::Vector3F* eyeDir, U32 deltaTime );
 	void CalcTargetSize( float* width, float* height ) const;
 
 	// Returns grinliz::INTERSECT or grinliz::REJECT
@@ -408,8 +408,8 @@ public:
 private:
 	const grinliz::Matrix4& InvXForm() const;
 
-	void CalcAnimation( BoneData* boneData ) const;	// compute the animition, accounting for crossfade, etc.
-	void CalcAnimation( BoneData::Bone* bone, grinliz::IString boneName ) const;	// compute the animition, accounting for crossfade, etc.
+	void CalcAnimation();									// compute the animition, accounting for crossfade, etc.
+	//void CalcAnimation( BoneData::Bone* bone, grinliz::IString boneName ) const;	// compute the animition, accounting for crossfade, etc.
 	void CrossFade( float fraction, BoneData::Bone* inOut, const BoneData::Bone& prev ) const;
 
 	SpaceTree* tree;

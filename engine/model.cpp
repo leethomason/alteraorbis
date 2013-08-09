@@ -553,22 +553,23 @@ void Model::CalcHitAABB( Rectangle3F* aabb ) const
 
 void Model::CrossFade( float fraction, BoneData::Bone* inOut, const BoneData::Bone& prev ) const
 {
-	Quaternion angle1 = inOut->rot;
-	Quaternion angle2 = prev.rot;
+	Quaternion angle1 = inOut->rotation;
+	Quaternion angle2 = prev.rotation;
 	Quaternion angle = angle1;
 	//Quaternion::SLERP( angle1, angle2, fraction, &angle );
 
-	inOut->rot = angle;
+	inOut->rotation = angle;
 	for( int i=0; i<3; ++i ) {
-		inOut->pos.X(i) = Lerp( prev.pos.X(i), inOut->pos.X(i), fraction );
+		inOut->position.X(i) = Lerp( prev.position.X(i), inOut->position.X(i), fraction );
 	}
 }
 
 
-void Model::CalcAnimation( BoneData* boneData ) const
+void Model::CalcAnimation()
 {
 	GLASSERT( HasAnimation() );
-	animationResource->GetTransform( currentAnim.id, resource->header, currentAnim.time, boneData );
+	GLASSERT( aux );
+	animationResource->GetTransform( currentAnim.id, resource->header, currentAnim.time, &aux->boneData );
 
 	if ( (crossFadeTime < totalCrossFadeTime) && (prevAnim.id >= 0) ) {
 		BoneData prevBoneData;
@@ -576,17 +577,17 @@ void Model::CalcAnimation( BoneData* boneData ) const
 		float fraction = (float)crossFadeTime / (float)totalCrossFadeTime;
 
 		for( int i=0; i<EL_MAX_BONES; ++i ) {
-			CrossFade( fraction, &boneData->bone[i], prevBoneData.bone[i] );
+			CrossFade( fraction, &aux->boneData.bone[i], prevBoneData.bone[i] );
 		}
 	}
 }
 
 
 
+/*
 void Model::CalcAnimation( BoneData::Bone* bone, IString boneName ) const
 {
 	GLASSERT( HasAnimation() );
-	//IString boneName = StringPool::Intern( _boneName );
 	animationResource->GetTransform( currentAnim.id, boneName, resource->header, currentAnim.time, bone );
 
 	if ( crossFadeTime < totalCrossFadeTime && (prevAnim.id >= 0) ) {
@@ -596,9 +597,10 @@ void Model::CalcAnimation( BoneData::Bone* bone, IString boneName ) const
 		CrossFade( fraction, bone, bone2 );
 	}
 }
+*/
 
 
-void Model::CalcMetaData( grinliz::IString name, grinliz::Matrix4* meta ) const
+void Model::CalcMetaData( grinliz::IString name, grinliz::Matrix4* meta )
 {
 	const Matrix4& xform = XForm();	// xform of this model
 	const ModelMetaData* data = resource->GetMetaData( name );
@@ -611,22 +613,13 @@ void Model::CalcMetaData( grinliz::IString name, grinliz::Matrix4* meta ) const
 		*meta = xform * local;
 	}
 	else {
-		BoneData::Bone bone;
-		CalcAnimation( &bone, data->boneName );
+		CalcAnimation();
 
-		Matrix4 local;
-		bone.ToMatrix( &local );
+		Matrix4 arr[EL_MAX_BONES];
+		aux->boneData.FlushTransform( arr, EL_MAX_BONES );
 
-		Matrix4 t;
-		t.SetTranslation( data->pos );
-
-		Matrix4 r;
-		if ( data->axis.Length() ) {
-			GLASSERT( Equal( data->axis.Length(), 1.0f, 0.0001f ));
-			r.SetAxisAngle( data->axis, data->rotation );
-		}
-
-		*meta = xform * local * t * r;
+		int index = aux->boneData.GetBoneIndex( data->boneName );
+		*meta = xform * arr[index];
 	}
 }
 
@@ -661,7 +654,7 @@ void Model::SetBoneFilter( const grinliz::IString* names, const bool* filter )
 
 
 
-void Model::EmitParticles( ParticleSystem* system, const Vector3F* eyeDir, U32 deltaTime ) const
+void Model::EmitParticles( ParticleSystem* system, const Vector3F* eyeDir, U32 deltaTime )
 {
 	if ( flags & MODEL_INVISIBLE )
 		return;
@@ -738,7 +731,7 @@ void Model::Queue( RenderQueue* queue, EngineShaders* engineShaders, int require
 				if ( !aux ) {
 					aux = ModelResourceManager::Instance()->modelAuxPool.New();
 				}
-				CalcAnimation( &aux->boneData ); 
+				CalcAnimation(); 
 				modelAux = aux;
 			}
 			if (     (flags & MODEL_TEXTURE0_XFORM)
