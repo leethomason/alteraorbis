@@ -3,6 +3,29 @@
 
 using namespace grinliz;
 
+/*
+	Coordinate systems:
+
+	OpenGL:
+
+	+----x	|
+	|		|
+	|	  Front
+	z
+
+	Blender:
+
+	y		|
+	|		|
+	|	  Front
+	+----x
+
+
+	Maybe this is how export works, to say nothing of rotation.
+	glX = bX
+	glY = bZ
+	glZ = -bY
+*/
 
 
 XAnimationParser::XAnimationParser()
@@ -17,30 +40,22 @@ XAnimationParser::~XAnimationParser()
 }
 
 
-bool XAnimationParser::GetLine( FILE* fp, char* buf, int size )
+bool XAnimationParser::GetLine( FILE* fp, GLString* str )
 {
-	char* p = buf;
-	const char* end = buf + size - 1;
-	int c = 0;
-	while( p < end ) {
-		c = getc( fp );
-		if ( c < 0 || c == '\n' )
-			break;
-		*p = c;
-		++p;
-	}
-	*p = 0;
+	*str = "";
 
-	// Remove comments:
-	char* comment = strstr( buf, "#" );
-	if ( comment ) {
-		*comment = 0;
+	int c = 0;
+	while( true ) {
+		c = getc( fp );
+		if ( c < 0 )
+			break;
+		if ( c == '\n' ) {
+			str->append( " " );
+			break;
+		}
+		char b = (char)c;
+		str->append( &b, 1 );
 	}
-	comment = strstr( buf, "//" );
-	if ( comment ) {
-		*comment = 0;
-	}
-	
 	return c >= 0;
 }
 
@@ -64,9 +79,7 @@ const char* XAnimationParser::ParseJoint( const char* p, BNode* node )
 		if ( memcmp( p, "OFFSET", strlen( "OFFSET" ) ) == 0) {
 			p += strlen( "OFFSET" );
 			p = ScanFloat( &node->refPos.x, p );
-			p = SkipWhiteSpace( p );
 			p = ScanFloat( &node->refPos.y, p );
-			p = SkipWhiteSpace( p );
 			p = ScanFloat( &node->refPos.z, p );
 			p = SkipWhiteSpace( p );
 		}
@@ -86,10 +99,10 @@ const char* XAnimationParser::ParseJoint( const char* p, BNode* node )
 				else GLASSERT( 0 );
 
 				++p;
-				if ( memcmp( p, "position", strlen( "position" ) )) {
+				if ( memcmp( p, "position", strlen( "position" )) == 0 ) {
 					p += strlen( "position" );
 				}
-				else if ( memcmp( p, "rotation", strlen( "rotation" ))) {
+				else if ( memcmp( p, "rotation", strlen( "rotation" )) == 0) {
 					p += strlen( "rotation" );
 					select +=3;
 				}
@@ -167,7 +180,15 @@ const char* XAnimationParser::ParseMotion( const char* p )
 			p = ScanFloat( &v, p );
 			if ( skip == 0 ) {
 				int select = channelArr[j].select;
-				channelArr[j].node->channel[frame][select] = v;
+				BNode* n = channelArr[j].node;
+				n->channel[frame][select] = v;
+
+				if ( select < 3 ) {
+					GLASSERT( v >= -4 && v < 4 );
+				}
+				else {
+					GLASSERT( v >= -360 && v <= 360 );
+				}
 			}
 		}
 		++skip;
@@ -176,6 +197,8 @@ const char* XAnimationParser::ParseMotion( const char* p )
 			++frame;
 		}
 	}
+	p = SkipWhiteSpace( p );
+	GLASSERT( *p == 0 );
 	return p;
 }
 
@@ -207,10 +230,23 @@ const char* XAnimationParser::ScanFloat( float* v, const char* p )
 }
 
 
+void XAnimationParser::Swizzle( grinliz::Vector3F* v )
+{
+	Vector3F s = { v->x, v->z, -v->y };
+	*v = s;
+}
+
+
+
 void XAnimationParser::WriteBVHRec( gamedb::WItem* frameItem, int n, BNode* node )
 {
 	gamedb::WItem* boneItem = frameItem->FetchChild( node->name.c_str() );
 
+	/* Test mesh: left foot forward
+	glX = bX
+	glY = bZ
+	glZ = -bY
+	*/
 	Vector3F pos = {	node->channel[n][0],
 						node->channel[n][1],
 						node->channel[n][2] };
@@ -228,8 +264,12 @@ void XAnimationParser::WriteBVHRec( gamedb::WItem* frameItem, int n, BNode* node
 		boneItem->SetString( "parent", node->parent->name.c_str() );
 	}
 	boneItem->SetFloatArray( "rotation", &q.x, 4 );
+
+	Vector3F refPos = node->refPos;
+	Swizzle( &pos );
+	Swizzle( &refPos );
 	boneItem->SetFloatArray( "position", &pos.x, 3 );
-	boneItem->SetFloatArray( "refPosition", &node->refPos.x, 3 );
+	boneItem->SetFloatArray( "refPosition", &refPos.x, 3 );
 
 	if ( node->childArr.Size() ) {
 		gamedb::WItem* subItem = frameItem->FetchChild( node->name.c_str() );
@@ -286,12 +326,12 @@ void XAnimationParser::ReadFile( const char* filename )
 	GLASSERT( fp );
 
 	// Read the lines, put them in the main buffer.
-	char buf[256];
+	GLString buf;
 	// Throw away header:
-	GetLine( fp, buf, 256 );
+	GetLine( fp, &buf );
 	// Read file into buffer
 	str = "";
-	while ( GetLine( fp, buf, 256 )) {
+	while ( GetLine( fp, &buf )) {
 		str.append( buf );
 	}
 	fclose( fp );

@@ -48,7 +48,7 @@ private:
 		int		select;
 	};
 
-	bool GetLine( FILE* fp, char* buf, int size );
+	bool GetLine( FILE* fp, grinliz::GLString* str );
 	const char* SkipWhiteSpace( const char* p ) { while( p && *p && isspace(*p)) ++p; return p; }
 	const char* SkipNumDelimiter( const char* p ) 
 	{ 
@@ -81,6 +81,8 @@ private:
 
 	void WriteBVH( const grinliz::GLString& type, gamedb::WItem* witem );
 	void WriteBVHRec( gamedb::WItem* witem, int n, BNode* node );
+
+	void Swizzle( grinliz::Vector3F* );
 
 	int   nFrames;
 	float frameTime;

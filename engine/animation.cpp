@@ -239,6 +239,7 @@ AnimationResource::AnimationResource( const gamedb::Item* _item )
 				sequence[type].nBones = boneIndex+1;
 
 				// Walk and compute the reference matrices.
+				FILE* fp = fopen( "animout.txt", "w" );
 				for( int i=0; i<sequence[type].nBones; ++i ) {
 					BoneData::Bone* bone = &sequence[type].frame[frame].boneData.bone[i];
 					BoneData::Bone* parentBone = 0;
@@ -251,6 +252,9 @@ AnimationResource::AnimationResource( const gamedb::Item* _item )
 					else {
 						bone->refConcat = bone->refPos;
 					}
+
+					GLLOG(( "An %s Sq %d Fr %d Bn %s Ref %.2f,%.2f,%.2f\n",
+						resName, type, frame, bone->name.c_str(), bone->refConcat.x, bone->refConcat.y, bone->refConcat.z ));
 				}
 			}
 			for( int frame=0; frame<nFrames; ++frame ) {
@@ -318,6 +322,11 @@ void AnimationResource::RecBoneWalk( const gamedb::Item* boneItem, int *boneInde
 	boneItem->GetFloatArray( "rotation", 4, &bone->rotation.x );
 	bone->rotation.Normalize();
 	boneItem->GetFloatArray( "position", 3, &bone->position.x );
+
+	for( int i=0; i<boneItem->NumChildren(); ++i ) {
+		const gamedb::Item* child = boneItem->ChildAt( i );
+		RecBoneWalk( child, boneIndex, boneData );
+	}
 }
 
 
@@ -443,6 +452,8 @@ bool AnimationResource::GetTransform(	int type,
 		GLASSERT( i < EL_MAX_BONES );
 
 		IString boneName = sequence[type].frame[frame0].boneData.bone[i].name;
+		if ( boneName == "base" ) continue;	// never attached to vertices.
+
 		int offset = header.BoneNameToOffset( boneName );
 
 		boneData->bone[offset].name = boneName;
