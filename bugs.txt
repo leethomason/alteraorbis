@@ -51,6 +51,10 @@ x Probably don't need squatting logic in PathMoveComponent. (Actually do)
 		x cancel orders
 		x building rotation
 		x leave core
+		- buildings (vault) can overlap
+		- vault should have 2x2 "placement" ui
+		- check release log from GT. extra debugging output.
+		- bugImage0 from GT
 		- decent clear dragging
 		- fix team logic
 		- build 2 height ice

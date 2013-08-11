@@ -236,7 +236,7 @@ AnimationResource::AnimationResource( const gamedb::Item* _item )
 				int boneIndex = 0;
 				const gamedb::Item* boneItem = frameItem->ChildAt( 0 );
 				RecBoneWalk( boneItem, &boneIndex, &sequence[type].frame[frame].boneData );
-				sequence[type].nBones = boneIndex+1;
+				sequence[type].nBones = boneIndex;
 
 				// Walk and compute the reference matrices.
 				FILE* fp = fopen( "animout.txt", "w" );
@@ -244,6 +244,7 @@ AnimationResource::AnimationResource( const gamedb::Item* _item )
 					BoneData::Bone* bone = &sequence[type].frame[frame].boneData.bone[i];
 					BoneData::Bone* parentBone = 0;
 					if ( bone->parent >= 0 ) {
+						GLASSERT( bone->parent < i );
 						parentBone = &sequence[type].frame[frame].boneData.bone[bone->parent];
 					}
 					if ( parentBone ) {
@@ -252,7 +253,9 @@ AnimationResource::AnimationResource( const gamedb::Item* _item )
 					else {
 						bone->refConcat = bone->refPos;
 					}
-
+				}
+				for( int i=0; i<sequence[type].nBones; ++i ) {
+					BoneData::Bone* bone = &sequence[type].frame[frame].boneData.bone[i];
 					GLLOG(( "An %s Sq %d Fr %d Bn %s Ref %.2f,%.2f,%.2f\n",
 						resName, type, frame, bone->name.c_str(), bone->refConcat.x, bone->refConcat.y, bone->refConcat.z ));
 				}
@@ -400,11 +403,12 @@ void AnimationResource::ComputeFrame( int type,
 
 void AnimationResource::ComputeBone( int type,
 									 int frame0, int frame1, float fraction,
-									 IString boneName,
+									 int index0,
 									 BoneData::Bone* bone ) const
 {
-	const BoneData::Bone* bone0 = sequence[type].frame[frame0].boneData.GetBone( boneName );
-	const BoneData::Bone* bone1 = sequence[type].frame[frame1].boneData.GetBone( boneName );
+	int index1 = (index0+1)%sequence[type].nBones;
+	const BoneData::Bone* bone0 = &sequence[type].frame[frame0].boneData.bone[index0];
+	const BoneData::Bone* bone1 = &sequence[type].frame[frame1].boneData.bone[index1];
 
 	Quaternion angle0 = bone0->rotation;
 	Quaternion angle1 = bone1->rotation;
@@ -430,18 +434,23 @@ bool AnimationResource::GetTransform(	int type,					// which animation to play: 
 	float fraction = 0;
 	int frame0 = 0;
 	int frame1 = 0;
+	int boneIndex = sequence[type].frame[0].boneData.GetBoneIndex( boneName );	// order is the same for all frames
 	ComputeFrame( type, time, &frame0, &frame1, &fraction );
-	ComputeBone( type, frame0, frame1, fraction, boneName, bone );
+	ComputeBone( type, frame0, frame1, fraction, boneIndex, bone );
 	return true;
 }
 
 
+/*	This copies the resource BoneData to the Model bone data,
+	doing interpolation in the process.
+*/
 bool AnimationResource::GetTransform(	int type, 
 										const ModelHeader& header, 
 										U32 timeClock, 
 										BoneData* boneData ) const
 {
-	memset( boneData, 0, sizeof( *boneData ));
+	*boneData = this->sequence[type].frame[0].boneData;	// The basics are the same for every frame.
+														// The part that changes is written below.
 
 	float fraction = 0;
 	int frame0 = 0;
@@ -450,14 +459,7 @@ bool AnimationResource::GetTransform(	int type,
 
 	for( int i=0; i<sequence[type].nBones; ++i ) {
 		GLASSERT( i < EL_MAX_BONES );
-
-		IString boneName = sequence[type].frame[frame0].boneData.bone[i].name;
-		if ( boneName == "base" ) continue;	// never attached to vertices.
-
-		int offset = header.BoneNameToOffset( boneName );
-
-		boneData->bone[offset].name = boneName;
-		ComputeBone( type, frame0, frame1, fraction, boneName, boneData->bone + offset );
+		ComputeBone( type, frame0, frame1, fraction, i, boneData->bone + i );
 	}
 	return true;
 }

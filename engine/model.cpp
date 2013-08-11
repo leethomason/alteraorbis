@@ -583,23 +583,6 @@ void Model::CalcAnimation()
 }
 
 
-
-/*
-void Model::CalcAnimation( BoneData::Bone* bone, IString boneName ) const
-{
-	GLASSERT( HasAnimation() );
-	animationResource->GetTransform( currentAnim.id, boneName, resource->header, currentAnim.time, bone );
-
-	if ( crossFadeTime < totalCrossFadeTime && (prevAnim.id >= 0) ) {
-		BoneData::Bone bone2;
-		animationResource->GetTransform( prevAnim.id, boneName, resource->header, prevAnim.time, &bone2 );
-		float fraction = (float)crossFadeTime / (float)totalCrossFadeTime;
-		CrossFade( fraction, bone, bone2 );
-	}
-}
-*/
-
-
 void Model::CalcMetaData( grinliz::IString name, grinliz::Matrix4* meta )
 {
 	const Matrix4& xform = XForm();	// xform of this model

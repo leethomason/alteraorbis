@@ -173,7 +173,7 @@ const char* XAnimationParser::ParseMotion( const char* p )
 	int skip = 0;
 	int frame = 0;
 
-	for( int i=0; i<nFramesInFile; ++i, ++skip ) {
+	for( int i=0; i<nFramesInFile; ++i ) {
 		for( int j=0; j<nChannels; ++j ) {
 			p = SkipWhiteSpace( p );
 			float v = 0;

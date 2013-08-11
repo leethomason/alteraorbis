@@ -147,6 +147,7 @@ struct BoneData
 		grinliz::Vector3F	position;
 	};
 
+	// nBones is in the Sequence.
 	Bone bone[EL_MAX_BONES];
 
 	void Clear() { memset( bone, 0, sizeof(Bone)*EL_MAX_BONES ); }

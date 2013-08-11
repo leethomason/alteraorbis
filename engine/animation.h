@@ -96,7 +96,7 @@ private:
 					   int *_frame0, int* _frame1, float* _fraction ) const;
 	void ComputeBone( int type,
 					  int frame0, int frame1, float fraction,
-					  grinliz::IString name,
+					  int boneIndex,
 					  BoneData::Bone* bone ) const;
 
 	const char* resName;
