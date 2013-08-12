@@ -403,17 +403,7 @@ void GPUState::Weld( const GPUState& state, const GPUStream& stream, const GPUSt
 		// of expanding to a matrix. And less work for the CPU as well. Disadvantages to keep in mind:
 		// - easier to debug a set of matrices
 		// - simpler shader code
-
-		Matrix4 d[EL_MAX_BONES*EL_MAX_INSTANCE];	// pos & rot per bone per instance. Big number.
-
-		for( int i=0; i<EL_MAX_INSTANCE; ++i ) {
-			for( int j=0; j<EL_MAX_BONES; ++j ) {
-				// Take the position/rotation already written
-				// to the bones, and create the xform matrices.
-				data.bones[i].FlushTransform( &d[i*EL_MAX_BONES], EL_MAX_BONES );
-			}
-		}
-		shadman->SetUniformArray( ShaderManager::U_BONEXFORM, count, d );
+		shadman->SetUniformArray( ShaderManager::U_BONEXFORM, count, data.bones );
 		shadman->SetStreamData( ShaderManager::A_BONE_ID, 1, GL_UNSIGNED_SHORT, stream.stride, PTR( data.streamPtr, stream.boneOffset ) );
 	}
 	else if ( flags & ShaderManager::BONE_FILTER ) {

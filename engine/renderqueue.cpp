@@ -131,7 +131,7 @@ void RenderQueue::Submit(	int modelRequired,
 			Vector4F	instanceTexture0XForm[EL_MAX_INSTANCE];
 			Vector4F	instanceTexture0Clip[EL_MAX_INSTANCE];
 			Matrix4		instanceTexture0ColorMap[EL_MAX_INSTANCE];
-			BoneData	instanceBone[EL_MAX_INSTANCE];
+			Matrix4		instanceBone[EL_MAX_INSTANCE*EL_MAX_BONES];
 
 			atom->Bind( &stream, &data );
 			data.matrix = instanceMatrix;
@@ -161,7 +161,9 @@ void RenderQueue::Submit(	int modelRequired,
 					instanceControlParam[index] = item->control;
 
 					if ( item->aux ) {
-						instanceBone[index]				= item->aux->boneData;
+						for( int i=0; i<EL_MAX_BONES; ++i ) {
+							instanceBone[index*EL_MAX_BONES+i]	= item->aux->boneMats[i];
+						}
 						instanceTexture0XForm[index]	= item->aux->texture0XForm;
 						instanceTexture0Clip[index]		= item->aux->texture0Clip;
 						instanceTexture0ColorMap[index] = item->aux->texture0ColorMap;

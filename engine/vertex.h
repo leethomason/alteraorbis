@@ -143,8 +143,10 @@ struct BoneData
 		grinliz::Vector3F	refConcat;
 
 		// Animation values:
-		grinliz::Quaternion rotation;
-		grinliz::Vector3F	position;
+		grinliz::Quaternion rotation[EL_MAX_ANIM_FRAMES];
+		grinliz::Vector3F	position[EL_MAX_ANIM_FRAMES];
+
+		void Serialize( XStream* xs );
 	};
 
 	// nBones is in the Sequence.
@@ -156,7 +158,10 @@ struct BoneData
 	const Bone* GetBone( const grinliz::IString& internedName ) const;
 	int GetBoneIndex( const grinliz::IString& internedName ) const;
 
-	void FlushTransform( grinliz::Matrix4* matArr, int num );
+//	void CalcTransform(	int frame0, int frame1, float fraction,			// interpolation of time
+//						const Bone* crossFade, float crossFadeFraction,	// interpolation of a different motion (can be null)
+//						int nBones,
+//						grinliz::Matrix4* outMat ) const;				// at least nBones of output
 };
 
 

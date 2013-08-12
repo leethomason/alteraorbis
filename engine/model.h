@@ -122,6 +122,8 @@ struct ModelHeader
 	grinliz::Rectangle3F	bounds;
 	ModelMetaData			metaData[EL_MAX_METADATA];
 	ModelParticleEffect		effectData[EL_MAX_MODEL_EFFECTS];
+
+	/* The model bone names. */
 	grinliz::IString		boneName[EL_MAX_BONES];
 
 	int BoneNameToOffset( const grinliz::IString& name ) const {
@@ -173,10 +175,10 @@ public:
 
 
 struct ModelAux {
-	BoneData			boneData;
 	grinliz::Vector4F	texture0XForm;
 	grinliz::Vector4F	texture0Clip;
 	grinliz::Matrix4	texture0ColorMap;
+	grinliz::Matrix4	boneMats[EL_MAX_BONES];
 };
 
 
@@ -408,9 +410,9 @@ public:
 private:
 	const grinliz::Matrix4& InvXForm() const;
 
-	void CalcAnimation();									// compute the animition, accounting for crossfade, etc.
+	void CalcAnimation();
 	//void CalcAnimation( BoneData::Bone* bone, grinliz::IString boneName ) const;	// compute the animition, accounting for crossfade, etc.
-	void CrossFade( float fraction, BoneData::Bone* inOut, const BoneData::Bone& prev ) const;
+	//void CrossFade( float fraction, BoneData::Bone* inOut, const BoneData::Bone& prev ) const;
 
 	SpaceTree* tree;
 	const ModelResource* resource;

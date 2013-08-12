@@ -175,7 +175,7 @@ struct GPUStreamData
 	grinliz::Vector4F*	texture0XForm;
 	grinliz::Vector4F*	texture0Clip;
 	grinliz::Matrix4*	texture0ColorMap;	// 3 vec4 per instance
-	BoneData*			bones;
+	grinliz::Matrix4*	bones;				// EL_MAX_BONES per instance
 };
 
 

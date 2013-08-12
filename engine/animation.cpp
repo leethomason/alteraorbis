@@ -228,24 +228,22 @@ AnimationResource::AnimationResource( const gamedb::Item* _item )
 			for( int frame=0; frame<nFrames; ++frame ) {
 				const gamedb::Item* frameItem = animItem->Child( frame );	// frame[0]
 			
-				sequence[type].frame[frame].start = frameItem->GetInt( "time" );
-			
 				// Set up and perform a recursive walk to generate a list
 				// of bones from the tree. Dependent bones are further
 				// down the list than their parents.
 				int boneIndex = 0;
 				const gamedb::Item* boneItem = frameItem->ChildAt( 0 );
-				RecBoneWalk( boneItem, &boneIndex, &sequence[type].frame[frame].boneData );
+				RecBoneWalk( boneItem, frame, &boneIndex, &sequence[type].boneData );
 				sequence[type].nBones = boneIndex;
 
 				// Walk and compute the reference matrices.
 				FILE* fp = fopen( "animout.txt", "w" );
 				for( int i=0; i<sequence[type].nBones; ++i ) {
-					BoneData::Bone* bone = &sequence[type].frame[frame].boneData.bone[i];
+					BoneData::Bone* bone = &sequence[type].boneData.bone[i];
 					BoneData::Bone* parentBone = 0;
 					if ( bone->parent >= 0 ) {
 						GLASSERT( bone->parent < i );
-						parentBone = &sequence[type].frame[frame].boneData.bone[bone->parent];
+						parentBone = &sequence[type].boneData.bone[bone->parent];
 					}
 					if ( parentBone ) {
 						bone->refConcat = parentBone->refConcat + bone->refPos;
@@ -255,16 +253,10 @@ AnimationResource::AnimationResource( const gamedb::Item* _item )
 					}
 				}
 				for( int i=0; i<sequence[type].nBones; ++i ) {
-					BoneData::Bone* bone = &sequence[type].frame[frame].boneData.bone[i];
+					BoneData::Bone* bone = &sequence[type].boneData.bone[i];
 					GLLOG(( "An %s Sq %d Fr %d Bn %s Ref %.2f,%.2f,%.2f\n",
 						resName, type, frame, bone->name.c_str(), bone->refConcat.x, bone->refConcat.y, bone->refConcat.z ));
 				}
-			}
-			for( int frame=0; frame<nFrames; ++frame ) {
-				if ( frame+1 < nFrames )
-					sequence[type].frame[frame].end = sequence[type].frame[frame+1].start;
-				else
-					sequence[type].frame[frame].end = sequence[type].totalDuration;
 			}
 		}
 	}
@@ -289,8 +281,6 @@ AnimationResource::AnimationResource( const gamedb::Item* _item )
 			sequence[i].item = 0;
 			sequence[i].nFrames = 1;
 			sequence[i].nBones = 0;
-			sequence[i].frame[0].start = 0;
-			sequence[i].frame[0].end   = DURATION[i];
 		}
 
 		sequence[ANIM_MELEE].metaDataID = ANIM_META_IMPACT;
@@ -299,36 +289,37 @@ AnimationResource::AnimationResource( const gamedb::Item* _item )
 }
 
 
-void AnimationResource::RecBoneWalk( const gamedb::Item* boneItem, int *boneIndex, BoneData* boneData )
+void AnimationResource::RecBoneWalk( const gamedb::Item* boneItem, int frame, int *boneIndex, BoneData* boneData )
 {
 	int index = *boneIndex;
 	*boneIndex += 1;
 	BoneData::Bone* bone = &boneData->bone[index];
 	
-	bone->name = StringPool::Intern( boneItem->Name() );
+	if ( frame == 0 ) {
+		bone->name = StringPool::Intern( boneItem->Name() );
 
-	bone->parent = -1;
-	if ( boneItem->HasAttribute( "parent" )) {
-		const char* parent = boneItem->GetString( "parent" );
-		for( int i=0; i<index; ++i ) {
-			if ( boneData->bone[i].name == parent ) {
-				bone->parent = i;
-				break;
+		bone->parent = -1;
+		if ( boneItem->HasAttribute( "parent" )) {
+			const char* parent = boneItem->GetString( "parent" );
+			for( int i=0; i<index; ++i ) {
+				if ( boneData->bone[i].name == parent ) {
+					bone->parent = i;
+					break;
+				}
 			}
+			GLASSERT( bone->parent >= 0 );	// should always be higher in the list.
 		}
-		GLASSERT( bone->parent >= 0 );	// should always be higher in the list.
+
+		boneItem->GetFloatArray( "refPosition", 3, &bone->refPos.x );
+		bone->refConcat.Zero();
 	}
-
-	boneItem->GetFloatArray( "refPosition", 3, &bone->refPos.x );
-	bone->refConcat.Zero();
-
-	boneItem->GetFloatArray( "rotation", 4, &bone->rotation.x );
-	bone->rotation.Normalize();
-	boneItem->GetFloatArray( "position", 3, &bone->position.x );
+	boneItem->GetFloatArray( "rotation", 4, &bone->rotation[frame].x );
+	bone->rotation[frame].Normalize();
+	boneItem->GetFloatArray( "position", 3, &bone->position[frame].x );
 
 	for( int i=0; i<boneItem->NumChildren(); ++i ) {
 		const gamedb::Item* child = boneItem->ChildAt( i );
-		RecBoneWalk( child, boneIndex, boneData );
+		RecBoneWalk( child, frame, boneIndex, boneData );
 	}
 }
 
@@ -356,112 +347,108 @@ U32 AnimationResource::Duration( int type ) const
 }
 
 
-U32 AnimationResource::TimeInRange( int type, U32 t ) const
-{
-	GLASSERT( type >= 0 && type < ANIM_COUNT );
-	U32 total = sequence[type].totalDuration;
-	U32 result = 0;
-
-	if ( Looping( type )) {
-		result = t % total;
-	}
-	else {
-		result = Min( total-1, t );
-	}
-	return result;
-}
-
-
 void AnimationResource::ComputeFrame( int type,
 									  U32 timeClock,
-									  int *_frame0, int* _frame1, float* _fraction ) const
+									  int *frame0, int* frame1, float* fraction ) const
 {
-	int frame0=0, frame1=0;
-	float fraction=0;
+	U32 timeInSequence = timeClock % sequence[type].totalDuration;
+	*frame0 = timeInSequence * sequence[type].nFrames / sequence[type].totalDuration;
+	*frame1 = (*frame0 + 1);
+	if ( *frame1 == sequence[type].nFrames ) {
+		*frame1 = 0;
+	}
+	int delta = timeInSequence - (*frame0) * sequence[type].totalDuration / sequence[type].nFrames;
+	*fraction = (float)delta / (float)(sequence[type].totalDuration / sequence[type].nFrames);
+}
 
-	U32 time = TimeInRange( type, timeClock );
 
-	for( frame0=0; frame0<sequence[type].nFrames; ++frame0 ) {
-		U32 start = sequence[type].frame[frame0].start;
-		U32 end   = sequence[type].frame[frame0].end;
-		if (    time >= start
-				&& time <  end ) 
-		{
-			// We found the frame!
-			fraction = (float)((double)(time-start) / (double)(end-start));
-			frame1 = (frame0 + 1) % sequence[type].nFrames;
-			break;
+void AnimationResource::GetTransform(	int typeA,					// which animation to play: "reference", "gunrun", etc.
+										U32 timeA,					// time for this animation
+										int typeB,					// 2nd animation
+										U32 timeB,					// 2nd animation time
+										float crossFraction,		// 0: all A, 1: all B
+										grinliz::Matrix4* output ) const	// At least EL_MAX_BONES
+{
+	// fixme: check for redundant call and return same output
+
+	bool hasFade = crossFraction > 0;
+
+	int frameA0=0, frameA1=0, frameB0=0, frameB1=0;
+	float fractionA=0, fractionB=0;
+
+	ComputeFrame( typeA, timeA, &frameA0, &frameA1, &fractionA );
+	if ( hasFade ) {
+		ComputeFrame( typeB, timeB, &frameB0, &frameB1, &fractionB );
+	}
+
+	Matrix4 concat[EL_MAX_BONES];
+	const BoneData& boneDataA = sequence[typeA].boneData;
+	const BoneData& boneDataB = sequence[typeB].boneData;
+
+
+	for( int i=0; i<EL_MAX_BONES; ++i ) {
+		output[i].SetIdentity();
+
+		if ( boneDataA.bone[i].name.empty() )
+			continue;
+
+		// The matrix takes the transform back to the origin
+		// then out transformed place. It is pure translation
+		// which is very nice.
+
+		Matrix4 inv;
+		inv.SetTranslation( -boneDataA.bone[i].refConcat );	// very easy inverse xform
+
+		Vector3F	positionA, positionB, position;
+		Quaternion	rotationA, rotationB, rotation;
+
+		for( int k=0; k<3; ++k ) {
+			positionA.X(k) = Lerp( boneDataA.bone[i].position[frameA0].X(k), 
+								   boneDataA.bone[i].position[frameA1].X(k), 
+								   fractionA );
+			if ( hasFade ) {
+				positionB.X(k) = Lerp( boneDataB.bone[i].position[frameB0].X(k), 
+									   boneDataB.bone[i].position[frameB1].X(k), 
+									   fractionB );
+				position.X(k) = Lerp( positionA.X(k), positionB.X(k), crossFraction );
+			}
 		}
+		if ( !hasFade ) {
+			position = positionA;
+		}
+
+		if ( hasFade ) {
+			Quaternion::SLERP( boneDataA.bone[i].rotation[frameA0],
+							   boneDataA.bone[i].rotation[frameA1],
+							   fractionA,
+							   &rotationA );
+			Quaternion::SLERP( boneDataB.bone[i].rotation[frameB0],
+							   boneDataB.bone[i].rotation[frameB1],
+							   fractionB,
+							   &rotationB );
+			Quaternion::SLERP( rotationA, rotationB, crossFraction, &rotation );
+		}
+		else {
+			Quaternion::SLERP( boneDataA.bone[i].rotation[frameA0],
+							   boneDataA.bone[i].rotation[frameA1],
+							   fractionA,
+							   &rotation );
+		}
+			
+		Matrix4 t, r;
+		t.SetTranslation( position );
+		rotation.ToMatrix( &r );
+		Matrix4 m = r * t;
+
+		if ( boneDataA.bone[i].parent ) {
+			concat[i] = concat[boneDataA.bone[i].parent] * m;
+		}
+		else {
+			concat[i] = m;
+		}
+
+		output[i] = concat[i] * inv;
 	}
-	GLASSERT( frame0 < sequence[type].nFrames );
-	GLASSERT( frame1 < sequence[type].nFrames );
-	*_frame0 = frame0;
-	*_frame1 = frame1;
-	*_fraction = fraction;
-}
-
-
-void AnimationResource::ComputeBone( int type,
-									 int frame0, int frame1, float fraction,
-									 int index0,
-									 BoneData::Bone* bone ) const
-{
-	int index1 = (index0+1)%sequence[type].nBones;
-	const BoneData::Bone* bone0 = &sequence[type].frame[frame0].boneData.bone[index0];
-	const BoneData::Bone* bone1 = &sequence[type].frame[frame1].boneData.bone[index1];
-
-	Quaternion angle0 = bone0->rotation;
-	Quaternion angle1 = bone1->rotation;
-	Quaternion angle = angle0;
-	//Quaternion::SLERP( angle0, angle1, fraction, &angle );
-
-	Vector3F pos;
-	for( int i=0; i<3; ++i ) {
-		pos.X(i) = Lerp( bone0->position.X(i), bone1->position.X(i), fraction );
-	}
-
-	bone->rotation	= angle;
-	bone->position	= pos;
-}
-
-
-bool AnimationResource::GetTransform(	int type,					// which animation to play: "reference", "gunrun", etc.
-										IString boneName,
-										const ModelHeader& header,	// used to get the bone IDs
-										U32 time,					// time for this animation
-										BoneData::Bone* bone ) const
-{
-	float fraction = 0;
-	int frame0 = 0;
-	int frame1 = 0;
-	int boneIndex = sequence[type].frame[0].boneData.GetBoneIndex( boneName );	// order is the same for all frames
-	ComputeFrame( type, time, &frame0, &frame1, &fraction );
-	ComputeBone( type, frame0, frame1, fraction, boneIndex, bone );
-	return true;
-}
-
-
-/*	This copies the resource BoneData to the Model bone data,
-	doing interpolation in the process.
-*/
-bool AnimationResource::GetTransform(	int type, 
-										const ModelHeader& header, 
-										U32 timeClock, 
-										BoneData* boneData ) const
-{
-	*boneData = this->sequence[type].frame[0].boneData;	// The basics are the same for every frame.
-														// The part that changes is written below.
-
-	float fraction = 0;
-	int frame0 = 0;
-	int frame1 = 0;
-	ComputeFrame( type, timeClock, &frame0, &frame1, &fraction );
-
-	for( int i=0; i<sequence[type].nBones; ++i ) {
-		GLASSERT( i < EL_MAX_BONES );
-		ComputeBone( type, frame0, frame1, fraction, i, boneData->bone + i );
-	}
-	return true;
 }
 
 
@@ -470,21 +457,13 @@ int AnimationResource::GetMetaData(	int type, U32 t0, U32 t1 ) const
 	if ( sequence[type].metaDataID == 0 )
 		return 0;
 
-	GLASSERT( t1 >= t0 );
-	int delta = int(t1 - t0);
-	
-	t0 = TimeInRange( type, t0 );
+	U32 t0Mod = t0 % sequence[type].totalDuration;
+	U32 delta = t1 - t0;
 
 	U32 tEvent = sequence[type].metaDataTime;
 
 	if ( tEvent >= t0 && tEvent < t0 + delta ) {
 		return sequence[type].metaDataID;
-	}
-	if ( t0 + delta >= sequence[type].totalDuration ) {
-		U32 t = (t0+delta) - sequence[type].totalDuration;
-		if ( tEvent < t ) {
-			return sequence[type].metaDataID;
-		}
 	}
 	return 0;
 }

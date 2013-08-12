@@ -50,9 +50,6 @@ private:
 	void UpdateAnimationInfo();
 	void UpdateModelInfo();
 
-	grinliz::GLString MakeFilename( const char* in );
-	void WriteXML();
-
 	Engine* engine;
 	enum { NUM_MODELS = 3 };
 
@@ -63,14 +60,11 @@ private:
 	int currentModel;
 	int  currentBone;
 	int  currentAnim;
-	bool doExport;
-	int  exportCount;
 
 	gamui::PushButton okay;
 	gamui::PushButton boneLeft, boneRight;
 	gamui::PushButton animLeft, animRight;
 	gamui::PushButton modelLeft, modelRight;
-	gamui::PushButton exportSCML;
 
 	gamui::ToggleButton ortho;
 	gamui::ToggleButton instance;
@@ -78,7 +72,6 @@ private:
 	gamui::ToggleButton triggerToggle[NUM_TRIGGERS];
 
 	gamui::TextLabel boneName, animName, modelName;
-	gamui::TextLabel pixelUnitRatio;
 
 	grinliz::Vector2I origin;
 	grinliz::Rectangle2I size;

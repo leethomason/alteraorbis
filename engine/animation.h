@@ -67,19 +67,18 @@ public:
 	
 	U32			Duration( int name ) const;
 
-	bool GetTransform(	int type,			// which animation to play: "reference", "gunrun", etc.
-						const ModelHeader& header,	// used to get the bone IDs
-						U32 time,					// time for this animation
-						BoneData* boneData ) const;
-
-	bool GetTransform(	int type,			// which animation to play: "reference", "gunrun", etc.
-						grinliz::IString boneName,
-						const ModelHeader& header,	// used to get the bone IDs
-						U32 time,					// time for this animation
-						BoneData::Bone* bone ) const;
+	// Compute the bones, with optional cross fade.
+	void GetTransform(	int typeA,					// which animation to play: "reference", "gunrun", etc.
+						U32 timeA,					// time for this animation
+						int typeB,					// 2nd animation
+						U32 timeB,					// 2nd animation time
+						float crossFraction,		// 0: all A, 1: all B
+						grinliz::Matrix4* out ) const;	// At least EL_MAX_BONES
 
 	int GetMetaData(	int type,
 						U32 t0, U32 t1 ) const;	// t1 > t0
+
+	const BoneData& GetBoneData( int type ) const { return sequence[type].boneData; }
 
 	// does this animation loop?
 	static bool Looping( int type );
@@ -89,33 +88,23 @@ public:
 	static bool Motion( int type );
 
 private:
-	void RecBoneWalk( const gamedb::Item* boneItem, int *boneIndex, BoneData* boneData );
-	U32 TimeInRange( int type, U32 t ) const;	
+	void RecBoneWalk( const gamedb::Item* boneItem, int frame, int *boneIndex, BoneData* boneData );
 	void ComputeFrame( int type,
 					   U32 time,
 					   int *_frame0, int* _frame1, float* _fraction ) const;
-	void ComputeBone( int type,
-					  int frame0, int frame1, float fraction,
-					  int boneIndex,
-					  BoneData::Bone* bone ) const;
 
 	const char* resName;
 	int nAnimations;
 
 	const gamedb::Item* item;
 
-	struct Frame {
-		U32			start;
-		U32			end;
-		BoneData	boneData;
-	};
-
 	struct Sequence {
-		U32					totalDuration;
 		const gamedb::Item* item;
+		// The animation sequence uses equally timed frames.
+		U32					totalDuration;
 		int					nFrames;
 		int					nBones;
-		Frame				frame[EL_MAX_ANIM_FRAMES];
+		BoneData			boneData;
 		int					metaDataID;
 		U32					metaDataTime;
 	};

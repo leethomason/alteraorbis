@@ -300,10 +300,10 @@ void Model::Serialize( XStream* xs, SpaceTree* tree )
 		}
 		if ( aux ) {
 			save->OpenElement( "aux" );
-			XARC_SER_KEY( xs, "texture0XForm", aux->texture0XForm );
-			XARC_SER_KEY( xs, "texture0Clip", aux->texture0Clip );
-			XARC_SER_KEY( xs, "texture0ColorMap", aux->texture0ColorMap );
-			aux->boneData.Serialize( xs );
+			XARC_SER( xs, aux->texture0XForm );
+			XARC_SER( xs, aux->texture0Clip );
+			XARC_SER( xs, aux->texture0ColorMap );
+			XARC_SER_ARR( xs, aux->boneMats[0].x, EL_MAX_BONES*16 );
 			save->CloseElement();
 		}
 	}
@@ -322,10 +322,10 @@ void Model::Serialize( XStream* xs, SpaceTree* tree )
 		if ( load->HasChild() ) {
 			load->OpenElement();	// aux
 			aux = ModelResourceManager::Instance()->modelAuxPool.New();
-			XARC_SER_KEY( xs, "texture0XForm", aux->texture0XForm );
-			XARC_SER_KEY( xs, "texture0Clip", aux->texture0Clip );
-			XARC_SER_KEY( xs, "texture0ColorMap", aux->texture0ColorMap );
-			aux->boneData.Serialize( xs );
+			XARC_SER( xs, aux->texture0XForm );
+			XARC_SER( xs, aux->texture0Clip );
+			XARC_SER( xs, aux->texture0ColorMap );
+			XARC_SER_ARR( xs, aux->boneMats[0].x, EL_MAX_BONES*16 );
 			load->CloseElement();
 		}
 	}
@@ -551,34 +551,22 @@ void Model::CalcHitAABB( Rectangle3F* aabb ) const
 }
 
 
-void Model::CrossFade( float fraction, BoneData::Bone* inOut, const BoneData::Bone& prev ) const
-{
-	Quaternion angle1 = inOut->rotation;
-	Quaternion angle2 = prev.rotation;
-	Quaternion angle = angle1;
-	//Quaternion::SLERP( angle1, angle2, fraction, &angle );
-
-	inOut->rotation = angle;
-	for( int i=0; i<3; ++i ) {
-		inOut->position.X(i) = Lerp( prev.position.X(i), inOut->position.X(i), fraction );
-	}
-}
-
-
 void Model::CalcAnimation()
 {
 	GLASSERT( HasAnimation() );
 	GLASSERT( aux );
-	animationResource->GetTransform( currentAnim.id, resource->header, currentAnim.time, &aux->boneData );
 
 	if ( (crossFadeTime < totalCrossFadeTime) && (prevAnim.id >= 0) ) {
-		BoneData prevBoneData;
-		animationResource->GetTransform( prevAnim.id, resource->header, prevAnim.time, &prevBoneData );
 		float fraction = (float)crossFadeTime / (float)totalCrossFadeTime;
-
-		for( int i=0; i<EL_MAX_BONES; ++i ) {
-			CrossFade( fraction, &aux->boneData.bone[i], prevBoneData.bone[i] );
-		}
+		animationResource->GetTransform( prevAnim.id,    prevAnim.time,
+										 currentAnim.id, currentAnim.time,
+										 fraction,
+										 aux->boneMats );
+	}
+	else {
+		animationResource->GetTransform( currentAnim.id, currentAnim.time,
+										 0, 0, 0,
+										 aux->boneMats );
 	}
 }
 
@@ -597,12 +585,8 @@ void Model::CalcMetaData( grinliz::IString name, grinliz::Matrix4* meta )
 	}
 	else {
 		CalcAnimation();
-
-		Matrix4 arr[EL_MAX_BONES];
-		aux->boneData.FlushTransform( arr, EL_MAX_BONES );
-
-		int index = aux->boneData.GetBoneIndex( data->boneName );
-		*meta = xform * arr[index];
+		int index = animationResource->GetBoneData(0).GetBoneIndex( data->boneName );
+		*meta = xform * aux->boneMats[index];
 	}
 }
 

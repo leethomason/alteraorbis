@@ -34,28 +34,37 @@ const BoneData::Bone* BoneData::GetBone( const grinliz::IString& internedName ) 
 	return bone+GetBoneIndex( internedName );
 }
 
+void BoneData::Bone::Serialize( XStream* xs )
+{
+	XarcOpen( xs, "Bone" );
+	XARC_SER( xs, name );
+	XARC_SER( xs, parent );
+	XARC_SER( xs, refPos );
+	XARC_SER( xs, refConcat );
+
+	XARC_SER_ARR( xs, &rotation[0].x, EL_MAX_ANIM_FRAMES*4 );
+	XARC_SER_ARR( xs, &position[0].x, EL_MAX_ANIM_FRAMES*3 );
+	XarcClose( xs );
+}
+
 void BoneData::Serialize( XStream* xs )
 {
 	XarcOpen( xs, "BoneData" );
 	for( int i=0; i<EL_MAX_BONES; ++i ) {
-		XarcOpen( xs, "bone" );
-		XARC_SER_KEY( xs, "name", bone[i].name );
-		XARC_SER_KEY( xs, "parent", bone[i].parent );
-		XARC_SER_KEY( xs, "refPos", bone[i].refPos );
-		XARC_SER_KEY( xs, "refConcat", bone[i].refConcat );
-		XARC_SER_KEY( xs, "rotation", bone[i].rotation );
-		XARC_SER_KEY( xs, "position", bone[i].position );
-		XarcClose( xs );
+		bone[i].Serialize( xs );
 	}
 	XarcClose( xs );
 }
 
 
-void BoneData::FlushTransform( grinliz::Matrix4* output, int num )
+/*
+void BoneData::FlushTransform(	int frame0, int frame1, float fraction,	// the interpolation
+								int nBones,
+								grinliz::Matrix4* output ) const
 {
 	Matrix4 concat[EL_MAX_BONES];
 
-	for( int i=0; i<num; ++i ) {
+	for( int i=0; i<nBones; ++i ) {
 		output[i].SetIdentity();
 
 		if ( bone[i].name.empty() )
@@ -67,9 +76,18 @@ void BoneData::FlushTransform( grinliz::Matrix4* output, int num )
 		Matrix4 inv;
 		inv.SetTranslation( -bone[i].refConcat );	// very easy inverse xform
 
+		Vector3F	position;
+		Quaternion	rotation;
+
+		for( int k=0; k<3; ++k ) {
+			position.X(k) = Lerp( bone[i].position[frame0].X(k), bone[i].position[frame1].X(k), fraction );
+		}
+		// FIXME: SLERP
+		rotation = bone[i].rotation[frame0];
+
 		Matrix4 t, r;
-		t.SetTranslation( bone[i].position );
-		bone[i].rotation.ToMatrix( &r );
+		t.SetTranslation( position );
+		rotation.ToMatrix( &r );
 		Matrix4 m = r * t;
 
 		if ( bone[i].parent ) {
@@ -82,4 +100,4 @@ void BoneData::FlushTransform( grinliz::Matrix4* output, int num )
 		output[i] = concat[i] * inv;
 	}
 }
-
+*/

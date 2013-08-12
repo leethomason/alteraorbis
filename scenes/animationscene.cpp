@@ -36,7 +36,6 @@ AnimationScene::AnimationScene( LumosGame* game ) : Scene( game )
 {
 	currentBone = -1;
 	currentAnim = 0;
-	doExport = false;
 
 	game->InitStd( &gamui2D, &okay, 0 );
 	Screenport* port = game->GetScreenportMutable();
@@ -87,11 +86,6 @@ AnimationScene::AnimationScene( LumosGame* game ) : Scene( game )
 			triggerToggle[0].AddToToggleGroup( &triggerToggle[i] );
 		}
 	}
-
-	exportSCML.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
-	exportSCML.SetText( "export" );
-
-	pixelUnitRatio.Init( &gamui2D );
 
 	engine = new Engine( port, game->GetDatabase(), 0 );
 	engine->particleSystem->LoadParticleDefs( "./res/particles.xml" );
@@ -152,9 +146,6 @@ void AnimationScene::Resize()
 	for( int i=0; i<NUM_TRIGGERS; ++i ) {
 		layout.PosAbs( &triggerToggle[i], 6+i, -2 );
 	}
-
-	layout.PosAbs( &exportSCML,		4, -1 );
-	layout.PosAbs( &pixelUnitRatio, 5, -1 );
 
 	layout.PosAbs( &animLeft,	0, 0 );
 	layout.PosAbs( &animName,	1, 0 );
@@ -233,11 +224,9 @@ void AnimationScene::UpdateAnimationInfo()
 			}
 		}
 		animName.SetText( name );
-		exportSCML.SetEnabled( false );
 	}
 	else {
 		animName.SetText( "none" );
-		exportSCML.SetEnabled( true );
 	}
 }
 
@@ -317,10 +306,6 @@ void AnimationScene::ItemTapped( const gamui::UIItem* item )
 	else if ( item == &instance ) {
 		SetModelVis( false );
 	}
-	else if ( item == &exportSCML ) {
-		doExport = true;
-		exportCount = -1;
-	}
 	else if ( item == &modelRight ) {
 		++currentModel;
 		if ( currentModel == resourceArr.Size() ) currentModel = 0;
@@ -335,99 +320,6 @@ void AnimationScene::ItemTapped( const gamui::UIItem* item )
 	UpdateModelInfo();
 	UpdateAnimationInfo();
 	UpdateBoneInfo();
-}
-
-
-void AnimationScene::WriteXML()
-{
-	char buf[256];
-	const ModelHeader& header = model[0]->GetResource()->header;
-	
-	const char* name = header.name.c_str();
-	SNPrintf( buf, 256, ".\\resin\\%s", name );
-	_mkdir( buf );
-	SNPrintf( buf, 256, "./resin/%s/%s.scml", name, name );
-
-	FILE* fp = fopen( buf, "w" );
-	XMLPrinter* xmlPrinter  = new XMLPrinter( fp );
-
-	int nBones=0;
-	for( ; nBones < EL_MAX_BONES; ++nBones ) {
-		if ( header.boneName[nBones].empty() )
-			break;
-	}
-	GLASSERT( nBones );
-
-	xmlPrinter->OpenElement( "spriter_data" );
-	xmlPrinter->PushAttribute( "scml_version", "1.0" );
-
-	xmlPrinter->OpenElement(	"folder" );
-	xmlPrinter->PushAttribute( "id", "0" );
-	xmlPrinter->PushAttribute( "name", "assets" );
-
-	for( int i=0; i<nBones; ++i ) {
-		xmlPrinter->OpenElement( "file" );
-		xmlPrinter->PushAttribute( "id", i );
-		GLString fname = MakeFilename( header.boneName[i].c_str() );
-		SNPrintf( buf, 256, "assets/%s.png", fname.c_str() );
-		xmlPrinter->PushAttribute( "name", buf );
-		xmlPrinter->PushAttribute( "width", partSize[i].Width() );
-		xmlPrinter->PushAttribute( "height", partSize[i].Height() );
-
-		xmlPrinter->CloseElement();
-	}
-	xmlPrinter->CloseElement();	// folder
-
-	xmlPrinter->OpenElement( "entity" );
-	xmlPrinter->PushAttribute( "id", 0 );
-	xmlPrinter->PushAttribute( "name", "char_000" );
-
-	xmlPrinter->OpenElement( "animation" );
-	xmlPrinter->PushAttribute( "id", 0 );
-	xmlPrinter->PushAttribute( "name", "reference" );
-	xmlPrinter->PushAttribute( "length", 5000 );
-	xmlPrinter->PushAttribute( "looping", "false" );
-
-	xmlPrinter->OpenElement( "mainline" );
-	
-	xmlPrinter->OpenElement( "key" );
-	xmlPrinter->PushAttribute( "id", 0 );
-
-	for( int i=0; i<nBones; ++i ) {
-		xmlPrinter->OpenElement( "object_ref" );
-		xmlPrinter->PushAttribute( "id", i );
-		xmlPrinter->PushAttribute( "timeline", i );
-		xmlPrinter->PushAttribute( "key", 0 );
-		xmlPrinter->PushAttribute( "z_index", i );
-		xmlPrinter->CloseElement();
-	}
-	xmlPrinter->CloseElement();	// key
-	xmlPrinter->CloseElement(); // mainline
-
-	for( int i=0; i<nBones; ++i ) {
-		xmlPrinter->OpenElement( "timeline" );
-		xmlPrinter->PushAttribute( "id", i );
-
-		xmlPrinter->OpenElement( "key" );
-		xmlPrinter->PushAttribute( "id", 0 );
-
-		xmlPrinter->OpenElement( "object" );
-		xmlPrinter->PushAttribute( "folder", 0 );
-		xmlPrinter->PushAttribute( "file", i );
-		xmlPrinter->PushAttribute( "x", partSize[i].min.x );
-		xmlPrinter->PushAttribute( "y", -partSize[i].min.y );
-		xmlPrinter->PushAttribute( "a", 0.5f );
-
-		xmlPrinter->CloseElement();	 //object
-		xmlPrinter->CloseElement();	 //key
-		xmlPrinter->CloseElement();	 //timeline
-	}
-	xmlPrinter->CloseElement();	 //animation
-	xmlPrinter->CloseElement();	 //entity
-	xmlPrinter->CloseElement();	 //spriter_data
-
-	delete xmlPrinter;
-	fclose( fp );
 }
 
 
@@ -482,68 +374,7 @@ void AnimationScene::DoTick( U32 deltaTime )
 }
 
 
-GLString AnimationScene::MakeFilename( const char* in )
-{
-	GLString s = in;
-	while( true ) {
-		int i = s.find( '.' );
-		if ( i == s.size() )
-			break;
-		s[i] = '_';
-	}
-	return s;
-}
-
-
 void AnimationScene::Draw3D( U32 deltaTime )
 {
-	if ( doExport ) {
-		SetModelVis( true );
-
-		char buf[256];
-		const char* part = "reference";
-		if ( exportCount >= 0 ) {
-			part = model[0]->GetResource()->header.boneName[exportCount].c_str();
-			int id[4] = { exportCount, -1, -1, -1 };
-			model[0]->SetBoneFilter( id );
-		}
-
-		bool glow = engine->Glow();
-		engine->SetGlow( false );
-		engine->Draw( deltaTime );
-		engine->SetGlow( glow );
-
-		if ( part && *part ) {
-			SNPrintf( buf, 256, "./resin/%s/assets", model[0]->GetResource()->header.name.c_str() );
-			_mkdir( buf );
-			GLString fname = MakeFilename( part );
-			SNPrintf( buf, 256, "./resin/%s/assets/%s", model[0]->GetResource()->header.name.c_str(), fname.c_str() );
-
-			if ( exportCount < 0 ) {
-				ScreenCapture( buf, false, true, true, &size );
-				origin.x = Mean( size.min.x, size.max.x );
-				origin.y = size.max.y;
-				size.min -= origin;
-				size.max -= origin;
-				SNPrintf( buf, 256, "PUR=%.1f", (float)size.Height() / model[0]->GetResource()->AABB().SizeY() );
-				pixelUnitRatio.SetText( buf );
-			}
-			else {
-				ScreenCapture( buf, false, true, true, &partSize[exportCount] );
-				partSize[exportCount].min -= origin;
-				partSize[exportCount].max -= origin;
-			}
-		}
-		++exportCount;
-		if ( exportCount == EL_MAX_BONES ) {
-			doExport = false;
-			WriteXML();
-			for( int i=0; i<NUM_MODELS; ++i ) 
-				model[i]->SetBoneFilter( 0 );
-			SetModelVis( false );
-		}
-	}
-	else {
-		engine->Draw( deltaTime );
-	}
+	engine->Draw( deltaTime );
 }
