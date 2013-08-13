@@ -123,17 +123,18 @@ struct ModelHeader
 	ModelMetaData			metaData[EL_MAX_METADATA];
 	ModelParticleEffect		effectData[EL_MAX_MODEL_EFFECTS];
 
-	/* The model bone names. */
-	grinliz::IString		boneName[EL_MAX_BONES];
-
-	int BoneNameToOffset( const grinliz::IString& name ) const {
-		for ( int i=0; i<EL_MAX_BONES; ++i ) {
-			if ( boneName[i] == name )
-				return i;
-		}
-		GLASSERT( 0 );
-		return 0;
-	}
+	/* The model bone names: these are the names (and the ID)
+	   actually found in the model creation. For example,
+	   if 'torso' is at index 5, then the ID for torso
+	   is 5, and the uniform for the torso transform should
+	   be at uniformMat[5].
+	*/
+	grinliz::IString		modelBoneName[EL_MAX_BONES];
+	/*	The armature uses different IDs. This maps from
+	    the model IDs to the armature IDs so the armature
+		mats can be re-ordered.
+	*/
+	int						modelToArmatureMap[EL_MAX_BONES];
 
 	void Set( const grinliz::IString& name, int nGroups, int nTotalVertices, int nTotalIndices,
 			  const grinliz::Rectangle3F& bounds );
@@ -178,6 +179,7 @@ struct ModelAux {
 	grinliz::Vector4F	texture0XForm;
 	grinliz::Vector4F	texture0Clip;
 	grinliz::Matrix4	texture0ColorMap;
+	int					animToModelMap[EL_MAX_BONES];
 	grinliz::Matrix4	boneMats[EL_MAX_BONES];
 };
 
@@ -286,8 +288,9 @@ public:
 	int GetAnimation() const						{ return currentAnim.id; }
 	bool AnimationDone() const;
 
+	// Get the bone name or index from the *model*, not the animation.
 	grinliz::IString GetBoneName( int i ) const;
-	int GetBoneID( grinliz::IString name ) const;
+	int GetBoneIndex( grinliz::IString name ) const;
 
 	// Update the time and animation rendering.
 	void DeltaAnimation(	U32 time, 

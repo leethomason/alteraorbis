@@ -166,8 +166,8 @@ void ModelHeader::Save( gamedb::WItem* parent )
 	}
 
 	gamedb::WItem* boneNode = node->FetchChild( "bones" );
-	for( int i=0; i<EL_MAX_BONES && !boneName[i].empty(); ++i ) {
-		gamedb::WItem* data = boneNode->FetchChild( boneName[i].c_str() );
+	for( int i=0; i<EL_MAX_BONES && !modelBoneName[i].empty(); ++i ) {
+		gamedb::WItem* data = boneNode->FetchChild( modelBoneName[i].c_str() );
 		data->SetInt( "id", i );
 	}
 }
@@ -605,12 +605,12 @@ void ProcessModel( XMLElement* model )
 	}	
 	printf( " groups=%d nVertex=%d nTri=%d\n", builder->NumGroups(), nTotalVertex, nTotalIndex/3 );
 
-	ModelHeader header;
+	ModelHeader header;	
 	header.Set( StringPool::Intern( assetName.c_str() ), builder->NumGroups(), nTotalVertex, nTotalIndex, builder->Bounds() );
 	header.animation = StringPool::Intern( animation.c_str() );
 
 	for( int i=0; i<builder->boneNames.Size(); ++i ) {
-		header.boneName[i] = builder->boneNames[i];
+		header.modelBoneName[i] = builder->boneNames[i];
 	}
 
 	if ( grinliz::StrEqual( model->Attribute( "shadowCaster" ), "false" ) ) {

@@ -211,11 +211,11 @@ void LivePreviewScene::GenerateRing( int mainRow )
 		};
 		int ids[4] = { -1,-1,-1,-1 };
 
-		ids[0] = model[i]->GetBoneID( StringPool::Intern( "main", true ));
+		ids[0] = model[i]->GetBoneIndex( StringPool::Intern( "main", true ));
 		GLASSERT( ids[0] >= 0 && ids[0] < 4 );
 		
 		for( int k=1; k<4; ++k ) {
-			int id = model[i]->GetBoneID( StringPool::Intern( parts[k], true ));
+			int id = model[i]->GetBoneIndex( StringPool::Intern( parts[k], true ));
 			GLASSERT( id >= 0 && id < 4 );
 			if ( (i==0) || ((i+mainRow*NUM_MODEL) & (1<<k))) {
 				ids[k] = id;

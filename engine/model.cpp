@@ -130,8 +130,8 @@ void ModelLoader::Load( const gamedb::Item* item, ModelResource* res )
 	}
 
 	for( int i=0; i<EL_MAX_BONES; ++i ) {
-		if ( !res->header.boneName[i].empty() ) {
-			GLOUTPUT(( "Model %s bone %d=%s\n", res->header.name.c_str(), i, res->header.boneName[i].c_str() ));
+		if ( !res->header.modelBoneName[i].empty() ) {
+			GLOUTPUT(( "Model %s bone %d=%s\n", res->header.name.c_str(), i, res->header.modelBoneName[i].c_str() ));
 		}
 	}
 
@@ -225,9 +225,27 @@ void Model::Init( const ModelResource* resource, SpaceTree* tree )
 	boneFilter.Set(0,0,0,0);
 	control.Set( 1, 1, 1, 1 );
 
-	animationResource = 0;
-	if ( resource->header.animation != "create" ) {
-		animationResource = AnimationResourceManager::Instance()->GetResource( resource->header.animation.c_str() );
+	animationResource = AnimationResourceManager::Instance()->GetResource( resource->header.animation.c_str() );
+	if ( animationResource ) {	// Match the IDs.
+		if ( !aux ) {
+			aux = ModelResourceManager::Instance()->modelAuxPool.New();
+		}
+		int type = 0;
+		// Find a sequence.
+		for( int i=0; i<ANIM_COUNT; ++i ) {
+			if ( !animationResource->GetBoneData(i).bone[i].name.empty() ) {
+				type = i;
+				break;
+			}
+		}
+
+		for( int i=0; i<EL_MAX_BONES; ++i ) {
+			aux->animToModelMap[i] = -1;
+			const IString& str = animationResource->GetBoneData(type).bone[i].name;
+			if ( !str.empty() ) {
+				aux->animToModelMap[i] = this->GetBoneIndex( str );
+			}
+		}
 	}
 
 	debugScale = 1.0f;
@@ -303,6 +321,7 @@ void Model::Serialize( XStream* xs, SpaceTree* tree )
 			XARC_SER( xs, aux->texture0XForm );
 			XARC_SER( xs, aux->texture0Clip );
 			XARC_SER( xs, aux->texture0ColorMap );
+			XARC_SER_ARR( xs, aux->animToModelMap, EL_MAX_BONES );
 			XARC_SER_ARR( xs, aux->boneMats[0].x, EL_MAX_BONES*16 );
 			save->CloseElement();
 		}
@@ -325,6 +344,7 @@ void Model::Serialize( XStream* xs, SpaceTree* tree )
 			XARC_SER( xs, aux->texture0XForm );
 			XARC_SER( xs, aux->texture0Clip );
 			XARC_SER( xs, aux->texture0ColorMap );
+			XARC_SER_ARR( xs, aux->animToModelMap, EL_MAX_BONES );
 			XARC_SER_ARR( xs, aux->boneMats[0].x, EL_MAX_BONES*16 );
 			load->CloseElement();
 		}
@@ -556,17 +576,27 @@ void Model::CalcAnimation()
 	GLASSERT( HasAnimation() );
 	GLASSERT( aux );
 
+	Matrix4 animMats[EL_MAX_BONES];
+
 	if ( (crossFadeTime < totalCrossFadeTime) && (prevAnim.id >= 0) ) {
 		float fraction = (float)crossFadeTime / (float)totalCrossFadeTime;
 		animationResource->GetTransform( prevAnim.id,    prevAnim.time,
 										 currentAnim.id, currentAnim.time,
 										 fraction,
-										 aux->boneMats );
+										 animMats );
 	}
 	else {
 		animationResource->GetTransform( currentAnim.id, currentAnim.time,
 										 0, 0, 0,
-										 aux->boneMats );
+										 animMats );
+	}
+
+	// The animationResource returns boneMats in armature order.
+	// They need to be submitted in Model order.
+	for( int i=0; i<EL_MAX_BONES; ++i ) {
+		if ( aux->animToModelMap[i] >= 0 ) {
+			aux->boneMats[aux->animToModelMap[i]] = animMats[i];
+		}
 	}
 }
 
@@ -585,8 +615,9 @@ void Model::CalcMetaData( grinliz::IString name, grinliz::Matrix4* meta )
 	}
 	else {
 		CalcAnimation();
-		int index = animationResource->GetBoneData(0).GetBoneIndex( data->boneName );
-		*meta = xform * aux->boneMats[index];
+		int index = GetBoneIndex( name );
+		GLASSERT( index >= 0 && index < EL_MAX_BONES );
+		*meta = xform * aux->boneMats[index];						
 	}
 }
 
@@ -594,14 +625,14 @@ void Model::CalcMetaData( grinliz::IString name, grinliz::Matrix4* meta )
 grinliz::IString Model::GetBoneName( int i ) const
 {
 	GLASSERT( i >= 0 && i < EL_MAX_BONES );
-	return resource->header.boneName[i];
+	return resource->header.modelBoneName[i];
 }
 
 
-int Model::GetBoneID( grinliz::IString name ) const
+int Model::GetBoneIndex( grinliz::IString name ) const
 {
 	for( int i=0; i<EL_MAX_BONES; ++i ) {
-		if ( resource->header.boneName[i] == name )
+		if ( resource->header.modelBoneName[i] == name )
 			return i;
 	}
 	return -1;
@@ -613,7 +644,7 @@ void Model::SetBoneFilter( const grinliz::IString* names, const bool* filter )
 	int id[4] = { -1, -1, -1, -1 };
 	for( int i=0; i<4; ++i ) {
 		if ( filter[i] ) {
-			id[i] = GetBoneID( names[i] );
+			id[i] = GetBoneIndex( names[i] );
 		}
 	}
 	SetBoneFilter( id );

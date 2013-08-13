@@ -87,7 +87,7 @@ void ModelHeader::Load( const gamedb::Item* item )
 		}
 	}
 
-	memset( boneName, 0, sizeof(const char*)*EL_MAX_BONES );
+	memset( modelBoneName, 0, sizeof(const char*)*EL_MAX_BONES );
 	const gamedb::Item* boneItem = header->Child( "bones" );
 	if ( boneItem && boneItem->NumChildren() > 0 ) {
 		for( int i=0; i<boneItem->NumChildren(); ++i ) {
@@ -96,8 +96,8 @@ void ModelHeader::Load( const gamedb::Item* item )
 			IString name = StringPool::Intern( dataItem->Name(), true );
 			int id       = dataItem->GetInt( "id" );
 
-			GLASSERT( boneName[id] == 0 );	// else duplicated bone?
-			boneName[id] = name;
+			GLASSERT( modelBoneName[id] == 0 );	// else duplicated bone?
+			modelBoneName[id] = name;
 		}
 	}
 }
