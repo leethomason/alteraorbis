@@ -78,9 +78,11 @@ const char* XAnimationParser::ParseJoint( const char* p, BNode* node )
 		p = SkipWhiteSpace( p );
 		if ( memcmp( p, "OFFSET", strlen( "OFFSET" ) ) == 0) {
 			p += strlen( "OFFSET" );
-			p = ScanFloat( &node->refPos.x, p );
-			p = ScanFloat( &node->refPos.y, p );
-			p = ScanFloat( &node->refPos.z, p );
+			float x, y, z;
+			p = ScanFloat( &x, p );
+			p = ScanFloat( &y, p );
+			p = ScanFloat( &z, p );
+			node->refPos.Set( x, z, -y );	// swizzle for coordinate xform
 			p = SkipWhiteSpace( p );
 		}
 		else if ( memcmp( p, "CHANNELS", strlen( "CHANNELS" ) ) == 0) {
@@ -229,34 +231,35 @@ const char* XAnimationParser::ScanFloat( float* v, const char* p )
 	return p;
 }
 
-
+/*
 void XAnimationParser::Swizzle( grinliz::Vector3F* v )
 {
 	Vector3F s = { v->x, v->z, -v->y };
 	*v = s;
 }
-
+*/
 
 
 void XAnimationParser::WriteBVHRec( gamedb::WItem* frameItem, int n, BNode* node )
 {
 	gamedb::WItem* boneItem = frameItem->FetchChild( node->name.c_str() );
 
-	/* Test mesh: left foot forward
+	/* swizzle for coordinate xform
 	glX = bX
 	glY = bZ
 	glZ = -bY
 	*/
 	Vector3F pos = {	node->channel[n][0],
-						node->channel[n][1],
-						node->channel[n][2] };
+						node->channel[n][2],
+						-node->channel[n][1] };
 
 	Matrix4 xRot, yRot, zRot;
 	xRot.SetXRotation( node->channel[n][3] );
-	yRot.SetYRotation( node->channel[n][4] );
-	zRot.SetZRotation( node->channel[n][5] );
+	yRot.SetYRotation( node->channel[n][5] );
+	zRot.SetZRotation( -node->channel[n][4] );
 
 	Matrix4 rot = xRot * yRot * zRot;	// Order?
+	//Matrix4 rot = xRot * zRot * yRot;	// Order?
 	Quaternion q;
 	q.FromRotationMatrix( rot );
 
@@ -266,8 +269,6 @@ void XAnimationParser::WriteBVHRec( gamedb::WItem* frameItem, int n, BNode* node
 	boneItem->SetFloatArray( "rotation", &q.x, 4 );
 
 	Vector3F refPos = node->refPos;
-	Swizzle( &pos );
-	Swizzle( &refPos );
 	boneItem->SetFloatArray( "position", &pos.x, 3 );
 	boneItem->SetFloatArray( "refPosition", &refPos.x, 3 );
 

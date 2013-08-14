@@ -87,9 +87,6 @@ private:
 	void WriteBVH( const grinliz::GLString& type, gamedb::WItem* witem );
 	void WriteBVHRec( gamedb::WItem* witem, int n, BNode* node );
 
-	// Switches from Blender to GL coordinates.
-	void Swizzle( grinliz::Vector3F* );
-
 	int   nFrames;
 	float frameTime;
 	int   frameSkip;
