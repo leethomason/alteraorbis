@@ -12,9 +12,15 @@
 #include "../shared/gamedbwriter.h"
 #include "../engine/enginelimits.h"
 
-/* Parses both .x and .bvh files.
-   Similar parser, and only the armiture is read from the .x, so
-   they produce exactly the same output.
+/*	Parses the ultra-simple and readable BVH file.
+	There is an issue with position vs. reference position handling. 
+		See AnimationResource::GetTransform
+	
+	This parses files in XYZ order. Other orders should be fine,
+	but some code is needed.
+
+	Input is expected in Blender coordinates. (Z-up) Swizzle
+	changes to GL coordinats.
 */
 class XAnimationParser
 {
@@ -61,7 +67,6 @@ private:
 		return p; 
 	}
 
-	// Parsers. Note that the X version takes the parent, the BVH version parses the parent.
 	const char* ParseJoint( const char* p, BNode* node );
 	const char* ParseMotion( const char* p );
 
@@ -82,6 +87,7 @@ private:
 	void WriteBVH( const grinliz::GLString& type, gamedb::WItem* witem );
 	void WriteBVHRec( gamedb::WItem* witem, int n, BNode* node );
 
+	// Switches from Blender to GL coordinates.
 	void Swizzle( grinliz::Vector3F* );
 
 	int   nFrames;
