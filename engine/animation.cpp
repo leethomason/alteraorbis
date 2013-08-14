@@ -237,7 +237,6 @@ AnimationResource::AnimationResource( const gamedb::Item* _item )
 				sequence[type].nBones = boneIndex;
 
 				// Walk and compute the reference matrices.
-				FILE* fp = fopen( "animout.txt", "w" );
 				for( int i=0; i<sequence[type].nBones; ++i ) {
 					BoneData::Bone* bone = &sequence[type].boneData.bone[i];
 					BoneData::Bone* parentBone = 0;
@@ -247,9 +246,11 @@ AnimationResource::AnimationResource( const gamedb::Item* _item )
 					}
 					if ( parentBone ) {
 						bone->refConcat = parentBone->refConcat + bone->refPos;
+						//bone->refConcat = parentBone->refConcat + parentBone->refPos;
 					}
 					else {
 						bone->refConcat = bone->refPos;
+						//bone->refConcat.Set( 0, 0, 0 );
 					}
 				}
 				for( int i=0; i<sequence[type].nBones; ++i ) {
@@ -385,19 +386,11 @@ void AnimationResource::GetTransform(	int typeA,					// which animation to play:
 	const BoneData& boneDataA = sequence[typeA].boneData;
 	const BoneData& boneDataB = sequence[typeB].boneData;
 
-
 	for( int i=0; i<EL_MAX_BONES; ++i ) {
 		output[i].SetIdentity();
 
 		if ( boneDataA.bone[i].name.empty() )
 			continue;
-
-		// The matrix takes the transform back to the origin
-		// then out transformed place. It is pure translation
-		// which is very nice.
-
-		Matrix4 inv;
-		inv.SetTranslation( -boneDataA.bone[i].refConcat );	// very easy inverse xform
 
 		Vector3F	positionA, positionB, position;
 		Quaternion	rotationA, rotationB, rotation;
@@ -435,19 +428,43 @@ void AnimationResource::GetTransform(	int typeA,					// which animation to play:
 							   &rotation );
 		}
 			
-		Matrix4 t, r;
-		t.SetTranslation( position );
-		rotation.ToMatrix( &r );
-		Matrix4 m = r * t;
 
-		if ( boneDataA.bone[i].parent ) {
-			concat[i] = concat[boneDataA.bone[i].parent] * m;
+		// The 'inv' takes the transform back to the origin
+		// then out transformed place. It is pure translation
+		// which is very nice.
+
+		if ( boneDataA.bone[i].name == "arm.upper.left" ) {
+			int debug=1;
+		}
+
+		Matrix4 inv;
+		inv.SetTranslation( -boneDataA.bone[i].refConcat );	// very easy inverse xform
+
+		Matrix4 t, r;
+
+		// This is a hack, or a bug, or a mis-understanding of the file
+		// format. (Eek.) Sometimes the position is set, and sometimes
+		// it is not.
+		static const Vector3F ZERO = { 0, 0, 0 };
+		if ( position.Equal( ZERO, 0.0001f )) {
+			t.SetTranslation( boneDataA.bone[i].refPos );
 		}
 		else {
+			t.SetTranslation( position );
+		}
+		rotation.ToMatrix( &r );
+		Matrix4 m = t * r;
+
+
+		int parentIndex = boneDataA.bone[i].parent; 
+		if ( parentIndex >= 0 ) {
+			output[i] = concat[parentIndex] * m * inv;
+			concat[i] = m * concat[parentIndex];
+		}
+		else {
+			output[i] = m * inv;
 			concat[i] = m;
 		}
-
-		output[i] = concat[i] * inv;
 	}
 }
 
