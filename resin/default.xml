@@ -33,8 +33,15 @@
   <!-- animation v2
        FIXME: still needs metadata
   -->
-  <animation filename="human2_male/human2_male_walk.bvh" assetName="humanMale2Animation" />
-  <model filename="human2.ac" modelName="humanMale2" animation="humanMale2Animation" origin="0 0 0" shading="flat" polyRemoval="pre" />
+  <animation filename="human2_male/human2_male_walk.bvh" assetName="humanMale2Animation">
+    <meta animation="melee" name="impact" time="300.0" />
+  </animation>
+  
+  <model filename="human2.ac" modelName="humanMale2" animation="humanMale2Animation" origin="0 0 0" shading="flat" polyRemoval="pre" >
+    <meta name="trigger" pos="-0.18 0.42 0" rot="1 0 0 -90" boneName="arm.lower.right" />
+    <meta name="target"  pos="0 0.72 0"/>
+    <meta name="shield"  pos="0 0.71 -0.06" rot="1 0 0 80" boneName="torso" />
+  </model>
 
   <texture filename="palette_50.png" emissive="true" />
   <texture filename="palette_100.png" emissive="true"/>

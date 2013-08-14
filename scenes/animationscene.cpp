@@ -72,6 +72,9 @@ AnimationScene::AnimationScene( LumosGame* game ) : Scene( game )
 	ortho.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
 	ortho.SetText( "ortho" );
 
+	zeroFrame.Init( &gamui2D, game->GetButtonLook(0) );
+	zeroFrame.SetText( "zero" );
+
 	instance.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
 	instance.SetText( "3x" );
 
@@ -142,9 +145,10 @@ void AnimationScene::Resize()
 	layout.PosAbs( &boneName,		1, -2 );
 	layout.PosAbs( &boneRight,		3, -2 );
 	layout.PosAbs( &ortho,			4, -2 );
-	layout.PosAbs( &instance,		5, -2 );
+	layout.PosAbs( &zeroFrame,		5, -2 );
+	layout.PosAbs( &instance,		6, -2 );
 	for( int i=0; i<NUM_TRIGGERS; ++i ) {
-		layout.PosAbs( &triggerToggle[i], 6+i, -2 );
+		layout.PosAbs( &triggerToggle[i], 7+i, -2 );
 	}
 
 	layout.PosAbs( &animLeft,	0, 0 );
@@ -259,6 +263,12 @@ void AnimationScene::Zoom( int style, float delta )
 }
 
 
+void AnimationScene::Rotate( float degrees )
+{
+	engine->camera.Orbit( degrees );
+}
+
+
 void AnimationScene::ItemTapped( const gamui::UIItem* item )
 {
 	if ( item == &okay ) {
@@ -326,9 +336,16 @@ void AnimationScene::ItemTapped( const gamui::UIItem* item )
 void AnimationScene::DoTick( U32 deltaTime )
 {
 	int metaDataEvent=0;
+
 	for( int i=0; i<NUM_MODELS; ++i ) {
-		model[i]->DeltaAnimation( deltaTime, (i==0) ? &metaDataEvent : 0, 0 );
-		model[i]->EmitParticles( engine->particleSystem, engine->camera.EyeDir3(), deltaTime );
+		if ( zeroFrame.Down() ) {
+			model[i]->SetAnimationTime( 0 );
+			model[i]->DeltaAnimation( 0, 0, 0 );
+		}
+		else {
+			model[i]->DeltaAnimation( deltaTime, (i==0) ? &metaDataEvent : 0, 0 );
+			model[i]->EmitParticles( engine->particleSystem, engine->camera.EyeDir3(), deltaTime );
+		}
 	}
 
 	if ( model[0]->HasAnimation() && model[0]->GetResource()->GetMetaData( IStringConst::ktrigger )) {

@@ -40,6 +40,7 @@ public:
 	}
 	virtual void ItemTapped( const gamui::UIItem* item );
 	void Zoom( int style, float delta );
+	void Rotate( float degrees );
 	virtual void DoTick( U32 deltaTime );
 	virtual void Draw3D( U32 deltaTime );
 
@@ -67,6 +68,7 @@ private:
 	gamui::PushButton modelLeft, modelRight;
 
 	gamui::ToggleButton ortho;
+	gamui::ToggleButton zeroFrame;
 	gamui::ToggleButton instance;
 	enum { PARTICLE, GUN, RING, LARGE_RING, NUM_TRIGGERS };
 	gamui::ToggleButton triggerToggle[NUM_TRIGGERS];

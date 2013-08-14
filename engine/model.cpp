@@ -563,6 +563,14 @@ void Model::DeltaAnimation( U32 _time, int *metaData, bool *done )
 }
 
 
+void Model::SetAnimationTime( U32 time )
+{
+	currentAnim.time = time;
+	prevAnim.time    = time;
+	crossFadeTime    = 100*1000; 
+}
+
+
 void Model::CalcHitAABB( Rectangle3F* aabb ) const
 {
 	// This is already an approximation - ignore rotation.
@@ -615,9 +623,14 @@ void Model::CalcMetaData( grinliz::IString name, grinliz::Matrix4* meta )
 	}
 	else {
 		CalcAnimation();
-		int index = GetBoneIndex( name );
+		int index = GetBoneIndex( data->boneName );
 		GLASSERT( index >= 0 && index < EL_MAX_BONES );
-		*meta = xform * aux->boneMats[index];						
+
+		Matrix4 t, r;
+		r.SetAxisAngle( data->axis, data->rotation );
+		t.SetTranslation( data->pos );
+
+		*meta = xform * aux->boneMats[index] * t * r;						
 	}
 }
 

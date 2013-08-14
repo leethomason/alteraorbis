@@ -296,6 +296,8 @@ public:
 	void DeltaAnimation(	U32 time, 
 							int *metaData,
 							bool *done );
+	// debugging
+	void SetAnimationTime( U32 time );
 
 	void SetAnimationRate( float rate )						{ animationRate = rate; }
 	bool HasAnimation() const								{ return animationResource && (currentAnim.id>=0); }
