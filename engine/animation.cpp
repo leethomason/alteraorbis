@@ -433,18 +433,15 @@ void AnimationResource::GetTransform(	int typeA,					// which animation to play:
 		// then out transformed place. It is pure translation
 		// which is very nice.
 
-		if ( boneDataA.bone[i].name == "arm.upper.left" ) {
-			int debug=1;
-		}
-
 		Matrix4 inv;
 		inv.SetTranslation( -boneDataA.bone[i].refConcat );	// very easy inverse xform
 
 		Matrix4 t, r;
 
 		// This is a hack, or a bug, or a mis-understanding of the file
-		// format. (Eek.) Sometimes the position is set, and sometimes
-		// it is not.
+		// format. (Eek. All bad.) Sometimes the position is set, 
+		// and sometimes it is not. So use the position if specified,
+		// else use the reference position.
 		static const Vector3F ZERO = { 0, 0, 0 };
 		if ( position.Equal( ZERO, 0.0001f )) {
 			t.SetTranslation( boneDataA.bone[i].refPos );

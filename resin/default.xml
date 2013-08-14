@@ -31,12 +31,12 @@
   <texture filename="palette.png" />
 
   <!-- animation v2
-       FIXME: still needs metadata
+       filename is a prefix to: walk, stand, gunwalk, gunstand, melee, impact
   -->
-  <animation filename="human2_male/human2_male_walk.bvh" assetName="humanMale2Animation">
+  <animation filename="human2_male/human2_male_.bvh" assetName="humanMale2Animation">
     <meta animation="melee" name="impact" time="300.0" />
   </animation>
-  
+
   <model filename="human2.ac" modelName="humanMale2" animation="humanMale2Animation" origin="0 0 0" shading="flat" polyRemoval="pre" >
     <meta name="trigger" pos="-0.18 0.42 0" rot="1 0 0 -90" boneName="arm.lower.right" />
     <meta name="target"  pos="0 0.72 0"/>
