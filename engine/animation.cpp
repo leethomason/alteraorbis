@@ -23,19 +23,19 @@ using namespace grinliz;
 AnimationResourceManager* AnimationResourceManager::instance = 0;
 
 static const char* gAnimationName[ ANIM_COUNT ] = {
-	"reference",
+	"stand",
 	"walk",
-	"gunrun",
 	"gunstand",
+	"gunwalk",
 	"melee",
-	"impactheavy"
+	"impact"
 };
 
 static const bool gAnimationLooping[ ANIM_COUNT ] = {
 	false,
 	true,
-	true,
 	false,
+	true,
 	false,
 	false
 };
@@ -43,8 +43,8 @@ static const bool gAnimationLooping[ ANIM_COUNT ] = {
 static const bool gAnimationSync[ ANIM_COUNT ] = {
 	false,
 	true,
-	true,
 	false,
+	true,
 	false,
 	false
 };
@@ -52,8 +52,8 @@ static const bool gAnimationSync[ ANIM_COUNT ] = {
 static const bool gAnimationMotion[ ANIM_COUNT ] = {
 	false,
 	true,
-	true,
 	false,
+	true,
 	false,
 	true
 };
@@ -73,6 +73,7 @@ bool AnimationResource::Motion( int type ) {
 
 /* static */ const char* AnimationResource::TypeToName( int type )
 {
+	GLASSERT( type >= 0 && type < ANIM_COUNT );
 	return gAnimationName[ type ];
 }
 
@@ -83,6 +84,7 @@ bool AnimationResource::Motion( int type ) {
 			return i;
 		}
 	}
+	GLASSERT( 0 );
 	return ANIM_OFF;
 }
 
