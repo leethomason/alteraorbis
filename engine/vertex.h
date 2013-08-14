@@ -157,11 +157,6 @@ struct BoneData
 
 	const Bone* GetBone( const grinliz::IString& internedName ) const;
 	int GetBoneIndex( const grinliz::IString& internedName ) const;
-
-//	void CalcTransform(	int frame0, int frame1, float fraction,			// interpolation of time
-//						const Bone* crossFade, float crossFadeFraction,	// interpolation of a different motion (can be null)
-//						int nBones,
-//						grinliz::Matrix4* outMat ) const;				// at least nBones of output
 };
 
 
