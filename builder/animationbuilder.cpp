@@ -343,8 +343,22 @@ void ProcessAnimation( const tinyxml2::XMLElement* element, gamedb::WItem* witem
 		parser.Parse( element, &doc, root, pur );
 	}
 	else if ( extension == ".bvh" ) {
-		XAnimationParser parser;
-		parser.ParseBVH( pathName.c_str(), root );
+		static const char* postfix[] = { "stand", "walk", "gunstand", "gunwalk", "melee", "impact", "" };
+		for( int i=0; *postfix[i]; ++i ) {
+
+			// stip off ".bvh"
+			GLString fn = pathName.substr( 0, pathName.size()-4 );
+			fn.append( postfix[i] );
+			fn.append( ".bvh" );
+
+			FILE* fp = fopen(  fn.c_str(), "rb" );
+			if ( fp ) {
+				fclose( fp );
+
+				XAnimationParser parser;
+				parser.ParseBVH( fn.c_str(), root );
+			}
+		}
 	}
 	else {
 		ExitError( "Animation", pathName.c_str(), assetName.c_str(), "file extension not recognized" );
