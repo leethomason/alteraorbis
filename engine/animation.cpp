@@ -257,8 +257,9 @@ AnimationResource::AnimationResource( const gamedb::Item* _item )
 				}
 				for( int i=0; i<sequence[type].nBones; ++i ) {
 					BoneData::Bone* bone = &sequence[type].boneData.bone[i];
-					GLLOG(( "An %s Sq %d Fr %d Bn %s Ref %.2f,%.2f,%.2f\n",
-						resName, type, frame, bone->name.c_str(), bone->refConcat.x, bone->refConcat.y, bone->refConcat.z ));
+					GLLOG(( "An %s Sq %d Fr %2d Bn %16s Ref %5.2f,%5.2f,%5.2f\n",
+						resName, type, frame, bone->name.c_str(), 
+						bone->refConcat.x, bone->refConcat.y, bone->refConcat.z ));
 				}
 			}
 		}
@@ -454,11 +455,10 @@ void AnimationResource::GetTransform(	int typeA,					// which animation to play:
 		rotation.ToMatrix( &r );
 		Matrix4 m = t * r;
 
-
 		int parentIndex = boneDataA.bone[i].parent; 
 		if ( parentIndex >= 0 ) {
 			output[i] = concat[parentIndex] * m * inv;
-			concat[i] = m * concat[parentIndex];
+			concat[i] = concat[parentIndex] * m;
 		}
 		else {
 			output[i] = m * inv;

@@ -231,19 +231,14 @@ const char* XAnimationParser::ScanFloat( float* v, const char* p )
 	return p;
 }
 
-/*
-void XAnimationParser::Swizzle( grinliz::Vector3F* v )
-{
-	Vector3F s = { v->x, v->z, -v->y };
-	*v = s;
-}
-*/
-
 
 void XAnimationParser::WriteBVHRec( gamedb::WItem* frameItem, int n, BNode* node )
 {
 	gamedb::WItem* boneItem = frameItem->FetchChild( node->name.c_str() );
 
+	if ( node->name == "arm.lower.right" && typeName == "gunstand" ) {
+		int debug=1;
+	}
 	/* swizzle for coordinate xform
 	glX = bX
 	glY = bZ
@@ -253,15 +248,14 @@ void XAnimationParser::WriteBVHRec( gamedb::WItem* frameItem, int n, BNode* node
 						node->channel[n][2],
 						-node->channel[n][1] };
 
-	Matrix4 xRot, yRot, zRot;
-	xRot.SetXRotation( node->channel[n][3] );
-	yRot.SetYRotation( node->channel[n][5] );
-	zRot.SetZRotation( -node->channel[n][4] );
+	float xr = node->channel[n][3];
+	float yr = node->channel[n][5];
+	float zr = -node->channel[n][4];
 
-	Matrix4 rot = xRot * yRot * zRot;	// Order?
-	//Matrix4 rot = xRot * zRot * yRot;	// Order?
-	Quaternion q;
-	q.FromRotationMatrix( rot );
+	Vector3F euler = { ToRadian(xr), ToRadian(yr), ToRadian(zr) };
+
+	// XYZs took a while to figure out.
+	Quaternion q = EulerToQuat( euler, EulOrdXYZs );
 
 	if ( node->parent ) {
 		boneItem->SetString( "parent", node->parent->name.c_str() );
@@ -281,10 +275,10 @@ void XAnimationParser::WriteBVHRec( gamedb::WItem* frameItem, int n, BNode* node
 }
 
 
-void XAnimationParser::WriteBVH( const grinliz::GLString& type, gamedb::WItem* witem )
+void XAnimationParser::WriteBVH( gamedb::WItem* witem )
 {
 	GLASSERT( bNodeRoot );
-	gamedb::WItem* animationItem = witem->FetchChild( type.c_str() );
+	gamedb::WItem* animationItem = witem->FetchChild( typeName.c_str() );
 
 	float totalDurationF = (float)nFrames * frameTime;
 	int totalDuration = (int)(totalDurationF * 1000.0f);
@@ -341,8 +335,8 @@ void XAnimationParser::ReadFile( const char* filename )
 
 void XAnimationParser::ParseBVH( const char* filename, gamedb::WItem* witem )
 {
-	GLString type = GetAnimationType( filename );
-	GLOUTPUT(( "Parsing BVH %s action=%s\n", filename, type.c_str() ));
+	typeName = GetAnimationType( filename );
+	GLOUTPUT(( "Parsing BVH %s action=%s\n", filename, typeName.c_str() ));
 	ReadFile( filename );
 
 	const char* p = str.c_str();
@@ -359,5 +353,5 @@ void XAnimationParser::ParseBVH( const char* filename, gamedb::WItem* witem )
 	ParseMotion( p );
 
 	witem->SetInt( "version", 2 );
-	WriteBVH( type, witem );
+	WriteBVH( witem );
 }

@@ -84,9 +84,10 @@ private:
 	
 	void DumpBNode( BNode* node, int depth );
 
-	void WriteBVH( const grinliz::GLString& type, gamedb::WItem* witem );
+	void WriteBVH( gamedb::WItem* witem );
 	void WriteBVHRec( gamedb::WItem* witem, int n, BNode* node );
 
+	grinliz::GLString typeName;
 	int   nFrames;
 	float frameTime;
 	int   frameSkip;

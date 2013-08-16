@@ -899,6 +899,35 @@ void Quaternion::Test()
 }
 
 
+Quaternion grinliz::EulerToQuat( Vector3F ea, int eaw )
+{
+    Quaternion qu;
+    float a[3], ti, tj, th, ci, cj, ch, si, sj, sh, cc, cs, sc, ss;
+    int i,j,k,h,n,s,f;
+    EulGetOrd(eaw,i,j,k,h,n,s,f);
+    if (f==EulFrmR) {float t = ea.x; ea.x = ea.z; ea.z = t;}
+    if (n==EulParOdd) ea.y = -ea.y;
+    ti = ea.x*0.5f; tj = ea.y*0.5f; th = ea.z*0.5f;
+    ci = cos(ti);  cj = cos(tj);  ch = cos(th);
+    si = sin(ti);  sj = sin(tj);  sh = sin(th);
+    cc = ci*ch; cs = ci*sh; sc = si*ch; ss = si*sh;
+    if (s==EulRepYes) {
+		a[i] = cj*(cs + sc);	/* Could speed up with */
+		a[j] = sj*(cc + ss);	/* trig identities. */
+		a[k] = sj*(cs - sc);
+		qu.w = cj*(cc - ss);
+    } else {
+		a[i] = cj*sc - sj*cs;
+		a[j] = cj*ss + sj*cc;
+		a[k] = cj*cs - sj*sc;
+		qu.w = cj*cc + sj*ss;
+    }
+    if (n==EulParOdd) a[j] = -a[j];
+    qu.x = a[X]; qu.y = a[Y]; qu.z = a[Z];
+    return (qu);
+}
+
+
 float grinliz::PointAABBDistance( const grinliz::Vector3F& point, const grinliz::Rectangle3F& aabb, Vector3F* nearest )
 {
 	if ( aabb.Contains( point )) {
