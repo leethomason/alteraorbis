@@ -20,6 +20,7 @@
 #include "../gamui/gamui.h"
 #include "../tinyxml2/tinyxml2.h"
 #include "../grinliz/glcontainer.h"
+#include "../engine/animation.h"
 
 class LumosGame;
 class Engine;
@@ -64,8 +65,8 @@ private:
 
 	gamui::PushButton okay;
 	gamui::PushButton boneLeft, boneRight;
-	gamui::PushButton animLeft, animRight;
 	gamui::PushButton modelLeft, modelRight;
+	gamui::ToggleButton animSelect[ANIM_COUNT];
 
 	gamui::ToggleButton ortho;
 	gamui::ToggleButton zeroFrame;
@@ -73,7 +74,7 @@ private:
 	enum { PARTICLE, GUN, RING, LARGE_RING, NUM_TRIGGERS };
 	gamui::ToggleButton triggerToggle[NUM_TRIGGERS];
 
-	gamui::TextLabel boneName, animName, modelName;
+	gamui::TextLabel boneName, modelName;
 
 	grinliz::Vector2I origin;
 	grinliz::Rectangle2I size;

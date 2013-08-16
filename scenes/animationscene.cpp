@@ -51,14 +51,12 @@ AnimationScene::AnimationScene( LumosGame* game ) : Scene( game )
 	boneName.Init( &gamui2D );
 	boneName.SetText( "all" );
 
-	animLeft.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
-	animLeft.SetText( "<" );
-
-	animRight.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
-	animRight.SetText( ">" );	
-
-	animName.Init( &gamui2D );
-	animName.SetText( "no animation" );
+	static const char* ANIM_NAME[ANIM_COUNT] = { "Stand", "Walk", "GunStand", "GunWalk", "Melee", "Impact" };
+	for( int i=0; i<ANIM_COUNT; ++i ) {
+		animSelect[i].Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
+		animSelect[i].SetText( ANIM_NAME[i] );
+		animSelect[0].AddToToggleGroup( &animSelect[i] );
+	}
 
 	modelLeft.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
 	modelLeft.SetText( "<-" );
@@ -151,9 +149,9 @@ void AnimationScene::Resize()
 		layout.PosAbs( &triggerToggle[i], 7+i, -2 );
 	}
 
-	layout.PosAbs( &animLeft,	0, 0 );
-	layout.PosAbs( &animName,	1, 0 );
-	layout.PosAbs( &animRight,	3, 0 );
+	for( int i=0; i<ANIM_COUNT; ++i ) {
+		layout.PosAbs( &animSelect[i], i, 0 );
+	}
 
 	layout.PosAbs( &modelLeft,	0, -3 );
 	layout.PosAbs( &modelName,	1, -3 );
@@ -214,23 +212,13 @@ void AnimationScene::UpdateModelInfo()
 
 void AnimationScene::UpdateAnimationInfo()
 {
-	const AnimationResource* res = model[0]->GetAnimationResource();
-	if ( res ) {
-		int nAnim = res->NumAnimations();
-		GLASSERT( currentAnim >=0 && currentAnim < nAnim );
-
-		const char* name = "none";
-		if ( nAnim > 0 ) {
-			name = res->AnimationName( currentAnim );
-			int type = AnimationResource::NameToType( name );
+	for( int k=0; k<ANIM_COUNT; ++k ) {
+		if ( animSelect[k].Down() ) {
 			for( int i=0; i<NUM_MODELS; ++i ) {
-				model[i]->SetAnimation( type, 500, false );
+				model[i]->SetAnimation( k, 500, false );
 			}
+			break;
 		}
-		animName.SetText( name );
-	}
-	else {
-		animName.SetText( "none" );
 	}
 }
 
@@ -281,21 +269,6 @@ void AnimationScene::ItemTapped( const gamui::UIItem* item )
 	else if ( item == &boneLeft ) {
 		--currentBone;
 		if ( currentBone == -2 ) currentBone = EL_MAX_BONES-1;
-	}
-	else if ( item == &animRight ) {
-		++currentAnim;
-		const AnimationResource* res = model[0]->GetAnimationResource();
-		GLASSERT( res );
-		if ( currentAnim >= res->NumAnimations() ) {
-			currentAnim = 0;
-		}
-	}
-	else if ( item == &animLeft ) {
-		-- currentAnim;
-		if ( currentAnim < 0 ) {
-			const AnimationResource* res = model[0]->GetAnimationResource();
-			currentAnim = res->NumAnimations()-1;
-		}
 	}
 	else if ( item == &ortho ) {
 		Screenport* port = engine->GetScreenportMutable();
