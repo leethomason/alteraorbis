@@ -181,7 +181,7 @@ bool AnimationResourceManager::HasResource( const char* name )
 /*
   V2
     humanMale2Animation []
-      walk [ totalDuration=833]
+      walk [ totalDuration=833 metaData='impact' metaDataTime=300 ]
         0000 [ time=0]
           base [ position=(0.000000 -0.000000 -0.000000 ) rotation=(0.000000 0.000000 0.000000 1.000000 )]
             leg.upper.left [ parent='base' position=(0.108094 0.160939 38.067875 ) rotation=(-0.001098 0.004170 -0.254688 0.967014 )]
@@ -478,7 +478,7 @@ int AnimationResource::GetMetaData(	int type, U32 t0, U32 t1 ) const
 
 	U32 tEvent = sequence[type].metaDataTime;
 
-	if ( tEvent >= t0 && tEvent < t0 + delta ) {
+	if ( tEvent >= t0Mod && tEvent < t0Mod + delta ) {
 		return sequence[type].metaDataID;
 	}
 	return 0;

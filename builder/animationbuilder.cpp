@@ -364,5 +364,19 @@ void ProcessAnimation( const tinyxml2::XMLElement* element, gamedb::WItem* witem
 		ExitError( "Animation", pathName.c_str(), assetName.c_str(), "file extension not recognized" );
 	}
 
-//	fclose( fp );
+	
+	// -- Process the meta data -- //
+	for(	const XMLElement* metaEle = element->FirstChildElement( "meta" );
+			metaEle;
+			metaEle = metaEle->NextSiblingElement( "meta" ) )
+	{
+		const char* animationName = metaEle->Attribute( "animation" );
+		const char* metaName = metaEle->Attribute( "name" );
+		int time = 0;
+		metaEle->QueryIntAttribute( "time", &time );
+
+		gamedb::WItem* animationItem = root->FetchChild( animationName );
+		animationItem->SetString( "metaData", metaName );
+		animationItem->SetInt(    "metaDataTime", time );
+	}
 }
