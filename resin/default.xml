@@ -34,7 +34,7 @@
        filename is a prefix to: walk, stand, gunwalk, gunstand, melee, impact
   -->
   <animation filename="human2_male/human2_male_.bvh" assetName="humanMale2Animation">
-    <meta animation="melee" name="impact" time="300.0" />
+    <meta animation="melee" name="impact" time="700" />
   </animation>
 
   <model filename="human2.ac" modelName="humanMale2" animation="humanMale2Animation" origin="0 0 0" shading="flat" polyRemoval="pre" >

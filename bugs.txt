@@ -61,11 +61,11 @@ x Probably don't need squatting logic in PathMoveComponent. (Actually do)
 		- decent UI
 		- show "clear" mark on top
 		- double layer for "build" marks
-		- proper animation system
+		x proper animation system
 			x skeletal animation
-			- support multiple sequences
-			- metadata events
-			- redo everything...
+			x support multiple sequences
+			x metadata events
+			x redo everything...
 		- wait states on wander
 	- Econ
 		- external constant file
