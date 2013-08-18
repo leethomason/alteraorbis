@@ -51,15 +51,15 @@ x Probably don't need squatting logic in PathMoveComponent. (Actually do)
 		x cancel orders
 		x building rotation
 		x leave core
-		- decent clear dragging
-		- fix team logic
-		- build 2 height ice
-		- decent UI
-		- show "clear" mark on top
-		- double layer for "build" marks
+		x decent UI
+		x show "clear" mark on top
+		x double layer for "build" marks
 		- proper animation system
 		- wait states on wander
 	- Econ
+		- fix team logic
+		- build 2 height ice
+		- decent clear dragging
 		- external constant file
 		- visitors create energy, buildings consume energy
 		- factory

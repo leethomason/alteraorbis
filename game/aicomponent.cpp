@@ -1404,8 +1404,8 @@ void AIComponent::FlushTaskList( const ComponentSet& thisComp )
 			int cx=1, cy=1;
 			if ( !task->structure.empty() ) {
 				const GameItem& rootItem = ItemDefDB::Instance()->Get( task->structure.c_str() );
-				rootItem.GetValue( "sizeX", &cx );
-				rootItem.GetValue( "siveY", &cy );
+				rootItem.GetValue( "size", &cx );
+				cy = cx;
 			}
 			Rectangle2I bounds;
 			bounds.Set( task->pos2i.x, task->pos2i.y, task->pos2i.x+cx-1, task->pos2i.y+cy-1 );

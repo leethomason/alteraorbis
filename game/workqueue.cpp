@@ -10,6 +10,8 @@
 
 #include "../xarchive/glstreamer.h"
 
+#include "../script/itemscript.h"
+
 using namespace grinliz;
 using namespace gamui;
 
@@ -24,58 +26,80 @@ WorkQueue::WorkQueue( WorldMap* wm, LumosChitBag* lcb, Engine* e ) : worldMap( w
 
 WorkQueue::~WorkQueue()
 {
-	while( !images.Empty() ) {
-		Image* image = images.Pop();
-		delete image;
-	}
-	while ( !models.Empty() ) {
-		Model* m = models.Pop();
-		engine->FreeModel( m );
+	for( int i=0; i<queue.Size(); ++i ) {
+		Model* m = queue[i].model;
+		if ( m ) {
+			engine->FreeModel( m );
+		}
 	}
 }
 
 
-void WorkQueue::AddImage( const QueueItem& item )
+void WorkQueue::AddImage( QueueItem* item )
 {
-	if ( item.action == CLEAR ) {
-		const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( "unitPlateCentered" );
-		GLASSERT( res );
-		Model* m = engine->AllocModel( res );
-		m->SetFlag( MODEL_CLICK_THROUGH );
-		GLASSERT( m );
-		const WorldGrid& wg = worldMap->GetWorldGrid( item.pos.x, item.pos.y );
-		int h = wg.Height();
-		m->SetPos( (float)item.pos.x + 0.5f, (float)h + 0.01f, (float)item.pos.y+0.5f );
-		models.Push( m );
+	const char* name = 0;
+	Vector3F pos = { 0, 0, 0 };
+
+	int size = 1;
+	if ( !item->structure.empty() ) {
+		const GameItem& gameItem = ItemDefDB::Instance()->Get( item->structure.c_str() );
+		gameItem.GetValue( "size", &size );
+	}
+
+	if ( item->action == CLEAR ) {
+		if ( item->structure.empty() ) {
+			// Clearing ice or plant
+			const WorldGrid& wg = worldMap->GetWorldGrid( item->pos.x, item->pos.y );
+			switch ( wg.Height() ) {
+			case 1:	name = "clearMarker1";	break;
+			case 2: name = "clearMarker2";	break;
+			case 3:	name = "clearMarker3";	break;
+			}
+			pos.Set( (float)item->pos.x + 0.5f, 0, (float)item->pos.y+0.5f );
+		}
+		else {
+			if ( size == 1 ) {
+				name = "clearMarker1";
+				pos.Set( (float)item->pos.x+0.5f, 0, (float)item->pos.y+0.5f );
+			}
+			else {
+				name = "clearMarker2";
+				pos.Set( (float)item->pos.x+1.f, 0, (float)item->pos.y+1.f );
+			}
+		}
 	}
 	else {
-		RenderAtom atom = LumosGame::CalcIconAtom( 10+item.action, true );	// fixme. switch to new icon texture
-		Image* image = new Image( &worldMap->overlay1, atom, true );
-		images.Push( image );
-		image->SetSize( 1, 1 );
-		image->SetPos( (float)item.pos.x, (float)item.pos.y );
+		if ( size == 1 ) {
+			name = "buildMarker1";
+			pos.Set( (float)item->pos.x + 0.5f, 0, (float)item->pos.y+0.5f );
+		}
+		else {
+			name = "buildMarker2";
+			pos.Set( (float)item->pos.x + 1.f, 0, (float)item->pos.y+1.f );
+		}
 	}
+	GLASSERT( name );
+	if ( name ) {
+		const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( name );
+		GLASSERT( res );
+		Model* m = engine->AllocModel( res );
+		GLASSERT( m );
+		m->SetFlag( MODEL_CLICK_THROUGH );
 
+		m->SetPos( pos );
+		GLASSERT( item->model == 0 );
+		item->model = m;
+	}
+	GLASSERT( item->model );
 }
 
 
-void WorkQueue::RemoveImage( const QueueItem& item )
+void WorkQueue::RemoveImage( QueueItem* item )
 {
-	for( int i=0; i<images.Size(); ++i ) {
-		Vector2I v = { (int)images[i]->X(), (int)images[i]->Y() };
-		if ( v == item.pos ) {
-			delete images[i];
-			images.Remove(i);
-			return;
-		}
-	}
-	for( int i=0; i<models.Size(); ++i ) {
-		Vector2I v = { (int)models[i]->Pos().x, (int)models[i]->Pos().z };
-		if ( v == item.pos ) {
-			engine->FreeModel( models[i] );
-			models.Remove(i);
-			return;
-		}
+	if ( item->model ) {
+		engine->FreeModel( item->model );
+		item->model = 0;
+		return;
 	}
 	GLASSERT( 0 );
 }
@@ -107,9 +131,14 @@ void WorkQueue::Add( int action, const grinliz::Vector2I& pos2i, IString structu
 	// Clear out existing.
 	Remove( pos2i );
 
-	QueueItem item( action, pos2i, structure, ++idPool );
+	QueueItem item;
+	item.action = action;
+	item.pos = pos2i;
+	item.structure = structure;
+	item.taskID = ++idPool;
+
+	AddImage( &item );
 	queue.Push( item );
-	AddImage( item );
 
 	Vector2F pos2 = { (float)pos2i.x+0.5f, (float)pos2i.y+0.5f };
 
@@ -155,6 +184,7 @@ const WorkQueue::QueueItem* WorkQueue::GetJobByTaskID( int taskID )
 {
 	for( int i=0; i<queue.Size(); ++i ) {
 		if ( queue[i].taskID == taskID ) {
+			GLASSERT( queue[i].model );
 			return &queue[i];
 		}
 	}
@@ -166,6 +196,7 @@ const WorkQueue::QueueItem* WorkQueue::GetJob( int id )
 {
 	for( int i=0; i<queue.Size(); ++i ) {
 		if ( queue[i].assigned == id ) {
+			GLASSERT( queue[i].model );
 			return &queue[i];
 		}
 	}
@@ -214,7 +245,8 @@ const WorkQueue::QueueItem* WorkQueue::Find( const grinliz::Vector2I& chitPos )
 
 void WorkQueue::RemoveItem( int index )
 {
-	RemoveImage( queue[index] );
+	GLASSERT( queue[index].model );
+	RemoveImage( &queue[index] );
 	queue.Remove( index );
 }
 
@@ -278,7 +310,7 @@ void WorkQueue::Serialize( XStream* xs )
 
 	if ( xs->Loading() ) {
 		for( int i=0; i<queue.Size(); ++i ) {
-			AddImage( queue[i] );
+			AddImage( &queue[i] );
 			idPool = Max( idPool, queue[i].taskID+1 );
 		}
 	}
