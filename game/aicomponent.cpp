@@ -1319,14 +1319,15 @@ void AIComponent::FlushTaskList( const ComponentSet& thisComp )
 	Vector2F taskPos2 = { (float)task->pos2i.x + 0.5f, (float)task->pos2i.y + 0.5f };
 	Vector3F taskPos3 = { taskPos2.x, 0, taskPos2.y };
 	Vector2I sector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
+	WorkQueue* workQueue = 0;
+	const WorkQueue::QueueItem* queueItem = 0;
 
 	// If this is a task associated with a work item, make
 	// sure that work item still exists.
 	if ( task->taskID ) {
-		const WorkQueue::QueueItem* queueItem = 0;
 		CoreScript* coreScript = GetChitBag()->ToLumos()->GetCore( sector );
 		if ( coreScript ) {
-			WorkQueue* workQueue = coreScript->GetWorkQueue();
+			workQueue = coreScript->GetWorkQueue();
 			if ( workQueue ) {
 				queueItem = workQueue->GetJobByTaskID( task->taskID );
 			}
@@ -1413,11 +1414,15 @@ void AIComponent::FlushTaskList( const ComponentSet& thisComp )
 			// Check for rock, water, etc.
 			for( int y=bounds.min.y; y<=bounds.max.y; ++y ) {
 				for( int x=bounds.min.x; x<=bounds.max.x; ++x ) {
-					if (    !map->IsPassable( pos2i.x, pos2i.y ) 
-						 || GetChitBag()->ToLumos()->QueryRemovable( pos2i )) 
+					Vector2I checkxy = { x, y };
+					if (    !map->IsPassable( x, y ) 
+						 || GetChitBag()->ToLumos()->QueryRemovable( checkxy )) 
 					{
 						// Found a plant or building in the way.
 						taskList.Clear();
+						if ( workQueue && queueItem ) {
+							workQueue->Remove( queueItem->pos );
+						}
 						break;
 					}
 				}
