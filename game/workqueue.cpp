@@ -35,16 +35,22 @@ WorkQueue::~WorkQueue()
 }
 
 
+int WorkQueue::CalcTaskSize( const QueueItem& item )
+{
+	int size = 1;
+	if ( !item.structure.empty() ) {
+		const GameItem& gameItem = ItemDefDB::Instance()->Get( item.structure.c_str() );
+		gameItem.GetValue( "size", &size );
+	}
+	return size;
+}
+
+
 void WorkQueue::AddImage( QueueItem* item )
 {
 	const char* name = 0;
 	Vector3F pos = { 0, 0, 0 };
-
-	int size = 1;
-	if ( !item->structure.empty() ) {
-		const GameItem& gameItem = ItemDefDB::Instance()->Get( item->structure.c_str() );
-		gameItem.GetValue( "size", &size );
-	}
+	int size = CalcTaskSize( *item );
 
 	if ( item->action == CLEAR ) {
 		if ( item->structure.empty() ) {
@@ -251,6 +257,51 @@ void WorkQueue::RemoveItem( int index )
 }
 
 
+bool WorkQueue::TaskCanComplete( const QueueItem& item )
+{
+	Vector2I pos2i = { item.pos.x, item.pos.y };
+	Vector2F pos2  = { (float)pos2i.x + 0.5f, (float)pos2i.y+0.5f };
+	const WorldGrid& wg = worldMap->GetWorldGrid( pos2i.x, pos2i.x );
+	RemovableFilter removableFilter;
+	int size = CalcTaskSize( item );
+
+	int passable = 0;
+	int removable = 0;
+	for( int y=pos2i.y; y<pos2i.y+size; ++y ) {
+		for( int x=pos2i.x; x<pos2i.x+size; ++x ) {
+			if ( worldMap->IsPassable( x, y )) {
+				++passable;
+			}
+			Vector2I v = { x, y };
+			if ( chitBag->QueryRemovable( v )) {
+				++removable;
+			}
+		}
+	}
+
+	switch ( item.action )
+	{
+	case CLEAR:
+		if ( passable == size*size && removable == 0 ) {
+			// nothing to clear.
+			return false;
+		}
+		break;
+
+	case BUILD:
+		if ( passable < size*size || removable ) {
+			// stuff in the way
+			return false;
+		}
+		break;
+
+	default:
+		GLASSERT( 0 );
+		break;
+	}
+	return true;
+}
+
 void WorkQueue::DoTick()
 {
 	for( int i=0; i<queue.Size(); ++i ) {
@@ -261,30 +312,9 @@ void WorkQueue::DoTick()
 			}
 		}
 
-		Vector2I pos2i = { queue[i].pos.x, queue[i].pos.y };
-		Vector2F pos2  = { (float)pos2i.x + 0.5f, (float)pos2i.y+0.5f };
-		const WorldGrid& wg = worldMap->GetWorldGrid( pos2i.x, pos2i.x );
-		RemovableFilter removableFilter;
-
-		switch ( queue[i].action )
-		{
-		case CLEAR:
-			if ( worldMap->IsPassable( pos2i.x, pos2i.y ) && !chitBag->QueryRemovable( pos2i )) {
-				RemoveItem( i );
-				--i;
-			}
-			break;
-
-		case BUILD:
-			if ( !worldMap->IsPassable( pos2i.x, pos2i.y ) || chitBag->QueryBuilding( pos2i )) {
-				RemoveItem( i );
-				--i;
-			}
-			break;
-
-		default:
-			GLASSERT( 0 );
-			break;
+		if ( !TaskCanComplete( queue[i] )) {
+			RemoveItem( i );
+			--i;
 		}
 	}
 }

@@ -85,11 +85,16 @@ public:
 	void DoTick();	// mostly looks for work being complete.
 	const grinliz::CDynArray< WorkQueue::QueueItem >& Queue() const { return queue; };	
 
+	// Can this task be done at the location?
+	// Stuff moves, commands change, etc.
+	bool TaskCanComplete( const QueueItem& item );
+
 private:
 
 	void AddImage( QueueItem* item );
 	void RemoveImage( QueueItem* item );
 	void RemoveItem( int index );
+	int CalcTaskSize( const QueueItem& item );
 
 	Engine*				engine;
 	WorldMap*			worldMap;

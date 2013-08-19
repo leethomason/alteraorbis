@@ -1372,28 +1372,34 @@ void AIComponent::FlushTaskList( const ComponentSet& thisComp )
 
 	case TASK_REMOVE:
 		{
-			if ( task->structure.empty() ) {
-				const WorldGrid& wg = map->GetWorldGrid( task->pos2i.x, task->pos2i.y );
-				if ( wg.RockHeight() ) {
-					DamageDesc dd( 10000, 0 );	// FIXME need constant
-					Vector3I voxel = { task->pos2i.x, 0, task->pos2i.y };
-					map->VoxelHit( voxel, dd );
+			GLASSERT( workQueue && queueItem );
+			if ( workQueue->TaskCanComplete( *queueItem )) {
+				if ( task->structure.empty() ) {
+					const WorldGrid& wg = map->GetWorldGrid( task->pos2i.x, task->pos2i.y );
+					if ( wg.RockHeight() ) {
+						DamageDesc dd( 10000, 0 );	// FIXME need constant
+						Vector3I voxel = { task->pos2i.x, 0, task->pos2i.y };
+						map->VoxelHit( voxel, dd );
+					}
 				}
+				else {
+					Chit* found = GetChitBag()->ToLumos()->QueryRemovable( task->pos2i );
+					if ( found ) {
+						DamageDesc dd( 10000, 0 );
+						ChitDamageInfo info( dd );
+						info.originID = 0;
+						info.awardXP  = false;
+						info.isMelee  = true;
+						info.isExplosion = false;
+						info.originOfImpact = thisComp.spatial->GetPosition();
+						found->SendMessage( ChitMsg( ChitMsg::CHIT_DAMAGE, 0, &info ), 0 );
+					}
+				}
+				taskList.PopFront();
 			}
 			else {
-				Chit* found = GetChitBag()->ToLumos()->QueryRemovable( task->pos2i );
-				if ( found ) {
-					DamageDesc dd( 10000, 0 );
-					ChitDamageInfo info( dd );
-					info.originID = 0;
-					info.awardXP  = false;
-					info.isMelee  = true;
-					info.isExplosion = false;
-					info.originOfImpact = thisComp.spatial->GetPosition();
-					found->SendMessage( ChitMsg( ChitMsg::CHIT_DAMAGE, 0, &info ), 0 );
-				}
+				taskList.Clear();
 			}
-			taskList.PopFront();
 		}
 		break;
 
@@ -1402,32 +1408,8 @@ void AIComponent::FlushTaskList( const ComponentSet& thisComp )
 			// IsPassable (isLand, noRocks)
 			// No plants
 			// No buildings
-			int cx=1, cy=1;
-			if ( !task->structure.empty() ) {
-				const GameItem& rootItem = ItemDefDB::Instance()->Get( task->structure.c_str() );
-				rootItem.GetValue( "size", &cx );
-				cy = cx;
-			}
-			Rectangle2I bounds;
-			bounds.Set( task->pos2i.x, task->pos2i.y, task->pos2i.x+cx-1, task->pos2i.y+cy-1 );
-
-			// Check for rock, water, etc.
-			for( int y=bounds.min.y; y<=bounds.max.y; ++y ) {
-				for( int x=bounds.min.x; x<=bounds.max.x; ++x ) {
-					Vector2I checkxy = { x, y };
-					if (    !map->IsPassable( x, y ) 
-						 || GetChitBag()->ToLumos()->QueryRemovable( checkxy )) 
-					{
-						// Found a plant or building in the way.
-						taskList.Clear();
-						if ( workQueue && queueItem ) {
-							workQueue->Remove( queueItem->pos );
-						}
-						break;
-					}
-				}
-			}
-			if ( !taskList.Empty() ) {
+			GLASSERT( workQueue && queueItem );
+			if ( workQueue->TaskCanComplete( *queueItem )) {
 				if ( task->structure.empty() ) {
 					map->SetRock( task->pos2i.x, task->pos2i.y, 1, false, WorldGrid::ICE );
 				}
@@ -1435,6 +1417,10 @@ void AIComponent::FlushTaskList( const ComponentSet& thisComp )
 					GetChitBag()->ToLumos()->NewBuilding( task->pos2i, task->structure.c_str(), thisComp.item->primaryTeam );
 				}
 				taskList.PopFront();
+			}
+			else {
+				// Plan has gone bust:
+				taskList.Clear();
 			}
 		}
 		break;
