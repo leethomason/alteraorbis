@@ -190,6 +190,15 @@ void Engine::MoveCameraXZ( float x, float z, Vector3F* calc )
 
 
 
+Model* Engine::AllocModel( const char* name )
+{
+	const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( name );
+	GLASSERT( res );
+	GLASSERT( spaceTree );
+	return spaceTree->AllocModel( res );
+}
+
+
 Model* Engine::AllocModel( const ModelResource* resource )
 {
 	GLASSERT( resource );

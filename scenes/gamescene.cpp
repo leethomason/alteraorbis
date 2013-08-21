@@ -40,6 +40,8 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	targetChit = 0;
 	possibleChit = 0;
 	infoID = 0;
+	selectionModel = 0;
+	buildActive = NO_BUILD;
 	voxelInfoID.Zero();
 	lumosGame = game;
 	game->InitStd( &gamui2D, &okay, 0 );
@@ -124,6 +126,9 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 
 GameScene::~GameScene()
 {
+	if ( selectionModel ) {
+		sim->GetEngine()->FreeModel( selectionModel );
+	}
 	delete sim;
 }
 
@@ -301,7 +306,9 @@ void GameScene::Rotate( float degrees )
 
 void GameScene::MouseMove( const grinliz::Vector2F& view, const grinliz::Ray& world )
 {
-	ModelVoxel mv = this->ModelAtMouse( view, sim->GetEngine() );
+	// --- Info and debugging info. ---
+	Vector3F at;
+	ModelVoxel mv = this->ModelAtMouse( view, sim->GetEngine(), TEST_TRI, 0, 0, 0, &at );
 	MoveModel( mv.model ? mv.model->userData : 0 );
 
 	if ( mv.model && mv.model->userData ) {
@@ -309,6 +316,53 @@ void GameScene::MouseMove( const grinliz::Vector2F& view, const grinliz::Ray& wo
 	}
 	if ( mv.VoxelHit() ) {
 		voxelInfoID = mv.Voxel2();
+	}
+
+	// --- Selection display. (Only in desktop interface.)
+	Engine* engine = sim->GetEngine();
+	float size = 1.0f;
+	const char* name = "";
+	if ( buildActive ) {
+		// Which should we use?
+		switch ( buildActive ) {
+		case CLEAR_ROCK: 
+			name = "clearMarker3";			
+			break;
+		case BUILD_ICE:
+		case BUILD_KIOSK_N:
+		case BUILD_KIOSK_M:
+		case BUILD_KIOSK_C:
+		case BUILD_KIOSK_S:
+			name = "buildMarker1";
+			break;
+		case BUILD_VAULT:
+			size = 2.0f;
+			name = "buildMarker2";
+			break;
+		default:
+			break;
+		}
+	}
+	if ( *name ) {
+		// Make the model current.
+		if ( !selectionModel || !StrEqual( selectionModel->GetResource()->Name(), name )) {
+			if ( selectionModel ) {
+				engine->FreeModel( selectionModel );
+			}
+			selectionModel = engine->AllocModel( name );
+			GLASSERT( selectionModel );
+		}
+	}
+	else {
+		if ( selectionModel ) {
+			engine->FreeModel( selectionModel );
+			selectionModel = 0;
+		}
+	}
+	if ( selectionModel ) {
+		float x = floorf( at.x ) + size*0.5f;
+		float z = floorf( at.z ) + size*0.5f;
+		selectionModel->SetPos( x, 0, z );
 	}
 }
 
@@ -401,7 +455,7 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 	}
 	enable3DDragging = (sim->GetPlayerChit() == 0) || (coreMode != 0);
 	
-	int  buildActive = 0;
+	buildActive = NO_BUILD;
 	for( int i=1; i<NUM_BUILD_BUTTONS; ++i ) {
 		if ( buildButton[i].Down() ) {
 			buildActive = i;

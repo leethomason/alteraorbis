@@ -90,6 +90,10 @@ private:
 	int					possibleChit;
 	int					infoID;
 	grinliz::Vector2I	voxelInfoID;
+	int					buildActive;	// which build button is active. 0 if none.
+
+	// Shows what is being built or removed.
+	Model*				selectionModel;
 
 	gamui::PushButton	okay;
 	gamui::PushButton	serialButton[NUM_SERIAL_BUTTONS];
