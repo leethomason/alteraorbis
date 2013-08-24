@@ -124,32 +124,43 @@ private:
 	struct Task
 	{
 		Task() { Clear(); }
-		Task( int _action, const grinliz::Vector2I _pos, int _taskID ) {
-			Clear();
-			action = _action;
-			pos2i = _pos;
-			taskID = _taskID;
+		static Task MoveTask( const grinliz::Vector2F& pos2, int taskID=0 ) 
+		{
+			grinliz::Vector2I pos2i = { (int)pos2.x, (int)pos2.y };
+			return MoveTask( pos2i, taskID );
 		}
-		Task( int _action, const grinliz::Vector2F _pos, int _taskID ) {
-			Clear();
-			action = _action;
-			pos2i.Set( (int)_pos.x, (int)_pos.y );
-			taskID = _taskID;
+
+		static Task MoveTask( const grinliz::Vector2I& pos2i, int taskID=0 )
+		{
+			Task t;
+			t.action = MOVE;
+			t.pos2i  = pos2i;
+			t.taskID = taskID;
+			return t;
 		}
-		Task( int _action, int _timer, const grinliz::Vector2I& _pos, int _taskID ) {
-			Clear();
-			action = _action;
-			timer  = _timer;
-			pos2i = _pos;
-			taskID = _taskID;
+		static Task StandTask( int time, int taskID=0 ) {
+			Task t;
+			t.action = STAND;
+			t.timer = time;
+			t.taskID = taskID;
+			return t;
 		}
-		Task( int _action, const grinliz::Vector2I _pos, grinliz::IString _structure, int _taskID ) {
-			Clear();
-			pos2i = _pos;
-			action = _action;
-			structure = _structure;
-			taskID = _taskID;
+		static Task RemoveTask( const grinliz::Vector2I& pos2i, int taskID=0 ) {
+			Task t;
+			t.action = TASK_REMOVE;
+			t.pos2i = pos2i;
+			t.taskID = taskID;
+			return t;
 		}
+		static Task BuildTask( const grinliz::Vector2I& pos2i, const grinliz::IString& structure, int taskID=0 ) {
+			Task t;
+			t.action = TASK_BUILD;
+			t.pos2i = pos2i;
+			t.structure = structure;
+			t.taskID = taskID;
+			return t;
+		}
+
 
 		void Clear() {
 			action = 0;

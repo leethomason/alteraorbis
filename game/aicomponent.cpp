@@ -46,17 +46,18 @@
 
 using namespace grinliz;
 
-static const float NORMAL_AWARENESS		= 10.0f;
-static const float LOOSE_AWARENESS		= 16.0f;
-static const float SHOOT_ANGLE			= 10.0f;	// variation from heading that we can shoot
-static const float SHOOT_ANGLE_DOT		=  0.985f;	// same number, as dot product.
-static const float WANDER_RADIUS		=  5.0f;
-static const float EAT_HP_PER_SEC		=  2.0f;
-static const float EAT_HP_HEAL_MULT		=  5.0f;	// eating really tears up plants. heal the critter more than damage the plant.
-static const int   WANDER_ODDS			= 50;		// as in 1 in WANDER_ODDS
-static const float PLANT_AWARE			=  3.0f;
-static const float GOLD_AWARE			=  3.5f;
-static const int   FORCE_COUNT_STUCK	=  8;
+static const float	NORMAL_AWARENESS			= 10.0f;
+static const float	LOOSE_AWARENESS				= 16.0f;
+static const float	SHOOT_ANGLE					= 10.0f;	// variation from heading that we can shoot
+static const float	SHOOT_ANGLE_DOT				=  0.985f;	// same number, as dot product.
+static const float	WANDER_RADIUS				=  5.0f;
+static const float	EAT_HP_PER_SEC				=  2.0f;
+static const float	EAT_HP_HEAL_MULT			=  5.0f;	// eating really tears up plants. heal the critter more than damage the plant.
+static const int	WANDER_ODDS					= 50;		// as in 1 in WANDER_ODDS
+static const float	PLANT_AWARE					=  3.0f;
+static const float	GOLD_AWARE					=  3.5f;
+static const int	FORCE_COUNT_STUCK			=  8;
+static const int	STAND_TIME_WHEN_WANDERING	= 1500;
 
 const char* AIComponent::MODE_NAMES[NUM_MODES]     = { "normal", "rockbreak", "battle" };
 const char* AIComponent::ACTION_NAMES[NUM_ACTIONS] = { "none", "move", "melee", "shoot", "wander", "stand" };
@@ -1098,7 +1099,9 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 		}
 	}
 	if ( !dest.IsZero() ) {
-		this->Move( dest, false );
+		Vector2I dest2i = { (int)dest.x, (int)dest.y };
+		taskList.Push( Task::MoveTask( dest2i ));
+		taskList.Push( Task::StandTask( STAND_TIME_WHEN_WANDERING ));
 	}
 }
 
@@ -1452,18 +1455,18 @@ void AIComponent::WorkQueueToTask(  const ComponentSet& thisComp )
 					float cost = 0;
 					if ( map->CalcPathBeside( thisComp.spatial->GetPosition2D(), dest, &end, &cost )) {
 						
-						taskList.Push( Task( MOVE, end, item->taskID ));
-						taskList.Push( Task( STAND, 1000, item->pos, item->taskID ));
-						taskList.Push( Task( TASK_REMOVE, item->pos, item->structure, item->taskID ));
+						taskList.Push( Task::MoveTask( end, item->taskID ));
+						taskList.Push( Task::StandTask( 1000, item->taskID ));
+						taskList.Push( Task::RemoveTask( item->pos, item->taskID ));
 					}
 				}
 				break;
 
 			case WorkQueue::BUILD:
 				{
-					taskList.Push( Task( MOVE, item->pos, item->taskID ));
-					taskList.Push( Task( STAND, 1000, item->pos, item->taskID ));
-					taskList.Push( Task( TASK_BUILD, item->pos, item->structure, item->taskID ));
+					taskList.Push( Task::MoveTask( item->pos, item->taskID ));
+					taskList.Push( Task::StandTask( 1000, item->taskID ));
+					taskList.Push( Task::BuildTask( item->pos, item->structure, item->taskID ));
 				}
 				break;
 
