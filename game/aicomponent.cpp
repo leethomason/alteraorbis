@@ -1374,13 +1374,11 @@ void AIComponent::FlushTaskList( const ComponentSet& thisComp )
 		{
 			GLASSERT( workQueue && queueItem );
 			if ( workQueue->TaskCanComplete( *queueItem )) {
-				if ( task->structure.empty() ) {
-					const WorldGrid& wg = map->GetWorldGrid( task->pos2i.x, task->pos2i.y );
-					if ( wg.RockHeight() ) {
-						DamageDesc dd( 10000, 0 );	// FIXME need constant
-						Vector3I voxel = { task->pos2i.x, 0, task->pos2i.y };
-						map->VoxelHit( voxel, dd );
-					}
+				const WorldGrid& wg = map->GetWorldGrid( task->pos2i.x, task->pos2i.y );
+				if ( wg.RockHeight() ) {
+					DamageDesc dd( 10000, 0 );	// FIXME need constant
+					Vector3I voxel = { task->pos2i.x, 0, task->pos2i.y };
+					map->VoxelHit( voxel, dd );
 				}
 				else {
 					Chit* found = GetChitBag()->ToLumos()->QueryRemovable( task->pos2i );

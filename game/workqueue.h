@@ -44,6 +44,7 @@ public:
 
 	struct QueueItem {
 		QueueItem() : action(NO_ACTION), assigned(0), taskID(0), model(0) { pos.Zero(); }
+		/*
 		QueueItem( const QueueItem& qi ) {
 			this->action	= qi.action;
 			this->structure = qi.structure;
@@ -60,6 +61,7 @@ public:
 			this->taskID	= qi.taskID;
 			this->model		= qi.model;
 		}
+		*/
 
 		void Serialize( XStream* xs );
 
@@ -72,7 +74,8 @@ public:
 	};
 
 	void Serialize( XStream* xs );
-	void Add( int action, const grinliz::Vector2I& pos, grinliz::IString structure );	// add an action to do
+	void AddBuild( const grinliz::Vector2I& pos, grinliz::IString structure );	// add an action to do
+	void AddClear( const grinliz::Vector2I& pos );
 	void Remove( const grinliz::Vector2I& pos );
 	
 	const QueueItem*	Find( const grinliz::Vector2I& chitPos );	// find something to do. don't hold pointer!
@@ -87,14 +90,18 @@ public:
 
 	// Can this task be done at the location?
 	// Stuff moves, commands change, etc.
-	bool TaskCanComplete( const QueueItem& item );
+	static bool TaskCanComplete(	WorldMap* worldMap, 
+									LumosChitBag* chitBag,
+									const grinliz::Vector2I& pos, bool build, int size );
+	bool TaskCanComplete( const WorkQueue::QueueItem& item );
 
 private:
 
 	void AddImage( QueueItem* item );
 	void RemoveImage( QueueItem* item );
 	void RemoveItem( int index );
-	int CalcTaskSize( const QueueItem& item );
+	int  CalcTaskSize( const QueueItem& item );
+	void SendNotification( const grinliz::Vector2I& pos );
 
 	Engine*				engine;
 	WorldMap*			worldMap;

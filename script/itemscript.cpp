@@ -83,6 +83,17 @@ const GameItem& ItemDefDB::Get( const char* name, int intrinsic )
 }
 
 
+/*static*/ void ItemDefDB::GetProperty( const char* name, const char* prop, int* value )
+{
+	GameItemArr arr;
+	Instance()->Get( name, &arr );
+	GLASSERT( arr.Size() > 0 );
+	
+	float v = 0;
+	arr[0]->GetValue( prop, value );
+}
+
+
 void ItemDefDB::Get( const char* name, GameItemArr* arr )
 {
 	GameItem* item=0;

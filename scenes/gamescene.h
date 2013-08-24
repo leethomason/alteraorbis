@@ -55,6 +55,7 @@ private:
 	void TapModel( Chit* chit );
 	void MoveModel( Chit* chit );
 	void ClearTargetFlags();
+	void SetSelectionModel( const grinliz::Vector2F& view );
 
 	enum {
 		SAVE,
@@ -79,6 +80,9 @@ private:
 		NUM_BUILD_BUTTONS
 	};
 
+	// returns the name from the build button
+	grinliz::IString StructureInfo( int buildButtonIndex, int* size );
+
 	LumosGame*	lumosGame;
 	Sim*		sim;
 	bool		fastMode;
@@ -91,6 +95,7 @@ private:
 	int					infoID;
 	grinliz::Vector2I	voxelInfoID;
 	int					buildActive;	// which build button is active. 0 if none.
+	grinliz::IString	BuildActiveInfo( int* size );
 
 	// Shows what is being built or removed.
 	Model*				selectionModel;

@@ -53,13 +53,14 @@ void WorkQueue::AddImage( QueueItem* item )
 	int size = CalcTaskSize( *item );
 
 	if ( item->action == CLEAR ) {
-		if ( item->structure.empty() ) {
+		const WorldGrid& wg = worldMap->GetWorldGrid( item->pos.x, item->pos.y );
+		if ( wg.Height() ) {
 			// Clearing ice or plant
-			const WorldGrid& wg = worldMap->GetWorldGrid( item->pos.x, item->pos.y );
 			switch ( wg.Height() ) {
 			case 1:	name = "clearMarker1";	break;
 			case 2: name = "clearMarker2";	break;
 			case 3:	name = "clearMarker3";	break;
+			default: name = "clearMarker1"; break;
 			}
 			pos.Set( (float)item->pos.x + 0.5f, 0, (float)item->pos.y+0.5f );
 		}
@@ -121,11 +122,8 @@ void WorkQueue::Remove( const grinliz::Vector2I& pos )
 }
 
 
-
-void WorkQueue::Add( int action, const grinliz::Vector2I& pos2i, IString structure )
+void WorkQueue::AddClear( const grinliz::Vector2I& pos2i )
 {
-	GLASSERT( action >= CLEAR && action < NUM_ACTIONS );
-
 	if ( pos2i.x / SECTOR_SIZE == sector.x && pos2i.y / SECTOR_SIZE == sector.y ) {
 		// okay!
 	}
@@ -134,20 +132,57 @@ void WorkQueue::Add( int action, const grinliz::Vector2I& pos2i, IString structu
 		return;
 	}
 
+	QueueItem item;
+	item.action = CLEAR;
+	item.pos = pos2i;
+	item.structure = IString();
+	item.taskID = ++idPool;
+
+	if ( !TaskCanComplete( item )) {
+		return;
+	}
+
 	// Clear out existing.
 	Remove( pos2i );
 
+	AddImage( &item );
+	queue.Push( item );
+	SendNotification( pos2i );
+}
+
+
+void WorkQueue::AddBuild( const grinliz::Vector2I& pos2i, IString structure )
+{
+	if ( pos2i.x / SECTOR_SIZE == sector.x && pos2i.y / SECTOR_SIZE == sector.y ) {
+		// okay!
+	}
+	else {
+		// wrong sector.
+		return;
+	}
+
 	QueueItem item;
-	item.action = action;
+	item.action = BUILD;
 	item.pos = pos2i;
 	item.structure = structure;
 	item.taskID = ++idPool;
 
+	if ( !TaskCanComplete( item )) {
+		return;
+	}
+
+	// Clear out existing.
+	Remove( pos2i );
+
 	AddImage( &item );
 	queue.Push( item );
+	SendNotification( pos2i );
+}
 
+
+void WorkQueue::SendNotification( const grinliz::Vector2I& pos2i )
+{
 	Vector2F pos2 = { (float)pos2i.x+0.5f, (float)pos2i.y+0.5f };
-
 	// Notify near.
 	CChitArray array;
 	ItemNameFilter workerFilter( IStringConst::kworker );
@@ -158,7 +193,7 @@ void WorkQueue::Add( int action, const grinliz::Vector2I& pos2i, IString structu
 	}
 }
 
-
+	
 void WorkQueue::Assign( int id, const WorkQueue::QueueItem* item )
 {
 	int index = item - queue.Mem();
@@ -257,13 +292,18 @@ void WorkQueue::RemoveItem( int index )
 }
 
 
-bool WorkQueue::TaskCanComplete( const QueueItem& item )
+bool WorkQueue::TaskCanComplete( const WorkQueue::QueueItem& item )
 {
-	Vector2I pos2i = { item.pos.x, item.pos.y };
+	return WorkQueue::TaskCanComplete( worldMap, chitBag, item.pos, item.action != CLEAR, CalcTaskSize( item ));
+}
+
+
+/*static*/ bool WorkQueue::TaskCanComplete( WorldMap* worldMap, 
+											LumosChitBag* chitBag,
+											const grinliz::Vector2I& pos2i, bool build, int size )
+{
 	Vector2F pos2  = { (float)pos2i.x + 0.5f, (float)pos2i.y+0.5f };
 	const WorldGrid& wg = worldMap->GetWorldGrid( pos2i.x, pos2i.x );
-	RemovableFilter removableFilter;
-	int size = CalcTaskSize( item );
 
 	int passable = 0;
 	int removable = 0;
@@ -279,25 +319,17 @@ bool WorkQueue::TaskCanComplete( const QueueItem& item )
 		}
 	}
 
-	switch ( item.action )
-	{
-	case CLEAR:
-		if ( passable == size*size && removable == 0 ) {
-			// nothing to clear.
-			return false;
-		}
-		break;
-
-	case BUILD:
+	if ( build ) {
 		if ( passable < size*size || removable ) {
 			// stuff in the way
 			return false;
 		}
-		break;
-
-	default:
-		GLASSERT( 0 );
-		break;
+	}
+	else {
+		if ( passable == size*size && removable == 0 ) {
+			// nothing to clear.
+			return false;
+		}
 	}
 	return true;
 }
