@@ -55,9 +55,9 @@ x Probably don't need squatting logic in PathMoveComponent. (Actually do)
 		x decent UI
 		x show "clear" mark on top
 		x double layer for "build" marks
-		- proper animation system
 		x wait states on wander
-		- don't count F/E that can't be pathed to
+		x don't count F/E that can't be pathed to
+		- proper animation system
 	- Econ
 		- fix team logic
 		- build 2 height ice

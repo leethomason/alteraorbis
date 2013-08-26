@@ -238,7 +238,8 @@ void AIComponent::GetFriendEnemyLists()
 	for( int i=0; i<chitArr.Size(); ++i ) {
 		int status = GetTeamStatus( chitArr[i] );
 		if ( status == ENEMY ) {
-			if ( enemyList.HasCap() ) {
+			if (    enemyList.HasCap() 
+				 && map->HasStraightPath( center, chitArr[i]->GetSpatialComponent()->GetPosition2D() )) {
 				enemyList.Push( chitArr[i]->ID());
 			}
 		}

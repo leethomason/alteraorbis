@@ -1463,6 +1463,16 @@ SectorPort WorldMap::NearestPort( const Vector2F& pos )
 }
 
 
+bool WorldMap::HasStraightPath( const grinliz::Vector2F& start, 
+								const grinliz::Vector2F& end )
+{
+
+	// Try a straight line ray cast
+	return GridPath( start, end );
+}
+
+
+
 bool WorldMap::CalcPath(	const grinliz::Vector2F& start, 
 							const grinliz::Vector2F& end, 
 							grinliz::Vector2F *path,
@@ -1561,15 +1571,15 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 	CalcZone( starti.x, starti.x );
 	CalcZone( endi.x,   endi.y );
 
-	WorldGrid* regionStart = grid + INDEX( starti.x, starti.y );
-	WorldGrid* regionEnd   = grid + INDEX( endi.x, endi.y );
+	WorldGrid* wgStart = grid + INDEX( starti.x, starti.y );
+	WorldGrid* wgEnd   = grid + INDEX( endi.x, endi.y );
 
 	if ( !IsPassable( starti.x, starti.y ) || !IsPassable( endi.x, endi.y ) ) {
 		return false;
 	}
 
 	// Regions are convex. If in the same region, it is passable.
-	if ( regionStart == regionEnd ) {
+	if ( wgStart->ZoneOrigin( starti.x, starti.y ) == wgEnd->ZoneOrigin( endi.x, endi.y ) ) {
 		okay = true;
 		if ( path ) {
 			path->Push( start );
