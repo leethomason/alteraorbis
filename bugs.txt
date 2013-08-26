@@ -58,6 +58,7 @@ x Probably don't need squatting logic in PathMoveComponent. (Actually do)
 		x wait states on wander
 		x don't count F/E that can't be pathed to
 		- proper animation system
+		- decent menu system
 	- Econ
 		- fix team logic
 		- build 2 height ice
@@ -110,7 +111,7 @@ x Probably don't need squatting logic in PathMoveComponent. (Actually do)
 - add target portrait
 - review all atlases for texture mem usage
 - particles aren't additive correctly
-- put metadata in model (authoring  time)
+d put metadata in model (authoring  time)
 - credits scene
 - remove normalization in shader
 - print uniform count for shaders
@@ -158,7 +159,7 @@ x Probably don't need squatting logic in PathMoveComponent. (Actually do)
 - Flora
 	x concept
 	x models
-	- redo texturing
+	x redo texturing
 
 - wilder, more digital face colors
 - filter face colors to matching effect

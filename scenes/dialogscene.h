@@ -44,6 +44,11 @@ private:
 	LumosGame* lumosGame;
 	gamui::PushButton okay;
 	gamui::PushButton itemArr[NUM_ITEMS];
+
+	enum { NUM_TOGGLES = 2,
+		   NUM_SUB     = 2 };
+	gamui::ToggleButton toggles[NUM_TOGGLES];
+	gamui::ToggleButton subButtons[NUM_SUB*NUM_TOGGLES];
 };
 
 #endif // DIALOGSCENE_INCLUDED
