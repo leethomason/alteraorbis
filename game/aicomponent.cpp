@@ -1552,6 +1552,10 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 
 	if ( aiMode == NORMAL_MODE && !taskList.Empty() ) {
 		FlushTaskList( thisComp );
+		if ( taskList.Empty() ) {
+			Think( thisComp );
+			rethink = 0;
+		}
 	}
 	else if ( !currentAction || (rethink > 1000 ) ) {
 		Think( thisComp );
@@ -1669,6 +1673,7 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 				aiMode = NORMAL_MODE;
 			}
 		}
+		taskList.Clear();
 		break;
 
 	case ChitMsg::CHIT_SECTOR_HERD:
