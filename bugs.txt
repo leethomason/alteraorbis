@@ -57,8 +57,8 @@ x Probably don't need squatting logic in PathMoveComponent. (Actually do)
 		x double layer for "build" marks
 		x wait states on wander
 		x don't count F/E that can't be pathed to
+		x decent menu system
 		- proper animation system
-		- decent menu system
 	- Econ
 		- fix team logic
 		- build 2 height ice
