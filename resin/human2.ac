@@ -1812,7 +1812,7 @@ refs 4
 0 0.404751 0.0820313
 kids 0
 OBJECT poly
-name "object"
+name "arm.lower.right"
 loc -0.096265 0.028873 0.00124674
 texture "human2_male/suit0.png"
 crease 45.000000
