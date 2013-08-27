@@ -142,9 +142,9 @@ x Probably don't need squatting logic in PathMoveComponent. (Actually do)
 	- variant: shock
 	- variant: blaster
 - Human Male
-	- model
-	- texture (procedural)
-	- animation
+	x model
+	x texture (procedural)
+	x animation
 - Human Female v2
 	- model
 	- texture (procedural)
