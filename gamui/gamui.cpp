@@ -1039,39 +1039,12 @@ void ToggleButton::ProcessToggleGroup()
 }
 
 
-/*
-bool ToggleButton::DoLayout()
-{
-	if ( m_subItemArr ) {
-		bool vis = Visible() && Down();
-		for( int i=0; i<m_subItemArr->Size(); ++i ) {
-			(*m_subItemArr)[i]->SetVisible( vis );
-		}
-	}
-	return Button::DoLayout();
-}
-*/
-
-
 void UIItem::DoPreLayout()
 {
 	if ( m_superItem ) {
 		SetVisible( m_superItem->Visible() && m_superItem->Down() );
 	}
 }
-
-/*
-void ToggleButton::ProcessSubGroup()
-{
-	if ( m_subItemArr ) {
-		bool visible = Down() && Visible();
-		CDynArray< UIItem* >& arr = *m_subItemArr;
-		for( int i=0; i<arr.Size(); ++i ) {
-			arr[i]->SetVisible( visible );
-		}
-	}
-}
-*/
 
 void ToggleButton::AddSubItem( UIItem* item )
 {
