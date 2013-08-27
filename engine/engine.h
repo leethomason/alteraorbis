@@ -114,6 +114,7 @@ public:
 	void CameraLookAt( float x, float z );
 
 	Model* AllocModel( const ModelResource* );
+	Model* AllocModel( const char* );
 	void FreeModel( Model* );
 
 	Map* GetMap()						{ return map; }

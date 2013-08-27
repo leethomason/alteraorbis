@@ -17,7 +17,6 @@
 #include "../script/plantscript.h"
 #include "../script/corescript.h"
 #include "../script/worldgen.h"
-#include "../script/portalscript.h"
 
 #include "pathmovecomponent.h"
 #include "debugstatecomponent.h"

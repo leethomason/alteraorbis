@@ -2,9 +2,10 @@
 - GT: needs pick up effect for gold (single yellow glow of the avatar?)
 - GT: needs pick up effect for kiosks or visitors (like a gold triangle or chest can float over the kiosk when the visitor spends money)
 - GT: ui to show idle and busy workers
-- use arrays to track components and component update time.
+x use arrays to track components and component update time.
   switch to calling the components vs. calling the chit. coherence is good!
   each component stores its location in the array so it can null itself on remove
+  Meh: initial test showed no advantage.
 - change shield to have cooldown then charge-up (rather than cooldown then reset)
 - rings deflect bolts
 - redo AI utility to be based on a set of curves
@@ -51,23 +52,17 @@ x Probably don't need squatting logic in PathMoveComponent. (Actually do)
 		x cancel orders
 		x building rotation
 		x leave core
-		- buildings (vault) can overlap
-		- vault should have 2x2 "placement" ui
-		- check release log from GT. extra debugging output.
-		- bugImage0 from GT
-		- decent clear dragging
+		x decent UI
+		x show "clear" mark on top
+		x double layer for "build" marks
+		x wait states on wander
+		x don't count F/E that can't be pathed to
+		x decent menu system
+		- proper animation system
+	- Econ
 		- fix team logic
 		- build 2 height ice
-		- decent UI
-		- show "clear" mark on top
-		- double layer for "build" marks
-		x proper animation system
-			x skeletal animation
-			x support multiple sequences
-			x metadata events
-			x redo everything...
-		- wait states on wander
-	- Econ
+		- decent clear dragging
 		- external constant file
 		- visitors create energy, buildings consume energy
 		- factory
@@ -116,7 +111,7 @@ x Probably don't need squatting logic in PathMoveComponent. (Actually do)
 - add target portrait
 - review all atlases for texture mem usage
 - particles aren't additive correctly
-- put metadata in model (authoring  time)
+d put metadata in model (authoring  time)
 - credits scene
 - remove normalization in shader
 - print uniform count for shaders
@@ -164,7 +159,7 @@ x Probably don't need squatting logic in PathMoveComponent. (Actually do)
 - Flora
 	x concept
 	x models
-	- redo texturing
+	x redo texturing
 
 - wilder, more digital face colors
 - filter face colors to matching effect

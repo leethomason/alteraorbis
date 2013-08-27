@@ -38,6 +38,8 @@ public:
 	// index 0, intrinsic items follow.
 	void Get( const char* name, GameItemArr* arr );
 
+	static void GetProperty( const char* name, const char* prop, int* value );
+
 private:
 	ItemDefDB()		{}
 

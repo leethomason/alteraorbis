@@ -137,6 +137,11 @@ public:
 					int maxPath,
 					float* totalCost,
 					bool showDebugging = false );
+
+	// Uses the very fast straight line pather.
+	bool HasStraightPath( const grinliz::Vector2F& start, 
+						  const grinliz::Vector2F& end );
+
 	// Returns the nearest pathable port to 'pos'. Returns (0,0) on failure.
 	SectorPort NearestPort( const grinliz::Vector2F& pos );
 	SectorPort RandomPort( grinliz::Random* random );

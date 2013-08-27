@@ -54,48 +54,6 @@ class PushButton;
 class ToggleButton;
 class Image;
 
-/*
-template < class T > 
-class CDynArray
-{
-public:
-	CDynArray()
-	{
-		vec = (T*)malloc( ALLOCATE*sizeof(T) );
-		size = 0;
-		cap = ALLOCATE;
-	}
-	~CDynArray() {
-		free( vec );
-	}
-
-	T& operator[]( int i )				{ GAMUIASSERT( i>=0 && i<(int)size ); return vec[i]; }
-	const T& operator[]( int i ) const	{ GAMUIASSERT( i>=0 && i<(int)size ); return vec[i]; }
-
-	T* PushArr( int count ) {
-		if ( size + count > cap ) {
-			cap = (size+count) * 3 / 2;
-			vec = (T*)realloc( vec, cap*sizeof(T) );
-		}
-		T* result = vec + size;
-		size += count;
-		return result;
-	}
-
-	int Size() const		{ return (int)size; }
-	
-	void Clear()			{ size = 0; }
-	bool Empty() const		{ return size==0; }
-	const T* Mem() const	{ return vec; }
-	T* Mem()				{ return vec; }
-
-private:
-	enum { ALLOCATE=1000 };
-	T* vec;
-	unsigned size;
-	unsigned cap;
-};
-*/
 
 /**
 	The most basic unit of state. A set of vertices and indices are sent to the GPU with a given RenderAtom, which
@@ -442,17 +400,22 @@ public:
 
 	virtual void Clear()	{ m_gamui = 0; }
 
+	// internal
+	void SetSuperItem( ToggleButton* tb ) { m_superItem = tb; }
+	ToggleButton* SuperItem() const		  { return m_superItem; }
+	void DoPreLayout();
+
 private:
 	UIItem( const UIItem& );			// private, not implemented.
 	void operator=( const UIItem& );	// private, not implemented.
 
-	float m_x;
-	float m_y;
-	int m_level;
-	bool m_visible;
-	float m_rotationX;
-	float m_rotationY;
-	float m_rotationZ;
+	float	m_x;
+	float	m_y;
+	int		m_level;
+	bool	m_visible;
+	float	m_rotationX;
+	float	m_rotationY;
+	float	m_rotationZ;
 
 protected:
 	template <class T> T Min( T a, T b ) const		{ return a<b ? a : b; }
@@ -467,8 +430,9 @@ protected:
 	UIItem( int level );
 	virtual ~UIItem();
 
-	Gamui* m_gamui;
-	bool m_enabled;
+	Gamui*			m_gamui;
+	bool			m_enabled;
+	ToggleButton*	m_superItem;	
 };
 
 
@@ -811,14 +775,14 @@ public:
 class ToggleButton : public Button
 {
 public:
-	ToggleButton() : Button(), m_next( 0 ), m_prev( 0 ), m_wasUp( true )		{}
+	ToggleButton() : Button(), m_next( 0 ), m_prev( 0 ), m_wasUp( true ), m_subItemArr(0)		{}
 	ToggleButton(	Gamui* gamui,
 					const RenderAtom& atomUpEnabled,
 					const RenderAtom& atomUpDisabled,
 					const RenderAtom& atomDownEnabled,
 					const RenderAtom& atomDownDisabled,
 					const RenderAtom& decoEnabled, 
-					const RenderAtom& decoDisabled) : Button(), m_next( 0 ), m_prev( 0 ), m_wasUp( true )
+					const RenderAtom& decoDisabled) : Button(), m_next( 0 ), m_prev( 0 ), m_wasUp( true ), m_subItemArr(0)
 	{
 		Button::Init( gamui, atomUpEnabled, atomUpDisabled, atomDownEnabled, atomDownDisabled, decoEnabled, decoDisabled );
 		m_prev = m_next = this;
@@ -849,7 +813,7 @@ public:
 		m_prev = m_next = this;
 	}
 
-	virtual ~ToggleButton()		{ RemoveFromToggleGroup(); }
+	virtual ~ToggleButton();
 
 	virtual bool CanHandleTap()											{ return true; }
 	virtual bool HandleTap(	TapAction action, float x, float y );
@@ -858,20 +822,29 @@ public:
 	void RemoveFromToggleGroup();
 	bool InToggleGroup();
 
+	// Add a sub-menu that only appears when this is Down. Can
+	// Can be anything; additional buttons, icons, etc.
+	void AddSubItem( UIItem* item );
+	void RemoveSubItem( UIItem* item );
+
 	void SetUp()								{ m_up = true; SetState(); ProcessToggleGroup(); }
 	void SetDown()								{ m_up = false; SetState(); ProcessToggleGroup(); }
 
 	virtual void Clear();
 	virtual ToggleButton* ToToggleButton() { return this; }
 
+	//virtual bool DoLayout();
+
 private:
 	void ProcessToggleGroup();
-	void PriSetUp()								{ m_up = true; SetState(); }
+	//void ProcessSubGroup();
+	void PriSetUp()								{ m_up = true;  SetState(); }
 	void PriSetDown()							{ m_up = false; SetState(); }
 
 	ToggleButton* m_next;
 	ToggleButton* m_prev;
 	bool m_wasUp;
+	grinliz::CDynArray< UIItem* >* m_subItemArr;
 };
 
 

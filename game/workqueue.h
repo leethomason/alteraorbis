@@ -43,9 +43,25 @@ public:
 	};
 
 	struct QueueItem {
-		QueueItem() : action(NO_ACTION), assigned(0) { pos.Zero(); }
-		QueueItem( int p_action, const grinliz::Vector2I& p_pos, grinliz::IString p_structure, int p_id ) 
-			: action(p_action), pos(p_pos), assigned(0), structure(p_structure), taskID(p_id) {}
+		QueueItem() : action(NO_ACTION), assigned(0), taskID(0), model(0) { pos.Zero(); }
+		/*
+		QueueItem( const QueueItem& qi ) {
+			this->action	= qi.action;
+			this->structure = qi.structure;
+			this->pos		= qi.pos;
+			this->assigned	= qi.assigned;
+			this->taskID	= qi.taskID;
+			this->model		= qi.model;
+		}
+		void operator=( const QueueItem& qi ) {
+			this->action	= qi.action;
+			this->structure = qi.structure;
+			this->pos		= qi.pos;
+			this->assigned	= qi.assigned;
+			this->taskID	= qi.taskID;
+			this->model		= qi.model;
+		}
+		*/
 
 		void Serialize( XStream* xs );
 
@@ -54,10 +70,12 @@ public:
 		grinliz::Vector2I	pos;
 		int					assigned;	// id of worker assigned this task.			
 		int					taskID;		// id # of this task
+		Model*				model;		// model used to show map work location
 	};
 
 	void Serialize( XStream* xs );
-	void Add( int action, const grinliz::Vector2I& pos, grinliz::IString structure );	// add an action to do
+	void AddBuild( const grinliz::Vector2I& pos, grinliz::IString structure );	// add an action to do
+	void AddClear( const grinliz::Vector2I& pos );
 	void Remove( const grinliz::Vector2I& pos );
 	
 	const QueueItem*	Find( const grinliz::Vector2I& chitPos );	// find something to do. don't hold pointer!
@@ -70,11 +88,20 @@ public:
 	void DoTick();	// mostly looks for work being complete.
 	const grinliz::CDynArray< WorkQueue::QueueItem >& Queue() const { return queue; };	
 
+	// Can this task be done at the location?
+	// Stuff moves, commands change, etc.
+	static bool TaskCanComplete(	WorldMap* worldMap, 
+									LumosChitBag* chitBag,
+									const grinliz::Vector2I& pos, bool build, int size );
+	bool TaskCanComplete( const WorkQueue::QueueItem& item );
+
 private:
 
-	void AddImage( const QueueItem& item );
-	void RemoveImage( const QueueItem& item );
+	void AddImage( QueueItem* item );
+	void RemoveImage( QueueItem* item );
 	void RemoveItem( int index );
+	int  CalcTaskSize( const QueueItem& item );
+	void SendNotification( const grinliz::Vector2I& pos );
 
 	Engine*				engine;
 	WorldMap*			worldMap;
@@ -82,8 +109,6 @@ private:
 	int					idPool;
 	grinliz::Vector2I	sector;
 	grinliz::CDynArray< QueueItem >		queue;	// work to do
-	grinliz::CDynArray< gamui::Image* > images;	// images to tag the work
-	grinliz::CDynArray< Model* >		models;	// models to tag the work
 };
 
 #endif // WORKQUEUE_ALTERA_INCLUDED
