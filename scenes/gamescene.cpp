@@ -31,6 +31,7 @@ using namespace gamui;
 static const float DEBUG_SCALE = 1.0f;
 static const float MINI_MAP_SIZE = 150.0f*DEBUG_SCALE;
 static const float MARK_SIZE = 6.0f*DEBUG_SCALE;
+const int GameScene::BUILD_MODE_START[NUM_BUILD_MODES] = { NO_BUILD, BUILD_ICE, BUILD_VAULT };
 
 #define USE_MOUSE_MOVE_SELECTION
 
@@ -80,14 +81,31 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	freeCameraButton.SetText( "Free\nCamera" );
 
 	static const char* buildButtonText[NUM_BUILD_BUTTONS] = { 
-		"None", "Clear", "Ice", 
-		"News\nKiosk", "Media\nKiosk", "Commerce\nKiosk", "Social\nKiosk", "Vault",
-		"Rotate"
+		"None", "Clear", "Rotate",
+		"Ice", 
+		"News\nKiosk", "Media\nKiosk", "Commerce\nKiosk", "Social\nKiosk", 
+		"Vault",
 	};
+	static const char* modeButtonText[NUM_BUILD_MODES] = {
+		"Utility", "Tech0\nBasic", "Tech0\nAdv"
+	};
+	for( int i=0; i<NUM_BUILD_MODES; ++i ) {
+		modeButton[i].Init( &gamui2D, game->GetButtonLook(0) );
+		modeButton[i].SetText( modeButtonText[i] );
+		modeButton[0].AddToToggleGroup( &modeButton[i] );
+	}
 	for( int i=0; i<NUM_BUILD_BUTTONS; ++i ) {
 		buildButton[i].Init( &gamui2D, game->GetButtonLook(0) );
 		buildButton[i].SetText( buildButtonText[i] );
 		buildButton[0].AddToToggleGroup( &buildButton[i] );
+	}
+
+	int mode = 0;
+	for( int i=0; i<NUM_BUILD_BUTTONS; ++i ) {
+		if ( mode < NUM_BUILD_MODES && BUILD_MODE_START[mode+1] == i ) {
+			++mode;
+		}
+		modeButton[mode].AddSubItem( &buildButton[i] );
 	}
 
 	createWorkerButton.Init( &gamui2D, game->GetButtonLook(0) );
@@ -147,10 +165,22 @@ void GameScene::Resize()
 	layout.PosAbs( &allRockButton, NUM_SERIAL_BUTTONS, -2 );
 	layout.PosAbs( &freeCameraButton, 0, -3 );
 
+	/*
 	for( int i=0; i<NUM_BUILD_BUTTONS; ++i ) {
 		int x = i/4;
 		int y = i - x*4;
 		layout.PosAbs( &buildButton[i], x, y+2 );
+	}
+	*/
+	int mode = 0;
+	for( int i=0; i<NUM_BUILD_BUTTONS; ++i ) {
+		if ( mode < NUM_BUILD_MODES && BUILD_MODE_START[mode+1] == i ) {
+			++mode;
+		}
+		layout.PosAbs( &buildButton[i], 1+i-BUILD_MODE_START[mode], mode+2 );
+	}
+	for( int i=0; i<NUM_BUILD_MODES; ++i ) {
+		layout.PosAbs( &modeButton[i], 0, i+2 );
 	}
 	layout.PosAbs( &createWorkerButton, 0, 6 );
 	layout.PosAbs( &ejectButton, 1, 6 );
@@ -958,8 +988,8 @@ void GameScene::DoTick( U32 delta )
 	SetBars();
 
 	CoreScript* coreMode = sim->GetChitBag()->IsBoundToCore( sim->GetPlayerChit(), true );
-	for( int i=0; i<NUM_BUILD_BUTTONS; ++i ) {
-		buildButton[i].SetVisible( coreMode != 0 );
+	for( int i=0; i<NUM_BUILD_MODES; ++i ) {
+		modeButton[i].SetVisible( coreMode != 0 );
 	}
 	createWorkerButton.SetVisible( coreMode != 0 );
 	ejectButton.SetVisible( coreMode != 0 );

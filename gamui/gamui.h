@@ -403,6 +403,7 @@ public:
 	// internal
 	void SetSuperItem( ToggleButton* tb ) { m_superItem = tb; }
 	ToggleButton* SuperItem() const		  { return m_superItem; }
+	void DoPreLayout();
 
 private:
 	UIItem( const UIItem& );			// private, not implemented.
@@ -828,14 +829,15 @@ public:
 
 	void SetUp()								{ m_up = true; SetState(); ProcessToggleGroup(); }
 	void SetDown()								{ m_up = false; SetState(); ProcessToggleGroup(); }
-	virtual bool DoLayout();
 
 	virtual void Clear();
 	virtual ToggleButton* ToToggleButton() { return this; }
 
+	//virtual bool DoLayout();
+
 private:
 	void ProcessToggleGroup();
-	void ProcessSubGroup();
+	//void ProcessSubGroup();
 	void PriSetUp()								{ m_up = true;  SetState(); }
 	void PriSetDown()							{ m_up = false; SetState(); }
 

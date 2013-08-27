@@ -1039,23 +1039,39 @@ void ToggleButton::ProcessToggleGroup()
 }
 
 
+/*
 bool ToggleButton::DoLayout()
 {
-	ProcessSubGroup();
+	if ( m_subItemArr ) {
+		bool vis = Visible() && Down();
+		for( int i=0; i<m_subItemArr->Size(); ++i ) {
+			(*m_subItemArr)[i]->SetVisible( vis );
+		}
+	}
 	return Button::DoLayout();
 }
+*/
 
 
+void UIItem::DoPreLayout()
+{
+	if ( m_superItem ) {
+		SetVisible( m_superItem->Visible() && m_superItem->Down() );
+	}
+}
+
+/*
 void ToggleButton::ProcessSubGroup()
 {
-	bool visible = Down() && Visible();
 	if ( m_subItemArr ) {
+		bool visible = Down() && Visible();
 		CDynArray< UIItem* >& arr = *m_subItemArr;
 		for( int i=0; i<arr.Size(); ++i ) {
 			arr[i]->SetVisible( visible );
 		}
 	}
 }
+*/
 
 void ToggleButton::AddSubItem( UIItem* item )
 {
@@ -1428,6 +1444,12 @@ int Gamui::SortItems( const void* _a, const void* _b )
 
 void Gamui::Render()
 {
+	if ( m_modified ) {
+		for( int i=0; i<m_itemArr.Size(); ++i ) {
+			m_itemArr[i]->DoPreLayout();
+		}
+	}
+
 	if ( m_focusImage ) {
 		const UIItem* focused = GetFocus();
 		if ( focused ) {
