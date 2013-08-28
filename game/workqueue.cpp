@@ -10,6 +10,8 @@
 
 #include "../xarchive/glstreamer.h"
 
+#include "../script/itemscript.h"
+
 using namespace grinliz;
 using namespace gamui;
 
@@ -24,58 +26,87 @@ WorkQueue::WorkQueue( WorldMap* wm, LumosChitBag* lcb, Engine* e ) : worldMap( w
 
 WorkQueue::~WorkQueue()
 {
-	while( !images.Empty() ) {
-		Image* image = images.Pop();
-		delete image;
-	}
-	while ( !models.Empty() ) {
-		Model* m = models.Pop();
-		engine->FreeModel( m );
+	for( int i=0; i<queue.Size(); ++i ) {
+		Model* m = queue[i].model;
+		if ( m ) {
+			engine->FreeModel( m );
+		}
 	}
 }
 
 
-void WorkQueue::AddImage( const QueueItem& item )
+int WorkQueue::CalcTaskSize( const QueueItem& item )
 {
-	if ( item.action == CLEAR ) {
-		const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( "unitPlateCentered" );
-		GLASSERT( res );
-		Model* m = engine->AllocModel( res );
-		m->SetFlag( MODEL_CLICK_THROUGH );
-		GLASSERT( m );
-		const WorldGrid& wg = worldMap->GetWorldGrid( item.pos.x, item.pos.y );
-		int h = wg.Height();
-		m->SetPos( (float)item.pos.x + 0.5f, (float)h + 0.01f, (float)item.pos.y+0.5f );
-		models.Push( m );
+	int size = 1;
+	if ( !item.structure.empty() ) {
+		const GameItem& gameItem = ItemDefDB::Instance()->Get( item.structure.c_str() );
+		gameItem.GetValue( "size", &size );
+	}
+	return size;
+}
+
+
+void WorkQueue::AddImage( QueueItem* item )
+{
+	const char* name = 0;
+	Vector3F pos = { 0, 0, 0 };
+	int size = CalcTaskSize( *item );
+
+	if ( item->action == CLEAR ) {
+		const WorldGrid& wg = worldMap->GetWorldGrid( item->pos.x, item->pos.y );
+		if ( wg.Height() ) {
+			// Clearing ice or plant
+			switch ( wg.Height() ) {
+			case 1:	name = "clearMarker1";	break;
+			case 2: name = "clearMarker2";	break;
+			case 3:	name = "clearMarker3";	break;
+			default: name = "clearMarker1"; break;
+			}
+			pos.Set( (float)item->pos.x + 0.5f, 0, (float)item->pos.y+0.5f );
+		}
+		else {
+			if ( size == 1 ) {
+				name = "clearMarker1";
+				pos.Set( (float)item->pos.x+0.5f, 0, (float)item->pos.y+0.5f );
+			}
+			else {
+				name = "clearMarker2";
+				pos.Set( (float)item->pos.x+1.f, 0, (float)item->pos.y+1.f );
+			}
+		}
 	}
 	else {
-		RenderAtom atom = LumosGame::CalcIconAtom( 10+item.action, true );	// fixme. switch to new icon texture
-		Image* image = new Image( &worldMap->overlay1, atom, true );
-		images.Push( image );
-		image->SetSize( 1, 1 );
-		image->SetPos( (float)item.pos.x, (float)item.pos.y );
+		if ( size == 1 ) {
+			name = "buildMarker1";
+			pos.Set( (float)item->pos.x + 0.5f, 0, (float)item->pos.y+0.5f );
+		}
+		else {
+			name = "buildMarker2";
+			pos.Set( (float)item->pos.x + 1.f, 0, (float)item->pos.y+1.f );
+		}
 	}
+	GLASSERT( name );
+	if ( name ) {
+		const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( name );
+		GLASSERT( res );
+		Model* m = engine->AllocModel( res );
+		GLASSERT( m );
+		m->SetFlag( MODEL_CLICK_THROUGH );
 
+		m->SetPos( pos );
+		GLASSERT( item->model == 0 );
+		item->model = m;
+	}
+	GLASSERT( item->model );
 }
 
 
-void WorkQueue::RemoveImage( const QueueItem& item )
+void WorkQueue::RemoveImage( QueueItem* item )
 {
-	for( int i=0; i<images.Size(); ++i ) {
-		Vector2I v = { (int)images[i]->X(), (int)images[i]->Y() };
-		if ( v == item.pos ) {
-			delete images[i];
-			images.Remove(i);
-			return;
-		}
-	}
-	for( int i=0; i<models.Size(); ++i ) {
-		Vector2I v = { (int)models[i]->Pos().x, (int)models[i]->Pos().z };
-		if ( v == item.pos ) {
-			engine->FreeModel( models[i] );
-			models.Remove(i);
-			return;
-		}
+	if ( item->model ) {
+		engine->FreeModel( item->model );
+		item->model = 0;
+		return;
 	}
 	GLASSERT( 0 );
 }
@@ -91,11 +122,8 @@ void WorkQueue::Remove( const grinliz::Vector2I& pos )
 }
 
 
-
-void WorkQueue::Add( int action, const grinliz::Vector2I& pos2i, IString structure )
+void WorkQueue::AddClear( const grinliz::Vector2I& pos2i )
 {
-	GLASSERT( action >= CLEAR && action < NUM_ACTIONS );
-
 	if ( pos2i.x / SECTOR_SIZE == sector.x && pos2i.y / SECTOR_SIZE == sector.y ) {
 		// okay!
 	}
@@ -104,15 +132,57 @@ void WorkQueue::Add( int action, const grinliz::Vector2I& pos2i, IString structu
 		return;
 	}
 
+	QueueItem item;
+	item.action = CLEAR;
+	item.pos = pos2i;
+	item.structure = IString();
+	item.taskID = ++idPool;
+
+	if ( !TaskCanComplete( item )) {
+		return;
+	}
+
 	// Clear out existing.
 	Remove( pos2i );
 
-	QueueItem item( action, pos2i, structure, ++idPool );
+	AddImage( &item );
 	queue.Push( item );
-	AddImage( item );
+	SendNotification( pos2i );
+}
 
+
+void WorkQueue::AddBuild( const grinliz::Vector2I& pos2i, IString structure )
+{
+	if ( pos2i.x / SECTOR_SIZE == sector.x && pos2i.y / SECTOR_SIZE == sector.y ) {
+		// okay!
+	}
+	else {
+		// wrong sector.
+		return;
+	}
+
+	QueueItem item;
+	item.action = BUILD;
+	item.pos = pos2i;
+	item.structure = structure;
+	item.taskID = ++idPool;
+
+	if ( !TaskCanComplete( item )) {
+		return;
+	}
+
+	// Clear out existing.
+	Remove( pos2i );
+
+	AddImage( &item );
+	queue.Push( item );
+	SendNotification( pos2i );
+}
+
+
+void WorkQueue::SendNotification( const grinliz::Vector2I& pos2i )
+{
 	Vector2F pos2 = { (float)pos2i.x+0.5f, (float)pos2i.y+0.5f };
-
 	// Notify near.
 	CChitArray array;
 	ItemNameFilter workerFilter( IStringConst::kworker );
@@ -123,7 +193,7 @@ void WorkQueue::Add( int action, const grinliz::Vector2I& pos2i, IString structu
 	}
 }
 
-
+	
 void WorkQueue::Assign( int id, const WorkQueue::QueueItem* item )
 {
 	int index = item - queue.Mem();
@@ -155,6 +225,7 @@ const WorkQueue::QueueItem* WorkQueue::GetJobByTaskID( int taskID )
 {
 	for( int i=0; i<queue.Size(); ++i ) {
 		if ( queue[i].taskID == taskID ) {
+			GLASSERT( queue[i].model );
 			return &queue[i];
 		}
 	}
@@ -166,6 +237,7 @@ const WorkQueue::QueueItem* WorkQueue::GetJob( int id )
 {
 	for( int i=0; i<queue.Size(); ++i ) {
 		if ( queue[i].assigned == id ) {
+			GLASSERT( queue[i].model );
 			return &queue[i];
 		}
 	}
@@ -214,10 +286,53 @@ const WorkQueue::QueueItem* WorkQueue::Find( const grinliz::Vector2I& chitPos )
 
 void WorkQueue::RemoveItem( int index )
 {
-	RemoveImage( queue[index] );
+	GLASSERT( queue[index].model );
+	RemoveImage( &queue[index] );
 	queue.Remove( index );
 }
 
+
+bool WorkQueue::TaskCanComplete( const WorkQueue::QueueItem& item )
+{
+	return WorkQueue::TaskCanComplete( worldMap, chitBag, item.pos, item.action != CLEAR, CalcTaskSize( item ));
+}
+
+
+/*static*/ bool WorkQueue::TaskCanComplete( WorldMap* worldMap, 
+											LumosChitBag* chitBag,
+											const grinliz::Vector2I& pos2i, bool build, int size )
+{
+	Vector2F pos2  = { (float)pos2i.x + 0.5f, (float)pos2i.y+0.5f };
+	const WorldGrid& wg = worldMap->GetWorldGrid( pos2i.x, pos2i.x );
+
+	int passable = 0;
+	int removable = 0;
+	for( int y=pos2i.y; y<pos2i.y+size; ++y ) {
+		for( int x=pos2i.x; x<pos2i.x+size; ++x ) {
+			if ( worldMap->IsPassable( x, y )) {
+				++passable;
+			}
+			Vector2I v = { x, y };
+			if ( chitBag->QueryRemovable( v )) {
+				++removable;
+			}
+		}
+	}
+
+	if ( build ) {
+		if ( passable < size*size || removable ) {
+			// stuff in the way
+			return false;
+		}
+	}
+	else {
+		if ( passable == size*size && removable == 0 ) {
+			// nothing to clear.
+			return false;
+		}
+	}
+	return true;
+}
 
 void WorkQueue::DoTick()
 {
@@ -229,30 +344,9 @@ void WorkQueue::DoTick()
 			}
 		}
 
-		Vector2I pos2i = { queue[i].pos.x, queue[i].pos.y };
-		Vector2F pos2  = { (float)pos2i.x + 0.5f, (float)pos2i.y+0.5f };
-		const WorldGrid& wg = worldMap->GetWorldGrid( pos2i.x, pos2i.x );
-		RemovableFilter removableFilter;
-
-		switch ( queue[i].action )
-		{
-		case CLEAR:
-			if ( worldMap->IsPassable( pos2i.x, pos2i.y ) && !chitBag->QueryRemovable( pos2i )) {
-				RemoveItem( i );
-				--i;
-			}
-			break;
-
-		case BUILD:
-			if ( !worldMap->IsPassable( pos2i.x, pos2i.y ) || chitBag->QueryBuilding( pos2i )) {
-				RemoveItem( i );
-				--i;
-			}
-			break;
-
-		default:
-			GLASSERT( 0 );
-			break;
+		if ( !TaskCanComplete( queue[i] )) {
+			RemoveItem( i );
+			--i;
 		}
 	}
 }
@@ -278,7 +372,7 @@ void WorkQueue::Serialize( XStream* xs )
 
 	if ( xs->Loading() ) {
 		for( int i=0; i<queue.Size(); ++i ) {
-			AddImage( queue[i] );
+			AddImage( &queue[i] );
 			idPool = Max( idPool, queue[i].taskID+1 );
 		}
 	}

@@ -37,7 +37,7 @@
     <meta animation="melee" name="impact" time="700" />
   </animation>
 
-  <texture filename="human2_male/suit0.png" assetName="suit0" />
+  <texture filename="human2_male/suit0.png" assetName="suit0" whiteMap="true" emissive="true" colorMap="true" />
   <model filename="human2.ac" modelName="humanMale" animation="humanMale2Animation" origin="0 0 0" shading="flat" polyRemoval="pre" >
     <meta name="trigger" pos="-0.18 0.42 0" rot="1 0 0 -90" boneName="arm.lower.right" />
     <meta name="target"  pos="0 0.72 0"/>
@@ -84,7 +84,7 @@
     <texture filename="testsquare.png" />
     <texture filename="testwrap.png" />
   </atlas>
-<!--
+
   <model filename="gold.ac"         modelName="gold"            origin="0 0 0" shading="flat"/>
   <model filename="dodecahedron.ac" modelName="crystal_green"   origin="1 0 0" shading="flat" />
   <model filename="dodecahedron.ac" modelName="crystal_red"     origin="0 0 0" shading="flat" />
@@ -102,6 +102,11 @@
   <model filename="unitCube.ac" shading="flat" />
   <model filename="targetFlag.ac" shading="flat" shadowCaster="false" />
   <model filename="possibleTargetFlag.ac" shading="flat" shadowCaster="false" />
+  <model filename="buildMarker1.ac" shading="flat" shadowCaster="true" />
+  <model filename="buildMarker2.ac" shading="flat" shadowCaster="true" />
+  <model filename="clearMarker1.ac" shading="flat" shadowCaster="true" />
+  <model filename="clearMarker2.ac" shading="flat" shadowCaster="true" />
+  <model filename="clearMarker3.ac" shading="flat" shadowCaster="true" />
 
   <model filename="core.ac" shading="flat" />
   <model filename="kiosk.ac" modelName="kiosk.n" origin="-6.50 0 -0.50" shading="flat" polyRemoval="pre" />
@@ -109,7 +114,6 @@
   <model filename="kiosk.ac" modelName="kiosk.c" origin="-1.50 0 -0.50" shading="flat" polyRemoval="pre" />
   <model filename="kiosk.ac" modelName="kiosk.s" origin="-4.50 0 -0.50" shading="flat" polyRemoval="pre" />
   <model assetName="vault"   filename="vault2.ac" origin="-5 0 -1"      shading="flat" polyRemoval="pre" />
--->
   
   <!-- Creating animation
     1. Add a model resource, with the usual flags, plus: animatimation="create"

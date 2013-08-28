@@ -98,12 +98,16 @@ UIItem::UIItem( int p_level )
 	  m_rotationY( 0 ),
 	  m_rotationZ( 0 ),
 	  m_gamui( 0 ),
-	  m_enabled( true )
+	  m_enabled( true ),
+	  m_superItem( 0 )
 {}
 
 
 UIItem::~UIItem()
 {
+	if ( m_superItem ) {
+		m_superItem->RemoveSubItem( this );
+	}
 	if ( m_gamui )
 		m_gamui->Remove( this );
 }
@@ -939,6 +943,18 @@ bool PushButton::HandleTap( TapAction action, float x, float y )
 }
 
 
+ToggleButton::~ToggleButton()		
+{ 
+	RemoveFromToggleGroup();
+	if ( m_subItemArr ) {
+		for( int i=0; i<m_subItemArr->Size(); ++i ) {
+			(*m_subItemArr)[i]->SetSuperItem( 0 );
+		}
+		delete m_subItemArr;
+	}
+}
+
+
 void ToggleButton::Clear()
 {
 	RemoveFromToggleGroup();
@@ -1020,6 +1036,35 @@ void ToggleButton::ProcessToggleGroup()
 		else
 			this->PriSetDown();
 	}
+}
+
+
+void UIItem::DoPreLayout()
+{
+	if ( m_superItem ) {
+		SetVisible( m_superItem->Visible() && m_superItem->Down() );
+	}
+}
+
+void ToggleButton::AddSubItem( UIItem* item )
+{
+	GAMUIASSERT( item->SuperItem() == 0 );
+
+	if ( !m_subItemArr ) {
+		m_subItemArr = new CDynArray< UIItem* >();
+	}
+	m_subItemArr->Push( item );
+	item->SetSuperItem( this );
+}
+
+
+void ToggleButton::RemoveSubItem( UIItem* item )
+{
+	GAMUIASSERT( m_subItemArr );
+	int index = m_subItemArr->Find( item );
+	GLASSERT( index >= 0 );
+	item->SetSuperItem( 0 );
+	m_subItemArr->Remove( index );
 }
 
 
@@ -1372,6 +1417,12 @@ int Gamui::SortItems( const void* _a, const void* _b )
 
 void Gamui::Render()
 {
+	if ( m_modified ) {
+		for( int i=0; i<m_itemArr.Size(); ++i ) {
+			m_itemArr[i]->DoPreLayout();
+		}
+	}
+
 	if ( m_focusImage ) {
 		const UIItem* focused = GetFocus();
 		if ( focused ) {

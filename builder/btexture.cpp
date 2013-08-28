@@ -42,6 +42,7 @@ BTexture::BTexture()
 	  invert( true ),
 	  emissive( false ),
 	  blackAlpha0( false ),
+	  whiteMap( false ),
 	  targetWidth( 0 ),
 	  targetHeight( 0 ),
 	  targetMax( 0 ),
@@ -88,6 +89,7 @@ bool BTexture::ParseTag( const tinyxml2::XMLElement* element )
 	element->QueryBoolAttribute( "premult", &doPreMult );
 	element->QueryBoolAttribute( "emissive", &emissive );
 	element->QueryBoolAttribute( "blackAlpha0", &blackAlpha0 );
+	element->QueryBoolAttribute( "whiteMap", &whiteMap );
 
 	return true;
 }
@@ -196,8 +198,47 @@ void BTexture::Create( int w, int h, int format )
 }
 
 
+void BTexture::WhiteMap()
+{
+	// Create a new surface for the target.
+	SDL_Surface* target = SDL_CreateRGBSurface( 0, surface->w, surface->h, 32, 0xff000000, 0x00ff0000, 0x0000ff00, 0x000000ff );
+	format = RGBA16;
+
+	for( int y=0; y<surface->h; ++y ) {
+		for( int x=0; x<surface->w; ++x ) {
+			Color4U8 c = GetPixel( surface, x, y );
+			Color4U8 d = { c.r, c.g, c.b, 0 };
+
+			// Is it white? (Account for AA.)
+			if (    c.b == 0xff 
+				 && c.r > 0 
+				 && c.g > 0 
+				 && abs( c.g - c.r ) < 2 ) 
+			{
+				int amount = c.r;
+				float f = (float)amount / 255.0f;
+
+				d.Set( 0,
+					   0,
+					   255,
+					   (U8)Lerp( 0.0f, (float)c.r, f  ));
+			}
+			PutPixel( target, x, y, d );
+		}
+	}
+	SDL_FreeSurface( surface );
+	surface = target;
+}
+
+
 bool BTexture::Scale()
 {
+	bool saveScaled = false;
+	if ( whiteMap ) {
+		saveScaled = true;
+		WhiteMap();
+	}
+
 	if ( targetMax ) {
 		targetWidth = surface->w;
 		targetHeight = surface->h;
@@ -216,7 +257,10 @@ bool BTexture::Scale()
 		SDL_Surface* old = surface;
 		surface = CreateScaledSurface( targetWidth, targetHeight, surface );
 		SDL_FreeSurface( old );
+		saveScaled = true;
+	}
 
+	if ( saveScaled ) {
 		printf( " Scaled" );
 		printf( " w=%d h=%d", surface->w, surface->h );
 

@@ -55,6 +55,7 @@ private:
 	void TapModel( Chit* chit );
 	void MoveModel( Chit* chit );
 	void ClearTargetFlags();
+	void SetSelectionModel( const grinliz::Vector2F& view );
 
 	enum {
 		SAVE,
@@ -67,17 +68,27 @@ private:
 		NEWS_BUTTON_HEIGHT = 25
 	};
 	enum {
+		BUILD_XFORM,
+		BUILD_BASIC,
+		BULID_BASIC_2,
+		NUM_BUILD_MODES
+	};
+	enum {
 		NO_BUILD,
 		CLEAR_ROCK,
+		ROTATE,
 		BUILD_ICE,
 		BUILD_KIOSK_N,
 		BUILD_KIOSK_M,
 		BUILD_KIOSK_C,
 		BUILD_KIOSK_S,
 		BUILD_VAULT,
-		ROTATE,
 		NUM_BUILD_BUTTONS
 	};
+	static const int BUILD_MODE_START[NUM_BUILD_MODES];
+
+	// returns the name from the build button
+	grinliz::IString StructureInfo( int buildButtonIndex, int* size );
 
 	LumosGame*	lumosGame;
 	Sim*		sim;
@@ -90,11 +101,17 @@ private:
 	int					possibleChit;
 	int					infoID;
 	grinliz::Vector2I	voxelInfoID;
+	int					buildActive;	// which build button is active. 0 if none.
+	grinliz::IString	BuildActiveInfo( int* size );
+
+	// Shows what is being built or removed.
+	Model*				selectionModel;
 
 	gamui::PushButton	okay;
 	gamui::PushButton	serialButton[NUM_SERIAL_BUTTONS];
 	gamui::ToggleButton freeCameraButton;
 	gamui::ToggleButton	buildButton[NUM_BUILD_BUTTONS];
+	gamui::ToggleButton modeButton[NUM_BUILD_MODES];
 	gamui::PushButton	createWorkerButton;
 	gamui::PushButton	ejectButton;
 	gamui::PushButton	allRockButton;

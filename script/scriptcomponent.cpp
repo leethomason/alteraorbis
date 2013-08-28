@@ -8,7 +8,6 @@
 #include "volcanoscript.h"
 #include "plantscript.h"
 #include "corescript.h"
-#include "portalscript.h"
 
 using namespace grinliz;
 

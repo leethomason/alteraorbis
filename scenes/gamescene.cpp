@@ -23,6 +23,7 @@
 
 #include "../script/procedural.h"
 #include "../script/corescript.h"
+#include "../script/itemscript.h"
 
 using namespace grinliz;
 using namespace gamui;
@@ -30,6 +31,9 @@ using namespace gamui;
 static const float DEBUG_SCALE = 1.0f;
 static const float MINI_MAP_SIZE = 150.0f*DEBUG_SCALE;
 static const float MARK_SIZE = 6.0f*DEBUG_SCALE;
+const int GameScene::BUILD_MODE_START[NUM_BUILD_MODES] = { NO_BUILD, BUILD_ICE, BUILD_VAULT };
+
+#define USE_MOUSE_MOVE_SELECTION
 
 GameScene::GameScene( LumosGame* game ) : Scene( game )
 {
@@ -40,6 +44,8 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	targetChit = 0;
 	possibleChit = 0;
 	infoID = 0;
+	selectionModel = 0;
+	buildActive = NO_BUILD;
 	voxelInfoID.Zero();
 	lumosGame = game;
 	game->InitStd( &gamui2D, &okay, 0 );
@@ -75,14 +81,31 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	freeCameraButton.SetText( "Free\nCamera" );
 
 	static const char* buildButtonText[NUM_BUILD_BUTTONS] = { 
-		"None", "Clear", "Ice", 
-		"News\nKiosk", "Media\nKiosk", "Commerce\nKiosk", "Social\nKiosk", "Vault",
-		"Rotate"
+		"None", "Clear", "Rotate",
+		"Ice", 
+		"News\nKiosk", "Media\nKiosk", "Commerce\nKiosk", "Social\nKiosk", 
+		"Vault",
 	};
+	static const char* modeButtonText[NUM_BUILD_MODES] = {
+		"Utility", "Tech0\nBasic", "Tech0\nAdv"
+	};
+	for( int i=0; i<NUM_BUILD_MODES; ++i ) {
+		modeButton[i].Init( &gamui2D, game->GetButtonLook(0) );
+		modeButton[i].SetText( modeButtonText[i] );
+		modeButton[0].AddToToggleGroup( &modeButton[i] );
+	}
 	for( int i=0; i<NUM_BUILD_BUTTONS; ++i ) {
 		buildButton[i].Init( &gamui2D, game->GetButtonLook(0) );
 		buildButton[i].SetText( buildButtonText[i] );
 		buildButton[0].AddToToggleGroup( &buildButton[i] );
+	}
+
+	int mode = 0;
+	for( int i=0; i<NUM_BUILD_BUTTONS; ++i ) {
+		if ( mode < NUM_BUILD_MODES && BUILD_MODE_START[mode+1] == i ) {
+			++mode;
+		}
+		modeButton[mode].AddSubItem( &buildButton[i] );
 	}
 
 	createWorkerButton.Init( &gamui2D, game->GetButtonLook(0) );
@@ -124,6 +147,9 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 
 GameScene::~GameScene()
 {
+	if ( selectionModel ) {
+		sim->GetEngine()->FreeModel( selectionModel );
+	}
 	delete sim;
 }
 
@@ -139,10 +165,22 @@ void GameScene::Resize()
 	layout.PosAbs( &allRockButton, NUM_SERIAL_BUTTONS, -2 );
 	layout.PosAbs( &freeCameraButton, 0, -3 );
 
+	/*
 	for( int i=0; i<NUM_BUILD_BUTTONS; ++i ) {
 		int x = i/4;
 		int y = i - x*4;
 		layout.PosAbs( &buildButton[i], x, y+2 );
+	}
+	*/
+	int mode = 0;
+	for( int i=0; i<NUM_BUILD_BUTTONS; ++i ) {
+		if ( mode < NUM_BUILD_MODES && BUILD_MODE_START[mode+1] == i ) {
+			++mode;
+		}
+		layout.PosAbs( &buildButton[i], 1+i-BUILD_MODE_START[mode], mode+2 );
+	}
+	for( int i=0; i<NUM_BUILD_MODES; ++i ) {
+		layout.PosAbs( &modeButton[i], 0, i+2 );
 	}
 	layout.PosAbs( &createWorkerButton, 0, 6 );
 	layout.PosAbs( &ejectButton, 1, 6 );
@@ -301,7 +339,8 @@ void GameScene::Rotate( float degrees )
 
 void GameScene::MouseMove( const grinliz::Vector2F& view, const grinliz::Ray& world )
 {
-	ModelVoxel mv = this->ModelAtMouse( view, sim->GetEngine() );
+	// --- Info and debugging info. ---
+	ModelVoxel mv = this->ModelAtMouse( view, sim->GetEngine(), TEST_TRI, 0, 0, 0, 0 );
 	MoveModel( mv.model ? mv.model->userData : 0 );
 
 	if ( mv.model && mv.model->userData ) {
@@ -310,6 +349,82 @@ void GameScene::MouseMove( const grinliz::Vector2F& view, const grinliz::Ray& wo
 	if ( mv.VoxelHit() ) {
 		voxelInfoID = mv.Voxel2();
 	}
+
+	SetSelectionModel( view );
+}
+
+
+void GameScene::SetSelectionModel( const grinliz::Vector2F& view )
+{
+#ifdef USE_MOUSE_MOVE_SELECTION
+	Vector3F at = { 0, 0, 0 };
+	ModelVoxel mv = this->ModelAtMouse( view, sim->GetEngine(), TEST_TRI, 0, 0, 0, &at );
+	Vector2I pos2i = { (int)at.x, (int)at.z };
+
+	// --- Selection display. (Only in desktop interface.)
+	Engine* engine = sim->GetEngine();
+	float size = 1.0f;
+	int height = 1;
+	const char* name = "";
+	if ( buildActive ) {
+		// Which should we use?
+		switch ( buildActive ) {
+		case CLEAR_ROCK: 
+			{
+				const WorldGrid& wg = sim->GetWorldMap()->GetWorldGrid( pos2i.x, pos2i.y );
+				switch ( wg.Height() ) {
+				case 3:	name = "clearMarker3";	break;
+				case 2:	name = "clearMarker2";	break;
+				default:	name = "clearMarker1";	break;
+				}
+			}
+			break;
+		case BUILD_ICE:
+		case BUILD_KIOSK_N:
+		case BUILD_KIOSK_M:
+		case BUILD_KIOSK_C:
+		case BUILD_KIOSK_S:
+			name = "buildMarker1";
+			break;
+		case BUILD_VAULT:
+			size = 2.0f;
+			name = "buildMarker2";
+			break;
+		default:
+			break;
+		}
+	}
+	if ( *name ) {
+		// Make the model current.
+		if ( !selectionModel || !StrEqual( selectionModel->GetResource()->Name(), name )) {
+			if ( selectionModel ) {
+				engine->FreeModel( selectionModel );
+			}
+			selectionModel = engine->AllocModel( name );
+			GLASSERT( selectionModel );
+		}
+	}
+	else {
+		if ( selectionModel ) {
+			engine->FreeModel( selectionModel );
+			selectionModel = 0;
+		}
+	}
+	if ( selectionModel ) {
+		// Move away from the eye so that the new color is visible.
+		Vector3F pos = at;
+		pos.x = floorf( at.x ) + size*0.5f;
+		pos.z = floorf( at.z ) + size*0.5f;
+		
+		Vector3F dir = pos - engine->camera.PosWC();
+		dir.Normalize();
+		pos = pos + dir*0.01f;
+
+		selectionModel->SetPos( pos );
+		Vector4F color = { 1,1,1, 0.3f };
+		selectionModel->SetColor( color );
+	}
+#endif
 }
 
 
@@ -386,6 +501,34 @@ void GameScene::TapModel( Chit* target )
 }
 
 
+grinliz::IString GameScene::BuildActiveInfo( int* size )
+{
+	static const char* name[NUM_BUILD_BUTTONS] = {
+		"",	// no build 
+		"", // clear
+		"",	// ice
+		"kiosk.n",
+		"kiosk.m",
+		"kiosk.c",
+		"kiosk.s",
+		"vault",
+		"",			// rotate
+	};
+	IString str;
+	if ( *name[buildActive] ) {
+		str = StringPool::Intern( name[buildActive], true );
+
+		if ( size ) {
+			// Get the size
+			*size = 1;
+			ItemDefDB::GetProperty( str.c_str(), "size", size );
+		}
+	}
+	return str;
+}
+
+
+
 void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::Ray& world )
 {
 	bool uiHasTap = ProcessTap( action, view, world );
@@ -401,20 +544,23 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 	}
 	enable3DDragging = (sim->GetPlayerChit() == 0) || (coreMode != 0);
 	
-	int  buildActive = 0;
-	for( int i=1; i<NUM_BUILD_BUTTONS; ++i ) {
-		if ( buildButton[i].Down() ) {
-			buildActive = i;
-			break;
+	buildActive = NO_BUILD;
+	if ( coreMode ) {
+		for( int i=1; i<NUM_BUILD_BUTTONS; ++i ) {
+			if ( buildButton[i].Down() ) {
+				buildActive = i;
+				break;
+			}
 		}
 	}
+	SetSelectionModel( view );
 
 	if ( !uiHasTap ) {
 		Vector3F atModel = { 0, 0, 0 };
 		Vector3F plane   = { 0, 0, 0 };
-
 		ModelVoxel mv = ModelAtMouse( view, sim->GetEngine(), TEST_HIT_AABB, 0, MODEL_CLICK_THROUGH, 0, &plane );
 		GLASSERT( plane.x > 0 && plane.z > 0 );
+		Vector2I plane2i = { (int)plane.x, (int)plane.z };
 
 		bool tap = Process3DTap( action, view, world, sim->GetEngine() );
 
@@ -426,6 +572,9 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 				RemovableFilter removableFilter;
 
 				if ( buildActive == CLEAR_ROCK ) {
+#ifdef USE_MOUSE_MOVE_SELECTION
+					wq->AddClear( plane2i );
+#else
 					if ( mv.VoxelHit()) {
 						wq->Add( WorkQueue::CLEAR, mv.Voxel2(), IString() );
 					}
@@ -437,8 +586,12 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 							wq->Add( WorkQueue::CLEAR, msc->MapPosition(), gameItem->name );
 						}
 					}
+#endif
 				}
 				else if ( buildActive == NO_BUILD ) {
+#ifdef USE_MOUSE_MOVE_SELECTION
+					wq->Remove( plane2i );
+#else
 					if ( mv.VoxelHit() ) {
 						// Clear a voxel.
 						wq->Remove( mv.Voxel2() );
@@ -449,6 +602,7 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 							wq->Remove( msc->MapPosition() );
 						}
 					}
+#endif
 				}
 				else if ( buildActive == ROTATE ) {
 					if ( mv.ModelHit() ) {
@@ -461,21 +615,18 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 						}
 					}
 				}
+#ifdef USE_MOUSE_MOVE_SELECTION
+				else {
+#else
 				else if ( !mv.VoxelHit() ) {
-					Vector2I v = { (int)plane.x, (int)plane.z };
-					switch ( buildActive ) {
-					case BUILD_ICE:			wq->Add( WorkQueue::BUILD, v, IString() );	break;
-					case BUILD_KIOSK_M:		wq->Add( WorkQueue::BUILD, v, StringPool::Intern( "kiosk.m" ));	break;
-					case BUILD_KIOSK_C:		wq->Add( WorkQueue::BUILD, v, StringPool::Intern( "kiosk.c" ));	break;
-					case BUILD_KIOSK_S:		wq->Add( WorkQueue::BUILD, v, StringPool::Intern( "kiosk.s" ));	break;
-					case BUILD_KIOSK_N:		wq->Add( WorkQueue::BUILD, v, StringPool::Intern( "kiosk.n" ));	break;
-					case BUILD_VAULT:		wq->Add( WorkQueue::BUILD, v, StringPool::Intern( "vault" ));	break;
-					default: GLASSERT( 0 ); break;
-					};
-					
+#endif
+					int size = 1;
+					IString name = BuildActiveInfo( &size );
+					wq->AddBuild( plane2i, name );
 				}
 			}
 			
+			/*
 			if ( mv.VoxelHit() ) {
 				// clicked on a rock. Melt away!
 				Chit* player = sim->GetPlayerChit();
@@ -484,6 +635,7 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 					return;
 				}
 			}
+			*/
 
 			int tapMod = lumosGame->GetTapMod();
 
@@ -836,8 +988,8 @@ void GameScene::DoTick( U32 delta )
 	SetBars();
 
 	CoreScript* coreMode = sim->GetChitBag()->IsBoundToCore( sim->GetPlayerChit(), true );
-	for( int i=0; i<NUM_BUILD_BUTTONS; ++i ) {
-		buildButton[i].SetVisible( coreMode != 0 );
+	for( int i=0; i<NUM_BUILD_MODES; ++i ) {
+		modeButton[i].SetVisible( coreMode != 0 );
 	}
 	createWorkerButton.SetVisible( coreMode != 0 );
 	ejectButton.SetVisible( coreMode != 0 );

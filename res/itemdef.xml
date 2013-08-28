@@ -86,8 +86,7 @@
         resource="vault"
         porch="1"
         procedural="team"
-        sizeX="2"
-        sizeY="2"
+        size="2"
         mass="200" />
 
   <item name="mantis"

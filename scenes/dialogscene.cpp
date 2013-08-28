@@ -30,6 +30,18 @@ DialogScene::DialogScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 		itemArr[i].Init( &gamui2D, stdBL );
 	}
 	itemArr[0].SetDeco( LumosGame::CalcDecoAtom( LumosGame::DECO_OKAY, true ), LumosGame::CalcDecoAtom( LumosGame::DECO_OKAY, false ) );
+
+	for( int i=0; i<NUM_TOGGLES; ++i ) {
+		toggles[i].Init( &gamui2D, lumosGame->GetButtonLook(0));
+		toggles[0].AddToToggleGroup( &toggles[i] );
+
+		for( int j=0; j<NUM_SUB; ++j ) {
+			int index = i*NUM_SUB+j;
+			subButtons[index].Init( &gamui2D, lumosGame->GetButtonLook(0));
+			toggles[i].AddSubItem( &subButtons[index] );
+			subButtons[i*NUM_SUB].AddToToggleGroup( &subButtons[index] );
+		}
+	}
 }
 
 
@@ -42,6 +54,15 @@ void DialogScene::Resize()
 
 	for ( int i=0; i<NUM_ITEMS; ++i ) {
 		layout.PosAbs( &itemArr[i], i, 0 );
+	}
+
+	for( int i=0; i<NUM_TOGGLES; ++i ) {
+		layout.PosAbs( &toggles[i], 0, i+2 );
+
+		for( int j=0; j<NUM_SUB; ++j ) {
+			int index = i*NUM_SUB+j;
+			layout.PosAbs( &subButtons[index], j+1, i+2 );
+		}
 	}
 }
 

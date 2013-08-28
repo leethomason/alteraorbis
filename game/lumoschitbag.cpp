@@ -57,12 +57,10 @@ Chit* LumosChitBag::NewBuilding( const Vector2I& pos, const char* name, int team
 	const GameItem& rootItem = ItemDefDB::Instance()->Get( name );
 
 	int cx=1;
-	int cy=1;
-	rootItem.GetValue( "sizeX", &cx );
-	rootItem.GetValue( "sizeY", &cy );
+	rootItem.GetValue( "size", &cx );
 
 	MapSpatialComponent* msc = new MapSpatialComponent( worldMap );
-	msc->SetMapPosition( pos.x, pos.y, cx, cy );
+	msc->SetMapPosition( pos.x, pos.y, cx, cx );
 	msc->SetMode( GRID_BLOCKED );
 	msc->SetBuilding( true );
 	

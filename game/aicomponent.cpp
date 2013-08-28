@@ -46,17 +46,18 @@
 
 using namespace grinliz;
 
-static const float NORMAL_AWARENESS		= 10.0f;
-static const float LOOSE_AWARENESS		= 16.0f;
-static const float SHOOT_ANGLE			= 10.0f;	// variation from heading that we can shoot
-static const float SHOOT_ANGLE_DOT		=  0.985f;	// same number, as dot product.
-static const float WANDER_RADIUS		=  5.0f;
-static const float EAT_HP_PER_SEC		=  2.0f;
-static const float EAT_HP_HEAL_MULT		=  5.0f;	// eating really tears up plants. heal the critter more than damage the plant.
-static const int   WANDER_ODDS			= 50;		// as in 1 in WANDER_ODDS
-static const float PLANT_AWARE			=  3.0f;
-static const float GOLD_AWARE			=  3.5f;
-static const int   FORCE_COUNT_STUCK	=  8;
+static const float	NORMAL_AWARENESS			= 10.0f;
+static const float	LOOSE_AWARENESS				= 16.0f;
+static const float	SHOOT_ANGLE					= 10.0f;	// variation from heading that we can shoot
+static const float	SHOOT_ANGLE_DOT				=  0.985f;	// same number, as dot product.
+static const float	WANDER_RADIUS				=  5.0f;
+static const float	EAT_HP_PER_SEC				=  2.0f;
+static const float	EAT_HP_HEAL_MULT			=  5.0f;	// eating really tears up plants. heal the critter more than damage the plant.
+static const int	WANDER_ODDS					= 50;		// as in 1 in WANDER_ODDS
+static const float	PLANT_AWARE					=  3.0f;
+static const float	GOLD_AWARE					=  3.5f;
+static const int	FORCE_COUNT_STUCK			=  8;
+static const int	STAND_TIME_WHEN_WANDERING	= 1500;
 
 const char* AIComponent::MODE_NAMES[NUM_MODES]     = { "normal", "rockbreak", "battle" };
 const char* AIComponent::ACTION_NAMES[NUM_ACTIONS] = { "none", "move", "melee", "shoot", "wander", "stand" };
@@ -237,7 +238,8 @@ void AIComponent::GetFriendEnemyLists()
 	for( int i=0; i<chitArr.Size(); ++i ) {
 		int status = GetTeamStatus( chitArr[i] );
 		if ( status == ENEMY ) {
-			if ( enemyList.HasCap() ) {
+			if (    enemyList.HasCap() 
+				 && map->HasStraightPath( center, chitArr[i]->GetSpatialComponent()->GetPosition2D() )) {
 				enemyList.Push( chitArr[i]->ID());
 			}
 		}
@@ -1098,7 +1100,9 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 		}
 	}
 	if ( !dest.IsZero() ) {
-		this->Move( dest, false );
+		Vector2I dest2i = { (int)dest.x, (int)dest.y };
+		taskList.Push( Task::MoveTask( dest2i ));
+		taskList.Push( Task::StandTask( STAND_TIME_WHEN_WANDERING ));
 	}
 }
 
@@ -1319,14 +1323,15 @@ void AIComponent::FlushTaskList( const ComponentSet& thisComp )
 	Vector2F taskPos2 = { (float)task->pos2i.x + 0.5f, (float)task->pos2i.y + 0.5f };
 	Vector3F taskPos3 = { taskPos2.x, 0, taskPos2.y };
 	Vector2I sector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
+	WorkQueue* workQueue = 0;
+	const WorkQueue::QueueItem* queueItem = 0;
 
 	// If this is a task associated with a work item, make
 	// sure that work item still exists.
 	if ( task->taskID ) {
-		const WorkQueue::QueueItem* queueItem = 0;
 		CoreScript* coreScript = GetChitBag()->ToLumos()->GetCore( sector );
 		if ( coreScript ) {
-			WorkQueue* workQueue = coreScript->GetWorkQueue();
+			workQueue = coreScript->GetWorkQueue();
 			if ( workQueue ) {
 				queueItem = workQueue->GetJobByTaskID( task->taskID );
 			}
@@ -1371,28 +1376,32 @@ void AIComponent::FlushTaskList( const ComponentSet& thisComp )
 
 	case TASK_REMOVE:
 		{
-			if ( task->structure.empty() ) {
+			GLASSERT( workQueue && queueItem );
+			if ( workQueue->TaskCanComplete( *queueItem )) {
 				const WorldGrid& wg = map->GetWorldGrid( task->pos2i.x, task->pos2i.y );
 				if ( wg.RockHeight() ) {
 					DamageDesc dd( 10000, 0 );	// FIXME need constant
 					Vector3I voxel = { task->pos2i.x, 0, task->pos2i.y };
 					map->VoxelHit( voxel, dd );
 				}
+				else {
+					Chit* found = GetChitBag()->ToLumos()->QueryRemovable( task->pos2i );
+					if ( found ) {
+						DamageDesc dd( 10000, 0 );
+						ChitDamageInfo info( dd );
+						info.originID = 0;
+						info.awardXP  = false;
+						info.isMelee  = true;
+						info.isExplosion = false;
+						info.originOfImpact = thisComp.spatial->GetPosition();
+						found->SendMessage( ChitMsg( ChitMsg::CHIT_DAMAGE, 0, &info ), 0 );
+					}
+				}
+				taskList.PopFront();
 			}
 			else {
-				Chit* found = GetChitBag()->ToLumos()->QueryRemovable( task->pos2i );
-				if ( found ) {
-					DamageDesc dd( 10000, 0 );
-					ChitDamageInfo info( dd );
-					info.originID = 0;
-					info.awardXP  = false;
-					info.isMelee  = true;
-					info.isExplosion = false;
-					info.originOfImpact = thisComp.spatial->GetPosition();
-					found->SendMessage( ChitMsg( ChitMsg::CHIT_DAMAGE, 0, &info ), 0 );
-				}
+				taskList.Clear();
 			}
-			taskList.PopFront();
 		}
 		break;
 
@@ -1401,28 +1410,8 @@ void AIComponent::FlushTaskList( const ComponentSet& thisComp )
 			// IsPassable (isLand, noRocks)
 			// No plants
 			// No buildings
-			int cx=1, cy=1;
-			if ( !task->structure.empty() ) {
-				const GameItem& rootItem = ItemDefDB::Instance()->Get( task->structure.c_str() );
-				rootItem.GetValue( "sizeX", &cx );
-				rootItem.GetValue( "siveY", &cy );
-			}
-			Rectangle2I bounds;
-			bounds.Set( task->pos2i.x, task->pos2i.y, task->pos2i.x+cx-1, task->pos2i.y+cy-1 );
-
-			// Check for rock, water, etc.
-			for( int y=bounds.min.y; y<=bounds.max.y; ++y ) {
-				for( int x=bounds.min.x; x<=bounds.max.x; ++x ) {
-					if (    !map->IsPassable( pos2i.x, pos2i.y ) 
-						 || GetChitBag()->ToLumos()->QueryRemovable( pos2i )) 
-					{
-						// Found a plant or building in the way.
-						taskList.Clear();
-						break;
-					}
-				}
-			}
-			if ( !taskList.Empty() ) {
+			GLASSERT( workQueue && queueItem );
+			if ( workQueue->TaskCanComplete( *queueItem )) {
 				if ( task->structure.empty() ) {
 					map->SetRock( task->pos2i.x, task->pos2i.y, 1, false, WorldGrid::ICE );
 				}
@@ -1430,6 +1419,10 @@ void AIComponent::FlushTaskList( const ComponentSet& thisComp )
 					GetChitBag()->ToLumos()->NewBuilding( task->pos2i, task->structure.c_str(), thisComp.item->primaryTeam );
 				}
 				taskList.PopFront();
+			}
+			else {
+				// Plan has gone bust:
+				taskList.Clear();
 			}
 		}
 		break;
@@ -1463,18 +1456,18 @@ void AIComponent::WorkQueueToTask(  const ComponentSet& thisComp )
 					float cost = 0;
 					if ( map->CalcPathBeside( thisComp.spatial->GetPosition2D(), dest, &end, &cost )) {
 						
-						taskList.Push( Task( MOVE, end, item->taskID ));
-						taskList.Push( Task( STAND, 1000, item->pos, item->taskID ));
-						taskList.Push( Task( TASK_REMOVE, item->pos, item->structure, item->taskID ));
+						taskList.Push( Task::MoveTask( end, item->taskID ));
+						taskList.Push( Task::StandTask( 1000, item->taskID ));
+						taskList.Push( Task::RemoveTask( item->pos, item->taskID ));
 					}
 				}
 				break;
 
 			case WorkQueue::BUILD:
 				{
-					taskList.Push( Task( MOVE, item->pos, item->taskID ));
-					taskList.Push( Task( STAND, 1000, item->pos, item->taskID ));
-					taskList.Push( Task( TASK_BUILD, item->pos, item->structure, item->taskID ));
+					taskList.Push( Task::MoveTask( item->pos, item->taskID ));
+					taskList.Push( Task::StandTask( 1000, item->taskID ));
+					taskList.Push( Task::BuildTask( item->pos, item->structure, item->taskID ));
 				}
 				break;
 
@@ -1560,6 +1553,10 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 
 	if ( aiMode == NORMAL_MODE && !taskList.Empty() ) {
 		FlushTaskList( thisComp );
+		if ( taskList.Empty() ) {
+			Think( thisComp );
+			rethink = 0;
+		}
 	}
 	else if ( !currentAction || (rethink > 1000 ) ) {
 		Think( thisComp );
@@ -1677,6 +1674,7 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 				aiMode = NORMAL_MODE;
 			}
 		}
+		taskList.Clear();
 		break;
 
 	case ChitMsg::CHIT_SECTOR_HERD:
