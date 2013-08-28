@@ -58,6 +58,8 @@ x Probably don't need squatting logic in PathMoveComponent. (Actually do)
 		x wait states on wander
 		x don't count F/E that can't be pathed to
 		x decent menu system
+		- GT: bug image
+		- restore electric rendering for faces
 		- proper animation system
 	- Econ
 		- fix team logic

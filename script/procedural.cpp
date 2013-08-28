@@ -19,8 +19,17 @@ using namespace grinliz;
 }
 
 
-void FaceGen::GetSkinColor( int index0, int index1, float fade, Color4F* color )
+HumanGen::HumanGen( bool female, U32 seed, int team )
 {
+	this->female = female;
+	this->seed   = seed;
+	this->team   = team;
+}
+
+
+void HumanGen::GetSkinColor( int index0, int index1, float fade, Color4F* color )
+{
+	static const int NUM_SKIN_COLORS = 4;
 	static const Vector2I c[NUM_SKIN_COLORS] = {
 		{ PAL_PURPLE*2, PAL_TANGERINE },
 		{ PAL_TANGERINE*2+1, PAL_PURPLE },
@@ -39,8 +48,9 @@ void FaceGen::GetSkinColor( int index0, int index1, float fade, Color4F* color )
 }
 
 
-void FaceGen::GetGlassesColor( int index0, int index1, float fade, Color4F* color )
+void HumanGen::GetGlassesColor( int index0, int index1, float fade, Color4F* color )
 {
+	static const int NUM_GLASSES_COLORS = 6;
 	static const Vector2I c[NUM_GLASSES_COLORS] = {
 		{ PAL_BLUE*2, PAL_ZERO },
 		{ PAL_BLUE*2, PAL_RED },
@@ -61,63 +71,100 @@ void FaceGen::GetGlassesColor( int index0, int index1, float fade, Color4F* colo
 }
 
 
-void FaceGen::GetHairColor( int index0, Color4F* color )
+void HumanGen::GetHairColor( int index0, Color4F* color )
 {
-	static const Vector2I c[NUM_HAIR_COLORS] = {
+	static const int N_FEMALE = 9;
+	static const int N_MALE   = 7;
+	
+	static const Vector2I cFemale[N_FEMALE] = {
+		// natural
+		{ PAL_GREEN*2,		PAL_RED },
+		{ PAL_RED*2+0,		PAL_TANGERINE },
+		{ PAL_PURPLE*2,		PAL_TANGERINE },
+		{ PAL_RED*2+1,		PAL_GREEN },
+		{ PAL_TANGERINE*2+1, PAL_PURPLE },
+		// intense
+		{ PAL_RED*2+1,		PAL_RED },
+		{ PAL_ZERO*2+1,		PAL_TANGERINE },
+		{ PAL_ZERO*2+1,		PAL_BLUE },
+		{ PAL_GRAY*2,		PAL_GRAY }
+	};
+
+	static const Vector2I cMale[N_MALE] = {
 		// natural
 		{ PAL_GREEN*2, PAL_RED },
 		{ PAL_RED*2+0, PAL_TANGERINE },
 		{ PAL_PURPLE*2, PAL_TANGERINE },
 		{ PAL_RED*2+1, PAL_GREEN },
 		{ PAL_TANGERINE*2+1, PAL_PURPLE },
-//		{ PAL_TANGERINE*2+1, PAL_GRAY },
 		// intense
-		{ PAL_RED*2+1, PAL_RED },
 		{ PAL_ZERO*2+1, PAL_TANGERINE },
-		{ PAL_ZERO*2+1, PAL_BLUE },
-		{ PAL_GRAY*2, PAL_GRAY }
+		{ PAL_GRAY*2,   PAL_GRAY }
 	};
 
 	const Game::Palette* palette = Game::GetMainPalette();
-	index0 = abs(index0) % NUM_HAIR_COLORS;
-	*color = palette->Get4F( c[index0].x, c[index0].y );
+	if ( female ) {
+		index0 = abs(index0) % N_FEMALE;
+		*color = palette->Get4F( cFemale[index0].x, cFemale[index0].y );
+	}
+	else {
+		index0 = abs(index0) % N_MALE;
+		*color = palette->Get4F( cMale[index0].x, cMale[index0].y );
+	}
 }
 
 
-void FaceGen::GetColors( U32 seed, grinliz::Vector4F* v )
+void HumanGen::GetSuitColor( grinliz::Vector4F* c )
+{
+	Random random( seed );
+	int y = random.Rand( PAL_COUNT );
+	int x0 = y + random.Rand( PAL_COUNT - y );
+	int x1 = y + random.Rand( PAL_COUNT - y );
+	float fraction = random.Uniform();
+
+	const Game::Palette* palette = Game::GetMainPalette();
+	Vector4F c0 = palette->GetV4F( x0*2, y );
+	Vector4F c1 = palette->GetV4F( x1*2, y );
+
+	*c = Lerp( c0, c1, fraction );
+	c->w = 0.7f;
+}
+
+
+void HumanGen::GetColors( grinliz::Vector4F* v )
 {
 	Color4F c[3];
-	GetColors( seed, c );
+	GetColors( c );
 	for( int i=0; i<3; ++i ) {
 		v[i].Set( c[i].r, c[i].g, c[i].b, c[i].a );
 	}
 }
 
 	
-void FaceGen::GetColors( U32 seed, grinliz::Color4F* c )
+void HumanGen::GetColors( grinliz::Color4F* c )
 {
 	Random random( seed );
 	random.Rand();
 
-	GetSkinColor(	random.Rand( NUM_SKIN_COLORS ), 
-					random.Rand( NUM_SKIN_COLORS ),
+	GetSkinColor(	random.Rand(), 
+					random.Rand(),
 					random.Uniform(), 
 					c+SKIN );
-	GetHairColor( random.Rand( NUM_HAIR_COLORS ), c+HAIR );
-	GetGlassesColor( random.Rand( NUM_GLASSES_COLORS ),
-					 random.Rand( NUM_GLASSES_COLORS ),
+	GetHairColor( random.Rand(), c+HAIR );
+	GetGlassesColor( random.Rand(),
+					 random.Rand(),
 					 random.Uniform(),
 					 c+GLASSES );
 }
 
 
-void FaceGen::Render( int seed, ProcRenderInfo* info )
+void HumanGen::AssignFace( ProcRenderInfo* info )
 {
 	Random random( seed );
 	random.Rand();
 
 	Vector4F vcol[3];
-	GetColors( random.Rand(), vcol );
+	GetColors( vcol );
 
 	// Get the texture to get the the metadata
 	Texture* texture = 0;
@@ -131,6 +178,38 @@ void FaceGen::Render( int seed, ProcRenderInfo* info )
 
 	info->texture = texture;
 	texture->GetTableEntry( random.Rand( texture->NumTableEntries() ), &info->te );
+
+	info->color.SetCol( 0, vcol[0] );
+	info->color.SetCol( 1, vcol[1] );
+	info->color.SetCol( 2, vcol[2] );
+}
+
+
+void HumanGen::AssignSuit( ProcRenderInfo* info )
+{
+	Random random( seed );
+	random.Rand();
+
+	Vector4F vcol[3];
+	GetColors( vcol );
+	GetSuitColor( &vcol[2] );
+
+	// Get the texture to get the the metadata
+	Texture* texture = 0;
+	if ( female ) {
+		texture = TextureManager::Instance()->GetTexture( "suit0" );
+	}
+	else {
+		texture = TextureManager::Instance()->GetTexture( "suit0" );
+	}
+	GLASSERT( texture );
+
+	info->texture = texture;
+	//texture->GetTableEntry( random.Rand( texture->NumTableEntries() ), &info->te );
+
+	vcol[0].w = 0;
+	vcol[1].w = 0;
+	vcol[2].w = 0.7f;	// suit glow
 
 	info->color.SetCol( 0, vcol[0] );
 	info->color.SetCol( 1, vcol[1] );

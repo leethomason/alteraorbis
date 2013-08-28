@@ -85,30 +85,37 @@ protected:
 
 
 // NOT a subclass. Face rendering is different from the other modes.
-class FaceGen
+class HumanGen
 {
 public:
+	HumanGen( bool female, U32 seed, int team );
 
-	FaceGen( bool p_female ) : female(p_female) {}
+	// False colors used by the face:
+	// red: skin
+	// green: hair
+	// blue: glasses/tattoo
+	void AssignFace( ProcRenderInfo* info );
+	// red: skin
+	// green: hair
+	// blue: suit
+	void AssignSuit( ProcRenderInfo* info );
 
-	enum { 
-		NUM_SKIN_COLORS = 4,
-		NUM_HAIR_COLORS	= 9,
-		NUM_GLASSES_COLORS = 6,
-	};
+private:
+
 	void GetSkinColor( int index0, int index1, float fade, grinliz::Color4F* c );
 	void GetHairColor( int index0, grinliz::Color4F* c );
 	void GetGlassesColor( int index0, int index1, float fade, grinliz::Color4F* c );
+	void GetSuitColor( grinliz::Vector4F* c );
 	
 	enum {
-		SKIN, GLASSES, HAIR
+		SKIN, HAIR, GLASSES
 	};
-	void GetColors( U32 seed, grinliz::Color4F* c );
-	void GetColors( U32 seed, grinliz::Vector4F* v );
-	void Render( int seed, ProcRenderInfo* info );
+	void GetColors( grinliz::Color4F* c );
+	void GetColors( grinliz::Vector4F* v );
 
-private:
 	bool female;
+	int  team;
+	U32  seed;
 };
 
 

@@ -174,9 +174,9 @@ void AnimationScene::LoadModel()
 		model[j]->SetPos( 1.0f + (float)j*0.6f, 0, 1 );
 
 		if ( colorMap ) {
-			FaceGen teamgen( false );
+			HumanGen gen( false, j+4, 1 );
 			ProcRenderInfo info;
-			teamgen.Render( j+1, &info );
+			gen.AssignSuit( &info );
 			model[j]->SetColorMap( true, info.color );
 		}
 	}
