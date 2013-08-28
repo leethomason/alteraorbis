@@ -522,6 +522,15 @@ void StringToVector( const char* str, Vector3F* vec )
 }
 
 
+void StringToVector( const char* str, Vector4F* vec )
+{
+#pragma warning ( push )
+#pragma warning ( disable : 4996 )
+		sscanf( str, "%f %f %f %f", &vec->x, &vec->y, &vec->z, &vec->w );
+#pragma warning ( pop )
+}
+
+
 void StringToAxisAngle( const char* str, Vector3F* axis, float* angle )
 {
 #pragma warning ( push )

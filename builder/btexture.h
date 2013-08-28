@@ -68,6 +68,7 @@ public:
 	bool invert;
 	bool emissive;	// if set, the alpha channel is emissiveness, not transparency
 	bool blackAlpha0;	// if set, all alpha=0 becomes 0,0,0,0	
+	bool whiteMap;
 	int targetWidth;
 	int targetHeight;
 	int targetMax;
@@ -84,6 +85,9 @@ public:
 	SDL_Surface* surface;
 	U16* pixelBuffer16;	// RGBA16, RGB16
 	U8*  pixelBuffer8;	// ALPHA
+
+private:	
+	void WhiteMap();
 };
 
 

@@ -19,6 +19,7 @@
 #include "../grinliz/gltypes.h"
 #include "../grinliz/gldebug.h"
 #include "../grinliz/glcolor.h"
+#include "../grinliz/glvector.h"
 #include "../grinliz/glstringutil.h"
 #include "../tinyxml2/tinyxml2.h"
 
@@ -37,5 +38,9 @@ void ExitError( const char* tag,
 				const char* pathName,
 				const char* assetName,
 				const char* message );
+
+void StringToVector( const char* str, grinliz::Vector3F* vec );
+void StringToVector( const char* str, grinliz::Vector4F* vec );
+
 
 #endif // UFO_BUILDER_INCLUDED
