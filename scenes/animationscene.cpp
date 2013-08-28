@@ -24,6 +24,8 @@
 
 #include "../xegame/istringconst.h"
 
+#include "../script/procedural.h"
+
 #include <direct.h>
 
 extern void ScreenCapture( const char* baseFilename, bool appendCount, bool trim, bool makeTransparent, grinliz::Rectangle2I* size );
@@ -89,12 +91,8 @@ AnimationScene::AnimationScene( LumosGame* game ) : Scene( game )
 	}
 
 	engine = new Engine( port, game->GetDatabase(), 0 );
-	engine->particleSystem->LoadParticleDefs( "./res/particles.xml" );
-
-	engine->lighting.midLight.ambient.Set( 0.5f, 0.5f, 0.5f );
-	engine->lighting.direction.Set( -1, 1, 1 );
-	engine->lighting.direction.Normalize();
-	engine->lighting.midLight.diffuse.Set( 0.5f, 0.5f, 0.5f );
+	engine->SetGlow( true );
+	engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
 
 	int count=0;
 	for( int i=0; i<NUM_MODELS; ++i ) {
@@ -164,14 +162,23 @@ void AnimationScene::LoadModel()
 	if ( currentModel >= resourceArr.Size() ) currentModel = 0;
 	if ( currentModel < 0 ) currentModel = resourceArr.Size()-1;
 
-	const ModelResource* res = resourceArr[currentModel];;
+	const ModelResource* res = resourceArr[currentModel];
 	GLASSERT( res );
+	bool colorMap = res->atom[0].texture->ColorMap();
+
 	for( int j=0; j<NUM_MODELS; ++j ) {
 		if ( model[j] ) {
 			engine->FreeModel( model[j] );
 		}
 		model[j] = engine->AllocModel( res );
 		model[j]->SetPos( 1.0f + (float)j*0.6f, 0, 1 );
+
+		if ( colorMap ) {
+			FaceGen teamgen( false );
+			ProcRenderInfo info;
+			teamgen.Render( j+1, &info );
+			model[j]->SetColorMap( true, info.color );
+		}
 	}
 	SetModelVis( false );
 	model[1]->SetAnimationRate( 0.8f );
