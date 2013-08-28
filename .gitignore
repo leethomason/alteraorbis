@@ -4,6 +4,9 @@
 *.user
 *.dat
 *.db
+*.blend1
+*.blend2
+
 Debug
 Release
 cap??.bmp
