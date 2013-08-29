@@ -9,7 +9,7 @@ kids 11
 OBJECT poly
 name "head"
 loc 0.0107343 0.574203 -0.00027468
-texture "human2_female/suit0.png"
+texture "human2_female/femsuit0.png"
 crease 45.000000
 numvert 32
 0.00238746 -0.101066 0
@@ -289,7 +289,7 @@ kids 0
 OBJECT poly
 name "arm.lower.left"
 loc -0.988985 -0.378096 0.00268087
-texture "human2_female/suit0.png"
+texture "human2_female/femsuit0.png"
 crease 45.000000
 numvert 8
 1.11414 0.574973 0.0173256
@@ -347,7 +347,7 @@ kids 0
 OBJECT poly
 name "arm.upper.left"
 loc 0.166088 0.319099 0.000788447
-texture "human2_female/suit0.png"
+texture "human2_female/femsuit0.png"
 crease 45.000000
 numvert 8
 0.00144172 -0.117716 0.0207939
@@ -405,7 +405,7 @@ kids 0
 OBJECT poly
 name "leg.lower.left"
 loc 0.136872 -0.258836 0.00918408
-texture "human2_female/suit0.png"
+texture "human2_female/femsuit0.png"
 crease 45.000000
 numvert 8
 -0.0729492 0.108533 0.0314417
@@ -463,7 +463,7 @@ kids 0
 OBJECT poly
 name "leg.upper.left"
 loc 0.0581757 0.0031344 0.0041155
-texture "human2_female/suit0.png"
+texture "human2_female/femsuit0.png"
 crease 45.000000
 numvert 8
 0.0588654 0.121368 -0.0504835
@@ -521,7 +521,7 @@ kids 0
 OBJECT poly
 name "arm.lower.right"
 loc 1.01719 -0.378096 0.00268078
-texture "human2_female/suit0.png"
+texture "human2_female/femsuit0.png"
 crease 45.000000
 numvert 8
 -1.12915 0.420592 -0.0173257
@@ -579,7 +579,7 @@ kids 0
 OBJECT poly
 name "leg.lower.right"
 loc -0.108664 -0.258836 -0.00382253
-texture "human2_female/suit0.png"
+texture "human2_female/femsuit0.png"
 crease 45.000000
 numvert 8
 0.040786 -0.122751 -0.0156911
@@ -637,7 +637,7 @@ kids 0
 OBJECT poly
 name "leg.upper.right"
 loc -0.0299677 0.0031344 0.00124606
-texture "human2_female/suit0.png"
+texture "human2_female/femsuit0.png"
 crease 45.000000
 numvert 8
 -0.0747747 -0.126107 0.0331578
@@ -695,12 +695,12 @@ kids 0
 OBJECT group
 name "humanFemale"
 loc 0.0725342 0.137491 -0.00202875
-texture "human2_female/suit0.png"
+texture "human2_female/femsuit0.png"
 kids 0
 OBJECT poly
 name "torso"
 loc 0.0154343 0.252487 -0.00628206
-texture "human2_female/suit0.png"
+texture "human2_female/femsuit0.png"
 crease 45.000000
 numvert 24
 0.0189484 0.188447 0.0175847
@@ -886,7 +886,7 @@ kids 0
 OBJECT poly
 name "arm.upper.right"
 loc -0.13788 0.319099 0.0045731
-texture "human2_female/suit0.png"
+texture "human2_female/femsuit0.png"
 crease 45.000000
 numvert 8
 0 0.0643829 -0.0207939
