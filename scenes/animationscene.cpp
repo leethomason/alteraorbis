@@ -174,13 +174,13 @@ void AnimationScene::LoadModel()
 		model[j]->SetPos( 1.0f + (float)j*0.6f, 0, 1 );
 
 		if ( colorMap ) {
-			FaceGen teamgen( false );
+			HumanGen gen( false, j+4, 1, false );
 			ProcRenderInfo info;
-			teamgen.Render( j+1, &info );
+			gen.AssignSuit( &info );
 			model[j]->SetColorMap( true, info.color );
 		}
 	}
-	SetModelVis( false );
+	SetModelVis();
 	model[1]->SetAnimationRate( 0.8f );
 	model[2]->SetAnimationRate( 1.2f );
 }
@@ -230,21 +230,16 @@ void AnimationScene::UpdateAnimationInfo()
 }
 
 
-void AnimationScene::SetModelVis( bool onlyShowOneUnrotated )
+void AnimationScene::SetModelVis()
 {
+	model[0]->ClearFlag( Model::MODEL_INVISIBLE );
 	for( int i=1; i<NUM_MODELS; ++i ) {
-		if ( onlyShowOneUnrotated || !instance.Down() ) {
+		if ( !instance.Down() ) {
 			model[i]->SetFlag( Model::MODEL_INVISIBLE );
 		}
 		else {
 			model[i]->ClearFlag( Model::MODEL_INVISIBLE );
 		}
-	}
-	for( int i=0; i<NUM_MODELS; ++i ) {
-		if ( onlyShowOneUnrotated )
-			model[i]->SetYRotation( 0 );
-		else
-			model[i]->SetYRotation( 20 );
 	}
 }
 
@@ -285,16 +280,16 @@ void AnimationScene::ItemTapped( const gamui::UIItem* item )
 			static const Vector3F UP  = { 0, 1, 0 };
 			engine->camera.SetPosWC( -5, 0.55f, 1 );
 			engine->camera.SetDir( DIR, UP ); 
-			SetModelVis( true );
+			SetModelVis();
 		}
 		else {
 			port->SetOrthoCamera( false, 0, 0 );
 			engine->CameraLookAt( 1, 1, 5 );
-			SetModelVis( false );
+			SetModelVis();
 		}
 	}
 	else if ( item == &instance ) {
-		SetModelVis( false );
+		SetModelVis();
 	}
 	else if ( item == &modelRight ) {
 		++currentModel;

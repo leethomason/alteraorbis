@@ -223,8 +223,8 @@ void GameScene::SetFace()
 		const GameItem& item = *chit->GetItem();
 		
 		ProcRenderInfo info;
-		FaceGen faceGen( true );
-		faceGen.Render( id, &info );
+		HumanGen faceGen( true, id, 1, true );
+		faceGen.AssignFace( &info );
 
 		RenderAtom procAtom( (const void*) (UIRenderer::RENDERSTATE_UI_CLIP_XFORM_MAP), 
 							 info.texture,

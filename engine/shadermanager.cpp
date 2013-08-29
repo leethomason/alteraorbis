@@ -89,6 +89,9 @@ int ShaderManager::Shader::GetUniformLocation( int uniform )
 		const char* name = gUniformName[uniform];
 		uniformLoc[uniform] = glGetUniformLocation( prog, name );
 		GLASSERT( uniformLoc[uniform] >= 0 );
+		if ( uniformLoc[uniform] < 0 ) {
+			GLOUTPUT_REL(( "Uniform id=%d name=%s\n", uniform, name )); 
+		}
 	}
 	return uniformLoc[uniform];
 }
@@ -207,6 +210,9 @@ void ShaderManager::SetUniform( int id, const grinliz::Matrix4& value )
 {
 	int loc = active->GetUniformLocation( id );
 	GLASSERT( loc >= 0 );
+	if ( loc < 0 ) {
+		GLOUTPUT_REL(( "SetUniform failed. id=%d.\n", id ));
+	}
 	glUniformMatrix4fv( loc, 1, false, value.x );
 	CHECK_GL_ERROR;
 }
@@ -458,10 +464,18 @@ FIXME: need to handle driver updates invalidating cache.
 			delete [] data;
 		}
 	}
-	int nUniforms, maxUniforms;
-	glGetProgramiv( shader->prog, GL_ACTIVE_UNIFORMS, &nUniforms );
-	glGetIntegerv( GL_MAX_VERTEX_UNIFORM_COMPONENTS, &maxUniforms );
-	GLOUTPUT(( "Shader %d created. Uniforms=%d / %d\n", flags, nUniforms, maxUniforms ));
+	//int nUniforms, maxUniforms;
+	//glGetProgramiv( shader->prog, GL_ACTIVE_UNIFORMS, &nUniforms );
+	//glGetIntegerv( GL_MAX_VERTEX_UNIFORM_COMPONENTS, &maxUniforms );
+	//GLOUTPUT_REL(( "Shader %d created. Uniforms=%d / %d\n", flags, nUniforms, maxUniforms ));
+
+	GLOUTPUT_REL(( "Shader %d created. ", flags ));
+	for( int i=0; i<32; ++i ) {
+		if ( flags & (1<<i)) {
+			GLOUTPUT_REL(( "%s ", gUniformName[i] ));
+		}
+	}
+	GLOUTPUT_REL(( "\n" ));
 
 	CHECK_GL_ERROR;
 

@@ -47,7 +47,7 @@ public:
 
 private:
 	void LoadModel();
-	void SetModelVis( bool onlyShowOne );
+	void SetModelVis();
 	void UpdateBoneInfo();
 	void UpdateAnimationInfo();
 	void UpdateModelInfo();
