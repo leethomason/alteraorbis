@@ -125,40 +125,18 @@ void LivePreviewScene::GenerateFaces( int mainRow )
 			model[i] = 0;
 		}
 
-		//Color4F skin, hair, glasses;
-		//faceGen.GetSkinColor( i, random.Rand(), random.Uniform(), &skin ); 
-		//faceGen.GetHairColor( i, &hair );
-		//faceGen.GetGlassesColor( i, random.Rand(), random.Uniform(), &glasses );
-
 		model[i] = engine->AllocModel( modelResource );
 		int row = i / COLS;
 		int col = i - row*COLS;
 		float x = START_X + float(col);
 		float z = START_Z + float(row);
-		float current = 1.0f - rowMult * (float)(mainRow);
 		
-		int index = mainRow * NUM_MODEL + i;
-
-		//switch ( row ) {
-		//case 0:
-		//	faceGen.GetSkinColor( col, col, 0, &skin ); 
-		//	faceGen.GetHairColor( col, &hair );
-		//	break;
-		//
-		//default:
-		//	break;
-		//}
-
 		model[i]->SetPos( x, 0.1f, z );
 		
-		HumanGen gen( currentType == HUMAN_FEMALE_FACE, random.Rand(), 1 );
+		HumanGen gen( currentType == HUMAN_FEMALE_FACE, random.Rand(), 1, electricButton.Down() );
 		ProcRenderInfo info;
 		gen.AssignFace( &info );
 
-//		Texture::TableEntry te;
-//		Texture* texture = model[i]->GetResource()->atom[0].texture;
-//		int n = index % texture->NumTableEntries();
-//		texture->GetTableEntry( n, &te );
 		model[i]->SetTextureXForm( info.te.uvXForm.x, info.te.uvXForm.y, info.te.uvXForm.z, info.te.uvXForm.w );
 		model[i]->SetTextureClip( info.te.clip.x, info.te.clip.y, info.te.clip.z, info.te.clip.w );
 		model[i]->SetColorMap( true, info.color );
@@ -167,8 +145,6 @@ void LivePreviewScene::GenerateFaces( int mainRow )
 //			skin = skin + hair*0.5f + glasses*0.5f;
 //			hair = hair + glasses*0.5f;
 //		}
-
-//		model[i]->SetColorMap( true, skin, hair, glasses, 1 );
 	}
 }
 

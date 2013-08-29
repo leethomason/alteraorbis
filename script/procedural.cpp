@@ -19,11 +19,12 @@ using namespace grinliz;
 }
 
 
-HumanGen::HumanGen( bool female, U32 seed, int team )
+HumanGen::HumanGen( bool female, U32 seed, int team, bool electric )
 {
 	this->female = female;
 	this->seed   = seed;
 	this->team   = team;
+	this->electric = electric;
 }
 
 
@@ -155,6 +156,11 @@ void HumanGen::GetColors( grinliz::Color4F* c )
 					 random.Rand(),
 					 random.Uniform(),
 					 c+GLASSES );
+
+	if ( electric ) {
+		c[SKIN] = c[SKIN] + c[HAIR]*0.5f + c[GLASSES]*0.5f;
+		c[HAIR] = c[HAIR] + c[GLASSES]*0.5f;
+	}
 }
 
 

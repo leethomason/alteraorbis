@@ -36,6 +36,7 @@ distribution.
 
 extern bool gDebugging;	// global debugging flag
 
+void relprintf( const char* format, ... );
 #if defined(DEBUG)
 	#if defined(_MSC_VER)
 		void dprintf( const char* format, ... );
@@ -45,7 +46,7 @@ extern bool gDebugging;	// global debugging flag
 		#define GLASSERT( x )		if ( !(x)) { _asm { int 3 } } //if ( !(x)) WinDebugBreak()
 		#define GLOUTPUT( x )		dprintf x
 		#define GLLOG( x )			logprintf x
-		#define GLOUTPUT_REL( x )	dprintf x
+		#define GLOUTPUT_REL( x )	relprintf x
 	#elif defined (ANDROID_NDK)
 		#include <android/log.h>
 		void dprintf( const char* format, ... );
@@ -58,10 +59,9 @@ extern bool gDebugging;	// global debugging flag
 		#define GLOUTPUT( x )	printf x	
 	#endif
 #else
-	void relprintf( const char* format, ... );
 	#define GLOUTPUT( x )
 	#define GLLOG( x )
-	#define GLOUTPUT_REL( x )	if ( gDebugging ) { relprintf x ; }
+	#define GLOUTPUT_REL( x )	relprintf x
 	#define GLASSERT( x )		if ( gDebugging && (!(x))) { relprintf( "ASSERT in '%s' at %d.\n", __FILE__, __LINE__ ); relprintf( "ASSERT: %s\n", #x ); }
 #endif
 

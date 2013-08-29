@@ -174,7 +174,7 @@ void AnimationScene::LoadModel()
 		model[j]->SetPos( 1.0f + (float)j*0.6f, 0, 1 );
 
 		if ( colorMap ) {
-			HumanGen gen( false, j+4, 1 );
+			HumanGen gen( false, j+4, 1, false );
 			ProcRenderInfo info;
 			gen.AssignSuit( &info );
 			model[j]->SetColorMap( true, info.color );

@@ -58,9 +58,23 @@ x Probably don't need squatting logic in PathMoveComponent. (Actually do)
 		x wait states on wander
 		x don't count F/E that can't be pathed to
 		x decent menu system
-		- GT: bug image
-		- restore electric rendering for faces
-		- proper animation system
+		x restore electric rendering for faces
+		x proper animation system
+		x GT: bug image
+		- Human Male
+			x model
+			x texture (procedural)
+			x animation
+		- Human Female v2
+			- model
+			- texture (procedural)
+			- animation
+		- Mantis
+			- concept
+			- model 
+			- animation
+		- Worker
+			- animation rendering (null animation)
 	- Econ
 		- fix team logic
 		- build 2 height ice
@@ -138,23 +152,11 @@ d put metadata in model (authoring  time)
 	- variant: fire
 	- variant: shock
 	- variant: blaster
-- Human Male
-	x model
-	x texture (procedural)
-	x animation
-- Human Female v2
-	- model
-	- texture (procedural)
-	- animation
 - Goblin Half Man
 	- http://grinninglizard.com/altera/forum/index.php?topic=8.msg186#msg186
 	- model
 	- animation
 - Mantis Man
-	- concept
-	- model 
-	- animation
-- Mantis
 	- concept
 	- model 
 	- animation

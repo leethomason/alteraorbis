@@ -88,7 +88,7 @@ protected:
 class HumanGen
 {
 public:
-	HumanGen( bool female, U32 seed, int team );
+	HumanGen( bool female, U32 seed, int team, bool electric );
 
 	// False colors used by the face:
 	// red: skin
@@ -116,6 +116,7 @@ private:
 	bool female;
 	int  team;
 	U32  seed;
+	bool electric;
 };
 
 
