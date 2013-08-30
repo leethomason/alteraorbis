@@ -78,10 +78,10 @@ x Probably don't need squatting logic in PathMoveComponent. (Actually do)
 		- Worker
 			- animation rendering (null animation)
 		- Cyclops
-			- replace balrog
+			x replace balrog
 			x model.
 				x double size of arms
-			- animation
+			x animation
 			- variant: fire
 			- variant: shock
 			- variant: blaster

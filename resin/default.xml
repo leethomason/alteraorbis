@@ -77,6 +77,29 @@
     <meta name="target"  pos="0 1.3 0"/>
   </model>
 
+  <model filename="cyclops/cyclops.ac" modelName="firecyclops" animation="cyclopsAnimation" origin="2 0 0" shading="flat" polyRemoval="pre" >
+    <meta name="trigger" pos="1.51 1.03 0.71" boneName="lower.right.arm" />
+    <meta name="target"  pos="2 1.3 0"/>
+    <meta name="althand" pos="2.43 1.0 0.50" boneName="lower.left.arm" />
+    <meta name="head"    pos="2.0 1.88 0.36" boneName="head" />
+
+    <particle name="balfire"  meta="trigger" />
+    <particle name="balfire"  meta="althand" />
+    <particle name="balfire"  meta="head" />
+    <particle name="balsmoke" meta="head" />
+  </model>
+
+  <model filename="cyclops/cyclops.ac" modelName="shockcyclops" animation="cyclopsAnimation" origin="4 0 0" shading="flat" polyRemoval="pre" >
+    <meta name="trigger" pos="3.51 1.03 0.71" boneName="lower.right.arm" />
+    <meta name="target"  pos="4 1.3 0"/>
+    <meta name="althand" pos="4.43 1.0 0.50" boneName="lower.left.arm" />
+    <meta name="head"    pos="4.0 1.88 0.36" boneName="head" />
+
+    <particle name="balshock"  meta="trigger" />
+    <particle name="balshock"  meta="althand" />
+    <particle name="balshock"  meta="head" />
+  </model>
+  
   <texture filename="palette_50.png" emissive="true" />
   <texture filename="palette_100.png" emissive="true"/>
   <texture filename="paletteglow.png" filename2="paletteglow_em.png" emissive="true" />

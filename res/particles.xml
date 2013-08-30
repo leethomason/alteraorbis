@@ -129,6 +129,14 @@
     <colorVelocity red="-0.05" green="-1.0" blue="0" alpha="-0.9" />
   </particle>
 
+  <particle name="balshock"
+            time="continuous" size="0.20" count="7" config="ray"
+            posFuzz="0.1" velocity="0.6" velocityFuzz="0.1" >
+    <color palx="8" paly="6" alpha="0" />
+    <colorVelocity red="0" green="-0.2" blue="0" alpha="1.5" />
+    <colorVelocity red="0" green="-0.6" blue="-0.1" alpha="-0.8" />
+  </particle>
+
   <particle name="spark"
             time="continuous" size="0.05" count="3" config="sphere"
             posFuzz="0.05" velocity="0.1" velocityFuzz="0.1" >
