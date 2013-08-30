@@ -64,6 +64,11 @@
     <meta name="target"  pos="0 0.33 0"/>
   </model>
 
+  <model filename="mantis/mantis.ac" modelName="redmantis" animation="mantisAnimation" origin="1 0 0" shading="flat" polyRemoval="pre" >
+    <meta name="trigger" pos="1 .35 .13" boneName="torso" />
+    <meta name="target"  pos="0 0.33 0"/>
+  </model>
+
   <texture filename="palette_50.png" emissive="true" />
   <texture filename="palette_100.png" emissive="true"/>
   <texture filename="paletteglow.png" filename2="paletteglow_em.png" emissive="true" />

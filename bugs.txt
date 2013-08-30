@@ -61,20 +61,34 @@ x Probably don't need squatting logic in PathMoveComponent. (Actually do)
 		x restore electric rendering for faces
 		x proper animation system
 		x GT: bug image
-		- Human Male
+		x Human Male
 			x model
 			x texture (procedural)
 			x animation
-		- Human Female v2
-			- model
-			- texture (procedural)
-			- animation
-		- Mantis
-			- concept
-			- model 
-			- animation
+		x Human Female v2
+			x model
+			x texture (procedural)
+			x animation
+		x Mantis
+			x concept
+			x model 
+			x animation
+		x Red Mantis
+			x model
 		- Worker
 			- animation rendering (null animation)
+		- Cyclops
+			- replace balrog
+			x model.
+				x double size of arms
+			- animation
+			- variant: fire
+			- variant: shock
+			- variant: blaster
+		- Arachnoid
+			- model
+			- texture
+			- animation
 	- Econ
 		- fix team logic
 		- build 2 height ice
@@ -143,15 +157,7 @@ d put metadata in model (authoring  time)
 - peaks news
 
 ** Art **
-- Cyclops
-    - http://grinninglizard.com/altera/forum/index.php?topic=8.msg172#msg172
-	- replace balrog
-	- model.
-		- double size of arms
-	- animation
-	- variant: fire
-	- variant: shock
-	- variant: blaster
+
 - Goblin Half Man
 	- http://grinninglizard.com/altera/forum/index.php?topic=8.msg186#msg186
 	- model
@@ -160,7 +166,16 @@ d put metadata in model (authoring  time)
 	- concept
 	- model 
 	- animation
-- Flora
+- Troll
+	- concept
+	- model 
+	- animation
+- Dragon
+	- concept
+	- model 
+	- animation
+	
+x Flora
 	x concept
 	x models
 	x redo texturing
