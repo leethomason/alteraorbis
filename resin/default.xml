@@ -55,6 +55,15 @@
     <meta name="shield"  pos="1 0.71 -0.06" rot="1 0 0 80" boneName="torso" />
   </model>
 
+  <animation filename="mantis/mantis_.bvh" assetName="mantisAnimation">
+    <meta animation="melee" name="impact" time="400" />
+  </animation>
+
+  <model filename="mantis/mantis.ac" modelName="mantis" animation="mantisAnimation" origin="0 0 0" shading="flat" polyRemoval="pre" >
+    <meta name="trigger" pos="-.22 .43 .36" boneName="arm.lower.right" />
+    <meta name="target"  pos="0 0.33 0"/>
+  </model>
+
   <texture filename="palette_50.png" emissive="true" />
   <texture filename="palette_100.png" emissive="true"/>
   <texture filename="paletteglow.png" filename2="paletteglow_em.png" emissive="true" />

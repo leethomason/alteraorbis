@@ -38,7 +38,7 @@ enum {
 	EL_FILE_STRING_LEN		= 30,
 	EL_MAX_METADATA			= 4,		// both animation and model
 	EL_MAX_MODEL_EFFECTS	= 4,		// max # of particle effects emitted by model
-	EL_MAX_BONES			= 12,		// could be 16?
+	EL_MAX_BONES			= 16,		// There is shader uniform memory allocated to: MAX_BONES*MAX_INSTANCE, so be careful with those constants.
 	EL_MAX_ANIM_FRAMES		= 24,
 
 	EL_MAX_MAP_SIZE			= 1024,		// used for allocating hash tables and lookup structures

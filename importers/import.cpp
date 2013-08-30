@@ -19,6 +19,7 @@
 extern "C" {
 	#include "ac3d.h"
 }
+#include <string.h>
 
 using namespace grinliz;
 
@@ -29,7 +30,16 @@ void ProcessAC3D( ACObject* ob, ModelBuilder* builder, const Matrix4& parent, co
 
 	MultMatrix4( parent, m, &matrix );
 	builder->SetMatrix( matrix );
-	builder->SetTexture( ob->textureName ? ob->textureName : "" );
+
+	const char* texname = ob->textureName;
+	if ( texname ) {
+		// Textures just use names, not paths.
+		if ( strrchr( texname, '/' )) {
+			texname = strrchr( texname, '/' )+1;
+		}
+	}
+
+	builder->SetTexture( texname ? texname : "" );
 	builder->PushObjectName( ob->name );
 
 	Vertex vertex[16];
