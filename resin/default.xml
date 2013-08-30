@@ -66,7 +66,15 @@
 
   <model filename="mantis/mantis.ac" modelName="redmantis" animation="mantisAnimation" origin="1 0 0" shading="flat" polyRemoval="pre" >
     <meta name="trigger" pos="1 .35 .13" boneName="torso" />
-    <meta name="target"  pos="0 0.33 0"/>
+  </model>
+
+  <animation filename="cyclops/cyclops_.bvh" assetName="cyclopsAnimation">
+    <!--<meta animation="melee" name="impact" time="400" />-->
+  </animation>
+
+  <model filename="cyclops/cyclops.ac" modelName="cyclops" animation="cyclopsAnimation" origin="0 0 0" shading="flat" polyRemoval="pre" >
+    <meta name="trigger" pos="-.42 1.0 .54" boneName="lower.right.arm" />
+    <meta name="target"  pos="0 1.3 0"/>
   </model>
 
   <texture filename="palette_50.png" emissive="true" />
