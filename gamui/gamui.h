@@ -788,7 +788,7 @@ public:
 		m_prev = m_next = this;
 	}
 
-	ToggleButton( Gamui* gamui, const ButtonLook& look ) : Button(), m_next( 0 ), m_prev( 0 ), m_wasUp( true )
+	ToggleButton( Gamui* gamui, const ButtonLook& look ) : Button(), m_next( 0 ), m_prev( 0 ), m_wasUp( true ), m_subItemArr(0)
 	{
 		RenderAtom nullAtom;
 		Button::Init( gamui, look.atomUpEnabled, look.atomUpDisabled, look.atomDownEnabled, look.atomDownDisabled, nullAtom, nullAtom );

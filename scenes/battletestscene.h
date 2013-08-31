@@ -105,11 +105,11 @@ private:
 	gamui::TextLabel label[2];
 	static const ButtonDef buttonDef[NUM_BUTTONS];
 
-	Engine* engine;
-	WorldMap* map;
-	bool battleStarted;
-	U32 boltTimer;
-	bool fireTestGun;
+	Engine*		engine;
+	WorldMap*	map;
+	bool		battleStarted;
+	U32			boltTimer;
+	bool		fireTestGun;
 
 	grinliz::Random random;
 	grinliz::Random fuzz;

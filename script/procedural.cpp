@@ -203,7 +203,7 @@ void HumanGen::AssignSuit( ProcRenderInfo* info )
 	// Get the texture to get the the metadata
 	Texture* texture = 0;
 	if ( female ) {
-		texture = TextureManager::Instance()->GetTexture( "suit0" );
+		texture = TextureManager::Instance()->GetTexture( "femsuit0" );
 	}
 	else {
 		texture = TextureManager::Instance()->GetTexture( "suit0" );

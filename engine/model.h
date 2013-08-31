@@ -325,7 +325,9 @@ public:
 
 	// 4 ids. Null to clear.
 	void SetBoneFilter( const int* boneID ) {
-		if ( boneID ) {
+		if ( boneID 
+			&& (boneID[0] >= 0 || boneID[1] >= 0 || boneID[2] >= 0 || boneID[3] >= 0 ) ) 
+		{
 			boneFilter.Set(  (float)boneID[0], (float)boneID[1], (float)boneID[2], (float)boneID[3] );
 			SetFlag( MODEL_HAS_BONE_FILTER );
 		}

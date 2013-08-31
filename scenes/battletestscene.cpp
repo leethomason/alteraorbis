@@ -30,6 +30,7 @@
 #include "../xegame/chit.h"
 #include "../xegame/rendercomponent.h"
 #include "../xegame/itemcomponent.h"
+#include "../xegame/istringconst.h"
 
 #include "../engine/engine.h"
 #include "../engine/text.h"
@@ -312,7 +313,7 @@ Chit* BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int
 	switch ( type ) {
 		case DUMMY:			asset="dummytarget";	break;
 		case MANTIS:		asset="mantis";			break;
-		case BALROG:		asset="balrog";			break;
+		case BALROG:		asset="cyclops";		break;
 	}
 
 	ItemDefDB::GameItemArr itemDefArr;
@@ -322,19 +323,21 @@ Chit* BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int
 
 	Chit* chit = chitBag.NewChit();
 
-	const char* weaponNames[3] = { "none", "melee", "pistol" };
-	GLLOG(( "Chit Created: %d '%s' weapon='%s' team=%d\n",
-		    chit->ID(), 
-			asset, weaponNames[loadout-NO_WEAPON], team ));
-
 	chit->Add( new SpatialComponent());
 	chit->Add( new RenderComponent( engine, asset ));
+
+	chitBag.AddItem( asset, chit, engine, team, level );
+	chitBag.AddItem( "shield", chit, engine, 0, level );
+	if ( loadout == MELEE_WEAPON )
+		chitBag.AddItem( "ring", chit, engine, 0, level );
+	else if ( loadout == PISTOL )
+		chitBag.AddItem( "blaster", chit, engine, 0, level );
+
 	if ( type != DUMMY ) {
 		chit->Add( new PathMoveComponent( map ));
 		AIComponent* ai = new AIComponent( engine, map );
 		ai->SetSectorAwareness( true );
 		chit->Add( ai );
-		//chit->Add( new DebugPathComponent( engine, map, static_cast<LumosGame*>(game) ));
 	}
 	else {
 		// The avoider only avoids things with move components. Makes sense and yet
@@ -342,67 +345,16 @@ Chit* BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int
 		// handles those just fine.)
 		chit->Add( new MoveComponent());
 	}
-	chit->Add( new DebugStateComponent( map ));
-
-	GameItem item( *(itemDefArr[0]));
-	item.primaryTeam = team;
-	item.stats.SetExpFromLevel( level );
-	item.InitState();
-	ItemComponent* inv = new ItemComponent( engine, map, item );
-	chit->Add( inv );
-
 	chit->Add( new HealthComponent( engine ));
+	chit->Add( new DebugStateComponent( map ));
 
 	chit->GetSpatialComponent()->SetPosYRot( (float)p.x+0.5f, 0, (float)p.y+0.5f, (float)random.Rand( 360 ) );
 
-	for( int i=1; i<itemDefArr.Size(); ++i ) {
-		inv->AddToInventory( new GameItem( *(itemDefArr[i]) ), true );
-	}
-
 	if ( type == HUMAN ) {
-		Color4F tangerine = game->GetPalette()->Get4F( PAL_TANGERINE*2, PAL_TANGERINE );
-		Color4F blue      = game->GetPalette()->Get4F( PAL_BLUE*2, PAL_BLUE );
-		if ( team == RIGHT_TEAM ) {
-			chit->GetRenderComponent()->SetColor( IString(), tangerine.ToVector() );
-		}
-		if ( team == LEFT_TEAM ) {
-			chit->GetRenderComponent()->SetColor( IString(), blue.ToVector() );
-		}
-
-		// Always get a shield
-		{
-			const GameItem& shield = itemDefDB->Get( "shield" );
-			GameItem* gi = new GameItem( shield );
-			gi->stats.Roll( random.Rand() );
-			gi->stats.SetExpFromLevel( level );
-			gi->InitState();
-			inv->AddToInventory( gi, true );
-		}
-
-		if( loadout == MELEE_WEAPON ) {
-			const GameItem& knife = itemDefDB->Get( "ring" );
-			GameItem* gi = new GameItem( knife );
-			gi->stats.Roll( random.Rand() );
-			gi->stats.SetExpFromLevel( level );
-			gi->InitState();
-			inv->AddToInventory( gi, true );
-		}
-		else if ( loadout == PISTOL ) {
-			const GameItem& gun = itemDefDB->Get( "testgun" );
-			GameItem* gi = new GameItem( gun );
-			gi->stats.SetExpFromLevel( level );
-			gi->InitState();	
-			inv->AddToInventory( gi, true );
-		}
-	}
-	else if ( type == BALROG ) {
-		if ( loadout == MELEE_WEAPON ) {
-			const GameItem& ax = itemDefDB->Get( "largeRing" );
-			GameItem* gi = new GameItem( ax );
-			gi->stats.SetExpFromLevel( level );
-			gi->InitState();
-			inv->AddToInventory( gi, true );
-		}
+		HumanGen gen( true, chit->ID(), team, false );
+		ProcRenderInfo info;
+		gen.AssignSuit( &info );
+		chit->GetRenderComponent()->SetProcedural( IStringConst::kmain, info );
 	}
 	return chit;
 }
