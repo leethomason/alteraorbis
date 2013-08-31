@@ -176,6 +176,14 @@ public:
 
 
 struct ModelAux {
+	ModelAux() {
+		for( int i=0; i<EL_MAX_BONES; ++i ) {
+			animToModelMap[i] = 0;
+		}
+		texture0XForm.Zero();
+		texture0Clip.Zero();
+	}
+
 	grinliz::Vector4F	texture0XForm;
 	grinliz::Vector4F	texture0Clip;
 	grinliz::Matrix4	texture0ColorMap;

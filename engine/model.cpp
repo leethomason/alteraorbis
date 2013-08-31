@@ -716,7 +716,9 @@ void Model::Queue( RenderQueue* queue, EngineShaders* engineShaders, int require
 			if ( HasBoneFilter() ) {
 				mod |= ShaderManager::BONE_FILTER;
 			}
-			if ( HasAnimation() ) {
+			if (    HasAnimation() 
+				 && !StrEqual( animationResource->ResourceName(), "nullAnimation" ) )		// something about the null animation doesn't render correctly. sleazy fix.
+			{
 				mod |= ShaderManager::BONE_XFORM;
 			}
 

@@ -75,20 +75,22 @@ x Probably don't need squatting logic in PathMoveComponent. (Actually do)
 			x animation
 		x Red Mantis
 			x model
-		- Worker
-			- animation rendering (null animation)
-		- Cyclops
+		x Worker
+			x animation rendering (null animation)
+		x Cyclops
 			x replace balrog
 			x model.
 				x double size of arms
 			x animation
-			- variant: fire
-			- variant: shock
-			- variant: blaster
-		- Arachnoid
-			- model
-			- texture
-			- animation
+			x variant: fire
+			x variant: shock
+		x Arachnoid
+			x model
+			x texture
+			x animation
+		x Visitor
+			x model
+			x texture
 	- Econ
 		- fix team logic
 		- build 2 height ice

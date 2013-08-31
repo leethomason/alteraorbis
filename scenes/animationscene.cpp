@@ -115,6 +115,7 @@ AnimationScene::AnimationScene( LumosGame* game ) : Scene( game )
 
 	engine->CameraLookAt( 1, 1, 5 );
 	UpdateAnimationInfo();
+	UpdateModelInfo();
 }
 
 
@@ -212,6 +213,11 @@ void AnimationScene::UpdateModelInfo()
 	modelName.SetText( res->header.name.c_str() );
 	if ( model[0]->GetResource() != res ) {
 		LoadModel();
+
+		const AnimationResource* animRes = model[0]->GetAnimationResource();
+		for( int i=0; i<ANIM_COUNT; ++i ) {
+			animSelect[i].SetEnabled( animRes->HasAnimation( i ));
+		}
 	}
 	modelName.SetText( model[0]->GetResource()->header.name.c_str() );
 }
@@ -221,8 +227,12 @@ void AnimationScene::UpdateAnimationInfo()
 {
 	for( int k=0; k<ANIM_COUNT; ++k ) {
 		if ( animSelect[k].Down() ) {
+			int id = k;
+			if ( !model[0]->GetAnimationResource()->HasAnimation( id )) {
+				id = 0;
+			}
 			for( int i=0; i<NUM_MODELS; ++i ) {
-				model[i]->SetAnimation( k, 500, false );
+				model[i]->SetAnimation( id, 500, false );
 			}
 			break;
 		}

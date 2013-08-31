@@ -194,6 +194,37 @@ bool AnimationResourceManager::HasResource( const char* name )
 
 AnimationResource::AnimationResource( const gamedb::Item* _item )
 {
+	// Set up a null animation.
+	item = 0;
+	resName = "nullAnimation";
+	nAnimations = ANIM_COUNT;
+	memset( sequence, 0, sizeof(Sequence)*ANIM_COUNT );
+		
+	static const int DURATION[ANIM_COUNT] = { 
+		1000, // stand
+		1000, // walk
+		1000, // gun stand
+		1000, // gun walk
+		1000, // melee,
+		200,  // impact
+	};
+
+	for( int i=0; i<ANIM_COUNT; ++i ) {
+		sequence[i].totalDuration = DURATION[i];
+		sequence[i].item = 0;
+		sequence[i].nFrames = 1;
+		sequence[i].nBones = 0;
+
+		for( int j=0; j<EL_MAX_BONES; ++j ) {
+			for( int k=0; k<EL_MAX_ANIM_FRAMES; ++k ) {
+				sequence[i].boneData.bone[j].rotation[k] = Quaternion();
+			}
+		}
+	}
+
+	sequence[ANIM_MELEE].metaDataID = ANIM_META_IMPACT;
+	sequence[ANIM_MELEE].metaDataTime = DURATION[ANIM_MELEE]/2;
+
 	if ( _item ) {
 		item = _item;
 		resName = item->Name();
@@ -263,32 +294,6 @@ AnimationResource::AnimationResource( const gamedb::Item* _item )
 				}
 			}
 		}
-	}
-	else {
-		// Set up a null animation.
-		item = 0;
-		resName = "nullAnimation";
-		nAnimations = ANIM_COUNT;
-		memset( sequence, 0, sizeof(Sequence)*ANIM_COUNT );
-		
-		static const int DURATION[ANIM_COUNT] = { 
-			1000, // reference
-			1000, // walk
-			1000, // gun walk
-			1000, // gun stand
-			600,  // melee,
-			200,  // count
-		};
-
-		for( int i=0; i<ANIM_COUNT; ++i ) {
-			sequence[i].totalDuration = DURATION[i];
-			sequence[i].item = 0;
-			sequence[i].nFrames = 1;
-			sequence[i].nBones = 0;
-		}
-
-		sequence[ANIM_MELEE].metaDataID = ANIM_META_IMPACT;
-		sequence[ANIM_MELEE].metaDataTime = DURATION[ANIM_MELEE]/2;
 	}
 }
 
