@@ -17,7 +17,7 @@
         resource="humanMale"
         flags="GOLD_PICKUP"
         procedural="suit"
-        mass ="50">
+        mass ="60">
     <intrinsics>
       <item name="hand"
             flags="MELEE_WEAPON INTRINSIC"
@@ -131,7 +131,7 @@
   </item>
 
   <item name="redMantis"
-        resource="redMantis"
+        resource="redmantis"
         flags="AI_WANDER_HERD AI_EAT_PLANTS AI_SECTOR_HERD GOLD_PICKUP"
         mass="30">
     <intrinsics>
@@ -152,25 +152,26 @@
     </intrinsics>
   </item>
 
-  
-  <!-- Base effects, FIRE, in this case, are part of the Balrog
-       model. Combination effects SMOKE=FIRE+WATER are 
-       procedurally generated at run time.
-       
-       "mass" is the basis for melee damage. Numbers (melee.kinetic) are
-       modifiers of that. 
-       TBD is the basis for ranged damage.
-  -->
-  <item name="balrog"
-        resource="balrog"
+   <item name="cyclops"
+        resource="cyclops"
+        flags="GOLD_PICKUP"
+        mass="400">
+    <intrinsics>
+      <item name="claw"
+            flags="MELEE_WEAPON INTRINSIC"
+            hardpoint="trigger">
+      </item>
+    </intrinsics>
+  </item>
+
+   <item name="fireCyclops"
+        resource="firecyclops"
         flags="EFFECT_FIRE IMMUNE_FIRE GOLD_PICKUP"
         mass="400">
     <intrinsics>
-      <!-- since intrinsic, also grants fire immunity -->
       <item name="claw"
             flags="MELEE_WEAPON INTRINSIC EFFECT_FIRE"
-            hardpoint="trigger"
-            meleeDamage="1.2">
+            hardpoint="trigger">
       </item>
       <item name="breath"
             flags="RANGED_WEAPON INTRINSIC EFFECT_FIRE EFFECT_EXPLOSIVE RENDER_TRAIL"
@@ -183,8 +184,28 @@
       </item>
     </intrinsics>
   </item>
-
  
+   <item name="shockCyclops"
+        resource="shockcyclops"
+        flags="EFFECT_SHOCK IMMUNE_SHOCK GOLD_PICKUP"
+        mass="400">
+    <intrinsics>
+      <item name="claw"
+            flags="MELEE_WEAPON INTRINSIC EFFECT_SHOCK"
+            hardpoint="trigger">
+      </item>
+      <item name="breath"
+            flags="RANGED_WEAPON INTRINSIC EFFECT_SHOCK"
+            hardpoint="head"
+            cooldown="300"
+            reload="2000"
+            clipCap="10"
+            speed ="1.2"
+            rangedDamage="50">
+      </item>
+    </intrinsics>
+  </item>
+
   <item name="dummytarget"
         resource="dummytarget"
         mass="30"
@@ -197,26 +218,6 @@
     <melee kinetic="2" />
   </item>
   
-  <item name="largeRing"
-        resource="largeRing"
-        flags="MELEE_WEAPON"
-        hardpoint="trigger">
-        <melee kinetic="2" />
-  </item>
-
-  <item name="testgun"
-        resource="testgun"
-        flags="MELEE_WEAPON RANGED_WEAPON"
-        hardpoint="trigger"
-        mass="1.5"
-        cooldown="500"
-        reload="2500"
-        clipCap="6"
-        meleeDamage="1.1"
-        rangedDamage="20"
-        >
-  </item>
-
   <item name="blaster"
         resource="testgun"
         flags="MELEE_WEAPON RANGED_WEAPON"
