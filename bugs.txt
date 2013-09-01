@@ -92,7 +92,7 @@ x Probably don't need squatting logic in PathMoveComponent. (Actually do)
 			x model
 			x texture
 		- fix battle scene
-			- check timing
+			x check timing
 			- procedural rendering colors
 			- weapon colors
 			- team colors

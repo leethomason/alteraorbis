@@ -106,7 +106,7 @@
        filename is a prefix to: walk, stand, gunwalk, gunstand, melee, impact
   -->
   <animation filename="human2_male/human2_male_.bvh" assetName="humanMale2Animation">
-    <meta animation="melee" name="impact" time="700" />
+    <meta animation="melee" name="impact" time="709" />
   </animation>
 
   <texture filename="human2_male/suit0.png" assetName="suit0" whiteMap="true" emissive="true" colorMap="true" />
@@ -117,7 +117,7 @@
   </model>
 
   <animation filename="human2_female/human2_female_.bvh" assetName="humanFemale2Animation">
-    <meta animation="melee" name="impact" time="700" />
+    <meta animation="melee" name="impact" time="500" />
   </animation>
 
   <texture filename="human2_female/femsuit0.png" assetName="femsuit0" whiteMap="true" emissive="true" colorMap="true" />
@@ -128,7 +128,7 @@
   </model>
 
   <animation filename="mantis/mantis_.bvh" assetName="mantisAnimation">
-    <meta animation="melee" name="impact" time="400" />
+    <meta animation="melee" name="impact" time="417" />
   </animation>
 
   <model filename="mantis/mantis.ac" modelName="mantis" animation="mantisAnimation" origin="0 0 0" shading="flat" polyRemoval="pre" >
@@ -143,7 +143,7 @@
   </model>
 
   <animation filename="cyclops/cyclops_.bvh" assetName="cyclopsAnimation">
-    <meta animation="melee" name="impact" time="400" />
+    <meta animation="melee" name="impact" time="917" />
   </animation>
 
   <model filename="cyclops/cyclops.ac" modelName="cyclops" animation="cyclopsAnimation" origin="0 0 0" shading="flat" polyRemoval="pre" >
@@ -175,7 +175,7 @@
   </model>
 
   <animation filename="rat/arachnoid_.bvh" assetName="arachnoidAnimation" >
-    <meta animation="melee" name="impact" time="400" />
+    <meta animation="melee" name="impact" time="417" />
   </animation>
 
   <model filename="rat/arachnoid.ac" modelName="arachnoid" animation="arachnoidAnimation" shading="flat">
