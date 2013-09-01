@@ -53,11 +53,15 @@ const BattleTestScene::ButtonDef BattleTestScene::buttonDef[NUM_BUTTONS] =
 	{ COUNT_8,	"8",		LEFT_COUNT },
 	{ DUMMY,	"Dummy",	LEFT_MOB },
 	{ HUMAN,	"Human",	LEFT_MOB },
+	{ HUMAN,	"Arachnoid",LEFT_MOB },
 	{ MANTIS,	"Mantis",	LEFT_MOB },
-	{ BALROG,	"Balrog",	LEFT_MOB },
+	{ RED_MANTIS,"RedMantis",LEFT_MOB },
+	{ CYCLOPS,	"Cyclops",	LEFT_MOB },
+	{ FIRE_CYCLOPS,	"F-Cyclops",LEFT_MOB },
+	{ SHOCK_CYCLOPS,	"S-Cyclops",LEFT_MOB },
 	{ NO_WEAPON,"None",		LEFT_WEAPON },
 	{ MELEE_WEAPON, "Melee",LEFT_WEAPON },
-	{ PISTOL,	"Pistol",	LEFT_WEAPON },
+	{ PISTOL,	"Blaster",	LEFT_WEAPON },
 	{ LEVEL_0,	"Lev0",		LEFT_LEVEL },
 	{ LEVEL_2,	"Lev2",		LEFT_LEVEL },
 	{ LEVEL_4,	"Lev4",		LEFT_LEVEL },
@@ -69,11 +73,15 @@ const BattleTestScene::ButtonDef BattleTestScene::buttonDef[NUM_BUTTONS] =
 	{ COUNT_8,	"8",		RIGHT_COUNT },
 	{ DUMMY,	"Dummy",	RIGHT_MOB },
 	{ HUMAN,	"Human",	RIGHT_MOB },
+	{ HUMAN,	"Arachnoid",RIGHT_MOB },
 	{ MANTIS,	"Mantis",	RIGHT_MOB },
-	{ BALROG,	"Balrog",	RIGHT_MOB },
+	{ RED_MANTIS,	"RedMantis",RIGHT_MOB },
+	{ CYCLOPS,	"Cyclops",	RIGHT_MOB },
+	{ FIRE_CYCLOPS,	"F-Cyclops",RIGHT_MOB },
+	{ SHOCK_CYCLOPS,	"S-Cyclops",RIGHT_MOB },
 	{ NO_WEAPON,"None",		RIGHT_WEAPON },
 	{ MELEE_WEAPON, "Melee",RIGHT_WEAPON },
-	{ PISTOL,	"Pistol",	RIGHT_WEAPON },
+	{ PISTOL,	"Blaster",	RIGHT_WEAPON },
 	{ LEVEL_0,	"Lev0",		RIGHT_LEVEL },
 	{ LEVEL_2,	"Lev2",		RIGHT_LEVEL },
 	{ LEVEL_4,	"Lev4",		RIGHT_LEVEL },
@@ -154,17 +162,27 @@ void BattleTestScene::Resize()
 	layout.SetSize( LAYOUT_SIZE_X, LAYOUT_SIZE_Y*0.5f );
 
 	int currentGroup = -1;
-	int y = -1;
 	int x = 0;
+	int col = 0;
+	int row = -1;
 
 	for( int i=0; i<NUM_BUTTONS; ++i ) {
 		if ( buttonDef[i].group != currentGroup ) {
-			y = i== NUM_OPTIONS ? 0 : y+1;
 			x = i < NUM_OPTIONS ? 0 : -4;
 			currentGroup = buttonDef[i].group;
+			col = 0;
+			if ( i == NUM_OPTIONS || i == 0 ) 
+				row = 0;
+			else
+				++row;
 		}
-		layout.PosAbs( &optionButton[i], x, y+1 );
-		++x;
+		if ( col == 4 ) {
+			col = 0;
+			++row;
+		}
+		layout.PosAbs( &optionButton[i], x+col, row+1 );
+		++col;
+	
 	}
 	layout.PosAbs( &label[0], 0, 0 );
 	layout.PosAbs( &label[1], -4, 0 );
@@ -309,30 +327,42 @@ void BattleTestScene::GoScene()
 		
 Chit* BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int team, int level )
 {
-	const char* asset = "humanFemale";
+	const char* itemName = "";
 	switch ( type ) {
-		case DUMMY:			asset="dummytarget";	break;
-		case MANTIS:		asset="mantis";			break;
-		case BALROG:		asset="cyclops";		break;
+	case DUMMY:			itemName = "dummytarget";		break;
+	case HUMAN:			itemName = "humanFemale";		break;
+	case ARACHNOID:		itemName = "arachnoid";			break;
+	case MANTIS:		itemName = "mantis";			break;
+	case RED_MANTIS:	itemName = "redMantis";			break;
+	case CYCLOPS:		itemName = "cyclops";			break;
+	case FIRE_CYCLOPS:	itemName = "fireCyclops";		break;
+	case SHOCK_CYCLOPS:	itemName = "shockCyclops";		break;
+	default: GLASSERT( 0 ); break;
 	}
 
 	ItemDefDB::GameItemArr itemDefArr;
 	ItemDefDB* itemDefDB = ItemDefDB::Instance();
-	itemDefDB->Get( asset, &itemDefArr );
+	itemDefDB->Get( itemName, &itemDefArr );
 	GLASSERT( itemDefArr.Size() > 0 );
 
 	Chit* chit = chitBag.NewChit();
 
 	chit->Add( new SpatialComponent());
-	chit->Add( new RenderComponent( engine, asset ));
+	const char* resourceName = itemDefArr[0]->ResourceName();
+	RenderComponent* rc = new RenderComponent( engine, resourceName );
+	chit->Add( rc );
 
-	chitBag.AddItem( asset, chit, engine, team, level );
-	chitBag.AddItem( "shield", chit, engine, 0, level );
-	if ( loadout == MELEE_WEAPON )
-		chitBag.AddItem( "ring", chit, engine, 0, level );
-	else if ( loadout == PISTOL )
-		chitBag.AddItem( "blaster", chit, engine, 0, level );
+	chitBag.AddItem( itemName, chit, engine, team, level );
 
+	if ( rc->HardpointAvailable( IStringConst::kshield )) {
+		chitBag.AddItem( "shield", chit, engine, 0, level );
+	}
+	if ( rc->CarryHardpointAvailable() ) {
+		if ( loadout == MELEE_WEAPON )
+			chitBag.AddItem( "ring", chit, engine, 0, level );
+		else if ( loadout == PISTOL )
+			chitBag.AddItem( "blaster", chit, engine, 0, level );
+	}
 	if ( type != DUMMY ) {
 		chit->Add( new PathMoveComponent( map ));
 		AIComponent* ai = new AIComponent( engine, map );
@@ -350,10 +380,12 @@ Chit* BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int
 
 	chit->GetSpatialComponent()->SetPosYRot( (float)p.x+0.5f, 0, (float)p.y+0.5f, (float)random.Rand( 360 ) );
 
-	if ( type == HUMAN ) {
-		HumanGen gen( true, chit->ID(), team, false );
+	IString procedural = itemDefArr[0]->GetValue( "procedural" );
+	if ( !procedural.empty() ) {
+		bool female = strstr( resourceName, "female" ) != 0;
+
 		ProcRenderInfo info;
-		gen.AssignSuit( &info );
+		AssignProcedural( procedural.c_str(), female, chit->ID(), team, false, &info );
 		chit->GetRenderComponent()->SetProcedural( IStringConst::kmain, info );
 	}
 	return chit;

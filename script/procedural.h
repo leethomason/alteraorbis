@@ -146,4 +146,9 @@ public:
 	void Assign( int seed, ProcRenderInfo* info );
 };
 
+
+void AssignProcedural( const char* name,
+					   bool female, U32 seed, int team, bool electric,
+					   ProcRenderInfo* info );
+
 #endif // LUMOS_PROCEDURAL_INCLUDED

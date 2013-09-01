@@ -2,7 +2,22 @@
   <item name="humanFemale"
         resource="humanFemale"
 			  flags="GOLD_PICKUP"
+        procedural="suit"
 			  mass ="50">
+    <intrinsics>
+      <item name="hand"
+            flags="MELEE_WEAPON INTRINSIC"
+            hardpoint="trigger"
+            meleeDamageMult="1">
+      </item>
+    </intrinsics>
+  </item>
+
+  <item name="humanMale"
+        resource="humanMale"
+        flags="GOLD_PICKUP"
+        procedural="suit"
+        mass ="50">
     <intrinsics>
       <item name="hand"
             flags="MELEE_WEAPON INTRINSIC"
@@ -89,6 +104,19 @@
         size="2"
         mass="200" />
 
+  <item name="arachnoid"
+        resource="arachnoid"
+        flags="AI_WANDER_HERD AI_EAT_PLANTS AI_SECTOR_HERD GOLD_PICKUP FLAMMABLE SHOCKABLE"
+        mass="10">
+    <intrinsics>
+      <item name="stinger"
+            flags="MELEE_WEAPON INTRINSIC"
+            hardpoint="trigger"
+            meleeDamage="2.0">
+      </item>
+    </intrinsics>
+  </item>
+
   <item name="mantis"
         resource="mantis"
         flags="AI_WANDER_HERD AI_EAT_PLANTS AI_SECTOR_HERD GOLD_PICKUP"
@@ -105,13 +133,22 @@
   <item name="redMantis"
         resource="redMantis"
         flags="AI_WANDER_HERD AI_EAT_PLANTS AI_SECTOR_HERD GOLD_PICKUP"
-        mass="35">
+        mass="30">
     <intrinsics>
       <item name="pincer"
             flags="MELEE_WEAPON INTRINSIC"
             hardpoint="trigger"
             meleeDamage="2.0">
       </item>
+      <item name="beam"
+            flags="RANGED_WEAPON INTRINSIC"
+            hardpoint="althand"
+            cooldown="200"
+            reload="2000"
+            clipCap="2"
+            speed ="1.0"
+            rangedDamage="10">
+        </item>
     </intrinsics>
   </item>
 

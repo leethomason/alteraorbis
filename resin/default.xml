@@ -138,6 +138,7 @@
 
   <model filename="mantis/mantis.ac" modelName="redmantis" animation="mantisAnimation" origin="1 0 0" shading="flat" polyRemoval="pre" >
     <meta name="trigger" pos="1 .35 .13" boneName="torso" />
+    <meta name="altHand" pos="1 0.40 0.20" baneName="torso" />
   </model>
 
   <animation filename="cyclops/cyclops_.bvh" assetName="cyclopsAnimation">

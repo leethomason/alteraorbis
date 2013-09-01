@@ -91,6 +91,11 @@ x Probably don't need squatting logic in PathMoveComponent. (Actually do)
 		x Visitor
 			x model
 			x texture
+		- fix battle scene
+		- fix main game
+		- re-work enemy spawn
+			- rats
+			- safer areas
 	- Econ
 		- fix team logic
 		- build 2 height ice

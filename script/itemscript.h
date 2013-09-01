@@ -38,6 +38,7 @@ public:
 	// index 0, intrinsic items follow.
 	void Get( const char* name, GameItemArr* arr );
 
+	// Get the 'value' of the property 'prop' from the item with 'name'
 	static void GetProperty( const char* name, const char* prop, int* value );
 
 private:
@@ -49,25 +50,6 @@ private:
 	grinliz::HashTable< const char*, GameItem*, grinliz::CompCharPtr, grinliz::OwnedPtrSem > map;
 };
 
-
-class GunGenerator
-{
-public:
-	// Base gun & level
-	//	Features: scope, melee, clip, driver (?)
-	//  Traits:   effect
-	enum {
-		BLASTER,
-		SHOTGUN,
-		ASSAULT,
-		SNIPER
-	};
-	enum {
-		SCOPE,
-		MELEE
-	};
-	void Generate( GameItem* item, int type, int featureFlags, int effectFlags, int level, U32 seed );
-};
 
 
 #endif // ITEM_SCRIPT_INCLUDED

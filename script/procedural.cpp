@@ -386,3 +386,24 @@ void TeamGen::Assign( int seed, ProcRenderInfo* info )
 	info->color.m44 = 0;
 }
 
+
+void AssignProcedural( const char* name,
+					   bool female, U32 seed, int team, bool electric,
+					   ProcRenderInfo* info )
+{
+	if ( !name || !*name )
+		return;
+
+	if ( StrEqual( name, "team" )) {
+		TeamGen gen;
+		gen.Assign( team, info );
+	}
+	else if ( StrEqual( name, "suit" )) {
+		HumanGen gen( female, seed, team, electric );
+		gen.AssignSuit( info );
+	}
+	else {
+		GLASSERT( 0 );
+	}
+}
+

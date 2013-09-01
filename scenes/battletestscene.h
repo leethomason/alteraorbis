@@ -69,9 +69,13 @@ private:
 		COUNT_8,
 
 		DUMMY,		
-		HUMAN,		// fist, ring, ranged weapon
-		MANTIS,		// pincer
-		BALROG,		// fist, axe, ranged intrinsic
+		HUMAN,
+		ARACHNOID,
+		MANTIS,
+		RED_MANTIS,
+		CYCLOPS,
+		FIRE_CYCLOPS,
+		SHOCK_CYCLOPS,
 		
 		NO_WEAPON,
 		MELEE_WEAPON,

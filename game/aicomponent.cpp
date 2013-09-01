@@ -239,7 +239,8 @@ void AIComponent::GetFriendEnemyLists()
 		int status = GetTeamStatus( chitArr[i] );
 		if ( status == ENEMY ) {
 			if (    enemyList.HasCap() 
-				 && map->HasStraightPath( center, chitArr[i]->GetSpatialComponent()->GetPosition2D() )) {
+				 && ( fullSectorAware || map->HasStraightPath( center, chitArr[i]->GetSpatialComponent()->GetPosition2D() ))) 
+			{
 				enemyList.Push( chitArr[i]->ID());
 			}
 		}
@@ -1554,7 +1555,6 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 	if ( aiMode == NORMAL_MODE && !taskList.Empty() ) {
 		FlushTaskList( thisComp );
 		if ( taskList.Empty() ) {
-			Think( thisComp );
 			rethink = 0;
 		}
 	}

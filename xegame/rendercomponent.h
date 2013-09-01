@@ -96,6 +96,9 @@ public:
 	// assets (guns, shields, etc.) can be Attached and Detatched
 	// to "metadata hardpoints".
 	bool HardpointAvailable( int hardpoint );
+	bool HardpointAvailable( const grinliz::IString& hardpoint );
+	// Carrying is a little special: you need both a hardpoint AND the animation.
+	bool CarryHardpointAvailable();
 
 	bool Attach( int hardpoint, const char* asset );
 	bool Attach( grinliz::IString metadata, const char* asset );

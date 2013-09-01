@@ -480,12 +480,28 @@ void RenderComponent::Deco( const char* asset, int slot, int duration )
 }
 
 
+bool RenderComponent::CarryHardpointAvailable()
+{
+	if ( HardpointAvailable( IStringConst::ktrigger )) {
+		if ( model[0] && model[0]->GetAnimationResource()->HasAnimation( ANIM_GUN_WALK )) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
 bool RenderComponent::HardpointAvailable( int hardpoint )
 {
 	int has = 0;
 	int use = 0;
 	IString n = IStringConst::Hardpoint( hardpoint );
+	return HardpointAvailable( n );
+}
 
+
+bool RenderComponent::HardpointAvailable( const IString& n )
+{
 	const ModelHeader& header = model[0]->GetResource()->header;
 	for( int i=0; i<EL_MAX_METADATA; ++i ) {
 		if ( header.metaData[i].name == n ) {
