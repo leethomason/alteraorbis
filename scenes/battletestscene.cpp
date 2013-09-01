@@ -493,7 +493,8 @@ void BattleTestScene::DoTick( U32 deltaTime )
 		boltTimer += deltaTime;
 		if ( boltTimer > 500 ) {
 			boltTimer = 0;
-			Bolt* bolt = chitBag.NewBolt();
+			ChitBag* cb = &chitBag;
+			Bolt* bolt = cb->NewBolt();
 
 			bolt->dir.Set( -0.1f+fuzz.Uniform()*0.2f, 0, 1 );
 			bolt->head.Set( 0.5f * (float)map->Width(), 0.5f, 2 );

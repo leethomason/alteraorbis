@@ -469,13 +469,8 @@ FIXME: need to handle driver updates invalidating cache.
 	//glGetIntegerv( GL_MAX_VERTEX_UNIFORM_COMPONENTS, &maxUniforms );
 	//GLOUTPUT_REL(( "Shader %d created. Uniforms=%d / %d\n", flags, nUniforms, maxUniforms ));
 
-	GLOUTPUT_REL(( "Shader %d created. ", flags ));
-	for( int i=0; i<32; ++i ) {
-		if ( flags & (1<<i)) {
-			GLOUTPUT_REL(( "%s ", gUniformName[i] ));
-		}
-	}
-	GLOUTPUT_REL(( "\n" ));
+	GLOUTPUT_REL(( "Shader %d created.\n", flags ));
+	GLOUTPUT_REL(( "%s", header.c_str() ));
 
 	CHECK_GL_ERROR;
 

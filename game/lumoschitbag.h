@@ -104,6 +104,14 @@ public:
 	Chit* NewBuilding( const grinliz::Vector2I& pos, const char* name, int team );
 	Chit* NewVisitor( int visitorIndex );
 
+
+	Bolt* NewBolt(	const grinliz::Vector3F& pos,
+					grinliz::Vector3F dir,
+					int effectFlags,
+					int chitID,
+					float damage,
+					float speed,
+					bool trail );
 	// Creates enough chits to empty the wallet.
 	void NewWalletChits( const grinliz::Vector3F& pos, const Wallet& wallet );
 	void AddItem( const char* name, Chit* chit, Engine* engine, int team, int level );

@@ -141,7 +141,7 @@
             meleeDamage="2.0">
       </item>
       <item name="beam"
-            flags="RANGED_WEAPON INTRINSIC"
+            flags="RANGED_WEAPON INTRINSIC EFFECT_FIRE"
             hardpoint="althand"
             cooldown="200"
             reload="2000"

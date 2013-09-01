@@ -97,8 +97,10 @@ x Probably don't need squatting logic in PathMoveComponent. (Actually do)
 			- weapon colors
 			- team colors
 			- cyclops explosion seems off
-			- shock under powered
-			- bolt colors
+			x shock under powered
+			x bolt colors
+			x make sure shader print-out correct
+			- balance battles
 		- fix main game
 		- re-work enemy spawn
 			- rats

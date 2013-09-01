@@ -589,3 +589,40 @@ bool ChitHasMapSpatial::Accept( Chit* chit )
 	MapSpatialComponent* msc = GET_SUB_COMPONENT( chit, SpatialComponent, MapSpatialComponent );
 	return msc != 0;
 }
+
+
+Bolt* LumosChitBag::NewBolt(	const Vector3F& pos,
+								Vector3F dir,
+								int effectFlags,
+								int chitID,
+								float damage,
+								float speed,
+								bool trail )
+{
+	Bolt* bolt = ChitBag::NewBolt();
+
+	dir.Normalize();
+	bolt->head = pos + dir*0.5f;
+	bolt->len = 0.5f;
+	bolt->dir = dir;
+
+	const Game::Palette* palette = Game::GetMainPalette();
+
+	switch( effectFlags & (GameItem::EFFECT_FIRE | GameItem::EFFECT_SHOCK) ) {
+	case 0:													bolt->color = palette->GetV4F( 1, PAL_GREEN );	break;
+	case GameItem::EFFECT_FIRE:								bolt->color = palette->GetV4F( 1, PAL_RED );	break;
+	case GameItem::EFFECT_SHOCK:							bolt->color = palette->GetV4F( 1, PAL_BLUE );	break;
+	case GameItem::EFFECT_FIRE | GameItem::EFFECT_SHOCK:	bolt->color = palette->GetV4F( 1, PAL_PURPLE );	break;
+	default:
+		GLASSERT( 0 );
+		break;
+	}
+
+	bolt->chitID = chitID;
+	bolt->damage = damage;
+	bolt->effect = effectFlags;
+	bolt->particle  = trail;
+	bolt->speed = speed;
+
+	return bolt;
+}

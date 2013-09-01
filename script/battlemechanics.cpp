@@ -20,6 +20,7 @@
 #include "../game/gamelimits.h"
 #include "../game/healthcomponent.h"
 #include "../game/worldmap.h"
+#include "../game/lumoschitbag.h"
 
 #include "../xegame/chitbag.h"
 #include "../xegame/chit.h"
@@ -262,19 +263,10 @@ void BattleMechanics::Shoot( ChitBag* bag, Chit* src, const grinliz::Vector3F& _
 	float radAt1 = ComputeRadAt1( src->GetItem(), weapon, src->GetMoveComponent()->IsMoving(), targetMoving );
 	Vector3F dir = FuzzyAim( p0, aimAt, radAt1 );
 
-	Bolt* bolt = bag->NewBolt();
-	bolt->head = p0 + dir*0.5f;
-	bolt->len = 0.5f;
-	bolt->dir = dir;
-	if ( item->flags & GameItem::EFFECT_FIRE )
-		bolt->color.Set( 1, 0, 0, 1 );	// FIXME: real color based on item
-	else
-		bolt->color.Set( 0, 1, 0, 1 );	// FIXME: real color based on item
-	bolt->chitID = src->ID();
-	bolt->damage = item->rangedDamage * item->stats.Damage();
-	bolt->effect = item->Effects();
-	bolt->particle  = (item->flags & GameItem::RENDER_TRAIL) ? true : false;
-	bolt->speed = item->CalcBoltSpeed();
+	Bolt* bolt = bag->ToLumos()->NewBolt( p0, dir, item->Effects(), src->ID(),
+											item->rangedDamage * item->stats.Damage(),
+											item->CalcBoltSpeed(),
+											(item->flags & GameItem::RENDER_TRAIL) ? true : false );
 }
 
 
