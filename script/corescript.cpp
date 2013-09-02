@@ -214,8 +214,12 @@ int CoreScript::DoTick( U32 delta, U32 since )
 			float roll = scriptContext->chit->random.Uniform();
 
 			if ( roll < greater ) {
-				static const char* GREATER[3] = { "cyclops", "fireCyclops", "shockCyclops" };
-				spawn = GREATER[ scriptContext->chit->random.Rand( 3 ) ];
+				static const char* GREATER[4] = { "cyclops", "cyclops", "fireCyclops", "shockCyclops" };
+				spawn = GREATER[ scriptContext->chit->random.Rand( 4 ) ];
+
+				Vector2F p2 = { pf.x, pf.z };
+				NewsEvent news( NewsEvent::PONY, p2, StringPool::Intern( spawn ), scriptContext->chit->ID() );
+				scriptContext->chitBag->AddNews( news );
 			}
 			if (!spawn && (roll < rat) ) {
 				spawn = "arachnoid";

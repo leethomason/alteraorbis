@@ -1078,9 +1078,10 @@ void GameScene::DrawDebugText()
 		}
 	}
 
-	ufoText->Draw( 0, y,	"Plants type: %d %d %d %d %d %d %d %d stage: %d %d %d %d", 
+	ufoText->Draw( 0, y,	"Plants type: %d %d %d %d %d %d %d %d stage: %d %d %d %d AIs: %d", 
 									typeCount[0], typeCount[1], typeCount[2], typeCount[3], typeCount[4], typeCount[5], typeCount[6], typeCount[7],
-									stageCount[0], stageCount[1], stageCount[2], stageCount[3] );
+									stageCount[0], stageCount[1], stageCount[2], stageCount[3],
+									chitBag->census.ais );
 	y += 16;
 
 	micropather::CacheData cacheData;

@@ -28,8 +28,8 @@ public:
 		ais = 0;
 	}
 
-	int									plants[NUM_PLANT_TYPES][MAX_PLANT_STAGES];
-	int									ais;	// the number of AIs.
+	int	plants[NUM_PLANT_TYPES][MAX_PLANT_STAGES];
+	int	ais;	// the number of AIs.
 
 
 	int CountPlants() const {

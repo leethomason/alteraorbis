@@ -100,7 +100,9 @@ x Probably don't need squatting logic in PathMoveComponent. (Actually do)
 		x re-work enemy spawn
 			x rats
 			x safer areas
+		- seperate greater spawn from lesser spawn
 		- cyclops herding
+		- unit healing
 
 	- Econ
 		- fix team logic
