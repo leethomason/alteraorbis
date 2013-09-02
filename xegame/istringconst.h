@@ -24,46 +24,52 @@ class IStringConst
 public:
 	static void Init();
 	
-	static grinliz::IString kmain;
-	static grinliz::IString ktrigger;
-	static grinliz::IString ktarget;
-	static grinliz::IString kalthand;
-	static grinliz::IString khead;
-	static grinliz::IString kshield;
+	static grinliz::IString main;
+	static grinliz::IString trigger;
+	static grinliz::IString target;
+	static grinliz::IString althand;
+	static grinliz::IString head;
+	static grinliz::IString shield;
 
-	static grinliz::IString khumanFemale;
-	static grinliz::IString khumanMale;
-	static grinliz::IString kworker;
+	static grinliz::IString humanFemale;
+	static grinliz::IString humanMale;
+	static grinliz::IString worker;
 
-	static grinliz::IString kring;
-	static grinliz::IString klargeRing;
-	static grinliz::IString kgold;
-	static grinliz::IString kcrystal_green;
-	static grinliz::IString kcrystal_red;
-	static grinliz::IString kcrystal_blue;
-	static grinliz::IString kcrystal_violet;
-	static grinliz::IString kcore;
+	static grinliz::IString ring;
+	static grinliz::IString gold;
+	static grinliz::IString crystal_green;
+	static grinliz::IString crystal_red;
+	static grinliz::IString crystal_blue;
+	static grinliz::IString crystal_violet;
+	static grinliz::IString core;
+
+	static grinliz::IString arachnoid;
+	static grinliz::IString mantis;
+	static grinliz::IString redMantis;
+	static grinliz::IString cyclops;
+	static grinliz::IString fireCyclops;
+	static grinliz::IString shockCyclops;
 
 	// double underscore -> '.'
-	static grinliz::IString kkiosk__n;
-	static grinliz::IString kkiosk__m;
-	static grinliz::IString kkiosk__c;
-	static grinliz::IString kkiosk__s;
+	static grinliz::IString kiosk__n;
+	static grinliz::IString kiosk__m;
+	static grinliz::IString kiosk__c;
+	static grinliz::IString kiosk__s;
 
 	static int Hardpoint( grinliz::IString str ) {
-		if		( str == ktrigger ) return HARDPOINT_TRIGGER;
-		else if ( str == kalthand ) return HARDPOINT_ALTHAND;
-		else if ( str == khead )	return HARDPOINT_HEAD;
-		else if ( str == kshield )	return HARDPOINT_SHIELD;
+		if		( str == trigger ) return HARDPOINT_TRIGGER;
+		else if ( str == althand ) return HARDPOINT_ALTHAND;
+		else if ( str == head )	return HARDPOINT_HEAD;
+		else if ( str == shield )	return HARDPOINT_SHIELD;
 		GLASSERT( 0 );
 		return 0;
 	}
-	static grinliz::IString Hardpoint( int i ) {
+	/*func*/ static grinliz::IString Hardpoint( int i ) {
 		switch ( i ) {
-		case HARDPOINT_TRIGGER:	return ktrigger;
-		case HARDPOINT_ALTHAND: return kalthand;
-		case HARDPOINT_HEAD:	return khead;
-		case HARDPOINT_SHIELD:	return kshield;
+		case HARDPOINT_TRIGGER:	return trigger;
+		case HARDPOINT_ALTHAND: return althand;
+		case HARDPOINT_HEAD:	return head;
+		case HARDPOINT_SHIELD:	return shield;
 		default:
 			GLASSERT( 0 );
 			return grinliz::IString();

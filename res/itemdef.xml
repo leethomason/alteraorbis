@@ -45,7 +45,7 @@
   </item>
 
   <item name="visitor"
-        resource="prime"
+        resource="visitor"
         flags="CLICK_THROUGH"
         mass="35" >
   </item>

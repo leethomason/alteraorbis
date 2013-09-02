@@ -333,11 +333,11 @@ void AnimationScene::DoTick( U32 deltaTime )
 		}
 	}
 
-	if ( model[0]->HasAnimation() && model[0]->GetResource()->GetMetaData( IStringConst::ktrigger )) {
+	if ( model[0]->HasAnimation() && model[0]->GetResource()->GetMetaData( IStringConst::trigger )) {
 		static const Vector3F UP = { 0, 1, 0 };
 		static const Vector3F POS = { 0,0,0 };
 		Matrix4 xform;
-		model[0]->CalcMetaData( IStringConst::ktrigger, &xform );
+		model[0]->CalcMetaData( IStringConst::trigger, &xform );
 		Vector3F p = xform * POS;
 
 		if ( metaDataEvent ) {
@@ -365,7 +365,7 @@ void AnimationScene::DoTick( U32 deltaTime )
 
 			if ( triggerModel ) {
 				Matrix4 xform;
-				model[0]->CalcMetaData( IStringConst::ktrigger, &xform );
+				model[0]->CalcMetaData( IStringConst::trigger, &xform );
 				triggerModel->SetTransform( xform );
 			}
 		}

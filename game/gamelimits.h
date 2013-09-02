@@ -39,9 +39,10 @@ static const int MAX_PASSABLE_PLANT_STAGE = 1;	// 0,1 passable, 2,3 are not
 
 // General guidelines to the # of things in the world.
 static const int TYPICAL_DOMAINS	= 100;
-static const int TYPICAL_DENIZENS	= TYPICAL_DOMAINS * 20;
-static const int TYPICAL_BEASTMEN	= TYPICAL_DOMAINS * 10;
+static const int TYPICAL_DENIZENS	= TYPICAL_DOMAINS * 20;		// fixme: not used or tracked
+static const int TYPICAL_BEASTMEN	= TYPICAL_DOMAINS * 10;		// fixme: not used or tracked
 static const int TYPICAL_MONSTERS	= TYPICAL_DOMAINS * 15;
+static const int TYPICAL_GREATER	= TYPICAL_DOMAINS * 1;		// fixme: not used or tracked
 
 enum {
 	CRYSTAL_GREEN,			// basic weapon crystal

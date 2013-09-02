@@ -17,6 +17,7 @@
 #include "../game/reservebank.h"
 #include "../game/workqueue.h"
 #include "../game/mapspatialcomponent.h"
+#include "../game/team.h"
 
 #include "../engine/engine.h"
 #include "../engine/text.h"
@@ -460,7 +461,7 @@ void GameScene::MoveModel( Chit* target )
 	Chit* focusedTarget = sim->GetChitBag()->GetChit( targetChit );
 	if ( target && target != focusedTarget ) {
 		AIComponent* ai = player->GetAIComponent();
-		if ( ai && ai->GetTeamStatus( target ) == AIComponent::ENEMY ) {
+		if ( ai && ai->GetTeamStatus( target ) == RELATE_ENEMY ) {
 			possibleChit = 0;
 			RenderComponent* rc = target->GetRenderComponent();
 			if ( rc ) {
@@ -488,7 +489,7 @@ void GameScene::TapModel( Chit* target )
 		return;
 	}
 	AIComponent* ai = player->GetAIComponent();
-	if ( ai && ai->GetTeamStatus( target ) == AIComponent::ENEMY ) {
+	if ( ai && ai->GetTeamStatus( target ) == RELATE_ENEMY ) {
 		ai->Target( target, true );
 		ClearTargetFlags();
 
@@ -861,7 +862,7 @@ void GameScene::HandleHotKey( int mask )
 			TeamGen gen;
 			ProcRenderInfo info;
 			gen.Assign( colorSeed, &info );
-			rc->SetProcedural( IStringConst::kmain, info );
+			rc->SetProcedural( IStringConst::main, info );
 		}
 		++colorSeed;
 	}

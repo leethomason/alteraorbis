@@ -126,22 +126,10 @@ int AIComponent::GetTeamStatus( Chit* other )
 	GameItem* thisItem  = parentChit->GetItem();
 	GameItem* otherItem = other->GetItem();
 
-	int t0  = thisItem ? thisItem->primaryTeam : 0;
+	int t0  = thisItem ? thisItem->primaryTeam  : 0;
 	int t1 = otherItem ? otherItem->primaryTeam : 0;
 
-	// t0 <= t1 to keep the logic simple.
-	if ( t0 > t1 ) Swap( &t0, &t1 );
-
-	if ( t0 == TEAM_NEUTRAL ) return NEUTRAL;
-	if ( t0 == t1 ) return FRIENDLY;
-
-	if ( t0 == TEAM_VISITOR ) {
-		if ( t1 == TEAM_HOUSE0 )
-			return FRIENDLY;
-		else
-			return ENEMY;
-	}
-	return ENEMY;
+	return GetRelationship( t0, t1 );
 }
 
 
@@ -156,7 +144,7 @@ bool AIComponent::LineOfSight( const ComponentSet& thisComp, Chit* t )
 	if ( !target.okay ) {
 		return false;
 	}
-	target.render->GetMetaData( IStringConst::ktarget, &dest );
+	target.render->GetMetaData( IStringConst::target, &dest );
 
 	Vector3F dir = dest - origin;
 	float length = dir.Length() + 0.01f;	// a little extra just in case
@@ -237,14 +225,14 @@ void AIComponent::GetFriendEnemyLists()
 	GetChitBag()->QuerySpatialHash( &chitArr, zone, parentChit, &feFilter );
 	for( int i=0; i<chitArr.Size(); ++i ) {
 		int status = GetTeamStatus( chitArr[i] );
-		if ( status == ENEMY ) {
+		if ( status == RELATE_ENEMY ) {
 			if (    enemyList.HasCap() 
 				 && ( fullSectorAware || map->HasStraightPath( center, chitArr[i]->GetSpatialComponent()->GetPosition2D() ))) 
 			{
 				enemyList.Push( chitArr[i]->ID());
 			}
 		}
-		else if ( status == FRIENDLY ) {
+		else if ( status == RELATE_FRIEND ) {
 			if ( friendList.HasCap() ) {
 				friendList.Push( chitArr[i]->ID());
 			}

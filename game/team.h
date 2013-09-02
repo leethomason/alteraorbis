@@ -16,15 +16,30 @@
 #ifndef LUMOS_TEAM_INCLUDED
 #define LUMOS_TEAM_INCLUDED
 
+#include "../grinliz/glstringutil.h"
+
 enum {
 	TEAM_NEUTRAL,	// neutral to all teams.
 	TEAM_VISITOR,
 	
+	TEAM_RAT,	
 	TEAM_GREEN_MANTIS,
 	TEAM_RED_MANTIS,
 
-	TEAM_HOUSE0
+	TEAM_HOUSE0,
+
+	TEAM_CHAOS
 };
 
+
+int GetTeam( const grinliz::IString& itemName );
+
+enum {
+	RELATE_FRIEND,
+	RELATE_ENEMY,
+	RELATE_NEUTRAL
+};
+
+int GetRelationship( int team0, int team1 );
 
 #endif // LUMOS_TEAM_INCLUDED

@@ -79,11 +79,6 @@ public:
 	void SetVisitorIndex( int i )			{ visitorIndex = i; }
 	int  VisitorIndex() const				{ return visitorIndex; }
 
-	enum {
-		FRIENDLY,
-		ENEMY,
-		NEUTRAL
-	};
 	int GetTeamStatus( Chit* other );
 
 	// Top level AI modes. Higher level goals.

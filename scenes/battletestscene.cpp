@@ -354,7 +354,7 @@ Chit* BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int
 
 	chitBag.AddItem( itemName, chit, engine, team, level );
 
-	if ( rc->HardpointAvailable( IStringConst::kshield )) {
+	if ( rc->HardpointAvailable( IStringConst::shield )) {
 		chitBag.AddItem( "shield", chit, engine, 0, level );
 	}
 	if ( rc->CarryHardpointAvailable() ) {
@@ -386,7 +386,7 @@ Chit* BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int
 
 		ProcRenderInfo info;
 		AssignProcedural( procedural.c_str(), female, chit->ID(), team, false, &info );
-		chit->GetRenderComponent()->SetProcedural( IStringConst::kmain, info );
+		chit->GetRenderComponent()->SetProcedural( IStringConst::main, info );
 	}
 	return chit;
 }

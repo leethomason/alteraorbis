@@ -332,8 +332,7 @@ grinliz::IString ItemGen::ToName( int id )
 
 /*static*/ bool ItemGen::ProceduralRender( int seed, const GameItem& item, ProcRenderInfo* info )
 {
-	if (    item.resource == IStringConst::kring 
-		 || item.resource == IStringConst::klargeRing ) 
+	if (    item.resource == IStringConst::ring ) 
 	{
 		WeaponGen wg;
 		wg.Render( seed, item, info );

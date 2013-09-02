@@ -74,7 +74,7 @@ Chit* LumosChitBag::NewBuilding( const Vector2I& pos, const char* name, int team
 		TeamGen gen;
 		ProcRenderInfo info;
 		gen.Assign( team, &info );
-		chit->GetRenderComponent()->SetProcedural( IStringConst::kmain, info );
+		chit->GetRenderComponent()->SetProcedural( IStringConst::main, info );
 	}
 
 #if 0	// debugging
@@ -93,14 +93,14 @@ Chit* LumosChitBag::NewMonsterChit( const Vector3F& pos, const char* name, int t
 	Chit* chit = NewChit();
 
 	chit->Add( new SpatialComponent());
-	chit->Add( new RenderComponent( engine, name ));
+	AddItem( name, chit, engine, team, 0 );
+	chit->GetItemComponent()->AddGold( ReserveBank::Instance()->WithdrawMonster() );
+
+	chit->Add( new RenderComponent( engine, chit->GetItem()->ResourceName() ));
 	chit->Add( new PathMoveComponent( worldMap ));
 	chit->Add( new AIComponent( engine, worldMap ));
 
 	chit->GetSpatialComponent()->SetPosition( pos );
-
-	AddItem( name, chit, engine, team, 0 );
-	chit->GetItemComponent()->AddGold( ReserveBank::Instance()->WithdrawMonster() );
 
 	chit->Add( new HealthComponent( engine ));
 	return chit;
@@ -248,7 +248,7 @@ Chit* LumosChitBag::NewGoldChit( const grinliz::Vector3F& pos, int amount )
 
 	Vector2F v2 = { pos.x, pos.z };
 
-	ItemNameFilter goldFilter( IStringConst::kgold );
+	ItemNameFilter goldFilter( IStringConst::gold );
 	this->QuerySpatialHash( &chitList, v2, 1.0f, 0, &goldFilter );
 	Chit* chit = 0;
 	if ( chitList.Size() ) {
@@ -460,7 +460,7 @@ CoreScript* LumosChitBag::GetCore( const grinliz::Vector2I& sector )
 		Vector2F pos2 = { (float)pos2i.x+0.5f, (float)pos2i.y+0.5f };
 
 		CChitArray array;
-		ItemNameFilter coreFilter( IStringConst::kcore );
+		ItemNameFilter coreFilter( IStringConst::core );
 		QuerySpatialHash( &array, pos2, 0.1f, 0, &coreFilter );
 		GLASSERT( !array.Empty() );
 
@@ -536,11 +536,11 @@ bool ItemNameFilter::Accept( Chit* chit )
 
 GoldCrystalFilter::GoldCrystalFilter()
 {
-	arr[0] = IStringConst::kgold;
-	arr[1] = IStringConst::kcrystal_green;
-	arr[2] = IStringConst::kcrystal_red;
-	arr[3] = IStringConst::kcrystal_blue;
-	arr[4] = IStringConst::kcrystal_violet;
+	arr[0] = IStringConst::gold;
+	arr[1] = IStringConst::crystal_green;
+	arr[2] = IStringConst::crystal_red;
+	arr[3] = IStringConst::crystal_blue;
+	arr[4] = IStringConst::crystal_violet;
 	iNames = arr;
 	count = 5;
 }

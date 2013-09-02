@@ -317,7 +317,7 @@ void RenderComponent::SetProcedural( IString hardpoint, const ProcRenderInfo& in
 	if ( !hardpoint.empty() ) {
 		for( int i=0; i<EL_MAX_METADATA+1; ++i ) {
 			// Model[0] is the main model, model[1] is the first hardpoint
-			if (    ( i==0 && hardpoint == IStringConst::kmain )
+			if (    ( i==0 && hardpoint == IStringConst::main )
 				 || ( i>0  && metaDataName[i-1] == hardpoint ))
 			{
 				GLASSERT( model[i] );
@@ -482,7 +482,7 @@ void RenderComponent::Deco( const char* asset, int slot, int duration )
 
 bool RenderComponent::CarryHardpointAvailable()
 {
-	if ( HardpointAvailable( IStringConst::ktrigger )) {
+	if ( HardpointAvailable( IStringConst::trigger )) {
 		if ( model[0] && model[0]->GetAnimationResource()->HasAnimation( ANIM_GUN_WALK )) {
 			return true;
 		}
@@ -578,7 +578,7 @@ bool RenderComponent::GetMetaData( grinliz::IString name, grinliz::Vector3F* pos
 bool RenderComponent::CalcTarget( grinliz::Vector3F* pos )
 {
 	if ( model[0] ) {
-		IString target = IStringConst::ktarget;
+		IString target = IStringConst::target;
 		if ( HasMetaData( target )) {
 			GetMetaData( target, pos );
 		}
@@ -594,7 +594,7 @@ bool RenderComponent::CalcTarget( grinliz::Vector3F* pos )
 bool RenderComponent::CalcTrigger( grinliz::Vector3F* pos, grinliz::Matrix4* xform )
 {
 	if ( model[0] ) {
-		IString trigger = IStringConst::ktrigger;
+		IString trigger = IStringConst::trigger;
 		if ( HasMetaData( trigger )) { 
 			if ( pos ) 
 				GetMetaData( trigger, pos );

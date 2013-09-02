@@ -185,7 +185,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 					if ( rc && shield->RoundsFraction() > 0 ) {
 						ParticleDef def = engine->particleSystem->GetPD( "shield" );
 						Vector3F shieldPos = { 0, 0, 0 };
-						rc->GetMetaData( IStringConst::kshield, &shieldPos );
+						rc->GetMetaData( IStringConst::shield, &shieldPos );
 					
 						float f = shield->RoundsFraction();
 						def.color.x *= f;

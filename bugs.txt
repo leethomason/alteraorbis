@@ -91,20 +91,17 @@ x Probably don't need squatting logic in PathMoveComponent. (Actually do)
 		x Visitor
 			x model
 			x texture
-		- fix battle scene
+		x fix battle scene
 			x check timing
-			- procedural rendering colors
-			- weapon colors
-			- team colors
-			- cyclops explosion seems off
 			x shock under powered
 			x bolt colors
 			x make sure shader print-out correct
-			- balance battles
-		- fix main game
-		- re-work enemy spawn
-			- rats
-			- safer areas
+		x fix main game
+		x re-work enemy spawn
+			x rats
+			x safer areas
+		- cyclops herding
+
 	- Econ
 		- fix team logic
 		- build 2 height ice
@@ -114,6 +111,11 @@ x Probably don't need squatting logic in PathMoveComponent. (Actually do)
 		- factory
 		- turret
 		- power
+		- procedural rendering colors
+			- weapon colors
+			- team colors
+		- cyclops explosion seems off
+		- balance battles
 	- Loot
 		- item screen
 		- drop items
