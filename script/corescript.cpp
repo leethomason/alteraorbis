@@ -159,8 +159,13 @@ int CoreScript::DoTick( U32 delta, U32 since )
 {
 	static const int RADIUS = 4;
 	Chit* attached = GetAttached(0);
+	bool normalPossible = scriptContext->census->normalMOBs < TYPICAL_MONSTERS;
+	bool greaterPossible = scriptContext->census->greaterMOBs < TYPICAL_GREATER;
 
-	if ( spawnTick.Delta( since ) && scriptContext->census->ais < TYPICAL_MONSTERS && !attached ) {
+	if (    spawnTick.Delta( since ) 
+		 && !attached
+		 && ( normalPossible || greaterPossible ))
+	{
 #if 1
 		// spawn stuff.
 		MapSpatialComponent* ms = GET_SUB_COMPONENT( scriptContext->chit, SpatialComponent, MapSpatialComponent );
@@ -213,7 +218,7 @@ int CoreScript::DoTick( U32 delta, U32 since )
 			const char* spawn = 0;
 			float roll = scriptContext->chit->random.Uniform();
 
-			if ( roll < greater ) {
+			if ( greaterPossible && roll < greater ) {
 				static const char* GREATER[4] = { "cyclops", "cyclops", "fireCyclops", "shockCyclops" };
 				spawn = GREATER[ scriptContext->chit->random.Rand( 4 ) ];
 
@@ -221,17 +226,19 @@ int CoreScript::DoTick( U32 delta, U32 since )
 				NewsEvent news( NewsEvent::PONY, p2, StringPool::Intern( spawn ), scriptContext->chit->ID() );
 				scriptContext->chitBag->AddNews( news );
 			}
-			if (!spawn && (roll < rat) ) {
+			if (!spawn && normalPossible && (roll < rat) ) {
 				spawn = "arachnoid";
 			}
-			if ( !spawn ) {
+			if ( !spawn && normalPossible ) {
 				spawn = SPAWN[outland];
 			}
 
-			IString ispawn = StringPool::Intern( spawn, true );
-			int team = GetTeam( ispawn );
-			GLASSERT( team != TEAM_NEUTRAL );
-			scriptContext->chitBag->NewMonsterChit( pf, spawn, team );
+			if ( spawn ) {
+				IString ispawn = StringPool::Intern( spawn, true );
+				int team = GetTeam( ispawn );
+				GLASSERT( team != TEAM_NEUTRAL );
+				scriptContext->chitBag->NewMonsterChit( pf, spawn, team );
+			}
 		}
 #endif
 	}

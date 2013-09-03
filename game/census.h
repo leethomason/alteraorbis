@@ -25,11 +25,13 @@ class Census
 public:
 	Census() {
 		memset( plants, 0, sizeof(int)*NUM_PLANT_TYPES*MAX_PLANT_STAGES );
-		ais = 0;
+		normalMOBs = 0;
+		greaterMOBs = 0;
 	}
 
 	int	plants[NUM_PLANT_TYPES][MAX_PLANT_STAGES];
-	int	ais;	// the number of AIs.
+	int	normalMOBs;		// the number of general MoBs (with AIs). Generally TYPICAL_MONSTERS
+	int greaterMOBs;	// greater mobs, generally TYPICAL_GREATER
 
 
 	int CountPlants() const {

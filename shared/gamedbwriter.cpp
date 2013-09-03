@@ -39,13 +39,13 @@ void WriteU32( FILE* fp, U32 val )
 Writer::Writer()
 {
 	stringPool = new StringPool();
-	root = witemMem.New();
+	root = new WItem();
 	root->Init( "root", 0, this );
 }
 
 Writer::~Writer()
 {
-	witemMem.Delete( root );
+	delete root;
 	delete stringPool;
 }
 
@@ -167,7 +167,7 @@ WItem::~WItem()
 	{
 		while ( child ) {
 			WItem* w = child->sibling;
-			writer->witemMem.Delete( child );
+			delete child;
 			child = w;
 		}
 	}
@@ -175,7 +175,7 @@ WItem::~WItem()
 		// Free the copy of the memory.
 		while ( attrib ) {
 			Attrib* a = attrib->next;
-			writer->attribMem.Delete( attrib );
+			delete attrib;
 			attrib = a;
 		}
 	}
@@ -208,7 +208,7 @@ WItem* WItem::CreateChild( const char* name )
 	GLASSERT( name && *name );
 	IString iname = writer->stringPool->Get( name );
 
-	WItem* witem = writer->witemMem.New();
+	WItem* witem = new WItem();
 	witem->Init( name, this, writer );
 
 	witem->sibling = this->child;
@@ -242,7 +242,7 @@ void WItem::SetData( const char* name, const void* d, int nData, bool useCompres
 	void* mem = malloc( nData );
 	memcpy( mem, d, nData );
 
-	Attrib* a = writer->attribMem.New();
+	Attrib* a = new Attrib();
 	a->Clear();
 	a->name = writer->stringPool->Get( name );
 	a->type = ATTRIBUTE_DATA;
@@ -277,7 +277,7 @@ void WItem::SetInt( const char* name, int value )
 {
 	GLASSERT( name && *name );
 
-	Attrib* a = writer->attribMem.New();
+	Attrib* a = new Attrib();
 	a->Clear();
 	a->name = writer->stringPool->Get( name );
 	a->type = ATTRIBUTE_INT;
@@ -292,7 +292,7 @@ void WItem::SetFloat( const char* name, float value )
 {
 	GLASSERT( name && *name );
 
-	Attrib* a = writer->attribMem.New();
+	Attrib* a = new Attrib();
 	a->Clear();
 	a->name = writer->stringPool->Get( name );
 	a->type = ATTRIBUTE_FLOAT;
@@ -307,7 +307,7 @@ void WItem::SetString( const char* name, const char* str )
 {
 	GLASSERT( name && *name );
 
-	Attrib *a = writer->attribMem.New();
+	Attrib *a = new Attrib();
 	a->Clear();
 	a->name = writer->stringPool->Get( name );
 	a->type = ATTRIBUTE_STRING;
@@ -322,7 +322,7 @@ void WItem::SetBool( const char* name, bool value )
 {
 	GLASSERT( name && *name );
 	
-	Attrib* a = writer->attribMem.New();
+	Attrib* a = new Attrib();
 	a->Clear();
 	a->name = writer->stringPool->Get( name );
 	a->type = ATTRIBUTE_BOOL;

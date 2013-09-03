@@ -102,7 +102,7 @@ template < class T >
 class MemoryPoolT
 {
 public:
-	MemoryPoolT() : pool( "typed", sizeof(T) ) 	{}
+	MemoryPoolT( const char* name ) : pool( name, sizeof(T) ) 	{}
 	~MemoryPoolT() {}
 
 	T* New() {

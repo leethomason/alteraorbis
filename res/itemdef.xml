@@ -3,6 +3,7 @@
         resource="humanFemale"
 			  flags="GOLD_PICKUP"
         procedural="suit"
+        mob="denizen"
 			  mass ="50">
     <intrinsics>
       <item name="hand"
@@ -17,6 +18,7 @@
         resource="humanMale"
         flags="GOLD_PICKUP"
         procedural="suit"
+        mob="denizen"
         mass ="60">
     <intrinsics>
       <item name="hand"
@@ -107,6 +109,7 @@
   <item name="arachnoid"
         resource="arachnoid"
         flags="AI_WANDER_HERD AI_EAT_PLANTS AI_SECTOR_HERD GOLD_PICKUP FLAMMABLE SHOCKABLE"
+        mob="normal"
         mass="10">
     <intrinsics>
       <item name="stinger"
@@ -120,6 +123,7 @@
   <item name="mantis"
         resource="mantis"
         flags="AI_WANDER_HERD AI_EAT_PLANTS AI_SECTOR_HERD GOLD_PICKUP"
+        mob="normal"
         mass="40">
     <intrinsics>
       <item name="pincer"
@@ -133,6 +137,7 @@
   <item name="redMantis"
         resource="redmantis"
         flags="AI_WANDER_HERD AI_EAT_PLANTS AI_SECTOR_HERD GOLD_PICKUP"
+        mob="normal"
         mass="30">
     <intrinsics>
       <item name="pincer"
@@ -145,7 +150,7 @@
             hardpoint="althand"
             cooldown="200"
             reload="2000"
-            clipCap="2"
+            clipCap="1"
             speed ="1.0"
             rangedDamage="10">
         </item>
@@ -155,6 +160,7 @@
    <item name="cyclops"
         resource="cyclops"
         flags="GOLD_PICKUP"
+        mob="greater"
         mass="400">
     <intrinsics>
       <item name="claw"
@@ -167,6 +173,7 @@
    <item name="fireCyclops"
         resource="firecyclops"
         flags="EFFECT_FIRE IMMUNE_FIRE GOLD_PICKUP"
+        mob="greater"
         mass="400">
     <intrinsics>
       <item name="claw"
@@ -188,6 +195,7 @@
    <item name="shockCyclops"
         resource="shockcyclops"
         flags="EFFECT_SHOCK IMMUNE_SHOCK GOLD_PICKUP"
+        mob="greater"
         mass="400">
     <intrinsics>
       <item name="claw"

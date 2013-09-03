@@ -49,6 +49,10 @@ MemoryPool::MemoryPool( const char* _name, unsigned _objectSize, unsigned _block
 
 	// Reserve 4 bytes for "nextBlock" pointer.
 	objectsPerBlock = ( blockSize - sizeof(Block) ) / objectSize;
+	while ( objectsPerBlock < 64 ) {
+		blockSize *= 2;
+		objectsPerBlock = ( blockSize - sizeof(Block) ) / objectSize;
+	}
 	GLASSERT( objectsPerBlock > 1 );
 
 	numBlocks = 0;
@@ -64,8 +68,8 @@ MemoryPool::MemoryPool( const char* _name, unsigned _objectSize, unsigned _block
 MemoryPool::~MemoryPool()
 {
 	#ifdef DEBUG
-//	GLOUTPUT(( "Memory pool '%s' destroyed. #blocks=%d usedKB=%d/%d\n", 
-//			   name, numBlocks, MemoryInUseWatermark()/1024, MemoryAllocated()/1024 ));
+	GLOUTPUT(( "Memory pool '%s' destroyed. #blocks=%d usedKB=%d/%d\n", 
+			   name, numBlocks, MemoryInUseWatermark()/1024, MemoryAllocated()/1024 ));
 	GLASSERT( numObjects == 0 );
 	#endif
 	FreePool();

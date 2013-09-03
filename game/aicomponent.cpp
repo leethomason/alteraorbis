@@ -105,17 +105,11 @@ void AIComponent::Serialize( XStream* xs )
 void AIComponent::OnAdd( Chit* chit )
 {
 	super::OnAdd( chit );
-	if ( parentChit->GetLumosChitBag() ) {
-		parentChit->GetLumosChitBag()->census.ais += 1;
-	}
 }
 
 
 void AIComponent::OnRemove()
 {
-	if ( parentChit->GetLumosChitBag() ) {
-		parentChit->GetLumosChitBag()->census.ais -= 1;
-	}
 	super::OnRemove();
 }
 

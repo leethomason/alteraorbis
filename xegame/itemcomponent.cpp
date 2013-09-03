@@ -347,11 +347,31 @@ void ItemComponent::OnAdd( Chit* chit )
 	super::OnAdd( chit );
 	GLASSERT( !mainItem.parentChit );
 	mainItem.parentChit = parentChit;
+
+	if ( parentChit->GetLumosChitBag() ) {
+		IString mob = mainItem.GetValue( "mob" );
+		if ( mob == "normal" ) {
+			parentChit->GetLumosChitBag()->census.normalMOBs += 1;
+		}
+		else if ( mob == "greater" ) {
+			parentChit->GetLumosChitBag()->census.greaterMOBs += 1;
+		}
+	}
 }
 
 
 void ItemComponent::OnRemove() 
 {
+	if ( parentChit->GetLumosChitBag() ) {
+		IString mob = mainItem.GetValue( "mob" );
+		if ( mob == "normal" ) {
+			parentChit->GetLumosChitBag()->census.normalMOBs -= 1;
+		}
+		else if ( mob == "greater" ) {
+			parentChit->GetLumosChitBag()->census.greaterMOBs -= 1;
+		}
+	}
+
 	GLASSERT( mainItem.parentChit == parentChit );
 	mainItem.parentChit = 0;
 	super::OnRemove();

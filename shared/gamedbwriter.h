@@ -160,8 +160,6 @@ private:
 
 	WItem*									root;
 	grinliz::StringPool*					stringPool;
-	grinliz::MemoryPoolT< WItem::Attrib >	attribMem; 
-	grinliz::MemoryPoolT< WItem >			witemMem; 
 	grinliz::CDynArray< WItem::Attrib* >	attribArr;		// cache. (Some trick doesn't work for child items, where multiple caches would be needed.)
 };
 

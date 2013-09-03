@@ -340,7 +340,9 @@ void Model::Serialize( XStream* xs, SpaceTree* tree )
 		}
 		if ( load->HasChild() ) {
 			load->OpenElement();	// aux
-			aux = ModelResourceManager::Instance()->modelAuxPool.New();
+			if ( !aux ) {
+				aux = ModelResourceManager::Instance()->modelAuxPool.New();
+			}
 			XARC_SER( xs, aux->texture0XForm );
 			XARC_SER( xs, aux->texture0Clip );
 			XARC_SER( xs, aux->texture0ColorMap );
@@ -928,7 +930,7 @@ const ModelResource* ModelResourceManager::GetModelResource( const char* name, b
 
 ModelResourceManager* ModelResourceManager::instance = 0;
 
-ModelResourceManager::ModelResourceManager()
+ModelResourceManager::ModelResourceManager() : modelAuxPool( "modelAuxPool" )
 {
 }
 	
