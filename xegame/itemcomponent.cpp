@@ -549,3 +549,31 @@ IShield* ItemComponent::GetShield()
 	return 0;
 }
 
+
+void ItemComponent::SetProceduralHardpoints()
+{
+	GLASSERT( parentChit->GetRenderComponent() );
+	RenderComponent* rc = parentChit->GetRenderComponent();
+	bool female = strstr( itemArr[0]->Name(), "female" ) != 0;
+	int  team   = itemArr[0]->primaryTeam;
+
+	for( int i=0; i<itemArr.Size(); ++i ) {
+		if (	i == 0
+			 || (    itemArr[i]->Active()			// in use (not in pack)
+			      && itemArr[i]->hardpoint			// at the hardpoint of interest
+			      && !itemArr[i]->Intrinsic() ))	// not a built-in
+		{
+			IString proc = itemArr[i]->GetValue( "procedural" );
+			ProcRenderInfo info;
+
+			if ( !proc.empty() ) {
+				AssignProcedural( proc.c_str(), female, parentChit->ID(), team, false, &info );
+			}
+			if ( i == 0 )
+				rc->SetProcedural( IStringConst::main, info );
+			else
+				rc->SetProcedural( itemArr[i]->hardpoint, info );
+		}
+	}
+}
+

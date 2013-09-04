@@ -206,6 +206,7 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos, const char* assetName )
 
 	chit->Add( new HealthComponent( engine ));
 	chit->GetSpatialComponent()->SetPosYRot( (float)pos.x+0.5f, 0, (float)pos.y+0.5f, 0 );
+	chit->GetItemComponent()->SetProceduralHardpoints();
 }
 
 

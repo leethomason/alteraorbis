@@ -75,6 +75,9 @@ public:
 	// add XP to current item and its weapon
 	void AddBattleXP( bool meleeAttack, int killshotLevel );
 
+	// Requires renderComponent
+	void SetProceduralHardpoints();
+
 private:
 	void DoSlowTick();
 	bool EmitEffect( const GameItem& it, U32 deltaTime );
