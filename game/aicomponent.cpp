@@ -53,6 +53,7 @@ static const float	SHOOT_ANGLE_DOT				=  0.985f;	// same number, as dot product.
 static const float	WANDER_RADIUS				=  5.0f;
 static const float	EAT_HP_PER_SEC				=  2.0f;
 static const float	EAT_HP_HEAL_MULT			=  5.0f;	// eating really tears up plants. heal the critter more than damage the plant.
+static const float  CORE_HP_PER_SEC				=  8.0f;
 static const int	WANDER_ODDS					= 50;		// as in 1 in WANDER_ODDS
 static const float	PLANT_AWARE					=  3.0f;
 static const float	GOLD_AWARE					=  3.5f;
@@ -76,6 +77,7 @@ AIComponent::AIComponent( Engine* _engine, WorldMap* _map )
 	fullSectorAware = false;
 	debugFlag = false;
 	visitorIndex = -1;
+	playerControlled = false;
 }
 
 
@@ -515,43 +517,58 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 since )
 
 	// Plant eater
 	if (	!thisComp.move->IsMoving()    
-		 && (itemFlags & GameItem::AI_EAT_PLANTS) 
 		 && (item->hp < totalHP ))  
 	{
-		// Are we on a plant?
-		Vector2F pos = thisComp.spatial->GetPosition2D();
-		// Note that currently only support eating stage 0-1 plants.
-		CChitArray plants;
-		PlantFilter plantFilter( -1, MAX_PASSABLE_PLANT_STAGE );
 
-		parentChit->GetChitBag()->QuerySpatialHash( &plants, pos, 0.4f, 0, &plantFilter );
-		if ( !plants.Empty() ) {
-			// We are standing on a plant.
-			float hp = Travel( EAT_HP_PER_SEC, since );
-			ChitMsg heal( ChitMsg::CHIT_HEAL );
-			heal.dataF = hp * EAT_HP_HEAL_MULT;
+		if ( itemFlags & GameItem::AI_EAT_PLANTS ) {
+			// Are we on a plant?
+			Vector2F pos = thisComp.spatial->GetPosition2D();
+			// Note that currently only support eating stage 0-1 plants.
+			CChitArray plants;
+			PlantFilter plantFilter( -1, MAX_PASSABLE_PLANT_STAGE );
 
-			if ( debugFlag ) {
-				GLOUTPUT(( "ID=%d Eating plants itemHp=%.1f total=%.1f hp=%.1f\n", thisComp.chit->ID(),
-					item->hp, item->TotalHP(), hp ));
+			parentChit->GetChitBag()->QuerySpatialHash( &plants, pos, 0.4f, 0, &plantFilter );
+			if ( !plants.Empty() ) {
+				// We are standing on a plant.
+				float hp = Travel( EAT_HP_PER_SEC, since );
+				ChitMsg heal( ChitMsg::CHIT_HEAL );
+				heal.dataF = hp * EAT_HP_HEAL_MULT;
+
+				if ( debugFlag ) {
+					GLOUTPUT(( "ID=%d Eating plants itemHp=%.1f total=%.1f hp=%.1f\n", thisComp.chit->ID(),
+						item->hp, item->TotalHP(), hp ));
+				}
+
+				DamageDesc dd( hp, 0 );
+				ChitDamageInfo info( dd );
+
+				info.originID = parentChit->ID();
+				info.awardXP  = false;
+				info.isMelee  = true;
+				info.isExplosion = false;
+				info.originOfImpact = thisComp.spatial->GetPosition();
+
+				ChitMsg damage( ChitMsg::CHIT_DAMAGE, 0, &info );
+				parentChit->SendMessage( heal, this );
+				plants[0]->SendMessage( damage );
+				return true;
 			}
-
-			DamageDesc dd( hp, 0 );
-			ChitDamageInfo info( dd );
-
-			info.originID = parentChit->ID();
-			info.awardXP  = false;
-			info.isMelee  = true;
-			info.isExplosion = false;
-			info.originOfImpact = thisComp.spatial->GetPosition();
-
-			ChitMsg damage( ChitMsg::CHIT_DAMAGE, 0, &info );
-			parentChit->SendMessage( heal, this );
-			plants[0]->SendMessage( damage );
-			return true;
+		}
+		if ( itemFlags & GameItem::AI_HEAL_AT_CORE ) {
+			// Are we on a core?
+			Vector2I pos2i = thisComp.spatial->GetPosition2DI();
+			Vector2I sector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
+			const SectorData& sd = map->GetSector( sector );
+			if ( sd.core == pos2i ) {
+				ChitMsg heal( ChitMsg::CHIT_HEAL );
+				heal.dataF = Travel( CORE_HP_PER_SEC, since );
+				parentChit->SendMessage( heal, this );
+				return true;
+			}
 		}
 	}
-	else if (    visitorIndex >= 0
+	
+	if (    visitorIndex >= 0
 		      && !thisComp.move->IsMoving() )
 	{
 		// Visitors at a kiosk.
@@ -579,7 +596,8 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 since )
 			return false;
 		}
 	}
-	else if ( !taskList.Empty() && taskList[0].action == STAND ) {
+	
+	if ( !taskList.Empty() && taskList[0].action == STAND ) {
 		const Vector2I& pos2i = taskList[0].pos2i;
 		Vector3F pos = { (float)pos2i.x+0.5f, 0.0f, (float)pos2i.y+0.5f };
 		engine->particleSystem->EmitPD( "construction", pos, V3F_UP, 30 );	// FIXME: standard delta constant
@@ -1012,12 +1030,20 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 	}
 
 	// Plant eater
-	if ( (itemFlags & GameItem::AI_EAT_PLANTS) && (item->hp < item->TotalHP()))  {
+	if ( (itemFlags & (GameItem::AI_EAT_PLANTS | GameItem::AI_HEAL_AT_CORE)) && (item->hp < item->TotalHP()))  {
 		// Are we near a plant?
 		// Note that currently only support eating stage 0-1 plants.
 		CChitArray plants;
-		PlantFilter plantFilter( -1, MAX_PASSABLE_PLANT_STAGE );
-		parentChit->GetChitBag()->QuerySpatialHash( &plants, pos2, PLANT_AWARE, 0, &plantFilter );
+
+		if ( itemFlags & GameItem::AI_EAT_PLANTS ) {
+			PlantFilter plantFilter( -1, MAX_PASSABLE_PLANT_STAGE );
+			parentChit->GetChitBag()->QuerySpatialHash( &plants, pos2, PLANT_AWARE, 0, &plantFilter );
+		}
+		else {
+		CChitArray array;
+			ItemNameFilter coreFilter( IStringConst::core );
+			parentChit->GetChitBag()->QuerySpatialHash( &plants, pos2, PLANT_AWARE, 0, &coreFilter );
+		}
 
 		Vector2F plantPos =  { 0, 0 };
 		float plantDist = 0;
@@ -1055,26 +1081,31 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 	*/
 	// Wander....
 	if ( dest.IsZero() ) {
-		if ( wanderFlags == 0 ) {
+		if ( playerControlled ) {
 			currentAction = WANDER;
 			return;
 		}
 		PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
 		int r = parentChit->random.Rand(4);
 
-		if (    pmc 
-			 && pmc->ForceCount() > FORCE_COUNT_STUCK 
-			 && itemFlags & GameItem::AI_SECTOR_HERD
- 			 && friendList.Size() >= (MAX_TRACK*3/4)
-			 && (thisComp.chit->random.Rand( WANDER_ODDS ) == 0) ) 
+		bool sectorHerd =		pmc 
+							 && pmc->ForceCount() > FORCE_COUNT_STUCK 
+							 && itemFlags & GameItem::AI_SECTOR_HERD
+ 							 && friendList.Size() >= (MAX_TRACK*3/4)
+							 && (thisComp.chit->random.Rand( WANDER_ODDS ) == 0);
+		bool sectorWander =		pmc
+							&& itemFlags & GameItem::AI_SECTOR_WANDER
+							&& thisComp.item
+							&& thisComp.item->HPFraction() > 0.98f;
+
+		if ( sectorHerd || sectorWander ) 
 		{
 			if ( SectorHerd( thisComp ) )
 				return;
 		}
-		else if ( r == 0 ) {
+		else if ( wanderFlags == 0 || r == 0 ) {
 			dest = ThinkWanderRandom( thisComp );
 		}
-		// FIXME add stand. stand doesn't "stick" at this point.
 		else if ( wanderFlags == GameItem::AI_WANDER_HERD ) {
 			dest = ThinkWanderFlock( thisComp );
 		}
@@ -1126,9 +1157,9 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 
 	// Consider flocking. This wasn't really working in a combat situation.
 	// May reconsider later, or just use for spreading out.
-	static  float FLOCK_MOVE_BIAS = 0.2f;
+	//static  float FLOCK_MOVE_BIAS = 0.2f;
 	Vector2F heading = thisComp.spatial->GetHeading2D();
-	Vector2F flockDir = heading;
+	//Vector2F flockDir = heading;
 	utility[OPTION_FLOCK_MOVE] = 0.001f;
 
 	int nRangedEnemies = 0;
@@ -1252,8 +1283,9 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 	switch ( index ) {
 		case OPTION_FLOCK_MOVE:
 		{
-			Vector2F dest = pos2 + flockDir;
-			this->Move( dest, false );
+			//Vector2F dest = pos2 + flockDir;
+			//this->Move( dest, false );
+			pmc->Stop();
 		}
 		break;
 
@@ -1663,7 +1695,7 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		{
 			// Read our destination port information:
 			const SectorPort* sectorPort = (const SectorPort*) msg.Ptr();
-			this->Move( *sectorPort, true );
+			this->Move( *sectorPort, false );
 		}
 		break;
 

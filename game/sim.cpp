@@ -110,6 +110,10 @@ void Sim::Load( const char* mapDAT, const char* gameDAT )
 			fclose( fp );
 		}
 	}
+	if ( chitBag->GetChit( playerID )) {
+		// mark as player controlled so it reacts as expected to player input.
+		chitBag->GetChit( playerID )->GetAIComponent()->playerControlled = true;
+	}
 }
 
 
@@ -196,7 +200,8 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos, const char* assetName )
 	chit->GetItem()->flags |= GameItem::AI_BINDS_TO_CORE;
 
 	AIComponent* ai = new AIComponent( engine, worldMap );
-	//ai->EnableDebug( true );
+	ai->EnableDebug( true );
+	ai->playerControlled = true;
 	chit->Add( ai );
 
 	chit->Add( new HealthComponent( engine ));

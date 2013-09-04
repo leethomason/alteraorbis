@@ -90,6 +90,8 @@ public:
 		NUM_MODES
 	};
 
+	bool playerControlled;
+
 private:
 	// Secondary AI modes.
 	enum {

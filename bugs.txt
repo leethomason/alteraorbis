@@ -102,7 +102,7 @@ x Probably don't need squatting logic in PathMoveComponent. (Actually do)
 			x safer areas
 		x seperate greater spawn from lesser spawn
 		- cyclops herding
-		- unit healing
+		x unit healing
 		- single player unit control
 
 	- Econ

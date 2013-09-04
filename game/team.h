@@ -18,6 +18,8 @@
 
 #include "../grinliz/glstringutil.h"
 
+class Chit;
+
 enum {
 	TEAM_NEUTRAL,	// neutral to all teams.
 	TEAM_VISITOR,
@@ -41,5 +43,6 @@ enum {
 };
 
 int GetRelationship( int team0, int team1 );
+int GetRelationship( Chit* chit0, Chit* chit1 );
 
 #endif // LUMOS_TEAM_INCLUDED

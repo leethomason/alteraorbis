@@ -159,7 +159,7 @@
 
    <item name="cyclops"
         resource="cyclops"
-        flags="GOLD_PICKUP"
+        flags="GOLD_PICKUP AI_HEAL_AT_CORE AI_SECTOR_WANDER"
         mob="greater"
         mass="400">
     <intrinsics>
@@ -172,7 +172,7 @@
 
    <item name="fireCyclops"
         resource="firecyclops"
-        flags="EFFECT_FIRE IMMUNE_FIRE GOLD_PICKUP"
+        flags="EFFECT_FIRE IMMUNE_FIRE GOLD_PICKUP AI_HEAL_AT_CORE AI_SECTOR_WANDER"
         mob="greater"
         mass="400">
     <intrinsics>
@@ -194,7 +194,7 @@
  
    <item name="shockCyclops"
         resource="shockcyclops"
-        flags="EFFECT_SHOCK IMMUNE_SHOCK GOLD_PICKUP"
+        flags="EFFECT_SHOCK IMMUNE_SHOCK GOLD_PICKUP AI_HEAL_AT_CORE AI_SECTOR_WANDER"
         mob="greater"
         mass="400">
     <intrinsics>
@@ -267,7 +267,7 @@
   -->
   <item name="plant0"
         desc="Orbstalk"
-        flags="FLAMMABLE"
+        flags="FLAMMABLE IMMUNE_SHOCK"
         mass ="5"
         sun="0.6"
         rain="0.4"
@@ -285,7 +285,7 @@
 
   <item name="plant2"
         desc="Fern"
-        flags="FLAMMABLE"
+        flags=""
         mass ="3"
         sun="0.2"
         rain="0.8"
@@ -321,7 +321,7 @@
 
   <item name="plant6"
         desc="SunBloom"
-        flags="FLAMMABLE"
+        flags=""
         mass ="1.5"
         sun="0.8"
         rain="0.2"
@@ -331,7 +331,7 @@
 
   <item name="plant7"
         desc="MoonBloom"
-        flags="FLAMMABLE"
+        flags=""
         mass ="1.5"
         sun="0.5"
         rain="0.3"

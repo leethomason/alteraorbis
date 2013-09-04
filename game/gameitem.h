@@ -259,12 +259,15 @@ public:
 		AI_WANDER_MASK      = AI_WANDER_HERD | AI_WANDER_CIRCLE,
 
 		AI_EAT_PLANTS		= (1<<17),		// eats plants to regain health
-		AI_SECTOR_HERD		= (1<<18),		// will herd across sectors
-		AI_BINDS_TO_CORE	= (1<<19),
-		AI_DOES_WORK		= (1<<20),
-		GOLD_PICKUP			= (1<<21),
+		AI_HEAL_AT_CORE		= (1<<18),		// stands at a core to regain health (greater monsters, generally)
+		AI_SECTOR_HERD		= (1<<19),		// will herd across sectors, as a group
+		AI_SECTOR_WANDER	= (1<<20),		// will wander between sectors, as an individual
+		AI_BINDS_TO_CORE	= (1<<21),
+		AI_DOES_WORK		= (1<<22),
 
-		CLICK_THROUGH		= (1<<22),		// model is created with flags to ignore world clicking
+		GOLD_PICKUP			= (1<<23),
+
+		CLICK_THROUGH		= (1<<24),		// model is created with flags to ignore world clicking
 	};
 
 	// ------ description ------

@@ -21,6 +21,7 @@
 #include "../game/healthcomponent.h"
 #include "../game/worldmap.h"
 #include "../game/lumoschitbag.h"
+#include "../game/team.h"
 
 #include "../xegame/chitbag.h"
 #include "../xegame/chit.h"
@@ -139,8 +140,8 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* 
 	for( int i=0; i<hashQuery.Size(); ++i ) {
 		Chit* target = hashQuery[i];
 
-		// Melee damage is chaos. Don't hit your own team.
-		if ( PrimaryTeam( target ) == primaryTeam ) {
+		// Melee damage is chaos. Don't hit your own friends.
+		if ( GetRelationship( src, target ) != RELATE_ENEMY ) {
 			continue;
 		}
 

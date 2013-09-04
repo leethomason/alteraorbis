@@ -135,7 +135,9 @@ void GameItem::Serialize( XStream* xs )
 		APPEND_FLAG( flags, f, AI_WANDER_HERD );
 		APPEND_FLAG( flags, f, AI_WANDER_CIRCLE );
 		APPEND_FLAG( flags, f, AI_EAT_PLANTS );
+		APPEND_FLAG( flags, f, AI_HEAL_AT_CORE );
 		APPEND_FLAG( flags, f, AI_SECTOR_HERD );
+		APPEND_FLAG( flags, f, AI_SECTOR_WANDER );
 		APPEND_FLAG( flags, f, AI_BINDS_TO_CORE );
 		APPEND_FLAG( flags, f, AI_DOES_WORK );
 		APPEND_FLAG( flags, f, GOLD_PICKUP );
@@ -162,7 +164,9 @@ void GameItem::Serialize( XStream* xs )
 			READ_FLAG( flags, f, AI_WANDER_HERD );
 			READ_FLAG( flags, f, AI_WANDER_CIRCLE );
 			READ_FLAG( flags, f, AI_EAT_PLANTS );
+			READ_FLAG( flags, f, AI_HEAL_AT_CORE );
 			READ_FLAG( flags, f, AI_SECTOR_HERD );
+			READ_FLAG( flags, f, AI_SECTOR_WANDER );
 			READ_FLAG( flags, f, AI_BINDS_TO_CORE );
 			READ_FLAG( flags, f, AI_DOES_WORK );
 			READ_FLAG( flags, f, GOLD_PICKUP );
@@ -217,7 +221,9 @@ void GameItem::Save( tinyxml2::XMLPrinter* printer )
 	APPEND_FLAG( flags, f, AI_WANDER_HERD );
 	APPEND_FLAG( flags, f, AI_WANDER_CIRCLE );
 	APPEND_FLAG( flags, f, AI_EAT_PLANTS );
+	APPEND_FLAG( flags, f, AI_HEAL_AT_CORE );
 	APPEND_FLAG( flags, f, AI_SECTOR_HERD );
+	APPEND_FLAG( flags, f, AI_SECTOR_WANDER );
 	APPEND_FLAG( flags, f, AI_BINDS_TO_CORE );
 	APPEND_FLAG( flags, f, AI_DOES_WORK );
 	APPEND_FLAG( flags, f, GOLD_PICKUP );
@@ -328,7 +334,9 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 		READ_FLAG( flags, f, AI_WANDER_HERD );
 		READ_FLAG( flags, f, AI_WANDER_CIRCLE );
 		READ_FLAG( flags, f, AI_EAT_PLANTS );
+		READ_FLAG( flags, f, AI_HEAL_AT_CORE );
 		READ_FLAG( flags, f, AI_SECTOR_HERD );
+		READ_FLAG( flags, f, AI_SECTOR_WANDER );
 		READ_FLAG( flags, f, AI_BINDS_TO_CORE );
 		READ_FLAG( flags, f, AI_DOES_WORK );
 		READ_FLAG( flags, f, GOLD_PICKUP );

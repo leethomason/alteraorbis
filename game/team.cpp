@@ -1,6 +1,8 @@
 #include "team.h"
 #include "../grinliz/glutil.h"
 #include "../xegame/istringconst.h"
+#include "../xegame/chit.h"
+#include "../xegame/itemcomponent.h"
 
 using namespace grinliz;
 
@@ -42,4 +44,14 @@ int GetRelationship( int t0, int t1 )
 			return RELATE_ENEMY;
 	}
 	return RELATE_ENEMY;
+}
+
+
+int GetRelationship( Chit* chit0, Chit* chit1 )
+{
+	if ( chit0->GetItem() && chit1->GetItem() ) {
+		return GetRelationship( chit0->GetItem()->primaryTeam,
+								chit1->GetItem()->primaryTeam );
+	}
+	return RELATE_NEUTRAL;
 }
