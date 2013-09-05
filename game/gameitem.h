@@ -200,6 +200,44 @@ public:
 };
 
 
+class Cooldown
+{
+public:
+	Cooldown( int t=1000 ) : TIME(t), time(t)	{}
+	void ResetReady() {
+		time = TIME;
+	}
+	void ResetUnready() {
+		time = 0;
+	}
+
+	bool CanUse() const { return time >= TIME; }
+	float Fraction() const {
+		if ( time >= TIME ) return 1.0f;
+		return (float)time / (float)TIME;
+	}
+	bool Use() {
+		if ( CanUse() ) {
+			time = 0;
+			return true;
+		}
+		return false;
+	}
+	bool Tick( int delta ) { time += delta; 
+		if ( time >= TIME && (time-delta) < TIME ) return true;
+		return false;
+	}
+	void Serialize( XStream* xs, const char* name );
+	
+	void SetThreshold( int t )	{ TIME = t; }
+	void SetCurrent( int t )	{ time = t; }
+
+private:
+	int TIME;
+	int time;
+};
+
+
 // FIXME: memory pool
 class GameItem :	private IMeleeWeaponItem, 
 					private IRangedWeaponItem,
@@ -220,7 +258,6 @@ public:
 	virtual ~GameItem()	{}
 	virtual GameItem* GetItem() { return this; }
 
-	virtual void Save( tinyxml2::XMLPrinter* );
 	virtual void Load( const tinyxml2::XMLElement* doc );
 	virtual void Serialize( XStream* xs );
 
@@ -283,8 +320,8 @@ public:
 	float	meleeDamage;	// a multiplier of the base (effective mass) applied before stats.Damage()
 	float	rangedDamage;	// base ranged damage, applied before stats.Damage()
 	float	absorbsDamage;	// how much damage this consumes, in the inventory (shield, armor, etc.) 1.0: all, 0.5: half
-	int		cooldown;		// time between uses
-	int		reload;			// time to reload once clip is used up
+	Cooldown cooldown;		// time between uses. For a MoB, this is the weapon switch time.
+	Cooldown reload;		// time to reload once clip is used up
 	int		clipCap;		// possible rounds in the clip
 
 	GameStat stats;
@@ -292,8 +329,6 @@ public:
 	// ------- current --------
 	bool	isHeld;			// if true, a held item is "in hand", else it is in the pack.
 	float	hp;				// current hp for this item
-	int		cooldownTime;	// counting down to ready state
-	int		reloadTime;		// counting down to ready state
 	int		rounds;			// current rounds in the clip
 	float	accruedFire;	// how much fire damage built up, not yet applied
 	float	accruedShock;	// how much shock damage built up, not yet applied
@@ -337,9 +372,7 @@ public:
 			rangedDamage	= rhs->rangedDamage;
 			absorbsDamage	= rhs->absorbsDamage;
 			cooldown		= rhs->cooldown;
-			cooldownTime	= rhs->cooldownTime;
 			reload			= rhs->reload;
-			reloadTime		= rhs->reloadTime;
 			clipCap			= rhs->clipCap;
 			rounds			= rhs->rounds;
 			stats			= rhs->stats;
@@ -369,10 +402,6 @@ public:
 			meleeDamage = 1;
 			rangedDamage = 0;
 			absorbsDamage = 0;
-			cooldown = 1000;
-			cooldownTime = 0;
-			reload = 2000;
-			reloadTime = 0;
 			clipCap = 0;			// default to no clip and unlimited ammo
 			rounds = clipCap;
 			stats.Init();
@@ -391,8 +420,8 @@ public:
 		hp = TotalHPF();
 		accruedFire = 0;
 		accruedShock = 0;
-		cooldownTime = 0;
-		reloadTime = 0;
+		cooldown.ResetReady();
+		reload.ResetReady();
 		rounds = clipCap;
 	}
 
@@ -419,9 +448,9 @@ public:
 	bool CanUse()					{ return !CoolingDown() && !Reloading() && HasRound(); }
 	bool Use();
 
-	bool CoolingDown() const		{ return cooldownTime > 0; }
+	bool CoolingDown() const		{ return !cooldown.CanUse(); }
 
-	bool Reloading() const			{ return clipCap > 0 && reloadTime > 0; }
+	bool Reloading() const			{ return clipCap > 0 && !reload.CanUse(); }
 	bool Reload();
 	bool CanReload() const			{ return !CoolingDown() && !Reloading() && (rounds < clipCap); }
 
@@ -448,7 +477,7 @@ public:
 
 	float ReloadFraction() const {
 		if ( Reloading() ) {
-			return (float)reloadTime / (float)reload;
+			return reload.Fraction();
 		}
 		return 1.0f;
 	}

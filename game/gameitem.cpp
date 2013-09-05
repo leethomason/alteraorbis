@@ -92,6 +92,15 @@ void GameStat::Roll( U32 seed )
 }
 
 
+void Cooldown::Serialize( XStream* xs, const char* name )
+{
+	XarcOpen( xs, name );
+	XARC_SER( xs, TIME );
+	XARC_SER( xs, time );
+	XarcClose( xs );
+}
+
+
 void GameItem::Serialize( XStream* xs )
 {
 	XarcOpen( xs, "GameItem" );
@@ -102,10 +111,6 @@ void GameItem::Serialize( XStream* xs )
 	XARC_SER( xs, mass );
 	XARC_SER_DEF( xs, hpRegen, 0.0f );
 	XARC_SER_DEF( xs, primaryTeam, 0 );
-	XARC_SER_DEF( xs, cooldown, 0 );
-	XARC_SER_DEF( xs, cooldownTime, 0 );
-	XARC_SER_DEF( xs, reload, 0 );
-	XARC_SER_DEF( xs, reloadTime, 0 );
 	XARC_SER_DEF( xs, clipCap, 0 );
 	XARC_SER_DEF( xs, rounds, 0 );
 	XARC_SER_DEF( xs, meleeDamage, 1.0f );
@@ -174,6 +179,9 @@ void GameItem::Serialize( XStream* xs )
 		}
 	}
 
+	cooldown.Serialize( xs, "cooldown" );
+	reload.Serialize( xs, "reload" );
+
 	XarcOpen( xs, "keyval" );
 	int n = keyValues.Size();
 	XARC_SER( xs, n );
@@ -191,74 +199,6 @@ void GameItem::Serialize( XStream* xs )
 
 	stats.Serialize( xs );
 	XarcClose( xs );
-}
-
-
-void GameItem::Save( tinyxml2::XMLPrinter* printer )
-{
-	printer->OpenElement( "item" );
-
-	printer->PushAttribute( "name", name.c_str() );
-	if ( !desc.empty() ) {
-		printer->PushAttribute( "desc", desc.c_str() );
-	}
-	if ( !resource.empty() ) {
-		printer->PushAttribute( "resource", resource.c_str() );
-	}
-	CStr<512> f;
-	APPEND_FLAG( flags, f, MELEE_WEAPON );
-	APPEND_FLAG( flags, f, RANGED_WEAPON );
-	APPEND_FLAG( flags, f, INTRINSIC );
-	APPEND_FLAG( flags, f, IMMUNE_FIRE );
-	APPEND_FLAG( flags, f, FLAMMABLE );
-	APPEND_FLAG( flags, f, IMMUNE_SHOCK );
-	APPEND_FLAG( flags, f, SHOCKABLE );
-	APPEND_FLAG( flags, f, EFFECT_EXPLOSIVE );
-	APPEND_FLAG( flags, f, EFFECT_FIRE );
-	APPEND_FLAG( flags, f, EFFECT_SHOCK );
-	APPEND_FLAG( flags, f, RENDER_TRAIL );
-	APPEND_FLAG( flags, f, INDESTRUCTABLE );
-	APPEND_FLAG( flags, f, AI_WANDER_HERD );
-	APPEND_FLAG( flags, f, AI_WANDER_CIRCLE );
-	APPEND_FLAG( flags, f, AI_EAT_PLANTS );
-	APPEND_FLAG( flags, f, AI_HEAL_AT_CORE );
-	APPEND_FLAG( flags, f, AI_SECTOR_HERD );
-	APPEND_FLAG( flags, f, AI_SECTOR_WANDER );
-	APPEND_FLAG( flags, f, AI_BINDS_TO_CORE );
-	APPEND_FLAG( flags, f, AI_DOES_WORK );
-	APPEND_FLAG( flags, f, GOLD_PICKUP );
-	APPEND_FLAG( flags, f, CLICK_THROUGH );
-	printer->PushAttribute( "flags", f.c_str() );
-	
-	PUSH_ATTRIBUTE( printer, mass );
-	PUSH_ATTRIBUTE( printer, hpRegen );
-	PUSH_ATTRIBUTE( printer, primaryTeam );
-	PUSH_ATTRIBUTE( printer, cooldown );
-	PUSH_ATTRIBUTE( printer, cooldownTime );
-	PUSH_ATTRIBUTE( printer, reload );
-	PUSH_ATTRIBUTE( printer, reloadTime );
-	PUSH_ATTRIBUTE( printer, clipCap );
-	PUSH_ATTRIBUTE( printer, rounds );
-	PUSH_ATTRIBUTE( printer, meleeDamage );
-	PUSH_ATTRIBUTE( printer, rangedDamage );
-	PUSH_ATTRIBUTE( printer, absorbsDamage );
-	PUSH_ATTRIBUTE( printer, accruedFire );
-	PUSH_ATTRIBUTE( printer, accruedShock );
-
-	for( int i=0; i<keyValues.Size(); ++i ) {
-		printer->PushAttribute( keyValues[i].key.c_str(), keyValues[i].value.c_str() );
-	}
-
-	if ( hardpoint != 0 ) {
-		printer->PushAttribute( "hardpoint", IStringConst::Hardpoint( hardpoint ).c_str() );
-	}
-	printer->PushAttribute( "isHeld", isHeld );
-	GLASSERT( hp <= TotalHP() );
-	printer->PushAttribute( "hp", hp );
-
-	stats.Save( printer );
-
-	printer->CloseElement();	// item
 }
 
 
@@ -353,17 +293,19 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 		else if ( name == "hardpoint" || name == "hp" ) {
 			// handled below
 		}
+		else if ( name == "cooldown" ) {
+			cooldown.SetThreshold( attr->IntValue() );
+		}
+		else if ( name == "reload" ) {
+			reload.SetThreshold( attr->IntValue() );
+		}
 		READ_FLOAT_ATTR( mass )
 		READ_FLOAT_ATTR( hpRegen )
 		READ_INT_ATTR( primaryTeam )
 		READ_FLOAT_ATTR( meleeDamage )
 		READ_FLOAT_ATTR( rangedDamage )
 		READ_FLOAT_ATTR( absorbsDamage )
-		READ_INT_ATTR( cooldown )
-		READ_INT_ATTR( reload )
 		READ_INT_ATTR( clipCap )
-		READ_INT_ATTR( cooldownTime )
-		READ_INT_ATTR( reloadTime )
 		READ_INT_ATTR( rounds )
 		READ_FLOAT_ATTR( accruedFire )
 		READ_FLOAT_ATTR( accruedShock )
@@ -396,7 +338,7 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 bool GameItem::Use() {
 	if ( CanUse() ) {
 		UseRound();
-		cooldownTime = cooldown;
+		cooldown.Use();
 		if ( parentChit ) {
 			parentChit->SetTickNeeded();
 		}
@@ -408,7 +350,7 @@ bool GameItem::Use() {
 
 bool GameItem::Reload() {
 	if ( CanReload()) {
-		reloadTime = reload;
+		reload.Use();
 		if ( parentChit ) {
 			parentChit->SetTickNeeded();
 		}
@@ -432,18 +374,13 @@ int GameItem::DoTick( U32 delta, U32 sinec )
 {
 	int tick = VERY_LONG_TICK;
 
-	if ( cooldownTime > 0 ) {
-		cooldownTime = Max( cooldownTime-(int)delta, 0 );
-		tick = 0;
+	cooldown.Tick( delta );
+	if ( reload.Tick( delta ) ) {
+		rounds = clipCap;
 	}
 
-	if ( reloadTime > 0 ) {
-		reloadTime = Max( reloadTime-(int)delta, 0 );
+	if ( !cooldown.CanUse() || !reload.CanUse() ) {
 		tick = 0;
-
-		if ( reloadTime == 0 ) {
-			rounds = clipCap;
-		}
 	}
 
 	float savedHP = hp;
@@ -506,7 +443,7 @@ void GameItem::AbsorbDamage( bool inInventory, DamageDesc dd, DamageDesc* remain
 		// Items in the inventory don't take damage. They
 		// may reduce damage for their parent.
 		if ( ToShield() ) {
-			reloadTime = reload;
+			reload.ResetUnready();
 			absorbed = Min( dd.damage * absorbsDamage, (float)rounds );
 			rounds -= LRintf( absorbed );
 			// Shock does extra damage to shields.

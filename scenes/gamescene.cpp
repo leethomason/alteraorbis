@@ -166,13 +166,6 @@ void GameScene::Resize()
 	layout.PosAbs( &allRockButton, NUM_SERIAL_BUTTONS, -2 );
 	layout.PosAbs( &freeCameraButton, 0, -3 );
 
-	/*
-	for( int i=0; i<NUM_BUILD_BUTTONS; ++i ) {
-		int x = i/4;
-		int y = i - x*4;
-		layout.PosAbs( &buildButton[i], x, y+2 );
-	}
-	*/
 	int mode = 0;
 	for( int i=0; i<NUM_BUILD_BUTTONS; ++i ) {
 		if ( mode < NUM_BUILD_MODES && BUILD_MODE_START[mode+1] == i ) {
@@ -507,13 +500,13 @@ grinliz::IString GameScene::BuildActiveInfo( int* size )
 	static const char* name[NUM_BUILD_BUTTONS] = {
 		"",	// no build 
 		"", // clear
+		"",	// rotate
 		"",	// ice
 		"kiosk.n",
 		"kiosk.m",
 		"kiosk.c",
 		"kiosk.s",
 		"vault",
-		"",			// rotate
 	};
 	IString str;
 	if ( *name[buildActive] ) {
@@ -566,7 +559,6 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 		bool tap = Process3DTap( action, view, world, sim->GetEngine() );
 
 		if ( tap ) {
-
 			if ( coreMode ) {
 				WorkQueue* wq = coreMode->GetWorkQueue();
 				GLASSERT( wq );
@@ -627,7 +619,6 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 				}
 			}
 			
-			/*
 			if ( mv.VoxelHit() ) {
 				// clicked on a rock. Melt away!
 				Chit* player = sim->GetPlayerChit();
@@ -636,7 +627,6 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 					return;
 				}
 			}
-			*/
 
 			int tapMod = lumosGame->GetTapMod();
 
@@ -836,7 +826,7 @@ void GameScene::DoDestTapped( const Vector2F& _dest )
 
 void GameScene::HandleHotKey( int mask )
 {
-	if ( mask == GAME_HK_SPACE ) {
+	if ( mask == GAME_HK_TOGGLE_FAST ) {
 		fastMode = !fastMode;
 #if 0
 		if ( FreeCamera() ) {
@@ -847,6 +837,15 @@ void GameScene::HandleHotKey( int mask )
 			}
 		}
 #endif
+	}
+	else if ( mask == GAME_HK_SPACE ) {
+		Chit* playerChit = sim->GetPlayerChit();
+		if ( playerChit ) {
+			ItemComponent* ic = playerChit->GetItemComponent();
+			if ( ic ) {
+				ic->SwapWeapons();
+			}
+		}
 	}
 	else if ( mask == GAME_HK_TOGGLE_COLORS ) {
 		static int colorSeed = 0;

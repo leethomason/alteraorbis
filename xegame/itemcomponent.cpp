@@ -463,21 +463,6 @@ bool ItemComponent::AddToInventory( GameItem* item, bool equip )
 	} 
 	else if ( equip ) {
 		GLASSERT( item->hardpoint );
-		// Tell the render component to render.
-		GLASSERT( rc );
-
-		if ( rc ) {
-			if ( rc->HardpointAvailable( item->hardpoint )) {
-				equipped = true;
-				bool okay = rc->Attach( item->hardpoint, item->ResourceName() );
-				GLASSERT( okay );
-
-				ProcRenderInfo info;
-				if ( ItemGen::ProceduralRender( item->stats.Hash(), *item, &info )) {
-					rc->SetProcedural( item->hardpoint, info );
-				}
-			}
-		}
 	}
 	GLASSERT( item->parentChit == 0 );
 	item->parentChit = parentChit;
@@ -507,10 +492,43 @@ GameItem* ItemComponent::IsCarrying()
 }
 
 
+bool ItemComponent::SwapWeapons()
+{
+	IRangedWeaponItem* ranged = GetRangedWeapon(0);
+	if ( ranged ) {
+		// search for something !ranged and !active
+		for( int i=0; i<itemArr.Size(); ++i ) {
+			if ( !itemArr[i]->Active() && !itemArr[i]->ToRangedWeapon() && itemArr[i]->ToMeleeWeapon() ) {
+				ranged->GetItem()->isHeld = false;
+				itemArr[i]->isHeld = true;
+				break;
+			}
+		}
+	}
+	else {
+		IMeleeWeaponItem* melee = GetMeleeWeapon();
+		for( int i=0; i<itemArr.Size(); ++i ) {
+			if ( !itemArr[i]->Active() && itemArr[i]->ToRangedWeapon() ) {
+				if ( melee )
+					melee->GetItem()->isHeld = false;
+				itemArr[i]->isHeld = true;
+				break;
+			}
+		}
+	}
+	if ( itemArr.Size() > 2 ) {
+		// remember, the 1st item is special. don't move it about.
+		Sort<GameItem*, InventorySorter>( itemArr.Mem()+1, itemArr.Size()-1 );
+	}
+	SetProceduralHardpoints();
+	return true;
+}
+
+
 IRangedWeaponItem* ItemComponent::GetRangedWeapon( grinliz::Vector3F* trigger )
 {
 	for( int i=itemArr.Size()-1; i>=0; --i ) {
-		if ( itemArr[i]->ToRangedWeapon() ) {
+		if ( itemArr[i]->Active() && itemArr[i]->ToRangedWeapon() ) {
 			if ( trigger ) {
 				RenderComponent* rc = parentChit->GetRenderComponent();
 				GLASSERT( rc );
@@ -531,7 +549,7 @@ IRangedWeaponItem* ItemComponent::GetRangedWeapon( grinliz::Vector3F* trigger )
 IMeleeWeaponItem* ItemComponent::GetMeleeWeapon()
 {
 	for( int i=itemArr.Size()-1; i>=0; --i ) {
-		if ( itemArr[i]->ToMeleeWeapon() ) {
+		if ( itemArr[i]->Active() && itemArr[i]->ToMeleeWeapon() ) {
 			return itemArr[i]->ToMeleeWeapon();
 		}
 	}
@@ -542,7 +560,7 @@ IMeleeWeaponItem* ItemComponent::GetMeleeWeapon()
 IShield* ItemComponent::GetShield()
 {
 	for( int i=itemArr.Size()-1; i>=0; --i ) {
-		if ( itemArr[i]->ToShield() ) {
+		if ( itemArr[i]->Active() && itemArr[i]->ToShield() ) {
 			return itemArr[i]->ToShield();
 		}
 	}
@@ -552,17 +570,36 @@ IShield* ItemComponent::GetShield()
 
 void ItemComponent::SetProceduralHardpoints()
 {
-	GLASSERT( parentChit->GetRenderComponent() );
+	if ( !parentChit->GetRenderComponent() ) {
+		return;
+	}
 	RenderComponent* rc = parentChit->GetRenderComponent();
 	bool female = strstr( itemArr[0]->Name(), "female" ) != 0;
 	int  team   = itemArr[0]->primaryTeam;
 
 	for( int i=0; i<itemArr.Size(); ++i ) {
+		/*
+		if ( rc ) {
+			if ( rc->HardpointAvailable( item->hardpoint )) {
+				equipped = true;
+				bool okay = rc->Attach( item->hardpoint, item->ResourceName() );
+				GLASSERT( okay );
+
+				ProcRenderInfo info;
+				if ( ItemGen::ProceduralRender( item->stats.Hash(), *item, &info )) {
+					rc->SetProcedural( item->hardpoint, info );
+				}
+			}
+		}*/
 		if (	i == 0
 			 || (    itemArr[i]->Active()			// in use (not in pack)
 			      && itemArr[i]->hardpoint			// at the hardpoint of interest
 			      && !itemArr[i]->Intrinsic() ))	// not a built-in
 		{
+			if ( i > 1 ) {
+
+			}
+
 			IString proc = itemArr[i]->GetValue( "procedural" );
 			ProcRenderInfo info;
 

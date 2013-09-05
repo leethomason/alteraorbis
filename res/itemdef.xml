@@ -4,6 +4,7 @@
 			  flags="GOLD_PICKUP"
         procedural="suit"
         mob="denizen"
+        cooldown="1500"
 			  mass ="50">
     <intrinsics>
       <item name="hand"

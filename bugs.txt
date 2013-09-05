@@ -101,9 +101,14 @@ x Probably don't need squatting logic in PathMoveComponent. (Actually do)
 			x rats
 			x safer areas
 		x seperate greater spawn from lesser spawn
-		- cyclops herding
 		x unit healing
+		x cyclops herding
 		- single player unit control
+			- proc gun
+			- ring/gun switch
+			- map axis correct
+			- expandable map
+			- face and suit colors in sync
 
 	- Econ
 		- fix team logic

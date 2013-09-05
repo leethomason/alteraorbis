@@ -55,6 +55,7 @@ static const float	EAT_HP_PER_SEC				=  2.0f;
 static const float	EAT_HP_HEAL_MULT			=  5.0f;	// eating really tears up plants. heal the critter more than damage the plant.
 static const float  CORE_HP_PER_SEC				=  8.0f;
 static const int	WANDER_ODDS					= 50;		// as in 1 in WANDER_ODDS
+static const int	GREATER_WANDER_ODDS			=  5;		// as in 1 in WANDER_ODDS
 static const float	PLANT_AWARE					=  3.0f;
 static const float	GOLD_AWARE					=  3.5f;
 static const int	FORCE_COUNT_STUCK			=  8;
@@ -1096,7 +1097,8 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 		bool sectorWander =		pmc
 							&& itemFlags & GameItem::AI_SECTOR_WANDER
 							&& thisComp.item
-							&& thisComp.item->HPFraction() > 0.98f;
+							&& thisComp.item->HPFraction() > 0.98f
+							&& (thisComp.chit->random.Rand( GREATER_WANDER_ODDS ) == 0);
 
 		if ( sectorHerd || sectorWander ) 
 		{

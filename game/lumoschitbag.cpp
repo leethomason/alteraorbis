@@ -394,21 +394,6 @@ void LumosChitBag::AddItem( const char* name, Chit* chit, Engine* engine, int te
 		GLASSERT( itemDefArr.Size() == 1 );
 		chit->GetItemComponent()->AddToInventory( new GameItem( item ), true );
 	}
-
-	/*
-	GLASSERT( chit->GetRenderComponent() );
-	IString proc = chit->GetItem()->GetValue( "procedural" );
-	if ( !proc.empty() ) {	
-		ProcRenderInfo info;
-		AssignProcedural( proc.c_str(),
-						  strstr( name, "female" ) != 0,
-						  chit->ID(),
-						  team,
-						  false,
-						  &info );
-		chit->GetRenderComponent()->SetProcedural( 
-	}
-	*/
 }
 
 

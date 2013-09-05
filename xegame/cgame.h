@@ -62,16 +62,17 @@ void GameZoom( void* handle, int style, float zoom );
 void GameCameraRotate( void* handle, float degrees );
 void GameDoTick( void* handle, unsigned int timeInMSec );
 
-#define GAME_HK_TOGGLE_UI				0x0001
-#define GAME_HK_TOGGLE_DEBUG_TEXT		0x0002
-#define GAME_HK_TOGGLE_PERF				0x0004
-#define GAME_HK_TOGGLE_GLOW				0x0008
-#define GAME_HK_SPACE					0x0010	// general action
-#define GAME_HK_DEBUG_UI				0x0020
-#define GAME_HK_TOGGLE_PATHING			0x0040
-#define GAME_HK_TOGGLE_COLORS			0x0080
+#define GAME_HK_TOGGLE_UI				1
+#define GAME_HK_TOGGLE_DEBUG_TEXT		2
+#define GAME_HK_TOGGLE_PERF				3
+#define GAME_HK_TOGGLE_GLOW				4
+#define GAME_HK_SPACE					5	// general action
+#define GAME_HK_TOGGLE_FAST				6	// fast mode and normal mode
+#define GAME_HK_DEBUG_UI				7
+#define GAME_HK_TOGGLE_PATHING			8
+#define GAME_HK_TOGGLE_COLORS			9
 
-void GameHotKey( void* handle, int mask );
+void GameHotKey( void* handle, int value );
 
 #define GAME_MAX_MOD_DATABASES			16
 void GameAddDatabase( const char* path );
