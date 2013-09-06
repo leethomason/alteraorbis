@@ -102,6 +102,32 @@ void LoadLibrary()
 }
 
 
+static const char* gMetaName[EL_NUM_METADATA] = {
+	"target",
+	"trigger",
+	"althand",
+	"head",
+	"shield"
+};
+
+const char* IDToMetaData( int id )
+{
+
+	GLASSERT( id >= 0 && id < EL_NUM_METADATA );
+	return gMetaName[id];
+}
+
+
+int MetaDataToID( const char* n ) 
+{
+	for( int i=0; i<EL_NUM_METADATA; ++i ) {
+		if ( StrEqual( gMetaName[i], n )) {
+			return i;
+		}
+	}
+	GLASSERT( 0 );
+	return 0;
+}
 
 
 void ModelHeader::Set(	const IString& name, int nAtoms, int nTotalVertices, int nTotalIndices,
@@ -120,7 +146,7 @@ void ModelHeader::Set(	const IString& name, int nAtoms, int nTotalVertices, int 
 	this->nTotalVertices = nTotalVertices;
 	this->nTotalIndices = nTotalIndices;
 	this->bounds = bounds;
-	memset( metaData, 0, sizeof(ModelMetaData)*EL_MAX_METADATA );
+	memset( metaData, 0, sizeof(ModelMetaData)*EL_NUM_METADATA );
 	memset( effectData, 0, sizeof(ModelParticleEffect)*EL_MAX_MODEL_EFFECTS );
 }
 
@@ -138,9 +164,9 @@ void ModelHeader::Save( gamedb::WItem* parent )
 
 	DBSet( node, "bounds", bounds ); 
 	gamedb::WItem* metaNode = node->FetchChild( "metaData" );
-	for( int i=0; i<EL_MAX_METADATA; ++i ) {
-		if ( !metaData[i].name.empty() ) {
-			gamedb::WItem* data = metaNode->FetchChild( metaData[i].name.c_str() );
+	for( int i=0; i<EL_NUM_METADATA; ++i ) {
+		if ( metaData[i].InUse() ) {
+			gamedb::WItem* data = metaNode->FetchChild( i );
 			data->SetFloat( "x", metaData[i].pos.x );
 			data->SetFloat( "y", metaData[i].pos.y );
 			data->SetFloat( "z", metaData[i].pos.z );
@@ -160,7 +186,7 @@ void ModelHeader::Save( gamedb::WItem* parent )
 	for( int i=0; i<EL_MAX_MODEL_EFFECTS; ++i ) {
 		if ( !effectData[i].name.empty() ) {
 			gamedb::WItem* data = effectNode->FetchChild(i);
-			data->SetString( "metaData", effectData[i].metaData.c_str() );
+			data->SetInt( "metaData", effectData[i].metaData );
 			data->SetString( "name", effectData[i].name.c_str() );
 		}
 	}
@@ -626,21 +652,20 @@ void ProcessModel( XMLElement* model )
 		header.flags |= ModelHeader::RESOURCE_NO_SHADOW;
 	}
 
-	int nMeta = 0;
 	for(	const XMLElement* metaEle = model->FirstChildElement( "meta" );
-			metaEle && nMeta < EL_MAX_METADATA;
+			metaEle;
 			metaEle = metaEle->NextSiblingElement( "meta" ) )
 	{
-		header.metaData[nMeta].name = StringPool::Intern( metaEle->Attribute( "name" ) );
+		int id = MetaDataToID( metaEle->Attribute( "name" ));
+		GLASSERT( metaEle->Attribute( "pos" ));
 		if ( metaEle->Attribute( "pos" )) {
-			StringToVector( metaEle->Attribute( "pos" ), &header.metaData[nMeta].pos );
-			header.metaData[nMeta].pos = header.metaData[nMeta].pos - origin;
+			StringToVector( metaEle->Attribute( "pos" ), &header.metaData[id].pos );
+			header.metaData[id].pos = header.metaData[id].pos - origin;
 		}
 		if ( metaEle->Attribute( "rot" )) {
-			StringToAxisAngle( metaEle->Attribute( "rot" ), &header.metaData[nMeta].axis, &header.metaData[nMeta].rotation );
+			StringToAxisAngle( metaEle->Attribute( "rot" ), &header.metaData[id].axis, &header.metaData[id].rotation );
 		}
-		header.metaData[nMeta].boneName = StringPool::Intern( metaEle->Attribute( "boneName" ) );
-		++nMeta;
+		header.metaData[id].boneName = StringPool::Intern( metaEle->Attribute( "boneName" ) );
 	}
 
 	int nEffect = 0;
@@ -648,7 +673,7 @@ void ProcessModel( XMLElement* model )
 			effectEle && nEffect < EL_MAX_MODEL_EFFECTS;
 			effectEle = effectEle->NextSiblingElement( "particle" ))
 	{
-		header.effectData[nEffect].metaData = StringPool::Intern( effectEle->Attribute( "meta" ) );
+		header.effectData[nEffect].metaData = MetaDataToID(effectEle->Attribute( "meta" ));
 		header.effectData[nEffect].name     = StringPool::Intern( effectEle->Attribute( "name" ) );
 		++nEffect;
 	}

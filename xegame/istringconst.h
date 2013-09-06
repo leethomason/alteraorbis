@@ -55,26 +55,6 @@ public:
 	static grinliz::IString kiosk__m;
 	static grinliz::IString kiosk__c;
 	static grinliz::IString kiosk__s;
-
-	static int Hardpoint( grinliz::IString str ) {
-		if		( str == trigger ) return HARDPOINT_TRIGGER;
-		else if ( str == althand ) return HARDPOINT_ALTHAND;
-		else if ( str == head )	return HARDPOINT_HEAD;
-		else if ( str == shield )	return HARDPOINT_SHIELD;
-		GLASSERT( 0 );
-		return 0;
-	}
-	/*func*/ static grinliz::IString Hardpoint( int i ) {
-		switch ( i ) {
-		case HARDPOINT_TRIGGER:	return trigger;
-		case HARDPOINT_ALTHAND: return althand;
-		case HARDPOINT_HEAD:	return head;
-		case HARDPOINT_SHIELD:	return shield;
-		default:
-			GLASSERT( 0 );
-			return grinliz::IString();
-		}
-	}
 };
 
 #endif // ISTRING_CONST_INCLUDED

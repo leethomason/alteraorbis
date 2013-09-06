@@ -210,6 +210,11 @@ struct Vector3
 
 	void Zero() { x = y = z = 0; }
 
+	bool IsZero()  const { 
+		return x == 0 && y == 0 && z == 0;
+	}
+
+
 	void Add( const Vector3<T>& vec ) {
 		x += vec.x;
 		y += vec.y;

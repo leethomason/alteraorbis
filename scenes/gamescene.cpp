@@ -861,7 +861,7 @@ void GameScene::HandleHotKey( int mask )
 			TeamGen gen;
 			ProcRenderInfo info;
 			gen.Assign( colorSeed, &info );
-			rc->SetProcedural( IStringConst::main, info );
+			rc->SetProcedural( 0, info );
 		}
 		++colorSeed;
 	}

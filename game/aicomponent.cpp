@@ -141,11 +141,11 @@ bool AIComponent::LineOfSight( const ComponentSet& thisComp, Chit* t )
 	if ( !target.okay ) {
 		return false;
 	}
-	target.render->GetMetaData( IStringConst::target, &dest );
+	target.render->GetMetaData( META_TARGET, &dest );
 
 	Vector3F dir = dest - origin;
 	float length = dir.Length() + 0.01f;	// a little extra just in case
-	CArray<const Model*, EL_MAX_METADATA+2> ignore, targetModels;
+	CArray<const Model*, RenderComponent::NUM_MODELS+1> ignore, targetModels;
 	thisComp.render->GetModelList( &ignore );
 
 	ModelVoxel mv = engine->IntersectModelVoxel( origin, dir, length, TEST_TRI, 0, 0, ignore.Mem() );
@@ -162,7 +162,7 @@ bool AIComponent::LineOfSight( const ComponentSet& thisComp, const grinliz::Vect
 	Vector3F origin;
 	IRangedWeaponItem* weapon = thisComp.itemComponent->GetRangedWeapon( &origin );
 	GLASSERT( weapon );
-	CArray<const Model*, EL_MAX_METADATA+2> ignore;
+	CArray<const Model*, RenderComponent::NUM_MODELS+1> ignore;
 	thisComp.render->GetModelList( &ignore );
 
 	Vector3F dest = { (float)mapPos.x+0.5f, 0.5f, (float)mapPos.y+0.5f };

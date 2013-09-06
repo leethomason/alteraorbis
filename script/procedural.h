@@ -67,24 +67,12 @@ struct ProcRenderInfo
 class ItemGen
 {
 public:
-	virtual ~ItemGen() {};
-
-	static int ToID( grinliz::IString name );
-	static grinliz::IString ToName( int id );
-
 	// PROC_RING_GUARD -> "guard"
 	static grinliz::IString ProcIDToName( int id );
 
-	// Returns true if this item is procedural, and fills out 'info'
-	static bool ProceduralRender( int seed, const GameItem& item, ProcRenderInfo* info );
-	virtual void Render( int seed, const GameItem& item, ProcRenderInfo* info ) = 0;
-
-protected:
-	ItemGen() {}
 };
 
 
-// NOT a subclass. Face rendering is different from the other modes.
 class HumanGen
 {
 public:
@@ -120,9 +108,15 @@ private:
 };
 
 
-class WeaponGen : public ItemGen
+class WeaponGen
 {
 public:
+
+	WeaponGen( U32 _seed, int _effectFlags ) : seed(_seed), effectFlags(_effectFlags) {}
+	void AssignRing( ProcRenderInfo* info );
+
+private:
+	void GetColors( int i, int effectFlags, grinliz::Color4F* array );
 	enum {
 		BASE,
 		CONTRAST,
@@ -131,12 +125,8 @@ public:
 		NUM_COLORS = 11,
 		NUM_ROWS = 8
 	};
-
-	WeaponGen() : ItemGen() {}
-	virtual void Render( int seed, const GameItem& item, ProcRenderInfo* info );
-
-	// [base, contrast, effect, glow]
-	void GetColors( int i, bool fire, bool shock, grinliz::Color4F* array );
+	U32 seed;
+	int effectFlags;
 };
 
 
@@ -148,7 +138,7 @@ public:
 
 
 void AssignProcedural( const char* name,
-					   bool female, U32 seed, int team, bool electric,
+					   bool female, U32 seed, int team, bool electric, int effectFlags,
 					   ProcRenderInfo* info );
 
 #endif // LUMOS_PROCEDURAL_INCLUDED

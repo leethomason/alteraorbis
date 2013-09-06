@@ -74,7 +74,7 @@ Chit* LumosChitBag::NewBuilding( const Vector2I& pos, const char* name, int team
 		TeamGen gen;
 		ProcRenderInfo info;
 		gen.Assign( team, &info );
-		chit->GetRenderComponent()->SetProcedural( IStringConst::main, info );
+		chit->GetRenderComponent()->SetProcedural( 0, info );
 	}
 
 #if 0	// debugging

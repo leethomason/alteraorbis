@@ -32,18 +32,10 @@
 using namespace grinliz;
 using namespace tinyxml2;
 
-RenderComponent::RenderComponent( Engine* _engine, const char* _asset ) 
-	: engine( _engine ),
-	  firstInit( false )
+RenderComponent::RenderComponent( Engine* _engine, const char* asset ) 
+	: engine( _engine )
 {
-	resource[0] = 0;
-	if ( _asset ) {
-		resource[0] = ModelResourceManager::Instance()->GetModelResource( _asset );
-		GLASSERT( resource[0] );
-	}
-	model[0] = 0;
-	for( int i=1; i<NUM_MODELS; ++i ) {
-		resource[i] = 0;
+	for( int i=0; i<NUM_MODELS; ++i ) {
 		model[i] = 0;
 	}
 	for( int i=0; i<NUM_DECO; ++i ) {
@@ -51,6 +43,8 @@ RenderComponent::RenderComponent( Engine* _engine, const char* _asset )
 		decoDuration[i] = 0;
 	}
 	radiusOfBase = 0;
+
+	mainAsset = StringPool::Intern( asset );
 }
 
 
@@ -65,38 +59,36 @@ RenderComponent::~RenderComponent()
 }
 
 
+const ModelResource* RenderComponent::MainResource() const
+{
+	GLASSERT( model[0] );
+	return model[0]->GetResource();
+}
+
+
 void RenderComponent::Serialize( XStream* xs )
 {
 	// FIXME serialize deco
 	BeginSerialize( xs, "RenderComponent" );
 
-	XarcOpen( xs, "resources" );
+	XarcOpen( xs, "models" );
 	for( int i=0; i<NUM_MODELS; ++i ) {
-		XarcOpen( xs, "res-mod" );
-		IString asset = resource[i] ? resource[i]->IName() : IString();
+		XarcOpen( xs, "models" );
+		IString asset = model[i] ? model[i]->GetResource()->IName() : IString();
 		XARC_SER( xs, asset );
 
 		if ( xs->Loading() ) {
 			if ( !asset.empty() ) {
-				resource[i] = ModelResourceManager::Instance()->GetModelResource( asset.c_str() );
-				model[i] = engine->AllocModel( resource[i] );
+				const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( asset.c_str() );
+				model[i] = engine->AllocModel( res );
 				model[i]->Serialize( xs, engine->GetSpaceTree() );
 			}
 		}
 		else {
-			if ( resource[i] ) {
-				GLASSERT( model[i] );
+			if ( model[i] ) {
 				model[i]->Serialize( xs, engine->GetSpaceTree() );
 			}
 		}
-		XarcClose( xs );
-	}
-	XarcClose( xs );
-
-	XarcOpen( xs, "metaDataNames" );
-	for( int i=0; i<EL_MAX_METADATA; ++i ) {
-		XarcOpen( xs, "meta" );
-		XARC_SER_KEY( xs, "meta", metaDataName[i] );
 		XarcClose( xs );
 	}
 	XarcClose( xs );
@@ -109,11 +101,12 @@ void RenderComponent::OnAdd( Chit* chit )
 {
 	Component::OnAdd( chit );
 
+	if ( !model[0] ) {
+		model[0] = engine->AllocModel( mainAsset.c_str() );
+	}
+
 	for( int i=0; i<NUM_MODELS; ++i ) {
-		if ( resource[i] ) {
-			if ( !model[i] ) {
-				model[i] = engine->AllocModel( resource[i] );
-			}
+		if ( model[i] ) {
 			model[i]->userData = parentChit;
 			model[i]->Modify();
 		}
@@ -128,11 +121,7 @@ void RenderComponent::OnRemove()
 		if ( model[i] ) {
 			engine->FreeModel( model[i] );
 			model[i] = 0;
-			resource[i] = 0;
 		}
-	}
-	for( int i=0; i<EL_MAX_METADATA; ++i ) {
-		metaDataName[i] = IString();
 	}
 	for( int i=0; i<NUM_DECO; ++i ) {
 		if ( deco[i] ) {
@@ -141,21 +130,6 @@ void RenderComponent::OnRemove()
 		}
 	}
 
-}
-
-
-void RenderComponent::FirstInit()
-{
-	GameItem* item = parentChit->GetItem();
-	if ( item ) {
-		if (item->flags & GameItem::CLICK_THROUGH) {
-			for( int i=0; i<NUM_MODELS; ++i ) {
-				if ( model[i] ) {
-					model[i]->SetFlag( MODEL_CLICK_THROUGH );
-				}
-			}
-		}
-	}
 }
 
 
@@ -241,56 +215,33 @@ bool RenderComponent::PlayAnimation( int type )
 }
 
 
-bool RenderComponent::Attach( int hardpoint, const char* asset )
+bool RenderComponent::Attach( int metaData, const char* asset )
 {
-	IString n = IStringConst::Hardpoint( hardpoint );
-	return Attach( n, asset );
-}
-
-bool RenderComponent::Attach( IString metaData, const char* asset )
-{
-	for( int j=1; j<NUM_MODELS; ++j ) {
-		if ( metaDataName[j-1].empty() ) {
-			metaDataName[j-1] = metaData;
-			GLASSERT( model[j] == 0 );
-			resource[j] = ModelResourceManager::Instance()->GetModelResource( asset );
-			GLASSERT( resource[j] );
-
-			// If we are already added (model[0] exists) add the attachments.
-			if ( model[0] ) {
-				model[j] = engine->AllocModel( resource[j] );
-				model[j]->userData = parentChit;
-			}
-			return true;
-		}
+	GLASSERT( metaData > 0 && metaData < EL_NUM_METADATA );
+	
+	// Don't re-create if not needed.
+	if ( model[metaData] && StrEqual( model[metaData]->GetResource()->Name(), asset )) {
+		return true;
 	}
-	return false;
-}
 
-
-void RenderComponent::SetColor( int hardpoint, const grinliz::Vector4F& colorMult )
-{
-	IString n = IStringConst::Hardpoint( hardpoint );
-	SetColor( n, colorMult );
-}
-
-
-void RenderComponent::SetColor( IString hardpoint, const grinliz::Vector4F& colorMult )
-{
-	if ( !hardpoint.empty() ) {
-		for( int i=0; i<EL_MAX_METADATA; ++i ) {
-			if ( metaDataName[i] == hardpoint ) {
-				GLASSERT( model[i+1] );
-				if ( model[i+1] ) {
-					model[i+1]->SetColor( colorMult );
-					return;
-				}
-			}
-		}
-		GLASSERT( 0 );	// safe, but we meant to find something.
+	if ( model[metaData] ) {
+		engine->FreeModel( model[metaData] );
 	}
-	else {
-		model[0]->SetColor( colorMult );
+
+	// If we are already added (model[0] exists) add the attachments.
+	const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( asset );
+	model[metaData] = engine->AllocModel( res );
+	model[metaData]->userData = parentChit;
+	return true;
+}
+
+
+void RenderComponent::SetColor( int metaData, const grinliz::Vector4F& colorMult )
+{
+	GLASSERT( metaData >= 0 && metaData < EL_NUM_METADATA );
+	GLASSERT( model[metaData] );
+	if ( model[metaData] ) {
+		model[metaData]->SetColor( colorMult );
 	}
 }
 
@@ -306,58 +257,26 @@ void RenderComponent::SetSaturation( float s )
 
 
 
-void RenderComponent::SetProcedural( int hardpoint, const ProcRenderInfo& info )
+void RenderComponent::SetProcedural( int metaData, const ProcRenderInfo& info )
 {
-	IString n = IStringConst::Hardpoint( hardpoint );
-	SetProcedural( n, info );
-}
-
-void RenderComponent::SetProcedural( IString hardpoint, const ProcRenderInfo& info )
-{
-	if ( !hardpoint.empty() ) {
-		for( int i=0; i<EL_MAX_METADATA+1; ++i ) {
-			// Model[0] is the main model, model[1] is the first hardpoint
-			if (    ( i==0 && hardpoint == IStringConst::main )
-				 || ( i>0  && metaDataName[i-1] == hardpoint ))
-			{
-				GLASSERT( model[i] );
-				Model* m = model[i];
-				if ( m ) {
-					m->SetTextureXForm( info.te.uvXForm );
-					m->SetColorMap( true, info.color );
-					m->SetBoneFilter( info.filterName, info.filter );
-					return;
-				}
-			}
-		}
-		GLASSERT( 0 );	// safe, but we meant to find something.
-	}
-	else {
-		model[0]->SetTextureXForm();
-		model[0]->SetColorMap( false, info.color );
-		model[0]->SetBoneFilter( info.filterName, info.filter );
+	GLASSERT( model[metaData] );
+	Model* m = model[metaData];
+	if ( m ) {
+		m->SetTextureXForm( info.te.uvXForm );
+		m->SetColorMap( true, info.color );
+		m->SetBoneFilter( info.filterName, info.filter );
+		return;
 	}
 }
 
 
 void RenderComponent::Detach( int metaData )
 {
-	IString n = IStringConst::Hardpoint( metaData );
-	Detach( n );
-}
-
-	
-void RenderComponent::Detach( IString metaData )
-{
-	for( int i=1; i<NUM_MODELS; ++i ) {
-		if ( metaDataName[i-1] == metaData ) {
-			metaDataName[i-1] = IString();
-			if ( model[i] )
-				engine->FreeModel( model[i] );
-			model[i] = 0;
-			resource[i] = 0;
-		}
+	GLASSERT( metaData > 0 && metaData < EL_NUM_METADATA );
+	if ( model[metaData] ) {
+		engine->FreeModel( model[metaData] );
 	}
+	model[metaData] = 0;
 }
 
 
@@ -367,11 +286,6 @@ int RenderComponent::DoTick( U32 deltaTime, U32 since )
 	int tick = VERY_LONG_TICK;
 
 	SpatialComponent* spatial = SyncToSpatial();
-
-	if ( !firstInit ) {
-		FirstInit();
-		firstInit = true;
-	}
 
 	// Animate the primary model.
 	if ( spatial && model[0] && model[0]->GetAnimationResource() ) {
@@ -406,12 +320,13 @@ int RenderComponent::DoTick( U32 deltaTime, U32 since )
 		}
 	}
 
+
 	// Position the attachments relative to the parent.
+	const ModelHeader& header =  model[0]->GetResource()->header;
 	for( int i=1; i<NUM_MODELS; ++i ) {
 		if ( model[i] ) {
-			GLASSERT( !metaDataName[i-1].empty() );
 			Matrix4 xform;
-			model[0]->CalcMetaData( metaDataName[i-1], &xform );
+			model[0]->CalcMetaData( i, &xform );
 			model[i]->SetTransform( xform );
 		}
 	}
@@ -482,7 +397,7 @@ void RenderComponent::Deco( const char* asset, int slot, int duration )
 
 bool RenderComponent::CarryHardpointAvailable()
 {
-	if ( HardpointAvailable( IStringConst::trigger )) {
+	if ( HasHardpoint( HARDPOINT_TRIGGER )) {
 		if ( model[0] && model[0]->GetAnimationResource()->HasAnimation( ANIM_GUN_WALK )) {
 			return true;
 		}
@@ -491,37 +406,28 @@ bool RenderComponent::CarryHardpointAvailable()
 }
 
 
-bool RenderComponent::HardpointAvailable( int hardpoint )
-{
-	int has = 0;
-	int use = 0;
-	IString n = IStringConst::Hardpoint( hardpoint );
-	return HardpointAvailable( n );
-}
-
-
-bool RenderComponent::HardpointAvailable( const IString& n )
+bool RenderComponent::HasHardpoint( int hardpoint )
 {
 	const ModelHeader& header = model[0]->GetResource()->header;
-	for( int i=0; i<EL_MAX_METADATA; ++i ) {
-		if ( header.metaData[i].name == n ) {
-			// have the slot - is it in use?
-			for( int k=0;  k<EL_MAX_METADATA; ++k ) {
-				if ( metaDataName[k] == n ) {
-					return false;
-				}
-			}
-			return true;
-		}
-	}
-	return false;
+	return header.metaData[hardpoint].InUse();
 }
+
+
+const ModelResource* RenderComponent::ResourceAtHardpoint( int hardpoint )
+{
+	GLASSERT( hardpoint >= 0 && hardpoint < EL_NUM_METADATA );
+	if ( model[hardpoint] ) {
+		return model[hardpoint]->GetResource();
+	}
+	return 0;
+}
+
 
 
 float RenderComponent::RadiusOfBase()
 {
-	if ( resource[0] && radiusOfBase == 0 ) {
-		const Rectangle3F& b = resource[0]->AABB();
+	if ( model[0] && radiusOfBase == 0 ) {
+		const Rectangle3F& b = model[0]->GetResource()->AABB();
 		radiusOfBase = Mean( b.SizeX(), b.SizeZ() );
 		radiusOfBase = Min( radiusOfBase, MAX_BASE_RADIUS );
 	}
@@ -529,45 +435,28 @@ float RenderComponent::RadiusOfBase()
 }
 
 
-const char* RenderComponent::GetMetaData( int i )
+bool RenderComponent::HasMetaData( int id )
 {
-	GLASSERT( i >= 0 && i < EL_MAX_METADATA );
-	if ( resource[0] ) {
-		const char* name = resource[0]->header.metaData[i].name.c_str();
-		if ( name && *name )
-			return name;
-	}
-	return 0;
+	GLASSERT( id >= 0 && id < EL_NUM_METADATA );
+	return model[0]->GetResource()->header.metaData[id].InUse();
 }
 
 
-bool RenderComponent::HasMetaData( grinliz::IString name )
-{
-	for( int i=0; i<EL_MAX_METADATA; ++i ) {
-		if ( resource[0] ) {
-			if ( resource[0]->header.metaData[i].name == name )
-				return true;
-		}
-	}
-	return false;
-}
-
-
-bool RenderComponent::GetMetaData( grinliz::IString name, grinliz::Matrix4* xform )
+bool RenderComponent::GetMetaData( int id, grinliz::Matrix4* xform )
 {
 	if ( model[0] ) {
 		SyncToSpatial();
-		model[0]->CalcMetaData( name, xform );
+		model[0]->CalcMetaData( id, xform );
 		return true;
 	}
 	return false;
 }
 
 
-bool RenderComponent::GetMetaData( grinliz::IString name, grinliz::Vector3F* pos )
+bool RenderComponent::GetMetaData( int id, grinliz::Vector3F* pos )
 {
 	Matrix4 xform;
-	if ( GetMetaData( name, &xform ) ) {
+	if ( GetMetaData( id, &xform ) ) {
 		*pos = xform * V3F_ZERO;
 		return true;
 	}
@@ -578,9 +467,8 @@ bool RenderComponent::GetMetaData( grinliz::IString name, grinliz::Vector3F* pos
 bool RenderComponent::CalcTarget( grinliz::Vector3F* pos )
 {
 	if ( model[0] ) {
-		IString target = IStringConst::target;
-		if ( HasMetaData( target )) {
-			GetMetaData( target, pos );
+		if ( HasMetaData( 0 )) {
+			GetMetaData( 0, pos );
 		}
 		else {
 			*pos = model[0]->AABB().Center();
@@ -595,11 +483,11 @@ bool RenderComponent::CalcTrigger( grinliz::Vector3F* pos, grinliz::Matrix4* xfo
 {
 	if ( model[0] ) {
 		IString trigger = IStringConst::trigger;
-		if ( HasMetaData( trigger )) { 
+		if ( HasMetaData( HARDPOINT_TRIGGER )) { 
 			if ( pos ) 
-				GetMetaData( trigger, pos );
+				GetMetaData( HARDPOINT_TRIGGER, pos );
 			if ( xform )
-				GetMetaData( trigger, xform );
+				GetMetaData( HARDPOINT_TRIGGER, xform );
 			return true;
 		}
 	}
@@ -607,7 +495,7 @@ bool RenderComponent::CalcTrigger( grinliz::Vector3F* pos, grinliz::Matrix4* xfo
 }
 
 
-void RenderComponent::GetModelList( grinliz::CArray<const Model*, NUM_MODELS+1> *ignore )
+void RenderComponent::GetModelList( grinliz::CArray<const Model*, RenderComponent::NUM_MODELS+1> *ignore )
 {
 	ignore->Clear();
 	for( int i=0; i<NUM_MODELS; ++i ) {
@@ -620,7 +508,7 @@ void RenderComponent::GetModelList( grinliz::CArray<const Model*, NUM_MODELS+1> 
 
 void RenderComponent::DebugStr( GLString* str )
 {
-	str->Format( "[Render]=%s ", resource[0]->header.name.c_str() );
+	str->Format( "[Render]=%s ", model[0]->GetResource()->header.name.c_str() );
 }
 
 

@@ -71,28 +71,41 @@ public:
 	void EmptyWallet() { wallet.MakeEmpty(); }
 	const Wallet& GetWallet() const			{ return wallet; }
 
-	bool AddToInventory( GameItem* item, bool equip );
+	void AddToInventory( GameItem* item, bool equip );
 
 	// add XP to current item and its weapon
 	void AddBattleXP( bool meleeAttack, int killshotLevel );
 
-	// Requires renderComponent
-	void SetProceduralHardpoints();
+	// If there is a RenderComponent, bring it in sync with
+	// the inventory.
+	void SetHardpoints();
 
 private:
 	void DoSlowTick();
 	bool EmitEffect( const GameItem& it, U32 deltaTime );
+	bool ItemActive( int index );
+	bool ItemActive( const GameItem* );	// expensive: needs a search.
 
 	CTicker slowTick;
 	Wallet wallet;
-	int pickupMode;
 
 	Engine *engine;
 	WorldMap* worldMap;
+
+	// The itemArr and activeArr are the same size.
+	// Intrinsic items are always active.
+	// Some items are active just by having them (although this isn't implemented yet)
+	// And some items (weapons, shields) only do something if they are the active hardpoint. The 
+	// hardpoint question is the tricky one. The GameItem::hardpoint is the hardpoint desired.
+	// But are we at that hardpoint? All shield resources are the same. And what if the
+	// render component isn't attached? That's where order matters: the first object in the
+	// array gets the hardpoints, and we get the hardpoints from the ModelResource. (So
+	// we do not need the RenderComponent.)
+	grinliz::CDynArray< GameItem* > itemArr;
+
 	// The first item is what this *is*.
 	// Following items are inventory: held items, intrinsic, pack.
 	GameItem mainItem;	// What we are. Always first in the array.
-	grinliz::CDynArray< GameItem* > itemArr;
 };
 
 #endif // ITEMCOMPONENT_INCLUDED

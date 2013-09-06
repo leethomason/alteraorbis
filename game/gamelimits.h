@@ -81,20 +81,5 @@ static const float EFFECT_DAMAGE_PER_SEC = 20.0f;
 static const float EFFECT_RADIUS = 1.5f;
 static const float EFFECT_ACCRUED_MAX = EFFECT_DAMAGE_PER_SEC;
 
-// hardpoint & metadata names/bitfields
-enum {
-	HARDPOINT_TRIGGER	= 0x01,	// this attaches to the trigger hardpoint
-	HARDPOINT_ALTHAND	= 0x02,	// this attaches to the alternate hand (non-trigger) hardpoint
-	HARDPOINT_HEAD		= 0x04,	// this attaches to the head hardpoint
-	HARDPOINT_SHIELD	= 0x08,	// this attaches to the shield hardpoint
-};
-
-enum {
-	PROCEDURAL_NONE,
-	PROCEDURAL_RING,			// layers, etc.
-
-	PROCEDURAL_INIT_MASK = PROCEDURAL_RING,				// mask of procedural rendering done at init time
-};
-
 
 #endif // GAMELIMITS_INCLUDED

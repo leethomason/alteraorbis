@@ -404,7 +404,7 @@ Vector3F BattleMechanics::ComputeLeadingShot( Chit* origin, Chit* target, Vector
 
 	if ( origin->GetRenderComponent() ) {
 		RenderComponent* rc = origin->GetRenderComponent();
-		if ( rc && rc->GetMetaData( IStringConst::trigger, &trigger )) {
+		if ( rc && rc->GetMetaData( HARDPOINT_TRIGGER, &trigger )) {
 			// have value;
 		}
 		else if ( rc ) {

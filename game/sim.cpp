@@ -99,6 +99,7 @@ void Sim::Load( const char* mapDAT, const char* gameDAT )
 			XARC_SER( &reader, playerID );
 			XARC_SER( &reader, minuteClock );
 			XARC_SER( &reader, timeInMinutes );
+			XARC_SER( &reader, GameItem::idPool );
 
 			reserveBank->Serialize( &reader );
 			visitors->Serialize( &reader );
@@ -133,6 +134,7 @@ void Sim::Save( const char* mapDAT, const char* gameDAT )
 			XARC_SER( &writer, playerID );
 			XARC_SER( &writer, minuteClock );
 			XARC_SER( &writer, timeInMinutes );
+			XARC_SER( &writer, GameItem::idPool );
 
 			reserveBank->Serialize( &writer );
 			visitors->Serialize( &writer );
@@ -207,7 +209,7 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos, const char* assetName )
 
 	chit->Add( new HealthComponent( engine ));
 	chit->GetSpatialComponent()->SetPosYRot( (float)pos.x+0.5f, 0, (float)pos.y+0.5f, 0 );
-	chit->GetItemComponent()->SetProceduralHardpoints();
+	chit->GetItemComponent()->SetHardpoints();
 }
 
 

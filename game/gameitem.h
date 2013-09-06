@@ -250,6 +250,7 @@ public:
 		flags = _flags;
 		name = grinliz::StringPool::Intern( _name );
 		resource = grinliz::StringPool::Intern( _res );
+		id = ++idPool;
 	}
 
 	GameItem( const GameItem& rhs )			{ CopyFrom( &rhs );	}
@@ -312,6 +313,8 @@ public:
 	grinliz::IString		desc;		// description / alternate name
 	grinliz::IString		key;		// modified name, for storage. not serialized.
 	grinliz::IString		resource;	// resource used to  render the item
+	int		id;				// unique id for this item
+	static int idPool;
 	int		flags;			// flags that define this item; 'constant'
 	int		hardpoint;		// id of hardpoint this item attaches to
 	float	mass;			// mass (kg)
@@ -327,7 +330,6 @@ public:
 	GameStat stats;
 
 	// ------- current --------
-	bool	isHeld;			// if true, a held item is "in hand", else it is in the pack.
 	float	hp;				// current hp for this item
 	int		rounds;			// current rounds in the clip
 	float	accruedFire;	// how much fire damage built up, not yet applied
@@ -363,6 +365,7 @@ public:
 			desc			= rhs->desc;
 			key				= rhs->key;
 			resource		= rhs->resource;
+			id				= ++idPool;
 			flags			= rhs->flags;
 			hardpoint		= rhs->hardpoint;
 			mass			= rhs->mass;
@@ -377,7 +380,6 @@ public:
 			rounds			= rhs->rounds;
 			stats			= rhs->stats;
 
-			isHeld			= rhs->isHeld;
 			hp				= rhs->hp;
 			accruedFire		= rhs->accruedFire;
 			accruedShock	= rhs->accruedShock;
@@ -394,6 +396,7 @@ public:
 			desc = grinliz::IString();
 			key  = grinliz::IString();
 			resource = grinliz::IString();
+			id = 0;
 			flags = 0;
 			hardpoint  = 0;
 			mass = 1;
@@ -407,7 +410,6 @@ public:
 			stats.Init();
 			keyValues.Clear();
 
-			isHeld = false;
 			hp = TotalHPF();
 			accruedFire = 0;
 			accruedShock = 0;
@@ -425,7 +427,6 @@ public:
 		rounds = clipCap;
 	}
 
-	bool Active() const		{ return isHeld || (flags & INTRINSIC); }
 	bool Intrinsic() const	{ return (flags & INTRINSIC) != 0; }
 
 	virtual IMeleeWeaponItem*	ToMeleeWeapon()		{ return (flags & MELEE_WEAPON) ? this : 0; }

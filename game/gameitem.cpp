@@ -100,6 +100,7 @@ void Cooldown::Serialize( XStream* xs, const char* name )
 	XarcClose( xs );
 }
 
+int GameItem::idPool = 0;
 
 void GameItem::Serialize( XStream* xs )
 {
@@ -108,6 +109,7 @@ void GameItem::Serialize( XStream* xs )
 	XARC_SER( xs, name );
 	XARC_SER( xs, desc );
 	XARC_SER( xs, resource );
+	XARC_SER( xs, id );
 	XARC_SER( xs, mass );
 	XARC_SER_DEF( xs, hpRegen, 0.0f );
 	XARC_SER_DEF( xs, primaryTeam, 0 );
@@ -120,7 +122,6 @@ void GameItem::Serialize( XStream* xs )
 	XARC_SER_DEF( xs, accruedShock, 0 );
 
 	XARC_SER( xs, hardpoint );
-	XARC_SER( xs, isHeld );
 	XARC_SER( xs, hp );
 
 	if ( xs->Saving() ) {
@@ -255,6 +256,7 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 	name		= StringPool::Intern( ele->Attribute( "name" ));
 	desc		= StringPool::Intern( ele->Attribute( "desc" ));
 	resource	= StringPool::Intern( ele->Attribute( "resource" ));
+	id = 0;
 	flags = 0;
 	const char* f = ele->Attribute( "flags" );
 
@@ -309,7 +311,6 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 		READ_INT_ATTR( rounds )
 		READ_FLOAT_ATTR( accruedFire )
 		READ_FLOAT_ATTR( accruedShock )
-		READ_BOOL_ATTR( isHeld )
 		else {
 			KeyValue kv = { name, StringPool::Intern( attr->Value() ) };
 			keyValues.Push( kv );
@@ -321,7 +322,7 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 	hardpoint = 0;
 	const char* h = ele->Attribute( "hardpoint" );
 	if ( h ) {
-		hardpoint = IStringConst::Hardpoint( StringPool::Intern( h ) );
+		hardpoint = MetaDataToID( h );
 		GLASSERT( hardpoint > 0 );
 	}
 	stats.Load( ele );

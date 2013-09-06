@@ -8,6 +8,7 @@
 #include "../xegame/testmap.h"
 
 #include "../game/lumosgame.h"
+#include "../game/gameitem.h"
 #include "../script/procedural.h"
 
 #include <sys/stat.h>
@@ -203,15 +204,11 @@ void LivePreviewScene::GenerateRing( int mainRow )
 			}
 		}
 
-		WeaponGen weaponGen;
-		Color4F color[3] = {	// Test color. Comment out assignment below.
-			{ 1, 0, 0, 0 },		// base:		red
-			{ 0, 1, 0, 0 },		// contrast:	yellow
-			{ 0, 0, 1, 0 }		// effect:		blue
-		};
-		// r,    g,			b
-		// base, contrast,  effect-glow
-		weaponGen.GetColors( i+mainRow*NUM_MODEL, col==2, col==3, color );
+		static const int FLAGS[COLS] = { 0, GameItem::EFFECT_FIRE, GameItem::EFFECT_FIRE | GameItem::EFFECT_EXPLOSIVE, GameItem::EFFECT_SHOCK, GameItem::EFFECT_FIRE | GameItem::EFFECT_SHOCK };
+
+		WeaponGen weaponGen( i + mainRow*137, FLAGS[col] );
+		ProcRenderInfo info;
+		weaponGen.AssignRing( &info );
 
 		if ( i == NUM_MODEL-1 ) {
 			model[i]->SetPos( 3.0f, y, x+0.15f );
@@ -219,16 +216,9 @@ void LivePreviewScene::GenerateRing( int mainRow )
 		else {
 			model[i]->SetPos( 3.0f, y, x );
 		}
-		model[i]->SetBoneFilter( ids );
-
-		Texture::TableEntry te;
-		Texture* texture = model[i]->GetResource()->atom[0].texture;
-		GLASSERT( texture );
-		int index = mainRow * NUM_MODEL + i;
-		int n = index % texture->NumTableEntries();
-		texture->GetTableEntry( n, &te );
-		model[i]->SetTextureXForm( te.uvXForm.x, te.uvXForm.y, te.uvXForm.z, te.uvXForm.w );
-		model[i]->SetColorMap( true, color[0], color[1], color[2], 0 );
+		model[i]->SetTextureXForm( info.te.uvXForm );
+		model[i]->SetColorMap( true, info.color );
+		model[i]->SetBoneFilter( info.filterName, info.filter );
 	}
 }
 

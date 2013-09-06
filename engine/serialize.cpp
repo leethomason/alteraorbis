@@ -42,37 +42,27 @@ void ModelHeader::Load( const gamedb::Item* item )
 
 	bounds.Zero();
 	DBRead( header, "bounds", bounds );
-	/*
-	const gamedb::Item* boundsItem = header->Child( "bounds" );
-	if ( boundsItem ) {
-		bounds.min.x = boundsItem->GetFloat( "min.x" );
-		bounds.min.y = boundsItem->GetFloat( "min.y" );
-		bounds.min.z = boundsItem->GetFloat( "min.z" );
-		bounds.max.x = boundsItem->GetFloat( "max.x" );
-		bounds.max.y = boundsItem->GetFloat( "max.y" );
-		bounds.max.z = boundsItem->GetFloat( "max.z" );
-	}
-	*/
 
-	memset( metaData, 0, sizeof(ModelMetaData)*EL_MAX_METADATA );
+	memset( metaData, 0, sizeof(ModelMetaData)*EL_NUM_METADATA );
 	const gamedb::Item* metaItem = header->Child( "metaData" );
 	if ( metaItem ) {
 		for( int i=0; i<metaItem->NumChildren(); ++i ) {
 			const gamedb::Item* dataItem = metaItem->ChildAt( i );
+			int id = (int) atof( dataItem->Name() );
 
-			metaData[i].name = StringPool::Intern( dataItem->Name(), true );
-			metaData[i].pos.x = dataItem->GetFloat( "x" );
-			metaData[i].pos.y = dataItem->GetFloat( "y" );
-			metaData[i].pos.z = dataItem->GetFloat( "z" );
+			//metaData[i].name = StringPool::Intern( dataItem->Name(), true );
+			metaData[id].pos.x = dataItem->GetFloat( "x" );
+			metaData[id].pos.y = dataItem->GetFloat( "y" );
+			metaData[id].pos.z = dataItem->GetFloat( "z" );
 
-			metaData[i].axis.x = dataItem->GetFloat( "axis.x" );
-			metaData[i].axis.y = dataItem->GetFloat( "axis.y" );
-			metaData[i].axis.z = dataItem->GetFloat( "axis.z" );
-			metaData[i].rotation = dataItem->GetFloat( "rotation" );
+			metaData[id].axis.x = dataItem->GetFloat( "axis.x" );
+			metaData[id].axis.y = dataItem->GetFloat( "axis.y" );
+			metaData[id].axis.z = dataItem->GetFloat( "axis.z" );
+			metaData[id].rotation = dataItem->GetFloat( "rotation" );
 
-			metaData[i].boneName = IString();
+			metaData[id].boneName = IString();
 			if ( dataItem->HasAttribute( "boneName" )) {
-				metaData[i].boneName = StringPool::Intern( dataItem->GetString( "boneName" ), true );
+				metaData[id].boneName = StringPool::Intern( dataItem->GetString( "boneName" ), true );
 			}
 		}
 	}
@@ -82,7 +72,7 @@ void ModelHeader::Load( const gamedb::Item* item )
 	if ( effectData ) {
 		for( int i=0; i<effectItem->NumChildren(); ++i ) {
 			const gamedb::Item* item = effectItem->Child(i);
-			effectData[i].metaData	= StringPool::Intern( item->GetString( "metaData" ), true );
+			effectData[i].metaData	=item->GetInt( "metaData" );
 			effectData[i].name		= StringPool::Intern( item->GetString( "name" ), true );
 		}
 	}

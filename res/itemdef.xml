@@ -223,6 +223,7 @@
   <item name="ring"
         resource="ring"
         flags="MELEE_WEAPON"
+		procedural="ring"
         hardpoint="trigger">
     <melee kinetic="2" />
   </item>

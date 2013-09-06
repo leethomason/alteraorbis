@@ -92,8 +92,8 @@ struct ModelAtom
 
 
 struct ModelMetaData {
-	grinliz::IString		name;		// name of the metadata
-	grinliz::Vector3F		pos;		// position
+	bool InUse() const { return !pos.IsZero(); }
+	grinliz::Vector3F		pos;		// position (0,0,0) is not in use.
 	grinliz::Vector3F		axis;		// axis of rotation (if any)
 	float					rotation;	// amount of rotation (if any)
 	grinliz::IString		boneName;	// name of the bone this metadata is attached to (if any)
@@ -101,7 +101,7 @@ struct ModelMetaData {
 
 
 struct ModelParticleEffect {
-	grinliz::IString	metaData;	// name	 of the metadata
+	int					metaData;	// id of the metadata
 	grinliz::IString	name;		// name of the particle effect.
 };
 
@@ -120,7 +120,7 @@ struct ModelHeader
 	U16						flags;
 	U16						nAtoms;
 	grinliz::Rectangle3F	bounds;
-	ModelMetaData			metaData[EL_MAX_METADATA];
+	ModelMetaData			metaData[EL_NUM_METADATA];
 	ModelParticleEffect		effectData[EL_MAX_MODEL_EFFECTS];
 
 	/* The model bone names: these are the names (and the ID)
@@ -160,8 +160,7 @@ public:
 					const grinliz::Vector3F& dir,
 					grinliz::Vector3F* intersect ) const;
 
-	const ModelMetaData* GetMetaData( grinliz::IString name ) const;
-	const ModelMetaData* GetMetaData( int i ) const { GLASSERT( i>= 0 && i < EL_MAX_METADATA ); return &header.metaData[i]; }
+	const ModelMetaData* GetMetaData( int i ) const { GLASSERT( i>= 0 && i < EL_NUM_METADATA ); return &header.metaData[i]; }
 
 	const char*			Name() const	{ return header.name.c_str(); }
 	grinliz::IString	IName() const	{ return header.name; }
@@ -397,7 +396,7 @@ public:
 		return b;
 	}
 
-	void CalcMetaData( grinliz::IString name, grinliz::Matrix4* xform );
+	void CalcMetaData( int id, grinliz::Matrix4* xform );
 	bool HasParticles() const {  return hasParticles; }
 	void EmitParticles( ParticleSystem* system, const grinliz::Vector3F* eyeDir, U32 deltaTime );
 	void CalcTargetSize( float* width, float* height ) const;

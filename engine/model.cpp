@@ -32,6 +32,32 @@
 
 using namespace grinliz;
 
+static const char* gMetaName[EL_NUM_METADATA] = {
+	"target",
+	"trigger",
+	"althand",
+	"head",
+	"shield"
+};
+
+const char* IDToMetaData( int id )
+{
+
+	GLASSERT( id >= 0 && id < EL_NUM_METADATA );
+	return gMetaName[id];
+}
+
+
+int MetaDataToID( const char* n ) 
+{
+	for( int i=0; i<EL_NUM_METADATA; ++i ) {
+		if ( StrEqual( gMetaName[i], n )) {
+			return i;
+		}
+	}
+	GLASSERT( 0 );
+	return 0;
+}
 
 void ModelResource::Free()
 {
@@ -82,17 +108,6 @@ int ModelResource::Intersect(	const grinliz::Vector3F& point,
 		}
 	}
 	return grinliz::REJECT;
-}
-
-
-const ModelMetaData* ModelResource::GetMetaData( grinliz::IString name ) const
-{
-	for( int i=0; i<EL_MAX_METADATA; ++i ) {
-		if ( name == header.metaData[i].name ) {
-			return &header.metaData[i];
-		}
-	}
-	return 0;
 }
 
 
@@ -611,10 +626,10 @@ void Model::CalcAnimation()
 }
 
 
-void Model::CalcMetaData( grinliz::IString name, grinliz::Matrix4* meta )
+void Model::CalcMetaData( int id, grinliz::Matrix4* meta )
 {
 	const Matrix4& xform = XForm();	// xform of this model
-	const ModelMetaData* data = resource->GetMetaData( name );
+	const ModelMetaData* data = resource->GetMetaData( id );
 	GLASSERT( data );
 
 	if ( !HasAnimation() || data->boneName.empty() ) {

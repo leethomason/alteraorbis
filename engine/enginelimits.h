@@ -36,7 +36,6 @@ enum {
 	EL_MAX_VERTEX_IN_MODEL	= EL_MAX_VERTEX_IN_GROUP * EL_MAX_MODEL_GROUPS,
 	EL_MAX_INDEX_IN_MODEL	= EL_MAX_INDEX_IN_GROUP * EL_MAX_MODEL_GROUPS,
 	EL_FILE_STRING_LEN		= 30,
-	EL_MAX_METADATA			= 4,		// both animation and model
 	EL_MAX_MODEL_EFFECTS	= 4,		// max # of particle effects emitted by model
 	EL_MAX_BONES			= 16,		// There is shader uniform memory allocated to: MAX_BONES*MAX_INSTANCE, so be careful with those constants.
 	EL_MAX_ANIM_FRAMES		= 24,
@@ -47,6 +46,26 @@ enum {
 	EL_MAX_INSTANCE			= 16,		// Max instances used. Impacts # of uniforms.
 	EL_TUNE_INSTANCE_MEM	= 8*1024	// Max memory per model.
 };
+
+
+// It would be cool if this was a flexible, general system.
+// Which was the first version. The first version was also
+// a giant PITA, so I switched to a simple enum.
+// The hardpoint and metadata system is a little cross-wired as well.
+// You can't attached to a "target" hardpoint, which is convenient
+// since a hardpoint==0 (META_TARGET) is no hardpoint
+enum {
+	META_TARGET,
+	HARDPOINT_TRIGGER,	// this attaches to the trigger hardpoint
+	HARDPOINT_ALTHAND,	// this attaches to the alternate hand (non-trigger) hardpoint. not always a hand.
+	HARDPOINT_HEAD,		// this attaches to the head hardpoint
+	HARDPOINT_SHIELD,	// this attaches to the shield hardpoint
+	EL_NUM_METADATA
+};
+
+const char* IDToMetaData( int id );
+int MetaDataToID( const char* );
+
 
 static const float MAP_HEIGHT = 4.0f;
 

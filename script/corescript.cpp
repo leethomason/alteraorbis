@@ -147,7 +147,7 @@ bool CoreScript::AttachToCore( Chit* chit )
 		TeamGen gen;
 		ProcRenderInfo info;
 		gen.Assign( team, &info );
-		scriptContext->chit->GetRenderComponent()->SetProcedural( IStringConst::main, info );
+		scriptContext->chit->GetRenderComponent()->SetProcedural( 0, info );
 
 		return true;
 	}
@@ -253,7 +253,7 @@ int CoreScript::DoTick( U32 delta, U32 since )
 		TeamGen gen;
 		ProcRenderInfo info;
 		gen.Assign( 0, &info );
-		scriptContext->chit->GetRenderComponent()->SetProcedural( IStringConst::main, info );
+		scriptContext->chit->GetRenderComponent()->SetProcedural( 0, info );
 	}
 	workQueue->DoTick();
 	return attached ? 0 : spawnTick.Next();

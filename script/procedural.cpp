@@ -223,7 +223,7 @@ void HumanGen::AssignSuit( ProcRenderInfo* info )
 }
 
 
-void WeaponGen::GetColors( int i, bool fire, bool shock, grinliz::Color4F* array )
+void WeaponGen::GetColors( int i, int flags, grinliz::Color4F* array )
 {
 	// red for fire
 	// green for shock/corruption? 
@@ -244,14 +244,16 @@ void WeaponGen::GetColors( int i, bool fire, bool shock, grinliz::Color4F* array
 	i = abs(i) % NUM_COLORS;
 
 	Vector2I effect = c[i*3+2];
-	if ( fire && shock ) {
-		effect.Set( 1, PAL_TANGERINE );
-	}
-	else if ( fire ) {
-		effect.Set( 1, PAL_RED );
-	}
-	else if ( shock ) {
-		effect.Set( 1, PAL_GREEN );
+	float alpha = 0.0;
+
+	switch ( flags & (GameItem::EFFECT_FIRE | GameItem::EFFECT_SHOCK)) {
+	case 0:													effect.Set( 1, PAL_GREEN ); 					break;
+	case GameItem::EFFECT_FIRE:								effect.Set( 1, PAL_RED );		alpha=0.7f;		break;
+	case GameItem::EFFECT_SHOCK:							effect.Set( 1, PAL_BLUE );		alpha=1.0f;		break;
+	case GameItem::EFFECT_FIRE | GameItem::EFFECT_SHOCK:	effect.Set( PAL_PURPLE*2+1, PAL_GRAY );	alpha=0.7f;		break;
+	default:
+		GLASSERT( 0 );
+		break;
 	}
 
 	const Game::Palette* palette = Game::GetMainPalette();
@@ -269,20 +271,17 @@ void WeaponGen::GetColors( int i, bool fire, bool shock, grinliz::Color4F* array
 
 	array[BASE].a		= 0;
 	array[CONTRAST].a	= 0;
-	array[EFFECT].a		= (fire || shock) ? 0.7f : 0.0f;
+	array[EFFECT].a		= alpha;
 }
 
 
-void WeaponGen::Render( int seed, const GameItem& item, ProcRenderInfo* info )
+void WeaponGen::AssignRing( ProcRenderInfo* info )
 {
 	Random random( seed );
 	random.Rand();
 
 	Color4F c[3];
-	GetColors(	random.Rand(), 
-				(item.flags & GameItem::EFFECT_FIRE) != 0, 
-				(item.flags & GameItem::EFFECT_SHOCK) != 0, 
-				c );
+	GetColors(	random.Rand(), effectFlags, c ); 
 
 	for( int i=0; i<3; ++i ) {
 		Vector4F v = { c[i].r, c[i].g, c[i].b, c[i].a };
@@ -290,55 +289,20 @@ void WeaponGen::Render( int seed, const GameItem& item, ProcRenderInfo* info )
 	}
 	info->color.m44 = 0;
 
-	const ModelResource* resource = ModelResourceManager::Instance()->GetModelResource( item.ResourceName() );
-	GLASSERT( resource );
-	Texture* texture = resource->atom[0].texture;
+	Texture* texture = TextureManager::Instance()->GetTexture( "ringAtlas" );
 	GLASSERT( texture );
 
 	info->texture = texture;
 	texture->GetTableEntry( random.Rand( texture->NumTableEntries() ), &info->te );
 	
-	info->filter[PROC_RING_MAIN] = true;
+	info->filter[PROC_RING_MAIN]  = true;
 	info->filter[PROC_RING_GUARD] = random.Boolean();
 	info->filter[PROC_RING_TRIAD] = random.Boolean();
 	info->filter[PROC_RING_BLADE] = random.Boolean();
 
 	for( int i=0; i<4; ++i ) {
-		info->filterName[i] = ProcIDToName( PROC_RING_MAIN+i );
+		info->filterName[i] = ItemGen::ProcIDToName( PROC_RING_MAIN+i );
 	}
-}
-
-
-
-int ItemGen::ToID( IString name )
-{
-	if ( name == "ring" ) {
-		return PROCEDURAL_RING;
-	}
-	return PROCEDURAL_NONE;
-}
-
-
-grinliz::IString ItemGen::ToName( int id )
-{
-	switch( id ) {
-	case PROCEDURAL_RING:			return StringPool::Intern( "ring", true );
-	default:
-		break;
-	}
-	return IString();
-}
-
-
-/*static*/ bool ItemGen::ProceduralRender( int seed, const GameItem& item, ProcRenderInfo* info )
-{
-	if (    item.resource == IStringConst::ring ) 
-	{
-		WeaponGen wg;
-		wg.Render( seed, item, info );
-		return true;
-	}
-	return false;
 }
 
 
@@ -387,7 +351,7 @@ void TeamGen::Assign( int seed, ProcRenderInfo* info )
 
 
 void AssignProcedural( const char* name,
-					   bool female, U32 seed, int team, bool electric,
+					   bool female, U32 seed, int team, bool electric, int effectFlags,
 					   ProcRenderInfo* info )
 {
 	if ( !name || !*name )
@@ -400,6 +364,10 @@ void AssignProcedural( const char* name,
 	else if ( StrEqual( name, "suit" )) {
 		HumanGen gen( female, seed, team, electric );
 		gen.AssignSuit( info );
+	}
+	else if ( StrEqual( name, "ring" )) {
+		WeaponGen gen( seed, effectFlags );
+		gen.AssignRing( info );
 	}
 	else {
 		GLASSERT( 0 );

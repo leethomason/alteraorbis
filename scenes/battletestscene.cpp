@@ -354,15 +354,13 @@ Chit* BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int
 
 	chitBag.AddItem( itemName, chit, engine, team, level );
 
-	if ( rc->HardpointAvailable( IStringConst::shield )) {
-		chitBag.AddItem( "shield", chit, engine, 0, level );
-	}
-	if ( rc->CarryHardpointAvailable() ) {
-		if ( loadout == MELEE_WEAPON )
-			chitBag.AddItem( "ring", chit, engine, 0, level );
-		else if ( loadout == PISTOL )
-			chitBag.AddItem( "blaster", chit, engine, 0, level );
-	}
+	// This will just shove stuff in the inventory if they can't be used.
+	chitBag.AddItem( "shield", chit, engine, 0, level );
+	if ( loadout == MELEE_WEAPON )
+		chitBag.AddItem( "ring", chit, engine, 0, level );
+	else if ( loadout == PISTOL )
+		chitBag.AddItem( "blaster", chit, engine, 0, level );
+
 	if ( type != DUMMY ) {
 		chit->Add( new PathMoveComponent( map ));
 		AIComponent* ai = new AIComponent( engine, map );
@@ -379,15 +377,18 @@ Chit* BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int
 	chit->Add( new DebugStateComponent( map ));
 
 	chit->GetSpatialComponent()->SetPosYRot( (float)p.x+0.5f, 0, (float)p.y+0.5f, (float)random.Rand( 360 ) );
+	chit->GetItemComponent()->SetHardpoints();
 
+	/*
 	IString procedural = itemDefArr[0]->GetValue( "procedural" );
 	if ( !procedural.empty() ) {
 		bool female = strstr( resourceName, "female" ) != 0;
 
 		ProcRenderInfo info;
 		AssignProcedural( procedural.c_str(), female, chit->ID(), team, false, &info );
-		chit->GetRenderComponent()->SetProcedural( IStringConst::main, info );
+		chit->GetRenderComponent()->SetProcedural( 0, info );
 	}
+	*/
 	return chit;
 }
 

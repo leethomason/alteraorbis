@@ -41,7 +41,6 @@ ItemComponent::ItemComponent( Engine* _engine, WorldMap* wm, const GameItem& _it
 	: engine(_engine), worldMap(wm), mainItem(_item), slowTick( 500 )
 {
 	itemArr.Push( &mainItem );	
-	pickupMode = 0;
 }
 
 
@@ -57,8 +56,6 @@ ItemComponent::~ItemComponent()
 void ItemComponent::Serialize( XStream* xs )
 {
 	this->BeginSerialize( xs, "ItemComponent" );
-	XARC_SER( xs, pickupMode );
-
 	int nItems = itemArr.Size();
 	XARC_SER( xs, nItems );
 
@@ -72,6 +69,7 @@ void ItemComponent::Serialize( XStream* xs )
 	for( int i=0; i<nItems; ++i ) {
 		itemArr[i]->Serialize( xs );
 	}
+
 	wallet.Serialize( xs );
 	this->EndSerialize( xs );
 }
@@ -125,6 +123,54 @@ void ItemComponent::AddBattleXP( bool isMelee, int killshotLevel )
 }
 
 
+bool ItemComponent::ItemActive( const GameItem* item )
+{
+	for( int i=0; i<itemArr.Size(); ++i ) {
+		if ( itemArr[i] == item ) {
+			return ItemActive( i );
+		}
+	}
+	return false;
+}
+
+
+bool ItemComponent::ItemActive( int i )
+{
+	if ( i == 0 ) return true;
+	GLASSERT( i < itemArr.Size() );
+	const GameItem* item = itemArr[i];
+	if ( item->Intrinsic() ) {
+		return true;
+	}
+	if ( item->hardpoint == 0 ) {
+		return true;
+	}
+
+	// It needs a hardpoint. Is it on the hardpoint?
+	const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( mainItem.resource.c_str(), false );
+	if ( !res ) {
+		// No visual representation??
+		GLASSERT( 0 );
+		return false;
+	}
+
+	if ( !res->header.metaData[item->hardpoint].InUse() ) {
+		// hardpoint not available; can't be used.
+		return false;
+	}
+
+	// Is anyone else using this?
+	for( int j=0; j<i; ++j ) {
+		if ( itemArr[j]->hardpoint == item->hardpoint ) {
+			return false;
+		}
+	}
+	// Has the hardpoint, no one else is using!
+	return true;
+}
+
+
+
 void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {
 	if ( msg.ID() == ChitMsg::CHIT_DAMAGE ) {
@@ -173,19 +219,20 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		GLLOG(( "Chit %3d '%s' (origin=%d) ", parentChit->ID(), mainItem.Name(), info->originID ));
 
 		// Run through the inventory, looking for modifiers.
-
-		for( int i=itemArr.Size()-1; i >= 0; --i ) {
-			if ( i==0 || itemArr[i]->Active() ) {
+		// Be cautious there is no order dependency here (except the
+		// inverse order to do the mainItem last)
+		for( int i=itemArr.Size()-1; i>=0; --i ) {
+			if ( i==0 || ItemActive(i) ) {
 				itemArr[i]->AbsorbDamage( i>0, dd, &dd, "DAMAGE" );
 
 				if ( itemArr[i]->ToShield() ) {
 					GameItem* shield = itemArr[i]->ToShield()->GetItem();
+					
 					RenderComponent* rc = parentChit->GetRenderComponent();
-
 					if ( rc && shield->RoundsFraction() > 0 ) {
 						ParticleDef def = engine->particleSystem->GetPD( "shield" );
 						Vector3F shieldPos = { 0, 0, 0 };
-						rc->GetMetaData( IStringConst::shield, &shieldPos );
+						rc->GetMetaData( HARDPOINT_SHIELD, &shieldPos );
 					
 						float f = shield->RoundsFraction();
 						def.color.x *= f;
@@ -306,7 +353,7 @@ int ItemComponent::DoTick( U32 delta, U32 since )
 		int t = itemArr[i]->DoTick( delta, since );
 		tick = Min( t, tick );
 
-		if (    ( i==0 || itemArr[i]->Active()) 
+		if (    ( i==0 || ItemActive(i) ) 
 			 && EmitEffect( mainItem, delta )) 
 		{
 			tick = 0;
@@ -399,89 +446,19 @@ bool ItemComponent::EmitEffect( const GameItem& it, U32 delta )
 	return emitted;
 }
 
-class InventorySorter
+
+void ItemComponent::AddToInventory( GameItem* item, bool equip )
 {
-public:
-	// "Less" in this case means "closer to center"
-	static bool Less( GameItem* i0, GameItem* i1 ) {
-
-		// Pack
-		// Held + hardpoint
-		// Held 
-		// Intrinsic + hardpoint
-		// Intrinsic
-		// (core)
-
-		enum {
-			CORE,
-			INTRINSIC	= 2,
-			HELD		= 4,
-			PACK		= 6
-		};
-
-		int s[2] = { 0, 0 };
-		for( int i=0; i<2; ++i ) {
-			GameItem* item = (i==0) ? i0 : i1;
-
-			if ( item->Intrinsic() ) {
-				s[i] = INTRINSIC;
-			}
-			else if ( item->Active() ) {
-				s[i] = HELD;
-			}
-			else {
-				s[i] = PACK;
-				GLASSERT( !item->Active() );
-			}
-			if ( item->hardpoint ) {
-				s[i] += 1;
-			}
-		}
-		if ( s[0] != s[1] ) {
-			return s[0] < s[1];
-		}
-		return strcmp( i0->Name(), i1->Name() ) < 0;
-	}
-};
-
-bool ItemComponent::AddToInventory( GameItem* item, bool equip )
-{
-	bool hardpointOpen = false;
-	RenderComponent* rc = parentChit->GetRenderComponent();
-	if ( rc ) {
-		hardpointOpen = rc->HardpointAvailable( item->hardpoint );
-	}
-
-	bool equipped = false;
-	
-	if ( item->Intrinsic() ) {
-		equipped = true;
-	}
-	else if ( equip && item->hardpoint == 0 ) {
-		// Held, but doesn't consume a hardpoint.
-		equipped = true;
-	} 
-	else if ( equip ) {
-		GLASSERT( item->hardpoint );
-	}
 	GLASSERT( item->parentChit == 0 );
 	item->parentChit = parentChit;
-	item->isHeld = equipped;
 	itemArr.Push( item );
-
-	if ( itemArr.Size() > 2 ) {
-		// remember, the 1st item is special. don't move it about.
-		Sort<GameItem*, InventorySorter>( itemArr.Mem()+1, itemArr.Size()-1 );
-	}
-
-	return equipped;
 }
 
 
 GameItem* ItemComponent::IsCarrying()
 {
 	for( int i=1; i<itemArr.Size(); ++i ) {
-		if (    itemArr[i]->Active()							// in use (not in pack)
+		if (    ItemActive( i )									// in use (not in pack)
 			 && itemArr[i]->hardpoint == HARDPOINT_TRIGGER		// at the hardpoint of interest
 			 && !itemArr[i]->Intrinsic() )						// not a built-in
 		{
@@ -494,13 +471,13 @@ GameItem* ItemComponent::IsCarrying()
 
 bool ItemComponent::SwapWeapons()
 {
+	/*
 	IRangedWeaponItem* ranged = GetRangedWeapon(0);
 	if ( ranged ) {
 		// search for something !ranged and !active
 		for( int i=0; i<itemArr.Size(); ++i ) {
-			if ( !itemArr[i]->Active() && !itemArr[i]->ToRangedWeapon() && itemArr[i]->ToMeleeWeapon() ) {
-				ranged->GetItem()->isHeld = false;
-				itemArr[i]->isHeld = true;
+			if ( !ItemActive(i) && !itemArr[i]->ToRangedWeapon() && itemArr[i]->ToMeleeWeapon() ) {
+				activeWeapon = itemArr[i];
 				break;
 			}
 		}
@@ -508,10 +485,8 @@ bool ItemComponent::SwapWeapons()
 	else {
 		IMeleeWeaponItem* melee = GetMeleeWeapon();
 		for( int i=0; i<itemArr.Size(); ++i ) {
-			if ( !itemArr[i]->Active() && itemArr[i]->ToRangedWeapon() ) {
-				if ( melee )
-					melee->GetItem()->isHeld = false;
-				itemArr[i]->isHeld = true;
+			if ( !ItemActive(i) && itemArr[i]->ToRangedWeapon() ) {
+				activeWeapon = itemArr[i];
 				break;
 			}
 		}
@@ -521,6 +496,7 @@ bool ItemComponent::SwapWeapons()
 		Sort<GameItem*, InventorySorter>( itemArr.Mem()+1, itemArr.Size()-1 );
 	}
 	SetProceduralHardpoints();
+	*/
 	return true;
 }
 
@@ -528,13 +504,13 @@ bool ItemComponent::SwapWeapons()
 IRangedWeaponItem* ItemComponent::GetRangedWeapon( grinliz::Vector3F* trigger )
 {
 	for( int i=itemArr.Size()-1; i>=0; --i ) {
-		if ( itemArr[i]->Active() && itemArr[i]->ToRangedWeapon() ) {
+		if ( ItemActive(i) && itemArr[i]->ToRangedWeapon() ) {
 			if ( trigger ) {
 				RenderComponent* rc = parentChit->GetRenderComponent();
 				GLASSERT( rc );
 				if ( rc ) {
 					Matrix4 xform;
-					rc->GetMetaData( IStringConst::Hardpoint( itemArr[i]->hardpoint ), &xform ); 
+					rc->GetMetaData( itemArr[i]->hardpoint, &xform ); 
 					Vector3F pos = xform * V3F_ZERO;
 					*trigger = pos;
 				}
@@ -549,7 +525,7 @@ IRangedWeaponItem* ItemComponent::GetRangedWeapon( grinliz::Vector3F* trigger )
 IMeleeWeaponItem* ItemComponent::GetMeleeWeapon()
 {
 	for( int i=itemArr.Size()-1; i>=0; --i ) {
-		if ( itemArr[i]->Active() && itemArr[i]->ToMeleeWeapon() ) {
+		if ( ItemActive(i) && itemArr[i]->ToMeleeWeapon() ) {
 			return itemArr[i]->ToMeleeWeapon();
 		}
 	}
@@ -560,7 +536,7 @@ IMeleeWeaponItem* ItemComponent::GetMeleeWeapon()
 IShield* ItemComponent::GetShield()
 {
 	for( int i=itemArr.Size()-1; i>=0; --i ) {
-		if ( itemArr[i]->Active() && itemArr[i]->ToShield() ) {
+		if ( ItemActive(i) && itemArr[i]->ToShield() ) {
 			return itemArr[i]->ToShield();
 		}
 	}
@@ -568,48 +544,38 @@ IShield* ItemComponent::GetShield()
 }
 
 
-void ItemComponent::SetProceduralHardpoints()
+void ItemComponent::SetHardpoints()
 {
 	if ( !parentChit->GetRenderComponent() ) {
 		return;
 	}
 	RenderComponent* rc = parentChit->GetRenderComponent();
-	bool female = strstr( itemArr[0]->Name(), "female" ) != 0;
+	bool female = strstr( itemArr[0]->Name(), "Female" ) != 0;
 	int  team   = itemArr[0]->primaryTeam;
 
+	bool usedHardpoint[EL_NUM_METADATA] = { false, false, false, false, false };
+
 	for( int i=0; i<itemArr.Size(); ++i ) {
-		/*
-		if ( rc ) {
-			if ( rc->HardpointAvailable( item->hardpoint )) {
-				equipped = true;
-				bool okay = rc->Attach( item->hardpoint, item->ResourceName() );
-				GLASSERT( okay );
+		const GameItem* item = itemArr[i];
+		bool setProc = (i==0);
 
-				ProcRenderInfo info;
-				if ( ItemGen::ProceduralRender( item->stats.Hash(), *item, &info )) {
-					rc->SetProcedural( item->hardpoint, info );
-				}
+		if ( i > 0 && item->hardpoint && !item->Intrinsic() ) { 
+			if ( !usedHardpoint[ item->hardpoint ] ) {
+				setProc = true;
+				rc->Attach( item->hardpoint, item->ResourceName() );
+				usedHardpoint[i] = true;
 			}
-		}*/
-		if (	i == 0
-			 || (    itemArr[i]->Active()			// in use (not in pack)
-			      && itemArr[i]->hardpoint			// at the hardpoint of interest
-			      && !itemArr[i]->Intrinsic() ))	// not a built-in
+		}
+
+		if ( setProc )	// not a built-in
 		{
-			if ( i > 1 ) {
-
-			}
-
 			IString proc = itemArr[i]->GetValue( "procedural" );
 			ProcRenderInfo info;
 
 			if ( !proc.empty() ) {
-				AssignProcedural( proc.c_str(), female, parentChit->ID(), team, false, &info );
+				AssignProcedural( proc.c_str(), female, item->id, team, false, item->Effects(), &info );
 			}
-			if ( i == 0 )
-				rc->SetProcedural( IStringConst::main, info );
-			else
-				rc->SetProcedural( itemArr[i]->hardpoint, info );
+			rc->SetProcedural( itemArr[i]->hardpoint, info );
 		}
 	}
 }
