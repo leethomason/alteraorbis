@@ -104,7 +104,6 @@ x Probably don't need squatting logic in PathMoveComponent. (Actually do)
 		x unit healing
 		x cyclops herding
 		- single player unit control
-			- proc gun
 			- ring/gun switch
 			- map axis correct
 			- expandable map
@@ -125,6 +124,7 @@ x Probably don't need squatting logic in PathMoveComponent. (Actually do)
 		- cyclops explosion seems off
 		- balance battles
 	- Loot
+		- proc gun
 		- item screen
 		- drop items
 		- pickup items
