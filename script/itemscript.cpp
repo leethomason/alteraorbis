@@ -14,6 +14,9 @@
 */
 
 #include "itemscript.h"
+#include "battlemechanics.h"
+#include "../engine/model.h"
+#include "../engine/animation.h"
 #include "../tinyxml2/tinyxml2.h"
 
 using namespace tinyxml2;
@@ -38,6 +41,7 @@ void ItemDefDB::Load( const char* path )
 			item->key = item->name;
 			GLASSERT( !map.Query( item->key.c_str(), 0 ));
 			map.Add( item->key.c_str(), item );
+			topNames.Push( item->name );
 
 			const XMLElement* intrinsicEle = itemEle->FirstChildElement( "intrinsics" );
 			if ( intrinsicEle ) {
@@ -114,3 +118,74 @@ void ItemDefDB::Get( const char* name, GameItemArr* arr )
 }
 
 
+
+void ItemDefDB::DumpWeaponStats()
+{
+	GameItem humanMale = this->Get( "humanMale" );
+
+
+	FILE* fp = fopen( "weapons.txt", "w" );
+	GLASSERT( fp );
+	GameItem** items = map.GetValues();
+
+	fprintf( fp, "%-25s %-5s %-5s %-5s %-5s\n", "Name", "Dam", "DPS", "C-DPS", "EffR" );
+	for( int i=0; i<topNames.Size(); ++i ) {
+		const char* name = topNames[i].c_str();
+		GameItemArr arr;
+		Get( name, &arr );
+
+		int meleeTime = 1000;
+		const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( arr[0]->ResourceName(), false );
+		if ( res ) {
+			IString animName = res->header.animation;
+			if ( !animName.empty() ) {
+				const AnimationResource* animRes = AnimationResourceManager::Instance()->GetResource( animName.c_str() );
+				if ( animRes ) {
+					meleeTime = animRes->Duration( ANIM_MELEE );
+				}
+			}
+		}
+
+		for( int j=0; j<arr.Size(); ++j ) {
+			if ( arr[j]->ToMeleeWeapon() ) {
+
+				DamageDesc dd;
+				if ( j>0 ) {
+					fprintf( fp, "%-12s:%-12s ", arr[0]->Name(), arr[j]->Name() );
+					BattleMechanics::CalcMeleeDamage( arr[0], arr[j]->ToMeleeWeapon(), &dd );
+				}
+				else {			
+					fprintf( fp, "%-25s ", arr[j]->Name() );
+					BattleMechanics::CalcMeleeDamage( &humanMale, arr[j]->ToMeleeWeapon(), &dd );
+				}
+				fprintf( fp, "%5.1f %5.1f ", 
+						    dd.damage, dd.damage*1000.0f/(float)meleeTime );
+				fprintf( fp, "\n" ); 
+			}
+			if ( arr[j]->ToRangedWeapon() ) {
+				float radAt1 = 1;
+
+				if ( j>0 ) {
+					fprintf( fp, "%-12s:%-12s ", arr[0]->Name(), arr[j]->Name() );
+					radAt1 = BattleMechanics::ComputeRadAt1( arr[0], arr[j]->ToRangedWeapon(), false, false );
+				}
+				else {
+					fprintf( fp, "%-25s ", arr[j]->Name() );
+					radAt1 = BattleMechanics::ComputeRadAt1( &humanMale, arr[j]->ToRangedWeapon(), false, false );
+				}
+
+				float effectiveRange = BattleMechanics::EffectiveRange( radAt1 );
+
+				float secpershot  = 1000.0f / (float)arr[j]->cooldown.Threshold();
+				float csecpershot = (float)arr[j]->clipCap * 1000.0f / (float)(arr[j]->cooldown.Threshold()*arr[j]->clipCap + arr[j]->reload.Threshold()); 
+
+				float dps  = arr[j]->rangedDamage * 0.5f * secpershot;
+				float cdps = arr[j]->rangedDamage * 0.5f * csecpershot;
+
+				fprintf( fp, "%5.1f %5.1f %5.1f %5.1f", arr[j]->rangedDamage, dps, cdps, effectiveRange );
+				fprintf( fp, "\n" ); 
+			}
+		}
+	}
+	fclose( fp );
+}

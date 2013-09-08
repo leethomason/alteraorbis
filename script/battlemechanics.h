@@ -47,7 +47,7 @@ public:
 								Chit* src,
 								const grinliz::Vector2I& mapPos );
 
-	static void CalcMeleeDamage( Chit* src, IMeleeWeaponItem* weapon, DamageDesc* );
+	static void CalcMeleeDamage( GameItem* weilderMainItem, IMeleeWeaponItem* weapon, DamageDesc* );
 	
 	// Shooting ------------------- //
 	static void Shoot(	ChitBag* bag, 

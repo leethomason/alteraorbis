@@ -128,7 +128,7 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* 
 	chitBag->QuerySpatialHash( &hashQuery, b, src, &accept );
 
 	DamageDesc dd;
-	CalcMeleeDamage( src, weapon, &dd );
+	CalcMeleeDamage( src->GetItem(), weapon, &dd );
 	ChitDamageInfo info( dd );
 	info.originID = src->ID();
 	info.awardXP  = true;
@@ -184,14 +184,12 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* 
 
 
 
-void BattleMechanics::CalcMeleeDamage( Chit* src, IMeleeWeaponItem* weapon, DamageDesc* dd )
+void BattleMechanics::CalcMeleeDamage( GameItem* mainItem, IMeleeWeaponItem* weapon, DamageDesc* dd )
 {
-	GameItem* item = weapon->GetItem();
-	GameItem* mainItem = src->GetItem();
-	ItemComponent* inv = src->GetItemComponent();
+	GameItem* item     = weapon->GetItem();
 
-	GLASSERT( inv && item && mainItem );
-	if ( !inv || !mainItem || !item ) return;
+	GLASSERT( item && mainItem );
+	if ( !mainItem || !item ) return;
 
 	// The effect is the union of the item and the mainItem.
 	// A fire creature imparts fire to the sword it holds.

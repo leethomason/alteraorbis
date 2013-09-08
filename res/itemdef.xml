@@ -10,7 +10,7 @@
       <item name="hand"
             flags="MELEE_WEAPON INTRINSIC"
             hardpoint="trigger"
-            meleeDamageMult="1">
+            meleeDamageMult="0.55">
       </item>
     </intrinsics>
   </item>
@@ -25,7 +25,7 @@
       <item name="hand"
             flags="MELEE_WEAPON INTRINSIC"
             hardpoint="trigger"
-            meleeDamageMult="1">
+            meleeDamageMult="0.5">
       </item>
     </intrinsics>
   </item>
@@ -38,8 +38,7 @@
       <item name="claw"
             flags="MELEE_WEAPON INTRINSIC"
             hardpoint="trigger"
-            meleeDamage="10"
-            rangedDamage="5"
+            meleeDamage="2"
             cooldown="500"
             reload="1000"
             clipCap="10"
@@ -130,7 +129,7 @@
       <item name="pincer"
             flags="MELEE_WEAPON INTRINSIC"
             hardpoint="trigger"
-            meleeDamage="1.8">
+            meleeDamage="1.6">
       </item>
     </intrinsics>
   </item>
@@ -144,7 +143,7 @@
       <item name="pincer"
             flags="MELEE_WEAPON INTRINSIC"
             hardpoint="trigger"
-            meleeDamage="2.0">
+            meleeDamage="1.6">
       </item>
       <item name="beam"
             flags="RANGED_WEAPON INTRINSIC EFFECT_FIRE"
@@ -186,7 +185,7 @@
             hardpoint="head"
             cooldown="1000"
             reload="3000"
-            clipCap="1"
+            clipCap="4"
             speed ="0.6"
             rangedDamage="50">
       </item>
@@ -223,9 +222,9 @@
   <item name="ring"
         resource="ring"
         flags="MELEE_WEAPON"
-		procedural="ring"
-        hardpoint="trigger">
-    <melee kinetic="2" />
+		    procedural="ring"
+        hardpoint="trigger"
+        meleeDamage="1.4">
   </item>
   
   <item name="blaster"
@@ -236,7 +235,7 @@
         cooldown="500"
         reload="2500"
         clipCap="6"
-        meleeDamage="1.1"
+        meleeDamage="0.8"
         rangedDamage="20"
         >
   </item>
@@ -269,6 +268,7 @@
   -->
   <item name="plant0"
         desc="Orbstalk"
+        resource="plant0"
         flags="FLAMMABLE IMMUNE_SHOCK"
         mass ="5"
         sun="0.6"
@@ -278,6 +278,7 @@
 
   <item name="plant1"
         desc="Tree"
+        resource="plant1"
         flags="FLAMMABLE"
         mass ="8"
         sun="0.5"
@@ -287,6 +288,7 @@
 
   <item name="plant2"
         desc="Fern"
+        resource="plant2"
         flags=""
         mass ="3"
         sun="0.2"
@@ -296,6 +298,7 @@
 
   <item name="plant3"
         desc="CrystalGrass"
+        resource="plant3"
         flags="IMMUNE_FIRE SHOCKABLE"
         mass ="5"
         sun="0.5"
@@ -305,6 +308,7 @@
 
   <item name="plant4"
         desc="Bamboo"
+        resource="plant4"
         flags="FLAMMABLE"
         mass ="2"
         sun="0.3"
@@ -314,6 +318,7 @@
 
   <item name="plant5"
         desc="Shroom"
+        resource="plant5"
         flags=""
         mass ="4"
         sun="0.1"
@@ -323,6 +328,7 @@
 
   <item name="plant6"
         desc="SunBloom"
+        resource="plant6"
         flags=""
         mass ="1.5"
         sun="0.8"
@@ -333,6 +339,7 @@
 
   <item name="plant7"
         desc="MoonBloom"
+        resource="plant7"
         flags=""
         mass ="1.5"
         sun="0.5"

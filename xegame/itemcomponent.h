@@ -71,7 +71,7 @@ public:
 	void EmptyWallet() { wallet.MakeEmpty(); }
 	const Wallet& GetWallet() const			{ return wallet; }
 
-	void AddToInventory( GameItem* item, bool equip );
+	void AddToInventory( GameItem* item );
 
 	// add XP to current item and its weapon
 	void AddBattleXP( bool meleeAttack, int killshotLevel );

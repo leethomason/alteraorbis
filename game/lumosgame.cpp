@@ -39,6 +39,7 @@ LumosGame::LumosGame(  int width, int height, int rotation, const char* savepath
 {
 	InitButtonLooks();
 	ItemDefDB::Instance()->Load( "./res/itemdef.xml" );
+	ItemDefDB::Instance()->DumpWeaponStats();
 
 	PushScene( SCENE_TITLE, 0 );
 	PushPopScene();

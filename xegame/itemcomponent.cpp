@@ -133,7 +133,13 @@ bool ItemComponent::ItemActive( const GameItem* item )
 	return false;
 }
 
-
+/* This is a delicate routine, and needs
+   to work consistently with SetHardpoints.
+   In general, inventory management is tricky stuff,
+   and this seems to be a pretty good approach.
+   It is decoupled from the RenderComponent, which
+   solves a bunch of issues.
+*/
 bool ItemComponent::ItemActive( int i )
 {
 	if ( i == 0 ) return true;
@@ -161,7 +167,9 @@ bool ItemComponent::ItemActive( int i )
 
 	// Is anyone else using this?
 	for( int j=0; j<i; ++j ) {
-		if ( itemArr[j]->hardpoint == item->hardpoint ) {
+		if (    !itemArr[j]->Intrinsic()  
+			 && itemArr[j]->hardpoint == item->hardpoint ) 
+		{
 			return false;
 		}
 	}
@@ -447,7 +455,7 @@ bool ItemComponent::EmitEffect( const GameItem& it, U32 delta )
 }
 
 
-void ItemComponent::AddToInventory( GameItem* item, bool equip )
+void ItemComponent::AddToInventory( GameItem* item )
 {
 	GLASSERT( item->parentChit == 0 );
 	item->parentChit = parentChit;
@@ -471,38 +479,51 @@ GameItem* ItemComponent::IsCarrying()
 
 bool ItemComponent::SwapWeapons()
 {
-	/*
-	IRangedWeaponItem* ranged = GetRangedWeapon(0);
-	if ( ranged ) {
-		// search for something !ranged and !active
-		for( int i=0; i<itemArr.Size(); ++i ) {
-			if ( !ItemActive(i) && !itemArr[i]->ToRangedWeapon() && itemArr[i]->ToMeleeWeapon() ) {
-				activeWeapon = itemArr[i];
-				break;
-			}
+	int i=0;
+	int slot0 = -1;
+	int slot1 = -1;
+
+	while( i < itemArr.Size() ) {
+		GameItem* item = itemArr[i];
+		if (   !item->Intrinsic()  
+			 && ItemActive(i) 
+			 && (item->ToMeleeWeapon() || item->ToRangedWeapon() ))
+		{
+			slot0 = i;
+			break;
 		}
+		++i;
 	}
-	else {
-		IMeleeWeaponItem* melee = GetMeleeWeapon();
-		for( int i=0; i<itemArr.Size(); ++i ) {
-			if ( !ItemActive(i) && itemArr[i]->ToRangedWeapon() ) {
-				activeWeapon = itemArr[i];
-				break;
-			}
+	++i;
+	while( i < itemArr.Size() ) {
+		GameItem* item = itemArr[i];
+		if (   !item->Intrinsic()  
+			 && !ItemActive(i) 
+			 && (item->ToMeleeWeapon() || item->ToRangedWeapon() ))
+		{
+			slot1 = i;
+			break;
 		}
+		++i;
 	}
-	if ( itemArr.Size() > 2 ) {
-		// remember, the 1st item is special. don't move it about.
-		Sort<GameItem*, InventorySorter>( itemArr.Mem()+1, itemArr.Size()-1 );
+	if ( slot0 >= 0 && slot1 >= 0 ) {
+		Swap( &itemArr[slot0], &itemArr[slot1] );
 	}
-	SetProceduralHardpoints();
-	*/
+	SetHardpoints();
+
+	IMeleeWeaponItem* melee = this->GetMeleeWeapon();
+	IRangedWeaponItem* ranged = this->GetRangedWeapon(0);
+	GLOUTPUT(( "Swapped. Active melee: %s ranged: %s\n",
+		melee ? melee->GetItem()->Name() : "",
+		ranged ? ranged->GetItem()->Name() : "" ));
+
 	return true;
 }
 
 
 IRangedWeaponItem* ItemComponent::GetRangedWeapon( grinliz::Vector3F* trigger )
 {
+	// Go backwards, so that we get the NOT intrinsic first.
 	for( int i=itemArr.Size()-1; i>=0; --i ) {
 		if ( ItemActive(i) && itemArr[i]->ToRangedWeapon() ) {
 			if ( trigger ) {
@@ -524,6 +545,7 @@ IRangedWeaponItem* ItemComponent::GetRangedWeapon( grinliz::Vector3F* trigger )
 
 IMeleeWeaponItem* ItemComponent::GetMeleeWeapon()
 {
+	// Go backwards, so that we get the NOT intrinsic first.
 	for( int i=itemArr.Size()-1; i>=0; --i ) {
 		if ( ItemActive(i) && itemArr[i]->ToMeleeWeapon() ) {
 			return itemArr[i]->ToMeleeWeapon();
@@ -535,7 +557,7 @@ IMeleeWeaponItem* ItemComponent::GetMeleeWeapon()
 
 IShield* ItemComponent::GetShield()
 {
-	for( int i=itemArr.Size()-1; i>=0; --i ) {
+	for( int i=0; i<itemArr.Size(); ++i ) {
 		if ( ItemActive(i) && itemArr[i]->ToShield() ) {
 			return itemArr[i]->ToShield();
 		}
@@ -563,7 +585,7 @@ void ItemComponent::SetHardpoints()
 			if ( !usedHardpoint[ item->hardpoint ] ) {
 				setProc = true;
 				rc->Attach( item->hardpoint, item->ResourceName() );
-				usedHardpoint[i] = true;
+				usedHardpoint[item->hardpoint] = true;
 			}
 		}
 

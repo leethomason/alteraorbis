@@ -212,12 +212,11 @@ void GameScene::SetFace()
 {
 	Chit* chit = sim->GetPlayerChit();
 	if ( chit ) {
-		int id = chit->ID();
 		GLASSERT( chit->GetItem() );
 		const GameItem& item = *chit->GetItem();
 		
 		ProcRenderInfo info;
-		HumanGen faceGen( true, id, 1, true );
+		HumanGen faceGen( true, item.id, item.primaryTeam, false );
 		faceGen.AssignFace( &info );
 
 		RenderAtom procAtom( (const void*) (UIRenderer::RENDERSTATE_UI_CLIP_XFORM_MAP), 

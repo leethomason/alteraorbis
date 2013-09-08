@@ -231,6 +231,7 @@ public:
 	
 	void SetThreshold( int t )	{ TIME = t; }
 	void SetCurrent( int t )	{ time = t; }
+	int Threshold() const		{ return time; }
 
 private:
 	int TIME;

@@ -387,12 +387,12 @@ void LumosChitBag::AddItem( const char* name, Chit* chit, Engine* engine, int te
 		ItemComponent* ic = new ItemComponent( engine, worldMap, item );
 		chit->Add( ic );
 		for( int i=1; i<itemDefArr.Size(); ++i ) {
-			ic->AddToInventory( new GameItem( *(itemDefArr[i]) ), true );
+			ic->AddToInventory( new GameItem( *(itemDefArr[i]) ) );
 		}
 	}
 	else {
 		GLASSERT( itemDefArr.Size() == 1 );
-		chit->GetItemComponent()->AddToInventory( new GameItem( item ), true );
+		chit->GetItemComponent()->AddToInventory( new GameItem( item ) );
 	}
 }
 

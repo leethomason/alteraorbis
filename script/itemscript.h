@@ -41,6 +41,8 @@ public:
 	// Get the 'value' of the property 'prop' from the item with 'name'
 	static void GetProperty( const char* name, const char* prop, int* value );
 
+	void DumpWeaponStats();
+
 private:
 	ItemDefDB()		{}
 
@@ -48,6 +50,7 @@ private:
 	GameItem nullItem;
 
 	grinliz::HashTable< const char*, GameItem*, grinliz::CompCharPtr, grinliz::OwnedPtrSem > map;
+	grinliz::CDynArray< grinliz::IString > topNames;
 };
 
 
