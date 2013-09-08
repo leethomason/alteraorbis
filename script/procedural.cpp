@@ -6,18 +6,6 @@
 using namespace grinliz;
 
 
-/*static*/ grinliz::IString ItemGen::ProcIDToName( int id )
-{
-	static const char* procNames[PROC_COUNT] = {
-		"main",
-		"guard",
-		"triad",
-		"blade"
-	};
-	GLASSERT( id >= 0 && id < PROC_COUNT );
-	return StringPool::Intern( procNames[id], true );
-}
-
 
 HumanGen::HumanGen( bool female, U32 seed, int team, bool electric )
 {
@@ -295,13 +283,51 @@ void WeaponGen::AssignRing( ProcRenderInfo* info )
 	info->texture = texture;
 	texture->GetTableEntry( random.Rand( texture->NumTableEntries() ), &info->te );
 	
-	info->filter[PROC_RING_MAIN]  = true;
-	info->filter[PROC_RING_GUARD] = random.Boolean();
-	info->filter[PROC_RING_TRIAD] = random.Boolean();
-	info->filter[PROC_RING_BLADE] = random.Boolean();
+	info->filter[0]  = true;
+	info->filter[1] = random.Boolean();
+	info->filter[2] = random.Boolean();
+	info->filter[3] = random.Boolean();
+
+	static const char* procNames[4] = {
+		"main",
+		"guard",
+		"triad",
+		"blade"
+	};
 
 	for( int i=0; i<4; ++i ) {
-		info->filterName[i] = ItemGen::ProcIDToName( PROC_RING_MAIN+i );
+		info->filterName[i] = StringPool::Intern( procNames[i] );
+	}
+}
+
+
+void WeaponGen::AssignGun( ProcRenderInfo* info )
+{
+	Random random( seed );
+	random.Rand();
+
+	Color4F c[3];
+	GetColors(	random.Rand(), effectFlags, c ); 
+
+	for( int i=0; i<3; ++i ) {
+		Vector4F v = { c[i].r, c[i].g, c[i].b, c[i].a };
+		info->color.SetCol( i, v );
+	}
+	info->color.m44 = 0;
+
+	Texture* texture = TextureManager::Instance()->GetTexture( "structure" );
+	GLASSERT( texture );
+
+	info->texture = texture;	
+	info->filter[0]  = true;
+	info->filter[1] = random.Boolean();
+	info->filter[2] = random.Boolean();
+	info->filter[3] = random.Boolean();
+
+	static const char* GUN_PARTS[4] = { "body", "cell", "driver", "scope" };
+
+	for( int i=0; i<4; ++i ) {
+		info->filterName[i] = StringPool::Intern( GUN_PARTS[i] );
 	}
 }
 
@@ -368,6 +394,10 @@ void AssignProcedural( const char* name,
 	else if ( StrEqual( name, "ring" )) {
 		WeaponGen gen( seed, effectFlags );
 		gen.AssignRing( info );
+	}
+	else if ( StrEqual( name, "gun" )) {
+		WeaponGen gen( seed, effectFlags );
+		gen.AssignGun( info );
 	}
 	else {
 		GLASSERT( 0 );

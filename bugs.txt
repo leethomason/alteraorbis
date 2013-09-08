@@ -35,84 +35,10 @@ x Probably don't need squatting logic in PathMoveComponent. (Actually do)
 	- Building list (FE determination)
 
 - game
-	- Silver
-		x texture bleeding in voxel renderer
-		x vertical voxels are stretched
-		d 1x1 filtering isn't working
-		x rain, general de-saturation
-		x rework glow to reduce artifacts
-		x ground texture
-		x tree textures
-		x flower colors (too saturated flowers)
-		x grid travel from port (no position selection)
-		x new Core model
-		x new 1x1 models
-		x support for mxn models
-		x new mxn models
-		x cancel orders
-		x building rotation
-		x leave core
-		x decent UI
-		x show "clear" mark on top
-		x double layer for "build" marks
-		x wait states on wander
-		x don't count F/E that can't be pathed to
-		x decent menu system
-		x restore electric rendering for faces
-		x proper animation system
-		x GT: bug image
-		x Human Male
-			x model
-			x texture (procedural)
-			x animation
-		x Human Female v2
-			x model
-			x texture (procedural)
-			x animation
-		x Mantis
-			x concept
-			x model 
-			x animation
-		x Red Mantis
-			x model
-		x Worker
-			x animation rendering (null animation)
-		x Cyclops
-			x replace balrog
-			x model.
-				x double size of arms
-			x animation
-			x variant: fire
-			x variant: shock
-		x Arachnoid
-			x model
-			x texture
-			x animation
-		x Visitor
-			x model
-			x texture
-		x fix battle scene
-			x check timing
-			x shock under powered
-			x bolt colors
-			x make sure shader print-out correct
-		x fix main game
-		x re-work enemy spawn
-			x rats
-			x safer areas
-		x seperate greater spawn from lesser spawn
-		x unit healing
-		x cyclops herding
-		- single player unit control
-			x face and suit colors in sync
-			x ring/gun switch
-			- proc gun
-			- map axis correct
-			- expandable map
-			- damage analysis
 
 	- Econ
-		- fix team logic
+		- expandable map
+		x fix team logic
 		- build 2 height ice
 		- decent clear dragging
 		- external constant file
@@ -120,12 +46,13 @@ x Probably don't need squatting logic in PathMoveComponent. (Actually do)
 		- factory
 		- turret
 		- power
-		- procedural rendering colors
-			- weapon colors
-			- team colors
+		x procedural rendering colors
+			x weapon colors
+		- team colors
 		- cyclops explosion seems off
 		- balance battles
 	- Loot
+		- proc gun
 		- item screen
 		- drop items
 		- pickup items
@@ -245,6 +172,80 @@ V2 ideas:
 
 ----------- FIXED -------------
 
+	x Silver
+		x texture bleeding in voxel renderer
+		x vertical voxels are stretched
+		d 1x1 filtering isn't working
+		x rain, general de-saturation
+		x rework glow to reduce artifacts
+		x ground texture
+		x tree textures
+		x flower colors (too saturated flowers)
+		x grid travel from port (no position selection)
+		x new Core model
+		x new 1x1 models
+		x support for mxn models
+		x new mxn models
+		x cancel orders
+		x building rotation
+		x leave core
+		x decent UI
+		x show "clear" mark on top
+		x double layer for "build" marks
+		x wait states on wander
+		x don't count F/E that can't be pathed to
+		x decent menu system
+		x restore electric rendering for faces
+		x proper animation system
+		x GT: bug image
+		x Human Male
+			x model
+			x texture (procedural)
+			x animation
+		x Human Female v2
+			x model
+			x texture (procedural)
+			x animation
+		x Mantis
+			x concept
+			x model 
+			x animation
+		x Red Mantis
+			x model
+		x Worker
+			x animation rendering (null animation)
+		x Cyclops
+			x replace balrog
+			x model.
+				x double size of arms
+			x animation
+			x variant: fire
+			x variant: shock
+		x Arachnoid
+			x model
+			x texture
+			x animation
+		x Visitor
+			x model
+			x texture
+		x fix battle scene
+			x check timing
+			x shock under powered
+			x bolt colors
+			x make sure shader print-out correct
+		x fix main game
+		x re-work enemy spawn
+			x rats
+			x safer areas
+		x seperate greater spawn from lesser spawn
+		x unit healing
+		x cyclops herding
+		- single player unit control
+			x face and suit colors in sync
+			x ring/gun switch
+			x damage analysis
+			x proc gun
+			x map axis correct
 x Gold
 	x drop gold
 	x player picks up gold

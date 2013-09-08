@@ -52,7 +52,7 @@ public:
 private:
 	void GenerateAndCreate();
 	void GenerateFaces( int mainRow );
-	void GenerateRing( int mainRow );
+	void GenerateRingOrGun( int mainRow, bool gun );
 
 	enum { 
 		ROWS = 4, 
@@ -62,6 +62,7 @@ private:
 		HUMAN_MALE_FACE = 0,
 		HUMAN_FEMALE_FACE,
 		RING,
+		GUN,
 		NUM_TYPES
 	};
 

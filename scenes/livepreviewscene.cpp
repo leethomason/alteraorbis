@@ -43,7 +43,7 @@ LivePreviewScene::LivePreviewScene( LumosGame* game, const LivePreviewSceneData*
 	electricButton.Init( &gamui2D, look );
 	electricButton.SetText( "Electric" );
 
-	static const char* typeName[NUM_TYPES] = { "Male\nFace", "Female\nFace", "Ring" };
+	static const char* typeName[NUM_TYPES] = { "Male\nFace", "Female\nFace", "Ring", "Gun" };
 	for( int i=0; i<NUM_TYPES; ++i ) {
 		typeButton[i].Init( &gamui2D, look );
 		typeButton[i].SetText( typeName[i] );
@@ -141,16 +141,11 @@ void LivePreviewScene::GenerateFaces( int mainRow )
 		model[i]->SetTextureXForm( info.te.uvXForm.x, info.te.uvXForm.y, info.te.uvXForm.z, info.te.uvXForm.w );
 		model[i]->SetTextureClip( info.te.clip.x, info.te.clip.y, info.te.clip.z, info.te.clip.w );
 		model[i]->SetColorMap( true, info.color );
-
-//		if ( electricButton.Down() ) {
-//			skin = skin + hair*0.5f + glasses*0.5f;
-//			hair = hair + glasses*0.5f;
-//		}
 	}
 }
 
 
-void LivePreviewScene::GenerateRing( int mainRow )
+void LivePreviewScene::GenerateRingOrGun( int mainRow, bool gun )
 {
 	static const float DELTA  = 0.3f;
 	static const float DIST   = 3.0f;
@@ -165,8 +160,16 @@ void LivePreviewScene::GenerateRing( int mainRow )
 	Random random( mainRow );
 	random.Rand();
 
+	static const char* GUN_NAMES[4] = { "pistol", "blaster", "beamgun", "pulse" };
+
+	const char* resName = "ring";
+	if ( gun ) {
+		resName = GUN_NAMES[mainRow%4];
+	}
+
 	const ModelResource* modelResource = 0;
-	modelResource = ModelResourceManager::Instance()->GetModelResource( "ring" );
+
+	modelResource = ModelResourceManager::Instance()->GetModelResource( resName );
 
 	int srcRows = modelResource->atom[0].texture->Height() / modelResource->atom[0].texture->Width() * 4;
 	float rowMult = 1.0f / (float)srcRows;
@@ -184,31 +187,14 @@ void LivePreviewScene::GenerateRing( int mainRow )
 		float y = float(ROWS-1-row) * DELTA;
 		float current = 1.0f - rowMult * (float)(mainRow);
 
-		// NOT in order.
-		static const char* parts[4] = {
-			"main",
-			"guard",
-			"triad",
-			"blade"
-		};
-		int ids[4] = { -1,-1,-1,-1 };
-
-		ids[0] = model[i]->GetBoneIndex( StringPool::Intern( "main", true ));
-		GLASSERT( ids[0] >= 0 && ids[0] < 4 );
-		
-		for( int k=1; k<4; ++k ) {
-			int id = model[i]->GetBoneIndex( StringPool::Intern( parts[k], true ));
-			GLASSERT( id >= 0 && id < 4 );
-			if ( (i==0) || ((i+mainRow*NUM_MODEL) & (1<<k))) {
-				ids[k] = id;
-			}
-		}
-
 		static const int FLAGS[COLS] = { 0, GameItem::EFFECT_FIRE, GameItem::EFFECT_FIRE | GameItem::EFFECT_EXPLOSIVE, GameItem::EFFECT_SHOCK, GameItem::EFFECT_FIRE | GameItem::EFFECT_SHOCK };
 
 		WeaponGen weaponGen( i + mainRow*137, FLAGS[col] );
 		ProcRenderInfo info;
-		weaponGen.AssignRing( &info );
+		if ( gun )
+			weaponGen.AssignGun( &info );
+		else
+			weaponGen.AssignRing( &info );
 
 		if ( i == NUM_MODEL-1 ) {
 			model[i]->SetPos( 3.0f, y, x+0.15f );
@@ -230,7 +216,8 @@ void LivePreviewScene::GenerateAndCreate()
 			switch ( currentType ) {
 				case		HUMAN_MALE_FACE:		GenerateFaces( i );		break;
 				case		HUMAN_FEMALE_FACE:		GenerateFaces( i );		break;
-				case		RING:					GenerateRing( i );		break;
+				case		RING:					GenerateRingOrGun( i, false );		break;
+				case		GUN:					GenerateRingOrGun( i, true );		break;
 				default:	GLASSERT( 0 );									break;
 			}
 			break;
@@ -246,17 +233,18 @@ void LivePreviewScene::ItemTapped( const gamui::UIItem* item )
 	}
 	else if ( item == &typeButton[HUMAN_MALE_FACE] ) {
 		currentType = HUMAN_MALE_FACE;
-		//rowButton[0].SetDown();
 		GenerateAndCreate(  );
 	}
 	else if ( item == &typeButton[HUMAN_FEMALE_FACE] ) {
 		currentType = HUMAN_FEMALE_FACE;
-		//rowButton[0].SetDown();
 		GenerateAndCreate( );
 	}
 	else if ( item == &typeButton[RING] ) {
 		currentType = RING;
-		//rowButton[0].SetDown();
+		GenerateAndCreate();
+	}
+	else if ( item == &typeButton[GUN] ) {
+		currentType = GUN;
 		GenerateAndCreate();
 	}
 

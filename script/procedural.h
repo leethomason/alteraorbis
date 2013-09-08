@@ -35,16 +35,6 @@ enum {
 	PAL_COUNT
 };
 
-enum {
-	PROC_RING_MAIN	= 0,	// each group starts at 0
-	PROC_RING_GUARD,
-	PROC_RING_TRIAD,
-	PROC_RING_BLADE,
-
-	PROC_COUNT
-};
-
-
 class GameItem;
 
 struct ProcRenderInfo
@@ -61,15 +51,6 @@ struct ProcRenderInfo
 	grinliz::Matrix4	color;
 	grinliz::IString	filterName[4];
 	bool				filter[4];		// item filters - maps to PROC_RING_MAIN, etc.
-};
-
-
-class ItemGen
-{
-public:
-	// PROC_RING_GUARD -> "guard"
-	static grinliz::IString ProcIDToName( int id );
-
 };
 
 
@@ -114,6 +95,7 @@ public:
 
 	WeaponGen( U32 _seed, int _effectFlags ) : seed(_seed), effectFlags(_effectFlags) {}
 	void AssignRing( ProcRenderInfo* info );
+	void AssignGun( ProcRenderInfo* info );
 
 private:
 	void GetColors( int i, int effectFlags, grinliz::Color4F* array );

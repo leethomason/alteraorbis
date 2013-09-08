@@ -247,9 +247,11 @@
   <model filename="plant7.ac" modelName="plant7.0"    origin="-3 0 0"  shading="smooth" polyRemoval="pre" />
   <model filename="plant7.ac" modelName="plant7.1"    origin="0 0 0"   shading="smooth" polyRemoval="pre" />
 
-  <model filename="weapons.ac"          modelName="testgun"     origin="0 0 0"      shadowCaster="false" />
+  <model filename="weapons2.ac"         modelName="blaster"     origin="0 0.5 -1"   shadowCaster="false" bones="true"/>
+  <model filename="weapons2.ac"         modelName="beamgun"     origin="0 0.5 0"    shadowCaster="false" bones="true"/>
+  <model filename="weapons2.ac"         modelName="pistol"      origin="0 0 -1"     shadowCaster="false" bones="true"/>
+  <model filename="weapons2.ac"         modelName="pulse"       origin="0 0 0"      shadowCaster="false" bones="true"/>
   <model filename="weapons.ac"          modelName="ring"        origin="0.20 0 0"   shadowCaster="false" bones="true" />
-  <model filename="weapons.ac"          modelName="largeRing"   origin="0.40 0 0"   shadowCaster="false" bones="true"/>
   <model                                filename="shield.ac"    origin="0 0 0"      shadowCaster="false" />
 
   <model filename="chess_weapons.ac"    modelName="RAY-1"        origin="0 0 0"/>

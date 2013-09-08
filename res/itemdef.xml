@@ -228,7 +228,7 @@
   </item>
   
   <item name="blaster"
-        resource="testgun"
+        resource="blaster"
         flags="MELEE_WEAPON RANGED_WEAPON"
         hardpoint="trigger"
         mass="1.5"
@@ -237,6 +237,49 @@
         clipCap="6"
         meleeDamage="0.8"
         rangedDamage="20"
+        procedural="gun"
+        >
+  </item>
+
+  <item name="beamgun"
+        resource="beamgun"
+        flags="MELEE_WEAPON RANGED_WEAPON"
+        hardpoint="trigger"
+        mass="1.5"
+        cooldown="1000"
+        reload="3000"
+        clipCap="4"
+        meleeDamage="0.8"
+        rangedDamage="30"
+        procedural="gun"
+        >
+  </item>
+
+  <item name="pistol"
+        resource="pistol"
+        flags="MELEE_WEAPON RANGED_WEAPON"
+        hardpoint="trigger"
+        mass="1.5"
+        cooldown="700"
+        reload="2000"
+        clipCap="6"
+        meleeDamage="0.8"
+        rangedDamage="25"
+        procedural="gun"
+        >
+  </item>
+
+  <item name="pulse"
+        resource="pulse"
+        flags="MELEE_WEAPON RANGED_WEAPON"
+        hardpoint="trigger"
+        mass="2.0"
+        cooldown="250"
+        reload="3000"
+        clipCap="12"
+        meleeDamage="0.8"
+        rangedDamage="20"
+        procedural="gun"
         >
   </item>
 
