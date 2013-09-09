@@ -45,12 +45,14 @@ public:
 	Chit* GetAttached( bool* standing );
 
 	WorkQueue* GetWorkQueue()	{ return workQueue; }
+	void SetDefaultSpawn( grinliz::IString s ) { defaultSpawn = s; }
 
 private:
 	WorldMap*	worldMap;
 	WorkQueue*	workQueue;
 	CTicker		spawnTick;
 	int			boundID;
+	grinliz::IString defaultSpawn;
 };
 
 #endif // CORESCRIPT_INCLUDED

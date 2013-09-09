@@ -156,6 +156,8 @@ void Sim::CreateCores()
 	const SectorData* sectorDataArr = worldMap->GetSectorData();
 
 	int ncores = 0;
+	CoreScript* cold = 0;
+	CoreScript* hot  = 0;
 
 	for( int i=0; i<NUM_SECTORS*NUM_SECTORS; ++i ) {
 		const SectorData& sd = sectorDataArr[i];
@@ -166,10 +168,16 @@ void Sim::CreateCores()
 			MapSpatialComponent* ms = GET_SUB_COMPONENT( chit, SpatialComponent, MapSpatialComponent );
 			GLASSERT( ms );
 			ms->SetMode( GRID_IN_USE ); 
-			chit->Add( new ScriptComponent( new CoreScript( worldMap, chitBag, engine ), engine, &chitBag->census ));
+			CoreScript* cs = new CoreScript( worldMap, chitBag, engine );
+			chit->Add( new ScriptComponent( cs, engine, &chitBag->census ));
+
+			if ( !cold ) cold = cs;	// first
+			hot = cs;	// last
 			++ncores;
 		}
 	}
+	cold->SetDefaultSpawn( StringPool::Intern( "arachnoid" ));	// easy starting point for greater spawns
+	hot->SetDefaultSpawn( StringPool::Intern( "arachnoid" ));	// easy starting point for greater spawns
 	GLOUTPUT(( "nCores=%d\n", ncores ));
 }
 

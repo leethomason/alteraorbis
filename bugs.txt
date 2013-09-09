@@ -2,12 +2,7 @@
 - GT: needs pick up effect for gold (single yellow glow of the avatar?)
 - GT: needs pick up effect for kiosks or visitors (like a gold triangle or chest can float over the kiosk when the visitor spends money)
 - GT: ui to show idle and busy workers
-x use arrays to track components and component update time.
-  switch to calling the components vs. calling the chit. coherence is good!
-  each component stores its location in the array so it can null itself on remove
-  Meh: initial test showed no advantage.
 - change shield to have cooldown then charge-up (rather than cooldown then reset)
-- rings deflect bolts
 - redo AI utility to be based on a set of curves
 - fix / disable right mouse behavior
 - UI on minimap. Target, show highlight of domain.
@@ -21,15 +16,11 @@ x use arrays to track components and component update time.
   of the overall AI state.
 - Melee should rotate to target (both rock and chit)
 - How does Ice and magma interact?
-x move GOLD_PICKUP to flag in Item
-x pools that are waterfalls need side rendering
-x remove squisher. nifty but outdated.
 - SectorHerd seems a little aggressive. Switch over to using ForceCount, check conditions to trigger.
-x Only call ApplyBlocks once. 
-x Probably don't need squatting logic in PathMoveComponent. (Actually do)
 - make sure gold/crystal gets returned to the Reserve when the Chit is destroyed
 - GT: lightning
 - GT: rez-in for structures
+- wander less centered on core?
 - SpatialHash: one stressed structure.
 	- MOB list (FE determination)
 	- Building list (FE determination)
@@ -152,6 +143,7 @@ x Flora
 - create release!
 
 ---------- Defer ----------
+d rings deflect bolts. too much AI change.
 d switch to ImageMagick for texture scaling
 - animation sync is generally flakey - lock to vsync? Not aware of any way to solve this.
 d when loading during grid travel, you sometimes back up. (Regen path on load; chooses wrong starting point. annoying to fix).
@@ -171,6 +163,15 @@ V2 ideas:
 - level up grid and special skills
 
 ----------- FIXED -------------
+x move GOLD_PICKUP to flag in Item
+x pools that are waterfalls need side rendering
+x remove squisher. nifty but outdated.
+x Only call ApplyBlocks once. 
+x Probably don't need squatting logic in PathMoveComponent. (Actually do)
+x use arrays to track components and component update time.
+  switch to calling the components vs. calling the chit. coherence is good!
+  each component stores its location in the array so it can null itself on remove
+  Meh: initial test showed no advantage.
 
 	x Silver
 		x texture bleeding in voxel renderer

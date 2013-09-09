@@ -48,6 +48,7 @@ void CoreScript::Serialize( XStream* xs )
 {
 	XarcOpen( xs, ScriptName() );
 	XARC_SER( xs, boundID );
+	XARC_SER( xs, defaultSpawn );
 	spawnTick.Serialize( xs, "spawn" );
 	workQueue->Serialize( xs );
 	XarcClose( xs );
@@ -187,35 +188,42 @@ int CoreScript::DoTick( U32 delta, U32 since )
 		if ( arr.Size() < 2 ) {
 			Vector3F pf = { (float)pos2i.x+0.5f, 0, (float)pos2i.y+0.5f };
 
-			/*
-				What to spawn?
-				A core has its "typical spawn": mantis, redManis, arachnoid.
-				And an occasional greater spawn: cyclops variants, dragon
-				All cores scan spawn arachnoids.
-			*/
-			static const char* SPAWN[NUM_SECTORS] = {
-				"arachnoid",
-				"arachnoid",
-				"arachnoid",
-				"arachnoid",
-				"mantis",
-				"mantis",
-				"mantis",
-				"redMantis",
-				"mantis",
-				"redMantis",
-				"mantis",
-				"redMantis",
-				"mantis",
-				"redMantis",
-				"redMantis",
-				"redMantis"
-			};
+			if ( defaultSpawn.empty() ) {
+				/*
+					What to spawn?
+					A core has its "typical spawn": mantis, redManis, arachnoid.
+					And an occasional greater spawn: cyclops variants, dragon
+					All cores scan spawn arachnoids.
+				*/
+				static const char* SPAWN[NUM_SECTORS] = {
+					"arachnoid",
+					"arachnoid",
+					"arachnoid",
+					"arachnoid",
+					"mantis",
+					"mantis",
+					"mantis",
+					"redMantis",
+					"mantis",
+					"redMantis",
+					"mantis",
+					"redMantis",
+					"mantis",
+					"redMantis",
+					"redMantis",
+					"redMantis"
+				};
+				defaultSpawn = StringPool::Intern( SPAWN[outland] );
+			}
 
-			const float greater    = (float)(outland*outland) / (float)(100*256);
+			float greater    = (float)(outland*outland) / (float)(40*256);
 			static const float rat = 0.25f;
+			const char* spawn	   = 0;
 
-			const char* spawn = 0;
+			if ( outland > 4 && defaultSpawn == "arachnoid" ) {
+				greater *= 4.f;	// special spots for greaters to spawn.
+			}
+
 			float roll = scriptContext->chit->random.Uniform();
 
 			if ( greaterPossible && roll < greater ) {
@@ -230,9 +238,8 @@ int CoreScript::DoTick( U32 delta, U32 since )
 				spawn = "arachnoid";
 			}
 			if ( !spawn && normalPossible ) {
-				spawn = SPAWN[outland];
+				spawn = defaultSpawn.c_str();
 			}
-
 			if ( spawn ) {
 				IString ispawn = StringPool::Intern( spawn, true );
 				int team = GetTeam( ispawn );

@@ -20,6 +20,7 @@
 #include "../xegame/testmap.h"
 #include "../grinliz/glcolor.h"
 #include "../engine/text.h"
+#include "../script/procedural.h"
 
 using namespace gamui;
 using namespace tinyxml2;
@@ -108,6 +109,7 @@ void RenderTestScene::SetupTest0()
 {
 	const ModelResource* res0 = ModelResourceManager::Instance()->GetModelResource( "humanFemale" );
 	const ModelResource* res1 = ModelResourceManager::Instance()->GetModelResource( "humanMale" );
+
 	for( int i=0; i<NUM_MODELS/2; ++i ) {
 		model[i] = engine->AllocModel( i<3 ? res0 : res1 );
 		model[i]->SetPos( 1, 0, (float)i );
@@ -118,6 +120,14 @@ void RenderTestScene::SetupTest0()
 		model[i]->SetPos( 2, 0, (float)(i-NUM_MODELS/2) );
 		model[i]->SetYRotation( (float)(i*30) );
 		model[i]->SetAnimation( ANIM_WALK, 1000, true ); 
+	}
+
+	for ( int i=0; i<NUM_MODELS; ++i ) {
+		ProcRenderInfo info;
+		AssignProcedural( "suit", model[i]->GetResource() == res0, i, 1, false, 0, &info ); 
+		model[i]->SetTextureXForm( info.te.uvXForm );
+		model[i]->SetColorMap( true, info.color );
+		model[i]->SetBoneFilter( info.filterName, info.filter );
 	}
 	engine->CameraLookAt( 2, (float)(NUM_MODELS/4), 12 );
 }
