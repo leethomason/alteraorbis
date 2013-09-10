@@ -415,8 +415,9 @@ void AIComponent::DoShoot( const ComponentSet& thisComp )
 	float distanceToTarget = normalToTarget.Length();
 	normalToTarget.Normalize();
 	float angleToTarget = RotationXZDegrees( normalToTarget.x, normalToTarget.y );
+	float deltaAngle = MinDeltaDegrees( headingAngle, angleToTarget, 0 );
 
-	if ( fabsf( headingAngle - angleToTarget ) < SHOOT_ANGLE ) {
+	if ( deltaAngle < SHOOT_ANGLE ) {
 		// all good.
 	}
 	else {

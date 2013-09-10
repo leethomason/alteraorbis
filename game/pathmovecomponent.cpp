@@ -267,8 +267,8 @@ void PathMoveComponent::RotationFirst( U32 delta )
 
 			float targetRot = RotationXZDegrees( delta.x, delta.y );
 
-			float deltaRot, bias;
-			MinDeltaDegrees( rot, targetRot, &deltaRot, &bias );
+			float bias;
+			float deltaRot = MinDeltaDegrees( rot, targetRot, &bias );
 
 			if ( travelRot > deltaRot ) {
 				rot = targetRot;
@@ -416,8 +416,8 @@ int PathMoveComponent::DoTick( U32 delta, U32 since )
 			// Apply final rotation if the path is complete.
 			GetPosRot( &pos2, &rot );
 
-			float deltaRot, bias;
-			MinDeltaDegrees( rot, dest.rotation, &deltaRot, &bias );
+			float bias;
+			float deltaRot = MinDeltaDegrees( rot, dest.rotation, &bias );
 			float travelRot	= Travel( ROTATION_SPEED, delta );
 			if ( deltaRot <= travelRot ) {
 				rot = dest.rotation;
