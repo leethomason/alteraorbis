@@ -27,6 +27,7 @@ Chit* WorldScript::IsTopLevel( Model* model )
 }
 
 
+/*
 void WorldScript::QueryChits( const Rectangle2F& rect, Engine* engine, grinliz::CDynArray<Chit*> *chitArr )
 {
 	chitArr->Clear();
@@ -38,6 +39,7 @@ void WorldScript::QueryChits( const Rectangle2F& rect, Engine* engine, grinliz::
 		}
 	}
 }
+*/
 
 
 

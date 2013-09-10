@@ -186,7 +186,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 
 		const ChitDamageInfo* info = (const ChitDamageInfo*) msg.Ptr();
 		GLASSERT( info );
-		DamageDesc dd = info->dd;
+		const DamageDesc ddorig = info->dd;
 
 		// Scale damage to distance, if explosion. And check for impact.
 		if ( info->isExplosion ) {
@@ -197,10 +197,12 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 				rc->CalcTarget( &target );
 				Vector3F v = (target - info->originOfImpact); 
 				float len = v.Length();
+				DamageDesc dd = ddorig;
 				dd.damage = Lerp( dd.damage, dd.damage*0.5f, len / EXPLOSIVE_RANGE );
 				v.Normalize();
 
-				bool knockback = dd.damage > (mainItem.TotalHP() *0.25f);
+				//bool knockback = dd.damage > (mainItem.TotalHP() *0.25f);
+				bool knockback = ddorig.damage > (mainItem.TotalHP() *0.25f);
 
 				// Ony apply for phyisics or pathmove
 				PhysicsMoveComponent* physics  = GET_SUB_COMPONENT( parentChit, MoveComponent, PhysicsMoveComponent );
@@ -231,6 +233,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		// inverse order to do the mainItem last)
 		for( int i=itemArr.Size()-1; i>=0; --i ) {
 			if ( i==0 || ItemActive(i) ) {
+				DamageDesc dd = ddorig;
 				itemArr[i]->AbsorbDamage( i>0, dd, &dd, "DAMAGE" );
 
 				if ( itemArr[i]->ToShield() ) {

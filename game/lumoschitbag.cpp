@@ -362,7 +362,7 @@ void LumosChitBag::HandleBolt( const Bolt& bolt, const ModelVoxel& mv )
 		Vector3F origin = mv.at - bolt.dir * rewind;
 
 		DamageDesc dd( bolt.damage, bolt.effect );
-		BattleMechanics::GenerateExplosionMsgs( dd, origin, bolt.chitID, engine, &chitList );
+		BattleMechanics::GenerateExplosionMsgs( dd, origin, bolt.chitID, engine, this );
 
 		if ( mv.VoxelHit() ) {
 			worldMap->VoxelHit( mv.voxel, dd );

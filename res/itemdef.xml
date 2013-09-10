@@ -187,7 +187,7 @@
             reload="3000"
             clipCap="4"
             speed ="0.6"
-            rangedDamage="50">
+            rangedDamage="30">
       </item>
     </intrinsics>
   </item>

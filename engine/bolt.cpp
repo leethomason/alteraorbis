@@ -67,49 +67,48 @@ void Bolt::TickAll( grinliz::CDynArray<Bolt>* bolts, U32 delta, Engine* engine, 
 		float distance = b.speed * timeSlice;
 		Vector3F travel = b.dir * distance;
 		Vector3F normal = { 0, 1, 0 };
+		ModelVoxel mv;
 
 		if ( !b.impact ) {
 			// Check if we hit something in the world.
 			// FIXME: add ignore list of the shooter, or move head away from model?
-			Vector3F at = { 0, 0, 0 };
 
 			// Check ground hit.
 			if ( (b.head + travel).y <= 0 ) {
 				b.impact = true;
 					
 				if ( b.head.y > 0 ) {
-					at = Lerp( b.head, b.head+travel, (b.head.y) / (travel.y));
+					mv.at = Lerp( b.head, b.head+travel, (b.head.y) / (travel.y));
 				}
 				else {
-					at = b.head;	// not really sure how this happened.
+					mv.at = b.head;	// not really sure how this happened.
 				}
 			}
 
 			// Check model hit.
-			ModelVoxel mv;
 			if ( !b.impact ) {
 				mv = engine->IntersectModelVoxel( b.head, b.dir, distance, TEST_TRI, 0, 0, 0 );
 				if ( mv.Hit() ) {
 					b.impact = true;
 					normal = b.dir;
-					at = mv.at;
 				}
 			}
 
 			if ( b.impact ) {
+				GLASSERT( !mv.at.IsZero() );
 				if ( handler ) {
 					handler->HandleBolt( b, mv );
 				}
-				b.head = at;
+				b.head = mv.at;
 
 				ParticleDef def = ps->GetPD( "boltImpact" );
 				def.color = b.color;
-				ps->EmitPD( def, at, -normal, delta );
+				ps->EmitPD( def, mv.at, -normal, delta );
 
 				if ( b.effect & GameItem::EFFECT_EXPLOSIVE ) {
 					def = ps->GetPD( "explosion" );
 					def.color = b.color;
-					ps->EmitPD( def, at, V3F_UP, delta );
+					ps->EmitPD( def, mv.at, V3F_UP, delta );
 				}
 			}
 		}

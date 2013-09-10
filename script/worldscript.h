@@ -30,7 +30,7 @@ public:
 	static Chit* IsTopLevel( Model* model );
 
 	// Query for the top level chits in a rectangular area
-	static void QueryChits( const grinliz::Rectangle2F& bounds, Engine* engine, grinliz::CDynArray<Chit*> *chitArr );
+	//static void QueryChits( const grinliz::Rectangle2F& bounds, Engine* engine, grinliz::CDynArray<Chit*> *chitArr );
 
 };
 
