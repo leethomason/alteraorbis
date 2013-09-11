@@ -10,7 +10,7 @@
       <item name="hand"
             flags="MELEE_WEAPON INTRINSIC"
             hardpoint="trigger"
-            meleeDamageMult="0.55">
+            meleeDamageMult="0.6">
       </item>
     </intrinsics>
   </item>
@@ -54,25 +54,25 @@
 
   <item name="gold"
         resource="gold"
-        flags="CLICK_THROUGH"
+        flags="INDESTRUCTABLE CLICK_THROUGH"
         mass="10">
   </item>
 
   <item name="crystal_green"
         resource="crystal_green"
-        flags="CLICK_THROUGH"
+        flags="INDESTRUCTABLE CLICK_THROUGH"
         mass="1" />
   <item name="crystal_red"
         resource="crystal_red"
-        flags="CLICK_THROUGH"
+        flags="INDESTRUCTABLE CLICK_THROUGH"
         mass="1" />
   <item name="crystal_blue"
         resource="crystal_blue"
-        flags="CLICK_THROUGH"
+        flags="INDESTRUCTABLE CLICK_THROUGH"
         mass="1" />
   <item name="crystal_violet"
         resource="crystal_violet"
-        flags="CLICK_THROUGH"
+        flags="INDESTRUCTABLE CLICK_THROUGH"
         mass="1" />
 
   <item name="kiosk.m"
@@ -187,7 +187,7 @@
             reload="3000"
             clipCap="4"
             speed ="0.6"
-            rangedDamage="50">
+            rangedDamage="30">
       </item>
     </intrinsics>
   </item>

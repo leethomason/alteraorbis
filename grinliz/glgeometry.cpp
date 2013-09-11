@@ -64,30 +64,32 @@ void SphericalXZ::ToCartesian( Matrix4* out )
 }
 
 
-void grinliz::MinDeltaDegrees( float angle0, float angle1, float* distance, float* bias )
+float grinliz::MinDeltaDegrees( float angle0, float angle1, float* bias )
 {
 	float delta = angle1 - angle0;
+	float distance = 0;
 
 	if ( delta >= 0.0f && delta <= 180.0f )
 	{
-		*distance = delta;
-		*bias = 1.0f;
+		distance = delta;
+		if ( bias )	*bias = 1.0f;
 	}
 	else if ( delta > 180.0f )
 	{
-		*distance = 360.0f - delta;
-		*bias = -1.0f;
+		distance = 360.0f - delta;
+		if ( bias ) *bias = -1.0f;
 	}
 	else if ( delta < 0.0f && delta >= -180.0f )
 	{
-		*distance = -delta;
-		*bias = -1.0f;
+		distance = -delta;
+		if ( bias ) *bias = -1.0f;
 	}
 	else
 	{
-		*distance = 360.0f + delta;
-		*bias = 1.0f;
+		distance = 360.0f + delta;
+		if ( bias) *bias = 1.0f;
 	}
+	return distance;
 }
 
 

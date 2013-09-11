@@ -1,0 +1,33 @@
+Game Design:
+Lee Thomason
+
+Programming:
+Lee Thomason
+
+2D Art:
+	Concept Art:
+	GT
+	Additional:
+	Johan
+
+	UI Elements: 
+	Lee Thomason
+
+	Faces, Rings:
+	GT
+
+3D Art:
+	World Rendering:
+	Lee Thomason
+
+	Structures:
+	Lee Thomason
+	GT
+
+	Creatures:
+	Lee Thomason
+	GT
+
+	Animation:
+	Lee Thomason
+

@@ -122,7 +122,6 @@ public:
 		                    const Chit* ignoreMe,
 							IChitAccept* filter );
 
-	// Use with caution: the array returned can change if a sub-function calls this.
 	void QuerySpatialHash(	CChitArray* arr,
 							const grinliz::Rectangle2F& r, 
 							const Chit* ignoreMe,

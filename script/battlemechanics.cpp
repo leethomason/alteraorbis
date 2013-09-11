@@ -458,17 +458,27 @@ Vector3F BattleMechanics::ComputeLeadingShot(	const grinliz::Vector3F& origin,
 }
 
 
-void BattleMechanics::GenerateExplosionMsgs( const DamageDesc& dd, const Vector3F& origin, int originID, Engine* engine, CDynArray<Chit*>* hashQuery )
+void BattleMechanics::GenerateExplosionMsgs( const DamageDesc& dd, const Vector3F& origin, int originID, Engine* engine, ChitBag* chitBag )
 {
-	Rectangle2F rect;
-	rect.Set( origin.x, origin.z, origin.x, origin.z );
-	rect.Outset( EXPLOSIVE_RANGE );
-	WorldScript::QueryChits( rect, engine, hashQuery );
+	Vector2F origin2 = { origin.x, origin.z };
+
+	CChitArray hashQuery;
+	ChitAcceptAll acceptAll;
+	chitBag->QuerySpatialHash( &hashQuery, origin2, EXPLOSIVE_RANGE, 0, &acceptAll );
 
 	GLLOG(( "<Explosion> (%.1f,%.1f,%.1f)\n", origin.x, origin.y, origin.z ));
-	for( int i=0; i<hashQuery->Size(); ++i ) {
+	//WorldMap* worldMap = engine->GetMap() ? engine->GetMap()->ToWorldMap() : 0;
+
+	for( int i=0; i<hashQuery.Size(); ++i ) {
 		Vector3F target = { 0, 0, 0 };
-		Chit* chit = (*hashQuery)[i];
+		Chit* chit = hashQuery[i];
+
+		// Check that the explosion doesn't go through walls, in a general quasi accurate way
+		// This doesn't work either - stops short of an unpathable target.
+		//Vector2F chit2 = chit->GetSpatialComponent()->GetPosition2D();
+		//if ( worldMap && !worldMap->HasStraightPath( origin2, chit2 )) {
+		//	continue;
+		//}
 
 		RenderComponent* rc = chit->GetRenderComponent();
 		if ( rc ) {

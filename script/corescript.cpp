@@ -216,7 +216,7 @@ int CoreScript::DoTick( U32 delta, U32 since )
 				defaultSpawn = StringPool::Intern( SPAWN[outland] );
 			}
 
-			float greater    = (float)(outland*outland) / (float)(40*256);
+			float greater    = (float)(outland*outland) / (float)(80*256);
 			static const float rat = 0.25f;
 			const char* spawn	   = 0;
 

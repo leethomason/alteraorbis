@@ -43,7 +43,7 @@ void relprintf( const char* format, ... );
 		void logprintf( const char* format, ... );
 		void WinDebugBreak();
 		
-		#define GLASSERT( x )		if ( !(x)) { _asm { int 3 } } //if ( !(x)) WinDebugBreak()
+		#define GLASSERT( x )			if ( !(x)) { _asm { int 3 } } //if ( !(x)) WinDebugBreak()
 		#define GLOUTPUT( x )		dprintf x
 		#define GLLOG( x )			logprintf x
 		#define GLOUTPUT_REL( x )	relprintf x

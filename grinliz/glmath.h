@@ -82,13 +82,13 @@ inline bool EqualInt( float a, float epsilon = EPSILON )
 	return Equal( (float)LRintf(a), a, epsilon );
 }
 
-/** The shortest path between 2 angles.
+/** The shortest path between 2 angles. (AngleBetween)
 	@param angle0	The first angle in degrees.
 	@param angle1	The second angle in degrees.
-	@param distance	The distance in degrees between the 2 angles - always positive.
 	@param bias		The direction of travel - either +1.0 or -1.0
+	@return distance	The distance in degrees between the 2 angles - always positive.
 */
-void MinDeltaDegrees( float angle0, float angle1, float* distance, float* bias );
+float MinDeltaDegrees( float angle0, float angle1, float* bias );
 
 inline float RotationXZDegrees( float x, float z ) {
 	return NormalizeAngleDegrees( ToDegree( atan2f( x, z )));
