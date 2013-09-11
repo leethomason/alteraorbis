@@ -68,7 +68,11 @@ Component* ComponentFactory::Factory( const char* name, Chit* chit ) const
 	else if ( StrEqual( name, "TrackingMoveComponent" )) {
 		return new TrackingMoveComponent( worldMap );
 	}
+	else if ( StrEqual( name, "PhysicsMoveComponent" )) {
+		return new PhysicsMoveComponent( worldMap, true );
+	}
 
 	GLASSERT( 0 );
+	GLOUTPUT_REL(( "%s", name ));
 	return 0;
 }
