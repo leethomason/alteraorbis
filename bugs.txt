@@ -32,7 +32,6 @@
 		x fix team logic
 		- build 2 height ice
 		- decent clear dragging
-		- external constant file
 		- visitors create energy, buildings consume energy
 		- factory
 		- turret
@@ -40,7 +39,7 @@
 		x procedural rendering colors
 			x weapon colors
 		- team colors
-		- cyclops explosion seems off
+		x cyclops explosion seems off
 		- balance battles
 	- Loot
 		- proc gun
@@ -52,6 +51,7 @@
 		- character screeen
 		x disable buttons on main ui when no game saved
 	- Fauna 2
+		- external constant file
 		- aging of stone
 		- consider moving ground to voxel gen system, so that ground can vary?
 		- teams. friend-enemy-neutral logic.
