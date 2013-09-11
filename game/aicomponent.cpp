@@ -834,7 +834,10 @@ Vector2F AIComponent::ThinkWanderFlock( const ComponentSet& thisComp )
 			pos.Push( v );
 		}
 	}
-	pos.Push( GetWanderOrigin( thisComp ) );	// the origin is a friend.
+	// Only consider the wander origin for workers.
+	if ( thisComp.item->flags & GameItem::AI_DOES_WORK ) {
+		pos.Push( GetWanderOrigin( thisComp ) );	// the origin is a friend.
+	}
 
 	// And plants are friends.
 	Rectangle2F r;
@@ -1064,23 +1067,24 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 			}
 		}
 	}
-	/*
-	FIXME: need to pick up gold. But need to make sure we have a valid, fast path.
-		   add a "straight line" check that doesn't hit the pather?
+
 	if ( dest.IsZero() ) {
 		// Is there stuff around to pick up?
-		if( thisComp.itemComponent->Pickup() == ItemComponent::GOLD_PICKUP ) {
+		if( itemFlags & GameItem::GOLD_PICKUP ) {
 			CChitArray gold;
-			parentChit->GetChitBag()->QuerySpatialHash( &gold, pos2, GOLD_AWARE, 0, LumosChitBag::GoldFilter );
+			GoldCrystalFilter filter;
+			parentChit->GetChitBag()->QuerySpatialHash( &gold, pos2, GOLD_AWARE, 0, &filter );
 
 			Vector2F goldPos;
-			if ( Closest( thisComp, gold.Mem(), gold.Size(), &goldPos, 0 ) ) {
+			if (    Closest( thisComp, gold.Mem(), gold.Size(), &goldPos, 0 )
+				 && map->HasStraightPath( goldPos, pos2 )) 
+			{
 				actionToTake = MOVE;
 				dest = goldPos;
 			}
 		}
 	}
-	*/
+
 	// Wander....
 	if ( dest.IsZero() ) {
 		if ( playerControlled ) {
@@ -1098,7 +1102,7 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 		bool sectorWander =		pmc
 							&& itemFlags & GameItem::AI_SECTOR_WANDER
 							&& thisComp.item
-							&& thisComp.item->HPFraction() > 0.98f
+							&& thisComp.item->HPFraction() > 0.90f
 							&& (thisComp.chit->random.Rand( GREATER_WANDER_ODDS ) == 0);
 
 		if ( sectorHerd || sectorWander ) 
