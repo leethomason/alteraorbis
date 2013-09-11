@@ -90,7 +90,7 @@ Scene* LumosGame::CreateScene( int id, SceneData* data )
 	case SCENE_LIVEPREVIEW:	scene = new LivePreviewScene( this, (const LivePreviewSceneData*)data );	break;
 	case SCENE_WORLDGEN:	scene = new WorldGenScene( this );			break;
 	case SCENE_GAME:		scene = new GameScene( this );				break;
-	case SCENE_CHARACTER:	scene = new CharacterScene( this );			break;
+	case SCENE_CHARACTER:	scene = new CharacterScene( this, (CharacterSceneData*)data );				break;
 
 	default:
 		GLASSERT( 0 );

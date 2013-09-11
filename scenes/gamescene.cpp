@@ -1,4 +1,5 @@
 #include "gamescene.h"
+#include "characterscene.h"
 
 #include "../xegame/chit.h"
 #include "../xegame/spatialcomponent.h"
@@ -127,9 +128,8 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	clearButton.SetSize( NEWS_BUTTON_WIDTH, NEWS_BUTTON_HEIGHT );
 	clearButton.SetText( "Clear" );
 
-	RenderAtom nullAtom;
-	faceImage.Init( &gamui2D, nullAtom, true );
-	faceImage.SetSize( 100, 100 );
+	faceButton.Init( &gamui2D, game->GetButtonLook(0) );
+	faceButton.SetSize( 100, 100 );
 	SetFace();
 
 	RenderAtom green = LumosGame::CalcPaletteAtom( 1, 3 );	
@@ -182,18 +182,19 @@ void GameScene::Resize()
 	const Screenport& port = lumosGame->GetScreenport();
 	minimap.SetPos( port.UIWidth()-MINI_MAP_SIZE, 0 );
 
-	faceImage.SetPos( minimap.X()-faceImage.Width(), 0 );
+	//faceImage.SetPos( minimap.X()-faceImage.Width(), 0 );
+	faceButton.SetPos( minimap.X()-faceButton.Width(), 0 );
 
-	layout.SetSize( faceImage.Width(), 10.0f );
+	layout.SetSize( faceButton.Width(), 10.0f );
 	layout.SetSpacing( 5.0f );
-	layout.SetOffset( faceImage.X(), faceImage.Y()+faceImage.Height() );
+	layout.SetOffset( faceButton.X(), faceButton.Y()+faceButton.Height() );
 	layout.SetGutter( 0, 5.0f );
 
 	layout.PosAbs( &healthBar,	0, 0 );
 	layout.PosAbs( &ammoBar,	0, 1 );
 	layout.PosAbs( &shieldBar,  0, 2 );
 
-	dateLabel.SetPos( faceImage.X()-faceImage.Width()*2.0f, 0 );
+	dateLabel.SetPos( faceButton.X()-faceButton.Width()*2.0f, 0 );
 	goldLabel.SetPos( dateLabel.X(), dateLabel.Y() + gamui2D.GetTextHeight() );
 	xpLabel.SetPos(   goldLabel.X(), goldLabel.Y() + gamui2D.GetTextHeight() );
 
@@ -222,15 +223,17 @@ void GameScene::SetFace()
 		RenderAtom procAtom( (const void*) (UIRenderer::RENDERSTATE_UI_CLIP_XFORM_MAP), 
 							 info.texture,
 							 info.te.uv.x, info.te.uv.y, info.te.uv.z, info.te.uv.w );
-		faceImage.SetAtom( procAtom );
-		faceImage.SetVisible( true );
+		faceButton.SetDeco( procAtom, procAtom );
+		faceButton.SetEnabled( true );
 
 		uiRenderer.uv[0]			= info.te.uv;
 		uiRenderer.uvClip[0]		= info.te.clip;
 		uiRenderer.colorXForm[0]	= info.color;
 	}
 	else {
-		faceImage.SetVisible( false );
+		RenderAtom nullAtom;
+		faceButton.SetDeco( nullAtom, nullAtom );
+		faceButton.SetEnabled( false );
 	}
 
 #if 0 
@@ -716,6 +719,12 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 			if ( cc ) {
 				cc->SetTrack( playerChit->ID() );
 			}
+		}
+	}
+	else if ( item == &faceButton ) {
+		Chit* playerChit = sim->GetPlayerChit();
+		if ( playerChit && playerChit->GetItemComponent() ) {			
+			game->PushScene( LumosGame::SCENE_CHARACTER, new CharacterSceneData( playerChit->GetItemComponent() ));
 		}
 	}
 

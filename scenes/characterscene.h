@@ -22,11 +22,21 @@
 
 class LumosGame;
 class Engine;
+class ItemComponent;
+
+
+class CharacterSceneData : public SceneData
+{
+public:
+	CharacterSceneData( ItemComponent* ic ) : SceneData(), itemComponent(ic) {}
+	ItemComponent* itemComponent;
+};
+
 
 class CharacterScene : public Scene
 {
 public:
-	CharacterScene( LumosGame* game );
+	CharacterScene( LumosGame* game, CharacterSceneData* itemComponent );
 	virtual ~CharacterScene();
 
 	virtual void Resize();
@@ -41,9 +51,16 @@ public:
 	virtual void Draw3D( U32 delatTime );
 
 private:
+	enum { 
+		NUM_ITEM_BUTTONS = 10
+	};
+	
+	LumosGame*		lumosGame;
+	Engine*			engine;
+	ItemComponent*	itemComponent;	// what item or inventory are we displaying?
+
 	gamui::PushButton okay;
-	LumosGame*	lumosGame;
-	Engine*		engine;
+	gamui::PushButton itemButton[NUM_ITEM_BUTTONS];
 };
 
 

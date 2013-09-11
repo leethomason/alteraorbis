@@ -120,7 +120,8 @@ private:
 	gamui::Image		minimap;
 	gamui::Image		playerMark;
 
-	gamui::Image		faceImage;
+	//gamui::Image		faceImage;
+	gamui::PushButton	faceButton;
 	gamui::DigitalBar	healthBar, ammoBar, shieldBar;
 
 	gamui::TextLabel	dateLabel;
