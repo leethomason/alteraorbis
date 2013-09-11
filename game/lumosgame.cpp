@@ -30,6 +30,7 @@
 #include "../scenes/livepreviewscene.h"
 #include "../scenes/worldgenscene.h"
 #include "../scenes/gamescene.h"
+#include "../scenes/characterscene.h"
 
 using namespace grinliz;
 using namespace gamui;
@@ -89,6 +90,7 @@ Scene* LumosGame::CreateScene( int id, SceneData* data )
 	case SCENE_LIVEPREVIEW:	scene = new LivePreviewScene( this, (const LivePreviewSceneData*)data );	break;
 	case SCENE_WORLDGEN:	scene = new WorldGenScene( this );			break;
 	case SCENE_GAME:		scene = new GameScene( this );				break;
+	case SCENE_CHARACTER:	scene = new CharacterScene( this );			break;
 
 	default:
 		GLASSERT( 0 );

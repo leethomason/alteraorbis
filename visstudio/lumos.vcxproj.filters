@@ -298,6 +298,9 @@
     <ClCompile Include="..\game\team.cpp">
       <Filter>Source Files\game</Filter>
     </ClCompile>
+    <ClCompile Include="..\scenes\characterscene.cpp">
+      <Filter>Source Files\scenes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\camera.h">
@@ -602,6 +605,9 @@
     </ClInclude>
     <ClInclude Include="..\game\visitorstatecomponent.h">
       <Filter>Source Files\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\scenes\characterscene.h">
+      <Filter>Source Files\scenes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

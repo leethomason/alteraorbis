@@ -45,7 +45,8 @@ public:
 		SCENE_ANIMATION,
 		SCENE_LIVEPREVIEW,
 		SCENE_WORLDGEN,
-		SCENE_GAME
+		SCENE_GAME,
+		SCENE_CHARACTER
 	};
 
 	virtual Scene* CreateScene( int id, SceneData* data );
