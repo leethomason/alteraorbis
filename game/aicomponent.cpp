@@ -751,6 +751,7 @@ void AIComponent::ThinkRockBreak( const ComponentSet& thisComp )
 	}
 	bool lineOfSight = rangedWeapon && LineOfSight( thisComp, targetDesc.mapPos );
 	if ( lineOfSight && rangedWeapon->GetItem()->CanUse() ) {
+		GLASSERT( targetDesc.HasTarget() );
 		currentAction = SHOOT;
 		return;
 	}
