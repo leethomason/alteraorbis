@@ -55,7 +55,7 @@ public:
 	virtual int DoTick( U32 delta, U32 since );
 	virtual void OnChitEvent( const ChitEvent& event );
 
-	GameItem* GetItem() { return &mainItem; }
+	GameItem* GetItem( int index=0 ) { return (index < itemArr.Size()) ? itemArr[index] : 0; }
 	// Is carrying anything - primarily a query for the animation system.
 	GameItem* IsCarrying();
 	bool SwapWeapons();	// swap between the melee and ranged weapons

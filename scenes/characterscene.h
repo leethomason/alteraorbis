@@ -51,6 +51,8 @@ public:
 	virtual void Draw3D( U32 delatTime );
 
 private:
+	void SetButtonText();
+
 	enum { 
 		NUM_ITEM_BUTTONS = 10
 	};
@@ -58,9 +60,10 @@ private:
 	LumosGame*		lumosGame;
 	Engine*			engine;
 	ItemComponent*	itemComponent;	// what item or inventory are we displaying?
+	Model*			model;
 
 	gamui::PushButton okay;
-	gamui::PushButton itemButton[NUM_ITEM_BUTTONS];
+	gamui::ToggleButton itemButton[NUM_ITEM_BUTTONS];
 };
 
 
