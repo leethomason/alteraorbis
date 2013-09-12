@@ -7,18 +7,19 @@
 using namespace gamui;
 using namespace grinliz;
 
-CharacterScene::CharacterScene( LumosGame* game, CharacterSceneData* csd ) : Scene( game )
+static const float NEAR = 0.1f;
+static const float FAR  = 10.0f;
+
+CharacterScene::CharacterScene( LumosGame* game, CharacterSceneData* csd ) : Scene( game ), screenport( game->GetScreenport() )
 {
 	this->lumosGame = game;
 	this->itemComponent = csd->itemComponent;
 	model = 0;
 
-	Screenport* port = game->GetScreenportMutable();
-	engine = new Engine( port, lumosGame->GetDatabase(), 0 );
+	screenport.SetNearFar( NEAR, FAR );
+	engine = new Engine( &screenport, lumosGame->GetDatabase(), 0 );
 	engine->SetGlow( true );
 	engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
-
-
 
 	game->InitStd( &gamui2D, &okay, 0 );
 
@@ -26,7 +27,13 @@ CharacterScene::CharacterScene( LumosGame* game, CharacterSceneData* csd ) : Sce
 		itemButton[i].Init( &gamui2D, lumosGame->GetButtonLook(0) );
 		itemButton[0].AddToToggleGroup( &itemButton[i] );
 	}
-	SetButtonText();
+	for( int i=0; i<NUM_TEXT_KV; ++i ) {
+		textKey[i].Init( &gamui2D );
+		textVal[i].Init( &gamui2D );
+
+		textKey[i].SetText( "key" );
+		textVal[i].SetText( "value" );
+	}
 
 	engine->lighting.direction.Set( 0, 1, 1 );
 	engine->lighting.direction.Normalize();
@@ -64,6 +71,12 @@ void CharacterScene::Resize()
 			col = 0;
 		}
 	}
+
+	layout.SetSize( layout.Width(), layout.Height()*0.5f );
+	for( int i=0; i<NUM_TEXT_KV; ++i ) {
+		layout.PosAbs( &textKey[i], -4, i );
+		layout.PosAbs( &textVal[i], -2, i );
+	}
 }
 
 
@@ -90,7 +103,12 @@ void CharacterScene::SetButtonText()
 		if ( !model ) {
 			model = engine->AllocModel( down->ResourceName() );
 			model->SetPos( 0,0,0 );
-			engine->CameraLookAt( engine->camera.PosWC(), model->AABB().Center() );
+
+			Rectangle3F aabb = model->AABB();
+			float size = Max( aabb.SizeX(), Max( aabb.SizeY(), aabb.SizeZ() ));
+			float d = 1.5f + size;
+			engine->camera.SetPosWC( d, d, d );
+			engine->CameraLookAt( engine->camera.PosWC(), aabb.Center() );
 
 			if ( !down->GetValue( "procedural" ).empty() ) {
 				ProcRenderInfo info;
@@ -122,6 +140,9 @@ void CharacterScene::DoTick( U32 deltaTime )
 	
 void CharacterScene::Draw3D( U32 deltaTime )
 {
+	// we use our own screenport
+	screenport.SetPerspective();
 	engine->Draw( deltaTime, 0, 0 );
+	screenport.SetUI();
 }
 

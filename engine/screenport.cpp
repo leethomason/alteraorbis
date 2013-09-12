@@ -27,6 +27,8 @@ using namespace grinliz;
 Screenport::Screenport( int w, int h, int virtualHeight )
 {
 	this->virtualHeight = (float)virtualHeight;
+	this->near = EL_NEAR;
+	this->far  = EL_FAR;
 	Resize( w, h );
 	uiMode = false;
 	orthoCamera = false;
@@ -85,11 +87,11 @@ void Screenport::SetPerspective()
 	uiMode = false;
 
 	GLASSERT( uiMode == false );
-	GLASSERT( EL_NEAR > 0.0f );
-	GLASSERT( EL_FAR > EL_NEAR );
+	GLASSERT( near > 0.0f );
+	GLASSERT( far > near );
 
-	frustum.zNear = EL_NEAR;
-	frustum.zFar  = EL_FAR;
+	frustum.zNear = near;
+	frustum.zFar  = far;
 
 	// Convert from the FOV to the half angle.
 	float theta = ToRadian( EL_FOV * 0.5f );

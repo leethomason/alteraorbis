@@ -53,6 +53,9 @@ class Screenport
 public:
 	Screenport( int width, int height, int virtualHeight ); 
 
+	// Needs to be set before engine is set up
+	void SetNearFar( float n, float f ) { near = n; far = f; GLASSERT( far > near ); }
+
 	void Resize( int w, int h );
 	float UIAspectRatio()		{ return UIHeight() / UIWidth(); }
 
@@ -81,6 +84,8 @@ public:
 
 	// Set the perspective PROJECTION.
 	void SetPerspective();
+	float Near() const { return near; }
+	float Far() const { return far; }
 
 	// Uses an ortho camera in perspective mode. Either the width or height should be
 	// 0, and the other will be calculated.
@@ -118,6 +123,8 @@ private:
 	float screenWidth; 
 	float screenHeight;		// if rotation==0, 320
 	float virtualHeight;	// used to be 320. Used for UI layout.
+	float near;
+	float far;
 
 	float physicalWidth;
 	float physicalHeight;

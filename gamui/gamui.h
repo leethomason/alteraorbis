@@ -902,6 +902,9 @@ public:
 	LayoutCalculator( float screenWidth, float screenHeight );
 	~LayoutCalculator();
 
+	float Width() const									{ return width; }
+	float Height() const								{ return height; }
+
 	void SetSize( float width, float height )			{ this->width = width; this->height = height; }
 	void SetGutter( float gutterX, float gutterY )		{ this->gutterX = gutterX; this->gutterY = gutterY; }
 	void SetSpacing( float spacing )					{ this->spacingX = this->spacingY = spacing; }

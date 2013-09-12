@@ -19,6 +19,7 @@
 #include "../xegame/scene.h"
 #include "../gamui/gamui.h"
 #include "../grinliz/glcontainer.h"
+#include "../engine/screenport.h"
 
 class LumosGame;
 class Engine;
@@ -54,7 +55,8 @@ private:
 	void SetButtonText();
 
 	enum { 
-		NUM_ITEM_BUTTONS = 10
+		NUM_ITEM_BUTTONS = 10,
+		NUM_TEXT_KV = 8
 	};
 	
 	LumosGame*		lumosGame;
@@ -62,8 +64,11 @@ private:
 	ItemComponent*	itemComponent;	// what item or inventory are we displaying?
 	Model*			model;
 
+	Screenport		screenport;
 	gamui::PushButton okay;
 	gamui::ToggleButton itemButton[NUM_ITEM_BUTTONS];
+	gamui::TextLabel textKey[NUM_TEXT_KV];
+	gamui::TextLabel textVal[NUM_TEXT_KV];
 };
 
 
