@@ -339,7 +339,11 @@ bool PathMoveComponent::AvoidOthers( U32 delta )
 		for( int i=0; i<chitArr.Size(); ++i ) {
 			Chit* chit = chitArr[i];
 			GLASSERT( chit != parentChit );
-			
+
+			if ( !chit->GetMoveComponent()->ShouldAvoid() ) {
+				continue;
+			}
+
 			Vector3F itPos3 = chit->GetSpatialComponent()->GetPosition();
 			float itRadius  = chit->GetRenderComponent()->RadiusOfBase(); 
 

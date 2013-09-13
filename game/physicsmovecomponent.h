@@ -72,6 +72,8 @@ public:
 	virtual void CalcVelocity( grinliz::Vector3F* v );
 
 	void SetTarget( int chitID )	{ target = chitID; }
+	virtual bool ShouldAvoid() const			{ return false; }
+
 
 private:
 	int target;
