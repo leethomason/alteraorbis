@@ -170,7 +170,8 @@ void PathMoveComponent::ComputeDest()
 	     || queued.pos.x <= 0 || queued.pos.y <= 0 
 		 || queued.pos.x >= (float)map->Width() || queued.pos.y >= (float)map->Height() ) 
 	{
-		this->Stop();
+		this->Clear();
+		parentChit->SendMessage( ChitMsg( ChitMsg::PATHMOVE_DESTINATION_BLOCKED ), this ); 
 		return;
 	}
 

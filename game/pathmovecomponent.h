@@ -68,6 +68,7 @@ public:
 	const grinliz::Vector2F& DestPos() const { return dest.pos; }
 
 	void Stop()				{ SetNoPath(); }
+	void Clear()			{ Stop(); queued.Clear(); }
 	bool Stopped() const	{ return !HasPath() && queued.pos.x < 0; }
 
 	void SetPathDebugging( bool d )	{ pathDebugging = d; }
