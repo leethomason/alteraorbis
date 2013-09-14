@@ -24,6 +24,8 @@
 #include "../xegame/chit.h"
 #include "../xegame/istringconst.h"
 
+#include "../script/battlemechanics.h"
+
 using namespace grinliz;
 using namespace tinyxml2;
 
@@ -426,7 +428,7 @@ void GameItem::Apply( const GameItem* intrinsic )
 }
 
 
-void GameItem::AbsorbDamage( bool inInventory, DamageDesc dd, DamageDesc* remain, const char* log )
+void GameItem::AbsorbDamage( bool inInventory, DamageDesc dd, DamageDesc* remain, const char* log, const IMeleeWeaponItem* booster )
 {
 	float absorbed = 0;
 	int   effect = dd.effects;
@@ -446,11 +448,18 @@ void GameItem::AbsorbDamage( bool inInventory, DamageDesc dd, DamageDesc* remain
 		if ( ToShield() ) {
 			reload.ResetUnready();
 			absorbed = Min( dd.damage * absorbsDamage, (float)rounds );
-			rounds -= LRintf( absorbed );
-			// Shock does extra damage to shields.
-			if ( effect & EFFECT_SHOCK ) {
-				rounds -= LRintf( absorbed * 0.5f );
+			
+			float cost = absorbed;
+			if ( effect & EFFECT_SHOCK ) cost *= 0.5f;
+			if ( booster ) {
+				float boost = BattleMechanics::ComputeShieldBoost( booster );
+				if ( boost > 1.0f ) {
+					cost /= boost;
+				}
 			}
+
+			rounds -= LRintf( cost );
+
 			if ( rounds < 0 ) rounds = 0;
 
 			// If the shield still has power, remove the effect.

@@ -53,6 +53,8 @@ public:
 	// Assuming effective range.
 	// 'contiuous' if true, accounts for clip reload time.
 	static float RangedDPTU( const IRangedWeaponItem* weapon, bool continuous );
+
+	static float ComputeShieldBoost( const IMeleeWeaponItem* weapon );
 	
 	// Shooting ------------------- //
 	static void Shoot(	ChitBag* bag, 

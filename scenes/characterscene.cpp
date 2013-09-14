@@ -81,19 +81,8 @@ void CharacterScene::Resize()
 
 void CharacterScene::SetItemInfo( const GameItem* item, const GameItem* user )
 {
-	static const char* keyText[NUM_TEXT_KV] = {
-		"Name",
-		"ID",
-		"Level",
-		"XP",
-		"Strength",
-		"Will",
-		"Charisma",
-		"Intelligence",
-		"Dexterity"
-	};
 	for( int i=0; i<NUM_TEXT_KV; ++i ) {
-		textKey[i].SetText( keyText[i] );
+		textKey[i].SetText( "" );
 		textVal[i].SetText( "" );
 	}
 
@@ -104,15 +93,19 @@ void CharacterScene::SetItemInfo( const GameItem* item, const GameItem* user )
 
 	str.Format( "%s", "name" );
 	textVal[KV_NAME].SetText( str.c_str() );
+	textKey[KV_NAME].SetText( "Name" );
 
 	str.Format( "%d", item->id );
 	textVal[KV_ID].SetText( str.c_str() );
+	textKey[KV_ID].SetText( "ID" );
 
 	str.Format( "%d", item->stats.Level() );
 	textVal[KV_LEVEL].SetText( str.c_str() );
+	textKey[KV_LEVEL].SetText( "Level" );
 
 	str.Format( "%d", item->stats.Experience() );
 	textVal[KV_XP].SetText( str.c_str() );
+	textKey[KV_XP].SetText( "XP" );
 
 	/*			Ranged		Melee	Shield
 		STR		Dam			Dam		Capacity
@@ -122,9 +115,9 @@ void CharacterScene::SetItemInfo( const GameItem* item, const GameItem* user )
 		DEX		Melee D/TU	x		x
 	*/
 
+	int i = KV_STR;
 	if ( item->ToRangedWeapon() ) {
-		int i = KV_STR;
-		textKey[i].SetText( "Damage" );
+		textKey[i].SetText( "Ranged Damage" );
 		str.Format( "%.1f", item->stats.Damage() * item->rangedDamage );
 		textVal[i++].SetText( str.c_str() );
 
@@ -140,16 +133,9 @@ void CharacterScene::SetItemInfo( const GameItem* item, const GameItem* user )
 		textKey[i].SetText( "Ranged D/TU" );
 		str.Format( "%.1f", BattleMechanics::RangedDPTU( item->ToRangedWeapon(), false ));
 		textVal[i++].SetText( str.c_str() );
-
-		if ( item->ToMeleeWeapon() ) {
-			textKey[i].SetText( "Melee D/TU" );
-			str.Format( "%.1f", BattleMechanics::MeleeDPTU( user, item->ToMeleeWeapon() ));
-			textVal[i++].SetText( str.c_str() );
-		}
 	}
-	else if ( item->ToMeleeWeapon() ) {
-		int i = KV_STR;
-		textKey[i].SetText( "Damage" );
+	if ( item->ToMeleeWeapon() ) {
+		textKey[i].SetText( "Melee Damage" );
 		DamageDesc dd;
 		BattleMechanics::CalcMeleeDamage( user, item->ToMeleeWeapon(), &dd );
 		str.Format( "%.1f", dd.damage );
@@ -159,12 +145,14 @@ void CharacterScene::SetItemInfo( const GameItem* item, const GameItem* user )
 		str.Format( "%.1f", BattleMechanics::MeleeDPTU( user, item->ToMeleeWeapon() ));
 		textVal[i++].SetText( str.c_str() );
 
-		for ( ; i<NUM_TEXT_KV; ++i ) {
-			textKey[i].SetText( "" );
+		float boost = BattleMechanics::ComputeShieldBoost( item->ToMeleeWeapon() );
+		if ( boost > 1.0f ) {
+			textKey[i].SetText( "Shield Boost" );
+			str.Format( "%.1f", boost );
+			textVal[i++].SetText( str.c_str() );
 		}
 	}
-	else if ( item->ToShield() ) {
-		int i = KV_STR;
+	if ( item->ToShield() ) {
 		textKey[i].SetText( "Capacity" );
 		str.Format( "%d", item->clipCap );
 		textVal[i++].SetText( str.c_str() );
@@ -172,25 +160,27 @@ void CharacterScene::SetItemInfo( const GameItem* item, const GameItem* user )
 		textKey[i].SetText( "Reload" );
 		str.Format( "%.1f", 0.001f * (float)item->reload.Threshold() );
 		textVal[i++].SetText( str.c_str() );
-
-		for ( ; i<NUM_TEXT_KV; ++i ) {
-			textKey[i].SetText( "" );
-		}
 	}
-	else {
+
+	if ( !(item->ToMeleeWeapon() || item->ToShield() || item->ToRangedWeapon() )) {
 		str.Format( "%d", item->stats.Strength() );
+		textKey[KV_STR].SetText( "Strength" );
 		textVal[KV_STR].SetText( str.c_str() );
 
 		str.Format( "%d", item->stats.Will() );
+		textKey[KV_WILL].SetText( "Will" );
 		textVal[KV_WILL].SetText( str.c_str() );
 
 		str.Format( "%d", item->stats.Charisma() );
+		textKey[KV_CHR].SetText( "Charisma" );
 		textVal[KV_CHR].SetText( str.c_str() );
 
 		str.Format( "%d", item->stats.Intelligence() );
+		textKey[KV_INT].SetText( "Intelligence" );
 		textVal[KV_INT].SetText( str.c_str() );
 
 		str.Format( "%d", item->stats.Dexterity() );
+		textKey[KV_DEX].SetText( "Dexterity" );
 		textVal[KV_DEX].SetText( str.c_str() );
 	}
 }

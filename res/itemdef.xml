@@ -224,7 +224,8 @@
         flags="MELEE_WEAPON"
 		    procedural="ring"
         hardpoint="trigger"
-        meleeDamage="1.4">
+        meleeDamage="1.4"
+        shieldBoost="1">
   </item>
   
   <item name="blaster"

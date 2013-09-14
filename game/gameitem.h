@@ -499,7 +499,7 @@ public:
 	}
 
 	// Absorb damage.'remain' is how much damage passes through the shield
-	void AbsorbDamage( bool inInventory, DamageDesc dd, DamageDesc* remain, const char* log );
+	void AbsorbDamage( bool inInventory, DamageDesc dd, DamageDesc* remain, const char* log, const IMeleeWeaponItem* booster );
 
 private:
 	float Delta( U32 delta, float v ) {

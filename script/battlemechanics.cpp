@@ -446,6 +446,19 @@ float BattleMechanics::MeleeDPTU( const GameItem* wielder, const IMeleeWeaponIte
 }
 
 
+float BattleMechanics::ComputeShieldBoost( const IMeleeWeaponItem* weapon )
+{
+	const GameItem* item = weapon->GetItem();
+	float value = 0;
+	item->GetValue( "shieldBoost", &value ); 
+	if ( value ) {
+		float boost = value * item->stats.NormalLeveledTrait( GameStat::CHR );
+		return Max( boost, 1.0f );
+	}
+	return 0;
+}
+
+
 float BattleMechanics::RangedDPTU( const IRangedWeaponItem* _weapon, bool continuous )
 {
 	const GameItem* weapon = _weapon->GetItem();

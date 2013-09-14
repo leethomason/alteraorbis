@@ -262,7 +262,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		for( int i=itemArr.Size()-1; i>=0; --i ) {
 			if ( i==0 || ItemActive(i) ) {
 				DamageDesc dd = ddorig;
-				itemArr[i]->AbsorbDamage( i>0, dd, &dd, "DAMAGE" );
+				itemArr[i]->AbsorbDamage( i>0, dd, &dd, "DAMAGE", this->GetMeleeWeapon() );
 
 				if ( itemArr[i]->ToShield() ) {
 					GameItem* shield = itemArr[i]->ToShield()->GetItem();

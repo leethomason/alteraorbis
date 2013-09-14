@@ -24,8 +24,9 @@ x SectorHerd seems a little aggressive. Switch over to using ForceCount, check c
 - SpatialHash: one stressed structure.
 	- MOB list (FE determination)
 	- Building list (FE determination)
-- Shield should absorb more with XP (and fix character screen to reflect this)
-- Add position fuzz to gold, crystal, and item drops
+x Shield should absorb more with XP (and fix character screen to reflect this)
+- is shield boost working correctly? Effects are *not* getting stripped by the shield.
+x Add position fuzz to gold, crystal, and item drops
 
 - game
 
