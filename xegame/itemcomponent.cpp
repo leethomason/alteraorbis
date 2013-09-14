@@ -37,20 +37,43 @@
 using namespace grinliz;
 
 
-ItemComponent::ItemComponent( Engine* _engine, WorldMap* wm, const GameItem& _item ) 
-	: engine(_engine), worldMap(wm), mainItem(_item), slowTick( 500 )
+ItemComponent::ItemComponent( Engine* _engine, WorldMap* wm, const GameItem& item ) 
+	: engine(_engine), worldMap(wm), slowTick( 500 )
 {
-	itemArr.Push( &mainItem );	
+	GLASSERT( !item.name.empty() );
+	itemArr.Push( new GameItem( item ) );	
+}
+
+
+ItemComponent::ItemComponent( Engine* _engine, WorldMap* wm, GameItem* item ) 
+	: engine(_engine), worldMap(wm), slowTick( 500 )
+{
+	// item can be null if loading.
+	if ( item ) {
+		GLASSERT( !item->name.empty() );
+		itemArr.Push( item );	
+	}
 }
 
 
 ItemComponent::~ItemComponent()
 {
-	for( int i=1; i<itemArr.Size(); ++i ) {
+	for( int i=0; i<itemArr.Size(); ++i ) {
 		delete itemArr[i];
 	}
 }
 
+
+void ItemComponent::DebugStr( grinliz::GLString* str )
+{
+	const GameItem* item = itemArr[0];
+	str->Format( "[Item] %s hp=%.1f/%d lvl=%d", item->Name(), item->hp, item->TotalHP(), item->stats.Level() );
+	if ( !wallet.IsEmpty() ) {
+		str->Format( "Au=%d Cy=g%dr%db%dv%d ", wallet.gold, 
+				        wallet.crystal[CRYSTAL_GREEN], wallet.crystal[CRYSTAL_RED], 
+						wallet.crystal[CRYSTAL_BLUE],  wallet.crystal[CRYSTAL_VIOLET]);
+	}
+}
 
 
 void ItemComponent::Serialize( XStream* xs )
@@ -60,14 +83,14 @@ void ItemComponent::Serialize( XStream* xs )
 	XARC_SER( xs, nItems );
 
 	if ( xs->Loading() ) {
-		GLASSERT( itemArr.Size() == 1 );
-		for ( int i=1; i<nItems; ++i  ) {
+		for ( int i=0; i<nItems; ++i  ) {
 			GameItem* pItem = new GameItem();	
 			itemArr.Push( pItem );
 		}
 	}
 	for( int i=0; i<nItems; ++i ) {
 		itemArr[i]->Serialize( xs );
+		GLASSERT( !itemArr[i]->name.empty() );
 	}
 
 	wallet.Serialize( xs );
@@ -94,12 +117,13 @@ void ItemComponent::AddGold( const Wallet& w )
 
 void ItemComponent::AddBattleXP( bool isMelee, int killshotLevel )
 {
-	int level = mainItem.stats.Level();
-	mainItem.stats.AddBattleXP( killshotLevel );
-	if ( mainItem.stats.Level() > level ) {
+	GameItem* mainItem = itemArr[0];
+	int level = mainItem->stats.Level();
+	mainItem->stats.AddBattleXP( killshotLevel );
+	if ( mainItem->stats.Level() > level ) {
 		// Level up!
 		// FIXME: show an icon
-		mainItem.hp = mainItem.TotalHPF();
+		mainItem->hp = mainItem->TotalHPF();
 	}
 
 	GameItem* weapon = 0;
@@ -153,7 +177,8 @@ bool ItemComponent::ItemActive( int i )
 	}
 
 	// It needs a hardpoint. Is it on the hardpoint?
-	const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( mainItem.resource.c_str(), false );
+	const GameItem* mainItem = itemArr[0];
+	const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( mainItem->resource.c_str(), false );
 	if ( !res ) {
 		// No visual representation??
 		GLASSERT( 0 );
@@ -181,6 +206,9 @@ bool ItemComponent::ItemActive( int i )
 
 void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {
+	GameItem* mainItem = itemArr[0];
+	GLASSERT( !mainItem->name.empty() );
+
 	if ( msg.ID() == ChitMsg::CHIT_DAMAGE ) {
 		parentChit->SetTickNeeded();
 
@@ -202,7 +230,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 				v.Normalize();
 
 				//bool knockback = dd.damage > (mainItem.TotalHP() *0.25f);
-				bool knockback = ddorig.damage > (mainItem.TotalHP() *0.25f);
+				bool knockback = ddorig.damage > (mainItem->TotalHP() *0.25f);
 
 				// Ony apply for phyisics or pathmove
 				PhysicsMoveComponent* physics  = GET_SUB_COMPONENT( parentChit, MoveComponent, PhysicsMoveComponent );
@@ -226,7 +254,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			}
 		}
 
-		GLLOG(( "Chit %3d '%s' (origin=%d) ", parentChit->ID(), mainItem.Name(), info->originID ));
+		GLLOG(( "Chit %3d '%s' (origin=%d) ", parentChit->ID(), mainItem->Name(), info->originID ));
 
 		// Run through the inventory, looking for modifiers.
 		// Be cautious there is no order dependency here (except the
@@ -260,8 +288,8 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		int originID = info->originID;
 		Chit* origin = GetChitBag()->GetChit( originID );
 		if ( origin && origin->GetItemComponent() ) {
-			bool killshot = mainItem.hp == 0 && !(mainItem.flags & GameItem::INDESTRUCTABLE);
-			origin->GetItemComponent()->AddBattleXP( info->isMelee, killshot ? mainItem.stats.Level() : 0 ); 
+			bool killshot = mainItem->hp == 0 && !(mainItem->flags & GameItem::INDESTRUCTABLE);
+			origin->GetItemComponent()->AddBattleXP( info->isMelee, killshot ? mainItem->stats.Level() : 0 ); 
 		}
 
 	}
@@ -270,9 +298,9 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		float heal = msg.dataF;
 		GLASSERT( heal >= 0 );
 
-		mainItem.hp += heal;
-		if ( mainItem.hp > mainItem.TotalHPF() ) {
-			mainItem.hp = mainItem.TotalHPF();
+		mainItem->hp += heal;
+		if ( mainItem->hp > mainItem->TotalHPF() ) {
+			mainItem->hp = mainItem->TotalHPF();
 		}
 
 		if ( parentChit->GetSpatialComponent() ) {
@@ -285,7 +313,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		GoldCrystalFilter filter;
 		if (    filter.Accept( gold )		// it really is gold/crystal
 			 && gold->GetItemComponent()	// it has an item component
-			 && mainItem.hp > 0 )			// this item is alive
+			 && mainItem->hp > 0 )			// this item is alive
 		{
 			wallet.Add( gold->GetItemComponent()->GetWallet() );
 			gold->GetItemComponent()->EmptyWallet();
@@ -308,7 +336,8 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 				break;
 			}
 			GameItem* item = itemArr.Pop();
-			parentChit->GetLumosChitBag()->NewItemChit( pos, item );
+			GLASSERT( !item->name.empty() );
+			parentChit->GetLumosChitBag()->NewItemChit( pos, item, true, true );
 		}
 	}
 	else {
@@ -346,16 +375,17 @@ void ItemComponent::OnChitEvent( const ChitEvent& event )
 
 void ItemComponent::DoSlowTick()
 {
+	GameItem* mainItem = itemArr[0];
 	// Look around for fire or shock spread.
-	if ( mainItem.accruedFire > 0 || mainItem.accruedShock > 0 ) {
+	if ( mainItem->accruedFire > 0 || mainItem->accruedShock > 0 ) {
 		SpatialComponent* sc = parentChit->GetSpatialComponent();
 		if ( sc ) {
-			if ( mainItem.accruedFire ) {
-				ChitEvent event = ChitEvent::EffectEvent( sc->GetPosition2D(), EFFECT_RADIUS, GameItem::EFFECT_FIRE, mainItem.accruedFire );
+			if ( mainItem->accruedFire ) {
+				ChitEvent event = ChitEvent::EffectEvent( sc->GetPosition2D(), EFFECT_RADIUS, GameItem::EFFECT_FIRE, mainItem->accruedFire );
 				GetChitBag()->QueueEvent( event );
 			}
-			if ( mainItem.accruedShock ) {
-				ChitEvent event = ChitEvent::EffectEvent( sc->GetPosition2D(), EFFECT_RADIUS, GameItem::EFFECT_SHOCK, mainItem.accruedShock );
+			if ( mainItem->accruedShock ) {
+				ChitEvent event = ChitEvent::EffectEvent( sc->GetPosition2D(), EFFECT_RADIUS, GameItem::EFFECT_SHOCK, mainItem->accruedShock );
 				GetChitBag()->QueueEvent( event );
 			}
 		}
@@ -365,6 +395,7 @@ void ItemComponent::DoSlowTick()
 
 int ItemComponent::DoTick( U32 delta, U32 since )
 {
+	GameItem* mainItem = itemArr[0];
 	if ( slowTick.Delta( since )) {
 		DoSlowTick();
 	}
@@ -374,7 +405,7 @@ int ItemComponent::DoTick( U32 delta, U32 since )
 		tick = Min( t, tick );
 
 		if (    ( i==0 || ItemActive(i) ) 
-			 && EmitEffect( mainItem, delta )) 
+			 && EmitEffect( *mainItem, delta )) 
 		{
 			tick = 0;
 		}
@@ -383,7 +414,7 @@ int ItemComponent::DoTick( U32 delta, U32 since )
 
 	static const float PICKUP_RANGE = 1.0f;
 
-	if ( mainItem.flags & GameItem::GOLD_PICKUP ) {
+	if ( mainItem->flags & GameItem::GOLD_PICKUP ) {
 		ComponentSet thisComp( parentChit, Chit::SPATIAL_BIT | ComponentSet::IS_ALIVE );
 		if ( thisComp.okay ) {
 			CChitArray arr;
@@ -410,13 +441,14 @@ int ItemComponent::DoTick( U32 delta, U32 since )
 
 void ItemComponent::OnAdd( Chit* chit )
 {
+	GameItem* mainItem = itemArr[0];
 	GLASSERT( itemArr.Size() >= 1 );	// the one true item
 	super::OnAdd( chit );
-	GLASSERT( !mainItem.parentChit );
-	mainItem.parentChit = parentChit;
+	GLASSERT( !mainItem->parentChit );
+	mainItem->parentChit = parentChit;
 
 	if ( parentChit->GetLumosChitBag() ) {
-		IString mob = mainItem.GetValue( "mob" );
+		IString mob = mainItem->GetValue( "mob" );
 		if ( mob == "normal" ) {
 			parentChit->GetLumosChitBag()->census.normalMOBs += 1;
 		}
@@ -429,8 +461,9 @@ void ItemComponent::OnAdd( Chit* chit )
 
 void ItemComponent::OnRemove() 
 {
+	GameItem* mainItem = itemArr[0];
 	if ( parentChit->GetLumosChitBag() ) {
-		IString mob = mainItem.GetValue( "mob" );
+		IString mob = mainItem->GetValue( "mob" );
 		if ( mob == "normal" ) {
 			parentChit->GetLumosChitBag()->census.normalMOBs -= 1;
 		}
@@ -439,8 +472,8 @@ void ItemComponent::OnRemove()
 		}
 	}
 
-	GLASSERT( mainItem.parentChit == parentChit );
-	mainItem.parentChit = 0;
+	GLASSERT( mainItem->parentChit == parentChit );
+	mainItem->parentChit = 0;
 	super::OnRemove();
 }
 
@@ -609,7 +642,7 @@ void ItemComponent::SetHardpoints()
 			if ( !proc.empty() ) {
 				AssignProcedural( proc.c_str(), female, item->id, team, false, item->Effects(), &info );
 			}
-			rc->SetProcedural( itemArr[i]->hardpoint, info );
+			rc->SetProcedural( (i==0) ? 0 : itemArr[i]->hardpoint, info );
 		}
 	}
 }

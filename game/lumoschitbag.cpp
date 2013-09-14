@@ -271,8 +271,8 @@ Chit* LumosChitBag::NewCrystalChit( const grinliz::Vector3F& pos, int crystal, b
 {
 	Vector2F v2 = { pos.x, pos.z };
 	if ( fuzz ) {
-		v2.x += random.Uniform11() * 0.2f;
-		v2.y += random.Uniform11() * 0.2f;
+		v2.x = floorf(pos.x) + random.Uniform();
+		v2.y = floorf(pos.y) + random.Uniform();
 	}
 
 	const char* name = 0;
@@ -308,13 +308,33 @@ void LumosChitBag::NewWalletChits( const grinliz::Vector3F& pos, const Wallet& w
 }
 
 
-Chit* LumosChitBag::NewItemChit( const grinliz::Vector3F& pos, GameItem* orphanItem )
+Chit* LumosChitBag::NewItemChit( const grinliz::Vector3F& _pos, GameItem* orphanItem, bool fuzz, bool onGround )
 {
+	GLASSERT( !orphanItem->Intrinsic() );
+	GLASSERT( !orphanItem->resource.empty() );
+
+	Vector3F pos = _pos;
+	if ( fuzz ) {
+		pos.x = floorf(pos.x) + random.Uniform();
+		pos.z = floorf(pos.z) + random.Uniform();
+	}
+
 	Chit* chit = this->NewChit();
 	chit->Add( new SpatialComponent());
-	chit->Add( new ItemComponent( engine, worldMap, orphanItem );
-	chit->Add( new RenderComponent( engine, chit->GetItem()->ResourceName() ));
+	chit->Add( new ItemComponent( engine, worldMap, orphanItem ));
+	chit->Add( new RenderComponent( engine, orphanItem->ResourceName() ));
+
+	if ( onGround ) {
+		const ModelResource* res = chit->GetRenderComponent()->MainResource();
+		Rectangle3F aabb = res->AABB();
+		pos.y = -aabb.min.y;
+
+		if ( aabb.SizeY() < 0.1f ) {
+			pos.y += 0.1f;
+		}
+	}
 	chit->GetSpatialComponent()->SetPosition( pos );
+	chit->GetItemComponent()->SetHardpoints();
 	return chit;
 }
 

@@ -40,15 +40,7 @@ public:
 	virtual const char* Name() const { return "ItemComponent"; }
 	virtual ItemComponent* ToItemComponent() { return this; }
 
-	virtual void DebugStr( grinliz::GLString* str ) {
-		str->Format( "[Item] %s hp=%.1f/%d ", mainItem.Name(), mainItem.hp, mainItem.TotalHP() );
-		if ( !wallet.IsEmpty() ) {
-			str->Format( "Au=%d Cy=g%dr%db%dv%d ", wallet.gold, 
-				          wallet.crystal[CRYSTAL_GREEN], wallet.crystal[CRYSTAL_RED], 
-						  wallet.crystal[CRYSTAL_BLUE],  wallet.crystal[CRYSTAL_VIOLET]);
-		}
-	}
-
+	virtual void DebugStr( grinliz::GLString* str );
 	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
 	virtual void OnAdd( Chit* chit );
 	virtual void OnRemove();
@@ -95,8 +87,8 @@ private:
 	Engine *engine;
 	WorldMap* worldMap;
 
-	// The itemArr and activeArr are the same size.
-	// Intrinsic items are always active.
+	// The first item in this array is what this *is*. The following items are what is being carried.
+	//
 	// Some items are active just by having them (although this isn't implemented yet)
 	// And some items (weapons, shields) only do something if they are the active hardpoint. The 
 	// hardpoint question is the tricky one. The GameItem::hardpoint is the hardpoint desired.
@@ -105,10 +97,6 @@ private:
 	// array gets the hardpoints, and we get the hardpoints from the ModelResource. (So
 	// we do not need the RenderComponent.)
 	grinliz::CDynArray< GameItem* > itemArr;
-
-	// The first item is what this *is*.
-	// Following items are inventory: held items, intrinsic, pack.
-	GameItem mainItem;	// What we are. Always first in the array.
 };
 
 #endif // ITEMCOMPONENT_INCLUDED

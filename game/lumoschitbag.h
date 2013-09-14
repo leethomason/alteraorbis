@@ -105,7 +105,7 @@ public:
 	Chit* NewVisitor( int visitorIndex );
 
 	// Creates "stuff in the world". The GameItem is passed by ownership.
-	Chit* NewItemChit( const grinliz::Vector3F& pos, GameItem* orphanItem );
+	Chit* NewItemChit( const grinliz::Vector3F& pos, GameItem* orphanItem, bool fuzzPos, bool placeOnGround );
 
 
 	Bolt* NewBolt(	const grinliz::Vector3F& pos,
