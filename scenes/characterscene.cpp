@@ -3,6 +3,7 @@
 #include "../engine/engine.h"
 #include "../xegame/itemcomponent.h"
 #include "../script/procedural.h"
+#include "../script/battlemechanics.h"
 
 using namespace gamui;
 using namespace grinliz;
@@ -27,12 +28,10 @@ CharacterScene::CharacterScene( LumosGame* game, CharacterSceneData* csd ) : Sce
 		itemButton[i].Init( &gamui2D, lumosGame->GetButtonLook(0) );
 		itemButton[0].AddToToggleGroup( &itemButton[i] );
 	}
+
 	for( int i=0; i<NUM_TEXT_KV; ++i ) {
 		textKey[i].Init( &gamui2D );
 		textVal[i].Init( &gamui2D );
-
-		textKey[i].SetText( "key" );
-		textVal[i].SetText( "value" );
 	}
 
 	engine->lighting.direction.Set( 0, 1, 1 );
@@ -80,6 +79,123 @@ void CharacterScene::Resize()
 }
 
 
+void CharacterScene::SetItemInfo( const GameItem* item, const GameItem* user )
+{
+	static const char* keyText[NUM_TEXT_KV] = {
+		"Name",
+		"ID",
+		"Level",
+		"XP",
+		"Strength",
+		"Will",
+		"Charisma",
+		"Intelligence",
+		"Dexterity"
+	};
+	for( int i=0; i<NUM_TEXT_KV; ++i ) {
+		textKey[i].SetText( keyText[i] );
+		textVal[i].SetText( "" );
+	}
+
+	if ( !item )
+		return;
+
+	CStr< 32 > str;
+
+	str.Format( "%s", "name" );
+	textVal[KV_NAME].SetText( str.c_str() );
+
+	str.Format( "%d", item->id );
+	textVal[KV_ID].SetText( str.c_str() );
+
+	str.Format( "%d", item->stats.Level() );
+	textVal[KV_LEVEL].SetText( str.c_str() );
+
+	str.Format( "%d", item->stats.Experience() );
+	textVal[KV_XP].SetText( str.c_str() );
+
+	/*			Ranged		Melee	Shield
+		STR		Dam			Dam		Capacity
+		WILL	EffRange	D/TU	Reload
+		CHR		Clip/Reload	x		x
+		INT		Ranged D/TU x		x
+		DEX		Melee D/TU	x		x
+	*/
+
+	if ( item->ToRangedWeapon() ) {
+		int i = KV_STR;
+		textKey[i].SetText( "Damage" );
+		str.Format( "%.1f", item->stats.Damage() * item->rangedDamage );
+		textVal[i++].SetText( str.c_str() );
+
+		textKey[i].SetText( "Effective Range" );
+		float radAt1 = BattleMechanics::ComputeRadAt1( user, item->ToRangedWeapon(), false, false );
+		str.Format( "%.1f", BattleMechanics::EffectiveRange( radAt1 ));
+		textVal[i++].SetText( str.c_str() );
+
+		textKey[i].SetText( "Clip/Reload" );
+		str.Format( "%d / %.1f", item->clipCap, 0.001f * (float)item->reload.Threshold() );
+		textVal[i++].SetText( str.c_str() );
+
+		textKey[i].SetText( "Ranged D/TU" );
+		str.Format( "%.1f", BattleMechanics::RangedDPTU( item->ToRangedWeapon(), false ));
+		textVal[i++].SetText( str.c_str() );
+
+		if ( item->ToMeleeWeapon() ) {
+			textKey[i].SetText( "Melee D/TU" );
+			str.Format( "%.1f", BattleMechanics::MeleeDPTU( user, item->ToMeleeWeapon() ));
+			textVal[i++].SetText( str.c_str() );
+		}
+	}
+	else if ( item->ToMeleeWeapon() ) {
+		int i = KV_STR;
+		textKey[i].SetText( "Damage" );
+		DamageDesc dd;
+		BattleMechanics::CalcMeleeDamage( user, item->ToMeleeWeapon(), &dd );
+		str.Format( "%.1f", dd.damage );
+		textVal[i++].SetText( str.c_str() );
+
+		textKey[i].SetText( "Melee D/TU" );
+		str.Format( "%.1f", BattleMechanics::MeleeDPTU( user, item->ToMeleeWeapon() ));
+		textVal[i++].SetText( str.c_str() );
+
+		for ( ; i<NUM_TEXT_KV; ++i ) {
+			textKey[i].SetText( "" );
+		}
+	}
+	else if ( item->ToShield() ) {
+		int i = KV_STR;
+		textKey[i].SetText( "Capacity" );
+		str.Format( "%d", item->clipCap );
+		textVal[i++].SetText( str.c_str() );
+
+		textKey[i].SetText( "Reload" );
+		str.Format( "%.1f", 0.001f * (float)item->reload.Threshold() );
+		textVal[i++].SetText( str.c_str() );
+
+		for ( ; i<NUM_TEXT_KV; ++i ) {
+			textKey[i].SetText( "" );
+		}
+	}
+	else {
+		str.Format( "%d", item->stats.Strength() );
+		textVal[KV_STR].SetText( str.c_str() );
+
+		str.Format( "%d", item->stats.Will() );
+		textVal[KV_WILL].SetText( str.c_str() );
+
+		str.Format( "%d", item->stats.Charisma() );
+		textVal[KV_CHR].SetText( str.c_str() );
+
+		str.Format( "%d", item->stats.Intelligence() );
+		textVal[KV_INT].SetText( str.c_str() );
+
+		str.Format( "%d", item->stats.Dexterity() );
+		textVal[KV_DEX].SetText( str.c_str() );
+	}
+}
+
+
 void CharacterScene::SetButtonText()
 {
 	int count=0;
@@ -118,6 +234,13 @@ void CharacterScene::SetButtonText()
 				model->SetBoneFilter( info.filterName, info.filter );
 			}
 		}
+	}
+
+	if ( down != itemComponent->GetItem(0)) {
+		SetItemInfo( down, itemComponent->GetItem(0) );
+	}
+	else {
+		SetItemInfo( down, 0 );
 	}
 }
 

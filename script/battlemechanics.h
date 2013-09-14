@@ -47,7 +47,12 @@ public:
 								Chit* src,
 								const grinliz::Vector2I& mapPos );
 
-	static void CalcMeleeDamage( GameItem* weilderMainItem, IMeleeWeaponItem* weapon, DamageDesc* );
+	static void CalcMeleeDamage( const GameItem* wielder, const IMeleeWeaponItem* weapon, DamageDesc* outDD );
+
+	static float MeleeDPTU( const GameItem* wielder, const IMeleeWeaponItem* weapon );
+	// Assuming effective range.
+	// 'contiuous' if true, accounts for clip reload time.
+	static float RangedDPTU( const IRangedWeaponItem* weapon, bool continuous );
 	
 	// Shooting ------------------- //
 	static void Shoot(	ChitBag* bag, 
@@ -60,8 +65,8 @@ public:
 	// Radius at 1 unit distance. The shot is randomly placed within the sphere
 	// at that distance. The shere part is tricky - doing volume calc for hit
 	// chances.
-	static float ComputeRadAt1(	GameItem* shooter, 
-								IRangedWeaponItem* weapon,
+	static float ComputeRadAt1(	const GameItem* shooter, 
+								const IRangedWeaponItem* weapon,
 								bool shooterMoving,
 								bool targetMoving );
 	// Returns the chance of hitting, between 0 and 1.

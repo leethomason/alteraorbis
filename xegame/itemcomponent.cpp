@@ -297,9 +297,18 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 	else if ( msg.ID() >= ChitMsg::CHIT_DESTROYED_START && msg.ID() <= ChitMsg::CHIT_DESTROYED_END ) {
 		// FIXME: send to reserve if no pos
 		GLASSERT( parentChit->GetSpatialComponent() );
+		Vector3F pos = parentChit->GetSpatialComponent()->GetPosition();
+
 		if ( !wallet.IsEmpty() ) {
-			parentChit->GetLumosChitBag()->NewWalletChits( parentChit->GetSpatialComponent()->GetPosition(), wallet );
+			parentChit->GetLumosChitBag()->NewWalletChits( pos, wallet );
 			wallet.MakeEmpty();
+		}
+		while( itemArr.Size() > 1 ) {
+			if ( itemArr[itemArr.Size()-1]->Intrinsic() ) {
+				break;
+			}
+			GameItem* item = itemArr.Pop();
+			parentChit->GetLumosChitBag()->NewItemChit( pos, item );
 		}
 	}
 	else {

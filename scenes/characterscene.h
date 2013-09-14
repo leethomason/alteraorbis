@@ -24,6 +24,7 @@
 class LumosGame;
 class Engine;
 class ItemComponent;
+class GameItem;
 
 
 class CharacterSceneData : public SceneData
@@ -53,10 +54,22 @@ public:
 
 private:
 	void SetButtonText();
+	void SetItemInfo( const GameItem* item, const GameItem* user );
 
 	enum { 
 		NUM_ITEM_BUTTONS = 10,
-		NUM_TEXT_KV = 8
+
+		KV_NAME = 0,
+		KV_ID,
+		KV_LEVEL,
+		KV_XP,
+		KV_STR,
+		KV_WILL,
+		KV_CHR,
+		KV_INT,
+		KV_DEX,
+
+		NUM_TEXT_KV
 	};
 	
 	LumosGame*		lumosGame;

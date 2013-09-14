@@ -5,12 +5,12 @@
         procedural="suit"
         mob="denizen"
         cooldown="1500"
-			  mass ="50">
+			  mass ="60">
     <intrinsics>
       <item name="hand"
             flags="MELEE_WEAPON INTRINSIC"
             hardpoint="trigger"
-            meleeDamageMult="0.6">
+            meleeDamageMult="0.5">
       </item>
     </intrinsics>
   </item>

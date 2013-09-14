@@ -16,7 +16,7 @@
   of the overall AI state.
 - Melee should rotate to target (both rock and chit)
 - How does Ice and magma interact?
-- SectorHerd seems a little aggressive. Switch over to using ForceCount, check conditions to trigger.
+x SectorHerd seems a little aggressive. Switch over to using ForceCount, check conditions to trigger.
 - make sure gold/crystal gets returned to the Reserve when the Chit is destroyed
 - GT: lightning
 - GT: rez-in for structures
@@ -24,6 +24,8 @@
 - SpatialHash: one stressed structure.
 	- MOB list (FE determination)
 	- Building list (FE determination)
+- Shield should absorb more with XP (and fix character screen to reflect this)
+- Add position fuzz to gold, crystal, and item drops
 
 - game
 
@@ -41,6 +43,9 @@
 		- team colors
 		x cyclops explosion seems off
 		- balance battles
+		- history events
+		- names of things
+		- winning names
 	- Loot
 		- proc gun
 		- item screen

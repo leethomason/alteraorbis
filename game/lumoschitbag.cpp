@@ -308,6 +308,17 @@ void LumosChitBag::NewWalletChits( const grinliz::Vector3F& pos, const Wallet& w
 }
 
 
+Chit* LumosChitBag::NewItemChit( const grinliz::Vector3F& pos, GameItem* orphanItem )
+{
+	Chit* chit = this->NewChit();
+	chit->Add( new SpatialComponent());
+	chit->Add( new ItemComponent( engine, worldMap, orphanItem );
+	chit->Add( new RenderComponent( engine, chit->GetItem()->ResourceName() ));
+	chit->GetSpatialComponent()->SetPosition( pos );
+	return chit;
+}
+
+
 void LumosChitBag::HandleBolt( const Bolt& bolt, const ModelVoxel& mv )
 {
 	GLASSERT( engine );

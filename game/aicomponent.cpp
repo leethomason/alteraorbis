@@ -1070,7 +1070,7 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 
 	if ( dest.IsZero() ) {
 		// Is there stuff around to pick up?
-		if( itemFlags & GameItem::GOLD_PICKUP ) {
+		if( !playerControlled && (itemFlags & GameItem::GOLD_PICKUP )) {
 			CChitArray gold;
 			GoldCrystalFilter filter;
 			parentChit->GetChitBag()->QuerySpatialHash( &gold, pos2, GOLD_AWARE, 0, &filter );

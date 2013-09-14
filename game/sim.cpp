@@ -209,6 +209,7 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos, const char* assetName )
 	chitBag->AddItem( "ring", chit, engine, 0, 2 );
 	chit->GetItemComponent()->AddGold( ReserveBank::Instance()->WithdrawDenizen() );
 	chit->GetItem()->flags |= GameItem::AI_BINDS_TO_CORE;
+	chit->GetItem()->stats.Roll( playerID );
 
 	AIComponent* ai = new AIComponent( engine, worldMap );
 	ai->EnableDebug( true );

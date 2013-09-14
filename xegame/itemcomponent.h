@@ -31,7 +31,10 @@ private:
 	typedef Component super;
 
 public:
+	// Creates an item from an item definiton.
 	ItemComponent( Engine* _engine, WorldMap* map, const GameItem& _item );
+	// Moves the item to this component
+	ItemComponent( Engine* _engine, WorldMap* map, GameItem* item );
 	virtual ~ItemComponent();
 
 	virtual const char* Name() const { return "ItemComponent"; }

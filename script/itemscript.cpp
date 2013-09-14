@@ -134,18 +134,6 @@ void ItemDefDB::DumpWeaponStats()
 		GameItemArr arr;
 		Get( name, &arr );
 
-		int meleeTime = 1000;
-		const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( arr[0]->ResourceName(), false );
-		if ( res ) {
-			IString animName = res->header.animation;
-			if ( !animName.empty() ) {
-				const AnimationResource* animRes = AnimationResourceManager::Instance()->GetResource( animName.c_str() );
-				if ( animRes ) {
-					meleeTime = animRes->Duration( ANIM_MELEE );
-				}
-			}
-		}
-
 		for( int j=0; j<arr.Size(); ++j ) {
 			if ( arr[j]->ToMeleeWeapon() ) {
 
@@ -158,8 +146,7 @@ void ItemDefDB::DumpWeaponStats()
 					fprintf( fp, "%-25s ", arr[j]->Name() );
 					BattleMechanics::CalcMeleeDamage( &humanMale, arr[j]->ToMeleeWeapon(), &dd );
 				}
-				fprintf( fp, "%5.1f %5.1f ", 
-						    dd.damage, dd.damage*1000.0f/(float)meleeTime );
+				fprintf( fp, "%5.1f %5.1f ", dd.damage, BattleMechanics::MeleeDPTU( &humanMale, arr[j]->ToMeleeWeapon()));
 				fprintf( fp, "\n" ); 
 			}
 			if ( arr[j]->ToRangedWeapon() ) {
@@ -176,11 +163,8 @@ void ItemDefDB::DumpWeaponStats()
 
 				float effectiveRange = BattleMechanics::EffectiveRange( radAt1 );
 
-				float secpershot  = 1000.0f / (float)arr[j]->cooldown.Threshold();
-				float csecpershot = (float)arr[j]->clipCap * 1000.0f / (float)(arr[j]->cooldown.Threshold()*arr[j]->clipCap + arr[j]->reload.Threshold()); 
-
-				float dps  = arr[j]->rangedDamage * 0.5f * secpershot;
-				float cdps = arr[j]->rangedDamage * 0.5f * csecpershot;
+				float dps  = BattleMechanics::RangedDPTU( arr[j]->ToRangedWeapon(), false );
+				float cdps = BattleMechanics::RangedDPTU( arr[j]->ToRangedWeapon(), true );
 
 				fprintf( fp, "%5.1f %5.1f %5.1f %5.1f", arr[j]->rangedDamage, dps, cdps, effectiveRange );
 				fprintf( fp, "\n" ); 

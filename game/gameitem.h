@@ -181,6 +181,7 @@ class IWeaponItem
 {
 public:
 	virtual GameItem* GetItem() = 0;
+	virtual const GameItem* GetItem() const = 0;
 };
 
 class IMeleeWeaponItem : virtual public IWeaponItem
@@ -197,6 +198,7 @@ class IShield
 {
 public:
 	virtual GameItem* GetItem() = 0;
+	virtual const GameItem* GetItem() const = 0;
 };
 
 
@@ -231,7 +233,7 @@ public:
 	
 	void SetThreshold( int t )	{ TIME = t; }
 	void SetCurrent( int t )	{ time = t; }
-	int Threshold() const		{ return time; }
+	int Threshold() const		{ return TIME; }
 
 private:
 	int TIME;
@@ -259,6 +261,7 @@ public:
 
 	virtual ~GameItem()	{}
 	virtual GameItem* GetItem() { return this; }
+	virtual const GameItem* GetItem() const { return this; }
 
 	virtual void Load( const tinyxml2::XMLElement* doc );
 	virtual void Serialize( XStream* xs );
@@ -433,10 +436,14 @@ public:
 	virtual IMeleeWeaponItem*	ToMeleeWeapon()		{ return (flags & MELEE_WEAPON) ? this : 0; }
 	virtual IRangedWeaponItem*	ToRangedWeapon()	{ return (flags & RANGED_WEAPON) ? this : 0; }
 
+	virtual const IMeleeWeaponItem*		ToMeleeWeapon() const	{ return (flags & MELEE_WEAPON) ? this : 0; }
+	virtual const IRangedWeaponItem*	ToRangedWeapon() const	{ return (flags & RANGED_WEAPON) ? this : 0; }
+
 	virtual IWeaponItem*		ToWeapon()			{ return (flags & (MELEE_WEAPON | RANGED_WEAPON)) ? this : 0; }
 	virtual const IWeaponItem*	ToWeapon() const	{ return (flags & (MELEE_WEAPON | RANGED_WEAPON)) ? this : 0; }
 
 	virtual IShield*			ToShield()			{ return ( hardpoint == HARDPOINT_SHIELD ) ? this : 0; }
+	virtual const IShield*		ToShield() const	{ return ( hardpoint == HARDPOINT_SHIELD ) ? this : 0; }
 
 	int Effects() const { return flags & EFFECT_MASK; }
 	int DoTick( U32 delta, U32 since );

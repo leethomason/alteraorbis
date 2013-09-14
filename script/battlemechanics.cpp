@@ -184,9 +184,9 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* 
 
 
 
-void BattleMechanics::CalcMeleeDamage( GameItem* mainItem, IMeleeWeaponItem* weapon, DamageDesc* dd )
+void BattleMechanics::CalcMeleeDamage( const GameItem* mainItem, const IMeleeWeaponItem* weapon, DamageDesc* dd )
 {
-	GameItem* item     = weapon->GetItem();
+	const GameItem* item     = weapon->GetItem();
 
 	GLASSERT( item && mainItem );
 	if ( !mainItem || !item ) return;
@@ -213,8 +213,8 @@ void BattleMechanics::CalcMeleeDamage( GameItem* mainItem, IMeleeWeaponItem* wea
 }
 
 
-float BattleMechanics::ComputeRadAt1(	GameItem* shooter, 
-										IRangedWeaponItem* weapon,
+float BattleMechanics::ComputeRadAt1(	const GameItem* shooter, 
+										const IRangedWeaponItem* weapon,
 										bool shooterMoving,
 										bool targetMoving )
 {
@@ -420,6 +420,43 @@ Vector3F BattleMechanics::ComputeLeadingShot( Chit* origin, Chit* target, Vector
 		*p0 = trigger;
 	}
 	return ComputeLeadingShot( trigger, t, v, speed );
+}
+
+
+float BattleMechanics::MeleeDPTU( const GameItem* wielder, const IMeleeWeaponItem* _weapon )
+{
+	const GameItem* weapon = _weapon->GetItem();
+	int meleeTime = 1000;
+	if ( !weapon->resource.empty() ) {
+		const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( weapon->ResourceName(), false );
+		if ( res ) {
+			IString animName = res->header.animation;
+			if ( !animName.empty() ) {
+				const AnimationResource* animRes = AnimationResourceManager::Instance()->GetResource( animName.c_str() );
+				if ( animRes ) {
+					meleeTime = animRes->Duration( ANIM_MELEE );
+				}
+			}
+		}
+	}
+	DamageDesc dd;
+	CalcMeleeDamage( wielder, _weapon, &dd );
+	
+	return dd.damage*1000.0f/(float)meleeTime;
+}
+
+
+float BattleMechanics::RangedDPTU( const IRangedWeaponItem* _weapon, bool continuous )
+{
+	const GameItem* weapon = _weapon->GetItem();
+	float secpershot  = 1000.0f / (float)weapon->cooldown.Threshold();
+	float csecpershot = (float)weapon->clipCap * 1000.0f / 
+							(float)(weapon->cooldown.Threshold()*weapon->clipCap + weapon->reload.Threshold()); 
+
+	float dps  = weapon->rangedDamage * weapon->GetItem()->stats.Damage() * 0.5f * secpershot;
+	float cdps = weapon->rangedDamage * weapon->GetItem()->stats.Damage() * 0.5f * csecpershot;
+
+	return continuous ? cdps : dps;
 }
 
 
