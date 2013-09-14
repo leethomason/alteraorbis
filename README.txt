@@ -32,24 +32,13 @@ Note: you can collect gold and crystals, but the economy isn’t connected. Noth
 Energy is used to power buildings and keep a domain operating. Visitors bring energy; they enter the world looking for domains that have interesting News, Commerce, Media, or Social, any of which they get at kiosks. If the domain has what the Visitor is looking for, energy is transferred to the domain. Visitors keep track of their favorite domains, and share the links with their friends.
 
 
-Changes (Silver)
+Changes (Silver-3)
 -------------------
 1. Buildings, rocks, plants, workers, and the ground are now production art. There will be tweaks, but the basic look of the game is in place.
-2. Animated things - the player, monsters - are still placeholder.
+2. Animated things is production art. The animations (the actual movement) is not.
 3. Visitors have specific interest: News, Media, Commerce, and Social and will seek out Kiosks to fulfill that interest.
 4. Fun tip: to cycle through the colors used to render buildings (only a few is this inital release) press the ‘c’ key.
-
-
-Major Changes (Gold)
--------------------
-1. Visitors arrive, search for kiosks, travel the world, and leave.
-2. Visitors share information about domain with friends.
-3. Much improved shared AI code for building more complex behaviors. Workqueues to get the work of the domain done. Tasks to schedule a series of behaviors.
-4. Construction of world objects by workers.
-5. Removal of world objects by worers.
-6. New Voxel renderer significantly reduces stress on the model renderer and improves overall performance. Also allows scaling to the size of the world.
-7. Improve the culling algorithm that computes what is and is not in visible bounds
-8. Rewrite of save/load filesystem. Scales to much larger worlds, much smaller file sizes, and takes less CPU to save/load.
+5. To change between the Ring and Blaster, use the spacebar.
 
 
 Install
@@ -66,7 +55,6 @@ Important Notes
 
 1. There is NO save game compatibility. Be sure to delete old games.
 2. If your avatar gets killed, ctrl-click will create a new one. (You can create a bunch if you wish).
-3. “Fast Mode" doesn't work very well. This will probably get removed.
 
 
 Getting Started
@@ -126,7 +114,7 @@ The are a variety of test scenes, in different states. The important one for thi
 
 
 * Asset Preview *
-Shows the face and ring art as they will appear in the game.
+Shows the face, ring, and gun art as they will appear in the game.
 
 
 * Particle *

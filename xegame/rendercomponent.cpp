@@ -141,6 +141,11 @@ SpatialComponent* RenderComponent::SyncToSpatial()
 		model[0]->SetRotation( spatial->GetRotation() );
 	}
 
+	const GameItem* item = parentChit->GetItem();
+	if ( item ) {
+		if ( item->flags & GameItem::CLICK_THROUGH )
+			model[0]->SetFlag( MODEL_CLICK_THROUGH );
+	}
 	return spatial;
 }
 

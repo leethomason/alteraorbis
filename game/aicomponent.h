@@ -222,7 +222,7 @@ private:
 
 		int id;
 		grinliz::Vector2I mapPos;
-		grinliz::IString  name;		// what structure to build
+		grinliz::IString  name;
 
 		grinliz::Vector3F MapTarget() const {
 			GLASSERT( !mapPos.IsZero() );
@@ -234,6 +234,7 @@ private:
 		void Set( int _id ) { id = _id; mapPos.Zero(); name = grinliz::IString(); }
 		void Set( const grinliz::Vector2I& _mapPos, grinliz::IString _name = grinliz::IString() ) 
 			{ mapPos = _mapPos; id = 0; name = _name; }
+		bool HasTarget() const { return id != 0 || !mapPos.IsZero(); }
 	};
 
 	int					aiMode;

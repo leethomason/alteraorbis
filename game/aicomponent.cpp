@@ -54,7 +54,7 @@ static const float	WANDER_RADIUS				=  5.0f;
 static const float	EAT_HP_PER_SEC				=  2.0f;
 static const float	EAT_HP_HEAL_MULT			=  5.0f;	// eating really tears up plants. heal the critter more than damage the plant.
 static const float  CORE_HP_PER_SEC				=  8.0f;
-static const int	WANDER_ODDS					= 50;		// as in 1 in WANDER_ODDS
+static const int	WANDER_ODDS					=100;		// as in 1 in WANDER_ODDS
 static const int	GREATER_WANDER_ODDS			=  5;		// as in 1 in WANDER_ODDS
 static const float	PLANT_AWARE					=  3.0f;
 static const float	GOLD_AWARE					=  3.5f;
@@ -402,9 +402,13 @@ void AIComponent::DoShoot( const ComponentSet& thisComp )
 		leading = BattleMechanics::ComputeLeadingShot( thisComp.chit, target.chit, 0 );
 		isMoving = target.chit->GetMoveComponent() ? target.chit->GetMoveComponent()->IsMoving() : false;
 	}
-	else {
-		GLASSERT( !targetDesc.mapPos.IsZero() );
+	else if ( !targetDesc.mapPos.IsZero() ) {
 		leading.Set( (float)targetDesc.mapPos.x + 0.5f, 0.5f, (float)targetDesc.mapPos.y + 0.5f );
+	}
+	else {
+		// case not supposed to happen, but never seen it be harmful:
+		currentAction = 0;
+		return;
 	}
 	Vector2F leading2D = { leading.x, leading.z };
 	// Rotate to target.
@@ -701,6 +705,7 @@ bool AIComponent::RockBreak( const grinliz::Vector2I& rock )
 	aiMode = ROCKBREAK_MODE;
 	currentAction = NO_ACTION;
 	targetDesc.Set( rock );
+	GLASSERT( targetDesc.HasTarget() );
 	parentChit->SetTickNeeded();
 	return true;
 }
@@ -752,6 +757,7 @@ void AIComponent::ThinkRockBreak( const ComponentSet& thisComp )
 	}
 	bool lineOfSight = rangedWeapon && LineOfSight( thisComp, targetDesc.mapPos );
 	if ( lineOfSight && rangedWeapon->GetItem()->CanUse() ) {
+		GLASSERT( targetDesc.HasTarget() );
 		currentAction = SHOOT;
 		return;
 	}
@@ -811,9 +817,20 @@ Vector2F AIComponent::ThinkWanderCircle( const ComponentSet& thisComp )
 
 Vector2F AIComponent::ThinkWanderRandom( const ComponentSet& thisComp )
 {
-	Vector2F dest = GetWanderOrigin( thisComp );
-	dest.x += parentChit->random.Uniform() * WANDER_RADIUS * parentChit->random.Sign();
-	dest.y += parentChit->random.Uniform() * WANDER_RADIUS * parentChit->random.Sign();
+	if ( thisComp.item->flags & GameItem::AI_DOES_WORK ) {
+		// workers stay close to core.
+		Vector2F dest = GetWanderOrigin( thisComp );
+		dest.x += parentChit->random.Uniform() * WANDER_RADIUS * parentChit->random.Sign();
+		dest.y += parentChit->random.Uniform() * WANDER_RADIUS * parentChit->random.Sign();
+		return dest;
+	}
+
+	Vector2I pos2i = thisComp.spatial->GetPosition2DI();
+	Vector2I sector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
+
+	Vector2F dest = { 0, 0 };
+	dest.x = (float)(sector.x*SECTOR_SIZE + 1 + parentChit->random.Rand( SECTOR_SIZE-2 )) + 0.5f;
+	dest.y = (float)(sector.y*SECTOR_SIZE + 1 + parentChit->random.Rand( SECTOR_SIZE-2 )) + 0.5f;
 	return dest;
 }
 
@@ -1095,9 +1112,8 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 		int r = parentChit->random.Rand(4);
 
 		bool sectorHerd =		pmc 
-							 && pmc->ForceCount() > FORCE_COUNT_STUCK 
 							 && itemFlags & GameItem::AI_SECTOR_HERD
- 							 && friendList.Size() >= (MAX_TRACK*3/4)
+ 							 && ( friendList.Size() >= (MAX_TRACK*3/4) || pmc->ForceCount() > FORCE_COUNT_STUCK)
 							 && (thisComp.chit->random.Rand( WANDER_ODDS ) == 0);
 		bool sectorWander =		pmc
 							&& itemFlags & GameItem::AI_SECTOR_WANDER
@@ -1299,6 +1315,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 		case OPTION_MOVE_TO_RANGE:
 		{
 			targetDesc.Set( target[OPTION_MOVE_TO_RANGE]->ID() );
+			GLASSERT( targetDesc.HasTarget() );
 			this->Move( moveToRange, false );
 		}
 		break;
@@ -1307,6 +1324,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 		{
 			currentAction = MELEE;
 			targetDesc.Set( target[OPTION_MELEE]->ID() );
+			GLASSERT( targetDesc.HasTarget() );
 		}
 		break;
 		
@@ -1315,6 +1333,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 			pmc->Stop();
 			currentAction = SHOOT;
 			targetDesc.Set( target[OPTION_SHOOT]->ID() );
+			GLASSERT( targetDesc.HasTarget() );
 		}
 		break;
 
@@ -1538,6 +1557,7 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 	// If focused, make sure we have a target.
 	if ( targetDesc.id && !chitBag->GetChit( targetDesc.id )) {
 		targetDesc.Clear();
+		currentAction = 0;
 	}
 	if ( !targetDesc.id ) {
 		focus = FOCUS_NONE;
@@ -1696,6 +1716,12 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			}
 		}
 		taskList.Clear();
+		{
+			PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
+			if ( pmc ) {
+				pmc->Clear();	// make sure to clear the path and the queued path
+			}
+		}
 		break;
 
 	case ChitMsg::CHIT_SECTOR_HERD:

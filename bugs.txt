@@ -135,9 +135,10 @@ x Flora
 - more natural skin tones
 
 ** Releasing **
+- set version
+- update README.txt
 - build release/debug
 - build assets
-- set version
 - test
 - def save:
 	- let the game run until 3rd age+

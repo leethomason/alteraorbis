@@ -170,7 +170,8 @@ void PathMoveComponent::ComputeDest()
 	     || queued.pos.x <= 0 || queued.pos.y <= 0 
 		 || queued.pos.x >= (float)map->Width() || queued.pos.y >= (float)map->Height() ) 
 	{
-		this->Stop();
+		this->Clear();
+		parentChit->SendMessage( ChitMsg( ChitMsg::PATHMOVE_DESTINATION_BLOCKED ), this ); 
 		return;
 	}
 
@@ -338,7 +339,11 @@ bool PathMoveComponent::AvoidOthers( U32 delta )
 		for( int i=0; i<chitArr.Size(); ++i ) {
 			Chit* chit = chitArr[i];
 			GLASSERT( chit != parentChit );
-			
+
+			if ( !chit->GetMoveComponent()->ShouldAvoid() ) {
+				continue;
+			}
+
 			Vector3F itPos3 = chit->GetSpatialComponent()->GetPosition();
 			float itRadius  = chit->GetRenderComponent()->RadiusOfBase(); 
 
