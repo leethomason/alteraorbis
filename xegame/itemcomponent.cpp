@@ -67,7 +67,7 @@ ItemComponent::~ItemComponent()
 void ItemComponent::DebugStr( grinliz::GLString* str )
 {
 	const GameItem* item = itemArr[0];
-	str->Format( "[Item] %s hp=%.1f/%d lvl=%d", item->Name(), item->hp, item->TotalHP(), item->stats.Level() );
+	str->Format( "[Item] %s hp=%.1f/%d lvl=%d", item->Name(), item->hp, item->TotalHP(), item->traits.Level() );
 	if ( !wallet.IsEmpty() ) {
 		str->Format( "Au=%d Cy=g%dr%db%dv%d ", wallet.gold, 
 				        wallet.crystal[CRYSTAL_GREEN], wallet.crystal[CRYSTAL_RED], 
@@ -118,9 +118,9 @@ void ItemComponent::AddGold( const Wallet& w )
 void ItemComponent::AddBattleXP( bool isMelee, int killshotLevel )
 {
 	GameItem* mainItem = itemArr[0];
-	int level = mainItem->stats.Level();
-	mainItem->stats.AddBattleXP( killshotLevel );
-	if ( mainItem->stats.Level() > level ) {
+	int level = mainItem->traits.Level();
+	mainItem->traits.AddBattleXP( killshotLevel );
+	if ( mainItem->traits.Level() > level ) {
 		// Level up!
 		// FIXME: show an icon
 		mainItem->hp = mainItem->TotalHPF();
@@ -141,7 +141,7 @@ void ItemComponent::AddBattleXP( bool isMelee, int killshotLevel )
 		// instrinsic parts don't level up...that is just
 		// really an extension of the main item.
 		if (( weapon->flags & GameItem::INTRINSIC) == 0 ) {
-			weapon->stats.AddBattleXP( killshotLevel );
+			weapon->traits.AddBattleXP( killshotLevel );
 		}
 	}
 }
@@ -289,7 +289,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		Chit* origin = GetChitBag()->GetChit( originID );
 		if ( origin && origin->GetItemComponent() ) {
 			bool killshot = mainItem->hp == 0 && !(mainItem->flags & GameItem::INDESTRUCTABLE);
-			origin->GetItemComponent()->AddBattleXP( info->isMelee, killshot ? mainItem->stats.Level() : 0 ); 
+			origin->GetItemComponent()->AddBattleXP( info->isMelee, killshot ? mainItem->traits.Level() : 0 ); 
 		}
 
 	}

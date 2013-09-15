@@ -412,7 +412,7 @@ void LumosChitBag::AddItem( const char* name, Chit* chit, Engine* engine, int te
 
 	GameItem item = *(itemDefArr[0]);
 	item.primaryTeam = team;
-	item.stats.SetExpFromLevel( level );
+	item.traits.SetExpFromLevel( level );
 	item.InitState();
 
 	if ( !chit->GetItemComponent() ) {

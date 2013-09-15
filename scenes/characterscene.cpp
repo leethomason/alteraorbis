@@ -99,11 +99,11 @@ void CharacterScene::SetItemInfo( const GameItem* item, const GameItem* user )
 	textVal[KV_ID].SetText( str.c_str() );
 	textKey[KV_ID].SetText( "ID" );
 
-	str.Format( "%d", item->stats.Level() );
+	str.Format( "%d", item->traits.Level() );
 	textVal[KV_LEVEL].SetText( str.c_str() );
 	textKey[KV_LEVEL].SetText( "Level" );
 
-	str.Format( "%d", item->stats.Experience() );
+	str.Format( "%d", item->traits.Experience() );
 	textVal[KV_XP].SetText( str.c_str() );
 	textKey[KV_XP].SetText( "XP" );
 
@@ -118,7 +118,7 @@ void CharacterScene::SetItemInfo( const GameItem* item, const GameItem* user )
 	int i = KV_STR;
 	if ( item->ToRangedWeapon() ) {
 		textKey[i].SetText( "Ranged Damage" );
-		str.Format( "%.1f", item->stats.Damage() * item->rangedDamage );
+		str.Format( "%.1f", item->traits.Damage() * item->rangedDamage );
 		textVal[i++].SetText( str.c_str() );
 
 		textKey[i].SetText( "Effective Range" );
@@ -163,23 +163,23 @@ void CharacterScene::SetItemInfo( const GameItem* item, const GameItem* user )
 	}
 
 	if ( !(item->ToMeleeWeapon() || item->ToShield() || item->ToRangedWeapon() )) {
-		str.Format( "%d", item->stats.Strength() );
+		str.Format( "%d", item->traits.Strength() );
 		textKey[KV_STR].SetText( "Strength" );
 		textVal[KV_STR].SetText( str.c_str() );
 
-		str.Format( "%d", item->stats.Will() );
+		str.Format( "%d", item->traits.Will() );
 		textKey[KV_WILL].SetText( "Will" );
 		textVal[KV_WILL].SetText( str.c_str() );
 
-		str.Format( "%d", item->stats.Charisma() );
+		str.Format( "%d", item->traits.Charisma() );
 		textKey[KV_CHR].SetText( "Charisma" );
 		textVal[KV_CHR].SetText( str.c_str() );
 
-		str.Format( "%d", item->stats.Intelligence() );
+		str.Format( "%d", item->traits.Intelligence() );
 		textKey[KV_INT].SetText( "Intelligence" );
 		textVal[KV_INT].SetText( str.c_str() );
 
-		str.Format( "%d", item->stats.Dexterity() );
+		str.Format( "%d", item->traits.Dexterity() );
 		textKey[KV_DEX].SetText( "Dexterity" );
 		textVal[KV_DEX].SetText( str.c_str() );
 	}

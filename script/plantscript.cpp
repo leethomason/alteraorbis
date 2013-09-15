@@ -110,7 +110,7 @@ void PlantScript::Init()
 {
 	const GameItem* resource = GetResource();
 	scriptContext->chit->Add( new ItemComponent( engine, worldMap, *resource ));
-	scriptContext->chit->GetItem()->stats.Roll( scriptContext->chit->random.Rand() );
+	scriptContext->chit->GetItem()->traits.Roll( scriptContext->chit->random.Rand() );
 	SetRenderComponent();
 
 	scriptContext->chit->GetSpatialComponent()->SetYRotation( (float)scriptContext->chit->random.Rand( 360 ));
@@ -173,7 +173,7 @@ int PlantScript::DoTick( U32 delta, U32 since )
 	lightTap.x = LRintf( light.x / norm );
 	lightTap.y = LRintf( light.z / norm );
 
-	float sunHeight		= h * item->stats.NormalLeveledTrait( GameStat::INT );	
+	float sunHeight		= h * item->traits.NormalLeveledTrait( GameTrait::INT );	
 	Vector2I tap = pos + lightTap;
 
 	if ( bounds.Contains( tap )) {
@@ -205,7 +205,7 @@ int PlantScript::DoTick( U32 delta, U32 since )
 	sun = Clamp( sun, 0.0f, 1.0f );
 
 	// ---------- Rain ------- //
-	float rootDepth = h * item->stats.NormalLeveledTrait( GameStat::DEX );
+	float rootDepth = h * item->traits.NormalLeveledTrait( GameTrait::DEX );
 
 	for( int j=-1; j<=1; ++j ) {
 		for( int i=-1; i<=1; ++i ) {
@@ -239,12 +239,12 @@ int PlantScript::DoTick( U32 delta, U32 since )
 	float GROW = Lerp( 0.2f, 0.1f, (float)stage / (float)(NUM_STAGE-1) );
 	float DIE  = 0.4f;
 
-	float toughness = item->stats.Toughness();
+	float toughness = item->traits.Toughness();
 
 	if ( distance < GROW * toughness ) {
 		// Heal.
 		ChitMsg healMsg( ChitMsg::CHIT_HEAL );
-		healMsg.dataF = HP_PER_SECOND*seconds*item->stats.NormalLeveledTrait( GameStat::STR );
+		healMsg.dataF = HP_PER_SECOND*seconds*item->traits.NormalLeveledTrait( GameTrait::STR );
 		scriptContext->chit->SendMessage( healMsg );
 
 		sporeTimer += since;

@@ -97,15 +97,13 @@ static const float SKILL_NORMALIZE = 0.1f;	// skill of 10 is a multiple 1.0
 static const float LEVEL_BONUS     = 0.5f;
 
 
-class GameStat
+class GameTrait
 {
 public:
-	GameStat()  {
+	GameTrait()  {
 		Init();	
 	}
 
-	void Save( tinyxml2::XMLPrinter* );
-	void Load( const tinyxml2::XMLElement* doc );
 	void Serialize( XStream* xs );
 
 	void Init() {
@@ -169,12 +167,10 @@ private:
 	float NormalLeveledSkill( int value ) const {
 		return LeveledSkill( value ) * SKILL_NORMALIZE;
 	}
-	void Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele );
 
 	int trait[NUM_TRAITS];
 	int exp;
 };
-
 
 
 class IWeaponItem 
@@ -331,7 +327,7 @@ public:
 	Cooldown reload;		// time to reload once clip is used up
 	int		clipCap;		// possible rounds in the clip
 
-	GameStat stats;
+	GameTrait traits;
 
 	// ------- current --------
 	float	hp;				// current hp for this item
@@ -339,6 +335,9 @@ public:
 	float	accruedFire;	// how much fire damage built up, not yet applied
 	float	accruedShock;	// how much shock damage built up, not yet applied
 
+	/* Key values are essentially a dynamic extension. They are defined in the
+       itemdef file.
+	*/
 	struct KeyValue
 	{
 		bool operator==( const KeyValue& rhs ) const { return key == rhs.key; }
@@ -352,6 +351,22 @@ public:
 	bool GetValue( const char* name, double* value ) const;
 	bool GetValue( const char* name, float* value ) const;
 	bool GetValue( const char* name, int* value ) const;
+
+	/* KeyInt values are counters and data. (#kills for example.
+       They are *not* read from itemDef.
+	*/
+	struct KeyIntValue 
+	{
+		bool operator==( const KeyIntValue& rhs ) const { return key == rhs.key; }
+
+		grinliz::IString	key;
+		int					value;
+	};
+	grinliz::CDynArray<KeyIntValue>	keyIntValues;
+
+	bool HasIntValue( const char* name );
+	int  GetIntValue( const char* name );
+	void SetIntValue( const char* name, int value );
 
 	float CalcBoltSpeed() const {
 		static const float SPEED = 10.0f;
@@ -382,15 +397,19 @@ public:
 			reload			= rhs->reload;
 			clipCap			= rhs->clipCap;
 			rounds			= rhs->rounds;
-			stats			= rhs->stats;
+			traits			= rhs->traits;
 
 			hp				= rhs->hp;
 			accruedFire		= rhs->accruedFire;
 			accruedShock	= rhs->accruedShock;
 
 			keyValues.Clear();
+			keyIntValues.Clear();
 			for( int i=0; i<rhs->keyValues.Size(); ++i ) {
 				keyValues.Push( rhs->keyValues[i] );
+			}
+			for( int i=0; i<rhs->keyIntValues.Size(); ++i ) {
+				keyIntValues.Push( rhs->keyIntValues[i] );
 			}
 
 			parentChit		= 0;	// NOT copied
@@ -411,8 +430,9 @@ public:
 			absorbsDamage = 0;
 			clipCap = 0;			// default to no clip and unlimited ammo
 			rounds = clipCap;
-			stats.Init();
+			traits.Init();
 			keyValues.Clear();
+			keyIntValues.Clear();
 
 			hp = TotalHPF();
 			accruedFire = 0;
@@ -474,7 +494,7 @@ public:
 	bool OnShock() const { return (!(flags & IMMUNE_SHOCK)) && accruedShock > 0; }
 
 	// Note that the current HP, if it has one, 
-	int TotalHP() const		{ return grinliz::LRintf( mass*stats.Toughness() ); }
+	int TotalHP() const		{ return grinliz::LRintf( mass*traits.Toughness() ); }
 	float TotalHPF() const	{ return (float)TotalHP(); }
 
 	float HPFraction() const	{ 

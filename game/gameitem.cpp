@@ -39,53 +39,17 @@ using namespace tinyxml2;
 #define PUSH_ATTRIBUTE( prnt, name )		{ prnt->PushAttribute( #name, name ); }
 
 
-void GameStat::Archive( tinyxml2::XMLPrinter* prn, const tinyxml2::XMLElement* ele )
+void GameTrait::Serialize( XStream* xs )
 {
-	XEArchiveT( prn, ele, "STR",  trait[STR] );
-	XEArchiveT( prn, ele, "WILL", trait[WILL] );
-	XEArchiveT( prn, ele, "CHR",  trait[CHR] );
-	XEArchiveT( prn, ele, "INT",  trait[INT] );
-	XEArchiveT( prn, ele, "DEX",  trait[DEX] );
-	XEArchiveT( prn, ele, "exp",  exp );
-}
-
-
-
-void GameStat::Serialize( XStream* xs )
-{
-	XarcOpen( xs, "stat" );
-	if ( xs->Saving() ) {
-		xs->Saving()->SetArr( "trait", trait, NUM_TRAITS );
-	}
-	else {
-		const StreamReader::Attribute* attr = xs->Loading()->Get( "trait" );
-		GLASSERT( attr );
-		xs->Loading()->Value( attr, trait, NUM_TRAITS );
-	}
+	XarcOpen( xs, "traits" );
+	XARC_SER_ARR( xs, trait, NUM_TRAITS );
 	XARC_SER( xs, exp );
 
 	XarcClose( xs );
 }
 
 
-void GameStat::Save( tinyxml2::XMLPrinter* printer )
-{
-	printer->OpenElement( "GameStat" );
-	Archive( printer, 0 );
-	printer->CloseElement();
-}
-
-
-void GameStat::Load( const tinyxml2::XMLElement* parent )
-{
-	const tinyxml2::XMLElement* ele = parent->FirstChildElement( "GameStat" );
-	if ( ele ) {
-		Archive( 0, ele );
-	}
-}
-
-
-void GameStat::Roll( U32 seed )
+void GameTrait::Roll( U32 seed )
 {
 	Random random( seed );
 	for( int i=0; i<NUM_TRAITS; ++i ) {
@@ -200,7 +164,22 @@ void GameItem::Serialize( XStream* xs )
 	}
 	XarcClose( xs );
 
-	stats.Serialize( xs );
+	XarcOpen( xs, "keyintval" );
+	n = keyIntValues.Size();
+	XARC_SER( xs, n );
+	if ( xs->Loading() ) {
+		GLASSERT( keyIntValues.Empty() );
+		keyIntValues.PushArr( n );
+	}
+	for( int i=0; i<n; ++i ) {
+		XarcOpen( xs, "key" );
+		XARC_SER_KEY( xs, "k", keyIntValues[i].key   );
+		XARC_SER_KEY( xs, "v", keyIntValues[i].value );
+		XarcClose( xs );
+	}
+	XarcClose( xs );
+
+	traits.Serialize( xs );
 	XarcClose( xs );
 }
 
@@ -249,6 +228,35 @@ bool GameItem::GetValue( const char* name, int* value ) const
 }
 
 	
+bool GameItem::HasIntValue( const char* name )
+{
+	for( int i=0; i<keyIntValues.Size(); ++i ) {
+		if ( keyIntValues[i].key == name )
+			return true;
+	}
+	return false;
+}
+
+
+int  GameItem::GetIntValue( const char* name )
+{
+	for( int i=0; i<keyIntValues.Size(); ++i ) {
+		if ( keyIntValues[i].key == name )
+			return keyIntValues[i].value;
+	}
+	return 0;
+}
+
+
+void GameItem::SetIntValue( const char* name, int value )
+{
+	for( int i=0; i<keyIntValues.Size(); ++i ) {
+		if ( keyIntValues[i].key == name )
+			keyIntValues[i].value = value;
+	}
+}
+
+
 void GameItem::Load( const tinyxml2::XMLElement* ele )
 {
 	this->CopyFrom( 0 );
@@ -327,7 +335,6 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 		hardpoint = MetaDataToID( h );
 		GLASSERT( hardpoint > 0 );
 	}
-	stats.Load( ele );
 
 	hp = this->TotalHPF();
 	ele->QueryFloatAttribute( "hp", &hp );

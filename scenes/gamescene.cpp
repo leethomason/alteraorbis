@@ -988,7 +988,7 @@ void GameScene::DoTick( U32 delta )
 
 	str.Clear();
 	if ( playerChit && playerChit->GetItem() ) {
-		const GameStat& stat = playerChit->GetItem()->stats;
+		const GameTrait& stat = playerChit->GetItem()->traits;
 		str.Format( "XP:%d Level:%d", stat.Experience(), stat.Level() );
 	}
 	xpLabel.SetText( str.c_str() );
