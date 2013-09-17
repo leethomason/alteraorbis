@@ -312,7 +312,6 @@ Chit* LumosChitBag::NewItemChit( const grinliz::Vector3F& _pos, GameItem* orphan
 {
 	GLASSERT( !orphanItem->Intrinsic() );
 	GLASSERT( !orphanItem->resource.empty() );
-	orphanItem->parentChit = 0;
 
 	Vector3F pos = _pos;
 	if ( fuzz ) {

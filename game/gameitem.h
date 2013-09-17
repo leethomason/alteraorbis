@@ -367,6 +367,7 @@ public:
 	bool HasIntValue( const char* name );
 	int  GetIntValue( const char* name );
 	void SetIntValue( const char* name, int value );
+	void IncrementIntValue( const char* name );
 
 	float CalcBoltSpeed() const {
 		static const float SPEED = 10.0f;
@@ -374,8 +375,6 @@ public:
 		GetValue( "speed", &speed );
 		return SPEED * speed;
 	}
-
-	Chit* parentChit;		// only set when attached to a Component
 
 	// Group all the copy/init in one place!
 	void CopyFrom( const GameItem* rhs ) {
@@ -411,8 +410,6 @@ public:
 			for( int i=0; i<rhs->keyIntValues.Size(); ++i ) {
 				keyIntValues.Push( rhs->keyIntValues[i] );
 			}
-
-			parentChit		= 0;	// NOT copied
 		}
 		else {
 			name = grinliz::IString();
@@ -437,8 +434,6 @@ public:
 			hp = TotalHPF();
 			accruedFire = 0;
 			accruedShock = 0;
-
-			parentChit = 0;
 		}
 	}
 
@@ -475,12 +470,12 @@ public:
 	//		Reloading
 	//		Out of rounds
 	bool CanUse()					{ return !CoolingDown() && !Reloading() && HasRound(); }
-	bool Use();
+	bool Use( Chit* parent );
 
 	bool CoolingDown() const		{ return !cooldown.CanUse(); }
 
 	bool Reloading() const			{ return clipCap > 0 && !reload.CanUse(); }
-	bool Reload();
+	bool Reload( Chit* parent );
 	bool CanReload() const			{ return !CoolingDown() && !Reloading() && (rounds < clipCap); }
 
 	int Rounds() const { return rounds; }
@@ -519,7 +514,7 @@ public:
 	}
 
 	// Absorb damage.'remain' is how much damage passes through the shield
-	void AbsorbDamage( bool inInventory, DamageDesc dd, DamageDesc* remain, const char* log, const IMeleeWeaponItem* booster );
+	void AbsorbDamage( bool inInventory, DamageDesc dd, DamageDesc* remain, const char* log, const IMeleeWeaponItem* booster, Chit* parent );
 
 private:
 	float Delta( U32 delta, float v ) {

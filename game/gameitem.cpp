@@ -257,6 +257,13 @@ void GameItem::SetIntValue( const char* name, int value )
 }
 
 
+void GameItem::IncrementIntValue( const char* name )
+{
+	int val = GetIntValue( name );
+	SetIntValue( name, val+1 );
+}
+
+
 void GameItem::Load( const tinyxml2::XMLElement* ele )
 {
 	this->CopyFrom( 0 );
@@ -345,7 +352,7 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 }
 
 
-bool GameItem::Use() {
+bool GameItem::Use( Chit* parentChit ) {
 	if ( CanUse() ) {
 		UseRound();
 		cooldown.Use();
@@ -358,7 +365,7 @@ bool GameItem::Use() {
 }
 
 
-bool GameItem::Reload() {
+bool GameItem::Reload( Chit* parentChit ) {
 	if ( CanReload()) {
 		reload.Use();
 		if ( parentChit ) {
@@ -435,7 +442,7 @@ void GameItem::Apply( const GameItem* intrinsic )
 }
 
 
-void GameItem::AbsorbDamage( bool inInventory, DamageDesc dd, DamageDesc* remain, const char* log, const IMeleeWeaponItem* booster )
+void GameItem::AbsorbDamage( bool inInventory, DamageDesc dd, DamageDesc* remain, const char* log, const IMeleeWeaponItem* booster, Chit* parentChit )
 {
 	float absorbed = 0;
 	int   effect = dd.effects;

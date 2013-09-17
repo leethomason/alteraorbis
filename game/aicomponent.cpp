@@ -305,7 +305,7 @@ void AIComponent::DoMove( const ComponentSet& thisComp )
 		// Reloading is always a good background task.
 		IRangedWeaponItem* rangedWeapon = thisComp.itemComponent->GetRangedWeapon( 0 );
 		if ( rangedWeapon && rangedWeapon->GetItem()->CanReload() ) {
-			rangedWeapon->GetItem()->Reload();
+			rangedWeapon->GetItem()->Reload( parentChit );
 		}
 	}
 	else {
@@ -375,7 +375,7 @@ void AIComponent::DoMove( const ComponentSet& thisComp )
 					}
 				}
 				else {
-					ranged->Reload();
+					ranged->Reload( parentChit );
 					if ( debugFlag ) {
 						GLOUTPUT(( "->Reload\n" ));
 					}
@@ -447,7 +447,7 @@ void AIComponent::DoShoot( const ComponentSet& thisComp )
 			}
 		}
 		else {
-			item->Reload();
+			item->Reload( parentChit );
 			// Out of ammo - do something else.
 			currentAction = NO_ACTION;
 		}
@@ -1048,7 +1048,7 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 
 	IRangedWeaponItem* ranged = thisComp.itemComponent->GetRangedWeapon( 0 );
 	if ( ranged && ranged->GetItem()->CanReload() ) {
-		ranged->GetItem()->Reload();
+		ranged->GetItem()->Reload( parentChit );
 	}
 
 	// Plant eater

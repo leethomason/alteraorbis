@@ -244,7 +244,7 @@ void BattleMechanics::Shoot( ChitBag* bag, Chit* src, const grinliz::Vector3F& _
 	Vector3F aimAt = _target;
 	GameItem* weaponItem = weapon->GetItem();
 	GLASSERT( weaponItem->CanUse() );
-	bool okay = weaponItem->Use();
+	bool okay = weaponItem->Use( src );
 	if ( !okay ) {
 		return;
 	}

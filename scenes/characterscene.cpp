@@ -155,11 +155,11 @@ void CharacterScene::SetItemInfo( const GameItem* item, const GameItem* user )
 	if ( item->ToShield() ) {
 		textKey[i].SetText( "Capacity" );
 		str.Format( "%d", item->clipCap );
-		textVal[i++].SetText( str.c_str() );
+		if ( i<NUM_TEXT_KV ) textVal[i++].SetText( str.c_str() );
 
 		textKey[i].SetText( "Reload" );
 		str.Format( "%.1f", 0.001f * (float)item->reload.Threshold() );
-		textVal[i++].SetText( str.c_str() );
+		if ( i<NUM_TEXT_KV ) textVal[i++].SetText( str.c_str() );
 	}
 
 	if ( !(item->ToMeleeWeapon() || item->ToShield() || item->ToRangedWeapon() )) {
@@ -182,6 +182,14 @@ void CharacterScene::SetItemInfo( const GameItem* item, const GameItem* user )
 		str.Format( "%d", item->traits.Dexterity() );
 		textKey[KV_DEX].SetText( "Dexterity" );
 		textVal[KV_DEX].SetText( str.c_str() );
+	}
+
+	for( int k=0; k<item->keyIntValues.Size(); ++k ) {
+		if ( i < NUM_TEXT_KV ) {
+			textKey[i].SetText( item->keyIntValues[k].key.c_str() );
+			str.Format( "%d", item->keyIntValues[k].value );
+			textVal[i++].SetText( str.c_str() );
+		}
 	}
 }
 

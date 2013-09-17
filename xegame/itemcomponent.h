@@ -69,7 +69,7 @@ public:
 	void AddToInventory( GameItem* item );
 
 	// add XP to current item and its weapon
-	void AddBattleXP( bool meleeAttack, int killshotLevel );
+	void AddBattleXP( bool meleeAttack, int killshotLevel, const GameItem* loser );
 
 	// If there is a RenderComponent, bring it in sync with
 	// the inventory.

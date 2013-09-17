@@ -115,7 +115,7 @@ void ItemComponent::AddGold( const Wallet& w )
 }
 
 
-void ItemComponent::AddBattleXP( bool isMelee, int killshotLevel )
+void ItemComponent::AddBattleXP( bool isMelee, int killshotLevel, const GameItem* loser )
 {
 	GameItem* mainItem = itemArr[0];
 	int level = mainItem->traits.Level();
@@ -143,6 +143,13 @@ void ItemComponent::AddBattleXP( bool isMelee, int killshotLevel )
 		if (( weapon->flags & GameItem::INTRINSIC) == 0 ) {
 			weapon->traits.AddBattleXP( killshotLevel );
 		}
+	}
+
+	if ( loser ) {
+		CStr< 64 > str;
+		str.Format( "Kills: %s", loser->Name() );
+		mainItem->IncrementIntValue( str.c_str() );
+		mainItem->IncrementIntValue( "Kills" );
 	}
 }
 
@@ -262,7 +269,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		for( int i=itemArr.Size()-1; i>=0; --i ) {
 			if ( i==0 || ItemActive(i) ) {
 				DamageDesc dd = ddorig;
-				itemArr[i]->AbsorbDamage( i>0, dd, &dd, "DAMAGE", this->GetMeleeWeapon() );
+				itemArr[i]->AbsorbDamage( i>0, dd, &dd, "DAMAGE", this->GetMeleeWeapon(), parentChit );
 
 				if ( itemArr[i]->ToShield() ) {
 					GameItem* shield = itemArr[i]->ToShield()->GetItem();
@@ -289,7 +296,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		Chit* origin = GetChitBag()->GetChit( originID );
 		if ( origin && origin->GetItemComponent() ) {
 			bool killshot = mainItem->hp == 0 && !(mainItem->flags & GameItem::INDESTRUCTABLE);
-			origin->GetItemComponent()->AddBattleXP( info->isMelee, killshot ? mainItem->traits.Level() : 0 ); 
+			origin->GetItemComponent()->AddBattleXP( info->isMelee, killshot ? mainItem->traits.Level() : 0, mainItem ); 
 		}
 
 	}
@@ -444,8 +451,6 @@ void ItemComponent::OnAdd( Chit* chit )
 	GameItem* mainItem = itemArr[0];
 	GLASSERT( itemArr.Size() >= 1 );	// the one true item
 	super::OnAdd( chit );
-	GLASSERT( !mainItem->parentChit );
-	mainItem->parentChit = parentChit;
 
 	if ( parentChit->GetLumosChitBag() ) {
 		IString mob = mainItem->GetValue( "mob" );
@@ -471,9 +476,6 @@ void ItemComponent::OnRemove()
 			parentChit->GetLumosChitBag()->census.greaterMOBs -= 1;
 		}
 	}
-
-	GLASSERT( mainItem->parentChit == parentChit );
-	mainItem->parentChit = 0;
 	super::OnRemove();
 }
 
@@ -502,8 +504,6 @@ bool ItemComponent::EmitEffect( const GameItem& it, U32 delta )
 
 void ItemComponent::AddToInventory( GameItem* item )
 {
-	GLASSERT( item->parentChit == 0 );
-	item->parentChit = parentChit;
 	itemArr.Push( item );
 }
 

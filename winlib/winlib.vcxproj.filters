@@ -121,6 +121,9 @@
     <ClCompile Include="..\xarchive\glstreamer.cpp">
       <Filter>Source Files\xarchive</Filter>
     </ClCompile>
+    <ClCompile Include="..\grinliz\glmicrodb.cpp">
+      <Filter>Source Files\grinliz</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\zlib\crc32.h">
@@ -233,6 +236,9 @@
     </ClInclude>
     <ClInclude Include="..\xarchive\glstreamer.h">
       <Filter>Source Files\xarchive</Filter>
+    </ClInclude>
+    <ClInclude Include="..\grinliz\glmicrodb.h">
+      <Filter>Source Files\grinliz</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
