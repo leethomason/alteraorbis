@@ -31,7 +31,12 @@ x Add position fuzz to gold, crystal, and item drops
 - game
 
 	- Econ
-		- expandable map
+		- expandable map.
+      - show "areas of interest"
+      - show danger level
+    - exploring
+      - xp for exploring!!
+      - "domain theme" when you arrive
 		x fix team logic
 		- build 2 height ice
 		- decent clear dragging
