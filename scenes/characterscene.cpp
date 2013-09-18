@@ -184,10 +184,13 @@ void CharacterScene::SetItemInfo( const GameItem* item, const GameItem* user )
 		textVal[KV_DEX].SetText( str.c_str() );
 	}
 
-	for( int k=0; k<item->keyIntValues.Size(); ++k ) {
-		if ( i < NUM_TEXT_KV ) {
-			textKey[i].SetText( item->keyIntValues[k].key.c_str() );
-			str.Format( "%d", item->keyIntValues[k].value );
+	MicroDBIterator it( item->microdb );
+	for( ; !it.Done() && i < NUM_TEXT_KV; it.Next() ) {
+		
+		const char* key = it.Key();
+		if ( it.NumSub() == 1 && it.SubType(0) == 'd' ) {
+			textKey[i].SetText( key );
+			str.Format( "%d", it.Int(0) );
 			textVal[i++].SetText( str.c_str() );
 		}
 	}

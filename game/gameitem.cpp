@@ -164,20 +164,7 @@ void GameItem::Serialize( XStream* xs )
 	}
 	XarcClose( xs );
 
-	XarcOpen( xs, "keyintval" );
-	n = keyIntValues.Size();
-	XARC_SER( xs, n );
-	if ( xs->Loading() ) {
-		GLASSERT( keyIntValues.Empty() );
-		keyIntValues.PushArr( n );
-	}
-	for( int i=0; i<n; ++i ) {
-		XarcOpen( xs, "key" );
-		XARC_SER_KEY( xs, "k", keyIntValues[i].key   );
-		XARC_SER_KEY( xs, "v", keyIntValues[i].value );
-		XarcClose( xs );
-	}
-	XarcClose( xs );
+	microdb.Serialize( xs, "microdb" );
 
 	traits.Serialize( xs );
 	XarcClose( xs );
@@ -228,42 +215,6 @@ bool GameItem::GetValue( const char* name, int* value ) const
 }
 
 	
-bool GameItem::HasIntValue( const char* name )
-{
-	for( int i=0; i<keyIntValues.Size(); ++i ) {
-		if ( keyIntValues[i].key == name )
-			return true;
-	}
-	return false;
-}
-
-
-int  GameItem::GetIntValue( const char* name )
-{
-	for( int i=0; i<keyIntValues.Size(); ++i ) {
-		if ( keyIntValues[i].key == name )
-			return keyIntValues[i].value;
-	}
-	return 0;
-}
-
-
-void GameItem::SetIntValue( const char* name, int value )
-{
-	for( int i=0; i<keyIntValues.Size(); ++i ) {
-		if ( keyIntValues[i].key == name )
-			keyIntValues[i].value = value;
-	}
-}
-
-
-void GameItem::IncrementIntValue( const char* name )
-{
-	int val = GetIntValue( name );
-	SetIntValue( name, val+1 );
-}
-
-
 void GameItem::Load( const tinyxml2::XMLElement* ele )
 {
 	this->CopyFrom( 0 );

@@ -248,3 +248,33 @@ void MicroDB::Serialize( XStream* xs, const char* name )
 	XarcClose( xs );
 }
 
+
+MicroDBIterator::MicroDBIterator( const MicroDB& _db ) : db(_db )
+{
+	if ( db.dataArr.Size() == 0 ) {
+		entry = 0;
+		subStart = 0;
+	}
+	else {
+		entry    = (const MicroDB::Entry*) db.dataArr.Mem();
+		subStart = (const MicroDB::SubEntry*) (entry+1); 
+	}
+}
+
+
+void MicroDBIterator::Next()
+{
+	GLASSERT( entry );
+	GLASSERT( subStart );
+	entry = (const MicroDB::Entry*)(subStart + entry->nSub );
+	if ( (const U8*)entry >= db.dataArr.Mem() + db.dataArr.Size() ) {
+		entry = 0;
+		subStart = 0;
+	}
+	else {
+		subStart = (const MicroDB::SubEntry*)(entry+1);
+	}
+}
+
+
+

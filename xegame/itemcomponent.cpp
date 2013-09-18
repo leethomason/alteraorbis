@@ -148,8 +148,17 @@ void ItemComponent::AddBattleXP( bool isMelee, int killshotLevel, const GameItem
 	if ( loser ) {
 		CStr< 64 > str;
 		str.Format( "Kills: %s", loser->Name() );
-		mainItem->IncrementIntValue( str.c_str() );
-		mainItem->IncrementIntValue( "Kills" );
+
+		int kills = 0;
+		int specific = 0;
+
+		mainItem->microdb.Fetch( "Kills", "d", &kills );
+		++kills;
+		mainItem->microdb.Set( "Kills", "d", kills );
+
+		mainItem->microdb.Fetch( str.c_str(), "d", &specific );
+		++specific;
+		mainItem->microdb.Set( str.c_str(), "d", specific );
 	}
 }
 

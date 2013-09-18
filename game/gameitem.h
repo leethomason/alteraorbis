@@ -25,6 +25,7 @@
 #include "../grinliz/glmath.h"
 #include "../grinliz/glutil.h"
 #include "../grinliz/glrandom.h"
+#include "../grinliz/glmicrodb.h"
 
 #include "../tinyxml2/tinyxml2.h"
 
@@ -352,22 +353,7 @@ public:
 	bool GetValue( const char* name, float* value ) const;
 	bool GetValue( const char* name, int* value ) const;
 
-	/* KeyInt values are counters and data. (#kills for example.
-       They are *not* read from itemDef.
-	*/
-	struct KeyIntValue 
-	{
-		bool operator==( const KeyIntValue& rhs ) const { return key == rhs.key; }
-
-		grinliz::IString	key;
-		int					value;
-	};
-	grinliz::CDynArray<KeyIntValue>	keyIntValues;
-
-	bool HasIntValue( const char* name );
-	int  GetIntValue( const char* name );
-	void SetIntValue( const char* name, int value );
-	void IncrementIntValue( const char* name );
+	grinliz::MicroDB microdb;
 
 	float CalcBoltSpeed() const {
 		static const float SPEED = 10.0f;
@@ -403,13 +389,10 @@ public:
 			accruedShock	= rhs->accruedShock;
 
 			keyValues.Clear();
-			keyIntValues.Clear();
 			for( int i=0; i<rhs->keyValues.Size(); ++i ) {
 				keyValues.Push( rhs->keyValues[i] );
 			}
-			for( int i=0; i<rhs->keyIntValues.Size(); ++i ) {
-				keyIntValues.Push( rhs->keyIntValues[i] );
-			}
+			microdb			= rhs->microdb;
 		}
 		else {
 			name = grinliz::IString();
@@ -429,7 +412,7 @@ public:
 			rounds = clipCap;
 			traits.Init();
 			keyValues.Clear();
-			keyIntValues.Clear();
+			microdb.Clear();
 
 			hp = TotalHPF();
 			accruedFire = 0;
