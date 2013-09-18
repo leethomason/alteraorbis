@@ -182,6 +182,7 @@ void CharacterScene::SetItemInfo( const GameItem* item, const GameItem* user )
 		str.Format( "%d", item->traits.Dexterity() );
 		textKey[KV_DEX].SetText( "Dexterity" );
 		textVal[KV_DEX].SetText( str.c_str() );
+		i = KV_DEX+1;
 	}
 
 	MicroDBIterator it( item->microdb );

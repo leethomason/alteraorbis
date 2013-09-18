@@ -24,13 +24,18 @@ class MicroDB
 public:
 	MicroDB()	{}
 	MicroDB( const MicroDB& rhs ) {
-		this->dataArr = rhs.dataArr;
+		for( int i=0; i<rhs.dataArr.Size(); ++i ) {
+			dataArr.Push( rhs.dataArr[i] );
+		}
 	}
 
 	~MicroDB()	{}
 
 	void operator=( const MicroDB& rhs ) {
-		this->dataArr = rhs.dataArr;
+		dataArr.Clear();
+		for( int i=0; i<rhs.dataArr.Size(); ++i ) {
+			dataArr.Push( rhs.dataArr[i] );
+		}
 	}
 	void Clear() { dataArr.Clear(); }
 

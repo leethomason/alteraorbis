@@ -145,20 +145,35 @@ void ItemComponent::AddBattleXP( bool isMelee, int killshotLevel, const GameItem
 		}
 	}
 
-	if ( loser ) {
-		CStr< 64 > str;
-		str.Format( "Kills: %s", loser->Name() );
 
+	if ( killshotLevel ) {
 		int kills = 0;
-		int specific = 0;
 
+		// Credit the main item and weapon.
+		kills = 0;
 		mainItem->microdb.Fetch( "Kills", "d", &kills );
-		++kills;
-		mainItem->microdb.Set( "Kills", "d", kills );
+		mainItem->microdb.Set( "Kills", "d", kills+1 );
 
-		mainItem->microdb.Fetch( str.c_str(), "d", &specific );
-		++specific;
-		mainItem->microdb.Set( str.c_str(), "d", specific );
+		if ( weapon ) {
+			kills = 0;
+			weapon->microdb.Fetch( "Kills", "d", &kills );
+			weapon->microdb.Set( "Kills", "d", kills+1 );
+		}
+
+		if ( loser ) {
+			CStr< 64 > str;
+			str.Format( "Kills: %s", loser->Name() );
+
+			kills = 0;
+			mainItem->microdb.Fetch( str.c_str(), "d", &kills );
+			mainItem->microdb.Set( str.c_str(), "d", kills+1 );
+
+			if ( weapon ) {
+				kills = 0;
+				weapon->microdb.Fetch( str.c_str(), "d", &kills );
+				weapon->microdb.Set( str.c_str(), "d", kills+1 );
+			}
+		}
 	}
 }
 
@@ -305,7 +320,9 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		Chit* origin = GetChitBag()->GetChit( originID );
 		if ( origin && origin->GetItemComponent() ) {
 			bool killshot = mainItem->hp == 0 && !(mainItem->flags & GameItem::INDESTRUCTABLE);
-			origin->GetItemComponent()->AddBattleXP( info->isMelee, killshot ? mainItem->traits.Level() : 0, mainItem ); 
+			origin->GetItemComponent()->AddBattleXP( info->isMelee, 
+													 killshot ? Max( 1, mainItem->traits.Level()) : 0, 
+													 mainItem ); 
 		}
 
 	}

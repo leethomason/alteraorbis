@@ -265,6 +265,7 @@ public:
 
 private:
 	CDynArray( const CDynArray<T>& );	// not allowed. Add a missing '&' in the code.
+	void operator=( const CDynArray< T, SEM >& rhs );	// hard to implement with ownership semantics
 
 	T* mem;
 	int size;
