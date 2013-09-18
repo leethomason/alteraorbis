@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 #include "glstreamer.h"
-#include "squisher.h"
+#include "../grinliz/glmicrodb.h"
 
 using namespace grinliz;
 
@@ -155,6 +155,55 @@ int main( int argc, const char* argv[] )
 		StreamReader reader( fp );
 		printf( "version=%d\n", reader.Version() );
 		DumpStream( &reader, 0 );
+
+		fclose( fp );
+	}
+
+	// Tacked on DB testing:
+	printf( "----- MicroDB -----\n" );
+	{
+		MicroDB microdb;
+
+		microdb.Set( "test-i", 
+			         "S", 
+					 StringPool::Intern( "valueI" ) );
+		microdb.Set( "test-d", "d", -3 );
+		microdb.Set( "3val", "Sdf", StringPool::Intern( "crazy" ), -5, 42.13f );
+
+		IString s;
+		int i;
+
+		microdb.Fetch( "test-i", "S", &s );
+		printf( "Fetch: (valueI) %s\n", s.c_str() );
+
+		microdb.Fetch( "test-d", "d", &i );
+		printf( "Fetch: (-3) %d\n", i );
+
+		FILE* fp = 0;
+		fopen_s( &fp, "microdbtest.dat", "wb" );
+		StreamWriter writer( fp );
+		microdb.Serialize( &writer, "test" );
+		fclose( fp ); 
+	}
+	{
+		FILE* fp = 0;
+		fopen_s( &fp, "microdbtest.dat", "rb" );
+		StreamReader reader( fp );
+		DumpStream( &reader, 0 );
+		fclose( fp );
+	}
+	{
+		FILE* fp = 0;
+		fopen_s( &fp, "microdbtest.dat", "rb" );
+		StreamReader reader( fp );
+		MicroDB microdb;
+		microdb.Serialize( &reader, "test" );
+
+		IString s;
+		float f;
+		int i;
+		microdb.Fetch( "3val", "Sdf", &s, &i, &f );
+		printf( "Fetched: %s %d %f\n", s.c_str(), i, f );
 
 		fclose( fp );
 	}

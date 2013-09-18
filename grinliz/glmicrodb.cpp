@@ -3,45 +3,42 @@
 
 using namespace grinliz;
 
-int MicroDB::Set( const char* key,  const char* fmt, ... )
+
+MicroDB::Entry* MicroDB::AppendEntry( const IString& key, int nSubKey ) 
 {
-	GLASSERT( fmt && *fmt );
-	GLASSERT( key && *key );
-	IString ikey = StringPool::Intern( key );
+	int pos = dataArr.Size();
+	dataArr.PushArr( sizeof(Entry) );
+	U8* p = dataArr.PushArr( sizeof(SubEntry)*nSubKey );
+	memset( p, 0, sizeof(SubEntry)*nSubKey );
 
-	// Find the key;
+	Entry* e = (Entry*) &dataArr[pos];
+	e->key = key.c_str();	// fixed memory
+	e->next[0] = 0;
+	e->next[1] = 0;
+	e->nSub = nSubKey;
 
-	int nData = strlen( fmt );
+	return e;
+}
 
+MicroDB::Entry* MicroDB::Set( const IString& key, int nSubKey, int* error )
+{
 	// Handle the first node.
 	if ( dataArr.Empty() ) {
-		Entry e;
-		e.key = ikey;
-		U8* p = dataArr.PushArr( sizeof(Entry) );
-		memcpy( p, &e, sizeof(Entry) );
-
-		// Space for the fmt
-		p = dataArr.PushArr( nData+1 );
-		memcpy( p, fmt, nData+1 );
-
-		// Space for the data 
-		dataArr.PushArr( nData*4 );
+		return AppendEntry( key, nSubKey );
 	}
 
 	int pos = 0;
-	U8* dataBlock = 0;
-
 	while( true ) {
 		Entry* node = (Entry*) &dataArr[pos];
-		if ( node->key == ikey ) {
-			if ( strcmp( fmt, (const char*) &dataArr[pos+sizeof(Entry)] )) {
+		if ( node->key == key.c_str() ) {	// compare by address is valid
+			if ( node->nSub != nSubKey ) {
 				GLASSERT( 0 );
-				return WRONG_FORMAT;
+				*error = WRONG_FORMAT;
+				return 0;
 			}
-			dataBlock = &dataArr[pos+sizeof(Entry)+nData+1];
-			break;
+			return node;
 		}
-		int compare = strcmp( node->key.c_str(), key );
+		int compare = strcmp( node->key, key.c_str() );
 		GLASSERT( compare != 0 );	// should have been caught above
 		int bias = compare < 0 ? 0 : 1;
 		if ( node->next[bias] ) {
@@ -49,62 +46,47 @@ int MicroDB::Set( const char* key,  const char* fmt, ... )
 		}
 		else {
 			node->next[bias] = dataArr.Size();
-
-			Entry e;
-			e.key = ikey;
-			U8* p = dataArr.PushArr( sizeof(Entry) );
-			memcpy( p, &e, sizeof(Entry) );
-
-			// Space for the fmt
-			p = dataArr.PushArr( nData+1 );
-			memcpy( p, fmt, nData+1 );
-
-			// Space for the data 
-			dataBlock = dataArr.PushArr( nData*4 );
-
-			break;
+			return AppendEntry( key, nSubKey );
 		}
 	}
+	GLASSERT( 0 );
+	return 0;
+}
+
+
+int MicroDB::Set( const char* key,  const char* fmt, ... )
+{
+	GLASSERT( fmt && *fmt );
+	GLASSERT( key && *key );
+	IString ikey = StringPool::Intern( key );
+
+	// Find the key;
+	int nData = strlen( fmt );
+	GLASSERT( nData < 256 );
+	
+	int error=0;
+	Entry* e = Set( StringPool::Intern( key ), nData, &error );
+	if ( !e ) return error;
 
 	const char* p = fmt;	// don't use the one in the array; it can change.
-	GLASSERT( dataBlock );
+
+	SubEntry* sub = (SubEntry*)(e+1);
 
 	va_list vl;
 	va_start( vl, fmt );
 
 	while ( *p ) {
 		switch ( *p ) { 
-		case 'S':
-			{
-				GLASSERT( sizeof( IString ) == 4 );
-				IString s = va_arg( vl, IString );
-				memcpy( dataBlock, &s, 4 );
-			}
-			break;
-
-		case 'd':
-			{
-				int val = va_arg( vl, int );
-				memcpy( dataBlock, &val, 4 );
-			}
-			break;
-
-		case 'f':
-			{
-				float val = va_arg( vl, float );
-				memcpy( dataBlock, &val, 4 );
-			}
-			break;
-
+		case 'S':	sub->type = 'S';	sub->str = va_arg( vl, IString ).c_str();	break;
+		case 'd':	sub->type = 'd';	sub->intVal = va_arg( vl, int );			break;
+		case 'f':	sub->type = 'f';	sub->floatVal = (float)va_arg( vl, double );		break;
 		default:
 			GLASSERT( 0 );
-			break;
-
+			return WRONG_FORMAT;
 		}
-		dataBlock += 4;
 		++p;
+		++sub;
 	}
-
 	va_end( vl );
 	return 0;
 }
@@ -112,7 +94,6 @@ int MicroDB::Set( const char* key,  const char* fmt, ... )
 
 int MicroDB::Fetch( const char* key, const char* fmt, ... )
 {
-
 	GLASSERT( fmt && *fmt );
 	GLASSERT( key && *key );
 	if ( dataArr.Empty() )
@@ -122,10 +103,10 @@ int MicroDB::Fetch( const char* key, const char* fmt, ... )
 	const Entry* pe = (const Entry*) &dataArr[0];
 
 	while( true ) {
-		if ( pe->key == ikey ) {
+		if ( pe->key == ikey.c_str() ) {
 			break;
 		}
-		int compare = strcmp( pe->key.c_str(), key );
+		int compare = strcmp( pe->key, key );
 		GLASSERT( compare != 0 );	// should have been caught above
 		int bias = compare < 0 ? 0 : 1;
 
@@ -136,38 +117,36 @@ int MicroDB::Fetch( const char* key, const char* fmt, ... )
 		pe = (const Entry*) &dataArr[pe->next[bias]];
 	}
 
-	const char* storedFMT = (const char*)(pe + 1);
-	GLASSERT( strcmp( storedFMT, fmt ) == 0 );
-	if ( strcmp( storedFMT, fmt )) {
-		return WRONG_FORMAT;
-	}
+	SubEntry* sub = (SubEntry*)(pe+1);
 
 	va_list vl;
 	va_start( vl, fmt );
 
 	const char* p = fmt;
-	const U8* dataBlock = (const U8*)(storedFMT + strlen(storedFMT) + 1);
 
 	while ( *p ) {
+		GLASSERT( *p == sub->type );
+		if ( *p != sub->type ) return WRONG_FORMAT;
+
 		switch ( *p ) { 
-		case 'S':
+		case 'S':	
 			{
 				IString* s = va_arg( vl, IString* );
-				memcpy( s, dataBlock, 4 );
+				*s = StringPool::Intern( sub->str );
 			}
 			break;
 
 		case 'd':
 			{
 				int* val = va_arg( vl, int* );
-				memcpy( val, dataBlock, 4 );
+				*val = sub->intVal;
 			}
 			break;
 
 		case 'f':
 			{
 				float* val = va_arg( vl, float* );
-				memcpy( val, dataBlock, 4 );
+				*val = sub->floatVal;
 			}
 			break;
 
@@ -176,7 +155,7 @@ int MicroDB::Fetch( const char* key, const char* fmt, ... )
 			break;
 
 		}
-		dataBlock += 4;
+		++sub;
 		++p;
 	}
 
@@ -184,31 +163,88 @@ int MicroDB::Fetch( const char* key, const char* fmt, ... )
 	return 0;
 }
 
-/*
+
 void MicroDB::Serialize( XStream* xs, const char* name )
 {
+	// The stream contains raw pointers. It needs
+	//   to be pulled apart to serialize.
 	CStr<16> str;
 	XarcOpen( xs, name );
 	
 	if ( xs->Saving() ) {
 		const Entry* pe = (const Entry*) dataArr.Mem();
-		while( pe < dataArr.Mem() + dataArr.Size() ) {
+		while( (const U8*)pe < dataArr.Mem() + dataArr.Size()) {
 
-			XarcOpen( xs, pe->key.c_str() );
+			XarcOpen( xs, pe->key );
+			XarcSet( xs, "nSub", pe->nSub );
 
-			int count = 0;
-			const char* fmt = (const char*)(pe + 1 );
-			const U8* data = (const U8*)(fmt + strlen(fmt) + 1);
+			SubEntry* sub = (SubEntry*)(pe+1);
+			for( int i=0; i<pe->nSub; ++i ) {
 
-			while ( *fmt ) {
-				str.Format( "%05d", count );
-				switch( *fmt ) {
-				case 'S':	xs->Saving()->Set( str.c_str(), 
+				str.Format( "%d", i );
+				switch ( sub->type ) {
+				case 'S':	xs->Saving()->Set( str.c_str(), sub->str );			break;
+				case 'd':	xs->Saving()->Set( str.c_str(), sub->intVal );		break;
+				case 'f':	xs->Saving()->Set( str.c_str(), sub->floatVal );	break;
+				default: GLASSERT( 0 );
+				}
 
+				++sub;
+			}
 			XarcClose( xs );
+			pe = (const Entry*)sub;
 		}
-	}	
+		XarcOpen( xs, "#microdb" );
+		XarcClose( xs );
+	}
+	else {
+		dataArr.Clear();
+		const char* key = xs->Loading()->OpenElement();
+		while ( !StrEqual( key, "#microdb" )) {
+
+			int nSub = 0;
+			int error = 0;
+			XarcGet( xs, "nSub", nSub );
+			Entry* entry = Set( StringPool::Intern( key ), nSub, &error );
+			GLASSERT( error == 0 );
+
+			SubEntry* sub = (SubEntry*)(entry+1);
+			for( int i=0; i<nSub; ++i, ++sub ) {
+				str.Format( "%d", i );
+				const StreamReader::Attribute* attribute = xs->Loading()->Get( str.c_str() );
+				switch ( attribute->type ) {
+				case XStream::ATTRIB_STRING:	
+					{
+						sub->type = 'S';
+						IString istr;
+						xs->Loading()->Value( attribute, &istr, 1, 0 );
+						sub->str = istr.c_str();
+					}
+					break;
+				case XStream::ATTRIB_INT:
+					{ 
+						sub->type = 'd';
+						xs->Loading()->Value( attribute, &sub->intVal, 1, 0 );
+					}
+					break;
+
+				case XStream::ATTRIB_FLOAT:
+					{
+						sub->type = 'f';
+						xs->Loading()->Value( attribute, &sub->floatVal, 1, 0 );
+					}
+					break;
+				default:
+					GLASSERT( 0 );
+					break;
+				};
+			}
+			xs->Loading()->CloseElement();
+			key = xs->Loading()->OpenElement();
+		}
+		xs->Loading()->CloseElement();
+	}
 
 	XarcClose( xs );
 }
-*/
+
