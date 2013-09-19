@@ -58,12 +58,11 @@ public:
 		DECO_OKAY = 15,
 		DECO_CANCEL = 22
 	};
-	static gamui::RenderAtom CalcDecoAtom( int id, bool enabled=true );
 	static gamui::RenderAtom CalcParticleAtom( int id, bool enabled=true );
 	static gamui::RenderAtom CalcIconAtom( int id, bool enabled=true );
 	static gamui::RenderAtom CalcIconAtom( const char* name );
-	static gamui::RenderAtom CalcIcon2Atom( int id, bool enabled=true );
 	static gamui::RenderAtom CalcPaletteAtom( int x, int y );
+	static gamui::RenderAtom CalcUIIconAtom( const char* name, bool enabled=true );
 
 	const char* GenName( const char* dataset, int seed, int minLen, int maxLen );
 

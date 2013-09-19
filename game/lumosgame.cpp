@@ -136,43 +136,25 @@ RenderAtom LumosGame::CalcIconAtom( int id, bool enabled )
 }
 
 
-RenderAtom LumosGame::CalcIcon2Atom( int id, bool enabled )
+RenderAtom LumosGame::CalcUIIconAtom( const char* name, bool enabled )
 {
-	GLASSERT( id >= 0 && id < 32 );
-	Texture* texture = TextureManager::Instance()->GetTexture( "icons2" );
-
-	static const int CX = 4;
-	static const int CY = 4;
-
-	int y = id / CX;
-	int x = id - y*CX;
-	float tx0 = (float)x / (float)CX;
-	float ty0 = (float)y / (float)CY;;
-	float tx1 = tx0 + 1.f/(float)CX;
-	float ty1 = ty0 + 1.f/(float)CY;
-
-	return RenderAtom( (const void*)(enabled ? UIRenderer::RENDERSTATE_UI_NORMAL : UIRenderer::RENDERSTATE_UI_DISABLED), (const void*)texture, tx0, ty0, tx1, ty1 );
-}
-
-RenderAtom LumosGame::CalcDecoAtom( int id, bool enabled )
-{
-	GLASSERT( id >= 0 && id <= 32 );
-	Texture* texture = TextureManager::Instance()->GetTexture( "iconDeco" );
-	float tx0 = 0;
-	float ty0 = 0;
-	float tx1 = 0;
-	float ty1 = 0;
-
-	if ( id != DECO_NONE ) {
-		int y = id / 8;
-		int x = id - y*8;
-		tx0 = (float)x / 8.f;
-		ty0 = (float)y / 4.f;
-		tx1 = tx0 + 1.f/8.f;
-		ty1 = ty0 + 1.f/4.f;
+	const Texture* texture = TextureManager::Instance()->GetTexture( "uiIcon" );
+	if ( !name || !*name ) {
+		name = "default";
 	}
-	return RenderAtom( (const void*)(enabled ? UIRenderer::RENDERSTATE_UI_DECO : UIRenderer::RENDERSTATE_UI_DECO_DISABLED), (const void*)texture, tx0, ty0, tx1, ty1 );
+
+	Texture::TableEntry te;
+	texture->GetTableEntry( name, &te );
+	RenderAtom atom( (const void*) (UIRenderer::RENDERSTATE_UI_DECO), 
+					 texture,
+					 te.uv.x, te.uv.y, te.uv.z, te.uv.w );
+
+	if ( !enabled ) {
+		atom.renderState = (const void*) UIRenderer::RENDERSTATE_UI_DECO_DISABLED;
+	}
+	return atom;
 }
+
 
 RenderAtom LumosGame::CalcPaletteAtom( int x, int y )
 {
@@ -225,12 +207,12 @@ void LumosGame::InitStd( gamui::Gamui* g, gamui::PushButton* okay, gamui::PushBu
 	if ( okay ) {
 		okay->Init( g, stdBL );
 		okay->SetSize( LAYOUT_SIZE_X, LAYOUT_SIZE_Y );
-		okay->SetDeco( CalcDecoAtom( DECO_OKAY, true ), CalcDecoAtom( DECO_OKAY, false ) );
+		okay->SetDeco( CalcUIIconAtom( "okay", true ), CalcUIIconAtom( "okay", false ) );
 	}
 	if ( cancel ) {
 		cancel->Init( g, stdBL );
 		cancel->SetSize( LAYOUT_SIZE_X, LAYOUT_SIZE_Y );
-		cancel->SetDeco( CalcDecoAtom( DECO_CANCEL, true ), CalcDecoAtom( DECO_CANCEL, false ) );
+		cancel->SetDeco( CalcUIIconAtom( "cancel", true ), CalcUIIconAtom( "cancel", false ) );
 	}
 }
 

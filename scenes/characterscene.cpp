@@ -207,19 +207,9 @@ void CharacterScene::SetButtonText()
 		if ( item && !item->Intrinsic() ) {
 			itemButton[count].SetText( item->name.c_str() );
 
-			const Texture* texture = TextureManager::Instance()->GetTexture( "uiIcon" );
 			IString decoName = item->GetValue( "uiIcon" );
-			if ( decoName.empty() ) {
-				decoName = StringPool::Intern( "default" );
-			}
-
-			Texture::TableEntry te;
-			texture->GetTableEntry( decoName.c_str(), &te );
-			RenderAtom atom( (const void*) (UIRenderer::RENDERSTATE_UI_DECO), 
-							 texture,
-							 te.uv.x, te.uv.y, te.uv.z, te.uv.w );
-			RenderAtom atomD = atom;
-			atomD.renderState = (const void*) UIRenderer::RENDERSTATE_UI_DECO_DISABLED;
+			RenderAtom atom = LumosGame::CalcUIIconAtom( decoName.c_str(), true );
+			RenderAtom atomD = LumosGame::CalcUIIconAtom( decoName.c_str(), false );
 
 			itemButton[count].SetDeco( atom, atomD );
 

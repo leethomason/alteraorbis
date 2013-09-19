@@ -29,7 +29,8 @@ DialogScene::DialogScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 	for ( int i=0; i<NUM_ITEMS; ++i ) {
 		itemArr[i].Init( &gamui2D, stdBL );
 	}
-	itemArr[0].SetDeco( LumosGame::CalcDecoAtom( LumosGame::DECO_OKAY, true ), LumosGame::CalcDecoAtom( LumosGame::DECO_OKAY, false ) );
+	itemArr[0].SetDeco( LumosGame::CalcUIIconAtom( "okay", true ), 
+						LumosGame::CalcUIIconAtom( "okay", false ) );
 
 	for( int i=0; i<NUM_TOGGLES; ++i ) {
 		toggles[i].Init( &gamui2D, lumosGame->GetButtonLook(0));
@@ -90,11 +91,11 @@ gamui::RenderAtom DialogScene::DragStart( const gamui::UIItem* item )
 void DialogScene::DragEnd( const gamui::UIItem* start, const gamui::UIItem* end )
 {
 	if ( end ) {
-		((PushButton*)end)->SetDeco( LumosGame::CalcDecoAtom( LumosGame::DECO_OKAY, true ), 
-			                         LumosGame::CalcDecoAtom( LumosGame::DECO_OKAY, false ) );
+		((PushButton*)end)->SetDeco( LumosGame::CalcUIIconAtom( "okay", true ), 
+			                         LumosGame::CalcUIIconAtom( "okay", false ) );
 	}
 	else if ( start ) {
-		((PushButton*)start)->SetDeco( LumosGame::CalcDecoAtom( LumosGame::DECO_OKAY, true ), 
-			                           LumosGame::CalcDecoAtom( LumosGame::DECO_OKAY, false ) );
+		((PushButton*)start)->SetDeco( LumosGame::CalcUIIconAtom( "okay", true ), 
+			                           LumosGame::CalcUIIconAtom( "okay", false ) );
 	}
 }
