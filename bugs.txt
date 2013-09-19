@@ -32,11 +32,11 @@ x Add position fuzz to gold, crystal, and item drops
 
 	- Econ
 		- inventory
-			- organize
-			- currently active
+			x organize
+			x currently active
 			- drop
 			- gold & crystal display
-			- character names
+			x character names
 		- item pickup
 		- item history
 			- created 

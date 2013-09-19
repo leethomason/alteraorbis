@@ -201,16 +201,40 @@ void CharacterScene::SetButtonText()
 {
 	int count=0;
 	const GameItem* down = 0;
+	const GameItem* mainItem = itemComponent->GetItem(0);
+	const IRangedWeaponItem* ranged = itemComponent->GetRangedWeapon(0);
+	const IMeleeWeaponItem*  melee  = itemComponent->GetMeleeWeapon();
+	const IShield*           shield = itemComponent->GetShield();
+	const GameItem* rangedItem = ranged ? ranged->GetItem() : 0;
+	const GameItem* meleeItem  = melee  ? melee->GetItem() : 0;
+	const GameItem* shieldItem = shield ? shield->GetItem() : 0;
+
+	RenderAtom nullAtom;
+	RenderAtom iconAtom = LumosGame::CalcUIIconAtom( "okay" );
+	memset( itemButtonIndex, 0, sizeof(itemButtonIndex[0])*NUM_ITEM_BUTTONS );
+
 	for( int i=0; i<NUM_ITEM_BUTTONS; ++i ) {
 		const GameItem* item = itemComponent->GetItem(i);
 		if ( item && !item->Intrinsic() ) {
+
+			// Set the text to the proper name, if we have it.
+			// Then an icon for what it is, and a check
+			// mark if the object is in use.
 			itemButton[count].SetText( item->ProperName() ? item->ProperName() : item->Name() );
+			itemButtonIndex[count] = i;
 
 			IString decoName = item->GetValue( "uiIcon" );
-			RenderAtom atom = LumosGame::CalcUIIconAtom( decoName.c_str(), true );
+			RenderAtom atom  = LumosGame::CalcUIIconAtom( decoName.c_str(), true );
 			RenderAtom atomD = LumosGame::CalcUIIconAtom( decoName.c_str(), false );
 
 			itemButton[count].SetDeco( atom, atomD );
+
+			if ( item == rangedItem || item == meleeItem || item == shieldItem ) {
+				itemButton[count].SetIcon( iconAtom, iconAtom );
+			}
+			else {
+				itemButton[count].SetIcon( nullAtom, nullAtom );
+			}
 
 			if ( itemButton[count].Down() ) {
 				down = item;
@@ -277,3 +301,43 @@ void CharacterScene::Draw3D( U32 deltaTime )
 	screenport.SetUI();
 }
 
+
+gamui::RenderAtom CharacterScene::DragStart( const gamui::UIItem* item )
+{
+	RenderAtom atom, nullAtom;
+	for( int i=0; i<NUM_ITEM_BUTTONS; ++i ) {
+		if ( &itemButton[i] == item ) {
+
+			itemButton[i].GetDeco( &atom, 0 );
+			if ( !atom.Equal( nullAtom ) ) {
+				itemButton[i].SetDeco( nullAtom, nullAtom );
+			}
+			return atom;
+		}
+	}
+	return nullAtom;
+}
+
+
+void CharacterScene::DragEnd( const gamui::UIItem* start, const gamui::UIItem* end )
+{
+	int startIndex = 0;
+	int endIndex   = 0;
+	for( int i=0; i<NUM_ITEM_BUTTONS; ++i ) {
+		if ( start == &itemButton[i] ) {
+			startIndex = itemButtonIndex[i];
+			break;
+		}
+	}
+	for( int i=0; i<NUM_ITEM_BUTTONS; ++i ) {
+		if ( end == &itemButton[i] ) {
+			endIndex = itemButtonIndex[i];
+			break;
+		}
+	}
+
+	if ( startIndex && endIndex ) {
+		itemComponent->Swap( startIndex, endIndex );
+	}
+	SetButtonText();
+}

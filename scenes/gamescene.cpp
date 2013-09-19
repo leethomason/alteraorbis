@@ -1117,3 +1117,13 @@ void GameScene::DrawDebugText()
 		y += 16;
 	}
 }
+
+
+void GameScene::SceneResult( int sceneID, int result )
+{
+	if ( sim->GetPlayerChit() && sim->GetPlayerChit()->GetItemComponent() ) {
+		sim->GetPlayerChit()->GetItemComponent()->SetHardpoints();
+	}
+}
+
+

@@ -272,9 +272,7 @@ void Game::PushPopScene()
 		if ( !sceneStack.Empty() ) {
 			sceneStack.Top()->scene->Activate();
 			sceneStack.Top()->scene->Resize();
-			if ( result != INT_MIN ) {
-				sceneStack.Top()->scene->SceneResult( id, result );
-			}
+			sceneStack.Top()->scene->SceneResult( id, result );
 		}
 	}
 

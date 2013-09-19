@@ -48,6 +48,8 @@ public:
 		ProcessTap( action, screen, world );
 	}
 	virtual void ItemTapped( const gamui::UIItem* item );
+	virtual gamui::RenderAtom	CharacterScene::DragStart( const gamui::UIItem* item );
+	virtual void				DragEnd( const gamui::UIItem* start, const gamui::UIItem* end );
 
 	virtual void DoTick( U32 deltaTime );
 	virtual void Draw3D( U32 delatTime );
@@ -79,6 +81,7 @@ private:
 	Screenport		screenport;
 	gamui::PushButton okay;
 	gamui::ToggleButton itemButton[NUM_ITEM_BUTTONS];
+	int					itemButtonIndex[NUM_ITEM_BUTTONS];	// the index in the ItemComponent
 	gamui::TextLabel textKey[NUM_TEXT_KV];
 	gamui::TextLabel textVal[NUM_TEXT_KV];
 };

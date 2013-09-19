@@ -53,7 +53,8 @@ public:
 	GameItem* GetItem( int index=0 ) { return (index < itemArr.Size()) ? itemArr[index] : 0; }
 	// Is carrying anything - primarily a query for the animation system.
 	GameItem* IsCarrying();
-	bool SwapWeapons();	// swap between the melee and ranged weapons
+	bool SwapWeapons();			// swap between the melee and ranged weapons
+	bool Swap( int i, int j );	// swap 2 slots 
 
 	// Gets the ranged weapon, optionally returns the trigger.
 	IRangedWeaponItem*	GetRangedWeapon( grinliz::Vector3F* trigger );

@@ -548,6 +548,19 @@ GameItem* ItemComponent::IsCarrying()
 }
 
 
+bool ItemComponent::Swap( int i, int j ) 
+{
+	if (    i > 0 && j > 0 && i < itemArr.Size() && j < itemArr.Size()
+		 && !itemArr[i]->Intrinsic()
+		 && !itemArr[j]->Intrinsic() )
+	{
+		grinliz::Swap( &itemArr[i], &itemArr[j] );
+		return true;
+	}
+	return false;
+}
+
+
 bool ItemComponent::SwapWeapons()
 {
 	int i=0;
@@ -578,7 +591,7 @@ bool ItemComponent::SwapWeapons()
 		++i;
 	}
 	if ( slot0 >= 0 && slot1 >= 0 ) {
-		Swap( &itemArr[slot0], &itemArr[slot1] );
+		grinliz::Swap( &itemArr[slot0], &itemArr[slot1] );
 	}
 	SetHardpoints();
 

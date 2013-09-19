@@ -78,7 +78,7 @@ void DialogScene::ItemTapped( const gamui::UIItem* item )
 
 gamui::RenderAtom DialogScene::DragStart( const gamui::UIItem* item )
 {
-	PushButton* button = (PushButton*)item;
+	Button* button = (Button*)item;
 	RenderAtom atom, nullAtom;
 	button->GetDeco( &atom, 0 );
 	if ( !atom.Equal( nullAtom ) ) {

@@ -45,6 +45,8 @@ public:
 	virtual void Draw3D( U32 deltaTime );
 	virtual void DrawDebugText();
 
+	virtual void SceneResult( int sceneID, int result );
+
 private:
 	void Save();
 	void Load();
