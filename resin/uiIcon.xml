@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with TexturePacker http://texturepacker.com-->
+<!-- $TexturePacker:SmartUpdate:d72fed32dc7e2c5b5e92c23adaab1eed$ -->
+<!--Format:
+n  => name of the sprite
+x  => sprite x pos in texture
+y  => sprite y pos in texture
+w  => sprite width (may be trimmed)
+h  => sprite height (may be trimmed)
+oX => sprite's x-corner offset (only available if trimmed)
+oY => sprite's y-corner offset (only available if trimmed)
+oW => sprite's original width (only available if trimmed)
+oH => sprite's original height (only available if trimmed)
+r => 'y' only set if sprite is rotated
+-->
+<TextureAtlas imagePath="uiIcon.png" width="256" height="256">
+    <sprite n="beamgun" x="64" y="192" w="64" h="64"/>
+    <sprite n="blaster" x="64" y="128" w="64" h="64"/>
+    <sprite n="cancel" x="64" y="64" w="64" h="64"/>
+    <sprite n="default" x="192" y="0" w="64" h="64"/>
+    <sprite n="human" x="128" y="0" w="64" h="64"/>
+    <sprite n="okay" x="64" y="0" w="64" h="64"/>
+    <sprite n="pistol" x="0" y="192" w="64" h="64"/>
+    <sprite n="pulse" x="0" y="128" w="64" h="64"/>
+    <sprite n="ring" x="0" y="64" w="64" h="64"/>
+    <sprite n="shield" x="0" y="0" w="64" h="64"/>
+</TextureAtlas>

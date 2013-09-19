@@ -90,9 +90,11 @@ gamui::RenderAtom DialogScene::DragStart( const gamui::UIItem* item )
 void DialogScene::DragEnd( const gamui::UIItem* start, const gamui::UIItem* end )
 {
 	if ( end ) {
-		((PushButton*)end)->SetDeco( LumosGame::CalcDecoAtom( LumosGame::DECO_OKAY, true ), LumosGame::CalcDecoAtom( LumosGame::DECO_OKAY, false ) );
+		((PushButton*)end)->SetDeco( LumosGame::CalcDecoAtom( LumosGame::DECO_OKAY, true ), 
+			                         LumosGame::CalcDecoAtom( LumosGame::DECO_OKAY, false ) );
 	}
 	else if ( start ) {
-		((PushButton*)start)->SetDeco( LumosGame::CalcDecoAtom( LumosGame::DECO_OKAY, true ), LumosGame::CalcDecoAtom( LumosGame::DECO_OKAY, false ) );
+		((PushButton*)start)->SetDeco( LumosGame::CalcDecoAtom( LumosGame::DECO_OKAY, true ), 
+			                           LumosGame::CalcDecoAtom( LumosGame::DECO_OKAY, false ) );
 	}
 }

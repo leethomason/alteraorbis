@@ -1,6 +1,7 @@
 <items>
   <item name="humanFemale"
         resource="humanFemale"
+        uiIcon="human"
 			  flags="GOLD_PICKUP"
         procedural="suit"
         mob="denizen"
@@ -17,6 +18,7 @@
 
   <item name="humanMale"
         resource="humanMale"
+        uiIcon="human"
         flags="GOLD_PICKUP"
         procedural="suit"
         mob="denizen"
@@ -221,6 +223,7 @@
 
   <item name="ring"
         resource="ring"
+        uiIcon="ring"
         flags="MELEE_WEAPON"
 		    procedural="ring"
         hardpoint="trigger"
@@ -230,6 +233,7 @@
   
   <item name="blaster"
         resource="blaster"
+        uiIcon="blaster"
         flags="MELEE_WEAPON RANGED_WEAPON"
         hardpoint="trigger"
         mass="1.5"
@@ -244,6 +248,7 @@
 
   <item name="beamgun"
         resource="beamgun"
+        uiIcon="beamgun"
         flags="MELEE_WEAPON RANGED_WEAPON"
         hardpoint="trigger"
         mass="1.5"
@@ -258,6 +263,7 @@
 
   <item name="pistol"
         resource="pistol"
+        uiIcon="pistol"
         flags="MELEE_WEAPON RANGED_WEAPON"
         hardpoint="trigger"
         mass="1.5"
@@ -272,6 +278,7 @@
 
   <item name="pulse"
         resource="pulse"
+        uiIcon="pulse"
         flags="MELEE_WEAPON RANGED_WEAPON"
         hardpoint="trigger"
         mass="2.0"
@@ -286,6 +293,7 @@
 
   <item name="shield"
         resource="shield"
+        uiIcon="shield"
         flags="HELD_AT_HARDPOINT"
         hardpoint="shield"
         reload ="3000"

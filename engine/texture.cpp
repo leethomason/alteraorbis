@@ -461,6 +461,7 @@ void Texture::GetTableEntry( const char* name, TableEntry* te ) const
 		const gamedb::Item* table = item->Child( "table" );
 		if ( table ) {
 			const gamedb::Item* child = table->Child( name );
+			GLASSERT( child );
 			GetTE( child, te );
 		}
 	}
@@ -469,7 +470,7 @@ void Texture::GetTableEntry( const char* name, TableEntry* te ) const
 
 void Texture::GetTE( const gamedb::Item* child, TableEntry* te ) const
 {
-	te->name = StringPool::Intern( child->Name(), true );
+	te->name = StringPool::Intern( child->Name() );
 
 	float x = child->GetFloat( "x" );
 	float y = child->GetFloat( "y" );

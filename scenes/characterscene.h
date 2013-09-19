@@ -68,11 +68,7 @@ private:
 		KV_CHR,
 		KV_INT,
 		KV_DEX,
-		KV_EXTRA_0,
-		KV_EXTRA_1,
-		KV_EXTRA_2,
-
-		NUM_TEXT_KV
+		NUM_TEXT_KV = KV_DEX+6
 	};
 	
 	LumosGame*		lumosGame;
