@@ -19,6 +19,8 @@
 
   <!-- Name generators -->
   <markov filename="sectorNames.txt" assetName="sector" />
+  <markov filename="humanMaleNames.txt" assetName="humanMaleNames" />
+  <markov filename="humanFemaleNames.txt" assetName="humanFemaleNames" />
   
   <!-- Icon and UI -->
   <texture filename="title.png" />

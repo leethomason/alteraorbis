@@ -91,8 +91,7 @@ void CharacterScene::SetItemInfo( const GameItem* item, const GameItem* user )
 
 	CStr< 32 > str;
 
-	str.Format( "%s", "name" );
-	textVal[KV_NAME].SetText( str.c_str() );
+	textVal[KV_NAME].SetText( item->ProperName() ? item->ProperName() : item->Name() );
 	textKey[KV_NAME].SetText( "Name" );
 
 	str.Format( "%d", item->id );
@@ -205,7 +204,7 @@ void CharacterScene::SetButtonText()
 	for( int i=0; i<NUM_ITEM_BUTTONS; ++i ) {
 		const GameItem* item = itemComponent->GetItem(i);
 		if ( item && !item->Intrinsic() ) {
-			itemButton[count].SetText( item->name.c_str() );
+			itemButton[count].SetText( item->ProperName() ? item->ProperName() : item->Name() );
 
 			IString decoName = item->GetValue( "uiIcon" );
 			RenderAtom atom = LumosGame::CalcUIIconAtom( decoName.c_str(), true );

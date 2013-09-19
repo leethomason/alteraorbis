@@ -73,6 +73,7 @@ void GameItem::Serialize( XStream* xs )
 	XarcOpen( xs, "GameItem" );
 
 	XARC_SER( xs, name );
+	XARC_SER( xs, properName );
 	XARC_SER( xs, desc );
 	XARC_SER( xs, resource );
 	XARC_SER( xs, id );
@@ -222,6 +223,7 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 	GLASSERT( StrEqual( ele->Name(), "item" ));
 	
 	name		= StringPool::Intern( ele->Attribute( "name" ));
+	properName	= StringPool::Intern( ele->Attribute( "properName" ));
 	desc		= StringPool::Intern( ele->Attribute( "desc" ));
 	resource	= StringPool::Intern( ele->Attribute( "resource" ));
 	id = 0;
@@ -257,7 +259,7 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 		 attr = attr->Next() )
 	{
 		IString name = StringPool::Intern( attr->Name() );
-		if ( name == "name" || name == "desc" || name == "resource" || name == "flags" ) {
+		if ( name == "name" || name == "properName" || name == "desc" || name == "resource" || name == "flags" ) {
 			// handled above.
 		}
 		else if ( name == "hardpoint" || name == "hp" ) {

@@ -269,6 +269,7 @@ public:
 	void Apply( const GameItem* intrinsic );	
 
 	const char* Name() const			{ return name.c_str(); }
+	const char* ProperName() const		{ return properName.c_str(); }
 	const char* Desc() const			{ return desc.c_str(); }
 	const char* ResourceName() const	{ return resource.c_str(); }
 
@@ -311,6 +312,7 @@ public:
 
 	// ------ description ------
 	grinliz::IString		name;		// name of the item
+	grinliz::IString		properName;	// the proper name, if the item has one "John"
 	grinliz::IString		desc;		// description / alternate name
 	grinliz::IString		key;		// modified name, for storage. not serialized.
 	grinliz::IString		resource;	// resource used to  render the item
@@ -366,6 +368,7 @@ public:
 	void CopyFrom( const GameItem* rhs ) {
 		if ( rhs ) {
 			name			= rhs->name;
+			properName		= rhs->properName;
 			desc			= rhs->desc;
 			key				= rhs->key;
 			resource		= rhs->resource;
@@ -396,6 +399,7 @@ public:
 		}
 		else {
 			name = grinliz::IString();
+			properName = grinliz::IString();
 			desc = grinliz::IString();
 			key  = grinliz::IString();
 			resource = grinliz::IString();
