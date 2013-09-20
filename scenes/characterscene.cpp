@@ -94,7 +94,6 @@ void CharacterScene::Resize()
 		moneyText[i+1].SetPos(  moneyImage[i+1].X() + moneyImage[i+1].Width(),	 moneyText[0].Y() );
 	}
 
-
 	int col=0;
 	int row=0;
 	for( int i=1; i<NUM_ITEM_BUTTONS; ++i ) {
