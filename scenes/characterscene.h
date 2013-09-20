@@ -20,6 +20,7 @@
 #include "../gamui/gamui.h"
 #include "../grinliz/glcontainer.h"
 #include "../engine/screenport.h"
+#include "../game/gamelimits.h"
 
 class LumosGame;
 class Engine;
@@ -78,12 +79,14 @@ private:
 	ItemComponent*	itemComponent;	// what item or inventory are we displaying?
 	Model*			model;
 
-	Screenport		screenport;
-	gamui::PushButton okay;
+	Screenport			screenport;
+	gamui::PushButton	okay;
 	gamui::ToggleButton itemButton[NUM_ITEM_BUTTONS];
 	int					itemButtonIndex[NUM_ITEM_BUTTONS];	// the index in the ItemComponent
-	gamui::TextLabel textKey[NUM_TEXT_KV];
-	gamui::TextLabel textVal[NUM_TEXT_KV];
+	gamui::TextLabel	textKey[NUM_TEXT_KV];
+	gamui::TextLabel	textVal[NUM_TEXT_KV];
+	gamui::TextLabel	moneyText[NUM_CRYSTAL_TYPES+1];
+	gamui::Image		moneyImage[NUM_CRYSTAL_TYPES+1];
 };
 
 

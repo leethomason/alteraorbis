@@ -34,6 +34,29 @@ CharacterScene::CharacterScene( LumosGame* game, CharacterSceneData* csd ) : Sce
 		textVal[i].Init( &gamui2D );
 	}
 
+	float size = gamui2D.GetTextHeight() * 2.0f;
+	for( int i=0; i<NUM_CRYSTAL_TYPES+1; ++i ) {
+		moneyText[i].Init( &gamui2D );
+
+		static const char* NAME[NUM_CRYSTAL_TYPES+1] = {
+			"au",
+			"crystalGreen",
+			"crystalRed",
+			"crystalBlue",
+			"crystalViolet"
+		};
+		RenderAtom atom = LumosGame::CalcUIIconAtom( NAME[i], true );
+		moneyImage[i].Init( &gamui2D, atom, true );
+		moneyImage[i].SetSize( size, size );
+	}
+	CStr<64> str;
+	str.Format( "%d", itemComponent->GetWallet().gold );
+	moneyText[0].SetText( str.c_str() );
+	for( int i=0; i<NUM_CRYSTAL_TYPES; ++i ) {
+		str.Format( "%d", itemComponent->GetWallet().crystal[i] );
+		moneyText[i+1].SetText( str.c_str() );
+	}
+
 	engine->lighting.direction.Set( 0, 1, 1 );
 	engine->lighting.direction.Normalize();
 	
@@ -59,6 +82,18 @@ void CharacterScene::Resize()
 
 	LayoutCalculator layout = lumosGame->DefaultLayout();
 	layout.PosAbs( &itemButton[0], 0, 0 );
+
+	float space = gamui2D.GetTextHeight() * 2.0f;
+	float dy = 0.5f * ( moneyImage[0].Height() - moneyText[0].Height() );
+
+	layout.PosAbs( &moneyImage[0], 2, 0, false );
+	moneyText[0].SetPos( moneyImage[0].X() + moneyImage[0].Width(), moneyImage[0].Y()+dy );
+
+	for( int i=0; i<NUM_CRYSTAL_TYPES; ++i ) {
+		moneyImage[i+1].SetPos( moneyText[i].X() + moneyText[i].Width() + space, moneyImage[0].Y() );
+		moneyText[i+1].SetPos(  moneyImage[i+1].X() + moneyImage[i+1].Width(),	 moneyText[0].Y() );
+	}
+
 
 	int col=0;
 	int row=0;

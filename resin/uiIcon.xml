@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with TexturePacker http://texturepacker.com-->
-<!-- $TexturePacker:SmartUpdate:d72fed32dc7e2c5b5e92c23adaab1eed$ -->
+<!-- $TexturePacker:SmartUpdate:8ad66845f4ef224ef6df3a9f78e935a7$ -->
 <!--Format:
 n  => name of the sprite
 x  => sprite x pos in texture
@@ -13,15 +13,20 @@ oW => sprite's original width (only available if trimmed)
 oH => sprite's original height (only available if trimmed)
 r => 'y' only set if sprite is rotated
 -->
-<TextureAtlas imagePath="uiIcon.png" width="256" height="256">
-    <sprite n="beamgun" x="64" y="192" w="64" h="64"/>
-    <sprite n="blaster" x="64" y="128" w="64" h="64"/>
-    <sprite n="cancel" x="64" y="64" w="64" h="64"/>
-    <sprite n="default" x="192" y="0" w="64" h="64"/>
-    <sprite n="human" x="128" y="0" w="64" h="64"/>
-    <sprite n="okay" x="64" y="0" w="64" h="64"/>
-    <sprite n="pistol" x="0" y="192" w="64" h="64"/>
-    <sprite n="pulse" x="0" y="128" w="64" h="64"/>
-    <sprite n="ring" x="0" y="64" w="64" h="64"/>
-    <sprite n="shield" x="0" y="0" w="64" h="64"/>
+<TextureAtlas imagePath="uiIcon.png" width="256" height="512">
+    <sprite n="au" x="0" y="256" w="128" h="128"/>
+    <sprite n="beamgun" x="128" y="448" w="64" h="64"/>
+    <sprite n="blaster" x="128" y="384" w="64" h="64"/>
+    <sprite n="cancel" x="192" y="320" w="64" h="64"/>
+    <sprite n="crystalBlue" x="128" y="128" w="128" h="128"/>
+    <sprite n="crystalGreen" x="0" y="128" w="128" h="128"/>
+    <sprite n="crystalRed" x="128" y="0" w="128" h="128"/>
+    <sprite n="crystalViolet" x="0" y="0" w="128" h="128"/>
+    <sprite n="default" x="128" y="320" w="64" h="64"/>
+    <sprite n="human" x="192" y="256" w="64" h="64"/>
+    <sprite n="okay" x="128" y="256" w="64" h="64"/>
+    <sprite n="pistol" x="64" y="448" w="64" h="64"/>
+    <sprite n="pulse" x="64" y="384" w="64" h="64"/>
+    <sprite n="ring" x="0" y="448" w="64" h="64"/>
+    <sprite n="shield" x="0" y="384" w="64" h="64"/>
 </TextureAtlas>
