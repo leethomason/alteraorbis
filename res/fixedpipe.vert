@@ -1,5 +1,22 @@
 // CAUTION: never use 'int' attributes. They don't work for reasons unknown to me.
 
+/*
+	Uniform usage. (INTSTANCE, BONE_XFORM)
+
+	u_mMatrix 			mat4 * INST 			64
+	u_controlParamArr	vec4 * INST 			16
+	u_colorParamArr		vec4 * INST 			16
+	u_colorMult			vec4					1
+	//u_boneXForm			mat4 * INST * BONE      1024  << would like to be 128!!
+	u_bonePos			vec4 * INST * BONE 		256
+	u_boneRot			vec4 * INST * BONE 		256
+	u_normalMatrix		mat4					4
+	u_lightDir			vec3					1
+	u_ambient			vec4					1
+	u_diffuse			vec4					1
+
+*/
+
 uniform mat4 	u_mvpMatrix;		// model-view-projection.
 									// although the model is identity in the instancing case.
 #if INSTANCE == 1

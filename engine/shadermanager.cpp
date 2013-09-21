@@ -406,6 +406,24 @@ FIXME: need to handle driver updates invalidating cache.
 	AppendConst( &header, "EL_MAX_INSTANCE", EL_MAX_INSTANCE );
 	AppendConst( &header, "EL_MAX_BONES",	 EL_MAX_BONES );
 
+	int predictedUniform = 0;
+	int predictedUniformInst = 0;
+
+	predictedUniform		=	4 +		// u_mvpMatrix
+								1;		// u_colorMult
+	predictedUniformInst	=	4 +		// u_mMatrix
+								1;		// u_controlParamArr
+	if ( flags & TEXTURE0 )				predictedUniform	 += 1;
+	if ( flags & COLOR_PARAM )			predictedUniformInst += 1;
+	if ( flags & BONE_FILTER )			predictedUniformInst += 1;
+	if ( flags & TEXTURE0_XFORM )		predictedUniformInst += 1;
+	if ( flags & TEXTURE0_CLIP )		predictedUniformInst += 1;
+	if ( flags & TEXTURE0_COLORMAP )	predictedUniformInst += 4;
+	if ( flags & BONE_FILTER )			predictedUniformInst += 1;
+	if ( flags & BONE_XFORM )			predictedUniformInst += 4 * EL_MAX_BONES;
+	if ( flags & LIGHTING_DIFFUSE )		predictedUniform += 7;	// normal matrix & lights
+	if ( flags & LIGHTING_HEMI )		predictedUniform += 7;	// normal matrix & lights
+
 #if 0 
 #ifdef DEBUG_OUTPUT
 	GLOUTPUT(( "header\n%s\n", header.c_str() ));
@@ -464,12 +482,43 @@ FIXME: need to handle driver updates invalidating cache.
 			delete [] data;
 		}
 	}
-	//int nUniforms, maxUniforms;
-	//glGetProgramiv( shader->prog, GL_ACTIVE_UNIFORMS, &nUniforms );
+	int nUniforms = 0;
+	glGetProgramiv( shader->prog, GL_ACTIVE_UNIFORMS, &nUniforms );
+	int uniformSize = 0;
+	char name[100];
+	GLint length = 0;
+	GLsizei size = 0;
+	GLenum type = 0;
+	for( int i=0; i<nUniforms; ++i ) {
+		glGetActiveUniform( shader->prog, i, 100, &length, &size, &type, name );
+		const char* cType = "?";
+		int v4Size = 1;
+		switch ( type ) {
+		case GL_FLOAT_MAT2:	cType = "mat2";	v4Size = 2;	break;
+		case GL_FLOAT_MAT3:	cType = "mat3";	v4Size = 3;	break;
+		case GL_FLOAT_MAT4:	cType = "mat4";	v4Size = 4;	break;
+		case GL_SAMPLER_2D: cType = "sampler2D";		break;
+		case GL_FLOAT:		cType = "float";			break;
+		case GL_FLOAT_VEC2:	cType = "vec2";				break;
+		case GL_FLOAT_VEC3:	cType = "vec3";				break;
+		case GL_FLOAT_VEC4:	cType = "vec4";				break;
+		default: 
+			GLASSERT( 0 );
+			break;
+		};
+
+		GLOUTPUT_REL(( "  %20s %10s %d x [%d] = %d\n", name, cType, v4Size, size, v4Size*size ));
+		uniformSize += v4Size*size;
+	}
+	GLOUTPUT_REL(( "Queried uniform size(v4): %d\n", uniformSize ));
+	int nInstance = (flags & INSTANCE) ? EL_MAX_INSTANCE : 1;
+	GLOUTPUT_REL(( "Predicted uniform size(v4): %d\n\n", predictedUniform + predictedUniformInst*nInstance ));
+
+
 	//glGetIntegerv( GL_MAX_VERTEX_UNIFORM_COMPONENTS, &maxUniforms );
 	//GLOUTPUT_REL(( "Shader %d created. Uniforms=%d / %d\n", flags, nUniforms, maxUniforms ));
 
-	GLOUTPUT_REL(( "Shader %d created.\n", flags ));
+	GLOUTPUT_REL(( "Shader %d created. nUniforms=%d\n", flags, nUniforms ));
 	GLOUTPUT_REL(( "%s", header.c_str() ));
 
 	CHECK_GL_ERROR;

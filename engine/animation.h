@@ -21,6 +21,7 @@
 #include "../grinliz/glcontainer.h"
 
 #include "../shared/gamedbreader.h"
+#include "../engine/enginelimits.h"
 
 #include "vertex.h"
 
@@ -71,7 +72,11 @@ public:
 						int typeB,					// 2nd animation
 						U32 timeB,					// 2nd animation time
 						float crossFraction,		// 0: all A, 1: all B
+#ifdef EL_VEC_BONES
+						grinliz::Vector4F* outPos, grinliz::Quaternion* outRot ) const;
+#else
 						grinliz::Matrix4* out ) const;	// At least EL_MAX_BONES
+#endif
 
 	int GetMetaData(	int type,
 						U32 t0, U32 t1 ) const;	// t1 > t0

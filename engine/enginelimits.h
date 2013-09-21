@@ -95,5 +95,7 @@ enum {
 //#define EL_SHOW_ALL_UNITS
 
 // --- Performance -- //
+// Pain to implement. Less interesting than the "using all the uniforms there are" approach.
+//#define EL_VEC_BONES	// use vector pos & rot for bones, instead of mat4, to save uniform space in shader
 
 #endif

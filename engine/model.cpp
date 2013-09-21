@@ -337,7 +337,12 @@ void Model::Serialize( XStream* xs, SpaceTree* tree )
 			XARC_SER( xs, aux->texture0Clip );
 			XARC_SER( xs, aux->texture0ColorMap );
 			XARC_SER_ARR( xs, aux->animToModelMap, EL_MAX_BONES );
+#ifdef EL_VEC_BONES
+			XARC_SER_ARR( xs, aux->bonePos, EL_MAX_BONES );
+			XARC_SER_ARR( xs, aux->boneRot, EL_MAX_BONES );
+#else
 			XARC_SER_ARR( xs, aux->boneMats[0].x, EL_MAX_BONES*16 );
+#endif
 			save->CloseElement();
 		}
 	}
@@ -362,7 +367,12 @@ void Model::Serialize( XStream* xs, SpaceTree* tree )
 			XARC_SER( xs, aux->texture0Clip );
 			XARC_SER( xs, aux->texture0ColorMap );
 			XARC_SER_ARR( xs, aux->animToModelMap, EL_MAX_BONES );
+#ifdef EL_VEC_BONES
+			XARC_SER_ARR( xs, aux->bonePos, EL_MAX_BONES );
+			XARC_SER_ARR( xs, aux->boneRot, EL_MAX_BONES );
+#else
 			XARC_SER_ARR( xs, aux->boneMats[0].x, EL_MAX_BONES*16 );
+#endif
 			load->CloseElement();
 		}
 	}
@@ -601,26 +611,45 @@ void Model::CalcAnimation()
 	GLASSERT( HasAnimation() );
 	GLASSERT( aux );
 
+#ifdef EL_VEC_BONES
+	Vector4F animPos[EL_MAX_BONES];
+	Quaternion animRot[EL_MAX_BONES];
+#else
 	Matrix4 animMats[EL_MAX_BONES];
+#endif
 
 	if ( (crossFadeTime < totalCrossFadeTime) && (prevAnim.id >= 0) ) {
 		float fraction = (float)crossFadeTime / (float)totalCrossFadeTime;
 		animationResource->GetTransform( prevAnim.id,    prevAnim.time,
 										 currentAnim.id, currentAnim.time,
 										 fraction,
+#ifdef EL_VEC_BONES
+										 animPos, animRot );
+#else
 										 animMats );
+#endif
 	}
 	else {
 		animationResource->GetTransform( currentAnim.id, currentAnim.time,
 										 0, 0, 0,
+#ifdef EL_VEC_BONES
+										 animPos, animRot );
+#else
 										 animMats );
+#endif
 	}
 
 	// The animationResource returns boneMats in armature order.
 	// They need to be submitted in Model order.
 	for( int i=0; i<EL_MAX_BONES; ++i ) {
 		if ( aux->animToModelMap[i] >= 0 ) {
+#ifdef EL_VEC_BONES
+			int idx = aux->animToModelMap[i];
+			aux->bonePos[idx] = animPos[i];
+			aux->boneRot[idx] = animRot[i];
+#else
 			aux->boneMats[aux->animToModelMap[i]] = animMats[i];
+#endif
 		}
 	}
 }
@@ -647,7 +676,13 @@ void Model::CalcMetaData( int id, grinliz::Matrix4* meta )
 		r.SetAxisAngle( data->axis, data->rotation );
 		t.SetTranslation( data->pos );
 
+#ifdef EL_VEC_BONES
+		Matrix4 m;
+		aux->boneRot[index].ToMatrix( &m );
+		m.SetCol( 3, aux->bonePos[index].x, aux->bonePos[index].y, aux->bonePos[index].z );
+#else
 		*meta = xform * aux->boneMats[index] * t * r;						
+#endif
 	}
 }
 

@@ -128,7 +128,12 @@ public:
 		U_TEXTURE0_CLIP,
 		U_TEXTURE0_COLORMAP,
 
+#ifdef EL_VEC_BONES
+		U_BONE_POS,
+		U_BONE_ROT,
+#else
 		U_BONEXFORM,			// the instance and normal mode use the same name.
+#endif
 
 		U_TEXTURE0,
 		U_TEXTURE1,

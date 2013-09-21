@@ -187,7 +187,12 @@ struct ModelAux {
 	grinliz::Vector4F	texture0Clip;
 	grinliz::Matrix4	texture0ColorMap;
 	int					animToModelMap[EL_MAX_BONES];
+#ifdef EL_VEC_BONES
+	grinliz::Vector4F	bonePos[EL_MAX_BONES];
+	grinliz::Quaternion	boneRot[EL_MAX_BONES];
+#else
 	grinliz::Matrix4	boneMats[EL_MAX_BONES];
+#endif
 };
 
 

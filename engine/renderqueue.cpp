@@ -19,6 +19,7 @@
 #include "gpustatemanager.h"
 #include "shadermanager.h"
 #include "../grinliz/glperformance.h"
+#include "../grinliz/glgeometry.h"
 #include <limits.h>
 
 using namespace grinliz;
@@ -131,7 +132,12 @@ void RenderQueue::Submit(	int modelRequired,
 			Vector4F	instanceTexture0XForm[EL_MAX_INSTANCE];
 			Vector4F	instanceTexture0Clip[EL_MAX_INSTANCE];
 			Matrix4		instanceTexture0ColorMap[EL_MAX_INSTANCE];
+#ifdef EL_VEC_BONES
+			Vector4F	instanceBonePos[EL_MAX_INSTANCE*EL_MAX_BONES];
+			Quaternion	instanceBoneRot[EL_MAX_INSTANCE*EL_MAX_BONES];
+#else
 			Matrix4		instanceBone[EL_MAX_INSTANCE*EL_MAX_BONES];
+#endif
 
 			atom->Bind( &stream, &data );
 			data.matrix = instanceMatrix;
@@ -141,7 +147,12 @@ void RenderQueue::Submit(	int modelRequired,
 			data.texture0XForm = instanceTexture0XForm;
 			data.texture0Clip = instanceTexture0Clip;
 			data.texture0ColorMap = instanceTexture0ColorMap;
+#ifdef EL_VEC_BONES
+			data.bonePos = instanceBonePos;
+			data.boneRot = instanceBoneRot;
+#else
 			data.bones  = instanceBone;
+#endif
 			GLASSERT( data.texture0 );	// not required, but not sure it works without
 
 			int k=start;
@@ -162,7 +173,12 @@ void RenderQueue::Submit(	int modelRequired,
 
 					if ( item->aux ) {
 						for( int i=0; i<EL_MAX_BONES; ++i ) {
+#ifdef EL_VEC_BONES
+							instanceBonePos[index*EL_MAX_BONES+i] = item->aux->bonePos[i];
+							instanceBoneRot[index*EL_MAX_BONES+i] = item->aux->boneRot[i];
+#else
 							instanceBone[index*EL_MAX_BONES+i]	= item->aux->boneMats[i];
+#endif
 						}
 						instanceTexture0XForm[index]	= item->aux->texture0XForm;
 						instanceTexture0Clip[index]		= item->aux->texture0Clip;

@@ -376,7 +376,11 @@ void AnimationResource::GetTransform(	int typeA,					// which animation to play:
 										int typeB,					// 2nd animation
 										U32 timeB,					// 2nd animation time
 										float crossFraction,		// 0: all A, 1: all B
+#ifdef EL_VEC_BONES
+										grinliz::Vector4F* animPos, grinliz::Quaternion* animRot ) const
+#else
 										grinliz::Matrix4* output ) const	// At least EL_MAX_BONES
+#endif
 {
 	// fixme: check for redundant call and return same output
 
@@ -395,7 +399,12 @@ void AnimationResource::GetTransform(	int typeA,					// which animation to play:
 	const BoneData& boneDataB = sequence[typeB].boneData;
 
 	for( int i=0; i<EL_MAX_BONES; ++i ) {
+#ifdef EL_VEC_BONES
+		animPos[i].Set(0,0,0,1);
+		animRot[i].Zero();
+#else
 		output[i].SetIdentity();
+#endif
 
 		if ( boneDataA.bone[i].name.empty() )
 			continue;
@@ -444,7 +453,8 @@ void AnimationResource::GetTransform(	int typeA,					// which animation to play:
 		Matrix4 inv;
 		inv.SetTranslation( -boneDataA.bone[i].refConcat );	// very easy inverse xform
 
-		Matrix4 t, r;
+		Matrix4		m;
+		Vector3F	t;
 
 		// This is a hack, or a bug, or a mis-understanding of the file
 		// format. (Eek. All bad.) Sometimes the position is set, 
@@ -452,17 +462,24 @@ void AnimationResource::GetTransform(	int typeA,					// which animation to play:
 		// else use the reference position.
 		static const Vector3F ZERO = { 0, 0, 0 };
 		if ( position.Equal( ZERO, 0.0001f )) {
-			t.SetTranslation( boneDataA.bone[i].refPos );
+			t = boneDataA.bone[i].refPos;
 		}
 		else {
-			t.SetTranslation( position );
+			t = position;
 		}
-		rotation.ToMatrix( &r );
-		Matrix4 m = t * r;
+		rotation.ToMatrix( &m );
+		m.SetCol( 3, t.x, t.y, t.z, 1 );
 
 		int parentIndex = boneDataA.bone[i].parent; 
 		if ( parentIndex >= 0 ) {
+#ifdef EL_VEC_BONES
+			Matrix4 out = concat[parentIndex] * m * inv;
+			animPos[i].Set( out.m41, out.m42, out.m43, out.m44 );
+			out.m41 = out.m42 = out.m43 = 0;
+			animRot[i].FromRotationMatrix( out );
+#else
 			output[i] = concat[parentIndex] * m * inv;
+#endif
 			concat[i] = concat[parentIndex] * m;
 		}
 		else {
