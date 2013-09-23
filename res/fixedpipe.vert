@@ -1,10 +1,11 @@
 // CAUTION: never use 'int' attributes. They don't work for reasons unknown to me.
 
 // Copied here so that it can be easily handled
-// if the instanceID isn't supported.
-int instance = gl_InstanceID;
+// if the InstanceID isn't supported.
+// INTEL BUG: if the ID is assigned, 'instance' is always 0.
+//int instance = gl_InstanceID;
 
-uniform mat4 	u_mvpMatrix;		// model-view-projection.
+uniform mat4 		u_mvpMatrix;						// model-view-projection.
 
 uniform mat4 		u_mMatrix[EL_MAX_INSTANCE];			// Additional model xform.
 uniform vec4		u_controlParamArr[EL_MAX_INSTANCE];
@@ -72,26 +73,26 @@ varying vec4 v_color;
 
 void main() {
 
-	vec4 controlParam 	= u_controlParamArr[instance];
+	vec4 controlParam 	= u_controlParamArr[gl_InstanceID];
 
 	#if SATURATION
 		v_saturation = controlParam.y;
 	#endif
 	#if COLOR_PARAM == 1
 		// Don't go insane with #if syntax later:
-		vec4 colorParam 	= u_colorParamArr[instance];
+		vec4 colorParam 	= u_colorParamArr[gl_InstanceID];
 	#endif
 	#if BONE_FILTER == 1
-		vec4 filterParam 	= u_filterParamArr[instance];
+		vec4 filterParam 	= u_filterParamArr[gl_InstanceID];
 	#endif
 	#if TEXTURE0_XFORM == 1
-		vec4 texture0XForm 	= u_texture0XFormArr[instance];
+		vec4 texture0XForm 	= u_texture0XFormArr[gl_InstanceID];
 	#endif
 	#if TEXTURE0_CLIP == 1
-		v_texture0Clip 		= u_texture0ClipArr[instance];
+		v_texture0Clip 		= u_texture0ClipArr[gl_InstanceID];
 	#endif
 	#if TEXTURE0_COLORMAP == 1
-		mat4 colorMap 		= u_colorMapArr[instance];
+		mat4 colorMap 		= u_colorMapArr[gl_InstanceID];
 	#endif
 
 	vec4 color = u_colorMult;
@@ -120,17 +121,17 @@ void main() {
 
 	mat4 xform = mat4( 1.0 );	
 	#if BONE_XFORM == 1
-		xform = u_boneXForm[int(a_boneID) + instance*EL_MAX_BONES];
+		xform = u_boneXForm[int(a_boneID) + gl_InstanceID*EL_MAX_BONES];
 	#endif
 	
 	#if BONE_XFORM == 0
-		vec4 pos = (u_mvpMatrix * u_mMatrix[instance]) * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );
+		vec4 pos = (u_mvpMatrix * u_mMatrix[gl_InstanceID]) * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );
 	#else
-		vec4 pos = (u_mvpMatrix * u_mMatrix[instance]) * xform * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );
+		vec4 pos = (u_mvpMatrix * u_mMatrix[gl_InstanceID]) * xform * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );
 	#endif
 	
 	#if LIGHTING_DIFFUSE  > 0
-		vec3 normal = normalize( (( u_normalMatrix * u_mMatrix[instance]) * xform * vec4( a_normal.x, a_normal.y, a_normal.z, 0 ) ).xyz );
+		vec3 normal = normalize( (( u_normalMatrix * u_mMatrix[gl_InstanceID]) * xform * vec4( a_normal.x, a_normal.y, a_normal.z, 0 ) ).xyz );
 
 		#if LIGHTING_DIFFUSE == 1
 			// Lambert lighting with ambient term.
