@@ -201,6 +201,8 @@ void MatrixStack::Multiply( const grinliz::Matrix4& m )
 /*static*/ GPUState::DepthTest	GPUState::currentDepthTest = DEPTH_TEST_TRUE;
 /*static*/ GPUState::ColorWrite	GPUState::currentColorWrite = COLOR_WRITE_TRUE;
 /*static*/ GPUState::StencilMode GPUState::currentStencilMode = STENCIL_OFF;
+/*static*/ Matrix4		GPUState::identity[EL_MAX_INSTANCE];
+/*static*/ Vector4F		GPUState::defaultControl[EL_MAX_INSTANCE];
 
 /*static*/ bool GPUState::SupportsVBOs()
 {
@@ -258,7 +260,7 @@ void MatrixStack::Multiply( const grinliz::Matrix4& m )
 
 
 //static 
-void GPUState::Weld( const GPUState& state, const GPUStream& stream, const GPUStreamData& data )
+void GPUState::Weld( const GPUState& state, const GPUStream& stream, const GPUStreamData& data, int nInstance )
 {
 	CHECK_GL_ERROR;
 	GLASSERT( stream.stride > 0 );
@@ -287,75 +289,43 @@ void GPUState::Weld( const GPUState& state, const GPUStream& stream, const GPUSt
 	shadman->ActivateShader( flags );
 	shadman->ClearStream();
 
+	// FIXME: this mv - mvp logit sure seems flawed. Should be walking a stack? Or just using bottom?
 	const Matrix4& mv = GPUState::TopMatrix( GPUState::MODELVIEW_MATRIX );
+	const Matrix4& v  = GPUState::ViewMatrix();
 
-	if ( flags & ShaderManager::INSTANCE ) {
-		Matrix4 vp;
-		MultMatrix4( GPUState::TopMatrix( GPUState::PROJECTION_MATRIX ), GPUState::ViewMatrix(), &vp );
+    Matrix4 mvp;
+    MultMatrix4( GPUState::TopMatrix( GPUState::PROJECTION_MATRIX ), mv, &mvp );
+    shadman->SetUniform( ShaderManager::U_MVP_MAT, mvp );
+ 
+	shadman->SetUniformArray( ShaderManager::U_M_MAT_ARR, EL_MAX_INSTANCE, data.matrix ? data.matrix : identity );
 
-		shadman->SetUniform( ShaderManager::U_MVP_MAT, vp );
-		GLASSERT( data.matrix );
-		shadman->SetUniformArray( ShaderManager::U_M_MAT_ARR, EL_MAX_INSTANCE, data.matrix );
-		GLASSERT( stream.instanceIDOffset > 0 );
-		shadman->SetStreamData( ShaderManager::A_INSTANCE_ID, 1, GL_UNSIGNED_SHORT, 
-			                    stream.stride, PTR( data.streamPtr, stream.instanceIDOffset ) );
-		
-		if ( flags & ShaderManager::COLOR_PARAM ) {
-			GLASSERT( data.colorParam );
-			shadman->SetUniformArray( ShaderManager::U_COLOR_PARAM_ARR, EL_MAX_INSTANCE, data.colorParam );
-		}
-		if ( flags & ShaderManager::BONE_FILTER ) {
-			GLASSERT( data.boneFilter );
-			shadman->SetUniformArray( ShaderManager::U_FILTER_PARAM_ARR, EL_MAX_INSTANCE, data.boneFilter );
-		}
-		if ( flags & ShaderManager::TEXTURE0_XFORM ) {
-			GLASSERT( data.texture0XForm );
-			shadman->SetUniformArray( ShaderManager::U_TEXTURE0_XFORM_ARR, EL_MAX_INSTANCE, data.texture0XForm );
-		}
-		if ( flags & ShaderManager::TEXTURE0_CLIP ) {
-			GLASSERT( data.texture0Clip );
-			shadman->SetUniformArray( ShaderManager::U_TEXTURE0_CLIP_ARR, EL_MAX_INSTANCE, data.texture0Clip );
-		}
-		if ( flags & ShaderManager::TEXTURE0_COLORMAP ) {
-			GLASSERT( data.texture0ColorMap );
-			shadman->SetUniformArray( ShaderManager::U_TEXTURE0_COLORMAP_ARR, EL_MAX_INSTANCE, data.texture0ColorMap );
-		}
-
-		GLASSERT( data.controlParam );
-		shadman->SetUniformArray( ShaderManager::U_CONTROL_PARAM_ARR, EL_MAX_INSTANCE, data.controlParam );
+	if ( flags & ShaderManager::COLOR_PARAM ) {
+		GLASSERT( data.colorParam );
+		shadman->SetUniformArray( ShaderManager::U_COLOR_PARAM_ARR, EL_MAX_INSTANCE, data.colorParam );
 	}
-	else {
-		Matrix4 mvp;
-		MultMatrix4( GPUState::TopMatrix( GPUState::PROJECTION_MATRIX ), mv, &mvp );
-		shadman->SetUniform( ShaderManager::U_MVP_MAT, mvp );
-		if ( flags & ShaderManager::COLOR_PARAM ) {
-			GLASSERT( data.colorParam );
-			shadman->SetUniform( ShaderManager::U_COLOR_PARAM, data.colorParam[0] );
-		}
-		if ( flags & ShaderManager::BONE_FILTER ) {
-			GLASSERT( data.boneFilter );
-			shadman->SetUniform( ShaderManager::U_FILTER_PARAM, data.boneFilter[0] );
-		}
-		if ( data.controlParam ) {
-			shadman->SetUniform( ShaderManager::U_CONTROL_PARAM, data.controlParam[0] );
-		}
-		else {
-			Vector4F v = { 1, 1, 1, 1 };
-			shadman->SetUniform( ShaderManager::U_CONTROL_PARAM, v );
-		}
-		if ( flags & ShaderManager::TEXTURE0_XFORM ) {
-			GLASSERT( data.texture0XForm );
-			shadman->SetUniform( ShaderManager::U_TEXTURE0_XFORM, data.texture0XForm[0] );
-		}
-		if ( flags & ShaderManager::TEXTURE0_CLIP ) {
-			GLASSERT( data.texture0Clip );
-			shadman->SetUniform( ShaderManager::U_TEXTURE0_CLIP, data.texture0Clip[0] );
-		}
-		if ( flags & ShaderManager::TEXTURE0_COLORMAP ) {
-			GLASSERT( data.texture0ColorMap );
-			shadman->SetUniform( ShaderManager::U_TEXTURE0_COLORMAP, data.texture0ColorMap[0] );
+	if ( flags & ShaderManager::BONE_FILTER ) {
+		GLASSERT( data.boneFilter );
+		shadman->SetUniformArray( ShaderManager::U_FILTER_PARAM_ARR, EL_MAX_INSTANCE, data.boneFilter );
+	}
+	if ( flags & ShaderManager::TEXTURE0_XFORM ) {
+		GLASSERT( data.texture0XForm );
+		shadman->SetUniformArray( ShaderManager::U_TEXTURE0_XFORM_ARR, EL_MAX_INSTANCE, data.texture0XForm );
+	}
+	if ( flags & ShaderManager::TEXTURE0_CLIP ) {
+		GLASSERT( data.texture0Clip );
+		shadman->SetUniformArray( ShaderManager::U_TEXTURE0_CLIP_ARR, EL_MAX_INSTANCE, data.texture0Clip );
+	}
+	if ( flags & ShaderManager::TEXTURE0_COLORMAP ) {
+		GLASSERT( data.texture0ColorMap );
+		shadman->SetUniformArray( ShaderManager::U_TEXTURE0_COLORMAP_ARR, EL_MAX_INSTANCE, data.texture0ColorMap );
+	}
+
+	if ( defaultControl[0].x != 1.0f ) {
+		for( int i=0; i<EL_MAX_INSTANCE; ++i ) {
+			defaultControl[i].Set( 1, 1, 1, 1 );
 		}
 	}
+	shadman->SetUniformArray( ShaderManager::U_CONTROL_PARAM_ARR, EL_MAX_INSTANCE, data.controlParam ? data.controlParam : defaultControl );
 
 	// Texture1
 	/*
@@ -394,10 +364,7 @@ void GPUState::Weld( const GPUState& state, const GPUStream& stream, const GPUSt
 	// bones
 	if ( flags & ShaderManager::BONE_XFORM ) {
 		GLASSERT( stream.boneOffset );	// could be zero...but that would be odd.
-		int count = EL_MAX_BONES;
-		if ( flags & ShaderManager::INSTANCE ) {
-			count *= EL_MAX_INSTANCE;
-		}
+		int count = EL_MAX_BONES * EL_MAX_INSTANCE;
 
 		// This could be much better packed (by a factor of 2) by using pos/rot as 2 vector4 instead
 		// of expanding to a matrix. And less work for the CPU as well. Disadvantages to keep in mind:
@@ -584,14 +551,13 @@ void GPUState::Clear( float r, float g, float b, float a )
 
 void GPUState::DrawQuads( const GPUStream& stream, const GPUStreamData& data, int nQuad )
 {
-	ClearShaderFlag( ShaderManager::INSTANCE );
 	quadsDrawn += nQuad;
 	++drawCalls;
 
 	GLASSERT( data.vertexBuffer );
 
 	glBindBufferX( GL_ARRAY_BUFFER, data.vertexBuffer );
-	Weld( *this, stream, data );
+	Weld( *this, stream, data, 1 );
 	glDrawArrays( GL_QUADS, 0, nQuad*4 );
 	glBindBufferX( GL_ARRAY_BUFFER, 0 );
 }
@@ -601,15 +567,8 @@ void GPUState::Draw( const GPUStream& stream, const GPUStreamData& data, int nIn
 {
 	if ( nIndex == 0 )
 		return;
+	if ( instances == 0 ) instances = 1;	// fix errors in old code
 
-	bool useInstancing = instances > 0;
-	if ( instances == 0 ) instances = 1;
-	if ( useInstancing ) {
-		SetShaderFlag( ShaderManager::INSTANCE );
-	}
-	else {
-		ClearShaderFlag( ShaderManager::INSTANCE );
-	}
 	GLASSERT( (primitive != GL_TRIANGLES ) || (nIndex % 3 == 0 ));
 
 	trianglesDrawn += instances * nIndex / 3;
@@ -623,10 +582,11 @@ void GPUState::Draw( const GPUStream& stream, const GPUStreamData& data, int nIn
 			glBindBufferX( GL_ARRAY_BUFFER, data.vertexBuffer );
 			GLASSERT( data.streamPtr == 0 );
 		}
-		Weld( *this, stream, data );
+		Weld( *this, stream, data, instances );
 
-		glDrawElements( primitive,	//GL_TRIANGLES except where debugging 
-						nIndex*instances, GL_UNSIGNED_SHORT, data.indexPtr );
+		glDrawElementsInstanced( primitive,	//GL_TRIANGLES except where debugging 
+								 nIndex, GL_UNSIGNED_SHORT, data.indexPtr,
+								 instances );
 
 		if ( data.vertexBuffer ) {
 			glBindBufferX( GL_ARRAY_BUFFER, 0 );
@@ -642,10 +602,10 @@ void GPUState::Draw( const GPUStream& stream, const GPUStreamData& data, int nIn
 		//
 		glBindBufferX( GL_ARRAY_BUFFER, data.vertexBuffer );
 		glBindBufferX( GL_ELEMENT_ARRAY_BUFFER, data.indexBuffer );
-		Weld( *this, stream, data );
+		Weld( *this, stream, data, instances );
 
-		glDrawElements( primitive,	// GL_TRIANGLES except when debugging 
-						nIndex*instances, GL_UNSIGNED_SHORT, 0 );
+		glDrawElementsInstanced( primitive,	// GL_TRIANGLES except when debugging 
+						nIndex, GL_UNSIGNED_SHORT, 0, instances );
 
 		glBindBufferX( GL_ARRAY_BUFFER, 0 );
 		glBindBufferX( GL_ELEMENT_ARRAY_BUFFER, 0 );
@@ -660,6 +620,7 @@ void GPUState::Draw( const GPUStream& stream, Texture* texture, const void* vert
 	data.streamPtr = vertex;
 	data.indexPtr = indices;
 	data.texture0 = texture;
+
 	Draw( stream, data, nIndex );
 }
 
@@ -870,22 +831,6 @@ GPUStream::GPUStream( const Vertex& vertex )
 	nTexture0 = 2;
 	texture0Offset = Vertex::TEXTURE_OFFSET;
 	boneOffset = Vertex::BONE_ID_OFFSET;
-}
-
-
-GPUStream::GPUStream( const InstVertex& vertex )
-{
-	Clear();
-
-	stride = sizeof( InstVertex );
-	nPos = 3;
-	posOffset = InstVertex::POS_OFFSET;
-	nNormal = 3;
-	normalOffset = InstVertex::NORMAL_OFFSET;
-	nTexture0 = 2;
-	texture0Offset = InstVertex::TEXTURE_OFFSET;
-	instanceIDOffset = InstVertex::INSTANCE_OFFSET;
-	boneOffset = InstVertex::BONE_ID_OFFSET;
 }
 
 

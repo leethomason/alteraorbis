@@ -120,7 +120,6 @@ void RenderQueue::Submit(	int modelRequired,
 		//			delta, state->StateFlags(), state->ShaderFlags(),
 		//			atom->texture->Name(), atom ));
 
-#ifdef XENOENGINE_INSTANCING
 		// The 2 paths is a PITA, both
 		// for startup time and debugging. If instancing
 		// in use, always instance.
@@ -132,12 +131,7 @@ void RenderQueue::Submit(	int modelRequired,
 			Vector4F	instanceTexture0XForm[EL_MAX_INSTANCE];
 			Vector4F	instanceTexture0Clip[EL_MAX_INSTANCE];
 			Matrix4		instanceTexture0ColorMap[EL_MAX_INSTANCE];
-#ifdef EL_VEC_BONES
-			Vector4F	instanceBonePos[EL_MAX_INSTANCE*EL_MAX_BONES];
-			Quaternion	instanceBoneRot[EL_MAX_INSTANCE*EL_MAX_BONES];
-#else
 			Matrix4		instanceBone[EL_MAX_INSTANCE*EL_MAX_BONES];
-#endif
 
 			atom->Bind( &stream, &data );
 			data.matrix = instanceMatrix;
@@ -147,12 +141,7 @@ void RenderQueue::Submit(	int modelRequired,
 			data.texture0XForm = instanceTexture0XForm;
 			data.texture0Clip = instanceTexture0Clip;
 			data.texture0ColorMap = instanceTexture0ColorMap;
-#ifdef EL_VEC_BONES
-			data.bonePos = instanceBonePos;
-			data.boneRot = instanceBoneRot;
-#else
 			data.bones  = instanceBone;
-#endif
 			GLASSERT( data.texture0 );	// not required, but not sure it works without
 
 			int k=start;
@@ -173,12 +162,7 @@ void RenderQueue::Submit(	int modelRequired,
 
 					if ( item->aux ) {
 						for( int i=0; i<EL_MAX_BONES; ++i ) {
-#ifdef EL_VEC_BONES
-							instanceBonePos[index*EL_MAX_BONES+i] = item->aux->bonePos[i];
-							instanceBoneRot[index*EL_MAX_BONES+i] = item->aux->boneRot[i];
-#else
 							instanceBone[index*EL_MAX_BONES+i]	= item->aux->boneMats[i];
-#endif
 						}
 						instanceTexture0XForm[index]	= item->aux->texture0XForm;
 						instanceTexture0Clip[index]		= item->aux->texture0Clip;
@@ -189,30 +173,6 @@ void RenderQueue::Submit(	int modelRequired,
 				k += delta;
 			}
 		}
-#else
-		{
-			atom->Bind( shader );
-			for( int k=start; k<end; ++k ) {
-				const Item* item = itemArr[k];
-				Model* model = item->model;
-
-				shader->PushMatrix( GPUState::MODELVIEW_MATRIX );
-				if ( xform ) {
-					shader->MultMatrix( GPUState::MODELVIEW_MATRIX, *xform );
-				}
-				shader->MultMatrix( GPUState::MODELVIEW_MATRIX, model->XForm() );
-				shader->SetParam( item->param );
-				if ( item->hasParam4 ) {
-					shader->InstanceParam4( 0, item->param4 );
-				}
-				if ( item->hasBoneData ) {
-					shader->InstanceBones( 0, item->boneData );
-				}
-				shader->Draw();
-				shader->PopMatrix( GPUState::MODELVIEW_MATRIX );
-			}
-		}
-#endif
 		start = end;
 	}
 }

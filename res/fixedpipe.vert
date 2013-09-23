@@ -1,62 +1,28 @@
 // CAUTION: never use 'int' attributes. They don't work for reasons unknown to me.
 
-/*
-	Uniform usage. (INTSTANCE, BONE_XFORM)
-
-	u_mMatrix 			mat4 * INST 			64
-	u_controlParamArr	vec4 * INST 			16
-	u_colorParamArr		vec4 * INST 			16
-	u_colorMult			vec4					1
-	//u_boneXForm			mat4 * INST * BONE      1024  << would like to be 128!!
-	u_bonePos			vec4 * INST * BONE 		256
-	u_boneRot			vec4 * INST * BONE 		256
-	u_normalMatrix		mat4					4
-	u_lightDir			vec3					1
-	u_ambient			vec4					1
-	u_diffuse			vec4					1
-
-*/
+// Copied here so that it can be easily handled
+// if the instanceID isn't supported.
+int instance = gl_InstanceID;
 
 uniform mat4 	u_mvpMatrix;		// model-view-projection.
-									// although the model is identity in the instancing case.
-#if INSTANCE == 1
-	uniform mat4 		u_mMatrix[EL_MAX_INSTANCE];		// Each instance gets its own transform. Burns up uniforms; this can't be huge.
-	uniform vec4		u_controlParamArr[EL_MAX_INSTANCE];
-	#if COLOR_PARAM == 1
-		uniform vec4	u_colorParamArr[EL_MAX_INSTANCE];
-	#endif
-	#if BONE_FILTER == 1
-		uniform vec4	u_filterParamArr[EL_MAX_INSTANCE];
-	#endif
 
-	#if TEXTURE0_XFORM == 1
-		uniform vec4 	u_texture0XFormArr[EL_MAX_INSTANCE];
-	#endif
-	#if TEXTURE0_CLIP == 1
-		uniform vec4	u_texture0ClipArr[EL_MAX_INSTANCE];
-	#endif
-	#if TEXTURE0_COLORMAP == 1
-		uniform mat4	u_colorMapArr[EL_MAX_INSTANCE];
-	#endif
+uniform mat4 		u_mMatrix[EL_MAX_INSTANCE];			// Additional model xform.
+uniform vec4		u_controlParamArr[EL_MAX_INSTANCE];
+#if COLOR_PARAM == 1
+	uniform vec4	u_colorParamArr[EL_MAX_INSTANCE];
+#endif
+#if BONE_FILTER == 1
+	uniform vec4	u_filterParamArr[EL_MAX_INSTANCE];
+#endif
 
-	attribute float a_instanceID;					// Index into the transformation.
-#else
-	uniform vec4 		u_controlParam;				// Controls fade.
-	#if COLOR_PARAM == 1
-		uniform vec4	u_colorParam;
-	#endif
-	#if BONE_FILTER == 1
-		uniform vec4	u_filterParam;
-	#endif
-	#if TEXTURE0_XFORM == 1
-		uniform vec4 	u_texture0XForm;
-	#endif
-	#if TEXTURE0_CLIP == 1
-		uniform vec4	u_texture0Clip;
-	#endif
-	#if TEXTURE0_COLORMAP == 1
-		uniform mat4	u_colorMap;
-	#endif
+#if TEXTURE0_XFORM == 1
+	uniform vec4 	u_texture0XFormArr[EL_MAX_INSTANCE];
+#endif
+#if TEXTURE0_CLIP == 1
+	uniform vec4	u_texture0ClipArr[EL_MAX_INSTANCE];
+#endif
+#if TEXTURE0_COLORMAP == 1
+	uniform mat4	u_colorMapArr[EL_MAX_INSTANCE];
 #endif
 
 uniform vec4 u_colorMult;			// Overall Color, if specified.
@@ -85,11 +51,7 @@ attribute vec3 a_pos;				// vertex position
 #if BONE_XFORM == 1 || BONE_FILTER == 1
 	attribute float a_boneID;
 	#if BONE_XFORM == 1
-		#if INSTANCE == 1
-			uniform mat4 u_boneXForm[EL_MAX_BONES*EL_MAX_INSTANCE];
-		#else
-			uniform mat4 u_boneXForm[EL_MAX_BONES];	
-		#endif
+		uniform mat4 u_boneXForm[EL_MAX_BONES*EL_MAX_INSTANCE];
 	#endif
 #endif
 
@@ -110,50 +72,26 @@ varying vec4 v_color;
 
 void main() {
 
-	#if INSTANCE == 1
-		vec4 controlParam 	= u_controlParamArr[int(a_instanceID)];
-	#else
-		vec4 controlParam 	= u_controlParam;
-	#endif
+	vec4 controlParam 	= u_controlParamArr[instance];
+
 	#if SATURATION
 		v_saturation = controlParam.y;
 	#endif
 	#if COLOR_PARAM == 1
 		// Don't go insane with #if syntax later:
-		#if INSTANCE == 1
-			vec4 colorParam 	= u_colorParamArr[int(a_instanceID)];
-		#else
-			vec4 colorParam 	= u_colorParam;
-		#endif
+		vec4 colorParam 	= u_colorParamArr[instance];
 	#endif
 	#if BONE_FILTER == 1
-		#if INSTANCE == 1
-			vec4 filterParam 	= u_filterParamArr[int(a_instanceID)];
-		#else
-			vec4 filterParam 	= u_filterParam;
-		#endif
+		vec4 filterParam 	= u_filterParamArr[instance];
 	#endif
 	#if TEXTURE0_XFORM == 1
-		#if INSTANCE == 1
-			vec4 texture0XForm 	= u_texture0XFormArr[int(a_instanceID)];
-		#else
-			vec4 texture0XForm 	= u_texture0XForm;
-		#endif
+		vec4 texture0XForm 	= u_texture0XFormArr[instance];
 	#endif
 	#if TEXTURE0_CLIP == 1
-		#if INSTANCE == 1
-			v_texture0Clip 		= u_texture0ClipArr[int(a_instanceID)];
-		#else
-			v_texture0Clip 		= u_texture0Clip;
-
-		#endif
+		v_texture0Clip 		= u_texture0ClipArr[instance];
 	#endif
 	#if TEXTURE0_COLORMAP == 1
-		#if INSTANCE == 1
-			mat4 colorMap 		= u_colorMapArr[int(a_instanceID)];
-		#else
-			mat4 colorMap 		= u_colorMap;
-		#endif
+		mat4 colorMap 		= u_colorMapArr[instance];
 	#endif
 
 	vec4 color = u_colorMult;
@@ -182,33 +120,17 @@ void main() {
 
 	mat4 xform = mat4( 1.0 );	
 	#if BONE_XFORM == 1
-		#if INSTANCE == 1
-		xform = u_boneXForm[int(a_boneID + a_instanceID*float(EL_MAX_BONES))];
-		#else
-		xform = u_boneXForm[int(a_boneID)];
-		#endif
+		xform = u_boneXForm[int(a_boneID) + instance*EL_MAX_BONES];
 	#endif
 	
-	#if INSTANCE == 0 
-		#if BONE_XFORM == 0
-			vec4 pos = u_mvpMatrix * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );
-		#else
-			vec4 pos = u_mvpMatrix * xform * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );
-		#endif
+	#if BONE_XFORM == 0
+		vec4 pos = (u_mvpMatrix * u_mMatrix[instance]) * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );
 	#else
-		#if BONE_XFORM == 0
-			vec4 pos = (u_mvpMatrix * u_mMatrix[int(a_instanceID)]) * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );
-		#else
-			vec4 pos = (u_mvpMatrix * u_mMatrix[int(a_instanceID)]) * xform * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );
-		#endif
+		vec4 pos = (u_mvpMatrix * u_mMatrix[instance]) * xform * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );
 	#endif
 	
 	#if LIGHTING_DIFFUSE  > 0
-		#if INSTANCE == 0 
-			vec3 normal = normalize( ( u_normalMatrix  * xform * vec4( a_normal.x, a_normal.y, a_normal.z, 0 ) ).xyz );
-		#else
-			vec3 normal = normalize( (( u_normalMatrix * u_mMatrix[int(a_instanceID)]) * xform * vec4( a_normal.x, a_normal.y, a_normal.z, 0 ) ).xyz );
-		#endif
+		vec3 normal = normalize( (( u_normalMatrix * u_mMatrix[instance]) * xform * vec4( a_normal.x, a_normal.y, a_normal.z, 0 ) ).xyz );
 
 		#if LIGHTING_DIFFUSE == 1
 			// Lambert lighting with ambient term.

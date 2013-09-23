@@ -17,7 +17,6 @@
 #define ENGINELIMITS_INCLUDED
 
 
-#define XENOENGINE_INSTANCING
 #define EL_USE_VBO			// Use VBOs: a good thing, everywhere but the original iPhone
 #define EL_USE_MRT_BLUR
 
@@ -44,7 +43,6 @@ enum {
 
 	// performance tuning
 	EL_MAX_INSTANCE			= 16,		// Max instances used. Impacts # of uniforms.
-	EL_TUNE_INSTANCE_MEM	= 8*1024	// Max memory per model.
 };
 
 

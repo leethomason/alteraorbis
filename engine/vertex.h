@@ -63,7 +63,7 @@ struct Vertex
 	}
 };
 
-
+/*
 struct InstVertex
 {
 	enum {
@@ -91,6 +91,7 @@ struct InstVertex
 	U16					boneID;
 	U16					instanceID;	// 8 bits is fine, but this structure should be 32 bit-aligned
 };
+*/
 	
 
 struct PTVertex

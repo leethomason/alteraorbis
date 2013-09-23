@@ -49,7 +49,7 @@ public:
 	static ShaderManager* Instance() { if ( !instance ) instance = new ShaderManager(); return instance; }
 
 	enum {				
-		INSTANCE			= (1<<0),		// Use instancing. Up to 16 uniform matrices contain the model
+		//INSTANCE			= (1<<0),		// Use instancing. Up to 16 uniform matrices contain the model
 											// transform. The instance attribute must be in the vertex data.
 
 		// Texture state.
@@ -96,7 +96,6 @@ public:
 		A_POS,			// 3 comp
 		A_NORMAL,		// 2 comp
 		A_COLOR,		// 3 comp
-		A_INSTANCE_ID,	// int
 		A_BONE_ID,		// int
 		MAX_ATTRIBUTE
 	};
@@ -120,20 +119,7 @@ public:
 		U_LIGHT_DIR,
 		U_AMBIENT,
 		U_DIFFUSE,
-		U_RADIUS,
-		U_COLOR_PARAM,
-		U_FILTER_PARAM,
-		U_CONTROL_PARAM,
-		U_TEXTURE0_XFORM,
-		U_TEXTURE0_CLIP,
-		U_TEXTURE0_COLORMAP,
-
-#ifdef EL_VEC_BONES
-		U_BONE_POS,
-		U_BONE_ROT,
-#else
-		U_BONEXFORM,			// the instance and normal mode use the same name.
-#endif
+		U_BONEXFORM,
 
 		U_TEXTURE0,
 		U_TEXTURE1,

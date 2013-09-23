@@ -32,7 +32,6 @@ static const char* gAttributeName[ShaderManager::MAX_ATTRIBUTE] =
 	"a_pos",
 	"a_normal",
 	"a_color",
-	"a_instanceID",
 	"a_boneID",
 };
 
@@ -53,13 +52,6 @@ static const char* gUniformName[ShaderManager::MAX_UNIFORM] =
 	"u_lightDir",
 	"u_ambient",
 	"u_diffuse",
-	"u_radius",
-	"u_colorParam",
-	"u_filterParam",
-	"u_controlParam",
-	"u_texture0XForm",
-	"u_texture0Clip",
-	"u_colorMap",
 
 	"u_boneXForm",
 
@@ -386,7 +378,7 @@ FIXME: need to handle driver updates invalidating cache.
 	AppendFlag( &header, "TEXTURE0_CLIP",		flags & TEXTURE0_CLIP );
 	AppendFlag( &header, "TEXTURE0_COLORMAP",	flags & TEXTURE0_COLORMAP );
 	AppendFlag( &header, "TEXTURE1",			0 );
-	AppendFlag( &header, "INSTANCE",			flags & INSTANCE );
+//	AppendFlag( &header, "INSTANCE",			flags & INSTANCE );
 	AppendFlag( &header, "COLORS",				flags & COLORS );
 	AppendFlag( &header, "PREMULT",				flags & PREMULT );
 	AppendFlag( &header, "EMISSIVE",			flags & EMISSIVE );
@@ -511,7 +503,8 @@ FIXME: need to handle driver updates invalidating cache.
 		uniformSize += v4Size*size;
 	}
 	GLOUTPUT_REL(( "Queried uniform size(v4): %d\n", uniformSize ));
-	int nInstance = (flags & INSTANCE) ? EL_MAX_INSTANCE : 1;
+	//int nInstance = (flags & INSTANCE) ? EL_MAX_INSTANCE : 1;
+	int nInstance = EL_MAX_INSTANCE;
 	GLOUTPUT_REL(( "Predicted uniform size(v4): %d\n\n", predictedUniform + predictedUniformInst*nInstance ));
 
 

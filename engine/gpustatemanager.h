@@ -117,7 +117,6 @@ struct GPUStream {
 	int normalOffset;
 	int nColor;
 	int colorOffset;
-	int instanceIDOffset;
 	int boneOffset;
 
 	enum GamuiType { kGamuiType };
@@ -127,11 +126,11 @@ struct GPUStream {
 				nTexture0( 0 ), texture0Offset( 0 ),
 				nTexture1( 0 ), texture1Offset( 0 ), 
 				nNormal( 0 ), normalOffset( 0 ),
-				nColor( 0 ), colorOffset( 0 ), instanceIDOffset( 0 ), boneOffset( 0 ) {}
+				nColor( 0 ), colorOffset( 0 ), boneOffset( 0 ) {}
 
 	// Uses type: GPUStream stream( Vertex );
 	GPUStream( const Vertex& vertex );
-	GPUStream( const InstVertex& vertex );
+	//GPUStream( const InstVertex& vertex );
 	GPUStream( GamuiType );
 	GPUStream( const PTVertex& vertex );
 	GPUStream( const PTVertex2& vertex );
@@ -319,7 +318,7 @@ public:
 
 protected:
 
-	static void Weld( const GPUState&, const GPUStream&, const GPUStreamData& );
+	static void Weld( const GPUState&, const GPUStream&, const GPUStreamData&, int nInstance );
 
 private:
 
@@ -335,6 +334,9 @@ private:
 	static DepthWrite	currentDepthWrite;
 	static ColorWrite	currentColorWrite;
 	static StencilMode	currentStencilMode;
+
+	static grinliz::Matrix4		identity[EL_MAX_INSTANCE];
+	static grinliz::Vector4F	defaultControl[EL_MAX_INSTANCE];
 
 protected:
 	static int		primitive;

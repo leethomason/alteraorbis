@@ -115,15 +115,6 @@ void ModelLoader::Load( const gamedb::Item* item, ModelResource* res )
 {
 	res->header.Load( item );
 
-	int instances = 1;
-#	ifdef XENOENGINE_INSTANCING
-	instances = EL_TUNE_INSTANCE_MEM / sizeof( InstVertex );
-	if ( instances > EL_MAX_INSTANCE ) 
-		instances = EL_MAX_INSTANCE;
-	if ( instances < 1 )
-		instances = 1;		// big model.
-#	endif
-
 	// compute the hit testing AABB
 	float ave = grinliz::Max( res->header.bounds.SizeX(), res->header.bounds.SizeZ() )*0.5f;
 	res->hitBounds.min.Set( -ave, res->header.bounds.min.y, -ave );
@@ -171,21 +162,15 @@ void ModelLoader::Load( const gamedb::Item* item, ModelResource* res )
 	for( U32 i=0; i<res->header.nAtoms; ++i )
 	{
 		ModelAtom* atom = &res->atom[i];
-		atom->instances = instances;
 		
-		atom->vertex = new InstVertex[ atom->nVertex * instances ];
-		for( int inst=0; inst<instances; ++inst ) {
-			for( unsigned j=0; j<atom->nVertex; ++j ) {
-				atom->vertex[j+inst*atom->nVertex].From( vBuffer[j+vOffset] );
-				atom->vertex[j+inst*atom->nVertex].instanceID = inst;
-			}
+		atom->vertex = new Vertex[atom->nVertex];
+		for( unsigned j=0; j<atom->nVertex; ++j ) {
+			atom->vertex[j] = vBuffer[j+vOffset];
 		}
 		
-		atom->index  = new U16[atom->nIndex * instances ];
-		for( int inst=0; inst<instances; ++inst ) {
-			for( unsigned j=0; j<atom->nIndex; ++j ) {
-				atom->index[j+inst*atom->nIndex] = iBuffer[j+iOffset] + inst*atom->nVertex;
-			}
+		atom->index  = new U16[atom->nIndex];
+		for( unsigned j=0; j<atom->nIndex; ++j ) {
+			atom->index[j] = iBuffer[j+iOffset];
 		}
 		vOffset += atom->nVertex;
 		iOffset += atom->nIndex;
@@ -829,8 +814,8 @@ void ModelAtom::Bind( GPUStream* stream, GPUStreamData* data ) const
 	if ( GPUState::SupportsVBOs() && !vertexBuffer.IsValid() ) {
 		GLASSERT( !indexBuffer.IsValid() );
 
-		vertexBuffer = GPUVertexBuffer::Create( vertex, sizeof(*vertex), nVertex*instances );
-		indexBuffer  = GPUIndexBuffer::Create(  index,  nIndex*instances );
+		vertexBuffer = GPUVertexBuffer::Create( vertex, sizeof(*vertex), nVertex );
+		indexBuffer  = GPUIndexBuffer::Create(  index,  nIndex );
 	}
 
 	if ( vertexBuffer.IsValid() && indexBuffer.IsValid() ) {

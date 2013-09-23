@@ -42,15 +42,6 @@ class XStream;
 class ParticleSystem;
 
 
-/*
-	v0 v1 v2 v0 v1 v2									vertex (3 points x 2 instances)
-	i0 i1 i2 i0 i0 i0 i0+3 i1+3 i2+3 i0+3 i0+3 i0+3		index (2 triangle x 2 instances)
-
-	vertex size *= nInstance
-	index size *= nInstance
-	instance size = index size * nInstance
-*/
-
 // The smallest draw unit: texture, vertex, index.
 struct ModelAtom 
 {
@@ -59,7 +50,6 @@ struct ModelAtom
 		nVertex = nIndex = 0;
 		index = 0;
 		vertex = 0;
-		instances = 0;
 	}
 
 	void Free() {
@@ -82,12 +72,10 @@ struct ModelAtom
 
 	void Bind( GPUStream* stream, GPUStreamData* data ) const;
 
-	U32 nVertex;
-	U32 nIndex;
-	U32 instances;
-
-	U16* index;
-	InstVertex* vertex;
+	U32		nVertex;
+	U32		nIndex;
+	U16*	index;
+	Vertex* vertex;
 };
 
 
