@@ -434,6 +434,7 @@ FIXME: need to handle driver updates invalidating cache.
 
 	int predicted = 0;
 	shader->maxInstance = CalcMaxInstances( flags, &predicted );
+	GLOUTPUT_REL(( "**** Shader %d *********\n", shader->flags ));
 	GLOUTPUT_REL(( "Shader MAX instance = %d\n", shader->maxInstance ));
 	GLOUTPUT_REL(( "Predicted uniform size(v4): %d\n\n", predicted ));
 
@@ -526,9 +527,7 @@ FIXME: need to handle driver updates invalidating cache.
 		uniformSize += v4Size*size;
 	}
 	GLOUTPUT_REL(( "Queried uniform size(v4): %d\n", uniformSize ));
-
-	//glGetIntegerv( GL_MAX_VERTEX_UNIFORM_COMPONENTS, &maxUniforms );
-	//GLOUTPUT_REL(( "Shader %d created. Uniforms=%d / %d\n", flags, nUniforms, maxUniforms ));
+	GLASSERT( uniformSize <= predicted );
 
 	GLOUTPUT_REL(( "Shader %d created. nUniforms=%d\n", flags, nUniforms ));
 	GLOUTPUT_REL(( "%s", header.c_str() ));

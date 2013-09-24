@@ -103,6 +103,15 @@ void RenderQueue::Submit(	int modelRequired,
 	GPUStream		stream;
 	GPUStreamData   data;
 
+	Matrix4		instanceMatrix[EL_MAX_INSTANCE];
+	Vector4F	instanceColorParam[EL_MAX_INSTANCE];
+	Vector4F	instanceBoneFilter[EL_MAX_INSTANCE];
+	Vector4F	instanceControlParam[EL_MAX_INSTANCE];
+	Vector4F	instanceTexture0XForm[EL_MAX_INSTANCE];
+	Vector4F	instanceTexture0Clip[EL_MAX_INSTANCE];
+	Matrix4		instanceTexture0ColorMap[EL_MAX_INSTANCE];
+	Matrix4		instanceBone[EL_MAX_INSTANCE*EL_MAX_BONES];
+
 	//GLOUTPUT(( "Batch:\n" ));
 	while( start < itemArr.Size() ) {
 		// Get a range;
@@ -124,15 +133,6 @@ void RenderQueue::Submit(	int modelRequired,
 		// for startup time and debugging. If instancing
 		// in use, always instance.
 		{
-			Matrix4		instanceMatrix[EL_MAX_INSTANCE];
-			Vector4F	instanceColorParam[EL_MAX_INSTANCE];
-			Vector4F	instanceBoneFilter[EL_MAX_INSTANCE];
-			Vector4F	instanceControlParam[EL_MAX_INSTANCE];
-			Vector4F	instanceTexture0XForm[EL_MAX_INSTANCE];
-			Vector4F	instanceTexture0Clip[EL_MAX_INSTANCE];
-			Matrix4		instanceTexture0ColorMap[EL_MAX_INSTANCE];
-			Matrix4		instanceBone[EL_MAX_INSTANCE*EL_MAX_BONES];
-
 			atom->Bind( &stream, &data );
 			data.matrix = instanceMatrix;
 			data.colorParam = instanceColorParam;
