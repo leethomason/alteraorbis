@@ -20,15 +20,29 @@ x SectorHerd seems a little aggressive. Switch over to using ForceCount, check c
 - make sure gold/crystal gets returned to the Reserve when the Chit is destroyed
 - GT: lightning
 - GT: rez-in for structures
-- wander less centered on core?
+x wander less centered on core?
 - SpatialHash: one stressed structure.
 	- MOB list (FE determination)
 	- Building list (FE determination)
 x Shield should absorb more with XP (and fix character screen to reflect this)
 - is shield boost working correctly? Effects are *not* getting stripped by the shield.
 x Add position fuzz to gold, crystal, and item drops
+- can re-pack MVP and Bone matrix in the shader to encode 3*vec4 as the transpose, then transpose in the shader
 
 - game
+
+	- Patch Fix
+		x Bones are broken!
+	    - Camera is a camera. Invert x axis on orbit.
+		- Movement speed a little sluggish
+		- Shoot trees
+		- Can’t click through trees
+		x Should shoot on priority walk
+		- Tear through rock on neutral zones
+		- Add a pave to keep it clear
+		- Mouse at edge
+		- Hide free camera button
+		- Unclear tabs are tabs
 
 	- Econ
 		- inventory
@@ -68,6 +82,8 @@ x Add position fuzz to gold, crystal, and item drops
 		- history events
 		- names of things
 		- winning names
+		- How do bases and adventuring play together?
+			- why do you quit adventuring to build a base?
 	- Loot
 		- proc gun
 		- item screen
