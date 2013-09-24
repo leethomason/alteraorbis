@@ -145,6 +145,7 @@ void RenderQueue::Submit(	int modelRequired,
 			GLASSERT( data.texture0 );	// not required, but not sure it works without
 
 			int k=start;
+
 			while( k < end ) {
 				int delta = Min( end-k, (int)EL_MAX_INSTANCE );
 

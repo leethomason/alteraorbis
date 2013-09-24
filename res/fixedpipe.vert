@@ -7,23 +7,23 @@
 
 uniform mat4 		u_mvpMatrix;						// model-view-projection.
 
-uniform mat4 		u_mMatrix[EL_MAX_INSTANCE];			// Additional model xform.
-uniform vec4		u_controlParamArr[EL_MAX_INSTANCE];
+uniform mat4 		u_mMatrix[MAX_INSTANCE];			// Additional model xform.
+uniform vec4		u_controlParamArr[MAX_INSTANCE];
 #if COLOR_PARAM == 1
-	uniform vec4	u_colorParamArr[EL_MAX_INSTANCE];
+	uniform vec4	u_colorParamArr[MAX_INSTANCE];
 #endif
 #if BONE_FILTER == 1
-	uniform vec4	u_filterParamArr[EL_MAX_INSTANCE];
+	uniform vec4	u_filterParamArr[MAX_INSTANCE];
 #endif
 
 #if TEXTURE0_XFORM == 1
-	uniform vec4 	u_texture0XFormArr[EL_MAX_INSTANCE];
+	uniform vec4 	u_texture0XFormArr[MAX_INSTANCE];
 #endif
 #if TEXTURE0_CLIP == 1
-	uniform vec4	u_texture0ClipArr[EL_MAX_INSTANCE];
+	uniform vec4	u_texture0ClipArr[MAX_INSTANCE];
 #endif
 #if TEXTURE0_COLORMAP == 1
-	uniform mat4	u_colorMapArr[EL_MAX_INSTANCE];
+	uniform mat4	u_colorMapArr[MAX_INSTANCE];
 #endif
 
 uniform vec4 u_colorMult;			// Overall Color, if specified.
@@ -52,7 +52,7 @@ attribute vec3 a_pos;				// vertex position
 #if BONE_XFORM == 1 || BONE_FILTER == 1
 	attribute float a_boneID;
 	#if BONE_XFORM == 1
-		uniform mat4 u_boneXForm[EL_MAX_BONES*EL_MAX_INSTANCE];
+		uniform mat4 u_boneXForm[EL_MAX_BONES*MAX_INSTANCE];
 	#endif
 #endif
 

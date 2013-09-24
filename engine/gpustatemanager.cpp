@@ -259,65 +259,44 @@ void MatrixStack::Multiply( const grinliz::Matrix4& m )
 }
 
 
-//static 
-void GPUState::Weld( const GPUState& state, const GPUStream& stream, const GPUStreamData& data, int nInstance )
+//static
+int GPUState::Upload( const GPUState& state, const GPUStream& stream, const GPUStreamData& data, int start, int instanceTotal )
 {
-	CHECK_GL_ERROR;
-	GLASSERT( stream.stride > 0 );
-
 	ShaderManager* shadman = ShaderManager::Instance();
+	int nInstance = instanceTotal - start;
+	nInstance = Min( nInstance, shadman->MaxInstances() );
+	GLASSERT( nInstance > 0 );
 
-	int flags = 0;
-	// State Flags
-	flags |= (data.texture0 ) ? ShaderManager::TEXTURE0 : 0;
-	flags |= (data.texture0 && (data.texture0->Format() == Texture::ALPHA )) ? ShaderManager::TEXTURE0_ALPHA_ONLY : 0;
-	if ( flags & ShaderManager::TEXTURE0 ) GLASSERT( stream.nTexture0 );
+	int flags = shadman->ShaderFlags();
 
-	/*
-	flags |= (state.HasTexture1() ) ? ShaderManager::TEXTURE1 : 0;
-	flags |= (state.HasTexture1() && (state.texture1->Format() == Texture::ALPHA )) ? ShaderManager::TEXTURE1_ALPHA_ONLY : 0;
-	*/
-
-	flags |= state.HasLighting();
-
-	// Stream Flags
-	flags |= stream.HasColor() ? ShaderManager::COLORS : 0;
-
-	// Actual shader option flags:
-	flags |= state.shaderFlags;	
-
-	shadman->ActivateShader( flags );
-	shadman->ClearStream();
-
-	// FIXME: this mv - mvp logit sure seems flawed. Should be walking a stack? Or just using bottom?
 	const Matrix4& mv = GPUState::TopMatrix( GPUState::MODELVIEW_MATRIX );
-	const Matrix4& v  = GPUState::ViewMatrix();
 
-    Matrix4 mvp;
+	Matrix4 mvp;
     MultMatrix4( GPUState::TopMatrix( GPUState::PROJECTION_MATRIX ), mv, &mvp );
     shadman->SetUniform( ShaderManager::U_MVP_MAT, mvp );
  
-	shadman->SetUniformArray( ShaderManager::U_M_MAT_ARR, EL_MAX_INSTANCE, data.matrix ? data.matrix : identity );
+	shadman->SetUniformArray( ShaderManager::U_M_MAT_ARR, nInstance, 
+							  data.matrix ? &data.matrix[start] : identity );
 
 	if ( flags & ShaderManager::COLOR_PARAM ) {
 		GLASSERT( data.colorParam );
-		shadman->SetUniformArray( ShaderManager::U_COLOR_PARAM_ARR, EL_MAX_INSTANCE, data.colorParam );
+		shadman->SetUniformArray( ShaderManager::U_COLOR_PARAM_ARR, nInstance, &data.colorParam[start] );
 	}
 	if ( flags & ShaderManager::BONE_FILTER ) {
 		GLASSERT( data.boneFilter );
-		shadman->SetUniformArray( ShaderManager::U_FILTER_PARAM_ARR, EL_MAX_INSTANCE, data.boneFilter );
+		shadman->SetUniformArray( ShaderManager::U_FILTER_PARAM_ARR, nInstance, &data.boneFilter[start] );
 	}
 	if ( flags & ShaderManager::TEXTURE0_XFORM ) {
 		GLASSERT( data.texture0XForm );
-		shadman->SetUniformArray( ShaderManager::U_TEXTURE0_XFORM_ARR, EL_MAX_INSTANCE, data.texture0XForm );
+		shadman->SetUniformArray( ShaderManager::U_TEXTURE0_XFORM_ARR, nInstance, &data.texture0XForm[start] );
 	}
 	if ( flags & ShaderManager::TEXTURE0_CLIP ) {
 		GLASSERT( data.texture0Clip );
-		shadman->SetUniformArray( ShaderManager::U_TEXTURE0_CLIP_ARR, EL_MAX_INSTANCE, data.texture0Clip );
+		shadman->SetUniformArray( ShaderManager::U_TEXTURE0_CLIP_ARR, nInstance, &data.texture0Clip[start] );
 	}
 	if ( flags & ShaderManager::TEXTURE0_COLORMAP ) {
 		GLASSERT( data.texture0ColorMap );
-		shadman->SetUniformArray( ShaderManager::U_TEXTURE0_COLORMAP_ARR, EL_MAX_INSTANCE, data.texture0ColorMap );
+		shadman->SetUniformArray( ShaderManager::U_TEXTURE0_COLORMAP_ARR, nInstance, &data.texture0ColorMap[start] );
 	}
 
 	if ( defaultControl[0].x != 1.0f ) {
@@ -325,56 +304,56 @@ void GPUState::Weld( const GPUState& state, const GPUStream& stream, const GPUSt
 			defaultControl[i].Set( 1, 1, 1, 1 );
 		}
 	}
-	shadman->SetUniformArray( ShaderManager::U_CONTROL_PARAM_ARR, EL_MAX_INSTANCE, data.controlParam ? data.controlParam : defaultControl );
-
-	// Texture1
-	/*
-	glActiveTexture( GL_TEXTURE1 );
-
-	if ( stream.HasTexture1() ) {
-		glBindTexture( GL_TEXTURE_2D, state.texture1->GLID() );
-		shadman->SetTexture( 1, state.texture1 );
-		shadman->SetStreamData( ShaderManager::A_TEXTURE1, stream.nTexture1, GL_FLOAT, stream.stride, PTR( data.streamPtr, stream.texture1Offset ) );
-	}
-	CHECK_GL_ERROR;
-	*/
+	shadman->SetUniformArray( ShaderManager::U_CONTROL_PARAM_ARR, nInstance, 
+		                      data.controlParam ? &data.controlParam[start] : defaultControl );
 
 	// Texture0
 	glActiveTexture( GL_TEXTURE0 );
 
 	if ( flags & ShaderManager::TEXTURE0 ) {
-		GLASSERT( data.texture0 );
-		glBindTexture( GL_TEXTURE_2D, data.texture0->GLID() );
-		shadman->SetTexture( 0, data.texture0 );
-		shadman->SetStreamData( ShaderManager::A_TEXTURE0, stream.nTexture0, GL_FLOAT, stream.stride, PTR( data.streamPtr, stream.texture0Offset ) );
+		if ( start == 0 ) {
+			GLASSERT( data.texture0 );
+			glBindTexture( GL_TEXTURE_2D, data.texture0->GLID() );
+			shadman->SetTexture( 0, data.texture0 );
+
+			shadman->SetStreamData( ShaderManager::A_TEXTURE0, stream.nTexture0, GL_FLOAT, stream.stride, PTR( data.streamPtr, stream.texture0Offset ) );
+		}
 	}
 	CHECK_GL_ERROR;
 
 	// vertex
 	if ( stream.HasPos() ) {
-		shadman->SetStreamData( ShaderManager::A_POS, stream.nPos, GL_FLOAT, stream.stride, PTR( data.streamPtr, stream.posOffset ) );	 
+		if ( start == 0 ) {
+			shadman->SetStreamData( ShaderManager::A_POS, stream.nPos, GL_FLOAT, stream.stride, PTR( data.streamPtr, stream.posOffset ) );	 
+		}
 	}
 
 	// color
 	if ( stream.HasColor() ) {
 		GLASSERT( stream.nColor == 4 );
-		shadman->SetStreamData( ShaderManager::A_COLOR, 4, GL_FLOAT, stream.stride, PTR( data.streamPtr, stream.colorOffset ) );	 
+		if ( start == 0 ) {
+			shadman->SetStreamData( ShaderManager::A_COLOR, 4, GL_FLOAT, stream.stride, PTR( data.streamPtr, stream.colorOffset ) );	 
+		}
 	}
 
 	// bones
 	if ( flags & ShaderManager::BONE_XFORM ) {
 		GLASSERT( stream.boneOffset );	// could be zero...but that would be odd.
-		int count = EL_MAX_BONES * EL_MAX_INSTANCE;
+		int count = EL_MAX_BONES * nInstance;
 
 		// This could be much better packed (by a factor of 2) by using pos/rot as 2 vector4 instead
 		// of expanding to a matrix. And less work for the CPU as well. Disadvantages to keep in mind:
 		// - easier to debug a set of matrices
 		// - simpler shader code
-		shadman->SetUniformArray( ShaderManager::U_BONEXFORM, count, data.bones );
-		shadman->SetStreamData( ShaderManager::A_BONE_ID, 1, GL_UNSIGNED_SHORT, stream.stride, PTR( data.streamPtr, stream.boneOffset ) );
+		shadman->SetUniformArray( ShaderManager::U_BONEXFORM, count, &data.bones[start*EL_MAX_BONES] );
+		if ( start == 0 ) {
+			shadman->SetStreamData( ShaderManager::A_BONE_ID, 1, GL_UNSIGNED_SHORT, stream.stride, PTR( data.streamPtr, stream.boneOffset ) );
+		}
 	}
 	else if ( flags & ShaderManager::BONE_FILTER ) {
-		shadman->SetStreamData( ShaderManager::A_BONE_ID, 1, GL_UNSIGNED_SHORT, stream.stride, PTR( data.streamPtr, stream.boneOffset ) );
+		if ( start == 0 ) {
+			shadman->SetStreamData( ShaderManager::A_BONE_ID, 1, GL_UNSIGNED_SHORT, stream.stride, PTR( data.streamPtr, stream.boneOffset ) );
+		}
 	}
 
 	// lighting 
@@ -389,11 +368,42 @@ void GPUState::Weld( const GPUState& state, const GPUStream& stream, const GPUSt
 		shadman->SetUniform( ShaderManager::U_LIGHT_DIR, dirEye3 );
 		shadman->SetUniform( ShaderManager::U_AMBIENT, GPUState::ambient );
 		shadman->SetUniform( ShaderManager::U_DIFFUSE, GPUState::diffuse );
-		shadman->SetStreamData( ShaderManager::A_NORMAL, 3, GL_FLOAT, stream.stride, PTR( data.streamPtr, stream.normalOffset ) );	 
+		if ( start == 0 ) {
+			shadman->SetStreamData( ShaderManager::A_NORMAL, 3, GL_FLOAT, stream.stride, PTR( data.streamPtr, stream.normalOffset ) );	 
+		}
 	}
 
 	// color multiplier is always set
 	shadman->SetUniform( ShaderManager::U_COLOR_MULT, state.color );
+
+	return nInstance;
+}
+
+
+//static 
+void GPUState::Weld( const GPUState& state, const GPUStream& stream, const GPUStreamData& data )
+{
+	CHECK_GL_ERROR;
+	GLASSERT( stream.stride > 0 );
+
+	ShaderManager* shadman = ShaderManager::Instance();
+
+	int flags = 0;
+	// State Flags
+	flags |= (data.texture0 ) ? ShaderManager::TEXTURE0 : 0;
+	flags |= (data.texture0 && (data.texture0->Format() == Texture::ALPHA )) ? ShaderManager::TEXTURE0_ALPHA_ONLY : 0;
+	if ( flags & ShaderManager::TEXTURE0 ) GLASSERT( stream.nTexture0 );
+
+	flags |= state.HasLighting();
+
+	// Stream Flags
+	flags |= stream.HasColor() ? ShaderManager::COLORS : 0;
+
+	// Actual shader option flags:
+	flags |= state.shaderFlags;	
+
+	shadman->ActivateShader( flags );
+	shadman->ClearStream();
 
 	// Blend
 	if ( (state.stateFlags & BLEND_MASK) != currentBlend ) {
@@ -557,7 +567,8 @@ void GPUState::DrawQuads( const GPUStream& stream, const GPUStreamData& data, in
 	GLASSERT( data.vertexBuffer );
 
 	glBindBufferX( GL_ARRAY_BUFFER, data.vertexBuffer );
-	Weld( *this, stream, data, 1 );
+	Weld( *this, stream, data );
+	Upload( *this, stream, data, 0, 1 );
 	glDrawArrays( GL_QUADS, 0, nQuad*4 );
 	glBindBufferX( GL_ARRAY_BUFFER, 0 );
 }
@@ -572,7 +583,6 @@ void GPUState::Draw( const GPUStream& stream, const GPUStreamData& data, int nIn
 	GLASSERT( (primitive != GL_TRIANGLES ) || (nIndex % 3 == 0 ));
 
 	trianglesDrawn += instances * nIndex / 3;
-	++drawCalls;
 
 	//glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 
@@ -582,12 +592,18 @@ void GPUState::Draw( const GPUStream& stream, const GPUStreamData& data, int nIn
 			glBindBufferX( GL_ARRAY_BUFFER, data.vertexBuffer );
 			GLASSERT( data.streamPtr == 0 );
 		}
-		Weld( *this, stream, data, instances );
+		Weld( *this, stream, data );
+		
+		int start = 0;
+		while ( start < instances ) {
+			int n = Upload( *this, stream, data, start, instances );
+			start += n;
 
-		glDrawElementsInstanced( primitive,	//GL_TRIANGLES except where debugging 
-								 nIndex, GL_UNSIGNED_SHORT, data.indexPtr,
-								 instances );
-
+			++drawCalls;
+			glDrawElementsInstanced( primitive,	//GL_TRIANGLES except where debugging 
+									 nIndex, GL_UNSIGNED_SHORT, data.indexPtr,
+									 n );
+		}
 		if ( data.vertexBuffer ) {
 			glBindBufferX( GL_ARRAY_BUFFER, 0 );
 		}
@@ -602,11 +618,17 @@ void GPUState::Draw( const GPUStream& stream, const GPUStreamData& data, int nIn
 		//
 		glBindBufferX( GL_ARRAY_BUFFER, data.vertexBuffer );
 		glBindBufferX( GL_ELEMENT_ARRAY_BUFFER, data.indexBuffer );
-		Weld( *this, stream, data, instances );
+		Weld( *this, stream, data );
 
-		glDrawElementsInstanced( primitive,	// GL_TRIANGLES except when debugging 
-						nIndex, GL_UNSIGNED_SHORT, 0, instances );
+		int start = 0;
+		while ( start < instances ) {
+			int n = Upload( *this, stream, data, start, instances );
+			start += n;
 
+			++drawCalls;
+			glDrawElementsInstanced( primitive,	// GL_TRIANGLES except when debugging 
+							nIndex, GL_UNSIGNED_SHORT, 0, n );
+		}
 		glBindBufferX( GL_ARRAY_BUFFER, 0 );
 		glBindBufferX( GL_ELEMENT_ARRAY_BUFFER, 0 );
 	}

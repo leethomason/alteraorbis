@@ -318,7 +318,9 @@ public:
 
 protected:
 
-	static void Weld( const GPUState&, const GPUStream&, const GPUStreamData&, int nInstance );
+	// Sets up the shader.
+	static void Weld( const GPUState&, const GPUStream&, const GPUStreamData& );
+	static int Upload( const GPUState&, const GPUStream&, const GPUStreamData&, int start, int instances );
 
 private:
 

@@ -310,6 +310,42 @@ void ShaderManager::ActivateShader( int flags )
 }
 
 
+int  ShaderManager::CalcMaxInstances( int flags, int* uniforms )
+{
+	int predictedUniform     = 0;
+	int predictedUniformInst = 0;
+
+	predictedUniform		=	4 +		// u_mvpMatrix
+								1;		// u_colorMult
+	predictedUniformInst	=	4 +		// u_mMatrix
+								1;		// u_controlParamArr
+	if ( flags & TEXTURE0 )				predictedUniform	 += 1;
+	if ( flags & COLOR_PARAM )			predictedUniformInst += 1;
+	if ( flags & BONE_FILTER )			predictedUniformInst += 1;
+	if ( flags & TEXTURE0_XFORM )		predictedUniformInst += 1;
+	if ( flags & TEXTURE0_CLIP )		predictedUniformInst += 1;
+	if ( flags & TEXTURE0_COLORMAP )	predictedUniformInst += 4;
+	if ( flags & BONE_FILTER )			predictedUniformInst += 1;
+	if ( flags & BONE_XFORM )			predictedUniformInst += 4 * EL_MAX_BONES;
+	if ( flags & LIGHTING_DIFFUSE )		predictedUniform += 7;	// normal matrix & lights
+	if ( flags & LIGHTING_HEMI )		predictedUniform += 7;	// normal matrix & lights
+
+	// GL specifies at least 256 v4 uniforms.
+	// Theoretically, some of those get used by the compiler for constants. (?) Although
+	// I've never neen any indication of this in the query.
+	// Say, 246 reliably remain?
+	static const int NUM_UNIFORM = 246;
+	int nInstance = (NUM_UNIFORM - predictedUniform) / predictedUniformInst;
+	GLASSERT( nInstance > 0 );
+	if ( nInstance < 1 ) nInstance = 1;
+
+	if ( uniforms ) {
+		*uniforms = predictedUniform + nInstance * predictedUniformInst;
+	}
+	return nInstance;
+}
+
+
 ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 {
 	static const int LEN = 1000;
@@ -378,7 +414,6 @@ FIXME: need to handle driver updates invalidating cache.
 	AppendFlag( &header, "TEXTURE0_CLIP",		flags & TEXTURE0_CLIP );
 	AppendFlag( &header, "TEXTURE0_COLORMAP",	flags & TEXTURE0_COLORMAP );
 	AppendFlag( &header, "TEXTURE1",			0 );
-//	AppendFlag( &header, "INSTANCE",			flags & INSTANCE );
 	AppendFlag( &header, "COLORS",				flags & COLORS );
 	AppendFlag( &header, "PREMULT",				flags & PREMULT );
 	AppendFlag( &header, "EMISSIVE",			flags & EMISSIVE );
@@ -395,26 +430,14 @@ FIXME: need to handle driver updates invalidating cache.
 	else 
 		AppendFlag( &header, "LIGHTING_DIFFUSE", 0, 0 );
 
-	AppendConst( &header, "EL_MAX_INSTANCE", EL_MAX_INSTANCE );
 	AppendConst( &header, "EL_MAX_BONES",	 EL_MAX_BONES );
 
-	int predictedUniform = 0;
-	int predictedUniformInst = 0;
+	int predicted = 0;
+	shader->maxInstance = CalcMaxInstances( flags, &predicted );
+	GLOUTPUT_REL(( "Shader MAX instance = %d\n", shader->maxInstance ));
+	GLOUTPUT_REL(( "Predicted uniform size(v4): %d\n\n", predicted ));
 
-	predictedUniform		=	4 +		// u_mvpMatrix
-								1;		// u_colorMult
-	predictedUniformInst	=	4 +		// u_mMatrix
-								1;		// u_controlParamArr
-	if ( flags & TEXTURE0 )				predictedUniform	 += 1;
-	if ( flags & COLOR_PARAM )			predictedUniformInst += 1;
-	if ( flags & BONE_FILTER )			predictedUniformInst += 1;
-	if ( flags & TEXTURE0_XFORM )		predictedUniformInst += 1;
-	if ( flags & TEXTURE0_CLIP )		predictedUniformInst += 1;
-	if ( flags & TEXTURE0_COLORMAP )	predictedUniformInst += 4;
-	if ( flags & BONE_FILTER )			predictedUniformInst += 1;
-	if ( flags & BONE_XFORM )			predictedUniformInst += 4 * EL_MAX_BONES;
-	if ( flags & LIGHTING_DIFFUSE )		predictedUniform += 7;	// normal matrix & lights
-	if ( flags & LIGHTING_HEMI )		predictedUniform += 7;	// normal matrix & lights
+	AppendConst( &header, "MAX_INSTANCE", shader->maxInstance );
 
 #if 0 
 #ifdef DEBUG_OUTPUT
@@ -503,10 +526,6 @@ FIXME: need to handle driver updates invalidating cache.
 		uniformSize += v4Size*size;
 	}
 	GLOUTPUT_REL(( "Queried uniform size(v4): %d\n", uniformSize ));
-	//int nInstance = (flags & INSTANCE) ? EL_MAX_INSTANCE : 1;
-	int nInstance = EL_MAX_INSTANCE;
-	GLOUTPUT_REL(( "Predicted uniform size(v4): %d\n\n", predictedUniform + predictedUniformInst*nInstance ));
-
 
 	//glGetIntegerv( GL_MAX_VERTEX_UNIFORM_COMPONENTS, &maxUniforms );
 	//GLOUTPUT_REL(( "Shader %d created. Uniforms=%d / %d\n", flags, nUniforms, maxUniforms ));
