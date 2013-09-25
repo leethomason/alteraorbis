@@ -226,11 +226,14 @@ void UFOText::TextOut( GPUState* shader, const char* str, int _x, int _y, int _h
 		if ( fixedWidth ) {
 			float cw = (float)h * 0.5f;
 			metric.advance = cw;
-			metric.x = (cw - metric.w) * 0.5f;
-			/*if ( metric.x < 0 ) {
+
+			if ( metric.w > cw ) {
 				metric.x = 0;
 				metric.w = cw;
-			}*/
+			}
+			else {
+				metric.x = (cw - metric.w) * 0.5f;
+			}
 		}
 
 		if ( rendering ) {

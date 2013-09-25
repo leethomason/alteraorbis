@@ -16,7 +16,7 @@
 #pragma warning ( disable : 4530 )		// Don't warn about unused exceptions.
 
 #include "glew.h"
-#include "SDL.h "
+#include "SDL.h"
 
 #include "../grinliz/gldebug.h"
 #include "../grinliz/gltypes.h"
@@ -24,6 +24,7 @@
 #include "../grinliz/glvector.h"
 #include "../grinliz/glrectangle.h"
 #include "../grinliz/glstringutil.h"
+#include "../Shiny/include/Shiny.h"
 
 #include "../xegame/cgame.h"
 #include "../game/gamesettings.h"
@@ -41,8 +42,9 @@
 //#define TEST_ROTATION
 //#define TEST_FULLSPEED
 //#define SEND_CRASH_LOGS
+#define USE_LOOP
 
-#define TIME_BETWEEN_FRAMES	1000/40
+#define TIME_BETWEEN_FRAMES	1000/33
 
 #define IPOD_SCREEN_WIDTH	320
 #define IPOD_SCREEN_HEIGHT	480
@@ -110,6 +112,7 @@ void TransformXY( int x0, int y0, int* x1, int* y1 )
 }
 
 
+#ifndef USE_LOOP
 Uint32 TimerCallback(Uint32 interval, void *param)
 {
 	SDL_Event user;
@@ -119,6 +122,7 @@ Uint32 TimerCallback(Uint32 interval, void *param)
 	SDL_PushEvent( &user );
 	return interval;
 }
+#endif
 
 
 int main( int argc, char **argv )
@@ -253,18 +257,22 @@ int main( int argc, char **argv )
 
 
 #ifndef TEST_FULLSPEED
+#ifndef USE_LOOP
 	SDL_TimerID timerID = SDL_AddTimer( TIME_BETWEEN_FRAMES, TimerCallback, 0 );
+#endif
 #endif
 
 	int modKeys = SDL_GetModState();
+#ifdef USE_LOOP
+	U32 tickTimer = 0;
+#endif
 
 	// ---- Main Loop --- //
-#ifdef TEST_FULLSPEED	
+#if defined(TEST_FULLSPEED) || defined(USE_LOOP)
 	while ( !done ) {
-		if ( SDL_PollEvent( &event ) )
+		while ( SDL_PollEvent( &event ) )
 #else
 	while ( !done && SDL_WaitEvent( &event ) )
-#endif
 	{
 		// The user event shouldn't be duplicated...if there are 2, pull out the dupe.
 		if ( event.type == SDL_USEREVENT ) {
@@ -279,6 +287,7 @@ int main( int argc, char **argv )
 				}
 			}
 		}
+#endif
 
 		switch( event.type )
 		{
@@ -497,14 +506,50 @@ int main( int argc, char **argv )
 			default:
 				break;
 		}
-#ifdef TEST_FULLSPEED	
-		}
+#if defined(TEST_FULLSPEED) || defined(USE_LOOP)
 
+#ifdef USE_LOOP
+		U32 delta = SDL_GetTicks() - tickTimer;
+		if ( delta < TIME_BETWEEN_FRAMES ) {
+			SDL_Delay(0);
+			continue;
+		}
+		tickTimer = SDL_GetTicks();
+#endif
 		glEnable( GL_DEPTH_TEST );
 		glDepthFunc( GL_LEQUAL );
 
-		GameDoTick( game, SDL_GetTicks() );
-		SDL_GL_SwapBuffers();
+		const U8* keys = SDL_GetKeyState( 0 );
+		if ( keys[SDLK_PAGEDOWN] ) {
+			GameZoom( game, GAME_ZOOM_DISTANCE, KEY_ZOOM_SPEED );
+		}
+		if ( keys[SDLK_PAGEUP] ) {
+			GameZoom( game, GAME_ZOOM_DISTANCE, -KEY_ZOOM_SPEED );
+		}
+		if ( keys[SDLK_HOME] ) {
+			GameCameraRotate( game, -KEY_ROTATE_SPEED );
+		}
+		if ( keys[SDLK_END] ) {
+			GameCameraRotate( game, KEY_ROTATE_SPEED );
+		}
+
+		{
+			PROFILE_BLOCK( GameDoTick );
+			GameDoTick( game, SDL_GetTicks() );
+		}
+		{
+			PROFILE_BLOCK( Swap );
+			SDL_GL_SwapBuffers();
+		}
+
+#ifdef USE_LOOP
+		int databaseID=0, size=0, offset=0;
+		// FIXME: account for databaseID when looking up sound.
+		while ( GamePopSound( game, &databaseID, &offset, &size ) ) {
+			Audio_PlayWav( "./res/uforesource.db", offset, size );
+		}
+#endif
+
 	}
 #else
 	}
