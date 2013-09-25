@@ -27,7 +27,8 @@
 
 #include "../engine/loosequadtree.h"
 
-#include "../grinliz/glperformance.h"
+//#include "../grinliz/glperformance.h"
+#include "../Shiny/include/Shiny.h"
 
 #include "../script/worldgen.h"
 
@@ -157,7 +158,8 @@ bool PathMoveComponent::NeedComputeDest()
 
 void PathMoveComponent::ComputeDest()
 {
-	GRINLIZ_PERFTRACK;
+	//GRINLIZ_PERFTRACK;
+	PROFILE_FUNC();
 	ComponentSet thisComp( parentChit, Chit::SPATIAL_BIT | Chit::RENDER_BIT | ComponentSet::IS_ALIVE );
 	if ( !thisComp.okay )
 		return;
@@ -250,7 +252,8 @@ float PathMoveComponent::GetDistToNext2( const Vector2F& current )
 
 void PathMoveComponent::RotationFirst( U32 delta )
 {
-	GRINLIZ_PERFTRACK;
+	//GRINLIZ_PERFTRACK;
+	PROFILE_FUNC();
 
 	if ( pathPos < nPathPos ) {
 		float speed = Speed();
@@ -315,7 +318,9 @@ void PathMoveComponent::RotationFirst( U32 delta )
 
 bool PathMoveComponent::AvoidOthers( U32 delta )
 {
-	GRINLIZ_PERFTRACK;
+//	GRINLIZ_PERFTRACK;
+	PROFILE_FUNC();
+
 	static const float PATH_AVOID_DISTANCE = MAX_BASE_RADIUS*2.0f;
 
 	avoidForceApplied = false;
@@ -401,7 +406,8 @@ bool PathMoveComponent::AvoidOthers( U32 delta )
 
 int PathMoveComponent::DoTick( U32 delta, U32 since )
 {
-	GRINLIZ_PERFTRACK;
+//	GRINLIZ_PERFTRACK;
+	PROFILE_FUNC();
 
 	int id = parentChit->ID();
 

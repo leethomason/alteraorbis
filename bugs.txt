@@ -28,6 +28,7 @@ x Shield should absorb more with XP (and fix character screen to reflect this)
 - is shield boost working correctly? Effects are *not* getting stripped by the shield.
 x Add position fuzz to gold, crystal, and item drops
 - can re-pack MVP and Bone matrix in the shader to encode 3*vec4 as the transpose, then transpose in the shader
+- Hide free camera button
 
 - game
 
@@ -39,10 +40,8 @@ x Add position fuzz to gold, crystal, and item drops
 		x Shoot trees
 		x Can’t click through trees
 		x Should shoot on priority walk
-		- Tear through rock on neutral zones
-			- support clear in neutral zones?
-		- Add a pave to keep it clear
-		- Hide free camera button
+		x Tear through rock on neutral zones
+			x support clear in neutral zones?
 		x Unclear tabs are tabs
 
 	- Econ
@@ -57,6 +56,8 @@ x Add position fuzz to gold, crystal, and item drops
 		- item history
 			- created 
 			x kills
+		- Add a pave to keep it clear
+			- switch to voxel rendering for ground?
 		- item value (compare)
 		- item forging
 		- item market

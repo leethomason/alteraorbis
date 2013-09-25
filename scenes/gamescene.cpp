@@ -1,3 +1,5 @@
+#include <time.h>
+
 #include "gamescene.h"
 #include "characterscene.h"
 

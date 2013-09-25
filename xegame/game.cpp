@@ -28,7 +28,8 @@
 
 #include "../grinliz/glmatrix.h"
 #include "../grinliz/glutil.h"
-#include "../grinliz/glperformance.h"
+//#include "../grinliz/glperformance.h"
+#include "../Shiny/include/Shiny.h"
 #include "../grinliz/glstringutil.h"
 
 #include "../tinyxml2/tinyxml2.h"
@@ -136,7 +137,8 @@ Game::~Game()
 	delete ShaderManager::Instance();
 	delete database0;
 	delete StringPool::Instance();
-	Performance::Free();
+	//Performance::Free();
+	PROFILE_DESTROY();
 
 	GLOUTPUT_REL(( "Game destructor complete.\n" ));
 }
@@ -390,6 +392,7 @@ const char* Game::GamePath( const char* type, int slot, const char* extension ) 
 }
 
 
+/*
 void Game::PrintPerf( int depth, const PerfData& data )
 {
 	static const int X = 350;
@@ -400,12 +403,47 @@ void Game::PrintPerf( int depth, const PerfData& data )
 	ufoText->Draw( X+280,		 Y+perfY, "%6.2f  %4d", data.inclusiveMSec, data.callCount );
 	perfY += 20;
 }
+*/
+
+void Game::PrintPerf()
+{
+	++perfFrameCount;
+	if ( perfFrameCount == 10 ) {
+		std::string str = PROFILE_GET_TREE_STRING();
+		profile = str.c_str();
+		perfFrameCount = 0;
+	}
+	char buf[512];
+
+	static const int X = 250;
+	static const int Y = 100;
+
+	const char* p = profile.c_str();
+	const char* end = p + profile.size();
+
+	UFOText* ufoText = UFOText::Instance();
+	int perfY = 0;
+
+	ufoText->SetFixed( true );
+	while( p < end ) {
+		char* q = buf;
+		while( p < end && *p != '\n' ) {
+			*q++ = *p++;
+		}
+		*q = 0;
+		ufoText->Draw( X, Y+perfY, "%s", buf );
+		perfY += 16;
+		++p;
+	}
+	ufoText->SetFixed( false );
+}
 
 
 void Game::DoTick( U32 _currentTime )
 {
 	{
-		GRINLIZ_PERFTRACK
+		//GRINLIZ_PERFTRACK
+		PROFILE_FUNC();
 
 		currentTime = _currentTime;
 		if ( previousTime == 0 ) {
@@ -443,14 +481,16 @@ void Game::DoTick( U32 _currentTime )
 		scene->DoTick( deltaTime );
 
 		{
-			GRINLIZ_PERFTRACK_NAME( "Game::DoTick 3D" );
+			//GRINLIZ_PERFTRACK_NAME( "Game::DoTick 3D" );
+			PROFILE_BLOCK( DoTick3D );
 
 			screenport.SetPerspective();
 			scene->Draw3D( deltaTime );
 		}
 
 		{
-			GRINLIZ_PERFTRACK_NAME( "Game::DoTick UI" );
+			//GRINLIZ_PERFTRACK_NAME( "Game::DoTick UI" );
+			PROFILE_BLOCK( DoTickUI );
 			GLASSERT( scene );
 
 			// UI Pass
@@ -499,6 +539,7 @@ void Game::DoTick( U32 _currentTime )
 
 #ifdef GRINLIZ_PROFILE
 
+	/*
 	if ( GetPerfLevel() ) {
 		Performance::EndFrame();
 		if ( ++perfFrameCount == 10 ) {
@@ -507,6 +548,12 @@ void Game::DoTick( U32 _currentTime )
 		}
 		perfY = 0;
 		Performance::Walk( this );
+	}
+	*/
+	PROFILE_UPDATE();
+
+	if ( GetPerfLevel() ) {
+		PrintPerf();
 	}
 #endif
 

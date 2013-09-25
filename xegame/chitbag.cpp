@@ -26,7 +26,8 @@
 
 #include "../engine/model.h"
 #include "../engine/engine.h"
-#include "../grinliz/glperformance.h"
+//#include "../grinliz/glperformance.h"
+#include "../Shiny/include/Shiny.h"
 #include "../tinyxml2/tinyxml2.h"
 #include "../xarchive/glstreamer.h"
 
@@ -206,7 +207,8 @@ CameraComponent* ChitBag::GetCamera( Engine* engine )
 
 void ChitBag::DoTick( U32 delta, Engine* engine )
 {
-	GRINLIZ_PERFTRACK;
+	//GRINLIZ_PERFTRACK;
+	PROFILE_FUNC();
 	bagTime += delta;
 	nTicked = 0;
 

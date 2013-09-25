@@ -19,7 +19,7 @@
 #include "texture.h"
 #include "enginelimits.h"
 #include "../gamui/gamui.h"	// for auto setting up gamui stream
-#include "../grinliz/glperformance.h"
+//#include "../grinliz/glperformance.h"
 #include "shadermanager.h"
 #include "../grinliz/glgeometry.h"
 

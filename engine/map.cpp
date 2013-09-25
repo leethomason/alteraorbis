@@ -30,7 +30,7 @@
 
 #include "../grinliz/glstringutil.h"
 #include "../grinliz/glrectangle.h"
-#include "../grinliz/glperformance.h"
+//#include "../grinliz/glperformance.h"
 
 using namespace grinliz;
 using namespace tinyxml2;

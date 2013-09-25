@@ -18,7 +18,7 @@
 #include "texture.h"
 #include "gpustatemanager.h"
 #include "shadermanager.h"
-#include "../grinliz/glperformance.h"
+//#include "../grinliz/glperformance.h"
 #include "../grinliz/glgeometry.h"
 #include <limits.h>
 

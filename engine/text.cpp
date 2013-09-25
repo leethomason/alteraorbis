@@ -44,6 +44,7 @@ UFOText::UFOText( const gamedb::Reader* database, Texture* texture, Screenport* 
 	this->database = database;
 	this->texture = texture;
 	this->screenport = screenport;
+	this->fixedWidth = false;
 
 	memset( metricCache, 0, sizeof(Metric)*CHAR_RANGE );
 	memset( kerningCache, 100, CHAR_RANGE*CHAR_RANGE );
@@ -221,6 +222,16 @@ void UFOText::TextOut( GPUState* shader, const char* str, int _x, int _y, int _h
 
 		gamui::IGamuiText::GlyphMetrics metric;
 		Metrics( *str, 0, (float)h, &metric );
+
+		if ( fixedWidth ) {
+			float cw = (float)h * 0.5f;
+			metric.advance = cw;
+			metric.x = (cw - metric.w) * 0.5f;
+			/*if ( metric.x < 0 ) {
+				metric.x = 0;
+				metric.w = cw;
+			}*/
+		}
 
 		if ( rendering ) {
 			vBuf[pos*4+0].tex.Set( metric.tx0, metric.ty0 );

@@ -36,6 +36,7 @@ public:
 	void Metrics(	int c, int c1,
 					float lineHeight,
 					gamui::IGamuiText::GlyphMetrics* metric );
+	void SetFixed( bool fix ) { fixedWidth = fix; }
 
 	static void Create( const gamedb::Reader*, Texture* texture, Screenport* screenport );
 	static void Destroy();
@@ -67,6 +68,7 @@ private:
 	float texWidthInv;
 	float texHeight;
 	float texHeightInv;
+	bool fixedWidth;
 
 	enum {
 		BUF_SIZE = 30,

@@ -15,7 +15,8 @@
 
 
 #include "../grinliz/glgeometry.h"
-#include "../grinliz/glperformance.h"
+//#include "../grinliz/glperformance.h"
+#include "../Shiny/include/Shiny.h"
 
 #include "particle.h"
 #include "surface.h"
@@ -59,7 +60,8 @@ void ParticleSystem::DeviceLoss()
 void ParticleSystem::Process( U32 delta, Camera* camera )
 {
 	// 8.4 ms (debug) in process. 0.8 in release (wow.)
-	GRINLIZ_PERFTRACK;
+//	GRINLIZ_PERFTRACK;
+	PROFILE_FUNC();
 
 	const Vector3F* eyeDir = camera->EyeDir3();
 	const Vector3F origin = camera->PosWC();

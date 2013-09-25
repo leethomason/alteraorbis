@@ -26,7 +26,8 @@
 #include "../engine/particle.h"
 #include "../engine/loosequadtree.h"
 
-#include "../grinliz/glperformance.h"
+//#include "../grinliz/glperformance.h"
+#include "../Shiny/include/Shiny.h"
 #include "../script/procedural.h"
 
 using namespace grinliz;
@@ -287,7 +288,9 @@ void RenderComponent::Detach( int metaData )
 
 int RenderComponent::DoTick( U32 deltaTime, U32 since )
 {
-	GRINLIZ_PERFTRACK;
+	//GRINLIZ_PERFTRACK;
+	PROFILE_FUNC();
+
 	int tick = VERY_LONG_TICK;
 
 	SpatialComponent* spatial = SyncToSpatial();

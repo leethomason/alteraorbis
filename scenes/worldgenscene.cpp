@@ -5,6 +5,7 @@
 #include "../game/worldinfo.h"
 #include "../game/worldmap.h"
 #include "../script/rockgen.h"
+#include <time.h>
 
 using namespace grinliz;
 using namespace gamui;

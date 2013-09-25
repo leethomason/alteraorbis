@@ -1,6 +1,7 @@
 #include "gamemovecomponent.h"
 #include "worldmap.h"
-#include "../grinliz/glperformance.h"
+//#include "../grinliz/glperformance.h"
+#include "../Shiny/include/Shiny.h"
 #include "../xegame/rendercomponent.h"
 #include "../xegame/chit.h"
 
@@ -14,7 +15,9 @@ void GameMoveComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 
 void GameMoveComponent::ApplyBlocks( Vector2F* pos, bool* forceApplied )
 {
-	GRINLIZ_PERFTRACK;
+	//GRINLIZ_PERFTRACK;
+	PROFILE_FUNC();
+
 	RenderComponent* render = parentChit->GetRenderComponent();
 	GLASSERT( render );
 	if ( !render ) return;

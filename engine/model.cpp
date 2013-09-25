@@ -25,7 +25,7 @@
 
 #include "../grinliz/glvector.h"
 #include "../grinliz/glstringutil.h"
-#include "../grinliz/glperformance.h"
+//#include "../grinliz/glperformance.h"
 #include "../xarchive/glstreamer.h"
 
 #include <float.h>

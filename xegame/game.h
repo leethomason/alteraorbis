@@ -18,7 +18,7 @@
 
 #include "../grinliz/gldebug.h"
 #include "../grinliz/gltypes.h"
-#include "../grinliz/glperformance.h"
+//#include "../grinliz/glperformance.h"
 #include "../grinliz/glcontainer.h"
 
 #include "../engine/surface.h"
@@ -54,7 +54,7 @@ enum SavePathMode {
 /*
 */
 
-class Game : public ITextureCreator, public grinliz::IPerformancePrinter 
+class Game : public ITextureCreator 
 {
 public:
 	Game( int width, int height, int rotation, int uiHeight, const char* savepath );
@@ -148,7 +148,8 @@ public:
 	// get moved out of game to its own thing.
 	static const Palette* GetMainPalette()	{ return mainPalette; }
 
-	virtual void PrintPerf( int depth, const grinliz::PerfData& data );
+	//virtual void PrintPerf( int depth, const grinliz::PerfData& data );
+	void PrintPerf();
 
 protected:
 	void PushPopScene();
@@ -161,7 +162,7 @@ private:
 
 	Screenport screenport;
 	Surface surface;	// general purpose memory buffer for handling images
-
+	grinliz::GLString profile;
 
 	bool scenePopQueued;
 
@@ -182,7 +183,6 @@ private:
 	bool suppressText;
 	bool renderUI;
 	bool debugUIEnabled;
-	int perfY;
 
 	ModelLoader* modelLoader;
 	gamedb::Reader* database0;		// the basic, complete database

@@ -22,7 +22,8 @@
 #include "../grinliz/glutil.h"
 #include "../grinliz/glgeometry.h"
 #include "../grinliz/glcolor.h"
-#include "../grinliz/glperformance.h"
+//#include "../grinliz/glperformance.h"
+#include "../Shiny/include/Shiny.h"
 #include "../shared/lodepng.h"
 #include "../xarchive/glstreamer.h"
 
@@ -1869,7 +1870,8 @@ void WorldMap::PushVoxel( int id, float x, float z, float h, const float* walls 
 
 void WorldMap::PrepVoxels( const SpaceTree* spaceTree )
 {
-	GRINLIZ_PERFTRACK
+	//GRINLIZ_PERFTRACK
+	PROFILE_FUNC();
 	// For each region of the spaceTree that is visible,
 	// generate voxels.
 	if ( !voxelVertexVBO.IsValid()) {

@@ -20,6 +20,9 @@
     <Filter Include="Source Files\xarchive">
       <UniqueIdentifier>{6672e3ce-a9eb-46cc-8adb-45ccdd362dc4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\shiny">
+      <UniqueIdentifier>{fb997ba6-31ca-4944-949c-22e39bfd6ef1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
@@ -123,6 +126,27 @@
     </ClCompile>
     <ClCompile Include="..\grinliz\glmicrodb.cpp">
       <Filter>Source Files\grinliz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Shiny\src\ShinyManager.c">
+      <Filter>Source Files\shiny</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Shiny\src\ShinyNode.c">
+      <Filter>Source Files\shiny</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Shiny\src\ShinyNodePool.c">
+      <Filter>Source Files\shiny</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Shiny\src\ShinyNodeState.c">
+      <Filter>Source Files\shiny</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Shiny\src\ShinyOutput.c">
+      <Filter>Source Files\shiny</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Shiny\src\ShinyTools.c">
+      <Filter>Source Files\shiny</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Shiny\src\ShinyZone.c">
+      <Filter>Source Files\shiny</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -239,6 +263,45 @@
     </ClInclude>
     <ClInclude Include="..\grinliz\glmicrodb.h">
       <Filter>Source Files\grinliz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Shiny\include\Shiny.h">
+      <Filter>Source Files\shiny</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Shiny\include\ShinyConfig.h">
+      <Filter>Source Files\shiny</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Shiny\include\ShinyData.h">
+      <Filter>Source Files\shiny</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Shiny\include\ShinyMacros.h">
+      <Filter>Source Files\shiny</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Shiny\include\ShinyManager.h">
+      <Filter>Source Files\shiny</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Shiny\include\ShinyNode.h">
+      <Filter>Source Files\shiny</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Shiny\include\ShinyNodePool.h">
+      <Filter>Source Files\shiny</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Shiny\include\ShinyNodeState.h">
+      <Filter>Source Files\shiny</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Shiny\include\ShinyOutput.h">
+      <Filter>Source Files\shiny</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Shiny\include\ShinyPrereqs.h">
+      <Filter>Source Files\shiny</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Shiny\include\ShinyTools.h">
+      <Filter>Source Files\shiny</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Shiny\include\ShinyVersion.h">
+      <Filter>Source Files\shiny</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Shiny\include\ShinyZone.h">
+      <Filter>Source Files\shiny</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -41,7 +41,8 @@
 #include "../xegame/istringconst.h"
 
 #include "../grinliz/glrectangle.h"
-#include "../grinliz/glperformance.h"
+//#include "../grinliz/glperformance.h"
+#include "../Shiny/include/Shiny.h"
 #include <climits>
 
 using namespace grinliz;
@@ -748,7 +749,6 @@ WorkQueue* AIComponent::GetWorkQueue()
 	
 void AIComponent::ThinkRockBreak( const ComponentSet& thisComp )
 {
-	//GRINLIZ_PERFTRACK;
 	PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
 	const WorldGrid& wg = map->GetWorldGrid( targetDesc.mapPos.x, targetDesc.mapPos.y );
 
@@ -1544,7 +1544,8 @@ void AIComponent::WorkQueueToTask(  const ComponentSet& thisComp )
 
 int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 {
-	GRINLIZ_PERFTRACK;
+	//GRINLIZ_PERFTRACK;
+	PROFILE_FUNC();
 
 	ComponentSet thisComp( parentChit, Chit::RENDER_BIT | 
 		                               Chit::SPATIAL_BIT |

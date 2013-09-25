@@ -39,6 +39,7 @@ ChitBag* Component::GetChitBag()
 	return 0;
 }
 
+
 LumosChitBag* Component::GetLumosChitBag()
 {
 	ChitBag* cb = GetChitBag();

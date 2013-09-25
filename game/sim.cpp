@@ -88,7 +88,7 @@ void Sim::Load( const char* mapDAT, const char* gameDAT )
 		CreatePlayer();
 	}
 	else {
-		QuickProfile qp( "Sim::Load" );
+		//QuickProfile qp( "Sim::Load" );
 		ComponentFactory factory( this, &chitBag->census, engine, worldMap, chitBag, weather, lumosGame );
 
 		FILE* fp = fopen( gameDAT, "rb" );
@@ -123,7 +123,7 @@ void Sim::Save( const char* mapDAT, const char* gameDAT )
 	worldMap->Save( mapDAT );
 
 	{
-		QuickProfile qp( "Sim::SaveXarc" );
+		//QuickProfile qp( "Sim::SaveXarc" );
 
 		ComponentFactory factory( this, &chitBag->census, engine, worldMap, chitBag, weather, lumosGame );
 
