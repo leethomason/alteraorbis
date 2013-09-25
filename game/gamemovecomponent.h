@@ -33,6 +33,7 @@ public:
 	virtual const char* Name() const { return "GameMoveComponent"; }
 	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
 	WorldMap* GetWorldMap() { return map; }
+	float Speed() const;
 
 protected:
 	// Keep from hitting world objects.

@@ -17,7 +17,7 @@ GridMoveComponent::GridMoveComponent( WorldMap* wm ) : GameMoveComponent( wm )
 	worldMap = wm;
 	state = NOT_INIT;
 	velocity.Zero();
-	speed = MOVE_SPEED;
+	speed = DEFAULT_MOVE_SPEED;
 }
 
 
@@ -112,7 +112,7 @@ int GridMoveComponent::DoTick( U32 delta, U32 since )
 	}
 	else {
 		speed -= Travel( GRID_ACCEL, since );
-		if ( speed < MOVE_SPEED ) speed = MOVE_SPEED;
+		if ( speed < DEFAULT_MOVE_SPEED ) speed = DEFAULT_MOVE_SPEED;
 	}
 
 	Vector2F dest = { 0, 0 };

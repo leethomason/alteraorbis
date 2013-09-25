@@ -574,7 +574,7 @@ void Game::Zoom( int style, float distance )
 
 void Game::Rotate( float degrees )
 {
-	sceneStack.Top()->scene->Rotate( degrees );
+	sceneStack.Top()->scene->Rotate( -degrees );
 }
 
 

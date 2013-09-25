@@ -460,10 +460,10 @@ int main( int argc, char **argv )
 
 				const U8* keys = SDL_GetKeyState( 0 );
 				if ( keys[SDLK_PAGEDOWN] ) {
-					GameZoom( game, GAME_ZOOM_DISTANCE, -KEY_ZOOM_SPEED );
+					GameZoom( game, GAME_ZOOM_DISTANCE, KEY_ZOOM_SPEED );
 				}
 				if ( keys[SDLK_PAGEUP] ) {
-					GameZoom( game, GAME_ZOOM_DISTANCE, KEY_ZOOM_SPEED );
+					GameZoom( game, GAME_ZOOM_DISTANCE, -KEY_ZOOM_SPEED );
 				}
 				if ( keys[SDLK_HOME] ) {
 					GameCameraRotate( game, -KEY_ROTATE_SPEED );
@@ -471,7 +471,19 @@ int main( int argc, char **argv )
 				if ( keys[SDLK_END] ) {
 					GameCameraRotate( game, KEY_ROTATE_SPEED );
 				}
-					
+
+				// This only works fullscreen (not just full window) which
+				// isn't supported yet.
+				/*
+				int x, y;
+				int buttons = SDL_GetMouseState( &x, &y );
+				if ( buttons == 0 ) {
+					if ( x <= 0 )
+						GameCameraRotate( game, -KEY_ROTATE_SPEED );
+					else if ( x >= surface->w-1 )
+						GameCameraRotate( game, -KEY_ROTATE_SPEED );
+				}
+				*/
 				GameDoTick( game, SDL_GetTicks() );
 				SDL_GL_SwapBuffers();
 

@@ -33,16 +33,17 @@ x Add position fuzz to gold, crystal, and item drops
 
 	- Patch Fix
 		x Bones are broken!
-	    - Camera is a camera. Invert x axis on orbit.
-		- Movement speed a little sluggish
-		- Shoot trees
-		- Can’t click through trees
+	    x invert camera and key axis see if that works better.
+		d Mouse at edge. need full screen mode.
+		x Movement speed a little sluggish
+		x Shoot trees
+		x Can’t click through trees
 		x Should shoot on priority walk
 		- Tear through rock on neutral zones
+			- support clear in neutral zones?
 		- Add a pave to keep it clear
-		- Mouse at edge
 		- Hide free camera button
-		- Unclear tabs are tabs
+		x Unclear tabs are tabs
 
 	- Econ
 		- inventory

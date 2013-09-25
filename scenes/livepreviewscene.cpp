@@ -271,5 +271,5 @@ void LivePreviewScene::Draw3D( U32 deltaTime )
 
 void LivePreviewScene::DrawDebugText()
 {
-	DrawDebugTextDrawCalls( 16, engine );
+	DrawDebugTextDrawCalls( 0, 16, engine );
 }

@@ -11,7 +11,7 @@
 
 using namespace grinliz;
 
-static const float TRACK_SPEED	= MOVE_SPEED * 4.0f;
+static const float TRACK_SPEED	= DEFAULT_MOVE_SPEED * 4.0f;
 
 PhysicsMoveComponent::PhysicsMoveComponent( WorldMap* _map, bool _deleteWhenDone ) : GameMoveComponent( _map ), deleteWhenDone( _deleteWhenDone )
 {

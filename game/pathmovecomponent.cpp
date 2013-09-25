@@ -84,9 +84,13 @@ void PathMoveComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 }
 
 
-float PathMoveComponent::Speed() const
+float GameMoveComponent::Speed() const
 {
-	return MOVE_SPEED;
+	float speed = DEFAULT_MOVE_SPEED;
+	if ( parentChit->GetItem() ) {
+		parentChit->GetItem()->GetValue( "speed", &speed );
+	}
+	return speed;
 }
 
 
@@ -95,7 +99,7 @@ void PathMoveComponent::CalcVelocity( grinliz::Vector3F* v )
 	v->Zero();
 	SpatialComponent* spatial = parentChit->GetSpatialComponent();
 	if ( spatial && this->IsMoving() ) {
-		*v = spatial->GetHeading() * MOVE_SPEED;
+		*v = spatial->GetHeading() * Speed();
 	}
 }
 
@@ -249,7 +253,8 @@ void PathMoveComponent::RotationFirst( U32 delta )
 	GRINLIZ_PERFTRACK;
 
 	if ( pathPos < nPathPos ) {
-		float travel    = Travel( MOVE_SPEED, delta );
+		float speed = Speed();
+		float travel    = Travel( speed, delta );
 		float travelRot	= Travel( ROTATION_SPEED, delta );
 
 		while ( travel > 0 && travelRot > 0 && pathPos < nPathPos ) {
@@ -374,7 +379,7 @@ bool PathMoveComponent::AvoidOthers( U32 delta )
 				// pathing where a CalcPath() is expected to get there.
 				// Limiting the magnitute to a fraction of the travel 
 				// speed avoids deadlocks.
-				float mag = Min( r-d, 0.5f * Travel( MOVE_SPEED, delta ) ); 
+				float mag = Min( r-d, 0.5f * Travel( Speed(), delta ) ); 
 				normal.Multiply( mag );
 				avoid += normal;
 				

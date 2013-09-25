@@ -51,6 +51,7 @@
   <item name="visitor"
         resource="visitor"
         flags="CLICK_THROUGH"
+        speed="1.0"
         mass="35" >
   </item>
 
@@ -317,11 +318,13 @@
   <!-- The plant items describe the plants at the smallest height. Scaled from there,
        remembering largest plant is 4x the height, 16x the surface area, and 64x the mass.
        A plant standing alone will have sun+rain = 1.0 in the absense of other effects.
+
+       CLICK_THROUGH is debatable. Sometimes you do want to shoot a tree.
   -->
   <item name="plant0"
         desc="Orbstalk"
         resource="plant0"
-        flags="FLAMMABLE IMMUNE_SHOCK"
+        flags="FLAMMABLE IMMUNE_SHOCK CLICK_THROUGH"
         mass ="5"
         sun="0.6"
         rain="0.4"
@@ -331,7 +334,7 @@
   <item name="plant1"
         desc="Tree"
         resource="plant1"
-        flags="FLAMMABLE"
+        flags="FLAMMABLE CLICK_THROUGH"
         mass ="8"
         sun="0.5"
         rain="0.5"
@@ -341,7 +344,7 @@
   <item name="plant2"
         desc="Fern"
         resource="plant2"
-        flags=""
+        flags="CLICK_THROUGH"
         mass ="3"
         sun="0.2"
         rain="0.8"
@@ -351,7 +354,7 @@
   <item name="plant3"
         desc="CrystalGrass"
         resource="plant3"
-        flags="IMMUNE_FIRE SHOCKABLE"
+        flags="IMMUNE_FIRE SHOCKABLE CLICK_THROUGH"
         mass ="5"
         sun="0.5"
         rain="0.3"
@@ -361,7 +364,7 @@
   <item name="plant4"
         desc="Bamboo"
         resource="plant4"
-        flags="FLAMMABLE"
+        flags="FLAMMABLE CLICK_THROUGH"
         mass ="2"
         sun="0.3"
         rain="0.7"
@@ -371,7 +374,7 @@
   <item name="plant5"
         desc="Shroom"
         resource="plant5"
-        flags=""
+        flags="CLICK_THROUGH"
         mass ="4"
         sun="0.1"
         rain="0.6"
@@ -381,7 +384,7 @@
   <item name="plant6"
         desc="SunBloom"
         resource="plant6"
-        flags=""
+        flags="CLICK_THROUGH"
         mass ="1.5"
         sun="0.8"
         rain="0.2"
@@ -392,7 +395,7 @@
   <item name="plant7"
         desc="MoonBloom"
         resource="plant7"
-        flags=""
+        flags="CLICK_THROUGH"
         mass ="1.5"
         sun="0.5"
         rain="0.3"

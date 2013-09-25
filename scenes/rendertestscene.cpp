@@ -265,6 +265,6 @@ void RenderTestScene::Draw3D( U32 deltaTime )
 
 void RenderTestScene::DrawDebugText()
 {
-	DrawDebugTextDrawCalls( 16, engine );
+	DrawDebugTextDrawCalls( 0, 16, engine );
 }
 

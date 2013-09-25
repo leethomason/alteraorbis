@@ -184,7 +184,7 @@ void ParticleScene::Draw3D( U32 deltaTime )
 
 void ParticleScene::DrawDebugText()
 {
-	this->DrawDebugTextDrawCalls( 16, engine );
+	this->DrawDebugTextDrawCalls( 0, 16, engine );
 }
 
 

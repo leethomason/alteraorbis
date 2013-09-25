@@ -116,7 +116,7 @@ public:
 protected:
 
 	// Utility function for standard output:
-	void DrawDebugTextDrawCalls( int y, Engine* engine );
+	void DrawDebugTextDrawCalls( int x, int y, Engine* engine );
 
 	Game*			game;
 	UIRenderer		uiRenderer;

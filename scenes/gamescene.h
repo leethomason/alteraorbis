@@ -114,6 +114,7 @@ private:
 	gamui::ToggleButton freeCameraButton;
 	gamui::ToggleButton	buildButton[NUM_BUILD_BUTTONS];
 	gamui::ToggleButton modeButton[NUM_BUILD_MODES];
+	gamui::Image		tabBar;
 	gamui::PushButton	createWorkerButton;
 	gamui::PushButton	ejectButton;
 	gamui::PushButton	allRockButton;

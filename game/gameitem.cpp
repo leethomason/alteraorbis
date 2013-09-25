@@ -172,6 +172,21 @@ void GameItem::Serialize( XStream* xs )
 }
 
 
+void GameItem::SetValue( const char* name, const char* value )
+{
+	IString ikey = StringPool::Intern( name );
+	IString ival = StringPool::Intern( value );
+	for( int i=0; i<keyValues.Size(); ++i ) {
+		if ( keyValues[i].key == ikey ) {
+			keyValues[i].value = ival;
+			return;
+		}
+	}
+	KeyValue kv = { ikey, ival };
+	keyValues.Push( kv );
+}
+
+
 grinliz::IString GameItem::GetValue( const char* name ) const
 {
 	for( int i=0; i<keyValues.Size(); ++i ) {

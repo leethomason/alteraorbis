@@ -354,6 +354,7 @@ public:
 	bool GetValue( const char* name, double* value ) const;
 	bool GetValue( const char* name, float* value ) const;
 	bool GetValue( const char* name, int* value ) const;
+	void SetValue( const char* name, const char* value );
 
 	grinliz::MicroDB microdb;
 

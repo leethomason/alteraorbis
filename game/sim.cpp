@@ -207,8 +207,8 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos, const char* assetName )
 	chitBag->AddItem( assetName, chit, engine, TEAM_HOUSE0, 0 );
 	chitBag->AddItem( "shield", chit, engine, 0, 2 );
 	chitBag->AddItem( "blaster", chit, engine, 0, 2 );
-	chitBag->AddItem( "beamgun", chit, engine, 0, 2 );
 	chitBag->AddItem( "ring", chit, engine, 0, 2 );
+	chitBag->AddItem( "beamgun", chit, engine, 0, 2 );
 	chit->GetItemComponent()->AddGold( ReserveBank::Instance()->WithdrawDenizen() );
 	chit->GetItem()->flags |= GameItem::AI_BINDS_TO_CORE;
 	chit->GetItem()->traits.Roll( playerID );
@@ -225,6 +225,11 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos, const char* assetName )
 	chit->Add( new HealthComponent( engine ));
 	chit->GetSpatialComponent()->SetPosYRot( (float)pos.x+0.5f, 0, (float)pos.y+0.5f, 0 );
 	chit->GetItemComponent()->SetHardpoints();
+
+	// Player speed boost
+	CStr<16> str;
+	str.Format( "%f", DEFAULT_MOVE_SPEED*1.5f/1.2f );
+	chit->GetItem()->SetValue( "speed", str.c_str() );
 }
 
 

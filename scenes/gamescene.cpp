@@ -109,6 +109,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 		}
 		modeButton[mode].AddSubItem( &buildButton[i] );
 	}
+	tabBar.Init( &gamui2D, LumosGame::CalcUIIconAtom( "tabBar", true ), false );
 
 	createWorkerButton.Init( &gamui2D, game->GetButtonLook(0) );
 	createWorkerButton.SetText( "Create\nWorker" );
@@ -171,11 +172,14 @@ void GameScene::Resize()
 		if ( mode < NUM_BUILD_MODES && BUILD_MODE_START[mode+1] == i ) {
 			++mode;
 		}
-		layout.PosAbs( &buildButton[i], 1+i-BUILD_MODE_START[mode], mode+2 );
+		layout.PosAbs( &buildButton[i], i-BUILD_MODE_START[mode], 1 );
 	}
 	for( int i=0; i<NUM_BUILD_MODES; ++i ) {
-		layout.PosAbs( &modeButton[i], 0, i+2 );
+		layout.PosAbs( &modeButton[i], i, 0 );
 	}
+	tabBar.SetPos( modeButton[0].X(), modeButton[0].Y() );
+	tabBar.SetSize( modeButton[NUM_BUILD_MODES-1].X() + modeButton[NUM_BUILD_MODES-1].Width() - modeButton[0].X(), modeButton[0].Height() );
+
 	layout.PosAbs( &createWorkerButton, 0, 6 );
 	layout.PosAbs( &ejectButton, 1, 6 );
 
@@ -999,6 +1003,7 @@ void GameScene::DoTick( U32 delta )
 	for( int i=0; i<NUM_BUILD_MODES; ++i ) {
 		modeButton[i].SetVisible( coreMode != 0 );
 	}
+	tabBar.SetVisible( modeButton[0].Visible() );
 	createWorkerButton.SetVisible( coreMode != 0 );
 	ejectButton.SetVisible( coreMode != 0 );
 
@@ -1033,19 +1038,21 @@ void GameScene::Draw3D( U32 deltaTime )
 
 void GameScene::DrawDebugText()
 {
-	DrawDebugTextDrawCalls( 16, sim->GetEngine() );
+	static const int x = 200;
+	int y = (int)game->GetScreenport().UIHeight() - 160;
+	DrawDebugTextDrawCalls( x, y, sim->GetEngine() );
+	y += 16;
 
 	UFOText* ufoText = UFOText::Instance();
 	Chit* chit = sim->GetPlayerChit();
 	Engine* engine = sim->GetEngine();
 	LumosChitBag* chitBag = sim->GetChitBag();
 	Vector3F at = { 0, 0, 0 };
-	int y = 32;
 
 	if ( chit && chit->GetSpatialComponent() ) {
 		const Vector3F& v = chit->GetSpatialComponent()->GetPosition();
 		at = v;
-		ufoText->Draw( 0, y, "Player: %.1f, %.1f, %.1f  Camera: %.1f %.1f %.1f", 
+		ufoText->Draw( x, y, "Player: %.1f, %.1f, %.1f  Camera: %.1f %.1f %.1f", 
 			           v.x, v.y, v.z,
 					   engine->camera.PosWC().x, engine->camera.PosWC().y, engine->camera.PosWC().z );
 		y += 16;
@@ -1061,7 +1068,7 @@ void GameScene::DrawDebugText()
 	}
 
 	Wallet w = ReserveBank::Instance()->GetWallet();
-	ufoText->Draw( 0, y,	"Date=%.2f %s. Sim/S=%.1f x%.1f ticks=%d/%d Reserve Au=%d r%dg%dv%d", 
+	ufoText->Draw( x, y,	"Date=%.2f %s. Sim/S=%.1f x%.1f ticks=%d/%d Reserve Au=%d r%dg%dv%d", 
 							sim->DateInAge(),
 							fastMode ? "fast" : "norm", 
 							simPS,
@@ -1085,7 +1092,7 @@ void GameScene::DrawDebugText()
 		}
 	}
 
-	ufoText->Draw( 0, y,	"Plants type: %d %d %d %d %d %d %d %d stage: %d %d %d %d AIs: norm=%d greater=%d", 
+	ufoText->Draw( x, y,	"Plants type: %d %d %d %d %d %d %d %d stage: %d %d %d %d AIs: norm=%d greater=%d", 
 									typeCount[0], typeCount[1], typeCount[2], typeCount[3], typeCount[4], typeCount[5], typeCount[6], typeCount[7],
 									stageCount[0], stageCount[1], stageCount[2], stageCount[3],
 									chitBag->census.normalMOBs, chitBag->census.greaterMOBs );
@@ -1094,7 +1101,7 @@ void GameScene::DrawDebugText()
 	micropather::CacheData cacheData;
 	Vector2I sector = { (int)at.x/SECTOR_SIZE, (int)at.z/SECTOR_SIZE };
 	sim->GetWorldMap()->PatherCacheHitMiss( sector, &cacheData );
-	ufoText->Draw( 0, y, "Pather(%d,%d) kb=%d/%d %.2f cache h:m=%d:%d %.2f", 
+	ufoText->Draw( x, y, "Pather(%d,%d) kb=%d/%d %.2f cache h:m=%d:%d %.2f", 
 						  sector.x, sector.y,
 						  cacheData.nBytesUsed/1024,
 						  cacheData.nBytesAllocated/1024,
@@ -1108,12 +1115,12 @@ void GameScene::DrawDebugText()
 	if ( info ) {
 		GLString str;
 		info->DebugStr( &str );
-		ufoText->Draw( 0, y, "id=%d: %s", infoID, str.c_str() );
+		ufoText->Draw( x, y, "id=%d: %s", infoID, str.c_str() );
 		y += 16;
 	}
 	if ( !voxelInfoID.IsZero() ) {
 		const WorldGrid& wg = sim->GetWorldMap()->GetWorldGrid( voxelInfoID.x, voxelInfoID.y );
-		ufoText->Draw( 0, y, "voxel=%d,%d hp=%d/%d", voxelInfoID.x, voxelInfoID.y, wg.HP(), wg.TotalHP() );
+		ufoText->Draw( x, y, "voxel=%d,%d hp=%d/%d", voxelInfoID.x, voxelInfoID.y, wg.HP(), wg.TotalHP() );
 		y += 16;
 	}
 }
