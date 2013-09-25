@@ -698,15 +698,34 @@ bool AIComponent::RockBreak( const grinliz::Vector2I& rock )
 	if ( !thisComp.okay ) 
 		return false;
 
-	const WorldGrid& wg = map->GetWorldGrid( rock.x, rock.y );
-	if ( wg.RockHeight() == 0 )
-		return false;
+	Vector2I sector = thisComp.spatial->GetPosition2DI();
+	sector.x /= SECTOR_SIZE;
+	sector.y /= SECTOR_SIZE;
 
-	aiMode = ROCKBREAK_MODE;
-	currentAction = NO_ACTION;
-	targetDesc.Set( rock );
-	GLASSERT( targetDesc.HasTarget() );
-	parentChit->SetTickNeeded();
+	CoreScript* cs = GetLumosChitBag()->GetCore( sector );
+	if ( cs && cs->GetAttached(0) && (cs->GetAttached(0) != parentChit) ) {
+		// Core is in use. We can only blast away.
+		const WorldGrid& wg = map->GetWorldGrid( rock.x, rock.y );
+		if ( wg.RockHeight() == 0 )
+			return false;
+
+		aiMode = ROCKBREAK_MODE;
+		currentAction = NO_ACTION;
+		targetDesc.Set( rock );
+		GLASSERT( targetDesc.HasTarget() );
+		parentChit->SetTickNeeded();
+	}
+	else {
+		// neutral. Can vaporize.
+		Vector2F dest = { (float)rock.x + 0.5f, (float)rock.y+0.5f };
+		Vector2F end = { 0, 0 };
+		float cost = 0;
+		if ( map->CalcPathBeside( thisComp.spatial->GetPosition2D(), dest, &end, &cost )) {
+			taskList.Push( Task::MoveTask( end, 0 ));
+			taskList.Push( Task::StandTask( 1000, 0 ));
+			taskList.Push( Task::RemoveTask( rock, 0 ));
+		}
+	}
 	return true;
 }
 
@@ -1417,8 +1436,9 @@ void AIComponent::FlushTaskList( const ComponentSet& thisComp )
 
 	case TASK_REMOVE:
 		{
-			GLASSERT( workQueue && queueItem );
-			if ( workQueue->TaskCanComplete( *queueItem )) {
+			//GLASSERT( workQueue && queueItem );
+			//if ( workQueue->TaskCanComplete( *queueItem )) {
+			if ( workQueue->TaskCanComplete( map, GetLumosChitBag(), task->pos2i, false, 1 )) {
 				const WorldGrid& wg = map->GetWorldGrid( task->pos2i.x, task->pos2i.y );
 				if ( wg.RockHeight() ) {
 					DamageDesc dd( 10000, 0 );	// FIXME need constant
@@ -1426,7 +1446,7 @@ void AIComponent::FlushTaskList( const ComponentSet& thisComp )
 					map->VoxelHit( voxel, dd );
 				}
 				else {
-					Chit* found = GetChitBag()->ToLumos()->QueryRemovable( task->pos2i );
+					Chit* found = GetLumosChitBag()->QueryRemovable( task->pos2i );
 					if ( found ) {
 						DamageDesc dd( 10000, 0 );
 						ChitDamageInfo info( dd );

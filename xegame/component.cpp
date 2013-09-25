@@ -39,6 +39,12 @@ ChitBag* Component::GetChitBag()
 	return 0;
 }
 
+LumosChitBag* Component::GetLumosChitBag()
+{
+	ChitBag* cb = GetChitBag();
+	if ( cb ) return cb->ToLumos();
+	return 0;
+}
 
 void Component::BeginSerialize( XStream* xs, const char* name )
 {

@@ -37,7 +37,7 @@ class Chit;
 class ChitBag;
 class ChitEvent;
 class ChitMsg;
-
+class LumosChitBag;
 
 class Component
 {
@@ -87,6 +87,7 @@ protected:
 	void EndSerialize( XStream* sx );
 
 	ChitBag* GetChitBag();
+	LumosChitBag* GetLumosChitBag();
 	Chit* parentChit;
 	int id;
 	bool willSerialize;
