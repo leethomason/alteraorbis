@@ -18,7 +18,6 @@
 #include "../grinliz/glmatrix.h"
 #include "../grinliz/glvector.h"
 #include "../grinliz/glgeometry.h"
-//#include "../grinliz/glperformance.h"
 #include "../Shiny/include/Shiny.h"
 
 #include "gpustatemanager.h"
