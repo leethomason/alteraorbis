@@ -21,6 +21,9 @@
   <markov filename="sectorNames.txt" assetName="sector" />
   <markov filename="humanMaleNames.txt" assetName="humanMaleNames" />
   <markov filename="humanFemaleNames.txt" assetName="humanFemaleNames" />
+  <markov filename="vikingMale.txt" assetName="vikingMale" />
+  <markov filename="vikingFemale.txt" assetName="vikingFemale" />
+  <markov filename="monster.txt" assetName="monster" />
   
   <!-- Icon and UI -->
   <texture filename="title.png" />

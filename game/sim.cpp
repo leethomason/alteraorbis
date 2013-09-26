@@ -51,7 +51,7 @@ Sim::Sim( LumosGame* g )
 	engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
 
 	chitBag = new LumosChitBag();
-	chitBag->SetContext( engine, worldMap );
+	chitBag->SetContext( engine, worldMap, lumosGame );
 	worldMap->AttachEngine( engine, chitBag );
 	playerID = 0;
 	minuteClock = 0;
@@ -212,11 +212,14 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos, const char* assetName )
 	chit->GetItemComponent()->AddGold( ReserveBank::Instance()->WithdrawDenizen() );
 	chit->GetItem()->flags |= GameItem::AI_BINDS_TO_CORE;
 	chit->GetItem()->traits.Roll( playerID );
-	chit->GetItem()->properName = StringPool::Intern( 
-		lumosGame->GenName( female ? "humanFemaleNames" : "humanMaleNames", 
-							chit->ID(),
-							4, 8 ));
 
+	IString nameGen = chit->GetItem()->GetValue( "nameGen" );
+	if ( !nameGen.empty() ) {
+		chit->GetItem()->properName = StringPool::Intern( 
+			lumosGame->GenName( nameGen.c_str(), 
+								chit->ID(),
+								4, 8 ));
+	}
 	AIComponent* ai = new AIComponent( engine, worldMap );
 	ai->EnableDebug( true );
 	ai->playerControlled = true;

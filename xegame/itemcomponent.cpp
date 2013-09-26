@@ -33,6 +33,7 @@
 #include "../xegame/rendercomponent.h"
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/istringconst.h"
+#include "../game/lumosgame.h"
 
 using namespace grinliz;
 
@@ -115,6 +116,24 @@ void ItemComponent::AddGold( const Wallet& w )
 }
 
 
+void ItemComponent::NameItem( GameItem* item )
+{
+	bool shouldHaveName = item->traits.Level() >= 4;	// FIXME: needs work...
+
+	if ( shouldHaveName ) {
+		if ( item->properName.empty() ) {
+			IString nameGen = item->GetValue( "nameGen" );
+			if ( !nameGen.empty() ) {
+				item->properName = StringPool::Intern( 
+					GetLumosChitBag()->GetLumosGame()->GenName( nameGen.c_str(), 
+																item->id,
+																4, 10 ));
+			}
+		}
+	}
+}
+
+
 void ItemComponent::AddBattleXP( bool isMelee, int killshotLevel, const GameItem* loser )
 {
 	GameItem* mainItem = itemArr[0];
@@ -124,6 +143,7 @@ void ItemComponent::AddBattleXP( bool isMelee, int killshotLevel, const GameItem
 		// Level up!
 		// FIXME: show an icon
 		mainItem->hp = mainItem->TotalHPF();
+		NameItem( mainItem );
 	}
 
 	GameItem* weapon = 0;
@@ -142,6 +162,7 @@ void ItemComponent::AddBattleXP( bool isMelee, int killshotLevel, const GameItem
 		// really an extension of the main item.
 		if (( weapon->flags & GameItem::INTRINSIC) == 0 ) {
 			weapon->traits.AddBattleXP( killshotLevel );
+			NameItem( weapon );
 		}
 	}
 

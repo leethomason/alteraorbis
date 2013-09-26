@@ -81,6 +81,7 @@ private:
 	bool EmitEffect( const GameItem& it, U32 deltaTime );
 	bool ItemActive( int index );
 	bool ItemActive( const GameItem* );	// expensive: needs a search.
+	void NameItem( GameItem* item );	// if conditions met, give the item a name.
 
 	CTicker slowTick;
 	Wallet wallet;

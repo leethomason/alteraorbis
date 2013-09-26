@@ -5,6 +5,7 @@
 			  flags="GOLD_PICKUP"
         procedural="suit"
         mob="denizen"
+        nameGen="humanFemaleNames"
         cooldown="1500"
 			  mass ="60">
     <intrinsics>
@@ -21,6 +22,7 @@
         uiIcon="human"
         flags="GOLD_PICKUP"
         procedural="suit"
+        nameGen="humanMaleNames"
         mob="denizen"
         mass ="60">
     <intrinsics>
@@ -113,6 +115,7 @@
         resource="arachnoid"
         flags="AI_WANDER_HERD AI_EAT_PLANTS AI_SECTOR_HERD GOLD_PICKUP FLAMMABLE SHOCKABLE"
         mob="normal"
+        nameGen="monster"
         mass="10">
     <intrinsics>
       <item name="stinger"
@@ -127,6 +130,7 @@
         resource="mantis"
         flags="AI_WANDER_HERD AI_EAT_PLANTS AI_SECTOR_HERD GOLD_PICKUP"
         mob="normal"
+        nameGen="monster"
         mass="40">
     <intrinsics>
       <item name="pincer"
@@ -141,6 +145,7 @@
         resource="redmantis"
         flags="AI_WANDER_HERD AI_EAT_PLANTS AI_SECTOR_HERD GOLD_PICKUP"
         mob="normal"
+        nameGen="monster"
         mass="30">
     <intrinsics>
       <item name="pincer"
@@ -164,6 +169,7 @@
         resource="cyclops"
         flags="GOLD_PICKUP AI_HEAL_AT_CORE AI_SECTOR_WANDER"
         mob="greater"
+        nameGen="monster"
         mass="400">
     <intrinsics>
       <item name="claw"
@@ -177,6 +183,7 @@
         resource="firecyclops"
         flags="EFFECT_FIRE IMMUNE_FIRE GOLD_PICKUP AI_HEAL_AT_CORE AI_SECTOR_WANDER"
         mob="greater"
+        nameGen="monster"
         mass="400">
     <intrinsics>
       <item name="claw"
@@ -199,6 +206,7 @@
         resource="shockcyclops"
         flags="EFFECT_SHOCK IMMUNE_SHOCK GOLD_PICKUP AI_HEAL_AT_CORE AI_SECTOR_WANDER"
         mob="greater"
+        nameGen="monster"
         mass="400">
     <intrinsics>
       <item name="claw"
@@ -227,6 +235,7 @@
         uiIcon="ring"
         flags="MELEE_WEAPON"
 		    procedural="ring"
+        nameGen="vikingFemale"
         hardpoint="trigger"
         meleeDamage="1.4"
         shieldBoost="1">
@@ -244,6 +253,7 @@
         meleeDamage="0.8"
         rangedDamage="20"
         procedural="gun"
+        nameGen="vikingMale"
         >
   </item>
 
@@ -259,6 +269,7 @@
         meleeDamage="0.8"
         rangedDamage="30"
         procedural="gun"
+        nameGen="vikingMale"
         >
   </item>
 
@@ -274,6 +285,7 @@
         meleeDamage="0.8"
         rangedDamage="25"
         procedural="gun"
+        nameGen="vikingMale"
         >
   </item>
 
@@ -289,6 +301,7 @@
         meleeDamage="0.8"
         rangedDamage="20"
         procedural="gun"
+        nameGen="vikingMale"
         >
   </item>
 

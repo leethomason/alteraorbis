@@ -36,7 +36,7 @@
 
 using namespace grinliz;
 
-LumosChitBag::LumosChitBag() : engine( 0 )
+LumosChitBag::LumosChitBag() : engine(0), worldMap(0), lumosGame(0)
 {
 }
 
