@@ -735,6 +735,10 @@ void PathCache::Add( const MP_VECTOR< void* >& path, const MP_VECTOR< float >& c
 
 void PathCache::AddNoSolution( void* end, void* states[], int count )
 {
+	if ( count + nItems > allocated*3/4 ) {
+		return;
+	}
+
 	for( int i=0; i<count; ++i ) {
 		Item item = { states[i], end, 0, FLT_MAX };
 		AddItem( item );
