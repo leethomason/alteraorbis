@@ -175,6 +175,7 @@ public:
 	virtual void Submit( GPUState* shader, bool emissiveOnly );
 	virtual void PrepVoxels( const SpaceTree* );
 	virtual void DrawVoxels( GPUState* shader, const grinliz::Matrix4* xform );
+	virtual void PrepGrid( const SpaceTree* spaceTree );
 	virtual void Draw3D(  const grinliz::Color3F& colorMult, GPUState::StencilMode, bool useSaturation );
 	virtual grinliz::Vector3I IntersectVoxel(	const grinliz::Vector3F& origin,
 												const grinliz::Vector3F& dir,
@@ -229,7 +230,7 @@ public:
 		ZONE_SIZE2  = ZONE_SIZE*ZONE_SIZE,
 		NUM_ZONES	= MAX_MAP_SIZE/ZONE_SIZE,
 	    NUM_ZONES2	= NUM_ZONES*NUM_ZONES,
-		MAX_VOXEL_QUADS  = 8000		// actually uses quads, so the vertex=4*MAX_VOXEL_QUADS
+		MAX_VOXEL_QUADS  = 8000,		// actually uses quads, so the vertex=4*MAX_VOXEL_QUADS
 	};
 
 private:
@@ -250,7 +251,7 @@ private:
 	void EmitWaterfalls( U32 delta );	// particle systems
 
 	void Init( int w, int h );
-	void Tessellate();
+	//void Tessellate();
 	void FreeVBOs();
 
 	bool Similar( const grinliz::Rectangle2I& r, int layer, const grinliz::BitArray<MAX_MAP_SIZE, MAX_MAP_SIZE, 1 >& setmap );
@@ -346,13 +347,17 @@ private:
 		static U32 Hash( const grinliz::Vector2I& v)			{ return (U32)(v.y*MAX_MAP_SIZE+v.x); }
 		static bool Equal( const grinliz::Vector2I& v0, const grinliz::Vector2I& v1 )	{ return v0 == v1; }
 	};
-	GPUVertexBuffer					vertexVBO[WorldGrid::NUM_LAYERS];
-	GPUIndexBuffer					indexVBO[WorldGrid::NUM_LAYERS];
-	Texture*						texture[WorldGrid::NUM_LAYERS];
-	int								nIndex[WorldGrid::NUM_LAYERS];
+	//GPUVertexBuffer					vertexVBO[WorldGrid::NUM_LAYERS];
+	//GPUIndexBuffer					indexVBO[WorldGrid::NUM_LAYERS];
+	//Texture*						texture[WorldGrid::NUM_LAYERS];
+	//int								nIndex[WorldGrid::NUM_LAYERS];
 
 	GPUVertexBuffer					voxelVertexVBO;
 	Texture*						voxelTexture;
+	GPUVertexBuffer					gridVertexVBO;
+	Texture*						gridTexture;
+	int								nVoxels;
+	int								nGrids;
 
 	grinliz::CDynArray< grinliz::Vector2I > waterfalls;
 	grinliz::CDynArray< grinliz::Vector2I > magmaGrids;

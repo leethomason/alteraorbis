@@ -247,7 +247,7 @@ void Engine::CreateMiniMap()
 	GPUState::PushMatrix( GPUState::MODELVIEW_MATRIX );
 	GPUState::MultMatrix( GPUState::MODELVIEW_MATRIX, scaleMat );
 
-	map->Draw3D( color, GPUState::STENCIL_OFF, false );
+//	map->Draw3D( color, GPUState::STENCIL_OFF, false );
 	GPUState::PopMatrix( GPUState::MODELVIEW_MATRIX );
 
 	miniMapRenderTarget->SetActive( false, this );
@@ -318,7 +318,9 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 	int exclude = Model::MODEL_INVISIBLE;
 	Model* modelRoot = spaceTree->Query( planes, 6, 0, exclude );
 	if ( map ) {
+		PROFILE_BLOCK( MapPrep );
 		map->PrepVoxels( spaceTree );
+		map->PrepGrid( spaceTree );
 	}
 	
 	Color4F ambient, diffuse, shadow;

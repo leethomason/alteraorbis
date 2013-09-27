@@ -48,6 +48,7 @@
   <texture filename="kioskscreen.png" filename2="black512.png" emissive="true" colorMap="true"/>
 
   <texture assetName="voxel" filename="voxelalt.png" filename2="voxelalt_em.png" emissive="true" width="256" height="64"/>
+  <texture assetName="voxmap" filename="voxmap.png" filename2="voxmap_em.png" emissive="true" />
   <texture filename="flags.png" />
 
   <!-- note this makes textures and materials the same thing, to have the emissive
@@ -57,7 +58,6 @@
   <texture assetName="map_land" filename="map_land.png"   />
   <texture filename="map_water.png"  filename2="map_water_em.png"  emissive="true"/>
   <texture filename="map_grid.png" filename2="map_grid_em.png" emissive="true" maxSize="128" />
-  <texture filename="map_core.png" maxSize="128" />
   <texture filename="map_port.png" maxSize="128" />
   
   <texture filename="ringAtlas.png" maxSize="1024" emissive="true" table="ring.xml" colorMap="true"/>

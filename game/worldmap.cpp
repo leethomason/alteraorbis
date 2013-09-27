@@ -65,11 +65,12 @@ WorldMap::WorldMap( int width, int height ) : Map( width, height )
 	iMapGridUse = 0;
 	
 	voxelTexture = 0;
+	gridTexture = 0;
 
-	texture[0] = TextureManager::Instance()->GetTexture( "map_water" );
-	texture[1] = TextureManager::Instance()->GetTexture( "map_grid" );
-	texture[2] = TextureManager::Instance()->GetTexture( "map_port" );
-	texture[3] = TextureManager::Instance()->GetTexture( "map_land" );
+//	texture[0] = TextureManager::Instance()->GetTexture( "map_water" );
+//	texture[1] = TextureManager::Instance()->GetTexture( "map_grid" );
+//	texture[2] = TextureManager::Instance()->GetTexture( "map_port" );
+//	texture[3] = TextureManager::Instance()->GetTexture( "map_land" );
 
 	debugRegionOverlay.Set( 0, 0, 0, 0 );
 }
@@ -89,16 +90,17 @@ WorldMap::~WorldMap()
 void WorldMap::DeviceLoss()
 {
 	FreeVBOs();
-	Tessellate();
+//	Tessellate();
 }
 
 void WorldMap::FreeVBOs()
 {
-	for( int i=0; i<WorldGrid::NUM_LAYERS; ++i ) {
-		vertexVBO[i].Destroy();
-		indexVBO[i].Destroy();
-	}
+//	for( int i=0; i<WorldGrid::NUM_LAYERS; ++i ) {
+//		vertexVBO[i].Destroy();
+//		indexVBO[i].Destroy();
+//	}
 	voxelVertexVBO.Destroy();
+	gridVertexVBO.Destroy();
 }
 
 
@@ -226,7 +228,7 @@ void WorldMap::Load( const char* pathToDAT )
 		fread( grid, sizeof(WorldGrid), width*height, fp );
 		fclose( fp );
 		
-		Tessellate();
+		//Tessellate();
 		usingSectors = true;
 		// Set up the rocks.
 		for( int j=0; j<height; ++j ) {
@@ -331,7 +333,7 @@ void WorldMap::InitCircle()
 			}
 		}
 	}
-	Tessellate();
+	//Tessellate();
 }
 
 
@@ -384,7 +386,7 @@ bool WorldMap::InitPNG( const char* filename,
 		}
 		free( pixels );
 	}
-	Tessellate();
+	//Tessellate();
 	return error == 0;
 }
 
@@ -457,6 +459,7 @@ void WorldMap::PushQuad( int layer, int x, int y, int w, int h, CDynArray<PTVert
 }
 
 
+#if 0
 // Wow: Tessallate: land:87720,131580 water:73236,109854
 // Filtering:
 // Tessallate:      land:76504,114756 water:60944, 91416
@@ -537,6 +540,7 @@ void WorldMap::Tessellate()
 		delete index[i];
 	}
 }
+#endif
 
 
 Vector2I WorldMap::FindEmbark()
@@ -1794,6 +1798,22 @@ void WorldMap::DrawZones()
 
 void WorldMap::Submit( GPUState* shader, bool emissiveOnly )
 {
+	if ( !gridTexture ) {
+		gridTexture = TextureManager::Instance()->GetTexture( "voxmap" );
+	}
+	
+	Vertex v;
+	GPUStream stream( v );
+
+	GPUStreamData data;
+	data.vertexBuffer	= gridVertexVBO.ID();
+	data.texture0		= gridTexture;
+	Vector4F control	= { 1, Saturation(), 1, 1 };
+	data.controlParam	= &control;
+
+	shader->DrawQuads( stream, data, nGrids );
+
+#if 0
 	for( int i=0; i<WorldGrid::NUM_LAYERS; ++i ) {
 		if ( emissiveOnly && !texture[i]->Emissive() )
 			continue;
@@ -1809,8 +1829,78 @@ void WorldMap::Submit( GPUState* shader, bool emissiveOnly )
 			shader->Draw( stream, data, nIndex[i] );
 		}
 	}
+#endif
 }
 
+
+
+void WorldMap::PrepGrid( const SpaceTree* spaceTree )
+{
+	// For each region of the spaceTree that is visible,
+	// generate voxels.
+	if ( !gridVertexVBO.IsValid()) {
+		gridVertexVBO = GPUVertexBuffer::Create( 0, sizeof(Vertex), voxelBuffer.Capacity() );
+	}
+	GLASSERT( gridVertexVBO.IsValid());
+	voxelBuffer.Clear();
+
+	// HARDCODE black magic values.
+	#define BLACKMAG_X(x)	float( double(x*256 + x*32 + 16) / 1024.0)
+	#define BLACKMAG_Y(y)   float( 0.75 - double(y*256 + y*32 + 16) / 1024.0)
+
+	static const Vector2F UV[WorldGrid::NUM_LAYERS] = {
+		{ BLACKMAG_X(1), BLACKMAG_Y(0) },	// water
+		{ BLACKMAG_X(0), BLACKMAG_Y(1) },	// grid
+		{ BLACKMAG_X(1), BLACKMAG_Y(1) },	// port
+		{ BLACKMAG_X(0), BLACKMAG_Y(0) },	// land
+	};
+	static const float du = 0.25f;
+	static const float dv = 0.25f;	
+
+	const CArray<Rectangle2I, SpaceTree::MAX_ZONES>& zones = spaceTree->Zones();
+	for( int i=0; i<zones.Size(); ++i ) {
+		Rectangle2I b = zones[i];
+
+		for( int y=b.min.y; y<=b.max.y; ++y ) {
+			for( int x=b.min.x; x<=b.max.x; ++x ) {
+
+				// Check for memory exceeded and break.
+				if ( voxelBuffer.Size()+4 >= voxelBuffer.Capacity() ) {
+					GLASSERT(0);	// not a problem, but may need to adjust capacity
+					y = b.max.y+1;
+					x = b.max.x+1;
+					break;
+				}
+
+				const WorldGrid& wg = grid[INDEX(x,y)];
+				if ( wg.Height() == 0 ) {
+					int layer = wg.Layer();
+
+					Vertex* vArr = voxelBuffer.PushArr( 4 );
+
+					float fx = (float)x;
+					float fy = (float)y;
+					vArr[0].pos.Set( fx,		0, fy );
+					vArr[1].pos.Set( fx,		0, fy+1.0f );
+					vArr[2].pos.Set( fx+1.0f,	0, fy+1.0f );
+					vArr[3].pos.Set( fx+1.0f,	0, fy );
+
+					vArr[0].tex.Set( UV[layer].x, UV[layer].y );
+					vArr[1].tex.Set( UV[layer].x, UV[layer].y+dv );
+					vArr[2].tex.Set( UV[layer].x+du, UV[layer].y+dv );
+					vArr[3].tex.Set( UV[layer].x+du, UV[layer].y );
+
+					for( int i=0; i<4; ++i ) {
+						vArr[i].normal = V3F_UP;
+						vArr[i].boneID = 0;
+					}
+				}
+			}
+		}
+	}
+	gridVertexVBO.Upload( voxelBuffer.Mem(), voxelBuffer.Size()*sizeof(Vertex), 0 );
+	nGrids = voxelBuffer.Size() / 4;
+}
 
 
 Vertex* WorldMap::PushVoxelQuad( int id, const Vector3F& normal )
@@ -1871,7 +1961,7 @@ void WorldMap::PushVoxel( int id, float x, float z, float h, const float* walls 
 void WorldMap::PrepVoxels( const SpaceTree* spaceTree )
 {
 	//GRINLIZ_PERFTRACK
-	PROFILE_FUNC();
+	//PROFILE_FUNC();
 	// For each region of the spaceTree that is visible,
 	// generate voxels.
 	if ( !voxelVertexVBO.IsValid()) {
@@ -1944,6 +2034,7 @@ void WorldMap::PrepVoxels( const SpaceTree* spaceTree )
 		}
 	}
 	voxelVertexVBO.Upload( voxelBuffer.Mem(), voxelBuffer.Size()*sizeof(Vertex), 0 );
+	nVoxels = voxelBuffer.Size() / 4;
 }
 
 
@@ -1966,7 +2057,7 @@ void WorldMap::DrawVoxels( GPUState* state, const grinliz::Matrix4* xform )
 	data.texture0		= voxelTexture;
 	data.controlParam	= &control;
 
-	state->DrawQuads( stream, data, voxelBuffer.Size()/4 );
+	state->DrawQuads( stream, data, nVoxels );
 
 	if ( xform ) {
 		state->PopMatrix( GPUState::MODELVIEW_MATRIX );
