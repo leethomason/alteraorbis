@@ -65,7 +65,7 @@ Engine::Engine( Screenport* port, const gamedb::Reader* database, Map* m )
 	ShaderManager::Instance()->AddDeviceLossHandler( this );
 	particleSystem = new ParticleSystem();
 	boltRenderer = new BoltRenderer();
-	miniMapRenderTarget = 0;
+//	miniMapRenderTarget = 0;
 }
 
 
@@ -75,7 +75,7 @@ Engine::~Engine()
 	ShaderManager::Instance()->RemoveDeviceLossHandler( this );
 	delete renderQueue;
 	delete spaceTree;
-	delete miniMapRenderTarget;
+//	delete miniMapRenderTarget;
 	for( int i=0; i<RT_COUNT; ++i )
 		delete renderTarget[i];
 	delete boltRenderer;
@@ -88,8 +88,8 @@ void Engine::DeviceLoss()
 		delete renderTarget[i];
 		renderTarget[i] = 0;
 	}
-	delete miniMapRenderTarget;
-	miniMapRenderTarget = 0;
+//	delete miniMapRenderTarget;
+//	miniMapRenderTarget = 0;
 }
 
 
@@ -213,6 +213,7 @@ void Engine::FreeModel( Model* model )
 }
 
 
+#if 0
 void Engine::CreateMiniMap()
 {
 	delete miniMapRenderTarget;
@@ -247,19 +248,20 @@ void Engine::CreateMiniMap()
 	GPUState::PushMatrix( GPUState::MODELVIEW_MATRIX );
 	GPUState::MultMatrix( GPUState::MODELVIEW_MATRIX, scaleMat );
 
-//	map->Draw3D( color, GPUState::STENCIL_OFF, false );
+	map->Draw3D( color, GPUState::STENCIL_OFF, false );
 	GPUState::PopMatrix( GPUState::MODELVIEW_MATRIX );
 
 	miniMapRenderTarget->SetActive( false, this );
 }
+#endif
 
 
 Texture* Engine::GetMiniMapTexture()
 {
-	if ( miniMapRenderTarget ) {
-		return miniMapRenderTarget->GetTexture();
-	}
-	return 0;
+//	if ( miniMapRenderTarget ) {
+//		return miniMapRenderTarget->GetTexture();
+//	}
+	return TextureManager::Instance()->GetTexture( "miniMap" );
 }
 
 
@@ -286,9 +288,9 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 	for( int i=0; i<NUM_MODEL_DRAW_CALLS; ++i )
 		modelDrawCalls[i] = 0;
 
-	if ( map && !miniMapRenderTarget ) {
-		CreateMiniMap();
-	}
+//	if ( map && !miniMapRenderTarget ) {
+//		CreateMiniMap();
+//	}
 
 	// -------- Camera & Frustum -------- //
 	screenport->SetView( camera.ViewMatrix() );	// Draw the camera

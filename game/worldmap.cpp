@@ -36,7 +36,9 @@
 
 #include "worldinfo.h"
 #include "gameitem.h"
+#include "lumosgame.h"
 #include "../script/worldgen.h"
+#include "../script/procedural.h"
 
 using namespace grinliz;
 using namespace micropather;
@@ -67,11 +69,6 @@ WorldMap::WorldMap( int width, int height ) : Map( width, height )
 	voxelTexture = 0;
 	gridTexture = 0;
 
-//	texture[0] = TextureManager::Instance()->GetTexture( "map_water" );
-//	texture[1] = TextureManager::Instance()->GetTexture( "map_grid" );
-//	texture[2] = TextureManager::Instance()->GetTexture( "map_port" );
-//	texture[3] = TextureManager::Instance()->GetTexture( "map_land" );
-
 	debugRegionOverlay.Set( 0, 0, 0, 0 );
 }
 
@@ -90,15 +87,10 @@ WorldMap::~WorldMap()
 void WorldMap::DeviceLoss()
 {
 	FreeVBOs();
-//	Tessellate();
 }
 
 void WorldMap::FreeVBOs()
 {
-//	for( int i=0; i<WorldGrid::NUM_LAYERS; ++i ) {
-//		vertexVBO[i].Destroy();
-//		indexVBO[i].Destroy();
-//	}
 	voxelVertexVBO.Destroy();
 	gridVertexVBO.Destroy();
 }
@@ -1792,6 +1784,45 @@ void WorldMap::DrawZones()
 				}
 			}
 		}
+	}
+}
+
+
+void WorldMap::CreateTexture( Texture* t )
+{
+	if ( StrEqual( t->Name(), "miniMap" ) ) {
+		
+		int size = t->Width()*t->Height();
+		U16* data = new U16[size];
+
+		int dx = this->Width() / t->Width();
+		int dy = this->Height() / t->Height();
+
+		const Game::Palette* palette = Game::GetMainPalette();
+		Color4U8 cWater = palette->Get4U8( PAL_BLUE*2, PAL_BLUE );
+		Color4U8 cGrid  = palette->Get4U8( PAL_PURPLE*2, PAL_PURPLE );
+		Color4U8 cPort  = palette->Get4U8( PAL_TANGERINE*2, PAL_TANGERINE );
+		Color4U8 cLand  = palette->Get4U8( PAL_PURPLE*2, PAL_GREEN );
+
+		U16 c[WorldGrid::NUM_LAYERS] = {
+			Surface::CalcRGB16( cWater ),
+			Surface::CalcRGB16( cGrid ),
+			Surface::CalcRGB16( cPort ),
+			Surface::CalcRGB16( cLand )
+		};
+
+		for( int y=0; y<t->Height(); ++y ) {
+			for( int x=0; x<t->Width(); ++x ) {
+				const WorldGrid& wg = grid[INDEX(x*dx,y*dy)];
+				data[y*t->Width()+x] = c[wg.Layer()];
+			}
+		}
+
+		t->Upload( data, sizeof(U16)*size );
+		delete [] data;
+	}
+	else {
+		GLASSERT( 0 );
 	}
 }
 

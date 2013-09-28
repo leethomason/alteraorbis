@@ -23,6 +23,8 @@
 #include "../gamui/gamui.h"
 #include "../tinyxml2/tinyxml2.h"
 
+#include "../engine/texture.h"
+
 #include "vertex.h"
 #include "enginelimits.h"
 #include "gpustatemanager.h"
@@ -41,7 +43,8 @@ public:
 };
 
 
-class Map : public gamui::IGamuiRenderer
+class Map : public gamui::IGamuiRenderer,
+			public ITextureCreator				// for creating the mini-map
 {
 public:
 
@@ -67,6 +70,7 @@ public:
 	virtual void PrepGrid( const SpaceTree* )	{}
 	virtual void DrawVoxels( GPUState* state, const grinliz::Matrix4* xform )		{}
 	virtual void Draw3D( const grinliz::Color3F& colorMult, GPUState::StencilMode, bool saturation )	{}
+	virtual void CreateTexture( Texture* t );	// creates a black texture (generally need override)
 
 	// Sets the current saturation 0:grey, 1:full color
 	void SetSaturation( float p_saturation )	{ saturation = p_saturation; }

@@ -37,7 +37,7 @@ private:
 	unsigned isGrid				: 1;
 	unsigned isPort				: 1;
 	unsigned isCore				: 1;
-	//unsigned pave				: 2;	// 0-3, the pave style
+	//unsigned pave				: 2;	// 0-3, the pave style, if >0
 
 	unsigned nominalRockHeight	: 2;	// 0-3
 	unsigned rockType			: 1;	// ROCK, ICE

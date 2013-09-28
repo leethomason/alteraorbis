@@ -53,11 +53,30 @@ Map::Map( int w, int h )
 	gamui::RenderAtom nullAtom;
 	overlay0.Init( this, nullAtom, nullAtom, 0 );
 	overlay1.Init( this, nullAtom, nullAtom, 0 );
+
+	TextureManager* texman = TextureManager::Instance();
+	texman->CreateTexture( "miniMap", 512, 512, Surface::RGB16, Texture::PARAM_NONE, this );
 }
 
 
 Map::~Map()
 {
+}
+
+
+void Map::CreateTexture( Texture* t )
+{
+	if ( StrEqual( t->Name(), "miniMap" ) ) {
+		
+		int size = t->Width()*t->Height();
+		U16* data = new U16[size];
+		memset( data, 0, sizeof(U16)*size );
+		t->Upload( data, sizeof(U16)*size );
+		delete [] data;
+	}
+	else {
+		GLASSERT( 0 );
+	}
 }
 
 

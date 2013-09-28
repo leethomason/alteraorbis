@@ -205,7 +205,7 @@ private:
 	BoltRenderer* boltRenderer;
 
 	RenderTarget* renderTarget[RT_COUNT];
-	RenderTarget* miniMapRenderTarget;
+	//RenderTarget* miniMapRenderTarget;
 };
 
 #endif // UFOATTACK_ENGINE_INCLUDED

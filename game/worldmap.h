@@ -233,6 +233,8 @@ public:
 		MAX_VOXEL_QUADS  = 8000,		// actually uses quads, so the vertex=4*MAX_VOXEL_QUADS
 	};
 
+	virtual void CreateTexture( Texture* t );
+
 private:
 	int INDEX( int x, int y ) const { 
 		GLASSERT( x >= 0 && x < width ); GLASSERT( y >= 0 && y < height ); 
