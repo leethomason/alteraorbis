@@ -39,8 +39,13 @@ int WorkQueue::CalcTaskSize( const QueueItem& item )
 {
 	int size = 1;
 	if ( !item.structure.empty() ) {
-		const GameItem& gameItem = ItemDefDB::Instance()->Get( item.structure.c_str() );
-		gameItem.GetValue( "size", &size );
+		if ( item.structure == "pave" ) {
+			size = 1;
+		}
+		else {
+			const GameItem& gameItem = ItemDefDB::Instance()->Get( item.structure.c_str() );
+			gameItem.GetValue( "size", &size );
+		}
 	}
 	return size;
 }
@@ -57,6 +62,7 @@ void WorkQueue::AddImage( QueueItem* item )
 		if ( wg.Height() ) {
 			// Clearing ice or plant
 			switch ( wg.Height() ) {
+			case 0:
 			case 1:	name = "clearMarker1";	break;
 			case 2: name = "clearMarker2";	break;
 			case 3:	name = "clearMarker3";	break;
@@ -150,6 +156,31 @@ void WorkQueue::AddClear( const grinliz::Vector2I& pos2i )
 	SendNotification( pos2i );
 }
 
+/*
+void WorkQueue::AddPave( const Vector2I& pos2i, int pave )
+{
+	if ( pos2i.x / SECTOR_SIZE == sector.x && pos2i.y / SECTOR_SIZE == sector.y ) {
+		// okay!
+	}
+	else {
+		// wrong sector.
+		return;
+	}
+
+	QueueItem item;
+	item.action = PAVE;
+	item.pave = pave;
+	item.pos = pos2i;
+	item.taskID = ++idPool;
+
+	// Clear out existing.
+	Remove( pos2i );
+
+	AddImage( &item );
+	queue.Push( item );
+	SendNotification( pos2i );
+}
+*/
 
 void WorkQueue::AddBuild( const grinliz::Vector2I& pos2i, IString structure )
 {
@@ -303,7 +334,7 @@ bool WorkQueue::TaskCanComplete( const WorkQueue::QueueItem& item )
 											const grinliz::Vector2I& pos2i, bool build, int size )
 {
 	Vector2F pos2  = { (float)pos2i.x + 0.5f, (float)pos2i.y+0.5f };
-	const WorldGrid& wg = worldMap->GetWorldGrid( pos2i.x, pos2i.x );
+	const WorldGrid& wg = worldMap->GetWorldGrid( pos2i.x, pos2i.y );
 
 	int passable = 0;
 	int removable = 0;
@@ -324,11 +355,14 @@ bool WorkQueue::TaskCanComplete( const WorkQueue::QueueItem& item )
 			// stuff in the way
 			return false;
 		}
+		// pavement blocks building...iffy:
+		if ( wg.Pave() )
+			return false;
 	}
 	else {
 		if ( passable == size*size && removable == 0 ) {
-			// nothing to clear.
-			return false;
+			// nothing to clear. (unless paved)
+			return wg.Pave() > 0;
 		}
 	}
 	return true;

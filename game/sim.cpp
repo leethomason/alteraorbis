@@ -441,6 +441,8 @@ void Sim::CreatePlant( int x, int y, int type )
 		return;
 
 	const WorldGrid& wg = worldMap->GetWorldGrid( x, y );
+	if ( wg.Pave() )
+		return;		// pavement blocks plants!
 
 	// check for a plant already there.
 	if (    wg.IsPassable() 

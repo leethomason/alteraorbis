@@ -1879,11 +1879,14 @@ void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 	#define BLACKMAG_X(x)	float( double(x*256 + x*32 + 16) / 1024.0)
 	#define BLACKMAG_Y(y)   float( 0.75 - double(y*256 + y*32 + 16) / 1024.0)
 
-	static const Vector2F UV[WorldGrid::NUM_LAYERS] = {
+	static const Vector2F UV[WorldGrid::NUM_LAYERS+WorldGrid::NUM_PAVE] = {
 		{ BLACKMAG_X(1), BLACKMAG_Y(0) },	// water
 		{ BLACKMAG_X(0), BLACKMAG_Y(1) },	// grid
 		{ BLACKMAG_X(1), BLACKMAG_Y(1) },	// port
 		{ BLACKMAG_X(0), BLACKMAG_Y(0) },	// land
+		{ BLACKMAG_X(0), BLACKMAG_Y(2) },	// pave1
+		{ BLACKMAG_X(2), BLACKMAG_Y(0) },	// pave2
+		{ BLACKMAG_X(2), BLACKMAG_Y(1) },	// pave3
 	};
 	static const float du = 0.25f;
 	static const float dv = 0.25f;	
@@ -1906,6 +1909,9 @@ void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 				const WorldGrid& wg = grid[INDEX(x,y)];
 				if ( wg.Height() == 0 ) {
 					int layer = wg.Layer();
+					if ( layer == WorldGrid::LAND ) {
+						layer += wg.Pave();
+					}
 
 					Vertex* vArr = voxelBuffer.PushArr( 4 );
 

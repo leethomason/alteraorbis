@@ -102,6 +102,13 @@ public:
 		WorldGrid wg = grid[index];
 		SetRock( x, y, wg.RockHeight(), magma, wg.RockType() );
 	}
+	void SetPave( int x, int y, int pave ) {
+		int index = INDEX(x,y);
+		const WorldGrid& wg = grid[index];
+		if ( wg.Layer() == WorldGrid::LAND && wg.Height() == 0 ) {
+			grid[index].SetPave(pave);
+		}
+	}
 
 	const WorldGrid& GetWorldGrid( int x, int y ) { return grid[INDEX(x,y)]; }
 

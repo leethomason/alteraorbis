@@ -106,7 +106,8 @@ private:
 
 		// These are special events:
 		TASK_REMOVE,
-		TASK_BUILD
+		TASK_BUILD,
+		TASK_PAVE
 	};
 
 	enum {
@@ -142,6 +143,15 @@ private:
 			t.taskID = taskID;
 			return t;
 		}
+		/*
+		static Task PaveTask( const grinliz::Vector2I& pos2i, int paveID, int taskID=0 ) {
+			Task t;
+			t.action = TASK_PAVE;
+			t.pos2i = pos2i;
+			t.data = paveID;
+			t.taskID = taskID;
+			return t;
+		}*/
 		static Task RemoveTask( const grinliz::Vector2I& pos2i, int taskID=0 ) {
 			Task t;
 			t.action = TASK_REMOVE;

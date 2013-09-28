@@ -213,54 +213,9 @@ void Engine::FreeModel( Model* model )
 }
 
 
-#if 0
-void Engine::CreateMiniMap()
-{
-	delete miniMapRenderTarget;
-	miniMapRenderTarget = new RenderTarget( 256, 256, false );
-	miniMapRenderTarget->SetActive( true, this );
-	
-	Matrix4 view;
-
-	Matrix4 scaleMat;
-	float width  = (float)map->Width();
-	float height = (float)map->Height();
-	float scale = 2.f / Max( width, height );
-
-	// Apply a scale to the model so that the rendering
-	// doesn't blow out the depth range.
-	float size = Max(width,height)*scale;
-	scaleMat.SetScale( scale );
-
-	float theta = ToRadian( EL_FOV/2.0f );
-	// tan(theta) = size / h
-	// which then implies 1/2 width, hence the 0.5 modifier
-	float h = 0.5f * size / tanf(theta);	
-	Vector3F eye = { size/2, h, size/2 };
-	Vector3F at  = { size/2, 0, size/2 };
-	Vector3F up  = { 0, 0, -1 };			// z is -1, remembering the origin of the map is upper left
-	LookAt( false, eye, at, up, 0, 0, &view );
-
-	miniMapRenderTarget->screenport->SetPerspective();
-	miniMapRenderTarget->screenport->SetView( view );
-	
-	Color3F color = { 1, 1, 1 };
-	GPUState::PushMatrix( GPUState::MODELVIEW_MATRIX );
-	GPUState::MultMatrix( GPUState::MODELVIEW_MATRIX, scaleMat );
-
-	map->Draw3D( color, GPUState::STENCIL_OFF, false );
-	GPUState::PopMatrix( GPUState::MODELVIEW_MATRIX );
-
-	miniMapRenderTarget->SetActive( false, this );
-}
-#endif
-
 
 Texture* Engine::GetMiniMapTexture()
 {
-//	if ( miniMapRenderTarget ) {
-//		return miniMapRenderTarget->GetTexture();
-//	}
 	return TextureManager::Instance()->GetTexture( "miniMap" );
 }
 
@@ -287,10 +242,6 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 	PROFILE_FUNC();
 	for( int i=0; i<NUM_MODEL_DRAW_CALLS; ++i )
 		modelDrawCalls[i] = 0;
-
-//	if ( map && !miniMapRenderTarget ) {
-//		CreateMiniMap();
-//	}
 
 	// -------- Camera & Frustum -------- //
 	screenport->SetView( camera.ViewMatrix() );	// Draw the camera

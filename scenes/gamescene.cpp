@@ -85,7 +85,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	freeCameraButton.SetText( "Free\nCamera" );
 
 	static const char* buildButtonText[NUM_BUILD_BUTTONS] = { 
-		"None", "Clear", "Rotate",
+		"None", "Clear", "Pave", "Rotate",
 		"Ice", 
 		"News\nKiosk", "Media\nKiosk", "Commerce\nKiosk", "Social\nKiosk", 
 		"Vault",
@@ -372,6 +372,7 @@ void GameScene::SetSelectionModel( const grinliz::Vector2F& view )
 		// Which should we use?
 		switch ( buildActive ) {
 		case CLEAR_ROCK: 
+		case PAVE:
 			{
 				const WorldGrid& wg = sim->GetWorldMap()->GetWorldGrid( pos2i.x, pos2i.y );
 				switch ( wg.Height() ) {
@@ -508,6 +509,7 @@ grinliz::IString GameScene::BuildActiveInfo( int* size )
 	static const char* name[NUM_BUILD_BUTTONS] = {
 		"",	// no build 
 		"", // clear
+		"pave",
 		"",	// rotate
 		"",	// ice
 		"kiosk.n",
@@ -517,7 +519,11 @@ grinliz::IString GameScene::BuildActiveInfo( int* size )
 		"vault",
 	};
 	IString str;
-	if ( *name[buildActive] ) {
+	if ( buildActive == PAVE ) {
+		if ( size ) *size = 1;
+		str = StringPool::Intern( "pave" );
+	}
+	else if ( *name[buildActive] ) {
 		str = StringPool::Intern( name[buildActive], true );
 
 		if ( size ) {
@@ -589,6 +595,13 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 					}
 #endif
 				}
+				/*
+				else if ( buildActive == PAVE ) {
+					Chit* player = sim->GetPlayerChit();
+					if ( player ) {
+						wq->AddPave( plane2i, player->GetItem()->primaryTeam % 3+1 );
+					}
+				}*/
 				else if ( buildActive == NO_BUILD ) {
 #ifdef USE_MOUSE_MOVE_SELECTION
 					wq->Remove( plane2i );

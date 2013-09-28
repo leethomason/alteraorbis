@@ -37,7 +37,7 @@ private:
 	unsigned isGrid				: 1;
 	unsigned isPort				: 1;
 	unsigned isCore				: 1;
-	//unsigned pave				: 2;	// 0-3, the pave style, if >0
+	unsigned pave				: 2;	// 0-3, the pave style, if >0
 
 	unsigned nominalRockHeight	: 2;	// 0-3
 	unsigned rockType			: 1;	// ROCK, ICE
@@ -110,7 +110,8 @@ public:
 		GRID,
 		PORT,
 		LAND,
-		NUM_LAYERS
+		NUM_LAYERS,
+		NUM_PAVE = 4	// including 0, which is "no pavement"
 	};
 	int Layer() const			{ 
 		int layer = WATER;
@@ -118,6 +119,12 @@ public:
 		else if ( isPort ) layer = PORT;
 		else if ( isLand ) layer = LAND;
 		return layer;
+	}
+	int Pave() const { return pave; }
+	void SetPave( int p ) {
+		GLASSERT( p >=0 && p < NUM_PAVE );
+		GLASSERT( Layer() == LAND );
+		pave = p;
 	}
 
 	void SetLand( bool land )	{ if ( land ) SetLand(); else SetWater(); }
@@ -154,6 +161,7 @@ public:
 		GLASSERT( IsLand() || (h==0) );
 		GLASSERT( h >= 0 && h <= MAX_ROCK_HEIGHT );
 		rockHeight = h;
+		if ( h > 0 ) pave = 0;	// rock clears out pavement.
 	}
 
 	int RockType() const { return rockType; }
@@ -181,7 +189,7 @@ public:
 	}
 
 	bool Magma() const			{ return magma != 0; }
-	void SetMagma( bool m )		{ magma = m ? 1 : 0; }
+	void SetMagma( bool m )		{ magma = m ? 1 : 0; if ( magma ) pave = 0; }
 
 	int TotalHP() const			{ return rockHeight * HP_PER_HEIGHT; }
 	int HP() const				{ return hp; }

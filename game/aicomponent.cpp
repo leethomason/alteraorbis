@@ -722,6 +722,7 @@ bool AIComponent::RockBreak( const grinliz::Vector2I& rock )
 		Vector2F end = { 0, 0 };
 		float cost = 0;
 		if ( map->CalcPathBeside( thisComp.spatial->GetPosition2D(), dest, &end, &cost )) {
+			taskList.Clear();
 			taskList.Push( Task::MoveTask( end, 0 ));
 			taskList.Push( Task::StandTask( 1000, 0 ));
 			taskList.Push( Task::RemoveTask( rock, 0 ));
@@ -1458,6 +1459,9 @@ void AIComponent::FlushTaskList( const ComponentSet& thisComp )
 						found->SendMessage( ChitMsg( ChitMsg::CHIT_DAMAGE, 0, &info ), 0 );
 					}
 				}
+				if ( wg.Pave() ) {
+					map->SetPave( task->pos2i.x, task->pos2i.y, 0 );
+				}
 				taskList.PopFront();
 			}
 			else {
@@ -1477,7 +1481,12 @@ void AIComponent::FlushTaskList( const ComponentSet& thisComp )
 					map->SetRock( task->pos2i.x, task->pos2i.y, 1, false, WorldGrid::ICE );
 				}
 				else {
-					GetChitBag()->ToLumos()->NewBuilding( task->pos2i, task->structure.c_str(), thisComp.item->primaryTeam );
+					if ( task->structure == "pave" ) {
+						map->SetPave( task->pos2i.x, task->pos2i.y, thisComp.item->primaryTeam%3+1 );
+					}
+					else {
+						GetChitBag()->ToLumos()->NewBuilding( task->pos2i, task->structure.c_str(), thisComp.item->primaryTeam );
+					}
 				}
 				taskList.PopFront();
 			}
@@ -1531,6 +1540,27 @@ void AIComponent::WorkQueueToTask(  const ComponentSet& thisComp )
 					taskList.Push( Task::BuildTask( item->pos, item->structure, item->taskID ));
 				}
 				break;
+
+				/*
+			case WorkQueue::PAVE:
+				{
+					Vector2F dest = { (float)item->pos.x + 0.5f, (float)item->pos.y + 0.5f };
+					if ( WorkQueue::TaskCanComplete( map, GetChitBag()->ToLumos(), item->pos, false, 1 )) {
+						Vector2F end;
+						float cost = 0;
+						if ( map->CalcPathBeside( thisComp.spatial->GetPosition2D(), dest, &end, &cost )) {
+						
+							taskList.Push( Task::MoveTask( end, item->taskID ));
+							taskList.Push( Task::StandTask( 1000, item->taskID ));
+							taskList.Push( Task::RemoveTask( item->pos, item->taskID ));
+						}
+					}
+					taskList.Push( Task::MoveTask( dest, item->taskID ));
+					taskList.Push( Task::StandTask( 1000, item->taskID ));
+					taskList.Push( Task::PaveTask( item->pos, item->pave, item->taskID ));
+				}
+				break;
+				*/
 
 			default:
 				GLASSERT( 0 );

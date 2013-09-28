@@ -38,35 +38,19 @@ public:
 	enum {
 		NO_ACTION,
 		CLEAR,
+		//PAVE,
 		BUILD,
 		NUM_ACTIONS,
 	};
 
 	struct QueueItem {
 		QueueItem() : action(NO_ACTION), assigned(0), taskID(0), model(0) { pos.Zero(); }
-		/*
-		QueueItem( const QueueItem& qi ) {
-			this->action	= qi.action;
-			this->structure = qi.structure;
-			this->pos		= qi.pos;
-			this->assigned	= qi.assigned;
-			this->taskID	= qi.taskID;
-			this->model		= qi.model;
-		}
-		void operator=( const QueueItem& qi ) {
-			this->action	= qi.action;
-			this->structure = qi.structure;
-			this->pos		= qi.pos;
-			this->assigned	= qi.assigned;
-			this->taskID	= qi.taskID;
-			this->model		= qi.model;
-		}
-		*/
 
 		void Serialize( XStream* xs );
 
 		int					action;		// CLEAR_GRID, etc.
 		grinliz::IString	structure;	// what to construct
+		//int					pave;
 		grinliz::Vector2I	pos;
 		int					assigned;	// id of worker assigned this task.			
 		int					taskID;		// id # of this task
@@ -76,6 +60,7 @@ public:
 	void Serialize( XStream* xs );
 	void AddBuild( const grinliz::Vector2I& pos, grinliz::IString structure );	// add an action to do
 	void AddClear( const grinliz::Vector2I& pos );
+	//void AddPave( const grinliz::Vector2I& pos, int paveID );
 	void Remove( const grinliz::Vector2I& pos );
 	
 	const QueueItem*	Find( const grinliz::Vector2I& chitPos );	// find something to do. don't hold pointer!

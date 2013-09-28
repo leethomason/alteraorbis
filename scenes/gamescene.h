@@ -78,6 +78,7 @@ private:
 	enum {
 		NO_BUILD,
 		CLEAR_ROCK,
+		PAVE,
 		ROTATE,
 		BUILD_ICE,
 		BUILD_KIOSK_N,
