@@ -32,6 +32,14 @@ Note: you can collect gold and crystals, but the economy isn’t connected. Noth
 Energy is used to power buildings and keep a domain operating. Visitors bring energy; they enter the world looking for domains that have interesting News, Commerce, Media, or Social, any of which they get at kiosks. If the domain has what the Visitor is looking for, energy is transferred to the domain. Visitors keep track of their favorite domains, and share the links with their friends.
 
 
+Changes (Silver4)
+-----------------
+1. New shader management; this will hopefully address the "player and monsters don't render bug"
+2. Preliminary character screen.
+3. New right mouse mapping (also preliminary)
+4. Increase player move speed
+5. In neutral domains, the player can dissolve rock (no particle effect yet)
+
 Changes (Silver-3)
 -------------------
 1. Buildings, rocks, plants, workers, and the ground are now production art. There will be tweaks, but the basic look of the game is in place.
