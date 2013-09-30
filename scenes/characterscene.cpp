@@ -23,6 +23,8 @@ CharacterScene::CharacterScene( LumosGame* game, CharacterSceneData* csd ) : Sce
 	engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
 
 	game->InitStd( &gamui2D, &okay, 0 );
+	dropButton.Init( &gamui2D, lumosGame->GetButtonLook(0));
+	dropButton.SetText( "Drop" );
 
 	for( int i=0; i<NUM_ITEM_BUTTONS; ++i ) {
 		itemButton[i].Init( &gamui2D, lumosGame->GetButtonLook(0) );
@@ -104,6 +106,7 @@ void CharacterScene::Resize()
 			col = 0;
 		}
 	}
+	layout.PosAbs( &dropButton, 0, row+1 );
 
 	layout.SetSize( layout.Width(), layout.Height()*0.5f );
 	for( int i=0; i<NUM_TEXT_KV; ++i ) {
@@ -276,6 +279,11 @@ void CharacterScene::SetButtonText()
 			++count;
 		}
 	}
+	for( ; count<NUM_ITEM_BUTTONS; ++count ) {
+		itemButton[count].SetText( "" );
+		itemButton[count].SetIcon( nullAtom, nullAtom );
+		itemButton[count].SetDeco( nullAtom, nullAtom );
+	}
 
 	if ( down ) {
 		if ( model && !StrEqual( model->GetResource()->Name(), down->ResourceName() )) {
@@ -373,5 +381,9 @@ void CharacterScene::DragEnd( const gamui::UIItem* start, const gamui::UIItem* e
 	if ( startIndex && endIndex ) {
 		itemComponent->Swap( startIndex, endIndex );
 	}
+	if ( start && startIndex && end == &dropButton ) {
+		itemComponent->Drop( itemComponent->GetItem( startIndex ));
+	}
+
 	SetButtonText();
 }

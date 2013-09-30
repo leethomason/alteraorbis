@@ -67,7 +67,10 @@ public:
 	void EmptyWallet() { wallet.MakeEmpty(); }
 	const Wallet& GetWallet() const			{ return wallet; }
 
+	// adds to the inventory; takes ownership of pointer
 	void AddToInventory( GameItem* item );
+	// drops the item from the inventory (which owns the memory)
+	void Drop( const GameItem* item );
 
 	// add XP to current item and its weapon
 	void AddBattleXP( bool meleeAttack, int killshotLevel, const GameItem* loser );

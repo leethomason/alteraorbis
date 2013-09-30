@@ -743,7 +743,8 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 	else if ( item == &faceButton ) {
 		Chit* playerChit = sim->GetPlayerChit();
 		if ( playerChit && playerChit->GetItemComponent() ) {			
-			game->PushScene( LumosGame::SCENE_CHARACTER, new CharacterSceneData( playerChit->GetItemComponent() ));
+			game->PushScene( LumosGame::SCENE_CHARACTER, 
+							 new CharacterSceneData( playerChit->GetItemComponent(), &dropList ));
 		}
 	}
 
@@ -1143,8 +1144,19 @@ void GameScene::DrawDebugText()
 
 void GameScene::SceneResult( int sceneID, int result )
 {
-	if ( sim->GetPlayerChit() && sim->GetPlayerChit()->GetItemComponent() ) {
-		sim->GetPlayerChit()->GetItemComponent()->SetHardpoints();
+	if ( sceneID == LumosGame::SCENE_CHARACTER ) {
+		Chit* playerChit = sim->GetPlayerChit();
+		GLASSERT( playerChit );
+		if ( playerChit ) {
+			ItemComponent* ic = playerChit->GetItemComponent();
+			GLASSERT( ic );
+			if ( ic ) {
+				while ( !dropList.Empty() ) {
+					ic->Drop( dropList.Pop() );
+				}
+				ic->SetHardpoints();
+			}
+		}
 	}
 }
 

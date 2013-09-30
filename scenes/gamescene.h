@@ -23,6 +23,8 @@ class LumosGame;
 class Sim;
 struct NewsEvent;
 class Chit;
+class GameItem;
+
 
 class GameScene : public Scene
 {
@@ -124,13 +126,14 @@ private:
 	gamui::Image		minimap;
 	gamui::Image		playerMark;
 
-	//gamui::Image		faceImage;
 	gamui::PushButton	faceButton;
 	gamui::DigitalBar	healthBar, ammoBar, shieldBar;
 
 	gamui::TextLabel	dateLabel;
 	gamui::TextLabel	goldLabel;
 	gamui::TextLabel	xpLabel;
+
+	grinliz::CDynArray<const GameItem*> dropList;	// stuff dropped in the character scene
 };
 
 

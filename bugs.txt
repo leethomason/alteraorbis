@@ -29,6 +29,7 @@ x Shield should absorb more with XP (and fix character screen to reflect this)
 x Add position fuzz to gold, crystal, and item drops
 - can re-pack MVP and Bone matrix in the shader to encode 3*vec4 as the transpose, then transpose in the shader
 - Hide free camera button
+- should be able to auto-clear when building 
 
 - game
 
@@ -51,7 +52,7 @@ x Add position fuzz to gold, crystal, and item drops
 			- drop
 			x gold & crystal display
 			x character names
-			- items get names
+			x items get names
 		- item pickup
 		- item history
 			- created 
@@ -82,7 +83,7 @@ x Add position fuzz to gold, crystal, and item drops
 		x cyclops explosion seems off
 		- balance battles
 		- history events
-		- names of things
+		x names of things
 		- winning names
 		- How do bases and adventuring play together?
 			- why do you quit adventuring to build a base?

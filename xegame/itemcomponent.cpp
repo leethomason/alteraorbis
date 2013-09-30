@@ -555,6 +555,27 @@ void ItemComponent::AddToInventory( GameItem* item )
 }
 
 
+void ItemComponent::Drop( const GameItem* item )
+{
+	GLASSERT( parentChit->GetSpatialComponent() );
+	if ( !parentChit->GetSpatialComponent() )
+		return;
+
+	// Can't drop main or intrinsic item
+	for( int i=1; i<itemArr.Size(); ++i ) {
+		if ( itemArr[i]->Intrinsic() )
+			continue;
+		if ( itemArr[i] == item ) {
+			parentChit->GetLumosChitBag()->NewItemChit( parentChit->GetSpatialComponent()->GetPosition(), 
+														itemArr[i], true, true );
+			itemArr.Remove(i);
+			return;
+		}
+	}
+	GLASSERT( 0 );	// should have found the item.
+}
+
+
 GameItem* ItemComponent::IsCarrying()
 {
 	for( int i=1; i<itemArr.Size(); ++i ) {

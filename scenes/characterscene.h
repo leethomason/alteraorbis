@@ -31,8 +31,9 @@ class GameItem;
 class CharacterSceneData : public SceneData
 {
 public:
-	CharacterSceneData( ItemComponent* ic ) : SceneData(), itemComponent(ic) {}
-	ItemComponent* itemComponent;
+	CharacterSceneData( ItemComponent* ic, grinliz::CDynArray<const GameItem*>* dl ) : SceneData(), itemComponent(ic), dropList(dl) {}
+	ItemComponent*					itemComponent;
+	grinliz::CDynArray<const GameItem*>*	dropList;
 };
 
 
@@ -87,6 +88,7 @@ private:
 	gamui::TextLabel	textVal[NUM_TEXT_KV];
 	gamui::TextLabel	moneyText[NUM_CRYSTAL_TYPES+1];
 	gamui::Image		moneyImage[NUM_CRYSTAL_TYPES+1];
+	gamui::PushButton	dropButton;
 };
 
 
