@@ -179,13 +179,14 @@ x Flora
 ** Releasing **
 - set version
 - update README.txt
+- update title screen text
 - build release/debug
 - build assets
-- test
 - def save:
 	- let the game run until 3rd age+
 	- place player
 	- use writedefsave.bat to create files
+- test
 - test def-start
 - test new-start
 - create release!
