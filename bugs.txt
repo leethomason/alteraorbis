@@ -57,8 +57,8 @@ x Add position fuzz to gold, crystal, and item drops
 		- item history
 			- created 
 			x kills
-		- Add a pave to keep it clear
-			- switch to voxel rendering for ground?
+		x Add a pave to keep it clear
+			x switch to voxel rendering for ground?
 		x item value (compare)
 		- item forging
 		- item market

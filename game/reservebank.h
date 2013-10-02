@@ -43,7 +43,13 @@ public:
 
 	// Withdraws 1 or 0 crystals. type is returned.
 	int WithdrawRandomCrystal();
-	int WithdrawGold( int g ) { g = grinliz::Min( g, bank.gold ); bank.gold -= g; return g; }
+	int WithdrawGold( int g )		{ g = grinliz::Min( g, bank.gold ); bank.gold -= g; return g; }
+	int WithdrawCrystal( int type ) {	if ( bank.crystal[type] > 0 ) { 
+											bank.crystal[type] -= 1;
+											return type;
+										}
+										return NUM_CRYSTAL_TYPES;
+	}
 
 	static ReserveBank* Instance() { return instance; }
 

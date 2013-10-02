@@ -94,7 +94,13 @@ Chit* LumosChitBag::NewMonsterChit( const Vector3F& pos, const char* name, int t
 
 	chit->Add( new SpatialComponent());
 	AddItem( name, chit, engine, team, 0 );
-	chit->GetItemComponent()->AddGold( ReserveBank::Instance()->WithdrawMonster() );
+
+	Wallet w = ReserveBank::Instance()->WithdrawMonster();
+	if ( chit->GetItem()->GetValue( "mob" ) == "greater" ) {
+		// can return NUM_CRYSTAL_TYPES, if out, which is fine.
+		w.AddCrystal( ReserveBank::Instance()->WithdrawCrystal( random.Rand( NUM_CRYSTAL_TYPES )));
+	}
+	chit->GetItemComponent()->AddGold( w );	
 
 	chit->Add( new RenderComponent( engine, chit->GetItem()->ResourceName() ));
 	chit->Add( new PathMoveComponent( worldMap ));
