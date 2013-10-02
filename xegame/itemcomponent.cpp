@@ -555,6 +555,16 @@ void ItemComponent::AddToInventory( GameItem* item )
 }
 
 
+
+void ItemComponent::AddToInventory( ItemComponent* ic )
+{
+	GLASSERT( ic );
+	GLASSERT( ic->NumItems() == 1 );
+	itemArr.Push( ic->itemArr.Pop() );
+	delete ic;
+}
+
+
 void ItemComponent::Drop( const GameItem* item )
 {
 	GLASSERT( parentChit->GetSpatialComponent() );

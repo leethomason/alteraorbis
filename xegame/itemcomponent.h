@@ -50,7 +50,8 @@ public:
 	virtual int DoTick( U32 delta, U32 since );
 	virtual void OnChitEvent( const ChitEvent& event );
 
-	GameItem* GetItem( int index=0 ) { return (index < itemArr.Size()) ? itemArr[index] : 0; }
+	int NumItems() const				{ return itemArr.Size(); }
+	GameItem* GetItem( int index=0 )	{ return (index < itemArr.Size()) ? itemArr[index] : 0; }
 	// Is carrying anything - primarily a query for the animation system.
 	GameItem* IsCarrying();
 	bool SwapWeapons();			// swap between the melee and ranged weapons
@@ -69,6 +70,9 @@ public:
 
 	// adds to the inventory; takes ownership of pointer
 	void AddToInventory( GameItem* item );
+	// Add the component, and deletes it.
+	void AddToInventory( ItemComponent* ic );
+
 	// drops the item from the inventory (which owns the memory)
 	void Drop( const GameItem* item );
 

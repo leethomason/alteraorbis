@@ -805,6 +805,18 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		}
 	}
 
+	for( int i=0; i<NUM_PICKUP_BUTTONS; ++i ) {
+		if ( item == &pickupButton[i] ) {
+			Chit* playerChit = sim->GetPlayerChit();
+			Chit* item = sim->GetChitBag()->GetChit( pickupData[i].chitID );
+			if ( item && playerChit ) {
+				if ( playerChit->GetAIComponent() ) {
+					playerChit->GetAIComponent()->Pickup( item );
+				}
+			}
+		}
+	}
+
 	if ( dest.x >= 0 ) {
 		DoDestTapped( dest );
 	}

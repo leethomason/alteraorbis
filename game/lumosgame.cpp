@@ -293,8 +293,14 @@ void LumosGame::ItemToButton( const GameItem* item, gamui::Button* button )
 	// Set the text to the proper name, if we have it.
 	// Then an icon for what it is, and a check
 	// mark if the object is in use.
-	text.Format( "%s\nAu: %d\n",	item->ProperName() ? item->ProperName() : item->Name(),
-									ItemDefDB::Instance()->CalcItemValue( item ));
+	int value = ItemDefDB::Instance()->CalcItemValue( item );
+	const char* name = item->ProperName() ? item->ProperName() : item->Name();
+	if ( value ) {
+		text.Format( "%s\nAu: %d\n", name, value );
+	}
+	else {
+		text.Format( "%s\n ", name );
+	}
 	button->SetText( text.c_str() );
 
 	IString decoName = item->GetValue( "uiIcon" );

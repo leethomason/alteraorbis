@@ -53,17 +53,18 @@ x Add position fuzz to gold, crystal, and item drops
 			x gold & crystal display
 			x character names
 			x items get names
-		- item pickup
+		x item pickup
 		- item history
 			- created 
 			x kills
 		- Add a pave to keep it clear
 			- switch to voxel rendering for ground?
-		- item value (compare)
+		x item value (compare)
 		- item forging
 		- item market
 		- item destruction
 		- real health bars & check visibility
+		- no item limit in inventory (but yes in invertory screen)
 		- expandable map
 	      - show "areas of interest"
 	      - show danger level

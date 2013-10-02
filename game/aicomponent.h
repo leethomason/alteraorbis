@@ -67,6 +67,7 @@ public:
 	void Move( const grinliz::Vector2F& dest, bool focused, float rotation=-1 );
 	// Returns true if the move is possible.
 	bool Move( const SectorPort& sectorport, bool focused );
+	void Pickup( Chit* item );
 
 	void Target( Chit* chit, bool focused );
 	bool RockBreak( const grinliz::Vector2I& pos );
@@ -107,7 +108,7 @@ private:
 		// These are special events:
 		TASK_REMOVE,
 		TASK_BUILD,
-		TASK_PAVE
+		TASK_PICKUP
 	};
 
 	enum {
@@ -143,15 +144,15 @@ private:
 			t.taskID = taskID;
 			return t;
 		}
-		/*
-		static Task PaveTask( const grinliz::Vector2I& pos2i, int paveID, int taskID=0 ) {
+		
+		// Assumes move first.
+		static Task PickupTask( int chitID, int taskID=0 ) {
 			Task t;
-			t.action = TASK_PAVE;
-			t.pos2i = pos2i;
-			t.data = paveID;
+			t.action = TASK_PICKUP;
+			t.data = chitID;
 			t.taskID = taskID;
 			return t;
-		}*/
+		}
 		static Task RemoveTask( const grinliz::Vector2I& pos2i, int taskID=0 ) {
 			Task t;
 			t.action = TASK_REMOVE;

@@ -670,6 +670,13 @@ bool AIComponent::Move( const SectorPort& sp, bool focused )
 }
 
 
+void AIComponent::Pickup( Chit* item )
+{
+	taskList.Push( Task::MoveTask( item->GetSpatialComponent()->GetPosition2D(), 0 ));
+	taskList.Push( Task::PickupTask( item->ID(), 0 ));
+}
+
+
 void AIComponent::Move( const grinliz::Vector2F& dest, bool focused, float rotation )
 {
 	PathMoveComponent* pmc    = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
@@ -1496,6 +1503,24 @@ void AIComponent::FlushTaskList( const ComponentSet& thisComp )
 			}
 		}
 		break;
+
+	case TASK_PICKUP:
+		{
+			int chitID = task->data;
+			Chit* itemChit = GetChitBag()->GetChit( chitID );
+			if (    itemChit 
+				 && itemChit->GetSpatialComponent()
+				 && itemChit->GetSpatialComponent()->GetPosition2DI() == parentChit->GetSpatialComponent()->GetPosition2DI()
+				 && itemChit->GetItemComponent()->NumItems() == 1 )	// doesn't have sub-items / intrinsic
+			{
+				ItemComponent* ic = itemChit->GetItemComponent();
+				itemChit->Remove( ic );
+				parentChit->GetItemComponent()->AddToInventory( ic );
+			}
+			taskList.PopFront();
+		}
+		break;
+
 	}
 }
 

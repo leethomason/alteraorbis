@@ -126,7 +126,7 @@ int ItemDefDB::CalcItemValue( const GameItem* item )
 	static const float SHIELD_VALUE = 20;
 
 	CArray<int, 16> value;
-	value.Push( 10 );
+	value.Push( 0 );
 
 	if ( item->ToMeleeWeapon() ) {
 		float dptu = BattleMechanics::MeleeDPTU( 0, item->ToMeleeWeapon() );
