@@ -135,6 +135,10 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	faceButton.SetSize( 100, 100 );
 	SetFace();
 
+	for( int i=0; i<NUM_PICKUP_BUTTONS; ++i ) {
+		pickupButton[i].Init( &gamui2D, game->GetButtonLook(0) );
+	}
+
 	RenderAtom green = LumosGame::CalcPaletteAtom( 1, 3 );	
 	RenderAtom grey  = LumosGame::CalcPaletteAtom( 0, 6 );
 	RenderAtom blue   = LumosGame::CalcPaletteAtom( 8, 0 );	
@@ -164,10 +168,10 @@ void GameScene::Resize()
 	
 	LayoutCalculator layout = static_cast<LumosGame*>(game)->DefaultLayout();
 	for( int i=0; i<NUM_SERIAL_BUTTONS; ++i ) {
-		layout.PosAbs( &serialButton[i], i, -2 );
+		layout.PosAbs( &serialButton[i], i+1, -1 );
 	}
-	layout.PosAbs( &allRockButton, NUM_SERIAL_BUTTONS, -2 );
-	layout.PosAbs( &freeCameraButton, 0, -3 );
+	layout.PosAbs( &allRockButton, 1, -2 );
+	layout.PosAbs( &freeCameraButton, 0, -2 );
 
 	int mode = 0;
 	for( int i=0; i<NUM_BUILD_BUTTONS; ++i ) {
@@ -191,6 +195,11 @@ void GameScene::Resize()
 	//faceImage.SetPos( minimap.X()-faceImage.Width(), 0 );
 	faceButton.SetPos( minimap.X()-faceButton.Width(), 0 );
 
+	for( int i=0; i<NUM_PICKUP_BUTTONS; ++i ) {
+		layout.PosAbs( &pickupButton[i], 0, i );
+	}
+
+	// ------ CHANGE LAYOUT ------- //
 	layout.SetSize( faceButton.Width(), 10.0f );
 	layout.SetSpacing( 5.0f );
 	layout.SetOffset( faceButton.X(), faceButton.Y()+faceButton.Height() );
@@ -212,6 +221,7 @@ void GameScene::Resize()
 	bool visible = game->DebugUIEnabled();
 	allRockButton.SetVisible( visible );
 	serialButton[CYCLE].SetVisible( visible );
+
 }
 
 
@@ -911,18 +921,54 @@ void GameScene::HandleHotKey( int mask )
 	}
 }
 
-/*
-class NewsSorter
+
+void GameScene::SetPickupButtons()
 {
-public:
-	static bool Less( const NewsEvent& v0, const NewsEvent& v1 )	
-	{ 
-		int score0 = v0.priority * 30*1000 - (int)v0.time;
-		int score1 = v1.priority * 30*1000 - (int)v1.time;
-		return score0 < score1; 
+	Chit* player = sim->GetPlayerChit();
+	CoreScript* coreMode = sim->GetChitBag()->IsBoundToCore( sim->GetPlayerChit(), true );
+	if ( player && !coreMode ) {
+		// Query items on the ground in a radius of the player.
+		LootFilter lootFilter;
+		static const float LOOT_RAD = 10.0f;
+		Vector2F pos = player->GetSpatialComponent()->GetPosition2D();
+
+		sim->GetChitBag()->QuerySpatialHash( &chitQuery, 
+											 pos, LOOT_RAD,
+											 0, &lootFilter );
+		
+		// Remove things that aren't pathable.
+		pickupData.Clear();
+		for( int i=0; i<chitQuery.Size(); i++ ) {
+			float cost = 0;
+			bool hasPath = sim->GetWorldMap()->CalcPath( pos, chitQuery[i]->GetSpatialComponent()->GetPosition2D(),
+														 0, &cost, false );
+			if ( hasPath ) {
+				PickupData pd = { chitQuery[i]->ID(), cost };
+				pickupData.Push( pd );
+			}
+		}
+
+		// Sort near to far.
+		Sort< PickupData, CompValue >( pickupData.Mem(), pickupData.Size() );
+
+		int i=0;
+		for( ; i<pickupData.Size() && i < NUM_PICKUP_BUTTONS; ++i ) {
+			Chit* chit = sim->GetChitBag()->GetChit( pickupData[i].chitID );
+			if ( chit && chit->GetItem() ) {
+				pickupButton[i].SetVisible( true );
+				lumosGame->ItemToButton( chit->GetItem(), &pickupButton[i] );
+			}
+		}
+		for( ; i < NUM_PICKUP_BUTTONS; ++i ) {
+			pickupButton[i].SetVisible( false );
+		}
 	}
-};
-*/
+	else {
+		for( int i=0; i<NUM_PICKUP_BUTTONS; ++i )
+			pickupButton[i].SetVisible( false );
+	}
+}
+
 
 void GameScene::DoTick( U32 delta )
 {
@@ -937,6 +983,8 @@ void GameScene::DoTick( U32 delta )
 			++simCount;
 		}
 	}
+
+	SetPickupButtons();
 
 	const NewsEvent* news = sim->GetChitBag()->News();
 	int nNews = sim->GetChitBag()->NumNews();
@@ -957,13 +1005,7 @@ void GameScene::DoTick( U32 delta )
 	}
 #endif
 	sim->GetChitBag()->SetNewsProcessed();
-	/*
-	localNews.Clear();
-	for( int i=0; i<nNews; ++i ) {
-		localNews.Push( news[i] );
-	}
-	Sort<NewsEvent, NewsSorter>( localNews.Mem(), localNews.Size() );
-	*/
+
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
 		if ( i < nNews ) {
 			//newsButton[i].SetText( localNews[i].name.c_str() );

@@ -118,6 +118,58 @@ void ItemDefDB::Get( const char* name, GameItemArr* arr )
 }
 
 
+int ItemDefDB::CalcItemValue( const GameItem* item )
+{
+	static const float EFFECT_BONUS = 1.5f;
+	static const float MELEE_VALUE  = 20;
+	static const float RANGED_VALUE = 30;
+	static const float SHIELD_VALUE = 20;
+
+	CArray<int, 16> value;
+	value.Push( 10 );
+
+	if ( item->ToMeleeWeapon() ) {
+		float dptu = BattleMechanics::MeleeDPTU( 0, item->ToMeleeWeapon() );
+
+		const GameItem& basic = Get( "ring" );
+		float refDPTU = BattleMechanics::MeleeDPTU( 0, basic.ToMeleeWeapon() );
+
+		float v = dptu / refDPTU * MELEE_VALUE;
+		if ( item->flags & GameItem::EFFECT_FIRE ) v *= EFFECT_BONUS;
+		if ( item->flags & GameItem::EFFECT_SHOCK ) v *= EFFECT_BONUS;
+		if ( item->flags & GameItem::EFFECT_EXPLOSIVE ) v *= EFFECT_BONUS;
+		value.Push( (int)v );
+	}
+
+	if ( item->ToRangedWeapon() ) {
+		float radAt1 = BattleMechanics::ComputeRadAt1( 0, item->ToRangedWeapon(), false, false );
+		float dptu = BattleMechanics::RangedDPTU( item->ToRangedWeapon(), true );
+		float er   = BattleMechanics::EffectiveRange( radAt1 );
+
+		const GameItem& basic = Get( "blaster" );
+		float refRadAt1 = BattleMechanics::ComputeRadAt1( 0, basic.ToRangedWeapon(), false, false );
+		float refDPTU = BattleMechanics::RangedDPTU( basic.ToRangedWeapon(), true );
+		float refER   = BattleMechanics::EffectiveRange( refRadAt1 );
+
+		float v = ( dptu * er ) / ( refDPTU * refER ) * RANGED_VALUE;
+		if ( item->flags & GameItem::EFFECT_FIRE ) v *= EFFECT_BONUS;
+		if ( item->flags & GameItem::EFFECT_SHOCK ) v *= EFFECT_BONUS;
+		if ( item->flags & GameItem::EFFECT_EXPLOSIVE ) v *= EFFECT_BONUS;
+		value.Push( (int)v );
+	}
+
+	if ( item->ToShield() ) {
+		int rounds = item->ClipCap();
+		const GameItem& basic = Get( "shield" );
+		int refRounds = basic.ClipCap();
+
+		// Currently, shield effects don't do anything, although that would be cool.
+		float v = float(rounds) / float(refRounds) * SHIELD_VALUE;
+		value.Push( int(v) );
+	}
+	return value.Max();
+}
+
 
 void ItemDefDB::DumpWeaponStats()
 {

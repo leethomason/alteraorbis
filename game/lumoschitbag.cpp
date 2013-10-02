@@ -622,6 +622,26 @@ bool ChitHasMapSpatial::Accept( Chit* chit )
 }
 
 
+bool LootFilter::Accept( Chit* chit )
+{
+	/*
+		Currently weapons and shields. Could be
+		expanded to other sorts of things when
+		they become available. (Keys? Decoration?)
+	*/
+	const GameItem* item = chit->GetItem();
+	if ( item ) {
+		if (    item->ToMeleeWeapon()
+			|| item->ToRangedWeapon()
+			|| item->ToShield() ) 
+		{
+			return true;
+		}
+	}
+	return  false;
+}
+
+
 Bolt* LumosChitBag::NewBolt(	const Vector3F& pos,
 								Vector3F dir,
 								int effectFlags,

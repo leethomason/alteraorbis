@@ -188,25 +188,34 @@ void BattleMechanics::CalcMeleeDamage( const GameItem* mainItem, const IMeleeWea
 {
 	const GameItem* item     = weapon->GetItem();
 
-	GLASSERT( item && mainItem );
-	if ( !mainItem || !item ) return;
+	GLASSERT( item );
+	if ( !item ) return;
 
 	// The effect is the union of the item and the mainItem.
 	// A fire creature imparts fire to the sword it holds.
 	// ...I think that makes sense.
-	int effect = (item->flags | mainItem->flags) & GameItem::EFFECT_MASK;
+	int effect = item->flags & GameItem::EFFECT_MASK;
+	if ( mainItem ) {	
+		effect |= mainItem->flags & GameItem::EFFECT_MASK; 
+	}
 
 	// Remove explosive melee effect. It would only be funny 10 or 20 times.
 	effect ^= GameItem::EFFECT_EXPLOSIVE;
 
 	// Now about mass.
 	// Use the sum; using another approach can yield surprising damage calc.
-	float mass = item->mass + mainItem->mass;
+	float mass = item->mass;
+	if ( mainItem ) {
+		mass += mainItem->mass;
+	}
 
 	static const float STRIKE_RATIO_INV = 1.0f / 5.0f;
 
 	float trait0 = item->traits.Damage();
-	float trait2 = mainItem->traits.Damage(); 
+	float trait2 = 1;
+	if ( mainItem ) {
+		trait2 = mainItem->traits.Damage(); 
+	}
 
 	dd->damage = mass * item->meleeDamage * STRIKE_RATIO_INV * trait0 * trait2;
 	dd->effects = effect;

@@ -257,15 +257,10 @@ void CharacterScene::SetButtonText()
 			// Set the text to the proper name, if we have it.
 			// Then an icon for what it is, and a check
 			// mark if the object is in use.
-			itemButton[count].SetText( item->ProperName() ? item->ProperName() : item->Name() );
+			lumosGame->ItemToButton( item, &itemButton[count] );
 			itemButtonIndex[count] = i;
 
-			IString decoName = item->GetValue( "uiIcon" );
-			RenderAtom atom  = LumosGame::CalcUIIconAtom( decoName.c_str(), true );
-			RenderAtom atomD = LumosGame::CalcUIIconAtom( decoName.c_str(), false );
-
-			itemButton[count].SetDeco( atom, atomD );
-
+			// Set the "active" icons.
 			if ( item == rangedItem || item == meleeItem || item == shieldItem ) {
 				itemButton[count].SetIcon( iconAtom, iconAtom );
 			}

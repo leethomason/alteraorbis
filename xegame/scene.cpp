@@ -106,7 +106,6 @@ ModelVoxel Scene::ModelAtMouse( const grinliz::Vector2F& view,
 	Vector3F at = { 0,0,0 };
 	game->GetScreenport().ViewProjectionInverse3D( &mvpi );
 	engine->RayFromViewToYPlane( view, mvpi, &ray, &at );
-	GLASSERT( at.x != 0 && at.z != 0 );
 	ModelVoxel mv = engine->IntersectModelVoxel( ray.origin, ray.direction, 10000.0f, 
 												method, required, exclude, ignore );
 	if ( planeIntersection ) {

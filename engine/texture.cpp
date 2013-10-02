@@ -161,7 +161,7 @@ Texture* TextureManager::CreateTexture( const char* name, int w, int h, int form
 
 	Texture* t = 0;
 	if ( texMap.Query( name, &t ) ) {
-		GLASSERT( t->creator == 0 || t->creator == creator );
+		GLASSERT( t->creator == 0 || (t->creator && creator) );
 		t->Set( name, w, h, format, flags );
 		t->creator = creator;
 	}

@@ -42,6 +42,7 @@ public:
 	static void GetProperty( const char* name, const char* prop, int* value );
 
 	void DumpWeaponStats();
+	int CalcItemValue( const GameItem* item );
 
 private:
 	ItemDefDB()		{}

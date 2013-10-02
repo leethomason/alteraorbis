@@ -42,6 +42,7 @@ distribution.
 #endif
 
 #include "micropather.h"
+#include "../Shiny/include/Shiny.h"
 
 using namespace std;
 using namespace micropather;
@@ -840,6 +841,7 @@ void MicroPather::GetCacheData( CacheData* data )
 
 int MicroPather::Solve( void* startNode, void* endNode, MP_VECTOR< void* >* path, float* cost )
 {
+	PROFILE_FUNC();
 	// Important to clear() in case the caller doesn't check the return code. There
 	// can easily be a left over path  from a previous call.
 	path->clear();

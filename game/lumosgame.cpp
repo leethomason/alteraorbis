@@ -285,3 +285,23 @@ const char* LumosGame::GenName( const char* dataset, int seed, int min, int max 
 	return 0;
 }
 
+
+void LumosGame::ItemToButton( const GameItem* item, gamui::Button* button )
+{
+	CStr<64> text;
+
+	// Set the text to the proper name, if we have it.
+	// Then an icon for what it is, and a check
+	// mark if the object is in use.
+	text.Format( "%s\nAu: %d\n",	item->ProperName() ? item->ProperName() : item->Name(),
+									ItemDefDB::Instance()->CalcItemValue( item ));
+	button->SetText( text.c_str() );
+
+	IString decoName = item->GetValue( "uiIcon" );
+	RenderAtom atom  = LumosGame::CalcUIIconAtom( decoName.c_str(), true );
+	atom.renderState = (const void*) UIRenderer::RENDERSTATE_UI_DISABLED;
+	RenderAtom atomD = LumosGame::CalcUIIconAtom( decoName.c_str(), false );
+
+	button->SetDeco( atom, atomD );
+}
+

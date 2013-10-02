@@ -61,11 +61,14 @@ private:
 	void ClearTargetFlags();
 	void SetSelectionModel( const grinliz::Vector2F& view );
 
+	void SetPickupButtons();
+
 	enum {
 		SAVE,
 		LOAD,
 		CYCLE,
 		NUM_SERIAL_BUTTONS,
+		NUM_PICKUP_BUTTONS = 8,
 		
 		NUM_NEWS_BUTTONS = 16,
 		NEWS_BUTTON_WIDTH  = 60,
@@ -90,6 +93,14 @@ private:
 		BUILD_VAULT,
 		NUM_BUILD_BUTTONS
 	};
+
+	struct PickupData {
+		int		chitID;
+		float	distance;	// pather distance
+
+		bool operator<( const PickupData& rhs ) const { return distance < rhs.distance; }
+	};
+
 	static const int BUILD_MODE_START[NUM_BUILD_MODES];
 
 	// returns the name from the build button
@@ -133,7 +144,11 @@ private:
 	gamui::TextLabel	goldLabel;
 	gamui::TextLabel	xpLabel;
 
+	gamui::PushButton	pickupButton[NUM_PICKUP_BUTTONS];
+
 	grinliz::CDynArray<const GameItem*> dropList;	// stuff dropped in the character scene
+	grinliz::CDynArray< Chit* >			chitQuery;
+	grinliz::CDynArray< PickupData >	pickupData;
 };
 
 

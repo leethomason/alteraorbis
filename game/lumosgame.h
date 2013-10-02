@@ -18,6 +18,8 @@
 
 #include "../xegame/game.h"
 
+class GameItem;
+
 class LumosGame : public Game
 {
 	typedef Game super;
@@ -79,6 +81,8 @@ public:
 	gamui::LayoutCalculator DefaultLayout();
 	void InitStd( gamui::Gamui* g, gamui::PushButton* okay, gamui::PushButton* cancel );
 	void PositionStd( gamui::PushButton* okay, gamui::PushButton* cancel );
+
+	void ItemToButton( const GameItem* item, gamui::Button* button );
 
 protected:
 

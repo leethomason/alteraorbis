@@ -349,6 +349,24 @@ public:
 		Pop();
 	}
 
+	const T& Max() const {
+		int m = 0;
+		for( int i=1; i<size; ++i ) {
+			if ( mem[i] > mem[m] )
+				m = i;
+		}
+		return mem[m];
+	}
+
+	const T& Min() const {
+		int m = 0;
+		for( int i=1; i<size; ++i ) {
+			if ( mem[i] < mem[m] )
+				m = i;
+		}
+		return mem[m];
+	}
+
 private:
 	T mem[CAPACITY];
 	int size;

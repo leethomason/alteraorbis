@@ -87,6 +87,13 @@ private:
 };
 
 
+// "loot" being items that can be dropped on the ground and picked up.
+class LootFilter : public IChitAccept
+{
+public:
+	virtual bool Accept( Chit* chit );
+};
+
 class LumosChitBag : public ChitBag,
 					 public IMapGridUse
 {
