@@ -31,9 +31,8 @@ class GameItem;
 class CharacterSceneData : public SceneData
 {
 public:
-	CharacterSceneData( ItemComponent* ic, grinliz::CDynArray<const GameItem*>* dl ) : SceneData(), itemComponent(ic), dropList(dl) {}
-	ItemComponent*					itemComponent;
-	grinliz::CDynArray<const GameItem*>*	dropList;
+	CharacterSceneData( ItemComponent* ic ) : SceneData(), itemComponent(ic) {}
+	ItemComponent*							itemComponent;
 };
 
 

@@ -353,6 +353,10 @@ int main( int argc, char **argv )
 						GameHotKey( game, GAME_HK_SPACE );
 						break;
 
+					case SDLK_m:
+						GameHotKey( game, GAME_HK_MAP );
+						break;
+
 					case SDLK_f:
 						GameHotKey( game, GAME_HK_TOGGLE_FAST );
 						break;

@@ -146,7 +146,6 @@ private:
 
 	gamui::PushButton	pickupButton[NUM_PICKUP_BUTTONS];
 
-	grinliz::CDynArray<const GameItem*> dropList;	// stuff dropped in the character scene
 	grinliz::CDynArray< Chit* >			chitQuery;
 	grinliz::CDynArray< PickupData >	pickupData;
 };

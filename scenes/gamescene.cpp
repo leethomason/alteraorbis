@@ -29,6 +29,8 @@
 #include "../script/corescript.h"
 #include "../script/itemscript.h"
 
+#include "../scenes/mapscene.h"
+
 using namespace grinliz;
 using namespace gamui;
 
@@ -754,7 +756,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		Chit* playerChit = sim->GetPlayerChit();
 		if ( playerChit && playerChit->GetItemComponent() ) {			
 			game->PushScene( LumosGame::SCENE_CHARACTER, 
-							 new CharacterSceneData( playerChit->GetItemComponent(), &dropList ));
+							 new CharacterSceneData( playerChit->GetItemComponent() ));
 		}
 	}
 
@@ -927,6 +929,12 @@ void GameScene::HandleHotKey( int mask )
 			r.Set( sector.x*SECTOR_SIZE, sector.y*SECTOR_SIZE, (sector.x+1)*SECTOR_SIZE-1, (sector.y+1)*SECTOR_SIZE-1 );
 		}
 		sim->GetWorldMap()->ShowRegionOverlay( r );
+	}
+	else if ( mask == GAME_HK_MAP ) {
+		Chit* playerChit = sim->GetPlayerChit();
+		if ( playerChit ) {
+			game->PushScene( LumosGame::SCENE_MAP, new MapSceneData( sim->GetChitBag(), sim->GetWorldMap(), playerChit ));
+		}
 	}
 	else {
 		super::HandleHotKey( mask );
@@ -1205,9 +1213,6 @@ void GameScene::SceneResult( int sceneID, int result )
 			ItemComponent* ic = playerChit->GetItemComponent();
 			GLASSERT( ic );
 			if ( ic ) {
-				while ( !dropList.Empty() ) {
-					ic->Drop( dropList.Pop() );
-				}
 				ic->SetHardpoints();
 			}
 		}

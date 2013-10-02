@@ -71,6 +71,7 @@ void GameDoTick( void* handle, unsigned int timeInMSec );
 #define GAME_HK_DEBUG_UI				7
 #define GAME_HK_TOGGLE_PATHING			8
 #define GAME_HK_TOGGLE_COLORS			9
+#define GAME_HK_MAP					   10
 
 void GameHotKey( void* handle, int value );
 
