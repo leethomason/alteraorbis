@@ -43,8 +43,13 @@ private:
 	WorldMap*		worldMap;
 	Chit*			player;
 
+	grinliz::Rectangle2F map2Bounds;
+
 	gamui::PushButton	okay;
 	gamui::Image		mapImage;
+	gamui::Image		map2Image;
+
+	gamui::Image		playerMark;
 };
 
 #endif // MAP_SCENE_INCLUDED

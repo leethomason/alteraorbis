@@ -907,6 +907,9 @@ public:
 
 	void SetSize( float width, float height )			{ this->width = width; this->height = height; }
 	void SetGutter( float gutterX, float gutterY )		{ this->gutterX = gutterX; this->gutterY = gutterY; }
+	float GutterX() const								{ return gutterX; }
+	float GutterY() const								{ return gutterY; }
+
 	void SetSpacing( float spacing )					{ this->spacingX = this->spacingY = spacing; }
 	void SetSpacing( float spacingX, float spacingY )	{ this->spacingX = spacingX; this->spacingY = spacingY; }
 

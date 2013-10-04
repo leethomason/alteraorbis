@@ -243,6 +243,13 @@ struct Rectangle2
 		max.y += dist;
 	}
 
+	void Add( T x, T y ) {
+		min.x += x;
+		min.y += y;
+		max.x += x;
+		max.y += y;
+	}
+
 	Vector2< T > Center() const {
 		Vector2< T > v = { (min.x + max.x) / (T)2, (min.y + max.y) / (T)2 };
 		return v;

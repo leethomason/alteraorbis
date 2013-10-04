@@ -1095,7 +1095,8 @@ void GameScene::Draw3D( U32 deltaTime )
 
 	RenderAtom atom( (const void*)UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, 
 					 (const void*)sim->GetMiniMapTexture(), 
-					 0, 0, 1, 1 );
+					 0, 1, 1, 0 );		// flip upside down!
+
 	/* coordinate test. they are correct.
 	RenderAtom atom( (const void*)UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, 
 					 (const void*)TextureManager::Instance()->GetTexture( "palette" ),
