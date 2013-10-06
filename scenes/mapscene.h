@@ -38,18 +38,28 @@ public:
 	virtual void ItemTapped( const gamui::UIItem* item );
 
 private:
+
+	void SetText();
+
+	enum {	MAP2_RAD	= 2,
+			MAP2_SIZE	= 5,
+			MAP2_SIZE2	= MAP2_SIZE*MAP2_SIZE
+	};
+
 	LumosGame*		lumosGame;
 	LumosChitBag*	lumosChitBag;
 	WorldMap*		worldMap;
 	Chit*			player;
 
+	grinliz::Rectangle2I sectorBounds;
 	grinliz::Rectangle2F map2Bounds;
 
 	gamui::PushButton	okay;
 	gamui::Image		mapImage;
 	gamui::Image		map2Image;
 
-	gamui::Image		playerMark;
+	gamui::Image		playerMark, playerMark2;
+	gamui::TextBox		map2Text[MAP2_SIZE2];
 };
 
 #endif // MAP_SCENE_INCLUDED
