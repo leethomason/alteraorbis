@@ -181,21 +181,6 @@ bool AIComponent::LineOfSight( const ComponentSet& thisComp, const grinliz::Vect
 }
 
 
-
-bool FEFilter::Accept( Chit* c ) 
-{
-	// Tricky stuff. This will return F/E units:
-	if( c->GetAIComponent() )
-		return true;
-	// Dummy targets, enemy structures.
-	// This probably isn't quite right. But
-	// automated things?
-	if ( c->GetMoveComponent() && c->GetItem() ) {
-		return true;
-	}
-	return false;
-}
-
 void AIComponent::GetFriendEnemyLists()
 {
 	SpatialComponent* sc = parentChit->GetSpatialComponent();
@@ -218,9 +203,9 @@ void AIComponent::GetFriendEnemyLists()
 	enemyList.Clear();
 
 	CChitArray chitArr;
-	FEFilter feFilter;
+	MoBFilter mobFilter;
 
-	GetChitBag()->QuerySpatialHash( &chitArr, zone, parentChit, &feFilter );
+	GetChitBag()->QuerySpatialHash( &chitArr, zone, parentChit, &mobFilter );
 	for( int i=0; i<chitArr.Size(); ++i ) {
 		int status = GetTeamStatus( chitArr[i] );
 		if ( status == RELATE_ENEMY ) {

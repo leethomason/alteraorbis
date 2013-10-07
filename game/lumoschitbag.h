@@ -34,6 +34,21 @@ public:
 };
 
 
+/* Hard to define...Not Buildings,
+   but something that can be a friend or enemy.
+   MoB is used in the genereric sense, doesn't
+   actually need to be mobile.
+   There are probably some non-exclusive cases,
+   so there is no reason to assume a Building
+   is not a MoB and vice versio.
+*/
+class MoBFilter : public IChitAccept
+{
+public:
+	virtual bool Accept( Chit* chit );
+};
+
+
 class PlantFilter : public IChitAccept
 {
 public:
@@ -97,6 +112,9 @@ public:
 class LumosChitBag : public ChitBag,
 					 public IMapGridUse
 {
+private:
+	typedef ChitBag super;
+
 public:
 	LumosChitBag();
 	virtual ~LumosChitBag();
@@ -104,6 +122,17 @@ public:
 	virtual LumosChitBag* ToLumos() { return this; }
 
 	void SetContext( Engine* e, WorldMap* wm, LumosGame* lg ) { engine = e; worldMap = wm; lumosGame = lg; }
+
+#if 0
+	virtual void AddToSpatialHash( Chit*, int x, int y );
+	virtual void RemoveFromSpatialHash( Chit*, int x, int y );
+	// Sector 0,0 if not using sectors works.
+	const grinliz::CDynArray<Chit*>& MoBsInSector( const grinliz::Vector2I& sector ) {
+		GLASSERT( sector.x >= 0 && sector.x < NUM_SECTORS );
+		GLASSERT( sector.y >= 0 && sector.y < NUM_SECTORS );
+		return mobsInSector[sector.y*NUM_SECTORS+sector.x];
+	}
+#endif
 
 	Chit* NewMonsterChit( const grinliz::Vector3F& pos, const char* name, int team );
 	Chit* NewGoldChit( const grinliz::Vector3F& pos, int amount );
@@ -166,8 +195,10 @@ private:
 	LumosGame* lumosGame;
 	grinliz::Random random;	// use the chit version, if possible, generally want to avoid high level random
 
-	grinliz::CDynArray<Chit*>					inUseArr;
-	grinliz::CDynArray<Chit*>					chitList;
+	grinliz::CDynArray<Chit*>	inUseArr;
+	grinliz::CDynArray<Chit*>	chitList;
+
+//	grinliz::CDynArray<Chit*>	mobsInSector[NUM_SECTORS*NUM_SECTORS];
 };
 
 

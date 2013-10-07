@@ -49,6 +49,51 @@ LumosChitBag::~LumosChitBag()
 }
 
 
+#if 0
+void LumosChitBag::AddToSpatialHash( Chit* chit, int x, int y )
+{
+	// This seems like a good idea, accept that the chit can
+	// of course change its components, has an update sequence,
+	// and may or may not match criteria. 
+	MoBFilter filter;
+	if ( filter.Accept( chit )) {
+		if ( worldMap->UsingSectors() ) {
+			Vector2I sector = { x / SECTOR_SIZE, y / SECTOR_SIZE };
+			mobsInSector[sector.y*NUM_SECTORS+sector.x].Push( chit );
+		}
+		else {
+			mobsInSector[0].Push( chit );
+		}
+	}
+	super::AddToSpatialHash( chit, x, y );
+}
+
+
+void LumosChitBag::RemoveFromSpatialHash( Chit* chit, int x, int y )
+{
+	MoBFilter filter;
+	if ( filter.Accept( chit )) {
+		if ( worldMap->UsingSectors() ) {
+			Vector2I sector = { x / SECTOR_SIZE, y / SECTOR_SIZE };
+			int s = sector.y*NUM_SECTORS+sector.x;
+			int i = mobsInSector[s].Find( chit );
+			GLASSERT( i >= 0 );
+			if ( i >= 0 ) {
+				mobsInSector[s].SwapRemove( i );
+			}
+		}
+		else {
+			int i = mobsInSector[0].Find( chit );
+			GLASSERT( i >= 0 );
+			if ( i >= 0 ) {
+				mobsInSector[0].SwapRemove( i );
+			}
+		}
+	}
+	super::RemoveFromSpatialHash( chit, x, y );
+}
+#endif
+
 
 Chit* LumosChitBag::NewBuilding( const Vector2I& pos, const char* name, int team )
 {
@@ -588,6 +633,12 @@ bool BuildingFilter::Accept( Chit* chit )
 	// Assumed to be MapSpatial with "building" flagged on.
 	MapSpatialComponent* msc = GET_SUB_COMPONENT( chit, SpatialComponent, MapSpatialComponent );
 	return msc && msc->Building();
+}
+
+
+bool MoBFilter::Accept( Chit* chit )
+{
+	return chit && chit->GetItem() && chit->GetAIComponent();
 }
 
 

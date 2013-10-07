@@ -3,9 +3,14 @@
 #include "../game/lumosgame.h"
 #include "../game/worldmap.h"
 #include "../game/worldinfo.h"
+#include "../game/lumoschitbag.h"
+#include "../game/team.h"
+#include "../game/gameitem.h"
 
 #include "../xegame/spatialcomponent.h"
+
 #include "../script/procedural.h"
+#include "../script/corescript.h"
 
 using namespace gamui;
 using namespace grinliz;
@@ -108,14 +113,41 @@ void MapScene::Resize()
 
 void MapScene::SetText()
 {
+	CDynArray<Chit*> query;
+
 	for( int j=0; j<MAP2_SIZE; ++j ) {
 		for( int i=0; i<MAP2_SIZE; ++i ) {
 
 			Vector2I sector = { sectorBounds.min.x + i, sectorBounds.min.y + j };
 			const SectorData& sd = worldMap->GetSector( sector );
 
+			MoBFilter mobFilter;
+			Rectangle2I innerI = sd.InnerBounds();
+			Rectangle2F inner;
+			inner.Set( float(innerI.min.x), float(innerI.min.y), float(innerI.max.x+1), float(innerI.max.y+1) );
+
+			lumosChitBag->QuerySpatialHash( &query, inner, 0, &mobFilter );
+
+			int enemy=0;
+			for( int k=0; k<query.Size(); ++k ) {
+				if ( GetRelationship( player->GetItem()->primaryTeam, query[k]->GetItem()->primaryTeam ) == RELATE_ENEMY ) {
+					++enemy;
+				}
+			}
+
+
 			CStr<64> str;
-			str.Format( "%s\n%d,%d\nax1 bx2 cx3", sd.name, i, j );
+			if ( sd.HasCore() ) {
+				const char* owner = "<none>";
+				CoreScript* cc = lumosChitBag->GetCore( sector );
+				if ( cc ) {
+					Chit* chitOwner = cc->GetAttached(0);
+					if ( chitOwner ) {
+						owner = chitOwner->GetItem()->Name();	// fixme: use team name
+					}
+				}
+				str.Format( "%s\n%s\nenemy=%d", sd.name, owner, enemy );
+			}
 			map2Text[j*MAP2_SIZE+i].SetText( str.c_str() );
 		}
 	}
