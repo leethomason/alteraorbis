@@ -30,6 +30,8 @@ x Add position fuzz to gold, crystal, and item drops
 - can re-pack MVP and Bone matrix in the shader to encode 3*vec4 as the transpose, then transpose in the shader
 - Hide free camera button
 - should be able to auto-clear when building 
+- standing shields!
+- personality, personality display
 
 - game
 
@@ -60,6 +62,7 @@ x Add position fuzz to gold, crystal, and item drops
 		x Add a pave to keep it clear
 			x switch to voxel rendering for ground?
 		x item value (compare)
+		- rework item screen layout
 		- item forging
 		- item market
 		- item destruction
@@ -158,20 +161,17 @@ d put metadata in model (authoring  time)
 	- concept
 	- model 
 	- animation
-- Troll
-	- concept
-	- model 
-	- animation
+x Troll
+	x concept
+	x model 
+	x animation
+	- spawn strategy
+	- item pickup / use AI
 - Dragon
 	- concept
 	- model 
 	- animation
 	
-x Flora
-	x concept
-	x models
-	x redo texturing
-
 - wilder, more digital face colors
 - filter face colors to matching effect
 - more natural skin tones
@@ -212,6 +212,10 @@ V2 ideas:
 - level up grid and special skills
 
 ----------- FIXED -------------
+x Flora
+	x concept
+	x models
+	x redo texturing
 x move GOLD_PICKUP to flag in Item
 x pools that are waterfalls need side rendering
 x remove squisher. nifty but outdated.

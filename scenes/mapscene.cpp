@@ -1,13 +1,19 @@
 #include "mapscene.h"
+
 #include "../game/lumosgame.h"
 #include "../game/worldmap.h"
+#include "../game/worldinfo.h"
+#include "../game/lumoschitbag.h"
+#include "../game/team.h"
+#include "../game/gameitem.h"
+
 #include "../xegame/spatialcomponent.h"
+
 #include "../script/procedural.h"
+#include "../script/corescript.h"
 
 using namespace gamui;
 using namespace grinliz;
-
-const int MAP2_RAD = 2;
 
 MapScene::MapScene( LumosGame* game, MapSceneData* data ) : Scene( game ), lumosGame(game)
 {
@@ -28,6 +34,8 @@ MapScene::MapScene( LumosGame* game, MapSceneData* data ) : Scene( game ), lumos
 	if ( sector.x >= NUM_SECTORS - MAP2_RAD )	sector.x = NUM_SECTORS - MAP2_RAD - 1;
 	if ( sector.y >= NUM_SECTORS - MAP2_RAD )	sector.y = NUM_SECTORS - MAP2_RAD - 1;
 
+	sectorBounds.Set( sector.x-MAP2_RAD, sector.y-MAP2_RAD, sector.x+MAP2_RAD, sector.y+MAP2_RAD );
+
 	map2Bounds.Set( float(sector.x-MAP2_RAD)*float(SECTOR_SIZE), 
 					float(sector.y-MAP2_RAD)*float(SECTOR_SIZE), 
 					float(sector.x+1+MAP2_RAD)*float(SECTOR_SIZE), 
@@ -42,7 +50,11 @@ MapScene::MapScene( LumosGame* game, MapSceneData* data ) : Scene( game ), lumos
 
 	RenderAtom atom = lumosGame->CalcPaletteAtom( PAL_TANGERINE*2, PAL_ZERO );
 	playerMark.Init( &gamui2D, atom, true );
+	playerMark2.Init( &gamui2D, atom, true );
 
+	for( int i=0; i<MAP2_SIZE2; ++i ) {
+		map2Text[i].Init( &gamui2D );
+	}
 }
 
 
@@ -70,9 +82,75 @@ void MapScene::Resize()
 	mapImage.SetPos( x, y );
 	map2Image.SetPos( port.UIWidth()*0.5f + 0.5f*layout.GutterX(), y );
 
-	playerMark.SetSize( dx*0.02f, dy*0.02f );
+	// --- MAIN ---
+
+	const float MARK_SIZE = dx*0.02f;
+	playerMark.SetSize( MARK_SIZE, MARK_SIZE );
 	Vector2F pos = player->GetSpatialComponent()->GetPosition2D();
-	playerMark.SetPos( x + dx*pos.x/float(worldMap->Width()), y + dy*pos.y/float(worldMap->Height()) );
+	playerMark.SetCenterPos( x + dx*pos.x/float(worldMap->Width()), 
+							 y + dy*pos.y/float(worldMap->Height()));
+
+	// --- AREA --- 
+
+	x = map2Image.X();
+	playerMark2.SetSize( MARK_SIZE, MARK_SIZE );
+	playerMark2.SetCenterPos( x + dx*(pos.x-map2Bounds.min.x)/map2Bounds.Width(), 
+							  y + dy*(pos.y-map2Bounds.min.y)/map2Bounds.Height());
+
+	float gridSize = map2Image.Width() / float(MAP2_SIZE);
+	float gutter = gamui2D.GetTextHeight() * 0.25f;
+
+	for( int j=0; j<MAP2_SIZE; ++j ) {
+		for( int i=0; i<MAP2_SIZE; ++i ) {
+			map2Text[j*MAP2_SIZE+i].SetPos( x + float(i)*gridSize + gutter, y + float(j)*gridSize + gutter );
+			map2Text[j*MAP2_SIZE+i].SetSize( gridSize - gutter*2.0f, gridSize - gutter*2.0f );
+		}
+	}
+
+	SetText();
+}
+
+
+void MapScene::SetText()
+{
+	CDynArray<Chit*> query;
+
+	for( int j=0; j<MAP2_SIZE; ++j ) {
+		for( int i=0; i<MAP2_SIZE; ++i ) {
+
+			Vector2I sector = { sectorBounds.min.x + i, sectorBounds.min.y + j };
+			const SectorData& sd = worldMap->GetSector( sector );
+
+			MoBFilter mobFilter;
+			Rectangle2I innerI = sd.InnerBounds();
+			Rectangle2F inner;
+			inner.Set( float(innerI.min.x), float(innerI.min.y), float(innerI.max.x+1), float(innerI.max.y+1) );
+
+			lumosChitBag->QuerySpatialHash( &query, inner, 0, &mobFilter );
+
+			int enemy=0;
+			for( int k=0; k<query.Size(); ++k ) {
+				if ( GetRelationship( player->GetItem()->primaryTeam, query[k]->GetItem()->primaryTeam ) == RELATE_ENEMY ) {
+					++enemy;
+				}
+			}
+
+
+			CStr<64> str;
+			if ( sd.HasCore() ) {
+				const char* owner = "<none>";
+				CoreScript* cc = lumosChitBag->GetCore( sector );
+				if ( cc ) {
+					Chit* chitOwner = cc->GetAttached(0);
+					if ( chitOwner ) {
+						owner = chitOwner->GetItem()->Name();	// fixme: use team name
+					}
+				}
+				str.Format( "%s\n%s\nenemy=%d", sd.name, owner, enemy );
+			}
+			map2Text[j*MAP2_SIZE+i].SetText( str.c_str() );
+		}
+	}
 }
 
 

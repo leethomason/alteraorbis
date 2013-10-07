@@ -33,7 +33,7 @@ public:
 		RENDERSTATE_UI_TEXT_DISABLED,
 		RENDERSTATE_UI_DECO,			// deco rendering
 		RENDERSTATE_UI_DECO_DISABLED,
-		RENDERSTATE_UI_CLIP_XFORM_MAP,
+		RENDERSTATE_UI_CLIP_XFORM_MAP,	// special rendering for faces. FIXME: not really working. Only supports one face.
 		RENDERSTATE_COUNT
 	};
 

@@ -29,11 +29,6 @@ struct ComponentSet;
 struct SectorPort;
 class WorkQueue;
 
-class FEFilter : public IChitAccept
-{
-public:
-	virtual bool Accept( Chit* chit );
-};
 
 // Combat AI: needs refactoring
 class AIComponent : public Component
