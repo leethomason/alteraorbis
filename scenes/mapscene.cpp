@@ -8,6 +8,7 @@
 #include "../game/gameitem.h"
 
 #include "../xegame/spatialcomponent.h"
+#include "../xegame/itemcomponent.h"
 
 #include "../script/procedural.h"
 #include "../script/corescript.h"
@@ -128,13 +129,25 @@ void MapScene::SetText()
 
 			lumosChitBag->QuerySpatialHash( &query, inner, 0, &mobFilter );
 
-			int enemy=0;
+			int low=0, med=0, high=0, greater=0;
+			float playerPower = player->GetItemComponent()->PowerRating();
+
 			for( int k=0; k<query.Size(); ++k ) {
-				if ( GetRelationship( player->GetItem()->primaryTeam, query[k]->GetItem()->primaryTeam ) == RELATE_ENEMY ) {
-					++enemy;
+				const GameItem* item = query[k]->GetItem();
+				if ( GetRelationship( player->GetItem()->primaryTeam, item->primaryTeam ) == RELATE_ENEMY ) {
+
+					float power = query[k]->GetItemComponent()->PowerRating();
+
+					if ( item->GetValue( "mob" ) == "greater" )
+						++greater;
+					else if ( power < playerPower * 0.5f ) 
+						++low;
+					else if ( power > playerPower * 2.0f )
+						++high;
+					else
+						++med;
 				}
 			}
-
 
 			CStr<64> str;
 			if ( sd.HasCore() ) {
@@ -143,10 +156,10 @@ void MapScene::SetText()
 				if ( cc ) {
 					Chit* chitOwner = cc->GetAttached(0);
 					if ( chitOwner ) {
-						owner = chitOwner->GetItem()->Name();	// fixme: use team name
+						owner = TeamName( chitOwner->GetItem()->primaryTeam ).c_str();
 					}
 				}
-				str.Format( "%s\n%s\nenemy=%d", sd.name, owner, enemy );
+				str.Format( "%s\n%s\nL%d M%d H%d G%d", sd.name, owner, low, med, high, greater );
 			}
 			map2Text[j*MAP2_SIZE+i].SetText( str.c_str() );
 		}
@@ -157,6 +170,14 @@ void MapScene::SetText()
 void MapScene::ItemTapped( const gamui::UIItem* item )
 {
 	if ( item == &okay ) {
+		lumosGame->PopScene();
+	}
+}
+
+
+void MapScene::HandleHotKey( int value )
+{
+	if ( value == GAME_HK_MAP ) {
 		lumosGame->PopScene();
 	}
 }

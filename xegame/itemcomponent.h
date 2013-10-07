@@ -83,6 +83,9 @@ public:
 	// the inventory.
 	void SetHardpoints();
 
+	// Very crude assessment of the power of this MoB.
+	float PowerRating() const;
+
 private:
 	void DoSlowTick();
 	bool EmitEffect( const GameItem& it, U32 deltaTime );

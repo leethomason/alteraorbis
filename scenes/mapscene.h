@@ -36,6 +36,7 @@ public:
 		ProcessTap( action, screen, world );
 	}
 	virtual void ItemTapped( const gamui::UIItem* item );
+	virtual void HandleHotKey( int value );
 
 private:
 

@@ -7,6 +7,20 @@
 using namespace grinliz;
 
 
+grinliz::IString TeamName( int team )
+{
+	IString name;
+	switch ( team ) {
+	case TEAM_HOUSE0:	name = StringPool::Intern( "House0" );	break;
+
+	default:
+		break;
+	}
+
+	return name;
+}
+
+
 int GetTeam( const grinliz::IString& itemName )
 {
 	if ( itemName == IStringConst::arachnoid ) {

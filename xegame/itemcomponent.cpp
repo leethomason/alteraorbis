@@ -134,6 +134,15 @@ void ItemComponent::NameItem( GameItem* item )
 }
 
 
+float ItemComponent::PowerRating() const
+{
+	GameItem* mainItem = itemArr[0];
+	int level = mainItem->traits.Level();
+
+	return float(1+level) * float(mainItem->mass);
+}
+
+
 void ItemComponent::AddBattleXP( bool isMelee, int killshotLevel, const GameItem* loser )
 {
 	GameItem* mainItem = itemArr[0];

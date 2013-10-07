@@ -32,6 +32,7 @@ x Add position fuzz to gold, crystal, and item drops
 - should be able to auto-clear when building 
 - standing shields!
 - personality, personality display
+- AI notifies friends when attacked, notifies that being attacked, etc.
 
 - game
 
@@ -55,26 +56,42 @@ x Add position fuzz to gold, crystal, and item drops
 			x gold & crystal display
 			x character names
 			x items get names
-		x item pickup
-		- item history
-			- created 
-			x kills
 		x Add a pave to keep it clear
 			x switch to voxel rendering for ground?
 		x item value (compare)
+		x item pickup
+		x fix team logic
+		x expandable map
+	      x show "areas of interest"
+	      x show danger level
+
+		- control
+			- space bar to pause
+			- tab to toggle weapons
+			- weapon swap button
+			- pause button
+		- map
+			- show home base
+			- fast travel from map screen
+			- main screen takes you to map
+			- hotkey to exit
+			- direction player is pointed
+		- item history
+			- created 
+			x kills
+		- console
+			- important events
+			- important de-rez
 		- rework item screen layout
 		- item forging
 		- item market
 		- item destruction
 		- real health bars & check visibility
-		- no item limit in inventory (but yes in invertory screen)
-		- expandable map
-	      - show "areas of interest"
-	      - show danger level
+		- no item limit in inventory (but yes in inventory screen)
+		- player re-gen. at cores? in general?
 	    - exploring
 	      - xp for exploring!!
 	      - "domain theme" when you arrive
-		x fix team logic
 		- build 2 height ice
 		- decent clear dragging
 		- visitors create energy, buildings consume energy
