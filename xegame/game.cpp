@@ -268,14 +268,19 @@ void Game::PushPopScene()
 		int result = sceneStack.Top()->result;
 		int id     = sceneStack.Top()->sceneID;
 
+		// Grab the data out.
+		SceneData* data = sceneStack.Top()->data;
+		sceneStack.Top()->data = 0;	// prevent it from getting deleted.
+
 		sceneStack.Top()->Free();
 		sceneStack.Pop();
 
 		if ( !sceneStack.Empty() ) {
 			sceneStack.Top()->scene->Activate();
 			sceneStack.Top()->scene->Resize();
-			sceneStack.Top()->scene->SceneResult( id, result );
+			sceneStack.Top()->scene->SceneResult( id, result, data );
 		}
+		delete data;
 	}
 
 	if (    sceneQueued.sceneID == MAX_SCENES 

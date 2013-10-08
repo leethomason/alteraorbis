@@ -709,8 +709,16 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		GLOUTPUT(( "minimap tapped nx=%.1f ny=%.1f\n", x, y ));
 
 		Engine* engine = sim->GetEngine();
-		dest.x = x*(float)engine->GetMap()->Width();
-		dest.y = y*(float)engine->GetMap()->Height();
+		//dest.x = x*(float)engine->GetMap()->Width();
+		//dest.y = y*(float)engine->GetMap()->Height();
+
+		Vector2I sector;
+		sector.x = int( x * float(NUM_SECTORS));
+		sector.y = int( y * float(NUM_SECTORS));
+
+		MapSceneData* data = new MapSceneData( sim->GetChitBag(), sim->GetWorldMap(), sim->GetPlayerChit() );
+		data->destSector = sector;
+		game->PushScene( LumosGame::SCENE_MAP, data );
 	}
 	else if ( item == &serialButton[SAVE] ) {
 		Save();
@@ -819,7 +827,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		}
 	}
 
-	if ( dest.x >= 0 ) {
+	if ( !dest.IsZero() ) {
 		DoDestTapped( dest );
 	}
 }
@@ -841,26 +849,16 @@ void GameScene::DoDestTapped( const Vector2F& _dest )
 				Vector2I destSector    = SectorData::SectorID( dest.x, dest.y );
 				SectorPort sectorPort;
 
-				// Are we on the grid?
-				GridMoveComponent* gmc = GET_SUB_COMPONENT( chit, MoveComponent, GridMoveComponent );
-					
-				if (    currentSector != destSector		// we want to get on the grid
-					 || gmc )							// we are on the grid, and want to change coordinates.
+				if ( currentSector != destSector )
 				{
-					// Find the nearest port.
-					int id = chit->ID();
-					SectorPort local = sim->GetWorldMap()->NearestPort( pos );
-					if ( local.IsValid() ) {
-						Rectangle2I portRect = sim->GetWorldMap()->GetSector( local.sector ).GetPortLoc( local.port );
-						dest = SectorData::PortPos( portRect, chit->ID() );
-						sectorPort.sector = destSector;
-						sectorPort.port   = sim->GetWorldMap()->GetSector( sectorPort.sector ).NearestPort( pos );
-					}
+					// Find the nearest port. (Somewhat arbitrary.)
+					sectorPort.sector = destSector;
+					sectorPort.port   = sim->GetWorldMap()->GetSector( sectorPort.sector ).NearestPort( pos );
 				}
 				if ( sectorPort.IsValid() ) {
 					ai->Move( sectorPort, true );
 				}
-				else {
+				else if ( currentSector == destSector ) {
 					ai->Move( dest, true );
 				}
 			}
@@ -1205,7 +1203,7 @@ void GameScene::DrawDebugText()
 }
 
 
-void GameScene::SceneResult( int sceneID, int result )
+void GameScene::SceneResult( int sceneID, int result, const SceneData* data )
 {
 	if ( sceneID == LumosGame::SCENE_CHARACTER ) {
 		Chit* playerChit = sim->GetPlayerChit();
@@ -1216,6 +1214,14 @@ void GameScene::SceneResult( int sceneID, int result )
 			if ( ic ) {
 				ic->SetHardpoints();
 			}
+		}
+	}
+	else if ( sceneID == LumosGame::SCENE_MAP ) {
+		// Works like a tap. Reconstruct map coordinates.
+		Vector2I sector = ((MapSceneData*)data)->destSector;
+		if ( !sector.IsZero() ) {
+			Vector2F dest = { float(sector.x*SECTOR_SIZE + SECTOR_SIZE/2), float(sector.y*SECTOR_SIZE + SECTOR_SIZE/2) };
+			DoDestTapped( dest );
 		}
 	}
 }

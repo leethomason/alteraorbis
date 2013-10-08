@@ -21,8 +21,11 @@ MapScene::MapScene( LumosGame* game, MapSceneData* data ) : Scene( game ), lumos
 	game->InitStd( &gamui2D, &okay, 0 );
 
 	lumosChitBag = data->lumosChitBag;
-	worldMap = data->worldMap;
-	player = data->player;
+	worldMap     = data->worldMap;
+	player       = data->player;
+	this->data   = data;
+
+	gridTravel.Init( &gamui2D, lumosGame->GetButtonLook(0) );
 
 	Texture* mapTexture = TextureManager::Instance()->GetTexture( "miniMap" );
 	RenderAtom mapAtom( (const void*)UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, (const void*)mapTexture, 0, 1, 1, 0 );
@@ -70,6 +73,8 @@ void MapScene::Resize()
 
 	const Screenport& port = lumosGame->GetScreenport();
 	LayoutCalculator layout = lumosGame->DefaultLayout();
+	
+	layout.PosAbs( &gridTravel, 1, -1 );
 
 	float y  = layout.GutterY();
 	float dy = okay.Y() - layout.GutterY() - y;
@@ -164,12 +169,28 @@ void MapScene::SetText()
 			map2Text[j*MAP2_SIZE+i].SetText( str.c_str() );
 		}
 	}
+
+	if ( !data->destSector.IsZero() ) {
+		const SectorData& sd = worldMap->GetSector( data->destSector );
+		CStr<64> str;
+		str.Format( "Grid Travel\n%s", sd.name.c_str() );
+		gridTravel.SetText(  str.c_str() );
+		gridTravel.SetEnabled( true );
+	}
+	else {
+		gridTravel.SetText( "GridTravel" );
+		gridTravel.SetEnabled( false );
+	}
 }
 
 
 void MapScene::ItemTapped( const gamui::UIItem* item )
 {
 	if ( item == &okay ) {
+		data->destSector.Zero();
+		lumosGame->PopScene();
+	}
+	else if ( item == &gridTravel ) {
 		lumosGame->PopScene();
 	}
 }
@@ -178,6 +199,7 @@ void MapScene::ItemTapped( const gamui::UIItem* item )
 void MapScene::HandleHotKey( int value )
 {
 	if ( value == GAME_HK_MAP ) {
+		data->destSector.Zero();
 		lumosGame->PopScene();
 	}
 }
