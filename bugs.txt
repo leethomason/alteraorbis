@@ -33,6 +33,7 @@ x Add position fuzz to gold, crystal, and item drops
 - standing shields!
 - personality, personality display
 - AI notifies friends when attacked, notifies that being attacked, etc.
+- maps: what direction is player pointed?
 
 - game
 
@@ -64,18 +65,17 @@ x Add position fuzz to gold, crystal, and item drops
 		x expandable map
 	      x show "areas of interest"
 	      x show danger level
+		x map
+			x show home base
+			x fast travel from map screen
+			x main screen takes you to map
+			x hotkey to exit
 
 		- control
 			- space bar to pause
 			- tab to toggle weapons
 			- weapon swap button
 			- pause button
-		- map
-			- show home base
-			- fast travel from map screen
-			- main screen takes you to map
-			- hotkey to exit
-			- direction player is pointed
 		- item history
 			- created 
 			x kills

@@ -161,7 +161,8 @@ public:
 
 	virtual int MapGridUse( int x, int y );
 
-	CoreScript* IsBoundToCore( Chit*, bool mustBeStandingOnCore );
+	CoreScript* IsBoundToCore( Chit*, bool mustBeStandingOnCore, Chit** coreChit=0 );
+
 	// Get the core for this sector.
 	CoreScript* GetCore( const grinliz::Vector2I& sector );
 

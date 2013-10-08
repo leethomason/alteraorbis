@@ -65,9 +65,10 @@ private:
 	gamui::PushButton	okay;
 	gamui::PushButton	gridTravel;
 	gamui::Image		mapImage;
-	gamui::Image		map2Image;
+	gamui::Image		mapImage2;
 
 	gamui::Image		playerMark, playerMark2;
+	gamui::Image		homeMark, homeMark2;
 	gamui::TextBox		map2Text[MAP2_SIZE2];
 };
 
