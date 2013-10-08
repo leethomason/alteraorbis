@@ -6,6 +6,8 @@
 *.db
 *.blend1
 *.blend2
+*.obj
+*.mtl
 
 Debug
 Release
