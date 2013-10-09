@@ -109,6 +109,17 @@ public:
 	virtual bool Accept( Chit* chit );
 };
 
+
+class GoldLootFilter : public IChitAccept
+{
+private:
+	GoldCrystalFilter	gold;
+	LootFilter			loot;
+public:
+	virtual bool Accept( Chit* chit ) { return gold.Accept( chit ) || loot.Accept( chit ); }
+};
+
+
 class LumosChitBag : public ChitBag,
 					 public IMapGridUse
 {
@@ -161,7 +172,8 @@ public:
 
 	virtual int MapGridUse( int x, int y );
 
-	CoreScript* IsBoundToCore( Chit*, bool mustBeStandingOnCore );
+	CoreScript* IsBoundToCore( Chit*, bool mustBeStandingOnCore, Chit** coreChit=0 );
+
 	// Get the core for this sector.
 	CoreScript* GetCore( const grinliz::Vector2I& sector );
 

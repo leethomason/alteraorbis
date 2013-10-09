@@ -77,10 +77,10 @@ public:
 	// Only with mouse/kbd input.
 	virtual void MouseMove( const grinliz::Vector2F& view, const grinliz::Ray& world )	{}
 
-	virtual void HandleHotKey( int mask )						{}
+	virtual void HandleHotKey( int value )						{}
 	virtual void Resize()										{}
 
-	virtual void SceneResult( int sceneID, int result )			{}
+	virtual void SceneResult( int sceneID, int result, const SceneData* data )			{}
 	virtual void ChildActivated( int childID, Scene* childScene, SceneData* data )		{}
 	Game* GetGame() { return game; }
 

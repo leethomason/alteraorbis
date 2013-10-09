@@ -8,6 +8,7 @@
 #include "../game/gameitem.h"
 
 #include "../xegame/spatialcomponent.h"
+#include "../xegame/itemcomponent.h"
 
 #include "../script/procedural.h"
 #include "../script/corescript.h"
@@ -20,12 +21,16 @@ MapScene::MapScene( LumosGame* game, MapSceneData* data ) : Scene( game ), lumos
 	game->InitStd( &gamui2D, &okay, 0 );
 
 	lumosChitBag = data->lumosChitBag;
-	worldMap = data->worldMap;
-	player = data->player;
+	worldMap     = data->worldMap;
+	player       = data->player;
+	this->data   = data;
+
+	gridTravel.Init( &gamui2D, lumosGame->GetButtonLook(0) );
 
 	Texture* mapTexture = TextureManager::Instance()->GetTexture( "miniMap" );
 	RenderAtom mapAtom( (const void*)UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, (const void*)mapTexture, 0, 1, 1, 0 );
 	mapImage.Init( &gamui2D, mapAtom, false );
+	mapImage.SetCapturesTap( true );
 	
 	Vector2I pos2i = player->GetSpatialComponent()->GetPosition2DI();
 	Vector2I sector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
@@ -46,11 +51,16 @@ MapScene::MapScene( LumosGame* game, MapSceneData* data ) : Scene( game ), lumos
 	mapAtom.tx1 = map2Bounds.max.x / float(worldMap->Width());
 	mapAtom.ty1 = map2Bounds.min.y / float(worldMap->Height());
 
-	map2Image.Init( &gamui2D, mapAtom, false );
+	mapImage2.Init( &gamui2D, mapAtom, false );
+	mapImage2.SetCapturesTap( true );
 
 	RenderAtom atom = lumosGame->CalcPaletteAtom( PAL_TANGERINE*2, PAL_ZERO );
 	playerMark.Init( &gamui2D, atom, true );
 	playerMark2.Init( &gamui2D, atom, true );
+
+	atom.renderState = (const void*)UIRenderer::RENDERSTATE_UI_DECO_DISABLED;
+	homeMark.Init( &gamui2D, atom, true );
+	homeMark2.Init( &gamui2D, atom, true );
 
 	for( int i=0; i<MAP2_SIZE2; ++i ) {
 		map2Text[i].Init( &gamui2D );
@@ -69,6 +79,9 @@ void MapScene::Resize()
 
 	const Screenport& port = lumosGame->GetScreenport();
 	LayoutCalculator layout = lumosGame->DefaultLayout();
+	
+	layout.PosAbs( &gridTravel, 1, -1 );
+	gridTravel.SetSize( gridTravel.Width()*2.f, gridTravel.Height() );	// double the button size
 
 	float y  = layout.GutterY();
 	float dy = okay.Y() - layout.GutterY() - y;
@@ -77,10 +90,19 @@ void MapScene::Resize()
 	dx = dy = Min( dx, dy );
 
 	mapImage.SetSize( dx, dy );
-	map2Image.SetSize( dx, dy );
+	mapImage2.SetSize( dx, dy );
 
 	mapImage.SetPos( x, y );
-	map2Image.SetPos( port.UIWidth()*0.5f + 0.5f*layout.GutterX(), y );
+	mapImage2.SetPos( port.UIWidth()*0.5f + 0.5f*layout.GutterX(), y );
+
+	Vector2I homeSector = { 0, 0 };
+	Chit* homeCore = 0;
+	lumosChitBag->IsBoundToCore( player, false, &homeCore );
+	if ( homeCore ) {
+		homeSector = homeCore->GetSpatialComponent()->GetPosition2DI();
+		homeSector.x /= SECTOR_SIZE;
+		homeSector.y /= SECTOR_SIZE;
+	}
 
 	// --- MAIN ---
 
@@ -90,14 +112,21 @@ void MapScene::Resize()
 	playerMark.SetCenterPos( x + dx*pos.x/float(worldMap->Width()), 
 							 y + dy*pos.y/float(worldMap->Height()));
 
+	homeMark.SetVisible( !homeSector.IsZero() );
+	if ( !homeSector.IsZero() ) {
+		homeMark.SetSize( dx/float(NUM_SECTORS), dy/float(NUM_SECTORS) );
+		homeMark.SetPos( x + dx*(float)homeSector.x/float(NUM_SECTORS),
+						 y + dy*(float)homeSector.y/float(NUM_SECTORS));
+	}
+
 	// --- AREA --- 
 
-	x = map2Image.X();
+	x = mapImage2.X();
 	playerMark2.SetSize( MARK_SIZE, MARK_SIZE );
 	playerMark2.SetCenterPos( x + dx*(pos.x-map2Bounds.min.x)/map2Bounds.Width(), 
 							  y + dy*(pos.y-map2Bounds.min.y)/map2Bounds.Height());
 
-	float gridSize = map2Image.Width() / float(MAP2_SIZE);
+	float gridSize = mapImage2.Width() / float(MAP2_SIZE);
 	float gutter = gamui2D.GetTextHeight() * 0.25f;
 
 	for( int j=0; j<MAP2_SIZE; ++j ) {
@@ -105,6 +134,14 @@ void MapScene::Resize()
 			map2Text[j*MAP2_SIZE+i].SetPos( x + float(i)*gridSize + gutter, y + float(j)*gridSize + gutter );
 			map2Text[j*MAP2_SIZE+i].SetSize( gridSize - gutter*2.0f, gridSize - gutter*2.0f );
 		}
+	}
+
+	homeMark2.SetVisible( false );
+	if ( !homeSector.IsZero() && sectorBounds.Contains( homeSector) ) {
+		homeMark2.SetVisible( true );
+		homeMark2.SetSize( gridSize, gridSize );
+		homeMark2.SetPos( x + dx*(float)(homeSector.x-sectorBounds.min.x)/float(MAP2_SIZE),
+						  y + dy*(float)(homeSector.y-sectorBounds.min.y)/float(MAP2_SIZE));
 	}
 
 	SetText();
@@ -128,13 +165,25 @@ void MapScene::SetText()
 
 			lumosChitBag->QuerySpatialHash( &query, inner, 0, &mobFilter );
 
-			int enemy=0;
+			int low=0, med=0, high=0, greater=0;
+			float playerPower = player->GetItemComponent()->PowerRating();
+
 			for( int k=0; k<query.Size(); ++k ) {
-				if ( GetRelationship( player->GetItem()->primaryTeam, query[k]->GetItem()->primaryTeam ) == RELATE_ENEMY ) {
-					++enemy;
+				const GameItem* item = query[k]->GetItem();
+				if ( GetRelationship( player->GetItem()->primaryTeam, item->primaryTeam ) == RELATE_ENEMY ) {
+
+					float power = query[k]->GetItemComponent()->PowerRating();
+
+					if ( item->GetValue( "mob" ) == "greater" )
+						++greater;
+					else if ( power < playerPower * 0.5f ) 
+						++low;
+					else if ( power > playerPower * 2.0f )
+						++high;
+					else
+						++med;
 				}
 			}
-
 
 			CStr<64> str;
 			if ( sd.HasCore() ) {
@@ -143,20 +192,64 @@ void MapScene::SetText()
 				if ( cc ) {
 					Chit* chitOwner = cc->GetAttached(0);
 					if ( chitOwner ) {
-						owner = chitOwner->GetItem()->Name();	// fixme: use team name
+						owner = TeamName( chitOwner->GetItem()->primaryTeam ).c_str();
 					}
 				}
-				str.Format( "%s\n%s\nenemy=%d", sd.name, owner, enemy );
+				str.Format( "%s\n%s\n%d-%d-%d G%d", sd.name, owner, low, med, high, greater );
 			}
 			map2Text[j*MAP2_SIZE+i].SetText( str.c_str() );
 		}
+	}
+
+	if ( !data->destSector.IsZero() ) {
+		const SectorData& sd = worldMap->GetSector( data->destSector );
+		CStr<64> str;
+		str.Format( "Grid Travel\n%s", sd.name.c_str() );
+		gridTravel.SetText(  str.c_str() );
+		gridTravel.SetEnabled( true );
+	}
+	else {
+		gridTravel.SetText( "GridTravel" );
+		gridTravel.SetEnabled( false );
 	}
 }
 
 
 void MapScene::ItemTapped( const gamui::UIItem* item )
 {
+	Vector2I sector = { 0, 0 };
+	
 	if ( item == &okay ) {
+		data->destSector.Zero();
+		lumosGame->PopScene();
+	}
+	else if ( item == &gridTravel ) {
+		lumosGame->PopScene();
+	}
+	else if ( item == &mapImage ) {
+		float x=0, y=0;
+		gamui2D.GetRelativeTap( &x, &y );
+		sector.x = int( x * float(NUM_SECTORS) );
+		sector.y = int( y * float(NUM_SECTORS) );
+		data->destSector = sector;
+		SetText();
+	}
+	else if ( item == &mapImage2 ) {
+		float x=0, y=0;
+		gamui2D.GetRelativeTap( &x, &y );
+
+		sector.x = sectorBounds.min.x + int( x * float(sectorBounds.Width()));
+		sector.y = sectorBounds.min.y + int( y * float(sectorBounds.Height()));
+		data->destSector = sector;
+		SetText();
+	}
+}
+
+
+void MapScene::HandleHotKey( int value )
+{
+	if ( value == GAME_HK_MAP ) {
+		data->destSector.Zero();
 		lumosGame->PopScene();
 	}
 }

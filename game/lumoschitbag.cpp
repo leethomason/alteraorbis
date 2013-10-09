@@ -508,7 +508,7 @@ int LumosChitBag::MapGridUse( int x, int y )
 
 
 
-CoreScript* LumosChitBag::IsBoundToCore( Chit* chit, bool mustBeStanding )
+CoreScript* LumosChitBag::IsBoundToCore( Chit* chit, bool mustBeStanding, Chit** coreChit )
 {
 	// Since the player can eject and walk around, the core
 	// the player is bound to can be anywhere in the world.
@@ -516,6 +516,11 @@ CoreScript* LumosChitBag::IsBoundToCore( Chit* chit, bool mustBeStanding )
 	if ( chit && chitToCoreTable.Query( chit->ID(), &coreID )) {
 		Chit* cc = GetChit( coreID );
 		if ( cc ) {
+
+			if ( coreChit ) { 
+				*coreChit = cc;
+			}
+
 			ScriptComponent* sc = cc->GetScriptComponent();
 			GLASSERT( sc );
 			IScript* script = sc->Script();

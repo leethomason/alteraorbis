@@ -83,12 +83,16 @@ public:
 	// the inventory.
 	void SetHardpoints();
 
+	// Very crude assessment of the power of this MoB.
+	float PowerRating() const;
+
 private:
 	void DoSlowTick();
 	bool EmitEffect( const GameItem& it, U32 deltaTime );
 	bool ItemActive( int index );
 	bool ItemActive( const GameItem* );	// expensive: needs a search.
 	void NameItem( GameItem* item );	// if conditions met, give the item a name.
+	void SortInventory();						// AIs will use the "best" item.
 
 	CTicker slowTick;
 	Wallet wallet;

@@ -145,6 +145,8 @@ public:
 	void Swap( Component* removeAndDelete, Component* addThis )	{ GLASSERT( swapOut == 0 ); GLASSERT( swapIn == 0 ); swapOut = removeAndDelete; swapIn = addThis; }
 
 	SpatialComponent*	GetSpatialComponent()	{ return spatialComponent; }
+	const SpatialComponent*	GetSpatialComponent() const	{ return spatialComponent; }
+
 	MoveComponent*		GetMoveComponent()		{ return moveComponent; }
 	ItemComponent*		GetItemComponent()		{ return itemComponent; }
 	ScriptComponent*	GetScriptComponent()	{ return scriptComponent; }
@@ -176,6 +178,9 @@ public:
 
 	void DebugStr( grinliz::GLString* str );
 
+	void SetPlayerControlled( bool player ) { playerControlled = player; }
+	bool PlayerControlled() const			{ return playerControlled; }
+
 
 	// "private"
 	// used by the spatial hash:
@@ -190,6 +195,7 @@ private:
 
 	ChitBag* chitBag;
 	int		 id;
+	bool	 playerControlled;
 	grinliz::CDynArray<IChitListener*> listeners;
 
 	struct CList

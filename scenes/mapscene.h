@@ -17,11 +17,17 @@ public:
 		SceneData(),
 		lumosChitBag(lcb),
 		worldMap(wm),
-		player(pc) {}
+		player(pc) 
+	{
+		destSector.Zero();
+	}
 
 	LumosChitBag*	lumosChitBag;
 	WorldMap*		worldMap;
 	Chit*			player;
+
+	// Read/Write	
+	grinliz::Vector2I	destSector;	// fast travel. request going in, destination coming out.
 };
 
 class MapScene : public Scene
@@ -36,6 +42,7 @@ public:
 		ProcessTap( action, screen, world );
 	}
 	virtual void ItemTapped( const gamui::UIItem* item );
+	virtual void HandleHotKey( int value );
 
 private:
 
@@ -50,15 +57,18 @@ private:
 	LumosChitBag*	lumosChitBag;
 	WorldMap*		worldMap;
 	Chit*			player;
+	MapSceneData*	data;
 
 	grinliz::Rectangle2I sectorBounds;
 	grinliz::Rectangle2F map2Bounds;
 
 	gamui::PushButton	okay;
+	gamui::PushButton	gridTravel;
 	gamui::Image		mapImage;
-	gamui::Image		map2Image;
+	gamui::Image		mapImage2;
 
 	gamui::Image		playerMark, playerMark2;
+	gamui::Image		homeMark, homeMark2;
 	gamui::TextBox		map2Text[MAP2_SIZE2];
 };
 

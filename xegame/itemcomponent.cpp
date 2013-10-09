@@ -29,6 +29,7 @@
 #include "../game/lumoschitbag.h"
 
 #include "../script/procedural.h"
+#include "../script/itemscript.h"
 
 #include "../xegame/rendercomponent.h"
 #include "../xegame/spatialcomponent.h"
@@ -131,6 +132,15 @@ void ItemComponent::NameItem( GameItem* item )
 			}
 		}
 	}
+}
+
+
+float ItemComponent::PowerRating() const
+{
+	GameItem* mainItem = itemArr[0];
+	int level = mainItem->traits.Level();
+
+	return float(1+level) * float(mainItem->mass);
 }
 
 
@@ -549,9 +559,42 @@ bool ItemComponent::EmitEffect( const GameItem& it, U32 delta )
 }
 
 
+class ItemValueCompare : public ISortCompare<const GameItem*>
+{
+public:
+	virtual bool Less( const GameItem* v0, const GameItem* v1 )
+	{
+		ItemDefDB* db = ItemDefDB::Instance();
+		int val0 = db->CalcItemValue( v0 );
+		int val1 = db->CalcItemValue( v1 );
+		return val0 < val1;
+	}
+};
+
+
+void ItemComponent::SortInventory()
+{
+	ItemValueCompare compare;
+
+	for( int i=1; i<itemArr.Size(); ++i ) {
+		if ( itemArr[i]->Intrinsic() )
+			continue;
+		if ( itemArr.Size() > i+1 ) {
+			::Sort<const GameItem*>( (const GameItem**) &itemArr[i], itemArr.Size() - i, &compare );
+		}
+		break;
+	}
+}
+
+
 void ItemComponent::AddToInventory( GameItem* item )
 {
 	itemArr.Push( item );
+
+	// AIs will use the "best" item.
+	if ( !parentChit->PlayerControlled() ) {
+		SortInventory();
+	}
 }
 
 
@@ -562,6 +605,11 @@ void ItemComponent::AddToInventory( ItemComponent* ic )
 	GLASSERT( ic->NumItems() == 1 );
 	itemArr.Push( ic->itemArr.Pop() );
 	delete ic;
+
+	// AIs will use the "best" item.
+	if ( !parentChit->PlayerControlled() ) {
+		SortInventory();
+	}
 }
 
 

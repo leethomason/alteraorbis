@@ -36,6 +36,9 @@ enum {
 
 int GetTeam( const grinliz::IString& itemName );
 
+// Team name, where it has one.
+grinliz::IString TeamName( int team );
+
 enum {
 	RELATE_FRIEND,
 	RELATE_ENEMY,

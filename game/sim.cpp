@@ -113,7 +113,7 @@ void Sim::Load( const char* mapDAT, const char* gameDAT )
 	}
 	if ( chitBag->GetChit( playerID )) {
 		// mark as player controlled so it reacts as expected to player input.
-		chitBag->GetChit( playerID )->GetAIComponent()->playerControlled = true;
+		chitBag->GetChit( playerID )->SetPlayerControlled( true );
 	}
 }
 
@@ -197,6 +197,7 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos, const char* assetName )
 	bool female = strstr( assetName, "emale" ) != 0;
 
 	Chit* chit = chitBag->NewChit();
+	chit->SetPlayerControlled( true );
 	playerID = chit->ID();
 	chitBag->GetCamera( engine )->SetTrack( playerID );
 
@@ -222,7 +223,6 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos, const char* assetName )
 	}
 	AIComponent* ai = new AIComponent( engine, worldMap );
 	ai->EnableDebug( true );
-	ai->playerControlled = true;
 	chit->Add( ai );
 
 	chit->Add( new HealthComponent( engine ));
