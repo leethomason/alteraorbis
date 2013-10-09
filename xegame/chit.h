@@ -145,6 +145,8 @@ public:
 	void Swap( Component* removeAndDelete, Component* addThis )	{ GLASSERT( swapOut == 0 ); GLASSERT( swapIn == 0 ); swapOut = removeAndDelete; swapIn = addThis; }
 
 	SpatialComponent*	GetSpatialComponent()	{ return spatialComponent; }
+	const SpatialComponent*	GetSpatialComponent() const	{ return spatialComponent; }
+
 	MoveComponent*		GetMoveComponent()		{ return moveComponent; }
 	ItemComponent*		GetItemComponent()		{ return itemComponent; }
 	ScriptComponent*	GetScriptComponent()	{ return scriptComponent; }

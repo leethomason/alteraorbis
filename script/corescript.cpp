@@ -249,7 +249,10 @@ int CoreScript::DoTick( U32 delta, U32 since )
 		}
 #endif
 	}
-	if ( attached && scriptContext->chit->GetSpatialComponent() ) {
+	if (    attached 
+		 && scriptContext->chit->GetSpatialComponent()
+		 && attached->GetSpatialComponent()->GetPosition2DI() == scriptContext->chit->GetSpatialComponent()->GetPosition2DI() ) 
+	{
 		Vector3F pos3 = scriptContext->chit->GetSpatialComponent()->GetPosition();
 		scriptContext->engine->particleSystem->EmitPD( "core", pos3, V3F_UP, delta );
 	}

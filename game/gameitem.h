@@ -306,8 +306,9 @@ public:
 		AI_DOES_WORK		= (1<<22),
 
 		GOLD_PICKUP			= (1<<23),
+		ITEM_PICKUP			= (1<<24),		// picks up items. will use if possible.
 
-		CLICK_THROUGH		= (1<<24),		// model is created with flags to ignore world clicking
+		CLICK_THROUGH		= (1<<25),		// model is created with flags to ignore world clicking
 	};
 
 	// ------ description ------

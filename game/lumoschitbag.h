@@ -109,6 +109,17 @@ public:
 	virtual bool Accept( Chit* chit );
 };
 
+
+class GoldLootFilter : public IChitAccept
+{
+private:
+	GoldCrystalFilter	gold;
+	LootFilter			loot;
+public:
+	virtual bool Accept( Chit* chit ) { return gold.Accept( chit ) || loot.Accept( chit ); }
+};
+
+
 class LumosChitBag : public ChitBag,
 					 public IMapGridUse
 {

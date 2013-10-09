@@ -59,6 +59,7 @@ const BattleTestScene::ButtonDef BattleTestScene::buttonDef[NUM_BUTTONS] =
 	{ CYCLOPS,	"Cyclops",			LEFT_MOB },
 	{ FIRE_CYCLOPS,	"F-Cyclops",	LEFT_MOB },
 	{ SHOCK_CYCLOPS,	"S-Cyclops",LEFT_MOB },
+	{ TROLL,	"Troll",	LEFT_MOB },
 	{ NO_WEAPON,"None",		LEFT_WEAPON },
 	{ MELEE_WEAPON, "Melee",LEFT_WEAPON },
 	{ PISTOL,	"Blaster",	LEFT_WEAPON },
@@ -79,6 +80,7 @@ const BattleTestScene::ButtonDef BattleTestScene::buttonDef[NUM_BUTTONS] =
 	{ CYCLOPS,	"Cyclops",			RIGHT_MOB },
 	{ FIRE_CYCLOPS,	"F-Cyclops",	RIGHT_MOB },
 	{ SHOCK_CYCLOPS,	"S-Cyclops",RIGHT_MOB },
+	{ TROLL,	"Troll",	RIGHT_MOB },
 	{ NO_WEAPON,"None",		RIGHT_WEAPON },
 	{ MELEE_WEAPON, "Melee",RIGHT_WEAPON },
 	{ PISTOL,	"Blaster",	RIGHT_WEAPON },
@@ -337,6 +339,7 @@ Chit* BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int
 	case CYCLOPS:		itemName = "cyclops";			break;
 	case FIRE_CYCLOPS:	itemName = "fireCyclops";		break;
 	case SHOCK_CYCLOPS:	itemName = "shockCyclops";		break;
+	case TROLL:			itemName = "troll";				break;
 	default: GLASSERT( 0 ); break;
 	}
 
@@ -354,18 +357,24 @@ Chit* BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int
 
 	chitBag.AddItem( itemName, chit, engine, team, level );
 
-	// This will just shove stuff in the inventory if they can't be used.
-	chitBag.AddItem( "shield", chit, engine, 0, level );
-	if ( loadout == MELEE_WEAPON )
-		chitBag.AddItem( "ring", chit, engine, 0, level );
-	else if ( loadout == PISTOL )
-		chitBag.AddItem( "blaster", chit, engine, 0, level );
+	if ( type == HUMAN ) {
+		chitBag.AddItem( "shield",		chit, engine, 0, level );
+		if ( loadout == MELEE_WEAPON )
+			chitBag.AddItem( "ring",	chit, engine, 0, level );
+		else if ( loadout == PISTOL )
+			chitBag.AddItem( "blaster", chit, engine, 0, level );
+	}
+	if ( type == TROLL ) {
+		if ( random.Bit() )
+			chitBag.AddItem( "shield",  chit, engine, 0, level );
+		if ( random.Bit() )
+			chitBag.AddItem( "ring",    chit, engine, 0, level );
+		if ( random.Bit() )
+			chitBag.AddItem( "blaster", chit, engine, 0, level );
+	}
 
 	if ( type != DUMMY ) {
 		chit->Add( new PathMoveComponent( map ));
-		AIComponent* ai = new AIComponent( engine, map );
-		ai->SetSectorAwareness( true );
-		chit->Add( ai );
 	}
 	else {
 		// The avoider only avoids things with move components. Makes sense and yet
@@ -373,6 +382,9 @@ Chit* BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int
 		// handles those just fine.)
 		chit->Add( new MoveComponent());
 	}
+	AIComponent* ai = new AIComponent( engine, map );
+	ai->SetSectorAwareness( true );
+	chit->Add( ai );
 	chit->Add( new HealthComponent( engine ));
 	chit->Add( new DebugStateComponent( map ));
 

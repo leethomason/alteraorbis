@@ -239,6 +239,20 @@ void AIComponent::GetFriendEnemyLists()
 }
 
 
+class ChitDistanceCompare : public ISortCompare<Chit*>
+{
+public:
+	ChitDistanceCompare( const Vector3F& _origin ) : origin(_origin) {}
+	virtual bool Less( Chit* v0, Chit* v1 )
+	{
+		return ( v0->GetSpatialComponent()->GetPosition() - origin ).LengthSquared() <
+			   ( v1->GetSpatialComponent()->GetPosition() - origin ).LengthSquared();
+	}
+
+private:
+	Vector3F origin;
+};
+
 Chit* AIComponent::Closest( const ComponentSet& thisComp, Chit* arr[], int n, Vector2F* outPos, float* distance )
 {
 	float best = FLT_MAX;
@@ -1054,7 +1068,6 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 	const GameItem* item	= parentChit->GetItem();
 	int itemFlags			= item ? item->flags : 0;
 	int wanderFlags			= itemFlags & GameItem::AI_WANDER_MASK;
-	int actionToTake		= WANDER;
 	Vector2F pos2 = thisComp.spatial->GetPosition2D();
 	Vector2I pos2i = { (int)pos2.x, (int)pos2.y };
 
@@ -1083,7 +1096,6 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 		float plantDist = 0;
 		if ( Closest( thisComp, plants.Mem(), plants.Size(), &plantPos, &plantDist )) {
 			if ( plantDist > 0.2f ) {
-				actionToTake = MOVE;
 				dest = plantPos;
 			}
 			else {
@@ -1099,17 +1111,45 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 
 	if ( dest.IsZero() ) {
 		// Is there stuff around to pick up?
-		if( !playerControlled && (itemFlags & GameItem::GOLD_PICKUP )) {
-			CChitArray gold;
-			GoldCrystalFilter filter;
-			parentChit->GetChitBag()->QuerySpatialHash( &gold, pos2, GOLD_AWARE, 0, &filter );
+		if( !playerControlled && ( itemFlags & (GameItem::GOLD_PICKUP | GameItem::ITEM_PICKUP))) {
 
-			Vector2F goldPos;
-			if (    Closest( thisComp, gold.Mem(), gold.Size(), &goldPos, 0 )
-				 && map->HasStraightPath( goldPos, pos2 )) 
-			{
-				actionToTake = MOVE;
-				dest = goldPos;
+			// Which filter to use?
+			GoldCrystalFilter	gold;
+			LootFilter			loot;
+			GoldLootFilter		both;
+
+			IChitAccept*	accept = 0;
+			if ( (itemFlags & GameItem::GOLD_PICKUP) && (itemFlags & GameItem::ITEM_PICKUP)) {
+				accept = &both;
+			}
+			else if ( itemFlags & GameItem::GOLD_PICKUP ) {
+				accept = &gold;
+			}
+			else {
+				accept = &loot;
+			}
+
+			CChitArray chitArr;
+			parentChit->GetChitBag()->QuerySpatialHash( &chitArr, pos2, GOLD_AWARE, 0, accept );
+
+			ChitDistanceCompare compare( thisComp.spatial->GetPosition() );
+			Sort<Chit*>( chitArr.Mem(), chitArr.Size(), &compare );
+
+			for( int i=0; i<chitArr.Size(); ++i ) {
+				Vector2F goldPos = chitArr[i]->GetSpatialComponent()->GetPosition2D();
+				if ( map->HasStraightPath( goldPos, pos2 )) {
+					// Pickup and gold use different techniques. (Because of player UI. 
+					// Always want gold - not all items.)
+					if ( loot.Accept( chitArr[i] )) {
+						taskList.Push( Task::MoveTask( goldPos, 0 ));
+						taskList.Push( Task::PickupTask( chitArr[i]->ID(), 0 ));
+						return;
+					}
+					else {
+						dest = goldPos;
+					}
+					break;
+				}
 			}
 		}
 	}
@@ -1501,6 +1541,7 @@ void AIComponent::FlushTaskList( const ComponentSet& thisComp )
 				ItemComponent* ic = itemChit->GetItemComponent();
 				itemChit->Remove( ic );
 				parentChit->GetItemComponent()->AddToInventory( ic );
+				GetChitBag()->DeleteChit( itemChit );
 			}
 			taskList.PopFront();
 		}

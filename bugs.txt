@@ -34,6 +34,7 @@ x Add position fuzz to gold, crystal, and item drops
 - personality, personality display
 - AI notifies friends when attacked, notifies that being attacked, etc.
 - maps: what direction is player pointed?
+- flammability / shockability very agressive
 
 - game
 
@@ -71,14 +72,10 @@ x Add position fuzz to gold, crystal, and item drops
 			x main screen takes you to map
 			x hotkey to exit
 
-		- control
-			- space bar to pause
-			- tab to toggle weapons
-			- weapon swap button
-			- pause button
-		- item history
-			- created 
-			x kills
+		- troll
+			x pick up and use items
+			- should sort by items value
+			- troll spawning
 		- console
 			- important events
 			- important de-rez
@@ -106,8 +103,22 @@ x Add position fuzz to gold, crystal, and item drops
 		- history events
 		x names of things
 		- winning names
+		- shield: xp from getting hit
 		- How do bases and adventuring play together?
 			- why do you quit adventuring to build a base?
+		- control
+			- space bar to pause
+			- tab to toggle weapons
+			- weapon swap button
+			- pause button
+		- item history
+			- created 
+			x kills
+
+	- Census
+		- check money
+		- greatest warrior, smith, weapons
+		- greatest monsters
 	- Loot
 		- proc gun
 		- item screen
