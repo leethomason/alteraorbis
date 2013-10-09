@@ -178,6 +178,9 @@ public:
 
 	void DebugStr( grinliz::GLString* str );
 
+	void SetPlayerControlled( bool player ) { playerControlled = player; }
+	bool PlayerControlled() const			{ return playerControlled; }
+
 
 	// "private"
 	// used by the spatial hash:
@@ -192,6 +195,7 @@ private:
 
 	ChitBag* chitBag;
 	int		 id;
+	bool	 playerControlled;
 	grinliz::CDynArray<IChitListener*> listeners;
 
 	struct CList

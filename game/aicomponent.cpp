@@ -79,7 +79,6 @@ AIComponent::AIComponent( Engine* _engine, WorldMap* _map )
 	fullSectorAware = false;
 	debugFlag = false;
 	visitorIndex = -1;
-	playerControlled = false;
 }
 
 
@@ -1111,8 +1110,9 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 
 	if ( dest.IsZero() ) {
 		// Is there stuff around to pick up?
-		if( !playerControlled && ( itemFlags & (GameItem::GOLD_PICKUP | GameItem::ITEM_PICKUP))) {
-
+		if(    !parentChit->PlayerControlled() 
+			&& ( itemFlags & (GameItem::GOLD_PICKUP | GameItem::ITEM_PICKUP))) 
+		{
 			// Which filter to use?
 			GoldCrystalFilter	gold;
 			LootFilter			loot;
@@ -1156,7 +1156,7 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 
 	// Wander....
 	if ( dest.IsZero() ) {
-		if ( playerControlled ) {
+		if ( parentChit->PlayerControlled() ) {
 			currentAction = WANDER;
 			return;
 		}

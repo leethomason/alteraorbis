@@ -27,7 +27,7 @@
 using namespace grinliz;
 using namespace tinyxml2;
 
-Chit::Chit( int _id, ChitBag* bag ) : next( 0 ), chitBag( bag ), id( _id ), timeToTick( 0 ), timeSince( 0 )
+Chit::Chit( int _id, ChitBag* bag ) : next( 0 ), chitBag( bag ), id( _id ), playerControlled( false ), timeToTick( 0 ), timeSince( 0 )
 {
 	Init( _id, bag );
 }
@@ -86,6 +86,7 @@ void Chit::Serialize( const ComponentFactory* factory, XStream* xs )
 	XarcOpen( xs, "Chit" );
 	XARC_SER( xs, id );
 	XARC_SER( xs, timeSince );
+	XARC_SER( xs, playerControlled );
 
 	if ( xs->Saving() ) {
 		for( int i=0; i<NUM_SLOTS; ++i ) {

@@ -92,6 +92,7 @@ private:
 	bool ItemActive( int index );
 	bool ItemActive( const GameItem* );	// expensive: needs a search.
 	void NameItem( GameItem* item );	// if conditions met, give the item a name.
+	void SortInventory();						// AIs will use the "best" item.
 
 	CTicker slowTick;
 	Wallet wallet;

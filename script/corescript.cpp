@@ -205,12 +205,12 @@ int CoreScript::DoTick( U32 delta, U32 since )
 					"mantis",
 					"redMantis",
 					"mantis",
-					"redMantis",
+					"troll",
 					"mantis",
 					"redMantis",
 					"mantis",
 					"redMantis",
-					"redMantis",
+					"troll",
 					"redMantis"
 				};
 				defaultSpawn = StringPool::Intern( SPAWN[outland] );
