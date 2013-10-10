@@ -945,6 +945,7 @@ void GameScene::SetPickupButtons()
 	Chit* player = sim->GetPlayerChit();
 	CoreScript* coreMode = sim->GetChitBag()->IsBoundToCore( sim->GetPlayerChit(), true );
 	if ( player && !coreMode ) {
+		bool canAdd = player && player->GetItemComponent() && player->GetItemComponent()->CanAddToInventory();
 		// Query items on the ground in a radius of the player.
 		LootFilter lootFilter;
 		static const float LOOT_RAD = 10.0f;
@@ -974,6 +975,7 @@ void GameScene::SetPickupButtons()
 			Chit* chit = sim->GetChitBag()->GetChit( pickupData[i].chitID );
 			if ( chit && chit->GetItem() ) {
 				pickupButton[i].SetVisible( true );
+				pickupButton[i].SetEnabled( canAdd );
 				lumosGame->ItemToButton( chit->GetItem(), &pickupButton[i] );
 			}
 		}

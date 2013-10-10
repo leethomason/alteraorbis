@@ -66,6 +66,7 @@ public:
 	void EmptyWallet() { wallet.MakeEmpty(); }
 	const Wallet& GetWallet() const			{ return wallet; }
 
+	bool CanAddToInventory();
 	// adds to the inventory; takes ownership of pointer
 	void AddToInventory( GameItem* item );
 	// Add the component, and deletes it.

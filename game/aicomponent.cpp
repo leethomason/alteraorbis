@@ -1127,16 +1127,17 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 			GoldCrystalFilter	gold;
 			LootFilter			loot;
 			GoldLootFilter		both;
+			bool canAdd	= thisComp.itemComponent->CanAddToInventory();
 
 			IChitAccept*	accept = 0;
-			if ( (itemFlags & GameItem::GOLD_PICKUP) && (itemFlags & GameItem::ITEM_PICKUP)) {
+			if ( canAdd && (itemFlags & GameItem::GOLD_PICKUP) && (itemFlags & GameItem::ITEM_PICKUP)) {
 				accept = &both;
+			}
+			else if ( canAdd && (itemFlags & GameItem::ITEM_PICKUP) ) {
+				accept = &loot;
 			}
 			else if ( itemFlags & GameItem::GOLD_PICKUP ) {
 				accept = &gold;
-			}
-			else {
-				accept = &loot;
 			}
 
 			CChitArray chitArr;
@@ -1548,10 +1549,12 @@ void AIComponent::FlushTaskList( const ComponentSet& thisComp )
 				 && itemChit->GetSpatialComponent()->GetPosition2DI() == parentChit->GetSpatialComponent()->GetPosition2DI()
 				 && itemChit->GetItemComponent()->NumItems() == 1 )	// doesn't have sub-items / intrinsic
 			{
-				ItemComponent* ic = itemChit->GetItemComponent();
-				itemChit->Remove( ic );
-				parentChit->GetItemComponent()->AddToInventory( ic );
-				GetChitBag()->DeleteChit( itemChit );
+				if ( parentChit->GetItemComponent()->CanAddToInventory() ) {
+					ItemComponent* ic = itemChit->GetItemComponent();
+					itemChit->Remove( ic );
+					parentChit->GetItemComponent()->AddToInventory( ic );
+					GetChitBag()->DeleteChit( itemChit );
+				}
 			}
 			taskList.PopFront();
 		}

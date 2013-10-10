@@ -60,7 +60,7 @@ private:
 	void SetItemInfo( const GameItem* item, const GameItem* user );
 
 	enum { 
-		NUM_ITEM_BUTTONS = 10,
+		NUM_ITEM_BUTTONS = INVERTORY_SLOTS+1,
 
 		KV_NAME = 0,
 		KV_ID,

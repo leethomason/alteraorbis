@@ -597,6 +597,17 @@ void ItemComponent::SortInventory()
 }
 
 
+bool ItemComponent::CanAddToInventory()
+{
+	int count = 0;
+	for( int i=1; i<itemArr.Size(); ++i ) {
+		if ( !itemArr[i]->Intrinsic() )
+			++count;
+	}
+	return count < INVERTORY_SLOTS;
+}
+
+
 void ItemComponent::AddToInventory( GameItem* item )
 {
 	itemArr.Push( item );
