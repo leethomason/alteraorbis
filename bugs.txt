@@ -71,20 +71,25 @@ x Add position fuzz to gold, crystal, and item drops
 			x fast travel from map screen
 			x main screen takes you to map
 			x hotkey to exit
-
-		- troll
+		x troll
 			x pick up and use items
-			- should sort by items value
-			- troll spawning
+			x should sort by items value
+			x troll spawning
+		x procedural rendering colors
+			x weapon colors
+		x names of things
+		x cyclops explosion seems off
+
 		- console
 			- important events
 			- important de-rez
+		- show grid travel dest
 		- rework item screen layout
 		- item forging
 		- item market
 		- item destruction
 		- real health bars & check visibility
-		- no item limit in inventory (but yes in inventory screen)
+		- no item limit in inventory (but yes in inventory screen). need to check inventory capacity before pickup.
 		- player re-gen. at cores? in general?
 	    - exploring
 	      - xp for exploring!!
@@ -95,13 +100,9 @@ x Add position fuzz to gold, crystal, and item drops
 		- factory
 		- turret
 		- power
-		x procedural rendering colors
-			x weapon colors
 		- team colors
-		x cyclops explosion seems off
 		- balance battles
 		- history events
-		x names of things
 		- winning names
 		- shield: xp from getting hit
 		- How do bases and adventuring play together?

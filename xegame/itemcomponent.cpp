@@ -247,6 +247,16 @@ bool ItemComponent::ItemActive( int i )
 		return false;
 	}
 
+	// Are we able to use carried items at all?
+	if (    res->header.metaData[HARDPOINT_TRIGGER].InUse()
+		 && res->header.metaData[HARDPOINT_SHIELD].InUse() )
+	{
+		// All is well. We can use items that aren't intrinsic.
+	}
+	else {
+		return false;
+	}
+
 	if ( !res->header.metaData[item->hardpoint].InUse() ) {
 		// hardpoint not available; can't be used.
 		return false;
@@ -631,20 +641,6 @@ void ItemComponent::Drop( const GameItem* item )
 		}
 	}
 	GLASSERT( 0 );	// should have found the item.
-}
-
-
-GameItem* ItemComponent::IsCarrying()
-{
-	for( int i=1; i<itemArr.Size(); ++i ) {
-		if (    ItemActive( i )									// in use (not in pack)
-			 && itemArr[i]->hardpoint == HARDPOINT_TRIGGER		// at the hardpoint of interest
-			 && !itemArr[i]->Intrinsic() )						// not a built-in
-		{
-			return itemArr[i];
-		}
-	}
-	return 0;
 }
 
 

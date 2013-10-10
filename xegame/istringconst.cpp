@@ -21,6 +21,7 @@ IString IStringConst::core;
 IString IStringConst::arachnoid;
 IString IStringConst::mantis;
 IString IStringConst::redMantis;
+IString IStringConst::troll;
 IString IStringConst::cyclops;
 IString IStringConst::fireCyclops;
 IString IStringConst::shockCyclops;
@@ -50,6 +51,7 @@ void IStringConst::Init()
 	arachnoid = StringPool::Intern( "arachnoid", true );
 	mantis = StringPool::Intern( "mantis", true );
 	redMantis = StringPool::Intern( "redMantis", true );
+	troll = StringPool::Intern( "troll", true );
 	cyclops = StringPool::Intern( "cyclops", true );
 	fireCyclops = StringPool::Intern( "fireCyclops", true );
 	shockCyclops = StringPool::Intern( "shockCyclops", true );

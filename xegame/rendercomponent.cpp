@@ -166,7 +166,8 @@ int RenderComponent::CalcAnimation() const
 	MoveComponent* move = parentChit->GetMoveComponent();
 	bool isMoving = move && move->IsMoving();
 	ItemComponent* inv = parentChit->GetItemComponent();
-	bool isCarrying = inv && inv->IsCarrying();
+
+	bool isCarrying = model[HARDPOINT_TRIGGER] != 0;
 
 	if ( isMoving ) {
 		if ( isCarrying ) {

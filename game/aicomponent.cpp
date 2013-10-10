@@ -244,8 +244,18 @@ public:
 	ChitDistanceCompare( const Vector3F& _origin ) : origin(_origin) {}
 	virtual bool Less( Chit* v0, Chit* v1 )
 	{
+#if 0
+		// This has a nasty rounding bug
+		// where 2 "close" things would always evaluate "less than" and
+		// the sort flips endlessly.
 		return ( v0->GetSpatialComponent()->GetPosition() - origin ).LengthSquared() <
 			   ( v1->GetSpatialComponent()->GetPosition() - origin ).LengthSquared();
+#endif
+		Vector3F p0 = v0->GetSpatialComponent()->GetPosition() - origin;
+		Vector3F p1 = v1->GetSpatialComponent()->GetPosition() - origin;
+		float len0 = p0.LengthSquared();
+		float len1 = p1.LengthSquared();
+		return len0 < len1;
 	}
 
 private:

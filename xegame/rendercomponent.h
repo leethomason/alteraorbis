@@ -71,6 +71,7 @@ public:
 	bool HasMetaData( int id );
 	bool GetMetaData( int id, grinliz::Matrix4* xform );
 	bool GetMetaData( int id, grinliz::Vector3F* pos );	
+	
 	// Useful metadata access.
 	bool CalcTarget( grinliz::Vector3F* pos );	// manufacture a target if there isn't metadata
 	bool CalcTrigger( grinliz::Vector3F* pos, grinliz::Matrix4* xform );	// either can be null

@@ -32,6 +32,9 @@ int GetTeam( const grinliz::IString& itemName )
 	else if ( itemName == IStringConst::redMantis ) {
 		return TEAM_RED_MANTIS;
 	}
+	else if ( itemName == IStringConst::troll ) {
+		return TEAM_TROLL;
+	}
 	else if (    itemName == IStringConst::cyclops
 		      || itemName == IStringConst::fireCyclops
 		      || itemName == IStringConst::shockCyclops )

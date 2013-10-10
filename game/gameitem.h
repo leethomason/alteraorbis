@@ -55,12 +55,6 @@ class XStream;
 			- Mantis
 				- "pincer" is an item, but not a hardpoint
 
-		Leads to:
-			INTRINSIC_AT_HARDPOINT		hand
-			INTRINSIC_FREE				pincer
-			HELD_AT_HARDPOINT			sword, shield
-			HELD_FREE					amulet
-
 	Hardpoints
 	- The possible list of hardpoints lives in the GameItem (as bit flags)
 	- The Render component exposes a list of metadata is supports
@@ -70,10 +64,11 @@ class XStream;
 	- There can only be one melee weapon / attack. This simplies the animation,
 	  and not having to track which melee hit. (This could be fixed, of course.)
 	  The melee weapon must be on the 'trigger' hardpoint.
-	- Similarly, the shield must be on the 'shield' hardpoitn
-	- An item can only attach to one hardpoint. It would be good if it could attach
-	  to either left or right hands, for example.
-	  
+	- Similarly, the shield must be on the 'shield' hardpoint
+	- An item can only attach to one hardpoint. (It would be good if it could attach
+	  to either left or right hands)
+	- In order to carry/use items, a ModelResource must have both a 'trigger' and
+	  and 'shield'. Seems better than adding Yet Another Flag.
 */
 
 class Chit;
