@@ -79,17 +79,19 @@ x Add position fuzz to gold, crystal, and item drops
 			x weapon colors
 		x names of things
 		x cyclops explosion seems off
+		x no item limit in inventory (but yes in inventory screen). need to check inventory capacity before pickup.
 
+		- gold to build stuff
+		- item forging
+		- item market
+		- visitors - E - tech
 		- console
 			- important events
 			- important de-rez
 		- show grid travel dest
 		- rework item screen layout
-		- item forging
-		- item market
 		- item destruction
 		- real health bars & check visibility
-		- no item limit in inventory (but yes in inventory screen). need to check inventory capacity before pickup.
 		- player re-gen. at cores? in general?
 	    - exploring
 	      - xp for exploring!!
