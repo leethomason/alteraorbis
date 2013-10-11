@@ -597,13 +597,21 @@ void ItemComponent::SortInventory()
 }
 
 
-bool ItemComponent::CanAddToInventory()
+
+int ItemComponent::NumCarriedItems() const
 {
 	int count = 0;
 	for( int i=1; i<itemArr.Size(); ++i ) {
 		if ( !itemArr[i]->Intrinsic() )
 			++count;
 	}
+	return count;
+}
+
+
+bool ItemComponent::CanAddToInventory()
+{
+	int count = NumCarriedItems();
 	return count < INVERTORY_SLOTS;
 }
 

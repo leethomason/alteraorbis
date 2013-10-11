@@ -1015,15 +1015,12 @@ void AIComponent::ThinkVisitor( const ComponentSet& thisComp )
 		}
 		else {
 			// Find a kiosk.
-			CChitArray arr;
-			Rectangle2I inneri = map->GetSector( sector ).InnerBounds();
-			Rectangle2F inner;
-			inner.Set( (float)inneri.min.x, (float)inneri.min.y, (float)(inneri.max.x+1), (float)(inneri.max.y+1) );
+			Chit* kiosk = GetLumosChitBag()->FindBuilding(	vd->CurrentKioskWant(),
+															sector,
+															&thisComp.spatial->GetPosition2D(),
+															LumosChitBag::RANDOM_NEAR );
 
-			ItemNameFilter kioskFilter( vd->CurrentKioskWant() );
-			parentChit->GetChitBag()->QuerySpatialHash( &arr, inner, 0, &kioskFilter );
-
-			if ( arr.Empty() ) {
+			if ( !kiosk ) {
 				// Done here.
 				vd->NoKiosk( sector );
 				if ( debugFlag ) {
@@ -1031,23 +1028,14 @@ void AIComponent::ThinkVisitor( const ComponentSet& thisComp )
 				}
 			}
 			else {
-				// Random!
-				parentChit->random.ShuffleArray( arr.Mem(), arr.Size() );
-				bool found = false;
-
-				for( int i=0; i<arr.Size(); ++i ) {
-					Chit* kiosk = arr[i];
-					MapSpatialComponent* msc = GET_SUB_COMPONENT( kiosk, SpatialComponent, MapSpatialComponent );
-					GLASSERT( msc );
-					Vector2I porchi = msc->PorchPos();
-					Vector2F porch = { (float)porchi.x+0.5f, (float)porchi.y+0.5f };
-					if ( map->CalcPath( thisComp.spatial->GetPosition2D(), porch, 0, 0, 0, 0 ) ) {
-						this->Move( porch, false );
-						found = true;
-						break;
-					}
+				MapSpatialComponent* msc = GET_SUB_COMPONENT( kiosk, SpatialComponent, MapSpatialComponent );
+				GLASSERT( msc );
+				Vector2I porchi = msc->PorchPos();
+				Vector2F porch = { (float)porchi.x+0.5f, (float)porchi.y+0.5f };
+				if ( map->CalcPath( thisComp.spatial->GetPosition2D(), porch, 0, 0, 0, 0 ) ) {
+					this->Move( porch, false );
 				}
-				if ( !found ) {
+				else {
 					// Done here.
 					vd->doneWith = sector;
 					if ( debugFlag ) {
@@ -1565,12 +1553,14 @@ void AIComponent::FlushTaskList( const ComponentSet& thisComp )
 
 void AIComponent::FindRoutineTasks( const ComponentSet& thisComp )
 {
-	/*
 	if ( thisComp.item->flags & GameItem::AI_DOES_WORK ) {
 		if ( thisComp.itemComponent->NumCarriedItems() ) {
 			// Take extra stuff to the vault.
 			Vector2I sector = thisComp.spatial->GetSector();
-			Chit* vault = GetLumosChitBag()->NearestInSector( StringPool::vault, sector );
+			Chit* vault = GetLumosChitBag()->FindBuilding(	IStringConst::vault, 
+															sector, 
+															&thisComp.spatial->GetPosition2D(), 
+															LumosChitBag::RANDOM_NEAR );
 			if ( vault ) {
 				MapSpatialComponent* msc = GET_SUB_COMPONENT( vault, SpatialComponent, MapSpatialComponent );
 				GLASSERT( msc );
@@ -1583,7 +1573,6 @@ void AIComponent::FindRoutineTasks( const ComponentSet& thisComp )
 			}
 		}
 	}
-	*/
 }
 
 

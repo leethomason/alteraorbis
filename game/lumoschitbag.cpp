@@ -104,6 +104,58 @@ void LumosChitBag::RemoveFromBuildingHash( MapSpatialComponent* chit, int x, int
 }
 
 
+Chit* LumosChitBag::FindBuilding(	const grinliz::IString&  name, 
+									const grinliz::Vector2I& sector, 
+									const grinliz::Vector2F* pos, 
+									int flags )
+{
+	CArray<Chit*, 16> match;
+	CArray<float, 16> weight;
+
+	for( MapSpatialComponent* it = mapSpatialHash[sector.y*NUM_SECTORS+sector.x]; it; it = it->nextBuilding ) {
+		Chit* chit = it->ParentChit();
+		GLASSERT( chit );
+		const GameItem* item = chit->GetItem();
+		if ( item && item->name == name ) {
+			if ( match.HasCap() ) {
+				match.Push( chit );
+			}
+		}
+	}
+
+	if ( match.Empty() )
+		return 0;
+	if ( !pos )
+		return match[0];
+
+	// NEAREST scans and finds the closest one.
+	// RANDOM_NEAR chooses one at random, but weighted by the (inverse) of the distance
+	if ( flags == NEAREST ) {
+		float closest = ( match[0]->GetSpatialComponent()->GetPosition2D() - *pos ).LengthSquared();
+		int   ci = 0;
+		for( int i=1; i<match.Size(); ++i ) {
+			float len2 = ( match[i]->GetSpatialComponent()->GetPosition2D() - *pos ).LengthSquared();
+			if ( len2 < closest ) {
+				closest = len2;
+				ci = i;
+			}
+		}
+		return match[ci];
+	}
+	if ( flags == RANDOM_NEAR ) {
+		for( int i=0; i<match.Size(); ++i ) {
+			float len = ( match[i]->GetSpatialComponent()->GetPosition2D() - *pos ).Length();
+			weight[i] = 1.0f / len;
+		}
+		int index = random.Select( weight.Mem(), weight.Size() );
+		return match[index];
+	}
+
+	// Bad flag? Something didn't return?
+	GLASSERT( 0 );
+}
+
+
 Chit* LumosChitBag::NewBuilding( const Vector2I& pos, const char* name, int team )
 {
 	Chit* chit = NewChit();

@@ -41,7 +41,9 @@ public:
 	static grinliz::IString crystal_red;
 	static grinliz::IString crystal_blue;
 	static grinliz::IString crystal_violet;
+	
 	static grinliz::IString core;
+	static grinliz::IString vault;
 
 	static grinliz::IString arachnoid;
 	static grinliz::IString mantis;
