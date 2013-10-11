@@ -106,7 +106,7 @@
   <model filename="kiosk.ac" modelName="kiosk.c" origin="-1.50 0 -0.50" shading="flat" polyRemoval="pre" />
   <model filename="kiosk.ac" modelName="kiosk.s" origin="-4.50 0 -0.50" shading="flat" polyRemoval="pre" />
   <model assetName="vault"   filename="vault2.ac" origin="-5 0 -1"      shading="flat" polyRemoval="pre" />
-
+  <model assetName="factory" filename="factory.ac" origin="0 0 0"       shading="flat" polyRemoval="pre" />
 
   <!-- animation v2
        filename is a prefix to: walk, stand, gunwalk, gunstand, melee, impact

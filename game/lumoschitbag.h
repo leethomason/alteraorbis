@@ -26,6 +26,7 @@ class WorldMap;
 struct Wallet;
 class CoreScript;
 class LumosGame;
+class MapSpatialComponent;
 
 class BuildingFilter : public IChitAccept
 {
@@ -134,16 +135,9 @@ public:
 
 	void SetContext( Engine* e, WorldMap* wm, LumosGame* lg ) { engine = e; worldMap = wm; lumosGame = lg; }
 
-#if 0
-	virtual void AddToSpatialHash( Chit*, int x, int y );
-	virtual void RemoveFromSpatialHash( Chit*, int x, int y );
-	// Sector 0,0 if not using sectors works.
-	const grinliz::CDynArray<Chit*>& MoBsInSector( const grinliz::Vector2I& sector ) {
-		GLASSERT( sector.x >= 0 && sector.x < NUM_SECTORS );
-		GLASSERT( sector.y >= 0 && sector.y < NUM_SECTORS );
-		return mobsInSector[sector.y*NUM_SECTORS+sector.x];
-	}
-#endif
+	// Buildings can't move - no update.
+	void AddToBuildingHash( MapSpatialComponent* chit, int x, int y );
+	void RemoveFromBuildingHash( MapSpatialComponent* chit, int x, int y );
 
 	Chit* NewMonsterChit( const grinliz::Vector3F& pos, const char* name, int team );
 	Chit* NewGoldChit( const grinliz::Vector3F& pos, int amount );
@@ -210,7 +204,7 @@ private:
 	grinliz::CDynArray<Chit*>	inUseArr;
 	grinliz::CDynArray<Chit*>	chitList;
 
-//	grinliz::CDynArray<Chit*>	mobsInSector[NUM_SECTORS*NUM_SECTORS];
+	MapSpatialComponent* mapSpatialHash[NUM_SECTORS*NUM_SECTORS];
 };
 
 

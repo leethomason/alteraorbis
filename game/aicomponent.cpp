@@ -41,7 +41,6 @@
 #include "../xegame/istringconst.h"
 
 #include "../grinliz/glrectangle.h"
-//#include "../grinliz/glperformance.h"
 #include "../Shiny/include/Shiny.h"
 #include <climits>
 
@@ -238,11 +237,11 @@ void AIComponent::GetFriendEnemyLists()
 }
 
 
-class ChitDistanceCompare : public ISortCompare<Chit*>
+class ChitDistanceCompare
 {
 public:
 	ChitDistanceCompare( const Vector3F& _origin ) : origin(_origin) {}
-	virtual bool Less( Chit* v0, Chit* v1 )
+	bool Less( Chit* v0, Chit* v1 ) const
 	{
 #if 0
 		// This has a nasty rounding bug
@@ -1144,7 +1143,7 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 			parentChit->GetChitBag()->QuerySpatialHash( &chitArr, pos2, GOLD_AWARE, 0, accept );
 
 			ChitDistanceCompare compare( thisComp.spatial->GetPosition() );
-			Sort<Chit*>( chitArr.Mem(), chitArr.Size(), &compare );
+			Sort( chitArr.Mem(), chitArr.Size(), compare );
 
 			for( int i=0; i<chitArr.Size(); ++i ) {
 				Vector2F goldPos = chitArr[i]->GetSpatialComponent()->GetPosition2D();
@@ -1564,6 +1563,30 @@ void AIComponent::FlushTaskList( const ComponentSet& thisComp )
 }
 
 
+void AIComponent::FindRoutineTasks( const ComponentSet& thisComp )
+{
+	/*
+	if ( thisComp.item->flags & GameItem::AI_DOES_WORK ) {
+		if ( thisComp.itemComponent->NumCarriedItems() ) {
+			// Take extra stuff to the vault.
+			Vector2I sector = thisComp.spatial->GetSector();
+			Chit* vault = GetLumosChitBag()->NearestInSector( StringPool::vault, sector );
+			if ( vault ) {
+				MapSpatialComponent* msc = GET_SUB_COMPONENT( vault, SpatialComponent, MapSpatialComponent );
+				GLASSERT( msc );
+				if ( msc ) {
+					Vector2I porch = msc->PorchPos();
+
+					taskList.Push( Task::MoveTask( porch, 0 ));
+					taskList.Push( Task::UseBuildingTask( 0 ));
+				}
+			}
+		}
+	}
+	*/
+}
+
+
 void AIComponent::WorkQueueToTask(  const ComponentSet& thisComp )
 {
 	// Is there work to do?		
@@ -1706,6 +1729,9 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 		 && taskList.Empty() ) 
 	{
 		WorkQueueToTask( thisComp );
+		if ( taskList.Empty() ) {
+			FindRoutineTasks( thisComp );
+		}
 	}
 
 	if ( aiMode == NORMAL_MODE && !taskList.Empty() ) {

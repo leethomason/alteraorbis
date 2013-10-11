@@ -38,6 +38,7 @@ using namespace grinliz;
 
 LumosChitBag::LumosChitBag() : engine(0), worldMap(0), lumosGame(0)
 {
+	memset( mapSpatialHash, 0, sizeof(MapSpatialComponent*)*NUM_SECTORS*NUM_SECTORS);
 }
 
 
@@ -52,47 +53,55 @@ LumosChitBag::~LumosChitBag()
 #if 0
 void LumosChitBag::AddToSpatialHash( Chit* chit, int x, int y )
 {
-	// This seems like a good idea, accept that the chit can
+	//MoBFilter filter : This seems like a good idea, accept that the chit can
 	// of course change its components, has an update sequence,
 	// and may or may not match criteria. 
-	MoBFilter filter;
-	if ( filter.Accept( chit )) {
-		if ( worldMap->UsingSectors() ) {
-			Vector2I sector = { x / SECTOR_SIZE, y / SECTOR_SIZE };
-			mobsInSector[sector.y*NUM_SECTORS+sector.x].Push( chit );
-		}
-		else {
-			mobsInSector[0].Push( chit );
-		}
+	Vector2I sector = { 0, 0 };
+	if ( worldMap->UsingSectors() ) {
+		sector.Set( x / SECTOR_SIZE, y / SECTOR_SIZE );
 	}
+	chitsInSector[sector.y*NUM_SECTORS+sector.x].Push( chit );
 	super::AddToSpatialHash( chit, x, y );
 }
+#endif
 
 
-void LumosChitBag::RemoveFromSpatialHash( Chit* chit, int x, int y )
+void LumosChitBag::AddToBuildingHash( MapSpatialComponent* chit, int x, int y )
 {
-	MoBFilter filter;
-	if ( filter.Accept( chit )) {
-		if ( worldMap->UsingSectors() ) {
-			Vector2I sector = { x / SECTOR_SIZE, y / SECTOR_SIZE };
-			int s = sector.y*NUM_SECTORS+sector.x;
-			int i = mobsInSector[s].Find( chit );
-			GLASSERT( i >= 0 );
-			if ( i >= 0 ) {
-				mobsInSector[s].SwapRemove( i );
+	int sx = x / SECTOR_SIZE;
+	int sy = y / SECTOR_SIZE;
+	GLASSERT( sx >= 0 && sx < NUM_SECTORS );
+	GLASSERT( sy >= 0 && sy < NUM_SECTORS );
+	GLASSERT( chit->nextBuilding == 0 );
+	
+	chit->nextBuilding = mapSpatialHash[sy*NUM_SECTORS+sx];
+	mapSpatialHash[sy*NUM_SECTORS+sx] = chit;
+}
+
+
+void LumosChitBag::RemoveFromBuildingHash( MapSpatialComponent* chit, int x, int y )
+{
+	int sx = x / SECTOR_SIZE;
+	int sy = y / SECTOR_SIZE;
+	GLASSERT( sx >= 0 && sx < NUM_SECTORS );
+	GLASSERT( sy >= 0 && sy < NUM_SECTORS );
+	GLASSERT( mapSpatialHash[sy*NUM_SECTORS+sx] );
+
+	MapSpatialComponent* prev = 0;
+	for( MapSpatialComponent* it = mapSpatialHash[sy*NUM_SECTORS+sx]; it; prev = it, it = it->nextBuilding ) {
+		if ( it == chit ) {
+			if ( prev ) {
+				prev->nextBuilding = it->nextBuilding;
 			}
-		}
-		else {
-			int i = mobsInSector[0].Find( chit );
-			GLASSERT( i >= 0 );
-			if ( i >= 0 ) {
-				mobsInSector[0].SwapRemove( i );
+			else {
+				mapSpatialHash[sy*NUM_SECTORS+sx] = it->nextBuilding;
 			}
+			it->nextBuilding = 0;
+			return;
 		}
 	}
-	super::RemoveFromSpatialHash( chit, x, y );
+	GLASSERT( 0 );
 }
-#endif
 
 
 Chit* LumosChitBag::NewBuilding( const Vector2I& pos, const char* name, int team )
@@ -104,7 +113,7 @@ Chit* LumosChitBag::NewBuilding( const Vector2I& pos, const char* name, int team
 	int cx=1;
 	rootItem.GetValue( "size", &cx );
 
-	MapSpatialComponent* msc = new MapSpatialComponent( worldMap );
+	MapSpatialComponent* msc = new MapSpatialComponent( worldMap, this );
 	msc->SetMapPosition( pos.x, pos.y, cx, cx );
 	msc->SetMode( GRID_BLOCKED );
 	msc->SetBuilding( true );

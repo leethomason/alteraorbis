@@ -90,7 +90,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 		"None", "Clear", "Pave", "Rotate",
 		"Ice", 
 		"News\nKiosk", "Media\nKiosk", "Commerce\nKiosk", "Social\nKiosk", 
-		"Vault",
+		"Vault", "Factory"
 	};
 	static const char* modeButtonText[NUM_BUILD_MODES] = {
 		"Utility", "Tech0\nBasic", "Tech0\nAdv"
@@ -402,6 +402,7 @@ void GameScene::SetSelectionModel( const grinliz::Vector2F& view )
 			name = "buildMarker1";
 			break;
 		case BUILD_VAULT:
+		case BUILD_FACTORY:
 			size = 2.0f;
 			name = "buildMarker2";
 			break;
@@ -529,6 +530,7 @@ grinliz::IString GameScene::BuildActiveInfo( int* size )
 		"kiosk.c",
 		"kiosk.s",
 		"vault",
+		"factory",
 	};
 	IString str;
 	if ( buildActive == PAVE ) {

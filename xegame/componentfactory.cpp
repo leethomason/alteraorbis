@@ -54,7 +54,7 @@ Component* ComponentFactory::Factory( const char* name, Chit* chit ) const
 		return new ScriptComponent( this, census );
 	}
 	else if ( StrEqual( name, "MapSpatialComponent" )) {
-		return new MapSpatialComponent( worldMap );
+		return new MapSpatialComponent( worldMap, chitBag );
 	}
 	else if ( StrEqual( name, "AIComponent" )) {
 		return new AIComponent( engine, worldMap );

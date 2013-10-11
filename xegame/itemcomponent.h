@@ -67,6 +67,7 @@ public:
 	const Wallet& GetWallet() const			{ return wallet; }
 
 	bool CanAddToInventory();
+	int  NumCarriedItems();
 	// adds to the inventory; takes ownership of pointer
 	void AddToInventory( GameItem* item );
 	// Add the component, and deletes it.

@@ -21,14 +21,13 @@
 class WorldMap;
 
 // Marks the WorldGrid inUse.
-// FIXME: not mutable; once added, can't be moved.
-//		  can this be fixed with a "mutable" flag on SpatialComponent?
+// Not mutable; once added, can't be moved.
 class MapSpatialComponent : public SpatialComponent
 {
 private:
 	typedef SpatialComponent super;
 public:
-	MapSpatialComponent( WorldMap* map );
+	MapSpatialComponent( WorldMap* map, LumosChitBag* );
 	virtual ~MapSpatialComponent()	{}
 
 	virtual const char* Name() const { return "MapSpatialComponent"; }
@@ -40,24 +39,29 @@ public:
 
 	// WARNING must be called before OnAdd
 	void SetMapPosition( int x, int y, int cx, int cy );
+	void SetBuilding( bool b );
+	// -- end before OnAdd warning --
 
 	grinliz::Vector2I MapPosition() const	{ return bounds.min; }
 	grinliz::Rectangle2I Bounds() const		{ return bounds; }
 
-	void SetMode( int mode );
+	void SetMode( int mode );	// GRID_IN_USE or GRID_BLOCKED
 	int Mode() const			{ return mode; }
-	void SetBuilding( bool b )	{ building = b; }
 	bool Building() const		{ return building; }
 
 	// Assumes there is a porch; to actually query,
 	// use the 'porch' property on the GameItem
 	grinliz::Vector2I PorchPos() const;
 
+	// internal: used by the LumosChitBag to track buildings.
+	MapSpatialComponent* nextBuilding;
+
 private:
 	int						mode;
 	bool					building;	// is this a building?
 	grinliz::Rectangle2I	bounds;
 	WorldMap*				worldMap;
+	LumosChitBag*			chitBag;
 };
 
 

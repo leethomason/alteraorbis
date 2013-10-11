@@ -101,7 +101,8 @@ private:
 		// These are special events:
 		TASK_REMOVE,
 		TASK_BUILD,
-		TASK_PICKUP
+		TASK_PICKUP,
+		TASK_USE_BUILDING
 	};
 
 	enum {
@@ -146,6 +147,13 @@ private:
 			t.taskID = taskID;
 			return t;
 		}
+		static Task UseBuildingTask( int taskID=0 ) {
+			Task t;
+			t.action = TASK_USE_BUILDING;
+			t.taskID = taskID;
+			return t;
+		}
+
 		static Task RemoveTask( const grinliz::Vector2I& pos2i, int taskID=0 ) {
 			Task t;
 			t.action = TASK_REMOVE;
@@ -196,7 +204,8 @@ private:
 	void ThinkVisitor( const ComponentSet& thisComp );
 
 	void WorkQueueToTask(  const ComponentSet& thisComp );	// turn a work item into a task
-	void FlushTaskList( const ComponentSet& thisComp );	// moves tasks along, mark tasks completed, do special actions
+	void FlushTaskList( const ComponentSet& thisComp );		// moves tasks along, mark tasks completed, do special actions
+	void FindRoutineTasks( const ComponentSet& );	// do maintenance, etc.
 
 	grinliz::Vector2F GetWanderOrigin( const ComponentSet& thisComp ) const;
 	int GetThinkTime() const { return 500; }

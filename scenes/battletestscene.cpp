@@ -253,7 +253,7 @@ void BattleTestScene::LoadMap()
 		Chit* chit = chitBag.NewChit();
 		const Vector2I& v = features[i];
 
-		MapSpatialComponent* msc = new MapSpatialComponent( map );
+		MapSpatialComponent* msc = new MapSpatialComponent( map, &chitBag );
 		msc->SetMapPosition( v.x, v.y, 1, 1 );
 		msc->SetMode( GRID_BLOCKED );
 		chit->Add( msc );

@@ -96,16 +96,8 @@ inline void Sort( T* mem, int size )
 }
 	
 
-// FIXME: bunch of trouble getting this signature correct.
-// want it to be const T&, but having compiler woes.
-template <class T>
-class ISortCompare {
-public:
-	virtual bool Less( T v0, T v1 ) = 0;
-};
-
-template <class T>
-inline void Sort( T* mem, int size, ISortCompare<T>* compare )
+template <class T, class COMP>
+inline void Sort( T* mem, int size, const COMP& compare )
 {
 	int gap = size;
 	for (;;) {
@@ -114,7 +106,7 @@ inline void Sort( T* mem, int size, ISortCompare<T>* compare )
 		const int end = size - gap;
 		for (int i = 0; i < end; i++) {
 			int j = i + gap;
-			if ( compare->Less( mem[j], mem[i]) ) {
+			if ( compare.Less( mem[j], mem[i]) ) {
 				Swap(mem+i, mem+j);
 				swapped = true;
 			}

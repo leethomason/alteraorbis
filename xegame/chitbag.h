@@ -113,8 +113,8 @@ public:
 
 	// Hashes based on integer coordinates. No need to call
 	// if they don't change.
-	virtual void AddToSpatialHash( Chit*, int x, int y );
-	virtual void RemoveFromSpatialHash( Chit*, int x, int y );
+	void AddToSpatialHash( Chit*, int x, int y );
+	void RemoveFromSpatialHash( Chit*, int x, int y );
 	void UpdateSpatialHash( Chit*, int x0, int y0, int x1, int y1 );
 
 	void QuerySpatialHash(	grinliz::CDynArray<Chit*>* array, 

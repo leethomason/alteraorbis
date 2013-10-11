@@ -479,7 +479,7 @@ void Sim::CreatePlant( int x, int y, int type )
 		}
 
 		Chit* chit = chitBag->NewChit();
-		MapSpatialComponent* ms = new MapSpatialComponent( worldMap );
+		MapSpatialComponent* ms = new MapSpatialComponent( worldMap, chitBag );
 		ms->SetMapPosition( x, y, 1, 1 );
 		chit->Add( ms );
 

@@ -15,15 +15,18 @@
 
 #include "mapspatialcomponent.h"
 #include "worldmap.h"
+#include "lumoschitbag.h"
 #include "../engine/serialize.h"
 
 using namespace grinliz;
 
-MapSpatialComponent::MapSpatialComponent( WorldMap* _map ) : SpatialComponent()
+MapSpatialComponent::MapSpatialComponent( WorldMap* _map, LumosChitBag* bag ) : SpatialComponent()
 {
 	worldMap = _map;
+	chitBag = bag;
 	mode = GRID_IN_USE;
 	building = false;
+	nextBuilding = 0;
 }
 
 
@@ -58,9 +61,20 @@ void MapSpatialComponent::SetMode( int newMode )
 }
 
 
+void MapSpatialComponent::SetBuilding( bool b )
+{
+	GLASSERT( !parentChit );
+	building = b;
+}
+
+
 void MapSpatialComponent::OnAdd( Chit* chit )
 {
 	super::OnAdd( chit );
+	if ( building ) {
+		Vector2I pos = GetPosition2DI();
+		chitBag->AddToBuildingHash( this, pos.x, pos.y ); 
+	}
 
 	if ( mode == GRID_BLOCKED ) {
 		Vector2I pos = MapPosition();
@@ -75,6 +89,10 @@ void MapSpatialComponent::OnAdd( Chit* chit )
 
 void MapSpatialComponent::OnRemove()
 {
+	if ( building ) {
+		Vector2I pos = GetPosition2DI();
+		chitBag->RemoveFromBuildingHash( this, pos.x, pos.y ); 
+	}
 	super::OnRemove();
 	if ( mode == GRID_BLOCKED ) {
 		Vector2I pos = MapPosition();

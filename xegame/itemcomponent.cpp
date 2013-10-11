@@ -569,10 +569,10 @@ bool ItemComponent::EmitEffect( const GameItem& it, U32 delta )
 }
 
 
-class ItemValueCompare : public ISortCompare<const GameItem*>
+class ItemValueCompare
 {
 public:
-	virtual bool Less( const GameItem* v0, const GameItem* v1 )
+	bool Less( const GameItem* v0, const GameItem* v1 ) const
 	{
 		ItemDefDB* db = ItemDefDB::Instance();
 		int val0 = db->CalcItemValue( v0 );
@@ -590,7 +590,7 @@ void ItemComponent::SortInventory()
 		if ( itemArr[i]->Intrinsic() )
 			continue;
 		if ( itemArr.Size() > i+1 ) {
-			::Sort<const GameItem*>( (const GameItem**) &itemArr[i], itemArr.Size() - i, &compare );
+			::Sort<const GameItem*, ItemValueCompare>( (const GameItem**) &itemArr[i], itemArr.Size() - i, compare );
 		}
 		break;
 	}

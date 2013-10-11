@@ -106,7 +106,7 @@ void NavTest2Scene::LoadMap()
 	for ( int i=0; i<blocks.Size(); ++i ) {
 		Chit* chit = chitBag.NewChit();
 		const Vector2I& v = blocks[i];
-		MapSpatialComponent* msc = new MapSpatialComponent( map );
+		MapSpatialComponent* msc = new MapSpatialComponent( map, chitBag.ToLumos() );
 		msc->SetMapPosition( v.x, v.y, 1, 1 );
 		msc->SetMode( GRID_BLOCKED );
 		chit->Add( msc );
@@ -115,7 +115,7 @@ void NavTest2Scene::LoadMap()
 	for( int i=0; i<features.Size(); ++i ) {
 		Chit* chit = chitBag.NewChit();
 		const Vector2I& v = features[i];
-		MapSpatialComponent* msc = new MapSpatialComponent( map );
+		MapSpatialComponent* msc = new MapSpatialComponent( map, chitBag.ToLumos() );
 		msc->SetMapPosition( v.x, v.y, 1, 1 );
 		msc->SetMode( GRID_BLOCKED );
 		chit->Add( msc );
