@@ -642,6 +642,19 @@ void ItemComponent::AddToInventory( ItemComponent* ic )
 }
 
 
+GameItem* ItemComponent::RemoveFromInventory( int index )
+{
+	GLASSERT( index < itemArr.Size() );
+	GameItem* item = itemArr[index];
+	if ( item->Intrinsic() ) 
+		return 0;
+	if ( index == 0 )
+		return 0;
+	itemArr.Remove( index );
+	return item;
+}
+
+
 void ItemComponent::Drop( const GameItem* item )
 {
 	GLASSERT( parentChit->GetSpatialComponent() );

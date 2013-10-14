@@ -1414,6 +1414,7 @@ void AIComponent::FlushTaskList( const ComponentSet& thisComp )
 	Vector2F taskPos2 = { (float)task->pos2i.x + 0.5f, (float)task->pos2i.y + 0.5f };
 	Vector3F taskPos3 = { taskPos2.x, 0, taskPos2.y };
 	Vector2I sector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
+
 	WorkQueue* workQueue = 0;
 	const WorkQueue::QueueItem* queueItem = 0;
 
@@ -1545,6 +1546,38 @@ void AIComponent::FlushTaskList( const ComponentSet& thisComp )
 			}
 			taskList.PopFront();
 		}
+		break;
+
+	case TASK_USE_BUILDING:
+		{
+			Chit* building = GetLumosChitBag()->QueryPorch( pos2i );
+			if ( building ) {
+				// Workers:
+				if ( thisComp.item->flags & GameItem::AI_DOES_WORK ) {
+					if ( building->GetItem()->name == IStringConst::vault ) {
+						ItemComponent* vaultIC = building->GetItemComponent();
+						GLASSERT( vaultIC );
+						Wallet w = thisComp.itemComponent->EmptyWallet();
+						vaultIC->AddGold( w );
+
+						// Put everything in the vault.
+						for( int i=1; i<thisComp.itemComponent->NumItems(); ++i ) {
+							if ( vaultIC->CanAddToInventory() ) {
+								GameItem* item = thisComp.itemComponent->RemoveFromInventory(i);
+								if ( item ) {
+									vaultIC->AddToInventory( item );
+								}
+							}
+						}
+					}
+				}
+			}
+			taskList.PopFront();
+		}
+		break;
+
+	default:
+		GLASSERT( 0 );
 		break;
 
 	}

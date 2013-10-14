@@ -299,7 +299,8 @@ float BattleMechanics::EffectiveRange( float radAt1, float targetDiameter, float
 	float r = 0;
 
 	for( int i=0; i<5; ++i ) {
-		// Cliffs make me nervous using a N-R search.
+		// Cliffs make me nervous using a N-R search. Use
+		// a binary search instead so it doesn't behave badly.
 		r = Mean(r0,r1);
 		c = ChanceToHit( r, radAt1, targetDiameter );
 

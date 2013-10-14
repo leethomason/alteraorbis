@@ -63,15 +63,19 @@ public:
 	void AddGold( int delta );
 	void AddGold( const Wallet& wallet );
 
-	void EmptyWallet() { wallet.MakeEmpty(); }
+	Wallet EmptyWallet() { Wallet w = wallet; wallet.MakeEmpty(); return w; }
 	const Wallet& GetWallet() const			{ return wallet; }
 
 	bool CanAddToInventory();
 	int  NumCarriedItems() const;
+
 	// adds to the inventory; takes ownership of pointer
 	void AddToInventory( GameItem* item );
 	// Add the component, and deletes it.
 	void AddToInventory( ItemComponent* ic );
+	// Removes an item from the inventory. Returns
+	// null if that item cannot be removed.
+	GameItem* RemoveFromInventory( int index );
 
 	// drops the item from the inventory (which owns the memory)
 	void Drop( const GameItem* item );
