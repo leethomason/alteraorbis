@@ -1,3 +1,4 @@
+//#version 120
 // CAUTION: never use 'int' attributes. They don't work for reasons unknown to me.
 
 // Copied here so that it can be easily handled

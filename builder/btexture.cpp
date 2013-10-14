@@ -16,6 +16,8 @@
 #include "btexture.h"
 #include "../grinliz/glcolor.h"
 #include "dither.h"
+#include "builder.h"
+#include "../shared/lodepng.h"
 
 using namespace grinliz;
 using namespace tinyxml2;
@@ -29,9 +31,6 @@ extern Color4U8 GetPixel( const SDL_Surface *surface, int x, int y);
 extern void PutPixel( SDL_Surface *surface, int x, int y, const Color4U8& c );
 
 typedef SDL_Surface* (SDLCALL * PFN_IMG_LOAD) (const char *file);
-extern PFN_IMG_LOAD libIMG_Load;
-
-
 
 BTexture::BTexture()
 	: isImage( false ),
@@ -98,15 +97,15 @@ bool BTexture::ParseTag( const tinyxml2::XMLElement* element )
 bool BTexture::Load()
 {
 	if ( alphaPathName.size() == 0 ) {
-		surface = libIMG_Load( pathName.c_str() );
+		surface = LoadImage( pathName.c_str() );
 		if ( !surface ) {
 			ExitError( "Texture", pathName.c_str(), assetName.c_str(), "Failed to load surface." );
 		}
 	}
 	else {
 		// Seperate color and alpha textures
-		SDL_Surface* rgb = libIMG_Load( pathName.c_str() );
-		SDL_Surface* alpha = libIMG_Load( alphaPathName.c_str() );
+		SDL_Surface* rgb   = LoadImage( pathName.c_str() );
+		SDL_Surface* alpha = LoadImage( alphaPathName.c_str() );
 		if ( !rgb ) {
 			ExitError( "Texture", pathName.c_str(), assetName.c_str(), "Failed to load RGB surface." );
 		}
@@ -263,12 +262,32 @@ bool BTexture::Scale()
 	if ( saveScaled ) {
 		printf( " Scaled" );
 		printf( " w=%d h=%d", surface->w, surface->h );
+	}
 
+	{
 		GLString path = "./resin/scaled/";
 		path += this->assetName;
-		path += ".bmp";
+		path += ".png";
 
-		SDL_SaveBMP( surface, path.c_str() );
+		//SDL_SaveBMP( surface, path.c_str() );
+
+		if ( surface->format->BytesPerPixel == 4 ) {
+			int error = lodepng_encode_file( path.c_str(), (const U8*)surface->pixels, surface->w, surface->h, LCT_RGBA, 8 );
+			if ( error )
+				printf( "LodePNG error:  %s\n", lodepng_error_text( error ) );
+
+		}
+		else if ( surface->format->BytesPerPixel == 3 ) {
+			int error = lodepng_encode_file( path.c_str(), (const U8*)surface->pixels, surface->w, surface->h, LCT_RGB, 8 );
+			if ( error )
+				printf( "LodePNG error:  %s\n", lodepng_error_text( error ) );
+		}
+		else if ( surface->format->BytesPerPixel == 1 ) {
+			int error = lodepng_encode_file( path.c_str(), (const U8*)surface->pixels, surface->w, surface->h, LCT_GREY, 8 );
+			if ( error )
+				printf( "LodePNG error:  %s\n", lodepng_error_text( error ) );
+		}
+
 	}
 	return true;
 }

@@ -176,6 +176,12 @@ void HumanGen::AssignFace( ProcRenderInfo* info )
 	info->color.SetCol( 0, vcol[0] );
 	info->color.SetCol( 1, vcol[1] );
 	info->color.SetCol( 2, vcol[2] );
+
+	// Alpha information solely from the alpha channel.
+	info->color.m41 = 0;
+	info->color.m42 = 0;
+	info->color.m43 = 0;
+	info->color.m44 = 1;
 }
 
 
@@ -201,13 +207,16 @@ void HumanGen::AssignSuit( ProcRenderInfo* info )
 	info->texture = texture;
 	//texture->GetTableEntry( random.Rand( texture->NumTableEntries() ), &info->te );
 
-	vcol[0].w = 0;
-	vcol[1].w = 0;
 	vcol[2].w = 0.7f;	// suit glow
-
 	info->color.SetCol( 0, vcol[0] );
 	info->color.SetCol( 1, vcol[1] );
 	info->color.SetCol( 2, vcol[2] );
+
+	// alpha interpreted as emissive; comes from color2
+	info->color.m41 = 0;
+	info->color.m42 = 0;
+	info->color.m43 = 0;
+	info->color.m44 = 1;
 }
 
 

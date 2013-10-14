@@ -43,6 +43,9 @@
     <ClCompile Include="xfileparser.cpp">
       <Filter>Source Files\importers</Filter>
     </ClCompile>
+    <ClCompile Include="..\shared\lodepng.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="builder.h">
@@ -77,6 +80,9 @@
     </ClInclude>
     <ClInclude Include="xfileparser.h">
       <Filter>Source Files\importers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\shared\lodepng.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

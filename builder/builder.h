@@ -25,6 +25,8 @@
 
 struct SDL_Surface;
 
+SDL_Surface* LoadImage( const char* pathname );
+
 grinliz::Color4U8 GetPixel( const SDL_Surface *surface, int x, int y);
 void PutPixel(SDL_Surface *surface, int x, int y, const grinliz::Color4U8& pixel);
 
