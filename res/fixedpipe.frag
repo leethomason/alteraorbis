@@ -1,4 +1,6 @@
-//#version 120
+//
+// CAUTION: a header is inserted *before* this text. #version and layout information goes there.
+
 #if TEXTURE0 == 1
 	uniform sampler2D texture0;
 	varying vec2 v_uv0;
