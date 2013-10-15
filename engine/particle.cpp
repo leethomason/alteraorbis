@@ -295,7 +295,7 @@ void ParticleSystem::Draw()
 	stream.stride = sizeof( ParticleStream );
 	stream.nPos = 3;
 	stream.posOffset = ParticleStream::POS_OFFSET;
-	stream.nTexture0 = 2;
+//	stream.nTexture0 = 2;
 	stream.texture0Offset = ParticleStream::TEXTURE_OFFSET;
 	stream.nColor = 4;
 	stream.colorOffset = ParticleStream::COLOR_OFFSET;

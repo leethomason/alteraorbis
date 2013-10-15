@@ -215,7 +215,7 @@ void BoltRenderer::DrawAll( const Bolt* bolts, int nBolts, Engine* engine )
 		stream.stride			= sizeof( vertex[0] );
 		stream.nPos				= 3;
 		stream.posOffset		= PTCVertex::POS_OFFSET;
-		stream.nTexture0		= 2;
+//		stream.nTexture0		= 2;
 		stream.texture0Offset	= PTCVertex::TEXTURE_OFFSET;
 		stream.nColor			= 4;
 		stream.colorOffset		= PTCVertex::COLOR_OFFSET;

@@ -87,9 +87,10 @@ public:
 	int ShaderFlags() const		{ GLASSERT( active ); return active->flags; }
 
 	// Warning: must match gAttributeName
+	// Warning: must match declaration in shader
 	enum {
-		A_TEXTURE0,		// 2 or 3 comp
-		A_TEXTURE1,		// 2 or 3 comp
+		A_TEXTURE0,		// 2 comp
+		A_TEXTURE1,		// 2 comp
 		A_POS,			// 3 comp
 		A_NORMAL,		// 2 comp
 		A_COLOR,		// 3 comp
@@ -176,6 +177,7 @@ private:
 	Shader* active;
 	grinliz::CDynArray<int> activeStreams;
 	U32 totalCompileTime;
+	bool attribLocationSupport;
 
 	void LoadProgram( const char* name, grinliz::GLString *store );
 	Shader* CreateProgram( int flag );

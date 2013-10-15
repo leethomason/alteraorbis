@@ -37,22 +37,20 @@ grinliz::Color4F	GPUState::diffuse;
 {
 	GPUVertexBuffer buffer;
 
-	if ( GPUState::SupportsVBOs() ) {
-		U32 dataSize  = size*nVertex;
-		glGenBuffersX( 1, (GLuint*) &buffer.id );
-		glBindBufferX( GL_ARRAY_BUFFER, buffer.id );
-		// if vertex is null this will just allocate
-		glBufferDataX( GL_ARRAY_BUFFER, dataSize, vertex, vertex ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW );
-		glBindBufferX( GL_ARRAY_BUFFER, 0 );
-		CHECK_GL_ERROR;
-	}
+	U32 dataSize  = size*nVertex;
+	glGenBuffersX( 1, (GLuint*) &buffer.id );
+	glBindBufferX( GL_ARRAY_BUFFER, buffer.id );
+	// if vertex is null this will just allocate
+	glBufferDataX( GL_ARRAY_BUFFER, dataSize, vertex, vertex ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW );
+	glBindBufferX( GL_ARRAY_BUFFER, 0 );
+	CHECK_GL_ERROR;
+
 	return buffer;
 }
 
 
 void GPUVertexBuffer::Upload( const void* data, int nBytes, int start )
 {
-	GLASSERT( GPUState::SupportsVBOs() );
 	glBindBufferX( GL_ARRAY_BUFFER, id );
 	// target, offset, size, data
 	glBufferSubDataX( GL_ARRAY_BUFFER, start, nBytes, data );
@@ -75,14 +73,13 @@ void GPUVertexBuffer::Destroy()
 {
 	GPUIndexBuffer buffer;
 
-	if ( GPUState::SupportsVBOs() ) {
-		U32 dataSize  = sizeof(U16)*nIndex;
-		glGenBuffersX( 1, (GLuint*) &buffer.id );
-		glBindBufferX( GL_ELEMENT_ARRAY_BUFFER, buffer.id );
-		glBufferDataX( GL_ELEMENT_ARRAY_BUFFER, dataSize, index, GL_STATIC_DRAW );
-		glBindBufferX( GL_ELEMENT_ARRAY_BUFFER, 0 );
-		CHECK_GL_ERROR;
-	}
+	U32 dataSize  = sizeof(U16)*nIndex;
+	glGenBuffersX( 1, (GLuint*) &buffer.id );
+	glBindBufferX( GL_ELEMENT_ARRAY_BUFFER, buffer.id );
+	glBufferDataX( GL_ELEMENT_ARRAY_BUFFER, dataSize, index, GL_STATIC_DRAW );
+	glBindBufferX( GL_ELEMENT_ARRAY_BUFFER, 0 );
+	CHECK_GL_ERROR;
+
 	return buffer;
 }
 
@@ -114,15 +111,14 @@ void GPUIndexBuffer::Destroy()
 {
 	GPUInstanceBuffer buffer;
 
-	if ( GPUState::SupportsVBOs() ) {
-		U32 dataSize  = nData;
-		glGenBuffersX( 1, (GLuint*) &buffer.id );
-		glBindBufferX( GL_ARRAY_BUFFER, buffer.id );
-		// if vertex is null this will just allocate
-		glBufferDataX( GL_ARRAY_BUFFER, dataSize, data, data ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW );
-		glBindBufferX( GL_ARRAY_BUFFER, 0 );
-		CHECK_GL_ERROR;
-	}
+	U32 dataSize  = nData;
+	glGenBuffersX( 1, (GLuint*) &buffer.id );
+	glBindBufferX( GL_ARRAY_BUFFER, buffer.id );
+	// if vertex is null this will just allocate
+	glBufferDataX( GL_ARRAY_BUFFER, dataSize, data, data ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW );
+	glBindBufferX( GL_ARRAY_BUFFER, 0 );
+	CHECK_GL_ERROR;
+
 	return buffer;
 }
 
@@ -195,7 +191,6 @@ void MatrixStack::Multiply( const grinliz::Matrix4& m )
 /*static*/ GPUState::MatrixType GPUState::matrixMode = MODELVIEW_MATRIX;
 /*static*/ MatrixStack	GPUState::mvStack;
 /*static*/ MatrixStack	GPUState::projStack;
-/*static*/ int			GPUState::vboSupport = 0;
 /*static*/ GPUState::BlendMode	GPUState::currentBlend = BLEND_NONE;
 /*static*/ GPUState::DepthWrite	GPUState::currentDepthWrite = DEPTH_WRITE_TRUE;
 /*static*/ GPUState::DepthTest	GPUState::currentDepthTest = DEPTH_TEST_TRUE;
@@ -203,20 +198,6 @@ void MatrixStack::Multiply( const grinliz::Matrix4& m )
 /*static*/ GPUState::StencilMode GPUState::currentStencilMode = STENCIL_OFF;
 /*static*/ Matrix4		GPUState::identity[EL_MAX_INSTANCE];
 /*static*/ Vector4F		GPUState::defaultControl[EL_MAX_INSTANCE];
-
-/*static*/ bool GPUState::SupportsVBOs()
-{
-#ifdef EL_USE_VBO
-	if ( vboSupport == 0 ) {
-		const char* extensions = (const char*)glGetString( GL_EXTENSIONS );
-		const char* vbo = strstr( extensions, "ARB_vertex_buffer_object" );
-		vboSupport = (vbo) ? 1 : -1;
-	}
-	return (vboSupport > 0);
-#else
-	return false;
-#endif
-}
 
 
 /*static */ void GPUState::ResetState()
@@ -316,7 +297,7 @@ int GPUState::Upload( const GPUState& state, const GPUStream& stream, const GPUS
 			glBindTexture( GL_TEXTURE_2D, data.texture0->GLID() );
 			shadman->SetTexture( 0, data.texture0 );
 
-			shadman->SetStreamData( ShaderManager::A_TEXTURE0, stream.nTexture0, GL_FLOAT, stream.stride, PTR( data.streamPtr, stream.texture0Offset ) );
+			shadman->SetStreamData( ShaderManager::A_TEXTURE0, 2, GL_FLOAT, stream.stride, PTR( data.streamPtr, stream.texture0Offset ) );
 		}
 	}
 	CHECK_GL_ERROR;
@@ -392,7 +373,6 @@ void GPUState::Weld( const GPUState& state, const GPUStream& stream, const GPUSt
 	// State Flags
 	flags |= (data.texture0 ) ? ShaderManager::TEXTURE0 : 0;
 	flags |= (data.texture0 && (data.texture0->Format() == Texture::ALPHA )) ? ShaderManager::TEXTURE0_ALPHA_ONLY : 0;
-	if ( flags & ShaderManager::TEXTURE0 ) GLASSERT( stream.nTexture0 );
 
 	flags |= state.HasLighting();
 
@@ -850,7 +830,7 @@ GPUStream::GPUStream( const Vertex& vertex )
 	posOffset = Vertex::POS_OFFSET;
 	nNormal = 3;
 	normalOffset = Vertex::NORMAL_OFFSET;
-	nTexture0 = 2;
+//	nTexture0 = 2;
 	texture0Offset = Vertex::TEXTURE_OFFSET;
 	boneOffset = Vertex::BONE_ID_OFFSET;
 }
@@ -862,7 +842,7 @@ GPUStream::GPUStream( GamuiType )
 	stride = sizeof( gamui::Gamui::Vertex );
 	nPos = 2;
 	posOffset = gamui::Gamui::Vertex::POS_OFFSET;
-	nTexture0 = 2;
+//	nTexture0 = 2;
 	texture0Offset = gamui::Gamui::Vertex::TEX_OFFSET;
 }
 
@@ -873,7 +853,7 @@ GPUStream::GPUStream( const PTVertex& vertex )
 	stride = sizeof( PTVertex );
 	nPos = 3;
 	posOffset = PTVertex::POS_OFFSET;
-	nTexture0 = 2;
+//	nTexture0 = 2;
 	texture0Offset = PTVertex::TEXTURE_OFFSET;
 }
 
@@ -884,7 +864,7 @@ GPUStream::GPUStream( const PTVertex2& vertex )
 	stride = sizeof( PTVertex2 );
 	nPos = 2;
 	posOffset = PTVertex2::POS_OFFSET;
-	nTexture0 = 2;
+//	nTexture0 = 2;
 	texture0Offset = PTVertex2::TEXTURE_OFFSET;
 
 }

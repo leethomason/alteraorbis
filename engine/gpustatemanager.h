@@ -109,9 +109,9 @@ struct GPUStream {
 	int stride;
 	int nPos;		
 	int posOffset;
-	int nTexture0;
+	//int nTexture0;
 	int texture0Offset;
-	int nTexture1;
+	//int nTexture1;
 	int texture1Offset;
 	int nNormal;
 	int normalOffset;
@@ -123,8 +123,8 @@ struct GPUStream {
 
 	GPUStream() :  stride( 0 ),
 				nPos( 0 ), posOffset( 0 ), 
-				nTexture0( 0 ), texture0Offset( 0 ),
-				nTexture1( 0 ), texture1Offset( 0 ), 
+				/*nTexture0( 0 ), */texture0Offset( 0 ),
+				/*nTexture1( 0 ), */texture1Offset( 0 ), 
 				nNormal( 0 ), normalOffset( 0 ),
 				nColor( 0 ), colorOffset( 0 ), boneOffset( 0 ) {}
 
@@ -140,8 +140,8 @@ struct GPUStream {
 	bool HasPos() const			{ return nPos > 0; }
 	bool HasNormal() const		{ return nNormal > 0; }
 	bool HasColor() const		{ return nColor > 0; }
-	bool HasTexture0() const	{ return nTexture0 > 0; }
-	bool HasTexture1() const	{ return nTexture1 > 0; }
+	//bool HasTexture0() const	{ return nTexture0 > 0; }
+	//bool HasTexture1() const	{ return nTexture1 > 0; }
 };
 
 
@@ -307,9 +307,6 @@ public:
 	static int QuadsDrawn()		{ return quadsDrawn; }
 	static int DrawCalls()		{ return drawCalls; }
 
-	static bool SupportsVBOs();
-
-
 	GPUState() : stateFlags( 0 ),
 				 shaderFlags( 0 )
 	{
@@ -326,7 +323,6 @@ private:
 
 	static void SwitchMatrixMode( MatrixType type );	
 	static MatrixType		matrixMode;		// Note this is static and global!
-	static int vboSupport;
 
 	static MatrixStack mvStack;
 	static MatrixStack projStack;
