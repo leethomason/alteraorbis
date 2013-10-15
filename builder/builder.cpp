@@ -1031,6 +1031,7 @@ int main( int argc, char* argv[] )
 		printf( "Usage: ufobuilder ./path/xmlFile.xml ./outPath/filename.db <options>\n" );
 		printf( "options:\n" );
 		printf( "    -d    print database\n" );
+		printf( "    -b    print output bitmaps\n" );
 		exit( 0 );
 	}
 
@@ -1042,6 +1043,9 @@ int main( int argc, char* argv[] )
 	for( int i=3; i<argc; ++i ) {
 		if ( StrEqual( argv[i], "-d" ) ) {
 			printDatabase = true;
+		}
+		if ( StrEqual( argv[i], "-b" )) {
+			BTexture::logToPNG = true;
 		}
 	}
 

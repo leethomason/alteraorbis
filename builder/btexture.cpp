@@ -32,6 +32,8 @@ extern void PutPixel( SDL_Surface *surface, int x, int y, const Color4U8& c );
 
 typedef SDL_Surface* (SDLCALL * PFN_IMG_LOAD) (const char *file);
 
+bool BTexture::logToPNG = false;
+
 BTexture::BTexture()
 	: isImage( false ),
 	  dither( false ),
@@ -264,7 +266,7 @@ bool BTexture::Scale()
 		printf( " w=%d h=%d", surface->w, surface->h );
 	}
 
-	{
+	if ( logToPNG ) {
 		GLString path = "./resin/scaled/";
 		path += this->assetName;
 		path += ".png";

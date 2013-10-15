@@ -75,6 +75,8 @@ public:
 	int atlasX;
 	int atlasY;
 
+	static bool logToPNG;
+
 	enum {
 		RGBA16,		// 4444		2
 		RGB16,		// 565		2
