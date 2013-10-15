@@ -19,7 +19,7 @@
 #include "../tinyxml2/tinyxml2.h"
 #include "../grinliz/glstringutil.h"
 #include "../shared/gamedbwriter.h"
-#include "SDL.h"
+#include "../libs/SDL2/include/SDL.h"
 #include <vector>
 
 class BTexture
@@ -74,6 +74,8 @@ public:
 	int targetMax;
 	int atlasX;
 	int atlasY;
+
+	static bool logToPNG;
 
 	enum {
 		RGBA16,		// 4444		2

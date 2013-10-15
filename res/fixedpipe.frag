@@ -1,3 +1,5 @@
+//
+// CAUTION: a header is inserted *before* this text. #version and layout information goes there.
 
 #if TEXTURE0 == 1
 	uniform sampler2D texture0;
@@ -33,9 +35,7 @@ void main()
 		#endif
 
 		#if TEXTURE0_COLORMAP == 1
-			float a = sample.a;
-			sample = sample.r*v_colorMap[0] + sample.g*v_colorMap[1] + sample.b*v_colorMap[2];
-			sample.a = mix( sample.a, a, v_colorMap[3][3] );
+			sample = sample.r*v_colorMap[0] + sample.g*v_colorMap[1] + sample.b*v_colorMap[2] + sample.a*v_colorMap[3];
 		#endif
 
 		#if TEXTURE0_ALPHA_ONLY == 1

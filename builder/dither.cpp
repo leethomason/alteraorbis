@@ -99,6 +99,7 @@ void OrderedDitherTo16( const SDL_Surface* surface, int format, bool invert, U16
 }
 
 
+#if 0
 // LIGHT/DARK offset error.
 void DiffusionDitherTo16( const SDL_Surface* _surface, int format, bool invert, U16* target )
 {
@@ -172,5 +173,4 @@ void DiffusionDitherTo16( const SDL_Surface* _surface, int format, bool invert, 
 	}
 	SDL_FreeSurface( surface );
 }
-
-
+#endif

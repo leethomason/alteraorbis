@@ -16,11 +16,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "SDL.h"
-#if defined(__APPLE__)	// OSX, not iphone
-#include "SDL_image.h"
-#endif
-#include "SDL_loadso.h"
+#include "../libs/SDL2/include/SDL.h"
 
 #include <string>
 #include <vector>
@@ -49,13 +45,11 @@
 #include "animationbuilder.h"
 
 #include "../markov/markov.h"
+#include "../shared/lodepng.h"
 
 using namespace std;
 using namespace grinliz;
 using namespace tinyxml2;
-
-typedef SDL_Surface* (SDLCALL * PFN_IMG_LOAD) (const char *file);
-PFN_IMG_LOAD libIMG_Load;
 
 string inputDirectory;
 string inputFullPath;
@@ -82,23 +76,6 @@ void ExitError( const char* tag,
 		   assetName ? assetName : "<no asset>", 
 		   message );
 	exit( 1 );
-}
-
-
-
-void LoadLibrary()
-{
-	#if defined(__APPLE__)
-		libIMG_Load = &IMG_Load;
-	#else
-		void* handle = grinliz::grinlizLoadLibrary( "SDL_image" );
-		if ( !handle )
-		{	
-			ExitError( "Initialization", 0, 0, "Could not load SDL_image library." );
-		}
-		libIMG_Load = (PFN_IMG_LOAD) grinliz::grinlizLoadFunction( handle, "IMG_Load" );
-		GLASSERT( libIMG_Load );
-	#endif
 }
 
 
@@ -215,7 +192,6 @@ void ModelGroup::Set( const char* textureName, int nVertex, int nIndex )
 Color4U8 GetPixel( const SDL_Surface *surface, int x, int y)
 {
     int bpp = surface->format->BytesPerPixel;
-    /* Here p is the address to the pixel we want to retrieve */
     U8 *p = (Uint8 *)surface->pixels + y * surface->pitch + x * bpp;
 	U32 c = 0;
 
@@ -229,14 +205,11 @@ Color4U8 GetPixel( const SDL_Surface *surface, int x, int y)
 		break;
 
     case 3:
-        if(SDL_BYTEORDER == SDL_BIG_ENDIAN)
-            c =  p[0] << 16 | p[1] << 8 | p[2];
-        else
-            c = p[0] | p[1] << 8 | p[2] << 16;
+        c =  (p[0] << 16) | (p[1] << 8) | p[2];
 		break;
 
     case 4:
-        c = *(U32 *)p;
+        c = (p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3];
 		break;
     }
 	Color4U8 color;
@@ -261,20 +234,17 @@ void PutPixel(SDL_Surface *surface, int x, int y, const Color4U8& c )
         break;
 
     case 3:
-        if(SDL_BYTEORDER == SDL_BIG_ENDIAN) {
-            p[0] = (pixel >> 16) & 0xff;
-            p[1] = (pixel >> 8) & 0xff;
-            p[2] = pixel & 0xff;
-        } else {
-            p[0] = pixel & 0xff;
-            p[1] = (pixel >> 8) & 0xff;
-            p[2] = (pixel >> 16) & 0xff;
-        }
-        break;
+        p[0] = (pixel >> 16) & 0xff;
+        p[1] = (pixel >> 8) & 0xff;
+        p[2] = pixel & 0xff;
+		break;
 
     case 4:
-        *(U32*)p = pixel;
-        break;
+        p[0] = (pixel >> 24) & 0xff;
+        p[1] = (pixel >> 16) & 0xff;
+        p[2] = (pixel >> 8) & 0xff;
+        p[3] = pixel & 0xff;
+		break;
     }
 }
 
@@ -861,6 +831,62 @@ void ProcessAtlas( XMLElement* atlasElement )
 }
 
 
+SDL_Surface* LoadImage( const char* pathname )
+{
+	FILE* fp = fopen( pathname, "rb" );
+	if ( !fp ) return 0;
+
+	fseek( fp, 0, SEEK_END );
+	int size = ftell( fp );
+	fseek( fp, 0, SEEK_SET );
+
+	if ( size == 0 ) return 0;
+
+	U8* data = new U8[size];
+	fread( data, 1, size, fp );
+	fclose( fp );
+
+	unsigned w, h, error=0;
+	LodePNGState state;
+	memset( &state, 0, sizeof(state) );
+	lodepng_inspect( &w, &h, &state, data, size );
+	SDL_Surface* surface = 0;
+
+	if ( state.info_png.color.colortype == LCT_RGB ) {
+		U8* out = 0;
+		error = lodepng_decode24( &out, &w, &h, data, size );
+		GLASSERT( !error );
+		surface = SDL_CreateRGBSurface( 0, w, h, 24, 0xff0000, 0x00ff00, 0x0000ff, 0 );
+		GLASSERT( surface->pitch == w * 3 );
+		memcpy( surface->pixels, out, w*h*3 );
+		free( out );
+	}
+	else if ( state.info_png.color.colortype == LCT_RGBA ) {
+		U8* out = 0;
+		error = lodepng_decode32( &out, &w, &h, data, size );
+		GLASSERT( !error );
+		surface = SDL_CreateRGBSurface( 0, w, h, 32, 0xff000000, 0x00ff0000, 0x0000ff00, 0x000000ff );
+		GLASSERT( surface->pitch == w*4 );
+		memcpy( surface->pixels, out, w*h*4 );
+		free( out );
+	}
+	else if ( state.info_png.color.colortype == LCT_GREY ) {
+		U8* out = 0;
+		error = lodepng_decode_memory( &out, &w, &h, data, size, LCT_GREY, 8  );
+		GLASSERT( !error );
+		surface = SDL_CreateRGBSurface( 0, w, h, 8, 0, 0, 0, 0xff );
+		GLASSERT( surface->pitch == w );
+		memcpy( surface->pixels, out, w*h );
+		free( out );
+	}
+	else {
+	}
+
+	delete [] data;
+	return surface;
+}
+
+
 void ProcessPalette( XMLElement* pal )
 {
 	int dx=0;
@@ -874,7 +900,7 @@ void ProcessPalette( XMLElement* pal )
 	GLString pathName, assetName;
 	ParseNames( pal, &assetName, &pathName, 0 );
 
-	SDL_Surface* surface = libIMG_Load( pathName.c_str() );
+	SDL_Surface* surface = LoadImage( pathName.c_str() );
 	if ( !surface ) {
 		ExitError( "Palette", pathName.c_str(), assetName.c_str(), "Could not load asset." );
 	}
@@ -912,7 +938,7 @@ void ProcessFont( XMLElement* font )
 	GLString pathName, assetName;
 	ParseNames( font, &assetName, &pathName, 0 );
 
-	SDL_Surface* surface = libIMG_Load( pathName.c_str() );
+	SDL_Surface* surface = LoadImage( pathName.c_str() );
 	if ( !surface ) {
 		ExitError( "Font", pathName.c_str(), assetName.c_str(), "Could not load asset." );
 	}
@@ -1005,11 +1031,11 @@ int main( int argc, char* argv[] )
 		printf( "Usage: ufobuilder ./path/xmlFile.xml ./outPath/filename.db <options>\n" );
 		printf( "options:\n" );
 		printf( "    -d    print database\n" );
+		printf( "    -b    print output bitmaps\n" );
 		exit( 0 );
 	}
 
     SDL_Init( SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE | SDL_INIT_TIMER );
-	LoadLibrary();
 
 	inputFullPath = argv[1];
 	outputPath = argv[2];
@@ -1017,6 +1043,9 @@ int main( int argc, char* argv[] )
 	for( int i=3; i<argc; ++i ) {
 		if ( StrEqual( argv[i], "-d" ) ) {
 			printDatabase = true;
+		}
+		if ( StrEqual( argv[i], "-b" )) {
+			BTexture::logToPNG = true;
 		}
 	}
 
@@ -1031,7 +1060,7 @@ int main( int argc, char* argv[] )
 	
 	{
 		string testInput = inputDirectory + "Lenna.png";
-		SDL_Surface* surface = libIMG_Load( testInput.c_str() );
+		SDL_Surface* surface = LoadImage( testInput.c_str() );
 		BTexture btexture;
 		btexture.Create( surface->w, surface->h, BTexture::RGB16 );
 		btexture.ToBuffer();
@@ -1039,8 +1068,9 @@ int main( int argc, char* argv[] )
 		if ( surface ) {
 			// 444
 			OrderedDitherTo16( surface, RGBA16, false, btexture.pixelBuffer16 );
-			SDL_Surface* newSurf = SDL_CreateRGBSurfaceFrom(	btexture.pixelBuffer16, surface->w, surface->h, 16, surface->w*2,
-																0xf000, 0x0f00, 0x00f0, 0 );
+			SDL_Surface* newSurf = SDL_CreateRGBSurface( 0, surface->w, surface->h, 16, 0xf000, 0x0f00, 0x00f0, 0x000f );
+			GLASSERT( newSurf->pitch == surface->w*2 );
+			memcpy( newSurf->pixels, btexture.pixelBuffer16, surface->w*surface->h*2 );
 			string out = inputDirectory + "Lenna4440.bmp";
 			SDL_SaveBMP( newSurf, out.c_str() );
 			
@@ -1048,21 +1078,25 @@ int main( int argc, char* argv[] )
 
 			// 565
 			OrderedDitherTo16( surface, RGB16, false, btexture.pixelBuffer16 );
-			newSurf = SDL_CreateRGBSurfaceFrom(	btexture.pixelBuffer16, surface->w, surface->h, 16, surface->w*2,
-												0xf800, 0x07e0, 0x001f, 0 );
+			newSurf = SDL_CreateRGBSurface(	0, surface->w, surface->h, 16, 0xf800, 0x07e0, 0x001f, 0 );
+			GLASSERT( newSurf->pitch == surface->w*2 );
+			memcpy( newSurf->pixels, btexture.pixelBuffer16, surface->w*surface->h*2 );
 			string out1 = inputDirectory + "Lenna565.bmp";
 			SDL_SaveBMP( newSurf, out1.c_str() );
 
 			SDL_FreeSurface( newSurf );
 
+#if 0
 			// 565 Diffusion
 			DiffusionDitherTo16( surface, RGB16, false, btexture.pixelBuffer16 );
-			newSurf = SDL_CreateRGBSurfaceFrom(	btexture.pixelBuffer16, surface->w, surface->h, 16, surface->w*2,
-												0xf800, 0x07e0, 0x001f, 0 );
+			newSurf = SDL_CreateRGBSurface(	06, surface->w, surface->h, 16,	0xf800, 0x07e0, 0x001f, 0 );
+			GLASSERT( newSurf->pitch == surface->w*2 );
+			memcpy( newSurf->pixels, btexture.pixelBuffer16, surface->w*surface->h*2 );
+
 			string out2 = inputDirectory + "Lenna565Diffuse.bmp";
 			SDL_SaveBMP( newSurf, out2.c_str() );
-
 			SDL_FreeSurface( newSurf );
+#endif
 			
 			SDL_FreeSurface( surface );
 		}

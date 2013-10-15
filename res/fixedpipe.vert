@@ -1,9 +1,11 @@
+//
+// CAUTION: a header is inserted *before* this text. #version and layout information goes there.
 // CAUTION: never use 'int' attributes. They don't work for reasons unknown to me.
 
 // Copied here so that it can be easily handled
 // if the InstanceID isn't supported.
 // INTEL BUG: if the ID is assigned, 'instance' is always 0.
-//int instance = gl_InstanceID;
+// int instance = gl_InstanceID;
 
 uniform mat4 		u_mvpMatrix;						// model-view-projection.
 
