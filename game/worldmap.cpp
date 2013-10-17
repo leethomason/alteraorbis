@@ -70,6 +70,9 @@ WorldMap::WorldMap( int width, int height ) : Map( width, height )
 	gridTexture = 0;
 
 	debugRegionOverlay.Set( 0, 0, 0, 0 );
+
+	voxelVertexVBO = 0;
+	gridVertexVBO = 0;
 }
 
 
@@ -81,6 +84,9 @@ WorldMap::~WorldMap()
 	DeleteAllRegions();
 	delete [] grid;
 	delete worldInfo;
+
+	delete voxelVertexVBO;
+	delete gridVertexVBO;
 }
 
 
@@ -91,8 +97,10 @@ void WorldMap::DeviceLoss()
 
 void WorldMap::FreeVBOs()
 {
-	voxelVertexVBO.Destroy();
-	gridVertexVBO.Destroy();
+	delete voxelVertexVBO;
+	delete gridVertexVBO;
+	voxelVertexVBO = 0;
+	gridVertexVBO = 0;
 }
 
 
@@ -131,8 +139,9 @@ void WorldMap::AttachEngine( Engine* e, IMapGridUse* imap )
 	engine = e;
 	iMapGridUse = imap;
 
-	if ( e == 0 && voxelVertexVBO.IsValid() ) {
-		voxelVertexVBO.Destroy();
+	if ( e == 0 && voxelVertexVBO ) {
+		delete voxelVertexVBO;
+		voxelVertexVBO = 0;
 	}
 }
 
@@ -525,8 +534,8 @@ void WorldMap::Tessellate()
 	GLOUTPUT(( "Tessallate: land:%d,%d water:%d,%d\n", vertex[WorldGrid::LAND]->Size(),  index[WorldGrid::LAND]->Size(),
 													   vertex[WorldGrid::WATER]->Size(), index[WorldGrid::WATER]->Size() ));
 	for( int i=0; i<WorldGrid::NUM_LAYERS; ++i ) {
-		vertexVBO[i] = GPUVertexBuffer::Create( vertex[i]->Mem(), sizeof(PTVertex), vertex[i]->Size() );
-		indexVBO[i]  = GPUIndexBuffer::Create( index[i]->Mem(), index[i]->Size() );
+		vertexVBO[i] = new GPUVertexBuffer( vertex[i]->Mem(), sizeof(PTVertex)*vertex[i]->Size() );
+		indexVBO[i]  = new GPUIndexBuffer(  index[i]->Mem(), index[i]->Size() );
 		nIndex[i] = index[i]->Size();
 		delete vertex[i];
 		delete index[i];
@@ -1730,7 +1739,7 @@ void WorldMap::ShowAdjacentRegions( float fx, float fy )
 
 void WorldMap::DrawTreeZones()
 {
-	CompositingShader debug( GPUState::BLEND_NORMAL );
+	CompositingShader debug( BLEND_NORMAL );
 	debug.SetColor( 0.2f, 0.8f, 0.6f, 0.5f );
 	if ( engine ) {
 		const CArray<Rectangle2I, SpaceTree::MAX_ZONES>& zones = engine->GetSpaceTree()->Zones();
@@ -1739,7 +1748,7 @@ void WorldMap::DrawTreeZones()
 			Rectangle2I r = zones[i];
 			Vector3F p0 = { (float)r.min.x, 0.05f, (float)r.min.y };
 			Vector3F p1 = { (float)r.max.x+0.95f, 0.05f, (float)r.max.y+0.95f };
-			debug.DrawQuad( 0, p0, p1, false );
+			GPUDevice::Instance()->DrawQuad( debug, 0, p0, p1, false );
 		}
 	}
 }
@@ -1747,14 +1756,16 @@ void WorldMap::DrawTreeZones()
 
 void WorldMap::DrawZones()
 {
-	CompositingShader debug( GPUState::BLEND_NORMAL );
+	CompositingShader debug( BLEND_NORMAL );
 	debug.SetColor( 1, 1, 1, 0.5f );
-	CompositingShader debugOrigin( GPUState::BLEND_NORMAL );
+	CompositingShader debugOrigin( BLEND_NORMAL );
 	debugOrigin.SetColor( 1, 0, 0, 0.5f );
-	CompositingShader debugAdjacent( GPUState::BLEND_NORMAL );
+	CompositingShader debugAdjacent( BLEND_NORMAL );
 	debugAdjacent.SetColor( 1, 1, 0, 0.5f );
-	CompositingShader debugPath( GPUState::BLEND_NORMAL );
+	CompositingShader debugPath( BLEND_NORMAL );
 	debugPath.SetColor( 0.5f, 0.5f, 1, 0.5f );
+
+	GPUDevice* device = GPUDevice::Instance();
 
 	for( int j=debugRegionOverlay.min.y; j<=debugRegionOverlay.max.y; ++j ) {
 		for( int i=debugRegionOverlay.min.x; i<=debugRegionOverlay.max.x; ++i ) {
@@ -1770,16 +1781,16 @@ void WorldMap::DrawZones()
 					Vector3F p1 = { (float)(i+gs.ZoneSize())-offset, 0.01f, (float)(j+gs.ZoneSize())-offset };
 
 					if ( gs.DebugOrigin() ) {
-						debugOrigin.DrawQuad( 0, p0, p1, false );
+						device->DrawQuad( debugOrigin, 0, p0, p1, false );
 					}
 					else if ( gs.DebugAdjacent() ) {
-						debugAdjacent.DrawQuad( 0, p0, p1, false );
+						device->DrawQuad( debugAdjacent, 0, p0, p1, false );
 					}
 					else if ( gs.DebugPath() ) {
-						debugPath.DrawQuad( 0, p0, p1, false );
+						device->DrawQuad( debugPath, 0, p0, p1, false );
 					}
 					else {
-						debug.DrawQuad( 0, p0, p1, false );
+						device->DrawQuad( debug, 0, p0, p1, false );
 					}
 				}
 			}
@@ -1837,27 +1848,27 @@ void WorldMap::Submit( GPUState* shader, bool emissiveOnly )
 	GPUStream stream( v );
 
 	GPUStreamData data;
-	data.vertexBuffer	= gridVertexVBO.ID();
+	data.vertexBuffer	= gridVertexVBO->ID();
 	data.texture0		= gridTexture;
 	Vector4F control	= { 1, Saturation(), 1, 1 };
 	data.controlParam	= &control;
 
-	shader->DrawQuads( stream, data, nGrids );
+	GPUDevice::Instance()->DrawQuads( *shader, stream, data, nGrids );
 
 #if 0
 	for( int i=0; i<WorldGrid::NUM_LAYERS; ++i ) {
 		if ( emissiveOnly && !texture[i]->Emissive() )
 			continue;
-		if ( vertexVBO[i].IsValid() && indexVBO[i].IsValid() ) {
+		if ( vertexVBO[i] && indexVBO[i] ) {
 			PTVertex pt;
 			GPUStream stream( pt );
 			Vector4F control = { 1, Saturation(), 1, 1 };
 			GPUStreamData data;
-			data.vertexBuffer = vertexVBO[i].ID();
-			data.indexBuffer  = indexVBO[i].ID();
+			data.vertexBuffer = vertexVBO[i]->ID();
+			data.indexBuffer  = indexVBO[i]->ID();
 			data.texture0	  = texture[i];
 			data.controlParam = &control;
-			shader->Draw( stream, data, nIndex[i] );
+			GPUDevice::Instance()->Draw( *shader, stream, data, 0, nIndex[i], 1 );
 		}
 	}
 #endif
@@ -1869,10 +1880,9 @@ void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 {
 	// For each region of the spaceTree that is visible,
 	// generate voxels.
-	if ( !gridVertexVBO.IsValid()) {
-		gridVertexVBO = GPUVertexBuffer::Create( 0, sizeof(Vertex), voxelBuffer.Capacity() );
+	if ( !gridVertexVBO ) {
+		gridVertexVBO = new GPUVertexBuffer( 0, sizeof(Vertex)*voxelBuffer.Capacity() );
 	}
-	GLASSERT( gridVertexVBO.IsValid());
 	voxelBuffer.Clear();
 
 	// HARDCODE black magic values.
@@ -1935,7 +1945,7 @@ void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 			}
 		}
 	}
-	gridVertexVBO.Upload( voxelBuffer.Mem(), voxelBuffer.Size()*sizeof(Vertex), 0 );
+	gridVertexVBO->Upload( voxelBuffer.Mem(), voxelBuffer.Size()*sizeof(Vertex), 0 );
 	nGrids = voxelBuffer.Size() / 4;
 }
 
@@ -2001,10 +2011,9 @@ void WorldMap::PrepVoxels( const SpaceTree* spaceTree )
 	//PROFILE_FUNC();
 	// For each region of the spaceTree that is visible,
 	// generate voxels.
-	if ( !voxelVertexVBO.IsValid()) {
-		voxelVertexVBO = GPUVertexBuffer::Create( 0, sizeof(Vertex), MAX_VOXEL_QUADS*4 );
+	if ( !voxelVertexVBO ) {
+		voxelVertexVBO = new GPUVertexBuffer( 0, sizeof(Vertex)*MAX_VOXEL_QUADS*4 );
 	}
-	GLASSERT( voxelVertexVBO.IsValid());
 	voxelBuffer.Clear();
 	
 	const CArray<Rectangle2I, SpaceTree::MAX_ZONES>& zones = spaceTree->Zones();
@@ -2070,7 +2079,7 @@ void WorldMap::PrepVoxels( const SpaceTree* spaceTree )
 			}
 		}
 	}
-	voxelVertexVBO.Upload( voxelBuffer.Mem(), voxelBuffer.Size()*sizeof(Vertex), 0 );
+	voxelVertexVBO->Upload( voxelBuffer.Mem(), voxelBuffer.Size()*sizeof(Vertex), 0 );
 	nVoxels = voxelBuffer.Size() / 4;
 }
 
@@ -2082,28 +2091,31 @@ void WorldMap::DrawVoxels( GPUState* state, const grinliz::Matrix4* xform )
 	}
 	Vertex v;
 	GPUStream stream( v );
+	GPUDevice* device = GPUDevice::Instance();
+
 	if ( xform ) {
-		state->PushMatrix( GPUState::MODELVIEW_MATRIX );
-		state->MultMatrix( GPUState::MODELVIEW_MATRIX, *xform );
+		device->PushMatrix( GPUDevice::MODELVIEW_MATRIX );
+		device->MultMatrix( GPUDevice::MODELVIEW_MATRIX, *xform );
 	}
 
 	Vector4F control = { 1, Saturation(), 1, 1 };
 
 	GPUStreamData data;
-	data.vertexBuffer	= voxelVertexVBO.ID();
+	data.vertexBuffer	= voxelVertexVBO->ID();
 	data.texture0		= voxelTexture;
 	data.controlParam	= &control;
 
-	state->DrawQuads( stream, data, nVoxels );
+	device->DrawQuads( *state, stream, data, nVoxels );
 
 	if ( xform ) {
-		state->PopMatrix( GPUState::MODELVIEW_MATRIX );
+		device->PopMatrix( GPUDevice::MODELVIEW_MATRIX );
 	}
 }
 
 
-void WorldMap::Draw3D(  const grinliz::Color3F& colorMult, GPUState::StencilMode mode, bool useSaturation )
+void WorldMap::Draw3D(  const grinliz::Color3F& colorMult, StencilMode mode, bool useSaturation )
 {
+	GPUDevice* device = GPUDevice::Instance();
 
 	// Real code to draw the map:
 	FlatShader shader;
@@ -2115,14 +2127,14 @@ void WorldMap::Draw3D(  const grinliz::Color3F& colorMult, GPUState::StencilMode
 	Submit( &shader, false );
 
 	if ( debugRegionOverlay.Area() > 0 ) {
-		if ( mode == GPUState::STENCIL_CLEAR ) {
+		if ( mode == STENCIL_CLEAR ) {
 			// Debugging pathing zones:
 			DrawZones();
 		}
 	}
 
 #if 0
-	if ( mode == GPUState::STENCIL_CLEAR ) {
+	if ( mode == STENCIL_CLEAR ) {
 		DrawTreeZones();
 	}
 #endif
@@ -2133,7 +2145,7 @@ void WorldMap::Draw3D(  const grinliz::Color3F& colorMult, GPUState::StencilMode
 		for( int i=0; i<debugPathVector.Size()-1; ++i ) {
 			Vector3F tail = { debugPathVector[i].x, 0.2f, debugPathVector[i].y };
 			Vector3F head = { debugPathVector[i+1].x, 0.2f, debugPathVector[i+1].y };
-			debug.DrawArrow( tail, head, false );
+			device->DrawArrow( debug, tail, head, false );
 		}
 	}
 	{
@@ -2144,9 +2156,9 @@ void WorldMap::Draw3D(  const grinliz::Color3F& colorMult, GPUState::StencilMode
 
 		FlatShader debug;
 		debug.SetColor( 1, 0, 0, 1 );
-		debug.DrawArrow( origin, xaxis, false );
+		device->DrawArrow( debug, origin, xaxis, false );
 		debug.SetColor( 0, 0, 1, 1 );
-		debug.DrawArrow( origin, zaxis, false );
+		device->DrawArrow( debug, origin, zaxis, false );
 	}
 }
 

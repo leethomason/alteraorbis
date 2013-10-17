@@ -16,7 +16,7 @@
 #ifndef XENOENGINE_ATLAS
 #define XENOENGINE_ATLAS
 
-#include "SDL.h"
+#include "../libs/SDL2/include/SDL.h"
 
 #include <vector>
 #include <algorithm>

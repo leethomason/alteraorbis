@@ -89,19 +89,22 @@ void Map::DrawOverlay( int id )
 }
 
 
-void Map::BeginRender()
+void Map::BeginRender( int nIndex, const uint16_t* index, int nVertex, const gamui::Gamui::Vertex* vertex )
 {
-	gamuiShader.PushMatrix( GPUState::MODELVIEW_MATRIX );
+	GPUDevice::Instance()->GetTempIBO()->Upload( index, nIndex, 0 );
+	GPUDevice::Instance()->GetTempVBO()->Upload( vertex, nVertex*sizeof(*vertex), 0 );
+
+	GPUDevice::Instance()->PushMatrix( GPUDevice::MODELVIEW_MATRIX );
 
 	Matrix4 rot;
 	rot.SetXRotation( 90 );
-	gamuiShader.MultMatrix( GPUState::MODELVIEW_MATRIX, rot );
+	GPUDevice::Instance()->MultMatrix( GPUDevice::MODELVIEW_MATRIX, rot );
 }
 
 
 void Map::EndRender()
 {
-	gamuiShader.PopMatrix( GPUState::MODELVIEW_MATRIX );
+	GPUDevice::Instance()->PopMatrix( GPUDevice::MODELVIEW_MATRIX );
 }
 
 
@@ -113,22 +116,22 @@ void Map::BeginRenderState( const void* renderState )
 		case UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE:
 		case RENDERSTATE_MAP_OPAQUE:
 			gamuiShader.SetColor( 1, 1, 1, 1 );
-			gamuiShader.SetBlendMode( GPUState::BLEND_NONE );
+			gamuiShader.SetBlendMode( BLEND_NONE );
 			break;
 
 		case UIRenderer::RENDERSTATE_UI_NORMAL:
 		case RENDERSTATE_MAP_NORMAL:
 			gamuiShader.SetColor( 1.0f, 1.0f, 1.0f, 0.8f );
-			gamuiShader.SetBlendMode( GPUState::BLEND_NORMAL );
+			gamuiShader.SetBlendMode( BLEND_NORMAL );
 			break;
 
 		case RENDERSTATE_MAP_TRANSLUCENT:
 			gamuiShader.SetColor( 1, 1, 1, ALPHA );
-			gamuiShader.SetBlendMode( GPUState::BLEND_NORMAL );
+			gamuiShader.SetBlendMode( BLEND_NORMAL );
 			break;
 		case RENDERSTATE_MAP_MORE_TRANSLUCENT:
 			gamuiShader.SetColor( 1, 1, 1, ALPHA_1 );
-			gamuiShader.SetBlendMode( GPUState::BLEND_NORMAL );
+			gamuiShader.SetBlendMode( BLEND_NORMAL );
 			break;
 		default:
 			GLASSERT( 0 );
@@ -142,8 +145,14 @@ void Map::BeginTexture( const void* textureHandle )
 }
 
 
-void Map::Render( const void* renderState, const void* textureHandle, int nIndex, const uint16_t* index, int nVertex, const gamui::Gamui::Vertex* vertex )
+void Map::Render( const void* renderState, const void* textureHandle, int start, int count )
 {
+	GPUDevice* device = GPUDevice::Instance();
+
 	GPUStream stream( GPUStream::kGamuiType );
-	gamuiShader.Draw( stream, texture, vertex, nIndex, index );
+	GPUStreamData data;
+	data.texture0 = (Texture*)textureHandle;
+	data.indexBuffer = device->GetTempIBO()->ID();
+	data.vertexBuffer = device->GetTempVBO()->ID();
+	device->Draw( gamuiShader, stream, data, start, count, 1 );
 }

@@ -26,7 +26,7 @@ public:
 	TestMap( int w, int h );
 	~TestMap();
 
-	virtual void Draw3D(  const grinliz::Color3F& colorMult, GPUState::StencilMode, bool useSaturation );
+	virtual void Draw3D(  const grinliz::Color3F& colorMult, StencilMode, bool useSaturation );
 
 	void SetColor( const grinliz::Color3F& color ) { this->color = color; }
 

@@ -37,8 +37,8 @@ distribution.
 #endif
 
 #ifndef __APPLE__
-	#include "SDL_loadso.h"
-	#include "SDL_error.h"
+	#include "../libs/SDL2/include/SDL_loadso.h"
+	#include "../libs/SDL2/include/SDL_error.h"
 #else
 	#include <dlfcn.h>
 #endif 

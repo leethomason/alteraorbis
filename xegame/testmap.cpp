@@ -53,7 +53,7 @@ TestMap::~TestMap()
 }
 
 
-void TestMap::Draw3D(  const Color3F& colorMult, GPUState::StencilMode mode, bool /*useSaturation*/ )
+void TestMap::Draw3D(  const Color3F& colorMult, StencilMode mode, bool /*useSaturation*/ )
 {
 	GPUStream stream;
 	stream.posOffset = 0;
@@ -64,7 +64,9 @@ void TestMap::Draw3D(  const Color3F& colorMult, GPUState::StencilMode mode, boo
 	shader.SetColor( colorMult.r*color.r, colorMult.g*color.g, colorMult.b*color.b );
 	shader.SetStencilMode( mode );
 
-	shader.Draw( stream, 0, vertex, width*height*6, index );
+	GPUDevice* device = GPUDevice::Instance();
+	GPUStreamData data;
+	device->Draw( shader, stream, data, width*height*4, vertex, width*height*6, index );
 
 	{
 		// Debugging coordinate system:
@@ -74,8 +76,8 @@ void TestMap::Draw3D(  const Color3F& colorMult, GPUState::StencilMode mode, boo
 
 		FlatShader debug;
 		debug.SetColor( 1, 0, 0, 1 );
-		debug.DrawArrow( origin, xaxis, false, 0.1f );
+		device->DrawArrow( debug, origin, xaxis, false, 0.1f );
 		debug.SetColor( 0, 0, 1, 1 );
-		debug.DrawArrow( origin, zaxis, false, 0.1f );
+		device->DrawArrow( debug, origin, zaxis, false, 0.1f );
 	}
 }

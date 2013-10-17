@@ -296,7 +296,7 @@ private:
 	grinliz::CDynArray< FocusItem >			m_focusItems;
 	grinliz::CDynArray< State >				m_stateBuffer;
 	grinliz::CDynArray< uint16_t >			m_indexBuffer;
-	grinliz::CDynArray< Vertex >				m_vertexBuffer;
+	grinliz::CDynArray< Vertex >			m_vertexBuffer;
 };
 
 
@@ -304,12 +304,12 @@ class IGamuiRenderer
 {
 public:
 	virtual ~IGamuiRenderer()	{}
-	virtual void BeginRender() = 0;
+	virtual void BeginRender( int nIndex, const uint16_t* index, int nVertex, const Gamui::Vertex* vertex ) = 0;
 	virtual void EndRender() = 0;
 
 	virtual void BeginRenderState( const void* renderState ) = 0;
 	virtual void BeginTexture( const void* textureHandle ) = 0;
-	virtual void Render( const void* renderState, const void* textureHandle, int nIndex, const uint16_t* index, int nVertex, const Gamui::Vertex* vertex ) = 0;
+	virtual void Render( const void* renderState, const void* textureHandle, int start, int count ) = 0;
 };
 
 

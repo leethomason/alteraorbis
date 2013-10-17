@@ -18,7 +18,7 @@
 
 #include "../grinliz/gltypes.h"
 #include "../grinliz/gldebug.h"
-#include "SDL.h"
+#include "../libs/SDL2/include/SDL.h"
 
 
 enum {		// channels	bytes
@@ -28,7 +28,7 @@ enum {		// channels	bytes
 };
 
 
-void DiffusionDitherTo16( const SDL_Surface* _surface, int format, bool invert, U16* target );
+//void DiffusionDitherTo16( const SDL_Surface* _surface, int format, bool invert, U16* target );
 void OrderedDitherTo16( const SDL_Surface* surface, int format, bool invert, U16* target );
 
 

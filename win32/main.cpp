@@ -16,7 +16,7 @@
 #pragma warning ( disable : 4530 )		// Don't warn about unused exceptions.
 
 #include "glew.h"
-#include "SDL.h"
+#include "../libs/SDL2/include/SDL.h"
 
 #include "../grinliz/gldebug.h"
 #include "../grinliz/gltypes.h"
@@ -130,7 +130,6 @@ int main( int argc, char **argv )
 	MemStartCheck();
 	{ char* test = new char[16]; delete [] test; }
 
-	SDL_Surface *surface = 0;
 	GLOUTPUT_REL(( "Altera startup. version=%d\n", VERSION ));
 
 	// SDL initialization steps.
@@ -139,31 +138,22 @@ int main( int argc, char **argv )
 	    fprintf( stderr, "SDL initialization failed: %s\n", SDL_GetError( ) );
 		exit( 1 );
 	}
-	SDL_EnableKeyRepeat( 0, 0 );
-	SDL_EnableUNICODE( 1 );
 
-	const SDL_version* sversion = SDL_Linked_Version();
-	GLOUTPUT(( "SDL: major %d minor %d patch %d\n", sversion->major, sversion->minor, sversion->patch ));
-
+	//  OpenGL 4.3 provides full compatibility with OpenGL ES 3.0.
 	SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
 	SDL_GL_SetAttribute( SDL_GL_RED_SIZE, 8);
 	SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 8);
 	SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 8);
 	SDL_GL_SetAttribute( SDL_GL_ALPHA_SIZE, 8);
 	SDL_GL_SetAttribute( SDL_GL_STENCIL_SIZE, 8);
+	//SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	//SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 1);
+	//SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
 	if ( multisample ) {
 		SDL_GL_SetAttribute( SDL_GL_MULTISAMPLEBUFFERS, 1 );
 		SDL_GL_SetAttribute( SDL_GL_MULTISAMPLESAMPLES, multisample );
 	}
-
-	int	videoFlags  = SDL_OPENGL;          /* Enable OpenGL in SDL */
-		videoFlags |= SDL_GL_DOUBLEBUFFER; /* Enable double buffering */
-
-	if ( fullscreen )
-		videoFlags |= SDL_FULLSCREEN;
-	else
-		videoFlags |= SDL_RESIZABLE;
 
 #ifdef TEST_ROTATION
 	screenWidth  = SCREEN_WIDTH;
@@ -181,19 +171,23 @@ int main( int argc, char **argv )
 	}
 
 	// Note that our output surface is rotated from the iPod.
-	//surface = SDL_SetVideoMode( IPOD_SCREEN_HEIGHT, IPOD_SCREEN_WIDTH, 32, videoFlags );
-	surface = SDL_SetVideoMode( screenWidth, screenHeight, 32, videoFlags );
-	GLASSERT( surface );
+	SDL_Window *screen = SDL_CreateWindow(	"Altera",
+											SDL_WINDOWPOS_UNDEFINED,
+											SDL_WINDOWPOS_UNDEFINED,
+											screenWidth, screenHeight,
+											/*SDL_WINDOW_FULLSCREEN | */ SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE );
+	GLASSERT( screen );
+	SDL_GL_CreateContext( screen );
 
 	int stencil = 0;
 	int depth = 0;
 	SDL_GL_GetAttribute( SDL_GL_STENCIL_SIZE, &stencil );
 	glGetIntegerv( GL_DEPTH_BITS, &depth );
-	GLOUTPUT_REL(( "SDL surface created. w=%d h=%d bpp=%d stencil=%d depthBits=%d\n", 
-					surface->w, surface->h, surface->format->BitsPerPixel, stencil, depth ));
+	GLOUTPUT_REL(( "SDL screen created. stencil=%d depthBits=%d\n", 
+					stencil, depth ));
 
     /* Verify there is a surface */
-    if ( !surface ) {
+    if ( !screen ) {
 	    fprintf( stderr,  "Video mode set failed: %s\n", SDL_GetError( ) );
 	    exit( 1 );
 	}
@@ -201,14 +195,6 @@ int main( int argc, char **argv )
 	int r = glewInit();
 	GLASSERT( r == GL_NO_ERROR );
 
-	// Calling this seems to confuse my ATI driver and cause lag / event back up?
-#if 0
-#ifdef TEST_FULLSPEED	
-	wglSwapIntervalEXT( 0 );	// vsync
-#else
-	wglSwapIntervalEXT( 1 );	// vsync
-#endif
-#endif
 	const unsigned char* vendor   = glGetString( GL_VENDOR );
 	const unsigned char* renderer = glGetString( GL_RENDERER );
 	const unsigned char* version  = glGetString( GL_VERSION );
@@ -230,32 +216,7 @@ int main( int argc, char **argv )
 	int zoomY = 0;
 
 	void* game = NewGame( screenWidth, screenHeight, rotation, ".\\" );
-
-#if SEND_CRASH_LOGS
-	// Can't call this until after the game is created!
-	if ( !SettingsManager::Instance()->GetSuppressCrashLog() ) {
-		// Check for a "didn't crash" file.
-		FILE* fp = fopen( "UFO_Running.txt", "r" );
-		if ( fp ) {
-			fseek( fp, 0, SEEK_END );
-			long len = ftell( fp );
-			if ( len > 1 ) {
-				// Wasn't deleted.
-				PostCurrentGame();
-			}
-			fclose( fp );
-		}
-	}
-	{
-		FILE* fp = fopen( "UFO_Running.txt", "w" );
-		if ( fp ) {
-			fprintf( fp, "Game running." );
-			fclose( fp );
-		}
-	}
-#endif
-
-
+	
 #ifndef TEST_FULLSPEED
 #ifndef USE_LOOP
 	SDL_TimerID timerID = SDL_AddTimer( TIME_BETWEEN_FRAMES, TimerCallback, 0 );
@@ -291,12 +252,13 @@ int main( int argc, char **argv )
 
 		switch( event.type )
 		{
-			case SDL_VIDEORESIZE:
-				screenWidth = event.resize.w;
-				screenHeight = event.resize.h;
-				surface = SDL_SetVideoMode( screenWidth, screenHeight, 32, videoFlags );
-				GameDeviceLoss( game );
-				GameResize( game, event.resize.w, event.resize.h, rotation );
+			case SDL_WINDOWEVENT:
+				if ( event.window.event == SDL_WINDOWEVENT_RESIZED ) {
+					screenWidth  = event.window.data1;
+					screenHeight = event.window.data2;
+					GameDeviceLoss( game );
+					GameResize( game, screenWidth, screenHeight, rotation );
+				}
 				break;
 
 			case SDL_KEYUP:
@@ -363,7 +325,7 @@ int main( int argc, char **argv )
 
 					case SDLK_s:
 						GameDoTick( game, SDL_GetTicks() );
-						SDL_GL_SwapBuffers();
+						SDL_GL_SwapWindow( screen );
 						ScreenCapture( "cap", true, false, false, 0 );
 						break;
 
@@ -471,17 +433,17 @@ int main( int argc, char **argv )
 				glEnable( GL_DEPTH_TEST );
 				glDepthFunc( GL_LEQUAL );
 
-				const U8* keys = SDL_GetKeyState( 0 );
-				if ( keys[SDLK_PAGEDOWN] ) {
+				const U8* keys =  SDL_GetKeyboardState( 0 );
+				if ( keys[SDL_SCANCODE_PAGEDOWN] ) {
 					GameZoom( game, GAME_ZOOM_DISTANCE, KEY_ZOOM_SPEED );
 				}
-				if ( keys[SDLK_PAGEUP] ) {
+				if ( keys[SDL_SCANCODE_PAGEUP] ) {
 					GameZoom( game, GAME_ZOOM_DISTANCE, -KEY_ZOOM_SPEED );
 				}
-				if ( keys[SDLK_HOME] ) {
+				if ( keys[SDL_SCANCODE_HOME] ) {
 					GameCameraRotate( game, -KEY_ROTATE_SPEED );
 				}
-				if ( keys[SDLK_END] ) {
+				if ( keys[SDL_SCANCODE_END] ) {
 					GameCameraRotate( game, KEY_ROTATE_SPEED );
 				}
 
@@ -498,7 +460,7 @@ int main( int argc, char **argv )
 				}
 				*/
 				GameDoTick( game, SDL_GetTicks() );
-				SDL_GL_SwapBuffers();
+				SDL_GL_SwapWindow( screen );
 
 				int databaseID=0, size=0, offset=0;
 				// FIXME: account for databaseID when looking up sound.
@@ -523,17 +485,17 @@ int main( int argc, char **argv )
 		glEnable( GL_DEPTH_TEST );
 		glDepthFunc( GL_LEQUAL );
 
-		const U8* keys = SDL_GetKeyState( 0 );
-		if ( keys[SDLK_PAGEDOWN] ) {
+		const U8* keys =  SDL_GetKeyboardState( 0 );
+		if ( keys[SDL_SCANCODE_PAGEDOWN] ) {
 			GameZoom( game, GAME_ZOOM_DISTANCE, KEY_ZOOM_SPEED );
 		}
-		if ( keys[SDLK_PAGEUP] ) {
+		if ( keys[SDL_SCANCODE_PAGEUP] ) {
 			GameZoom( game, GAME_ZOOM_DISTANCE, -KEY_ZOOM_SPEED );
 		}
-		if ( keys[SDLK_HOME] ) {
+		if ( keys[SDL_SCANCODE_HOME] ) {
 			GameCameraRotate( game, -KEY_ROTATE_SPEED );
 		}
-		if ( keys[SDLK_END] ) {
+		if ( keys[SDL_SCANCODE_END] ) {
 			GameCameraRotate( game, KEY_ROTATE_SPEED );
 		}
 
@@ -543,7 +505,7 @@ int main( int argc, char **argv )
 		}
 		{
 			PROFILE_BLOCK( Swap );
-			SDL_GL_SwapBuffers();
+			SDL_GL_SwapWindow( screen );
 		}
 
 #ifdef USE_LOOP
@@ -614,8 +576,7 @@ void ScreenCapture( const char* baseFilename, bool appendCount, bool trim, bool 
 	int width  = viewPort[2]-viewPort[0];
 	int height = viewPort[3]-viewPort[1];
 
-	SDL_Surface* surface = SDL_CreateRGBSurface( SDL_SWSURFACE, width, height, 
-												 32, 0xff, 0xff<<8, 0xff<<16, 0xff<<24 );
+	SDL_Surface* surface = SDL_CreateRGBSurface( 0, width, height, 32, 0xff, 0xff<<8, 0xff<<16, 0xff<<24 );
 	if ( !surface )
 		return;
 
@@ -659,8 +620,8 @@ void ScreenCapture( const char* baseFilename, bool appendCount, bool trim, bool 
 		while ( r.min.y < r.max.y && RectangleIsBlack( r, 3, surface )) {
 			--r.max.y;
 		}
-		SDL_Surface* newSurface = SDL_CreateRGBSurface( SDL_SWSURFACE, r.Width(), r.Height(), 
-														32, 0xff, 0xff<<8, 0xff<<16, 0xff<<24 );
+		SDL_Surface* newSurface = SDL_CreateRGBSurface( 0, r.Width(), r.Height(), 32, 0xff, 0xff<<8, 0xff<<16, 0xff<<24 );
+
 		// Stupid BLT semantics consider dst alpha.
 		memset( newSurface->pixels, 255, newSurface->pitch*r.Height() );
 		SDL_Rect srcRect = { r.min.x, r.min.y, r.Width(), r.Height() };
@@ -711,90 +672,5 @@ void ScreenCapture( const char* baseFilename, bool appendCount, bool trim, bool 
 //		SDL_SaveBMP( surface, buf );
 		lodepng_encode32_file( buf, (const unsigned char*)surface->pixels, width, height );
 	}
-	SDL_FreeSurface( surface );
+	SDL_FreeSurface(surface); 
 }
-
-/*
-void PostCurrentGame()
-{
-	GLOUTPUT(( "Posting current game.\n" ));
-
-    BOOL  bResults = FALSE;
-    HINTERNET hSession = NULL,
-              hConnect = NULL,
-              hRequest = NULL;
-
-    // Use WinHttpOpen to obtain a session handle.
-    hSession = WinHttpOpen(  L"UFO Attack", 
-                             WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
-                             WINHTTP_NO_PROXY_NAME, 
-                             WINHTTP_NO_PROXY_BYPASS, 0);
-
-    // Specify an HTTP server.
-    if (hSession)
-        hConnect = WinHttpConnect( hSession, L"www.grinninglizard.com",
-                                   INTERNET_DEFAULT_HTTP_PORT, 0);
-
-    // Create an HTTP Request handle.
-    if (hConnect)
-        hRequest = WinHttpOpenRequest( hConnect, L"POST", 
-                                       L"/collect/server.php", 
-                                       NULL, WINHTTP_NO_REFERER, 
-                                       WINHTTP_DEFAULT_ACCEPT_TYPES, 
-                                       0);
-
-	char buf[32];
-	grinliz::SNPrintf( buf, 32, "version=%d", VERSION );
-
-	std::string data( buf );
-	data += "&device=win32&stacktrace=";
-	FILE* fp = fopen( "currentgame.xml", "r" );
-
-	if ( fp ) {
-		fseek( fp, 0, SEEK_END );
-		long len = ftell( fp );
-		fseek( fp, 0, SEEK_SET );
-
-		char* mem = new char[len+1];
-		fread( mem, 1, len, fp );
-		fclose( fp );
-
-		mem[len] = 0;
-	
-		data += mem;
-		delete [] mem;
-	}
-	else {
-		data += "none";
-	}
-
-    // Send a Request.
-	// BLACKEST VOODOO. Getting this to work: http://social.msdn.microsoft.com/Forums/en/vcgeneral/thread/917e9b99-4b8e-4173-99ad-001fec6a59e2
-	//
-	LPCWSTR additionalHeaders = L"Content-Type: application/x-www-form-urlencoded\r\n";
-	DWORD hLen   = -1;
-
-    bResults = WinHttpSendRequest( hRequest, 
-                                   additionalHeaders,
-                                   hLen, 
-								   (LPVOID)data.c_str(),
-								   data.size(), 
-                                   data.size(), 
-								   0 );
-
-    // Report errors.
-    if (!bResults) {
-        GLOUTPUT(("Error %d has occurred.\n",GetLastError()));
-	}
-
-	// If we close the handles too soon, it seems like the requests fails. Even though this is being run synchronously...
-	Sleep( 1000 );
-
-    // Close open handles.
-    if (hRequest) WinHttpCloseHandle(hRequest);
-    if (hConnect) WinHttpCloseHandle(hConnect);
-    if (hSession) WinHttpCloseHandle(hSession);
-
-}
-
-*/

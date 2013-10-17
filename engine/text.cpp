@@ -254,7 +254,9 @@ void UFOText::TextOut( GPUState* shader, const char* str, int _x, int _y, int _h
 			if ( pos == BUF_SIZE || *(str+1) == 0 ) {
 				if ( pos > 0 ) {
 					GPUStream stream( *vBuf );
-					shader->Draw( stream, texture, vBuf, pos*6, iBuf );
+					GPUStreamData data;
+					data.texture0 = texture;
+					GPUDevice::Instance()->Draw( *shader, stream, data, pos*4, vBuf, pos*6, iBuf );
 					pos = 0;
 				}
 			}
@@ -270,7 +272,7 @@ void UFOText::TextOut( GPUState* shader, const char* str, int _x, int _y, int _h
 void UFOText::Draw( int x, int y, const char* format, ... )
 {
 	screenport->SetUI();
-	CompositingShader shader( GPUState::BLEND_NORMAL );
+	CompositingShader shader( BLEND_NORMAL );
 
     va_list     va;
 	const int	size = 1024;

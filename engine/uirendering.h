@@ -37,16 +37,16 @@ public:
 		RENDERSTATE_COUNT
 	};
 
-	UIRenderer() : shader( GPUState::BLEND_NORMAL ), textRed( 1 ), textGreen( 1 ), textBlue( 1 ), texture( 0 ) {}
+	UIRenderer() : shader( BLEND_NORMAL ), textRed( 1 ), textGreen( 1 ), textBlue( 1 ), texture( 0 ) {}
 
 	void SetTextColor( float r, float g, float b )		{ textRed = r; textGreen = g; textBlue = b; }
 
-	virtual void BeginRender();
+	virtual void BeginRender( int nIndex, const uint16_t* index, int nVertex, const gamui::Gamui::Vertex* vertex );
 	virtual void EndRender();
 
 	virtual void BeginRenderState( const void* renderState );
 	virtual void BeginTexture( const void* textureHandle );
-	virtual void Render( const void* renderState, const void* textureHandle, int nIndex, const uint16_t* index, int nVertex, const gamui::Gamui::Vertex* vertex ) ;
+	virtual void Render( const void* renderState, const void* textureHandle, int start, int count ) ;
 
 	static void SetAtomCoordFromPixel( int x0, int y0, int x1, int y1, int w, int h, gamui::RenderAtom* );
 	static void LayoutListOnScreen( gamui::UIItem* items, int nItems, int stride, float x, float y, float vSpace, const Screenport& port );

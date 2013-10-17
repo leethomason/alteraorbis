@@ -58,6 +58,7 @@
 #define CHECK_GL_ERROR	{	if ( gDebugging ) {									\
 								GLenum error = glGetError();					\
 								if ( error  != GL_NO_ERROR ) {					\
+									GLOUTPUT(( "GL Error: %x\n", error ));		\
 									GLOUTPUT_REL(( "GL Error: %x\n", error ));	\
 									GLASSERT( error == GL_NO_ERROR );			\
 								}												\

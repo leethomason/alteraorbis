@@ -183,7 +183,7 @@ public:
 	virtual void PrepVoxels( const SpaceTree* );
 	virtual void DrawVoxels( GPUState* shader, const grinliz::Matrix4* xform );
 	virtual void PrepGrid( const SpaceTree* spaceTree );
-	virtual void Draw3D(  const grinliz::Color3F& colorMult, GPUState::StencilMode, bool useSaturation );
+	virtual void Draw3D(  const grinliz::Color3F& colorMult, StencilMode, bool useSaturation );
 	virtual grinliz::Vector3I IntersectVoxel(	const grinliz::Vector3F& origin,
 												const grinliz::Vector3F& dir,
 												float length,				
@@ -356,14 +356,10 @@ private:
 		static U32 Hash( const grinliz::Vector2I& v)			{ return (U32)(v.y*MAX_MAP_SIZE+v.x); }
 		static bool Equal( const grinliz::Vector2I& v0, const grinliz::Vector2I& v1 )	{ return v0 == v1; }
 	};
-	//GPUVertexBuffer					vertexVBO[WorldGrid::NUM_LAYERS];
-	//GPUIndexBuffer					indexVBO[WorldGrid::NUM_LAYERS];
-	//Texture*						texture[WorldGrid::NUM_LAYERS];
-	//int								nIndex[WorldGrid::NUM_LAYERS];
 
-	GPUVertexBuffer					voxelVertexVBO;
+	GPUVertexBuffer*				voxelVertexVBO;
 	Texture*						voxelTexture;
-	GPUVertexBuffer					gridVertexVBO;
+	GPUVertexBuffer*				gridVertexVBO;
 	Texture*						gridTexture;
 	int								nVoxels;
 	int								nGrids;

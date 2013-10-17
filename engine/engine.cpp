@@ -213,7 +213,6 @@ void Engine::FreeModel( Model* model )
 }
 
 
-
 Texture* Engine::GetMiniMapTexture()
 {
 	return TextureManager::Instance()->GetTexture( "miniMap" );
@@ -275,12 +274,14 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 		map->PrepGrid( spaceTree );
 	}
 	
+	GPUDevice* device = GPUDevice::Instance();
+
 	Color4F ambient, diffuse, shadow;
 	Vector4F dir;
 	lighting.Query( &diffuse, &ambient, &shadow, temperature, &dir );
-	GPUState::ambient = ambient;
-	GPUState::directionWC = dir;
-	GPUState::diffuse = diffuse;
+	device->ambient = ambient;
+	device->directionWC = dir;
+	device->diffuse = diffuse;
 
 	EngineShaders engineShaders;
 	{
@@ -288,7 +289,7 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 		LightShader light( flag );
 		LightShader em( flag );
 		em.SetShaderFlag( ShaderManager::EMISSIVE );
-		LightShader blend( flag, GPUState::BLEND_NORMAL );
+		LightShader blend( flag, BLEND_NORMAL );
 
 		engineShaders.Push( EngineShaders::LIGHT, light );
 		engineShaders.Push( EngineShaders::EMISSIVE, em );
@@ -319,9 +320,9 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 		engineShaders.PushAll( black );
 		QueueSet( &engineShaders, modelRoot, 0, 0, 0, EngineShaders::EMISSIVE );
 		{
-			modelDrawCalls[GLOW_BLACK] = GPUState::DrawCalls();
+			modelDrawCalls[GLOW_BLACK] = device->DrawCalls();
 			renderQueue->Submit( 0, 0, 0 );
-			modelDrawCalls[GLOW_BLACK] = GPUState::DrawCalls() - modelDrawCalls[GLOW_BLACK];
+			modelDrawCalls[GLOW_BLACK] = device->DrawCalls() - modelDrawCalls[GLOW_BLACK];
 		}
 		engineShaders.PopAll();
 
@@ -337,12 +338,12 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 		}
 		// And throw the emissive shader to exclusive:
 		{
-			modelDrawCalls[GLOW_EMISSIVE] = GPUState::DrawCalls();
+			modelDrawCalls[GLOW_EMISSIVE] = device->DrawCalls();
 			if ( map ) {
 				map->DrawVoxels( &ex, 0 );
 			}
 			renderQueue->Submit( 0, 0, 0 );
-			modelDrawCalls[GLOW_EMISSIVE] = GPUState::DrawCalls() - modelDrawCalls[GLOW_EMISSIVE];
+			modelDrawCalls[GLOW_EMISSIVE] = device->DrawCalls() - modelDrawCalls[GLOW_EMISSIVE];
 		}
 		engineShaders.Pop( EngineShaders::EMISSIVE );
 		renderTarget[RT_LIGHTS]->SetActive( false, this );
@@ -362,7 +363,7 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 		if ( shadowAmount > 0.0f ) {
 
 			FlatShader shadowShader;
-			shadowShader.SetStencilMode( GPUState::STENCIL_WRITE );
+			shadowShader.SetStencilMode( STENCIL_WRITE );
 			shadowShader.SetDepthTest( false );	// flat plane. 1st pass.
 			shadowShader.SetDepthWrite( false );
 			shadowShader.SetColorWrite( false );
@@ -376,18 +377,18 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 			shadowMatrix.m32 = -lighting.direction.z/lighting.direction.y;
 
 			{
-				modelDrawCalls[SHADOW] = GPUState::DrawCalls();
+				modelDrawCalls[SHADOW] = device->DrawCalls();
 				if ( map ) {
 					map->DrawVoxels( &shadowShader, &shadowMatrix );
 				}
 				renderQueue->Submit( 0, 0, &shadowMatrix );
-				modelDrawCalls[SHADOW] = GPUState::DrawCalls() - modelDrawCalls[SHADOW];
+				modelDrawCalls[SHADOW] = device->DrawCalls() - modelDrawCalls[SHADOW];
 			}
 			engineShaders.PopAll();
 
-			map->Draw3D( shadow, GPUState::STENCIL_SET, true );
+			map->Draw3D( shadow, STENCIL_SET, true );
 		}
-		map->Draw3D( lighted, GPUState::STENCIL_CLEAR, true );
+		map->Draw3D( lighted, STENCIL_CLEAR, true );
 #else
 		map->Draw3D( lighted, GPUState::STENCIL_OFF );
 #endif
@@ -409,9 +410,9 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 		}
 		QueueSet( &engineShaders, modelRoot, 0, 0, 0, 0  );
 		{
-			modelDrawCalls[MODELS] = GPUState::DrawCalls();
+			modelDrawCalls[MODELS] = device->DrawCalls();
 			renderQueue->Submit( 0, 0, 0 );
-			modelDrawCalls[MODELS] = GPUState::DrawCalls() - modelDrawCalls[MODELS];
+			modelDrawCalls[MODELS] = device->DrawCalls() - modelDrawCalls[MODELS];
 		}
 	}
 #endif
@@ -434,7 +435,7 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 	#ifdef ENGINE_DEBUG_GLOW
 		CompositingShader shader( GPUState::BLEND_NONE );
 	#else
-		CompositingShader shader( GPUState::BLEND_ADD );
+		CompositingShader shader( BLEND_ADD );
 	#endif
 
 	#ifdef EL_USE_MRT_BLUR
@@ -442,7 +443,8 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 			shader.SetColor( lighting.glow.r, lighting.glow.g, lighting.glow.b, 0 );
 			Vector3F p0 = { 0, screenport->UIHeight(), 0 };
 			Vector3F p1 = { screenport->UIWidth(), 0, 0 };
-			shader.DrawQuad( renderTarget[RT_BLUR_0+i]->GetTexture(), p0, p1 );
+
+			device->DrawQuad( shader, renderTarget[RT_BLUR_0+i]->GetTexture(), p0, p1 );
 		}
 	#else
 		shader.SetTexture0( renderTarget[RT_BLUR_Y]->GetTexture() );
@@ -472,6 +474,8 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 
 void Engine::Blur()
 {
+	GPUDevice* device = GPUDevice::Instance();
+
 #ifdef EL_USE_MRT_BLUR
 	for( int i=0; i<BLUR_COUNT; ++i ) {
 		if ( !renderTarget[i+RT_BLUR_0] ) {
@@ -487,7 +491,7 @@ void Engine::Blur()
 		FlatShader shader;
 		Vector3F p0 = { 0, screenport->UIHeight(), 0 };
 		Vector3F p1 = { screenport->UIWidth(), 0, 0 };
-		shader.DrawQuad( renderTarget[i+RT_BLUR_0-1]->GetTexture(), p0, p1 );
+		device->DrawQuad( shader, renderTarget[i+RT_BLUR_0-1]->GetTexture(), p0, p1 );
 
 		renderTarget[i+RT_BLUR_0]->SetActive( false, this );
 	}
@@ -767,7 +771,7 @@ void DrawDebugLines( U32 delta )
 		if ( dl->time > 0 ) {
 			dl->time -= delta;
 			flatShader.SetColor( dl->color.x, dl->color.y, dl->color.z );
-			flatShader.DrawLine( dl->tail, dl->head );
+			GPUDevice::Instance()->DrawLine( flatShader, dl->tail, dl->head );
 			++i;
 		}
 		else {

@@ -1484,25 +1484,31 @@ void Gamui::Render()
 	const void* renderState = 0;
 	const void* textureHandle = 0;
 
-	m_iRenderer->BeginRender();
-	for( int i=0; i<m_stateBuffer.Size(); ++i ) {
-		const State& state = m_stateBuffer[i];
+	if ( m_indexBuffer.Size() ) {
+		m_iRenderer->BeginRender( m_indexBuffer.Size(), &m_indexBuffer[0], m_vertexBuffer.Size(), &m_vertexBuffer[0] );
 
-		if ( state.renderState != renderState ) {
-			m_iRenderer->BeginRenderState( state.renderState );
-			renderState = state.renderState;
-		}
-		if ( state.textureHandle != textureHandle ) {
-			m_iRenderer->BeginTexture( state.textureHandle );
-			textureHandle = state.textureHandle;
-		}
+		for( int i=0; i<m_stateBuffer.Size(); ++i ) {
+			const State& state = m_stateBuffer[i];
 
-		m_iRenderer->Render(	renderState, 
-								textureHandle, 
-								state.nIndex, &m_indexBuffer[state.indexStart], 
-								state.nVertex, &m_vertexBuffer[0] );
+			if ( state.renderState != renderState ) {
+				m_iRenderer->BeginRenderState( state.renderState );
+				renderState = state.renderState;
+			}
+			if ( state.textureHandle != textureHandle ) {
+				m_iRenderer->BeginTexture( state.textureHandle );
+				textureHandle = state.textureHandle;
+			}
+
+			// The vertexBuffer is a little non-obvious: since
+			// the index array references vertices from the beginning,
+			// they are the same each time.
+			m_iRenderer->Render(	renderState, 
+									textureHandle, 
+									state.indexStart,
+									state.nIndex );
+		}
+		m_iRenderer->EndRender();
 	}
-	m_iRenderer->EndRender();
 }
 
 

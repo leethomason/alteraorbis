@@ -91,6 +91,12 @@ int ShaderManager::Shader::GetUniformLocation( int uniform )
 
 ShaderManager::ShaderManager() : active(0), totalCompileTime(0)
 {
+	if ( GLEW_ARB_explicit_attrib_location ) 
+		attribLocationSupport = true;
+	else
+		attribLocationSupport = false;
+	GLASSERT( attribLocationSupport );
+
 	LoadProgram( "fixedpipe.vert", &fixedpipeVert );
 	LoadProgram( "fixedpipe.frag", &fixedpipeFrag );
 
@@ -439,6 +445,7 @@ FIXME: need to handle driver updates invalidating cache.
 	GLOUTPUT_REL(( "Predicted uniform size(v4): %d\n\n", predicted ));
 
 	AppendConst( &header, "MAX_INSTANCE", shader->maxInstance );
+	AppendConst( &header, "EXPLICIT_ATTRIB", attribLocationSupport ? 1 : 0 );
 
 #if 0 
 #ifdef DEBUG_OUTPUT

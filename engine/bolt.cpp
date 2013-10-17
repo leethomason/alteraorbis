@@ -215,13 +215,14 @@ void BoltRenderer::DrawAll( const Bolt* bolts, int nBolts, Engine* engine )
 		stream.stride			= sizeof( vertex[0] );
 		stream.nPos				= 3;
 		stream.posOffset		= PTCVertex::POS_OFFSET;
-		stream.nTexture0		= 2;
 		stream.texture0Offset	= PTCVertex::TEXTURE_OFFSET;
 		stream.nColor			= 4;
 		stream.colorOffset		= PTCVertex::COLOR_OFFSET;
 
 		ParticleShader shader;
-		shader.Draw( stream, texture, vertex, count*6, index );
+		GPUStreamData data;
+		data.texture0 = texture;
+		GPUDevice::Instance()->Draw( shader, stream, data, count*4, vertex, count*6, index );
 	}
 }
 

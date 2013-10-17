@@ -1,9 +1,11 @@
+//
+// CAUTION: a header is inserted *before* this text. #version and layout information goes there.
 // CAUTION: never use 'int' attributes. They don't work for reasons unknown to me.
 
 // Copied here so that it can be easily handled
 // if the InstanceID isn't supported.
 // INTEL BUG: if the ID is assigned, 'instance' is always 0.
-//int instance = gl_InstanceID;
+// int instance = gl_InstanceID;
 
 uniform mat4 		u_mvpMatrix;						// model-view-projection.
 
@@ -27,14 +29,26 @@ uniform vec4		u_controlParamArr[MAX_INSTANCE];
 #endif
 
 uniform vec4 u_colorMult;			// Overall Color, if specified.
-attribute vec3 a_pos;				// vertex position
 
+// IN: attributes
+attribute 		vec3 a_pos;				// vertex position
 #if COLORS == 1
-	attribute vec4 a_color;			// vertex color
+	attribute 	vec4 a_color;			// vertex color
 #endif
+#if TEXTURE0 == 1
+	attribute 	vec2 a_uv0;
+#endif
+#if TEXTURE1 == 1
+	attribute 	vec2 a_uv1;
+#endif
+#if BONE_XFORM == 1 || BONE_FILTER == 1
+	attribute 	float a_boneID;
+#endif
+#if LIGHTING_DIFFUSE > 0
+	attribute 	vec3 a_normal;		// vertex normal
+#endif 
 
 #if TEXTURE0 == 1
-	attribute vec2 a_uv0;
 	varying vec2 v_uv0;
 	#if TEXTURE0_CLIP == 1
 		varying vec4 v_texture0Clip;
@@ -45,12 +59,10 @@ attribute vec3 a_pos;				// vertex position
 #endif
 
 #if TEXTURE1 == 1
-	attribute vec2 a_uv1;
 	varying vec2 v_uv1;
 #endif
 
 #if BONE_XFORM == 1 || BONE_FILTER == 1
-	attribute float a_boneID;
 	#if BONE_XFORM == 1
 		uniform mat4 u_boneXForm[EL_MAX_BONES*MAX_INSTANCE];
 	#endif
@@ -61,8 +73,6 @@ attribute vec3 a_pos;				// vertex position
 	uniform vec3 u_lightDir;		// light direction, eye space (x,y,z,0)
 	uniform vec4 u_ambient;			// ambient light. ambient+diffuse = 1
 	uniform vec4 u_diffuse;			// diffuse light
-
-	attribute vec3 a_normal;		// vertex normal
 #endif
 
 #if SATURATION

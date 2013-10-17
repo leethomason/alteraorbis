@@ -810,24 +810,14 @@ void ModelAtom::Bind( GPUStream* stream, GPUStreamData* data ) const
 	GPUStream vertexStream( *vertex );
 	*stream = vertexStream;
 
-#ifdef EL_USE_VBO
-	if ( GPUState::SupportsVBOs() && !vertexBuffer.IsValid() ) {
-		GLASSERT( !indexBuffer.IsValid() );
-
-		vertexBuffer = GPUVertexBuffer::Create( vertex, sizeof(*vertex), nVertex );
-		indexBuffer  = GPUIndexBuffer::Create(  index,  nIndex );
+	if ( !vertexBuffer ) {
+		vertexBuffer = new GPUVertexBuffer( vertex, sizeof(*vertex)*nVertex );
+		indexBuffer  = new GPUIndexBuffer(  index,  nIndex );
 	}
 
-	if ( vertexBuffer.IsValid() && indexBuffer.IsValid() ) {
-		data->indexBuffer = indexBuffer.ID();
-		data->vertexBuffer = vertexBuffer.ID();
-	}
-	else
-#endif
-	{
-		data->indexPtr = index;
-		data->streamPtr = vertex;
-	}
+	data->indexBuffer = indexBuffer->ID();
+	data->vertexBuffer = vertexBuffer->ID();
+
 	data->texture0 = this->texture;
 }
 
