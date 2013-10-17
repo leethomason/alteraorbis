@@ -50,25 +50,29 @@ struct ModelAtom
 		nVertex = nIndex = 0;
 		index = 0;
 		vertex = 0;
+		vertexBuffer = 0;
+		indexBuffer = 0;
 	}
 
 	void Free() {
 		DeviceLoss();
 		delete [] index;
 		delete [] vertex;
+		delete vertexBuffer;
+		delete indexBuffer;
 		Init();
 	}
 
 	void DeviceLoss() {
-		vertexBuffer.Destroy();
-		indexBuffer.Destroy();
+		delete vertexBuffer;
+		delete indexBuffer;
+		vertexBuffer = 0;
+		indexBuffer = 0;
 	}
 
 	Texture* texture;
-#	ifdef EL_USE_VBO
-	mutable GPUVertexBuffer vertexBuffer;		// created on demand, hence 'mutable'
-	mutable GPUIndexBuffer  indexBuffer;
-#	endif
+	mutable GPUVertexBuffer* vertexBuffer;		// created on demand, hence 'mutable'
+	mutable GPUIndexBuffer*  indexBuffer;
 
 	void Bind( GPUStream* stream, GPUStreamData* data ) const;
 

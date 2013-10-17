@@ -19,7 +19,6 @@
 #include "texture.h"
 #include "enginelimits.h"
 #include "../gamui/gamui.h"	// for auto setting up gamui stream
-//#include "../grinliz/glperformance.h"
 #include "shadermanager.h"
 #include "../grinliz/glgeometry.h"
 
@@ -27,40 +26,50 @@
 
 using namespace grinliz;
 
-int GPUState::matrixDepth[3];
-grinliz::Color4F	GPUState::ambient;
-grinliz::Vector4F	GPUState::directionWC;
-grinliz::Color4F	GPUState::diffuse;
-
-
-/*static*/ GPUVertexBuffer GPUVertexBuffer::Create( const void* vertex, int size, int nVertex )
+GPUVertexBuffer::GPUVertexBuffer( const void* vertex, int size )
 {
-	GPUVertexBuffer buffer;
+	this->sizeInBytes = size;
 
-	U32 dataSize  = size*nVertex;
-	glGenBuffersX( 1, (GLuint*) &buffer.id );
-	glBindBufferX( GL_ARRAY_BUFFER, buffer.id );
-	// if vertex is null this will just allocate
-	glBufferDataX( GL_ARRAY_BUFFER, dataSize, vertex, vertex ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW );
+	CHECK_GL_ERROR;
+	glGenBuffersX( 1, (GLuint*) &id );
+	glBindBufferX( GL_ARRAY_BUFFER, id );
+	glBufferDataX( GL_ARRAY_BUFFER, size, vertex, vertex ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW );
 	glBindBufferX( GL_ARRAY_BUFFER, 0 );
 	CHECK_GL_ERROR;
+}
 
-	return buffer;
+
+GPUVertexBuffer::~GPUVertexBuffer() 
+{
+	glDeleteBuffersX( 1, (GLuint*) &id );
 }
 
 
 void GPUVertexBuffer::Upload( const void* data, int nBytes, int start )
 {
-	glBindBufferX( GL_ARRAY_BUFFER, id );
-	// target, offset, size, data
-	glBufferSubDataX( GL_ARRAY_BUFFER, start, nBytes, data );
 	CHECK_GL_ERROR;
+	glBindBufferX( GL_ARRAY_BUFFER, id );
+	glBufferSubDataX( GL_ARRAY_BUFFER, start, nBytes, data );
 	glBindBufferX( GL_ARRAY_BUFFER, 0 );
 	CHECK_GL_ERROR;
 }
 
 
-void GPUVertexBuffer::Destroy() 
+GPUIndexBuffer::GPUIndexBuffer( const U16* index, int nIndex )
+{
+	this->nIndex = nIndex;
+	U32 dataSize  = sizeof(U16)*nIndex;
+
+	CHECK_GL_ERROR;
+	glGenBuffersX( 1, (GLuint*) &id );
+	glBindBufferX( GL_ELEMENT_ARRAY_BUFFER, id );
+	glBufferDataX( GL_ELEMENT_ARRAY_BUFFER, dataSize, index, index ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW );
+	glBindBufferX( GL_ELEMENT_ARRAY_BUFFER, 0 );
+	CHECK_GL_ERROR;
+}
+
+
+GPUIndexBuffer::~GPUIndexBuffer() 
 {
 	if ( id ) {
 		glDeleteBuffersX( 1, (GLuint*) &id );
@@ -69,80 +78,15 @@ void GPUVertexBuffer::Destroy()
 }
 
 
-/*static*/ GPUIndexBuffer GPUIndexBuffer::Create( const U16* index, int nIndex )
-{
-	GPUIndexBuffer buffer;
-
-	U32 dataSize  = sizeof(U16)*nIndex;
-	glGenBuffersX( 1, (GLuint*) &buffer.id );
-	glBindBufferX( GL_ELEMENT_ARRAY_BUFFER, buffer.id );
-	glBufferDataX( GL_ELEMENT_ARRAY_BUFFER, dataSize, index, GL_STATIC_DRAW );
-	glBindBufferX( GL_ELEMENT_ARRAY_BUFFER, 0 );
-	CHECK_GL_ERROR;
-
-	return buffer;
-}
-
-/*
 void GPUIndexBuffer::Upload( const uint16_t* data, int count, int start )
 {
-	GLASSERT( GPUState::SupportsVBOs() );
-	glBindBufferX( GL_ELEMENT_ARRAY_BUFFER, id );
-	// target, offset, size, data
-	glBufferSubDataX( GL_ELEMENT_ARRAY_BUFFER, start*sizeof(uint16_t), count*sizeof(uint16_t), data );
 	CHECK_GL_ERROR;
+	glBindBufferX( GL_ELEMENT_ARRAY_BUFFER, id );
+	glBufferSubDataX( GL_ELEMENT_ARRAY_BUFFER, start*sizeof(uint16_t), count*sizeof(uint16_t), data );
 	glBindBufferX( GL_ELEMENT_ARRAY_BUFFER, 0 );
 	CHECK_GL_ERROR;
 }
-*/
 
-
-
-void GPUIndexBuffer::Destroy() 
-{
-	if ( id ) {
-		glDeleteBuffersX( 1, (GLuint*) &id );
-		id = 0;
-	}
-}
-
-
-/*static*/ GPUInstanceBuffer GPUInstanceBuffer::Create( const uint8_t* data, int nData )
-{
-	GPUInstanceBuffer buffer;
-
-	U32 dataSize  = nData;
-	glGenBuffersX( 1, (GLuint*) &buffer.id );
-	glBindBufferX( GL_ARRAY_BUFFER, buffer.id );
-	// if vertex is null this will just allocate
-	glBufferDataX( GL_ARRAY_BUFFER, dataSize, data, data ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW );
-	glBindBufferX( GL_ARRAY_BUFFER, 0 );
-	CHECK_GL_ERROR;
-
-	return buffer;
-}
-
-
-/*
-void GPUInstanceBuffer::Upload( const uint8_t* data, int count, int start )
-{
-	GLASSERT( GPUState::SupportsVBOs() );
-	glBindBufferX( GL_ARRAY_BUFFER, id );
-	// target, offset, size, data
-	glBufferSubDataX( GL_ARRAY_BUFFER, start*sizeof(uint8_t), count*sizeof(uint8_t), data );
-	CHECK_GL_ERROR;
-	glBindBufferX( GL_ARRAY_BUFFER, 0 );
-	CHECK_GL_ERROR;
-}
-*/
-
-void GPUInstanceBuffer::Destroy() 
-{
-	if ( id ) {
-		glDeleteBuffersX( 1, (GLuint*) &id );
-		id = 0;
-	}
-}
 
 
 MatrixStack::MatrixStack() : index( 0 )
@@ -183,24 +127,43 @@ void MatrixStack::Multiply( const grinliz::Matrix4& m )
 }
 
 
-/*static*/ int			GPUState::primitive = GL_TRIANGLES; 
-/*static*/ int			GPUState::trianglesDrawn = 0;
-/*static*/ int			GPUState::quadsDrawn = 0;
-/*static*/ int			GPUState::drawCalls = 0;
-/*static*/ uint32_t		GPUState::uid = 0;
-/*static*/ GPUState::MatrixType GPUState::matrixMode = MODELVIEW_MATRIX;
-/*static*/ MatrixStack	GPUState::mvStack;
-/*static*/ MatrixStack	GPUState::projStack;
-/*static*/ GPUState::BlendMode	GPUState::currentBlend = BLEND_NONE;
-/*static*/ GPUState::DepthWrite	GPUState::currentDepthWrite = DEPTH_WRITE_TRUE;
-/*static*/ GPUState::DepthTest	GPUState::currentDepthTest = DEPTH_TEST_TRUE;
-/*static*/ GPUState::ColorWrite	GPUState::currentColorWrite = COLOR_WRITE_TRUE;
-/*static*/ GPUState::StencilMode GPUState::currentStencilMode = STENCIL_OFF;
-/*static*/ Matrix4		GPUState::identity[EL_MAX_INSTANCE];
-/*static*/ Vector4F		GPUState::defaultControl[EL_MAX_INSTANCE];
+GPUDevice* GPUDevice::instance = 0;
+
+GPUDevice::GPUDevice()
+{
+	matrixMode			= MODELVIEW_MATRIX;
+	currentBlend		= BLEND_NONE;
+	currentDepthTest	= DEPTH_TEST_TRUE;
+	currentDepthWrite	= DEPTH_WRITE_TRUE;
+	currentColorWrite	= COLOR_WRITE_TRUE;
+	currentStencilMode	= STENCIL_OFF;
+	primitive			= GL_TRIANGLES;
+	trianglesDrawn		= 0;
+	quadsDrawn			= 0;
+	drawCalls			= 0;
+	uid					= 0;
+	for( int i=0; i<3; ++i ) matrixDepth[i] = 0;
+
+	ambient.Set( 0.3f, 0.3f, 0.3f, 1.0f );
+	directionWC.Set( 1, 1, 1, 0 );
+	directionWC.Normalize();
+	diffuse.Set( 0.7f, 0.7f, 0.7f, 1.0f );
+
+	vertexBuffer = new GPUVertexBuffer( 0, 256*1024 );
+	indexBuffer  = new GPUIndexBuffer( 0,   64*1024 );
+
+	ResetState();
+}
+
+GPUDevice::~GPUDevice()
+{
+	delete vertexBuffer;
+	delete indexBuffer;
+	instance = 0;
+}
 
 
-/*static */ void GPUState::ResetState()
+void GPUDevice::ResetState()
 {
 	// Texture unit 0
 	glActiveTexture( GL_TEXTURE0 );
@@ -240,8 +203,7 @@ void MatrixStack::Multiply( const grinliz::Matrix4& m )
 }
 
 
-//static
-int GPUState::Upload( const GPUState& state, const GPUStream& stream, const GPUStreamData& data, int start, int instanceTotal )
+int GPUDevice::Upload( const GPUState& state, const GPUStream& stream, const GPUStreamData& data, int start, int instanceTotal )
 {
 	ShaderManager* shadman = ShaderManager::Instance();
 	int nInstance = instanceTotal - start;
@@ -250,10 +212,10 @@ int GPUState::Upload( const GPUState& state, const GPUStream& stream, const GPUS
 
 	int flags = shadman->ShaderFlags();
 
-	const Matrix4& mv = GPUState::TopMatrix( GPUState::MODELVIEW_MATRIX );
+	const Matrix4& mv = TopMatrix( MODELVIEW_MATRIX );
 
 	Matrix4 mvp;
-    MultMatrix4( GPUState::TopMatrix( GPUState::PROJECTION_MATRIX ), mv, &mvp );
+    MultMatrix4( TopMatrix( PROJECTION_MATRIX ), mv, &mvp );
     shadman->SetUniform( ShaderManager::U_MVP_MAT, mvp );
  
 	shadman->SetUniformArray( ShaderManager::U_M_MAT_ARR, nInstance, 
@@ -297,7 +259,7 @@ int GPUState::Upload( const GPUState& state, const GPUStream& stream, const GPUS
 			glBindTexture( GL_TEXTURE_2D, data.texture0->GLID() );
 			shadman->SetTexture( 0, data.texture0 );
 
-			shadman->SetStreamData( ShaderManager::A_TEXTURE0, 2, GL_FLOAT, stream.stride, PTR( data.streamPtr, stream.texture0Offset ) );
+			shadman->SetStreamData( ShaderManager::A_TEXTURE0, 2, GL_FLOAT, stream.stride, PTR( 0, stream.texture0Offset ) );
 		}
 	}
 	CHECK_GL_ERROR;
@@ -305,7 +267,7 @@ int GPUState::Upload( const GPUState& state, const GPUStream& stream, const GPUS
 	// vertex
 	if ( stream.HasPos() ) {
 		if ( start == 0 ) {
-			shadman->SetStreamData( ShaderManager::A_POS, stream.nPos, GL_FLOAT, stream.stride, PTR( data.streamPtr, stream.posOffset ) );	 
+			shadman->SetStreamData( ShaderManager::A_POS, stream.nPos, GL_FLOAT, stream.stride, PTR( 0, stream.posOffset ) );	 
 		}
 	}
 
@@ -313,7 +275,7 @@ int GPUState::Upload( const GPUState& state, const GPUStream& stream, const GPUS
 	if ( stream.HasColor() ) {
 		GLASSERT( stream.nColor == 4 );
 		if ( start == 0 ) {
-			shadman->SetStreamData( ShaderManager::A_COLOR, 4, GL_FLOAT, stream.stride, PTR( data.streamPtr, stream.colorOffset ) );	 
+			shadman->SetStreamData( ShaderManager::A_COLOR, 4, GL_FLOAT, stream.stride, PTR( 0, stream.colorOffset ) );	 
 		}
 	}
 
@@ -328,41 +290,40 @@ int GPUState::Upload( const GPUState& state, const GPUStream& stream, const GPUS
 		// - simpler shader code
 		shadman->SetUniformArray( ShaderManager::U_BONEXFORM, count, &data.bones[start*EL_MAX_BONES] );
 		if ( start == 0 ) {
-			shadman->SetStreamData( ShaderManager::A_BONE_ID, 1, GL_UNSIGNED_SHORT, stream.stride, PTR( data.streamPtr, stream.boneOffset ) );
+			shadman->SetStreamData( ShaderManager::A_BONE_ID, 1, GL_UNSIGNED_SHORT, stream.stride, PTR( 0, stream.boneOffset ) );
 		}
 	}
 	else if ( flags & ShaderManager::BONE_FILTER ) {
 		if ( start == 0 ) {
-			shadman->SetStreamData( ShaderManager::A_BONE_ID, 1, GL_UNSIGNED_SHORT, stream.stride, PTR( data.streamPtr, stream.boneOffset ) );
+			shadman->SetStreamData( ShaderManager::A_BONE_ID, 1, GL_UNSIGNED_SHORT, stream.stride, PTR( 0, stream.boneOffset ) );
 		}
 	}
 
 	// lighting 
 	if ( flags & (ShaderManager::LIGHTING_DIFFUSE | ShaderManager::LIGHTING_HEMI) ) {
 
-		Vector4F dirEye = GPUState::ViewMatrix() * GPUState::directionWC;
+		Vector4F dirEye = ViewMatrix() * directionWC;
 		GLASSERT( Equal( dirEye.Length(), 1.f, 0.01f ));
 		Vector3F dirEye3 = { dirEye.x, dirEye.y, dirEye.z };
 
 		// NOTE: the normal matrix can be used because the game doesn't support scaling.
 		shadman->SetUniform( ShaderManager::U_NORMAL_MAT, mv );
 		shadman->SetUniform( ShaderManager::U_LIGHT_DIR, dirEye3 );
-		shadman->SetUniform( ShaderManager::U_AMBIENT, GPUState::ambient );
-		shadman->SetUniform( ShaderManager::U_DIFFUSE, GPUState::diffuse );
+		shadman->SetUniform( ShaderManager::U_AMBIENT, ambient );
+		shadman->SetUniform( ShaderManager::U_DIFFUSE, diffuse );
 		if ( start == 0 ) {
-			shadman->SetStreamData( ShaderManager::A_NORMAL, 3, GL_FLOAT, stream.stride, PTR( data.streamPtr, stream.normalOffset ) );	 
+			shadman->SetStreamData( ShaderManager::A_NORMAL, 3, GL_FLOAT, stream.stride, PTR( 0, stream.normalOffset ) );	 
 		}
 	}
 
 	// color multiplier is always set
-	shadman->SetUniform( ShaderManager::U_COLOR_MULT, state.color );
+	shadman->SetUniform( ShaderManager::U_COLOR_MULT, state.Color() );
 
 	return nInstance;
 }
 
 
-//static 
-void GPUState::Weld( const GPUState& state, const GPUStream& stream, const GPUStreamData& data )
+void GPUDevice::Weld( const GPUState& state, const GPUStream& stream, const GPUStreamData& data )
 {
 	CHECK_GL_ERROR;
 	GLASSERT( stream.stride > 0 );
@@ -380,15 +341,15 @@ void GPUState::Weld( const GPUState& state, const GPUStream& stream, const GPUSt
 	flags |= stream.HasColor() ? ShaderManager::COLORS : 0;
 
 	// Actual shader option flags:
-	flags |= state.shaderFlags;	
+	flags |= state.ShaderFlags();	
 
 	shadman->ActivateShader( flags );
 	shadman->ClearStream();
 
 	// Blend
-	if ( (state.stateFlags & BLEND_MASK) != currentBlend ) {
-		currentBlend = BlendMode(state.stateFlags & BLEND_MASK);
-		switch( state.stateFlags & BLEND_MASK ) {
+	if ( (state.StateFlags() & BLEND_MASK) != currentBlend ) {
+		currentBlend = BlendMode(state.StateFlags() & BLEND_MASK);
+		switch( state.StateFlags() & BLEND_MASK ) {
 		case BLEND_NONE:
 			glDisable( GL_BLEND );
 				break;
@@ -406,7 +367,7 @@ void GPUState::Weld( const GPUState& state, const GPUStream& stream, const GPUSt
 	}
 
 	// Depth Write
-	DepthWrite depthWrite = DepthWrite(state.stateFlags & DEPTH_WRITE_MASK);
+	DepthWrite depthWrite = DepthWrite(state.StateFlags() & DEPTH_WRITE_MASK);
 	if ( (depthWrite == DEPTH_WRITE_TRUE) && (currentDepthWrite == DEPTH_WRITE_FALSE) ) {
 		glDepthMask( GL_TRUE );
 		currentDepthWrite = DEPTH_WRITE_TRUE;
@@ -417,7 +378,7 @@ void GPUState::Weld( const GPUState& state, const GPUStream& stream, const GPUSt
 	}
 
 	// Depth test
-	DepthTest depthTest = DepthTest(state.stateFlags & DEPTH_TEST_MASK);
+	DepthTest depthTest = DepthTest(state.StateFlags() & DEPTH_TEST_MASK);
 	if ( (depthTest == DEPTH_TEST_TRUE) && (currentDepthTest == DEPTH_TEST_FALSE) ) {
 		glEnable( GL_DEPTH_TEST );
 		currentDepthTest = DEPTH_TEST_TRUE;
@@ -428,7 +389,7 @@ void GPUState::Weld( const GPUState& state, const GPUStream& stream, const GPUSt
 	}
 
 	// Color test
-	ColorWrite colorWrite = ColorWrite(state.stateFlags & COLOR_WRITE_MASK);
+	ColorWrite colorWrite = ColorWrite(state.StateFlags() & COLOR_WRITE_MASK);
 	if ( (colorWrite == COLOR_WRITE_TRUE) && (currentColorWrite == COLOR_WRITE_FALSE)) {
 		glColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE );
 		currentColorWrite = COLOR_WRITE_TRUE;
@@ -438,7 +399,7 @@ void GPUState::Weld( const GPUState& state, const GPUStream& stream, const GPUSt
 		currentColorWrite = COLOR_WRITE_FALSE;
 	}
 
-	StencilMode stencilMode = StencilMode(state.stateFlags & STENCIL_MASK);
+	StencilMode stencilMode = StencilMode(state.StateFlags() & STENCIL_MASK);
 	if ( stencilMode != currentStencilMode ) {
 		currentStencilMode = stencilMode;
 		switch( stencilMode ) {
@@ -475,7 +436,7 @@ void GPUState::Weld( const GPUState& state, const GPUStream& stream, const GPUSt
 }
 
 
-void GPUState::Clear( float r, float g, float b, float a )
+void GPUDevice::Clear( float r, float g, float b, float a )
 {
 	GLASSERT( currentStencilMode == STENCIL_OFF );	// could be fixed, just implemented for 'off'
 	glStencilMask( GL_TRUE );	// Stupid stupid opengl behavior.
@@ -485,20 +446,14 @@ void GPUState::Clear( float r, float g, float b, float a )
 	glStencilMask( GL_FALSE );
 }
 
-#if 0
-/*static*/void GPUState::SetMatrixMode( MatrixType m )
-{
-	matrixMode = m;
-}
-#else
 
-/*static*/ void GPUState::SetViewport( int w, int h )
+void GPUDevice::SetViewport( int w, int h )
 {
 	glViewport( 0, 0, w, h );
 }
 
 
-/*static*/ void GPUState::SetOrthoTransform( int screenWidth, int screenHeight )
+void GPUDevice::SetOrthoTransform( int screenWidth, int screenHeight )
 {
 	Matrix4 ortho;
 	ortho.SetOrtho( 0, (float)screenWidth, (float)screenHeight, 0, -100.f, 100.f );
@@ -510,14 +465,14 @@ void GPUState::Clear( float r, float g, float b, float a )
 }
 
 
-/*static*/ void GPUState::SetPerspectiveTransform( const grinliz::Matrix4& perspective )
+void GPUDevice::SetPerspectiveTransform( const grinliz::Matrix4& perspective )
 {
 	SetMatrix( PROJECTION_MATRIX, perspective );
 	CHECK_GL_ERROR;
 }
 
 
-/*static*/ void GPUState::SetCameraTransform( const grinliz::Matrix4& camera )
+void GPUDevice::SetCameraTransform( const grinliz::Matrix4& camera )
 {
 	// In normalized coordinates.
 	GLASSERT( mvStack.NumMatrix() == 1 );
@@ -526,20 +481,7 @@ void GPUState::Clear( float r, float g, float b, float a )
 }
 
 
-/*static*/ void GPUState::SetScissor( int x, int y, int w, int h )
-{
-	if ( w > 0 && h > 0 ) {
-		glEnable( GL_SCISSOR_TEST );
-		glScissor( x, y, w, h );
-	}
-	else {
-		glDisable( GL_SCISSOR_TEST );
-	}
-}
-#endif
-
-
-void GPUState::DrawQuads( const GPUStream& stream, const GPUStreamData& data, int nQuad )
+void GPUDevice::DrawQuads( const GPUState& state, const GPUStream& stream, const GPUStreamData& data, int nQuad )
 {
 	quadsDrawn += nQuad;
 	++drawCalls;
@@ -547,14 +489,14 @@ void GPUState::DrawQuads( const GPUStream& stream, const GPUStreamData& data, in
 	GLASSERT( data.vertexBuffer );
 
 	glBindBufferX( GL_ARRAY_BUFFER, data.vertexBuffer );
-	Weld( *this, stream, data );
-	Upload( *this, stream, data, 0, 1 );
+	Weld( state, stream, data );
+	Upload( state, stream, data, 0, 1 );
 	glDrawArrays( GL_QUADS, 0, nQuad*4 );
 	glBindBufferX( GL_ARRAY_BUFFER, 0 );
 }
 
 
-void GPUState::Draw( const GPUStream& stream, const GPUStreamData& data, int nIndex, int instances )
+void GPUDevice::Draw( const GPUState& state, const GPUStream& stream, const GPUStreamData& data, int first, int nIndex, int instances )
 {
 	if ( nIndex == 0 )
 		return;
@@ -564,90 +506,60 @@ void GPUState::Draw( const GPUStream& stream, const GPUStreamData& data, int nIn
 
 	trianglesDrawn += instances * nIndex / 3;
 
-	//glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+	GLASSERT( data.vertexBuffer );
+	GLASSERT( data.indexBuffer );
 
-	if ( data.indexPtr ) {	
-		GLASSERT( data.indexBuffer == 0 );
-		if ( data.vertexBuffer ) {
-			glBindBufferX( GL_ARRAY_BUFFER, data.vertexBuffer );
-			GLASSERT( data.streamPtr == 0 );
-		}
-		Weld( *this, stream, data );
-		
-		int start = 0;
-		while ( start < instances ) {
-			int n = Upload( *this, stream, data, start, instances );
-			start += n;
+	// This took a long time to figure. OpenGL is a state machine, except, apparently, when it isn't.
+	// The VBOs impact how the SetxxxPointers work. If they aren't set, then the wrong thing gets
+	// bound. What a PITA. And ugly design problem with OpenGL.
+	//
+	glBindBufferX( GL_ARRAY_BUFFER, data.vertexBuffer );
+	glBindBufferX( GL_ELEMENT_ARRAY_BUFFER, data.indexBuffer );
+	Weld( state, stream, data );
 
-			++drawCalls;
-			glDrawElementsInstanced( primitive,	//GL_TRIANGLES except where debugging 
-									 nIndex, GL_UNSIGNED_SHORT, data.indexPtr,
-									 n );
-		}
-		if ( data.vertexBuffer ) {
-			glBindBufferX( GL_ARRAY_BUFFER, 0 );
-		}
+	int start = 0;
+	while ( start < instances ) {
+		int n = Upload( state, stream, data, start, instances );
+		start += n;
+
+		++drawCalls;
+		glDrawElementsInstanced( primitive,	// GL_TRIANGLES except when debugging 
+								 nIndex, GL_UNSIGNED_SHORT, (const void*)(first*2), n );
 	}
-	else {
-		GLASSERT( data.vertexBuffer );
-		GLASSERT( data.indexBuffer );
+	glBindBufferX( GL_ARRAY_BUFFER, 0 );
+	glBindBufferX( GL_ELEMENT_ARRAY_BUFFER, 0 );
 
-		// This took a long time to figure. OpenGL is a state machine, except, apparently, when it isn't.
-		// The VBOs impact how the SetxxxPointers work. If they aren't set, then the wrong thing gets
-		// bound. What a PITA. And ugly design problem with OpenGL.
-		//
-		glBindBufferX( GL_ARRAY_BUFFER, data.vertexBuffer );
-		glBindBufferX( GL_ELEMENT_ARRAY_BUFFER, data.indexBuffer );
-		Weld( *this, stream, data );
-
-		int start = 0;
-		while ( start < instances ) {
-			int n = Upload( *this, stream, data, start, instances );
-			start += n;
-
-			++drawCalls;
-			glDrawElementsInstanced( primitive,	// GL_TRIANGLES except when debugging 
-							nIndex, GL_UNSIGNED_SHORT, 0, n );
-		}
-		glBindBufferX( GL_ARRAY_BUFFER, 0 );
-		glBindBufferX( GL_ELEMENT_ARRAY_BUFFER, 0 );
-	}
 	CHECK_GL_ERROR;
 }
 
 
-void GPUState::Draw( const GPUStream& stream, Texture* texture, const void* vertex, int nIndex, const uint16_t* indices )
+void GPUDevice::Draw(	const GPUState& state,
+						const GPUStream& stream, 
+						const GPUStreamData& _data, 
+						int maxVertex,
+						const void* vertex,				
+						int nIndex, 
+						const uint16_t* indices )
 {
-	GPUStreamData data;
-	data.streamPtr = vertex;
-	data.indexPtr = indices;
-	data.texture0 = texture;
+	CHECK_GL_ERROR;
 
-	Draw( stream, data, nIndex );
+	GLASSERT( nIndex < indexBuffer->NumIndex() );
+	GLASSERT( maxVertex * stream.stride < vertexBuffer->SizeInBytes() );
+
+	int nI = Min( nIndex, indexBuffer->NumIndex() );
+	int nV = Min( maxVertex, vertexBuffer->SizeInBytes() / stream.stride );
+
+	indexBuffer->Upload( indices, nI, 0 );
+	vertexBuffer->Upload( vertex, nV*stream.stride, 0 );
+
+	GPUStreamData data = _data;
+	data.indexBuffer  = indexBuffer->ID();
+	data.vertexBuffer = vertexBuffer->ID();
+	Draw( state, stream, data, 0, nI, 1 );
 }
 
 
-void GPUState::Draw( const GPUStream& stream, Texture* texture, const GPUVertexBuffer& vertex, int nIndex, const uint16_t* indices )
-{
-	GPUStreamData data;
-	data.vertexBuffer = vertex.ID();
-	data.indexPtr = indices;
-	data.texture0 = texture;
-	Draw( stream, data, nIndex );
-}
-
-
-void GPUState::Draw( const GPUStream& stream, Texture* texture, const GPUVertexBuffer& vertex,	int nIndex, const GPUIndexBuffer& index )
-{
-	GPUStreamData data;
-	data.vertexBuffer = vertex.ID();
-	data.indexBuffer = index.ID();
-	data.texture0 = texture;
-	Draw( stream, data, nIndex );
-}
-
-
-void GPUState::DrawQuad( Texture* texture, const grinliz::Vector3F p0, const grinliz::Vector3F p1, bool positive )
+void GPUDevice::DrawQuad( const GPUState& state, Texture* texture, const grinliz::Vector3F p0, const grinliz::Vector3F p1, bool positive )
 {
 	PTVertex pos[4] = { 
 		{ { p0.x, p0.y, p0.z }, { 0, 0 } },
@@ -660,11 +572,13 @@ void GPUState::DrawQuad( Texture* texture, const grinliz::Vector3F p0, const gri
 	const U16* index = positive ? indexPos : indexNeg;
 
 	GPUStream stream( pos[0] );
-	Draw( stream, texture, pos, 6, index );
+	GPUStreamData data;
+	data.texture0 = texture;
+	Draw( state, stream, data, 4, pos, 6, index );
 }
 
 
-void GPUState::DrawLine( const grinliz::Vector3F p0, const grinliz::Vector3F p1 )
+void GPUDevice::DrawLine( const GPUState& state, const grinliz::Vector3F p0, const grinliz::Vector3F p1 )
 {
 	Vector3F v[2] = { p0, p1 };
 	static const U16 index[2] = { 0, 1 };
@@ -672,14 +586,14 @@ void GPUState::DrawLine( const grinliz::Vector3F p0, const grinliz::Vector3F p1 
 	GPUStream stream;
 	stream.stride = sizeof(Vector3F);
 	stream.nPos = 3;
-
+	GPUStreamData data;
 	primitive = GL_LINES;
-	Draw( stream, 0, v, 2, index );
+	Draw( state, stream, data, 2, v, 2, index );
 	primitive = GL_TRIANGLES;
 }
 
 
-void GPUState::DrawArrow( const grinliz::Vector3F p0, const grinliz::Vector3F p1, bool positive, float width )
+void GPUDevice::DrawArrow( const GPUState& state, const grinliz::Vector3F p0, const grinliz::Vector3F p1, bool positive, float width )
 {
 	const Vector3F UP = { 0, 1, 0 };
 	Vector3F normal; 
@@ -698,19 +612,20 @@ void GPUState::DrawArrow( const grinliz::Vector3F p0, const grinliz::Vector3F p1
 		const U16* index = positive ? indexPos : indexNeg;
 
 		GPUStream stream( pos[0] );
-		Draw( stream, 0, pos, 3, index );
+		GPUStreamData data;
+		Draw( state, stream, data, 4, pos, 3, index );
 	}
 }
 
 
-void GPUState::SwitchMatrixMode( MatrixType type )
+void GPUDevice::SwitchMatrixMode( MatrixType type )
 {
 	matrixMode = type;
 	CHECK_GL_ERROR;
 }
 
 
-void GPUState::PushMatrix( MatrixType type )
+void GPUDevice::PushMatrix( MatrixType type )
 {
 	SwitchMatrixMode( type );
 
@@ -729,7 +644,7 @@ void GPUState::PushMatrix( MatrixType type )
 }
 
 
-void GPUState::MultMatrix( MatrixType type, const grinliz::Matrix4& m )
+void GPUDevice::MultMatrix( MatrixType type, const grinliz::Matrix4& m )
 {
 	// A lot of identities seem to get through...
 	if ( m.IsIdentity() )
@@ -752,7 +667,7 @@ void GPUState::MultMatrix( MatrixType type, const grinliz::Matrix4& m )
 }
 
 
-void GPUState::PopMatrix( MatrixType type )
+void GPUDevice::PopMatrix( MatrixType type )
 {
 	CHECK_GL_ERROR;
 
@@ -776,7 +691,7 @@ void GPUState::PopMatrix( MatrixType type )
 }
 
 
-void GPUState::SetMatrix( MatrixType type, const Matrix4& m )
+void GPUDevice::SetMatrix( MatrixType type, const Matrix4& m )
 {
 	CHECK_GL_ERROR;
 
@@ -794,7 +709,7 @@ void GPUState::SetMatrix( MatrixType type, const Matrix4& m )
 }
 
 
-const grinliz::Matrix4& GPUState::TopMatrix( MatrixType type )
+const grinliz::Matrix4& GPUDevice::TopMatrix( MatrixType type )
 {
 	if ( type == MODELVIEW_MATRIX ) {
 		return mvStack.Top();
@@ -803,7 +718,7 @@ const grinliz::Matrix4& GPUState::TopMatrix( MatrixType type )
 }
 
 
-const grinliz::Matrix4& GPUState::ViewMatrix()
+const grinliz::Matrix4& GPUDevice::ViewMatrix()
 {
 	return mvStack.Bottom();
 }

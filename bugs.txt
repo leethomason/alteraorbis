@@ -744,3 +744,6 @@ Release:
 outer tick: 24.2
 inner tick: 25
 
+
+do tick ui (title, debug) 6ms
+switched over to the new Gamui callbacks, caching render buffer. now down to 850us - 1ms. Wow.

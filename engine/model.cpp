@@ -810,15 +810,13 @@ void ModelAtom::Bind( GPUStream* stream, GPUStreamData* data ) const
 	GPUStream vertexStream( *vertex );
 	*stream = vertexStream;
 
-	if ( !vertexBuffer.IsValid() ) {
-		GLASSERT( !indexBuffer.IsValid() );
-
-		vertexBuffer = GPUVertexBuffer::Create( vertex, sizeof(*vertex), nVertex );
-		indexBuffer  = GPUIndexBuffer::Create(  index,  nIndex );
+	if ( !vertexBuffer ) {
+		vertexBuffer = new GPUVertexBuffer( vertex, sizeof(*vertex)*nVertex );
+		indexBuffer  = new GPUIndexBuffer(  index,  nIndex );
 	}
 
-	data->indexBuffer = indexBuffer.ID();
-	data->vertexBuffer = vertexBuffer.ID();
+	data->indexBuffer = indexBuffer->ID();
+	data->vertexBuffer = vertexBuffer->ID();
 
 	data->texture0 = this->texture;
 }

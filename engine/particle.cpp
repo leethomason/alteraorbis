@@ -32,6 +32,7 @@ using namespace grinliz;
 ParticleSystem::ParticleSystem() : texture( 0 ), time( 0 ), nParticles( 0 )
 {
 	ShaderManager::Instance()->AddDeviceLossHandler( this );
+	vbo = 0;
 }
 
 
@@ -45,9 +46,8 @@ ParticleSystem::~ParticleSystem()
 void ParticleSystem::Clear()
 {
 	nParticles = 0;
-	if ( vbo.IsValid() ) {
-		vbo.Destroy();
-	}
+	delete vbo;
+	vbo = 0;
 }
 
 
@@ -285,27 +285,25 @@ void ParticleSystem::Draw()
 	if ( !texture ) {
 		texture = TextureManager::Instance()->GetTexture( "particle" );
 	}
-	if ( !vbo.IsValid() ) {
-		vbo = GPUVertexBuffer::Create( 0, sizeof( ParticleStream ), MAX_PARTICLES*4 );
+	if ( !vbo ) {
+		vbo = new GPUVertexBuffer( 0, sizeof( ParticleStream )*MAX_PARTICLES*4 );
 	}
-	GLASSERT( vbo.IsValid() );
-	vbo.Upload( vertexBuffer, sizeof(ParticleStream)*nParticles*4, 0 );
+	vbo->Upload( vertexBuffer, sizeof(ParticleStream)*nParticles*4, 0 );
 	
 	GPUStream stream;
 	stream.stride = sizeof( ParticleStream );
 	stream.nPos = 3;
 	stream.posOffset = ParticleStream::POS_OFFSET;
-//	stream.nTexture0 = 2;
 	stream.texture0Offset = ParticleStream::TEXTURE_OFFSET;
 	stream.nColor = 4;
 	stream.colorOffset = ParticleStream::COLOR_OFFSET;
 
 	GPUStreamData data;
-	data.vertexBuffer = vbo.ID();
+	data.vertexBuffer = vbo->ID();
 	data.texture0 = texture;
 
 	ParticleShader shader;
-	shader.DrawQuads( stream, data, nParticles );
+	GPUDevice::Instance()->DrawQuads( shader, stream, data, nParticles );
 }
 
 

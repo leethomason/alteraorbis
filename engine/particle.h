@@ -215,7 +215,7 @@ private:
 	Texture* texture;
 	U32 time;
 
-	GPUVertexBuffer vbo;
+	GPUVertexBuffer* vbo;
 
 	int nParticles;
 	grinliz::CDynArray<ParticleDef> particleDefArr;

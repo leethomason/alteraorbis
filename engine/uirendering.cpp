@@ -25,10 +25,12 @@ using namespace grinliz;
 using namespace gamui;
 
 
-void UIRenderer::BeginRender()
+void UIRenderer::BeginRender( int nIndex, const uint16_t* index, int nVertex, const gamui::Gamui::Vertex* vertex )
 {
 	// Should be completely uneeded, but fixes bugs on a netbook. (With questionable drivers.)
-	GPUState::ResetState();
+	GPUDevice::Instance()->ResetState();
+	GPUDevice::Instance()->GetTempIBO()->Upload( index, nIndex, 0 );
+	GPUDevice::Instance()->GetTempVBO()->Upload( vertex, nVertex*sizeof(*vertex), 0 );
 }
 
 
@@ -42,48 +44,49 @@ void UIRenderer::BeginRenderState( const void* renderState )
 	int state = ((int)renderState) & 0xffff;
 	int data  = ((int)renderState) >> 16;
 	shader = CompositingShader();
+	GPUDevice* device = GPUDevice::Instance();
 
 	switch ( state )
 	{
 	case RENDERSTATE_UI_NORMAL:
 		shader.SetColor( 1, 1, 1, 1 );
-		shader.SetBlendMode( GPUState::BLEND_NORMAL );
+		shader.SetBlendMode( BLEND_NORMAL );
 		break;
 
 	case RENDERSTATE_UI_NORMAL_OPAQUE:
 		shader.SetColor( 1, 1, 1, 1 );
-		shader.SetBlendMode( GPUState::BLEND_NONE );
+		shader.SetBlendMode( BLEND_NONE );
 		break;
 
 	case RENDERSTATE_UI_DISABLED:
 		shader.SetColor( 1, 1, 1, 0.5f );
-		shader.SetBlendMode( GPUState::BLEND_NORMAL );
+		shader.SetBlendMode( BLEND_NORMAL );
 		break;
 
 	case RENDERSTATE_UI_TEXT:
 		shader.SetColor( textRed, textGreen, textBlue, 1 );
-		shader.SetBlendMode( GPUState::BLEND_NORMAL );
+		shader.SetBlendMode( BLEND_NORMAL );
 		break;
 
 	case RENDERSTATE_UI_TEXT_DISABLED:
 		shader.SetColor( textRed, textGreen, textBlue, 0.5f );
-		shader.SetBlendMode( GPUState::BLEND_NORMAL );
+		shader.SetBlendMode( BLEND_NORMAL );
 		break;
 
 	case RENDERSTATE_UI_DECO:
 		shader.SetColor( 1, 1, 1, 0.7f );
-		shader.SetBlendMode( GPUState::BLEND_NORMAL );
+		shader.SetBlendMode( BLEND_NORMAL );
 		break;
 
 	case RENDERSTATE_UI_DECO_DISABLED:
 		shader.SetColor( 1, 1, 1, 0.2f );
-		shader.SetBlendMode( GPUState::BLEND_NORMAL );
+		shader.SetBlendMode( BLEND_NORMAL );
 		break;
 
 	case RENDERSTATE_UI_CLIP_XFORM_MAP:
 		{
 			shader.SetColor( 1, 1, 1, 1 );
-			shader.SetBlendMode( GPUState::BLEND_NORMAL );
+			shader.SetBlendMode( BLEND_NORMAL );
 			shader.SetShaderFlag( ShaderManager::TEXTURE0_CLIP);
 			shader.SetShaderFlag( ShaderManager::TEXTURE0_COLORMAP );
 		}
@@ -102,20 +105,21 @@ void UIRenderer::BeginTexture( const void* textureHandle )
 }
 
 
-void UIRenderer::Render( const void* renderState, const void* textureHandle, int nIndex, const uint16_t* index, int nVertex, const Gamui::Vertex* vertex )
+void UIRenderer::Render( const void* renderState, const void* textureHandle, int start, int count )
 {
 	GPUStream stream( GPUStream::kGamuiType );
 	
 	GPUStreamData data;
-	data.streamPtr = vertex;
-	data.indexPtr = index;
 	data.texture0 = (Texture*)textureHandle;
 	data.texture0XForm = uv;
 	data.texture0Clip  = uvClip;
 	data.texture0ColorMap = colorXForm;
+	data.indexBuffer  = GPUDevice::Instance()->GetTempIBO()->ID();
+	data.vertexBuffer = GPUDevice::Instance()->GetTempVBO()->ID();
 
-	shader.Draw( stream, data, nIndex );
+	GPUDevice::Instance()->Draw( shader, stream, data, start, count, 1 );
 }
+
 
 
 void UIRenderer::SetAtomCoordFromPixel( int x0, int y0, int x1, int y1, int w, int h, RenderAtom* atom )

@@ -135,6 +135,7 @@ Game::~Game()
 	ImageManager::Destroy();
 	TextureManager::Destroy();
 	delete ShaderManager::Instance();
+	delete GPUDevice::Instance();
 	delete database0;
 	delete StringPool::Instance();
 	//Performance::Free();
@@ -441,6 +442,7 @@ void Game::PrintPerf()
 
 void Game::DoTick( U32 _currentTime )
 {
+	GPUDevice* device = GPUDevice::Instance();
 	{
 		//GRINLIZ_PERFTRACK
 		PROFILE_FUNC();
@@ -470,13 +472,12 @@ void Game::DoTick( U32 _currentTime )
 		if ( deltaTime > 100 )
 			deltaTime = 100;
 
-		
-		GPUState::ResetState();
+		device->ResetState();
 
 		Scene* scene = sceneStack.Top()->scene;
 
 		Color4F cc = scene->ClearColor();
-		GPUState::Clear( cc.r, cc.g, cc.b, cc.a );
+		device->Clear( cc.r, cc.g, cc.b, cc.a );
 
 		scene->DoTick( deltaTime );
 
@@ -516,9 +517,9 @@ void Game::DoTick( U32 _currentTime )
 			ufoText->Draw(	0,  Y, "#%d %5.1ffps %4.1fK/f %3ddc/f quads=%.1fK/f", 
 							VERSION, 
 							framesPerSecond, 
-							(float)GPUState::TrianglesDrawn()/1000.0f,
-							GPUState::DrawCalls(),
-							(float)GPUState::QuadsDrawn()/1000.0f );
+							(float)device->TrianglesDrawn()/1000.0f,
+							device->DrawCalls(),
+							(float)device->QuadsDrawn()/1000.0f );
 			sceneStack.Top()->scene->DrawDebugText();
 		}
 	}
@@ -557,7 +558,7 @@ void Game::DoTick( U32 _currentTime )
 	}
 #endif
 
-	GPUState::ResetTriCount();
+	device->ResetTriCount();
 	previousTime = currentTime;
 	++currentFrame;
 
@@ -657,7 +658,7 @@ void Game::DeviceLoss()
 	TextureManager::Instance()->DeviceLoss();
 	ModelResourceManager::Instance()->DeviceLoss();
 	ShaderManager::Instance()->DeviceLoss();
-	GPUState::ResetState();
+	delete GPUDevice::Instance();
 }
 
 

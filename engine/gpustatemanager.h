@@ -31,6 +31,7 @@
 
 class Texture;
 class Particle;
+class GPUState;
 
 class MatrixStack
 {
@@ -58,9 +59,9 @@ class GPUBuffer
 {
 public:
 	GPUBuffer() : id( 0 )			{}
-	bool IsValid() const			{ return id != 0; }
+	virtual ~GPUBuffer()			{}
+
 	U32 ID() const					{ return id; }
-	void Clear()					{ id = 0; }
 
 protected:	
 	U32 id;
@@ -71,34 +72,28 @@ class GPUVertexBuffer : public GPUBuffer
 {
 public:
 	// a null value for vertex will create an empty buffer
-	static GPUVertexBuffer Create( const void* vertex, int size, int nVertex );
-	void Upload( const void* data, int nBytes, int start );
+	GPUVertexBuffer( const void* data, int sizeInBytes );
+	~GPUVertexBuffer();
 
-	GPUVertexBuffer() : GPUBuffer() {}
-	void Destroy();
+	void Upload( const void* data, int nBytes, int start );
+	int SizeInBytes() const { return sizeInBytes; }
 private:
+	int sizeInBytes;
 };
 
 
 class GPUIndexBuffer : public GPUBuffer
 {
 public:
-	static GPUIndexBuffer Create( const uint16_t* index, int nIndex );
-	//void Upload( const uint16_t* data, int size, int start );
+	static GPUIndexBuffer Create(  );
+	void Upload( const uint16_t* data, int size, int start );
 
-	GPUIndexBuffer() : GPUBuffer() {}
-	void Destroy();
-};
+	GPUIndexBuffer( const uint16_t* index, int nIndex );
+	~GPUIndexBuffer();
 
-
-class GPUInstanceBuffer : public GPUBuffer
-{
-public:
-	static GPUInstanceBuffer Create( const uint8_t* index, int nIndex );
-	//void Upload( const uint8_t* data, int size, int start );
-
-	GPUInstanceBuffer() : GPUBuffer() {}
-	void Destroy();
+	int NumIndex() const { return nIndex; }
+private:
+	int nIndex;
 };
 
 
@@ -123,14 +118,13 @@ struct GPUStream {
 
 	GPUStream() :  stride( 0 ),
 				nPos( 0 ), posOffset( 0 ), 
-				/*nTexture0( 0 ), */texture0Offset( 0 ),
-				/*nTexture1( 0 ), */texture1Offset( 0 ), 
+				texture0Offset( 0 ),
+				texture1Offset( 0 ), 
 				nNormal( 0 ), normalOffset( 0 ),
 				nColor( 0 ), colorOffset( 0 ), boneOffset( 0 ) {}
 
 	// Uses type: GPUStream stream( Vertex );
 	GPUStream( const Vertex& vertex );
-	//GPUStream( const InstVertex& vertex );
 	GPUStream( GamuiType );
 	GPUStream( const PTVertex& vertex );
 	GPUStream( const PTVertex2& vertex );
@@ -140,8 +134,6 @@ struct GPUStream {
 	bool HasPos() const			{ return nPos > 0; }
 	bool HasNormal() const		{ return nNormal > 0; }
 	bool HasColor() const		{ return nColor > 0; }
-	//bool HasTexture0() const	{ return nTexture0 > 0; }
-	//bool HasTexture1() const	{ return nTexture1 > 0; }
 };
 
 
@@ -149,7 +141,8 @@ struct GPUStream {
 */
 struct GPUStreamData
 {
-	GPUStreamData() : streamPtr(0), indexPtr(0), vertexBuffer(0), indexBuffer(0), 
+	GPUStreamData() : vertexBuffer(0), 
+					  indexBuffer(0), 
 					  texture0(0), 
 					  matrix(0), 
 					  colorParam(0), 
@@ -166,8 +159,6 @@ struct GPUStreamData
 #endif
 	{}
 
-	const void*			streamPtr;
-	const uint16_t*		indexPtr;
 	U32					vertexBuffer;
 	U32					indexBuffer;
 
@@ -188,11 +179,48 @@ struct GPUStreamData
 };
 
 
-/* WARNING: this gets copied around, and slices.
-   Sub-classes are for initialization. They can't
-   store data.
-*/
-class GPUState 
+// Flag values used for state ordering - be sure Blend is in the correct high bits!
+enum StencilMode {
+	STENCIL_OFF		= 0,			// ignore stencil
+	STENCIL_WRITE	= (1<<0),		// draw commands write to stencil
+	STENCIL_SET		= (1<<1),		// draw if stencil is set
+	STENCIL_CLEAR	= (1<<2),		// draw if stencil is clear
+	STENCIL_MASK    = STENCIL_WRITE | STENCIL_SET | STENCIL_CLEAR
+};
+
+enum DepthWrite {
+	DEPTH_WRITE_TRUE	= 0,
+	DEPTH_WRITE_FALSE	= (1<<3),
+	DEPTH_WRITE_MASK	= DEPTH_WRITE_FALSE
+};
+
+enum DepthTest {
+	DEPTH_TEST_TRUE		= 0,
+	DEPTH_TEST_FALSE	= (1<<4),
+	DEPTH_TEST_MASK		= DEPTH_TEST_FALSE
+};
+
+enum ColorWrite {
+	COLOR_WRITE_TRUE	= 0,
+	COLOR_WRITE_FALSE	= (1<<5),
+	COLOR_WRITE_MASK	= COLOR_WRITE_FALSE
+};
+
+enum LightingType {
+	LIGHTING_LAMBERT	= 0,
+	LIGHTING_HEMI		= (1<<6),
+	LIGHTING_MASK		= LIGHTING_HEMI
+};
+
+enum BlendMode {
+	BLEND_NONE		= 0,			// opaque
+	BLEND_NORMAL	= (1<<7),		// a, 1-a
+	BLEND_ADD		= (1<<8),		// additive blending
+	BLEND_MASK		= BLEND_NORMAL | BLEND_ADD
+};
+
+	
+class GPUDevice
 {
 public:
 	enum MatrixType {
@@ -200,60 +228,122 @@ public:
 		PROJECTION_MATRIX,
 	};
 
-	// FLag values used for state ordering - be sure Blend is in the correct high bits!
 
-	enum StencilMode {
-		STENCIL_OFF		= 0,			// ignore stencil
-		STENCIL_WRITE	= (1<<0),		// draw commands write to stencil
-		STENCIL_SET		= (1<<1),		// draw if stencil is set
-		STENCIL_CLEAR	= (1<<2),		// draw if stencil is clear
-		STENCIL_MASK    = STENCIL_WRITE | STENCIL_SET | STENCIL_CLEAR
-	};
-
-	enum DepthWrite {
-		DEPTH_WRITE_TRUE	= 0,
-		DEPTH_WRITE_FALSE	= (1<<3),
-		DEPTH_WRITE_MASK	= DEPTH_WRITE_FALSE
-	};
-
-	enum DepthTest {
-		DEPTH_TEST_TRUE		= 0,
-		DEPTH_TEST_FALSE	= (1<<4),
-		DEPTH_TEST_MASK		= DEPTH_TEST_FALSE
-	};
-
-	enum ColorWrite {
-		COLOR_WRITE_TRUE	= 0,
-		COLOR_WRITE_FALSE	= (1<<5),
-		COLOR_WRITE_MASK	= COLOR_WRITE_FALSE
-	};
-
-	enum Lighting {
-		LIGHTING_LAMBERT	= 0,
-		LIGHTING_HEMI		= (1<<6),
-		LIGHTING_MASK		= LIGHTING_HEMI
-	};
-
-	enum BlendMode {
-		BLEND_NONE		= 0,			// opaque
-		BLEND_NORMAL	= (1<<7),		// a, 1-a
-		BLEND_ADD		= (1<<8),		// additive blending
-		BLEND_MASK		= BLEND_NORMAL | BLEND_ADD
-	};
 	enum { STATE_BITS = 9 };
 
+	static GPUDevice* Instance()	{ if ( !instance ) instance = new GPUDevice(); return instance; }
+	~GPUDevice();
 
-	static void ResetState();
-	static void Clear( float r, float g, float b, float a );
+	void ResetState();
+	void Clear( float r, float g, float b, float a );
 
 	// Set the top level state. The engine has top level (root transforms)
 	// for the screen size, scissor, and transform:
-	static void SetViewport( int w, int h );
-	static void SetOrthoTransform( int width, int height );
-	static void SetPerspectiveTransform( const grinliz::Matrix4& perspective );
+	void SetViewport( int w, int h );
+	void SetOrthoTransform( int width, int height );
+	void SetPerspectiveTransform( const grinliz::Matrix4& perspective );
 	// The top level V matrix in perspective mode.
-	static void SetCameraTransform( const grinliz::Matrix4& camera );
-	static void SetScissor( int x, int y, int w, int h );
+	void SetCameraTransform( const grinliz::Matrix4& camera );
+
+	void PushMatrix( MatrixType type );
+	void SetMatrix( MatrixType type, const grinliz::Matrix4& m );
+	void MultMatrix( MatrixType type, const grinliz::Matrix4& m );
+	void PopMatrix( MatrixType type );
+
+	const grinliz::Matrix4& TopMatrix( MatrixType type );
+	const grinliz::Matrix4& ViewMatrix();
+
+	void ResetTriCount()	{ quadsDrawn = 0; trianglesDrawn = 0; drawCalls = 0; }
+	int TrianglesDrawn()	{ return trianglesDrawn; }
+	int QuadsDrawn()		{ return quadsDrawn; }
+	int DrawCalls()			{ return drawCalls; }
+
+	grinliz::Color4F		ambient;
+	grinliz::Vector4F	directionWC;
+	grinliz::Color4F		diffuse;
+
+	void Draw(		const GPUState& state, 
+					const GPUStream& stream, 
+					const GPUStreamData& data, 
+					int startIndex,
+					int nIndex, 
+					int nInstance );
+
+	void DrawQuads( const GPUState& state,
+					const GPUStream& stream, 
+					const GPUStreamData& data, 
+					int nQuad );
+
+	// CAUTION: this uses the temporary buffers, so 
+	// calling this will flush them.
+	void Draw(		const GPUState& state,
+					const GPUStream& stream, 
+					const GPUStreamData& data, 
+					int maxVertex,
+					const void* vertex,				
+					int nIndex, 
+					const uint16_t* indices );
+
+	void DrawLine(	const GPUState& state, const grinliz::Vector3F p0, const grinliz::Vector3F p1 );
+	void DrawQuad(	const GPUState& state, Texture* texture, const grinliz::Vector3F p0, const grinliz::Vector3F p1, bool positiveWinding=true );
+	void DrawArrow( const GPUState& state, const grinliz::Vector3F p0, const grinliz::Vector3F p1, bool positiveWinding=true, float width=0.4f );
+
+	// Use with caution; but good for uploading vertices
+	// that are then rendered with multiple draw calls. (Gamui, 
+	// in particualar.) Just don't call the Draw( ... void*, ) form
+
+	GPUVertexBuffer* GetTempVBO()	{ return vertexBuffer; }
+	GPUIndexBuffer*  GetTempIBO()	{ return indexBuffer; }
+
+private:
+	static GPUDevice* instance;
+	GPUDevice();
+
+	GPUVertexBuffer* vertexBuffer;
+	GPUIndexBuffer*	indexBuffer;
+
+protected:
+
+	// Sets up the shader.
+	void Weld( const GPUState&, const GPUStream&, const GPUStreamData& );
+	int Upload( const GPUState&, const GPUStream&, const GPUStreamData&, int start, int instances );
+
+private:
+
+	void SwitchMatrixMode( MatrixType type );	
+	static const void* PTR( const void* base, int offset ) {
+		return (const void*)((const U8*)base + offset);
+	}
+
+	MatrixType	matrixMode;
+
+	MatrixStack mvStack;
+	MatrixStack projStack;
+
+	BlendMode	currentBlend;
+	DepthTest	currentDepthTest;
+	DepthWrite	currentDepthWrite;
+	ColorWrite	currentColorWrite;
+	StencilMode	currentStencilMode;
+
+	int					primitive;
+	int					trianglesDrawn;
+	int					quadsDrawn;
+	int					drawCalls;
+	uint32_t			uid;
+	int					matrixDepth[3];
+
+	grinliz::Matrix4	identity[EL_MAX_INSTANCE];
+	grinliz::Vector4F	defaultControl[EL_MAX_INSTANCE];
+};
+
+/* WARNING: this gets copied around, and slices.
+   Sub-classes are for initialization. They can't
+   store data.
+*/
+class GPUState 
+{
+public:
 
 	int HasLighting() const;
 
@@ -265,6 +355,7 @@ public:
 		grinliz::Color4F c = { (float)color.r*INV, (float)color.g*INV, (float)color.b*INV, (float)color.a*INV };
 		SetColor( c );
 	}
+	const grinliz::Color4F& Color() const { return color; }
 
 	// Set any of the flags (that are boolean) from ShaderManager
 	void SetShaderFlag( int flag )				{ shaderFlags |= flag; }
@@ -272,81 +363,19 @@ public:
 	int  ShaderFlags() const					{ return shaderFlags; }
 	int  StateFlags() const						{ return stateFlags; }
 
-	void SetStencilMode( StencilMode value )	{ stateFlags &= (~STENCIL_MASK); stateFlags |= value; }
-	void SetDepthWrite( bool value )			{ stateFlags &= (~DEPTH_WRITE_MASK); stateFlags |= (value ? DEPTH_WRITE_TRUE : DEPTH_WRITE_FALSE); }
-	void SetDepthTest( bool value )				{ stateFlags &= (~DEPTH_TEST_MASK); stateFlags |= (value ? DEPTH_TEST_TRUE : DEPTH_TEST_FALSE); }
-	void SetColorWrite( bool value )			{ stateFlags &= (~COLOR_WRITE_MASK); stateFlags |= (value ? COLOR_WRITE_TRUE : COLOR_WRITE_FALSE); }
-	void SetBlendMode( BlendMode value )		{ stateFlags &= (~BLEND_MASK); stateFlags |= value; }
-
-	static void PushMatrix( MatrixType type );
-	static void SetMatrix( MatrixType type, const grinliz::Matrix4& m );
-	static void MultMatrix( MatrixType type, const grinliz::Matrix4& m );
-	static void PopMatrix( MatrixType type );
-
-	static const grinliz::Matrix4& TopMatrix( MatrixType type );
-	static const grinliz::Matrix4& ViewMatrix();
-
-	// More input to the draw call. Must be set up by the engine.
-	static grinliz::Color4F		ambient;
-	static grinliz::Vector4F	directionWC;
-	static grinliz::Color4F		diffuse;
-
-	void Draw( const GPUStream& stream, const GPUStreamData& data, int nIndex, int nInstance=0 );
-	void DrawQuads( const GPUStream& stream, const GPUStreamData& data, int nQuad );
-
-	void Draw( const GPUStream& stream, Texture* texture, const void* vertex,				int nIndex, const uint16_t* indices );
-	void Draw( const GPUStream& stream, Texture* texture, const GPUVertexBuffer& vertex,	int nIndex, const uint16_t* index );
-	void Draw( const GPUStream& stream, Texture* texture, const GPUVertexBuffer& vertex,	int nIndex, const GPUIndexBuffer& index );
-
-	void DrawLine( const grinliz::Vector3F p0, const grinliz::Vector3F p1 );
-	void DrawQuad( Texture* texture, const grinliz::Vector3F p0, const grinliz::Vector3F p1, bool positiveWinding=true );
-	void DrawArrow( const grinliz::Vector3F p0, const grinliz::Vector3F p1, bool positiveWinding=true, float width=0.4f );
-
-	static void ResetTriCount()	{ quadsDrawn = 0; trianglesDrawn = 0; drawCalls = 0; }
-	static int TrianglesDrawn() { return trianglesDrawn; }
-	static int QuadsDrawn()		{ return quadsDrawn; }
-	static int DrawCalls()		{ return drawCalls; }
-
 	GPUState() : stateFlags( 0 ),
 				 shaderFlags( 0 )
 	{
 		color.Set( 1,1,1,1 );
 	}
 
-protected:
-
-	// Sets up the shader.
-	static void Weld( const GPUState&, const GPUStream&, const GPUStreamData& );
-	static int Upload( const GPUState&, const GPUStream&, const GPUStreamData&, int start, int instances );
-
-private:
-
-	static void SwitchMatrixMode( MatrixType type );	
-	static MatrixType		matrixMode;		// Note this is static and global!
-
-	static MatrixStack mvStack;
-	static MatrixStack projStack;
-
-	static BlendMode	currentBlend;
-	static DepthTest	currentDepthTest;
-	static DepthWrite	currentDepthWrite;
-	static ColorWrite	currentColorWrite;
-	static StencilMode	currentStencilMode;
-
-	static grinliz::Matrix4		identity[EL_MAX_INSTANCE];
-	static grinliz::Vector4F	defaultControl[EL_MAX_INSTANCE];
+    void SetStencilMode( StencilMode value )	{ stateFlags &= (~STENCIL_MASK); stateFlags |= value; }
+    void SetDepthWrite( bool value )            { stateFlags &= (~DEPTH_WRITE_MASK); stateFlags |= (value ? DEPTH_WRITE_TRUE : DEPTH_WRITE_FALSE); }
+    void SetDepthTest( bool value )             { stateFlags &= (~DEPTH_TEST_MASK); stateFlags |= (value ? DEPTH_TEST_TRUE : DEPTH_TEST_FALSE); }
+    void SetColorWrite( bool value )            { stateFlags &= (~COLOR_WRITE_MASK); stateFlags |= (value ? COLOR_WRITE_TRUE : COLOR_WRITE_FALSE); }
+    void SetBlendMode( BlendMode value )        { stateFlags &= (~BLEND_MASK); stateFlags |= value; }
 
 protected:
-	static int		primitive;
-	static int		trianglesDrawn;
-	static int		quadsDrawn;
-	static int		drawCalls;
-	static uint32_t uid;
-	static int		matrixDepth[3];
-
-	static const void* PTR( const void* base, int offset ) {
-		return (const void*)((const U8*)base + offset);
-	}
 
 	int				stateFlags;
 	int				shaderFlags;

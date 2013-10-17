@@ -170,7 +170,7 @@ void RenderQueue::Submit(	int modelRequired,
 						instanceTexture0ColorMap[index] = item->aux->texture0ColorMap;
 					}
 				}
-				state->Draw( stream, data, atom->nIndex, delta );
+				GPUDevice::Instance()->Draw( *state, stream, data, 0, atom->nIndex, delta );
 				k += delta;
 			}
 		}

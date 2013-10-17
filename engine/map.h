@@ -65,7 +65,7 @@ public:
 
 	virtual void PrepVoxels( const SpaceTree* )											{}
 	virtual void DrawVoxels( GPUState* state, const grinliz::Matrix4* xform )		{}
-	virtual void Draw3D( const grinliz::Color3F& colorMult, GPUState::StencilMode, bool saturation )	{}
+	virtual void Draw3D( const grinliz::Color3F& colorMult, StencilMode, bool saturation )	{}
 
 	// Sets the current saturation 0:grey, 1:full color
 	void SetSaturation( float p_saturation )	{ saturation = p_saturation; }
@@ -79,11 +79,11 @@ public:
 		RENDERSTATE_MAP_TRANSLUCENT,
 		RENDERSTATE_MAP_MORE_TRANSLUCENT
 	};
-	virtual void BeginRender();
+	virtual void BeginRender( int nIndex, const uint16_t* index, int nVertex, const gamui::Gamui::Vertex* vertex );
 	virtual void EndRender();
 	virtual void BeginRenderState( const void* renderState );
 	virtual void BeginTexture( const void* textureHandle );
-	virtual void Render( const void* renderState, const void* textureHandle, int nIndex, const uint16_t* index, int nVertex, const gamui::Gamui::Vertex* vertex );
+	virtual void Render( const void* renderState, const void* textureHandle, int start, int count );
 
 	virtual grinliz::Vector3I IntersectVoxel(	const grinliz::Vector3F& origin,
 												const grinliz::Vector3F& dir,
