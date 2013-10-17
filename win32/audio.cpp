@@ -14,7 +14,7 @@
 */
 
 #include "audio.h"
-#include "SDL.h "
+#include "../libs/SDL2/include/SDL.h"
 #include <stdlib.h>
 #include "../grinliz/gldebug.h"
 
