@@ -303,7 +303,7 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 	// ----------- Render Passess ---------- //
 #ifdef ENGINE_RENDER_GLOW
 	if ( glow ) {
-		//PROFILE_BLOCK( Glow );
+		PROFILE_BLOCK( Glow );
 		if ( !renderTarget[RT_LIGHTS] ) {
 			renderTarget[RT_LIGHTS] = new RenderTarget( screenport->PhysicalWidth(), screenport->PhysicalHeight(), true );
 		}
@@ -351,7 +351,7 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 #endif
 
 	if ( map ) {
-		//PROFILE_BLOCK( Map );
+		PROFILE_BLOCK( Map );
 #ifdef ENGINE_RENDER_MAP
 		// Draw shadows to stencil buffer.
 		float shadowAmount = 1.0f;
@@ -400,7 +400,7 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 	// -------- Models ---------- //
 #ifdef ENGINE_RENDER_MODELS
 	{
-		//PROFILE_BLOCK( Models );
+		PROFILE_BLOCK( Models );
 		if ( map ) {
 			GPUState state;
 			engineShaders.GetState( EngineShaders::LIGHT, 0, &state );
@@ -427,7 +427,7 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 	// --------- Composite Glow -------- //
 #ifdef ENGINE_RENDER_GLOW
 	if ( glow ) {
-		//PROFILE_BLOCK( CompositeGlow );
+		PROFILE_BLOCK( CompositeGlow );
 		Blur();
 
 		screenport->SetUI();
@@ -474,6 +474,7 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 
 void Engine::Blur()
 {
+	PROFILE_FUNC();
 	GPUDevice* device = GPUDevice::Instance();
 
 #ifdef EL_USE_MRT_BLUR

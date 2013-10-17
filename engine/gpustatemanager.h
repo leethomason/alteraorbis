@@ -292,15 +292,26 @@ public:
 	// that are then rendered with multiple draw calls. (Gamui, 
 	// in particualar.) Just don't call the Draw( ... void*, ) form
 
-	GPUVertexBuffer* GetTempVBO()	{ return vertexBuffer; }
-	GPUIndexBuffer*  GetTempIBO()	{ return indexBuffer; }
+	GPUVertexBuffer* GetTempVBO()	{ return vertexBuffer[0]; }
+	GPUIndexBuffer*  GetTempIBO()	{ return indexBuffer[0]; }
 
 private:
 	static GPUDevice* instance;
 	GPUDevice();
 
-	GPUVertexBuffer* vertexBuffer;
-	GPUIndexBuffer*	indexBuffer;
+	enum { 
+		NUM_LARGE = 4,
+		NUM_SMALL = 32,
+		NUM_BUFFERS = NUM_LARGE + NUM_SMALL,
+		LARGE_START = 0,
+		SMALL_START = NUM_LARGE,
+		SMALL_SIZE  = 16*1024
+	};
+	bool IsSmall( int i ) const { return i >= SMALL_START; }
+	GPUVertexBuffer* vertexBuffer[NUM_BUFFERS];
+	GPUIndexBuffer*	indexBuffer[NUM_BUFFERS];
+	int cBufLarge;
+	int cBufSmall;
 
 protected:
 

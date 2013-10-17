@@ -71,7 +71,7 @@ private:
 	bool fixedWidth;
 
 	enum {
-		BUF_SIZE = 30,
+		BUF_SIZE = 1000,
 		CHAR_OFFSET = 32,
 		CHAR_RANGE  = 128 - CHAR_OFFSET,
 		END_CHAR = CHAR_OFFSET + CHAR_RANGE

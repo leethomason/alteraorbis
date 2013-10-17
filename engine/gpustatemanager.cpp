@@ -149,16 +149,24 @@ GPUDevice::GPUDevice()
 	directionWC.Normalize();
 	diffuse.Set( 0.7f, 0.7f, 0.7f, 1.0f );
 
-	vertexBuffer = new GPUVertexBuffer( 0, 256*1024 );
-	indexBuffer  = new GPUIndexBuffer( 0,   64*1024 );
+	cBufLarge = 0;
+	cBufSmall = 0;
+	for( int i=0; i<NUM_BUFFERS; ++i ) {
+		int vSize = IsSmall(i) ? SMALL_SIZE : 256*1024;
+		int iSize = IsSmall(i) ? SMALL_SIZE : 64*1024;
 
+		vertexBuffer[i] = new GPUVertexBuffer( 0, vSize );
+		indexBuffer[i]  = new GPUIndexBuffer( 0,  iSize );
+	}
 	ResetState();
 }
 
 GPUDevice::~GPUDevice()
 {
-	delete vertexBuffer;
-	delete indexBuffer;
+	for( int i=0; i<NUM_BUFFERS; ++i ) {
+		delete vertexBuffer[i];
+		delete indexBuffer[i];
+	}
 	instance = 0;
 }
 
@@ -542,19 +550,28 @@ void GPUDevice::Draw(	const GPUState& state,
 						const uint16_t* indices )
 {
 	CHECK_GL_ERROR;
+	bool small = ( nIndex <= SMALL_SIZE ) && ( maxVertex*stream.stride <= SMALL_SIZE );
+	int idx = 0;
+	if( small ) {
+		idx = cBufSmall++;
+		if ( cBufSmall == NUM_BUFFERS ) cBufSmall = SMALL_START;
+	}
+	else {
+		idx = cBufLarge++;
+		if ( cBufLarge == SMALL_START ) cBufLarge = 0;
+	}
+	GLASSERT( nIndex < indexBuffer[idx]->NumIndex() );
+	GLASSERT( maxVertex * stream.stride < vertexBuffer[idx]->SizeInBytes() );
 
-	GLASSERT( nIndex < indexBuffer->NumIndex() );
-	GLASSERT( maxVertex * stream.stride < vertexBuffer->SizeInBytes() );
+	int nI = Min( nIndex, indexBuffer[idx]->NumIndex() );
+	int nV = Min( maxVertex, vertexBuffer[idx]->SizeInBytes() / stream.stride );
 
-	int nI = Min( nIndex, indexBuffer->NumIndex() );
-	int nV = Min( maxVertex, vertexBuffer->SizeInBytes() / stream.stride );
-
-	indexBuffer->Upload( indices, nI, 0 );
-	vertexBuffer->Upload( vertex, nV*stream.stride, 0 );
+	indexBuffer[idx]->Upload( indices, nI, 0 );
+	vertexBuffer[idx]->Upload( vertex, nV*stream.stride, 0 );
 
 	GPUStreamData data = _data;
-	data.indexBuffer  = indexBuffer->ID();
-	data.vertexBuffer = vertexBuffer->ID();
+	data.indexBuffer  = indexBuffer[idx]->ID();
+	data.vertexBuffer = vertexBuffer[idx]->ID();
 	Draw( state, stream, data, 0, nI, 1 );
 }
 
