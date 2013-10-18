@@ -43,18 +43,39 @@ TestMap::TestMap( int w, int h ) : Map( w, h )
 	}
 	int *test = new int[14];
 	delete [] test;
+
+	vbo = new GPUVertexBuffer( 0, size*4*sizeof(Vector3F) );
+	ibo = new GPUIndexBuffer( 0, size*6 );
+	ShaderManager::Instance()->AddDeviceLossHandler( this );
 }
 
 
 TestMap::~TestMap()
 {
+	ShaderManager::Instance()->RemoveDeviceLossHandler( this );
 	delete [] vertex;
 	delete [] index;
+	delete vbo;
+	delete ibo;
+}
+
+
+void TestMap::DeviceLoss()
+{
+	int size = width*height;
+	delete vbo;
+	delete ibo;
+	vbo = new GPUVertexBuffer( 0, size*4*sizeof(Vector3F) );
+	ibo = new GPUIndexBuffer( 0, size*6 );
 }
 
 
 void TestMap::Draw3D(  const Color3F& colorMult, StencilMode mode, bool /*useSaturation*/ )
 {
+	int size = width*height;
+	vbo->Upload( vertex, size*4*sizeof(vertex[0]), 0 );
+	ibo->Upload( index, size*6, 0 );
+
 	GPUStream stream;
 	stream.posOffset = 0;
 	stream.nPos = 3;
@@ -66,7 +87,9 @@ void TestMap::Draw3D(  const Color3F& colorMult, StencilMode mode, bool /*useSat
 
 	GPUDevice* device = GPUDevice::Instance();
 	GPUStreamData data;
-	device->Draw( shader, stream, data, width*height*4, vertex, width*height*6, index );
+	data.vertexBuffer = vbo->ID();
+	data.indexBuffer  = ibo->ID();
+	device->Draw( shader, stream, data, 0, size*6, 1 );
 
 	{
 		// Debugging coordinate system:
@@ -76,8 +99,8 @@ void TestMap::Draw3D(  const Color3F& colorMult, StencilMode mode, bool /*useSat
 
 		FlatShader debug;
 		debug.SetColor( 1, 0, 0, 1 );
-		device->DrawArrow( debug, origin, xaxis, false, 0.1f );
+		device->DrawArrow( debug, origin, xaxis, 0.1f );
 		debug.SetColor( 0, 0, 1, 1 );
-		device->DrawArrow( debug, origin, zaxis, false, 0.1f );
+		device->DrawArrow( debug, origin, zaxis, 0.1f );
 	}
 }

@@ -108,7 +108,6 @@ public:
 
 	//// ------- public interface  below this line needs eval ---- //
 	void RenderGamui2D()	{ gamui2D.Render(); }
-	void RenderGamui3D()	{ gamui3D.Render(); }
 
 	// 2D overlay rendering.
 	virtual void DrawDebugText()								{}
@@ -120,7 +119,7 @@ protected:
 
 	Game*			game;
 	UIRenderer		uiRenderer;
-	gamui::Gamui	gamui2D, gamui3D;
+	gamui::Gamui	gamui2D;
 	gamui::Image	dragImage;
 	bool			dragStarted;
 	bool			threeDTapDown;

@@ -359,10 +359,6 @@ void Texture::Upload( const void* pixels, int size )
 	GLASSERT( data == 0 || data == w );
 	glGetTexLevelParameteriv( GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &data );
 	GLASSERT( data == 0 || data == h );
-	if ( data > 0 ) {
-		glGetTexLevelParameteriv( GL_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT, &data );
-		GLASSERT( data == glFormat );
-	}
 #endif
 
 	glTexImage2D(	GL_TEXTURE_2D,

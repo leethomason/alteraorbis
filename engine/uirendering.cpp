@@ -29,8 +29,10 @@ void UIRenderer::BeginRender( int nIndex, const uint16_t* index, int nVertex, co
 {
 	// Should be completely uneeded, but fixes bugs on a netbook. (With questionable drivers.)
 	GPUDevice::Instance()->ResetState();
-	GPUDevice::Instance()->GetTempIBO()->Upload( index, nIndex, 0 );
-	GPUDevice::Instance()->GetTempVBO()->Upload( vertex, nVertex*sizeof(*vertex), 0 );
+	vbo = GPUDevice::Instance()->GetUIVBO( GPUDevice::HUD );
+	ibo = GPUDevice::Instance()->GetUIIBO( GPUDevice::HUD );
+	vbo->Upload( vertex, nVertex*sizeof(*vertex), 0 );
+	ibo->Upload( index, nIndex, 0 );
 }
 
 
@@ -114,8 +116,8 @@ void UIRenderer::Render( const void* renderState, const void* textureHandle, int
 	data.texture0XForm = uv;
 	data.texture0Clip  = uvClip;
 	data.texture0ColorMap = colorXForm;
-	data.indexBuffer  = GPUDevice::Instance()->GetTempIBO()->ID();
-	data.vertexBuffer = GPUDevice::Instance()->GetTempVBO()->ID();
+	data.indexBuffer  = ibo->ID();
+	data.vertexBuffer = vbo->ID();
 
 	GPUDevice::Instance()->Draw( shader, stream, data, start, count, 1 );
 }

@@ -24,26 +24,33 @@
 #include "vertex.h"
 #include "../gamui/gamui.h"
 #include "../shared/gamedbreader.h"
+#include "shadermanager.h"
 
 class GPUState;
+class GPUVertexBuffer;
 
-class UFOText
+class UFOText : public IDeviceLossHandler
 {
 public:
 	static UFOText* Instance() 	{ GLASSERT( instance ); return instance; }
 
+	// Queues drawing, actually. Need to call CommitDraw() to send to screen.
 	void Draw( int x, int y, const char* format, ... );
+	void FinalDraw();
+
 	void Metrics(	int c, int c1,
 					float lineHeight,
 					gamui::IGamuiText::GlyphMetrics* metric );
 	void SetFixed( bool fix ) { fixedWidth = fix; }
 
-	static void Create( const gamedb::Reader*, Texture* texture, Screenport* screenport );
+	virtual void DeviceLoss();
+
+	static void Create( const gamedb::Reader*, Texture* texture );
 	static void Destroy();
 
 private:
-	UFOText( const gamedb::Reader*, Texture* texture, Screenport* screenport );
-	~UFOText()	{}
+	UFOText( const gamedb::Reader*, Texture* texture );
+	~UFOText();
 
 	struct Metric
 	{
@@ -56,13 +63,13 @@ private:
 	void CacheMetric( int c );
 	void CacheKern( int c, int cPrev );
 
-	void TextOut( GPUState* shader, const char* str, int x, int y, int h, int *w );
+	void TextOut( const char* str, int x, int y, int h, int *w );
 
 	static UFOText* instance;
 	
 	const gamedb::Reader* database;
 	Texture* texture;
-	Screenport* screenport;
+	GPUVertexBuffer* vbo;
 
 	float fontSize;
 	float texWidthInv;
@@ -71,7 +78,7 @@ private:
 	bool fixedWidth;
 
 	enum {
-		BUF_SIZE = 1000,
+		VBO_MEM		= 128*1024,
 		CHAR_OFFSET = 32,
 		CHAR_RANGE  = 128 - CHAR_OFFSET,
 		END_CHAR = CHAR_OFFSET + CHAR_RANGE
@@ -80,8 +87,7 @@ private:
 	int MetricIndex( int c )          { return c - CHAR_OFFSET; }
 	int KernIndex( int c, int cPrev ) { return (c-CHAR_OFFSET)*CHAR_RANGE + (cPrev-CHAR_OFFSET); }
 
-	PTVertex2	vBuf[BUF_SIZE*4];
-	U16			iBuf[BUF_SIZE*6];
+	grinliz::CDynArray< PTVertex2 > quadBuf;
 	Metric		metricCache[ CHAR_RANGE ];
 	S8			kerningCache[ CHAR_RANGE*CHAR_RANGE ];
 };

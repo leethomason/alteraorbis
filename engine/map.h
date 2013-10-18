@@ -106,11 +106,13 @@ public:
 	bool UsingSectors() const				{ return usingSectors; }
 
 protected:
-	bool usingSectors;
-	int width;
-	int height;
+	bool				usingSectors;
+	int					width;
+	int					height;
 	CompositingShader	gamuiShader;
-	Texture* texture;
+	Texture*			texture;
+	GPUVertexBuffer*	vbo;
+	GPUIndexBuffer*		ibo;
 private:
 	float				saturation;
 };

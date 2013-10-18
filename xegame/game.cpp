@@ -108,7 +108,7 @@ Game::Game( int width, int height, int rotation, int uiHeight, const char* path 
 
 	Texture* textTexture = TextureManager::Instance()->GetTexture( "font" );
 	GLASSERT( textTexture );
-	UFOText::Create( database0, textTexture, &screenport );
+	UFOText::Create( database0, textTexture );
 
 	_mkdir( "save" );
 	GLOUTPUT(( "Game::Init complete.\n" ));
@@ -134,7 +134,8 @@ Game::~Game()
 	ModelResourceManager::Destroy();
 	ImageManager::Destroy();
 	TextureManager::Destroy();
-	delete ShaderManager::Instance();
+
+	delete ShaderManager::Instance();	// handles device loss - should be near the end.
 	delete GPUDevice::Instance();
 	delete database0;
 	delete StringPool::Instance();
@@ -501,7 +502,6 @@ void Game::DoTick( U32 _currentTime )
 
 			// UI Pass
 			screenport.SetUI(); 
-			scene->RenderGamui3D();
 
 			if ( renderUI ) {
 				screenport.SetUI();
@@ -562,6 +562,8 @@ void Game::DoTick( U32 _currentTime )
 		PrintPerf();
 	}
 #endif
+	screenport.SetUI();
+	UFOText::Instance()->FinalDraw();
 
 	device->ResetTriCount();
 	previousTime = currentTime;
