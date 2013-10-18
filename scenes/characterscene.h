@@ -21,6 +21,7 @@
 #include "../grinliz/glcontainer.h"
 #include "../engine/screenport.h"
 #include "../game/gamelimits.h"
+#include "../widget/moneywidget.h"
 
 class LumosGame;
 class Engine;
@@ -85,9 +86,8 @@ private:
 	int					itemButtonIndex[NUM_ITEM_BUTTONS];	// the index in the ItemComponent
 	gamui::TextLabel	textKey[NUM_TEXT_KV];
 	gamui::TextLabel	textVal[NUM_TEXT_KV];
-	gamui::TextLabel	moneyText[NUM_CRYSTAL_TYPES+1];
-	gamui::Image		moneyImage[NUM_CRYSTAL_TYPES+1];
 	gamui::PushButton	dropButton;
+	MoneyWidget			moneyWidget;
 };
 
 

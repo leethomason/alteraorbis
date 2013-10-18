@@ -1770,7 +1770,7 @@ LayoutCalculator::~LayoutCalculator()
 }
 
 
-void LayoutCalculator::PosAbs( UIItem* item, int _x, int _y, bool setSize )
+void LayoutCalculator::PosAbs( IWidget* item, int _x, int _y, bool setSize )
 {
 	float pos[2] = { 0, 0 };
 	int xArr[2] = { _x, _y };
@@ -1842,7 +1842,7 @@ void LayoutCalculator::PosAbs( UIItem* item, int _x, int _y, bool setSize )
 }
 
 
-void LayoutCalculator::PosInner( UIItem* item, float wDivH )
+void LayoutCalculator::PosInner( IWidget* item, float wDivH )
 {
 	innerX0 = Max( innerX0, gutterX );
 	innerX1 = Min( innerX1, screenWidth - gutterX );

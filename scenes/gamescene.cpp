@@ -150,8 +150,8 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	shieldBar.Init( &gamui2D, 10, blue, grey );
 
 	dateLabel.Init( &gamui2D );
-	goldLabel.Init( &gamui2D );
 	xpLabel.Init( &gamui2D );
+	moneyWidget.Init( &gamui2D );
 }
 
 
@@ -211,9 +211,9 @@ void GameScene::Resize()
 	layout.PosAbs( &ammoBar,	0, 1 );
 	layout.PosAbs( &shieldBar,  0, 2 );
 
-	dateLabel.SetPos( faceButton.X()-faceButton.Width()*2.0f, 0 );
-	goldLabel.SetPos( dateLabel.X(), dateLabel.Y() + gamui2D.GetTextHeight() );
-	xpLabel.SetPos(   goldLabel.X(), goldLabel.Y() + gamui2D.GetTextHeight() );
+	dateLabel.SetPos(	faceButton.X()-faceButton.Width()*2.0f, 0 );
+	xpLabel.SetPos(		dateLabel.X(), dateLabel.Y() + gamui2D.GetTextHeight() );
+	moneyWidget.SetPos( dateLabel.X(), xpLabel.Y() + gamui2D.GetTextHeight() );
 
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
 		newsButton[i].SetPos( port.UIWidth()- (NEWS_BUTTON_WIDTH), MINI_MAP_SIZE + (NEWS_BUTTON_HEIGHT+2)*i );
@@ -1062,13 +1062,7 @@ void GameScene::DoTick( U32 delta )
 	if ( playerChit && playerChit->GetItemComponent() ) {
 		wallet = playerChit->GetItemComponent()->GetWallet();
 	}
-	str.Format( "Au:%d g:%d r:%d b:%d v:%d", 
-				wallet.gold, 
-				wallet.crystal[CRYSTAL_GREEN], 
-				wallet.crystal[CRYSTAL_RED], 
-				wallet.crystal[CRYSTAL_BLUE], 
-				wallet.crystal[CRYSTAL_VIOLET] );
-	goldLabel.SetText( str.c_str() );
+	moneyWidget.Set( wallet );
 
 	str.Clear();
 	if ( playerChit && playerChit->GetItem() ) {

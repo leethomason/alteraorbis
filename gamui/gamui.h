@@ -329,7 +329,25 @@ public:
 };
 
 
-class UIItem
+/*
+	The minimal interface needed to implement a widget, and 
+	have it work with layout.
+*/
+class IWidget
+{
+public:
+	virtual float X() const			= 0;
+	virtual float Y() const			= 0;
+	virtual float Width() const		= 0;
+	virtual float Height() const	= 0;
+
+	virtual void SetPos( float x, float y )			= 0;
+	virtual void SetSize( float width, float h )	= 0;	// recommendation; not required
+	virtual bool Visible() const					= 0;
+	virtual void SetVisible( bool visible )			= 0;
+};
+
+class UIItem : public IWidget
 {
 public:
 	enum {
@@ -346,8 +364,8 @@ public:
 	void SetPos( const float* x )				{ SetPos( x[0], x[1] ); }
 	void SetCenterPos( float x, float y )		{ SetPos( x - Width()*0.5f, y - Height()*0.5f ); }
 	
-	float X() const								{ return m_x; }
-	float Y() const								{ return m_y; }
+	virtual float X() const						{ return m_x; }
+	virtual float Y() const						{ return m_y; }
 	virtual float Width() const = 0;
 	virtual float Height() const = 0;
 	float CenterX() const						{ return X() + Width()*0.5f; }
@@ -916,14 +934,14 @@ public:
 	void SetOffset( float x, float y )			{ this->offsetX = x; this->offsetY = y; }
 	void SetTextOffset( float x, float y )		{ this->textOffsetX = x; this->textOffsetY = y; }
 
-	void PosAbs( UIItem* item, int x, int y, bool setSize=true );
+	void PosAbs( IWidget* item, int x, int y, bool setSize=true );
 	void PosAbs( TextLabel* label, int x, int y ) {
 		useTextOffset = true;
 		PosAbs( (UIItem*) label, x, y ); 
 		useTextOffset = false;
 	}
 	// Consume the inner space (should be last call)
-	void PosInner( UIItem* item, float widthDivHeight=0 );
+	void PosInner( IWidget* item, float widthDivHeight=0 );
 
 private:
 	float Max( float a, float b ) const { return a > b ? a : b; }

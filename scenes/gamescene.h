@@ -18,6 +18,7 @@
 
 #include "../xegame/scene.h"
 #include "../xegame/chitevent.h"
+#include "../widget/moneywidget.h"
 
 class LumosGame;
 class Sim;
@@ -142,8 +143,8 @@ private:
 	gamui::DigitalBar	healthBar, ammoBar, shieldBar;
 
 	gamui::TextLabel	dateLabel;
-	gamui::TextLabel	goldLabel;
 	gamui::TextLabel	xpLabel;
+	MoneyWidget			moneyWidget;
 
 	gamui::PushButton	pickupButton[NUM_PICKUP_BUTTONS];
 

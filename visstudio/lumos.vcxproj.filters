@@ -35,6 +35,9 @@
     <Filter Include="Source Files\components">
       <UniqueIdentifier>{a9a1f6ac-4f55-43f9-8b73-96559e22e25e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\widget">
+      <UniqueIdentifier>{bee90d72-05ee-4916-8a80-6e6211d04059}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\engine\camera.cpp">
@@ -303,6 +306,9 @@
     </ClCompile>
     <ClCompile Include="..\scenes\mapscene.cpp">
       <Filter>Source Files\scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\widget\moneywidget.cpp">
+      <Filter>Source Files\widget</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -614,6 +620,9 @@
     </ClInclude>
     <ClInclude Include="..\scenes\mapscene.h">
       <Filter>Source Files\scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\widget\moneywidget.h">
+      <Filter>Source Files\widget</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
