@@ -217,7 +217,8 @@ enum BlendMode {
 	BLEND_MASK		= BLEND_NORMAL | BLEND_ADD
 };
 
-	
+
+/* In the case of device loss, the GPUDevice is deleted and re-created. */
 class GPUDevice
 {
 public:
@@ -272,33 +273,36 @@ public:
 					const GPUStreamData& data, 
 					int nQuad );
 
-	// CAUTION: this uses the temporary buffers, so 
-	// calling this will flush them.
-	void DrawPtr(	const GPUState& state,
-					const GPUStream& stream, 
-					const GPUStreamData& data, 
-					int maxVertex,
-					const void* vertex,				
-					int nIndex, 
-					const uint16_t* indices );
-
 	void DrawLine(	const GPUState& state, const grinliz::Vector3F p0, const grinliz::Vector3F p1 );
 	void DrawQuad(	const GPUState& state, Texture* texture, const grinliz::Vector3F p0, const grinliz::Vector3F p1, bool positiveWinding=true );
-	void DrawArrow( const GPUState& state, const grinliz::Vector3F p0, const grinliz::Vector3F p1, bool positiveWinding=true, float width=0.4f );
+	void DrawArrow( const GPUState& state, const grinliz::Vector3F p0, const grinliz::Vector3F p1, float width=0.4f );
 
-	// Use with caution; but good for uploading vertices
-	// that are then rendered with multiple draw calls. (Gamui, 
-	// in particualar.) Just don't call the Draw( ... void*, ) form
-
-	GPUVertexBuffer* GetTempVBO()	{ return vertexBuffer; }
-	GPUIndexBuffer*  GetTempIBO()	{ return indexBuffer; }
+	// There are 3 UI layers, but can be many more gamui main objects
+	// because of scene stacking. Rather than run around and track
+	// all those VBOs, keep them here.
+	enum {
+		OVERLAY0,
+		OVERLAY1,
+		HUD,
+		NUM_UI_LAYERS
+	};
+	GPUVertexBuffer* GetUIVBO( int id );
+	GPUIndexBuffer*  GetUIIBO( int id );
 
 private:
+	// draws a vertex-buffer-only primitive (not indexed)
+	void DrawPrimitive( int prim, const GPUState& state, const GPUStream& stream, const GPUStreamData& data, int count );
+
 	static GPUDevice* instance;
 	GPUDevice();
 
-	GPUVertexBuffer* vertexBuffer;
-	GPUIndexBuffer*	indexBuffer;
+	enum { NUM_QUAD_BUFFERS = 64 };
+	int currentQuadBuf;
+
+	bool			 uiVBOInUse[NUM_UI_LAYERS];
+	GPUVertexBuffer* vertexBuffer[NUM_UI_LAYERS];
+	GPUIndexBuffer*	 indexBuffer[NUM_UI_LAYERS];
+	GPUVertexBuffer* quadBuffer[NUM_QUAD_BUFFERS];
 
 protected:
 

@@ -19,8 +19,9 @@
 #include "../engine/map.h"
 #include "../grinliz/glvector.h"
 #include "../grinliz/glcolor.h"
+#include "../engine/shadermanager.h"
 
-class TestMap : public Map
+class TestMap : public Map, public IDeviceLossHandler
 {
 public:
 	TestMap( int w, int h );
@@ -29,11 +30,14 @@ public:
 	virtual void Draw3D(  const grinliz::Color3F& colorMult, StencilMode, bool useSaturation );
 
 	void SetColor( const grinliz::Color3F& color ) { this->color = color; }
+	virtual void DeviceLoss();
 
 private:
 	grinliz::Vector3F*	vertex;	// 4 vertex quads
 	U16*				index;	// 6 index / quad
 	grinliz::Color3F	color;
+	GPUVertexBuffer*	vbo;
+	GPUIndexBuffer*		ibo;
 };
 
 #endif // TESTMAP_INCLUDED

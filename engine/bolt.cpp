@@ -163,6 +163,7 @@ BoltRenderer::BoltRenderer()
 BoltRenderer::~BoltRenderer()
 {
 	ShaderManager::Instance()->RemoveDeviceLossHandler( this );
+	delete vbo;
 }
 
 
@@ -218,6 +219,8 @@ void BoltRenderer::DrawAll( const Bolt* bolts, int nBolts, Engine* engine )
 	Texture* texture = TextureManager::Instance()->GetTexture( "particle" );
 
 	if ( count ) {
+
+		vbo->Upload( vertex, count*4*sizeof(vertex[0]), 0 );
 
 		GPUStream stream;
 		stream.stride			= sizeof( vertex[0] );

@@ -497,7 +497,6 @@ void Game::DoTick( U32 _currentTime )
 
 			// UI Pass
 			screenport.SetUI(); 
-			scene->RenderGamui3D();
 
 			if ( renderUI ) {
 				screenport.SetUI();

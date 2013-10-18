@@ -29,9 +29,9 @@ Scene::Scene( Game* _game )
 	: game( _game )
 {
 	gamui2D.Init( &uiRenderer, game->GetRenderAtom( Game::ATOM_TEXT ), game->GetRenderAtom( Game::ATOM_TEXT_D ), &uiRenderer );
-	gamui3D.Init( &uiRenderer, game->GetRenderAtom( Game::ATOM_TEXT ), game->GetRenderAtom( Game::ATOM_TEXT_D ), &uiRenderer );
+//	gamui3D.Init( &uiRenderer, game->GetRenderAtom( Game::ATOM_TEXT ), game->GetRenderAtom( Game::ATOM_TEXT_D ), &uiRenderer );
 	gamui2D.SetTextHeight( TEXT_HEIGHT );
-	gamui3D.SetTextHeight( TEXT_HEIGHT );
+//	gamui3D.SetTextHeight( TEXT_HEIGHT );
 	
 	RenderAtom nullAtom;
 	dragImage.Init( &gamui2D, nullAtom, true );
