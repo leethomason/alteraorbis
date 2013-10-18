@@ -66,7 +66,7 @@ void TestMap::Draw3D(  const Color3F& colorMult, StencilMode mode, bool /*useSat
 
 	GPUDevice* device = GPUDevice::Instance();
 	GPUStreamData data;
-	device->Draw( shader, stream, data, width*height*4, vertex, width*height*6, index );
+	device->DrawPtr( shader, stream, data, width*height*4, vertex, width*height*6, index );
 
 	{
 		// Debugging coordinate system:

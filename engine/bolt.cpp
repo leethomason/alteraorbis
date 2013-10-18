@@ -141,17 +141,11 @@ void Bolt::TickAll( grinliz::CDynArray<Bolt>* bolts, U32 delta, Engine* engine, 
 BoltRenderer::BoltRenderer()
 {
 	nBolts = 0;
+	vbo = new GPUVertexBuffer( 0, MAX_BOLTS*4*sizeof(PTCVertex) );
+
 	float u0 = (float)ParticleDef::BOLT / (float)ParticleDef::NUM_TEX;
 	float u1 = (float)(ParticleDef::BOLT+1) / (float)ParticleDef::NUM_TEX;
 
-	for( int i=0; i<MAX_BOLTS; ++i ) {
-		index[i*6+0] = i*4+0;
-		index[i*6+1] = i*4+1;
-		index[i*6+2] = i*4+2;
-		index[i*6+3] = i*4+0;
-		index[i*6+4] = i*4+2;
-		index[i*6+5] = i*4+3;
-	}
 	for( int i=0; i<MAX_BOLTS; ++i ) {
 		vertex[i*4+0].tex.Set( u0, 0 );
 		vertex[i*4+1].tex.Set( u1, 0 );
@@ -162,6 +156,20 @@ BoltRenderer::BoltRenderer()
 			vertex[i*4+k].color.Set( 1,1,1,1 );
 		}
 	}
+	ShaderManager::Instance()->AddDeviceLossHandler( this );
+}
+
+
+BoltRenderer::~BoltRenderer()
+{
+	ShaderManager::Instance()->RemoveDeviceLossHandler( this );
+}
+
+
+void BoltRenderer::DeviceLoss()
+{
+	delete vbo;
+	vbo = new GPUVertexBuffer( 0, MAX_BOLTS*4*sizeof(PTCVertex));
 }
 
 
@@ -222,7 +230,8 @@ void BoltRenderer::DrawAll( const Bolt* bolts, int nBolts, Engine* engine )
 		ParticleShader shader;
 		GPUStreamData data;
 		data.texture0 = texture;
-		GPUDevice::Instance()->Draw( shader, stream, data, count*4, vertex, count*6, index );
+		data.vertexBuffer = vbo->ID();
+		GPUDevice::Instance()->DrawQuads( shader, stream, data, count );
 	}
 }
 

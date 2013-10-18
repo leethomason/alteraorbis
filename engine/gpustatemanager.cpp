@@ -534,7 +534,7 @@ void GPUDevice::Draw( const GPUState& state, const GPUStream& stream, const GPUS
 }
 
 
-void GPUDevice::Draw(	const GPUState& state,
+void GPUDevice::DrawPtr(const GPUState& state,
 						const GPUStream& stream, 
 						const GPUStreamData& _data, 
 						int maxVertex,
@@ -575,7 +575,7 @@ void GPUDevice::DrawQuad( const GPUState& state, Texture* texture, const grinliz
 	GPUStream stream( pos[0] );
 	GPUStreamData data;
 	data.texture0 = texture;
-	Draw( state, stream, data, 4, pos, 6, index );
+	DrawPtr( state, stream, data, 4, pos, 6, index );
 }
 
 
@@ -589,7 +589,7 @@ void GPUDevice::DrawLine( const GPUState& state, const grinliz::Vector3F p0, con
 	stream.nPos = 3;
 	GPUStreamData data;
 	primitive = GL_LINES;
-	Draw( state, stream, data, 2, v, 2, index );
+	DrawPtr( state, stream, data, 2, v, 2, index );
 	primitive = GL_TRIANGLES;
 }
 
@@ -614,7 +614,7 @@ void GPUDevice::DrawArrow( const GPUState& state, const grinliz::Vector3F p0, co
 
 		GPUStream stream( pos[0] );
 		GPUStreamData data;
-		Draw( state, stream, data, 4, pos, 3, index );
+		DrawPtr( state, stream, data, 4, pos, 3, index );
 	}
 }
 

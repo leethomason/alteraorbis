@@ -104,9 +104,7 @@ struct GPUStream {
 	int stride;
 	int nPos;		
 	int posOffset;
-	//int nTexture0;
 	int texture0Offset;
-	//int nTexture1;
 	int texture1Offset;
 	int nNormal;
 	int normalOffset;
@@ -276,7 +274,7 @@ public:
 
 	// CAUTION: this uses the temporary buffers, so 
 	// calling this will flush them.
-	void Draw(		const GPUState& state,
+	void DrawPtr(	const GPUState& state,
 					const GPUStream& stream, 
 					const GPUStreamData& data, 
 					int maxVertex,

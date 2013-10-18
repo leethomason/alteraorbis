@@ -413,7 +413,7 @@ FIXME: need to handle driver updates invalidating cache.
 	shader->vertexProg = glCreateShader( GL_VERTEX_SHADER );
 	shader->fragmentProg = glCreateShader( GL_FRAGMENT_SHADER );
 
-	header = "";
+	header = "#version 140\n";
 	AppendFlag( &header, "TEXTURE0",			flags & TEXTURE0 );
 	AppendFlag( &header, "TEXTURE0_ALPHA_ONLY",	flags & TEXTURE0_ALPHA_ONLY );
 	AppendFlag( &header, "TEXTURE0_XFORM",		flags & TEXTURE0_XFORM );

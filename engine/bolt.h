@@ -23,10 +23,12 @@
 #include "../grinliz/glcontainer.h"
 
 #include "vertex.h"
+#include "shadermanager.h"
 
 class Engine;
 struct Bolt;
 struct ModelVoxel;
+class GPUVertexBuffer;
 
 class IBoltImpactHandler
 {
@@ -71,20 +73,21 @@ private:
 };
 
 
-class BoltRenderer
+class BoltRenderer : public IDeviceLossHandler
 {
 public:
 	BoltRenderer();
-	~BoltRenderer()	{}
+	~BoltRenderer();
 
 	void DrawAll( const Bolt* bolts, int nBolts, Engine* engine );
+	virtual void DeviceLoss();
 
 private:
 	enum { MAX_BOLTS = 400 };
 	int nBolts;
 
-	U16			index[MAX_BOLTS*6];
-	PTCVertex	vertex[MAX_BOLTS*4];
+	PTCVertex			vertex[MAX_BOLTS*4];
+	GPUVertexBuffer*	vbo;
 };
 
 #endif // LUMOS_BOLT_INCLUDED
