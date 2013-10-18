@@ -486,6 +486,7 @@ void GPUDevice::DrawQuads( const GPUState& state, const GPUStream& stream, const
 	quadsDrawn += nQuad;
 	++drawCalls;
 
+	//glDisable( GL_CULL_FACE );
 	GLASSERT( data.vertexBuffer );
 
 	glBindBufferX( GL_ARRAY_BUFFER, data.vertexBuffer );

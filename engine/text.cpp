@@ -21,14 +21,15 @@
 #include "../grinliz/glutil.h"
 #include "../grinliz/glrectangle.h"
 #include "gpustatemanager.h"
+#include "shadermanager.h"
 
 using namespace grinliz;
 
 
 UFOText* UFOText::instance = 0;
-void UFOText::Create( const gamedb::Reader* db, Texture* texture, Screenport* screenport )
+void UFOText::Create( const gamedb::Reader* db, Texture* texture )
 {
-	instance = new UFOText( db, texture, screenport );
+	instance = new UFOText( db, texture );
 }
 
 
@@ -39,17 +40,14 @@ void UFOText::Destroy()
 }
 
 
-UFOText::UFOText( const gamedb::Reader* database, Texture* texture, Screenport* screenport )
+UFOText::UFOText( const gamedb::Reader* database, Texture* texture )
 {
 	this->database = database;
 	this->texture = texture;
-	this->screenport = screenport;
 	this->fixedWidth = false;
 
 	memset( metricCache, 0, sizeof(Metric)*CHAR_RANGE );
 	memset( kerningCache, 100, CHAR_RANGE*CHAR_RANGE );
-	memset( vBuf, 0, sizeof(PTVertex2)*BUF_SIZE*4 );
-	memset( iBuf, 0, sizeof(U16)*BUF_SIZE*6 );
 
 	const gamedb::Item* fontItem = database->Root()->Child( "data" )
 												   ->Child( "fonts" )
@@ -62,6 +60,23 @@ UFOText::UFOText( const gamedb::Reader* database, Texture* texture, Screenport* 
 	texWidthInv = 1.0f / (float)commonItem->GetInt( "scaleW" );
 	texHeight = (float)commonItem->GetInt( "scaleH" );
 	texHeightInv = 1.0f / texHeight;
+
+	vbo = new GPUVertexBuffer( 0, VBO_MEM );
+	ShaderManager::Instance()->AddDeviceLossHandler( this );
+}
+
+
+UFOText::~UFOText()
+{
+	delete vbo;
+	ShaderManager::Instance()->RemoveDeviceLossHandler( this );
+}
+
+
+void UFOText::DeviceLoss()
+{
+	delete vbo;
+	vbo = new GPUVertexBuffer( 0, VBO_MEM );
 }
 
 
@@ -186,7 +201,7 @@ void UFOText::Metrics(	int c, int cPrev,
 }
 
 
-void UFOText::TextOut( GPUState* shader, const char* str, int _x, int _y, int _h, int* w )
+void UFOText::TextOut( const char* str, int _x, int _y, int _h, int* w )
 {
 	bool rendering = true;
 	float x = (float)_x;
@@ -198,28 +213,8 @@ void UFOText::TextOut( GPUState* shader, const char* str, int _x, int _y, int _h
 		rendering = false;
 	}
 
-	GLASSERT( !rendering || shader );
-
-	if ( rendering ) {
-		if ( iBuf[1] == 0 ) {
-			// not initialized
-			for( int pos=0; pos<BUF_SIZE; ++pos ) {
-				iBuf[pos*6+0] = pos*4 + 0;
-				iBuf[pos*6+1] = pos*4 + 2;
-				iBuf[pos*6+2] = pos*4 + 1;
-				iBuf[pos*6+3] = pos*4 + 0;
-				iBuf[pos*6+4] = pos*4 + 3;
-				iBuf[pos*6+5] = pos*4 + 2;
-			}
-		}
-	}
-
-	int pos = 0;
 	while( *str )
 	{
-		// Draw a glyph or nothing, at this point:
-		GLASSERT( pos < BUF_SIZE );
-
 		gamui::IGamuiText::GlyphMetrics metric;
 		Metrics( *str, 0, (float)h, &metric );
 
@@ -237,30 +232,18 @@ void UFOText::TextOut( GPUState* shader, const char* str, int _x, int _y, int _h
 		}
 
 		if ( rendering ) {
-			vBuf[pos*4+0].tex.Set( metric.tx0, metric.ty0 );
-			vBuf[pos*4+1].tex.Set( metric.tx1, metric.ty0 );
-			vBuf[pos*4+2].tex.Set( metric.tx1, metric.ty1 );
-			vBuf[pos*4+3].tex.Set( metric.tx0, metric.ty1 );
+			PTVertex2* vBuf = quadBuf.PushArr(4);
+			vBuf[0].tex.Set( metric.tx0, metric.ty0 );
+			vBuf[1].tex.Set( metric.tx0, metric.ty1 );
+			vBuf[2].tex.Set( metric.tx1, metric.ty1 );
+			vBuf[3].tex.Set( metric.tx1, metric.ty0 );
 
-			vBuf[pos*4+0].pos.Set( (float)x+metric.x,			(float)y+metric.y );	
-			vBuf[pos*4+1].pos.Set( (float)x+metric.x+metric.w,	(float)y+metric.y );	
-			vBuf[pos*4+2].pos.Set( (float)x+metric.x+metric.w,	(float)y+metric.y+metric.h );	
-			vBuf[pos*4+3].pos.Set( (float)x+metric.x,			(float)y+metric.y+metric.h );				
+			vBuf[0].pos.Set( (float)x+metric.x,				(float)y+metric.y );	
+			vBuf[1].pos.Set( (float)x+metric.x,				(float)y+metric.y+metric.h );				
+			vBuf[2].pos.Set( (float)x+metric.x+metric.w,	(float)y+metric.y+metric.h );	
+			vBuf[3].pos.Set( (float)x+metric.x+metric.w,	(float)y+metric.y );	
 		}
 		x += metric.advance;
-		++pos;
-
-		if ( rendering ) {
-			if ( pos == BUF_SIZE || *(str+1) == 0 ) {
-				if ( pos > 0 ) {
-					GPUStream stream( *vBuf );
-					GPUStreamData data;
-					data.texture0 = texture;
-					GPUDevice::Instance()->Draw( *shader, stream, data, pos*4, vBuf, pos*6, iBuf );
-					pos = 0;
-				}
-			}
-		}
 		++str;
 	}
 	if ( w ) {
@@ -269,11 +252,29 @@ void UFOText::TextOut( GPUState* shader, const char* str, int _x, int _y, int _h
 }
 
 
-void UFOText::Draw( int x, int y, const char* format, ... )
+void UFOText::FinalDraw()
 {
-	screenport->SetUI();
+	int n = quadBuf.Size();
+	if ( quadBuf.Size() * sizeof(PTVertex2) > VBO_MEM ) {
+		n = VBO_MEM / sizeof(PTVertex2);
+	}
+	vbo->Upload( quadBuf.Mem(), n*sizeof(PTVertex2), 0 );
+
 	CompositingShader shader( BLEND_NORMAL );
 
+	PTVertex2 v;
+	GPUStream stream( v );
+	GPUStreamData data;
+	data.texture0 = texture;
+	data.vertexBuffer = vbo->ID();
+	GPUDevice::Instance()->DrawQuads( shader, stream, data, n/4 );
+
+	quadBuf.Clear();
+}
+
+
+void UFOText::Draw( int x, int y, const char* format, ... )
+{
     va_list     va;
 	const int	size = 1024;
     char		buffer[size];
@@ -293,5 +294,5 @@ void UFOText::Draw( int x, int y, const char* format, ... )
 #endif
 	va_end( va );
 
-    TextOut( &shader, buffer, x, y, 16, 0 );
+    TextOut( buffer, x, y, 16, 0 );
 }
