@@ -133,9 +133,9 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	clearButton.SetSize( NEWS_BUTTON_WIDTH, NEWS_BUTTON_HEIGHT );
 	clearButton.SetText( "Clear" );
 
-	faceButton.Init( &gamui2D, game->GetButtonLook(0) );
-	faceButton.SetSize( 100, 100 );
-	SetFace();
+	faceWidget.Init( &gamui2D, game->GetButtonLook(0) );
+	faceWidget.SetFace( &uiRenderer, sim->GetPlayerChit() ? sim->GetPlayerChit()->GetItem() : 0 );
+	faceWidget.SetSize( 100, 100 );
 
 	for( int i=0; i<NUM_PICKUP_BUTTONS; ++i ) {
 		pickupButton[i].Init( &gamui2D, game->GetButtonLook(0) );
@@ -194,24 +194,23 @@ void GameScene::Resize()
 	const Screenport& port = lumosGame->GetScreenport();
 	minimap.SetPos( port.UIWidth()-MINI_MAP_SIZE, 0 );
 
-	//faceImage.SetPos( minimap.X()-faceImage.Width(), 0 );
-	faceButton.SetPos( minimap.X()-faceButton.Width(), 0 );
+	faceWidget.SetPos( minimap.X()-faceWidget.Width(), 0 );
 
 	for( int i=0; i<NUM_PICKUP_BUTTONS; ++i ) {
 		layout.PosAbs( &pickupButton[i], 0, i );
 	}
 
 	// ------ CHANGE LAYOUT ------- //
-	layout.SetSize( faceButton.Width(), 10.0f );
+	layout.SetSize( faceWidget.Width(), 10.0f );
 	layout.SetSpacing( 5.0f );
-	layout.SetOffset( faceButton.X(), faceButton.Y()+faceButton.Height() );
+	layout.SetOffset( faceWidget.X(), faceWidget.Y()+faceWidget.Height() );
 	layout.SetGutter( 0, 5.0f );
 
 	layout.PosAbs( &healthBar,	0, 0 );
 	layout.PosAbs( &ammoBar,	0, 1 );
 	layout.PosAbs( &shieldBar,  0, 2 );
 
-	dateLabel.SetPos(	faceButton.X()-faceButton.Width()*2.0f, 0 );
+	dateLabel.SetPos(	faceWidget.X()-faceWidget.Width()*2.0f, 0 );
 	xpLabel.SetPos(		dateLabel.X(), dateLabel.Y() + gamui2D.GetTextHeight() );
 	moneyWidget.SetPos( dateLabel.X(), xpLabel.Y() + gamui2D.GetTextHeight() );
 
@@ -224,41 +223,6 @@ void GameScene::Resize()
 	allRockButton.SetVisible( visible );
 	serialButton[CYCLE].SetVisible( visible );
 
-}
-
-
-void GameScene::SetFace()
-{
-	Chit* chit = sim->GetPlayerChit();
-	if ( chit ) {
-		GLASSERT( chit->GetItem() );
-		const GameItem& item = *chit->GetItem();
-		
-		ProcRenderInfo info;
-		HumanGen faceGen( true, item.id, item.primaryTeam, false );
-		faceGen.AssignFace( &info );
-
-		RenderAtom procAtom( (const void*) (UIRenderer::RENDERSTATE_UI_CLIP_XFORM_MAP), 
-							 info.texture,
-							 info.te.uv.x, info.te.uv.y, info.te.uv.z, info.te.uv.w );
-		faceButton.SetDeco( procAtom, procAtom );
-		faceButton.SetEnabled( true );
-
-		uiRenderer.uv[0]			= info.te.uv;
-		uiRenderer.uvClip[0]		= info.te.clip;
-		uiRenderer.colorXForm[0]	= info.color;
-	}
-	else {
-		RenderAtom nullAtom;
-		faceButton.SetDeco( nullAtom, nullAtom );
-		faceButton.SetEnabled( false );
-	}
-
-#if 0 
-	faceImage.SetVisible( true );
-	RenderAtom atom = LumosGame::CalcPaletteAtom( 0, 0 );
-	faceImage.SetAtom( atom );
-#endif
 }
 
 
@@ -331,7 +295,7 @@ void GameScene::Load()
 	else {
 		sim->Load( datPath, 0 );
 	}
-	SetFace();
+	faceWidget.SetFace( &uiRenderer, sim->GetPlayerChit() ? sim->GetPlayerChit()->GetItem() : 0 );
 }
 
 
@@ -682,7 +646,7 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 
 				Vector2I v = { (int)plane.x, (int)plane.z };
 				sim->CreatePlayer( v, 0 ); 
-				SetFace();
+				faceWidget.SetFace( &uiRenderer, sim->GetPlayerChit() ? sim->GetPlayerChit()->GetItem() : 0 );
 #if 0
 				sim->CreateVolcano( (int)at.x, (int)at.z, 6 );
 				sim->CreatePlant( (int)at.x, (int)at.z, -1 );
@@ -762,7 +726,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 			}
 		}
 	}
-	else if ( item == &faceButton ) {
+	else if ( item == faceWidget.GetButton() ) {
 		Chit* playerChit = sim->GetPlayerChit();
 		if ( playerChit && playerChit->GetItemComponent() ) {			
 			game->PushScene( LumosGame::SCENE_CHARACTER, 
@@ -1053,9 +1017,7 @@ void GameScene::DoTick( U32 delta )
 	dateLabel.SetText( str.c_str() );
 
 	Chit* playerChit = sim->GetPlayerChit();
-	if ( !playerChit ) {
-		SetFace();
-	}
+	faceWidget.SetFace( &uiRenderer, sim->GetPlayerChit() ? sim->GetPlayerChit()->GetItem() : 0 );
 	str.Clear();
 
 	Wallet wallet;

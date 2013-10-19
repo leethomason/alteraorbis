@@ -22,6 +22,7 @@
 #include "../engine/screenport.h"
 #include "../game/gamelimits.h"
 #include "../widget/moneywidget.h"
+#include "../widget/facewidget.h"
 
 class LumosGame;
 class Engine;
@@ -61,18 +62,14 @@ private:
 	void SetItemInfo( const GameItem* item, const GameItem* user );
 
 	enum { 
-		NUM_ITEM_BUTTONS = INVERTORY_SLOTS+1,
+		NUM_ITEM_BUTTONS = INVERTORY_SLOTS,
 
-		KV_NAME = 0,
-		KV_ID,
-		KV_LEVEL,
-		KV_XP,
-		KV_STR,
+		KV_STR = 0,
 		KV_WILL,
 		KV_CHR,
 		KV_INT,
 		KV_DEX,
-		NUM_TEXT_KV = KV_DEX+6
+		NUM_TEXT_KV = KV_DEX+10
 	};
 	
 	LumosGame*		lumosGame;
@@ -84,10 +81,12 @@ private:
 	gamui::PushButton	okay;
 	gamui::ToggleButton itemButton[NUM_ITEM_BUTTONS];
 	int					itemButtonIndex[NUM_ITEM_BUTTONS];	// the index in the ItemComponent
+	gamui::TextBox		desc;
 	gamui::TextLabel	textKey[NUM_TEXT_KV];
 	gamui::TextLabel	textVal[NUM_TEXT_KV];
 	gamui::PushButton	dropButton;
 	MoneyWidget			moneyWidget;
+	FaceToggleWidget	faceWidget;
 };
 
 

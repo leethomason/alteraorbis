@@ -26,9 +26,14 @@ CharacterScene::CharacterScene( LumosGame* game, CharacterSceneData* csd ) : Sce
 	dropButton.Init( &gamui2D, lumosGame->GetButtonLook(0));
 	dropButton.SetText( "Drop" );
 
+	faceWidget.Init( &gamui2D, lumosGame->GetButtonLook(0));
+	faceWidget.SetFace( &uiRenderer, itemComponent->GetItem(0) );
+
+	desc.Init( &gamui2D );
+
 	for( int i=0; i<NUM_ITEM_BUTTONS; ++i ) {
 		itemButton[i].Init( &gamui2D, lumosGame->GetButtonLook(0) );
-		itemButton[0].AddToToggleGroup( &itemButton[i] );
+		faceWidget.GetToggleButton()->AddToToggleGroup( &itemButton[i] );
 	}
 
 	for( int i=0; i<NUM_TEXT_KV; ++i ) {
@@ -46,7 +51,6 @@ CharacterScene::CharacterScene( LumosGame* game, CharacterSceneData* csd ) : Sce
 	static const Vector3F out = { 1, 0, 0 };
 	engine->camera.SetDir( out, V3F_UP );
 
-	itemButton[0].SetDown();
 	SetButtonText();
 }
 
@@ -63,27 +67,34 @@ void CharacterScene::Resize()
 	lumosGame->PositionStd( &okay, 0 );
 
 	LayoutCalculator layout = lumosGame->DefaultLayout();
-	layout.PosAbs( &itemButton[0], 0, 0 );
 
-	layout.PosAbs( &moneyWidget, 2, 0, false );
+	layout.PosAbs( &faceWidget, 0, 0 );
+	layout.PosAbs( &itemButton[0], 1, 0 );
 
-	int col=0;
+	layout.PosAbs( &moneyWidget, 1, 0, false );
+
+	int col=1;
 	int row=0;
-	for( int i=1; i<NUM_ITEM_BUTTONS; ++i ) {
+	for( int i=0; i<NUM_ITEM_BUTTONS; ++i ) {
 		layout.PosAbs( &itemButton[i], col, row+1 );
 		++col;
-		if ( col == 3 ) {
+		if ( col == 4 ) {
 			++row;
-			col = 0;
+			col = 1;
 		}
 	}
-	layout.PosAbs( &dropButton, 0, row+1 );
+	layout.PosAbs( &dropButton, 1, row+1 );
 
-	layout.SetSize( layout.Width(), layout.Height()*0.5f );
+	layout.SetSize( layout.Width(), layout.Height()*0.4f );
+
+	layout.PosAbs( &desc, -4, 0 );
+	desc.SetSize( layout.Width() * 4.0f, layout.Height() * 3.0f );
+
 	for( int i=0; i<NUM_TEXT_KV; ++i ) {
-		layout.PosAbs( &textKey[i], -4, i );
-		layout.PosAbs( &textVal[i], -2, i );
+		layout.PosAbs( &textKey[i], -4, i+2 );
+		layout.PosAbs( &textVal[i], -2, i+2 );
 	}
+
 }
 
 
@@ -97,22 +108,14 @@ void CharacterScene::SetItemInfo( const GameItem* item, const GameItem* user )
 	if ( !item )
 		return;
 
-	CStr< 32 > str;
+	CStr< 128 > str;
 
-	textVal[KV_NAME].SetText( item->ProperName() ? item->ProperName() : item->Name() );
-	textKey[KV_NAME].SetText( "Name" );
+	str.Format( "%s\nLevel: %d  XP: %d / %d", item->ProperName() ? item->ProperName() : item->Name(), 
+										 item->traits.Level(),
+										 item->traits.Experience(),
+										 GameTrait::LevelToExperience( item->traits.Level()+1 ));
+	desc.SetText( str.c_str() );
 
-	str.Format( "%d", item->id );
-	textVal[KV_ID].SetText( str.c_str() );
-	textKey[KV_ID].SetText( "ID" );
-
-	str.Format( "%d", item->traits.Level() );
-	textVal[KV_LEVEL].SetText( str.c_str() );
-	textKey[KV_LEVEL].SetText( "Level" );
-
-	str.Format( "%d", item->traits.Experience() );
-	textVal[KV_XP].SetText( str.c_str() );
-	textKey[KV_XP].SetText( "XP" );
 
 	/*			Ranged		Melee	Shield
 		STR		Dam			Dam		Capacity
@@ -122,7 +125,7 @@ void CharacterScene::SetItemInfo( const GameItem* item, const GameItem* user )
 		DEX		Melee D/TU	x		x
 	*/
 
-	int i = KV_STR;
+	int i = 0;
 	if ( item->ToRangedWeapon() ) {
 		textKey[i].SetText( "Ranged Damage" );
 		str.Format( "%.1f", item->traits.Damage() * item->rangedDamage );
@@ -192,6 +195,7 @@ void CharacterScene::SetItemInfo( const GameItem* item, const GameItem* user )
 		i = KV_DEX+1;
 	}
 
+	++i;	// put in space
 	MicroDBIterator it( item->microdb );
 	for( ; !it.Done() && i < NUM_TEXT_KV; it.Next() ) {
 		
@@ -221,34 +225,42 @@ void CharacterScene::SetButtonText()
 	RenderAtom iconAtom = LumosGame::CalcUIIconAtom( "okay" );
 	memset( itemButtonIndex, 0, sizeof(itemButtonIndex[0])*NUM_ITEM_BUTTONS );
 
+	int src = 1;
 	for( int i=0; i<NUM_ITEM_BUTTONS; ++i ) {
-		const GameItem* item = itemComponent->GetItem(i);
-		if ( item && !item->Intrinsic() ) {
-
-			// Set the text to the proper name, if we have it.
-			// Then an icon for what it is, and a check
-			// mark if the object is in use.
-			lumosGame->ItemToButton( item, &itemButton[count] );
-			itemButtonIndex[count] = i;
-
-			// Set the "active" icons.
-			if ( item == rangedItem || item == meleeItem || item == shieldItem ) {
-				itemButton[count].SetIcon( iconAtom, iconAtom );
-			}
-			else {
-				itemButton[count].SetIcon( nullAtom, nullAtom );
-			}
-
-			if ( itemButton[count].Down() ) {
-				down = item;
-			}
-			++count;
+		const GameItem* item = itemComponent->GetItem(src);
+		if ( !item || item->Intrinsic() ) {
+			++src;
+			continue;
 		}
+
+		// Set the text to the proper name, if we have it.
+		// Then an icon for what it is, and a check
+		// mark if the object is in use.
+		lumosGame->ItemToButton( item, &itemButton[count] );
+		itemButtonIndex[count] = src;
+
+		// Set the "active" icons.
+		if ( item == rangedItem || item == meleeItem || item == shieldItem ) {
+			itemButton[count].SetIcon( iconAtom, iconAtom );
+		}
+		else {
+			itemButton[count].SetIcon( nullAtom, nullAtom );
+		}
+
+		if ( itemButton[count].Down() ) {
+			down = item;
+		}
+		++count;
+		++src;
 	}
 	for( ; count<NUM_ITEM_BUTTONS; ++count ) {
 		itemButton[count].SetText( "" );
 		itemButton[count].SetIcon( nullAtom, nullAtom );
 		itemButton[count].SetDeco( nullAtom, nullAtom );
+	}
+
+	if ( !down ) {
+		down = itemComponent->GetItem(0);
 	}
 
 	if ( down ) {
@@ -294,6 +306,9 @@ void CharacterScene::ItemTapped( const gamui::UIItem* item )
 		if ( item == &itemButton[i] ) {
 			SetButtonText();
 		}
+	}
+	if ( item == faceWidget.GetButton() ) {
+		SetButtonText();
 	}
 }
 

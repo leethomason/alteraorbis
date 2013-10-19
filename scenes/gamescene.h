@@ -18,7 +18,9 @@
 
 #include "../xegame/scene.h"
 #include "../xegame/chitevent.h"
+
 #include "../widget/moneywidget.h"
+#include "../widget/facewidget.h"
 
 class LumosGame;
 class Sim;
@@ -53,7 +55,6 @@ public:
 private:
 	void Save();
 	void Load();
-	void SetFace();
 	void SetBars();
 	void DoDestTapped( const grinliz::Vector2F& grid );
 
@@ -139,7 +140,7 @@ private:
 	gamui::Image		minimap;
 	gamui::Image		playerMark;
 
-	gamui::PushButton	faceButton;
+	FacePushWidget		faceWidget;
 	gamui::DigitalBar	healthBar, ammoBar, shieldBar;
 
 	gamui::TextLabel	dateLabel;
