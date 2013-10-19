@@ -20,13 +20,13 @@
 #include "../gamui/gamui.h"
 
 class LumosGame;
-
+class ItemComponent;
 
 class DialogScene : public Scene
 {
 public:
 	DialogScene( LumosGame* game );
-	virtual ~DialogScene() {}
+	virtual ~DialogScene();
 
 	virtual void Resize();
 
@@ -45,10 +45,20 @@ private:
 	gamui::PushButton okay;
 	gamui::PushButton itemArr[NUM_ITEMS];
 
-	enum { NUM_TOGGLES = 2,
-		   NUM_SUB     = 2 };
+	// Objects for testing various UI scenes.
+	ItemComponent* itemComponent0;
+	ItemComponent* itemComponent1;
+
+	enum { NUM_TOGGLES	= 2,
+		   NUM_SUB		= 2,
+		   CHARACTER	= 0,
+		   VAULT,
+		   NUM_SCENES
+	};
 	gamui::ToggleButton toggles[NUM_TOGGLES];
 	gamui::ToggleButton subButtons[NUM_SUB*NUM_TOGGLES];
+
+	gamui::PushButton	sceneButtons[NUM_SCENES];
 };
 
 #endif // DIALOGSCENE_INCLUDED

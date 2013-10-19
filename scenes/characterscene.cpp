@@ -69,6 +69,8 @@ void CharacterScene::Resize()
 	LayoutCalculator layout = lumosGame->DefaultLayout();
 
 	layout.PosAbs( &faceWidget, 0, 0 );
+	faceWidget.SetSize( faceWidget.Width(), faceWidget.Height()*2.0f );
+
 	layout.PosAbs( &itemButton[0], 1, 0 );
 
 	layout.PosAbs( &moneyWidget, 1, 0, false );

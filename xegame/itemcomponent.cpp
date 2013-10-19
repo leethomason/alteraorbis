@@ -621,7 +621,7 @@ void ItemComponent::AddToInventory( GameItem* item )
 	itemArr.Push( item );
 
 	// AIs will use the "best" item.
-	if ( !parentChit->PlayerControlled() ) {
+	if ( parentChit && !parentChit->PlayerControlled() ) {
 		SortInventory();
 	}
 }

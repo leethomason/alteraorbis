@@ -68,7 +68,7 @@ void TitleScene::Resize()
 	background.SetSize( port.UIWidth(), port.UIHeight() );
 
 	static const bool VIS[NUM_TESTS] = {
-		false, true, false, true, false, false,
+		true, true, false, true, false, false,
 		true, true, true
 	};
 	bool visible = game->DebugUIEnabled();
