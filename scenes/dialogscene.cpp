@@ -55,6 +55,7 @@ DialogScene::DialogScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 
 	ItemDefDB* db = ItemDefDB::Instance();
 	const GameItem& human = db->Get( "humanMale" );
+	const GameItem& troll = db->Get( "troll" );
 	const GameItem& blaster = db->Get( "blaster" );
 	const GameItem& pistol = db->Get( "pistol" );
 	const GameItem& ring = db->Get( "ring" );
@@ -63,11 +64,18 @@ DialogScene::DialogScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 	itemComponent0->AddToInventory( new GameItem( blaster ));
 	itemComponent0->AddToInventory( new GameItem( pistol ));
 	itemComponent0->AddToInventory( new GameItem( ring ));
+
+	itemComponent1 = new ItemComponent( 0, 0, new GameItem( troll ));
+	itemComponent1->AddToInventory( new GameItem( blaster ));
+	itemComponent1->AddToInventory( new GameItem( pistol ));
+	itemComponent1->AddToInventory( new GameItem( ring ));
+	itemComponent1->AddToInventory( new GameItem( ring ));
 }
 
 DialogScene::~DialogScene()
 {
 	delete itemComponent0;
+	delete itemComponent1;
 }
 
 
@@ -104,6 +112,9 @@ void DialogScene::ItemTapped( const gamui::UIItem* item )
 	}
 	else if ( item == &sceneButtons[CHARACTER] ) {
 		game->PushScene( LumosGame::SCENE_CHARACTER, new CharacterSceneData( itemComponent0 ));
+	}
+	else if ( item == &sceneButtons[VAULT] ) {
+		game->PushScene( LumosGame::SCENE_CHARACTER, new CharacterSceneData( itemComponent0, itemComponent1 ));
 	}
 }
 

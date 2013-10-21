@@ -46,39 +46,25 @@
 
 #define TIME_BETWEEN_FRAMES	1000/33
 
-#define IPOD_SCREEN_WIDTH	320
-#define IPOD_SCREEN_HEIGHT	480
-
-#define NEXUS_ONE_SCREEN_WIDTH  480
-#define NEXUS_ONE_SCREEN_HEIGHT  800
-
 static const float KEY_ZOOM_SPEED		= 0.02f;
 static const float KEY_ROTATE_SPEED		= 2.0f;
 
 #if 0
-static const int SCREEN_WIDTH  = IPOD_SCREEN_WIDTH*2;
-static const int SCREEN_HEIGHT = IPOD_SCREEN_HEIGHT*2;
-#endif
-#if 0
-static const int SCREEN_WIDTH  = IPOD_SCREEN_WIDTH;
-static const int SCREEN_HEIGHT = IPOD_SCREEN_HEIGHT;
+// A default screenshot size for market.
+static const int SCREEN_WIDTH  = 800;
+static const int SCREEN_HEIGHT = 600;
 #endif
 #if 1
-// A default screenshot size for market.
-static const int SCREEN_WIDTH  = NEXUS_ONE_SCREEN_WIDTH*5/4;
-static const int SCREEN_HEIGHT = NEXUS_ONE_SCREEN_HEIGHT*5/4;
-#endif
-#if 0
-// used in "how to play" and the source code web pages
-static const int SCREEN_WIDTH = 384;
-static const int SCREEN_HEIGHT = 640;
+// 4:3 test
+static const int SCREEN_WIDTH  = 800;
+static const int SCREEN_HEIGHT = 600;
 #endif
 
 
 const int multisample = 2;
 bool fullscreen = false;
-int screenWidth = 0;
-int screenHeight = 0;
+int screenWidth  = SCREEN_WIDTH;
+int screenHeight = SCREEN_HEIGHT;
 bool cameraIso = true;
 
 int nModDB = 0;
@@ -155,19 +141,11 @@ int main( int argc, char **argv )
 		SDL_GL_SetAttribute( SDL_GL_MULTISAMPLESAMPLES, multisample );
 	}
 
-#ifdef TEST_ROTATION
-	screenWidth  = SCREEN_WIDTH;
-	screenHeight = SCREEN_HEIGHT;
-#else
-	screenWidth  = SCREEN_HEIGHT;
-	screenHeight = SCREEN_WIDTH;
-#endif
-
 	if ( argc == 3 ) {
 		screenWidth = atoi( argv[1] );
 		screenHeight = atoi( argv[2] );
-		if ( screenWidth <= 0 ) screenWidth = IPOD_SCREEN_WIDTH;
-		if ( screenHeight <= 0 ) screenHeight = IPOD_SCREEN_HEIGHT;
+		if ( screenWidth <= 0 ) screenWidth   = SCREEN_WIDTH;
+		if ( screenHeight <= 0 ) screenHeight = SCREEN_HEIGHT;
 	}
 
 	// Note that our output surface is rotated from the iPod.

@@ -33,8 +33,9 @@ class GameItem;
 class CharacterSceneData : public SceneData
 {
 public:
-	CharacterSceneData( ItemComponent* ic ) : SceneData(), itemComponent(ic) {}
-	ItemComponent*							itemComponent;
+	CharacterSceneData( ItemComponent* ic, ItemComponent* ic2=0 ) : SceneData(), itemComponent(ic), vault(ic2) {}
+	ItemComponent*	itemComponent;
+	ItemComponent*	vault;				// vault, chest, storage, etc.				
 };
 
 
@@ -75,12 +76,14 @@ private:
 	LumosGame*		lumosGame;
 	Engine*			engine;
 	ItemComponent*	itemComponent;	// what item or inventory are we displaying?
+	ItemComponent*	vault;			// if interacting with a vault/chest/storage, otherwise null
 	Model*			model;
+	int				nStorage;		// 1 for character, 2 for vault
 
 	Screenport			screenport;
 	gamui::PushButton	okay;
-	gamui::ToggleButton itemButton[NUM_ITEM_BUTTONS];
-	int					itemButtonIndex[NUM_ITEM_BUTTONS];	// the index in the ItemComponent
+	gamui::ToggleButton itemButton[2][NUM_ITEM_BUTTONS];
+	int					itemButtonIndex[2][NUM_ITEM_BUTTONS];	// the index in the ItemComponent
 	gamui::TextBox		desc;
 	gamui::TextLabel	textKey[NUM_TEXT_KV];
 	gamui::TextLabel	textVal[NUM_TEXT_KV];

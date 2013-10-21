@@ -211,6 +211,7 @@ void TextLabel::SetText( const char* t )
 void TextLabel::SetText( const char* start, const char* end )
 {
 	if (    memcmp( start, m_str, end-start ) == 0	// contain the same thing
+		 && m_str
 		 && m_str[end-start] == 0 )					// have the same length
 	{
 		// They are the same.
