@@ -223,13 +223,6 @@ void CharacterScene::SetItemInfo( const GameItem* item, const GameItem* user )
 void CharacterScene::SetButtonText()
 {
 	const GameItem* down = 0;
-	const GameItem* mainItem = itemComponent->GetItem(0);
-	const IRangedWeaponItem* ranged = itemComponent->GetRangedWeapon(0);
-	const IMeleeWeaponItem*  melee  = itemComponent->GetMeleeWeapon();
-	const IShield*           shield = itemComponent->GetShield();
-	const GameItem* rangedItem = ranged ? ranged->GetItem() : 0;
-	const GameItem* meleeItem  = melee  ? melee->GetItem() : 0;
-	const GameItem* shieldItem = shield ? shield->GetItem() : 0;
 
 	RenderAtom nullAtom;
 	RenderAtom iconAtom = LumosGame::CalcUIIconAtom( "okay" );
@@ -241,8 +234,19 @@ void CharacterScene::SetButtonText()
 	for( int j=0; j<nStorage; ++j ) {
 		int count=0;
 		int src = 1;
+
+		ItemComponent* ic = (j==0) ? itemComponent : vault;
+
+		const GameItem* mainItem		= ic->GetItem(0);
+		const IRangedWeaponItem* ranged = ic->GetRangedWeapon(0);
+		const IMeleeWeaponItem*  melee  = ic->GetMeleeWeapon();
+		const IShield*           shield = ic->GetShield();
+		const GameItem* rangedItem		= ranged ? ranged->GetItem() : 0;
+		const GameItem* meleeItem		= melee  ? melee->GetItem() : 0;
+		const GameItem* shieldItem		= shield ? shield->GetItem() : 0;
+
 		for( int i=0; i<NUM_ITEM_BUTTONS; ++i ) {
-			const GameItem* item = itemComponent->GetItem(src);
+			const GameItem* item = ic->GetItem(src);
 			if ( !item || item->Intrinsic() ) {
 				++src;
 				continue;
@@ -269,7 +273,7 @@ void CharacterScene::SetButtonText()
 			++src;
 		}
 		for( ; count<NUM_ITEM_BUTTONS; ++count ) {
-			itemButton[j][count].SetText( "" );
+			itemButton[j][count].SetText( " \n " );
 			itemButton[j][count].SetIcon( nullAtom, nullAtom );
 			itemButton[j][count].SetDeco( nullAtom, nullAtom );
 		}
@@ -279,10 +283,11 @@ void CharacterScene::SetButtonText()
 	}
 
 	if ( down ) {
-		if ( model && !StrEqual( model->GetResource()->Name(), down->ResourceName() )) {
-			engine->FreeModel( model );
-			model = 0;
-		}
+		// This doesn't work because we actually want to trigger off the item id.
+		//if ( model && !StrEqual( model->GetResource()->Name(), down->ResourceName() )) {
+			
+		engine->FreeModel( model );
+		model = 0;
 		if ( !model ) {
 			model = engine->AllocModel( down->ResourceName() );
 			model->SetPos( 0,0,0 );
@@ -364,29 +369,40 @@ gamui::RenderAtom CharacterScene::DragStart( const gamui::UIItem* item )
 void CharacterScene::DragEnd( const gamui::UIItem* start, const gamui::UIItem* end )
 {
 	int startIndex = 0;
+	ItemComponent* startIC = 0;
 	int endIndex   = 0;
+	ItemComponent* endIC = 0;
 
-	/*
-	for( int i=0; i<NUM_ITEM_BUTTONS; ++i ) {
-		if ( start == &itemButton[i] ) {
-			startIndex = itemButtonIndex[i];
-			break;
+	for( int j=0; j<nStorage; ++j ) {
+		for( int i=0; i<NUM_ITEM_BUTTONS; ++i ) {
+			if ( start == &itemButton[j][i] ) {
+				startIndex = itemButtonIndex[j][i];
+				startIC = (j==0) ? itemComponent : vault;
+				break;
+			}
+		}
+		for( int i=0; i<NUM_ITEM_BUTTONS; ++i ) {
+			if ( end == &itemButton[j][i] ) {
+				endIndex = itemButtonIndex[j][i];
+				endIC = (j==0) ? itemComponent : vault;
+				break;
+			}
 		}
 	}
-	for( int i=0; i<NUM_ITEM_BUTTONS; ++i ) {
-		if ( end == &itemButton[i] ) {
-			endIndex = itemButtonIndex[i];
-			break;
-		}
-	}
-
 	if ( startIndex && endIndex ) {
-		itemComponent->Swap( startIndex, endIndex );
+		ItemComponent::Swap2( startIC, startIndex, endIC, endIndex );
 	}
-	if ( start && startIndex && end == &dropButton ) {
+	else if ( startIndex && endIC ) {
+		GameItem* item = startIC->RemoveFromInventory( startIndex );
+		if ( item ) {
+			endIC->AddToInventory( item );
+		}
+	}
+
+
+	if ( !vault && start && startIndex && end == &dropButton ) {
 		itemComponent->Drop( itemComponent->GetItem( startIndex ));
 	}
-	*/
 
 	SetButtonText();
 }

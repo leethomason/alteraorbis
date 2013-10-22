@@ -689,6 +689,22 @@ bool ItemComponent::Swap( int i, int j )
 }
 
 
+/*static*/ bool ItemComponent::Swap2( ItemComponent* a, int aIndex, ItemComponent* b, int bIndex )
+{
+	if (    a && b
+		 && (aIndex >= 0 && aIndex < a->itemArr.Size() )
+		 && (bIndex >= 0 && bIndex < b->itemArr.Size() )
+		 && !a->itemArr[aIndex]->Intrinsic()
+		 && !b->itemArr[bIndex]->Intrinsic() )
+	{
+		grinliz::Swap( &a->itemArr[aIndex], &b->itemArr[bIndex] );
+		return true;
+	}
+	return false;
+}
+
+
+
 bool ItemComponent::SwapWeapons()
 {
 	int i=0;
