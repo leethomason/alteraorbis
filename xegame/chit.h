@@ -180,7 +180,7 @@ public:
 
 	void SetPlayerControlled( bool player ) { playerControlled = player; }
 	bool PlayerControlled() const			{ return playerControlled; }
-
+	int PrimaryTeam() const;
 
 	// "private"
 	// used by the spatial hash:

@@ -14,6 +14,7 @@
 #include "gridmovecomponent.h"
 #include "team.h"
 #include "visitorstatecomponent.h"
+#include "../scenes/characterscene.h"
 
 #include "../xegame/rendercomponent.h"
 #include "../xegame/itemcomponent.h"
@@ -36,7 +37,7 @@
 
 using namespace grinliz;
 
-LumosChitBag::LumosChitBag() : engine(0), worldMap(0), lumosGame(0)
+LumosChitBag::LumosChitBag() : engine(0), worldMap(0), lumosGame(0), sceneID(-1), sceneData(0)
 {
 	memset( mapSpatialHash, 0, sizeof(MapSpatialComponent*)*NUM_SECTORS*NUM_SECTORS);
 }
@@ -47,6 +48,7 @@ LumosChitBag::~LumosChitBag()
 	// Call the parent function so that chits aren't 
 	// aren't using deleted memory.
 	DeleteAll();
+	delete sceneData;
 }
 
 
@@ -800,3 +802,30 @@ Bolt* LumosChitBag::NewBolt(	const Vector3F& pos,
 
 	return bolt;
 }
+
+
+void LumosChitBag::PushScene( int id, SceneData* data )
+{
+	if ( sceneID >= 0 ) {
+		GLLOG(( "Dupe scene pushed.\n" ));
+		delete data;
+	}
+	else {
+		sceneID = id;
+		sceneData = data;
+	}
+}
+
+
+bool LumosChitBag::PopScene( int* id, SceneData** data )
+{
+	if ( sceneID >= 0 ) {
+		*id = sceneID;
+		*data = sceneData;
+		sceneID = -1;
+		sceneData = 0;
+		return true;
+	}
+	return false;
+}
+

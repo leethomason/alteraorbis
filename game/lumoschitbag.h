@@ -27,6 +27,7 @@ struct Wallet;
 class CoreScript;
 class LumosGame;
 class MapSpatialComponent;
+class SceneData;
 
 class BuildingFilter : public IChitAccept
 {
@@ -132,7 +133,7 @@ public:
 	virtual ~LumosChitBag();
 
 	virtual LumosChitBag* ToLumos() { return this; }
-
+	// initialization
 	void SetContext( Engine* e, WorldMap* wm, LumosGame* lg ) { engine = e; worldMap = wm; lumosGame = lg; }
 
 	// Buildings can't move - no update.
@@ -190,6 +191,11 @@ public:
 	Chit* QueryRemovable( const grinliz::Vector2I& pos );
 
 	LumosGame* GetLumosGame() { return lumosGame; }
+	// Why the duplicate? This is for components to request
+	// a new scene because of a player action. Both queues,
+	// and doesn't allow multiple scenes to queue.
+	void PushScene( int id, SceneData* data );
+	bool PopScene( int* id, SceneData** data );
 
 	// Used by the CoreScript.
 	// A table that maps MOB chit ids -> core chit IDs
@@ -204,6 +210,8 @@ private:
 	Engine* engine;
 	WorldMap* worldMap;
 	LumosGame* lumosGame;
+	int sceneID;
+	SceneData* sceneData;
 	grinliz::Random random;	// use the chit version, if possible, generally want to avoid high level random
 
 	grinliz::CDynArray<Chit*>	inUseArr;

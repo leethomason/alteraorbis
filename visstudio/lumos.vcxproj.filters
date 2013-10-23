@@ -38,6 +38,9 @@
     <Filter Include="Source Files\widget">
       <UniqueIdentifier>{bee90d72-05ee-4916-8a80-6e6211d04059}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\ai">
+      <UniqueIdentifier>{1c28f925-78d6-4a1a-9c12-f5fd220f81fc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\engine\camera.cpp">
@@ -312,6 +315,9 @@
     </ClCompile>
     <ClCompile Include="..\widget\facewidget.cpp">
       <Filter>Source Files\widget</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ai\tasklist.cpp">
+      <Filter>Source Files\ai</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -629,6 +635,9 @@
     </ClInclude>
     <ClInclude Include="..\widget\facewidget.h">
       <Filter>Source Files\widget</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ai\tasklist.h">
+      <Filter>Source Files\ai</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
