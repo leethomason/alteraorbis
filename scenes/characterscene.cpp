@@ -93,6 +93,10 @@ void CharacterScene::Resize()
 	desc.SetSize( layout.Width() * 4.0f, layout.Height() );
 
 	float y = desc.Y() + desc.Height();
+	if ( vault ) {
+		y = dropButton.Y();
+	}
+
 	float x = desc.X();
 	float dx = desc.Width() * 0.5f;
 
