@@ -80,14 +80,18 @@ void CharacterScene::Resize()
 	layout.PosAbs( &moneyWidget, 1, 0, false );
 	
 	for( int j=0; j<nStorage; ++j ) {
-		int col=1+j*4;
+		int col=0;
 		int row=0;
+
 		for( int i=0; i<NUM_ITEM_BUTTONS; ++i ) {
-			layout.PosAbs( &itemButton[j][i], col, row+1 );
+			if ( j==0 )
+				layout.PosAbs( &itemButton[j][i], col+1, row+1 );
+			else
+				layout.PosAbs( &itemButton[j][i], -3+col, row+1 );
 			++col;
-			if ( col == 4+j*4 ) {
+			if ( col == 3 ) {
 				++row;
-				col = 1+j*4;
+				col = 0;
 			}
 		}
 	}
@@ -98,6 +102,7 @@ void CharacterScene::Resize()
 
 	float y = desc.Y() + desc.Height();
 	if ( vault ) {
+		desc.SetPos( port.UIWidth()*0.5f - layout.Width()*0.5f, desc.Y() );
 		y = dropButton.Y();
 	}
 
