@@ -66,6 +66,10 @@ CharacterScene::~CharacterScene()
 
 void CharacterScene::Resize()
 {
+	// Dowside of a local Engine: need to resize it.
+	const Screenport& port = game->GetScreenport();
+	engine->GetScreenportMutable()->Resize( port.PhysicalWidth(), port.PhysicalHeight() );
+
 	lumosGame->PositionStd( &okay, 0 );
 
 	LayoutCalculator layout = lumosGame->DefaultLayout();
