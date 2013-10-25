@@ -345,7 +345,7 @@ Chit* LumosChitBag::QueryPorch( const grinliz::Vector2I& pos )
 			int porch = 0;
 			item->GetValue( "porch", &porch );
 			if ( msc && porch ) {
-				if ( msc->PorchPos() == pos ) {
+				if ( msc->PorchPos().Contains( pos )) {
 					return chit;
 				}
 			}

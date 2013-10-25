@@ -17,6 +17,7 @@
 #include "worldmap.h"
 #include "lumoschitbag.h"
 #include "../engine/serialize.h"
+#include "../xegame/itemcomponent.h"
 
 using namespace grinliz;
 
@@ -116,19 +117,49 @@ void MapSpatialComponent::Serialize( XStream* xs )
 }
 
 
-Vector2I MapSpatialComponent::PorchPos() const
+Vector2I MapSpatialComponent::PorchPos( int id ) const
 {
-	Vector2I v = bounds.min;
+	Rectangle2I r = PorchPos();
+	Vector2I v = {
+		r.min.x + (r.Width()-1)  * (id & 1),
+		r.min.y + (r.Height()-1) * (id & 1),
+	};
+	return v;
+}
+
+
+Rectangle2I MapSpatialComponent::PorchPos() const
+{
+	Rectangle2I v;
+	v.min = bounds.min;
+	v.max = bounds.max;
 
 	int r = LRintf( this->GetYRotation() / 90.0f );
 
+	// Buildings can be size 1x1 or size 2x2
+	int size = 1;
+	if ( parentChit->GetItem() ) {
+		parentChit->GetItem()->GetValue( "size", &size );
+	}
+	GLASSERT( size == 1 || size == 2 );
+
 	switch (r) {
-	case 0:		v.y = bounds.max.y + 1;	break;
-	case 1:		v.x = bounds.max.x + 1;	break;
-	case 2:		v.y = bounds.min.y - 1;	break;
-	case 3:		v.x = bounds.min.x - 1;	break;
+	case 0:		v.min.y = v.max.y = bounds.max.y + 1;	break;
+	case 1:		v.min.x = v.max.x = bounds.max.x + 1;	break;
+	case 2:		v.min.y = v.max.y = bounds.min.y - 1;	break;
+	case 3:		v.min.x = v.max.x = bounds.min.x - 1;	break;
 	default:	GLASSERT(0);	break;
 	}
+
+	if ( size == 2 ) {
+		if ( r == 0 || r == 2 ) {
+			v.max.x++;
+		}
+		else {
+			v.max.y++;
+		}
+	}
+
 	return v;
 }
 

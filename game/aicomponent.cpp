@@ -1055,7 +1055,8 @@ void AIComponent::ThinkVisitor( const ComponentSet& thisComp )
 			else {
 				MapSpatialComponent* msc = GET_SUB_COMPONENT( kiosk, SpatialComponent, MapSpatialComponent );
 				GLASSERT( msc );
-				Vector2I porchi = msc->PorchPos();
+				// The porch is a rectangle; go to a particular point based on the ID()
+				Vector2I porchi = msc->PorchPos( parentChit->ID() );
 				Vector2F porch = { (float)porchi.x+0.5f, (float)porchi.y+0.5f };
 				if ( map->CalcPath( thisComp.spatial->GetPosition2D(), porch, 0, 0, 0, 0 ) ) {
 					this->Move( porch, false );
@@ -1457,7 +1458,7 @@ void AIComponent::FindRoutineTasks( const ComponentSet& thisComp )
 				MapSpatialComponent* msc = GET_SUB_COMPONENT( vault, SpatialComponent, MapSpatialComponent );
 				GLASSERT( msc );
 				if ( msc ) {
-					Vector2I porch = msc->PorchPos();
+					Vector2I porch = msc->PorchPos( parentChit->ID() );
 
 					if ( !taskList ) taskList = new TaskList( map, engine );
 					taskList->Push( Task::MoveTask( porch, 0 ));

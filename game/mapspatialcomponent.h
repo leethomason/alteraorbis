@@ -51,7 +51,9 @@ public:
 
 	// Assumes there is a porch; to actually query,
 	// use the 'porch' property on the GameItem
-	grinliz::Vector2I PorchPos() const;
+	grinliz::Rectangle2I PorchPos() const;
+	// The same, but a single location for a given chitID
+	grinliz::Vector2I PorchPos( int id ) const;
 
 	// internal: used by the LumosChitBag to track buildings.
 	MapSpatialComponent* nextBuilding;
