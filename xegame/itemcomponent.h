@@ -54,6 +54,7 @@ public:
 	GameItem* GetItem( int index=0 )	{ return (index < itemArr.Size()) ? itemArr[index] : 0; }
 	bool SwapWeapons();			// swap between the melee and ranged weapons
 	bool Swap( int i, int j );	// swap 2 slots 
+	static bool Swap2( ItemComponent* a, int aIndex, ItemComponent* b, int bIndex );	// swap 2 slots, in 2 (possibly) different inventoryComponents
 
 	// Gets the ranged weapon, optionally returns the trigger.
 	IRangedWeaponItem*	GetRangedWeapon( grinliz::Vector3F* trigger );
