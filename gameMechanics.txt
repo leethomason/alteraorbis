@@ -1,0 +1,12 @@
+Gold & Crystal
+--------------
+
+How is personal gold handled relative to vault gold?
+- what are you carrying, vs. what is stored?
+- what happens when you de-rez?
+- what is in the vaults?
+It's weird to have 2 values to keep track of. (Although "in the bank" vs. "in the wallet" is normal in RL). 
+And it's not really fun.
+Should show one total: assumed on player. Penalty when dropped?
+
+

@@ -1,16 +1,23 @@
 #include "tasklist.h"
+
+#include "../game/lumosmath.h"
 #include "../game/pathmovecomponent.h"
-#include "../xegame/chit.h"
-#include "../xegame/spatialcomponent.h"
 #include "../game/workqueue.h"
 #include "../game/aicomponent.h"
 #include "../game/worldmap.h"
 #include "../game/worldgrid.h"
 #include "../game/lumoschitbag.h"
 #include "../game/lumosgame.h"
+
+#include "../xegame/chit.h"
+#include "../xegame/spatialcomponent.h"
 #include "../xegame/itemcomponent.h"
 #include "../xegame/istringconst.h"
+
 #include "../scenes/characterscene.h"
+
+#include "../script/corescript.h"
+
 
 using namespace grinliz;
 using namespace ai;
@@ -208,6 +215,15 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta, U32 since )
 									vaultIC->AddToInventory( item );
 								}
 							}
+						}
+
+						// Move gold & crystal to the owner?
+						Vector2I sector = ToSector( pos2i );
+						CoreScript* cs = chitBag->GetCore( sector );
+						Chit* controller = cs->GetAttached( 0 );
+						if ( controller && controller->GetItemComponent() ) {
+							Wallet w = vaultIC->EmptyWallet();
+							controller->GetItemComponent()->AddGold( w );
 						}
 					}
 				}

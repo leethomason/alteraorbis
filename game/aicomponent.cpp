@@ -1454,7 +1454,7 @@ void AIComponent::FindRoutineTasks( const ComponentSet& thisComp )
 															sector, 
 															&thisComp.spatial->GetPosition2D(), 
 															LumosChitBag::RANDOM_NEAR );
-			if ( vault ) {
+			if ( vault && vault->GetItemComponent() && vault->GetItemComponent()->CanAddToInventory() ) {
 				MapSpatialComponent* msc = GET_SUB_COMPONENT( vault, SpatialComponent, MapSpatialComponent );
 				GLASSERT( msc );
 				if ( msc ) {

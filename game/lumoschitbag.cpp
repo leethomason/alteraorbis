@@ -40,6 +40,7 @@ using namespace grinliz;
 LumosChitBag::LumosChitBag() : engine(0), worldMap(0), lumosGame(0), sceneID(-1), sceneData(0)
 {
 	memset( mapSpatialHash, 0, sizeof(MapSpatialComponent*)*NUM_SECTORS*NUM_SECTORS);
+	memset( coreCache, 0, sizeof(Chit*)*NUM_SECTORS*NUM_SECTORS );
 }
 
 
@@ -606,24 +607,28 @@ CoreScript* LumosChitBag::GetCore( const grinliz::Vector2I& sector )
 {
 	const SectorData& sd = worldMap->GetSector( sector );
 	if ( sd.HasCore() ) {
-		Vector2I pos2i = sd.core;
-		Vector2F pos2 = { (float)pos2i.x+0.5f, (float)pos2i.y+0.5f };
+		int index = sector.y * NUM_SECTORS + sector.x;
+		if ( !coreCache[index] ) {
+			Vector2I pos2i = sd.core;
+			Vector2F pos2 = { (float)pos2i.x+0.5f, (float)pos2i.y+0.5f };
 
-		CChitArray array;
-		ItemNameFilter coreFilter( IStringConst::core );
-		QuerySpatialHash( &array, pos2, 0.1f, 0, &coreFilter );
-		GLASSERT( !array.Empty() );
+			CChitArray array;
+			ItemNameFilter coreFilter( IStringConst::core );
+			QuerySpatialHash( &array, pos2, 0.1f, 0, &coreFilter );
+			GLASSERT( !array.Empty() );
 
-		if ( !array.Empty() ) {
-			Chit* cc = array[0];
-			ScriptComponent* sc = cc->GetScriptComponent();
-			GLASSERT( sc );
-			IScript* script = sc->Script();
-			GLASSERT( script );
-			CoreScript* coreScript = script->ToCoreScript();
-			GLASSERT( coreScript );
-			return coreScript;
+			if ( !array.Empty() ) {
+				coreCache[index] = array[0];
+			}
 		}
+		Chit* cc = coreCache[index];
+		ScriptComponent* sc = cc->GetScriptComponent();
+		GLASSERT( sc );
+		IScript* script = sc->Script();
+		GLASSERT( script );
+		CoreScript* coreScript = script->ToCoreScript();
+		GLASSERT( coreScript );
+		return coreScript;
 	}
 	return 0;
 }

@@ -217,7 +217,9 @@ private:
 	grinliz::CDynArray<Chit*>	inUseArr;
 	grinliz::CDynArray<Chit*>	chitList;
 
-	MapSpatialComponent* mapSpatialHash[NUM_SECTORS*NUM_SECTORS];
+	MapSpatialComponent*	mapSpatialHash[NUM_SECTORS*NUM_SECTORS];
+	// Cores can't be destroyed, so we can cache them.
+	Chit*					coreCache[NUM_SECTORS*NUM_SECTORS];
 };
 
 

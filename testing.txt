@@ -1,0 +1,30 @@
+Testing:
+
+Player
+	- clear rock in neutral domains
+
+Workers
+	- pick up items 
+		WORKER
+		- deliver to vault
+		- stand
+		- place in vault
+		PLAYER
+		- go to vault
+		- check for items
+	- build
+		WORKER
+		- mixed set of orders: build, remove
+		- show construction particles
+		- don't build overlapping structures
+		- don't get stuck pathing
+
+Mantis
+	- heal
+		- after battle, go to plants
+	- collect items		
+
+Cyclops
+	- heal
+		- after battle, go to core
+	- collect items

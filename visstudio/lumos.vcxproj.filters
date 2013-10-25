@@ -639,6 +639,9 @@
     <ClInclude Include="..\ai\tasklist.h">
       <Filter>Source Files\ai</Filter>
     </ClInclude>
+    <ClInclude Include="..\game\lumosmath.h">
+      <Filter>Source Files\game</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\engine\sources.mk">

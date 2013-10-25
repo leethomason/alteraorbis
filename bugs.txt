@@ -51,6 +51,16 @@ x Add position fuzz to gold, crystal, and item drops
 			x support clear in neutral zones?
 		x Unclear tabs are tabs
 
+	x Loot
+		x proc gun
+		x item screen
+		x drop items
+		x pickup items
+		x weapon toggle / selection
+		x level up
+		x character screeen
+		x disable buttons on main ui when no game saved
+
 	- Econ
 		x inventory
 			x organize
@@ -81,42 +91,27 @@ x Add position fuzz to gold, crystal, and item drops
 		x names of things
 		x cyclops explosion seems off
 		x no item limit in inventory (but yes in inventory screen). need to check inventory capacity before pickup.
-
-		- vault:
+		x vault:
 			x workers pick stuff up, take to vault
-			- show vault gold / crystal
-			- ability of player to use vault. refactor UseBuilding() code out of the ai loop.
-			- citizens *don't* pick stuff up
-			- vaults should have higher item limit - UI issue
-			- vault behavior if overflow...
-		- forge / factors
+			x show vault gold / crystal
+			x ability of player to use vault. refactor UseBuilding() code out of the ai loop.
+			x vault behavior if overflow...
+
+		- porch positions incorrect
+		- forge / factory
+			- factory
 			- ability to use factory
 			- create weapons
+		- turret
 		- gold to build stuff
 		- item forging
-		- item market
 		- visitors - E - tech
-		- console
-			- important events
-			- important de-rez
 		- show grid travel dest
 		x rework item screen layout
 		- item destruction
-		- real health bars & check visibility
 		- player re-gen. at cores? in general?
-	    - exploring
-	      - xp for exploring!!
-	      - "domain theme" when you arrive
-		- build 2 height ice
 		- decent clear dragging
-		- visitors create energy, buildings consume energy
-		- factory
-		- turret
-		- power
 		- team colors
-		- balance battles
-		- history events
-		- winning names
 		- shield: xp from getting hit
 		- How do bases and adventuring play together?
 			- why do you quit adventuring to build a base?
@@ -125,23 +120,36 @@ x Add position fuzz to gold, crystal, and item drops
 			- tab to toggle weapons
 			- weapon swap button
 			- pause button
+
+	- Market
+		- denizens
+		- item market
+		- citizens *don't* pick stuff up in their own domain
+		- vault:
+			- item limit
+		- what to do with full vaults?
+
+	- Adventure
+		- drop cash or return to vault
+		- balance battles
+		- history events
 		- item history
 			- created 
 			x kills
+			- winning names
+		- console
+			- important events
+			- important de-rez
+		- real health bars & check visibility
+	    - exploring
+	      - xp for exploring!!
+	      - "domain theme" when you arrive
 
 	- Census
 		- check money
 		- greatest warrior, smith, weapons
 		- greatest monsters
-	- Loot
-		- proc gun
-		- item screen
-		- drop items
-		- pickup items
-		- weapon toggle / selection
-		x level up
-		- character screeen
-		x disable buttons on main ui when no game saved
+
 	- Fauna 2
 		- external constant file
 		- aging of stone
