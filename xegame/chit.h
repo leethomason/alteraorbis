@@ -162,6 +162,7 @@ public:
 
 	// Returns the item if this has the ItemComponent.
 	GameItem* GetItem();
+	const GameItem* GetItem() const	{ return const_cast<const GameItem*>(const_cast<Chit*>(this)->GetItem()); }
 	void QueueDelete();
 
 	// Send a message to the listeners, and every component

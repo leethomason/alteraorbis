@@ -150,8 +150,7 @@ int main( int argc, char **argv )
 
 	// Note that our output surface is rotated from the iPod.
 	SDL_Window *screen = SDL_CreateWindow(	"Altera",
-											SDL_WINDOWPOS_UNDEFINED,
-											SDL_WINDOWPOS_UNDEFINED,
+											50, 50,
 											screenWidth, screenHeight,
 											/*SDL_WINDOW_FULLSCREEN | */ SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE );
 	GLASSERT( screen );

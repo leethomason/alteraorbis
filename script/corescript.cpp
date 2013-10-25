@@ -131,7 +131,7 @@ bool CoreScript::AttachToCore( Chit* chit )
 		// FIXME: connect to energy system
 		int team = 0;
 		if ( chit && chit->GetItem() ) {
-			team = chit->GetItem()->primaryTeam;
+			team = chit->PrimaryTeam();
 		}
 
 		// FIXME: worker hack until economy is in place.

@@ -42,6 +42,8 @@ public:
 	static grinliz::IString crystal_blue;
 	static grinliz::IString crystal_violet;
 	
+	static grinliz::IString pave;
+	static grinliz::IString ice;
 	static grinliz::IString core;
 	static grinliz::IString vault;
 

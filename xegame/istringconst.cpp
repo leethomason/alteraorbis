@@ -17,6 +17,8 @@ IString IStringConst::crystal_green;
 IString IStringConst::crystal_red;
 IString IStringConst::crystal_blue;
 IString IStringConst::crystal_violet;
+IString IStringConst::pave;
+IString IStringConst::ice;
 IString IStringConst::core;
 IString IStringConst::vault;
 IString IStringConst::arachnoid;
@@ -49,6 +51,8 @@ void IStringConst::Init()
 	crystal_blue = StringPool::Intern( "crystal_blue", true );
 	crystal_violet = StringPool::Intern( "crystal_violet", true );
 	core = StringPool::Intern( "core", true );
+	pave = StringPool::Intern( "pave", true );
+	ice = StringPool::Intern( "ice", true );
 	vault = StringPool::Intern( "vault", true );
 	arachnoid = StringPool::Intern( "arachnoid", true );
 	mantis = StringPool::Intern( "mantis", true );

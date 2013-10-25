@@ -7,6 +7,7 @@
 class Chit;
 class WorkQueue;
 class WorldMap;
+class Engine;
 
 namespace ai {
 
@@ -59,6 +60,7 @@ public:
 		t.taskID = taskID;
 		return t;
 	}
+
 	static Task UseBuildingTask( int taskID=0 ) {
 		Task t;
 		t.action = TASK_USE_BUILDING;
@@ -73,15 +75,16 @@ public:
 		t.taskID = taskID;
 		return t;
 	}
+
 	static Task BuildTask( const grinliz::Vector2I& pos2i, const grinliz::IString& structure, int taskID=0 ) {
 		Task t;
 		t.action = TASK_BUILD;
 		t.pos2i = pos2i;
+		GLASSERT( !structure.empty() );
 		t.structure = structure;
 		t.taskID = taskID;
 		return t;
 	}
-
 
 	void Clear() {
 		action = 0;
@@ -101,11 +104,13 @@ public:
 };
 
 
+// A TaskList is a set of Tasks to do one thing. (Visit a Vault, for example.)
+// The WorkQueue is a list of all the TaskLists to do.
 class TaskList
 {
 public:
-	TaskList();
-	~TaskList();
+	TaskList( WorldMap* _map, Engine* _engine )	: worldMap(_map), engine(_engine) {}
+	~TaskList()	{}
 
 	grinliz::Vector2I Pos2I() const;
 	bool Empty() const { return taskList.Empty(); }
@@ -117,10 +122,12 @@ public:
 	void DoStanding( int time );
 
 	// WorkQueue is optional, but connects the tasks back to the queue.
-	void DoTasks( Chit* chit, WorkQueue* workQueue, WorldMap* map );
+	void DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta, U32 since );
 
 private:
 	grinliz::CDynArray<Task> taskList;
+	WorldMap* worldMap;
+	Engine* engine;
 };
 
 }; // namespace 'ai'

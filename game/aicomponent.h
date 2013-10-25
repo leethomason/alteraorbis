@@ -18,11 +18,8 @@
 
 #include "../xegame/component.h"
 #include "../xegame/cticker.h"
-#include "../xegame/chitbag.h"
 #include "../grinliz/glcontainer.h"
 #include "../grinliz/glrectangle.h"
-#include "../script/battlemechanics.h"
-#include "../ai/tasklist.h"
 
 class WorldMap;
 class Engine;
@@ -30,7 +27,9 @@ struct ComponentSet;
 struct SectorPort;
 class WorkQueue;
 
-
+namespace ai {
+	class TaskList;
+};
 // Combat AI: needs refactoring
 class AIComponent : public Component
 {
@@ -121,7 +120,7 @@ private:
 	void ThinkVisitor( const ComponentSet& thisComp );
 
 	void WorkQueueToTask(  const ComponentSet& thisComp );	// turn a work item into a task
-	void FlushTaskList( const ComponentSet& thisComp );		// moves tasks along, mark tasks completed, do special actions
+	void FlushTaskList( const ComponentSet& thisComp, U32 delta, U32 since );		// moves tasks along, mark tasks completed, do special actions
 	void FindRoutineTasks( const ComponentSet& );	// do maintenance, etc.
 
 	grinliz::Vector2F GetWanderOrigin( const ComponentSet& thisComp ) const;
@@ -188,7 +187,7 @@ private:
 
 	grinliz::CArray<int, MAX_TRACK> friendList;
 	grinliz::CArray<int, MAX_TRACK> enemyList;
-	ai::TaskList taskList;
+	ai::TaskList* taskList;
 };
 
 

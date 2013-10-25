@@ -39,7 +39,7 @@ int WorkQueue::CalcTaskSize( const IString& structure )
 {
 	int size = 1;
 	if ( !structure.empty() ) {
-		if ( structure == "pave" ) {
+		if ( structure == IStringConst::pave || structure == IStringConst::ice ) {
 			size = 1;
 		}
 		else {
@@ -55,7 +55,7 @@ void WorkQueue::AddImage( QueueItem* item )
 {
 	const char* name = 0;
 	Vector3F pos = { 0, 0, 0 };
-	int size = CalcTaskSize( *item );
+	int size = CalcTaskSize( item->structure );
 
 	if ( item->action == CLEAR ) {
 		const WorldGrid& wg = worldMap->GetWorldGrid( item->pos.x, item->pos.y );
@@ -184,6 +184,7 @@ void WorkQueue::AddPave( const Vector2I& pos2i, int pave )
 
 void WorkQueue::AddBuild( const grinliz::Vector2I& pos2i, IString structure )
 {
+	GLASSERT( !structure.empty() );
 	if ( pos2i.x / SECTOR_SIZE == sector.x && pos2i.y / SECTOR_SIZE == sector.y ) {
 		// okay!
 	}
@@ -325,7 +326,7 @@ void WorkQueue::RemoveItem( int index )
 
 bool WorkQueue::TaskCanComplete( const WorkQueue::QueueItem& item )
 {
-	return WorkQueue::TaskCanComplete( worldMap, chitBag, item.pos, item.action != CLEAR, CalcTaskSize( item ));
+	return WorkQueue::TaskCanComplete( worldMap, chitBag, item.pos, item.action != CLEAR, CalcTaskSize( item.structure ));
 }
 
 

@@ -33,7 +33,7 @@ class GameItem;
 class CharacterSceneData : public SceneData
 {
 public:
-	CharacterSceneData( ItemComponent* ic, ItemComponent* ic2=0 ) : SceneData(), itemComponent(ic), vault(ic2) {}
+	CharacterSceneData( ItemComponent* ic, ItemComponent* ic2=0 ) : SceneData(), itemComponent(ic), vault(ic2) { GLASSERT(ic); }
 	ItemComponent*	itemComponent;
 	ItemComponent*	vault;				// vault, chest, storage, etc.				
 };

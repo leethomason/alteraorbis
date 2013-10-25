@@ -38,7 +38,6 @@ public:
 	enum {
 		NO_ACTION,
 		CLEAR,
-		//PAVE,
 		BUILD,
 		NUM_ACTIONS,
 	};
@@ -59,7 +58,6 @@ public:
 	void Serialize( XStream* xs );
 	void AddBuild( const grinliz::Vector2I& pos, grinliz::IString structure );	// add an action to do
 	void AddClear( const grinliz::Vector2I& pos );
-	//void AddPave( const grinliz::Vector2I& pos, int paveID );
 	void Remove( const grinliz::Vector2I& pos );
 	
 	const QueueItem*	Find( const grinliz::Vector2I& chitPos );	// find something to do. don't hold pointer!

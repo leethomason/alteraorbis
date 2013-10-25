@@ -42,7 +42,7 @@ void TaskList::DoStanding( int time )
 }
 
 
-void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, WorldMap* map )
+void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta, U32 since )
 {
 	if ( taskList.Empty() ) return;
 	PathMoveComponent* pmc		= GET_SUB_COMPONENT( chit, MoveComponent, PathMoveComponent );
@@ -91,13 +91,16 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, WorldMap* map )
 
 	case Task::TASK_STAND:
 		if ( pmc->Stopped() ) {
-			// DoStand will decrement timer.
+			task->timer -= (int)since;
 			if ( task->timer <= 0 ) {
 				taskList.Remove(0);
 			}
-		}
-		else {
-			ai->Stand();
+			if ( taskList.Size() >= 2 ) {
+				int action = taskList[1].action;
+				if ( action == Task::TASK_BUILD || action == Task::TASK_REMOVE ) {
+					int debug=1;
+				}
+			}
 		}
 		break;
 
@@ -106,12 +109,12 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, WorldMap* map )
 			//GLASSERT( workQueue && queueItem );
 			//if ( workQueue->TaskCanComplete( *queueItem )) {
 			//worldMap, chitBag, item.pos, item.action != CLEAR, CalcTaskSize( item )
-			if ( WorkQueue::TaskCanComplete( map, chitBag, task->pos2i, false, WorkQueue::CalcTaskSize( task->structure ))) {
-				const WorldGrid& wg = map->GetWorldGrid( task->pos2i.x, task->pos2i.y );
+			if ( WorkQueue::TaskCanComplete( worldMap, chitBag, task->pos2i, false, WorkQueue::CalcTaskSize( task->structure ))) {
+				const WorldGrid& wg = worldMap->GetWorldGrid( task->pos2i.x, task->pos2i.y );
 				if ( wg.RockHeight() ) {
 					DamageDesc dd( 10000, 0 );	// FIXME need constant
 					Vector3I voxel = { task->pos2i.x, 0, task->pos2i.y };
-					map->VoxelHit( voxel, dd );
+					worldMap->VoxelHit( voxel, dd );
 				}
 				else {
 					Chit* found = chitBag->QueryRemovable( task->pos2i );
@@ -127,7 +130,7 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, WorldMap* map )
 					}
 				}
 				if ( wg.Pave() ) {
-					map->SetPave( task->pos2i.x, task->pos2i.y, 0 );
+					worldMap->SetPave( task->pos2i.x, task->pos2i.y, 0 );
 				}
 				taskList.Remove(0);
 			}
@@ -142,18 +145,15 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, WorldMap* map )
 			// IsPassable (isLand, noRocks)
 			// No plants
 			// No buildings
-			if ( WorkQueue::TaskCanComplete( map, chitBag, task->pos2i, false, WorkQueue::CalcTaskSize( task->structure ))) {
-			//if ( workQueue->TaskCanComplete( *queueItem )) {
-				if ( task->structure.empty() ) {
-					map->SetRock( task->pos2i.x, task->pos2i.y, 1, false, WorldGrid::ICE );
+			if ( WorkQueue::TaskCanComplete( worldMap, chitBag, task->pos2i, true, WorkQueue::CalcTaskSize( task->structure ))) {
+				if ( task->structure == IStringConst::ice ) {
+					worldMap->SetRock( task->pos2i.x, task->pos2i.y, 1, false, WorldGrid::ICE );
+				}
+				else if ( task->structure == IStringConst::pave ) {
+					worldMap->SetPave( task->pos2i.x, task->pos2i.y, chit->PrimaryTeam()%3+1 );
 				}
 				else {
-					if ( task->structure == "pave" ) {
-						map->SetPave( task->pos2i.x, task->pos2i.y, chit->PrimaryTeam()%3+1 );
-					}
-					else {
-						chitBag->NewBuilding( task->pos2i, task->structure.c_str(), chit->PrimaryTeam() );
-					}
+					chitBag->NewBuilding( task->pos2i, task->structure.c_str(), chit->PrimaryTeam() );
 				}
 				taskList.Remove(0);
 			}

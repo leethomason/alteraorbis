@@ -488,7 +488,7 @@ grinliz::IString GameScene::BuildActiveInfo( int* size )
 		"", // clear
 		"pave",
 		"",	// rotate
-		"",	// ice
+		"ice",	// ice
 		"kiosk.n",
 		"kiosk.m",
 		"kiosk.c",
@@ -497,9 +497,16 @@ grinliz::IString GameScene::BuildActiveInfo( int* size )
 		"factory",
 	};
 	IString str;
+	// Handle "pave" and "ice" which are 
+	// non-items. (They are world voxels, not
+	// chits.)
 	if ( buildActive == PAVE ) {
 		if ( size ) *size = 1;
-		str = StringPool::Intern( "pave" );
+		str = IStringConst::pave;
+	}
+	else if ( buildActive == BUILD_ICE ) {
+		if ( size ) *size = 1;
+		str = IStringConst::ice;
 	}
 	else if ( *name[buildActive] ) {
 		str = StringPool::Intern( name[buildActive], true );
@@ -573,13 +580,6 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 					}
 #endif
 				}
-				/*
-				else if ( buildActive == PAVE ) {
-					Chit* player = sim->GetPlayerChit();
-					if ( player ) {
-						wq->AddPave( plane2i, player->GetItem()->primaryTeam % 3+1 );
-					}
-				}*/
 				else if ( buildActive == NO_BUILD ) {
 #ifdef USE_MOUSE_MOVE_SELECTION
 					wq->Remove( plane2i );
@@ -807,7 +807,6 @@ void GameScene::DoDestTapped( const Vector2F& _dest )
 		Chit* chit = sim->GetPlayerChit();
 		if ( chit ) {
 			AIComponent* ai = chit->GetAIComponent();
-			GLASSERT( ai );
 			if ( ai ) {
 				Vector2F pos = chit->GetSpatialComponent()->GetPosition2D();
 				// Is this grid travel or normal travel?
@@ -1044,6 +1043,16 @@ void GameScene::DoTick( U32 delta )
 	ejectButton.SetVisible( coreMode != 0 );
 
 	sim->GetEngine()->RestrictCamera( 0 );
+
+	// The game will open scenes - say the CharacterScene for the
+	// Vault - in response to player actions. Look for them here.
+	if ( !game->IsScenePushed() ) {
+		int id=0;
+		SceneData* data=0;
+		if ( sim->GetChitBag()->PopScene( &id, &data )) {
+			game->PushScene( id, data );
+		}
+	}
 }
 
 

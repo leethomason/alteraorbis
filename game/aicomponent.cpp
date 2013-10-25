@@ -49,6 +49,8 @@
 #include "../Shiny/include/Shiny.h"
 #include <climits>
 
+#include "../ai/tasklist.h"
+
 using namespace grinliz;
 using namespace ai;
 
@@ -84,11 +86,13 @@ AIComponent::AIComponent( Engine* _engine, WorldMap* _map )
 	fullSectorAware = false;
 	debugFlag = false;
 	visitorIndex = -1;
+	taskList = 0;
 }
 
 
 AIComponent::~AIComponent()
 {
+	delete taskList;
 }
 
 
@@ -617,13 +621,14 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 since )
 		}
 	}
 	
+	/*
 	if ( taskList.Standing() ) {
 		const Vector2I& pos2i = taskList.Pos2I();
 		Vector3F pos = { (float)pos2i.x+0.5f, 0.0f, (float)pos2i.y+0.5f };
 		engine->particleSystem->EmitPD( "construction", pos, V3F_UP, 30 );	// FIXME: standard delta constant
 		taskList.DoStanding( since );
 		return true;	// keep standing
-	}
+	}*/
 	return false;
 }
 
@@ -683,10 +688,23 @@ bool AIComponent::Move( const SectorPort& sp, bool focused )
 }
 
 
+void AIComponent::Stand()
+{
+	if ( aiMode != BATTLE_MODE ) {
+		PathMoveComponent* pmc    = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
+		if ( pmc ) {
+			pmc->Stop();
+		}
+		currentAction = STAND;
+	}
+}
+
+
 void AIComponent::Pickup( Chit* item )
 {
-	taskList.Push( Task::MoveTask( item->GetSpatialComponent()->GetPosition2D(), 0 ));
-	taskList.Push( Task::PickupTask( item->ID(), 0 ));
+	if ( !taskList ) taskList = new TaskList( map, engine );
+	taskList->Push( Task::MoveTask( item->GetSpatialComponent()->GetPosition2D(), 0 ));
+	taskList->Push( Task::PickupTask( item->ID(), 0 ));
 }
 
 
@@ -742,10 +760,11 @@ bool AIComponent::RockBreak( const grinliz::Vector2I& rock )
 		Vector2F end = { 0, 0 };
 		float cost = 0;
 		if ( map->CalcPathBeside( thisComp.spatial->GetPosition2D(), dest, &end, &cost )) {
-			taskList.Clear();
-			taskList.Push( Task::MoveTask( end, 0 ));
-			taskList.Push( Task::StandTask( 1000, 0 ));
-			taskList.Push( Task::RemoveTask( rock, 0 ));
+			if ( !taskList ) taskList = new TaskList( map, engine );
+			taskList->Clear();
+			taskList->Push( Task::MoveTask( end, 0 ));
+			taskList->Push( Task::StandTask( 1000, 0 ));
+			taskList->Push( Task::RemoveTask( rock, 0 ));
 		}
 	}
 	return true;
@@ -1145,8 +1164,9 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 					// Pickup and gold use different techniques. (Because of player UI. 
 					// Always want gold - not all items.)
 					if ( loot.Accept( chitArr[i] )) {
-						taskList.Push( Task::MoveTask( goldPos, 0 ));
-						taskList.Push( Task::PickupTask( chitArr[i]->ID(), 0 ));
+						if ( !taskList ) taskList = new TaskList( map, engine );
+						taskList->Push( Task::MoveTask( goldPos, 0 ));
+						taskList->Push( Task::PickupTask( chitArr[i]->ID(), 0 ));
 						return;
 					}
 					else {
@@ -1194,8 +1214,9 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 	}
 	if ( !dest.IsZero() ) {
 		Vector2I dest2i = { (int)dest.x, (int)dest.y };
-		taskList.Push( Task::MoveTask( dest2i ));
-		taskList.Push( Task::StandTask( STAND_TIME_WHEN_WANDERING ));
+		if ( !taskList ) taskList = new TaskList( map, engine );
+		taskList->Push( Task::MoveTask( dest2i ));
+		taskList->Push( Task::StandTask( STAND_TIME_WHEN_WANDERING ));
 	}
 }
 
@@ -1406,17 +1427,19 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 }
 
 
-void AIComponent::FlushTaskList( const ComponentSet& thisComp )
+void AIComponent::FlushTaskList( const ComponentSet& thisComp, U32 delta, U32 since )
 {
-	Vector2I pos2i    = thisComp.spatial->GetPosition2DI();
-	Vector2I sector   = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
+	if ( taskList ) {
+		Vector2I pos2i    = thisComp.spatial->GetPosition2DI();
+		Vector2I sector   = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
 
-	WorkQueue* workQueue = 0;
-	CoreScript* coreScript = GetChitBag()->ToLumos()->GetCore( sector );
-	if ( coreScript ) {
-		workQueue = coreScript->GetWorkQueue();
+		WorkQueue* workQueue = 0;
+		CoreScript* coreScript = GetChitBag()->ToLumos()->GetCore( sector );
+		if ( coreScript ) {
+			workQueue = coreScript->GetWorkQueue();
+		}
+		taskList->DoTasks( parentChit, workQueue, delta, since );
 	}
-	taskList.DoTasks( parentChit, workQueue, map );
 }
 
 
@@ -1436,8 +1459,9 @@ void AIComponent::FindRoutineTasks( const ComponentSet& thisComp )
 				if ( msc ) {
 					Vector2I porch = msc->PorchPos();
 
-					taskList.Push( Task::MoveTask( porch, 0 ));
-					taskList.Push( Task::UseBuildingTask( 0 ));
+					if ( !taskList ) taskList = new TaskList( map, engine );
+					taskList->Push( Task::MoveTask( porch, 0 ));
+					taskList->Push( Task::UseBuildingTask( 0 ));
 				}
 			}
 		}
@@ -1470,42 +1494,22 @@ void AIComponent::WorkQueueToTask(  const ComponentSet& thisComp )
 					Vector2F end;
 					float cost = 0;
 					if ( map->CalcPathBeside( thisComp.spatial->GetPosition2D(), dest, &end, &cost )) {
-						
-						taskList.Push( Task::MoveTask( end, item->taskID ));
-						taskList.Push( Task::StandTask( 1000, item->taskID ));
-						taskList.Push( Task::RemoveTask( item->pos, item->taskID ));
+						if ( !taskList ) taskList = new TaskList( map, engine );
+						taskList->Push( Task::MoveTask( end, item->taskID ));
+						taskList->Push( Task::StandTask( 1000, item->taskID ));
+						taskList->Push( Task::RemoveTask( item->pos, item->taskID ));
 					}
 				}
 				break;
 
 			case WorkQueue::BUILD:
 				{
-					taskList.Push( Task::MoveTask( item->pos, item->taskID ));
-					taskList.Push( Task::StandTask( 1000, item->taskID ));
-					taskList.Push( Task::BuildTask( item->pos, item->structure, item->taskID ));
+					if ( !taskList ) taskList = new TaskList( map, engine );
+					taskList->Push( Task::MoveTask( item->pos, item->taskID ));
+					taskList->Push( Task::StandTask( 1000, item->taskID ));
+					taskList->Push( Task::BuildTask( item->pos, item->structure, item->taskID ));
 				}
 				break;
-
-				/*
-			case WorkQueue::PAVE:
-				{
-					Vector2F dest = { (float)item->pos.x + 0.5f, (float)item->pos.y + 0.5f };
-					if ( WorkQueue::TaskCanComplete( map, GetChitBag()->ToLumos(), item->pos, false, 1 )) {
-						Vector2F end;
-						float cost = 0;
-						if ( map->CalcPathBeside( thisComp.spatial->GetPosition2D(), dest, &end, &cost )) {
-						
-							taskList.Push( Task::MoveTask( end, item->taskID ));
-							taskList.Push( Task::StandTask( 1000, item->taskID ));
-							taskList.Push( Task::RemoveTask( item->pos, item->taskID ));
-						}
-					}
-					taskList.Push( Task::MoveTask( dest, item->taskID ));
-					taskList.Push( Task::StandTask( 1000, item->taskID ));
-					taskList.Push( Task::PaveTask( item->pos, item->pave, item->taskID ));
-				}
-				break;
-				*/
 
 			default:
 				GLASSERT( 0 );
@@ -1568,7 +1572,9 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 	if ( aiMode != BATTLE_MODE && enemyList.Size() ) {
 		aiMode = BATTLE_MODE;
 		currentAction = 0;
-		taskList.Clear();
+		if ( taskList ) {
+			taskList->Clear();
+		}
 		if ( debugFlag ) {
 			GLOUTPUT(( "ID=%d Mode to Battle\n", thisComp.chit->ID() ));
 		}
@@ -1584,17 +1590,17 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 	// Is there work to do?
 	if (    aiMode == NORMAL_MODE 
 		 && (thisComp.item->flags & GameItem::AI_DOES_WORK)
-		 && taskList.Empty() ) 
+		 && (!taskList || taskList->Empty()) ) 
 	{
 		WorkQueueToTask( thisComp );
-		if ( taskList.Empty() ) {
+		if ( !taskList || taskList->Empty() ) {
 			FindRoutineTasks( thisComp );
 		}
 	}
 
-	if ( aiMode == NORMAL_MODE && !taskList.Empty() ) {
-		FlushTaskList( thisComp );
-		if ( taskList.Empty() ) {
+	if ( aiMode == NORMAL_MODE && taskList && !taskList->Empty() ) {
+		FlushTaskList( thisComp, deltaTime, timeSince );
+		if ( taskList->Empty() ) {
 			rethink = 0;
 		}
 	}
@@ -1699,6 +1705,17 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 				}
 			}
 		}
+		if ( chit->PlayerControlled()) {
+			Chit* building = GetLumosChitBag()->QueryPorch( thisComp.spatial->GetPosition2DI() );
+			if ( building && building->GetItem() ) {
+				IString name = building->GetItem()->name;
+				ItemComponent* ic = parentChit->GetItemComponent();
+				if ( name == IStringConst::vault && ic ) {
+					GetLumosChitBag()->PushScene( LumosGame::SCENE_CHARACTER, 
+								new CharacterSceneData( ic, building->GetItemComponent() ));
+				}
+			}
+		}
 		break;
 
 	case ChitMsg::PATHMOVE_DESTINATION_BLOCKED:
@@ -1714,7 +1731,9 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 				aiMode = NORMAL_MODE;
 			}
 		}
-		taskList.Clear();
+		if ( taskList ) {
+			taskList->Clear();
+		}
 		{
 			PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
 			if ( pmc ) {
