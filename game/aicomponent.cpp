@@ -25,6 +25,11 @@
 #include "workqueue.h"
 #include "team.h"
 
+// move to tasklist file
+#include "lumoschitbag.h"
+#include "lumosgame.h"
+#include "../scenes/characterscene.h"
+
 #include "../script/battlemechanics.h"
 #include "../script/plantscript.h"
 #include "../script/worldgen.h"
@@ -45,6 +50,7 @@
 #include <climits>
 
 using namespace grinliz;
+using namespace ai;
 
 static const float	NORMAL_AWARENESS			= 10.0f;
 static const float	LOOSE_AWARENESS				= 16.0f;
@@ -611,11 +617,11 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 since )
 		}
 	}
 	
-	if ( !taskList.Empty() && taskList[0].action == STAND ) {
-		const Vector2I& pos2i = taskList[0].pos2i;
+	if ( taskList.Standing() ) {
+		const Vector2I& pos2i = taskList.Pos2I();
 		Vector3F pos = { (float)pos2i.x+0.5f, 0.0f, (float)pos2i.y+0.5f };
 		engine->particleSystem->EmitPD( "construction", pos, V3F_UP, 30 );	// FIXME: standard delta constant
-		taskList[0].timer -= since;
+		taskList.DoStanding( since );
 		return true;	// keep standing
 	}
 	return false;
@@ -1402,185 +1408,15 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 
 void AIComponent::FlushTaskList( const ComponentSet& thisComp )
 {
-	if ( taskList.Empty() ) return;
-	PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
-	if ( !pmc ) {
-		taskList.Clear();
-		return;
-	}
-
-	Task* task = &taskList[0];
-	Vector2I pos2i = thisComp.spatial->GetPosition2DI();
-	Vector2F taskPos2 = { (float)task->pos2i.x + 0.5f, (float)task->pos2i.y + 0.5f };
-	Vector3F taskPos3 = { taskPos2.x, 0, taskPos2.y };
-	Vector2I sector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
+	Vector2I pos2i    = thisComp.spatial->GetPosition2DI();
+	Vector2I sector   = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
 
 	WorkQueue* workQueue = 0;
-	const WorkQueue::QueueItem* queueItem = 0;
-
-	// If this is a task associated with a work item, make
-	// sure that work item still exists.
-	if ( task->taskID ) {
-		CoreScript* coreScript = GetChitBag()->ToLumos()->GetCore( sector );
-		if ( coreScript ) {
-			workQueue = coreScript->GetWorkQueue();
-			if ( workQueue ) {
-				queueItem = workQueue->GetJobByTaskID( task->taskID );
-			}
-		}
-		if ( !queueItem ) {
-			// This task it attached to a work item that expired.
-			taskList.Clear();
-			return;
-		}
+	CoreScript* coreScript = GetChitBag()->ToLumos()->GetCore( sector );
+	if ( coreScript ) {
+		workQueue = coreScript->GetWorkQueue();
 	}
-
-	switch ( task->action ) {
-	case MOVE:
-		if ( pmc->Stopped() ) {
-			if ( pos2i == task->pos2i ) {
-				// arrived!
-				taskList.PopFront();
-			}
-			else {
-				Vector2F dest = { (float)task->pos2i.x + 0.5f, (float)task->pos2i.y + 0.5f };
-				Move( dest, false );
-			}
-		}
-		break;
-
-	case MELEE:
-	case SHOOT:
-	case WANDER:
-		GLASSERT( 0 );
-		taskList.PopFront();
-		break;
-
-	case STAND:
-		if ( pmc->Stopped() ) {
-			currentAction = STAND;
-			// DoStand will decrement timer.
-			if ( task->timer <= 0 ) {
-				taskList.PopFront();
-			}
-		}
-		break;
-
-	case TASK_REMOVE:
-		{
-			//GLASSERT( workQueue && queueItem );
-			//if ( workQueue->TaskCanComplete( *queueItem )) {
-			if ( workQueue->TaskCanComplete( map, GetLumosChitBag(), task->pos2i, false, 1 )) {
-				const WorldGrid& wg = map->GetWorldGrid( task->pos2i.x, task->pos2i.y );
-				if ( wg.RockHeight() ) {
-					DamageDesc dd( 10000, 0 );	// FIXME need constant
-					Vector3I voxel = { task->pos2i.x, 0, task->pos2i.y };
-					map->VoxelHit( voxel, dd );
-				}
-				else {
-					Chit* found = GetLumosChitBag()->QueryRemovable( task->pos2i );
-					if ( found ) {
-						DamageDesc dd( 10000, 0 );
-						ChitDamageInfo info( dd );
-						info.originID = 0;
-						info.awardXP  = false;
-						info.isMelee  = true;
-						info.isExplosion = false;
-						info.originOfImpact = thisComp.spatial->GetPosition();
-						found->SendMessage( ChitMsg( ChitMsg::CHIT_DAMAGE, 0, &info ), 0 );
-					}
-				}
-				if ( wg.Pave() ) {
-					map->SetPave( task->pos2i.x, task->pos2i.y, 0 );
-				}
-				taskList.PopFront();
-			}
-			else {
-				taskList.Clear();
-			}
-		}
-		break;
-
-	case TASK_BUILD:
-		{
-			// IsPassable (isLand, noRocks)
-			// No plants
-			// No buildings
-			GLASSERT( workQueue && queueItem );
-			if ( workQueue->TaskCanComplete( *queueItem )) {
-				if ( task->structure.empty() ) {
-					map->SetRock( task->pos2i.x, task->pos2i.y, 1, false, WorldGrid::ICE );
-				}
-				else {
-					if ( task->structure == "pave" ) {
-						map->SetPave( task->pos2i.x, task->pos2i.y, thisComp.item->primaryTeam%3+1 );
-					}
-					else {
-						GetChitBag()->ToLumos()->NewBuilding( task->pos2i, task->structure.c_str(), thisComp.item->primaryTeam );
-					}
-				}
-				taskList.PopFront();
-			}
-			else {
-				// Plan has gone bust:
-				taskList.Clear();
-			}
-		}
-		break;
-
-	case TASK_PICKUP:
-		{
-			int chitID = task->data;
-			Chit* itemChit = GetChitBag()->GetChit( chitID );
-			if (    itemChit 
-				 && itemChit->GetSpatialComponent()
-				 && itemChit->GetSpatialComponent()->GetPosition2DI() == parentChit->GetSpatialComponent()->GetPosition2DI()
-				 && itemChit->GetItemComponent()->NumItems() == 1 )	// doesn't have sub-items / intrinsic
-			{
-				if ( parentChit->GetItemComponent()->CanAddToInventory() ) {
-					ItemComponent* ic = itemChit->GetItemComponent();
-					itemChit->Remove( ic );
-					parentChit->GetItemComponent()->AddToInventory( ic );
-					GetChitBag()->DeleteChit( itemChit );
-				}
-			}
-			taskList.PopFront();
-		}
-		break;
-
-	case TASK_USE_BUILDING:
-		{
-			Chit* building = GetLumosChitBag()->QueryPorch( pos2i );
-			if ( building ) {
-				// Workers:
-				if ( thisComp.item->flags & GameItem::AI_DOES_WORK ) {
-					if ( building->GetItem()->name == IStringConst::vault ) {
-						ItemComponent* vaultIC = building->GetItemComponent();
-						GLASSERT( vaultIC );
-						Wallet w = thisComp.itemComponent->EmptyWallet();
-						vaultIC->AddGold( w );
-
-						// Put everything in the vault.
-						for( int i=1; i<thisComp.itemComponent->NumItems(); ++i ) {
-							if ( vaultIC->CanAddToInventory() ) {
-								GameItem* item = thisComp.itemComponent->RemoveFromInventory(i);
-								if ( item ) {
-									vaultIC->AddToInventory( item );
-								}
-							}
-						}
-					}
-				}
-			}
-			taskList.PopFront();
-		}
-		break;
-
-	default:
-		GLASSERT( 0 );
-		break;
-
-	}
+	taskList.DoTasks( parentChit, workQueue, map );
 }
 
 

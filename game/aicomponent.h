@@ -22,6 +22,7 @@
 #include "../grinliz/glcontainer.h"
 #include "../grinliz/glrectangle.h"
 #include "../script/battlemechanics.h"
+#include "../ai/tasklist.h"
 
 class WorldMap;
 class Engine;
@@ -63,6 +64,7 @@ public:
 	// Returns true if the move is possible.
 	bool Move( const SectorPort& sectorport, bool focused );
 	void Pickup( Chit* item );
+	void Stand();
 
 	void Target( Chit* chit, bool focused );
 	bool RockBreak( const grinliz::Vector2I& pos );
@@ -86,7 +88,6 @@ public:
 		NUM_MODES
 	};
 
-private:
 	// Secondary AI modes.
 	enum {
 		NO_ACTION,
@@ -97,95 +98,11 @@ private:
 		WANDER,
 		STAND,			// used to eat plants, reload
 		NUM_ACTIONS,
-
-		// These are special events:
-		TASK_REMOVE,
-		TASK_BUILD,
-		TASK_PICKUP,
-		TASK_USE_BUILDING
 	};
 
+private:
 	enum {
 		MAX_TRACK = 8,
-	};
-
-	/*	Attempt to put in a meta-language:
-		Worker:		MOVE x,y
-					STAND 1000 x,y	NOTE: x,y is of *task* not where standing
-					REMOVE rock
-	*/
-	struct Task
-	{
-		Task() { Clear(); }
-		static Task MoveTask( const grinliz::Vector2F& pos2, int taskID=0 ) 
-		{
-			grinliz::Vector2I pos2i = { (int)pos2.x, (int)pos2.y };
-			return MoveTask( pos2i, taskID );
-		}
-
-		static Task MoveTask( const grinliz::Vector2I& pos2i, int taskID=0 )
-		{
-			Task t;
-			t.action = MOVE;
-			t.pos2i  = pos2i;
-			t.taskID = taskID;
-			return t;
-		}
-		static Task StandTask( int time, int taskID=0 ) {
-			Task t;
-			t.action = STAND;
-			t.timer = time;
-			t.taskID = taskID;
-			return t;
-		}
-		
-		// Assumes move first.
-		static Task PickupTask( int chitID, int taskID=0 ) {
-			Task t;
-			t.action = TASK_PICKUP;
-			t.data = chitID;
-			t.taskID = taskID;
-			return t;
-		}
-		static Task UseBuildingTask( int taskID=0 ) {
-			Task t;
-			t.action = TASK_USE_BUILDING;
-			t.taskID = taskID;
-			return t;
-		}
-
-		static Task RemoveTask( const grinliz::Vector2I& pos2i, int taskID=0 ) {
-			Task t;
-			t.action = TASK_REMOVE;
-			t.pos2i = pos2i;
-			t.taskID = taskID;
-			return t;
-		}
-		static Task BuildTask( const grinliz::Vector2I& pos2i, const grinliz::IString& structure, int taskID=0 ) {
-			Task t;
-			t.action = TASK_BUILD;
-			t.pos2i = pos2i;
-			t.structure = structure;
-			t.taskID = taskID;
-			return t;
-		}
-
-
-		void Clear() {
-			action = 0;
-			pos2i.Zero();
-			timer = 0;
-			data = 0;
-			structure = grinliz::IString();
-			taskID = 0;
-		}
-
-		int					action;		// move, stand, etc.
-		grinliz::Vector2I	pos2i;
-		int					timer;
-		int					data;
-		grinliz::IString	structure;
-		int					taskID;		// if !0, then attached to a workqueue task
 	};
 
 	void GetFriendEnemyLists();
@@ -271,7 +188,7 @@ private:
 
 	grinliz::CArray<int, MAX_TRACK> friendList;
 	grinliz::CArray<int, MAX_TRACK> enemyList;
-	grinliz::CArray< Task, 4 >		taskList;
+	ai::TaskList taskList;
 };
 
 

@@ -35,15 +35,15 @@ WorkQueue::~WorkQueue()
 }
 
 
-int WorkQueue::CalcTaskSize( const QueueItem& item )
+int WorkQueue::CalcTaskSize( const IString& structure )
 {
 	int size = 1;
-	if ( !item.structure.empty() ) {
-		if ( item.structure == "pave" ) {
+	if ( !structure.empty() ) {
+		if ( structure == "pave" ) {
 			size = 1;
 		}
 		else {
-			const GameItem& gameItem = ItemDefDB::Instance()->Get( item.structure.c_str() );
+			const GameItem& gameItem = ItemDefDB::Instance()->Get( structure.c_str() );
 			gameItem.GetValue( "size", &size );
 		}
 	}

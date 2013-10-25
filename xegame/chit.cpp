@@ -353,6 +353,15 @@ void Chit::DebugStr( GLString* str )
 }
 
 
+int Chit::PrimaryTeam() const
+{
+	const GameItem* item = GetItem();
+	if ( item ) 
+		return item->primaryTeam;
+	return 0;
+}
+
+
 
 ComponentSet::ComponentSet( Chit* _chit, int bits )
 {

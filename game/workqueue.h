@@ -50,7 +50,6 @@ public:
 
 		int					action;		// CLEAR_GRID, etc.
 		grinliz::IString	structure;	// what to construct
-		//int					pave;
 		grinliz::Vector2I	pos;
 		int					assigned;	// id of worker assigned this task.			
 		int					taskID;		// id # of this task
@@ -79,13 +78,13 @@ public:
 									LumosChitBag* chitBag,
 									const grinliz::Vector2I& pos, bool build, int size );
 	bool TaskCanComplete( const WorkQueue::QueueItem& item );
+	static int  CalcTaskSize( const grinliz::IString& structure );
 
 private:
 
 	void AddImage( QueueItem* item );
 	void RemoveImage( QueueItem* item );
 	void RemoveItem( int index );
-	int  CalcTaskSize( const QueueItem& item );
 	void SendNotification( const grinliz::Vector2I& pos );
 
 	Engine*				engine;

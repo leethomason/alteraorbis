@@ -84,6 +84,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\ai\tasklist.cpp" />
     <ClCompile Include="..\engine\animation.cpp" />
     <ClCompile Include="..\engine\bolt.cpp" />
     <ClCompile Include="..\engine\camera.cpp" />
@@ -176,6 +177,7 @@
     <ClCompile Include="..\xegame\ufosound.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\ai\tasklist.h" />
     <ClInclude Include="..\engine\animation.h" />
     <ClInclude Include="..\engine\bolt.h" />
     <ClInclude Include="..\engine\camera.h" />
