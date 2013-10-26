@@ -49,8 +49,7 @@ public:
 	int Mode() const			{ return mode; }
 	bool Building() const		{ return building; }
 
-	// Assumes there is a porch; to actually query,
-	// use the 'porch' property on the GameItem
+	// Returns the porch, or an empty rectangle if there is none.
 	grinliz::Rectangle2I PorchPos() const;
 	// The same, but a single location for a given chitID
 	grinliz::Vector2I PorchPos( int id ) const;

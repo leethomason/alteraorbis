@@ -14,6 +14,8 @@
 #include "gridmovecomponent.h"
 #include "team.h"
 #include "visitorstatecomponent.h"
+#include "lumosmath.h"
+
 #include "../scenes/characterscene.h"
 
 #include "../xegame/rendercomponent.h"
@@ -110,7 +112,8 @@ void LumosChitBag::RemoveFromBuildingHash( MapSpatialComponent* chit, int x, int
 Chit* LumosChitBag::FindBuilding(	const grinliz::IString&  name, 
 									const grinliz::Vector2I& sector, 
 									const grinliz::Vector2F* pos, 
-									int flags )
+									int flags,
+									CChitArray* arr )
 {
 	CArray<Chit*, 16> match;
 	CArray<float, 16> weight;
@@ -123,6 +126,13 @@ Chit* LumosChitBag::FindBuilding(	const grinliz::IString&  name,
 			if ( match.HasCap() ) {
 				match.Push( chit );
 			}
+		}
+	}
+
+	if ( arr ) {
+		arr->Clear();
+		for ( int i=0; i<match.Size() && arr->HasCap(); ++i ) {
+			arr->Push( match[i] );
 		}
 	}
 
@@ -295,59 +305,42 @@ Chit* LumosChitBag::QueryRemovable( const grinliz::Vector2I& pos2i )
 Chit* LumosChitBag::QueryBuilding( const grinliz::Rectangle2I& bounds )
 {
 	GLASSERT( MAX_BUILDING_SIZE == 2 );	// else adjust logic
-	static const float EPS   = 0.1f;
 
-	Rectangle2F r;
-	r.min.x = (float)bounds.min.x - EPS;
-	r.min.y = (float)bounds.min.y - EPS;
-	r.max.x = (float)(bounds.max.x+1) + EPS;
-	r.max.y = (float)(bounds.max.y+1) + EPS;
-
-	BuildingFilter buildingFilter;
-	CChitArray arr;
-	this->QuerySpatialHash( &arr, r, 0, &buildingFilter );
-
-	Chit* building = 0;
-	if ( arr.Size() > 0 ) {
-		building = arr[0];
-
-#ifdef DEBUG
-		MapSpatialComponent* msc = GET_SUB_COMPONENT( building, SpatialComponent, MapSpatialComponent );
-		GLASSERT( msc->Bounds().Intersect( bounds ));		
-#endif
+	// Add one to the lower bound to pick up a 2x2 buinding
+	// they may be pushing into the bounds. The building
+	// is in the hash at the min coordinate.
+	for( int y=bounds.min.y-1; y<=bounds.max.y; ++y ) {
+		for( int x=bounds.min.x-1; x<=bounds.max.x; ++x ) {
+			MapSpatialComponent* msc = mapSpatialHash[ SectorIndex( ToSector(x,y) ) ];
+			if ( msc ) {
+				GLASSERT( msc->Building() );
+				return msc->ParentChit();
+			}
+		}
 	}
-	return building;
+	return 0;
 }
 
 
 Chit* LumosChitBag::QueryPorch( const grinliz::Vector2I& pos )
 {
-	GLASSERT( MAX_BUILDING_SIZE == 2 );	// else adjust logic
-	static const float EPS   = 0.1f;
-	static const float DELTA = 1.5f;
-	static const float OFFSET = DELTA + EPS;
+	Rectangle2I r;
+	// account for both 2x2 buildings and porch.
+	//
+	//	bbp
+	//  bbp
+	r.min.x = pos.x - 2;
+	r.min.y = pos.y - 2;
+	r.max.x = pos.x + 1;
+	r.max.y = pos.y + 1;
 
-	Rectangle2F r;
-	r.min.x = (float)pos.x + 0.5f - OFFSET;
-	r.min.y = (float)pos.y + 0.5f - OFFSET;
-	r.max.x = (float)pos.x + 0.5f + OFFSET;
-	r.max.y = (float)pos.y + 0.5f + OFFSET;
-
-	BuildingFilter buildingFilter;
-	CChitArray arr;
-	this->QuerySpatialHash( &arr, r, 0, &buildingFilter );
-
-	for( int i=0; i<arr.Size(); ++i ) {
-		Chit* chit = arr[i];
-		MapSpatialComponent* msc = GET_SUB_COMPONENT( chit, SpatialComponent, MapSpatialComponent );
-		GLASSERT( msc );	// all buildings should be msc's
-		GameItem* item = chit->GetItem();
-		if ( item ) {
-			int porch = 0;
-			item->GetValue( "porch", &porch );
-			if ( msc && porch ) {
+	for( int y=r.min.y-1; y<=r.max.y; ++y ) {
+		for( int x=r.min.x-1; x<=r.max.x; ++x ) {
+			Vector2I sector = ToSector( x, y );
+			MapSpatialComponent* msc = mapSpatialHash[ SectorIndex( sector ) ];
+			if ( msc ) {
 				if ( msc->PorchPos().Contains( pos )) {
-					return chit;
+					return msc->ParentChit();
 				}
 			}
 		}

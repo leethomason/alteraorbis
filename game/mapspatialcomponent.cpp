@@ -73,8 +73,7 @@ void MapSpatialComponent::OnAdd( Chit* chit )
 {
 	super::OnAdd( chit );
 	if ( building ) {
-		Vector2I pos = GetPosition2DI();
-		chitBag->AddToBuildingHash( this, pos.x, pos.y ); 
+		chitBag->AddToBuildingHash( this, bounds.min.x, bounds.min.y ); 
 	}
 
 	if ( mode == GRID_BLOCKED ) {
@@ -92,7 +91,7 @@ void MapSpatialComponent::OnRemove()
 {
 	if ( building ) {
 		Vector2I pos = GetPosition2DI();
-		chitBag->RemoveFromBuildingHash( this, pos.x, pos.y ); 
+		chitBag->RemoveFromBuildingHash( this, bounds.min.x, bounds.min.y ); 
 	}
 	super::OnRemove();
 	if ( mode == GRID_BLOCKED ) {
@@ -131,17 +130,18 @@ Vector2I MapSpatialComponent::PorchPos( int id ) const
 Rectangle2I MapSpatialComponent::PorchPos() const
 {
 	Rectangle2I v;
+	v.Set( 0, 0, 0, 0 );
+
+	GameItem* item = parentChit->GetItem();
+	if ( !item ) return v;
+	if ( item->GetValue( "porch" ).empty() ) return v;
+
+	// picks up the size, so we only need to 
+	// adjust one coordinate for the porch below
 	v.min = bounds.min;
 	v.max = bounds.max;
 
 	int r = LRintf( this->GetYRotation() / 90.0f );
-
-	// Buildings can be size 1x1 or size 2x2
-	int size = 1;
-	if ( parentChit->GetItem() ) {
-		parentChit->GetItem()->GetValue( "size", &size );
-	}
-	GLASSERT( size == 1 || size == 2 );
 
 	switch (r) {
 	case 0:		v.min.y = v.max.y = bounds.max.y + 1;	break;
@@ -149,15 +149,6 @@ Rectangle2I MapSpatialComponent::PorchPos() const
 	case 2:		v.min.y = v.max.y = bounds.min.y - 1;	break;
 	case 3:		v.min.x = v.max.x = bounds.min.x - 1;	break;
 	default:	GLASSERT(0);	break;
-	}
-
-	if ( size == 2 ) {
-		if ( r == 0 || r == 2 ) {
-			v.max.x++;
-		}
-		else {
-			v.max.y++;
-		}
 	}
 
 	return v;

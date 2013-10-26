@@ -139,11 +139,16 @@ public:
 	// Buildings can't move - no update.
 	void AddToBuildingHash( MapSpatialComponent* chit, int x, int y );
 	void RemoveFromBuildingHash( MapSpatialComponent* chit, int x, int y );
+
 	enum {
 		NEAREST,
 		RANDOM_NEAR
 	};
-	Chit* FindBuilding( const grinliz::IString& name, const grinliz::Vector2I& sector, const grinliz::Vector2F* pos, int flags );
+	Chit* FindBuilding( const grinliz::IString& name, 
+						const grinliz::Vector2I& sector,	// sector to quer
+						const grinliz::Vector2F* pos,		// used for evaluating NEAREST, etc.
+						int flags,
+						CChitArray* arr );					// optional; the first N hits
 
 	Chit* NewMonsterChit( const grinliz::Vector3F& pos, const char* name, int team );
 	Chit* NewGoldChit( const grinliz::Vector3F& pos, int amount );

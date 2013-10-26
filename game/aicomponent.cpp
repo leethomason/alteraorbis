@@ -1043,7 +1043,7 @@ void AIComponent::ThinkVisitor( const ComponentSet& thisComp )
 			Chit* kiosk = GetLumosChitBag()->FindBuilding(	vd->CurrentKioskWant(),
 															sector,
 															&thisComp.spatial->GetPosition2D(),
-															LumosChitBag::RANDOM_NEAR );
+															LumosChitBag::RANDOM_NEAR, 0 );
 
 			if ( !kiosk ) {
 				// Done here.
@@ -1453,7 +1453,7 @@ void AIComponent::FindRoutineTasks( const ComponentSet& thisComp )
 			Chit* vault = GetLumosChitBag()->FindBuilding(	IStringConst::vault, 
 															sector, 
 															&thisComp.spatial->GetPosition2D(), 
-															LumosChitBag::RANDOM_NEAR );
+															LumosChitBag::RANDOM_NEAR, 0 );
 			if ( vault && vault->GetItemComponent() && vault->GetItemComponent()->CanAddToInventory() ) {
 				MapSpatialComponent* msc = GET_SUB_COMPONENT( vault, SpatialComponent, MapSpatialComponent );
 				GLASSERT( msc );

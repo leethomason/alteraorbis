@@ -10,6 +10,7 @@
 #include "../xegame/chitbag.h"
 #include "../xegame/componentfactory.h"
 #include "../xegame/cameracomponent.h"
+#include "../xegame/istringconst.h"
 
 #include "../script/itemscript.h"
 #include "../script/scriptcomponent.h"
@@ -29,6 +30,7 @@
 #include "aicomponent.h"
 #include "reservebank.h"
 #include "team.h"
+#include "lumosmath.h"
 
 #include "../xarchive/glstreamer.h"
 
@@ -373,6 +375,24 @@ void Sim::DoWeatherEffects( U32 delta )
 void Sim::Draw3D( U32 deltaTime )
 {
 	engine->Draw( deltaTime, chitBag->BoltMem(), chitBag->NumBolts() );
+	
+#if 0
+	// Debug porth locations.
+	Chit* player = this->GetPlayerChit();
+	if ( player ) {
+		CompositingShader debug( BLEND_NORMAL );
+		debug.SetColor( 1, 1, 1, 0.5f );
+		CChitArray arr;
+		chitBag->FindBuilding(	IStringConst::vault, ToSector( player->GetSpatialComponent()->GetPosition2DI() ),
+								0, LumosChitBag::NEAREST, &arr );
+		for( int i=0; i<arr.Size(); ++i ) {
+			Rectangle2I p = GET_SUB_COMPONENT( arr[i], SpatialComponent, MapSpatialComponent )->PorchPos();
+			Vector3F p0 = { (float)p.min.x, 0.1f, (float)p.min.y };
+			Vector3F p1 = { (float)(p.max.x+1), 0.1f, (float)(p.max.y+1) };
+			GPUDevice::Instance()->DrawQuad( debug, 0, p0, p1, false );
+		}
+	}
+#endif
 }
 
 
