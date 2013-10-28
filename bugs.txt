@@ -97,7 +97,7 @@ x Add position fuzz to gold, crystal, and item drops
 			x ability of player to use vault. refactor UseBuilding() code out of the ai loop.
 			x vault behavior if overflow...
 
-		- porch positions incorrect
+		x porch positions incorrect
 		- forge / factory
 			- factory
 			- ability to use factory

@@ -49,7 +49,8 @@ public:
 		SCENE_WORLDGEN,
 		SCENE_GAME,
 		SCENE_CHARACTER,
-		SCENE_MAP
+		SCENE_MAP,
+		SCENE_FORGE,
 	};
 
 	virtual Scene* CreateScene( int id, SceneData* data );

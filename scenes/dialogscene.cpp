@@ -20,7 +20,9 @@
 #include "../xegame/itemcomponent.h"
 #include "../game/lumosgame.h"
 #include "../script/itemscript.h"
+
 #include "../scenes/characterscene.h"
+#include "../scenes/forgescene.h"
 
 using namespace gamui;
 
@@ -48,7 +50,7 @@ DialogScene::DialogScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 	}
 
 	for( int i=0; i<NUM_SCENES; ++i ) {
-		static const char* name[NUM_SCENES] = { "character", "vault" };
+		static const char* name[NUM_SCENES] = { "character", "vault", "forge" };
 		sceneButtons[i].Init( &gamui2D, lumosGame->GetButtonLook(0));
 		sceneButtons[i].SetText( name[i] );
 	}
@@ -115,6 +117,9 @@ void DialogScene::ItemTapped( const gamui::UIItem* item )
 	}
 	else if ( item == &sceneButtons[VAULT] ) {
 		game->PushScene( LumosGame::SCENE_CHARACTER, new CharacterSceneData( itemComponent0, itemComponent1 ));
+	}
+	else if ( item == &sceneButtons[FORGE] ) {
+		game->PushScene( LumosGame::SCENE_FORGE, new ForgeSceneData() );
 	}
 }
 

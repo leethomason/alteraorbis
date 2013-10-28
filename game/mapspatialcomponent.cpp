@@ -119,10 +119,13 @@ void MapSpatialComponent::Serialize( XStream* xs )
 Vector2I MapSpatialComponent::PorchPos( int id ) const
 {
 	Rectangle2I r = PorchPos();
-	Vector2I v = {
-		r.min.x + (r.Width()-1)  * (id & 1),
-		r.min.y + (r.Height()-1) * (id & 1),
-	};
+	Vector2I v = { 0, 0 };
+	if ( r.Width() == 0 ) {
+		return v;
+	}
+
+	v.Set(	r.min.x + (r.Width()-1)  * (id & 1),
+			r.min.y + (r.Height()-1) * (id & 1) );
 	return v;
 }
 

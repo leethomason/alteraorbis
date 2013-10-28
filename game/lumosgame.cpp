@@ -32,6 +32,7 @@
 #include "../scenes/gamescene.h"
 #include "../scenes/characterscene.h"
 #include "../scenes/mapscene.h"
+#include "../scenes/forgescene.h"
 
 using namespace grinliz;
 using namespace gamui;
@@ -100,6 +101,7 @@ Scene* LumosGame::CreateScene( int id, SceneData* data )
 	case SCENE_GAME:		scene = new GameScene( this );				break;
 	case SCENE_CHARACTER:	scene = new CharacterScene( this, (CharacterSceneData*)data );				break;
 	case SCENE_MAP:			scene = new MapScene( this, (MapSceneData*)data );							break;
+	case SCENE_FORGE:		scene = new ForgeScene( this, (ForgeSceneData*)data );						break;
 
 	default:
 		GLASSERT( 0 );

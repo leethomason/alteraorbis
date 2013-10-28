@@ -305,17 +305,12 @@ Chit* LumosChitBag::QueryRemovable( const grinliz::Vector2I& pos2i )
 Chit* LumosChitBag::QueryBuilding( const grinliz::Rectangle2I& bounds )
 {
 	GLASSERT( MAX_BUILDING_SIZE == 2 );	// else adjust logic
+	Vector2I sector = ToSector( bounds.min );
 
-	// Add one to the lower bound to pick up a 2x2 buinding
-	// they may be pushing into the bounds. The building
-	// is in the hash at the min coordinate.
-	for( int y=bounds.min.y-1; y<=bounds.max.y; ++y ) {
-		for( int x=bounds.min.x-1; x<=bounds.max.x; ++x ) {
-			MapSpatialComponent* msc = mapSpatialHash[ SectorIndex( ToSector(x,y) ) ];
-			if ( msc ) {
-				GLASSERT( msc->Building() );
-				return msc->ParentChit();
-			}
+	for( MapSpatialComponent* it = mapSpatialHash[SectorIndex(sector)]; it; it = it->nextBuilding ) {
+		if ( it->Bounds().Intersect( bounds )) {
+			GLASSERT( it->Building() );
+			return it->ParentChit();
 		}
 	}
 	return 0;
@@ -324,25 +319,10 @@ Chit* LumosChitBag::QueryBuilding( const grinliz::Rectangle2I& bounds )
 
 Chit* LumosChitBag::QueryPorch( const grinliz::Vector2I& pos )
 {
-	Rectangle2I r;
-	// account for both 2x2 buildings and porch.
-	//
-	//	bbp
-	//  bbp
-	r.min.x = pos.x - 2;
-	r.min.y = pos.y - 2;
-	r.max.x = pos.x + 1;
-	r.max.y = pos.y + 1;
-
-	for( int y=r.min.y-1; y<=r.max.y; ++y ) {
-		for( int x=r.min.x-1; x<=r.max.x; ++x ) {
-			Vector2I sector = ToSector( x, y );
-			MapSpatialComponent* msc = mapSpatialHash[ SectorIndex( sector ) ];
-			if ( msc ) {
-				if ( msc->PorchPos().Contains( pos )) {
-					return msc->ParentChit();
-				}
-			}
+	Vector2I sector = ToSector(pos);
+	for( MapSpatialComponent* it = mapSpatialHash[SectorIndex(pos)]; it; it = it->nextBuilding ) {
+		if ( it->PorchPos().Contains( pos )) {
+			return it->ParentChit();
 		}
 	}
 	return 0;
