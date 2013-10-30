@@ -930,6 +930,8 @@ public:
 
 	void SetSpacing( float spacing )					{ this->spacingX = this->spacingY = spacing; }
 	void SetSpacing( float spacingX, float spacingY )	{ this->spacingX = spacingX; this->spacingY = spacingY; }
+	float SpacingX() const								{ return spacingX; }
+	float SpacingY() const								{ return spacingY; }
 
 	void SetOffset( float x, float y )			{ this->offsetX = x; this->offsetY = y; }
 	void SetTextOffset( float x, float y )		{ this->textOffsetX = x; this->textOffsetY = y; }

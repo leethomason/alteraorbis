@@ -54,6 +54,8 @@ ForgeScene::ForgeScene( LumosGame* game, ForgeSceneData* data ) : Scene( game ),
 		effects[i].Init( &gamui2D, game->GetButtonLook(0));
 		effects[i].SetText( name[i] );
 	}
+	itemDescWidget.Init( &gamui2D );
+
 	SetModel();
 }
 
@@ -83,6 +85,9 @@ void ForgeScene::Resize()
 	for( int i=0; i<NUM_EFFECTS; ++i ) {
 		layout.PosAbs( &effects[i], 3, i );
 	}
+
+	itemDescWidget.SetLayout( layout );
+	layout.PosAbs( &itemDescWidget, -4, 0 );
 }
 
 

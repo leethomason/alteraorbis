@@ -4,6 +4,7 @@
 #include "../xegame/scene.h"
 #include "../gamui/gamui.h"
 #include "../engine/screenport.h"
+#include "../widget/itemdescwidget.h"
 
 class GameItem;
 class LumosGame;
@@ -87,6 +88,7 @@ private:
 	gamui::ToggleButton gunType[NUM_GUN_TYPES];
 	gamui::ToggleButton gunParts[NUM_GUN_PARTS];
 	gamui::ToggleButton effects[NUM_EFFECTS];
+	ItemDescWidget		itemDescWidget;
 };
 
 

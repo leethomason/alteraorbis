@@ -21,8 +21,10 @@
 #include "../grinliz/glcontainer.h"
 #include "../engine/screenport.h"
 #include "../game/gamelimits.h"
+
 #include "../widget/moneywidget.h"
 #include "../widget/facewidget.h"
+#include "../widget/itemdescwidget.h"
 
 class LumosGame;
 class Engine;
@@ -65,12 +67,6 @@ private:
 	enum { 
 		NUM_ITEM_BUTTONS = INVERTORY_SLOTS,
 
-		KV_STR = 0,
-		KV_WILL,
-		KV_CHR,
-		KV_INT,
-		KV_DEX,
-		NUM_TEXT_KV = KV_DEX+10
 	};
 	
 	LumosGame*		lumosGame;
@@ -85,11 +81,10 @@ private:
 	gamui::ToggleButton itemButton[2][NUM_ITEM_BUTTONS];
 	int					itemButtonIndex[2][NUM_ITEM_BUTTONS];	// the index in the ItemComponent
 	gamui::TextBox		desc;
-	gamui::TextLabel	textKey[NUM_TEXT_KV];
-	gamui::TextLabel	textVal[NUM_TEXT_KV];
 	gamui::PushButton	dropButton;
 	MoneyWidget			moneyWidget;
 	FaceToggleWidget	faceWidget;
+	ItemDescWidget		itemDescWidget;
 };
 
 
