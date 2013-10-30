@@ -76,9 +76,17 @@ private:
 		NUM_RING_PARTS
 	};
 
+	enum {
+		EFFECT_FIRE,
+		EFFECT_SHOCK,
+		EFFECT_EXPLOSIVE,
+		NUM_EFFECTS
+	};
+
 	gamui::ToggleButton	itemType[NUM_ITEM_TYPES];
 	gamui::ToggleButton gunType[NUM_GUN_TYPES];
 	gamui::ToggleButton gunParts[NUM_GUN_PARTS];
+	gamui::ToggleButton effects[NUM_EFFECTS];
 };
 
 

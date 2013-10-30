@@ -1,5 +1,6 @@
 #include "forgescene.h"
 #include "../game/lumosgame.h"
+#include "../game/gameitem.h"
 #include "../engine/engine.h"
 #include "../script/procedural.h"
 
@@ -48,7 +49,11 @@ ForgeScene::ForgeScene( LumosGame* game, ForgeSceneData* data ) : Scene( game ),
 		gunParts[i].Init( &gamui2D, game->GetButtonLook(0));
 		gunParts[i].SetText( name[i] );
 	}
-
+	for( int i=0; i<NUM_EFFECTS; ++i ) {
+		static const char* name[NUM_EFFECTS] = { "Fire", "Shock", "Explosive" };
+		effects[i].Init( &gamui2D, game->GetButtonLook(0));
+		effects[i].SetText( name[i] );
+	}
 	SetModel();
 }
 
@@ -75,6 +80,9 @@ void ForgeScene::Resize()
 	for( int i=1; i<NUM_GUN_PARTS; ++i ) {
 		layout.PosAbs( &gunParts[i], 2, i-1 );
 	}
+	for( int i=0; i<NUM_EFFECTS; ++i ) {
+		layout.PosAbs( &effects[i], 3, i );
+	}
 }
 
 
@@ -90,11 +98,16 @@ void ForgeScene::SetModel()
 	if ( gunParts[GUN_DRIVER].Down() ) features |= WeaponGen::GUN_DRIVER;
 	if ( gunParts[GUN_SCOPE].Down() )  features |= WeaponGen::GUN_SCOPE;
 
+	int eff = 0;
+	if ( effects[EFFECT_FIRE].Down() )		eff |= GameItem::EFFECT_FIRE;
+	if ( effects[EFFECT_SHOCK].Down() )		eff |= GameItem::EFFECT_SHOCK;
+	if ( effects[EFFECT_EXPLOSIVE].Down() )	eff |= GameItem::EFFECT_EXPLOSIVE;
+
 	engine->FreeModel( model );
 	model = engine->AllocModel( gType );
 	model->SetPos( 0, 0, 0 );
 
-	WeaponGen gen( 0, 0, features );
+	WeaponGen gen( 0, eff, features );
 	ProcRenderInfo info;
 	gen.AssignGun( &info );
 

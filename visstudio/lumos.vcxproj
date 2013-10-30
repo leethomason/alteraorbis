@@ -156,6 +156,7 @@
     <ClCompile Include="..\script\worldgen.cpp" />
     <ClCompile Include="..\script\worldscript.cpp" />
     <ClCompile Include="..\widget\facewidget.cpp" />
+    <ClCompile Include="..\widget\itemdescwidget.cpp" />
     <ClCompile Include="..\widget\moneywidget.cpp" />
     <ClCompile Include="..\win32\audio.cpp" />
     <ClCompile Include="..\win32\framebuffer.cpp" />
@@ -263,6 +264,7 @@
     <ClInclude Include="..\script\worldscript.h" />
     <ClInclude Include="..\shared\dbhelper.h" />
     <ClInclude Include="..\widget\facewidget.h" />
+    <ClInclude Include="..\widget\itemdescwidget.h" />
     <ClInclude Include="..\widget\moneywidget.h" />
     <ClInclude Include="..\win32\audio.h" />
     <ClInclude Include="..\win32\framebuffer.h" />

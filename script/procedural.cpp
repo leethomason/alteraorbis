@@ -254,6 +254,18 @@ void WeaponGen::GetColors( int i, int flags, grinliz::Color4F* array )
 	}
 
 	const Game::Palette* palette = Game::GetMainPalette();
+	Color4F effectColor = palette->Get4F( effect.x, effect.y );
+
+	// Add in explosive as a modifying color to the main 2.
+	// At the time of this code being written, I don't
+	// expect exlposive to be very common.
+	if ( flags & GameItem::EFFECT_EXPLOSIVE ) {
+		Color4F ec = palette->Get4F( PAL_TANGERINE*2, 0 );
+		for( int i=0; i<3; ++i )
+			effectColor.X(i) = Mean( effectColor.X(i), ec.X(i) );
+		alpha = Max( 0.7f, alpha );
+	}
+	effectColor.a = alpha;
 
 	Color4F base		= palette->Get4F( c[i*3+0].x, c[i*3+0].y );
 	array[BASE]			= base;
@@ -264,7 +276,7 @@ void WeaponGen::GetColors( int i, int flags, grinliz::Color4F* array )
 							Lerp( base.b, contrast.b, LERP ),
 							Lerp( base.a, contrast.a, LERP ) );
 							
-	array[EFFECT]		= palette->Get4F( effect.x, effect.y );
+	array[EFFECT]		= effectColor;
 
 	array[BASE].a		= 0;
 	array[CONTRAST].a	= 0;

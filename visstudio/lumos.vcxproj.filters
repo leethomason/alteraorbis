@@ -322,6 +322,9 @@
     <ClCompile Include="..\scenes\forgescene.cpp">
       <Filter>Source Files\scenes</Filter>
     </ClCompile>
+    <ClCompile Include="..\widget\itemdescwidget.cpp">
+      <Filter>Source Files\widget</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\camera.h">
@@ -647,6 +650,9 @@
     </ClInclude>
     <ClInclude Include="..\scenes\forgescene.h">
       <Filter>Source Files\scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\widget\itemdescwidget.h">
+      <Filter>Source Files\widget</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
