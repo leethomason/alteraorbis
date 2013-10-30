@@ -124,7 +124,7 @@ void RenderTestScene::SetupTest0()
 
 	for ( int i=0; i<NUM_MODELS; ++i ) {
 		ProcRenderInfo info;
-		AssignProcedural( "suit", model[i]->GetResource() == res0, i, 1, false, 0, &info ); 
+		AssignProcedural( "suit", model[i]->GetResource() == res0, i, 1, false, 0, 0, &info ); 
 		model[i]->SetTextureXForm( info.te.uvXForm );
 		model[i]->SetColorMap( true, info.color );
 		model[i]->SetBoneFilter( info.filterName, info.filter );

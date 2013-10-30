@@ -209,7 +209,9 @@ Model* Engine::AllocModel( const ModelResource* resource )
 
 void Engine::FreeModel( Model* model )
 {
-	spaceTree->FreeModel( model );
+	if ( model ) {
+		spaceTree->FreeModel( model );
+	}
 }
 
 

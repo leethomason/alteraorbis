@@ -93,7 +93,17 @@ class WeaponGen
 {
 public:
 
-	WeaponGen( U32 _seed, int _effectFlags ) : seed(_seed), effectFlags(_effectFlags) {}
+	enum {
+		GUN_CELL	= 0x02,
+		GUN_DRIVER	= 0x04,
+		GUN_SCOPE	= 0x08,
+
+		RING_GUARD	= 0x02,
+		RING_TRIAD	= 0x04,
+		RING_BLADE	= 0x08
+	};
+
+	WeaponGen( U32 _seed, int _effectFlags, int _features ) : seed(_seed), effectFlags(_effectFlags), features(_features) {}
 	void AssignRing( ProcRenderInfo* info );
 	void AssignGun( ProcRenderInfo* info );
 
@@ -109,6 +119,7 @@ private:
 	};
 	U32 seed;
 	int effectFlags;
+	int features;
 };
 
 
@@ -120,7 +131,12 @@ public:
 
 
 void AssignProcedural( const char* name,
-					   bool female, U32 seed, int team, bool electric, int effectFlags,
+					   bool female, 
+					   U32 seed,			// random #
+					   int team,			// team, from PrimaryTeam() (0 if not needed)
+					   bool electric,		// more colorface face rendering
+					   int effectFlags,		// EFFECT_FIRE etc.
+					   int features,		// which parts of the weapon are in use
 					   ProcRenderInfo* info );
 
 #endif // LUMOS_PROCEDURAL_INCLUDED

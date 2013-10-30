@@ -309,7 +309,14 @@ void CharacterScene::SetButtonText()
 
 			if ( !down->GetValue( "procedural" ).empty() ) {
 				ProcRenderInfo info;
-				AssignProcedural( down->GetValue( "procedural" ).c_str(), strstr( down->Name(), "emale" )!=0, down->id, down->primaryTeam, false, down->flags & GameItem::EFFECT_MASK, &info );
+				AssignProcedural(	down->GetValue( "procedural" ).c_str(), 
+									strstr( down->Name(), "emale" )!=0, 
+									down->id, 
+									down->primaryTeam, 
+									false, 
+									down->flags & GameItem::EFFECT_MASK, 
+									0,
+									&info );
 				model->SetTextureXForm( info.te.uvXForm );
 				model->SetColorMap( true, info.color );
 				model->SetBoneFilter( info.filterName, info.filter );

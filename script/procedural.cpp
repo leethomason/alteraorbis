@@ -293,9 +293,9 @@ void WeaponGen::AssignRing( ProcRenderInfo* info )
 	texture->GetTableEntry( random.Rand( texture->NumTableEntries() ), &info->te );
 	
 	info->filter[0]  = true;
-	info->filter[1] = random.Boolean();
-	info->filter[2] = random.Boolean();
-	info->filter[3] = random.Boolean();
+	info->filter[1] = (features & RING_GUARD) != 0;
+	info->filter[2] = (features & RING_TRIAD) != 0;
+	info->filter[3] = (features & RING_BLADE) != 0;
 
 	static const char* procNames[4] = {
 		"main",
@@ -328,10 +328,10 @@ void WeaponGen::AssignGun( ProcRenderInfo* info )
 	GLASSERT( texture );
 
 	info->texture = texture;	
-	info->filter[0]  = true;
-	info->filter[1] = random.Boolean();
-	info->filter[2] = random.Boolean();
-	info->filter[3] = random.Boolean();
+	info->filter[0] = true;
+	info->filter[1] = (features & GUN_CELL)   != 0;
+	info->filter[2] = (features & GUN_DRIVER) != 0;
+	info->filter[3] = (features & GUN_SCOPE)  != 0;
 
 	static const char* GUN_PARTS[4] = { "body", "cell", "driver", "scope" };
 
@@ -386,7 +386,7 @@ void TeamGen::Assign( int seed, ProcRenderInfo* info )
 
 
 void AssignProcedural( const char* name,
-					   bool female, U32 seed, int team, bool electric, int effectFlags,
+					   bool female, U32 seed, int team, bool electric, int effectFlags, int features,
 					   ProcRenderInfo* info )
 {
 	if ( !name || !*name )
@@ -401,11 +401,11 @@ void AssignProcedural( const char* name,
 		gen.AssignSuit( info );
 	}
 	else if ( StrEqual( name, "ring" )) {
-		WeaponGen gen( seed, effectFlags );
+		WeaponGen gen( seed, effectFlags, features );
 		gen.AssignRing( info );
 	}
 	else if ( StrEqual( name, "gun" )) {
-		WeaponGen gen( seed, effectFlags );
+		WeaponGen gen( seed, effectFlags, features );
 		gen.AssignGun( info );
 	}
 	else {

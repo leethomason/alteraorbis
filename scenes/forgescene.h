@@ -3,9 +3,12 @@
 
 #include "../xegame/scene.h"
 #include "../gamui/gamui.h"
+#include "../engine/screenport.h"
 
 class GameItem;
 class LumosGame;
+class Engine;
+class Model;
 
 
 class ForgeSceneData : public SceneData
@@ -33,7 +36,12 @@ public:
 	virtual void Draw3D( U32 delatTime );
 
 private:
+	void SetModel();
+
 	LumosGame*			lumosGame;
+	Engine*				engine;
+	Screenport			screenport;
+	Model*				model;
 
 	gamui::PushButton	okay;
 
@@ -52,8 +60,25 @@ private:
 		NUM_GUN_TYPES
 	};
 
+	enum {
+		GUN_BODY,		// on
+		GUN_CELL,		// boosts clip
+		GUN_DRIVER,		// boosts power/damage
+		GUN_SCOPE,		// boosts accuracy
+		NUM_GUN_PARTS
+	};
+
+	enum {
+		RING_MAIN,		// on
+		RING_GUARD,		// shield coupler
+		RING_TRIAD,		// 
+		RING_BLADE,		// 
+		NUM_RING_PARTS
+	};
+
 	gamui::ToggleButton	itemType[NUM_ITEM_TYPES];
 	gamui::ToggleButton gunType[NUM_GUN_TYPES];
+	gamui::ToggleButton gunParts[NUM_GUN_PARTS];
 };
 
 

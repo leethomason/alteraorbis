@@ -189,7 +189,7 @@ void LivePreviewScene::GenerateRingOrGun( int mainRow, bool gun )
 
 		static const int FLAGS[COLS] = { 0, GameItem::EFFECT_FIRE, GameItem::EFFECT_FIRE | GameItem::EFFECT_EXPLOSIVE, GameItem::EFFECT_SHOCK, GameItem::EFFECT_FIRE | GameItem::EFFECT_SHOCK };
 
-		WeaponGen weaponGen( i + mainRow*137, FLAGS[col] );
+		WeaponGen weaponGen( i + mainRow*137, FLAGS[col], Random::Hash8(i+mainRow*17) );
 		ProcRenderInfo info;
 		if ( gun )
 			weaponGen.AssignGun( &info );

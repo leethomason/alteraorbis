@@ -820,10 +820,13 @@ void ItemComponent::SetHardpoints()
 		if ( setProc )	// not a built-in
 		{
 			IString proc = itemArr[i]->GetValue( "procedural" );
+			int features = 0;
+			itemArr[i]->GetValue( "features", &features );
+
 			ProcRenderInfo info;
 
 			if ( !proc.empty() ) {
-				AssignProcedural( proc.c_str(), female, item->id, team, false, item->Effects(), &info );
+				AssignProcedural( proc.c_str(), female, item->id, team, false, item->Effects(), features, &info );
 			}
 			rc->SetProcedural( (i==0) ? 0 : itemArr[i]->hardpoint, info );
 		}
