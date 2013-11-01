@@ -44,7 +44,7 @@ int WorkQueue::CalcTaskSize( const IString& structure )
 		}
 		else {
 			const GameItem& gameItem = ItemDefDB::Instance()->Get( structure.c_str() );
-			gameItem.GetValue( "size", &size );
+			gameItem.keyValues.Fetch( "size", "d", &size );
 		}
 	}
 	return size;

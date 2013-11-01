@@ -151,85 +151,12 @@ void GameItem::Serialize( XStream* xs )
 
 	cooldown.Serialize( xs, "cooldown" );
 	reload.Serialize( xs, "reload" );
-
-	XarcOpen( xs, "keyval" );
-	int n = keyValues.Size();
-	XARC_SER( xs, n );
-	if ( xs->Loading() ) {
-		GLASSERT( keyValues.Empty() );
-		keyValues.PushArr( n );
-	}
-	for( int i=0; i<n; ++i ) {
-		XarcOpen( xs, "key" );
-		XARC_SER_KEY( xs, "k", keyValues[i].key   );
-		XARC_SER_KEY( xs, "v", keyValues[i].value );
-		XarcClose( xs );
-	}
-	XarcClose( xs );
-
+	
+	keyValues.Serialize( xs, "keyval" );
 	microdb.Serialize( xs, "microdb" );
 
 	traits.Serialize( xs );
 	XarcClose( xs );
-}
-
-
-void GameItem::SetValue( const char* name, const char* value )
-{
-	IString ikey = StringPool::Intern( name );
-	IString ival = StringPool::Intern( value );
-	for( int i=0; i<keyValues.Size(); ++i ) {
-		if ( keyValues[i].key == ikey ) {
-			keyValues[i].value = ival;
-			return;
-		}
-	}
-	KeyValue kv = { ikey, ival };
-	keyValues.Push( kv );
-}
-
-
-grinliz::IString GameItem::GetValue( const char* name ) const
-{
-	for( int i=0; i<keyValues.Size(); ++i ) {
-		if ( keyValues[i].key == name ) {
-			return keyValues[i].value;
-		}
-	}
-	return IString();
-}
-
-
-bool GameItem::GetValue( const char* name, double* value ) const 
-{ 
-	IString v = GetValue( name );
-	if ( !v.empty() ) {
-		*value = atof( v.c_str() );
-		return true;
-	}
-	return false;
-}
-
-
-bool GameItem::GetValue( const char* name, float* value ) const 
-{
-	IString v = GetValue( name );
-	if ( !v.empty() ) {
-		*value = (float)atof( v.c_str() );
-		return true;
-	}
-	return false;
-}
-
-
-bool GameItem::GetValue( const char* name, int* value ) const 
-{
-	IString v = GetValue( name );
-	if ( !v.empty() ) {
-		*value = (int) atof( v.c_str() );
-		return true;
-	}
-	return false;
 }
 
 	
@@ -300,8 +227,31 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 		READ_FLOAT_ATTR( accruedFire )
 		READ_FLOAT_ATTR( accruedShock )
 		else {
-			KeyValue kv = { name, StringPool::Intern( attr->Value() ) };
-			keyValues.Push( kv );
+			// What is it??? Tricky stuff.
+			int integer=0;
+			int real=0;
+			int str=0;
+
+			for( const char* p=attr->Value(); *p; ++p ) {
+				if ( *p == '-' || isdigit(*p) || *p == '+' ) {
+					integer++;
+				}
+				else if ( *p == '.' ) {
+					real++;
+				}
+				else if ( isupper(*p) || islower(*p) ) {
+					str++;
+				}
+			}
+
+			if ( str )	
+				keyValues.Set( name.c_str(), "S", StringPool::Intern( attr->Value() ));
+			else if ( integer && real )
+				keyValues.Set( name.c_str(), "f", atof( attr->Value()));
+			else if ( integer )
+				keyValues.Set( name.c_str(), "d", atoi( attr->Value()));
+			else
+				GLASSERT(0);
 		}
 	}
 

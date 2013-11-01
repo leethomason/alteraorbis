@@ -229,10 +229,10 @@ int PlantScript::DoTick( U32 delta, U32 since )
 	// ------- calc ------- //
 	Vector3F actual = { sun, rain, temp };
 	Vector3F optimal = { 0.5f, 0.5f, 0.5f };
-
-	item->GetValue( "sun", &optimal.x );
-	item->GetValue( "rain", &optimal.y );
-	item->GetValue( "temp", &optimal.z );
+	
+	item->keyValues.Fetch( "sun",  "f", &optimal.x );
+	item->keyValues.Fetch( "rain", "f", &optimal.y );
+	item->keyValues.Fetch( "temp", "f", &optimal.z );
 
 	float distance = ( optimal - actual ).Length();
 
@@ -249,7 +249,7 @@ int PlantScript::DoTick( U32 delta, U32 since )
 
 		sporeTimer += since;
 		int nStage = 4;
-		item->GetValue( "nStage", &nStage );
+		item->keyValues.Fetch( "nStage", "d", &nStage );
 
 		// Grow
 		if (    item->HPFraction() > 0.9f 

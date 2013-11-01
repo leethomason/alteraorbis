@@ -216,7 +216,7 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos, const char* assetName )
 	chit->GetItem()->flags |= GameItem::AI_BINDS_TO_CORE;
 	chit->GetItem()->traits.Roll( playerID );
 
-	IString nameGen = chit->GetItem()->GetValue( "nameGen" );
+	IString nameGen = chit->GetItem()->keyValues.GetIString( "nameGen" );
 	if ( !nameGen.empty() ) {
 		chit->GetItem()->properName = StringPool::Intern( 
 			lumosGame->GenName( nameGen.c_str(), 
@@ -232,9 +232,7 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos, const char* assetName )
 	chit->GetItemComponent()->SetHardpoints();
 
 	// Player speed boost
-	CStr<16> str;
-	str.Format( "%f", DEFAULT_MOVE_SPEED*1.5f/1.2f );
-	chit->GetItem()->SetValue( "speed", str.c_str() );
+	chit->GetItem()->keyValues.Set( "speed", "f", DEFAULT_MOVE_SPEED*1.5f/1.2f );
 }
 
 

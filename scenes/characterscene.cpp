@@ -215,9 +215,10 @@ void CharacterScene::SetButtonText()
 			engine->camera.SetPosWC( d, d, d );
 			engine->CameraLookAt( engine->camera.PosWC(), aabb.Center() );
 
-			if ( !down->GetValue( "procedural" ).empty() ) {
+			IString proc = down->keyValues.GetIString( "procedural" );
+			if ( !proc.empty() ) {
 				ProcRenderInfo info;
-				AssignProcedural(	down->GetValue( "procedural" ).c_str(), 
+				AssignProcedural(	proc.c_str(), 
 									strstr( down->Name(), "emale" )!=0, 
 									down->id, 
 									down->primaryTeam, 

@@ -137,7 +137,7 @@ Rectangle2I MapSpatialComponent::PorchPos() const
 
 	GameItem* item = parentChit->GetItem();
 	if ( !item ) return v;
-	if ( item->GetValue( "porch" ).empty() ) return v;
+	if ( item->keyValues.GetIString( "porch" ).empty() ) return v;
 
 	// picks up the size, so we only need to 
 	// adjust one coordinate for the porch below

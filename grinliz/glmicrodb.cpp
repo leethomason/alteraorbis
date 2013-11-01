@@ -92,15 +92,64 @@ int MicroDB::Set( const char* key,  const char* fmt, ... )
 }
 
 
-int MicroDB::Fetch( const char* key, const char* fmt, ... )
+int MicroDB::GetFloat( const char* key, float* value ) const
 {
-	GLASSERT( fmt && *fmt );
-	GLASSERT( key && *key );
-	if ( dataArr.Empty() )
-		return KEY_NOT_FOUND;
-
 	IString ikey = StringPool::Intern( key );
+	Entry* pe = 0;
+	int findResult = Find( ikey, &pe );
+	if ( findResult ) return findResult;
+
+	SubEntry* sub = (SubEntry*)(pe+1);
+	GLASSERT( sub->type == 'f' );
+	if ( sub->type != 'f' ) WRONG_FORMAT;
+
+	*value = sub->floatVal;
+	return 0;
+}
+	
+	
+int MicroDB::GetInt( const char* key, int* value ) const
+{
+	IString ikey = StringPool::Intern( key );
+	Entry* pe = 0;
+	int findResult = Find( ikey, &pe );
+	if ( findResult ) return findResult;
+
+	SubEntry* sub = (SubEntry*)(pe+1);
+	GLASSERT( sub->type == 'd' );
+	if ( sub->type != 'd' ) WRONG_FORMAT;
+
+	*value = sub->intVal;
+	return 0;
+}
+
+
+grinliz::IString MicroDB::GetIString( const char* key ) const
+{
+	IString ikey = StringPool::Intern( key );
+	Entry* pe = 0;
+	int findResult = Find( ikey, &pe );
+	if ( findResult ) return IString();
+
+	SubEntry* sub = (SubEntry*)(pe+1);
+	GLASSERT( sub->type == 'S' );
+	if ( sub->type != 'S' ) return IString();
+
+	return StringPool::Intern( sub->str );
+}
+
+
+int MicroDB::Find( const IString& ikey, MicroDB::Entry** result ) const
+{
+	*result=0;
+
+	GLASSERT( !ikey.empty() );
+	if ( ikey.empty() ) {
+		return KEY_NOT_FOUND;
+	}
+
 	const Entry* pe = (const Entry*) &dataArr[0];
+	const char* key = ikey.c_str();
 
 	while( true ) {
 		if ( pe->key == ikey.c_str() ) {
@@ -116,6 +165,21 @@ int MicroDB::Fetch( const char* key, const char* fmt, ... )
 
 		pe = (const Entry*) &dataArr[pe->next[bias]];
 	}
+	*result = const_cast<Entry*>(pe);
+	return NO_ERROR;
+}
+
+
+int MicroDB::Fetch( const char* key, const char* fmt, ... ) const
+{
+	GLASSERT( fmt && *fmt );
+	if ( dataArr.Empty() )
+		return KEY_NOT_FOUND;
+
+	IString ikey = StringPool::Intern( key );
+	Entry* pe = 0;
+	int findResult = Find( ikey, &pe );
+	if ( findResult ) return findResult;
 
 	SubEntry* sub = (SubEntry*)(pe+1);
 
@@ -129,6 +193,10 @@ int MicroDB::Fetch( const char* key, const char* fmt, ... )
 		if ( *p != sub->type ) return WRONG_FORMAT;
 
 		switch ( *p ) { 
+		case '%':
+			--sub;	// incremented end of loop
+			break;
+
 		case 'S':	
 			{
 				IString* s = va_arg( vl, IString* );

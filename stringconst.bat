@@ -1,3 +1,3 @@
 cd xegame
-\Python27\python.exe istringconst.py
+\Python33\python.exe istringconst.py
 cd ..

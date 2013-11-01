@@ -123,7 +123,7 @@ void ItemComponent::NameItem( GameItem* item )
 
 	if ( shouldHaveName ) {
 		if ( item->properName.empty() ) {
-			IString nameGen = item->GetValue( "nameGen" );
+			IString nameGen = item->keyValues.GetIString( "nameGen" );
 			if ( !nameGen.empty() ) {
 				item->properName = StringPool::Intern( 
 					GetLumosChitBag()->GetLumosGame()->GenName( nameGen.c_str(), 
@@ -520,7 +520,7 @@ void ItemComponent::OnAdd( Chit* chit )
 	super::OnAdd( chit );
 
 	if ( parentChit->GetLumosChitBag() ) {
-		IString mob = mainItem->GetValue( "mob" );
+		IString mob = mainItem->keyValues.GetIString( "mob" );
 		if ( mob == "normal" ) {
 			parentChit->GetLumosChitBag()->census.normalMOBs += 1;
 		}
@@ -535,7 +535,8 @@ void ItemComponent::OnRemove()
 {
 	GameItem* mainItem = itemArr[0];
 	if ( parentChit->GetLumosChitBag() ) {
-		IString mob = mainItem->GetValue( "mob" );
+		IString mob;
+		mainItem->keyValues.Fetch( "mob", "S", &mob );
 		if ( mob == "normal" ) {
 			parentChit->GetLumosChitBag()->census.normalMOBs -= 1;
 		}
@@ -819,9 +820,9 @@ void ItemComponent::SetHardpoints()
 
 		if ( setProc )	// not a built-in
 		{
-			IString proc = itemArr[i]->GetValue( "procedural" );
+			IString proc = itemArr[i]->keyValues.GetIString( "procedural" );
 			int features = 0;
-			itemArr[i]->GetValue( "features", &features );
+			itemArr[i]->keyValues.Fetch( "features", "d", &features );
 
 			ProcRenderInfo info;
 

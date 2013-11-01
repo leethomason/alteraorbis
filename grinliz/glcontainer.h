@@ -37,17 +37,30 @@ distribution.
 namespace grinliz
 {
 
-class CompValue {
+
+class CompValueBase {
 public:
 	// Hash table:
 	template <class T>
 	static U32 Hash( const T& v)					{ return (U32)(v); }
 	template <class T>
 	static bool Equal( const T& v0, const T& v1 )	{ return v0 == v1; }
+};
 
+
+class CompValue : public CompValueBase {
+public:
 	// Sort, FindMax:
 	template <class T>
 	static bool Less( const T& v0, const T& v1 )	{ return v0 < v1; }
+};
+
+
+class CompValueDescending : public CompValueBase {
+public:
+	// Sort, FindMax:
+	template <class T>
+	static bool Less( const T& v0, const T& v1 )	{ return v0 > v1; }
 };
 
 

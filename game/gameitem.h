@@ -17,6 +17,7 @@
 #define GAMEITEM_INCLUDED
 
 #include "gamelimits.h"
+#include "lumosmath.h"
 
 #include "../engine/enginelimits.h"
 
@@ -89,7 +90,6 @@ public:
 };
 
 
-static const float SKILL_NORMALIZE = 0.1f;	// skill of 10 is a multiple 1.0
 static const float LEVEL_BONUS     = 0.5f;
 
 
@@ -105,6 +105,17 @@ public:
 	void Init() {
 		for( int i=0; i<NUM_TRAITS; ++i ) trait[i] = 10;
 		exp	= 0;
+	}
+		
+	void Set( int i, int value ) {
+		GLASSERT( i >= 0 && i < NUM_TRAITS );
+		GLASSERT( value > 0 && value <= 20 );
+		trait[i] = value;
+	}
+
+	int Get( int i ) {
+		GLASSERT( i >= 0 && i < NUM_TRAITS );
+		return trait[i];
 	}
 
 	// 1-20
@@ -126,16 +137,14 @@ public:
 
 	void AddBattleXP( int killshotLevel )	{ exp += 1 + killshotLevel; }
 
-	// 1.0 is normal, 0.1 very low, 2+ exceptional.
-	float NormalLeveledTrait( int t ) const { GLASSERT( t>=0 && t<NUM_TRAITS ); return NormalLeveledSkill( trait[t] ); }
+	float NormalLeveledTrait( int t ) const {
+		GLASSERT( t >= 0 && t < NUM_TRAITS );
+		return NormalLeveledSkill( trait[t] );
+	}
+
 	float Accuracy() const		{ return NormalLeveledSkill( Dexterity() ); }
 	float Damage() const		{ return NormalLeveledSkill( Strength() ); }
 	float Toughness() const		{ return NormalLeveledSkill( Will() ); }
-	
-	int LevelStr() const		{ return grinliz::LRintf( LeveledSkill( Strength() )); }
-	int LevelWill() const		{ return grinliz::LRintf( LeveledSkill( Will() )); }
-	int LevelInt() const		{ return grinliz::LRintf( LeveledSkill( Intelligence() )); }
-	int LevelDex() const		{ return grinliz::LRintf( LeveledSkill( Dexterity() )); }
 	
 	U32 Hash() const			{ 
 		return grinliz::Random::Hash( trait, sizeof(trait[0])*NUM_TRAITS );
@@ -147,21 +156,25 @@ public:
 	//			   8 -> 3          128-255 -> 3
 	static int ExperienceToLevel( int ep )	{ return grinliz::LogBase2( ep/16 ); } 
 	static int LevelToExperience( int lp )	{ return 16*(1<<lp); }
-
+					
 	enum {	STR,
 			WILL,
 			CHR,
 			INT,
 			DEX,
-			NUM_TRAITS
+			NUM_TRAITS,
+
+			ALT_DAMAGE		= STR,
+			ALT_SPEED		= WILL,
+			ALT_COOL		= WILL,
+			ALT_CAPACITY	= CHR,
+			ALT_RELOAD		= INT,
+			ALT_ACCURACY	= DEX,
 		};
 
 private:
-	float LeveledSkill( int value ) const { 
-		return ((float)value + (float)Level() * LEVEL_BONUS);
-	}
 	float NormalLeveledSkill( int value ) const {
-		return LeveledSkill( value ) * SKILL_NORMALIZE;
+		return Dice3D6ToMult( value + this->Level() );
 	}
 
 	int trait[NUM_TRAITS];
@@ -322,7 +335,7 @@ public:
 	float	meleeDamage;	// a multiplier of the base (effective mass) applied before stats.Damage()
 	float	rangedDamage;	// base ranged damage, applied before stats.Damage()
 	float	absorbsDamage;	// how much damage this consumes, in the inventory (shield, armor, etc.) 1.0: all, 0.5: half
-	Cooldown cooldown;		// time between uses. For a MoB, this is the weapon switch time.
+	Cooldown cooldown;		// time between uses.
 	Cooldown reload;		// time to reload once clip is used up
 	int		clipCap;		// possible rounds in the clip
 
@@ -334,30 +347,16 @@ public:
 	float	accruedFire;	// how much fire damage built up, not yet applied
 	float	accruedShock;	// how much shock damage built up, not yet applied
 
-	/* Key values are essentially a dynamic extension. They are defined in the
-       itemdef file.
-	*/
-	struct KeyValue
-	{
-		bool operator==( const KeyValue& rhs ) const { return key == rhs.key; }
-
-		grinliz::IString	key;
-		grinliz::IString	value;
-	};
-	grinliz::CDynArray<KeyValue>	keyValues;
-
-	grinliz::IString GetValue( const char* name ) const;
-	bool GetValue( const char* name, double* value ) const;
-	bool GetValue( const char* name, float* value ) const;
-	bool GetValue( const char* name, int* value ) const;
-	void SetValue( const char* name, const char* value );
-
+	// These are the same, except for use. 'keyValues' are used
+	// for simple dynamic extension. speed=2.0 for example.
+	// 'microdb' is used to record history, events, etc.
+	grinliz::MicroDB keyValues;
 	grinliz::MicroDB microdb;
 
 	float CalcBoltSpeed() const {
 		static const float SPEED = 10.0f;
 		float speed = 1.0f;
-		GetValue( "speed", &speed );
+		keyValues.GetFloat( "speed", &speed );
 		return SPEED * speed;
 	}
 
@@ -388,10 +387,7 @@ public:
 			accruedFire		= rhs->accruedFire;
 			accruedShock	= rhs->accruedShock;
 
-			keyValues.Clear();
-			for( int i=0; i<rhs->keyValues.Size(); ++i ) {
-				keyValues.Push( rhs->keyValues[i] );
-			}
+			keyValues		= rhs->keyValues;
 			microdb			= rhs->microdb;
 		}
 		else {
@@ -473,7 +469,7 @@ public:
 	bool OnShock() const { return (!(flags & IMMUNE_SHOCK)) && accruedShock > 0; }
 
 	// Note that the current HP, if it has one, 
-	int TotalHP() const		{ return grinliz::LRintf( mass*traits.Toughness() ); }
+	int   TotalHP() const	{ return grinliz::Max( 1, (int)grinliz::LRintf( mass*traits.Toughness())); }
 	float TotalHPF() const	{ return (float)TotalHP(); }
 
 	float HPFraction() const	{ 

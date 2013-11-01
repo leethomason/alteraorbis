@@ -18,6 +18,8 @@
 #include "../engine/model.h"
 #include "../engine/animation.h"
 #include "../tinyxml2/tinyxml2.h"
+#include "../xegame/istringconst.h"
+#include "../game/lumosmath.h"
 
 using namespace tinyxml2;
 using namespace grinliz;
@@ -94,7 +96,7 @@ const GameItem& ItemDefDB::Get( const char* name, int intrinsic )
 	GLASSERT( arr.Size() > 0 );
 	
 	float v = 0;
-	arr[0]->GetValue( prop, value );
+	arr[0]->keyValues.Fetch( prop, "d", value );
 }
 
 
@@ -171,6 +173,38 @@ int ItemDefDB::CalcItemValue( const GameItem* item )
 }
 
 
+void ItemDefDB::AssignWeaponStats( const int* roll, const GameItem& base, GameItem* item )
+{
+	// Accuracy and Damage are effected by traits + level.
+	// Speed, ClipCap, Reload by traits. (And only at creation.)
+	// Accuracy:	DEX, level		
+	// Damage:		STR, level, rangedDamage
+	//
+	// Fixed at creation:
+	// Speed:		WILL
+	// ClipCap:		CHR		
+	// Reload:		INT
+
+	item->traits.Set( GameTrait::STR,  roll[0] );
+	item->traits.Set( GameTrait::WILL, roll[1] );
+	item->traits.Set( GameTrait::CHR,  roll[2] );
+	item->traits.Set( GameTrait::INT,  roll[3] );
+	item->traits.Set( GameTrait::DEX,  roll[4] );
+
+	float cool = (float)item->cooldown.Threshold();
+	cool *= Dice3D6ToMult( item->traits.Get( GameTrait::ALT_COOL ));
+	item->cooldown.SetThreshold( Clamp( (int)cool, 1000, 3000 ));
+
+	float clipCap = (float)base.clipCap;
+	clipCap *= Dice3D6ToMult( item->traits.Get( GameTrait::ALT_CAPACITY ));
+	item->clipCap = Clamp( (int)clipCap, 1, 100 );
+
+	float reload = (float)base.reload.Threshold();
+	reload /= Dice3D6ToMult( item->traits.Get( GameTrait::ALT_RELOAD ));
+	item->reload.SetThreshold( Clamp( (int)reload, 100, 1000 ));
+}
+
+
 void ItemDefDB::DumpWeaponStats()
 {
 	GameItem humanMale = this->Get( "humanMale" );
@@ -225,3 +259,5 @@ void ItemDefDB::DumpWeaponStats()
 	}
 	fclose( fp );
 }
+
+

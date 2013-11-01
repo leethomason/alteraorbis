@@ -240,6 +240,12 @@ float BattleMechanics::ComputeRadAt1(	const GameItem* shooter,
 		accuracy *= shooter->traits.Accuracy();
 	}
 	if ( weapon ) {
+		// There is both a built in accuracy (the type of gun) and
+		// the accurcaty from the traits (quality/variance of the weapon)
+		float weaponAcc = 1;
+		weapon->GetItem()->keyValues.GetFloat( "accuracy", &weaponAcc );
+
+		accuracy *= weaponAcc;
 		accuracy *= weapon->GetItem()->traits.Accuracy();
 	}
 
@@ -460,7 +466,7 @@ float BattleMechanics::ComputeShieldBoost( const IMeleeWeaponItem* weapon )
 {
 	const GameItem* item = weapon->GetItem();
 	float value = 0;
-	item->GetValue( "shieldBoost", &value ); 
+	item->keyValues.Fetch( "shieldBoost", "f", &value ); 
 	if ( value ) {
 		float boost = value * item->traits.NormalLeveledTrait( GameTrait::CHR );
 		return Max( boost, 1.0f );

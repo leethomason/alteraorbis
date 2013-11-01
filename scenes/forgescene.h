@@ -84,6 +84,7 @@ private:
 		NUM_EFFECTS
 	};
 
+	ForgeSceneData*		forgeData;
 	gamui::ToggleButton	itemType[NUM_ITEM_TYPES];
 	gamui::ToggleButton gunType[NUM_GUN_TYPES];
 	gamui::ToggleButton gunParts[NUM_GUN_PARTS];

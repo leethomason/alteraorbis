@@ -51,7 +51,12 @@ public:
 		f:	float
 	*/
 	int Set(   const char* key, const char* fmt, ... );
-	int Fetch( const char* key, const char* fmt, ... );
+	int Fetch( const char* key, const char* fmt, ... ) const;
+
+	// convenience, for simple key-value pairs
+	grinliz::IString	GetIString( const char* key ) const;
+	int GetFloat( const char* key, float* value ) const;	///< doesn't write if not found.
+	int GetInt( const char* key, int* value ) const;
 
 	void Serialize( XStream* xs, const char* name );
 
@@ -73,6 +78,7 @@ private:
 		};
 	};
 
+	int Find( const IString& key, Entry** entry ) const;
 	Entry* Set( const IString& key, int nSubKey, int* error );
 	Entry* AppendEntry( const IString& key, int nSubKey );
 

@@ -1,3 +1,8 @@
+<!--
+  
+
+-->
+
 <items>
   <item name="humanFemale"
         resource="humanFemale"
@@ -264,15 +269,50 @@
         shieldBoost="1">
   </item>
   
+  <item name="pistol"
+        resource="pistol"
+        uiIcon="pistol"
+        flags="MELEE_WEAPON RANGED_WEAPON"
+        hardpoint="trigger"
+        mass="1.5"
+        accuracy="0.8"
+        cooldown="700"
+        reload="2000"
+        clipCap="4"
+        meleeDamage="0.8"
+        rangedDamage="25"
+        procedural="gun"
+        nameGen="vikingMale"
+        >
+  </item>
+
   <item name="blaster"
         resource="blaster"
         uiIcon="blaster"
         flags="MELEE_WEAPON RANGED_WEAPON"
         hardpoint="trigger"
         mass="1.5"
+        accuracy="1.0"
         cooldown="500"
-        reload="2500"
+        reload="2000"
         clipCap="6"
+        meleeDamage="0.8"
+        rangedDamage="20"
+        procedural="gun"
+        nameGen="vikingMale"
+        >
+  </item>
+
+  <item name="pulse"
+        resource="pulse"
+        uiIcon="pulse"
+        flags="MELEE_WEAPON RANGED_WEAPON"
+        hardpoint="trigger"
+        mass="2.0"
+        accuracy="1.2"
+        cooldown="250"
+        reload="3000"
+        clipCap="12"
         meleeDamage="0.8"
         rangedDamage="20"
         procedural="gun"
@@ -286,43 +326,12 @@
         flags="MELEE_WEAPON RANGED_WEAPON"
         hardpoint="trigger"
         mass="1.5"
-        cooldown="1000"
+        accuracy="2.0"
+        cooldown="800"
         reload="3000"
         clipCap="4"
         meleeDamage="0.8"
-        rangedDamage="30"
-        procedural="gun"
-        nameGen="vikingMale"
-        >
-  </item>
-
-  <item name="pistol"
-        resource="pistol"
-        uiIcon="pistol"
-        flags="MELEE_WEAPON RANGED_WEAPON"
-        hardpoint="trigger"
-        mass="1.5"
-        cooldown="700"
-        reload="2000"
-        clipCap="6"
-        meleeDamage="0.8"
-        rangedDamage="25"
-        procedural="gun"
-        nameGen="vikingMale"
-        >
-  </item>
-
-  <item name="pulse"
-        resource="pulse"
-        uiIcon="pulse"
-        flags="MELEE_WEAPON RANGED_WEAPON"
-        hardpoint="trigger"
-        mass="2.0"
-        cooldown="250"
-        reload="3000"
-        clipCap="12"
-        meleeDamage="0.8"
-        rangedDamage="20"
+        rangedDamage="35"
         procedural="gun"
         nameGen="vikingMale"
         >

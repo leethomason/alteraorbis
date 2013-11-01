@@ -65,6 +65,10 @@ void ItemDescWidget::SetInfo( const GameItem* item, const GameItem* user )
 		str.Format( "%.1f", BattleMechanics::EffectiveRange( radAt1 ));
 		textVal[i++].SetText( str.c_str() );
 
+		textKey[i].SetText( "Fire Rate" );
+		str.Format( "%.1f", 1.0f / (0.001f * (float)item->cooldown.Threshold()));
+		textVal[i++].SetText( str.c_str() );
+
 		textKey[i].SetText( "Clip/Reload" );
 		str.Format( "%d / %.1f", item->clipCap, 0.001f * (float)item->reload.Threshold() );
 		textVal[i++].SetText( str.c_str() );

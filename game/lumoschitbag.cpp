@@ -176,7 +176,7 @@ Chit* LumosChitBag::NewBuilding( const Vector2I& pos, const char* name, int team
 	const GameItem& rootItem = ItemDefDB::Instance()->Get( name );
 
 	int cx=1;
-	rootItem.GetValue( "size", &cx );
+	rootItem.keyValues.GetInt( "size", &cx );
 
 	MapSpatialComponent* msc = new MapSpatialComponent( worldMap, this );
 	msc->SetMapPosition( pos.x, pos.y, cx, cx );
@@ -188,7 +188,7 @@ Chit* LumosChitBag::NewBuilding( const Vector2I& pos, const char* name, int team
 	chit->Add( new HealthComponent( engine ));
 	AddItem( name, chit, engine, team, 0 );
 
-	IString proc = rootItem.GetValue( "procedural" );
+	IString proc = rootItem.keyValues.GetIString( "procedural" );
 	if ( !proc.empty() ) {
 		TeamGen gen;
 		ProcRenderInfo info;
@@ -215,7 +215,7 @@ Chit* LumosChitBag::NewMonsterChit( const Vector3F& pos, const char* name, int t
 	AddItem( name, chit, engine, team, 0 );
 
 	Wallet w = ReserveBank::Instance()->WithdrawMonster();
-	if ( chit->GetItem()->GetValue( "mob" ) == "greater" ) {
+	if ( chit->GetItem()->keyValues.GetIString( "mob" ) == "greater" ) {
 		// can return NUM_CRYSTAL_TYPES, if out, which is fine.
 		w.AddCrystal( ReserveBank::Instance()->WithdrawCrystal( random.Rand( NUM_CRYSTAL_TYPES )));
 	}

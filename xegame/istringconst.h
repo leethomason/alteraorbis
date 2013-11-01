@@ -36,6 +36,10 @@ public:
 	static grinliz::IString worker;
 
 	static grinliz::IString ring;
+	static grinliz::IString pistol;
+	static grinliz::IString blaster;
+	static grinliz::IString pulse;
+	static grinliz::IString beamgun;
 	static grinliz::IString gold;
 	static grinliz::IString crystal_green;
 	static grinliz::IString crystal_red;

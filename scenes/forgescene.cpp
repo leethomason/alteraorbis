@@ -2,7 +2,9 @@
 #include "../game/lumosgame.h"
 #include "../game/gameitem.h"
 #include "../engine/engine.h"
+
 #include "../script/procedural.h"
+#include "../script/itemscript.h"
 
 using namespace gamui;
 using namespace grinliz;
@@ -13,6 +15,9 @@ static const float FAR  = 10.0f;
 
 ForgeScene::ForgeScene( LumosGame* game, ForgeSceneData* data ) : Scene( game ), lumosGame( game ), screenport( game->GetScreenport())
 {
+	forgeData = data;
+	forgeData->item = new GameItem();
+
 	screenport.SetNearFar( NEAR, FAR );
 	engine = new Engine( &screenport, lumosGame->GetDatabase(), 0 );
 	engine->SetGlow( true );
@@ -62,6 +67,8 @@ ForgeScene::ForgeScene( LumosGame* game, ForgeSceneData* data ) : Scene( game ),
 
 ForgeScene::~ForgeScene()
 {
+	delete forgeData->item;
+	forgeData->item = 0;
 	engine->FreeModel( model );
 	delete engine;
 }
@@ -98,10 +105,17 @@ void ForgeScene::SetModel()
 	else if ( gunType[PULSE].Down() )	gType = "pulse";
 	else if ( gunType[BEAMGUN].Down() ) gType = "beamgun";
 
+	static const int roll[GameTrait::NUM_TRAITS] = { 10, 11, 10, 11, 10 };
+
+	const GameItem& item = ItemDefDB::Instance()->Get( gType );
+	*(forgeData->item) = item;
+	ItemDefDB::Instance()->AssignWeaponStats( roll, item, forgeData->item );
+	itemDescWidget.SetInfo( forgeData->item, 0 );
+
 	int features = 0;
-	if ( gunParts[GUN_CELL].Down() )   features |= WeaponGen::GUN_CELL;
-	if ( gunParts[GUN_DRIVER].Down() ) features |= WeaponGen::GUN_DRIVER;
-	if ( gunParts[GUN_SCOPE].Down() )  features |= WeaponGen::GUN_SCOPE;
+	if ( gunParts[GUN_CELL].Down() )		features |= WeaponGen::GUN_CELL;
+	if ( gunParts[GUN_DRIVER].Down() )		features |= WeaponGen::GUN_DRIVER;
+	if ( gunParts[GUN_SCOPE].Down() )		features |= WeaponGen::GUN_SCOPE;
 
 	int eff = 0;
 	if ( effects[EFFECT_FIRE].Down() )		eff |= GameItem::EFFECT_FIRE;
