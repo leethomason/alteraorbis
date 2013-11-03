@@ -210,18 +210,24 @@ public:
 class Cooldown
 {
 public:
-	Cooldown( int t=1000 ) : TIME(t), time(t)	{}
+	Cooldown( int t=1000 ) : threshold(t), time(t)								{}
+	Cooldown( const Cooldown& rhs ) : threshold(rhs.threshold), time(rhs.time)	{}
+	void operator=( const Cooldown& rhs ) {
+		this->time		= rhs.time;
+		this->threshold = rhs.threshold;
+	}
+
 	void ResetReady() {
-		time = TIME;
+		time = threshold;
 	}
 	void ResetUnready() {
 		time = 0;
 	}
 
-	bool CanUse() const { return time >= TIME; }
+	bool CanUse() const { return time >= threshold; }
 	float Fraction() const {
-		if ( time >= TIME ) return 1.0f;
-		return (float)time / (float)TIME;
+		if ( time >= threshold ) return 1.0f;
+		return (float)time / (float)threshold;
 	}
 	bool Use() {
 		if ( CanUse() ) {
@@ -231,17 +237,17 @@ public:
 		return false;
 	}
 	bool Tick( int delta ) { time += delta; 
-		if ( time >= TIME && (time-delta) < TIME ) return true;
+		if ( time >= threshold && (time-delta) < threshold ) return true;
 		return false;
 	}
 	void Serialize( XStream* xs, const char* name );
 	
-	void SetThreshold( int t )	{ TIME = t; }
+	void SetThreshold( int t )	{ threshold = t; }
 	void SetCurrent( int t )	{ time = t; }
-	int Threshold() const		{ return TIME; }
+	int Threshold() const		{ return threshold; }
 
 private:
-	int TIME;
+	int threshold;
 	int time;
 };
 

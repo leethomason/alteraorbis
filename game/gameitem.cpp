@@ -61,7 +61,7 @@ void GameTrait::Roll( U32 seed )
 void Cooldown::Serialize( XStream* xs, const char* name )
 {
 	XarcOpen( xs, name );
-	XARC_SER( xs, TIME );
+	XARC_SER( xs, threshold );
 	XARC_SER( xs, time );
 	XarcClose( xs );
 }

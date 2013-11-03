@@ -73,7 +73,7 @@ void ItemDescWidget::SetInfo( const GameItem* item, const GameItem* user )
 		str.Format( "%d / %.1f", item->clipCap, 0.001f * (float)item->reload.Threshold() );
 		textVal[i++].SetText( str.c_str() );
 
-		textKey[i].SetText( "Ranged D/TU" );
+		textKey[i].SetText( "Ranged D/S" );
 		str.Format( "%.1f", BattleMechanics::RangedDPTU( item->ToRangedWeapon(), false ));
 		textVal[i++].SetText( str.c_str() );
 	}
@@ -84,7 +84,7 @@ void ItemDescWidget::SetInfo( const GameItem* item, const GameItem* user )
 		str.Format( "%.1f", dd.damage );
 		textVal[i++].SetText( str.c_str() );
 
-		textKey[i].SetText( "Melee D/TU" );
+		textKey[i].SetText( "Melee D/S" );
 		str.Format( "%.1f", BattleMechanics::MeleeDPTU( user, item->ToMeleeWeapon() ));
 		textVal[i++].SetText( str.c_str() );
 

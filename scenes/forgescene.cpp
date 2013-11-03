@@ -100,17 +100,19 @@ void ForgeScene::Resize()
 
 void ForgeScene::SetModel()
 {
+	GameItem humanMale = ItemDefDB::Instance()->Get( "humanMale" );
+
 	const char* gType = "pistol";
 	if ( gunType[BLASTER].Down() )		gType = "blaster";
 	else if ( gunType[PULSE].Down() )	gType = "pulse";
 	else if ( gunType[BEAMGUN].Down() ) gType = "beamgun";
 
-	static const int roll[GameTrait::NUM_TRAITS] = { 10, 11, 10, 11, 10 };
+	static const int roll[GameTrait::NUM_TRAITS] = { 10, 10, 10, 10, 10 };
 
 	const GameItem& item = ItemDefDB::Instance()->Get( gType );
 	*(forgeData->item) = item;
 	ItemDefDB::Instance()->AssignWeaponStats( roll, item, forgeData->item );
-	itemDescWidget.SetInfo( forgeData->item, 0 );
+	itemDescWidget.SetInfo( forgeData->item, &humanMale );
 
 	int features = 0;
 	if ( gunParts[GUN_CELL].Down() )		features |= WeaponGen::GUN_CELL;

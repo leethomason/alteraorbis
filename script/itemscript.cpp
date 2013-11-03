@@ -181,19 +181,18 @@ void ItemDefDB::AssignWeaponStats( const int* roll, const GameItem& base, GameIt
 	// Damage:		STR, level, rangedDamage
 	//
 	// Fixed at creation:
-	// Speed:		WILL
+	// Cooldown:	WILL
 	// ClipCap:		CHR		
 	// Reload:		INT
 
-	item->traits.Set( GameTrait::STR,  roll[0] );
-	item->traits.Set( GameTrait::WILL, roll[1] );
-	item->traits.Set( GameTrait::CHR,  roll[2] );
-	item->traits.Set( GameTrait::INT,  roll[3] );
-	item->traits.Set( GameTrait::DEX,  roll[4] );
+	*item = base;
+	for( int i=0; i<GameTrait::NUM_TRAITS; ++i ) {
+		item->traits.Set( i, roll[i] );
+	}
 
 	float cool = (float)item->cooldown.Threshold();
 	cool *= Dice3D6ToMult( item->traits.Get( GameTrait::ALT_COOL ));
-	item->cooldown.SetThreshold( Clamp( (int)cool, 1000, 3000 ));
+	item->cooldown.SetThreshold( Clamp( (int)cool, 100, 3000 ));
 
 	float clipCap = (float)base.clipCap;
 	clipCap *= Dice3D6ToMult( item->traits.Get( GameTrait::ALT_CAPACITY ));
@@ -201,14 +200,13 @@ void ItemDefDB::AssignWeaponStats( const int* roll, const GameItem& base, GameIt
 
 	float reload = (float)base.reload.Threshold();
 	reload /= Dice3D6ToMult( item->traits.Get( GameTrait::ALT_RELOAD ));
-	item->reload.SetThreshold( Clamp( (int)reload, 100, 1000 ));
+	item->reload.SetThreshold( Clamp( (int)reload, 100, 3000 ));
 }
 
 
 void ItemDefDB::DumpWeaponStats()
 {
 	GameItem humanMale = this->Get( "humanMale" );
-
 
 	FILE* fp = fopen( "weapons.txt", "w" );
 	GLASSERT( fp );
