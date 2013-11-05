@@ -91,7 +91,7 @@ void ItemDescWidget::SetInfo( const GameItem* item, const GameItem* user )
 		float boost = BattleMechanics::ComputeShieldBoost( item->ToMeleeWeapon() );
 		if ( boost > 1.0f ) {
 			textKey[i].SetText( "Shield Boost" );
-			str.Format( "%.1f", boost );
+			str.Format( "%02d%%", int(100.0f * boost) - 100 );
 			textVal[i++].SetText( str.c_str() );
 		}
 	}

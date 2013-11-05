@@ -37,6 +37,9 @@ ForgeScene::ForgeScene( LumosGame* game, ForgeSceneData* data ) : Scene( game ),
 
 	lumosGame->InitStd( &gamui2D, &okay, 0 );
 
+	techAvailLabel.Init( &gamui2D );
+	techRequiredLabel.Init( &gamui2D );
+
 	for( int i=0; i<NUM_ITEM_TYPES; ++i ) {
 		static const char* name[NUM_ITEM_TYPES] = { "Ring", "Gun", "Shield" };
 		itemType[i].Init( &gamui2D, game->GetButtonLook(0));
@@ -54,12 +57,25 @@ ForgeScene::ForgeScene( LumosGame* game, ForgeSceneData* data ) : Scene( game ),
 		gunParts[i].Init( &gamui2D, game->GetButtonLook(0));
 		gunParts[i].SetText( name[i] );
 	}
+	for( int i=0; i<NUM_RING_PARTS; ++i ) {
+		static const char* name[NUM_RING_PARTS] = { "Main", "Guard", "Triad", "Blade" };
+		ringParts[i].Init( &gamui2D, game->GetButtonLook(0));
+		ringParts[i].SetText( name[i] );
+	}
 	for( int i=0; i<NUM_EFFECTS; ++i ) {
 		static const char* name[NUM_EFFECTS] = { "Fire", "Shock", "Explosive" };
 		effects[i].Init( &gamui2D, game->GetButtonLook(0));
 		effects[i].SetText( name[i] );
 	}
 	itemDescWidget.Init( &gamui2D );
+	crystalRequiredWidget.Init( &gamui2D );
+	crystalAvailWidget.Init( &gamui2D );
+
+	CStr<64> str;
+	str.Format( "Tech Available: %d", data->tech );
+	techAvailLabel.SetText( str.c_str() );
+
+	crystalAvailWidget.Set( data->wallet );
 
 	SetModel();
 }
@@ -86,12 +102,23 @@ void ForgeScene::Resize()
 		layout.PosAbs( &gunType[i], 1, i );		
 	}
 	gunParts[0].SetVisible( false );
+	ringParts[0].SetVisible( false );
+
 	for( int i=1; i<NUM_GUN_PARTS; ++i ) {
 		layout.PosAbs( &gunParts[i], 2, i-1 );
 	}
+	for( int i=1; i<NUM_RING_PARTS; ++i ) {
+		layout.PosAbs( &ringParts[i], 2, i-1 );
+	}
+
 	for( int i=0; i<NUM_EFFECTS; ++i ) {
 		layout.PosAbs( &effects[i], 3, i );
 	}
+
+	layout.PosAbs( &techAvailLabel, 0, NUM_ITEM_TYPES + 1 );
+	layout.PosAbs( &techRequiredLabel, 0, NUM_ITEM_TYPES + 2 );
+	layout.PosAbs( &crystalAvailWidget, 0, NUM_ITEM_TYPES+3 );
+	layout.PosAbs( &crystalRequiredWidget, 0, NUM_ITEM_TYPES+4 );
 
 	itemDescWidget.SetLayout( layout );
 	layout.PosAbs( &itemDescWidget, -4, 0 );
@@ -101,41 +128,119 @@ void ForgeScene::Resize()
 void ForgeScene::SetModel()
 {
 	GameItem humanMale = ItemDefDB::Instance()->Get( "humanMale" );
+	techRequired = 0;
+	crystalRequired.MakeEmpty();
+	crystalRequired.crystal[CRYSTAL_GREEN] += 1;
 
-	const char* gType = "pistol";
-	if ( gunType[BLASTER].Down() )		gType = "blaster";
-	else if ( gunType[PULSE].Down() )	gType = "pulse";
-	else if ( gunType[BEAMGUN].Down() ) gType = "beamgun";
+	int type = RING;
+	if ( itemType[GUN].Down() )		type = GUN;
+	if ( itemType[SHIELD].Down() )	type = SHIELD;
+	
+	for( int i=0; i<NUM_GUN_TYPES; ++i ) {
+		gunType[i].SetVisible( type == GUN );
+	}
+	for( int i=1; i<NUM_GUN_PARTS; ++i ) {
+		gunParts[i].SetVisible( type == GUN );
+	}
+	for( int i=1; i<NUM_RING_PARTS; ++i ) {
+		ringParts[i].SetVisible( type == RING );
+	}
 
-	static const int roll[GameTrait::NUM_TRAITS] = { 10, 10, 10, 10, 10 };
+	const char* typeName = "pistol";
 
-	const GameItem& item = ItemDefDB::Instance()->Get( gType );
-	*(forgeData->item) = item;
-	ItemDefDB::Instance()->AssignWeaponStats( roll, item, forgeData->item );
-	itemDescWidget.SetInfo( forgeData->item, &humanMale );
+	int roll[GameTrait::NUM_TRAITS] = { 10, 10, 10, 10, 10 };
+
+	static const int BONUS = 2;
 
 	int features = 0;
-	if ( gunParts[GUN_CELL].Down() )		features |= WeaponGen::GUN_CELL;
-	if ( gunParts[GUN_DRIVER].Down() )		features |= WeaponGen::GUN_DRIVER;
-	if ( gunParts[GUN_SCOPE].Down() )		features |= WeaponGen::GUN_SCOPE;
+	if ( type == GUN ) {
+		if ( gunType[BLASTER].Down() )		{ typeName = "blaster"; }
+		else if ( gunType[PULSE].Down() )	{ typeName = "pulse";   techRequired += 1; }
+		else if ( gunType[BEAMGUN].Down() ) { typeName = "beamgun"; techRequired += 1; }
+
+		if ( gunParts[GUN_CELL].Down() )		{ 
+			features |= WeaponGen::GUN_CELL;		
+			roll[GameTrait::ALT_CAPACITY] += BONUS*2; 
+			techRequired++;
+		}
+		if ( gunParts[GUN_DRIVER].Down() )		{ 
+			features |= WeaponGen::GUN_DRIVER;	
+			roll[GameTrait::ALT_DAMAGE]   += BONUS;	
+			techRequired++;
+		}
+		if ( gunParts[GUN_SCOPE].Down() )		{ 
+			features |= WeaponGen::GUN_SCOPE;		
+			roll[GameTrait::ALT_ACCURACY] += BONUS; 
+			techRequired++;
+		}
+	}
+	else if ( type == RING ) {
+		typeName = "ring";
+
+		if ( ringParts[RING_GUARD].Down() )		{ 
+			features |= WeaponGen::RING_GUARD;	
+			roll[GameTrait::CHR] += BONUS; 
+			techRequired++;
+		}	
+		if ( ringParts[RING_TRIAD].Down() )		{ 
+			features |= WeaponGen::RING_TRIAD;	
+			roll[GameTrait::ALT_DAMAGE] += BONUS/2; 
+			techRequired++;
+		}
+		if ( ringParts[RING_BLADE].Down() )		{ 
+			features |= WeaponGen::RING_BLADE;	
+			roll[GameTrait::CHR] -= BONUS; 
+			roll[GameTrait::ALT_DAMAGE] += BONUS; 
+		}	
+	}
+	else if ( type == SHIELD ) {
+		typeName = "shield";
+	}
+
+	const GameItem& item = ItemDefDB::Instance()->Get( typeName );
+	forgeData->item->CopyFrom( &item, forgeData->item->id );
+	ItemDefDB::Instance()->AssignWeaponStats( roll, item, forgeData->item );
+	itemDescWidget.SetInfo( forgeData->item, &humanMale );
 
 	int eff = 0;
 	if ( effects[EFFECT_FIRE].Down() )		eff |= GameItem::EFFECT_FIRE;
 	if ( effects[EFFECT_SHOCK].Down() )		eff |= GameItem::EFFECT_SHOCK;
 	if ( effects[EFFECT_EXPLOSIVE].Down() )	eff |= GameItem::EFFECT_EXPLOSIVE;
 
-	engine->FreeModel( model );
-	model = engine->AllocModel( gType );
-	model->SetPos( 0, 0, 0 );
+	if ( eff & GameItem::EFFECT_FIRE ) {
+		crystalRequired.crystal[CRYSTAL_RED] += 1;
+	}
+	if ( eff & GameItem::EFFECT_SHOCK ) {
+		crystalRequired.crystal[CRYSTAL_BLUE] += 1;
+	}
+	if ( eff & GameItem::EFFECT_EXPLOSIVE ) {
+		crystalRequired.crystal[CRYSTAL_VIOLET] += 1;
+	}
+	// 2 effects adds a 2nd violet crystal
+	if ( FloorPowerOf2( eff ) != eff ) {
+		crystalRequired.crystal[CRYSTAL_VIOLET] += 1;
+	}
 
-	WeaponGen gen( 0, eff, features );
+	engine->FreeModel( model );
+	model = engine->AllocModel( typeName );
+	model->SetPos( 0, 0, 0 );
+	Quaternion q;
+	static const Vector3F AXIS = { 0, 0, 1 };
+	q.FromAxisAngle( AXIS, type == SHIELD ? -90.0f : 0.0f );
+	model->SetRotation( q );
+
 	ProcRenderInfo info;
-	gen.AssignGun( &info );
+	AssignProcedural( typeName, false, forgeData->item->id, 0, false, eff, features, &info );
 
 	model->SetTextureXForm( info.te.uvXForm.x, info.te.uvXForm.y, info.te.uvXForm.z, info.te.uvXForm.w );
 	model->SetTextureClip( info.te.clip.x, info.te.clip.y, info.te.clip.z, info.te.clip.w );
 	model->SetColorMap( true, info.color );
 	model->SetBoneFilter( info.filterName, info.filter );
+
+	CStr<64> str;
+	str.Format( "Tech Required: %d", techRequired );
+	techRequiredLabel.SetText( str.c_str() );
+	crystalRequiredWidget.Set( crystalRequired );
 }
 
 

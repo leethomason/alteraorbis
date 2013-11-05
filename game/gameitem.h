@@ -367,14 +367,17 @@ public:
 	}
 
 	// Group all the copy/init in one place!
-	void CopyFrom( const GameItem* rhs ) {
+	void CopyFrom( const GameItem* rhs, int useID=-1 ) {
 		if ( rhs ) {
 			name			= rhs->name;
 			properName		= rhs->properName;
 			desc			= rhs->desc;
 			key				= rhs->key;
 			resource		= rhs->resource;
-			id				= ++idPool;
+			if ( useID < 0 ) 
+				id			= ++idPool;
+			else
+				id			= useID;
 			flags			= rhs->flags;
 			hardpoint		= rhs->hardpoint;
 			mass			= rhs->mass;

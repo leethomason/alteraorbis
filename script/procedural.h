@@ -106,6 +106,7 @@ public:
 	WeaponGen( U32 _seed, int _effectFlags, int _features ) : seed(_seed), effectFlags(_effectFlags), features(_features) {}
 	void AssignRing( ProcRenderInfo* info );
 	void AssignGun( ProcRenderInfo* info );
+	void AssignShield( ProcRenderInfo* info );
 
 private:
 	void GetColors( int i, int effectFlags, grinliz::Color4F* array );

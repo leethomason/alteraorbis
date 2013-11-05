@@ -5,6 +5,8 @@
 #include "../gamui/gamui.h"
 #include "../engine/screenport.h"
 #include "../widget/itemdescwidget.h"
+#include "../widget/moneywidget.h"
+#include "../game/wallet.h"
 
 class GameItem;
 class LumosGame;
@@ -15,8 +17,10 @@ class Model;
 class ForgeSceneData : public SceneData
 {
 public:
-	ForgeSceneData() : SceneData(), item(0) {}
-	GameItem* item;		// item that was forged.
+	ForgeSceneData() : SceneData(), item(0), tech(3) {}
+	GameItem*	item;		// item that was forged. (out)
+	int			tech;		// available tech (in)
+	Wallet		wallet;		// in/out: available and used
 };
 
 
@@ -85,10 +89,18 @@ private:
 	};
 
 	ForgeSceneData*		forgeData;
+	int					techRequired;
+	Wallet				crystalRequired;
+
 	gamui::ToggleButton	itemType[NUM_ITEM_TYPES];
 	gamui::ToggleButton gunType[NUM_GUN_TYPES];
 	gamui::ToggleButton gunParts[NUM_GUN_PARTS];
+	gamui::ToggleButton ringParts[NUM_RING_PARTS];
 	gamui::ToggleButton effects[NUM_EFFECTS];
+	gamui::TextLabel	techRequiredLabel;
+	gamui::TextLabel	techAvailLabel;
+	MoneyWidget			crystalRequiredWidget;
+	MoneyWidget			crystalAvailWidget;
 	ItemDescWidget		itemDescWidget;
 };
 

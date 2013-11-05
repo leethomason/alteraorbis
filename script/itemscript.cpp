@@ -185,7 +185,7 @@ void ItemDefDB::AssignWeaponStats( const int* roll, const GameItem& base, GameIt
 	// ClipCap:		CHR		
 	// Reload:		INT
 
-	*item = base;
+	item->CopyFrom( &base, item->id );
 	for( int i=0; i<GameTrait::NUM_TRAITS; ++i ) {
 		item->traits.Set( i, roll[i] );
 	}

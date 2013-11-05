@@ -42,7 +42,7 @@
   <texture filename="charSwatch.png" width="128" height="8" /> 
   <texture filename="characters.png" />
   <texture filename="bluestone.png" />
-  <texture filename="shield.png" filename2="shield_em.png" emissive="true" />
+  <texture filename="shield.png" emissive="true" colorMap="true" />
   <texture filename="debugging.png" noMip="true" />
   <texture filename="structure.png"   filename2="black512.png" emissive="true" colorMap="true"/>
   <texture filename="kioskscreen.png" filename2="black512.png" emissive="true" colorMap="true"/>

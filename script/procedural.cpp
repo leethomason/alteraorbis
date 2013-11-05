@@ -322,6 +322,27 @@ void WeaponGen::AssignRing( ProcRenderInfo* info )
 }
 
 
+void WeaponGen::AssignShield( ProcRenderInfo* info )
+{
+	Random random( seed );
+	random.Rand();
+
+	Color4F c[3];
+	GetColors( random.Rand(), effectFlags, c ); 
+
+	for( int i=0; i<3; ++i ) {
+		Vector4F v = { c[i].r, c[i].g, c[i].b, c[i].a };
+		info->color.SetCol( i, v );
+	}
+	info->color.m44 = 0;
+
+	Texture* texture = TextureManager::Instance()->GetTexture( "structure" );
+	GLASSERT( texture );
+
+	info->texture = texture;	
+}
+
+
 void WeaponGen::AssignGun( ProcRenderInfo* info )
 {
 	Random random( seed );
@@ -416,9 +437,18 @@ void AssignProcedural( const char* name,
 		WeaponGen gen( seed, effectFlags, features );
 		gen.AssignRing( info );
 	}
-	else if ( StrEqual( name, "gun" )) {
+	else if ( StrEqual( name, "gun" )
+	          || StrEqual( name, "pistol" )
+			  || StrEqual( name, "blaster" )
+			  || StrEqual( name, "pulse" )
+			  || StrEqual( name, "beamgun" ))
+	{
 		WeaponGen gen( seed, effectFlags, features );
 		gen.AssignGun( info );
+	}
+	else if ( StrEqual( name, "shield" )) {
+		WeaponGen gen( seed, effectFlags, features );
+		gen.AssignShield( info );
 	}
 	else {
 		GLASSERT( 0 );

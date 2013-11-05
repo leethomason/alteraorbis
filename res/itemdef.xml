@@ -266,7 +266,7 @@
         nameGen="vikingFemale"
         hardpoint="trigger"
         meleeDamage="1.4"
-        shieldBoost="1">
+        shieldBoost="1.0">
   </item>
   
   <item name="pistol"
@@ -275,7 +275,7 @@
         flags="MELEE_WEAPON RANGED_WEAPON"
         hardpoint="trigger"
         mass="1.5"
-        accuracy="0.8"
+        accuracy="0.6"
         cooldown="700"
         reload="2000"
         clipCap="4"
@@ -292,7 +292,7 @@
         flags="MELEE_WEAPON RANGED_WEAPON"
         hardpoint="trigger"
         mass="1.5"
-        accuracy="1.0"
+        accuracy="0.8"
         cooldown="500"
         reload="2000"
         clipCap="6"
@@ -309,7 +309,7 @@
         flags="MELEE_WEAPON RANGED_WEAPON"
         hardpoint="trigger"
         mass="2.0"
-        accuracy="1.2"
+        accuracy="1.0"
         cooldown="250"
         reload="3000"
         clipCap="12"
@@ -326,7 +326,7 @@
         flags="MELEE_WEAPON RANGED_WEAPON"
         hardpoint="trigger"
         mass="1.5"
-        accuracy="2.0"
+        accuracy="1.4"
         cooldown="800"
         reload="3000"
         clipCap="4"
