@@ -78,6 +78,10 @@ class Random
 		return total;
 	}
 
+	/** Roll dice and distribute to an array.
+	*/
+	void DiceArray( int sides, int nDiceToRoll, int maxPerOutput, int nOutputs, int* output );
+
 	/** Like Dice, but returns a value between 0 and 1.
 	*/
 	float DiceUniform( U32 nDice, U32 sides );

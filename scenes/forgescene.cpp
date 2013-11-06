@@ -13,10 +13,17 @@ static const float NEAR = 0.1f;
 static const float FAR  = 10.0f;
 
 
+ForgeSceneData::~ForgeSceneData()
+{
+	delete item;
+}
+
+
 ForgeScene::ForgeScene( LumosGame* game, ForgeSceneData* data ) : Scene( game ), lumosGame( game ), screenport( game->GetScreenport())
 {
 	forgeData = data;
 	forgeData->item = new GameItem();
+	itemBuilt = false;
 
 	screenport.SetNearFar( NEAR, FAR );
 	engine = new Engine( &screenport, lumosGame->GetDatabase(), 0 );
@@ -37,6 +44,8 @@ ForgeScene::ForgeScene( LumosGame* game, ForgeSceneData* data ) : Scene( game ),
 
 	lumosGame->InitStd( &gamui2D, &okay, 0 );
 
+	availableLabel.Init( &gamui2D );
+	requiredLabel.Init( &gamui2D );
 	techAvailLabel.Init( &gamui2D );
 	techRequiredLabel.Init( &gamui2D );
 
@@ -71,11 +80,17 @@ ForgeScene::ForgeScene( LumosGame* game, ForgeSceneData* data ) : Scene( game ),
 	crystalRequiredWidget.Init( &gamui2D );
 	crystalAvailWidget.Init( &gamui2D );
 
+	availableLabel.SetText( "Available:" );
+	requiredLabel.SetText( "Required:" );
+
 	CStr<64> str;
-	str.Format( "Tech Available: %d", data->tech );
+	str.Format( "Tech: %d", data->tech );
 	techAvailLabel.SetText( str.c_str() );
 
 	crystalAvailWidget.Set( data->wallet );
+
+	buildButton.Init( &gamui2D, game->GetButtonLook(0));
+	buildButton.SetText( "Build" );
 
 	SetModel();
 }
@@ -83,8 +98,10 @@ ForgeScene::ForgeScene( LumosGame* game, ForgeSceneData* data ) : Scene( game ),
 
 ForgeScene::~ForgeScene()
 {
-	delete forgeData->item;
-	forgeData->item = 0;
+	if ( !itemBuilt ) {
+		delete forgeData->item;
+		forgeData->item = 0;
+	}
 	engine->FreeModel( model );
 	delete engine;
 }
@@ -115,13 +132,18 @@ void ForgeScene::Resize()
 		layout.PosAbs( &effects[i], 3, i );
 	}
 
-	layout.PosAbs( &techAvailLabel, 0, NUM_ITEM_TYPES + 1 );
-	layout.PosAbs( &techRequiredLabel, 0, NUM_ITEM_TYPES + 2 );
-	layout.PosAbs( &crystalAvailWidget, 0, NUM_ITEM_TYPES+3 );
-	layout.PosAbs( &crystalRequiredWidget, 0, NUM_ITEM_TYPES+4 );
+	// --- Half vertical -- //
+	layout.PosAbs( &availableLabel,			0, NUM_ITEM_TYPES+1 );
+	layout.PosAbs( &techAvailLabel,			1, NUM_ITEM_TYPES+1 );
+	layout.PosAbs( &crystalAvailWidget,		1, NUM_ITEM_TYPES+2 );
+	layout.PosAbs( &requiredLabel,			0, NUM_ITEM_TYPES+3 );
+	layout.PosAbs( &techRequiredLabel,		1, NUM_ITEM_TYPES+3 );
+	layout.PosAbs( &crystalRequiredWidget,	1, NUM_ITEM_TYPES+4 );
 
 	itemDescWidget.SetLayout( layout );
 	layout.PosAbs( &itemDescWidget, -4, 0 );
+
+	layout.PosAbs( &buildButton, -2, NUM_ITEM_TYPES+1, 2, 2 );
 }
 
 
@@ -197,9 +219,11 @@ void ForgeScene::SetModel()
 		typeName = "shield";
 	}
 
-	const GameItem& item = ItemDefDB::Instance()->Get( typeName );
-	forgeData->item->CopyFrom( &item, forgeData->item->id );
-	ItemDefDB::Instance()->AssignWeaponStats( roll, item, forgeData->item );
+	if ( !itemBuilt ) {
+		const GameItem& item = ItemDefDB::Instance()->Get( typeName );
+		forgeData->item->CopyFrom( &item, forgeData->item->id );
+		ItemDefDB::Instance()->AssignWeaponStats( roll, item, forgeData->item );
+	}
 	itemDescWidget.SetInfo( forgeData->item, &humanMale );
 
 	int eff = 0;
@@ -224,6 +248,8 @@ void ForgeScene::SetModel()
 	engine->FreeModel( model );
 	model = engine->AllocModel( typeName );
 	model->SetPos( 0, 0, 0 );
+
+	// Rotate the shield to face the camera.
 	Quaternion q;
 	static const Vector3F AXIS = { 0, 0, 1 };
 	q.FromAxisAngle( AXIS, type == SHIELD ? -90.0f : 0.0f );
@@ -238,9 +264,19 @@ void ForgeScene::SetModel()
 	model->SetBoneFilter( info.filterName, info.filter );
 
 	CStr<64> str;
-	str.Format( "Tech Required: %d", techRequired );
+	str.Format( "Tech: %d", techRequired );
 	techRequiredLabel.SetText( str.c_str() );
 	crystalRequiredWidget.Set( crystalRequired );
+	
+	if (    !itemBuilt 
+		 && techRequired <= forgeData->tech 
+		 && crystalRequired <= forgeData->wallet ) 
+	{
+		buildButton.SetEnabled( true );
+	}
+	else {
+		buildButton.SetEnabled( false );
+	}
 }
 
 
@@ -249,9 +285,35 @@ void ForgeScene::ItemTapped( const gamui::UIItem* item )
 	if ( item == &okay ) {
 		lumosGame->PopScene();
 	}
-	else {
-		SetModel();
+	else if ( item == &buildButton ) {
+		// Can only be tapped if enabled.
+		forgeData->wallet.Remove( crystalRequired );
+		forgeData->itemWallet.Add( crystalRequired );	// becomes part of the item, and will be returned to Reserve when item is destroyed.
+		forgeData->item->traits.Roll( forgeData->item->id, 
+									  GameTrait::NUM_TRAITS*2 + forgeData->level );
+
+		crystalAvailWidget.Set( forgeData->wallet );
+		crystalRequiredWidget.SetVisible( false );
+
+		// Disable everything.
+		for( int i=0; i<NUM_ITEM_TYPES; ++i ) {
+			itemType[i].SetEnabled(false);		
+		}
+		for( int i=0; i<NUM_GUN_TYPES; ++i ) {
+			gunType[i].SetEnabled( false );
+		}
+		for( int i=1; i<NUM_GUN_PARTS; ++i ) {
+			gunParts[i].SetEnabled( false );
+		}
+		for( int i=1; i<NUM_RING_PARTS; ++i ) {
+			ringParts[i].SetEnabled( false );
+		}
+		for( int i=0; i<NUM_EFFECTS; ++i ) {
+			effects[i].SetEnabled( false );
+		}
+		itemBuilt = true;
 	}
+	SetModel();
 }
 
 

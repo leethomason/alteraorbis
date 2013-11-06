@@ -1771,7 +1771,7 @@ LayoutCalculator::~LayoutCalculator()
 }
 
 
-void LayoutCalculator::PosAbs( IWidget* item, int _x, int _y, bool setSize )
+void LayoutCalculator::PosAbs( IWidget* item, int _x, int _y, int _cx, int _cy, bool setSize )
 {
 	float pos[2] = { 0, 0 };
 	int xArr[2] = { _x, _y };
@@ -1799,7 +1799,9 @@ void LayoutCalculator::PosAbs( IWidget* item, int _x, int _y, bool setSize )
 	item->SetPos( pos[0]+offsetX, pos[1]+offsetY );
 
 	if ( setSize ) {
-		item->SetSize( width, height );
+		float w = width * float(_cx)  + spacingX * float(_cx-1);
+		float h = height * float(_cy) + spacingY * float(_cy-1);
+		item->SetSize( w, h );
 	}
 
 	if ( item->Visible() ) {

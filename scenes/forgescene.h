@@ -17,10 +17,13 @@ class Model;
 class ForgeSceneData : public SceneData
 {
 public:
-	ForgeSceneData() : SceneData(), item(0), tech(3) {}
-	GameItem*	item;		// item that was forged. (out)
+	ForgeSceneData() : SceneData(), item(0), tech(3), level(4) {}
+	virtual ~ForgeSceneData();
+	GameItem*	item;		// item that was forged. (out) WARNING: be sure to null so it doesn't get deleted!
 	int			tech;		// available tech (in)
+	int			level;		// skill of the smith (in)
 	Wallet		wallet;		// in/out: available and used
+	Wallet		itemWallet;	// out: the wallet that should become part of the new ItemComponent
 };
 
 
@@ -47,6 +50,7 @@ private:
 	Engine*				engine;
 	Screenport			screenport;
 	Model*				model;
+	bool				itemBuilt;
 
 	gamui::PushButton	okay;
 
@@ -97,8 +101,9 @@ private:
 	gamui::ToggleButton gunParts[NUM_GUN_PARTS];
 	gamui::ToggleButton ringParts[NUM_RING_PARTS];
 	gamui::ToggleButton effects[NUM_EFFECTS];
-	gamui::TextLabel	techRequiredLabel;
-	gamui::TextLabel	techAvailLabel;
+	gamui::TextLabel	requiredLabel,  techRequiredLabel;
+	gamui::TextLabel	availableLabel, techAvailLabel;
+	gamui::PushButton	buildButton;
 	MoneyWidget			crystalRequiredWidget;
 	MoneyWidget			crystalAvailWidget;
 	ItemDescWidget		itemDescWidget;

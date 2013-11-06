@@ -936,7 +936,7 @@ public:
 	void SetOffset( float x, float y )			{ this->offsetX = x; this->offsetY = y; }
 	void SetTextOffset( float x, float y )		{ this->textOffsetX = x; this->textOffsetY = y; }
 
-	void PosAbs( IWidget* item, int x, int y, bool setSize=true );
+	void PosAbs( IWidget* item, int x, int y, int dx=1, int dy=1, bool setSize=true );
 	void PosAbs( TextLabel* label, int x, int y ) {
 		useTextOffset = true;
 		PosAbs( (UIItem*) label, x, y ); 

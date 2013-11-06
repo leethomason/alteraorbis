@@ -37,6 +37,7 @@ public:
 	virtual void ItemTapped( const gamui::UIItem* item );
 	virtual gamui::RenderAtom DragStart( const gamui::UIItem* item );
 	virtual void DragEnd( const gamui::UIItem* start, const gamui::UIItem* end );
+	virtual void SceneResult( int sceneID, int result, const SceneData* data );
 
 private:
 	enum { NUM_ITEMS = 4 };

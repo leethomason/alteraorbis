@@ -58,6 +58,13 @@ void GameTrait::Roll( U32 seed )
 }
 
 
+void GameTrait::Roll( U32 seed, int nDice )
+{
+	Random random( seed );
+	random.DiceArray( 6, nDice, 3, NUM_TRAITS, trait );
+}
+
+
 void Cooldown::Serialize( XStream* xs, const char* name )
 {
 	XarcOpen( xs, name );

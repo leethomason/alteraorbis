@@ -35,12 +35,31 @@ struct Wallet
 			this->crystal[i] += w.crystal[i];
 	}
 
+	void Remove( const Wallet& w ) {
+		this->gold -= w.gold;
+		GLASSERT( this->gold >= 0 );
+		for( int i=0; i<NUM_CRYSTAL_TYPES; ++i ) {
+			this->crystal[i] -= w.crystal[i];
+			GLASSERT( this->crystal[i] >= 0 );
+		}
+	}
+
 	bool IsEmpty() const;
 	void MakeEmpty() {
 		Wallet empty;
 		*this = empty;
 	}
 	void Serialize( XStream* xs );
+
+	bool operator<=(const Wallet& rhs ) const {
+		if ( gold <= rhs.gold ) {
+			for( int i=0; i<NUM_CRYSTAL_TYPES; ++i ) {
+				if ( crystal[i] > rhs.crystal[i] ) return false;
+			}
+			return true;
+		}
+		return false;
+	}
 
 	int gold;
 	int crystal[NUM_CRYSTAL_TYPES];

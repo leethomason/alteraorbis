@@ -119,8 +119,18 @@ void DialogScene::ItemTapped( const gamui::UIItem* item )
 		game->PushScene( LumosGame::SCENE_CHARACTER, new CharacterSceneData( itemComponent0, itemComponent1 ));
 	}
 	else if ( item == &sceneButtons[FORGE] ) {
-		game->PushScene( LumosGame::SCENE_FORGE, new ForgeSceneData() );
+		ForgeSceneData* data = new ForgeSceneData();
+		data->wallet.crystal[CRYSTAL_GREEN] = 1;
+		data->wallet.crystal[CRYSTAL_RED] = 1;
+		data->wallet.crystal[CRYSTAL_BLUE] = 1;
+		data->wallet.crystal[CRYSTAL_VIOLET] = 1;
+		game->PushScene( LumosGame::SCENE_FORGE, data );
 	}
+}
+
+
+void DialogScene::SceneResult( int sceneID, int result, const SceneData* data )
+{
 }
 
 

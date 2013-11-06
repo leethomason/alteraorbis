@@ -31,6 +31,8 @@ distribution.
 #include <math.h>
 #include <string.h>
 #include <time.h>
+
+#include "glcontainer.h"
 	
 using namespace grinliz;
 
@@ -398,5 +400,37 @@ int Random::Select( const float* scores, int nItems )
 	}
 	GLASSERT( 0 );
 	return 0;
+}
+
+
+void Random::DiceArray( int sides, int nDiceToRoll, int maxDie, int nOutputs, int* output )
+{
+	int rollPer = nDiceToRoll / nOutputs;
+	int remain  = nDiceToRoll % nOutputs;
+
+	static const int ARR = 16;
+	int arr[ARR];
+
+	memset( output, 0, sizeof(int)*nOutputs );
+	
+	for( int i=0; i<nOutputs; ++i ) {
+		int n = rollPer;
+		if ( i < remain ) n++;
+
+		if ( n > 0 && n <= maxDie ) {
+			output[i] = (int)Dice( n, sides );
+		}
+		else {
+			// Choose the highest.
+			n = Min( n, ARR );
+			for( int j=0; j<n; ++j ) {
+				arr[j] = 1 + Rand( sides );
+			}
+			Sort< int, CompValueDescending >( arr, n );
+			for( int j=0; j<maxDie; ++j ) {
+				output[i] += arr[j];
+			}
+		}
+	}
 }
 
