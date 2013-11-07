@@ -71,11 +71,6 @@ void ItemComponent::DebugStr( grinliz::GLString* str )
 {
 	const GameItem* item = itemArr[0];
 	str->Format( "[Item] %s hp=%.1f/%d lvl=%d", item->Name(), item->hp, item->TotalHP(), item->traits.Level() );
-//	if ( !wallet.IsEmpty() ) {
-//		str->Format( "Au=%d Cy=g%dr%db%dv%d ", wallet.gold, 
-//				        wallet.crystal[CRYSTAL_GREEN], wallet.crystal[CRYSTAL_RED], 
-//						wallet.crystal[CRYSTAL_BLUE],  wallet.crystal[CRYSTAL_VIOLET]);
-//	}
 }
 
 
@@ -96,28 +91,8 @@ void ItemComponent::Serialize( XStream* xs )
 		GLASSERT( !itemArr[i]->name.empty() );
 	}
 
-//	wallet.Serialize( xs );
 	this->EndSerialize( xs );
 }
-
-
-/*
-void ItemComponent::AddGold( int delta )
-{
-	wallet.gold += delta;
-	parentChit->SetTickNeeded();
-}
-
-
-void ItemComponent::AddGold( const Wallet& w )
-{
-	wallet.gold += w.gold;
-	for( int i=0; i<NUM_CRYSTAL_TYPES; ++i ) {
-		wallet.crystal[i] += w.crystal[i];
-	}
-	parentChit->SetTickNeeded();
-}
-*/
 
 
 void ItemComponent::NameItem( GameItem* item )
@@ -415,7 +390,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 
 		if ( buildingFilter.Accept( parentChit ) || mobFilter.Accept( parentChit )) {
 			dropItems = true;
-			if ( !mainItem->wallet.IsEmpty() ) {
+			if ( !w.IsEmpty() ) {
 				parentChit->GetLumosChitBag()->NewWalletChits( pos, w );
 			}
 		}

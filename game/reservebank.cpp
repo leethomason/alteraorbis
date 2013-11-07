@@ -15,14 +15,11 @@ ReserveBank* ReserveBank::instance = 0;
 
 
 bool Wallet::IsEmpty() const {
-	if ( gold == 0 ) {
-		for( int i=0; i<NUM_CRYSTAL_TYPES; ++i ) {
-			if ( crystal[i] )
-				return false;
-		}
-		return true;
+	int count = gold;
+	for( int i=0; i<NUM_CRYSTAL_TYPES; ++i ) {
+		count += crystal[i];
 	}
-	return false;
+	return count == 0;
 }
 
 

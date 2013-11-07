@@ -10,3 +10,27 @@ And it's not really fun.
 Should show one total: assumed on player. Penalty when dropped?
 
 
+Tech Levels
+----------
+
+Tech 0:
+	Forge
+	Kiosk:M
+	Kiosk:N
+	Kiosk:C
+	Kiosk:S
+	Temple:1
+	Sleep Tube
+
+Tech 1:
+	Temple:2
+	Vault
+	Market
+	Bar
+	Turret
+
+Tech 2:
+	Temple:3
+	Spa
+	Lounge
+
