@@ -46,8 +46,9 @@ public:
 
 	WorkQueue* GetWorkQueue()	{ return workQueue; }
 	void SetDefaultSpawn( grinliz::IString s ) { defaultSpawn = s; }
-	int GetTechLevel() const	{ return 2; }		// FIXME
 
+	int GetTechLevel() const	{ return (int)GetTech(); }
+	float GetTech() const		{ return 2.57f; }
 private:
 	WorldMap*	worldMap;
 	WorkQueue*	workQueue;

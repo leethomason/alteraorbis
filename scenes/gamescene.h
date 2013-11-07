@@ -78,8 +78,10 @@ private:
 	};
 	enum {
 		BUILD_XFORM,
-		BUILD_BASIC,
-		BULID_BASIC_2,
+		BUILD_TECH0,
+		BUILD_TECH1,
+		//BUILD_TECH2,
+		//BUILD_TECH3,
 		NUM_BUILD_MODES
 	};
 	enum {
@@ -88,12 +90,12 @@ private:
 		PAVE,
 		ROTATE,
 		BUILD_ICE,
+		BUILD_FACTORY,
 		BUILD_KIOSK_N,
 		BUILD_KIOSK_M,
 		BUILD_KIOSK_C,
 		BUILD_KIOSK_S,
 		BUILD_VAULT,
-		BUILD_FACTORY,
 		NUM_BUILD_BUTTONS
 	};
 
@@ -145,6 +147,7 @@ private:
 
 	gamui::TextLabel	dateLabel;
 	gamui::TextLabel	xpLabel;
+	gamui::TextLabel	techLabel;
 	MoneyWidget			moneyWidget;
 
 	gamui::PushButton	pickupButton[NUM_PICKUP_BUTTONS];

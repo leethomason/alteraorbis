@@ -88,12 +88,12 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 
 	static const char* buildButtonText[NUM_BUILD_BUTTONS] = { 
 		"None", "Clear", "Pave", "Rotate",
-		"Ice", 
+		"Ice", "Factory",
 		"News\nKiosk", "Media\nKiosk", "Commerce\nKiosk", "Social\nKiosk", 
-		"Vault", "Factory"
+		"Vault"
 	};
 	static const char* modeButtonText[NUM_BUILD_MODES] = {
-		"Utility", "Tech0\nBasic", "Tech0\nAdv"
+		"Utility", "Tech0", "Tech1"
 	};
 	for( int i=0; i<NUM_BUILD_MODES; ++i ) {
 		modeButton[i].Init( &gamui2D, game->GetButtonLook(0) );
@@ -151,6 +151,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 
 	dateLabel.Init( &gamui2D );
 	xpLabel.Init( &gamui2D );
+	techLabel.Init( &gamui2D );
 	moneyWidget.Init( &gamui2D );
 }
 
@@ -166,6 +167,7 @@ GameScene::~GameScene()
 
 void GameScene::Resize()
 {
+	const Screenport& port = lumosGame->GetScreenport();
 	lumosGame->PositionStd( &okay, 0 );
 	
 	LayoutCalculator layout = static_cast<LumosGame*>(game)->DefaultLayout();
@@ -191,10 +193,15 @@ void GameScene::Resize()
 	layout.PosAbs( &createWorkerButton, 0, 6 );
 	layout.PosAbs( &ejectButton, 1, 6 );
 
-	const Screenport& port = lumosGame->GetScreenport();
-	minimap.SetPos( port.UIWidth()-MINI_MAP_SIZE, 0 );
+//	minimap.SetPos( port.UIWidth()-MINI_MAP_SIZE, 0 );
+//	faceWidget.SetPos( minimap.X()-faceWidget.Width(), 0 );
 
-	faceWidget.SetPos( minimap.X()-faceWidget.Width(), 0 );
+	layout.PosAbs( &faceWidget, -2, 0, 1, 1 );
+	layout.PosAbs( &minimap,    -1, 0, 1, 1 );
+	minimap.SetSize( minimap.Width(), minimap.Width() );	// make square
+
+	layout.PosAbs( &dateLabel,   5, 0 );
+	layout.PosAbs( &moneyWidget, 5, -1 );
 
 	for( int i=0; i<NUM_PICKUP_BUTTONS; ++i ) {
 		layout.PosAbs( &pickupButton[i], 0, i );
@@ -210,9 +217,8 @@ void GameScene::Resize()
 	layout.PosAbs( &ammoBar,	0, 1 );
 	layout.PosAbs( &shieldBar,  0, 2 );
 
-	dateLabel.SetPos(	faceWidget.X()-faceWidget.Width()*2.0f, 0 );
 	xpLabel.SetPos(		dateLabel.X(), dateLabel.Y() + gamui2D.GetTextHeight() );
-	moneyWidget.SetPos( dateLabel.X(), xpLabel.Y() + gamui2D.GetTextHeight() );
+	techLabel.SetPos(	xpLabel.X(),   xpLabel.Y() + gamui2D.GetTextHeight() );
 
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
 		newsButton[i].SetPos( port.UIWidth()- (NEWS_BUTTON_WIDTH), MINI_MAP_SIZE + (NEWS_BUTTON_HEIGHT+2)*i );
@@ -1012,7 +1018,7 @@ void GameScene::DoTick( U32 delta )
 	const SectorData& sd = sim->GetWorldMap()->GetWorldInfo().GetSector( sector );
 
 	CStr<64> str;
-	str.Format( "%.2f %s", sim->DateInAge(), sd.name.c_str() );
+	str.Format( "Date %.2f %s", sim->DateInAge(), sd.name.c_str() );
 	dateLabel.SetText( str.c_str() );
 
 	Chit* playerChit = sim->GetPlayerChit();
@@ -1028,19 +1034,26 @@ void GameScene::DoTick( U32 delta )
 	str.Clear();
 	if ( playerChit && playerChit->GetItem() ) {
 		const GameTrait& stat = playerChit->GetItem()->traits;
-		str.Format( "XP:%d Level:%d", stat.Experience(), stat.Level() );
+		str.Format( "Level %d XP %d/%d", stat.Level(), stat.Experience(), GameTrait::LevelToExperience( stat.Level()+1) );
 	}
 	xpLabel.SetText( str.c_str() );
 
 	SetBars();
 
-	CoreScript* coreMode = sim->GetChitBag()->IsBoundToCore( sim->GetPlayerChit(), true );
+	CoreScript* coreMode = sim->GetChitBag()->IsBoundToCore( playerChit, true );
 	for( int i=0; i<NUM_BUILD_MODES; ++i ) {
 		modeButton[i].SetVisible( coreMode != 0 );
 	}
 	tabBar.SetVisible( modeButton[0].Visible() );
 	createWorkerButton.SetVisible( coreMode != 0 );
 	ejectButton.SetVisible( coreMode != 0 );
+
+	str.Clear();
+	if ( playerChit && coreMode ) {
+		float tech = coreMode->GetTech();
+		str.Format( "Tech %.2f", tech );
+	}
+	techLabel.SetText( str.c_str() );
 
 	sim->GetEngine()->RestrictCamera( 0 );
 
