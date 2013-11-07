@@ -39,7 +39,7 @@ x Add position fuzz to gold, crystal, and item drops
 
 - game
 
-	- Patch Fix
+	x Patch Fix
 		x Bones are broken!
 	    x invert camera and key axis see if that works better.
 		d Mouse at edge. need full screen mode.
@@ -96,25 +96,19 @@ x Add position fuzz to gold, crystal, and item drops
 			x show vault gold / crystal
 			x ability of player to use vault. refactor UseBuilding() code out of the ai loop.
 			x vault behavior if overflow...
-
+		x rework item screen layout
+		x item forging
 		x porch positions incorrect
+
 		- forge / factory
-			- factory
+			x factory
 			- ability to use factory
-			- create weapons
+			x create weapons
 		- turret
 		- gold to build stuff
-		- item forging
 		- visitors - E - tech
 		- show grid travel dest
-		x rework item screen layout
-		- item destruction
-		- player re-gen. at cores? in general?
-		- decent clear dragging
-		- team colors
-		- shield: xp from getting hit
-		- How do bases and adventuring play together?
-			- why do you quit adventuring to build a base?
+		x player re-gen. at cores? in general?
 		- control
 			- space bar to pause
 			- tab to toggle weapons
@@ -122,6 +116,9 @@ x Add position fuzz to gold, crystal, and item drops
 			- pause button
 
 	- Market
+		- decent clear dragging
+		- team colors
+		- item destruction
 		- denizens
 		- item market
 		- citizens *don't* pick stuff up in their own domain
@@ -130,6 +127,13 @@ x Add position fuzz to gold, crystal, and item drops
 		- what to do with full vaults?
 
 	- Adventure
+		- How do bases and adventuring play together?
+			- why do you quit adventuring to build a base?
+		- shield: 
+			- xp from getting hit
+			- bugs in damage calc
+			- slow reload
+			- effects do something
 		- drop cash or return to vault
 		- balance battles
 		- history events

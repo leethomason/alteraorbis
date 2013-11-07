@@ -142,6 +142,7 @@ grinliz::IString MicroDB::GetIString( const char* key ) const
 int MicroDB::Find( const IString& ikey, MicroDB::Entry** result ) const
 {
 	*result=0;
+	if ( dataArr.Empty() ) return KEY_NOT_FOUND;
 
 	GLASSERT( !ikey.empty() );
 	if ( ikey.empty() ) {

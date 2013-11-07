@@ -233,6 +233,7 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos, const char* assetName )
 
 	// Player speed boost
 	chit->GetItem()->keyValues.Set( "speed", "f", DEFAULT_MOVE_SPEED*1.5f/1.2f );
+	chit->GetItem()->hpRegen = 1.0f;
 }
 
 

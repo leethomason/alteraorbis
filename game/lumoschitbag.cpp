@@ -320,7 +320,7 @@ Chit* LumosChitBag::QueryBuilding( const grinliz::Rectangle2I& bounds )
 Chit* LumosChitBag::QueryPorch( const grinliz::Vector2I& pos )
 {
 	Vector2I sector = ToSector(pos);
-	for( MapSpatialComponent* it = mapSpatialHash[SectorIndex(pos)]; it; it = it->nextBuilding ) {
+	for( MapSpatialComponent* it = mapSpatialHash[SectorIndex(sector)]; it; it = it->nextBuilding ) {
 		if ( it->PorchPos().Contains( pos )) {
 			return it->ParentChit();
 		}
