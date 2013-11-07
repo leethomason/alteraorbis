@@ -41,7 +41,7 @@ CharacterScene::CharacterScene( LumosGame* game, CharacterSceneData* csd ) : Sce
 	}
 	itemDescWidget.Init( &gamui2D );
 	moneyWidget.Init( &gamui2D );
-	moneyWidget.Set( itemComponent->GetWallet() );
+	moneyWidget.Set( itemComponent->GetItem(0)->wallet );
 
 	engine->lighting.direction.Set( 0, 1, 1 );
 	engine->lighting.direction.Normalize();

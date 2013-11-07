@@ -25,6 +25,7 @@ IString IStringConst::pave;
 IString IStringConst::ice;
 IString IStringConst::core;
 IString IStringConst::vault;
+IString IStringConst::forge;
 IString IStringConst::arachnoid;
 IString IStringConst::mantis;
 IString IStringConst::redMantis;
@@ -62,6 +63,7 @@ void IStringConst::Init()
 	ice = StringPool::Intern( "ice", true );
 	core = StringPool::Intern( "core", true );
 	vault = StringPool::Intern( "vault", true );
+	forge = StringPool::Intern( "forge", true );
 	arachnoid = StringPool::Intern( "arachnoid", true );
 	mantis = StringPool::Intern( "mantis", true );
 	redMantis = StringPool::Intern( "redMantis", true );

@@ -212,7 +212,7 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos, const char* assetName )
 	chitBag->AddItem( "blaster", chit, engine, 0, 2 );
 	chitBag->AddItem( "ring", chit, engine, 0, 2 );
 	chitBag->AddItem( "beamgun", chit, engine, 0, 2 );
-	chit->GetItemComponent()->AddGold( ReserveBank::Instance()->WithdrawDenizen() );
+	chit->GetItem()->wallet.AddGold( ReserveBank::Instance()->WithdrawDenizen() );
 	chit->GetItem()->flags |= GameItem::AI_BINDS_TO_CORE;
 	chit->GetItem()->traits.Roll( playerID );
 

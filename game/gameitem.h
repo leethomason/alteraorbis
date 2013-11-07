@@ -18,6 +18,7 @@
 
 #include "gamelimits.h"
 #include "lumosmath.h"
+#include "wallet.h"
 
 #include "../engine/enginelimits.h"
 
@@ -139,6 +140,7 @@ public:
 	void Roll( U32 seed, int nDice );
 
 	void AddBattleXP( int killshotLevel )	{ exp += 1 + killshotLevel; }
+	void AddCraftXP( int nCrystals )		{ exp += 8 * nCrystals; }
 
 	float NormalLeveledTrait( int t ) const {
 		GLASSERT( t >= 0 && t < NUM_TRAITS );
@@ -149,10 +151,6 @@ public:
 	float Damage() const		{ return NormalLeveledSkill( Strength() ); }
 	float Toughness() const		{ return NormalLeveledSkill( Will() ); }
 	
-	U32 Hash() const			{ 
-		return grinliz::Random::Hash( trait, sizeof(trait[0])*NUM_TRAITS );
-	}
-
 	// Log base 2: 1 -> 0		exp: 0-31  -> 0 level
 	//			   2 -> 1           32-63  -> 1
 	//             4 -> 2           64-127 -> 2
@@ -349,6 +347,7 @@ public:
 	int		clipCap;		// possible rounds in the clip
 
 	GameTrait traits;
+	Wallet wallet;			// this is either money carried (denizens) or resources bound in (weapons)
 
 	// ------- current --------
 	float	hp;				// current hp for this item
@@ -394,6 +393,7 @@ public:
 			clipCap			= rhs->clipCap;
 			rounds			= rhs->rounds;
 			traits			= rhs->traits;
+			wallet			= rhs->wallet;
 
 			hp				= rhs->hp;
 			accruedFire		= rhs->accruedFire;
@@ -420,6 +420,7 @@ public:
 			clipCap = 0;			// default to no clip and unlimited ammo
 			rounds = clipCap;
 			traits.Init();
+			wallet.EmptyWallet();
 			keyValues.Clear();
 			microdb.Clear();
 

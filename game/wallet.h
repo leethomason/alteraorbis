@@ -24,6 +24,11 @@ struct Wallet
 		gold = 0;
 		for( int i=0; i<NUM_CRYSTAL_TYPES; ++i) crystal[i] = 0; 
 	}
+
+	void AddGold( int g ) {
+		this->gold += g;
+	}
+
 	// Does the check before the increment.
 	void AddCrystal( int id ) {
 		if ( id < NUM_CRYSTAL_TYPES ) crystal[id] += 1;
@@ -45,9 +50,11 @@ struct Wallet
 	}
 
 	bool IsEmpty() const;
-	void MakeEmpty() {
+	Wallet EmptyWallet() {
+		Wallet w = *this;
 		Wallet empty;
 		*this = empty;
+		return w;
 	}
 	void Serialize( XStream* xs );
 

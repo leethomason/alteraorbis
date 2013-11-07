@@ -219,7 +219,7 @@ Chit* LumosChitBag::NewMonsterChit( const Vector3F& pos, const char* name, int t
 		// can return NUM_CRYSTAL_TYPES, if out, which is fine.
 		w.AddCrystal( ReserveBank::Instance()->WithdrawCrystal( random.Rand( NUM_CRYSTAL_TYPES )));
 	}
-	chit->GetItemComponent()->AddGold( w );	
+	chit->GetItem()->wallet.Add( w );	
 
 	chit->Add( new RenderComponent( engine, chit->GetItem()->ResourceName() ));
 	chit->Add( new PathMoveComponent( worldMap ));
@@ -350,7 +350,7 @@ Chit* LumosChitBag::NewGoldChit( const grinliz::Vector3F& pos, int amount )
 		chit->GetSpatialComponent()->SetPosition( pos );
 
 	}
-	chit->GetItemComponent()->AddGold( amount );
+	chit->GetItem()->wallet.AddGold( amount );
 	return chit;
 }
 
@@ -379,7 +379,7 @@ Chit* LumosChitBag::NewCrystalChit( const grinliz::Vector3F& pos, int crystal, b
 	
 	Wallet w;
 	w.AddCrystal( crystal );
-	chit->GetItemComponent()->AddGold( w );
+	chit->GetItem()->wallet.Add( w );
 
 	return chit;
 }

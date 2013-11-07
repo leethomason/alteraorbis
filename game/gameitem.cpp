@@ -163,6 +163,7 @@ void GameItem::Serialize( XStream* xs )
 	microdb.Serialize( xs, "microdb" );
 
 	traits.Serialize( xs );
+	wallet.Serialize( xs );
 	XarcClose( xs );
 }
 

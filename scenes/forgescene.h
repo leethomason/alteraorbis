@@ -80,8 +80,8 @@ private:
 	enum {
 		RING_MAIN,		// on
 		RING_GUARD,		// shield coupler
-		RING_TRIAD,		// 
-		RING_BLADE,		// 
+		RING_TRIAD,		// increases damage
+		RING_BLADE,		// increases damage, decreases shield coupling
 		NUM_RING_PARTS
 	};
 

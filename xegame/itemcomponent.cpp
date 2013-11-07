@@ -27,6 +27,7 @@
 #include "../game/physicsmovecomponent.h"
 #include "../game/pathmovecomponent.h"
 #include "../game/lumoschitbag.h"
+#include "../game/reservebank.h"
 
 #include "../script/procedural.h"
 #include "../script/itemscript.h"
@@ -70,11 +71,11 @@ void ItemComponent::DebugStr( grinliz::GLString* str )
 {
 	const GameItem* item = itemArr[0];
 	str->Format( "[Item] %s hp=%.1f/%d lvl=%d", item->Name(), item->hp, item->TotalHP(), item->traits.Level() );
-	if ( !wallet.IsEmpty() ) {
-		str->Format( "Au=%d Cy=g%dr%db%dv%d ", wallet.gold, 
-				        wallet.crystal[CRYSTAL_GREEN], wallet.crystal[CRYSTAL_RED], 
-						wallet.crystal[CRYSTAL_BLUE],  wallet.crystal[CRYSTAL_VIOLET]);
-	}
+//	if ( !wallet.IsEmpty() ) {
+//		str->Format( "Au=%d Cy=g%dr%db%dv%d ", wallet.gold, 
+//				        wallet.crystal[CRYSTAL_GREEN], wallet.crystal[CRYSTAL_RED], 
+//						wallet.crystal[CRYSTAL_BLUE],  wallet.crystal[CRYSTAL_VIOLET]);
+//	}
 }
 
 
@@ -95,11 +96,12 @@ void ItemComponent::Serialize( XStream* xs )
 		GLASSERT( !itemArr[i]->name.empty() );
 	}
 
-	wallet.Serialize( xs );
+//	wallet.Serialize( xs );
 	this->EndSerialize( xs );
 }
 
 
+/*
 void ItemComponent::AddGold( int delta )
 {
 	wallet.gold += delta;
@@ -115,6 +117,7 @@ void ItemComponent::AddGold( const Wallet& w )
 	}
 	parentChit->SetTickNeeded();
 }
+*/
 
 
 void ItemComponent::NameItem( GameItem* item )
@@ -386,32 +389,50 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		Chit* gold = (Chit*)msg.Ptr();
 		GoldCrystalFilter filter;
 		if (    filter.Accept( gold )		// it really is gold/crystal
-			 && gold->GetItemComponent()	// it has an item component
+			 && gold->GetItem()				// it has an item component
 			 && mainItem->hp > 0 )			// this item is alive
 		{
-			wallet.Add( gold->GetItemComponent()->GetWallet() );
-			gold->GetItemComponent()->EmptyWallet();
+			mainItem->wallet.Add( gold->GetItem()->wallet );
+			gold->GetItem()->wallet.EmptyWallet();
 
 			// Need to delete the gold, else it will track to us again!
 			gold->QueueDelete();
 		}
 	}
 	else if ( msg.ID() >= ChitMsg::CHIT_DESTROYED_START && msg.ID() <= ChitMsg::CHIT_DESTROYED_END ) {
-		// FIXME: send to reserve if no pos
-		GLASSERT( parentChit->GetSpatialComponent() );
-		Vector3F pos = parentChit->GetSpatialComponent()->GetPosition();
 
-		if ( !wallet.IsEmpty() ) {
-			parentChit->GetLumosChitBag()->NewWalletChits( pos, wallet );
-			wallet.MakeEmpty();
+		// Drop our wallet on the ground or send to the Reserve?
+		// Basically, MoBs and buildings drop stuff. The rest goes to Reserve.
+		BuildingFilter buildingFilter;
+		MoBFilter mobFilter;
+
+		Wallet w = mainItem->wallet.EmptyWallet();
+		bool dropItems = false;
+		Vector3F pos = { 0, 0, 0 };
+		if ( parentChit->GetSpatialComponent() ) {
+			pos = parentChit->GetSpatialComponent()->GetPosition();
 		}
+
+		if ( buildingFilter.Accept( parentChit ) || mobFilter.Accept( parentChit )) {
+			dropItems = true;
+			if ( !mainItem->wallet.IsEmpty() ) {
+				parentChit->GetLumosChitBag()->NewWalletChits( pos, w );
+			}
+		}
+		else {
+			ReserveBank::Instance()->Deposit( w );
+		}
+
 		while( itemArr.Size() > 1 ) {
 			if ( itemArr[itemArr.Size()-1]->Intrinsic() ) {
 				break;
 			}
 			GameItem* item = itemArr.Pop();
 			GLASSERT( !item->name.empty() );
-			parentChit->GetLumosChitBag()->NewItemChit( pos, item, true, true );
+			if ( dropItems )
+				parentChit->GetLumosChitBag()->NewItemChit( pos, item, true, true );
+			else
+				ReserveBank::Instance()->Deposit( item->wallet.EmptyWallet() );
 		}
 	}
 	else {

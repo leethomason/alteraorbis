@@ -151,7 +151,7 @@ void ForgeScene::SetModel()
 {
 	GameItem humanMale = ItemDefDB::Instance()->Get( "humanMale" );
 	techRequired = 0;
-	crystalRequired.MakeEmpty();
+	crystalRequired.EmptyWallet();
 	crystalRequired.crystal[CRYSTAL_GREEN] += 1;
 
 	int type = RING;

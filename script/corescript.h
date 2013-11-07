@@ -46,6 +46,7 @@ public:
 
 	WorkQueue* GetWorkQueue()	{ return workQueue; }
 	void SetDefaultSpawn( grinliz::IString s ) { defaultSpawn = s; }
+	int GetTechLevel() const	{ return 2; }		// FIXME
 
 private:
 	WorldMap*	worldMap;

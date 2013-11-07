@@ -52,6 +52,7 @@ public:
 	}
 
 	static ReserveBank* Instance() { return instance; }
+	void Deposit( const Wallet& wallet ) { bank.Add( wallet ); }
 
 private:
 	static ReserveBank* instance;

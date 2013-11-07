@@ -15,6 +15,7 @@
 #include "../xegame/istringconst.h"
 
 #include "../scenes/characterscene.h"
+#include "../scenes/forgescene.h"
 
 #include "../script/corescript.h"
 
@@ -193,21 +194,36 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta, U32 since )
 
 	case Task::TASK_USE_BUILDING:
 		{
-			Chit* building = chitBag->QueryPorch( pos2i );
+			Chit* building	= chitBag->QueryPorch( pos2i );
+			Vector2I sector	= ToSector( pos2i );
+			CoreScript* cs	= chitBag->GetCore( sector );
+
 			if ( building ) {
+				IString buildingName = building->GetItem()->name;
+
 				if ( chit->PlayerControlled() ) {
-					chitBag->PushScene( LumosGame::SCENE_CHARACTER, 
-										new CharacterSceneData( itemComp, building->GetItemComponent() ));
+					if ( buildingName == IStringConst::vault ) {
+						chitBag->PushScene( LumosGame::SCENE_CHARACTER, 
+											new CharacterSceneData( itemComp, building->GetItemComponent() ));
+					}
+					else if ( buildingName == IStringConst::forge ) {
+						ForgeSceneData* data = new ForgeSceneData();
+						data->tech = cs->GetTechLevel();
+						data->level = chit->GetItem()->traits.Level();
+						data->wallet = chit->GetItem()->wallet;
+						chitBag->PushScene( LumosGame::SCENE_FORGE, data );
+					}
 				}
 				// Workers:
 				else if ( chit->GetItem()->flags & GameItem::AI_DOES_WORK ) {
-					if ( building->GetItem()->name == IStringConst::vault ) {
-						ItemComponent* vaultIC = building->GetItemComponent();
-						GLASSERT( vaultIC );
-						Wallet w = itemComp->EmptyWallet();
-						vaultIC->AddGold( w );
+					if ( buildingName == IStringConst::vault ) {
+						GameItem* vaultItem = building->GetItem();
+						GLASSERT( vaultItem );
+						Wallet w = vaultItem->wallet.EmptyWallet();
+						vaultItem->wallet.Add( w );
 
 						// Put everything in the vault.
+						ItemComponent* vaultIC = building->GetItemComponent();
 						for( int i=1; i<itemComp->NumItems(); ++i ) {
 							if ( vaultIC->CanAddToInventory() ) {
 								GameItem* item = itemComp->RemoveFromInventory(i);
@@ -218,12 +234,10 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta, U32 since )
 						}
 
 						// Move gold & crystal to the owner?
-						Vector2I sector = ToSector( pos2i );
-						CoreScript* cs = chitBag->GetCore( sector );
 						Chit* controller = cs->GetAttached( 0 );
 						if ( controller && controller->GetItemComponent() ) {
-							Wallet w = vaultIC->EmptyWallet();
-							controller->GetItemComponent()->AddGold( w );
+							Wallet w = vaultItem->wallet.EmptyWallet();
+							controller->GetItem()->wallet.Add( w );
 						}
 					}
 				}

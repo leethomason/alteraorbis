@@ -1020,8 +1020,8 @@ void GameScene::DoTick( U32 delta )
 	str.Clear();
 
 	Wallet wallet;
-	if ( playerChit && playerChit->GetItemComponent() ) {
-		wallet = playerChit->GetItemComponent()->GetWallet();
+	if ( playerChit && playerChit->GetItem() ) {
+		wallet = playerChit->GetItem()->wallet;
 	}
 	moneyWidget.Set( wallet );
 

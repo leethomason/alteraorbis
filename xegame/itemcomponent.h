@@ -61,12 +61,6 @@ public:
 	IMeleeWeaponItem*	GetMeleeWeapon();
 	IShield*			GetShield();
 
-	void AddGold( int delta );
-	void AddGold( const Wallet& wallet );
-
-	Wallet EmptyWallet() { Wallet w = wallet; wallet.MakeEmpty(); return w; }
-	const Wallet& GetWallet() const			{ return wallet; }
-
 	bool CanAddToInventory();
 	int  NumCarriedItems() const;
 
@@ -100,7 +94,6 @@ private:
 	void SortInventory();						// AIs will use the "best" item.
 
 	CTicker slowTick;
-	Wallet wallet;
 
 	Engine *engine;
 	WorldMap* worldMap;
