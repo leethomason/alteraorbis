@@ -1,6 +1,9 @@
 #include "forgescene.h"
 #include "../game/lumosgame.h"
 #include "../game/gameitem.h"
+
+#include "../xegame/itemcomponent.h"
+
 #include "../engine/engine.h"
 
 #include "../script/procedural.h"
@@ -13,17 +16,14 @@ static const float NEAR = 0.1f;
 static const float FAR  = 10.0f;
 
 
-ForgeSceneData::~ForgeSceneData()
-{
-	delete item;
-}
-
-
 ForgeScene::ForgeScene( LumosGame* game, ForgeSceneData* data ) : Scene( game ), lumosGame( game ), screenport( game->GetScreenport())
 {
 	forgeData = data;
-	forgeData->item = new GameItem();
-	itemBuilt = false;
+	item = new GameItem();
+	random.SetSeed( item->id );
+	random.Rand();
+	random.Rand();
+	displayItem = item;
 
 	screenport.SetNearFar( NEAR, FAR );
 	engine = new Engine( &screenport, lumosGame->GetDatabase(), 0 );
@@ -87,21 +87,18 @@ ForgeScene::ForgeScene( LumosGame* game, ForgeSceneData* data ) : Scene( game ),
 	str.Format( "Tech: %d", data->tech );
 	techAvailLabel.SetText( str.c_str() );
 
-	crystalAvailWidget.Set( data->wallet );
+	crystalAvailWidget.Set( forgeData->itemComponent->GetItem(0)->wallet );
 
 	buildButton.Init( &gamui2D, game->GetButtonLook(0));
 	buildButton.SetText( "Build" );
 
-	SetModel();
+	SetModel( false );
 }
 
 
 ForgeScene::~ForgeScene()
 {
-	if ( !itemBuilt ) {
-		delete forgeData->item;
-		forgeData->item = 0;
-	}
+	delete item;
 	engine->FreeModel( model );
 	delete engine;
 }
@@ -147,7 +144,7 @@ void ForgeScene::Resize()
 }
 
 
-void ForgeScene::SetModel()
+void ForgeScene::SetModel( bool randomTraits )
 {
 	GameItem humanMale = ItemDefDB::Instance()->Get( "humanMale" );
 	techRequired = 0;
@@ -171,6 +168,13 @@ void ForgeScene::SetModel()
 	const char* typeName = "pistol";
 
 	int roll[GameTrait::NUM_TRAITS] = { 10, 10, 10, 10, 10 };
+	if ( randomTraits ) {
+		random.DiceArray( 6, 
+						  GameTrait::NUM_TRAITS*2 + 2 + forgeData->itemComponent->GetItem(0)->traits.Level(), 
+						  3, 
+						  GameTrait::NUM_TRAITS, 
+						  roll );
+	}
 
 	static const int BONUS = 2;
 
@@ -219,12 +223,12 @@ void ForgeScene::SetModel()
 		typeName = "shield";
 	}
 
-	if ( !itemBuilt ) {
-		const GameItem& item = ItemDefDB::Instance()->Get( typeName );
-		forgeData->item->CopyFrom( &item, forgeData->item->id );
-		ItemDefDB::Instance()->AssignWeaponStats( roll, item, forgeData->item );
+	if ( item ) {
+		const GameItem& itemDef = ItemDefDB::Instance()->Get( typeName );
+		item->CopyFrom( &itemDef, item->id );
+		ItemDefDB::Instance()->AssignWeaponStats( roll, itemDef, item );
 	}
-	itemDescWidget.SetInfo( forgeData->item, &humanMale );
+	itemDescWidget.SetInfo( displayItem, &humanMale );
 
 	int eff = 0;
 	if ( effects[EFFECT_FIRE].Down() )		eff |= GameItem::EFFECT_FIRE;
@@ -255,8 +259,14 @@ void ForgeScene::SetModel()
 	q.FromAxisAngle( AXIS, type == SHIELD ? -90.0f : 0.0f );
 	model->SetRotation( q );
 
+	if ( item ) {
+		item->keyValues.Set( "features", "d", features );
+		item->flags &= ~GameItem::EFFECT_MASK;
+		item->flags |= eff;
+	}
+
 	ProcRenderInfo info;
-	AssignProcedural( typeName, false, forgeData->item->id, 0, false, eff, features, &info );
+	AssignProcedural( typeName, false, displayItem->id, 0, false, eff, features, &info );
 
 	model->SetTextureXForm( info.te.uvXForm.x, info.te.uvXForm.y, info.te.uvXForm.z, info.te.uvXForm.w );
 	model->SetTextureClip( info.te.clip.x, info.te.clip.y, info.te.clip.z, info.te.clip.w );
@@ -268,9 +278,9 @@ void ForgeScene::SetModel()
 	techRequiredLabel.SetText( str.c_str() );
 	crystalRequiredWidget.Set( crystalRequired );
 	
-	if (    !itemBuilt 
+	if (    displayItem 
 		 && techRequired <= forgeData->tech 
-		 && crystalRequired <= forgeData->wallet ) 
+		 && crystalRequired <= forgeData->itemComponent->GetItem(0)->wallet ) 
 	{
 		buildButton.SetEnabled( true );
 	}
@@ -280,19 +290,24 @@ void ForgeScene::SetModel()
 }
 
 
-void ForgeScene::ItemTapped( const gamui::UIItem* item )
+void ForgeScene::ItemTapped( const gamui::UIItem* uiItem )
 {
-	if ( item == &okay ) {
+	if ( uiItem == &okay ) {
 		lumosGame->PopScene();
 	}
-	else if ( item == &buildButton ) {
-		// Can only be tapped if enabled.
-		forgeData->wallet.Remove( crystalRequired );
-		forgeData->itemWallet.Add( crystalRequired );	// becomes part of the item, and will be returned to Reserve when item is destroyed.
-		forgeData->item->traits.Roll( forgeData->item->id, 
-									  GameTrait::NUM_TRAITS*2 + forgeData->level );
+	else if ( uiItem == &buildButton ) {
+		// This can only be tapped if enabled. We don't need to check for enough
+		// resources to build. Start with the SetModel() call, which will
+		// apply the features and make the die roll.
+		SetModel( true );
 
-		crystalAvailWidget.Set( forgeData->wallet );
+		forgeData->itemComponent->AddToInventory( item );
+		forgeData->itemComponent->GetItem(0)->wallet.Remove( crystalRequired );
+		item->wallet.Add( crystalRequired );	// becomes part of the item, and will be returned to Reserve when item is destroyed.
+
+		displayItem = item;
+		item = 0;
+		crystalAvailWidget.Set( forgeData->itemComponent->GetItem(0)->wallet );
 		crystalRequiredWidget.SetVisible( false );
 
 		// Disable everything.
@@ -311,9 +326,8 @@ void ForgeScene::ItemTapped( const gamui::UIItem* item )
 		for( int i=0; i<NUM_EFFECTS; ++i ) {
 			effects[i].SetEnabled( false );
 		}
-		itemBuilt = true;
 	}
-	SetModel();
+	SetModel( false );
 }
 
 

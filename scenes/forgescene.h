@@ -12,18 +12,15 @@ class GameItem;
 class LumosGame;
 class Engine;
 class Model;
-
+class ItemComponent;
 
 class ForgeSceneData : public SceneData
 {
 public:
-	ForgeSceneData() : SceneData(), item(0), tech(3), level(4) {}
-	virtual ~ForgeSceneData();
-	GameItem*	item;		// item that was forged. (out) WARNING: be sure to null so it doesn't get deleted!
-	int			tech;		// available tech (in)
-	int			level;		// skill of the smith (in)
-	Wallet		wallet;		// in/out: available and used
-	Wallet		itemWallet;	// out: the wallet that should become part of the new ItemComponent
+	ForgeSceneData() : SceneData(), tech(3), itemComponent(0) {}
+
+	int				tech;		// available tech (in)
+	ItemComponent*	itemComponent;	// who is operating this forge?
 };
 
 
@@ -44,14 +41,14 @@ public:
 	virtual void Draw3D( U32 delatTime );
 
 private:
-	void SetModel();
+	void SetModel( bool randomizeTraits );
 
 	LumosGame*			lumosGame;
 	Engine*				engine;
 	Screenport			screenport;
 	Model*				model;
-	bool				itemBuilt;
-
+	const GameItem*		displayItem;
+	grinliz::Random		random;
 	gamui::PushButton	okay;
 
 	enum {
@@ -95,6 +92,7 @@ private:
 	ForgeSceneData*		forgeData;
 	int					techRequired;
 	Wallet				crystalRequired;
+	GameItem*			item;
 
 	gamui::ToggleButton	itemType[NUM_ITEM_TYPES];
 	gamui::ToggleButton gunType[NUM_GUN_TYPES];

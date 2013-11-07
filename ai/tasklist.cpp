@@ -206,11 +206,10 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta, U32 since )
 						chitBag->PushScene( LumosGame::SCENE_CHARACTER, 
 											new CharacterSceneData( itemComp, building->GetItemComponent() ));
 					}
-					else if ( buildingName == IStringConst::forge ) {
+					else if ( buildingName == IStringConst::forge && itemComp->CanAddToInventory() ) {
 						ForgeSceneData* data = new ForgeSceneData();
 						data->tech = cs->GetTechLevel();
-						data->level = chit->GetItem()->traits.Level();
-						data->wallet = chit->GetItem()->wallet;
+						data->itemComponent = itemComp;
 						chitBag->PushScene( LumosGame::SCENE_FORGE, data );
 					}
 				}

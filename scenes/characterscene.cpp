@@ -107,16 +107,6 @@ void CharacterScene::Resize()
 
 	itemDescWidget.SetLayout( layout );
 	itemDescWidget.SetPos( x, y );
-
-	/*
-	float dx = desc.Width() * 0.5f;
-
-	for( int i=0; i<NUM_TEXT_KV; ++i ) {
-		textKey[i].SetPos( x, y );
-		textVal[i].SetPos( x+dx, y );
-		y += gamui2D.GetTextHeight() * 1.5f;
-	}
-	*/
 }
 
 
@@ -218,13 +208,16 @@ void CharacterScene::SetButtonText()
 			IString proc = down->keyValues.GetIString( "procedural" );
 			if ( !proc.empty() ) {
 				ProcRenderInfo info;
+				int features = 0;
+				down->keyValues.Fetch( "features", "d", &features );
+
 				AssignProcedural(	proc.c_str(), 
 									strstr( down->Name(), "emale" )!=0, 
 									down->id, 
 									down->primaryTeam, 
 									false, 
 									down->flags & GameItem::EFFECT_MASK, 
-									0,
+									features,
 									&info );
 				model->SetTextureXForm( info.te.uvXForm );
 				model->SetColorMap( true, info.color );

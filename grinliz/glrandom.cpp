@@ -432,5 +432,6 @@ void Random::DiceArray( int sides, int nDiceToRoll, int maxDie, int nOutputs, in
 			}
 		}
 	}
+	ShuffleArray( output, nOutputs );
 }
 

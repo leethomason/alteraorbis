@@ -72,6 +72,10 @@ DialogScene::DialogScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 	itemComponent1->AddToInventory( new GameItem( pistol ));
 	itemComponent1->AddToInventory( new GameItem( ring ));
 	itemComponent1->AddToInventory( new GameItem( ring ));
+
+	for( int i=0; i<NUM_CRYSTAL_TYPES; ++i ) {
+		itemComponent0->GetItem(0)->wallet.AddCrystal( i );
+	}
 }
 
 DialogScene::~DialogScene()
@@ -120,10 +124,8 @@ void DialogScene::ItemTapped( const gamui::UIItem* item )
 	}
 	else if ( item == &sceneButtons[FORGE] ) {
 		ForgeSceneData* data = new ForgeSceneData();
-		data->wallet.crystal[CRYSTAL_GREEN] = 1;
-		data->wallet.crystal[CRYSTAL_RED] = 1;
-		data->wallet.crystal[CRYSTAL_BLUE] = 1;
-		data->wallet.crystal[CRYSTAL_VIOLET] = 1;
+		data->itemComponent = itemComponent0;
+		data->tech = 3;
 		game->PushScene( LumosGame::SCENE_FORGE, data );
 	}
 }
