@@ -597,7 +597,9 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 since )
 	{
 		// Visitors at a kiosk.
 		Vector2I pos2i = thisComp.spatial->GetPosition2DI();
-		Chit* chit = this->GetChitBag()->ToLumos()->QueryPorch( pos2i );
+		Vector2I sector = ToSector( pos2i );
+		Chit* chit = this->GetLumosChitBag()->QueryPorch( pos2i );
+		CoreScript* cs = this->GetLumosChitBag()->GetCore( sector );
 		
 		VisitorData* vd = &Visitors::Instance()->visitorData[visitorIndex];
 		IString kioskName = vd->CurrentKioskWant();
@@ -607,6 +609,7 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 since )
 			if ( vd->kioskTime > VisitorData::KIOSK_TIME ) {
 				Vector2I sector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
 				vd->DidVisitKiosk( sector );
+				cs->AddTech();
 				vd->kioskTime = 0;
 				currentAction = NO_ACTION;	// done here - move on!
 				return false;

@@ -20,6 +20,11 @@
 
 #include "../script/procedural.h"
 
+static const double TECH_ADDED_BY_VISITOR = 0.2;
+static const double TECH_DECAY_0 = 0.0001;
+static const double TECH_DECAY_1 = 0.001;
+static const double TECH_MAX = 3.5;
+
 using namespace grinliz;
 
 CoreScript::CoreScript( WorldMap* map, LumosChitBag* chitBag, Engine* engine ) 
@@ -29,6 +34,7 @@ CoreScript::CoreScript( WorldMap* map, LumosChitBag* chitBag, Engine* engine )
 	  workQueue( 0 )
 {
 	workQueue = new WorkQueue( map, chitBag, engine );
+	tech = 0;
 }
 
 
@@ -48,6 +54,7 @@ void CoreScript::Serialize( XStream* xs )
 {
 	XarcOpen( xs, ScriptName() );
 	XARC_SER( xs, boundID );
+	XARC_SER( xs, tech );
 	XARC_SER( xs, defaultSpawn );
 	spawnTick.Serialize( xs, "spawn" );
 	workQueue->Serialize( xs );
@@ -75,8 +82,8 @@ void CoreScript::OnAdd()
 void CoreScript::OnRemove()
 {
 	if ( boundID ) {
-	GLASSERT( scriptContext->chitBag );
-	scriptContext->chitBag->chitToCoreTable.Remove( boundID );
+		GLASSERT( scriptContext->chitBag );
+		scriptContext->chitBag->chitToCoreTable.Remove( boundID );
 	}
 }
 
@@ -162,6 +169,9 @@ int CoreScript::DoTick( U32 delta, U32 since )
 	Chit* attached = GetAttached(0);
 	bool normalPossible = scriptContext->census->normalMOBs < TYPICAL_MONSTERS;
 	bool greaterPossible = scriptContext->census->greaterMOBs < TYPICAL_GREATER;
+
+	tech -= Lerp( TECH_DECAY_0, TECH_DECAY_1, tech/TECH_MAX );
+	tech = Clamp( tech, 0.0, TECH_MAX );
 
 	if (    spawnTick.Delta( since ) 
 		 && !attached
@@ -270,3 +280,8 @@ int CoreScript::DoTick( U32 delta, U32 since )
 }
 
 
+void CoreScript::AddTech()
+{
+	tech += TECH_ADDED_BY_VISITOR;
+	tech = Clamp( tech, 0.0, TECH_MAX );
+}

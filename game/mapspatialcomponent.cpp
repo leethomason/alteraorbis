@@ -134,10 +134,13 @@ Rectangle2I MapSpatialComponent::PorchPos() const
 {
 	Rectangle2I v;
 	v.Set( 0, 0, 0, 0 );
+	int porch = 0;
 
 	GameItem* item = parentChit->GetItem();
-	if ( !item ) return v;
-	if ( item->keyValues.GetIString( "porch" ).empty() ) return v;
+	if ( !item ) 
+		return v;
+	if ( item->keyValues.GetInt( "porch", &porch ))
+		return v;
 
 	// picks up the size, so we only need to 
 	// adjust one coordinate for the porch below

@@ -127,6 +127,13 @@ inline T Lerp( const T& x0, const T& x1, float t )
 }
 
 
+template <class T>
+inline T Lerp( const T& x0, const T& x1, double t )
+{
+	return  x0 + (x1-x0)*t;
+}
+
+
 // Cubic fade (hermite)
 // Use: Lerp( a, b, Fade3( t ));
 inline float Fade3( float t )

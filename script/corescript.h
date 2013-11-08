@@ -48,12 +48,15 @@ public:
 	void SetDefaultSpawn( grinliz::IString s ) { defaultSpawn = s; }
 
 	int GetTechLevel() const	{ return (int)GetTech(); }
-	float GetTech() const		{ return 2.57f; }
+	float GetTech() const		{ return float(tech); }
+	void AddTech();
+
 private:
 	WorldMap*	worldMap;
 	WorkQueue*	workQueue;
 	CTicker		spawnTick;
 	int			boundID;
+	double		tech;
 	grinliz::IString defaultSpawn;
 };
 

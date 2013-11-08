@@ -193,12 +193,10 @@ void GameScene::Resize()
 	layout.PosAbs( &createWorkerButton, 0, 6 );
 	layout.PosAbs( &ejectButton, 1, 6 );
 
-//	minimap.SetPos( port.UIWidth()-MINI_MAP_SIZE, 0 );
-//	faceWidget.SetPos( minimap.X()-faceWidget.Width(), 0 );
-
 	layout.PosAbs( &faceWidget, -2, 0, 1, 1 );
 	layout.PosAbs( &minimap,    -1, 0, 1, 1 );
 	minimap.SetSize( minimap.Width(), minimap.Width() );	// make square
+	faceWidget.SetSize( faceWidget.Width(), faceWidget.Width() );
 
 	layout.PosAbs( &dateLabel,   5, 0 );
 	layout.PosAbs( &moneyWidget, 5, -1 );
@@ -495,12 +493,12 @@ grinliz::IString GameScene::BuildActiveInfo( int* size )
 		"pave",
 		"",	// rotate
 		"ice",	// ice
+		"factory",
 		"kiosk.n",
 		"kiosk.m",
 		"kiosk.c",
 		"kiosk.s",
 		"vault",
-		"factory",
 	};
 	IString str;
 	// Handle "pave" and "ice" which are 
