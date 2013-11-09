@@ -90,7 +90,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 		"None", "Clear", "Pave", "Rotate",
 		"Ice", "Factory",
 		"News\nKiosk", "Media\nKiosk", "Commerce\nKiosk", "Social\nKiosk", 
-		"Vault"
+		"Vault", "Forge"
 	};
 	static const char* modeButtonText[NUM_BUILD_MODES] = {
 		"Utility", "Tech0", "Tech1"
@@ -499,6 +499,7 @@ grinliz::IString GameScene::BuildActiveInfo( int* size )
 		"kiosk.c",
 		"kiosk.s",
 		"vault",
+		"factory"
 	};
 	IString str;
 	// Handle "pave" and "ice" which are 
@@ -1050,6 +1051,11 @@ void GameScene::DoTick( U32 delta )
 	if ( playerChit && coreMode ) {
 		float tech = coreMode->GetTech();
 		str.Format( "Tech %.2f", tech );
+
+		int atech = coreMode->AchievedTechLevel();
+		for( int i=1; i<NUM_BUILD_MODES; ++i ) {
+			modeButton[i].SetEnabled( i-1 <= atech );
+		}
 	}
 	techLabel.SetText( str.c_str() );
 

@@ -47,7 +47,9 @@ public:
 	WorkQueue* GetWorkQueue()	{ return workQueue; }
 	void SetDefaultSpawn( grinliz::IString s ) { defaultSpawn = s; }
 
-	int GetTechLevel() const	{ return (int)GetTech(); }
+	int GetTechLevel() const		{ return (int)GetTech(); }
+	int AchievedTechLevel() const	{ return achievedTechLevel; }
+
 	float GetTech() const		{ return float(tech); }
 	void AddTech();
 
@@ -57,6 +59,7 @@ private:
 	CTicker		spawnTick;
 	int			boundID;
 	double		tech;
+	int			achievedTechLevel;
 	grinliz::IString defaultSpawn;
 };
 

@@ -28,7 +28,9 @@
 // move to tasklist file
 #include "lumoschitbag.h"
 #include "lumosgame.h"
+
 #include "../scenes/characterscene.h"
+#include "../scenes/forgescene.h"
 
 #include "../script/battlemechanics.h"
 #include "../script/plantscript.h"
@@ -1677,6 +1679,12 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 									   ComponentSet::IS_ALIVE |
 									   ComponentSet::NOT_IN_IMPACT );
 
+	if ( !thisComp.okay )
+		return;
+
+	Vector2I mapPos = thisComp.spatial->GetPosition2DI();
+	Vector2I sector = ToSector( mapPos );
+
 	switch ( msg.ID() ) {
 	case ChitMsg::PATHMOVE_DESTINATION_REACHED:
 		if ( currentAction != WANDER ) {
@@ -1689,8 +1697,6 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		// action or mode.
 		if ( chit->GetItem() && ( chit->GetItem()->flags & GameItem::AI_BINDS_TO_CORE )) {
 
-			Vector2I mapPos = thisComp.spatial->GetPosition2DI();
-			Vector2I sector = { mapPos.x/SECTOR_SIZE, mapPos.y/SECTOR_SIZE };
 			bool standingOnCore = map->GetWorldGrid( mapPos.x, mapPos.y ).IsCore();
 
 			if ( standingOnCore ) {
@@ -1714,9 +1720,18 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			if ( building && building->GetItem() ) {
 				IString name = building->GetItem()->name;
 				ItemComponent* ic = parentChit->GetItemComponent();
-				if ( name == IStringConst::vault && ic ) {
-					GetLumosChitBag()->PushScene( LumosGame::SCENE_CHARACTER, 
-								new CharacterSceneData( ic, building->GetItemComponent() ));
+				CoreScript* cs	= GetLumosChitBag()->GetCore( sector );
+
+				if ( cs && ic ) {
+					if ( name == IStringConst::vault ) {
+						GetLumosChitBag()->PushScene( LumosGame::SCENE_CHARACTER, new CharacterSceneData( ic, building->GetItemComponent() ));
+					}
+					else if ( name == IStringConst::factory ) {
+						ForgeSceneData* data = new ForgeSceneData();
+						data->tech = cs->GetTechLevel();
+						data->itemComponent = ic;
+						GetLumosChitBag()->PushScene( LumosGame::SCENE_FORGE, data );
+					}
 				}
 			}
 		}

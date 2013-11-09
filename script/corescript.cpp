@@ -35,6 +35,7 @@ CoreScript::CoreScript( WorldMap* map, LumosChitBag* chitBag, Engine* engine )
 {
 	workQueue = new WorkQueue( map, chitBag, engine );
 	tech = 0;
+	achievedTechLevel = 0;
 }
 
 
@@ -55,6 +56,7 @@ void CoreScript::Serialize( XStream* xs )
 	XarcOpen( xs, ScriptName() );
 	XARC_SER( xs, boundID );
 	XARC_SER( xs, tech );
+	XARC_SER( xs, achievedTechLevel );
 	XARC_SER( xs, defaultSpawn );
 	spawnTick.Serialize( xs, "spawn" );
 	workQueue->Serialize( xs );
@@ -284,4 +286,6 @@ void CoreScript::AddTech()
 {
 	tech += TECH_ADDED_BY_VISITOR;
 	tech = Clamp( tech, 0.0, TECH_MAX );
+
+	achievedTechLevel = Max( achievedTechLevel, (int)tech );
 }

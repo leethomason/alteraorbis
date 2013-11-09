@@ -50,6 +50,7 @@ public:
 	static grinliz::IString ice;
 	static grinliz::IString core;
 	static grinliz::IString vault;
+	static grinliz::IString factory;
 	static grinliz::IString forge;
 
 	static grinliz::IString arachnoid;

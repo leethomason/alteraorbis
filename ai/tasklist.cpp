@@ -202,16 +202,7 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta, U32 since )
 				IString buildingName = building->GetItem()->name;
 
 				if ( chit->PlayerControlled() ) {
-					if ( buildingName == IStringConst::vault ) {
-						chitBag->PushScene( LumosGame::SCENE_CHARACTER, 
-											new CharacterSceneData( itemComp, building->GetItemComponent() ));
-					}
-					else if ( buildingName == IStringConst::forge && itemComp->CanAddToInventory() ) {
-						ForgeSceneData* data = new ForgeSceneData();
-						data->tech = cs->GetTechLevel();
-						data->itemComponent = itemComp;
-						chitBag->PushScene( LumosGame::SCENE_FORGE, data );
-					}
+					// Not sure how this happened. But do nothing.
 				}
 				// Workers:
 				else if ( chit->GetItem()->flags & GameItem::AI_DOES_WORK ) {

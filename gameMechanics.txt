@@ -14,7 +14,8 @@ Tech Levels
 ----------
 
 Tech 0:
-	Forge
+	Ice
+	Forge/Factory
 	Kiosk:M
 	Kiosk:N
 	Kiosk:C
