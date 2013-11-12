@@ -32,6 +32,7 @@ Tech 1:
 
 Tech 2:
 	Temple:3
-	Spa
 	Lounge
 
+Tech 3:
+	Meditation Center

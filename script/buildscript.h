@@ -45,6 +45,7 @@ public:
 	};
 
 	const BuildData& GetData( int i );
+	const BuildData& GetDataFromStructure( const grinliz::IString& structure );
 
 private:
 	static BuildData buildData[NUM_OPTIONS];

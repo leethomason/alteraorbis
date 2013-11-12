@@ -156,31 +156,6 @@ void WorkQueue::AddClear( const grinliz::Vector2I& pos2i )
 	SendNotification( pos2i );
 }
 
-/*
-void WorkQueue::AddPave( const Vector2I& pos2i, int pave )
-{
-	if ( pos2i.x / SECTOR_SIZE == sector.x && pos2i.y / SECTOR_SIZE == sector.y ) {
-		// okay!
-	}
-	else {
-		// wrong sector.
-		return;
-	}
-
-	QueueItem item;
-	item.action = PAVE;
-	item.pave = pave;
-	item.pos = pos2i;
-	item.taskID = ++idPool;
-
-	// Clear out existing.
-	Remove( pos2i );
-
-	AddImage( &item );
-	queue.Push( item );
-	SendNotification( pos2i );
-}
-*/
 
 void WorkQueue::AddBuild( const grinliz::Vector2I& pos2i, IString structure )
 {

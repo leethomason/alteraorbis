@@ -8,6 +8,7 @@
 #include "../game/worldgrid.h"
 #include "../game/lumoschitbag.h"
 #include "../game/lumosgame.h"
+#include "../game/reservebank.h"
 
 #include "../xegame/chit.h"
 #include "../xegame/spatialcomponent.h"
@@ -18,7 +19,7 @@
 #include "../scenes/forgescene.h"
 
 #include "../script/corescript.h"
-
+#include "../script/buildscript.h"
 
 using namespace grinliz;
 using namespace ai;
@@ -153,7 +154,14 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta, U32 since )
 			// IsPassable (isLand, noRocks)
 			// No plants
 			// No buildings
-			if ( WorkQueue::TaskCanComplete( worldMap, chitBag, task->pos2i, true, WorkQueue::CalcTaskSize( task->structure ))) {
+			BuildScript buildScript;
+			const BuildData& buildData	= buildScript.GetDataFromStructure( task->structure );
+			int cost					= buildData.cost;
+			bool canAfford				= itemComp->GetItem(0)->wallet.gold >= cost;
+
+			if (    canAfford 
+				 && WorkQueue::TaskCanComplete( worldMap, chitBag, task->pos2i, true, WorkQueue::CalcTaskSize( task->structure ))) 
+			{
 				if ( task->structure == IStringConst::ice ) {
 					worldMap->SetRock( task->pos2i.x, task->pos2i.y, 1, false, WorldGrid::ICE );
 				}
@@ -164,6 +172,9 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta, U32 since )
 					chitBag->NewBuilding( task->pos2i, task->structure.c_str(), chit->PrimaryTeam() );
 				}
 				taskList.Remove(0);
+				// Move the build cost to the reserve bank.
+				itemComp->GetItem(0)->wallet.gold -= cost;
+				ReserveBank::Instance()->Deposit( cost );
 			}
 			else {
 				// Plan has gone bust:

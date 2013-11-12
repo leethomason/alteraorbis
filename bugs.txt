@@ -104,11 +104,10 @@ x Add position fuzz to gold, crystal, and item drops
 			x ability to use factory
 			x create weapons
 
-		- gold to build stuff
-		- visitors - E - tech
+		x gold to build stuff
+		x visitors - E - tech
 			x indicator
 			x unlock higher tech with achieving threshold level
-			- tech pyramid
 		- show grid travel dest
 		x player re-gen. at cores? in general?
 		- control
@@ -116,8 +115,10 @@ x Add position fuzz to gold, crystal, and item drops
 			- tab to toggle weapons
 			- weapon swap button
 			- pause button
+			- cheat buttons for money and crystal
 
 	- Market
+		- tech pyramids
 		- turret
 		- decent clear dragging
 		- team colors

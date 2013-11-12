@@ -52,7 +52,8 @@ public:
 	}
 
 	static ReserveBank* Instance() { return instance; }
-	void Deposit( const Wallet& wallet ) { bank.Add( wallet ); }
+	void Deposit( const Wallet& wallet )	{ bank.Add( wallet ); }
+	void Deposit( int gold )				{ bank.AddGold( gold ); }
 
 private:
 	static ReserveBank* instance;

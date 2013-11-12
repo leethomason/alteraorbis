@@ -403,35 +403,37 @@ int Random::Select( const float* scores, int nItems )
 }
 
 
-void Random::DiceArray( int sides, int nDiceToRoll, int maxDie, int nOutputs, int* output )
+U32 Random::WeightedDice( U32 nDice, U32 sides, int weight )
 {
-	int rollPer = nDiceToRoll / nOutputs;
-	int remain  = nDiceToRoll % nOutputs;
+	int n = (int)nDice + abs(weight);
 
 	static const int ARR = 16;
 	int arr[ARR];
+	if ( n > ARR ) 
+		n = ARR;
 
-	memset( output, 0, sizeof(int)*nOutputs );
-	
-	for( int i=0; i<nOutputs; ++i ) {
-		int n = rollPer;
-		if ( i < remain ) n++;
-
-		if ( n > 0 && n <= maxDie ) {
-			output[i] = (int)Dice( n, sides );
-		}
-		else {
-			// Choose the highest.
-			n = Min( n, ARR );
-			for( int j=0; j<n; ++j ) {
-				arr[j] = 1 + Rand( sides );
-			}
-			Sort< int, CompValueDescending >( arr, n );
-			for( int j=0; j<maxDie; ++j ) {
-				output[i] += arr[j];
-			}
-		}
+	// Roll the dice.
+	for( int i=0; i<n; ++i ) {
+		arr[i] = 1 + Rand(sides);
 	}
-	ShuffleArray( output, nOutputs );
+
+	// Sort to the high/low rolls.
+	if ( weight > 0 ) {
+		// Highest to lowest.
+		Sort< int, CompValueDescending >( arr, n );
+	}
+	else {
+		// Lowest to highest.
+		Sort< int, CompValue >(arr, n );
+	}
+
+	// And finally sum. Should always be in range.
+	int sum = 0;
+	for( U32 i=0; i<nDice; ++i ) {
+		sum += arr[i];
+	}
+
+	GLASSERT( sum >= int(nDice) && sum <= int(nDice*sides) );
+	return sum;
 }
 

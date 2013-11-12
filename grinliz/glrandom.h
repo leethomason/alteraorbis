@@ -78,9 +78,10 @@ class Random
 		return total;
 	}
 
-	/** Roll dice and distribute to an array.
-	*/
-	void DiceArray( int sides, int nDiceToRoll, int maxPerOutput, int nOutputs, int* output );
+	// Weight one way or the other. 
+	// 3d6 -1 roll 4 dice, and remove the highest.
+	// 3d6 +2 roll 5 dice, keep the 3 highest 
+	U32 WeightedDice( U32 nDice, U32 sides, int weight );
 
 	/** Like Dice, but returns a value between 0 and 1.
 	*/

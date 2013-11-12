@@ -169,11 +169,13 @@ void ForgeScene::SetModel( bool randomTraits )
 
 	int roll[GameTrait::NUM_TRAITS] = { 10, 10, 10, 10, 10 };
 	if ( randomTraits ) {
-		random.DiceArray( 6, 
-						  GameTrait::NUM_TRAITS*2 + 2 + forgeData->itemComponent->GetItem(0)->traits.Level(), 
-						  3, 
-						  GameTrait::NUM_TRAITS, 
-						  roll );
+		int level = forgeData->itemComponent->GetItem(0)->traits.Level();
+		static const int COMPETENCE = 4;
+
+		for( int i=0; i<GameTrait::NUM_TRAITS; ++i ) {
+			int weight = -1 + (level + random.Rand(COMPETENCE)) / COMPETENCE;
+			roll[i] = random.WeightedDice( 3, 6, weight );
+		}
 	}
 
 	static const int BONUS = 2;

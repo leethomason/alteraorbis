@@ -24,6 +24,18 @@ BuildData BuildScript::buildData[NUM_OPTIONS] = {
 };
 
 
+const BuildData& BuildScript::GetDataFromStructure( const grinliz::IString& structure )
+{
+	for( int i=0; i<NUM_OPTIONS; ++i ) {
+		if ( structure == buildData[i].cStructure ) {
+			return GetData( i );
+		}
+	}
+	GLASSERT( 0 );
+	return GetData( 0 );
+}
+
+
 const BuildData& BuildScript::GetData( int i )
 {
 	GLASSERT( i >= 0 && i < NUM_OPTIONS );

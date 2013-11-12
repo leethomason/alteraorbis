@@ -135,9 +135,6 @@ public:
 	}
 	// Roll the initial values.
 	void Roll( U32 seed );
-	// Roll the initial values, more dice result in better numbers.
-	// Minimum value of nDice = NUM_TRAITS
-	void Roll( U32 seed, int nDice );
 
 	void AddBattleXP( int killshotLevel )	{ exp += 1 + killshotLevel; }
 	void AddCraftXP( int nCrystals )		{ exp += 8 * nCrystals; }
