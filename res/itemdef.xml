@@ -89,39 +89,45 @@
         resource="kiosk.m"
         porch="1"
         procedural="team"
-        mass="50" />
+        mass="50"
+        cost="40" />
 
   <item name="kiosk.n"
         resource="kiosk.n"
         porch="1"
         procedural="team"
-        mass="50" />
+        mass="50"
+        cost="40" />
 
   <item name="kiosk.c"
         resource="kiosk.c"
         porch="1"
         procedural="team"
-        mass="50" />
+        mass="50"
+        cost="40" />
 
   <item name="kiosk.s"
         resource="kiosk.s"
         porch="1"
         procedural="team"
-        mass="50" />
+        mass="50"
+        cost="40" />
 
   <item name="vault"
         resource="vault"
         porch="1"
         procedural="team"
         size="2"
-        mass="200" />
+        mass="200"
+        cost="100" />
 
   <item name="factory"
         resource="factory"
         porch="1"
         procedural="team"
         size="2"
-        mass="120" />
+        mass="120"
+        cost="80" />
 
   <item name="arachnoid"
         resource="arachnoid"

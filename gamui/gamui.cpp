@@ -847,6 +847,7 @@ void Button::SetSize( float width, float height )
 
 void Button::SetText( const char* text )
 {
+	GAMUIASSERT( text );
 	const char* p = strchr( text, '\n' );
 	if ( p && *(p+1) ) {
 		m_label[0].SetText( text, p );	// calls Modify()

@@ -100,6 +100,12 @@ const GameItem& ItemDefDB::Get( const char* name, int intrinsic )
 }
 
 
+bool ItemDefDB::Has( const char* name )
+{
+	return map.Query( name, 0 );
+}
+
+
 void ItemDefDB::Get( const char* name, GameItemArr* arr )
 {
 	GameItem* item=0;

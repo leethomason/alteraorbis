@@ -37,7 +37,6 @@ using namespace gamui;
 static const float DEBUG_SCALE = 1.0f;
 static const float MINI_MAP_SIZE = 150.0f*DEBUG_SCALE;
 static const float MARK_SIZE = 6.0f*DEBUG_SCALE;
-const int GameScene::BUILD_MODE_START[NUM_BUILD_MODES] = { NO_BUILD, BUILD_ICE, BUILD_VAULT };
 
 #define USE_MOUSE_MOVE_SELECTION
 
@@ -51,7 +50,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	possibleChit = 0;
 	infoID = 0;
 	selectionModel = 0;
-	buildActive = NO_BUILD;
+	buildActive = 0;
 	voxelInfoID.Zero();
 	lumosGame = game;
 	game->InitStd( &gamui2D, &okay, 0 );
@@ -86,33 +85,24 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	freeCameraButton.Init( &gamui2D, game->GetButtonLook(0) );
 	freeCameraButton.SetText( "Free\nCamera" );
 
-	static const char* buildButtonText[NUM_BUILD_BUTTONS] = { 
-		"None", "Clear", "Pave", "Rotate",
-		"Ice", "Factory",
-		"News\nKiosk", "Media\nKiosk", "Commerce\nKiosk", "Social\nKiosk", 
-		"Vault", "Forge"
-	};
 	static const char* modeButtonText[NUM_BUILD_MODES] = {
-		"Utility", "Tech0", "Tech1"
+		"Utility", "Tech0", "Tech1", "Tech2", "Tech3"
 	};
 	for( int i=0; i<NUM_BUILD_MODES; ++i ) {
 		modeButton[i].Init( &gamui2D, game->GetButtonLook(0) );
 		modeButton[i].SetText( modeButtonText[i] );
 		modeButton[0].AddToToggleGroup( &modeButton[i] );
 	}
-	for( int i=0; i<NUM_BUILD_BUTTONS; ++i ) {
+	for( int i=0; i<BuildScript::NUM_OPTIONS; ++i ) {
+		const BuildData& bd = buildScript.GetData( i );
+
 		buildButton[i].Init( &gamui2D, game->GetButtonLook(0) );
-		buildButton[i].SetText( buildButtonText[i] );
+		buildButton[i].SetText( bd.label.c_str() );
 		buildButton[0].AddToToggleGroup( &buildButton[i] );
+
+		modeButton[bd.techLevel].AddSubItem( &buildButton[i] );
 	}
 
-	int mode = 0;
-	for( int i=0; i<NUM_BUILD_BUTTONS; ++i ) {
-		if ( mode < NUM_BUILD_MODES && BUILD_MODE_START[mode+1] == i ) {
-			++mode;
-		}
-		modeButton[mode].AddSubItem( &buildButton[i] );
-	}
 	tabBar.Init( &gamui2D, LumosGame::CalcUIIconAtom( "tabBar", true ), false );
 
 	createWorkerButton.Init( &gamui2D, game->GetButtonLook(0) );
@@ -177,12 +167,16 @@ void GameScene::Resize()
 	layout.PosAbs( &allRockButton, 1, -2 );
 	layout.PosAbs( &freeCameraButton, 0, -2 );
 
-	int mode = 0;
-	for( int i=0; i<NUM_BUILD_BUTTONS; ++i ) {
-		if ( mode < NUM_BUILD_MODES && BUILD_MODE_START[mode+1] == i ) {
-			++mode;
+	int level = BuildScript::TECH_UTILITY;
+	int start = 0;
+
+	for( int i=0; i<BuildScript::NUM_OPTIONS; ++i ) {
+		const BuildData& bd = buildScript.GetData( i );
+		if ( bd.techLevel != level ) {
+			level = bd.techLevel;
+			start = i;
 		}
-		layout.PosAbs( &buildButton[i], i-BUILD_MODE_START[mode], 1 );
+		layout.PosAbs( &buildButton[i], i-start, 1 );
 	}
 	for( int i=0; i<NUM_BUILD_MODES; ++i ) {
 		layout.PosAbs( &modeButton[i], i, 0 );
@@ -351,8 +345,8 @@ void GameScene::SetSelectionModel( const grinliz::Vector2F& view )
 	if ( buildActive ) {
 		// Which should we use?
 		switch ( buildActive ) {
-		case CLEAR_ROCK: 
-		case PAVE:
+		case BuildScript::CLEAR: 
+		case BuildScript::PAVE:
 			{
 				const WorldGrid& wg = sim->GetWorldMap()->GetWorldGrid( pos2i.x, pos2i.y );
 				switch ( wg.Height() ) {
@@ -362,15 +356,15 @@ void GameScene::SetSelectionModel( const grinliz::Vector2F& view )
 				}
 			}
 			break;
-		case BUILD_ICE:
-		case BUILD_KIOSK_N:
-		case BUILD_KIOSK_M:
-		case BUILD_KIOSK_C:
-		case BUILD_KIOSK_S:
+		case BuildScript::ICE:
+		case BuildScript::KIOSK_N:
+		case BuildScript::KIOSK_M:
+		case BuildScript::KIOSK_C:
+		case BuildScript::KIOSK_S:
 			name = "buildMarker1";
 			break;
-		case BUILD_VAULT:
-		case BUILD_FACTORY:
+		case BuildScript::VAULT:
+		case BuildScript::FACTORY:
 			size = 2.0f;
 			name = "buildMarker2";
 			break;
@@ -485,48 +479,6 @@ void GameScene::TapModel( Chit* target )
 }
 
 
-grinliz::IString GameScene::BuildActiveInfo( int* size )
-{
-	static const char* name[NUM_BUILD_BUTTONS] = {
-		"",	// no build 
-		"", // clear
-		"pave",
-		"",	// rotate
-		"ice",	// ice
-		"factory",
-		"kiosk.n",
-		"kiosk.m",
-		"kiosk.c",
-		"kiosk.s",
-		"vault",
-		"factory"
-	};
-	IString str;
-	// Handle "pave" and "ice" which are 
-	// non-items. (They are world voxels, not
-	// chits.)
-	if ( buildActive == PAVE ) {
-		if ( size ) *size = 1;
-		str = IStringConst::pave;
-	}
-	else if ( buildActive == BUILD_ICE ) {
-		if ( size ) *size = 1;
-		str = IStringConst::ice;
-	}
-	else if ( *name[buildActive] ) {
-		str = StringPool::Intern( name[buildActive], true );
-
-		if ( size ) {
-			// Get the size
-			*size = 1;
-			ItemDefDB::GetProperty( str.c_str(), "size", size );
-		}
-	}
-	return str;
-}
-
-
-
 void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::Ray& world )
 {
 	bool uiHasTap = ProcessTap( action, view, world );
@@ -542,9 +494,9 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 	}
 	enable3DDragging = (sim->GetPlayerChit() == 0) || (coreMode != 0);
 	
-	buildActive = NO_BUILD;
+	buildActive = 0;
 	if ( coreMode ) {
-		for( int i=1; i<NUM_BUILD_BUTTONS; ++i ) {
+		for( int i=1; i<BuildScript::NUM_OPTIONS; ++i ) {
 			if ( buildButton[i].Down() ) {
 				buildActive = i;
 				break;
@@ -559,6 +511,7 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 		ModelVoxel mv = ModelAtMouse( view, sim->GetEngine(), TEST_HIT_AABB, 0, MODEL_CLICK_THROUGH, 0, &plane );
 		GLASSERT( plane.x > 0 && plane.z > 0 );
 		Vector2I plane2i = { (int)plane.x, (int)plane.z };
+		const BuildData& buildData = buildScript.GetData( buildActive );
 
 		bool tap = Process3DTap( action, view, world, sim->GetEngine() );
 
@@ -568,7 +521,7 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 				GLASSERT( wq );
 				RemovableFilter removableFilter;
 
-				if ( buildActive == CLEAR_ROCK ) {
+				if ( buildActive == BuildScript::CLEAR ) {
 #ifdef USE_MOUSE_MOVE_SELECTION
 					wq->AddClear( plane2i );
 #else
@@ -585,7 +538,7 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 					}
 #endif
 				}
-				else if ( buildActive == NO_BUILD ) {
+				else if ( buildActive == BuildScript::NONE ) {
 #ifdef USE_MOUSE_MOVE_SELECTION
 					wq->Remove( plane2i );
 #else
@@ -601,7 +554,7 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 					}
 #endif
 				}
-				else if ( buildActive == ROTATE ) {
+				else if ( buildActive == BuildScript::ROTATE ) {
 					if ( mv.ModelHit() ) {
 						MapSpatialComponent* msc = GET_SUB_COMPONENT( mv.model->userData, SpatialComponent, MapSpatialComponent );
 						if ( msc ) {
@@ -617,9 +570,7 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 #else
 				else if ( !mv.VoxelHit() ) {
 #endif
-					int size = 1;
-					IString name = BuildActiveInfo( &size );
-					wq->AddBuild( plane2i, name );
+					wq->AddBuild( plane2i, buildData.structure );
 				}
 			}
 			

@@ -31,6 +31,7 @@ public:
 
 	void Load( const char* path );
 
+	bool Has( const char* name );
 	const GameItem& Get( const char* name, int intrinsic=-1 );
 
 	typedef grinliz::CArray<GameItem*, 16> GameItemArr;

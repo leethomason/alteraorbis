@@ -22,6 +22,8 @@
 #include "../widget/moneywidget.h"
 #include "../widget/facewidget.h"
 
+#include "../script/buildscript.h"
+
 class LumosGame;
 class Sim;
 struct NewsEvent;
@@ -80,24 +82,9 @@ private:
 		BUILD_XFORM,
 		BUILD_TECH0,
 		BUILD_TECH1,
-		//BUILD_TECH2,
-		//BUILD_TECH3,
+		BUILD_TECH2,
+		BUILD_TECH3,
 		NUM_BUILD_MODES
-	};
-	enum {
-		NO_BUILD,
-		CLEAR_ROCK,
-		PAVE,
-		ROTATE,
-		BUILD_ICE,
-		BUILD_FACTORY,
-		BUILD_KIOSK_N,
-		BUILD_KIOSK_M,
-		BUILD_KIOSK_C,
-		BUILD_KIOSK_S,
-		BUILD_VAULT,
-		BUILD_FORGE,
-		NUM_BUILD_BUTTONS
 	};
 
 	struct PickupData {
@@ -106,8 +93,6 @@ private:
 
 		bool operator<( const PickupData& rhs ) const { return distance < rhs.distance; }
 	};
-
-	static const int BUILD_MODE_START[NUM_BUILD_MODES];
 
 	// returns the name from the build button
 	grinliz::IString StructureInfo( int buildButtonIndex, int* size );
@@ -124,15 +109,15 @@ private:
 	int					infoID;
 	grinliz::Vector2I	voxelInfoID;
 	int					buildActive;	// which build button is active. 0 if none.
-	grinliz::IString	BuildActiveInfo( int* size );
 
 	// Shows what is being built or removed.
 	Model*				selectionModel;
+	BuildScript			buildScript;
 
 	gamui::PushButton	okay;
 	gamui::PushButton	serialButton[NUM_SERIAL_BUTTONS];
 	gamui::ToggleButton freeCameraButton;
-	gamui::ToggleButton	buildButton[NUM_BUILD_BUTTONS];
+	gamui::ToggleButton	buildButton[BuildScript::NUM_OPTIONS];
 	gamui::ToggleButton modeButton[NUM_BUILD_MODES];
 	gamui::Image		tabBar;
 	gamui::PushButton	createWorkerButton;

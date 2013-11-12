@@ -99,16 +99,15 @@ x Add position fuzz to gold, crystal, and item drops
 		x rework item screen layout
 		x item forging
 		x porch positions incorrect
-
-		- forge / factory
+		x forge / factory
 			x factory
-			- ability to use factory
+			x ability to use factory
 			x create weapons
-		- turret
+
 		- gold to build stuff
 		- visitors - E - tech
 			x indicator
-			- unlock higher tech with achieving threshold level
+			x unlock higher tech with achieving threshold level
 			- tech pyramid
 		- show grid travel dest
 		x player re-gen. at cores? in general?
@@ -119,11 +118,15 @@ x Add position fuzz to gold, crystal, and item drops
 			- pause button
 
 	- Market
+		- turret
 		- decent clear dragging
 		- team colors
 		- item destruction
 		- denizens
 		- item market
+		- forge
+			- forge or factory?
+			- fee to forge
 		- citizens *don't* pick stuff up in their own domain
 		- vault:
 			- item limit
