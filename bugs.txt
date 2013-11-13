@@ -108,12 +108,11 @@ x Add position fuzz to gold, crystal, and item drops
 		x visitors - E - tech
 			x indicator
 			x unlock higher tech with achieving threshold level
-		- show grid travel dest
+		x show grid travel dest
 		x player re-gen. at cores? in general?
 		- control
 			- space bar to pause
 			- tab to toggle weapons
-			- weapon swap button
 			- pause button
 			- cheat buttons for money and crystal
 
@@ -134,6 +133,7 @@ x Add position fuzz to gold, crystal, and item drops
 		- what to do with full vaults?
 
 	- Adventure
+		- weapon swap button or auto-swap?
 		- How do bases and adventuring play together?
 			- why do you quit adventuring to build a base?
 		- shield: 
