@@ -56,7 +56,9 @@ TitleScene::TitleScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 	}
 
 	note.Init( &gamui2D );
-	note.SetText( "Thanks for playing this tech demo of Altera. Please do read the README.txt. This build (hopefully) addresses some rendering bugs and adds a preliminary character UI." );
+	note.SetText( "Thanks for playing this early alpha of Altera. "
+				  "Many features are incomplete. Plase see the "
+				  "README.txt for a gameplay walkthrough." );
 }
 
 

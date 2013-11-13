@@ -1,11 +1,8 @@
-﻿This is a very early alpha tech test for the game Altera.
-
+﻿This is a very early alpha test for the game Altera.
 
 More at: grinninglizard.com/altera
 
-
-The “Silver” release is cleaning up issues with the prior (giant) “Gold” release.
-
+The "Econ" release adds the basic game mechanics - exploring and building - in a rudimentary form.
 
 Game Fiction (in brief)
 -----------------------
@@ -13,53 +10,29 @@ Game Fiction (in brief)
 
 Altera ("other") is the world inside the computer. Mother Core wakes at date 0.00 and creates the world. The world is split into Domains, each controlled by a central core. The domains are connected by the grid, a fast travel system that can be accessed with enough permission from Mother Core.
 
-
-Note: the date and domain name are shown near the character portrait.
-
-
 The first age (Age 0) is the Age of Fire. The world is covered by volcanoes that shape the landscape. After that volcanoes become less common (but are always present) and vegetation begins to rule the landscape.
-
 
 Note: the advantage of starting with the pre-generated world is that it is filled out with rock, creatures, and plants.
 
+Au (gold) and Crystals are the currencies of Altera. Au is used for purchases of both item and buildings. Many items, and some buildings, also requires a crystal. From most to least common, crystals are green, red, blue, and violet.
 
-Au (gold), Crystals, and Energy are the currencies of Altera. Au is used for purchases of both item and buildings. Many items, and some buildings, also requires a crystal. From most to least common, crystals are green, red, blue, and violet.
+"Tech" measures the technology of a domain, and more generally refers to its civilization achievement. A domain starts at Tech0 and can rise to Tech3. Building in a domain work better at higher tech levels, and many buildings can only be contstructed once that tech level is achieved.
 
-
-Note: you can collect gold and crystals, but the economy isn’t connected. Nothing costs anything to build or maintain.
-
-
-Energy is used to power buildings and keep a domain operating. Visitors bring energy; they enter the world looking for domains that have interesting News, Commerce, Media, or Social, any of which they get at kiosks. If the domain has what the Visitor is looking for, energy is transferred to the domain. Visitors keep track of their favorite domains, and share the links with their friends.
+Visitors bring Tech, which degrades over time. You need a continual stream of visitors, which is done be constructing Kiosks to attract them. Visitors enter the world looking for domains that have interesting News, Commerce, Media, or Social, any of which they get at kiosks. If the domain has what the Visitor is looking for, tech is transferred to the domain. Visitors keep track of their favorite domains, and share the links with their friends.
 
 
-Changes (Silver4)
+Changes (Econ)
 -----------------
-1. New shader management; this will hopefully address the "player and monsters don't render bug"
-2. Preliminary character screen.
-3. New right mouse mapping (also preliminary)
-4. Increase player move speed
-5. In neutral domains, the player can dissolve rock (no particle effect yet)
-
-Changes (Silver-3)
--------------------
-1. Buildings, rocks, plants, workers, and the ground are now production art. There will be tweaks, but the basic look of the game is in place.
-2. Animated things is production art. The animations (the actual movement) is not.
-3. Visitors have specific interest: News, Media, Commerce, and Social and will seek out Kiosks to fulfill that interest.
-4. Fun tip: to cycle through the colors used to render buildings (only a few is this inital release) press the ‘c’ key.
-5. To change between the Ring and Blaster, use the spacebar.
 
 
 Install
 -------
 
-
-Unzip (to desktop, or downloads directory) and run the game .exe. It may require the microsoft redistributables. (Although if you installed Xenowar, these
-are already installed.) http://www.microsoft.com/en-us/download/details.aspx?id=5555
+Unzip (to desktop, or downloads directory) and run the game .exe. It may require the microsoft redistributables. (Although if you installed Xenowar, these are already installed.) http://www.microsoft.com/en-us/download/details.aspx?id=5555
 
 
 Important Notes
 ---------------
-
 
 1. There is NO save game compatibility. Be sure to delete old games.
 2. If your avatar gets killed, ctrl-click will create a new one. (You can create a bunch if you wish).
@@ -67,10 +40,14 @@ Important Notes
 
 Getting Started
 ---------------
+
 Tap "Load Established" to bring in a pre-generated world, well populated. That’s the best way to get started. (Later, try "Generate" to create a world from scratch.)
 
-
 Tap "Continue" to start in the world or continue with the last saved game.
+
+The world is more dangerous at the edges, and safer in the center. You want to collect enough gold and crystals as you make your way toward a good spot near the center to build a domain.
+
+
 
 
 You start near a Domain Core. (Placeholder art.) Mantis will
