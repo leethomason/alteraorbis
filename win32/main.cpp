@@ -251,7 +251,7 @@ int main( int argc, char **argv )
 				break;
 			case SDL_KEYDOWN:
 			{
-				switch ( event.key.keysym.sym )
+				switch ( event.key.keysym.scancode )
 				{
 					case SDLK_LCTRL:	modKeys = modKeys | KMOD_LCTRL;		break;
 					case SDLK_RCTRL:	modKeys = modKeys | KMOD_RCTRL;		break;
@@ -276,50 +276,23 @@ int main( int argc, char **argv )
 						}
 						break;
 
-					case SDLK_u:
-						GameHotKey( game, GAME_HK_TOGGLE_UI );
-						break;
-
-					case SDLK_i:
-						GameHotKey( game, GAME_HK_DEBUG_UI );
-						break;
-
-					case SDLK_g:
-						GameHotKey( game, GAME_HK_TOGGLE_GLOW );
-						break;
-
-					case SDLK_SPACE:
-						GameHotKey( game, GAME_HK_SPACE );
-						break;
-
-					case SDLK_m:
-						GameHotKey( game, GAME_HK_MAP );
-						break;
-
-					case SDLK_f:
-						GameHotKey( game, GAME_HK_TOGGLE_FAST );
-						break;
+					case SDLK_SPACE:GameHotKey( game, GAME_HK_SPACE );			break;
+					case SDLK_a:	GameHotKey( game, GAME_HK_TOGGLE_PATHING );	break;
+					case SDLK_b:	GameHotKey( game, GAME_HK_CHEAT_GOLD );		break;
+					case SDLK_c:	GameHotKey( game, GAME_HK_TOGGLE_COLORS );	break;
+					case SDLK_d:	GameHotKey( game, GAME_HK_TOGGLE_DEBUG_TEXT );	break;
+					case SDLK_f:	GameHotKey( game, GAME_HK_TOGGLE_FAST );	break;
+					case SDLK_g:	GameHotKey( game, GAME_HK_TOGGLE_GLOW );	break;
+					case SDLK_i:	GameHotKey( game, GAME_HK_DEBUG_UI );		break;
+					case SDLK_k:	GameHotKey( game, GAME_HK_CHEAT_CRYSTAL );	break;
+					case SDLK_m:	GameHotKey( game, GAME_HK_MAP );			break;
+					case SDLK_p:	GameHotKey( game, GAME_HK_TOGGLE_PERF );	break;
+					case SDLK_u:	GameHotKey( game, GAME_HK_TOGGLE_UI );		break;
 
 					case SDLK_s:
 						GameDoTick( game, SDL_GetTicks() );
 						SDL_GL_SwapWindow( screen );
 						ScreenCapture( "cap", true, false, false, 0 );
-						break;
-
-					case SDLK_p:
-						GameHotKey( game, GAME_HK_TOGGLE_PERF );
-						break;
-
-					case SDLK_d:
-						GameHotKey( game, GAME_HK_TOGGLE_DEBUG_TEXT );
-						break;
-
-					case SDLK_a:
-						GameHotKey( game, GAME_HK_TOGGLE_PATHING );
-						break;
-
-					case SDLK_c:
-						GameHotKey( game, GAME_HK_TOGGLE_COLORS );
 						break;
 
 					default:

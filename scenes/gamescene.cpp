@@ -855,6 +855,23 @@ void GameScene::HandleHotKey( int mask )
 			game->PushScene( LumosGame::SCENE_MAP, new MapSceneData( sim->GetChitBag(), sim->GetWorldMap(), playerChit ));
 		}
 	}
+	else if ( mask == GAME_HK_CHEAT_GOLD ) {
+		Chit* playerChit = sim->GetPlayerChit();
+		if ( playerChit ) {
+			static const int GOLD = 100;
+			ReserveBank::Instance()->WithdrawGold( GOLD );
+			playerChit->GetItem()->wallet.AddGold( GOLD );
+		}
+	}
+	else if ( mask == GAME_HK_CHEAT_CRYSTAL ) {
+		Chit* playerChit = sim->GetPlayerChit();
+		if ( playerChit ) {
+			for( int i=0; i<NUM_CRYSTAL_TYPES; ++i ) {
+				ReserveBank::Instance()->WithdrawCrystal( i );
+				playerChit->GetItem()->wallet.AddCrystal(i);
+			}
+		}
+	}
 	else {
 		super::HandleHotKey( mask );
 	}
