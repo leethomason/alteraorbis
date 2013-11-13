@@ -103,18 +103,13 @@ x Add position fuzz to gold, crystal, and item drops
 			x factory
 			x ability to use factory
 			x create weapons
-
 		x gold to build stuff
 		x visitors - E - tech
 			x indicator
 			x unlock higher tech with achieving threshold level
 		x show grid travel dest
 		x player re-gen. at cores? in general?
-		- control
-			- space bar to pause
-			- tab to toggle weapons
-			- pause button
-			- cheat buttons for money and crystal
+		- cheat buttons for money and crystal
 
 	- Market
 		- tech pyramids
@@ -133,6 +128,10 @@ x Add position fuzz to gold, crystal, and item drops
 		- what to do with full vaults?
 
 	- Adventure
+		- control
+			- space bar to pause
+			- tab to toggle weapons
+			- pause button
 		- weapon swap button or auto-swap?
 		- How do bases and adventuring play together?
 			- why do you quit adventuring to build a base?

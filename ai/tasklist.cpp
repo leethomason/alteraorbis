@@ -8,7 +8,6 @@
 #include "../game/worldgrid.h"
 #include "../game/lumoschitbag.h"
 #include "../game/lumosgame.h"
-#include "../game/reservebank.h"
 
 #include "../xegame/chit.h"
 #include "../xegame/spatialcomponent.h"
@@ -169,12 +168,13 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta, U32 since )
 					worldMap->SetPave( task->pos2i.x, task->pos2i.y, chit->PrimaryTeam()%3+1 );
 				}
 				else {
-					chitBag->NewBuilding( task->pos2i, task->structure.c_str(), chit->PrimaryTeam() );
+					// Move the build cost to the building. The gold is held there until the
+					// building is destroyed
+					itemComp->GetItem(0)->wallet.gold -= cost;
+					Chit* building = chitBag->NewBuilding( task->pos2i, task->structure.c_str(), chit->PrimaryTeam() );
+					building->GetItem()->wallet.AddGold( cost );
 				}
 				taskList.Remove(0);
-				// Move the build cost to the reserve bank.
-				itemComp->GetItem(0)->wallet.gold -= cost;
-				ReserveBank::Instance()->Deposit( cost );
 			}
 			else {
 				// Plan has gone bust:
