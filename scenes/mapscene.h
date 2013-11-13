@@ -53,11 +53,11 @@ private:
 			MAP2_SIZE2	= MAP2_SIZE*MAP2_SIZE
 	};
 
-	LumosGame*		lumosGame;
-	LumosChitBag*	lumosChitBag;
-	WorldMap*		worldMap;
-	Chit*			player;
-	MapSceneData*	data;
+	LumosGame*			lumosGame;
+	LumosChitBag*		lumosChitBag;
+	WorldMap*			worldMap;
+	Chit*				player;
+	MapSceneData*		data;
 
 	grinliz::Rectangle2I sectorBounds;
 	grinliz::Rectangle2F map2Bounds;
@@ -68,7 +68,8 @@ private:
 	gamui::Image		mapImage2;
 
 	gamui::Image		playerMark, playerMark2;
-	gamui::Image		homeMark, homeMark2;
+	gamui::Image		homeMark,	homeMark2;
+	gamui::Image		travelMark, travelMark2;
 	gamui::TextBox		map2Text[MAP2_SIZE2];
 };
 

@@ -62,6 +62,11 @@ MapScene::MapScene( LumosGame* game, MapSceneData* data ) : Scene( game ), lumos
 	homeMark.Init( &gamui2D, atom, true );
 	homeMark2.Init( &gamui2D, atom, true );
 
+	RenderAtom travelAtom = lumosGame->CalcPaletteAtom( PAL_GRAY*2, PAL_ZERO );
+	travelAtom.renderState = (const void*)UIRenderer::RENDERSTATE_UI_DECO_DISABLED;
+	travelMark.Init( &gamui2D, travelAtom, true );
+	travelMark2.Init( &gamui2D, travelAtom, true );
+
 	for( int i=0; i<MAP2_SIZE2; ++i ) {
 		map2Text[i].Init( &gamui2D );
 	}
@@ -119,6 +124,13 @@ void MapScene::Resize()
 						 y + dy*(float)homeSector.y/float(NUM_SECTORS));
 	}
 
+	travelMark.SetVisible( !data->destSector.IsZero() );
+	if ( !data->destSector.IsZero() ) {
+		travelMark.SetSize( dx/float(NUM_SECTORS), dy/float(NUM_SECTORS) );
+		travelMark.SetPos(	x + dx*(float)data->destSector.x/float(NUM_SECTORS),
+							y + dy*(float)data->destSector.y/float(NUM_SECTORS));
+	}
+
 	// --- AREA --- 
 
 	x = mapImage2.X();
@@ -142,6 +154,14 @@ void MapScene::Resize()
 		homeMark2.SetSize( gridSize, gridSize );
 		homeMark2.SetPos( x + dx*(float)(homeSector.x-sectorBounds.min.x)/float(MAP2_SIZE),
 						  y + dy*(float)(homeSector.y-sectorBounds.min.y)/float(MAP2_SIZE));
+	}
+
+	travelMark2.SetVisible( false );
+	if ( !data->destSector.IsZero() && sectorBounds.Contains( data->destSector ) ) {
+		travelMark2.SetVisible( true );
+		travelMark2.SetSize( gridSize, gridSize );
+		travelMark2.SetPos( x + dx*(float)(data->destSector.x-sectorBounds.min.x)/float(MAP2_SIZE),
+						    y + dy*(float)(data->destSector.y-sectorBounds.min.y)/float(MAP2_SIZE));
 	}
 
 	SetText();
@@ -232,7 +252,7 @@ void MapScene::ItemTapped( const gamui::UIItem* item )
 		sector.x = int( x * float(NUM_SECTORS) );
 		sector.y = int( y * float(NUM_SECTORS) );
 		data->destSector = sector;
-		SetText();
+		Resize();
 	}
 	else if ( item == &mapImage2 ) {
 		float x=0, y=0;
@@ -241,7 +261,7 @@ void MapScene::ItemTapped( const gamui::UIItem* item )
 		sector.x = sectorBounds.min.x + int( x * float(sectorBounds.Width()));
 		sector.y = sectorBounds.min.y + int( y * float(sectorBounds.Height()));
 		data->destSector = sector;
-		SetText();
+		Resize();
 	}
 }
 
