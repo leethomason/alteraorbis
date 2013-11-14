@@ -77,7 +77,7 @@ Wallet ReserveBank::WithdrawMonster()
 {
 	Wallet w;
 	w.gold = WithdrawGold( GOLD_PER_MONSTER );
-	if ( random.Rand(10) == 0 ) {
+	if ( random.Rand(2) == 0 ) {
 		w.AddCrystal( WithdrawRandomCrystal() );
 	}
 	return w;
@@ -94,7 +94,7 @@ int ReserveBank::WithdrawVolcanoGold()
 
 int ReserveBank::WithdrawRandomCrystal()
 {
-	static const float score[NUM_CRYSTAL_TYPES] = { 512,64,8,1 };
+	static const float score[NUM_CRYSTAL_TYPES] = { 100,50,10,1 };
 	int type = random.Select( score, NUM_CRYSTAL_TYPES );
 
 	if ( bank.crystal[type] ) {

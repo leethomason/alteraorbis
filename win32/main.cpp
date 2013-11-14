@@ -251,7 +251,7 @@ int main( int argc, char **argv )
 				break;
 			case SDL_KEYDOWN:
 			{
-				switch ( event.key.keysym.scancode )
+				switch ( event.key.keysym.sym )
 				{
 					case SDLK_LCTRL:	modKeys = modKeys | KMOD_LCTRL;		break;
 					case SDLK_RCTRL:	modKeys = modKeys | KMOD_RCTRL;		break;

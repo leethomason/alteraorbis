@@ -186,6 +186,7 @@ public:
 	// "private"
 	// used by the spatial hash:
 	Chit* next;
+
 	// for components, so there is one random # generator per chit (not per component)
 	grinliz::Random random;
 	int timeToTick;		// time until next tick needed: set by DoTick() call

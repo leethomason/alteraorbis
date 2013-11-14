@@ -29,8 +29,7 @@
 
 class MapSpatialComponent;
 
-/* Chits with a SpatialComponent are in the map world as there own entity. (Hardpoint
-   items do not have SpatialComponents.)
+/* Chits with a SpatialComponent are in the map world as there own entity.
 */
 class SpatialComponent : public Component
 {

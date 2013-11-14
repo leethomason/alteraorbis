@@ -144,39 +144,6 @@ void GameDoTick( void* handle, unsigned int timeInMSec )
 }
 
 
-/*
-void GameCameraGet( void* handle, int param, float* value ) 
-{
-	CheckThread check;
-
-	Game* game = (Game*)handle;
-	switch( param ) {
-		case GAME_CAMERA_TILT:
-			*value = game->engine->camera.GetTilt();
-			break;
-		case GAME_CAMERA_YROTATE:
-			*value = game->engine->camera.GetYRotation();
-			break;
-		case GAME_CAMERA_ZOOM:
-			*value = game->engine->GetZoom();
-			break;
-		default:
-			GLASSERT( 0 );
-	}
-}
-*/
-
-/*
-void GameMoveCamera( void* handle, float dx, float dy, float dz )
-{
-	CheckThread check;
-
-	Game* game = (Game*)handle;
-	game->engine->camera.DeltaPosWC( dx, dy, dz );
-}
-*/
-
-
 void GameHotKey( void* handle, int mask )
 {
 	CheckThread check;

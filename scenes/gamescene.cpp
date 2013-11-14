@@ -106,7 +106,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	tabBar.Init( &gamui2D, LumosGame::CalcUIIconAtom( "tabBar", true ), false );
 
 	createWorkerButton.Init( &gamui2D, game->GetButtonLook(0) );
-	createWorkerButton.SetText( "Create\nWorker" );
+	createWorkerButton.SetText( "WorkerBot" );
 
 	ejectButton.Init( &gamui2D, game->GetButtonLook(0) );
 	ejectButton.SetText( "Eject\nCore" );
@@ -184,8 +184,8 @@ void GameScene::Resize()
 	tabBar.SetPos( modeButton[0].X(), modeButton[0].Y() );
 	tabBar.SetSize( modeButton[NUM_BUILD_MODES-1].X() + modeButton[NUM_BUILD_MODES-1].Width() - modeButton[0].X(), modeButton[0].Height() );
 
-	layout.PosAbs( &createWorkerButton, 0, 6 );
-	layout.PosAbs( &ejectButton, 1, 6 );
+	layout.PosAbs( &createWorkerButton, 0, 2 );
+	layout.PosAbs( &ejectButton,        0, 2 );
 
 	layout.PosAbs( &faceWidget, -2, 0, 1, 1 );
 	layout.PosAbs( &minimap,    -1, 0, 1, 1 );
@@ -663,8 +663,12 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		Chit* playerChit = sim->GetPlayerChit();
 		CoreScript* coreMode = sim->GetChitBag()->IsBoundToCore( playerChit, true );
 		if ( coreMode ) {
-			int team = playerChit->GetItem()->primaryTeam;
-			sim->GetChitBag()->NewWorkerChit( playerChit->GetSpatialComponent()->GetPosition(), team );
+			if ( playerChit->GetItem()->wallet.gold > 20 ) {
+				playerChit->GetItem()->wallet.gold -= 20;
+				ReserveBank::Instance()->Deposit( 20 );
+				int team = playerChit->GetItem()->primaryTeam;
+				sim->GetChitBag()->NewWorkerChit( playerChit->GetSpatialComponent()->GetPosition(), team );
+			}
 		}
 	}
 	else if ( item == &ejectButton ) {
@@ -1024,6 +1028,21 @@ void GameScene::DoTick( U32 delta )
 		for( int i=1; i<NUM_BUILD_MODES; ++i ) {
 			modeButton[i].SetEnabled( i-1 <= atech );
 		}
+
+		// How many workers in the sector?
+		Vector2I sector = ToSector( playerChit->GetSpatialComponent()->GetPosition2DI() );
+		Rectangle2F b;
+		b.Set( (float)(sector.x*SECTOR_SIZE+1), (float)(sector.y*SECTOR_SIZE+1),
+			   (float)((sector.x+1)*SECTOR_SIZE-1), (float)((sector.y+1)*SECTOR_SIZE-1) );
+
+		CChitArray arr;
+		ItemNameFilter workerFilter( IStringConst::worker );
+
+		static const int MAX_BOTS = 4;
+		sim->GetChitBag()->QuerySpatialHash( &arr, b, 0, &workerFilter );
+		str.Format( "WorkerBot\n20 %d/%d", arr.Size(), MAX_BOTS ); 
+		createWorkerButton.SetText( str.c_str() );
+		createWorkerButton.SetEnabled( arr.Size() < MAX_BOTS );
 	}
 	techLabel.SetText( str.c_str() );
 

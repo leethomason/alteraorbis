@@ -286,7 +286,7 @@
         reload="2000"
         clipCap="4"
         meleeDamage="0.8"
-        rangedDamage="25"
+        rangedDamage="15"
         procedural="gun"
         nameGen="vikingMale"
         >
@@ -303,7 +303,7 @@
         reload="2000"
         clipCap="6"
         meleeDamage="0.8"
-        rangedDamage="20"
+        rangedDamage="10"
         procedural="gun"
         nameGen="vikingMale"
         >
@@ -320,7 +320,7 @@
         reload="3000"
         clipCap="12"
         meleeDamage="0.8"
-        rangedDamage="20"
+        rangedDamage="12"
         procedural="gun"
         nameGen="vikingMale"
         >
@@ -337,7 +337,7 @@
         reload="3000"
         clipCap="4"
         meleeDamage="0.8"
-        rangedDamage="35"
+        rangedDamage="20"
         procedural="gun"
         nameGen="vikingMale"
         >
