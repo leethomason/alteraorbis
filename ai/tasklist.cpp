@@ -20,6 +20,8 @@
 #include "../script/corescript.h"
 #include "../script/buildscript.h"
 
+#include "../engine/particle.h"
+
 using namespace grinliz;
 using namespace ai;
 
@@ -64,10 +66,16 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta, U32 since )
 		return;
 	}
 
-	Task* task        = &taskList[0];
-	Vector2I pos2i    = spatial->GetPosition2DI();
-	Vector2F taskPos2 = { (float)task->pos2i.x + 0.5f, (float)task->pos2i.y + 0.5f };
-	Vector3F taskPos3 = { taskPos2.x, 0, taskPos2.y };
+	Task* task			= &taskList[0];
+	Vector2I pos2i		= spatial->GetPosition2DI();
+	Vector2F taskPos2	= { (float)task->pos2i.x + 0.5f, (float)task->pos2i.y + 0.5f };
+	Vector3F taskPos3	= { taskPos2.x, 0, taskPos2.y };
+	Vector2I sector		= ToSector( pos2i );
+	CoreScript* coreScript = chitBag->GetCore( sector );
+	Chit* controller = 0;
+	if ( coreScript ) {
+		controller = coreScript->GetAttached( 0 );
+	}
 
 	// If this is a task associated with a work item, make
 	// sure that work item still exists.
@@ -106,7 +114,9 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta, U32 since )
 			if ( taskList.Size() >= 2 ) {
 				int action = taskList[1].action;
 				if ( action == Task::TASK_BUILD || action == Task::TASK_REMOVE ) {
-					int debug=1;
+					Vector3F pos = ToWorld3F( taskList[1].pos2i );
+					pos.y = 0.5f;
+					engine->particleSystem->EmitPD( "construction", pos, V3F_UP, 30 );	// FIXME: standard delta constant					
 				}
 			}
 		}
@@ -114,9 +124,6 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta, U32 since )
 
 	case Task::TASK_REMOVE:
 		{
-			//GLASSERT( workQueue && queueItem );
-			//if ( workQueue->TaskCanComplete( *queueItem )) {
-			//worldMap, chitBag, item.pos, item.action != CLEAR, CalcTaskSize( item )
 			if ( WorkQueue::TaskCanComplete( worldMap, chitBag, task->pos2i, false, WorkQueue::CalcTaskSize( task->structure ))) {
 				const WorldGrid& wg = worldMap->GetWorldGrid( task->pos2i.x, task->pos2i.y );
 				if ( wg.RockHeight() ) {
@@ -156,7 +163,7 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta, U32 since )
 			BuildScript buildScript;
 			const BuildData& buildData	= buildScript.GetDataFromStructure( task->structure );
 			int cost					= buildData.cost;
-			bool canAfford				= itemComp->GetItem(0)->wallet.gold >= cost;
+			bool canAfford				= controller && controller->GetItem() && (controller->GetItem()->wallet.gold >= cost);
 
 			if (    canAfford 
 				 && WorkQueue::TaskCanComplete( worldMap, chitBag, task->pos2i, true, WorkQueue::CalcTaskSize( task->structure ))) 
@@ -170,7 +177,8 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta, U32 since )
 				else {
 					// Move the build cost to the building. The gold is held there until the
 					// building is destroyed
-					itemComp->GetItem(0)->wallet.gold -= cost;
+					GameItem* controllerItem = controller->GetItem();
+					controllerItem->wallet.gold -= cost; 
 					Chit* building = chitBag->NewBuilding( task->pos2i, task->structure.c_str(), chit->PrimaryTeam() );
 					building->GetItem()->wallet.AddGold( cost );
 				}
@@ -206,8 +214,6 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta, U32 since )
 	case Task::TASK_USE_BUILDING:
 		{
 			Chit* building	= chitBag->QueryPorch( pos2i );
-			Vector2I sector	= ToSector( pos2i );
-			CoreScript* cs	= chitBag->GetCore( sector );
 
 			if ( building ) {
 				IString buildingName = building->GetItem()->name;
@@ -235,7 +241,6 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta, U32 since )
 						}
 
 						// Move gold & crystal to the owner?
-						Chit* controller = cs->GetAttached( 0 );
 						if ( controller && controller->GetItemComponent() ) {
 							Wallet w = vaultItem->wallet.EmptyWallet();
 							controller->GetItem()->wallet.Add( w );

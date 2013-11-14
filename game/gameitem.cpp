@@ -342,7 +342,9 @@ int GameItem::DoTick( U32 delta, U32 sinec )
 	accruedShock -= maxEffectDamage * ((flags & SHOCKABLE) ? 0.5f : 1.0f);
 	accruedShock = Max( 0.0f, accruedShock );
 
-	hp += Delta( delta, hpRegen );
+	if ( hp > 0 ) {
+		hp += Delta( delta, hpRegen );
+	}
 	hp = Clamp( hp, 0.0f, TotalHPF() );
 
 	if ( flags & INDESTRUCTABLE ) {

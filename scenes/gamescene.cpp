@@ -185,7 +185,7 @@ void GameScene::Resize()
 	tabBar.SetSize( modeButton[NUM_BUILD_MODES-1].X() + modeButton[NUM_BUILD_MODES-1].Width() - modeButton[0].X(), modeButton[0].Height() );
 
 	layout.PosAbs( &createWorkerButton, 0, 2 );
-	layout.PosAbs( &ejectButton,        0, 2 );
+	layout.PosAbs( &ejectButton,        0, 3 );
 
 	layout.PosAbs( &faceWidget, -2, 0, 1, 1 );
 	layout.PosAbs( &minimap,    -1, 0, 1, 1 );
@@ -1029,6 +1029,7 @@ void GameScene::DoTick( U32 delta )
 			modeButton[i].SetEnabled( i-1 <= atech );
 		}
 
+		CStr<32> str2;
 		// How many workers in the sector?
 		Vector2I sector = ToSector( playerChit->GetSpatialComponent()->GetPosition2DI() );
 		Rectangle2F b;
@@ -1040,8 +1041,8 @@ void GameScene::DoTick( U32 delta )
 
 		static const int MAX_BOTS = 4;
 		sim->GetChitBag()->QuerySpatialHash( &arr, b, 0, &workerFilter );
-		str.Format( "WorkerBot\n20 %d/%d", arr.Size(), MAX_BOTS ); 
-		createWorkerButton.SetText( str.c_str() );
+		str2.Format( "WorkerBot\n20 %d/%d", arr.Size(), MAX_BOTS ); 
+		createWorkerButton.SetText( str2.c_str() );
 		createWorkerButton.SetEnabled( arr.Size() < MAX_BOTS );
 	}
 	techLabel.SetText( str.c_str() );

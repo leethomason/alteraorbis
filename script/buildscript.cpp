@@ -60,6 +60,7 @@ const BuildData& BuildScript::GetData( int i )
 		buildData[i].size = 1;
 		if ( has ) {
 			ItemDefDB::GetProperty( buildData[i].cStructure, "size", &buildData[i].size );
+			ItemDefDB::GetProperty( buildData[i].cStructure, "cost", &buildData[i].cost );
 		}
 	}
 	return buildData[i];
