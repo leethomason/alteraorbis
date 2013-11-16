@@ -36,6 +36,8 @@ x Add position fuzz to gold, crystal, and item drops
 - AI notifies friends when attacked, notifies that being attacked, etc.
 - maps: what direction is player pointed?
 - flammability / shockability very agressive
+- viewing edge of world breaks all kinds of limits and ASSERTs
+- zooming out exceeds the vertex cache...
 
 - game
 
@@ -112,7 +114,7 @@ x Add position fuzz to gold, crystal, and item drops
 		x cheat buttons for money and crystal
 
 		x build worker limits & cost
-		- with regen units are immortal...
+		x with regen units are immortal...
 
 	- Market
 		- tech pyramids -> power plants
@@ -157,6 +159,7 @@ x Add position fuzz to gold, crystal, and item drops
 	    - exploring
 	      - xp for exploring!!
 	      - "domain theme" when you arrive
+	    - player creation screen
 
 	- Census
 		- check money

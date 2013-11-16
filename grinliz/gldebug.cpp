@@ -191,7 +191,7 @@ void* DebugNew( size_t size, bool arrayType, const char* name, int line )
 	}
 
 	// #BREAKHERE
-	if ( head->id == 327 ) {
+	if ( head->id == 18996 ) {
 		int debug = 1;
 	}
 

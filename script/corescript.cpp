@@ -17,6 +17,7 @@
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/rendercomponent.h"
 #include "../xegame/istringconst.h"
+#include "../xegame/cameracomponent.h"
 
 #include "../script/procedural.h"
 
@@ -136,6 +137,12 @@ bool CoreScript::AttachToCore( Chit* chit )
 		chit->GetChitBag()->DeferredDelete( c );
 		scriptContext->chit->SetTickNeeded();
 
+		// If the camera is tracking what just bound to core, stop tracking.
+		CameraComponent* cc = bag->GetCamera( scriptContext->engine );
+		if ( cc && cc->Tracking() == chit->ID() ) {
+			cc->SetTrack( 0 );
+		}
+
 		// FIXME: check for existing workers
 		// FIXME: connect to energy system
 		int team = 0;
@@ -237,14 +244,12 @@ int CoreScript::DoTick( U32 delta, U32 since )
 			}
 
 			float roll = scriptContext->chit->random.Uniform();
+			bool isGreater = false;
 
 			if ( greaterPossible && roll < greater ) {
 				static const char* GREATER[4] = { "cyclops", "cyclops", "fireCyclops", "shockCyclops" };
 				spawn = GREATER[ scriptContext->chit->random.Rand( 4 ) ];
-
-				Vector2F p2 = { pf.x, pf.z };
-				NewsEvent news( NewsEvent::PONY, p2, StringPool::Intern( spawn ), scriptContext->chit->ID() );
-				scriptContext->chitBag->AddNews( news );
+				isGreater = true;
 			}
 			if (!spawn && normalPossible && (roll < rat) ) {
 				spawn = "arachnoid";
@@ -256,7 +261,13 @@ int CoreScript::DoTick( U32 delta, U32 since )
 				IString ispawn = StringPool::Intern( spawn, true );
 				int team = GetTeam( ispawn );
 				GLASSERT( team != TEAM_NEUTRAL );
-				scriptContext->chitBag->NewMonsterChit( pf, spawn, team );
+				Chit* mob = scriptContext->chitBag->NewMonsterChit( pf, spawn, team );
+
+				if ( isGreater ) {
+					Vector2F p2 = { pf.x, pf.z };
+					NewsEvent news( NewsEvent::PONY, p2, StringPool::Intern( spawn ), mob->ID() );
+					scriptContext->chitBag->AddNews( news );
+				}
 			}
 		}
 #endif

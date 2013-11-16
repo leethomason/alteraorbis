@@ -20,7 +20,7 @@ BuildData BuildScript::buildData[NUM_OPTIONS] = {
 	{	"Social",	"kiosk.s",	1, 0, 0 },
 	{	"Factory",	"factory",	1, 0, 0 },
 	// Tech 1
-	{	"Vault",	"vault.s",	2, 0, 0 },
+	{	"Vault",	"vault",	2, 0, 0 },
 };
 
 

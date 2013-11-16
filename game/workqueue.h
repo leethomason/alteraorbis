@@ -74,7 +74,10 @@ public:
 	// Stuff moves, commands change, etc.
 	static bool TaskCanComplete(	WorldMap* worldMap, 
 									LumosChitBag* chitBag,
-									const grinliz::Vector2I& pos, bool build, int size );
+									const grinliz::Vector2I& pos, 
+									bool build, 
+									int size );
+
 	bool TaskCanComplete( const WorkQueue::QueueItem& item );
 	static int  CalcTaskSize( const grinliz::IString& structure );
 

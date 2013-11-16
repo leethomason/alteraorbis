@@ -184,7 +184,8 @@ void WorldGenScene::DoTick( U32 delta )
 					for( int j=0; j<NUM_SECTORS; ++j ) {
 						for( int i=0; i<NUM_SECTORS; ++i ) {
 							name = "sector";
-							const char* n = static_cast<LumosGame*>(game)->GenName( "sector", random.Rand(), 4, 10 );
+							// Keep the names a little short, so that they don't overflow UI.
+							const char* n = static_cast<LumosGame*>(game)->GenName( "sector", random.Rand(), 4, 7 );
 							GLASSERT( n );
 							if ( n ) {
 								name = n;

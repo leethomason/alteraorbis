@@ -187,16 +187,18 @@ void Sim::CreateCores()
 void Sim::CreatePlayer()
 {
 	Vector2I v = worldMap->FindEmbark();
-	CreatePlayer( v, "humanFemale" );
+	CreatePlayer( v );
 }
 
 
-void Sim::CreatePlayer( const grinliz::Vector2I& pos, const char* assetName )
+void Sim::CreatePlayer( const grinliz::Vector2I& pos )
 {
-	if ( !assetName ) {
-		assetName = "humanFemale";
+	bool female = true;
+	const char* assetName = "humanFemale";
+	if ( random.Bit() ) {
+		female = false;
+		assetName = "humanMale";
 	}
-	bool female = strstr( assetName, "emale" ) != 0;
 
 	Chit* chit = chitBag->NewChit();
 	chit->SetPlayerControlled( true );
@@ -208,10 +210,9 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos, const char* assetName )
 	chit->Add( new PathMoveComponent( worldMap ));
 
 	chitBag->AddItem( assetName, chit, engine, TEAM_HOUSE0, 0 );
-	chitBag->AddItem( "shield", chit, engine, 0, 2 );
-	chitBag->AddItem( "blaster", chit, engine, 0, 2 );
-	chitBag->AddItem( "ring", chit, engine, 0, 2 );
-	chitBag->AddItem( "beamgun", chit, engine, 0, 2 );
+	chitBag->AddItem( "shield", chit, engine, 0, 0 );
+	chitBag->AddItem( "blaster", chit, engine, 0, 0 );
+	chitBag->AddItem( "ring", chit, engine, 0, 0 );
 	chit->GetItem()->wallet.AddGold( ReserveBank::Instance()->WithdrawDenizen() );
 	chit->GetItem()->flags |= GameItem::AI_BINDS_TO_CORE;
 	chit->GetItem()->traits.Roll( playerID );

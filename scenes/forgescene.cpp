@@ -303,6 +303,10 @@ void ForgeScene::ItemTapped( const gamui::UIItem* uiItem )
 		// apply the features and make the die roll.
 		SetModel( true );
 
+		int count=0;
+		for( int i=0; i<NUM_CRYSTAL_TYPES; ++i ) count += crystalRequired.crystal[i];
+		
+		forgeData->itemComponent->GetItem(0)->traits.AddCraftXP( count );
 		forgeData->itemComponent->AddToInventory( item );
 		forgeData->itemComponent->GetItem(0)->wallet.Remove( crystalRequired );
 		item->wallet.Add( crystalRequired );	// becomes part of the item, and will be returned to Reserve when item is destroyed.

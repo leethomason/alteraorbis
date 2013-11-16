@@ -59,6 +59,7 @@ void CameraComponent::DebugStr( grinliz::GLString* str )
 	
 void CameraComponent::SetPanTo( const grinliz::Vector3F& _dest, float _speed )
 {
+	GLOUTPUT(( "CC Pan set\n" ));
 	mode = PAN;
 	dest = _dest;
 	speed = _speed;
@@ -67,6 +68,9 @@ void CameraComponent::SetPanTo( const grinliz::Vector3F& _dest, float _speed )
 
 void CameraComponent::SetTrack( int targetID ) 
 {
+	if ( mode != TRACK || targetChitID != targetID ) {
+		GLOUTPUT(( "CC Track set to %d\n", targetID ));
+	}
 	mode = TRACK;
 	targetChitID = targetID;
 }

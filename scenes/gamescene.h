@@ -66,6 +66,7 @@ private:
 	void SetSelectionModel( const grinliz::Vector2F& view );
 
 	void SetPickupButtons();
+	bool FreeCameraMode();
 
 	enum {
 		SAVE,

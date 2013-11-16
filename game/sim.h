@@ -67,7 +67,7 @@ public:
 	double DateInAge() const { return (double)timeInMinutes / (double)MINUTES_IN_AGE; }
 	
 	void CreatePlayer();
-	void CreatePlayer( const grinliz::Vector2I& pos, const char* assetName );
+	void CreatePlayer( const grinliz::Vector2I& pos );
 
 private:
 	void CreateCores();
