@@ -16,6 +16,7 @@ struct BuildData
 };
 
 
+// Utility class. Cheap to create.
 class BuildScript
 {
 public:
@@ -24,8 +25,8 @@ public:
 	enum {
 		NONE,
 		CLEAR,
-		PAVE,
 		ROTATE,
+		PAVE,
 		ICE,
 		KIOSK_N,
 		KIOSK_M,
@@ -44,8 +45,11 @@ public:
 		TECH3
 	};
 
+	static bool IsBuild( int action ) { return action >= PAVE; }
+	static bool IsClear( int action ) { return action == CLEAR; }
+
 	const BuildData& GetData( int i );
-	const BuildData& GetDataFromStructure( const grinliz::IString& structure );
+	const BuildData* GetDataFromStructure( const grinliz::IString& structure );
 
 private:
 	static BuildData buildData[NUM_OPTIONS];

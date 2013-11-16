@@ -22,8 +22,7 @@ public:
 	enum {
 		TASK_MOVE = 1024,
 		TASK_STAND,
-		TASK_REMOVE,
-		TASK_BUILD,
+		TASK_BUILD,		// any BuildScript action
 		TASK_PICKUP,
 		TASK_USE_BUILDING
 	};
@@ -68,20 +67,13 @@ public:
 		return t;
 	}
 
-	static Task RemoveTask( const grinliz::Vector2I& pos2i, int taskID=0 ) {
-		Task t;
-		t.action = TASK_REMOVE;
-		t.pos2i = pos2i;
-		t.taskID = taskID;
-		return t;
-	}
+	static Task RemoveTask( const grinliz::Vector2I& pos2i, int taskID=0 );
 
-	static Task BuildTask( const grinliz::Vector2I& pos2i, const grinliz::IString& structure, int taskID=0 ) {
+	static Task BuildTask( const grinliz::Vector2I& pos2i, int buildScriptID, int taskID=0 ) {
 		Task t;
 		t.action = TASK_BUILD;
 		t.pos2i = pos2i;
-		GLASSERT( !structure.empty() );
-		t.structure = structure;
+		t.buildScriptID = buildScriptID;
 		t.taskID = taskID;
 		return t;
 	}
@@ -91,15 +83,15 @@ public:
 		pos2i.Zero();
 		timer = 0;
 		data = 0;
-		structure = grinliz::IString();
+		buildScriptID = 0;
 		taskID = 0;
 	}
 
 	int					action;		// move, stand, etc.
+	int					buildScriptID;
 	grinliz::Vector2I	pos2i;
 	int					timer;
 	int					data;
-	grinliz::IString	structure;
 	int					taskID;		// if !0, then attached to a workqueue task
 };
 

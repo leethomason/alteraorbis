@@ -516,7 +516,7 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 
 				if ( buildActive == BuildScript::CLEAR ) {
 #ifdef USE_MOUSE_MOVE_SELECTION
-					wq->AddClear( plane2i );
+					wq->AddAction( plane2i, BuildScript::CLEAR );
 #else
 					if ( mv.VoxelHit()) {
 						wq->Add( WorkQueue::CLEAR, mv.Voxel2(), IString() );
@@ -563,7 +563,7 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 #else
 				else if ( !mv.VoxelHit() ) {
 #endif
-					wq->AddBuild( plane2i, buildData.structure );
+					wq->AddAction( plane2i, buildActive );
 				}
 			}
 			

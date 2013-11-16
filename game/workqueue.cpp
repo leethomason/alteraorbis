@@ -11,6 +11,7 @@
 #include "../xarchive/glstreamer.h"
 
 #include "../script/itemscript.h"
+#include "../script/buildscript.h"
 
 using namespace grinliz;
 using namespace gamui;
@@ -55,9 +56,11 @@ void WorkQueue::AddImage( QueueItem* item )
 {
 	const char* name = 0;
 	Vector3F pos = { 0, 0, 0 };
-	int size = CalcTaskSize( item->structure );
+	BuildScript buildScript;
+	const BuildData& buildData = buildScript.GetData( item->action );
+	int size = buildData.size;
 
-	if ( item->action == CLEAR ) {
+	if ( item->action == BuildScript::CLEAR ) {
 		const WorldGrid& wg = worldMap->GetWorldGrid( item->pos.x, item->pos.y );
 		if ( wg.Height() ) {
 			// Clearing ice or plant
@@ -128,9 +131,9 @@ void WorkQueue::Remove( const grinliz::Vector2I& pos )
 }
 
 
-void WorkQueue::AddClear( const grinliz::Vector2I& pos2i )
+void WorkQueue::AddAction( const grinliz::Vector2I& pos2i, int action )
 {
-	if ( pos2i.x / SECTOR_SIZE == sector.x && pos2i.y / SECTOR_SIZE == sector.y ) {
+	if ( ToSector( pos2i ) == sector ) {
 		// okay!
 	}
 	else {
@@ -139,9 +142,8 @@ void WorkQueue::AddClear( const grinliz::Vector2I& pos2i )
 	}
 
 	QueueItem item;
-	item.action = CLEAR;
+	item.action = action;
 	item.pos = pos2i;
-	item.structure = IString();
 	item.taskID = ++idPool;
 
 	if ( !TaskCanComplete( item )) {
@@ -150,37 +152,6 @@ void WorkQueue::AddClear( const grinliz::Vector2I& pos2i )
 
 	// Clear out existing.
 	Remove( pos2i );
-
-	AddImage( &item );
-	queue.Push( item );
-	SendNotification( pos2i );
-}
-
-
-void WorkQueue::AddBuild( const grinliz::Vector2I& pos2i, IString structure )
-{
-	GLASSERT( !structure.empty() );
-	if ( pos2i.x / SECTOR_SIZE == sector.x && pos2i.y / SECTOR_SIZE == sector.y ) {
-		// okay!
-	}
-	else {
-		// wrong sector.
-		return;
-	}
-
-	QueueItem item;
-	item.action = BUILD;
-	item.pos = pos2i;
-	item.structure = structure;
-	item.taskID = ++idPool;
-
-	if ( !TaskCanComplete( item )) {
-		return;
-	}
-
-	// Clear out existing.
-	Remove( pos2i );
-
 	AddImage( &item );
 	queue.Push( item );
 	SendNotification( pos2i );
@@ -264,7 +235,7 @@ const WorkQueue::QueueItem* WorkQueue::Find( const grinliz::Vector2I& chitPos )
 			float cost = 0;
 			Vector2F end = { (float)queue[i].pos.x+0.5f, (float)queue[i].pos.y+0.5f };
 
-			if ( queue[i].action == CLEAR ) {
+			if ( queue[i].action == BuildScript::CLEAR ) {
 				Vector2F bestEnd = { 0, 0 };
 
 				if ( worldMap->CalcPathBeside( start, end, &bestEnd, &cost )) {
@@ -301,16 +272,26 @@ void WorkQueue::RemoveItem( int index )
 
 bool WorkQueue::TaskCanComplete( const WorkQueue::QueueItem& item )
 {
-	return WorkQueue::TaskCanComplete( worldMap, chitBag, item.pos, item.action != CLEAR, CalcTaskSize( item.structure ));
+	return WorkQueue::TaskCanComplete(	worldMap, 
+										chitBag, 
+										item.pos, 
+										item.action,
+										0 );
 }
 
 
 /*static*/ bool WorkQueue::TaskCanComplete( WorldMap* worldMap, 
 											LumosChitBag* chitBag,
-											const grinliz::Vector2I& pos2i, bool build, int size )
+											const grinliz::Vector2I& pos2i, 
+											int action,
+											const Wallet* available )
 {
 	Vector2F pos2  = { (float)pos2i.x + 0.5f, (float)pos2i.y+0.5f };
 	const WorldGrid& wg = worldMap->GetWorldGrid( pos2i.x, pos2i.y );
+
+	BuildScript buildScript;
+	const BuildData& buildData = buildScript.GetData( action );
+	int size = buildData.size;
 
 	int passable = 0;
 	int removable = 0;
@@ -326,7 +307,7 @@ bool WorkQueue::TaskCanComplete( const WorkQueue::QueueItem& item )
 		}
 	}
 
-	if ( build ) {
+	if ( action != BuildScript::CLEAR ) {
 		if ( passable < size*size || removable ) {
 			// stuff in the way
 			return false;
@@ -366,7 +347,6 @@ void WorkQueue::QueueItem::Serialize( XStream* xs )
 {
 	XarcOpen( xs, "QueueItem" );
 	XARC_SER( xs, action );
-	XARC_SER( xs, structure );
 	XARC_SER( xs, pos );
 	XARC_SER( xs, assigned );
 	XARC_SER( xs, taskID );

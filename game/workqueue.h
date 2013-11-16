@@ -27,6 +27,7 @@ class XStream;
 class LumosChitBag;
 class Model;
 class Engine;
+struct Wallet;
 
 class WorkQueue
 {
@@ -35,20 +36,12 @@ public:
 	~WorkQueue();
 	void InitSector( const grinliz::Vector2I& _sector ) { sector = _sector; }
 
-	enum {
-		NO_ACTION,
-		CLEAR,
-		BUILD,
-		NUM_ACTIONS,
-	};
-
 	struct QueueItem {
-		QueueItem() : action(NO_ACTION), assigned(0), taskID(0), model(0) { pos.Zero(); }
+		QueueItem() : action(0), assigned(0), taskID(0), model(0) { pos.Zero(); }
 
 		void Serialize( XStream* xs );
 
-		int					action;		// CLEAR_GRID, etc.
-		grinliz::IString	structure;	// what to construct
+		int					action;		// BuildScript::CLEAR, ICE, VAULT, etc.
 		grinliz::Vector2I	pos;
 		int					assigned;	// id of worker assigned this task.			
 		int					taskID;		// id # of this task
@@ -56,8 +49,8 @@ public:
 	};
 
 	void Serialize( XStream* xs );
-	void AddBuild( const grinliz::Vector2I& pos, grinliz::IString structure );	// add an action to do
-	void AddClear( const grinliz::Vector2I& pos );
+	void AddAction( const grinliz::Vector2I& pos, int action );	// add an action to do
+	//void AddClear( const grinliz::Vector2I& pos );
 	void Remove( const grinliz::Vector2I& pos );
 	
 	const QueueItem*	Find( const grinliz::Vector2I& chitPos );	// find something to do. don't hold pointer!
@@ -75,8 +68,8 @@ public:
 	static bool TaskCanComplete(	WorldMap* worldMap, 
 									LumosChitBag* chitBag,
 									const grinliz::Vector2I& pos, 
-									bool build, 
-									int size );
+									int action,
+									const Wallet* availableFunds );	// if null, doesn't matter
 
 	bool TaskCanComplete( const WorkQueue::QueueItem& item );
 	static int  CalcTaskSize( const grinliz::IString& structure );

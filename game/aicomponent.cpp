@@ -37,6 +37,7 @@
 #include "../script/worldgen.h"
 #include "../script/corescript.h"
 #include "../script/itemscript.h"
+#include "../script/buildscript.h"
 
 #include "../engine/engine.h"
 #include "../engine/particle.h"
@@ -1492,34 +1493,25 @@ void AIComponent::WorkQueueToTask(  const ComponentSet& thisComp )
 			}
 		}
 		if ( item ) {
-			switch ( item->action )
-			{
-			case WorkQueue::CLEAR:
-				{
-					Vector2F dest = { (float)item->pos.x + 0.5f, (float)item->pos.y + 0.5f };
-					Vector2F end;
-					float cost = 0;
-					if ( map->CalcPathBeside( thisComp.spatial->GetPosition2D(), dest, &end, &cost )) {
-						if ( !taskList ) taskList = new TaskList( map, engine );
-						taskList->Push( Task::MoveTask( end, item->taskID ));
-						taskList->Push( Task::StandTask( 1000, item->taskID ));
-						taskList->Push( Task::RemoveTask( item->pos, item->taskID ));
-					}
-				}
-				break;
-
-			case WorkQueue::BUILD:
-				{
+			if ( BuildScript::IsClear( item->action )) {
+				Vector2F dest = { (float)item->pos.x + 0.5f, (float)item->pos.y + 0.5f };
+				Vector2F end;
+				float cost = 0;
+				if ( map->CalcPathBeside( thisComp.spatial->GetPosition2D(), dest, &end, &cost )) {
 					if ( !taskList ) taskList = new TaskList( map, engine );
-					taskList->Push( Task::MoveTask( item->pos, item->taskID ));
+					taskList->Push( Task::MoveTask( end, item->taskID ));
 					taskList->Push( Task::StandTask( 1000, item->taskID ));
-					taskList->Push( Task::BuildTask( item->pos, item->structure, item->taskID ));
+					taskList->Push( Task::RemoveTask( item->pos, item->taskID ));
 				}
-				break;
-
-			default:
+			}
+			else if ( BuildScript::IsBuild( item->action )) {
+				if ( !taskList ) taskList = new TaskList( map, engine );
+				taskList->Push( Task::MoveTask( item->pos, item->taskID ));
+				taskList->Push( Task::StandTask( 1000, item->taskID ));
+				taskList->Push( Task::BuildTask( item->pos, item->action, item->taskID ));
+			}
+			else {
 				GLASSERT( 0 );
-				break;
 			}
 		}
 	}

@@ -10,8 +10,8 @@ BuildData BuildScript::buildData[NUM_OPTIONS] = {
 	// Utility
 	{	"None",		"",			0, 0, 0 },
 	{	"Clear",	"",			0, 0, 0 },
-	{	"Pave",		"pave",		0, 0, 0 },
 	{	"Rotate",	"",			0, 0, 0 },
+	{	"Pave",		"pave",		0, 0, 0 },
 	{	"Ice",		"ice",		0, 0, 0 },
 	// Tech 0
 	{	"News",		"kiosk.n",	1, 0, 0 },
@@ -24,15 +24,14 @@ BuildData BuildScript::buildData[NUM_OPTIONS] = {
 };
 
 
-const BuildData& BuildScript::GetDataFromStructure( const grinliz::IString& structure )
+const BuildData* BuildScript::GetDataFromStructure( const grinliz::IString& structure )
 {
 	for( int i=0; i<NUM_OPTIONS; ++i ) {
 		if ( structure == buildData[i].cStructure ) {
-			return GetData( i );
+			return &GetData( i );
 		}
 	}
-	GLASSERT( 0 );
-	return GetData( 0 );
+	return 0;
 }
 
 

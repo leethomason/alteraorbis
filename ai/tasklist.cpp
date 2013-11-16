@@ -25,6 +25,12 @@
 using namespace grinliz;
 using namespace ai;
 
+Task Task::RemoveTask( const grinliz::Vector2I& pos2i, int taskID )
+{
+	return Task::BuildTask( pos2i, BuildScript::CLEAR, taskID );
+}
+
+
 Vector2I TaskList::Pos2I() const
 {
 	Vector2I v = { 0, 0 };
@@ -113,7 +119,7 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta, U32 since )
 			}
 			if ( taskList.Size() >= 2 ) {
 				int action = taskList[1].action;
-				if ( action == Task::TASK_BUILD || action == Task::TASK_REMOVE ) {
+				if ( action == Task::TASK_BUILD ) {
 					Vector3F pos = ToWorld3F( taskList[1].pos2i );
 					pos.y = 0.5f;
 					engine->particleSystem->EmitPD( "construction", pos, V3F_UP, 30 );	// FIXME: standard delta constant					
@@ -122,10 +128,15 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta, U32 since )
 		}
 		break;
 
-	case Task::TASK_REMOVE:
+	case Task::TASK_BUILD:
 		{
-			if ( WorkQueue::TaskCanComplete( worldMap, chitBag, task->pos2i, false, WorkQueue::CalcTaskSize( task->structure ))) {
-				const WorldGrid& wg = worldMap->GetWorldGrid( task->pos2i.x, task->pos2i.y );
+			// "BUILD" just refers to a BuildScript task. Do some special case handling
+			// up front for rocks. (Which aren't handled by the general code.)
+			// Although a small kludge, way better than things used to be.
+
+			const WorldGrid& wg = worldMap->GetWorldGrid( task->pos2i.x, task->pos2i.y );
+
+			if ( task->buildScriptID == BuildScript::CLEAR ) {
 				if ( wg.RockHeight() ) {
 					DamageDesc dd( 10000, 0 );	// FIXME need constant
 					Vector3I voxel = { task->pos2i.x, 0, task->pos2i.y };
@@ -134,14 +145,9 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta, U32 since )
 				else {
 					Chit* found = chitBag->QueryRemovable( task->pos2i );
 					if ( found ) {
-						DamageDesc dd( 10000, 0 );
-						ChitDamageInfo info( dd );
-						info.originID = 0;
-						info.awardXP  = false;
-						info.isMelee  = true;
-						info.isExplosion = false;
-						info.originOfImpact = spatial->GetPosition();
-						found->SendMessage( ChitMsg( ChitMsg::CHIT_DAMAGE, 0, &info ), 0 );
+						GLASSERT( found->GetItem() );
+						found->GetItem()->hp = 0;
+						found->SetTickNeeded();
 					}
 				}
 				if ( wg.Pave() ) {
@@ -149,40 +155,33 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta, U32 since )
 				}
 				taskList.Remove(0);
 			}
-			else {
-				taskList.Clear();
-			}
-		}
-		break;
+			else if ( controller && controller->GetItem() ) {
+				BuildScript buildScript;
+				const BuildData& buildData	= buildScript.GetData( task->buildScriptID );
 
-	case Task::TASK_BUILD:
-		{
-			// IsPassable (isLand, noRocks)
-			// No plants
-			// No buildings
-			BuildScript buildScript;
-			const BuildData& buildData	= buildScript.GetDataFromStructure( task->structure );
-			int cost					= buildData.cost;
-			bool canAfford				= controller && controller->GetItem() && (controller->GetItem()->wallet.gold >= cost);
-
-			if (    canAfford 
-				 && WorkQueue::TaskCanComplete( worldMap, chitBag, task->pos2i, true, WorkQueue::CalcTaskSize( task->structure ))) 
-			{
-				if ( task->structure == IStringConst::ice ) {
-					worldMap->SetRock( task->pos2i.x, task->pos2i.y, 1, false, WorldGrid::ICE );
-				}
-				else if ( task->structure == IStringConst::pave ) {
-					worldMap->SetPave( task->pos2i.x, task->pos2i.y, chit->PrimaryTeam()%3+1 );
+				if ( WorkQueue::TaskCanComplete( worldMap, chitBag, task->pos2i,
+					task->buildScriptID,
+					&controller->GetItem()->wallet ))
+				{
+					if ( task->buildScriptID == BuildScript::ICE ) {
+						worldMap->SetRock( task->pos2i.x, task->pos2i.y, 1, false, WorldGrid::ICE );
+					}
+					else if ( task->buildScriptID == BuildScript::PAVE ) {
+						worldMap->SetPave( task->pos2i.x, task->pos2i.y, chit->PrimaryTeam()%3+1 );
+					}
+					else {
+						// Move the build cost to the building. The gold is held there until the
+						// building is destroyed
+						GameItem* controllerItem = controller->GetItem();
+						controllerItem->wallet.gold -= buildData.cost; 
+						Chit* building = chitBag->NewBuilding( task->pos2i, buildData.cStructure, chit->PrimaryTeam() );
+						building->GetItem()->wallet.AddGold( buildData.cost );
+					}
+					taskList.Remove(0);
 				}
 				else {
-					// Move the build cost to the building. The gold is held there until the
-					// building is destroyed
-					GameItem* controllerItem = controller->GetItem();
-					controllerItem->wallet.gold -= cost; 
-					Chit* building = chitBag->NewBuilding( task->pos2i, task->structure.c_str(), chit->PrimaryTeam() );
-					building->GetItem()->wallet.AddGold( cost );
+					taskList.Clear();
 				}
-				taskList.Remove(0);
 			}
 			else {
 				// Plan has gone bust:
