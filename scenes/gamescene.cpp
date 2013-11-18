@@ -672,7 +672,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		Chit* playerChit = sim->GetPlayerChit();
 		CoreScript* coreMode = sim->GetChitBag()->IsBoundToCore( playerChit, true );
 		if ( coreMode ) {
-			if ( playerChit->GetItem()->wallet.gold > 20 ) {
+			if ( playerChit->GetItem()->wallet.gold >= 20 ) {
 				playerChit->GetItem()->wallet.gold -= 20;
 				ReserveBank::Instance()->Deposit( 20 );
 				int team = playerChit->GetItem()->primaryTeam;

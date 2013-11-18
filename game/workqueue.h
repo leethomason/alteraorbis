@@ -69,7 +69,7 @@ public:
 									LumosChitBag* chitBag,
 									const grinliz::Vector2I& pos, 
 									int action,
-									const Wallet* availableFunds );	// if null, doesn't matter
+									const Wallet& availableFunds );
 
 	bool TaskCanComplete( const WorkQueue::QueueItem& item );
 	static int  CalcTaskSize( const grinliz::IString& structure );

@@ -12,6 +12,7 @@
 
 #include "../script/itemscript.h"
 #include "../script/buildscript.h"
+#include "../script/corescript.h"
 
 using namespace grinliz;
 using namespace gamui;
@@ -272,11 +273,22 @@ void WorkQueue::RemoveItem( int index )
 
 bool WorkQueue::TaskCanComplete( const WorkQueue::QueueItem& item )
 {
+	Wallet wallet;
+	Vector2I sector = ToSector( item.pos );
+	CoreScript* coreScript = chitBag->GetCore( sector );
+	Chit* controller = 0;
+	if ( coreScript ) {
+		controller = coreScript->GetAttached( 0 );
+		if ( controller && controller->GetItem() ) {
+			wallet = controller->GetItem()->wallet;
+		}
+	}
+
 	return WorkQueue::TaskCanComplete(	worldMap, 
 										chitBag, 
 										item.pos, 
 										item.action,
-										0 );
+										wallet );
 }
 
 
@@ -284,7 +296,7 @@ bool WorkQueue::TaskCanComplete( const WorkQueue::QueueItem& item )
 											LumosChitBag* chitBag,
 											const grinliz::Vector2I& pos2i, 
 											int action,
-											const Wallet* available )
+											const Wallet& available )
 {
 	Vector2F pos2  = { (float)pos2i.x + 0.5f, (float)pos2i.y+0.5f };
 	const WorldGrid& wg = worldMap->GetWorldGrid( pos2i.x, pos2i.y );
@@ -292,6 +304,10 @@ bool WorkQueue::TaskCanComplete( const WorkQueue::QueueItem& item )
 	BuildScript buildScript;
 	const BuildData& buildData = buildScript.GetData( action );
 	int size = buildData.size;
+	
+	if ( available.gold <= buildData.cost ) {
+		return false;
+	}
 
 	int passable = 0;
 	int removable = 0;

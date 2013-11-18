@@ -161,7 +161,7 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta, U32 since )
 
 				if ( WorkQueue::TaskCanComplete( worldMap, chitBag, task->pos2i,
 					task->buildScriptID,
-					&controller->GetItem()->wallet ))
+					controller->GetItem()->wallet ))
 				{
 					if ( task->buildScriptID == BuildScript::ICE ) {
 						worldMap->SetRock( task->pos2i.x, task->pos2i.y, 1, false, WorldGrid::ICE );
