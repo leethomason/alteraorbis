@@ -106,14 +106,6 @@ private:
 };
 
 
-/*
-class IChitListener
-{
-public:
-	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg ) = 0;
-};
-*/
-
 // Gets a component that is a direct child of the general component.
 #define GET_GENERAL_COMPONENT( chit, name ) static_cast<name*>( chit->GetComponent( #name ) )
 #define GET_SUB_COMPONENT( chit, top, sub ) ( chit->Get##top() ? chit->Get##top()->To##sub() : 0 )

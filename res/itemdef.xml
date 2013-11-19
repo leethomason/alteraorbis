@@ -129,6 +129,14 @@
         mass="120"
         cost="80" />
 
+  <item name="power"
+        resource="power"
+        porch="1"
+        procedural="team"
+        size="2"
+        mass="100"
+        cost="60" />
+
   <item name="arachnoid"
         resource="arachnoid"
         flags="AI_WANDER_HERD AI_EAT_PLANTS AI_SECTOR_HERD GOLD_PICKUP FLAMMABLE SHOCKABLE"

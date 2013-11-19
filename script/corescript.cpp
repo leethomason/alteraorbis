@@ -24,7 +24,7 @@
 static const double TECH_ADDED_BY_VISITOR = 0.2;
 static const double TECH_DECAY_0 = 0.0001;
 static const double TECH_DECAY_1 = 0.001;
-static const double TECH_MAX = 3.5;
+static const double TECH_MAX = 3.9;
 
 using namespace grinliz;
 
@@ -295,6 +295,9 @@ int CoreScript::DoTick( U32 delta, U32 since )
 
 void CoreScript::AddTech()
 {
+	int power = 0;
+	count the power plants.
+
 	tech += TECH_ADDED_BY_VISITOR;
 	tech = Clamp( tech, 0.0, TECH_MAX );
 

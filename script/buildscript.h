@@ -34,6 +34,7 @@ public:
 		KIOSK_S,
 		VAULT,
 		FACTORY,
+		POWER,
 		NUM_OPTIONS,
 
 		NUM_TECH_LEVELS = 4,
