@@ -27,7 +27,7 @@ class Engine;
 class WorldMap;
 
 class NavTestScene : public Scene, 
-					 public IChitListener,
+					 //public IChitListener,
 					 public IMapGridUse
 {
 public:

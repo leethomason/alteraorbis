@@ -60,6 +60,13 @@ int GetRelationship( int t0, int t1 )
 		else
 			return RELATE_ENEMY;
 	}
+
+	// Trolls are neutral to the mantis, so they can disperse out.
+	if ( t1 == TEAM_TROLL ) {
+		if ( t0 == TEAM_GREEN_MANTIS || t0 == TEAM_RED_MANTIS )
+			return RELATE_NEUTRAL;
+	}
+
 	return RELATE_ENEMY;
 }
 

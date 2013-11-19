@@ -38,7 +38,7 @@ void Chit::Init( int _id, ChitBag* _chitBag )
 	GLASSERT( chitBag == 0 );
 	GLASSERT( id == 0 );
 	GLASSERT( next == 0 );
-	GLASSERT( listeners.Empty() );
+//	GLASSERT( listeners.Empty() );
 
 	id = _id;
 	chitBag = _chitBag;
@@ -70,7 +70,7 @@ void Chit::Free()
 	id = 0;
 	next = 0;
 	chitBag = 0;
-	listeners.Clear();
+//	listeners.Clear();
 }
 
 
@@ -232,9 +232,9 @@ void Chit::OnChitEvent( const ChitEvent& event )
 void Chit::SendMessage( const ChitMsg& msg, Component* exclude )
 {
 	// Listeners.
-	for( int i=0; i<listeners.Size(); ++i ) {
-		listeners[i]->OnChitMsg( this, msg );
-	}
+//	for( int i=0; i<listeners.Size(); ++i ) {
+//		listeners[i]->OnChitMsg( this, msg );
+//	}
 
 	int i=0;
 	while ( i<cListeners.Size() ) {
@@ -279,7 +279,7 @@ bool Chit::CarryMsg( int componentID, Chit* src, const ChitMsg& msg )
 	return false;
 }
 
-
+/*
 void Chit::AddListener( IChitListener* listener )
 {
 	GLASSERT( listeners.Find( listener ) < 0 );
@@ -293,7 +293,7 @@ void Chit::RemoveListener( IChitListener* listener )
 	GLASSERT( i >= 0 );
 	listeners.SwapRemove( i );
 }
-
+*/
 
 void Chit::AddListener( Component* c )
 {

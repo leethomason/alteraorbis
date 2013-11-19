@@ -185,7 +185,7 @@
 
   <item name="troll"
         resource="troll"
-        flags="GOLD_PICKUP ITEM_PICKUP AI_SECTOR_HERD AI_HEAL_AT_CORE"
+        flags="GOLD_PICKUP ITEM_PICKUP AI_SECTOR_WANDER AI_HEAL_AT_CORE"
         nameGen="monster"
         mob="normal"
         mass ="40">

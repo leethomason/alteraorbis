@@ -32,7 +32,10 @@ MapScene::MapScene( LumosGame* game, MapSceneData* data ) : Scene( game ), lumos
 	mapImage.Init( &gamui2D, mapAtom, false );
 	mapImage.SetCapturesTap( true );
 	
-	Vector2I pos2i = player->GetSpatialComponent()->GetPosition2DI();
+	Vector2I pos2i = { worldMap->Width()/2, worldMap->Height()/2 };
+	if ( player ) {
+		pos2i = player->GetSpatialComponent()->GetPosition2DI();
+	}
 	Vector2I sector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
 	if ( sector.x < MAP2_RAD )					sector.x = MAP2_RAD;
 	if ( sector.y < MAP2_RAD )					sector.y = MAP2_RAD;
@@ -113,7 +116,10 @@ void MapScene::Resize()
 
 	const float MARK_SIZE = dx*0.02f;
 	playerMark.SetSize( MARK_SIZE, MARK_SIZE );
-	Vector2F pos = player->GetSpatialComponent()->GetPosition2D();
+	Vector2F pos = { 0, 0 };
+	if ( player ) {
+		pos = player->GetSpatialComponent()->GetPosition2D();
+	}
 	playerMark.SetCenterPos( x + dx*pos.x/float(worldMap->Width()), 
 							 y + dy*pos.y/float(worldMap->Height()));
 
@@ -186,11 +192,16 @@ void MapScene::SetText()
 			lumosChitBag->QuerySpatialHash( &query, inner, 0, &mobFilter );
 
 			int low=0, med=0, high=0, greater=0;
-			float playerPower = player->GetItemComponent()->PowerRating();
+			float playerPower = 0;
+			int primaryTeam = 0;
+			if ( player ) {
+				playerPower = player->GetItemComponent()->PowerRating();
+				primaryTeam = player->GetItem()->primaryTeam;
+			}
 
 			for( int k=0; k<query.Size(); ++k ) {
 				const GameItem* item = query[k]->GetItem();
-				if ( GetRelationship( player->GetItem()->primaryTeam, item->primaryTeam ) == RELATE_ENEMY ) {
+				if ( GetRelationship( primaryTeam, item->primaryTeam ) == RELATE_ENEMY ) {
 
 					float power = query[k]->GetItemComponent()->PowerRating();
 

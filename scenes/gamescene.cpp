@@ -616,8 +616,8 @@ bool GameScene::FreeCameraMode()
 	bool button = freeCameraButton.Down();
 	Chit* playerChit = sim->GetPlayerChit();
 	CoreScript* coreMode = sim->GetChitBag()->IsBoundToCore( playerChit, true );
-
-	if ( button || coreMode )
+	
+	if ( button || coreMode || (!playerChit) )
 		return true;
 	return false;
 }
@@ -840,9 +840,7 @@ void GameScene::HandleHotKey( int mask )
 	}
 	else if ( mask == GAME_HK_MAP ) {
 		Chit* playerChit = sim->GetPlayerChit();
-		if ( playerChit ) {
-			game->PushScene( LumosGame::SCENE_MAP, new MapSceneData( sim->GetChitBag(), sim->GetWorldMap(), playerChit ));
-		}
+		game->PushScene( LumosGame::SCENE_MAP, new MapSceneData( sim->GetChitBag(), sim->GetWorldMap(), playerChit ));
 	}
 	else if ( mask == GAME_HK_CHEAT_GOLD ) {
 		Chit* playerChit = sim->GetPlayerChit();

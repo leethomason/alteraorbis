@@ -93,7 +93,7 @@ NavTestScene::NavTestScene( LumosGame* game ) : Scene( game )
 		chit[i]->Add( new DebugPathComponent( engine, map, game ) );
 		chit[i]->GetSpatialComponent()->SetPosition( 10.0f + (float)i*2.f, 0.0f, 10.0f );
 	}
-	chit[1]->AddListener( this );
+	//chit[1]->AddListener( this );
 	// Comment in to get a unit pacing.
 	//GET_COMPONENT( chit[1], PathMoveComponent )->SetDest( 13.f, 10.f );
 

@@ -106,11 +106,13 @@ private:
 };
 
 
+/*
 class IChitListener
 {
 public:
 	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg ) = 0;
 };
+*/
 
 // Gets a component that is a direct child of the general component.
 #define GET_GENERAL_COMPONENT( chit, name ) static_cast<name*>( chit->GetComponent( #name ) )
@@ -170,8 +172,9 @@ public:
 	// Synchronous
 	void SendMessage(	const ChitMsg& message, 
 						Component* exclude=0 );			// useful to not call ourselves. 
-	void AddListener( IChitListener* listener );
-	void RemoveListener( IChitListener* listener );
+	
+	//void AddListener( IChitListener* listener );
+	//void RemoveListener( IChitListener* listener );
 
 	// special versions for components that are weak-ref.
 	void AddListener( Component* c );
@@ -198,7 +201,7 @@ private:
 	ChitBag* chitBag;
 	int		 id;
 	bool	 playerControlled;
-	grinliz::CDynArray<IChitListener*> listeners;
+//	grinliz::CDynArray<IChitListener*> listeners;
 
 	struct CList
 	{
