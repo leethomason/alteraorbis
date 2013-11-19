@@ -33,6 +33,7 @@ class BuildingFilter : public IChitAccept
 {
 public:
 	virtual bool Accept( Chit* chit );
+	virtual int  Type() { return MAP; }
 };
 
 
@@ -48,6 +49,7 @@ class MoBFilter : public IChitAccept
 {
 public:
 	virtual bool Accept( Chit* chit );
+	virtual int  Type() { return MOB; }
 };
 
 
@@ -56,6 +58,8 @@ class PlantFilter : public IChitAccept
 public:
 	PlantFilter( int type=-1, int maxStage=3 );
 	virtual bool Accept( Chit* chit );
+	virtual int  Type() { return MAP; }
+
 private:
 	int typeFilter;
 	int maxStage;
@@ -66,6 +70,8 @@ class RemovableFilter : public IChitAccept
 {
 public:
 	virtual bool Accept( Chit* chit );
+	virtual int  Type() { return buildingFilter.Type() | plantFilter.Type(); }	
+
 private:
 	BuildingFilter buildingFilter;
 	PlantFilter    plantFilter;
@@ -76,6 +82,7 @@ class ChitHasMapSpatial : public IChitAccept
 {
 public:
 	virtual bool Accept( Chit* chit );
+	virtual int  Type() { return MAP; }
 };
 
 class ItemNameFilter : public IChitAccept
@@ -86,6 +93,7 @@ public:
 	ItemNameFilter( const grinliz::IString* names, int n );
 
 	virtual bool Accept( Chit* chit );
+	virtual int  Type() { return MAP | MOB; }
 
 protected:
 	ItemNameFilter();
@@ -109,6 +117,7 @@ class LootFilter : public IChitAccept
 {
 public:
 	virtual bool Accept( Chit* chit );
+	virtual int  Type() { return MOB; }
 };
 
 
@@ -119,6 +128,7 @@ private:
 	LootFilter			loot;
 public:
 	virtual bool Accept( Chit* chit ) { return gold.Accept( chit ) || loot.Accept( chit ); }
+	virtual int  Type() { return gold.Type() | loot.Type(); }
 };
 
 

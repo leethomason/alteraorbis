@@ -47,26 +47,34 @@ class CameraComponent;
 class IChitAccept
 {
 public:
+	enum {
+		MAP = 0x01,
+		MOB = 0x02
+	};
 	virtual bool Accept( Chit* chit ) = 0;
+	virtual int  Type() = 0;
 };
 
 
 class ChitAcceptAll : public IChitAccept
 {
 public:
-	virtual bool Accept( Chit* chit ) { return true; }
+	virtual bool Accept( Chit* chit )	{ return true; }
+	virtual int  Type()					{ return MAP | MOB; }
 };
 
 class ChitHasMoveComponent : public IChitAccept
 {
 public:
 	virtual bool Accept( Chit* chit );
+	virtual int  Type()					{ return MOB; }
 };
 
 class ChitHasAIComponent : public IChitAccept
 {
 public:
 	virtual bool Accept( Chit* chit );
+	virtual int  Type()					{ return MAP | MOB; }
 };
 
 
@@ -137,7 +145,7 @@ public:
 		r.Set( origin.x-rad, origin.y-rad, origin.x+rad, origin.y+rad );
 		QuerySpatialHash( array, r, ignoreMe, accept );
 	}
-	// Use with caution: the array returned can change if a sub-function calls this.
+
 	void QuerySpatialHash(	CChitArray* array,
 							const grinliz::Vector2F& origin, 
 							float rad,
@@ -161,23 +169,13 @@ public:
 private:
 
 	enum {
-#ifdef SPATIAL_VAR
 		SIZE2 = 1024*64	// 16 bits
-#else
-		SHIFT = 2,	// a little tuning done; seems reasonable
-		SIZE = MAX_MAP_SIZE >> SHIFT,
-		SIZE2 = SIZE*SIZE,
-#endif
 	};
 
 	U32 HashIndex( U32 x, U32 y ) const {
-#ifdef SPATIAL_VAR
 		//return (y*MAX_MAP_SIZE + x) & (SIZE2-1);
 		//return (x ^ (y<<6)) & (SIZE2-1);				// 16 bit variation
 		return (y*137 +x ) & (SIZE2-1);					// prime # wins the day.
-#else
-		return ( (y>>SHIFT)*SIZE + (x>>SHIFT) );
-#endif
 	}
 
 	int idPool;
@@ -212,7 +210,10 @@ private:
 	grinliz::CDynArray<Component*>	tickList[Chit::NUM_SLOTS];
 #endif
 	
-	Chit* spatialHash[SIZE2];
+	// Split out into 2 hashes for performance, and
+	// independent tweaking.
+	Chit* mapSpatialHash[SIZE2];
+	Chit* mobSpatialHash[SIZE2];
 };
 
 
