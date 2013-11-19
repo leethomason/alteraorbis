@@ -68,7 +68,7 @@ static const float  CORE_HP_PER_SEC				=  8.0f;
 static const int	WANDER_ODDS					=100;		// as in 1 in WANDER_ODDS
 static const int	GREATER_WANDER_ODDS			=  5;		// as in 1 in WANDER_ODDS
 static const float	PLANT_AWARE					=  3.0f;
-static const float	GOLD_AWARE					=  3.5f;
+static const float	GOLD_AWARE					=  5.0f;
 static const int	FORCE_COUNT_STUCK			=  8;
 static const int	STAND_TIME_WHEN_WANDERING	= 1500;
 
@@ -1109,20 +1109,13 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 	}
 
 	// Plant eater
-	if ( (itemFlags & (GameItem::AI_EAT_PLANTS | GameItem::AI_HEAL_AT_CORE)) && (item->hp < item->TotalHP()))  {
+	if ( (itemFlags & GameItem::AI_EAT_PLANTS) && (item->hp < item->TotalHP()))  {
 		// Are we near a plant?
 		// Note that currently only support eating stage 0-1 plants.
 		CChitArray plants;
-
-		if ( itemFlags & GameItem::AI_EAT_PLANTS ) {
-			PlantFilter plantFilter( -1, MAX_PASSABLE_PLANT_STAGE );
-			parentChit->GetChitBag()->QuerySpatialHash( &plants, pos2, PLANT_AWARE, 0, &plantFilter );
-		}
-		else {
-		CChitArray array;
-			ItemNameFilter coreFilter( IStringConst::core );
-			parentChit->GetChitBag()->QuerySpatialHash( &plants, pos2, PLANT_AWARE, 0, &coreFilter );
-		}
+	
+		PlantFilter plantFilter( -1, MAX_PASSABLE_PLANT_STAGE );
+		parentChit->GetChitBag()->QuerySpatialHash( &plants, pos2, PLANT_AWARE, 0, &plantFilter );
 
 		Vector2F plantPos =  { 0, 0 };
 		float plantDist = 0;
@@ -1138,6 +1131,19 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 				currentAction = STAND;
 				return;
 			}
+		}
+	}
+
+	// Core healer
+	if ( (itemFlags & GameItem::AI_HEAL_AT_CORE) && (item->hp < item->TotalHPF() * 0.8f )) {
+		Vector2I sector = ToSector( thisComp.spatial->GetPosition2DI() );
+		const SectorData& sd = map->GetSector( sector );
+		if ( sd.core != pos2i ) {
+			dest = ToWorld2F( sd.core );
+		}
+		else {
+			currentAction = STAND;
+			return;
 		}
 	}
 
