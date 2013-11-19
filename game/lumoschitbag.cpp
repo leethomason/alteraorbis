@@ -462,7 +462,7 @@ void LumosChitBag::HandleBolt( const Bolt& bolt, const ModelVoxel& mv )
 					chitHit->SendMessage( msg, 0 );
 				}
 			}
-			else {
+			else if ( mv.VoxelHit() ) {
 				worldMap->VoxelHit( mv.voxel, dd );
 			}
 		}

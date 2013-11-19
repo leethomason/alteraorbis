@@ -52,6 +52,7 @@ public:
 	static grinliz::IString vault;
 	static grinliz::IString factory;
 	static grinliz::IString forge;
+	static grinliz::IString power;
 
 	static grinliz::IString arachnoid;
 	static grinliz::IString mantis;

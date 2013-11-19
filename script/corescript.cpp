@@ -12,6 +12,7 @@
 #include "../game/aicomponent.h"
 #include "../game/workqueue.h"
 #include "../game/team.h"
+#include "../game/lumosmath.h"
 
 #include "../xegame/chit.h"
 #include "../xegame/spatialcomponent.h"
@@ -24,7 +25,7 @@
 static const double TECH_ADDED_BY_VISITOR = 0.2;
 static const double TECH_DECAY_0 = 0.0001;
 static const double TECH_DECAY_1 = 0.001;
-static const double TECH_MAX = 3.9;
+static const double TECH_MAX = 3.99;
 
 using namespace grinliz;
 
@@ -293,13 +294,19 @@ int CoreScript::DoTick( U32 delta, U32 since )
 }
 
 
+int CoreScript::MaxTech() const
+{
+	CChitArray arr;
+	Vector2I sector = ToSector( scriptContext->chit->GetSpatialComponent()->GetPosition2DI() );
+	scriptContext->chitBag->FindBuilding( IStringConst::power, sector, 0, 0, &arr );
+	return arr.Size() + 1;	// get one power for core
+}
+
+
 void CoreScript::AddTech()
 {
-	int power = 0;
-	count the power plants.
-
 	tech += TECH_ADDED_BY_VISITOR;
-	tech = Clamp( tech, 0.0, TECH_MAX );
+	tech = Clamp( tech, 0.0, Min( TECH_MAX, double( MaxTech() )));
 
 	achievedTechLevel = Max( achievedTechLevel, (int)tech );
 }

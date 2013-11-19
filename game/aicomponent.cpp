@@ -977,8 +977,12 @@ bool AIComponent::SectorHerd( const ComponentSet& thisComp )
 				if ( rc ) {
 					rc->Deco( "horn", RenderComponent::DECO_HEAD, 10*1000 );
 				}
-				NewsEvent news( NewsEvent::PONY, pos, StringPool::Intern( "SectorHerd" ), parentChit->ID() );
-				GetChitBag()->AddNews( news );
+
+				// Trolls herd *all the time*
+				if ( thisComp.item->name != "troll" ) {
+					NewsEvent news( NewsEvent::PONY, pos, StringPool::Intern( "SectorHerd" ), parentChit->ID() );
+					GetChitBag()->AddNews( news );
+				}
 
 				ChitMsg msg( ChitMsg::CHIT_SECTOR_HERD, 0, &dest );
 				for( int i=0; i<friendList.Size(); ++i ) {

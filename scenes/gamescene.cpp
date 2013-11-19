@@ -363,6 +363,7 @@ void GameScene::SetSelectionModel( const grinliz::Vector2F& view )
 		case BuildScript::KIOSK_S:
 			name = "buildMarker1";
 			break;
+		case BuildScript::POWER:
 		case BuildScript::VAULT:
 		case BuildScript::FACTORY:
 			size = 2.0f;
@@ -989,7 +990,8 @@ void GameScene::DoTick( U32 delta )
 	str.Clear();
 	if ( playerChit && coreMode ) {
 		float tech = coreMode->GetTech();
-		str.Format( "Tech %.2f", tech );
+		int maxTech = coreMode->MaxTech();
+		str.Format( "Tech %.2f / %d", tech, maxTech );
 
 		int atech = coreMode->AchievedTechLevel();
 		for( int i=1; i<NUM_BUILD_MODES; ++i ) {

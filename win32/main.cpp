@@ -49,12 +49,12 @@
 static const float KEY_ZOOM_SPEED		= 0.02f;
 static const float KEY_ROTATE_SPEED		= 2.0f;
 
-#if 0
+#if 1
 // A default screenshot size for market.
 static const int SCREEN_WIDTH  = 800;
 static const int SCREEN_HEIGHT = 600;
 #endif
-#if 1
+#if 0
 // 4:3 test
 static const int SCREEN_WIDTH  = 800;
 static const int SCREEN_HEIGHT = 600;

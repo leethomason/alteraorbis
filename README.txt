@@ -73,7 +73,7 @@ Tap the mini-map to see the local area and world overview. The map shows your gr
 
 You can either exit the mini-map at your currect location, or initiate grid travel.
 
-You will need about FIXME gold to build a domain.
+You will need about 300 gold to build a domain. (But you can get started with significantly less and add you go.)
 
 ** Building a Domain **
 
@@ -86,7 +86,8 @@ Buildings:
 * ICE is artificial stone. You can use it for walls and to organize your domain.
 * Kiosks attract Visitors, which bring Tech. There are different kinds of kiosks; at this stage, there isn't a strategic advantage to specializing, so should probably build one (at least) of each.
 * A Vault is a place to store items you create. Worker Bots will bring any gold and crystal they collect to your vault, where it is deposited in your account.
-* A Factory (or Forge - not sure of the name yet) allows you to build Guns, Rings, and Shields.
+* A Factory (or Forge - not sure of the name yet) allows you to build Guns, Rings, and Shields. Before you tap "Build" the weapon with typical stats will be shown. When you press build, your avatar's level and random factors are applied, and the resulting stats are shown.
+* Power buildings hold tech. (Working on a better name for the next build of the game.) You need one power level for each level of tech.
 
 You can build additional Worker Bots (up to a limit) and at any time eject from your core. You can't build while not controlling your core, but the AI will carry on without you. In this alpha, you are the sole defender of your domain and will need to eject to fend of attackers.
 

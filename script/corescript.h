@@ -51,6 +51,7 @@ public:
 	int AchievedTechLevel() const	{ return achievedTechLevel; }
 
 	float GetTech() const		{ return float(tech); }
+	int MaxTech() const;
 	void AddTech();
 
 private:

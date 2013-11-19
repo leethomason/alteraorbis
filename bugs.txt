@@ -1,4 +1,7 @@
 - fire + shock too cheap to build
+- core healers more agressively look for core
+- search more for items / gold
+- trolls: heal at core?
 - GT: needs pick up effect for gold (single yellow glow of the avatar?)
 - GT: needs pick up effect for kiosks or visitors (like a gold triangle or chest can float over the kiosk when the visitor spends money)
 - GT: ui to show idle and busy workers
