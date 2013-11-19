@@ -1,35 +1,25 @@
 - fire + shock too cheap to build
-- trolls should wander, be neutral to mantis
-x construction particles
-- GT: tiny bug with faces, teeth turns the same colour as hair
 - GT: needs pick up effect for gold (single yellow glow of the avatar?)
 - GT: needs pick up effect for kiosks or visitors (like a gold triangle or chest can float over the kiosk when the visitor spends money)
 - GT: ui to show idle and busy workers
 - change shield to have cooldown then charge-up (rather than cooldown then reset)
 - redo AI utility to be based on a set of curves
 - fix / disable right mouse behavior
-- UI on minimap. Target, show highlight of domain.
-- consider removing chit listeners
+x consider removing chit listeners
 - unify rockgen and worldgen. frustrating they are separate steps.
 - rethink spawning. spawn based on need? what's around?
 - need to "ding" on level up
 - add rez-in animation
 - show rock damage
-- Move after shooting target, continue to hit after destroying rock. need more awareness
-  of the overall AI state.
 - Melee should rotate to target (both rock and chit)
 - How does Ice and magma interact?
-x SectorHerd seems a little aggressive. Switch over to using ForceCount, check conditions to trigger.
 - make sure gold/crystal gets returned to the Reserve when the Chit is destroyed
 - GT: lightning
 - GT: rez-in for structures
-x wander less centered on core?
 - SpatialHash: one stressed structure.
 	- MOB list (FE determination)
 	- Building list (FE determination)
-x Shield should absorb more with XP (and fix character screen to reflect this)
 - is shield boost working correctly? Effects are *not* getting stripped by the shield.
-x Add position fuzz to gold, crystal, and item drops
 - can re-pack MVP and Bone matrix in the shader to encode 3*vec4 as the transpose, then transpose in the shader
 - Hide free camera button
 - should be able to auto-clear when building 
@@ -280,6 +270,16 @@ V2 ideas:
 - level up grid and special skills
 
 ----------- FIXED -------------
+x wander less centered on core?
+x Add position fuzz to gold, crystal, and item drops
+x Shield should absorb more with XP (and fix character screen to reflect this)
+x UI on minimap. Target, show highlight of domain.
+x Move after shooting target, continue to hit after destroying rock. need more awareness
+  of the overall AI state.
+x trolls should wander, be neutral to mantis
+x construction particles
+x GT: tiny bug with faces, teeth turns the same colour as hair
+x SectorHerd seems a little aggressive. Switch over to using ForceCount, check conditions to trigger.
 x Flora
 	x concept
 	x models
