@@ -33,81 +33,6 @@ x consider removing chit listeners
 
 - game
 
-	x Patch Fix
-		x Bones are broken!
-	    x invert camera and key axis see if that works better.
-		d Mouse at edge. need full screen mode.
-		x Movement speed a little sluggish
-		x Shoot trees
-		x Can’t click through trees
-		x Should shoot on priority walk
-		x Tear through rock on neutral zones
-			x support clear in neutral zones?
-		x Unclear tabs are tabs
-
-	x Loot
-		x proc gun
-		x item screen
-		x drop items
-		x pickup items
-		x weapon toggle / selection
-		x level up
-		x character screeen
-		x disable buttons on main ui when no game saved
-
-	- Econ
-		x inventory
-			x organize
-			x currently active
-			x drop
-			x gold & crystal display
-			x character names
-			x items get names
-		x Add a pave to keep it clear
-			x switch to voxel rendering for ground?
-		x item value (compare)
-		x item pickup
-		x fix team logic
-		x expandable map
-	      x show "areas of interest"
-	      x show danger level
-		x map
-			x show home base
-			x fast travel from map screen
-			x main screen takes you to map
-			x hotkey to exit
-		x troll
-			x pick up and use items
-			x should sort by items value
-			x troll spawning
-		x procedural rendering colors
-			x weapon colors
-		x names of things
-		x cyclops explosion seems off
-		x no item limit in inventory (but yes in inventory screen). need to check inventory capacity before pickup.
-		x vault:
-			x workers pick stuff up, take to vault
-			x show vault gold / crystal
-			x ability of player to use vault. refactor UseBuilding() code out of the ai loop.
-			x vault behavior if overflow...
-		x rework item screen layout
-		x item forging
-		x porch positions incorrect
-		x forge / factory
-			x factory
-			x ability to use factory
-			x create weapons
-		x gold to build stuff
-		x visitors - E - tech
-			x indicator
-			x unlock higher tech with achieving threshold level
-		x show grid travel dest
-		x player re-gen. at cores? in general?
-		x cheat buttons for money and crystal
-
-		x build worker limits & cost
-		x with regen units are immortal...
-
 	- Market
 		- tech pyramids -> power plants
 		- turret
@@ -224,7 +149,7 @@ x Troll
 	x model 
 	x animation
 	- spawn strategy
-	- item pickup / use AI
+	x item pickup / use AI
 - Dragon
 	- concept
 	- model 
@@ -270,6 +195,79 @@ V2 ideas:
 - level up grid and special skills
 
 ----------- FIXED -------------
+x Patch Fix
+	x Bones are broken!
+    x invert camera and key axis see if that works better.
+	d Mouse at edge. need full screen mode.
+	x Movement speed a little sluggish
+	x Shoot trees
+	x Can’t click through trees
+	x Should shoot on priority walk
+	x Tear through rock on neutral zones
+		x support clear in neutral zones?
+	x Unclear tabs are tabs
+
+x Loot
+	x proc gun
+	x item screen
+	x drop items
+	x pickup items
+	x weapon toggle / selection
+	x level up
+	x character screeen
+	x disable buttons on main ui when no game saved
+
+x Econ
+	x inventory
+		x organize
+		x currently active
+		x drop
+		x gold & crystal display
+		x character names
+		x items get names
+	x Add a pave to keep it clear
+		x switch to voxel rendering for ground?
+	x item value (compare)
+	x item pickup
+	x fix team logic
+	x expandable map
+      x show "areas of interest"
+      x show danger level
+	x map
+		x show home base
+		x fast travel from map screen
+		x main screen takes you to map
+		x hotkey to exit
+	x troll
+		x pick up and use items
+		x should sort by items value
+		x troll spawning
+	x procedural rendering colors
+		x weapon colors
+	x names of things
+	x cyclops explosion seems off
+	x no item limit in inventory (but yes in inventory screen). need to check inventory capacity before pickup.
+	x vault:
+		x workers pick stuff up, take to vault
+		x show vault gold / crystal
+		x ability of player to use vault. refactor UseBuilding() code out of the ai loop.
+		x vault behavior if overflow...
+	x rework item screen layout
+	x item forging
+	x porch positions incorrect
+	x forge / factory
+		x factory
+		x ability to use factory
+		x create weapons
+	x gold to build stuff
+	x visitors - E - tech
+		x indicator
+		x unlock higher tech with achieving threshold level
+	x show grid travel dest
+	x player re-gen. at cores? in general?
+	x cheat buttons for money and crystal
+	x build worker limits & cost
+	x with regen units are immortal...
 x wander less centered on core?
 x Add position fuzz to gold, crystal, and item drops
 x Shield should absorb more with XP (and fix character screen to reflect this)

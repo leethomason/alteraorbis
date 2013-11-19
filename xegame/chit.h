@@ -173,13 +173,6 @@ public:
 	void SendMessage(	const ChitMsg& message, 
 						Component* exclude=0 );			// useful to not call ourselves. 
 	
-	//void AddListener( IChitListener* listener );
-	//void RemoveListener( IChitListener* listener );
-
-	// special versions for components that are weak-ref.
-	void AddListener( Component* c );
-	void RemoveListener( Component* c );
-
 	void DebugStr( grinliz::GLString* str );
 
 	void SetPlayerControlled( bool player ) { playerControlled = player; }
@@ -201,14 +194,6 @@ private:
 	ChitBag* chitBag;
 	int		 id;
 	bool	 playerControlled;
-//	grinliz::CDynArray<IChitListener*> listeners;
-
-	struct CList
-	{
-		int chitID;
-		int componentID;
-	};
-	grinliz::CDynArray<CList> cListeners;
 
 public:
 	enum {
