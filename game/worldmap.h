@@ -237,7 +237,7 @@ public:
 		ZONE_SIZE2  = ZONE_SIZE*ZONE_SIZE,
 		NUM_ZONES	= MAX_MAP_SIZE/ZONE_SIZE,
 	    NUM_ZONES2	= NUM_ZONES*NUM_ZONES,
-		MAX_VOXEL_QUADS  = 8000,		// actually uses quads, so the vertex=4*MAX_VOXEL_QUADS
+		MAX_VOXEL_QUADS  = 16000,		// actually uses quads, so the vertex=4*MAX_VOXEL_QUADS
 	};
 
 	virtual void CreateTexture( Texture* t );

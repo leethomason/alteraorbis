@@ -1139,7 +1139,9 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 		Vector2I sector = ToSector( thisComp.spatial->GetPosition2DI() );
 		const SectorData& sd = map->GetSector( sector );
 		if ( sd.core != pos2i ) {
-			dest = ToWorld2F( sd.core );
+			if ( map->CalcPath( thisComp.spatial->GetPosition2D(), ToWorld2F( sd.core ), 0, 0, 0, 0 )) {
+				dest = ToWorld2F( sd.core );
+			}
 		}
 		else {
 			currentAction = STAND;

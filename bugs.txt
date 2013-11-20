@@ -19,9 +19,9 @@ x consider removing chit listeners
 - make sure gold/crystal gets returned to the Reserve when the Chit is destroyed
 - GT: lightning
 - GT: rez-in for structures
-- SpatialHash: one stressed structure.
-	- MOB list (FE determination)
-	- Building list (FE determination)
+x SpatialHash: one stressed structure.
+	x MOB list (FE determination)
+	x Building list (FE determination)
 - is shield boost working correctly? Effects are *not* getting stripped by the shield.
 - can re-pack MVP and Bone matrix in the shader to encode 3*vec4 as the transpose, then transpose in the shader
 - Hide free camera button
@@ -32,7 +32,9 @@ x consider removing chit listeners
 - maps: what direction is player pointed?
 - flammability / shockability very agressive
 - viewing edge of world breaks all kinds of limits and ASSERTs
-- zooming out exceeds the vertex cache...
+x zooming out exceeds the vertex cache...
+- item repair
+- items count plants, other items towards kills
 
 - game
 
@@ -51,6 +53,7 @@ x consider removing chit listeners
 		- vault:
 			- item limit
 		- what to do with full vaults?
+		- rethink fiction / core control / avatar prime
 
 	- Adventure
 		- control

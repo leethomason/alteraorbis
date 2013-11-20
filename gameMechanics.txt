@@ -20,11 +20,9 @@ Tech 0:
 	Kiosk:N
 	Kiosk:C
 	Kiosk:S
-	Temple:1
-	Sleep Tube
+	Temple/Power
 
 Tech 1:
-	Temple:2
 	Vault
 	Market
 	Bar
@@ -32,7 +30,6 @@ Tech 1:
 
 Tech 2:
 	Temple:3
-	Lounge
 
 Tech 3:
 	Meditation Center

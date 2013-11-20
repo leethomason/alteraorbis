@@ -35,6 +35,7 @@ public:
 		VAULT,
 		FACTORY,
 		POWER,
+		BED,
 		NUM_OPTIONS,
 
 		NUM_TECH_LEVELS = 4,

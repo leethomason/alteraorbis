@@ -343,34 +343,29 @@ void GameScene::SetSelectionModel( const grinliz::Vector2F& view )
 	int height = 1;
 	const char* name = "";
 	if ( buildActive ) {
-		// Which should we use?
-		switch ( buildActive ) {
-		case BuildScript::CLEAR: 
-		case BuildScript::PAVE:
-			{
-				const WorldGrid& wg = sim->GetWorldMap()->GetWorldGrid( pos2i.x, pos2i.y );
-				switch ( wg.Height() ) {
-				case 3:	name = "clearMarker3";	break;
-				case 2:	name = "clearMarker2";	break;
-				default:	name = "clearMarker1";	break;
-				}
+		if ( buildActive == BuildScript::ROTATE ) {
+			// nothing.
+		}
+		else if (    buildActive == BuildScript::CLEAR 
+			      || buildActive == BuildScript::PAVE ) 
+		{
+			const WorldGrid& wg = sim->GetWorldMap()->GetWorldGrid( pos2i.x, pos2i.y );
+			switch ( wg.Height() ) {
+			case 3:	name = "clearMarker3";	break;
+			case 2:	name = "clearMarker2";	break;
+			default:	name = "clearMarker1";	break;
 			}
-			break;
-		case BuildScript::ICE:
-		case BuildScript::KIOSK_N:
-		case BuildScript::KIOSK_M:
-		case BuildScript::KIOSK_C:
-		case BuildScript::KIOSK_S:
-			name = "buildMarker1";
-			break;
-		case BuildScript::POWER:
-		case BuildScript::VAULT:
-		case BuildScript::FACTORY:
-			size = 2.0f;
-			name = "buildMarker2";
-			break;
-		default:
-			break;
+		}
+		else { 
+			BuildScript buildScript;
+			int s = buildScript.GetData( buildActive ).size;
+			if ( s == 1 ) {
+				name = "buildMarker1";
+			}
+			else {
+				size = 2.0f;
+				name = "buildMarker2";
+			}
 		}
 	}
 	if ( *name ) {

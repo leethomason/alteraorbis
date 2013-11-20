@@ -22,7 +22,6 @@
 #include "../grinliz/glutil.h"
 #include "../grinliz/glgeometry.h"
 #include "../grinliz/glcolor.h"
-//#include "../grinliz/glperformance.h"
 #include "../Shiny/include/Shiny.h"
 #include "../shared/lodepng.h"
 #include "../xarchive/glstreamer.h"

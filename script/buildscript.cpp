@@ -22,6 +22,7 @@ BuildData BuildScript::buildData[NUM_OPTIONS] = {
 	{	"Power",	"power",	1, 0, 0 },
 	// Tech 1
 	{	"Vault",	"vault",	2, 0, 0 },
+	{	"SleepTube","bed",		2, 0, 0 },
 };
 
 
