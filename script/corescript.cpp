@@ -13,6 +13,7 @@
 #include "../game/workqueue.h"
 #include "../game/team.h"
 #include "../game/lumosmath.h"
+#include "../game/gameitem.h"
 
 #include "../xegame/chit.h"
 #include "../xegame/spatialcomponent.h"
@@ -32,7 +33,7 @@ using namespace grinliz;
 CoreScript::CoreScript( WorldMap* map, LumosChitBag* chitBag, Engine* engine ) 
 	: worldMap( map ), 
 	  spawnTick( 10*1000 ), 
-	  boundID( 0 ),
+	  team( 0 ),
 	  workQueue( 0 )
 {
 	workQueue = new WorkQueue( map, chitBag, engine );
@@ -56,7 +57,7 @@ void CoreScript::Init()
 void CoreScript::Serialize( XStream* xs )
 {
 	XarcOpen( xs, ScriptName() );
-	XARC_SER( xs, boundID );
+	//XARC_SER( xs, boundID );
 	XARC_SER( xs, tech );
 	XARC_SER( xs, achievedTechLevel );
 	XARC_SER( xs, defaultSpawn );
@@ -77,21 +78,21 @@ void CoreScript::OnAdd()
 	Vector2I sector = { mapPos.x/SECTOR_SIZE, mapPos.y/SECTOR_SIZE };
 	workQueue->InitSector( sector );
 
-	if ( boundID ) {
-		scriptContext->chitBag->chitToCoreTable.Add( boundID, scriptContext->chit->ID() );
-	}
+//	if ( boundID ) {
+//		scriptContext->chitBag->chitToCoreTable.Add( boundID, scriptContext->chit->ID() );
+//	}
 }
 
 
 void CoreScript::OnRemove()
 {
-	if ( boundID ) {
-		GLASSERT( scriptContext->chitBag );
-		scriptContext->chitBag->chitToCoreTable.Remove( boundID );
-	}
+//	if ( boundID ) {
+//		GLASSERT( scriptContext->chitBag );
+//		scriptContext->chitBag->chitToCoreTable.Remove( boundID );
+//	}
 }
 
-
+/*
 Chit* CoreScript::GetAttached( bool* standing )
 {
 	Chit* c = 0;
@@ -113,8 +114,9 @@ Chit* CoreScript::GetAttached( bool* standing )
 	}
 	return c;
 }
+*/
 
-
+/*
 bool CoreScript::AttachToCore( Chit* chit )
 {
 	Chit* bound = GetAttached(0);
@@ -171,28 +173,65 @@ bool CoreScript::AttachToCore( Chit* chit )
 	}
 	return false;
 }
+*/
+
+
+bool CoreScript::InUse() const
+{
+	return PrimaryTeam() != 0;
+}
+
+
+int CoreScript::PrimaryTeam() const
+{
+	const GameItem* item = scriptContext->chit->GetItem();
+	if ( item ) {
+		return item->primaryTeam;
+	}
+	return 0;
+}
 
 
 int CoreScript::DoTick( U32 delta, U32 since )
 {
 	static const int RADIUS = 4;
-	Chit* attached = GetAttached(0);
+
+	int primaryTeam = 0;
+	if ( scriptContext->chit->GetItem() ) {
+		primaryTeam = scriptContext->chit->GetItem()->primaryTeam;
+	}
+	if ( primaryTeam != team ) {
+		team = primaryTeam;
+		TeamGen gen;
+		ProcRenderInfo info;
+		gen.Assign( team, &info );
+		scriptContext->chit->GetRenderComponent()->SetProcedural( 0, info );
+	}
+
 	bool normalPossible = scriptContext->census->normalMOBs < TYPICAL_MONSTERS;
 	bool greaterPossible = scriptContext->census->greaterMOBs < TYPICAL_GREATER;
+
+	bool attached = InUse();
 
 	tech -= Lerp( TECH_DECAY_0, TECH_DECAY_1, tech/TECH_MAX );
 	tech = Clamp( tech, 0.0, TECH_MAX );
 
-	if (    spawnTick.Delta( since ) 
+	MapSpatialComponent* ms = GET_SUB_COMPONENT( scriptContext->chit, SpatialComponent, MapSpatialComponent );
+	GLASSERT( ms );
+	Vector2I pos2i = ms->MapPosition();
+	Vector2I sector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
+
+	if ( spawnTick.Delta( since ) && attached ) {
+		CChitArray arr;
+		scriptContext->chitBag->FindBuilding( IStringConst::bed, sector, 0, 0, &arr );
+
+	}
+	else if (    spawnTick.Delta( since ) 
 		 && !attached
 		 && ( normalPossible || greaterPossible ))
 	{
 #if 1
 		// spawn stuff.
-		MapSpatialComponent* ms = GET_SUB_COMPONENT( scriptContext->chit, SpatialComponent, MapSpatialComponent );
-		GLASSERT( ms );
-		Vector2I pos2i = ms->MapPosition();
-		Vector2I sector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
 
 		// 0->NUM_SECTORS
 		int outland = abs( sector.x - NUM_SECTORS/2 ) + abs( sector.y - NUM_SECTORS/2 );
@@ -273,13 +312,13 @@ int CoreScript::DoTick( U32 delta, U32 since )
 		}
 #endif
 	}
-	if (    attached 
-		 && scriptContext->chit->GetSpatialComponent()
-		 && attached->GetSpatialComponent()->GetPosition2DI() == scriptContext->chit->GetSpatialComponent()->GetPosition2DI() ) 
-	{
-		Vector3F pos3 = scriptContext->chit->GetSpatialComponent()->GetPosition();
-		scriptContext->engine->particleSystem->EmitPD( "core", pos3, V3F_UP, delta );
-	}
+//	if (    attached 
+//		 && scriptContext->chit->GetSpatialComponent()
+//		 && attached->GetSpatialComponent()->GetPosition2DI() == scriptContext->chit->GetSpatialComponent()->GetPosition2DI() ) 
+//	{
+//		Vector3F pos3 = scriptContext->chit->GetSpatialComponent()->GetPosition();
+//		scriptContext->engine->particleSystem->EmitPD( "core", pos3, V3F_UP, delta );
+//	}
 	if ( !attached ) {
 		// Clear the work queue - chit is gone that controls this.
 		workQueue->ClearJobs();

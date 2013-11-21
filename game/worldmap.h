@@ -218,7 +218,6 @@ public:
 	const SectorData& GetSector( const grinliz::Vector2I& sector ) const;
 
 	// Find random land on the largest continent
-	grinliz::Vector2I FindEmbark();
 	grinliz::Color4U8 Pixel( int x, int y )	{ 
 		return grid[y*width+x].ToColor();
 	}

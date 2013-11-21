@@ -544,7 +544,7 @@ int LumosChitBag::MapGridUse( int x, int y )
 }
 
 
-
+/*
 CoreScript* LumosChitBag::IsBoundToCore( Chit* chit, bool mustBeStanding, Chit** coreChit )
 {
 	// Since the player can eject and walk around, the core
@@ -574,7 +574,7 @@ CoreScript* LumosChitBag::IsBoundToCore( Chit* chit, bool mustBeStanding, Chit**
 	}
 	return 0;
 }
-
+*/
 
 CoreScript* LumosChitBag::GetCore( const grinliz::Vector2I& sector )
 {

@@ -391,16 +391,6 @@ Chit* BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int
 	chit->GetSpatialComponent()->SetPosYRot( (float)p.x+0.5f, 0, (float)p.y+0.5f, (float)random.Rand( 360 ) );
 	chit->GetItemComponent()->SetHardpoints();
 
-	/*
-	IString procedural = itemDefArr[0]->GetValue( "procedural" );
-	if ( !procedural.empty() ) {
-		bool female = strstr( resourceName, "female" ) != 0;
-
-		ProcRenderInfo info;
-		AssignProcedural( procedural.c_str(), female, chit->ID(), team, false, &info );
-		chit->GetRenderComponent()->SetProcedural( 0, info );
-	}
-	*/
 	return chit;
 }
 

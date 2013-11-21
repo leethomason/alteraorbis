@@ -748,7 +748,7 @@ bool AIComponent::RockBreak( const grinliz::Vector2I& rock )
 	sector.y /= SECTOR_SIZE;
 
 	CoreScript* cs = GetLumosChitBag()->GetCore( sector );
-	if ( cs && cs->GetAttached(0) && (cs->GetAttached(0) != parentChit) ) {
+	if ( cs && cs->InUse() && (cs->PrimaryTeam() != thisComp.item->primaryTeam) ) {
 		// Core is in use. We can only blast away.
 		const WorldGrid& wg = map->GetWorldGrid( rock.x, rock.y );
 		if ( wg.RockHeight() == 0 )
@@ -1699,6 +1699,7 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		// FIXME: when should an AI bind to core? This just does
 		// it at the end of a move, irrespective of the current
 		// action or mode.
+		/*
 		if ( chit->GetItem() && ( chit->GetItem()->flags & GameItem::AI_BINDS_TO_CORE )) {
 
 			bool standingOnCore = map->GetWorldGrid( mapPos.x, mapPos.y ).IsCore();
@@ -1719,6 +1720,7 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 				}
 			}
 		}
+		*/
 		if ( chit->PlayerControlled()) {
 			Chit* building = GetLumosChitBag()->QueryPorch( thisComp.spatial->GetPosition2DI() );
 			if ( building && building->GetItem() ) {

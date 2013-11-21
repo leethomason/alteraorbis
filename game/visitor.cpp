@@ -124,7 +124,7 @@ SectorPort Visitors::ChooseDestination( int index, WorldMap* map, LumosChitBag* 
 		sector.Set( random.Rand( NUM_SECTORS ), random.Rand( NUM_SECTORS ));
 		const SectorData& sd = map->GetSector( sector );
 		CoreScript* cs = chitBag->GetCore( sector );
-		if ( sd.ports && cs && cs->GetAttached(0) ) {
+		if ( sd.ports && cs && cs->InUse() ) {
 			break;
 		}
 		sector.Zero();

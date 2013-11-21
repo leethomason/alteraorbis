@@ -35,33 +35,40 @@ public:
 	virtual void OnRemove();
 
 	virtual int DoTick( U32 delta, U32 since );
-	virtual const char* ScriptName() { return "CoreScript"; }
-	virtual CoreScript* ToCoreScript() { return this; }
+	virtual const char* ScriptName()	{ return "CoreScript"; }
+	virtual CoreScript* ToCoreScript()	{ return this; }
 
 	// Once attached, can't detach. There for good.
 	// Can however move around again if the Chit 'ejects'.
 	// In this case the chit is attached, but !standing
-	bool AttachToCore( Chit* chit );
-	Chit* GetAttached( bool* standing );
+	// bool AttachToCore( Chit* chit );
+	// Chit* GetAttached( bool* standing );
 
-	WorkQueue* GetWorkQueue()	{ return workQueue; }
+	bool InUse() const;
+	int  PrimaryTeam() const;
+
+	WorkQueue* GetWorkQueue()		{ return workQueue; }
 	void SetDefaultSpawn( grinliz::IString s ) { defaultSpawn = s; }
 
 	int GetTechLevel() const		{ return (int)GetTech(); }
 	int AchievedTechLevel() const	{ return achievedTechLevel; }
 
-	float GetTech() const		{ return float(tech); }
-	int MaxTech() const;
-	void AddTech();
+	float GetTech() const			{ return float(tech); }
+	int   MaxTech() const;
+	void  AddTech();
 
 private:
 	WorldMap*	worldMap;
 	WorkQueue*	workQueue;
+	int			team;			// cache so we can update if it changes
+	
+	// serialized
 	CTicker		spawnTick;
-	int			boundID;
 	double		tech;
 	int			achievedTechLevel;
 	grinliz::IString defaultSpawn;
+
+
 };
 
 #endif // CORESCRIPT_INCLUDED

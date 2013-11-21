@@ -7,7 +7,7 @@
   <item name="humanFemale"
         resource="humanFemale"
         uiIcon="human"
-			  flags="GOLD_PICKUP"
+			  flags="GOLD_PICKUP ITEM_PICKUP AI_WANDER_HERD"
         procedural="suit"
         mob="denizen"
         nameGen="humanFemaleNames"
@@ -25,7 +25,7 @@
   <item name="humanMale"
         resource="humanMale"
         uiIcon="human"
-        flags="GOLD_PICKUP"
+        flags="GOLD_PICKUP ITEM_PICKUP AI_WANDER_HERD"
         procedural="suit"
         nameGen="humanMaleNames"
         mob="denizen"
@@ -138,10 +138,10 @@
         cost="60" />
 
   <item name="bed"
-        resource="testStruct2"
+        resource="testStruct1"
         porch="1"
         procedural="team"
-        size="2"
+        size="1"
         mass="30"
         cost="25" />
 

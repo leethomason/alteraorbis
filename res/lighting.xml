@@ -22,18 +22,18 @@
   <hemispherical>
     <diffuse red="0.9" green="0.9" blue="0.9"/>
     <ambient red="0.2" green="0.2" blue="0.3"/>
-    <shadow red="0.6" green="0.6" blue="0.6"/>
+    <shadow red="0.65" green="0.65" blue="0.65"/>
 
     <warm>
     <diffuse red="1.0" green="0.95" blue="0.80"/>
     <ambient red="0.2" green="0.2" blue="0.3"/>
-    <shadow red="0.6" green="0.6" blue="0.6"/>
+    <shadow red="0.65" green="0.65" blue="0.65"/>
     </warm>
 
     <cool>
     <diffuse red="0.8" green="0.90" blue="0.95"/>
     <ambient red="0.2" green="0.2" blue="0.3"/>
-    <shadow red="0.6" green="0.6" blue="0.6"/>
+    <shadow red="0.65" green="0.65" blue="0.65"/>
    </cool>
   </hemispherical>
 

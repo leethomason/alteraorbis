@@ -78,10 +78,7 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta, U32 since )
 	Vector3F taskPos3	= { taskPos2.x, 0, taskPos2.y };
 	Vector2I sector		= ToSector( pos2i );
 	CoreScript* coreScript = chitBag->GetCore( sector );
-	Chit* controller = 0;
-	if ( coreScript ) {
-		controller = coreScript->GetAttached( 0 );
-	}
+	Chit* controller = coreScript->ParentChit();
 
 	// If this is a task associated with a work item, make
 	// sure that work item still exists.

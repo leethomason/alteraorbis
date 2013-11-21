@@ -543,6 +543,7 @@ void WorldMap::Tessellate()
 #endif
 
 
+/*
 Vector2I WorldMap::FindEmbark()
 {
 	Random random;
@@ -561,8 +562,7 @@ Vector2I WorldMap::FindEmbark()
 	v.y += 2;
 	return v;
 }
-
-
+*/
 
 void WorldMap::ProcessZone( ChitBag* cb )
 {

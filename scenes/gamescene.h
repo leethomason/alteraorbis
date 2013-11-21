@@ -122,7 +122,7 @@ private:
 	gamui::ToggleButton modeButton[NUM_BUILD_MODES];
 	gamui::Image		tabBar;
 	gamui::PushButton	createWorkerButton;
-	gamui::PushButton	ejectButton;
+	gamui::ToggleButton	coreToggle;	// if down, in core mode
 	gamui::PushButton	allRockButton;
 	gamui::PushButton	newsButton[NUM_NEWS_BUTTONS];
 	gamui::PushButton	clearButton;

@@ -276,12 +276,10 @@ bool WorkQueue::TaskCanComplete( const WorkQueue::QueueItem& item )
 	Wallet wallet;
 	Vector2I sector = ToSector( item.pos );
 	CoreScript* coreScript = chitBag->GetCore( sector );
-	Chit* controller = 0;
-	if ( coreScript ) {
-		controller = coreScript->GetAttached( 0 );
-		if ( controller && controller->GetItem() ) {
-			wallet = controller->GetItem()->wallet;
-		}
+
+	Chit* controller = coreScript->ParentChit();
+	if ( controller && controller->GetItem() ) {
+		wallet = controller->GetItem()->wallet;
 	}
 
 	return WorkQueue::TaskCanComplete(	worldMap, 

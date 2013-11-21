@@ -1,14 +1,10 @@
 - fire + shock too cheap to build
-x core healers more agressively look for core
-x search more for items / gold
-x trolls: heal at core?
 - GT: needs pick up effect for gold (single yellow glow of the avatar?)
 - GT: needs pick up effect for kiosks or visitors (like a gold triangle or chest can float over the kiosk when the visitor spends money)
 - GT: ui to show idle and busy workers
 - change shield to have cooldown then charge-up (rather than cooldown then reset)
 - redo AI utility to be based on a set of curves
 - fix / disable right mouse behavior
-x consider removing chit listeners
 - unify rockgen and worldgen. frustrating they are separate steps.
 - rethink spawning. spawn based on need? what's around?
 - need to "ding" on level up
@@ -19,9 +15,6 @@ x consider removing chit listeners
 - make sure gold/crystal gets returned to the Reserve when the Chit is destroyed
 - GT: lightning
 - GT: rez-in for structures
-x SpatialHash: one stressed structure.
-	x MOB list (FE determination)
-	x Building list (FE determination)
 - is shield boost working correctly? Effects are *not* getting stripped by the shield.
 - can re-pack MVP and Bone matrix in the shader to encode 3*vec4 as the transpose, then transpose in the shader
 - Hide free camera button
@@ -32,16 +25,19 @@ x SpatialHash: one stressed structure.
 - maps: what direction is player pointed?
 - flammability / shockability very agressive
 - viewing edge of world breaks all kinds of limits and ASSERTs
-x zooming out exceeds the vertex cache...
 - item repair
 - items count plants, other items towards kills
+- button to use vault / factory / etc.
 
 - game
 
 	- Market
 		- tech pyramids -> power plants
 		- turret
-		- decent clear dragging
+		- marking build
+			- dragging, rows
+			- top view?
+			- auto-clear vegetation
 		- team colors
 		- item destruction
 		- denizens
@@ -201,6 +197,14 @@ V2 ideas:
 - level up grid and special skills
 
 ----------- FIXED -------------
+x core healers more agressively look for core
+x search more for items / gold
+x trolls: heal at core?
+x SpatialHash: one stressed structure.
+	x MOB list (FE determination)
+	x Building list (FE determination)
+x zooming out exceeds the vertex cache...
+x consider removing chit listeners
 x Patch Fix
 	x Bones are broken!
     x invert camera and key axis see if that works better.

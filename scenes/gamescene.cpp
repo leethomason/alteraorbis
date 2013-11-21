@@ -62,8 +62,6 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	Vector3F target = { (float)sim->GetWorldMap()->Width() *0.5f, 0.0f, (float)sim->GetWorldMap()->Height() * 0.5f };
 	if ( sim->GetPlayerChit() ) {
 		target = sim->GetPlayerChit()->GetSpatialComponent()->GetPosition();
-		//CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
-		//cc->SetTrack( sim->GetPlayerChit()->ID() );
 	}
 	sim->GetEngine()->CameraLookAt( target + delta, target );
 	
@@ -108,8 +106,8 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	createWorkerButton.Init( &gamui2D, game->GetButtonLook(0) );
 	createWorkerButton.SetText( "WorkerBot" );
 
-	ejectButton.Init( &gamui2D, game->GetButtonLook(0) );
-	ejectButton.SetText( "Eject\nCore" );
+	coreToggle.Init( &gamui2D, game->GetButtonLook(0) );
+	coreToggle.SetText( "Core\nPrime" );
 	
 	allRockButton.Init( &gamui2D, game->GetButtonLook(0) );
 	allRockButton.SetText( "All Rock" );
@@ -185,7 +183,7 @@ void GameScene::Resize()
 	tabBar.SetSize( modeButton[NUM_BUILD_MODES-1].X() + modeButton[NUM_BUILD_MODES-1].Width() - modeButton[0].X(), modeButton[0].Height() );
 
 	layout.PosAbs( &createWorkerButton, 0, 2 );
-	layout.PosAbs( &ejectButton,        0, 3 );
+	layout.PosAbs( &coreToggle,    0, 3 );
 
 	layout.PosAbs( &faceWidget, -2, 0, 1, 1 );
 	layout.PosAbs( &minimap,    -1, 0, 1, 1 );
@@ -479,9 +477,10 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 {
 	bool uiHasTap = ProcessTap( action, view, world );
 	Engine* engine = sim->GetEngine();
-	CoreScript* coreMode = sim->GetChitBag()->IsBoundToCore( sim->GetPlayerChit(), true );
+//	CoreScript* coreMode = sim->GetChitBag()->IsBoundToCore( sim->GetPlayerChit(), true );
 	
 	enable3DDragging = FreeCameraMode();
+	bool coreMode = coreToggle.Down();
 	
 	buildActive = 0;
 	if ( coreMode ) {
@@ -506,7 +505,8 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 
 		if ( tap ) {
 			if ( coreMode ) {
-				WorkQueue* wq = coreMode->GetWorkQueue();
+				CoreScript* coreScript = sim->GetChitBag()->GetCore( sim->GetChitBag()->PlayerHomeSector() );
+				WorkQueue* wq = coreScript->GetWorkQueue();
 				GLASSERT( wq );
 				RemovableFilter removableFilter;
 
@@ -611,7 +611,8 @@ bool GameScene::FreeCameraMode()
 {
 	bool button = freeCameraButton.Down();
 	Chit* playerChit = sim->GetPlayerChit();
-	CoreScript* coreMode = sim->GetChitBag()->IsBoundToCore( playerChit, true );
+	bool coreMode = coreToggle.Down();
+//	CoreScript* coreMode = sim->GetChitBag()->IsBoundToCore( playerChit, true );
 	
 	if ( button || coreMode || (!playerChit) )
 		return true;
@@ -665,18 +666,17 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		sim->SetAllRock();
 	}
 	else if ( item == &createWorkerButton ) {
-		Chit* playerChit = sim->GetPlayerChit();
-		CoreScript* coreMode = sim->GetChitBag()->IsBoundToCore( playerChit, true );
-		if ( coreMode ) {
-			if ( playerChit->GetItem()->wallet.gold >= 20 ) {
-				playerChit->GetItem()->wallet.gold -= 20;
-				ReserveBank::Instance()->Deposit( 20 );
-				int team = playerChit->GetItem()->primaryTeam;
-				sim->GetChitBag()->NewWorkerChit( playerChit->GetSpatialComponent()->GetPosition(), team );
-			}
+		CoreScript* cs = sim->GetChitBag()->GetHomeCore();
+		Chit* coreChit = cs->ParentChit();
+		if ( coreChit->GetItem()->wallet.gold >= 20 ) {
+			coreChit->GetItem()->wallet.gold -= 20;
+			ReserveBank::Instance()->Deposit( 20 );
+			int team = coreChit->GetItem()->primaryTeam;
+			sim->GetChitBag()->NewWorkerChit( coreChit->GetSpatialComponent()->GetPosition(), team );
 		}
 	}
-	else if ( item == &ejectButton ) {
+	/*
+	else if ( item == &corePrimeToggle ) {
 		// Should be disabled unless we are bound to a core.
 		Chit* playerChit = sim->GetPlayerChit();
 		if ( playerChit ) {
@@ -686,7 +686,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 				playerChit->Add( new PathMoveComponent( sim->GetWorldMap() ));
 			}
 		}
-	}
+	}*/
 	else if ( item == faceWidget.GetButton() ) {
 		Chit* playerChit = sim->GetPlayerChit();
 		if ( playerChit && playerChit->GetItemComponent() ) {			
@@ -855,6 +855,14 @@ void GameScene::HandleHotKey( int mask )
 			}
 		}
 	}
+	else if ( mask == GAME_HK_CHEAT_TECH ) {
+		Chit* player = sim->GetPlayerChit();
+
+		CoreScript* coreScript = sim->GetChitBag()->GetCore( sim->GetChitBag()->PlayerHomeSector() );
+		for( int i=0; i<10; ++i ) {
+			coreScript->AddTech();
+		}
+	}
 	else {
 		super::HandleHotKey( mask );
 	}
@@ -864,8 +872,8 @@ void GameScene::HandleHotKey( int mask )
 void GameScene::SetPickupButtons()
 {
 	Chit* player = sim->GetPlayerChit();
-	CoreScript* coreMode = sim->GetChitBag()->IsBoundToCore( sim->GetPlayerChit(), true );
-	if ( player && !coreMode ) {
+	CoreScript* coreScript = sim->GetChitBag()->GetCore( sim->GetChitBag()->PlayerHomeSector() );
+	if ( player && !coreScript ) {
 		bool canAdd = player && player->GetItemComponent() && player->GetItemComponent()->CanAddToInventory();
 		// Query items on the ground in a radius of the player.
 		LootFilter lootFilter;
@@ -960,8 +968,9 @@ void GameScene::DoTick( U32 delta )
 	str.Clear();
 
 	Wallet wallet;
-	if ( playerChit && playerChit->GetItem() ) {
-		wallet = playerChit->GetItem()->wallet;
+	CoreScript* cs = sim->GetChitBag()->GetHomeCore();
+	if ( cs ) {
+		wallet = cs->ParentChit()->GetItem()->wallet;
 	}
 	moneyWidget.Set( wallet );
 
@@ -974,21 +983,23 @@ void GameScene::DoTick( U32 delta )
 
 	SetBars();
 
-	CoreScript* coreMode = sim->GetChitBag()->IsBoundToCore( playerChit, true );
+//	CoreScript* coreMode = sim->GetChitBag()->IsBoundToCore( playerChit, true );
+	bool coreMode = coreToggle.Down();
 	for( int i=0; i<NUM_BUILD_MODES; ++i ) {
 		modeButton[i].SetVisible( coreMode != 0 );
 	}
 	tabBar.SetVisible( modeButton[0].Visible() );
 	createWorkerButton.SetVisible( coreMode != 0 );
-	ejectButton.SetVisible( coreMode != 0 );
+//	ejectButton.SetVisible( coreMode != 0 );
 
 	str.Clear();
 	if ( playerChit && coreMode ) {
-		float tech = coreMode->GetTech();
-		int maxTech = coreMode->MaxTech();
+		CoreScript* coreScript = sim->GetChitBag()->GetCore( sim->GetChitBag()->PlayerHomeSector() );
+		float tech = coreScript->GetTech();
+		int maxTech = coreScript->MaxTech();
 		str.Format( "Tech %.2f / %d", tech, maxTech );
 
-		int atech = coreMode->AchievedTechLevel();
+		int atech = coreScript->AchievedTechLevel();
 		for( int i=1; i<NUM_BUILD_MODES; ++i ) {
 			modeButton[i].SetEnabled( i-1 <= atech );
 		}

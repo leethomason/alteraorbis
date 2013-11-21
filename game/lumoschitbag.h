@@ -187,10 +187,17 @@ public:
 
 	virtual int MapGridUse( int x, int y );
 
-	CoreScript* IsBoundToCore( Chit*, bool mustBeStandingOnCore, Chit** coreChit=0 );
+	//CoreScript* IsBoundToCore( Chit*, bool mustBeStandingOnCore, Chit** coreChit=0 );
 
 	// Get the core for this sector.
 	CoreScript* GetCore( const grinliz::Vector2I& sector );
+	CoreScript* GetHomeCore()	{ return GetCore( PlayerHomeSector() ); }
+	
+	// FIXME placeholder code
+	grinliz::Vector2I PlayerHomeSector() const {
+		grinliz::Vector2I v = { 5, 5 };
+		return v;
+	}
 
 	Census census;
 

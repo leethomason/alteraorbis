@@ -114,7 +114,8 @@ void Sim::Load( const char* mapDAT, const char* gameDAT )
 		}
 	}
 	if ( chitBag->GetChit( playerID )) {
-		// mark as player controlled so it reacts as expected to player input.
+		// Mark as player controlled so it reacts as expected to player input.
+		// This is the primary avatar, and has some special rules.
 		chitBag->GetChit( playerID )->SetPlayerControlled( true );
 	}
 }
@@ -181,12 +182,21 @@ void Sim::CreateCores()
 	cold->SetDefaultSpawn( StringPool::Intern( "arachnoid" ));	// easy starting point for greater spawns
 	hot->SetDefaultSpawn( StringPool::Intern( "arachnoid" ));	// easy starting point for greater spawns
 	GLOUTPUT(( "nCores=%d\n", ncores ));
+
+	Vector2I homeSector = chitBag->PlayerHomeSector();
+	CoreScript* homeCS = chitBag->GetCore( homeSector );
+	Chit* homeChit = homeCS->ParentChit();
+	homeChit->GetItem()->primaryTeam = TEAM_HOUSE0;
 }
 
 
 void Sim::CreatePlayer()
 {
-	Vector2I v = worldMap->FindEmbark();
+	//Vector2I v = worldMap->FindEmbark();
+
+	Vector2I sector = chitBag->PlayerHomeSector();
+	Vector2I v = {	sector.x*SECTOR_SIZE + SECTOR_SIZE/2 + 4,
+					sector.y*SECTOR_SIZE + SECTOR_SIZE/2 + 4 };
 	CreatePlayer( v );
 }
 
@@ -332,8 +342,18 @@ void Sim::DoTick( U32 delta )
 	}
 
 	CreatePlant( random.Rand(worldMap->Width()), random.Rand(worldMap->Height()), -1 );
-
 	DoWeatherEffects( delta );
+
+	// Special rule for player controlled chit: give money to the core.
+	CoreScript* cs = chitBag->GetHomeCore();
+	Chit* player   = this->GetPlayerChit();
+	if ( cs && player ) {
+		GameItem* item = player->GetItem();
+		if ( item && !item->wallet.IsEmpty() ) {
+			Wallet w = item->wallet.EmptyWallet();
+			cs->ParentChit()->GetItem()->wallet.Add( w );
+		}
+	}
 }
 
 
@@ -377,7 +397,7 @@ void Sim::Draw3D( U32 deltaTime )
 	engine->Draw( deltaTime, chitBag->BoltMem(), chitBag->NumBolts() );
 	
 #if 0
-	// Debug porth locations.
+	// Debug port locations.
 	Chit* player = this->GetPlayerChit();
 	if ( player ) {
 		CompositingShader debug( BLEND_NORMAL );
