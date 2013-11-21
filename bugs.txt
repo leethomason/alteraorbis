@@ -33,6 +33,8 @@ x consider removing chit listeners
 - flammability / shockability very agressive
 - viewing edge of world breaks all kinds of limits and ASSERTs
 - zooming out exceeds the vertex cache...
+- shield looks very boring (and hard to tell what it is). And does it turn off if you don't have one?
+- obvious and easy to get to menu cancel
 
 - game
 
@@ -157,6 +159,8 @@ x Troll
 	- concept
 	- model 
 	- animation
+- Arachnoid
+  - update tail and texturing
 	
 - wilder, more digital face colors
 - filter face colors to matching effect
