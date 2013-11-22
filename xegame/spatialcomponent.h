@@ -67,7 +67,7 @@ public:
 
 	void SetPosYRot( float x, float y, float z, float yRot );
 	void SetPosYRot( const grinliz::Vector3F& v, float yRot ) { SetPosYRot( v.x, v.y, v.z, yRot ); }
-	void SetPosRot( const grinliz::Vector3F& v, const grinliz::Quaternion& quat );
+	virtual void SetPosRot( const grinliz::Vector3F& v, const grinliz::Quaternion& quat );
 
 	grinliz::Vector3F GetHeading() const;
 

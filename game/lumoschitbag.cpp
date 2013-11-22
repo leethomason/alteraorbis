@@ -177,11 +177,13 @@ Chit* LumosChitBag::NewBuilding( const Vector2I& pos, const char* name, int team
 
 	int cx=1;
 	rootItem.keyValues.GetInt( "size", &cx );
+	int porch=0;
+	rootItem.keyValues.GetInt( "porch", &porch );
 
 	MapSpatialComponent* msc = new MapSpatialComponent( worldMap, this );
 	msc->SetMapPosition( pos.x, pos.y, cx, cx );
 	msc->SetMode( GRID_BLOCKED );
-	msc->SetBuilding( true );
+	msc->SetBuilding( true, porch != 0 );
 	
 	chit->Add( msc );
 	chit->Add( new RenderComponent( engine, rootItem.ResourceName() ));

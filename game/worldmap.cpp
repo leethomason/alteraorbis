@@ -1888,8 +1888,8 @@ void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 	#define BLACKMAG_X(x)	float( double(x*256 + x*32 + 16) / 1024.0)
 	#define BLACKMAG_Y(y)   float( 0.75 - double(y*256 + y*32 + 16) / 1024.0)
 
-	static const int NUM = WorldGrid::NUM_LAYERS+WorldGrid::NUM_PAVE+1;
-	static const Vector2F UV[] = {
+	static const int NUM = WorldGrid::NUM_LAYERS + (WorldGrid::NUM_PAVE-1) + 1;
+	static const Vector2F UV[NUM] = {
 		{ BLACKMAG_X(1), BLACKMAG_Y(0) },	// water
 		{ BLACKMAG_X(0), BLACKMAG_Y(1) },	// grid
 		{ BLACKMAG_X(1), BLACKMAG_Y(1) },	// port
