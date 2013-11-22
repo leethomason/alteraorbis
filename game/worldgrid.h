@@ -38,6 +38,7 @@ private:
 	unsigned isPort				: 1;
 	unsigned isCore				: 1;
 	unsigned pave				: 2;	// 0-3, the pave style, if >0
+	unsigned isPorch			: 1;	// only used for rendering
 
 	unsigned nominalRockHeight	: 2;	// 0-3
 	unsigned rockType			: 1;	// ROCK, ICE
@@ -104,6 +105,7 @@ public:
 	bool IsPort() const			{ return isPort != 0; }
 	bool IsGrid() const			{ return isGrid != 0; }
 	bool IsCore() const			{ return isCore != 0; }
+	bool IsPorch() const		{ return isPorch != 0; }
 
 	enum {
 		WATER,
@@ -125,6 +127,9 @@ public:
 		GLASSERT( p >=0 && p < NUM_PAVE );
 		GLASSERT( Layer() == LAND );
 		pave = p;
+	}
+	void SetPorch( bool on ) {
+		isPorch = on ? 1 : 0;
 	}
 
 	void SetLand( bool land )	{ if ( land ) SetLand(); else SetWater(); }

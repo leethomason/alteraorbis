@@ -184,6 +184,12 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta, U32 since )
 				// Plan has gone bust:
 				taskList.Clear();
 			}
+
+			// No matter if successful or not, we need to clear the work item.
+			// The work is done or can't be done.
+			if ( workQueue ) {
+				workQueue->Remove( pos2i );
+			}
 		}
 		break;
 

@@ -28,18 +28,17 @@
 - item repair
 - items count plants, other items towards kills
 - button to use vault / factory / etc.
+- item destruction
+- fix porch image (alpha of the tiles, if not general improvement)
 
 - game
 
 	- Market
+		x rethink fiction / core control / avatar prime
 		- tech pyramids -> power plants
 		- turret
-		- marking build
-			- dragging, rows
-			- top view?
-			- auto-clear vegetation
+		- influence zones for buildings
 		- team colors
-		- item destruction
 		- denizens
 		- item market
 		- forge
@@ -49,7 +48,10 @@
 		- vault:
 			- item limit
 		- what to do with full vaults?
-		- rethink fiction / core control / avatar prime
+		- marking build zones
+			- dragging, rows
+			- top view?
+			- auto-clear vegetation
 
 	- Adventure
 		- control

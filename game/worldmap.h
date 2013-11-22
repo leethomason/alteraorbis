@@ -109,6 +109,10 @@ public:
 			grid[index].SetPave(pave);
 		}
 	}
+	void SetPorch( int x, int y, bool on ) {
+		int index = INDEX( x, y );
+		grid[index].SetPorch( on );
+	}
 
 	const WorldGrid& GetWorldGrid( int x, int y ) { return grid[INDEX(x,y)]; }
 

@@ -326,9 +326,8 @@ bool WorkQueue::TaskCanComplete( const WorkQueue::QueueItem& item )
 			// stuff in the way
 			return false;
 		}
-		// pavement blocks building...iffy:
-		if ( wg.Pave() )
-			return false;
+
+		
 	}
 	else {
 		if ( passable == size*size && removable == 0 ) {

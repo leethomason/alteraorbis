@@ -58,6 +58,8 @@ public:
 	MapSpatialComponent* nextBuilding;
 
 private:
+	void UpdatePorch( const grinliz::Rectangle2I& bounds );
+
 	int						mode;
 	bool					building;	// is this a building?
 	grinliz::Rectangle2I	bounds;

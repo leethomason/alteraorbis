@@ -612,7 +612,6 @@ bool GameScene::FreeCameraMode()
 	bool button = freeCameraButton.Down();
 	Chit* playerChit = sim->GetPlayerChit();
 	bool coreMode = coreToggle.Down();
-//	CoreScript* coreMode = sim->GetChitBag()->IsBoundToCore( playerChit, true );
 	
 	if ( button || coreMode || (!playerChit) )
 		return true;
@@ -675,18 +674,6 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 			sim->GetChitBag()->NewWorkerChit( coreChit->GetSpatialComponent()->GetPosition(), team );
 		}
 	}
-	/*
-	else if ( item == &corePrimeToggle ) {
-		// Should be disabled unless we are bound to a core.
-		Chit* playerChit = sim->GetPlayerChit();
-		if ( playerChit ) {
-			CoreScript* coreMode   = sim->GetChitBag()->IsBoundToCore( playerChit, true );
-			if ( coreMode ) {
-				GLASSERT( !playerChit->GetMoveComponent() );
-				playerChit->Add( new PathMoveComponent( sim->GetWorldMap() ));
-			}
-		}
-	}*/
 	else if ( item == faceWidget.GetButton() ) {
 		Chit* playerChit = sim->GetPlayerChit();
 		if ( playerChit && playerChit->GetItemComponent() ) {			
@@ -718,7 +705,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 			}
 		}
 	}
-	if ( item == &freeCameraButton ) {
+	if ( item == &freeCameraButton || item == &coreToggle ) {
 		// Set it to track nothing; if it needs to track something, that will
 		// be set by future mouse actions or DoTick
 		CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
@@ -983,14 +970,12 @@ void GameScene::DoTick( U32 delta )
 
 	SetBars();
 
-//	CoreScript* coreMode = sim->GetChitBag()->IsBoundToCore( playerChit, true );
 	bool coreMode = coreToggle.Down();
 	for( int i=0; i<NUM_BUILD_MODES; ++i ) {
 		modeButton[i].SetVisible( coreMode != 0 );
 	}
 	tabBar.SetVisible( modeButton[0].Visible() );
 	createWorkerButton.SetVisible( coreMode != 0 );
-//	ejectButton.SetVisible( coreMode != 0 );
 
 	str.Clear();
 	if ( playerChit && coreMode ) {

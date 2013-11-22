@@ -69,11 +69,26 @@ void MapSpatialComponent::SetBuilding( bool b )
 }
 
 
+
+void MapSpatialComponent::UpdatePorch( const grinliz::Rectangle2I& bounds )
+{
+	Rectangle2I b = bounds;
+	b.Outset( 1 );
+	Rectangle2IEdgeIterator it( b );
+
+	for( it.Begin(); !it.Done(); it.Next() ) {
+		Chit* porch = chitBag->QueryPorch( it.Pos() );
+		worldMap->SetPorch( it.Pos().x, it.Pos().y, porch != 0 );
+	}
+}
+
+
 void MapSpatialComponent::OnAdd( Chit* chit )
 {
 	super::OnAdd( chit );
 	if ( building ) {
 		chitBag->AddToBuildingHash( this, bounds.min.x, bounds.min.y ); 
+		UpdatePorch( bounds );
 	}
 
 	if ( mode == GRID_BLOCKED ) {
@@ -102,6 +117,7 @@ void MapSpatialComponent::OnRemove()
 			}
 		}
 	}
+	UpdatePorch( bounds );
 }
 
 

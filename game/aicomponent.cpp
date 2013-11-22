@@ -738,6 +738,7 @@ bool AIComponent::RockBreak( const grinliz::Vector2I& rock )
 	GLOUTPUT(( "Destroy something at %d,%d\n", rock.x, rock.y ));
 	ComponentSet thisComp( parentChit, Chit::RENDER_BIT | 
 		                               Chit::SPATIAL_BIT |
+									   Chit::ITEM_BIT |
 									   ComponentSet::IS_ALIVE |
 									   ComponentSet::NOT_IN_IMPACT );
 	if ( !thisComp.okay ) 
