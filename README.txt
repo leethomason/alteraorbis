@@ -91,6 +91,8 @@ Buildings:
 
 You can build additional Worker Bots (up to a limit) and at any time eject from your core. You can't build while not controlling your core, but the AI will carry on without you. In this alpha, you are the sole defender of your domain and will need to eject to fend of attackers.
 
+You can use a Factory or Vault my moving your avatar to the grid square at the front. The Factory or Vault screen will automatically open.
+
 
 Filing a Bug
 ------------
