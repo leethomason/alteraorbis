@@ -166,6 +166,7 @@ public:
 	Chit* NewWorkerChit( const grinliz::Vector3F& pos, int team );
 	Chit* NewBuilding( const grinliz::Vector2I& pos, const char* name, int team );
 	Chit* NewVisitor( int visitorIndex );
+	Chit* NewDenizen( const grinliz::Vector2I& pos, int team );
 
 	// Creates "stuff in the world". The GameItem is passed by ownership.
 	Chit* NewItemChit( const grinliz::Vector3F& pos, GameItem* orphanItem, bool fuzzPos, bool placeOnGround );
@@ -186,8 +187,6 @@ public:
 	virtual void HandleBolt( const Bolt& bolt, const ModelVoxel& mv );
 
 	virtual int MapGridUse( int x, int y );
-
-	//CoreScript* IsBoundToCore( Chit*, bool mustBeStandingOnCore, Chit** coreChit=0 );
 
 	// Get the core for this sector.
 	CoreScript* GetCore( const grinliz::Vector2I& sector );

@@ -131,14 +131,14 @@
 
   <item name="power"
         resource="power"
-        porch="1"
+        porch="0"
         procedural="team"
         size="2"
         mass="100"
         cost="60" />
 
   <item name="bed"
-        resource="testStruct1"
+        resource="sleep"
         porch="1"
         procedural="team"
         size="1"

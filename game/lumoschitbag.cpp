@@ -234,6 +234,47 @@ Chit* LumosChitBag::NewMonsterChit( const Vector3F& pos, const char* name, int t
 }
 
 
+Chit* LumosChitBag::NewDenizen( const grinliz::Vector2I& pos, int team )
+{
+	bool female = true;
+	const char* assetName = "humanFemale";
+	if ( random.Bit() ) {
+		female = false;
+		assetName = "humanMale";
+	}
+
+	Chit* chit = NewChit();
+
+	chit->Add( new SpatialComponent());
+	chit->Add( new RenderComponent( engine, assetName ));
+	chit->Add( new PathMoveComponent( worldMap ));
+
+	AddItem( assetName, chit, engine, team, 0 );
+	chit->GetItem()->wallet.AddGold( ReserveBank::Instance()->WithdrawDenizen() );
+	chit->GetItem()->traits.Roll( random.Rand() );
+
+	/* FIXME: need name. need to move namegen to script
+	IString nameGen = chit->GetItem()->keyValues.GetIString( "nameGen" );
+	if ( !nameGen.empty() ) {
+		chit->GetItem()->properName = StringPool::Intern( 
+			lumosGame->GenName( nameGen.c_str(), 
+								chit->ID(),
+								4, 8 ));
+	}
+	*/
+	AIComponent* ai = new AIComponent( engine, worldMap );
+	chit->Add( ai );
+
+	chit->Add( new HealthComponent( engine ));
+	chit->GetSpatialComponent()->SetPosYRot( (float)pos.x+0.5f, 0, (float)pos.y+0.5f, 0 );
+	chit->GetItemComponent()->SetHardpoints();
+
+	Vector2I sector = ToSector( pos );
+	GetCore( sector )->AddCitizen( chit );
+	return chit;
+}
+
+
 Chit* LumosChitBag::NewWorkerChit( const Vector3F& pos, int team )
 {
 	Chit* chit = NewChit();

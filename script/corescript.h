@@ -38,11 +38,9 @@ public:
 	virtual const char* ScriptName()	{ return "CoreScript"; }
 	virtual CoreScript* ToCoreScript()	{ return this; }
 
-	// Once attached, can't detach. There for good.
-	// Can however move around again if the Chit 'ejects'.
-	// In this case the chit is attached, but !standing
-	// bool AttachToCore( Chit* chit );
-	// Chit* GetAttached( bool* standing );
+	void AddCitizen( Chit* chit );
+	bool IsCitizen( Chit* chit );
+	int  NumCitizens();
 
 	bool InUse() const;
 	int  PrimaryTeam() const;
@@ -67,8 +65,7 @@ private:
 	double		tech;
 	int			achievedTechLevel;
 	grinliz::IString defaultSpawn;
-
-
+	grinliz::CDynArray< int > citizens;
 };
 
 #endif // CORESCRIPT_INCLUDED
