@@ -244,9 +244,6 @@
     <ClCompile Include="..\game\debugstatecomponent.cpp">
       <Filter>Source Files\components</Filter>
     </ClCompile>
-    <ClCompile Include="..\game\aicomponent.cpp">
-      <Filter>Source Files\components</Filter>
-    </ClCompile>
     <ClCompile Include="..\game\debugpathcomponent.cpp">
       <Filter>Source Files\components</Filter>
     </ClCompile>
@@ -327,6 +324,9 @@
     </ClCompile>
     <ClCompile Include="..\script\buildscript.cpp">
       <Filter>Source Files\script</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\aicomponent.cpp">
+      <Filter>Source Files\ai</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -549,9 +549,6 @@
     <ClInclude Include="..\game\debugstatecomponent.h">
       <Filter>Source Files\components</Filter>
     </ClInclude>
-    <ClInclude Include="..\game\aicomponent.h">
-      <Filter>Source Files\components</Filter>
-    </ClInclude>
     <ClInclude Include="..\game\debugpathcomponent.h">
       <Filter>Source Files\components</Filter>
     </ClInclude>
@@ -659,6 +656,9 @@
     </ClInclude>
     <ClInclude Include="..\script\buildscript.h">
       <Filter>Source Files\script</Filter>
+    </ClInclude>
+    <ClInclude Include="..\game\aicomponent.h">
+      <Filter>Source Files\ai</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

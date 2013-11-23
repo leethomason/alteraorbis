@@ -145,6 +145,14 @@
         mass="30"
         cost="25" />
 
+  <item name="market"
+        resource="testStruct2"
+        porch="1"
+        procedural="team"
+        size="2"
+        mass="50"
+        cost="50" />
+
   <item name="arachnoid"
         resource="arachnoid"
         flags="AI_WANDER_HERD AI_EAT_PLANTS AI_SECTOR_HERD GOLD_PICKUP FLAMMABLE SHOCKABLE"

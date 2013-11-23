@@ -50,17 +50,18 @@ DialogScene::DialogScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 	}
 
 	for( int i=0; i<NUM_SCENES; ++i ) {
-		static const char* name[NUM_SCENES] = { "character", "vault", "forge" };
+		static const char* name[NUM_SCENES] = { "character", "vault", "forge", "market" };
 		sceneButtons[i].Init( &gamui2D, lumosGame->GetButtonLook(0));
 		sceneButtons[i].SetText( name[i] );
 	}
 
 	ItemDefDB* db = ItemDefDB::Instance();
-	const GameItem& human = db->Get( "humanMale" );
-	const GameItem& troll = db->Get( "troll" );
-	const GameItem& blaster = db->Get( "blaster" );
-	const GameItem& pistol = db->Get( "pistol" );
-	const GameItem& ring = db->Get( "ring" );
+	const GameItem& human	= db->Get( "humanMale" );
+	const GameItem& troll	= db->Get( "troll" );
+	const GameItem& blaster	= db->Get( "blaster" );
+	const GameItem& pistol	= db->Get( "pistol" );
+	const GameItem& ring	= db->Get( "ring" );
+	const GameItem& core	= db->Get( "core" );
 
 	itemComponent0 = new ItemComponent( 0, 0, new GameItem( human ));
 	itemComponent0->AddToInventory( new GameItem( blaster ));
@@ -72,6 +73,10 @@ DialogScene::DialogScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 	itemComponent1->AddToInventory( new GameItem( pistol ));
 	itemComponent1->AddToInventory( new GameItem( ring ));
 	itemComponent1->AddToInventory( new GameItem( ring ));
+	itemComponent1->GetItem()->wallet.AddGold( 200 );
+
+	coreComponent = new ItemComponent( 0, 0, new GameItem( core ));
+	coreComponent->GetItem(0)->wallet.AddGold( 100 );
 
 	for( int i=0; i<NUM_CRYSTAL_TYPES; ++i ) {
 		itemComponent0->GetItem(0)->wallet.AddCrystal( i );
@@ -82,6 +87,7 @@ DialogScene::~DialogScene()
 {
 	delete itemComponent0;
 	delete itemComponent1;
+	delete coreComponent;
 }
 
 
@@ -117,10 +123,13 @@ void DialogScene::ItemTapped( const gamui::UIItem* item )
 		game->PopScene();
 	}
 	else if ( item == &sceneButtons[CHARACTER] ) {
-		game->PushScene( LumosGame::SCENE_CHARACTER, new CharacterSceneData( itemComponent0 ));
+		game->PushScene( LumosGame::SCENE_CHARACTER, new CharacterSceneData( itemComponent0, 0, 0 ));
 	}
 	else if ( item == &sceneButtons[VAULT] ) {
-		game->PushScene( LumosGame::SCENE_CHARACTER, new CharacterSceneData( itemComponent0, itemComponent1 ));
+		game->PushScene( LumosGame::SCENE_CHARACTER, new CharacterSceneData( itemComponent0, itemComponent1, 0 ));
+	}
+	else if ( item == &sceneButtons[MARKET] ) {
+		game->PushScene( LumosGame::SCENE_CHARACTER, new CharacterSceneData( itemComponent0, itemComponent1, coreComponent ));
 	}
 	else if ( item == &sceneButtons[FORGE] ) {
 		ForgeSceneData* data = new ForgeSceneData();

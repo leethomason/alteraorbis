@@ -1697,31 +1697,7 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			currentAction = NO_ACTION;
 			parentChit->SetTickNeeded();
 		}
-		// FIXME: when should an AI bind to core? This just does
-		// it at the end of a move, irrespective of the current
-		// action or mode.
-		/*
-		if ( chit->GetItem() && ( chit->GetItem()->flags & GameItem::AI_BINDS_TO_CORE )) {
 
-			bool standingOnCore = map->GetWorldGrid( mapPos.x, mapPos.y ).IsCore();
-
-			if ( standingOnCore ) {
-				CoreScript* boundCore = GetChitBag()->ToLumos()->IsBoundToCore( parentChit, false );
-				CoreScript* thisCore  = GetChitBag()->ToLumos()->GetCore( sector );
-
-				// If the MOB is bound to a core in a different sector it can't bind here. BUT,
-				// it can re-bind to this core if needed.
-				if ( boundCore && (boundCore != thisCore )) {
-					// Do nothing. Bound somewhere else.
-				}
-				else {
-					// Bind or re-bind
-					GLASSERT( thisCore );	// we should be standing on one. 
-					thisCore->AttachToCore( parentChit );
-				}
-			}
-		}
-		*/
 		if ( chit->PlayerControlled()) {
 			Chit* building = GetLumosChitBag()->QueryPorch( thisComp.spatial->GetPosition2DI() );
 			if ( building && building->GetItem() ) {
@@ -1731,7 +1707,7 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 
 				if ( cs && ic ) {
 					if ( name == IStringConst::vault ) {
-						GetLumosChitBag()->PushScene( LumosGame::SCENE_CHARACTER, new CharacterSceneData( ic, building->GetItemComponent() ));
+						GetLumosChitBag()->PushScene( LumosGame::SCENE_CHARACTER, new CharacterSceneData( ic, building->GetItemComponent(), 0 ));
 					}
 					else if ( name == IStringConst::factory ) {
 						ForgeSceneData* data = new ForgeSceneData();
