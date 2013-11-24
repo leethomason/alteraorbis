@@ -678,7 +678,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		Chit* playerChit = sim->GetPlayerChit();
 		if ( playerChit && playerChit->GetItemComponent() ) {			
 			game->PushScene( LumosGame::SCENE_CHARACTER, 
-							 new CharacterSceneData( playerChit->GetItemComponent() ));
+							 new CharacterSceneData( playerChit->GetItemComponent(), 0, 0 ));
 		}
 	}
 

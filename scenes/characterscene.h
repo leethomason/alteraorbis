@@ -35,9 +35,18 @@ class GameItem;
 class CharacterSceneData : public SceneData
 {
 public:
-	CharacterSceneData( ItemComponent* ic, ItemComponent* ic2=0 ) : SceneData(), itemComponent(ic), vault(ic2) { GLASSERT(ic); }
+	CharacterSceneData( ItemComponent* ic,			// character
+						ItemComponent* ic2,			// vault, market
+						ItemComponent* core )		// If set, this is a market, and this is where tax goes
+		: SceneData(), itemComponent(ic), storageIC(ic2), coreIC(core) { GLASSERT(ic); }
+
 	ItemComponent*	itemComponent;
-	ItemComponent*	vault;				// vault, chest, storage, etc.				
+	ItemComponent*	storageIC;			// vault, chest, storage, etc.				
+	ItemComponent*	coreIC;				// for markets
+
+	bool IsCharacter() const	{ return storageIC == 0 && coreIC == 0; }
+	bool IsVault() const		{ return coreIC == 0 && storageIC != 0; }
+	bool IsMarket() const		{ return coreIC != 0; }
 };
 
 
@@ -69,12 +78,11 @@ private:
 
 	};
 	
-	LumosGame*		lumosGame;
-	Engine*			engine;
-	ItemComponent*	itemComponent;	// what item or inventory are we displaying?
-	ItemComponent*	vault;			// if interacting with a vault/chest/storage, otherwise null
-	Model*			model;
-	int				nStorage;		// 1 for character, 2 for vault
+	LumosGame*			lumosGame;
+	Engine*				engine;
+	CharacterSceneData*	data;
+	Model*				model;
+	int					nStorage;	// 1 for character, 2 for vault
 
 	Screenport			screenport;
 	gamui::PushButton	okay;
@@ -82,9 +90,12 @@ private:
 	int					itemButtonIndex[2][NUM_ITEM_BUTTONS];	// the index in the ItemComponent
 	gamui::TextBox		desc;
 	gamui::PushButton	dropButton;
-	MoneyWidget			moneyWidget;
+	MoneyWidget			moneyWidget[2];		// left is character, right is market
 	FaceToggleWidget	faceWidget;
 	ItemDescWidget		itemDescWidget;
+	gamui::TextBox		billOfSale;
+	int					bought;
+	int					sold;
 };
 
 

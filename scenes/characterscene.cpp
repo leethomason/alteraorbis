@@ -14,10 +14,10 @@ static const float FAR  = 10.0f;
 CharacterScene::CharacterScene( LumosGame* game, CharacterSceneData* csd ) : Scene( game ), screenport( game->GetScreenport() )
 {
 	this->lumosGame = game;
-	this->itemComponent = csd->itemComponent;
-	vault = csd->vault;
-	nStorage = vault ? 2 : 1;
+	data = csd;
+	nStorage = data->storageIC ? 2 : 1;
 	model = 0;
+	bought = sold = 0;
 
 	screenport.SetNearFar( NEAR, FAR );
 	engine = new Engine( &screenport, lumosGame->GetDatabase(), 0 );
@@ -27,9 +27,13 @@ CharacterScene::CharacterScene( LumosGame* game, CharacterSceneData* csd ) : Sce
 	game->InitStd( &gamui2D, &okay, 0 );
 	dropButton.Init( &gamui2D, lumosGame->GetButtonLook(0));
 	dropButton.SetText( "Drop" );
+	dropButton.SetVisible( !data->IsMarket() );
+
+	billOfSale.Init( &gamui2D );
+	billOfSale.SetVisible( data->IsMarket() );
 
 	faceWidget.Init( &gamui2D, lumosGame->GetButtonLook(0));
-	faceWidget.SetFace( &uiRenderer, itemComponent->GetItem(0) );
+	faceWidget.SetFace( &uiRenderer, data->itemComponent->GetItem(0) );
 
 	desc.Init( &gamui2D );
 	
@@ -40,8 +44,16 @@ CharacterScene::CharacterScene( LumosGame* game, CharacterSceneData* csd ) : Sce
 		}
 	}
 	itemDescWidget.Init( &gamui2D );
-	moneyWidget.Init( &gamui2D );
-	moneyWidget.Set( itemComponent->GetItem(0)->wallet );
+
+	moneyWidget[0].Init( &gamui2D );
+	moneyWidget[1].Init( &gamui2D );
+	moneyWidget[1].SetVisible( false );
+
+	moneyWidget[0].Set( data->itemComponent->GetItem(0)->wallet );
+	if ( data->IsMarket() ) {
+		moneyWidget[1].SetVisible( true );
+		moneyWidget[1].Set( data->storageIC->GetItem(0)->wallet );
+	}
 
 	engine->lighting.direction.Set( 0, 1, 1 );
 	engine->lighting.direction.Normalize();
@@ -73,8 +85,6 @@ void CharacterScene::Resize()
 
 	layout.PosAbs( &faceWidget, 0, 0 );
 	faceWidget.SetSize( faceWidget.Width(), faceWidget.Height()*2.0f );
-
-	layout.PosAbs( &moneyWidget, 1, 0, false );
 	
 	for( int j=0; j<nStorage; ++j ) {
 		int col=0;
@@ -92,13 +102,17 @@ void CharacterScene::Resize()
 			}
 		}
 	}
+	layout.PosAbs( &moneyWidget[0], 1, 0, false );
+	layout.PosAbs( &moneyWidget[1], -3, 0, false );
 	layout.PosAbs( &dropButton, 1, 7 );
+	layout.PosAbs( &billOfSale, 1, 7 );	
+	billOfSale.SetSize( 200, 200 );
 
 	layout.PosAbs( &desc, -4, 0 );
 	desc.SetSize( layout.Width() * 4.0f, layout.Height() );
 
 	float y = desc.Y() + desc.Height();
-	if ( vault ) {
+	if ( !data->IsCharacter() ) {
 		desc.SetPos( port.UIWidth()*0.5f - layout.Width()*0.5f, desc.Y() );
 		y = dropButton.Y();
 	}
@@ -142,7 +156,7 @@ void CharacterScene::SetButtonText()
 		int count=0;
 		int src = 1;
 
-		ItemComponent* ic = (j==0) ? itemComponent : vault;
+		ItemComponent* ic = (j==0) ? data->itemComponent : data->storageIC;
 
 		const GameItem* mainItem		= ic->GetItem(0);
 		const IRangedWeaponItem* ranged = ic->GetRangedWeapon(0);
@@ -186,7 +200,7 @@ void CharacterScene::SetButtonText()
 		}
 	}
 	if ( !down ) {
-		down = itemComponent->GetItem(0);
+		down = data->itemComponent->GetItem(0);
 	}
 
 	if ( down ) {
@@ -226,12 +240,19 @@ void CharacterScene::SetButtonText()
 		}
 	}
 
-	if ( down != itemComponent->GetItem(0)) {
-		SetItemInfo( down, itemComponent->GetItem(0) );
+	if ( down != data->itemComponent->GetItem(0)) {
+		SetItemInfo( down, data->itemComponent->GetItem(0) );
 	}
 	else {
 		SetItemInfo( down, 0 );
 	}
+
+	CStr<64> str;
+	str.Format( "Buy: %d\n"
+				"Sell: %d\n"
+				"Total: %d", bought, sold, bought-sold );
+	billOfSale.SetText( str.c_str() );
+				
 }
 
 
@@ -295,14 +316,14 @@ void CharacterScene::DragEnd( const gamui::UIItem* start, const gamui::UIItem* e
 		for( int i=0; i<NUM_ITEM_BUTTONS; ++i ) {
 			if ( start == &itemButton[j][i] ) {
 				startIndex = itemButtonIndex[j][i];
-				startIC = (j==0) ? itemComponent : vault;
+				startIC = (j==0) ? data->itemComponent : data->storageIC;
 				break;
 			}
 		}
 		for( int i=0; i<NUM_ITEM_BUTTONS; ++i ) {
 			if ( end == &itemButton[j][i] ) {
 				endIndex = itemButtonIndex[j][i];
-				endIC = (j==0) ? itemComponent : vault;
+				endIC = (j==0) ? data->itemComponent : data->storageIC;
 				break;
 			}
 		}
@@ -318,8 +339,8 @@ void CharacterScene::DragEnd( const gamui::UIItem* start, const gamui::UIItem* e
 	}
 
 
-	if ( !vault && start && startIndex && end == &dropButton ) {
-		itemComponent->Drop( itemComponent->GetItem( startIndex ));
+	if ( data->IsCharacter() && start && startIndex && end == &dropButton ) {
+		data->itemComponent->Drop( data->itemComponent->GetItem( startIndex ));
 	}
 
 	SetButtonText();

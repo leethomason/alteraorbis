@@ -224,7 +224,6 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos )
 	chitBag->AddItem( "blaster", chit, engine, 0, 0 );
 	chitBag->AddItem( "ring", chit, engine, 0, 0 );
 	chit->GetItem()->wallet.AddGold( ReserveBank::Instance()->WithdrawDenizen() );
-	chit->GetItem()->flags |= GameItem::AI_BINDS_TO_CORE;
 	chit->GetItem()->traits.Roll( playerID );
 
 	IString nameGen = chit->GetItem()->keyValues.GetIString( "nameGen" );
@@ -245,6 +244,9 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos )
 	// Player speed boost
 	chit->GetItem()->keyValues.Set( "speed", "f", DEFAULT_MOVE_SPEED*1.5f/1.2f );
 	chit->GetItem()->hpRegen = 1.0f;
+
+	Vector2I sector = ToSector( pos );
+	chitBag->GetCore( sector )->AddCitizen( chit );
 }
 
 

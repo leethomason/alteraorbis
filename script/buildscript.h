@@ -36,6 +36,7 @@ public:
 		FACTORY,
 		POWER,
 		BED,
+		MARKET,
 		NUM_OPTIONS,
 
 		NUM_TECH_LEVELS = 4,
