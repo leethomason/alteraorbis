@@ -82,5 +82,6 @@ static const float EFFECT_DAMAGE_PER_SEC = 20.0f;
 static const float EFFECT_RADIUS = 1.5f;
 static const float EFFECT_ACCRUED_MAX = EFFECT_DAMAGE_PER_SEC;
 
+static const float MARKET_COST_MULT = 0.8f;
 
 #endif // GAMELIMITS_INCLUDED

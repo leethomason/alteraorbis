@@ -84,7 +84,9 @@ public:
 	void InitStd( gamui::Gamui* g, gamui::PushButton* okay, gamui::PushButton* cancel );
 	void PositionStd( gamui::PushButton* okay, gamui::PushButton* cancel );
 
-	void ItemToButton( const GameItem* item, gamui::Button* button );
+	// Put the item text and symbols on a button.
+	// If for sale, pass in the costMult: <1 for the amount it can be sold for, >1 for the buying price
+	void ItemToButton( const GameItem* item, gamui::Button* button, float costMult=0.0f );
 
 protected:
 

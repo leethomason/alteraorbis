@@ -72,6 +72,7 @@ public:
 private:
 	void SetButtonText();
 	void SetItemInfo( const GameItem* item, const GameItem* user );
+	void CalcCost( int* bought, int* sold );
 
 	enum { 
 		NUM_ITEM_BUTTONS = INVERTORY_SLOTS,
@@ -94,8 +95,9 @@ private:
 	FaceToggleWidget	faceWidget;
 	ItemDescWidget		itemDescWidget;
 	gamui::TextBox		billOfSale;
-	int					bought;
-	int					sold;
+
+	grinliz::CDynArray< const GameItem* > boughtList, soldList;
+
 };
 
 

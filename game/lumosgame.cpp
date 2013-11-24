@@ -290,7 +290,7 @@ const char* LumosGame::GenName( const char* dataset, int seed, int min, int max 
 }
 
 
-void LumosGame::ItemToButton( const GameItem* item, gamui::Button* button )
+void LumosGame::ItemToButton( const GameItem* item, gamui::Button* button, float priceMult )
 {
 	CStr<64> text;
 
@@ -300,7 +300,13 @@ void LumosGame::ItemToButton( const GameItem* item, gamui::Button* button )
 	int value = ItemDefDB::Instance()->CalcItemValue( item );
 	const char* name = item->ProperName() ? item->ProperName() : item->Name();
 	if ( value ) {
-		text.Format( "%s\nAu: %d\n", name, value );
+		if ( priceMult ) {
+			int transaction = int( float(value)*priceMult );
+			text.Format( "%s\n%d (%d)", name, transaction, value );
+		}
+		else {
+			text.Format( "%s\n%d", name, value );
+		}
 	}
 	else {
 		text.Format( "%s\n ", name );

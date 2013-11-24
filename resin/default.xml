@@ -271,7 +271,7 @@
   <model filename="weapons2.ac"         modelName="pistol"      origin="0 0 -1"     shadowCaster="true" bones="true"/>
   <model filename="weapons2.ac"         modelName="pulse"       origin="0 0 0"      shadowCaster="true" bones="true"/>
   <model filename="weapons.ac"          modelName="ring"        origin="0.20 0 0"   shadowCaster="true" bones="true" />
-  <model                                filename="shield.ac"    origin="0 0 0"      shadowCaster="true" />
+  <model filename="shield.ac"                                   origin="0 0 0"      shadowCaster="true" />
 
   <font assetName="font" filename="font_0.png" noMip="true">
     <info face="Tahoma" size="28" bold="0" italic="0" charset="" unicode="1" stretchH="100" smooth="1" aa="1" padding="2,2,2,2" spacing="1,1" outline="0"/>

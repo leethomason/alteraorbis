@@ -1,9 +1,14 @@
 #include "characterscene.h"
+
 #include "../game/lumosgame.h"
+
 #include "../engine/engine.h"
+
 #include "../xegame/itemcomponent.h"
+
 #include "../script/procedural.h"
 #include "../script/battlemechanics.h"
+#include "../script/itemscript.h"
 
 using namespace gamui;
 using namespace grinliz;
@@ -17,7 +22,6 @@ CharacterScene::CharacterScene( LumosGame* game, CharacterSceneData* csd ) : Sce
 	data = csd;
 	nStorage = data->storageIC ? 2 : 1;
 	model = 0;
-	bought = sold = 0;
 
 	screenport.SetNearFar( NEAR, FAR );
 	engine = new Engine( &screenport, lumosGame->GetDatabase(), 0 );
@@ -165,6 +169,10 @@ void CharacterScene::SetButtonText()
 		const GameItem* rangedItem		= ranged ? ranged->GetItem() : 0;
 		const GameItem* meleeItem		= melee  ? melee->GetItem() : 0;
 		const GameItem* shieldItem		= shield ? shield->GetItem() : 0;
+		float costMult = 0;
+		if ( data->IsMarket() ) {
+			costMult = MARKET_COST_MULT;
+		}
 
 		for( int i=0; i<NUM_ITEM_BUTTONS; ++i ) {
 			const GameItem* item = ic->GetItem(src);
@@ -176,7 +184,7 @@ void CharacterScene::SetButtonText()
 			// Set the text to the proper name, if we have it.
 			// Then an icon for what it is, and a check
 			// mark if the object is in use.
-			lumosGame->ItemToButton( item, &itemButton[j][count] );
+			lumosGame->ItemToButton( item, &itemButton[j][count], j == 0 ? costMult : 1.0f / costMult );
 			itemButtonIndex[j][count] = src;
 
 			// Set the "active" icons.
@@ -246,6 +254,9 @@ void CharacterScene::SetButtonText()
 	else {
 		SetItemInfo( down, 0 );
 	}
+
+	int bought=0, sold=0;
+	CalcCost( &bought, &sold );
 
 	CStr<64> str;
 	str.Format( "Buy: %d\n"
@@ -335,6 +346,33 @@ void CharacterScene::DragEnd( const gamui::UIItem* start, const gamui::UIItem* e
 		GameItem* item = startIC->RemoveFromInventory( startIndex );
 		if ( item ) {
 			endIC->AddToInventory( item );
+
+			// Moved from one inventory to the other.
+			// Buying or selling?
+			if ( startIC == data->itemComponent ) {
+				// we are selling:
+				int i = boughtList.Find( item );
+				if ( i >= 0 ) {
+					// changed our minds - return to store.
+					boughtList.SwapRemove( i );
+				}
+				else {
+					GLASSERT( soldList.Find( item ) < 0 );
+					soldList.Push( item );
+				}
+			}
+			else {
+				// we are buying:
+				int i = soldList.Find( item );
+				if ( i >= 0 ) {
+					// changed our minds - back to inventory.
+					soldList.SwapRemove( i );
+				}
+				else {
+					GLASSERT( boughtList.Find( item ) < 0 );
+					boughtList.Push( item );
+				}
+			}
 		}
 	}
 
@@ -344,4 +382,20 @@ void CharacterScene::DragEnd( const gamui::UIItem* start, const gamui::UIItem* e
 	}
 
 	SetButtonText();
+}
+
+
+void CharacterScene::CalcCost( int* bought, int* sold )
+{
+	*bought = 0;
+	*sold = 0;
+
+	for( int i=0; i<boughtList.Size(); ++i ) {
+		int value = ItemDefDB::Instance()->CalcItemValue( boughtList[i] );
+		*bought += int( float(value) / MARKET_COST_MULT );
+	}
+	for( int i=0; i<soldList.Size(); ++i ) {
+		int value = ItemDefDB::Instance()->CalcItemValue( soldList[i] );
+		*sold += int( float(value) * MARKET_COST_MULT );
+	}
 }
