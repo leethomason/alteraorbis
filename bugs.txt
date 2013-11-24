@@ -1,3 +1,4 @@
+- no volcanos in controlled domains
 - fire + shock too cheap to build
 - GT: needs pick up effect for gold (single yellow glow of the avatar?)
 - GT: needs pick up effect for kiosks or visitors (like a gold triangle or chest can float over the kiosk when the visitor spends money)
