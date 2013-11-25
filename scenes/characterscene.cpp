@@ -261,7 +261,7 @@ void CharacterScene::SetButtonText()
 	CStr<64> str;
 	str.Format( "Buy: %d\n"
 				"Sell: %d\n"
-				"Total: %d", bought, sold, bought-sold );
+				"%s: %d", bought, sold, (sold > bought) ? "Earn" : "Cost", abs(bought-sold) );
 	billOfSale.SetText( str.c_str() );
 				
 }
