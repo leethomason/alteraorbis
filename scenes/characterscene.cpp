@@ -28,10 +28,14 @@ CharacterScene::CharacterScene( LumosGame* game, CharacterSceneData* csd ) : Sce
 	engine->SetGlow( true );
 	engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
 
-	game->InitStd( &gamui2D, &okay, 0 );
+	game->InitStd( &gamui2D, &okay, &cancel );
 	dropButton.Init( &gamui2D, lumosGame->GetButtonLook(0));
 	dropButton.SetText( "Drop" );
 	dropButton.SetVisible( !data->IsMarket() );
+
+	reset.Init( &gamui2D, lumosGame->GetButtonLook(0));
+	reset.SetText( "Reset" );
+	reset.SetVisible( data->IsMarket() );
 
 	billOfSale.Init( &gamui2D );
 	billOfSale.SetVisible( data->IsMarket() );
@@ -83,7 +87,7 @@ void CharacterScene::Resize()
 	const Screenport& port = game->GetScreenport();
 	engine->GetScreenportMutable()->Resize( port.PhysicalWidth(), port.PhysicalHeight() );
 
-	lumosGame->PositionStd( &okay, 0 );
+	lumosGame->PositionStd( &okay, &cancel );
 
 	LayoutCalculator layout = lumosGame->DefaultLayout();
 
@@ -111,6 +115,7 @@ void CharacterScene::Resize()
 	layout.PosAbs( &dropButton, 1, 7 );
 	layout.PosAbs( &billOfSale, 1, 7 );	
 	billOfSale.SetSize( 200, 200 );
+	layout.PosAbs( &reset, -1, -2 );
 
 	layout.PosAbs( &desc, -4, 0 );
 	desc.SetSize( layout.Width() * 4.0f, layout.Height() );
@@ -184,7 +189,10 @@ void CharacterScene::SetButtonText()
 			// Set the text to the proper name, if we have it.
 			// Then an icon for what it is, and a check
 			// mark if the object is in use.
-			lumosGame->ItemToButton( item, &itemButton[j][count], j == 0 ? costMult : 1.0f / costMult );
+			if ( data->IsMarket() )
+				lumosGame->ItemToButton( item, &itemButton[j][count], j == 0 ? costMult : 1.0f / costMult );
+			else
+				lumosGame->ItemToButton( item, &itemButton[j][count], 0 );
 			itemButtonIndex[j][count] = src;
 
 			// Set the "active" icons.
@@ -263,25 +271,67 @@ void CharacterScene::SetButtonText()
 				"Sell: %d\n"
 				"%s: %d", bought, sold, (sold > bought) ? "Earn" : "Cost", abs(bought-sold) );
 	billOfSale.SetText( str.c_str() );
-				
+
+	if ( data->IsMarket() ) {
+		int bought=0, sold=0;
+		CalcCost( &bought, &sold );
+		int cost = bought - sold;
+
+		const Wallet& wallet = data->itemComponent->GetItem()->wallet;
+		okay.SetEnabled( cost <= wallet.gold );
+	}
+}
+
+
+void CharacterScene::ResetInventory()
+{
+	CDynArray< GameItem* > player, store; 
+
+	// Remove everything so we don't overflow
+	// an inventory. And then add stuff back.
+	for( int i=0; i<boughtList.Size(); ++i ) {
+		int index = data->itemComponent->FindItem( boughtList[i] );
+		GLASSERT( index >= 0 );
+		store.Push( data->itemComponent->RemoveFromInventory( index ));
+	}
+	for( int i=0; i<soldList.Size(); ++i ) {
+		int index = data->storageIC->FindItem( soldList[i] );
+		GLASSERT( index >= 0 );
+		player.Push( data->storageIC->RemoveFromInventory( index ));
+	}
+
+	for( int i=0; i<player.Size(); ++i ) {
+		data->itemComponent->AddToInventory( player[i] );
+	}
+	for( int i=0; i<store.Size(); ++i ) {
+		data->storageIC->AddToInventory( store[i] );
+	}
+	boughtList.Clear();
+	soldList.Clear();
 }
 
 
 void CharacterScene::ItemTapped( const gamui::UIItem* item )
 {
 	if ( item == &okay ) {
+		if ( data->IsMarket() ) {
+			int bought=0, sold=0;
+			CalcCost( &bought, &sold );
+
+			int cost = bought - sold;
+			data->itemComponent->GetItem(0)->wallet.AddGold( -cost );
+			data->storageIC->GetItem(0)->wallet.AddGold( cost );
+		}
 		lumosGame->PopScene();
 	}
-	for( int j=0; j<nStorage; ++j ) {
-		for( int i=0; i<NUM_ITEM_BUTTONS; ++i ) {
-			if ( item == &itemButton[j][i] ) {
-				SetButtonText();
-			}
-		}
+	if ( item == &cancel ) {
+		ResetInventory();
+		lumosGame->PopScene();
 	}
-	if ( item == faceWidget.GetButton() ) {
-		SetButtonText();
+	if ( item == &reset ) {
+		ResetInventory();
 	}
+	SetButtonText();
 }
 
 void CharacterScene::DoTick( U32 deltaTime )
@@ -347,30 +397,32 @@ void CharacterScene::DragEnd( const gamui::UIItem* start, const gamui::UIItem* e
 		if ( item ) {
 			endIC->AddToInventory( item );
 
-			// Moved from one inventory to the other.
-			// Buying or selling?
-			if ( startIC == data->itemComponent ) {
-				// we are selling:
-				int i = boughtList.Find( item );
-				if ( i >= 0 ) {
-					// changed our minds - return to store.
-					boughtList.SwapRemove( i );
+			if ( endIC != startIC ) {
+				// Moved from one inventory to the other.
+				// Buying or selling?
+				if ( startIC == data->itemComponent ) {
+					// we are selling:
+					int i = boughtList.Find( item );
+					if ( i >= 0 ) {
+						// changed our minds - return to store.
+						boughtList.SwapRemove( i );
+					}
+					else {
+						GLASSERT( soldList.Find( item ) < 0 );
+						soldList.Push( item );
+					}
 				}
 				else {
-					GLASSERT( soldList.Find( item ) < 0 );
-					soldList.Push( item );
-				}
-			}
-			else {
-				// we are buying:
-				int i = soldList.Find( item );
-				if ( i >= 0 ) {
-					// changed our minds - back to inventory.
-					soldList.SwapRemove( i );
-				}
-				else {
-					GLASSERT( boughtList.Find( item ) < 0 );
-					boughtList.Push( item );
+					// we are buying:
+					int i = soldList.Find( item );
+					if ( i >= 0 ) {
+						// changed our minds - back to inventory.
+						soldList.SwapRemove( i );
+					}
+					else {
+						GLASSERT( boughtList.Find( item ) < 0 );
+						boughtList.Push( item );
+					}
 				}
 			}
 		}

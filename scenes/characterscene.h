@@ -37,16 +37,16 @@ class CharacterSceneData : public SceneData
 public:
 	CharacterSceneData( ItemComponent* ic,			// character
 						ItemComponent* ic2,			// vault, market
-						ItemComponent* core )		// If set, this is a market, and this is where tax goes
-		: SceneData(), itemComponent(ic), storageIC(ic2), coreIC(core) { GLASSERT(ic); }
+						bool market )				// apply markup, costs
+		: SceneData(), itemComponent(ic), storageIC(ic2), isMarket(market) { GLASSERT(ic); }
 
 	ItemComponent*	itemComponent;
 	ItemComponent*	storageIC;			// vault, chest, storage, etc.				
-	ItemComponent*	coreIC;				// for markets
+	bool			isMarket;			// for markets
 
-	bool IsCharacter() const	{ return storageIC == 0 && coreIC == 0; }
-	bool IsVault() const		{ return coreIC == 0 && storageIC != 0; }
-	bool IsMarket() const		{ return coreIC != 0; }
+	bool IsCharacter() const	{ return storageIC == 0; }
+	bool IsVault() const		{ return storageIC && !isMarket; }
+	bool IsMarket() const		{ return isMarket; }
 };
 
 
@@ -73,6 +73,7 @@ private:
 	void SetButtonText();
 	void SetItemInfo( const GameItem* item, const GameItem* user );
 	void CalcCost( int* bought, int* sold );
+	void ResetInventory();
 
 	enum { 
 		NUM_ITEM_BUTTONS = INVERTORY_SLOTS,
@@ -86,7 +87,7 @@ private:
 	int					nStorage;	// 1 for character, 2 for vault
 
 	Screenport			screenport;
-	gamui::PushButton	okay;
+	gamui::PushButton	okay, cancel, reset;
 	gamui::ToggleButton itemButton[2][NUM_ITEM_BUTTONS];
 	int					itemButtonIndex[2][NUM_ITEM_BUTTONS];	// the index in the ItemComponent
 	gamui::TextBox		desc;

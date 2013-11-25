@@ -61,7 +61,7 @@ DialogScene::DialogScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 	const GameItem& blaster	= db->Get( "blaster" );
 	const GameItem& pistol	= db->Get( "pistol" );
 	const GameItem& ring	= db->Get( "ring" );
-	const GameItem& core	= db->Get( "core" );
+	const GameItem& market	= db->Get( "market" );
 
 	itemComponent0 = new ItemComponent( 0, 0, new GameItem( human ));
 	itemComponent0->AddToInventory( new GameItem( blaster ));
@@ -75,8 +75,11 @@ DialogScene::DialogScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 	itemComponent1->AddToInventory( new GameItem( ring ));
 	itemComponent1->GetItem()->wallet.AddGold( 200 );
 
-	coreComponent = new ItemComponent( 0, 0, new GameItem( core ));
-	coreComponent->GetItem(0)->wallet.AddGold( 100 );
+	marketComponent = new ItemComponent( 0, 0, new GameItem( market ));
+	marketComponent->GetItem(0)->wallet.AddGold( 100 );
+	marketComponent->AddToInventory( new GameItem( blaster ));
+	marketComponent->AddToInventory( new GameItem( blaster ));
+	marketComponent->AddToInventory( new GameItem( pistol ));
 
 	for( int i=0; i<NUM_CRYSTAL_TYPES; ++i ) {
 		itemComponent0->GetItem(0)->wallet.AddCrystal( i );
@@ -87,7 +90,7 @@ DialogScene::~DialogScene()
 {
 	delete itemComponent0;
 	delete itemComponent1;
-	delete coreComponent;
+	delete marketComponent;
 }
 
 
@@ -129,7 +132,7 @@ void DialogScene::ItemTapped( const gamui::UIItem* item )
 		game->PushScene( LumosGame::SCENE_CHARACTER, new CharacterSceneData( itemComponent0, itemComponent1, 0 ));
 	}
 	else if ( item == &sceneButtons[MARKET] ) {
-		game->PushScene( LumosGame::SCENE_CHARACTER, new CharacterSceneData( itemComponent0, itemComponent1, coreComponent ));
+		game->PushScene( LumosGame::SCENE_CHARACTER, new CharacterSceneData( itemComponent0, marketComponent, true ));
 	}
 	else if ( item == &sceneButtons[FORGE] ) {
 		ForgeSceneData* data = new ForgeSceneData();

@@ -248,7 +248,7 @@ public:
 		Pop();
 	}
 
-	int Find( const T& t ) {
+	int Find( const T& t ) const {
 		for( int i=0; i<size; ++i ) {
 			if ( mem[i] == t )
 				return i;

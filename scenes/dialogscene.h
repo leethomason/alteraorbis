@@ -49,7 +49,7 @@ private:
 	// Objects for testing various UI scenes.
 	ItemComponent* itemComponent0;
 	ItemComponent* itemComponent1;
-	ItemComponent* coreComponent;
+	ItemComponent* marketComponent;
 
 	enum { NUM_TOGGLES	= 2,
 		   NUM_SUB		= 2,
