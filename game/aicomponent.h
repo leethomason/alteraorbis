@@ -127,6 +127,11 @@ private:
 	int GetThinkTime() const { return 500; }
 	WorkQueue* GetWorkQueue();
 
+	// Returns true if this action was actually taken.
+	bool ThinkWanderEatPlants( const ComponentSet& thisComp );
+	bool ThinkWanderHealAtCore( const ComponentSet& thisComp );
+	bool ThinkCriticalNeeds( const ComponentSet& thisComp );
+
 	// What happens when no other move is working.
 	grinliz::Vector2F ThinkWanderRandom( const ComponentSet& thisComp );
 	// pseudo-flocking

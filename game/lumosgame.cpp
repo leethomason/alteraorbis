@@ -297,7 +297,7 @@ void LumosGame::ItemToButton( const GameItem* item, gamui::Button* button, float
 	// Set the text to the proper name, if we have it.
 	// Then an icon for what it is, and a check
 	// mark if the object is in use.
-	int value = ItemDefDB::Instance()->CalcItemValue( item );
+	int value = item->GetValue();
 	const char* name = item->ProperName() ? item->ProperName() : item->Name();
 	if ( value ) {
 		if ( priceMult ) {

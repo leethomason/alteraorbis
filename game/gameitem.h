@@ -314,8 +314,8 @@ public:
 		AI_HEAL_AT_CORE		= (1<<18),		// stands at a core to regain health (greater monsters, generally)
 		AI_SECTOR_HERD		= (1<<19),		// will herd across sectors, as a group
 		AI_SECTOR_WANDER	= (1<<20),		// will wander between sectors, as an individual
-		AI_BINDS_TO_CORE	= (1<<21),
-		AI_DOES_WORK		= (1<<22),
+		AI_DOES_WORK		= (1<<21),
+		AI_USES_BUILDINGS	= (1<<22),		// can use markets, etc. and do transactions
 
 		GOLD_PICKUP			= (1<<23),
 		ITEM_PICKUP			= (1<<24),		// picks up items. will use if possible.
@@ -425,6 +425,7 @@ public:
 			accruedFire = 0;
 			accruedShock = 0;
 		}
+		value = -1;
 	}
 
 	void InitState() {
@@ -503,6 +504,8 @@ public:
 		return 1.0f;
 	}
 
+	int GetValue() const;
+
 	// Absorb damage.'remain' is how much damage passes through the shield
 	void AbsorbDamage( bool inInventory, DamageDesc dd, DamageDesc* remain, const char* log, const IMeleeWeaponItem* booster, Chit* parent );
 
@@ -510,6 +513,8 @@ private:
 	float Delta( U32 delta, float v ) {
 		return v * (float)delta * 0.001f;
 	}
+
+	mutable int value;	// not serialized, but cached
 };
 
 

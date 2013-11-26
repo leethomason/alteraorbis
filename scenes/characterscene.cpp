@@ -443,11 +443,11 @@ void CharacterScene::CalcCost( int* bought, int* sold )
 	*sold = 0;
 
 	for( int i=0; i<boughtList.Size(); ++i ) {
-		int value = ItemDefDB::Instance()->CalcItemValue( boughtList[i] );
+		int value = boughtList[i]->GetValue();
 		*bought += int( float(value) / MARKET_COST_MULT );
 	}
 	for( int i=0; i<soldList.Size(); ++i ) {
-		int value = ItemDefDB::Instance()->CalcItemValue( soldList[i] );
+		int value = soldList[i]->GetValue();
 		*sold += int( float(value) * MARKET_COST_MULT );
 	}
 }

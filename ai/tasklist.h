@@ -8,6 +8,7 @@ class Chit;
 class WorkQueue;
 class WorldMap;
 class Engine;
+struct ComponentSet;
 
 namespace ai {
 
@@ -117,6 +118,8 @@ public:
 	void DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta, U32 since );
 
 private:
+	void UseBuilding( const ComponentSet& thisComp, Chit* building, const grinliz::IString& buildingName );
+
 	grinliz::CDynArray<Task> taskList;
 	WorldMap* worldMap;
 	Engine* engine;

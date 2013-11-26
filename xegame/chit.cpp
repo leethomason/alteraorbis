@@ -311,6 +311,10 @@ ComponentSet::ComponentSet( Chit* _chit, int bits )
 			spatial = chit->GetSpatialComponent();
 			if ( !spatial ) ++error;
 		}
+		if ( bits & Chit::AI_BIT ) {
+			ai = chit->GetAIComponent();
+			if ( !ai ) ++error;
+		}
 		if ( bits & Chit::MOVE_BIT ) {
 			move = chit->GetMoveComponent();
 			if ( !move ) ++error;
@@ -364,6 +368,7 @@ void ComponentSet::Zero()
 	itemComponent = 0;
 	item = 0;
 	render = 0;
+	ai = 0;
 }
 
 

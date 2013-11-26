@@ -53,6 +53,7 @@
 #include <climits>
 
 #include "../ai/tasklist.h"
+#include "../ai/marketai.h"
 
 using namespace grinliz;
 using namespace ai;
@@ -1089,6 +1090,113 @@ void AIComponent::ThinkVisitor( const ComponentSet& thisComp )
 }
 
 
+bool AIComponent::ThinkWanderEatPlants( const ComponentSet& thisComp )
+{
+	GLASSERT( thisComp.item );
+	// Plant eater
+	if (    (thisComp.item->flags & GameItem::AI_EAT_PLANTS) 
+		 && (thisComp.item->hp < thisComp.item->TotalHPF() * 0.8f ))  
+	{
+		// Are we near a plant?
+		// Note that currently only support eating stage 0-1 plants.
+		CChitArray plants;
+	
+		PlantFilter plantFilter( -1, MAX_PASSABLE_PLANT_STAGE );
+		parentChit->GetChitBag()->QuerySpatialHash( &plants, thisComp.spatial->GetPosition2D(), PLANT_AWARE, 0, &plantFilter );
+
+		Vector2F plantPos =  { 0, 0 };
+		float plantDist = 0;
+		if ( Closest( thisComp, plants.Mem(), plants.Size(), &plantPos, &plantDist )) {
+			if ( ToWorld2I( plantPos ) == thisComp.spatial->GetPosition2DI() ) {
+				if ( debugFlag ) {
+					GLOUTPUT(( "ID=%d Stand\n", thisComp.chit->ID() ));
+				}
+				currentAction = STAND;
+			}
+			else {
+				this->Move( plantPos, false );
+			}
+			return true;
+		}
+	}
+	return false;
+}
+
+
+bool AIComponent::ThinkWanderHealAtCore( const ComponentSet& thisComp )
+{
+	// Core healer
+	if (    (thisComp.item->flags & GameItem::AI_HEAL_AT_CORE) 
+		 && (thisComp.item->hp < thisComp.item->TotalHPF() * 0.8f )) 
+	{
+		Vector2I sector = ToSector( thisComp.spatial->GetPosition2DI() );
+		const SectorData& sd = map->GetSector( sector );
+		if ( sd.core != thisComp.spatial->GetPosition2DI() ) {
+			if ( map->CalcPath( thisComp.spatial->GetPosition2D(), ToWorld2F( sd.core ), 0, 0, 0, 0 )) {
+				this->Move( ToWorld2F( sd.core ), false );
+			}
+		}
+		else {
+			currentAction = STAND;
+		}
+		return true;
+	}
+	return false;
+}
+
+
+
+bool AIComponent::ThinkCriticalNeeds( const ComponentSet& thisComp )
+{
+	Vector2F pos = thisComp.spatial->GetPosition2D();
+	Vector2I pos2i = thisComp.spatial->GetPosition2DI();
+	Vector2I sector = ToSector( pos2i );
+
+	// Are we un-armed?
+	// If we don't have one of the big 3: gun, ring, shield check for
+	// a market to buy it, and the means to buy.
+	if (    thisComp.item->flags & GameItem::AI_USES_BUILDINGS 
+		 && thisComp.item->wallet.gold > 10 )
+	{
+		const IMeleeWeaponItem* melee = thisComp.itemComponent->GetMeleeWeapon();
+		const IRangedWeaponItem* ranged = thisComp.itemComponent->GetRangedWeapon(0);
+		const IShield* shield = thisComp.itemComponent->GetShield();
+
+		// Don't want the AIs running to the market all the time if nothing
+		// is there. (And planning to have random market visits anyway.)
+		// This is "critical call ahead" needs.
+		if ( !melee || !ranged || !shield ) {
+			LumosChitBag* chitBag = this->GetLumosChitBag();
+			Chit* market = chitBag->FindBuilding( IStringConst::market, sector, &pos, 
+												  LumosChitBag::RANDOM_NEAR, 0 );
+
+			bool goMarket = false;
+			MarketAI marketAI( market );
+
+			if ( !ranged && marketAI.HasRanged( thisComp.item->wallet.gold )) {
+				goMarket = true;
+			}
+			if ( !shield && marketAI.HasShield( thisComp.item->wallet.gold )) {
+				goMarket = true;
+			}
+			if ( !melee && marketAI.HasMelee( thisComp.item->wallet.gold )) {
+				goMarket = true;
+			}
+
+			if ( goMarket ) {
+				MapSpatialComponent* msc = GET_SUB_COMPONENT( market, SpatialComponent, MapSpatialComponent );
+				Vector2I porch = msc->PorchPos( thisComp.chit->ID() );
+				taskList->Push( Task::MoveTask( porch, 0 ));
+				taskList->Push( Task::StandTask( 1000 ));
+				taskList->Push( Task::UseBuildingTask( 0 ));
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+
 void AIComponent::ThinkWander( const ComponentSet& thisComp )
 {
 	// Wander in some sort of directed fashion.
@@ -1109,46 +1217,12 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 		ranged->GetItem()->Reload( parentChit );
 	}
 
-	// Plant eater
-	if ( (itemFlags & GameItem::AI_EAT_PLANTS) && (item->hp < item->TotalHP()))  {
-		// Are we near a plant?
-		// Note that currently only support eating stage 0-1 plants.
-		CChitArray plants;
-	
-		PlantFilter plantFilter( -1, MAX_PASSABLE_PLANT_STAGE );
-		parentChit->GetChitBag()->QuerySpatialHash( &plants, pos2, PLANT_AWARE, 0, &plantFilter );
-
-		Vector2F plantPos =  { 0, 0 };
-		float plantDist = 0;
-		if ( Closest( thisComp, plants.Mem(), plants.Size(), &plantPos, &plantDist )) {
-			if ( plantDist > 0.2f ) {
-				dest = plantPos;
-			}
-			else {
-				// Already where we need to be		
-				if ( debugFlag ) {
-					GLOUTPUT(( "ID=%d Stand\n", thisComp.chit->ID() ));
-				}
-				currentAction = STAND;
-				return;
-			}
-		}
-	}
-
-	// Core healer
-	if ( (itemFlags & GameItem::AI_HEAL_AT_CORE) && (item->hp < item->TotalHPF() * 0.8f )) {
-		Vector2I sector = ToSector( thisComp.spatial->GetPosition2DI() );
-		const SectorData& sd = map->GetSector( sector );
-		if ( sd.core != pos2i ) {
-			if ( map->CalcPath( thisComp.spatial->GetPosition2D(), ToWorld2F( sd.core ), 0, 0, 0, 0 )) {
-				dest = ToWorld2F( sd.core );
-			}
-		}
-		else {
-			currentAction = STAND;
-			return;
-		}
-	}
+	if ( ThinkWanderEatPlants( thisComp ))
+		return;
+	if ( ThinkWanderHealAtCore( thisComp ))
+		return;
+	if ( ThinkCriticalNeeds( thisComp ))
+		return;
 
 	if ( dest.IsZero() ) {
 		// Is there stuff around to pick up?

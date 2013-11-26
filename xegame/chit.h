@@ -240,6 +240,7 @@ struct ComponentSet
 	ItemComponent*		itemComponent;
 	GameItem*			item;
 	RenderComponent*	render;
+	AIComponent*		ai;
 };
 
 

@@ -571,9 +571,8 @@ class ItemValueCompare
 public:
 	bool Less( const GameItem* v0, const GameItem* v1 ) const
 	{
-		ItemDefDB* db = ItemDefDB::Instance();
-		int val0 = db->CalcItemValue( v0 );
-		int val1 = db->CalcItemValue( v1 );
+		int val0 = v0->GetValue();
+		int val1 = v1->GetValue();
 		return val0 < val1;
 	}
 };

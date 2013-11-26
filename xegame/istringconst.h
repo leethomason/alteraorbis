@@ -54,6 +54,7 @@ public:
 	static grinliz::IString forge;
 	static grinliz::IString power;
 	static grinliz::IString bed;
+	static grinliz::IString market;
 
 	static grinliz::IString arachnoid;
 	static grinliz::IString mantis;

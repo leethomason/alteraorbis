@@ -25,6 +25,7 @@
 #include "../xegame/istringconst.h"
 
 #include "../script/battlemechanics.h"
+#include "../script/itemscript.h"
 
 using namespace grinliz;
 using namespace tinyxml2;
@@ -112,7 +113,7 @@ void GameItem::Serialize( XStream* xs )
 		APPEND_FLAG( flags, f, AI_HEAL_AT_CORE );
 		APPEND_FLAG( flags, f, AI_SECTOR_HERD );
 		APPEND_FLAG( flags, f, AI_SECTOR_WANDER );
-		APPEND_FLAG( flags, f, AI_BINDS_TO_CORE );
+		APPEND_FLAG( flags, f, AI_USES_BUILDINGS );
 		APPEND_FLAG( flags, f, AI_DOES_WORK );
 		APPEND_FLAG( flags, f, GOLD_PICKUP );
 		APPEND_FLAG( flags, f, ITEM_PICKUP );
@@ -142,7 +143,7 @@ void GameItem::Serialize( XStream* xs )
 			READ_FLAG( flags, f, AI_HEAL_AT_CORE );
 			READ_FLAG( flags, f, AI_SECTOR_HERD );
 			READ_FLAG( flags, f, AI_SECTOR_WANDER );
-			READ_FLAG( flags, f, AI_BINDS_TO_CORE );
+			READ_FLAG( flags, f, AI_USES_BUILDINGS );
 			READ_FLAG( flags, f, AI_DOES_WORK );
 			READ_FLAG( flags, f, GOLD_PICKUP );
 			READ_FLAG( flags, f, ITEM_PICKUP );
@@ -195,7 +196,7 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 		READ_FLAG( flags, f, AI_HEAL_AT_CORE );
 		READ_FLAG( flags, f, AI_SECTOR_HERD );
 		READ_FLAG( flags, f, AI_SECTOR_WANDER );
-		READ_FLAG( flags, f, AI_BINDS_TO_CORE );
+		READ_FLAG( flags, f, AI_USES_BUILDINGS );
 		READ_FLAG( flags, f, AI_DOES_WORK );
 		READ_FLAG( flags, f, GOLD_PICKUP );
 		READ_FLAG( flags, f, ITEM_PICKUP );
@@ -433,7 +434,70 @@ void GameItem::AbsorbDamage( bool inInventory, DamageDesc dd, DamageDesc* remain
 }
 
 
+
+int GameItem::GetValue() const
+{
+	static const float EFFECT_BONUS = 1.5f;
+	static const float MELEE_VALUE  = 20;
+	static const float RANGED_VALUE = 30;
+	static const float SHIELD_VALUE = 20;
+	
+	if ( value < 0 ) { 
+		CArray<int, 16> valueArr;
+		valueArr.Push( 0 );
+		value = 0;
+
+		if ( ToMeleeWeapon() ) {
+			float dptu = BattleMechanics::MeleeDPTU( 0, ToMeleeWeapon() );
+
+			const GameItem& basic = ItemDefDB::Instance()->Get( "ring" );
+			float refDPTU = BattleMechanics::MeleeDPTU( 0, basic.ToMeleeWeapon() );
+
+			float v = dptu / refDPTU * MELEE_VALUE;
+			if ( 
+				flags & GameItem::EFFECT_FIRE ) v *= EFFECT_BONUS;
+			if ( flags & GameItem::EFFECT_SHOCK ) v *= EFFECT_BONUS;
+			if ( flags & GameItem::EFFECT_EXPLOSIVE ) v *= EFFECT_BONUS;
+			valueArr.Push( (int)v );
+		}
+
+		if ( ToRangedWeapon() ) {
+			float radAt1 = BattleMechanics::ComputeRadAt1( 0, ToRangedWeapon(), false, false );
+			float dptu = BattleMechanics::RangedDPTU( ToRangedWeapon(), true );
+			float er   = BattleMechanics::EffectiveRange( radAt1 );
+
+			const GameItem& basic = ItemDefDB::Instance()->Get( "blaster" );
+			float refRadAt1 = BattleMechanics::ComputeRadAt1( 0, basic.ToRangedWeapon(), false, false );
+			float refDPTU = BattleMechanics::RangedDPTU( basic.ToRangedWeapon(), true );
+			float refER   = BattleMechanics::EffectiveRange( refRadAt1 );
+
+			float v = ( dptu * er ) / ( refDPTU * refER ) * RANGED_VALUE;
+			if ( flags & GameItem::EFFECT_FIRE ) v *= EFFECT_BONUS;
+			if ( flags & GameItem::EFFECT_SHOCK ) v *= EFFECT_BONUS;
+			if ( flags & GameItem::EFFECT_EXPLOSIVE ) v *= EFFECT_BONUS;
+			valueArr.Push( (int)v );
+		}
+
+		if ( ToShield() ) {
+			int rounds = ClipCap();
+			const GameItem& basic = ItemDefDB::Instance()->Get( "shield" );
+			int refRounds = basic.ClipCap();
+
+			// Currently, shield effects don't do anything, although that would be cool.
+			float v = float(rounds) / float(refRounds) * SHIELD_VALUE;
+			valueArr.Push( int(v) );
+		}
+		if ( !valueArr.Empty() ) {
+			value = valueArr.Max();
+		}
+	}
+	return value;
+}
+
+
 void DamageDesc::Log()
 {
 	GLLOG(( "[damage=%.1f]", damage ));
 }
+
+
