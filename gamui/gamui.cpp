@@ -159,6 +159,7 @@ TextLabel::TextLabel() : UIItem( Gamui::LEVEL_TEXT ),
 	m_str[0] = 0;
 	m_allocated = ALLOCATED;
 	m_boundsWidth = 0;
+	m_tabWidth = 0;
 }
 
 
@@ -278,6 +279,7 @@ void TextLabel::ConstQueue( CDynArray< uint16_t > *indexBuf, CDynArray< Gamui::V
 
 	IGamuiText::GlyphMetrics metrics;
 	float height = m_gamui->GetTextHeight();
+	int tab = 0;
 
 	while ( p && *p ) {
 		// Text layout. Written this algorithm so many times, and it's
@@ -286,8 +288,19 @@ void TextLabel::ConstQueue( CDynArray< uint16_t > *indexBuf, CDynArray< Gamui::V
 		// Respect line breaks, even if we aren't in multi-line mode.
 		while ( *p == '\n' ) {
 			y += height;
+			tab = 0;
 			x = X();
 			++p;
+		}
+		if ( !*p ) break;
+
+		// Tabs are implemented as tables.
+		if ( *p == '\t' && m_tabWidth > 0 ) {
+			++p;
+			if ( !*p ) break;
+
+			++tab;
+			x = X() + float(tab)*m_tabWidth;
 		}
 
 		// Throw away space after a line break.
@@ -295,7 +308,7 @@ void TextLabel::ConstQueue( CDynArray< uint16_t > *indexBuf, CDynArray< Gamui::V
 			while ( *p && *p == ' ' ) {
 				++p;
 			}
-			if ( *p == '\n' ) {
+			if ( !*p || *p == '\n' ) {
 				continue;	// we need to hit the previous case..
 			}
 		}
@@ -306,6 +319,7 @@ void TextLabel::ConstQueue( CDynArray< uint16_t > *indexBuf, CDynArray< Gamui::V
 			if ( x + w > X() + m_boundsWidth ) { 
 				y += height;
 				x = X();
+				tab = 0;
 				continue;
 			}
 		}

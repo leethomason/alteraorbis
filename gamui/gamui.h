@@ -466,7 +466,8 @@ public:
 	virtual float Width() const;
 	virtual float Height() const;
 
-	void SetBounds( float width )				{ if ( m_boundsWidth != width )		{ m_boundsWidth = width;   m_width = m_height = -1; Modify(); }}
+	void SetBounds( float width )	{ if ( m_boundsWidth != width )		{ m_boundsWidth = width; m_width = m_height = -1; Modify(); }}
+	void SetTab( float tabWidth )	{ if ( m_tabWidth != tabWidth )		{ m_tabWidth = tabWidth; m_width = m_height = -1; Modify(); }}
 
 	void SetText( const char* t );
 	void SetText( const char* start, const char* end );	///< Adds text from [start,end)
@@ -495,6 +496,7 @@ private:
 	char* m_str;
 	int	  m_allocated;
 	float m_boundsWidth;
+	float m_tabWidth;
 
 	mutable float m_width;
 	mutable float m_height;
