@@ -381,6 +381,29 @@ bool ChitHasAIComponent::Accept( Chit* chit )
 }
 
 
+bool MultiFilter::Accept( Chit* chit ) 
+{
+	for( int i=0; i<filters.Size(); ++i ) {
+		if ( !filters[i]->Accept( chit ) ) {
+			return false;
+		}
+	}
+	return true;
+}
+
+
+int MultiFilter::Type()
+{
+	if ( type == -1 ) {
+		type = 0;
+		for( int i=0; i<filters.Size(); ++i ) {
+			type |= filters[i]->Type();
+		}
+	}
+	return type;
+}
+
+
 void ChitBag::QuerySpatialHash(	grinliz::CDynArray<Chit*>* array, 
 								const grinliz::Rectangle2F& rf, 
 								const Chit* ignore,

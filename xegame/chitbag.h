@@ -77,6 +77,19 @@ public:
 	virtual int  Type()					{ return MAP | MOB; }
 };
 
+class MultiFilter : public IChitAccept
+{
+public:
+	MultiFilter() : type(-1) {}
+
+	virtual bool Accept( Chit* chit );
+	virtual int  Type();					// committed when called the first time
+
+	grinliz::CDynArray< IChitAccept* > filters;
+private:
+	int type;
+};
+
 
 class ChitBag : public IBoltImpactHandler
 {

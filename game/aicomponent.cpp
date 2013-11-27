@@ -1199,6 +1199,58 @@ bool AIComponent::ThinkCriticalNeeds( const ComponentSet& thisComp )
 }
 
 
+bool AIComponent::ThinkLoot( const ComponentSet& thisComp )
+{
+	// Is there stuff around to pick up?
+
+	int flags = thisComp.item->flags;
+
+	if(    !parentChit->PlayerControlled() 
+		&& ( flags & (GameItem::GOLD_PICKUP | GameItem::ITEM_PICKUP))) 
+	{
+		// Which filter to use?
+		GoldCrystalFilter	gold;
+		LootFilter			loot;
+
+		MultiFilter filter;
+		bool canAdd	= thisComp.itemComponent->CanAddToInventory();
+
+		if ( canAdd && ( flags & GameItem::ITEM_PICKUP)) {
+			filter.filters.Push( &loot );
+		}
+		if ( flags & GameItem::GOLD_PICKUP ) {
+			filter.filters.Push( &gold );
+		}
+
+		Vector2F pos2 = thisComp.spatial->GetPosition2D();
+		CChitArray chitArr;
+		parentChit->GetChitBag()->QuerySpatialHash( &chitArr, pos2, GOLD_AWARE, 0, &filter );
+
+		ChitDistanceCompare compare( thisComp.spatial->GetPosition() );
+		Sort( chitArr.Mem(), chitArr.Size(), compare );
+
+		for( int i=0; i<chitArr.Size(); ++i ) {
+			Vector2F goldPos = chitArr[i]->GetSpatialComponent()->GetPosition2D();
+			if ( map->HasStraightPath( goldPos, pos2 )) {
+				// Pickup and gold use different techniques. (Because of player UI. 
+				// Always want gold - not all items.)
+				if ( loot.Accept( chitArr[i] )) {
+					if ( !taskList ) taskList = new TaskList( map, engine );
+					taskList->Push( Task::MoveTask( goldPos, 0 ));
+					taskList->Push( Task::PickupTask( chitArr[i]->ID(), 0 ));
+					return true;
+				}
+				else {
+					this->Move( goldPos, false );
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+
 void AIComponent::ThinkWander( const ComponentSet& thisComp )
 {
 	// Wander in some sort of directed fashion.
@@ -1223,56 +1275,10 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 		return;
 	if ( ThinkWanderHealAtCore( thisComp ))
 		return;
+	if ( ThinkLoot( thisComp ))
+		return;
 	if ( ThinkCriticalNeeds( thisComp ))
 		return;
-
-	if ( dest.IsZero() ) {
-		// Is there stuff around to pick up?
-		if(    !parentChit->PlayerControlled() 
-			&& ( itemFlags & (GameItem::GOLD_PICKUP | GameItem::ITEM_PICKUP))) 
-		{
-			// Which filter to use?
-			GoldCrystalFilter	gold;
-			LootFilter			loot;
-			GoldLootFilter		both;
-			bool canAdd	= thisComp.itemComponent->CanAddToInventory();
-
-			IChitAccept*	accept = 0;
-			if ( canAdd && (itemFlags & GameItem::GOLD_PICKUP) && (itemFlags & GameItem::ITEM_PICKUP)) {
-				accept = &both;
-			}
-			else if ( canAdd && (itemFlags & GameItem::ITEM_PICKUP) ) {
-				accept = &loot;
-			}
-			else if ( itemFlags & GameItem::GOLD_PICKUP ) {
-				accept = &gold;
-			}
-
-			CChitArray chitArr;
-			parentChit->GetChitBag()->QuerySpatialHash( &chitArr, pos2, GOLD_AWARE, 0, accept );
-
-			ChitDistanceCompare compare( thisComp.spatial->GetPosition() );
-			Sort( chitArr.Mem(), chitArr.Size(), compare );
-
-			for( int i=0; i<chitArr.Size(); ++i ) {
-				Vector2F goldPos = chitArr[i]->GetSpatialComponent()->GetPosition2D();
-				if ( map->HasStraightPath( goldPos, pos2 )) {
-					// Pickup and gold use different techniques. (Because of player UI. 
-					// Always want gold - not all items.)
-					if ( loot.Accept( chitArr[i] )) {
-						if ( !taskList ) taskList = new TaskList( map, engine );
-						taskList->Push( Task::MoveTask( goldPos, 0 ));
-						taskList->Push( Task::PickupTask( chitArr[i]->ID(), 0 ));
-						return;
-					}
-					else {
-						dest = goldPos;
-					}
-					break;
-				}
-			}
-		}
-	}
 
 	// Wander....
 	if ( dest.IsZero() ) {
