@@ -146,7 +146,7 @@
         cost="25" />
 
   <item name="market"
-        resource="testStruct2"
+        resource="market"
         porch="1"
         procedural="team"
         size="2"

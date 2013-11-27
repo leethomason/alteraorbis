@@ -281,8 +281,14 @@ void CharacterScene::SetButtonText()
 		CalcCost( &bought, &sold );
 		int cost = bought - sold;
 
-		const Wallet& wallet = data->itemComponent->GetItem()->wallet;
-		okay.SetEnabled( cost <= wallet.gold );
+		if ( bought > sold ) {
+			const Wallet& wallet = data->itemComponent->GetItem()->wallet;
+			okay.SetEnabled( cost <= wallet.gold );
+		}
+		else {
+			const Wallet& wallet = data->storageIC->GetItem()->wallet;
+			okay.SetEnabled( -cost <= wallet.gold );
+		}
 	}
 }
 

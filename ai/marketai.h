@@ -17,18 +17,18 @@ public:
 
 	// generic form of the query
 	const GameItem* Has( int flag, int hardpoint, int maxAuCost, int minAuValue );
-	GameItem* Buy( const GameItem* itemToBuy, int* cost );
 
-	// Returns a price greater than 0 if the market will buy this item, 0 if not
-	int WillAccept( const GameItem* item );
-	// Calls WillAccept() - returns >0 if purchased, 0 if not.
-	int SellToMarket( GameItem* item );
+	// returns cost (>0) if able to buy
+	static int Transact(	const GameItem* itemToBuy, 
+							ItemComponent* buyer,
+							ItemComponent* seller,
+							bool doTrade );					// If 'false', no transaction is done, but returns the cost IF the trade would succeed.
 
 private:
 	// How much it cost to buy this item.
-	int ValueToCost( int value ) const;
+	static int ValueToCost( int value );
 	// How much a store will pay for this item.
-	int ValueToTrade( int value ) const;
+	static int ValueToTrade( int value );
 
 	Chit* chit;
 	ItemComponent* ic;

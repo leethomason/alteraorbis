@@ -1186,6 +1186,7 @@ bool AIComponent::ThinkCriticalNeeds( const ComponentSet& thisComp )
 				if ( goMarket ) {
 					MapSpatialComponent* msc = GET_SUB_COMPONENT( market, SpatialComponent, MapSpatialComponent );
 					Vector2I porch = msc->PorchPos( thisComp.chit->ID() );
+					if ( !taskList ) taskList = new TaskList( map, engine );
 					taskList->Push( Task::MoveTask( porch, 0 ));
 					taskList->Push( Task::StandTask( 1000 ));
 					taskList->Push( Task::UseBuildingTask( 0 ));

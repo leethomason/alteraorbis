@@ -320,17 +320,12 @@ void TaskList::GoShopping(  const ComponentSet& thisComp, Chit* market )
 		GameItem* gi = thisComp.itemComponent->GetItem( i );
 		int value = gi->GetValue();
 		if ( value && !gi->Intrinsic() && (gi != ranged) && (gi != melee) && (gi != shield) ) {
-			int sold = marketAI.SellToMarket( gi );
+
+			int sold = MarketAI::Transact(	gi, 
+											market->GetItemComponent(),	// buyer
+											thisComp.itemComponent,		// seller
+											true );
 			if ( sold ) {
-				GLOUTPUT(( "%s %s sold %s for %d at sector=%x,%x\n",
-					thisComp.item->name.c_str(),
-					thisComp.item->properName.c_str(),
-					gi->name.c_str(),
-					sold,
-					sector.x, sector.y ));
-				GameItem* removed = thisComp.itemComponent->RemoveFromInventory( i );
-				GLASSERT( removed );
-				thisComp.item->wallet.AddGold( sold );
 				--i;
 			}
 		}
@@ -343,18 +338,27 @@ void TaskList::GoShopping(  const ComponentSet& thisComp, Chit* market )
 		if ( i == 1 && !shield ) purchase = marketAI.HasShield( thisComp.item->wallet.gold, 1 );
 		if ( i == 2 && !melee )  purchase = marketAI.HasMelee(  thisComp.item->wallet.gold, 1 );
 		if ( purchase ) {
-			int cost=0;
-			GameItem* result = marketAI.Buy( purchase, &cost );
-			GLASSERT( result && cost > 0 );
-			thisComp.itemComponent->AddToInventory( result );
-			thisComp.item->wallet.AddGold( -cost );
+			
+			MarketAI::Transact(	purchase,
+								thisComp.itemComponent,
+								market->GetItemComponent(),
+								true );
+		}
+	}
 
-			GLOUTPUT(( "%s %s bought %s for %d at sector=%x,%x\n",
-				thisComp.item->name.c_str(),
-				thisComp.item->properName.c_str(),
-				purchase->name.c_str(),
-				cost,
-				sector.x, sector.y ));
+	// Upgrades! Don't set ranged, shield, etc. because we don't want a critical followed 
+	// by a non-critical. Also, personality probably should factor in to purchasing decisions.
+	for( int i=0; i<3; ++i ) {
+		const GameItem* purchase = 0;
+		if ( i == 0 && ranged ) purchase = marketAI.HasRanged( thisComp.item->wallet.gold, ranged->GetValue() * 3 / 2 );
+		if ( i == 1 && shield ) purchase = marketAI.HasShield( thisComp.item->wallet.gold, shield->GetValue() * 3 / 2 );
+		if ( i == 2 && melee )  purchase = marketAI.HasMelee(  thisComp.item->wallet.gold, melee->GetValue() * 3 / 2 );
+		if ( purchase ) {
+			
+			MarketAI::Transact(	purchase,
+								thisComp.itemComponent,
+								market->GetItemComponent(),
+								true );
 		}
 	}
 }
