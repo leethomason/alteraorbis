@@ -99,7 +99,7 @@ void TitleScene::Resize()
 	}
 
 	layout.PosAbs( &note, 0, 1 );
-	note.SetSize( port.UIWidth()/2, port.UIHeight()/2 );
+	note.SetBounds( port.UIWidth() / 2 );
 }
 
 

@@ -70,7 +70,7 @@ private:
 	gamui::Image		playerMark, playerMark2;
 	gamui::Image		homeMark,	homeMark2;
 	gamui::Image		travelMark, travelMark2;
-	gamui::TextBox		map2Text[MAP2_SIZE2];
+	gamui::TextLabel	map2Text[MAP2_SIZE2];
 };
 
 #endif // MAP_SCENE_INCLUDED

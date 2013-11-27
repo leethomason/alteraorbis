@@ -90,12 +90,12 @@ private:
 	gamui::PushButton	okay, cancel, reset;
 	gamui::ToggleButton itemButton[2][NUM_ITEM_BUTTONS];
 	int					itemButtonIndex[2][NUM_ITEM_BUTTONS];	// the index in the ItemComponent
-	gamui::TextBox		desc;
+	gamui::TextLabel	desc;
 	gamui::PushButton	dropButton;
 	MoneyWidget			moneyWidget[2];		// left is character, right is market
 	FaceToggleWidget	faceWidget;
 	ItemDescWidget		itemDescWidget;
-	gamui::TextBox		billOfSale;
+	gamui::TextLabel	billOfSale;
 
 	grinliz::CDynArray< const GameItem* > boughtList, soldList;
 

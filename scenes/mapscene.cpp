@@ -143,7 +143,7 @@ void MapScene::Resize()
 	for( int j=0; j<MAP2_SIZE; ++j ) {
 		for( int i=0; i<MAP2_SIZE; ++i ) {
 			map2Text[j*MAP2_SIZE+i].SetPos( x + float(i)*gridSize + gutter, y + float(j)*gridSize + gutter );
-			map2Text[j*MAP2_SIZE+i].SetSize( gridSize - gutter*2.0f, gridSize - gutter*2.0f );
+			map2Text[j*MAP2_SIZE+i].SetBounds( gridSize - gutter*2.0f );
 		}
 	}
 

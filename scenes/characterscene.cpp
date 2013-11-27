@@ -117,11 +117,12 @@ void CharacterScene::Resize()
 	layout.PosAbs( &moneyWidget[1], -3, 0, false );
 	layout.PosAbs( &dropButton, 1, 7 );
 	layout.PosAbs( &billOfSale, 1, 7 );	
-	billOfSale.SetSize( 200, 200 );
+	//billOfSale.SetSize( 200, 200 );
 	layout.PosAbs( &reset, -1, -2 );
 
 	layout.PosAbs( &desc, -4, 0 );
-	desc.SetSize( layout.Width() * 4.0f, layout.Height() );
+	//desc.SetSize( layout.Width() * 4.0f, layout.Height() );
+	desc.SetBounds( layout.Width() * 4.0f );
 
 	float y = desc.Y() + desc.Height();
 	if ( !data->IsCharacter() ) {
