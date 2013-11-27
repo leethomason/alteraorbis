@@ -1150,15 +1150,7 @@ void GameScene::DrawDebugText()
 void GameScene::SceneResult( int sceneID, int result, const SceneData* data )
 {
 	if ( sceneID == LumosGame::SCENE_CHARACTER ) {
-		Chit* playerChit = sim->GetPlayerChit();
-		GLASSERT( playerChit );
-		if ( playerChit ) {
-			ItemComponent* ic = playerChit->GetItemComponent();
-			GLASSERT( ic );
-			if ( ic ) {
-				ic->SetHardpoints();
-			}
-		}
+		// Hardpoint setting is now automatic
 	}
 	else if ( sceneID == LumosGame::SCENE_MAP ) {
 		// Works like a tap. Reconstruct map coordinates.

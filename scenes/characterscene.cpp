@@ -1,14 +1,17 @@
 #include "characterscene.h"
 
 #include "../game/lumosgame.h"
+#include "../game/lumoschitbag.h"
 
 #include "../engine/engine.h"
 
 #include "../xegame/itemcomponent.h"
+#include "../xegame/spatialcomponent.h"
 
 #include "../script/procedural.h"
 #include "../script/battlemechanics.h"
 #include "../script/itemscript.h"
+#include "../script/corescript.h"
 
 using namespace gamui;
 using namespace grinliz;

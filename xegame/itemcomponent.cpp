@@ -41,15 +41,15 @@ using namespace grinliz;
 
 
 ItemComponent::ItemComponent( Engine* _engine, WorldMap* wm, const GameItem& item ) 
-	: engine(_engine), worldMap(wm), slowTick( 500 )
+	: engine(_engine), worldMap(wm), slowTick( 500 ), hardpointsModified( true )
 {
 	GLASSERT( !item.name.empty() );
-	itemArr.Push( new GameItem( item ) );	
+	itemArr.Push( new GameItem( item ) );
 }
 
 
 ItemComponent::ItemComponent( Engine* _engine, WorldMap* wm, GameItem* item ) 
-	: engine(_engine), worldMap(wm), slowTick( 500 )
+	: engine(_engine), worldMap(wm), slowTick( 500 ), hardpointsModified( true )
 {
 	// item can be null if loading.
 	if ( item ) {
@@ -465,6 +465,11 @@ void ItemComponent::DoSlowTick()
 
 int ItemComponent::DoTick( U32 delta, U32 since )
 {
+	if ( hardpointsModified && parentChit->GetRenderComponent() ) {
+		SetHardpoints();
+		hardpointsModified = false;
+	}
+
 	GameItem* mainItem = itemArr[0];
 	if ( slowTick.Delta( since )) {
 		DoSlowTick();
@@ -514,6 +519,7 @@ void ItemComponent::OnAdd( Chit* chit )
 	GameItem* mainItem = itemArr[0];
 	GLASSERT( itemArr.Size() >= 1 );	// the one true item
 	super::OnAdd( chit );
+	hardpointsModified = true;
 
 	if ( parentChit->GetLumosChitBag() ) {
 		IString mob = mainItem->keyValues.GetIString( "mob" );
@@ -615,6 +621,7 @@ bool ItemComponent::CanAddToInventory()
 void ItemComponent::AddToInventory( GameItem* item )
 {
 	itemArr.Push( item );
+	hardpointsModified = true;
 
 	// AIs will use the "best" item.
 	if ( parentChit && !parentChit->PlayerControlled() ) {
@@ -630,6 +637,7 @@ void ItemComponent::AddToInventory( ItemComponent* ic )
 	GLASSERT( ic->NumItems() == 1 );
 	itemArr.Push( ic->itemArr.Pop() );
 	delete ic;
+	hardpointsModified = true;
 
 	// AIs will use the "best" item.
 	if ( !parentChit->PlayerControlled() ) {
@@ -646,6 +654,8 @@ GameItem* ItemComponent::RemoveFromInventory( int index )
 		return 0;
 	if ( index == 0 )
 		return 0;
+
+	hardpointsModified = true;
 	itemArr.Remove( index );
 	return item;
 }
@@ -657,6 +667,7 @@ void ItemComponent::Drop( const GameItem* item )
 	if ( !parentChit->GetSpatialComponent() )
 		return;
 
+	hardpointsModified = true;
 	// Can't drop main or intrinsic item
 	for( int i=1; i<itemArr.Size(); ++i ) {
 		if ( itemArr[i]->Intrinsic() )
@@ -679,6 +690,7 @@ bool ItemComponent::Swap( int i, int j )
 		 && !itemArr[j]->Intrinsic() )
 	{
 		grinliz::Swap( &itemArr[i], &itemArr[j] );
+		hardpointsModified = true;
 		return true;
 	}
 	return false;
@@ -733,8 +745,8 @@ bool ItemComponent::SwapWeapons()
 	if ( slot0 >= 0 && slot1 >= 0 ) {
 		grinliz::Swap( &itemArr[slot0], &itemArr[slot1] );
 	}
-	SetHardpoints();
-
+	hardpointsModified = true;
+	
 	IMeleeWeaponItem* melee = this->GetMeleeWeapon();
 	IRangedWeaponItem* ranged = this->GetRangedWeapon(0);
 	GLOUTPUT(( "Swapped. Active melee: %s ranged: %s\n",

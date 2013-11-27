@@ -267,7 +267,7 @@ Chit* LumosChitBag::NewDenizen( const grinliz::Vector2I& pos, int team )
 
 	chit->Add( new HealthComponent( engine ));
 	chit->GetSpatialComponent()->SetPosYRot( (float)pos.x+0.5f, 0, (float)pos.y+0.5f, 0 );
-	chit->GetItemComponent()->SetHardpoints();
+//	chit->GetItemComponent()->SetHardpoints(); automatic now
 
 	Vector2I sector = ToSector( pos );
 	GetCore( sector )->AddCitizen( chit );
@@ -465,7 +465,7 @@ Chit* LumosChitBag::NewItemChit( const grinliz::Vector3F& _pos, GameItem* orphan
 		}
 	}
 	chit->GetSpatialComponent()->SetPosition( pos );
-	chit->GetItemComponent()->SetHardpoints();
+//	chit->GetItemComponent()->SetHardpoints(); automatic
 	return chit;
 }
 

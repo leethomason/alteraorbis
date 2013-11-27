@@ -289,6 +289,8 @@ void TaskList::GoShopping(  const ComponentSet& thisComp, Chit* market )
 
 	int rangedIndex=0, meleeIndex=0, shieldIndex=0;
 
+	Vector2I sector = ToSector( thisComp.spatial->GetPosition2DI() );
+
 	MarketAI marketAI( market );
 
 	// The inventory is kept in value sorted order.
@@ -320,6 +322,12 @@ void TaskList::GoShopping(  const ComponentSet& thisComp, Chit* market )
 		if ( value && !gi->Intrinsic() && (gi != ranged) && (gi != melee) && (gi != shield) ) {
 			int sold = marketAI.SellToMarket( gi );
 			if ( sold ) {
+				GLOUTPUT(( "%s %s sold %s for %d at sector=%x,%x\n",
+					thisComp.item->name.c_str(),
+					thisComp.item->properName.c_str(),
+					gi->name.c_str(),
+					sold,
+					sector.x, sector.y ));
 				GameItem* removed = thisComp.itemComponent->RemoveFromInventory( i );
 				GLASSERT( removed );
 				thisComp.item->wallet.AddGold( sold );
@@ -337,8 +345,16 @@ void TaskList::GoShopping(  const ComponentSet& thisComp, Chit* market )
 		if ( purchase ) {
 			int cost=0;
 			GameItem* result = marketAI.Buy( purchase, &cost );
+			GLASSERT( result && cost > 0 );
 			thisComp.itemComponent->AddToInventory( result );
 			thisComp.item->wallet.AddGold( -cost );
+
+			GLOUTPUT(( "%s %s bought %s for %d at sector=%x,%x\n",
+				thisComp.item->name.c_str(),
+				thisComp.item->properName.c_str(),
+				purchase->name.c_str(),
+				cost,
+				sector.x, sector.y ));
 		}
 	}
 }

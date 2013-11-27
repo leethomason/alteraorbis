@@ -280,7 +280,7 @@ void ForgeScene::SetModel( bool randomTraits )
 	techRequiredLabel.SetText( str.c_str() );
 	crystalRequiredWidget.Set( crystalRequired );
 	
-	if (    displayItem 
+	if (    item 
 		 && techRequired <= forgeData->tech 
 		 && crystalRequired <= forgeData->itemComponent->GetItem(0)->wallet ) 
 	{

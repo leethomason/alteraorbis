@@ -57,7 +57,9 @@ GameItem* MarketAI::Buy( const GameItem* itemToBuy, int* cost )
 	*cost = 0;
 	for( int i=1; i<ic->NumItems(); ++i ) {
 		if ( ic->GetItem(i) == itemToBuy ) {
-			return ic->RemoveFromInventory( i );
+			GameItem* item = ic->RemoveFromInventory( i );
+			*cost = ValueToCost( item->GetValue() );
+			return item;
 		}
 	}
 	return 0;

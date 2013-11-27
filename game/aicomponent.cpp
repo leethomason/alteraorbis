@@ -1779,6 +1779,13 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 				IString name = building->GetItem()->name;
 				ItemComponent* ic = parentChit->GetItemComponent();
 				CoreScript* cs	= GetLumosChitBag()->GetCore( sector );
+				Chit* core = cs->ParentChit();
+
+				// Messy:
+				// Money and crystal are transferred from the avatar to the core. (But 
+				// not items.) We need to xfer it *back* before using the factor, market,
+				// etc. On the tick, the avatar will restore it to the core.
+				ic->GetItem()->wallet.Add( core->GetItem()->wallet.EmptyWallet() );
 
 				if ( cs && ic ) {
 					if ( name == IStringConst::vault ) {

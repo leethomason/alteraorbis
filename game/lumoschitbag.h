@@ -217,6 +217,7 @@ public:
 	// and doesn't allow multiple scenes to queue.
 	void PushScene( int id, SceneData* data );
 	bool PopScene( int* id, SceneData** data );
+	bool IsScenePushed() const { return sceneID >= 0; }
 
 	// Used by the CoreScript.
 	// A table that maps MOB chit ids -> core chit IDs

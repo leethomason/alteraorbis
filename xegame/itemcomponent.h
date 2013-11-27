@@ -85,14 +85,13 @@ public:
 	// add XP to current item and its weapon
 	void AddBattleXP( bool meleeAttack, int killshotLevel, const GameItem* loser );
 
-	// If there is a RenderComponent, bring it in sync with
-	// the inventory.
-	void SetHardpoints();
-
 	// Very crude assessment of the power of this MoB.
 	float PowerRating() const;
 
 private:
+	// If there is a RenderComponent, bring it in sync with
+	// the inventory.
+	void SetHardpoints();
 	void DoSlowTick();
 	bool EmitEffect( const GameItem& it, U32 deltaTime );
 	bool ItemActive( int index );
@@ -104,6 +103,7 @@ private:
 
 	Engine *engine;
 	WorldMap* worldMap;
+	bool hardpointsModified;	// not serialized.
 
 	// The first item in this array is what this *is*. The following items are what is being carried.
 	//

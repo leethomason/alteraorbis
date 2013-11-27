@@ -239,7 +239,7 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos )
 
 	chit->Add( new HealthComponent( engine ));
 	chit->GetSpatialComponent()->SetPosYRot( (float)pos.x+0.5f, 0, (float)pos.y+0.5f, 0 );
-	chit->GetItemComponent()->SetHardpoints();
+//	chit->GetItemComponent()->SetHardpoints(); automatic now
 
 	// Player speed boost
 	chit->GetItem()->keyValues.Set( "speed", "f", DEFAULT_MOVE_SPEED*1.5f/1.2f );
@@ -351,9 +351,13 @@ void Sim::DoTick( U32 delta )
 	Chit* player   = this->GetPlayerChit();
 	if ( cs && player ) {
 		GameItem* item = player->GetItem();
+		// Don't clear the avatar's wallet if a scene is pushed - the avatar
+		// may be about to use the wallet!
 		if ( item && !item->wallet.IsEmpty() ) {
-			Wallet w = item->wallet.EmptyWallet();
-			cs->ParentChit()->GetItem()->wallet.Add( w );
+			if ( !lumosGame->IsScenePushed() && !chitBag->IsScenePushed() ) {
+				Wallet w = item->wallet.EmptyWallet();
+				cs->ParentChit()->GetItem()->wallet.Add( w );
+			}
 		}
 	}
 }
