@@ -1,4 +1,5 @@
 #include "tasklist.h"
+#include "marketai.h"
 
 #include "../game/lumosmath.h"
 #include "../game/pathmovecomponent.h"
@@ -269,6 +270,75 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 				Wallet w = vaultItem->wallet.EmptyWallet();
 				controller->GetItem()->wallet.Add( w );
 			}
+		}
+		return;
+	}
+	if ( thisComp.item->flags & GameItem::AI_USES_BUILDINGS ) {
+		if ( buildingName == IStringConst::market ) {
+			GoShopping( thisComp, building );
+		}
+	}
+}
+
+
+void TaskList::GoShopping(  const ComponentSet& thisComp, Chit* market )
+{
+	GameItem* ranged=0;
+	GameItem* melee=0;
+	GameItem* shield=0;
+
+	int rangedIndex=0, meleeIndex=0, shieldIndex=0;
+
+	MarketAI marketAI( market );
+
+	// The inventory is kept in value sorted order.
+	// 1. Figure out the good stuff
+	// 2. Sell everything that isn't "best of". FIXME: depending on personality, some denizens should keep back-ups
+	// 3. Buy better stuff where it makes sense
+
+	for( int i=1; i<thisComp.itemComponent->NumItems(); ++i ) {
+		GameItem* gi = thisComp.itemComponent->GetItem( i );
+		if ( !gi->Intrinsic() ) {
+			if ( !ranged && (gi->flags & GameItem::RANGED_WEAPON)) {
+				ranged = gi;
+				rangedIndex = i;
+			}
+			else if ( !melee && !(gi->flags & GameItem::RANGED_WEAPON) && (gi->flags & GameItem::MELEE_WEAPON) ) {
+				melee = gi;
+				meleeIndex = i;
+			}
+			else if ( !shield && gi->hardpoint == HARDPOINT_SHIELD ) {
+				shield = gi;
+				shieldIndex = i;
+			}
+		}
+	}
+
+	for( int i=1; i<thisComp.itemComponent->NumItems(); ++i ) {
+		GameItem* gi = thisComp.itemComponent->GetItem( i );
+		int value = gi->GetValue();
+		if ( value && !gi->Intrinsic() && (gi != ranged) && (gi != melee) && (gi != shield) ) {
+			int sold = marketAI.SellToMarket( gi );
+			if ( sold ) {
+				GameItem* removed = thisComp.itemComponent->RemoveFromInventory( i );
+				GLASSERT( removed );
+				thisComp.item->wallet.AddGold( sold );
+				--i;
+			}
+		}
+	}
+
+	// Basic, critical buys:
+	for( int i=0; i<3; ++i ) {
+		const GameItem* purchase = 0;
+		if ( i == 0 && !ranged ) purchase = marketAI.HasRanged( thisComp.item->wallet.gold, 1 );
+		if ( i == 1 && !shield ) purchase = marketAI.HasShield( thisComp.item->wallet.gold, 1 );
+		if ( i == 2 && !melee )  purchase = marketAI.HasMelee(  thisComp.item->wallet.gold, 1 );
+		if ( purchase ) {
+			int cost=0;
+			GameItem* result = marketAI.Buy( purchase, &cost );
+			thisComp.itemComponent->AddToInventory( result );
+			thisComp.item->wallet.AddGold( -cost );
 		}
 	}
 }

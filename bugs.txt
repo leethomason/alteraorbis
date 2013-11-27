@@ -29,12 +29,13 @@
 - item repair
 - items count plants, other items towards kills
 - button to use vault / factory / etc.
-- item destruction
+- item destruction / hpRegen
 - fix porch image (alpha of the tiles, if not general improvement)
 - shield looks very boring (and hard to tell what it is). And does it turn off if you don't have one?
 - obvious and easy to get to menu cancel
 - buildings shouldn't drop gold on de-rez
 - TextBox needs to be better, and should be used much more.
+- AIs should account for personality and skills when doing inventory sorting
 
 - game
 

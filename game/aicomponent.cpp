@@ -1156,7 +1156,7 @@ bool AIComponent::ThinkCriticalNeeds( const ComponentSet& thisComp )
 	// If we don't have one of the big 3: gun, ring, shield check for
 	// a market to buy it, and the means to buy.
 	if (    thisComp.item->flags & GameItem::AI_USES_BUILDINGS 
-		 && thisComp.item->wallet.gold > 10 )
+		 && thisComp.item->wallet.gold )
 	{
 		const IMeleeWeaponItem* melee = thisComp.itemComponent->GetMeleeWeapon();
 		const IRangedWeaponItem* ranged = thisComp.itemComponent->GetRangedWeapon(0);
@@ -1169,27 +1169,28 @@ bool AIComponent::ThinkCriticalNeeds( const ComponentSet& thisComp )
 			LumosChitBag* chitBag = this->GetLumosChitBag();
 			Chit* market = chitBag->FindBuilding( IStringConst::market, sector, &pos, 
 												  LumosChitBag::RANDOM_NEAR, 0 );
+			if ( market ) {
+				bool goMarket = false;
+				MarketAI marketAI( market );
 
-			bool goMarket = false;
-			MarketAI marketAI( market );
+				if ( !ranged && marketAI.HasRanged( thisComp.item->wallet.gold )) {
+					goMarket = true;
+				}
+				if ( !shield && marketAI.HasShield( thisComp.item->wallet.gold )) {
+					goMarket = true;
+				}
+				if ( !melee && marketAI.HasMelee( thisComp.item->wallet.gold )) {
+					goMarket = true;
+				}
 
-			if ( !ranged && marketAI.HasRanged( thisComp.item->wallet.gold )) {
-				goMarket = true;
-			}
-			if ( !shield && marketAI.HasShield( thisComp.item->wallet.gold )) {
-				goMarket = true;
-			}
-			if ( !melee && marketAI.HasMelee( thisComp.item->wallet.gold )) {
-				goMarket = true;
-			}
-
-			if ( goMarket ) {
-				MapSpatialComponent* msc = GET_SUB_COMPONENT( market, SpatialComponent, MapSpatialComponent );
-				Vector2I porch = msc->PorchPos( thisComp.chit->ID() );
-				taskList->Push( Task::MoveTask( porch, 0 ));
-				taskList->Push( Task::StandTask( 1000 ));
-				taskList->Push( Task::UseBuildingTask( 0 ));
-				return true;
+				if ( goMarket ) {
+					MapSpatialComponent* msc = GET_SUB_COMPONENT( market, SpatialComponent, MapSpatialComponent );
+					Vector2I porch = msc->PorchPos( thisComp.chit->ID() );
+					taskList->Push( Task::MoveTask( porch, 0 ));
+					taskList->Push( Task::StandTask( 1000 ));
+					taskList->Push( Task::UseBuildingTask( 0 ));
+					return true;
+				}
 			}
 		}
 	}
@@ -1781,7 +1782,12 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 
 				if ( cs && ic ) {
 					if ( name == IStringConst::vault ) {
-						GetLumosChitBag()->PushScene( LumosGame::SCENE_CHARACTER, new CharacterSceneData( ic, building->GetItemComponent(), 0 ));
+						GetLumosChitBag()->PushScene( LumosGame::SCENE_CHARACTER, 
+							new CharacterSceneData( ic, building->GetItemComponent(), 0 ));
+					}
+					else if ( name == IStringConst::market ) {
+						GetLumosChitBag()->PushScene( LumosGame::SCENE_CHARACTER, 
+							new CharacterSceneData( ic, building->GetItemComponent(), true ));
 					}
 					else if ( name == IStringConst::factory ) {
 						ForgeSceneData* data = new ForgeSceneData();

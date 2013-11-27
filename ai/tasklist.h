@@ -119,6 +119,7 @@ public:
 
 private:
 	void UseBuilding( const ComponentSet& thisComp, Chit* building, const grinliz::IString& buildingName );
+	void GoShopping(  const ComponentSet& thisComp, Chit* market );
 
 	grinliz::CDynArray<Task> taskList;
 	WorldMap* worldMap;
