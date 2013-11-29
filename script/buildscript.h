@@ -37,6 +37,7 @@ public:
 		POWER,
 		BED,
 		MARKET,
+		BAR,
 		NUM_OPTIONS,
 
 		NUM_TECH_LEVELS = 4,

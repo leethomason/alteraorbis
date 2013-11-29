@@ -20,6 +20,7 @@
 #include "../xegame/cticker.h"
 #include "../grinliz/glcontainer.h"
 #include "../grinliz/glrectangle.h"
+#include "../ai/aineeds.h"
 
 class WorldMap;
 class Engine;
@@ -30,6 +31,7 @@ class WorkQueue;
 namespace ai {
 	class TaskList;
 };
+
 // Combat AI: needs refactoring
 class AIComponent : public Component
 {
@@ -140,9 +142,6 @@ private:
 	// creepy circle pacing
 	grinliz::Vector2F ThinkWanderCircle( const ComponentSet& thisComp );
 
-	Engine*		engine;
-	WorldMap*	map;
-
 	enum { 
 		FOCUS_NONE,
 		FOCUS_MOVE,
@@ -172,6 +171,9 @@ private:
 		bool HasTarget() const { return id != 0 || !mapPos.IsZero(); }
 	};
 
+	Engine*				engine;
+	WorldMap*			map;
+
 	int					aiMode;
 	TargetDesc			targetDesc;
 	int					currentAction;
@@ -182,6 +184,9 @@ private:
 	bool				fullSectorAware;
 	int					visitorIndex;
 	bool				debugFlag;
+	ai::TaskList*		taskList;
+	ai::Needs			needs;
+
 	static const char*	MODE_NAMES[NUM_MODES];
 	static const char*	ACTION_NAMES[NUM_ACTIONS];
 
@@ -193,7 +198,6 @@ private:
 
 	grinliz::CArray<int, MAX_TRACK> friendList;
 	grinliz::CArray<int, MAX_TRACK> enemyList;
-	ai::TaskList* taskList;
 };
 
 

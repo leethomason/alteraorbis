@@ -85,6 +85,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\ai\aineeds.cpp" />
     <ClCompile Include="..\ai\marketai.cpp" />
     <ClCompile Include="..\ai\tasklist.cpp" />
     <ClCompile Include="..\engine\animation.cpp" />
@@ -182,6 +183,7 @@
     <ClCompile Include="..\xegame\ufosound.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\ai\aineeds.h" />
     <ClInclude Include="..\ai\marketai.h" />
     <ClInclude Include="..\ai\tasklist.h" />
     <ClInclude Include="..\engine\animation.h" />

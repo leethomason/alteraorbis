@@ -331,6 +331,9 @@
     <ClCompile Include="..\ai\marketai.cpp">
       <Filter>Source Files\ai</Filter>
     </ClCompile>
+    <ClCompile Include="..\ai\aineeds.cpp">
+      <Filter>Source Files\ai</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\camera.h">
@@ -664,6 +667,9 @@
       <Filter>Source Files\ai</Filter>
     </ClInclude>
     <ClInclude Include="..\ai\marketai.h">
+      <Filter>Source Files\ai</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ai\aineeds.h">
       <Filter>Source Files\ai</Filter>
     </ClInclude>
   </ItemGroup>

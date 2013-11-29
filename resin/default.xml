@@ -102,15 +102,16 @@
   <model filename="clearMarker3.ac" shading="flat" shadowCaster="true" />
 
   <model filename="core.ac" shading="flat" />
-  <model filename="kiosk.ac" modelName="kiosk.n" origin="-6.50 0 -0.50" shading="flat" polyRemoval="pre" />
-  <model filename="kiosk.ac" modelName="kiosk.m" origin="-8.50 0 -0.50" shading="flat" polyRemoval="pre" />
-  <model filename="kiosk.ac" modelName="kiosk.c" origin="-1.50 0 -0.50" shading="flat" polyRemoval="pre" />
-  <model filename="kiosk.ac" modelName="kiosk.s" origin="-4.50 0 -0.50" shading="flat" polyRemoval="pre" />
-  <model assetName="vault"   filename="vault2.ac" origin="-5 0 -1"      shading="flat" polyRemoval="pre" />
-  <model assetName="factory" filename="factory.ac" origin="0 0 0"       shading="flat" polyRemoval="pre" />
-  <model assetName="power"   filename="power.ac"  origin="0 0 0"        shading="flat" polyRemoval="pre" />
-  <model assetName="sleep"   filename="sleep.ac"  origin="-5.5 0 -0.5"  shading="flat" polyRemoval="pre" />
-  <model assetName="market"  filename="market.ac"  origin="-6 0 -1"     shading="flat" polyRemoval="pre" />
+  <model filename="kiosk.ac" modelName="kiosk.n"    origin="-6.50 0 -0.50" shading="flat" polyRemoval="pre" />
+  <model filename="kiosk.ac" modelName="kiosk.m"    origin="-8.50 0 -0.50" shading="flat" polyRemoval="pre" />
+  <model filename="kiosk.ac" modelName="kiosk.c"    origin="-1.50 0 -0.50" shading="flat" polyRemoval="pre" />
+  <model filename="kiosk.ac" modelName="kiosk.s"    origin="-4.50 0 -0.50" shading="flat" polyRemoval="pre" />
+  <model assetName="vault"   filename="vault2.ac"   origin="-5 0 -1"       shading="flat" polyRemoval="pre" />
+  <model assetName="factory" filename="factory.ac"  origin="0 0 0"         shading="flat" polyRemoval="pre" />
+  <model assetName="power"   filename="power.ac"    origin="0 0 0"         shading="flat" polyRemoval="pre" />
+  <model assetName="sleep"   filename="sleep.ac"    origin="-5.5 0 -0.5"   shading="flat" polyRemoval="pre" />
+  <model assetName="market"  filename="market.ac"   origin="-6 0 -1"       shading="flat" polyRemoval="pre" />
+  <model assetName="bar"     filename="bar.ac"      origin="-5 0 -1"       shading="flat" polyRemoval="pre" />
 
   <!-- animation v2
        filename is a prefix to: walk, stand, gunwalk, gunstand, melee, impact

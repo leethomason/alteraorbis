@@ -180,6 +180,29 @@ private:
 };
 
 
+/*
+	The Personality scale is a variant of the Big-5 personality
+	traits. 4 are easier to get your head around, and they are
+	changed to be more useful for the game.
+
+	In this case, there isn't meaning to a lower or higher
+	score. 10 or 11 is "in between" and scores above or below
+	favor behavior on that spectrum.
+
+	Intellectual -	Physical
+	Introvert	-	Extrovert
+	Planned		-	Impulsive
+	Neurotic	-	Stable
+class Personality
+{
+public:
+
+
+private:
+};
+*/
+
+
 class IWeaponItem 
 {
 public:
