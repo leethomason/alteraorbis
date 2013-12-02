@@ -134,6 +134,7 @@ private:
 	bool ThinkWanderEatPlants( const ComponentSet& thisComp );
 	bool ThinkWanderHealAtCore( const ComponentSet& thisComp );
 	bool ThinkCriticalNeeds( const ComponentSet& thisComp );
+	bool ThinkNeeds( const ComponentSet& thisComp );
 	bool ThinkLoot( const ComponentSet& thisComp );
 
 	// What happens when no other move is working.

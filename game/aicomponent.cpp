@@ -132,7 +132,6 @@ void AIComponent::OnRemove()
 
 int AIComponent::GetTeamStatus( Chit* other )
 {
-	// FIXME: placeholder friend/enemy logic
 	GameItem* thisItem  = parentChit->GetItem();
 	GameItem* otherItem = other->GetItem();
 
@@ -1055,7 +1054,7 @@ void AIComponent::ThinkVisitor( const ComponentSet& thisComp )
 			Chit* kiosk = GetLumosChitBag()->FindBuilding(	vd->CurrentKioskWant(),
 															sector,
 															&thisComp.spatial->GetPosition2D(),
-															LumosChitBag::RANDOM_NEAR, 0 );
+															LumosChitBag::RANDOM_NEAR, 0, 0 );
 
 			if ( !kiosk ) {
 				// Done here.
@@ -1145,7 +1144,6 @@ bool AIComponent::ThinkWanderHealAtCore( const ComponentSet& thisComp )
 }
 
 
-
 bool AIComponent::ThinkCriticalNeeds( const ComponentSet& thisComp )
 {
 	Vector2F pos = thisComp.spatial->GetPosition2D();
@@ -1168,7 +1166,7 @@ bool AIComponent::ThinkCriticalNeeds( const ComponentSet& thisComp )
 		if ( !melee || !ranged || !shield ) {
 			LumosChitBag* chitBag = this->GetLumosChitBag();
 			Chit* market = chitBag->FindBuilding( IStringConst::market, sector, &pos, 
-												  LumosChitBag::RANDOM_NEAR, 0 );
+												  LumosChitBag::RANDOM_NEAR, 0, 0 );
 			if ( market ) {
 				bool goMarket = false;
 				MarketAI marketAI( market );
@@ -1196,6 +1194,29 @@ bool AIComponent::ThinkCriticalNeeds( const ComponentSet& thisComp )
 		}
 	}
 	return false;
+}
+
+
+bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
+{
+	if ( !(thisComp.item->flags & GameItem::AI_USES_BUILDINGS )) {
+		return false;
+	}
+
+	Vector2I pos2i = thisComp.spatial->GetPosition2DI();
+	Vector2I sector = ToSector( pos2i );
+	CoreScript* coreScript = GetLumosChitBag()->GetCore( sector );
+
+	if ( !coreScript ) return false;
+	if ( GetTeamStatus( coreScript->ParentChit() ) == RELATE_ENEMY ) return false;
+
+	CChitArray arr;
+	BuildingFilter filter( true );
+	GetLumosChitBag()->FindBuilding( IString(), sector, 0, 0, &arr, &filter );
+	// FIXME here
+
+	return false;
+
 }
 
 
@@ -1278,6 +1299,8 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 	if ( ThinkLoot( thisComp ))
 		return;
 	if ( ThinkCriticalNeeds( thisComp ))
+		return;
+	if ( ThinkNeeds( thisComp ))
 		return;
 
 	// Wander....
@@ -1536,7 +1559,7 @@ void AIComponent::FlushTaskList( const ComponentSet& thisComp, U32 delta, U32 si
 		Vector2I sector   = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
 
 		WorkQueue* workQueue = 0;
-		CoreScript* coreScript = GetChitBag()->ToLumos()->GetCore( sector );
+		CoreScript* coreScript = GetLumosChitBag()->GetCore( sector );
 		if ( coreScript ) {
 			workQueue = coreScript->GetWorkQueue();
 		}
@@ -1554,7 +1577,7 @@ void AIComponent::FindRoutineTasks( const ComponentSet& thisComp )
 			Chit* vault = GetLumosChitBag()->FindBuilding(	IStringConst::vault, 
 															sector, 
 															&thisComp.spatial->GetPosition2D(), 
-															LumosChitBag::RANDOM_NEAR, 0 );
+															LumosChitBag::RANDOM_NEAR, 0, 0 );
 			if ( vault && vault->GetItemComponent() && vault->GetItemComponent()->CanAddToInventory() ) {
 				MapSpatialComponent* msc = GET_SUB_COMPONENT( vault, SpatialComponent, MapSpatialComponent );
 				GLASSERT( msc );

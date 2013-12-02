@@ -113,7 +113,8 @@ Chit* LumosChitBag::FindBuilding(	const grinliz::IString&  name,
 									const grinliz::Vector2I& sector, 
 									const grinliz::Vector2F* pos, 
 									int flags,
-									CChitArray* arr )
+									CChitArray* arr,
+									IChitAccept* filter )
 {
 	CArray<Chit*, 16> match;
 	CArray<float, 16> weight;
@@ -121,8 +122,13 @@ Chit* LumosChitBag::FindBuilding(	const grinliz::IString&  name,
 	for( MapSpatialComponent* it = mapSpatialHash[sector.y*NUM_SECTORS+sector.x]; it; it = it->nextBuilding ) {
 		Chit* chit = it->ParentChit();
 		GLASSERT( chit );
+		if ( filter && !filter->Accept( chit )) {				// if a filter, check it.
+			continue;
+		}
+
 		const GameItem* item = chit->GetItem();
-		if ( item && item->name == name ) {
+
+		if ( item && ( name.empty() || item->name == name )) {	// name, if empty, matches everything
 			if ( match.HasCap() ) {
 				match.Push( chit );
 			}
@@ -136,6 +142,8 @@ Chit* LumosChitBag::FindBuilding(	const grinliz::IString&  name,
 		}
 	}
 
+	// If we found nothing, or we don't care about the position, return early.
+	// Else deal with choice / sorting / etc. below.
 	if ( match.Empty() )
 		return 0;
 	if ( !pos )
@@ -717,11 +725,25 @@ GoldCrystalFilter::GoldCrystalFilter()
 }
 
 
+BuildingFilter::BuildingFilter( bool needOnly ) : needSupplyOnly( needOnly ) {}
+
 bool BuildingFilter::Accept( Chit* chit ) 
 {
 	// Assumed to be MapSpatial with "building" flagged on.
 	MapSpatialComponent* msc = GET_SUB_COMPONENT( chit, SpatialComponent, MapSpatialComponent );
-	return msc && msc->Building();
+	if ( msc && msc->Building() ) {
+		if ( needSupplyOnly ) {
+			const GameItem* item = chit->GetItem();
+			if ( item ) {
+				int need=0;
+				item->keyValues.GetInt( "need", &need );
+				return need != 0;
+			}
+			return false;
+		}
+		return true;
+	}
+	return false;
 }
 
 

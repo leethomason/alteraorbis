@@ -121,13 +121,18 @@
         mass="200"
         cost="100" />
 
+  <!-- needs require crystals to use -->
   <item name="factory"
         resource="factory"
         porch="1"
         procedural="team"
         size="2"
         mass="120"
-        cost="80" />
+        cost="80" 
+        
+        needs="1"
+        needs.fun="4"
+        />
 
   <item name="power"
         resource="power"
@@ -143,7 +148,11 @@
         procedural="team"
         size="1"
         mass="30"
-        cost="25" />
+        cost="25"
+        
+        needs="1"
+        needs.energy="3"
+        />
 
   <item name="market"
         resource="market"
@@ -151,15 +160,27 @@
         procedural="team"
         size="2"
         mass="50"
-        cost="50" />
+        cost="50"
+        
+        needs="1"
+        needs.fun="3"
+        />
 
+  <!-- comlpex needs: gives social if others there, 
+       gives food if available.
+  -->
   <item name="bar"
         resource="bar"
         porch="1"
         procedural="team"
         size="2"
         mass="50"
-        cost="50" />
+        cost="50"
+        
+        needs.fun="2"
+        needs.social="4"
+        needs.food="2"
+        />
   
   <item name="arachnoid"
         resource="arachnoid"

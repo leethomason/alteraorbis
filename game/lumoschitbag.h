@@ -32,8 +32,13 @@ class SceneData;
 class BuildingFilter : public IChitAccept
 {
 public:
+	BuildingFilter( bool needSupplyOnly=false );
+
 	virtual bool Accept( Chit* chit );
 	virtual int  Type() { return MAP; }
+
+private:
+	bool needSupplyOnly;
 };
 
 
@@ -154,11 +159,12 @@ public:
 		NEAREST,
 		RANDOM_NEAR
 	};
-	Chit* FindBuilding( const grinliz::IString& name, 
-						const grinliz::Vector2I& sector,	// sector to quer
+	Chit* FindBuilding( const grinliz::IString& name,		// particular building, or emtpy to match all
+						const grinliz::Vector2I& sector,	// sector to query
 						const grinliz::Vector2F* pos,		// used for evaluating NEAREST, etc.
 						int flags,
-						CChitArray* arr );					// optional; the first N hits
+						CChitArray* arr,					// optional; the first N hits
+						IChitAccept* filter );				// optional; run this filter first
 
 	Chit* NewMonsterChit( const grinliz::Vector3F& pos, const char* name, int team );
 	Chit* NewGoldChit( const grinliz::Vector3F& pos, int amount );

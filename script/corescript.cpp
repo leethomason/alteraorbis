@@ -174,7 +174,7 @@ int CoreScript::DoTick( U32 delta, U32 since )
 
 	if ( spawnTick.Delta( since ) && attached ) {
 		CChitArray arr;
-		scriptContext->chitBag->FindBuilding( IStringConst::bed, sector, 0, 0, &arr );
+		scriptContext->chitBag->FindBuilding( IStringConst::bed, sector, 0, 0, &arr, 0 );
 
 		int nCitizens = this->NumCitizens();
 
@@ -286,7 +286,7 @@ int CoreScript::MaxTech() const
 {
 	CChitArray arr;
 	Vector2I sector = ToSector( scriptContext->chit->GetSpatialComponent()->GetPosition2DI() );
-	scriptContext->chitBag->FindBuilding( IStringConst::power, sector, 0, 0, &arr );
+	scriptContext->chitBag->FindBuilding( IStringConst::power, sector, 0, 0, &arr, 0 );
 	return arr.Size() + 1;	// get one power for core
 }
 
