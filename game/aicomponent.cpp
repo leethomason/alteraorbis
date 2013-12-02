@@ -1210,10 +1210,16 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 	if ( !coreScript ) return false;
 	if ( GetTeamStatus( coreScript->ParentChit() ) == RELATE_ENEMY ) return false;
 
-	CChitArray arr;
 	BuildingFilter filter( true );
-	GetLumosChitBag()->FindBuilding( IString(), sector, 0, 0, &arr, &filter );
-	// FIXME here
+	GetLumosChitBag()->FindBuilding( IString(), sector, 0, 0, &chitArr, &filter );
+	
+	float best=-1;
+	float score=0;
+
+	for( int i=0; i<chitArr.Size(); ++i ) {
+
+
+	}
 
 	return false;
 

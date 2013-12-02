@@ -199,6 +199,7 @@ private:
 	bool DoStand( const ComponentSet& thisComp, U32 since );	// return true if doing something
 	bool SectorHerd( const ComponentSet& thisComp );
 
+	grinliz::CDynArray< Chit* > chitArr;	// temporary, local
 	grinliz::CArray<int, MAX_TRACK> friendList;
 	grinliz::CArray<int, MAX_TRACK> enemyList;
 };

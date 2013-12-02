@@ -66,6 +66,7 @@ private:
 	int			achievedTechLevel;
 	grinliz::IString defaultSpawn;
 	grinliz::CDynArray< int > citizens;
+	mutable grinliz::CDynArray< Chit* > chitArr;	// used as a temporary, memory cached here.
 };
 
 #endif // CORESCRIPT_INCLUDED

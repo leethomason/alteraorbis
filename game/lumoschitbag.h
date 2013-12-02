@@ -163,7 +163,7 @@ public:
 						const grinliz::Vector2I& sector,	// sector to query
 						const grinliz::Vector2F* pos,		// used for evaluating NEAREST, etc.
 						int flags,
-						CChitArray* arr,					// optional; the first N hits
+						grinliz::CDynArray<Chit*>* arr,						// optional; the first N hits
 						IChitAccept* filter );				// optional; run this filter first
 
 	Chit* NewMonsterChit( const grinliz::Vector3F& pos, const char* name, int team );
@@ -244,6 +244,8 @@ private:
 
 	grinliz::CDynArray<Chit*>	inUseArr;
 	grinliz::CDynArray<Chit*>	chitList;
+	grinliz::CDynArray<Chit*>	findMatch;
+	grinliz::CDynArray<float>	findWeight;
 
 	MapSpatialComponent*	mapSpatialHash[NUM_SECTORS*NUM_SECTORS];
 	// Cores can't be destroyed, so we can cache them.

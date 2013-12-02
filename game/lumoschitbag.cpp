@@ -113,11 +113,12 @@ Chit* LumosChitBag::FindBuilding(	const grinliz::IString&  name,
 									const grinliz::Vector2I& sector, 
 									const grinliz::Vector2F* pos, 
 									int flags,
-									CChitArray* arr,
+									CDynArray<Chit*>* arr,
 									IChitAccept* filter )
 {
-	CArray<Chit*, 16> match;
-	CArray<float, 16> weight;
+	CDynArray<Chit*>& match = arr ? *arr : findMatch;	// sleazy reference trick to point to either passed in or local.
+	match.Clear();
+	findWeight.Clear();
 
 	for( MapSpatialComponent* it = mapSpatialHash[sector.y*NUM_SECTORS+sector.x]; it; it = it->nextBuilding ) {
 		Chit* chit = it->ParentChit();
@@ -129,16 +130,7 @@ Chit* LumosChitBag::FindBuilding(	const grinliz::IString&  name,
 		const GameItem* item = chit->GetItem();
 
 		if ( item && ( name.empty() || item->name == name )) {	// name, if empty, matches everything
-			if ( match.HasCap() ) {
-				match.Push( chit );
-			}
-		}
-	}
-
-	if ( arr ) {
-		arr->Clear();
-		for ( int i=0; i<match.Size() && arr->HasCap(); ++i ) {
-			arr->Push( match[i] );
+			match.Push( chit );
 		}
 	}
 
@@ -166,9 +158,9 @@ Chit* LumosChitBag::FindBuilding(	const grinliz::IString&  name,
 	if ( flags == RANDOM_NEAR ) {
 		for( int i=0; i<match.Size(); ++i ) {
 			float len = ( match[i]->GetSpatialComponent()->GetPosition2D() - *pos ).Length();
-			weight.Push( 1.0f/len );
+			findWeight.Push( 1.0f/len );
 		}
-		int index = random.Select( weight.Mem(), weight.Size() );
+		int index = random.Select( findWeight.Mem(), findWeight.Size() );
 		return match[index];
 	}
 

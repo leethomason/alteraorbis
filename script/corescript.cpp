@@ -171,20 +171,20 @@ int CoreScript::DoTick( U32 delta, U32 since )
 	GLASSERT( ms );
 	Vector2I pos2i = ms->MapPosition();
 	Vector2I sector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
+	int tickd = spawnTick.Delta( since );
 
-	if ( spawnTick.Delta( since ) && attached ) {
-		CChitArray arr;
-		scriptContext->chitBag->FindBuilding( IStringConst::bed, sector, 0, 0, &arr, 0 );
+	if ( tickd && attached ) {
+		scriptContext->chitBag->FindBuilding( IStringConst::bed, sector, 0, 0, &chitArr, 0 );
 
 		int nCitizens = this->NumCitizens();
 
-		if ( nCitizens < arr.Size() ) {
+		if ( nCitizens < chitArr.Size() ) {
 			Chit* chit = scriptContext->chitBag->NewDenizen( pos2i, team );
 		}
 	}
-	else if (    spawnTick.Delta( since ) 
-		 && !attached
-		 && ( normalPossible || greaterPossible ))
+	else if (    tickd 
+			  && !attached
+			  && ( normalPossible || greaterPossible ))
 	{
 #if 1
 		// spawn stuff.
@@ -284,10 +284,9 @@ int CoreScript::DoTick( U32 delta, U32 since )
 
 int CoreScript::MaxTech() const
 {
-	CChitArray arr;
 	Vector2I sector = ToSector( scriptContext->chit->GetSpatialComponent()->GetPosition2DI() );
-	scriptContext->chitBag->FindBuilding( IStringConst::power, sector, 0, 0, &arr, 0 );
-	return arr.Size() + 1;	// get one power for core
+	scriptContext->chitBag->FindBuilding( IStringConst::power, sector, 0, 0, &chitArr, 0 );
+	return Min( chitArr.Size() + 1, 4 );	// get one power for core
 }
 
 
