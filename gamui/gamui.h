@@ -870,6 +870,8 @@ public:
 	void SetLowerAtom( const RenderAtom& );
 	void SetHigherAtom( const RenderAtom& );
 
+	void SetText( const char* text )		{ m_textLabel.SetText( text ); }
+
 	virtual const RenderAtom* GetRenderAtom() const;
 	virtual bool DoLayout();
 	virtual void Queue( grinliz::CDynArray< uint16_t > *index, grinliz::CDynArray< Gamui::Vertex > *vertex );
@@ -881,6 +883,7 @@ private:
 	RenderAtom	m_atomLower;
 	RenderAtom	m_atomHigher;
 	float		m_width, m_height;
+	TextLabel	m_textLabel;
 	Image		m_image[MAX_TICKS];
 };
 

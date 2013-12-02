@@ -24,6 +24,8 @@
 
 #include "../script/buildscript.h"
 
+#include "../ai/aineeds.h"
+
 class LumosGame;
 class Sim;
 struct NewsEvent;
@@ -57,7 +59,7 @@ public:
 private:
 	void Save();
 	void Load();
-	void SetBars();
+	void SetBars( Chit* chit );
 	void DoDestTapped( const grinliz::Vector2F& grid );
 
 	void TapModel( Chit* chit );
@@ -110,6 +112,7 @@ private:
 	int					infoID;
 	grinliz::Vector2I	voxelInfoID;
 	int					buildActive;	// which build button is active. 0 if none.
+	int					chitFaceToTrack;
 
 	// Shows what is being built or removed.
 	Model*				selectionModel;
@@ -131,6 +134,7 @@ private:
 
 	FacePushWidget		faceWidget;
 	gamui::DigitalBar	healthBar, ammoBar, shieldBar;
+	gamui::DigitalBar	needBar[ai::Needs::NUM_NEEDS];
 
 	gamui::TextLabel	dateLabel;
 	gamui::TextLabel	xpLabel;

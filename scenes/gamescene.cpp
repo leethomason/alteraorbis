@@ -51,6 +51,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	infoID = 0;
 	selectionModel = 0;
 	buildActive = 0;
+	chitFaceToTrack = 0;
 	voxelInfoID.Zero();
 	lumosGame = game;
 	game->InitStd( &gamui2D, &okay, 0 );
@@ -122,7 +123,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	clearButton.SetText( "Clear" );
 
 	faceWidget.Init( &gamui2D, game->GetButtonLook(0) );
-	faceWidget.SetFace( &uiRenderer, sim->GetPlayerChit() ? sim->GetPlayerChit()->GetItem() : 0 );
+	chitFaceToTrack = sim->GetPlayerChit() ? sim->GetPlayerChit()->ID() : 0;
 	faceWidget.SetSize( 100, 100 );
 
 	for( int i=0; i<NUM_PICKUP_BUTTONS; ++i ) {
@@ -136,6 +137,15 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	healthBar.Init( &gamui2D, 10, green, grey );
 	ammoBar.Init( &gamui2D, 10, blue, grey );
 	shieldBar.Init( &gamui2D, 10, blue, grey );
+
+	healthBar.SetText( "HP" );
+	ammoBar.SetText( "Weapon" );
+	shieldBar.SetText( "Shield" );
+
+	for( int i=0; i<ai::Needs::NUM_NEEDS; i++ ) {
+		needBar[i].Init( &gamui2D, 10, green, grey );
+		needBar[i].SetText( ai::Needs::Name( i ) );
+	}
 
 	dateLabel.Init( &gamui2D );
 	xpLabel.Init( &gamui2D );
@@ -206,6 +216,9 @@ void GameScene::Resize()
 	layout.PosAbs( &healthBar,	0, 0 );
 	layout.PosAbs( &ammoBar,	0, 1 );
 	layout.PosAbs( &shieldBar,  0, 2 );
+	for( int i=0; i<ai::Needs::NUM_NEEDS; ++i ) {
+		layout.PosAbs( &needBar[i], 0, 3+i );
+	}
 
 	xpLabel.SetPos(		dateLabel.X(), dateLabel.Y() + gamui2D.GetTextHeight() );
 	techLabel.SetPos(	xpLabel.X(),   xpLabel.Y() + gamui2D.GetTextHeight() );
@@ -222,13 +235,13 @@ void GameScene::Resize()
 }
 
 
-void GameScene::SetBars()
+void GameScene::SetBars( Chit* chit )
 {
 	RenderAtom orange = LumosGame::CalcPaletteAtom( 4, 0 );
 	RenderAtom grey   = LumosGame::CalcPaletteAtom( 0, 6 );
 	RenderAtom blue   = LumosGame::CalcPaletteAtom( 8, 0 );	
+	AIComponent* ai = chit ? chit->GetAIComponent() : 0;
 
-	Chit* chit = sim->GetPlayerChit();
 	if ( chit && chit->GetItem() ) {
 		const GameItem* item = chit->GetItem();
 		healthBar.SetRange( item->HPFraction() );
@@ -265,11 +278,22 @@ void GameScene::SetBars()
 		else {
 			shieldBar.SetRange( 0 );
 		}
+
+		if ( ai ) {
+			const ai::Needs& needs = ai->GetNeeds();
+			for( int i=0; i<ai::Needs::NUM_NEEDS; ++i ) {
+				needBar[i].SetRange( (float)needs.Value(i) );
+			}
+		}
 	}
 
 	healthBar.SetVisible( chit != 0 );
 	ammoBar.SetVisible( chit != 0 );
 	shieldBar.SetVisible( chit != 0 );
+
+	for( int i=0; i<ai::Needs::NUM_NEEDS; ++i ) {
+		needBar[i].SetVisible( ai != 0 );
+	}
 }
 
 void GameScene::Save()
@@ -291,7 +315,7 @@ void GameScene::Load()
 	else {
 		sim->Load( datPath, 0 );
 	}
-	faceWidget.SetFace( &uiRenderer, sim->GetPlayerChit() ? sim->GetPlayerChit()->GetItem() : 0 );
+	chitFaceToTrack = sim->GetPlayerChit() ? sim->GetPlayerChit()->ID() : 0;
 }
 
 
@@ -330,7 +354,6 @@ void GameScene::MouseMove( const grinliz::Vector2F& view, const grinliz::Ray& wo
 
 void GameScene::SetSelectionModel( const grinliz::Vector2F& view )
 {
-#ifdef USE_MOUSE_MOVE_SELECTION
 	Vector3F at = { 0, 0, 0 };
 	ModelVoxel mv = this->ModelAtMouse( view, sim->GetEngine(), TEST_TRI, 0, 0, 0, &at );
 	Vector2I pos2i = { (int)at.x, (int)at.z };
@@ -396,7 +419,6 @@ void GameScene::SetSelectionModel( const grinliz::Vector2F& view )
 		Vector4F color = { 1,1,1, 0.3f };
 		selectionModel->SetColor( color );
 	}
-#endif
 }
 
 
@@ -457,27 +479,41 @@ void GameScene::TapModel( Chit* target )
 		if ( ai ) {
 			ai->EnableDebug( true );
 		}
-		return;
 	}
+
 	AIComponent* ai = player->GetAIComponent();
+	const char* setTarget = 0;
+
 	if ( ai && ai->GetTeamStatus( target ) == RELATE_ENEMY ) {
 		ai->Target( target, true );
+		setTarget = "target";
+	}
+	else if ( ai && FreeCameraMode() && ai->GetTeamStatus( target ) == RELATE_FRIEND ) {
+		const GameItem* item = target->GetItem();
+		bool denizen = strstr( item->ResourceName(), "human" ) != 0;
+		if (denizen) {
+			chitFaceToTrack = target->ID();
+			setTarget = "possibleTarget";
+		}
+	}
+
+	if ( setTarget ) {
 		ClearTargetFlags();
 
 		RenderComponent* rc = target->GetRenderComponent();
 		if ( rc ) {
-			rc->Deco( "target", RenderComponent::DECO_FOOT, INT_MAX );
+			rc->Deco( setTarget, RenderComponent::DECO_FOOT, INT_MAX );
 			targetChit = target->ID();
 		}
 	}
 }
 
 
+
 void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::Ray& world )
 {
 	bool uiHasTap = ProcessTap( action, view, world );
 	Engine* engine = sim->GetEngine();
-//	CoreScript* coreMode = sim->GetChitBag()->IsBoundToCore( sim->GetPlayerChit(), true );
 	
 	enable3DDragging = FreeCameraMode();
 	bool coreMode = coreToggle.Down();
@@ -590,8 +626,8 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 			else if ( tapMod == GAME_TAP_MOD_CTRL ) {
 
 				Vector2I v = { (int)plane.x, (int)plane.z };
-				sim->CreatePlayer( v ); 
-				faceWidget.SetFace( &uiRenderer, sim->GetPlayerChit() ? sim->GetPlayerChit()->GetItem() : 0 );
+				sim->CreatePlayer( v );
+				chitFaceToTrack = sim->GetPlayerChit() ? sim->GetPlayerChit()->ID() : 0;
 #if 0
 				sim->CreateVolcano( (int)at.x, (int)at.z, 6 );
 				sim->CreatePlant( (int)at.x, (int)at.z, -1 );
@@ -951,7 +987,13 @@ void GameScene::DoTick( U32 delta )
 	dateLabel.SetText( str.c_str() );
 
 	Chit* playerChit = sim->GetPlayerChit();
-	faceWidget.SetFace( &uiRenderer, sim->GetPlayerChit() ? sim->GetPlayerChit()->GetItem() : 0 );
+	if ( !coreToggle.Down() ) {
+		chitFaceToTrack = playerChit ? playerChit->ID() : 0;
+	}
+	Chit* track = sim->GetChitBag()->GetChit( chitFaceToTrack );
+	faceWidget.SetFace( &uiRenderer, track ? track->GetItem() : 0 );
+	SetBars( track );
+	
 	str.Clear();
 
 	Wallet wallet;
@@ -967,8 +1009,6 @@ void GameScene::DoTick( U32 delta )
 		str.Format( "Level %d XP %d/%d", stat.Level(), stat.Experience(), GameTrait::LevelToExperience( stat.Level()+1) );
 	}
 	xpLabel.SetText( str.c_str() );
-
-	SetBars();
 
 	bool coreMode = coreToggle.Down();
 	for( int i=0; i<NUM_BUILD_MODES; ++i ) {

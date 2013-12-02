@@ -25,6 +25,8 @@ class CTicker
 public:
 	CTicker( int _period ) : period(_period), time(0) {}
 
+	// Sets time passed. Returns the number of times
+	// that this ticker fired.
 	int Delta( U32 d ) {
 		int n = 0;
 		time -= d;
@@ -48,6 +50,7 @@ public:
 	void Set( int t ) {
 		time = t;
 	}
+	int Period() const { return period; }
 
 	void Serialize( XStream* xs, const char* name );
 

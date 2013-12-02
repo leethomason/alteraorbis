@@ -77,13 +77,12 @@ const char* AIComponent::MODE_NAMES[NUM_MODES]     = { "normal", "rockbreak", "b
 const char* AIComponent::ACTION_NAMES[NUM_ACTIONS] = { "none", "move", "melee", "shoot", "wander", "stand" };
 
 
-AIComponent::AIComponent( Engine* _engine, WorldMap* _map )
+AIComponent::AIComponent( Engine* _engine, WorldMap* _map ) : feTicker( 750 ), needsTicker( 1000 )
 {
 	engine = _engine;
 	map = _map;
 	currentAction = 0;
 	focus = 0;
-	friendEnemyAge = 0;
 	aiMode = NORMAL_MODE;
 	wanderTime = 0;
 	rethink = 0;
@@ -112,8 +111,9 @@ void AIComponent::Serialize( XStream* xs )
 	XARC_SER( xs, wanderTime );
 	XARC_SER( xs, rethink );
 	XARC_SER( xs, fullSectorAware );
-	XARC_SER( xs, friendEnemyAge );
 	XARC_SER( xs, visitorIndex );
+	feTicker.Serialize( xs, "feTicker" );
+	needsTicker.Serialize( xs, "needsTicker" );
 	this->EndSerialize( xs );
 }
 
@@ -1616,7 +1616,6 @@ void AIComponent::WorkQueueToTask(  const ComponentSet& thisComp )
 
 int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 {
-	//GRINLIZ_PERFTRACK;
 	PROFILE_FUNC();
 
 	ComponentSet thisComp( parentChit, Chit::RENDER_BIT | 
@@ -1637,7 +1636,6 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 	}
 
 	wanderTime += timeSince;
-	friendEnemyAge += timeSince;
 	int oldAction = currentAction;
 
 	ChitBag* chitBag = this->GetChitBag();
@@ -1656,9 +1654,9 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 		focus = FOCUS_NONE;
 	}
 
-	if ( friendEnemyAge > 750 ) {
+	if ( feTicker.Delta( timeSince )) {
 		GetFriendEnemyLists();
-		friendEnemyAge = parentChit->ID() & 63;	// a little randomness
+		feTicker.Set( parentChit->ID() & 63 );	// a little randomness
 	}
 
 	// High level mode switch, in/out of battle?
@@ -1678,6 +1676,11 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 		if ( debugFlag ) {
 			GLOUTPUT(( "ID=%d Mode to Normal\n", thisComp.chit->ID() ));
 		}
+	}
+
+	if ( (thisComp.item->flags & GameItem::AI_USES_BUILDINGS) && needsTicker.Delta( timeSince )) {
+		// FIXME: don't call away from friendly sectors.
+		needs.DoTick( needsTicker.Period(), aiMode == BATTLE_MODE );
 	}
 
 	// Is there work to do?

@@ -23,21 +23,25 @@ namespace ai {
 class Needs
 {
 public:
-	Needs() : food(1), social(1), energy(1), fun(1) {}
-
-	double	food,
-			social,
-			energy,
-			fun;
-
-	// Intended to be pretty long - every second or so.
+	Needs()  { for( int i=0; i<NUM_NEEDS; ++i ) need[i] = 1; }
 
 	enum {
-		FLAG_IN_BATTLE,
-		FLAG_AT_TEAM_SECTOR
+		FOOD,
+		SOCIAL,
+		ENERGY,
+		FUN,
+		NUM_NEEDS
 	};
 
-	void DoTick( U32 delta, int flags );
+	static const char* Name( int i );
+	double Value( int i ) const { GLASSERT( i >= 0 && i < NUM_NEEDS ); return need[i]; }
+
+	// Intended to be pretty long - every second or so.
+	void DoTick( U32 delta, bool inBattle );
+
+private:
+
+	double	need[NUM_NEEDS];
 };
 
 

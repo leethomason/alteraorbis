@@ -6,27 +6,29 @@ using namespace grinliz;
 
 static const double DECAY_TIME = 100.0;	// in seconds
 
-void Needs::DoTick( U32 delta, int flags )
+/* static */ const char* Needs::Name( int i )
 {
-	double dNeed = double(delta*1000) / DECAY_TIME;
+	GLASSERT( i >= 0 && i < NUM_NEEDS );
 
-	// Suspend needs if not at home team sectors.
-	if ( !(flags & FLAG_AT_TEAM_SECTOR )) {
-		return;
+	static const char* name[NUM_NEEDS] = { "food", "social", "energy", "fun" };
+	return name[i];
+}
+
+
+void Needs::DoTick( U32 delta, bool inBattle )
+{
+	double dNeed = double(delta) * 0.001 / DECAY_TIME;
+
+	for( int i=0; i<NUM_NEEDS; ++i ) {
+		need[i] -= dNeed;
 	}
 
-	food	-= dNeed;
-	social	-= dNeed;
-	energy	-= dNeed;
-	fun		-= dNeed;
-
-	if ( flags & FLAG_IN_BATTLE ) {
-		fun += dNeed * 5.0;
+	if ( inBattle ) {
+		need[FUN] += dNeed * 10.0;
 	}
 
-	food	= Clamp( food,	 0.0, 1.0 );
-	social	= Clamp( social, 0.0, 1.0 );
-	energy	= Clamp( energy, 0.0, 1.0 );
-	fun		= Clamp( fun,	 0.0, 1.0 );
+	for( int i=0; i<NUM_NEEDS; ++i ) {
+		need[i] = Clamp( need[i], 0.0, 1.0 );
+	}
 }
 

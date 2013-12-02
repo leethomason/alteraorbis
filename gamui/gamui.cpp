@@ -1065,6 +1065,7 @@ void DigitalBar::Init(	Gamui* gamui,
 	for( int i=0; i<nTicks; ++i ) {
 		m_image[i].Init( gamui, m_atomHigher, true );
 	}
+	m_textLabel.Init( gamui );
 	SetRange( 0 );
 }
 
@@ -1165,6 +1166,8 @@ bool DigitalBar::DoLayout()
 		m_image[i].SetPos( X() + (float)i*(perItemWidth + space),
 						   Y() );
 	}
+
+	m_textLabel.SetCenterPos( X() + Width()*0.5f, Y() + Height()*0.5f );
 	return false;
 }
 

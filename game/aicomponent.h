@@ -79,6 +79,7 @@ public:
 	int  VisitorIndex() const				{ return visitorIndex; }
 
 	int GetTeamStatus( Chit* other );
+	const ai::Needs& GetNeeds() const		{ return needs; }
 
 	// Top level AI modes. Higher level goals.
 	// Translated to immediate goals: MOVE, SHOOT, MELEE
@@ -178,13 +179,14 @@ private:
 	TargetDesc			targetDesc;
 	int					currentAction;
 	int					focus;
-	int					friendEnemyAge;
+	CTicker				feTicker;
 	U32					wanderTime;
 	int					rethink;
 	bool				fullSectorAware;
 	int					visitorIndex;
 	bool				debugFlag;
 	ai::TaskList*		taskList;
+	CTicker				needsTicker;
 	ai::Needs			needs;
 
 	static const char*	MODE_NAMES[NUM_MODES];
