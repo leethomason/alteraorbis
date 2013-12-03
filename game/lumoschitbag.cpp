@@ -717,22 +717,11 @@ GoldCrystalFilter::GoldCrystalFilter()
 }
 
 
-BuildingFilter::BuildingFilter( bool needOnly ) : needSupplyOnly( needOnly ) {}
-
 bool BuildingFilter::Accept( Chit* chit ) 
 {
 	// Assumed to be MapSpatial with "building" flagged on.
 	MapSpatialComponent* msc = GET_SUB_COMPONENT( chit, SpatialComponent, MapSpatialComponent );
 	if ( msc && msc->Building() ) {
-		if ( needSupplyOnly ) {
-			const GameItem* item = chit->GetItem();
-			if ( item ) {
-				int need=0;
-				item->keyValues.GetInt( "need", &need );
-				return need != 0;
-			}
-			return false;
-		}
 		return true;
 	}
 	return false;

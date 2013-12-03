@@ -1210,17 +1210,55 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 	if ( !coreScript ) return false;
 	if ( GetTeamStatus( coreScript->ParentChit() ) == RELATE_ENEMY ) return false;
 
-	BuildingFilter filter( true );
+	BuildingFilter filter;
 	GetLumosChitBag()->FindBuilding( IString(), sector, 0, 0, &chitArr, &filter );
 	
-	float best=-1;
-	float score=0;
+	const ai::Needs& needs = thisComp.ai->GetNeeds();
+	BuildScript buildScript;
+	int    best=-1;
+	double score=0;
+	double needVal=0;
+
+	// Score the buildings as a fit for the needs.
+	// future: consider distance to building
+	// FIXME: only use sleep pods in home sector
 
 	for( int i=0; i<chitArr.Size(); ++i ) {
+		Chit* chit = chitArr[i];
+		const GameItem* item = chit->GetItem();
+		GLASSERT( item );
+		const BuildData* bd = buildScript.GetDataFromStructure( item->name );
+		if ( !bd || bd->needs.IsZero() ) 
+			continue;
 
-
+		double s=0;
+		double nv=0;
+		for( int k=0; k<ai::Needs::NUM_NEEDS; ++k ) {
+			if ( bd->needs.Value(k) > 0 ) {
+				// (how much needed) * (how much available)
+				nv += 1.0 - needs.Value(k);
+				s  += (1.0 - needs.Value(k)) * bd->needs.Value(k);	
+			}
+		}
+		if ( s > 0 && s > score ) {
+			score = s;
+			best = i;
+			needVal = nv;
+		}
 	}
 
+	if ( best >= 0 && needVal > 0.4 ) {
+		Chit* chit = chitArr[best];
+		MapSpatialComponent* msc = GET_SUB_COMPONENT( chit, SpatialComponent, MapSpatialComponent );
+		GLASSERT( msc );
+		Vector2I porch = msc->PorchPos( thisComp.chit->ID() );
+		GLASSERT( porch.x > 0 );
+
+		taskList->Push( Task::MoveTask( porch, 0 ));
+		taskList->Push( Task::StandTask( 1000 ));
+		taskList->Push( Task::UseBuildingTask( 0 ));
+		return true;
+	}
 	return false;
 
 }

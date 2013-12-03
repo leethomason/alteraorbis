@@ -121,6 +121,9 @@
         mass="200"
         cost="100" />
 
+  <!-- note that the needs has a weird syntax - it
+       is part of the AI, not the GameItem, and 
+       so there isn't an obvious way to serialize it. -->
   <!-- needs require crystals to use -->
   <item name="factory"
         resource="factory"
@@ -130,8 +133,7 @@
         mass="120"
         cost="80" 
         
-        needs="1"
-        needs.fun="4"
+        need.fun="0.4"
         />
 
   <item name="power"
@@ -150,8 +152,7 @@
         mass="30"
         cost="25"
         
-        needs="1"
-        needs.energy="3"
+        need.energy="0.3"
         />
 
   <item name="market"
@@ -162,8 +163,7 @@
         mass="50"
         cost="50"
         
-        needs="1"
-        needs.fun="3"
+        need.fun="0.3"
         />
 
   <!-- comlpex needs: gives social if others there, 
@@ -177,9 +177,9 @@
         mass="50"
         cost="50"
         
-        needs.fun="2"
-        needs.social="4"
-        needs.food="2"
+        need.fun="0.2"
+        need.social="0.4"
+        need.food="0.2"
         />
   
   <item name="arachnoid"

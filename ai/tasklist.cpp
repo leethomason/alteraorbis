@@ -240,11 +240,11 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta, U32 since )
 
 void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const grinliz::IString& buildingName )
 {
-	LumosChitBag* chitBag = thisComp.chit->GetLumosChitBag();
-	Vector2I pos2i = thisComp.spatial->GetPosition2DI();
-	Vector2I sector		= ToSector( pos2i );
-	CoreScript* coreScript = chitBag->GetCore( sector );
-	Chit* controller = coreScript->ParentChit();
+	LumosChitBag* chitBag	= thisComp.chit->GetLumosChitBag();
+	Vector2I pos2i			= thisComp.spatial->GetPosition2DI();
+	Vector2I sector			= ToSector( pos2i );
+	CoreScript* coreScript	= chitBag->GetCore( sector );
+	Chit* controller		= coreScript->ParentChit();
 
 	// Workers:
 	if ( thisComp.item->flags & GameItem::AI_DOES_WORK ) {
@@ -274,9 +274,32 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 		return;
 	}
 	if ( thisComp.item->flags & GameItem::AI_USES_BUILDINGS ) {
+		BuildScript buildScript;
+		const BuildData* bd = buildScript.GetDataFromStructure( buildingName );
+		GLASSERT( bd );
+		double needScale = 0;
+
 		if ( buildingName == IStringConst::market ) {
 			GoShopping( thisComp, building );
+			needScale = 1;
 		}
+		else if ( buildingName == IStringConst::factory ) {
+			// FIXME: use factory
+			// FIXME: check for successfully building something
+			needScale = 1;
+		}
+		else if ( buildingName == IStringConst::bed ) {
+			needScale = 1;	// should be a delay here?
+		}
+		else if ( buildingName == IStringConst::bar ) {
+			// FIXME: check social
+			// FIXME: check for food
+			needScale = 1;
+		}
+		else {
+			GLASSERT( 0 );
+		}
+		thisComp.ai->GetNeedsMutable()->Add( bd->needs, needScale );
 	}
 }
 

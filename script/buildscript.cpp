@@ -62,8 +62,21 @@ const BuildData& BuildScript::GetData( int i )
 		
 		buildData[i].size = 1;
 		if ( has ) {
-			ItemDefDB::GetProperty( buildData[i].cStructure, "size", &buildData[i].size );
-			ItemDefDB::GetProperty( buildData[i].cStructure, "cost", &buildData[i].cost );
+			const GameItem& gi = ItemDefDB::Instance()->Get( buildData[i].cStructure );
+			gi.keyValues.GetInt( "size", &buildData[i].size );
+			gi.keyValues.GetInt( "cost", &buildData[i].cost );
+
+			buildData[i].needs.SetZero();
+			
+			for( int i=0; i<ai::Needs::NUM_NEEDS; ++i ) {
+				CStr<32> str;
+				str.Format( "need.%s", ai::Needs::Name(i) );
+
+				float need=0;
+				gi.keyValues.GetFloat( str.c_str(), &need );
+				buildData[i].needs.Set( i, need );
+			}
+
 		}
 	}
 	return buildData[i];

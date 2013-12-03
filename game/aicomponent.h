@@ -80,6 +80,7 @@ public:
 
 	int GetTeamStatus( Chit* other );
 	const ai::Needs& GetNeeds() const		{ return needs; }
+	ai::Needs* GetNeedsMutable()			{ return &needs; }
 
 	// Top level AI modes. Higher level goals.
 	// Translated to immediate goals: MOVE, SHOOT, MELEE

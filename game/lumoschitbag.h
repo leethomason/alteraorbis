@@ -32,13 +32,8 @@ class SceneData;
 class BuildingFilter : public IChitAccept
 {
 public:
-	BuildingFilter( bool needSupplyOnly=false );
-
 	virtual bool Accept( Chit* chit );
 	virtual int  Type() { return MAP; }
-
-private:
-	bool needSupplyOnly;
 };
 
 

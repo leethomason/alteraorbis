@@ -4,6 +4,8 @@
 #include "../grinliz/gltypes.h"
 #include "../grinliz/gldebug.h"
 
+class XStream;
+
 namespace ai {
 
 /*
@@ -35,12 +37,25 @@ public:
 
 	static const char* Name( int i );
 	double Value( int i ) const { GLASSERT( i >= 0 && i < NUM_NEEDS ); return need[i]; }
+	void Set( int i, double v ) { GLASSERT( i >= 0 && i < NUM_NEEDS ); need[i] = v; }
+	void Add( const Needs& needs, double scale );
+
+	void SetZero() { for( int i=0; i<NUM_NEEDS; ++i ) need[i] = 0; }
+	bool IsZero() const { 
+		for( int i=0; i<NUM_NEEDS; ++i ) {
+			if ( need[i] > 0 ) 
+				return false;
+		}
+		return true;
+	}
 
 	// Intended to be pretty long - every second or so.
 	void DoTick( U32 delta, bool inBattle );
 
-private:
+	// Needs to load from XML - declared in the itemdef.xml
+	void Serialize( XStream* xs );
 
+private:
 	double	need[NUM_NEEDS];
 };
 

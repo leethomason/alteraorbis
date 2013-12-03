@@ -2,6 +2,7 @@
 #define BUILD_SCRIPT_INCLUDED
 
 #include "../grinliz/glstringutil.h"
+#include "../ai/aineeds.h"
 
 struct BuildData
 {
@@ -13,6 +14,7 @@ struct BuildData
 	grinliz::IString	name;			// "Vault"
 	grinliz::IString	label;			// "Vault\n50"
 	grinliz::IString	structure;		// "vault"
+	ai::Needs			needs;			// needs advertised by the building
 };
 
 

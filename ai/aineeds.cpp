@@ -32,3 +32,11 @@ void Needs::DoTick( U32 delta, bool inBattle )
 	}
 }
 
+
+void Needs::Add( const Needs& other, double scale )
+{
+	for( int i=0; i<NUM_NEEDS; ++i ) {
+		need[i] += other.need[i] * scale;
+	}
+}
+
