@@ -133,6 +133,7 @@
         mass="120"
         cost="80" 
         
+		need.time="2.0"
         need.fun="0.4"
         />
 
@@ -152,6 +153,7 @@
         mass="30"
         cost="25"
         
+		need.time="10.0"
         need.energy="0.3"
         />
 
@@ -163,6 +165,7 @@
         mass="50"
         cost="50"
         
+		need.time="1.5"
         need.fun="0.3"
         />
 
@@ -177,6 +180,7 @@
         mass="50"
         cost="50"
         
+		need.time="5.0"
         need.fun="0.2"
         need.social="0.4"
         need.food="0.2"

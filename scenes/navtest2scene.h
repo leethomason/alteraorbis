@@ -59,7 +59,6 @@ private:
 
 	gamui::PushButton okay;
 	gamui::ToggleButton regionButton;
-	gamui::Image minimap;
 
 	Engine* engine;
 	WorldMap* map;

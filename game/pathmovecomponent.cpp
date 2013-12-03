@@ -115,6 +115,7 @@ void PathMoveComponent::QueueDest( grinliz::Vector2F d, float r, const SectorPor
 	if ( sector ) {
 		queued.sectorPort = *sector;
 	}
+	parentChit->SetTickNeeded();
 }
 
 
@@ -128,6 +129,7 @@ void PathMoveComponent::QueueDest( Chit* target )
 		float angle = RotationXZDegrees( delta.x, delta.y );
 		QueueDest( v, angle );
 	}
+	parentChit->SetTickNeeded();
 }
 
 
@@ -362,6 +364,8 @@ bool PathMoveComponent::AvoidOthers( U32 delta )
 
 			if ( d < r ) {
 				avoidForceApplied = true;
+				// Want the other to respond to force, so wake it up:
+				chit->SetTickNeeded();
 
 				// Move away from the centers so the bases don't overlap.
 				Vector3F normal = pos3 - itPos3;
@@ -420,12 +424,14 @@ int PathMoveComponent::DoTick( U32 delta, U32 since )
 	avoidForceApplied = false;
 	isMoving = false;
 	SectorPort portJump;
+	int time = VERY_LONG_TICK;
 
 	if ( HasPath() ) {
 		// We should be doing something!
 		bool squattingDest = false;
 		int startPathPos = pathPos;
 		float distToNext2 = GetDistToNext2( pos2 );
+		time = 0;
 
 		if ( pathPos == nPathPos && dest.rotation >= 0 ) {
 			// is rotation moving? Should isMoving be set?
@@ -515,6 +521,9 @@ int PathMoveComponent::DoTick( U32 delta, U32 since )
 		}
 	}
 	else {
+		// This case does not reset the time - we
+		// only need to keep DoTick going if force
+		// is applied. (And that is below.)
 		GetPosRot( &pos2, &rot );
 		AvoidOthers( delta );
 		ApplyBlocks( &pos2, &this->blockForceApplied );
@@ -528,14 +537,21 @@ int PathMoveComponent::DoTick( U32 delta, U32 since )
 		return 0;
 	}
 
-	if ( blockForceApplied /*|| avoidForceApplied*/ ) {
+	if ( avoidForceApplied ) {
+		time = 0;
+	}
+	if ( blockForceApplied ) {
+		time = 0;
 		++forceCount;
 	}
 	else {
-		if ( forceCount > 0 ) 
+		if ( forceCount > 0 ) {
 			--forceCount;
+			time = 0;
+		}
 	}
 	return 0;
+	//	return time;	FIXME: should return time. This code needs cleanup.
 }
 
 

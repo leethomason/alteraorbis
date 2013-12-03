@@ -61,10 +61,6 @@ NavTest2Scene::NavTest2Scene( LumosGame* game, const NavTest2SceneData* _data ) 
 
 	LoadMap();
 
-	RenderAtom atom;
-	minimap.Init( &gamui2D, atom, false );
-	minimap.SetSize( 200, 200 );
-
 	LayoutCalculator layout = game->DefaultLayout();
 	regionButton.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
 	regionButton.SetText( "region" );
@@ -85,7 +81,6 @@ void NavTest2Scene::Resize()
 	lumosGame->PositionStd( &okay, 0 );
 
 	const Screenport& port = lumosGame->GetScreenport();
-	minimap.SetPos( port.UIWidth()-200, 0 );
 	LayoutCalculator layout = lumosGame->DefaultLayout();
 	layout.PosAbs( &regionButton, 1, -1 );
 }
@@ -153,7 +148,6 @@ void NavTest2Scene::CreateChit( const Vector2I& p )
 #endif
 
 	chit->GetSpatialComponent()->SetPosition( (float)p.x+0.5f, 0, (float)p.y+0.5f );
-	//chit->AddListener( this );
 	OnChitMsg( chit, ChitMsg(ChitMsg::PATHMOVE_DESTINATION_REACHED) );
 	++nChits;
 }
@@ -228,28 +222,6 @@ void NavTest2Scene::Tap( int action, const grinliz::Vector2F& view, const grinli
 		// Check mini-map
 		grinliz::Vector2F ui;
 		game->GetScreenport().ViewToUI( view, &ui );
-		if (    ui.x >= minimap.X() && ui.x <= minimap.X()+minimap.Width()
-			 && ui.y >= minimap.Y() && ui.y <= minimap.Y()+minimap.Height() )
-		{
-			float x = (ui.x - minimap.X())*(float)map->Width() / minimap.Width();
-			float y = (ui.y - minimap.Y())*(float)map->Height() / minimap.Height();
-
-			Vector3F at;
-			Rectangle2I mapBounds = map->Bounds();
-
-			//GLOUTPUT(( "Mini-map %d,%d\n", int(x), int(y) ));
-			CameraComponent* cc = chitBag.GetCamera( engine );
-
-			engine->CameraLookingAt( &at );
-			if ( at.x >= 0 && at.z >= 0 && at.x < (float)mapBounds.max.x && at.z < (float)mapBounds.max.y ) {
-				Vector3F delta = { x-at.x, 0, y-at.z };
-				cc->SetPanTo( engine->camera.PosWC() + delta );
-			}
-			else {
-				Vector3F dest = { x, engine->camera.PosWC().y, y };
-				cc->SetPanTo( dest );
-			}
-		}
 	}
 
 	if ( !uiHasTap ) {
@@ -285,10 +257,6 @@ void NavTest2Scene::DoTick( U32 deltaTime )
 		}
 		creationTick = 0;
 	}
-	RenderAtom atom( (const void*)UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, 
-					 (const void*)engine->GetMiniMapTexture(), 
-					 0, 0, 1, 1 );
-	minimap.SetAtom( atom );
 }
 
 

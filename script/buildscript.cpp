@@ -79,6 +79,9 @@ const BuildData& BuildScript::GetData( int i )
 				}
 			}
 
+			float timeF = 1.0;
+			gi.keyValues.GetFloat( "need.time", &timeF );
+			buildData[i].standTime = int( timeF * 1000.0f );
 		}
 	}
 	return buildData[i];

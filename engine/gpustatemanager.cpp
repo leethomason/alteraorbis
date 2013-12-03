@@ -645,7 +645,7 @@ void GPUDevice::DrawQuad( const GPUState& state, Texture* texture, const grinliz
 	DrawQuads( state, stream, data, 1 );
 	++currentQuadBuf;
 	if ( currentQuadBuf == NUM_QUAD_BUFFERS ) {
-		GLASSERT( 0 ); // we are re-using VBOs and possibly stalling GPU
+//		GLASSERT( 0 ); // we are re-using VBOs and possibly stalling GPU
 		currentQuadBuf = 0;
 	}
 }

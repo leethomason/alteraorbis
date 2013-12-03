@@ -21,6 +21,7 @@
 #include "../grinliz/glcontainer.h"
 #include "../grinliz/glrectangle.h"
 #include "../ai/aineeds.h"
+#include "../ai/tasklist.h"
 
 class WorldMap;
 class Engine;

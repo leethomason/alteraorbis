@@ -121,6 +121,10 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta, U32 since )
 					pos.y = 0.5f;
 					engine->particleSystem->EmitPD( "construction", pos, V3F_UP, 30 );	// FIXME: standard delta constant					
 				}
+				else if ( action == Task::TASK_USE_BUILDING ) {
+					Vector3F pos = thisComp.spatial->GetPosition();
+					engine->particleSystem->EmitPD( "useBuilding", pos, V3F_UP, 30 );	// FIXME: standard delta constant					
+				}
 			}
 		}
 		break;

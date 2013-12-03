@@ -15,6 +15,7 @@ struct BuildData
 	grinliz::IString	label;			// "Vault\n50"
 	grinliz::IString	structure;		// "vault"
 	ai::Needs			needs;			// needs advertised by the building
+	int					standTime;
 };
 
 

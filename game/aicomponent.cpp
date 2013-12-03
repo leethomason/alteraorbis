@@ -77,7 +77,7 @@ const char* AIComponent::MODE_NAMES[NUM_MODES]     = { "normal", "rockbreak", "b
 const char* AIComponent::ACTION_NAMES[NUM_ACTIONS] = { "none", "move", "melee", "shoot", "wander", "stand" };
 
 
-AIComponent::AIComponent( Engine* _engine, WorldMap* _map ) : feTicker( 750 ), needsTicker( 1000 )
+AIComponent::AIComponent( Engine* _engine, WorldMap* _map ) : feTicker( 750 ), needsTicker( 1000 ), taskList( _map, _engine )
 {
 	engine = _engine;
 	map = _map;
@@ -89,13 +89,11 @@ AIComponent::AIComponent( Engine* _engine, WorldMap* _map ) : feTicker( 750 ), n
 	fullSectorAware = false;
 	debugFlag = false;
 	visitorIndex = -1;
-	taskList = 0;
 }
 
 
 AIComponent::~AIComponent()
 {
-	delete taskList;
 }
 
 
@@ -626,15 +624,6 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 since )
 			return false;
 		}
 	}
-	
-	/*
-	if ( taskList.Standing() ) {
-		const Vector2I& pos2i = taskList.Pos2I();
-		Vector3F pos = { (float)pos2i.x+0.5f, 0.0f, (float)pos2i.y+0.5f };
-		engine->particleSystem->EmitPD( "construction", pos, V3F_UP, 30 );	// FIXME: standard delta constant
-		taskList.DoStanding( since );
-		return true;	// keep standing
-	}*/
 	return false;
 }
 
@@ -708,9 +697,8 @@ void AIComponent::Stand()
 
 void AIComponent::Pickup( Chit* item )
 {
-	if ( !taskList ) taskList = new TaskList( map, engine );
-	taskList->Push( Task::MoveTask( item->GetSpatialComponent()->GetPosition2D(), 0 ));
-	taskList->Push( Task::PickupTask( item->ID(), 0 ));
+	taskList.Push( Task::MoveTask( item->GetSpatialComponent()->GetPosition2D(), 0 ));
+	taskList.Push( Task::PickupTask( item->ID(), 0 ));
 }
 
 
@@ -767,11 +755,10 @@ bool AIComponent::RockBreak( const grinliz::Vector2I& rock )
 		Vector2F end = { 0, 0 };
 		float cost = 0;
 		if ( map->CalcPathBeside( thisComp.spatial->GetPosition2D(), dest, &end, &cost )) {
-			if ( !taskList ) taskList = new TaskList( map, engine );
-			taskList->Clear();
-			taskList->Push( Task::MoveTask( end, 0 ));
-			taskList->Push( Task::StandTask( 1000, 0 ));
-			taskList->Push( Task::RemoveTask( rock, 0 ));
+			taskList.Clear();
+			taskList.Push( Task::MoveTask( end, 0 ));
+			taskList.Push( Task::StandTask( 1000, 0 ));
+			taskList.Push( Task::RemoveTask( rock, 0 ));
 		}
 	}
 	return true;
@@ -1165,11 +1152,14 @@ bool AIComponent::ThinkCriticalNeeds( const ComponentSet& thisComp )
 		// This is "critical call ahead" needs.
 		if ( !melee || !ranged || !shield ) {
 			LumosChitBag* chitBag = this->GetLumosChitBag();
-			Chit* market = chitBag->FindBuilding( IStringConst::market, sector, &pos, 
-												  LumosChitBag::RANDOM_NEAR, 0, 0 );
+			Chit* market = chitBag->FindBuilding( IStringConst::market, sector, &pos, LumosChitBag::RANDOM_NEAR, 0, 0 );
+
 			if ( market ) {
 				bool goMarket = false;
 				MarketAI marketAI( market );
+				BuildScript buildScript;
+				const BuildData* bd = buildScript.GetDataFromStructure( IStringConst::market );
+				GLASSERT( bd );
 
 				if ( !ranged && marketAI.HasRanged( thisComp.item->wallet.gold )) {
 					goMarket = true;
@@ -1184,10 +1174,9 @@ bool AIComponent::ThinkCriticalNeeds( const ComponentSet& thisComp )
 				if ( goMarket ) {
 					MapSpatialComponent* msc = GET_SUB_COMPONENT( market, SpatialComponent, MapSpatialComponent );
 					Vector2I porch = msc->PorchPos( thisComp.chit->ID() );
-					if ( !taskList ) taskList = new TaskList( map, engine );
-					taskList->Push( Task::MoveTask( porch, 0 ));
-					taskList->Push( Task::StandTask( 1000 ));
-					taskList->Push( Task::UseBuildingTask( 0 ));
+					taskList.Push( Task::MoveTask( porch, 0 ));
+					taskList.Push( Task::StandTask( bd->standTime ));
+					taskList.Push( Task::UseBuildingTask( 0 ));
 					return true;
 				}
 			}
@@ -1218,6 +1207,7 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 	int    best=-1;
 	double score=0;
 	double needVal=0;
+	const BuildData* bestBD = 0;
 
 	// Score the buildings as a fit for the needs.
 	// future: consider distance to building
@@ -1244,6 +1234,7 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 			score = s;
 			best = i;
 			needVal = nv;
+			bestBD = bd;
 		}
 	}
 
@@ -1254,9 +1245,9 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 		Vector2I porch = msc->PorchPos( thisComp.chit->ID() );
 		GLASSERT( porch.x > 0 );
 
-		taskList->Push( Task::MoveTask( porch, 0 ));
-		taskList->Push( Task::StandTask( 1000 ));
-		taskList->Push( Task::UseBuildingTask( 0 ));
+		taskList.Push( Task::MoveTask( porch, 0 ));
+		taskList.Push( Task::StandTask( bestBD->standTime ));
+		taskList.Push( Task::UseBuildingTask( 0 ));
 		return true;
 	}
 	return false;
@@ -1300,9 +1291,8 @@ bool AIComponent::ThinkLoot( const ComponentSet& thisComp )
 				// Pickup and gold use different techniques. (Because of player UI. 
 				// Always want gold - not all items.)
 				if ( loot.Accept( chitArr[i] )) {
-					if ( !taskList ) taskList = new TaskList( map, engine );
-					taskList->Push( Task::MoveTask( goldPos, 0 ));
-					taskList->Push( Task::PickupTask( chitArr[i]->ID(), 0 ));
+					taskList.Push( Task::MoveTask( goldPos, 0 ));
+					taskList.Push( Task::PickupTask( chitArr[i]->ID(), 0 ));
 					return true;
 				}
 				else {
@@ -1383,9 +1373,8 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 	}
 	if ( !dest.IsZero() ) {
 		Vector2I dest2i = { (int)dest.x, (int)dest.y };
-		if ( !taskList ) taskList = new TaskList( map, engine );
-		taskList->Push( Task::MoveTask( dest2i ));
-		taskList->Push( Task::StandTask( STAND_TIME_WHEN_WANDERING ));
+		taskList.Push( Task::MoveTask( dest2i ));
+		taskList.Push( Task::StandTask( STAND_TIME_WHEN_WANDERING ));
 	}
 }
 
@@ -1598,7 +1587,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 
 void AIComponent::FlushTaskList( const ComponentSet& thisComp, U32 delta, U32 since )
 {
-	if ( taskList ) {
+	if ( !taskList.Empty() ) {
 		Vector2I pos2i    = thisComp.spatial->GetPosition2DI();
 		Vector2I sector   = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
 
@@ -1607,7 +1596,7 @@ void AIComponent::FlushTaskList( const ComponentSet& thisComp, U32 delta, U32 si
 		if ( coreScript ) {
 			workQueue = coreScript->GetWorkQueue();
 		}
-		taskList->DoTasks( parentChit, workQueue, delta, since );
+		taskList.DoTasks( parentChit, workQueue, delta, since );
 	}
 }
 
@@ -1628,9 +1617,8 @@ void AIComponent::FindRoutineTasks( const ComponentSet& thisComp )
 				if ( msc ) {
 					Vector2I porch = msc->PorchPos( parentChit->ID() );
 
-					if ( !taskList ) taskList = new TaskList( map, engine );
-					taskList->Push( Task::MoveTask( porch, 0 ));
-					taskList->Push( Task::UseBuildingTask( 0 ));
+					taskList.Push( Task::MoveTask( porch, 0 ));
+					taskList.Push( Task::UseBuildingTask( 0 ));
 				}
 			}
 		}
@@ -1660,17 +1648,15 @@ void AIComponent::WorkQueueToTask(  const ComponentSet& thisComp )
 				Vector2F end;
 				float cost = 0;
 				if ( map->CalcPathBeside( thisComp.spatial->GetPosition2D(), dest, &end, &cost )) {
-					if ( !taskList ) taskList = new TaskList( map, engine );
-					taskList->Push( Task::MoveTask( end, item->taskID ));
-					taskList->Push( Task::StandTask( 1000, item->taskID ));
-					taskList->Push( Task::RemoveTask( item->pos, item->taskID ));
+					taskList.Push( Task::MoveTask( end, item->taskID ));
+					taskList.Push( Task::StandTask( 1000, item->taskID ));
+					taskList.Push( Task::RemoveTask( item->pos, item->taskID ));
 				}
 			}
 			else if ( BuildScript::IsBuild( item->action )) {
-				if ( !taskList ) taskList = new TaskList( map, engine );
-				taskList->Push( Task::MoveTask( item->pos, item->taskID ));
-				taskList->Push( Task::StandTask( 1000, item->taskID ));
-				taskList->Push( Task::BuildTask( item->pos, item->action, item->taskID ));
+				taskList.Push( Task::MoveTask( item->pos, item->taskID ));
+				taskList.Push( Task::StandTask( 1000, item->taskID ));
+				taskList.Push( Task::BuildTask( item->pos, item->action, item->taskID ));
 			}
 			else {
 				GLASSERT( 0 );
@@ -1731,9 +1717,7 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 	if ( aiMode != BATTLE_MODE && enemyList.Size() ) {
 		aiMode = BATTLE_MODE;
 		currentAction = 0;
-		if ( taskList ) {
-			taskList->Clear();
-		}
+		taskList.Clear();
 		if ( debugFlag ) {
 			GLOUTPUT(( "ID=%d Mode to Battle\n", thisComp.chit->ID() ));
 		}
@@ -1754,17 +1738,17 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 	// Is there work to do?
 	if (    aiMode == NORMAL_MODE 
 		 && (thisComp.item->flags & GameItem::AI_DOES_WORK)
-		 && (!taskList || taskList->Empty()) ) 
+		 && taskList.Empty() ) 
 	{
 		WorkQueueToTask( thisComp );
-		if ( !taskList || taskList->Empty() ) {
+		if ( taskList.Empty() ) {
 			FindRoutineTasks( thisComp );
 		}
 	}
 
-	if ( aiMode == NORMAL_MODE && taskList && !taskList->Empty() ) {
+	if ( aiMode == NORMAL_MODE && !taskList.Empty() ) {
 		FlushTaskList( thisComp, deltaTime, timeSince );
-		if ( taskList->Empty() ) {
+		if ( taskList.Empty() ) {
 			rethink = 0;
 		}
 	}
@@ -1898,9 +1882,7 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 				aiMode = NORMAL_MODE;
 			}
 		}
-		if ( taskList ) {
-			taskList->Clear();
-		}
+		taskList.Clear();
 		{
 			PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
 			if ( pmc ) {
