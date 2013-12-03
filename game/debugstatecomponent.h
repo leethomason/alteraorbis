@@ -38,7 +38,7 @@ public:
 	virtual void OnAdd( Chit* chit );
 	virtual void OnRemove();
 	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
-	virtual int DoTick( U32 delta, U32 since );
+	virtual int DoTick( U32 delta );
 
 private:
 	WorldMap* map;

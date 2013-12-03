@@ -202,7 +202,7 @@ void Chit::DoTick( U32 delta )
 		if ( slot[i] ) { 
 			GLASSERT( swapOut == 0 );
 			GLASSERT( swapIn == 0 );
-			int t = slot[i]->DoTick( delta, timeSince );
+			int t = slot[i]->DoTick( timeSince );
 			timeToTick = Min( timeToTick, t );
 
 			if ( swapOut ) {

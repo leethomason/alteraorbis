@@ -68,7 +68,7 @@ bool PhysicsMoveComponent::IsMoving() const
 }
 
 
-int PhysicsMoveComponent::DoTick( U32 delta, U32 since )
+int PhysicsMoveComponent::DoTick( U32 delta )
 {
 	ComponentSet thisComp( parentChit, Chit::SPATIAL_BIT );
 	if ( thisComp.okay ) {

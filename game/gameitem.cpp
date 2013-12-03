@@ -311,7 +311,7 @@ void GameItem::UseRound() {
 
 // FIXME: pass in items affecting this one:
 // The body affects the claw. Environment (water) affects the body.
-int GameItem::DoTick( U32 delta, U32 sinec )
+int GameItem::DoTick( U32 delta )
 {
 	int tick = VERY_LONG_TICK;
 

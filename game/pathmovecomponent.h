@@ -51,7 +51,7 @@ public:
 
 	virtual void OnAdd( Chit* chit );
 	virtual void OnRemove();
-	virtual int DoTick( U32 delta, U32 since );
+	virtual int DoTick( U32 delta );
 	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
 
 	virtual void CalcVelocity( grinliz::Vector3F* v );

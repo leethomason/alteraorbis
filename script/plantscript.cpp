@@ -130,7 +130,7 @@ void PlantScript::Serialize(  XStream* xs )
 }
 
 
-int PlantScript::DoTick( U32 delta, U32 since )
+int PlantScript::DoTick( U32 delta )
 {
 	static const float	HP_PER_SECOND = 1.0f;
 	static const int	TIME_TO_GROW  = 4 * (1000 * 60);	// minutes
@@ -141,17 +141,17 @@ int PlantScript::DoTick( U32 delta, U32 since )
 	// don't have an onAdd.
 	SetRenderComponent();
 
-	age += since;
-	ageAtStage += since;
+	age += delta;
+	ageAtStage += delta;
 
 	const int tick = MINUTE + scriptContext->chit->random.Rand( 1024*16 );
 
-	growTimer += since;
+	growTimer += delta;
 	if ( growTimer < MINUTE ) 
 		return tick;
 
 	growTimer = 0;
-	float seconds = (float)since / 1000.0f;
+	float seconds = (float)delta / 1000.0f;
 
 	MapSpatialComponent* sc = GET_SUB_COMPONENT( scriptContext->chit, SpatialComponent, MapSpatialComponent );
 	GLASSERT( sc );
@@ -247,7 +247,7 @@ int PlantScript::DoTick( U32 delta, U32 since )
 		healMsg.dataF = HP_PER_SECOND*seconds*item->traits.NormalLeveledTrait( GameTrait::STR );
 		scriptContext->chit->SendMessage( healMsg );
 
-		sporeTimer += since;
+		sporeTimer += delta;
 		int nStage = 4;
 		item->keyValues.Fetch( "nStage", "d", &nStage );
 

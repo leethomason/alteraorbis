@@ -40,7 +40,7 @@ void HealthComponent::Serialize( XStream* xs )
 }
 
 
-int HealthComponent::DoTick( U32 delta, U32 since )
+int HealthComponent::DoTick( U32 delta )
 {
 	DeltaHealth();
 	if ( destroyed ) {

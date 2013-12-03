@@ -476,7 +476,7 @@ public:
 	virtual const IShield*		ToShield() const	{ return ( hardpoint == HARDPOINT_SHIELD ) ? this : 0; }
 
 	int Effects() const { return flags & EFFECT_MASK; }
-	int DoTick( U32 delta, U32 since );
+	int DoTick( U32 delta );
 	
 	// States:
 	//		Ready

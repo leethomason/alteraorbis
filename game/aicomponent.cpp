@@ -1585,7 +1585,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 }
 
 
-void AIComponent::FlushTaskList( const ComponentSet& thisComp, U32 delta, U32 since )
+void AIComponent::FlushTaskList( const ComponentSet& thisComp, U32 delta )
 {
 	if ( !taskList.Empty() ) {
 		Vector2I pos2i    = thisComp.spatial->GetPosition2DI();
@@ -1596,7 +1596,7 @@ void AIComponent::FlushTaskList( const ComponentSet& thisComp, U32 delta, U32 si
 		if ( coreScript ) {
 			workQueue = coreScript->GetWorkQueue();
 		}
-		taskList.DoTasks( parentChit, workQueue, delta, since );
+		taskList.DoTasks( parentChit, workQueue, delta );
 	}
 }
 
@@ -1667,7 +1667,7 @@ void AIComponent::WorkQueueToTask(  const ComponentSet& thisComp )
 
 
 
-int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
+int AIComponent::DoTick( U32 deltaTime )
 {
 	PROFILE_FUNC();
 
@@ -1689,7 +1689,7 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 		return 0;
 	}
 
-	wanderTime += timeSince;
+	wanderTime += deltaTime;
 	int oldAction = currentAction;
 
 	ChitBag* chitBag = this->GetChitBag();
@@ -1708,7 +1708,7 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 		focus = FOCUS_NONE;
 	}
 
-	if ( feTicker.Delta( timeSince )) {
+	if ( feTicker.Delta( deltaTime )) {
 		GetFriendEnemyLists();
 		feTicker.Set( parentChit->ID() & 63 );	// a little randomness
 	}
@@ -1730,7 +1730,7 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 		}
 	}
 
-	if ( (thisComp.item->flags & GameItem::AI_USES_BUILDINGS) && needsTicker.Delta( timeSince )) {
+	if ( (thisComp.item->flags & GameItem::AI_USES_BUILDINGS) && needsTicker.Delta( deltaTime )) {
 		// FIXME: don't call away from friendly sectors.
 		needs.DoTick( needsTicker.Period(), aiMode == BATTLE_MODE );
 	}
@@ -1747,7 +1747,7 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 	}
 
 	if ( aiMode == NORMAL_MODE && !taskList.Empty() ) {
-		FlushTaskList( thisComp, deltaTime, timeSince );
+		FlushTaskList( thisComp, deltaTime );
 		if ( taskList.Empty() ) {
 			rethink = 0;
 		}
@@ -1772,7 +1772,7 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 			DoShoot( thisComp );
 			break;
 		case STAND:
-			if ( !DoStand( thisComp, timeSince ) ) {
+			if ( !DoStand( thisComp, deltaTime ) ) {
 				rethink += deltaTime;
 			}
 			break;

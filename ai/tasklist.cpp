@@ -59,7 +59,7 @@ void TaskList::DoStanding( int time )
 }
 
 
-void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta, U32 since )
+void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta )
 {
 	if ( taskList.Empty() ) return;
 
@@ -110,7 +110,7 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta, U32 since )
 
 	case Task::TASK_STAND:
 		if ( pmc->Stopped() ) {
-			task->timer -= (int)since;
+			task->timer -= (int)delta;
 			if ( task->timer <= 0 ) {
 				taskList.Remove(0);
 			}

@@ -286,7 +286,7 @@ void RenderComponent::Detach( int metaData )
 }
 
 
-int RenderComponent::DoTick( U32 deltaTime, U32 since )
+int RenderComponent::DoTick( U32 deltaTime )
 {
 	//GRINLIZ_PERFTRACK;
 	PROFILE_FUNC();
@@ -342,7 +342,7 @@ int RenderComponent::DoTick( U32 deltaTime, U32 since )
 	// The decos:
 	for( int i=0; i<NUM_DECO; ++i ) {
 		if ( deco[i] ) {
-			decoDuration[i] -= since;
+			decoDuration[i] -= deltaTime;
 			if ( decoDuration[i] < 0 ) {
 				engine->FreeModel( deco[i] );
 				deco[i] = 0;

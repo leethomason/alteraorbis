@@ -50,7 +50,7 @@ public:
 	virtual void OnAdd( Chit* chit );
 	virtual void OnRemove();
 
-	virtual int  DoTick( U32 delta, U32 timeSince );
+	virtual int  DoTick( U32 delta );
 	virtual void DebugStr( grinliz::GLString* str );
 	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
 	virtual void OnChitEvent( const ChitEvent& event );
@@ -125,7 +125,7 @@ private:
 	void ThinkVisitor( const ComponentSet& thisComp );
 
 	void WorkQueueToTask(  const ComponentSet& thisComp );	// turn a work item into a task
-	void FlushTaskList( const ComponentSet& thisComp, U32 delta, U32 since );		// moves tasks along, mark tasks completed, do special actions
+	void FlushTaskList( const ComponentSet& thisComp, U32 delta );		// moves tasks along, mark tasks completed, do special actions
 	void FindRoutineTasks( const ComponentSet& );	// do maintenance, etc.
 
 	grinliz::Vector2F GetWanderOrigin( const ComponentSet& thisComp ) const;

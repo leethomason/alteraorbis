@@ -50,7 +50,7 @@ void VolcanoScript::Serialize( XStream* xs )
 }
 
 
-int VolcanoScript::DoTick( U32 delta, U32 since )
+int VolcanoScript::DoTick( U32 delta )
 {
 	SpatialComponent* sc = scriptContext->chit->GetSpatialComponent();
 	Vector2I pos = { 0,  0 };

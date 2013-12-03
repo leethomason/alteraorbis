@@ -47,7 +47,7 @@ public:
 
 	virtual void Serialize( XStream* xs );
 
-	virtual int DoTick( U32 delta, U32 since );
+	virtual int DoTick( U32 delta );
 	virtual void OnChitEvent( const ChitEvent& event );
 
 	int NumItems() const				{ return itemArr.Size(); }

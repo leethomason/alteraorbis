@@ -143,7 +143,7 @@ int CoreScript::PrimaryTeam() const
 }
 
 
-int CoreScript::DoTick( U32 delta, U32 since )
+int CoreScript::DoTick( U32 delta )
 {
 	static const int RADIUS = 4;
 
@@ -171,7 +171,7 @@ int CoreScript::DoTick( U32 delta, U32 since )
 	GLASSERT( ms );
 	Vector2I pos2i = ms->MapPosition();
 	Vector2I sector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
-	int tickd = spawnTick.Delta( since );
+	int tickd = spawnTick.Delta( delta );
 
 	if ( tickd && attached ) {
 		scriptContext->chitBag->FindBuilding( IStringConst::bed, sector, 0, 0, &chitArr, 0 );

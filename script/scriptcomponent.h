@@ -54,7 +54,7 @@ public:
 	virtual void OnAdd() = 0;
 	virtual void OnRemove() = 0;
 	virtual void Serialize( XStream* xs )	= 0;
-	virtual int DoTick( U32 delta, U32 since ) = 0;
+	virtual int DoTick( U32 delta ) = 0;
 	virtual const char* ScriptName() = 0;
 
 	// Safe casting.
@@ -87,7 +87,7 @@ public:
 	virtual void OnRemove();
 
 	virtual void DebugStr( grinliz::GLString* str )		{ str->Format( "[Script] " ); }
-	virtual int DoTick( U32 delta, U32 since );
+	virtual int DoTick( U32 delta );
 
 	IScript* Script() { return script; }
 

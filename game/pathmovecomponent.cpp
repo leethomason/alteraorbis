@@ -408,7 +408,7 @@ bool PathMoveComponent::AvoidOthers( U32 delta )
 }
 
 
-int PathMoveComponent::DoTick( U32 delta, U32 since )
+int PathMoveComponent::DoTick( U32 delta )
 {
 //	GRINLIZ_PERFTRACK;
 	PROFILE_FUNC();

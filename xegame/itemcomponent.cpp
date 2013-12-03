@@ -463,7 +463,7 @@ void ItemComponent::DoSlowTick()
 }
 
 
-int ItemComponent::DoTick( U32 delta, U32 since )
+int ItemComponent::DoTick( U32 delta )
 {
 	if ( hardpointsModified && parentChit->GetRenderComponent() ) {
 		SetHardpoints();
@@ -471,12 +471,12 @@ int ItemComponent::DoTick( U32 delta, U32 since )
 	}
 
 	GameItem* mainItem = itemArr[0];
-	if ( slowTick.Delta( since )) {
+	if ( slowTick.Delta( delta )) {
 		DoSlowTick();
 	}
 	int tick = VERY_LONG_TICK;
 	for( int i=0; i<itemArr.Size(); ++i ) {	
-		int t = itemArr[i]->DoTick( delta, since );
+		int t = itemArr[i]->DoTick( delta );
 		tick = Min( t, tick );
 
 		if (    ( i==0 || ItemActive(i) ) 

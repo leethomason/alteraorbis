@@ -62,7 +62,7 @@ void VisitorStateComponent::OnRemove()
 }
 
 
-int VisitorStateComponent::DoTick( U32 delta, U32 since )
+int VisitorStateComponent::DoTick( U32 delta )
 {
 	AIComponent* ai = parentChit->GetAIComponent();
 	if ( ai ) {

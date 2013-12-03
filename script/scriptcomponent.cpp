@@ -84,15 +84,15 @@ void ScriptComponent::OnRemove()
 }
 
 
-int ScriptComponent::DoTick( U32 delta, U32 since )
+int ScriptComponent::DoTick( U32 delta )
 {
 	if ( !context.initialized ) {
 		script->SetContext( &context );
 		script->Init();
 		context.initialized = true;
 	}
-	int result = script->DoTick( delta, since );
-	context.time += since;
+	int result = script->DoTick( delta );
+	context.time += delta;
 	return result;
 }
 

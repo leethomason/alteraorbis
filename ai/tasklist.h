@@ -117,7 +117,7 @@ public:
 	void DoStanding( int time );
 
 	// WorkQueue is optional, but connects the tasks back to the queue.
-	void DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta, U32 since );
+	void DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta );
 
 private:
 	void UseBuilding( const ComponentSet& thisComp, Chit* building, const grinliz::IString& buildingName );

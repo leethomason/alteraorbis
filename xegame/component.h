@@ -62,7 +62,7 @@ public:
 	bool WillSerialize() const							{ return willSerialize; }
 	void SetSerialize( bool s )							{ willSerialize = s; }
 
-	virtual int DoTick( U32 delta, U32 since )			{ return VERY_LONG_TICK; }
+	virtual int DoTick( U32 delta )						{ return VERY_LONG_TICK; }
 	virtual void DoUpdate()								{}
 	virtual void DebugStr( grinliz::GLString* str )		{}
 
