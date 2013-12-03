@@ -1689,6 +1689,7 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 		                               Chit::SPATIAL_BIT |
 									   Chit::MOVE_BIT |
 									   Chit::ITEM_BIT |
+									   Chit::AI_BIT |
 									   ComponentSet::IS_ALIVE |
 									   ComponentSet::NOT_IN_IMPACT );
 	if ( !thisComp.okay ) {

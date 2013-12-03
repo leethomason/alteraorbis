@@ -187,7 +187,7 @@ private:
 	bool				fullSectorAware;
 	int					visitorIndex;
 	bool				debugFlag;
-	ai::TaskList*		taskList;
+	ai::TaskList		taskList;
 	CTicker				needsTicker;
 	ai::Needs			needs;
 

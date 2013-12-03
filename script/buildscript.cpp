@@ -68,13 +68,15 @@ const BuildData& BuildScript::GetData( int i )
 
 			buildData[i].needs.SetZero();
 			
-			for( int i=0; i<ai::Needs::NUM_NEEDS; ++i ) {
+			for( int k=0; k<ai::Needs::NUM_NEEDS; ++k ) {
 				CStr<32> str;
-				str.Format( "need.%s", ai::Needs::Name(i) );
+				str.Format( "need.%s", ai::Needs::Name(k) );
 
 				float need=0;
 				gi.keyValues.GetFloat( str.c_str(), &need );
-				buildData[i].needs.Set( i, need );
+				if ( need > 0 ) {
+					buildData[i].needs.Set( k, need );
+				}
 			}
 
 		}
