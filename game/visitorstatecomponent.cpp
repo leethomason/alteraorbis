@@ -104,9 +104,8 @@ int VisitorStateComponent::DoTick( U32 delta )
 
 void VisitorStateComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {
-	Vector2F pos2 = chit->GetSpatialComponent()->GetPosition2D() + OFFSET;
-
 	if ( msg.ID() == ChitMsg::SPATIAL_CHANGED ) {
+		Vector2F pos2 = chit->GetSpatialComponent()->GetPosition2D() + OFFSET;
 		for( int i=0; i<VisitorData::NUM_VISITS; ++i ) {
 			wants[i].SetPos( pos2.x + (float)i*0.25f, pos2.y );
 			wants[i].SetSize( SIZE, SIZE );

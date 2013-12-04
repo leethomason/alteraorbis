@@ -72,7 +72,7 @@ public:
 
 	void Stop()				{ SetNoPath(); }
 	void Clear()			{ Stop(); queued.Clear(); }
-	bool Stopped() const	{ return !path.Empty() && queued.pos.x < 0; }
+	bool Stopped() const	{ return path.Empty() && queued.pos.IsZero(); }
 
 	void SetPathDebugging( bool d )	{ pathDebugging = d; }
 
