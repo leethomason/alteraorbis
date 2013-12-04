@@ -27,7 +27,6 @@
 
 #include "../engine/loosequadtree.h"
 
-//#include "../grinliz/glperformance.h"
 #include "../Shiny/include/Shiny.h"
 
 #include "../script/worldgen.h"
