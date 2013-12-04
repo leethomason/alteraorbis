@@ -247,7 +247,7 @@ const WorkQueue::QueueItem* WorkQueue::Find( const grinliz::Vector2I& chitPos )
 				}
 			}
 			else {
-				if ( worldMap->CalcPath( start, end, 0, 0, 0, &cost )) {
+				if ( worldMap->CalcPath( start, end, 0, &cost )) {
 					if ( cost < bestCost ) {
 						bestCost = cost;
 						best = i;

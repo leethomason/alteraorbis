@@ -1056,7 +1056,7 @@ void AIComponent::ThinkVisitor( const ComponentSet& thisComp )
 				// The porch is a rectangle; go to a particular point based on the ID()
 				Vector2I porchi = msc->PorchPos( parentChit->ID() );
 				Vector2F porch = { (float)porchi.x+0.5f, (float)porchi.y+0.5f };
-				if ( map->CalcPath( thisComp.spatial->GetPosition2D(), porch, 0, 0, 0, 0 ) ) {
+				if ( map->CalcPath( thisComp.spatial->GetPosition2D(), porch, 0, 0 ) ) {
 					this->Move( porch, false );
 				}
 				else {
@@ -1118,7 +1118,7 @@ bool AIComponent::ThinkWanderHealAtCore( const ComponentSet& thisComp )
 		Vector2I sector = ToSector( thisComp.spatial->GetPosition2DI() );
 		const SectorData& sd = map->GetSector( sector );
 		if ( sd.core != thisComp.spatial->GetPosition2DI() ) {
-			if ( map->CalcPath( thisComp.spatial->GetPosition2D(), ToWorld2F( sd.core ), 0, 0, 0, 0 )) {
+			if ( map->CalcPath( thisComp.spatial->GetPosition2D(), ToWorld2F( sd.core ), 0, 0 )) {
 				this->Move( ToWorld2F( sd.core ), false );
 			}
 		}

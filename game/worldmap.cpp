@@ -1477,31 +1477,6 @@ bool WorldMap::HasStraightPath( const grinliz::Vector2F& start,
 }
 
 
-
-bool WorldMap::CalcPath(	const grinliz::Vector2F& start, 
-							const grinliz::Vector2F& end, 
-							grinliz::Vector2F *path,
-							int *len,
-							int maxPath,
-							float *totalCost,
-							bool debugging )
-{
-	pathCache.Clear();
-	bool result = CalcPath( start, end, &pathCache, totalCost, debugging );
-	if ( result ) {
-		if ( path ) {
-			for( int i=0; i<pathCache.Size() && i < maxPath; ++i ) {
-				path[i] = pathCache[i];
-			}
-		}
-		if ( len ) {
-			*len = Min( maxPath, pathCache.Size() );
-		}
-	}
-	return result;
-}
-
-
 micropather::MicroPather* WorldMap::PushPather( const Vector2I& sector )
 {
 	GLASSERT( currentPather == 0 );
@@ -1553,9 +1528,10 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 							bool debugging )
 {
 	debugPathVector.Clear();
-	if ( path ) { 
-		path->Clear();
+	if ( !path ) { 
+		path = &pathCache;
 	}
+	path->Clear();
 	bool okay = false;
 	float dummyCost = 0;
 	if ( !totalCost ) totalCost = &dummyCost;	// prevent crash later.
@@ -1586,10 +1562,8 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 	// Regions are convex. If in the same region, it is passable.
 	if ( wgStart->ZoneOrigin( starti.x, starti.y ) == wgEnd->ZoneOrigin( endi.x, endi.y ) ) {
 		okay = true;
-		if ( path ) {
-			path->Push( start );
-			path->Push( end );
-		}
+		path->Push( start );
+		path->Push( end );
 		*totalCost = (end-start).Length();
 	}
 
@@ -1597,10 +1571,8 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 	if ( !okay ) {
 		okay = GridPath( start, end );
 		if ( okay ) {
-			if ( path ) { 
-				path->Push( start );
-				path->Push( end );
-			}
+			path->Push( start );
+			path->Push( end );
 			*totalCost = (end-start).Length();
 		}
 	}
@@ -1614,11 +1586,8 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 		if ( result == micropather::MicroPather::SOLVED ) {
 			//GLOUTPUT(( "Region succeeded len=%d.\n", pathRegions.size() ));
 			Vector2F from = start;
-			if ( path ) { 
-				path->Push( start );
-			}
+			path->Push( start );
 			okay = true;
-			//Vector2F pos = start;
 
 			// Walk each of the regions, and connect them with vectors.
 			for( unsigned i=0; i<pathRegions.size()-1; ++i ) {
@@ -1653,28 +1622,22 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 						break;
 					}
 				}
-				if ( path ) {
-					path->Push( v );
-				}
+				path->Push( v );
 				from = v;
 			}
-			if ( path ) {
-				path->Push( end );
-			}
+			path->Push( end );
 		}
 		PopPather();
 	}
 
 	if ( okay ) {
-		if ( debugging && path ) {
+		if ( debugging ) {
 			for( int i=0; i<path->Size(); ++i )
 				debugPathVector.Push( (*path)[i] );
 		}
 	}
 	else {
-		if ( path ) {
-			path->Clear();
-		}
+		path->Clear();
 	}
 	return okay;
 }

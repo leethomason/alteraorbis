@@ -530,3 +530,14 @@ void grinliz::MultMatrix4( const Matrix4& m, const Rectangle3F& in, Rectangle3F*
 #endif
 }
 
+
+void Matrix2::SetRotation( float degrees )
+{
+	float rad = ToRadian( degrees );
+	float co = cosf( rad );
+	float si = sinf( rad );
+	a = co;
+	b = -si;
+	c = si;
+	d = co;
+}

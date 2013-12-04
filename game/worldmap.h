@@ -130,7 +130,7 @@ public:
 	// Call the pather; return true if successful.
 	bool CalcPath(	const grinliz::Vector2F& start, 
 					const grinliz::Vector2F& end, 
-					grinliz::CDynArray<grinliz::Vector2F> *path,
+					grinliz::CDynArray< grinliz::Vector2F > *path,
 					float* totalCost,
 					bool showDebugging = false );
 
@@ -140,14 +140,6 @@ public:
 							const grinliz::Vector2F& end, 
 							grinliz::Vector2F* bestEnd,
 							float* totalCost );
-
-	bool CalcPath(	const grinliz::Vector2F& start, 
-					const grinliz::Vector2F& end, 
-					grinliz::Vector2F *path,
-					int *pathLen,
-					int maxPath,
-					float* totalCost,
-					bool showDebugging = false );
 
 	// Uses the very fast straight line pather.
 	bool HasStraightPath( const grinliz::Vector2F& start, 
