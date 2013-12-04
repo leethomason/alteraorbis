@@ -88,8 +88,8 @@ public:
 	
 private:
 	enum {
-		FORCE_COUNT_HIGH = 10,
-		FORCE_COUNT_EXCESSIVE = 40
+		FORCE_COUNT_HIGH = 20,
+		FORCE_COUNT_EXCESSIVE = 80
 	};
 
 	// Commit the 'queued' to the 'dest', if possible. 

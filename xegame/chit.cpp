@@ -234,28 +234,14 @@ void Chit::SendMessage( const ChitMsg& msg, Component* exclude )
 	// Components
 	for( int i=0; i<NUM_SLOTS; ++i ) {
 		if ( slot[i] && slot[i] != exclude ) {
-			/*
-			if ( i==4 && ID()==240 && ((U32)this & 0xfff) == 0x314 ) {
-				int debug=1;
-			}
-			GLOUTPUT(( "Sending message to %d from chit %d %x\n", i, ID(), this ));
-			*/
 			slot[i]->OnChitMsg( this, msg );
 			//GLOUTPUT(( "return\n" ));
 		}
 	}
-}
-
-
-bool Chit::CarryMsg( int componentID, Chit* src, const ChitMsg& msg )
-{
-	for( int i=0; i<NUM_SLOTS; ++i ) {
-		if ( slot[i] && slot[i]->ID() == componentID ) {
-			slot[i]->OnChitMsg( src, msg );
-			return true;
-		}
+	// Listeners
+	for( int i=0; i<listeners.Size(); ++i ) {
+		listeners[i]->OnChitMsg( this, msg );
 	}
-	return false;
 }
 
 

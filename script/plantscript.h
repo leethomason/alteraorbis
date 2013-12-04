@@ -43,17 +43,6 @@ public:
 	// Plant specific:
 	static GameItem* IsPlant( Chit* chit, int* type, int* stage );
 
-	/*
-	static bool PlantFilter( Chit* chit ) { return IsPlant( chit, 0, 0 ) != 0; }
-	static bool PassablePlantFilter( Chit* chit ) {
-		int stage=0;
-		if( IsPlant( chit, 0, &stage )) {
-			return stage < 2;
-		}
-		return false;
-	}
-	*/
-
 	int Type() const	{ return type; }
 	int Stage() const	{ return stage; }
 

@@ -399,7 +399,7 @@ void PathMoveComponent::AvoidOthers( U32 delta, grinliz::Vector2F* pos2, grinliz
 				// speed avoids deadlocks.
 				float mag = Min( r-d, 0.5f * Travel( Speed(), delta ) ); 
 
-				if ( alignment < 0 ) {
+				if ( alignment > 0 ) {
 					normal.Multiply( mag );
 					avoid += normal;
 				}
@@ -506,16 +506,15 @@ int PathMoveComponent::DoTick( U32 delta )
 
 	if ( avoidForceApplied ) {
 		time = 0;
+		forceCount += 1;
 	}
 	if ( blockForceApplied ) {
 		time = 0;
-		++forceCount;
+		forceCount += 2;
 	}
-	else {
-		if ( forceCount > 0 ) {
-			--forceCount;
-			time = 0;
-		}
+	if ( !avoidForceApplied && !blockForceApplied && forceCount > 0 ) {
+		--forceCount;
+		time = 0;
 	}
 
 	SetPosRot( pos, heading );

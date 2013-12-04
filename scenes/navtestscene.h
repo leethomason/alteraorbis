@@ -27,7 +27,6 @@ class Engine;
 class WorldMap;
 
 class NavTestScene : public Scene, 
-					 //public IChitListener,
 					 public IMapGridUse
 {
 public:
@@ -44,17 +43,15 @@ public:
 	virtual void ItemTapped( const gamui::UIItem* item );
 	virtual void Draw3D( U32 deltaTime );
 
-	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
-
 	virtual void DrawDebugText();
 	virtual void MouseMove( const grinliz::Vector2F& view, const grinliz::Ray& world );
 	virtual int MapGridUse( int x, int y );
 
 private:
-	gamui::PushButton okay,
-					  block,
-					  block20;
-	gamui::TextLabel  textLabel;
+	gamui::PushButton	okay,
+						block,
+						block20;
+	gamui::TextLabel	textLabel;
 	gamui::ToggleButton showAdjacent, 
 		                showZonePath,
 						showOverlay,
