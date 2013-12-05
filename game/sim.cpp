@@ -309,7 +309,13 @@ void Sim::DoTick( U32 delta )
 			int x = random.Rand(worldMap->Width());
 			int y = random.Rand(worldMap->Height());
 			if ( worldMap->IsLand( x, y ) ) {
-				CreateVolcano( x, y, VOLC_RAD );
+				// Don't destroy opporating domains. Crazy annoying.
+				Vector2I pos = { x, y };
+				Vector2I sector = ToSector( pos );
+				CoreScript* cs = chitBag->GetCore( sector );
+				if ( cs && !cs->InUse() ) {
+					CreateVolcano( x, y, VOLC_RAD );
+				}
 				break;
 			}
 		}

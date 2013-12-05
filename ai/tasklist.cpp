@@ -9,6 +9,7 @@
 #include "../game/worldgrid.h"
 #include "../game/lumoschitbag.h"
 #include "../game/lumosgame.h"
+#include "../game/team.h"
 
 #include "../xegame/chit.h"
 #include "../xegame/spatialcomponent.h"
@@ -228,6 +229,7 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta )
 				}
 				else {
 					UseBuilding( thisComp, building, buildingName );
+					lastBuildingUsed = buildingName;
 				}
 			}
 			taskList.Remove(0);
@@ -238,6 +240,33 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta )
 		GLASSERT( 0 );
 		break;
 
+	}
+}
+
+
+void TaskList::SocialPulse( const ComponentSet& thisComp, const Vector2F& origin )
+{
+	LumosChitBag* chitBag	= thisComp.chit->GetLumosChitBag();
+	CChitArray arr;
+	MoBFilter mobFilter;
+	chitBag->QuerySpatialHash( &arr, origin, 1.5f, 0, &mobFilter );
+
+	// How to handle checking they are all friends? Just run
+	// the first one and see if they are friendly.
+
+	if ( arr.Size() < 2 ) return;
+	for( int i=1; i<arr.Size(); ++i ) {
+		int status = arr[0]->GetAIComponent()->GetTeamStatus( arr[i] );
+		if ( status == RELATE_ENEMY ) {
+			// one bad apple ruins the bunch.
+			return;
+		}
+	}
+
+	// Okay, passed checks. Give social happiness.
+	double social = double( arr.Size() ) * 0.1;
+	for( int i=0; i<arr.Size(); ++i ) {
+		arr[i]->GetAIComponent()->GetNeedsMutable()->Add( ai::Needs::SOCIAL, social );
 	}
 }
 
@@ -281,29 +310,26 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 		BuildScript buildScript;
 		const BuildData* bd = buildScript.GetDataFromStructure( buildingName );
 		GLASSERT( bd );
-		double needScale = 0;
+		ai::Needs needs = bd->needs;
 
 		if ( buildingName == IStringConst::market ) {
 			GoShopping( thisComp, building );
-			needScale = 1;
 		}
 		else if ( buildingName == IStringConst::factory ) {
 			// FIXME: use factory
 			// FIXME: check for successfully building something
-			needScale = 1;
 		}
 		else if ( buildingName == IStringConst::bed ) {
-			needScale = 1;	// should be a delay here?
+			// Apply the needs as is.
 		}
 		else if ( buildingName == IStringConst::bar ) {
-			// FIXME: check social
+			SocialPulse( thisComp, thisComp.spatial->GetPosition2D() );
 			// FIXME: check for food
-			needScale = 1;
 		}
 		else {
 			GLASSERT( 0 );
 		}
-		thisComp.ai->GetNeedsMutable()->Add( bd->needs, needScale );
+		thisComp.ai->GetNeedsMutable()->Add( needs, 1.0 );
 	}
 }
 

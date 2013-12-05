@@ -39,7 +39,7 @@ public:
 	virtual CoreScript* ToCoreScript()	{ return this; }
 
 	void AddCitizen( Chit* chit );
-	bool IsCitizen( Chit* chit );
+	bool IsCitizen( Chit* chit ); 
 	int  NumCitizens();
 
 	bool InUse() const;
@@ -66,6 +66,7 @@ private:
 	int			achievedTechLevel;
 	grinliz::IString defaultSpawn;
 	grinliz::CDynArray< int > citizens;
+
 	mutable grinliz::CDynArray< Chit* > chitArr;	// used as a temporary, memory cached here.
 };
 

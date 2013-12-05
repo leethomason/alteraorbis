@@ -118,14 +118,18 @@ public:
 
 	// WorkQueue is optional, but connects the tasks back to the queue.
 	void DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta );
+	grinliz::IString LastBuildingUsed() const { return lastBuildingUsed; }
 
 private:
 	void UseBuilding( const ComponentSet& thisComp, Chit* building, const grinliz::IString& buildingName );
 	void GoShopping(  const ComponentSet& thisComp, Chit* market );
+	// chat, basically, between denizens
+	void SocialPulse( const ComponentSet& thisComp, const grinliz::Vector2F& origin );
 
+	WorldMap*	worldMap;
+	Engine*		engine;
+	grinliz::IString lastBuildingUsed;	// should probably be serialized, if this was serialized.
 	grinliz::CDynArray<Task> taskList;
-	WorldMap* worldMap;
-	Engine* engine;
 };
 
 }; // namespace 'ai'

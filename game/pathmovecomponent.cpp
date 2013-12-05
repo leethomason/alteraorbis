@@ -261,6 +261,7 @@ bool PathMoveComponent::ApplyRotation( float travelRot, const Vector2F& targetHe
 
 	float dot = DotProduct( targetHeading, *heading );
 	if ( dot > 0.999f ) {
+		*heading = targetHeading;
 		return true;
 	}
 
@@ -268,7 +269,8 @@ bool PathMoveComponent::ApplyRotation( float travelRot, const Vector2F& targetHe
 	CrossProduct( *heading, targetHeading, &cross );
 
 	Matrix2 rot;
-	rot.SetRotation( Sign( cross.z ) * travelRot );
+	float s = cross.z < 0.f ? -1.f : 1.f;	// don't use Sign(), because it can return 0
+	rot.SetRotation( s * travelRot );
 	*heading = rot * (*heading);
 
 	float newDot = DotProduct( targetHeading, *heading );
@@ -333,7 +335,9 @@ void PathMoveComponent::RotationFirst( U32 delta, Vector2F* pos2, Vector2F* head
 			// The right algorithm is tricky...tried
 			// lots of approaches, regret not documenting them.
 			// It's all about avoiding "orbiting" conditions.
-			if ( rotationDone || dist > travel*12.0f ) {
+			if (    rotationDone 
+				 || ( dist > travel*12.0f && dot > 0.5f ))	// dist > travel*12 bit keeps from orbiting. 
+			{												// dot > 0.5f makes the avatar turn in the generally correct direction before moving
 				*pos2 += (*heading) * travel;
 			}
 			travel -= dist;	// applies even if we rotate

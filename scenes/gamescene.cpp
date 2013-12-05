@@ -132,7 +132,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 
 	RenderAtom green = LumosGame::CalcPaletteAtom( 1, 3 );	
 	RenderAtom grey  = LumosGame::CalcPaletteAtom( 0, 6 );
-	RenderAtom blue   = LumosGame::CalcPaletteAtom( 8, 0 );	
+	RenderAtom blue  = LumosGame::CalcPaletteAtom( 8, 0 );	
 
 	healthBar.Init( &gamui2D, 10, green, grey );
 	ammoBar.Init( &gamui2D, 10, blue, grey );
@@ -711,10 +711,10 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		}
 	}
 	else if ( item == faceWidget.GetButton() ) {
-		Chit* playerChit = sim->GetPlayerChit();
-		if ( playerChit && playerChit->GetItemComponent() ) {			
+		Chit* chit = sim->GetChitBag()->GetChit( chitFaceToTrack );
+		if ( chit && chit->GetItemComponent() ) {			
 			game->PushScene( LumosGame::SCENE_CHARACTER, 
-							 new CharacterSceneData( playerChit->GetItemComponent(), 0, 0 ));
+							 new CharacterSceneData( chit->GetItemComponent(), 0, 0 ));
 		}
 	}
 

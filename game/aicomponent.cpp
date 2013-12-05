@@ -1208,10 +1208,14 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 	double score=0;
 	double needVal=0;
 	const BuildData* bestBD = 0;
+	CChitArray mobs;
 
 	// Score the buildings as a fit for the needs.
 	// future: consider distance to building
 	// FIXME: only use sleep pods in home sector
+	// FIXME: add "wander" in this sectory. Patrolling is good.
+	// FIXME: add "adventure" - visit neighbor sector, as a need,
+	//        and a way to get back.
 
 	for( int i=0; i<chitArr.Size(); ++i ) {
 		Chit* chit = chitArr[i];
@@ -1221,6 +1225,12 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 		if ( !bd || bd->needs.IsZero() ) 
 			continue;
 
+		MapSpatialComponent* msc = GET_SUB_COMPONENT( chit, SpatialComponent, MapSpatialComponent );
+		GLASSERT( msc );
+		Vector2I porch = msc->PorchPos( chit->ID() );
+		GLASSERT( !porch.IsZero() );
+
+		// The needs match.
 		double s=0;
 		double nv=0;
 		for( int k=0; k<ai::Needs::NUM_NEEDS; ++k ) {
@@ -1230,6 +1240,22 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 				s  += (1.0 - needs.Value(k)) * bd->needs.Value(k);	
 			}
 		}
+
+		// Variation - is this the last building visited?
+		if ( item->name == taskList.LastBuildingUsed() ) {
+			s *= 0.5;
+		}
+
+		// Practicality - is available?
+		// Note that for social buildings, being crowded is good.
+		if ( needs.Value( ai::Needs::SOCIAL ) == 0 ) {
+			MoBFilter mobFilter;
+			GetLumosChitBag()->QuerySpatialHash( &mobs, ToWorld2F( porch ), 0.3f, thisComp.chit, &mobFilter );
+			if ( mobs.Size() ) {
+				s *= 0.5;
+			}
+		}
+
 		if ( s > 0 && s > score ) {
 			score = s;
 			best = i;
@@ -1251,7 +1277,6 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 		return true;
 	}
 	return false;
-
 }
 
 
@@ -1733,6 +1758,9 @@ int AIComponent::DoTick( U32 deltaTime )
 	if ( (thisComp.item->flags & GameItem::AI_USES_BUILDINGS) && needsTicker.Delta( deltaTime )) {
 		// FIXME: don't call away from friendly sectors.
 		needs.DoTick( needsTicker.Period(), aiMode == BATTLE_MODE );
+		if ( thisComp.chit->PlayerControlled() ) {
+			thisComp.ai->GetNeedsMutable()->SetFull();
+		}
 	}
 
 	// Is there work to do?

@@ -10,7 +10,7 @@ static const double DECAY_TIME = 100.0;	// in seconds
 {
 	GLASSERT( i >= 0 && i < NUM_NEEDS );
 
-	static const char* name[NUM_NEEDS] = { "food", "social", "energy", "fun" };
+	static const char* name[NUM_NEEDS] = { /*"food",*/ "social", "energy", "fun" };
 	return name[i];
 }
 
@@ -26,7 +26,11 @@ void Needs::DoTick( U32 delta, bool inBattle )
 	if ( inBattle ) {
 		need[FUN] += dNeed * 10.0;
 	}
+	ClampNeeds();
+}
 
+void Needs::ClampNeeds()
+{
 	for( int i=0; i<NUM_NEEDS; ++i ) {
 		need[i] = Clamp( need[i], 0.0, 1.0 );
 	}
@@ -38,5 +42,6 @@ void Needs::Add( const Needs& other, double scale )
 	for( int i=0; i<NUM_NEEDS; ++i ) {
 		need[i] += other.need[i] * scale;
 	}
+	ClampNeeds();
 }
 

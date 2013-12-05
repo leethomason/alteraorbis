@@ -28,7 +28,7 @@ public:
 	Needs()  { for( int i=0; i<NUM_NEEDS; ++i ) need[i] = 1; }
 
 	enum {
-		FOOD,
+		//FOOD,	cool but not yet implemented
 		SOCIAL,
 		ENERGY,
 		FUN,
@@ -37,10 +37,12 @@ public:
 
 	static const char* Name( int i );
 	double Value( int i ) const { GLASSERT( i >= 0 && i < NUM_NEEDS ); return need[i]; }
-	void Set( int i, double v ) { GLASSERT( i >= 0 && i < NUM_NEEDS ); need[i] = v; }
+	void Set( int i, double v ) { GLASSERT( i >= 0 && i < NUM_NEEDS ); need[i] = v; ClampNeeds(); }
 	void Add( const Needs& needs, double scale );
+	void Add( int i, double v ) { GLASSERT( i >= 0 && i < NUM_NEEDS ); need[i] += v; ClampNeeds(); }
 
 	void SetZero() { for( int i=0; i<NUM_NEEDS; ++i ) need[i] = 0; }
+	void SetFull() { for( int i=0; i<NUM_NEEDS; ++i ) need[i] = 1; }
 	bool IsZero() const { 
 		for( int i=0; i<NUM_NEEDS; ++i ) {
 			if ( need[i] > 0 ) 
@@ -56,6 +58,7 @@ public:
 	void Serialize( XStream* xs );
 
 private:
+	void ClampNeeds();
 	double	need[NUM_NEEDS];
 };
 
