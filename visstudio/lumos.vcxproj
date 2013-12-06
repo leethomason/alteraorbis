@@ -151,6 +151,7 @@
     <ClCompile Include="..\script\battlemechanics.cpp" />
     <ClCompile Include="..\script\buildscript.cpp" />
     <ClCompile Include="..\script\corescript.cpp" />
+    <ClCompile Include="..\script\forgescript.cpp" />
     <ClCompile Include="..\script\itemscript.cpp" />
     <ClCompile Include="..\script\plantscript.cpp" />
     <ClCompile Include="..\script\procedural.cpp" />
@@ -261,6 +262,7 @@
     <ClInclude Include="..\script\battlemechanics.h" />
     <ClInclude Include="..\script\buildscript.h" />
     <ClInclude Include="..\script\corescript.h" />
+    <ClInclude Include="..\script\forgescript.h" />
     <ClInclude Include="..\script\itemscript.h" />
     <ClInclude Include="..\script\plantscript.h" />
     <ClInclude Include="..\script\procedural.h" />

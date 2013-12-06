@@ -334,6 +334,9 @@
     <ClCompile Include="..\ai\aineeds.cpp">
       <Filter>Source Files\ai</Filter>
     </ClCompile>
+    <ClCompile Include="..\script\forgescript.cpp">
+      <Filter>Source Files\script</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\camera.h">
@@ -671,6 +674,9 @@
     </ClInclude>
     <ClInclude Include="..\ai\aineeds.h">
       <Filter>Source Files\ai</Filter>
+    </ClInclude>
+    <ClInclude Include="..\script\forgescript.h">
+      <Filter>Source Files\script</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

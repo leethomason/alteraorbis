@@ -316,8 +316,8 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 			GoShopping( thisComp, building );
 		}
 		else if ( buildingName == IStringConst::factory ) {
-			// FIXME: use factory
-			// FIXME: check for successfully building something
+			bool used = UseFactory( thisComp, building );
+			if ( !used ) needs.SetZero();
 		}
 		else if ( buildingName == IStringConst::bed ) {
 			// Apply the needs as is.
@@ -414,4 +414,10 @@ void TaskList::GoShopping(  const ComponentSet& thisComp, Chit* market )
 								true );
 		}
 	}
+}
+
+
+bool TaskList::UseFactory( const ComponentSet& thisComp, Chit* factory )
+{
+	return true;
 }

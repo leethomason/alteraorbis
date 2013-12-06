@@ -16,7 +16,11 @@ static const float NEAR = 0.1f;
 static const float FAR  = 10.0f;
 
 
-ForgeScene::ForgeScene( LumosGame* game, ForgeSceneData* data ) : Scene( game ), lumosGame( game ), screenport( game->GetScreenport())
+ForgeScene::ForgeScene( LumosGame* game, ForgeSceneData* data ) 
+	:	Scene( game ), 
+		lumosGame( game ), 
+		screenport( game->GetScreenport()),
+		forgeScript( data->itemComponent, data->tech )
 {
 	forgeData = data;
 	item = new GameItem();
@@ -49,32 +53,27 @@ ForgeScene::ForgeScene( LumosGame* game, ForgeSceneData* data ) : Scene( game ),
 	techAvailLabel.Init( &gamui2D );
 	techRequiredLabel.Init( &gamui2D );
 
-	for( int i=0; i<NUM_ITEM_TYPES; ++i ) {
-		static const char* name[NUM_ITEM_TYPES] = { "Ring", "Gun", "Shield" };
+	for( int i=0; i<ForgeScript::NUM_ITEM_TYPES; ++i ) {
 		itemType[i].Init( &gamui2D, game->GetButtonLook(0));
-		itemType[i].SetText( name[i] );
+		itemType[i].SetText( ForgeScript::ItemName(i) );
 		itemType[0].AddToToggleGroup( &itemType[i] );
 	}
-	for( int i=0; i<NUM_GUN_TYPES; ++i ) {
-		static const char* name[NUM_GUN_TYPES] = { "Pistol", "Blaster", "Pulse", "Beamgun" };
+	for( int i=0; i<ForgeScript::NUM_GUN_TYPES; ++i ) {
 		gunType[i].Init( &gamui2D, game->GetButtonLook(0));
-		gunType[i].SetText( name[i] );
+		gunType[i].SetText( ForgeScript::GunType(i) );
 		gunType[0].AddToToggleGroup( &gunType[i] );
 	}
 	for( int i=0; i<NUM_GUN_PARTS; ++i ) {
-		static const char* name[NUM_GUN_PARTS] = { "Body", "Cell", "Driver", "Scope" };
 		gunParts[i].Init( &gamui2D, game->GetButtonLook(0));
-		gunParts[i].SetText( name[i] );
+		gunParts[i].SetText( ForgeScript::ItemPart( ForgeScript::GUN, i ));
 	}
 	for( int i=0; i<NUM_RING_PARTS; ++i ) {
-		static const char* name[NUM_RING_PARTS] = { "Main", "Guard", "Triad", "Blade" };
 		ringParts[i].Init( &gamui2D, game->GetButtonLook(0));
-		ringParts[i].SetText( name[i] );
+		ringParts[i].SetText( ForgeScript::ItemPart( ForgeScript::RING, i ));
 	}
-	for( int i=0; i<NUM_EFFECTS; ++i ) {
-		static const char* name[NUM_EFFECTS] = { "Fire", "Shock", "Explosive" };
+	for( int i=0; i<ForgeScript::NUM_EFFECTS; ++i ) {
 		effects[i].Init( &gamui2D, game->GetButtonLook(0));
-		effects[i].SetText( name[i] );
+		effects[i].SetText( ForgeScript::Effect(i) );
 	}
 	itemDescWidget.Init( &gamui2D );
 	crystalRequiredWidget.Init( &gamui2D );
@@ -109,10 +108,10 @@ void ForgeScene::Resize()
 	lumosGame->PositionStd( &okay, 0 );
 	LayoutCalculator layout = lumosGame->DefaultLayout();
 
-	for( int i=0; i<NUM_ITEM_TYPES; ++i ) {
+	for( int i=0; i<ForgeScript::NUM_ITEM_TYPES; ++i ) {
 		layout.PosAbs( &itemType[i], 0, i );		
 	}
-	for( int i=0; i<NUM_GUN_TYPES; ++i ) {
+	for( int i=0; i<ForgeScript::NUM_GUN_TYPES; ++i ) {
 		layout.PosAbs( &gunType[i], 1, i );		
 	}
 	gunParts[0].SetVisible( false );
@@ -125,22 +124,22 @@ void ForgeScene::Resize()
 		layout.PosAbs( &ringParts[i], 2, i-1 );
 	}
 
-	for( int i=0; i<NUM_EFFECTS; ++i ) {
+	for( int i=0; i<ForgeScript::NUM_EFFECTS; ++i ) {
 		layout.PosAbs( &effects[i], 3, i );
 	}
 
 	// --- Half vertical -- //
-	layout.PosAbs( &availableLabel,			0, NUM_ITEM_TYPES+1 );
-	layout.PosAbs( &techAvailLabel,			1, NUM_ITEM_TYPES+1 );
-	layout.PosAbs( &crystalAvailWidget,		1, NUM_ITEM_TYPES+2 );
-	layout.PosAbs( &requiredLabel,			0, NUM_ITEM_TYPES+3 );
-	layout.PosAbs( &techRequiredLabel,		1, NUM_ITEM_TYPES+3 );
-	layout.PosAbs( &crystalRequiredWidget,	1, NUM_ITEM_TYPES+4 );
+	layout.PosAbs( &availableLabel,			0, ForgeScript::NUM_ITEM_TYPES+1 );
+	layout.PosAbs( &techAvailLabel,			1, ForgeScript::NUM_ITEM_TYPES+1 );
+	layout.PosAbs( &crystalAvailWidget,		1, ForgeScript::NUM_ITEM_TYPES+2 );
+	layout.PosAbs( &requiredLabel,			0, ForgeScript::NUM_ITEM_TYPES+3 );
+	layout.PosAbs( &techRequiredLabel,		1, ForgeScript::NUM_ITEM_TYPES+3 );
+	layout.PosAbs( &crystalRequiredWidget,	1, ForgeScript::NUM_ITEM_TYPES+4 );
 
 	itemDescWidget.SetLayout( layout );
 	layout.PosAbs( &itemDescWidget, -4, 0 );
 
-	layout.PosAbs( &buildButton, -2, NUM_ITEM_TYPES+1, 2, 2 );
+	layout.PosAbs( &buildButton, -2, ForgeScript::NUM_ITEM_TYPES+1, 2, 2 );
 }
 
 
@@ -149,141 +148,78 @@ void ForgeScene::SetModel( bool randomTraits )
 	GameItem humanMale = ItemDefDB::Instance()->Get( "humanMale" );
 	techRequired = 0;
 	crystalRequired.EmptyWallet();
-	crystalRequired.crystal[CRYSTAL_GREEN] += 1;
 
-	int type = RING;
-	if ( itemType[GUN].Down() )		type = GUN;
-	if ( itemType[SHIELD].Down() )	type = SHIELD;
+	int type	= ForgeScript::RING;
+	int subType = 0;
+	int partsFlags = 0;
+	int effectFlags = 0;
+
+	if ( itemType[ForgeScript::GUN].Down() )	type = ForgeScript::GUN;
+	if ( itemType[ForgeScript::SHIELD].Down() )	type = ForgeScript::SHIELD;
 	
-	for( int i=0; i<NUM_GUN_TYPES; ++i ) {
-		gunType[i].SetVisible( type == GUN );
+	for( int i=0; i<ForgeScript::NUM_GUN_TYPES; ++i ) {
+		gunType[i].SetVisible( type == ForgeScript::GUN );
 	}
 	for( int i=1; i<NUM_GUN_PARTS; ++i ) {
-		gunParts[i].SetVisible( type == GUN );
+		gunParts[i].SetVisible( type == ForgeScript::GUN );
 	}
 	for( int i=1; i<NUM_RING_PARTS; ++i ) {
-		ringParts[i].SetVisible( type == RING );
+		ringParts[i].SetVisible( type == ForgeScript::RING );
 	}
 
-	const char* typeName = "pistol";
+	if ( type == ForgeScript::GUN ) {
+		if ( gunType[ForgeScript::BLASTER].Down() )			{ subType = ForgeScript::BLASTER; }
+		else if ( gunType[ForgeScript::PULSE].Down() )		{ subType = ForgeScript::PULSE;	  }
+		else if ( gunType[ForgeScript::BEAMGUN].Down() )	{ subType = ForgeScript::BEAMGUN; }
 
-	int roll[GameTrait::NUM_TRAITS] = { 10, 10, 10, 10, 10 };
-	if ( randomTraits ) {
-		int level = forgeData->itemComponent->GetItem(0)->traits.Level();
-		static const int COMPETENCE = 4;
-
-		for( int i=0; i<GameTrait::NUM_TRAITS; ++i ) {
-			int weight = -1 + (level + random.Rand(COMPETENCE)) / COMPETENCE;
-			roll[i] = random.WeightedDice( 3, 6, weight );
-		}
+		if ( gunParts[GUN_CELL].Down() )					{ partsFlags |= WeaponGen::GUN_CELL; }
+		if ( gunParts[GUN_DRIVER].Down() )					{ partsFlags |= WeaponGen::GUN_DRIVER; }
+		if ( gunParts[GUN_SCOPE].Down() )					{ partsFlags |= WeaponGen::GUN_SCOPE; }
+	}
+	else if ( type == ForgeScript::RING ) {
+		if ( ringParts[RING_GUARD].Down() )					{ partsFlags |= WeaponGen::RING_GUARD;	}
+		if ( ringParts[RING_TRIAD].Down() )					{ partsFlags |= WeaponGen::RING_TRIAD;	}
+		if ( ringParts[RING_BLADE].Down() )					{ partsFlags |= WeaponGen::RING_BLADE;	}
 	}
 
-	static const int BONUS = 2;
+	if ( effects[ForgeScript::EFFECT_FIRE].Down() )			effectFlags |= GameItem::EFFECT_FIRE;
+	if ( effects[ForgeScript::EFFECT_SHOCK].Down() )		effectFlags |= GameItem::EFFECT_SHOCK;
+	if ( effects[ForgeScript::EFFECT_EXPLOSIVE].Down() )	effectFlags |= GameItem::EFFECT_EXPLOSIVE;
 
-	int features = 0;
-	if ( type == GUN ) {
-		if ( gunType[BLASTER].Down() )		{ typeName = "blaster"; }
-		else if ( gunType[PULSE].Down() )	{ typeName = "pulse";   techRequired += 1; }
-		else if ( gunType[BEAMGUN].Down() ) { typeName = "beamgun"; techRequired += 1; }
+	forgeScript.Build(	type, subType, 
+						partsFlags, effectFlags, 
+						item, &crystalRequired, &techRequired, randomTraits );
 
-		if ( gunParts[GUN_CELL].Down() )		{ 
-			features |= WeaponGen::GUN_CELL;		
-			roll[GameTrait::ALT_CAPACITY] += BONUS*2; 
-			techRequired++;
-		}
-		if ( gunParts[GUN_DRIVER].Down() )		{ 
-			features |= WeaponGen::GUN_DRIVER;	
-			roll[GameTrait::ALT_DAMAGE]   += BONUS;	
-			techRequired++;
-		}
-		if ( gunParts[GUN_SCOPE].Down() )		{ 
-			features |= WeaponGen::GUN_SCOPE;		
-			roll[GameTrait::ALT_ACCURACY] += BONUS; 
-			techRequired++;
-		}
-	}
-	else if ( type == RING ) {
-		typeName = "ring";
-
-		if ( ringParts[RING_GUARD].Down() )		{ 
-			features |= WeaponGen::RING_GUARD;	
-			roll[GameTrait::CHR] += BONUS; 
-			techRequired++;
-		}	
-		if ( ringParts[RING_TRIAD].Down() )		{ 
-			features |= WeaponGen::RING_TRIAD;	
-			roll[GameTrait::ALT_DAMAGE] += BONUS/2; 
-			techRequired++;
-		}
-		if ( ringParts[RING_BLADE].Down() )		{ 
-			features |= WeaponGen::RING_BLADE;	
-			roll[GameTrait::CHR] -= BONUS; 
-			roll[GameTrait::ALT_DAMAGE] += BONUS; 
-		}	
-	}
-	else if ( type == SHIELD ) {
-		typeName = "shield";
-	}
-
-	if ( item ) {
-		const GameItem& itemDef = ItemDefDB::Instance()->Get( typeName );
-		item->CopyFrom( &itemDef, item->id );
-		ItemDefDB::Instance()->AssignWeaponStats( roll, itemDef, item );
-	}
 	itemDescWidget.SetInfo( displayItem, &humanMale );
 
-	int eff = 0;
-	if ( effects[EFFECT_FIRE].Down() )		eff |= GameItem::EFFECT_FIRE;
-	if ( effects[EFFECT_SHOCK].Down() )		eff |= GameItem::EFFECT_SHOCK;
-	if ( effects[EFFECT_EXPLOSIVE].Down() )	eff |= GameItem::EFFECT_EXPLOSIVE;
-
-	if ( eff & GameItem::EFFECT_FIRE ) {
-		crystalRequired.crystal[CRYSTAL_RED] += 1;
-	}
-	if ( eff & GameItem::EFFECT_SHOCK ) {
-		crystalRequired.crystal[CRYSTAL_BLUE] += 1;
-	}
-	if ( eff & GameItem::EFFECT_EXPLOSIVE ) {
-		crystalRequired.crystal[CRYSTAL_VIOLET] += 1;
-	}
-	// 2 effects adds a 2nd violet crystal
-	if ( FloorPowerOf2( eff ) != eff ) {
-		crystalRequired.crystal[CRYSTAL_VIOLET] += 1;
-	}
-
-	engine->FreeModel( model );
-	model = engine->AllocModel( typeName );
-	model->SetPos( 0, 0, 0 );
-
-	// Rotate the shield to face the camera.
-	Quaternion q;
-	static const Vector3F AXIS = { 0, 0, 1 };
-	q.FromAxisAngle( AXIS, type == SHIELD ? -90.0f : 0.0f );
-	model->SetRotation( q );
-
-	if ( item ) {
-		item->keyValues.Set( "features", "d", features );
-		item->flags &= ~GameItem::EFFECT_MASK;
-		item->flags |= eff;
-	}
-
 	ProcRenderInfo info;
-	AssignProcedural( typeName, false, displayItem->id, 0, false, eff, features, &info );
+	if ( item ) {
+		engine->FreeModel( model );
+		model = engine->AllocModel( item->resource.c_str() );
+		model->SetPos( 0, 0, 0 );
 
-	model->SetTextureXForm( info.te.uvXForm.x, info.te.uvXForm.y, info.te.uvXForm.z, info.te.uvXForm.w );
-	model->SetTextureClip( info.te.clip.x, info.te.clip.y, info.te.clip.z, info.te.clip.w );
-	model->SetColorMap( true, info.color );
-	model->SetBoneFilter( info.filterName, info.filter );
+		// Rotate the shield to face the camera.
+		Quaternion q;
+		static const Vector3F AXIS = { 0, 0, 1 };
+		q.FromAxisAngle( AXIS, type == ForgeScript::SHIELD ? -90.0f : 0.0f );
+		model->SetRotation( q );
 
+		AssignProcedural( item->resource.c_str(), false, displayItem->id, 0, false, effectFlags, partsFlags, &info );
+
+		model->SetTextureXForm( info.te.uvXForm.x, info.te.uvXForm.y, info.te.uvXForm.z, info.te.uvXForm.w );
+		model->SetTextureClip( info.te.clip.x, info.te.clip.y, info.te.clip.z, info.te.clip.w );
+		model->SetColorMap( true, info.color );
+		model->SetBoneFilter( info.filterName, info.filter );
+	}
 	CStr<64> str;
 	str.Format( "Tech: %d", techRequired );
 	techRequiredLabel.SetText( str.c_str() );
 	crystalRequiredWidget.Set( crystalRequired );
 	
 	if (    item 
-		 && techRequired <= forgeData->tech 
-		 && crystalRequired <= forgeData->itemComponent->GetItem(0)->wallet ) 
-	{
+		&& crystalRequired <= forgeData->itemComponent->GetItem()->wallet
+		&& techRequired <= forgeData->tech ) 
+	{ 
 		buildButton.SetEnabled( true );
 	}
 	else {
@@ -317,10 +253,10 @@ void ForgeScene::ItemTapped( const gamui::UIItem* uiItem )
 		crystalRequiredWidget.SetVisible( false );
 
 		// Disable everything.
-		for( int i=0; i<NUM_ITEM_TYPES; ++i ) {
+		for( int i=0; i<ForgeScript::NUM_ITEM_TYPES; ++i ) {
 			itemType[i].SetEnabled(false);		
 		}
-		for( int i=0; i<NUM_GUN_TYPES; ++i ) {
+		for( int i=0; i<ForgeScript::NUM_GUN_TYPES; ++i ) {
 			gunType[i].SetEnabled( false );
 		}
 		for( int i=1; i<NUM_GUN_PARTS; ++i ) {
@@ -329,7 +265,7 @@ void ForgeScene::ItemTapped( const gamui::UIItem* uiItem )
 		for( int i=1; i<NUM_RING_PARTS; ++i ) {
 			ringParts[i].SetEnabled( false );
 		}
-		for( int i=0; i<NUM_EFFECTS; ++i ) {
+		for( int i=0; i<ForgeScript::NUM_EFFECTS; ++i ) {
 			effects[i].SetEnabled( false );
 		}
 	}

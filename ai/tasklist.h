@@ -123,6 +123,8 @@ public:
 private:
 	void UseBuilding( const ComponentSet& thisComp, Chit* building, const grinliz::IString& buildingName );
 	void GoShopping(  const ComponentSet& thisComp, Chit* market );
+	bool UseFactory(  const ComponentSet& thisComp, Chit* factory );
+
 	// chat, basically, between denizens
 	void SocialPulse( const ComponentSet& thisComp, const grinliz::Vector2F& origin );
 

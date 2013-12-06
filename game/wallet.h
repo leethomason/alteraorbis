@@ -16,6 +16,8 @@
 #ifndef WALLET_INCLUDED
 #define WALLET_INCLUDED
 
+#include "gamelimits.h"
+
 class XStream;
 
 struct Wallet
