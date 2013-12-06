@@ -24,7 +24,8 @@ public:
 		BLASTER,
 		PULSE,
 		BEAMGUN,
-		NUM_GUN_TYPES
+		NUM_GUN_TYPES,
+		NUM_TECH0_GUNS = 2
 	};
 
 	enum {

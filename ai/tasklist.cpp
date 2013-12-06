@@ -21,6 +21,8 @@
 
 #include "../script/corescript.h"
 #include "../script/buildscript.h"
+#include "../script/forgescript.h"
+#include "../script/procedural.h"
 
 #include "../engine/particle.h"
 
@@ -417,7 +419,36 @@ void TaskList::GoShopping(  const ComponentSet& thisComp, Chit* market )
 }
 
 
-bool TaskList::UseFactory( const ComponentSet& thisComp, Chit* factory )
+bool TaskList::UseFactory( const ComponentSet& thisComp, Chit* factory, int tech )
 {
+	IRangedWeaponItem* ranged = thisComp.itemComponent->GetRangedWeapon(0);
+	IMeleeWeaponItem* melee = thisComp.itemComponent->GetMeleeWeapon();
+	IShield* shield = thisComp.itemComponent->GetShield();
+
+	int item = 0;
+	int subItem = 0;
+	int parts = 1;		// always have body.
+	int effects = GameItem::EFFECT_MASK;
+	Random& random = thisComp.chit->random;
+
+	int partsArr[] = { WeaponGen::GUN_CELL, WeaponGen::GUN_DRIVER, WeaponGen::GUN_SCOPE };
+
+	if ( !ranged )	item = ForgeScript::GUN;
+	else if ( !shield ) item = ForgeScript::SHIELD;
+	else if ( !melee )	item = ForgeScript::SHIELD;
+	else {
+		item = random.Rand( ForgeScript::NUM_ITEM_TYPES );
+	}
+
+	if ( item == ForgeScript::GUN ) {
+		if ( tech == 0 )
+			subItem = random.Rand( ForgeScript::NUM_TECH0_GUNS );
+		else
+			subItem = random.Rand( ForgeScript::NUM_GUN_TYPES );
+	}
+
+		subItem = WeaponGen::PART_MASK;
+
+
 	return true;
 }

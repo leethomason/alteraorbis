@@ -100,7 +100,9 @@ public:
 
 		RING_GUARD	= 0x02,	// shield coupler
 		RING_TRIAD	= 0x04,	// boosts damage
-		RING_BLADE	= 0x08	// boosts damage, decrease shield coupling
+		RING_BLADE	= 0x08,	// boosts damage, decrease shield coupling
+
+		PART_MASK   = 0x0f
 	};
 
 	WeaponGen( U32 _seed, int _effectFlags, int _features ) : seed(_seed), effectFlags(_effectFlags), features(_features) {}
