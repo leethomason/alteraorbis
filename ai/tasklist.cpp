@@ -318,7 +318,7 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 			GoShopping( thisComp, building );
 		}
 		else if ( buildingName == IStringConst::factory ) {
-			bool used = UseFactory( thisComp, building );
+			bool used = UseFactory( thisComp, building, coreScript->GetTechLevel() );
 			if ( !used ) needs.SetZero();
 		}
 		else if ( buildingName == IStringConst::bed ) {
@@ -421,34 +421,89 @@ void TaskList::GoShopping(  const ComponentSet& thisComp, Chit* market )
 
 bool TaskList::UseFactory( const ComponentSet& thisComp, Chit* factory, int tech )
 {
+	// Guarentee we can build something:
+	if ( thisComp.item->wallet.crystal[0] == 0 ) {
+		return false;
+	}
+	if ( !thisComp.itemComponent->CanAddToInventory() ) {
+		return false;
+	}
+
 	IRangedWeaponItem* ranged = thisComp.itemComponent->GetRangedWeapon(0);
 	IMeleeWeaponItem* melee = thisComp.itemComponent->GetMeleeWeapon();
 	IShield* shield = thisComp.itemComponent->GetShield();
 
-	int item = 0;
-	int subItem = 0;
+	int itemType = 0;
+	int subType = 0;
 	int parts = 1;		// always have body.
 	int effects = GameItem::EFFECT_MASK;
 	Random& random = thisComp.chit->random;
 
-	int partsArr[] = { WeaponGen::GUN_CELL, WeaponGen::GUN_DRIVER, WeaponGen::GUN_SCOPE };
+	int partsArr[]   = { WeaponGen::GUN_CELL, WeaponGen::GUN_DRIVER, WeaponGen::GUN_SCOPE };
+	int effectsArr[] = { GameItem::EFFECT_FIRE, GameItem::EFFECT_SHOCK, GameItem::EFFECT_EXPLOSIVE };
 
-	if ( !ranged )	item = ForgeScript::GUN;
-	else if ( !shield ) item = ForgeScript::SHIELD;
-	else if ( !melee )	item = ForgeScript::SHIELD;
+	if ( !ranged )		itemType = ForgeScript::GUN;
+	else if ( !shield ) itemType = ForgeScript::SHIELD;
+	else if ( !melee )	itemType = ForgeScript::SHIELD;
 	else {
-		item = random.Rand( ForgeScript::NUM_ITEM_TYPES );
+		itemType = random.Rand( ForgeScript::NUM_ITEM_TYPES );
 	}
 
-	if ( item == ForgeScript::GUN ) {
+	if ( itemType == ForgeScript::GUN ) {
 		if ( tech == 0 )
-			subItem = random.Rand( ForgeScript::NUM_TECH0_GUNS );
+			subType = random.Rand( ForgeScript::NUM_TECH0_GUNS );
 		else
-			subItem = random.Rand( ForgeScript::NUM_GUN_TYPES );
+			subType = random.Rand( ForgeScript::NUM_GUN_TYPES );
+		parts = WeaponGen::PART_MASK;
+	}
+	else if ( itemType == ForgeScript::RING ) {
+		if ( (tech < 2) && random.Bit() ) {
+			parts = WeaponGen::RING_GUARD | WeaponGen::RING_TRIAD | WeaponGen::RING_BLADE;
+		}
+		else {
+			// Don't use the blade at higher tech levels.
+			parts = WeaponGen::RING_GUARD | WeaponGen::RING_TRIAD;
+		}
 	}
 
-		subItem = WeaponGen::PART_MASK;
+	random.ShuffleArray( partsArr, GL_C_ARRAY_SIZE( partsArr ));
+	random.ShuffleArray( effectsArr, GL_C_ARRAY_SIZE( partsArr ));
 
+	ForgeScript forge( thisComp.itemComponent, tech );
+	GameItem* item = new GameItem();
 
+	int cp = 0;
+	int ce = 0;
+	Wallet wallet;
+
+	// Given we have a crystal, we should always be able to build something.
+	// Remove sub-parts and effects until we succeed
+	while( true ) {
+		wallet.EmptyWallet();
+		int techRequired = 0;
+		forge.Build( itemType, subType, parts, effects, item, &wallet, &techRequired, true );
+
+		if ( wallet <= thisComp.item->wallet && techRequired <= tech ) {
+			thisComp.item->wallet.Remove( wallet );
+			break;
+		}
+
+		if ( wallet > thisComp.item->wallet ) {
+			GLASSERT( ce < 3 );
+			effects &= ~(effectsArr[ce++]);
+		}
+		if ( techRequired > tech ) {
+			GLASSERT( cp < 3 );
+			parts &= ~(partsArr[cp++]);
+		}
+	}
+	thisComp.itemComponent->AddToInventory( item );
+	thisComp.item->traits.AddCraftXP( wallet.NumCrystals() );
+
+	Vector2I sector = thisComp.spatial->GetPosition2DI();
+	GLOUTPUT(( "'%s' forged the item '%s' at sector=%x,%x\n",
+		thisComp.item->BestName(),
+		item->BestName(),
+		sector.x, sector.y ));
 	return true;
 }
