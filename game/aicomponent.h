@@ -62,7 +62,7 @@ public:
 	// it is given extra priority. The 'dest' must be in the same
 	// sector. If 'sector' is also specfied, will do grid travel
 	// after the move.
-	void Move( const grinliz::Vector2F& dest, bool focused, float rotation=-1 );
+	void Move( const grinliz::Vector2F& dest, bool focused, const grinliz::Vector2F* normal=0 );
 	// Returns true if the move is possible.
 	bool Move( const SectorPort& sectorport, bool focused );
 	void Pickup( Chit* item );

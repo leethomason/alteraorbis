@@ -481,7 +481,7 @@ void GameScene::TapModel( Chit* target )
 		}
 	}
 
-	AIComponent* ai = player->GetAIComponent();
+	AIComponent* ai = player ? player->GetAIComponent() : 0;
 	const char* setTarget = 0;
 
 	if ( ai && ai->GetTeamStatus( target ) == RELATE_ENEMY ) {
@@ -494,6 +494,11 @@ void GameScene::TapModel( Chit* target )
 		if (denizen) {
 			chitFaceToTrack = target->ID();
 			setTarget = "possibleTarget";
+
+			CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
+			if ( cc ) {
+				cc->SetTrack( chitFaceToTrack );
+			}
 		}
 	}
 
@@ -634,8 +639,14 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 #endif
 			}
 			else if ( tapMod == GAME_TAP_MOD_SHIFT ) {
-				for( int i=0; i<NUM_PLANT_TYPES; ++i ) {
-					sim->CreatePlant( (int)plane.x+i, (int)plane.z, i );
+				//for( int i=0; i<NUM_PLANT_TYPES; ++i ) {
+				//	sim->CreatePlant( (int)plane.x+i, (int)plane.z, i );
+				//}
+				Vector3F p = plane;
+				p.y = 0;
+				for( int i=0; i<5; ++i ) {
+					sim->GetChitBag()->NewMonsterChit( plane, "mantis", TEAM_GREEN_MANTIS );
+					p.x += 1.0f;
 				}
 			}
 		}

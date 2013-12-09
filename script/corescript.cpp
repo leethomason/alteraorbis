@@ -30,7 +30,7 @@ static const double TECH_MAX = 3.99;
 
 using namespace grinliz;
 
-// #define SPAWN_MOBS
+#define SPAWN_MOBS
 
 CoreScript::CoreScript( WorldMap* map, LumosChitBag* chitBag, Engine* engine ) 
 	: worldMap( map ), 
@@ -188,7 +188,7 @@ int CoreScript::DoTick( U32 delta )
 			  && !attached
 			  && ( normalPossible || greaterPossible ))
 	{
-#if SPAWN_MOBS
+#ifdef SPAWN_MOBS
 		// spawn stuff.
 
 		// 0->NUM_SECTORS

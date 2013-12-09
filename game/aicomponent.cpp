@@ -361,7 +361,7 @@ void AIComponent::DoMove( const ComponentSet& thisComp )
 						continue;
 					}
 
-					if ( DotProduct( normal, heading ) > SHOOT_ANGLE_DOT ) {
+					if ( DotProduct( normal, heading ) >= SHOOT_ANGLE_DOT ) {
 						// Wow - can take the shot!
 						float u = BattleMechanics::ChanceToHit( range, radAt1 );
 
@@ -432,22 +432,20 @@ void AIComponent::DoShoot( const ComponentSet& thisComp )
 	Vector2F leading2D = { leading.x, leading.z };
 	// Rotate to target.
 	Vector2F heading = thisComp.spatial->GetHeading2D();
-	float headingAngle = RotationXZDegrees( heading.x, heading.y );
-
 	Vector2F normalToTarget = leading2D - thisComp.spatial->GetPosition2D();
 	float distanceToTarget = normalToTarget.Length();
 	normalToTarget.Normalize();
-	float angleToTarget = RotationXZDegrees( normalToTarget.x, normalToTarget.y );
-	float deltaAngle = MinDeltaDegrees( headingAngle, angleToTarget, 0 );
+	float dot = DotProduct( heading, normalToTarget );
 
-	if ( deltaAngle < SHOOT_ANGLE ) {
+	if ( dot >= SHOOT_ANGLE_DOT ) {
 		// all good.
 	}
 	else {
 		// Rotate to target.
 		PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
 		if ( pmc ) {
-			pmc->QueueDest( thisComp.spatial->GetPosition2D(), angleToTarget );
+			//float angle = RotationXZDegrees( normalToTarget.x, normalToTarget.y );
+			pmc->QueueDest( thisComp.spatial->GetPosition2D(), &normalToTarget );
 		}
 		return;
 	}
@@ -673,7 +671,7 @@ bool AIComponent::Move( const SectorPort& sp, bool focused )
 			const SectorData& localSD = map->GetSector( local.sector );
 			// Local path to remote dst
 			Vector2F dest2 = SectorData::PortPos( localSD.GetPortLoc(local.port), parentChit->ID() );
-			pmc->QueueDest( dest2, -1, &sp );
+			pmc->QueueDest( dest2, 0, &sp );
 			currentAction = MOVE;
 			focus = focused ? FOCUS_MOVE : 0;
 			return true;
@@ -702,11 +700,11 @@ void AIComponent::Pickup( Chit* item )
 }
 
 
-void AIComponent::Move( const grinliz::Vector2F& dest, bool focused, float rotation )
+void AIComponent::Move( const grinliz::Vector2F& dest, bool focused, const Vector2F* normal )
 {
 	PathMoveComponent* pmc    = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
 	if ( pmc ) {
-		pmc->QueueDest( dest, rotation );
+		pmc->QueueDest( dest, normal );
 		currentAction = MOVE;
 		focus = focused ? FOCUS_MOVE : 0;
 	}

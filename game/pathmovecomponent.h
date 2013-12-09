@@ -56,11 +56,11 @@ public:
 
 	virtual void CalcVelocity( grinliz::Vector3F* v );
 
+//	void QueueDest( const grinliz::Vector2F& dest,
+//					float rotation = -1.f,			// if specified, the rotation we wish to get to
+//					const SectorPort* sector=0 );	// if specified, the sector travel target
 	void QueueDest( const grinliz::Vector2F& dest,
-					float rotation = -1.f,			// if specified, the rotation we wish to get to
-					const SectorPort* sector=0 );	// if specified, the sector travel target
-	void QueueDest( const grinliz::Vector2F& dest,
-					const grinliz::Vector2F& heading,	// if !zero, the rotation we wish to get to
+					const grinliz::Vector2F* heading=0,	// if !zero, the rotation we wish to get to
 					const SectorPort* sector=0 );		// if specified, the sector travel target
 
 	void QueueDest( Chit* targetChit );
@@ -105,8 +105,8 @@ private:
 		dest.Clear();
 	}
 
-	// Rotate, then move in that direction.
-	void RotationFirst( U32 delta, grinliz::Vector2F* pos2, grinliz::Vector2F* heading );
+	// Rotate, then move in that direction. Return true when done.
+	bool RotationFirst( U32 delta, grinliz::Vector2F* pos2, grinliz::Vector2F* heading );
 	// return true of rotation is complete
 	bool ApplyRotation( float travelRotation, const grinliz::Vector2F& targetHeading, grinliz::Vector2F* heading );
 

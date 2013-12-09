@@ -64,10 +64,10 @@ void PathMoveComponent::OnAdd( Chit* chit )
 	// Serialization case:
 	// if there is a queue location, use that, else use the current location.
 	if ( queued.pos.x > 0 ) {
-		QueueDest( queued.pos, queued.heading, &queued.sectorPort );
+		QueueDest( queued.pos, &queued.heading, &queued.sectorPort );
 	}
 	else if ( dest.pos.x > 0 ) {
-		QueueDest( dest.pos, dest.heading, &dest.sectorPort );
+		QueueDest( dest.pos, &dest.heading, &dest.sectorPort );
 	}
 }
 
@@ -107,23 +107,28 @@ void PathMoveComponent::CalcVelocity( grinliz::Vector3F* v )
 	}
 }
 
-
+/*
 void PathMoveComponent::QueueDest( const grinliz::Vector2F& d, float r, const SectorPort* sector )
 {
+	Vector3F currentHeading = parentChit->GetSpatialComponent()->GetHeading();
 	Vector2F h = { 0, 0 };
 	if ( r >= 0 ) {
 		h.Set( cosf( ToRadian(r)), sinf( ToRadian(r)) );
 	}
 	QueueDest( d, h, sector );
 }
+*/
 
 
-void PathMoveComponent::QueueDest( const grinliz::Vector2F& d, const grinliz::Vector2F& h, const SectorPort* sector )
+void PathMoveComponent::QueueDest( const grinliz::Vector2F& d, const grinliz::Vector2F* h, const SectorPort* sector )
 {
 	GLASSERT(  d.x > 0 && d.y > 0 );
 
 	queued.pos = d;
-	queued.heading = h;
+	queued.heading.Zero();
+	if ( h ) {
+		queued.heading = *h;
+	}
 	queued.sectorPort.Zero();
 	if ( sector ) {
 		queued.sectorPort = *sector;
@@ -139,8 +144,9 @@ void PathMoveComponent::QueueDest( Chit* target )
 	if ( targetSpatial && srcSpatial ) {
 		Vector2F v = targetSpatial->GetPosition2D();
 		Vector2F delta = v - srcSpatial->GetPosition2D();
-		float angle = RotationXZDegrees( delta.x, delta.y );
-		QueueDest( v, angle );
+		delta.SafeNormalize( 1, 0 );
+		//float angle = RotationXZDegrees( delta.x, delta.y );
+		QueueDest( v, &delta );
 	}
 	parentChit->SetTickNeeded();
 }
@@ -190,7 +196,6 @@ void PathMoveComponent::ComputeDest()
 		parentChit->SendMessage( ChitMsg( ChitMsg::PATHMOVE_DESTINATION_BLOCKED ), this ); 
 		return;
 	}
-
 
 	GLASSERT( queued.pos.x >= 0 && queued.pos.y >= 0 );
 	dest = queued;
@@ -288,61 +293,69 @@ bool PathMoveComponent::ApplyRotation( float travelRot, const Vector2F& targetHe
 }
 
 
-void PathMoveComponent::RotationFirst( U32 delta, Vector2F* pos2, Vector2F* heading )
+bool PathMoveComponent::RotationFirst( U32 _dt, Vector2F* pos2, Vector2F* heading )
 {
 	//PROFILE_FUNC();
 
-	if ( pathPos < path.Size() ) {
-		float speed		= Speed();
-		float travel    = Travel( speed, delta );
-		float travelRot	= Travel( ROTATION_SPEED, delta );
+	float speed		= Speed();
+	float dt		= float(_dt)*0.001f;
 
-		while (    (travel > 0 )
-			    && (travelRot > 0) 
-				&& (pathPos < path.Size()) ) 
-		{
-			Vector2F next  = path[pathPos];
-			Vector2F delta = next - (*pos2);
-			float    dist = delta.Length();
+	while (    (dt > 0.001 )
+			&& (pathPos < path.Size()) ) 
+	{
+		float travel    = Travel( speed, dt );		// distance = speed * time, time = distance / speed
+		float travelRot	= Travel( ROTATION_SPEED, dt );
+
+		Vector2F next  = path[pathPos];		// next waypoint
+		Vector2F delta = next - (*pos2);	// vector to next waypoint
+		float    dist = delta.Length();		// distance to next waypoint
 			
-			// check for very close & patch.
-			static const float EPS = 0.01f;
-			if ( dist <= EPS ) {
-				travel -= dist;
+		// check for very close & patch.
+		static const float EPS = 0.01f;
+		if ( dist <= EPS ) {
+			dt -= dist / speed;	
+			*pos2 = next;
+			++pathPos;
+			continue;
+		}
+
+		// Do vector based motion.
+		Vector2F targetHeading = delta;
+		targetHeading.SafeNormalize(1,0);
+
+		// Rotation while moving takes no extra time.
+		bool rotationDone = ApplyRotation( travelRot, targetHeading, heading );
+		float dot = DotProduct( targetHeading, *heading );
+
+		if ( dist <= travel ) {
+			if ( dot > 0.5f ) {
+				// we are close enough to hit dest. Patch.
 				*pos2 = next;
+				*heading = targetHeading;
 				++pathPos;
+				dt -= dist / speed;
 				continue;
 			}
-
-			// Do vector based motion.
-			Vector2F targetHeading = delta;
-			targetHeading.SafeNormalize(1,0);
-
-			bool rotationDone = ApplyRotation( travelRot, targetHeading, heading );
-			float dot = DotProduct( targetHeading, *heading );
-
-			if ( dist <= travel ) {
-				if ( dot > 0.5f ) {
-					// we are close enough to hit dest. Patch.
-					*pos2 = next;
-					*heading = targetHeading;
-					++pathPos;
-					travel -= dist;	// applies even if we rotate
-					continue;
-				}
-			}
-
-			// The right algorithm is tricky...tried
-			// lots of approaches, regret not documenting them.
-			// It's all about avoiding "orbiting" conditions.
-			if (    rotationDone 
-				 || ( dist > travel*12.0f && dot > 0.5f ))	// dist > travel*12 bit keeps from orbiting. 
-			{												// dot > 0.5f makes the avatar turn in the generally correct direction before moving
-				*pos2 += (*heading) * travel;
-			}
-			travel -= dist;	// applies even if we rotate
 		}
+
+		// The right algorithm is tricky...tried
+		// lots of approaches, regret not documenting them.
+		// It's all about avoiding "orbiting" conditions.
+		if (       rotationDone 
+				|| ( dist > travel*12.0f && dot > 0.5f ))	// dist > travel*12 bit keeps from orbiting. 
+		{												// dot > 0.5f makes the avatar turn in the generally correct direction before moving
+			*pos2 += (*heading) * travel;
+		}
+		dt -= dist / speed;
 	}
+
+	bool done = pathPos == path.Size();
+	if ( pathPos == path.Size() && !dest.heading.IsZero() ) {
+		// Pure rotation:
+		float travelRot	= Travel( ROTATION_SPEED, dt );
+		done = ApplyRotation( travelRot, dest.heading, heading );
+	}
+	return done;
 }
 
 
@@ -445,24 +458,8 @@ int PathMoveComponent::DoTick( U32 delta )
 		// We should be doing something!
 		time = 0;
 		isMoving = true;
-
-		if ( pathPos == path.Size()  ) {
-			// is rotation moving? Should isMoving be set?
-			// Apply final rotation if the path is complete.
-			bool done = true;
-			if ( !dest.heading.IsZero()) {
-				float travelRot	= Travel( ROTATION_SPEED, delta );
-				done = ApplyRotation( travelRot, dest.heading, &heading );
-			}
-			if ( done ) {
-				parentChit->SendMessage( ChitMsg( ChitMsg::PATHMOVE_DESTINATION_REACHED), this );
-				SetNoPath();
-			}
-		}
-		else if ( pathPos < path.Size() ) {
-			// Move down the path.
-			RotationFirst( delta, &pos, &heading );
-		}
+		
+		bool pathDone = RotationFirst( delta, &pos, &heading );
 
 		bool portFound = false;
 		if ( dest.sectorPort.IsValid() ) {
@@ -478,10 +475,12 @@ int PathMoveComponent::DoTick( U32 delta )
 				// Close enough. Too much jugging on the ports is a real hassle.
 				portFound = true;
 				portJump = dest.sectorPort;
-				parentChit->SendMessage( ChitMsg( ChitMsg::PATHMOVE_DESTINATION_REACHED), this );
-				SetNoPath();
+				pathDone = true;
 			}
-
+		}
+		if ( pathDone ) {
+			parentChit->SendMessage( ChitMsg( ChitMsg::PATHMOVE_DESTINATION_REACHED), this );
+			SetNoPath();
 		}
 
 		if ( !portFound && forceCount > FORCE_COUNT_EXCESSIVE ) {
