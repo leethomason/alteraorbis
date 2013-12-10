@@ -223,15 +223,16 @@ void GameScene::Resize()
 	xpLabel.SetPos(		dateLabel.X(), dateLabel.Y() + gamui2D.GetTextHeight() );
 	techLabel.SetPos(	xpLabel.X(),   xpLabel.Y() + gamui2D.GetTextHeight() );
 
+	bool visible = game->GetDebugUI();
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
 		newsButton[i].SetPos( port.UIWidth()- (NEWS_BUTTON_WIDTH), MINI_MAP_SIZE + (NEWS_BUTTON_HEIGHT+2)*i );
+		newsButton[i].SetVisible( visible );
 	}
 	clearButton.SetPos( newsButton[0].X() - clearButton.Width(), newsButton[0].Y() );
 
-	bool visible = game->DebugUIEnabled();
 	allRockButton.SetVisible( visible );
 	serialButton[CYCLE].SetVisible( visible );
-
+	clearButton.SetVisible( visible );
 }
 
 

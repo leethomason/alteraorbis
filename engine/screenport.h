@@ -57,7 +57,7 @@ public:
 	void SetNearFar( float n, float f ) { near = n; far = f; GLASSERT( far > near ); }
 
 	void Resize( int w, int h );
-	float UIAspectRatio()		{ return UIHeight() / UIWidth(); }
+	float UIAspectRatio() const		{ return UIHeight() / UIWidth(); }
 
 	void UIToView( const grinliz::Vector2F& in, grinliz::Vector2F* view ) const;
 	void ViewToUI( const grinliz::Vector2F& in, grinliz::Vector2F* ui ) const;

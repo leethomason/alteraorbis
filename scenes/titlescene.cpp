@@ -66,13 +66,22 @@ void TitleScene::Resize()
 	const Screenport& port = game->GetScreenport();
 
 	background.SetPos( 0, 0 );
-	background.SetSize( port.UIWidth(), port.UIHeight() );
+
+	float aspect = port.UIAspectRatio();
+	if ( aspect >= 0.5f ) {
+		background.SetSize( port.UIWidth(), port.UIWidth()*0.5f );
+	}
+	else {
+		background.SetSize( port.UIHeight()*2.0f, port.UIHeight() );
+	}
+	background.SetCenterPos( port.UIWidth()*0.5f, port.UIHeight()*0.5f );
+//	background.SetSize( port.UIWidth(), port.UIHeight() );
 
 	static const bool VIS[NUM_TESTS] = {
 		true, true, false, true, false, false,
 		true, true, true
 	};
-	bool visible = game->DebugUIEnabled();
+	bool visible = game->GetDebugUI();
 
 	LayoutCalculator layout = lumosGame->DefaultLayout();
 	int c = 0;

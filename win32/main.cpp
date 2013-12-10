@@ -283,7 +283,7 @@ int main( int argc, char **argv )
 					case SDLK_d:	GameHotKey( game, GAME_HK_TOGGLE_DEBUG_TEXT );	break;
 					case SDLK_f:	GameHotKey( game, GAME_HK_TOGGLE_FAST );	break;
 					case SDLK_g:	GameHotKey( game, GAME_HK_TOGGLE_GLOW );	break;
-					case SDLK_i:	GameHotKey( game, GAME_HK_DEBUG_UI );		break;
+					case SDLK_i:	GameHotKey( game, GAME_HK_TOGGLE_DEBUG_UI );		break;
 					case SDLK_k:	GameHotKey( game, GAME_HK_CHEAT_CRYSTAL );	break;
 					case SDLK_m:	GameHotKey( game, GAME_HK_MAP );			break;
 					case SDLK_p:	GameHotKey( game, GAME_HK_TOGGLE_PERF );	break;

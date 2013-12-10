@@ -64,11 +64,11 @@ void GameDoTick( void* handle, unsigned int timeInMSec );
 
 #define GAME_HK_TOGGLE_UI				1
 #define GAME_HK_TOGGLE_DEBUG_TEXT		2
-#define GAME_HK_TOGGLE_PERF				3
-#define GAME_HK_TOGGLE_GLOW				4
-#define GAME_HK_SPACE					5	// general action
-#define GAME_HK_TOGGLE_FAST				6	// fast mode and normal mode
-#define GAME_HK_DEBUG_UI				7
+#define GAME_HK_TOGGLE_DEBUG_UI			3
+#define GAME_HK_TOGGLE_PERF				4
+#define GAME_HK_TOGGLE_GLOW				5
+#define GAME_HK_SPACE					6	// general action
+#define GAME_HK_TOGGLE_FAST				7	// fast mode and normal mode
 #define GAME_HK_TOGGLE_PATHING			8
 #define GAME_HK_TOGGLE_COLORS			9
 #define GAME_HK_MAP					   10

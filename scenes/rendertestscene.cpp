@@ -98,7 +98,7 @@ void RenderTestScene::Resize()
 	layout.PosAbs( &refreshButton, 2, -1 );
 
 	for( int i=0; i<NUM_CONTROL; ++i ) {
-		control[i].SetVisible( game->DebugUIEnabled() );
+		control[i].SetVisible( game->GetDebugUI() );
 		layout.PosAbs( &control[i], i, -2 );
 	}
 }
