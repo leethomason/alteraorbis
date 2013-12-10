@@ -300,7 +300,7 @@ bool PathMoveComponent::RotationFirst( U32 _dt, Vector2F* pos2, Vector2F* headin
 	float speed		= Speed();
 	float dt		= float(_dt)*0.001f;
 
-	while (    (dt > 0.001 )
+	while (    (dt > 0.0001 )
 			&& (pathPos < path.Size()) ) 
 	{
 		float travel    = Travel( speed, dt );		// distance = speed * time, time = distance / speed

@@ -193,7 +193,7 @@ Component* Chit::GetComponent( int id )
 Component* Chit::swapOut = 0;
 Component* Chit::swapIn  = 0;
 
-void Chit::DoTick( U32 delta )
+void Chit::DoTick()
 {
 	timeToTick = VERY_LONG_TICK;
 	GLASSERT( timeSince >= 0 );

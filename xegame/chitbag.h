@@ -80,7 +80,11 @@ public:
 class MultiFilter : public IChitAccept
 {
 public:
-	MultiFilter() : type(-1) {}
+	enum {
+		MATCH_ANY,
+		MATCH_ALL
+	};
+	MultiFilter( int anyAll ) : type(-1) {}
 
 	virtual bool Accept( Chit* chit );
 	virtual int  Type();					// committed when called the first time
@@ -88,6 +92,7 @@ public:
 	grinliz::CDynArray< IChitAccept* > filters;
 private:
 	int type;
+	int anyAll;
 };
 
 

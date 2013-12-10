@@ -240,11 +240,15 @@ void ChitBag::DoTick( U32 delta, Engine* engine )
 
 				if ( c->timeToTick <= 0 ) {
 					++nTicked;
-					c->DoTick( delta );
+					c->DoTick();
 					GLASSERT( c->timeToTick >= 0 );
 				}
 			}
 		}
+	}
+
+	if ( engine ) {
+		Bolt::TickAll( &bolts, delta, engine, this );
 	}
 
 	// Make sure the camera is updated last so it doesn't "drag"
@@ -252,7 +256,7 @@ void ChitBag::DoTick( U32 delta, Engine* engine )
 	// put in a priority system.
 	Chit* camera = GetChit( activeCamera );
 	if ( camera ) {
-		camera->DoTick( delta );
+		camera->DoTick();
 	}
 
 	for( int i=0; i<deleteList.Size(); ++i ) {
@@ -282,10 +286,6 @@ void ChitBag::DoTick( U32 delta, Engine* engine )
 		Component* c = zombieDeleteList.Pop();
 		GLASSERT( c->ParentChit() == 0 );
 		delete c;
-	}
-
-	if ( engine ) {
-		Bolt::TickAll( &bolts, delta, engine, this );
 	}
 
 	for( int i=0; i<news.Size(); ++i ) {
@@ -383,12 +383,22 @@ bool ChitHasAIComponent::Accept( Chit* chit )
 
 bool MultiFilter::Accept( Chit* chit ) 
 {
-	for( int i=0; i<filters.Size(); ++i ) {
-		if ( !filters[i]->Accept( chit ) ) {
-			return false;
+	if ( anyAll == MATCH_ANY ) {
+		for( int i=0; i<filters.Size(); ++i ) {
+			if ( filters[i]->Accept( chit )) {
+				return true;
+			}
 		}
+		return false;
 	}
-	return true;
+	else {
+		for( int i=0; i<filters.Size(); ++i ) {
+			if ( !filters[i]->Accept( chit )) {
+				return false;
+			}
+		}
+		return true;
+	}
 }
 
 

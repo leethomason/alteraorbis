@@ -18,6 +18,7 @@
 #include "texture.h"
 #include "../grinliz/glperformance.h"
 #include "../grinliz/glrandom.h"
+#include <direct.h>
 
 #define DEBUG_OUTPUT
 
@@ -105,8 +106,6 @@ ShaderManager::ShaderManager() : active(0), totalCompileTime(0)
 	U32 hash = hash0 ^ hash1;
 
 	hashStr.Format( "%x", hash );
-
-	// FIXME make cache directory
 }
 
 
@@ -378,6 +377,7 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 
 	// Is it in the cache?
 #if 0
+	// FIXME: this code works, but doesn't get the metadata: max uniforms, etc.
 	if ( GLEW_ARB_get_program_binary ) {
 		CStr<200> path;
 		path.Format( "./cache/shader_%s_%d.shader", hashStr.c_str(), flags );
@@ -402,9 +402,6 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 				GLOUTPUT(( "Shader %d loaded from cache.\n", flags ));
 				return shader;
 			}
-FIXME: need to handle driver updates invalidating cache.
-		   should do a delete if the cache fails.
-
 			GLASSERT( false );	// bad cache
 		}
 	}
@@ -489,6 +486,7 @@ FIXME: need to handle driver updates invalidating cache.
 	CHECK_GL_ERROR;
 
 	if ( GLEW_ARB_get_program_binary ) {
+		_mkdir( "./cache" );
 		CStr<200> path;
 		path.Format( "./cache/shader_%s_%d.shader", hashStr.c_str(), flags );
 		FILE* fp = fopen( path.c_str(), "wb" );

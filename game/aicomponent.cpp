@@ -1291,7 +1291,7 @@ bool AIComponent::ThinkLoot( const ComponentSet& thisComp )
 		GoldCrystalFilter	gold;
 		LootFilter			loot;
 
-		MultiFilter filter;
+		MultiFilter filter( MultiFilter::MATCH_ANY );
 		bool canAdd	= thisComp.itemComponent->CanAddToInventory();
 
 		if ( canAdd && ( flags & GameItem::ITEM_PICKUP)) {

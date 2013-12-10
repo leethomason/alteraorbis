@@ -142,7 +142,7 @@ public:
 	void Remove( Component* );
 
 	void SetTickNeeded()		{ timeToTick = 0; }
-	void DoTick( U32 delta );
+	void DoTick();
 
 	void OnChitEvent( const ChitEvent& event );
 	void Swap( Component* removeAndDelete, Component* addThis )	{ GLASSERT( swapOut == 0 ); GLASSERT( swapIn == 0 ); swapOut = removeAndDelete; swapIn = addThis; }

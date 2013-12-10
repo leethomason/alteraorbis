@@ -127,6 +127,15 @@ int PhysicsMoveComponent::DoTick( U32 delta )
 }
 
 
+TrackingMoveComponent::TrackingMoveComponent( WorldMap* map ) : GameMoveComponent( map ), target( 0 )
+{
+}
+
+TrackingMoveComponent::~TrackingMoveComponent()		
+{
+	int debug=1;
+}
+
 
 void TrackingMoveComponent::Serialize( XStream* xs )
 {
@@ -165,7 +174,7 @@ bool TrackingMoveComponent::IsMoving()
 }
 
 
-int TrackingMoveComponent::DoTick( U32 deltaTime, U32 since )
+int TrackingMoveComponent::DoTick( U32 deltaTime )
 {
 	Chit* chit = GetChitBag()->GetChit( target );
 	if ( !chit || !chit->GetSpatialComponent() || !parentChit->GetSpatialComponent() ) {
@@ -178,7 +187,9 @@ int TrackingMoveComponent::DoTick( U32 deltaTime, U32 since )
 
 	Vector3F delta = targetPos - pos;
 	float len = delta.Length();
-	float travel = this->Travel( TRACK_SPEED, deltaTime );
+	// This component gets added to non-moving components, so the first
+	// tick time can be really big.
+	float travel = this->Travel( TRACK_SPEED, Min( deltaTime, MAX_FRAME_TIME ));
 
 	if ( travel >= len ) {
 		parentChit->GetSpatialComponent()->SetPosition( targetPos );
