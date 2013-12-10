@@ -151,6 +151,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	xpLabel.Init( &gamui2D );
 	techLabel.Init( &gamui2D );
 	moneyWidget.Init( &gamui2D );
+	consoleWidget.Init( &gamui2D );
 }
 
 
@@ -202,6 +203,11 @@ void GameScene::Resize()
 
 	layout.PosAbs( &dateLabel,   5, 0 );
 	layout.PosAbs( &moneyWidget, 5, -1 );
+
+	static int CONSOLE_HEIGHT = 2;	// in layout...
+	layout.PosAbs( &consoleWidget, 1, -1 - CONSOLE_HEIGHT );
+	float consoleHeight = okay.Y() - consoleWidget.Y();
+	consoleWidget.SetBounds( 0, consoleHeight );
 
 	for( int i=0; i<NUM_PICKUP_BUTTONS; ++i ) {
 		layout.PosAbs( &pickupButton[i], 0, i );
@@ -1058,6 +1064,7 @@ void GameScene::DoTick( U32 delta )
 		createWorkerButton.SetEnabled( arr.Size() < MAX_BOTS );
 	}
 	techLabel.SetText( str.c_str() );
+	consoleWidget.DoTick( delta );
 
 	// It's pretty tricky keeping the camera, camera component, and various
 	// modes all working together. 

@@ -337,6 +337,9 @@
     <ClCompile Include="..\script\forgescript.cpp">
       <Filter>Source Files\script</Filter>
     </ClCompile>
+    <ClCompile Include="..\widget\consolewidget.cpp">
+      <Filter>Source Files\widget</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\camera.h">
@@ -677,6 +680,9 @@
     </ClInclude>
     <ClInclude Include="..\script\forgescript.h">
       <Filter>Source Files\script</Filter>
+    </ClInclude>
+    <ClInclude Include="..\widget\consolewidget.h">
+      <Filter>Source Files\widget</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

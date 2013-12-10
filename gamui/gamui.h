@@ -466,7 +466,8 @@ public:
 	virtual float Width() const;
 	virtual float Height() const;
 
-	void SetBounds( float width )	{ if ( m_boundsWidth != width )		{ m_boundsWidth = width; m_width = m_height = -1; Modify(); }}
+	// If width=0 or height=0, interpreted as unbounded.
+	void SetBounds( float width, float height );
 	void SetTab( float tabWidth )	{ if ( m_tabWidth != tabWidth )		{ m_tabWidth = tabWidth; m_width = m_height = -1; Modify(); }}
 
 	void SetText( const char* t );
@@ -496,6 +497,7 @@ private:
 	char* m_str;
 	int	  m_allocated;
 	float m_boundsWidth;
+	float m_boundsHeight;
 	float m_tabWidth;
 
 	mutable float m_width;

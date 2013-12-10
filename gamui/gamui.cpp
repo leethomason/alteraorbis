@@ -159,6 +159,7 @@ TextLabel::TextLabel() : UIItem( Gamui::LEVEL_TEXT ),
 	m_str[0] = 0;
 	m_allocated = ALLOCATED;
 	m_boundsWidth = 0;
+	m_boundsHeight = 0;
 	m_tabWidth = 0;
 }
 
@@ -194,6 +195,18 @@ const RenderAtom* TextLabel::GetRenderAtom() const
 
 	return Enabled() ? m_gamui->GetTextAtom() : m_gamui->GetDisabledTextAtom();
 }
+
+
+void TextLabel::SetBounds( float width, float height )	
+{ 
+	if ( m_boundsWidth != width || m_boundsHeight != height ) { 
+		m_boundsWidth = width; 
+		m_boundsHeight = height;
+		m_width = m_height = -1; 
+		Modify(); 
+	}
+}
+
 
 
 const char* TextLabel::GetText() const
@@ -322,6 +335,11 @@ void TextLabel::ConstQueue( CDynArray< uint16_t > *indexBuf, CDynArray< Gamui::V
 				tab = 0;
 				continue;
 			}
+		}
+
+		// And finally, have we exceeded the y bound?
+		if ( m_boundsHeight && ( y + height >= Y() + m_boundsHeight) ) {
+			break;
 		}
 
 		iText->GamuiGlyph( *p, p>m_str ? *(p-1):0, height, &metrics );

@@ -21,6 +21,7 @@
 
 #include "../widget/moneywidget.h"
 #include "../widget/facewidget.h"
+#include "../widget/consolewidget.h"
 
 #include "../script/buildscript.h"
 
@@ -140,6 +141,7 @@ private:
 	gamui::TextLabel	xpLabel;
 	gamui::TextLabel	techLabel;
 	MoneyWidget			moneyWidget;
+	ConsoleWidget		consoleWidget;
 
 	gamui::PushButton	pickupButton[NUM_PICKUP_BUTTONS];
 
