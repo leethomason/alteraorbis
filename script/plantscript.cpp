@@ -167,9 +167,6 @@ int PlantScript::DoTick( U32 delta )
 
 	Vector2I pos = sc->MapPosition();
 	Vector2F pos2f = sc->GetPosition2D();
-	float h = (float)(stage+1);
-
-	float rainFraction	= weather->RainFraction( pos2f.x, pos2f.y );
 	Rectangle2I bounds = worldMap->Bounds();
 
 	int nStage = 4;
@@ -177,12 +174,14 @@ int PlantScript::DoTick( U32 delta )
 
 	if ( grow ) {
 		// ------ Sun -------- //
-		const Vector3F& light = engine->lighting.direction;
-		float norm = Max( fabs( light.x ), fabs( light.z ));
+		const float		h				= (float)(stage+1);
+		const float		rainFraction	= weather->RainFraction( pos2f.x, pos2f.y );
+		const Vector3F& light			= engine->lighting.direction;
+		const float		norm			= Max( fabs( light.x ), fabs( light.z ));
 		lightTap.x = LRintf( light.x / norm );
 		lightTap.y = LRintf( light.z / norm );
 
-		float sunHeight		= h * item->traits.NormalLeveledTrait( GameTrait::INT );	
+		float sunHeight			= h;	
 		Vector2I tap = pos + lightTap;
 
 		if ( bounds.Contains( tap )) {
@@ -193,50 +192,48 @@ int PlantScript::DoTick( U32 delta )
 				sunHeight = Min( sunHeight, (float)wg.RockHeight() * 0.5f );
 			}
 			else {
-				Rectangle2F r;
-				r.Set( (float)tap.x, (float)tap.y, (float)(tap.x+1), (float)(tap.y+1) );
 				CChitArray query;
-
 				ChitAcceptAll all;
-				scriptContext->chit->GetChitBag()->QuerySpatialHash( &query, r, 0, &all );
+				// This is a 1x1 query - will sometimes ignore big buildings, which is a minor bug.
+				scriptContext->chit->GetChitBag()->QuerySpatialHash( &query, ToWorld2F(pos), 0.5f, scriptContext->chit, &all );
 				for( int i=0; i<query.Size(); ++i ) {
 					RenderComponent* rc = query[i]->GetRenderComponent();
 					if ( rc ) {
 						Rectangle3F aabb = rc->MainModel()->AABB();
-						sunHeight = Min( h - aabb.max.y*0.5f, sunHeight );
+						sunHeight = Min( sunHeight, aabb.max.y*0.5f );
 						break;
 					}
 				}
 			}
 		}
 
-		float sun = sunHeight * (1.0f-rainFraction) / h;
-		sun = Clamp( sun, 0.0f, 1.0f );
+		float sunPerUnitH = sunHeight * (1.0f-rainFraction) / h;
+		sunPerUnitH = Clamp( sunPerUnitH, 0.0f, 1.0f );
 
 		// ---------- Rain ------- //
-		float rootDepth = h * item->traits.NormalLeveledTrait( GameTrait::DEX );
+		float water = rainFraction;
 
-		for( int j=-1; j<=1; ++j ) {
-			for( int i=-1; i<=1; ++i ) {
-				tap.Set( pos.x+i, pos.y+j );
-				if ( bounds.Contains( tap )) {
-					const WorldGrid& wg = worldMap->GetWorldGrid( tap.x, tap.y );
-					// Underground rocks limit root dethp.
-					rootDepth = Min( rootDepth, (float)MAX_HEIGHT - wg.RockHeight() );
-					if ( wg.IsWater() ) {
-						rainFraction += 0.25f;
-					}
+		static const Vector2I check[4] = { {-1,0}, {1,0}, {0,-1}, {0,1} };
+		for( int i=0; i<GL_C_ARRAY_SIZE( check ); ++i ) {
+			tap = pos + check[i];
+			if ( bounds.Contains( tap )) {
+				const WorldGrid& wg = worldMap->GetWorldGrid( tap.x, tap.y );
+				// Water or rock runoff increase water.
+				if ( wg.RockHeight() ) {
+					water += 0.25f * rainFraction;
+				}
+				if ( wg.IsWater() ) {
+					water += 0.25f;
 				}
 			}
 		}
-		float rain = Clamp( rainFraction * rootDepth / h, 0.0f, 1.0f );
-		rootDepth = Clamp( rootDepth, 0.1f, h );
+		water = Clamp( water, 0.f, 1.f );
 
 		// ------- Temperature ----- //
 		float temp = weather->Temperature( (float)pos.x+0.5f, (float)pos.y+0.5f );
 
 		// ------- calc ------- //
-		Vector3F actual = { sun, rain, temp };
+		Vector3F actual = { sunPerUnitH, water, temp };
 		Vector3F optimal = { 0.5f, 0.5f, 0.5f };
 	
 		item->keyValues.Fetch( "sun",  "f", &optimal.x );
@@ -245,11 +242,11 @@ int PlantScript::DoTick( U32 delta )
 
 		float distance = ( optimal - actual ).Length();
 
-		float GROW = Lerp( 0.2f, 0.1f, (float)stage / (float)(NUM_STAGE-1) );
-		float DIE  = 0.4f;
+		const float GROW = Lerp( 0.2f, 0.1f, (float)stage / (float)(NUM_STAGE-1) );
+		const float DIE  = 0.4f;
 
 		float toughness = item->traits.Toughness();
-		float seconds = float( TIME_TO_SPORE ) / 1000.0f;
+		float seconds = float( TIME_TO_GROW ) / 1000.0f;
 
 		if ( distance < GROW * toughness ) {
 
@@ -292,10 +289,15 @@ int PlantScript::DoTick( U32 delta )
 	}
 	// Spore (more likely if bigger plant)
 	if (    spore 
-		 && ( int(scriptContext->chit->random.Rand(nStage)) <= stage )) {
+		 && ( int(scriptContext->chit->random.Rand(nStage)) <= stage )) 
+	{
+		// Number range reflects wind direction.
 		int dx = -1 + scriptContext->chit->random.Rand(4);	// [-1,2]
 		int dy = -1 + scriptContext->chit->random.Rand(3);	// [-1,1]
 
+		// Remember that create plant will favor creating
+		// existing plants, so we don't need to specify
+		// what to create.
 		sim->CreatePlant( pos.x+dx, pos.y+dy, -1 );
 	}
 
