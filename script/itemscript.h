@@ -52,8 +52,46 @@ private:
 	GameItem nullItem;
 
 	grinliz::HashTable< const char*, GameItem*, grinliz::CompCharPtr, grinliz::OwnedPtrSem > map;
+	// Names of all the items in the DefDB - "top" because "cyclops" is in the list, but not "cyclops claw"
 	grinliz::CDynArray< grinliz::IString > topNames;
 };
+
+// Needs to be small - lots of these to save.
+struct ItemHistory
+{
+	grinliz::IString name;			// echos GameItem:	blaster
+	grinliz::IString properName;	//					Hruntar
+	grinliz::IString desc;			//					Hruntar a superb blaster
+};
+
+/*
+	As of this point, GameItems are owned by Chits. (Specifically ItemComponents). And
+	occasionally other places. I'm questioning this design. However, we need to be
+	able to look up items for history and such. It either is in use, or deleted, and
+	we need a record of what it was.
+*/
+class ItemDB
+{
+public:
+	static ItemDB* Instance() { if ( !instance ) instance = new ItemDB(); return instance; }
+	~ItemDB()	{ instance = 0; }
+
+	void Add( const GameItem* );
+	void Remove( const GameItem* );
+
+	// Find an item by id; if null, can use History
+	const GameItem*		Find( int id );
+	// Should always return.
+	const ItemHistory*	History( int id );
+
+	void Serialize( XStream* xs );
+
+private:
+	static ItemDB* instance;
+	grinliz::HashTable< int, const GameItem* > itemMap;	// map of all the active, allocated items.
+	grinliz::CDynArray< ItemHistory > itemHistory;      // all the items ever created. id is the index; may need to compress in the future.
+};
+
 
 
 

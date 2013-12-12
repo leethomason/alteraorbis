@@ -43,7 +43,7 @@ Sim::Sim( LumosGame* g ) : minuteClock( 60*1000 ), secondClock( 1000 ), volcTime
 	Screenport* port = lumosGame->GetScreenportMutable();
 	const gamedb::Reader* database = lumosGame->GetDatabase();
 
-	NewsHistory::Create();
+	newsHistory = new NewsHistory();
 	worldMap	= new WorldMap( MAX_MAP_SIZE, MAX_MAP_SIZE );
 	engine		= new Engine( port, database, worldMap );
 	weather		= new Weather( MAX_MAP_SIZE, MAX_MAP_SIZE );
@@ -72,7 +72,7 @@ Sim::~Sim()
 	delete chitBag;
 	delete engine;
 	delete worldMap;
-	NewsHistory::Destroy();
+	delete newsHistory;
 }
 
 

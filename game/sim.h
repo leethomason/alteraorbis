@@ -34,6 +34,7 @@ class Texture;
 class Chit;
 class Weather;
 class ReserveBank;
+class NewsHistory;
 
 class Sim
 {
@@ -80,6 +81,7 @@ private:
 	ReserveBank*	reserveBank;
 	LumosChitBag*	chitBag;
 	Visitors*		visitors;
+	NewsHistory*	newsHistory;
 
 	grinliz::Random	random;
 	int playerID;
