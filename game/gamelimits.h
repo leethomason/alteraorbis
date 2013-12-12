@@ -58,9 +58,9 @@ enum {
 // doesn't impact the pather. Plants must be 1x1
 static const int MAX_BUILDING_SIZE	= 2;	
 
-static const U32 MINUTE				= 1000*60;						// game time and real time
 static const U32 MINUTES_IN_AGE		= 100;
-static const U32 AGE				= MINUTE * MINUTES_IN_AGE;		// 1st age, 2nd age, etc.
+static const U32 AGE_IN_MSEC		= MINUTES_IN_AGE * 60 * 1000;
+
 static const float MIN_EFFECTIVE_RANGE = 2.0f;
 static const float MAX_EFFECTIVE_RANGE = 25.0f;	
 

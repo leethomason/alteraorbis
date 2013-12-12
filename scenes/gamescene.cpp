@@ -52,6 +52,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	selectionModel = 0;
 	buildActive = 0;
 	chitFaceToTrack = 0;
+	currentNews = 0;
 	voxelInfoID.Zero();
 	lumosGame = game;
 	game->InitStd( &gamui2D, &okay, 0 );
@@ -553,7 +554,7 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 
 		if ( tap ) {
 			if ( coreMode ) {
-				CoreScript* coreScript = sim->GetChitBag()->GetCore( sim->GetChitBag()->PlayerHomeSector() );
+				CoreScript* coreScript = sim->GetChitBag()->GetCore( sim->GetChitBag()->GetHomeSector() );
 				WorkQueue* wq = coreScript->GetWorkQueue();
 				GLASSERT( wq );
 				RemovableFilter removableFilter;
@@ -739,14 +740,18 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
 		if ( item == &newsButton[i] ) {
 			if ( FreeCameraMode() ) {
-				const NewsEvent* ne = sim->GetChitBag()->News() + i;
-				CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
-				if ( cc && ne->chitID ) {
-					cc->SetTrack( ne->chitID );
-				}
-				else {
-					sim->GetEngine()->CameraLookAt( ne->pos.x, ne->pos.y );
-					if ( cc ) cc->SetTrack( 0 );
+				NewsHistory* history = NewsHistory::Instance();
+				int index = history->NumNews() - 1 - i;
+				if ( index >= 0 ) {
+					const NewsEvent& ne = history->News( index );
+					CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
+					if ( cc && ne.chitID ) {
+						cc->SetTrack( ne.chitID );
+					}
+					else {
+						sim->GetEngine()->CameraLookAt( ne.pos.x, ne.pos.y );
+						if ( cc ) cc->SetTrack( 0 );
+					}
 				}
 			}
 		}
@@ -899,7 +904,7 @@ void GameScene::HandleHotKey( int mask )
 	else if ( mask == GAME_HK_CHEAT_TECH ) {
 		Chit* player = sim->GetPlayerChit();
 
-		CoreScript* coreScript = sim->GetChitBag()->GetCore( sim->GetChitBag()->PlayerHomeSector() );
+		CoreScript* coreScript = sim->GetChitBag()->GetCore( sim->GetChitBag()->GetHomeSector() );
 		for( int i=0; i<10; ++i ) {
 			coreScript->AddTech();
 		}
@@ -913,7 +918,7 @@ void GameScene::HandleHotKey( int mask )
 void GameScene::SetPickupButtons()
 {
 	Chit* player = sim->GetPlayerChit();
-	CoreScript* coreScript = sim->GetChitBag()->GetCore( sim->GetChitBag()->PlayerHomeSector() );
+	CoreScript* coreScript = sim->GetChitBag()->GetCore( sim->GetChitBag()->GetHomeSector() );
 	if ( player && !coreScript ) {
 		bool canAdd = player && player->GetItemComponent() && player->GetItemComponent()->CanAddToInventory();
 		// Query items on the ground in a radius of the player.
@@ -960,6 +965,52 @@ void GameScene::SetPickupButtons()
 }
 
 
+void GameScene::ProcessNewsToConsole()
+{
+	NewsHistory* history = NewsHistory::Instance();
+	currentNews = Max( currentNews, history->NumNews() - 40 );
+	GLString str;
+	LumosChitBag* chitBag = sim->GetChitBag();
+	CoreScript* coreScript = chitBag->GetHomeCore();
+
+	//Vector2I avatarSector = { 0, 0 };
+	//Chit* playerChit = sim->GetPlayerChit();
+	//if ( playerChit && playerChit->GetSpatialComponent() ) {
+	//	avatarSector = ToSector( playerChit->GetSpatialComponent()->GetPosition2DI() );
+	//}
+	//Vector2I homeSector = sim->GetChitBag()->GetHomeSector();
+
+	// Check if news sector is 1)current avatar sector, or 2)domain sector
+
+	for ( ;currentNews < history->NumNews(); ++currentNews ) {
+		const NewsEvent& ne = history->News( currentNews );
+		//Vector2I sector = ne.Sector();
+
+		str = "";
+
+		switch( ne.what ) {
+		case NewsEvent::DENIZEN_CREATED:
+		case NewsEvent::DENIZEN_KILLED:
+			if ( coreScript && coreScript->IsCitizen( ne.chitID )) {
+				ne.Console( &str, chitBag );
+			}
+			break;
+
+		case NewsEvent::GREATER_MOB_CREATED:
+		case NewsEvent::GREATER_MOB_KILLED:
+			ne.Console( &str, chitBag );
+			break;
+
+		default:
+			break;
+		}
+		if ( !str.empty() ) {
+			consoleWidget.Push( str );
+		}
+	}
+}
+
+
 void GameScene::DoTick( U32 delta )
 {
 	clock_t startTime = clock();
@@ -976,14 +1027,13 @@ void GameScene::DoTick( U32 delta )
 
 	SetPickupButtons();
 
-	const NewsEvent* news = sim->GetChitBag()->News();
-	int nNews = sim->GetChitBag()->NumNews();
-
-	sim->GetChitBag()->SetNewsProcessed();
-
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
-		if ( i < nNews ) {
-			newsButton[i].SetText( news[i].name.c_str() );
+		NewsHistory* history = NewsHistory::Instance();
+		int index = history->NumNews() - 1 - i;
+		if ( index >= 0 ) {
+			const NewsEvent& ne = history->News( index );
+			IString name = ne.GetWhat();
+			newsButton[i].SetText( name.c_str() );
 			newsButton[i].SetEnabled( true );
 		}
 		else {
@@ -1001,7 +1051,7 @@ void GameScene::DoTick( U32 delta )
 	const SectorData& sd = sim->GetWorldMap()->GetWorldInfo().GetSector( sector );
 
 	CStr<64> str;
-	str.Format( "Date %.2f %s", sim->DateInAge(), sd.name.c_str() );
+	str.Format( "Date %.2f %s", NewsHistory::Instance()->AgeF(), sd.name.c_str() );
 	dateLabel.SetText( str.c_str() );
 
 	Chit* playerChit = sim->GetPlayerChit();
@@ -1037,7 +1087,7 @@ void GameScene::DoTick( U32 delta )
 
 	str.Clear();
 	if ( playerChit && coreMode ) {
-		CoreScript* coreScript = sim->GetChitBag()->GetCore( sim->GetChitBag()->PlayerHomeSector() );
+		CoreScript* coreScript = sim->GetChitBag()->GetCore( sim->GetChitBag()->GetHomeSector() );
 		float tech = coreScript->GetTech();
 		int maxTech = coreScript->MaxTech();
 		str.Format( "Tech %.2f / %d", tech, maxTech );
@@ -1065,6 +1115,7 @@ void GameScene::DoTick( U32 delta )
 	}
 	techLabel.SetText( str.c_str() );
 	consoleWidget.DoTick( delta );
+	ProcessNewsToConsole();
 
 	// It's pretty tricky keeping the camera, camera component, and various
 	// modes all working together. 
@@ -1149,7 +1200,7 @@ void GameScene::DrawDebugText()
 
 	Wallet w = ReserveBank::Instance()->GetWallet();
 	ufoText->Draw( x, y,	"Date=%.2f %s. Sim/S=%.1f x%.1f ticks=%d/%d Reserve Au=%d r%dg%dv%d", 
-							sim->DateInAge(),
+							NewsHistory::Instance()->AgeF(),
 							fastMode ? "fast" : "norm", 
 							simPS,
 							simPS / 30.0f,

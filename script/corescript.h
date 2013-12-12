@@ -40,6 +40,7 @@ public:
 
 	void AddCitizen( Chit* chit );
 	bool IsCitizen( Chit* chit ); 
+	bool IsCitizen( int id );
 	int  NumCitizens();
 
 	bool InUse() const;

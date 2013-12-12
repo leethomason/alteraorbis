@@ -122,6 +122,7 @@
     <ClCompile Include="..\game\lumoschitbag.cpp" />
     <ClCompile Include="..\game\lumosgame.cpp" />
     <ClCompile Include="..\game\mapspatialcomponent.cpp" />
+    <ClCompile Include="..\game\news.cpp" />
     <ClCompile Include="..\game\pathmovecomponent.cpp" />
     <ClCompile Include="..\game\physicsmovecomponent.cpp" />
     <ClCompile Include="..\game\reservebank.cpp" />
@@ -229,6 +230,7 @@
     <ClInclude Include="..\game\lumosgame.h" />
     <ClInclude Include="..\game\lumosmath.h" />
     <ClInclude Include="..\game\mapspatialcomponent.h" />
+    <ClInclude Include="..\game\news.h" />
     <ClInclude Include="..\game\pathmovecomponent.h" />
     <ClInclude Include="..\game\physicsmovecomponent.h" />
     <ClInclude Include="..\game\reservebank.h" />

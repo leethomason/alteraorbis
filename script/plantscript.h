@@ -18,6 +18,7 @@
 
 #include "scriptcomponent.h"
 #include "../grinliz/glrandom.h"
+#include "../xegame/cticker.h"
 
 class WorldMap;
 class Engine;
@@ -64,8 +65,8 @@ private:
 	int			stage;		// 0-3
 	U32			age;
 	U32			ageAtStage;
-	int			growTimer;
-	int			sporeTimer;
+	CTicker		growTimer;
+	CTicker		sporeTimer;
 };
 
 #endif // PLANT_SCRIPT_INCLUDED

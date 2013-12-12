@@ -2,6 +2,13 @@
 
 using namespace grinliz;
 
+/*
+	4 Newest
+	3
+	2
+	1
+	0 Oldest 
+*/
 
 ConsoleWidget::ConsoleWidget()
 {
@@ -28,18 +35,26 @@ void ConsoleWidget::SetBounds( float w, float h )
 
 void ConsoleWidget::Push( const grinliz::GLString &str )
 {
+	// Else kick off the oldest:
 	for( int i=1; i<lines.Size(); ++i ) {
 		lines[i-1] = lines[i];
 		age[i-1]   = age[i];
 	}
 	lines[lines.Size()-1] = str;
 	age[age.Size()-1] = 0;
+	SetText();
+}
 
+void ConsoleWidget::SetText()
+{
 	strBuffer = "";
-	for( int i=0; i<lines.Size(); ++i ) {
-		strBuffer.append( lines[i] );
-		strBuffer.append( "\n" );
+	for( int i=lines.Size()-1; i>=0; --i ) {
+		if ( !lines[i].empty() ) {
+			strBuffer.append( lines[i] );
+			strBuffer.append( "\n" );
+		}
 	}
+	text.SetText( strBuffer.c_str() );
 }
 
 
@@ -49,11 +64,8 @@ void ConsoleWidget::DoTick( U32 delta )
 	for( int i=0; i<lines.Size(); ++i ) {
 		age[i] += delta;
 		if ( age[i] > AGE_TIME ) {
-			++count;
+			lines[i] = "";
 		}
 	}
-	GLString empty;
-	for( int i=0; i<count; ++i ) {
-		Push( empty );
-	}
+	SetText();
 }

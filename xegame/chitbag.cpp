@@ -287,34 +287,11 @@ void ChitBag::DoTick( U32 delta, Engine* engine )
 		GLASSERT( c->ParentChit() == 0 );
 		delete c;
 	}
-
-	for( int i=0; i<news.Size(); ++i ) {
-		news[i].age += delta;
-	}
 }
 
 
 void ChitBag::HandleBolt( const Bolt& bolt, const ModelVoxel& mv )
 {
-}
-
-
-void ChitBag::AddNews( const NewsEvent& event )
-{
-	news.PushFront( event );
-	news[0].age = 0;
-
-	if ( news.Size() > 40 ) {
-		news.Pop();
-	}
-}
-
-
-void ChitBag::SetNewsProcessed()
-{
-	for( int i=0; i<news.Size(); ++i ) {
-		news[i].processed = true;
-	}
 }
 
 

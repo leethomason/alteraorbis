@@ -191,10 +191,10 @@ public:
 
 	// Get the core for this sector.
 	CoreScript* GetCore( const grinliz::Vector2I& sector );
-	CoreScript* GetHomeCore()	{ return GetCore( PlayerHomeSector() ); }
+	CoreScript* GetHomeCore()	{ return GetCore( GetHomeSector() ); }
 	
 	// FIXME placeholder code
-	grinliz::Vector2I PlayerHomeSector() const {
+	grinliz::Vector2I GetHomeSector() const {
 		grinliz::Vector2I v = { 5, 5 };
 		return v;
 	}

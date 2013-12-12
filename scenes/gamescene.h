@@ -29,7 +29,7 @@
 
 class LumosGame;
 class Sim;
-struct NewsEvent;
+class NewsEvent;
 class Chit;
 class GameItem;
 
@@ -70,6 +70,7 @@ private:
 
 	void SetPickupButtons();
 	bool FreeCameraMode();
+	void ProcessNewsToConsole();
 
 	enum {
 		SAVE,
@@ -114,6 +115,7 @@ private:
 	grinliz::Vector2I	voxelInfoID;
 	int					buildActive;	// which build button is active. 0 if none.
 	int					chitFaceToTrack;
+	int					currentNews;	// index of the last news item put in the console
 
 	// Shows what is being built or removed.
 	Model*				selectionModel;

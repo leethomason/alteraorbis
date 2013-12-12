@@ -340,6 +340,9 @@
     <ClCompile Include="..\widget\consolewidget.cpp">
       <Filter>Source Files\widget</Filter>
     </ClCompile>
+    <ClCompile Include="..\game\news.cpp">
+      <Filter>Source Files\game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\camera.h">
@@ -683,6 +686,9 @@
     </ClInclude>
     <ClInclude Include="..\widget\consolewidget.h">
       <Filter>Source Files\widget</Filter>
+    </ClInclude>
+    <ClInclude Include="..\game\news.h">
+      <Filter>Source Files\game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -110,6 +110,12 @@ bool CoreScript::IsCitizen( Chit* chit )
 }
 
 
+bool CoreScript::IsCitizen( int id )
+{
+	return citizens.Find( id ) >= 0;
+}
+
+
 int CoreScript::NumCitizens()
 {
 	int i=0;
@@ -262,9 +268,8 @@ int CoreScript::DoTick( U32 delta )
 				Chit* mob = scriptContext->chitBag->NewMonsterChit( pf, spawn, team );
 
 				if ( isGreater ) {
-					Vector2F p2 = { pf.x, pf.z };
-					NewsEvent news( NewsEvent::PONY, p2, StringPool::Intern( spawn ), mob->ID() );
-					scriptContext->chitBag->AddNews( news );
+					NewsEvent news( NewsEvent::GREATER_MOB_CREATED, ToWorld2F( pf ), mob->ID() );
+					NewsHistory::Instance()->Add( news );
 				}
 			}
 		}

@@ -26,9 +26,11 @@ public:
 	void DoTick( U32 delta );
 
 private:
+	void SetText();
+
 	enum { 
-		NUM_LINES = 10,		// expediant hack
-		AGE_TIME  = 5000,	// msec
+		NUM_LINES = 10,			// expediant hack
+		AGE_TIME  = 20*1000,	// msec
 	};
 	gamui::TextLabel	text;
 	grinliz::GLString	strBuffer;

@@ -103,7 +103,7 @@ void MapScene::Resize()
 	mapImage.SetPos( x, y );
 	mapImage2.SetPos( port.UIWidth()*0.5f + 0.5f*layout.GutterX(), y );
 
-	Vector2I homeSector = lumosChitBag->PlayerHomeSector();
+	Vector2I homeSector = lumosChitBag->GetHomeSector();
 
 	// --- MAIN ---
 

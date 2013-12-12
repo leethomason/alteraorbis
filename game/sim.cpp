@@ -37,12 +37,13 @@
 using namespace grinliz;
 using namespace tinyxml2;
 
-Sim::Sim( LumosGame* g )
+Sim::Sim( LumosGame* g ) : minuteClock( 60*1000 ), secondClock( 1000 ), volcTimer( 10*1000 )
 {
 	lumosGame = g;
 	Screenport* port = lumosGame->GetScreenportMutable();
 	const gamedb::Reader* database = lumosGame->GetDatabase();
 
+	NewsHistory::Create();
 	worldMap	= new WorldMap( MAX_MAP_SIZE, MAX_MAP_SIZE );
 	engine		= new Engine( port, database, worldMap );
 	weather		= new Weather( MAX_MAP_SIZE, MAX_MAP_SIZE );
@@ -56,10 +57,6 @@ Sim::Sim( LumosGame* g )
 	chitBag->SetContext( engine, worldMap, lumosGame );
 	worldMap->AttachEngine( engine, chitBag );
 	playerID = 0;
-	minuteClock = 0;
-	timeInMinutes = 0;
-	volcTimer = 0;
-	secondClock = 1000;
 	currentVisitor = 0;
 
 	random.SetSeedFromTime();
@@ -75,6 +72,7 @@ Sim::~Sim()
 	delete chitBag;
 	delete engine;
 	delete worldMap;
+	NewsHistory::Destroy();
 }
 
 
@@ -98,11 +96,14 @@ void Sim::Load( const char* mapDAT, const char* gameDAT )
 		if ( fp ) {
 			StreamReader reader( fp );
 			XarcOpen( &reader, "Sim" );
+
 			XARC_SER( &reader, playerID );
-			XARC_SER( &reader, minuteClock );
-			XARC_SER( &reader, timeInMinutes );
 			XARC_SER( &reader, GameItem::idPool );
 
+			minuteClock.Serialize( &reader, "minuteClock" );
+			secondClock.Serialize( &reader, "secondClock" );
+			volcTimer.Serialize( &reader, "volcTimer" );
+			NewsHistory::Instance()->Serialize( &reader );
 			reserveBank->Serialize( &reader );
 			visitors->Serialize( &reader );
 			engine->camera.Serialize( &reader );
@@ -135,10 +136,12 @@ void Sim::Save( const char* mapDAT, const char* gameDAT )
 			StreamWriter writer( fp );
 			XarcOpen( &writer, "Sim" );
 			XARC_SER( &writer, playerID );
-			XARC_SER( &writer, minuteClock );
-			XARC_SER( &writer, timeInMinutes );
 			XARC_SER( &writer, GameItem::idPool );
 
+			minuteClock.Serialize( &writer, "minuteClock" );
+			secondClock.Serialize( &writer, "secondClock" );
+			volcTimer.Serialize( &writer, "volcTimer" );
+			NewsHistory::Instance()->Serialize( &writer );
 			reserveBank->Serialize( &writer );
 			visitors->Serialize( &writer );
 			engine->camera.Serialize( &writer );
@@ -183,7 +186,7 @@ void Sim::CreateCores()
 	hot->SetDefaultSpawn( StringPool::Intern( "arachnoid" ));	// easy starting point for greater spawns
 	GLOUTPUT(( "nCores=%d\n", ncores ));
 
-	Vector2I homeSector = chitBag->PlayerHomeSector();
+	Vector2I homeSector = chitBag->GetHomeSector();
 	CoreScript* homeCS = chitBag->GetCore( homeSector );
 	Chit* homeChit = homeCS->ParentChit();
 	homeChit->GetItem()->primaryTeam = TEAM_HOUSE0;
@@ -194,7 +197,7 @@ void Sim::CreatePlayer()
 {
 	//Vector2I v = worldMap->FindEmbark();
 
-	Vector2I sector = chitBag->PlayerHomeSector();
+	Vector2I sector = chitBag->GetHomeSector();
 	Vector2I v = {	sector.x*SECTOR_SIZE + SECTOR_SIZE/2 + 4,
 					sector.y*SECTOR_SIZE + SECTOR_SIZE/2 + 4 };
 	CreatePlayer( v );
@@ -264,47 +267,26 @@ Texture* Sim::GetMiniMapTexture()
 
 void Sim::DoTick( U32 delta )
 {
+	NewsHistory::Instance()->DoTick( delta );
 	worldMap->DoTick( delta, chitBag );
 	chitBag->DoTick( delta, engine );
 
-	bool minuteTick = false;
-	bool secondTick = false;
-
-	minuteClock -= (int)delta;
-	if ( minuteClock <= 0 ) {
-		minuteClock += MINUTE;
-		timeInMinutes++;
-		minuteTick = true;
-	}
-
-	secondClock -= (int)delta;
-	if ( secondClock <= 0 ) {
-		secondClock += 1000;
-		secondTick = true;
-	}
-
-	// Logic that will probably need to be broken out.
-	// What happens in a given age?
-	int age = timeInMinutes / MINUTES_IN_AGE;
-	volcTimer += delta;
+	int minuteTick = minuteClock.Delta( delta );
+	int secondTick = secondClock.Delta( delta );
+	int volcano    = volcTimer.Delta( delta );
 
 	// Age of Fire. Needs lots of volcanoes to seed the world.
 	static const int VOLC_RAD = 9;
 	static const int VOLC_DIAM = VOLC_RAD*2+1;
 	static const int NUM_VOLC = MAX_MAP_SIZE*MAX_MAP_SIZE / (VOLC_DIAM*VOLC_DIAM);
-	int MSEC_TO_VOLC = AGE / NUM_VOLC;
+	int MSEC_TO_VOLC = AGE_IN_MSEC / NUM_VOLC;
+
+	int age = NewsHistory::Instance()->AgeI();
 
 	// NOT Age of Fire:
-	if ( age > 1 ) {
-		MSEC_TO_VOLC *= 20;
-	}
-	else if ( age > 0 ) {
-		MSEC_TO_VOLC *= 10;
-	}
+	volcTimer.SetPeriod( (age > 1 ? MSEC_TO_VOLC*4 : MSEC_TO_VOLC) + random.Rand(1000) );
 
-	while( volcTimer >= MSEC_TO_VOLC ) {
-		volcTimer -= MSEC_TO_VOLC;
-
+	while( volcano-- ) {
 		for( int i=0; i<5; ++i ) {
 			int x = random.Rand(worldMap->Width());
 			int y = random.Rand(worldMap->Height());

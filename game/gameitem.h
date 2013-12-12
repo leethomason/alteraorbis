@@ -306,6 +306,7 @@ public:
 	const char* Name() const			{ return name.c_str(); }
 	const char* ProperName() const		{ return properName.c_str(); }
 	const char* BestName() const		{ if ( !properName.empty() ) return properName.c_str(); return name.c_str(); }
+	grinliz::IString BestNameI() const	{ if ( !properName.empty() ) return properName; return name; }
 	const char* Desc() const			{ return desc.c_str(); }
 	const char* ResourceName() const	{ return resource.c_str(); }
 

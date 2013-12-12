@@ -966,8 +966,8 @@ bool AIComponent::SectorHerd( const ComponentSet& thisComp )
 
 				// Trolls herd *all the time*
 				if ( thisComp.item->name != "troll" ) {
-					NewsEvent news( NewsEvent::PONY, pos, StringPool::Intern( "SectorHerd" ), parentChit->ID() );
-					GetChitBag()->AddNews( news );
+					NewsEvent news( NewsEvent::SECTOR_HERD, pos, parentChit->ID() );
+					NewsHistory::Instance()->Add( news );
 				}
 
 				ChitMsg msg( ChitMsg::CHIT_SECTOR_HERD, 0, &dest );
@@ -1733,7 +1733,7 @@ int AIComponent::DoTick( U32 deltaTime )
 
 	if ( feTicker.Delta( deltaTime )) {
 		GetFriendEnemyLists();
-		feTicker.Set( parentChit->ID() & 63 );	// a little randomness
+		feTicker.SetTime( feTicker.Period() + parentChit->ID() & 63 );	// a little randomness
 	}
 
 	// High level mode switch, in/out of battle?

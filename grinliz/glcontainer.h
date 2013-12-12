@@ -32,7 +32,6 @@ distribution.
 #include "gldebug.h"
 #include "gltypes.h"
 #include "glutil.h"
-//#include "glstringutil.h"
 
 namespace grinliz
 {

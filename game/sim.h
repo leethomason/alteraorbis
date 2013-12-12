@@ -24,6 +24,7 @@
 
 #include "gamelimits.h"
 #include "visitor.h"
+#include "../xegame/cticker.h"
 
 class Engine;
 class WorldMap;
@@ -63,8 +64,6 @@ public:
 	void CreateVolcano( int x, int y, int size );
 	// type=-1 will scan for natural plant choice
 	void CreatePlant( int x, int y, int type );
-
-	double DateInAge() const { return (double)timeInMinutes / (double)MINUTES_IN_AGE; }
 	
 	void CreatePlayer();
 	void CreatePlayer( const grinliz::Vector2I& pos );
@@ -84,10 +83,9 @@ private:
 
 	grinliz::Random	random;
 	int playerID;
-	int secondClock;
-	int minuteClock;
-	U32 timeInMinutes;
-	int volcTimer;
+	CTicker minuteClock, 
+			secondClock, 
+			volcTimer;
 	int currentVisitor;
 
 	grinliz::CDynArray< Chit* >	queryArr;	// local; cached at object.

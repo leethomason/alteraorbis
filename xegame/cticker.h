@@ -23,13 +23,13 @@ class XStream;
 class CTicker
 {
 public:
-	CTicker( int _period ) : period(_period), time(0) {}
+	explicit CTicker( int _period ) : period(_period), time(_period) {}
 
 	// Sets time passed. Returns the number of times
 	// that this ticker fired.
 	int Delta( U32 d ) {
 		int n = 0;
-		time -= d;
+		time -= int(d);
 		while ( time <= 0 ) {
 			++n;
 			time += period;
@@ -47,10 +47,12 @@ public:
 	void Within( int t ) { 
 		if ( t < time ) time = t;
 	}
-	void Set( int t ) {
+	// Remember it counts *down*
+	void SetTime( int t ) {
 		time = t;
 	}
 	int Period() const { return period; }
+	void SetPeriod( int t ) { period = t; }
 
 	void Serialize( XStream* xs, const char* name );
 
