@@ -235,7 +235,7 @@ void ItemDB::Serialize( XStream* xs )
 {
 	XarcOpen( xs, "ItemDB" );
 	// Don't serialize map! It is created/destroyed with GameItems
-	XARC_SER_CARRAY( xs, itemHistory );
+	//XARC_SER_CARRAY( xs, itemHistory );
 	XarcClose( xs );
 }
 
@@ -244,15 +244,11 @@ void ItemDB::Add( const GameItem* gi )
 	int id = gi->ID();
 	GLASSERT( id >= 0 );
 
-	if ( id == 127 ) {
-		int debug=1;
-	}
-
 	// History
-	if ( id >= itemHistory.Size() ) {
-		itemHistory.PushArr( id - itemHistory.Size() + 1 );
-	}
-	itemHistory[id].Set( gi );
+	//if ( id >= itemHistory.Size() ) {
+	//	itemHistory.PushArr( id - itemHistory.Size() + 1 );
+	//}
+	//itemHistory[id].Set( gi );
 
 	// Current
 	itemMap.Add( id, gi );
@@ -263,12 +259,9 @@ void ItemDB::Remove( const GameItem* gi )
 {
 	int id = gi->ID();
 	GLASSERT( id >= 0 );
-	if ( id == 127 ) {
-		int debug=1;
-	}
 
 	// History:
-	Update( gi );
+	//Update( gi );
 
 	// Current:
 	itemMap.Remove( id );
@@ -279,13 +272,16 @@ void ItemDB::Update( const GameItem* gi )
 {
 	int id = gi->ID();
 	GLASSERT( id >= 0 );
-	GLASSERT( id < itemHistory.Size() );
+	//GLASSERT( id < itemHistory.Size() );
 
-	if ( id == 127 ) {
-		int debug=1;
-	}
-
-	itemHistory[id].Set( gi );
+	//itemHistory[id].Set( gi );
 }
 
+
+const GameItem*	ItemDB::Find( int id )
+{
+	const GameItem* gi = 0;
+	itemMap.Query( id, &gi );
+	return gi;
+}
 

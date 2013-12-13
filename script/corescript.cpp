@@ -268,7 +268,7 @@ int CoreScript::DoTick( U32 delta )
 				Chit* mob = scriptContext->chitBag->NewMonsterChit( pf, spawn, team );
 
 				if ( isGreater ) {
-					NewsEvent news( NewsEvent::GREATER_MOB_CREATED, ToWorld2F( pf ), mob->ID() );
+					NewsEvent news( NewsEvent::GREATER_MOB_CREATED, ToWorld2F( pf ), mob );
 					NewsHistory::Instance()->Add( news );
 				}
 			}

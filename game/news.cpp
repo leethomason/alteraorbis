@@ -3,6 +3,7 @@
 #include "../xegame/chitbag.h"
 #include "../xegame/chit.h"
 #include "gameitem.h"
+#include "../script/itemscript.h"
 
 using namespace grinliz;
 
@@ -44,6 +45,17 @@ void NewsHistory::Add( const NewsEvent& event )
 }
 
 
+NewsEvent::NewsEvent( U32 what, const grinliz::Vector2F& pos, Chit* main, Chit* second )
+{
+	Clear();
+	this->what = what;
+	this->pos = pos;
+	this->chitID	   = main ? main->ID() : 0;
+	this->itemID	   = ( main && main->GetItem() )     ? main->GetItem()->ID()   : 0;
+	this->secondItemID = ( second && second->GetItem() ) ? second->GetItem()->ID() : 0;
+}
+
+
 grinliz::IString NewsEvent::GetWhat() const
 {
 	GLASSERT( what >= 0 && what < NUM_WHAT );
@@ -66,14 +78,14 @@ void NewsEvent::Console( grinliz::GLString* str, ChitBag* chitBag ) const
 {
 	IString wstr = GetWhat();
 	Vector2I sector = ToSector( ToWorld2I( pos ));
-	Chit* chit = chitBag->GetChit( chitID );
-	Chit* altChit = chitBag->GetChit( altChitID );
+	const GameItem* item = ItemDB::Instance()->Find( itemID );
+	const GameItem* second = ItemDB::Instance()->Find( secondItemID );
 	IString chitName, altChitName;
-	if ( chit && chit->GetItem() ) {
-		chitName = chit->GetItem()->IBestName();
+	if ( item ) {
+		chitName = item->IBestName();
 	}
-	if ( altChit && altChit->GetItem() ) {
-		altChitName = altChit->GetItem()->IBestName();
+	if ( second ) {
+		altChitName = second->IBestName();
 	}
 
 	switch ( what ) {
@@ -98,7 +110,8 @@ void NewsEvent::Serialize( XStream* xs )
 	XARC_SER( xs, what );
 	XARC_SER( xs, pos );
 	XARC_SER( xs, chitID );
-	XARC_SER( xs, altChitID );
+	XARC_SER( xs, itemID );
+	XARC_SER( xs, secondItemID );
 	XARC_SER( xs, date );
 }
 

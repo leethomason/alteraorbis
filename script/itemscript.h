@@ -94,7 +94,7 @@ public:
 private:
 	static ItemDB* instance;
 	grinliz::HashTable< int, const GameItem* > itemMap;	// map of all the active, allocated items.
-	grinliz::CDynArray< ItemHistory > itemHistory;      // all the items ever created. id is the index; may need to compress in the future.
+	//grinliz::CDynArray< ItemHistory > itemHistory;      // all the items ever created. id is the index; may need to compress in the future.
 };
 
 

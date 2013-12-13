@@ -11,6 +11,7 @@
 class XStream;
 class WorldMap;
 class ChitBag;
+class Chit;
 
 // Lots of these - needs to be small. These are kept for the entire
 // record of the game. 
@@ -19,13 +20,7 @@ class NewsEvent {
 	
 public:
 	NewsEvent() { Clear(); }
-	NewsEvent( U32 what, const grinliz::Vector2F& pos, int chitID=0, int altChitID=0 ) {
-		Clear();
-		this->what = what;
-		this->pos = pos;
-		this->chitID = chitID;
-		this->altChitID = altChitID;
-	}
+	NewsEvent( U32 what, const grinliz::Vector2F& pos, Chit* main=0, Chit* second=0 );
 
 	void Serialize( XStream* xs );
 
@@ -50,15 +45,17 @@ public:
 
 	int					what;	
 	grinliz::Vector2F	pos;			// where it happened
-	int					chitID;			// whom the news in about (subject)
-	int					altChitID;		// secondary player
+	// Use Items instead of Chits so we can look up history.
+	int					chitID;			// to track it
+	int					itemID;			// whom the news in about (subject)
+	int					secondItemID;	// secondary player
 	U32					date;			// when it happened, in msec
 
 	void Clear() {
 		what = 0;
 		pos.Zero();
-		chitID = 0;
-		altChitID = 0;
+		itemID = 0;
+		secondItemID = 0;
 		date = 0;
 	}
 };

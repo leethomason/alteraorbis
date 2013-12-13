@@ -966,7 +966,7 @@ bool AIComponent::SectorHerd( const ComponentSet& thisComp )
 
 				// Trolls herd *all the time*
 				if ( thisComp.item->IName() != "troll" ) {
-					NewsEvent news( NewsEvent::SECTOR_HERD, pos, parentChit->ID() );
+					NewsEvent news( NewsEvent::SECTOR_HERD, pos, parentChit );
 					NewsHistory::Instance()->Add( news );
 				}
 
