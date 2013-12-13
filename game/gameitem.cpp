@@ -160,6 +160,10 @@ void GameItem::Serialize( XStream* xs )
 	traits.Serialize( xs );
 	wallet.Serialize( xs );
 	XarcClose( xs );
+
+	if ( xs->Loading() ) {
+		Track();
+	}
 }
 
 	
@@ -493,6 +497,53 @@ int GameItem::GetValue() const
 	}
 	return value;
 }
+
+
+int GameItem::ID() const { 
+	if ( !id ) {
+		id = ++idPool; 
+		// id is now !0, so start tracking.
+		Track();	
+	}
+	return id; 
+}
+
+
+void GameItem::Track() const
+{
+	// use the 'id', not ID() so we don't allocate:
+	if ( id == 0 ) return;
+
+	ItemDB* db = ItemDB::Instance();
+	if ( db ) {
+		db->Add( this );
+	}
+}
+
+
+void GameItem::UpdateTrack() const 
+{
+	// use the 'id', not ID() so we don't allocate:
+	if ( id == 0 ) return;
+
+	ItemDB* db = ItemDB::Instance();
+	if ( db ) {
+		db->Update( this );
+	}
+}
+
+
+void GameItem::UnTrack() const
+{
+	// use the 'id', not ID() so we don't allocate:
+	if ( id == 0 ) return;
+
+	ItemDB* db = ItemDB::Instance();
+	if ( db ) {
+		db->Remove( this );
+	}
+}
+
 
 
 void DamageDesc::Log()

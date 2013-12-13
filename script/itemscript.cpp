@@ -20,6 +20,7 @@
 #include "../tinyxml2/tinyxml2.h"
 #include "../xegame/istringconst.h"
 #include "../game/lumosmath.h"
+#include "../xarchive/glstreamer.h"
 
 using namespace tinyxml2;
 using namespace grinliz;
@@ -40,10 +41,10 @@ void ItemDefDB::Load( const char* path )
 		{
 			GameItem* item = new GameItem();
 			item->Load( itemEle );
-			item->key = item->name;
+			item->key = item->IName();
 			GLASSERT( !map.Query( item->key.c_str(), 0 ));
 			map.Add( item->key.c_str(), item );
-			topNames.Push( item->name );
+			topNames.Push( item->IName() );
 
 			const XMLElement* intrinsicEle = itemEle->FirstChildElement( "intrinsics" );
 			if ( intrinsicEle ) {
@@ -138,7 +139,7 @@ void ItemDefDB::AssignWeaponStats( const int* roll, const GameItem& base, GameIt
 	// ClipCap:		CHR		
 	// Reload:		INT
 
-	item->CopyFrom( &base, item->id );
+	item->CopyFrom( &base );
 	for( int i=0; i<GameTrait::NUM_TRAITS; ++i ) {
 		item->traits.Set( i, roll[i] );
 	}
@@ -209,6 +210,82 @@ void ItemDefDB::DumpWeaponStats()
 		}
 	}
 	fclose( fp );
+}
+
+
+void ItemHistory::Set( const GameItem* gi )
+{
+	this->name			= gi->IName();
+	this->properName	= gi->IProperName();
+	this->desc			= gi->IDesc();
+}
+
+void ItemHistory::Serialize( XStream* xs )
+{
+	XarcOpen( xs, "ItemHistory" );
+	XARC_SER( xs, name );
+	XARC_SER( xs, properName );
+	XARC_SER( xs, desc );
+	XarcClose( xs );
+}
+
+ItemDB* ItemDB::instance = 0;
+
+void ItemDB::Serialize( XStream* xs ) 
+{
+	XarcOpen( xs, "ItemDB" );
+	// Don't serialize map! It is created/destroyed with GameItems
+	XARC_SER_CARRAY( xs, itemHistory );
+	XarcClose( xs );
+}
+
+void ItemDB::Add( const GameItem* gi )
+{
+	int id = gi->ID();
+	GLASSERT( id >= 0 );
+
+	if ( id == 127 ) {
+		int debug=1;
+	}
+
+	// History
+	if ( id >= itemHistory.Size() ) {
+		itemHistory.PushArr( id - itemHistory.Size() + 1 );
+	}
+	itemHistory[id].Set( gi );
+
+	// Current
+	itemMap.Add( id, gi );
+}
+
+
+void ItemDB::Remove( const GameItem* gi )
+{
+	int id = gi->ID();
+	GLASSERT( id >= 0 );
+	if ( id == 127 ) {
+		int debug=1;
+	}
+
+	// History:
+	Update( gi );
+
+	// Current:
+	itemMap.Remove( id );
+}
+
+
+void ItemDB::Update( const GameItem* gi )
+{
+	int id = gi->ID();
+	GLASSERT( id >= 0 );
+	GLASSERT( id < itemHistory.Size() );
+
+	if ( id == 127 ) {
+		int debug=1;
+	}
+
+	itemHistory[id].Set( gi );
 }
 
 

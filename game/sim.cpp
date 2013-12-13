@@ -43,6 +43,7 @@ Sim::Sim( LumosGame* g ) : minuteClock( 60*1000 ), secondClock( 1000 ), volcTime
 	Screenport* port = lumosGame->GetScreenportMutable();
 	const gamedb::Reader* database = lumosGame->GetDatabase();
 
+	itemDB		= new ItemDB();
 	newsHistory = new NewsHistory();
 	worldMap	= new WorldMap( MAX_MAP_SIZE, MAX_MAP_SIZE );
 	engine		= new Engine( port, database, worldMap );
@@ -73,6 +74,7 @@ Sim::~Sim()
 	delete engine;
 	delete worldMap;
 	delete newsHistory;
+	delete itemDB;
 }
 
 
@@ -103,7 +105,8 @@ void Sim::Load( const char* mapDAT, const char* gameDAT )
 			minuteClock.Serialize( &reader, "minuteClock" );
 			secondClock.Serialize( &reader, "secondClock" );
 			volcTimer.Serialize( &reader, "volcTimer" );
-			NewsHistory::Instance()->Serialize( &reader );
+			itemDB->Serialize( &reader );
+			newsHistory->Serialize( &reader );
 			reserveBank->Serialize( &reader );
 			visitors->Serialize( &reader );
 			engine->camera.Serialize( &reader );
@@ -141,7 +144,8 @@ void Sim::Save( const char* mapDAT, const char* gameDAT )
 			minuteClock.Serialize( &writer, "minuteClock" );
 			secondClock.Serialize( &writer, "secondClock" );
 			volcTimer.Serialize( &writer, "volcTimer" );
-			NewsHistory::Instance()->Serialize( &writer );
+			itemDB->Serialize( &writer );
+			newsHistory->Serialize( &writer );
 			reserveBank->Serialize( &writer );
 			visitors->Serialize( &writer );
 			engine->camera.Serialize( &writer );
@@ -231,10 +235,10 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos )
 
 	IString nameGen = chit->GetItem()->keyValues.GetIString( "nameGen" );
 	if ( !nameGen.empty() ) {
-		chit->GetItem()->properName = StringPool::Intern( 
+		chit->GetItem()->SetProperName( StringPool::Intern( 
 			lumosGame->GenName( nameGen.c_str(), 
 								chit->ID(),
-								4, 8 ));
+								4, 8 )));
 	}
 	AIComponent* ai = new AIComponent( engine, worldMap );
 	ai->EnableDebug( true );

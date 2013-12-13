@@ -35,6 +35,7 @@ class Chit;
 class Weather;
 class ReserveBank;
 class NewsHistory;
+class ItemDB;
 
 class Sim
 {
@@ -82,6 +83,7 @@ private:
 	LumosChitBag*	chitBag;
 	Visitors*		visitors;
 	NewsHistory*	newsHistory;
+	ItemDB*			itemDB;
 
 	grinliz::Random	random;
 	int playerID;

@@ -129,7 +129,7 @@ Chit* LumosChitBag::FindBuilding(	const grinliz::IString&  name,
 
 		const GameItem* item = chit->GetItem();
 
-		if ( item && ( name.empty() || item->name == name )) {	// name, if empty, matches everything
+		if ( item && ( name.empty() || item->IName() == name )) {	// name, if empty, matches everything
 			match.Push( chit );
 		}
 	}
@@ -442,7 +442,7 @@ void LumosChitBag::NewWalletChits( const grinliz::Vector3F& pos, const Wallet& w
 Chit* LumosChitBag::NewItemChit( const grinliz::Vector3F& _pos, GameItem* orphanItem, bool fuzz, bool onGround )
 {
 	GLASSERT( !orphanItem->Intrinsic() );
-	GLASSERT( !orphanItem->resource.empty() );
+	GLASSERT( !orphanItem->IResourceName().empty() );
 
 	Vector3F pos = _pos;
 	if ( fuzz ) {
@@ -694,7 +694,7 @@ bool ItemNameFilter::Accept( Chit* chit )
 			}
 		}
 		else if ( iNames ) {
-			const IString& key = item->name;
+			const IString& key = item->IName();
 			for( int i=0; i<count; ++i ) {
 				if ( key == iNames[i] )
 					return true;

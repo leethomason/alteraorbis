@@ -603,7 +603,7 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 since )
 		VisitorData* vd = &Visitors::Instance()->visitorData[visitorIndex];
 		IString kioskName = vd->CurrentKioskWant();
 
-		if ( chit && chit->GetItem()->name == kioskName ) {
+		if ( chit && chit->GetItem()->IName() == kioskName ) {
 			vd->kioskTime += since;
 			if ( vd->kioskTime > VisitorData::KIOSK_TIME ) {
 				Vector2I sector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
@@ -965,7 +965,7 @@ bool AIComponent::SectorHerd( const ComponentSet& thisComp )
 				}
 
 				// Trolls herd *all the time*
-				if ( thisComp.item->name != "troll" ) {
+				if ( thisComp.item->IName() != "troll" ) {
 					NewsEvent news( NewsEvent::SECTOR_HERD, pos, parentChit->ID() );
 					NewsHistory::Instance()->Add( news );
 				}
@@ -1006,7 +1006,7 @@ void AIComponent::ThinkVisitor( const ComponentSet& thisComp )
 	VisitorData* vd = Visitors::Get( visitorIndex );
 	Chit* kiosk = GetChitBag()->ToLumos()->QueryPorch( pos2i );
 	IString kioskName = vd->CurrentKioskWant();
-	if ( kiosk && kiosk->GetItem()->name == kioskName ) {
+	if ( kiosk && kiosk->GetItem()->IName() == kioskName ) {
 		// all good
 	}
 	else {
@@ -1219,7 +1219,7 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 		Chit* chit = chitArr[i];
 		const GameItem* item = chit->GetItem();
 		GLASSERT( item );
-		const BuildData* bd = buildScript.GetDataFromStructure( item->name );
+		const BuildData* bd = buildScript.GetDataFromStructure( item->IName() );
 		if ( !bd || bd->needs.IsZero() ) 
 			continue;
 
@@ -1240,7 +1240,7 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 		}
 
 		// Variation - is this the last building visited?
-		if ( item->name == taskList.LastBuildingUsed() ) {
+		if ( item->IName() == taskList.LastBuildingUsed() ) {
 			s *= 0.5;
 		}
 
@@ -1864,7 +1864,7 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		if ( chit->PlayerControlled()) {
 			Chit* building = GetLumosChitBag()->QueryPorch( thisComp.spatial->GetPosition2DI() );
 			if ( building && building->GetItem() ) {
-				IString name = building->GetItem()->name;
+				IString name = building->GetItem()->IName();
 				ItemComponent* ic = parentChit->GetItemComponent();
 				CoreScript* cs	= GetLumosChitBag()->GetCore( sector );
 				Chit* core = cs->ParentChit();

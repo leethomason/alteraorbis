@@ -62,6 +62,9 @@ struct ItemHistory
 	grinliz::IString name;			// echos GameItem:	blaster
 	grinliz::IString properName;	//					Hruntar
 	grinliz::IString desc;			//					Hruntar a superb blaster
+
+	void Set( const GameItem* );
+	void Serialize( XStream* xs );
 };
 
 /*
@@ -73,15 +76,17 @@ struct ItemHistory
 class ItemDB
 {
 public:
-	static ItemDB* Instance() { if ( !instance ) instance = new ItemDB(); return instance; }
-	~ItemDB()	{ instance = 0; }
+	ItemDB()	{ GLASSERT( instance == 0 ); instance = this; }
+	~ItemDB()	{ GLASSERT( instance ); instance = 0; }
+
+	static ItemDB* Instance() { return instance; }
 
 	void Add( const GameItem* );
+	void Update( const GameItem* );
 	void Remove( const GameItem* );
 
 	// Find an item by id; if null, can use History
 	const GameItem*		Find( int id );
-	// Should always return.
 	const ItemHistory*	History( int id );
 
 	void Serialize( XStream* xs );

@@ -443,7 +443,7 @@ float BattleMechanics::MeleeDPTU( const GameItem* wielder, const IMeleeWeaponIte
 {
 	const GameItem* weapon = _weapon->GetItem();
 	int meleeTime = 1000;
-	if ( !weapon->resource.empty() ) {
+	if ( !weapon->IResourceName().empty() ) {
 		const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( weapon->ResourceName(), false );
 		if ( res ) {
 			IString animName = res->header.animation;

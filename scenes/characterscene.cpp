@@ -247,7 +247,7 @@ void CharacterScene::SetButtonText()
 
 				AssignProcedural(	proc.c_str(), 
 									strstr( down->Name(), "emale" )!=0, 
-									down->id, 
+									down->ID(), 
 									down->primaryTeam, 
 									false, 
 									down->flags & GameItem::EFFECT_MASK, 

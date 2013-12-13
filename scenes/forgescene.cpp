@@ -24,7 +24,7 @@ ForgeScene::ForgeScene( LumosGame* game, ForgeSceneData* data )
 {
 	forgeData = data;
 	item = new GameItem();
-	random.SetSeed( item->id );
+	random.SetSeed( item->ID() );
 	random.Rand();
 	random.Rand();
 	displayItem = item;
@@ -195,7 +195,7 @@ void ForgeScene::SetModel( bool randomTraits )
 	ProcRenderInfo info;
 	if ( item ) {
 		engine->FreeModel( model );
-		model = engine->AllocModel( item->resource.c_str() );
+		model = engine->AllocModel( item->ResourceName() );
 		model->SetPos( 0, 0, 0 );
 
 		// Rotate the shield to face the camera.
@@ -204,7 +204,7 @@ void ForgeScene::SetModel( bool randomTraits )
 		q.FromAxisAngle( AXIS, type == ForgeScript::SHIELD ? -90.0f : 0.0f );
 		model->SetRotation( q );
 
-		AssignProcedural( item->resource.c_str(), false, displayItem->id, 0, false, effectFlags, partsFlags, &info );
+		AssignProcedural( item->ResourceName(), false, displayItem->ID(), 0, false, effectFlags, partsFlags, &info );
 
 		model->SetTextureXForm( info.te.uvXForm.x, info.te.uvXForm.y, info.te.uvXForm.z, info.te.uvXForm.w );
 		model->SetTextureClip( info.te.clip.x, info.te.clip.y, info.te.clip.z, info.te.clip.w );

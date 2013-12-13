@@ -279,21 +279,15 @@ class GameItem :	private IMeleeWeaponItem,
 					private IShield
 {
 public:
-	GameItem( int _flags=0, const char* _name=0, const char* _res=0 )
-	{
-		CopyFrom(0);
-		flags = _flags;
-		name = grinliz::StringPool::Intern( _name );
-		resource = grinliz::StringPool::Intern( _res );
-		id = ++idPool;
-	}
+	GameItem()								{ CopyFrom(0); Track();			}
+	GameItem( const GameItem& rhs )			{ CopyFrom( &rhs ); Track();	}
+	void operator=( const GameItem& rhs )	{ int savedID = id; CopyFrom( &rhs ); id = savedID; UpdateTrack();	}
+	virtual ~GameItem()						{ UnTrack(); }
 
-	GameItem( const GameItem& rhs )			{ CopyFrom( &rhs );	}
-	void operator=( const GameItem& rhs )	{ CopyFrom( &rhs );	}
-
-	virtual ~GameItem()	{}
 	virtual GameItem* GetItem() { return this; }
 	virtual const GameItem* GetItem() const { return this; }
+
+	int ID() const;
 
 	virtual void Load( const tinyxml2::XMLElement* doc );
 	virtual void Serialize( XStream* xs );
@@ -303,12 +297,20 @@ public:
 	// basic sanity flags.
 	void Apply( const GameItem* intrinsic );	
 
-	const char* Name() const			{ return name.c_str(); }
-	const char* ProperName() const		{ return properName.c_str(); }
-	const char* BestName() const		{ if ( !properName.empty() ) return properName.c_str(); return name.c_str(); }
-	grinliz::IString BestNameI() const	{ if ( !properName.empty() ) return properName; return name; }
-	const char* Desc() const			{ return desc.c_str(); }
-	const char* ResourceName() const	{ return resource.c_str(); }
+	const char*			Name() const			{ return name.c_str(); }
+	grinliz::IString	IName() const			{ return name; }
+	const char*			ProperName() const		{ return properName.c_str(); }
+	grinliz::IString	IProperName() const		{ return properName; }
+	const char*			BestName() const		{ if ( !properName.empty() ) return properName.c_str(); return name.c_str(); }
+	grinliz::IString	IBestName() const		{ if ( !properName.empty() ) return properName; return name; }
+	const char*			Desc() const			{ return desc.c_str(); }
+	grinliz::IString	IDesc() const			{ return desc; }
+	const char*			ResourceName() const	{ return resource.c_str(); }
+	grinliz::IString	IResourceName() const	{ return resource; }
+
+	void SetName( const char* n )				{ name = grinliz::StringPool::Intern( n ); UpdateTrack(); }
+	void SetProperName( const char* n )			{ properName = grinliz::StringPool::Intern( n ); UpdateTrack(); }
+	void SetProperName( const grinliz::IString& n ) { properName = n; UpdateTrack(); }
 
 	enum {
 		// Type(s) of the item
@@ -348,14 +350,7 @@ public:
 		CLICK_THROUGH		= (1<<25),		// model is created with flags to ignore world clicking
 	};
 
-	// ------ description ------
-	grinliz::IString		name;		// name of the item
-	grinliz::IString		properName;	// the proper name, if the item has one "John"
-	grinliz::IString		desc;		// description / alternate name
 	grinliz::IString		key;		// modified name, for storage. not serialized.
-	grinliz::IString		resource;	// resource used to  render the item
-	int		id;				// unique id for this item
-	static int idPool;
 	int		flags;			// flags that define this item; 'constant'
 	int		hardpoint;		// id of hardpoint this item attaches to
 	float	mass;			// mass (kg)
@@ -391,17 +386,14 @@ public:
 	}
 
 	// Group all the copy/init in one place!
-	void CopyFrom( const GameItem* rhs, int useID=-1 ) {
+	void CopyFrom( const GameItem* rhs ) {
 		if ( rhs ) {
 			name			= rhs->name;
 			properName		= rhs->properName;
 			desc			= rhs->desc;
 			key				= rhs->key;
 			resource		= rhs->resource;
-			if ( useID < 0 ) 
-				id			= ++idPool;
-			else
-				id			= useID;
+			id				= 0;	// assigned when needed
 			flags			= rhs->flags;
 			hardpoint		= rhs->hardpoint;
 			mass			= rhs->mass;
@@ -534,11 +526,25 @@ public:
 	// Absorb damage.'remain' is how much damage passes through the shield
 	void AbsorbDamage( bool inInventory, DamageDesc dd, DamageDesc* remain, const char* log, const IMeleeWeaponItem* booster, Chit* parent );
 
+	static int idPool;
+
 private:
 	float Delta( U32 delta, float v ) {
 		return v * (float)delta * 0.001f;
 	}
 
+	// Functions to update the ItemDB
+	void Track() const;
+	void UnTrack() const;
+	void UpdateTrack() const;
+
+	// ------ description ------
+	grinliz::IString		name;		// name of the item
+	grinliz::IString		properName;	// the proper name, if the item has one "John"
+	grinliz::IString		desc;		// description / alternate name
+	grinliz::IString		resource;	// resource used to  render the item
+
+	mutable int	id;		// unique id for this item. not assigned until needed, hence mutable
 	mutable int value;	// not serialized, but cached
 };
 

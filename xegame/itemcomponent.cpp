@@ -43,7 +43,7 @@ using namespace grinliz;
 ItemComponent::ItemComponent( Engine* _engine, WorldMap* wm, const GameItem& item ) 
 	: engine(_engine), worldMap(wm), slowTick( 500 ), hardpointsModified( true )
 {
-	GLASSERT( !item.name.empty() );
+	GLASSERT( !item.IName().empty() );
 	itemArr.Push( new GameItem( item ) );
 }
 
@@ -53,7 +53,7 @@ ItemComponent::ItemComponent( Engine* _engine, WorldMap* wm, GameItem* item )
 {
 	// item can be null if loading.
 	if ( item ) {
-		GLASSERT( !item->name.empty() );
+		GLASSERT( !item->IName().empty() );
 		itemArr.Push( item );	
 	}
 }
@@ -88,7 +88,7 @@ void ItemComponent::Serialize( XStream* xs )
 	}
 	for( int i=0; i<nItems; ++i ) {
 		itemArr[i]->Serialize( xs );
-		GLASSERT( !itemArr[i]->name.empty() );
+		GLASSERT( !itemArr[i]->IName().empty() );
 	}
 
 	this->EndSerialize( xs );
@@ -100,13 +100,13 @@ void ItemComponent::NameItem( GameItem* item )
 	bool shouldHaveName = item->traits.Level() >= 4;	// FIXME: needs work...
 
 	if ( shouldHaveName ) {
-		if ( item->properName.empty() ) {
+		if ( item->IProperName().empty() ) {
 			IString nameGen = item->keyValues.GetIString( "nameGen" );
 			if ( !nameGen.empty() ) {
-				item->properName = StringPool::Intern( 
+				item->SetProperName( StringPool::Intern( 
 					GetLumosChitBag()->GetLumosGame()->GenName( nameGen.c_str(), 
-																item->id,
-																4, 10 ));
+																item->ID(),
+																4, 10 )));
 			}
 		}
 	}
@@ -218,7 +218,7 @@ bool ItemComponent::ItemActive( int i )
 
 	// It needs a hardpoint. Is it on the hardpoint?
 	const GameItem* mainItem = itemArr[0];
-	const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( mainItem->resource.c_str(), false );
+	const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( mainItem->ResourceName(), false );
 	if ( !res ) {
 		// No visual representation??
 		GLASSERT( 0 );
@@ -257,7 +257,7 @@ bool ItemComponent::ItemActive( int i )
 void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {
 	GameItem* mainItem = itemArr[0];
-	GLASSERT( !mainItem->name.empty() );
+	GLASSERT( !mainItem->IName().empty() );
 
 	if ( msg.ID() == ChitMsg::CHIT_DAMAGE ) {
 		parentChit->SetTickNeeded();
@@ -403,7 +403,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 				break;
 			}
 			GameItem* item = itemArr.Pop();
-			GLASSERT( !item->name.empty() );
+			GLASSERT( !item->IName().empty() );
 			if ( dropItems )
 				parentChit->GetLumosChitBag()->NewItemChit( pos, item, true, true );
 			else
@@ -834,7 +834,7 @@ void ItemComponent::SetHardpoints()
 			ProcRenderInfo info;
 
 			if ( !proc.empty() ) {
-				AssignProcedural( proc.c_str(), female, item->id, team, false, item->Effects(), features, &info );
+				AssignProcedural( proc.c_str(), female, item->ID(), team, false, item->Effects(), features, &info );
 			}
 			rc->SetProcedural( (i==0) ? 0 : itemArr[i]->hardpoint, info );
 		}

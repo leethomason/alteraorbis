@@ -137,7 +137,7 @@ void ForgeScript::Build(	int type,			// GUN
 
 	if ( item ) {
 		const GameItem& itemDef = ItemDefDB::Instance()->Get( typeName );
-		item->CopyFrom( &itemDef, item->id );
+		item->CopyFrom( &itemDef );
 		ItemDefDB::Instance()->AssignWeaponStats( roll, itemDef, item );
 	}
 

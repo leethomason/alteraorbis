@@ -224,7 +224,7 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta )
 		{
 			Chit* building	= chitBag->QueryPorch( pos2i );
 			if ( building ) {
-				IString buildingName = building->GetItem()->name;
+				IString buildingName = building->GetItem()->IName();
 
 				if ( chit->PlayerControlled() ) {
 					// Not sure how this happened. But do nothing.
