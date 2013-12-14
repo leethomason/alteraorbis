@@ -15,7 +15,6 @@ ForgeScript::ForgeScript( ItemComponent* forgeUser, int techLevel )
 {
 	this->forgeUser = forgeUser;
 	this->techLevel = techLevel;
-	random.SetSeedFromTime();
 }
 
 
@@ -74,6 +73,13 @@ void ForgeScript::Build(	int type,			// GUN
 	*techRequired = 0;
 	required->EmptyWallet();
 	required->crystal[CRYSTAL_GREEN] += 1;
+
+	// Random, but can't leave forge and come back
+	// to get different numbers.
+	Random random;
+	random.SetSeed(   forgeUser->GetItem()->ID() 
+		            ^ forgeUser->GetItem()->traits.Experience() 
+					^ (type + subType*37 + partsFlags*129 + effectFlags*11) );
 
 	const char* typeName = "pistol";
 
@@ -137,7 +143,7 @@ void ForgeScript::Build(	int type,			// GUN
 
 	if ( item ) {
 		const GameItem& itemDef = ItemDefDB::Instance()->Get( typeName );
-		item->CopyFrom( &itemDef );
+		*item = itemDef;
 		ItemDefDB::Instance()->AssignWeaponStats( roll, itemDef, item );
 	}
 

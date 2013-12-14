@@ -58,7 +58,6 @@ public:
 private:
 	ItemComponent* forgeUser;
 	int techLevel;
-	grinliz::Random random;
 };
 
 

@@ -12,6 +12,7 @@ class XStream;
 class WorldMap;
 class ChitBag;
 class Chit;
+class GameItem;
 
 // Lots of these - needs to be small. These are kept for the entire
 // record of the game. 
@@ -21,16 +22,20 @@ class NewsEvent {
 public:
 	NewsEvent() { Clear(); }
 	NewsEvent( U32 what, const grinliz::Vector2F& pos, Chit* main=0, Chit* second=0 );
+	NewsEvent( U32 what, const grinliz::Vector2F& pos, const GameItem* item, Chit* second=0 );
 
 	void Serialize( XStream* xs );
 
-	enum {
-		DENIZEN_CREATED = 1,
-		DENIZEN_KILLED,
-		GREATER_MOB_CREATED,
-		GREATER_MOB_KILLED,
+	// Be sure to update GetWhat() when this list chnages.
+	enum {							//	FIRST		SECOND		CHIT
+		DENIZEN_CREATED = 1,		//	created					created
+		DENIZEN_KILLED,				//  killed		killer		killed
+		GREATER_MOB_CREATED,		//  created					created
+		GREATER_MOB_KILLED,			//  killed		killer		killed
 
-		SECTOR_HERD,		
+		FORGED,						//	item		maker		maker
+//		DESTROYED,					//  item							// be careful to only track significant items
+		SECTOR_HERD,				//	mob
 
 		VOLCANO,
 		POOL,
@@ -39,9 +44,12 @@ public:
 		NUM_WHAT
 	};
 
-	grinliz::IString GetWhat() const;
-	void Console( grinliz::GLString* str, ChitBag* chitBag ) const;
-	grinliz::Vector2I Sector() const { return ToSector( ToWorld2I( pos )); }
+	bool				Origin() const { return    what == DENIZEN_CREATED
+												|| what == GREATER_MOB_CREATED
+												|| what == FORGED; }
+	grinliz::IString	GetWhat() const;
+	void				Console( grinliz::GLString* str ) const;
+	grinliz::Vector2I	Sector() const { return ToSector( ToWorld2I( pos )); }
 
 	int					what;	
 	grinliz::Vector2F	pos;			// where it happened
@@ -67,7 +75,7 @@ public:
 class NewsHistory
 {
 public:
-	NewsHistory();
+	NewsHistory( ChitBag* chitBag );
 	~NewsHistory();
 
 	static NewsHistory* Instance() { return instance; }
@@ -86,12 +94,18 @@ public:
 	const NewsEvent& News( int i ) { GLASSERT( i >= 0 && i < events.Size() ); return events[i]; }
 	const NewsEvent* NewsPtr() { return events.Mem(); }
 
+	const NewsEvent** Find( int itemID, int* num );
+
+	ChitBag* GetChitBag() const { return chitBag; }
+
 private:
 
 	static NewsHistory* instance;
 
 	U32 date;
-	grinliz::CDynArray< NewsEvent > events;
+	ChitBag* chitBag;
+	grinliz::CDynArray< const NewsEvent* > cache;	// return from query call
+	grinliz::CDynArray< NewsEvent > events;			// big array of everything that has happend.
 };
 
 

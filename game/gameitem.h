@@ -385,65 +385,6 @@ public:
 		return SPEED * speed;
 	}
 
-	// Group all the copy/init in one place!
-	void CopyFrom( const GameItem* rhs ) {
-		if ( rhs ) {
-			name			= rhs->name;
-			properName		= rhs->properName;
-			desc			= rhs->desc;
-			key				= rhs->key;
-			resource		= rhs->resource;
-			id				= 0;	// assigned when needed
-			flags			= rhs->flags;
-			hardpoint		= rhs->hardpoint;
-			mass			= rhs->mass;
-			hpRegen			= rhs->hpRegen;
-			primaryTeam		= rhs->primaryTeam;
-			meleeDamage		= rhs->meleeDamage;
-			rangedDamage	= rhs->rangedDamage;
-			absorbsDamage	= rhs->absorbsDamage;
-			cooldown		= rhs->cooldown;
-			reload			= rhs->reload;
-			clipCap			= rhs->clipCap;
-			rounds			= rhs->rounds;
-			traits			= rhs->traits;
-			wallet			= rhs->wallet;
-
-			hp				= rhs->hp;
-			accruedFire		= rhs->accruedFire;
-			accruedShock	= rhs->accruedShock;
-
-			keyValues		= rhs->keyValues;
-			microdb			= rhs->microdb;
-		}
-		else {
-			name = grinliz::IString();
-			properName = grinliz::IString();
-			desc = grinliz::IString();
-			key  = grinliz::IString();
-			resource = grinliz::IString();
-			id = 0;
-			flags = 0;
-			hardpoint  = 0;
-			mass = 1;
-			hpRegen = 0;
-			primaryTeam = 0;
-			meleeDamage = 1;
-			rangedDamage = 0;
-			absorbsDamage = 0;
-			clipCap = 0;			// default to no clip and unlimited ammo
-			rounds = clipCap;
-			traits.Init();
-			wallet.EmptyWallet();
-			keyValues.Clear();
-			microdb.Clear();
-
-			hp = TotalHPF();
-			accruedFire = 0;
-			accruedShock = 0;
-		}
-		value = -1;
-	}
 
 	void InitState() {
 		hp = TotalHPF();
@@ -529,6 +470,7 @@ public:
 	static int idPool;
 
 private:
+	void CopyFrom( const GameItem* rhs );
 	float Delta( U32 delta, float v ) {
 		return v * (float)delta * 0.001f;
 	}

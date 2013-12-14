@@ -44,7 +44,6 @@ Sim::Sim( LumosGame* g ) : minuteClock( 60*1000 ), secondClock( 1000 ), volcTime
 	const gamedb::Reader* database = lumosGame->GetDatabase();
 
 	itemDB		= new ItemDB();
-	newsHistory = new NewsHistory();
 	worldMap	= new WorldMap( MAX_MAP_SIZE, MAX_MAP_SIZE );
 	engine		= new Engine( port, database, worldMap );
 	weather		= new Weather( MAX_MAP_SIZE, MAX_MAP_SIZE );
@@ -56,6 +55,7 @@ Sim::Sim( LumosGame* g ) : minuteClock( 60*1000 ), secondClock( 1000 ), volcTime
 
 	chitBag = new LumosChitBag();
 	chitBag->SetContext( engine, worldMap, lumosGame );
+	newsHistory = new NewsHistory( chitBag );
 	worldMap->AttachEngine( engine, chitBag );
 	playerID = 0;
 	currentVisitor = 0;
@@ -70,10 +70,10 @@ Sim::~Sim()
 	delete weather;
 	delete reserveBank;
 	worldMap->AttachEngine( 0, 0 );
+	delete newsHistory;
 	delete chitBag;
 	delete engine;
 	delete worldMap;
-	delete newsHistory;
 	delete itemDB;
 }
 

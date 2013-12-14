@@ -505,5 +505,11 @@ bool TaskList::UseFactory( const ComponentSet& thisComp, Chit* factory, int tech
 		thisComp.item->BestName(),
 		item->BestName(),
 		sector.x, sector.y ));
+
+	if ( NewsHistory::Instance() ) {
+		NewsEvent news( NewsEvent::FORGED, thisComp.spatial->GetPosition2D(), item, thisComp.chit ); 
+		NewsHistory::Instance()->Add( news );
+	}
+
 	return true;
 }

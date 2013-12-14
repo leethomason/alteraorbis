@@ -139,7 +139,7 @@ void ItemDefDB::AssignWeaponStats( const int* roll, const GameItem& base, GameIt
 	// ClipCap:		CHR		
 	// Reload:		INT
 
-	item->CopyFrom( &base );
+	*item = base;
 	for( int i=0; i<GameTrait::NUM_TRAITS; ++i ) {
 		item->traits.Set( i, roll[i] );
 	}
@@ -215,6 +215,7 @@ void ItemDefDB::DumpWeaponStats()
 
 void ItemHistory::Set( const GameItem* gi )
 {
+	this->itemID		= gi->ID();
 	this->name			= gi->IName();
 	this->properName	= gi->IProperName();
 	this->desc			= gi->IDesc();
@@ -235,7 +236,7 @@ void ItemDB::Serialize( XStream* xs )
 {
 	XarcOpen( xs, "ItemDB" );
 	// Don't serialize map! It is created/destroyed with GameItems
-	//XARC_SER_CARRAY( xs, itemHistory );
+	XARC_SER_CARRAY( xs, itemHistory );
 	XarcClose( xs );
 }
 
@@ -245,10 +246,8 @@ void ItemDB::Add( const GameItem* gi )
 	GLASSERT( id >= 0 );
 
 	// History
-	//if ( id >= itemHistory.Size() ) {
-	//	itemHistory.PushArr( id - itemHistory.Size() + 1 );
-	//}
-	//itemHistory[id].Set( gi );
+	// Don't add to history - most Items are plants or irrelevent.
+	// A name change will do an Update() which adds to history.
 
 	// Current
 	itemMap.Add( id, gi );
@@ -261,7 +260,12 @@ void ItemDB::Remove( const GameItem* gi )
 	GLASSERT( id >= 0 );
 
 	// History:
-	//Update( gi );
+	ItemHistory history;
+	history.Set( gi );
+	int index = itemHistory.BSearch( history );
+	if ( index >= 0 ) {
+		itemHistory[index] = history;
+	}
 
 	// Current:
 	itemMap.Remove( id );
@@ -272,9 +276,9 @@ void ItemDB::Update( const GameItem* gi )
 {
 	int id = gi->ID();
 	GLASSERT( id >= 0 );
-	//GLASSERT( id < itemHistory.Size() );
-
-	//itemHistory[id].Set( gi );
+	ItemHistory history;
+	history.Set( gi );
+	itemHistory.Add( history );
 }
 
 

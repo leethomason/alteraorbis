@@ -1,5 +1,6 @@
 #include "itemdescwidget.h"
 #include "../game/gameitem.h"
+#include "../game/news.h"
 #include "../grinliz/glstringutil.h"
 #include "../script/battlemechanics.h"
 
@@ -108,6 +109,22 @@ void ItemDescWidget::SetInfo( const GameItem* item, const GameItem* user )
 		if ( it.NumSub() == 1 && it.SubType(0) == 'd' ) {
 			str.Format( "%s\t%d\n", key, it.Int(0) );
 			textBuffer += str.c_str();
+		}
+	}
+
+	textBuffer += '\n';
+	NewsHistory* history = NewsHistory::Instance();
+	if ( history ) {
+		GLString s;
+
+		int num=0;
+		const NewsEvent** events = history->Find( item->ID(), &num );
+		for( int i=0; i<num; ++i ) {
+			events[i]->Console( &s );
+			if ( !s.empty() ) {
+				textBuffer += s.c_str();
+				textBuffer += '\n';
+			}
 		}
 	}
 

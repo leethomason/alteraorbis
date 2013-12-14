@@ -9,7 +9,7 @@ using namespace grinliz;
 
 NewsHistory* NewsHistory::instance = 0;
 
-NewsHistory::NewsHistory() : date(0)
+NewsHistory::NewsHistory( ChitBag* _chitBag ) : date(0), chitBag(_chitBag)
 {
 	GLASSERT( !instance );
 	instance = this;
@@ -45,6 +45,28 @@ void NewsHistory::Add( const NewsEvent& event )
 }
 
 
+const NewsEvent** NewsHistory::Find( int itemID, int* num )
+{
+	cache.Clear();
+	for( int i=events.Size()-1; i>=0; --i ) {
+		if ( events[i].itemID == itemID ) {
+			cache.Push( &events[i] );
+			if ( events[i].Origin() ) {
+				break;
+			}
+		}
+	}
+	// They are in inverse order;
+	int size = cache.Size();
+	for( int i=0; i<size/2; ++i ) {
+		Swap( &cache[i], &cache[size-i-1] );
+	}
+	*num = cache.Size();
+	return cache.Mem();
+}
+
+
+
 NewsEvent::NewsEvent( U32 what, const grinliz::Vector2F& pos, Chit* main, Chit* second )
 {
 	Clear();
@@ -53,6 +75,17 @@ NewsEvent::NewsEvent( U32 what, const grinliz::Vector2F& pos, Chit* main, Chit* 
 	this->chitID	   = main ? main->ID() : 0;
 	this->itemID	   = ( main && main->GetItem() )     ? main->GetItem()->ID()   : 0;
 	this->secondItemID = ( second && second->GetItem() ) ? second->GetItem()->ID() : 0;
+}
+
+
+NewsEvent::NewsEvent( U32 what, const grinliz::Vector2F& pos, const GameItem* item, Chit* second )
+{
+	Clear();
+	this->what = what;
+	this->pos = pos;
+	this->itemID = item->ID();
+	this->chitID = second->ID();
+	this->secondItemID = second->GetItem() ? second->GetItem()->ID() : 0;
 }
 
 
@@ -65,6 +98,7 @@ grinliz::IString NewsEvent::GetWhat() const
 		"Denizen Derez",
 		"Greater Created",
 		"Greater Derez",
+		"Forged",
 		"Sector Herd",
 		"Volcano",
 		"Pool",
@@ -74,29 +108,43 @@ grinliz::IString NewsEvent::GetWhat() const
 }
 
 
-void NewsEvent::Console( grinliz::GLString* str, ChitBag* chitBag ) const
+void NewsEvent::Console( grinliz::GLString* str ) const
 {
 	IString wstr = GetWhat();
-	Vector2I sector = ToSector( ToWorld2I( pos ));
-	const GameItem* item = ItemDB::Instance()->Find( itemID );
+	Vector2I sector	= ToSector( ToWorld2I( pos ));
+	// FIXME: handle find failures (or remove history tracking...)
+	const GameItem* item   = ItemDB::Instance()->Find( itemID );
 	const GameItem* second = ItemDB::Instance()->Find( secondItemID );
-	IString chitName, altChitName;
+
+	Chit* chit = 0;
+	if ( NewsHistory::Instance()) {
+		ChitBag* chitBag = NewsHistory::Instance()->GetChitBag();
+		if ( chitBag ) {
+			chit = chitBag->GetChit( chitID );
+		}
+	}
+
+	IString itemName, secondItemName;
 	if ( item ) {
-		chitName = item->IBestName();
+		itemName = item->IBestName();
 	}
 	if ( second ) {
-		altChitName = second->IBestName();
+		secondItemName = second->IBestName();
 	}
 
 	switch ( what ) {
 	case DENIZEN_CREATED:
 	case GREATER_MOB_CREATED:
-		str->Format( "%s: %s at domain %x%x", wstr.c_str(), chitName.c_str(), sector.x, sector.y ); 
+		str->Format( "%s: %s at domain %x%x", wstr.c_str(), itemName.c_str(), sector.x, sector.y ); 
 		break;
 
 	case DENIZEN_KILLED:
 	case GREATER_MOB_KILLED:
-		str->Format( "%s: %s at domain %x%x by %s", wstr.c_str(), chitName.c_str(), sector.x, sector.y, altChitName.c_str() ); 
+		str->Format( "%s: %s at domain %x%x by %s", wstr.c_str(), itemName.c_str(), sector.x, sector.y, secondItemName.c_str() ); 
+		break;
+
+	case FORGED:
+		str->Format( "%s forged at domain %x%x by %s", itemName.c_str(), sector.x, sector.y, secondItemName.c_str() );
 		break;
 
 	default:
@@ -107,11 +155,13 @@ void NewsEvent::Console( grinliz::GLString* str, ChitBag* chitBag ) const
 
 void NewsEvent::Serialize( XStream* xs )
 {
+	XarcOpen( xs, "NewsEvent" );
 	XARC_SER( xs, what );
 	XARC_SER( xs, pos );
 	XARC_SER( xs, chitID );
 	XARC_SER( xs, itemID );
 	XARC_SER( xs, secondItemID );
 	XARC_SER( xs, date );
+	XarcClose( xs );	
 }
 

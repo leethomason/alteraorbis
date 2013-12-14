@@ -1,8 +1,11 @@
 #include "forgescene.h"
 #include "../game/lumosgame.h"
 #include "../game/gameitem.h"
+#include "../game/news.h"
 
 #include "../xegame/itemcomponent.h"
+#include "../xegame/chit.h"
+#include "../xegame/spatialcomponent.h"
 
 #include "../engine/engine.h"
 
@@ -91,7 +94,7 @@ ForgeScene::ForgeScene( LumosGame* game, ForgeSceneData* data )
 	buildButton.Init( &gamui2D, game->GetButtonLook(0));
 	buildButton.SetText( "Build" );
 
-	SetModel( false );
+	SetModel( true );
 }
 
 
@@ -247,6 +250,14 @@ void ForgeScene::ItemTapped( const gamui::UIItem* uiItem )
 		forgeData->itemComponent->GetItem(0)->wallet.Remove( crystalRequired );
 		item->wallet.Add( crystalRequired );	// becomes part of the item, and will be returned to Reserve when item is destroyed.
 
+		Chit* chit = forgeData->itemComponent->ParentChit();
+		if ( chit && NewsHistory::Instance() ) {
+			Vector2F pos = { 0, 0 };
+			if ( chit->GetSpatialComponent() ) pos = chit->GetSpatialComponent()->GetPosition2D();
+			NewsEvent news( NewsEvent::FORGED, pos, item, forgeData->itemComponent->ParentChit() ); 
+			NewsHistory::Instance()->Add( news );
+		}
+
 		displayItem = item;
 		item = 0;
 		crystalAvailWidget.Set( forgeData->itemComponent->GetItem(0)->wallet );
@@ -269,7 +280,7 @@ void ForgeScene::ItemTapped( const gamui::UIItem* uiItem )
 			effects[i].SetEnabled( false );
 		}
 	}
-	SetModel( false );
+	SetModel( true );
 }
 
 

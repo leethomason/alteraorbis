@@ -20,7 +20,7 @@ class ForgeSceneData : public SceneData
 public:
 	ForgeSceneData() : SceneData(), tech(3), itemComponent(0) {}
 
-	int				tech;		// available tech (in)
+	int				tech;			// available tech (in)
 	ItemComponent*	itemComponent;	// who is operating this forge?
 };
 

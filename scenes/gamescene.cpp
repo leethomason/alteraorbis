@@ -991,14 +991,15 @@ void GameScene::ProcessNewsToConsole()
 		switch( ne.what ) {
 		case NewsEvent::DENIZEN_CREATED:
 		case NewsEvent::DENIZEN_KILLED:
+		case NewsEvent::FORGED:
 			if ( coreScript && coreScript->IsCitizen( ne.chitID )) {
-				ne.Console( &str, chitBag );
+				ne.Console( &str );
 			}
 			break;
 
 		case NewsEvent::GREATER_MOB_CREATED:
 		case NewsEvent::GREATER_MOB_KILLED:
-			ne.Console( &str, chitBag );
+			ne.Console( &str );
 			break;
 
 		default:

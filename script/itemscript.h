@@ -59,6 +59,10 @@ private:
 // Needs to be small - lots of these to save.
 struct ItemHistory
 {
+	bool operator<(const ItemHistory& rhs) const { return this->itemID < rhs.itemID; }
+	bool operator==(const ItemHistory& rhs) const { return this->itemID == rhs.itemID; }
+
+	int itemID;
 	grinliz::IString name;			// echos GameItem:	blaster
 	grinliz::IString properName;	//					Hruntar
 	grinliz::IString desc;			//					Hruntar a superb blaster
@@ -94,7 +98,7 @@ public:
 private:
 	static ItemDB* instance;
 	grinliz::HashTable< int, const GameItem* > itemMap;	// map of all the active, allocated items.
-	//grinliz::CDynArray< ItemHistory > itemHistory;      // all the items ever created. id is the index; may need to compress in the future.
+	grinliz::SortedDynArray< ItemHistory > itemHistory;      // all the items ever created. id is the index; may need to compress in the future.
 };
 
 
