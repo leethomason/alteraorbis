@@ -7,6 +7,7 @@
 #include "../grinliz/glstringutil.h"
 #include "gamelimits.h"
 #include "lumosmath.h"
+#include "../xegame/stackedsingleton.h"
 
 class XStream;
 class WorldMap;
@@ -72,13 +73,13 @@ public:
 // "scoped singleton": created and destroyed by a main game/scene scope, 
 // but there can only be one active. (Could implement a stack, in the future.)
 // Created and destroyed by the Simulation
-class NewsHistory
+class NewsHistory : public StackedSingleton< NewsHistory >
 {
 public:
 	NewsHistory( ChitBag* chitBag );
 	~NewsHistory();
 
-	static NewsHistory* Instance() { return instance; }
+	//static NewsHistory* Instance() { return instance; }
 	void Add( const NewsEvent& event );
 
 	// First thing to tick! Updates the main clock.
@@ -100,7 +101,7 @@ public:
 
 private:
 
-	static NewsHistory* instance;
+	//static NewsHistory* instance;
 
 	U32 date;
 	ChitBag* chitBag;

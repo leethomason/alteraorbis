@@ -230,7 +230,8 @@ void ItemHistory::Serialize( XStream* xs )
 	XarcClose( xs );
 }
 
-ItemDB* ItemDB::instance = 0;
+//ItemDB* ItemDB::instance = 0;
+ItemDB* StackedSingleton< ItemDB >::instance = 0;
 
 void ItemDB::Serialize( XStream* xs ) 
 {

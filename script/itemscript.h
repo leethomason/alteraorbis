@@ -21,6 +21,7 @@
 #include "../grinliz/glcontainer.h"
 
 #include "../game/gameitem.h"
+#include "../xegame/stackedsingleton.h"
 
 
 class ItemDefDB
@@ -77,13 +78,11 @@ struct ItemHistory
 	able to look up items for history and such. It either is in use, or deleted, and
 	we need a record of what it was.
 */
-class ItemDB
+class ItemDB : public StackedSingleton< ItemDB >
 {
 public:
-	ItemDB()	{ GLASSERT( instance == 0 ); instance = this; }
-	~ItemDB()	{ GLASSERT( instance ); instance = 0; }
-
-	static ItemDB* Instance() { return instance; }
+	ItemDB()	{ PushInstance( this ); }
+	~ItemDB()	{ PopInstance( this );; }
 
 	void Add( const GameItem* );
 	void Update( const GameItem* );
@@ -96,7 +95,6 @@ public:
 	void Serialize( XStream* xs );
 
 private:
-	static ItemDB* instance;
 	grinliz::HashTable< int, const GameItem* > itemMap;	// map of all the active, allocated items.
 	grinliz::SortedDynArray< ItemHistory > itemHistory;      // all the items ever created. id is the index; may need to compress in the future.
 };

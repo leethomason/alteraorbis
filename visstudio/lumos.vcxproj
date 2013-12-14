@@ -297,6 +297,7 @@
     <ClInclude Include="..\xegame\rendercomponent.h" />
     <ClInclude Include="..\xegame\scene.h" />
     <ClInclude Include="..\xegame\spatialcomponent.h" />
+    <ClInclude Include="..\xegame\stackedsingleton.h" />
     <ClInclude Include="..\xegame\testmap.h" />
     <ClInclude Include="..\xegame\ufosound.h" />
     <ClInclude Include="..\xegame\xegamelimits.h" />

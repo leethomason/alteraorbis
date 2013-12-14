@@ -7,19 +7,22 @@
 
 using namespace grinliz;
 
-NewsHistory* NewsHistory::instance = 0;
+//NewsHistory* NewsHistory::instance = 0;
+NewsHistory* StackedSingleton< NewsHistory >::instance = 0;
 
 NewsHistory::NewsHistory( ChitBag* _chitBag ) : date(0), chitBag(_chitBag)
 {
-	GLASSERT( !instance );
-	instance = this;
+//	GLASSERT( !instance );
+//	instance = this;
+	PushInstance( this );
 }
 
 
 NewsHistory::~NewsHistory()
 {
-	GLASSERT( instance );
-	instance = 0;
+	PopInstance( this );
+//	GLASSERT( instance );
+//	instance = 0;
 }
 
 
@@ -131,20 +134,21 @@ void NewsEvent::Console( grinliz::GLString* str ) const
 	if ( second ) {
 		secondItemName = second->IBestName();
 	}
+	float age = float( double(date) / double(AGE_IN_MSEC));
 
 	switch ( what ) {
 	case DENIZEN_CREATED:
 	case GREATER_MOB_CREATED:
-		str->Format( "%s: %s at domain %x%x", wstr.c_str(), itemName.c_str(), sector.x, sector.y ); 
+		str->Format( "%s: %s at %x%x on %.2f", wstr.c_str(), itemName.c_str(), sector.x, sector.y, age ); 
 		break;
 
 	case DENIZEN_KILLED:
 	case GREATER_MOB_KILLED:
-		str->Format( "%s: %s at domain %x%x by %s", wstr.c_str(), itemName.c_str(), sector.x, sector.y, secondItemName.c_str() ); 
+		str->Format( "%s: %s at %x%x by %s on %.2f", wstr.c_str(), itemName.c_str(), sector.x, sector.y, secondItemName.c_str(), age ); 
 		break;
 
 	case FORGED:
-		str->Format( "%s forged at domain %x%x by %s", itemName.c_str(), sector.x, sector.y, secondItemName.c_str() );
+		str->Format( "%s forged at %x%x by %s on %.2f", itemName.c_str(), sector.x, sector.y, secondItemName.c_str(), age );
 		break;
 
 	default:
