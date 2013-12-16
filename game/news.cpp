@@ -1,8 +1,9 @@
 #include "news.h"
+#include "gameitem.h"
+#include "worldinfo.h"
 #include "../xarchive/glstreamer.h"
 #include "../xegame/chitbag.h"
 #include "../xegame/chit.h"
-#include "gameitem.h"
 #include "../script/itemscript.h"
 
 using namespace grinliz;
@@ -102,6 +103,7 @@ grinliz::IString NewsEvent::GetWhat() const
 		"Greater Created",
 		"Greater Derez",
 		"Forged",
+		"Destroyed",
 		"Sector Herd",
 		"Volcano",
 		"Pool",
@@ -135,20 +137,35 @@ void NewsEvent::Console( grinliz::GLString* str ) const
 		secondItemName = second->IBestName();
 	}
 	float age = float( double(date) / double(AGE_IN_MSEC));
+	IString domain;
+	if ( WorldInfo::Instance() ) {
+		const SectorData& sd = WorldInfo::Instance()->GetSector( sector );
+		domain = sd.name;
+	}
 
 	switch ( what ) {
 	case DENIZEN_CREATED:
-	case GREATER_MOB_CREATED:
-		str->Format( "%s: %s at %x%x on %.2f", wstr.c_str(), itemName.c_str(), sector.x, sector.y, age ); 
+		str->Format( "%.2f: Denizen %s rezzed at %s.", age, itemName.c_str(), domain.c_str() );
 		break;
 
 	case DENIZEN_KILLED:
+		str->Format( "%.2f: Denizen %s derez at %s by %s.", age, itemName.c_str(), domain.c_str(), secondItemName.c_str() );
+		break;
+
+	case GREATER_MOB_CREATED:
+		str->Format( "%.2f: Greater %s rezzed at %s.", age, itemName.c_str(), domain.c_str() ); 
+		break;
+
 	case GREATER_MOB_KILLED:
-		str->Format( "%s: %s at %x%x by %s on %.2f", wstr.c_str(), itemName.c_str(), sector.x, sector.y, secondItemName.c_str(), age ); 
+		str->Format( "%.2f: Greater %s derez at %s by %s.", age, itemName.c_str(), domain.c_str(), secondItemName.c_str() ); 
 		break;
 
 	case FORGED:
-		str->Format( "%s forged at %x%x by %s on %.2f", itemName.c_str(), sector.x, sector.y, secondItemName.c_str(), age );
+		str->Format( "%.2f: %s forged at %s by %s.", age, itemName.c_str(), domain.c_str(), secondItemName.c_str() );
+		break;
+
+	case DE_FORGED:
+		str->Format( "%.2f: %s destroyed at %s.", age, itemName.c_str(), domain.c_str() );
 		break;
 
 	default:

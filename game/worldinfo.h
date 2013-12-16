@@ -22,6 +22,7 @@
 #include "gamelimits.h"
 #include "../engine/enginelimits.h"
 #include "../grinliz/glutil.h"
+#include "../xegame/stackedsingleton.h"
 
 struct WorldGrid;
 namespace micropather {
@@ -95,7 +96,8 @@ public:
 */
 typedef grinliz::Vector2<S16> GridEdge;
 
-class WorldInfo : public micropather::Graph
+class WorldInfo : public micropather::Graph, 
+				  public StackedSingleton< WorldInfo >
 {
 public:
 	WorldInfo( const WorldGrid* worldGrid, int mapWidth, int mapHeight );
