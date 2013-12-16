@@ -66,7 +66,7 @@ struct ItemHistory
 	int itemID;
 	grinliz::IString name;			// echos GameItem:	blaster
 	grinliz::IString properName;	//					Hruntar
-	grinliz::IString desc;			//					Hruntar a superb blaster
+	//grinliz::IString desc;			//					Hruntar a superb blaster
 
 	void Set( const GameItem* );
 	void Serialize( XStream* xs );

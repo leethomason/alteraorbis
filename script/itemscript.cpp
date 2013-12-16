@@ -218,7 +218,6 @@ void ItemHistory::Set( const GameItem* gi )
 	this->itemID		= gi->ID();
 	this->name			= gi->IName();
 	this->properName	= gi->IProperName();
-	this->desc			= gi->IDesc();
 }
 
 void ItemHistory::Serialize( XStream* xs )
@@ -226,7 +225,6 @@ void ItemHistory::Serialize( XStream* xs )
 	XarcOpen( xs, "ItemHistory" );
 	XARC_SER( xs, name );
 	XARC_SER( xs, properName );
-	XARC_SER( xs, desc );
 	XarcClose( xs );
 }
 

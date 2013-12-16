@@ -75,7 +75,6 @@ void GameItem::CopyFrom( const GameItem* rhs ) {
 	if ( rhs ) {
 		name			= rhs->name;
 		properName		= rhs->properName;
-		desc			= rhs->desc;
 		key				= rhs->key;
 		resource		= rhs->resource;
 		id				= 0;	// assigned when needed
@@ -104,7 +103,6 @@ void GameItem::CopyFrom( const GameItem* rhs ) {
 	else {
 		name = grinliz::IString();
 		properName = grinliz::IString();
-		desc = grinliz::IString();
 		key  = grinliz::IString();
 		resource = grinliz::IString();
 		id = 0;
@@ -137,7 +135,6 @@ void GameItem::Serialize( XStream* xs )
 
 	XARC_SER( xs, name );
 	XARC_SER( xs, properName );
-	XARC_SER( xs, desc );
 	XARC_SER( xs, resource );
 	XARC_SER( xs, id );
 	XARC_SER( xs, mass );
@@ -236,7 +233,6 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 	
 	name		= StringPool::Intern( ele->Attribute( "name" ));
 	properName	= StringPool::Intern( ele->Attribute( "properName" ));
-	desc		= StringPool::Intern( ele->Attribute( "desc" ));
 	resource	= StringPool::Intern( ele->Attribute( "resource" ));
 	id = 0;
 	flags = 0;
@@ -605,6 +601,31 @@ void GameItem::UnTrack() const
 	}
 }
 
+
+void GameItem::SetProperName( const grinliz::IString& n ) 
+{ 
+	fullName = IString();	// clear cache
+	properName = n; 
+	UpdateTrack();
+}
+
+
+
+
+IString GameItem::IFullName() const
+{
+	if ( fullName.empty() ) {
+		if ( properName.empty() ) {
+			fullName = name;
+		}
+		else {
+			GLString n;
+			n.Format( "%s (%s)", properName.c_str(), name.c_str() );
+			fullName = StringPool::Intern( n.c_str() );
+		}
+	}
+	return fullName;
+}
 
 
 void DamageDesc::Log()

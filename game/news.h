@@ -79,7 +79,6 @@ public:
 	NewsHistory( ChitBag* chitBag );
 	~NewsHistory();
 
-	//static NewsHistory* Instance() { return instance; }
 	void Add( const NewsEvent& event );
 
 	// First thing to tick! Updates the main clock.
@@ -95,13 +94,11 @@ public:
 	const NewsEvent& News( int i ) { GLASSERT( i >= 0 && i < events.Size() ); return events[i]; }
 	const NewsEvent* NewsPtr() { return events.Mem(); }
 
-	const NewsEvent** Find( int itemID, int* num );
+	const NewsEvent** Find( int itemID, bool includeSecond, int* num );
 
 	ChitBag* GetChitBag() const { return chitBag; }
 
 private:
-
-	//static NewsHistory* instance;
 
 	U32 date;
 	ChitBag* chitBag;

@@ -19,6 +19,7 @@ void ItemDescWidget::SetPos( float x, float y )
 
 	text.SetPos( x, y );
 	text.SetTab( layout.Width()*2.0f + layout.SpacingX()*2.0f );
+	text.SetBounds( layout.Width()*4.0f + layout.SpacingX()*4.0f, 0 );
 }
 
 
@@ -118,7 +119,7 @@ void ItemDescWidget::SetInfo( const GameItem* item, const GameItem* user )
 		GLString s;
 
 		int num=0;
-		const NewsEvent** events = history->Find( item->ID(), &num );
+		const NewsEvent** events = history->Find( item->ID(), true, &num );
 		for( int i=0; i<num; ++i ) {
 			events[i]->Console( &s );
 			if ( !s.empty() ) {

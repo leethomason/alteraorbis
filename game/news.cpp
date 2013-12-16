@@ -49,13 +49,15 @@ void NewsHistory::Add( const NewsEvent& event )
 }
 
 
-const NewsEvent** NewsHistory::Find( int itemID, int* num )
+const NewsEvent** NewsHistory::Find( int itemID, bool second, int* num )
 {
 	cache.Clear();
 	for( int i=events.Size()-1; i>=0; --i ) {
-		if ( events[i].itemID == itemID ) {
+		if (    events[i].itemID == itemID
+			|| (second && events[i].secondItemID == itemID) ) 
+		{
 			cache.Push( &events[i] );
-			if ( events[i].Origin() ) {
+			if ( events[i].itemID == itemID && events[i].Origin() ) {
 				break;
 			}
 		}
@@ -115,6 +117,7 @@ grinliz::IString NewsEvent::GetWhat() const
 
 void NewsEvent::Console( grinliz::GLString* str ) const
 {
+	*str = "";
 	IString wstr = GetWhat();
 	Vector2I sector	= ToSector( ToWorld2I( pos ));
 	// FIXME: handle find failures (or remove history tracking...)
@@ -129,12 +132,12 @@ void NewsEvent::Console( grinliz::GLString* str ) const
 		}
 	}
 
-	IString itemName, secondItemName;
+	IString itemName, secondName;
 	if ( item ) {
-		itemName = item->IBestName();
+		itemName = item->IFullName();
 	}
 	if ( second ) {
-		secondItemName = second->IBestName();
+		secondName = second->IFullName();
 	}
 	float age = float( double(date) / double(AGE_IN_MSEC));
 	IString domain;
@@ -149,7 +152,7 @@ void NewsEvent::Console( grinliz::GLString* str ) const
 		break;
 
 	case DENIZEN_KILLED:
-		str->Format( "%.2f: Denizen %s derez at %s by %s.", age, itemName.c_str(), domain.c_str(), secondItemName.c_str() );
+		str->Format( "%.2f: Denizen %s derez at %s by %s.", age, itemName.c_str(), domain.c_str(), secondName.c_str() );
 		break;
 
 	case GREATER_MOB_CREATED:
@@ -157,11 +160,11 @@ void NewsEvent::Console( grinliz::GLString* str ) const
 		break;
 
 	case GREATER_MOB_KILLED:
-		str->Format( "%.2f: Greater %s derez at %s by %s.", age, itemName.c_str(), domain.c_str(), secondItemName.c_str() ); 
+		str->Format( "%.2f: Greater %s derez at %s by %s.", age, itemName.c_str(), domain.c_str(), secondName.c_str() ); 
 		break;
 
 	case FORGED:
-		str->Format( "%.2f: %s forged at %s by %s.", age, itemName.c_str(), domain.c_str(), secondItemName.c_str() );
+		str->Format( "%.2f: %s forged at %s by %s.", age, itemName.c_str(), domain.c_str(), secondName.c_str() );
 		break;
 
 	case DE_FORGED:

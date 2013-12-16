@@ -297,20 +297,23 @@ public:
 	// basic sanity flags.
 	void Apply( const GameItem* intrinsic );	
 
+	// name:		blaster
+	// proper:		Hgar
+	// best:		Hgar
+	// full:		Hgar (blaster)
 	const char*			Name() const			{ return name.c_str(); }
 	grinliz::IString	IName() const			{ return name; }
 	const char*			ProperName() const		{ return properName.c_str(); }
 	grinliz::IString	IProperName() const		{ return properName; }
 	const char*			BestName() const		{ if ( !properName.empty() ) return properName.c_str(); return name.c_str(); }
 	grinliz::IString	IBestName() const		{ if ( !properName.empty() ) return properName; return name; }
-	const char*			Desc() const			{ return desc.c_str(); }
-	grinliz::IString	IDesc() const			{ return desc; }
+	grinliz::IString	IFullName() const;
 	const char*			ResourceName() const	{ return resource.c_str(); }
 	grinliz::IString	IResourceName() const	{ return resource; }
 
 	void SetName( const char* n )				{ name = grinliz::StringPool::Intern( n ); UpdateTrack(); }
 	void SetProperName( const char* n )			{ properName = grinliz::StringPool::Intern( n ); UpdateTrack(); }
-	void SetProperName( const grinliz::IString& n ) { properName = n; UpdateTrack(); }
+	void SetProperName( const grinliz::IString& n );
 
 	enum {
 		// Type(s) of the item
@@ -483,11 +486,11 @@ private:
 	// ------ description ------
 	grinliz::IString		name;		// name of the item
 	grinliz::IString		properName;	// the proper name, if the item has one "John"
-	grinliz::IString		desc;		// description / alternate name
 	grinliz::IString		resource;	// resource used to  render the item
 
-	mutable int	id;		// unique id for this item. not assigned until needed, hence mutable
-	mutable int value;	// not serialized, but cached
+	mutable int	id;						// unique id for this item. not assigned until needed, hence mutable
+	mutable int value;					// not serialized, but cached
+	mutable grinliz::IString fullName;	// not serialized, but cached
 };
 
 
