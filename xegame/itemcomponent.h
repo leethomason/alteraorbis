@@ -97,13 +97,15 @@ private:
 	bool ItemActive( int index );
 	bool ItemActive( const GameItem* );	// expensive: needs a search.
 	void NameItem( GameItem* item );	// if conditions met, give the item a name.
-	void SortInventory();						// AIs will use the "best" item.
+	void SortInventory();				// AIs will use the "best" item.
+	void NewsDestroy( const GameItem* item );	// generate destroy message
 
 	CTicker slowTick;
 
 	Engine *engine;
 	WorldMap* worldMap;
 	bool hardpointsModified;	// not serialized.
+	int  lastDamageID;			// the last thing that hit us. not serialized.
 
 	// The first item in this array is what this *is*. The following items are what is being carried.
 	//

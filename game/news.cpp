@@ -136,9 +136,24 @@ void NewsEvent::Console( grinliz::GLString* str ) const
 	if ( item ) {
 		itemName = item->IFullName();
 	}
+	else {
+		const ItemHistory* history = ItemDB::Instance()->History( itemID );
+		if ( history ) {
+			itemName = history->fullName;
+		}
+	}
+
+
 	if ( second ) {
 		secondName = second->IFullName();
 	}
+	else {
+		const ItemHistory* history = ItemDB::Instance()->History( secondItemID );
+		if ( history ) {
+			secondName = history->fullName;
+		}
+	}
+
 	float age = float( double(date) / double(AGE_IN_MSEC));
 	IString domain;
 	if ( WorldInfo::Instance() ) {
@@ -167,7 +182,7 @@ void NewsEvent::Console( grinliz::GLString* str ) const
 		str->Format( "%.2f: %s forged at %s by %s.", age, itemName.c_str(), domain.c_str(), secondName.c_str() );
 		break;
 
-	case DE_FORGED:
+	case UN_FORGED:
 		str->Format( "%.2f: %s destroyed at %s.", age, itemName.c_str(), domain.c_str() );
 		break;
 

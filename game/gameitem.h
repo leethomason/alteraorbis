@@ -296,6 +296,15 @@ public:
 	// implies that the parent is immune to fire. Apply() sets
 	// basic sanity flags.
 	void Apply( const GameItem* intrinsic );	
+	
+	// is this an item who has a trackable history? I try 
+	// to avoid saying what an Item is...but sometimes
+	// you need to know.
+	bool Significant() const;
+	bool IsDenizen() const;	
+	bool IsGreaterMOB() const;
+	bool IsForged() const;
+	int  GetValue() const;
 
 	// name:		blaster
 	// proper:		Hgar
@@ -465,8 +474,6 @@ public:
 		return 1.0f;
 	}
 
-	int GetValue() const;
-
 	// Absorb damage.'remain' is how much damage passes through the shield
 	void AbsorbDamage( bool inInventory, DamageDesc dd, DamageDesc* remain, const char* log, const IMeleeWeaponItem* booster, Chit* parent );
 
@@ -489,7 +496,6 @@ private:
 	grinliz::IString		resource;	// resource used to  render the item
 
 	mutable int	id;						// unique id for this item. not assigned until needed, hence mutable
-	mutable int value;					// not serialized, but cached
 	mutable grinliz::IString fullName;	// not serialized, but cached
 };
 

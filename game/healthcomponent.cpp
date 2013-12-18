@@ -81,10 +81,6 @@ void HealthComponent::DeltaHealth()
 
 void HealthComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {
-	//if ( msg.ID() == ChitMsg::GAMEITEM_TICK ) {
-	//	DeltaHealth();
-	//}
-	//else 
 	if ( chit == parentChit && msg.ID() == ChitMsg::RENDER_IMPACT ) {
 		if ( !destroyed ) {
 			RenderComponent* render = parentChit->GetRenderComponent();

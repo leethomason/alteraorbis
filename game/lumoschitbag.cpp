@@ -216,13 +216,6 @@ Chit* LumosChitBag::NewMonsterChit( const Vector3F& pos, const char* name, int t
 	chit->Add( new SpatialComponent());
 	AddItem( name, chit, engine, team, 0 );
 
-	Wallet w = ReserveBank::Instance()->WithdrawMonster();
-	if ( chit->GetItem()->keyValues.GetIString( "mob" ) == "greater" ) {
-		// can return NUM_CRYSTAL_TYPES, if out, which is fine.
-		w.AddCrystal( ReserveBank::Instance()->WithdrawCrystal( random.Rand( NUM_CRYSTAL_TYPES )));
-	}
-	chit->GetItem()->wallet.Add( w );	
-
 	chit->Add( new RenderComponent( engine, chit->GetItem()->ResourceName() ));
 	chit->Add( new PathMoveComponent( worldMap ));
 	chit->Add( new AIComponent( engine, worldMap ));
@@ -230,6 +223,17 @@ Chit* LumosChitBag::NewMonsterChit( const Vector3F& pos, const char* name, int t
 	chit->GetSpatialComponent()->SetPosition( pos );
 
 	chit->Add( new HealthComponent( engine ));
+
+	Wallet w = ReserveBank::Instance()->WithdrawMonster();
+	if ( chit->GetItem()->keyValues.GetIString( "mob" ) == "greater" ) {
+		// can return NUM_CRYSTAL_TYPES, if out, which is fine.
+		w.AddCrystal( ReserveBank::Instance()->WithdrawCrystal( random.Rand( NUM_CRYSTAL_TYPES )));
+		NewsHistory* history = NewsHistory::Instance();
+		if ( history ) {
+			history->Add( NewsEvent( NewsEvent::GREATER_MOB_CREATED, ToWorld2F(pos), chit, 0 ));
+		}
+	}
+	chit->GetItem()->wallet.Add( w );	
 	return chit;
 }
 
@@ -271,6 +275,12 @@ Chit* LumosChitBag::NewDenizen( const grinliz::Vector2I& pos, int team )
 
 	Vector2I sector = ToSector( pos );
 	GetCore( sector )->AddCitizen( chit );
+
+	NewsHistory* history = NewsHistory::Instance();
+	if ( history ) {
+		history->Add( NewsEvent( NewsEvent::DENIZEN_CREATED, ToWorld2F(pos), chit, 0 ));
+	}
+
 	return chit;
 }
 

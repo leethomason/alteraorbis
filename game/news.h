@@ -35,7 +35,7 @@ public:
 		GREATER_MOB_KILLED,			//  killed		killer		killed
 
 		FORGED,						//	item		maker		maker
-		DE_FORGED,					//  item							// be careful to only track significant items
+		UN_FORGED,					//  item		killer	
 		SECTOR_HERD,				//	mob
 
 		VOLCANO,

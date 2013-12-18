@@ -125,7 +125,6 @@ void GameItem::CopyFrom( const GameItem* rhs ) {
 		accruedFire = 0;
 		accruedShock = 0;
 	}
-	value = -1;
 }
 
 
@@ -503,54 +502,50 @@ int GameItem::GetValue() const
 	static const float RANGED_VALUE = 30;
 	static const float SHIELD_VALUE = 20;
 	
-	if ( value < 0 ) { 
-		CArray<int, 16> valueArr;
-		valueArr.Push( 0 );
-		value = 0;
+	int value = 0;
 
-		if ( ToMeleeWeapon() ) {
-			float dptu = BattleMechanics::MeleeDPTU( 0, ToMeleeWeapon() );
+	if ( ToRangedWeapon() ) {
+		float radAt1 = BattleMechanics::ComputeRadAt1( 0, ToRangedWeapon(), false, false );
+		float dptu = BattleMechanics::RangedDPTU( ToRangedWeapon(), true );
+		float er   = BattleMechanics::EffectiveRange( radAt1 );
 
-			const GameItem& basic = ItemDefDB::Instance()->Get( "ring" );
-			float refDPTU = BattleMechanics::MeleeDPTU( 0, basic.ToMeleeWeapon() );
+		const GameItem& basic = ItemDefDB::Instance()->Get( "blaster" );
+		float refRadAt1 = BattleMechanics::ComputeRadAt1( 0, basic.ToRangedWeapon(), false, false );
+		float refDPTU = BattleMechanics::RangedDPTU( basic.ToRangedWeapon(), true );
+		float refER   = BattleMechanics::EffectiveRange( refRadAt1 );
 
-			float v = dptu / refDPTU * MELEE_VALUE;
-			if ( 
-				flags & GameItem::EFFECT_FIRE ) v *= EFFECT_BONUS;
-			if ( flags & GameItem::EFFECT_SHOCK ) v *= EFFECT_BONUS;
-			if ( flags & GameItem::EFFECT_EXPLOSIVE ) v *= EFFECT_BONUS;
-			valueArr.Push( (int)v );
-		}
+		float v = ( dptu * er ) / ( refDPTU * refER ) * RANGED_VALUE;
+		if ( flags & GameItem::EFFECT_FIRE ) v *= EFFECT_BONUS;
+		if ( flags & GameItem::EFFECT_SHOCK ) v *= EFFECT_BONUS;
+		if ( flags & GameItem::EFFECT_EXPLOSIVE ) v *= EFFECT_BONUS;
+		value = LRintf( v );
+	}
 
-		if ( ToRangedWeapon() ) {
-			float radAt1 = BattleMechanics::ComputeRadAt1( 0, ToRangedWeapon(), false, false );
-			float dptu = BattleMechanics::RangedDPTU( ToRangedWeapon(), true );
-			float er   = BattleMechanics::EffectiveRange( radAt1 );
+	if ( ToMeleeWeapon() ) {
+		float dptu = BattleMechanics::MeleeDPTU( 0, ToMeleeWeapon() );
 
-			const GameItem& basic = ItemDefDB::Instance()->Get( "blaster" );
-			float refRadAt1 = BattleMechanics::ComputeRadAt1( 0, basic.ToRangedWeapon(), false, false );
-			float refDPTU = BattleMechanics::RangedDPTU( basic.ToRangedWeapon(), true );
-			float refER   = BattleMechanics::EffectiveRange( refRadAt1 );
+		const GameItem& basic = ItemDefDB::Instance()->Get( "ring" );
+		float refDPTU = BattleMechanics::MeleeDPTU( 0, basic.ToMeleeWeapon() );
 
-			float v = ( dptu * er ) / ( refDPTU * refER ) * RANGED_VALUE;
-			if ( flags & GameItem::EFFECT_FIRE ) v *= EFFECT_BONUS;
-			if ( flags & GameItem::EFFECT_SHOCK ) v *= EFFECT_BONUS;
-			if ( flags & GameItem::EFFECT_EXPLOSIVE ) v *= EFFECT_BONUS;
-			valueArr.Push( (int)v );
-		}
+		float v = dptu / refDPTU * MELEE_VALUE;
+		if ( flags & GameItem::EFFECT_FIRE ) v *= EFFECT_BONUS;
+		if ( flags & GameItem::EFFECT_SHOCK ) v *= EFFECT_BONUS;
+		if ( flags & GameItem::EFFECT_EXPLOSIVE ) v *= EFFECT_BONUS;
 
-		if ( ToShield() ) {
-			int rounds = ClipCap();
-			const GameItem& basic = ItemDefDB::Instance()->Get( "shield" );
-			int refRounds = basic.ClipCap();
+		if ( value ) value += LRintf( v*0.5f );
+		else value = LRintf(v);
+	}
 
-			// Currently, shield effects don't do anything, although that would be cool.
-			float v = float(rounds) / float(refRounds) * SHIELD_VALUE;
-			valueArr.Push( int(v) );
-		}
-		if ( !valueArr.Empty() ) {
-			value = valueArr.Max();
-		}
+	if ( ToShield() ) {
+		int rounds = ClipCap();
+		const GameItem& basic = ItemDefDB::Instance()->Get( "shield" );
+		int refRounds = basic.ClipCap();
+
+		// Currently, shield effects don't do anything, although that would be cool.
+		float v = float(rounds) / float(refRounds) * SHIELD_VALUE;
+
+		if ( value ) value += LRintf( v*0.5f );
+		else value = LRintf(v);
 	}
 	return value;
 }
@@ -610,6 +605,44 @@ void GameItem::SetProperName( const grinliz::IString& n )
 }
 
 
+bool GameItem::IsDenizen() const
+{
+	IString mob = keyValues.GetIString( "mob" );
+	if ( mob == "denizen" ) {
+		return true;
+	}
+	return false;
+}
+
+
+bool GameItem::IsGreaterMOB() const
+{
+	IString mob = keyValues.GetIString( "mob" );
+	if ( mob == "greater" ) {
+		return true;
+	}
+	return false;
+}
+
+
+bool GameItem::IsForged() const 
+{
+	return GetValue() > 0;
+}
+
+
+bool GameItem::Significant() const
+{
+	if (    traits.Level() >= 4 
+		|| !properName.empty()
+		|| IsDenizen()
+		|| IsGreaterMOB() )
+	{
+		return true;
+	}
+	
+	return false;
+}
 
 
 IString GameItem::IFullName() const

@@ -41,7 +41,7 @@ using namespace grinliz;
 
 
 ItemComponent::ItemComponent( Engine* _engine, WorldMap* wm, const GameItem& item ) 
-	: engine(_engine), worldMap(wm), slowTick( 500 ), hardpointsModified( true )
+	: engine(_engine), worldMap(wm), slowTick( 500 ), hardpointsModified( true ), lastDamageID(0)
 {
 	GLASSERT( !item.IName().empty() );
 	itemArr.Push( new GameItem( item ) );
@@ -49,7 +49,7 @@ ItemComponent::ItemComponent( Engine* _engine, WorldMap* wm, const GameItem& ite
 
 
 ItemComponent::ItemComponent( Engine* _engine, WorldMap* wm, GameItem* item ) 
-	: engine(_engine), worldMap(wm), slowTick( 500 ), hardpointsModified( true )
+	: engine(_engine), worldMap(wm), slowTick( 500 ), hardpointsModified( true ), lastDamageID(0)
 {
 	// item can be null if loading.
 	if ( item ) {
@@ -253,6 +253,28 @@ bool ItemComponent::ItemActive( int i )
 }
 
 
+void ItemComponent::NewsDestroy( const GameItem* item )
+{
+	NewsHistory* history = NewsHistory::Instance();
+	if ( !history ) return;
+	Vector2F pos = { 0, 0 };
+	if ( parentChit->GetSpatialComponent() ) {
+		pos = parentChit->GetSpatialComponent()->GetPosition2D();
+	}
+
+	Chit* destroyer = parentChit->GetChitBag()->GetChit( lastDamageID );
+
+	if ( item->IsDenizen() ) {
+		history->Add( NewsEvent( NewsEvent::DENIZEN_KILLED, pos, parentChit, destroyer ));
+	}
+	else if ( item->IsGreaterMOB() ) {
+		history->Add( NewsEvent( NewsEvent::GREATER_MOB_KILLED, pos, parentChit, destroyer ));
+	}
+	else if ( item->IsForged() ) {
+		history->Add( NewsEvent( NewsEvent::UN_FORGED, pos, parentChit, destroyer ));
+	}
+}
+
 
 void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {
@@ -343,7 +365,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 													 killshot ? Max( 1, mainItem->traits.Level()) : 0, 
 													 mainItem ); 
 		}
-
+		lastDamageID = originID;
 	}
 	else if ( msg.ID() == ChitMsg::CHIT_HEAL ) {
 		parentChit->SetTickNeeded();
@@ -374,7 +396,9 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			gold->QueueDelete();
 		}
 	}
-	else if ( msg.ID() >= ChitMsg::CHIT_DESTROYED_START && msg.ID() <= ChitMsg::CHIT_DESTROYED_END ) {
+	else if ( msg.ID() >= ChitMsg::CHIT_DESTROYED_START && msg.ID() <= ChitMsg::CHIT_DESTROYED_END ) 
+	{
+		NewsDestroy( mainItem );
 
 		// Drop our wallet on the ground or send to the Reserve?
 		// Basically, MoBs and buildings drop stuff. The rest goes to Reserve.
@@ -404,10 +428,13 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			}
 			GameItem* item = itemArr.Pop();
 			GLASSERT( !item->IName().empty() );
-			if ( dropItems )
+			if ( dropItems ) {
 				parentChit->GetLumosChitBag()->NewItemChit( pos, item, true, true );
-			else
+			}
+			else {
 				ReserveBank::Instance()->Deposit( item->wallet.EmptyWallet() );
+				NewsDestroy( item );
+			}
 		}
 	}
 	else {

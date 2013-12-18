@@ -64,9 +64,7 @@ struct ItemHistory
 	bool operator==(const ItemHistory& rhs) const { return this->itemID == rhs.itemID; }
 
 	int itemID;
-	grinliz::IString name;			// echos GameItem:	blaster
-	grinliz::IString properName;	//					Hruntar
-	//grinliz::IString desc;			//					Hruntar a superb blaster
+	grinliz::IString fullName;
 
 	void Set( const GameItem* );
 	void Serialize( XStream* xs );
@@ -84,9 +82,9 @@ public:
 	ItemDB()	{ PushInstance( this ); }
 	~ItemDB()	{ PopInstance( this );; }
 
-	void Add( const GameItem* );
-	void Update( const GameItem* );
-	void Remove( const GameItem* );
+	void Add( const GameItem* );		// start tracking (possibly insignificant)
+	void Update( const GameItem* );		// item changed
+	void Remove( const GameItem* );		// stop tracking
 
 	// Find an item by id; if null, can use History
 	const GameItem*		Find( int id );
@@ -96,7 +94,7 @@ public:
 
 private:
 	grinliz::HashTable< int, const GameItem* > itemMap;	// map of all the active, allocated items.
-	grinliz::SortedDynArray< ItemHistory > itemHistory;      // all the items ever created. id is the index; may need to compress in the future.
+	grinliz::SortedDynArray< ItemHistory > itemHistory; // all the significant items ever created
 };
 
 

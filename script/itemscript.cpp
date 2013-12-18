@@ -216,15 +216,13 @@ void ItemDefDB::DumpWeaponStats()
 void ItemHistory::Set( const GameItem* gi )
 {
 	this->itemID		= gi->ID();
-	this->name			= gi->IName();
-	this->properName	= gi->IProperName();
+	this->fullName      = gi->IFullName();
 }
 
 void ItemHistory::Serialize( XStream* xs )
 {
 	XarcOpen( xs, "ItemHistory" );
-	XARC_SER( xs, name );
-	XARC_SER( xs, properName );
+	XARC_SER( xs, fullName );
 	XarcClose( xs );
 }
 
@@ -245,8 +243,11 @@ void ItemDB::Add( const GameItem* gi )
 	GLASSERT( id >= 0 );
 
 	// History
-	// Don't add to history - most Items are plants or irrelevent.
-	// A name change will do an Update() which adds to history.
+	if ( gi->Significant() ) {
+		ItemHistory h;
+		h.Set( gi );
+		itemHistory.Add( h );
+	}
 
 	// Current
 	itemMap.Add( id, gi );
@@ -259,11 +260,10 @@ void ItemDB::Remove( const GameItem* gi )
 	GLASSERT( id >= 0 );
 
 	// History:
-	ItemHistory history;
-	history.Set( gi );
-	int index = itemHistory.BSearch( history );
-	if ( index >= 0 ) {
-		itemHistory[index] = history;
+	if ( gi->Significant() ) {
+		ItemHistory h;
+		h.Set( gi );
+		itemHistory.Add( h );
 	}
 
 	// Current:
@@ -275,9 +275,12 @@ void ItemDB::Update( const GameItem* gi )
 {
 	int id = gi->ID();
 	GLASSERT( id >= 0 );
-	ItemHistory history;
-	history.Set( gi );
-	itemHistory.Add( history );
+
+	if ( gi->Significant() ) {
+		ItemHistory h;
+		h.Set( gi );
+		itemHistory.Add( h );
+	}
 }
 
 
@@ -286,5 +289,16 @@ const GameItem*	ItemDB::Find( int id )
 	const GameItem* gi = 0;
 	itemMap.Query( id, &gi );
 	return gi;
+}
+
+
+const ItemHistory* ItemDB::History( int id )
+{
+	ItemHistory key;
+	key.itemID = id;
+
+	const ItemHistory* h = 0;
+	int index = itemHistory.BSearch( key );
+	return index >= 0 ? &itemHistory[index] : 0;
 }
 

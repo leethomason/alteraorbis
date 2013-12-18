@@ -254,6 +254,11 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos )
 
 	Vector2I sector = ToSector( pos );
 	chitBag->GetCore( sector )->AddCitizen( chit );
+
+	NewsHistory* history = NewsHistory::Instance();
+	if ( history ) {
+		history->Add( NewsEvent( NewsEvent::DENIZEN_CREATED, ToWorld2F(pos), chit, 0 ));
+	}
 }
 
 
