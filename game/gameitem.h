@@ -301,9 +301,7 @@ public:
 	// to avoid saying what an Item is...but sometimes
 	// you need to know.
 	bool Significant() const;
-	bool IsDenizen() const;	
-	bool IsGreaterMOB() const;
-	bool IsForged() const;
+	// Get the value of the item. Currently equivalent to being loot.
 	int  GetValue() const;
 
 	// name:		blaster

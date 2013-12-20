@@ -490,8 +490,6 @@ int PathMoveComponent::DoTick( U32 delta )
 			SetNoPath();
 			parentChit->SendMessage( ChitMsg( ChitMsg::PATHMOVE_DESTINATION_BLOCKED), this );
 
-			//NewsEvent news( NewsEvent::PONY, pos2, StringPool::Intern( "FC Exec" ), parentChit->ID() );
-			//GetChitBag()->AddNews( news );
 			forceCount = 0;
 		}
 	}

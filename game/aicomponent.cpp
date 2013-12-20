@@ -491,19 +491,21 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 		return;
 	}
 	GameItem* item = weapon->GetItem();
+	PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
 
 	// Are we close enough to hit? Then swing. Else move to target.
 	if ( targetDesc.id && BattleMechanics::InMeleeZone( engine, parentChit, target.chit )) {
 		GLASSERT( parentChit->GetRenderComponent()->AnimationReady() );
 		parentChit->GetRenderComponent()->PlayAnimation( ANIM_MELEE );
+		if ( pmc ) pmc->Stop();
 	}
 	else if ( !targetDesc.id && BattleMechanics::InMeleeZone( engine, parentChit, targetDesc.mapPos )) {
 		GLASSERT( parentChit->GetRenderComponent()->AnimationReady() );
 		parentChit->GetRenderComponent()->PlayAnimation( ANIM_MELEE );
+		if ( pmc ) pmc->Stop();
 	}
 	else {
 		// Move to target.
-		PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
 		if ( pmc ) {
 			Vector2F targetPos = { 0, 0 };
 			if ( targetDesc.id )

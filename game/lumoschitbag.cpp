@@ -228,9 +228,11 @@ Chit* LumosChitBag::NewMonsterChit( const Vector3F& pos, const char* name, int t
 	if ( chit->GetItem()->keyValues.GetIString( "mob" ) == "greater" ) {
 		// can return NUM_CRYSTAL_TYPES, if out, which is fine.
 		w.AddCrystal( ReserveBank::Instance()->WithdrawCrystal( random.Rand( NUM_CRYSTAL_TYPES )));
+		
 		NewsHistory* history = NewsHistory::Instance();
 		if ( history ) {
 			history->Add( NewsEvent( NewsEvent::GREATER_MOB_CREATED, ToWorld2F(pos), chit, 0 ));
+			chit->GetItem()->keyValues.Set( "destroyMsg", "d", NewsEvent::GREATER_MOB_KILLED );
 		}
 	}
 	chit->GetItem()->wallet.Add( w );	
@@ -279,6 +281,7 @@ Chit* LumosChitBag::NewDenizen( const grinliz::Vector2I& pos, int team )
 	NewsHistory* history = NewsHistory::Instance();
 	if ( history ) {
 		history->Add( NewsEvent( NewsEvent::DENIZEN_CREATED, ToWorld2F(pos), chit, 0 ));
+		chit->GetItem()->keyValues.Set( "destroyMsg", "d", NewsEvent::DENIZEN_KILLED );
 	}
 
 	return chit;

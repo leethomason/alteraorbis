@@ -973,12 +973,12 @@ void GameScene::ProcessNewsToConsole()
 	LumosChitBag* chitBag = sim->GetChitBag();
 	CoreScript* coreScript = chitBag->GetHomeCore();
 
-	//Vector2I avatarSector = { 0, 0 };
-	//Chit* playerChit = sim->GetPlayerChit();
-	//if ( playerChit && playerChit->GetSpatialComponent() ) {
-	//	avatarSector = ToSector( playerChit->GetSpatialComponent()->GetPosition2DI() );
-	//}
-	//Vector2I homeSector = sim->GetChitBag()->GetHomeSector();
+	Vector2I avatarSector = { 0, 0 };
+	Chit* playerChit = sim->GetPlayerChit();
+	if ( playerChit && playerChit->GetSpatialComponent() ) {
+		avatarSector = ToSector( playerChit->GetSpatialComponent()->GetPosition2DI() );
+	}
+	Vector2I homeSector = sim->GetChitBag()->GetHomeSector();
 
 	// Check if news sector is 1)current avatar sector, or 2)domain sector
 
@@ -992,6 +992,7 @@ void GameScene::ProcessNewsToConsole()
 		case NewsEvent::DENIZEN_CREATED:
 		case NewsEvent::DENIZEN_KILLED:
 		case NewsEvent::FORGED:
+		case NewsEvent::UN_FORGED:
 			if ( coreScript && coreScript->IsCitizen( ne.chitID )) {
 				ne.Console( &str );
 			}
@@ -1001,6 +1002,17 @@ void GameScene::ProcessNewsToConsole()
 		case NewsEvent::GREATER_MOB_KILLED:
 			ne.Console( &str );
 			break;
+
+		case NewsEvent::LESSER_MOB_NAMED:
+		case NewsEvent::LESSER_NAMED_MOB_KILLED:
+			{
+				Vector2I sector = ToSector( ToWorld2I( ne.pos ));
+				if ( sector == homeSector || sector == avatarSector ) {
+					ne.Console( &str );
+				}
+			}
+			break;
+
 
 		default:
 			break;

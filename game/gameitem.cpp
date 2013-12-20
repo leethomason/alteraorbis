@@ -605,42 +605,13 @@ void GameItem::SetProperName( const grinliz::IString& n )
 }
 
 
-bool GameItem::IsDenizen() const
-{
-	IString mob = keyValues.GetIString( "mob" );
-	if ( mob == "denizen" ) {
-		return true;
-	}
-	return false;
-}
-
-
-bool GameItem::IsGreaterMOB() const
-{
-	IString mob = keyValues.GetIString( "mob" );
-	if ( mob == "greater" ) {
-		return true;
-	}
-	return false;
-}
-
-
-bool GameItem::IsForged() const 
-{
-	return GetValue() > 0;
-}
-
-
 bool GameItem::Significant() const
 {
-	if (    traits.Level() >= 4 
-		|| !properName.empty()
-		|| IsDenizen()
-		|| IsGreaterMOB() )
-	{
+	int msg = 0;
+	if ( keyValues.GetInt( "destroyMsg", &msg ) == 0 ) {
 		return true;
 	}
-	
+
 	return false;
 }
 

@@ -98,12 +98,14 @@ NewsEvent::NewsEvent( U32 what, const grinliz::Vector2F& pos, const GameItem* it
 grinliz::IString NewsEvent::GetWhat() const
 {
 	GLASSERT( what >= 0 && what < NUM_WHAT );
-	static const char* NAME[NUM_WHAT] = {
+	static const char* NAME[] = {
 		"",
 		"Denizen Created",
 		"Denizen Derez",
 		"Greater Created",
 		"Greater Derez",
+		"Lesser Named",
+		"Lesser Derez",
 		"Forged",
 		"Destroyed",
 		"Sector Herd",
@@ -111,6 +113,7 @@ grinliz::IString NewsEvent::GetWhat() const
 		"Pool",
 		"Waterfall"
 	};
+	GLASSERT( GL_C_ARRAY_SIZE( NAME ) == NUM_WHAT );
 	return grinliz::StringPool::Intern( NAME[what], true );
 }
 
@@ -143,7 +146,6 @@ void NewsEvent::Console( grinliz::GLString* str ) const
 		}
 	}
 
-
 	if ( second ) {
 		secondName = second->IFullName();
 	}
@@ -175,7 +177,12 @@ void NewsEvent::Console( grinliz::GLString* str ) const
 		break;
 
 	case GREATER_MOB_KILLED:
+	case LESSER_NAMED_MOB_KILLED:
 		str->Format( "%.2f: Greater %s derez at %s by %s.", age, itemName.c_str(), domain.c_str(), secondName.c_str() ); 
+		break;
+
+	case LESSER_MOB_NAMED:
+		str->Format( "%.2f: %s has earned a name at %s.", age, itemName.c_str(), domain.c_str() );
 		break;
 
 	case FORGED:

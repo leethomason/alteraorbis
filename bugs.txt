@@ -1,4 +1,4 @@
-- no volcanos in controlled domains
+
 - fire + shock too cheap to build
 - GT: needs pick up effect for gold (single yellow glow of the avatar?)
 - GT: needs pick up effect for kiosks or visitors (like a gold triangle or chest can float over the kiosk when the visitor spends money)
@@ -38,6 +38,17 @@
 - AIs should account for personality and skills when doing inventory sorting
 
 - game
+
+	- Denizen
+		- item pickup isn't working
+		- melee (standing too close) is a mess
+		- melee (attacking closest) not working
+		x no volcanos in controlled domains
+		- UI needs re-work
+
+	- Census
+		- coolest stuff, past and present, by category
+		- total of Au and Crystal
 
 	- Market
 		x rethink fiction / core control / avatar prime

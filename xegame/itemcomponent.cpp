@@ -97,7 +97,7 @@ void ItemComponent::Serialize( XStream* xs )
 
 void ItemComponent::NameItem( GameItem* item )
 {
-	bool shouldHaveName = item->traits.Level() >= 4;	// FIXME: needs work...
+	bool shouldHaveName = item->traits.Level() >= LEVEL_OF_NAMING;
 
 	if ( shouldHaveName ) {
 		if ( item->IProperName().empty() ) {
@@ -107,6 +107,18 @@ void ItemComponent::NameItem( GameItem* item )
 					GetLumosChitBag()->GetLumosGame()->GenName( nameGen.c_str(), 
 																item->ID(),
 																4, 10 )));
+			}
+
+			// An item that wasn't significant is now significant.
+			// In practice, this means adding tracking for lesser mobs.
+			if ( item->keyValues.GetIString( "mob" ) == "normal" ) {
+				SpatialComponent* sc = parentChit->GetSpatialComponent();
+				if ( sc ) {
+					NewsEvent news( NewsEvent::LESSER_MOB_NAMED, sc->GetPosition2D(), item, parentChit ); 
+					// Should not have been already added.
+					GLASSERT( item->keyValues.GetIString( "destroyMsg" ) == IString() );
+					item->keyValues.Set( "destroyMsg", "d",  NewsEvent::LESSER_NAMED_MOB_KILLED );
+				}
 			}
 		}
 	}
@@ -264,14 +276,9 @@ void ItemComponent::NewsDestroy( const GameItem* item )
 
 	Chit* destroyer = parentChit->GetChitBag()->GetChit( lastDamageID );
 
-	if ( item->IsDenizen() ) {
-		history->Add( NewsEvent( NewsEvent::DENIZEN_KILLED, pos, parentChit, destroyer ));
-	}
-	else if ( item->IsGreaterMOB() ) {
-		history->Add( NewsEvent( NewsEvent::GREATER_MOB_KILLED, pos, parentChit, destroyer ));
-	}
-	else if ( item->IsForged() ) {
-		history->Add( NewsEvent( NewsEvent::UN_FORGED, pos, parentChit, destroyer ));
+	int msg = 0;
+	if ( item->keyValues.GetInt( "destroyMsg", &msg ) == 0 ) {
+		history->Add( NewsEvent( msg, pos, parentChit, destroyer ));
 	}
 }
 
@@ -398,7 +405,9 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 	}
 	else if ( msg.ID() >= ChitMsg::CHIT_DESTROYED_START && msg.ID() <= ChitMsg::CHIT_DESTROYED_END ) 
 	{
-		NewsDestroy( mainItem );
+		if ( msg.ID() == ChitMsg::CHIT_DESTROYED_START ) {
+			NewsDestroy( mainItem );
+		}
 
 		// Drop our wallet on the ground or send to the Reserve?
 		// Basically, MoBs and buildings drop stuff. The rest goes to Reserve.

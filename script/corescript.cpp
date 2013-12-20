@@ -267,10 +267,11 @@ int CoreScript::DoTick( U32 delta )
 				GLASSERT( team != TEAM_NEUTRAL );
 				Chit* mob = scriptContext->chitBag->NewMonsterChit( pf, spawn, team );
 
-				if ( isGreater ) {
-					NewsEvent news( NewsEvent::GREATER_MOB_CREATED, ToWorld2F( pf ), mob );
-					NewsHistory::Instance()->Add( news );
-				}
+//				if ( isGreater ) {
+//					NewsEvent news( NewsEvent::GREATER_MOB_CREATED, ToWorld2F( pf ), mob );
+//					NewsHistory::Instance()->Add( news );
+//					mob->GetItem()->keyValues.Set( "destroyMsg", "d", NewsEvent::GREATER_MOB_KILLED );
+//				}
 			}
 		}
 #endif

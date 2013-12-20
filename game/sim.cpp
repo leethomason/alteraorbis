@@ -258,6 +258,7 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos )
 	NewsHistory* history = NewsHistory::Instance();
 	if ( history ) {
 		history->Add( NewsEvent( NewsEvent::DENIZEN_CREATED, ToWorld2F(pos), chit, 0 ));
+		chit->GetItem()->keyValues.Set( "destroyMsg", "d", NewsEvent::DENIZEN_KILLED );
 	}
 }
 

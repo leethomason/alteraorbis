@@ -677,9 +677,6 @@ void WorldMap::ProcessZone( ChitBag* cb )
 							if ( poolGrids.Size() >= 10 && border == 0 && water <= waterMax ) {
 								GLOUTPUT(( "pool found. zone=%d,%d area=%d waterFall=%d\n", zx, zy, poolGrids.Size(), water ));
 								
-								//Vector2F posF = { (float)poolGrids[0].x+0.5f, (float)poolGrids[0].y+0.5f };
-								//NewsEvent poolNews( NewsEvent::UNICORN, posF, StringPool::Intern( "water", true ));
-								//cb->AddNews( poolNews );
 								NewsEvent poolNews( NewsEvent::POOL, ToWorld2F( poolGrids[0] ));
 								NewsHistory::Instance()->Add( poolNews );
 
@@ -693,9 +690,6 @@ void WorldMap::ProcessZone( ChitBag* cb )
 										if ( grid[INDEX(v)].IsWater() ) {
 											waterfalls.Push( poolGrids[i] );
 
-											//posF.Set( (float)poolGrids[i].x+0.5f, (float)poolGrids[i].y+0.5f );
-											//NewsEvent we( NewsEvent::PEGASUS, posF, StringPool::Intern( "waterfall" ));
-											//cb->AddNews( we );
 											NewsEvent we( NewsEvent::WATERFALL, ToWorld2F( poolGrids[i] ));
 											NewsHistory::Instance()->Add( we );
 										}

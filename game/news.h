@@ -27,14 +27,18 @@ public:
 
 	void Serialize( XStream* xs );
 
+public:
 	// Be sure to update GetWhat() when this list chnages.
 	enum {							//	FIRST		SECOND		CHIT
-		DENIZEN_CREATED = 1,		//	created					created
+		NONE,
+		DENIZEN_CREATED ,			//	created					created		
 		DENIZEN_KILLED,				//  killed		killer		killed
-		GREATER_MOB_CREATED,		//  created					created
+		GREATER_MOB_CREATED,		//  created					created		
 		GREATER_MOB_KILLED,			//  killed		killer		killed
+		LESSER_MOB_NAMED,			//	created
+		LESSER_NAMED_MOB_KILLED,	//	killed		killer		killed
 
-		FORGED,						//	item		maker		maker
+		FORGED,						//	item		maker		maker		
 		UN_FORGED,					//  item		killer	
 		SECTOR_HERD,				//	mob
 
@@ -47,6 +51,7 @@ public:
 
 	bool				Origin() const { return    what == DENIZEN_CREATED
 												|| what == GREATER_MOB_CREATED
+												|| what == LESSER_MOB_NAMED
 												|| what == FORGED; }
 	grinliz::IString	GetWhat() const;
 	void				Console( grinliz::GLString* str ) const;
