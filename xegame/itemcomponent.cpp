@@ -136,6 +136,11 @@ float ItemComponent::PowerRating() const
 
 void ItemComponent::AddBattleXP( bool isMelee, int killshotLevel, const GameItem* loser )
 {
+	// Loser has to be a MOB. That was a funny bug. kills: plant0 7
+	if ( loser->keyValues.GetIString( "mob" ) == IString() ) {
+		return;
+	}
+
 	GameItem* mainItem = itemArr[0];
 	int level = mainItem->traits.Level();
 	mainItem->traits.AddBattleXP( killshotLevel );

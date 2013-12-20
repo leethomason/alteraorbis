@@ -4,7 +4,7 @@
 using namespace ai;
 using namespace grinliz;
 
-static const double DECAY_TIME = 100.0;	// in seconds
+static const double DECAY_TIME = 200.0;	// in seconds
 
 /* static */ const char* Needs::Name( int i )
 {
