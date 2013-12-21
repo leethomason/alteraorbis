@@ -217,6 +217,8 @@ void ItemHistory::Set( const GameItem* gi )
 {
 	this->itemID		= gi->ID();
 	this->fullName      = gi->IFullName();
+	this->level			= gi->traits.Level();
+	this->value			= gi->GetValue();
 }
 
 void ItemHistory::Serialize( XStream* xs )

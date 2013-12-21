@@ -118,13 +118,33 @@ grinliz::IString NewsEvent::GetWhat() const
 }
 
 
+grinliz::IString NewsEvent::IDToName( int id ) const
+{
+	GLASSERT( ItemDB::Instance() );
+	if ( !ItemDB::Instance() ) return IString();
+
+	IString name;
+
+	const GameItem* item = ItemDB::Instance()->Find( itemID );
+	if ( item ) {
+		name = item->IFullName();
+	}
+	else {
+		const ItemHistory* history = ItemDB::Instance()->History( itemID );
+		if ( history ) {
+			name = history->fullName;
+		}
+	}
+	return name;
+}
+
+
 void NewsEvent::Console( grinliz::GLString* str ) const
 {
 	*str = "";
 	IString wstr = GetWhat();
 	Vector2I sector	= ToSector( ToWorld2I( pos ));
 	// FIXME: handle find failures (or remove history tracking...)
-	const GameItem* item   = ItemDB::Instance()->Find( itemID );
 	const GameItem* second = ItemDB::Instance()->Find( secondItemID );
 
 	Chit* chit = 0;
@@ -135,26 +155,8 @@ void NewsEvent::Console( grinliz::GLString* str ) const
 		}
 	}
 
-	IString itemName, secondName;
-	if ( item ) {
-		itemName = item->IFullName();
-	}
-	else {
-		const ItemHistory* history = ItemDB::Instance()->History( itemID );
-		if ( history ) {
-			itemName = history->fullName;
-		}
-	}
-
-	if ( second ) {
-		secondName = second->IFullName();
-	}
-	else {
-		const ItemHistory* history = ItemDB::Instance()->History( secondItemID );
-		if ( history ) {
-			secondName = history->fullName;
-		}
-	}
+	IString itemName   = IDToName( itemID );
+	IString secondName = IDToName( secondItemID );
 
 	float age = float( double(date) / double(AGE_IN_MSEC));
 	IString domain;
@@ -173,12 +175,12 @@ void NewsEvent::Console( grinliz::GLString* str ) const
 		break;
 
 	case GREATER_MOB_CREATED:
-		str->Format( "%.2f: Greater %s rezzed at %s.", age, itemName.c_str(), domain.c_str() ); 
+		str->Format( "%.2f: %s rezzed at %s.", age, itemName.c_str(), domain.c_str() ); 
 		break;
 
 	case GREATER_MOB_KILLED:
 	case LESSER_NAMED_MOB_KILLED:
-		str->Format( "%.2f: Greater %s derez at %s by %s.", age, itemName.c_str(), domain.c_str(), secondName.c_str() ); 
+		str->Format( "%.2f: %s derez at %s by %s.", age, itemName.c_str(), domain.c_str(), secondName.c_str() ); 
 		break;
 
 	case LESSER_MOB_NAMED:

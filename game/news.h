@@ -56,6 +56,7 @@ public:
 	grinliz::IString	GetWhat() const;
 	void				Console( grinliz::GLString* str ) const;
 	grinliz::Vector2I	Sector() const { return ToSector( ToWorld2I( pos )); }
+	grinliz::IString	IDToName( int id ) const;
 
 	int					what;	
 	grinliz::Vector2F	pos;			// where it happened

@@ -24,8 +24,8 @@
 #include "../script/procedural.h"
 
 static const double TECH_ADDED_BY_VISITOR = 0.2;
-static const double TECH_DECAY_0 = 0.0001;
-static const double TECH_DECAY_1 = 0.001;
+static const double TECH_DECAY_0 = 0.00005;
+static const double TECH_DECAY_1 = 0.00020;
 static const double TECH_MAX = 3.99;
 
 using namespace grinliz;

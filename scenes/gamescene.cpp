@@ -76,14 +76,14 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	playerMark.Init( &gamui2D, atom, true );
 	playerMark.SetSize( MARK_SIZE, MARK_SIZE );
 
-	static const char* serialText[NUM_SERIAL_BUTTONS] = { "Save", "Load", "Cycle" }; 
+	static const char* serialText[NUM_SERIAL_BUTTONS] = { "Save", "Load" }; 
 	for( int i=0; i<NUM_SERIAL_BUTTONS; ++i ) {
 		serialButton[i].Init( &gamui2D, game->GetButtonLook(0) );
 		serialButton[i].SetText( serialText[i] );
 	}
 
-	freeCameraButton.Init( &gamui2D, game->GetButtonLook(0) );
-	freeCameraButton.SetText( "Free\nCamera" );
+	//freeCameraButton.Init( &gamui2D, game->GetButtonLook(0) );
+	//freeCameraButton.SetText( "Free\nCamera" );
 
 	static const char* modeButtonText[NUM_BUILD_MODES] = {
 		"Utility", "Tech0", "Tech1", "Tech2", "Tech3"
@@ -108,8 +108,12 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	createWorkerButton.Init( &gamui2D, game->GetButtonLook(0) );
 	createWorkerButton.SetText( "WorkerBot" );
 
-	coreToggle.Init( &gamui2D, game->GetButtonLook(0) );
-	coreToggle.SetText( "Core\nPrime" );
+	for( int i=0; i<NUM_UI_MODES; ++i ) {
+		static const char* TEXT[NUM_UI_MODES] = { "Build", "View", "Avatar" };
+		uiMode[i].Init( &gamui2D, game->GetButtonLook(0));
+		uiMode[i].SetText( TEXT[i] );
+		uiMode[0].AddToToggleGroup( &uiMode[i] );
+	}
 	
 	allRockButton.Init( &gamui2D, game->GetButtonLook(0) );
 	allRockButton.SetText( "All Rock" );
@@ -153,6 +157,8 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	techLabel.Init( &gamui2D );
 	moneyWidget.Init( &gamui2D );
 	consoleWidget.Init( &gamui2D );
+
+	uiMode[UI_AVATAR].SetDown();
 }
 
 
@@ -175,7 +181,7 @@ void GameScene::Resize()
 		layout.PosAbs( &serialButton[i], i+1, -1 );
 	}
 	layout.PosAbs( &allRockButton, 1, -2 );
-	layout.PosAbs( &freeCameraButton, 0, -2 );
+	//layout.PosAbs( &freeCameraButton, 0, -2 );
 
 	int level = BuildScript::TECH_UTILITY;
 	int start = 0;
@@ -186,16 +192,18 @@ void GameScene::Resize()
 			level = bd.techLevel;
 			start = i;
 		}
-		layout.PosAbs( &buildButton[i], i-start, 1 );
+		layout.PosAbs( &buildButton[i], i-start+1, 1 );
 	}
 	for( int i=0; i<NUM_BUILD_MODES; ++i ) {
-		layout.PosAbs( &modeButton[i], i, 0 );
+		layout.PosAbs( &modeButton[i], i+1, 0 );
 	}
 	tabBar.SetPos( modeButton[0].X(), modeButton[0].Y() );
 	tabBar.SetSize( modeButton[NUM_BUILD_MODES-1].X() + modeButton[NUM_BUILD_MODES-1].Width() - modeButton[0].X(), modeButton[0].Height() );
 
-	layout.PosAbs( &createWorkerButton, 0, 2 );
-	layout.PosAbs( &coreToggle,    0, 3 );
+	layout.PosAbs( &createWorkerButton, 1, 2 );
+	for( int i=0; i<NUM_UI_MODES; ++i ) {
+		layout.PosAbs( &uiMode[i], 0, i );
+	}
 
 	layout.PosAbs( &faceWidget, -2, 0, 1, 1 );
 	layout.PosAbs( &minimap,    -1, 0, 1, 1 );
@@ -238,7 +246,6 @@ void GameScene::Resize()
 	clearButton.SetPos( newsButton[0].X() - clearButton.Width(), newsButton[0].Y() );
 
 	allRockButton.SetVisible( visible );
-	serialButton[CYCLE].SetVisible( visible );
 	clearButton.SetVisible( visible );
 }
 
@@ -529,10 +536,9 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 	Engine* engine = sim->GetEngine();
 	
 	enable3DDragging = FreeCameraMode();
-	bool coreMode = coreToggle.Down();
 	
 	buildActive = 0;
-	if ( coreMode ) {
+	if ( uiMode[UI_BUILD].Down() ) {
 		for( int i=1; i<BuildScript::NUM_OPTIONS; ++i ) {
 			if ( buildButton[i].Down() ) {
 				buildActive = i;
@@ -553,7 +559,7 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 		bool tap = Process3DTap( action, view, world, sim->GetEngine() );
 
 		if ( tap ) {
-			if ( coreMode ) {
+			if ( uiMode[UI_BUILD].Down() ) {
 				CoreScript* coreScript = sim->GetChitBag()->GetCore( sim->GetChitBag()->GetHomeSector() );
 				WorkQueue* wq = coreScript->GetWorkQueue();
 				GLASSERT( wq );
@@ -662,11 +668,17 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 }
 
 
+bool GameScene::CoreMode()
+{
+	return uiMode[UI_BUILD].Down() || uiMode[UI_VIEW].Down(); 
+}
+
 bool GameScene::FreeCameraMode()
 {
-	bool button = freeCameraButton.Down();
+	//bool button = freeCameraButton.Down();
+	bool button      = uiMode[UI_VIEW].Down();
 	Chit* playerChit = sim->GetPlayerChit();
-	bool coreMode = coreToggle.Down();
+	bool coreMode    = CoreMode();
 	
 	if ( button || coreMode || (!playerChit) )
 		return true;
@@ -710,12 +722,12 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		sim = new Sim( lumosGame );
 		Load();
 	}
-	else if ( item == &serialButton[CYCLE] ) {
-		Save();
-		delete sim;
-		sim = new Sim( lumosGame );
-		Load();
-	}
+//	else if ( item == &serialButton[CYCLE] ) {
+//		Save();
+//		delete sim;
+//		sim = new Sim( lumosGame );
+//		Load();
+//	}
 	else if ( item == &allRockButton ) {
 		sim->SetAllRock();
 	}
@@ -764,7 +776,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 			}
 		}
 	}
-	if ( item == &freeCameraButton || item == &coreToggle ) {
+	if ( /*item == &freeCameraButton || */ item == &uiMode[UI_BUILD] || item == &uiMode[UI_VIEW] || item == &uiMode[UI_AVATAR] ) {
 		// Set it to track nothing; if it needs to track something, that will
 		// be set by future mouse actions or DoTick
 		CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
@@ -1068,7 +1080,7 @@ void GameScene::DoTick( U32 delta )
 	dateLabel.SetText( str.c_str() );
 
 	Chit* playerChit = sim->GetPlayerChit();
-	if ( !coreToggle.Down() ) {
+	if ( uiMode[UI_AVATAR].Down() ) {
 		chitFaceToTrack = playerChit ? playerChit->ID() : 0;
 	}
 	Chit* track = sim->GetChitBag()->GetChit( chitFaceToTrack );
@@ -1091,15 +1103,14 @@ void GameScene::DoTick( U32 delta )
 	}
 	xpLabel.SetText( str.c_str() );
 
-	bool coreMode = coreToggle.Down();
 	for( int i=0; i<NUM_BUILD_MODES; ++i ) {
-		modeButton[i].SetVisible( coreMode != 0 );
+		modeButton[i].SetVisible( uiMode[UI_BUILD].Down() );
 	}
-	tabBar.SetVisible( modeButton[0].Visible() );
-	createWorkerButton.SetVisible( coreMode != 0 );
+	tabBar.SetVisible( uiMode[UI_BUILD].Down() );
+	createWorkerButton.SetVisible( uiMode[UI_BUILD].Down() );
 
 	str.Clear();
-	if ( playerChit && coreMode ) {
+	if ( playerChit && CoreMode() ) {
 		CoreScript* coreScript = sim->GetChitBag()->GetCore( sim->GetChitBag()->GetHomeSector() );
 		float tech = coreScript->GetTech();
 		int maxTech = coreScript->MaxTech();

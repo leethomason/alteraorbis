@@ -41,10 +41,11 @@
 
 	- Denizen
 		- item pickup isn't working
-		- melee (standing too close) is a mess
-		- melee (attacking closest) not working
+		x melee (standing too close) is a mess
+		x melee (attacking closest) not working
 		x no volcanos in controlled domains
 		- UI needs re-work
+		- switching to melee weapon causes stand around and do nothing. (move to AI? need to reset AI?)
 
 	- Census
 		- coolest stuff, past and present, by category

@@ -63,8 +63,10 @@ struct ItemHistory
 	bool operator<(const ItemHistory& rhs) const { return this->itemID < rhs.itemID; }
 	bool operator==(const ItemHistory& rhs) const { return this->itemID == rhs.itemID; }
 
-	int itemID;
-	grinliz::IString fullName;
+	int					itemID;
+	grinliz::IString	fullName;
+	U16					level;
+	U16					value;
 
 	void Set( const GameItem* );
 	void Serialize( XStream* xs );

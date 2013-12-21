@@ -70,12 +70,12 @@ private:
 
 	void SetPickupButtons();
 	bool FreeCameraMode();
+	bool CoreMode();		// currently controlling the core (build or view)
 	void ProcessNewsToConsole();
 
 	enum {
 		SAVE,
 		LOAD,
-		CYCLE,
 		NUM_SERIAL_BUTTONS,
 		NUM_PICKUP_BUTTONS = 8,
 		
@@ -90,6 +90,13 @@ private:
 		BUILD_TECH2,
 		BUILD_TECH3,
 		NUM_BUILD_MODES
+	};
+
+	enum {
+		UI_BUILD,
+		UI_VIEW,
+		UI_AVATAR,
+		NUM_UI_MODES
 	};
 
 	struct PickupData {
@@ -123,12 +130,12 @@ private:
 
 	gamui::PushButton	okay;
 	gamui::PushButton	serialButton[NUM_SERIAL_BUTTONS];
-	gamui::ToggleButton freeCameraButton;
+	//gamui::ToggleButton freeCameraButton;
 	gamui::ToggleButton	buildButton[BuildScript::NUM_OPTIONS];
 	gamui::ToggleButton modeButton[NUM_BUILD_MODES];
 	gamui::Image		tabBar;
 	gamui::PushButton	createWorkerButton;
-	gamui::ToggleButton	coreToggle;	// if down, in core mode
+	gamui::ToggleButton	uiMode[NUM_UI_MODES];
 	gamui::PushButton	allRockButton;
 	gamui::PushButton	newsButton[NUM_NEWS_BUTTONS];
 	gamui::PushButton	clearButton;
