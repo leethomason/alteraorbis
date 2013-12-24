@@ -127,7 +127,9 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	clearButton.SetSize( NEWS_BUTTON_WIDTH, NEWS_BUTTON_HEIGHT );
 	clearButton.SetText( "Clear" );
 
-	faceWidget.Init( &gamui2D, game->GetButtonLook(0) );
+	faceWidget.Init( &gamui2D, game->GetButtonLook(0),
+					 FaceWidget::ALL );
+
 	chitFaceToTrack = sim->GetPlayerChit() ? sim->GetPlayerChit()->ID() : 0;
 	faceWidget.SetSize( 100, 100 );
 
@@ -139,21 +141,21 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	RenderAtom grey  = LumosGame::CalcPaletteAtom( 0, 6 );
 	RenderAtom blue  = LumosGame::CalcPaletteAtom( 8, 0 );	
 
-	healthBar.Init( &gamui2D, 10, green, grey );
-	ammoBar.Init( &gamui2D, 10, blue, grey );
-	shieldBar.Init( &gamui2D, 10, blue, grey );
+//	healthBar.Init( &gamui2D, 10, green, grey );
+//	ammoBar.Init( &gamui2D, 10, blue, grey );
+//	shieldBar.Init( &gamui2D, 10, blue, grey );
 
-	healthBar.SetText( "HP" );
-	ammoBar.SetText( "Weapon" );
-	shieldBar.SetText( "Shield" );
+//	healthBar.SetText( "HP" );
+//	ammoBar.SetText( "Weapon" );
+//	shieldBar.SetText( "Shield" );
 
-	for( int i=0; i<ai::Needs::NUM_NEEDS; i++ ) {
-		needBar[i].Init( &gamui2D, 10, green, grey );
-		needBar[i].SetText( ai::Needs::Name( i ) );
-	}
+//	for( int i=0; i<ai::Needs::NUM_NEEDS; i++ ) {
+//		needBar[i].Init( &gamui2D, 10, green, grey );
+//		needBar[i].SetText( ai::Needs::Name( i ) );
+//	}
 
 	dateLabel.Init( &gamui2D );
-	xpLabel.Init( &gamui2D );
+//	xpLabel.Init( &gamui2D );
 	techLabel.Init( &gamui2D );
 	moneyWidget.Init( &gamui2D );
 	consoleWidget.Init( &gamui2D );
@@ -205,13 +207,15 @@ void GameScene::Resize()
 		layout.PosAbs( &uiMode[i], 0, i );
 	}
 
-	layout.PosAbs( &faceWidget, -2, 0, 1, 1 );
-	layout.PosAbs( &minimap,    -1, 0, 1, 1 );
+	layout.PosAbs( &faceWidget, -1, 0, 1, 1 );
+	layout.PosAbs( &minimap,    -2, 0, 1, 1 );
 	minimap.SetSize( minimap.Width(), minimap.Width() );	// make square
 	faceWidget.SetSize( faceWidget.Width(), faceWidget.Width() );
 
-	layout.PosAbs( &dateLabel,   5, 0 );
+	layout.PosAbs( &dateLabel,   -3, 0 );
 	layout.PosAbs( &moneyWidget, 5, -1 );
+	techLabel.SetPos( moneyWidget.X() + moneyWidget.Width() + layout.SpacingX(),
+					  moneyWidget.Y() );
 
 	static int CONSOLE_HEIGHT = 2;	// in layout...
 	layout.PosAbs( &consoleWidget, 1, -1 - CONSOLE_HEIGHT );
@@ -228,15 +232,15 @@ void GameScene::Resize()
 	layout.SetOffset( faceWidget.X(), faceWidget.Y()+faceWidget.Height() );
 	layout.SetGutter( 0, 5.0f );
 
-	layout.PosAbs( &healthBar,	0, 0 );
-	layout.PosAbs( &ammoBar,	0, 1 );
-	layout.PosAbs( &shieldBar,  0, 2 );
-	for( int i=0; i<ai::Needs::NUM_NEEDS; ++i ) {
-		layout.PosAbs( &needBar[i], 0, 3+i );
-	}
+//	layout.PosAbs( &healthBar,	0, 0 );
+//	layout.PosAbs( &ammoBar,	0, 1 );
+//	layout.PosAbs( &shieldBar,  0, 2 );
+//	for( int i=0; i<ai::Needs::NUM_NEEDS; ++i ) {
+//		layout.PosAbs( &needBar[i], 0, 3+i );
+//	}
 
-	xpLabel.SetPos(		dateLabel.X(), dateLabel.Y() + gamui2D.GetTextHeight() );
-	techLabel.SetPos(	xpLabel.X(),   xpLabel.Y() + gamui2D.GetTextHeight() );
+//	xpLabel.SetPos(		dateLabel.X(), dateLabel.Y() + gamui2D.GetTextHeight() );
+//	techLabel.SetPos(	dateLabel.X(),   dateLabel.Y() + gamui2D.GetTextHeight() );
 
 	bool visible = game->GetDebugUI();
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
@@ -252,6 +256,12 @@ void GameScene::Resize()
 
 void GameScene::SetBars( Chit* chit )
 {
+	ItemComponent* ic = chit ? chit->GetItemComponent() : 0;
+	AIComponent* ai = chit ? chit->GetAIComponent() : 0;
+
+	faceWidget.SetMeta( ic, ai );
+
+	/*
 	RenderAtom orange = LumosGame::CalcPaletteAtom( 4, 0 );
 	RenderAtom grey   = LumosGame::CalcPaletteAtom( 0, 6 );
 	RenderAtom blue   = LumosGame::CalcPaletteAtom( 8, 0 );	
@@ -309,6 +319,7 @@ void GameScene::SetBars( Chit* chit )
 	for( int i=0; i<ai::Needs::NUM_NEEDS; ++i ) {
 		needBar[i].SetVisible( ai != 0 );
 	}
+	*/
 }
 
 void GameScene::Save()
@@ -1076,7 +1087,7 @@ void GameScene::DoTick( U32 delta )
 	const SectorData& sd = sim->GetWorldMap()->GetWorldInfo().GetSector( sector );
 
 	CStr<64> str;
-	str.Format( "Date %.2f %s", NewsHistory::Instance()->AgeF(), sd.name.c_str() );
+	str.Format( "Date %.2f\n%s", NewsHistory::Instance()->AgeF(), sd.name.c_str() );
 	dateLabel.SetText( str.c_str() );
 
 	Chit* playerChit = sim->GetPlayerChit();
@@ -1101,7 +1112,7 @@ void GameScene::DoTick( U32 delta )
 		const GameTrait& stat = playerChit->GetItem()->traits;
 		str.Format( "Level %d XP %d/%d", stat.Level(), stat.Experience(), GameTrait::LevelToExperience( stat.Level()+1) );
 	}
-	xpLabel.SetText( str.c_str() );
+//	xpLabel.SetText( str.c_str() );
 
 	for( int i=0; i<NUM_BUILD_MODES; ++i ) {
 		modeButton[i].SetVisible( uiMode[UI_BUILD].Down() );
@@ -1110,11 +1121,14 @@ void GameScene::DoTick( U32 delta )
 	createWorkerButton.SetVisible( uiMode[UI_BUILD].Down() );
 
 	str.Clear();
+	CoreScript* coreScript = sim->GetChitBag()->GetCore( sim->GetChitBag()->GetHomeSector() );
+
+	float tech = coreScript->GetTech();
+	int maxTech = coreScript->MaxTech();
+	str.Format( "Tech %.2f / %d", tech, maxTech );
+	techLabel.SetText( str.c_str() );
+
 	if ( playerChit && CoreMode() ) {
-		CoreScript* coreScript = sim->GetChitBag()->GetCore( sim->GetChitBag()->GetHomeSector() );
-		float tech = coreScript->GetTech();
-		int maxTech = coreScript->MaxTech();
-		str.Format( "Tech %.2f / %d", tech, maxTech );
 
 		int atech = coreScript->AchievedTechLevel();
 		for( int i=1; i<NUM_BUILD_MODES; ++i ) {
@@ -1137,7 +1151,6 @@ void GameScene::DoTick( U32 delta )
 		createWorkerButton.SetText( str2.c_str() );
 		createWorkerButton.SetEnabled( arr.Size() < MAX_BOTS );
 	}
-	techLabel.SetText( str.c_str() );
 	consoleWidget.DoTick( delta );
 	ProcessNewsToConsole();
 

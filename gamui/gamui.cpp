@@ -1126,7 +1126,9 @@ void DigitalBar::SetHigherAtom( const RenderAtom& atom )
 
 void DigitalBar::SetRange( float t0 )
 {
-	GAMUIASSERT( t0 >= 0 && t0 <= 1 );
+	if ( t0 < 0 ) t0 = 0;
+	if ( t0 > 1 ) t0 = 1;
+
 	if ( t0 != m_t ) {
 		m_t = t0;
 

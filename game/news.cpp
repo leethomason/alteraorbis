@@ -8,13 +8,10 @@
 
 using namespace grinliz;
 
-//NewsHistory* NewsHistory::instance = 0;
 NewsHistory* StackedSingleton< NewsHistory >::instance = 0;
 
 NewsHistory::NewsHistory( ChitBag* _chitBag ) : date(0), chitBag(_chitBag)
 {
-//	GLASSERT( !instance );
-//	instance = this;
 	PushInstance( this );
 }
 
@@ -22,8 +19,6 @@ NewsHistory::NewsHistory( ChitBag* _chitBag ) : date(0), chitBag(_chitBag)
 NewsHistory::~NewsHistory()
 {
 	PopInstance( this );
-//	GLASSERT( instance );
-//	instance = 0;
 }
 
 
@@ -125,12 +120,12 @@ grinliz::IString NewsEvent::IDToName( int id ) const
 
 	IString name;
 
-	const GameItem* item = ItemDB::Instance()->Find( itemID );
+	const GameItem* item = ItemDB::Instance()->Find( id );
 	if ( item ) {
 		name = item->IFullName();
 	}
 	else {
-		const ItemHistory* history = ItemDB::Instance()->History( itemID );
+		const ItemHistory* history = ItemDB::Instance()->History( id );
 		if ( history ) {
 			name = history->fullName;
 		}
@@ -144,8 +139,9 @@ void NewsEvent::Console( grinliz::GLString* str ) const
 	*str = "";
 	IString wstr = GetWhat();
 	Vector2I sector	= ToSector( ToWorld2I( pos ));
-	// FIXME: handle find failures (or remove history tracking...)
 	const GameItem* second = ItemDB::Instance()->Find( secondItemID );
+
+	GLASSERT( itemID != secondItemID );
 
 	Chit* chit = 0;
 	if ( NewsHistory::Instance()) {

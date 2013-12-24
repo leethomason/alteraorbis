@@ -51,7 +51,9 @@ public:
 	virtual void OnChitEvent( const ChitEvent& event );
 
 	int NumItems() const				{ return itemArr.Size(); }
-	GameItem* GetItem( int index=0 )	{ return (index < itemArr.Size()) ? itemArr[index] : 0; }
+	GameItem* GetItem( int index=0 )				{ return (index < itemArr.Size()) ? itemArr[index] : 0; }
+	const GameItem* GetItem( int index=0 ) const	{ return ( index < itemArr.Size()) ? itemArr[index] : 0; }
+
 	int FindItem( const GameItem* item ) const { 
 		for( int i=0; i<itemArr.Size(); ++i ) {
 			if ( itemArr[i] == item ) return i;

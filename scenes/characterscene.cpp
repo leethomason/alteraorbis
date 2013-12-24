@@ -43,7 +43,7 @@ CharacterScene::CharacterScene( LumosGame* game, CharacterSceneData* csd ) : Sce
 	billOfSale.Init( &gamui2D );
 	billOfSale.SetVisible( data->IsMarket() );
 
-	faceWidget.Init( &gamui2D, lumosGame->GetButtonLook(0));
+	faceWidget.Init( &gamui2D, lumosGame->GetButtonLook(0), 0 );
 	faceWidget.SetFace( &uiRenderer, data->itemComponent->GetItem(0) );
 
 	desc.Init( &gamui2D );

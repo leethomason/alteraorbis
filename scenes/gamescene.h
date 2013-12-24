@@ -143,11 +143,11 @@ private:
 	gamui::Image		playerMark;
 
 	FacePushWidget		faceWidget;
-	gamui::DigitalBar	healthBar, ammoBar, shieldBar;
-	gamui::DigitalBar	needBar[ai::Needs::NUM_NEEDS];
+	//gamui::DigitalBar	healthBar, ammoBar, shieldBar;
+	//gamui::DigitalBar	needBar[ai::Needs::NUM_NEEDS];
 
 	gamui::TextLabel	dateLabel;
-	gamui::TextLabel	xpLabel;
+	//gamui::TextLabel	xpLabel;
 	gamui::TextLabel	techLabel;
 	MoneyWidget			moneyWidget;
 	ConsoleWidget		consoleWidget;
