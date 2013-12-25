@@ -52,6 +52,11 @@ void FaceWidget::BaseInit( gamui::Gamui* gamui, const gamui::ButtonLook& look, i
 		bar[i+BAR_SOCIAL].Init( gamui, 10, green, grey );
 		bar[i+BAR_SOCIAL].SetText( ai::Needs::Name( i ) );
 	}
+
+	upper.SetVisible( false );
+	for( int i=0; i<MAX_BARS; ++i ) {
+		bar[i].SetVisible( (flags & (1<<i)) != 0 );
+	}
 }
 
 
@@ -76,6 +81,7 @@ void FaceWidget::SetFace( UIRenderer* renderer, const GameItem* item )
 
 		CStr<40> str;
 		if ( flags & SHOW_NAME ) {
+			upper.SetVisible( true );
 			str.AppendFormat( "%s", item->IBestName().c_str() );
 		}
 		upper.SetText( str.c_str() );

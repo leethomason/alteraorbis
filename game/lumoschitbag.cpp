@@ -15,6 +15,7 @@
 #include "team.h"
 #include "visitorstatecomponent.h"
 #include "lumosmath.h"
+#include "lumosgame.h"	// FIXME: namegen should be in script
 
 #include "../scenes/characterscene.h"
 
@@ -259,15 +260,17 @@ Chit* LumosChitBag::NewDenizen( const grinliz::Vector2I& pos, int team )
 	chit->GetItem()->wallet.AddGold( ReserveBank::Instance()->WithdrawDenizen() );
 	chit->GetItem()->traits.Roll( random.Rand() );
 
-	/* FIXME: need name. need to move namegen to script
 	IString nameGen = chit->GetItem()->keyValues.GetIString( "nameGen" );
 	if ( !nameGen.empty() ) {
-		chit->GetItem()->properName = StringPool::Intern( 
-			lumosGame->GenName( nameGen.c_str(), 
+		LumosGame* game = LumosGame::Instance();
+		if ( game ) {
+			chit->GetItem()->SetProperName( StringPool::Intern( 
+				game->GenName(	nameGen.c_str(), 
 								chit->ID(),
-								4, 8 ));
+								4, 8 )));
+		}
 	}
-	*/
+
 	AIComponent* ai = new AIComponent( engine, worldMap );
 	chit->Add( ai );
 

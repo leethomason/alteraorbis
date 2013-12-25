@@ -246,7 +246,6 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos )
 
 	chit->Add( new HealthComponent( engine ));
 	chit->GetSpatialComponent()->SetPosYRot( (float)pos.x+0.5f, 0, (float)pos.y+0.5f, 0 );
-//	chit->GetItemComponent()->SetHardpoints(); automatic now
 
 	// Player speed boost
 	chit->GetItem()->keyValues.Set( "speed", "f", DEFAULT_MOVE_SPEED*1.5f/1.2f );

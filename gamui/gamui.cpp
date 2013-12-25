@@ -342,29 +342,38 @@ void TextLabel::ConstQueue( CDynArray< uint16_t > *indexBuf, CDynArray< Gamui::V
 			break;
 		}
 
-		iText->GamuiGlyph( *p, p>m_str ? *(p-1):0, height, &metrics );
+		// Everything above is about a word; now we are
+		// committed and can run in a tight loop.
+		while( p && *p && *p != '\n' && *p != '\t' ) {
+			iText->GamuiGlyph( *p, p>m_str ? *(p-1):0, height, &metrics );
 
-		//x = floorf( x + 0.5f );
-		float x0 = x+metrics.x;
-		float x1 = x+metrics.x+metrics.w;
-		float y0 = y+metrics.y;
-		float y1 = y+metrics.y+metrics.h;
+			float x0 = x+metrics.x;
+			float x1 = x+metrics.x+metrics.w;
+			float y0 = y+metrics.y;
+			float y1 = y+metrics.y+metrics.h;
 
-		if ( vertexBuf ) {
-			Gamui::Vertex* vertex = PushQuad( indexBuf, vertexBuf );
+			if ( vertexBuf ) {
+				Gamui::Vertex* vertex = PushQuad( indexBuf, vertexBuf );
 		
-			vertex[0].Set( x0, y0,				
-						   metrics.tx0, metrics.ty0 );
-			vertex[1].Set( x0, y1, 
-						   metrics.tx0, metrics.ty1 );
-			vertex[2].Set( x1, y1, 
-						   metrics.tx1, metrics.ty1 );
-			vertex[3].Set( x1, y0,
-						   metrics.tx1, metrics.ty0 );
+				vertex[0].Set( x0, y0,				
+							   metrics.tx0, metrics.ty0 );
+				vertex[1].Set( x0, y1, 
+							   metrics.tx0, metrics.ty1 );
+				vertex[2].Set( x1, y1, 
+							   metrics.tx1, metrics.ty1 );
+				vertex[3].Set( x1, y0,
+							   metrics.tx1, metrics.ty0 );
+			}
+			int done = isspace( *p );
+
+			++p;
+			x += metrics.advance;
+			xmax = x > xmax ? x : xmax;
+
+			// We processed a space; leave the (inner) word loop.
+			if ( done )
+				break;
 		}
-		++p;
-		x += metrics.advance;
-		xmax = x > xmax ? x : xmax;
 	}
 
 	m_width = xmax - X();
@@ -1163,6 +1172,7 @@ void DigitalBar::SetVisible( bool visible )
 	for( int i=0; i<m_nTicks; ++i ) {
 		m_image[i].SetVisible( visible );
 	}
+	m_textLabel.SetVisible( visible );
 }
 
 

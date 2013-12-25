@@ -130,7 +130,6 @@ private:
 
 	gamui::PushButton	okay;
 	gamui::PushButton	serialButton[NUM_SERIAL_BUTTONS];
-	//gamui::ToggleButton freeCameraButton;
 	gamui::ToggleButton	buildButton[BuildScript::NUM_OPTIONS];
 	gamui::ToggleButton modeButton[NUM_BUILD_MODES];
 	gamui::Image		tabBar;
@@ -143,11 +142,8 @@ private:
 	gamui::Image		playerMark;
 
 	FacePushWidget		faceWidget;
-	//gamui::DigitalBar	healthBar, ammoBar, shieldBar;
-	//gamui::DigitalBar	needBar[ai::Needs::NUM_NEEDS];
 
 	gamui::TextLabel	dateLabel;
-	//gamui::TextLabel	xpLabel;
 	gamui::TextLabel	techLabel;
 	MoneyWidget			moneyWidget;
 	ConsoleWidget		consoleWidget;

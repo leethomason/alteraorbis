@@ -37,9 +37,12 @@
 using namespace grinliz;
 using namespace gamui;
 
+LumosGame* StackedSingleton<LumosGame>::instance = 0;
+
 LumosGame::LumosGame(  int width, int height, int rotation, const char* savepath ) 
 	: Game( width, height, rotation, 600, savepath )
 {
+	PushInstance( this );
 	InitButtonLooks();
 	ItemDefDB::Instance()->Load( "./res/itemdef.xml" );
 	ItemDefDB::Instance()->DumpWeaponStats();
@@ -51,6 +54,7 @@ LumosGame::LumosGame(  int width, int height, int rotation, const char* savepath
 
 LumosGame::~LumosGame()
 {
+	PopInstance( this );
 	TextureManager::Instance()->TextureCreatorInvalid( this );
 	delete ItemDefDB::Instance();
 }

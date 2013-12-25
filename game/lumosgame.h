@@ -17,10 +17,11 @@
 #define LUMOS_LUMOSGAME_INCLUDED
 
 #include "../xegame/game.h"
+#include "../xegame/stackedsingleton.h"
 
 class GameItem;
 
-class LumosGame : public Game
+class LumosGame : public Game, public StackedSingleton< LumosGame >
 {
 	typedef Game super;
 

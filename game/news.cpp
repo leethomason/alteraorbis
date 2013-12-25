@@ -106,7 +106,8 @@ grinliz::IString NewsEvent::GetWhat() const
 		"Sector Herd",
 		"Volcano",
 		"Pool",
-		"Waterfall"
+		"Waterfall",
+		"Purchase"
 	};
 	GLASSERT( GL_C_ARRAY_SIZE( NAME ) == NUM_WHAT );
 	return grinliz::StringPool::Intern( NAME[what], true );
@@ -189,6 +190,10 @@ void NewsEvent::Console( grinliz::GLString* str ) const
 
 	case UN_FORGED:
 		str->Format( "%.2f: %s destroyed at %s.", age, itemName.c_str(), domain.c_str() );
+		break;
+
+	case PURCHASED:
+		str->Format( "%.2f: %s purchased at %s by %s.", age, itemName.c_str(), domain.c_str(), secondName.c_str() );
 		break;
 
 	default:

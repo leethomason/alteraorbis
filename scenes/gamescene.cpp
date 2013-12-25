@@ -82,9 +82,6 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 		serialButton[i].SetText( serialText[i] );
 	}
 
-	//freeCameraButton.Init( &gamui2D, game->GetButtonLook(0) );
-	//freeCameraButton.SetText( "Free\nCamera" );
-
 	static const char* modeButtonText[NUM_BUILD_MODES] = {
 		"Utility", "Tech0", "Tech1", "Tech2", "Tech3"
 	};
@@ -141,21 +138,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	RenderAtom grey  = LumosGame::CalcPaletteAtom( 0, 6 );
 	RenderAtom blue  = LumosGame::CalcPaletteAtom( 8, 0 );	
 
-//	healthBar.Init( &gamui2D, 10, green, grey );
-//	ammoBar.Init( &gamui2D, 10, blue, grey );
-//	shieldBar.Init( &gamui2D, 10, blue, grey );
-
-//	healthBar.SetText( "HP" );
-//	ammoBar.SetText( "Weapon" );
-//	shieldBar.SetText( "Shield" );
-
-//	for( int i=0; i<ai::Needs::NUM_NEEDS; i++ ) {
-//		needBar[i].Init( &gamui2D, 10, green, grey );
-//		needBar[i].SetText( ai::Needs::Name( i ) );
-//	}
-
 	dateLabel.Init( &gamui2D );
-//	xpLabel.Init( &gamui2D );
 	techLabel.Init( &gamui2D );
 	moneyWidget.Init( &gamui2D );
 	consoleWidget.Init( &gamui2D );
@@ -183,7 +166,6 @@ void GameScene::Resize()
 		layout.PosAbs( &serialButton[i], i+1, -1 );
 	}
 	layout.PosAbs( &allRockButton, 1, -2 );
-	//layout.PosAbs( &freeCameraButton, 0, -2 );
 
 	int level = BuildScript::TECH_UTILITY;
 	int start = 0;
@@ -223,7 +205,7 @@ void GameScene::Resize()
 	consoleWidget.SetBounds( 0, consoleHeight );
 
 	for( int i=0; i<NUM_PICKUP_BUTTONS; ++i ) {
-		layout.PosAbs( &pickupButton[i], 0, i );
+		layout.PosAbs( &pickupButton[i], 0, i+3 );
 	}
 
 	// ------ CHANGE LAYOUT ------- //
@@ -231,16 +213,6 @@ void GameScene::Resize()
 	layout.SetSpacing( 5.0f );
 	layout.SetOffset( faceWidget.X(), faceWidget.Y()+faceWidget.Height() );
 	layout.SetGutter( 0, 5.0f );
-
-//	layout.PosAbs( &healthBar,	0, 0 );
-//	layout.PosAbs( &ammoBar,	0, 1 );
-//	layout.PosAbs( &shieldBar,  0, 2 );
-//	for( int i=0; i<ai::Needs::NUM_NEEDS; ++i ) {
-//		layout.PosAbs( &needBar[i], 0, 3+i );
-//	}
-
-//	xpLabel.SetPos(		dateLabel.X(), dateLabel.Y() + gamui2D.GetTextHeight() );
-//	techLabel.SetPos(	dateLabel.X(),   dateLabel.Y() + gamui2D.GetTextHeight() );
 
 	bool visible = game->GetDebugUI();
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
@@ -260,66 +232,6 @@ void GameScene::SetBars( Chit* chit )
 	AIComponent* ai = chit ? chit->GetAIComponent() : 0;
 
 	faceWidget.SetMeta( ic, ai );
-
-	/*
-	RenderAtom orange = LumosGame::CalcPaletteAtom( 4, 0 );
-	RenderAtom grey   = LumosGame::CalcPaletteAtom( 0, 6 );
-	RenderAtom blue   = LumosGame::CalcPaletteAtom( 8, 0 );	
-	AIComponent* ai = chit ? chit->GetAIComponent() : 0;
-
-	if ( chit && chit->GetItem() ) {
-		const GameItem* item = chit->GetItem();
-		healthBar.SetRange( item->HPFraction() );
-
-		IShield* ishield			= 0;
-		IRangedWeaponItem* iweapon	= 0;
-
-		ItemComponent* itemComp = chit->GetItemComponent();
-		if ( itemComp ) {
-			ishield	= itemComp->GetShield();
-			iweapon	= itemComp->GetRangedWeapon(0);
-		}
-
-		if ( iweapon ) {
-			float r = 0;
-			if ( iweapon->GetItem()->Reloading() ) {
-				r = iweapon->GetItem()->ReloadFraction();
-				ammoBar.SetLowerAtom( orange );
-			}
-			else {
-				r = iweapon->GetItem()->RoundsFraction();
-				ammoBar.SetLowerAtom( blue );
-			}
-			ammoBar.SetRange( Clamp( r, 0.f, 1.f ) );
-		}
-		else {
-			ammoBar.SetRange( 0 );
-		}
-
-		if ( ishield ) {
-			float r = ishield->GetItem()->RoundsFraction();
-			shieldBar.SetRange( Clamp( r, 0.f, 1.0f ));
-		}
-		else {
-			shieldBar.SetRange( 0 );
-		}
-
-		if ( ai ) {
-			const ai::Needs& needs = ai->GetNeeds();
-			for( int i=0; i<ai::Needs::NUM_NEEDS; ++i ) {
-				needBar[i].SetRange( (float)needs.Value(i) );
-			}
-		}
-	}
-
-	healthBar.SetVisible( chit != 0 );
-	ammoBar.SetVisible( chit != 0 );
-	shieldBar.SetVisible( chit != 0 );
-
-	for( int i=0; i<ai::Needs::NUM_NEEDS; ++i ) {
-		needBar[i].SetVisible( ai != 0 );
-	}
-	*/
 }
 
 void GameScene::Save()
@@ -733,12 +645,6 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		sim = new Sim( lumosGame );
 		Load();
 	}
-//	else if ( item == &serialButton[CYCLE] ) {
-//		Save();
-//		delete sim;
-//		sim = new Sim( lumosGame );
-//		Load();
-//	}
 	else if ( item == &allRockButton ) {
 		sim->SetAllRock();
 	}
@@ -941,8 +847,7 @@ void GameScene::HandleHotKey( int mask )
 void GameScene::SetPickupButtons()
 {
 	Chit* player = sim->GetPlayerChit();
-	CoreScript* coreScript = sim->GetChitBag()->GetCore( sim->GetChitBag()->GetHomeSector() );
-	if ( player && !coreScript ) {
+	if ( player && uiMode[UI_AVATAR].Down() ) {
 		bool canAdd = player && player->GetItemComponent() && player->GetItemComponent()->CanAddToInventory();
 		// Query items on the ground in a radius of the player.
 		LootFilter lootFilter;
@@ -1016,6 +921,7 @@ void GameScene::ProcessNewsToConsole()
 		case NewsEvent::DENIZEN_KILLED:
 		case NewsEvent::FORGED:
 		case NewsEvent::UN_FORGED:
+		case NewsEvent::PURCHASED:
 			if ( coreScript && coreScript->IsCitizen( ne.chitID )) {
 				ne.Console( &str );
 			}

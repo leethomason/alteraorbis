@@ -1,6 +1,7 @@
 #include "marketai.h"
 #include "../xegame/chit.h"
 #include "../game/gameitem.h" 
+#include "../game/news.h"
 #include "../xegame/itemcomponent.h"
 #include "../xegame/spatialcomponent.h"
 
@@ -76,8 +77,10 @@ const GameItem* MarketAI::HasShield( int au, int minValue )	{ return Has( 0, HAR
 						buyer->GetItem()->wallet.AddGold( -cost );
 						seller->GetItem()->wallet.AddGold( cost );
 
+						Vector2F pos    = { 0, 0 };
 						Vector2I sector = { 0, 0 };
 						if ( seller->ParentChit()->GetSpatialComponent() ) {
+							pos = seller->ParentChit()->GetSpatialComponent()->GetPosition2D();
 							sector = ToSector( seller->ParentChit()->GetSpatialComponent()->GetPosition2DI() );
 						}
 						GLOUTPUT(( "'%s' sold to '%s' the item '%s' for %d Au at sector=%x,%x\n",
@@ -86,6 +89,11 @@ const GameItem* MarketAI::HasShield( int au, int minValue )	{ return Has( 0, HAR
 							gi->BestName(),
 							cost,
 							sector.x, sector.y ));
+
+						NewsHistory* history = NewsHistory::Instance();
+						if ( history ) {
+							history->Add( NewsEvent( NewsEvent::PURCHASED, pos, gi, buyer->ParentChit() ));
+						}
 					}
 					return cost;
 				}

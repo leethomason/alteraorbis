@@ -46,6 +46,8 @@ public:
 		POOL,
 		WATERFALL,
 
+		PURCHASED,					//	item		purchaser	0
+
 		NUM_WHAT
 	};
 
