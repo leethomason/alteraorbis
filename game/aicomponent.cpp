@@ -119,6 +119,7 @@ void AIComponent::Serialize( XStream* xs )
 void AIComponent::OnAdd( Chit* chit )
 {
 	super::OnAdd( chit );
+	feTicker.SetPeriod( 750 + (chit->ID() & 128) );
 }
 
 
@@ -1735,7 +1736,6 @@ int AIComponent::DoTick( U32 deltaTime )
 
 	if ( feTicker.Delta( deltaTime )) {
 		GetFriendEnemyLists();
-		feTicker.SetTime( feTicker.Period() + parentChit->ID() & 63 );	// a little randomness
 	}
 
 	// High level mode switch, in/out of battle?

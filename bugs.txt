@@ -36,6 +36,7 @@
 - buildings shouldn't drop gold on de-rez
 - TextBox needs to be better, and should be used much more.
 - AIs should account for personality and skills when doing inventory sorting
+- Click through of disabled buttons is surprising
 
 - game
 
@@ -48,14 +49,13 @@
 		x Tech decaying too fast or too few visitors. What is the visitor logic??
 		x Pre-roll the forge scene. No random factor?
 		- switching to melee weapon causes stand around and do nothing. (move to AI? need to reset AI?)
-		- Click through of disabled buttons is surprising
 		- Lingering cursor after building.
 		- “Focus” shouldn’t switch so easily.
-		- Stuff on the ground blocks clicking.
+		x Stuff on the ground blocks clicking.
 		- Robots should clear before build.
 		- Paving more obvious? All green disappears?
 		- Bug: Can focus target across domains.
-		- Green gems too rare (not in volcanoes?)
+		x Green gems too rare (not in volcanoes?)
 
 	- Census
 		- coolest stuff, past and present, by category

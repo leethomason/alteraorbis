@@ -43,6 +43,7 @@ using namespace grinliz;
 #define ENGINE_RENDER_SHADOWS
 #define ENGINE_RENDER_MAP
 #define ENGINE_RENDER_GLOW
+//#define ENGINE_DETAILED_PROFILE
 
 
 Engine::Engine( Screenport* port, const gamedb::Reader* database, Map* m ) 
@@ -271,7 +272,9 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 	int exclude = Model::MODEL_INVISIBLE;
 	Model* modelRoot = spaceTree->Query( planes, 6, 0, exclude );
 	if ( map ) {
+#ifdef ENGINE_DETAILED_PROFILE
 		PROFILE_BLOCK( MapPrep );
+#endif
 		map->PrepVoxels( spaceTree );
 		map->PrepGrid( spaceTree );
 	}
@@ -305,7 +308,9 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 	// ----------- Render Passess ---------- //
 #ifdef ENGINE_RENDER_GLOW
 	if ( glow ) {
+#ifdef ENGINE_DETAILED_PROFILE
 		PROFILE_BLOCK( Glow );
+#endif
 		if ( !renderTarget[RT_LIGHTS] ) {
 			renderTarget[RT_LIGHTS] = new RenderTarget( screenport->PhysicalWidth(), screenport->PhysicalHeight(), true );
 		}
@@ -353,7 +358,9 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 #endif
 
 	if ( map ) {
+#ifdef ENGINE_DETAILED_PROFILE
 		PROFILE_BLOCK( Map );
+#endif
 #ifdef ENGINE_RENDER_MAP
 		// Draw shadows to stencil buffer.
 		float shadowAmount = 1.0f;
@@ -402,7 +409,9 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 	// -------- Models ---------- //
 #ifdef ENGINE_RENDER_MODELS
 	{
+#ifdef ENGINE_DETAILED_PROFILE
 		PROFILE_BLOCK( Models );
+#endif
 		if ( map ) {
 			GPUState state;
 			engineShaders.GetState( EngineShaders::LIGHT, 0, &state );
@@ -429,7 +438,9 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 	// --------- Composite Glow -------- //
 #ifdef ENGINE_RENDER_GLOW
 	if ( glow ) {
+#ifdef ENGINE_DETAILED_PROFILE
 		PROFILE_BLOCK( CompositeGlow );
+#endif
 		Blur();
 
 		screenport->SetUI();
@@ -476,7 +487,9 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 
 void Engine::Blur()
 {
+#ifdef ENGINE_DETAILED_PROFILE
 	PROFILE_FUNC();
+#endif
 	GPUDevice* device = GPUDevice::Instance();
 
 #ifdef EL_USE_MRT_BLUR
