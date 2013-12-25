@@ -1184,19 +1184,28 @@ const RenderAtom* DigitalBar::GetRenderAtom() const
 
 bool DigitalBar::DoLayout()
 {
-	//
-	// a space b space c
-	//
-	float totalSpace = m_width * 0.10f;
-	float space = totalSpace / (float)(m_nTicks-1);
-	float perItemWidth = 0.90f * m_width / (float)m_nTicks;
+	if ( m_nTicks > 2 ) {
+		//
+		// a space b space c
+		//
+		float totalSpace = m_width * 0.10f;
+		float space = totalSpace / (float)(m_nTicks-1);
+		float perItemWidth = 0.90f * m_width / (float)m_nTicks;
 
-	for( int i=0; i<m_nTicks; ++i ) {
-		m_image[i].SetSize( perItemWidth, m_height );
-		m_image[i].SetPos( X() + (float)i*(perItemWidth + space),
-						   Y() );
+		for( int i=0; i<m_nTicks; ++i ) {
+			m_image[i].SetSize( perItemWidth, m_height );
+			m_image[i].SetPos( X() + (float)i*(perItemWidth + space),
+							   Y() );
+		}
 	}
-
+	else {
+		m_image[0].SetAtom( m_atomLower );
+		m_image[1].SetAtom( m_atomHigher );
+		m_image[0].SetSize( m_width * m_t, m_height );
+		m_image[1].SetSize( m_width * (1.0f-m_t), m_height );
+		m_image[0].SetPos( X(), Y() );
+		m_image[1].SetPos( X() + m_width*m_t, Y() );
+	}
 	m_textLabel.SetCenterPos( X() + Width()*0.5f, Y() + Height()*0.5f );
 	return false;
 }

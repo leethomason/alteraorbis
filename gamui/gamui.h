@@ -844,8 +844,7 @@ class DigitalBar : public UIItem
 public:
 	DigitalBar();
 	DigitalBar( Gamui* gamui,
-				int nTicks,
-
+				int nTicks,							// if 2, continuous
 				const RenderAtom& atomLower,		// lit
 				const RenderAtom& atomHigher )		// un-lit
 		: UIItem( Gamui::LEVEL_FOREGROUND )

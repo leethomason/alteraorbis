@@ -38,10 +38,10 @@ void FaceWidget::BaseInit( gamui::Gamui* gamui, const gamui::ButtonLook& look, i
 	RenderAtom grey  = LumosGame::CalcPaletteAtom( 0, 6 );
 	RenderAtom blue  = LumosGame::CalcPaletteAtom( 8, 0 );	
 
-	bar[BAR_HP].Init(		gamui, 10, green, grey );
-	bar[BAR_AMMO].Init(		gamui, 10, blue, grey );
-	bar[BAR_SHIELD].Init(	gamui, 10, blue, grey );
-	bar[BAR_LEVEL].Init(	gamui, 10, blue, grey );
+	bar[BAR_HP].Init(		gamui, 2, green, grey );
+	bar[BAR_AMMO].Init(		gamui, 2, blue, grey );
+	bar[BAR_SHIELD].Init(	gamui, 2, blue, grey );
+	bar[BAR_LEVEL].Init(	gamui, 2, blue, grey );
 
 	bar[BAR_HP].SetText( "HP" );
 	bar[BAR_AMMO].SetText( "Weapon" );
@@ -49,7 +49,7 @@ void FaceWidget::BaseInit( gamui::Gamui* gamui, const gamui::ButtonLook& look, i
 
 	for( int i=0; i<ai::Needs::NUM_NEEDS; i++ ) {
 		GLASSERT( i < MAX_BARS );
-		bar[i+BAR_SOCIAL].Init( gamui, 10, green, grey );
+		bar[i+BAR_SOCIAL].Init( gamui, 2, green, grey );
 		bar[i+BAR_SOCIAL].SetText( ai::Needs::Name( i ) );
 	}
 

@@ -40,11 +40,13 @@
 - game
 
 	- Denizen
-		- item pickup isn't working
+		x item pickup isn't working
 		x melee (standing too close) is a mess
 		x melee (attacking closest) not working
 		x no volcanos in controlled domains
 		x UI needs re-work
+		x Tech decaying too fast or too few visitors. What is the visitor logic??
+		x Pre-roll the forge scene. No random factor?
 		- switching to melee weapon causes stand around and do nothing. (move to AI? need to reset AI?)
 		- Click through of disabled buttons is surprising
 		- Lingering cursor after building.
@@ -54,8 +56,6 @@
 		- Paving more obvious? All green disappears?
 		- Bug: Can focus target across domains.
 		- Green gems too rare (not in volcanoes?)
-		x Tech decaying too fast or too few visitors. What is the visitor logic??
-		x Pre-roll the forge scene. No random factor?
 
 	- Census
 		- coolest stuff, past and present, by category
