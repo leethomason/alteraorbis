@@ -18,7 +18,6 @@
 
 #include "../grinliz/gldebug.h"
 #include "../grinliz/gltypes.h"
-//#include "../grinliz/glperformance.h"
 #include "../grinliz/glcontainer.h"
 
 #include "../engine/surface.h"
@@ -44,6 +43,7 @@ class TiXmlDocument;
 class Stats;
 class Unit;
 class Research;
+class ItemDefDB;
 
 enum SavePathMode {
 	SAVEPATH_READ,
@@ -184,6 +184,7 @@ private:
 
 	ModelLoader* modelLoader;
 	gamedb::Reader* database0;		// the basic, complete database
+	ItemDefDB*		itemDefDB;		// the definitions of items
 
 	struct SceneNode {
 		Scene*			scene;

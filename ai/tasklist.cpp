@@ -67,7 +67,7 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta )
 	if ( taskList.Empty() ) return;
 
 	ComponentSet thisComp( chit, Chit::MOVE_BIT | Chit::SPATIAL_BIT | Chit::AI_BIT | Chit::ITEM_BIT | ComponentSet::IS_ALIVE );
-	PathMoveComponent* pmc		= GET_SUB_COMPONENT( chit, MoveComponent, PathMoveComponent );
+	PathMoveComponent* pmc = GET_SUB_COMPONENT( chit, MoveComponent, PathMoveComponent );
 
 	if ( !pmc || !thisComp.okay ) {
 		taskList.Clear();
@@ -147,7 +147,7 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta )
 					worldMap->VoxelHit( voxel, dd );
 				}
 				else {
-					Chit* found = chitBag->QueryRemovable( task->pos2i );
+					Chit* found = chitBag->QueryRemovable( task->pos2i, false );
 					if ( found ) {
 						GLASSERT( found->GetItem() );
 						found->GetItem()->hp = 0;
@@ -167,6 +167,19 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta )
 					task->buildScriptID,
 					controller->GetItem()->wallet ))
 				{
+					// Auto-Clear plants.
+					Rectangle2F clearBounds;
+					clearBounds.Set( (float)task->pos2i.x, (float)task->pos2i.y, (float)(task->pos2i.x + buildData.size), (float)(task->pos2i.y + buildData.size));
+					CChitArray plants;
+					PlantFilter plantFilter;
+					chitBag->QuerySpatialHash( &plants, clearBounds, 0, &plantFilter );
+					for( int k=0; k<plants.Size(); ++k ) {
+						plants[k]->GetItem()->hp = 0;
+						plants[k]->SetTickNeeded();
+					}
+
+					// Now build. The Rock/Pave/Building may coexist with a plant for a frame,
+					// but the plant will be de-rezzed at the next tick.
 					if ( task->buildScriptID == BuildScript::ICE ) {
 						worldMap->SetRock( task->pos2i.x, task->pos2i.y, 1, false, WorldGrid::ICE );
 					}

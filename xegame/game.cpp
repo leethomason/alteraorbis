@@ -28,7 +28,6 @@
 
 #include "../grinliz/glmatrix.h"
 #include "../grinliz/glutil.h"
-//#include "../grinliz/glperformance.h"
 #include "../Shiny/include/Shiny.h"
 #include "../grinliz/glstringutil.h"
 
@@ -37,6 +36,8 @@
 
 #include "ufosound.h"
 #include "istringconst.h"
+
+#include "../script/itemscript.h"
 
 #include <time.h>
 #include <direct.h>	// for _mkdir
@@ -111,6 +112,11 @@ Game::Game( int width, int height, int rotation, int uiHeight, const char* path 
 	UFOText::Create( database0, textTexture );
 
 	_mkdir( "save" );
+
+	itemDefDB = new ItemDefDB();
+	itemDefDB->Load( "./res/itemdef.xml" );
+	itemDefDB->DumpWeaponStats();
+
 	GLOUTPUT(( "Game::Init complete.\n" ));
 }
 
@@ -137,9 +143,9 @@ Game::~Game()
 
 	delete ShaderManager::Instance();	// handles device loss - should be near the end.
 	delete GPUDevice::Instance();
+	delete itemDefDB;
 	delete database0;
 	delete StringPool::Instance();
-	//Performance::Free();
 	PROFILE_DESTROY();
 
 	GLOUTPUT_REL(( "Game destructor complete.\n" ));

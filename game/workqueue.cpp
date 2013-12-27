@@ -315,7 +315,10 @@ bool WorkQueue::TaskCanComplete( const WorkQueue::QueueItem& item )
 				++passable;
 			}
 			Vector2I v = { x, y };
-			if ( chitBag->QueryRemovable( v )) {
+			// The 'build' actions will automatically clear plants. (As will PAVE, etc.)
+			// However, if the action is CLEAR, we need to know there is something
+			// there to remove.
+			if ( chitBag->QueryRemovable( v, action != BuildScript::CLEAR )) {
 				++removable;
 			}
 		}
@@ -326,8 +329,6 @@ bool WorkQueue::TaskCanComplete( const WorkQueue::QueueItem& item )
 			// stuff in the way
 			return false;
 		}
-
-		
 	}
 	else {
 		if ( passable == size*size && removable == 0 ) {

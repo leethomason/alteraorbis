@@ -25,7 +25,7 @@
 using namespace tinyxml2;
 using namespace grinliz;
 
-/*static*/ ItemDefDB* ItemDefDB::instance = 0;
+ItemDefDB* StackedSingleton< ItemDefDB >::instance = 0;
 
 void ItemDefDB::Load( const char* path )
 {

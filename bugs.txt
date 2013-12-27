@@ -48,18 +48,21 @@
 		x UI needs re-work
 		x Tech decaying too fast or too few visitors. What is the visitor logic??
 		x Pre-roll the forge scene. No random factor?
+		x Stuff on the ground blocks clicking.
+		x Green gems too rare (not in volcanoes?)
+		- Need "use building" button
 		- switching to melee weapon causes stand around and do nothing. (move to AI? need to reset AI?)
 		- Lingering cursor after building.
 		- “Focus” shouldn’t switch so easily.
-		x Stuff on the ground blocks clicking.
 		- Robots should clear before build.
 		- Paving more obvious? All green disappears?
 		- Bug: Can focus target across domains.
-		x Green gems too rare (not in volcanoes?)
+		- Review 2 release logs from GT
 
 	- Census
 		- coolest stuff, past and present, by category
 		- total of Au and Crystal
+		- consider tying gold/crystal to per-cycle census
 
 	- Market
 		x rethink fiction / core control / avatar prime

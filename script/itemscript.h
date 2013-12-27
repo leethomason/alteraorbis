@@ -24,11 +24,11 @@
 #include "../xegame/stackedsingleton.h"
 
 
-class ItemDefDB
+class ItemDefDB : public StackedSingleton< ItemDefDB >
 {
 public:
-	static ItemDefDB* Instance() { if ( !instance ) instance = new ItemDefDB(); return instance; }
-	~ItemDefDB()	{ instance = 0; }
+	ItemDefDB()		{ PushInstance( this ); }
+	~ItemDefDB()	{ PopInstance( this ); }
 
 	void Load( const char* path );
 
@@ -47,9 +47,6 @@ public:
 	void AssignWeaponStats( const int* roll, const GameItem& base, GameItem* item );
 
 private:
-	ItemDefDB()		{}
-
-	static ItemDefDB* instance;
 	GameItem nullItem;
 
 	grinliz::HashTable< const char*, GameItem*, grinliz::CompCharPtr, grinliz::OwnedPtrSem > map;

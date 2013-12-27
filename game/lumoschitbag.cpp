@@ -339,13 +339,20 @@ Chit* LumosChitBag::NewVisitor( int visitorIndex )
 }
 
 
-Chit* LumosChitBag::QueryRemovable( const grinliz::Vector2I& pos2i )
+Chit* LumosChitBag::QueryRemovable( const grinliz::Vector2I& pos2i, bool ignorePlants )
 {
 	Vector2F pos2 = { (float)pos2i.x+0.5f, (float)pos2i.y+0.5f };
 
-	CChitArray array;
+	CChitArray		array;
 	RemovableFilter removableFilter;
-	QuerySpatialHash( &array, pos2, 0.1f, 0, &removableFilter );
+	BuildingFilter  buildingFilter;
+
+	IChitAccept* filter = &removableFilter;
+	if ( ignorePlants ) {
+		filter = &buildingFilter;
+	}
+
+	QuerySpatialHash( &array, pos2, 0.1f, 0, filter );
 
 	Chit* found = 0;
 	// First pass: plants & 1x1 buildings.

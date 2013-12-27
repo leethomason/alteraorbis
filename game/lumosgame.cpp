@@ -44,8 +44,6 @@ LumosGame::LumosGame(  int width, int height, int rotation, const char* savepath
 {
 	PushInstance( this );
 	InitButtonLooks();
-	ItemDefDB::Instance()->Load( "./res/itemdef.xml" );
-	ItemDefDB::Instance()->DumpWeaponStats();
 
 	PushScene( SCENE_TITLE, 0 );
 	PushPopScene();
@@ -56,7 +54,6 @@ LumosGame::~LumosGame()
 {
 	PopInstance( this );
 	TextureManager::Instance()->TextureCreatorInvalid( this );
-	delete ItemDefDB::Instance();
 }
 
 
