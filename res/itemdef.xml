@@ -1,7 +1,7 @@
 <!--
     Notes:
       Any carried item will replace the instrinsic item.
-      A weapon can NOT be BOTH ranged and melee (this is for code simplicity)
+      An item can be RANGED, MELEE, **OR** SHIELD (on none of those)
       Every thing that can battle at all should have an intrinsic melee. (So it doesn't get "stuck")
 -->
 

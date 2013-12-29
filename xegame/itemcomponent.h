@@ -68,18 +68,17 @@ public:
 	/*	Weapon queries. Seem simple, but aren't.
 		GetRanged/Melee: returns the currently equipped weapon. Can
 			be intrinsic OR held. Can be null. Can both be null.
-		GetReserved: returns the weapon that can be swapped in. Always
-			held. May be null.
+		GetActive/Reserved: returns the a held weapon. Either in hand,
+			or can be swapped in.
 	*/
 
 	// Gets the *currently* in use:
 	IRangedWeaponItem*	GetRangedWeapon( grinliz::Vector3F* trigger );	// optionally returns trigger
-	IMeleeWeaponItem*	GetMeleeWeapon();
-	IShield*			GetShield();
+	IMeleeWeaponItem*	GetMeleeWeapon()	{ return melee; }
+	IShield*			GetShield()			{ return shield; }
 
-	// If a melee weapon is in use, the ranged weapon that can 
-	// be swapped in. If ranged, the melee weapon.
-	IWeaponItem*		GetReserveWeapon();
+	// Always returns a HELD weapon, or null.
+	IWeaponItem*		GetReserveWeapon()	{ return reserve; }
 
 	bool CanAddToInventory();
 	int  NumCarriedItems() const;
@@ -102,12 +101,14 @@ public:
 	float PowerRating() const;
 
 private:
-	// If there is a RenderComponent, bring it in sync with
-	// the inventory.
+	// If there is a RenderComponent, bring it in sync with the inventory.
 	void SetHardpoints();
+	// Update the active/reserve/melee/ranged. Call whenever inventory changes.
+	void UpdateActive();
+
 	void DoSlowTick();
 	bool EmitEffect( const GameItem& it, U32 deltaTime );
-	bool ItemActive( int index );
+	bool ItemActive( int index )	{ return activeArr[index]; }
 	bool ItemActive( const GameItem* );	// expensive: needs a search.
 	void NameItem( GameItem* item );	// if conditions met, give the item a name.
 	void SortInventory();				// AIs will use the "best" item.
@@ -115,10 +116,15 @@ private:
 
 	CTicker slowTick;
 
-	Engine *engine;
-	WorldMap* worldMap;
-	bool hardpointsModified;	// not serialized.
-	int  lastDamageID;			// the last thing that hit us. not serialized.
+	// Not serialized:
+	Engine*				engine;
+	WorldMap*			worldMap;
+	bool				hardpointsModified;
+	int					lastDamageID;			// the last thing that hit us.
+	IRangedWeaponItem*	ranged;		// may be 0, active, or neither
+	IMeleeWeaponItem*	melee;		// may be 0, active, or neither
+	IWeaponItem*		reserve;	// remember: always held
+	IShield*			shield;
 
 	// The first item in this array is what this *is*. The following items are what is being carried.
 	//
@@ -130,6 +136,7 @@ private:
 	// array gets the hardpoints, and we get the hardpoints from the ModelResource. (So
 	// we do not need the RenderComponent.)
 	grinliz::CDynArray< GameItem* > itemArr;
+	grinliz::CDynArray< bool >		activeArr;
 };
 
 #endif // ITEMCOMPONENT_INCLUDED
