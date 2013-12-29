@@ -1,6 +1,8 @@
 <!--
-  
-
+    Notes:
+      Any carried item will replace the instrinsic item.
+      A weapon can NOT be BOTH ranged and melee (this is for code simplicity)
+      Every thing that can battle at all should have an intrinsic melee. (So it doesn't get "stuck")
 -->
 
 <items>
@@ -335,7 +337,7 @@
   <item name="pistol"
         resource="pistol"
         uiIcon="pistol"
-        flags="MELEE_WEAPON RANGED_WEAPON CLICK_THROUGH"
+        flags="RANGED_WEAPON CLICK_THROUGH"
         hardpoint="trigger"
         mass="1.5"
         accuracy="0.6"
@@ -352,7 +354,7 @@
   <item name="blaster"
         resource="blaster"
         uiIcon="blaster"
-        flags="MELEE_WEAPON RANGED_WEAPON CLICK_THROUGH"
+        flags="RANGED_WEAPON CLICK_THROUGH"
         hardpoint="trigger"
         mass="1.5"
         accuracy="0.8"
@@ -369,7 +371,7 @@
   <item name="pulse"
         resource="pulse"
         uiIcon="pulse"
-        flags="MELEE_WEAPON RANGED_WEAPON CLICK_THROUGH"
+        flags="RANGED_WEAPON CLICK_THROUGH"
         hardpoint="trigger"
         mass="2.0"
         accuracy="1.0"
@@ -386,7 +388,7 @@
   <item name="beamgun"
         resource="beamgun"
         uiIcon="beamgun"
-        flags="MELEE_WEAPON RANGED_WEAPON CLICK_THROUGH"
+        flags="RANGED_WEAPON CLICK_THROUGH"
         hardpoint="trigger"
         mass="1.5"
         accuracy="1.4"

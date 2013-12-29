@@ -231,7 +231,7 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos )
 	chitBag->AddItem( "blaster", chit, engine, 0, 0 );
 	chitBag->AddItem( "ring", chit, engine, 0, 0 );
 	chit->GetItem()->wallet.AddGold( ReserveBank::Instance()->WithdrawDenizen() );
-	chit->GetItem()->traits.Roll( playerID );
+	chit->GetItem()->GetTraitsMutable()->Roll( playerID );
 
 	IString nameGen = chit->GetItem()->keyValues.GetIString( "nameGen" );
 	if ( !nameGen.empty() ) {

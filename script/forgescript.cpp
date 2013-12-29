@@ -78,14 +78,14 @@ void ForgeScript::Build(	int type,			// GUN
 	// to get different numbers.
 	Random random;
 	random.SetSeed(   forgeUser->GetItem()->ID() 
-		            ^ forgeUser->GetItem()->traits.Experience() 
+		            ^ forgeUser->GetItem()->Traits().Experience() 
 					^ (type + subType*37 + partsFlags*129 + effectFlags*11) );
 
 	const char* typeName = "pistol";
 
 	int roll[GameTrait::NUM_TRAITS] = { 10, 10, 10, 10, 10 };
 	if ( doRandom ) {
-		int level = forgeUser->GetItem(0)->traits.Level();
+		int level = forgeUser->GetItem(0)->Traits().Level();
 		static const int COMPETENCE = 4;
 
 		for( int i=0; i<GameTrait::NUM_TRAITS; ++i ) {

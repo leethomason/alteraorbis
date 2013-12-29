@@ -28,6 +28,7 @@ class Engine;
 struct ComponentSet;
 struct SectorPort;
 class WorkQueue;
+class IRangedWeaponItem;
 
 namespace ai {
 	class TaskList;
@@ -114,7 +115,7 @@ private:
 				   grinliz::Vector2F* pos, float* distance );
 
 	// Compute the line of site
-	bool LineOfSight( const ComponentSet& thisComp, Chit* target );
+	bool LineOfSight( const ComponentSet& thisComp, Chit* target, IRangedWeaponItem* weapon );
 	bool LineOfSight( const ComponentSet& thisComp, const grinliz::Vector2I& voxel );
 
 	void Think( const ComponentSet& thisComp );	// Choose a new action.

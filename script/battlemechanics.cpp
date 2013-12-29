@@ -211,10 +211,10 @@ void BattleMechanics::CalcMeleeDamage( const GameItem* mainItem, const IMeleeWea
 
 	static const float STRIKE_RATIO_INV = 1.0f / 5.0f;
 
-	float trait0 = item->traits.Damage();
+	float trait0 = item->Traits().Damage();
 	float trait2 = 1;
 	if ( mainItem ) {
-		trait2 = mainItem->traits.Damage(); 
+		trait2 = mainItem->Traits().Damage(); 
 	}
 
 	dd->damage = mass * item->meleeDamage * STRIKE_RATIO_INV * trait0 * trait2;
@@ -237,16 +237,16 @@ float BattleMechanics::ComputeRadAt1(	const GameItem* shooter,
 	}
 
 	if ( shooter  ) {
-		accuracy *= shooter->traits.Accuracy();
+		accuracy *= shooter->Traits().Accuracy();
 	}
 	if ( weapon ) {
 		// There is both a built in accuracy (the type of gun) and
-		// the accurcaty from the traits (quality/variance of the weapon)
+		// the accuracy from the traits (quality/variance of the weapon)
 		float weaponAcc = 1;
 		weapon->GetItem()->keyValues.GetFloat( "accuracy", &weaponAcc );
 
 		accuracy *= weaponAcc;
-		accuracy *= weapon->GetItem()->traits.Accuracy();
+		accuracy *= weapon->GetItem()->Traits().Accuracy();
 	}
 
  	float radAt1 = BASE_ACCURACY / accuracy;
@@ -278,7 +278,7 @@ void BattleMechanics::Shoot( ChitBag* bag, Chit* src, const grinliz::Vector3F& _
 	Vector3F dir = FuzzyAim( p0, aimAt, radAt1 );
 
 	Bolt* bolt = bag->ToLumos()->NewBolt( p0, dir, item->Effects(), src->ID(),
-											item->rangedDamage * item->traits.Damage(),
+											item->rangedDamage * item->Traits().Damage(),
 											item->CalcBoltSpeed(),
 											(item->flags & GameItem::RENDER_TRAIL) ? true : false );
 }
@@ -468,7 +468,7 @@ float BattleMechanics::ComputeShieldBoost( const IMeleeWeaponItem* weapon )
 	float value = 0;
 	item->keyValues.Fetch( "shieldBoost", "f", &value ); 
 	if ( value ) {
-		float boost = value * item->traits.NormalLeveledTrait( GameTrait::CHR );
+		float boost = value * item->Traits().NormalLeveledTrait( GameTrait::CHR );
 		return Max( boost, 1.0f );
 	}
 	return 0;
@@ -482,8 +482,8 @@ float BattleMechanics::RangedDPTU( const IRangedWeaponItem* _weapon, bool contin
 	float csecpershot = (float)weapon->clipCap * 1000.0f / 
 							(float)(weapon->cooldown.Threshold()*weapon->clipCap + weapon->reload.Threshold()); 
 
-	float dps  = weapon->rangedDamage * weapon->GetItem()->traits.Damage() * 0.5f * secpershot;
-	float cdps = weapon->rangedDamage * weapon->GetItem()->traits.Damage() * 0.5f * csecpershot;
+	float dps  = weapon->rangedDamage * weapon->GetItem()->Traits().Damage() * 0.5f * secpershot;
+	float cdps = weapon->rangedDamage * weapon->GetItem()->Traits().Damage() * 0.5f * csecpershot;
 
 	return continuous ? cdps : dps;
 }

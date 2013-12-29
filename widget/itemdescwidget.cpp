@@ -44,7 +44,7 @@ void ItemDescWidget::SetInfo( const GameItem* item, const GameItem* user )
 
 	int i = 0;
 	if ( item->ToRangedWeapon() ) {
-		str.Format( "Ranged Damage\t%.1f\n", item->traits.Damage() * item->rangedDamage );
+		str.Format( "Ranged Damage\t%.1f\n", item->Traits().Damage() * item->rangedDamage );
 		textBuffer += str.c_str();
 		
 		float radAt1 = BattleMechanics::ComputeRadAt1( user, item->ToRangedWeapon(), false, false );
@@ -86,19 +86,19 @@ void ItemDescWidget::SetInfo( const GameItem* item, const GameItem* user )
 	}
 
 	if ( !(item->ToMeleeWeapon() || item->ToShield() || item->ToRangedWeapon() )) {
-		str.Format( "Strength\t%d\n", item->traits.Strength() );
+		str.Format( "Strength\t%d\n", item->Traits().Strength() );
 		textBuffer += str.c_str();
 
-		str.Format( "Will\t%d\n", item->traits.Will() );
+		str.Format( "Will\t%d\n", item->Traits().Will() );
 		textBuffer += str.c_str();
 
-		str.Format( "Charisma\t%d\n", item->traits.Charisma() );
+		str.Format( "Charisma\t%d\n", item->Traits().Charisma() );
 		textBuffer += str.c_str();
 
-		str.Format( "Intelligence\t%d\n", item->traits.Intelligence() );
+		str.Format( "Intelligence\t%d\n", item->Traits().Intelligence() );
 		textBuffer += str.c_str();
 
-		str.Format( "Dexterity\t%d\n", item->traits.Dexterity() );
+		str.Format( "Dexterity\t%d\n", item->Traits().Dexterity() );
 		textBuffer += str.c_str();
 	}
 

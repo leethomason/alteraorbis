@@ -63,6 +63,7 @@ const BattleTestScene::ButtonDef BattleTestScene::buttonDef[NUM_BUTTONS] =
 	{ NO_WEAPON,"None",		LEFT_WEAPON },
 	{ MELEE_WEAPON, "Melee",LEFT_WEAPON },
 	{ PISTOL,	"Blaster",	LEFT_WEAPON },
+	{ BLASTER_AND_GUN,	"Both",	LEFT_WEAPON },
 	{ LEVEL_0,	"Lev0",		LEFT_LEVEL },
 	{ LEVEL_2,	"Lev2",		LEFT_LEVEL },
 	{ LEVEL_4,	"Lev4",		LEFT_LEVEL },
@@ -84,6 +85,7 @@ const BattleTestScene::ButtonDef BattleTestScene::buttonDef[NUM_BUTTONS] =
 	{ NO_WEAPON,"None",		RIGHT_WEAPON },
 	{ MELEE_WEAPON, "Melee",RIGHT_WEAPON },
 	{ PISTOL,	"Blaster",	RIGHT_WEAPON },
+	{ BLASTER_AND_GUN,	"Both",	RIGHT_WEAPON },
 	{ LEVEL_0,	"Lev0",		RIGHT_LEVEL },
 	{ LEVEL_2,	"Lev2",		RIGHT_LEVEL },
 	{ LEVEL_4,	"Lev4",		RIGHT_LEVEL },
@@ -359,9 +361,9 @@ Chit* BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int
 
 	if ( type == HUMAN ) {
 		chitBag.AddItem( "shield",		chit, engine, 0, level );
-		if ( loadout == MELEE_WEAPON )
+		if ( loadout == MELEE_WEAPON || loadout == BLASTER_AND_GUN )
 			chitBag.AddItem( "ring",	chit, engine, 0, level );
-		else if ( loadout == PISTOL )
+		if ( loadout == PISTOL || loadout == BLASTER_AND_GUN )
 			chitBag.AddItem( "blaster", chit, engine, 0, level );
 	}
 	if ( type == TROLL ) {

@@ -141,19 +141,19 @@ void ItemDefDB::AssignWeaponStats( const int* roll, const GameItem& base, GameIt
 
 	*item = base;
 	for( int i=0; i<GameTrait::NUM_TRAITS; ++i ) {
-		item->traits.Set( i, roll[i] );
+		item->GetTraitsMutable()->Set( i, roll[i] );
 	}
 
 	float cool = (float)item->cooldown.Threshold();
-	cool *= Dice3D6ToMult( item->traits.Get( GameTrait::ALT_COOL ));
+	cool *= Dice3D6ToMult( item->Traits().Get( GameTrait::ALT_COOL ));
 	item->cooldown.SetThreshold( Clamp( (int)cool, 100, 3000 ));
 
 	float clipCap = (float)base.clipCap;
-	clipCap *= Dice3D6ToMult( item->traits.Get( GameTrait::ALT_CAPACITY ));
+	clipCap *= Dice3D6ToMult( item->Traits().Get( GameTrait::ALT_CAPACITY ));
 	item->clipCap = Clamp( (int)clipCap, 1, 100 );
 
 	float reload = (float)base.reload.Threshold();
-	reload /= Dice3D6ToMult( item->traits.Get( GameTrait::ALT_RELOAD ));
+	reload /= Dice3D6ToMult( item->Traits().Get( GameTrait::ALT_RELOAD ));
 	item->reload.SetThreshold( Clamp( (int)reload, 100, 3000 ));
 }
 
@@ -217,7 +217,7 @@ void ItemHistory::Set( const GameItem* gi )
 {
 	this->itemID		= gi->ID();
 	this->fullName      = gi->IFullName();
-	this->level			= gi->traits.Level();
+	this->level			= gi->Traits().Level();
 	this->value			= gi->GetValue();
 }
 

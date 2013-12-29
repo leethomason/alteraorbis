@@ -65,10 +65,21 @@ public:
 
 	static bool Swap2( ItemComponent* a, int aIndex, ItemComponent* b, int bIndex );	// swap 2 slots, in 2 (possibly) different inventoryComponents
 
-	// Gets the ranged weapon, optionally returns the trigger.
-	IRangedWeaponItem*	GetRangedWeapon( grinliz::Vector3F* trigger );
+	/*	Weapon queries. Seem simple, but aren't.
+		GetRanged/Melee: returns the currently equipped weapon. Can
+			be intrinsic OR held. Can be null. Can both be null.
+		GetReserved: returns the weapon that can be swapped in. Always
+			held. May be null.
+	*/
+
+	// Gets the *currently* in use:
+	IRangedWeaponItem*	GetRangedWeapon( grinliz::Vector3F* trigger );	// optionally returns trigger
 	IMeleeWeaponItem*	GetMeleeWeapon();
 	IShield*			GetShield();
+
+	// If a melee weapon is in use, the ranged weapon that can 
+	// be swapped in. If ranged, the melee weapon.
+	IWeaponItem*		GetReserveWeapon();
 
 	bool CanAddToInventory();
 	int  NumCarriedItems() const;
@@ -87,7 +98,7 @@ public:
 	// add XP to current item and its weapon
 	void AddBattleXP( bool meleeAttack, int killshotLevel, const GameItem* loser );
 
-	// Very crude assessment of the power of this MoB.
+	// Very crude assessment of the power of this MOB.
 	float PowerRating() const;
 
 private:

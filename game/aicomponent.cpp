@@ -141,11 +141,10 @@ int AIComponent::GetTeamStatus( Chit* other )
 }
 
 
-bool AIComponent::LineOfSight( const ComponentSet& thisComp, Chit* t )
+bool AIComponent::LineOfSight( const ComponentSet& thisComp, Chit* t, IRangedWeaponItem* weapon )
 {
 
 	Vector3F origin, dest;
-	IRangedWeaponItem* weapon = thisComp.itemComponent->GetRangedWeapon( &origin );
 	GLASSERT( weapon );
 
 	ComponentSet target( t, Chit::SPATIAL_BIT | Chit::RENDER_BIT | ComponentSet::IS_ALIVE );
@@ -1415,10 +1414,19 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 	const Vector3F& pos = thisComp.spatial->GetPosition();
 	Vector2F pos2 = { pos.x, pos.z };
 	
-	// The current ranged weapon.
-	IRangedWeaponItem* rangedWeapon = thisComp.itemComponent->GetRangedWeapon( 0 );
-	// The current melee weapon.
-	IMeleeWeaponItem* meleeWeapon = thisComp.itemComponent->GetMeleeWeapon();
+	// Use the current or reserve - switch out later if we need to.
+	IRangedWeaponItem* rangedWeapon = thisComp.itemComponent->GetRangedWeapon(0);
+	IMeleeWeaponItem*  meleeWeapon  = thisComp.itemComponent->GetMeleeWeapon();
+
+	IWeaponItem* reserve = thisComp.itemComponent->GetReserveWeapon();
+	if ( reserve ) {
+		if ( !rangedWeapon && reserve->GetItem()->ToRangedWeapon() ) {
+			rangedWeapon = reserve->GetItem()->ToRangedWeapon();
+		}
+		if ( !meleeWeapon && reserve->GetItem()->ToMeleeWeapon() ) {
+			meleeWeapon = reserve->GetItem()->ToMeleeWeapon();
+		}
+	}
 
 	enum {
 		OPTION_FLOCK_MOVE,		// Move to better position with allies (not too close, not too far)
@@ -1446,11 +1454,26 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 	//Vector2F flockDir = heading;
 	utility[OPTION_FLOCK_MOVE] = 0.001f;
 
-	int nRangedEnemies = 0;
+	int nRangedEnemies = 0;	// number of enemies that could be shooting at me
+	int nMeleeEnemies = 0;	// number of enemies that could be pounding at me
+	Rectangle2F meleeBounds;
+	meleeBounds.min = meleeBounds.max = pos2;
+	meleeBounds.Outset( MELEE_RANGE );			// approximation - be careful to use loose MELEE_RANGE, below
+
 	for( int k=0; k<enemyList.Size(); ++k ) {
 		Chit* chit = GetChitBag()->GetChit( enemyList[k] );
-		if ( chit && chit->GetItemComponent() && chit->GetItemComponent()->GetRangedWeapon(0) ) {
-			++nRangedEnemies;
+		if ( chit ) {
+			ItemComponent* ic = chit->GetItemComponent();
+			if ( ic ) {
+				if ( ic->GetRangedWeapon(0) ) {
+					++nRangedEnemies;
+				}
+				if ( ic->GetMeleeWeapon() && chit->GetSpatialComponent() &&
+					meleeBounds.Contains( chit->GetSpatialComponent()->GetPosition2D() ))
+				{
+					++nMeleeEnemies;
+				}
+			}
 		}
 	}
 
@@ -1468,6 +1491,11 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 
 		normalToEnemy.SafeNormalize( 1, 0 );
 		float dot = DotProduct( normalToEnemy, heading );
+
+		// If we have melee targets, focus in on those.
+		if ( nMeleeEnemies && range > (MELEE_RANGE*2.5f)) {
+			continue;
+		}
 
 		// Prefer targets we are pointed at.
 		static const float DOT_BIAS = 0.25f;
@@ -1515,7 +1543,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 					}
 				}
 
-				if ( u > utility[OPTION_SHOOT] && LineOfSight( thisComp, enemy.chit ) ) {
+				if ( u > utility[OPTION_SHOOT] && LineOfSight( thisComp, enemy.chit, rangedWeapon ) ) {
 					utility[OPTION_SHOOT] = u;
 					target[OPTION_SHOOT] = enemy.chit;
 				}
@@ -1607,6 +1635,26 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 		GLOUTPUT(( "ID=%d Think: flock=%.2f mtrange=%.2f melee=%.2f shoot=%.2f -> %s\n",
 				   thisComp.chit->ID(), utility[OPTION_FLOCK_MOVE], utility[OPTION_MOVE_TO_RANGE], utility[OPTION_MELEE], utility[OPTION_SHOOT],
 				   optionName[index] ));
+	}
+
+	// And finally, do a swap if needed!
+	// This logic is minimal: what about the other states?
+	bool swap = false;
+	if ( currentAction == MELEE && reserve && reserve->ToMeleeWeapon() ) {
+		thisComp.itemComponent->SwapWeapons();
+		swap = true;
+	}
+	if ( currentAction == SHOOT && reserve && reserve->ToRangedWeapon() ) {
+		thisComp.itemComponent->SwapWeapons();
+		swap = true;
+	}
+	if ( swap && debugFlag ) {
+		IRangedWeaponItem* r = thisComp.itemComponent->GetRangedWeapon(0);
+		IMeleeWeaponItem*  m = thisComp.itemComponent->GetMeleeWeapon();
+
+		GLOUTPUT(( "ID=%d swapped in r=%s m=%s\n", thisComp.chit->ID(), 
+			r ? r->GetItem()->BestName() : "none",
+			m ? m->GetItem()->BestName() : "none" ));
 	}
 }
 

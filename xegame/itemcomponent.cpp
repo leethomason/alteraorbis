@@ -70,7 +70,7 @@ ItemComponent::~ItemComponent()
 void ItemComponent::DebugStr( grinliz::GLString* str )
 {
 	const GameItem* item = itemArr[0];
-	str->Format( "[Item] %s hp=%.1f/%d lvl=%d", item->Name(), item->hp, item->TotalHP(), item->traits.Level() );
+	str->Format( "[Item] %s hp=%.1f/%d lvl=%d", item->Name(), item->hp, item->TotalHP(), item->Traits().Level() );
 }
 
 
@@ -97,7 +97,7 @@ void ItemComponent::Serialize( XStream* xs )
 
 void ItemComponent::NameItem( GameItem* item )
 {
-	bool shouldHaveName = item->traits.Level() >= LEVEL_OF_NAMING;
+	bool shouldHaveName = item->Traits().Level() >= LEVEL_OF_NAMING;
 
 	if ( shouldHaveName ) {
 		if ( item->IProperName().empty() ) {
@@ -128,7 +128,7 @@ void ItemComponent::NameItem( GameItem* item )
 float ItemComponent::PowerRating() const
 {
 	GameItem* mainItem = itemArr[0];
-	int level = mainItem->traits.Level();
+	int level = mainItem->Traits().Level();
 
 	return float(1+level) * float(mainItem->mass);
 }
@@ -142,9 +142,9 @@ void ItemComponent::AddBattleXP( bool isMelee, int killshotLevel, const GameItem
 	}
 
 	GameItem* mainItem = itemArr[0];
-	int level = mainItem->traits.Level();
-	mainItem->traits.AddBattleXP( killshotLevel );
-	if ( mainItem->traits.Level() > level ) {
+	int level = mainItem->Traits().Level();
+	mainItem->GetTraitsMutable()->AddBattleXP( killshotLevel );
+	if ( mainItem->Traits().Level() > level ) {
 		// Level up!
 		// FIXME: show an icon
 		mainItem->hp = mainItem->TotalHPF();
@@ -166,7 +166,7 @@ void ItemComponent::AddBattleXP( bool isMelee, int killshotLevel, const GameItem
 		// instrinsic parts don't level up...that is just
 		// really an extension of the main item.
 		if (( weapon->flags & GameItem::INTRINSIC) == 0 ) {
-			weapon->traits.AddBattleXP( killshotLevel );
+			weapon->GetTraitsMutable()->AddBattleXP( killshotLevel );
 			NameItem( weapon );
 		}
 	}
@@ -374,7 +374,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		if ( origin && origin->GetItemComponent() ) {
 			bool killshot = mainItem->hp == 0 && !(mainItem->flags & GameItem::INDESTRUCTABLE);
 			origin->GetItemComponent()->AddBattleXP( info->isMelee, 
-													 killshot ? Max( 1, mainItem->traits.Level()) : 0, 
+													 killshot ? Max( 1, mainItem->Traits().Level()) : 0, 
 													 mainItem ); 
 		}
 		lastDamageID = originID;
@@ -527,7 +527,6 @@ int ItemComponent::DoTick( U32 delta )
 		}
 	}
 
-
 	static const float PICKUP_RANGE = 1.0f;
 
 	if ( mainItem->flags & GameItem::GOLD_PICKUP ) {
@@ -571,6 +570,7 @@ void ItemComponent::OnAdd( Chit* chit )
 			parentChit->GetLumosChitBag()->census.greaterMOBs += 1;
 		}
 	}
+	slowTick.SetPeriod( 500 + (chit->ID() & 128));
 }
 
 
@@ -753,48 +753,36 @@ bool ItemComponent::Swap( int i, int j )
 }
 
 
-
 bool ItemComponent::SwapWeapons()
 {
-	int i=0;
-	int slot0 = -1;
-	int slot1 = -1;
+	// The current but NOT intrinsic
+	GameItem* current = 0;
+	IRangedWeaponItem* ranged = GetRangedWeapon(0);
+	IMeleeWeaponItem*  melee  = GetMeleeWeapon();
+	if ( ranged && !ranged->GetItem()->Intrinsic() )
+		current = ranged->GetItem();
+	if ( melee && !melee->GetItem()->Intrinsic() )
+		current = melee->GetItem();
 
-	while( i < itemArr.Size() ) {
-		GameItem* item = itemArr[i];
-		if (   !item->Intrinsic()  
-			 && ItemActive(i) 
-			 && (item->ToMeleeWeapon() || item->ToRangedWeapon() ))
-		{
-			slot0 = i;
-			break;
-		}
-		++i;
-	}
-	++i;
-	while( i < itemArr.Size() ) {
-		GameItem* item = itemArr[i];
-		if (   !item->Intrinsic()  
-			 && !ItemActive(i) 
-			 && (item->ToMeleeWeapon() || item->ToRangedWeapon() ))
-		{
-			slot1 = i;
-			break;
-		}
-		++i;
-	}
-	if ( slot0 >= 0 && slot1 >= 0 ) {
-		grinliz::Swap( &itemArr[slot0], &itemArr[slot1] );
-	}
-	hardpointsModified = true;
+	// The reserve is never intrinsic:
+	IWeaponItem* reserve = GetReserveWeapon();
+	GLASSERT( !reserve->GetItem()->Intrinsic() );
+
+	GLASSERT( current != reserve->GetItem() );
+
+	if ( current && reserve ) {
+		int slot0 = FindItem( current->GetItem() );
+		int slot1 = FindItem( reserve->GetItem() );
+		Swap( slot0, slot1 );
+
+		hardpointsModified = true;
 	
-	IMeleeWeaponItem* melee = this->GetMeleeWeapon();
-	IRangedWeaponItem* ranged = this->GetRangedWeapon(0);
-	GLOUTPUT(( "Swapped. Active melee: %s ranged: %s\n",
-		melee ? melee->GetItem()->Name() : "",
-		ranged ? ranged->GetItem()->Name() : "" ));
-
-	return true;
+		GLOUTPUT(( "Swapped %s -> %s\n",
+				   current->GetItem()->BestName(),
+				   reserve->GetItem()->BestName() ));
+		return true;
+	}
+	return false;
 }
 
 
@@ -802,7 +790,11 @@ IRangedWeaponItem* ItemComponent::GetRangedWeapon( grinliz::Vector3F* trigger )
 {
 	// Go backwards, so that we get the NOT intrinsic first.
 	for( int i=itemArr.Size()-1; i>=0; --i ) {
-		if ( ItemActive(i) && itemArr[i]->ToRangedWeapon() ) {
+		if ( !ItemActive(i) ) {
+			continue;
+		}
+		IRangedWeaponItem* ranged = itemArr[i]->ToRangedWeapon();
+		if ( ranged ) {
 			if ( trigger ) {
 				RenderComponent* rc = parentChit->GetRenderComponent();
 				GLASSERT( rc );
@@ -813,7 +805,7 @@ IRangedWeaponItem* ItemComponent::GetRangedWeapon( grinliz::Vector3F* trigger )
 					*trigger = pos;
 				}
 			}
-			return itemArr[i]->ToRangedWeapon();
+			return ranged;
 		}
 	}
 	return 0;
@@ -822,10 +814,28 @@ IRangedWeaponItem* ItemComponent::GetRangedWeapon( grinliz::Vector3F* trigger )
 
 IMeleeWeaponItem* ItemComponent::GetMeleeWeapon()
 {
-	// Go backwards, so that we get the NOT intrinsic first.
 	for( int i=itemArr.Size()-1; i>=0; --i ) {
-		if ( ItemActive(i) && itemArr[i]->ToMeleeWeapon() ) {
-			return itemArr[i]->ToMeleeWeapon();
+		if ( !ItemActive(i) )
+			continue;
+		IMeleeWeaponItem* melee = itemArr[i]->ToMeleeWeapon();
+		if ( melee ) {
+			return melee;
+		}
+	}
+	return 0;
+}
+
+
+
+IWeaponItem* ItemComponent::GetReserveWeapon()
+{
+	for( int i=1; i<itemArr.Size(); ++i ) {
+		GameItem* item = itemArr[i];
+		if (	!item->Intrinsic()		// can't swap
+			 && !ItemActive( i )		// else already in use.
+			 && item->ToWeapon() )
+		{
+			return item->ToWeapon();
 		}
 	}
 	return 0;

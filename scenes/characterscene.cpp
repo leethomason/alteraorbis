@@ -145,9 +145,9 @@ void CharacterScene::SetItemInfo( const GameItem* item, const GameItem* user )
 	CStr< 128 > str;
 
 	str.Format( "%s\nLevel: %d  XP: %d / %d", item->ProperName() ? item->ProperName() : item->Name(), 
-										 item->traits.Level(),
-										 item->traits.Experience(),
-										 GameTrait::LevelToExperience( item->traits.Level()+1 ));
+										 item->Traits().Level(),
+										 item->Traits().Experience(),
+										 GameTrait::LevelToExperience( item->Traits().Level()+1 ));
 	desc.SetText( str.c_str() );
 
 	itemDescWidget.SetInfo( item, user );

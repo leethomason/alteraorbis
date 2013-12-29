@@ -99,6 +99,7 @@ void GameItem::CopyFrom( const GameItem* rhs ) {
 
 		keyValues		= rhs->keyValues;
 		microdb			= rhs->microdb;
+		value			= -1;
 	}
 	else {
 		name = grinliz::IString();
@@ -124,6 +125,7 @@ void GameItem::CopyFrom( const GameItem* rhs ) {
 		hp = TotalHPF();
 		accruedFire = 0;
 		accruedShock = 0;
+		value			= -1;
 	}
 }
 
@@ -221,6 +223,10 @@ void GameItem::Serialize( XStream* xs )
 	if ( xs->Loading() ) {
 		Track();
 	}
+
+	// In the interest of coding sanity, a weapon
+	// can not be both ranged and melee.
+	GLASSERT( !( (flags & MELEE_WEAPON) && (flags & RANGED_WEAPON) ));
 }
 
 	
@@ -494,15 +500,18 @@ void GameItem::AbsorbDamage( bool inInventory, DamageDesc dd, DamageDesc* remain
 }
 
 
-
 int GameItem::GetValue() const
 {
+	if ( value >= 0 ) {
+		return value;
+	}
+
+	value = 0;
+
 	static const float EFFECT_BONUS = 1.5f;
 	static const float MELEE_VALUE  = 20;
 	static const float RANGED_VALUE = 30;
 	static const float SHIELD_VALUE = 20;
-	
-	int value = 0;
 
 	if ( ToRangedWeapon() ) {
 		float radAt1 = BattleMechanics::ComputeRadAt1( 0, ToRangedWeapon(), false, false );
@@ -629,6 +638,16 @@ IString GameItem::IFullName() const
 		}
 	}
 	return fullName;
+}
+
+
+float DamageDesc::Score() const
+{
+	float score = damage;
+	if ( effects & GameItem::EFFECT_FIRE ) score *= 1.5f;
+	if ( effects & GameItem::EFFECT_SHOCK ) score *= 2.0f;
+	if ( effects & GameItem::EFFECT_EXPLOSIVE ) score *= 2.5f;
+	return score;
 }
 
 

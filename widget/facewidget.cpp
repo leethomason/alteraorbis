@@ -107,10 +107,10 @@ void FaceWidget::SetMeta( ItemComponent* ic, AIComponent* ai )
 		if ( flags & LEVEL_BAR ) {
 			bar[BAR_HP].SetRange( item->HPFraction() );
 
-			int lev = item->traits.Level();
-			int xp = item->traits.Experience();
-			int nxp = item->traits.LevelToExperience( item->traits.Level()+1 );
-			int pxp = item->traits.LevelToExperience( item->traits.Level() );
+			int lev = item->Traits().Level();
+			int xp  = item->Traits().Experience();
+			int nxp = item->Traits().LevelToExperience( item->Traits().Level()+1 );
+			int pxp = item->Traits().LevelToExperience( item->Traits().Level() );
 
 			str.Format( "Level %d", lev );
 			bar[BAR_LEVEL].SetText( str.c_str() );

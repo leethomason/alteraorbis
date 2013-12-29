@@ -88,6 +88,7 @@ public:
 	int effects;
 
 	void Log();
+	float Score() const;	// overall rating of damage (includes efffects)
 };
 
 
@@ -114,7 +115,7 @@ public:
 		trait[i] = value;
 	}
 
-	int Get( int i ) {
+	int Get( int i ) const {
 		GLASSERT( i >= 0 && i < NUM_TRAITS );
 		return trait[i];
 	}
@@ -202,22 +203,29 @@ private:
 };
 */
 
+class IMeleeWeaponItem;
+class IRangedWeaponItem;
 
 class IWeaponItem 
 {
 public:
 	virtual GameItem* GetItem() = 0;
 	virtual const GameItem* GetItem() const = 0;
+
+	virtual IMeleeWeaponItem*	ToMeleeWeapon()		{ return 0; }
+	virtual IRangedWeaponItem*	ToRangedWeapon()	{ return 0; }
 };
 
 class IMeleeWeaponItem : virtual public IWeaponItem
 {
 public:
+	virtual IMeleeWeaponItem*	ToMeleeWeapon()		{ return this; }
 };
 
 class IRangedWeaponItem : virtual public IWeaponItem
 {
 public:
+	virtual IRangedWeaponItem*	ToRangedWeapon()	{ return this; }
 };
 
 class IShield
@@ -373,7 +381,6 @@ public:
 	Cooldown reload;		// time to reload once clip is used up
 	int		clipCap;		// possible rounds in the clip
 
-	GameTrait traits;
 	Wallet wallet;			// this is either money carried (denizens) or resources bound in (weapons)
 
 	// ------- current --------
@@ -394,7 +401,6 @@ public:
 		keyValues.GetFloat( "speed", &speed );
 		return SPEED * speed;
 	}
-
 
 	void InitState() {
 		hp = TotalHPF();
@@ -477,11 +483,16 @@ public:
 
 	static int idPool;
 
+	const GameTrait& Traits() const { return traits; }
+	GameTrait* GetTraitsMutable()	{ value = -1; return &traits; }
+
 private:
 	void CopyFrom( const GameItem* rhs );
 	float Delta( U32 delta, float v ) {
 		return v * (float)delta * 0.001f;
 	}
+
+	GameTrait traits;
 
 	// Functions to update the ItemDB
 	void Track() const;
@@ -495,6 +506,7 @@ private:
 
 	mutable int	id;						// unique id for this item. not assigned until needed, hence mutable
 	mutable grinliz::IString fullName;	// not serialized, but cached
+	mutable int value;					// not serialized, but cached
 };
 
 

@@ -113,7 +113,7 @@ void PlantScript::Init()
 {
 	const GameItem* resource = GetResource();
 	scriptContext->chit->Add( new ItemComponent( engine, worldMap, *resource ));
-	scriptContext->chit->GetItem()->traits.Roll( scriptContext->chit->random.Rand() );
+	scriptContext->chit->GetItem()->GetTraitsMutable()->Roll( scriptContext->chit->random.Rand() );
 	SetRenderComponent();
 
 	scriptContext->chit->GetSpatialComponent()->SetYRotation( (float)scriptContext->chit->random.Rand( 360 ));
@@ -245,14 +245,14 @@ int PlantScript::DoTick( U32 delta )
 		const float GROW = Lerp( 0.2f, 0.1f, (float)stage / (float)(NUM_STAGE-1) );
 		const float DIE  = 0.4f;
 
-		float toughness = item->traits.Toughness();
+		float toughness = item->Traits().Toughness();
 		float seconds = float( TIME_TO_GROW ) / 1000.0f;
 
 		if ( distance < GROW * toughness ) {
 
 			// Heal.
 			ChitMsg healMsg( ChitMsg::CHIT_HEAL );
-			healMsg.dataF = HP_PER_SECOND*seconds*item->traits.NormalLeveledTrait( GameTrait::STR );
+			healMsg.dataF = HP_PER_SECOND*seconds*item->Traits().NormalLeveledTrait( GameTrait::STR );
 			scriptContext->chit->SendMessage( healMsg );
 
 			// Grow
