@@ -151,6 +151,7 @@ bool AIComponent::LineOfSight( const ComponentSet& thisComp, Chit* t, IRangedWea
 	if ( !target.okay ) {
 		return false;
 	}
+	thisComp.render->GetMetaData( HARDPOINT_TRIGGER, &origin );
 	target.render->GetMetaData( META_TARGET, &dest );
 
 	Vector3F dir = dest - origin;
