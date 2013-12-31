@@ -177,7 +177,6 @@ private:
 	Shader* active;
 	grinliz::CDynArray<int> activeStreams;
 	U32 totalCompileTime;
-	bool attribLocationSupport;
 
 	void LoadProgram( const char* name, grinliz::GLString *store );
 	Shader* CreateProgram( int flag );

@@ -1414,6 +1414,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 	}
 	const Vector3F& pos = thisComp.spatial->GetPosition();
 	Vector2F pos2 = { pos.x, pos.z };
+	Vector2I sector = ToSector( ToWorld2I( pos2 ));
 	
 	// Use the current or reserve - switch out later if we need to.
 	IRangedWeaponItem* rangedWeapon = thisComp.itemComponent->GetRangedWeapon(0);
@@ -1457,9 +1458,6 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 
 	int nRangedEnemies = 0;	// number of enemies that could be shooting at me
 	int nMeleeEnemies = 0;	// number of enemies that could be pounding at me
-	Rectangle2F meleeBounds;
-	meleeBounds.min = meleeBounds.max = pos2;
-	meleeBounds.Outset( MELEE_RANGE );			// approximation - be careful to use loose MELEE_RANGE, below
 
 	for( int k=0; k<enemyList.Size(); ++k ) {
 		Chit* chit = GetChitBag()->GetChit( enemyList[k] );
@@ -1470,7 +1468,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 					++nRangedEnemies;
 				}
 				if ( ic->GetMeleeWeapon() && chit->GetSpatialComponent() &&
-					meleeBounds.Contains( chit->GetSpatialComponent()->GetPosition2D() ))
+					( pos2 - chit->GetSpatialComponent()->GetPosition2D() ).LengthSquared() <= (MELEE_RANGE*MELEE_RANGE) )
 				{
 					++nMeleeEnemies;
 				}
@@ -1484,6 +1482,14 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 		if ( !enemy.okay ) {
 			continue;
 		}
+		if ( map->UsingSectors() ) {
+			Vector2I s = ToSector( enemy.spatial->GetPosition2DI());
+			if ( s != sector ) {
+				enemyList[k] = 0;
+				continue;
+			}
+		}
+
 		const Vector3F	enemyPos		= enemy.spatial->GetPosition();
 		const Vector2F	enemyPos2		= { enemyPos.x, enemyPos.z };
 		float			range			= (enemyPos - pos).Length();
@@ -1494,7 +1500,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 		float dot = DotProduct( normalToEnemy, heading );
 
 		// If we have melee targets, focus in on those.
-		if ( nMeleeEnemies && range > (MELEE_RANGE*1.5f)) {
+		if ( nMeleeEnemies && range > MELEE_RANGE) {
 			continue;
 		}
 

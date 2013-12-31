@@ -56,7 +56,7 @@ Game::Game( int width, int height, int rotation, int uiHeight, const char* path 
 	frameCountsSinceMark( 0 ),
 	framesPerSecond( 0 ),
 	debugUI( false ), 
-	debugText( true ),
+	debugText( false ),
 	perfText( false ),
 	perfFrameCount( 0 ),
 	suppressText( false ),

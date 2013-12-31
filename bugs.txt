@@ -55,12 +55,12 @@ x TextBox needs to be better, and should be used much more.
 		x Robots should clear before build.
 		x Lingering cursor after building.
 		x Need "use building" button
-		- Paving more obvious? All green disappears?
-		- Bug: Can focus target across domains.
-		- Review 2 release logs from GT
-		- cyclops attracted by tech?
-		- view mode should clear build selection
-		- wallet / transaction / can build seems to have problems with zero (> vs >=)
+		x Bug: Can focus target across domains.
+		x view mode should clear build selection
+		x wallet / transaction / can build seems to have problems with zero (> vs >=)
+		x Review 2 release logs from GT
+		x Paving more obvious? All green disappears?
+		- check bolt renderer
 
 	- Census
 		- coolest stuff, past and present, by category
@@ -71,6 +71,7 @@ x TextBox needs to be better, and should be used much more.
 		- greatest monsters
 
 	- Market
+		- cyclops attracted by tech?
 		x rethink fiction / core control / avatar prime
 		- tech pyramids -> power plants
 		- turret

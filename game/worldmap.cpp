@@ -1872,7 +1872,7 @@ void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 
 				// Check for memory exceeded and break.
 				if ( voxelBuffer.Size()+4 >= voxelBuffer.Capacity() ) {
-					GLASSERT(0);	// not a problem, but may need to adjust capacity
+					//GLASSERT(0);	// not a problem, but may need to adjust capacity
 					y = b.max.y+1;
 					x = b.max.x+1;
 					break;
@@ -1995,7 +1995,7 @@ void WorldMap::PrepVoxels( const SpaceTree* spaceTree )
 
 				// Check for memory exceeded and break.
 				if ( voxelBuffer.Size()+(6*4) >= voxelBuffer.Capacity() ) {
-					GLASSERT(0);	// not a problem, but may need to adjust capacity
+					//GLASSERT(0);	// not a problem, but may need to adjust capacity
 					y = b.max.y+1;
 					x = b.max.x+1;
 					break;

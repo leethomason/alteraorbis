@@ -303,7 +303,7 @@ bool WorkQueue::TaskCanComplete( const WorkQueue::QueueItem& item )
 	const BuildData& buildData = buildScript.GetData( action );
 	int size = buildData.size;
 	
-	if ( available.gold <= buildData.cost ) {
+	if ( available.gold < buildData.cost ) {
 		return false;
 	}
 

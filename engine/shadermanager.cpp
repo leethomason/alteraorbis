@@ -92,12 +92,6 @@ int ShaderManager::Shader::GetUniformLocation( int uniform )
 
 ShaderManager::ShaderManager() : active(0), totalCompileTime(0)
 {
-	if ( GLEW_ARB_explicit_attrib_location ) 
-		attribLocationSupport = true;
-	else
-		attribLocationSupport = false;
-	GLASSERT( attribLocationSupport );
-
 	LoadProgram( "fixedpipe.vert", &fixedpipeVert );
 	LoadProgram( "fixedpipe.frag", &fixedpipeFrag );
 
@@ -410,10 +404,12 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 	GLOUTPUT_REL(( "Predicted uniform size(v4): %d\n\n", predicted ));
 
 	AppendConst( &header, "MAX_INSTANCE", shader->maxInstance );
-	AppendConst( &header, "EXPLICIT_ATTRIB", attribLocationSupport ? 1 : 0 );
 
 	// Is it in the cache?
-#if 1
+#if 0
+	// This is all working fine, but does nothing to speed up the Intel GPU,
+	// which is the only GPU with a problem. #ifdeffing out until I have
+	// the time to research what is going on.
 	if ( GLEW_ARB_get_program_binary ) {
 		CStr<200> path;
 		path.Format( "./cache/shader_%s_%d.shader", hashStr.c_str(), flags );
@@ -488,6 +484,7 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 	}
 	CHECK_GL_ERROR;
 
+#if 0
 	if ( GLEW_ARB_get_program_binary ) {
 		_mkdir( "./cache" );
 		CStr<200> path;
@@ -506,6 +503,7 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 			delete [] data;
 		}
 	}
+#endif
 	int nUniforms = 0;
 	glGetProgramiv( shader->prog, GL_ACTIVE_UNIFORMS, &nUniforms );
 	int uniformSize = 0;
