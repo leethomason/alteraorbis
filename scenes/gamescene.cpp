@@ -82,6 +82,10 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 		serialButton[i].SetText( serialText[i] );
 	}
 
+	useBuildingButton.Init( &gamui2D, game->GetButtonLook(0) );
+	useBuildingButton.SetText( "Use" );
+	useBuildingButton.SetVisible( false );
+
 	static const char* modeButtonText[NUM_BUILD_MODES] = {
 		"Utility", "Tech0", "Tech1", "Tech2", "Tech3"
 	};
@@ -166,6 +170,7 @@ void GameScene::Resize()
 		layout.PosAbs( &serialButton[i], i+1, -1 );
 	}
 	layout.PosAbs( &allRockButton, 1, -2 );
+	layout.PosAbs( &useBuildingButton, 1, 0 );
 
 	int level = BuildScript::TECH_UTILITY;
 	int start = 0;
@@ -665,6 +670,9 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 							 new CharacterSceneData( chit->GetItemComponent(), 0, 0 ));
 		}
 	}
+	else if ( item == &useBuildingButton ) {
+		sim->UseBuilding();
+	}
 
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
 		if ( item == &newsButton[i] ) {
@@ -1059,6 +1067,16 @@ void GameScene::DoTick( U32 delta )
 	}
 	consoleWidget.DoTick( delta );
 	ProcessNewsToConsole();
+
+	bool useBuildingVisible = false;
+	if ( uiMode[UI_AVATAR].Down() && playerChit ) {
+		Chit* building = sim->GetChitBag()->QueryPorch( playerChit->GetSpatialComponent()->GetPosition2DI() );
+		if ( building ) {
+			useBuildingVisible = true;
+		}
+	}
+	useBuildingButton.SetVisible( useBuildingVisible );
+
 
 	// It's pretty tricky keeping the camera, camera component, and various
 	// modes all working together. 

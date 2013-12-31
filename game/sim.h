@@ -55,7 +55,6 @@ public:
 	Texture*		GetMiniMapTexture();
 	Chit*			GetPlayerChit();
 
-
 	// use with caution: not a clear separation between sim and game
 	Engine*			GetEngine()		{ return engine; }
 	LumosChitBag*	GetChitBag()	{ return chitBag; }
@@ -69,6 +68,7 @@ public:
 	
 	void CreatePlayer();
 	void CreatePlayer( const grinliz::Vector2I& pos );
+	void UseBuilding();	// the player wants to use a building
 
 private:
 	void CreateCores();

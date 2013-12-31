@@ -1494,7 +1494,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 		float dot = DotProduct( normalToEnemy, heading );
 
 		// If we have melee targets, focus in on those.
-		if ( nMeleeEnemies && range > (MELEE_RANGE*2.5f)) {
+		if ( nMeleeEnemies && range > (MELEE_RANGE*1.5f)) {
 			continue;
 		}
 
@@ -1912,38 +1912,6 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			parentChit->SetTickNeeded();
 		}
 
-		if ( chit->PlayerControlled()) {
-			Chit* building = GetLumosChitBag()->QueryPorch( thisComp.spatial->GetPosition2DI() );
-			if ( building && building->GetItem() ) {
-				IString name = building->GetItem()->IName();
-				ItemComponent* ic = parentChit->GetItemComponent();
-				CoreScript* cs	= GetLumosChitBag()->GetCore( sector );
-				Chit* core = cs->ParentChit();
-
-				// Messy:
-				// Money and crystal are transferred from the avatar to the core. (But 
-				// not items.) We need to xfer it *back* before using the factor, market,
-				// etc. On the tick, the avatar will restore it to the core.
-				ic->GetItem()->wallet.Add( core->GetItem()->wallet.EmptyWallet() );
-
-				if ( cs && ic ) {
-					if ( name == IStringConst::vault ) {
-						GetLumosChitBag()->PushScene( LumosGame::SCENE_CHARACTER, 
-							new CharacterSceneData( ic, building->GetItemComponent(), 0 ));
-					}
-					else if ( name == IStringConst::market ) {
-						GetLumosChitBag()->PushScene( LumosGame::SCENE_CHARACTER, 
-							new CharacterSceneData( ic, building->GetItemComponent(), true ));
-					}
-					else if ( name == IStringConst::factory ) {
-						ForgeSceneData* data = new ForgeSceneData();
-						data->tech = cs->GetTechLevel();
-						data->itemComponent = ic;
-						GetLumosChitBag()->PushScene( LumosGame::SCENE_FORGE, data );
-					}
-				}
-			}
-		}
 		break;
 
 	case ChitMsg::PATHMOVE_DESTINATION_BLOCKED:

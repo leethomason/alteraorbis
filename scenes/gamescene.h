@@ -132,6 +132,7 @@ private:
 	gamui::PushButton	serialButton[NUM_SERIAL_BUTTONS];
 	gamui::ToggleButton	buildButton[BuildScript::NUM_OPTIONS];
 	gamui::ToggleButton modeButton[NUM_BUILD_MODES];
+	gamui::PushButton	useBuildingButton;
 	gamui::Image		tabBar;
 	gamui::PushButton	createWorkerButton;
 	gamui::ToggleButton	uiMode[NUM_UI_MODES];

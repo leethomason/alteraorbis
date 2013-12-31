@@ -27,16 +27,17 @@
 - flammability / shockability very agressive
 - viewing edge of world breaks all kinds of limits and ASSERTs
 - item repair
-- items count plants, other items towards kills
+x items count plants, other items towards kills
 - button to use vault / factory / etc.
 - item destruction / hpRegen
 - fix porch image (alpha of the tiles, if not general improvement)
 - shield looks very boring (and hard to tell what it is). And does it turn off if you don't have one?
 - obvious and easy to get to menu cancel
 - buildings shouldn't drop gold on de-rez
-- TextBox needs to be better, and should be used much more.
+x TextBox needs to be better, and should be used much more.
 - AIs should account for personality and skills when doing inventory sorting
 - Click through of disabled buttons is surprising
+- “Focus” shouldn’t switch so easily.
 
 - game
 
@@ -50,19 +51,24 @@
 		x Pre-roll the forge scene. No random factor?
 		x Stuff on the ground blocks clicking.
 		x Green gems too rare (not in volcanoes?)
-		- Need "use building" button
-		- switching to melee weapon causes stand around and do nothing. (move to AI? need to reset AI?)
-		- Lingering cursor after building.
-		- “Focus” shouldn’t switch so easily.
+		x switching to melee weapon causes stand around and do nothing. (move to AI? need to reset AI?)
 		x Robots should clear before build.
+		x Lingering cursor after building.
+		x Need "use building" button
 		- Paving more obvious? All green disappears?
 		- Bug: Can focus target across domains.
 		- Review 2 release logs from GT
+		- cyclops attracted by tech?
+		- view mode should clear build selection
+		- wallet / transaction / can build seems to have problems with zero (> vs >=)
 
 	- Census
 		- coolest stuff, past and present, by category
 		- total of Au and Crystal
 		- consider tying gold/crystal to per-cycle census
+		- check money
+		- greatest warrior, smith, weapons
+		- greatest monsters
 
 	- Market
 		x rethink fiction / core control / avatar prime
@@ -70,8 +76,8 @@
 		- turret
 		- influence zones for buildings
 		- team colors
-		- denizens
-		- item market
+		x denizens
+		x item market
 		- forge
 			- forge or factory?
 			- fee to forge
@@ -89,9 +95,9 @@
 			- space bar to pause
 			- tab to toggle weapons
 			- pause button
-		- weapon swap button or auto-swap?
-		- How do bases and adventuring play together?
-			- why do you quit adventuring to build a base?
+		x weapon swap button or auto-swap?
+		x How do bases and adventuring play together?
+			x why do you quit adventuring to build a base?
 		- shield: 
 			- xp from getting hit
 			- bugs in damage calc
@@ -104,19 +110,14 @@
 			- created 
 			x kills
 			- winning names
-		- console
-			- important events
-			- important de-rez
+		x console
+			x important events
+			x important de-rez
 		- real health bars & check visibility
 	    - exploring
 	      - xp for exploring!!
 	      - "domain theme" when you arrive
 	    - player creation screen
-
-	- Census
-		- check money
-		- greatest warrior, smith, weapons
-		- greatest monsters
 
 	- Fauna 2
 		- external constant file

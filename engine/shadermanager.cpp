@@ -103,7 +103,10 @@ ShaderManager::ShaderManager() : active(0), totalCompileTime(0)
 
 	U32 hash0 = Random::Hash( fixedpipeVert.c_str(), fixedpipeVert.size() );
 	U32 hash1 = Random::Hash( fixedpipeFrag.c_str(), fixedpipeFrag.size() );
-	U32 hash = hash0 ^ hash1;
+	U32 hash2 = Random::Hash( glGetString( GL_VENDOR ), -1 );
+	U32 hash3 = Random::Hash( glGetString( GL_RENDERER ), -1 );
+	U32 hash4 = Random::Hash( glGetString( GL_VERSION ), -1 );
+	U32 hash = hash0 ^ hash1 ^ hash2 ^ hash3 ^ hash4;
 
 	hashStr.Format( "%x", hash );
 }
@@ -375,41 +378,6 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 	shader->flags = flags;
 	shader->prog = glCreateProgram();
 
-	// Is it in the cache?
-#if 0
-	// FIXME: this code works, but doesn't get the metadata: max uniforms, etc.
-	if ( GLEW_ARB_get_program_binary ) {
-		CStr<200> path;
-		path.Format( "./cache/shader_%s_%d.shader", hashStr.c_str(), flags );
-		FILE* fp = fopen( path.c_str(), "rb" );
-		if ( fp ) {
-			// In the cache!
-			fseek( fp, 0, SEEK_END );
-			long len = ftell( fp )-4;
-			fseek( fp, 0, SEEK_SET );
-			U8* data = new U8[len];
-			U32 binaryFormat;
-			fread( &binaryFormat, 4, 1, fp );
-			fread( data, 1, len, fp );
-			fclose( fp );
-
-			glProgramBinary( shader->prog, binaryFormat, data, len );
-			delete [] data;
-			int success = 0;
-
-			glGetProgramiv( shader->prog, GL_LINK_STATUS, &success);
-			if ( success ) {
-				GLOUTPUT(( "Shader %d loaded from cache.\n", flags ));
-				return shader;
-			}
-			GLASSERT( false );	// bad cache
-		}
-	}
-#endif
-
-	shader->vertexProg = glCreateShader( GL_VERTEX_SHADER );
-	shader->fragmentProg = glCreateShader( GL_FRAGMENT_SHADER );
-
 	header = "#version 140\n";
 	AppendFlag( &header, "TEXTURE0",			flags & TEXTURE0 );
 	AppendFlag( &header, "TEXTURE0_ALPHA_ONLY",	flags & TEXTURE0_ALPHA_ONLY );
@@ -443,6 +411,41 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 
 	AppendConst( &header, "MAX_INSTANCE", shader->maxInstance );
 	AppendConst( &header, "EXPLICIT_ATTRIB", attribLocationSupport ? 1 : 0 );
+
+	// Is it in the cache?
+#if 1
+	if ( GLEW_ARB_get_program_binary ) {
+		CStr<200> path;
+		path.Format( "./cache/shader_%s_%d.shader", hashStr.c_str(), flags );
+		FILE* fp = fopen( path.c_str(), "rb" );
+		if ( fp ) {
+			// In the cache!
+			fseek( fp, 0, SEEK_END );
+			long len = ftell( fp )-4;
+			fseek( fp, 0, SEEK_SET );
+			U8* data = new U8[len];
+			U32 binaryFormat;
+			fread( &binaryFormat, 4, 1, fp );
+			fread( data, 1, len, fp );
+			fclose( fp );
+
+			glProgramBinary( shader->prog, binaryFormat, data, len );
+			delete [] data;
+			int success = 0;
+
+			glGetProgramiv( shader->prog, GL_LINK_STATUS, &success);
+			if ( success ) {
+				GLOUTPUT_REL(( "Shader %d loaded from cache.\n", flags ));
+				return shader;
+			}
+			GLOUTPUT_REL(( "Bad shader cache.\n" ));
+		}
+	}
+#endif
+
+	shader->vertexProg = glCreateShader( GL_VERTEX_SHADER );
+	shader->fragmentProg = glCreateShader( GL_FRAGMENT_SHADER );
+
 
 #if 0 
 #ifdef DEBUG_OUTPUT

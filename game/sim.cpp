@@ -19,6 +19,9 @@
 #include "../script/corescript.h"
 #include "../script/worldgen.h"
 
+#include "../scenes/characterscene.h"
+#include "../scenes/forgescene.h"
+
 #include "pathmovecomponent.h"
 #include "debugstatecomponent.h"
 #include "healthcomponent.h"
@@ -531,3 +534,43 @@ void Sim::CreatePlant( int x, int y, int type )
 	}
 }
 
+
+void Sim::UseBuilding()
+{
+	Chit* player = GetPlayerChit();
+	if ( !player ) return;
+
+	Vector2I pos2i = player->GetSpatialComponent()->GetPosition2DI();
+	Vector2I sector = ToSector( pos2i );
+
+	Chit* building = chitBag->QueryPorch( pos2i );
+	if ( building && building->GetItem() ) {
+		IString name = building->GetItem()->IName();
+		ItemComponent* ic = player->GetItemComponent();
+		CoreScript* cs	= chitBag->GetCore( sector );
+		Chit* core = cs->ParentChit();
+
+		// Messy:
+		// Money and crystal are transferred from the avatar to the core. (But 
+		// not items.) We need to xfer it *back* before using the factor, market,
+		// etc. On the tick, the avatar will restore it to the core.
+		ic->GetItem()->wallet.Add( core->GetItem()->wallet.EmptyWallet() );
+
+		if ( cs && ic ) {
+			if ( name == IStringConst::vault ) {
+				chitBag->PushScene( LumosGame::SCENE_CHARACTER, 
+					new CharacterSceneData( ic, building->GetItemComponent(), 0 ));
+			}
+			else if ( name == IStringConst::market ) {
+				chitBag->PushScene( LumosGame::SCENE_CHARACTER, 
+					new CharacterSceneData( ic, building->GetItemComponent(), true ));
+			}
+			else if ( name == IStringConst::factory ) {
+				ForgeSceneData* data = new ForgeSceneData();
+				data->tech = cs->GetTechLevel();
+				data->itemComponent = ic;
+				chitBag->PushScene( LumosGame::SCENE_FORGE, data );
+			}
+		}
+	}
+}
