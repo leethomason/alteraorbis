@@ -19,7 +19,7 @@
 - is shield boost working correctly? Effects are *not* getting stripped by the shield.
 - can re-pack MVP and Bone matrix in the shader to encode 3*vec4 as the transpose, then transpose in the shader
 - Hide free camera button
-- should be able to auto-clear when building 
+x should be able to auto-clear when building 
 - standing shields!
 - personality, personality display
 - AI notifies friends when attacked, notifies that being attacked, etc.
@@ -31,7 +31,7 @@ x items count plants, other items towards kills
 - button to use vault / factory / etc.
 - item destruction / hpRegen
 - fix porch image (alpha of the tiles, if not general improvement)
-- shield looks very boring (and hard to tell what it is). And does it turn off if you don't have one?
+- shield looks very boring (and hard to tell what it is). And does it turn off if you don't have one? And does it glow?
 - obvious and easy to get to menu cancel
 - buildings shouldn't drop gold on de-rez
 x TextBox needs to be better, and should be used much more.
