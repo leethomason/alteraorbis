@@ -56,8 +56,8 @@ class Matrix4
 
 	/// Construct an identity matrix
 	Matrix4()								{	SetIdentity();	}
-	Matrix4( const Matrix4& rhs )			{	memcpy( x, rhs.x, sizeof(float)*16 ); }
-	void operator=( const Matrix4& rhs )	{	memcpy( x, rhs.x, sizeof(float)*16 ); }
+	Matrix4( const Matrix4& rhs )			{	for( int i=0; i<COMPONENTS*COMPONENTS; ++i ) x[i] = rhs.x[i]; }
+	void operator=( const Matrix4& rhs )	{	for( int i=0; i<COMPONENTS*COMPONENTS; ++i ) x[i] = rhs.x[i]; }
 
 	/// Set the matrix to identity
 	void SetIdentity()		{	x[0] = x[5] = x[10] = x[15] = 1.0f;
@@ -377,8 +377,8 @@ class Matrix2
 
 	/// Construct an identity matrix
 	Matrix2()								{	SetIdentity();	}
-	Matrix2( const Matrix2& rhs )			{	memcpy( x, rhs.x, sizeof(float)*COMPONENTS*COMPONENTS ); }
-	void operator=( const Matrix2& rhs )	{	memcpy( x, rhs.x, sizeof(float)*COMPONENTS*COMPONENTS ); }
+	Matrix2( const Matrix2& rhs )			{	for( int i=0; i<COMPONENTS*COMPONENTS; ++i ) x[i] = rhs.x[i]; }
+	void operator=( const Matrix2& rhs )	{	for( int i=0; i<COMPONENTS*COMPONENTS; ++i ) x[i] = rhs.x[i]; }
 
 	/// Set the matrix to identity
 	void SetIdentity()		{	x[0] = x[3] = 1.0f;

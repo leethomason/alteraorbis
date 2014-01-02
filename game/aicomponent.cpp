@@ -1781,10 +1781,22 @@ int AIComponent::DoTick( U32 deltaTime )
 	}
 
 	// If focused, make sure we have a target.
-	if ( targetDesc.id && !chitBag->GetChit( targetDesc.id )) {
-		targetDesc.Clear();
-		currentAction = 0;
+	if ( targetDesc.id ) {
+		Chit* chit = chitBag->GetChit( targetDesc.id );
+		if ( !chit ) {
+			targetDesc.Clear();
+			currentAction = 0;
+		}
+		else if ( map->UsingSectors() ) {
+			if (    !chit->GetSpatialComponent() 
+				 || ( ToSector( thisComp.spatial->GetPosition2DI() ) != ToSector( chit->GetSpatialComponent()->GetPosition2DI() )))
+			{
+				targetDesc.Clear();
+				currentAction = 0;
+			}
+		}
 	}
+
 	if ( !targetDesc.id ) {
 		focus = FOCUS_NONE;
 	}

@@ -376,11 +376,7 @@ void AnimationResource::GetTransform(	int typeA,					// which animation to play:
 										int typeB,					// 2nd animation
 										U32 timeB,					// 2nd animation time
 										float crossFraction,		// 0: all A, 1: all B
-#ifdef EL_VEC_BONES
-										grinliz::Vector4F* animPos, grinliz::Quaternion* animRot ) const
-#else
 										grinliz::Matrix4* output ) const	// At least EL_MAX_BONES
-#endif
 {
 	// fixme: check for redundant call and return same output
 
@@ -399,12 +395,7 @@ void AnimationResource::GetTransform(	int typeA,					// which animation to play:
 	const BoneData& boneDataB = sequence[typeB].boneData;
 
 	for( int i=0; i<EL_MAX_BONES; ++i ) {
-#ifdef EL_VEC_BONES
-		animPos[i].Set(0,0,0,1);
-		animRot[i].Zero();
-#else
 		output[i].SetIdentity();
-#endif
 
 		if ( boneDataA.bone[i].name.empty() )
 			continue;
@@ -472,14 +463,7 @@ void AnimationResource::GetTransform(	int typeA,					// which animation to play:
 
 		int parentIndex = boneDataA.bone[i].parent; 
 		if ( parentIndex >= 0 ) {
-#ifdef EL_VEC_BONES
-			Matrix4 out = concat[parentIndex] * m * inv;
-			animPos[i].Set( out.m41, out.m42, out.m43, out.m44 );
-			out.m41 = out.m42 = out.m43 = 0;
-			animRot[i].FromRotationMatrix( out );
-#else
 			output[i] = concat[parentIndex] * m * inv;
-#endif
 			concat[i] = concat[parentIndex] * m;
 		}
 		else {

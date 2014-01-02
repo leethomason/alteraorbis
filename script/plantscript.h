@@ -35,8 +35,8 @@ public:
 
 	virtual void Init();
 	virtual void Serialize( XStream* xs );
-	virtual void OnAdd()	{}
-	virtual void OnRemove()	{}
+	virtual void OnAdd();
+	virtual void OnRemove();
 
 	virtual int DoTick( U32 delta );
 	virtual const char* ScriptName() { return "PlantScript"; }
