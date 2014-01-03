@@ -150,7 +150,7 @@
   <model filename="mantis/mantis.ac" modelName="redmantis" animation="mantisAnimation" origin="1 0 0" shading="flat" polyRemoval="pre" >
     <meta name="trigger" pos="1 .35 .13" boneName="torso" />
     <meta name="target"  pos="1 0.33 0"/>
-    <meta name="althand" pos="1 0.40 0.20" baneName="torso" />
+    <meta name="althand" pos="1 0.40 0.20" boneName="torso" />
   </model>
 
   <animation filename="cyclops/cyclops_.bvh" assetName="cyclopsAnimation">

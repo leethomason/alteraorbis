@@ -360,7 +360,7 @@ public:
 		AI_SECTOR_HERD		= (1<<19),		// will herd across sectors, as a group
 		AI_SECTOR_WANDER	= (1<<20),		// will wander between sectors, as an individual
 		AI_DOES_WORK		= (1<<21),
-		AI_USES_BUILDINGS	= (1<<22),		// can use markets, etc. and do transactions
+		AI_USES_BUILDINGS	= (1<<22),		// can use markets, etc. and do transactions. also used as a general "smart enough to use weapons" flag.
 
 		GOLD_PICKUP			= (1<<23),
 		ITEM_PICKUP			= (1<<24),		// picks up items. will use if possible.

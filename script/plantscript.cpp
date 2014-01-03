@@ -64,6 +64,9 @@ void PlantScript::SetRenderComponent()
 	str[5] = '0' + type;
 	str[7] = '0' + stage;
 
+	int t = -1;
+	int s = -1;
+
 	GLASSERT( scriptContext->chit );
 	if ( scriptContext->chit->GetRenderComponent() ) {
 		const ModelResource* res = scriptContext->chit->GetRenderComponent()->MainResource();
@@ -77,9 +80,8 @@ void PlantScript::SetRenderComponent()
 		RenderComponent* rc = scriptContext->chit->GetRenderComponent();
 		const char* name = rc->MainResource()->Name();
 		GLASSERT( strlen( name ) == 8 );
-		int t = name[5] - '0';
-		int s = name[7] - '0';
-		scriptContext->census->plants[t][s] -= 1;
+		t = name[5] - '0';
+		s = name[7] - '0';
 
 		scriptContext->chit->Remove( rc );
 		delete rc;
@@ -89,11 +91,28 @@ void PlantScript::SetRenderComponent()
 		RenderComponent* rc = new RenderComponent( engine, str.c_str() );
 		rc->SetSerialize( false );
 		scriptContext->chit->Add( rc );
-
-		scriptContext->census->plants[type][stage] += 1;
 	}
+
+	if ( t >= 0 ) {
+		GLASSERT( s >= 0 );
+		scriptContext->census->plants[t][s]			-= 1;
+		scriptContext->census->plants[type][stage]	+= 1;
+	}
+
 	GameItem* item = scriptContext->chit->GetItem();
 	scriptContext->chit->GetRenderComponent()->SetSaturation( item->HPFraction() );
+}
+
+
+void PlantScript::OnAdd()
+{
+	scriptContext->census->plants[type][stage] += 1;
+}
+
+
+void PlantScript::OnRemove()
+{
+	scriptContext->census->plants[type][stage] -= 1;
 }
 
 
@@ -154,6 +173,9 @@ int PlantScript::DoTick( U32 delta )
 	int tick = Min( growTimer.Next(), sporeTimer.Next() );
 
 	if ( !grow && !spore ) {
+		if ( scriptContext->chit->GetRenderComponent() && scriptContext->chit->GetItem() ) {
+			scriptContext->chit->GetRenderComponent()->SetSaturation( scriptContext->chit->GetItem()->HPFraction() );
+		}
 		return tick;
 	}
 

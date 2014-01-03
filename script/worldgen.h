@@ -27,7 +27,6 @@
 #include "../xarchive/glstreamer.h"
 #include "../engine/enginelimits.h"
 #include "../game/worldinfo.h"
-#include "../micropather/micropather.h"
 
 namespace grinliz {
 class PerlinNoise;
@@ -74,7 +73,18 @@ public:
 	// Connect up portal or core.
 	void GenerateTerrain( U32 seed, SectorData* data );
 
-	const U8* Land() const						{ return land; }
+	const U8*	Land() const						{ return land; }
+
+	// Bits: 
+	//	low 2:	Core
+	//	next 2:	Port0
+	//	next 2:	Port1
+	//	next 2:	Port2
+	//	next 2:	Port3
+	enum {
+		EAST, NORTH, WEST, SOUTH
+	};
+	const U16*	Path() const						{ return path; }
 
 	enum {
 		SIZE			= MAX_MAP_SIZE
@@ -93,28 +103,27 @@ public:
 		return (void*)i;
 	}
 
-	/*
-	virtual float LeastCostEstimate( void* stateStart, void* stateEnd );
-	virtual void AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > *adjacent );
-	virtual void  PrintStateInfo( void* state ) { GLASSERT( 0 ); }
-	*/
-
 private:
+	int INDEX( int x, int y ) const					{ return y*SIZE + x; }
+	int INDEX( const grinliz::Vector2I& v ) const	{ return v.y*SIZE + v.x; }
+
 	int  CountFlixelsAboveCutoff( const float* flixels, float cutoff, float* maxh );
 	void Draw( const grinliz::Rectangle2I& r, int land );
 	int  CalcSectorArea( int x, int y );
 	void AddPorts( SectorData* sector );
-	int CalcSectorAreaFromFill( SectorData* s, const grinliz::Vector2I& origin, bool* allPortsColored );
+	int  CalcSectorAreaFromFill( SectorData* s, const grinliz::Vector2I& origin, bool* allPortsColored );
 	void DepositLand( SectorData* s, U32 seed, int n );
 	void Filter( const grinliz::Rectangle2I& bounds );
 	void RemoveUncoloredLand( SectorData* s );
+	void CalcPath( const SectorData* s );
 
 	float* flixels;
 	grinliz::PerlinNoise* noise0;
 	grinliz::PerlinNoise* noise1;
 
-	U8* land;
-	U8* color;
+	U8*	 land;
+	U16* color;	// used in 2 differnt ways: 1) to determine if land is connected to a port, and 2) to determine the path to cores and ports
+	U16* path;
 };
 
 #endif // LUMOS_WORLDGEN_INCLUDED

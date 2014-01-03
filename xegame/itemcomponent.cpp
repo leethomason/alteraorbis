@@ -229,7 +229,6 @@ void ItemComponent::UpdateActive()
 {
 	melee = 0;
 	ranged = 0;
-	//active = 0;
 	reserve = 0;
 	shield = 0;
 	activeArr.Clear();
@@ -239,8 +238,10 @@ void ItemComponent::UpdateActive()
 
 	const GameItem* mainItem = itemArr[0];
 	const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( mainItem->ResourceName(), false );
+	int usesWeapons = itemArr[0]->flags & GameItem::AI_USES_BUILDINGS;
+
 	for ( int i=0; i<EL_NUM_METADATA; ++i ) {
-		usedHardpoint[i] = !res || !( res->header.metaData[i].InUse() );	// set the hardpoint in use if it isn't available.
+		usedHardpoint[i] = !res || !( res->header.metaData[i].InUse() ) || !usesWeapons;	// set the hardpoint in use if it isn't available.
 	}
 
 	for( int i=1; i<itemArr.Size(); ++i ) {

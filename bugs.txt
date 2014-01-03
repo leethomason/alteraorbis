@@ -60,7 +60,12 @@ x TextBox needs to be better, and should be used much more.
 		x wallet / transaction / can build seems to have problems with zero (> vs >=)
 		x Review 2 release logs from GT
 		x Paving more obvious? All green disappears?
-		- check bolt renderer
+		x huge spawn clusters kill performance. Improved for now: cache animation calculation.
+		- bolt renderer buggy
+		- stuck in rocks - implement Rampage
+		x stuck in battle mode
+		- doesn't seem to pick up loot when should
+		- redmantis run&gun broken?
 
 	- Census
 		- coolest stuff, past and present, by category

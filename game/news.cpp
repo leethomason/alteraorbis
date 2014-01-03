@@ -142,7 +142,8 @@ void NewsEvent::Console( grinliz::GLString* str ) const
 	Vector2I sector	= ToSector( ToWorld2I( pos ));
 	const GameItem* second = ItemDB::Instance()->Find( secondItemID );
 
-	GLASSERT( itemID != secondItemID );
+	// Not the case with explosives: can kill yourself.
+	//GLASSERT( itemID != secondItemID );
 
 	Chit* chit = 0;
 	if ( NewsHistory::Instance()) {

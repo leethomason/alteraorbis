@@ -85,7 +85,7 @@ public:
 		MATCH_ANY,
 		MATCH_ALL
 	};
-	MultiFilter( int anyAll ) : type(-1) {}
+	MultiFilter( int anyAllMatch ) : type(-1), anyAll(anyAllMatch) {}
 
 	virtual bool Accept( Chit* chit );
 	virtual int  Type();					// committed when called the first time

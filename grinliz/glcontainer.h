@@ -229,6 +229,13 @@ public:
 		return temp;
 	}
 
+	T PopFront() {
+		GLASSERT( size > 0 );
+		T temp = mem[0];
+		Remove( 0 );
+		return temp;
+	}
+
 	void Remove( int i ) {
 		GLASSERT( i < (int)size );
 		// Copy down.
