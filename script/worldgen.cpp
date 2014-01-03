@@ -11,7 +11,6 @@
 
 #include "../shared/lodepng.h"
 #include "../game/gamelimits.h"
-#include "../micropather/micropather.h"
 
 using namespace grinliz;
 
@@ -48,8 +47,9 @@ void SectorData::Serialize( XStream* xs )
 WorldGen::WorldGen()
 {
 	land = new U8[SIZE*SIZE];
-	memset( land, 0, SIZE*SIZE );
-	color = new U8[SIZE*SIZE];
+	memset( land, 0, SIZE*SIZE*sizeof(*land) );
+	color = new U16[SIZE*SIZE];
+	path = new U16[SIZE*SIZE];
 	flixels = 0;
 	noise0 = 0;
 	noise1 = 0;
@@ -61,6 +61,7 @@ WorldGen::~WorldGen()
 	delete [] land;
 	delete [] color;
 	delete [] flixels;
+	delete [] path;
 	delete noise0;
 	delete noise1;
 }
@@ -187,7 +188,7 @@ int WorldGen::CountFlixelsAboveCutoff( const float* flixels, float cutoff, float
 
 int WorldGen::CalcSectorAreaFromFill( SectorData* s, const grinliz::Vector2I& origin, bool* allPortsColored )
 {
-	memset( color, 0, SIZE*SIZE );
+	memset( color, 0, SIZE*SIZE*sizeof(*color) );
 	int c = 1;
 
 	CDynArray<Vector2I> stack;
@@ -247,94 +248,6 @@ void WorldGen::RemoveUncoloredLand( SectorData* s )
 		}
 	}
 }
-
-#if 0
-float WorldGen::LeastCostEstimate( void* stateStart, void* stateEnd ) {
-	grinliz::Vector2I start = FromState( stateStart );
-	grinliz::Vector2I end   = FromState( stateEnd );
-//	float len2 = (float)((start.x-end.x)*(start.x-end.x) + (start.y-end.y)*(start.y-end.y));
-//	return sqrtf( len2 );
-	float len = (float)(abs(start.x-end.x) + abs(start.y-end.y));
-	return len;
-}
-
-
-void WorldGen::AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > *adjacent ) {
-	Vector2I start = FromState( state );
-	GLASSERT( patherBounds.Contains( start ));
-
-	static const Vector2I delta[4] = {
-		{ -1, 0 },
-		{ 1, 0 },
-		{ 0, -1 },
-		{ 0, 1 }
-	};
-	for( int i=0; i<4; ++i ) {
-		Vector2I v = start + delta[i];
-		if ( patherBounds.Contains( v ) ) {
-			int type = land[v.y*SIZE+v.x];
-			if ( type != WATER ) {
-				float cost = (type >= LAND1 && type <= LAND3) ? 8.0f : 1.0f;	// prefer existing paths.
-				micropather::StateCost sc = { ToState( v ), cost };
-				adjacent->push_back( sc );
-			}
-		}
-	}
-}
-
-
-void WorldGen::PathToCore( SectorData* s )
-{
-	if ( !s->HasCore() )
-		return;
-
-	// Clear land around core.
-	Rectangle2I b;
-	b.min = b.max = s->core;
-	b.Outset( 2 );
-	for( int y=b.min.y; y<=b.max.y; ++y ) {
-		for( int x=b.min.x; x<=b.max.x; ++x ) {
-			int type = land[y*SIZE+x];
-			if ( type >= LAND1 && type <= LAND3 ) {
-				type = LAND0;
-			}
-		}
-	}
-
-	// Now make sure there is a LAND0 route from
-	// each port to the core. This keeps critters
-	// from piling up on the ports quite so much.
-	micropather::MicroPather* pather = new micropather::MicroPather( this, SIZE*SIZE, 4, false );
-	MP_VECTOR< void* > path;
-	patherBounds = s->InnerBounds();
-
-	for( int i=0; i<4; ++i ) {
-		int port = (1<<i);
-		if ( s->ports & port ) {
-			Vector2I startVec = s->core;
-			Vector2I endVec   = s->GetPortLoc( port ).Center();
-			GLASSERT( color[startVec.y*SIZE+startVec.x] == color[endVec.y*SIZE+endVec.x] );
-
-			void* start = ToState( startVec );
-			void* end   = ToState( endVec );
-
-			float cost = 0;
-			path.clear();
-			int result = pather->Solve( start, end, &path, &cost );
-			GLASSERT( result == micropather::MicroPather::SOLVED );	// else coloring failed?
-			
-			for( unsigned k=0; k<path.size(); ++k ) {
-				Vector2I v = FromState( path[i] );
-				int type = land[v.y*SIZE+v.x];
-				if ( type >= LAND1 && type <= LAND3 ) {
-					land[v.y*SIZE+v.x] = LAND0;
-				}
-			}
-		}
-	}
-	delete pather;
-}
-#endif
 
 
 void WorldGen::DepositLand( SectorData* s, U32 seed, int n )
@@ -677,6 +590,7 @@ void WorldGen::ProcessSectors( U32 seed, SectorData* sectorData )
 	GLOUTPUT(( "nSectors=%d\n", sectors.Size() ));
 	for( int i=0; i<sectors.Size(); ++i ) {
 		GenerateTerrain( random.Rand(), sectors[i] );
+		CalcPath( sectors[i] );
 	}
 }
 
@@ -716,18 +630,106 @@ void WorldGen::GenerateTerrain( U32 seed, SectorData* s )
 	Draw( r, LAND0 );
 
 	land[c.y*SIZE+c.x] = CORE;
-
 	bool portsColored = false;
-	int a = CalcSectorAreaFromFill( s, c, &portsColored );
+	int  a			  = 0;
+
 	while ( a < AREA || !portsColored ) {
 		DepositLand( s, seed, Max( AREA-a, (int)INNER_SECTOR_SIZE ));
+		// Filter 1x1 zones.
+		Filter( s->InnerBounds() );
 		a = CalcSectorAreaFromFill( s, c, &portsColored );
 	}
-	// Filter 1x1 zones.
-	Filter( s->InnerBounds() );
 	RemoveUncoloredLand( s );
 
 	s->area = CalcSectorArea( s->x/SECTOR_SIZE, s->y/SECTOR_SIZE );
 }
+
+
+void WorldGen::CalcPath( const SectorData* s )
+{
+	// Rember that (playable) land is fully connected. This
+	// is guaranteed in GenerateTerrain(), which
+	// simply deletes all the land not connected 
+	// to the core and ports.
+
+	// The AI can use this information to get
+	// to a core or port from any location is
+	// the map, and in fact, we encode this into
+	// the map.
+
+	// This algorithm is a flood fill from 
+	// the destination to every point on the
+	// map. The correct direction to the 
+	// destination is the the direction of
+	// "one less" in the resulting gradient.
+
+
+	GLASSERT( s->ports );
+	Rectangle2I bounds = s->InnerBounds();
+
+	for( int y=bounds.min.y; y<=bounds.max.y; ++y ) {
+		for( int x=bounds.min.x; x<=bounds.max.x; ++x ) {
+			color[INDEX(x,y)] = 0;
+		}
+	}
+	int area = 1;
+
+	Vector2I v = { s->core.x, s->core.y };
+	color[SIZE*v.y + v.x] = 1;
+	CDynArray< Vector2I > stack;
+	stack.Push( v );
+
+	static const Vector2I arr[4] = { {1,0}, {0,1}, {-1,0}, {0,-1} };
+
+	while( !stack.Empty() ) {
+		v = stack.PopFront();
+
+		int c = color[INDEX(v.x,v.y)] + 1;
+		GLASSERT( c > 1 );
+
+		for( int k=0; k<4; ++k ) {
+			Vector2I loc = v + arr[k];
+			if ( bounds.Contains(loc) && land[INDEX(loc)] ) {
+				// Do we have an unvisited, land location?
+				if ( color[INDEX(loc)] == 0 ) {
+					++area;
+					color[INDEX(loc)] = c;
+					stack.Push( loc );
+				}
+			}
+		}
+	}
+
+	GLASSERT( area == s->area );
+
+	for( int y=bounds.min.y; y<=bounds.max.y; ++y ) {
+		for( int x=bounds.min.x; x<=bounds.max.x; ++x ) {
+			Vector2I v = { x, y };
+
+			if ( color[INDEX(v)] ) {
+				int dir=-1;
+				if ( v == s->core ) {
+					dir = 0;
+				}
+				else {
+					for( int k=0; k<4; ++k ) {
+						Vector2I loc = v + arr[k];
+						if ( bounds.Contains( loc ) ) {
+							int d = color[INDEX(v)] - color[INDEX(loc)];
+							if ( d == 1 ) {
+								dir = k;
+								break;
+							}
+						}
+					}
+				}
+				GLASSERT( dir >= 0 );
+				path[INDEX(x,y)] = dir;
+			}
+		}
+	}
+}
+
+
 
 

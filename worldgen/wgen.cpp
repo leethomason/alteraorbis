@@ -76,9 +76,10 @@ int main(int argc, const char* argv[])
 		printf( "loop %d: %dms\n", i, endTime - loopTime );
 		loopTime = endTime;
 
-		CStr<32> fname;
+		CStr<32> fname, fnameP;
 		fname.Format( "worldgen%02d.png", i );
 		printf( "Writing %s\n", fname.c_str() );
+		fnameP.Format( "worldgen-path%02d.png", i );
 		
 		static const int SIZE2 = WorldGen::SIZE*WorldGen::SIZE;
 		Color4U8* pixels = new Color4U8[SIZE2];
@@ -109,6 +110,25 @@ int main(int argc, const char* argv[])
 			pixels[i] = grid.ToColor();
 		}
 		lodepng_encode32_file( fname.c_str(), (const unsigned char*)pixels, WorldGen::SIZE, WorldGen::SIZE );
+
+		for( int i=0; i<SIZE2; ++i ) {
+			int path = *(worldGen.Path() + i);
+			int h = *(worldGen.Land() + i);
+
+			if ( h != WorldGen::WATER ) {
+				switch( path ) {
+				case 0:	pixels[i].Set( 255, 0, 0, 255  ); break;
+				case 1:	pixels[i].Set( 0, 255, 0, 255 ); break;
+				case 2:	pixels[i].Set( 0, 0, 255, 255 ); break;
+				case 3:	pixels[i].Set( 255, 0, 255, 255 ); break;
+				}
+			}
+			else {
+				pixels[i].Set( 0, 0, 0, 255 );
+			}
+		}
+		lodepng_encode32_file( fnameP.c_str(), (const unsigned char*)pixels, WorldGen::SIZE, WorldGen::SIZE );
+
 		delete [] pixels;
 		delete [] sectorData;
 	}
