@@ -111,9 +111,13 @@ private:
 	void Draw( const grinliz::Rectangle2I& r, int land );
 	int  CalcSectorArea( int x, int y );
 	void AddPorts( SectorData* sector );
-	int  CalcSectorAreaFromFill( SectorData* s, const grinliz::Vector2I& origin, bool* allPortsColored );
 	void DepositLand( SectorData* s, U32 seed, int n );
 	void Filter( const grinliz::Rectangle2I& bounds );
+
+	// returns area
+	int Color( const grinliz::Rectangle2I& bounds, const grinliz::Vector2I& origin );
+	bool AllPortsColored( const SectorData* d );
+
 	void RemoveUncoloredLand( SectorData* s );
 	void CalcPath( const SectorData* s );
 

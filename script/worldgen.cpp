@@ -50,6 +50,7 @@ WorldGen::WorldGen()
 	memset( land, 0, SIZE*SIZE*sizeof(*land) );
 	color = new U16[SIZE*SIZE];
 	path = new U16[SIZE*SIZE];
+	memset( path, 0, sizeof(*path)*SIZE*SIZE );
 	flixels = 0;
 	noise0 = 0;
 	noise1 = 0;
@@ -186,48 +187,51 @@ int WorldGen::CountFlixelsAboveCutoff( const float* flixels, float cutoff, float
 }
 
 
-int WorldGen::CalcSectorAreaFromFill( SectorData* s, const grinliz::Vector2I& origin, bool* allPortsColored )
+int WorldGen::Color( const Rectangle2I& bounds, const Vector2I& origin )
 {
-	memset( color, 0, SIZE*SIZE*sizeof(*color) );
-	int c = 1;
+	// Rember that (playable) land is fully connected. This
+	// is guaranteed in GenerateTerrain(), which
+	// simply deletes all the land not connected 
+	// to the core and ports.
 
+	// The AI can use this information to get
+	// to a core or port from any location is
+	// the map, and in fact, we encode this into
+	// the map.
+
+	// This algorithm is a flood fill from 
+	// the destination to every point on the
+	// map. The correct direction to the 
+	// destination is the the direction of
+	// "one less" in the resulting gradient.
+
+	for( int y=bounds.min.y; y <= bounds.max.y; ++y ) {
+		for( int x=bounds.min.x; x <= bounds.max.x; ++x ) {
+			color[INDEX(x,y)] = 0;
+		}
+	}
+	int c = 1;
 	CDynArray<Vector2I> stack;
-	Rectangle2I bounds = s->InnerBounds();
 
 	GLASSERT( land[origin.y*SIZE+origin.x] );
 
 	stack.Push( origin );
-	int area = 0;
+	color[INDEX(origin.x, origin.y)] = 1;
+	int area = 1;
 
 	while( !stack.Empty() ) {
-		Vector2I v = stack.Pop();
-		if (    (color[v.y*SIZE+v.x] == 0)
-			 && land[v.y*SIZE+v.x] ) 
-		{
-			color[v.y*SIZE+v.x] = 1;
-			++area;
+		Vector2I v = stack.PopFront();
+		c = color[INDEX(v)] + 1;
+		GLASSERT( c > 1 );
 
-			Vector2I v0 = { v.x-1, v.y };
-			Vector2I v1 = { v.x+1, v.y };
-			Vector2I v2 = { v.x, v.y-1 };
-			Vector2I v3 = { v.x, v.y+1 };
+		static const Vector2I d[4] = { {1,0}, {0,1}, {-1,0}, {0,-1} };
 
-			if ( bounds.Contains( v0 ) ) stack.Push( v0 );
-			if ( bounds.Contains( v1 ) ) stack.Push( v1 );
-			if ( bounds.Contains( v2 ) ) stack.Push( v2 );
-			if ( bounds.Contains( v3 ) ) stack.Push( v3 );
-		}
-	}
-	if ( allPortsColored ) {
-		*allPortsColored = true;
-		for( int i=0; i<4; ++i ) {
-			int port = 1<<i;
-			if ( s->ports & port ) {
-				Rectangle2I r = s->GetPortLoc( port );
-				if ( color[r.min.y*SIZE+r.min.x] == 0 ) {
-					*allPortsColored = false;
-					break;
-				}
+		for( int k=0; k<4; ++k ) {
+			Vector2I n = v + d[k];
+			if ( bounds.Contains(n) && land[INDEX(n)] && color[INDEX(n)] == 0 ) {
+				color[INDEX(n)] = c;
+				++area;
+				stack.Push( n );
 			}
 		}
 	}
@@ -235,13 +239,29 @@ int WorldGen::CalcSectorAreaFromFill( SectorData* s, const grinliz::Vector2I& or
 }
 
 
+bool WorldGen::AllPortsColored( const SectorData* s )
+{
+	bool allPortsColored = true;
+	for( int i=0; i<4; ++i ) {
+		int port = 1<<i;
+		if ( s->ports & port ) {
+			Rectangle2I r = s->GetPortLoc( port );
+			if ( color[INDEX(r.min)] == 0 ) {
+				allPortsColored = false;
+				break;
+			}
+		}
+	}
+	return allPortsColored;
+}
+
+
 void WorldGen::RemoveUncoloredLand( SectorData* s )
 {
 	Rectangle2I bounds = s->InnerBounds();
 
-	// Inset one more, so that checks can be in all directions.
-	for( int y=bounds.min.y+1; y<=bounds.max.y-1; ++y ) {
-		for( int x=bounds.min.x+1; x<=bounds.max.x-1; ++x ) {
+	for( int y=bounds.min.y; y<=bounds.max.y; ++y ) {
+		for( int x=bounds.min.x; x<=bounds.max.x; ++x ) {
 			if ( color[y*SIZE+x] == 0 ) {
 				land[y*SIZE+x] = 0;
 			}
@@ -630,101 +650,75 @@ void WorldGen::GenerateTerrain( U32 seed, SectorData* s )
 	Draw( r, LAND0 );
 
 	land[c.y*SIZE+c.x] = CORE;
+	int  a			  = AREA;
 	bool portsColored = false;
-	int  a			  = 0;
 
 	while ( a < AREA || !portsColored ) {
+		// FIXME: if a port isn't connected, it would be
+		// nice to use an overlay to put an interesting
+		// artistically generated connection to the core.
+		// DepositLand() is nice for adding area, but maybe
+		// not the right thing for connecting ports.
 		DepositLand( s, seed, Max( AREA-a, (int)INNER_SECTOR_SIZE ));
-		// Filter 1x1 zones.
 		Filter( s->InnerBounds() );
-		a = CalcSectorAreaFromFill( s, c, &portsColored );
+
+		a = Color( s->InnerBounds(), s->core );
+		portsColored = AllPortsColored( s );
 	}
 	RemoveUncoloredLand( s );
 
-	s->area = CalcSectorArea( s->x/SECTOR_SIZE, s->y/SECTOR_SIZE );
+	s->area = a;
+	int checkArea = CalcSectorArea( s->x/SECTOR_SIZE, s->y/SECTOR_SIZE );
+	GLASSERT( a == checkArea );
 }
 
 
 void WorldGen::CalcPath( const SectorData* s )
 {
-	// Rember that (playable) land is fully connected. This
-	// is guaranteed in GenerateTerrain(), which
-	// simply deletes all the land not connected 
-	// to the core and ports.
-
-	// The AI can use this information to get
-	// to a core or port from any location is
-	// the map, and in fact, we encode this into
-	// the map.
-
-	// This algorithm is a flood fill from 
-	// the destination to every point on the
-	// map. The correct direction to the 
-	// destination is the the direction of
-	// "one less" in the resulting gradient.
-
-
-	GLASSERT( s->ports );
 	Rectangle2I bounds = s->InnerBounds();
+	static const Vector2I d[4] = { {1,0}, {0,1}, {-1,0}, {0,-1} };
 
-	for( int y=bounds.min.y; y<=bounds.max.y; ++y ) {
-		for( int x=bounds.min.x; x<=bounds.max.x; ++x ) {
-			color[INDEX(x,y)] = 0;
-		}
-	}
-	int area = 1;
-
-	Vector2I v = { s->core.x, s->core.y };
-	color[SIZE*v.y + v.x] = 1;
-	CDynArray< Vector2I > stack;
-	stack.Push( v );
-
-	static const Vector2I arr[4] = { {1,0}, {0,1}, {-1,0}, {0,-1} };
-
-	while( !stack.Empty() ) {
-		v = stack.PopFront();
-
-		int c = color[INDEX(v.x,v.y)] + 1;
-		GLASSERT( c > 1 );
-
-		for( int k=0; k<4; ++k ) {
-			Vector2I loc = v + arr[k];
-			if ( bounds.Contains(loc) && land[INDEX(loc)] ) {
-				// Do we have an unvisited, land location?
-				if ( color[INDEX(loc)] == 0 ) {
-					++area;
-					color[INDEX(loc)] = c;
-					stack.Push( loc );
-				}
+	for( int i=0; i<5; ++i ) {
+		Vector2I origin = s->core;
+		if ( i > 0 ) {
+			if ( s->ports & (1<<i)) {
+				origin = s->GetPortLoc( 1<<i ).Center();
+			}
+			else {
+				// no port.
+				continue;
 			}
 		}
-	}
+		Color( bounds, origin );
 
-	GLASSERT( area == s->area );
+		for( int y=bounds.min.y; y<=bounds.max.y; ++y ) {
+			for( int x=bounds.min.x; x<=bounds.max.x; ++x ) {
+				Vector2I v = { x, y };
 
-	for( int y=bounds.min.y; y<=bounds.max.y; ++y ) {
-		for( int x=bounds.min.x; x<=bounds.max.x; ++x ) {
-			Vector2I v = { x, y };
-
-			if ( color[INDEX(v)] ) {
-				int dir=-1;
-				if ( v == s->core ) {
-					dir = 0;
-				}
-				else {
-					for( int k=0; k<4; ++k ) {
-						Vector2I loc = v + arr[k];
-						if ( bounds.Contains( loc ) ) {
-							int d = color[INDEX(v)] - color[INDEX(loc)];
-							if ( d == 1 ) {
-								dir = k;
-								break;
+				if ( color[INDEX(v)] ) {
+					// FIXME: this always chooses the first hit.
+					// Would be nice to mix it up to make the
+					// paths look more natural, and choose among
+					// the valid paths.
+					int dir=-1;
+					if ( v == origin ) {
+						dir = 0;
+					}
+					else {
+						for( int k=0; k<4; ++k ) {
+							Vector2I loc = v + d[k];
+							if ( bounds.Contains( loc ) ) {
+								int d = color[INDEX(v)] - color[INDEX(loc)];
+								if ( d == 1 ) {
+									dir = k;
+									break;
+								}
 							}
 						}
 					}
+					GLASSERT( dir >= 0 );
+					path[INDEX(x,y)] |= dir << (i*2);
 				}
-				GLASSERT( dir >= 0 );
-				path[INDEX(x,y)] = dir;
 			}
 		}
 	}

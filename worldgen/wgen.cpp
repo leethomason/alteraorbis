@@ -116,7 +116,7 @@ int main(int argc, const char* argv[])
 			int h = *(worldGen.Land() + i);
 
 			if ( h != WorldGen::WATER ) {
-				switch( path ) {
+				switch( path & 3 ) {
 				case 0:	pixels[i].Set( 255, 0, 0, 255  ); break;
 				case 1:	pixels[i].Set( 0, 255, 0, 255 ); break;
 				case 2:	pixels[i].Set( 0, 0, 255, 255 ); break;
