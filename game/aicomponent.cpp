@@ -789,18 +789,36 @@ void AIComponent::ThinkRampage( const ComponentSet& thisComp )
 	if ( thisComp.move->IsMoving() )
 		return;
 
-	// FIXME: switch to melee
-	// FIXME: stop at destination
-
 	// Where are we, and where to next?
-	Vector2I pos2i = thisComp.spatial->GetPosition2DI();
-	const WorldGrid& wg0 = map->GetWorldGrid( pos2i.x, pos2i.y );
-	Vector2I next = pos2i + wg0.Path( rampageTarget );
-	const WorldGrid& wg1 = map->GetWorldGrid( next.x, next.y );
+	Vector2I pos2i			= thisComp.spatial->GetPosition2DI();
+	const WorldGrid& wg0	= map->GetWorldGrid( pos2i.x, pos2i.y );
+	Vector2I next			= pos2i + wg0.Path( rampageTarget );
+	const WorldGrid& wg1	= map->GetWorldGrid( next.x, next.y );
+	const SectorData& sd	= map->GetSector( ToSector( pos2i ));
+
+	Rectangle2I dest;
+	switch( rampageTarget ) {
+	case WorldGrid::CORE:		dest.min = dest.max = sd.core;				break;
+	case WorldGrid::PORT_POS_X:	dest = sd.GetPortLoc( SectorData::POS_X );	break;
+	case WorldGrid::PORT_POS_Y:	dest = sd.GetPortLoc( SectorData::POS_Y );	break;
+	case WorldGrid::PORT_NEG_X:	dest = sd.GetPortLoc( SectorData::NEG_X );	break;
+	case WorldGrid::PORT_NEG_Y:	dest = sd.GetPortLoc( SectorData::NEG_Y );	break;
+	}
+
+	if ( dest.Contains( pos2i )) {
+		aiMode = NORMAL_MODE;
+		currentAction = NO_ACTION;
+		return;
+	}
 
 	if ( wg1.RockHeight() ) {
 		targetDesc.Set( next ); 
 		currentAction = MELEE;
+
+		IWeaponItem* reserve = thisComp.itemComponent->GetReserveWeapon();
+		if ( reserve && reserve->ToMeleeWeapon() ) {
+			thisComp.itemComponent->SwapWeapons();
+		}
 	}
 	else if ( wg1.IsLand() ) {
 		this->Move( ToWorld2F( next ), false );
