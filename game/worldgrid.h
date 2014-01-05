@@ -36,7 +36,6 @@ private:
 	unsigned isLand				: 1;
 	unsigned isGrid				: 1;
 	unsigned isPort				: 1;
-	unsigned isCore				: 1;
 	unsigned pave				: 2;	// 0-3, the pave style, if >0
 	unsigned isPorch			: 1;	// only used for rendering
 
@@ -53,6 +52,8 @@ private:
 	unsigned debugPath			: 1;
 	unsigned debugOrigin		: 1;
 
+	unsigned path				: 10;	// 2 bits: core, port0-3
+
 	bool IsBlocked() const			{ return (!isLand) || isGrid || rockHeight || hasPool; }
 
 public:
@@ -61,7 +62,6 @@ public:
 		return    isLand == wg.isLand
 			   && isGrid == wg.isGrid
 			   && isPort == wg.isPort
-			   && isCore == wg.isCore
 			   && nominalRockHeight == wg.nominalRockHeight
 			   && rockType == wg.rockType
 			   && magma == wg.magma
@@ -83,9 +83,6 @@ public:
 		else if ( isPort ) {
 			c.Set( 180, 180, 0, 255 );
 		}
-		else if ( isCore ) {
-			c.Set( 200, 100, 100, 255 );
-		}
 		else if ( isLand ) {
 			if ( nominalRockHeight == 0 ) {
 				c.Set( 0, 140, 0, 255 );
@@ -104,7 +101,6 @@ public:
 	bool IsLand() const			{ return isLand != 0; }
 	bool IsPort() const			{ return isPort != 0; }
 	bool IsGrid() const			{ return isGrid != 0; }
-	bool IsCore() const			{ return isCore != 0; }
 	bool IsPorch() const		{ return isPorch != 0; }
 
 	enum {
@@ -136,7 +132,6 @@ public:
 
 	void SetGrid()				{ isLand = 1; isGrid = 1; }
 	void SetPort()				{ isLand = 1; isPort = 1; }
-	void SetCore()				{ isLand = 1; isCore = 1; }
 	void SetLandAndRock( U8 h )	{
 		// So confusing. Max rock height=3, but land goes from 1-4 to be distinct from water.
 		// Subtract here.
@@ -150,7 +145,7 @@ public:
 	}
 
 	void SetLand()				{ 
-		GLASSERT( sizeof(WorldGrid) == sizeof(U32) ); 
+		GLASSERT( sizeof(WorldGrid) == sizeof(U32)*2 );	// WorldGrid can be any size; just make sure it is the one intended 
 		isLand = 1;
 	}
 
@@ -236,6 +231,18 @@ public:
 		zoneSize = s;
 		GLASSERT( s == zoneSize );
 	}
+
+	void SetPath( int pathData )	{ path = pathData; }
+
+	enum { CORE, PORT0, PORT1, PORT2, PORT3 };
+	const grinliz::Vector2I& Path( int dest ) {
+		static const grinliz::Vector2I DIR[4] = {
+			{1,0}, {0,1}, {-1,0}, {0,-1}
+		};
+		int index = (path >> (dest*2)) & 3;
+		return DIR[index];
+	}
+
 };
 
 #endif // LUMOS_WORLD_GRID_INCLUDED

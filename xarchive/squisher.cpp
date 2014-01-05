@@ -6,6 +6,7 @@ Squisher::Squisher()
 	table = new U8[256*256];
 	memset( table, 0, 256*256 );
 	totalIn = totalOut = 0;
+	stream = 0;
 }
 
 
@@ -15,10 +16,35 @@ Squisher::~Squisher()
 }
 
 
+void Squisher::FlushBits() {
+	if ( bit ) {
+		if ( stream ) {
+			fputc( byte, stream );
+		}
+		else {
+			buffer.Push( byte );
+		}
+		bit = byte = 0;
+	}
+}
+
+
+U8 Squisher::ReadByte()
+{
+	if ( stream ) {
+		return fgetc( stream );
+	}
+	else {
+		U8 b = *compBuf;
+		++compBuf;
+		return b;
+	}
+}
+
 const U8* Squisher::Encode( const U8* in, int nIn, int* nCompressedOut )
 {
 	buffer.Clear();
-	p1 = p2 = 0;
+	int p1 = 0, p2 = 0;
 	bit = byte = 0;
 
 	const U8* p = in;
@@ -45,11 +71,48 @@ const U8* Squisher::Encode( const U8* in, int nIn, int* nCompressedOut )
 }
 
 
+void Squisher::StreamEncode( const void* in, int nIn, FILE* fp, int* nWritten )
+{
+	stream = fp;
+	Encode( (const U8*) in, nIn, nWritten );
+	stream = 0;
+}
+
+
+void Squisher::StreamDecode( void* _write, int nDecom, FILE* fp )
+{
+	int p1 = 0, p2 = 0;
+	bit = byte = 0;
+	U8* write = (U8*)_write;
+	stream = fp;
+
+	for( int i=0; i<nDecom; ++i ) {
+		int b = PopBit();
+
+		int c = 0;
+		if ( b == 1 ) {
+			c = table[INDEX(p1,p2)];
+			*write = c;
+			++write;
+		}
+		else {
+			c = Pop8Bits();
+			*write = c;
+			++write;
+			table[INDEX(p1,p2)] = c;
+		}
+		p2 = p1;
+		p1 = c;
+	}
+	stream = 0;
+}
+
+
 const U8* Squisher::Decode( const U8* in, int nDecom, int* nCompressed )
 {
 	buffer.Clear();
 	compBuf = in;
-	p1 = p2 = 0;
+	int p1=0, p2=0;
 	bit = byte = 0;
 
 	for( int i=0; i<nDecom; ++i ) {

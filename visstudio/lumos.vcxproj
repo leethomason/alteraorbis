@@ -169,6 +169,7 @@
     <ClCompile Include="..\win32\framebuffer.cpp" />
     <ClCompile Include="..\win32\glew.c" />
     <ClCompile Include="..\win32\main.cpp" />
+    <ClCompile Include="..\xarchive\squisher.cpp" />
     <ClCompile Include="..\xegame\cameracomponent.cpp" />
     <ClCompile Include="..\xegame\cgame.cpp" />
     <ClCompile Include="..\xegame\chit.cpp" />

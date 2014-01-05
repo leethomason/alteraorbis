@@ -23,8 +23,10 @@
 #include "../grinliz/glgeometry.h"
 #include "../grinliz/glcolor.h"
 #include "../Shiny/include/Shiny.h"
-#include "../shared/lodepng.h"
+
 #include "../xarchive/glstreamer.h"
+#include "../shared/lodepng.h"
+#include "../xarchive/squisher.h"
 
 #include "../engine/engine.h"
 #include "../engine/texture.h"
@@ -203,7 +205,13 @@ void WorldMap::Save( const char* pathToDAT )
 		XarcClose( &writer );
 
 		// Tack on the grid so that the dat file can still be inspected.
-		fwrite( grid, sizeof(WorldGrid), width*height, fp );
+		//fwrite( grid, sizeof(WorldGrid), width*height, fp );
+
+		// This works very well; about 3:1 compression.
+		Squisher squisher;
+		int bytes = 0;
+		squisher.StreamEncode( grid, sizeof(WorldGrid)*width*height, fp, &bytes );
+
 		fclose( fp );
 	}
 }
@@ -225,10 +233,12 @@ void WorldMap::Load( const char* pathToDAT )
 		worldInfo->Serialize( &reader );
 		XarcClose( &reader );
 
-		fread( grid, sizeof(WorldGrid), width*height, fp );
+		//fread( grid, sizeof(WorldGrid), width*height, fp );
+		Squisher squisher;
+		squisher.StreamDecode( grid, sizeof(WorldGrid)*width*height, fp );
+
 		fclose( fp );
 		
-		//Tessellate();
 		usingSectors = true;
 		// Set up the rocks.
 		for( int j=0; j<height; ++j ) {
@@ -391,7 +401,7 @@ bool WorldMap::InitPNG( const char* filename,
 }
 
 
-void WorldMap::MapInit( const U8* land )
+void WorldMap::MapInit( const U8* land, const U16* path )
 {
 	GLASSERT( grid );
 	for( int i=0; i<width*height; ++i ) {
@@ -406,11 +416,12 @@ void WorldMap::MapInit( const U8* land )
 			grid[i].SetPort();
 		}
 		else if ( h == WorldGen::CORE ) {
-			grid[i].SetCore();
+			grid[i].SetLandAndRock( 0 );
 		}
 		else {
 			GLASSERT( 0 );
 		}
+		grid[i].SetPath( path[i] );
 	}
 }
 

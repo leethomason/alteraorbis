@@ -94,7 +94,7 @@ void WorldGenScene::CreateTexture( Texture* t )
 			pix16 = new U16[SIZE2];
 		}
 		// Must also set SectorData, which is done elsewhere.
-		worldMap->MapInit( worldGen->Land() );
+		worldMap->MapInit( worldGen->Land(), worldGen->Path() );
 
 		int i=0;
 		for( int y=0; y<WorldGen::SIZE; ++y ) {

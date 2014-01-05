@@ -85,7 +85,7 @@ public:
 				  grinliz::CDynArray<grinliz::Vector2I>* wayPoints,
 				  grinliz::CDynArray<grinliz::Vector2I>* features );
 	// Init from WorldGen data:
-	void MapInit( const U8* land );
+	void MapInit( const U8* land, const U16* path );
 
 	void SavePNG( const char* path );
 	void Save( const char* pathToData );
