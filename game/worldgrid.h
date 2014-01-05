@@ -235,7 +235,7 @@ public:
 	void SetPath( int pathData )	{ path = pathData; }
 
 	enum { CORE, PORT0, PORT1, PORT2, PORT3 };
-	const grinliz::Vector2I& Path( int dest ) {
+	const grinliz::Vector2I& Path( int dest ) const {
 		static const grinliz::Vector2I DIR[4] = {
 			{1,0}, {0,1}, {-1,0}, {0,-1}
 		};

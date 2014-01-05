@@ -110,6 +110,7 @@ void AIComponent::Serialize( XStream* xs )
 	XARC_SER( xs, rethink );
 	XARC_SER( xs, fullSectorAware );
 	XARC_SER( xs, visitorIndex );
+	XARC_SER( xs, rampageTarget );
 	feTicker.Serialize( xs, "feTicker" );
 	needsTicker.Serialize( xs, "needsTicker" );
 	this->EndSerialize( xs );
@@ -654,6 +655,7 @@ void AIComponent::Think( const ComponentSet& thisComp )
 		break;
 	case ROCKBREAK_MODE:	ThinkRockBreak( thisComp );	break;
 	case BATTLE_MODE:		ThinkBattle( thisComp );	break;
+	case RAMPAGE_MODE:		ThinkRampage( thisComp );	break;
 	}
 };
 
@@ -779,6 +781,34 @@ WorkQueue* AIComponent::GetWorkQueue()
 
 	WorkQueue* workQueue = coreScript->GetWorkQueue();
 	return workQueue;
+}
+
+
+void AIComponent::ThinkRampage( const ComponentSet& thisComp )
+{
+	if ( thisComp.move->IsMoving() )
+		return;
+
+	// FIXME: switch to melee
+	// FIXME: stop at destination
+
+	// Where are we, and where to next?
+	Vector2I pos2i = thisComp.spatial->GetPosition2DI();
+	const WorldGrid& wg0 = map->GetWorldGrid( pos2i.x, pos2i.y );
+	Vector2I next = pos2i + wg0.Path( rampageTarget );
+	const WorldGrid& wg1 = map->GetWorldGrid( next.x, next.y );
+
+	if ( wg1.RockHeight() ) {
+		targetDesc.Set( next ); 
+		currentAction = MELEE;
+	}
+	else if ( wg1.IsLand() ) {
+		this->Move( ToWorld2F( next ), false );
+	}
+	else {
+		aiMode = NORMAL_MODE;
+		currentAction = NO_ACTION;
+	}
 }
 
 	

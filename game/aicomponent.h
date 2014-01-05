@@ -68,6 +68,7 @@ public:
 	bool Move( const SectorPort& sectorport, bool focused );
 	void Pickup( Chit* item );
 	void Stand();
+	void Rampage( int dest ) { rampageTarget = dest; aiMode = RAMPAGE_MODE; currentAction = NO_ACTION; }
 
 	void Target( Chit* chit, bool focused );
 	bool RockBreak( const grinliz::Vector2I& pos );
@@ -88,7 +89,8 @@ public:
 	// Translated to immediate goals: MOVE, SHOOT, MELEE
 	enum {
 		NORMAL_MODE,
-		ROCKBREAK_MODE,		// weird special mode for attacking rocks
+		RAMPAGE_MODE,		// a MOB that gets stuck can 'rampage', which means cutting a path through the world.
+		ROCKBREAK_MODE,		// weird special mode for attacking rocks. probably can be removed.
 		BATTLE_MODE,
 		NUM_MODES
 	};
@@ -124,6 +126,7 @@ private:
 	void ThinkRockBreak( const ComponentSet& thisComp );
 	void ThinkBuild( const ComponentSet& thisComp );
 	void ThinkVisitor( const ComponentSet& thisComp );
+	void ThinkRampage( const ComponentSet& thisComp );
 
 	void WorkQueueToTask(  const ComponentSet& thisComp );	// turn a work item into a task
 	void FlushTaskList( const ComponentSet& thisComp, U32 delta );		// moves tasks along, mark tasks completed, do special actions
@@ -189,6 +192,7 @@ private:
 	bool				fullSectorAware;
 	int					visitorIndex;
 	bool				debugFlag;
+	int					rampageTarget;
 	ai::TaskList		taskList;
 	CTicker				needsTicker;
 	ai::Needs			needs;

@@ -780,10 +780,15 @@ void GameScene::HandleHotKey( int mask )
 	else if ( mask == GAME_HK_SPACE ) {
 		Chit* playerChit = sim->GetPlayerChit();
 		if ( playerChit ) {
+#if 0
 			ItemComponent* ic = playerChit->GetItemComponent();
 			if ( ic ) {
 				ic->SwapWeapons();
 			}
+#else
+			AIComponent* ai = playerChit->GetAIComponent();
+			ai->Rampage( 0 );
+#endif
 		}
 	}
 	else if ( mask == GAME_HK_TOGGLE_COLORS ) {
