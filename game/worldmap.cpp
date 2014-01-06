@@ -416,7 +416,7 @@ void WorldMap::MapInit( const U8* land, const U16* path )
 			grid[i].SetPort();
 		}
 		else if ( h == WorldGen::CORE ) {
-			grid[i].SetLandAndRock( 0 );
+			grid[i].SetLandAndRock( WorldGen::LAND0 );
 		}
 		else {
 			GLASSERT( 0 );

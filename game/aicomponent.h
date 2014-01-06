@@ -68,7 +68,7 @@ public:
 	bool Move( const SectorPort& sectorport, bool focused );
 	void Pickup( Chit* item );
 	void Stand();
-	void Rampage( int dest ) { rampageTarget = dest; aiMode = RAMPAGE_MODE; currentAction = NO_ACTION; }
+	void Rampage( int dest );
 
 	void Target( Chit* chit, bool focused );
 	bool RockBreak( const grinliz::Vector2I& pos );
@@ -126,7 +126,7 @@ private:
 	void ThinkRockBreak( const ComponentSet& thisComp );
 	void ThinkBuild( const ComponentSet& thisComp );
 	void ThinkVisitor( const ComponentSet& thisComp );
-	void ThinkRampage( const ComponentSet& thisComp );
+	void ThinkRampage( const ComponentSet& thisComp );	// process the rampage action
 
 	void WorkQueueToTask(  const ComponentSet& thisComp );	// turn a work item into a task
 	void FlushTaskList( const ComponentSet& thisComp, U32 delta );		// moves tasks along, mark tasks completed, do special actions
@@ -142,6 +142,7 @@ private:
 	bool ThinkCriticalNeeds( const ComponentSet& thisComp );
 	bool ThinkNeeds( const ComponentSet& thisComp );
 	bool ThinkLoot( const ComponentSet& thisComp );
+	bool ThinkDoRampage( const ComponentSet& thisComp );	// whether this MOB should rampage
 
 	// What happens when no other move is working.
 	grinliz::Vector2F ThinkWanderRandom( const ComponentSet& thisComp );
@@ -193,6 +194,7 @@ private:
 	int					visitorIndex;
 	bool				debugFlag;
 	int					rampageTarget;
+	int					destinationBlocked;
 	ai::TaskList		taskList;
 	CTicker				needsTicker;
 	ai::Needs			needs;

@@ -89,6 +89,8 @@ AIComponent::AIComponent( Engine* _engine, WorldMap* _map ) : feTicker( 750 ), n
 	fullSectorAware = false;
 	debugFlag = false;
 	visitorIndex = -1;
+	rampageTarget = 0;
+	destinationBlocked = 0;
 }
 
 
@@ -111,6 +113,7 @@ void AIComponent::Serialize( XStream* xs )
 	XARC_SER( xs, fullSectorAware );
 	XARC_SER( xs, visitorIndex );
 	XARC_SER( xs, rampageTarget );
+	XARC_SER( xs, destinationBlocked );
 	feTicker.Serialize( xs, "feTicker" );
 	needsTicker.Serialize( xs, "needsTicker" );
 	this->EndSerialize( xs );
@@ -784,6 +787,50 @@ WorkQueue* AIComponent::GetWorkQueue()
 }
 
 
+void AIComponent::Rampage( int dest ) 
+{ 
+	rampageTarget = dest; 
+	aiMode = RAMPAGE_MODE; 
+	currentAction = NO_ACTION; 
+
+	NewsEvent news( NewsEvent::RAMPAGE, parentChit->GetSpatialComponent()->GetPosition2D(), parentChit );
+	NewsHistory::Instance()->Add( news );	
+}
+
+
+bool AIComponent::ThinkDoRampage( const ComponentSet& thisComp )
+{
+	if ( destinationBlocked < 5 ) 
+		return false;
+
+	FIXME: check for rampage path...
+
+	if ( parentChit->random.Rand( 10 ))
+		return false;
+
+	int targetArr[] = { 0, 1, 2, 3, 4 };
+	parentChit->random.ShuffleArray( targetArr, 5 );
+	const SectorData& sd = map->GetSector( ToSector( thisComp.spatial->GetPosition2DI() ));
+
+	int target = -1;
+	for( int i=0; i<5; ++i ) {
+		int t = targetArr[i];
+		if ( t == 0 ) {
+			// Core. Should always path there.
+			target = t;
+			break;
+		}
+		else if ( sd.ports & (1<<(i-1))) {
+			target = i;
+			break;
+		}
+	}
+	GLASSERT( target >= 0 );
+	this->Rampage( target );
+	return true;
+}
+
+
 void AIComponent::ThinkRampage( const ComponentSet& thisComp )
 {
 	if ( thisComp.move->IsMoving() )
@@ -1410,6 +1457,8 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 		return;
 	if ( ThinkNeeds( thisComp ))
 		return;
+	if ( ThinkDoRampage( thisComp ))
+		return;
 
 	// Wander....
 	if ( dest.IsZero() ) {
@@ -1972,6 +2021,7 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 
 	switch ( msg.ID() ) {
 	case ChitMsg::PATHMOVE_DESTINATION_REACHED:
+		destinationBlocked = 0;
 		if ( currentAction != WANDER ) {
 			focus = 0;
 			currentAction = NO_ACTION;
@@ -1981,6 +2031,7 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		break;
 
 	case ChitMsg::PATHMOVE_DESTINATION_BLOCKED:
+		destinationBlocked++;
 		focus = 0;
 		currentAction = NO_ACTION;
 		parentChit->SetTickNeeded();

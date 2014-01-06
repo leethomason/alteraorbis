@@ -41,6 +41,7 @@ public:
 		FORGED,						//	item		maker		maker		
 		UN_FORGED,					//  item		killer	
 		SECTOR_HERD,				//	mob
+		RAMPAGE,					//	mob
 
 		VOLCANO,
 		POOL,

@@ -104,6 +104,7 @@ grinliz::IString NewsEvent::GetWhat() const
 		"Forged",
 		"Destroyed",
 		"Sector Herd",
+		"Rampage",
 		"Volcano",
 		"Pool",
 		"Waterfall",
