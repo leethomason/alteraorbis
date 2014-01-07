@@ -72,8 +72,9 @@ static const float	PLANT_AWARE					=  3.0f;
 static const float	GOLD_AWARE					=  5.0f;
 static const int	FORCE_COUNT_STUCK			=  8;
 static const int	STAND_TIME_WHEN_WANDERING	= 1500;
+static const int	RAMPAGE_THRESHOLD			= 40;		// how many times a destination must be blocked before rampage
 
-const char* AIComponent::MODE_NAMES[NUM_MODES]     = { "normal", "rockbreak", "battle" };
+const char* AIComponent::MODE_NAMES[NUM_MODES]     = { "normal", "rampage", "rockbreak", "battle" };
 const char* AIComponent::ACTION_NAMES[NUM_ACTIONS] = { "none", "move", "melee", "shoot", "wander", "stand" };
 
 
@@ -800,33 +801,24 @@ void AIComponent::Rampage( int dest )
 
 bool AIComponent::ThinkDoRampage( const ComponentSet& thisComp )
 {
-	if ( destinationBlocked < 5 ) 
+	if ( destinationBlocked < RAMPAGE_THRESHOLD ) 
 		return false;
 
-	FIXME: check for rampage path...
-
-	if ( parentChit->random.Rand( 10 ))
-		return false;
-
-	int targetArr[] = { 0, 1, 2, 3, 4 };
-	parentChit->random.ShuffleArray( targetArr, 5 );
+	// Go for a rampage: remember, if the path is clear,
+	// it's essentially just a random walk.
+	destinationBlocked = 0;
 	const SectorData& sd = map->GetSector( ToSector( thisComp.spatial->GetPosition2DI() ));
 
-	int target = -1;
-	for( int i=0; i<5; ++i ) {
-		int t = targetArr[i];
-		if ( t == 0 ) {
-			// Core. Should always path there.
-			target = t;
-			break;
-		}
-		else if ( sd.ports & (1<<(i-1))) {
-			target = i;
-			break;
+	CArray< int, 5 > targetArr;
+	targetArr.Push( 0 );	// always core.
+	for( int i=0; i<4; ++i ) {
+		if ( sd.ports & (1<<i)) {
+			targetArr.Push( i+1 );	// push the port, if it has it.
 		}
 	}
-	GLASSERT( target >= 0 );
-	this->Rampage( target );
+
+	parentChit->random.ShuffleArray( targetArr.Mem(), targetArr.Size() );
+	this->Rampage( targetArr[0] );
 	return true;
 }
 
@@ -858,7 +850,19 @@ void AIComponent::ThinkRampage( const ComponentSet& thisComp )
 		return;
 	}
 
-	if ( wg1.RockHeight() ) {
+	CChitArray plants;
+	PlantFilter plantFilter;
+	parentChit->GetChitBag()->QuerySpatialHash( &plants, thisComp.spatial->GetPosition2D(), 0.2f, 0, &plantFilter );
+	bool plantInTheWay = false;
+
+	if ( plants.Size() ) {
+		int stage=0, type=0;
+		PlantScript::IsPlant( plants[0], &type, &stage );
+		if ( stage >= 2 ) 
+			plantInTheWay = true;
+	}
+
+	if ( wg1.RockHeight() || plantInTheWay ) {
 		targetDesc.Set( next ); 
 		currentAction = MELEE;
 
@@ -866,7 +870,7 @@ void AIComponent::ThinkRampage( const ComponentSet& thisComp )
 		if ( reserve && reserve->ToMeleeWeapon() ) {
 			thisComp.itemComponent->SwapWeapons();
 		}
-	}
+	} 
 	else if ( wg1.IsLand() ) {
 		this->Move( ToWorld2F( next ), false );
 	}
@@ -2035,6 +2039,11 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		focus = 0;
 		currentAction = NO_ACTION;
 		parentChit->SetTickNeeded();
+
+		if ( aiMode == RAMPAGE_MODE ) {
+			// Never expect move troubles in rampage mode.
+			aiMode = NORMAL_MODE;
+		}
 
 		{
 			WorkQueue* workQueue = GetWorkQueue();

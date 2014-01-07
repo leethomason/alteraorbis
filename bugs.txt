@@ -1,4 +1,6 @@
 
+- bolt renderer buggy
+- redmantis run&gun broken?
 - fire + shock too cheap to build
 - GT: needs pick up effect for gold (single yellow glow of the avatar?)
 - GT: needs pick up effect for kiosks or visitors (like a gold triangle or chest can float over the kiosk when the visitor spends money)
@@ -41,7 +43,7 @@ x TextBox needs to be better, and should be used much more.
 
 - game
 
-	- Denizen
+	x Denizen
 		x item pickup isn't working
 		x melee (standing too close) is a mess
 		x melee (attacking closest) not working
@@ -61,11 +63,9 @@ x TextBox needs to be better, and should be used much more.
 		x Review 2 release logs from GT
 		x Paving more obvious? All green disappears?
 		x huge spawn clusters kill performance. Improved for now: cache animation calculation.
-		- bolt renderer buggy
-		- stuck in rocks - implement Rampage
+		x stuck in rocks - implement Rampage
 		x stuck in battle mode
-		- doesn't seem to pick up loot when should
-		- redmantis run&gun broken?
+		x doesn't seem to pick up loot when should
 
 	- Census
 		- coolest stuff, past and present, by category

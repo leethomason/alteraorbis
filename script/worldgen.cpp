@@ -54,6 +54,7 @@ WorldGen::WorldGen()
 	flixels = 0;
 	noise0 = 0;
 	noise1 = 0;
+	features = 0;
 }
 
 
@@ -65,8 +66,14 @@ WorldGen::~WorldGen()
 	delete [] path;
 	delete noise0;
 	delete noise1;
+	if ( features ) free( features );
 }
 
+
+void WorldGen::LoadFeatures( const char* path )
+{
+	lodepng_decode32_file( (unsigned char**)(&features), (unsigned int*) &featuresSize.x, (unsigned int*) &featuresSize.y, path );
+}
 
 void WorldGen::StartLandAndWater( U32 seed0, U32 seed1 )
 {

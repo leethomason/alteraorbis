@@ -43,6 +43,7 @@ int main(int argc, const char* argv[])
 	clock_t loopTime = startTime;
 
 	WorldGen worldGen;
+	worldGen.LoadFeatures( "../res/features.png" );
 
 	for( int i=0; i<count; ++i ) {
 		// Always change seed in case of retry.

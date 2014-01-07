@@ -107,18 +107,6 @@ void PathMoveComponent::CalcVelocity( grinliz::Vector3F* v )
 	}
 }
 
-/*
-void PathMoveComponent::QueueDest( const grinliz::Vector2F& d, float r, const SectorPort* sector )
-{
-	Vector3F currentHeading = parentChit->GetSpatialComponent()->GetHeading();
-	Vector2F h = { 0, 0 };
-	if ( r >= 0 ) {
-		h.Set( cosf( ToRadian(r)), sinf( ToRadian(r)) );
-	}
-	QueueDest( d, h, sector );
-}
-*/
-
 
 void PathMoveComponent::QueueDest( const grinliz::Vector2F& d, const grinliz::Vector2F* h, const SectorPort* sector )
 {
@@ -415,10 +403,10 @@ void PathMoveComponent::AvoidOthers( U32 delta, grinliz::Vector2F* pos2, grinliz
 				// speed avoids deadlocks.
 				float mag = Min( r-d, 0.5f * Travel( Speed(), delta ) ); 
 
-				if ( alignment > 0 ) {
+				//if ( alignment > 0 ) {
 					normal.Multiply( mag );
 					avoid += normal;
-				}
+				//}
 				
 				// Apply a sidestep vector so they don't just push.
 				if ( alignment > 0.7f ) {

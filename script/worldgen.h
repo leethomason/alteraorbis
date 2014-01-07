@@ -20,6 +20,7 @@
 #include "../grinliz/gldebug.h"
 #include "../grinliz/glrectangle.h"
 #include "../grinliz/glcontainer.h"
+#include "../grinliz/glcolor.h"
 
 #include "../xegame/xegamelimits.h"
 
@@ -38,6 +39,8 @@ class WorldGen
 public:
 	WorldGen();
 	~WorldGen();
+
+	void LoadFeatures( const char* path );
 
 	// Done in order:
 	//  - Start()
@@ -125,9 +128,12 @@ private:
 	grinliz::PerlinNoise* noise0;
 	grinliz::PerlinNoise* noise1;
 
-	U8*	 land;
-	U16* color;	// used in 2 differnt ways: 1) to determine if land is connected to a port, and 2) to determine the path to cores and ports
-	U16* path;
+	U8*			land;
+	U16*		color;		// used in 2 differnt ways: 1) to determine if land is connected to a port, and 2) to determine the path to cores and ports
+	U16*		path;
+
+	grinliz::Vector2I	featuresSize;
+	grinliz::Color4U8*	features;	// used to pull in the PNG file of the features.
 };
 
 #endif // LUMOS_WORLDGEN_INCLUDED

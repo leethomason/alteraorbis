@@ -21,18 +21,19 @@ Au (gold) and Crystals are the currencies of Altera. Au is used for purchases of
 Visitors bring Tech, which degrades over time. You need a continual stream of visitors, which is done be constructing Kiosks to attract them. Visitors enter the world looking for domains that have interesting News, Commerce, Media, or Social, any of which they get at kiosks. If the domain has what the Visitor is looking for, tech is transferred to the domain. Visitors keep track of their favorite domains, and share the links with their friends.
 
 
-Changes (Econ)
+Changes (Denizen)
 -----------------
 
-1. New fancy and fixed rendering system. Better management of GPU memory. (Hopefully) gets Altera running on many more systems, including Intel and nVidia.
-2. Upgrade underlying SDL framework the game uses.
-3. Forges / Factory: ability to create a factory and make weapons.
-4. Vault: ability to use vaults to store things. Worker Bots will take world items to vaults.
-5. Improvements to character screen.
-6. Map scene, information about the nearby domains.
-7. Improve the widget system used by the game.
-8. Trolls! Trolls wander the world creating trouble. They can use items that they find.
-
+- The player is no longer a denizen; you are now a domain core. (And the UI is adjusted accordingly.)
+- Denizens! Buy sleep tubes and denizens will come stay in your domain.
+- Melee and ranged weapons: AI will switch between them automatically.
+- Your workers will auto clear before building.
+- MOBs will now destroy rock if they get stuck in the world.
+- Fixes: item picking, avoidance, melee, buying something that takes all Au, MOBs getting stuck in the world.
+- Volcanoes will no longer form in active domains
+- Rework UI
+- Tech decay adjusted
+- The forge will now show you what you will actually build
 
 Install
 -------
@@ -56,6 +57,8 @@ Getting Started
 Tap "Load Established" to bring in a pre-generated world, well populated. That’s the best way to get started. (Later, try "Generate" to create a world from scratch.)
 
 Tap "Continue" to start in the world or continue with the last saved game.
+
+You - the player - are actually the Domain Core. Your 
 
 The world is more dangerous at the edges, and safer in the center. You want to collect enough gold and crystals as you make your way toward a good spot near the center to build a domain.
 
