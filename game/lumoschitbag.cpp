@@ -368,6 +368,21 @@ Chit* LumosChitBag::QueryRemovable( const grinliz::Vector2I& pos2i, bool ignoreP
 }
 
 
+Chit* LumosChitBag::QueryPlant( const grinliz::Vector2I& pos, int* type, int* stage )
+{
+	CChitArray plants;
+	PlantFilter plantFilter;
+	QuerySpatialHash( &plants, ToWorld2F( pos ), 0.2f, 0, &plantFilter );
+
+	if ( plants.Size() ) {
+		if ( PlantScript::IsPlant( plants[0], type, stage )) {
+			return plants[0];
+		}
+	}
+	return 0;
+}
+
+
 Chit* LumosChitBag::QueryBuilding( const grinliz::Rectangle2I& bounds )
 {
 	GLASSERT( MAX_BUILDING_SIZE == 2 );	// else adjust logic

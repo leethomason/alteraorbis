@@ -490,6 +490,12 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 	else if ( !targetDesc.mapPos.IsZero() ) {
 		// make sure we aren't swinging at an empty voxel.
 		targetOkay = map->GetWorldGrid( targetDesc.mapPos.x, targetDesc.mapPos.y ).RockHeight() > 0;
+
+		// Sometimes we do want to clear plants - check for that.
+		if ( !targetOkay ) {
+			Chit* plant = GetLumosChitBag()->QueryPlant( thisComp.spatial->GetPosition2DI(), 0, 0 );
+			targetOkay = plant != 0;
+		}
 	}
 
 	if ( !weapon || !targetOkay ) {
@@ -850,17 +856,9 @@ void AIComponent::ThinkRampage( const ComponentSet& thisComp )
 		return;
 	}
 
-	CChitArray plants;
-	PlantFilter plantFilter;
-	parentChit->GetChitBag()->QuerySpatialHash( &plants, thisComp.spatial->GetPosition2D(), 0.2f, 0, &plantFilter );
-	bool plantInTheWay = false;
-
-	if ( plants.Size() ) {
-		int stage=0, type=0;
-		PlantScript::IsPlant( plants[0], &type, &stage );
-		if ( stage >= 2 ) 
-			plantInTheWay = true;
-	}
+	int type, stage;
+	Chit* plant = GetLumosChitBag()->QueryPlant( pos2i, &type, &stage );
+	bool plantInTheWay = plant && stage >= 2;
 
 	if ( wg1.RockHeight() || plantInTheWay ) {
 		targetDesc.Set( next ); 

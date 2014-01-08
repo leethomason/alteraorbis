@@ -99,7 +99,6 @@ void HealthComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 
 			battleMechanics.MeleeAttack( engine, parentChit, item );
 			engine->particleSystem->EmitPD( "meleeImpact", pos, V3F_UP, 0 );
-		
 		}
 	}
 	else {

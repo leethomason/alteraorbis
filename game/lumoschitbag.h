@@ -211,6 +211,7 @@ public:
 	}
 	Chit* QueryBuilding( const grinliz::Rectangle2I& bounds );
 	Chit* QueryRemovable( const grinliz::Vector2I& pos, bool ignorePlants );
+	Chit* QueryPlant( const grinliz::Vector2I& pos, int* type, int* stage );
 
 	LumosGame* GetLumosGame() { return lumosGame; }
 	// Why the duplicate? This is for components to request
