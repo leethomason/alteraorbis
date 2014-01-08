@@ -27,6 +27,7 @@ MapSpatialComponent::MapSpatialComponent( WorldMap* _map, LumosChitBag* bag ) : 
 	chitBag = bag;
 	mode = GRID_IN_USE;
 	building = false;
+	hasPorch = false;
 	nextBuilding = 0;
 }
 
@@ -62,10 +63,35 @@ void MapSpatialComponent::SetMode( int newMode )
 }
 
 
-void MapSpatialComponent::SetBuilding( bool b )
+void MapSpatialComponent::SetBuilding( bool b, bool p )
 {
 	GLASSERT( !parentChit );
 	building = b;
+	hasPorch = p;
+}
+
+
+
+void MapSpatialComponent::UpdatePorch( const grinliz::Rectangle2I& bounds )
+{
+	if ( building && hasPorch ) {
+		Rectangle2I b = bounds;
+		b.Outset( 1 );
+		Rectangle2IEdgeIterator it( b );
+
+		for( it.Begin(); !it.Done(); it.Next() ) {
+			Chit* porch = chitBag->QueryPorch( it.Pos() );
+			worldMap->SetPorch( it.Pos().x, it.Pos().y, porch != 0 );
+		}
+	}
+}
+
+
+
+void MapSpatialComponent::SetPosRot( const grinliz::Vector3F& v, const grinliz::Quaternion& quat )
+{
+	super::SetPosRot( v, quat );
+	UpdatePorch( bounds );
 }
 
 
@@ -74,6 +100,7 @@ void MapSpatialComponent::OnAdd( Chit* chit )
 	super::OnAdd( chit );
 	if ( building ) {
 		chitBag->AddToBuildingHash( this, bounds.min.x, bounds.min.y ); 
+		UpdatePorch( bounds );
 	}
 
 	if ( mode == GRID_BLOCKED ) {
@@ -102,6 +129,7 @@ void MapSpatialComponent::OnRemove()
 			}
 		}
 	}
+	UpdatePorch( bounds );
 }
 
 
@@ -110,6 +138,7 @@ void MapSpatialComponent::Serialize( XStream* xs )
 	this->BeginSerialize( xs, "MapSpatialComponent" );
 	XARC_SER( xs, mode );
 	XARC_SER( xs, building );
+	XARC_SER( xs, hasPorch );
 	XARC_SER( xs, bounds );
 	super::Serialize( xs );
 	this->EndSerialize( xs );
@@ -136,11 +165,12 @@ Rectangle2I MapSpatialComponent::PorchPos() const
 	v.Set( 0, 0, 0, 0 );
 	int porch = 0;
 
-	GameItem* item = parentChit->GetItem();
-	if ( !item ) 
-		return v;
-	if ( item->keyValues.GetInt( "porch", &porch ))
-		return v;
+	//GameItem* item = parentChit->GetItem();
+	//if ( !item ) 
+	//	return v;
+	//if ( item->keyValues.GetInt( "porch", &porch ))
+	//	return v;
+	if ( !hasPorch ) return v;
 
 	// picks up the size, so we only need to 
 	// adjust one coordinate for the porch below

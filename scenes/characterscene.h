@@ -35,9 +35,18 @@ class GameItem;
 class CharacterSceneData : public SceneData
 {
 public:
-	CharacterSceneData( ItemComponent* ic, ItemComponent* ic2=0 ) : SceneData(), itemComponent(ic), vault(ic2) { GLASSERT(ic); }
+	CharacterSceneData( ItemComponent* ic,			// character
+						ItemComponent* ic2,			// vault, market
+						bool market )				// apply markup, costs
+		: SceneData(), itemComponent(ic), storageIC(ic2), isMarket(market) { GLASSERT(ic); }
+
 	ItemComponent*	itemComponent;
-	ItemComponent*	vault;				// vault, chest, storage, etc.				
+	ItemComponent*	storageIC;			// vault, chest, storage, etc.				
+	bool			isMarket;			// for markets
+
+	bool IsCharacter() const	{ return storageIC == 0; }
+	bool IsVault() const		{ return storageIC && !isMarket; }
+	bool IsMarket() const		{ return isMarket; }
 };
 
 
@@ -63,28 +72,33 @@ public:
 private:
 	void SetButtonText();
 	void SetItemInfo( const GameItem* item, const GameItem* user );
+	void CalcCost( int* bought, int* sold );
+	void ResetInventory();
 
 	enum { 
 		NUM_ITEM_BUTTONS = INVERTORY_SLOTS,
 
 	};
 	
-	LumosGame*		lumosGame;
-	Engine*			engine;
-	ItemComponent*	itemComponent;	// what item or inventory are we displaying?
-	ItemComponent*	vault;			// if interacting with a vault/chest/storage, otherwise null
-	Model*			model;
-	int				nStorage;		// 1 for character, 2 for vault
+	LumosGame*			lumosGame;
+	Engine*				engine;
+	CharacterSceneData*	data;
+	Model*				model;
+	int					nStorage;	// 1 for character, 2 for vault
 
 	Screenport			screenport;
-	gamui::PushButton	okay;
+	gamui::PushButton	okay, cancel, reset;
 	gamui::ToggleButton itemButton[2][NUM_ITEM_BUTTONS];
 	int					itemButtonIndex[2][NUM_ITEM_BUTTONS];	// the index in the ItemComponent
-	gamui::TextBox		desc;
+	gamui::TextLabel	desc;
 	gamui::PushButton	dropButton;
-	MoneyWidget			moneyWidget;
+	MoneyWidget			moneyWidget[2];		// left is character, right is market
 	FaceToggleWidget	faceWidget;
 	ItemDescWidget		itemDescWidget;
+	gamui::TextLabel	billOfSale;
+
+	grinliz::CDynArray< const GameItem* > boughtList, soldList;
+
 };
 
 

@@ -15,6 +15,21 @@ inline grinliz::Vector2F ToWorld2F( const grinliz::Vector2I& pos2i ) {
 	return v;
 }
 
+inline grinliz::Vector2F ToWorld2F( const grinliz::Vector3F& pos3 ) {
+	grinliz::Vector2F v = { pos3.x, pos3.z };
+	return v;
+}
+
+inline grinliz::Vector2I ToWorld2I( const grinliz::Vector2F& pos2 ) {
+	grinliz::Vector2I pos2i = { (int)pos2.x, (int)pos2.y };
+	return pos2i;
+}
+
+inline grinliz::Vector2I ToWorld2I( const grinliz::Vector3F& pos3 ) {
+	grinliz::Vector2I pos2i = { (int)pos3.x, (int)pos3.z };
+	return pos2i;
+}
+
 inline grinliz::Vector2I ToSector( const grinliz::Vector2I& pos2i ) {
 	grinliz::Vector2I v = { pos2i.x / SECTOR_SIZE, pos2i.y / SECTOR_SIZE };
 	GLASSERT( v.x >= 0 && v.x < NUM_SECTORS );

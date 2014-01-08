@@ -37,12 +37,13 @@
 using namespace grinliz;
 using namespace gamui;
 
+LumosGame* StackedSingleton<LumosGame>::instance = 0;
+
 LumosGame::LumosGame(  int width, int height, int rotation, const char* savepath ) 
 	: Game( width, height, rotation, 600, savepath )
 {
+	PushInstance( this );
 	InitButtonLooks();
-	ItemDefDB::Instance()->Load( "./res/itemdef.xml" );
-	ItemDefDB::Instance()->DumpWeaponStats();
 
 	PushScene( SCENE_TITLE, 0 );
 	PushPopScene();
@@ -51,8 +52,8 @@ LumosGame::LumosGame(  int width, int height, int rotation, const char* savepath
 
 LumosGame::~LumosGame()
 {
+	PopInstance( this );
 	TextureManager::Instance()->TextureCreatorInvalid( this );
-	delete ItemDefDB::Instance();
 }
 
 
@@ -290,17 +291,23 @@ const char* LumosGame::GenName( const char* dataset, int seed, int min, int max 
 }
 
 
-void LumosGame::ItemToButton( const GameItem* item, gamui::Button* button )
+void LumosGame::ItemToButton( const GameItem* item, gamui::Button* button, float priceMult )
 {
 	CStr<64> text;
 
 	// Set the text to the proper name, if we have it.
 	// Then an icon for what it is, and a check
 	// mark if the object is in use.
-	int value = ItemDefDB::Instance()->CalcItemValue( item );
+	int value = item->GetValue();
 	const char* name = item->ProperName() ? item->ProperName() : item->Name();
 	if ( value ) {
-		text.Format( "%s\nAu: %d\n", name, value );
+		if ( priceMult ) {
+			int transaction = int( float(value)*priceMult );
+			text.Format( "%s\n%d (%d)", name, transaction, value );
+		}
+		else {
+			text.Format( "%s\n%d", name, value );
+		}
 	}
 	else {
 		text.Format( "%s\n ", name );

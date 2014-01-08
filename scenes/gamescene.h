@@ -21,12 +21,15 @@
 
 #include "../widget/moneywidget.h"
 #include "../widget/facewidget.h"
+#include "../widget/consolewidget.h"
 
 #include "../script/buildscript.h"
 
+#include "../ai/aineeds.h"
+
 class LumosGame;
 class Sim;
-struct NewsEvent;
+class NewsEvent;
 class Chit;
 class GameItem;
 
@@ -57,7 +60,7 @@ public:
 private:
 	void Save();
 	void Load();
-	void SetBars();
+	void SetBars( Chit* chit );
 	void DoDestTapped( const grinliz::Vector2F& grid );
 
 	void TapModel( Chit* chit );
@@ -67,11 +70,12 @@ private:
 
 	void SetPickupButtons();
 	bool FreeCameraMode();
+	bool CoreMode();		// currently controlling the core (build or view)
+	void ProcessNewsToConsole();
 
 	enum {
 		SAVE,
 		LOAD,
-		CYCLE,
 		NUM_SERIAL_BUTTONS,
 		NUM_PICKUP_BUTTONS = 8,
 		
@@ -86,6 +90,13 @@ private:
 		BUILD_TECH2,
 		BUILD_TECH3,
 		NUM_BUILD_MODES
+	};
+
+	enum {
+		UI_BUILD,
+		UI_VIEW,
+		UI_AVATAR,
+		NUM_UI_MODES
 	};
 
 	struct PickupData {
@@ -110,6 +121,8 @@ private:
 	int					infoID;
 	grinliz::Vector2I	voxelInfoID;
 	int					buildActive;	// which build button is active. 0 if none.
+	int					chitFaceToTrack;
+	int					currentNews;	// index of the last news item put in the console
 
 	// Shows what is being built or removed.
 	Model*				selectionModel;
@@ -117,12 +130,12 @@ private:
 
 	gamui::PushButton	okay;
 	gamui::PushButton	serialButton[NUM_SERIAL_BUTTONS];
-	gamui::ToggleButton freeCameraButton;
 	gamui::ToggleButton	buildButton[BuildScript::NUM_OPTIONS];
 	gamui::ToggleButton modeButton[NUM_BUILD_MODES];
+	gamui::PushButton	useBuildingButton;
 	gamui::Image		tabBar;
 	gamui::PushButton	createWorkerButton;
-	gamui::PushButton	ejectButton;
+	gamui::ToggleButton	uiMode[NUM_UI_MODES];
 	gamui::PushButton	allRockButton;
 	gamui::PushButton	newsButton[NUM_NEWS_BUTTONS];
 	gamui::PushButton	clearButton;
@@ -130,12 +143,11 @@ private:
 	gamui::Image		playerMark;
 
 	FacePushWidget		faceWidget;
-	gamui::DigitalBar	healthBar, ammoBar, shieldBar;
 
 	gamui::TextLabel	dateLabel;
-	gamui::TextLabel	xpLabel;
 	gamui::TextLabel	techLabel;
 	MoneyWidget			moneyWidget;
+	ConsoleWidget		consoleWidget;
 
 	gamui::PushButton	pickupButton[NUM_PICKUP_BUTTONS];
 

@@ -23,6 +23,8 @@ BuildData BuildScript::buildData[NUM_OPTIONS] = {
 	// Tech 1
 	{	"Vault",	"vault",	2, 0, 0 },
 	{	"SleepTube","bed",		2, 0, 0 },
+	{	"Market",	"market",	2, 0, 0 },
+	{	"Bar",		"bar",		2, 0, 0 },
 };
 
 
@@ -60,8 +62,26 @@ const BuildData& BuildScript::GetData( int i )
 		
 		buildData[i].size = 1;
 		if ( has ) {
-			ItemDefDB::GetProperty( buildData[i].cStructure, "size", &buildData[i].size );
-			ItemDefDB::GetProperty( buildData[i].cStructure, "cost", &buildData[i].cost );
+			const GameItem& gi = ItemDefDB::Instance()->Get( buildData[i].cStructure );
+			gi.keyValues.GetInt( "size", &buildData[i].size );
+			gi.keyValues.GetInt( "cost", &buildData[i].cost );
+
+			buildData[i].needs.SetZero();
+			
+			for( int k=0; k<ai::Needs::NUM_NEEDS; ++k ) {
+				CStr<32> str;
+				str.Format( "need.%s", ai::Needs::Name(k) );
+
+				float need=0;
+				gi.keyValues.GetFloat( str.c_str(), &need );
+				if ( need > 0 ) {
+					buildData[i].needs.Set( k, need );
+				}
+			}
+
+			float timeF = 1.0;
+			gi.keyValues.GetFloat( "need.time", &timeF );
+			buildData[i].standTime = int( timeF * 1000.0f );
 		}
 	}
 	return buildData[i];

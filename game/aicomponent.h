@@ -20,16 +20,20 @@
 #include "../xegame/cticker.h"
 #include "../grinliz/glcontainer.h"
 #include "../grinliz/glrectangle.h"
+#include "../ai/aineeds.h"
+#include "../ai/tasklist.h"
 
 class WorldMap;
 class Engine;
 struct ComponentSet;
 struct SectorPort;
 class WorkQueue;
+class IRangedWeaponItem;
 
 namespace ai {
 	class TaskList;
 };
+
 // Combat AI: needs refactoring
 class AIComponent : public Component
 {
@@ -47,7 +51,7 @@ public:
 	virtual void OnAdd( Chit* chit );
 	virtual void OnRemove();
 
-	virtual int  DoTick( U32 delta, U32 timeSince );
+	virtual int  DoTick( U32 delta );
 	virtual void DebugStr( grinliz::GLString* str );
 	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
 	virtual void OnChitEvent( const ChitEvent& event );
@@ -59,11 +63,12 @@ public:
 	// it is given extra priority. The 'dest' must be in the same
 	// sector. If 'sector' is also specfied, will do grid travel
 	// after the move.
-	void Move( const grinliz::Vector2F& dest, bool focused, float rotation=-1 );
+	void Move( const grinliz::Vector2F& dest, bool focused, const grinliz::Vector2F* normal=0 );
 	// Returns true if the move is possible.
 	bool Move( const SectorPort& sectorport, bool focused );
 	void Pickup( Chit* item );
 	void Stand();
+	void Rampage( int dest );
 
 	void Target( Chit* chit, bool focused );
 	bool RockBreak( const grinliz::Vector2I& pos );
@@ -77,12 +82,15 @@ public:
 	int  VisitorIndex() const				{ return visitorIndex; }
 
 	int GetTeamStatus( Chit* other );
+	const ai::Needs& GetNeeds() const		{ return needs; }
+	ai::Needs* GetNeedsMutable()			{ return &needs; }
 
 	// Top level AI modes. Higher level goals.
 	// Translated to immediate goals: MOVE, SHOOT, MELEE
 	enum {
 		NORMAL_MODE,
-		ROCKBREAK_MODE,		// weird special mode for attacking rocks
+		RAMPAGE_MODE,		// a MOB that gets stuck can 'rampage', which means cutting a path through the world.
+		ROCKBREAK_MODE,		// weird special mode for attacking rocks. probably can be removed.
 		BATTLE_MODE,
 		NUM_MODES
 	};
@@ -109,7 +117,7 @@ private:
 				   grinliz::Vector2F* pos, float* distance );
 
 	// Compute the line of site
-	bool LineOfSight( const ComponentSet& thisComp, Chit* target );
+	bool LineOfSight( const ComponentSet& thisComp, Chit* target, IRangedWeaponItem* weapon );
 	bool LineOfSight( const ComponentSet& thisComp, const grinliz::Vector2I& voxel );
 
 	void Think( const ComponentSet& thisComp );	// Choose a new action.
@@ -118,14 +126,23 @@ private:
 	void ThinkRockBreak( const ComponentSet& thisComp );
 	void ThinkBuild( const ComponentSet& thisComp );
 	void ThinkVisitor( const ComponentSet& thisComp );
+	void ThinkRampage( const ComponentSet& thisComp );	// process the rampage action
 
 	void WorkQueueToTask(  const ComponentSet& thisComp );	// turn a work item into a task
-	void FlushTaskList( const ComponentSet& thisComp, U32 delta, U32 since );		// moves tasks along, mark tasks completed, do special actions
+	void FlushTaskList( const ComponentSet& thisComp, U32 delta );		// moves tasks along, mark tasks completed, do special actions
 	void FindRoutineTasks( const ComponentSet& );	// do maintenance, etc.
 
 	grinliz::Vector2F GetWanderOrigin( const ComponentSet& thisComp ) const;
 	int GetThinkTime() const { return 500; }
 	WorkQueue* GetWorkQueue();
+
+	// Returns true if this action was actually taken.
+	bool ThinkWanderEatPlants( const ComponentSet& thisComp );
+	bool ThinkWanderHealAtCore( const ComponentSet& thisComp );
+	bool ThinkCriticalNeeds( const ComponentSet& thisComp );
+	bool ThinkNeeds( const ComponentSet& thisComp );
+	bool ThinkLoot( const ComponentSet& thisComp );
+	bool ThinkDoRampage( const ComponentSet& thisComp );	// whether this MOB should rampage
 
 	// What happens when no other move is working.
 	grinliz::Vector2F ThinkWanderRandom( const ComponentSet& thisComp );
@@ -133,9 +150,6 @@ private:
 	grinliz::Vector2F ThinkWanderFlock( const ComponentSet& thisComp );
 	// creepy circle pacing
 	grinliz::Vector2F ThinkWanderCircle( const ComponentSet& thisComp );
-
-	Engine*		engine;
-	WorldMap*	map;
 
 	enum { 
 		FOCUS_NONE,
@@ -166,16 +180,25 @@ private:
 		bool HasTarget() const { return id != 0 || !mapPos.IsZero(); }
 	};
 
+	Engine*				engine;
+	WorldMap*			map;
+
 	int					aiMode;
 	TargetDesc			targetDesc;
 	int					currentAction;
 	int					focus;
-	int					friendEnemyAge;
+	CTicker				feTicker;
 	U32					wanderTime;
 	int					rethink;
 	bool				fullSectorAware;
 	int					visitorIndex;
 	bool				debugFlag;
+	int					rampageTarget;
+	int					destinationBlocked;
+	ai::TaskList		taskList;
+	CTicker				needsTicker;
+	ai::Needs			needs;
+
 	static const char*	MODE_NAMES[NUM_MODES];
 	static const char*	ACTION_NAMES[NUM_ACTIONS];
 
@@ -185,9 +208,9 @@ private:
 	bool DoStand( const ComponentSet& thisComp, U32 since );	// return true if doing something
 	bool SectorHerd( const ComponentSet& thisComp );
 
+	grinliz::CDynArray< Chit* > chitArr;	// temporary, local
 	grinliz::CArray<int, MAX_TRACK> friendList;
 	grinliz::CArray<int, MAX_TRACK> enemyList;
-	ai::TaskList* taskList;
 };
 
 

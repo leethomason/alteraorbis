@@ -279,6 +279,32 @@ struct Rectangle2I : public Rectangle2< int >
 	void SetInvalid()	{ min.x = INVALID + 1; max.x = INVALID; min.y = INVALID + 1; max.y = INVALID; }
 };
 
+class Rectangle2IEdgeIterator
+{
+public:
+	Rectangle2IEdgeIterator( const Rectangle2I& r ) : bounds(r), point(r.min), dx(1), dy(0) {}
+
+	void Begin()	{ dx = 1; dy = 0; point = bounds.min; }
+	bool Done()		{ return dy == -1 && point == bounds.min; }
+	void Next()		{ 
+		point.x += dx; point.y += dy; 
+		if ( !bounds.Contains( point )) {
+			point.x -= dx; point.y -= dy;
+			int tx = -dy;
+			int ty = dx;
+			dx = tx; dy = ty;
+			point.x += dx; point.y += dy;
+		}
+	}
+	const Vector2I& Pos() const { return point; }
+
+private:
+	Rectangle2I bounds;
+	Vector2I point;
+	int dx, dy;
+};
+
+
 struct Rectangle2F : public Rectangle2< float >
 {
 	Rectangle2F() { min.Zero(); max.Zero(); }

@@ -15,6 +15,7 @@
 #include "team.h"
 #include "visitorstatecomponent.h"
 #include "lumosmath.h"
+#include "lumosgame.h"	// FIXME: namegen should be in script
 
 #include "../scenes/characterscene.h"
 
@@ -113,29 +114,29 @@ Chit* LumosChitBag::FindBuilding(	const grinliz::IString&  name,
 									const grinliz::Vector2I& sector, 
 									const grinliz::Vector2F* pos, 
 									int flags,
-									CChitArray* arr )
+									CDynArray<Chit*>* arr,
+									IChitAccept* filter )
 {
-	CArray<Chit*, 16> match;
-	CArray<float, 16> weight;
+	CDynArray<Chit*>& match = arr ? *arr : findMatch;	// sleazy reference trick to point to either passed in or local.
+	match.Clear();
+	findWeight.Clear();
 
 	for( MapSpatialComponent* it = mapSpatialHash[sector.y*NUM_SECTORS+sector.x]; it; it = it->nextBuilding ) {
 		Chit* chit = it->ParentChit();
 		GLASSERT( chit );
+		if ( filter && !filter->Accept( chit )) {				// if a filter, check it.
+			continue;
+		}
+
 		const GameItem* item = chit->GetItem();
-		if ( item && item->name == name ) {
-			if ( match.HasCap() ) {
-				match.Push( chit );
-			}
+
+		if ( item && ( name.empty() || item->IName() == name )) {	// name, if empty, matches everything
+			match.Push( chit );
 		}
 	}
 
-	if ( arr ) {
-		arr->Clear();
-		for ( int i=0; i<match.Size() && arr->HasCap(); ++i ) {
-			arr->Push( match[i] );
-		}
-	}
-
+	// If we found nothing, or we don't care about the position, return early.
+	// Else deal with choice / sorting / etc. below.
 	if ( match.Empty() )
 		return 0;
 	if ( !pos )
@@ -158,9 +159,9 @@ Chit* LumosChitBag::FindBuilding(	const grinliz::IString&  name,
 	if ( flags == RANDOM_NEAR ) {
 		for( int i=0; i<match.Size(); ++i ) {
 			float len = ( match[i]->GetSpatialComponent()->GetPosition2D() - *pos ).Length();
-			weight.Push( 1.0f/len );
+			findWeight.Push( 1.0f/len );
 		}
-		int index = random.Select( weight.Mem(), weight.Size() );
+		int index = random.Select( findWeight.Mem(), findWeight.Size() );
 		return match[index];
 	}
 
@@ -177,11 +178,13 @@ Chit* LumosChitBag::NewBuilding( const Vector2I& pos, const char* name, int team
 
 	int cx=1;
 	rootItem.keyValues.GetInt( "size", &cx );
+	int porch=0;
+	rootItem.keyValues.GetInt( "porch", &porch );
 
 	MapSpatialComponent* msc = new MapSpatialComponent( worldMap, this );
 	msc->SetMapPosition( pos.x, pos.y, cx, cx );
 	msc->SetMode( GRID_BLOCKED );
-	msc->SetBuilding( true );
+	msc->SetBuilding( true, porch != 0 );
 	
 	chit->Add( msc );
 	chit->Add( new RenderComponent( engine, rootItem.ResourceName() ));
@@ -214,13 +217,6 @@ Chit* LumosChitBag::NewMonsterChit( const Vector3F& pos, const char* name, int t
 	chit->Add( new SpatialComponent());
 	AddItem( name, chit, engine, team, 0 );
 
-	Wallet w = ReserveBank::Instance()->WithdrawMonster();
-	if ( chit->GetItem()->keyValues.GetIString( "mob" ) == "greater" ) {
-		// can return NUM_CRYSTAL_TYPES, if out, which is fine.
-		w.AddCrystal( ReserveBank::Instance()->WithdrawCrystal( random.Rand( NUM_CRYSTAL_TYPES )));
-	}
-	chit->GetItem()->wallet.Add( w );	
-
 	chit->Add( new RenderComponent( engine, chit->GetItem()->ResourceName() ));
 	chit->Add( new PathMoveComponent( worldMap ));
 	chit->Add( new AIComponent( engine, worldMap ));
@@ -228,6 +224,69 @@ Chit* LumosChitBag::NewMonsterChit( const Vector3F& pos, const char* name, int t
 	chit->GetSpatialComponent()->SetPosition( pos );
 
 	chit->Add( new HealthComponent( engine ));
+
+	Wallet w = ReserveBank::Instance()->WithdrawMonster();
+	if ( chit->GetItem()->keyValues.GetIString( "mob" ) == "greater" ) {
+		// can return NUM_CRYSTAL_TYPES, if out, which is fine.
+		w.AddCrystal( ReserveBank::Instance()->WithdrawCrystal( random.Rand( NUM_CRYSTAL_TYPES )));
+		
+		NewsHistory* history = NewsHistory::Instance();
+		if ( history ) {
+			history->Add( NewsEvent( NewsEvent::GREATER_MOB_CREATED, ToWorld2F(pos), chit, 0 ));
+			chit->GetItem()->keyValues.Set( "destroyMsg", "d", NewsEvent::GREATER_MOB_KILLED );
+		}
+	}
+	chit->GetItem()->wallet.Add( w );	
+	return chit;
+}
+
+
+Chit* LumosChitBag::NewDenizen( const grinliz::Vector2I& pos, int team )
+{
+	bool female = true;
+	const char* assetName = "humanFemale";
+	if ( random.Bit() ) {
+		female = false;
+		assetName = "humanMale";
+	}
+
+	Chit* chit = NewChit();
+
+	chit->Add( new SpatialComponent());
+	chit->Add( new RenderComponent( engine, assetName ));
+	chit->Add( new PathMoveComponent( worldMap ));
+
+	AddItem( assetName, chit, engine, team, 0 );
+	chit->GetItem()->wallet.AddGold( ReserveBank::Instance()->WithdrawDenizen() );
+	chit->GetItem()->GetTraitsMutable()->Roll( random.Rand() );
+
+	IString nameGen = chit->GetItem()->keyValues.GetIString( "nameGen" );
+	if ( !nameGen.empty() ) {
+		LumosGame* game = LumosGame::Instance();
+		if ( game ) {
+			chit->GetItem()->SetProperName( StringPool::Intern( 
+				game->GenName(	nameGen.c_str(), 
+								chit->ID(),
+								4, 8 )));
+		}
+	}
+
+	AIComponent* ai = new AIComponent( engine, worldMap );
+	chit->Add( ai );
+
+	chit->Add( new HealthComponent( engine ));
+	chit->GetSpatialComponent()->SetPosYRot( (float)pos.x+0.5f, 0, (float)pos.y+0.5f, 0 );
+//	chit->GetItemComponent()->SetHardpoints(); automatic now
+
+	Vector2I sector = ToSector( pos );
+	GetCore( sector )->AddCitizen( chit );
+
+	NewsHistory* history = NewsHistory::Instance();
+	if ( history ) {
+		history->Add( NewsEvent( NewsEvent::DENIZEN_CREATED, ToWorld2F(pos), chit, 0 ));
+		chit->GetItem()->keyValues.Set( "destroyMsg", "d", NewsEvent::DENIZEN_KILLED );
+	}
+
 	return chit;
 }
 
@@ -280,13 +339,20 @@ Chit* LumosChitBag::NewVisitor( int visitorIndex )
 }
 
 
-Chit* LumosChitBag::QueryRemovable( const grinliz::Vector2I& pos2i )
+Chit* LumosChitBag::QueryRemovable( const grinliz::Vector2I& pos2i, bool ignorePlants )
 {
 	Vector2F pos2 = { (float)pos2i.x+0.5f, (float)pos2i.y+0.5f };
 
-	CChitArray array;
+	CChitArray		array;
 	RemovableFilter removableFilter;
-	QuerySpatialHash( &array, pos2, 0.1f, 0, &removableFilter );
+	BuildingFilter  buildingFilter;
+
+	IChitAccept* filter = &removableFilter;
+	if ( ignorePlants ) {
+		filter = &buildingFilter;
+	}
+
+	QuerySpatialHash( &array, pos2, 0.1f, 0, filter );
 
 	Chit* found = 0;
 	// First pass: plants & 1x1 buildings.
@@ -299,6 +365,21 @@ Chit* LumosChitBag::QueryRemovable( const grinliz::Vector2I& pos2i )
 		found = QueryBuilding( pos2i );
 	}
 	return found;
+}
+
+
+Chit* LumosChitBag::QueryPlant( const grinliz::Vector2I& pos, int* type, int* stage )
+{
+	CChitArray plants;
+	PlantFilter plantFilter;
+	QuerySpatialHash( &plants, ToWorld2F( pos ), 0.2f, 0, &plantFilter );
+
+	if ( plants.Size() ) {
+		if ( PlantScript::IsPlant( plants[0], type, stage )) {
+			return plants[0];
+		}
+	}
+	return 0;
 }
 
 
@@ -399,7 +480,7 @@ void LumosChitBag::NewWalletChits( const grinliz::Vector3F& pos, const Wallet& w
 Chit* LumosChitBag::NewItemChit( const grinliz::Vector3F& _pos, GameItem* orphanItem, bool fuzz, bool onGround )
 {
 	GLASSERT( !orphanItem->Intrinsic() );
-	GLASSERT( !orphanItem->resource.empty() );
+	GLASSERT( !orphanItem->IResourceName().empty() );
 
 	Vector3F pos = _pos;
 	if ( fuzz ) {
@@ -422,7 +503,7 @@ Chit* LumosChitBag::NewItemChit( const grinliz::Vector3F& _pos, GameItem* orphan
 		}
 	}
 	chit->GetSpatialComponent()->SetPosition( pos );
-	chit->GetItemComponent()->SetHardpoints();
+//	chit->GetItemComponent()->SetHardpoints(); automatic
 	return chit;
 }
 
@@ -499,7 +580,7 @@ void LumosChitBag::AddItem( const char* name, Chit* chit, Engine* engine, int te
 
 	GameItem item = *(itemDefArr[0]);
 	item.primaryTeam = team;
-	item.traits.SetExpFromLevel( level );
+	item.GetTraitsMutable()->SetExpFromLevel( level );
 	item.InitState();
 
 	if ( !chit->GetItemComponent() ) {
@@ -544,7 +625,7 @@ int LumosChitBag::MapGridUse( int x, int y )
 }
 
 
-
+/*
 CoreScript* LumosChitBag::IsBoundToCore( Chit* chit, bool mustBeStanding, Chit** coreChit )
 {
 	// Since the player can eject and walk around, the core
@@ -574,7 +655,7 @@ CoreScript* LumosChitBag::IsBoundToCore( Chit* chit, bool mustBeStanding, Chit**
 	}
 	return 0;
 }
-
+*/
 
 CoreScript* LumosChitBag::GetCore( const grinliz::Vector2I& sector )
 {
@@ -651,7 +732,7 @@ bool ItemNameFilter::Accept( Chit* chit )
 			}
 		}
 		else if ( iNames ) {
-			const IString& key = item->name;
+			const IString& key = item->IName();
 			for( int i=0; i<count; ++i ) {
 				if ( key == iNames[i] )
 					return true;
@@ -678,7 +759,10 @@ bool BuildingFilter::Accept( Chit* chit )
 {
 	// Assumed to be MapSpatial with "building" flagged on.
 	MapSpatialComponent* msc = GET_SUB_COMPONENT( chit, SpatialComponent, MapSpatialComponent );
-	return msc && msc->Building();
+	if ( msc && msc->Building() ) {
+		return true;
+	}
+	return false;
 }
 
 

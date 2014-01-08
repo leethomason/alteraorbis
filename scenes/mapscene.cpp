@@ -103,14 +103,7 @@ void MapScene::Resize()
 	mapImage.SetPos( x, y );
 	mapImage2.SetPos( port.UIWidth()*0.5f + 0.5f*layout.GutterX(), y );
 
-	Vector2I homeSector = { 0, 0 };
-	Chit* homeCore = 0;
-	lumosChitBag->IsBoundToCore( player, false, &homeCore );
-	if ( homeCore ) {
-		homeSector = homeCore->GetSpatialComponent()->GetPosition2DI();
-		homeSector.x /= SECTOR_SIZE;
-		homeSector.y /= SECTOR_SIZE;
-	}
+	Vector2I homeSector = lumosChitBag->GetHomeSector();
 
 	// --- MAIN ---
 
@@ -150,7 +143,7 @@ void MapScene::Resize()
 	for( int j=0; j<MAP2_SIZE; ++j ) {
 		for( int i=0; i<MAP2_SIZE; ++i ) {
 			map2Text[j*MAP2_SIZE+i].SetPos( x + float(i)*gridSize + gutter, y + float(j)*gridSize + gutter );
-			map2Text[j*MAP2_SIZE+i].SetSize( gridSize - gutter*2.0f, gridSize - gutter*2.0f );
+			map2Text[j*MAP2_SIZE+i].SetBounds( gridSize - gutter*2.0f, 0 );
 		}
 	}
 
@@ -220,11 +213,8 @@ void MapScene::SetText()
 			if ( sd.HasCore() ) {
 				const char* owner = "<none>";
 				CoreScript* cc = lumosChitBag->GetCore( sector );
-				if ( cc ) {
-					Chit* chitOwner = cc->GetAttached(0);
-					if ( chitOwner ) {
-						owner = TeamName( chitOwner->GetItem()->primaryTeam ).c_str();
-					}
+				if ( cc->InUse() ) {
+					owner = TeamName( cc->PrimaryTeam() ).c_str();
 				}
 				str.Format( "%s\n%s\n%d-%d-%d G%d", sd.name, owner, low, med, high, greater );
 			}

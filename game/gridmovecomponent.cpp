@@ -86,7 +86,7 @@ void GridMoveComponent::SetDest( const SectorPort& sp )
 }
 
 
-int GridMoveComponent::DoTick( U32 delta, U32 since )
+int GridMoveComponent::DoTick( U32 delta )
 {
 	if ( state == DONE ) {
 		parentChit->Swap( this, new PathMoveComponent( map ));
@@ -106,12 +106,12 @@ int GridMoveComponent::DoTick( U32 delta, U32 since )
 	// on on or off board.
 	if ( state != OFF_BOARD ) {
 		if ( speed < GRID_SPEED ) {
-			speed += Travel( GRID_ACCEL, since );
+			speed += Travel( GRID_ACCEL, delta );
 			if ( speed > GRID_SPEED ) speed = GRID_SPEED;
 		}
 	}
 	else {
-		speed -= Travel( GRID_ACCEL, since );
+		speed -= Travel( GRID_ACCEL, delta );
 		if ( speed < DEFAULT_MOVE_SPEED ) speed = DEFAULT_MOVE_SPEED;
 	}
 
@@ -183,7 +183,7 @@ int GridMoveComponent::DoTick( U32 delta, U32 since )
 					}
 				}
 
-				float travel = Travel( speed, since );
+				float travel = Travel( speed, delta );
 				while ( travel > 0 && !path.Empty() ) {
 					GridEdge ge   = path[0];
 					Vector2F target = worldInfo.GridEdgeToMapF( ge );
@@ -214,7 +214,7 @@ int GridMoveComponent::DoTick( U32 delta, U32 since )
 		if ( distance > 0 ) {
 			dir.Multiply( 1.0f / distance );	// Normalize.
 
-			float travel = Travel( speed, since );
+			float travel = Travel( speed, delta );
 			velocity.Set( dir.x*speed, 0, dir.y*speed );
 
 			if ( travel > distance ) travel = distance;

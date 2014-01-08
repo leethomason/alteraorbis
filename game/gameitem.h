@@ -88,6 +88,7 @@ public:
 	int effects;
 
 	void Log();
+	float Score() const;	// overall rating of damage (includes efffects)
 };
 
 
@@ -114,7 +115,7 @@ public:
 		trait[i] = value;
 	}
 
-	int Get( int i ) {
+	int Get( int i ) const {
 		GLASSERT( i >= 0 && i < NUM_TRAITS );
 		return trait[i];
 	}
@@ -180,21 +181,51 @@ private:
 };
 
 
+/*
+	The Personality scale is a variant of the Big-5 personality
+	traits. 4 are easier to get your head around, and they are
+	changed to be more useful for the game.
+
+	In this case, there isn't meaning to a lower or higher
+	score. 10 or 11 is "in between" and scores above or below
+	favor behavior on that spectrum.
+
+	Intellectual -	Physical
+	Introvert	-	Extrovert
+	Planned		-	Impulsive
+	Neurotic	-	Stable
+class Personality
+{
+public:
+
+
+private:
+};
+*/
+
+class IMeleeWeaponItem;
+class IRangedWeaponItem;
+
 class IWeaponItem 
 {
 public:
 	virtual GameItem* GetItem() = 0;
 	virtual const GameItem* GetItem() const = 0;
+
+	virtual IMeleeWeaponItem*	ToMeleeWeapon()		{ return 0; }
+	virtual IRangedWeaponItem*	ToRangedWeapon()	{ return 0; }
 };
 
 class IMeleeWeaponItem : virtual public IWeaponItem
 {
 public:
+	virtual IMeleeWeaponItem*	ToMeleeWeapon()		{ return this; }
 };
 
 class IRangedWeaponItem : virtual public IWeaponItem
 {
 public:
+	virtual IRangedWeaponItem*	ToRangedWeapon()	{ return this; }
 };
 
 class IShield
@@ -256,21 +287,15 @@ class GameItem :	private IMeleeWeaponItem,
 					private IShield
 {
 public:
-	GameItem( int _flags=0, const char* _name=0, const char* _res=0 )
-	{
-		CopyFrom(0);
-		flags = _flags;
-		name = grinliz::StringPool::Intern( _name );
-		resource = grinliz::StringPool::Intern( _res );
-		id = ++idPool;
-	}
+	GameItem()								{ CopyFrom(0); Track();			}
+	GameItem( const GameItem& rhs )			{ CopyFrom( &rhs ); Track();	}
+	void operator=( const GameItem& rhs )	{ int savedID = id; CopyFrom( &rhs ); id = savedID; UpdateTrack();	}
+	virtual ~GameItem()						{ UnTrack(); }
 
-	GameItem( const GameItem& rhs )			{ CopyFrom( &rhs );	}
-	void operator=( const GameItem& rhs )	{ CopyFrom( &rhs );	}
-
-	virtual ~GameItem()	{}
 	virtual GameItem* GetItem() { return this; }
 	virtual const GameItem* GetItem() const { return this; }
+
+	int ID() const;
 
 	virtual void Load( const tinyxml2::XMLElement* doc );
 	virtual void Serialize( XStream* xs );
@@ -279,11 +304,31 @@ public:
 	// implies that the parent is immune to fire. Apply() sets
 	// basic sanity flags.
 	void Apply( const GameItem* intrinsic );	
+	
+	// is this an item who has a trackable history? I try 
+	// to avoid saying what an Item is...but sometimes
+	// you need to know.
+	bool Significant() const;
+	// Get the value of the item. Currently equivalent to being loot.
+	int  GetValue() const;
 
-	const char* Name() const			{ return name.c_str(); }
-	const char* ProperName() const		{ return properName.c_str(); }
-	const char* Desc() const			{ return desc.c_str(); }
-	const char* ResourceName() const	{ return resource.c_str(); }
+	// name:		blaster
+	// proper:		Hgar
+	// best:		Hgar
+	// full:		Hgar (blaster)
+	const char*			Name() const			{ return name.c_str(); }
+	grinliz::IString	IName() const			{ return name; }
+	const char*			ProperName() const		{ return properName.c_str(); }
+	grinliz::IString	IProperName() const		{ return properName; }
+	const char*			BestName() const		{ if ( !properName.empty() ) return properName.c_str(); return name.c_str(); }
+	grinliz::IString	IBestName() const		{ if ( !properName.empty() ) return properName; return name; }
+	grinliz::IString	IFullName() const;
+	const char*			ResourceName() const	{ return resource.c_str(); }
+	grinliz::IString	IResourceName() const	{ return resource; }
+
+	void SetName( const char* n )				{ name = grinliz::StringPool::Intern( n ); UpdateTrack(); }
+	void SetProperName( const char* n )			{ properName = grinliz::StringPool::Intern( n ); UpdateTrack(); }
+	void SetProperName( const grinliz::IString& n );
 
 	enum {
 		// Type(s) of the item
@@ -314,8 +359,8 @@ public:
 		AI_HEAL_AT_CORE		= (1<<18),		// stands at a core to regain health (greater monsters, generally)
 		AI_SECTOR_HERD		= (1<<19),		// will herd across sectors, as a group
 		AI_SECTOR_WANDER	= (1<<20),		// will wander between sectors, as an individual
-		AI_BINDS_TO_CORE	= (1<<21),
-		AI_DOES_WORK		= (1<<22),
+		AI_DOES_WORK		= (1<<21),
+		AI_USES_BUILDINGS	= (1<<22),		// can use markets, etc. and do transactions. also used as a general "smart enough to use weapons" flag.
 
 		GOLD_PICKUP			= (1<<23),
 		ITEM_PICKUP			= (1<<24),		// picks up items. will use if possible.
@@ -323,14 +368,7 @@ public:
 		CLICK_THROUGH		= (1<<25),		// model is created with flags to ignore world clicking
 	};
 
-	// ------ description ------
-	grinliz::IString		name;		// name of the item
-	grinliz::IString		properName;	// the proper name, if the item has one "John"
-	grinliz::IString		desc;		// description / alternate name
 	grinliz::IString		key;		// modified name, for storage. not serialized.
-	grinliz::IString		resource;	// resource used to  render the item
-	int		id;				// unique id for this item
-	static int idPool;
 	int		flags;			// flags that define this item; 'constant'
 	int		hardpoint;		// id of hardpoint this item attaches to
 	float	mass;			// mass (kg)
@@ -343,7 +381,6 @@ public:
 	Cooldown reload;		// time to reload once clip is used up
 	int		clipCap;		// possible rounds in the clip
 
-	GameTrait traits;
 	Wallet wallet;			// this is either money carried (denizens) or resources bound in (weapons)
 
 	// ------- current --------
@@ -363,68 +400,6 @@ public:
 		float speed = 1.0f;
 		keyValues.GetFloat( "speed", &speed );
 		return SPEED * speed;
-	}
-
-	// Group all the copy/init in one place!
-	void CopyFrom( const GameItem* rhs, int useID=-1 ) {
-		if ( rhs ) {
-			name			= rhs->name;
-			properName		= rhs->properName;
-			desc			= rhs->desc;
-			key				= rhs->key;
-			resource		= rhs->resource;
-			if ( useID < 0 ) 
-				id			= ++idPool;
-			else
-				id			= useID;
-			flags			= rhs->flags;
-			hardpoint		= rhs->hardpoint;
-			mass			= rhs->mass;
-			hpRegen			= rhs->hpRegen;
-			primaryTeam		= rhs->primaryTeam;
-			meleeDamage		= rhs->meleeDamage;
-			rangedDamage	= rhs->rangedDamage;
-			absorbsDamage	= rhs->absorbsDamage;
-			cooldown		= rhs->cooldown;
-			reload			= rhs->reload;
-			clipCap			= rhs->clipCap;
-			rounds			= rhs->rounds;
-			traits			= rhs->traits;
-			wallet			= rhs->wallet;
-
-			hp				= rhs->hp;
-			accruedFire		= rhs->accruedFire;
-			accruedShock	= rhs->accruedShock;
-
-			keyValues		= rhs->keyValues;
-			microdb			= rhs->microdb;
-		}
-		else {
-			name = grinliz::IString();
-			properName = grinliz::IString();
-			desc = grinliz::IString();
-			key  = grinliz::IString();
-			resource = grinliz::IString();
-			id = 0;
-			flags = 0;
-			hardpoint  = 0;
-			mass = 1;
-			hpRegen = 0;
-			primaryTeam = 0;
-			meleeDamage = 1;
-			rangedDamage = 0;
-			absorbsDamage = 0;
-			clipCap = 0;			// default to no clip and unlimited ammo
-			rounds = clipCap;
-			traits.Init();
-			wallet.EmptyWallet();
-			keyValues.Clear();
-			microdb.Clear();
-
-			hp = TotalHPF();
-			accruedFire = 0;
-			accruedShock = 0;
-		}
 	}
 
 	void InitState() {
@@ -451,7 +426,7 @@ public:
 	virtual const IShield*		ToShield() const	{ return ( hardpoint == HARDPOINT_SHIELD ) ? this : 0; }
 
 	int Effects() const { return flags & EFFECT_MASK; }
-	int DoTick( U32 delta, U32 since );
+	int DoTick( U32 delta );
 	
 	// States:
 	//		Ready
@@ -506,10 +481,32 @@ public:
 	// Absorb damage.'remain' is how much damage passes through the shield
 	void AbsorbDamage( bool inInventory, DamageDesc dd, DamageDesc* remain, const char* log, const IMeleeWeaponItem* booster, Chit* parent );
 
+	static int idPool;
+
+	const GameTrait& Traits() const { return traits; }
+	GameTrait* GetTraitsMutable()	{ value = -1; return &traits; }
+
 private:
+	void CopyFrom( const GameItem* rhs );
 	float Delta( U32 delta, float v ) {
 		return v * (float)delta * 0.001f;
 	}
+
+	GameTrait traits;
+
+	// Functions to update the ItemDB
+	void Track() const;
+	void UnTrack() const;
+	void UpdateTrack() const;
+
+	// ------ description ------
+	grinliz::IString		name;		// name of the item
+	grinliz::IString		properName;	// the proper name, if the item has one "John"
+	grinliz::IString		resource;	// resource used to  render the item
+
+	mutable int	id;						// unique id for this item. not assigned until needed, hence mutable
+	mutable grinliz::IString fullName;	// not serialized, but cached
+	mutable int value;					// not serialized, but cached
 };
 
 

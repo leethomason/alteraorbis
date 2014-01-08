@@ -35,8 +35,8 @@ void VolcanoScript::Init()
 		//GLOUTPUT(( "VolcanoScript::Init. pos=%d,%d\n", (int)pos.x, (int)pos.y ));
 		worldMap->SetMagma( (int)pos.x, (int)pos.y, true );
 
-		NewsEvent event( 0, pos, StringPool::Intern( "volcano", true ));
-		scriptContext->chitBag->AddNews( event );
+		NewsEvent event( NewsEvent::VOLCANO, pos );
+		NewsHistory::Instance()->Add( event );
 	}
 }
 
@@ -50,7 +50,7 @@ void VolcanoScript::Serialize( XStream* xs )
 }
 
 
-int VolcanoScript::DoTick( U32 delta, U32 since )
+int VolcanoScript::DoTick( U32 delta )
 {
 	SpatialComponent* sc = scriptContext->chit->GetSpatialComponent();
 	Vector2I pos = { 0,  0 };

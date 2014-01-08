@@ -23,8 +23,10 @@
 #include "../grinliz/glgeometry.h"
 #include "../grinliz/glcolor.h"
 #include "../Shiny/include/Shiny.h"
-#include "../shared/lodepng.h"
+
 #include "../xarchive/glstreamer.h"
+#include "../shared/lodepng.h"
+#include "../xarchive/squisher.h"
 
 #include "../engine/engine.h"
 #include "../engine/texture.h"
@@ -203,7 +205,13 @@ void WorldMap::Save( const char* pathToDAT )
 		XarcClose( &writer );
 
 		// Tack on the grid so that the dat file can still be inspected.
-		fwrite( grid, sizeof(WorldGrid), width*height, fp );
+		//fwrite( grid, sizeof(WorldGrid), width*height, fp );
+
+		// This works very well; about 3:1 compression.
+		Squisher squisher;
+		int bytes = 0;
+		squisher.StreamEncode( grid, sizeof(WorldGrid)*width*height, fp, &bytes );
+
 		fclose( fp );
 	}
 }
@@ -225,10 +233,12 @@ void WorldMap::Load( const char* pathToDAT )
 		worldInfo->Serialize( &reader );
 		XarcClose( &reader );
 
-		fread( grid, sizeof(WorldGrid), width*height, fp );
+		//fread( grid, sizeof(WorldGrid), width*height, fp );
+		Squisher squisher;
+		squisher.StreamDecode( grid, sizeof(WorldGrid)*width*height, fp );
+
 		fclose( fp );
 		
-		//Tessellate();
 		usingSectors = true;
 		// Set up the rocks.
 		for( int j=0; j<height; ++j ) {
@@ -391,7 +401,7 @@ bool WorldMap::InitPNG( const char* filename,
 }
 
 
-void WorldMap::MapInit( const U8* land )
+void WorldMap::MapInit( const U8* land, const U16* path )
 {
 	GLASSERT( grid );
 	for( int i=0; i<width*height; ++i ) {
@@ -406,11 +416,12 @@ void WorldMap::MapInit( const U8* land )
 			grid[i].SetPort();
 		}
 		else if ( h == WorldGen::CORE ) {
-			grid[i].SetCore();
+			grid[i].SetLandAndRock( WorldGen::LAND0 );
 		}
 		else {
 			GLASSERT( 0 );
 		}
+		grid[i].SetPath( path[i] );
 	}
 }
 
@@ -543,6 +554,7 @@ void WorldMap::Tessellate()
 #endif
 
 
+/*
 Vector2I WorldMap::FindEmbark()
 {
 	Random random;
@@ -561,8 +573,7 @@ Vector2I WorldMap::FindEmbark()
 	v.y += 2;
 	return v;
 }
-
-
+*/
 
 void WorldMap::ProcessZone( ChitBag* cb )
 {
@@ -677,9 +688,8 @@ void WorldMap::ProcessZone( ChitBag* cb )
 							if ( poolGrids.Size() >= 10 && border == 0 && water <= waterMax ) {
 								GLOUTPUT(( "pool found. zone=%d,%d area=%d waterFall=%d\n", zx, zy, poolGrids.Size(), water ));
 								
-								Vector2F posF = { (float)poolGrids[0].x+0.5f, (float)poolGrids[0].y+0.5f };
-								NewsEvent poolNews( NewsEvent::UNICORN, posF, StringPool::Intern( "water", true ));
-								cb->AddNews( poolNews );
+								NewsEvent poolNews( NewsEvent::POOL, ToWorld2F( poolGrids[0] ));
+								NewsHistory::Instance()->Add( poolNews );
 
 								for( int i=0; i<poolGrids.Size(); ++i ) {
 									int idx = INDEX( poolGrids[i] );
@@ -691,9 +701,8 @@ void WorldMap::ProcessZone( ChitBag* cb )
 										if ( grid[INDEX(v)].IsWater() ) {
 											waterfalls.Push( poolGrids[i] );
 
-											posF.Set( (float)poolGrids[i].x+0.5f, (float)poolGrids[i].y+0.5f );
-											NewsEvent we( NewsEvent::PEGASUS, posF, StringPool::Intern( "waterfall" ));
-											cb->AddNews( we );
+											NewsEvent we( NewsEvent::WATERFALL, ToWorld2F( poolGrids[i] ));
+											NewsHistory::Instance()->Add( we );
 										}
 									}
 								}
@@ -1477,31 +1486,6 @@ bool WorldMap::HasStraightPath( const grinliz::Vector2F& start,
 }
 
 
-
-bool WorldMap::CalcPath(	const grinliz::Vector2F& start, 
-							const grinliz::Vector2F& end, 
-							grinliz::Vector2F *path,
-							int *len,
-							int maxPath,
-							float *totalCost,
-							bool debugging )
-{
-	pathCache.Clear();
-	bool result = CalcPath( start, end, &pathCache, totalCost, debugging );
-	if ( result ) {
-		if ( path ) {
-			for( int i=0; i<pathCache.Size() && i < maxPath; ++i ) {
-				path[i] = pathCache[i];
-			}
-		}
-		if ( len ) {
-			*len = Min( maxPath, pathCache.Size() );
-		}
-	}
-	return result;
-}
-
-
 micropather::MicroPather* WorldMap::PushPather( const Vector2I& sector )
 {
 	GLASSERT( currentPather == 0 );
@@ -1553,9 +1537,10 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 							bool debugging )
 {
 	debugPathVector.Clear();
-	if ( path ) { 
-		path->Clear();
+	if ( !path ) { 
+		path = &pathCache;
 	}
+	path->Clear();
 	bool okay = false;
 	float dummyCost = 0;
 	if ( !totalCost ) totalCost = &dummyCost;	// prevent crash later.
@@ -1586,10 +1571,8 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 	// Regions are convex. If in the same region, it is passable.
 	if ( wgStart->ZoneOrigin( starti.x, starti.y ) == wgEnd->ZoneOrigin( endi.x, endi.y ) ) {
 		okay = true;
-		if ( path ) {
-			path->Push( start );
-			path->Push( end );
-		}
+		path->Push( start );
+		path->Push( end );
 		*totalCost = (end-start).Length();
 	}
 
@@ -1597,10 +1580,8 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 	if ( !okay ) {
 		okay = GridPath( start, end );
 		if ( okay ) {
-			if ( path ) { 
-				path->Push( start );
-				path->Push( end );
-			}
+			path->Push( start );
+			path->Push( end );
 			*totalCost = (end-start).Length();
 		}
 	}
@@ -1614,11 +1595,8 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 		if ( result == micropather::MicroPather::SOLVED ) {
 			//GLOUTPUT(( "Region succeeded len=%d.\n", pathRegions.size() ));
 			Vector2F from = start;
-			if ( path ) { 
-				path->Push( start );
-			}
+			path->Push( start );
 			okay = true;
-			//Vector2F pos = start;
 
 			// Walk each of the regions, and connect them with vectors.
 			for( unsigned i=0; i<pathRegions.size()-1; ++i ) {
@@ -1653,28 +1631,22 @@ bool WorldMap::CalcPath(	const grinliz::Vector2F& start,
 						break;
 					}
 				}
-				if ( path ) {
-					path->Push( v );
-				}
+				path->Push( v );
 				from = v;
 			}
-			if ( path ) {
-				path->Push( end );
-			}
+			path->Push( end );
 		}
 		PopPather();
 	}
 
 	if ( okay ) {
-		if ( debugging && path ) {
+		if ( debugging ) {
 			for( int i=0; i<path->Size(); ++i )
 				debugPathVector.Push( (*path)[i] );
 		}
 	}
 	else {
-		if ( path ) {
-			path->Clear();
-		}
+		path->Clear();
 	}
 	return okay;
 }
@@ -1888,7 +1860,8 @@ void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 	#define BLACKMAG_X(x)	float( double(x*256 + x*32 + 16) / 1024.0)
 	#define BLACKMAG_Y(y)   float( 0.75 - double(y*256 + y*32 + 16) / 1024.0)
 
-	static const Vector2F UV[WorldGrid::NUM_LAYERS+WorldGrid::NUM_PAVE] = {
+	static const int NUM = WorldGrid::NUM_LAYERS + (WorldGrid::NUM_PAVE-1) + 1;
+	static const Vector2F UV[NUM] = {
 		{ BLACKMAG_X(1), BLACKMAG_Y(0) },	// water
 		{ BLACKMAG_X(0), BLACKMAG_Y(1) },	// grid
 		{ BLACKMAG_X(1), BLACKMAG_Y(1) },	// port
@@ -1896,6 +1869,7 @@ void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 		{ BLACKMAG_X(0), BLACKMAG_Y(2) },	// pave1
 		{ BLACKMAG_X(2), BLACKMAG_Y(0) },	// pave2
 		{ BLACKMAG_X(2), BLACKMAG_Y(1) },	// pave3
+		{ BLACKMAG_X(2), BLACKMAG_Y(2) },	// porch
 	};
 	static const float du = 0.25f;
 	static const float dv = 0.25f;	
@@ -1909,7 +1883,7 @@ void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 
 				// Check for memory exceeded and break.
 				if ( voxelBuffer.Size()+4 >= voxelBuffer.Capacity() ) {
-					GLASSERT(0);	// not a problem, but may need to adjust capacity
+					//GLASSERT(0);	// not a problem, but may need to adjust capacity
 					y = b.max.y+1;
 					x = b.max.x+1;
 					break;
@@ -1920,6 +1894,9 @@ void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 					int layer = wg.Layer();
 					if ( layer == WorldGrid::LAND ) {
 						layer += wg.Pave();
+						if ( wg.IsPorch() ) {
+							layer = NUM-1;
+						}
 					}
 
 					Vertex* vArr = voxelBuffer.PushArr( 4 );
@@ -2029,7 +2006,7 @@ void WorldMap::PrepVoxels( const SpaceTree* spaceTree )
 
 				// Check for memory exceeded and break.
 				if ( voxelBuffer.Size()+(6*4) >= voxelBuffer.Capacity() ) {
-					GLASSERT(0);	// not a problem, but may need to adjust capacity
+					//GLASSERT(0);	// not a problem, but may need to adjust capacity
 					y = b.max.y+1;
 					x = b.max.x+1;
 					break;

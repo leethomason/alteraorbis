@@ -25,6 +25,7 @@
 #include "../xegame/istringconst.h"
 
 #include "../script/battlemechanics.h"
+#include "../script/itemscript.h"
 
 using namespace grinliz;
 using namespace tinyxml2;
@@ -69,13 +70,72 @@ void Cooldown::Serialize( XStream* xs, const char* name )
 
 int GameItem::idPool = 0;
 
+// Group all the copy/init in one place!
+void GameItem::CopyFrom( const GameItem* rhs ) {
+	if ( rhs ) {
+		name			= rhs->name;
+		properName		= rhs->properName;
+		key				= rhs->key;
+		resource		= rhs->resource;
+		id				= 0;	// assigned when needed
+		flags			= rhs->flags;
+		hardpoint		= rhs->hardpoint;
+		mass			= rhs->mass;
+		hpRegen			= rhs->hpRegen;
+		primaryTeam		= rhs->primaryTeam;
+		meleeDamage		= rhs->meleeDamage;
+		rangedDamage	= rhs->rangedDamage;
+		absorbsDamage	= rhs->absorbsDamage;
+		cooldown		= rhs->cooldown;
+		reload			= rhs->reload;
+		clipCap			= rhs->clipCap;
+		rounds			= rhs->rounds;
+		traits			= rhs->traits;
+		wallet			= rhs->wallet;
+
+		hp				= rhs->hp;
+		accruedFire		= rhs->accruedFire;
+		accruedShock	= rhs->accruedShock;
+
+		keyValues		= rhs->keyValues;
+		microdb			= rhs->microdb;
+		value			= -1;
+	}
+	else {
+		name = grinliz::IString();
+		properName = grinliz::IString();
+		key  = grinliz::IString();
+		resource = grinliz::IString();
+		id = 0;
+		flags = 0;
+		hardpoint  = 0;
+		mass = 1;
+		hpRegen = 0;
+		primaryTeam = 0;
+		meleeDamage = 1;
+		rangedDamage = 0;
+		absorbsDamage = 0;
+		clipCap = 0;			// default to no clip and unlimited ammo
+		rounds = clipCap;
+		traits.Init();
+		wallet.EmptyWallet();
+		keyValues.Clear();
+		microdb.Clear();
+
+		hp = TotalHPF();
+		accruedFire = 0;
+		accruedShock = 0;
+		value			= -1;
+	}
+}
+
+
 void GameItem::Serialize( XStream* xs )
 {
 	XarcOpen( xs, "GameItem" );
 
 	XARC_SER( xs, name );
 	XARC_SER( xs, properName );
-	XARC_SER( xs, desc );
 	XARC_SER( xs, resource );
 	XARC_SER( xs, id );
 	XARC_SER( xs, mass );
@@ -112,7 +172,7 @@ void GameItem::Serialize( XStream* xs )
 		APPEND_FLAG( flags, f, AI_HEAL_AT_CORE );
 		APPEND_FLAG( flags, f, AI_SECTOR_HERD );
 		APPEND_FLAG( flags, f, AI_SECTOR_WANDER );
-		APPEND_FLAG( flags, f, AI_BINDS_TO_CORE );
+		APPEND_FLAG( flags, f, AI_USES_BUILDINGS );
 		APPEND_FLAG( flags, f, AI_DOES_WORK );
 		APPEND_FLAG( flags, f, GOLD_PICKUP );
 		APPEND_FLAG( flags, f, ITEM_PICKUP );
@@ -142,7 +202,7 @@ void GameItem::Serialize( XStream* xs )
 			READ_FLAG( flags, f, AI_HEAL_AT_CORE );
 			READ_FLAG( flags, f, AI_SECTOR_HERD );
 			READ_FLAG( flags, f, AI_SECTOR_WANDER );
-			READ_FLAG( flags, f, AI_BINDS_TO_CORE );
+			READ_FLAG( flags, f, AI_USES_BUILDINGS );
 			READ_FLAG( flags, f, AI_DOES_WORK );
 			READ_FLAG( flags, f, GOLD_PICKUP );
 			READ_FLAG( flags, f, ITEM_PICKUP );
@@ -159,6 +219,14 @@ void GameItem::Serialize( XStream* xs )
 	traits.Serialize( xs );
 	wallet.Serialize( xs );
 	XarcClose( xs );
+
+	if ( xs->Loading() ) {
+		Track();
+	}
+
+	// In the interest of coding sanity, a weapon
+	// can not be both ranged and melee.
+	GLASSERT( !( (flags & MELEE_WEAPON) && (flags & RANGED_WEAPON) ));
 }
 
 	
@@ -170,7 +238,6 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 	
 	name		= StringPool::Intern( ele->Attribute( "name" ));
 	properName	= StringPool::Intern( ele->Attribute( "properName" ));
-	desc		= StringPool::Intern( ele->Attribute( "desc" ));
 	resource	= StringPool::Intern( ele->Attribute( "resource" ));
 	id = 0;
 	flags = 0;
@@ -195,7 +262,7 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 		READ_FLAG( flags, f, AI_HEAL_AT_CORE );
 		READ_FLAG( flags, f, AI_SECTOR_HERD );
 		READ_FLAG( flags, f, AI_SECTOR_WANDER );
-		READ_FLAG( flags, f, AI_BINDS_TO_CORE );
+		READ_FLAG( flags, f, AI_USES_BUILDINGS );
 		READ_FLAG( flags, f, AI_DOES_WORK );
 		READ_FLAG( flags, f, GOLD_PICKUP );
 		READ_FLAG( flags, f, ITEM_PICKUP );
@@ -310,7 +377,7 @@ void GameItem::UseRound() {
 
 // FIXME: pass in items affecting this one:
 // The body affects the claw. Environment (water) affects the body.
-int GameItem::DoTick( U32 delta, U32 sinec )
+int GameItem::DoTick( U32 delta )
 {
 	int tick = VERY_LONG_TICK;
 
@@ -433,7 +500,160 @@ void GameItem::AbsorbDamage( bool inInventory, DamageDesc dd, DamageDesc* remain
 }
 
 
+int GameItem::GetValue() const
+{
+	if ( value >= 0 ) {
+		return value;
+	}
+
+	value = 0;
+
+	static const float EFFECT_BONUS = 1.5f;
+	static const float MELEE_VALUE  = 20;
+	static const float RANGED_VALUE = 30;
+	static const float SHIELD_VALUE = 20;
+
+	if ( ToRangedWeapon() ) {
+		float radAt1 = BattleMechanics::ComputeRadAt1( 0, ToRangedWeapon(), false, false );
+		float dptu = BattleMechanics::RangedDPTU( ToRangedWeapon(), true );
+		float er   = BattleMechanics::EffectiveRange( radAt1 );
+
+		const GameItem& basic = ItemDefDB::Instance()->Get( "blaster" );
+		float refRadAt1 = BattleMechanics::ComputeRadAt1( 0, basic.ToRangedWeapon(), false, false );
+		float refDPTU = BattleMechanics::RangedDPTU( basic.ToRangedWeapon(), true );
+		float refER   = BattleMechanics::EffectiveRange( refRadAt1 );
+
+		float v = ( dptu * er ) / ( refDPTU * refER ) * RANGED_VALUE;
+		if ( flags & GameItem::EFFECT_FIRE ) v *= EFFECT_BONUS;
+		if ( flags & GameItem::EFFECT_SHOCK ) v *= EFFECT_BONUS;
+		if ( flags & GameItem::EFFECT_EXPLOSIVE ) v *= EFFECT_BONUS;
+		value = LRintf( v );
+	}
+
+	if ( ToMeleeWeapon() ) {
+		float dptu = BattleMechanics::MeleeDPTU( 0, ToMeleeWeapon() );
+
+		const GameItem& basic = ItemDefDB::Instance()->Get( "ring" );
+		float refDPTU = BattleMechanics::MeleeDPTU( 0, basic.ToMeleeWeapon() );
+
+		float v = dptu / refDPTU * MELEE_VALUE;
+		if ( flags & GameItem::EFFECT_FIRE ) v *= EFFECT_BONUS;
+		if ( flags & GameItem::EFFECT_SHOCK ) v *= EFFECT_BONUS;
+		if ( flags & GameItem::EFFECT_EXPLOSIVE ) v *= EFFECT_BONUS;
+
+		if ( value ) value += LRintf( v*0.5f );
+		else value = LRintf(v);
+	}
+
+	if ( ToShield() ) {
+		int rounds = ClipCap();
+		const GameItem& basic = ItemDefDB::Instance()->Get( "shield" );
+		int refRounds = basic.ClipCap();
+
+		// Currently, shield effects don't do anything, although that would be cool.
+		float v = float(rounds) / float(refRounds) * SHIELD_VALUE;
+
+		if ( value ) value += LRintf( v*0.5f );
+		else value = LRintf(v);
+	}
+	return value;
+}
+
+
+int GameItem::ID() const { 
+	if ( !id ) {
+		id = ++idPool; 
+		// id is now !0, so start tracking.
+		Track();	
+	}
+	return id; 
+}
+
+
+void GameItem::Track() const
+{
+	// use the 'id', not ID() so we don't allocate:
+	if ( id == 0 ) return;
+
+	ItemDB* db = ItemDB::Instance();
+	if ( db ) {
+		db->Add( this );
+	}
+}
+
+
+void GameItem::UpdateTrack() const 
+{
+	// use the 'id', not ID() so we don't allocate:
+	if ( id == 0 ) return;
+
+	ItemDB* db = ItemDB::Instance();
+	if ( db ) {
+		db->Update( this );
+	}
+}
+
+
+void GameItem::UnTrack() const
+{
+	// use the 'id', not ID() so we don't allocate:
+	if ( id == 0 ) return;
+
+	ItemDB* db = ItemDB::Instance();
+	if ( db ) {
+		db->Remove( this );
+	}
+}
+
+
+void GameItem::SetProperName( const grinliz::IString& n ) 
+{ 
+	fullName = IString();	// clear cache
+	properName = n; 
+	UpdateTrack();
+}
+
+
+bool GameItem::Significant() const
+{
+	int msg = 0;
+	if ( keyValues.GetInt( "destroyMsg", &msg ) == 0 ) {
+		return true;
+	}
+
+	return false;
+}
+
+
+IString GameItem::IFullName() const
+{
+	if ( fullName.empty() ) {
+		if ( properName.empty() ) {
+			fullName = name;
+		}
+		else {
+			GLString n;
+			n.Format( "%s (%s)", properName.c_str(), name.c_str() );
+			fullName = StringPool::Intern( n.c_str() );
+		}
+	}
+	return fullName;
+}
+
+
+float DamageDesc::Score() const
+{
+	float score = damage;
+	if ( effects & GameItem::EFFECT_FIRE ) score *= 1.5f;
+	if ( effects & GameItem::EFFECT_SHOCK ) score *= 2.0f;
+	if ( effects & GameItem::EFFECT_EXPLOSIVE ) score *= 2.5f;
+	return score;
+}
+
+
 void DamageDesc::Log()
 {
 	GLLOG(( "[damage=%.1f]", damage ));
 }
+
+

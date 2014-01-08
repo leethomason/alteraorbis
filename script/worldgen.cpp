@@ -11,7 +11,7 @@
 
 #include "../shared/lodepng.h"
 #include "../game/gamelimits.h"
-#include "../micropather/micropather.h"
+#include "../engine/ufoutil.h"
 
 using namespace grinliz;
 
@@ -48,11 +48,14 @@ void SectorData::Serialize( XStream* xs )
 WorldGen::WorldGen()
 {
 	land = new U8[SIZE*SIZE];
-	memset( land, 0, SIZE*SIZE );
-	color = new U8[SIZE*SIZE];
+	memset( land, 0, SIZE*SIZE*sizeof(*land) );
+	color = new U16[SIZE*SIZE];
+	path = new U16[SIZE*SIZE];
+	memset( path, 0, sizeof(*path)*SIZE*SIZE );
 	flixels = 0;
 	noise0 = 0;
 	noise1 = 0;
+	features = 0;
 }
 
 
@@ -61,10 +64,17 @@ WorldGen::~WorldGen()
 	delete [] land;
 	delete [] color;
 	delete [] flixels;
+	delete [] path;
 	delete noise0;
 	delete noise1;
+	if ( features ) free( features );
 }
 
+
+void WorldGen::LoadFeatures( const char* path )
+{
+	lodepng_decode32_file( (unsigned char**)(&features), (unsigned int*) &featuresSize.x, (unsigned int*) &featuresSize.y, path );
+}
 
 void WorldGen::StartLandAndWater( U32 seed0, U32 seed1 )
 {
@@ -185,48 +195,51 @@ int WorldGen::CountFlixelsAboveCutoff( const float* flixels, float cutoff, float
 }
 
 
-int WorldGen::CalcSectorAreaFromFill( SectorData* s, const grinliz::Vector2I& origin, bool* allPortsColored )
+int WorldGen::Color( const Rectangle2I& bounds, const Vector2I& origin )
 {
-	memset( color, 0, SIZE*SIZE );
-	int c = 1;
+	// Rember that (playable) land is fully connected. This
+	// is guaranteed in GenerateTerrain(), which
+	// simply deletes all the land not connected 
+	// to the core and ports.
 
+	// The AI can use this information to get
+	// to a core or port from any location is
+	// the map, and in fact, we encode this into
+	// the map.
+
+	// This algorithm is a flood fill from 
+	// the destination to every point on the
+	// map. The correct direction to the 
+	// destination is the the direction of
+	// "one less" in the resulting gradient.
+
+	for( int y=bounds.min.y; y <= bounds.max.y; ++y ) {
+		for( int x=bounds.min.x; x <= bounds.max.x; ++x ) {
+			color[INDEX(x,y)] = 0;
+		}
+	}
+	int c = 1;
 	CDynArray<Vector2I> stack;
-	Rectangle2I bounds = s->InnerBounds();
 
 	GLASSERT( land[origin.y*SIZE+origin.x] );
 
 	stack.Push( origin );
-	int area = 0;
+	color[INDEX(origin.x, origin.y)] = 1;
+	int area = 1;
 
 	while( !stack.Empty() ) {
-		Vector2I v = stack.Pop();
-		if (    (color[v.y*SIZE+v.x] == 0)
-			 && land[v.y*SIZE+v.x] ) 
-		{
-			color[v.y*SIZE+v.x] = 1;
-			++area;
+		Vector2I v = stack.PopFront();
+		c = color[INDEX(v)] + 1;
+		GLASSERT( c > 1 );
 
-			Vector2I v0 = { v.x-1, v.y };
-			Vector2I v1 = { v.x+1, v.y };
-			Vector2I v2 = { v.x, v.y-1 };
-			Vector2I v3 = { v.x, v.y+1 };
+		static const Vector2I d[4] = { {1,0}, {0,1}, {-1,0}, {0,-1} };
 
-			if ( bounds.Contains( v0 ) ) stack.Push( v0 );
-			if ( bounds.Contains( v1 ) ) stack.Push( v1 );
-			if ( bounds.Contains( v2 ) ) stack.Push( v2 );
-			if ( bounds.Contains( v3 ) ) stack.Push( v3 );
-		}
-	}
-	if ( allPortsColored ) {
-		*allPortsColored = true;
-		for( int i=0; i<4; ++i ) {
-			int port = 1<<i;
-			if ( s->ports & port ) {
-				Rectangle2I r = s->GetPortLoc( port );
-				if ( color[r.min.y*SIZE+r.min.x] == 0 ) {
-					*allPortsColored = false;
-					break;
-				}
+		for( int k=0; k<4; ++k ) {
+			Vector2I n = v + d[k];
+			if ( bounds.Contains(n) && land[INDEX(n)] && color[INDEX(n)] == 0 ) {
+				color[INDEX(n)] = c;
+				++area;
+				stack.Push( n );
 			}
 		}
 	}
@@ -234,107 +247,34 @@ int WorldGen::CalcSectorAreaFromFill( SectorData* s, const grinliz::Vector2I& or
 }
 
 
+int WorldGen::PortsColored( const SectorData* s )
+{
+	int portsColored = 0;
+	for( int i=0; i<4; ++i ) {
+		int port = 1<<i;
+		if ( s->ports & port ) {
+			Rectangle2I r = s->GetPortLoc( port );
+			if ( color[INDEX(r.min)] ) {
+				portsColored |= port;
+			}
+		}
+	}
+	return portsColored;
+}
+
+
 void WorldGen::RemoveUncoloredLand( SectorData* s )
 {
 	Rectangle2I bounds = s->InnerBounds();
 
-	// Inset one more, so that checks can be in all directions.
-	for( int y=bounds.min.y+1; y<=bounds.max.y-1; ++y ) {
-		for( int x=bounds.min.x+1; x<=bounds.max.x-1; ++x ) {
+	for( int y=bounds.min.y; y<=bounds.max.y; ++y ) {
+		for( int x=bounds.min.x; x<=bounds.max.x; ++x ) {
 			if ( color[y*SIZE+x] == 0 ) {
 				land[y*SIZE+x] = 0;
 			}
 		}
 	}
 }
-
-#if 0
-float WorldGen::LeastCostEstimate( void* stateStart, void* stateEnd ) {
-	grinliz::Vector2I start = FromState( stateStart );
-	grinliz::Vector2I end   = FromState( stateEnd );
-//	float len2 = (float)((start.x-end.x)*(start.x-end.x) + (start.y-end.y)*(start.y-end.y));
-//	return sqrtf( len2 );
-	float len = (float)(abs(start.x-end.x) + abs(start.y-end.y));
-	return len;
-}
-
-
-void WorldGen::AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > *adjacent ) {
-	Vector2I start = FromState( state );
-	GLASSERT( patherBounds.Contains( start ));
-
-	static const Vector2I delta[4] = {
-		{ -1, 0 },
-		{ 1, 0 },
-		{ 0, -1 },
-		{ 0, 1 }
-	};
-	for( int i=0; i<4; ++i ) {
-		Vector2I v = start + delta[i];
-		if ( patherBounds.Contains( v ) ) {
-			int type = land[v.y*SIZE+v.x];
-			if ( type != WATER ) {
-				float cost = (type >= LAND1 && type <= LAND3) ? 8.0f : 1.0f;	// prefer existing paths.
-				micropather::StateCost sc = { ToState( v ), cost };
-				adjacent->push_back( sc );
-			}
-		}
-	}
-}
-
-
-void WorldGen::PathToCore( SectorData* s )
-{
-	if ( !s->HasCore() )
-		return;
-
-	// Clear land around core.
-	Rectangle2I b;
-	b.min = b.max = s->core;
-	b.Outset( 2 );
-	for( int y=b.min.y; y<=b.max.y; ++y ) {
-		for( int x=b.min.x; x<=b.max.x; ++x ) {
-			int type = land[y*SIZE+x];
-			if ( type >= LAND1 && type <= LAND3 ) {
-				type = LAND0;
-			}
-		}
-	}
-
-	// Now make sure there is a LAND0 route from
-	// each port to the core. This keeps critters
-	// from piling up on the ports quite so much.
-	micropather::MicroPather* pather = new micropather::MicroPather( this, SIZE*SIZE, 4, false );
-	MP_VECTOR< void* > path;
-	patherBounds = s->InnerBounds();
-
-	for( int i=0; i<4; ++i ) {
-		int port = (1<<i);
-		if ( s->ports & port ) {
-			Vector2I startVec = s->core;
-			Vector2I endVec   = s->GetPortLoc( port ).Center();
-			GLASSERT( color[startVec.y*SIZE+startVec.x] == color[endVec.y*SIZE+endVec.x] );
-
-			void* start = ToState( startVec );
-			void* end   = ToState( endVec );
-
-			float cost = 0;
-			path.clear();
-			int result = pather->Solve( start, end, &path, &cost );
-			GLASSERT( result == micropather::MicroPather::SOLVED );	// else coloring failed?
-			
-			for( unsigned k=0; k<path.size(); ++k ) {
-				Vector2I v = FromState( path[i] );
-				int type = land[v.y*SIZE+v.x];
-				if ( type >= LAND1 && type <= LAND3 ) {
-					land[v.y*SIZE+v.x] = LAND0;
-				}
-			}
-		}
-	}
-	delete pather;
-}
-#endif
 
 
 void WorldGen::DepositLand( SectorData* s, U32 seed, int n )
@@ -587,24 +527,24 @@ Rectangle2I SectorData::GetPortLoc( int port ) const
 {
 	Rectangle2I r;
 	static const int LONG  = 4;
-	static const int OFFSET = (SECTOR_SIZE-LONG)/2;
 	static const int SHORT = 2;
+	static const int HALF  = SECTOR_SIZE/2;
 
 	if ( port == NEG_X ) {
-		r.Set( x+1, y+OFFSET, 
-			   x+SHORT, y+OFFSET+LONG-1 ); 
+		r.Set( x+1,			y+HALF-SHORT, 
+			   x+SHORT,		y+HALF+SHORT-1 ); 
 	}
 	else if ( port == POS_X ) {
-		r.Set( x+SECTOR_SIZE-SHORT-1, y+OFFSET, 
-			   x+SECTOR_SIZE-2, y+OFFSET+LONG-1 ); 
+		r.Set( x+SECTOR_SIZE-SHORT-1,	y+HALF-SHORT, 
+			   x+SECTOR_SIZE-2,			y+HALF+SHORT-1 ); 
 	}
 	else if ( port == NEG_Y ) {
-		r.Set( x+OFFSET,        y+1, 
-			   x+OFFSET+LONG-1, y+SHORT ); 
+		r.Set( x+HALF-SHORT,        y+1, 
+			   x+HALF+SHORT-1,		y+SHORT ); 
 	}
 	else if ( port == POS_Y ) {
-		r.Set( x+OFFSET,        y+SECTOR_SIZE-SHORT-1, 
-			   x+OFFSET+LONG-1, y+SECTOR_SIZE-2 ); 
+		r.Set( x+HALF-SHORT,        y+SECTOR_SIZE-SHORT-1, 
+			   x+HALF+SHORT-1,		y+SECTOR_SIZE-2 ); 
 	}
 	else {
 		GLASSERT( 0 );
@@ -677,6 +617,7 @@ void WorldGen::ProcessSectors( U32 seed, SectorData* sectorData )
 	GLOUTPUT(( "nSectors=%d\n", sectors.Size() ));
 	for( int i=0; i<sectors.Size(); ++i ) {
 		GenerateTerrain( random.Rand(), sectors[i] );
+		CalcPath( sectors[i] );
 	}
 }
 
@@ -707,6 +648,8 @@ void WorldGen::GenerateTerrain( U32 seed, SectorData* s )
 	// Place core
 	Vector2I c = {	s->x + SECTOR_SIZE/2 - 10 + random.Dice( 3, 6 ),
 					s->y + SECTOR_SIZE/2 - 10 + random.Dice( 3, 6 )  };
+	Vector2I sector = { s->x/SECTOR_SIZE, s->y/SECTOR_SIZE };
+
 	s->core = c;
 
 	Rectangle2I r;
@@ -715,19 +658,135 @@ void WorldGen::GenerateTerrain( U32 seed, SectorData* s )
 
 	Draw( r, LAND0 );
 
-	land[c.y*SIZE+c.x] = CORE;
+	land[c.y*SIZE+c.x]	= CORE;
+	int  a				= Color( s->InnerBounds(), s->core );
+	int portsColored	= PortsColored( s );
+	int	featurePlaced	= random.Rand( 2 );
 
-	bool portsColored = false;
-	int a = CalcSectorAreaFromFill( s, c, &portsColored );
-	while ( a < AREA || !portsColored ) {
-		DepositLand( s, seed, Max( AREA-a, (int)INNER_SECTOR_SIZE ));
-		a = CalcSectorAreaFromFill( s, c, &portsColored );
+	while ( a < AREA || (portsColored != s->ports) ) {
+		if ( !featurePlaced && features ) {
+			
+			int nFeatures = (featuresSize.x/SECTOR_SIZE)*(featuresSize.y/SECTOR_SIZE);
+			int feature = random.Rand( nFeatures );
+
+			for( int i=0; i<4; ++i ) {
+				int port = 1<<i;
+				if ( ( port & s->ports ) && !(portsColored & port) ) {
+					if ( port == SectorData::POS_X )	  PlaceFeature( feature, sector, 0 );
+					else if ( port == SectorData::POS_Y ) PlaceFeature( feature, sector, 90 );
+					else if ( port == SectorData::NEG_X ) PlaceFeature( feature, sector, 180 );
+					else if ( port == SectorData::NEG_Y ) PlaceFeature( feature, sector, 270 );
+				}
+			}
+			featurePlaced = 1;
+		}
+		else {
+			DepositLand( s, seed, Max( AREA-a, (int)INNER_SECTOR_SIZE ));
+		}
+		Filter( s->InnerBounds() );
+
+		a = Color( s->InnerBounds(), s->core );
+		portsColored = PortsColored( s );
 	}
-	// Filter 1x1 zones.
-	Filter( s->InnerBounds() );
 	RemoveUncoloredLand( s );
 
-	s->area = CalcSectorArea( s->x/SECTOR_SIZE, s->y/SECTOR_SIZE );
+	s->area = a;
+	int checkArea = CalcSectorArea( s->x/SECTOR_SIZE, s->y/SECTOR_SIZE );
+	GLASSERT( a == checkArea );
 }
+
+
+void WorldGen::PlaceFeature( int feature, const grinliz::Vector2I& sector, int rotation )
+{
+	if ( !features ) return;
+
+	Matrix2I rot;
+	rot.SetRotation( rotation );
+
+	int cx = featuresSize.x / SECTOR_SIZE;
+	int cy = featuresSize.y / SECTOR_SIZE;
+	int fy = feature / cx;
+	int fx = feature - fy*cx;
+
+	// Mapping
+	Rectangle2I map;
+	map.Set( 0, 0, SECTOR_SIZE-1, SECTOR_SIZE-1 );
+	map = rot * map;
+
+	for( int j=0; j<SECTOR_SIZE; ++j ) {
+		for( int i=0; i<SECTOR_SIZE; ++i ) {
+			Color4U8 c = features[(fy*SECTOR_SIZE+j)*featuresSize.x + (fx*SECTOR_SIZE+i)];
+			Vector2I src = { i, j };
+			Vector2I dst = rot * src;
+			dst.x += -map.min.x + sector.x * SECTOR_SIZE;
+			dst.y += -map.min.y + sector.y * SECTOR_SIZE;
+
+			if ( c.g == 255 ) {
+				if ( land[INDEX(dst)] == WATER ) {
+					land[INDEX(dst)] = LAND0;
+				}
+			}
+			else if ( c.b == 255 ) {
+				if ( land[INDEX(dst)] >= LAND0 && land[INDEX(dst)] <= LAND3 ) {
+					land[INDEX(dst)] = WATER;
+				}
+			}
+		}
+	}
+}
+
+
+void WorldGen::CalcPath( const SectorData* s )
+{
+	Rectangle2I bounds = s->InnerBounds();
+	static const Vector2I d[4] = { {1,0}, {0,1}, {-1,0}, {0,-1} };
+
+	for( int i=0; i<5; ++i ) {
+		Vector2I origin = s->core;
+		if ( i > 0 ) {
+			if ( s->ports & (1<<i)) {
+				origin = s->GetPortLoc( 1<<i ).Center();
+			}
+			else {
+				// no port.
+				continue;
+			}
+		}
+		Color( bounds, origin );
+
+		for( int y=bounds.min.y; y<=bounds.max.y; ++y ) {
+			for( int x=bounds.min.x; x<=bounds.max.x; ++x ) {
+				Vector2I v = { x, y };
+
+				if ( color[INDEX(v)] ) {
+					// FIXME: this always chooses the first hit.
+					// Would be nice to mix it up to make the
+					// paths look more natural, and choose among
+					// the valid paths.
+					int dir=-1;
+					if ( v == origin ) {
+						dir = 0;
+					}
+					else {
+						for( int k=0; k<4; ++k ) {
+							Vector2I loc = v + d[k];
+							if ( bounds.Contains( loc ) ) {
+								int d = color[INDEX(v)] - color[INDEX(loc)];
+								if ( d == 1 ) {
+									dir = k;
+									break;
+								}
+							}
+						}
+					}
+					GLASSERT( dir >= 0 );
+					path[INDEX(x,y)] |= dir << (i*2);
+				}
+			}
+		}
+	}
+}
+
+
 
 

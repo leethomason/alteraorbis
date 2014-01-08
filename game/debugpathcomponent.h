@@ -39,7 +39,7 @@ public:
 
 	virtual void OnAdd( Chit* chit );
 	virtual void OnRemove();
-	virtual int DoTick( U32 delta, U32 since );
+	virtual int DoTick( U32 delta );
 
 private:
 	Engine* engine;

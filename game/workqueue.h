@@ -50,7 +50,6 @@ public:
 
 	void Serialize( XStream* xs );
 	void AddAction( const grinliz::Vector2I& pos, int action );	// add an action to do
-	//void AddClear( const grinliz::Vector2I& pos );
 	void Remove( const grinliz::Vector2I& pos );
 	
 	const QueueItem*	Find( const grinliz::Vector2I& chitPos );	// find something to do. don't hold pointer!

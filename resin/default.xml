@@ -102,13 +102,16 @@
   <model filename="clearMarker3.ac" shading="flat" shadowCaster="true" />
 
   <model filename="core.ac" shading="flat" />
-  <model filename="kiosk.ac" modelName="kiosk.n" origin="-6.50 0 -0.50" shading="flat" polyRemoval="pre" />
-  <model filename="kiosk.ac" modelName="kiosk.m" origin="-8.50 0 -0.50" shading="flat" polyRemoval="pre" />
-  <model filename="kiosk.ac" modelName="kiosk.c" origin="-1.50 0 -0.50" shading="flat" polyRemoval="pre" />
-  <model filename="kiosk.ac" modelName="kiosk.s" origin="-4.50 0 -0.50" shading="flat" polyRemoval="pre" />
-  <model assetName="vault"   filename="vault2.ac" origin="-5 0 -1"      shading="flat" polyRemoval="pre" />
-  <model assetName="factory" filename="factory.ac" origin="0 0 0"       shading="flat" polyRemoval="pre" />
-  <model assetName="power"   filename="power.ac"  origin="0 0 0"        shading="flat" polyRemoval="pre" />
+  <model filename="kiosk.ac" modelName="kiosk.n"    origin="-6.50 0 -0.50" shading="flat" polyRemoval="pre" />
+  <model filename="kiosk.ac" modelName="kiosk.m"    origin="-8.50 0 -0.50" shading="flat" polyRemoval="pre" />
+  <model filename="kiosk.ac" modelName="kiosk.c"    origin="-1.50 0 -0.50" shading="flat" polyRemoval="pre" />
+  <model filename="kiosk.ac" modelName="kiosk.s"    origin="-4.50 0 -0.50" shading="flat" polyRemoval="pre" />
+  <model assetName="vault"   filename="vault2.ac"   origin="-5 0 -1"       shading="flat" polyRemoval="pre" />
+  <model assetName="factory" filename="factory.ac"  origin="0 0 0"         shading="flat" polyRemoval="pre" />
+  <model assetName="power"   filename="power.ac"    origin="0 0 0"         shading="flat" polyRemoval="pre" />
+  <model assetName="sleep"   filename="sleep.ac"    origin="-5.5 0 -0.5"   shading="flat" polyRemoval="pre" />
+  <model assetName="market"  filename="market.ac"   origin="-6 0 -1"       shading="flat" polyRemoval="pre" />
+  <model assetName="bar"     filename="bar.ac"      origin="-5 0 -1"       shading="flat" polyRemoval="pre" />
 
   <!-- animation v2
        filename is a prefix to: walk, stand, gunwalk, gunstand, melee, impact
@@ -147,7 +150,7 @@
   <model filename="mantis/mantis.ac" modelName="redmantis" animation="mantisAnimation" origin="1 0 0" shading="flat" polyRemoval="pre" >
     <meta name="trigger" pos="1 .35 .13" boneName="torso" />
     <meta name="target"  pos="1 0.33 0"/>
-    <meta name="althand" pos="1 0.40 0.20" baneName="torso" />
+    <meta name="althand" pos="1 0.40 0.20" boneName="torso" />
   </model>
 
   <animation filename="cyclops/cyclops_.bvh" assetName="cyclopsAnimation">
@@ -270,7 +273,7 @@
   <model filename="weapons2.ac"         modelName="pistol"      origin="0 0 -1"     shadowCaster="true" bones="true"/>
   <model filename="weapons2.ac"         modelName="pulse"       origin="0 0 0"      shadowCaster="true" bones="true"/>
   <model filename="weapons.ac"          modelName="ring"        origin="0.20 0 0"   shadowCaster="true" bones="true" />
-  <model                                filename="shield.ac"    origin="0 0 0"      shadowCaster="true" />
+  <model filename="shield.ac"                                   origin="0 0 0"      shadowCaster="true" />
 
   <font assetName="font" filename="font_0.png" noMip="true">
     <info face="Tahoma" size="28" bold="0" italic="0" charset="" unicode="1" stretchH="100" smooth="1" aa="1" padding="2,2,2,2" spacing="1,1" outline="0"/>

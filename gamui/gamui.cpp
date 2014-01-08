@@ -25,6 +25,7 @@
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
 
 using namespace gamui;
 using namespace std;
@@ -157,6 +158,9 @@ TextLabel::TextLabel() : UIItem( Gamui::LEVEL_TEXT ),
 	m_str = m_buf;
 	m_str[0] = 0;
 	m_allocated = ALLOCATED;
+	m_boundsWidth = 0;
+	m_boundsHeight = 0;
+	m_tabWidth = 0;
 }
 
 
@@ -191,6 +195,18 @@ const RenderAtom* TextLabel::GetRenderAtom() const
 
 	return Enabled() ? m_gamui->GetTextAtom() : m_gamui->GetDisabledTextAtom();
 }
+
+
+void TextLabel::SetBounds( float width, float height )	
+{ 
+	if ( m_boundsWidth != width || m_boundsHeight != height ) { 
+		m_boundsWidth = width; 
+		m_boundsHeight = height;
+		m_width = m_height = -1; 
+		Modify(); 
+	}
+}
+
 
 
 const char* TextLabel::GetText() const
@@ -240,35 +256,29 @@ bool TextLabel::DoLayout()
 }
 
 
-void TextLabel::CalcSize( float* width, float* height ) const
+float TextLabel::WordWidth( const char* p, IGamuiText* iText ) const
 {
-	*width = 0;
-	*height = 0;
-
-	if ( !m_gamui )
-		return;
-	IGamuiText* iText = m_gamui->GetTextInterface();
-	if ( !iText )
-		return;
-
-	const char* p = m_str;
-
+	float w = 0;
 	IGamuiText::GlyphMetrics metrics;
-	float x = 0;
-	float h = m_gamui->GetTextHeight();
+	float height = m_gamui->GetTextHeight();
+	char prev = ' ';
 
-	while ( p && *p ) {
-		iText->GamuiGlyph( *p, p>m_str ? *(p-1):0, h, &metrics );
+	while( *p && !isspace( *p )) {
+		iText->GamuiGlyph( *p, prev, height, &metrics );
+		w += metrics.advance;
+		prev = *p;
 		++p;
-		x += metrics.advance;
 	}
-	*width = x;
-	*height = m_gamui->GetTextHeight();
-	GAMUIASSERT( *height > 0 );
+	return w;
 }
 
 
-void TextLabel::Queue( CDynArray< uint16_t > *indexBuf, CDynArray< Gamui::Vertex > *vertexBuf )
+void TextLabel::Queue( CDynArray< uint16_t > *indexBuf, CDynArray< Gamui::Vertex > *vertexBuf ) 
+{
+	ConstQueue( indexBuf, vertexBuf );
+}
+
+void TextLabel::ConstQueue( CDynArray< uint16_t > *indexBuf, CDynArray< Gamui::Vertex > *vertexBuf ) const
 {
 	if ( !m_gamui )
 		return;
@@ -278,32 +288,96 @@ void TextLabel::Queue( CDynArray< uint16_t > *indexBuf, CDynArray< Gamui::Vertex
 	float x = X();
 	float y = Y(); //floorf( Y()+0.5f );	// snapping seems to hurt quality. Text is so tricky.
 
+	float xmax = x;
+
 	IGamuiText::GlyphMetrics metrics;
 	float height = m_gamui->GetTextHeight();
+	int tab = 0;
 
 	while ( p && *p ) {
-		iText->GamuiGlyph( *p, p>m_str ? *(p-1):0, height, &metrics );
+		// Text layout. Written this algorithm so many times, and it's
+		// always tricky. This is at least a very simple version.
 
-		Gamui::Vertex* vertex = PushQuad( indexBuf, vertexBuf );
+		// Respect line breaks, even if we aren't in multi-line mode.
+		while ( *p == '\n' ) {
+			y += height;
+			tab = 0;
+			x = X();
+			++p;
+		}
+		if ( !*p ) break;
 
-		//x = floorf( x + 0.5f );
-		float x0 = x+metrics.x;
-		float x1 = x+metrics.x+metrics.w;
-		float y0 = y+metrics.y;
-		float y1 = y+metrics.y+metrics.h;
+		// Tabs are implemented as tables.
+		if ( *p == '\t' && m_tabWidth > 0 ) {
+			++p;
+			if ( !*p ) break;
 
-		vertex[0].Set( x0, y0,				
-					   metrics.tx0, metrics.ty0 );
-		vertex[1].Set( x0, y1, 
-					   metrics.tx0, metrics.ty1 );
-		vertex[2].Set( x1, y1, 
-					   metrics.tx1, metrics.ty1 );
-		vertex[3].Set( x1, y0,
-			           metrics.tx1, metrics.ty0 );
+			++tab;
+			x = X() + float(tab)*m_tabWidth;
+		}
 
-		++p;
-		x += metrics.advance;
+		// Throw away space after a line break.
+		if ( m_boundsWidth && ( x == X() && y > Y() )) {
+			while ( *p && *p == ' ' ) {
+				++p;
+			}
+			if ( !*p || *p == '\n' ) {
+				continue;	// we need to hit the previous case..
+			}
+		}
+
+		// If we aren't the first word, do we need to break?
+		if ( m_boundsWidth && (x > X()) && (*p != ' ') ) {
+			float w = WordWidth( p, iText );
+			if ( x + w > X() + m_boundsWidth ) { 
+				y += height;
+				x = X();
+				tab = 0;
+				continue;
+			}
+		}
+
+		// And finally, have we exceeded the y bound?
+		if ( m_boundsHeight && ( y + height >= Y() + m_boundsHeight) ) {
+			break;
+		}
+
+		// Everything above is about a word; now we are
+		// committed and can run in a tight loop.
+		while( p && *p && *p != '\n' && *p != '\t' ) {
+			iText->GamuiGlyph( *p, p>m_str ? *(p-1):0, height, &metrics );
+
+			float x0 = x+metrics.x;
+			float x1 = x+metrics.x+metrics.w;
+			float y0 = y+metrics.y;
+			float y1 = y+metrics.y+metrics.h;
+
+			if ( vertexBuf ) {
+				Gamui::Vertex* vertex = PushQuad( indexBuf, vertexBuf );
+		
+				vertex[0].Set( x0, y0,				
+							   metrics.tx0, metrics.ty0 );
+				vertex[1].Set( x0, y1, 
+							   metrics.tx0, metrics.ty1 );
+				vertex[2].Set( x1, y1, 
+							   metrics.tx1, metrics.ty1 );
+				vertex[3].Set( x1, y0,
+							   metrics.tx1, metrics.ty0 );
+			}
+			int done = isspace( *p );
+
+			++p;
+			x += metrics.advance;
+			xmax = x > xmax ? x : xmax;
+
+			// We processed a space; leave the (inner) word loop.
+			if ( done )
+				break;
+		}
 	}
+
+	m_width = xmax - X();
+	m_height = y + height - Y();
 }
 
 
@@ -313,7 +387,7 @@ float TextLabel::Width() const
 		return 0;
 
 	if ( m_width < 0 ) {
-		CalcSize( &m_width, &m_height );
+		ConstQueue( 0, 0 );
 	}
 	return m_width;
 }
@@ -325,67 +399,9 @@ float TextLabel::Height() const
 		return 0;
 
 	if ( m_height < 0 ) {
-		CalcSize( &m_width, &m_height );
+		ConstQueue( 0, 0 );
 	}
 	return m_height;
-}
-
-
-TextBox::TextBox() : UIItem( Gamui::LEVEL_TEXT ), m_needsLayout( true ), m_width( 0 ), m_height( 0 ), m_textLabelArr( 0 ), m_lines( 0 )
-{}
-
-
-TextBox::~TextBox() 
-{
-	delete [] m_textLabelArr;
-}
-
-
-void TextBox::Init( Gamui* g ) 
-{
-	m_gamui = g;
-	m_gamui->Add( this );
-	m_storage.Init( g );
-	m_storage.SetVisible( false );
-	m_needsLayout = true;
-}
-
-
-const RenderAtom* TextBox::GetRenderAtom() const
-{
-	return 0;
-}
-
-
-bool TextBox::DoLayout()
-{
-	if ( m_needsLayout ) {
-		float h = m_storage.Height();
-		int lines =(int)(Height()/h);
-
-		if ( lines != m_lines ) {
-			m_lines = lines;
-			delete [] m_textLabelArr;
-			m_textLabelArr = new TextLabel[m_lines];
-			for( int i=0; i<m_lines; ++i ) {
-				m_textLabelArr[i].Init( m_gamui );
-			}
-		}
-		for( int i=0; i<m_lines; ++i ) {
-			m_textLabelArr[i].SetVisible( Visible() );
-			m_textLabelArr[i].SetEnabled( Enabled() );
-		}
-		m_gamui->LayoutTextBlock( m_storage.GetText(), m_textLabelArr, m_lines, X(), Y(), Width() );
-
-		m_needsLayout = false;
-	}
-	return false;	// children render, not the textbox
-}
-
-
-void TextBox::Queue( CDynArray< uint16_t > *indexBuf, CDynArray< Gamui::Vertex > *vertexBuf )
-{
-	// does nothing - children draw
 }
 
 
@@ -396,7 +412,6 @@ Image::Image() : UIItem( Gamui::LEVEL_BACKGROUND ),
 	  m_capturesTap( false )
 {
 }
-
 
 Image::Image( Gamui* gamui, const RenderAtom& atom, bool foreground ): UIItem( Gamui::LEVEL_BACKGROUND ),
 	  m_width( DEFAULT_SIZE ),
@@ -672,8 +687,7 @@ void Image::Queue( CDynArray< uint16_t > *indexBuf, CDynArray< Gamui::Vertex > *
 
 
 Button::Button() : UIItem( Gamui::LEVEL_FOREGROUND ),
-	m_up( true ),
-	m_usingText1( false )
+	m_up( true )
 {
 }
 
@@ -712,8 +726,7 @@ void Button::Init(	Gamui* gamui,
 	m_icon.Init( gamui, nullAtom, false );
 	m_icon.SetLevel( Gamui::LEVEL_ICON );
 
-	m_label[0].Init( gamui );
-	m_label[1].Init( gamui );
+	m_label.Init( gamui );
 	gamui->Add( this );
 }
 
@@ -722,10 +735,8 @@ float Button::Width() const
 {
 	float x0 = m_face.X() + m_face.Width();
 	float x1 = m_deco.X() + m_deco.Width();
-	float x2 = m_label[0].X() + m_label[0].Width();
+	float x2 = m_label.X() + m_label.Width();
 	float x3 = x2;
-	if ( m_usingText1 ) 
-		x3 = m_label[1].X() + m_label[1].Width();
 
 	float x = Max( x0, Max( x1, Max( x2, x3 ) ) );
 	return x - X();
@@ -736,10 +747,8 @@ float Button::Height() const
 {
 	float y0 = m_face.Y() + m_face.Height();
 	float y1 = m_deco.Y() + m_deco.Height();
-	float y2 = m_label[0].Y() + m_label[0].Height();
+	float y2 = m_label.Y() + m_label.Height();
 	float y3 = y2;
-	if ( m_usingText1 ) 
-		y3 = m_label[1].Y() + m_label[1].Height();
 
 	float y = Max( y0, Max( y1, Max( y2, y3 ) ) );
 	return y - Y();
@@ -770,21 +779,8 @@ void Button::PositionChildren()
 	// --- face ---- //
 	float x=0, y0=0, y1=0;
 
-	if ( !m_usingText1 ) {
-		float h = m_label[0].Height();
-		m_label[1].SetVisible( false );
-		y0 = Y() + (m_face.Height() - h)*0.5f;
-	}
-	else {
-		float h0 = m_label[0].Height();
-		float h2 = m_label[1].Height();
-		float h = h0 + h2;
-
-		y0 = Y() + (m_face.Height() - h)*0.5f;
-		y1 = y0 + h0;
-
-		m_label[1].SetVisible( Visible() );
-	}
+	float h = m_label.Height();
+	y0 = Y() + (m_face.Height() - h)*0.5f;
 
 	// --- icon -- //
 	float iconSize = Min( m_face.Height(), m_face.Width() ) * 0.5f;
@@ -793,10 +789,7 @@ void Button::PositionChildren()
 
 	// --- text --- //
 
-	float w = m_label[0].Width();
-	if ( m_usingText1 ) {
-		w = Max( w, m_label[1].Width() );
-	}
+	float w = m_label.Width();
 	
 	if ( m_textLayout == LEFT ) {
 		x = X();
@@ -812,10 +805,9 @@ void Button::PositionChildren()
 	y0 += m_textDY;
 	y1 += m_textDY;
 
-	m_label[0].SetPos( x, y0 );
-	m_label[1].SetPos( x, y1 );
+	m_label.SetPos( x, y0 );
 
-	m_label[0].SetVisible( Visible() );
+	m_label.SetVisible( Visible() );
 	m_deco.SetVisible( Visible() );
 	m_face.SetVisible( Visible() );
 	m_icon.SetVisible( Visible() );
@@ -830,8 +822,7 @@ void Button::SetPos( float x, float y )
 	m_face.SetPos( x, y );
 	m_deco.SetPos( x, y );
 	m_icon.SetPos( x, y );
-	m_label[0].SetPos( x, y );
-	m_label[1].SetPos( x, y );
+	m_label.SetPos( x, y );
 	// Modify(); don't call let sub-functions check
 }
 
@@ -848,22 +839,7 @@ void Button::SetSize( float width, float height )
 void Button::SetText( const char* text )
 {
 	GAMUIASSERT( text );
-	const char* p = strchr( text, '\n' );
-	if ( p && *(p+1) ) {
-		m_label[0].SetText( text, p );	// calls Modify()
-		SetText2( p+1 );
-	}
-	else {
-		m_label[0].SetText( text );	// calls Modify()
-	}
-}
-
-
-void Button::SetText2( const char* text )
-{
-	m_usingText1 = true;
-	m_label[1].SetText( text );
-	Modify();
+	m_label.SetText( text );	// calls Modify()
 }
 
 
@@ -895,8 +871,7 @@ void Button::SetState()
 	m_face.SetAtom( m_atoms[faceIndex] );
 	m_deco.SetAtom( m_atoms[decoIndex] );
 	m_icon.SetAtom( m_atoms[iconIndex] );
-	m_label[0].SetEnabled( m_enabled );
-	m_label[1].SetEnabled( m_enabled );
+	m_label.SetEnabled( m_enabled );
 	//Modify(); sub functions should call
 }
 
@@ -1117,6 +1092,7 @@ void DigitalBar::Init(	Gamui* gamui,
 	for( int i=0; i<nTicks; ++i ) {
 		m_image[i].Init( gamui, m_atomHigher, true );
 	}
+	m_textLabel.Init( gamui );
 	SetRange( 0 );
 }
 
@@ -1159,7 +1135,9 @@ void DigitalBar::SetHigherAtom( const RenderAtom& atom )
 
 void DigitalBar::SetRange( float t0 )
 {
-	GAMUIASSERT( t0 >= 0 && t0 <= 1 );
+	if ( t0 < 0 ) t0 = 0;
+	if ( t0 > 1 ) t0 = 1;
+
 	if ( t0 != m_t ) {
 		m_t = t0;
 
@@ -1194,6 +1172,7 @@ void DigitalBar::SetVisible( bool visible )
 	for( int i=0; i<m_nTicks; ++i ) {
 		m_image[i].SetVisible( visible );
 	}
+	m_textLabel.SetVisible( visible );
 }
 
 
@@ -1205,18 +1184,29 @@ const RenderAtom* DigitalBar::GetRenderAtom() const
 
 bool DigitalBar::DoLayout()
 {
-	//
-	// a space b space c
-	//
-	float totalSpace = m_width * 0.10f;
-	float space = totalSpace / (float)(m_nTicks-1);
-	float perItemWidth = 0.90f * m_width / (float)m_nTicks;
+	if ( m_nTicks > 2 ) {
+		//
+		// a space b space c
+		//
+		float totalSpace = m_width * 0.10f;
+		float space = totalSpace / (float)(m_nTicks-1);
+		float perItemWidth = 0.90f * m_width / (float)m_nTicks;
 
-	for( int i=0; i<m_nTicks; ++i ) {
-		m_image[i].SetSize( perItemWidth, m_height );
-		m_image[i].SetPos( X() + (float)i*(perItemWidth + space),
-						   Y() );
+		for( int i=0; i<m_nTicks; ++i ) {
+			m_image[i].SetSize( perItemWidth, m_height );
+			m_image[i].SetPos( X() + (float)i*(perItemWidth + space),
+							   Y() );
+		}
 	}
+	else {
+		m_image[0].SetAtom( m_atomLower );
+		m_image[1].SetAtom( m_atomHigher );
+		m_image[0].SetSize( m_width * m_t, m_height );
+		m_image[1].SetSize( m_width * (1.0f-m_t), m_height );
+		m_image[0].SetPos( X(), Y() );
+		m_image[1].SetPos( X() + m_width*m_t, Y() );
+	}
+	m_textLabel.SetCenterPos( X() + Width()*0.5f, Y() + Height()*0.5f );
 	return false;
 }
 

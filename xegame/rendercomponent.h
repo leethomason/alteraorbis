@@ -59,7 +59,7 @@ public:
 	virtual void OnAdd( Chit* chit );
 	virtual void OnRemove();
 
-	virtual int DoTick( U32 deltaTime, U32 since );
+	virtual int DoTick( U32 deltaTime );
 	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
 
 	// ------ Additional --------

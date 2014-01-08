@@ -20,11 +20,12 @@
 #include "../tinyxml2/tinyxml2.h"
 #include "../xegame/istringconst.h"
 #include "../game/lumosmath.h"
+#include "../xarchive/glstreamer.h"
 
 using namespace tinyxml2;
 using namespace grinliz;
 
-/*static*/ ItemDefDB* ItemDefDB::instance = 0;
+ItemDefDB* StackedSingleton< ItemDefDB >::instance = 0;
 
 void ItemDefDB::Load( const char* path )
 {
@@ -40,10 +41,10 @@ void ItemDefDB::Load( const char* path )
 		{
 			GameItem* item = new GameItem();
 			item->Load( itemEle );
-			item->key = item->name;
+			item->key = item->IName();
 			GLASSERT( !map.Query( item->key.c_str(), 0 ));
 			map.Add( item->key.c_str(), item );
-			topNames.Push( item->name );
+			topNames.Push( item->IName() );
 
 			const XMLElement* intrinsicEle = itemEle->FirstChildElement( "intrinsics" );
 			if ( intrinsicEle ) {
@@ -126,59 +127,6 @@ void ItemDefDB::Get( const char* name, GameItemArr* arr )
 }
 
 
-int ItemDefDB::CalcItemValue( const GameItem* item )
-{
-	static const float EFFECT_BONUS = 1.5f;
-	static const float MELEE_VALUE  = 20;
-	static const float RANGED_VALUE = 30;
-	static const float SHIELD_VALUE = 20;
-
-	CArray<int, 16> value;
-	value.Push( 0 );
-
-	if ( item->ToMeleeWeapon() ) {
-		float dptu = BattleMechanics::MeleeDPTU( 0, item->ToMeleeWeapon() );
-
-		const GameItem& basic = Get( "ring" );
-		float refDPTU = BattleMechanics::MeleeDPTU( 0, basic.ToMeleeWeapon() );
-
-		float v = dptu / refDPTU * MELEE_VALUE;
-		if ( item->flags & GameItem::EFFECT_FIRE ) v *= EFFECT_BONUS;
-		if ( item->flags & GameItem::EFFECT_SHOCK ) v *= EFFECT_BONUS;
-		if ( item->flags & GameItem::EFFECT_EXPLOSIVE ) v *= EFFECT_BONUS;
-		value.Push( (int)v );
-	}
-
-	if ( item->ToRangedWeapon() ) {
-		float radAt1 = BattleMechanics::ComputeRadAt1( 0, item->ToRangedWeapon(), false, false );
-		float dptu = BattleMechanics::RangedDPTU( item->ToRangedWeapon(), true );
-		float er   = BattleMechanics::EffectiveRange( radAt1 );
-
-		const GameItem& basic = Get( "blaster" );
-		float refRadAt1 = BattleMechanics::ComputeRadAt1( 0, basic.ToRangedWeapon(), false, false );
-		float refDPTU = BattleMechanics::RangedDPTU( basic.ToRangedWeapon(), true );
-		float refER   = BattleMechanics::EffectiveRange( refRadAt1 );
-
-		float v = ( dptu * er ) / ( refDPTU * refER ) * RANGED_VALUE;
-		if ( item->flags & GameItem::EFFECT_FIRE ) v *= EFFECT_BONUS;
-		if ( item->flags & GameItem::EFFECT_SHOCK ) v *= EFFECT_BONUS;
-		if ( item->flags & GameItem::EFFECT_EXPLOSIVE ) v *= EFFECT_BONUS;
-		value.Push( (int)v );
-	}
-
-	if ( item->ToShield() ) {
-		int rounds = item->ClipCap();
-		const GameItem& basic = Get( "shield" );
-		int refRounds = basic.ClipCap();
-
-		// Currently, shield effects don't do anything, although that would be cool.
-		float v = float(rounds) / float(refRounds) * SHIELD_VALUE;
-		value.Push( int(v) );
-	}
-	return value.Max();
-}
-
-
 void ItemDefDB::AssignWeaponStats( const int* roll, const GameItem& base, GameItem* item )
 {
 	// Accuracy and Damage are effected by traits + level.
@@ -191,21 +139,21 @@ void ItemDefDB::AssignWeaponStats( const int* roll, const GameItem& base, GameIt
 	// ClipCap:		CHR		
 	// Reload:		INT
 
-	item->CopyFrom( &base, item->id );
+	*item = base;
 	for( int i=0; i<GameTrait::NUM_TRAITS; ++i ) {
-		item->traits.Set( i, roll[i] );
+		item->GetTraitsMutable()->Set( i, roll[i] );
 	}
 
 	float cool = (float)item->cooldown.Threshold();
-	cool *= Dice3D6ToMult( item->traits.Get( GameTrait::ALT_COOL ));
+	cool *= Dice3D6ToMult( item->Traits().Get( GameTrait::ALT_COOL ));
 	item->cooldown.SetThreshold( Clamp( (int)cool, 100, 3000 ));
 
 	float clipCap = (float)base.clipCap;
-	clipCap *= Dice3D6ToMult( item->traits.Get( GameTrait::ALT_CAPACITY ));
+	clipCap *= Dice3D6ToMult( item->Traits().Get( GameTrait::ALT_CAPACITY ));
 	item->clipCap = Clamp( (int)clipCap, 1, 100 );
 
 	float reload = (float)base.reload.Threshold();
-	reload /= Dice3D6ToMult( item->traits.Get( GameTrait::ALT_RELOAD ));
+	reload /= Dice3D6ToMult( item->Traits().Get( GameTrait::ALT_RELOAD ));
 	item->reload.SetThreshold( Clamp( (int)reload, 100, 3000 ));
 }
 
@@ -264,4 +212,95 @@ void ItemDefDB::DumpWeaponStats()
 	fclose( fp );
 }
 
+
+void ItemHistory::Set( const GameItem* gi )
+{
+	this->itemID		= gi->ID();
+	this->fullName      = gi->IFullName();
+	this->level			= gi->Traits().Level();
+	this->value			= gi->GetValue();
+}
+
+void ItemHistory::Serialize( XStream* xs )
+{
+	XarcOpen( xs, "ItemHistory" );
+	XARC_SER( xs, fullName );
+	XarcClose( xs );
+}
+
+//ItemDB* ItemDB::instance = 0;
+ItemDB* StackedSingleton< ItemDB >::instance = 0;
+
+void ItemDB::Serialize( XStream* xs ) 
+{
+	XarcOpen( xs, "ItemDB" );
+	// Don't serialize map! It is created/destroyed with GameItems
+	XARC_SER_CARRAY( xs, itemHistory );
+	XarcClose( xs );
+}
+
+void ItemDB::Add( const GameItem* gi )
+{
+	int id = gi->ID();
+	GLASSERT( id >= 0 );
+
+	// History
+	if ( gi->Significant() ) {
+		ItemHistory h;
+		h.Set( gi );
+		itemHistory.Add( h );
+	}
+
+	// Current
+	itemMap.Add( id, gi );
+}
+
+
+void ItemDB::Remove( const GameItem* gi )
+{
+	int id = gi->ID();
+	GLASSERT( id >= 0 );
+
+	// History:
+	if ( gi->Significant() ) {
+		ItemHistory h;
+		h.Set( gi );
+		itemHistory.Add( h );
+	}
+
+	// Current:
+	itemMap.Remove( id );
+}
+
+
+void ItemDB::Update( const GameItem* gi )
+{
+	int id = gi->ID();
+	GLASSERT( id >= 0 );
+
+	if ( gi->Significant() ) {
+		ItemHistory h;
+		h.Set( gi );
+		itemHistory.Add( h );
+	}
+}
+
+
+const GameItem*	ItemDB::Find( int id )
+{
+	const GameItem* gi = 0;
+	itemMap.Query( id, &gi );
+	return gi;
+}
+
+
+const ItemHistory* ItemDB::History( int id )
+{
+	ItemHistory key;
+	key.itemID = id;
+
+	const ItemHistory* h = 0;
+	int index = itemHistory.BSearch( key );
+	return index >= 0 ? &itemHistory[index] : 0;
+}
 

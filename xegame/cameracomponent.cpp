@@ -76,7 +76,7 @@ void CameraComponent::SetTrack( int targetID )
 }
 
 
-int CameraComponent::DoTick( U32 delta, U32 since ) 
+int CameraComponent::DoTick( U32 delta ) 
 {
 	if ( GetChitBag()->GetCameraChitID() != parentChit->ID() ) {
 		parentChit->QueueDelete();

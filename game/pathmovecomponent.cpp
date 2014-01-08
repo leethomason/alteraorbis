@@ -27,7 +27,6 @@
 
 #include "../engine/loosequadtree.h"
 
-//#include "../grinliz/glperformance.h"
 #include "../Shiny/include/Shiny.h"
 
 #include "../script/worldgen.h"
@@ -43,11 +42,11 @@ void PathMoveComponent::Serialize( XStream* item )
 {
 	this->BeginSerialize( item, Name() );
 	XARC_SER( item, queued.pos );
-	XARC_SER( item, queued.rotation );
+	XARC_SER( item, queued.heading );
 	XARC_SER( item, queued.sectorPort.sector );
 	XARC_SER( item, queued.sectorPort.port );
 	XARC_SER( item, dest.pos );
-	XARC_SER( item, dest.rotation );
+	XARC_SER( item, dest.heading );
 	XARC_SER( item, dest.sectorPort.sector );
 	XARC_SER( item, dest.sectorPort.port );
 	this->EndSerialize( item );
@@ -60,20 +59,24 @@ void PathMoveComponent::OnAdd( Chit* chit )
 	blockForceApplied = false;
 	avoidForceApplied = false;
 	forceCount = 0;
+	path.Clear();
 	
 	// Serialization case:
 	// if there is a queue location, use that, else use the current location.
-	if ( queued.pos.x >= 0 ) {
-		QueueDest( queued.pos, queued.rotation, &queued.sectorPort );
+	if ( queued.pos.x > 0 ) {
+		QueueDest( queued.pos, &queued.heading, &queued.sectorPort );
 	}
-	else if ( dest.pos.x >= 0 ) {
-		QueueDest( dest.pos, dest.rotation, &dest.sectorPort );
+	else if ( dest.pos.x > 0 ) {
+		QueueDest( dest.pos, &dest.heading, &dest.sectorPort );
 	}
 }
 
 
 void PathMoveComponent::OnRemove()
 {
+	if ( !path.Empty() ) {
+		parentChit->SendMessage( ChitMsg( ChitMsg::PATHMOVE_DESTINATION_BLOCKED ), this ); 
+	}
 	super::OnRemove();
 }
 
@@ -105,16 +108,20 @@ void PathMoveComponent::CalcVelocity( grinliz::Vector3F* v )
 }
 
 
-void PathMoveComponent::QueueDest( grinliz::Vector2F d, float r, const SectorPort* sector )
+void PathMoveComponent::QueueDest( const grinliz::Vector2F& d, const grinliz::Vector2F* h, const SectorPort* sector )
 {
-	GLASSERT(  d.x >= 0 && d.y >= 0 );
+	GLASSERT(  d.x > 0 && d.y > 0 );
 
 	queued.pos = d;
-	queued.rotation = r;
+	queued.heading.Zero();
+	if ( h ) {
+		queued.heading = *h;
+	}
 	queued.sectorPort.Zero();
 	if ( sector ) {
 		queued.sectorPort = *sector;
 	}
+	parentChit->SetTickNeeded();
 }
 
 
@@ -125,29 +132,27 @@ void PathMoveComponent::QueueDest( Chit* target )
 	if ( targetSpatial && srcSpatial ) {
 		Vector2F v = targetSpatial->GetPosition2D();
 		Vector2F delta = v - srcSpatial->GetPosition2D();
-		float angle = RotationXZDegrees( delta.x, delta.y );
-		QueueDest( v, angle );
+		delta.SafeNormalize( 1, 0 );
+		//float angle = RotationXZDegrees( delta.x, delta.y );
+		QueueDest( v, &delta );
 	}
+	parentChit->SetTickNeeded();
 }
 
 
 bool PathMoveComponent::NeedComputeDest()
 {
-	if ( queued.pos.x < 0 ) 
+	if ( queued.pos.IsZero() ) 
 		return false;
 
 	// Optimize - can tweak existing path? 
 	// - If there is a path, and this doesn't change it, do nothing.
 	// - If there is a path, and this only changes the end rotation, just do that.
 	// But if the force count is high, don't optimize. We may be stuck.
-	if ( HasPath() && !ForceCountHigh() ) {
-		static const float EPS = 0.01f;
-		if ( dest.pos.Equal( queued.pos, EPS ) && Equal( dest.rotation, queued.rotation, EPS ) ) {
-			queued.Clear();
-			return false;
-		}
+	if ( !path.Empty() && !ForceCountHigh() ) {
+		static const float EPS = 0.1f;
 		if ( dest.pos.Equal( queued.pos, EPS ) ) {
-			dest.rotation = queued.rotation;
+			dest.heading = queued.heading;
 			queued.Clear();
 			return false;
 		}
@@ -158,7 +163,6 @@ bool PathMoveComponent::NeedComputeDest()
 
 void PathMoveComponent::ComputeDest()
 {
-	//GRINLIZ_PERFTRACK;
 	PROFILE_FUNC();
 	ComponentSet thisComp( parentChit, Chit::SPATIAL_BIT | Chit::RENDER_BIT | ComponentSet::IS_ALIVE );
 	if ( !thisComp.okay )
@@ -181,12 +185,10 @@ void PathMoveComponent::ComputeDest()
 		return;
 	}
 
-
 	GLASSERT( queued.pos.x >= 0 && queued.pos.y >= 0 );
 	dest = queued;
 	GLASSERT( dest.pos.x >= 0 && dest.pos.y >= 0 );
 	queued.Clear();
-	nPathPos = 0;
 	pathPos = 0;
 
 	// Make sure the 'dest' is actually a point we can get to.
@@ -199,13 +201,13 @@ void PathMoveComponent::ComputeDest()
 	}
 
 	float cost=0;
-	bool okay = map->CalcPath( posVec, dest.pos, path, &nPathPos, MAX_MOVE_PATH, &cost, pathDebugging ); 
+	bool okay = map->CalcPath( posVec, dest.pos, &path, &cost, pathDebugging ); 
 	if ( !okay ) {
 		SetNoPath();
 		parentChit->SendMessage( ChitMsg( ChitMsg::PATHMOVE_DESTINATION_BLOCKED ), this ); 
 	}
 	else {
-		GLASSERT( nPathPos > 0 );
+		GLASSERT( !path.Empty() );
 		GLASSERT( pathPos == 0 );
 		GLASSERT( dest.pos.x >= 0 && dest.pos.y >= 0 );
 		// We are back on track:
@@ -215,19 +217,18 @@ void PathMoveComponent::ComputeDest()
 }
 
 
-void PathMoveComponent::GetPosRot( grinliz::Vector2F* pos, float* rot )
+void PathMoveComponent::GetPosRot( grinliz::Vector2F* pos, grinliz::Vector2F* heading )
 {
 	SpatialComponent* spatial = parentChit->GetSpatialComponent();
 	GLASSERT( spatial );
-	const Vector3F& pos3 = spatial->GetPosition();
-	pos->Set( pos3.x, pos3.z );
-	GLASSERT( map->Bounds().Contains( (int)pos->x, (int)pos->y ));
-	*rot = spatial->GetYRotation();
+	*pos = spatial->GetPosition2D();
+	*heading = spatial->GetHeading2D();
 }
 
 
-void PathMoveComponent::SetPosRot( grinliz::Vector2F pos, float rot )
+void PathMoveComponent::SetPosRot( const grinliz::Vector2F& _pos, const grinliz::Vector2F& heading )
 {
+	Vector2F pos = _pos;
 	SpatialComponent* spatial = parentChit->GetSpatialComponent();
 	GLASSERT( spatial );
 
@@ -237,114 +238,140 @@ void PathMoveComponent::SetPosRot( grinliz::Vector2F pos, float rot )
 	pos.x = Clamp( pos.x, b.min.x, b.max.x );
 	pos.y = Clamp( pos.y, b.min.y, b.max.y );
 
-	spatial->SetPosition( pos.x, 0, pos.y );
-	spatial->SetYRotation( rot );
+	// FIXME: could be more efficient with half-angles and setting
+	// the quaternion directly.
+	float rotation = RotationXZDegrees( heading.x, heading.y );
+	Vector3F pos3 = { pos.x, 0, pos.y };
+	Quaternion q;
+	q.FromAxisAngle( V3F_UP, rotation );
+	
+	spatial->SetPosRot( pos3, q );
 }
 
 
-float PathMoveComponent::GetDistToNext2( const Vector2F& current )
+bool PathMoveComponent::ApplyRotation( float travelRot, const Vector2F& targetHeading, Vector2F* heading )
 {
-	float dx = current.x - path[pathPos].x;
-	float dy = current.y - path[pathPos].y;
-	return dx*dx + dy*dy;
+
+	float dot = DotProduct( targetHeading, *heading );
+	if ( dot > 0.999f ) {
+		*heading = targetHeading;
+		return true;
+	}
+
+	Vector3F cross;
+	CrossProduct( *heading, targetHeading, &cross );
+
+	Matrix2 rot;
+	float s = cross.z < 0.f ? -1.f : 1.f;	// don't use Sign(), because it can return 0
+	rot.SetRotation( s * travelRot );
+	*heading = rot * (*heading);
+
+	float newDot = DotProduct( targetHeading, *heading );
+	Vector3F newCross;
+	CrossProduct( *heading, targetHeading, &newCross );
+
+	if (    ( Sign(dot) == Sign(newDot) )
+		 && ( Sign(cross.z) != Sign(newCross.z))) 
+	{
+		// over-rotated.
+		*heading = targetHeading;
+		return true;
+	}
+	return false;
 }
 
 
-void PathMoveComponent::RotationFirst( U32 delta )
+bool PathMoveComponent::RotationFirst( U32 _dt, Vector2F* pos2, Vector2F* heading )
 {
-	//GRINLIZ_PERFTRACK;
-	PROFILE_FUNC();
+	//PROFILE_FUNC();
 
-	if ( pathPos < nPathPos ) {
-		float speed = Speed();
-		float travel    = Travel( speed, delta );
-		float travelRot	= Travel( ROTATION_SPEED, delta );
+	float speed		= Speed();
+	float dt		= float(_dt)*0.001f;
 
-		while ( travel > 0 && travelRot > 0 && pathPos < nPathPos ) {
-			Vector2F next  = path[pathPos];
-			Vector2F delta = next - pos2;
-			float    dist = delta.Length();
+	while (    (dt > 0.0001 )
+			&& (pathPos < path.Size()) ) 
+	{
+		float travel    = Travel( speed, dt );		// distance = speed * time, time = distance / speed
+		float travelRot	= Travel( ROTATION_SPEED, dt );
+
+		Vector2F next  = path[pathPos];		// next waypoint
+		Vector2F delta = next - (*pos2);	// vector to next waypoint
+		float    dist = delta.Length();		// distance to next waypoint
 			
-			// check for very close & patch.
-			static const float EPS = 0.01f;
-			if ( dist <= EPS ) {
-				travel -= dist;
-				pos2 = next;
+		// check for very close & patch.
+		static const float EPS = 0.01f;
+		if ( dist <= EPS ) {
+			dt -= dist / speed;	
+			*pos2 = next;
+			++pathPos;
+			continue;
+		}
+
+		// Do vector based motion.
+		Vector2F targetHeading = delta;
+		targetHeading.SafeNormalize(1,0);
+
+		// Rotation while moving takes no extra time.
+		bool rotationDone = ApplyRotation( travelRot, targetHeading, heading );
+		float dot = DotProduct( targetHeading, *heading );
+
+		if ( dist <= travel ) {
+			if ( dot > 0.5f ) {
+				// we are close enough to hit dest. Patch.
+				*pos2 = next;
+				*heading = targetHeading;
 				++pathPos;
+				dt -= dist / speed;
 				continue;
 			}
-
-			float targetRot = RotationXZDegrees( delta.x, delta.y );
-
-			float bias;
-			float deltaRot = MinDeltaDegrees( rot, targetRot, &bias );
-
-			if ( travelRot > deltaRot ) {
-				rot = targetRot;
-				travelRot -= deltaRot;
-			}
-			else {
-				rot += travelRot*bias;
-				rot = NormalizeAngleDegrees( rot );
-				travelRot = 0;
-			}
-
-			// We we don't chase the destination point, line
-			// it up closer
-			float rotationLimit = ROTATION_LIMIT;
-			if ( dist < 1.0f ) {
-				rotationLimit = Lerp( 0.0f, ROTATION_LIMIT, dist );
-			}
-			
-			if ( deltaRot < rotationLimit ) {
-				//Vector2F norm = { sinf(ToRadian(rot)), cosf(ToRadian(rot)) };
-				Vector2F norm = parentChit->GetSpatialComponent()->GetHeading2D();
-				norm.Normalize();
-
-				if ( dist <= travel ) {
-					travel -= dist;
-					pos2 = next;
-					++pathPos;
-				}
-				else {
-					pos2 += norm * travel;
-					travel = 0;
-				}
-			}
 		}
+
+		// The right algorithm is tricky...tried
+		// lots of approaches, regret not documenting them.
+		// It's all about avoiding "orbiting" conditions.
+		if (       rotationDone 
+				|| ( dist > travel*12.0f && dot > 0.5f ))	// dist > travel*12 bit keeps from orbiting. 
+		{												// dot > 0.5f makes the avatar turn in the generally correct direction before moving
+			*pos2 += (*heading) * travel;
+		}
+		dt -= dist / speed;
 	}
+
+	bool done = pathPos == path.Size();
+	if ( pathPos == path.Size() && !dest.heading.IsZero() ) {
+		// Pure rotation:
+		float travelRot	= Travel( ROTATION_SPEED, dt );
+		done = ApplyRotation( travelRot, dest.heading, heading );
+	}
+	return done;
 }
 
 
-bool PathMoveComponent::AvoidOthers( U32 delta )
+void PathMoveComponent::AvoidOthers( U32 delta, grinliz::Vector2F* pos2, grinliz::Vector2F* heading )
 {
-//	GRINLIZ_PERFTRACK;
 	PROFILE_FUNC();
 
 	static const float PATH_AVOID_DISTANCE = MAX_BASE_RADIUS*2.0f;
 
 	avoidForceApplied = false;
-	bool squattingDest = false;
 
 	RenderComponent* render = parentChit->GetRenderComponent();
-	if ( !render ) return false;
+	if ( !render ) return;
 	
 	Rectangle2F bounds;
-	bounds.Set( pos2.x-PATH_AVOID_DISTANCE, pos2.y-PATH_AVOID_DISTANCE, 
-		        pos2.x+PATH_AVOID_DISTANCE, pos2.y+PATH_AVOID_DISTANCE );
+	bounds.min = bounds.max = *pos2;
+	bounds.Outset( PATH_AVOID_DISTANCE );
 
 	ChitHasMoveComponent hasMoveComponentFilter;
+	CChitArray chitArr;
 	GetChitBag()->QuerySpatialHash( &chitArr, bounds, parentChit, &hasMoveComponentFilter );
 
-	if ( !chitArr.Empty() ) {
-		Vector3F pos3    = { pos2.x, 0, pos2.y };
-		float radius     = parentChit->GetRenderComponent()->RadiusOfBase();
-		Vector3F avoid = { 0, 0 };
-		static const Vector3F UP = { 0, 1, 0 };
+	/* Push in a normal direction and slow down, but don't accelerate. */
 
-		Vector3F wayPoint   = { path[pathPos].x, 0, path[pathPos].y };
-		Vector3F destNormal = wayPoint - pos3;
-		destNormal.SafeNormalize( 1, 0, 0 );
+	if ( !chitArr.Empty() ) {
+		float radius     = parentChit->GetRenderComponent()->RadiusOfBase();
+
+		Vector2F avoid = { 0, 0 };
 
 		for( int i=0; i<chitArr.Size(); ++i ) {
 			Chit* chit = chitArr[i];
@@ -354,65 +381,54 @@ bool PathMoveComponent::AvoidOthers( U32 delta )
 				continue;
 			}
 
-			Vector3F itPos3 = chit->GetSpatialComponent()->GetPosition();
+			Vector2F itPos2 = chit->GetSpatialComponent()->GetPosition2D();
 			float itRadius  = chit->GetRenderComponent()->RadiusOfBase(); 
 
-			float d = (pos3-itPos3).Length();
+			float d = ((*pos2)-itPos2).Length();
 			float r = radius + itRadius;
 
 			if ( d < r ) {
 				avoidForceApplied = true;
+				// Want the other to respond to force, so wake it up:
+				chit->SetTickNeeded();
 
 				// Move away from the centers so the bases don't overlap.
-				Vector3F normal = pos3 - itPos3;
-				normal.y = 0;
-				normal.SafeNormalize( -destNormal.x, -destNormal.y, -destNormal.z );
-				float alignment = DotProduct( -normal, destNormal ); // how "in the way" is this?
+				Vector2F normal = *pos2 - itPos2;
+				normal.SafeNormalize( 1, 0 );
+				float alignment = DotProduct( -normal, *heading ); // how "in the way" is this?
 					
-				// Is this guy squatting on our dest?
-				// This check is surprisingly broad, but keeps everyone from "orbiting"
-				if ( (wayPoint-itPos3).LengthSquared() < r*r ) {
-					// Dang squatter.
-					if ( pathPos < nPathPos-1 ) {
-						++pathPos;	// go around
-					}
-					else {
-						squattingDest = true;
-					}
-				}
 				// Not getting stuck forever is very important. It breaks
 				// pathing where a CalcPath() is expected to get there.
 				// Limiting the magnitute to a fraction of the travel 
 				// speed avoids deadlocks.
 				float mag = Min( r-d, 0.5f * Travel( Speed(), delta ) ); 
-				normal.Multiply( mag );
-				avoid += normal;
+
+				//if ( alignment > 0 ) {
+					normal.Multiply( mag );
+					avoid += normal;
+				//}
 				
 				// Apply a sidestep vector so they don't just push.
 				if ( alignment > 0.7f ) {
-					Vector3F right;
-					CrossProduct( destNormal, UP, &right );
+					Vector2F right = { heading->x, -heading->y };
 					avoid += right * (0.5f*mag );
 				}	
 			}
 		}
-		avoid.y = 0;	// be sure.
-		pos2.x += avoid.x;
-		pos2.y += avoid.z;
+		*pos2 += avoid;
 	}
-	return squattingDest;
 }
 
 
-int PathMoveComponent::DoTick( U32 delta, U32 since )
+int PathMoveComponent::DoTick( U32 delta )
 {
-//	GRINLIZ_PERFTRACK;
 	PROFILE_FUNC();
 
 	int id = parentChit->ID();
 
 	if ( NeedComputeDest() ) {
-		pathPos = nPathPos = 0;	// clear the old path.
+		pathPos = 0;			// clear the old path.
+		path.Clear();
 		ComputeDest();			// ComputeDest can fail, send message, then cause re-queue
 	}
 
@@ -420,52 +436,22 @@ int PathMoveComponent::DoTick( U32 delta, U32 since )
 	avoidForceApplied = false;
 	isMoving = false;
 	SectorPort portJump;
+	int time = VERY_LONG_TICK;
 
-	if ( HasPath() ) {
+	Vector2F pos, heading;
+	GetPosRot( &pos, &heading );
+
+	if ( !path.Empty() ) {
+
 		// We should be doing something!
-		bool squattingDest = false;
-		int startPathPos = pathPos;
-		float distToNext2 = GetDistToNext2( pos2 );
-
-		if ( pathPos == nPathPos && dest.rotation >= 0 ) {
-			// is rotation moving? Should isMoving be set?
-			// Apply final rotation if the path is complete.
-			GetPosRot( &pos2, &rot );
-
-			float bias;
-			float deltaRot = MinDeltaDegrees( rot, dest.rotation, &bias );
-			float travelRot	= Travel( ROTATION_SPEED, delta );
-			if ( deltaRot <= travelRot ) {
-				rot = dest.rotation;
-				dest.rotation = -1.f;
-			}
-			else {
-				rot = NormalizeAngleDegrees( rot + bias*travelRot );
-			}
-			SetPosRot( pos2, rot );
-		}
-		else if ( pathPos < nPathPos ) {
-			// Move down the path.
-			isMoving = true;
-			GetPosRot( &pos2, &rot );
-
-			RotationFirst( delta );
-
-			squattingDest = AvoidOthers( delta );
-			ApplyBlocks( &pos2, &this->blockForceApplied );
-			SetPosRot( pos2, rot );
-		}
-
-		// Position set: nothing below can change.
-		if ( squattingDest ) {
-			GLASSERT( pathPos >= nPathPos-1 );
-			pathPos = nPathPos;
-		}
-		// Are we at the end of the path data?
+		time = 0;
+		isMoving = true;
+		
+		bool pathDone = RotationFirst( delta, &pos, &heading );
 
 		bool portFound = false;
 		if ( dest.sectorPort.IsValid() ) {
-			Vector2I pos2i = { (int)pos2.x, (int)pos2.y };
+			Vector2I pos2i = { (int)pos.x, (int)pos.y };
 
 			// Sector and Port of departure:
 			Vector2I departureSector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
@@ -477,49 +463,27 @@ int PathMoveComponent::DoTick( U32 delta, U32 since )
 				// Close enough. Too much jugging on the ports is a real hassle.
 				portFound = true;
 				portJump = dest.sectorPort;
-				parentChit->SendMessage( ChitMsg( ChitMsg::PATHMOVE_DESTINATION_REACHED), this );
-				SetNoPath();
+				pathDone = true;
 			}
-
+		}
+		if ( pathDone ) {
+			parentChit->SendMessage( ChitMsg( ChitMsg::PATHMOVE_DESTINATION_REACHED), this );
+			SetNoPath();
 		}
 
-		if ( !portFound ) {
-			if (    ( pathPos == nPathPos )
-				 && ( dest.rotation < 0 || Equal( dest.rotation, rot, 0.01f ))) 
-			{
-				if ( squattingDest || dest.pos.Equal( path[nPathPos-1], parentChit->GetRenderComponent()->RadiusOfBase()*0.2f ) ) {
+		if ( !portFound && forceCount > FORCE_COUNT_EXCESSIVE ) {
 	#ifdef DEBUG_PMC
-					GLOUTPUT(( "Dest reached. squatted=%s\n", squattingDest ? "true" : "false" ));
+			GLOUTPUT(( "Block force excessive. forceCount=%d\n", forceCount ));
 	#endif
-					// actually reached the end!
-					parentChit->SendMessage( ChitMsg( ChitMsg::PATHMOVE_DESTINATION_REACHED), this );
-					SetNoPath();
-				}
-				else {
-					// continue path:
-					GLASSERT( dest.pos.x >= 0 );
-					QueueDest( dest.pos, dest.rotation );
-				}
-			}
-			else if ( forceCount > FORCE_COUNT_EXCESSIVE ) {
-	#ifdef DEBUG_PMC
-				GLOUTPUT(( "Block force excessive. forceCount=%d\n", forceCount ));
-	#endif
-				SetNoPath();
-				parentChit->SendMessage( ChitMsg( ChitMsg::PATHMOVE_DESTINATION_BLOCKED), this );
+			SetNoPath();
+			parentChit->SendMessage( ChitMsg( ChitMsg::PATHMOVE_DESTINATION_BLOCKED), this );
 
-				//NewsEvent news( NewsEvent::PONY, pos2, StringPool::Intern( "FC Exec" ), parentChit->ID() );
-				//GetChitBag()->AddNews( news );
-				forceCount = 0;
-			}
+			forceCount = 0;
 		}
 	}
-	else {
-		GetPosRot( &pos2, &rot );
-		AvoidOthers( delta );
-		ApplyBlocks( &pos2, &this->blockForceApplied );
-		SetPosRot( pos2, rot );
-	};
+
+	AvoidOthers( delta, &pos, &heading );
+	ApplyBlocks( &pos, &this->blockForceApplied );
 
 	if ( portJump.IsValid() ) {
 		GridMoveComponent* gmc = new GridMoveComponent( map );
@@ -528,20 +492,27 @@ int PathMoveComponent::DoTick( U32 delta, U32 since )
 		return 0;
 	}
 
-	if ( blockForceApplied /*|| avoidForceApplied*/ ) {
-		++forceCount;
+	if ( avoidForceApplied ) {
+		time = 0;
+		forceCount += 1;
 	}
-	else {
-		if ( forceCount > 0 ) 
-			--forceCount;
+	if ( blockForceApplied ) {
+		time = 0;
+		forceCount += 2;
 	}
-	return 0;
+	if ( !avoidForceApplied && !blockForceApplied && forceCount > 0 ) {
+		--forceCount;
+		time = 0;
+	}
+
+	SetPosRot( pos, heading );
+	return time;
 }
 
 
 void PathMoveComponent::DebugStr( grinliz::GLString* str )
 {
-	if ( pathPos < nPathPos ) {
+	if ( pathPos < path.Size() ) {
 		str->Format( "[PathMove]=%.1f,%.1f ", dest.pos.x, dest.pos.y );
 	}
 	else {

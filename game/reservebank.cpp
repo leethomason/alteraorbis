@@ -109,7 +109,9 @@ Wallet ReserveBank::WithdrawVolcano()
 {
 	Wallet w;
 	w.gold		= WithdrawVolcanoGold();
-	w.AddCrystal( WithdrawRandomCrystal() );
+	if ( random.Rand(3) == 0 ) {
+		w.AddCrystal( WithdrawRandomCrystal() );
+	}
 	return w;
 }
 

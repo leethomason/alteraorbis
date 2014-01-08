@@ -26,7 +26,7 @@ void main()
 {
 	vec4 color = v_color;
 	#if TEXTURE0 == 1
-		vec4 sample = texture2D( texture0, v_uv0 );
+		vec4 sample = texture( texture0, v_uv0 );
 
 		#if TEXTURE0_CLIP == 1
 			// step( edge, x ) = 0 if x < edge
@@ -61,9 +61,9 @@ void main()
 	#endif
 	#if TEXTURE1 == 1
 		#if TEXTURE1_ALPHA_ONLY == 1
-			color.a *= texture2D( texture1, v_uv1).a;
+			color.a *= texture( texture1, v_uv1).a;
 		#else
-			color *= texture2D( texture1, v_uv1 );
+			color *= texture( texture1, v_uv1 );
 		#endif
 	#endif
 	#if PREMULT == 1

@@ -43,6 +43,15 @@ class ComponentFactory;
 class XStream;
 class LumosChitBag;
 class DamageDesc;
+class ChitMsg;
+
+// Allows registering to listen to chit messages.
+// This is not serialized. Calls are synchronous. (Be careful.)
+class IChitListener
+{
+public:
+	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg ) = 0;
+};
 
 struct ChitDamageInfo
 {
@@ -133,7 +142,7 @@ public:
 	void Remove( Component* );
 
 	void SetTickNeeded()		{ timeToTick = 0; }
-	void DoTick( U32 delta );
+	void DoTick();
 
 	void OnChitEvent( const ChitEvent& event );
 	void Swap( Component* removeAndDelete, Component* addThis )	{ GLASSERT( swapOut == 0 ); GLASSERT( swapIn == 0 ); swapOut = removeAndDelete; swapIn = addThis; }
@@ -162,8 +171,17 @@ public:
 	// Send a message to the listeners, and every component
 	// in the chit (which don't need to be listeners.)
 	// Synchronous
-	void SendMessage(	const ChitMsg& message, 
-						Component* exclude=0 );			// useful to not call ourselves. 
+	void SendMessage(	const ChitMsg& message, Component* exclude=0 );			// useful to not call ourselves. 
+
+	void AddListener( IChitListener* handler ) {
+		GLASSERT( listeners.Find( handler ) < 0 );
+		listeners.Push( handler );
+	}
+	void RemoveListener( IChitListener* handler ) {
+		int i = listeners.Find( handler );
+		GLASSERT( i >= 0 );
+		if ( i >= 0 ) listeners.SwapRemove( i );
+	}
 	
 	void DebugStr( grinliz::GLString* str );
 
@@ -181,11 +199,10 @@ public:
 	int timeSince;		// time since the last tick
 
 private:
-	bool CarryMsg( int componentID, Chit* src, const ChitMsg& msg );
-
 	ChitBag* chitBag;
 	int		 id;
 	bool	 playerControlled;
+	grinliz::CDynArray< IChitListener* > listeners;
 
 public:
 	enum {
@@ -240,6 +257,7 @@ struct ComponentSet
 	ItemComponent*		itemComponent;
 	GameItem*			item;
 	RenderComponent*	render;
+	AIComponent*		ai;
 };
 
 

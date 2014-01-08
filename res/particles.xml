@@ -219,6 +219,15 @@
     <colorFuzz red="0.1" green="0.1" blue="0.1" alpha="0.1" />
   </particle>
 
+  <particle name="useBuilding" sizeX="0.07" sizeY="0.17" count="10" config="ray" 
+            time="continuous"
+            velocity="0.8" velocityFuzz="0.2" posFuzz="0.2"
+            texMin="3" texMax="3">
+    <color palx="7" paly="4" alpha="1"/>
+    <colorVelocity red="0" green="0.8" blue="0" alpha="-0.8"/>
+    <colorFuzz red="0.1" green="0.1" blue="0.1" alpha="0.1" />
+  </particle>
+
   <particle name="construction" size="0.05" count="15" config="ray"
             time="continuous"
             velocity="1.8" velocityFuzz="0.2" posFuzz="0.1"

@@ -144,22 +144,31 @@ public:
 	void Format( const char* format, ...) 
 	{
 		va_list     va;
-
-		//
-		//  format and output the message..
-		//
 		va_start( va, format );
 	#ifdef _MSC_VER
 		int result = vsnprintf_s( buf, ALLOCATE, _TRUNCATE, format, va );
 	#else
-		// Reading the spec, the size does seem correct. The man pages
-		// say it will aways be null terminated (whereas the strcpy is not.)
-		// Pretty nervous about the implementation, so force a null after.
 		int result = vsnprintf( buf, ALLOCATE, format, va );
 	#endif
 		va_end( va );
 		Validate();
 	}
+	void AppendFormat( const char* format, ... )
+	{
+		va_list     va;
+		va_start( va, format );
+		int s = size();
+		if ( s < Capacity() ) {
+			#ifdef _MSC_VER
+				int result = vsnprintf_s( buf+s, ALLOCATE-s, _TRUNCATE, format, va );
+			#else
+				int result = vsnprintf( buf+s, ALLOCATE-s, format, va );
+			#endif
+		}
+		va_end( va );
+		Validate();
+	}
+
 
 	bool operator==( const char* str ) const						{ return buf && str && strcmp( buf, str ) == 0; }
 	bool operator!=( const char* str ) const						{ return !(*this == str); }

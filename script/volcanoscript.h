@@ -32,7 +32,7 @@ public:
 	virtual void OnAdd()	{}
 	virtual void OnRemove()	{}
 
-	virtual int DoTick( U32 delta, U32 since );
+	virtual int DoTick( U32 delta );
 	virtual const char* ScriptName() { return "VolcanoScript"; }
 
 private:

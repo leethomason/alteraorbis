@@ -85,7 +85,7 @@ public:
 				  grinliz::CDynArray<grinliz::Vector2I>* wayPoints,
 				  grinliz::CDynArray<grinliz::Vector2I>* features );
 	// Init from WorldGen data:
-	void MapInit( const U8* land );
+	void MapInit( const U8* land, const U16* path );
 
 	void SavePNG( const char* path );
 	void Save( const char* pathToData );
@@ -109,6 +109,10 @@ public:
 			grid[index].SetPave(pave);
 		}
 	}
+	void SetPorch( int x, int y, bool on ) {
+		int index = INDEX( x, y );
+		grid[index].SetPorch( on );
+	}
 
 	const WorldGrid& GetWorldGrid( int x, int y ) { return grid[INDEX(x,y)]; }
 
@@ -126,7 +130,7 @@ public:
 	// Call the pather; return true if successful.
 	bool CalcPath(	const grinliz::Vector2F& start, 
 					const grinliz::Vector2F& end, 
-					grinliz::CDynArray<grinliz::Vector2F> *path,
+					grinliz::CDynArray< grinliz::Vector2F > *path,
 					float* totalCost,
 					bool showDebugging = false );
 
@@ -136,14 +140,6 @@ public:
 							const grinliz::Vector2F& end, 
 							grinliz::Vector2F* bestEnd,
 							float* totalCost );
-
-	bool CalcPath(	const grinliz::Vector2F& start, 
-					const grinliz::Vector2F& end, 
-					grinliz::Vector2F *path,
-					int *pathLen,
-					int maxPath,
-					float* totalCost,
-					bool showDebugging = false );
 
 	// Uses the very fast straight line pather.
 	bool HasStraightPath( const grinliz::Vector2F& start, 
@@ -218,7 +214,6 @@ public:
 	const SectorData& GetSector( const grinliz::Vector2I& sector ) const;
 
 	// Find random land on the largest continent
-	grinliz::Vector2I FindEmbark();
 	grinliz::Color4U8 Pixel( int x, int y )	{ 
 		return grid[y*width+x].ToColor();
 	}

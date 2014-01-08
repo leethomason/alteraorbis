@@ -25,6 +25,7 @@
 
 #include "chit.h"
 #include "xegamelimits.h"
+#include "../game/news.h"
 #include "chitevent.h"
 
 class Engine;
@@ -77,6 +78,24 @@ public:
 	virtual int  Type()					{ return MAP | MOB; }
 };
 
+class MultiFilter : public IChitAccept
+{
+public:
+	enum {
+		MATCH_ANY,
+		MATCH_ALL
+	};
+	MultiFilter( int anyAllMatch ) : type(-1), anyAll(anyAllMatch) {}
+
+	virtual bool Accept( Chit* chit );
+	virtual int  Type();					// committed when called the first time
+
+	grinliz::CDynArray< IChitAccept* > filters;
+private:
+	int type;
+	int anyAll;
+};
+
 
 class ChitBag : public IBoltImpactHandler
 {
@@ -113,11 +132,6 @@ public:
 
 	// passes ownership
 	void QueueEvent( const ChitEvent& event )			{ events.Push( event ); }
-
-	void AddNews( const NewsEvent& event );
-	const NewsEvent* News() const { return news.Mem(); }
-	int NumNews() const { return news.Size(); }
-	void SetNewsProcessed();
 
 	// Hashes based on integer coordinates. No need to call
 	// if they don't change.
@@ -204,7 +218,6 @@ private:
 	grinliz::CDynArray<Chit*>		hashQuery;			// local data, cached at class level
 	grinliz::CDynArray<Chit*>		cachedQuery;		// local data, cached at class level
 	grinliz::CDynArray<ChitEvent>	events;
-	grinliz::CDynArray<NewsEvent>	news;
 	grinliz::CDynArray<Bolt>		bolts;
 #ifdef OUTER_TICK
 	grinliz::CDynArray<Component*>	tickList[Chit::NUM_SLOTS];

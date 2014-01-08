@@ -244,9 +244,6 @@
     <ClCompile Include="..\game\debugstatecomponent.cpp">
       <Filter>Source Files\components</Filter>
     </ClCompile>
-    <ClCompile Include="..\game\aicomponent.cpp">
-      <Filter>Source Files\components</Filter>
-    </ClCompile>
     <ClCompile Include="..\game\debugpathcomponent.cpp">
       <Filter>Source Files\components</Filter>
     </ClCompile>
@@ -327,6 +324,27 @@
     </ClCompile>
     <ClCompile Include="..\script\buildscript.cpp">
       <Filter>Source Files\script</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\aicomponent.cpp">
+      <Filter>Source Files\ai</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ai\marketai.cpp">
+      <Filter>Source Files\ai</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ai\aineeds.cpp">
+      <Filter>Source Files\ai</Filter>
+    </ClCompile>
+    <ClCompile Include="..\script\forgescript.cpp">
+      <Filter>Source Files\script</Filter>
+    </ClCompile>
+    <ClCompile Include="..\widget\consolewidget.cpp">
+      <Filter>Source Files\widget</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\news.cpp">
+      <Filter>Source Files\game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\xarchive\squisher.cpp">
+      <Filter>Source Files\game</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -549,9 +567,6 @@
     <ClInclude Include="..\game\debugstatecomponent.h">
       <Filter>Source Files\components</Filter>
     </ClInclude>
-    <ClInclude Include="..\game\aicomponent.h">
-      <Filter>Source Files\components</Filter>
-    </ClInclude>
     <ClInclude Include="..\game\debugpathcomponent.h">
       <Filter>Source Files\components</Filter>
     </ClInclude>
@@ -659,6 +674,27 @@
     </ClInclude>
     <ClInclude Include="..\script\buildscript.h">
       <Filter>Source Files\script</Filter>
+    </ClInclude>
+    <ClInclude Include="..\game\aicomponent.h">
+      <Filter>Source Files\ai</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ai\marketai.h">
+      <Filter>Source Files\ai</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ai\aineeds.h">
+      <Filter>Source Files\ai</Filter>
+    </ClInclude>
+    <ClInclude Include="..\script\forgescript.h">
+      <Filter>Source Files\script</Filter>
+    </ClInclude>
+    <ClInclude Include="..\widget\consolewidget.h">
+      <Filter>Source Files\widget</Filter>
+    </ClInclude>
+    <ClInclude Include="..\game\news.h">
+      <Filter>Source Files\game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xegame\stackedsingleton.h">
+      <Filter>Source Files\xegame</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -9,9 +9,27 @@ It's weird to have 2 values to keep track of. (Although "in the bank" vs. "in th
 And it's not really fun.
 Should show one total: assumed on player. Penalty when dropped?
 
+Markets
+-------
+
+Need markets to buy/sell stuff. Where is the gold??
+
+Sell to QueueCore (tax paid to domain)
+Buy from market (tax paid to domain)
+How does market get stuff??
+
+Sell to Market. Buy from Market. (Taxed)
+Market can run out of money.
+
+Hybrid:
+Sell to Market.
+Buy from Market
+Market can overflow to QueueCore
+
+Start simple: put the gold in the market. Pay taxes to core.
 
 Tech Levels
-----------
+-----------
 
 Tech 0:
 	Ice
@@ -23,13 +41,18 @@ Tech 0:
 	Temple/Power
 
 Tech 1:
-	Vault
-	Market
-	Bar
-	Turret
+	Vault: store gold & stuff
+	Market: buy / sell
+	Bar: denizen needs
+	Turret: defense
+	SleepTube: denizen needs. drives population.
 
 Tech 2:
-	Temple:3
 
 Tech 3:
 	Meditation Center
+
+
+Buildings
+---------
+

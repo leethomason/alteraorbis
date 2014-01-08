@@ -56,8 +56,8 @@ class Matrix4
 
 	/// Construct an identity matrix
 	Matrix4()								{	SetIdentity();	}
-	Matrix4( const Matrix4& rhs )			{	memcpy( x, rhs.x, sizeof(float)*16 ); }
-	void operator=( const Matrix4& rhs )	{	memcpy( x, rhs.x, sizeof(float)*16 ); }
+	Matrix4( const Matrix4& rhs )			{	for( int i=0; i<COMPONENTS*COMPONENTS; ++i ) x[i] = rhs.x[i]; }
+	void operator=( const Matrix4& rhs )	{	for( int i=0; i<COMPONENTS*COMPONENTS; ++i ) x[i] = rhs.x[i]; }
 
 	/// Set the matrix to identity
 	void SetIdentity()		{	x[0] = x[5] = x[10] = x[15] = 1.0f;
@@ -364,8 +364,109 @@ inline void MultMatrix4( const Matrix4& m, const Vector4F& v, Vector4F* w )
 
 void MultMatrix4( const Matrix4& m, const Rectangle3F& in, Rectangle3F* out );
 
-}
 
-// namespace grinliz
+
+class Matrix2
+{
+  public:
+	enum { COMPONENTS = 2 };
+
+	inline static int INDEX( int row, int col ) {	GLASSERT( row >= 0 && row < COMPONENTS );
+													GLASSERT( col >= 0 && col < COMPONENTS );
+													return col*COMPONENTS+row; }
+
+	/// Construct an identity matrix
+	Matrix2()								{	SetIdentity();	}
+	Matrix2( const Matrix2& rhs )			{	for( int i=0; i<COMPONENTS*COMPONENTS; ++i ) x[i] = rhs.x[i]; }
+	void operator=( const Matrix2& rhs )	{	for( int i=0; i<COMPONENTS*COMPONENTS; ++i ) x[i] = rhs.x[i]; }
+
+	/// Set the matrix to identity
+	void SetIdentity()		{	x[0] = x[3] = 1.0f;
+								x[1] = x[2] = 0.0f; 
+							}
+
+	void Set( int row, int col, float v )	{	x[INDEX(row,col)] = v; }
+	float& m( int row, int col )			{	return x[INDEX(row,col)]; }
+	float m(int row, int col ) const		{	return x[INDEX(row,col)]; }
+
+	/// Set the rotation terms
+	void SetRotation( float thetaDegree );
+
+	bool operator==( const Matrix2& rhs ) const	{ 
+		for( int i=0; i<COMPONENTS*COMPONENTS; ++i )
+			if ( x[i] != rhs.x[i] )
+				return false;
+		return true;
+	}
+
+	bool operator!=( const Matrix2& rhs ) const	{ 
+		int match = 0;
+		for( int i=0; i<COMPONENTS*COMPONENTS; ++i )
+			if ( x[i] == rhs.x[i] )
+				++match;
+		if ( match == COMPONENTS*COMPONENTS ) return false;
+		return true;
+	}
+
+	/// Invert
+	void Invert( Matrix2* s ) const
+	{
+		float det = a*d - b*c;
+		float inv = 1.0f / det;
+		s->a = d * inv;
+		s->b = -b * inv;
+		s->c = -c * inv;
+		s->d = a * inv;
+	}
+
+
+	bool IsIdentity() const {
+		return    x[0] == 1 && x[3] == 1 
+			   && x[1] == 0 && x[2] == 0;
+	}
+	
+#ifdef _MSC_VER
+#pragma warning ( push )
+#pragma warning ( disable : 4201 )	// un-named union.
+#endif
+	// Row-Column notation is backwards from x,y regrettably. Very
+	// confusing. Just uses array. Increment by one moves down to the next
+	// row, so that the next columnt is at +4.
+	union
+	{
+		float x[COMPONENTS*COMPONENTS];
+		struct {
+			// row-column
+			float m11, m21, m12, m22;
+		};
+		struct {
+			float a, c, b, d;	// why I hate this memory arrangement, illustrated.
+		};
+	};
+#ifdef _MSC_VER
+#pragma warning ( pop )
+#endif
+
+	friend Matrix2 operator*( const Matrix2& a, const Matrix2& b )
+	{	
+		Matrix2 r;
+		r.m11 = a.m11*b.m11 + a.m12*b.m21;
+		r.m12 = a.m11*b.m12 + a.m12*b.m22;
+		r.m21 = a.m21*b.m11 + a.m22*b.m21;
+		r.m22 = a.m21*b.m12 + a.m22*b.m22;
+		return r;
+	}
+
+	friend Vector2<float> operator*( const Matrix2& a, const Vector2<float>& b )
+	{
+		Vector2F r;
+		r.x = a.m11*b.x + a.m12*b.y;
+		r.y = a.m21*b.x + a.m22*b.y;
+		return r;
+	}
+};
+
+
+}// namespace grinliz
 
 #endif

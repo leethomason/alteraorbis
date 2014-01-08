@@ -16,6 +16,8 @@
 #ifndef WALLET_INCLUDED
 #define WALLET_INCLUDED
 
+#include "gamelimits.h"
+
 class XStream;
 
 struct Wallet
@@ -56,6 +58,15 @@ struct Wallet
 		*this = empty;
 		return w;
 	}
+
+	int NumCrystals() const {
+		int count=0;
+		for( int i=0; i<NUM_CRYSTAL_TYPES; ++i ) {
+			count += crystal[i];
+		}
+		return count;
+	}
+
 	void Serialize( XStream* xs );
 
 	bool operator<=(const Wallet& rhs ) const {
@@ -66,6 +77,10 @@ struct Wallet
 			return true;
 		}
 		return false;
+	}
+
+	bool operator>(const Wallet& rhs ) const {
+		return !(operator<=(rhs));
 	}
 
 	int gold;

@@ -59,7 +59,7 @@ void DebugPathComponent::OnRemove()
 }
 
 
-int DebugPathComponent::DoTick( U32 delta, U32 timeSince )
+int DebugPathComponent::DoTick( U32 delta )
 {
 	SpatialComponent* spatial = parentChit->GetSpatialComponent();
 	if ( spatial ) {

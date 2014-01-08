@@ -179,12 +179,7 @@ struct ModelAux {
 	grinliz::Vector4F	texture0Clip;
 	grinliz::Matrix4	texture0ColorMap;
 	int					animToModelMap[EL_MAX_BONES];
-#ifdef EL_VEC_BONES
-	grinliz::Vector4F	bonePos[EL_MAX_BONES];
-	grinliz::Quaternion	boneRot[EL_MAX_BONES];
-#else
 	grinliz::Matrix4	boneMats[EL_MAX_BONES];
-#endif
 };
 
 
@@ -435,11 +430,14 @@ private:
 	
 	struct AnimationState {
 		void Init() { time=0; id=ANIM_OFF; }
+		bool operator==(const AnimationState& rhs ) const { return time == rhs.time && id == rhs.id; }
+
 		U32				time;
 		int				id;
 	};
 	AnimationState	currentAnim;
 	AnimationState	prevAnim;
+	AnimationState	cachedAnim;
 
 	float animationRate;
 	U32 totalCrossFadeTime;	// how much time the crossfade will use
@@ -453,6 +451,7 @@ private:
 	grinliz::Vector4F	boneFilter;
 	grinliz::Vector4F	control;
 	ModelAux* aux;
+
 
 	mutable bool xformValid;
 	mutable bool invValid;

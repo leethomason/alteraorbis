@@ -62,7 +62,7 @@ public:
 	bool WillSerialize() const							{ return willSerialize; }
 	void SetSerialize( bool s )							{ willSerialize = s; }
 
-	virtual int DoTick( U32 delta, U32 since )			{ return VERY_LONG_TICK; }
+	virtual int DoTick( U32 delta )						{ return VERY_LONG_TICK; }
 	virtual void DoUpdate()								{}
 	virtual void DebugStr( grinliz::GLString* str )		{}
 
@@ -79,8 +79,11 @@ public:
 	virtual HealthComponent*	ToHealthComponent()			{ return 0; }
 
 protected:
-	float Travel( float rate, U32 time ) const {
-		return rate * ((float)time) * 0.001f;
+	float Travel( float rate, U32 msecTime ) const {
+		return rate * ((float)msecTime) * 0.001f;
+	}
+	float Travel( float rate, float secTime ) const {
+		return rate * secTime;
 	}
 
 	void BeginSerialize( XStream* xs, const char* name );

@@ -85,6 +85,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\ai\aineeds.cpp" />
+    <ClCompile Include="..\ai\marketai.cpp" />
     <ClCompile Include="..\ai\tasklist.cpp" />
     <ClCompile Include="..\engine\animation.cpp" />
     <ClCompile Include="..\engine\bolt.cpp" />
@@ -120,6 +122,7 @@
     <ClCompile Include="..\game\lumoschitbag.cpp" />
     <ClCompile Include="..\game\lumosgame.cpp" />
     <ClCompile Include="..\game\mapspatialcomponent.cpp" />
+    <ClCompile Include="..\game\news.cpp" />
     <ClCompile Include="..\game\pathmovecomponent.cpp" />
     <ClCompile Include="..\game\physicsmovecomponent.cpp" />
     <ClCompile Include="..\game\reservebank.cpp" />
@@ -149,6 +152,7 @@
     <ClCompile Include="..\script\battlemechanics.cpp" />
     <ClCompile Include="..\script\buildscript.cpp" />
     <ClCompile Include="..\script\corescript.cpp" />
+    <ClCompile Include="..\script\forgescript.cpp" />
     <ClCompile Include="..\script\itemscript.cpp" />
     <ClCompile Include="..\script\plantscript.cpp" />
     <ClCompile Include="..\script\procedural.cpp" />
@@ -157,6 +161,7 @@
     <ClCompile Include="..\script\volcanoscript.cpp" />
     <ClCompile Include="..\script\worldgen.cpp" />
     <ClCompile Include="..\script\worldscript.cpp" />
+    <ClCompile Include="..\widget\consolewidget.cpp" />
     <ClCompile Include="..\widget\facewidget.cpp" />
     <ClCompile Include="..\widget\itemdescwidget.cpp" />
     <ClCompile Include="..\widget\moneywidget.cpp" />
@@ -164,6 +169,7 @@
     <ClCompile Include="..\win32\framebuffer.cpp" />
     <ClCompile Include="..\win32\glew.c" />
     <ClCompile Include="..\win32\main.cpp" />
+    <ClCompile Include="..\xarchive\squisher.cpp" />
     <ClCompile Include="..\xegame\cameracomponent.cpp" />
     <ClCompile Include="..\xegame\cgame.cpp" />
     <ClCompile Include="..\xegame\chit.cpp" />
@@ -181,6 +187,8 @@
     <ClCompile Include="..\xegame\ufosound.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\ai\aineeds.h" />
+    <ClInclude Include="..\ai\marketai.h" />
     <ClInclude Include="..\ai\tasklist.h" />
     <ClInclude Include="..\engine\animation.h" />
     <ClInclude Include="..\engine\bolt.h" />
@@ -223,6 +231,7 @@
     <ClInclude Include="..\game\lumosgame.h" />
     <ClInclude Include="..\game\lumosmath.h" />
     <ClInclude Include="..\game\mapspatialcomponent.h" />
+    <ClInclude Include="..\game\news.h" />
     <ClInclude Include="..\game\pathmovecomponent.h" />
     <ClInclude Include="..\game\physicsmovecomponent.h" />
     <ClInclude Include="..\game\reservebank.h" />
@@ -257,6 +266,7 @@
     <ClInclude Include="..\script\battlemechanics.h" />
     <ClInclude Include="..\script\buildscript.h" />
     <ClInclude Include="..\script\corescript.h" />
+    <ClInclude Include="..\script\forgescript.h" />
     <ClInclude Include="..\script\itemscript.h" />
     <ClInclude Include="..\script\plantscript.h" />
     <ClInclude Include="..\script\procedural.h" />
@@ -266,6 +276,7 @@
     <ClInclude Include="..\script\worldgen.h" />
     <ClInclude Include="..\script\worldscript.h" />
     <ClInclude Include="..\shared\dbhelper.h" />
+    <ClInclude Include="..\widget\consolewidget.h" />
     <ClInclude Include="..\widget\facewidget.h" />
     <ClInclude Include="..\widget\itemdescwidget.h" />
     <ClInclude Include="..\widget\moneywidget.h" />
@@ -287,6 +298,7 @@
     <ClInclude Include="..\xegame\rendercomponent.h" />
     <ClInclude Include="..\xegame\scene.h" />
     <ClInclude Include="..\xegame\spatialcomponent.h" />
+    <ClInclude Include="..\xegame\stackedsingleton.h" />
     <ClInclude Include="..\xegame\testmap.h" />
     <ClInclude Include="..\xegame\ufosound.h" />
     <ClInclude Include="..\xegame\xegamelimits.h" />

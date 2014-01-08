@@ -34,7 +34,7 @@ private:
 public:
 
 	PathMoveComponent(	WorldMap* _map )				// required; used to avoids blocks when moving. 
-		: GameMoveComponent( _map ), nPathPos( 0 ), pathPos( 0 ), pathDebugging( false ), forceCount( 0 )
+		: GameMoveComponent( _map ), pathPos( 0 ), pathDebugging( false ), forceCount( 0 )
 	{ 
 		queued.Clear();
 		dest.Clear();
@@ -51,14 +51,18 @@ public:
 
 	virtual void OnAdd( Chit* chit );
 	virtual void OnRemove();
-	virtual int DoTick( U32 delta, U32 since );
+	virtual int DoTick( U32 delta );
 	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
 
 	virtual void CalcVelocity( grinliz::Vector3F* v );
 
-	void QueueDest( grinliz::Vector2F dest,
-					float rotation = -1.f,			// if specified, the rotation we wish to get to
-					const SectorPort* sector=0 );	// if specified, the sector travel target
+//	void QueueDest( const grinliz::Vector2F& dest,
+//					float rotation = -1.f,			// if specified, the rotation we wish to get to
+//					const SectorPort* sector=0 );	// if specified, the sector travel target
+	void QueueDest( const grinliz::Vector2F& dest,
+					const grinliz::Vector2F* heading=0,	// if !zero, the rotation we wish to get to
+					const SectorPort* sector=0 );		// if specified, the sector travel target
+
 	void QueueDest( Chit* targetChit );
 	bool QueuedDest( grinliz::Vector2F* dest ) const {
 		if ( queued.pos.x >= 0 ) { *dest = queued.pos; return true; }
@@ -68,7 +72,7 @@ public:
 
 	void Stop()				{ SetNoPath(); }
 	void Clear()			{ Stop(); queued.Clear(); }
-	bool Stopped() const	{ return !HasPath() && queued.pos.x < 0; }
+	bool Stopped() const	{ return path.Empty() && queued.pos.IsZero(); }
 
 	void SetPathDebugging( bool d )	{ pathDebugging = d; }
 
@@ -84,48 +88,43 @@ public:
 	
 private:
 	enum {
-		FORCE_COUNT_HIGH = 10,
-		FORCE_COUNT_EXCESSIVE = 40
+		FORCE_COUNT_HIGH = 20,
+		FORCE_COUNT_EXCESSIVE = 80
 	};
 
 	// Commit the 'queued' to the 'dest', if possible. 
 	void ComputeDest();
 	bool NeedComputeDest();
 	
-	void GetPosRot( grinliz::Vector2F* pos, float* rot );
-	void SetPosRot( grinliz::Vector2F pos, float rot );
-	float GetDistToNext2( const grinliz::Vector2F& currentPos );
+	void GetPosRot( grinliz::Vector2F* pos,		  grinliz::Vector2F* heading );
+	void SetPosRot( const grinliz::Vector2F& pos, const grinliz::Vector2F& heading );
 
 	void SetNoPath() {
-		nPathPos = pathPos = forceCount = 0;
+		pathPos = forceCount = 0;
+		path.Clear();
 		dest.Clear();
 	}
-	bool HasPath() const {
-		return dest.pos.x >= 0 && nPathPos > 0;
-	}
 
-	// Rotate, then move in that direction.
-	void RotationFirst( U32 delta );
+	// Rotate, then move in that direction. Return true when done.
+	bool RotationFirst( U32 delta, grinliz::Vector2F* pos2, grinliz::Vector2F* heading );
+	// return true of rotation is complete
+	bool ApplyRotation( float travelRotation, const grinliz::Vector2F& targetHeading, grinliz::Vector2F* heading );
+
 	// Try to avoid walking through others.
-	// Returns 'true' if the destination is being squatted.
-	bool AvoidOthers( U32 delta );
+	void AvoidOthers( U32 delta, grinliz::Vector2F* pos2, grinliz::Vector2F* heading );
 
-	int nPathPos;				// size of path
 	int pathPos;				// index of where we are on path
 
 	struct Dest {
-		void Clear() { pos.Set( -1, -1 ); rotation = -1.f; sectorPort.Zero(); }
+		void Clear() { pos.Zero(); heading.Zero(); sectorPort.Zero(); }
 
 		grinliz::Vector2F	pos;
-		float				rotation;	// <0 means ignore
+		grinliz::Vector2F	heading;	// 0 means ignore
 		SectorPort			sectorPort;
 	};
 
 	Dest queued;	// queued up, 
 	Dest dest;		// in use
-
-	grinliz::Vector2F pos2;		// only valid during tick!
-	float    rot;				// only valid during tick!
 
 	bool pathDebugging;
 
@@ -134,8 +133,7 @@ private:
 	bool isMoving;
 	int  forceCount;
 
-	grinliz::CDynArray< Chit* > chitArr;
-	grinliz::Vector2F path[MAX_MOVE_PATH];
+	grinliz::CDynArray< grinliz::Vector2F > path;		// the path
 };
 
 #endif // PATH_MOVE_COMPONENT_INCLUDED

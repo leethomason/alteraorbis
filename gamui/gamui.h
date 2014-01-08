@@ -466,6 +466,10 @@ public:
 	virtual float Width() const;
 	virtual float Height() const;
 
+	// If width=0 or height=0, interpreted as unbounded.
+	void SetBounds( float width, float height );
+	void SetTab( float tabWidth )	{ if ( m_tabWidth != tabWidth )		{ m_tabWidth = tabWidth; m_width = m_height = -1; Modify(); }}
+
 	void SetText( const char* t );
 	void SetText( const char* start, const char* end );	///< Adds text from [start,end)
 
@@ -484,48 +488,20 @@ public:
 	virtual void Queue( grinliz::CDynArray< uint16_t > *index, grinliz::CDynArray< Gamui::Vertex > *vertex );
 
 private:
-	void CalcSize( float* width, float* height ) const;
+	float WordWidth( const char* p, IGamuiText* iText ) const;
+	// Always sets the width and height (which are mutable for that reason.)
+	void ConstQueue( grinliz::CDynArray< uint16_t > *index, grinliz::CDynArray< Gamui::Vertex > *vertex ) const;
 
 	enum { ALLOCATED = 16 };
 	char  m_buf[ALLOCATED];
 	char* m_str;
 	int	  m_allocated;
+	float m_boundsWidth;
+	float m_boundsHeight;
+	float m_tabWidth;
 
 	mutable float m_width;
 	mutable float m_height;
-};
-
-
-class TextBox : public UIItem
-{
-public:
-	TextBox();
-	~TextBox();
-
-	void Init( Gamui* );
-
-	void SetSize( float width, float height )	{ m_width = width; m_height = height; m_needsLayout = true; Modify(); }
-	virtual float Width() const					{ return m_width; }
-	virtual float Height() const				{ return m_height; }
-
-	void SetText( const char* t )				{ m_storage.SetText( t ); m_needsLayout = true; Modify(); }
-
-	const char* GetText() const					{ return m_storage.GetText(); }
-	void ClearText()							{ m_storage.ClearText(); m_needsLayout = true; Modify(); }
-	virtual void SetEnabled( bool enabled )		{ UIItem::SetEnabled( enabled ); m_needsLayout = true; Modify(); }
-	virtual void SetVisible( bool visible )		{ UIItem::SetVisible( visible ); m_needsLayout = true; Modify(); }
-
-	virtual const RenderAtom* GetRenderAtom() const;
-	virtual bool DoLayout();
-	virtual void Queue( grinliz::CDynArray< uint16_t > *index, grinliz::CDynArray< Gamui::Vertex > *vertex );
-
-private:
-	bool		m_needsLayout;
-	float		m_width;
-	float		m_height;
-	TextLabel	m_storage;
-	TextLabel*	m_textLabelArr;
-	int			m_lines;
 };
 
 
@@ -674,8 +650,7 @@ public:
 	void SetIcon( const RenderAtom& atom, const RenderAtom& atomD )			{ m_atoms[ICON] = atom; m_atoms[ICON_D] = atomD; SetState(); Modify(); }
 
 	void SetText( const char* text );
-	const char* GetText() const { return m_label[0].GetText(); }
-	const char* GetText2() const { return m_label[1].GetText(); }
+	const char* GetText() const { return m_label.GetText(); }
 
 	enum {
 		CENTER, LEFT, RIGHT
@@ -714,7 +689,6 @@ protected:
 private:
 
 	void PositionChildren();
-	void SetText2( const char* text );
 
 	enum {
 		UP,
@@ -733,14 +707,13 @@ private:
 	Image		m_deco;
 	Image		m_icon;
 
-	bool		m_usingText1;
 	int			m_textLayout;
 	int			m_decoLayout;
 	float		m_textDX;
 	float		m_textDY;
 	float		m_decoDX;
 	float		m_decoDY;	
-	TextLabel	m_label[2];
+	TextLabel	m_label;
 };
 
 
@@ -871,8 +844,7 @@ class DigitalBar : public UIItem
 public:
 	DigitalBar();
 	DigitalBar( Gamui* gamui,
-				int nTicks,
-
+				int nTicks,							// if 2, continuous
 				const RenderAtom& atomLower,		// lit
 				const RenderAtom& atomHigher )		// un-lit
 		: UIItem( Gamui::LEVEL_FOREGROUND )
@@ -899,6 +871,8 @@ public:
 	void SetLowerAtom( const RenderAtom& );
 	void SetHigherAtom( const RenderAtom& );
 
+	void SetText( const char* text )		{ m_textLabel.SetText( text ); }
+
 	virtual const RenderAtom* GetRenderAtom() const;
 	virtual bool DoLayout();
 	virtual void Queue( grinliz::CDynArray< uint16_t > *index, grinliz::CDynArray< Gamui::Vertex > *vertex );
@@ -910,6 +884,7 @@ private:
 	RenderAtom	m_atomLower;
 	RenderAtom	m_atomHigher;
 	float		m_width, m_height;
+	TextLabel	m_textLabel;
 	Image		m_image[MAX_TICKS];
 };
 

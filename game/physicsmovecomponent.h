@@ -36,7 +36,7 @@ public:
 
 	virtual void OnAdd( Chit* chit );
 	virtual void OnRemove();
-	virtual int DoTick( U32 delta, U32 since );
+	virtual int DoTick( U32 delta );
 	virtual bool IsMoving() const;
 	virtual void CalcVelocity( grinliz::Vector3F* v )	{ *v = velocity; }
 
@@ -57,8 +57,8 @@ class TrackingMoveComponent : public GameMoveComponent
 private:
 	typedef GameMoveComponent super;
 public:
-	TrackingMoveComponent( WorldMap* map ) : GameMoveComponent( map ), target( 0 )	{}
-	virtual ~TrackingMoveComponent()		{}
+	TrackingMoveComponent( WorldMap* map );
+	virtual ~TrackingMoveComponent();
 
 	virtual const char* Name() const { return "TrackingMoveComponent"; }
 	virtual TrackingMoveComponent* ToTrackingMoveComponent() { return this; }
@@ -67,13 +67,12 @@ public:
 	}
 
 	virtual void Serialize( XStream* xs );
-	virtual int  DoTick( U32 delta, U32 since );
+	virtual int  DoTick( U32 since );
 	virtual bool IsMoving();
 	virtual void CalcVelocity( grinliz::Vector3F* v );
 
-	void SetTarget( int chitID )	{ target = chitID; }
+	void SetTarget( int chitID )				{ target = chitID; }
 	virtual bool ShouldAvoid() const			{ return false; }
-
 
 private:
 	int target;

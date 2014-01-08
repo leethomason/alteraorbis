@@ -8,6 +8,7 @@ class Chit;
 class WorkQueue;
 class WorldMap;
 class Engine;
+struct ComponentSet;
 
 namespace ai {
 
@@ -43,6 +44,8 @@ public:
 		t.taskID = taskID;
 		return t;
 	}
+	// FIXME: many stands don't work if you move off the healing place, building, etc.
+	// Check and use location.
 	static Task StandTask( int time, int taskID=0 ) {
 		Task t;
 		t.action = TASK_STAND;
@@ -114,12 +117,21 @@ public:
 	void DoStanding( int time );
 
 	// WorkQueue is optional, but connects the tasks back to the queue.
-	void DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta, U32 since );
+	void DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta );
+	grinliz::IString LastBuildingUsed() const { return lastBuildingUsed; }
 
 private:
+	void UseBuilding( const ComponentSet& thisComp, Chit* building, const grinliz::IString& buildingName );
+	void GoShopping(  const ComponentSet& thisComp, Chit* market );
+	bool UseFactory(  const ComponentSet& thisComp, Chit* factory, int tech );
+
+	// chat, basically, between denizens
+	void SocialPulse( const ComponentSet& thisComp, const grinliz::Vector2F& origin );
+
+	WorldMap*	worldMap;
+	Engine*		engine;
+	grinliz::IString lastBuildingUsed;	// should probably be serialized, if this was serialized.
 	grinliz::CDynArray<Task> taskList;
-	WorldMap* worldMap;
-	Engine* engine;
 };
 
 }; // namespace 'ai'

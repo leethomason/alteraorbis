@@ -247,7 +247,7 @@ const WorkQueue::QueueItem* WorkQueue::Find( const grinliz::Vector2I& chitPos )
 				}
 			}
 			else {
-				if ( worldMap->CalcPath( start, end, 0, 0, 0, &cost )) {
+				if ( worldMap->CalcPath( start, end, 0, &cost )) {
 					if ( cost < bestCost ) {
 						bestCost = cost;
 						best = i;
@@ -276,12 +276,10 @@ bool WorkQueue::TaskCanComplete( const WorkQueue::QueueItem& item )
 	Wallet wallet;
 	Vector2I sector = ToSector( item.pos );
 	CoreScript* coreScript = chitBag->GetCore( sector );
-	Chit* controller = 0;
-	if ( coreScript ) {
-		controller = coreScript->GetAttached( 0 );
-		if ( controller && controller->GetItem() ) {
-			wallet = controller->GetItem()->wallet;
-		}
+
+	Chit* controller = coreScript->ParentChit();
+	if ( controller && controller->GetItem() ) {
+		wallet = controller->GetItem()->wallet;
 	}
 
 	return WorkQueue::TaskCanComplete(	worldMap, 
@@ -305,7 +303,7 @@ bool WorkQueue::TaskCanComplete( const WorkQueue::QueueItem& item )
 	const BuildData& buildData = buildScript.GetData( action );
 	int size = buildData.size;
 	
-	if ( available.gold <= buildData.cost ) {
+	if ( available.gold < buildData.cost ) {
 		return false;
 	}
 
@@ -317,7 +315,10 @@ bool WorkQueue::TaskCanComplete( const WorkQueue::QueueItem& item )
 				++passable;
 			}
 			Vector2I v = { x, y };
-			if ( chitBag->QueryRemovable( v )) {
+			// The 'build' actions will automatically clear plants. (As will PAVE, etc.)
+			// However, if the action is CLEAR, we need to know there is something
+			// there to remove.
+			if ( chitBag->QueryRemovable( v, action != BuildScript::CLEAR )) {
 				++removable;
 			}
 		}
@@ -328,9 +329,6 @@ bool WorkQueue::TaskCanComplete( const WorkQueue::QueueItem& item )
 			// stuff in the way
 			return false;
 		}
-		// pavement blocks building...iffy:
-		if ( wg.Pave() )
-			return false;
 	}
 	else {
 		if ( passable == size*size && removable == 0 ) {

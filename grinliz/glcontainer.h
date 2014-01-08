@@ -32,7 +32,6 @@ distribution.
 #include "gldebug.h"
 #include "gltypes.h"
 #include "glutil.h"
-//#include "glstringutil.h"
 
 namespace grinliz
 {
@@ -230,6 +229,13 @@ public:
 		return temp;
 	}
 
+	T PopFront() {
+		GLASSERT( size > 0 );
+		T temp = mem[0];
+		Remove( 0 );
+		return temp;
+	}
+
 	void Remove( int i ) {
 		GLASSERT( i < (int)size );
 		// Copy down.
@@ -248,7 +254,7 @@ public:
 		Pop();
 	}
 
-	int Find( const T& t ) {
+	int Find( const T& t ) const {
 		for( int i=0; i<size; ++i ) {
 			if ( mem[i] == t )
 				return i;
@@ -282,6 +288,7 @@ public:
 	}
 
 	// Binary Search: array must be sorted!
+	// near: an optional parameter that returns something near an insertion point.
 	int BSearch( const T& t ) const {
 		int low = 0;
 		int high = Size();
@@ -299,7 +306,7 @@ public:
 		return -1;
 	}
 
-private:
+protected:
 	CDynArray( const CDynArray<T>& );	// not allowed. Add a missing '&' in the code.
 	void operator=( const CDynArray< T, SEM >& rhs );	// hard to implement with ownership semantics
 
@@ -311,6 +318,32 @@ private:
 		CACHE_SIZE = (CACHE*sizeof(T)+sizeof(int)-1)/sizeof(int)
 	};
 	int cache[CACHE_SIZE];
+};
+
+
+template < class T, class SEM=ValueSem >
+class SortedDynArray : public CDynArray< T, SEM >
+{
+public:
+	void Add( const T& t ) {
+		int index = BSearch( t );
+
+		if ( index >= 0 ) {
+			mem[index] = t;
+		}
+		else {
+			EnsureCap( size+1 );
+
+			int i = size;
+			while ( (i>0) && ( t < mem[i-1] )) {
+				mem[i] = mem[i-1];
+				--i;
+			}
+			mem[i] = t;
+			++size;
+			++nAlloc;
+		}
+	}
 };
 
 

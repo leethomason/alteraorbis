@@ -39,11 +39,12 @@ public:
 
 	// WARNING must be called before OnAdd
 	void SetMapPosition( int x, int y, int cx, int cy );
-	void SetBuilding( bool b );
+	void SetBuilding( bool b, bool hasPorch );
 	// -- end before OnAdd warning --
 
 	grinliz::Vector2I MapPosition() const	{ return bounds.min; }
 	grinliz::Rectangle2I Bounds() const		{ return bounds; }
+	virtual void SetPosRot( const grinliz::Vector3F& v, const grinliz::Quaternion& quat );
 
 	void SetMode( int mode );	// GRID_IN_USE or GRID_BLOCKED
 	int Mode() const			{ return mode; }
@@ -58,8 +59,11 @@ public:
 	MapSpatialComponent* nextBuilding;
 
 private:
+	void UpdatePorch( const grinliz::Rectangle2I& bounds );
+
 	int						mode;
 	bool					building;	// is this a building?
+	bool					hasPorch;	// if a building, does it have a porch?
 	grinliz::Rectangle2I	bounds;
 	WorldMap*				worldMap;
 	LumosChitBag*			chitBag;

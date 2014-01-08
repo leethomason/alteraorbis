@@ -18,7 +18,6 @@
 
 #include "../grinliz/gldebug.h"
 #include "../grinliz/gltypes.h"
-//#include "../grinliz/glperformance.h"
 #include "../grinliz/glcontainer.h"
 
 #include "../engine/surface.h"
@@ -44,6 +43,7 @@ class TiXmlDocument;
 class Stats;
 class Unit;
 class Research;
+class ItemDefDB;
 
 enum SavePathMode {
 	SAVEPATH_READ,
@@ -89,12 +89,10 @@ public:
 	U32 CurrentTime() const	{ return currentTime; }
 	U32 DeltaTime() const	{ return currentTime-previousTime; }
 
-	void SetDebugLevel( int level )		{ debugLevel = (level%4); }
-	int GetDebugLevel() const			{ return debugLevel; }
-	void SetPerfLevel( int level )		{ perfLevel = (level%2); }
-	int GetPerfLevel() const			{ return perfLevel; }
+	bool GetDebugUI() const				{ return debugUI; }
+	bool GetDebugText() const			{ return debugText; }
+	bool GetPerfText() const			{ return perfText; }
 	int GetTapMod() const				{ return tapMod; }
-	bool DebugUIEnabled() const			{ return debugUIEnabled; }
 
 	const char* GamePath( const char* type, int slot, const char* extension ) const;
 	bool HasFile( const char* file ) const;
@@ -177,15 +175,16 @@ private:
 	U32 markFrameTime;
 	U32 frameCountsSinceMark;
 	float framesPerSecond;
-	int debugLevel;
-	int perfLevel;
+	bool debugUI;
+	bool debugText;
+	bool perfText;
 	int perfFrameCount;
 	bool suppressText;
 	bool renderUI;
-	bool debugUIEnabled;
 
 	ModelLoader* modelLoader;
 	gamedb::Reader* database0;		// the basic, complete database
+	ItemDefDB*		itemDefDB;		// the definitions of items
 
 	struct SceneNode {
 		Scene*			scene;

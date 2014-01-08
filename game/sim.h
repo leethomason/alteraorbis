@@ -24,6 +24,7 @@
 
 #include "gamelimits.h"
 #include "visitor.h"
+#include "../xegame/cticker.h"
 
 class Engine;
 class WorldMap;
@@ -33,6 +34,8 @@ class Texture;
 class Chit;
 class Weather;
 class ReserveBank;
+class NewsHistory;
+class ItemDB;
 
 class Sim
 {
@@ -52,7 +55,6 @@ public:
 	Texture*		GetMiniMapTexture();
 	Chit*			GetPlayerChit();
 
-
 	// use with caution: not a clear separation between sim and game
 	Engine*			GetEngine()		{ return engine; }
 	LumosChitBag*	GetChitBag()	{ return chitBag; }
@@ -63,11 +65,10 @@ public:
 	void CreateVolcano( int x, int y, int size );
 	// type=-1 will scan for natural plant choice
 	void CreatePlant( int x, int y, int type );
-
-	double DateInAge() const { return (double)timeInMinutes / (double)MINUTES_IN_AGE; }
 	
 	void CreatePlayer();
 	void CreatePlayer( const grinliz::Vector2I& pos );
+	void UseBuilding();	// the player wants to use a building
 
 private:
 	void CreateCores();
@@ -81,13 +82,14 @@ private:
 	ReserveBank*	reserveBank;
 	LumosChitBag*	chitBag;
 	Visitors*		visitors;
+	NewsHistory*	newsHistory;
+	ItemDB*			itemDB;
 
 	grinliz::Random	random;
 	int playerID;
-	int secondClock;
-	int minuteClock;
-	U32 timeInMinutes;
-	int volcTimer;
+	CTicker minuteClock, 
+			secondClock, 
+			volcTimer;
 	int currentVisitor;
 
 	grinliz::CDynArray< Chit* >	queryArr;	// local; cached at object.

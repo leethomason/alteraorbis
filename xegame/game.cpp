@@ -28,7 +28,6 @@
 
 #include "../grinliz/glmatrix.h"
 #include "../grinliz/glutil.h"
-//#include "../grinliz/glperformance.h"
 #include "../Shiny/include/Shiny.h"
 #include "../grinliz/glstringutil.h"
 
@@ -37,6 +36,8 @@
 
 #include "ufosound.h"
 #include "istringconst.h"
+
+#include "../script/itemscript.h"
 
 #include <time.h>
 #include <direct.h>	// for _mkdir
@@ -54,8 +55,9 @@ Game::Game( int width, int height, int rotation, int uiHeight, const char* path 
 	markFrameTime( 0 ),
 	frameCountsSinceMark( 0 ),
 	framesPerSecond( 0 ),
-	debugLevel( 1 ),
-	perfLevel( 0 ),
+	debugUI( false ), 
+	debugText( false ),
+	perfText( false ),
 	perfFrameCount( 0 ),
 	suppressText( false ),
 	renderUI( true ),
@@ -63,7 +65,6 @@ Game::Game( int width, int height, int rotation, int uiHeight, const char* path 
 	isDragging( false )
 {
 	IStringConst::Init();
-	debugUIEnabled = false;
 
 	savePath = path;
 	char c = savePath[savePath.size()-1];
@@ -111,6 +112,11 @@ Game::Game( int width, int height, int rotation, int uiHeight, const char* path 
 	UFOText::Create( database0, textTexture );
 
 	_mkdir( "save" );
+
+	itemDefDB = new ItemDefDB();
+	itemDefDB->Load( "./res/itemdef.xml" );
+	itemDefDB->DumpWeaponStats();
+
 	GLOUTPUT(( "Game::Init complete.\n" ));
 }
 
@@ -137,9 +143,9 @@ Game::~Game()
 
 	delete ShaderManager::Instance();	// handles device loss - should be near the end.
 	delete GPUDevice::Instance();
+	delete itemDefDB;
 	delete database0;
 	delete StringPool::Instance();
-	//Performance::Free();
 	PROFILE_DESTROY();
 
 	GLOUTPUT_REL(( "Game destructor complete.\n" ));
@@ -518,7 +524,7 @@ void Game::DoTick( U32 _currentTime )
 #if 1
 	UFOText* ufoText = UFOText::Instance();
 	if ( !suppressText ) {
-		if ( debugLevel >= 1 ) {
+		if ( debugText ) {
 			ufoText->Draw(	0,  Y, "#%d %5.1ffps %4.1fK/f %3ddc/f quads=%.1fK/f", 
 							VERSION, 
 							framesPerSecond, 
@@ -558,7 +564,7 @@ void Game::DoTick( U32 _currentTime )
 	*/
 	PROFILE_UPDATE();
 
-	if ( GetPerfLevel() ) {
+	if ( perfText ) {
 		PrintPerf();
 	}
 #endif
@@ -644,15 +650,16 @@ void Game::HandleHotKey( int key )
 	if ( key == GAME_HK_TOGGLE_UI ) {
 		renderUI = !renderUI;
 	}
-	if ( key == GAME_HK_DEBUG_UI ) {
-		debugUIEnabled = !debugUIEnabled;
+	if ( key == GAME_HK_TOGGLE_DEBUG_UI ) {
+		debugUI = !debugUI;
 		sceneStack.Top()->scene->Resize();
 	}
 	if ( key == GAME_HK_TOGGLE_DEBUG_TEXT ) {
-		SetDebugLevel( GetDebugLevel() + 1 );
+		debugText = !debugText;
+		sceneStack.Top()->scene->Resize();
 	}
 	else if ( key == GAME_HK_TOGGLE_PERF ) {
-		SetPerfLevel( GetPerfLevel() + 1 );
+		perfText = !perfText;
 	}
 	else {
 		sceneStack.Top()->scene->HandleHotKey( key );

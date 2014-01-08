@@ -44,10 +44,10 @@ bool RenderQueue::CompareItem::Less( const Item* s0, const Item* s1 )
 	result = (int)((SPTR)s1->atom - (SPTR)s0->atom);
 	if ( result ) return result > 0;
 
-	result = (int)((SPTR)s1->atom->texture - (SPTR)s0->atom->texture);
+	result = s1->state.ShaderFlags() - s0->state.ShaderFlags();
 	if ( result ) return result > 0;
 
-	result = s1->state.ShaderFlags() - s0->state.ShaderFlags();
+	result = (int)((SPTR)s1->atom->texture - (SPTR)s0->atom->texture);
 	return result > 0;
 }
 

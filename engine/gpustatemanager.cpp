@@ -578,44 +578,6 @@ void GPUDevice::Draw( const GPUState& state, const GPUStream& stream, const GPUS
 }
 
 
-/*
-void GPUDevice::DrawPtr(const GPUState& state,
-						const GPUStream& stream, 
-						const GPUStreamData& _data, 
-						int maxVertex,
-						const void* vertex,				
-						int nIndex, 
-						const uint16_t* indices )
-{
-	CHECK_GL_ERROR;
-	bool small = ( nIndex <= SMALL_SIZE ) && ( maxVertex*stream.stride <= SMALL_SIZE );
-	int idx = 0;
-	if( small ) {
-		idx = cBufSmall++;
-		if ( cBufSmall == NUM_BUFFERS ) cBufSmall = SMALL_START;
-	}
-	else {
-		idx = cBufLarge++;
-		if ( cBufLarge == SMALL_START ) cBufLarge = 0;
-	}
-	GLASSERT( nIndex < indexBuffer[idx]->NumIndex() );
-	GLASSERT( maxVertex * stream.stride < vertexBuffer[idx]->SizeInBytes() );
-
-	int nI = Min( nIndex, indexBuffer[idx]->NumIndex() );
-	int nV = Min( maxVertex, vertexBuffer[idx]->SizeInBytes() / stream.stride );
-
-	indexBuffer[idx]->Upload( indices, nI, 0 );
-	vertexBuffer[idx]->Upload( vertex, nV*stream.stride, 0 );
-
-	GPUStreamData data = _data;
-	data.indexBuffer  = indexBuffer[idx]->ID();
-	data.vertexBuffer = vertexBuffer[idx]->ID();
-	Draw( state, stream, data, 0, nI, 1 );
-}
-*/
-
-
-
 void GPUDevice::DrawQuad( const GPUState& state, Texture* texture, const grinliz::Vector3F p0, const grinliz::Vector3F p1, bool positive )
 {
 	PTVertex pos[4] = { 
@@ -645,7 +607,7 @@ void GPUDevice::DrawQuad( const GPUState& state, Texture* texture, const grinliz
 	DrawQuads( state, stream, data, 1 );
 	++currentQuadBuf;
 	if ( currentQuadBuf == NUM_QUAD_BUFFERS ) {
-		GLASSERT( 0 ); // we are re-using VBOs and possibly stalling GPU
+//		GLASSERT( 0 ); // we are re-using VBOs and possibly stalling GPU
 		currentQuadBuf = 0;
 	}
 }

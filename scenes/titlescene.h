@@ -61,7 +61,7 @@ private:
 	};
 	gamui::PushButton	testScene[NUM_TESTS];
 	gamui::PushButton	gameScene[NUM_GAME];
-	gamui::TextBox		note;
+	gamui::TextLabel	note;
 };
 
 #endif // TITLESCENE_INCLUDED

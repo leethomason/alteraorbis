@@ -21,6 +21,8 @@
 
 using namespace grinliz;
 
+static const int	TIME_TO_GROW  = 4 * (1000 * 60);	// minutes
+static const int	TIME_TO_SPORE = 3 * (1000 * 60); 
 
 /*static*/ GameItem* PlantScript::IsPlant( Chit* chit, int* type, int* stage )
 {
@@ -46,12 +48,13 @@ PlantScript::PlantScript( Sim* p_sim, Engine* p_engine, WorldMap* p_map, Weather
 	engine( p_engine ), 
 	worldMap( p_map ), 
 	weather( p_weather ),
-	type( p_type )
+	type( p_type ),
+	growTimer( TIME_TO_GROW ),
+	sporeTimer( TIME_TO_SPORE )
 {
 	stage = 0;
 	age = 0;
 	ageAtStage = 0;
-	growTimer = sporeTimer = 0;
 }
 
 
@@ -60,6 +63,9 @@ void PlantScript::SetRenderComponent()
 	CStr<10> str = "plant0.0";
 	str[5] = '0' + type;
 	str[7] = '0' + stage;
+
+	int t = -1;
+	int s = -1;
 
 	GLASSERT( scriptContext->chit );
 	if ( scriptContext->chit->GetRenderComponent() ) {
@@ -74,9 +80,8 @@ void PlantScript::SetRenderComponent()
 		RenderComponent* rc = scriptContext->chit->GetRenderComponent();
 		const char* name = rc->MainResource()->Name();
 		GLASSERT( strlen( name ) == 8 );
-		int t = name[5] - '0';
-		int s = name[7] - '0';
-		scriptContext->census->plants[t][s] -= 1;
+		t = name[5] - '0';
+		s = name[7] - '0';
 
 		scriptContext->chit->Remove( rc );
 		delete rc;
@@ -86,11 +91,28 @@ void PlantScript::SetRenderComponent()
 		RenderComponent* rc = new RenderComponent( engine, str.c_str() );
 		rc->SetSerialize( false );
 		scriptContext->chit->Add( rc );
-
-		scriptContext->census->plants[type][stage] += 1;
 	}
+
+	if ( t >= 0 ) {
+		GLASSERT( s >= 0 );
+		scriptContext->census->plants[t][s]			-= 1;
+		scriptContext->census->plants[type][stage]	+= 1;
+	}
+
 	GameItem* item = scriptContext->chit->GetItem();
 	scriptContext->chit->GetRenderComponent()->SetSaturation( item->HPFraction() );
+}
+
+
+void PlantScript::OnAdd()
+{
+	scriptContext->census->plants[type][stage] += 1;
+}
+
+
+void PlantScript::OnRemove()
+{
+	scriptContext->census->plants[type][stage] -= 1;
 }
 
 
@@ -110,10 +132,14 @@ void PlantScript::Init()
 {
 	const GameItem* resource = GetResource();
 	scriptContext->chit->Add( new ItemComponent( engine, worldMap, *resource ));
-	scriptContext->chit->GetItem()->traits.Roll( scriptContext->chit->random.Rand() );
+	scriptContext->chit->GetItem()->GetTraitsMutable()->Roll( scriptContext->chit->random.Rand() );
 	SetRenderComponent();
 
 	scriptContext->chit->GetSpatialComponent()->SetYRotation( (float)scriptContext->chit->random.Rand( 360 ));
+
+	// Add some fuzz to the timers.
+	growTimer.SetPeriod(  TIME_TO_GROW + scriptContext->chit->random.Rand( TIME_TO_GROW/10 ));
+	sporeTimer.SetPeriod( TIME_TO_SPORE + scriptContext->chit->random.Rand( TIME_TO_SPORE/10 ));
 }
 
 
@@ -124,34 +150,34 @@ void PlantScript::Serialize(  XStream* xs )
 	XARC_SER( xs, stage );
 	XARC_SER( xs, age );
 	XARC_SER( xs, ageAtStage );
-	XARC_SER( xs, growTimer );
-	XARC_SER( xs, sporeTimer );
+	growTimer.Serialize( xs, "growTimer" );
+	sporeTimer.Serialize( xs, "sporeTimer" );
 	XarcClose( xs );
 }
 
 
-int PlantScript::DoTick( U32 delta, U32 since )
+int PlantScript::DoTick( U32 delta )
 {
 	static const float	HP_PER_SECOND = 1.0f;
-	static const int	TIME_TO_GROW  = 4 * (1000 * 60);	// minutes
-	static const int	TIME_TO_SPORE = 1 * (1000 * 60); 
 
 	// Need to generate when the PlantScript loads. (It doesn't save
 	// the render component.) This is over-checking, but currently
 	// don't have an onAdd.
 	SetRenderComponent();
 
-	age += since;
-	ageAtStage += since;
+	age += delta;
+	ageAtStage += delta;
 
-	const int tick = MINUTE + scriptContext->chit->random.Rand( 1024*16 );
+	int grow = growTimer.Delta( delta );
+	int spore = sporeTimer.Delta( delta );
+	int tick = Min( growTimer.Next(), sporeTimer.Next() );
 
-	growTimer += since;
-	if ( growTimer < MINUTE ) 
+	if ( !grow && !spore ) {
+		if ( scriptContext->chit->GetRenderComponent() && scriptContext->chit->GetItem() ) {
+			scriptContext->chit->GetRenderComponent()->SetSaturation( scriptContext->chit->GetItem()->HPFraction() );
+		}
 		return tick;
-
-	growTimer = 0;
-	float seconds = (float)since / 1000.0f;
+	}
 
 	MapSpatialComponent* sc = GET_SUB_COMPONENT( scriptContext->chit, SpatialComponent, MapSpatialComponent );
 	GLASSERT( sc );
@@ -162,135 +188,139 @@ int PlantScript::DoTick( U32 delta, U32 since )
 	if ( !item ) return tick;
 
 	Vector2I pos = sc->MapPosition();
-	float h = (float)(stage+1);
-
-	float rainFraction	= weather->RainFraction( (float)pos.x+0.5f, (float)pos.y+0.5f );
+	Vector2F pos2f = sc->GetPosition2D();
 	Rectangle2I bounds = worldMap->Bounds();
 
-	// ------ Sun -------- //
-	const Vector3F& light = engine->lighting.direction;
-	float norm = Max( fabs( light.x ), fabs( light.z ));
-	lightTap.x = LRintf( light.x / norm );
-	lightTap.y = LRintf( light.z / norm );
+	int nStage = 4;
+	item->keyValues.Fetch( "nStage", "d", &nStage );
 
-	float sunHeight		= h * item->traits.NormalLeveledTrait( GameTrait::INT );	
-	Vector2I tap = pos + lightTap;
+	if ( grow ) {
+		// ------ Sun -------- //
+		const float		h				= (float)(stage+1);
+		const float		rainFraction	= weather->RainFraction( pos2f.x, pos2f.y );
+		const Vector3F& light			= engine->lighting.direction;
+		const float		norm			= Max( fabs( light.x ), fabs( light.z ));
+		lightTap.x = LRintf( light.x / norm );
+		lightTap.y = LRintf( light.z / norm );
 
-	if ( bounds.Contains( tap )) {
-		// Check for model or rock. If looking at a model, take 1/2 the
-		// height of the first thing we find.
-		const WorldGrid& wg = worldMap->GetWorldGrid( tap.x, tap.y );
-		if ( wg.RockHeight() > 0 ) {
-			sunHeight = Min( sunHeight, (float)wg.RockHeight() * 0.5f );
-		}
-		else {
-			Rectangle2F r;
-			r.Set( (float)tap.x, (float)tap.y, (float)(tap.x+1), (float)(tap.y+1) );
-			CChitArray query;
+		float sunHeight			= h;	
+		Vector2I tap = pos + lightTap;
 
-			ChitAcceptAll all;
-			scriptContext->chit->GetChitBag()->QuerySpatialHash( &query, r, 0, &all );
-			for( int i=0; i<query.Size(); ++i ) {
-				RenderComponent* rc = query[i]->GetRenderComponent();
-				if ( rc ) {
-					Rectangle3F aabb = rc->MainModel()->AABB();
-					sunHeight = Min( h - aabb.max.y*0.5f, sunHeight );
-					break;
+		if ( bounds.Contains( tap )) {
+			// Check for model or rock. If looking at a model, take 1/2 the
+			// height of the first thing we find.
+			const WorldGrid& wg = worldMap->GetWorldGrid( tap.x, tap.y );
+			if ( wg.RockHeight() > 0 ) {
+				sunHeight = Min( sunHeight, (float)wg.RockHeight() * 0.5f );
+			}
+			else {
+				CChitArray query;
+				ChitAcceptAll all;
+				// This is a 1x1 query - will sometimes ignore big buildings, which is a minor bug.
+				scriptContext->chit->GetChitBag()->QuerySpatialHash( &query, ToWorld2F(pos), 0.5f, scriptContext->chit, &all );
+				for( int i=0; i<query.Size(); ++i ) {
+					RenderComponent* rc = query[i]->GetRenderComponent();
+					if ( rc ) {
+						Rectangle3F aabb = rc->MainModel()->AABB();
+						sunHeight = Min( sunHeight, aabb.max.y*0.5f );
+						break;
+					}
 				}
 			}
 		}
-	}
 
-	float sun = sunHeight * (1.0f-rainFraction) / h;
-	sun = Clamp( sun, 0.0f, 1.0f );
+		float sunPerUnitH = sunHeight * (1.0f-rainFraction) / h;
+		sunPerUnitH = Clamp( sunPerUnitH, 0.0f, 1.0f );
 
-	// ---------- Rain ------- //
-	float rootDepth = h * item->traits.NormalLeveledTrait( GameTrait::DEX );
+		// ---------- Rain ------- //
+		float water = rainFraction;
 
-	for( int j=-1; j<=1; ++j ) {
-		for( int i=-1; i<=1; ++i ) {
-			tap.Set( pos.x+i, pos.y+j );
+		static const Vector2I check[4] = { {-1,0}, {1,0}, {0,-1}, {0,1} };
+		for( int i=0; i<GL_C_ARRAY_SIZE( check ); ++i ) {
+			tap = pos + check[i];
 			if ( bounds.Contains( tap )) {
 				const WorldGrid& wg = worldMap->GetWorldGrid( tap.x, tap.y );
-				// Underground rocks limit root dethp.
-				rootDepth = Min( rootDepth, (float)MAX_HEIGHT - wg.RockHeight() );
+				// Water or rock runoff increase water.
+				if ( wg.RockHeight() ) {
+					water += 0.25f * rainFraction;
+				}
 				if ( wg.IsWater() ) {
-					rainFraction += 0.25f;
+					water += 0.25f;
 				}
 			}
 		}
-	}
-	float rain = Clamp( rainFraction * rootDepth / h, 0.0f, 1.0f );
-	rootDepth = Clamp( rootDepth, 0.1f, h );
+		water = Clamp( water, 0.f, 1.f );
 
-	// ------- Temperature ----- //
-	float temp = weather->Temperature( (float)pos.x+0.5f, (float)pos.y+0.5f );
+		// ------- Temperature ----- //
+		float temp = weather->Temperature( (float)pos.x+0.5f, (float)pos.y+0.5f );
 
-	// ------- calc ------- //
-	Vector3F actual = { sun, rain, temp };
-	Vector3F optimal = { 0.5f, 0.5f, 0.5f };
+		// ------- calc ------- //
+		Vector3F actual = { sunPerUnitH, water, temp };
+		Vector3F optimal = { 0.5f, 0.5f, 0.5f };
 	
-	item->keyValues.Fetch( "sun",  "f", &optimal.x );
-	item->keyValues.Fetch( "rain", "f", &optimal.y );
-	item->keyValues.Fetch( "temp", "f", &optimal.z );
+		item->keyValues.Fetch( "sun",  "f", &optimal.x );
+		item->keyValues.Fetch( "rain", "f", &optimal.y );
+		item->keyValues.Fetch( "temp", "f", &optimal.z );
 
-	float distance = ( optimal - actual ).Length();
+		float distance = ( optimal - actual ).Length();
 
-	float GROW = Lerp( 0.2f, 0.1f, (float)stage / (float)(NUM_STAGE-1) );
-	float DIE  = 0.4f;
+		const float GROW = Lerp( 0.2f, 0.1f, (float)stage / (float)(NUM_STAGE-1) );
+		const float DIE  = 0.4f;
 
-	float toughness = item->traits.Toughness();
+		float toughness = item->Traits().Toughness();
+		float seconds = float( TIME_TO_GROW ) / 1000.0f;
 
-	if ( distance < GROW * toughness ) {
-		// Heal.
-		ChitMsg healMsg( ChitMsg::CHIT_HEAL );
-		healMsg.dataF = HP_PER_SECOND*seconds*item->traits.NormalLeveledTrait( GameTrait::STR );
-		scriptContext->chit->SendMessage( healMsg );
+		if ( distance < GROW * toughness ) {
 
-		sporeTimer += since;
-		int nStage = 4;
-		item->keyValues.Fetch( "nStage", "d", &nStage );
+			// Heal.
+			ChitMsg healMsg( ChitMsg::CHIT_HEAL );
+			healMsg.dataF = HP_PER_SECOND*seconds*item->Traits().NormalLeveledTrait( GameTrait::STR );
+			scriptContext->chit->SendMessage( healMsg );
 
-		// Grow
-		if (    item->HPFraction() > 0.9f 
-			 && ageAtStage > TIME_TO_GROW 
-			 && stage < (nStage-1) ) 
-		{
-			++stage;
-			ageAtStage = 0;
-			SetRenderComponent();
+			// Grow
+			if (    item->HPFraction() > 0.9f 
+				 && ageAtStage > TIME_TO_GROW 
+				 && stage < (nStage-1) ) 
+			{
+				++stage;
+				ageAtStage = 0;
+				SetRenderComponent();
 
-			// Set the mass to be consistent with rendering.
-			const GameItem* resource = GetResource();
-			item->mass = resource->mass * (float)((stage+1)*(stage+1));
-			item->hp   = item->TotalHP() * 0.5f;
+				// Set the mass to be consistent with rendering.
+				const GameItem* resource = GetResource();
+				item->mass = resource->mass * (float)((stage+1)*(stage+1));
+				item->hp   = item->TotalHP() * 0.5f;
 
-			sc->SetMode( stage < 2 ? GRID_IN_USE : GRID_BLOCKED );
+				sc->SetMode( stage < 2 ? GRID_IN_USE : GRID_BLOCKED );
+			}
+
 		}
+		else if ( distance > DIE * toughness ) {
+			DamageDesc dd( HP_PER_SECOND * seconds, 0 );
 
-		// Spore
-		if ( sporeTimer > TIME_TO_SPORE ) {
-			sporeTimer -= TIME_TO_SPORE;
-			int dx = -1 + scriptContext->chit->random.Rand(4);	// [-1,2]
-			int dy = -1 + scriptContext->chit->random.Rand(3);	// [-1,1]
+			ChitDamageInfo info( dd );
+			info.originID = scriptContext->chit->ID();
+			info.awardXP  = false;
+			info.isMelee  = true;
+			info.isExplosion = false;
+			info.originOfImpact.Zero();
 
-			sim->CreatePlant( pos.x+dx, pos.y+dy, -1 );
+			ChitMsg damage( ChitMsg::CHIT_DAMAGE, 0, &info );
+			scriptContext->chit->SendMessage( damage );
 		}
 	}
-	else if ( distance > DIE * toughness ) {
-		DamageDesc dd( HP_PER_SECOND * seconds, 0 );
+	// Spore (more likely if bigger plant)
+	if (    spore 
+		 && ( int(scriptContext->chit->random.Rand(nStage)) <= stage )) 
+	{
+		// Number range reflects wind direction.
+		int dx = -1 + scriptContext->chit->random.Rand(4);	// [-1,2]
+		int dy = -1 + scriptContext->chit->random.Rand(3);	// [-1,1]
 
-		ChitDamageInfo info( dd );
-		info.originID = scriptContext->chit->ID();
-		info.awardXP  = false;
-		info.isMelee  = true;
-		info.isExplosion = false;
-		info.originOfImpact.Zero();
-
-		ChitMsg damage( ChitMsg::CHIT_DAMAGE, 0, &info );
-		scriptContext->chit->SendMessage( damage );
-
-		sporeTimer = 0;
+		// Remember that create plant will favor creating
+		// existing plants, so we don't need to specify
+		// what to create.
+		sim->CreatePlant( pos.x+dx, pos.y+dy, -1 );
 	}
 
 	scriptContext->chit->GetRenderComponent()->SetSaturation( item->HPFraction() );

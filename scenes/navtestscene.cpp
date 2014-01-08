@@ -261,23 +261,6 @@ void NavTestScene::DrawDebugText()
 }
 
 
-void NavTestScene::OnChitMsg( Chit* chit, const ChitMsg& msg )
-{
-	/*
-//	GLOUTPUT(( "OnChitMsg %s %d\n", componentName, id ));
-	const Vector2F& pos = chit->GetSpatialComponent()->GetPosition2D();
-	static const Vector2F t0 = { 11.f, 10.f };
-	static const Vector2F t1 = { 13.f, 10.f };
-	if ( (pos-t0).LengthSquared() < (pos-t1).LengthSquared() ) {
-		GET_COMPONENT( chit, PathMoveComponent )->QueueDest( t1 );
-	}
-	else {
-		GET_COMPONENT( chit, PathMoveComponent )->QueueDest( t0 );
-	}
-	*/
-}
-
-
 void NavTestScene::Draw3D( U32 deltaTime )
 {
 	engine->Draw( deltaTime );

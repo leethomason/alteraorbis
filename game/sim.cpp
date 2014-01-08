@@ -19,6 +19,9 @@
 #include "../script/corescript.h"
 #include "../script/worldgen.h"
 
+#include "../scenes/characterscene.h"
+#include "../scenes/forgescene.h"
+
 #include "pathmovecomponent.h"
 #include "debugstatecomponent.h"
 #include "healthcomponent.h"
@@ -37,12 +40,13 @@
 using namespace grinliz;
 using namespace tinyxml2;
 
-Sim::Sim( LumosGame* g )
+Sim::Sim( LumosGame* g ) : minuteClock( 60*1000 ), secondClock( 1000 ), volcTimer( 10*1000 )
 {
 	lumosGame = g;
 	Screenport* port = lumosGame->GetScreenportMutable();
 	const gamedb::Reader* database = lumosGame->GetDatabase();
 
+	itemDB		= new ItemDB();
 	worldMap	= new WorldMap( MAX_MAP_SIZE, MAX_MAP_SIZE );
 	engine		= new Engine( port, database, worldMap );
 	weather		= new Weather( MAX_MAP_SIZE, MAX_MAP_SIZE );
@@ -54,12 +58,9 @@ Sim::Sim( LumosGame* g )
 
 	chitBag = new LumosChitBag();
 	chitBag->SetContext( engine, worldMap, lumosGame );
+	newsHistory = new NewsHistory( chitBag );
 	worldMap->AttachEngine( engine, chitBag );
 	playerID = 0;
-	minuteClock = 0;
-	timeInMinutes = 0;
-	volcTimer = 0;
-	secondClock = 1000;
 	currentVisitor = 0;
 
 	random.SetSeedFromTime();
@@ -72,9 +73,11 @@ Sim::~Sim()
 	delete weather;
 	delete reserveBank;
 	worldMap->AttachEngine( 0, 0 );
+	delete newsHistory;
 	delete chitBag;
 	delete engine;
 	delete worldMap;
+	delete itemDB;
 }
 
 
@@ -98,11 +101,15 @@ void Sim::Load( const char* mapDAT, const char* gameDAT )
 		if ( fp ) {
 			StreamReader reader( fp );
 			XarcOpen( &reader, "Sim" );
+
 			XARC_SER( &reader, playerID );
-			XARC_SER( &reader, minuteClock );
-			XARC_SER( &reader, timeInMinutes );
 			XARC_SER( &reader, GameItem::idPool );
 
+			minuteClock.Serialize( &reader, "minuteClock" );
+			secondClock.Serialize( &reader, "secondClock" );
+			volcTimer.Serialize( &reader, "volcTimer" );
+			itemDB->Serialize( &reader );
+			newsHistory->Serialize( &reader );
 			reserveBank->Serialize( &reader );
 			visitors->Serialize( &reader );
 			engine->camera.Serialize( &reader );
@@ -114,7 +121,8 @@ void Sim::Load( const char* mapDAT, const char* gameDAT )
 		}
 	}
 	if ( chitBag->GetChit( playerID )) {
-		// mark as player controlled so it reacts as expected to player input.
+		// Mark as player controlled so it reacts as expected to player input.
+		// This is the primary avatar, and has some special rules.
 		chitBag->GetChit( playerID )->SetPlayerControlled( true );
 	}
 }
@@ -134,10 +142,13 @@ void Sim::Save( const char* mapDAT, const char* gameDAT )
 			StreamWriter writer( fp );
 			XarcOpen( &writer, "Sim" );
 			XARC_SER( &writer, playerID );
-			XARC_SER( &writer, minuteClock );
-			XARC_SER( &writer, timeInMinutes );
 			XARC_SER( &writer, GameItem::idPool );
 
+			minuteClock.Serialize( &writer, "minuteClock" );
+			secondClock.Serialize( &writer, "secondClock" );
+			volcTimer.Serialize( &writer, "volcTimer" );
+			itemDB->Serialize( &writer );
+			newsHistory->Serialize( &writer );
 			reserveBank->Serialize( &writer );
 			visitors->Serialize( &writer );
 			engine->camera.Serialize( &writer );
@@ -181,12 +192,21 @@ void Sim::CreateCores()
 	cold->SetDefaultSpawn( StringPool::Intern( "arachnoid" ));	// easy starting point for greater spawns
 	hot->SetDefaultSpawn( StringPool::Intern( "arachnoid" ));	// easy starting point for greater spawns
 	GLOUTPUT(( "nCores=%d\n", ncores ));
+
+	Vector2I homeSector = chitBag->GetHomeSector();
+	CoreScript* homeCS = chitBag->GetCore( homeSector );
+	Chit* homeChit = homeCS->ParentChit();
+	homeChit->GetItem()->primaryTeam = TEAM_HOUSE0;
 }
 
 
 void Sim::CreatePlayer()
 {
-	Vector2I v = worldMap->FindEmbark();
+	//Vector2I v = worldMap->FindEmbark();
+
+	Vector2I sector = chitBag->GetHomeSector();
+	Vector2I v = {	sector.x*SECTOR_SIZE + SECTOR_SIZE/2 + 4,
+					sector.y*SECTOR_SIZE + SECTOR_SIZE/2 + 4 };
 	CreatePlayer( v );
 }
 
@@ -214,15 +234,14 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos )
 	chitBag->AddItem( "blaster", chit, engine, 0, 0 );
 	chitBag->AddItem( "ring", chit, engine, 0, 0 );
 	chit->GetItem()->wallet.AddGold( ReserveBank::Instance()->WithdrawDenizen() );
-	chit->GetItem()->flags |= GameItem::AI_BINDS_TO_CORE;
-	chit->GetItem()->traits.Roll( playerID );
+	chit->GetItem()->GetTraitsMutable()->Roll( playerID );
 
 	IString nameGen = chit->GetItem()->keyValues.GetIString( "nameGen" );
 	if ( !nameGen.empty() ) {
-		chit->GetItem()->properName = StringPool::Intern( 
+		chit->GetItem()->SetProperName( StringPool::Intern( 
 			lumosGame->GenName( nameGen.c_str(), 
 								chit->ID(),
-								4, 8 ));
+								4, 8 )));
 	}
 	AIComponent* ai = new AIComponent( engine, worldMap );
 	ai->EnableDebug( true );
@@ -230,11 +249,19 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos )
 
 	chit->Add( new HealthComponent( engine ));
 	chit->GetSpatialComponent()->SetPosYRot( (float)pos.x+0.5f, 0, (float)pos.y+0.5f, 0 );
-	chit->GetItemComponent()->SetHardpoints();
 
 	// Player speed boost
 	chit->GetItem()->keyValues.Set( "speed", "f", DEFAULT_MOVE_SPEED*1.5f/1.2f );
 	chit->GetItem()->hpRegen = 1.0f;
+
+	Vector2I sector = ToSector( pos );
+	chitBag->GetCore( sector )->AddCitizen( chit );
+
+	NewsHistory* history = NewsHistory::Instance();
+	if ( history ) {
+		history->Add( NewsEvent( NewsEvent::DENIZEN_CREATED, ToWorld2F(pos), chit, 0 ));
+		chit->GetItem()->keyValues.Set( "destroyMsg", "d", NewsEvent::DENIZEN_KILLED );
+	}
 }
 
 
@@ -252,52 +279,37 @@ Texture* Sim::GetMiniMapTexture()
 
 void Sim::DoTick( U32 delta )
 {
+	NewsHistory::Instance()->DoTick( delta );
 	worldMap->DoTick( delta, chitBag );
 	chitBag->DoTick( delta, engine );
 
-	bool minuteTick = false;
-	bool secondTick = false;
-
-	minuteClock -= (int)delta;
-	if ( minuteClock <= 0 ) {
-		minuteClock += MINUTE;
-		timeInMinutes++;
-		minuteTick = true;
-	}
-
-	secondClock -= (int)delta;
-	if ( secondClock <= 0 ) {
-		secondClock += 1000;
-		secondTick = true;
-	}
-
-	// Logic that will probably need to be broken out.
-	// What happens in a given age?
-	int age = timeInMinutes / MINUTES_IN_AGE;
-	volcTimer += delta;
+	int minuteTick = minuteClock.Delta( delta );
+	int secondTick = secondClock.Delta( delta );
+	int volcano    = volcTimer.Delta( delta );
 
 	// Age of Fire. Needs lots of volcanoes to seed the world.
 	static const int VOLC_RAD = 9;
 	static const int VOLC_DIAM = VOLC_RAD*2+1;
 	static const int NUM_VOLC = MAX_MAP_SIZE*MAX_MAP_SIZE / (VOLC_DIAM*VOLC_DIAM);
-	int MSEC_TO_VOLC = AGE / NUM_VOLC;
+	int MSEC_TO_VOLC = AGE_IN_MSEC / NUM_VOLC;
+
+	int age = NewsHistory::Instance()->AgeI();
 
 	// NOT Age of Fire:
-	if ( age > 1 ) {
-		MSEC_TO_VOLC *= 20;
-	}
-	else if ( age > 0 ) {
-		MSEC_TO_VOLC *= 10;
-	}
+	volcTimer.SetPeriod( (age > 1 ? MSEC_TO_VOLC*4 : MSEC_TO_VOLC) + random.Rand(1000) );
 
-	while( volcTimer >= MSEC_TO_VOLC ) {
-		volcTimer -= MSEC_TO_VOLC;
-
+	while( volcano-- ) {
 		for( int i=0; i<5; ++i ) {
 			int x = random.Rand(worldMap->Width());
 			int y = random.Rand(worldMap->Height());
 			if ( worldMap->IsLand( x, y ) ) {
-				CreateVolcano( x, y, VOLC_RAD );
+				// Don't destroy opporating domains. Crazy annoying.
+				Vector2I pos = { x, y };
+				Vector2I sector = ToSector( pos );
+				CoreScript* cs = chitBag->GetCore( sector );
+				if ( cs && !cs->InUse() ) {
+					CreateVolcano( x, y, VOLC_RAD );
+				}
 				break;
 			}
 		}
@@ -332,8 +344,22 @@ void Sim::DoTick( U32 delta )
 	}
 
 	CreatePlant( random.Rand(worldMap->Width()), random.Rand(worldMap->Height()), -1 );
-
 	DoWeatherEffects( delta );
+
+	// Special rule for player controlled chit: give money to the core.
+	CoreScript* cs = chitBag->GetHomeCore();
+	Chit* player   = this->GetPlayerChit();
+	if ( cs && player ) {
+		GameItem* item = player->GetItem();
+		// Don't clear the avatar's wallet if a scene is pushed - the avatar
+		// may be about to use the wallet!
+		if ( item && !item->wallet.IsEmpty() ) {
+			if ( !lumosGame->IsScenePushed() && !chitBag->IsScenePushed() ) {
+				Wallet w = item->wallet.EmptyWallet();
+				cs->ParentChit()->GetItem()->wallet.Add( w );
+			}
+		}
+	}
 }
 
 
@@ -377,7 +403,7 @@ void Sim::Draw3D( U32 deltaTime )
 	engine->Draw( deltaTime, chitBag->BoltMem(), chitBag->NumBolts() );
 	
 #if 0
-	// Debug porth locations.
+	// Debug port locations.
 	Chit* player = this->GetPlayerChit();
 	if ( player ) {
 		CompositingShader debug( BLEND_NORMAL );
@@ -461,8 +487,9 @@ void Sim::CreatePlant( int x, int y, int type )
 		return;
 
 	const WorldGrid& wg = worldMap->GetWorldGrid( x, y );
-	if ( wg.Pave() )
-		return;		// pavement blocks plants!
+	if ( wg.Pave() || wg.IsPorch() ) {
+		return;
+	}
 
 	// check for a plant already there.
 	if (    wg.IsPassable() 
@@ -508,3 +535,43 @@ void Sim::CreatePlant( int x, int y, int type )
 	}
 }
 
+
+void Sim::UseBuilding()
+{
+	Chit* player = GetPlayerChit();
+	if ( !player ) return;
+
+	Vector2I pos2i = player->GetSpatialComponent()->GetPosition2DI();
+	Vector2I sector = ToSector( pos2i );
+
+	Chit* building = chitBag->QueryPorch( pos2i );
+	if ( building && building->GetItem() ) {
+		IString name = building->GetItem()->IName();
+		ItemComponent* ic = player->GetItemComponent();
+		CoreScript* cs	= chitBag->GetCore( sector );
+		Chit* core = cs->ParentChit();
+
+		// Messy:
+		// Money and crystal are transferred from the avatar to the core. (But 
+		// not items.) We need to xfer it *back* before using the factor, market,
+		// etc. On the tick, the avatar will restore it to the core.
+		ic->GetItem()->wallet.Add( core->GetItem()->wallet.EmptyWallet() );
+
+		if ( cs && ic ) {
+			if ( name == IStringConst::vault ) {
+				chitBag->PushScene( LumosGame::SCENE_CHARACTER, 
+					new CharacterSceneData( ic, building->GetItemComponent(), 0 ));
+			}
+			else if ( name == IStringConst::market ) {
+				chitBag->PushScene( LumosGame::SCENE_CHARACTER, 
+					new CharacterSceneData( ic, building->GetItemComponent(), true ));
+			}
+			else if ( name == IStringConst::factory ) {
+				ForgeSceneData* data = new ForgeSceneData();
+				data->tech = cs->GetTechLevel();
+				data->itemComponent = ic;
+				chitBag->PushScene( LumosGame::SCENE_FORGE, data );
+			}
+		}
+	}
+}

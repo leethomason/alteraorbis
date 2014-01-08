@@ -16,6 +16,9 @@
     <ClCompile Include="..\micropather\micropather.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\engine\ufoutil.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\script\worldgen.h">

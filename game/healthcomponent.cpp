@@ -40,7 +40,7 @@ void HealthComponent::Serialize( XStream* xs )
 }
 
 
-int HealthComponent::DoTick( U32 delta, U32 since )
+int HealthComponent::DoTick( U32 delta )
 {
 	DeltaHealth();
 	if ( destroyed ) {
@@ -81,10 +81,6 @@ void HealthComponent::DeltaHealth()
 
 void HealthComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {
-	//if ( msg.ID() == ChitMsg::GAMEITEM_TICK ) {
-	//	DeltaHealth();
-	//}
-	//else 
 	if ( chit == parentChit && msg.ID() == ChitMsg::RENDER_IMPACT ) {
 		if ( !destroyed ) {
 			RenderComponent* render = parentChit->GetRenderComponent();
@@ -103,7 +99,6 @@ void HealthComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 
 			battleMechanics.MeleeAttack( engine, parentChit, item );
 			engine->particleSystem->EmitPD( "meleeImpact", pos, V3F_UP, 0 );
-		
 		}
 	}
 	else {

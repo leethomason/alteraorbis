@@ -21,13 +21,14 @@
 #include "../grinliz/glcontainer.h"
 
 #include "../game/gameitem.h"
+#include "../xegame/stackedsingleton.h"
 
 
-class ItemDefDB
+class ItemDefDB : public StackedSingleton< ItemDefDB >
 {
 public:
-	static ItemDefDB* Instance() { if ( !instance ) instance = new ItemDefDB(); return instance; }
-	~ItemDefDB()	{ instance = 0; }
+	ItemDefDB()		{ PushInstance( this ); }
+	~ItemDefDB()	{ PopInstance( this ); }
 
 	void Load( const char* path );
 
@@ -43,18 +44,58 @@ public:
 	static void GetProperty( const char* name, const char* prop, int* value );
 
 	void DumpWeaponStats();
-	int  CalcItemValue( const GameItem* item );
 	void AssignWeaponStats( const int* roll, const GameItem& base, GameItem* item );
 
 private:
-	ItemDefDB()		{}
-
-	static ItemDefDB* instance;
 	GameItem nullItem;
 
 	grinliz::HashTable< const char*, GameItem*, grinliz::CompCharPtr, grinliz::OwnedPtrSem > map;
+	// Names of all the items in the DefDB - "top" because "cyclops" is in the list, but not "cyclops claw"
 	grinliz::CDynArray< grinliz::IString > topNames;
 };
+
+// Needs to be small - lots of these to save.
+struct ItemHistory
+{
+	bool operator<(const ItemHistory& rhs) const { return this->itemID < rhs.itemID; }
+	bool operator==(const ItemHistory& rhs) const { return this->itemID == rhs.itemID; }
+
+	int					itemID;
+	grinliz::IString	fullName;
+	U16					level;
+	U16					value;
+
+	void Set( const GameItem* );
+	void Serialize( XStream* xs );
+};
+
+/*
+	As of this point, GameItems are owned by Chits. (Specifically ItemComponents). And
+	occasionally other places. I'm questioning this design. However, we need to be
+	able to look up items for history and such. It either is in use, or deleted, and
+	we need a record of what it was.
+*/
+class ItemDB : public StackedSingleton< ItemDB >
+{
+public:
+	ItemDB()	{ PushInstance( this ); }
+	~ItemDB()	{ PopInstance( this );; }
+
+	void Add( const GameItem* );		// start tracking (possibly insignificant)
+	void Update( const GameItem* );		// item changed
+	void Remove( const GameItem* );		// stop tracking
+
+	// Find an item by id; if null, can use History
+	const GameItem*		Find( int id );
+	const ItemHistory*	History( int id );
+
+	void Serialize( XStream* xs );
+
+private:
+	grinliz::HashTable< int, const GameItem* > itemMap;	// map of all the active, allocated items.
+	grinliz::SortedDynArray< ItemHistory > itemHistory; // all the significant items ever created
+};
+
 
 
 

@@ -94,13 +94,15 @@ class WeaponGen
 public:
 
 	enum {
-		GUN_CELL	= 0x02,
-		GUN_DRIVER	= 0x04,
-		GUN_SCOPE	= 0x08,
+		GUN_CELL	= 0x02,	// boosts clip capacity
+		GUN_DRIVER	= 0x04,	// boosts power/damage
+		GUN_SCOPE	= 0x08,	// boosts accuracy
 
-		RING_GUARD	= 0x02,
-		RING_TRIAD	= 0x04,
-		RING_BLADE	= 0x08
+		RING_GUARD	= 0x02,	// shield coupler
+		RING_TRIAD	= 0x04,	// boosts damage
+		RING_BLADE	= 0x08,	// boosts damage, decrease shield coupling
+
+		PART_MASK   = 0x0f
 	};
 
 	WeaponGen( U32 _seed, int _effectFlags, int _features ) : seed(_seed), effectFlags(_effectFlags), features(_features) {}

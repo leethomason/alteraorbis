@@ -47,19 +47,38 @@ public:
 
 	virtual void Serialize( XStream* xs );
 
-	virtual int DoTick( U32 delta, U32 since );
+	virtual int DoTick( U32 delta );
 	virtual void OnChitEvent( const ChitEvent& event );
 
 	int NumItems() const				{ return itemArr.Size(); }
-	GameItem* GetItem( int index=0 )	{ return (index < itemArr.Size()) ? itemArr[index] : 0; }
+	GameItem* GetItem( int index=0 )				{ return (index < itemArr.Size()) ? itemArr[index] : 0; }
+	const GameItem* GetItem( int index=0 ) const	{ return ( index < itemArr.Size()) ? itemArr[index] : 0; }
+
+	int FindItem( const GameItem* item ) const { 
+		for( int i=0; i<itemArr.Size(); ++i ) {
+			if ( itemArr[i] == item ) return i;
+		}
+		return -1;
+	}
 	bool SwapWeapons();			// swap between the melee and ranged weapons
 	bool Swap( int i, int j );	// swap 2 slots 
+
 	static bool Swap2( ItemComponent* a, int aIndex, ItemComponent* b, int bIndex );	// swap 2 slots, in 2 (possibly) different inventoryComponents
 
-	// Gets the ranged weapon, optionally returns the trigger.
-	IRangedWeaponItem*	GetRangedWeapon( grinliz::Vector3F* trigger );
-	IMeleeWeaponItem*	GetMeleeWeapon();
-	IShield*			GetShield();
+	/*	Weapon queries. Seem simple, but aren't.
+		GetRanged/Melee: returns the currently equipped weapon. Can
+			be intrinsic OR held. Can be null. Can both be null.
+		GetActive/Reserved: returns the a held weapon. Either in hand,
+			or can be swapped in.
+	*/
+
+	// Gets the *currently* in use:
+	IRangedWeaponItem*	GetRangedWeapon( grinliz::Vector3F* trigger );	// optionally returns trigger
+	IMeleeWeaponItem*	GetMeleeWeapon()	{ return melee; }
+	IShield*			GetShield()			{ return shield; }
+
+	// Always returns a HELD weapon, or null.
+	IWeaponItem*		GetReserveWeapon()	{ return reserve; }
 
 	bool CanAddToInventory();
 	int  NumCarriedItems() const;
@@ -78,25 +97,34 @@ public:
 	// add XP to current item and its weapon
 	void AddBattleXP( bool meleeAttack, int killshotLevel, const GameItem* loser );
 
-	// If there is a RenderComponent, bring it in sync with
-	// the inventory.
-	void SetHardpoints();
-
-	// Very crude assessment of the power of this MoB.
+	// Very crude assessment of the power of this MOB.
 	float PowerRating() const;
 
 private:
+	// If there is a RenderComponent, bring it in sync with the inventory.
+	void SetHardpoints();
+	// Update the active/reserve/melee/ranged. Call whenever inventory changes.
+	void UpdateActive();
+
 	void DoSlowTick();
 	bool EmitEffect( const GameItem& it, U32 deltaTime );
-	bool ItemActive( int index );
+	bool ItemActive( int index )	{ return activeArr[index]; }
 	bool ItemActive( const GameItem* );	// expensive: needs a search.
 	void NameItem( GameItem* item );	// if conditions met, give the item a name.
-	void SortInventory();						// AIs will use the "best" item.
+	void SortInventory();				// AIs will use the "best" item.
+	void NewsDestroy( const GameItem* item );	// generate destroy message
 
 	CTicker slowTick;
 
-	Engine *engine;
-	WorldMap* worldMap;
+	// Not serialized:
+	Engine*				engine;
+	WorldMap*			worldMap;
+	bool				hardpointsModified;
+	int					lastDamageID;			// the last thing that hit us.
+	IRangedWeaponItem*	ranged;		// may be 0, active, or neither
+	IMeleeWeaponItem*	melee;		// may be 0, active, or neither
+	IWeaponItem*		reserve;	// remember: always held
+	IShield*			shield;
 
 	// The first item in this array is what this *is*. The following items are what is being carried.
 	//
@@ -108,6 +136,7 @@ private:
 	// array gets the hardpoints, and we get the hardpoints from the ModelResource. (So
 	// we do not need the RenderComponent.)
 	grinliz::CDynArray< GameItem* > itemArr;
+	grinliz::CDynArray< bool >		activeArr;
 };
 
 #endif // ITEMCOMPONENT_INCLUDED

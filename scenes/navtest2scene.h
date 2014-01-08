@@ -34,7 +34,8 @@ public:
 	int nPerCreation;
 };
 
-class NavTest2Scene : public Scene //, public IChitListener
+
+class NavTest2Scene : public Scene,  public IChitListener
 {
 public:
 	NavTest2Scene( LumosGame* game, const NavTest2SceneData* );
@@ -59,7 +60,6 @@ private:
 
 	gamui::PushButton okay;
 	gamui::ToggleButton regionButton;
-	gamui::Image minimap;
 
 	Engine* engine;
 	WorldMap* map;

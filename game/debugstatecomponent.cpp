@@ -82,7 +82,7 @@ void DebugStateComponent::OnRemove()
 }
 
 
-int DebugStateComponent::DoTick( U32 delta, U32 since )
+int DebugStateComponent::DoTick( U32 delta )
 {
 	GameItem* pItem = parentChit->GetItem();
 	if ( !pItem )

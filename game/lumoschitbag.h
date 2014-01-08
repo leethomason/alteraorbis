@@ -154,11 +154,12 @@ public:
 		NEAREST,
 		RANDOM_NEAR
 	};
-	Chit* FindBuilding( const grinliz::IString& name, 
-						const grinliz::Vector2I& sector,	// sector to quer
+	Chit* FindBuilding( const grinliz::IString& name,		// particular building, or emtpy to match all
+						const grinliz::Vector2I& sector,	// sector to query
 						const grinliz::Vector2F* pos,		// used for evaluating NEAREST, etc.
 						int flags,
-						CChitArray* arr );					// optional; the first N hits
+						grinliz::CDynArray<Chit*>* arr,						// optional; the first N hits
+						IChitAccept* filter );				// optional; run this filter first
 
 	Chit* NewMonsterChit( const grinliz::Vector3F& pos, const char* name, int team );
 	Chit* NewGoldChit( const grinliz::Vector3F& pos, int amount );
@@ -166,6 +167,7 @@ public:
 	Chit* NewWorkerChit( const grinliz::Vector3F& pos, int team );
 	Chit* NewBuilding( const grinliz::Vector2I& pos, const char* name, int team );
 	Chit* NewVisitor( int visitorIndex );
+	Chit* NewDenizen( const grinliz::Vector2I& pos, int team );
 
 	// Creates "stuff in the world". The GameItem is passed by ownership.
 	Chit* NewItemChit( const grinliz::Vector3F& pos, GameItem* orphanItem, bool fuzzPos, bool placeOnGround );
@@ -187,10 +189,15 @@ public:
 
 	virtual int MapGridUse( int x, int y );
 
-	CoreScript* IsBoundToCore( Chit*, bool mustBeStandingOnCore, Chit** coreChit=0 );
-
 	// Get the core for this sector.
 	CoreScript* GetCore( const grinliz::Vector2I& sector );
+	CoreScript* GetHomeCore()	{ return GetCore( GetHomeSector() ); }
+	
+	// FIXME placeholder code
+	grinliz::Vector2I GetHomeSector() const {
+		grinliz::Vector2I v = { 5, 5 };
+		return v;
+	}
 
 	Census census;
 
@@ -203,7 +210,8 @@ public:
 		return QueryBuilding( r );
 	}
 	Chit* QueryBuilding( const grinliz::Rectangle2I& bounds );
-	Chit* QueryRemovable( const grinliz::Vector2I& pos );
+	Chit* QueryRemovable( const grinliz::Vector2I& pos, bool ignorePlants );
+	Chit* QueryPlant( const grinliz::Vector2I& pos, int* type, int* stage );
 
 	LumosGame* GetLumosGame() { return lumosGame; }
 	// Why the duplicate? This is for components to request
@@ -211,6 +219,7 @@ public:
 	// and doesn't allow multiple scenes to queue.
 	void PushScene( int id, SceneData* data );
 	bool PopScene( int* id, SceneData** data );
+	bool IsScenePushed() const { return sceneID >= 0; }
 
 	// Used by the CoreScript.
 	// A table that maps MOB chit ids -> core chit IDs
@@ -231,6 +240,8 @@ private:
 
 	grinliz::CDynArray<Chit*>	inUseArr;
 	grinliz::CDynArray<Chit*>	chitList;
+	grinliz::CDynArray<Chit*>	findMatch;
+	grinliz::CDynArray<float>	findWeight;
 
 	MapSpatialComponent*	mapSpatialHash[NUM_SECTORS*NUM_SECTORS];
 	// Cores can't be destroyed, so we can cache them.

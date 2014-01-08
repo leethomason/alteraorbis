@@ -18,6 +18,7 @@
 
 #include "scriptcomponent.h"
 #include "../grinliz/glrandom.h"
+#include "../xegame/cticker.h"
 
 class WorldMap;
 class Engine;
@@ -34,25 +35,14 @@ public:
 
 	virtual void Init();
 	virtual void Serialize( XStream* xs );
-	virtual void OnAdd()	{}
-	virtual void OnRemove()	{}
+	virtual void OnAdd();
+	virtual void OnRemove();
 
-	virtual int DoTick( U32 delta, U32 since );
+	virtual int DoTick( U32 delta );
 	virtual const char* ScriptName() { return "PlantScript"; }
 
 	// Plant specific:
 	static GameItem* IsPlant( Chit* chit, int* type, int* stage );
-
-	/*
-	static bool PlantFilter( Chit* chit ) { return IsPlant( chit, 0, 0 ) != 0; }
-	static bool PassablePlantFilter( Chit* chit ) {
-		int stage=0;
-		if( IsPlant( chit, 0, &stage )) {
-			return stage < 2;
-		}
-		return false;
-	}
-	*/
 
 	int Type() const	{ return type; }
 	int Stage() const	{ return stage; }
@@ -75,8 +65,8 @@ private:
 	int			stage;		// 0-3
 	U32			age;
 	U32			ageAtStage;
-	int			growTimer;
-	int			sporeTimer;
+	CTicker		growTimer;
+	CTicker		sporeTimer;
 };
 
 #endif // PLANT_SCRIPT_INCLUDED

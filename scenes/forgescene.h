@@ -7,6 +7,7 @@
 #include "../widget/itemdescwidget.h"
 #include "../widget/moneywidget.h"
 #include "../game/wallet.h"
+#include "../script/forgescript.h"
 
 class GameItem;
 class LumosGame;
@@ -19,7 +20,7 @@ class ForgeSceneData : public SceneData
 public:
 	ForgeSceneData() : SceneData(), tech(3), itemComponent(0) {}
 
-	int				tech;		// available tech (in)
+	int				tech;			// available tech (in)
 	ItemComponent*	itemComponent;	// who is operating this forge?
 };
 
@@ -41,31 +42,6 @@ public:
 	virtual void Draw3D( U32 delatTime );
 
 private:
-	void SetModel( bool randomizeTraits );
-
-	LumosGame*			lumosGame;
-	Engine*				engine;
-	Screenport			screenport;
-	Model*				model;
-	const GameItem*		displayItem;
-	grinliz::Random		random;
-	gamui::PushButton	okay;
-
-	enum {
-		RING,
-		GUN,
-		SHIELD,
-		NUM_ITEM_TYPES
-	};
-
-	enum {
-		PISTOL,
-		BLASTER,
-		PULSE,
-		BEAMGUN,
-		NUM_GUN_TYPES
-	};
-
 	enum {
 		GUN_BODY,		// on
 		GUN_CELL,		// boosts clip
@@ -82,23 +58,28 @@ private:
 		NUM_RING_PARTS
 	};
 
-	enum {
-		EFFECT_FIRE,
-		EFFECT_SHOCK,
-		EFFECT_EXPLOSIVE,
-		NUM_EFFECTS
-	};
+	void SetModel( bool randomizeTraits );
+
+	LumosGame*			lumosGame;
+	Engine*				engine;
+	Screenport			screenport;
+	Model*				model;
+	const GameItem*		displayItem;
+	grinliz::Random		random;
+	gamui::PushButton	okay;
 
 	ForgeSceneData*		forgeData;
 	int					techRequired;
 	Wallet				crystalRequired;
 	GameItem*			item;
 
-	gamui::ToggleButton	itemType[NUM_ITEM_TYPES];
-	gamui::ToggleButton gunType[NUM_GUN_TYPES];
+	ForgeScript			forgeScript;
+
+	gamui::ToggleButton	itemType[ForgeScript::NUM_ITEM_TYPES];
+	gamui::ToggleButton gunType[ForgeScript::NUM_GUN_TYPES];
 	gamui::ToggleButton gunParts[NUM_GUN_PARTS];
 	gamui::ToggleButton ringParts[NUM_RING_PARTS];
-	gamui::ToggleButton effects[NUM_EFFECTS];
+	gamui::ToggleButton effects[ForgeScript::NUM_EFFECTS];
 	gamui::TextLabel	requiredLabel,  techRequiredLabel;
 	gamui::TextLabel	availableLabel, techAvailLabel;
 	gamui::PushButton	buildButton;

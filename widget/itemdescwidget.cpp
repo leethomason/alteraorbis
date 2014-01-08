@@ -1,5 +1,6 @@
 #include "itemdescwidget.h"
 #include "../game/gameitem.h"
+#include "../game/news.h"
 #include "../grinliz/glstringutil.h"
 #include "../script/battlemechanics.h"
 
@@ -8,10 +9,7 @@ using namespace grinliz;
 
 void ItemDescWidget::Init( gamui::Gamui* gamui )
 {
-	for( int i=0; i<NUM_TEXT_KV; ++i ) {
-		textKey[i].Init( gamui );
-		textVal[i].Init( gamui );
-	}
+	text.Init( gamui );
 }
 
 
@@ -19,31 +17,21 @@ void ItemDescWidget::SetPos( float x, float y )
 {
 	float x1 = x + layout.Width()*2.0f + layout.SpacingX()*2.0f;
 
-	for( int i=0; i<NUM_TEXT_KV; ++i ) {
-		float y1 =  y + (float)i * layout.Height() * 0.5f;
-		textKey[i].SetPos( x,  y1 );
-		textVal[i].SetPos( x1, y1 );
-	}
+	text.SetPos( x, y );
+	text.SetTab( layout.Width()*2.0f + layout.SpacingX()*2.0f );
+	text.SetBounds( layout.Width()*4.0f + layout.SpacingX()*4.0f, 0 );
 }
 
 
 void ItemDescWidget::SetVisible( bool v )
 {
-	for( int i=0; i<NUM_TEXT_KV; ++i ) {
-		textKey[i].SetVisible( v );
-		textVal[i].SetVisible( v );
-	}
+	text.SetVisible( v );
 }
 
 
 void ItemDescWidget::SetInfo( const GameItem* item, const GameItem* user )
 {
-	for( int i=0; i<NUM_TEXT_KV; ++i ) {
-		textKey[i].SetText( "" );
-		textVal[i].SetText( "" );
-	}
-
-
+	textBuffer.Clear();
 	CStr<64> str;
 
 	/*			Ranged		Melee	Shield
@@ -56,89 +44,92 @@ void ItemDescWidget::SetInfo( const GameItem* item, const GameItem* user )
 
 	int i = 0;
 	if ( item->ToRangedWeapon() ) {
-		textKey[i].SetText( "Ranged Damage" );
-		str.Format( "%.1f", item->traits.Damage() * item->rangedDamage );
-		textVal[i++].SetText( str.c_str() );
-
-		textKey[i].SetText( "Effective Range" );
+		str.Format( "Ranged Damage\t%.1f\n", item->Traits().Damage() * item->rangedDamage );
+		textBuffer += str.c_str();
+		
 		float radAt1 = BattleMechanics::ComputeRadAt1( user, item->ToRangedWeapon(), false, false );
-		str.Format( "%.1f", BattleMechanics::EffectiveRange( radAt1 ));
-		textVal[i++].SetText( str.c_str() );
+		str.Format( "Effective Range\t%.1f\n", BattleMechanics::EffectiveRange( radAt1 ));
+		textBuffer += str.c_str();
 
-		textKey[i].SetText( "Fire Rate" );
-		str.Format( "%.1f", 1.0f / (0.001f * (float)item->cooldown.Threshold()));
-		textVal[i++].SetText( str.c_str() );
+		str.Format( "Fire Rate\t%.1f\n", 1.0f / (0.001f * (float)item->cooldown.Threshold()));
+		textBuffer += str.c_str();
 
-		textKey[i].SetText( "Clip/Reload" );
-		str.Format( "%d / %.1f", item->clipCap, 0.001f * (float)item->reload.Threshold() );
-		textVal[i++].SetText( str.c_str() );
+		str.Format( "Clip/Reload\t%d / %.1f\n", item->clipCap, 0.001f * (float)item->reload.Threshold() );
+		textBuffer += str.c_str();
 
-		textKey[i].SetText( "Ranged D/S" );
-		str.Format( "%.1f", BattleMechanics::RangedDPTU( item->ToRangedWeapon(), false ));
-		textVal[i++].SetText( str.c_str() );
+		str.Format( "Ranged D/S\t%.1f\n", BattleMechanics::RangedDPTU( item->ToRangedWeapon(), false ));
+		textBuffer += str.c_str();
 	}
+
 	if ( item->ToMeleeWeapon() ) {
-		textKey[i].SetText( "Melee Damage" );
 		DamageDesc dd;
 		BattleMechanics::CalcMeleeDamage( user, item->ToMeleeWeapon(), &dd );
-		str.Format( "%.1f", dd.damage );
-		textVal[i++].SetText( str.c_str() );
 
-		textKey[i].SetText( "Melee D/S" );
-		str.Format( "%.1f", BattleMechanics::MeleeDPTU( user, item->ToMeleeWeapon() ));
-		textVal[i++].SetText( str.c_str() );
+		str.Format( "Melee Damage\t%.1f\n", dd.damage );
+		textBuffer += str.c_str();
+
+		str.Format( "Melee D/S\t%.1f\n", BattleMechanics::MeleeDPTU( user, item->ToMeleeWeapon() ));
+		textBuffer += str.c_str();
 
 		float boost = BattleMechanics::ComputeShieldBoost( item->ToMeleeWeapon() );
 		if ( boost > 1.0f ) {
-			textKey[i].SetText( "Shield Boost" );
-			str.Format( "%02d%%", int(100.0f * boost) - 100 );
-			textVal[i++].SetText( str.c_str() );
+			str.Format( "Shield Boost\t%02d%%\n", int(100.0f * boost) - 100 );
+			textBuffer += str.c_str();
 		}
 	}
 	if ( item->ToShield() ) {
-		textKey[i].SetText( "Capacity" );
-		str.Format( "%d", item->clipCap );
-		if ( i<NUM_TEXT_KV ) textVal[i++].SetText( str.c_str() );
+		str.Format( "Capacity\t%d\n", item->clipCap );
+		textBuffer += str.c_str();
 
-		textKey[i].SetText( "Reload" );
-		str.Format( "%.1f", 0.001f * (float)item->reload.Threshold() );
-		if ( i<NUM_TEXT_KV ) textVal[i++].SetText( str.c_str() );
+		str.Format( "Reload\t%.1f\n", 0.001f * (float)item->reload.Threshold() );
+		textBuffer += str.c_str();
 	}
 
 	if ( !(item->ToMeleeWeapon() || item->ToShield() || item->ToRangedWeapon() )) {
-		str.Format( "%d", item->traits.Strength() );
-		textKey[KV_STR].SetText( "Strength" );
-		textVal[KV_STR].SetText( str.c_str() );
+		str.Format( "Strength\t%d\n", item->Traits().Strength() );
+		textBuffer += str.c_str();
 
-		str.Format( "%d", item->traits.Will() );
-		textKey[KV_WILL].SetText( "Will" );
-		textVal[KV_WILL].SetText( str.c_str() );
+		str.Format( "Will\t%d\n", item->Traits().Will() );
+		textBuffer += str.c_str();
 
-		str.Format( "%d", item->traits.Charisma() );
-		textKey[KV_CHR].SetText( "Charisma" );
-		textVal[KV_CHR].SetText( str.c_str() );
+		str.Format( "Charisma\t%d\n", item->Traits().Charisma() );
+		textBuffer += str.c_str();
 
-		str.Format( "%d", item->traits.Intelligence() );
-		textKey[KV_INT].SetText( "Intelligence" );
-		textVal[KV_INT].SetText( str.c_str() );
+		str.Format( "Intelligence\t%d\n", item->Traits().Intelligence() );
+		textBuffer += str.c_str();
 
-		str.Format( "%d", item->traits.Dexterity() );
-		textKey[KV_DEX].SetText( "Dexterity" );
-		textVal[KV_DEX].SetText( str.c_str() );
-		i = KV_DEX+1;
+		str.Format( "Dexterity\t%d\n", item->Traits().Dexterity() );
+		textBuffer += str.c_str();
 	}
 
-	++i;	// put in space
+	textBuffer += '\n';
 	MicroDBIterator it( item->microdb );
-	for( ; !it.Done() && i < NUM_TEXT_KV; it.Next() ) {
+	for( ; !it.Done(); it.Next() ) {
 		
 		const char* key = it.Key();
 		if ( it.NumSub() == 1 && it.SubType(0) == 'd' ) {
-			textKey[i].SetText( key );
-			str.Format( "%d", it.Int(0) );
-			textVal[i++].SetText( str.c_str() );
+			str.Format( "%s\t%d\n", key, it.Int(0) );
+			textBuffer += str.c_str();
 		}
 	}
+
+	textBuffer += '\n';
+	NewsHistory* history = NewsHistory::Instance();
+	if ( history ) {
+		GLString s;
+
+		int num=0;
+		const NewsEvent** events = history->Find( item->ID(), true, &num );
+		for( int i=0; i<num; ++i ) {
+			events[i]->Console( &s );
+			if ( !s.empty() ) {
+				textBuffer += s.c_str();
+				textBuffer += '\n';
+			}
+		}
+	}
+
+	text.SetText( textBuffer.c_str() );
 }
 
 

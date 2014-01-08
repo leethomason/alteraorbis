@@ -13,6 +13,7 @@
 #include "../game/workqueue.h"
 #include "../game/team.h"
 #include "../game/lumosmath.h"
+#include "../game/gameitem.h"
 
 #include "../xegame/chit.h"
 #include "../xegame/spatialcomponent.h"
@@ -23,16 +24,18 @@
 #include "../script/procedural.h"
 
 static const double TECH_ADDED_BY_VISITOR = 0.2;
-static const double TECH_DECAY_0 = 0.0001;
-static const double TECH_DECAY_1 = 0.001;
-static const double TECH_MAX = 3.99;
+static const double TECH_DECAY_0 = 0.00005;
+static const double TECH_DECAY_1 = 0.00020;
+static const double TECH_MAX = 4;
 
 using namespace grinliz;
+
+#define SPAWN_MOBS
 
 CoreScript::CoreScript( WorldMap* map, LumosChitBag* chitBag, Engine* engine ) 
 	: worldMap( map ), 
 	  spawnTick( 10*1000 ), 
-	  boundID( 0 ),
+	  team( 0 ),
 	  workQueue( 0 )
 {
 	workQueue = new WorkQueue( map, chitBag, engine );
@@ -56,10 +59,20 @@ void CoreScript::Init()
 void CoreScript::Serialize( XStream* xs )
 {
 	XarcOpen( xs, ScriptName() );
-	XARC_SER( xs, boundID );
 	XARC_SER( xs, tech );
 	XARC_SER( xs, achievedTechLevel );
 	XARC_SER( xs, defaultSpawn );
+
+	if ( xs->Loading() ) {
+		int size=0;
+		XarcGet( xs, "citizens.size", size );
+		citizens.PushArr( size );
+	}
+	else {
+		XarcSet( xs, "citizens.size", citizens.Size() );
+	}
+	XARC_SER_ARR( xs, citizens.Mem(), citizens.Size() );
+
 	spawnTick.Serialize( xs, "spawn" );
 	workQueue->Serialize( xs );
 	XarcClose( xs );
@@ -76,123 +89,113 @@ void CoreScript::OnAdd()
 	Vector2I mapPos = scriptContext->chit->GetSpatialComponent()->GetPosition2DI();
 	Vector2I sector = { mapPos.x/SECTOR_SIZE, mapPos.y/SECTOR_SIZE };
 	workQueue->InitSector( sector );
-
-	if ( boundID ) {
-		scriptContext->chitBag->chitToCoreTable.Add( boundID, scriptContext->chit->ID() );
-	}
 }
 
 
 void CoreScript::OnRemove()
 {
-	if ( boundID ) {
-		GLASSERT( scriptContext->chitBag );
-		scriptContext->chitBag->chitToCoreTable.Remove( boundID );
-	}
 }
 
 
-Chit* CoreScript::GetAttached( bool* standing )
+void CoreScript::AddCitizen( Chit* chit )
 {
-	Chit* c = 0;
-	if ( boundID ) {
-		c = scriptContext->chit->GetChitBag()->GetChit( boundID );
-		if ( !c ) {
-			boundID = 0;
-		}
-		if ( c && standing ) {
-			if (    !c->GetMoveComponent()
-				&& (c->GetSpatialComponent()->GetPosition2DI() == scriptContext->chit->GetSpatialComponent()->GetPosition2DI() ))
-			{
-				*standing = true;
-			}
-			else {
-				*standing = false;
-			}
-		}
-	}
-	return c;
+	GLASSERT( citizens.Find( chit->ID()) < 0 );
+	citizens.Push( chit->ID() );
 }
 
 
-bool CoreScript::AttachToCore( Chit* chit )
+bool CoreScript::IsCitizen( Chit* chit )
 {
-	Chit* bound = GetAttached(0);
+	return citizens.Find( chit->ID() ) >= 0;
+}
 
-	ComponentSet chitset( chit, Chit::SPATIAL_BIT | Chit::RENDER_BIT | ComponentSet::IS_ALIVE );
-	if ( chitset.okay && (!bound || bound == chit) ) {
 
-		LumosChitBag* bag = scriptContext->chit->GetChitBag()->ToLumos();
-		bag->chitToCoreTable.Add( chit->ID(), scriptContext->chit->ID() );
+bool CoreScript::IsCitizen( int id )
+{
+	return citizens.Find( id ) >= 0;
+}
 
-		// Set the position of the bound item to the core.
-		Vector3F pos = scriptContext->chit->GetSpatialComponent()->GetPosition();
-		Vector2F pos2 = { pos.x, pos.z };
-		chitset.spatial->SetPosition( pos );
-		boundID = chit->ID();
 
-		// Remove the Move component so it doesn't go anywhere or block other motion. But
-		// still can be hit, has spatial, etc.
-		Component* c = chit->GetMoveComponent();
-		chit->Remove( c );
-		chit->GetChitBag()->DeferredDelete( c );
-		scriptContext->chit->SetTickNeeded();
-
-		// If the camera is tracking what just bound to core, stop tracking.
-		CameraComponent* cc = bag->GetCamera( scriptContext->engine );
-		if ( cc && cc->Tracking() == chit->ID() ) {
-			cc->SetTrack( 0 );
+int CoreScript::NumCitizens()
+{
+	int i=0;
+	int count=0;
+	while ( i < citizens.Size() ) {
+		int id = citizens[i];
+		if ( scriptContext->chitBag->GetChit( id ) ) {
+			++count;
+			++i;
 		}
-
-		// FIXME: check for existing workers
-		// FIXME: connect to energy system
-		int team = 0;
-		if ( chit && chit->GetItem() ) {
-			team = chit->PrimaryTeam();
+		else {
+			// Dead and gone.
+			citizens.SwapRemove( i );
 		}
+	}
+	return count;
+}
 
-		// FIXME: worker hack until economy is in place.
-		CChitArray arr;
-		static const char* WORKER[] = { "worker" };
-		ItemNameFilter filter( WORKER, 1 );
-		chit->GetChitBag()->QuerySpatialHash( &arr, pos2, 10.0f, 0, &filter );
 
-		int count = 2 - arr.Size();
-		for( int i=0; i<count; ++i ) {
-			scriptContext->chit->GetLumosChitBag()->NewWorkerChit( pos, team );
-		}
+bool CoreScript::InUse() const
+{
+	return PrimaryTeam() != 0;
+}
 
+
+int CoreScript::PrimaryTeam() const
+{
+	const GameItem* item = scriptContext->chit->GetItem();
+	if ( item ) {
+		return item->primaryTeam;
+	}
+	return 0;
+}
+
+
+int CoreScript::DoTick( U32 delta )
+{
+	static const int RADIUS = 4;
+
+	int primaryTeam = 0;
+	if ( scriptContext->chit->GetItem() ) {
+		primaryTeam = scriptContext->chit->GetItem()->primaryTeam;
+	}
+	if ( primaryTeam != team ) {
+		team = primaryTeam;
 		TeamGen gen;
 		ProcRenderInfo info;
 		gen.Assign( team, &info );
 		scriptContext->chit->GetRenderComponent()->SetProcedural( 0, info );
-
-		return true;
 	}
-	return false;
-}
 
-
-int CoreScript::DoTick( U32 delta, U32 since )
-{
-	static const int RADIUS = 4;
-	Chit* attached = GetAttached(0);
 	bool normalPossible = scriptContext->census->normalMOBs < TYPICAL_MONSTERS;
 	bool greaterPossible = scriptContext->census->greaterMOBs < TYPICAL_GREATER;
 
-	tech -= Lerp( TECH_DECAY_0, TECH_DECAY_1, tech/TECH_MAX );
-	tech = Clamp( tech, 0.0, TECH_MAX );
+	bool attached = InUse();
 
-	if (    spawnTick.Delta( since ) 
-		 && !attached
-		 && ( normalPossible || greaterPossible ))
+	tech -= Lerp( TECH_DECAY_0, TECH_DECAY_1, tech/TECH_MAX );
+	tech = Clamp( tech, 0.0, double(MaxTech())-0.01 );
+
+	MapSpatialComponent* ms = GET_SUB_COMPONENT( scriptContext->chit, SpatialComponent, MapSpatialComponent );
+	GLASSERT( ms );
+	Vector2I pos2i = ms->MapPosition();
+	Vector2I sector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
+	int tickd = spawnTick.Delta( delta );
+
+	if ( tickd && attached ) {
+		scriptContext->chitBag->FindBuilding( IStringConst::bed, sector, 0, 0, &chitArr, 0 );
+
+		int nCitizens = this->NumCitizens();
+
+		if ( nCitizens < chitArr.Size() ) {
+			Chit* chit = scriptContext->chitBag->NewDenizen( pos2i, team );
+		}
+	}
+	else if (    tickd 
+			  && !attached
+			  && ( normalPossible || greaterPossible ))
 	{
-#if 1
+#ifdef SPAWN_MOBS
 		// spawn stuff.
-		MapSpatialComponent* ms = GET_SUB_COMPONENT( scriptContext->chit, SpatialComponent, MapSpatialComponent );
-		GLASSERT( ms );
-		Vector2I pos2i = ms->MapPosition();
-		Vector2I sector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
 
 		// 0->NUM_SECTORS
 		int outland = abs( sector.x - NUM_SECTORS/2 ) + abs( sector.y - NUM_SECTORS/2 );
@@ -264,21 +267,14 @@ int CoreScript::DoTick( U32 delta, U32 since )
 				GLASSERT( team != TEAM_NEUTRAL );
 				Chit* mob = scriptContext->chitBag->NewMonsterChit( pf, spawn, team );
 
-				if ( isGreater ) {
-					Vector2F p2 = { pf.x, pf.z };
-					NewsEvent news( NewsEvent::PONY, p2, StringPool::Intern( spawn ), mob->ID() );
-					scriptContext->chitBag->AddNews( news );
-				}
+//				if ( isGreater ) {
+//					NewsEvent news( NewsEvent::GREATER_MOB_CREATED, ToWorld2F( pf ), mob );
+//					NewsHistory::Instance()->Add( news );
+//					mob->GetItem()->keyValues.Set( "destroyMsg", "d", NewsEvent::GREATER_MOB_KILLED );
+//				}
 			}
 		}
 #endif
-	}
-	if (    attached 
-		 && scriptContext->chit->GetSpatialComponent()
-		 && attached->GetSpatialComponent()->GetPosition2DI() == scriptContext->chit->GetSpatialComponent()->GetPosition2DI() ) 
-	{
-		Vector3F pos3 = scriptContext->chit->GetSpatialComponent()->GetPosition();
-		scriptContext->engine->particleSystem->EmitPD( "core", pos3, V3F_UP, delta );
 	}
 	if ( !attached ) {
 		// Clear the work queue - chit is gone that controls this.
@@ -296,17 +292,18 @@ int CoreScript::DoTick( U32 delta, U32 since )
 
 int CoreScript::MaxTech() const
 {
-	CChitArray arr;
 	Vector2I sector = ToSector( scriptContext->chit->GetSpatialComponent()->GetPosition2DI() );
-	scriptContext->chitBag->FindBuilding( IStringConst::power, sector, 0, 0, &arr );
-	return arr.Size() + 1;	// get one power for core
+	scriptContext->chitBag->FindBuilding( IStringConst::power, sector, 0, 0, &chitArr, 0 );
+	return Min( chitArr.Size() + 1, 4 );	// get one power for core
 }
 
 
 void CoreScript::AddTech()
 {
 	tech += TECH_ADDED_BY_VISITOR;
-	tech = Clamp( tech, 0.0, Min( TECH_MAX, double( MaxTech() )));
+	tech = Clamp( tech, 0.0, Min( TECH_MAX, double( MaxTech() ) - 0.01 ));
 
 	achievedTechLevel = Max( achievedTechLevel, (int)tech );
 }
+
+

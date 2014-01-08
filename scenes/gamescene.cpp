@@ -51,6 +51,8 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	infoID = 0;
 	selectionModel = 0;
 	buildActive = 0;
+	chitFaceToTrack = 0;
+	currentNews = 0;
 	voxelInfoID.Zero();
 	lumosGame = game;
 	game->InitStd( &gamui2D, &okay, 0 );
@@ -62,8 +64,6 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	Vector3F target = { (float)sim->GetWorldMap()->Width() *0.5f, 0.0f, (float)sim->GetWorldMap()->Height() * 0.5f };
 	if ( sim->GetPlayerChit() ) {
 		target = sim->GetPlayerChit()->GetSpatialComponent()->GetPosition();
-		//CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
-		//cc->SetTrack( sim->GetPlayerChit()->ID() );
 	}
 	sim->GetEngine()->CameraLookAt( target + delta, target );
 	
@@ -76,14 +76,15 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	playerMark.Init( &gamui2D, atom, true );
 	playerMark.SetSize( MARK_SIZE, MARK_SIZE );
 
-	static const char* serialText[NUM_SERIAL_BUTTONS] = { "Save", "Load", "Cycle" }; 
+	static const char* serialText[NUM_SERIAL_BUTTONS] = { "Save", "Load" }; 
 	for( int i=0; i<NUM_SERIAL_BUTTONS; ++i ) {
 		serialButton[i].Init( &gamui2D, game->GetButtonLook(0) );
 		serialButton[i].SetText( serialText[i] );
 	}
 
-	freeCameraButton.Init( &gamui2D, game->GetButtonLook(0) );
-	freeCameraButton.SetText( "Free\nCamera" );
+	useBuildingButton.Init( &gamui2D, game->GetButtonLook(0) );
+	useBuildingButton.SetText( "Use" );
+	useBuildingButton.SetVisible( false );
 
 	static const char* modeButtonText[NUM_BUILD_MODES] = {
 		"Utility", "Tech0", "Tech1", "Tech2", "Tech3"
@@ -108,8 +109,12 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	createWorkerButton.Init( &gamui2D, game->GetButtonLook(0) );
 	createWorkerButton.SetText( "WorkerBot" );
 
-	ejectButton.Init( &gamui2D, game->GetButtonLook(0) );
-	ejectButton.SetText( "Eject\nCore" );
+	for( int i=0; i<NUM_UI_MODES; ++i ) {
+		static const char* TEXT[NUM_UI_MODES] = { "Build", "View", "Avatar" };
+		uiMode[i].Init( &gamui2D, game->GetButtonLook(0));
+		uiMode[i].SetText( TEXT[i] );
+		uiMode[0].AddToToggleGroup( &uiMode[i] );
+	}
 	
 	allRockButton.Init( &gamui2D, game->GetButtonLook(0) );
 	allRockButton.SetText( "All Rock" );
@@ -123,8 +128,10 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	clearButton.SetSize( NEWS_BUTTON_WIDTH, NEWS_BUTTON_HEIGHT );
 	clearButton.SetText( "Clear" );
 
-	faceWidget.Init( &gamui2D, game->GetButtonLook(0) );
-	faceWidget.SetFace( &uiRenderer, sim->GetPlayerChit() ? sim->GetPlayerChit()->GetItem() : 0 );
+	faceWidget.Init( &gamui2D, game->GetButtonLook(0),
+					 FaceWidget::ALL );
+
+	chitFaceToTrack = sim->GetPlayerChit() ? sim->GetPlayerChit()->ID() : 0;
 	faceWidget.SetSize( 100, 100 );
 
 	for( int i=0; i<NUM_PICKUP_BUTTONS; ++i ) {
@@ -133,16 +140,14 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 
 	RenderAtom green = LumosGame::CalcPaletteAtom( 1, 3 );	
 	RenderAtom grey  = LumosGame::CalcPaletteAtom( 0, 6 );
-	RenderAtom blue   = LumosGame::CalcPaletteAtom( 8, 0 );	
-
-	healthBar.Init( &gamui2D, 10, green, grey );
-	ammoBar.Init( &gamui2D, 10, blue, grey );
-	shieldBar.Init( &gamui2D, 10, blue, grey );
+	RenderAtom blue  = LumosGame::CalcPaletteAtom( 8, 0 );	
 
 	dateLabel.Init( &gamui2D );
-	xpLabel.Init( &gamui2D );
 	techLabel.Init( &gamui2D );
 	moneyWidget.Init( &gamui2D );
+	consoleWidget.Init( &gamui2D );
+
+	uiMode[UI_AVATAR].SetDown();
 }
 
 
@@ -165,7 +170,7 @@ void GameScene::Resize()
 		layout.PosAbs( &serialButton[i], i+1, -1 );
 	}
 	layout.PosAbs( &allRockButton, 1, -2 );
-	layout.PosAbs( &freeCameraButton, 0, -2 );
+	layout.PosAbs( &useBuildingButton, 1, 0 );
 
 	int level = BuildScript::TECH_UTILITY;
 	int start = 0;
@@ -176,27 +181,36 @@ void GameScene::Resize()
 			level = bd.techLevel;
 			start = i;
 		}
-		layout.PosAbs( &buildButton[i], i-start, 1 );
+		layout.PosAbs( &buildButton[i], i-start+1, 1 );
 	}
 	for( int i=0; i<NUM_BUILD_MODES; ++i ) {
-		layout.PosAbs( &modeButton[i], i, 0 );
+		layout.PosAbs( &modeButton[i], i+1, 0 );
 	}
 	tabBar.SetPos( modeButton[0].X(), modeButton[0].Y() );
 	tabBar.SetSize( modeButton[NUM_BUILD_MODES-1].X() + modeButton[NUM_BUILD_MODES-1].Width() - modeButton[0].X(), modeButton[0].Height() );
 
-	layout.PosAbs( &createWorkerButton, 0, 2 );
-	layout.PosAbs( &ejectButton,        0, 3 );
+	layout.PosAbs( &createWorkerButton, 1, 2 );
+	for( int i=0; i<NUM_UI_MODES; ++i ) {
+		layout.PosAbs( &uiMode[i], 0, i );
+	}
 
-	layout.PosAbs( &faceWidget, -2, 0, 1, 1 );
-	layout.PosAbs( &minimap,    -1, 0, 1, 1 );
+	layout.PosAbs( &faceWidget, -1, 0, 1, 1 );
+	layout.PosAbs( &minimap,    -2, 0, 1, 1 );
 	minimap.SetSize( minimap.Width(), minimap.Width() );	// make square
 	faceWidget.SetSize( faceWidget.Width(), faceWidget.Width() );
 
-	layout.PosAbs( &dateLabel,   5, 0 );
+	layout.PosAbs( &dateLabel,   -3, 0 );
 	layout.PosAbs( &moneyWidget, 5, -1 );
+	techLabel.SetPos( moneyWidget.X() + moneyWidget.Width() + layout.SpacingX(),
+					  moneyWidget.Y() );
+
+	static int CONSOLE_HEIGHT = 2;	// in layout...
+	layout.PosAbs( &consoleWidget, 1, -1 - CONSOLE_HEIGHT );
+	float consoleHeight = okay.Y() - consoleWidget.Y();
+	consoleWidget.SetBounds( 0, consoleHeight );
 
 	for( int i=0; i<NUM_PICKUP_BUTTONS; ++i ) {
-		layout.PosAbs( &pickupButton[i], 0, i );
+		layout.PosAbs( &pickupButton[i], 0, i+3 );
 	}
 
 	// ------ CHANGE LAYOUT ------- //
@@ -205,73 +219,24 @@ void GameScene::Resize()
 	layout.SetOffset( faceWidget.X(), faceWidget.Y()+faceWidget.Height() );
 	layout.SetGutter( 0, 5.0f );
 
-	layout.PosAbs( &healthBar,	0, 0 );
-	layout.PosAbs( &ammoBar,	0, 1 );
-	layout.PosAbs( &shieldBar,  0, 2 );
-
-	xpLabel.SetPos(		dateLabel.X(), dateLabel.Y() + gamui2D.GetTextHeight() );
-	techLabel.SetPos(	xpLabel.X(),   xpLabel.Y() + gamui2D.GetTextHeight() );
-
+	bool visible = game->GetDebugUI();
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
 		newsButton[i].SetPos( port.UIWidth()- (NEWS_BUTTON_WIDTH), MINI_MAP_SIZE + (NEWS_BUTTON_HEIGHT+2)*i );
+		newsButton[i].SetVisible( visible );
 	}
 	clearButton.SetPos( newsButton[0].X() - clearButton.Width(), newsButton[0].Y() );
 
-	bool visible = game->DebugUIEnabled();
 	allRockButton.SetVisible( visible );
-	serialButton[CYCLE].SetVisible( visible );
-
+	clearButton.SetVisible( visible );
 }
 
 
-void GameScene::SetBars()
+void GameScene::SetBars( Chit* chit )
 {
-	RenderAtom orange = LumosGame::CalcPaletteAtom( 4, 0 );
-	RenderAtom grey   = LumosGame::CalcPaletteAtom( 0, 6 );
-	RenderAtom blue   = LumosGame::CalcPaletteAtom( 8, 0 );	
+	ItemComponent* ic = chit ? chit->GetItemComponent() : 0;
+	AIComponent* ai = chit ? chit->GetAIComponent() : 0;
 
-	Chit* chit = sim->GetPlayerChit();
-	if ( chit && chit->GetItem() ) {
-		const GameItem* item = chit->GetItem();
-		healthBar.SetRange( item->HPFraction() );
-
-		IShield* ishield			= 0;
-		IRangedWeaponItem* iweapon	= 0;
-
-		ItemComponent* itemComp = chit->GetItemComponent();
-		if ( itemComp ) {
-			ishield	= itemComp->GetShield();
-			iweapon	= itemComp->GetRangedWeapon(0);
-		}
-
-		if ( iweapon ) {
-			float r = 0;
-			if ( iweapon->GetItem()->Reloading() ) {
-				r = iweapon->GetItem()->ReloadFraction();
-				ammoBar.SetLowerAtom( orange );
-			}
-			else {
-				r = iweapon->GetItem()->RoundsFraction();
-				ammoBar.SetLowerAtom( blue );
-			}
-			ammoBar.SetRange( Clamp( r, 0.f, 1.f ) );
-		}
-		else {
-			ammoBar.SetRange( 0 );
-		}
-
-		if ( ishield ) {
-			float r = ishield->GetItem()->RoundsFraction();
-			shieldBar.SetRange( Clamp( r, 0.f, 1.0f ));
-		}
-		else {
-			shieldBar.SetRange( 0 );
-		}
-	}
-
-	healthBar.SetVisible( chit != 0 );
-	ammoBar.SetVisible( chit != 0 );
-	shieldBar.SetVisible( chit != 0 );
+	faceWidget.SetMeta( ic, ai );
 }
 
 void GameScene::Save()
@@ -293,7 +258,7 @@ void GameScene::Load()
 	else {
 		sim->Load( datPath, 0 );
 	}
-	faceWidget.SetFace( &uiRenderer, sim->GetPlayerChit() ? sim->GetPlayerChit()->GetItem() : 0 );
+	chitFaceToTrack = sim->GetPlayerChit() ? sim->GetPlayerChit()->ID() : 0;
 }
 
 
@@ -332,7 +297,6 @@ void GameScene::MouseMove( const grinliz::Vector2F& view, const grinliz::Ray& wo
 
 void GameScene::SetSelectionModel( const grinliz::Vector2F& view )
 {
-#ifdef USE_MOUSE_MOVE_SELECTION
 	Vector3F at = { 0, 0, 0 };
 	ModelVoxel mv = this->ModelAtMouse( view, sim->GetEngine(), TEST_TRI, 0, 0, 0, &at );
 	Vector2I pos2i = { (int)at.x, (int)at.z };
@@ -398,7 +362,6 @@ void GameScene::SetSelectionModel( const grinliz::Vector2F& view )
 		Vector4F color = { 1,1,1, 0.3f };
 		selectionModel->SetColor( color );
 	}
-#endif
 }
 
 
@@ -459,32 +422,51 @@ void GameScene::TapModel( Chit* target )
 		if ( ai ) {
 			ai->EnableDebug( true );
 		}
-		return;
 	}
-	AIComponent* ai = player->GetAIComponent();
+
+	AIComponent* ai = player ? player->GetAIComponent() : 0;
+	const char* setTarget = 0;
+
 	if ( ai && ai->GetTeamStatus( target ) == RELATE_ENEMY ) {
 		ai->Target( target, true );
+		setTarget = "target";
+	}
+	else if ( ai && FreeCameraMode() && ai->GetTeamStatus( target ) == RELATE_FRIEND ) {
+		const GameItem* item = target->GetItem();
+		bool denizen = strstr( item->ResourceName(), "human" ) != 0;
+		if (denizen) {
+			chitFaceToTrack = target->ID();
+			setTarget = "possibleTarget";
+
+			CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
+			if ( cc ) {
+				cc->SetTrack( chitFaceToTrack );
+			}
+		}
+	}
+
+	if ( setTarget ) {
 		ClearTargetFlags();
 
 		RenderComponent* rc = target->GetRenderComponent();
 		if ( rc ) {
-			rc->Deco( "target", RenderComponent::DECO_FOOT, INT_MAX );
+			rc->Deco( setTarget, RenderComponent::DECO_FOOT, INT_MAX );
 			targetChit = target->ID();
 		}
 	}
 }
 
 
+
 void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::Ray& world )
 {
 	bool uiHasTap = ProcessTap( action, view, world );
 	Engine* engine = sim->GetEngine();
-	CoreScript* coreMode = sim->GetChitBag()->IsBoundToCore( sim->GetPlayerChit(), true );
 	
 	enable3DDragging = FreeCameraMode();
 	
 	buildActive = 0;
-	if ( coreMode ) {
+	if ( uiMode[UI_BUILD].Down() ) {
 		for( int i=1; i<BuildScript::NUM_OPTIONS; ++i ) {
 			if ( buildButton[i].Down() ) {
 				buildActive = i;
@@ -505,8 +487,9 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 		bool tap = Process3DTap( action, view, world, sim->GetEngine() );
 
 		if ( tap ) {
-			if ( coreMode ) {
-				WorkQueue* wq = coreMode->GetWorkQueue();
+			if ( uiMode[UI_BUILD].Down() ) {
+				CoreScript* coreScript = sim->GetChitBag()->GetCore( sim->GetChitBag()->GetHomeSector() );
+				WorkQueue* wq = coreScript->GetWorkQueue();
 				GLASSERT( wq );
 				RemovableFilter removableFilter;
 
@@ -590,16 +573,22 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 			else if ( tapMod == GAME_TAP_MOD_CTRL ) {
 
 				Vector2I v = { (int)plane.x, (int)plane.z };
-				sim->CreatePlayer( v ); 
-				faceWidget.SetFace( &uiRenderer, sim->GetPlayerChit() ? sim->GetPlayerChit()->GetItem() : 0 );
+				sim->CreatePlayer( v );
+				chitFaceToTrack = sim->GetPlayerChit() ? sim->GetPlayerChit()->ID() : 0;
 #if 0
 				sim->CreateVolcano( (int)at.x, (int)at.z, 6 );
 				sim->CreatePlant( (int)at.x, (int)at.z, -1 );
 #endif
 			}
 			else if ( tapMod == GAME_TAP_MOD_SHIFT ) {
-				for( int i=0; i<NUM_PLANT_TYPES; ++i ) {
-					sim->CreatePlant( (int)plane.x+i, (int)plane.z, i );
+				//for( int i=0; i<NUM_PLANT_TYPES; ++i ) {
+				//	sim->CreatePlant( (int)plane.x+i, (int)plane.z, i );
+				//}
+				Vector3F p = plane;
+				p.y = 0;
+				for( int i=0; i<5; ++i ) {
+					sim->GetChitBag()->NewMonsterChit( plane, "mantis", TEAM_GREEN_MANTIS );
+					p.x += 1.0f;
 				}
 			}
 		}
@@ -607,11 +596,17 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 }
 
 
+bool GameScene::CoreMode()
+{
+	return uiMode[UI_BUILD].Down() || uiMode[UI_VIEW].Down(); 
+}
+
 bool GameScene::FreeCameraMode()
 {
-	bool button = freeCameraButton.Down();
+	//bool button = freeCameraButton.Down();
+	bool button      = uiMode[UI_VIEW].Down();
 	Chit* playerChit = sim->GetPlayerChit();
-	CoreScript* coreMode = sim->GetChitBag()->IsBoundToCore( playerChit, true );
+	bool coreMode    = CoreMode();
 	
 	if ( button || coreMode || (!playerChit) )
 		return true;
@@ -655,57 +650,45 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		sim = new Sim( lumosGame );
 		Load();
 	}
-	else if ( item == &serialButton[CYCLE] ) {
-		Save();
-		delete sim;
-		sim = new Sim( lumosGame );
-		Load();
-	}
 	else if ( item == &allRockButton ) {
 		sim->SetAllRock();
 	}
 	else if ( item == &createWorkerButton ) {
-		Chit* playerChit = sim->GetPlayerChit();
-		CoreScript* coreMode = sim->GetChitBag()->IsBoundToCore( playerChit, true );
-		if ( coreMode ) {
-			if ( playerChit->GetItem()->wallet.gold >= 20 ) {
-				playerChit->GetItem()->wallet.gold -= 20;
-				ReserveBank::Instance()->Deposit( 20 );
-				int team = playerChit->GetItem()->primaryTeam;
-				sim->GetChitBag()->NewWorkerChit( playerChit->GetSpatialComponent()->GetPosition(), team );
-			}
-		}
-	}
-	else if ( item == &ejectButton ) {
-		// Should be disabled unless we are bound to a core.
-		Chit* playerChit = sim->GetPlayerChit();
-		if ( playerChit ) {
-			CoreScript* coreMode   = sim->GetChitBag()->IsBoundToCore( playerChit, true );
-			if ( coreMode ) {
-				GLASSERT( !playerChit->GetMoveComponent() );
-				playerChit->Add( new PathMoveComponent( sim->GetWorldMap() ));
-			}
+		CoreScript* cs = sim->GetChitBag()->GetHomeCore();
+		Chit* coreChit = cs->ParentChit();
+		if ( coreChit->GetItem()->wallet.gold >= 20 ) {
+			coreChit->GetItem()->wallet.gold -= 20;
+			ReserveBank::Instance()->Deposit( 20 );
+			int team = coreChit->GetItem()->primaryTeam;
+			sim->GetChitBag()->NewWorkerChit( coreChit->GetSpatialComponent()->GetPosition(), team );
 		}
 	}
 	else if ( item == faceWidget.GetButton() ) {
-		Chit* playerChit = sim->GetPlayerChit();
-		if ( playerChit && playerChit->GetItemComponent() ) {			
+		Chit* chit = sim->GetChitBag()->GetChit( chitFaceToTrack );
+		if ( chit && chit->GetItemComponent() ) {			
 			game->PushScene( LumosGame::SCENE_CHARACTER, 
-							 new CharacterSceneData( playerChit->GetItemComponent() ));
+							 new CharacterSceneData( chit->GetItemComponent(), 0, 0 ));
 		}
+	}
+	else if ( item == &useBuildingButton ) {
+		sim->UseBuilding();
 	}
 
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
 		if ( item == &newsButton[i] ) {
 			if ( FreeCameraMode() ) {
-				const NewsEvent* ne = sim->GetChitBag()->News() + i;
-				CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
-				if ( cc && ne->chitID ) {
-					cc->SetTrack( ne->chitID );
-				}
-				else {
-					sim->GetEngine()->CameraLookAt( ne->pos.x, ne->pos.y );
-					if ( cc ) cc->SetTrack( 0 );
+				NewsHistory* history = NewsHistory::Instance();
+				int index = history->NumNews() - 1 - i;
+				if ( index >= 0 ) {
+					const NewsEvent& ne = history->News( index );
+					CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
+					if ( cc && ne.chitID ) {
+						cc->SetTrack( ne.chitID );
+					}
+					else {
+						sim->GetEngine()->CameraLookAt( ne.pos.x, ne.pos.y );
+						if ( cc ) cc->SetTrack( 0 );
+					}
 				}
 			}
 		}
@@ -718,7 +701,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 			}
 		}
 	}
-	if ( item == &freeCameraButton ) {
+	if ( /*item == &freeCameraButton || */ item == &uiMode[UI_BUILD] || item == &uiMode[UI_VIEW] || item == &uiMode[UI_AVATAR] ) {
 		// Set it to track nothing; if it needs to track something, that will
 		// be set by future mouse actions or DoTick
 		CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
@@ -797,10 +780,15 @@ void GameScene::HandleHotKey( int mask )
 	else if ( mask == GAME_HK_SPACE ) {
 		Chit* playerChit = sim->GetPlayerChit();
 		if ( playerChit ) {
+#if 0
 			ItemComponent* ic = playerChit->GetItemComponent();
 			if ( ic ) {
 				ic->SwapWeapons();
 			}
+#else
+			AIComponent* ai = playerChit->GetAIComponent();
+			ai->Rampage( 0 );
+#endif
 		}
 	}
 	else if ( mask == GAME_HK_TOGGLE_COLORS ) {
@@ -855,6 +843,14 @@ void GameScene::HandleHotKey( int mask )
 			}
 		}
 	}
+	else if ( mask == GAME_HK_CHEAT_TECH ) {
+		Chit* player = sim->GetPlayerChit();
+
+		CoreScript* coreScript = sim->GetChitBag()->GetCore( sim->GetChitBag()->GetHomeSector() );
+		for( int i=0; i<10; ++i ) {
+			coreScript->AddTech();
+		}
+	}
 	else {
 		super::HandleHotKey( mask );
 	}
@@ -864,8 +860,7 @@ void GameScene::HandleHotKey( int mask )
 void GameScene::SetPickupButtons()
 {
 	Chit* player = sim->GetPlayerChit();
-	CoreScript* coreMode = sim->GetChitBag()->IsBoundToCore( sim->GetPlayerChit(), true );
-	if ( player && !coreMode ) {
+	if ( player && uiMode[UI_AVATAR].Down() ) {
 		bool canAdd = player && player->GetItemComponent() && player->GetItemComponent()->CanAddToInventory();
 		// Query items on the ground in a radius of the player.
 		LootFilter lootFilter;
@@ -911,6 +906,66 @@ void GameScene::SetPickupButtons()
 }
 
 
+void GameScene::ProcessNewsToConsole()
+{
+	NewsHistory* history = NewsHistory::Instance();
+	currentNews = Max( currentNews, history->NumNews() - 40 );
+	GLString str;
+	LumosChitBag* chitBag = sim->GetChitBag();
+	CoreScript* coreScript = chitBag->GetHomeCore();
+
+	Vector2I avatarSector = { 0, 0 };
+	Chit* playerChit = sim->GetPlayerChit();
+	if ( playerChit && playerChit->GetSpatialComponent() ) {
+		avatarSector = ToSector( playerChit->GetSpatialComponent()->GetPosition2DI() );
+	}
+	Vector2I homeSector = sim->GetChitBag()->GetHomeSector();
+
+	// Check if news sector is 1)current avatar sector, or 2)domain sector
+
+	for ( ;currentNews < history->NumNews(); ++currentNews ) {
+		const NewsEvent& ne = history->News( currentNews );
+		//Vector2I sector = ne.Sector();
+
+		str = "";
+
+		switch( ne.what ) {
+		case NewsEvent::DENIZEN_CREATED:
+		case NewsEvent::DENIZEN_KILLED:
+		case NewsEvent::FORGED:
+		case NewsEvent::UN_FORGED:
+		case NewsEvent::PURCHASED:
+			if ( coreScript && coreScript->IsCitizen( ne.chitID )) {
+				ne.Console( &str );
+			}
+			break;
+
+		case NewsEvent::GREATER_MOB_CREATED:
+		case NewsEvent::GREATER_MOB_KILLED:
+			ne.Console( &str );
+			break;
+
+		case NewsEvent::LESSER_MOB_NAMED:
+		case NewsEvent::LESSER_NAMED_MOB_KILLED:
+			{
+				Vector2I sector = ToSector( ToWorld2I( ne.pos ));
+				if ( sector == homeSector || sector == avatarSector ) {
+					ne.Console( &str );
+				}
+			}
+			break;
+
+
+		default:
+			break;
+		}
+		if ( !str.empty() ) {
+			consoleWidget.Push( str );
+		}
+	}
+}
+
+
 void GameScene::DoTick( U32 delta )
 {
 	clock_t startTime = clock();
@@ -927,14 +982,13 @@ void GameScene::DoTick( U32 delta )
 
 	SetPickupButtons();
 
-	const NewsEvent* news = sim->GetChitBag()->News();
-	int nNews = sim->GetChitBag()->NumNews();
-
-	sim->GetChitBag()->SetNewsProcessed();
-
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
-		if ( i < nNews ) {
-			newsButton[i].SetText( news[i].name.c_str() );
+		NewsHistory* history = NewsHistory::Instance();
+		int index = history->NumNews() - 1 - i;
+		if ( index >= 0 ) {
+			const NewsEvent& ne = history->News( index );
+			IString name = ne.GetWhat();
+			newsButton[i].SetText( name.c_str() );
 			newsButton[i].SetEnabled( true );
 		}
 		else {
@@ -952,43 +1006,50 @@ void GameScene::DoTick( U32 delta )
 	const SectorData& sd = sim->GetWorldMap()->GetWorldInfo().GetSector( sector );
 
 	CStr<64> str;
-	str.Format( "Date %.2f %s", sim->DateInAge(), sd.name.c_str() );
+	str.Format( "Date %.2f\n%s", NewsHistory::Instance()->AgeF(), sd.name.c_str() );
 	dateLabel.SetText( str.c_str() );
 
 	Chit* playerChit = sim->GetPlayerChit();
-	faceWidget.SetFace( &uiRenderer, sim->GetPlayerChit() ? sim->GetPlayerChit()->GetItem() : 0 );
+	if ( uiMode[UI_AVATAR].Down() ) {
+		chitFaceToTrack = playerChit ? playerChit->ID() : 0;
+	}
+	Chit* track = sim->GetChitBag()->GetChit( chitFaceToTrack );
+	faceWidget.SetFace( &uiRenderer, track ? track->GetItem() : 0 );
+	SetBars( track );
+	
 	str.Clear();
 
 	Wallet wallet;
-	if ( playerChit && playerChit->GetItem() ) {
-		wallet = playerChit->GetItem()->wallet;
+	CoreScript* cs = sim->GetChitBag()->GetHomeCore();
+	if ( cs ) {
+		wallet = cs->ParentChit()->GetItem()->wallet;
 	}
 	moneyWidget.Set( wallet );
 
 	str.Clear();
 	if ( playerChit && playerChit->GetItem() ) {
-		const GameTrait& stat = playerChit->GetItem()->traits;
+		const GameTrait& stat = playerChit->GetItem()->Traits();
 		str.Format( "Level %d XP %d/%d", stat.Level(), stat.Experience(), GameTrait::LevelToExperience( stat.Level()+1) );
 	}
-	xpLabel.SetText( str.c_str() );
+//	xpLabel.SetText( str.c_str() );
 
-	SetBars();
-
-	CoreScript* coreMode = sim->GetChitBag()->IsBoundToCore( playerChit, true );
 	for( int i=0; i<NUM_BUILD_MODES; ++i ) {
-		modeButton[i].SetVisible( coreMode != 0 );
+		modeButton[i].SetVisible( uiMode[UI_BUILD].Down() );
 	}
-	tabBar.SetVisible( modeButton[0].Visible() );
-	createWorkerButton.SetVisible( coreMode != 0 );
-	ejectButton.SetVisible( coreMode != 0 );
+	tabBar.SetVisible( uiMode[UI_BUILD].Down() );
+	createWorkerButton.SetVisible( uiMode[UI_BUILD].Down() );
 
 	str.Clear();
-	if ( playerChit && coreMode ) {
-		float tech = coreMode->GetTech();
-		int maxTech = coreMode->MaxTech();
-		str.Format( "Tech %.2f / %d", tech, maxTech );
+	CoreScript* coreScript = sim->GetChitBag()->GetCore( sim->GetChitBag()->GetHomeSector() );
 
-		int atech = coreMode->AchievedTechLevel();
+	float tech = coreScript->GetTech();
+	int maxTech = coreScript->MaxTech();
+	str.Format( "Tech %.2f / %d", tech, maxTech );
+	techLabel.SetText( str.c_str() );
+
+	if ( playerChit && CoreMode() ) {
+
+		int atech = coreScript->AchievedTechLevel();
 		for( int i=1; i<NUM_BUILD_MODES; ++i ) {
 			modeButton[i].SetEnabled( i-1 <= atech );
 		}
@@ -1009,7 +1070,18 @@ void GameScene::DoTick( U32 delta )
 		createWorkerButton.SetText( str2.c_str() );
 		createWorkerButton.SetEnabled( arr.Size() < MAX_BOTS );
 	}
-	techLabel.SetText( str.c_str() );
+	consoleWidget.DoTick( delta );
+	ProcessNewsToConsole();
+
+	bool useBuildingVisible = false;
+	if ( uiMode[UI_AVATAR].Down() && playerChit ) {
+		Chit* building = sim->GetChitBag()->QueryPorch( playerChit->GetSpatialComponent()->GetPosition2DI() );
+		if ( building ) {
+			useBuildingVisible = true;
+		}
+	}
+	useBuildingButton.SetVisible( useBuildingVisible );
+
 
 	// It's pretty tricky keeping the camera, camera component, and various
 	// modes all working together. 
@@ -1094,7 +1166,7 @@ void GameScene::DrawDebugText()
 
 	Wallet w = ReserveBank::Instance()->GetWallet();
 	ufoText->Draw( x, y,	"Date=%.2f %s. Sim/S=%.1f x%.1f ticks=%d/%d Reserve Au=%d r%dg%dv%d", 
-							sim->DateInAge(),
+							NewsHistory::Instance()->AgeF(),
 							fastMode ? "fast" : "norm", 
 							simPS,
 							simPS / 30.0f,
@@ -1154,15 +1226,7 @@ void GameScene::DrawDebugText()
 void GameScene::SceneResult( int sceneID, int result, const SceneData* data )
 {
 	if ( sceneID == LumosGame::SCENE_CHARACTER ) {
-		Chit* playerChit = sim->GetPlayerChit();
-		GLASSERT( playerChit );
-		if ( playerChit ) {
-			ItemComponent* ic = playerChit->GetItemComponent();
-			GLASSERT( ic );
-			if ( ic ) {
-				ic->SetHardpoints();
-			}
-		}
+		// Hardpoint setting is now automatic
 	}
 	else if ( sceneID == LumosGame::SCENE_MAP ) {
 		// Works like a tap. Reconstruct map coordinates.

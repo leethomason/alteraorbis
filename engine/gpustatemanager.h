@@ -149,12 +149,7 @@ struct GPUStreamData
 					  texture0XForm(0),
 					  texture0Clip(0),
 					  texture0ColorMap(0),
-#ifdef EL_VEC_BONES
-					  bonePos(0),
-					  boneRot(0)
-#else
 					  bones(0)
-#endif
 	{}
 
 	U32					vertexBuffer;
@@ -168,12 +163,7 @@ struct GPUStreamData
 	grinliz::Vector4F*	texture0XForm;
 	grinliz::Vector4F*	texture0Clip;
 	grinliz::Matrix4*	texture0ColorMap;	// 3 vec4 per instance
-#ifdef EL_VEC_BONES
-	grinliz::Vector4F*	bonePos;
-	grinliz::Quaternion* boneRot;
-#else
 	grinliz::Matrix4*	bones;				// EL_MAX_BONES per instance
-#endif
 };
 
 

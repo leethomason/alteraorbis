@@ -147,6 +147,22 @@ class Matrix2I
 		grinliz::Vector2I result = { r3.x, r3.y };
 		return result;
 	}
+	friend grinliz::Rectangle2I operator*( const Matrix2I& a, const grinliz::Rectangle2I& r ) 
+	{
+		grinliz::Vector2I arr[3] = { r.max, { r.min.x, r.max.y }, { r.max.x, r.min.y } };
+		grinliz::Vector2I v = a * r.min;
+		grinliz::Rectangle2I out;
+		out.min = out.max = v;
+
+		for( int i=0; i<3; ++i ) {
+			v = a * arr[i];
+			out.min.x = grinliz::Min( out.min.x, v.x );
+			out.min.y = grinliz::Min( out.min.y, v.y );
+			out.max.x = grinliz::Max( out.max.x, v.x );
+			out.max.y = grinliz::Max( out.max.y, v.y );
+		}
+		return out;
+	}
 };
 
 

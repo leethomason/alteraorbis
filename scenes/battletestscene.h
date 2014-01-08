@@ -81,6 +81,7 @@ private:
 		NO_WEAPON,
 		MELEE_WEAPON,
 		PISTOL,
+		BLASTER_AND_GUN,
 
 		LEVEL_0,
 		LEVEL_2,

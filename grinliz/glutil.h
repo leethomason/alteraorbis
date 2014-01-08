@@ -39,6 +39,9 @@ distribution.
 
 namespace grinliz {
 
+// Sleazy C trick that looks weird in code.
+#define GL_C_ARRAY_SIZE( a ) (sizeof(a)/sizeof(a[0]))
+
 /// Minimum
 template <class T> inline T		Min( T a, T b )		{ return ( a < b ) ? a : b; }
 /// Maximum

@@ -53,6 +53,7 @@
 #include <climits>
 
 #include "../ai/tasklist.h"
+#include "../ai/marketai.h"
 
 using namespace grinliz;
 using namespace ai;
@@ -71,31 +72,31 @@ static const float	PLANT_AWARE					=  3.0f;
 static const float	GOLD_AWARE					=  5.0f;
 static const int	FORCE_COUNT_STUCK			=  8;
 static const int	STAND_TIME_WHEN_WANDERING	= 1500;
+static const int	RAMPAGE_THRESHOLD			= 40;		// how many times a destination must be blocked before rampage
 
-const char* AIComponent::MODE_NAMES[NUM_MODES]     = { "normal", "rockbreak", "battle" };
+const char* AIComponent::MODE_NAMES[NUM_MODES]     = { "normal", "rampage", "rockbreak", "battle" };
 const char* AIComponent::ACTION_NAMES[NUM_ACTIONS] = { "none", "move", "melee", "shoot", "wander", "stand" };
 
 
-AIComponent::AIComponent( Engine* _engine, WorldMap* _map )
+AIComponent::AIComponent( Engine* _engine, WorldMap* _map ) : feTicker( 750 ), needsTicker( 1000 ), taskList( _map, _engine )
 {
 	engine = _engine;
 	map = _map;
 	currentAction = 0;
 	focus = 0;
-	friendEnemyAge = 0;
 	aiMode = NORMAL_MODE;
 	wanderTime = 0;
 	rethink = 0;
 	fullSectorAware = false;
 	debugFlag = false;
 	visitorIndex = -1;
-	taskList = 0;
+	rampageTarget = 0;
+	destinationBlocked = 0;
 }
 
 
 AIComponent::~AIComponent()
 {
-	delete taskList;
 }
 
 
@@ -111,8 +112,11 @@ void AIComponent::Serialize( XStream* xs )
 	XARC_SER( xs, wanderTime );
 	XARC_SER( xs, rethink );
 	XARC_SER( xs, fullSectorAware );
-	XARC_SER( xs, friendEnemyAge );
 	XARC_SER( xs, visitorIndex );
+	XARC_SER( xs, rampageTarget );
+	XARC_SER( xs, destinationBlocked );
+	feTicker.Serialize( xs, "feTicker" );
+	needsTicker.Serialize( xs, "needsTicker" );
 	this->EndSerialize( xs );
 }
 
@@ -120,6 +124,7 @@ void AIComponent::Serialize( XStream* xs )
 void AIComponent::OnAdd( Chit* chit )
 {
 	super::OnAdd( chit );
+	feTicker.SetPeriod( 750 + (chit->ID() & 128) );
 }
 
 
@@ -131,7 +136,6 @@ void AIComponent::OnRemove()
 
 int AIComponent::GetTeamStatus( Chit* other )
 {
-	// FIXME: placeholder friend/enemy logic
 	GameItem* thisItem  = parentChit->GetItem();
 	GameItem* otherItem = other->GetItem();
 
@@ -142,17 +146,17 @@ int AIComponent::GetTeamStatus( Chit* other )
 }
 
 
-bool AIComponent::LineOfSight( const ComponentSet& thisComp, Chit* t )
+bool AIComponent::LineOfSight( const ComponentSet& thisComp, Chit* t, IRangedWeaponItem* weapon )
 {
 
 	Vector3F origin, dest;
-	IRangedWeaponItem* weapon = thisComp.itemComponent->GetRangedWeapon( &origin );
 	GLASSERT( weapon );
 
 	ComponentSet target( t, Chit::SPATIAL_BIT | Chit::RENDER_BIT | ComponentSet::IS_ALIVE );
 	if ( !target.okay ) {
 		return false;
 	}
+	thisComp.render->GetMetaData( HARDPOINT_TRIGGER, &origin );
 	target.render->GetMetaData( META_TARGET, &dest );
 
 	Vector3F dir = dest - origin;
@@ -363,7 +367,7 @@ void AIComponent::DoMove( const ComponentSet& thisComp )
 						continue;
 					}
 
-					if ( DotProduct( normal, heading ) > SHOOT_ANGLE_DOT ) {
+					if ( DotProduct( normal, heading ) >= SHOOT_ANGLE_DOT ) {
 						// Wow - can take the shot!
 						float u = BattleMechanics::ChanceToHit( range, radAt1 );
 
@@ -434,22 +438,20 @@ void AIComponent::DoShoot( const ComponentSet& thisComp )
 	Vector2F leading2D = { leading.x, leading.z };
 	// Rotate to target.
 	Vector2F heading = thisComp.spatial->GetHeading2D();
-	float headingAngle = RotationXZDegrees( heading.x, heading.y );
-
 	Vector2F normalToTarget = leading2D - thisComp.spatial->GetPosition2D();
 	float distanceToTarget = normalToTarget.Length();
 	normalToTarget.Normalize();
-	float angleToTarget = RotationXZDegrees( normalToTarget.x, normalToTarget.y );
-	float deltaAngle = MinDeltaDegrees( headingAngle, angleToTarget, 0 );
+	float dot = DotProduct( heading, normalToTarget );
 
-	if ( deltaAngle < SHOOT_ANGLE ) {
+	if ( dot >= SHOOT_ANGLE_DOT ) {
 		// all good.
 	}
 	else {
 		// Rotate to target.
 		PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
 		if ( pmc ) {
-			pmc->QueueDest( thisComp.spatial->GetPosition2D(), angleToTarget );
+			//float angle = RotationXZDegrees( normalToTarget.x, normalToTarget.y );
+			pmc->QueueDest( thisComp.spatial->GetPosition2D(), &normalToTarget );
 		}
 		return;
 	}
@@ -488,6 +490,12 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 	else if ( !targetDesc.mapPos.IsZero() ) {
 		// make sure we aren't swinging at an empty voxel.
 		targetOkay = map->GetWorldGrid( targetDesc.mapPos.x, targetDesc.mapPos.y ).RockHeight() > 0;
+
+		// Sometimes we do want to clear plants - check for that.
+		if ( !targetOkay ) {
+			Chit* plant = GetLumosChitBag()->QueryPlant( thisComp.spatial->GetPosition2DI(), 0, 0 );
+			targetOkay = plant != 0;
+		}
 	}
 
 	if ( !weapon || !targetOkay ) {
@@ -495,19 +503,21 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 		return;
 	}
 	GameItem* item = weapon->GetItem();
+	PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
 
 	// Are we close enough to hit? Then swing. Else move to target.
 	if ( targetDesc.id && BattleMechanics::InMeleeZone( engine, parentChit, target.chit )) {
 		GLASSERT( parentChit->GetRenderComponent()->AnimationReady() );
 		parentChit->GetRenderComponent()->PlayAnimation( ANIM_MELEE );
+		if ( pmc ) pmc->Stop();
 	}
 	else if ( !targetDesc.id && BattleMechanics::InMeleeZone( engine, parentChit, targetDesc.mapPos )) {
 		GLASSERT( parentChit->GetRenderComponent()->AnimationReady() );
 		parentChit->GetRenderComponent()->PlayAnimation( ANIM_MELEE );
+		if ( pmc ) pmc->Stop();
 	}
 	else {
 		// Move to target.
-		PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
 		if ( pmc ) {
 			Vector2F targetPos = { 0, 0 };
 			if ( targetDesc.id )
@@ -607,7 +617,7 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 since )
 		VisitorData* vd = &Visitors::Instance()->visitorData[visitorIndex];
 		IString kioskName = vd->CurrentKioskWant();
 
-		if ( chit && chit->GetItem()->name == kioskName ) {
+		if ( chit && chit->GetItem()->IName() == kioskName ) {
 			vd->kioskTime += since;
 			if ( vd->kioskTime > VisitorData::KIOSK_TIME ) {
 				Vector2I sector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
@@ -626,15 +636,6 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 since )
 			return false;
 		}
 	}
-	
-	/*
-	if ( taskList.Standing() ) {
-		const Vector2I& pos2i = taskList.Pos2I();
-		Vector3F pos = { (float)pos2i.x+0.5f, 0.0f, (float)pos2i.y+0.5f };
-		engine->particleSystem->EmitPD( "construction", pos, V3F_UP, 30 );	// FIXME: standard delta constant
-		taskList.DoStanding( since );
-		return true;	// keep standing
-	}*/
 	return false;
 }
 
@@ -664,6 +665,7 @@ void AIComponent::Think( const ComponentSet& thisComp )
 		break;
 	case ROCKBREAK_MODE:	ThinkRockBreak( thisComp );	break;
 	case BATTLE_MODE:		ThinkBattle( thisComp );	break;
+	case RAMPAGE_MODE:		ThinkRampage( thisComp );	break;
 	}
 };
 
@@ -684,7 +686,7 @@ bool AIComponent::Move( const SectorPort& sp, bool focused )
 			const SectorData& localSD = map->GetSector( local.sector );
 			// Local path to remote dst
 			Vector2F dest2 = SectorData::PortPos( localSD.GetPortLoc(local.port), parentChit->ID() );
-			pmc->QueueDest( dest2, -1, &sp );
+			pmc->QueueDest( dest2, 0, &sp );
 			currentAction = MOVE;
 			focus = focused ? FOCUS_MOVE : 0;
 			return true;
@@ -708,17 +710,16 @@ void AIComponent::Stand()
 
 void AIComponent::Pickup( Chit* item )
 {
-	if ( !taskList ) taskList = new TaskList( map, engine );
-	taskList->Push( Task::MoveTask( item->GetSpatialComponent()->GetPosition2D(), 0 ));
-	taskList->Push( Task::PickupTask( item->ID(), 0 ));
+	taskList.Push( Task::MoveTask( item->GetSpatialComponent()->GetPosition2D(), 0 ));
+	taskList.Push( Task::PickupTask( item->ID(), 0 ));
 }
 
 
-void AIComponent::Move( const grinliz::Vector2F& dest, bool focused, float rotation )
+void AIComponent::Move( const grinliz::Vector2F& dest, bool focused, const Vector2F* normal )
 {
 	PathMoveComponent* pmc    = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
 	if ( pmc ) {
-		pmc->QueueDest( dest, rotation );
+		pmc->QueueDest( dest, normal );
 		currentAction = MOVE;
 		focus = focused ? FOCUS_MOVE : 0;
 	}
@@ -738,6 +739,7 @@ bool AIComponent::RockBreak( const grinliz::Vector2I& rock )
 	GLOUTPUT(( "Destroy something at %d,%d\n", rock.x, rock.y ));
 	ComponentSet thisComp( parentChit, Chit::RENDER_BIT | 
 		                               Chit::SPATIAL_BIT |
+									   Chit::ITEM_BIT |
 									   ComponentSet::IS_ALIVE |
 									   ComponentSet::NOT_IN_IMPACT );
 	if ( !thisComp.okay ) 
@@ -748,7 +750,7 @@ bool AIComponent::RockBreak( const grinliz::Vector2I& rock )
 	sector.y /= SECTOR_SIZE;
 
 	CoreScript* cs = GetLumosChitBag()->GetCore( sector );
-	if ( cs && cs->GetAttached(0) && (cs->GetAttached(0) != parentChit) ) {
+	if ( cs && cs->InUse() && (cs->PrimaryTeam() != thisComp.item->primaryTeam) ) {
 		// Core is in use. We can only blast away.
 		const WorldGrid& wg = map->GetWorldGrid( rock.x, rock.y );
 		if ( wg.RockHeight() == 0 )
@@ -766,11 +768,10 @@ bool AIComponent::RockBreak( const grinliz::Vector2I& rock )
 		Vector2F end = { 0, 0 };
 		float cost = 0;
 		if ( map->CalcPathBeside( thisComp.spatial->GetPosition2D(), dest, &end, &cost )) {
-			if ( !taskList ) taskList = new TaskList( map, engine );
-			taskList->Clear();
-			taskList->Push( Task::MoveTask( end, 0 ));
-			taskList->Push( Task::StandTask( 1000, 0 ));
-			taskList->Push( Task::RemoveTask( rock, 0 ));
+			taskList.Clear();
+			taskList.Push( Task::MoveTask( end, 0 ));
+			taskList.Push( Task::StandTask( 1000, 0 ));
+			taskList.Push( Task::RemoveTask( rock, 0 ));
 		}
 	}
 	return true;
@@ -790,6 +791,91 @@ WorkQueue* AIComponent::GetWorkQueue()
 
 	WorkQueue* workQueue = coreScript->GetWorkQueue();
 	return workQueue;
+}
+
+
+void AIComponent::Rampage( int dest ) 
+{ 
+	rampageTarget = dest; 
+	aiMode = RAMPAGE_MODE; 
+	currentAction = NO_ACTION; 
+
+	NewsEvent news( NewsEvent::RAMPAGE, parentChit->GetSpatialComponent()->GetPosition2D(), parentChit );
+	NewsHistory::Instance()->Add( news );	
+}
+
+
+bool AIComponent::ThinkDoRampage( const ComponentSet& thisComp )
+{
+	if ( destinationBlocked < RAMPAGE_THRESHOLD ) 
+		return false;
+
+	// Go for a rampage: remember, if the path is clear,
+	// it's essentially just a random walk.
+	destinationBlocked = 0;
+	const SectorData& sd = map->GetSector( ToSector( thisComp.spatial->GetPosition2DI() ));
+
+	CArray< int, 5 > targetArr;
+	targetArr.Push( 0 );	// always core.
+	for( int i=0; i<4; ++i ) {
+		if ( sd.ports & (1<<i)) {
+			targetArr.Push( i+1 );	// push the port, if it has it.
+		}
+	}
+
+	parentChit->random.ShuffleArray( targetArr.Mem(), targetArr.Size() );
+	this->Rampage( targetArr[0] );
+	return true;
+}
+
+
+void AIComponent::ThinkRampage( const ComponentSet& thisComp )
+{
+	if ( thisComp.move->IsMoving() )
+		return;
+
+	// Where are we, and where to next?
+	Vector2I pos2i			= thisComp.spatial->GetPosition2DI();
+	const WorldGrid& wg0	= map->GetWorldGrid( pos2i.x, pos2i.y );
+	Vector2I next			= pos2i + wg0.Path( rampageTarget );
+	const WorldGrid& wg1	= map->GetWorldGrid( next.x, next.y );
+	const SectorData& sd	= map->GetSector( ToSector( pos2i ));
+
+	Rectangle2I dest;
+	switch( rampageTarget ) {
+	case WorldGrid::CORE:		dest.min = dest.max = sd.core;				break;
+	case WorldGrid::PORT_POS_X:	dest = sd.GetPortLoc( SectorData::POS_X );	break;
+	case WorldGrid::PORT_POS_Y:	dest = sd.GetPortLoc( SectorData::POS_Y );	break;
+	case WorldGrid::PORT_NEG_X:	dest = sd.GetPortLoc( SectorData::NEG_X );	break;
+	case WorldGrid::PORT_NEG_Y:	dest = sd.GetPortLoc( SectorData::NEG_Y );	break;
+	}
+
+	if ( dest.Contains( pos2i )) {
+		aiMode = NORMAL_MODE;
+		currentAction = NO_ACTION;
+		return;
+	}
+
+	int type, stage;
+	Chit* plant = GetLumosChitBag()->QueryPlant( pos2i, &type, &stage );
+	bool plantInTheWay = plant && stage >= 2;
+
+	if ( wg1.RockHeight() || plantInTheWay ) {
+		targetDesc.Set( next ); 
+		currentAction = MELEE;
+
+		IWeaponItem* reserve = thisComp.itemComponent->GetReserveWeapon();
+		if ( reserve && reserve->ToMeleeWeapon() ) {
+			thisComp.itemComponent->SwapWeapons();
+		}
+	} 
+	else if ( wg1.IsLand() ) {
+		this->Move( ToWorld2F( next ), false );
+	}
+	else {
+		aiMode = NORMAL_MODE;
+		currentAction = NO_ACTION;
+	}
 }
 
 	
@@ -979,9 +1065,9 @@ bool AIComponent::SectorHerd( const ComponentSet& thisComp )
 				}
 
 				// Trolls herd *all the time*
-				if ( thisComp.item->name != "troll" ) {
-					NewsEvent news( NewsEvent::PONY, pos, StringPool::Intern( "SectorHerd" ), parentChit->ID() );
-					GetChitBag()->AddNews( news );
+				if ( thisComp.item->IName() != "troll" ) {
+					NewsEvent news( NewsEvent::SECTOR_HERD, pos, parentChit );
+					NewsHistory::Instance()->Add( news );
 				}
 
 				ChitMsg msg( ChitMsg::CHIT_SECTOR_HERD, 0, &dest );
@@ -1020,7 +1106,7 @@ void AIComponent::ThinkVisitor( const ComponentSet& thisComp )
 	VisitorData* vd = Visitors::Get( visitorIndex );
 	Chit* kiosk = GetChitBag()->ToLumos()->QueryPorch( pos2i );
 	IString kioskName = vd->CurrentKioskWant();
-	if ( kiosk && kiosk->GetItem()->name == kioskName ) {
+	if ( kiosk && kiosk->GetItem()->IName() == kioskName ) {
 		// all good
 	}
 	else {
@@ -1053,7 +1139,7 @@ void AIComponent::ThinkVisitor( const ComponentSet& thisComp )
 			Chit* kiosk = GetLumosChitBag()->FindBuilding(	vd->CurrentKioskWant(),
 															sector,
 															&thisComp.spatial->GetPosition2D(),
-															LumosChitBag::RANDOM_NEAR, 0 );
+															LumosChitBag::RANDOM_NEAR, 0, 0 );
 
 			if ( !kiosk ) {
 				// Done here.
@@ -1068,7 +1154,7 @@ void AIComponent::ThinkVisitor( const ComponentSet& thisComp )
 				// The porch is a rectangle; go to a particular point based on the ID()
 				Vector2I porchi = msc->PorchPos( parentChit->ID() );
 				Vector2F porch = { (float)porchi.x+0.5f, (float)porchi.y+0.5f };
-				if ( map->CalcPath( thisComp.spatial->GetPosition2D(), porch, 0, 0, 0, 0 ) ) {
+				if ( map->CalcPath( thisComp.spatial->GetPosition2D(), porch, 0, 0 ) ) {
 					this->Move( porch, false );
 				}
 				else {
@@ -1085,6 +1171,261 @@ void AIComponent::ThinkVisitor( const ComponentSet& thisComp )
 		parentChit->GetItem()->hp = 0;
 		parentChit->SetTickNeeded();
 	}
+}
+
+
+bool AIComponent::ThinkWanderEatPlants( const ComponentSet& thisComp )
+{
+	GLASSERT( thisComp.item );
+	// Plant eater
+	if (    (thisComp.item->flags & GameItem::AI_EAT_PLANTS) 
+		 && (thisComp.item->hp < thisComp.item->TotalHPF() * 0.8f ))  
+	{
+		// Are we near a plant?
+		// Note that currently only support eating stage 0-1 plants.
+		CChitArray plants;
+	
+		PlantFilter plantFilter( -1, MAX_PASSABLE_PLANT_STAGE );
+		parentChit->GetChitBag()->QuerySpatialHash( &plants, thisComp.spatial->GetPosition2D(), PLANT_AWARE, 0, &plantFilter );
+
+		Vector2F plantPos =  { 0, 0 };
+		float plantDist = 0;
+		if ( Closest( thisComp, plants.Mem(), plants.Size(), &plantPos, &plantDist )) {
+			if ( ToWorld2I( plantPos ) == thisComp.spatial->GetPosition2DI() ) {
+				if ( debugFlag ) {
+					GLOUTPUT(( "ID=%d Stand\n", thisComp.chit->ID() ));
+				}
+				currentAction = STAND;
+			}
+			else {
+				this->Move( plantPos, false );
+			}
+			return true;
+		}
+	}
+	return false;
+}
+
+
+bool AIComponent::ThinkWanderHealAtCore( const ComponentSet& thisComp )
+{
+	// Core healer
+	if (    (thisComp.item->flags & GameItem::AI_HEAL_AT_CORE) 
+		 && (thisComp.item->hp < thisComp.item->TotalHPF() * 0.8f )) 
+	{
+		Vector2I sector = ToSector( thisComp.spatial->GetPosition2DI() );
+		const SectorData& sd = map->GetSector( sector );
+		if ( sd.core != thisComp.spatial->GetPosition2DI() ) {
+			if ( map->CalcPath( thisComp.spatial->GetPosition2D(), ToWorld2F( sd.core ), 0, 0 )) {
+				this->Move( ToWorld2F( sd.core ), false );
+			}
+		}
+		else {
+			currentAction = STAND;
+		}
+		return true;
+	}
+	return false;
+}
+
+
+bool AIComponent::ThinkCriticalNeeds( const ComponentSet& thisComp )
+{
+	Vector2F pos = thisComp.spatial->GetPosition2D();
+	Vector2I pos2i = thisComp.spatial->GetPosition2DI();
+	Vector2I sector = ToSector( pos2i );
+
+	// Are we un-armed?
+	// If we don't have one of the big 3: gun, ring, shield check for
+	// a market to buy it, and the means to buy.
+	if (    thisComp.item->flags & GameItem::AI_USES_BUILDINGS 
+		 && thisComp.item->wallet.gold )
+	{
+		const IMeleeWeaponItem* melee = thisComp.itemComponent->GetMeleeWeapon();
+		const IRangedWeaponItem* ranged = thisComp.itemComponent->GetRangedWeapon(0);
+		const IShield* shield = thisComp.itemComponent->GetShield();
+
+		// Don't want the AIs running to the market all the time if nothing
+		// is there. (And planning to have random market visits anyway.)
+		// This is "critical call ahead" needs.
+		if ( !melee || !ranged || !shield ) {
+			LumosChitBag* chitBag = this->GetLumosChitBag();
+			Chit* market = chitBag->FindBuilding( IStringConst::market, sector, &pos, LumosChitBag::RANDOM_NEAR, 0, 0 );
+
+			if ( market ) {
+				bool goMarket = false;
+				MarketAI marketAI( market );
+				BuildScript buildScript;
+				const BuildData* bd = buildScript.GetDataFromStructure( IStringConst::market );
+				GLASSERT( bd );
+
+				if ( !ranged && marketAI.HasRanged( thisComp.item->wallet.gold )) {
+					goMarket = true;
+				}
+				if ( !shield && marketAI.HasShield( thisComp.item->wallet.gold )) {
+					goMarket = true;
+				}
+				if ( !melee && marketAI.HasMelee( thisComp.item->wallet.gold )) {
+					goMarket = true;
+				}
+
+				if ( goMarket ) {
+					MapSpatialComponent* msc = GET_SUB_COMPONENT( market, SpatialComponent, MapSpatialComponent );
+					Vector2I porch = msc->PorchPos( thisComp.chit->ID() );
+					taskList.Push( Task::MoveTask( porch, 0 ));
+					taskList.Push( Task::StandTask( bd->standTime ));
+					taskList.Push( Task::UseBuildingTask( 0 ));
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+
+bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
+{
+	if ( !(thisComp.item->flags & GameItem::AI_USES_BUILDINGS )) {
+		return false;
+	}
+
+	Vector2I pos2i = thisComp.spatial->GetPosition2DI();
+	Vector2I sector = ToSector( pos2i );
+	CoreScript* coreScript = GetLumosChitBag()->GetCore( sector );
+
+	if ( !coreScript ) return false;
+	if ( GetTeamStatus( coreScript->ParentChit() ) == RELATE_ENEMY ) return false;
+
+	BuildingFilter filter;
+	GetLumosChitBag()->FindBuilding( IString(), sector, 0, 0, &chitArr, &filter );
+	
+	const ai::Needs& needs = thisComp.ai->GetNeeds();
+	BuildScript buildScript;
+	int    best=-1;
+	double score=0;
+	double needVal=0;
+	const BuildData* bestBD = 0;
+	CChitArray mobs;
+
+	// Score the buildings as a fit for the needs.
+	// future: consider distance to building
+	// FIXME: only use sleep pods in home sector
+	// FIXME: add "wander" in this sectory. Patrolling is good.
+	// FIXME: add "adventure" - visit neighbor sector, as a need,
+	//        and a way to get back.
+
+	for( int i=0; i<chitArr.Size(); ++i ) {
+		Chit* chit = chitArr[i];
+		const GameItem* item = chit->GetItem();
+		GLASSERT( item );
+		const BuildData* bd = buildScript.GetDataFromStructure( item->IName() );
+		if ( !bd || bd->needs.IsZero() ) 
+			continue;
+
+		MapSpatialComponent* msc = GET_SUB_COMPONENT( chit, SpatialComponent, MapSpatialComponent );
+		GLASSERT( msc );
+		Vector2I porch = msc->PorchPos( chit->ID() );
+		GLASSERT( !porch.IsZero() );
+
+		// The needs match.
+		double s=0;
+		double nv=0;
+		for( int k=0; k<ai::Needs::NUM_NEEDS; ++k ) {
+			if ( bd->needs.Value(k) > 0 ) {
+				// (how much needed) * (how much available)
+				nv += 1.0 - needs.Value(k);
+				s  += (1.0 - needs.Value(k)) * bd->needs.Value(k);	
+			}
+		}
+
+		// Variation - is this the last building visited?
+		if ( item->IName() == taskList.LastBuildingUsed() ) {
+			s *= 0.5;
+		}
+
+		// Practicality - is available?
+		// Note that for social buildings, being crowded is good.
+		if ( needs.Value( ai::Needs::SOCIAL ) == 0 ) {
+			MoBFilter mobFilter;
+			GetLumosChitBag()->QuerySpatialHash( &mobs, ToWorld2F( porch ), 0.3f, thisComp.chit, &mobFilter );
+			if ( mobs.Size() ) {
+				s *= 0.5;
+			}
+		}
+
+		if ( s > 0 && s > score ) {
+			score = s;
+			best = i;
+			needVal = nv;
+			bestBD = bd;
+		}
+	}
+
+	if ( best >= 0 && needVal > 0.4 ) {
+		Chit* chit = chitArr[best];
+		MapSpatialComponent* msc = GET_SUB_COMPONENT( chit, SpatialComponent, MapSpatialComponent );
+		GLASSERT( msc );
+		Vector2I porch = msc->PorchPos( thisComp.chit->ID() );
+		GLASSERT( porch.x > 0 );
+
+		taskList.Push( Task::MoveTask( porch, 0 ));
+		taskList.Push( Task::StandTask( bestBD->standTime ));
+		taskList.Push( Task::UseBuildingTask( 0 ));
+		return true;
+	}
+	return false;
+}
+
+
+bool AIComponent::ThinkLoot( const ComponentSet& thisComp )
+{
+	// Is there stuff around to pick up?
+
+	int flags = thisComp.item->flags;
+
+	if(    !parentChit->PlayerControlled() 
+		&& ( flags & (GameItem::GOLD_PICKUP | GameItem::ITEM_PICKUP))) 
+	{
+		// Which filter to use?
+		GoldCrystalFilter	gold;
+		LootFilter			loot;
+
+		MultiFilter filter( MultiFilter::MATCH_ANY );
+		bool canAdd	= thisComp.itemComponent->CanAddToInventory();
+
+		if ( canAdd && ( flags & GameItem::ITEM_PICKUP)) {
+			filter.filters.Push( &loot );
+		}
+		if ( flags & GameItem::GOLD_PICKUP ) {
+			filter.filters.Push( &gold );
+		}
+
+		Vector2F pos2 = thisComp.spatial->GetPosition2D();
+		CChitArray chitArr;
+		parentChit->GetChitBag()->QuerySpatialHash( &chitArr, pos2, GOLD_AWARE, 0, &filter );
+
+		ChitDistanceCompare compare( thisComp.spatial->GetPosition() );
+		Sort( chitArr.Mem(), chitArr.Size(), compare );
+
+		for( int i=0; i<chitArr.Size(); ++i ) {
+			Vector2F goldPos = chitArr[i]->GetSpatialComponent()->GetPosition2D();
+			if ( map->HasStraightPath( goldPos, pos2 )) {
+				// Pickup and gold use different techniques. (Because of player UI. 
+				// Always want gold - not all items.)
+				if ( loot.Accept( chitArr[i] )) {
+					taskList.Push( Task::MoveTask( goldPos, 0 ));
+					taskList.Push( Task::PickupTask( chitArr[i]->ID(), 0 ));
+					return true;
+				}
+				else {
+					this->Move( goldPos, false );
+					return true;
+				}
+			}
+		}
+	}
+	return false;
 }
 
 
@@ -1108,94 +1449,18 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 		ranged->GetItem()->Reload( parentChit );
 	}
 
-	// Plant eater
-	if ( (itemFlags & GameItem::AI_EAT_PLANTS) && (item->hp < item->TotalHP()))  {
-		// Are we near a plant?
-		// Note that currently only support eating stage 0-1 plants.
-		CChitArray plants;
-	
-		PlantFilter plantFilter( -1, MAX_PASSABLE_PLANT_STAGE );
-		parentChit->GetChitBag()->QuerySpatialHash( &plants, pos2, PLANT_AWARE, 0, &plantFilter );
-
-		Vector2F plantPos =  { 0, 0 };
-		float plantDist = 0;
-		if ( Closest( thisComp, plants.Mem(), plants.Size(), &plantPos, &plantDist )) {
-			if ( plantDist > 0.2f ) {
-				dest = plantPos;
-			}
-			else {
-				// Already where we need to be		
-				if ( debugFlag ) {
-					GLOUTPUT(( "ID=%d Stand\n", thisComp.chit->ID() ));
-				}
-				currentAction = STAND;
-				return;
-			}
-		}
-	}
-
-	// Core healer
-	if ( (itemFlags & GameItem::AI_HEAL_AT_CORE) && (item->hp < item->TotalHPF() * 0.8f )) {
-		Vector2I sector = ToSector( thisComp.spatial->GetPosition2DI() );
-		const SectorData& sd = map->GetSector( sector );
-		if ( sd.core != pos2i ) {
-			if ( map->CalcPath( thisComp.spatial->GetPosition2D(), ToWorld2F( sd.core ), 0, 0, 0, 0 )) {
-				dest = ToWorld2F( sd.core );
-			}
-		}
-		else {
-			currentAction = STAND;
-			return;
-		}
-	}
-
-	if ( dest.IsZero() ) {
-		// Is there stuff around to pick up?
-		if(    !parentChit->PlayerControlled() 
-			&& ( itemFlags & (GameItem::GOLD_PICKUP | GameItem::ITEM_PICKUP))) 
-		{
-			// Which filter to use?
-			GoldCrystalFilter	gold;
-			LootFilter			loot;
-			GoldLootFilter		both;
-			bool canAdd	= thisComp.itemComponent->CanAddToInventory();
-
-			IChitAccept*	accept = 0;
-			if ( canAdd && (itemFlags & GameItem::GOLD_PICKUP) && (itemFlags & GameItem::ITEM_PICKUP)) {
-				accept = &both;
-			}
-			else if ( canAdd && (itemFlags & GameItem::ITEM_PICKUP) ) {
-				accept = &loot;
-			}
-			else if ( itemFlags & GameItem::GOLD_PICKUP ) {
-				accept = &gold;
-			}
-
-			CChitArray chitArr;
-			parentChit->GetChitBag()->QuerySpatialHash( &chitArr, pos2, GOLD_AWARE, 0, accept );
-
-			ChitDistanceCompare compare( thisComp.spatial->GetPosition() );
-			Sort( chitArr.Mem(), chitArr.Size(), compare );
-
-			for( int i=0; i<chitArr.Size(); ++i ) {
-				Vector2F goldPos = chitArr[i]->GetSpatialComponent()->GetPosition2D();
-				if ( map->HasStraightPath( goldPos, pos2 )) {
-					// Pickup and gold use different techniques. (Because of player UI. 
-					// Always want gold - not all items.)
-					if ( loot.Accept( chitArr[i] )) {
-						if ( !taskList ) taskList = new TaskList( map, engine );
-						taskList->Push( Task::MoveTask( goldPos, 0 ));
-						taskList->Push( Task::PickupTask( chitArr[i]->ID(), 0 ));
-						return;
-					}
-					else {
-						dest = goldPos;
-					}
-					break;
-				}
-			}
-		}
-	}
+	if ( ThinkWanderEatPlants( thisComp ))
+		return;
+	if ( ThinkWanderHealAtCore( thisComp ))
+		return;
+	if ( ThinkLoot( thisComp ))
+		return;
+	if ( ThinkCriticalNeeds( thisComp ))
+		return;
+	if ( ThinkNeeds( thisComp ))
+		return;
+	if ( ThinkDoRampage( thisComp ))
+		return;
 
 	// Wander....
 	if ( dest.IsZero() ) {
@@ -1233,9 +1498,8 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 	}
 	if ( !dest.IsZero() ) {
 		Vector2I dest2i = { (int)dest.x, (int)dest.y };
-		if ( !taskList ) taskList = new TaskList( map, engine );
-		taskList->Push( Task::MoveTask( dest2i ));
-		taskList->Push( Task::StandTask( STAND_TIME_WHEN_WANDERING ));
+		taskList.Push( Task::MoveTask( dest2i ));
+		taskList.Push( Task::StandTask( STAND_TIME_WHEN_WANDERING ));
 	}
 }
 
@@ -1249,11 +1513,21 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 	}
 	const Vector3F& pos = thisComp.spatial->GetPosition();
 	Vector2F pos2 = { pos.x, pos.z };
+	Vector2I sector = ToSector( ToWorld2I( pos2 ));
 	
-	// The current ranged weapon.
-	IRangedWeaponItem* rangedWeapon = thisComp.itemComponent->GetRangedWeapon( 0 );
-	// The current melee weapon.
-	IMeleeWeaponItem* meleeWeapon = thisComp.itemComponent->GetMeleeWeapon();
+	// Use the current or reserve - switch out later if we need to.
+	IRangedWeaponItem* rangedWeapon = thisComp.itemComponent->GetRangedWeapon(0);
+	IMeleeWeaponItem*  meleeWeapon  = thisComp.itemComponent->GetMeleeWeapon();
+
+	IWeaponItem* reserve = thisComp.itemComponent->GetReserveWeapon();
+	if ( reserve ) {
+		if ( !rangedWeapon && reserve->GetItem()->ToRangedWeapon() ) {
+			rangedWeapon = reserve->GetItem()->ToRangedWeapon();
+		}
+		if ( !meleeWeapon && reserve->GetItem()->ToMeleeWeapon() ) {
+			meleeWeapon = reserve->GetItem()->ToMeleeWeapon();
+		}
+	}
 
 	enum {
 		OPTION_FLOCK_MOVE,		// Move to better position with allies (not too close, not too far)
@@ -1281,11 +1555,23 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 	//Vector2F flockDir = heading;
 	utility[OPTION_FLOCK_MOVE] = 0.001f;
 
-	int nRangedEnemies = 0;
+	int nRangedEnemies = 0;	// number of enemies that could be shooting at me
+	int nMeleeEnemies = 0;	// number of enemies that could be pounding at me
+
 	for( int k=0; k<enemyList.Size(); ++k ) {
 		Chit* chit = GetChitBag()->GetChit( enemyList[k] );
-		if ( chit && chit->GetItemComponent() && chit->GetItemComponent()->GetRangedWeapon(0) ) {
-			++nRangedEnemies;
+		if ( chit ) {
+			ItemComponent* ic = chit->GetItemComponent();
+			if ( ic ) {
+				if ( ic->GetRangedWeapon(0) ) {
+					++nRangedEnemies;
+				}
+				if ( ic->GetMeleeWeapon() && chit->GetSpatialComponent() &&
+					( pos2 - chit->GetSpatialComponent()->GetPosition2D() ).LengthSquared() <= (MELEE_RANGE*MELEE_RANGE) )
+				{
+					++nMeleeEnemies;
+				}
+			}
 		}
 	}
 
@@ -1295,6 +1581,14 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 		if ( !enemy.okay ) {
 			continue;
 		}
+		if ( map->UsingSectors() ) {
+			Vector2I s = ToSector( enemy.spatial->GetPosition2DI());
+			if ( s != sector ) {
+				enemyList[k] = 0;
+				continue;
+			}
+		}
+
 		const Vector3F	enemyPos		= enemy.spatial->GetPosition();
 		const Vector2F	enemyPos2		= { enemyPos.x, enemyPos.z };
 		float			range			= (enemyPos - pos).Length();
@@ -1303,6 +1597,11 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 
 		normalToEnemy.SafeNormalize( 1, 0 );
 		float dot = DotProduct( normalToEnemy, heading );
+
+		// If we have melee targets, focus in on those.
+		if ( nMeleeEnemies && range > MELEE_RANGE) {
+			continue;
+		}
 
 		// Prefer targets we are pointed at.
 		static const float DOT_BIAS = 0.25f;
@@ -1350,7 +1649,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 					}
 				}
 
-				if ( u > utility[OPTION_SHOOT] && LineOfSight( thisComp, enemy.chit ) ) {
+				if ( u > utility[OPTION_SHOOT] && LineOfSight( thisComp, enemy.chit, rangedWeapon ) ) {
 					utility[OPTION_SHOOT] = u;
 					target[OPTION_SHOOT] = enemy.chit;
 				}
@@ -1443,21 +1742,41 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 				   thisComp.chit->ID(), utility[OPTION_FLOCK_MOVE], utility[OPTION_MOVE_TO_RANGE], utility[OPTION_MELEE], utility[OPTION_SHOOT],
 				   optionName[index] ));
 	}
+
+	// And finally, do a swap if needed!
+	// This logic is minimal: what about the other states?
+	bool swap = false;
+	if ( currentAction == MELEE && reserve && reserve->ToMeleeWeapon() ) {
+		thisComp.itemComponent->SwapWeapons();
+		swap = true;
+	}
+	if ( currentAction == SHOOT && reserve && reserve->ToRangedWeapon() ) {
+		thisComp.itemComponent->SwapWeapons();
+		swap = true;
+	}
+	if ( swap && debugFlag ) {
+		IRangedWeaponItem* r = thisComp.itemComponent->GetRangedWeapon(0);
+		IMeleeWeaponItem*  m = thisComp.itemComponent->GetMeleeWeapon();
+
+		GLOUTPUT(( "ID=%d swapped in r=%s m=%s\n", thisComp.chit->ID(), 
+			r ? r->GetItem()->BestName() : "none",
+			m ? m->GetItem()->BestName() : "none" ));
+	}
 }
 
 
-void AIComponent::FlushTaskList( const ComponentSet& thisComp, U32 delta, U32 since )
+void AIComponent::FlushTaskList( const ComponentSet& thisComp, U32 delta )
 {
-	if ( taskList ) {
+	if ( !taskList.Empty() ) {
 		Vector2I pos2i    = thisComp.spatial->GetPosition2DI();
 		Vector2I sector   = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
 
 		WorkQueue* workQueue = 0;
-		CoreScript* coreScript = GetChitBag()->ToLumos()->GetCore( sector );
+		CoreScript* coreScript = GetLumosChitBag()->GetCore( sector );
 		if ( coreScript ) {
 			workQueue = coreScript->GetWorkQueue();
 		}
-		taskList->DoTasks( parentChit, workQueue, delta, since );
+		taskList.DoTasks( parentChit, workQueue, delta );
 	}
 }
 
@@ -1471,16 +1790,15 @@ void AIComponent::FindRoutineTasks( const ComponentSet& thisComp )
 			Chit* vault = GetLumosChitBag()->FindBuilding(	IStringConst::vault, 
 															sector, 
 															&thisComp.spatial->GetPosition2D(), 
-															LumosChitBag::RANDOM_NEAR, 0 );
+															LumosChitBag::RANDOM_NEAR, 0, 0 );
 			if ( vault && vault->GetItemComponent() && vault->GetItemComponent()->CanAddToInventory() ) {
 				MapSpatialComponent* msc = GET_SUB_COMPONENT( vault, SpatialComponent, MapSpatialComponent );
 				GLASSERT( msc );
 				if ( msc ) {
 					Vector2I porch = msc->PorchPos( parentChit->ID() );
 
-					if ( !taskList ) taskList = new TaskList( map, engine );
-					taskList->Push( Task::MoveTask( porch, 0 ));
-					taskList->Push( Task::UseBuildingTask( 0 ));
+					taskList.Push( Task::MoveTask( porch, 0 ));
+					taskList.Push( Task::UseBuildingTask( 0 ));
 				}
 			}
 		}
@@ -1510,17 +1828,15 @@ void AIComponent::WorkQueueToTask(  const ComponentSet& thisComp )
 				Vector2F end;
 				float cost = 0;
 				if ( map->CalcPathBeside( thisComp.spatial->GetPosition2D(), dest, &end, &cost )) {
-					if ( !taskList ) taskList = new TaskList( map, engine );
-					taskList->Push( Task::MoveTask( end, item->taskID ));
-					taskList->Push( Task::StandTask( 1000, item->taskID ));
-					taskList->Push( Task::RemoveTask( item->pos, item->taskID ));
+					taskList.Push( Task::MoveTask( end, item->taskID ));
+					taskList.Push( Task::StandTask( 1000, item->taskID ));
+					taskList.Push( Task::RemoveTask( item->pos, item->taskID ));
 				}
 			}
 			else if ( BuildScript::IsBuild( item->action )) {
-				if ( !taskList ) taskList = new TaskList( map, engine );
-				taskList->Push( Task::MoveTask( item->pos, item->taskID ));
-				taskList->Push( Task::StandTask( 1000, item->taskID ));
-				taskList->Push( Task::BuildTask( item->pos, item->action, item->taskID ));
+				taskList.Push( Task::MoveTask( item->pos, item->taskID ));
+				taskList.Push( Task::StandTask( 1000, item->taskID ));
+				taskList.Push( Task::BuildTask( item->pos, item->action, item->taskID ));
 			}
 			else {
 				GLASSERT( 0 );
@@ -1531,15 +1847,15 @@ void AIComponent::WorkQueueToTask(  const ComponentSet& thisComp )
 
 
 
-int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
+int AIComponent::DoTick( U32 deltaTime )
 {
-	//GRINLIZ_PERFTRACK;
 	PROFILE_FUNC();
 
 	ComponentSet thisComp( parentChit, Chit::RENDER_BIT | 
 		                               Chit::SPATIAL_BIT |
 									   Chit::MOVE_BIT |
 									   Chit::ITEM_BIT |
+									   Chit::AI_BIT |
 									   ComponentSet::IS_ALIVE |
 									   ComponentSet::NOT_IN_IMPACT );
 	if ( !thisComp.okay ) {
@@ -1553,8 +1869,7 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 		return 0;
 	}
 
-	wanderTime += timeSince;
-	friendEnemyAge += timeSince;
+	wanderTime += deltaTime;
 	int oldAction = currentAction;
 
 	ChitBag* chitBag = this->GetChitBag();
@@ -1565,26 +1880,35 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 	}
 
 	// If focused, make sure we have a target.
-	if ( targetDesc.id && !chitBag->GetChit( targetDesc.id )) {
-		targetDesc.Clear();
-		currentAction = 0;
+	if ( targetDesc.id ) {
+		Chit* chit = chitBag->GetChit( targetDesc.id );
+		if ( !chit ) {
+			targetDesc.Clear();
+			currentAction = 0;
+		}
+		else if ( map->UsingSectors() ) {
+			if (    !chit->GetSpatialComponent() 
+				 || ( ToSector( thisComp.spatial->GetPosition2DI() ) != ToSector( chit->GetSpatialComponent()->GetPosition2DI() )))
+			{
+				targetDesc.Clear();
+				currentAction = 0;
+			}
+		}
 	}
+
 	if ( !targetDesc.id ) {
 		focus = FOCUS_NONE;
 	}
 
-	if ( friendEnemyAge > 750 ) {
+	if ( feTicker.Delta( deltaTime )) {
 		GetFriendEnemyLists();
-		friendEnemyAge = parentChit->ID() & 63;	// a little randomness
 	}
 
 	// High level mode switch, in/out of battle?
 	if ( aiMode != BATTLE_MODE && enemyList.Size() ) {
 		aiMode = BATTLE_MODE;
 		currentAction = 0;
-		if ( taskList ) {
-			taskList->Clear();
-		}
+		taskList.Clear();
 		if ( debugFlag ) {
 			GLOUTPUT(( "ID=%d Mode to Battle\n", thisComp.chit->ID() ));
 		}
@@ -1597,20 +1921,28 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 		}
 	}
 
+	if ( (thisComp.item->flags & GameItem::AI_USES_BUILDINGS) && needsTicker.Delta( deltaTime )) {
+		// FIXME: don't call away from friendly sectors.
+		needs.DoTick( needsTicker.Period(), aiMode == BATTLE_MODE );
+		if ( thisComp.chit->PlayerControlled() ) {
+			thisComp.ai->GetNeedsMutable()->SetFull();
+		}
+	}
+
 	// Is there work to do?
 	if (    aiMode == NORMAL_MODE 
 		 && (thisComp.item->flags & GameItem::AI_DOES_WORK)
-		 && (!taskList || taskList->Empty()) ) 
+		 && taskList.Empty() ) 
 	{
 		WorkQueueToTask( thisComp );
-		if ( !taskList || taskList->Empty() ) {
+		if ( taskList.Empty() ) {
 			FindRoutineTasks( thisComp );
 		}
 	}
 
-	if ( aiMode == NORMAL_MODE && taskList && !taskList->Empty() ) {
-		FlushTaskList( thisComp, deltaTime, timeSince );
-		if ( taskList->Empty() ) {
+	if ( aiMode == NORMAL_MODE && !taskList.Empty() ) {
+		FlushTaskList( thisComp, deltaTime );
+		if ( taskList.Empty() ) {
 			rethink = 0;
 		}
 	}
@@ -1634,7 +1966,7 @@ int AIComponent::DoTick( U32 deltaTime, U32 timeSince )
 			DoShoot( thisComp );
 			break;
 		case STAND:
-			if ( !DoStand( thisComp, timeSince ) ) {
+			if ( !DoStand( thisComp, deltaTime ) ) {
 				rethink += deltaTime;
 			}
 			break;
@@ -1691,60 +2023,25 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 
 	switch ( msg.ID() ) {
 	case ChitMsg::PATHMOVE_DESTINATION_REACHED:
+		destinationBlocked = 0;
 		if ( currentAction != WANDER ) {
 			focus = 0;
 			currentAction = NO_ACTION;
 			parentChit->SetTickNeeded();
 		}
-		// FIXME: when should an AI bind to core? This just does
-		// it at the end of a move, irrespective of the current
-		// action or mode.
-		if ( chit->GetItem() && ( chit->GetItem()->flags & GameItem::AI_BINDS_TO_CORE )) {
 
-			bool standingOnCore = map->GetWorldGrid( mapPos.x, mapPos.y ).IsCore();
-
-			if ( standingOnCore ) {
-				CoreScript* boundCore = GetChitBag()->ToLumos()->IsBoundToCore( parentChit, false );
-				CoreScript* thisCore  = GetChitBag()->ToLumos()->GetCore( sector );
-
-				// If the MOB is bound to a core in a different sector it can't bind here. BUT,
-				// it can re-bind to this core if needed.
-				if ( boundCore && (boundCore != thisCore )) {
-					// Do nothing. Bound somewhere else.
-				}
-				else {
-					// Bind or re-bind
-					GLASSERT( thisCore );	// we should be standing on one. 
-					thisCore->AttachToCore( parentChit );
-				}
-			}
-		}
-		if ( chit->PlayerControlled()) {
-			Chit* building = GetLumosChitBag()->QueryPorch( thisComp.spatial->GetPosition2DI() );
-			if ( building && building->GetItem() ) {
-				IString name = building->GetItem()->name;
-				ItemComponent* ic = parentChit->GetItemComponent();
-				CoreScript* cs	= GetLumosChitBag()->GetCore( sector );
-
-				if ( cs && ic ) {
-					if ( name == IStringConst::vault ) {
-						GetLumosChitBag()->PushScene( LumosGame::SCENE_CHARACTER, new CharacterSceneData( ic, building->GetItemComponent() ));
-					}
-					else if ( name == IStringConst::factory ) {
-						ForgeSceneData* data = new ForgeSceneData();
-						data->tech = cs->GetTechLevel();
-						data->itemComponent = ic;
-						GetLumosChitBag()->PushScene( LumosGame::SCENE_FORGE, data );
-					}
-				}
-			}
-		}
 		break;
 
 	case ChitMsg::PATHMOVE_DESTINATION_BLOCKED:
+		destinationBlocked++;
 		focus = 0;
 		currentAction = NO_ACTION;
 		parentChit->SetTickNeeded();
+
+		if ( aiMode == RAMPAGE_MODE ) {
+			// Never expect move troubles in rampage mode.
+			aiMode = NORMAL_MODE;
+		}
 
 		{
 			WorkQueue* workQueue = GetWorkQueue();
@@ -1754,9 +2051,7 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 				aiMode = NORMAL_MODE;
 			}
 		}
-		if ( taskList ) {
-			taskList->Clear();
-		}
+		taskList.Clear();
 		{
 			PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
 			if ( pmc ) {
