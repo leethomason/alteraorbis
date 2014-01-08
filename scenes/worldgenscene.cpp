@@ -21,6 +21,8 @@ WorldGenScene::WorldGenScene( LumosGame* game ) : Scene( game )
 	texman->CreateTexture( "worldGenPreview", MAX_MAP_SIZE, MAX_MAP_SIZE, Surface::RGB16, Texture::PARAM_NONE, this );
 
 	worldGen = new WorldGen();
+	worldGen->LoadFeatures( "./res/features.png" );
+
 	rockGen = new RockGen( WorldGen::SIZE );
 
 	RenderAtom atom( (const void*)UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, texman->GetTexture( "worldGenPreview" ), 
