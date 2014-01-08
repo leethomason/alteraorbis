@@ -77,6 +77,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\engine\ufoutil.cpp" />
     <ClCompile Include="..\micropather\micropather.cpp" />
     <ClCompile Include="..\script\worldgen.cpp" />
     <ClCompile Include="wgen.cpp" />

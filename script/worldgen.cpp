@@ -11,6 +11,7 @@
 
 #include "../shared/lodepng.h"
 #include "../game/gamelimits.h"
+#include "../engine/ufoutil.h"
 
 using namespace grinliz;
 
@@ -246,20 +247,19 @@ int WorldGen::Color( const Rectangle2I& bounds, const Vector2I& origin )
 }
 
 
-bool WorldGen::AllPortsColored( const SectorData* s )
+int WorldGen::PortsColored( const SectorData* s )
 {
-	bool allPortsColored = true;
+	int portsColored = 0;
 	for( int i=0; i<4; ++i ) {
 		int port = 1<<i;
 		if ( s->ports & port ) {
 			Rectangle2I r = s->GetPortLoc( port );
-			if ( color[INDEX(r.min)] == 0 ) {
-				allPortsColored = false;
-				break;
+			if ( color[INDEX(r.min)] ) {
+				portsColored |= port;
 			}
 		}
 	}
-	return allPortsColored;
+	return portsColored;
 }
 
 
@@ -527,24 +527,24 @@ Rectangle2I SectorData::GetPortLoc( int port ) const
 {
 	Rectangle2I r;
 	static const int LONG  = 4;
-	static const int OFFSET = (SECTOR_SIZE-LONG)/2;
 	static const int SHORT = 2;
+	static const int HALF  = SECTOR_SIZE/2;
 
 	if ( port == NEG_X ) {
-		r.Set( x+1, y+OFFSET, 
-			   x+SHORT, y+OFFSET+LONG-1 ); 
+		r.Set( x+1,			y+HALF-SHORT, 
+			   x+SHORT,		y+HALF+SHORT-1 ); 
 	}
 	else if ( port == POS_X ) {
-		r.Set( x+SECTOR_SIZE-SHORT-1, y+OFFSET, 
-			   x+SECTOR_SIZE-2, y+OFFSET+LONG-1 ); 
+		r.Set( x+SECTOR_SIZE-SHORT-1,	y+HALF-SHORT, 
+			   x+SECTOR_SIZE-2,			y+HALF+SHORT-1 ); 
 	}
 	else if ( port == NEG_Y ) {
-		r.Set( x+OFFSET,        y+1, 
-			   x+OFFSET+LONG-1, y+SHORT ); 
+		r.Set( x+HALF-SHORT,        y+1, 
+			   x+HALF+SHORT-1,		y+SHORT ); 
 	}
 	else if ( port == POS_Y ) {
-		r.Set( x+OFFSET,        y+SECTOR_SIZE-SHORT-1, 
-			   x+OFFSET+LONG-1, y+SECTOR_SIZE-2 ); 
+		r.Set( x+HALF-SHORT,        y+SECTOR_SIZE-SHORT-1, 
+			   x+HALF+SHORT-1,		y+SECTOR_SIZE-2 ); 
 	}
 	else {
 		GLASSERT( 0 );
@@ -648,6 +648,8 @@ void WorldGen::GenerateTerrain( U32 seed, SectorData* s )
 	// Place core
 	Vector2I c = {	s->x + SECTOR_SIZE/2 - 10 + random.Dice( 3, 6 ),
 					s->y + SECTOR_SIZE/2 - 10 + random.Dice( 3, 6 )  };
+	Vector2I sector = { s->x/SECTOR_SIZE, s->y/SECTOR_SIZE };
+
 	s->core = c;
 
 	Rectangle2I r;
@@ -656,27 +658,81 @@ void WorldGen::GenerateTerrain( U32 seed, SectorData* s )
 
 	Draw( r, LAND0 );
 
-	land[c.y*SIZE+c.x] = CORE;
-	int  a			  = AREA;
-	bool portsColored = false;
+	land[c.y*SIZE+c.x]	= CORE;
+	int  a				= Color( s->InnerBounds(), s->core );
+	int portsColored	= PortsColored( s );
+	int	featurePlaced	= random.Rand( 2 );
 
-	while ( a < AREA || !portsColored ) {
-		// FIXME: if a port isn't connected, it would be
-		// nice to use an overlay to put an interesting
-		// artistically generated connection to the core.
-		// DepositLand() is nice for adding area, but maybe
-		// not the right thing for connecting ports.
-		DepositLand( s, seed, Max( AREA-a, (int)INNER_SECTOR_SIZE ));
+	while ( a < AREA || (portsColored != s->ports) ) {
+		if ( !featurePlaced && features ) {
+			
+			int nFeatures = (featuresSize.x/SECTOR_SIZE)*(featuresSize.y/SECTOR_SIZE);
+			int feature = random.Rand( nFeatures );
+
+			for( int i=0; i<4; ++i ) {
+				int port = 1<<i;
+				if ( ( port & s->ports ) && !(portsColored & port) ) {
+					if ( port == SectorData::POS_X )	  PlaceFeature( feature, sector, 0 );
+					else if ( port == SectorData::POS_Y ) PlaceFeature( feature, sector, 90 );
+					else if ( port == SectorData::NEG_X ) PlaceFeature( feature, sector, 180 );
+					else if ( port == SectorData::NEG_Y ) PlaceFeature( feature, sector, 270 );
+				}
+			}
+			featurePlaced = 1;
+		}
+		else {
+			DepositLand( s, seed, Max( AREA-a, (int)INNER_SECTOR_SIZE ));
+		}
 		Filter( s->InnerBounds() );
 
 		a = Color( s->InnerBounds(), s->core );
-		portsColored = AllPortsColored( s );
+		portsColored = PortsColored( s );
 	}
 	RemoveUncoloredLand( s );
 
 	s->area = a;
 	int checkArea = CalcSectorArea( s->x/SECTOR_SIZE, s->y/SECTOR_SIZE );
 	GLASSERT( a == checkArea );
+}
+
+
+void WorldGen::PlaceFeature( int feature, const grinliz::Vector2I& sector, int rotation )
+{
+	if ( !features ) return;
+
+	Matrix2I rot;
+	rot.SetRotation( rotation );
+
+	int cx = featuresSize.x / SECTOR_SIZE;
+	int cy = featuresSize.y / SECTOR_SIZE;
+	int fy = feature / cx;
+	int fx = feature - fy*cx;
+
+	// Mapping
+	Rectangle2I map;
+	map.Set( 0, 0, SECTOR_SIZE-1, SECTOR_SIZE-1 );
+	map = rot * map;
+
+	for( int j=0; j<SECTOR_SIZE; ++j ) {
+		for( int i=0; i<SECTOR_SIZE; ++i ) {
+			Color4U8 c = features[(fy*SECTOR_SIZE+j)*featuresSize.x + (fx*SECTOR_SIZE+i)];
+			Vector2I src = { i, j };
+			Vector2I dst = rot * src;
+			dst.x += -map.min.x + sector.x * SECTOR_SIZE;
+			dst.y += -map.min.y + sector.y * SECTOR_SIZE;
+
+			if ( c.g == 255 ) {
+				if ( land[INDEX(dst)] == WATER ) {
+					land[INDEX(dst)] = LAND0;
+				}
+			}
+			else if ( c.b == 255 ) {
+				if ( land[INDEX(dst)] >= LAND0 && land[INDEX(dst)] <= LAND3 ) {
+					land[INDEX(dst)] = WATER;
+				}
+			}
+		}
+	}
 }
 
 

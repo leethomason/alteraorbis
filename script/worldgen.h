@@ -116,10 +116,11 @@ private:
 	void AddPorts( SectorData* sector );
 	void DepositLand( SectorData* s, U32 seed, int n );
 	void Filter( const grinliz::Rectangle2I& bounds );
+	void PlaceFeature( int feature, const grinliz::Vector2I& sector, int rotation );
 
 	// returns area
 	int Color( const grinliz::Rectangle2I& bounds, const grinliz::Vector2I& origin );
-	bool AllPortsColored( const SectorData* d );
+	int PortsColored( const SectorData* d );
 
 	void RemoveUncoloredLand( SectorData* s );
 	void CalcPath( const SectorData* s );
