@@ -34,6 +34,7 @@ Changes (Denizen)
 - Rework UI
 - Tech decay adjusted
 - The forge will now show you what you will actually build
+- Fixes to the shaders - thanks to GT and Jeff for release logs!
 
 Install
 -------
@@ -52,49 +53,109 @@ Important Notes
 Getting Started
 ---------------
 
+Overall:
+1. Adventure to get Au and crystal.
+2. Build basic facilities to get tech.
+3. Bring in denizens.
+4. Kick start your economy.
+
 ** Adventuring **
 
 Tap "Load Established" to bring in a pre-generated world, well populated. That’s the best way to get started. (Later, try "Generate" to create a world from scratch.)
 
-Tap "Continue" to start in the world or continue with the last saved game.
+Tap "Continue" to continue with the last saved game.
 
-You - the player - are actually the Domain Core. Your 
+You - the player - are actually the Domain Core, glowing near the center of the screen. The Prime Avatar, the only denizen controlled directly by core, is standing nearby. (In this alpha build, the domain core is invulnerable.)
 
-The world is more dangerous at the edges, and safer in the center. You want to collect enough gold and crystals as you make your way toward a good spot near the center to build a domain.
+There are 3 modes you can toggle in the upper left: Build, View, and Avatar.
+
+* 'Build' allows you to build your base.
+* 'View' allows you to freely view the world. You can also tap denizens of the world to follow them.
+* 'Avatar' assumes direct control of the Prime Avatar.
+
+To start, stay in Avatar mode. You'll need to journey about and collect Au (gold) and Crystal to fund base building.
 
 Tap (left click) where you want to move.
 
 In an uncontrolled domain, you can tap rock or plants to remove them.
 
-You can tap a monster to attack; if not doing something else, your avatar will automatically attack monsters as they approach. The space bar swaps between your first 2 weapons (generally a ring and a gun). You can order weapons and choose shields on the character screen.
+You can tap a monster to attack; if not doing something else, your avatar will automatically attack monsters as they approach. The avatar will automatically change weapons. You can order weapons and choose shields on the character screen.
 
 If items are dropped by the monsters, a list (nearest at top) of items you can pick up appears on the left side of the screen. Tap what you wish to pick up. You pick up gold and crystal automatically when you walk over it.
 
-Tap your face portrait to bring up the character screen. You can order you weapons here and drop extra items.
+Tap your face portrait to bring up the character screen. You can order you weapons here and drop extra items. Generally you will want the top 3 slots to be a ring, a gun, and a shield. These will be the weapons used by the avatar.
 
-Tap the mini-map to see the local area and world overview. The map shows your grid travel destination, the location of your domain (once you build it), and a scan of nearby domains. The nearby domain view is important to navigating the world. It shows monster counts with lower/equivalent/higher threat rankings than your avatar. Keep in mind that enough numbers of lower level monsters will still overwhelm you. Additionally, it shows a count of Greater MoBs (G1 for example) which represent very deadly threats.
+Tap the mini-map to see the local area and world overview. The map shows your grid travel destination, the location of your domain, and a scan of nearby domains. The nearby domain view is important to navigating the world. It shows monster counts with lower/equivalent/higher threat rankings than your avatar. Keep in mind that enough numbers of lower level monsters will still overwhelm you. Additionally, it shows a count of Greater MOBs (G1 for example) which represent very deadly threats.
 
 You can either exit the mini-map at your currect location, or initiate grid travel.
 
-You will need about 300 gold to build a domain. (But you can get started with significantly less and add you go.)
+You can get started building a domain at any time, but having about 500 gold and some Crystal is a good start.
+
+At this point in the game developement, there is no penalty to having the Prime Avatar get de-rezzed. Just ctrl-click to create a new one.
 
 ** Building a Domain **
 
-If you step onto a domain core, you will immediately take control of it. 2 worker bots appear and wander about, waiting for you bidding. You can have them clear rock or vegetation. You will need clear paths from your core to the ports so that visitors can get to your domain.
+*** Tech ***
 
-You can use Pave to create walkways that won't get overrun by vegitation.
+To get back to your Domain, you can always tap "View" then "Home".
 
-Buildings:
+Tapping "Build" switches to build mode. And starts up a bunch of buttons.
 
+* The top row of buttons are tabs, and switch between building Utility, and Tech0-3 structures.
+* The 2nd row are building available for that tab.
+* The "WorkerBot" will build a worker to do your bidding.
+
+You should build:
+* Kiosks for visitors
+* Clear paths to the ports at the borders of your domain (so visitors can arrive)
+* Pave to keep paths clear.
+* Ice creates walls for defence.
+
+Once that is in place:
+* Power/Temple stores Tech from visitors
+* And a Factory/Forge lets you create new weapons and armor.
+
+Once visitors are arriving, you can move to to kick starting the economy.
+
+*** Denizens ***
+
+Once you achieve Tech 2, you can build sleep tubes, which attract denizens. Each denizen requires one sleep tube.
+
+Denizens help defend your domain, build and buy weapons, and and generally fun to have around. But they require:
+
+* Social: Provided at bars.
+* Energy: From a sleep tube.
+* Fun: Battle, building, and shopping.
+
+(In the future they will also need food, but that isn't implemented. Also, if there needs aren't met, nothing bad happens at this time.)
+
+They come into the world with some Au, but no weapons. So you need to kick start the economy.
+
+*** Econ ***
+
+You can use the Prime Avatar to build weapons at a Factory, if you haven't found any in your travels. Build some cheap weapons, your denizens don't have much cash. To use any usable building (Factory, Vault, or Market) move the the front porch and tap the "Use Building" button.
+
+You can then sell the weapons to the Market, which starts out fairly broke as well. But the Market will turn a profit when the denizens start buying weapons. 
+
+You can then build and sell better weapons. And monsters that arrive in your domain can now be effectively stopped by your (armed) denizens, who will start building weapons of their own. 
+
+If you can keep your domain together against the world you have done a lot with this alpha build of the game!
+
+
+Reference
+----------
+
+Buildings
+
+* Pave
 * ICE is artificial stone. You can use it for walls and to organize your domain.
 * Kiosks attract Visitors, which bring Tech. There are different kinds of kiosks; at this stage, there isn't a strategic advantage to specializing, so should probably build one (at least) of each.
-* A Vault is a place to store items you create. Worker Bots will bring any gold and crystal they collect to your vault, where it is deposited in your account.
 * A Factory (or Forge - not sure of the name yet) allows you to build Guns, Rings, and Shields. Before you tap "Build" the weapon with typical stats will be shown. When you press build, your avatar's level and random factors are applied, and the resulting stats are shown.
 * Power buildings hold tech. (Working on a better name for the next build of the game.) You need one power level for each level of tech.
-
-You can build additional Worker Bots (up to a limit) and at any time eject from your core. You can't build while not controlling your core, but the AI will carry on without you. In this alpha, you are the sole defender of your domain and will need to eject to fend of attackers.
-
-You can use a Factory or Vault my moving your avatar to the grid square at the front. The Factory or Vault screen will automatically open.
+* A Vault is a place to store items you create. Worker Bots will bring any gold and crystal they collect to your vault, where it is deposited in your account.
+* Sleeptube is required for a denizen.
+* Markets buy and sell items. They have their own (limited) gold; so tehy start poor and build up.
+* Bar. The social hub of your domain.
 
 
 Filing a Bug

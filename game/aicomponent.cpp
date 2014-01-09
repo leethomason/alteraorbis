@@ -1339,6 +1339,9 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 			}
 		}
 
+		// Small wiggle to use different markets, sleep tubes, etc.
+		s += 0.05 * double(Random::Hash8( chit->ID() ^ thisComp.chit->ID())) / 255.0;
+
 		// Variation - is this the last building visited?
 		if ( item->IName() == taskList.LastBuildingUsed() ) {
 			s *= 0.5;

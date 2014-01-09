@@ -59,7 +59,6 @@ Game::Game( int width, int height, int rotation, int uiHeight, const char* path 
 	debugText( false ),
 	perfText( false ),
 	perfFrameCount( 0 ),
-	suppressText( false ),
 	renderUI( true ),
 	previousTime( 0 ),
 	isDragging( false )
@@ -523,16 +522,14 @@ void Game::DoTick( U32 _currentTime )
 	#endif
 #if 1
 	UFOText* ufoText = UFOText::Instance();
-	if ( !suppressText ) {
-		if ( debugText ) {
-			ufoText->Draw(	0,  Y, "#%d %5.1ffps %4.1fK/f %3ddc/f quads=%.1fK/f", 
-							VERSION, 
-							framesPerSecond, 
-							(float)device->TrianglesDrawn()/1000.0f,
-							device->DrawCalls(),
-							(float)device->QuadsDrawn()/1000.0f );
-			sceneStack.Top()->scene->DrawDebugText();
-		}
+	ufoText->Draw(	0,  Y, "#%d %5.1ffps %4.1fK/f %3ddc/f quads=%.1fK/f", 
+					VERSION, 
+					framesPerSecond, 
+					(float)device->TrianglesDrawn()/1000.0f,
+					device->DrawCalls(),
+					(float)device->QuadsDrawn()/1000.0f );
+	if ( debugText ) {
+		sceneStack.Top()->scene->DrawDebugText();
 	}
 	Y += space;
 #endif

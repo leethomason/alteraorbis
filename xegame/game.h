@@ -179,7 +179,6 @@ private:
 	bool debugText;
 	bool perfText;
 	int perfFrameCount;
-	bool suppressText;
 	bool renderUI;
 
 	ModelLoader* modelLoader;

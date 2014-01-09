@@ -193,6 +193,9 @@ void FaceWidget::SetVisible( bool vis )
 	button->SetVisible( vis ); 
 	upper.SetVisible( vis );
 	for( int i=0; i < MAX_BARS; ++i ) {
-		bar[i].SetVisible( vis && ((1<<i) & flags) );
+		if ( !vis )
+			bar[i].SetVisible( false );
+		else
+			bar[i].SetVisible( ((1<<i) & flags) != 0 );
 	}
 }

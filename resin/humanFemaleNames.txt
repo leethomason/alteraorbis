@@ -1,3 +1,6 @@
+Alice
+Alixe
+Alleca
 Annette
 Clarity
 Celerity
@@ -5,9 +8,12 @@ Daria
 Dalia
 Della
 Dellos
+Lanella
 Lilith
+Latten
 Mara
 Maya
+M3ya
 Quorra
 Qualla
 Selma
@@ -15,5 +21,7 @@ Serenity
 Storm
 Talia
 Trinity
+Xelca
 Xelos
+Zallas
 Zensa
