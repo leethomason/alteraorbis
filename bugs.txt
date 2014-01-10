@@ -1,3 +1,7 @@
+- serializing too much news (pool, sectorherd, rampage)
+- particles
+- hash table degrading?
+- unsafe normalize in ai/melee
 
 - bolt renderer buggy
 - redmantis run&gun broken?

@@ -512,7 +512,7 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 
 		Vector2F pos2 = thisComp.spatial->GetPosition2D();
 		Vector2F heading = target.spatial->GetPosition2D() - pos2;
-		heading.Normalize();
+		heading.Normalize(); // safe
 
 		if ( pmc ) pmc->QueueDest( pos2, &heading );
 	}
@@ -522,7 +522,7 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 
 		Vector2F pos2 = thisComp.spatial->GetPosition2D();
 		Vector2F heading = ToWorld2F( targetDesc.mapPos ) - pos2;
-		heading.Normalize();
+		heading.Normalize(); // safe
 
 		if ( pmc ) pmc->QueueDest( pos2, &heading );
 	}
@@ -818,6 +818,12 @@ void AIComponent::Rampage( int dest )
 bool AIComponent::ThinkDoRampage( const ComponentSet& thisComp )
 {
 	if ( destinationBlocked < RAMPAGE_THRESHOLD ) 
+		return false;
+
+	// Need a melee weapon to rampage. Ranged is never used.
+	IMeleeWeaponItem* melee = thisComp.itemComponent->GetMeleeWeapon();
+	IWeaponItem* reserve = thisComp.itemComponent->GetReserveWeapon();
+	if ( !melee && ( !reserve || !reserve->ToMeleeWeapon() ))
 		return false;
 
 	// Go for a rampage: remember, if the path is clear,

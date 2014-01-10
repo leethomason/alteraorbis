@@ -132,8 +132,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	clearButton.SetSize( NEWS_BUTTON_WIDTH, NEWS_BUTTON_HEIGHT );
 	clearButton.SetText( "Clear" );
 
-	faceWidget.Init( &gamui2D, game->GetButtonLook(0),
-					 FaceWidget::ALL );
+	faceWidget.Init( &gamui2D, game->GetButtonLook(0), FaceWidget::ALL );
 
 	chitFaceToTrack = sim->GetPlayerChit() ? sim->GetPlayerChit()->ID() : 0;
 	faceWidget.SetSize( 100, 100 );

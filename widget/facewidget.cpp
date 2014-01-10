@@ -90,6 +90,12 @@ void FaceWidget::SetFace( UIRenderer* renderer, const GameItem* item )
 		button->SetVisible( false );
 		upper.SetText( "" );
 	}
+ 
+	for( int i=0; i < MAX_BARS; ++i ) {
+		bool on = ((1<<i) & flags) != 0;
+		on = on && button->Visible();
+		bar[i].SetVisible( on );
+	}	
 }
 
 
