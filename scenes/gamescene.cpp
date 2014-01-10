@@ -30,6 +30,7 @@
 #include "../script/itemscript.h"
 
 #include "../scenes/mapscene.h"
+#include "../scenes/censusscene.h"
 
 using namespace grinliz;
 using namespace gamui;
@@ -122,6 +123,8 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	
 	allRockButton.Init( &gamui2D, game->GetButtonLook(0) );
 	allRockButton.SetText( "All Rock" );
+	censusButton.Init( &gamui2D, game->GetButtonLook(0) );
+	censusButton.SetText( "Census" );
 
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
 		newsButton[i].Init( &gamui2D, game->GetButtonLook(0) );
@@ -174,6 +177,7 @@ void GameScene::Resize()
 		layout.PosAbs( &serialButton[i], i+1, -1 );
 	}
 	layout.PosAbs( &allRockButton, 1, -2 );
+	layout.PosAbs( &censusButton, 2, -2 );
 	layout.PosAbs( &useBuildingButton, 1, 0 );
 	layout.PosAbs( &cameraHomeButton, 1, 0 );
 
@@ -233,6 +237,7 @@ void GameScene::Resize()
 
 	allRockButton.SetVisible( visible );
 	clearButton.SetVisible( visible );
+	censusButton.SetVisible( visible );
 }
 
 
@@ -657,6 +662,9 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 	}
 	else if ( item == &allRockButton ) {
 		sim->SetAllRock();
+	}
+	else if ( item == &censusButton ) {
+		game->PushScene( LumosGame::SCENE_CENSUS, new CensusSceneData( sim->GetChitBag()) );
 	}
 	else if ( item == &createWorkerButton ) {
 		CoreScript* cs = sim->GetChitBag()->GetHomeCore();

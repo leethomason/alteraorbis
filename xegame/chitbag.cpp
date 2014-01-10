@@ -205,6 +205,27 @@ CameraComponent* ChitBag::GetCamera( Engine* engine )
 }
 
 
+int ChitBag::NumBlocks() const
+{
+	return blocks.Size();
+}
+
+
+void ChitBag::GetBlockPtrs( int b, grinliz::CDynArray<Chit*>* arr ) const
+{
+	arr->Clear();
+	Chit* block = blocks[b];
+
+	for( int j=0; j<BLOCK_SIZE; ++j ) {
+		Chit* c = block + j;
+		int id = c->ID();
+		if ( id ) {
+			arr->Push( c );
+		}
+	}
+}
+
+
 void ChitBag::DoTick( U32 delta, Engine* engine )
 {
 	//GRINLIZ_PERFTRACK;

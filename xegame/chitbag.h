@@ -180,6 +180,10 @@ public:
 
 	virtual LumosChitBag* ToLumos() { return 0; }
 
+	// Slow iteration: (for census)
+	int NumBlocks() const;
+	void GetBlockPtrs( int block, grinliz::CDynArray<Chit*>* arr ) const;
+
 private:
 
 	enum {
