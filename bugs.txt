@@ -8,7 +8,7 @@
 - change shield to have cooldown then charge-up (rather than cooldown then reset)
 - redo AI utility to be based on a set of curves
 - fix / disable right mouse behavior
-- unify rockgen and worldgen. frustrating they are separate steps.
+- unify rockgen and worldgen. frustrating they are separate steps. or don't pass height to rockgen?
 - rethink spawning. spawn based on need? what's around?
 - need to "ding" on level up
 - add rez-in animation
@@ -20,7 +20,7 @@
 - GT: rez-in for structures
 - is shield boost working correctly? Effects are *not* getting stripped by the shield.
 - can re-pack MVP and Bone matrix in the shader to encode 3*vec4 as the transpose, then transpose in the shader
-- Hide free camera button
+x Hide free camera button
 x should be able to auto-clear when building 
 - standing shields!
 - personality, personality display
@@ -29,12 +29,12 @@ x should be able to auto-clear when building
 - flammability / shockability very agressive
 - viewing edge of world breaks all kinds of limits and ASSERTs
 - item repair
-x items count plants, other items towards kills
-- button to use vault / factory / etc.
 - item destruction / hpRegen
+x items count plants, other items towards kills
+x button to use vault / factory / etc.
 - fix porch image (alpha of the tiles, if not general improvement)
 - shield looks very boring (and hard to tell what it is). And does it turn off if you don't have one? And does it glow?
-- obvious and easy to get to menu cancel
+x obvious and easy to get to menu cancel
 - buildings shouldn't drop gold on de-rez
 x TextBox needs to be better, and should be used much more.
 - AIs should account for personality and skills when doing inventory sorting
@@ -42,30 +42,6 @@ x TextBox needs to be better, and should be used much more.
 - “Focus” shouldn’t switch so easily.
 
 - game
-
-	x Denizen
-		x item pickup isn't working
-		x melee (standing too close) is a mess
-		x melee (attacking closest) not working
-		x no volcanos in controlled domains
-		x UI needs re-work
-		x Tech decaying too fast or too few visitors. What is the visitor logic??
-		x Pre-roll the forge scene. No random factor?
-		x Stuff on the ground blocks clicking.
-		x Green gems too rare (not in volcanoes?)
-		x switching to melee weapon causes stand around and do nothing. (move to AI? need to reset AI?)
-		x Robots should clear before build.
-		x Lingering cursor after building.
-		x Need "use building" button
-		x Bug: Can focus target across domains.
-		x view mode should clear build selection
-		x wallet / transaction / can build seems to have problems with zero (> vs >=)
-		x Review 2 release logs from GT
-		x Paving more obvious? All green disappears?
-		x huge spawn clusters kill performance. Improved for now: cache animation calculation.
-		x stuck in rocks - implement Rampage
-		x stuck in battle mode
-		x doesn't seem to pick up loot when should
 
 	- Census
 		- coolest stuff, past and present, by category
@@ -239,6 +215,29 @@ V2 ideas:
 - level up grid and special skills
 
 ----------- FIXED -------------
+x Denizen
+	x item pickup isn't working
+	x melee (standing too close) is a mess
+	x melee (attacking closest) not working
+	x no volcanos in controlled domains
+	x UI needs re-work
+	x Tech decaying too fast or too few visitors. What is the visitor logic??
+	x Pre-roll the forge scene. No random factor?
+	x Stuff on the ground blocks clicking.
+	x Green gems too rare (not in volcanoes?)
+	x switching to melee weapon causes stand around and do nothing. (move to AI? need to reset AI?)
+	x Robots should clear before build.
+	x Lingering cursor after building.
+	x Need "use building" button
+	x Bug: Can focus target across domains.
+	x view mode should clear build selection
+	x wallet / transaction / can build seems to have problems with zero (> vs >=)
+	x Review 2 release logs from GT
+	x Paving more obvious? All green disappears?
+	x huge spawn clusters kill performance. Improved for now: cache animation calculation.
+	x stuck in rocks - implement Rampage
+	x stuck in battle mode
+	x doesn't seem to pick up loot when should
 x core healers more agressively look for core
 x search more for items / gold
 x trolls: heal at core?
