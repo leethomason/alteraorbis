@@ -692,13 +692,13 @@ const void Quaternion::ToMatrix( Matrix4* mat ) const
 	mat->x[14] = 0.0f;
 	mat->x[15] = 1.0f;
 
-	GLASSERT( mat->IsRotation() );
+	//GLASSERT( mat->IsRotation() );
 }
 
 
 void Quaternion::FromRotationMatrix( const Matrix4& m )
 {
-	GLASSERT( m.IsRotation() );
+	//GLASSERT( m.IsRotation() );
 
     float trace = m.m11 + m.m22 + m.m33;
 
