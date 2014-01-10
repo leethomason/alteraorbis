@@ -493,7 +493,7 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 
 		// Sometimes we do want to clear plants - check for that.
 		if ( !targetOkay ) {
-			Chit* plant = GetLumosChitBag()->QueryPlant( thisComp.spatial->GetPosition2DI(), 0, 0 );
+			Chit* plant = GetLumosChitBag()->QueryPlant( targetDesc.mapPos, 0, 0 );
 			targetOkay = plant != 0;
 		}
 	}
@@ -509,12 +509,22 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 	if ( targetDesc.id && BattleMechanics::InMeleeZone( engine, parentChit, target.chit )) {
 		GLASSERT( parentChit->GetRenderComponent()->AnimationReady() );
 		parentChit->GetRenderComponent()->PlayAnimation( ANIM_MELEE );
-		if ( pmc ) pmc->Stop();
+
+		Vector2F pos2 = thisComp.spatial->GetPosition2D();
+		Vector2F heading = target.spatial->GetPosition2D() - pos2;
+		heading.Normalize();
+
+		if ( pmc ) pmc->QueueDest( pos2, &heading );
 	}
 	else if ( !targetDesc.id && BattleMechanics::InMeleeZone( engine, parentChit, targetDesc.mapPos )) {
 		GLASSERT( parentChit->GetRenderComponent()->AnimationReady() );
 		parentChit->GetRenderComponent()->PlayAnimation( ANIM_MELEE );
-		if ( pmc ) pmc->Stop();
+
+		Vector2F pos2 = thisComp.spatial->GetPosition2D();
+		Vector2F heading = ToWorld2F( targetDesc.mapPos ) - pos2;
+		heading.Normalize();
+
+		if ( pmc ) pmc->QueueDest( pos2, &heading );
 	}
 	else {
 		// Move to target.
@@ -857,7 +867,7 @@ void AIComponent::ThinkRampage( const ComponentSet& thisComp )
 	}
 
 	int type, stage;
-	Chit* plant = GetLumosChitBag()->QueryPlant( pos2i, &type, &stage );
+	Chit* plant = GetLumosChitBag()->QueryPlant( next, &type, &stage );
 	bool plantInTheWay = plant && stage >= 2;
 
 	if ( wg1.RockHeight() || plantInTheWay ) {
