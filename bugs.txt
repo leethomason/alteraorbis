@@ -1,7 +1,8 @@
 - serializing too much news (pool, sectorherd, rampage)
-- particles
-- hash table degrading?
-- unsafe normalize in ai/melee
+x particles
+t hash table degrading? - test perf with new table (and better allocator)
+x unsafe normalize in ai/melee
+t test chitbag performance
 
 - bolt renderer buggy
 - redmantis run&gun broken?

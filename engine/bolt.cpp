@@ -201,7 +201,7 @@ void BoltRenderer::DrawAll( const Bolt* bolts, int nBolts, Engine* engine )
 			Vector3F n;
 			Vector3F tail = bolts[i].head - bolts[i].len*bolts[i].dir;
 			CrossProduct( eyeNormal, bolts[i].head - tail, &n );
-			n.SafeNormalize( 1, 0, 0 );
+			n.Normalize();
 
 			vertex[i*4+0].pos = tail - HALF_WIDTH*n;
 			vertex[i*4+1].pos = tail + HALF_WIDTH*n;

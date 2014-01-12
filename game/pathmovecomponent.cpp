@@ -132,7 +132,7 @@ void PathMoveComponent::QueueDest( Chit* target )
 	if ( targetSpatial && srcSpatial ) {
 		Vector2F v = targetSpatial->GetPosition2D();
 		Vector2F delta = v - srcSpatial->GetPosition2D();
-		delta.SafeNormalize( 1, 0 );
+		delta.Normalize();
 		//float angle = RotationXZDegrees( delta.x, delta.y );
 		QueueDest( v, &delta );
 	}
@@ -309,7 +309,7 @@ bool PathMoveComponent::RotationFirst( U32 _dt, Vector2F* pos2, Vector2F* headin
 
 		// Do vector based motion.
 		Vector2F targetHeading = delta;
-		targetHeading.SafeNormalize(1,0);
+		targetHeading.Normalize();
 
 		// Rotation while moving takes no extra time.
 		bool rotationDone = ApplyRotation( travelRot, targetHeading, heading );
@@ -394,7 +394,7 @@ void PathMoveComponent::AvoidOthers( U32 delta, grinliz::Vector2F* pos2, grinliz
 
 				// Move away from the centers so the bases don't overlap.
 				Vector2F normal = *pos2 - itPos2;
-				normal.SafeNormalize( 1, 0 );
+				normal.Normalize();
 				float alignment = DotProduct( -normal, *heading ); // how "in the way" is this?
 					
 				// Not getting stuck forever is very important. It breaks

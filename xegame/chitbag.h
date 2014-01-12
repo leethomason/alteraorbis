@@ -202,7 +202,7 @@ private:
 		int compID;
 	};
 
-	enum { BLOCK_SIZE = 1000 };
+	enum { BLOCK_SIZE = 8*1000 };
 	Chit* memRoot;
 	// Use a memory pool so the chits don't move on re-allocation. I
 	// keep wanting to use a DynArray, but that opens up issues of

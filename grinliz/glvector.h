@@ -128,27 +128,19 @@ struct Vector2
 
 	void Normalize()	
 	{ 
-		T lenInv = static_cast<T>(1) / grinliz::Length( x, y );
-		x *= lenInv; y *= lenInv;
-		#ifdef DEBUG
-		float len = x*x + y*y;
-		GLASSERT( len > .9999f && len < 1.0001f );
-		#endif
-	}
-
-	void SafeNormalize( T altx, T alty )	
-	{ 
-		T len = grinliz::Length( x, y);
-		if ( len > static_cast<T>(0.00001) ) {
-			T lenInv = static_cast<T>(1) / grinliz::Length( x, y );
-			x *= lenInv; 
-			y *= lenInv;
+		T len = grinliz::Length( x, y );
+		if ( len == 0 ) {
+			Set( 1, 0 );
 		}
 		else {
-			x = altx; y = alty;
+			T lenInv = static_cast<T>(1) / len;
+			x *= lenInv; y *= lenInv;
+			#ifdef DEBUG
+			float len = x*x + y*y;
+			GLASSERT( len > .9999f && len < 1.0001f );
+			#endif
 		}
 	}
-
 
 	void RotatePos90()
 	{
@@ -314,32 +306,21 @@ struct Vector3
 
 	void Normalize()	
 	{ 
-
-		GLASSERT( grinliz::Length( x, y, z ) > 0.00001f );
-		T lenInv = static_cast<T>(1) / grinliz::Length( x, y, z );
-		x *= lenInv; 
-		y *= lenInv;
-		z *= lenInv;
-		#ifdef DEBUG
-		T len = x*x + y*y + z*z;
-		GLASSERT( len > (T)(.9999) && len < (T)(1.0001) );
-		#endif
-	}
-
-	void SafeNormalize( T altx, T alty, T altz )	
-	{ 
-		T len = grinliz::Length( x, y, z );
-		if ( len > static_cast<T>(0.00001) ) {
-			T lenInv = static_cast<T>(1) / grinliz::Length( x, y, z );
+		T len = grinliz::Length( x,y,z );
+		if ( len == 0 ) {
+			Set(  1, 0, 0 );
+		}
+		else {
+			T lenInv = static_cast<T>(1) / len;
 			x *= lenInv; 
 			y *= lenInv;
 			z *= lenInv;
 		}
-		else {
-			x = altx; y = alty; z = altz;
-		}
+		#ifdef DEBUG
+		len = x*x + y*y + z*z;
+		GLASSERT( len > (T)(.9999) && len < (T)(1.0001) );
+		#endif
 	}
-
 
 	T Length() const		{ return grinliz::Length( x, y, z ); };
 	T LengthSquared() const { return x*x + y*y + z*z; }
@@ -475,15 +456,19 @@ struct Vector4
 
 	void Normalize()	
 	{ 
-
-		GLASSERT( grinliz::Length( x, y, z, w ) > 0.00001f );
-		T lenInv = static_cast<T>(1) / grinliz::Length( x, y, z, w );
-		x *= lenInv; 
-		y *= lenInv;
-		z *= lenInv;
-		w *= lenInv;
+		T len = grinliz::Length( x, y, z, w );
+		if ( len == 0 ) {
+			Set( 1, 0, 0, 0 );
+		}
+		else {
+			T lenInv = static_cast<T>(1) / len;
+			x *= lenInv; 
+			y *= lenInv;
+			z *= lenInv;
+			w *= lenInv;
+		}
 		#ifdef DEBUG
-		T len = x*x + y*y + z*z + w*w;
+		len = x*x + y*y + z*z + w*w;
 		GLASSERT( len > (T)(.9999) && len < (T)(1.0001) );
 		#endif
 	}

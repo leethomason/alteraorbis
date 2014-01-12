@@ -157,7 +157,7 @@ void TrackingMoveComponent::CalcVelocity( grinliz::Vector3F* v )
 	Vector3F pos = parentChit->GetSpatialComponent()->GetPosition();
 
 	Vector3F delta = targetPos - pos;
-	delta.SafeNormalize( 1,0,0 );
+	delta.Normalize();
 	*v = delta * TRACK_SPEED;
 }
 

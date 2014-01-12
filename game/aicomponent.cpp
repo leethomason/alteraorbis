@@ -512,7 +512,7 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 
 		Vector2F pos2 = thisComp.spatial->GetPosition2D();
 		Vector2F heading = target.spatial->GetPosition2D() - pos2;
-		heading.Normalize(); // safe
+		heading.Normalize();
 
 		if ( pmc ) pmc->QueueDest( pos2, &heading );
 	}
@@ -522,7 +522,7 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 
 		Vector2F pos2 = thisComp.spatial->GetPosition2D();
 		Vector2F heading = ToWorld2F( targetDesc.mapPos ) - pos2;
-		heading.Normalize(); // safe
+		heading.Normalize();
 
 		if ( pmc ) pmc->QueueDest( pos2, &heading );
 	}
@@ -1614,7 +1614,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 		Vector3F		toEnemy			= (enemyPos - pos);
 		Vector2F		normalToEnemy	= { toEnemy.x, toEnemy.z };
 
-		normalToEnemy.SafeNormalize( 1, 0 );
+		normalToEnemy.Normalize();
 		float dot = DotProduct( normalToEnemy, heading );
 
 		// If we have melee targets, focus in on those.

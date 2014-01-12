@@ -68,12 +68,12 @@ void ChitBag::Serialize( const ComponentFactory* factory, XStream* xs )
 
 	if ( xs->Saving() ) {
 		XarcOpen( xs, "Chits" );
-		Chit** chits = chitID.GetValues();
 		for( int i=0; i<chitID.NumValues(); ++i ) {
+			Chit* chit = chitID.GetValue( i );
 			XarcOpen( xs, "id" );
-			xs->Saving()->Set( "id", chits[i]->ID() );
+			xs->Saving()->Set( "id", chit->ID() );
 			XarcClose( xs );
-			chits[i]->Serialize( factory, xs  );
+			chit->Serialize( factory, xs  );
 		}
 		XarcClose( xs );
 

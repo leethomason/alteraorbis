@@ -164,7 +164,6 @@ void ItemDefDB::DumpWeaponStats()
 
 	FILE* fp = fopen( "weapons.txt", "w" );
 	GLASSERT( fp );
-	GameItem** items = map.GetValues();
 
 	fprintf( fp, "%-25s %-5s %-5s %-5s %-5s\n", "Name", "Dam", "DPS", "C-DPS", "EffR" );
 	for( int i=0; i<topNames.Size(); ++i ) {
