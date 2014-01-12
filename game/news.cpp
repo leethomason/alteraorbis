@@ -36,11 +36,18 @@ void NewsHistory::Serialize( XStream* xs )
 }
 
 
-void NewsHistory::Add( const NewsEvent& event )
+void NewsHistory::Add( const NewsEvent& e )
 {
-	NewsEvent* pEvent = events.PushArr(1);
-	*pEvent = event;
-	pEvent->date = date;
+	NewsEvent event = e;
+	event.date = date;
+
+	if ( event.what < NewsEvent::START_CURRENT ) {
+		events.Push( event );
+	}
+	if ( !current.HasCap() ) {
+		current.PopFront();
+	}
+	current.Push( event );
 }
 
 
@@ -103,12 +110,15 @@ grinliz::IString NewsEvent::GetWhat() const
 		"Lesser Derez",
 		"Forged",
 		"Destroyed",
+		"Purchase",
+
+		"",	// placeholder to mark minor events
+
 		"Sector Herd",
 		"Rampage",
 		"Volcano",
 		"Pool",
 		"Waterfall",
-		"Purchase"
 	};
 	GLASSERT( GL_C_ARRAY_SIZE( NAME ) == NUM_WHAT );
 	return grinliz::StringPool::Intern( NAME[what], true );
