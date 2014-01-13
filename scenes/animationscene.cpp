@@ -91,7 +91,6 @@ AnimationScene::AnimationScene( LumosGame* game ) : Scene( game )
 	}
 
 	engine = new Engine( port, game->GetDatabase(), 0 );
-	engine->SetGlow( true );
 	engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
 
 	int count=0;

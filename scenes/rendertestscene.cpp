@@ -40,7 +40,6 @@ RenderTestScene::RenderTestScene( LumosGame* game, const RenderTestSceneData* da
 	Color3F c = { 0.5f, 0.5f, 0.5f };
 	testMap->SetColor( c );
 
-	engine->SetGlow( true );
 	engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
 	
 	switch( data->id ) {
@@ -57,8 +56,6 @@ RenderTestScene::RenderTestScene( LumosGame* game, const RenderTestSceneData* da
 	LayoutCalculator layout = lumosGame->DefaultLayout();
 
 	lumosGame->InitStd( &gamui2D, &okay, 0 );
-	glowButton.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ) );
-	glowButton.SetText( "glow" );
 
 	refreshButton.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
 	refreshButton.SetText( "refresh" );
@@ -94,7 +91,6 @@ void RenderTestScene::Resize()
 	lumosGame->PositionStd( &okay, 0 );
 	
 	LayoutCalculator layout = lumosGame->DefaultLayout();
-	layout.PosAbs( &glowButton, 1, -1 );
 	layout.PosAbs( &refreshButton, 2, -1 );
 
 	for( int i=0; i<NUM_CONTROL; ++i ) {
@@ -162,9 +158,6 @@ void RenderTestScene::ItemTapped( const gamui::UIItem* item )
 	if ( item == &okay ) {
 		game->PopScene();
 	}
-	else if ( item == &glowButton ) {
-		engine->SetGlow( !engine->Glow() );
-	}
 	else if ( item == &refreshButton ) {
 		LoadLighting();
 	}
@@ -223,7 +216,6 @@ void RenderTestScene::HandleHotKey( int mask )
 		{
 			bool visible = !okay.Visible();
 			okay.SetVisible( visible );
-			glowButton.SetVisible( visible );
 			refreshButton.SetVisible( visible );
 		}
 		break;
@@ -235,6 +227,8 @@ void RenderTestScene::HandleHotKey( int mask )
 		}
 		break;
 	}
+
+	super::HandleHotKey( mask );
 }
 
 

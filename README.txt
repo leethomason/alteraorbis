@@ -167,9 +167,18 @@ If you find an issue,
 3. Write down the steps to reproduce
 4. IMPORTANT: include the release_log.txt file. It is written anew every time you run the game, so be sure to include the log that show the problem you are submitting.
 
-
 Known Issues:
 ------------
+
+"BLUE WALL" rendering bug: a giant block of color blocks half the screen. If you see it, please toggle the rendering features:
+1: glow
+2: particles
+3: voxel
+4: shadow
+5: bolt
+If toggling something causes the wall to disappear and reappear, PLEASE file that information on the forum or issues list.
+
+Bolt renderer occassionally generates incorrect bolts.
 
 The current bug lists that I'm personally tracking:
 https://code.google.com/p/alteraorbis/source/browse/bugs.txt

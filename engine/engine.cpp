@@ -46,11 +46,14 @@ using namespace grinliz;
 //#define ENGINE_DETAILED_PROFILE
 
 
+Engine* StackedSingleton<Engine>::instance = 0;
+
+
 Engine::Engine( Screenport* port, const gamedb::Reader* database, Map* m ) 
 	:	
 		screenport( port ),
 		initZoomDistance( 0 ),
-		glow( false ),
+		stages( 0xffff ),
 		map( 0 )
 {
 	map = m;
@@ -66,17 +69,19 @@ Engine::Engine( Screenport* port, const gamedb::Reader* database, Map* m )
 	ShaderManager::Instance()->AddDeviceLossHandler( this );
 	particleSystem = new ParticleSystem();
 	boltRenderer = new BoltRenderer();
-//	miniMapRenderTarget = 0;
+
+	PushInstance( this );
 }
 
 
 Engine::~Engine()
 {
+	PopInstance( this );
+
 	delete particleSystem;
 	ShaderManager::Instance()->RemoveDeviceLossHandler( this );
 	delete renderQueue;
 	delete spaceTree;
-//	delete miniMapRenderTarget;
 	for( int i=0; i<RT_COUNT; ++i )
 		delete renderTarget[i];
 	delete boltRenderer;
@@ -89,8 +94,6 @@ void Engine::DeviceLoss()
 		delete renderTarget[i];
 		renderTarget[i] = 0;
 	}
-//	delete miniMapRenderTarget;
-//	miniMapRenderTarget = 0;
 }
 
 
@@ -271,7 +274,7 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 	// Get the working set of models.
 	int exclude = Model::MODEL_INVISIBLE;
 	Model* modelRoot = spaceTree->Query( planes, 6, 0, exclude );
-	if ( map ) {
+	if ( map && (stages & STAGE_VOXEL) ) {
 #ifdef ENGINE_DETAILED_PROFILE
 		PROFILE_BLOCK( MapPrep );
 #endif
@@ -307,7 +310,7 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 
 	// ----------- Render Passess ---------- //
 #ifdef ENGINE_RENDER_GLOW
-	if ( glow ) {
+	if ( stages & STAGE_GLOW ) {
 #ifdef ENGINE_DETAILED_PROFILE
 		PROFILE_BLOCK( Glow );
 #endif
@@ -346,7 +349,7 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 		// And throw the emissive shader to exclusive:
 		{
 			modelDrawCalls[GLOW_EMISSIVE] = device->DrawCalls();
-			if ( map ) {
+			if ( map && (stages & STAGE_VOXEL) ) {
 				map->DrawVoxels( &ex, 0 );
 			}
 			renderQueue->Submit( 0, 0, 0 );
@@ -369,7 +372,7 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 		lighting.CalcLight( groundNormal, 1.0f, &lighted, &shadow, temperature );
 
 #ifdef ENGINE_RENDER_SHADOWS
-		if ( shadowAmount > 0.0f ) {
+		if ( shadowAmount > 0.0f && (stages & STAGE_SHADOW) ) {
 
 			FlatShader shadowShader;
 			shadowShader.SetStencilMode( STENCIL_WRITE );
@@ -387,7 +390,7 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 
 			{
 				modelDrawCalls[SHADOW] = device->DrawCalls();
-				if ( map ) {
+				if ( map && (stages && STAGE_VOXEL) ) {
 					map->DrawVoxels( &shadowShader, &shadowMatrix );
 				}
 				renderQueue->Submit( 0, 0, &shadowMatrix );
@@ -412,7 +415,7 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 #ifdef ENGINE_DETAILED_PROFILE
 		PROFILE_BLOCK( Models );
 #endif
-		if ( map ) {
+		if ( map && (stages & STAGE_VOXEL) ) {
 			GPUState state;
 			engineShaders.GetState( EngineShaders::LIGHT, 0, &state );
 
@@ -437,7 +440,7 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 
 	// --------- Composite Glow -------- //
 #ifdef ENGINE_RENDER_GLOW
-	if ( glow ) {
+	if ( stages & STAGE_GLOW ) {
 #ifdef ENGINE_DETAILED_PROFILE
 		PROFILE_BLOCK( CompositeGlow );
 #endif
@@ -473,11 +476,14 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 #endif
 
 	// ------ Particle system ------------- //
-	boltRenderer->DrawAll( bolts, nBolts, this );
-
+	if ( stages & STAGE_BOLT ) {
+		boltRenderer->DrawAll( bolts, nBolts, this );
+	}
 	particleSystem->Update( deltaTime, &camera );
-	particleSystem->Draw();
-
+	
+	if ( stages & STAGE_PARTICLE ) {
+		particleSystem->Draw();
+	}
 	// ---- Debugging ---
 	{
 		DrawDebugLines( deltaTime );

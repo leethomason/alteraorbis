@@ -177,3 +177,37 @@ void Scene::DrawDebugTextDrawCalls( int x, int y, Engine* engine )
 		engine->particleSystem->NumParticles() );
 }
 
+
+void Scene::HandleHotKey( int value )
+{
+	Engine* engine = Engine::Instance();	// can be null
+	int stage = 0;
+
+	if ( value == GAME_HK_TOGGLE_GLOW ) {
+		stage = Engine::STAGE_GLOW; 
+	}
+	else if ( value == GAME_HK_TOGGLE_PARTICLE ) {
+		stage = Engine::STAGE_PARTICLE;
+	}
+	else if ( value == GAME_HK_TOGGLE_VOXEL ) {
+		stage = Engine::STAGE_VOXEL;
+	}
+	else if ( value == GAME_HK_TOGGLE_SHADOW ) {
+		stage = Engine::STAGE_SHADOW;
+	}
+	else if ( value == GAME_HK_TOGGLE_BOLT ) {
+		stage = Engine::STAGE_BOLT;
+	}
+
+	if ( engine && stage ) {
+		int s = engine->Stages();
+		if ( s & stage ) {
+			s = s & (~stage);
+		}
+		else {
+			s |= stage;
+		}
+		engine->SetStages( s );
+	}
+}
+

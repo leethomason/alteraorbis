@@ -34,7 +34,6 @@ ForgeScene::ForgeScene( LumosGame* game, ForgeSceneData* data )
 
 	screenport.SetNearFar( NEAR, FAR );
 	engine = new Engine( &screenport, lumosGame->GetDatabase(), 0 );
-	engine->SetGlow( true );
 	engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
 
 	engine->lighting.direction.Set( 2, 1, 1 );

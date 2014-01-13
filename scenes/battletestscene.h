@@ -28,6 +28,7 @@ class ItemStorage;
 
 class BattleTestScene : public Scene
 {
+	typedef Scene super;
 public:
 	BattleTestScene( LumosGame* game );
 	~BattleTestScene();
