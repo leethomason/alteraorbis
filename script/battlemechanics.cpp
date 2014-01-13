@@ -175,8 +175,8 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* 
 		for( int x=bi.min.x; x<=bi.max.x; ++x ) {
 			Vector2I mapPos = { x, y };
 			if ( InMeleeZone( engine, src, mapPos )) {
-				int h = wm->GetVoxelHeight( x, y );
-				if ( h ) {
+				const WorldGrid& wg = wm->GetWorldGrid( x, y );
+				if ( wg.RockHeight() ) {
 					Vector3I voxel = { x, 0, y };
 					wm->VoxelHit( voxel, dd );
 				}
