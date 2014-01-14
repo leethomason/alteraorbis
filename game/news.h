@@ -40,14 +40,17 @@ public:
 
 		FORGED,						//	item		maker		maker		
 		UN_FORGED,					//  item		killer	
+
+		PURCHASED,					//	item		purchaser	0
+
+		// Current events, but not logged:
+		START_CURRENT,
 		SECTOR_HERD,				//	mob
 		RAMPAGE,					//	mob
 
 		VOLCANO,
 		POOL,
 		WATERFALL,
-
-		PURCHASED,					//	item		purchaser	0
 
 		NUM_WHAT
 	};
@@ -99,9 +102,13 @@ public:
 	double AgeD() const { return double(date) / double(AGE_IN_MSEC); }
 	float  AgeF() const { return float(AgeD()); }
 
+	// Returns on important events
 	int NumNews() const { return events.Size(); }
 	const NewsEvent& News( int i ) { GLASSERT( i >= 0 && i < events.Size() ); return events[i]; }
-	const NewsEvent* NewsPtr() { return events.Mem(); }
+
+	// Returns all events
+	enum { MAX_CURRENT = 20 };
+	const grinliz::CArray< NewsEvent, MAX_CURRENT >& CurrentNews() const { return current; }
 
 	const NewsEvent** Find( int itemID, bool includeSecond, int* num );
 
@@ -113,6 +120,8 @@ private:
 	ChitBag* chitBag;
 	grinliz::CDynArray< const NewsEvent* > cache;	// return from query call
 	grinliz::CDynArray< NewsEvent > events;			// big array of everything that has happend.
+	grinliz::CArray< NewsEvent, MAX_CURRENT > current;
+
 };
 
 

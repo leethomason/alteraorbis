@@ -307,7 +307,7 @@ void Sim::DoTick( U32 delta )
 				Vector2I pos = { x, y };
 				Vector2I sector = ToSector( pos );
 				CoreScript* cs = chitBag->GetCore( sector );
-				if ( cs && !cs->InUse() ) {
+				if ( cs && ( !cs->InUse() || age == 0 )) {
 					CreateVolcano( x, y, VOLC_RAD );
 				}
 				break;

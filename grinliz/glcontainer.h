@@ -463,7 +463,7 @@ template <class K, class V, class KCOMPARE=CompValue, class SEM=ValueSem >
 class HashTable
 {
 public:
-	HashTable() : nAdds(0), nItems(0), nBuckets(0), buckets(0), reallocating(false) {}
+	HashTable() : nBuckets(0), nItems(0), nDeleted(0), reallocating(false), buckets(0) {}
 	~HashTable() 
 	{ 
 		RemoveAll();
@@ -475,7 +475,9 @@ public:
 	// replaced.
 	void Add( const K& key, const V& value ) 
 	{
-		values.Clear();
+		if ( !reallocating ) {
+			values.Clear();
+		}
 		EnsureCap();
 
 		// Existing value?
@@ -489,12 +491,15 @@ public:
 			U32 hash = KCOMPARE::Hash(key);
 			while( true ) {
 				hash = hash & (nBuckets-1);
-				if ( buckets[hash].state == UNUSED || buckets[hash].state == DELETED ) {
+				int state = buckets[hash].state;
+				if ( state == UNUSED || state == DELETED ) {
+					if ( state == DELETED ) 
+						--nDeleted;
+					++nItems;
+
 					buckets[hash].state = IN_USE;
 					buckets[hash].key   = key;
 					buckets[hash].value = value;
-					++nAdds;
-					++nItems;
 					break;
 				}
 				++hash;
@@ -506,6 +511,7 @@ public:
 		int index = FindIndex( key );
 		GLASSERT( index >= 0 );
 		buckets[index].state = DELETED;
+		++nDeleted;
 		--nItems;
 		SEM::DoRemove( buckets[index].value );
 		values.Clear();
@@ -513,7 +519,7 @@ public:
 	}
 
 	void RemoveAll() {
-		for( U32 i=0; i<nBuckets; ++i ) {
+		for( int i=0; i<nBuckets; ++i ) {
 			if ( buckets[i].state == IN_USE ) {
 				SEM::DoRemove( buckets[i].value );
 				--nItems;
@@ -522,6 +528,7 @@ public:
 		}
 		values.Clear();
 		GLASSERT( nItems == 0 );
+		nDeleted = 0;
 	}
 
 
@@ -543,44 +550,44 @@ public:
 	}
 
 	bool Empty() const		{ return nItems == 0; }
+
 	int NumValues() const	{ return nItems; }
 
-	V* GetValues() {
+	V GetValue( int i ) {
 		// Create a cache of the values, so they can be a true array.
 		if ( values.Empty() ) {
-			for( U32 i=0; i<nBuckets; ++i ) {
+			for( int i=0; i<nBuckets; ++i ) {
 				if ( buckets[i].state == IN_USE ) {
-					values.Push( buckets[i].value );
+					values.Push( buckets[i] );
 				}
 			}	
 		}
 		GLASSERT( values.Size() == nItems );
-		return values.Mem();
+		return values[i].value;
 	}
 
 private:
 	void EnsureCap() {
-		if ( nAdds >= nBuckets*1/2 ) {
+		if ( (nItems + nDeleted) >= nBuckets*2/3 ) {
 			GLASSERT( !reallocating );
 			reallocating = true;
-			Bucket* oldBuckets = buckets;
-			U32 oldNBuckets = nBuckets;
-			U32 oldNAdds = nAdds;
-			U32 oldNItems = nItems;
+			if ( nItems ) {
+				GetValue( 0 );	// trick to copy the hashtable
+			}
 
-			nBuckets = CeilPowerOf2( Max(	(U32)(nItems*4), 
-											nAdds*2, 
-											(U32) 128 ));
+			int n = CeilPowerOf2( nItems*3 );
+			if ( n < 16 ) n = 16;
+
+			// Don't need to reallacote if n <= nBuckets,
+			// but DO need to re-initialize.
+			delete [] buckets;
+			nBuckets = n;
 			buckets = new Bucket[nBuckets];
 
-			nAdds = 0;
 			nItems = 0;
-			for( U32 i=0; i<oldNBuckets; ++i ) {
-				if ( oldBuckets[i].state == IN_USE ) {
-					Add( oldBuckets[i].key, oldBuckets[i].value );
-				}
+			for( int i=0; i<values.Size(); ++i ) {
+				Add( values[i].key, values[i].value );
 			}
-			delete [] oldBuckets;
 			values.Clear();
 			reallocating = false;
 		}
@@ -607,9 +614,9 @@ private:
 		return -1;
 	}
 
-	U32 nAdds;
-	int nItems;
-	U32 nBuckets;
+	int nBuckets;
+	int nItems;		// in use
+	int nDeleted;
 	bool reallocating;
 
 	enum {
@@ -627,11 +634,8 @@ private:
 	};
 	Bucket *buckets;
 
-	CDynArray< V > values;
+	CDynArray< Bucket > values;	// essentially a cache of the hash table.
 };
-
-
-
 
 }	// namespace grinliz
 #endif

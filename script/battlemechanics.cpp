@@ -135,14 +135,17 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* 
 	info.isMelee  = true;
 	info.isExplosion = false;
 	info.originOfImpact = src->GetSpatialComponent()->GetPosition();
+	MoBFilter mobFilter;
 
 	// Check for chit impacts.
 	for( int i=0; i<hashQuery.Size(); ++i ) {
 		Chit* target = hashQuery[i];
 
 		// Melee damage is chaos. Don't hit your own friends.
-		if ( GetRelationship( src, target ) != RELATE_ENEMY ) {
-			continue;
+		if ( mobFilter.Accept( target ) ) {
+			if ( GetRelationship( src, target ) != RELATE_ENEMY ) {
+				continue;
+			}
 		}
 
 		if ( InMeleeZone( engine, src, target )) {

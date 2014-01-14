@@ -135,8 +135,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	clearButton.SetSize( NEWS_BUTTON_WIDTH, NEWS_BUTTON_HEIGHT );
 	clearButton.SetText( "Clear" );
 
-	faceWidget.Init( &gamui2D, game->GetButtonLook(0),
-					 FaceWidget::ALL );
+	faceWidget.Init( &gamui2D, game->GetButtonLook(0), FaceWidget::ALL );
 
 	chitFaceToTrack = sim->GetPlayerChit() ? sim->GetPlayerChit()->ID() : 0;
 	faceWidget.SetSize( 100, 100 );
@@ -223,14 +222,12 @@ void GameScene::Resize()
 	}
 
 	// ------ CHANGE LAYOUT ------- //
-	layout.SetSize( faceWidget.Width(), 10.0f );
+	layout.SetSize( faceWidget.Width(), 20.0f );
 	layout.SetSpacing( 5.0f );
-	layout.SetOffset( faceWidget.X(), faceWidget.Y()+faceWidget.Height() );
-	layout.SetGutter( 0, 5.0f );
 
 	bool visible = game->GetDebugUI();
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
-		newsButton[i].SetPos( port.UIWidth()- (NEWS_BUTTON_WIDTH), MINI_MAP_SIZE + (NEWS_BUTTON_HEIGHT+2)*i );
+		layout.PosAbs( &newsButton[i], -1, -NUM_NEWS_BUTTONS+i );
 		newsButton[i].SetVisible( visible );
 	}
 	clearButton.SetPos( newsButton[0].X() - clearButton.Width(), newsButton[0].Y() );
@@ -701,9 +698,11 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		if ( item == &newsButton[i] ) {
 			if ( FreeCameraMode() ) {
 				NewsHistory* history = NewsHistory::Instance();
-				int index = history->NumNews() - 1 - i;
+				const grinliz::CArray< NewsEvent, NewsHistory::MAX_CURRENT >& current = history->CurrentNews();
+
+				int index = current.Size() - 1 - i;
 				if ( index >= 0 ) {
-					const NewsEvent& ne = history->News( index );
+					const NewsEvent& ne = current[index];
 					CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
 					if ( cc && ne.chitID ) {
 						cc->SetTrack( ne.chitID );
@@ -1007,9 +1006,11 @@ void GameScene::DoTick( U32 delta )
 
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
 		NewsHistory* history = NewsHistory::Instance();
-		int index = history->NumNews() - 1 - i;
+		const grinliz::CArray< NewsEvent, NewsHistory::MAX_CURRENT >& current = history->CurrentNews();
+
+		int index = current.Size() - 1 - i;
 		if ( index >= 0 ) {
-			const NewsEvent& ne = history->News( index );
+			const NewsEvent& ne = current[index];
 			IString name = ne.GetWhat();
 			newsButton[i].SetText( name.c_str() );
 			newsButton[i].SetEnabled( true );

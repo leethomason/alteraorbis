@@ -15,7 +15,6 @@
 
 
 #include "../grinliz/glgeometry.h"
-//#include "../grinliz/glperformance.h"
 #include "../Shiny/include/Shiny.h"
 
 #include "particle.h"
@@ -60,18 +59,19 @@ void ParticleSystem::DeviceLoss()
 void ParticleSystem::Process( U32 delta, Camera* camera )
 {
 	// 8.4 ms (debug) in process. 0.8 in release (wow.)
-//	GRINLIZ_PERFTRACK;
 	PROFILE_FUNC();
 
 	const Vector3F* eyeDir = camera->EyeDir3();
 	const Vector3F origin = camera->PosWC();
 	float RAD2 = EL_FAR*EL_FAR;
+	float alphaCutoff = 0.0f;
 
 	if ( nParticles > MAX_PARTICLES/2 ) {
-		RAD2 /= 16;
+		alphaCutoff = 0.1f;
 	}
-	else if ( nParticles > MAX_PARTICLES/4 ) {
-		RAD2 /= 8;
+	if ( nParticles > MAX_PARTICLES*3/4 ) {
+		RAD2 /= 2;
+		alphaCutoff = 0.2f;
 	}
 
 	time += delta;
@@ -92,9 +92,9 @@ void ParticleSystem::Process( U32 delta, Camera* camera )
 		*pd = *srcPD;
 		Vector4F color = srcPS->color + pd->colorVel * deltaF;
 
-		if (    color.w <= 0 
+		if (    color.w <= alphaCutoff
 			 || ((pd->pos - origin).LengthSquared() > RAD2)
-			 || (pd->velocity.y < 0 && pd->pos.y < 0)
+			 || (pd->velocity.y < 0 && pd->pos.y < 0 )
 			 || (pd->velocity.y > 0 && pd->pos.y > EL_CAMERA_MAX) )
 		{
 			nParticles--;
