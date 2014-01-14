@@ -2,7 +2,7 @@
 
 More at: grinninglizard.com/altera
 
-The "Econ" release adds the basic game mechanics - exploring and building - in a rudimentary form.
+The "Denizen" release adds basic city building.
 
 
 Game Fiction (in brief)
@@ -16,9 +16,9 @@ Note: the advantage of starting with the pre-generated world is that it is fille
 
 Au (gold) and Crystals are the currencies of Altera. Au is used for purchases of both item and buildings. Many items, and some buildings, also requires a crystal. From most to least common, crystals are green, red, blue, and violet.
 
-"Tech" measures the technology of a domain, and more generally refers to its civilization achievement. A domain starts at Tech0 and can rise to Tech3. Building in a domain work better at higher tech levels, and many buildings can only be contstructed once that tech level is achieved.
+"Tech" measures the technology of a domain, and more generally refers to its civilization achievement. A domain starts at Tech0 and can rise to Tech3. Buildings in a domain work better at higher tech levels, and many buildings can only be constructed once that tech level is achieved.
 
-Visitors bring Tech, which degrades over time. You need a continual stream of visitors, which is done be constructing Kiosks to attract them. Visitors enter the world looking for domains that have interesting News, Commerce, Media, or Social, any of which they get at kiosks. If the domain has what the Visitor is looking for, tech is transferred to the domain. Visitors keep track of their favorite domains, and share the links with their friends.
+Visitors bring Tech, which degrades over time. You need a continual stream of visitors, which is done by constructing Kiosks to attract them. Visitors enter the world looking for domains that have interesting News, Commerce, Media, or Social, any of which they get at kiosks. If the domain has what the Visitor is looking for, tech is transferred to the domain. Visitors keep track of their favorite domains, and share the links with their friends.
 
 
 Changes (Denizen)
@@ -47,7 +47,7 @@ Important Notes
 
 1. There is NO save game compatibility. Be sure to delete old games.
 2. If your avatar gets killed, ctrl-click will create a new one. (You can create a bunch if you wish).
-3. The game is intended to run on a tablet (Windows tablet, at this point) and generally will. Good touch support for building / removing isn't in place yet.
+3. The game is intended to run on a tablet (Windows tablets only at this point) and generally will. Good touch support for building / removing isn't in place yet.
 
 
 Getting Started
@@ -91,7 +91,7 @@ You can either exit the mini-map at your currect location, or initiate grid trav
 
 You can get started building a domain at any time, but having about 500 gold and some Crystal is a good start.
 
-At this point in the game developement, there is no penalty to having the Prime Avatar get de-rezzed. Just ctrl-click to create a new one.
+At this point in the game development, there is no penalty to having the Prime Avatar get de-rezzed. Just ctrl-click to create a new one.
 
 ** Building a Domain **
 
@@ -167,9 +167,22 @@ If you find an issue,
 3. Write down the steps to reproduce
 4. IMPORTANT: include the release_log.txt file. It is written anew every time you run the game, so be sure to include the log that show the problem you are submitting.
 
+Extra info for bug:
+The rendering features can be toggled with the number keys. If you a rendering bug, knowing if it can be toggled on/off is very valuable information. For example, if you spot the "blue wall" rendering bug, you can tap (1) to turn off glow, then (1) to turn glow back on. If the "blue wall" goes away then returns, it's part of the glow rendering.
+
+1: glow
+2: particles
+3: voxel
+4: shadow
+5: bolt
+
 
 Known Issues:
 ------------
+
+"BLUE WALL" rendering bug: a giant block of color blocks half the screen. If you see it, please toggle the rendering features (above) to see if anything fixes it.
+
+Bolt renderer occasionally generates incorrect bolts.
 
 The current bug lists that I'm personally tracking:
 https://code.google.com/p/alteraorbis/source/browse/bugs.txt
@@ -196,5 +209,5 @@ Other scenes:
 * animation: animation preview utility
 * dialog: screen to test the game menus
 
-
 http://grinninglizard.com/altera/
+

@@ -191,7 +191,6 @@ public:
 	// Brings water & waterfalls current
 	void DoTick( U32 delta, ChitBag* chitBag );
 	void VoxelHit( const grinliz::Vector3I& voxel, const DamageDesc& dd );
-	int GetVoxelHeight( int x, int y );
 
 	// ---- MicroPather ---- //
 	virtual float LeastCostEstimate( void* stateStart, void* stateEnd );

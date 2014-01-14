@@ -34,6 +34,7 @@ public:
 
 class RenderTestScene : public Scene
 {
+	typedef Scene super;
 public:
 	RenderTestScene( LumosGame* game, const RenderTestSceneData* data );
 	virtual ~RenderTestScene();
@@ -63,7 +64,6 @@ private:
 	int glowLayer;
 	LumosGame* lumosGame;
 	gamui::PushButton okay;
-	gamui::PushButton glowButton;
 	gamui::PushButton refreshButton;
 	gamui::ToggleButton control[ NUM_CONTROL ];
 	gamui::Image rtImage;

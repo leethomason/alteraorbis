@@ -52,21 +52,22 @@ private:
 	unsigned debugPath			: 1;
 	unsigned debugOrigin		: 1;
 
-	unsigned path				: 10;	// 2 bits: core, port0-3
-
-	bool IsBlocked() const			{ return (!isLand) || isGrid || rockHeight || hasPool; }
+	unsigned path				: 10;	// 2 bits each: core, port0-3
 
 public:
-	// Not a full compare; more "equal type"
-	bool Equal( const WorldGrid& wg ) const {
-		return    isLand == wg.isLand
-			   && isGrid == wg.isGrid
-			   && isPort == wg.isPort
-			   && nominalRockHeight == wg.nominalRockHeight
-			   && rockType == wg.rockType
-			   && magma == wg.magma
-			   && rockHeight == wg.rockHeight
-			   && hasPool == wg.hasPool;
+	bool IsBlocked() const			{ return extBlock || (!isLand) || isGrid || rockHeight || hasPool; }
+	bool IsPassable() const			{ return !IsBlocked(); }
+	
+	// does this and rhs render the same voxel?
+	int VoxelEqual( const WorldGrid& wg ) const {
+		return	isLand == wg.isLand &&
+				isGrid == wg.isGrid &&
+				isPort == wg.isPort &&
+				pave   == wg.pave &&
+				isPorch == wg.isPorch &&
+				rockHeight == wg.rockHeight &&
+				magma == wg.magma &&
+				hasPool == wg.hasPool;
 	}
 
 	enum {
@@ -122,6 +123,7 @@ public:
 	void SetPave( int p ) {
 		GLASSERT( p >=0 && p < NUM_PAVE );
 		GLASSERT( Layer() == LAND );
+		GLASSERT( RockHeight() == 0 );
 		pave = p;
 	}
 	void SetPorch( bool on ) {
@@ -200,10 +202,6 @@ public:
 		if ( points > TotalHP() ) points = TotalHP();
 		hp = points;
 		GLASSERT( hp == points );
-	}
-
-	bool IsPassable() const { 
-		return IsLand() && !IsBlocked(); 
 	}
 
 	bool DebugAdjacent() const		{ return debugAdjacent != 0; }

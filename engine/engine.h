@@ -31,6 +31,7 @@
 #include "screenport.h"
 #include "lighting.h"
 #include "shadermanager.h"
+#include "../xegame/stackedsingleton.h"
 
 class RenderQueue;
 class RenderTarget;
@@ -76,7 +77,8 @@ void DrawDebugLines( U32 delta );
 		
 */
 
-class Engine :	public IDeviceLossHandler
+class Engine :	public IDeviceLossHandler,
+				public StackedSingleton< Engine >
 {
 public:
 	Engine( Screenport* screenport, const gamedb::Reader* database, Map* map );
@@ -160,8 +162,17 @@ public:
 
 	Texture* GetRenderTargetTexture( int id=0 );
 
-	void SetGlow( bool b ) { glow = b; }
-	bool Glow() const { return glow; }
+	enum {
+		STAGE_PARTICLE		= 0x01,
+		STAGE_SHADOW		= 0x02,
+		STAGE_GLOW			= 0x04,
+		STAGE_VOXEL			= 0x08,
+		STAGE_BOLT			= 0x10,
+	};
+
+	void SetStages( int s ) { stages = s; }
+	int  Stages() const		{ return stages; }
+
 	void SetTemperature( float temp ) { temperature = temp; }
 
 	virtual void DeviceLoss();
@@ -196,16 +207,15 @@ private:
 	Screenport* screenport;
 	float	initZoom;
 	int		initZoomDistance;
-	bool	glow;
+	int		stages;
 	float	temperature;
 	
-	Map*	map;
-	SpaceTree* spaceTree;
-	RenderQueue* renderQueue;
-	BoltRenderer* boltRenderer;
+	Map*			map;
+	SpaceTree*		spaceTree;
+	RenderQueue*	renderQueue;
+	BoltRenderer*	boltRenderer;
 
 	RenderTarget* renderTarget[RT_COUNT];
-	//RenderTarget* miniMapRenderTarget;
 };
 
 #endif // UFOATTACK_ENGINE_INCLUDED

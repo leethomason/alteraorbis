@@ -147,16 +147,6 @@ void WorldMap::AttachEngine( Engine* e, IMapGridUse* imap )
 }
 
 
-int WorldMap::GetVoxelHeight( int x, int y )
-{
-	const WorldGrid& wg = GetWorldGrid( x, y );
-	if ( wg.Pool() ) {
-		return POOL_HEIGHT;
-	}
-	return wg.RockHeight();
-}
-
-
 void WorldMap::VoxelHit( const Vector3I& v, const DamageDesc& dd )
 {
 	int index = INDEX(v.x, v.z);
@@ -832,7 +822,7 @@ void WorldMap::SetRock( int x, int y, int h, bool magma, int rockType )
 	wg.SetRockType( rockType );
 	wg.DeltaHP( wg.TotalHP() );	// always repair. Correct?
 
-	if ( !was.Equal( wg )) {
+	if ( !was.VoxelEqual( wg )) {
 		voxelInit.Clear( x/ZONE_SIZE, y/ZONE_SIZE );
 		grid[INDEX(x,y)] = wg;
 	}
@@ -893,7 +883,7 @@ bool WorldMap::IsPassable( int x, int y ) const
 {
 	int index = INDEX(x,y);
 	const WorldGrid& wg = grid[index];
-	return wg.IsPassable() && (wg.extBlock == 0);
+	return wg.IsPassable();
 }
 
 

@@ -66,15 +66,20 @@ void GameDoTick( void* handle, unsigned int timeInMSec );
 #define GAME_HK_TOGGLE_DEBUG_TEXT		2
 #define GAME_HK_TOGGLE_DEBUG_UI			3
 #define GAME_HK_TOGGLE_PERF				4
-#define GAME_HK_TOGGLE_GLOW				5
-#define GAME_HK_SPACE					6	// general action
-#define GAME_HK_TOGGLE_FAST				7	// fast mode and normal mode
-#define GAME_HK_TOGGLE_PATHING			8
-#define GAME_HK_TOGGLE_COLORS			9
-#define GAME_HK_MAP					   10
-#define GAME_HK_CHEAT_GOLD			   11
-#define GAME_HK_CHEAT_CRYSTAL		   12
-#define GAME_HK_CHEAT_TECH			   13
+#define GAME_HK_SPACE					5	// general action
+#define GAME_HK_TOGGLE_FAST				6	// fast mode and normal mode
+#define GAME_HK_TOGGLE_PATHING			7
+#define GAME_HK_TOGGLE_COLORS			8
+#define GAME_HK_MAP					    9
+#define GAME_HK_CHEAT_GOLD			   10
+#define GAME_HK_CHEAT_CRYSTAL		   11
+#define GAME_HK_CHEAT_TECH			   12
+
+#define GAME_HK_TOGGLE_GLOW			   13
+#define GAME_HK_TOGGLE_PARTICLE		   14
+#define GAME_HK_TOGGLE_VOXEL		   15
+#define GAME_HK_TOGGLE_SHADOW		   16
+#define GAME_HK_TOGGLE_BOLT			   17
 
 void GameHotKey( void* handle, int value );
 
