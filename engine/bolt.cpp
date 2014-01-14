@@ -176,11 +176,13 @@ void BoltRenderer::DeviceLoss()
 
 void BoltRenderer::DrawAll( const Bolt* bolts, int nBolts, Engine* engine )
 {
-	// FIXME: crude culling to the view frustum
 	// FIXME: move more to the shader?
 
 	if ( nBolts == 0 )
 		return;
+
+	const Vector3F origin = engine->camera.PosWC();
+	float RAD2 = EL_FAR*EL_FAR;
 
 	Vector3F eyeNormal = engine->camera.EyeDir3()[Camera::NORMAL];
 	static const float HALF_WIDTH = 0.07f;
@@ -191,6 +193,10 @@ void BoltRenderer::DrawAll( const Bolt* bolts, int nBolts, Engine* engine )
 
 	int count = 0;
 	for( int i=0; i<nBolts; ++i ) {
+
+		if ( ( bolts[i].head - origin ).LengthSquared() > RAD2 )
+			continue;
+
 		if ( bolts[i].particle ) {
 			def.color = bolts[i].color;
 			ps->EmitPD( def, bolts[i].head, V3F_UP, 0 );
