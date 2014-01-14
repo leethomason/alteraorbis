@@ -3,6 +3,7 @@
 
 #include "glstreamer.h"
 #include "../grinliz/glmicrodb.h"
+#include "squisher.h"
 
 using namespace grinliz;
 
@@ -206,6 +207,44 @@ int main( int argc, const char* argv[] )
 		printf( "Fetched: %s %d %f\n", s.c_str(), i, f );
 
 		fclose( fp );
+	}
+	{
+		{
+			FILE* fp = 0;
+			fopen_s( &fp, "squishtest.dat", "wb" );
+			Squisher squisher;
+			static const char* test0 = "Hello world. This is compressed data.";
+			static const char* test1 = "This is a 2nd line of comrpessed data, and concludes the test.";
+
+			int len = strlen(test0)+1;
+			squisher.StreamEncode( &len, 4, fp );
+			squisher.StreamEncode( test0, strlen(test0)+1, fp );
+			len = strlen(test1)+1;
+			squisher.StreamEncode( &len, 4, fp );
+			squisher.StreamEncode( test1, strlen(test1)+1, fp );
+			squisher.StreamEncode( 0, 0, fp );
+
+			printf( "Encode: Unc=%d Comp=%d\n", squisher.encodedU, squisher.encodedC );
+
+			fclose( fp );
+		}
+		{
+			FILE* fp = 0;
+			fopen_s( &fp, "squishtest.dat", "rb" );
+			Squisher squisher;
+			char buffer[200];
+
+			int len=0;
+			squisher.StreamDecode( &len, 4, fp );
+			squisher.StreamDecode( buffer, len, fp );
+			printf( "%s\n", buffer );
+			squisher.StreamDecode( &len, 4, fp );
+			squisher.StreamDecode( buffer, len, fp );
+			printf( "%s\n", buffer );
+
+			printf( "Decode: Unc=%d Comp=%d\n", squisher.decodedU, squisher.decodedC );
+		}
+
 	}
 	return 0;
 }
