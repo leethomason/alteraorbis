@@ -477,8 +477,8 @@ public:
 	{
 		if ( !reallocating ) {
 			values.Clear();
+			EnsureCap();
 		}
-		EnsureCap();
 
 		// Existing value?
 		int index = FindIndex( key );

@@ -37,6 +37,8 @@
 
 #include "../xarchive/glstreamer.h"
 
+#include "../grinliz/glperformance.h"
+
 using namespace grinliz;
 using namespace tinyxml2;
 
@@ -133,7 +135,7 @@ void Sim::Save( const char* mapDAT, const char* gameDAT )
 	worldMap->Save( mapDAT );
 
 	{
-		//QuickProfile qp( "Sim::SaveXarc" );
+		QuickProfile qp( "Sim::SaveXarc" );
 
 		ComponentFactory factory( this, &chitBag->census, engine, worldMap, chitBag, weather, lumosGame );
 
