@@ -1,6 +1,6 @@
 - "blue wall" bug. Alpha present. Not screen aligned. Noise in particles??
 x corrupt pathing info. worldgrid change w/o reset?
-- bolt renderer busted, occasionally
+x bolt renderer busted, occasionally
 
 x serializing too much news (pool, sectorherd, rampage)
 x particles
