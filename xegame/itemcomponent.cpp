@@ -468,7 +468,9 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			}
 		}
 		else {
-			ReserveBank::Instance()->Deposit( w );
+			if ( ReserveBank::Instance() ) {	// null in battle mode
+				ReserveBank::Instance()->Deposit( w );
+			}
 		}
 
 		while( itemArr.Size() > 1 ) {

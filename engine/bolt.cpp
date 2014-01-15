@@ -176,43 +176,51 @@ void BoltRenderer::DeviceLoss()
 
 void BoltRenderer::DrawAll( const Bolt* bolts, int nBolts, Engine* engine )
 {
-	// FIXME: crude culling to the view frustum
 	// FIXME: move more to the shader?
 
 	if ( nBolts == 0 )
 		return;
 
+	const Vector3F origin = engine->camera.PosWC();
+	const float RAD2 = EL_FAR*EL_FAR;
+
 	Vector3F eyeNormal = engine->camera.EyeDir3()[Camera::NORMAL];
 	static const float HALF_WIDTH = 0.07f;
 
-	nBolts = Min( nBolts, (int)MAX_BOLTS );
 	ParticleSystem* ps = engine->particleSystem;
 	ParticleDef def = ps->GetPD( "smoketrail" );
 
 	int count = 0;
-	for( int i=0; i<nBolts; ++i ) {
+	for( int i=0; i<nBolts && count<MAX_BOLTS; ++i ) {
+
+		Vector3F head = bolts[i].head;
+
+		if ( ( head - origin ).LengthSquared() > RAD2 )
+			continue;
+
 		if ( bolts[i].particle ) {
 			def.color = bolts[i].color;
 			ps->EmitPD( def, bolts[i].head, V3F_UP, 0 );
 		}
 		else {
-			++count;
-
 			Vector3F n;
-			Vector3F tail = bolts[i].head - bolts[i].len*bolts[i].dir;
-			CrossProduct( eyeNormal, bolts[i].head - tail, &n );
+			Vector3F tail = head - bolts[i].len*bolts[i].dir;
+			CrossProduct( eyeNormal, head - tail, &n );
 			n.Normalize();
 
-			vertex[i*4+0].pos = tail - HALF_WIDTH*n;
-			vertex[i*4+1].pos = tail + HALF_WIDTH*n;
-			vertex[i*4+2].pos = bolts[i].head + HALF_WIDTH*n;
-			vertex[i*4+3].pos = bolts[i].head - HALF_WIDTH*n;
+			int base = count*4;
+			vertex[base+0].pos = tail - HALF_WIDTH*n;
+			vertex[base+1].pos = tail + HALF_WIDTH*n;
+			vertex[base+2].pos = head + HALF_WIDTH*n;
+			vertex[base+3].pos = head - HALF_WIDTH*n;
 
 			Vector4F color = bolts[i].color;
-			vertex[i*4+0].color = color;
-			vertex[i*4+1].color = color;
-			vertex[i*4+2].color = color;
-			vertex[i*4+3].color = color;
+			vertex[base+0].color = color;
+			vertex[base+1].color = color;
+			vertex[base+2].color = color;
+			vertex[base+3].color = color;
+
+			++count;
 		}
 	}
 

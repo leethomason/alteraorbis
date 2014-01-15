@@ -127,6 +127,8 @@ grinliz::IString NewsEvent::GetWhat() const
 
 grinliz::IString NewsEvent::IDToName( int id ) const
 {
+	if ( id == 0 ) return IString();
+
 	GLASSERT( ItemDB::Instance() );
 	if ( !ItemDB::Instance() ) return IString();
 

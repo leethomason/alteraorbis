@@ -26,7 +26,6 @@ LivePreviewScene::LivePreviewScene( LumosGame* game, const LivePreviewSceneData*
 	//map->SetColor( c );
 	
 	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase(), map );
-	engine->SetGlow( true );
 	engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
 
 	LayoutCalculator layout = game->DefaultLayout();

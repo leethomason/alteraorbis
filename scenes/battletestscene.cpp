@@ -239,7 +239,6 @@ void BattleTestScene::LoadMap()
 
 	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase(), map );	
 	engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
-	engine->SetGlow( true );
 	chitBag.SetContext( engine, map, (LumosGame*)game );
 	map->AttachEngine( engine, &chitBag );
 
@@ -280,13 +279,15 @@ void BattleTestScene::LoadMap()
 
 void BattleTestScene::HandleHotKey( int mask )
 {
-	if ( mask == GAME_HK_TOGGLE_GLOW ) {
-		engine->SetGlow( !engine->Glow() );
-	}
-	else if ( mask == GAME_HK_SPACE ) {
+	if ( mask == GAME_HK_SPACE ) {
 		fireTestGun = !fireTestGun;
 	}
+	else {
+		super::HandleHotKey( mask );
+	}
 }
+
+
 
 void BattleTestScene::GoScene()
 {

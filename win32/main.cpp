@@ -282,13 +282,18 @@ int main( int argc, char **argv )
 					case SDLK_c:	GameHotKey( game, GAME_HK_TOGGLE_COLORS );	break;
 					case SDLK_d:	GameHotKey( game, GAME_HK_TOGGLE_DEBUG_TEXT );	break;
 					case SDLK_f:	GameHotKey( game, GAME_HK_TOGGLE_FAST );	break;
-					case SDLK_g:	GameHotKey( game, GAME_HK_TOGGLE_GLOW );	break;
 					case SDLK_i:	GameHotKey( game, GAME_HK_TOGGLE_DEBUG_UI );		break;
 					case SDLK_k:	GameHotKey( game, GAME_HK_CHEAT_CRYSTAL );	break;
 					case SDLK_m:	GameHotKey( game, GAME_HK_MAP );			break;
 					case SDLK_p:	GameHotKey( game, GAME_HK_TOGGLE_PERF );	break;
 					case SDLK_t:	GameHotKey( game, GAME_HK_CHEAT_TECH );		break;
 					case SDLK_u:	GameHotKey( game, GAME_HK_TOGGLE_UI );		break;
+
+					case SDLK_1:	GameHotKey( game, GAME_HK_TOGGLE_GLOW );	break;
+					case SDLK_2:	GameHotKey( game, GAME_HK_TOGGLE_PARTICLE );	break;
+					case SDLK_3:	GameHotKey( game, GAME_HK_TOGGLE_VOXEL );	break;
+					case SDLK_4:	GameHotKey( game, GAME_HK_TOGGLE_SHADOW );	break;
+					case SDLK_5:	GameHotKey( game, GAME_HK_TOGGLE_BOLT );	break;
 
 					case SDLK_s:
 						GameDoTick( game, SDL_GetTicks() );

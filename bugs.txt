@@ -1,9 +1,15 @@
-- serializing too much news (pool, sectorherd, rampage)
-x particles
-t hash table degrading? - test perf with new table (and better allocator)
-x unsafe normalize in ai/melee
-t test chitbag performance
+- "blue wall" bug. Alpha present. Not screen aligned. Noise in particles??
+x corrupt pathing info. worldgrid change w/o reset?
+x bolt renderer busted, occasionally
 
+x serializing too much news (pool, sectorherd, rampage)
+x particles
+x hash table degrading? - test perf with new table (and better allocator)
+x unsafe normalize in ai/melee
+x test chitbag performance
+
+
+- squisher, in streaming mode, to save files
 - bolt renderer buggy
 - redmantis run&gun broken?
 - fire + shock too cheap to build

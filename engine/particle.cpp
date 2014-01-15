@@ -97,13 +97,15 @@ void ParticleSystem::Process( U32 delta, Camera* camera )
 			 || (pd->velocity.y < 0 && pd->pos.y < 0 )
 			 || (pd->velocity.y > 0 && pd->pos.y > EL_CAMERA_MAX) )
 		{
-			nParticles--;
+			// don't advance pd & ps. This will
+			// be overwritten
 		}
 		else { 
 			if ( color.w > 1 ) {
 				GLASSERT( pd->colorVel1.w < 0.f );
 				color.w = 1.f;
 				pd->colorVel = pd->colorVel1;
+				GLASSERT( pd->colorVel.w < 0 );
 			}
 
 			pd->pos  += pd->velocity * deltaF;
@@ -142,6 +144,7 @@ void ParticleSystem::Process( U32 delta, Camera* camera )
 		srcPD++;
 		srcPS += 4;
 	}
+	nParticles = pd - particleData;
 }
 
 
@@ -207,10 +210,10 @@ void ParticleSystem::EmitPD(	const ParticleDef& def,
 	int count = def.count;
 
 	if ( def.time == ParticleDef::CONTINUOUS ) {
-		float nParticles = (float)def.count * (float)deltaTime * 0.001f;
-		count = (int) floorf( nParticles );
-		nParticles -= floorf( nParticles );
-		if ( random.Uniform() <= nParticles )
+		float nPart = (float)def.count * (float)deltaTime * 0.001f;
+		count = (int) floorf( nPart );
+		nPart -= count;
+		if ( random.Uniform() <= nPart )
 			++count;
 	}
 
@@ -231,8 +234,8 @@ void ParticleSystem::EmitPD(	const ParticleDef& def,
 
 			// There is potentially both an increasing alpha
 			// and decreasing alpha velocity.
-			GLASSERT( def.colorVelocity0.w < 0 || def.colorVelocity1.w < 0 );
-			pd->colorVel = def.colorVelocity0;
+			GLASSERT( def.colorVelocity0.w < -0.001f || def.colorVelocity1.w < -0.001f );
+			pd->colorVel  = def.colorVelocity0;
 			pd->colorVel1 = def.colorVelocity1;
 
 			Vector3F vFuzz;

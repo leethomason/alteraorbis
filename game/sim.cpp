@@ -53,7 +53,6 @@ Sim::Sim( LumosGame* g ) : minuteClock( 60*1000 ), secondClock( 1000 ), volcTime
 	reserveBank = new ReserveBank();
 	visitors	= new Visitors();
 
-	engine->SetGlow( true );
 	engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
 
 	chitBag = new LumosChitBag();
