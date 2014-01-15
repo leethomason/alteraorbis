@@ -222,12 +222,21 @@ void ItemHistory::Set( const GameItem* gi )
 
 void ItemHistory::Serialize( XStream* xs )
 {
+	int aLevel = level;	// U16 to int conversion, and back.
+	int aValue = value;
+
 	XarcOpen( xs, "ItemHistory" );
+	XARC_SER( xs, itemID );
 	XARC_SER( xs, fullName );
+	XARC_SER( xs, aLevel );
+	XARC_SER( xs, aValue );
 	XarcClose( xs );
+
+	level = aLevel;
+	value = aValue;
 }
 
-//ItemDB* ItemDB::instance = 0;
+
 ItemDB* StackedSingleton< ItemDB >::instance = 0;
 
 void ItemDB::Serialize( XStream* xs ) 

@@ -30,7 +30,7 @@ private:
 
 	enum { 
 		NUM_LINES = 10,			// expediant hack
-		AGE_TIME  = 20*1000,	// msec
+		AGE_TIME  = 40*1000,	// msec
 	};
 	gamui::TextLabel	text;
 	grinliz::GLString	strBuffer;

@@ -35,6 +35,7 @@ Changes (Denizen)
 - Tech decay adjusted
 - The forge will now show you what you will actually build
 - Fixes to the shaders - thanks to GT and Jeff for release logs!
+- Fix to bolt rendering
 
 Install
 -------
@@ -181,8 +182,6 @@ Known Issues:
 ------------
 
 "BLUE WALL" rendering bug: a giant block of color blocks half the screen. If you see it, please toggle the rendering features (above) to see if anything fixes it.
-
-Bolt renderer occasionally generates incorrect bolts.
 
 The current bug lists that I'm personally tracking:
 https://code.google.com/p/alteraorbis/source/browse/bugs.txt

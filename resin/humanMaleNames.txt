@@ -1,18 +1,20 @@
 Adam
+Adama
 Alpha
+Alkalla
+Alteran
 Atta
 Axon
 Cillin
 Cypher
-Cycon
 Cyrrus
 Darwin
 Darc
 Darris
 Delta
 Garrus
-Gormun
 Garva
+Gormun
 Khronos
 Kellos
 Kelvak
@@ -20,7 +22,9 @@ Illus
 Indigo
 Malcom
 Markus
+Mordin
 Morpheus
+Neo
 Nemo
 Neutron
 Nikolai
@@ -33,3 +37,4 @@ Strident
 Xallic
 Xerces
 Xerek
+Xycon
