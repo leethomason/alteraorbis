@@ -199,8 +199,8 @@ void WorldMap::Save( const char* pathToDAT )
 
 		// This works very well; about 3:1 compression.
 		Squisher squisher;
-		int bytes = 0;
-		squisher.StreamEncode( grid, sizeof(WorldGrid)*width*height, fp, &bytes );
+		squisher.StreamEncode( grid, sizeof(WorldGrid)*width*height, fp );
+		squisher.StreamEncode( 0, 0, fp );
 
 		fclose( fp );
 	}

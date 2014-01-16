@@ -52,6 +52,7 @@ public:
 		SCENE_CHARACTER,
 		SCENE_MAP,
 		SCENE_FORGE,
+		SCENE_CENSUS,
 	};
 
 	virtual Scene* CreateScene( int id, SceneData* data );

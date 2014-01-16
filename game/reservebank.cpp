@@ -4,13 +4,6 @@
 
 using namespace grinliz;
 
-static const int GOLD_PER_DENIZEN  = 100;
-static const int GOLD_PER_BEASTMAN =  20;
-static const int GOLD_PER_MONSTER  =  10;
-static const int ALL_GOLD =   TYPICAL_DENIZENS*GOLD_PER_DENIZEN 
-							+ TYPICAL_BEASTMEN*GOLD_PER_BEASTMAN
-							+ TYPICAL_MONSTERS*GOLD_PER_MONSTER;
-
 ReserveBank* ReserveBank::instance = 0;
 
 
@@ -43,10 +36,10 @@ ReserveBank::ReserveBank()
 	// All the gold in the world.
 	bank.gold = ALL_GOLD;
 
-	bank.crystal[CRYSTAL_GREEN]		= TYPICAL_DOMAINS * 10;
-	bank.crystal[CRYSTAL_RED]		= TYPICAL_DOMAINS * 4;
-	bank.crystal[CRYSTAL_BLUE]		= TYPICAL_DOMAINS * 2;
-	bank.crystal[CRYSTAL_VIOLET]	= TYPICAL_DOMAINS / 2;
+	bank.crystal[CRYSTAL_GREEN]		= ALL_CRYSTAL_GREEN;
+	bank.crystal[CRYSTAL_RED]		= ALL_CRYSTAL_RED;
+	bank.crystal[CRYSTAL_BLUE]		= ALL_CRYSTAL_BLUE;
+	bank.crystal[CRYSTAL_VIOLET]	= ALL_CRYSTAL_VIOLET;
 }
 
 

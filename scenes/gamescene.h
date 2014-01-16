@@ -138,6 +138,7 @@ private:
 	gamui::PushButton	createWorkerButton;
 	gamui::ToggleButton	uiMode[NUM_UI_MODES];
 	gamui::PushButton	allRockButton;
+	gamui::PushButton	censusButton;
 	gamui::PushButton	newsButton[NUM_NEWS_BUTTONS];
 	gamui::PushButton	clearButton;
 	gamui::Image		minimap;
