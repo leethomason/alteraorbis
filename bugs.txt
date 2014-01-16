@@ -52,13 +52,23 @@ x TextBox needs to be better, and should be used much more.
 
 - game
 
+	- Denizen-2
+		- update cyclops art
+		- update temple art
+		- update arachnoid art
+
 	- Census
-		- coolest stuff, past and present, by category
-		- total of Au and Crystal
-		- consider tying gold/crystal to per-cycle census
-		- check money
-		- greatest warrior, smith, weapons
+		x coolest stuff, past and present, by category
+		x total of Au and Crystal
+		x consider tying gold/crystal to per-cycle census
+		x check money
+		- money checks optional
+		x greatest warrior
+		- greatest smith
+		x greatest weapons
 		- greatest monsters
+		- needs to feel interactive
+		- location and owner
 
 	- Market
 		- cyclops attracted by tech?
@@ -79,7 +89,7 @@ x TextBox needs to be better, and should be used much more.
 		- marking build zones
 			- dragging, rows
 			- top view?
-			- auto-clear vegetation
+			x auto-clear vegetation
 
 	- Adventure
 		- control
