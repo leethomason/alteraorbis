@@ -271,6 +271,7 @@ public:
 	const char* c_str() const						{ return m_buf; }
 
 	void Format( const char* format, ...);
+	void AppendFormat( const char* format, ...);
 
 private:
 	void ensureSize( unsigned s );
