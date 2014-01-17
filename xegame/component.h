@@ -56,7 +56,7 @@ public:
 	virtual const char* Name() const = 0;
 
 	// Utility
-	Chit* ParentChit() { return parentChit; }
+	Chit* ParentChit() const { return parentChit; }
 	Chit* GetChit( int id );
 
 	bool WillSerialize() const							{ return willSerialize; }

@@ -1,9 +1,13 @@
 #include "censusscene.h"
-#include "../game/lumosgame.h"
 #include "../xegame/chitbag.h"
 #include "../xegame/itemcomponent.h"
+#include "../xegame/spatialcomponent.h"
 #include "../script/itemscript.h"
+#include "../game/lumosgame.h"
 #include "../game/reservebank.h"
+#include "../game/worldmap.h"
+#include "../game/worldinfo.h"
+#include "../engine/engine.h"
 
 using namespace gamui;
 using namespace grinliz;
@@ -20,6 +24,10 @@ CensusScene::CensusScene( LumosGame* game, CensusSceneData* d ) : Scene( game ),
 {
 	lumosGame->InitStd( &gamui2D, &okay, 0 );
 	text.Init( &gamui2D );
+
+	memset( mobActive, 0, sizeof(*mobActive)*MOB_COUNT );
+	memset( itemActive, 0, sizeof(*itemActive)*ITEM_COUNT );
+
 	Scan();
 }
 
@@ -41,6 +49,7 @@ void CensusScene::Resize()
 	float dy = text.Y();
 
 	text.SetBounds( port.UIWidth() - dx*2.0f, port.UIHeight() - dy*2.0f );
+	text.SetTab( text.Width() * 0.3f );
 }
 
 
@@ -52,7 +61,7 @@ void CensusScene::ItemTapped( const gamui::UIItem* item )
 }
 
 
-void CensusScene::ScanItem( const GameItem* item )
+void CensusScene::ScanItem( ItemComponent* ic, const GameItem* item )
 {
 	allWallet.Add( item->wallet );
 	if ( item->Intrinsic() ) return;
@@ -67,8 +76,9 @@ void CensusScene::ScanItem( const GameItem* item )
 		else if ( mobIStr == "normal" )  slot = MOB_NORMAL;
 
 		if ( slot >= 0 ) {
-			if ( item->Traits().Level() > mobLevelActive[slot].level ) {
-				mobLevelActive[slot].Set( item );
+			if ( !mobActive[slot].item || item->Traits().Level() > mobActive[slot].item->Traits().Level() ) {
+				mobActive[slot].item = item;
+				mobActive[slot].ic = ic;
 			}
 		}
 	}
@@ -83,8 +93,9 @@ void CensusScene::ScanItem( const GameItem* item )
 	else if ( itemIStr == "shield" ) slot = ITEM_SHIELD;
 
 	if ( slot >= 0 ) {
-		if ( item->Traits().Level() > itemLevelActive[slot].level ) {
-			itemLevelActive[slot].Set( item );
+		if ( !itemActive[slot].item || item->GetValue() > itemActive[slot].item->GetValue() ) {
+			itemActive[slot].item = item;
+			itemActive[slot].ic = ic;
 		}
 	}
 
@@ -113,7 +124,7 @@ void CensusScene::Scan()
 			if ( ic ) {
 
 				for( int k=0; k<ic->NumItems(); ++k ) {
-					ScanItem( ic->GetItem(k));
+					ScanItem( ic, ic->GetItem(k));
 				}
 			}
 		}
@@ -137,36 +148,59 @@ void CensusScene::Scan()
 
 	GLString str;
 	str.Format( "Chits: %d\n", nChits );
-	str.AppendFormat( "Allocated: Au=%d Green=%d Red=%d Blue=%d Violet=%d\n", ALL_GOLD, ALL_CRYSTAL_GREEN, ALL_CRYSTAL_RED, ALL_CRYSTAL_BLUE, ALL_CRYSTAL_VIOLET );
-	str.AppendFormat( "InPlay:    Au=%d Green=%d Red=%d Blue=%d Violet=%d\n", allWallet.gold, allWallet.crystal[0], allWallet.crystal[1], allWallet.crystal[2], allWallet.crystal[3] );
-	str.AppendFormat( "InReserve: Au=%d Green=%d Red=%d Blue=%d Violet=%d\n", reserveWallet.gold, reserveWallet.crystal[0], reserveWallet.crystal[1], reserveWallet.crystal[2], reserveWallet.crystal[3] );
-	str.AppendFormat( "Total:     Au=%d Green=%d Red=%d Blue=%d Violet=%d\n", 
+	str.AppendFormat( "Allocated:\tAu=%d Green=%d Red=%d Blue=%d Violet=%d\n", ALL_GOLD, ALL_CRYSTAL_GREEN, ALL_CRYSTAL_RED, ALL_CRYSTAL_BLUE, ALL_CRYSTAL_VIOLET );
+	str.AppendFormat( "InPlay:\tAu=%d Green=%d Red=%d Blue=%d Violet=%d\n", allWallet.gold, allWallet.crystal[0], allWallet.crystal[1], allWallet.crystal[2], allWallet.crystal[3] );
+	str.AppendFormat( "InReserve:\tAu=%d Green=%d Red=%d Blue=%d Violet=%d\n", reserveWallet.gold, reserveWallet.crystal[0], reserveWallet.crystal[1], reserveWallet.crystal[2], reserveWallet.crystal[3] );
+	str.AppendFormat( "Total:\tAu=%d Green=%d Red=%d Blue=%d Violet=%d\n", 
 		allWallet.gold + reserveWallet.gold, 
 		allWallet.crystal[0] + reserveWallet.crystal[0], 
 		allWallet.crystal[1] + reserveWallet.crystal[1], 
 		allWallet.crystal[2] + reserveWallet.crystal[2], 
 		allWallet.crystal[3] + reserveWallet.crystal[3] );
 
-	str.AppendFormat( "MOBs: Au=%d Green=%d Red=%d Blue=%d Violet=%d\n", mobWallet.gold, mobWallet.crystal[0], mobWallet.crystal[1], mobWallet.crystal[2], mobWallet.crystal[3] );
-	str.append( "Max Level, alive: " );			levelActive.AppendDesc( &str );	str.append( "\n" );
-	str.append( "Max Level, historical: " );	levelAny.AppendDesc( &str ); str.append( "\n" );
-	str.append( "Max Value, alive: " );			valueActive.AppendDesc( &str ); str.append( "\n" );
-	str.append( "Max Value, historical: " );	valueAny.AppendDesc( &str ); str.append( "\n" );
+	str.AppendFormat( "MOBs:\tAu=%d Green=%d Red=%d Blue=%d Violet=%d\n", mobWallet.gold, mobWallet.crystal[0], mobWallet.crystal[1], mobWallet.crystal[2], mobWallet.crystal[3] );
+	str.append( "Level, alive:\t" );			levelActive.AppendDesc( &str );	str.append( "\n" );
+	str.append( "Level, historical:\t" );	levelAny.AppendDesc( &str ); str.append( "\n" );
+	str.append( "Value, alive:\t" );			valueActive.AppendDesc( &str ); str.append( "\n" );
+	str.append( "Value, historical:\t" );	valueAny.AppendDesc( &str ); str.append( "\n" );
 
 	for( int i=0; i<MOB_COUNT; ++i ) {
 		static const char* NAME[MOB_COUNT] = { "Denizen", "Greater", "Lesser" };
-		if ( mobLevelActive[i].itemID ) {
-			str.AppendFormat( "%s: ", NAME[i] );
-			mobLevelActive[i].AppendDesc( &str );
+		if ( mobActive[i].item ) {
+			ItemHistory h;
+			h.Set( mobActive[i].item );
+
+			str.AppendFormat( "%s:\t", NAME[i] );
+			h.AppendDesc( &str );
+
+			Chit* chit = mobActive[i].ic->ParentChit();
+			SpatialComponent* sc = chit->GetSpatialComponent();
+			if ( sc ) {
+				Vector2I sector = ToSector( sc->GetPosition2DI() );
+
+				WorldMap* map = Engine::Instance()->GetMap()->ToWorldMap();
+				const SectorData& sd = map->GetSector( sector );
+				str.AppendFormat( " at %s", sd.name.c_str() );
+			}
+
 			str.append( "\n" );
 		}
 	}
 
 	for( int i=0; i<ITEM_COUNT; ++i ) {
 		static const char* NAME[ITEM_COUNT] = { "Pistol", "Blaster", "Pulse", "Beamgun", "Ring", "Shield" };
-		if ( itemLevelActive[i].itemID ) {
-			str.AppendFormat( "%s: ", NAME[i] );
-			itemLevelActive[i].AppendDesc( &str );
+		if ( itemActive[i].item ) {
+			ItemHistory h;
+			h.Set( itemActive[i].item );
+
+			str.AppendFormat( "%s:\t", NAME[i] );
+			h.AppendDesc( &str );
+
+			const GameItem* mainItem = itemActive[i].ic->GetItem(0);
+			IString mob = mainItem->keyValues.GetIString( "mob" );
+			if ( !mob.empty() ) {
+				str.AppendFormat( " wielded by %s", mainItem->BestName() );
+			}
 			str.append( "\n" );
 		}
 	}

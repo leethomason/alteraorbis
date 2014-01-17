@@ -1,8 +1,5 @@
 - "blue wall" bug. Alpha present. Not screen aligned. Noise in particles??
-- squisher, in streaming mode, to save files
 - fire + shock too cheap to build
-- GT: needs pick up effect for gold (single yellow glow of the avatar?)
-- GT: needs pick up effect for kiosks or visitors (like a gold triangle or chest can float over the kiosk when the visitor spends money)
 - GT: ui to show idle and busy workers
 - change shield to have cooldown then charge-up (rather than cooldown then reset)
 - redo AI utility to be based on a set of curves
@@ -15,44 +12,47 @@
 - How does Ice and magma interact?
 - make sure gold/crystal gets returned to the Reserve when the Chit is destroyed
 - GT: lightning
-- GT: rez-in for structures
-- is shield boost working correctly? Effects are *not* getting stripped by the shield.
 - can re-pack MVP and Bone matrix in the shader to encode 3*vec4 as the transpose, then transpose in the shader
 - standing shields!
 - personality, personality display
 - AI notifies friends when attacked, notifies that being attacked, etc.
 - maps: what direction is player pointed?
-- flammability / shockability very agressive
-- viewing edge of world breaks all kinds of limits and ASSERTs
-- item repair
-- item destruction / hpRegen
 - fix porch image (alpha of the tiles, if not general improvement)
-- shield looks very boring (and hard to tell what it is). And does it turn off if you don't have one? And does it glow?
-- buildings shouldn't drop gold on de-rez
 - AIs should account for personality and skills when doing inventory sorting
-- Click through of disabled buttons is surprising
-- “Focus” shouldn’t switch so easily.
 
 - game
-
 	- Denizen-2
 		- update cyclops art
 		- update temple art
 		- update arachnoid art
 		- fix modes if no avatar
+		- squisher, in streaming mode, to save files
+		- GT: needs pick up effect for gold (single yellow glow of the avatar?)
+		- GT: needs pick up effect for kiosks or visitors (like a gold triangle or chest can float over the kiosk when the visitor spends money)
+		- GT: rez-in for structures
+		- is shield boost working correctly? Effects are *not* getting stripped by the shield.
+		- flammability / shockability very agressive
+		- viewing edge of world breaks all kinds of limits and ASSERTs
+		- item destruction / hpRegen
+		- shield looks very boring (and hard to tell what it is). And does it turn off if you don't have one? And does it glow?
+		- buildings shouldn't drop gold on de-rez
+		- Click through of disabled buttons is surprising
+		- “Focus” shouldn’t switch so easily.
+		- space bar pause
 
 	- Census
 		x coolest stuff, past and present, by category
 		x total of Au and Crystal
 		x consider tying gold/crystal to per-cycle census
 		x check money
-		- money checks optional
+		x switch over to tracking GameItems, if active.
 		x greatest warrior
-		- greatest smith
 		x greatest weapons
+		x location and owner
+		- money checks optional
+		- greatest smith
 		- greatest monsters
 		- needs to feel interactive
-		- location and owner
 
 	- Market
 		x rethink fiction / core control / avatar prime

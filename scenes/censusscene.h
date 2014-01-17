@@ -37,7 +37,7 @@ public:
 
 private:
 	void Scan();
-	void ScanItem( const GameItem* );
+	void ScanItem( ItemComponent* ic, const GameItem* );
 
 	LumosGame*			lumosGame;
 	ChitBag*			chitBag;
@@ -68,10 +68,15 @@ private:
 	ItemHistory levelActive, 
 				levelAny,
 				valueActive,
-				valueAny,
+				valueAny;
 
-				mobLevelActive[MOB_COUNT],
-				itemLevelActive[ITEM_COUNT];
+	struct Info {
+		const GameItem*			item;
+		const ItemComponent*	ic;
+	};
+
+	Info mobActive[MOB_COUNT];
+	Info itemActive[ITEM_COUNT];
 };
 
 #endif // CENSUS_SCENE_INCLUDED
