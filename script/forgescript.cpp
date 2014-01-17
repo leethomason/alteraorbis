@@ -49,6 +49,7 @@ const char* ForgeScript::ItemPart( int item, int part )
 	else {
 		GLASSERT( 0 );
 	}
+	return 0;
 }
 
 
