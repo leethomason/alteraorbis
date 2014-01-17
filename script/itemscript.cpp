@@ -237,6 +237,29 @@ void ItemHistory::Serialize( XStream* xs )
 }
 
 
+void ItemHistory::AppendDesc( GLString* str )
+{
+	if ( !itemID ) {
+		str->append( "(none)" );
+	}
+	else {
+		GLASSERT( !fullName.empty() );
+		if ( level && value ) {
+			str->AppendFormat( "%s Level %d Value %d", fullName.c_str(), level, value );
+		}
+		else if ( level ) {
+			str->AppendFormat( "%s Level %d", fullName.c_str(), level );
+		}
+		else if ( value ) {
+			str->AppendFormat( "%s Value %d", fullName.c_str(), value );
+		}
+		else {
+			str->AppendFormat( "%s", fullName.c_str() );
+		}
+	}
+}
+
+
 ItemDB* StackedSingleton< ItemDB >::instance = 0;
 
 void ItemDB::Serialize( XStream* xs ) 

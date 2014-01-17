@@ -57,6 +57,8 @@ private:
 // Needs to be small - lots of these to save.
 struct ItemHistory
 {
+	ItemHistory() : itemID(0), level(0), value(0) {}
+
 	bool operator<(const ItemHistory& rhs) const { return this->itemID < rhs.itemID; }
 	bool operator==(const ItemHistory& rhs) const { return this->itemID == rhs.itemID; }
 
@@ -67,6 +69,7 @@ struct ItemHistory
 
 	void Set( const GameItem* );
 	void Serialize( XStream* xs );
+	void AppendDesc( grinliz::GLString* str );
 };
 
 /*
@@ -90,6 +93,9 @@ public:
 	const ItemHistory*	History( int id );
 
 	void Serialize( XStream* xs );
+
+	int NumHistory() const { return itemHistory.Size(); }
+	const ItemHistory& HistoryByIndex( int i ) { return itemHistory[i]; }
 
 private:
 	grinliz::HashTable< int, const GameItem* > itemMap;	// map of all the active, allocated items.

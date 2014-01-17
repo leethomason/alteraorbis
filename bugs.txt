@@ -1,20 +1,5 @@
 - "blue wall" bug. Alpha present. Not screen aligned. Noise in particles??
-x corrupt pathing info. worldgrid change w/o reset?
-x bolt renderer busted, occasionally
-
-x serializing too much news (pool, sectorherd, rampage)
-x particles
-x hash table degrading? - test perf with new table (and better allocator)
-x unsafe normalize in ai/melee
-x test chitbag performance
-
-
-- squisher, in streaming mode, to save files
-- bolt renderer buggy
-- redmantis run&gun broken?
 - fire + shock too cheap to build
-- GT: needs pick up effect for gold (single yellow glow of the avatar?)
-- GT: needs pick up effect for kiosks or visitors (like a gold triangle or chest can float over the kiosk when the visitor spends money)
 - GT: ui to show idle and busy workers
 - change shield to have cooldown then charge-up (rather than cooldown then reset)
 - redo AI utility to be based on a set of curves
@@ -24,53 +9,61 @@ x test chitbag performance
 - need to "ding" on level up
 - add rez-in animation
 - show rock damage
-- Melee should rotate to target (both rock and chit)
 - How does Ice and magma interact?
 - make sure gold/crystal gets returned to the Reserve when the Chit is destroyed
 - GT: lightning
-- GT: rez-in for structures
-- is shield boost working correctly? Effects are *not* getting stripped by the shield.
 - can re-pack MVP and Bone matrix in the shader to encode 3*vec4 as the transpose, then transpose in the shader
-x Hide free camera button
-x should be able to auto-clear when building 
 - standing shields!
 - personality, personality display
 - AI notifies friends when attacked, notifies that being attacked, etc.
 - maps: what direction is player pointed?
-- flammability / shockability very agressive
-- viewing edge of world breaks all kinds of limits and ASSERTs
-- item repair
-- item destruction / hpRegen
-x items count plants, other items towards kills
-x button to use vault / factory / etc.
 - fix porch image (alpha of the tiles, if not general improvement)
-- shield looks very boring (and hard to tell what it is). And does it turn off if you don't have one? And does it glow?
-x obvious and easy to get to menu cancel
-- buildings shouldn't drop gold on de-rez
-x TextBox needs to be better, and should be used much more.
 - AIs should account for personality and skills when doing inventory sorting
-- Click through of disabled buttons is surprising
-- “Focus” shouldn’t switch so easily.
 
 - game
+	- Denizen-2
+		- update cyclops art
+		- update temple art
+		- update arachnoid art
+		- fix modes if no avatar
+		- squisher, in streaming mode, to save files
+		- GT: needs pick up effect for gold (single yellow glow of the avatar?)
+		- GT: needs pick up effect for kiosks or visitors (like a gold triangle or chest can float over the kiosk when the visitor spends money)
+		- GT: rez-in for structures
+		- is shield boost working correctly? Effects are *not* getting stripped by the shield.
+		- flammability / shockability very agressive
+		- viewing edge of world breaks all kinds of limits and ASSERTs
+		- item destruction / hpRegen
+		- shield looks very boring (and hard to tell what it is). And does it turn off if you don't have one? And does it glow?
+		- buildings shouldn't drop gold on de-rez
+		- Click through of disabled buttons is surprising
+		- “Focus” shouldn’t switch so easily.
+		- space bar pause
 
 	- Census
-		- coolest stuff, past and present, by category
-		- total of Au and Crystal
-		- consider tying gold/crystal to per-cycle census
-		- check money
-		- greatest warrior, smith, weapons
+		x coolest stuff, past and present, by category
+		x total of Au and Crystal
+		x consider tying gold/crystal to per-cycle census
+		x check money
+		x switch over to tracking GameItems, if active.
+		x greatest warrior
+		x greatest weapons
+		x location and owner
+		- money checks optional
+		- greatest smith
 		- greatest monsters
+		- needs to feel interactive
 
 	- Market
-		- cyclops attracted by tech?
 		x rethink fiction / core control / avatar prime
+		x denizens
+		x item market
+		- proper game start: location, selection of team color, icons
+		- cyclops attracted by tech?
 		- tech pyramids -> power plants
 		- turret
 		- influence zones for buildings
 		- team colors
-		x denizens
-		x item market
 		- forge
 			- forge or factory?
 			- fee to forge
@@ -81,16 +74,19 @@ x TextBox needs to be better, and should be used much more.
 		- marking build zones
 			- dragging, rows
 			- top view?
-			- auto-clear vegetation
+			x auto-clear vegetation
 
 	- Adventure
+		x weapon swap button or auto-swap?
+		x How do bases and adventuring play together?
+			x why do you quit adventuring to build a base?
+		x console
+			x important events
+			x important de-rez
 		- control
 			- space bar to pause
 			- tab to toggle weapons
 			- pause button
-		x weapon swap button or auto-swap?
-		x How do bases and adventuring play together?
-			x why do you quit adventuring to build a base?
 		- shield: 
 			- xp from getting hit
 			- bugs in damage calc
@@ -103,9 +99,6 @@ x TextBox needs to be better, and should be used much more.
 			- created 
 			x kills
 			- winning names
-		x console
-			x important events
-			x important de-rez
 		- real health bars & check visibility
 	    - exploring
 	      - xp for exploring!!
@@ -226,6 +219,22 @@ V2 ideas:
 - level up grid and special skills
 
 ----------- FIXED -------------
+x Melee should rotate to target (both rock and chit)
+x Hide free camera button
+x should be able to auto-clear when building 
+x items count plants, other items towards kills
+x button to use vault / factory / etc.
+x obvious and easy to get to menu cancel
+x TextBox needs to be better, and should be used much more.
+x corrupt pathing info. worldgrid change w/o reset?
+x bolt renderer busted, occasionally
+x serializing too much news (pool, sectorherd, rampage)
+x particles
+x hash table degrading? - test perf with new table (and better allocator)
+x unsafe normalize in ai/melee
+x test chitbag performance
+x bolt renderer buggy
+x redmantis run&gun broken?
 x Denizen
 	x item pickup isn't working
 	x melee (standing too close) is a mess

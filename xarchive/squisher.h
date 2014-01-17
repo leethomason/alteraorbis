@@ -14,15 +14,16 @@ public:
 	Squisher();
 	~Squisher();
 
+	// Encode / Decode to memory.
 	const U8* Encode( const U8* in, int nIn, int* nCompressedOut );
 	const U8* Decode( const U8* in, int nDecompressed, int* nCompressed );
 
-	// Stream operation. Decode assumes size of decoded data is known.
-	void StreamEncode( const void* in, int nIn, FILE* fp, int* nWritten );
+	// Encode / Decode a block to a file.
+	// Use StreamEncode( 0, 0, fp )	for final flush.
+	void StreamEncode( const void* in, int nIn, FILE* fp );
 	void StreamDecode( void* write, int size, FILE* fp );
 
-	double Ratio() const { return (double)totalOut / (double)totalIn; }
-	int totalIn, totalOut;
+	int encodedU, encodedC, decodedU, decodedC;
 
 private:
 	int INDEX( unsigned p1, unsigned p2 ) { return p1*256+p2; }
@@ -30,6 +31,8 @@ private:
 	U8 byte;
 	U8 bit;
 	const U8* compBuf;
+	int streamP1;
+	int streamP2;
 
 	U8* table;
 

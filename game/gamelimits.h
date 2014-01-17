@@ -45,6 +45,19 @@ static const int TYPICAL_BEASTMEN	= TYPICAL_DOMAINS * 10;		// fixme: not used or
 static const int TYPICAL_MONSTERS	= TYPICAL_DOMAINS * 15;
 static const int TYPICAL_GREATER	= 10;						// These guys get overwhelming fast - they can clear a domain.
 
+static const int GOLD_PER_DENIZEN  = 100;
+static const int GOLD_PER_BEASTMAN =  20;
+static const int GOLD_PER_MONSTER  =  10;
+static const int ALL_GOLD =   TYPICAL_DENIZENS*GOLD_PER_DENIZEN 
+							+ TYPICAL_BEASTMEN*GOLD_PER_BEASTMAN
+							+ TYPICAL_MONSTERS*GOLD_PER_MONSTER;
+
+static const int ALL_CRYSTAL_GREEN  = TYPICAL_DOMAINS * 10;
+static const int ALL_CRYSTAL_RED    = TYPICAL_DOMAINS * 4;
+static const int ALL_CRYSTAL_BLUE   = TYPICAL_DOMAINS * 2;
+static const int ALL_CRYSTAL_VIOLET = TYPICAL_DOMAINS / 2;
+
+
 enum {
 	CRYSTAL_GREEN,			// basic weapon crystal
 	CRYSTAL_RED,			// fire weapon

@@ -308,12 +308,14 @@ void TextLabel::ConstQueue( CDynArray< uint16_t > *indexBuf, CDynArray< Gamui::V
 		if ( !*p ) break;
 
 		// Tabs are implemented as tables.
-		if ( *p == '\t' && m_tabWidth > 0 ) {
+		if ( *p == '\t' ) {
 			++p;
 			if ( !*p ) break;
 
-			++tab;
-			x = X() + float(tab)*m_tabWidth;
+			if ( m_tabWidth > 0 ) {
+				++tab;
+				x = X() + float(tab)*m_tabWidth;
+			}
 		}
 
 		// Throw away space after a line break.

@@ -346,6 +346,9 @@
     <ClCompile Include="..\xarchive\squisher.cpp">
       <Filter>Source Files\game</Filter>
     </ClCompile>
+    <ClCompile Include="..\scenes\censusscene.cpp">
+      <Filter>Source Files\scenes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\camera.h">
@@ -695,6 +698,9 @@
     </ClInclude>
     <ClInclude Include="..\xegame\stackedsingleton.h">
       <Filter>Source Files\xegame</Filter>
+    </ClInclude>
+    <ClInclude Include="..\scenes\censusscene.h">
+      <Filter>Source Files\scenes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
