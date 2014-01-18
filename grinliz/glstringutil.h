@@ -124,13 +124,6 @@ public:
 										Validate();
 									}
 
-#if 0
-	// fixme: inconsistent with += behavior
-	CStr( int value )				{	GLASSERT(sizeof(*this) == ALLOCATE );		// not required for class to work, but certainly the intended design
-										buf[0] = 0; 
-										SNPrintf( buf, ALLOCATE, "%d", value );
-										Validate();
-#endif									}
 	~CStr()	{}
 
 	const char* c_str()	const			{ return buf; }

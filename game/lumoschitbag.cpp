@@ -27,6 +27,7 @@
 #include "../engine/model.h"
 #include "../engine/engine.h"
 #include "../engine/loosequadtree.h"
+#include "../engine/particle.h"
 
 #include "../script/battlemechanics.h"
 #include "../script/itemscript.h"
@@ -205,6 +206,8 @@ Chit* LumosChitBag::NewBuilding( const Vector2I& pos, const char* name, int team
 	sp.port = 1;
 	worldMap->SetRandomPort( sp );
 #endif
+
+	engine->particleSystem->EmitPD( "constructionDone", ToWorld3F( pos ), V3F_UP, 0 );
 
 	return chit;
 }

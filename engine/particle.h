@@ -81,7 +81,7 @@ struct ParticleStream
 // SHALLOW
 struct ParticleDef
 {
-	grinliz::CStr<16> name;
+	grinliz::CStr<64> name;
 
 	enum { ONCE, CONTINUOUS };
 	int time;		// "once" "continuous"

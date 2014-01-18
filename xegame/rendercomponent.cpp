@@ -38,11 +38,8 @@ RenderComponent::RenderComponent( Engine* _engine, const char* asset )
 	for( int i=0; i<NUM_MODELS; ++i ) {
 		model[i] = 0;
 	}
-	for( int i=0; i<NUM_DECO; ++i ) {
-		deco[i] = 0;
-		decoDuration[i] = 0;
-	}
 	radiusOfBase = 0;
+	groundMark = 0;
 
 	mainAsset = StringPool::Intern( asset );
 }
@@ -53,9 +50,7 @@ RenderComponent::~RenderComponent()
 	for( int i=0; i<NUM_MODELS; ++i ) {
 		GLASSERT( model[i] == 0 );
 	}
-	for( int i=0; i<NUM_DECO; ++i ) {
-		GLASSERT( deco[i] == 0 );
-	}
+	GLASSERT( groundMark == 0 );
 }
 
 
@@ -123,13 +118,10 @@ void RenderComponent::OnRemove()
 			model[i] = 0;
 		}
 	}
-	for( int i=0; i<NUM_DECO; ++i ) {
-		if ( deco[i] ) {
-			engine->FreeModel( deco[i] );
-			deco[i] = 0;
-		}
+	if ( groundMark ) {
+		engine->FreeModel( groundMark );
+		groundMark = 0;
 	}
-
 }
 
 
@@ -339,66 +331,76 @@ int RenderComponent::DoTick( U32 deltaTime )
 		}
 	}
 
-	// The decos:
-	for( int i=0; i<NUM_DECO; ++i ) {
-		if ( deco[i] ) {
-			decoDuration[i] -= deltaTime;
-			if ( decoDuration[i] < 0 ) {
-				engine->FreeModel( deco[i] );
-				deco[i] = 0;
-				decoDuration[i] = 0;
+	if ( groundMark ) {
+		Vector3F pos = model[0]->Pos();
+		pos.y += 0.01f;
+		groundMark->SetPos( pos );
+	}
+
+	{
+		// Shove this off the particle renderer, as a 2nd layer??
+
+		int i=0;
+		static const float DY = 0.4f;
+		const Rectangle2F& aabb = model[0]->AABB();
+		Vector3F pos = model[0]->Pos();
+		pos.y = aabb.max.y;
+
+		while ( i < icons.Size() ) {
+			icons[i].time -= (int)deltaTime;
+			if ( icons[i].time > 0 ) {
+
 			}
+
 		}
 	}
 
-	if ( deco[DECO_FOOT] ) {
-		Vector3F pos = model[0]->Pos();
-		pos.y += 0.01f;
-		deco[DECO_FOOT]->SetPos( pos );
-		tick = 0;
-	}
-	if ( deco[DECO_HEAD] ) {
-		Vector3F pos = model[0]->Pos();
-		pos.y += model[0]->AABB().SizeY() + 0.4f;
-
-		Quaternion camera = engine->camera.Quat();
-		Matrix4 camMat;
-		camera.ToMatrix( &camMat );
-		float degrees = camMat.CalcRotationAroundAxis( 1 );
-	
-		deco[DECO_HEAD]->SetPos( pos );
-		deco[DECO_HEAD]->SetYRotation( degrees );
-		tick = 0;
-	}
 	return tick;
 }
 
 
-void RenderComponent::Deco( const char* asset, int slot, int duration )
+void RenderComponent::AddDeco( const char* asset, int duration )
 {
-	GLASSERT( slot < NUM_DECO );
-	if ( deco[slot] ) {
-		engine->FreeModel( deco[slot] );
-		deco[slot] = 0;
+	Icon* icon = icons.PushArr(1);
+	icon->model = engine->AllocModel( "iconHeadPlate" );
+	icon->time = duration;
+
+	Vector3F pos = { 0, 0, 0 };	// wait for DoTick to get the pos correct.
+	icon->model->SetPos( pos );	
+	icon->model->userData = parentChit;
+	icon->model->SetFlag( MODEL_CLICK_THROUGH );
+
+	Texture* texture = icon->model->GetResource()->atom[0].texture;
+	Texture::TableEntry te;
+	texture->GetTableEntry( asset, &te );
+	GLASSERT( !te.name.empty() );
+
+	icon->model->SetTextureXForm( te.uvXForm.x, te.uvXForm.y, te.uvXForm.z, te.uvXForm.w );
+	icon->model->SetTextureClip( te.clip.x, te.clip.y, te.clip.z, te.clip.w );
+}
+
+
+void RenderComponent::SetGroundMark( const char* asset )
+{
+	if ( groundMark ) {
+		engine->FreeModel( groundMark );
+		groundMark = 0;
 	}
-	if ( duration > 0 ) {
-		decoDuration[slot] = duration;
-		const ModelResource* res = ModelResourceManager::Instance()
-			->GetModelResource( slot == DECO_FOOT ? "iconPlate" : "iconHeadPlate" );
-		deco[slot] = engine->AllocModel( res );
+	if ( asset && *asset ) {
+		groundMark = engine->AllocModel( "iconPlate" );
 		Vector3F pos = model[0]->Pos();
 		pos.y = 0.01f;
-		deco[slot]->SetPos( pos );	
-		deco[slot]->userData = parentChit;
-		deco[slot]->SetFlag( MODEL_CLICK_THROUGH );
+		groundMark->SetPos( pos );	
+		groundMark->userData = parentChit;
+		groundMark->SetFlag( MODEL_CLICK_THROUGH );
 
-		Texture* texture = deco[slot]->GetResource()->atom[0].texture;
+		Texture* texture = groundMark->GetResource()->atom[0].texture;
 		Texture::TableEntry te;
 		texture->GetTableEntry( asset, &te );
 		GLASSERT( !te.name.empty() );
 
-		deco[slot]->SetTextureXForm( te.uvXForm.x, te.uvXForm.y, te.uvXForm.z, te.uvXForm.w );
-		deco[slot]->SetTextureClip( te.clip.x, te.clip.y, te.clip.z, te.clip.w );
+		groundMark->SetTextureXForm( te.uvXForm.x, te.uvXForm.y, te.uvXForm.z, te.uvXForm.w );
+		groundMark->SetTextureClip( te.clip.x, te.clip.y, te.clip.z, te.clip.w );
 	}
 }
 

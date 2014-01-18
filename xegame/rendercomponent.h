@@ -27,7 +27,6 @@
 #include "../grinliz/glmatrix.h"
 #include "../grinliz/glcolor.h"
 
-
 class Engine;
 class ModelResource;
 class Model;
@@ -107,7 +106,8 @@ public:
 	void Detach( int hardpoint );
 
 	// --- Decoration --- //
-	void Deco( const char* asset, int slot, int duration );
+	void SetGroundMark( const char* asset );
+	void AddDeco( const char* name, int duration );
 
 private:
 	int CalcAnimation() const;
@@ -118,8 +118,16 @@ private:
 	grinliz::IString		mainAsset;
 
 	Model*					model[ NUM_MODELS ];
-	Model*					deco[ NUM_DECO ];
-	int						decoDuration[ NUM_DECO ];
+	Model*					groundMark;
+
+	// Using gamui to do the deco icons seems to make a lot more sense, but
+	// there are challenges: 1) managing lots of gamui images, 2) getting
+	// the size xform correct, 3) culling
+	struct Icon {
+		Model*	model;
+		int		time;
+	};
+	grinliz::CDynArray< Icon > icons;
 };
 
 #endif // RENDER_COMPONENT_INCLUDED

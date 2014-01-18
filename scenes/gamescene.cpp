@@ -723,7 +723,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 			}
 		}
 	}
-	if ( /*item == &freeCameraButton || */ item == &uiMode[UI_BUILD] || item == &uiMode[UI_VIEW] || item == &uiMode[UI_AVATAR] ) {
+	if ( item == &uiMode[UI_BUILD] || item == &uiMode[UI_VIEW] || item == &uiMode[UI_AVATAR] ) {
 		// Set it to track nothing; if it needs to track something, that will
 		// be set by future mouse actions or DoTick
 		CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
@@ -1033,10 +1033,19 @@ void GameScene::DoTick( U32 delta )
 	str.Format( "Date %.2f\n%s", NewsHistory::Instance()->AgeF(), sd.name.c_str() );
 	dateLabel.SetText( str.c_str() );
 
+	// Set the states: VIEW, BUILD, AVATAR. Avatar is 
+	// disabled if there isn't one...
 	Chit* playerChit = sim->GetPlayerChit();
+	if ( !playerChit ) {
+		if ( uiMode[UI_AVATAR].Down() ) {
+			uiMode[UI_VIEW].SetDown();
+		}
+	}
+	uiMode[UI_AVATAR].SetEnabled( playerChit != 0 );
 	if ( uiMode[UI_AVATAR].Down() ) {
 		chitFaceToTrack = playerChit ? playerChit->ID() : 0;
 	}
+
 	Chit* track = sim->GetChitBag()->GetChit( chitFaceToTrack );
 	faceWidget.SetFace( &uiRenderer, track ? track->GetItem() : 0 );
 	SetBars( track );

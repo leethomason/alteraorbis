@@ -19,14 +19,14 @@
 - maps: what direction is player pointed?
 - fix porch image (alpha of the tiles, if not general improvement)
 - AIs should account for personality and skills when doing inventory sorting
+- squisher, in streaming mode, to save files
 
 - game
 	- Denizen-2
 		- update cyclops art
 		- update temple art
 		- update arachnoid art
-		- fix modes if no avatar
-		- squisher, in streaming mode, to save files
+		x fix modes if no avatar
 		- GT: needs pick up effect for gold (single yellow glow of the avatar?)
 		- GT: needs pick up effect for kiosks or visitors (like a gold triangle or chest can float over the kiosk when the visitor spends money)
 		- GT: rez-in for structures
@@ -197,6 +197,9 @@ x Troll
 - test def-start
 - test new-start
 - create release!
+
+--- Links --- 
+http://weloveiconfonts.com/ : entypo
 
 ---------- Defer ----------
 d rings deflect bolts. too much AI change.
