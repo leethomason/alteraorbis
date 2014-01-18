@@ -1129,6 +1129,8 @@ void WorldMap::AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > *a
 	Vector2I start;
 	const WorldGrid* startGrid = ToGrid( state, &start );
 
+	// FIXME: incorrect; need to walk the edges of the zone.
+	//   also need a 2D iterator, which is in the code somewhere...
 	// Flush out the neighbors.
 	for( int j=-1; j<=1; ++j ) {
 		for( int i=-1; i<=1; ++i ) {

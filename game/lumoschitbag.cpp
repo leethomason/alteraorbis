@@ -168,6 +168,7 @@ Chit* LumosChitBag::FindBuilding(	const grinliz::IString&  name,
 
 	// Bad flag? Something didn't return?
 	GLASSERT( 0 );
+	return 0;
 }
 
 

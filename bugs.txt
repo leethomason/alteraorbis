@@ -39,6 +39,8 @@
 		- Click through of disabled buttons is surprising
 		- “Focus” shouldn’t switch so easily.
 		- space bar pause
+    - turrets
+    - ruins
 
 	- Census
 		x coolest stuff, past and present, by category
