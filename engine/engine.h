@@ -31,6 +31,10 @@
 #include "screenport.h"
 #include "lighting.h"
 #include "shadermanager.h"
+#include "uirendering.h"
+
+#include "../gamui/gamui.h"
+
 #include "../xegame/stackedsingleton.h"
 
 class RenderQueue;
@@ -190,6 +194,8 @@ public:
 		BLUR_COUNT = 5
 	};
 
+	gamui::Gamui overlay;
+
 private:
 	enum ShadowState {
 		IN_SHADOW,
@@ -216,6 +222,8 @@ private:
 	BoltRenderer*	boltRenderer;
 
 	RenderTarget* renderTarget[RT_COUNT];
+
+	UIRenderer uiRenderer;
 };
 
 #endif // UFOATTACK_ENGINE_INCLUDED

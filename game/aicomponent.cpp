@@ -1077,7 +1077,7 @@ bool AIComponent::SectorHerd( const ComponentSet& thisComp )
 
 				RenderComponent* rc = parentChit->GetRenderComponent();
 				if ( rc ) {
-					rc->Deco( "horn", RenderComponent::DECO_HEAD, 10*1000 );
+					rc->AddDeco( "horn", 10*1000 );
 				}
 
 				// Trolls herd *all the time*

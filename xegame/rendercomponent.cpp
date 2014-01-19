@@ -29,6 +29,8 @@
 #include "../Shiny/include/Shiny.h"
 #include "../script/procedural.h"
 
+#include "../game/lumosgame.h"
+
 using namespace grinliz;
 using namespace tinyxml2;
 
@@ -337,24 +339,7 @@ int RenderComponent::DoTick( U32 deltaTime )
 		groundMark->SetPos( pos );
 	}
 
-	{
-		// Shove this off the particle renderer, as a 2nd layer??
-
-		int i=0;
-		static const float DY = 0.4f;
-		const Rectangle2F& aabb = model[0]->AABB();
-		Vector3F pos = model[0]->Pos();
-		pos.y = aabb.max.y;
-
-		while ( i < icons.Size() ) {
-			icons[i].time -= (int)deltaTime;
-			if ( icons[i].time > 0 ) {
-
-			}
-
-		}
-	}
-
+	ProcessIcons( (int) deltaTime );
 	return tick;
 }
 
@@ -362,21 +347,57 @@ int RenderComponent::DoTick( U32 deltaTime )
 void RenderComponent::AddDeco( const char* asset, int duration )
 {
 	Icon* icon = icons.PushArr(1);
-	icon->model = engine->AllocModel( "iconHeadPlate" );
+	icon->image = new gamui::Image();
+	gamui::RenderAtom atom = LumosGame::CalcIconAtom( asset );
+	icon->image->Init( &engine->overlay, atom, false );
 	icon->time = duration;
+}
 
-	Vector3F pos = { 0, 0, 0 };	// wait for DoTick to get the pos correct.
-	icon->model->SetPos( pos );	
-	icon->model->userData = parentChit;
-	icon->model->SetFlag( MODEL_CLICK_THROUGH );
 
-	Texture* texture = icon->model->GetResource()->atom[0].texture;
-	Texture::TableEntry te;
-	texture->GetTableEntry( asset, &te );
-	GLASSERT( !te.name.empty() );
+void RenderComponent::ProcessIcons( int delta )
+{
+	for( int i=0; i<icons.Size(); ++i ) {
+		icons[i].time -= delta;
+		if ( icons[i].time < 0 ) {
+			delete icons[i].image;
+			icons.Remove( i );
+			--i;
+		}
+	}
 
-	icon->model->SetTextureXForm( te.uvXForm.x, te.uvXForm.y, te.uvXForm.z, te.uvXForm.w );
-	icon->model->SetTextureClip( te.clip.x, te.clip.y, te.clip.z, te.clip.w );
+	if ( icons.Empty() ) {
+		return;
+	}
+
+	SpatialComponent* sc = parentChit->GetSpatialComponent();
+	Vector3F pos = { 0, 0, 0 };
+	if ( sc ) pos = sc->GetPosition();
+
+	bool inView = false;
+
+	float len2 = ( engine->camera.PosWC() - pos ).LengthSquared();
+	if ( len2 < EL_FAR*EL_FAR ) {
+		const Screenport& port = engine->GetScreenport();
+		Vector2F ui = { 0, 0 };
+		port.WorldToUI( pos, &ui );
+		Rectangle2F uiBounds;
+		uiBounds.Set( 0, 0, port.UIWidth(), port.UIHeight() );
+		uiBounds.Outset( port.UIHeight() * 0.25f );
+		if ( uiBounds.Contains( ui )) {
+			inView = true;
+
+			for( int i=0; i<icons.Size(); ++i ) {
+				icons[i].image->SetCenterPos( ui.x, ui.y );
+				icons[i].image->SetVisible( true );
+			}
+		}
+	}
+
+	if ( !inView ) {
+		for( int i=0; i<icons.Size(); ++i ) {
+			icons[i].image->SetVisible( false );
+		}
+	}
 }
 
 

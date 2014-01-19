@@ -27,6 +27,9 @@
 #include "../grinliz/glmatrix.h"
 #include "../grinliz/glcolor.h"
 
+#include "../gamui/gamui.h"
+
+
 class Engine;
 class ModelResource;
 class Model;
@@ -112,6 +115,7 @@ public:
 private:
 	int CalcAnimation() const;
 	SpatialComponent* SyncToSpatial();	// this a scary function: location is stored in both the model and the spatialcomponent
+	void ProcessIcons( int time );
 
 	Engine*					engine;
 	float					radiusOfBase;
@@ -120,12 +124,12 @@ private:
 	Model*					model[ NUM_MODELS ];
 	Model*					groundMark;
 
-	// Using gamui to do the deco icons seems to make a lot more sense, but
-	// there are challenges: 1) managing lots of gamui images, 2) getting
-	// the size xform correct, 3) culling
-	struct Icon {
-		Model*	model;
-		int		time;
+	class Icon {
+	public:
+		Icon() : image(0), time(0) {}
+
+		gamui::Image*	image;
+		int				time;
 	};
 	grinliz::CDynArray< Icon > icons;
 };

@@ -376,11 +376,11 @@ void GameScene::ClearTargetFlags()
 {
 	Chit* target = sim->GetChitBag()->GetChit( targetChit );
 	if ( target && target->GetRenderComponent() ) {
-		target->GetRenderComponent()->Deco( 0, 0, 0 );
+		target->GetRenderComponent()->SetGroundMark( 0 );
 	}
 	target = sim->GetChitBag()->GetChit( possibleChit );
 	if ( target && target->GetRenderComponent() ) {
-		target->GetRenderComponent()->Deco( 0, 0, 0 );
+		target->GetRenderComponent()->SetGroundMark( 0 );
 	}
 	targetChit = possibleChit = 0;
 }
@@ -398,7 +398,7 @@ void GameScene::MoveModel( Chit* target )
 	if ( oldTarget ) {
 		RenderComponent* rc = oldTarget->GetRenderComponent();
 		if ( rc ) {
-			rc->Deco( 0, 0, 0 );
+			rc->SetGroundMark( 0 );
 		}
 	}
 	Chit* focusedTarget = sim->GetChitBag()->GetChit( targetChit );
@@ -408,7 +408,7 @@ void GameScene::MoveModel( Chit* target )
 			possibleChit = 0;
 			RenderComponent* rc = target->GetRenderComponent();
 			if ( rc ) {
-				rc->Deco( "possibleTarget", RenderComponent::DECO_FOOT, INT_MAX );
+				rc->SetGroundMark( "possibleTarget" );
 				possibleChit = target->ID();
 			}
 		}
@@ -457,7 +457,7 @@ void GameScene::TapModel( Chit* target )
 
 		RenderComponent* rc = target->GetRenderComponent();
 		if ( rc ) {
-			rc->Deco( setTarget, RenderComponent::DECO_FOOT, INT_MAX );
+			rc->SetGroundMark( setTarget );
 			targetChit = target->ID();
 		}
 	}

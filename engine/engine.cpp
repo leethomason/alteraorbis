@@ -70,6 +70,14 @@ Engine::Engine( Screenport* port, const gamedb::Reader* database, Map* m )
 	particleSystem = new ParticleSystem();
 	boltRenderer = new BoltRenderer();
 
+	TextureManager* tm = TextureManager::Instance();
+	gamui::RenderAtom text, textD;
+	text.Init(  (const void*)UIRenderer::RENDERSTATE_UI_TEXT, 
+		        (const void*)tm->GetTexture( "font" ), 0, 0, 1, 1 );
+	textD.Init( (const void*)UIRenderer::RENDERSTATE_UI_TEXT_DISABLED, 
+		        (const void*)tm->GetTexture( "font" ), 0, 0, 1, 1 );
+
+	overlay.Init( &uiRenderer, text, textD, &uiRenderer );
 	PushInstance( this );
 }
 
@@ -488,6 +496,11 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 	{
 		DrawDebugLines( deltaTime );
 	}
+
+	// Overlay elements
+	screenport->SetUI();
+	overlay.Render();
+	screenport->SetPerspective();
 }
 
 
