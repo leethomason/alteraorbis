@@ -126,7 +126,7 @@ void Sim::Load( const char* mapDAT, const char* gameDAT )
 		// Mark as player controlled so it reacts as expected to player input.
 		// This is the primary avatar, and has some special rules.
 		player->SetPlayerControlled( true );
-		player->GetRenderComponent()->AddDeco( "horn", 100*1000 );
+		//player->GetRenderComponent()->AddDeco( "horn", 100*1000 );
 	}
 }
 

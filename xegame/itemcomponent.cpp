@@ -138,6 +138,23 @@ float ItemComponent::PowerRating() const
 }
 
 
+void ItemComponent::AddCraftXP( int nCrystals )
+{
+	GameItem* mainItem = itemArr[0];
+	int level = mainItem->Traits().Level();
+	mainItem->GetTraitsMutable()->AddCraftXP( nCrystals );
+	if ( mainItem->Traits().Level() > level ) {
+		// Level up!
+		// FIXME: show an icon
+		mainItem->hp = mainItem->TotalHPF();
+		NameItem( mainItem );
+		if ( parentChit->GetRenderComponent() ) {
+			parentChit->GetRenderComponent()->AddDeco( "levelup", STD_DECO );
+		}
+	}
+}
+
+
 void ItemComponent::AddBattleXP( bool isMelee, int killshotLevel, const GameItem* loser )
 {
 	// Loser has to be a MOB. That was a funny bug. kills: plant0 7
@@ -150,9 +167,11 @@ void ItemComponent::AddBattleXP( bool isMelee, int killshotLevel, const GameItem
 	mainItem->GetTraitsMutable()->AddBattleXP( killshotLevel );
 	if ( mainItem->Traits().Level() > level ) {
 		// Level up!
-		// FIXME: show an icon
 		mainItem->hp = mainItem->TotalHPF();
 		NameItem( mainItem );
+		if ( parentChit->GetRenderComponent() ) {
+			parentChit->GetRenderComponent()->AddDeco( "levelup", STD_DECO );
+		}
 	}
 
 	GameItem* weapon = 0;
@@ -441,6 +460,10 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 
 			// Need to delete the gold, else it will track to us again!
 			gold->QueueDelete();
+
+			if ( parentChit->GetRenderComponent() ) {
+				parentChit->GetRenderComponent()->AddDeco( "loot", STD_DECO );
+			}
 		}
 	}
 	else if ( msg.ID() >= ChitMsg::CHIT_DESTROYED_START && msg.ID() <= ChitMsg::CHIT_DESTROYED_END ) 
@@ -724,6 +747,10 @@ void ItemComponent::AddToInventory( ItemComponent* ic )
 		SortInventory();
 	}
 	UpdateActive();
+
+	if ( parentChit && parentChit->GetRenderComponent() ) {
+		parentChit->GetRenderComponent()->AddDeco( "loot", STD_DECO );
+	}
 }
 
 

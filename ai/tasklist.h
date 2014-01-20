@@ -3,6 +3,7 @@
 
 #include "../grinliz/glvector.h"
 #include "../grinliz/glstringutil.h"
+#include "../xegame/cticker.h"
 
 class Chit;
 class WorkQueue;
@@ -104,7 +105,7 @@ public:
 class TaskList
 {
 public:
-	TaskList( WorldMap* _map, Engine* _engine )	: worldMap(_map), engine(_engine) {}
+	TaskList( WorldMap* _map, Engine* _engine )	: worldMap(_map), engine(_engine), socialTicker(1000) {}
 	~TaskList()	{}
 
 	grinliz::Vector2I Pos2I() const;
@@ -114,7 +115,7 @@ public:
 	void Clear()						{ taskList.Clear(); }
 
 	bool Standing() const { return !taskList.Empty() && taskList[0].action == Task::TASK_STAND; }
-	void DoStanding( int time );
+	bool DoStanding( const ComponentSet& thisComp, int time );
 
 	// WorkQueue is optional, but connects the tasks back to the queue.
 	void DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta );
@@ -131,6 +132,7 @@ private:
 	WorldMap*	worldMap;
 	Engine*		engine;
 	grinliz::IString lastBuildingUsed;	// should probably be serialized, if this was serialized.
+	CTicker socialTicker;
 	grinliz::CDynArray<Task> taskList;
 };
 

@@ -244,7 +244,7 @@ void ForgeScene::ItemTapped( const gamui::UIItem* uiItem )
 		int count=0;
 		for( int i=0; i<NUM_CRYSTAL_TYPES; ++i ) count += crystalRequired.crystal[i];
 		
-		forgeData->itemComponent->GetItem(0)->GetTraitsMutable()->AddCraftXP( count );
+		forgeData->itemComponent->AddCraftXP( count );
 		forgeData->itemComponent->AddToInventory( item );
 		forgeData->itemComponent->GetItem(0)->wallet.Remove( crystalRequired );
 		item->wallet.Add( crystalRequired );	// becomes part of the item, and will be returned to Reserve when item is destroyed.

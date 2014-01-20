@@ -72,6 +72,7 @@ public:
 
 	void Target( Chit* chit, bool focused );
 	bool RockBreak( const grinliz::Vector2I& pos );
+	void MakeAware( const int* enemyIDs, int n );
 	
 	// Use a null IString for ICE.
 	bool Build( const grinliz::Vector2I& pos, grinliz::IString structure );
