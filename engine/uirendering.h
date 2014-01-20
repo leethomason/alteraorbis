@@ -37,7 +37,7 @@ public:
 		RENDERSTATE_COUNT
 	};
 
-	UIRenderer() : shader(BLEND_NORMAL), textRed(1), textGreen(1), textBlue(1), texture(0), vbo(0), ibo() {}
+	UIRenderer( int _layer ) : layer(_layer), shader(BLEND_NORMAL), textRed(1), textGreen(1), textBlue(1), texture(0), vbo(0), ibo() {}
 
 	void SetTextColor( float r, float g, float b )		{ textRed = r; textGreen = g; textBlue = b; }
 
@@ -59,6 +59,7 @@ public:
 	grinliz::Matrix4  colorXForm[NUM_DATA];
 
 private:
+	int layer;
 	CompositingShader shader;
 	float textRed, textGreen, textBlue;
 	Texture* texture;

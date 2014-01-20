@@ -29,8 +29,8 @@ void UIRenderer::BeginRender( int nIndex, const uint16_t* index, int nVertex, co
 {
 	// Should be completely uneeded, but fixes bugs on a netbook. (With questionable drivers.)
 	GPUDevice::Instance()->ResetState();
-	vbo = GPUDevice::Instance()->GetUIVBO( GPUDevice::HUD );
-	ibo = GPUDevice::Instance()->GetUIIBO( GPUDevice::HUD );
+	vbo = GPUDevice::Instance()->GetUIVBO( layer );
+	ibo = GPUDevice::Instance()->GetUIIBO( layer );
 	vbo->Upload( vertex, nVertex*sizeof(*vertex), 0 );
 	ibo->Upload( index, nIndex, 0 );
 }

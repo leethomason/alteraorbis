@@ -208,7 +208,7 @@ Chit* LumosChitBag::NewBuilding( const Vector2I& pos, const char* name, int team
 	worldMap->SetRandomPort( sp );
 #endif
 
-	engine->particleSystem->EmitPD( "constructionDone", ToWorld3F( pos ), V3F_UP, 0 );
+	engine->particleSystem->EmitPD( "constructiondone", ToWorld3F( pos ), V3F_UP, 0 );
 
 	return chit;
 }

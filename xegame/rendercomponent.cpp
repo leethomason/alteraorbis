@@ -124,6 +124,10 @@ void RenderComponent::OnRemove()
 		engine->FreeModel( groundMark );
 		groundMark = 0;
 	}
+	for( int i=0; i<icons.Size(); ++i ) {
+		delete icons[i].image;
+	}
+	icons.Clear();
 }
 
 
@@ -351,6 +355,7 @@ void RenderComponent::AddDeco( const char* asset, int duration )
 	gamui::RenderAtom atom = LumosGame::CalcIconAtom( asset );
 	icon->image->Init( &engine->overlay, atom, false );
 	icon->time = duration;
+	icon->rotation = 90.0f;
 }
 
 
@@ -358,6 +363,8 @@ void RenderComponent::ProcessIcons( int delta )
 {
 	for( int i=0; i<icons.Size(); ++i ) {
 		icons[i].time -= delta;
+		icons[i].rotation -= Travel( 180.0f, float(delta)/1000.0f );
+
 		if ( icons[i].time < 0 ) {
 			delete icons[i].image;
 			icons.Remove( i );
@@ -374,21 +381,36 @@ void RenderComponent::ProcessIcons( int delta )
 	if ( sc ) pos = sc->GetPosition();
 
 	bool inView = false;
+	static const float SIZE = 20.0f;
 
 	float len2 = ( engine->camera.PosWC() - pos ).LengthSquared();
 	if ( len2 < EL_FAR*EL_FAR ) {
 		const Screenport& port = engine->GetScreenport();
+		
 		Vector2F ui = { 0, 0 };
-		port.WorldToUI( pos, &ui );
+		const Rectangle3F& aabb = model[0]->AABB();
+		Vector3F topCenter = { pos.x, aabb.max.y, pos.z };
+
+		port.WorldToUI( topCenter, &ui );
 		Rectangle2F uiBounds;
 		uiBounds.Set( 0, 0, port.UIWidth(), port.UIHeight() );
 		uiBounds.Outset( port.UIHeight() * 0.25f );
+
 		if ( uiBounds.Contains( ui )) {
 			inView = true;
+			float width = icons.Size() * SIZE;
 
 			for( int i=0; i<icons.Size(); ++i ) {
-				icons[i].image->SetCenterPos( ui.x, ui.y );
+				icons[i].image->SetCenterPos( ui.x - width*0.5f + (float)(i)*SIZE + SIZE*0.5f, ui.y-SIZE );
 				icons[i].image->SetVisible( true );
+				icons[i].image->SetSize( SIZE, SIZE );
+
+				if ( icons[i].rotation >= 0 ) {
+					icons[i].image->SetRotationY( icons[i].rotation );
+				}
+				else {
+					icons[i].image->SetRotationY( 0 );
+				}
 			}
 		}
 	}

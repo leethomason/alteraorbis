@@ -26,7 +26,8 @@ using namespace gamui;
 
 
 Scene::Scene( Game* _game )
-	: game( _game )
+	: game( _game ),
+	  uiRenderer( GPUDevice::HUD )
 {
 	gamui2D.Init( &uiRenderer, game->GetRenderAtom( Game::ATOM_TEXT ), game->GetRenderAtom( Game::ATOM_TEXT_D ), &uiRenderer );
 //	gamui3D.Init( &uiRenderer, game->GetRenderAtom( Game::ATOM_TEXT ), game->GetRenderAtom( Game::ATOM_TEXT_D ), &uiRenderer );
