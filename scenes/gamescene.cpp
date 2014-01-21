@@ -469,7 +469,8 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 {
 	bool uiHasTap = ProcessTap( action, view, world );
 	Engine* engine = sim->GetEngine();
-	
+	WorldMap* map = sim->GetWorldMap();
+
 	enable3DDragging = FreeCameraMode();
 	
 	buildActive = 0;
@@ -487,7 +488,12 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 		Vector3F atModel = { 0, 0, 0 };
 		Vector3F plane   = { 0, 0, 0 };
 		ModelVoxel mv = ModelAtMouse( view, sim->GetEngine(), TEST_HIT_AABB, 0, MODEL_CLICK_THROUGH, 0, &plane );
-		GLASSERT( plane.x > 0 && plane.z > 0 );
+		if ( plane.x > 0 && plane.z > 0 && plane.x < float(map->Width()) && plane.z < float(map->Width()) ) {
+			// okay
+		}
+		else {
+			return;	// outside of world. don't do testing.
+		}
 		Vector2I plane2i = { (int)plane.x, (int)plane.z };
 		const BuildData& buildData = buildScript.GetData( buildActive );
 

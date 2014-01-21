@@ -20,6 +20,8 @@
 - fix porch image (alpha of the tiles, if not general improvement)
 - AIs should account for personality and skills when doing inventory sorting
 - squisher, in streaming mode, to save files
+- “Focus” shouldn’t switch so easily.
+- 32bit texture support
 
 - game
 	- Denizen-2
@@ -27,19 +29,19 @@
 		- update temple art
 		- update arachnoid art
 		x fix modes if no avatar
-		- GT: needs pick up effect for gold (single yellow glow of the avatar?)
-		- GT: needs pick up effect for kiosks or visitors (like a gold triangle or chest can float over the kiosk when the visitor spends money)
+		x GT: needs pick up effect for gold (single yellow glow of the avatar?)
+		x GT: needs pick up effect for kiosks or visitors (like a gold triangle or chest can float over the kiosk when the visitor spends money)
 		x GT: rez-in for structures
 		- is shield boost working correctly? Effects are *not* getting stripped by the shield.
 		- flammability / shockability very agressive
-		- viewing edge of world breaks all kinds of limits and ASSERTs
+		x viewing edge of world breaks all kinds of limits and ASSERTs
 		x item destruction / hpRegen
 		- shield looks very boring (and hard to tell what it is). And does it turn off if you don't have one? And does it glow?
 		- buildings shouldn't drop gold on de-rez
 		- Click through of disabled buttons is surprising
-		- “Focus” shouldn’t switch so easily.
 		- space bar pause
     	- turrets
+    	- time scale culling
 
 	- Census
 		x coolest stuff, past and present, by category

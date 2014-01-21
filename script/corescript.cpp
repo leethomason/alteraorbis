@@ -304,6 +304,11 @@ void CoreScript::AddTech()
 	tech = Clamp( tech, 0.0, Min( TECH_MAX, double( MaxTech() ) - 0.01 ));
 
 	achievedTechLevel = Max( achievedTechLevel, (int)tech );
+
+	RenderComponent* rc = scriptContext->chit->GetRenderComponent();
+	if ( rc ) {
+		rc->AddDeco( "techxfer", STD_DECO );
+	}
 }
 
 

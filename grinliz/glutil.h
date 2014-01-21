@@ -157,11 +157,6 @@ inline float Fade5( float t )
 */
 template <class T> inline T BilinearInterpolate( T q00, T q10, T q01, T q11, T x, T y )
 {
-	GLASSERT( x >= (T)0.0 );
-	GLASSERT( x <= (T)1.0 );
-	GLASSERT( y >= (T)0.0 );
-	GLASSERT( y <= (T)1.0 );
-
 	const T one = static_cast<T>(1);
 	return q00*(one-x)*(one-y) + q10*(x)*(one-y) + q01*(one-x)*(y) + q11*(x)*(y);
 }
@@ -174,11 +169,6 @@ template <class T> inline T BilinearInterpolate( T q00, T q10, T q01, T q11, T x
 */
 template <class T> inline T BilinearInterpolate( const T* q, T x, T y, const T* weight )
 {
-	GLASSERT( x >= (T)0.0 );
-	GLASSERT( x <= (T)1.0 );
-	GLASSERT( y >= (T)0.0 );
-	GLASSERT( y <= (T)1.0 );
-
 	const T one = static_cast<T>(1);
 	const T zero = static_cast<T>(0);
 	const T area[4] = { (one-x)*(one-y), (one-x)*(y), (x)*(one-y), x*y };

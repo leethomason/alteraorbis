@@ -18,12 +18,13 @@ VisitorStateComponent::VisitorStateComponent( WorldMap* _map ) : worldMap( _map 
 	for( int i=0; i<VisitorData::NUM_VISITS; ++i ) {
 		RenderAtom nullAtom;
 		wants[i].Init( &worldMap->overlay0, nullAtom, true );
+		wants[i].SetVisible( false );	// keep flash from world origin
 	}
-
 
 	RenderAtom gray = LumosGame::CalcPaletteAtom( PAL_GRAY*2, 0 );
 	RenderAtom green = LumosGame::CalcPaletteAtom( PAL_GREEN*2, 0 );
 	bar.Init( &worldMap->overlay0, 10, green, gray );
+	bar.SetVisible( false );
 }
 
 
