@@ -28,19 +28,23 @@
 		- update cyclops art
 		- update temple art
 		- update arachnoid art
+    	- turrets
+    		- turret art
+    		- building takes crystal
+    		- building rotation
+    		- turret ai
 		x fix modes if no avatar
 		x GT: needs pick up effect for gold (single yellow glow of the avatar?)
 		x GT: needs pick up effect for kiosks or visitors (like a gold triangle or chest can float over the kiosk when the visitor spends money)
 		x GT: rez-in for structures
-		- is shield boost working correctly? Effects are *not* getting stripped by the shield.
-		- flammability / shockability very agressive
 		x viewing edge of world breaks all kinds of limits and ASSERTs
 		x item destruction / hpRegen
+		- is shield boost working correctly? Effects are *not* getting stripped by the shield.
 		- shield looks very boring (and hard to tell what it is). And does it turn off if you don't have one? And does it glow?
+		- flammability / shockability very agressive
 		- buildings shouldn't drop gold on de-rez
 		- Click through of disabled buttons is surprising
 		- space bar pause
-    	- turrets
     	- time scale culling
 
 	- Census
