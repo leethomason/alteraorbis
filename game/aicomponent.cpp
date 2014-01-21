@@ -199,12 +199,13 @@ bool AIComponent::LineOfSight( const ComponentSet& thisComp, const grinliz::Vect
 void AIComponent::MakeAware( const int* enemyIDs, int n )
 {
 	for( int i=0; i<n; ++i ) {
+		int id = enemyIDs[i];
 		Chit* chit = GetChitBag()->GetChit( enemyIDs[i] );
 		if ( chit ) {
 			int status = GetTeamStatus( chit );
 			if ( status == RELATE_ENEMY ) {
-				if ( enemyList.HasCap() && enemyList.Find( enemyIDs[i] ) < 0 ) {
-					enemyList.Push( chitArr[i]->ID());
+				if ( enemyList.HasCap() && enemyList.Find( id ) < 0 ) {
+					enemyList.Push( id );
 				}
 			}
 		}

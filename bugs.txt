@@ -29,18 +29,17 @@
 		x fix modes if no avatar
 		- GT: needs pick up effect for gold (single yellow glow of the avatar?)
 		- GT: needs pick up effect for kiosks or visitors (like a gold triangle or chest can float over the kiosk when the visitor spends money)
-		- GT: rez-in for structures
+		x GT: rez-in for structures
 		- is shield boost working correctly? Effects are *not* getting stripped by the shield.
 		- flammability / shockability very agressive
 		- viewing edge of world breaks all kinds of limits and ASSERTs
-		- item destruction / hpRegen
+		x item destruction / hpRegen
 		- shield looks very boring (and hard to tell what it is). And does it turn off if you don't have one? And does it glow?
 		- buildings shouldn't drop gold on de-rez
 		- Click through of disabled buttons is surprising
 		- “Focus” shouldn’t switch so easily.
 		- space bar pause
-    - turrets
-    - ruins
+    	- turrets
 
 	- Census
 		x coolest stuff, past and present, by category
@@ -106,6 +105,7 @@
 	      - xp for exploring!!
 	      - "domain theme" when you arrive
 	    - player creation screen
+	    - ruins
 
 	- Fauna 2
 		- external constant file

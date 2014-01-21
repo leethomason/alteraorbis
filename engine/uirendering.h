@@ -26,13 +26,13 @@ class UIRenderer : public gamui::IGamuiRenderer, public gamui::IGamuiText
 {
 public:
 	enum {
-		RENDERSTATE_UI_NORMAL = 1,		// normal UI rendering (1.0 alpha)
-		RENDERSTATE_UI_NORMAL_OPAQUE,	// same, but for resources that don't blend (background images)
-		RENDERSTATE_UI_DISABLED,		// disabled of both above
+		RENDERSTATE_UI_NORMAL = 1,		// a=1, normal UI rendering (1.0 alpha)
+		RENDERSTATE_UI_NORMAL_OPAQUE,	// a=1, same, but for resources that don't blend (background images)
+		RENDERSTATE_UI_DISABLED,		// a=0.5, disabled of both above
 		RENDERSTATE_UI_TEXT,			// text rendering
 		RENDERSTATE_UI_TEXT_DISABLED,
-		RENDERSTATE_UI_DECO,			// deco rendering
-		RENDERSTATE_UI_DECO_DISABLED,
+		RENDERSTATE_UI_DECO,			// a=0.7,deco rendering
+		RENDERSTATE_UI_DECO_DISABLED,	// a=0.2
 		RENDERSTATE_UI_CLIP_XFORM_MAP,	// special rendering for faces. FIXME: not really working. Only supports one face.
 		RENDERSTATE_COUNT
 	};

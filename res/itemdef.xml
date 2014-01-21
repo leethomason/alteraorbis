@@ -331,7 +331,9 @@
         nameGen="vikingFemale"
         hardpoint="trigger"
         meleeDamage="1.4"
-        shieldBoost="1.0">
+        shieldBoost="1.0"
+        hpRegen="1.0"
+        >
   </item>
   
   <item name="pistol"
@@ -348,6 +350,7 @@
         rangedDamage="15"
         procedural="gun"
         nameGen="vikingMale"
+        hpRegen="1.0"
         >
   </item>
 
@@ -365,6 +368,7 @@
         rangedDamage="10"
         procedural="gun"
         nameGen="vikingMale"
+        hpRegen="1.0"
         >
   </item>
 
@@ -382,6 +386,7 @@
         rangedDamage="12"
         procedural="gun"
         nameGen="vikingMale"
+        hpRegen="1.0"
         >
   </item>
 
@@ -399,6 +404,7 @@
         rangedDamage="20"
         procedural="gun"
         nameGen="vikingMale"
+        hpRegen="1.0"
         >
   </item>
 
@@ -411,7 +417,9 @@
         clipCap="20"
         mass="1.0"
         absorbsDamage="0.8"
-        procedural="shield">
+        procedural="shield"
+        hpRegen="1.0"
+        >
   </item>
 
   <item name="tree"

@@ -350,12 +350,26 @@ int RenderComponent::DoTick( U32 deltaTime )
 
 void RenderComponent::AddDeco( const char* asset, int duration )
 {
-	Icon* icon = icons.PushArr(1);
-	icon->image = new gamui::Image();
 	gamui::RenderAtom atom = LumosGame::CalcIconAtom( asset );
-	icon->image->Init( &engine->overlay, atom, false );
-	icon->time = duration;
-	icon->rotation = 90.0f;
+	atom.renderState = (const void*)UIRenderer::RENDERSTATE_UI_DISABLED;
+
+	bool found = false;
+	// Check for existing; up the time.
+	for( int i=0; i<icons.Size(); ++i ) {
+		if ( icons[i].image->GetRenderAtom()->Equal( atom )) {
+			icons[i].time = Max( icons[i].time, duration );
+			found = true;
+		}
+	}
+
+	if ( !found ) {
+		Icon* icon = icons.PushArr(1);
+		icon->image = new gamui::Image();
+		icon->image->SetVisible( false );
+		icon->image->Init( &engine->overlay, atom, false );
+		icon->time = duration;
+		icon->rotation = 90.0f;
+	}
 }
 
 
