@@ -141,6 +141,9 @@ void CensusScene::Scan()
 	}
 	levelAny = levelActive;
 	valueAny = valueActive;
+	killsAny = killsActive;
+	greaterKillsAny = greaterKillsActive;
+	craftedAny = craftedActive;
 
 	ItemDB* itemDB = ItemDB::Instance();
 	for( int i=0; i<itemDB->NumHistory(); ++i ) {
@@ -182,12 +185,16 @@ void CensusScene::Scan()
 	str.append( "Level, historical:\t" );	levelAny.AppendDesc( &str );	str.append( "\n" );
 	str.append( "Value, alive:\t" );		valueActive.AppendDesc( &str ); str.append( "\n" );
 	str.append( "Value, historical:\t" );	valueAny.AppendDesc( &str );	str.append( "\n" );
-	str.append( "Kills, active\t" );		killsActive.AppendDesc( &str );	str.append( "\n" );
-	str.append( "Kills, historical\t" );	killsAny.AppendDesc( &str );	str.append( "\n" );
+	str.append( "\n" );
+	str.append( "Kills:\n" );
+	str.append( "active\t" );		killsActive.AppendDesc( &str );	str.append( "\n" );
+	str.append( "historical\t" );	killsAny.AppendDesc( &str );	str.append( "\n" );
 	str.append( "Greater, active\t" );		greaterKillsActive.AppendDesc( &str );	str.append( "\n" );
 	str.append( "Greater, historical\t" );	greaterKillsAny.AppendDesc( &str );	str.append( "\n" );
+	str.append( "\n" );
 	str.append( "Crafted, active\t" );		craftedActive.AppendDesc( &str );str.append( "\n" );
 	str.append( "Crafted, historical\t" );	craftedAny.AppendDesc( &str );	str.append( "\n" );
+	str.append( "\n" );
 
 	for( int i=0; i<MOB_COUNT; ++i ) {
 		static const char* NAME[MOB_COUNT] = { "Denizen", "Greater", "Lesser" };
