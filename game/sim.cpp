@@ -284,7 +284,13 @@ void Sim::DoTick( U32 delta )
 {
 	NewsHistory::Instance()->DoTick( delta );
 	worldMap->DoTick( delta, chitBag );
-	chitBag->DoTick( delta, engine );
+
+	ChitContext context;
+	context.census = &chitBag->census;
+	context.engine = engine;
+	context.map = worldMap;
+	context.worldMap = worldMap;
+	chitBag->DoTick( delta, &context );
 
 	int minuteTick = minuteClock.Delta( delta );
 	int secondTick = secondClock.Delta( delta );
@@ -534,7 +540,7 @@ void Sim::CreatePlant( int x, int y, int type )
 		chit->Add( ms );
 
 		chit->Add( new HealthComponent( engine ) );
-		chit->Add( new ScriptComponent( new PlantScript( this, engine, worldMap, weather, type ), engine, &chitBag->census ));
+		chit->Add( new ScriptComponent( new PlantScript( this, weather, type ), engine, &chitBag->census ));
 	}
 }
 

@@ -97,6 +97,22 @@ private:
 };
 
 
+class Census;
+class WorldMap;
+class Map;
+
+struct ChitContext
+{
+	// cross-engine
+	Engine*		engine;
+	Census*		census;
+	Map*		map;
+
+	// game specific
+	WorldMap*	worldMap;
+};
+
+
 class ChitBag : public IBoltImpactHandler
 {
 public:
@@ -118,7 +134,7 @@ public:
 	int NumBolts() const { return bolts.Size(); }
 
 	// Calls every chit that has a tick.
-	void DoTick( U32 delta, Engine* engine );	
+	void DoTick( U32 delta, const ChitContext* context );	
 	U32 AbsTime() const { return bagTime; }
 
 	int NumChits() const { return chitID.NumValues(); }
@@ -179,6 +195,7 @@ public:
 	int GetCameraChitID() const { return activeCamera; }
 
 	virtual LumosChitBag* ToLumos() { return 0; }
+	const ChitContext* GetContext() const { return chitContext; }
 
 	// Slow iteration: (for census)
 	int NumBlocks() const;
@@ -200,6 +217,7 @@ private:
 	U32 bagTime;
 	int nTicked;
 	int activeCamera;
+	const ChitContext* chitContext;
 
 	struct CompID { 
 		int chitID;

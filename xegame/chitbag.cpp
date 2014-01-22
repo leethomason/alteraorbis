@@ -41,6 +41,7 @@ ChitBag::ChitBag()
 	memset( mobSpatialHash, 0, sizeof(*mobSpatialHash)*SIZE2 );
 	memRoot = 0;
 	activeCamera = 0;
+	chitContext = 0;
 }
 
 
@@ -226,10 +227,10 @@ void ChitBag::GetBlockPtrs( int b, grinliz::CDynArray<Chit*>* arr ) const
 }
 
 
-void ChitBag::DoTick( U32 delta, Engine* engine )
+void ChitBag::DoTick( U32 delta, const ChitContext* context )
 {
-	//GRINLIZ_PERFTRACK;
 	PROFILE_FUNC();
+	chitContext = context;
 	bagTime += delta;
 	nTicked = 0;
 
@@ -268,8 +269,8 @@ void ChitBag::DoTick( U32 delta, Engine* engine )
 		}
 	}
 
-	if ( engine ) {
-		Bolt::TickAll( &bolts, delta, engine, this );
+	if ( context && context->engine ) {
+		Bolt::TickAll( &bolts, delta, context->engine, this );
 	}
 
 	// Make sure the camera is updated last so it doesn't "drag"
@@ -308,6 +309,7 @@ void ChitBag::DoTick( U32 delta, Engine* engine )
 		GLASSERT( c->ParentChit() == 0 );
 		delete c;
 	}
+	context = 0;
 }
 
 

@@ -49,7 +49,7 @@ void ScriptComponent::Serialize( XStream* xs )
 			script = new VolcanoScript( factory->GetWorldMap(), 0 );
 		}
 		else if ( StrEqual( name, "PlantScript" )) {
-			script = new PlantScript( factory->GetSim(), factory->GetEngine(), factory->GetWorldMap(), factory->GetWeather(), 0 );
+			script = new PlantScript( factory->GetSim(), factory->GetWeather(), 0 );
 		}
 		else if ( StrEqual( name, "CoreScript" )) {
 			script = new CoreScript( factory->GetWorldMap(), factory->GetChitBag(), factory->GetEngine() );

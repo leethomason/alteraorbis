@@ -511,35 +511,13 @@ void BattleTestScene::DoTick( U32 deltaTime )
 		}
 	}
 
-	chitBag.DoTick( deltaTime, engine );
+	ChitContext context;
+	context.census = 0;
+	context.engine = engine;
+	context.map = map;
+	context.worldMap = map;
 
-	/*
-	if ( battleStarted ) {
-		bool aware = false;
-		Rectangle2F b;
-		b.Set( 0, 0, (float)map->Width(), (float)map->Height() );
-
-		chitBag.QuerySpatialHash( &chitArr, b, 0, ChitBag::HasAIComponentFilter );
-		Chit* enemy = 0;
-		Chit* left  = 0;
-		for( int i=0; i<chitArr.Size(); ++i ) {
-			AIComponent* ai = chitArr[i]->GetAIComponent();
-			if ( !ai->AwareOfEnemy() ) {
-				if ( chitArr[i]->GetItem()->primaryTeam == LEFT_TEAM ) {
-					left = chitArr[i];
-				}
-				else {
-					enemy = chitArr[i];
-				}
-			}
-		}
-		// Are both sides unaware?
-		if ( enemy && left ) {
-			enemy->GetAIComponent()->Target( left, false );
-			left->GetAIComponent()->Target( enemy, false );
-		}
-	}
-	*/
+	chitBag.DoTick( deltaTime, &context );
 }
 
 

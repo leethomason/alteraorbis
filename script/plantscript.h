@@ -30,7 +30,7 @@ class Sim;
 class PlantScript : public IScript
 {
 public:
-	PlantScript( Sim* sim, Engine* engine, WorldMap* map, Weather* weather, int type );
+	PlantScript( Sim* sim, Weather* weather, int type );
 	virtual ~PlantScript()	{}
 
 	virtual void Init();
@@ -57,8 +57,6 @@ private:
 	};
 
 	Sim*		sim;
-	Engine*		engine;
-	WorldMap*	worldMap;
 	Weather*	weather;
 	grinliz::Vector2I	lightTap;		// where to check for a shadow. (only check one spot.)
 	int			type;		// 0-7, fern, tree, etc.

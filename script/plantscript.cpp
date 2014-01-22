@@ -43,10 +43,8 @@ static const int	TIME_TO_SPORE = 3 * (1000 * 60);
 }
 
 
-PlantScript::PlantScript( Sim* p_sim, Engine* p_engine, WorldMap* p_map, Weather* p_weather, int p_type ) : 
+PlantScript::PlantScript( Sim* p_sim, Weather* p_weather, int p_type ) : 
 	sim( p_sim ),
-	engine( p_engine ), 
-	worldMap( p_map ), 
 	weather( p_weather ),
 	type( p_type ),
 	growTimer( TIME_TO_GROW ),
@@ -87,8 +85,9 @@ void PlantScript::SetRenderComponent()
 		delete rc;
 	}
 
+	const ChitContext* context = scriptContext->chitBag->GetContext();
 	if ( !scriptContext->chit->GetRenderComponent() ) {
-		RenderComponent* rc = new RenderComponent( engine, str.c_str() );
+		RenderComponent* rc = new RenderComponent( context->engine, str.c_str() );
 		rc->SetSerialize( false );
 		scriptContext->chit->Add( rc );
 	}
@@ -131,7 +130,8 @@ const GameItem* PlantScript::GetResource()
 void PlantScript::Init()
 {
 	const GameItem* resource = GetResource();
-	scriptContext->chit->Add( new ItemComponent( engine, worldMap, *resource ));
+	const ChitContext* context = scriptContext->chitBag->GetContext();
+	scriptContext->chit->Add( new ItemComponent( context->engine, context->worldMap, *resource ));
 	scriptContext->chit->GetItem()->GetTraitsMutable()->Roll( scriptContext->chit->random.Rand() );
 	SetRenderComponent();
 
@@ -189,7 +189,8 @@ int PlantScript::DoTick( U32 delta )
 
 	Vector2I pos = sc->MapPosition();
 	Vector2F pos2f = sc->GetPosition2D();
-	Rectangle2I bounds = worldMap->Bounds();
+	const ChitContext* context = scriptContext->chitBag->GetContext();
+	Rectangle2I bounds = context->worldMap->Bounds();
 
 	int nStage = 4;
 	item->keyValues.Fetch( "nStage", "d", &nStage );
@@ -198,7 +199,7 @@ int PlantScript::DoTick( U32 delta )
 		// ------ Sun -------- //
 		const float		h				= (float)(stage+1);
 		const float		rainFraction	= weather->RainFraction( pos2f.x, pos2f.y );
-		const Vector3F& light			= engine->lighting.direction;
+		const Vector3F& light			= context->engine->lighting.direction;
 		const float		norm			= Max( fabs( light.x ), fabs( light.z ));
 		lightTap.x = LRintf( light.x / norm );
 		lightTap.y = LRintf( light.z / norm );
@@ -209,7 +210,7 @@ int PlantScript::DoTick( U32 delta )
 		if ( bounds.Contains( tap )) {
 			// Check for model or rock. If looking at a model, take 1/2 the
 			// height of the first thing we find.
-			const WorldGrid& wg = worldMap->GetWorldGrid( tap.x, tap.y );
+			const WorldGrid& wg = context->worldMap->GetWorldGrid( tap.x, tap.y );
 			if ( wg.RockHeight() > 0 ) {
 				sunHeight = Min( sunHeight, (float)wg.RockHeight() * 0.5f );
 			}
@@ -239,7 +240,7 @@ int PlantScript::DoTick( U32 delta )
 		for( int i=0; i<GL_C_ARRAY_SIZE( check ); ++i ) {
 			tap = pos + check[i];
 			if ( bounds.Contains( tap )) {
-				const WorldGrid& wg = worldMap->GetWorldGrid( tap.x, tap.y );
+				const WorldGrid& wg = context->worldMap->GetWorldGrid( tap.x, tap.y );
 				// Water or rock runoff increase water.
 				if ( wg.RockHeight() ) {
 					water += 0.25f * rainFraction;
