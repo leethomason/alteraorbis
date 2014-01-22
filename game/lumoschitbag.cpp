@@ -575,7 +575,7 @@ void LumosChitBag::HandleBolt( const Bolt& bolt, const ModelVoxel& mv )
 }
 
 
-void LumosChitBag::AddItem( const char* name, Chit* chit, Engine* engine, int team, int level )
+void LumosChitBag::AddItem( const char* name, Chit* chit, Engine* engine, int team, int level, const char* altRes )
 {
 	ItemDefDB* itemDefDB = ItemDefDB::Instance();
 	ItemDefDB::GameItemArr itemDefArr;
@@ -583,6 +583,9 @@ void LumosChitBag::AddItem( const char* name, Chit* chit, Engine* engine, int te
 	GLASSERT( itemDefArr.Size() > 0 );
 
 	GameItem item = *(itemDefArr[0]);
+	if ( altRes ) {
+		item.SetResource( altRes );
+	}
 	item.primaryTeam = team;
 	item.GetTraitsMutable()->SetExpFromLevel( level );
 	item.InitState();
@@ -591,12 +594,12 @@ void LumosChitBag::AddItem( const char* name, Chit* chit, Engine* engine, int te
 		ItemComponent* ic = new ItemComponent( engine, worldMap, item );
 		chit->Add( ic );
 		for( int i=1; i<itemDefArr.Size(); ++i ) {
-			ic->AddToInventory( new GameItem( *(itemDefArr[i]) ) );
+			ic->AddToInventory( new GameItem( *(itemDefArr[i] )));
 		}
 	}
 	else {
 		GLASSERT( itemDefArr.Size() == 1 );
-		chit->GetItemComponent()->AddToInventory( new GameItem( item ) );
+		chit->GetItemComponent()->AddToInventory( new GameItem( item) );
 	}
 }
 

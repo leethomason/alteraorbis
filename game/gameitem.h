@@ -333,6 +333,7 @@ public:
 	void SetName( const char* n )				{ name = grinliz::StringPool::Intern( n ); UpdateTrack(); }
 	void SetProperName( const char* n )			{ properName = grinliz::StringPool::Intern( n ); UpdateTrack(); }
 	void SetProperName( const grinliz::IString& n );
+	void SetResource( const char* n )			{ resource = grinliz::StringPool::Intern( n ); }
 
 	enum {
 		// Type(s) of the item

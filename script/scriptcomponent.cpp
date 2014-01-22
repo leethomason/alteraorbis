@@ -8,6 +8,7 @@
 #include "volcanoscript.h"
 #include "plantscript.h"
 #include "corescript.h"
+#include "countdownscript.h"
 
 using namespace grinliz;
 
@@ -52,6 +53,9 @@ void ScriptComponent::Serialize( XStream* xs )
 		}
 		else if ( StrEqual( name, "CoreScript" )) {
 			script = new CoreScript( factory->GetWorldMap(), factory->GetChitBag(), factory->GetEngine() );
+		}
+		else if ( StrEqual( name, "CountDownScript" )) {
+			script = new CountDownScript( 1000 );
 		}
 		else {
 			GLASSERT( 0 );

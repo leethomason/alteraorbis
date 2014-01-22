@@ -29,6 +29,8 @@
 #include "../engine/particle.h"
 
 #include "../script/procedural.h"
+#include "../script/countdownscript.h"
+#include "../script/itemscript.h"
 
 #include "../game/lumoschitbag.h"
 
@@ -50,28 +52,6 @@ int HealthComponent::DoTick( U32 delta )
 		destroyed += delta;
 		GLASSERT( parentChit );
 		if ( destroyed >= COUNTDOWN ) {
-
-			const GameItem* item = parentChit->GetItem();
-			if ( item && parentChit->GetSpatialComponent() ) {
-				IString mob = item->keyValues.GetIString( "mob" );
-				if ( !mob.empty() ) {
-					const char* asset = 0;
-					if ( mob == "normal" ) asset = "tombstoneLesser";
-					else if ( mob == "greater" ) asset = "tombstoneGreater";
-					else if ( mob == "denizen" ) asset = "tombstoneDenizen";
-
-					// FIXME handle procedural.
-					// FIXME add delete script
-					if ( asset ) {
-						Chit* chit = GetLumosChitBag()->NewChit();
-						chit->Add( new SpatialComponent() );
-						chit->Add( new RenderComponent( engine, asset ));
-						Vector3F pos = parentChit->GetSpatialComponent()->GetPosition();
-						pos.y = 0;
-						chit->GetSpatialComponent()->SetPosition( pos );
-					}
-				}
-			}
 
 			parentChit->SendMessage( ChitMsg( ChitMsg::CHIT_DESTROYED_END ), this );
 			GetChitBag()->QueueDelete( parentChit );
@@ -96,10 +76,36 @@ void HealthComponent::DeltaHealth()
 		item = parentChit->GetItem();
 	}
 	if ( item ) {
-		if ( item->hp == 0 && item->TotalHP() != 0 ) {
+		if ( item->hp == 0 ) {
 			parentChit->SendMessage( ChitMsg( ChitMsg::CHIT_DESTROYED_START), this );
 			GLLOG(( "Chit %3d destroyed.\n", parentChit->ID() ));
 			destroyed = 1;
+
+			const GameItem* item = parentChit->GetItem();
+			if ( item && parentChit->GetSpatialComponent() ) {
+				IString mob = item->keyValues.GetIString( "mob" );
+				if ( !mob.empty() ) {
+					const char* asset = 0;
+					if ( mob == "normal" ) asset = "tombstoneLesser";
+					else if ( mob == "greater" ) asset = "tombstoneGreater";
+					else if ( mob == "denizen" ) asset = "tombstoneDenizen";
+
+					if ( asset ) {
+						Chit* chit = GetLumosChitBag()->NewChit();
+
+						GetLumosChitBag()->AddItem( "tombstone", chit, Engine::Instance(), 0, 0, asset );
+						chit->Add( new SpatialComponent() );
+						chit->Add( new RenderComponent( Engine::Instance(), asset ));
+						chit->Add( new ScriptComponent( new CountDownScript( 30*1000 ), Engine::Instance(),0 ));
+						chit->Add( new HealthComponent( Engine::Instance()));
+
+						Vector3F pos = parentChit->GetSpatialComponent()->GetPosition();
+						pos.y = 0;
+						chit->GetSpatialComponent()->SetPosition( pos );
+					}
+				}
+			}
+
 		}
 	}
 }

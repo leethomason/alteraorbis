@@ -86,6 +86,10 @@
         resource="crystal_violet"
         flags="INDESTRUCTABLE CLICK_THROUGH"
         mass="1" />
+        
+  <item name="tombstone"
+        flags="INDESTRUCTABLE CLICK_THROUGH"
+        mass="10" />
 
   <item name="kiosk.m"
         resource="kiosk.m"
