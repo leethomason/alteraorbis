@@ -21,6 +21,7 @@
 #include "../xegame/itemcomponent.h"
 #include "../xegame/rendercomponent.h"
 #include "../xegame/game.h"
+#include "../xegame/spatialcomponent.h"
 
 #include "../grinliz/glutil.h"
 
@@ -28,6 +29,8 @@
 #include "../engine/particle.h"
 
 #include "../script/procedural.h"
+
+#include "../game/lumoschitbag.h"
 
 using namespace grinliz;
 
@@ -47,6 +50,29 @@ int HealthComponent::DoTick( U32 delta )
 		destroyed += delta;
 		GLASSERT( parentChit );
 		if ( destroyed >= COUNTDOWN ) {
+
+			const GameItem* item = parentChit->GetItem();
+			if ( item && parentChit->GetSpatialComponent() ) {
+				IString mob = item->keyValues.GetIString( "mob" );
+				if ( !mob.empty() ) {
+					const char* asset = 0;
+					if ( mob == "normal" ) asset = "tombstoneLesser";
+					else if ( mob == "greater" ) asset = "tombstoneGreater";
+					else if ( mob == "denizen" ) asset = "tombstoneDenizen";
+
+					// FIXME handle procedural.
+					// FIXME add delete script
+					if ( asset ) {
+						Chit* chit = GetLumosChitBag()->NewChit();
+						chit->Add( new SpatialComponent() );
+						chit->Add( new RenderComponent( engine, asset ));
+						Vector3F pos = parentChit->GetSpatialComponent()->GetPosition();
+						pos.y = 0;
+						chit->GetSpatialComponent()->SetPosition( pos );
+					}
+				}
+			}
+
 			parentChit->SendMessage( ChitMsg( ChitMsg::CHIT_DESTROYED_END ), this );
 			GetChitBag()->QueueDelete( parentChit );
 		}

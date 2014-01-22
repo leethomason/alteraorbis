@@ -113,6 +113,10 @@
   <model assetName="market"  filename="market.ac"   origin="-6 0 -1"       shading="flat" polyRemoval="pre" />
   <model assetName="bar"     filename="bar.ac"      origin="-5 0 -1"       shading="flat" polyRemoval="pre" />
 
+  <model filename="tombstoneDenizen.ac"                                    shading="flat" ployRemoval="pre" />
+  <model filename="tombstoneLesser.ac"                                     shading="flat" ployRemoval="pre" />
+  <model filename="tombstoneGreater.ac"                                    shading="flat" ployRemoval="pre" />
+
   <!-- animation v2
        filename is a prefix to: walk, stand, gunwalk, gunstand, melee, impact
   -->
