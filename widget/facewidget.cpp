@@ -83,6 +83,7 @@ void FaceWidget::SetFace( UIRenderer* renderer, const GameItem* item )
 		if ( flags & SHOW_NAME ) {
 			upper.SetVisible( true );
 			str.AppendFormat( "%s", item->IBestName().c_str() );
+			//str.AppendFormat( "%s", item->INameAndTitle().c_str() );
 		}
 		upper.SetText( str.c_str() );
 	}

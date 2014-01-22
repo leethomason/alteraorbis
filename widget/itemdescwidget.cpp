@@ -103,7 +103,7 @@ void ItemDescWidget::SetInfo( const GameItem* item, const GameItem* user )
 	}
 
 	textBuffer += '\n';
-	MicroDBIterator it( item->microdb );
+	MicroDBIterator it( item->historyDB );
 	for( ; !it.Done(); it.Next() ) {
 		
 		const char* key = it.Key();

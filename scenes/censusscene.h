@@ -68,7 +68,13 @@ private:
 	ItemHistory levelActive, 
 				levelAny,
 				valueActive,
-				valueAny;
+				valueAny,
+				killsActive,
+				killsAny,
+				greaterKillsActive,
+				greaterKillsAny,
+				craftedActive,
+				craftedAny;
 
 	struct Info {
 		const GameItem*			item;

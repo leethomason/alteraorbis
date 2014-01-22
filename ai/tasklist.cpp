@@ -527,6 +527,7 @@ bool TaskList::UseFactory( const ComponentSet& thisComp, Chit* factory, int tech
 	}
 	thisComp.itemComponent->AddToInventory( item );
 	thisComp.itemComponent->AddCraftXP( wallet.NumCrystals() );
+	thisComp.item->historyDB.Increment( "Crafted" );
 
 	Vector2I sector = thisComp.spatial->GetPosition2DI();
 	GLOUTPUT(( "'%s' forged the item '%s' at sector=%x,%x\n",

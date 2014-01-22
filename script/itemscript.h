@@ -46,26 +46,33 @@ public:
 	void DumpWeaponStats();
 	void AssignWeaponStats( const int* roll, const GameItem& base, GameItem* item );
 
+	const grinliz::CDynArray< grinliz::IString >& GreaterMOBs() const { return greaterMOBs; }
+	const grinliz::CDynArray< grinliz::IString >& LesserMOBs() const  { return lesserMOBs; }
+
 private:
 	GameItem nullItem;
 
 	grinliz::HashTable< const char*, GameItem*, grinliz::CompCharPtr, grinliz::OwnedPtrSem > map;
 	// Names of all the items in the DefDB - "top" because "cyclops" is in the list, but not "cyclops claw"
 	grinliz::CDynArray< grinliz::IString > topNames;
+	grinliz::CDynArray< grinliz::IString > greaterMOBs, lesserMOBs;
 };
 
 // Needs to be small - lots of these to save.
 struct ItemHistory
 {
-	ItemHistory() : itemID(0), level(0), value(0) {}
+	ItemHistory() : itemID(0), level(0), value(0), kills(0), greater(0), crafted(0) {}
 
 	bool operator<(const ItemHistory& rhs) const { return this->itemID < rhs.itemID; }
 	bool operator==(const ItemHistory& rhs) const { return this->itemID == rhs.itemID; }
 
 	int					itemID;
-	grinliz::IString	fullName;
+	grinliz::IString	titledName;
 	U16					level;
 	U16					value;
+	U16					kills;
+	U16					greater;
+	U16					crafted;
 
 	void Set( const GameItem* );
 	void Serialize( XStream* xs );

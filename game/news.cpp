@@ -141,7 +141,7 @@ grinliz::IString NewsEvent::IDToName( int id ) const
 	else {
 		const ItemHistory* history = ItemDB::Instance()->History( id );
 		if ( history ) {
-			name = history->fullName;
+			name = history->titledName;
 		}
 	}
 	return name;

@@ -99,14 +99,24 @@ void CensusScene::ScanItem( ItemComponent* ic, const GameItem* item )
 		}
 	}
 
-	if ( item->Traits().Level() > levelActive.level ) {
+	ItemHistory h;
+	h.Set( item );
+
+	if ( h.level > levelActive.level ) {
 		levelActive.Set( item );
 	}
-	if ( item->GetValue() > valueActive.value ) {
+	if ( h.value > valueActive.value ) {
 		valueActive.Set( item );
 	}
-
-
+	if ( h.kills > killsActive.kills ) {
+		killsActive.Set( item );
+	}
+	if ( h.greater > greaterKillsActive.greater ) {
+		greaterKillsActive.Set( item );
+	}
+	if ( h.crafted > craftedActive.crafted ) {
+		craftedActive.Set( item );
+	}
 }
 
 
@@ -141,6 +151,15 @@ void CensusScene::Scan()
 		if ( h.value > valueAny.value ) {
 			valueAny = h;
 		}
+		if ( h.kills > killsAny.kills ) {
+			killsAny = h;
+		}
+		if ( h.greater > greaterKillsAny.greater ) {
+			greaterKillsAny = h;
+		}
+		if ( h.crafted > craftedAny.crafted ) {
+			craftedAny = h;
+		}
 	}
 
 	ReserveBank* reserve = ReserveBank::Instance();
@@ -159,10 +178,16 @@ void CensusScene::Scan()
 		allWallet.crystal[3] + reserveWallet.crystal[3] );
 
 	str.AppendFormat( "MOBs:\tAu=%d Green=%d Red=%d Blue=%d Violet=%d\n", mobWallet.gold, mobWallet.crystal[0], mobWallet.crystal[1], mobWallet.crystal[2], mobWallet.crystal[3] );
-	str.append( "Level, alive:\t" );			levelActive.AppendDesc( &str );	str.append( "\n" );
-	str.append( "Level, historical:\t" );	levelAny.AppendDesc( &str ); str.append( "\n" );
-	str.append( "Value, alive:\t" );			valueActive.AppendDesc( &str ); str.append( "\n" );
-	str.append( "Value, historical:\t" );	valueAny.AppendDesc( &str ); str.append( "\n" );
+	str.append( "Level, alive:\t" );		levelActive.AppendDesc( &str );	str.append( "\n" );
+	str.append( "Level, historical:\t" );	levelAny.AppendDesc( &str );	str.append( "\n" );
+	str.append( "Value, alive:\t" );		valueActive.AppendDesc( &str ); str.append( "\n" );
+	str.append( "Value, historical:\t" );	valueAny.AppendDesc( &str );	str.append( "\n" );
+	str.append( "Kills, active\t" );		killsActive.AppendDesc( &str );	str.append( "\n" );
+	str.append( "Kills, historical\t" );	killsAny.AppendDesc( &str );	str.append( "\n" );
+	str.append( "Greater, active\t" );		greaterKillsActive.AppendDesc( &str );	str.append( "\n" );
+	str.append( "Greater, historical\t" );	greaterKillsAny.AppendDesc( &str );	str.append( "\n" );
+	str.append( "Crafted, active\t" );		craftedActive.AppendDesc( &str );str.append( "\n" );
+	str.append( "Crafted, historical\t" );	craftedAny.AppendDesc( &str );	str.append( "\n" );
 
 	for( int i=0; i<MOB_COUNT; ++i ) {
 		static const char* NAME[MOB_COUNT] = { "Denizen", "Greater", "Lesser" };
@@ -180,7 +205,7 @@ void CensusScene::Scan()
 
 				WorldMap* map = Engine::Instance()->GetMap()->ToWorldMap();
 				const SectorData& sd = map->GetSector( sector );
-				str.AppendFormat( " at %s", sd.name.c_str() );
+				str.AppendFormat( " at %s", sd.name.safe_str() );
 			}
 
 			str.append( "\n" );
@@ -205,7 +230,7 @@ void CensusScene::Scan()
 		}
 	}
 
-	text.SetText( str.c_str() );
+	text.SetText( str.safe_str() );
 }
 
 

@@ -165,6 +165,9 @@ void ItemComponent::AddBattleXP( bool isMelee, int killshotLevel, const GameItem
 	GameItem* mainItem = itemArr[0];
 	int level = mainItem->Traits().Level();
 	mainItem->GetTraitsMutable()->AddBattleXP( killshotLevel );
+
+	bool isGreater = (loser->keyValues.GetIString( "mob" ) == "greater");
+
 	if ( mainItem->Traits().Level() > level ) {
 		// Level up!
 		mainItem->hp = mainItem->TotalHPF();
@@ -196,31 +199,25 @@ void ItemComponent::AddBattleXP( bool isMelee, int killshotLevel, const GameItem
 
 
 	if ( killshotLevel ) {
-		int kills = 0;
-
 		// Credit the main item and weapon.
-		kills = 0;
-		mainItem->microdb.Fetch( "Kills", "d", &kills );
-		mainItem->microdb.Set( "Kills", "d", kills+1 );
+		mainItem->historyDB.Increment( "Kills" );
+		if ( isGreater )
+			mainItem->historyDB.Increment( "Greater" );
 
 		if ( weapon ) {
-			kills = 0;
-			weapon->microdb.Fetch( "Kills", "d", &kills );
-			weapon->microdb.Set( "Kills", "d", kills+1 );
+			weapon->historyDB.Increment( "Kills" );
+			if ( isGreater )
+				weapon->historyDB.Increment( "Greater" );
 		}
 
 		if ( loser ) {
 			CStr< 64 > str;
 			str.Format( "Kills: %s", loser->Name() );
 
-			kills = 0;
-			mainItem->microdb.Fetch( str.c_str(), "d", &kills );
-			mainItem->microdb.Set( str.c_str(), "d", kills+1 );
+			mainItem->historyDB.Increment( str.c_str() );
 
 			if ( weapon ) {
-				kills = 0;
-				weapon->microdb.Fetch( str.c_str(), "d", &kills );
-				weapon->microdb.Set( str.c_str(), "d", kills+1 );
+				weapon->historyDB.Increment( str.c_str() );
 			}
 		}
 	}

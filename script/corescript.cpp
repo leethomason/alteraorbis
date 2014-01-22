@@ -22,6 +22,7 @@
 #include "../xegame/cameracomponent.h"
 
 #include "../script/procedural.h"
+#include "../script/itemscript.h"
 
 static const double TECH_ADDED_BY_VISITOR = 0.2;
 static const double TECH_DECAY_0 = 0.00005;
@@ -251,8 +252,8 @@ int CoreScript::DoTick( U32 delta )
 			bool isGreater = false;
 
 			if ( greaterPossible && roll < greater ) {
-				static const char* GREATER[4] = { "cyclops", "cyclops", "fireCyclops", "shockCyclops" };
-				spawn = GREATER[ scriptContext->chit->random.Rand( 4 ) ];
+				const grinliz::CDynArray< grinliz::IString >& greater = ItemDefDB::Instance()->GreaterMOBs();
+				spawn = greater[ scriptContext->chit->random.Rand( greater.Size() ) ].c_str();
 				isGreater = true;
 			}
 			if (!spawn && normalPossible && (roll < rat) ) {

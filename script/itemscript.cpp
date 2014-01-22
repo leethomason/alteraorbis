@@ -46,6 +46,14 @@ void ItemDefDB::Load( const char* path )
 			map.Add( item->key.c_str(), item );
 			topNames.Push( item->IName() );
 
+			IString mob = item->keyValues.GetIString( "mob" );
+			if ( mob == "greater" ) {
+				greaterMOBs.Push( item->IName() );
+			}
+			else if ( mob == "normal" ) {
+				lesserMOBs.Push( item->IName() );
+			}
+
 			const XMLElement* intrinsicEle = itemEle->FirstChildElement( "intrinsics" );
 			if ( intrinsicEle ) {
 				int nSub = 0;
@@ -215,25 +223,42 @@ void ItemDefDB::DumpWeaponStats()
 void ItemHistory::Set( const GameItem* gi )
 {
 	this->itemID		= gi->ID();
-	this->fullName      = gi->IFullName();
+	this->titledName	= gi->INameAndTitle();
 	this->level			= gi->Traits().Level();
 	this->value			= gi->GetValue();
+
+	int k=0, c=0;
+
+	gi->historyDB.GetInt( "Kills", &k );
+	gi->historyDB.GetInt( "Crafted", &c );
+
+	this->kills = k;
+	this->crafted = c;
 }
 
 void ItemHistory::Serialize( XStream* xs )
 {
 	int aLevel = level;	// U16 to int conversion, and back.
 	int aValue = value;
+	int aKills = kills;
+	int aCrafted = crafted;
+	int aGreater = greater;
 
 	XarcOpen( xs, "ItemHistory" );
 	XARC_SER( xs, itemID );
-	XARC_SER( xs, fullName );
+	XARC_SER( xs, titledName );
 	XARC_SER( xs, aLevel );
 	XARC_SER( xs, aValue );
+	XARC_SER( xs, aKills );
+	XARC_SER( xs, aGreater );
+	XARC_SER( xs, aCrafted );
 	XarcClose( xs );
 
 	level = aLevel;
 	value = aValue;
+	kills = aKills;
+	greater = aGreater;
+	crafted = aCrafted;
 }
 
 
@@ -243,19 +268,18 @@ void ItemHistory::AppendDesc( GLString* str )
 		str->append( "(none)" );
 	}
 	else {
-		GLASSERT( !fullName.empty() );
-		if ( level && value ) {
-			str->AppendFormat( "%s Level %d Value %d", fullName.c_str(), level, value );
-		}
-		else if ( level ) {
-			str->AppendFormat( "%s Level %d", fullName.c_str(), level );
-		}
-		else if ( value ) {
-			str->AppendFormat( "%s Value %d", fullName.c_str(), value );
-		}
-		else {
-			str->AppendFormat( "%s", fullName.c_str() );
-		}
+		GLASSERT( !titledName.empty() );
+		str->AppendFormat( "%s", titledName.c_str() );
+		if ( level )
+			str->AppendFormat( " Level %d", level );
+		if ( value )
+			str->AppendFormat( " Value %d", value );
+		if ( kills )
+			str->AppendFormat( " Kills %d", kills );
+		if ( greater ) 
+			str->AppendFormat( " Greater %d", greater );
+		if ( crafted )
+			str->AppendFormat( " Crafted %d", crafted );
 	}
 }
 

@@ -98,7 +98,7 @@ void GameItem::CopyFrom( const GameItem* rhs ) {
 		accruedShock	= rhs->accruedShock;
 
 		keyValues		= rhs->keyValues;
-		microdb			= rhs->microdb;
+		historyDB		= rhs->historyDB;
 		value			= -1;
 	}
 	else {
@@ -120,7 +120,7 @@ void GameItem::CopyFrom( const GameItem* rhs ) {
 		traits.Init();
 		wallet.EmptyWallet();
 		keyValues.Clear();
-		microdb.Clear();
+		historyDB.Clear();
 
 		hp = TotalHPF();
 		accruedFire = 0;
@@ -214,7 +214,7 @@ void GameItem::Serialize( XStream* xs )
 	reload.Serialize( xs, "reload" );
 	
 	keyValues.Serialize( xs, "keyval" );
-	microdb.Serialize( xs, "microdb" );
+	historyDB.Serialize( xs, "historyDB" );
 
 	traits.Serialize( xs );
 	wallet.Serialize( xs );
@@ -638,6 +638,54 @@ IString GameItem::IFullName() const
 		}
 	}
 	return fullName;
+}
+
+
+IString GameItem::INameAndTitle() const
+{
+	IString title = ITitle();
+	CStr<128> str;
+	str.Format( "%s %s", BestName(), ITitle().safe_str() );
+	return StringPool::Intern( str.c_str() );
+}
+
+
+IString GameItem::ITitle() const
+{
+	// Bane Greater
+	// Slayer Greater
+	// Bane Lesser
+
+	static const int LESSER_BANE = 100;
+	static const int GREATER_BANE = 4;
+
+	const grinliz::CDynArray< grinliz::IString >& greaterMOBs = ItemDefDB::Instance()->GreaterMOBs();
+	const grinliz::CDynArray< grinliz::IString >& lesserMOBs  = ItemDefDB::Instance()->LesserMOBs();
+	CStr<64> str;
+
+	int high = 0;
+	IString highStr;
+
+	// Check the greater
+	for( int pass=0; pass<2; ++pass ) {
+		const grinliz::CDynArray< grinliz::IString >& mobs = (pass==0) ? greaterMOBs : lesserMOBs;
+		int bane = (pass==0) ? GREATER_BANE : LESSER_BANE;
+
+		for( int i=0; i<mobs.Size(); ++i ) {
+			str.Format( "Kills: %s", mobs[i].c_str() );
+			int count = 0;
+			keyValues.GetInt( str.c_str(), &count );
+			if ( count > high ) { 
+				count = high;
+				highStr = mobs[i];
+			}
+		}
+		if ( high ) {
+			str.Format( "%s %s", highStr.c_str(), high >= bane ? "Bane" : "Slayer" );
+			return StringPool::Intern( str.c_str() );
+		}
+	}
+	return IString();
 }
 
 
