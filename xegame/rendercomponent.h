@@ -130,6 +130,7 @@ private:
 
 		gamui::Image*	image;
 		int				time;
+		float			rotation;
 	};
 	grinliz::CDynArray< Icon > icons;
 };

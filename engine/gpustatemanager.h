@@ -273,6 +273,7 @@ public:
 	enum {
 		OVERLAY0,
 		OVERLAY1,
+		ENGINE,
 		HUD,
 		NUM_UI_LAYERS
 	};

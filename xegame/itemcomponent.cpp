@@ -138,6 +138,23 @@ float ItemComponent::PowerRating() const
 }
 
 
+void ItemComponent::AddCraftXP( int nCrystals )
+{
+	GameItem* mainItem = itemArr[0];
+	int level = mainItem->Traits().Level();
+	mainItem->GetTraitsMutable()->AddCraftXP( nCrystals );
+	if ( mainItem->Traits().Level() > level ) {
+		// Level up!
+		// FIXME: show an icon
+		mainItem->hp = mainItem->TotalHPF();
+		NameItem( mainItem );
+		if ( parentChit->GetRenderComponent() ) {
+			parentChit->GetRenderComponent()->AddDeco( "levelup", STD_DECO );
+		}
+	}
+}
+
+
 void ItemComponent::AddBattleXP( bool isMelee, int killshotLevel, const GameItem* loser )
 {
 	// Loser has to be a MOB. That was a funny bug. kills: plant0 7
@@ -148,11 +165,16 @@ void ItemComponent::AddBattleXP( bool isMelee, int killshotLevel, const GameItem
 	GameItem* mainItem = itemArr[0];
 	int level = mainItem->Traits().Level();
 	mainItem->GetTraitsMutable()->AddBattleXP( killshotLevel );
+
+	bool isGreater = (loser->keyValues.GetIString( "mob" ) == "greater");
+
 	if ( mainItem->Traits().Level() > level ) {
 		// Level up!
-		// FIXME: show an icon
 		mainItem->hp = mainItem->TotalHPF();
 		NameItem( mainItem );
+		if ( parentChit->GetRenderComponent() ) {
+			parentChit->GetRenderComponent()->AddDeco( "levelup", STD_DECO );
+		}
 	}
 
 	GameItem* weapon = 0;
@@ -177,31 +199,25 @@ void ItemComponent::AddBattleXP( bool isMelee, int killshotLevel, const GameItem
 
 
 	if ( killshotLevel ) {
-		int kills = 0;
-
 		// Credit the main item and weapon.
-		kills = 0;
-		mainItem->microdb.Fetch( "Kills", "d", &kills );
-		mainItem->microdb.Set( "Kills", "d", kills+1 );
+		mainItem->historyDB.Increment( "Kills" );
+		if ( isGreater )
+			mainItem->historyDB.Increment( "Greater" );
 
 		if ( weapon ) {
-			kills = 0;
-			weapon->microdb.Fetch( "Kills", "d", &kills );
-			weapon->microdb.Set( "Kills", "d", kills+1 );
+			weapon->historyDB.Increment( "Kills" );
+			if ( isGreater )
+				weapon->historyDB.Increment( "Greater" );
 		}
 
 		if ( loser ) {
 			CStr< 64 > str;
 			str.Format( "Kills: %s", loser->Name() );
 
-			kills = 0;
-			mainItem->microdb.Fetch( str.c_str(), "d", &kills );
-			mainItem->microdb.Set( str.c_str(), "d", kills+1 );
+			mainItem->historyDB.Increment( str.c_str() );
 
 			if ( weapon ) {
-				kills = 0;
-				weapon->microdb.Fetch( str.c_str(), "d", &kills );
-				weapon->microdb.Set( str.c_str(), "d", kills+1 );
+				weapon->historyDB.Increment( str.c_str() );
 			}
 		}
 	}
@@ -441,6 +457,10 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 
 			// Need to delete the gold, else it will track to us again!
 			gold->QueueDelete();
+
+			if ( parentChit->GetRenderComponent() ) {
+				parentChit->GetRenderComponent()->AddDeco( "loot", STD_DECO );
+			}
 		}
 	}
 	else if ( msg.ID() >= ChitMsg::CHIT_DESTROYED_START && msg.ID() <= ChitMsg::CHIT_DESTROYED_END ) 
@@ -724,6 +744,10 @@ void ItemComponent::AddToInventory( ItemComponent* ic )
 		SortInventory();
 	}
 	UpdateActive();
+
+	if ( parentChit && parentChit->GetRenderComponent() ) {
+		parentChit->GetRenderComponent()->AddDeco( "loot", STD_DECO );
+	}
 }
 
 

@@ -262,6 +262,7 @@ public:
 
 	unsigned size() const							{ return m_size; }
 	const char* c_str() const						{ return m_buf; }
+	const char* safe_str() const					{ return m_buf ? m_buf : ""; }
 
 	void Format( const char* format, ...);
 	void AppendFormat( const char* format, ...);
@@ -306,6 +307,7 @@ public:
 	bool operator>( const IString& other ) const	{ return strcmp( c_str(), other.c_str() ) > 0; } 
 
 	const char* c_str() const					{ return str; }
+	const char* safe_str() const				{ return str ? str : ""; }
 	bool empty() const							{ return !str || *str == 0; }
 	int size() const							{ return strlen( str ); }
 

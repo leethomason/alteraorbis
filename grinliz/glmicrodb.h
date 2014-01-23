@@ -58,6 +58,9 @@ public:
 	int GetFloat( const char* key, float* value ) const;	///< doesn't write if not found.
 	int GetInt( const char* key, int* value ) const;
 
+	// Convenience: fetch a key, increment by 1, set key
+	void Increment( const char* key );
+
 	void Serialize( XStream* xs, const char* name );
 
 private:

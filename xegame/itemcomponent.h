@@ -96,6 +96,7 @@ public:
 
 	// add XP to current item and its weapon
 	void AddBattleXP( bool meleeAttack, int killshotLevel, const GameItem* loser );
+	void AddCraftXP( int nCrystals );
 
 	// Very crude assessment of the power of this MOB.
 	float PowerRating() const;

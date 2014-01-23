@@ -20,27 +20,32 @@
 - fix porch image (alpha of the tiles, if not general improvement)
 - AIs should account for personality and skills when doing inventory sorting
 - squisher, in streaming mode, to save files
+- “Focus” shouldn’t switch so easily.
+- 32bit texture support
 
 - game
 	- Denizen-2
 		- update cyclops art
 		- update temple art
 		- update arachnoid art
+      - changing active weapon in invetory doesn't change rendering in-game
+		x forge / factory name update
+    	- tombstones
+    	x accomplishments
+    		x move kills, accomplishments to central tracking system?
 		x fix modes if no avatar
-		- GT: needs pick up effect for gold (single yellow glow of the avatar?)
-		- GT: needs pick up effect for kiosks or visitors (like a gold triangle or chest can float over the kiosk when the visitor spends money)
-		- GT: rez-in for structures
+		x GT: needs pick up effect for gold (single yellow glow of the avatar?)
+		x GT: needs pick up effect for kiosks or visitors (like a gold triangle or chest can float over the kiosk when the visitor spends money)
+		x GT: rez-in for structures
+		x viewing edge of world breaks all kinds of limits and ASSERTs
+		x item destruction / hpRegen
 		- is shield boost working correctly? Effects are *not* getting stripped by the shield.
-		- flammability / shockability very agressive
-		- viewing edge of world breaks all kinds of limits and ASSERTs
-		- item destruction / hpRegen
 		- shield looks very boring (and hard to tell what it is). And does it turn off if you don't have one? And does it glow?
+		- flammability / shockability very agressive
 		- buildings shouldn't drop gold on de-rez
 		- Click through of disabled buttons is surprising
-		- “Focus” shouldn’t switch so easily.
 		- space bar pause
-    - turrets
-    - ruins
+    	- time scale culling
 
 	- Census
 		x coolest stuff, past and present, by category
@@ -51,21 +56,27 @@
 		x greatest warrior
 		x greatest weapons
 		x location and owner
+		- name / level / health display
 		- money checks optional
 		- greatest smith
 		- greatest monsters
 		- needs to feel interactive
+		- # kills
+		- browsing of items/people
 
 	- Market
 		x rethink fiction / core control / avatar prime
 		x denizens
 		x item market
+		- guard posts
+		- world effects morale/needs: water, tombstones, temples, etc.
 		- proper game start: location, selection of team color, icons
 		- cyclops attracted by tech?
 		- tech pyramids -> power plants
 		- turret
 		- influence zones for buildings
 		- team colors
+		- battle flags
 		- forge
 			- forge or factory?
 			- fee to forge
@@ -77,6 +88,8 @@
 			- dragging, rows
 			- top view?
 			x auto-clear vegetation
+		- morale
+			- madness / starvation / things going wrong
 
 	- Adventure
 		x weapon swap button or auto-swap?
@@ -106,6 +119,7 @@
 	      - xp for exploring!!
 	      - "domain theme" when you arrive
 	    - player creation screen
+	    - ruins
 
 	- Fauna 2
 		- external constant file
@@ -117,6 +131,11 @@
 		- inventory screen
 	- Building
 		- domain building
+    	- turrets
+    		- turret art
+    		- building takes crystal
+    		- building rotation
+    		- turret ai
 	- AI
 		- other cores doing the same
 

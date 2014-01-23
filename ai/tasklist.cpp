@@ -15,6 +15,7 @@
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/itemcomponent.h"
 #include "../xegame/istringconst.h"
+#include "../xegame/rendercomponent.h"
 
 #include "../scenes/characterscene.h"
 #include "../scenes/forgescene.h"
@@ -51,14 +52,20 @@ void TaskList::Push( const Task& task )
 }
 
 
-void TaskList::DoStanding( int time )
+bool TaskList::DoStanding( const ComponentSet& thisComp, int time )
 {
 	if ( Standing() ) {
 		taskList[0].timer -= time;
 		if ( taskList[0].timer <= 0 ) {
 			taskList.Remove(0);
 		}
+		int n = socialTicker.Delta( time );
+		for( int i=0; i<n; ++i ) {
+			SocialPulse( thisComp, thisComp.spatial->GetPosition2D() );
+		}
+		return true;
 	}
+	return false;
 }
 
 
@@ -278,10 +285,18 @@ void TaskList::SocialPulse( const ComponentSet& thisComp, const Vector2F& origin
 		}
 	}
 
+	// No one to talk to.
+	if ( arr.Size() <= 1 ) {
+		return;
+	}
+
 	// Okay, passed checks. Give social happiness.
 	double social = double( arr.Size() ) * 0.1;
 	for( int i=0; i<arr.Size(); ++i ) {
 		arr[i]->GetAIComponent()->GetNeedsMutable()->Add( ai::Needs::SOCIAL, social );
+		if ( thisComp.chit->GetRenderComponent() ) {
+			thisComp.chit->GetRenderComponent()->AddDeco( "chat", STD_DECO );
+		}
 	}
 }
 
@@ -338,7 +353,7 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 			// Apply the needs as is.
 		}
 		else if ( buildingName == IStringConst::bar ) {
-			SocialPulse( thisComp, thisComp.spatial->GetPosition2D() );
+			//SocialPulse( thisComp, thisComp.spatial->GetPosition2D() );
 			// FIXME: check for food
 		}
 		else {
@@ -511,7 +526,8 @@ bool TaskList::UseFactory( const ComponentSet& thisComp, Chit* factory, int tech
 		}
 	}
 	thisComp.itemComponent->AddToInventory( item );
-	thisComp.item->GetTraitsMutable()->AddCraftXP( wallet.NumCrystals() );
+	thisComp.itemComponent->AddCraftXP( wallet.NumCrystals() );
+	thisComp.item->historyDB.Increment( "Crafted" );
 
 	Vector2I sector = thisComp.spatial->GetPosition2DI();
 	GLOUTPUT(( "'%s' forged the item '%s' at sector=%x,%x\n",

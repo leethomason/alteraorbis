@@ -54,7 +54,8 @@ Engine::Engine( Screenport* port, const gamedb::Reader* database, Map* m )
 		screenport( port ),
 		initZoomDistance( 0 ),
 		stages( 0xffff ),
-		map( 0 )
+		map( 0 ),
+		uiRenderer( GPUDevice::ENGINE )
 {
 	map = m;
 	temperature = 0;

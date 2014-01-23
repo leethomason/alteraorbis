@@ -196,6 +196,23 @@ bool AIComponent::LineOfSight( const ComponentSet& thisComp, const grinliz::Vect
 }
 
 
+void AIComponent::MakeAware( const int* enemyIDs, int n )
+{
+	for( int i=0; i<n; ++i ) {
+		int id = enemyIDs[i];
+		Chit* chit = GetChitBag()->GetChit( enemyIDs[i] );
+		if ( chit ) {
+			int status = GetTeamStatus( chit );
+			if ( status == RELATE_ENEMY ) {
+				if ( enemyList.HasCap() && enemyList.Find( id ) < 0 ) {
+					enemyList.Push( id );
+				}
+			}
+		}
+	}
+}
+
+
 void AIComponent::GetFriendEnemyLists()
 {
 	SpatialComponent* sc = parentChit->GetSpatialComponent();
@@ -555,7 +572,7 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 }
 
 
-bool AIComponent::DoStand( const ComponentSet& thisComp, U32 since )
+bool AIComponent::DoStand( const ComponentSet& thisComp, U32 time )
 {
 	const GameItem* item	= parentChit->GetItem();
 	int itemFlags			= item ? item->flags : 0;
@@ -577,7 +594,7 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 since )
 			parentChit->GetChitBag()->QuerySpatialHash( &plants, pos, 0.4f, 0, &plantFilter );
 			if ( !plants.Empty() ) {
 				// We are standing on a plant.
-				float hp = Travel( EAT_HP_PER_SEC, since );
+				float hp = Travel( EAT_HP_PER_SEC, time );
 				ChitMsg heal( ChitMsg::CHIT_HEAL );
 				heal.dataF = hp * EAT_HP_HEAL_MULT;
 
@@ -608,7 +625,7 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 since )
 			const SectorData& sd = map->GetSector( sector );
 			if ( sd.core == pos2i ) {
 				ChitMsg heal( ChitMsg::CHIT_HEAL );
-				heal.dataF = Travel( CORE_HP_PER_SEC, since );
+				heal.dataF = Travel( CORE_HP_PER_SEC, time );
 				parentChit->SendMessage( heal, this );
 				return true;
 			}
@@ -628,7 +645,7 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 since )
 		IString kioskName = vd->CurrentKioskWant();
 
 		if ( chit && chit->GetItem()->IName() == kioskName ) {
-			vd->kioskTime += since;
+			vd->kioskTime += time;
 			if ( vd->kioskTime > VisitorData::KIOSK_TIME ) {
 				Vector2I sector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
 				vd->DidVisitKiosk( sector );
@@ -646,7 +663,7 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 since )
 			return false;
 		}
 	}
-	return false;
+	return taskList.DoStanding( thisComp, time );
 }
 
 
@@ -738,7 +755,12 @@ void AIComponent::Move( const grinliz::Vector2F& dest, bool focused, const Vecto
 
 void AIComponent::Target( Chit* chit, bool focused )
 {
-	aiMode = BATTLE_MODE;
+	if ( aiMode != BATTLE_MODE ) {
+		aiMode = BATTLE_MODE;
+		if ( parentChit->GetRenderComponent() ) {
+			parentChit->GetRenderComponent()->AddDeco( "attention", STD_DECO );
+		}
+	}
 	targetDesc.Set( chit->ID() );
 	focus = focused ? FOCUS_TARGET : 0;
 }
@@ -1865,7 +1887,6 @@ void AIComponent::WorkQueueToTask(  const ComponentSet& thisComp )
 }
 
 
-
 int AIComponent::DoTick( U32 deltaTime )
 {
 	PROFILE_FUNC();
@@ -1928,8 +1949,19 @@ int AIComponent::DoTick( U32 deltaTime )
 		aiMode = BATTLE_MODE;
 		currentAction = 0;
 		taskList.Clear();
+
 		if ( debugFlag ) {
 			GLOUTPUT(( "ID=%d Mode to Battle\n", thisComp.chit->ID() ));
+		}
+
+		if ( parentChit->GetRenderComponent() ) {
+			parentChit->GetRenderComponent()->AddDeco( "attention", STD_DECO );
+		}
+		for( int i=0; i<friendList.Size(); ++i ) {
+			Chit* fr = GetChitBag()->GetChit( friendList[i] );
+			if ( fr && fr->GetAIComponent() ) {
+				fr->GetAIComponent()->MakeAware( enemyList.Mem(), enemyList.Size() );
+			}
 		}
 	}
 	else if ( aiMode == BATTLE_MODE && targetDesc.id == 0 && enemyList.Empty() ) {

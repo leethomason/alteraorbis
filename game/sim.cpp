@@ -122,9 +122,11 @@ void Sim::Load( const char* mapDAT, const char* gameDAT )
 		}
 	}
 	if ( chitBag->GetChit( playerID )) {
+		Chit* player = chitBag->GetChit( playerID );
 		// Mark as player controlled so it reacts as expected to player input.
 		// This is the primary avatar, and has some special rules.
-		chitBag->GetChit( playerID )->SetPlayerControlled( true );
+		player->SetPlayerControlled( true );
+		//player->GetRenderComponent()->AddDeco( "horn", 100*1000 );
 	}
 }
 

@@ -18,7 +18,7 @@ BuildData BuildScript::buildData[NUM_OPTIONS] = {
 	{	"Media",	"kiosk.m",	1, 0, 0 },
 	{	"Commerce",	"kiosk.c",	1, 0, 0 },
 	{	"Social",	"kiosk.s",	1, 0, 0 },
-	{	"Factory",	"factory",	1, 0, 0 },
+	{	"Forge",	"factory",	1, 0, 0 },
 	{	"Power",	"power",	1, 0, 0 },
 	// Tech 1
 	{	"Vault",	"vault",	2, 0, 0 },

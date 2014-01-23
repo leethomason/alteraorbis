@@ -38,13 +38,16 @@ DebugStateComponent::DebugStateComponent( WorldMap* _map ) : map( _map )
 	RenderAtom a1 = LumosGame::CalcPaletteAtom( 1, 3 );	
 	RenderAtom a2 = LumosGame::CalcPaletteAtom( 1, 1 );
 	healthBar.Init( &map->overlay0, 10, a1, a2 ); 
+	healthBar.SetVisible( false );
 
 	RenderAtom blue   = LumosGame::CalcPaletteAtom( 8, 0 );	
 	ammoBar.Init( &map->overlay0, 10, blue, blue );
+	ammoBar.SetVisible( false );
 
 	RenderAtom purple = LumosGame::CalcPaletteAtom( 10, 0 );
 	RenderAtom grey   = LumosGame::CalcPaletteAtom( 0, 6 );
 	shieldBar.Init( &map->overlay0, 10, purple, grey );
+	shieldBar.SetVisible( false );
 }
 
 
@@ -126,6 +129,11 @@ int DebugStateComponent::DoTick( U32 delta )
 		float r = shield->RoundsFraction();
 		shieldBar.SetRange( Clamp( r, 0.f, 1.0f ));
 	}
+
+	ammoBar.SetVisible( true );
+	shieldBar.SetVisible( true );
+	healthBar.SetVisible( true );
+
 	return VERY_LONG_TICK;
 }
 

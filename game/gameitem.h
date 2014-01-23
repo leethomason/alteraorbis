@@ -137,6 +137,8 @@ public:
 	// Roll the initial values.
 	void Roll( U32 seed );
 
+	// Add...XP() should be called from the ItemComponent - 
+	// other things need to happen (display items, add hp, etc.)
 	void AddBattleXP( int killshotLevel )	{ exp += 1 + killshotLevel; }
 	void AddCraftXP( int nCrystals )		{ exp += 8 * nCrystals; }
 
@@ -325,6 +327,8 @@ public:
 	grinliz::IString	IFullName() const;
 	const char*			ResourceName() const	{ return resource.c_str(); }
 	grinliz::IString	IResourceName() const	{ return resource; }
+	grinliz::IString	ITitle() const;				// Dragon Slayer
+	grinliz::IString	INameAndTitle() const;		// The full out: Hegas (humanFemale) Dragon Slayer
 
 	void SetName( const char* n )				{ name = grinliz::StringPool::Intern( n ); UpdateTrack(); }
 	void SetProperName( const char* n )			{ properName = grinliz::StringPool::Intern( n ); UpdateTrack(); }
@@ -393,7 +397,7 @@ public:
 	// for simple dynamic extension. speed=2.0 for example.
 	// 'microdb' is used to record history, events, etc.
 	grinliz::MicroDB keyValues;
-	grinliz::MicroDB microdb;
+	grinliz::MicroDB historyDB;
 
 	float CalcBoltSpeed() const {
 		static const float SPEED = 10.0f;
