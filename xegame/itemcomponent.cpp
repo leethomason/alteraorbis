@@ -396,10 +396,10 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		// Run through the inventory, looking for modifiers.
 		// Be cautious there is no order dependency here (except the
 		// inverse order to do the mainItem last)
+		DamageDesc dd = ddorig;
 		for( int i=itemArr.Size()-1; i>=0; --i ) {
 			if ( i==0 || ItemActive(i) ) {
-				DamageDesc dd = ddorig;
-				itemArr[i]->AbsorbDamage( i>0, dd, &dd, "DAMAGE", this->GetMeleeWeapon(), parentChit );
+				itemArr[i]->AbsorbDamage( i>0, dd, &dd, this->GetMeleeWeapon(), parentChit );
 
 				if ( itemArr[i]->ToShield() ) {
 					GameItem* shield = itemArr[i]->ToShield()->GetItem();

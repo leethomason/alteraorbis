@@ -434,64 +434,64 @@ void GameItem::Apply( const GameItem* intrinsic )
 }
 
 
-void GameItem::AbsorbDamage( bool inInventory, DamageDesc dd, DamageDesc* remain, const char* log, const IMeleeWeaponItem* booster, Chit* parentChit )
+void GameItem::AbsorbDamage( bool inInventory, 
+							 DamageDesc dd, 
+							 DamageDesc* _remain, 
+							 const IMeleeWeaponItem* booster, 
+							 Chit* parentChit )
 {
-	float absorbed = 0;
-	int   effect = dd.effects;
+	DamageDesc* remain = _remain;
+	DamageDesc temp;
+	if ( !remain ) {
+		remain = &temp;
+	}
+
+	*remain = dd;
 
 	if ( !inInventory ) {
 		// just regular item getting hit, that takes damage.
-		absorbed = Min( dd.damage, hp );
 		if ( dd.effects & EFFECT_FIRE )
-			accruedFire += absorbed;
+			accruedFire += dd.damage;
 		if ( dd.effects & EFFECT_SHOCK )
-			accruedShock += absorbed;
-		hp -= absorbed;
+			accruedShock += dd.damage;
+		hp -= dd.damage;
+		if ( hp < 0 ) hp = 0;
 	}
 	else {
 		// Items in the inventory don't take damage. They
 		// may reduce damage for their parent.
 		if ( ToShield() ) {
 			reload.ResetUnready();
-			absorbed = Min( dd.damage * absorbsDamage, (float)rounds );
+
+			if ( rounds ) {
+				float canAbsorb = Min( dd.damage * absorbsDamage, (float)rounds );
 			
-			float cost = absorbed;
-			if ( effect & EFFECT_SHOCK ) cost *= 0.5f;
-			if ( booster ) {
 				float boost = BattleMechanics::ComputeShieldBoost( booster );
-				if ( boost > 1.0f ) {
-					cost /= boost;
-				}
+				float cost = canAbsorb / boost;
+
+				rounds -= LRintf( cost );
+				if ( rounds < 0 ) rounds = 0;
+
+				remain->damage -= canAbsorb;
+				if ( remain->damage < 0 ) remain->damage = 0;
+
 			}
-
-			rounds -= LRintf( cost );
-
-			if ( rounds < 0 ) rounds = 0;
-
-			// If the shield still has power, remove the effect.
-			if ( rounds > 0 ) {
-				if ( flags & EFFECT_FIRE )
-					effect &= (~EFFECT_FIRE);
-				if ( flags & EFFECT_SHOCK )
-					effect &= (~EFFECT_SHOCK);
-			}
+			// Shields absorb damage, which prevent fire & shock.
+			// So the bonuses are only useful if they remove effects
+			// even if the shield is out of rounds...which makes them
+			// maybe too powerful.
+			if ( flags & EFFECT_FIRE )
+				remain->effects &= (~EFFECT_FIRE);
+			if ( flags & EFFECT_SHOCK )
+				remain->effects &= (~EFFECT_SHOCK);
 		}
-		else {
+		else if ( absorbsDamage > 0 ) {
 			// Something that straight up reduces damage.
-			absorbed = dd.damage * absorbsDamage;
-		}
-	}
-	if ( remain ) {
-		remain->damage = dd.damage - absorbed;
-		remain->effects = effect;
-		GLASSERT( remain->damage >= 0 );
-	}
-	if ( absorbed ) {
-		if ( inInventory ) {
-			GLLOG(( "Damage Absorbed %s absorbed=%.1f ", name.c_str(), absorbed ));
-		}
-		else {
-			GLLOG(( "Damage %s total=%.1f hp=%.1f accFire=%.1f accShock=%.1f ", name.c_str(), absorbed, hp, accruedFire, accruedShock ));
+			remain->damage *= (1.0f - absorbsDamage);
+			if ( flags & EFFECT_FIRE )
+				remain->effects &= (~EFFECT_FIRE);
+			if ( flags & EFFECT_SHOCK )
+				remain->effects &= (~EFFECT_SHOCK);
 		}
 	}
 	if ( parentChit ) {
@@ -550,8 +550,10 @@ int GameItem::GetValue() const
 		const GameItem& basic = ItemDefDB::Instance()->Get( "shield" );
 		int refRounds = basic.ClipCap();
 
-		// Currently, shield effects don't do anything, although that would be cool.
 		float v = float(rounds) / float(refRounds) * SHIELD_VALUE;
+
+		if ( flags & GameItem::EFFECT_FIRE )  v *= 2.0f;
+		if ( flags & GameItem::EFFECT_SHOCK ) v *= 2.0f;
 
 		if ( value ) value += LRintf( v*0.5f );
 		else value = LRintf(v);

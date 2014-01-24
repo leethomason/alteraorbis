@@ -28,8 +28,11 @@
 		- update cyclops art
 		- update temple art
 		- update arachnoid art
+		- update tombstone art
+		- update shield art. boring and hard to identify.
+		- shield glow
 		x forge / factory name update
-    	- tombstones
+    	x tombstones
     	x accomplishments
     		x move kills, accomplishments to central tracking system?
 		x fix modes if no avatar
@@ -38,12 +41,20 @@
 		x GT: rez-in for structures
 		x viewing edge of world breaks all kinds of limits and ASSERTs
 		x item destruction / hpRegen
-		- is shield boost working correctly? Effects are *not* getting stripped by the shield.
-		- shield looks very boring (and hard to tell what it is). And does it turn off if you don't have one? And does it glow?
-		- flammability / shockability very agressive
+		x is shield boost working correctly? Effects are *not* getting stripped by the shield.
 		- buildings shouldn't drop gold on de-rez
 		- Click through of disabled buttons is surprising
 		- space bar pause
+		- change gold and healing icons 
+
+	 - Food
+	 	- food collection
+	 	- food transport
+	 	- food need 
+	 	- consume elixer
+	 	- consume raw
+	 	- morale
+	 	- effects of low morale (madness, starvation)
     	- time scale culling
 
 	- Census
@@ -62,11 +73,13 @@
 		- needs to feel interactive
 		- # kills
 		- browsing of items/people
+		- redo UI layout
 
 	- Market
 		x rethink fiction / core control / avatar prime
 		x denizens
 		x item market
+		- flammability / shockability very agressive
 		- guard posts
 		- world effects morale/needs: water, tombstones, temples, etc.
 		- proper game start: location, selection of team color, icons

@@ -467,6 +467,8 @@ float BattleMechanics::MeleeDPTU( const GameItem* wielder, const IMeleeWeaponIte
 
 float BattleMechanics::ComputeShieldBoost( const IMeleeWeaponItem* weapon )
 {
+	if ( !weapon ) return 1.0f;
+
 	const GameItem* item = weapon->GetItem();
 	float value = 0;
 	item->keyValues.Fetch( "shieldBoost", "f", &value ); 
@@ -474,7 +476,7 @@ float BattleMechanics::ComputeShieldBoost( const IMeleeWeaponItem* weapon )
 		float boost = value * item->Traits().NormalLeveledTrait( GameTrait::CHR );
 		return Max( boost, 1.0f );
 	}
-	return 0;
+	return 1.0f;
 }
 
 

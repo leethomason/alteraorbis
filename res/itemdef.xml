@@ -420,7 +420,7 @@
         reload ="3000"
         clipCap="20"
         mass="1.0"
-        absorbsDamage="0.8"
+        absorbsDamage="1.0"
         procedural="shield"
         hpRegen="1.0"
         >
