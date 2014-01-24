@@ -22,6 +22,8 @@
 - squisher, in streaming mode, to save files
 - “Focus” shouldn’t switch so easily.
 - 32bit texture support
+- see monsters when you click on them
+- remove "tech grouping" of buildings
 
 - game
 	- Denizen-2
@@ -30,6 +32,7 @@
 		- update arachnoid art
 		- update tombstone art
 		- update shield art. boring and hard to identify.
+		- different porch color for usable buildings
 		- shield glow
 		x forge / factory name update
     	x tombstones
@@ -43,10 +46,17 @@
 		x item destruction / hpRegen
 		x is shield boost working correctly? Effects are *not* getting stripped by the shield.
 		x buildings shouldn't drop gold on de-rez
-	    - changing active weapon in invetory doesn't change rendering in-game
+	    x changing active weapon in invetory doesn't change rendering in-game
 		- Click through of disabled buttons is surprising
 		- space bar pause
 		- change gold and healing icons 
+		- guard posts
+		- workers will try to clear water
+		- workerBot button not working
+		- gold cheat not working when no avatar
+		- need to limit gold / crystal of MOBs
+		x accuracy changes in forge screen
+		x rezzed, de-rezzed needs different words. too hard to tell apart.
 
 	 - Food
 	 	- food collection

@@ -722,12 +722,12 @@ bool ItemComponent::CanAddToInventory()
 void ItemComponent::AddToInventory( GameItem* item )
 {
 	itemArr.Push( item );
-	hardpointsModified = true;
 
 	// AIs will use the "best" item.
 	if ( parentChit && !parentChit->PlayerControlled() ) {
 		SortInventory();
 	}
+	hardpointsModified = true;
 	UpdateActive();
 }
 
@@ -739,12 +739,12 @@ void ItemComponent::AddToInventory( ItemComponent* ic )
 	GLASSERT( ic->NumItems() == 1 );
 	itemArr.Push( ic->itemArr.Pop() );
 	delete ic;
-	hardpointsModified = true;
 
 	// AIs will use the "best" item.
 	if ( !parentChit->PlayerControlled() ) {
 		SortInventory();
 	}
+	hardpointsModified = true;
 	UpdateActive();
 
 	if ( parentChit && parentChit->GetRenderComponent() ) {
@@ -762,8 +762,8 @@ GameItem* ItemComponent::RemoveFromInventory( int index )
 	if ( index == 0 )
 		return 0;
 
-	hardpointsModified = true;
 	itemArr.Remove( index );
+	hardpointsModified = true;
 	UpdateActive();
 	return item;
 }
@@ -800,6 +800,7 @@ bool ItemComponent::Swap( int i, int j )
 	{
 		grinliz::Swap( &itemArr[i], &itemArr[j] );
 		hardpointsModified = true;
+		hardpointsModified = true;
 		UpdateActive();
 		return true;
 	}
@@ -817,7 +818,9 @@ bool ItemComponent::Swap( int i, int j )
 	{
 		grinliz::Swap( &a->itemArr[aIndex], &b->itemArr[bIndex] );
 		a->UpdateActive();
+		a->hardpointsModified = true;
 		b->UpdateActive();
+		b->hardpointsModified = true;
 		return true;
 	}
 	return false;

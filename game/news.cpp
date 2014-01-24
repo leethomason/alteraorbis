@@ -178,20 +178,20 @@ void NewsEvent::Console( grinliz::GLString* str ) const
 
 	switch ( what ) {
 	case DENIZEN_CREATED:
-		str->Format( "%.2f: Denizen %s rezzed at %s.", age, itemName.c_str(), domain.c_str() );
+		str->Format( "%.2f: Denizen %s created at %s.", age, itemName.c_str(), domain.c_str() );
 		break;
 
 	case DENIZEN_KILLED:
-		str->Format( "%.2f: Denizen %s derez at %s by %s.", age, itemName.c_str(), domain.c_str(), secondName.c_str() );
+		str->Format( "%.2f: Denizen %s de-rez at %s by %s.", age, itemName.c_str(), domain.c_str(), secondName.c_str() );
 		break;
 
 	case GREATER_MOB_CREATED:
-		str->Format( "%.2f: %s rezzed at %s.", age, itemName.c_str(), domain.c_str() ); 
+		str->Format( "%.2f: %s created at %s.", age, itemName.c_str(), domain.c_str() ); 
 		break;
 
 	case GREATER_MOB_KILLED:
 	case LESSER_NAMED_MOB_KILLED:
-		str->Format( "%.2f: %s derez at %s by %s.", age, itemName.c_str(), domain.c_str(), secondName.c_str() ); 
+		str->Format( "%.2f: %s de-rez at %s by %s.", age, itemName.c_str(), domain.c_str(), secondName.c_str() ); 
 		break;
 
 	case LESSER_MOB_NAMED:

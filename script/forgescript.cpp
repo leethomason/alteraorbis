@@ -80,7 +80,8 @@ void ForgeScript::Build(	int type,			// GUN
 	Random random;
 	random.SetSeed(   forgeUser->GetItem()->ID() 
 		            ^ forgeUser->GetItem()->Traits().Experience() 
-					^ (type + subType*37 + partsFlags*129 + effectFlags*11) );
+					^ (type) );	// do NOT include parts - should not change on parts changing
+								// not changing on sub-type either
 
 	const char* typeName = "pistol";
 
