@@ -472,8 +472,6 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		}
 
 		// Drop our wallet on the ground or send to the Reserve?
-		// Basically, MoBs and buildings drop stuff. The rest goes to Reserve.
-		BuildingFilter buildingFilter;
 		MoBFilter mobFilter;
 
 		Wallet w = mainItem->wallet.EmptyWallet();
@@ -483,7 +481,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			pos = parentChit->GetSpatialComponent()->GetPosition();
 		}
 
-		if ( buildingFilter.Accept( parentChit ) || mobFilter.Accept( parentChit )) {
+		if ( mobFilter.Accept( parentChit )) {
 			dropItems = true;
 			if ( !w.IsEmpty() ) {
 				parentChit->GetLumosChitBag()->NewWalletChits( pos, w );

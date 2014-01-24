@@ -42,7 +42,7 @@
 		x viewing edge of world breaks all kinds of limits and ASSERTs
 		x item destruction / hpRegen
 		x is shield boost working correctly? Effects are *not* getting stripped by the shield.
-		- buildings shouldn't drop gold on de-rez
+		x buildings shouldn't drop gold on de-rez
 		- Click through of disabled buttons is surprising
 		- space bar pause
 		- change gold and healing icons 
