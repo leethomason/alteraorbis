@@ -43,6 +43,7 @@
 		x item destruction / hpRegen
 		x is shield boost working correctly? Effects are *not* getting stripped by the shield.
 		x buildings shouldn't drop gold on de-rez
+	    - changing active weapon in invetory doesn't change rendering in-game
 		- Click through of disabled buttons is surprising
 		- space bar pause
 		- change gold and healing icons 
