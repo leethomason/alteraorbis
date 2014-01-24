@@ -44,6 +44,7 @@ class Stats;
 class Unit;
 class Research;
 class ItemDefDB;
+class LumosGame;
 
 enum SavePathMode {
 	SAVEPATH_READ,
@@ -59,6 +60,8 @@ class Game : public ITextureCreator
 public:
 	Game( int width, int height, int rotation, int uiHeight, const char* savepath );
 	virtual ~Game();
+
+	virtual LumosGame* ToLumosGame() { return 0; }
 
 	void DeviceLoss();
 	void Resize( int width, int height, int rotation );

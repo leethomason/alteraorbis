@@ -33,7 +33,7 @@
 using namespace grinliz;
 using namespace tinyxml2;
 
-ChitBag::ChitBag()
+ChitBag::ChitBag( const ChitContext& c )
 {
 	idPool = 0;
 	bagTime = 0;
@@ -41,7 +41,7 @@ ChitBag::ChitBag()
 	memset( mobSpatialHash, 0, sizeof(*mobSpatialHash)*SIZE2 );
 	memRoot = 0;
 	activeCamera = 0;
-	chitContext = 0;
+	chitContext = c;
 }
 
 
@@ -227,10 +227,9 @@ void ChitBag::GetBlockPtrs( int b, grinliz::CDynArray<Chit*>* arr ) const
 }
 
 
-void ChitBag::DoTick( U32 delta, const ChitContext* context )
+void ChitBag::DoTick( U32 delta )
 {
 	PROFILE_FUNC();
-	chitContext = context;
 	bagTime += delta;
 	nTicked = 0;
 
@@ -269,8 +268,8 @@ void ChitBag::DoTick( U32 delta, const ChitContext* context )
 		}
 	}
 
-	if ( context && context->engine ) {
-		Bolt::TickAll( &bolts, delta, context->engine, this );
+	if ( chitContext.engine ) {
+		Bolt::TickAll( &bolts, delta, chitContext.engine, this );
 	}
 
 	// Make sure the camera is updated last so it doesn't "drag"
@@ -309,7 +308,6 @@ void ChitBag::DoTick( U32 delta, const ChitContext* context )
 		GLASSERT( c->ParentChit() == 0 );
 		delete c;
 	}
-	context = 0;
 }
 
 

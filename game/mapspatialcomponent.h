@@ -27,7 +27,7 @@ class MapSpatialComponent : public SpatialComponent
 private:
 	typedef SpatialComponent super;
 public:
-	MapSpatialComponent( WorldMap* map, LumosChitBag* );
+	MapSpatialComponent();
 	virtual ~MapSpatialComponent()	{}
 
 	virtual const char* Name() const { return "MapSpatialComponent"; }
@@ -65,8 +65,6 @@ private:
 	bool					building;	// is this a building?
 	bool					hasPorch;	// if a building, does it have a porch?
 	grinliz::Rectangle2I	bounds;
-	WorldMap*				worldMap;
-	LumosChitBag*			chitBag;
 };
 
 

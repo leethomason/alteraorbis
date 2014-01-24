@@ -57,8 +57,10 @@ Sim::Sim( LumosGame* g ) : minuteClock( 60*1000 ), secondClock( 1000 ), volcTime
 
 	engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
 
-	chitBag = new LumosChitBag();
-	chitBag->SetContext( engine, worldMap, lumosGame );
+	ChitContext context;
+	context.Set( engine, worldMap, g );
+	chitBag = new LumosChitBag( context );
+
 	newsHistory = new NewsHistory( chitBag );
 	worldMap->AttachEngine( engine, chitBag );
 	playerID = 0;
@@ -185,7 +187,7 @@ void Sim::CreateCores()
 			GLASSERT( ms );
 			ms->SetMode( GRID_IN_USE ); 
 			CoreScript* cs = new CoreScript( worldMap, chitBag, engine );
-			chit->Add( new ScriptComponent( cs, engine, &chitBag->census ));
+			chit->Add( new ScriptComponent( cs ));
 
 			if ( !cold ) cold = cs;	// first
 			hot = cs;	// last
@@ -229,8 +231,8 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos )
 	chitBag->GetCamera( engine )->SetTrack( playerID );
 
 	chit->Add( new SpatialComponent());
-	chit->Add( new RenderComponent( engine, assetName ));
-	chit->Add( new PathMoveComponent( worldMap ));
+	chit->Add( new RenderComponent( assetName ));
+	chit->Add( new PathMoveComponent());
 
 	chitBag->AddItem( assetName, chit, engine, TEAM_HOUSE0, 0 );
 	chitBag->AddItem( "shield", chit, engine, 0, 0 );
@@ -246,11 +248,11 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos )
 								chit->ID(),
 								4, 8 )));
 	}
-	AIComponent* ai = new AIComponent( engine, worldMap );
+	AIComponent* ai = new AIComponent();
 	ai->EnableDebug( true );
 	chit->Add( ai );
 
-	chit->Add( new HealthComponent( engine ));
+	chit->Add( new HealthComponent());
 	chit->GetSpatialComponent()->SetPosYRot( (float)pos.x+0.5f, 0, (float)pos.y+0.5f, 0 );
 
 	// Player speed boost
@@ -285,12 +287,7 @@ void Sim::DoTick( U32 delta )
 	NewsHistory::Instance()->DoTick( delta );
 	worldMap->DoTick( delta, chitBag );
 
-	ChitContext context;
-	context.census = &chitBag->census;
-	context.engine = engine;
-	context.map = worldMap;
-	context.worldMap = worldMap;
-	chitBag->DoTick( delta, &context );
+	chitBag->DoTick( delta );
 
 	int minuteTick = minuteClock.Delta( delta );
 	int secondTick = secondClock.Delta( delta );
@@ -467,7 +464,7 @@ void Sim::CreateVolcano( int x, int y, int size )
 
 	Chit* chit = chitBag->NewChit();
 	chit->Add( new SpatialComponent() );
-	chit->Add( new ScriptComponent( new VolcanoScript( worldMap, size ), engine, &chitBag->census ));
+	chit->Add( new ScriptComponent( new VolcanoScript( worldMap, size )));
 
 	chit->GetSpatialComponent()->SetPosition( (float)x+0.5f, 0.0f, (float)y+0.5f );
 }
@@ -535,12 +532,12 @@ void Sim::CreatePlant( int x, int y, int type )
 		}
 
 		Chit* chit = chitBag->NewChit();
-		MapSpatialComponent* ms = new MapSpatialComponent( worldMap, chitBag );
+		MapSpatialComponent* ms = new MapSpatialComponent();
 		ms->SetMapPosition( x, y, 1, 1 );
 		chit->Add( ms );
 
-		chit->Add( new HealthComponent( engine ) );
-		chit->Add( new ScriptComponent( new PlantScript( this, weather, type ), engine, &chitBag->census ));
+		chit->Add( new HealthComponent() );
+		chit->Add( new ScriptComponent( new PlantScript( this, weather, type )));
 	}
 }
 

@@ -26,20 +26,16 @@ private:
 	typedef MoveComponent super;
 
 public:
-	GameMoveComponent( WorldMap* _map ) : map( _map ) {
-	}
+	GameMoveComponent()				{}
 	virtual ~GameMoveComponent()	{}
 
 	virtual const char* Name() const { return "GameMoveComponent"; }
 	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
-	WorldMap* GetWorldMap() { return map; }
 	float Speed() const;
 
 protected:
 	// Keep from hitting world objects.
 	void ApplyBlocks( grinliz::Vector2F* pos, bool* forceApplied );
-
-	WorldMap* map;
 };
 
 

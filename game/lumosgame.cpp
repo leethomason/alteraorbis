@@ -38,12 +38,9 @@
 using namespace grinliz;
 using namespace gamui;
 
-LumosGame* StackedSingleton<LumosGame>::instance = 0;
-
 LumosGame::LumosGame(  int width, int height, int rotation, const char* savepath ) 
 	: Game( width, height, rotation, 600, savepath )
 {
-	PushInstance( this );
 	InitButtonLooks();
 
 	PushScene( SCENE_TITLE, 0 );
@@ -53,7 +50,6 @@ LumosGame::LumosGame(  int width, int height, int rotation, const char* savepath
 
 LumosGame::~LumosGame()
 {
-	PopInstance( this );
 	TextureManager::Instance()->TextureCreatorInvalid( this );
 }
 

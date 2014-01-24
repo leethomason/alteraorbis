@@ -28,7 +28,7 @@ private:
 	typedef Component super;
 
 public:
-	VisitorStateComponent( WorldMap* map );
+	VisitorStateComponent();
 	~VisitorStateComponent();
 
 	virtual const char* Name() const { return "VisitorStateComponent"; }
@@ -41,7 +41,6 @@ public:
 	void OnChitMsg( Chit* chit, const ChitMsg& msg );
 
 private:
-	WorldMap* worldMap;
 	gamui::Image		wants[VisitorData::NUM_VISITS];
 	gamui::DigitalBar	bar;	// FIXME: this is a pretty general need to have here. Probably should be head decos.
 	bool needsInit;

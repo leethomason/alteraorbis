@@ -40,8 +40,8 @@
 using namespace grinliz;
 
 
-ItemComponent::ItemComponent( Engine* _engine, WorldMap* wm, const GameItem& item ) 
-	: engine(_engine), worldMap(wm), slowTick( 500 ), hardpointsModified( true ), lastDamageID(0),
+ItemComponent::ItemComponent( const GameItem& item ) 
+	: slowTick( 500 ), hardpointsModified( true ), lastDamageID(0),
 	  ranged(0), melee(0), reserve(0), shield(0)
 {
 	GLASSERT( !item.IName().empty() );
@@ -49,8 +49,8 @@ ItemComponent::ItemComponent( Engine* _engine, WorldMap* wm, const GameItem& ite
 }
 
 
-ItemComponent::ItemComponent( Engine* _engine, WorldMap* wm, GameItem* item ) 
-	: engine(_engine), worldMap(wm), slowTick( 500 ), hardpointsModified( true ), lastDamageID(0),
+ItemComponent::ItemComponent( GameItem* item ) 
+	: slowTick( 500 ), hardpointsModified( true ), lastDamageID(0),
 	  ranged(0), melee(0), reserve(0), shield(0)
 {
 	// item can be null if loading.
@@ -102,15 +102,16 @@ void ItemComponent::Serialize( XStream* xs )
 void ItemComponent::NameItem( GameItem* item )
 {
 	bool shouldHaveName = item->Traits().Level() >= LEVEL_OF_NAMING;
+	const ChitContext* context = this->GetChitContext();
 
 	if ( shouldHaveName ) {
 		if ( item->IProperName().empty() ) {
 			IString nameGen = item->keyValues.GetIString( "nameGen" );
 			if ( !nameGen.empty() ) {
 				item->SetProperName( StringPool::Intern( 
-					GetLumosChitBag()->GetLumosGame()->GenName( nameGen.c_str(), 
-																item->ID(),
-																4, 10 )));
+					context->game->GenName( nameGen.c_str(), 
+											item->ID(),
+											4, 10 )));
 			}
 
 			// An item that wasn't significant is now significant.
@@ -341,6 +342,7 @@ void ItemComponent::NewsDestroy( const GameItem* item )
 
 void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {
+	const ChitContext* context = GetChitContext();
 	GameItem* mainItem = itemArr[0];
 	GLASSERT( !mainItem->IName().empty() );
 
@@ -378,7 +380,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 					float r = -300.0f + (float)chit->random.Rand( 600 );
 
 					if ( pathMove ) {
-						physics = new PhysicsMoveComponent( worldMap, true );
+						physics = new PhysicsMoveComponent( true );
 						parentChit->Remove( pathMove );
 						GetChitBag()->DeferredDelete( pathMove );
 						parentChit->Add( physics );
@@ -404,7 +406,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 					
 					RenderComponent* rc = parentChit->GetRenderComponent();
 					if ( rc && shield->RoundsFraction() > 0 ) {
-						ParticleDef def = engine->particleSystem->GetPD( "shield" );
+						ParticleDef def = context->engine->particleSystem->GetPD( "shield" );
 						Vector3F shieldPos = { 0, 0, 0 };
 						rc->GetMetaData( HARDPOINT_SHIELD, &shieldPos );
 					
@@ -412,7 +414,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 						def.color.x *= f;
 						def.color.y *= f;
 						def.color.z *= f;
-						engine->particleSystem->EmitPD( def, shieldPos, V3F_UP, 0 );
+						context->engine->particleSystem->EmitPD( def, shieldPos, V3F_UP, 0 );
 					}
 				}
 
@@ -442,7 +444,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 
 		if ( parentChit->GetSpatialComponent() ) {
 			Vector3F v = parentChit->GetSpatialComponent()->GetPosition();
-			engine->particleSystem->EmitPD( "heal", v, V3F_UP, 30 );
+			context->engine->particleSystem->EmitPD( "heal", v, V3F_UP, 30 );
 		}
 	}
 	else if ( msg.ID() == ChitMsg::CHIT_TRACKING_ARRIVED ) {
@@ -567,6 +569,7 @@ int ItemComponent::DoTick( U32 delta )
 		SetHardpoints();
 		hardpointsModified = false;
 	}
+	const ChitContext* context = GetChitContext();
 
 	GameItem* mainItem = itemArr[0];
 	if ( slowTick.Delta( delta )) {
@@ -599,7 +602,7 @@ int ItemComponent::DoTick( U32 delta )
 				GLASSERT( parentChit != gold );
 				TrackingMoveComponent* tc = GET_SUB_COMPONENT( gold, MoveComponent, TrackingMoveComponent );
 				if ( !tc ) {
-					tc = new TrackingMoveComponent( worldMap );
+					tc = new TrackingMoveComponent();
 					tc->SetTarget( parentChit->ID() );
 					gold->Add( tc );
 				}
@@ -651,7 +654,8 @@ void ItemComponent::OnRemove()
 
 bool ItemComponent::EmitEffect( const GameItem& it, U32 delta )
 {
-	ParticleSystem* ps = engine->particleSystem;
+	const ChitContext* context = GetChitContext();
+	ParticleSystem* ps = context->engine->particleSystem;
 	bool emitted = false;
 
 	ComponentSet compSet( parentChit, Chit::ITEM_BIT | Chit::SPATIAL_BIT | ComponentSet::IS_ALIVE );

@@ -72,7 +72,7 @@ private:
 	int nChits;
 	int creationTick;
 
-	LumosChitBag chitBag;
+	LumosChitBag* chitBag;
 };
 
 

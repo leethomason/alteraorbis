@@ -70,6 +70,7 @@ void HealthComponent::DeltaHealth()
 {
 	if ( destroyed )
 		return;
+	const ChitContext* context = GetChitContext();
 
 	GameItem* item = 0;
 	if ( parentChit->GetItemComponent() ) {
@@ -93,11 +94,11 @@ void HealthComponent::DeltaHealth()
 					if ( asset ) {
 						Chit* chit = GetLumosChitBag()->NewChit();
 
-						GetLumosChitBag()->AddItem( "tombstone", chit, Engine::Instance(), 0, 0, asset );
+						GetLumosChitBag()->AddItem( "tombstone", chit, context->engine, 0, 0, asset );
 						chit->Add( new SpatialComponent() );
-						chit->Add( new RenderComponent( Engine::Instance(), asset ));
-						chit->Add( new ScriptComponent( new CountDownScript( 30*1000 ), Engine::Instance(),0 ));
-						chit->Add( new HealthComponent( Engine::Instance()));
+						chit->Add( new RenderComponent( asset ));
+						chit->Add( new ScriptComponent( new CountDownScript( 30*1000 )));
+						chit->Add( new HealthComponent());
 
 						Vector3F pos = parentChit->GetSpatialComponent()->GetPosition();
 						pos.y = 0;
@@ -129,8 +130,9 @@ void HealthComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			Vector3F pos;
 			render->CalcTrigger( &pos, 0 );
 
-			battleMechanics.MeleeAttack( engine, parentChit, item );
-			engine->particleSystem->EmitPD( "meleeImpact", pos, V3F_UP, 0 );
+			const ChitContext* context = GetChitContext();
+			battleMechanics.MeleeAttack( context->engine, parentChit, item );
+			context->engine->particleSystem->EmitPD( "meleeImpact", pos, V3F_UP, 0 );
 		}
 	}
 	else {

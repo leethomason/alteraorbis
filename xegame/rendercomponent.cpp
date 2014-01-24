@@ -31,11 +31,12 @@
 
 #include "../game/lumosgame.h"
 
+#include "../xegame/chitbag.h"
+
 using namespace grinliz;
 using namespace tinyxml2;
 
-RenderComponent::RenderComponent( Engine* _engine, const char* asset ) 
-	: engine( _engine )
+RenderComponent::RenderComponent( const char* asset ) 
 {
 	for( int i=0; i<NUM_MODELS; ++i ) {
 		model[i] = 0;
@@ -66,6 +67,11 @@ const ModelResource* RenderComponent::MainResource() const
 void RenderComponent::Serialize( XStream* xs )
 {
 	// FIXME serialize deco
+
+	// Can't get context: order is Serialize() then Add()
+	Engine* engine = Engine::Instance();
+
+	//const ChitContext* context = this->GetChitContext();
 	BeginSerialize( xs, "RenderComponent" );
 
 	XarcOpen( xs, "models" );
@@ -97,9 +103,10 @@ void RenderComponent::Serialize( XStream* xs )
 void RenderComponent::OnAdd( Chit* chit )
 {
 	Component::OnAdd( chit );
+	const ChitContext* context = GetChitContext();
 
 	if ( !model[0] ) {
-		model[0] = engine->AllocModel( mainAsset.c_str() );
+		model[0] = context->engine->AllocModel( mainAsset.c_str() );
 	}
 
 	for( int i=0; i<NUM_MODELS; ++i ) {
@@ -113,15 +120,16 @@ void RenderComponent::OnAdd( Chit* chit )
 
 void RenderComponent::OnRemove()
 {
+	const ChitContext* context = GetChitContext();
 	Component::OnRemove();
 	for( int i=0; i<NUM_MODELS; ++i ) {
 		if ( model[i] ) {
-			engine->FreeModel( model[i] );
+			context->engine->FreeModel( model[i] );
 			model[i] = 0;
 		}
 	}
 	if ( groundMark ) {
-		engine->FreeModel( groundMark );
+		context->engine->FreeModel( groundMark );
 		groundMark = 0;
 	}
 	for( int i=0; i<icons.Size(); ++i ) {
@@ -228,13 +236,14 @@ bool RenderComponent::Attach( int metaData, const char* asset )
 		return true;
 	}
 
+	const ChitContext* context = GetChitContext();
 	if ( model[metaData] ) {
-		engine->FreeModel( model[metaData] );
+		context->engine->FreeModel( model[metaData] );
 	}
 
 	// If we are already added (model[0] exists) add the attachments.
 	const ModelResource* res = ModelResourceManager::Instance()->GetModelResource( asset );
-	model[metaData] = engine->AllocModel( res );
+	model[metaData] = context->engine->AllocModel( res );
 	model[metaData]->userData = parentChit;
 	return true;
 }
@@ -278,7 +287,8 @@ void RenderComponent::Detach( int metaData )
 {
 	GLASSERT( metaData > 0 && metaData < EL_NUM_METADATA );
 	if ( model[metaData] ) {
-		engine->FreeModel( model[metaData] );
+		const ChitContext* context = GetChitContext();
+		context->engine->FreeModel( model[metaData] );
 	}
 	model[metaData] = 0;
 }
@@ -318,10 +328,12 @@ int RenderComponent::DoTick( U32 deltaTime )
 		}
 	}
 
+	const ChitContext* context = GetChitContext();
+
 	// Some models are particle emitters; handle those here:
 	for( int i=0; i<NUM_MODELS; ++i ) {
 		if( model[i] && model[i]->HasParticles() ) {
-			model[i]->EmitParticles( engine->particleSystem, engine->camera.EyeDir3(), deltaTime );
+			model[i]->EmitParticles( context->engine->particleSystem, context->engine->camera.EyeDir3(), deltaTime );
 			tick = 0;
 		}
 	}
@@ -363,10 +375,11 @@ void RenderComponent::AddDeco( const char* asset, int duration )
 	}
 
 	if ( !found ) {
+		const ChitContext* context = GetChitContext();
 		Icon* icon = icons.PushArr(1);
 		icon->image = new gamui::Image();
 		icon->image->SetVisible( false );
-		icon->image->Init( &engine->overlay, atom, false );
+		icon->image->Init( &context->engine->overlay, atom, false );
 		icon->time = duration;
 		icon->rotation = 90.0f;
 	}
@@ -397,9 +410,10 @@ void RenderComponent::ProcessIcons( int delta )
 	bool inView = false;
 	static const float SIZE = 20.0f;
 
-	float len2 = ( engine->camera.PosWC() - pos ).LengthSquared();
+	const ChitContext* context = GetChitContext();
+	float len2 = ( context->engine->camera.PosWC() - pos ).LengthSquared();
 	if ( len2 < EL_FAR*EL_FAR ) {
-		const Screenport& port = engine->GetScreenport();
+		const Screenport& port = context->engine->GetScreenport();
 		
 		Vector2F ui = { 0, 0 };
 		const Rectangle3F& aabb = model[0]->AABB();
@@ -439,12 +453,13 @@ void RenderComponent::ProcessIcons( int delta )
 
 void RenderComponent::SetGroundMark( const char* asset )
 {
+	const ChitContext* context = GetChitContext();
 	if ( groundMark ) {
-		engine->FreeModel( groundMark );
+		context->engine->FreeModel( groundMark );
 		groundMark = 0;
 	}
 	if ( asset && *asset ) {
-		groundMark = engine->AllocModel( "iconPlate" );
+		groundMark = context->engine->AllocModel( "iconPlate" );
 		Vector3F pos = model[0]->Pos();
 		pos.y = 0.01f;
 		groundMark->SetPos( pos );	
@@ -581,14 +596,15 @@ void RenderComponent::DebugStr( GLString* str )
 
 void RenderComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {
+	const ChitContext* context = GetChitContext();
 	if ( msg.ID() == ChitMsg::CHIT_DESTROYED_START ) {
 		// Don't self delete.
 
 		static const Vector3F UP = { 0, 1, 0 };
 		static const Vector3F DOWN = { 0, -1, 0 };
 		static const Vector3F RIGHT = { 1, 0, 0 };
-		engine->particleSystem->EmitPD( "derez", model[0]->AABB().Center(), UP, 0 );
-		engine->particleSystem->EmitPD( "derez", model[0]->AABB().Center(), DOWN, 0 );
+		context->engine->particleSystem->EmitPD( "derez", model[0]->AABB().Center(), UP, 0 );
+		context->engine->particleSystem->EmitPD( "derez", model[0]->AABB().Center(), DOWN, 0 );
 	}
 	else if ( msg.ID() == ChitMsg::CHIT_DESTROYED_TICK ) {
 		float f = msg.dataF;

@@ -67,7 +67,7 @@ private:
 	enum { SIZE = 32 };
 	Chit* chit[NUM_CHITS];
 
-	ChitBag chitBag;
+	ChitBag* chitBag;
 	grinliz::BitArray< SIZE, SIZE, 1 > blocks;
 };
 

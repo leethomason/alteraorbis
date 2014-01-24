@@ -146,7 +146,7 @@ BattleTestScene::BattleTestScene( LumosGame* game ) : Scene( game )
 BattleTestScene::~BattleTestScene()
 {
 	map->AttachEngine( 0, 0 );
-	chitBag.DeleteAll();
+	delete chitBag;
 	delete engine;
 	delete map;
 }
@@ -214,6 +214,11 @@ void BattleTestScene::LoadMap()
 	delete map;
 
 	map = new WorldMap( 32, 32 );
+	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase(), map );	
+
+	ChitContext context;
+	context.Set( engine, map, game->ToLumosGame() );
+	chitBag = new LumosChitBag( context );
 
 	grinliz::CDynArray<Vector2I> blocks, features, wp;
 	map->InitPNG( "./res/testarena32.png", &blocks, &wp, &features );
@@ -237,10 +242,8 @@ void BattleTestScene::LoadMap()
 	ShuffleArray( waypoints[LEFT].Mem(),  waypoints[LEFT].Size(),  &random );
 	ShuffleArray( waypoints[MID].Mem(),   waypoints[MID].Size(),   &random );
 
-	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase(), map );	
 	engine->LoadConfigFiles( "./res/particles.xml", "./res/lighting.xml" );
-	chitBag.SetContext( engine, map, (LumosGame*)game );
-	map->AttachEngine( engine, &chitBag );
+	map->AttachEngine( engine, chitBag );
 
 	for ( int i=0; i<blocks.Size(); ++i ) {
 		const Vector2I& v = blocks[i];
@@ -251,16 +254,16 @@ void BattleTestScene::LoadMap()
 	const GameItem& treeItem = itemDefDB->Get( "tree" );
 
 	for( int i=0; i<features.Size(); ++i ) {
-		Chit* chit = chitBag.NewChit();
+		Chit* chit = chitBag->NewChit();
 		const Vector2I& v = features[i];
 
-		MapSpatialComponent* msc = new MapSpatialComponent( map, &chitBag );
+		MapSpatialComponent* msc = new MapSpatialComponent();
 		msc->SetMapPosition( v.x, v.y, 1, 1 );
 		msc->SetMode( GRID_BLOCKED );
 		chit->Add( msc );
-		chit->Add( new RenderComponent( engine, "plant1.3" ));
-		chit->Add( new ItemComponent( engine, map, treeItem ));
-		chit->Add( new HealthComponent( engine ));
+		chit->Add( new RenderComponent( "plant1.3" ));
+		chit->Add( new ItemComponent( treeItem ));
+		chit->Add( new HealthComponent());
 	}
 
 	Vector2I unit = { 2, 16 };
@@ -298,10 +301,10 @@ void BattleTestScene::GoScene()
 
 	// Remove everything that is currently on the board that is some sort of character.
 	ChitAcceptAll acceptAll;
-	chitBag.QuerySpatialHash( &chitArr, b, 0, &acceptAll );
+	chitBag->QuerySpatialHash( &chitArr, b, 0, &acceptAll );
 	for( int i=0; i<chitArr.Size(); ++i ) {
 		if ( chitArr[i]->GetMoveComponent() ) {
-			chitBag.DeleteChit( chitArr[i] );
+			chitBag->DeleteChit( chitArr[i] );
 		}
 	}
 
@@ -351,33 +354,33 @@ Chit* BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int
 	itemDefDB->Get( itemName, &itemDefArr );
 	GLASSERT( itemDefArr.Size() > 0 );
 
-	Chit* chit = chitBag.NewChit();
+	Chit* chit = chitBag->NewChit();
 
 	chit->Add( new SpatialComponent());
 	const char* resourceName = itemDefArr[0]->ResourceName();
-	RenderComponent* rc = new RenderComponent( engine, resourceName );
+	RenderComponent* rc = new RenderComponent( resourceName );
 	chit->Add( rc );
 
-	chitBag.AddItem( itemName, chit, engine, team, level );
+	chitBag->AddItem( itemName, chit, engine, team, level );
 
 	if ( type == HUMAN ) {
-		chitBag.AddItem( "shield",		chit, engine, 0, level );
+		chitBag->AddItem( "shield",		chit, engine, 0, level );
 		if ( loadout == MELEE_WEAPON || loadout == BLASTER_AND_GUN )
-			chitBag.AddItem( "ring",	chit, engine, 0, level );
+			chitBag->AddItem( "ring",	chit, engine, 0, level );
 		if ( loadout == PISTOL || loadout == BLASTER_AND_GUN )
-			chitBag.AddItem( "blaster", chit, engine, 0, level );
+			chitBag->AddItem( "blaster", chit, engine, 0, level );
 	}
 	if ( type == TROLL ) {
 		if ( random.Bit() )
-			chitBag.AddItem( "shield",  chit, engine, 0, level );
+			chitBag->AddItem( "shield",  chit, engine, 0, level );
 		if ( random.Bit() )
-			chitBag.AddItem( "ring",    chit, engine, 0, level );
+			chitBag->AddItem( "ring",    chit, engine, 0, level );
 		if ( random.Bit() )
-			chitBag.AddItem( "blaster", chit, engine, 0, level );
+			chitBag->AddItem( "blaster", chit, engine, 0, level );
 	}
 
 	if ( type != DUMMY ) {
-		chit->Add( new PathMoveComponent( map ));
+		chit->Add( new PathMoveComponent());
 	}
 	else {
 		// The avoider only avoids things with move components. Makes sense and yet
@@ -385,11 +388,11 @@ Chit* BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int
 		// handles those just fine.)
 		chit->Add( new MoveComponent());
 	}
-	AIComponent* ai = new AIComponent( engine, map );
+	AIComponent* ai = new AIComponent();
 	ai->SetSectorAwareness( true );
 	chit->Add( ai );
-	chit->Add( new HealthComponent( engine ));
-	chit->Add( new DebugStateComponent( map ));
+	chit->Add( new HealthComponent());
+	chit->Add( new DebugStateComponent(map));
 
 	chit->GetSpatialComponent()->SetPosYRot( (float)p.x+0.5f, 0, (float)p.y+0.5f, (float)random.Rand( 360 ) );
 //	chit->GetItemComponent()->SetHardpoints(); automatic
@@ -409,7 +412,7 @@ void BattleTestScene::DrawDebugText()
 	ufoText->Draw( 0, 16, "PathCache mem=%%=%d hit%%=%d chits:ticked/total=%d/%d regions=%d", 
 		(int)(cacheData.memoryFraction * 100.0f),
 		(int)(cacheData.hitFraction * 100.f),
-		chitBag.NumTicked(), chitBag.NumChits(),
+		chitBag->NumTicked(), chitBag->NumChits(),
 		map->CalcNumRegions() );
 
 	if ( debugRay.direction.x ) {
@@ -466,7 +469,7 @@ void BattleTestScene::Tap( int action, const grinliz::Vector2F& view, const grin
 			at.y = 0.01f;
 
 			DamageDesc dd( 20, 0 );
-			BattleMechanics::GenerateExplosionMsgs( dd, at, 0, engine, &chitBag );
+			BattleMechanics::GenerateExplosionMsgs( dd, at, 0, engine, chitBag );
 #endif		
 		}
 	}
@@ -499,7 +502,7 @@ void BattleTestScene::DoTick( U32 deltaTime )
 		boltTimer += deltaTime;
 		if ( boltTimer > 500 ) {
 			boltTimer = 0;
-			ChitBag* cb = &chitBag;
+			ChitBag* cb = chitBag;
 			Bolt* bolt = cb->NewBolt();
 
 			bolt->dir.Set( -0.1f+fuzz.Uniform()*0.2f, 0, 1 );
@@ -511,18 +514,12 @@ void BattleTestScene::DoTick( U32 deltaTime )
 		}
 	}
 
-	ChitContext context;
-	context.census = 0;
-	context.engine = engine;
-	context.map = map;
-	context.worldMap = map;
-
-	chitBag.DoTick( deltaTime, &context );
+	chitBag->DoTick( deltaTime );
 }
 
 
 void BattleTestScene::Draw3D( U32 deltaTime )
 {
-	engine->Draw( deltaTime, chitBag.BoltMem(), chitBag.NumBolts() );
+	engine->Draw( deltaTime, chitBag->BoltMem(), chitBag->NumBolts() );
 }
 

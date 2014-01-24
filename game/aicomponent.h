@@ -41,7 +41,7 @@ private:
 	typedef Component super;
 
 public:
-	AIComponent( Engine* _engine, WorldMap* _worldMap );
+	AIComponent();
 	virtual ~AIComponent();
 
 	virtual const char* Name() const { return "AIComponent"; }
@@ -133,7 +133,7 @@ private:
 	void FlushTaskList( const ComponentSet& thisComp, U32 delta );		// moves tasks along, mark tasks completed, do special actions
 	void FindRoutineTasks( const ComponentSet& );	// do maintenance, etc.
 
-	grinliz::Vector2F GetWanderOrigin( const ComponentSet& thisComp ) const;
+	grinliz::Vector2F GetWanderOrigin( const ComponentSet& thisComp );
 	int GetThinkTime() const { return 500; }
 	WorkQueue* GetWorkQueue();
 
@@ -180,9 +180,6 @@ private:
 			{ mapPos = _mapPos; id = 0; name = _name; }
 		bool HasTarget() const { return id != 0 || !mapPos.IsZero(); }
 	};
-
-	Engine*				engine;
-	WorldMap*			map;
 
 	int					aiMode;
 	TargetDesc			targetDesc;

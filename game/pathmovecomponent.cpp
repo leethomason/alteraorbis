@@ -167,10 +167,12 @@ void PathMoveComponent::ComputeDest()
 	ComponentSet thisComp( parentChit, Chit::SPATIAL_BIT | Chit::RENDER_BIT | ComponentSet::IS_ALIVE );
 	if ( !thisComp.okay )
 		return;
+	
+	const ChitContext* context = GetChitContext();
 
 	const Vector2F& posVec = thisComp.spatial->GetPosition2D();
 	bool sameSector = true;
-	if ( map->UsingSectors() ) {
+	if ( context->worldMap->UsingSectors() ) {
 		Vector2I v0 = SectorData::SectorID( posVec.x, posVec.y );
 		Vector2I v1 = SectorData::SectorID( queued.pos.x, queued.pos.y );
 		sameSector = (v0 == v1);
@@ -178,7 +180,7 @@ void PathMoveComponent::ComputeDest()
 
 	if (	!sameSector
 	     || queued.pos.x <= 0 || queued.pos.y <= 0 
-		 || queued.pos.x >= (float)map->Width() || queued.pos.y >= (float)map->Height() ) 
+		 || queued.pos.x >= (float)context->worldMap->Width() || queued.pos.y >= (float)context->worldMap->Height() ) 
 	{
 		this->Clear();
 		parentChit->SendMessage( ChitMsg( ChitMsg::PATHMOVE_DESTINATION_BLOCKED ), this ); 
@@ -194,14 +196,14 @@ void PathMoveComponent::ComputeDest()
 	// Make sure the 'dest' is actually a point we can get to.
 	float radius = thisComp.render->RadiusOfBase();
 	Vector2F d = dest.pos;
-	if ( map->ApplyBlockEffect( d, radius, &dest.pos ) ) {
+	if ( context->worldMap->ApplyBlockEffect( d, radius, &dest.pos ) ) {
 #ifdef DEBUG_PMC
 		GLOUTPUT(( "Dest adjusted. (%.1f,%.1f) -> (%.1f,%.1f)\n", d.x, d.y, dest.pos.x, dest.pos.y ));
 #endif
 	}
 
 	float cost=0;
-	bool okay = map->CalcPath( posVec, dest.pos, &path, &cost, pathDebugging ); 
+	bool okay = context->worldMap->CalcPath( posVec, dest.pos, &path, &cost, pathDebugging ); 
 	if ( !okay ) {
 		SetNoPath();
 		parentChit->SendMessage( ChitMsg( ChitMsg::PATHMOVE_DESTINATION_BLOCKED ), this ); 
@@ -232,8 +234,10 @@ void PathMoveComponent::SetPosRot( const grinliz::Vector2F& _pos, const grinliz:
 	SpatialComponent* spatial = parentChit->GetSpatialComponent();
 	GLASSERT( spatial );
 
+	const ChitContext* context = GetChitContext();
+
 	Rectangle2F b;
-	b.Set( 0, 0, (float)map->Width(), (float)map->Height() );
+	b.Set( 0, 0, (float)context->worldMap->Width(), (float)context->worldMap->Height() );
 	b.Outset( -0.1f );
 	pos.x = Clamp( pos.x, b.min.x, b.max.x );
 	pos.y = Clamp( pos.y, b.min.y, b.max.y );
@@ -425,6 +429,7 @@ int PathMoveComponent::DoTick( U32 delta )
 	PROFILE_FUNC();
 
 	int id = parentChit->ID();
+	const ChitContext* context = GetChitContext();
 
 	if ( NeedComputeDest() ) {
 		pathPos = 0;			// clear the old path.
@@ -455,7 +460,7 @@ int PathMoveComponent::DoTick( U32 delta )
 
 			// Sector and Port of departure:
 			Vector2I departureSector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
-			const SectorData& sd = map->GetWorldInfo().GetSector( departureSector );
+			const SectorData& sd = context->worldMap->GetWorldInfo().GetSector( departureSector );
 			int departurePort = sd.NearestPort( dest.pos );
 
 			Rectangle2I portBounds = sd.GetPortLoc( departurePort );
@@ -486,9 +491,9 @@ int PathMoveComponent::DoTick( U32 delta )
 	ApplyBlocks( &pos, &this->blockForceApplied );
 
 	if ( portJump.IsValid() ) {
-		GridMoveComponent* gmc = new GridMoveComponent( map );
-		gmc->SetDest( portJump );
+		GridMoveComponent* gmc = new GridMoveComponent();
 		parentChit->Swap( this, gmc );
+		gmc->SetDest( portJump );
 		return 0;
 	}
 

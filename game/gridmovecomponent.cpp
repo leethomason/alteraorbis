@@ -12,9 +12,8 @@ using namespace grinliz;
 
 static const float GRID_ACCEL = 1.0f;
 
-GridMoveComponent::GridMoveComponent( WorldMap* wm ) : GameMoveComponent( wm )
+GridMoveComponent::GridMoveComponent() : GameMoveComponent()
 {
-	worldMap = wm;
 	state = NOT_INIT;
 	velocity.Zero();
 	speed = DEFAULT_MOVE_SPEED;
@@ -82,14 +81,16 @@ void GridMoveComponent::SetDest( const SectorPort& sp )
 
 	destSectorPort = sp;
 	// Error check:
-	worldMap->GetWorldInfo().GetGridEdge( destSectorPort.sector, destSectorPort.port );
+	//const ChitContext* context = this->GetChitContext();
+	//context->worldMap->GetWorldInfo().GetGridEdge( destSectorPort.sector, destSectorPort.port );
 }
 
 
 int GridMoveComponent::DoTick( U32 delta )
 {
+	const ChitContext* context = this->GetChitContext();
 	if ( state == DONE ) {
-		parentChit->Swap( this, new PathMoveComponent( map ));
+		parentChit->Swap( this, new PathMoveComponent());
 		return VERY_LONG_TICK;
 	}
 	if ( state == NOT_INIT ) {
@@ -118,8 +119,7 @@ int GridMoveComponent::DoTick( U32 delta )
 	Vector2F dest = { 0, 0 };
 	int stateIfDestReached = DONE;
 	bool goToDest = true;
-	GLASSERT( worldMap );
-	const WorldInfo& worldInfo = worldMap->GetWorldInfo();
+	const WorldInfo& worldInfo = context->worldMap->GetWorldInfo();
 	GLASSERT( &worldInfo );
 
 	switch ( state ) 
@@ -167,9 +167,9 @@ int GridMoveComponent::DoTick( U32 delta )
 			else {
 				if ( path.Size() == 0 ) {
 					Vector2I mapPos = { (int)pos.x, (int)pos.y };
-					GridEdge current = worldMap->GetWorldInfo().MapToGridEdge( mapPos.x, mapPos.y );
-					GLASSERT( worldMap->GetWorldInfo().HasGridEdge( current ));
-					int result = worldMap->GetWorldInfoMutable()->Solve( current, destEdge, &path );
+					GridEdge current = context->worldMap->GetWorldInfo().MapToGridEdge( mapPos.x, mapPos.y );
+					GLASSERT( context->worldMap->GetWorldInfo().HasGridEdge( current ));
+					int result = context->worldMap->GetWorldInfoMutable()->Solve( current, destEdge, &path );
 					if ( result == micropather::MicroPather::START_END_SAME ) {
 						path.Clear();
 						path.Push( current );

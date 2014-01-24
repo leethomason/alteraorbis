@@ -22,16 +22,14 @@
 #include "../engine/engine.h"
 #include "../engine/texture.h"
 #include "../xegame/chit.h"
+#include "../xegame/chitbag.h"
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/rendercomponent.h"
 
 using namespace grinliz;
 
-DebugPathComponent::DebugPathComponent( Engine* _engine, WorldMap* _map, LumosGame* _game )
+DebugPathComponent::DebugPathComponent()
 {
-	engine = _engine;
-	map = _map;
-	game = _game;
 	resource = ModelResourceManager::Instance()->GetModelResource( "unitPlateCentered" );
 }
 
@@ -44,16 +42,20 @@ DebugPathComponent::~DebugPathComponent()
 void DebugPathComponent::OnAdd( Chit* chit )
 {
 	super::OnAdd( chit );
-	model = engine->AllocModel( resource );
+	const ChitContext* context = GetChitContext();
+	model = context->engine->AllocModel( resource );
 	model->SetFlag( Model::MODEL_NO_SHADOW );
 }
 
 
 void DebugPathComponent::OnRemove()
 {
+	// Get the context before remove - still valid but parent chit goes away.
+	const ChitContext* context = GetChitContext();
+
 	super::OnRemove();
 	if ( model ) {
-		engine->FreeModel( model );
+		context->engine->FreeModel( model );
 		model = 0;
 	}
 }

@@ -30,7 +30,7 @@ private:
 	typedef Component super;
 
 public:
-	DebugPathComponent( Engine*, WorldMap*, LumosGame* );
+	DebugPathComponent();
 	~DebugPathComponent();
 
 	virtual const char* Name() const { return "DebugPathComponent"; }
@@ -42,10 +42,6 @@ public:
 	virtual int DoTick( U32 delta );
 
 private:
-	Engine* engine;
-	WorldMap* map;
-	LumosGame* game;
-
 	const ModelResource* resource;
 	Model* model;
 };

@@ -41,7 +41,7 @@
 
 using namespace grinliz;
 
-LumosChitBag::LumosChitBag() : engine(0), worldMap(0), lumosGame(0), sceneID(-1), sceneData(0)
+LumosChitBag::LumosChitBag( const ChitContext& c) : ChitBag(c), sceneID(-1), sceneData(0)
 {
 	memset( mapSpatialHash, 0, sizeof(MapSpatialComponent*)*NUM_SECTORS*NUM_SECTORS);
 	memset( coreCache, 0, sizeof(Chit*)*NUM_SECTORS*NUM_SECTORS );
@@ -174,6 +174,7 @@ Chit* LumosChitBag::FindBuilding(	const grinliz::IString&  name,
 
 Chit* LumosChitBag::NewBuilding( const Vector2I& pos, const char* name, int team )
 {
+	const ChitContext* context = GetContext();
 	Chit* chit = NewChit();
 
 	const GameItem& rootItem = ItemDefDB::Instance()->Get( name );
@@ -183,15 +184,15 @@ Chit* LumosChitBag::NewBuilding( const Vector2I& pos, const char* name, int team
 	int porch=0;
 	rootItem.keyValues.GetInt( "porch", &porch );
 
-	MapSpatialComponent* msc = new MapSpatialComponent( worldMap, this );
+	MapSpatialComponent* msc = new MapSpatialComponent();
 	msc->SetMapPosition( pos.x, pos.y, cx, cx );
 	msc->SetMode( GRID_BLOCKED );
 	msc->SetBuilding( true, porch != 0 );
 	
 	chit->Add( msc );
-	chit->Add( new RenderComponent( engine, rootItem.ResourceName() ));
-	chit->Add( new HealthComponent( engine ));
-	AddItem( name, chit, engine, team, 0 );
+	chit->Add( new RenderComponent( rootItem.ResourceName() ));
+	chit->Add( new HealthComponent());
+	AddItem( name, chit, context->engine, team, 0 );
 
 	IString proc = rootItem.keyValues.GetIString( "procedural" );
 	if ( !proc.empty() ) {
@@ -208,7 +209,7 @@ Chit* LumosChitBag::NewBuilding( const Vector2I& pos, const char* name, int team
 	worldMap->SetRandomPort( sp );
 #endif
 
-	engine->particleSystem->EmitPD( "constructiondone", ToWorld3F( pos ), V3F_UP, 0 );
+	context->engine->particleSystem->EmitPD( "constructiondone", ToWorld3F( pos ), V3F_UP, 0 );
 
 	return chit;
 }
@@ -216,18 +217,19 @@ Chit* LumosChitBag::NewBuilding( const Vector2I& pos, const char* name, int team
 
 Chit* LumosChitBag::NewMonsterChit( const Vector3F& pos, const char* name, int team )
 {
+	const ChitContext* context = GetContext();
 	Chit* chit = NewChit();
 
 	chit->Add( new SpatialComponent());
-	AddItem( name, chit, engine, team, 0 );
+	AddItem( name, chit, context->engine, team, 0 );
 
-	chit->Add( new RenderComponent( engine, chit->GetItem()->ResourceName() ));
-	chit->Add( new PathMoveComponent( worldMap ));
-	chit->Add( new AIComponent( engine, worldMap ));
+	chit->Add( new RenderComponent( chit->GetItem()->ResourceName() ));
+	chit->Add( new PathMoveComponent());
+	chit->Add( new AIComponent());
 
 	chit->GetSpatialComponent()->SetPosition( pos );
 
-	chit->Add( new HealthComponent( engine ));
+	chit->Add( new HealthComponent());
 
 	Wallet w = ReserveBank::Instance()->WithdrawMonster();
 	if ( chit->GetItem()->keyValues.GetIString( "mob" ) == "greater" ) {
@@ -247,6 +249,7 @@ Chit* LumosChitBag::NewMonsterChit( const Vector3F& pos, const char* name, int t
 
 Chit* LumosChitBag::NewDenizen( const grinliz::Vector2I& pos, int team )
 {
+	const ChitContext* context = GetContext();
 	bool female = true;
 	const char* assetName = "humanFemale";
 	if ( random.Bit() ) {
@@ -257,16 +260,16 @@ Chit* LumosChitBag::NewDenizen( const grinliz::Vector2I& pos, int team )
 	Chit* chit = NewChit();
 
 	chit->Add( new SpatialComponent());
-	chit->Add( new RenderComponent( engine, assetName ));
-	chit->Add( new PathMoveComponent( worldMap ));
+	chit->Add( new RenderComponent( assetName ));
+	chit->Add( new PathMoveComponent());
 
-	AddItem( assetName, chit, engine, team, 0 );
+	AddItem( assetName, chit, context->engine, team, 0 );
 	chit->GetItem()->wallet.AddGold( ReserveBank::Instance()->WithdrawDenizen() );
 	chit->GetItem()->GetTraitsMutable()->Roll( random.Rand() );
 
 	IString nameGen = chit->GetItem()->keyValues.GetIString( "nameGen" );
 	if ( !nameGen.empty() ) {
-		LumosGame* game = LumosGame::Instance();
+		LumosGame* game = chit->GetChitBag()->GetContext()->game;
 		if ( game ) {
 			chit->GetItem()->SetProperName( StringPool::Intern( 
 				game->GenName(	nameGen.c_str(), 
@@ -275,10 +278,10 @@ Chit* LumosChitBag::NewDenizen( const grinliz::Vector2I& pos, int team )
 		}
 	}
 
-	AIComponent* ai = new AIComponent( engine, worldMap );
+	AIComponent* ai = new AIComponent();
 	chit->Add( ai );
 
-	chit->Add( new HealthComponent( engine ));
+	chit->Add( new HealthComponent());
 	chit->GetSpatialComponent()->SetPosYRot( (float)pos.x+0.5f, 0, (float)pos.y+0.5f, 0 );
 //	chit->GetItemComponent()->SetHardpoints(); automatic now
 
@@ -297,48 +300,50 @@ Chit* LumosChitBag::NewDenizen( const grinliz::Vector2I& pos, int team )
 
 Chit* LumosChitBag::NewWorkerChit( const Vector3F& pos, int team )
 {
+	const ChitContext* context = GetContext();
 	Chit* chit = NewChit();
 	const GameItem& rootItem = ItemDefDB::Instance()->Get( "worker" );
 
 	chit->Add( new SpatialComponent());
-	chit->Add( new RenderComponent( engine, rootItem.ResourceName() ));
-	chit->Add( new PathMoveComponent( worldMap ));
-	chit->Add( new AIComponent( engine, worldMap ));
+	chit->Add( new RenderComponent( rootItem.ResourceName() ));
+	chit->Add( new PathMoveComponent());
+	chit->Add( new AIComponent());
 	chit->GetSpatialComponent()->SetPosition( pos );
-	AddItem( rootItem.Name(), chit, engine, team, 0 );
-	chit->Add( new HealthComponent( engine ));
-	chit->Add( new DebugStateComponent( worldMap ));
+	AddItem( rootItem.Name(), chit, context->engine, team, 0 );
+	chit->Add( new HealthComponent());
+	chit->Add( new DebugStateComponent( context->worldMap ));
 	return chit;
 }
 
 
 Chit* LumosChitBag::NewVisitor( int visitorIndex )
 {
+	const ChitContext* context = GetContext();
 	Chit* chit = NewChit();
 	const GameItem& rootItem = ItemDefDB::Instance()->Get( "visitor" );
 
 	chit->Add( new SpatialComponent());
-	chit->Add( new RenderComponent( engine, rootItem.ResourceName() ));
+	chit->Add( new RenderComponent( rootItem.ResourceName() ));
 
-	AIComponent* ai = new AIComponent( engine, worldMap );
+	AIComponent* ai = new AIComponent();
 	chit->Add( ai );
 	GLASSERT( visitorIndex >= 0 && visitorIndex < Visitors::NUM_VISITORS );
 	ai->SetVisitorIndex( visitorIndex );
 	Visitors::Instance()->visitorData[visitorIndex].Connect();	// initialize.
 
 	// Visitors start at world center, with gridMove, and go from there.
-	Vector3F pos = { (float)worldMap->Width()*0.5f, 0.0f, (float)worldMap->Height()*0.5f };
+	Vector3F pos = { (float)context->worldMap->Width()*0.5f, 0.0f, (float)context->worldMap->Height()*0.5f };
 	chit->GetSpatialComponent()->SetPosition( pos );
 
-	GridMoveComponent* gmc = new GridMoveComponent( worldMap );
+	GridMoveComponent* gmc = new GridMoveComponent();
 	chit->Add( gmc );
 
-	SectorPort sp = worldMap->RandomPort( &random );
+	SectorPort sp = context->worldMap->RandomPort( &random );
 	gmc->SetDest( sp );
 
-	AddItem( rootItem.Name(), chit, engine, TEAM_VISITOR, 0 );
-	chit->Add( new HealthComponent( engine ));
-	chit->Add( new VisitorStateComponent( worldMap ));
+	AddItem( rootItem.Name(), chit, context->engine, TEAM_VISITOR, 0 );
+	chit->Add( new HealthComponent());
+	chit->Add( new VisitorStateComponent());
 	return chit;
 }
 
@@ -418,6 +423,7 @@ Chit* LumosChitBag::NewGoldChit( const grinliz::Vector3F& pos, int amount )
 {
 	if ( !amount )
 		return 0;
+	const ChitContext* context = GetContext();
 
 	Vector2F v2 = { pos.x, pos.z };
 
@@ -430,8 +436,8 @@ Chit* LumosChitBag::NewGoldChit( const grinliz::Vector3F& pos, int amount )
 	if ( !chit ) {
 		chit = this->NewChit();
 		chit->Add( new SpatialComponent());
-		AddItem( "gold", chit, engine, 0, 0 );
-		chit->Add( new RenderComponent( engine, chit->GetItem()->ResourceName() ));
+		AddItem( "gold", chit, context->engine, 0, 0 );
+		chit->Add( new RenderComponent( chit->GetItem()->ResourceName() ));
 		chit->GetSpatialComponent()->SetPosition( pos );
 
 	}
@@ -456,10 +462,12 @@ Chit* LumosChitBag::NewCrystalChit( const grinliz::Vector3F& pos, int crystal, b
 	case CRYSTAL_VIOLET:	name="crystal_violet";	break;
 	}
 
+	const ChitContext* context = GetContext();
+
 	Chit* chit = this->NewChit();
 	chit->Add( new SpatialComponent());
-	AddItem( name, chit, engine, 0, 0 );
-	chit->Add( new RenderComponent( engine, chit->GetItem()->ResourceName() ));
+	AddItem( name, chit, context->engine, 0, 0 );
+	chit->Add( new RenderComponent( chit->GetItem()->ResourceName() ));
 	chit->GetSpatialComponent()->SetPosition( pos );
 	
 	Wallet w;
@@ -494,8 +502,8 @@ Chit* LumosChitBag::NewItemChit( const grinliz::Vector3F& _pos, GameItem* orphan
 
 	Chit* chit = this->NewChit();
 	chit->Add( new SpatialComponent());
-	chit->Add( new ItemComponent( engine, worldMap, orphanItem ));
-	chit->Add( new RenderComponent( engine, orphanItem->ResourceName() ));
+	chit->Add( new ItemComponent( orphanItem ));
+	chit->Add( new RenderComponent( orphanItem->ResourceName() ));
 
 	if ( onGround ) {
 		const ModelResource* res = chit->GetRenderComponent()->MainResource();
@@ -514,7 +522,7 @@ Chit* LumosChitBag::NewItemChit( const grinliz::Vector3F& _pos, GameItem* orphan
 
 void LumosChitBag::HandleBolt( const Bolt& bolt, const ModelVoxel& mv )
 {
-	GLASSERT( engine );
+	const ChitContext* context = GetContext();
 	Chit* chitShooter = GetChit( bolt.chitID );	// may be null
 	int shooterTeam = -1;
 	if ( chitShooter && chitShooter->GetItemComponent() ) {
@@ -548,7 +556,7 @@ void LumosChitBag::HandleBolt( const Bolt& bolt, const ModelVoxel& mv )
 				}
 			}
 			else if ( mv.VoxelHit() ) {
-				worldMap->VoxelHit( mv.voxel, dd );
+				context->worldMap->VoxelHit( mv.voxel, dd );
 			}
 		}
 	}
@@ -566,10 +574,10 @@ void LumosChitBag::HandleBolt( const Bolt& bolt, const ModelVoxel& mv )
 		Vector3F origin = mv.at - bolt.dir * rewind;
 
 		DamageDesc dd( bolt.damage, bolt.effect );
-		BattleMechanics::GenerateExplosionMsgs( dd, origin, bolt.chitID, engine, this );
+		BattleMechanics::GenerateExplosionMsgs( dd, origin, bolt.chitID, context->engine, this );
 
 		if ( mv.VoxelHit() ) {
-			worldMap->VoxelHit( mv.voxel, dd );
+			context->worldMap->VoxelHit( mv.voxel, dd );
 		}
 	}
 }
@@ -591,7 +599,7 @@ void LumosChitBag::AddItem( const char* name, Chit* chit, Engine* engine, int te
 	item.InitState();
 
 	if ( !chit->GetItemComponent() ) {
-		ItemComponent* ic = new ItemComponent( engine, worldMap, item );
+		ItemComponent* ic = new ItemComponent( item );
 		chit->Add( ic );
 		for( int i=1; i<itemDefArr.Size(); ++i ) {
 			ic->AddToInventory( new GameItem( *(itemDefArr[i] )));
@@ -632,41 +640,10 @@ int LumosChitBag::MapGridUse( int x, int y )
 }
 
 
-/*
-CoreScript* LumosChitBag::IsBoundToCore( Chit* chit, bool mustBeStanding, Chit** coreChit )
-{
-	// Since the player can eject and walk around, the core
-	// the player is bound to can be anywhere in the world.
-	int coreID = 0;
-	if ( chit && chitToCoreTable.Query( chit->ID(), &coreID )) {
-		Chit* cc = GetChit( coreID );
-		if ( cc ) {
-
-			if ( coreChit ) { 
-				*coreChit = cc;
-			}
-
-			ScriptComponent* sc = cc->GetScriptComponent();
-			GLASSERT( sc );
-			IScript* script = sc->Script();
-			GLASSERT( script );
-			CoreScript* coreScript = script->ToCoreScript();
-			GLASSERT( coreScript );
-			bool standing = false;
-			Chit* chit = coreScript->GetAttached(&standing);
-
-			if ( mustBeStanding ) 
-				return (standing && chit) ? coreScript : 0;
-			return coreScript;
-		}
-	}
-	return 0;
-}
-*/
-
 CoreScript* LumosChitBag::GetCore( const grinliz::Vector2I& sector )
 {
-	const SectorData& sd = worldMap->GetSector( sector );
+	const ChitContext* context = GetContext();	
+	const SectorData& sd = context->worldMap->GetSector( sector );
 	if ( sd.HasCore() ) {
 		int index = sector.y * NUM_SECTORS + sector.x;
 		if ( !coreCache[index] ) {

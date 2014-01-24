@@ -31,7 +31,7 @@ private:
 	typedef Component super;
 
 public:
-	HealthComponent( Engine* e) : engine(e), destroyed(0)	{}
+	HealthComponent() : destroyed(0)	{}
 	virtual ~HealthComponent()	{}
 
 	virtual const char* Name() const { return "HealthComponent"; }
@@ -48,9 +48,7 @@ private:
 	enum { COUNTDOWN = 800 };
 	void DeltaHealth();
 
-	Engine* engine;
 	U32 destroyed;
-
 	BattleMechanics battleMechanics;
 };
 

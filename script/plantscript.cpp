@@ -87,7 +87,7 @@ void PlantScript::SetRenderComponent()
 
 	const ChitContext* context = scriptContext->chitBag->GetContext();
 	if ( !scriptContext->chit->GetRenderComponent() ) {
-		RenderComponent* rc = new RenderComponent( context->engine, str.c_str() );
+		RenderComponent* rc = new RenderComponent( str.c_str() );
 		rc->SetSerialize( false );
 		scriptContext->chit->Add( rc );
 	}
@@ -131,7 +131,7 @@ void PlantScript::Init()
 {
 	const GameItem* resource = GetResource();
 	const ChitContext* context = scriptContext->chitBag->GetContext();
-	scriptContext->chit->Add( new ItemComponent( context->engine, context->worldMap, *resource ));
+	scriptContext->chit->Add( new ItemComponent( *resource ));
 	scriptContext->chit->GetItem()->GetTraitsMutable()->Roll( scriptContext->chit->random.Rand() );
 	SetRenderComponent();
 

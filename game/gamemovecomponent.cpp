@@ -1,9 +1,9 @@
 #include "gamemovecomponent.h"
 #include "worldmap.h"
-//#include "../grinliz/glperformance.h"
 #include "../Shiny/include/Shiny.h"
 #include "../xegame/rendercomponent.h"
 #include "../xegame/chit.h"
+#include "../xegame/chitbag.h"
 
 using namespace grinliz;
 
@@ -26,7 +26,9 @@ void GameMoveComponent::ApplyBlocks( Vector2F* pos, bool* forceApplied )
 	float rotation = 0;
 	float radius = render->RadiusOfBase();
 
-	WorldMap::BlockResult result = map->ApplyBlockEffect( *pos, radius, &newPos );
+	const ChitContext* context = GetChitContext();
+
+	WorldMap::BlockResult result = context->worldMap->ApplyBlockEffect( *pos, radius, &newPos );
 	if ( forceApplied ) *forceApplied = ( result == WorldMap::FORCE_APPLIED );
 	bool isStuck = ( result == WorldMap::STUCK );
 
@@ -34,8 +36,8 @@ void GameMoveComponent::ApplyBlocks( Vector2F* pos, bool* forceApplied )
 		int x = (int)newPos.x;
 		int y = (int)newPos.y;
 
-		if ( !map->IsPassable( x, y )) {
-  			Vector2I out = map->FindPassable( x, y );
+		if ( !context->worldMap->IsPassable( x, y )) {
+  			Vector2I out = context->worldMap->FindPassable( x, y );
 			newPos.x = (float)out.x + 0.5f;
 			newPos.y = (float)out.y + 0.5f;
 		}

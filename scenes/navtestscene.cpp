@@ -77,6 +77,10 @@ NavTestScene::NavTestScene( LumosGame* game ) : Scene( game )
 	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase(), map );
 	map->AttachEngine( engine, this );
 
+	ChitContext context;
+	context.Set( engine, map, 0 );
+	chitBag = new ChitBag( context );
+
 	Rectangle2I b;
 	b.Set( 0, 0, map->Width()-1, map->Height()-1 );
 	map->ShowRegionOverlay( b );
@@ -85,23 +89,20 @@ NavTestScene::NavTestScene( LumosGame* game ) : Scene( game )
 	tapMark.Zero();
 
 	for( int i=0; i<NUM_CHITS; ++i ) {
-		chit[i] = chitBag.NewChit();
+		chit[i] = chitBag->NewChit();
 		chit[i]->Add( new SpatialComponent() );
-		chit[i]->Add( new RenderComponent( engine, "humanFemale" ) );
-		chit[i]->Add( new PathMoveComponent( map ) );
-		chit[i]->Add( new DebugPathComponent( engine, map, game ) );
+		chit[i]->Add( new RenderComponent( "humanFemale" ) );
+		chit[i]->Add( new PathMoveComponent() );
+		chit[i]->Add( new DebugPathComponent() );
 		chit[i]->GetSpatialComponent()->SetPosition( 10.0f + (float)i*2.f, 0.0f, 10.0f );
 	}
-	//chit[1]->AddListener( this );
-	// Comment in to get a unit pacing.
-	//GET_COMPONENT( chit[1], PathMoveComponent )->SetDest( 13.f, 10.f );
-
 }
 
 
 NavTestScene::~NavTestScene()
 {
-	chitBag.DeleteAll();
+	chitBag->DeleteAll();
+	delete chitBag;
 	delete engine;
 	map->AttachEngine( 0, 0 );
 	delete map;
@@ -237,7 +238,7 @@ void NavTestScene::ItemTapped( const gamui::UIItem* item )
 
 void NavTestScene::DoTick( U32 deltaTime )
 {
-	chitBag.DoTick( deltaTime, 0 );
+	chitBag->DoTick( deltaTime );
 }
 
 

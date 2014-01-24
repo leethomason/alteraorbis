@@ -39,6 +39,8 @@ class ChitEvent;
 class ChitMsg;
 class LumosChitBag;
 
+struct ChitContext;
+
 class Component
 {
 public:
@@ -89,8 +91,10 @@ protected:
 	void BeginSerialize( XStream* xs, const char* name );
 	void EndSerialize( XStream* sx );
 
-	ChitBag* GetChitBag();
-	LumosChitBag* GetLumosChitBag();
+	ChitBag*			GetChitBag();
+	LumosChitBag*		GetLumosChitBag();
+	const ChitContext*	GetChitContext();
+
 	Chit* parentChit;
 	int id;
 	bool willSerialize;

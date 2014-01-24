@@ -139,12 +139,10 @@ private:
 	typedef ChitBag super;
 
 public:
-	LumosChitBag();
+	LumosChitBag( const ChitContext& );
 	virtual ~LumosChitBag();
 
 	virtual LumosChitBag* ToLumos() { return this; }
-	// initialization
-	void SetContext( Engine* e, WorldMap* wm, LumosGame* lg ) { engine = e; worldMap = wm; lumosGame = lg; }
 
 	// Buildings can't move - no update.
 	void AddToBuildingHash( MapSpatialComponent* chit, int x, int y );
@@ -213,7 +211,7 @@ public:
 	Chit* QueryRemovable( const grinliz::Vector2I& pos, bool ignorePlants );
 	Chit* QueryPlant( const grinliz::Vector2I& pos, int* type, int* stage );
 
-	LumosGame* GetLumosGame() { return lumosGame; }
+	//LumosGame* GetLumosGame() { return lumosGame; }
 	// Why the duplicate? This is for components to request
 	// a new scene because of a player action. Both queues,
 	// and doesn't allow multiple scenes to queue.
@@ -231,9 +229,6 @@ private:
 
 	static bool HasMapSpatialInUse( Chit* );
 
-	Engine* engine;
-	WorldMap* worldMap;
-	LumosGame* lumosGame;
 	int sceneID;
 	SceneData* sceneData;
 	grinliz::Random random;	// use the chit version, if possible, generally want to avoid high level random

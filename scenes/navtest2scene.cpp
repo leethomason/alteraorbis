@@ -59,6 +59,14 @@ NavTest2Scene::NavTest2Scene( LumosGame* game, const NavTest2SceneData* _data ) 
 	map = 0;
 	data = _data;
 
+	map = new WorldMap( 64, 64 );
+	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase(), map );	
+
+	ChitContext context;
+	context.Set( engine, map, 0 );
+	chitBag = new LumosChitBag( context );
+	map->AttachEngine( 0, chitBag );	// connect up the pather, but we do the render.
+
 	LoadMap();
 
 	LayoutCalculator layout = game->DefaultLayout();
@@ -69,7 +77,8 @@ NavTest2Scene::NavTest2Scene( LumosGame* game, const NavTest2SceneData* _data ) 
 
 NavTest2Scene::~NavTest2Scene()
 {
-	chitBag.DeleteAll();
+	chitBag->DeleteAll();
+	delete chitBag;
 	delete engine;
 	delete map;
 }
@@ -88,33 +97,26 @@ void NavTest2Scene::Resize()
 
 void NavTest2Scene::LoadMap()
 {
-	delete engine;
-	delete map;
-
-	map = new WorldMap( 32, 32 );
-	map->AttachEngine( 0, &chitBag );	// connect up the pather, but we do the render.
 	grinliz::CDynArray<Vector2I> blocks, features;
 	map->InitPNG( data->worldFilename, &blocks, &waypoints, &features );
 
-	engine = new Engine( game->GetScreenportMutable(), game->GetDatabase(), map );	
-
 	for ( int i=0; i<blocks.Size(); ++i ) {
-		Chit* chit = chitBag.NewChit();
+		Chit* chit = chitBag->NewChit();
 		const Vector2I& v = blocks[i];
-		MapSpatialComponent* msc = new MapSpatialComponent( map, chitBag.ToLumos() );
+		MapSpatialComponent* msc = new MapSpatialComponent();
 		msc->SetMapPosition( v.x, v.y, 1, 1 );
 		msc->SetMode( GRID_BLOCKED );
 		chit->Add( msc );
-		chit->Add( new RenderComponent( engine, "unitCube" ));
+		chit->Add( new RenderComponent( "unitCube" ));
 	}
 	for( int i=0; i<features.Size(); ++i ) {
-		Chit* chit = chitBag.NewChit();
+		Chit* chit = chitBag->NewChit();
 		const Vector2I& v = features[i];
-		MapSpatialComponent* msc = new MapSpatialComponent( map, chitBag.ToLumos() );
+		MapSpatialComponent* msc = new MapSpatialComponent();
 		msc->SetMapPosition( v.x, v.y, 1, 1 );
 		msc->SetMode( GRID_BLOCKED );
 		chit->Add( msc );
-		chit->Add( new RenderComponent( engine, "tree" ));
+		chit->Add( new RenderComponent( "tree" ));
 	}
 
 	clock_t start = clock();
@@ -133,7 +135,7 @@ void NavTest2Scene::CreateChit( const Vector2I& p )
 {
 	//GRINLIZ_PERFTRACK;
 
-	Chit* chit = chitBag.NewChit();
+	Chit* chit = chitBag->NewChit();
 	chit->Add( new SpatialComponent() );
 
 	const char* asset = "humanFemale";
@@ -141,8 +143,8 @@ void NavTest2Scene::CreateChit( const Vector2I& p )
 		asset = "hornet";
 	}
 
-	chit->Add( new RenderComponent( engine, asset ));
-	chit->Add( new PathMoveComponent( map ));
+	chit->Add( new RenderComponent( asset ));
+	chit->Add( new PathMoveComponent());
 #ifdef DEBUG_PMC
 	chit->Add( new DebugPathComponent( engine, map, static_cast<LumosGame*>(game) ));
 #endif
@@ -249,7 +251,7 @@ void NavTest2Scene::ItemTapped( const gamui::UIItem* item )
 
 void NavTest2Scene::DoTick( U32 deltaTime )
 {
-	chitBag.DoTick( deltaTime, 0 );
+	chitBag->DoTick( deltaTime );
 	++creationTick;
 	
 	if ( creationTick >= 5 && nChits < data->nChits ) {

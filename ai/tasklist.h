@@ -105,8 +105,12 @@ public:
 class TaskList
 {
 public:
-	TaskList( WorldMap* _map, Engine* _engine )	: worldMap(_map), engine(_engine), socialTicker(1000) {}
+	TaskList()	: worldMap(0), engine(0), socialTicker(1000) {}
 	~TaskList()	{}
+	void Init( WorldMap* _map, Engine* _engine ) {
+		worldMap = _map;
+		engine = _engine;
+	}
 
 	grinliz::Vector2I Pos2I() const;
 	bool Empty() const { return taskList.Empty(); }

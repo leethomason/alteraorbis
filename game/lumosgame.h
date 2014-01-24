@@ -21,7 +21,7 @@
 
 class GameItem;
 
-class LumosGame : public Game, public StackedSingleton< LumosGame >
+class LumosGame : public Game
 {
 	typedef Game super;
 
@@ -36,6 +36,8 @@ public:
 
 	LumosGame(  int width, int height, int rotation, const char* savepath );
 	virtual ~LumosGame();
+
+	virtual LumosGame* ToLumosGame() { return this; }
 
 	enum {
 		SCENE_TITLE,

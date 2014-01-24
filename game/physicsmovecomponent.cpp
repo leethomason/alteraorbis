@@ -13,7 +13,7 @@ using namespace grinliz;
 
 static const float TRACK_SPEED	= DEFAULT_MOVE_SPEED * 4.0f;
 
-PhysicsMoveComponent::PhysicsMoveComponent( WorldMap* _map, bool _deleteWhenDone ) : GameMoveComponent( _map ), deleteWhenDone( _deleteWhenDone )
+PhysicsMoveComponent::PhysicsMoveComponent( bool _deleteWhenDone ) : GameMoveComponent(), deleteWhenDone( _deleteWhenDone )
 {
 	rotation = 0;
 	velocity.Zero();
@@ -120,14 +120,14 @@ int PhysicsMoveComponent::DoTick( U32 delta )
 	if ( !isMoving && deleteWhenDone ) {
 		Chit* chit = parentChit;
 		chit->Remove( this );
-		chit->Add( new PathMoveComponent( map ));
+		chit->Add( new PathMoveComponent());
 		delete this;
 	}
 	return isMoving ? 0 : VERY_LONG_TICK;
 }
 
 
-TrackingMoveComponent::TrackingMoveComponent( WorldMap* map ) : GameMoveComponent( map ), target( 0 )
+TrackingMoveComponent::TrackingMoveComponent() : GameMoveComponent(), target( 0 )
 {
 }
 

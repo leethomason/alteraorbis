@@ -21,10 +21,8 @@
 
 using namespace grinliz;
 
-MapSpatialComponent::MapSpatialComponent( WorldMap* _map, LumosChitBag* bag ) : SpatialComponent()
+MapSpatialComponent::MapSpatialComponent() : SpatialComponent()
 {
-	worldMap = _map;
-	chitBag = bag;
 	mode = GRID_IN_USE;
 	building = false;
 	hasPorch = false;
@@ -48,18 +46,19 @@ void MapSpatialComponent::SetMapPosition( int x, int y, int cx, int cy )
 
 void MapSpatialComponent::SetMode( int newMode ) 
 {
-	GLASSERT( worldMap );
-	GLASSERT( newMode == GRID_IN_USE || newMode == GRID_BLOCKED );
+	// This code gets run on OnAdd() as well.
+	if ( parentChit ) {
+		const ChitContext* context = GetChitContext();
+		if ( newMode != mode ) {
 
-	if ( newMode != mode ) {
-		mode = newMode;
-
-		for( int y=bounds.min.y; y<=bounds.max.y; ++y ) {
-			for( int x=bounds.min.x; x<=bounds.max.x; ++x ) {
-				worldMap->UpdateBlock( x, y );
+			for( int y=bounds.min.y; y<=bounds.max.y; ++y ) {
+				for( int x=bounds.min.x; x<=bounds.max.x; ++x ) {
+					context->worldMap->UpdateBlock( x, y );
+				}
 			}
 		}
 	}
+	mode = newMode;
 }
 
 
@@ -75,13 +74,14 @@ void MapSpatialComponent::SetBuilding( bool b, bool p )
 void MapSpatialComponent::UpdatePorch( const grinliz::Rectangle2I& bounds )
 {
 	if ( building && hasPorch ) {
+		const ChitContext* context = GetChitContext();
 		Rectangle2I b = bounds;
 		b.Outset( 1 );
 		Rectangle2IEdgeIterator it( b );
 
 		for( it.Begin(); !it.Done(); it.Next() ) {
-			Chit* porch = chitBag->QueryPorch( it.Pos() );
-			worldMap->SetPorch( it.Pos().x, it.Pos().y, porch != 0 );
+			Chit* porch = GetLumosChitBag()->QueryPorch( it.Pos() );
+			context->worldMap->SetPorch( it.Pos().x, it.Pos().y, porch != 0 );
 		}
 	}
 }
@@ -99,33 +99,29 @@ void MapSpatialComponent::OnAdd( Chit* chit )
 {
 	super::OnAdd( chit );
 	if ( building ) {
-		chitBag->AddToBuildingHash( this, bounds.min.x, bounds.min.y ); 
+		GetLumosChitBag()->AddToBuildingHash( this, bounds.min.x, bounds.min.y ); 
 		UpdatePorch( bounds );
 	}
 
-	if ( mode == GRID_BLOCKED ) {
-		Vector2I pos = MapPosition();
-		for( int y=bounds.min.y; y<=bounds.max.y; ++y ) {
-			for( int x=bounds.min.x; x<=bounds.max.x; ++x ) {
-				worldMap->UpdateBlock( x, y );
-			}
-		}
-	}
+	int m = mode;
+	mode = -1;	// make sure SetMode() does something.
+	SetMode( m );
 }
 
 
 void MapSpatialComponent::OnRemove()
 {
+	const ChitContext* context = GetChitContext();
 	if ( building ) {
 		Vector2I pos = GetPosition2DI();
-		chitBag->RemoveFromBuildingHash( this, bounds.min.x, bounds.min.y ); 
+		GetLumosChitBag()->RemoveFromBuildingHash( this, bounds.min.x, bounds.min.y ); 
 	}
 	super::OnRemove();
 	if ( mode == GRID_BLOCKED ) {
 		Vector2I pos = MapPosition();
 		for( int y=bounds.min.y; y<=bounds.max.y; ++y ) {
 			for( int x=bounds.min.x; x<=bounds.max.x; ++x ) {
-				worldMap->UpdateBlock( x, y );
+				context->worldMap->UpdateBlock( x, y );
 			}
 		}
 	}

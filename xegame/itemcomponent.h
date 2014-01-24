@@ -32,9 +32,9 @@ private:
 
 public:
 	// Creates an item from an item definiton.
-	ItemComponent( Engine* _engine, WorldMap* map, const GameItem& _item );
+	ItemComponent( const GameItem& _item );
 	// Moves the item to this component
-	ItemComponent( Engine* _engine, WorldMap* map, GameItem* item );
+	ItemComponent( GameItem* item );
 	virtual ~ItemComponent();
 
 	virtual const char* Name() const { return "ItemComponent"; }
@@ -118,8 +118,6 @@ private:
 	CTicker slowTick;
 
 	// Not serialized:
-	Engine*				engine;
-	WorldMap*			worldMap;
 	bool				hardpointsModified;
 	int					lastDamageID;			// the last thing that hit us.
 	IRangedWeaponItem*	ranged;		// may be 0, active, or neither

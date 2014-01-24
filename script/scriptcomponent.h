@@ -73,8 +73,8 @@ private:
 	typedef Component super;
 
 public:
-	ScriptComponent( IScript* p_script, Engine* engine, Census* p_census );
-	ScriptComponent( const ComponentFactory* f, Census* p_census );
+	ScriptComponent( IScript* p_script );
+	ScriptComponent( const ComponentFactory* f );
 
 	virtual ~ScriptComponent()									{ delete script; }
 

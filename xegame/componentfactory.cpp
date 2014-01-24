@@ -29,47 +29,46 @@ Component* ComponentFactory::Factory( const char* name, Chit* chit ) const
 		return new SpatialComponent();
 	}
 	else if ( StrEqual( name, "PathMoveComponent" )) {
-		return new PathMoveComponent( worldMap );
+		return new PathMoveComponent();
 	}
 	else if ( StrEqual( name, "ItemComponent" )) {
-		GameItem item;
-		return new ItemComponent( engine, worldMap, 0 );
+		return new ItemComponent( 0 );
 	}
 	else if ( StrEqual( name, "DebugStateComponent" )) {
 		return new DebugStateComponent( worldMap );
 	}
 	else if ( StrEqual( name, "DebugPathComponent" )) {
-		return new DebugPathComponent( engine, worldMap, lumosGame );
+		return new DebugPathComponent();
 	}
 	else if ( StrEqual( name, "HealthComponent" )) {
-		return new HealthComponent( engine );
+		return new HealthComponent();
 	}
 	else if ( StrEqual( name, "RenderComponent" )) {
-		return new RenderComponent( engine, 0 );
+		return new RenderComponent( 0 );
 	}
 	else if ( StrEqual( name, "CameraComponent" )) {
 		return new CameraComponent( &engine->camera );
 	}
 	else if ( StrEqual( name, "ScriptComponent" )) {
-		return new ScriptComponent( this, census );
+		return new ScriptComponent( this );
 	}
 	else if ( StrEqual( name, "MapSpatialComponent" )) {
-		return new MapSpatialComponent( worldMap, chitBag );
+		return new MapSpatialComponent();
 	}
 	else if ( StrEqual( name, "AIComponent" )) {
-		return new AIComponent( engine, worldMap );
+		return new AIComponent();
 	}
 	else if ( StrEqual( name, "GridMoveComponent" )) {
-		return new GridMoveComponent( worldMap );
+		return new GridMoveComponent();
 	}
 	else if ( StrEqual( name, "VisitorStateComponent" )) {
-		return new VisitorStateComponent( worldMap );
+		return new VisitorStateComponent();
 	}
 	else if ( StrEqual( name, "TrackingMoveComponent" )) {
-		return new TrackingMoveComponent( worldMap );
+		return new TrackingMoveComponent();
 	}
 	else if ( StrEqual( name, "PhysicsMoveComponent" )) {
-		return new PhysicsMoveComponent( worldMap, true );
+		return new PhysicsMoveComponent( true );
 	}
 
 	GLASSERT( 0 );

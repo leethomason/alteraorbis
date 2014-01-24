@@ -63,19 +63,19 @@ DialogScene::DialogScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 	const GameItem& ring	= db->Get( "ring" );
 	const GameItem& market	= db->Get( "market" );
 
-	itemComponent0 = new ItemComponent( 0, 0, new GameItem( human ));
+	itemComponent0 = new ItemComponent( new GameItem( human ));
 	itemComponent0->AddToInventory( new GameItem( blaster ));
 	itemComponent0->AddToInventory( new GameItem( pistol ));
 	itemComponent0->AddToInventory( new GameItem( ring ));
 
-	itemComponent1 = new ItemComponent( 0, 0, new GameItem( troll ));
+	itemComponent1 = new ItemComponent( new GameItem( troll ));
 	itemComponent1->AddToInventory( new GameItem( blaster ));
 	itemComponent1->AddToInventory( new GameItem( pistol ));
 	itemComponent1->AddToInventory( new GameItem( ring ));
 	itemComponent1->AddToInventory( new GameItem( ring ));
 	itemComponent1->GetItem()->wallet.AddGold( 200 );
 
-	marketComponent = new ItemComponent( 0, 0, new GameItem( market ));
+	marketComponent = new ItemComponent( new GameItem( market ));
 	marketComponent->GetItem(0)->wallet.AddGold( 100 );
 	marketComponent->AddToInventory( new GameItem( blaster ));
 	marketComponent->AddToInventory( new GameItem( blaster ));

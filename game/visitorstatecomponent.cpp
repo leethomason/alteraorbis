@@ -6,6 +6,7 @@
 #include "../script/procedural.h"
 #include "../xegame/chit.h"
 #include "../xegame/spatialcomponent.h"
+#include "../xegame/chitbag.h"
 
 using namespace grinliz;
 using namespace gamui;
@@ -13,18 +14,8 @@ using namespace gamui;
 static const float SIZE = 0.2f;
 static const Vector2F OFFSET = { -0.5f, -0.5f };
 
-VisitorStateComponent::VisitorStateComponent( WorldMap* _map ) : worldMap( _map )
+VisitorStateComponent::VisitorStateComponent()
 {
-	for( int i=0; i<VisitorData::NUM_VISITS; ++i ) {
-		RenderAtom nullAtom;
-		wants[i].Init( &worldMap->overlay0, nullAtom, true );
-		wants[i].SetVisible( false );	// keep flash from world origin
-	}
-
-	RenderAtom gray = LumosGame::CalcPaletteAtom( PAL_GRAY*2, 0 );
-	RenderAtom green = LumosGame::CalcPaletteAtom( PAL_GREEN*2, 0 );
-	bar.Init( &worldMap->overlay0, 10, green, gray );
-	bar.SetVisible( false );
 }
 
 
@@ -44,21 +35,35 @@ void VisitorStateComponent::Serialize( XStream* xs )
 void VisitorStateComponent::OnAdd( Chit* chit )
 {
 	super::OnAdd( chit );
+
+	const ChitContext* context = GetChitContext();
 	needsInit = true;
 
 	for( int i=0; i<VisitorData::NUM_VISITS; ++i ) {
-		worldMap->overlay0.Add( &wants[i] );
+		RenderAtom nullAtom;
+		wants[i].Init( &context->worldMap->overlay0, nullAtom, true );
+		wants[i].SetVisible( false );	// keep flash from world origin
 	}
-	worldMap->overlay0.Add( &bar );
+
+	RenderAtom gray = LumosGame::CalcPaletteAtom( PAL_GRAY*2, 0 );
+	RenderAtom green = LumosGame::CalcPaletteAtom( PAL_GREEN*2, 0 );
+	bar.Init( &context->worldMap->overlay0, 10, green, gray );
+	bar.SetVisible( false );
+
+	for( int i=0; i<VisitorData::NUM_VISITS; ++i ) {
+		context->worldMap->overlay0.Add( &wants[i] );
+	}
+	context->worldMap->overlay0.Add( &bar );
 }
 
 
 void VisitorStateComponent::OnRemove()
 {
+	const ChitContext* context = GetChitContext();
 	for( int i=0; i<VisitorData::NUM_VISITS; ++i ) {
-		worldMap->overlay0.Remove( &wants[i] );
+		context->worldMap->overlay0.Remove( &wants[i] );
 	}
-	worldMap->overlay0.Remove( &bar );
+	context->worldMap->overlay0.Remove( &bar );
 	super::OnRemove();
 }
 

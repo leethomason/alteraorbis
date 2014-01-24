@@ -124,7 +124,7 @@ private:
 	grinliz::Ray debugRay;
 	grinliz::CDynArray<Chit*> chitArr;
 	
-	LumosChitBag	chitBag;
+	LumosChitBag*	chitBag;
 };
 
 

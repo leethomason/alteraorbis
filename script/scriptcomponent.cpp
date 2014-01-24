@@ -10,22 +10,18 @@
 #include "corescript.h"
 #include "countdownscript.h"
 
+#include "../game/lumoschitbag.h"
+
 using namespace grinliz;
 
 
-ScriptComponent::ScriptComponent( IScript* p_script, Engine* engine, Census* p_census ) : script( p_script ), factory( 0 )	
+ScriptComponent::ScriptComponent( IScript* p_script ) : script( p_script ), factory( 0 )	
 {
-	context.census = p_census;
-	context.engine = engine;
-	GLASSERT( context.engine );
 }
 
 
-ScriptComponent::ScriptComponent( const ComponentFactory* f, Census* c ) : script( 0 ), factory( f )
+ScriptComponent::ScriptComponent( const ComponentFactory* f ) : script( 0 ), factory( f )
 {
-	context.census = c;
-	context.engine = f->GetEngine();
-	GLASSERT( context.engine );
 }
 
 void ScriptComponent::Serialize( XStream* xs )
@@ -70,12 +66,15 @@ void ScriptComponent::Serialize( XStream* xs )
 void ScriptComponent::OnAdd( Chit* chit )
 {
 	super::OnAdd( chit );
-	
+	const ChitContext* cc = GetChitContext();
+
 	// Do NOT set these. Will stomp on the Load()
 	//context.initialized = false;
 	//context.time = 0;
-	context.chit = chit;
-	context.chitBag = chit->GetChitBag()->ToLumos();
+	context.chit	= chit;
+	context.census	= &chit->GetLumosChitBag()->census;
+	context.chitBag = chit->GetLumosChitBag();
+	context.engine	= cc->engine;
 	script->SetContext( &context );
 	script->OnAdd();
 }

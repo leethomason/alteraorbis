@@ -25,7 +25,7 @@ class PhysicsMoveComponent : public GameMoveComponent
 private:
 	typedef GameMoveComponent super;
 public:
-	PhysicsMoveComponent( WorldMap* _map, bool deleteWhenDone );
+	PhysicsMoveComponent( bool deleteWhenDone );
 	virtual ~PhysicsMoveComponent() {}
 
 	virtual const char* Name() const { return "PhysicsMoveComponent"; }
@@ -57,7 +57,7 @@ class TrackingMoveComponent : public GameMoveComponent
 private:
 	typedef GameMoveComponent super;
 public:
-	TrackingMoveComponent( WorldMap* map );
+	TrackingMoveComponent();
 	virtual ~TrackingMoveComponent();
 
 	virtual const char* Name() const { return "TrackingMoveComponent"; }

@@ -48,7 +48,7 @@ public:
 
 	// spacetree probably  sufficient, but 'engine' easier to keep track of
 	// asset can be null if followed by a Load()
-	RenderComponent( Engine* engine, const char* asset );
+	RenderComponent( const char* asset );
 	virtual ~RenderComponent();
 
 	// ------ Component functionality: -------
@@ -117,7 +117,6 @@ private:
 	SpatialComponent* SyncToSpatial();	// this a scary function: location is stored in both the model and the spatialcomponent
 	void ProcessIcons( int time );
 
-	Engine*					engine;
 	float					radiusOfBase;
 	grinliz::IString		mainAsset;
 

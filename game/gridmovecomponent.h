@@ -25,7 +25,7 @@ class GridMoveComponent : public GameMoveComponent
 private:
 	typedef GameMoveComponent super;
 public:
-	GridMoveComponent( WorldMap* );
+	GridMoveComponent();
 	virtual ~GridMoveComponent();
 
 	virtual const char* Name() const { return "GridMoveComponent"; }
@@ -53,7 +53,6 @@ private:
 		OFF_BOARD,
 		DONE
 	};
-	WorldMap*			worldMap;
 	int					state;
 	SectorPort			destSectorPort;
 	//bool				deleteWhenDone;
