@@ -673,8 +673,8 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		CoreScript* cs = sim->GetChitBag()->GetHomeCore();
 		Chit* coreChit = cs->ParentChit();
 		if ( coreChit->GetItem()->wallet.gold >= 20 ) {
-			coreChit->GetItem()->wallet.gold -= 20;
-			ReserveBank::Instance()->Deposit( 20 );
+			coreChit->GetItem()->wallet.AddGold( -20 );
+			ReserveBank::Instance()->bank.AddGold( 20 );
 			int team = coreChit->GetItem()->primaryTeam;
 			sim->GetChitBag()->NewWorkerChit( coreChit->GetSpatialComponent()->GetPosition(), team );
 		}
@@ -855,18 +855,18 @@ void GameScene::HandleHotKey( int mask )
 		game->PushScene( LumosGame::SCENE_MAP, new MapSceneData( sim->GetChitBag(), sim->GetWorldMap(), playerChit ));
 	}
 	else if ( mask == GAME_HK_CHEAT_GOLD ) {
-		Chit* playerChit = sim->GetPlayerChit();
-		if ( playerChit ) {
+		CoreScript* cs = sim->GetChitBag()->GetHomeCore();
+		if ( cs ) {
 			static const int GOLD = 100;
-			ReserveBank::Instance()->WithdrawGold( GOLD );
-			playerChit->GetItem()->wallet.AddGold( GOLD );
+			ReserveBank::Instance()->bank.AddGold( -GOLD );
+			cs->ParentChit()->GetItem()->wallet.AddGold( GOLD );
 		}
 	}
 	else if ( mask == GAME_HK_CHEAT_CRYSTAL ) {
 		Chit* playerChit = sim->GetPlayerChit();
 		if ( playerChit ) {
 			for( int i=0; i<NUM_CRYSTAL_TYPES; ++i ) {
-				ReserveBank::Instance()->WithdrawCrystal( i );
+				ReserveBank::Instance()->bank.AddCrystal( -i );
 				playerChit->GetItem()->wallet.AddCrystal(i);
 			}
 		}
@@ -1032,8 +1032,8 @@ void GameScene::DoTick( U32 delta )
 
 	Vector3F lookAt = { 0, 0, 0 };
 	sim->GetEngine()->CameraLookingAt( &lookAt );
-	Vector2I sector = { (int)lookAt.x / SECTOR_SIZE, (int)lookAt.z / SECTOR_SIZE };
-	const SectorData& sd = sim->GetWorldMap()->GetWorldInfo().GetSector( sector );
+	Vector2I viewingSector = { (int)lookAt.x / SECTOR_SIZE, (int)lookAt.z / SECTOR_SIZE };
+	const SectorData& sd = sim->GetWorldMap()->GetWorldInfo().GetSector( viewingSector );
 
 	CStr<64> str;
 	str.Format( "Date %.2f\n%s", NewsHistory::Instance()->AgeF(), sd.name.c_str() );
@@ -1086,29 +1086,27 @@ void GameScene::DoTick( U32 delta )
 	str.Format( "Tech %.2f / %d", tech, maxTech );
 	techLabel.SetText( str.c_str() );
 
-	if ( playerChit && CoreMode() ) {
-
-		int atech = coreScript->AchievedTechLevel();
-		for( int i=1; i<NUM_BUILD_MODES; ++i ) {
-			modeButton[i].SetEnabled( i-1 <= atech );
-		}
-
-		CStr<32> str2;
-		// How many workers in the sector?
-		Vector2I sector = ToSector( playerChit->GetSpatialComponent()->GetPosition2DI() );
-		Rectangle2F b;
-		b.Set( (float)(sector.x*SECTOR_SIZE+1), (float)(sector.y*SECTOR_SIZE+1),
-			   (float)((sector.x+1)*SECTOR_SIZE-1), (float)((sector.y+1)*SECTOR_SIZE-1) );
-
-		CChitArray arr;
-		ItemNameFilter workerFilter( IStringConst::worker );
-
-		static const int MAX_BOTS = 4;
-		sim->GetChitBag()->QuerySpatialHash( &arr, b, 0, &workerFilter );
-		str2.Format( "WorkerBot\n20 %d/%d", arr.Size(), MAX_BOTS ); 
-		createWorkerButton.SetText( str2.c_str() );
-		createWorkerButton.SetEnabled( arr.Size() < MAX_BOTS );
+	int atech = coreScript->AchievedTechLevel();
+	for( int i=1; i<NUM_BUILD_MODES; ++i ) {
+		modeButton[i].SetEnabled( i-1 <= atech );
 	}
+
+	CStr<32> str2;
+	// How many workers in the sector?
+	Vector2I homeSector = sim->GetChitBag()->GetHomeSector();
+	Rectangle2F b;
+	b.Set( (float)(homeSector.x*SECTOR_SIZE+1), (float)(homeSector.y*SECTOR_SIZE+1),
+			(float)((homeSector.x+1)*SECTOR_SIZE-1), (float)((homeSector.y+1)*SECTOR_SIZE-1) );
+
+	CChitArray arr;
+	ItemNameFilter workerFilter( IStringConst::worker );
+
+	static const int MAX_BOTS = 4;
+	sim->GetChitBag()->QuerySpatialHash( &arr, b, 0, &workerFilter );
+	str2.Format( "WorkerBot\n20 %d/%d", arr.Size(), MAX_BOTS ); 
+	createWorkerButton.SetText( str2.c_str() );
+	createWorkerButton.SetEnabled( arr.Size() < MAX_BOTS );
+
 	consoleWidget.DoTick( delta );
 	ProcessNewsToConsole();
 
@@ -1121,7 +1119,6 @@ void GameScene::DoTick( U32 delta )
 	}
 	useBuildingButton.SetVisible( useBuildingVisible );
 	cameraHomeButton.SetVisible( uiMode[UI_VIEW].Down() );
-
 
 	// It's pretty tricky keeping the camera, camera component, and various
 	// modes all working together. 
@@ -1204,14 +1201,10 @@ void GameScene::DrawDebugText()
 		simCount = 0;
 	}
 
-	Wallet w = ReserveBank::Instance()->GetWallet();
-	ufoText->Draw( x, y,	"Date=%.2f %s. Sim/S=%.1f x%.1f ticks=%d/%d Reserve Au=%d r%dg%dv%d", 
-							NewsHistory::Instance()->AgeF(),
-							fastMode ? "fast" : "norm", 
-							simPS,
-							simPS / 30.0f,
+	Wallet w = ReserveBank::Instance()->bank;
+	ufoText->Draw( x, y,	"ticks=%d/%d Reserve Au=%d G=%d R=%d B=%d V=%d", 
 							chitBag->NumTicked(), chitBag->NumChits(),
-							w.gold, w.crystal[0], w.crystal[1], w.crystal[2] ); 
+							w.gold, w.crystal[0], w.crystal[1], w.crystal[2], w.crystal[3] ); 
 	y += 16;
 
 	int typeCount[NUM_PLANT_TYPES];

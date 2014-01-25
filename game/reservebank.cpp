@@ -69,7 +69,10 @@ int ReserveBank::WithdrawDenizen()
 Wallet ReserveBank::WithdrawMonster()
 {
 	Wallet w;
-	w.gold = WithdrawGold( GOLD_PER_MONSTER );
+	if ( bank.gold >= GOLD_PER_MONSTER ) {
+		w.AddGold( GOLD_PER_MONSTER );
+		bank.AddGold( -GOLD_PER_MONSTER );
+	}
 	if ( random.Rand(2) == 0 ) {
 		w.AddCrystal( WithdrawRandomCrystal() );
 	}

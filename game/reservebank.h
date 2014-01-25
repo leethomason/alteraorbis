@@ -30,10 +30,9 @@ public:
 	ReserveBank();
 	~ReserveBank();
 
-	void Serialize( XStream* xs );
+	Wallet bank;
 
-	int Gold() const					{ return bank.gold; }
-	const Wallet& GetWallet() const		{ return bank; }
+	void Serialize( XStream* xs );
 
 	int WithdrawDenizen();
 	Wallet WithdrawMonster();
@@ -43,23 +42,11 @@ public:
 
 	// Withdraws 1 or 0 crystals. type is returned.
 	int WithdrawRandomCrystal();
-	int WithdrawGold( int g )		{ g = grinliz::Min( g, bank.gold ); bank.gold -= g; return g; }
-	int WithdrawCrystal( int type ) {	if ( bank.crystal[type] > 0 ) { 
-											bank.crystal[type] -= 1;
-											return type;
-										}
-										return NUM_CRYSTAL_TYPES;
-	}
-
 	static ReserveBank* Instance() { return instance; }
-	void Deposit( const Wallet& wallet )	{ bank.Add( wallet ); }
-	void Deposit( int gold )				{ bank.AddGold( gold ); }
 
 private:
 	static ReserveBank* instance;
 	grinliz::Random random;
-
-	Wallet bank;
 };
 
 #endif // RESERVE_BANK_INCLUDED

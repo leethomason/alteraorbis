@@ -29,11 +29,15 @@ struct Wallet
 
 	void AddGold( int g ) {
 		this->gold += g;
+		GLASSERT( this->gold >= 0 );
 	}
 
 	// Does the check before the increment.
-	void AddCrystal( int id ) {
-		if ( id < NUM_CRYSTAL_TYPES ) crystal[id] += 1;
+	void AddCrystal( int id, int n=1 ) {
+		if ( id < NUM_CRYSTAL_TYPES ) {
+			crystal[id] += n;
+			GLASSERT( crystal[id] >= 0 );
+		}
 	}
 
 	void Add( const Wallet& w ) {

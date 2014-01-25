@@ -463,6 +463,30 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			if ( parentChit->GetRenderComponent() ) {
 				parentChit->GetRenderComponent()->AddDeco( "loot", STD_DECO );
 			}
+
+			// Some MOBs gather a lot of loot. Cheat a little, and send
+			// the massive loot tax off the reserve.
+			IString mob = mainItem->keyValues.GetIString( "mob" );
+			int limit = 0;
+			if ( mob == "normal" )
+				limit = MAX_NORMAL_GOLD;
+			else
+				limit = MAX_GREATER_GOLD;
+
+			if ( limit ) {
+				int d = mainItem->wallet.gold - limit;
+				if ( d > 0 ) {
+					mainItem->wallet.AddGold( -d );
+					ReserveBank::Instance()->bank.AddGold( d );
+				}
+				for( int i=0; i<NUM_CRYSTAL_TYPES; ++i ) {
+					d = mainItem->wallet.crystal[i] - MAX_MOB_CRYSTAL;
+					if ( d > 0 ) {
+						mainItem->wallet.AddCrystal( i, -d );
+						ReserveBank::Instance()->bank.AddCrystal( i, d );
+					}
+				}
+			}
 		}
 	}
 	else if ( msg.ID() >= ChitMsg::CHIT_DESTROYED_START && msg.ID() <= ChitMsg::CHIT_DESTROYED_END ) 
@@ -489,7 +513,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		}
 		else {
 			if ( ReserveBank::Instance() ) {	// null in battle mode
-				ReserveBank::Instance()->Deposit( w );
+				ReserveBank::Instance()->bank.Add( w );
 			}
 		}
 
@@ -503,7 +527,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 				parentChit->GetLumosChitBag()->NewItemChit( pos, item, true, true );
 			}
 			else {
-				ReserveBank::Instance()->Deposit( item->wallet.EmptyWallet() );
+				ReserveBank::Instance()->bank.Add( item->wallet.EmptyWallet() );
 				NewsDestroy( item );
 			}
 		}

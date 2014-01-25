@@ -47,16 +47,17 @@
 		x is shield boost working correctly? Effects are *not* getting stripped by the shield.
 		x buildings shouldn't drop gold on de-rez
 	    x changing active weapon in invetory doesn't change rendering in-game
+		x workerBot button not working
+		x gold cheat not working when no avatar
+		x need to limit gold / crystal of MOBs
+		x accuracy changes in forge screen
+		x rezzed, de-rezzed needs different words. too hard to tell apart.
+		x names on mobs
 		- Click through of disabled buttons is surprising
 		- space bar pause
 		- change gold and healing icons 
 		- guard posts
 		- workers will try to clear water
-		- workerBot button not working
-		- gold cheat not working when no avatar
-		- need to limit gold / crystal of MOBs
-		x accuracy changes in forge screen
-		x rezzed, de-rezzed needs different words. too hard to tell apart.
 
 	 - Food
 	 	- food collection

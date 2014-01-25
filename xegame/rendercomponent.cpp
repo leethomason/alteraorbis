@@ -43,6 +43,7 @@ RenderComponent::RenderComponent( const char* asset )
 	}
 	radiusOfBase = 0;
 	groundMark = 0;
+	textLabel = 0;
 
 	mainAsset = StringPool::Intern( asset );
 }
@@ -115,6 +116,9 @@ void RenderComponent::OnAdd( Chit* chit )
 			model[i]->Modify();
 		}
 	}
+	textLabel = new gamui::TextLabel();
+	textLabel->Init(  &context->engine->overlay );
+	textLabel->SetVisible( false );
 }
 
 
@@ -136,6 +140,8 @@ void RenderComponent::OnRemove()
 		delete icons[i].image;
 	}
 	icons.Clear();
+	delete textLabel;
+	textLabel = 0;
 }
 
 
@@ -399,10 +405,6 @@ void RenderComponent::ProcessIcons( int delta )
 		}
 	}
 
-	if ( icons.Empty() ) {
-		return;
-	}
-
 	SpatialComponent* sc = parentChit->GetSpatialComponent();
 	Vector3F pos = { 0, 0, 0 };
 	if ( sc ) pos = sc->GetPosition();
@@ -412,11 +414,17 @@ void RenderComponent::ProcessIcons( int delta )
 
 	const ChitContext* context = GetChitContext();
 	float len2 = ( context->engine->camera.PosWC() - pos ).LengthSquared();
-	if ( len2 < EL_FAR*EL_FAR ) {
+	IString proper;
+	if ( parentChit->GetItem() ) {
+		proper = parentChit->GetItem()->IProperName();
+	}
+
+	if ( len2 < EL_FAR*EL_FAR && ( icons.Size() || !proper.empty() )) {
 		const Screenport& port = context->engine->GetScreenport();
 		
 		Vector2F ui = { 0, 0 };
-		const Rectangle3F& aabb = model[0]->AABB();
+		//const Rectangle3F aabb = model[0]->AABB();
+		const Rectangle3F aabb = model[0]->GetInvariantAABB( 0, 0 );
 		Vector3F topCenter = { pos.x, aabb.max.y, pos.z };
 
 		port.WorldToUI( topCenter, &ui );
@@ -427,11 +435,21 @@ void RenderComponent::ProcessIcons( int delta )
 		if ( uiBounds.Contains( ui )) {
 			inView = true;
 			float width = icons.Size() * SIZE;
+			float dy = SIZE * 0.5f;
+
+			textLabel->SetText( proper.safe_str() );
+			textLabel->SetVisible( true );
+			textLabel->SetCenterPos( ui.x, ui.y - dy );
+			
+			if ( !proper.empty() ) {
+				dy += SIZE;
+			}
 
 			for( int i=0; i<icons.Size(); ++i ) {
-				icons[i].image->SetCenterPos( ui.x - width*0.5f + (float)(i)*SIZE + SIZE*0.5f, ui.y-SIZE );
-				icons[i].image->SetVisible( true );
 				icons[i].image->SetSize( SIZE, SIZE );
+				icons[i].image->SetCenterPos( ui.x - width*0.5f + (float)(i)*SIZE + SIZE*0.5f, 
+											  ui.y - dy );
+				icons[i].image->SetVisible( true );
 
 				if ( icons[i].rotation >= 0 ) {
 					icons[i].image->SetRotationY( icons[i].rotation );
@@ -443,7 +461,9 @@ void RenderComponent::ProcessIcons( int delta )
 		}
 	}
 
+
 	if ( !inView ) {
+		textLabel->SetVisible( false );
 		for( int i=0; i<icons.Size(); ++i ) {
 			icons[i].image->SetVisible( false );
 		}

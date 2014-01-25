@@ -234,7 +234,7 @@ Chit* LumosChitBag::NewMonsterChit( const Vector3F& pos, const char* name, int t
 	Wallet w = ReserveBank::Instance()->WithdrawMonster();
 	if ( chit->GetItem()->keyValues.GetIString( "mob" ) == "greater" ) {
 		// can return NUM_CRYSTAL_TYPES, if out, which is fine.
-		w.AddCrystal( ReserveBank::Instance()->WithdrawCrystal( random.Rand( NUM_CRYSTAL_TYPES )));
+		w.AddCrystal( ReserveBank::Instance()->WithdrawRandomCrystal() );;
 		
 		NewsHistory* history = NewsHistory::Instance();
 		if ( history ) {

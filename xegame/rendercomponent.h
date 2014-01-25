@@ -123,6 +123,7 @@ private:
 	Model*					model[ NUM_MODELS ];
 	Model*					groundMark;
 
+	// This all needs to get pulled into a "floating readout" class
 	class Icon {
 	public:
 		Icon() : image(0), time(0) {}
@@ -132,6 +133,7 @@ private:
 		float			rotation;
 	};
 	grinliz::CDynArray< Icon > icons;
+	gamui::TextLabel*	textLabel;
 };
 
 #endif // RENDER_COMPONENT_INCLUDED

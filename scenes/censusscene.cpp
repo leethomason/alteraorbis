@@ -166,7 +166,7 @@ void CensusScene::Scan()
 	}
 
 	ReserveBank* reserve = ReserveBank::Instance();
-	const Wallet& reserveWallet = reserve->GetWallet();
+	const Wallet& reserveWallet = reserve->bank;
 
 	GLString str;
 	str.Format( "Chits: %d\n", nChits );
