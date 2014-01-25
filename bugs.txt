@@ -54,7 +54,6 @@
 		x rezzed, de-rezzed needs different words. too hard to tell apart.
 		x names on mobs
 		- Click through of disabled buttons is surprising
-		- space bar pause
 		- change gold and healing icons 
 		- guard posts
 		- workers will try to clear water

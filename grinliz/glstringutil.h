@@ -127,6 +127,8 @@ public:
 	~CStr()	{}
 
 	const char* c_str()	const			{ return buf; }
+	const char* safe_str() const		{ return buf ? buf : ""; }
+
 	int size() const					{ return strlen( buf ); }
 	bool empty() const					{ return buf[0] == 0; }
 

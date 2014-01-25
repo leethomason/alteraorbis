@@ -437,7 +437,11 @@ void RenderComponent::ProcessIcons( int delta )
 			float width = icons.Size() * SIZE;
 			float dy = SIZE * 0.5f;
 
-			textLabel->SetText( proper.safe_str() );
+			CStr<16> str;
+			if ( !proper.empty() ) {
+				str.Format( "%s %d", proper.safe_str(), parentChit->GetItem()->Traits().Level() );
+			}
+			textLabel->SetText( str.safe_str() );
 			textLabel->SetVisible( true );
 			textLabel->SetCenterPos( ui.x, ui.y - dy );
 			
