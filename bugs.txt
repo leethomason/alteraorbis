@@ -25,9 +25,9 @@
 
 - game
 	- Denizen-2
-		- update cyclops art
-		- update temple art
-		- update arachnoid art
+		x update cyclops art
+		x update temple art
+		x update arachnoid art
       - changing active weapon in invetory doesn't change rendering in-game
 		x forge / factory name update
     	- tombstones
