@@ -34,6 +34,7 @@
 		- update shield art. boring and hard to identify.
 		- different porch color for usable buildings
 		- shield glow
+		- change gold and healing icons 
 		x forge / factory name update
     	x tombstones
     	x accomplishments
@@ -54,7 +55,6 @@
 		x rezzed, de-rezzed needs different words. too hard to tell apart.
 		x names on mobs
 		- Click through of disabled buttons is surprising
-		- change gold and healing icons 
 		- guard posts
 		- workers will try to clear water
 

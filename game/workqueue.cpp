@@ -309,10 +309,14 @@ bool WorkQueue::TaskCanComplete( const WorkQueue::QueueItem& item )
 
 	int passable = 0;
 	int removable = 0;
+	int water = 0;
 	for( int y=pos2i.y; y<pos2i.y+size; ++y ) {
 		for( int x=pos2i.x; x<pos2i.x+size; ++x ) {
 			if ( worldMap->IsPassable( x, y )) {
 				++passable;
+			}
+			if ( !worldMap->IsLand( x, y )) {
+				++water;
 			}
 			Vector2I v = { x, y };
 			// The 'build' actions will automatically clear plants. (As will PAVE, etc.)
@@ -324,16 +328,20 @@ bool WorkQueue::TaskCanComplete( const WorkQueue::QueueItem& item )
 		}
 	}
 
-	if ( action != BuildScript::CLEAR ) {
-		if ( passable < size*size || removable ) {
-			// stuff in the way
-			return false;
-		}
+	if ( water > 0 ) {
+		return false;
 	}
-	else {
+
+	if ( action == BuildScript::CLEAR ) {
 		if ( passable == size*size && removable == 0 ) {
 			// nothing to clear. (unless paved)
 			return wg.Pave() > 0;
+		}
+	}
+	else {
+		if ( passable < size*size || removable ) {
+			// stuff in the way
+			return false;
 		}
 	}
 	return true;

@@ -116,7 +116,10 @@ void MapSpatialComponent::OnRemove()
 		Vector2I pos = GetPosition2DI();
 		GetLumosChitBag()->RemoveFromBuildingHash( this, bounds.min.x, bounds.min.y ); 
 	}
+	
+	// Remove so that the callback doesn't return blocking.
 	super::OnRemove();
+
 	if ( mode == GRID_BLOCKED ) {
 		Vector2I pos = MapPosition();
 		for( int y=bounds.min.y; y<=bounds.max.y; ++y ) {
