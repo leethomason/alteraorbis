@@ -27,10 +27,10 @@
 
 - game
 	- Denizen-2
-		- update cyclops art
-		- update temple art
-		- update arachnoid art
-		- update tombstone art
+		x update cyclops art
+		x update temple art
+		x update arachnoid art
+		x update tombstone art
 		- update shield art. boring and hard to identify.
 		- different porch color for usable buildings
 		- shield glow
