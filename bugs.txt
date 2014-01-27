@@ -31,7 +31,7 @@
 		x update temple art
 		x update arachnoid art
 		x update tombstone art
-		- update shield art. boring and hard to identify.
+		x update shield art. boring and hard to identify.
 		- different porch color for usable buildings
 		- shield glow
 		- change gold and healing icons 

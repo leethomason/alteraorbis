@@ -1,5 +1,12 @@
 @import url(http://weloveiconfonts.com/api/?family=entypo);
 
+@import url(http://weloveiconfonts.com/api/?family=fontawesome);
+
 [class*="entypo-"]:before {
   font-family: 'entypo', sans-serif;
+}
+
+
+[class*="fontawesome-"]:before {
+  font-family: 'fontawesome', sans-serif;
 }
