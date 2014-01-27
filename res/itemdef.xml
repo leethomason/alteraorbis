@@ -144,7 +144,7 @@
         />
 
   <item name="power"
-        resource="power"
+        resource="pyramid0"
         porch="0"
         procedural="team"
         size="2"

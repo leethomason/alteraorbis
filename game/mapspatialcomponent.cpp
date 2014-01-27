@@ -44,21 +44,27 @@ void MapSpatialComponent::SetMapPosition( int x, int y, int cx, int cy )
 }
 
 
+void MapSpatialComponent::UpdateBlock( WorldMap* map )
+{
+	for( int y=bounds.min.y; y<=bounds.max.y; ++y ) {
+		for( int x=bounds.min.x; x<=bounds.max.x; ++x ) {
+			map->UpdateBlock( x, y );
+		}
+	}
+}
+
+
 void MapSpatialComponent::SetMode( int newMode ) 
 {
 	// This code gets run on OnAdd() as well.
 	if ( parentChit ) {
-		const ChitContext* context = GetChitContext();
 		if ( newMode != mode ) {
-
-			for( int y=bounds.min.y; y<=bounds.max.y; ++y ) {
-				for( int x=bounds.min.x; x<=bounds.max.x; ++x ) {
-					context->worldMap->UpdateBlock( x, y );
-				}
+			mode = newMode;	// UpdateBlock() makes callback occur - set mode first!
+			if ( parentChit ) {
+				UpdateBlock( GetChitContext()->worldMap );
 			}
 		}
 	}
-	mode = newMode;
 }
 
 
@@ -103,9 +109,9 @@ void MapSpatialComponent::OnAdd( Chit* chit )
 		UpdatePorch( bounds );
 	}
 
-	int m = mode;
-	mode = -1;	// make sure SetMode() does something.
-	SetMode( m );
+	if ( mode == GRID_BLOCKED ) {
+		UpdateBlock( GetChitContext()->worldMap );
+	}
 }
 
 
@@ -121,12 +127,9 @@ void MapSpatialComponent::OnRemove()
 	super::OnRemove();
 
 	if ( mode == GRID_BLOCKED ) {
-		Vector2I pos = MapPosition();
-		for( int y=bounds.min.y; y<=bounds.max.y; ++y ) {
-			for( int x=bounds.min.x; x<=bounds.max.x; ++x ) {
-				context->worldMap->UpdateBlock( x, y );
-			}
-		}
+		// This component is no longer in the block (the OnRemove() is above
+		// this LOC), so this will set things to the correct value.
+		UpdateBlock( context->worldMap );
 	}
 	UpdatePorch( bounds );
 }

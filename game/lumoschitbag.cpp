@@ -177,7 +177,14 @@ Chit* LumosChitBag::NewBuilding( const Vector2I& pos, const char* name, int team
 	const ChitContext* context = GetContext();
 	Chit* chit = NewChit();
 
-	const GameItem& rootItem = ItemDefDB::Instance()->Get( name );
+	GameItem rootItem = ItemDefDB::Instance()->Get( name );
+
+	// Hack...how to do this better??
+	if ( rootItem.IResourceName() == "pyramid0" ) {
+		CStr<32> str;
+		str.Format( "pyramid%d", random.Rand(3) );
+		rootItem.SetResource( str.c_str() );
+	}
 
 	int cx=1;
 	rootItem.keyValues.GetInt( "size", &cx );

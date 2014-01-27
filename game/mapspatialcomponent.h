@@ -60,6 +60,7 @@ public:
 
 private:
 	void UpdatePorch( const grinliz::Rectangle2I& bounds );
+	void UpdateBlock( WorldMap* map );	// can't use the context - used after OnRemove
 
 	int						mode;
 	bool					building;	// is this a building?

@@ -101,8 +101,9 @@ void HealthComponent::DeltaHealth()
 						chit->Add( new HealthComponent());
 
 						Vector3F pos = parentChit->GetSpatialComponent()->GetPosition();
+						float r = parentChit->GetSpatialComponent()->GetYRotation();
 						pos.y = 0;
-						chit->GetSpatialComponent()->SetPosition( pos );
+						chit->GetSpatialComponent()->SetPosYRot( pos, r );
 					}
 				}
 			}

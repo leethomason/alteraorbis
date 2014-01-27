@@ -32,9 +32,7 @@
 		x update arachnoid art
 		x update tombstone art
 		x update shield art. boring and hard to identify.
-		- different porch color for usable buildings
-		- shield glow
-		- change gold and healing icons 
+		x shield glow
 		x forge / factory name update
     	x tombstones
     	x accomplishments
@@ -54,6 +52,10 @@
 		x accuracy changes in forge screen
 		x rezzed, de-rezzed needs different words. too hard to tell apart.
 		x names on mobs
+		x pyramids
+		- building add/remove bug
+		- different porch color for usable buildings
+		- change gold and healing icons 
 		- Click through of disabled buttons is surprising
 		- guard posts
 		- workers will try to clear water

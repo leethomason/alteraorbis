@@ -28,6 +28,7 @@ IString IStringConst::vault;
 IString IStringConst::factory;
 IString IStringConst::forge;
 IString IStringConst::power;
+IString IStringConst::temple;
 IString IStringConst::bed;
 IString IStringConst::market;
 IString IStringConst::bar;
@@ -71,6 +72,7 @@ void IStringConst::Init()
 	factory = StringPool::Intern( "factory", true );
 	forge = StringPool::Intern( "forge", true );
 	power = StringPool::Intern( "power", true );
+	temple = StringPool::Intern( "temple", true );
 	bed = StringPool::Intern( "bed", true );
 	market = StringPool::Intern( "market", true );
 	bar = StringPool::Intern( "bar", true );
