@@ -328,12 +328,21 @@ void WeaponGen::AssignShield( ProcRenderInfo* info )
 	random.Rand();
 
 	Color4F c[3];
+	Vector4F v[3];
 	GetColors( random.Rand(), effectFlags, c ); 
 
 	for( int i=0; i<3; ++i ) {
-		Vector4F v = { c[i].r, c[i].g, c[i].b, c[i].a };
-		info->color.SetCol( i, v );
+		v[i].Set( c[i].r, c[i].g, c[i].b, c[i].a );
 	}
+
+	v[CONTRAST].w = Max( v[CONTRAST].w, 0.7f );
+
+	// Red: outer
+	info->color.SetCol( 0, v[BASE] );
+	// Blue: ring
+	info->color.SetCol( 2, v[CONTRAST] );
+	// Effect: inner
+	info->color.SetCol( 1, v[EFFECT] );
 	info->color.m44 = 0;
 
 	Texture* texture = TextureManager::Instance()->GetTexture( "structure" );
