@@ -56,13 +56,11 @@ void MapSpatialComponent::UpdateBlock( WorldMap* map )
 
 void MapSpatialComponent::SetMode( int newMode ) 
 {
+	mode = newMode;	// UpdateBlock() makes callback occur - set mode first!
 	// This code gets run on OnAdd() as well.
 	if ( parentChit ) {
-		if ( newMode != mode ) {
-			mode = newMode;	// UpdateBlock() makes callback occur - set mode first!
-			if ( parentChit ) {
-				UpdateBlock( GetChitContext()->worldMap );
-			}
+		if ( parentChit ) {
+			UpdateBlock( GetChitContext()->worldMap );
 		}
 	}
 }
