@@ -56,10 +56,10 @@
 		x pyramids
 		x building add/remove bug
 		x guard posts
+		x workers will try to clear water
+		x auto-clear not working with ice
 		- different porch color for usable buildings
 		- change gold and healing icons 
-		- workers will try to clear water
-		- auto-clear not working with ice
 		- tune guarding: 
 
 	 - Food

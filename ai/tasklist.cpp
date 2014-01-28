@@ -10,6 +10,7 @@
 #include "../game/lumoschitbag.h"
 #include "../game/lumosgame.h"
 #include "../game/team.h"
+#include "../game/mapspatialcomponent.h"
 
 #include "../xegame/chit.h"
 #include "../xegame/spatialcomponent.h"
@@ -183,6 +184,15 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta )
 					for( int k=0; k<plants.Size(); ++k ) {
 						plants[k]->GetItem()->hp = 0;
 						plants[k]->SetTickNeeded();
+						// Some hackery: we can't build until the plant isn't there,
+						// but the component won't get deleted until later. Remove
+						// the MapSpatialComponent to detatch it from map.
+						MapSpatialComponent* msc = GET_SUB_COMPONENT( plants[k], SpatialComponent, MapSpatialComponent );
+						GLASSERT( msc );
+						if ( msc ) {
+							plants[k]->Remove( msc );
+							delete msc;
+						}
 					}
 
 					// Now build. The Rock/Pave/Building may coexist with a plant for a frame,
