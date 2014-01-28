@@ -32,6 +32,7 @@ IString IStringConst::temple;
 IString IStringConst::bed;
 IString IStringConst::market;
 IString IStringConst::bar;
+IString IStringConst::guardpost;
 IString IStringConst::arachnoid;
 IString IStringConst::mantis;
 IString IStringConst::redMantis;
@@ -76,6 +77,7 @@ void IStringConst::Init()
 	bed = StringPool::Intern( "bed", true );
 	market = StringPool::Intern( "market", true );
 	bar = StringPool::Intern( "bar", true );
+	guardpost = StringPool::Intern( "guardpost", true );
 	arachnoid = StringPool::Intern( "arachnoid", true );
 	mantis = StringPool::Intern( "mantis", true );
 	redMantis = StringPool::Intern( "redMantis", true );

@@ -1338,6 +1338,65 @@ bool AIComponent::ThinkCriticalNeeds( const ComponentSet& thisComp )
 }
 
 
+Vector2I AIComponent::RandomPosInRect( const grinliz::Rectangle2I& rect, bool excludeCenter )
+{
+	Vector2I v = { 0, 0 };
+	while( true ) {
+		 v.Set( rect.min.x + parentChit->random.Rand( rect.Width() ),
+				rect.min.y + parentChit->random.Rand( rect.Height() ));
+		if ( excludeCenter && v == rect.Center() )
+			continue;
+		break;
+	}
+	return v;
+}
+
+
+bool AIComponent::ThinkGuard( const ComponentSet& thisComp )
+{
+	if ( !(thisComp.item->flags & GameItem::AI_USES_BUILDINGS )) {
+		return false;
+	}
+
+	// High Will -> guarding fan
+	if ( thisComp.item->Traits().Will() < parentChit->random.Dice( 3, 6 ) ) {
+		return false;
+	}
+	Vector2I pos2i = thisComp.spatial->GetPosition2DI();
+	Vector2I sector = ToSector( pos2i );
+	CoreScript* coreScript = GetLumosChitBag()->GetCore( sector );
+
+	if ( !coreScript ) return false;
+	if ( !coreScript->IsCitizen( thisComp.chit->ID() )) return false;	// only guard when home.
+
+	ItemNameFilter filter( IStringConst::guardpost );
+	GetLumosChitBag()->FindBuilding( IString(), sector, 0, 0, &chitArr, &filter );
+
+	if ( chitArr.Empty() ) return false;
+
+	// Are we already guarding??
+	for( int i=0; i<chitArr.Size(); ++i ) {
+		Rectangle2I guardBounds;
+		guardBounds.min = guardBounds.max = chitArr[i]->GetSpatialComponent()->GetPosition2DI();
+		guardBounds.Outset( 2 ); // FIXME: const
+		if ( guardBounds.Contains( pos2i )) {
+			taskList.Push( Task::MoveTask( ToWorld2F( RandomPosInRect( guardBounds, true ))));
+			taskList.Push( Task::StandTask( 10*1000, 0 ));	// FIXME: const
+			return true;
+		}
+	}
+
+	int post = thisComp.chit->random.Rand( chitArr.Size() );
+	Rectangle2I guardBounds;
+	guardBounds.min = guardBounds.max = chitArr[post]->GetSpatialComponent()->GetPosition2DI();
+	guardBounds.Outset( 2 ); // FIXME: const
+
+	taskList.Push( Task::MoveTask( ToWorld2F( RandomPosInRect( guardBounds, true ))));
+	taskList.Push( Task::StandTask( 10*1000, 0 ));	// FIXME: const
+	return true;
+}
+
+
 bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 {
 	if ( !(thisComp.item->flags & GameItem::AI_USES_BUILDINGS )) {
@@ -1516,6 +1575,8 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 	if ( ThinkCriticalNeeds( thisComp ))
 		return;
 	if ( ThinkNeeds( thisComp ))
+		return;
+	if ( ThinkGuard( thisComp ))
 		return;
 	if ( ThinkDoRampage( thisComp ))
 		return;

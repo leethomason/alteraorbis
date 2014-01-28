@@ -24,6 +24,7 @@
 - 32bit texture support
 - see monsters when you click on them
 - remove "tech grouping" of buildings
+- Click through of disabled buttons is surprising
 
 - game
 	- Denizen-2
@@ -53,12 +54,13 @@
 		x rezzed, de-rezzed needs different words. too hard to tell apart.
 		x names on mobs
 		x pyramids
-		- building add/remove bug
+		x building add/remove bug
+		x guard posts
 		- different porch color for usable buildings
 		- change gold and healing icons 
-		- Click through of disabled buttons is surprising
-		- guard posts
 		- workers will try to clear water
+		- auto-clear not working with ice
+		- tune guarding: 
 
 	 - Food
 	 	- food collection

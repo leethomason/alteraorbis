@@ -72,9 +72,9 @@ class Random
 	/** "Roll dice." Has the same bell curve distribution as N dice. Dice start with the 
 		value '1', so RandD2( 2, 6 ) returns a value from 2-12
 	*/
-	U32 Dice( U32 nDice, U32 sides ) {	
-		U32 total = 0;
-		for( U32 i=0; i<nDice; ++i ) { total += Rand(sides)+1; }
+	int Dice( U32 nDice, U32 sides ) {	
+		int total = 0;
+		for( U32 i=0; i<nDice; ++i ) { total += (int)Rand(sides)+1; }
 		return total;
 	}
 

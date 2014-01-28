@@ -144,6 +144,7 @@ private:
 	bool ThinkNeeds( const ComponentSet& thisComp );
 	bool ThinkLoot( const ComponentSet& thisComp );
 	bool ThinkDoRampage( const ComponentSet& thisComp );	// whether this MOB should rampage
+	bool ThinkGuard( const ComponentSet& thisComp );
 
 	// What happens when no other move is working.
 	grinliz::Vector2F ThinkWanderRandom( const ComponentSet& thisComp );
@@ -151,6 +152,8 @@ private:
 	grinliz::Vector2F ThinkWanderFlock( const ComponentSet& thisComp );
 	// creepy circle pacing
 	grinliz::Vector2F ThinkWanderCircle( const ComponentSet& thisComp );
+
+	grinliz::Vector2I RandomPosInRect( const grinliz::Rectangle2I& rect, bool excludeCenter );
 
 	enum { 
 		FOCUS_NONE,

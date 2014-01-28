@@ -59,7 +59,7 @@ public:
 	MapSpatialComponent* nextBuilding;
 
 private:
-	void UpdatePorch( const grinliz::Rectangle2I& bounds );
+	void UpdatePorch( const grinliz::Rectangle2I& bounds, WorldMap* worldMap, LumosChitBag* bag );
 	void UpdateBlock( WorldMap* map );	// can't use the context - used after OnRemove
 
 	int						mode;

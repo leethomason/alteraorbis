@@ -77,17 +77,16 @@ void MapSpatialComponent::SetBuilding( bool b, bool p )
 
 
 
-void MapSpatialComponent::UpdatePorch( const grinliz::Rectangle2I& bounds )
+void MapSpatialComponent::UpdatePorch( const grinliz::Rectangle2I& bounds, WorldMap* worldMap, LumosChitBag* bag )
 {
 	if ( building && hasPorch ) {
-		const ChitContext* context = GetChitContext();
 		Rectangle2I b = bounds;
 		b.Outset( 1 );
 		Rectangle2IEdgeIterator it( b );
 
 		for( it.Begin(); !it.Done(); it.Next() ) {
-			Chit* porch = GetLumosChitBag()->QueryPorch( it.Pos() );
-			context->worldMap->SetPorch( it.Pos().x, it.Pos().y, porch != 0 );
+			Chit* porch = bag->QueryPorch( it.Pos() );
+			worldMap->SetPorch( it.Pos().x, it.Pos().y, porch != 0 );
 		}
 	}
 }
@@ -97,7 +96,9 @@ void MapSpatialComponent::UpdatePorch( const grinliz::Rectangle2I& bounds )
 void MapSpatialComponent::SetPosRot( const grinliz::Vector3F& v, const grinliz::Quaternion& quat )
 {
 	super::SetPosRot( v, quat );
-	UpdatePorch( bounds );
+	if ( parentChit ) {
+		UpdatePorch( bounds, GetChitContext()->worldMap, GetLumosChitBag() );
+	}
 }
 
 
@@ -106,7 +107,7 @@ void MapSpatialComponent::OnAdd( Chit* chit )
 	super::OnAdd( chit );
 	if ( building ) {
 		GetLumosChitBag()->AddToBuildingHash( this, bounds.min.x, bounds.min.y ); 
-		UpdatePorch( bounds );
+		UpdatePorch( bounds, GetChitContext()->worldMap, GetLumosChitBag() );
 	}
 
 	if ( mode == GRID_BLOCKED ) {
@@ -118,6 +119,8 @@ void MapSpatialComponent::OnAdd( Chit* chit )
 void MapSpatialComponent::OnRemove()
 {
 	const ChitContext* context = GetChitContext();
+	LumosChitBag* chitBag = GetLumosChitBag();
+	
 	if ( building ) {
 		Vector2I pos = GetPosition2DI();
 		GetLumosChitBag()->RemoveFromBuildingHash( this, bounds.min.x, bounds.min.y ); 
@@ -131,7 +134,7 @@ void MapSpatialComponent::OnRemove()
 		// this LOC), so this will set things to the correct value.
 		UpdateBlock( context->worldMap );
 	}
-	UpdatePorch( bounds );
+	UpdatePorch( bounds, context->worldMap, chitBag );
 }
 
 

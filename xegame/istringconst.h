@@ -57,6 +57,7 @@ public:
 	static grinliz::IString bed;
 	static grinliz::IString market;
 	static grinliz::IString bar;
+	static grinliz::IString guardpost;
 
 	static grinliz::IString arachnoid;
 	static grinliz::IString mantis;

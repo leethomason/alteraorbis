@@ -151,6 +151,14 @@
         mass="100"
         cost="60" />
 
+  <item name="guardpost"
+        resource="guardpost"
+        procedural="team"
+        size="1"
+        mass="80"
+        cost="30"
+        />
+
   <item name="bed"
         resource="sleep"
         porch="1"

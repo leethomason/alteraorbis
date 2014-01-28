@@ -509,34 +509,12 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 				if ( buildActive == BuildScript::CLEAR ) {
 #ifdef USE_MOUSE_MOVE_SELECTION
 					wq->AddAction( plane2i, BuildScript::CLEAR );
-#else
-					if ( mv.VoxelHit()) {
-						wq->Add( WorkQueue::CLEAR, mv.Voxel2(), IString() );
-					}
-					else if ( mv.ModelHit() && mv.model->userData && removableFilter.Accept( mv.model->userData )) {
-						MapSpatialComponent* msc = GET_SUB_COMPONENT( mv.model->userData, SpatialComponent, MapSpatialComponent );
-						GameItem* gameItem = mv.model->userData->GetItem();
-						GLASSERT( msc );
-						if ( msc && gameItem  ) {
-							wq->Add( WorkQueue::CLEAR, msc->MapPosition(), gameItem->name );
-						}
-					}
+					return;
 #endif
 				}
 				else if ( buildActive == BuildScript::NONE ) {
 #ifdef USE_MOUSE_MOVE_SELECTION
 					wq->Remove( plane2i );
-#else
-					if ( mv.VoxelHit() ) {
-						// Clear a voxel.
-						wq->Remove( mv.Voxel2() );
-					}
-					else if ( mv.ModelHit() ) {
-						MapSpatialComponent* msc = GET_SUB_COMPONENT( mv.model->userData, SpatialComponent, MapSpatialComponent );
-						if ( msc ) {
-							wq->Remove( msc->MapPosition() );
-						}
-					}
 #endif
 				}
 				else if ( buildActive == BuildScript::ROTATE ) {
@@ -552,19 +530,19 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 				}
 #ifdef USE_MOUSE_MOVE_SELECTION
 				else {
-#else
-				else if ( !mv.VoxelHit() ) {
 #endif
 					wq->AddAction( plane2i, buildActive );
 				}
 			}
 			
 			if ( mv.VoxelHit() ) {
-				// clicked on a rock. Melt away!
-				Chit* player = sim->GetPlayerChit();
-				if ( player && player->GetAIComponent() ) {
-					player->GetAIComponent()->RockBreak( mv.Voxel2() );
-					return;
+				if ( uiMode[UI_AVATAR].Down()) {
+					// clicked on a rock. Melt away!
+					Chit* player = sim->GetPlayerChit();
+					if ( player && player->GetAIComponent() ) {
+						player->GetAIComponent()->RockBreak( mv.Voxel2() );
+						return;
+					}
 				}
 			}
 
@@ -863,11 +841,13 @@ void GameScene::HandleHotKey( int mask )
 		}
 	}
 	else if ( mask == GAME_HK_CHEAT_CRYSTAL ) {
-		Chit* playerChit = sim->GetPlayerChit();
-		if ( playerChit ) {
+		CoreScript* cs = sim->GetChitBag()->GetHomeCore();
+		if ( cs ) {
 			for( int i=0; i<NUM_CRYSTAL_TYPES; ++i ) {
-				ReserveBank::Instance()->bank.AddCrystal( -i );
-				playerChit->GetItem()->wallet.AddCrystal(i);
+				if ( ReserveBank::Instance()->bank.crystal[i] ) {
+					ReserveBank::Instance()->bank.AddCrystal( i, -1 );
+					cs->ParentChit()->GetItem()->wallet.AddCrystal(i, 1 );
+				}
 			}
 		}
 	}
