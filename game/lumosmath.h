@@ -3,6 +3,7 @@
 
 #include "../grinliz/glvector.h"
 #include "../grinliz/glutil.h"
+#include "../grinliz/glrectangle.h"
 #include "gamelimits.h"
 
 inline grinliz::Vector3F ToWorld3F( const grinliz::Vector2I& pos2i ) {
@@ -40,6 +41,20 @@ inline grinliz::Vector2I ToSector( const grinliz::Vector2I& pos2i ) {
 inline grinliz::Vector2I ToSector( int x, int y ) {
 	grinliz::Vector2I pos2i = { x, y };
 	return ToSector( pos2i );
+}
+
+inline grinliz::Rectangle2I SectorBounds( const grinliz::Vector2I& sector ) {
+	grinliz::Rectangle2I r;
+	r.Set( sector.x*SECTOR_SIZE, sector.y*SECTOR_SIZE,
+		   (sector.x+1)*SECTOR_SIZE-1, (sector.y+1)*SECTOR_SIZE-1 );
+	return r;
+}
+
+inline grinliz::Rectangle2I InnerSectorBounds( const grinliz::Vector2I& sector ) {
+	grinliz::Rectangle2I r;
+	r.Set( sector.x*SECTOR_SIZE+1, sector.y*SECTOR_SIZE+1,
+		   (sector.x+1)*SECTOR_SIZE-2, (sector.y+1)*SECTOR_SIZE-2 );
+	return r;
 }
 
 inline int SectorIndex( const grinliz::Vector2I& sector ) {

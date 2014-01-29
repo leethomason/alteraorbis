@@ -1094,7 +1094,10 @@ void GameScene::DoTick( U32 delta )
 	if ( uiMode[UI_AVATAR].Down() && playerChit ) {
 		Chit* building = sim->GetChitBag()->QueryPorch( playerChit->GetSpatialComponent()->GetPosition2DI() );
 		if ( building ) {
-			useBuildingVisible = true;
+			IString name = building->GetItem()->IName();
+			if ( name == "vault" || name == "factory" || name == "market" ) {
+				useBuildingVisible = true;
+			}
 		}
 	}
 	useBuildingButton.SetVisible( useBuildingVisible );

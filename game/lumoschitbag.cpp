@@ -679,6 +679,20 @@ CoreScript* LumosChitBag::GetCore( const grinliz::Vector2I& sector )
 }
 
 
+bool ItemFlagFilter::Accept( Chit* chit )
+{
+	GameItem* item = chit->GetItem();
+	if ( !item ) return false;
+
+	if ( ( (item->flags & required) == required ) &&
+		 ( (item->flags & excluded) == 0 ))
+	{
+		return true;
+	}
+	return false;
+}
+
+
 ItemNameFilter::ItemNameFilter()
 {
 	cNames = 0;

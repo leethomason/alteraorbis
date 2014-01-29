@@ -73,6 +73,8 @@ static const float	GOLD_AWARE					=  5.0f;
 static const int	FORCE_COUNT_STUCK			=  8;
 static const int	STAND_TIME_WHEN_WANDERING	= 1500;
 static const int	RAMPAGE_THRESHOLD			= 40;		// how many times a destination must be blocked before rampage
+static const int	GUARD_RANGE					= 2;
+static const int	GUARD_TIME					= 10*1000;
 
 const char* AIComponent::MODE_NAMES[NUM_MODES]     = { "normal", "rampage", "rockbreak", "battle" };
 const char* AIComponent::ACTION_NAMES[NUM_ACTIONS] = { "none", "move", "melee", "shoot", "wander", "stand" };
@@ -100,7 +102,6 @@ AIComponent::~AIComponent()
 
 void AIComponent::Serialize( XStream* xs )
 {
-	// FIXME check
 	this->BeginSerialize( xs, Name() );
 	XARC_SER( xs, aiMode );
 	XARC_SER( xs, currentAction );
@@ -655,6 +656,7 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 time )
 				Vector2I sector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
 				vd->DidVisitKiosk( sector );
 				cs->AddTech();
+				thisComp.render->AddDeco( "techxfer", STD_DECO );
 				vd->kioskTime = 0;
 				currentAction = NO_ACTION;	// done here - move on!
 				return false;
@@ -668,7 +670,11 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 time )
 			return false;
 		}
 	}
-	return taskList.DoStanding( thisComp, time );
+	// FIXME: there are 2 stand functions. The AIComponent one and
+	// the TaskList one. Need to sort that out. But don't call
+	// DoStanding here.
+	//	return taskList.DoStanding( thisComp, time );
+	return false;
 }
 
 
@@ -1357,6 +1363,9 @@ bool AIComponent::ThinkGuard( const ComponentSet& thisComp )
 	if ( !(thisComp.item->flags & GameItem::AI_USES_BUILDINGS )) {
 		return false;
 	}
+	if ( parentChit->PlayerControlled() ) {
+		return false;
+	}
 
 	// High Will -> guarding fan
 	if ( thisComp.item->Traits().Will() < parentChit->random.Dice( 3, 6 ) ) {
@@ -1364,6 +1373,8 @@ bool AIComponent::ThinkGuard( const ComponentSet& thisComp )
 	}
 	Vector2I pos2i = thisComp.spatial->GetPosition2DI();
 	Vector2I sector = ToSector( pos2i );
+	Rectangle2I bounds = InnerSectorBounds( sector );
+
 	CoreScript* coreScript = GetLumosChitBag()->GetCore( sector );
 
 	if ( !coreScript ) return false;
@@ -1378,10 +1389,12 @@ bool AIComponent::ThinkGuard( const ComponentSet& thisComp )
 	for( int i=0; i<chitArr.Size(); ++i ) {
 		Rectangle2I guardBounds;
 		guardBounds.min = guardBounds.max = chitArr[i]->GetSpatialComponent()->GetPosition2DI();
-		guardBounds.Outset( 2 ); // FIXME: const
+		guardBounds.Outset( GUARD_RANGE );
+		guardBounds.DoIntersection( bounds );
+
 		if ( guardBounds.Contains( pos2i )) {
 			taskList.Push( Task::MoveTask( ToWorld2F( RandomPosInRect( guardBounds, true ))));
-			taskList.Push( Task::StandTask( 10*1000, 0 ));	// FIXME: const
+			taskList.Push( Task::StandTask( GUARD_TIME, 0 ));
 			return true;
 		}
 	}
@@ -1389,10 +1402,11 @@ bool AIComponent::ThinkGuard( const ComponentSet& thisComp )
 	int post = thisComp.chit->random.Rand( chitArr.Size() );
 	Rectangle2I guardBounds;
 	guardBounds.min = guardBounds.max = chitArr[post]->GetSpatialComponent()->GetPosition2DI();
-	guardBounds.Outset( 2 ); // FIXME: const
+	guardBounds.Outset( GUARD_RANGE );
+	guardBounds.DoIntersection( bounds );
 
 	taskList.Push( Task::MoveTask( ToWorld2F( RandomPosInRect( guardBounds, true ))));
-	taskList.Push( Task::StandTask( 10*1000, 0 ));	// FIXME: const
+	taskList.Push( Task::StandTask( GUARD_TIME, 0 ));
 	return true;
 }
 
@@ -2098,7 +2112,7 @@ int AIComponent::DoTick( U32 deltaTime )
 			DoShoot( thisComp );
 			break;
 		case STAND:
-			if ( !DoStand( thisComp, deltaTime ) ) {
+			if ( taskList.Empty() ) {	// If there is a tasklist, it will manage standing and re-thinking.
 				rethink += deltaTime;
 			}
 			break;

@@ -423,8 +423,11 @@ void RenderComponent::ProcessIcons( int delta )
 		const Screenport& port = context->engine->GetScreenport();
 		
 		Vector2F ui = { 0, 0 };
-		//const Rectangle3F aabb = model[0]->AABB();
-		const Rectangle3F aabb = model[0]->GetInvariantAABB( 0, 0 );
+		if ( parentChit->GetItem() && parentChit->GetItem()->IName() == "visitor" ) {
+			int debug=1;
+		}
+		const Rectangle3F aabb = model[0]->AABB();
+		//const Rectangle3F aabb = model[0]->GetInvariantAABB( 0, 0 );
 		Vector3F topCenter = { pos.x, aabb.max.y, pos.z };
 
 		port.WorldToUI( topCenter, &ui );

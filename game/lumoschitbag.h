@@ -102,6 +102,18 @@ protected:
 	int						count;
 };
 
+class ItemFlagFilter : public IChitAccept
+{
+public:
+	ItemFlagFilter( int _required, int _excluded ) : required(_required), excluded(_excluded) {}
+
+	virtual bool Accept( Chit* chit );
+	virtual int Type() { return MAP | MOB; }
+	
+private:
+	int excluded, required;
+};
+
 
 class GoldCrystalFilter : public ItemNameFilter
 {

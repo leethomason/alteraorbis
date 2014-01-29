@@ -306,10 +306,11 @@ void CoreScript::AddTech()
 
 	achievedTechLevel = Max( achievedTechLevel, (int)tech );
 
-	RenderComponent* rc = scriptContext->chit->GetRenderComponent();
-	if ( rc ) {
-		rc->AddDeco( "techxfer", STD_DECO );
-	}
+	// Done by the visitor.
+//	RenderComponent* rc = scriptContext->chit->GetRenderComponent();
+//	if ( rc ) {
+//		rc->AddDeco( "techxfer", STD_DECO );
+//	}
 }
 
 

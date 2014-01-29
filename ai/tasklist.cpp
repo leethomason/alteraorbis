@@ -47,14 +47,39 @@ Vector2I TaskList::Pos2I() const
 }
 
 
+void Task::Serialize( XStream* xs )
+{
+	XarcOpen( xs, "Task" );
+	XARC_SER( xs, action );
+	XARC_SER( xs, buildScriptID );
+	XARC_SER( xs, pos2i );
+	XARC_SER( xs, timer );
+	XARC_SER( xs, data );
+	XARC_SER( xs, taskID );
+	XarcClose( xs );
+}
+
+
+
 void TaskList::Push( const Task& task )
 {
 	taskList.Push( task );
 }
 
 
+void TaskList::Serialize( XStream* xs )
+{
+	XarcOpen( xs, "TaskList" );
+	XARC_SER( xs, lastBuildingUsed );
+	XARC_SER_CARRAY( xs, taskList );
+	socialTicker.Serialize( xs, "socialTicker" );
+	XarcClose( xs );
+}
+
+
 bool TaskList::DoStanding( const ComponentSet& thisComp, int time )
 {
+	if ( taskList.Empty() ) return false;
 	if ( Standing() ) {
 		taskList[0].timer -= time;
 		if ( taskList[0].timer <= 0 ) {
@@ -121,10 +146,9 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta )
 
 	case Task::TASK_STAND:
 		if ( pmc->Stopped() ) {
-			task->timer -= (int)delta;
-			if ( task->timer <= 0 ) {
-				taskList.Remove(0);
-			}
+			thisComp.ai->Stand();
+			DoStanding( thisComp, delta );
+
 			if ( taskList.Size() >= 2 ) {
 				int action = taskList[1].action;
 				if ( action == Task::TASK_BUILD ) {
@@ -278,10 +302,20 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta )
 
 void TaskList::SocialPulse( const ComponentSet& thisComp, const Vector2F& origin )
 {
+	if ( !(thisComp.item->flags & GameItem::AI_USES_BUILDINGS )) {
+		return;
+	}
+
 	LumosChitBag* chitBag	= thisComp.chit->GetLumosChitBag();
 	CChitArray arr;
+	
 	MoBFilter mobFilter;
-	chitBag->QuerySpatialHash( &arr, origin, 1.5f, 0, &mobFilter );
+	ItemFlagFilter flagFilter( GameItem::AI_USES_BUILDINGS, 0 );
+	MultiFilter filter( MultiFilter::MATCH_ALL );
+	filter.filters.Push( &mobFilter );
+	filter.filters.Push( &flagFilter );
+
+	chitBag->QuerySpatialHash( &arr, origin, 1.5f, 0, &filter );
 
 	// How to handle checking they are all friends? Just run
 	// the first one and see if they are friendly.
@@ -301,7 +335,7 @@ void TaskList::SocialPulse( const ComponentSet& thisComp, const Vector2F& origin
 	}
 
 	// Okay, passed checks. Give social happiness.
-	double social = double( arr.Size() ) * 0.1;
+	double social = double( arr.Size() ) * 0.05;
 	for( int i=0; i<arr.Size(); ++i ) {
 		arr[i]->GetAIComponent()->GetNeedsMutable()->Add( ai::Needs::SOCIAL, social );
 		if ( thisComp.chit->GetRenderComponent() ) {

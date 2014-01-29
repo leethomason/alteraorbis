@@ -91,6 +91,8 @@ public:
 		taskID = 0;
 	}
 
+	void Serialize( XStream* xs );
+
 	int					action;		// move, stand, etc.
 	int					buildScriptID;
 	grinliz::Vector2I	pos2i;
@@ -112,6 +114,8 @@ public:
 		engine = _engine;
 	}
 
+	void Serialize( XStream* xs );
+
 	grinliz::Vector2I Pos2I() const;
 	bool Empty() const { return taskList.Empty(); }
 	
@@ -119,7 +123,6 @@ public:
 	void Clear()						{ taskList.Clear(); }
 
 	bool Standing() const { return !taskList.Empty() && taskList[0].action == Task::TASK_STAND; }
-	bool DoStanding( const ComponentSet& thisComp, int time );
 
 	// WorkQueue is optional, but connects the tasks back to the queue.
 	void DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta );
@@ -129,6 +132,7 @@ private:
 	void UseBuilding( const ComponentSet& thisComp, Chit* building, const grinliz::IString& buildingName );
 	void GoShopping(  const ComponentSet& thisComp, Chit* market );
 	bool UseFactory(  const ComponentSet& thisComp, Chit* factory, int tech );
+	bool DoStanding( const ComponentSet& thisComp, int time );
 
 	// chat, basically, between denizens
 	void SocialPulse( const ComponentSet& thisComp, const grinliz::Vector2F& origin );
@@ -144,3 +148,4 @@ private:
 
 #endif // TASKLIST_INCLUDED
 
+	

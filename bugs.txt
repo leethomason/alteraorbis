@@ -25,6 +25,8 @@
 - see monsters when you click on them
 - remove "tech grouping" of buildings
 - Click through of disabled buttons is surprising
+- none vs. clear is wonky
+- different porch color for usable buildings
 
 - game
 	- Denizen-2
@@ -58,11 +60,10 @@
 		x guard posts
 		x workers will try to clear water
 		x auto-clear not working with ice
-		- different porch color for usable buildings
-		- change gold and healing icons 
-		- tune guarding: 
+		x change gold and healing icons 
 
 	 - Food
+		- tune guarding
 	 	- food collection
 	 	- food transport
 	 	- food need 
