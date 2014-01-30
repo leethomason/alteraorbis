@@ -1160,6 +1160,7 @@ void WorldMap::AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > *a
 		}
 		if ( adj.Find( origin ) < 0 ) {
 			adj.Push( origin );
+			currentOrigin = origin;
 		}
 	}
 
