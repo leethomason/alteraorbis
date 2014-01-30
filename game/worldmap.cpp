@@ -871,11 +871,10 @@ void WorldMap::UpdateBlock( int x, int y )
 void WorldMap::ResetPather( int x, int y )
 {
 	Vector2I sector = { x/SECTOR_SIZE, y/SECTOR_SIZE };
-	micropather::MicroPather* pather = worldInfo->GetSector( sector ).pather;
-	if ( pather ) {
-		pather->Reset();
-	}
+	micropather::MicroPather* pather = PushPather( sector );
+	pather->Reset();
 	zoneInit.Clear( x>>ZONE_SHIFT, y>>ZONE_SHIFT);
+	PopPather();
 }
 
 
@@ -1129,116 +1128,80 @@ void WorldMap::AdjacentCost( void* state, MP_VECTOR< micropather::StateCost > *a
 	Vector2I start;
 	const WorldGrid* startGrid = ToGrid( state, &start );
 
-	// FIXME: incorrect; need to walk the edges of the zone.
-	//   also need a 2D iterator, which is in the code somewhere...
-	// Flush out the neighbors.
-	for( int j=-1; j<=1; ++j ) {
-		for( int i=-1; i<=1; ++i ) {
-			int x = start.x + i*ZONE_SIZE;
-			int y = start.y + j*ZONE_SIZE;
-			if ( x >= 0 && x < width && y >= 0 && y < height ) {
-				CalcZone( x, y ); 
-			}
-		}
-	}
-
 	GLASSERT( IsPassable( start.x, start.y ));
 	Vector2F startC = ZoneCenter( start.x, start.y );
-	
-	Rectangle2I bounds = this->Bounds();
-	Vector2I currentZone = { -1, -1 };
-	CArray< Vector2I, ZONE_SIZE*4+4 > adj;
 
+	Rectangle2I mapBounds = this->Bounds();
 	int size = startGrid->ZoneSize();
 	GLASSERT( size > 0 );
 
-	// Start and direction for the walk. Note that
-	// it needs to be in-order and include diagonals so
-	// that adjacent states aren't duplicated.
-	const Vector2I borderStart[4] = {
-		{ start.x,			start.y-1 },
-		{ start.x+size,		start.y },
-		{ start.x+size-1,	start.y+size },
-		{ start.x-1,		start.y+size-1 }
-	};
-	static const Vector2I borderDir[4] = {
-		{ 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 }
-	};
+	Rectangle2I zoneBounds;
+	zoneBounds.Set( start.x, start.y, start.x+size-1, start.y+size-1 );
+	Rectangle2I adjBounds = zoneBounds;
+	adjBounds.Outset( 1 );
 
-	const Vector2I corner[4] = {
-		{ start.x+size, start.y-1 }, 
-		{ start.x+size, start.y+size },
-		{ start.x-1, start.y+size }, 
-		{ start.x-1, start.y-1 }, 
-	};
-	static const Vector2I cornerDir[4] = {
-		{-1,1}, {-1,-1}, {1,-1}, {1,1}
-	};
-	static const Vector2I filter[3] = { {0,0}, {0,1}, {1,0} };
+	CArray< Vector2I, ZONE_SIZE*4+4 > adj;			// origins
 
+	Rectangle2IEdgeIterator it( adjBounds );
+	Vector2I currentOrigin = { -1, -1 };
 
-	// Calc all the places that can be adjacent.
-	for( int i=0; i<4; ++i ) {
-		// Scan the border.
-		Vector2I v = borderStart[i];
-		for( int k=0; k<size; ++k, v = v + borderDir[i] ) {
-			if ( bounds.Contains( v.x, v.y ) )
-			{
-				if ( IsPassable(v.x,v.y) ) 
-				{
-					Vector2I origin = ZoneOrigin( v.x, v.y );
-					GLASSERT( ToState( v.x, v.y ) != state );
-					GLASSERT( IsPassable( origin.x, origin.y) );
-					adj.Push( v );
-				}
-			}
+	for( it.Begin(); !it.Done(); it.Next() ) {
+		Vector2I v = it.Pos();
+		if ( !mapBounds.Contains( v )) {
+			continue;
 		}
-		// Check the corner.
-		bool pass = true;
-		for( int j=0; j<3; ++j ) {
-			Vector2I delta = { cornerDir[i].x * filter[j].x, cornerDir[i].y * filter[j].y };
-			v = corner[i] + delta;
-			if ( bounds.Contains( v ) && IsPassable( v.x, v.y ) ) {
-				// all is well.
-			}
-			else {
-				pass = false;
-				break;
-			}
+		// Move this down? But be careful to flush
+		// everything.
+		CalcZone( v.x, v.y );
+		Vector2I origin = ZoneOrigin( v.x, v.y );
+		if ( origin == currentOrigin ) {
+			// just looked at this.
+			continue;
 		}
-		if ( pass ) {
-			GLASSERT( ToState( corner[i].x, corner[i].y ) != state );
-			GLASSERT( IsPassable( corner[i].x, corner[i].y) );
-			adj.Push( corner[i] );
+		if ( adj.Find( origin ) < 0 ) {
+			adj.Push( origin );
 		}
 	}
 
-	const WorldGrid* current = 0;
-	const WorldGrid* first = 0;
 	for( int i=0; i<adj.Size(); ++i ) {
-		int x = adj[i].x;
-		int y = adj[i].y;
-		GLASSERT( bounds.Contains( x, y ));
+		Vector2I origin = adj[i];	
+		const WorldGrid* wg = ZoneOriginG( origin.x, origin.y );
 
-		CalcZone( x, y );
-		const WorldGrid* g = ZoneOriginG( x, y );
-		GLASSERT( IsPassable( x,y ) );
+		if ( wg->ZoneSize() && IsPassable( origin.x, origin.y )) {
+			// We can path to it - unless it's a corner. In
+			// which case extra checks are needed
+			Rectangle2I b;
+			b.Set( origin.x, origin.y, origin.x+wg->ZoneSize()-1, origin.y+wg->ZoneSize()-1 );
 
-		// The corners wrap around:
-		if ( g == current || g == first)
-		{
-			continue;
+			int dx = 0, dy = 0;
+			int cx = 0, cy = 0;
+			if ( b.max.x < zoneBounds.min.x ) { dx = -1; cx = zoneBounds.min.x; }
+			if ( b.min.x > zoneBounds.max.x ) { dx = 1;  cx = zoneBounds.max.x; }
+			if ( b.max.y < zoneBounds.min.y ) { dy = -1; cy = zoneBounds.min.y; }
+			if ( b.min.y > zoneBounds.max.y ) { dy = 1;  cy = zoneBounds.max.y; }
+
+			bool okay = false;
+			if ( abs(dx) == 1 && abs(dy) == 1 )
+			{
+				// *sigh* corner.
+				// We know the corner itself is passable, check neighbors:
+				if ( IsPassable( cx+dx, cy ) && IsPassable( cx, cy+dy )) {
+					okay = true;
+				}
+			}
+			else {
+				okay = true;	// not a corner - already checked.
+			}
+
+			if ( okay ) {
+				Vector2F otherC = ZoneCenter( origin.x, origin.y );
+				float cost = (otherC-startC).Length();
+				void* s = ToState( origin.x, origin.y );
+				GLASSERT( s != state );
+				micropather::StateCost sc = { s, cost };
+				adjacent->push_back( sc );
+			}
 		}
-		current = g;
-		if ( !first )
-			first = g;
-
-		Vector2F otherC = ZoneCenter( x, y );
-		float cost = (otherC-startC).Length();
-		void* s = ToState( x, y );
-		GLASSERT( s != state );
-		micropather::StateCost sc = { s, cost };
-		adjacent->push_back( sc );
 	}
 }
 
@@ -1483,7 +1446,13 @@ micropather::MicroPather* WorldMap::PushPather( const Vector2I& sector )
 	GLASSERT( currentPather == 0 );
 	GLASSERT( sector.x >= 0 && sector.x < NUM_SECTORS );
 	GLASSERT( sector.y >= 0 && sector.y < NUM_SECTORS );
-	SectorData* sd = worldInfo->SectorDataMemMutable() + sector.y*NUM_SECTORS+sector.x;
+	SectorData* sd = 0;
+	if ( this->UsingSectors() ) {
+		sd = worldInfo->SectorDataMemMutable() + sector.y*NUM_SECTORS+sector.x;
+	}
+	else {
+		sd = worldInfo->SectorDataMemMutable();
+	}
 	if ( !sd->pather ) {
 		int area = sd->area ? sd->area : 1000;
 		sd->pather = new micropather::MicroPather( this, area, 7, true );

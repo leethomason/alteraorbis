@@ -107,7 +107,7 @@ public:
 class TaskList
 {
 public:
-	TaskList()	: worldMap(0), engine(0), socialTicker(1000) {}
+	TaskList()	: worldMap(0), engine(0), socialTicker(2000) {}
 	~TaskList()	{}
 	void Init( WorldMap* _map, Engine* _engine ) {
 		worldMap = _map;

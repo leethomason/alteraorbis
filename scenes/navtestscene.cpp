@@ -101,7 +101,6 @@ NavTestScene::NavTestScene( LumosGame* game ) : Scene( game )
 
 NavTestScene::~NavTestScene()
 {
-	chitBag->DeleteAll();
 	delete chitBag;
 	delete engine;
 	map->AttachEngine( 0, 0 );
@@ -177,7 +176,7 @@ void NavTestScene::Tap( int action, const grinliz::Vector2F& view, const grinliz
 					blocks.Clear( d.x, d.y );
 				else
 					blocks.Set( d.x, d.y );
-				map->ResetPather( d.x, d.y);
+				map->UpdateBlock( d.x, d.y );
 			}
 			else {
 				// Move to the marked location.
@@ -230,7 +229,7 @@ void NavTestScene::ItemTapped( const gamui::UIItem* item )
 		if ( map->IsLand( x, y ) && !blocks.IsSet(x,y) ) {
 			blocks.Set( x, y );
 			--makeBlocks;
-			map->ResetPather( x, y );
+			map->UpdateBlock( x, y );
 		}
 	}
 }

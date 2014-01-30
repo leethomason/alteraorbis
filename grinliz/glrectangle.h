@@ -277,6 +277,10 @@ struct Rectangle2I : public Rectangle2< int >
 
 	/// Initialize to an invalid rectangle.
 	void SetInvalid()	{ min.x = INVALID + 1; max.x = INVALID; min.y = INVALID + 1; max.y = INVALID; }
+
+	bool IsCorner( const grinliz::Vector2I& point ) const			
+						{ return    ( point.x == min.x || point.x == max.x ) 
+								 && ( point.y == min.y || point.y == max.y ); } 
 };
 
 class Rectangle2IEdgeIterator
