@@ -36,6 +36,9 @@
 using namespace grinliz;
 using namespace tinyxml2;
 
+grinliz::MemoryPoolT< gamui::TextLabel > RenderComponent::textLabelPool( "textLabelPool" );
+grinliz::MemoryPoolT< gamui::Image >	 RenderComponent::imagePool( "imagePool" );
+
 RenderComponent::RenderComponent( const char* asset ) 
 {
 	for( int i=0; i<NUM_MODELS; ++i ) {
@@ -116,9 +119,6 @@ void RenderComponent::OnAdd( Chit* chit )
 			model[i]->Modify();
 		}
 	}
-	textLabel = new gamui::TextLabel();
-	textLabel->Init(  &context->engine->overlay );
-	textLabel->SetVisible( false );
 }
 
 
@@ -137,10 +137,10 @@ void RenderComponent::OnRemove()
 		groundMark = 0;
 	}
 	for( int i=0; i<icons.Size(); ++i ) {
-		delete icons[i].image;
+		imagePool.Delete( icons[i].image );
 	}
 	icons.Clear();
-	delete textLabel;
+	textLabelPool.Delete( textLabel );
 	textLabel = 0;
 }
 
@@ -374,7 +374,7 @@ void RenderComponent::AddDeco( const char* asset, int duration )
 	bool found = false;
 	// Check for existing; up the time.
 	for( int i=0; i<icons.Size(); ++i ) {
-		if ( icons[i].image->GetRenderAtom()->Equal( atom )) {
+		if ( icons[i].atom.Equal( atom )) {
 			icons[i].time = Max( icons[i].time, duration );
 			found = true;
 		}
@@ -383,9 +383,8 @@ void RenderComponent::AddDeco( const char* asset, int duration )
 	if ( !found ) {
 		const ChitContext* context = GetChitContext();
 		Icon* icon = icons.PushArr(1);
-		icon->image = new gamui::Image();
-		icon->image->SetVisible( false );
-		icon->image->Init( &context->engine->overlay, atom, false );
+		icon->atom = atom;
+		icon->image = 0;
 		icon->time = duration;
 		icon->rotation = 90.0f;
 	}
@@ -399,7 +398,7 @@ void RenderComponent::ProcessIcons( int delta )
 		icons[i].rotation -= Travel( 180.0f, float(delta)/1000.0f );
 
 		if ( icons[i].time < 0 ) {
-			delete icons[i].image;
+			imagePool.Delete( icons[i].image );
 			icons.Remove( i );
 			--i;
 		}
@@ -436,6 +435,10 @@ void RenderComponent::ProcessIcons( int delta )
 		uiBounds.Outset( port.UIHeight() * 0.25f );
 
 		if ( uiBounds.Contains( ui )) {
+			if ( !textLabel ) {
+				textLabel = textLabelPool.New();
+				textLabel->Init(  &context->engine->overlay );
+			}
 			inView = true;
 			float width = icons.Size() * SIZE;
 			float dy = SIZE * 0.5f;
@@ -453,6 +456,10 @@ void RenderComponent::ProcessIcons( int delta )
 			}
 
 			for( int i=0; i<icons.Size(); ++i ) {
+				if ( !icons[i].image ) {
+					icons[i].image = imagePool.New();
+					icons[i].image->Init( &context->engine->overlay, icons[i].atom, false );
+				}
 				icons[i].image->SetSize( SIZE, SIZE );
 				icons[i].image->SetCenterPos( ui.x - width*0.5f + (float)(i)*SIZE + SIZE*0.5f, 
 											  ui.y - dy );
@@ -468,11 +475,12 @@ void RenderComponent::ProcessIcons( int delta )
 		}
 	}
 
-
 	if ( !inView ) {
-		textLabel->SetVisible( false );
+		textLabelPool.Delete( textLabel );
+		textLabel = 0;
 		for( int i=0; i<icons.Size(); ++i ) {
-			icons[i].image->SetVisible( false );
+			imagePool.Delete( icons[i].image );
+			icons[i].image = 0;
 		}
 	}
 }

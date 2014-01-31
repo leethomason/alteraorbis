@@ -48,6 +48,8 @@ ChitBag::ChitBag( const ChitContext& c )
 ChitBag::~ChitBag()
 {
 	DeleteAll();
+	RenderComponent::textLabelPool.FreePool();
+	RenderComponent::imagePool.FreePool();
 }
 
 

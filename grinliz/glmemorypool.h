@@ -116,7 +116,8 @@ public:
 		}
 	}
 
-	bool Empty() const { return pool.Empty(); }
+	bool Empty() const	{ return pool.Empty(); }
+	void FreePool()		{ pool.FreePool(); }
 
 private:
 	MemoryPool pool;

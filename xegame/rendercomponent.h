@@ -26,6 +26,7 @@
 #include "../grinliz/glvector.h"
 #include "../grinliz/glmatrix.h"
 #include "../grinliz/glcolor.h"
+#include "../grinliz/glmemorypool.h"
 
 #include "../gamui/gamui.h"
 
@@ -112,6 +113,9 @@ public:
 	void SetGroundMark( const char* asset );
 	void AddDeco( const char* name, int duration );
 
+	static grinliz::MemoryPoolT< gamui::TextLabel > textLabelPool;
+	static grinliz::MemoryPoolT< gamui::Image > imagePool;
+
 private:
 	int CalcAnimation() const;
 	SpatialComponent* SyncToSpatial();	// this a scary function: location is stored in both the model and the spatialcomponent
@@ -131,9 +135,11 @@ private:
 		gamui::Image*	image;
 		int				time;
 		float			rotation;
+		gamui::RenderAtom atom;
 	};
 	grinliz::CDynArray< Icon > icons;
 	gamui::TextLabel*	textLabel;
+
 };
 
 #endif // RENDER_COMPONENT_INCLUDED
