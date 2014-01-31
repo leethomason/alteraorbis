@@ -48,7 +48,7 @@ void CameraComponent::Serialize( XStream* xs )
 
 void CameraComponent::DebugStr( grinliz::GLString* str )
 {
-	str->Format( "[Camera] mode=" );
+	str->AppendFormat( "[Camera] mode=" );
 	switch( mode ) {
 		case DONE:	str->Format( "done " ); break;
 		case PAN:	str->Format( "pan " );	break;

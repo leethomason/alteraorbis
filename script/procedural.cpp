@@ -400,7 +400,7 @@ void TeamGen::Assign( int seed, ProcRenderInfo* info )
 
 	info->texture = TextureManager::Instance()->GetTexture( "structure" );
 
-	int index = seed % NUM;
+	int index = (seed+2) % NUM;	// the magic constant is to get a good color palette for HOUSE0
 	bool select = (seed / NUM) & 1 ? true : false; 
 
 	const Game::Palette* palette = Game::GetMainPalette();

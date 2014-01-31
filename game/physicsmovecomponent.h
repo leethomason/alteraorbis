@@ -63,7 +63,7 @@ public:
 	virtual const char* Name() const { return "TrackingMoveComponent"; }
 	virtual TrackingMoveComponent* ToTrackingMoveComponent() { return this; }
 	virtual void DebugStr( grinliz::GLString* str ) {
-		str->Format( "[TrackingMove] target=%d ", target );
+		str->AppendFormat( "[TrackingMove] target=%d ", target );
 	}
 
 	virtual void Serialize( XStream* xs );

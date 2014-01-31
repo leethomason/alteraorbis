@@ -27,9 +27,11 @@
 - Click through of disabled buttons is surprising
 - none vs. clear is wonky
 - different porch color for usable buildings
+- colors of buildings (not enough)
+- colors of faces (too dark)
 
 - game
-	- Denizen-2
+	x Denizen-2
 		x update cyclops art
 		x update temple art
 		x update arachnoid art

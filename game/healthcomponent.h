@@ -39,7 +39,7 @@ public:
 
 	virtual void Serialize( XStream* xs );
 
-	virtual void DebugStr( grinliz::GLString* str )		{ str->Format( "[Health] " ); }
+	virtual void DebugStr( grinliz::GLString* str )		{ str->AppendFormat( "[Health] " ); }
 	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
 	virtual int DoTick( U32 delta );
 	float DestroyedFraction() const { return (float)destroyed/(float)COUNTDOWN; }

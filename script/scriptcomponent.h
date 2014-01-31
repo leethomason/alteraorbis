@@ -86,7 +86,7 @@ public:
 	virtual void OnAdd( Chit* chit );
 	virtual void OnRemove();
 
-	virtual void DebugStr( grinliz::GLString* str )		{ str->Format( "[Script] " ); }
+	virtual void DebugStr( grinliz::GLString* str )		{ str->AppendFormat( "[Script] %s ", script->ScriptName() ); }
 	virtual int DoTick( U32 delta );
 
 	IScript* Script() { return script; }

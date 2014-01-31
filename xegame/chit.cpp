@@ -270,7 +270,7 @@ void Chit::DebugStr( GLString* str )
 			unsigned size = str->size();
 			slot[i]->DebugStr( str );
 			if ( size == str->size() ) {
-				str->Format( "[] " );
+				str->AppendFormat( "[] " );
 			}
 		}
 	}

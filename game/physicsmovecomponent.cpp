@@ -22,7 +22,7 @@ PhysicsMoveComponent::PhysicsMoveComponent( bool _deleteWhenDone ) : GameMoveCom
 
 void PhysicsMoveComponent::DebugStr( grinliz::GLString* str )
 {
-	str->Format( "[PhysicsMove] " );
+	str->AppendFormat( "[PhysicsMove] " );
 }
 
 

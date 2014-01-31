@@ -2147,7 +2147,7 @@ int AIComponent::DoTick( U32 deltaTime )
 
 void AIComponent::DebugStr( grinliz::GLString* str )
 {
-	str->Format( "[AI] %s %s ", MODE_NAMES[aiMode], ACTION_NAMES[currentAction] );
+	str->AppendFormat( "[AI] %s %s ", MODE_NAMES[aiMode], ACTION_NAMES[currentAction] );
 }
 
 

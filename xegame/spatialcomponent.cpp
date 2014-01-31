@@ -27,7 +27,7 @@ using namespace grinliz;
 
 void SpatialComponent::DebugStr( GLString* str )
 {
-	str->Format( "[Spatial]=%.1f,%.1f,%.1f ", position.x, position.y, position.z );
+	str->AppendFormat( "[Spatial]=%.1f,%.1f,%.1f ", position.x, position.y, position.z );
 }
 
 

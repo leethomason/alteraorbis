@@ -518,9 +518,9 @@ int PathMoveComponent::DoTick( U32 delta )
 void PathMoveComponent::DebugStr( grinliz::GLString* str )
 {
 	if ( pathPos < path.Size() ) {
-		str->Format( "[PathMove]=%.1f,%.1f ", dest.pos.x, dest.pos.y );
+		str->AppendFormat( "[PathMove]=%d/%d ", pathPos, path.Size() );
 	}
 	else {
-		str->Format( "[PathMove]=still " );
+		str->AppendFormat( "[PathMove]=still " );
 	}
 }

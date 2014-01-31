@@ -625,7 +625,7 @@ void RenderComponent::GetModelList( grinliz::CArray<const Model*, RenderComponen
 
 void RenderComponent::DebugStr( GLString* str )
 {
-	str->Format( "[Render]=%s ", model[0]->GetResource()->header.name.c_str() );
+	str->AppendFormat( "[Render]=%s ", model[0]->GetResource()->header.name.c_str() );
 }
 
 
