@@ -474,7 +474,10 @@ void GameItem::AbsorbDamage( bool inInventory,
 
 				remain->damage -= canAbsorb;
 				if ( remain->damage < 0 ) remain->damage = 0;
-
+				
+				this->GetTraitsMutable()->AddXP( 1 );	// don't really need a bunch of extra code;
+														// shields quietly level up, etc. Don't get 
+														// named or kill tracking.
 			}
 			// Shields absorb damage, which prevent fire & shock.
 			// So the bonuses are only useful if they remove effects

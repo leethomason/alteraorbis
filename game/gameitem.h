@@ -141,6 +141,7 @@ public:
 	// other things need to happen (display items, add hp, etc.)
 	void AddBattleXP( int killshotLevel )	{ exp += 1 + killshotLevel; }
 	void AddCraftXP( int nCrystals )		{ exp += 8 * nCrystals; }
+	void AddXP( int xp )					{ exp += xp; }
 
 	float NormalLeveledTrait( int t ) const {
 		GLASSERT( t >= 0 && t < NUM_TRAITS );
