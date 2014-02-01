@@ -576,3 +576,27 @@ void XarcSet( XStream* xs, const char* key, const grinliz::IString& i )
 	GLASSERT( xs->Saving() );
 	xs->Saving()->Set( key, i.empty() ? "" : i.c_str() );
 }
+
+
+bool XarcGet( XStream* xs, const char* key, grinliz::Matrix4 &v )			
+{ 
+	GLASSERT( xs->Loading() );
+	const StreamReader::Attribute* attr = xs->Loading()->Get( key );
+	if ( attr->n == 1 ) {
+		v.SetIdentity();
+		return true;
+	}
+	return XarcGetArr( xs, key, v.x, 16 );
+}
+
+
+void XarcSet( XStream* xs, const char* key, const grinliz::Matrix4& v )		
+{ 
+	float identity[1] = { 1 };
+	if ( v.IsIdentity() ) {
+		XarcSetArr( xs, key, identity, 1 );
+	}
+	else {
+		XarcSetArr( xs, key, v.x, 16 );
+	}
+}

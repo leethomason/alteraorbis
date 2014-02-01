@@ -290,8 +290,8 @@ inline bool XarcGet( XStream* xs, const char* key, grinliz::Rectangle2I &v )		{ 
 inline void XarcSet( XStream* xs, const char* key, const grinliz::Rectangle2I& v )	{ XarcSetArr( xs, key, &v.min.x, 4 );}
 
 // Matrix
-inline bool XarcGet( XStream* xs, const char* key, grinliz::Matrix4 &v )			{ return XarcGetArr( xs, key, v.x, 16 );}
-inline void XarcSet( XStream* xs, const char* key, const grinliz::Matrix4& v )		{ XarcSetArr( xs, key, v.x, 16 );}
+bool XarcGet( XStream* xs, const char* key, grinliz::Matrix4 &v );
+void XarcSet( XStream* xs, const char* key, const grinliz::Matrix4& v );
 
 #define XARC_SER( stream, name ) {			\
 	if ( (stream)->Saving() )				\

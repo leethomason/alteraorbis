@@ -3,6 +3,7 @@
 
 #include "glstreamer.h"
 #include "../grinliz/glmicrodb.h"
+#include "../grinliz/glmatrix.h"
 #include "squisher.h"
 
 using namespace grinliz;
@@ -27,17 +28,23 @@ void MetaData( XStream* xs )
 	float   j = 2;
 	double  k = 3;
 	IString s = StringPool::Intern( "istring" );
+	Matrix4 iMat, tMat;
+	tMat.SetTranslation( 2, 2, 2 );
 
 	XARC_SER( xs, j );
 	XARC_SER( xs, i );
 	XARC_SER( xs, k );
 	XARC_SER( xs, s );
+	XARC_SER( xs, iMat );
+	XARC_SER( xs, tMat );
 
 	// Asserts do nothing on save(). checks load() worked.
 	GLASSERT( i == 1 );
 	GLASSERT( j == 2 );
 	GLASSERT( k == 3 );
 	GLASSERT( s == "istring" );
+	GLASSERT( iMat.IsIdentity() );
+	GLASSERT( tMat.m14 == 2.0f );
 
 	int     iArr[] = { 1, -1000 };
 	float   jArr[] = { 2, -2000.0f };

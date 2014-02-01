@@ -323,7 +323,25 @@ void Model::Serialize( XStream* xs, SpaceTree* tree )
 			XARC_SER( xs, aux->texture0Clip );
 			XARC_SER( xs, aux->texture0ColorMap );
 			XARC_SER_ARR( xs, aux->animToModelMap, EL_MAX_BONES );
-			XARC_SER_ARR( xs, aux->boneMats[0].x, EL_MAX_BONES*16 );
+			GLASSERT( EL_MAX_BONES == 16 );	// just to fix the code below
+			// This is done because of the compression that
+			// the serializer can do on identity matrices.
+			XARC_SER( xs, aux->boneMats[0] );
+			XARC_SER( xs, aux->boneMats[1] );
+			XARC_SER( xs, aux->boneMats[2] );
+			XARC_SER( xs, aux->boneMats[3] );
+			XARC_SER( xs, aux->boneMats[4] );
+			XARC_SER( xs, aux->boneMats[5] );
+			XARC_SER( xs, aux->boneMats[6] );
+			XARC_SER( xs, aux->boneMats[7] );
+			XARC_SER( xs, aux->boneMats[8] );
+			XARC_SER( xs, aux->boneMats[9] );
+			XARC_SER( xs, aux->boneMats[10] );
+			XARC_SER( xs, aux->boneMats[11] );
+			XARC_SER( xs, aux->boneMats[12] );
+			XARC_SER( xs, aux->boneMats[13] );
+			XARC_SER( xs, aux->boneMats[14] );
+			XARC_SER( xs, aux->boneMats[15] );
 			save->CloseElement();
 		}
 	}
