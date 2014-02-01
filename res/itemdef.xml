@@ -199,6 +199,15 @@
         need.social="0.4"
         need.food="0.2"
         />
+
+  <item name="farm"
+        resource="farm"
+        porch="1"
+        procedural="team"
+        size="1"
+        mass="50"
+        cost="40"
+        />
   
   <item name="arachnoid"
         resource="arachnoid"

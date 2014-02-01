@@ -1066,10 +1066,10 @@ void GameScene::DoTick( U32 delta )
 	str.Format( "Tech %.2f / %d", tech, maxTech );
 	techLabel.SetText( str.c_str() );
 
-	int atech = coreScript->AchievedTechLevel();
-	for( int i=1; i<NUM_BUILD_MODES; ++i ) {
-		modeButton[i].SetEnabled( i-1 <= atech );
-	}
+//	int atech = coreScript->AchievedTechLevel();
+//	for( int i=1; i<NUM_BUILD_MODES; ++i ) {
+//		modeButton[i].SetEnabled( i-1 <= atech );
+//	}
 
 	CStr<32> str2;
 	// How many workers in the sector?

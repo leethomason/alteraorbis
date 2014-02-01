@@ -42,6 +42,7 @@ public:
 		MARKET,
 		BAR,
 		GUARDPOST,
+		FARM,
 		NUM_OPTIONS,
 
 		NUM_TECH_LEVELS = 4,

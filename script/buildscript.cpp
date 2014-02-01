@@ -26,6 +26,7 @@ BuildData BuildScript::buildData[NUM_OPTIONS] = {
 	{	"Market",	"market",	2, 0, 0 },
 	{	"Bar",		"bar",		2, 0, 0 },
 	{	"GuardPost","guardpost",2, 0, 0 },
+	{	"Farm",		"farm",		3, 0, 0 },
 };
 
 
