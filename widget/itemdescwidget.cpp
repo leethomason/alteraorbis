@@ -119,7 +119,7 @@ void ItemDescWidget::SetInfo( const GameItem* item, const GameItem* user )
 		GLString s;
 
 		int num=0;
-		const NewsEvent** events = history->Find( item->ID(), true, &num );
+		const NewsEvent** events = history->Find( item->ID(), true, &num, 0 );
 		for( int i=0; i<num; ++i ) {
 			events[i]->Console( &s );
 			if ( !s.empty() ) {

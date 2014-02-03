@@ -110,7 +110,13 @@ public:
 	enum { MAX_CURRENT = 20 };
 	const grinliz::CArray< NewsEvent, MAX_CURRENT >& CurrentNews() const { return current; }
 
-	const NewsEvent** Find( int itemID, bool includeSecond, int* num );
+	struct Data {
+		Data() : bornOrNamed(0), died(0) {}
+
+		U32 bornOrNamed;
+		U32 died;
+	};
+	const NewsEvent** Find( int itemID, bool includeSecond, int* num, Data* data );
 
 	ChitBag* GetChitBag() const { return chitBag; }
 

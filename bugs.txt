@@ -29,6 +29,7 @@
 - different porch color for usable buildings
 - colors of buildings (not enough)
 - colors of faces (too dark)
+- census of dead items not working correctly
 
 - game
 	x Denizen-2

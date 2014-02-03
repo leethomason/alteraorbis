@@ -201,7 +201,7 @@ void CensusScene::Scan()
 		if ( mobActive[i].item ) {
 			ItemHistory h;
 			h.Set( mobActive[i].item );
-
+			
 			str.AppendFormat( "%s:\t", NAME[i] );
 			h.AppendDesc( &str );
 
