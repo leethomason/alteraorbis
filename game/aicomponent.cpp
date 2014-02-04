@@ -2112,7 +2112,8 @@ int AIComponent::DoTick( U32 deltaTime )
 			DoShoot( thisComp );
 			break;
 		case STAND:
-			if ( taskList.Empty() ) {	// If there is a tasklist, it will manage standing and re-thinking.
+			if ( taskList.Empty() ) {				// If there is a tasklist, it will manage standing and re-thinking.
+				DoStand( thisComp, deltaTime );		// We aren't doing the tasklist stand, so do the component stand
 				rethink += deltaTime;
 			}
 			break;
