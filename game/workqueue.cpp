@@ -19,8 +19,9 @@ using namespace gamui;
 
 static const float NOTIFICATION_RAD = 5.0f;
 
-WorkQueue::WorkQueue( WorldMap* wm, LumosChitBag* lcb, Engine* e ) : worldMap( wm ), chitBag( lcb ), engine( e )
+WorkQueue::WorkQueue()
 {
+	parentChit = 0;
 	sector.Zero();
 	idPool = 0;
 }
@@ -28,6 +29,9 @@ WorkQueue::WorkQueue( WorldMap* wm, LumosChitBag* lcb, Engine* e ) : worldMap( w
 
 WorkQueue::~WorkQueue()
 {
+	GLASSERT( parentChit );
+	Engine* engine = parentChit->GetChitBag()->GetContext()->engine;
+
 	for( int i=0; i<queue.Size(); ++i ) {
 		Model* m = queue[i].model;
 		if ( m ) {
@@ -60,6 +64,11 @@ void WorkQueue::AddImage( QueueItem* item )
 	BuildScript buildScript;
 	const BuildData& buildData = buildScript.GetData( item->action );
 	int size = buildData.size;
+
+	GLASSERT( parentChit );
+	const ChitContext* context = parentChit->GetChitBag()->GetContext();
+	Engine* engine = context->engine;
+	WorldMap* worldMap = context->worldMap;
 
 	if ( item->action == BuildScript::CLEAR ) {
 		const WorldGrid& wg = worldMap->GetWorldGrid( item->pos.x, item->pos.y );
@@ -113,6 +122,10 @@ void WorkQueue::AddImage( QueueItem* item )
 
 void WorkQueue::RemoveImage( QueueItem* item )
 {
+	GLASSERT( parentChit );
+	const ChitContext* context = parentChit->GetChitBag()->GetContext();
+	Engine* engine = context->engine;
+
 	if ( item->model ) {
 		engine->FreeModel( item->model );
 		item->model = 0;
@@ -161,6 +174,9 @@ void WorkQueue::AddAction( const grinliz::Vector2I& pos2i, int action )
 
 void WorkQueue::SendNotification( const grinliz::Vector2I& pos2i )
 {
+	GLASSERT( parentChit );
+	LumosChitBag* chitBag = parentChit->GetLumosChitBag();
+
 	Vector2F pos2 = { (float)pos2i.x+0.5f, (float)pos2i.y+0.5f };
 	// Notify near.
 	CChitArray array;
@@ -226,6 +242,11 @@ const WorkQueue::QueueItem* WorkQueue::GetJob( int id )
 
 const WorkQueue::QueueItem* WorkQueue::Find( const grinliz::Vector2I& chitPos )
 {
+	GLASSERT( parentChit );
+	const ChitContext* context = parentChit->GetChitBag()->GetContext();
+	//Engine* engine = context->engine;
+	WorldMap* worldMap = context->worldMap;
+
 	int best=-1;
 	float bestCost = FLT_MAX;
 	const Vector2F start = { (float)chitPos.x+0.5f, (float)chitPos.y+0.5f };
@@ -273,6 +294,12 @@ void WorkQueue::RemoveItem( int index )
 
 bool WorkQueue::TaskCanComplete( const WorkQueue::QueueItem& item )
 {
+	GLASSERT( parentChit );
+	LumosChitBag* chitBag = parentChit->GetLumosChitBag();
+	const ChitContext* context = parentChit->GetChitBag()->GetContext();
+	WorldMap* worldMap = context->worldMap;
+
+
 	Wallet wallet;
 	Vector2I sector = ToSector( item.pos );
 	CoreScript* coreScript = chitBag->GetCore( sector );
@@ -349,6 +376,9 @@ bool WorkQueue::TaskCanComplete( const WorkQueue::QueueItem& item )
 
 void WorkQueue::DoTick()
 {
+	GLASSERT( parentChit );
+	LumosChitBag* chitBag = parentChit->GetLumosChitBag();
+
 	for( int i=0; i<queue.Size(); ++i ) {
 
 		if ( queue[i].assigned ) {

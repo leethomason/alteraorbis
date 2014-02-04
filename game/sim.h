@@ -25,6 +25,7 @@
 #include "gamelimits.h"
 #include "visitor.h"
 #include "../xegame/cticker.h"
+#include "../xegame/stackedsingleton.h"
 
 class Engine;
 class WorldMap;
@@ -37,7 +38,7 @@ class ReserveBank;
 class NewsHistory;
 class ItemDB;
 
-class Sim
+class Sim : public StackedSingleton<Sim>
 {
 public:
 	Sim( LumosGame* game );

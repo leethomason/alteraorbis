@@ -200,6 +200,13 @@ Chit* LumosChitBag::NewBuilding( const Vector2I& pos, const char* name, int team
 	chit->Add( new RenderComponent( rootItem.ResourceName() ));
 	chit->Add( new HealthComponent());
 	AddItem( name, chit, context->engine, team, 0 );
+	
+	IString script = rootItem.keyValues.GetIString( "script" );
+	if ( !script.empty() ) {
+		IScript* s = ScriptComponent::Factory( script );
+		GLASSERT( s );
+		chit->Add( new ScriptComponent( s ));
+	}
 
 	IString proc = rootItem.keyValues.GetIString( "procedural" );
 	if ( !proc.empty() ) {

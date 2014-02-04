@@ -91,6 +91,8 @@ public:
 
 	IScript* Script() { return script; }
 
+	static IScript* Factory( grinliz::IString name );
+
 private:
 	ScriptContext context;
 	IScript* script;

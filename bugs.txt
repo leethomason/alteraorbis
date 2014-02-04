@@ -29,6 +29,7 @@
 - different porch color for usable buildings
 - colors of buildings (not enough)
 - colors of faces (too dark)
+- scripts are pluggable now: should Bar be a plugged-in script?
 
 - game
 	x Denizen-2

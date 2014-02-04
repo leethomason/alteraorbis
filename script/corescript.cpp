@@ -33,15 +33,14 @@ using namespace grinliz;
 
 #define SPAWN_MOBS
 
-CoreScript::CoreScript( WorldMap* map, LumosChitBag* chitBag, Engine* engine ) 
-	: worldMap( map ), 
-	  spawnTick( 10*1000 ), 
+CoreScript::CoreScript() 
+	: spawnTick( 10*1000 ), 
 	  team( 0 ),
 	  workQueue( 0 )
 {
-	workQueue = new WorkQueue( map, chitBag, engine );
 	tech = 0;
 	achievedTechLevel = 0;
+	workQueue = 0;
 }
 
 
@@ -75,6 +74,10 @@ void CoreScript::Serialize( XStream* xs )
 	XARC_SER_ARR( xs, citizens.Mem(), citizens.Size() );
 
 	spawnTick.Serialize( xs, "spawn" );
+
+	if ( !workQueue ) { 
+		workQueue = new WorkQueue();
+	}
 	workQueue->Serialize( xs );
 	XarcClose( xs );
 }
@@ -87,14 +90,19 @@ void CoreScript::OnAdd()
 	GLASSERT( scriptContext->chitBag );
 	GLASSERT( scriptContext->engine->GetMap() );
 
+	if ( !workQueue ) {
+		workQueue = new WorkQueue();
+	}
 	Vector2I mapPos = scriptContext->chit->GetSpatialComponent()->GetPosition2DI();
 	Vector2I sector = { mapPos.x/SECTOR_SIZE, mapPos.y/SECTOR_SIZE };
-	workQueue->InitSector( sector );
+	workQueue->InitSector( scriptContext->chit, sector );
 }
 
 
 void CoreScript::OnRemove()
 {
+	delete workQueue;
+	workQueue = 0;
 }
 
 

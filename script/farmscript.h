@@ -13,32 +13,28 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef VOLCANO_SCRIPT_INCLUDED
-#define VOLCANO_SCRIPT_INCLUDED
+#ifndef Farm_SCRIPT_INCLUDED
+#define Farm_SCRIPT_INCLUDED
 
 #include "scriptcomponent.h"
-#include "../grinliz/glvector.h"
+#include "../xegame/cticker.h"
 
-class WorldMap;
 
-class VolcanoScript : public IScript
+class FarmScript : public IScript
 {
 public:
-	VolcanoScript( int maxSize );
-	virtual ~VolcanoScript()			{}
+	FarmScript();
+	virtual ~FarmScript()	{}
 
 	virtual void Init();
+	virtual void OnAdd()		{}
+	virtual void OnRemove()		{}
 	virtual void Serialize( XStream* xs );
-	virtual void OnAdd()	{}
-	virtual void OnRemove()	{}
-
 	virtual int DoTick( U32 delta );
-	virtual const char* ScriptName() { return "VolcanoScript"; }
+	virtual const char* ScriptName() { return "FarmScript"; }
 
 private:
-	int			size;
-	int			maxSize;
+	CTicker timer;
 };
 
-
-#endif // VOLCANO_SCRIPT_INCLUDED
+#endif // PLANT_SCRIPT_INCLUDED

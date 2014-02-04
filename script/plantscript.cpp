@@ -43,9 +43,7 @@ static const int	TIME_TO_SPORE = 3 * (1000 * 60);
 }
 
 
-PlantScript::PlantScript( Sim* p_sim, Weather* p_weather, int p_type ) : 
-	sim( p_sim ),
-	weather( p_weather ),
+PlantScript::PlantScript( int p_type ) : 
 	type( p_type ),
 	growTimer( TIME_TO_GROW ),
 	sporeTimer( TIME_TO_SPORE )
@@ -190,6 +188,7 @@ int PlantScript::DoTick( U32 delta )
 	Vector2I pos = sc->MapPosition();
 	Vector2F pos2f = sc->GetPosition2D();
 	const ChitContext* context = scriptContext->chitBag->GetContext();
+	Weather* weather = Weather::Instance();
 	Rectangle2I bounds = context->worldMap->Bounds();
 
 	int nStage = 4;
@@ -321,7 +320,7 @@ int PlantScript::DoTick( U32 delta )
 		// Remember that create plant will favor creating
 		// existing plants, so we don't need to specify
 		// what to create.
-		sim->CreatePlant( pos.x+dx, pos.y+dy, -1 );
+		Sim::Instance()->CreatePlant( pos.x+dx, pos.y+dy, -1 );
 	}
 
 	scriptContext->chit->GetRenderComponent()->SetSaturation( item->HPFraction() );

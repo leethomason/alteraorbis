@@ -352,6 +352,9 @@
     <ClCompile Include="..\script\countdownscript.cpp">
       <Filter>Source Files\script</Filter>
     </ClCompile>
+    <ClCompile Include="..\script\farmscript.cpp">
+      <Filter>Source Files\script</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\camera.h">
@@ -706,6 +709,9 @@
       <Filter>Source Files\scenes</Filter>
     </ClInclude>
     <ClInclude Include="..\script\countdownscript.h">
+      <Filter>Source Files\script</Filter>
+    </ClInclude>
+    <ClInclude Include="..\script\farmscript.h">
       <Filter>Source Files\script</Filter>
     </ClInclude>
   </ItemGroup>

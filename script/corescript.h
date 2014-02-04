@@ -26,7 +26,7 @@ class LumosChitBag;
 class CoreScript : public IScript
 {
 public:
-	CoreScript( WorldMap* map, LumosChitBag* chitBag, Engine* engine );
+	CoreScript();
 	virtual ~CoreScript();
 
 	virtual void Init();
@@ -57,7 +57,6 @@ public:
 	void  AddTech();
 
 private:
-	WorldMap*	worldMap;
 	WorkQueue*	workQueue;
 	int			team;			// cache so we can update if it changes
 	

@@ -207,6 +207,7 @@
         size="1"
         mass="50"
         cost="40"
+        script="FarmScript"
         />
   
   <item name="arachnoid"

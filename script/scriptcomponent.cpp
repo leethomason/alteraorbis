@@ -9,6 +9,7 @@
 #include "plantscript.h"
 #include "corescript.h"
 #include "countdownscript.h"
+#include "farmscript.h"
 
 #include "../game/lumoschitbag.h"
 
@@ -23,6 +24,32 @@ ScriptComponent::ScriptComponent( IScript* p_script ) : script( p_script ), fact
 ScriptComponent::ScriptComponent( const ComponentFactory* f ) : script( 0 ), factory( f )
 {
 }
+
+
+/*static*/ IScript* ScriptComponent::Factory( grinliz::IString name )
+{
+	IScript* script = 0;
+	if ( name == "VolcanoScript" ) {
+		script = new VolcanoScript( 0 );
+	}
+	else if ( name == "PlantScript" ) {
+		script = new PlantScript( 0 );
+	}
+	else if ( name == "CoreScript" ) {
+		script = new CoreScript();
+	}
+	else if ( name == "CountDownScript" ) {
+		script = new CountDownScript( 1000 );
+	}
+	else if ( name == "FarmScript" ) {
+		script = new FarmScript();
+	}
+	else {
+		GLASSERT( 0 );
+	}
+	return script;
+}
+
 
 void ScriptComponent::Serialize( XStream* xs )
 {
@@ -40,22 +67,7 @@ void ScriptComponent::Serialize( XStream* xs )
 		const StreamReader::Attribute* attr = xs->Loading()->Get( "ScriptName" );
 		GLASSERT( attr );
 		const char* name = xs->Loading()->Value( attr, 0 );
-
-		if ( StrEqual( name, "VolcanoScript" )) {
-			script = new VolcanoScript( factory->GetWorldMap(), 0 );
-		}
-		else if ( StrEqual( name, "PlantScript" )) {
-			script = new PlantScript( factory->GetSim(), factory->GetWeather(), 0 );
-		}
-		else if ( StrEqual( name, "CoreScript" )) {
-			script = new CoreScript( factory->GetWorldMap(), factory->GetChitBag(), factory->GetEngine() );
-		}
-		else if ( StrEqual( name, "CountDownScript" )) {
-			script = new CountDownScript( 1000 );
-		}
-		else {
-			GLASSERT( 0 );
-		}
+		script = Factory( StringPool::Intern( name ));
 		GLASSERT( script );
 	}
 	script->Serialize( xs );

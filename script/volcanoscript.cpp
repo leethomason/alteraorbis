@@ -18,9 +18,8 @@ using namespace tinyxml2;
 
 static const U32 SPREAD_RATE = 4000;
 
-VolcanoScript::VolcanoScript( WorldMap* p_map, int p_size )
+VolcanoScript::VolcanoScript( int p_size )
 {
-	worldMap = p_map;
 	maxSize = p_size;
 	size = 0;
 }
@@ -29,11 +28,13 @@ VolcanoScript::VolcanoScript( WorldMap* p_map, int p_size )
 void VolcanoScript::Init()
 {
 	SpatialComponent* sc = scriptContext->chit->GetSpatialComponent();
+	const ChitContext* context = scriptContext->chitBag->GetContext();
+
 	GLASSERT( sc );
 	if ( sc ) {
 		Vector2F pos = sc->GetPosition2D();
 		//GLOUTPUT(( "VolcanoScript::Init. pos=%d,%d\n", (int)pos.x, (int)pos.y ));
-		worldMap->SetMagma( (int)pos.x, (int)pos.y, true );
+		context->worldMap->SetMagma( (int)pos.x, (int)pos.y, true );
 
 		NewsEvent event( NewsEvent::VOLCANO, pos );
 		NewsHistory::Instance()->Add( event );
@@ -52,7 +53,10 @@ void VolcanoScript::Serialize( XStream* xs )
 
 int VolcanoScript::DoTick( U32 delta )
 {
+	const ChitContext* context = scriptContext->chitBag->GetContext();
 	SpatialComponent* sc = scriptContext->chit->GetSpatialComponent();
+	WorldMap* worldMap = context->worldMap;
+
 	Vector2I pos = { 0,  0 };
 	GLASSERT( sc );
 	if ( sc ) {

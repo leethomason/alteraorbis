@@ -28,13 +28,14 @@ class LumosChitBag;
 class Model;
 class Engine;
 struct Wallet;
+class Chit;
 
 class WorkQueue
 {
 public:
-	WorkQueue( WorldMap*, LumosChitBag*, Engine* );
+	WorkQueue();
 	~WorkQueue();
-	void InitSector( const grinliz::Vector2I& _sector ) { sector = _sector; }
+	void InitSector( Chit* _parent, const grinliz::Vector2I& _sector ) { parentChit = _parent; sector = _sector; }
 
 	struct QueueItem {
 		QueueItem() : action(0), assigned(0), taskID(0), model(0) { pos.Zero(); }
@@ -80,9 +81,7 @@ private:
 	void RemoveItem( int index );
 	void SendNotification( const grinliz::Vector2I& pos );
 
-	Engine*				engine;
-	WorldMap*			worldMap;
-	LumosChitBag*		chitBag;
+	Chit				*parentChit;
 	int					idPool;
 	grinliz::Vector2I	sector;
 	grinliz::CDynArray< QueueItem >		queue;	// work to do

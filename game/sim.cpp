@@ -42,6 +42,9 @@
 using namespace grinliz;
 using namespace tinyxml2;
 
+Weather* StackedSingleton<Weather>::instance	= 0;
+Sim* StackedSingleton<Sim>::instance			= 0;
+
 Sim::Sim( LumosGame* g ) : minuteClock( 60*1000 ), secondClock( 1000 ), volcTimer( 10*1000 )
 {
 	lumosGame = g;
@@ -67,11 +70,13 @@ Sim::Sim( LumosGame* g ) : minuteClock( 60*1000 ), secondClock( 1000 ), volcTime
 	currentVisitor = 0;
 
 	random.SetSeedFromTime();
+	PushInstance( this );
 }
 
 
 Sim::~Sim()
 {
+	PopInstance( this );
 	delete visitors;
 	delete weather;
 	delete reserveBank;
@@ -186,7 +191,7 @@ void Sim::CreateCores()
 			MapSpatialComponent* ms = GET_SUB_COMPONENT( chit, SpatialComponent, MapSpatialComponent );
 			GLASSERT( ms );
 			ms->SetMode( GRID_IN_USE ); 
-			CoreScript* cs = new CoreScript( worldMap, chitBag, engine );
+			CoreScript* cs = new CoreScript();
 			chit->Add( new ScriptComponent( cs ));
 
 			if ( !cold ) cold = cs;	// first
@@ -464,7 +469,7 @@ void Sim::CreateVolcano( int x, int y, int size )
 
 	Chit* chit = chitBag->NewChit();
 	chit->Add( new SpatialComponent() );
-	chit->Add( new ScriptComponent( new VolcanoScript( worldMap, size )));
+	chit->Add( new ScriptComponent( new VolcanoScript( size )));
 
 	chit->GetSpatialComponent()->SetPosition( (float)x+0.5f, 0.0f, (float)y+0.5f );
 }
@@ -537,7 +542,7 @@ void Sim::CreatePlant( int x, int y, int type )
 		chit->Add( ms );
 
 		chit->Add( new HealthComponent() );
-		chit->Add( new ScriptComponent( new PlantScript( this, weather, type )));
+		chit->Add( new ScriptComponent( new PlantScript( type )));
 	}
 }
 
