@@ -355,6 +355,9 @@
     <ClCompile Include="..\script\farmscript.cpp">
       <Filter>Source Files\script</Filter>
     </ClCompile>
+    <ClCompile Include="..\game\towcomponent.cpp">
+      <Filter>Source Files\components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\camera.h">
@@ -713,6 +716,9 @@
     </ClInclude>
     <ClInclude Include="..\script\farmscript.h">
       <Filter>Source Files\script</Filter>
+    </ClInclude>
+    <ClInclude Include="..\game\towcomponent.h">
+      <Filter>Source Files\components</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -41,11 +41,9 @@ class RenderComponent : public Component
 private:
 	typedef Component super;
 public:
-	enum {	NUM_MODELS	= EL_NUM_METADATA,	// slot[0] is the main model (and META_TARGET). Others are hardpoint attach.
-
-			DECO_FOOT	= 0,
-			DECO_HEAD,
-			NUM_DECO };
+	enum {	
+			NUM_MODELS	= EL_NUM_METADATA,	// slot[0] is the main model (and META_TARGET). Others are hardpoint attach.
+		 };
 
 	// spacetree probably  sufficient, but 'engine' easier to keep track of
 	// asset can be null if followed by a Load()

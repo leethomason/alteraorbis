@@ -9,8 +9,8 @@
 - need to "ding" on level up
 - add rez-in animation
 - show rock damage
-- How does Ice and magma interact?
-- make sure gold/crystal gets returned to the Reserve when the Chit is destroyed
+x How does Ice and magma interact? Volcanoes wipe out ice. Okay for now.
+- loss of gold crystal. was: make sure gold/crystal gets returned to the Reserve when the Chit is destroyed
 - GT: lightning
 - can re-pack MVP and Bone matrix in the shader to encode 3*vec4 as the transpose, then transpose in the shader
 - standing shields!
@@ -30,6 +30,7 @@
 - colors of buildings (not enough)
 - colors of faces (too dark)
 - scripts are pluggable now: should Bar be a plugged-in script?
+- MOBs should attack buildings
 
 - game
 	x Denizen-2

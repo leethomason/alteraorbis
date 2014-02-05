@@ -30,7 +30,6 @@ class MoveComponent;
 class ItemComponent;
 class ScriptComponent;
 class AIComponent;
-class CameraComponent;
 class HealthComponent;
 
 class Chit;

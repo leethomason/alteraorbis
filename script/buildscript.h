@@ -43,6 +43,7 @@ public:
 		BAR,
 		GUARDPOST,
 		FARM,
+		DISTILLERY,
 		NUM_OPTIONS,
 
 		NUM_TECH_LEVELS = 4,

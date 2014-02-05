@@ -128,6 +128,7 @@
     <ClCompile Include="..\game\reservebank.cpp" />
     <ClCompile Include="..\game\sim.cpp" />
     <ClCompile Include="..\game\team.cpp" />
+    <ClCompile Include="..\game\towcomponent.cpp" />
     <ClCompile Include="..\game\visitor.cpp" />
     <ClCompile Include="..\game\visitorstatecomponent.cpp" />
     <ClCompile Include="..\game\workqueue.cpp" />
@@ -241,6 +242,7 @@
     <ClInclude Include="..\game\sectorport.h" />
     <ClInclude Include="..\game\sim.h" />
     <ClInclude Include="..\game\team.h" />
+    <ClInclude Include="..\game\towcomponent.h" />
     <ClInclude Include="..\game\visitor.h" />
     <ClInclude Include="..\game\visitorstatecomponent.h" />
     <ClInclude Include="..\game\wallet.h" />

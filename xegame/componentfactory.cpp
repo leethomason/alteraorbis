@@ -12,6 +12,7 @@
 #include "../game/gridmovecomponent.h"
 #include "../game/visitorstatecomponent.h"
 #include "../game/physicsmovecomponent.h"
+#include "../game/towcomponent.h"
 
 #include "../script/scriptcomponent.h"
 
@@ -69,6 +70,9 @@ Component* ComponentFactory::Factory( const char* name, Chit* chit ) const
 	}
 	else if ( StrEqual( name, "PhysicsMoveComponent" )) {
 		return new PhysicsMoveComponent( true );
+	}
+	else if ( StrEqual( name, "TowComponent" )) {
+		return new TowComponent();
 	}
 
 	GLASSERT( 0 );
