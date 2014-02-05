@@ -43,18 +43,21 @@ public:
 
 	// Plant specific:
 	static GameItem* IsPlant( Chit* chit, int* type, int* stage );
+	virtual PlantScript*  ToPlantScript()	{ return this; }
 
 	int Type() const	{ return type; }
 	int Stage() const	{ return stage; }
 
-private:
-	void SetRenderComponent();
-	const GameItem* GetResource();
+	void SetStage( int stage );	// for debugging; not intended for general use
 
 	enum {
 		NUM_STAGE = 4,
 		MAX_HEIGHT = NUM_STAGE
 	};
+
+private:
+	void SetRenderComponent();
+	const GameItem* GetResource();
 
 	grinliz::Vector2I	lightTap;		// where to check for a shadow. (only check one spot.)
 	int			type;		// 0-7, fern, tree, etc.

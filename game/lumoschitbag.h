@@ -180,8 +180,11 @@ public:
 	Chit* NewDenizen( const grinliz::Vector2I& pos, int team );
 
 	// Creates "stuff in the world". The GameItem is passed by ownership.
-	Chit* NewItemChit( const grinliz::Vector3F& pos, GameItem* orphanItem, bool fuzzPos, bool placeOnGround );
-
+	Chit* NewItemChit(  const grinliz::Vector3F& pos, 
+						GameItem* orphanItem, 
+						bool fuzzPos, 
+						bool placeOnGround, 
+						int selfDestructTimer );
 
 	Bolt* NewBolt(	const grinliz::Vector3F& pos,
 					grinliz::Vector3F dir,

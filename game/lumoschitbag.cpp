@@ -35,6 +35,7 @@
 #include "../script/corescript.h"
 #include "../script/plantscript.h"
 #include "../script/procedural.h"
+#include "../script/countdownscript.h"
 
 
 //#define DEBUG_EXPLOSION
@@ -297,7 +298,6 @@ Chit* LumosChitBag::NewDenizen( const grinliz::Vector2I& pos, int team )
 
 	chit->Add( new HealthComponent());
 	chit->GetSpatialComponent()->SetPosYRot( (float)pos.x+0.5f, 0, (float)pos.y+0.5f, 0 );
-//	chit->GetItemComponent()->SetHardpoints(); automatic now
 
 	Vector2I sector = ToSector( pos );
 	GetCore( sector )->AddCitizen( chit );
@@ -503,7 +503,7 @@ void LumosChitBag::NewWalletChits( const grinliz::Vector3F& pos, const Wallet& w
 }
 
 
-Chit* LumosChitBag::NewItemChit( const grinliz::Vector3F& _pos, GameItem* orphanItem, bool fuzz, bool onGround )
+Chit* LumosChitBag::NewItemChit( const grinliz::Vector3F& _pos, GameItem* orphanItem, bool fuzz, bool onGround, int selfDestructTimer )
 {
 	GLASSERT( !orphanItem->Intrinsic() );
 	GLASSERT( !orphanItem->IResourceName().empty() );
@@ -529,7 +529,11 @@ Chit* LumosChitBag::NewItemChit( const grinliz::Vector3F& _pos, GameItem* orphan
 		}
 	}
 	chit->GetSpatialComponent()->SetPosition( pos );
-//	chit->GetItemComponent()->SetHardpoints(); automatic
+	chit->Add( new HealthComponent());
+
+	if ( selfDestructTimer ) {
+		chit->Add( new ScriptComponent( new CountDownScript( selfDestructTimer )));
+	}
 	return chit;
 }
 

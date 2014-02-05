@@ -24,6 +24,7 @@ class CoreScript;
 class PortalScript;
 class Engine;
 class LumosChitBag;
+class PlantScript;
 
 struct ScriptContext
 {
@@ -58,9 +59,9 @@ public:
 	virtual const char* ScriptName() = 0;
 
 	// Safe casting.
-	virtual CoreScript* ToCoreScript() { return 0; }
-	virtual PortalScript* ToPortalScript() { return 0; }
-
+	virtual CoreScript*   ToCoreScript()	{ return 0; }
+	virtual PortalScript* ToPortalScript()	{ return 0; }
+	virtual PlantScript*  ToPlantScript()	{ return 0; }
 
 protected:
 	const ScriptContext* scriptContext;

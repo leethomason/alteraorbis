@@ -329,3 +329,10 @@ int PlantScript::DoTick( U32 delta )
 }
 
 
+void PlantScript::SetStage( int s )
+{
+	stage = s;
+	MapSpatialComponent* msc = GET_SUB_COMPONENT( scriptContext->chit, SpatialComponent, MapSpatialComponent );
+	GLASSERT( msc );
+	msc->SetMode( stage < 2 ? GRID_IN_USE : GRID_BLOCKED );
+}

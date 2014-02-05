@@ -100,6 +100,16 @@ void MicroDB::Increment( const char* key )
 }
 
 
+int MicroDB::Add( const char* key, int add )
+{
+	int value = 0;
+	Fetch( key, "d", &value );
+	value += add;
+	Set(   key, "d", value );
+	return value;
+}
+
+
 int MicroDB::GetFloat( const char* key, float* value ) const
 {
 	IString ikey = StringPool::Intern( key );

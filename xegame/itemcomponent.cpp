@@ -524,7 +524,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			GameItem* item = itemArr.Pop();
 			GLASSERT( !item->IName().empty() );
 			if ( dropItems ) {
-				parentChit->GetLumosChitBag()->NewItemChit( pos, item, true, true );
+				parentChit->GetLumosChitBag()->NewItemChit( pos, item, true, true, 0 );
 			}
 			else {
 				ReserveBank::Instance()->bank.Add( item->wallet.EmptyWallet() );
@@ -806,7 +806,7 @@ void ItemComponent::Drop( const GameItem* item )
 			continue;
 		if ( itemArr[i] == item ) {
 			parentChit->GetLumosChitBag()->NewItemChit( parentChit->GetSpatialComponent()->GetPosition(), 
-														itemArr[i], true, true );
+														itemArr[i], true, true, 0 );
 			itemArr.Remove(i);
 			UpdateActive();
 			return;

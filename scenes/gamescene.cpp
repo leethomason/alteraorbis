@@ -28,6 +28,7 @@
 #include "../script/procedural.h"
 #include "../script/corescript.h"
 #include "../script/itemscript.h"
+#include "../script/plantscript.h"
 
 #include "../scenes/mapscene.h"
 #include "../scenes/censusscene.h"
@@ -572,15 +573,24 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 #endif
 			}
 			else if ( tapMod == GAME_TAP_MOD_SHIFT ) {
-				//for( int i=0; i<NUM_PLANT_TYPES; ++i ) {
-				//	sim->CreatePlant( (int)plane.x+i, (int)plane.z, i );
-				//}
+				
+				for( int i=0; i<NUM_PLANT_TYPES; ++i ) {
+					Chit* chit = sim->CreatePlant( (int)plane.x+i, (int)plane.z, i );
+					if ( chit ) {
+						if ( i < 6 ) {
+							chit->GetScriptComponent()->Script()->ToPlantScript()->SetStage( 3 );
+						}
+					}
+				}
+
+#if 0	// monsters
 				Vector3F p = plane;
 				p.y = 0;
 				for( int i=0; i<5; ++i ) {
 					sim->GetChitBag()->NewMonsterChit( plane, "mantis", TEAM_GREEN_MANTIS );
 					p.x += 1.0f;
 				}
+#endif
 			}
 		}
 	}

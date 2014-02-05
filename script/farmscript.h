@@ -35,6 +35,7 @@ public:
 
 private:
 	CTicker timer;
+	grinliz::CDynArray<Chit*> plantArr;
 };
 
 #endif // PLANT_SCRIPT_INCLUDED

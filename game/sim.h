@@ -65,7 +65,7 @@ public:
 	void SetAllRock();
 	void CreateVolcano( int x, int y, int size );
 	// type=-1 will scan for natural plant choice
-	void CreatePlant( int x, int y, int type );
+	Chit* CreatePlant( int x, int y, int type );
 	
 	void CreatePlayer();
 	void CreatePlayer( const grinliz::Vector2I& pos );

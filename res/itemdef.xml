@@ -544,4 +544,11 @@
         nStage="2"
         />
 
+  <item name="fruit"
+        desc="Fruit"
+        resource="fruit"
+        flags="CLICK_THROUGH"
+        mass="5"
+        />
+
 </items>

@@ -475,31 +475,31 @@ void Sim::CreateVolcano( int x, int y, int size )
 }
 
 
-void Sim::CreatePlant( int x, int y, int type )
+Chit* Sim::CreatePlant( int x, int y, int type )
 {
 	if ( !worldMap->Bounds().Contains( x, y ) ) {
-		return;
+		return 0;
 	}
 	const SectorData& sd = worldMap->GetSector( x, y );
 	if ( sd.ports == 0 ) {
 		// no point to plants in the outland
-		return;
+		return 0;
 	}
 
 	// About 50,000 plants seems about right.
 	int count = chitBag->census.CountPlants();
 	if ( count > worldMap->Bounds().Area() / 20 ) {
-		return;
+		return 0;
 	}
 
 	// And space them out a little.
 	Random r( x+y*1024 );
 	if ( r.Rand(4) == 0 )
-		return;
+		return 0;
 
 	const WorldGrid& wg = worldMap->GetWorldGrid( x, y );
 	if ( wg.Pave() || wg.IsPorch() ) {
-		return;
+		return 0;
 	}
 
 	// check for a plant already there.
@@ -543,7 +543,9 @@ void Sim::CreatePlant( int x, int y, int type )
 
 		chit->Add( new HealthComponent() );
 		chit->Add( new ScriptComponent( new PlantScript( type )));
+		return chit;
 	}
+	return 0;
 }
 
 

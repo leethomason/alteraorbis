@@ -60,6 +60,8 @@ public:
 
 	// Convenience: fetch a key, increment by 1, set key
 	void Increment( const char* key );
+	// Fetch a value; add to it, return the result
+	int  Add( const char* key, int value );
 
 	void Serialize( XStream* xs, const char* name );
 
