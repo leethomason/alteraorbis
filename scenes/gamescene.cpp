@@ -137,9 +137,9 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	clearButton.SetText( "Clear" );
 
 	faceWidget.Init( &gamui2D, game->GetButtonLook(0), FaceWidget::ALL );
+	faceWidget.SetSize( 100, 100 );
 
 	chitFaceToTrack = sim->GetPlayerChit() ? sim->GetPlayerChit()->ID() : 0;
-	faceWidget.SetSize( 100, 100 );
 
 	for( int i=0; i<NUM_PICKUP_BUTTONS; ++i ) {
 		pickupButton[i].Init( &gamui2D, game->GetButtonLook(0) );

@@ -440,6 +440,16 @@ void Image::Init( Gamui* gamui, const RenderAtom& atom, bool foreground )
 }
 
 
+void Image::SetSize( float width, float height )							
+{ 
+	if ( m_width != width || m_height != height ) {
+		m_width = width; 
+		m_height = height; 
+		Modify(); 
+	}
+}
+
+
 bool Image::HandleTap( TapAction action, float x, float y )
 {
 	if ( action == TAP_DOWN ) {

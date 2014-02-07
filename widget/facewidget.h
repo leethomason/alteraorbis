@@ -34,31 +34,31 @@ public:
 	void SetFace( UIRenderer* renderer, const GameItem* item );
 	void SetMeta( ItemComponent* ic, AIComponent* ai );
 
-	virtual float X() const							{ return button->X(); }
-	virtual float Y() const							{ return button->Y(); }
-	virtual float Width() const						{ return button->Width(); }
-	virtual float Height() const					{ return button->Height(); }
+	virtual float X() const							{ return GetButton()->X(); }
+	virtual float Y() const							{ return GetButton()->Y(); }
+	virtual float Width() const						{ return GetButton()->Width(); }
+	virtual float Height() const					{ return GetButton()->Height(); }
 
 	virtual void SetPos( float x, float y );
 	// always sets the size of the button (ignores flags)
 	virtual void SetSize( float w, float h );
-	virtual bool Visible() const					{ return button->Visible(); }
+	virtual bool Visible() const					{ return GetButton()->Visible(); }
 	virtual void SetVisible( bool vis );
 
-	const gamui::Button* GetButton() const			{ return button; }
-	gamui::Button* GetButton()						{ return button; }
+	virtual const gamui::Button* GetButton() const = 0;
+	virtual gamui::Button* GetButton() = 0;
 
 protected:
 	void BaseInit( gamui::Gamui* gamui, const gamui::ButtonLook& look, int flags );
 
 	int					flags;
-	gamui::Button*		button;
 	gamui::TextLabel	upper;
 	enum {
 		BAR_HP,
 		BAR_AMMO,
 		BAR_SHIELD,
 		BAR_LEVEL,
+		BAR_FOOD,
 		BAR_SOCIAL,
 		BAR_ENERY,
 		BAR_FUN,
@@ -72,12 +72,12 @@ class FaceToggleWidget : public FaceWidget
 {
 public:
 	FaceToggleWidget() {
-		button = &toggle;
 	}
 
 	virtual void Init( gamui::Gamui* gamui, const gamui::ButtonLook&, int flags );
-	gamui::ToggleButton* GetToggleButton()			{ return &toggle; }
 
+	virtual const gamui::Button* GetButton() const		{ return &toggle; }
+	virtual gamui::Button* GetButton()					{ return &toggle; }
 private:
 	gamui::ToggleButton toggle;
 };
@@ -87,10 +87,11 @@ class FacePushWidget : public FaceWidget
 {
 public:
 	FacePushWidget() {
-		button = &push;
 	}
 	virtual void Init( gamui::Gamui* gamui, const gamui::ButtonLook&, int flags );
 
+	virtual const gamui::Button* GetButton() const		{ return &push; }
+	virtual gamui::Button* GetButton()					{ return &push; }
 private:
 	gamui::PushButton push;
 

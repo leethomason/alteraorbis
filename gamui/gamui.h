@@ -516,14 +516,7 @@ public:
 	void SetAtom( const RenderAtom& atom );
 	void SetSlice( bool enable );
 
-	void SetSize( float width, float height )							
-	{ 
-		if ( m_width != width || m_height != height ) {
-			m_width = width; 
-			m_height = height; 
-			Modify(); 
-		}
-	}
+	virtual void SetSize( float width, float height );
 	void SetForeground( bool foreground );
 	void SetCapturesTap( bool captures )								{ m_capturesTap = captures; }
 

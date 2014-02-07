@@ -93,13 +93,15 @@ public:
 	ItemNameFilter( const grinliz::IString* names, int n );
 
 	virtual bool Accept( Chit* chit );
-	virtual int  Type() { return MAP | MOB; }
+	virtual int  Type()		{ return type; } 
+	void SetType( int t )	{ type = t; }
 
 protected:
 	ItemNameFilter();
 	const char**			cNames;
 	const grinliz::IString* iNames;
 	int						count;
+	int						type;
 };
 
 class ItemFlagFilter : public IChitAccept

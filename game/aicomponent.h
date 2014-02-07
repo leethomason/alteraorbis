@@ -128,6 +128,7 @@ private:
 	void ThinkBuild( const ComponentSet& thisComp );
 	void ThinkVisitor( const ComponentSet& thisComp );
 	void ThinkRampage( const ComponentSet& thisComp );	// process the rampage action
+	bool ThinkHungry( const ComponentSet& thisComp );
 
 	void WorkQueueToTask(  const ComponentSet& thisComp );	// turn a work item into a task
 	void FlushTaskList( const ComponentSet& thisComp, U32 delta );		// moves tasks along, mark tasks completed, do special actions

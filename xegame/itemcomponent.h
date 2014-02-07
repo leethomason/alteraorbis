@@ -60,6 +60,13 @@ public:
 		}
 		return -1;
 	}
+	int FindItem( const grinliz::IString& name ) const {
+		for( int i=0; i<itemArr.Size(); ++i ) {
+			if ( itemArr[i]->IName() == name ) return i;
+		}
+		return -1;
+	}
+
 	bool SwapWeapons();			// swap between the melee and ranged weapons
 	bool Swap( int i, int j );	// swap 2 slots 
 

@@ -709,6 +709,7 @@ ItemNameFilter::ItemNameFilter()
 	cNames = 0;
 	iNames = 0;
 	count  = 0;
+	type = MAP | MOB;
 }
 
 
@@ -717,6 +718,7 @@ ItemNameFilter::ItemNameFilter( const char* arr[], int n )
 	cNames = arr;
 	iNames = 0;
 	count  = n;
+	type = MAP | MOB;
 }
 
 
@@ -725,6 +727,7 @@ ItemNameFilter::ItemNameFilter( const grinliz::IString& istring )
 	cNames = 0;
 	iNames = &istring;
 	count  = 1;
+	type = MAP | MOB;
 }
 
 
@@ -733,6 +736,7 @@ ItemNameFilter::ItemNameFilter( const grinliz::IString* arr, int n )
 	cNames = 0;
 	iNames = arr;
 	count  = n;
+	type = MAP | MOB;
 }
 
 

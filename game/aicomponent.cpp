@@ -70,6 +70,7 @@ static const int	WANDER_ODDS					=100;		// as in 1 in WANDER_ODDS
 static const int	GREATER_WANDER_ODDS			=  5;		// as in 1 in WANDER_ODDS
 static const float	PLANT_AWARE					=  3.0f;
 static const float	GOLD_AWARE					=  5.0f;
+static const float	FRUIT_AWARE					=  5.0f;
 static const int	FORCE_COUNT_STUCK			=  8;
 static const int	STAND_TIME_WHEN_WANDERING	= 1500;
 static const int	RAMPAGE_THRESHOLD			= 40;		// how many times a destination must be blocked before rampage
@@ -1411,6 +1412,59 @@ bool AIComponent::ThinkGuard( const ComponentSet& thisComp )
 }
 
 
+bool AIComponent::ThinkHungry( const ComponentSet& thisComp )
+{
+	// Some buildings provide food - that happens in ThinNeeds.
+	// This is for picking up food on the group.
+
+	if ( !(thisComp.item->flags & GameItem::AI_USES_BUILDINGS )) {
+		return false;
+	}
+
+	const ai::Needs& needs = GetNeeds();
+	if ( needs.Value( Needs::FOOD ) > 0.1f ) {
+		// not that hungry...
+		return false;
+	}
+
+	IString ifruit = StringPool::Intern( "fruit" );
+
+	// Are we carrying fruit?? If so, eat!
+	int index = thisComp.itemComponent->FindItem( ifruit );
+	if ( index >= 0 ) {
+		GameItem* item = thisComp.itemComponent->RemoveFromInventory( index );
+		delete item;
+		this->GetNeedsMutable()->Set( Needs::FOOD, 1 );
+		return true;	// did something...?
+	}
+
+	// Can we go pick something up?
+	if ( thisComp.itemComponent->CanAddToInventory() ) {
+		IString arr[1] = { ifruit };
+		ItemNameFilter filter( arr, 1 );
+		filter.SetType( IChitAccept::MOB );
+		const ChitContext* context = this->GetChitContext();
+
+		Vector2F pos2 = thisComp.spatial->GetPosition2D();
+		CChitArray chitArr;
+		parentChit->GetChitBag()->QuerySpatialHash( &chitArr, pos2, FRUIT_AWARE, 0, &filter );
+
+		for( int i=0; i<chitArr.Size(); ++i ) {
+			Chit* fruit = chitArr[i];
+			GLASSERT( fruit->GetSpatialComponent() );
+			Vector2F fruitPos = fruit->GetSpatialComponent()->GetPosition2D();
+
+			if ( context->worldMap->HasStraightPath( fruitPos, pos2 )) {
+				taskList.Push( Task::MoveTask( fruitPos, 0 ));
+				taskList.Push( Task::PickupTask( fruit->ID(), 0 ));
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+
 bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 {
 	if ( !(thisComp.item->flags & GameItem::AI_USES_BUILDINGS )) {
@@ -1587,6 +1641,8 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 	if ( ThinkLoot( thisComp ))
 		return;
 	if ( ThinkCriticalNeeds( thisComp ))
+		return;
+	if ( ThinkHungry( thisComp )) 
 		return;
 	if ( ThinkNeeds( thisComp ))
 		return;

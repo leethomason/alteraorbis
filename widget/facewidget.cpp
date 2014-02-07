@@ -15,17 +15,17 @@ static const float SPACE = 5.0f;
 
 void FaceToggleWidget::Init( gamui::Gamui* gamui, const gamui::ButtonLook& look, int f )
 {
-	BaseInit( gamui, look, f );
 	toggle.Init( gamui, look );
 	toggle.SetEnabled( true );
+	BaseInit( gamui, look, f );
 }
 
 
 void FacePushWidget::Init( gamui::Gamui* gamui, const gamui::ButtonLook& look, int f )
 {
-	BaseInit( gamui, look, f );
 	push.Init( gamui, look );
 	push.SetEnabled( true );
+	BaseInit( gamui, look, f );
 }
 
 
@@ -38,6 +38,8 @@ void FaceWidget::BaseInit( gamui::Gamui* gamui, const gamui::ButtonLook& look, i
 	RenderAtom grey  = LumosGame::CalcPaletteAtom( 0, 6 );
 	RenderAtom blue  = LumosGame::CalcPaletteAtom( 8, 0 );	
 
+	// Must keep the Needs and Bars in sync.
+	GLASSERT( BAR_FOOD + ai::Needs::NUM_NEEDS == MAX_BARS );
 	bar[BAR_HP].Init(		gamui, 2, green, grey );
 	bar[BAR_AMMO].Init(		gamui, 2, blue, grey );
 	bar[BAR_SHIELD].Init(	gamui, 2, blue, grey );
@@ -47,10 +49,11 @@ void FaceWidget::BaseInit( gamui::Gamui* gamui, const gamui::ButtonLook& look, i
 	bar[BAR_AMMO].SetText( "Weapon" );
 	bar[BAR_SHIELD].SetText( "Shield" );
 
+
 	for( int i=0; i<ai::Needs::NUM_NEEDS; i++ ) {
 		GLASSERT( i < MAX_BARS );
-		bar[i+BAR_SOCIAL].Init( gamui, 2, green, grey );
-		bar[i+BAR_SOCIAL].SetText( ai::Needs::Name( i ) );
+		bar[i+BAR_FOOD].Init( gamui, 2, green, grey );
+		bar[i+BAR_FOOD].SetText( ai::Needs::Name( i ) );
 	}
 
 	upper.SetVisible( false );
@@ -71,13 +74,13 @@ void FaceWidget::SetFace( UIRenderer* renderer, const GameItem* item )
 								info.texture,
 								info.te.uv.x, info.te.uv.y, info.te.uv.z, info.te.uv.w );
 
-		button->SetDeco( procAtom, procAtom );
+		GetButton()->SetDeco( procAtom, procAtom );
 
 		renderer->uv[0]			= info.te.uv;
 		renderer->uvClip[0]		= info.te.clip;
 		renderer->colorXForm[0]	= info.color;
 
-		button->SetVisible( true );
+		GetButton()->SetVisible( true );
 
 		CStr<40> str;
 		if ( flags & SHOW_NAME ) {
@@ -88,13 +91,13 @@ void FaceWidget::SetFace( UIRenderer* renderer, const GameItem* item )
 		upper.SetText( str.c_str() );
 	}
 	else {
-		button->SetVisible( false );
+		GetButton()->SetVisible( false );
 		upper.SetText( "" );
 	}
  
 	for( int i=0; i < MAX_BARS; ++i ) {
 		bool on = ((1<<i) & flags) != 0;
-		on = on && button->Visible();
+		on = on && GetButton()->Visible();
 		bar[i].SetVisible( on );
 	}	
 }
@@ -155,7 +158,7 @@ void FaceWidget::SetMeta( ItemComponent* ic, AIComponent* ai )
 	if ( ai ) {
 		const ai::Needs& needs = ai->GetNeeds();
 		for( int i=0; i<ai::Needs::NUM_NEEDS; ++i ) {
-			bar[i+BAR_SOCIAL].SetRange( (float)needs.Value(i) );
+			bar[i+BAR_FOOD].SetRange( (float)needs.Value(i) );
 		}
 	}
 }
@@ -163,16 +166,16 @@ void FaceWidget::SetMeta( ItemComponent* ic, AIComponent* ai )
 
 void FaceWidget::SetPos( float x, float y )			
 { 
-	button->SetPos( x, y );  
+	GetButton()->SetPos( x, y );  
 	upper.SetPos( x, y ); 
 
-	float cy = button->Y() + button->Height() + SPACE;
+	float cy = GetButton()->Y() + GetButton()->Height() + SPACE;
 	for( int i=0; i < MAX_BARS; ++i ) {
 		int on = (1<<i) & flags;
 
 		if ( on ) {
 			bar[i].SetPos( x, cy );
-			bar[i].SetSize( button->Width(), HEIGHT );
+			bar[i].SetSize( GetButton()->Width(), HEIGHT );
 			bar[i].SetVisible( true );
 			cy += HEIGHT + SPACE;
 		}
@@ -185,19 +188,20 @@ void FaceWidget::SetPos( float x, float y )
 
 void FaceWidget::SetSize( float w, float h )		
 { 
+	Button* button = GetButton();
 	button->SetSize( w, h ); 
 	upper.SetBounds( w, 0 ); 
 	for( int i=0; i < MAX_BARS; ++i ) {
-		bar[i].SetSize( button->Width(), HEIGHT );
+		bar[i].SetSize( GetButton()->Width(), HEIGHT );
 	}
 	// SetSize calls SetPos, but NOT vice versa
-	SetPos( button->X(), button->Y() );
+	SetPos( GetButton()->X(), GetButton()->Y() );
 }
 
 
 void FaceWidget::SetVisible( bool vis )
 { 
-	button->SetVisible( vis ); 
+	GetButton()->SetVisible( vis ); 
 	upper.SetVisible( vis );
 	for( int i=0; i < MAX_BARS; ++i ) {
 		if ( !vis )

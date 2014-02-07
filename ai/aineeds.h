@@ -28,7 +28,7 @@ public:
 	Needs()  { for( int i=0; i<NUM_NEEDS; ++i ) need[i] = 1; }
 
 	enum {
-		//FOOD,	cool but not yet implemented
+		FOOD,
 		SOCIAL,
 		ENERGY,
 		FUN,

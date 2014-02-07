@@ -10,7 +10,8 @@ static const double DECAY_TIME = 200.0;	// in seconds
 {
 	GLASSERT( i >= 0 && i < NUM_NEEDS );
 
-	static const char* name[NUM_NEEDS] = { /*"food",*/ "social", "energy", "fun" };
+	static const char* name[NUM_NEEDS] = { "food", "social", "energy", "fun" };
+	GLASSERT( GL_C_ARRAY_SIZE( name ) == NUM_NEEDS );
 	return name[i];
 }
 

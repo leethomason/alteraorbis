@@ -50,7 +50,11 @@ CharacterScene::CharacterScene( LumosGame* game, CharacterSceneData* csd ) : Sce
 	for( int j=0; j<nStorage; ++j ) {
 		for( int i=0; i<NUM_ITEM_BUTTONS; ++i ) {
 			itemButton[j][i].Init( &gamui2D, lumosGame->GetButtonLook(0) );
-			faceWidget.GetToggleButton()->AddToToggleGroup( &itemButton[j][i] );
+
+			Button* button = faceWidget.GetButton();
+			if ( button->ToToggleButton() ) {
+				button->ToToggleButton()->AddToToggleGroup( &itemButton[j][i] );
+			}
 		}
 	}
 	itemDescWidget.Init( &gamui2D );
