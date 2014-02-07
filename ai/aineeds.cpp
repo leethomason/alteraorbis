@@ -1,5 +1,6 @@
 #include "aineeds.h"
 #include "../grinliz/glutil.h"
+#include "../xarchive/glstreamer.h"
 
 using namespace ai;
 using namespace grinliz;
@@ -46,3 +47,10 @@ void Needs::Add( const Needs& other, double scale )
 	ClampNeeds();
 }
 
+
+void Needs::Serialize( XStream* xs )
+{
+	XarcOpen( xs, "Needs" );
+	XARC_SER_ARR( xs, need, NUM_NEEDS );
+	XarcClose( xs );
+}

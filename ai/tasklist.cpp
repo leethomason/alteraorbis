@@ -260,7 +260,7 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta )
 			Chit* itemChit = chitBag->GetChit( chitID );
 			if (    itemChit 
 				 && itemChit->GetSpatialComponent()
-				 && itemChit->GetSpatialComponent()->GetPosition2DI() == thisComp.spatial->GetPosition2DI()
+				 && (itemChit->GetSpatialComponent()->GetPosition2D() - thisComp.spatial->GetPosition2D()).Length() <= PICKUP_RANGE
 				 && itemChit->GetItemComponent()->NumItems() == 1 )	// doesn't have sub-items / intrinsic
 			{
 				if ( thisComp.itemComponent->CanAddToInventory() ) {

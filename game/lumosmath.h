@@ -31,6 +31,18 @@ inline grinliz::Vector2I ToWorld2I( const grinliz::Vector3F& pos3 ) {
 	return pos2i;
 }
 
+inline grinliz::Vector2I AdjacentWorldGrid( const grinliz::Vector2F& pos2 ) {
+	grinliz::Vector2I v = ToWorld2I( pos2 );
+
+	float dx = pos2.x - (float(v.x) + 0.5f);
+	float dy = pos2.y - (float(v.y) + 0.5f);
+	if ( fabsf( dx > dy ))
+		v.x += (dx>0) ? 1 : -1;
+	else
+		v.y += (dy>0) ? 1 : -1;
+	return v;
+}
+
 inline grinliz::Vector2I ToSector( const grinliz::Vector2I& pos2i ) {
 	grinliz::Vector2I v = { pos2i.x / SECTOR_SIZE, pos2i.y / SECTOR_SIZE };
 	GLASSERT( v.x >= 0 && v.x < NUM_SECTORS );

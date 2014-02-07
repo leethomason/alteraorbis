@@ -609,8 +609,6 @@ int ItemComponent::DoTick( U32 delta )
 		}
 	}
 
-	static const float PICKUP_RANGE = 1.0f;
-
 	if ( mainItem->flags & GameItem::GOLD_PICKUP ) {
 		ComponentSet thisComp( parentChit, Chit::SPATIAL_BIT | ComponentSet::IS_ALIVE );
 		if ( thisComp.okay ) {

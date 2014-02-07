@@ -117,6 +117,7 @@ void AIComponent::Serialize( XStream* xs )
 	XARC_SER( xs, destinationBlocked );
 	feTicker.Serialize( xs, "feTicker" );
 	needsTicker.Serialize( xs, "needsTicker" );
+	needs.Serialize( xs );
 	this->EndSerialize( xs );
 }
 
@@ -1452,10 +1453,14 @@ bool AIComponent::ThinkHungry( const ComponentSet& thisComp )
 		for( int i=0; i<chitArr.Size(); ++i ) {
 			Chit* fruit = chitArr[i];
 			GLASSERT( fruit->GetSpatialComponent() );
-			Vector2F fruitPos = fruit->GetSpatialComponent()->GetPosition2D();
 
-			if ( context->worldMap->HasStraightPath( fruitPos, pos2 )) {
-				taskList.Push( Task::MoveTask( fruitPos, 0 ));
+			Vector2F fruitPos = fruit->GetSpatialComponent()->GetPosition2D();
+			// The fruit is always on an impassible map grid,
+			// so target the nearest adjacent grid.
+			Vector2F goPos = ToWorld2F( AdjacentWorldGrid( fruitPos ));
+
+			if ( context->worldMap->HasStraightPath( goPos, pos2 )) {
+				taskList.Push( Task::MoveTask( goPos, 0 ));
 				taskList.Push( Task::PickupTask( fruit->ID(), 0 ));
 				return true;
 			}
