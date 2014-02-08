@@ -315,10 +315,13 @@ public:
 	// Get the value of the item. Currently equivalent to being loot.
 	int  GetValue() const;
 
-	// name:		blaster
-	// proper:		Hgar
-	// best:		Hgar
-	// full:		Hgar (blaster)
+	// name:		blaster						humanFemale					The item name - itemdef.xml
+	// proper:		Hgar						Trinity						Given name, if assigned. Else empty/null.
+	// best:		Hgar						Trinity						Given name, if assigned. Else item name.
+	// full:		Hgar (blaster)				Trinity (humanFemale)		Fully formatted.
+	// title:		Dragon Slayer				Troll Bane			
+	// nameAndTitle:Hgar (blaster) Dragon...	Trinity (humanFemale) Troll Bane
+
 	const char*			Name() const			{ return name.c_str(); }
 	grinliz::IString	IName() const			{ return name; }
 	const char*			ProperName() const		{ return properName.c_str(); }
@@ -328,8 +331,8 @@ public:
 	grinliz::IString	IFullName() const;
 	const char*			ResourceName() const	{ return resource.c_str(); }
 	grinliz::IString	IResourceName() const	{ return resource; }
-	grinliz::IString	ITitle() const;				// Dragon Slayer
-	grinliz::IString	INameAndTitle() const;		// The full out: Hegas (humanFemale) Dragon Slayer
+	grinliz::IString	ITitle() const;
+	grinliz::IString	INameAndTitle() const;
 
 	void SetName( const char* n )				{ name = grinliz::StringPool::Intern( n ); UpdateTrack(); }
 	void SetProperName( const char* n )			{ properName = grinliz::StringPool::Intern( n ); UpdateTrack(); }

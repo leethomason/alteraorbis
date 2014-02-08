@@ -187,8 +187,8 @@ void CensusScene::Scan()
 	str.append( "Value, historical:\t" );	valueAny.AppendDesc( &str );	str.append( "\n" );
 	str.append( "\n" );
 	str.append( "Kills:\n" );
-	str.append( "active\t" );		killsActive.AppendDesc( &str );	str.append( "\n" );
-	str.append( "historical\t" );	killsAny.AppendDesc( &str );	str.append( "\n" );
+	str.append( "active\t" );				killsActive.AppendDesc( &str );	str.append( "\n" );
+	str.append( "historical\t" );			killsAny.AppendDesc( &str );	str.append( "\n" );
 	str.append( "Greater, active\t" );		greaterKillsActive.AppendDesc( &str );	str.append( "\n" );
 	str.append( "Greater, historical\t" );	greaterKillsAny.AppendDesc( &str );	str.append( "\n" );
 	str.append( "\n" );
