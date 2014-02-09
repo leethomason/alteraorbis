@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with TexturePacker http://texturepacker.com-->
-<!-- $TexturePacker:SmartUpdate:d07e14f88a012923c7fd74cfd5a1e188$ -->
+<!-- $TexturePacker:SmartUpdate:350cebb2ed7a36afcc05d000d90df84f$ -->
 <!--Format:
 n  => name of the sprite
 x  => sprite x pos in texture
@@ -14,22 +14,22 @@ oH => sprite's original height (only available if trimmed)
 r => 'y' only set if sprite is rotated
 -->
 <TextureAtlas imagePath="uiIcon.png" width="512" height="1024">
-    <sprite n="au" x="0" y="512" w="128" h="128"/>
-    <sprite n="beamgun" x="64" y="832" w="64" h="64"/>
-    <sprite n="blaster" x="64" y="768" w="64" h="64"/>
-    <sprite n="buttonDown" x="0" y="256" w="256" h="256"/>
-    <sprite n="buttonUp" x="256" y="0" w="256" h="256"/>
-    <sprite n="cancel" x="64" y="704" w="64" h="64"/>
-    <sprite n="crystalBlue" x="384" y="384" w="128" h="128"/>
-    <sprite n="crystalGreen" x="256" y="384" w="128" h="128"/>
-    <sprite n="crystalRed" x="384" y="256" w="128" h="128"/>
-    <sprite n="crystalViolet" x="256" y="256" w="128" h="128"/>
-    <sprite n="default" x="64" y="640" w="64" h="64"/>
-    <sprite n="human" x="0" y="960" w="64" h="64"/>
-    <sprite n="okay" x="0" y="896" w="64" h="64"/>
-    <sprite n="pistol" x="0" y="832" w="64" h="64"/>
-    <sprite n="pulse" x="0" y="768" w="64" h="64"/>
-    <sprite n="ring" x="0" y="704" w="64" h="64"/>
-    <sprite n="shield" x="0" y="640" w="64" h="64"/>
+    <sprite n="au" x="264" y="544" w="128" h="128"/>
+    <sprite n="beamgun" x="400" y="648" w="64" h="64"/>
+    <sprite n="blaster" x="400" y="576" w="64" h="64"/>
+    <sprite n="buttonDown" x="0" y="528" w="256" h="256"/>
+    <sprite n="buttonUp" x="0" y="264" w="256" h="256"/>
+    <sprite n="cancel" x="400" y="504" w="64" h="64"/>
+    <sprite n="crystalBlue" x="264" y="408" w="128" h="128"/>
+    <sprite n="crystalGreen" x="264" y="272" w="128" h="128"/>
+    <sprite n="crystalRed" x="264" y="136" w="128" h="128"/>
+    <sprite n="crystalViolet" x="264" y="0" w="128" h="128"/>
+    <sprite n="default" x="400" y="432" w="64" h="64"/>
+    <sprite n="human" x="400" y="360" w="64" h="64"/>
+    <sprite n="okay" x="400" y="288" w="64" h="64"/>
+    <sprite n="pistol" x="400" y="216" w="64" h="64"/>
+    <sprite n="pulse" x="400" y="144" w="64" h="64"/>
+    <sprite n="ring" x="400" y="72" w="64" h="64"/>
+    <sprite n="shield" x="400" y="0" w="64" h="64"/>
     <sprite n="tabBar" x="0" y="0" w="256" h="256"/>
 </TextureAtlas>
