@@ -17,6 +17,17 @@ static const double DECAY_TIME = 200.0;	// in seconds
 }
 
 
+Needs::Needs()  
+{ 
+	for( int i=0; i<NUM_NEEDS; ++i ) {
+		need[i] = 1; 
+		// DEBUGGING FIXME
+		need[FOOD] = 0.2;
+	}
+}
+
+
+
 void Needs::DoTick( U32 delta, bool inBattle )
 {
 	double dNeed = double(delta) * 0.001 / DECAY_TIME;

@@ -1413,54 +1413,101 @@ bool AIComponent::ThinkGuard( const ComponentSet& thisComp )
 }
 
 
+Chit* AIComponent::FindFruit( const Vector2F& pos2, Vector2F* dest )
+{
+	// Be careful of performance. Allow one full pathing, use
+	// direct pathing for the rest.
+	// Also, kind of tricky. Fruit is usually blocked, so it
+	// can be picked up on its grid, or the closest neighbor
+	// grid. And check near the mob and near farms.
+
+	const ChitContext* context = this->GetChitContext();
+	LumosChitBag* chitBag = this->GetLumosChitBag();
+
+	IString arr[1] = { IStringConst::fruit };
+	ItemNameFilter filter( arr, 1 );
+	filter.SetType( IChitAccept::MOB );
+
+	// Check local. For local, use direct path.
+	CChitArray chitArr;
+	chitBag->QuerySpatialHash( &chitArr, pos2, FRUIT_AWARE, 0, &filter );
+	for( int i=0; i<chitArr.Size(); ++i ) {
+		Chit* chit = chitArr[i];
+		Vector2F fruitPos = chit->GetSpatialComponent()->GetPosition2D();
+		if ( context->worldMap->HasStraightPath( pos2, fruitPos )) {
+			*dest = fruitPos;
+			return chit;
+		}
+		Vector2F fruitPosAdj = ToWorld2F( AdjacentWorldGrid( fruitPos ));
+		if ( context->worldMap->HasStraightPath( pos2, fruitPosAdj )) {
+			*dest = fruitPosAdj;
+			return chit;
+		}
+	}
+
+	// Okay, now check the farms. Now we need to use full pathing for meaningful results.
+	Vector2F farmLoc;
+	if ( chitBag->FindBuilding( IStringConst::farm, ToSector( ToWorld2I( pos2 )), 
+		                        &farmLoc, LumosChitBag::RANDOM_NEAR, 0, 0 )) {
+
+		chitBag->QuerySpatialHash( &chitArr, farmLoc, FARM_GROW_RAD, 0, &filter );	
+		parentChit->random.ShuffleArray( chitArr.Mem(), chitArr.Size() );
+		for( int i=0; i<chitArr.Size(); ++i ) {
+			Chit* chit = chitArr[i];
+			Vector2F fruitPos = chit->GetSpatialComponent()->GetPosition2D();
+			if ( context->worldMap->CalcPath( pos2, fruitPos, 0, 0, 0 )) {
+				*dest = fruitPos;
+				return chit;
+			}
+			Vector2F fruitPosAdj = ToWorld2F( AdjacentWorldGrid( fruitPos ));
+			if ( context->worldMap->CalcPath( pos2, fruitPosAdj, 0, 0, 0 )) {
+				*dest = fruitPosAdj;
+				return chit;
+			}
+		}
+	}
+	dest->Zero();
+	return 0;
+}
+
+
 bool AIComponent::ThinkHungry( const ComponentSet& thisComp )
 {
-	// Some buildings provide food - that happens in ThinNeeds.
+	// Some buildings provide food - that happens in ThinkNeeds.
 	// This is for picking up food on the group.
 
 	if ( !(thisComp.item->flags & GameItem::AI_USES_BUILDINGS )) {
 		return false;
 	}
 
-	const ai::Needs& needs = GetNeeds();
-	if ( needs.Value( Needs::FOOD ) > 0.1f ) {
-		// not that hungry...
-		return false;
-	}
-
 	IString ifruit = StringPool::Intern( "fruit" );
 
-	// Are we carrying fruit?? If so, eat!
+	// Are we carrying fruit?? If so, eat if hungry!
+	const ai::Needs& needs = GetNeeds();
 	int index = thisComp.itemComponent->FindItem( ifruit );
-	if ( index >= 0 ) {
-		GameItem* item = thisComp.itemComponent->RemoveFromInventory( index );
-		delete item;
-		this->GetNeedsMutable()->Set( Needs::FOOD, 1 );
-		return true;	// did something...?
+	if ( needs.Value( Needs::FOOD ) < 0.1f ) {
+		if ( index >= 0 ) {
+			GameItem* item = thisComp.itemComponent->RemoveFromInventory( index );
+			delete item;
+			this->GetNeedsMutable()->Set( Needs::FOOD, 1 );
+			return true;	// did something...?
+		}
 	}
 
-	// Can we go pick something up?
-	if ( thisComp.itemComponent->CanAddToInventory() ) {
-		IString arr[1] = { ifruit };
-		ItemNameFilter filter( arr, 1 );
-		filter.SetType( IChitAccept::MOB );
-		const ChitContext* context = this->GetChitContext();
-
-		Vector2F pos2 = thisComp.spatial->GetPosition2D();
-		CChitArray chitArr;
-		parentChit->GetChitBag()->QuerySpatialHash( &chitArr, pos2, FRUIT_AWARE, 0, &filter );
-
-		for( int i=0; i<chitArr.Size(); ++i ) {
-			Chit* fruit = chitArr[i];
-			GLASSERT( fruit->GetSpatialComponent() );
-
-			Vector2F fruitPos = fruit->GetSpatialComponent()->GetPosition2D();
-			// The fruit is always on an impassible map grid,
-			// so target the nearest adjacent grid.
-			Vector2F goPos = ToWorld2F( AdjacentWorldGrid( fruitPos ));
-
-			if ( context->worldMap->HasStraightPath( goPos, pos2 )) {
-				taskList.Push( Task::MoveTask( goPos, 0 ));
+	if ( index >= 0 ) {
+		// already carrying something.
+		return false;
+	}
+	
+	if (    thisComp.item->IName() == "worker" 
+		 || thisComp.item->GetPersonality().Botany() == Personality::LIKES ) 
+	{
+		// Can we go pick something up?
+		if ( thisComp.itemComponent->CanAddToInventory() ) {
+			Vector2F fruitPos = { 0, 0 };
+			Chit* fruit = FindFruit( thisComp.spatial->GetPosition2D(), &fruitPos );
+			if ( fruit ) {
+				taskList.Push( Task::MoveTask( fruitPos, 0 ));
 				taskList.Push( Task::PickupTask( fruit->ID(), 0 ));
 				return true;
 			}
@@ -1647,6 +1694,7 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 		return;
 	if ( ThinkCriticalNeeds( thisComp ))
 		return;
+	// This hanles both being hungry AND moving food around.
 	if ( ThinkHungry( thisComp )) 
 		return;
 	if ( ThinkNeeds( thisComp ))
@@ -2175,6 +2223,7 @@ int AIComponent::DoTick( U32 deltaTime )
 		case STAND:
 			if ( taskList.Empty() ) {	// If there is a tasklist, it will manage standing and re-thinking.
 				rethink += deltaTime;
+				DoStand( thisComp, deltaTime );
 			}
 			break;
 

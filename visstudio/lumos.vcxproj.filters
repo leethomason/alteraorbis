@@ -358,6 +358,9 @@
     <ClCompile Include="..\game\towcomponent.cpp">
       <Filter>Source Files\components</Filter>
     </ClCompile>
+    <ClCompile Include="..\game\personality.cpp">
+      <Filter>Source Files\game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\camera.h">
@@ -719,6 +722,9 @@
     </ClInclude>
     <ClInclude Include="..\game\towcomponent.h">
       <Filter>Source Files\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\game\personality.h">
+      <Filter>Source Files\game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

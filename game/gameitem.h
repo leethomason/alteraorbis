@@ -31,6 +31,8 @@
 
 #include "../tinyxml2/tinyxml2.h"
 
+#include "personality.h"
+
 class DamageDesc;
 class XStream;
 
@@ -183,28 +185,6 @@ private:
 	int exp;
 };
 
-
-/*
-	The Personality scale is a variant of the Big-5 personality
-	traits. 4 are easier to get your head around, and they are
-	changed to be more useful for the game.
-
-	In this case, there isn't meaning to a lower or higher
-	score. 10 or 11 is "in between" and scores above or below
-	favor behavior on that spectrum.
-
-	Intellectual -	Physical
-	Introvert	-	Extrovert
-	Planned		-	Impulsive
-	Neurotic	-	Stable
-class Personality
-{
-public:
-
-
-private:
-};
-*/
 
 class IMeleeWeaponItem;
 class IRangedWeaponItem;
@@ -489,8 +469,10 @@ public:
 
 	static int idPool;
 
-	const GameTrait& Traits() const { return traits; }
-	GameTrait* GetTraitsMutable()	{ value = -1; return &traits; }
+	const GameTrait& Traits() const				{ return traits; }
+	GameTrait* GetTraitsMutable()				{ value = -1; return &traits; }
+	const Personality& GetPersonality() const	{ return personality; }
+	Personality* GetPersonalityMutable()		{ return &personality; }
 
 private:
 	void CopyFrom( const GameItem* rhs );
@@ -498,7 +480,8 @@ private:
 		return v * (float)delta * 0.001f;
 	}
 
-	GameTrait traits;
+	GameTrait	traits;
+	Personality personality;
 
 	// Functions to update the ItemDB
 	void Track() const;

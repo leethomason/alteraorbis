@@ -25,7 +25,7 @@ namespace ai {
 class Needs
 {
 public:
-	Needs()  { for( int i=0; i<NUM_NEEDS; ++i ) need[i] = 1; }
+	Needs();
 
 	enum {
 		FOOD,

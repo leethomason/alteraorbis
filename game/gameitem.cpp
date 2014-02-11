@@ -91,6 +91,7 @@ void GameItem::CopyFrom( const GameItem* rhs ) {
 		clipCap			= rhs->clipCap;
 		rounds			= rhs->rounds;
 		traits			= rhs->traits;
+		personality		= rhs->personality;
 		wallet			= rhs->wallet;
 
 		hp				= rhs->hp;
@@ -118,6 +119,7 @@ void GameItem::CopyFrom( const GameItem* rhs ) {
 		clipCap = 0;			// default to no clip and unlimited ammo
 		rounds = clipCap;
 		traits.Init();
+		personality.Init();
 		wallet.EmptyWallet();
 		keyValues.Clear();
 		historyDB.Clear();
@@ -217,6 +219,7 @@ void GameItem::Serialize( XStream* xs )
 	historyDB.Serialize( xs, "historyDB" );
 
 	traits.Serialize( xs );
+	personality.Serialize( xs );
 	wallet.Serialize( xs );
 	XarcClose( xs );
 

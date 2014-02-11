@@ -281,6 +281,7 @@ Chit* LumosChitBag::NewDenizen( const grinliz::Vector2I& pos, int team )
 	AddItem( assetName, chit, context->engine, team, 0 );
 	chit->GetItem()->wallet.AddGold( ReserveBank::Instance()->WithdrawDenizen() );
 	chit->GetItem()->GetTraitsMutable()->Roll( random.Rand() );
+	chit->GetItem()->GetPersonalityMutable()->Roll( random.Rand(), &chit->GetItem()->Traits() );
 
 	IString nameGen = chit->GetItem()->keyValues.GetIString( "nameGen" );
 	if ( !nameGen.empty() ) {

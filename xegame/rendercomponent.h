@@ -110,6 +110,7 @@ public:
 	// --- Decoration --- //
 	void SetGroundMark( const char* asset );
 	void AddDeco( const char* name, int duration );
+	void RemoveDeco( const char* name );
 
 	static grinliz::MemoryPoolT< gamui::TextLabel > textLabelPool;
 	static grinliz::MemoryPoolT< gamui::Image > imagePool;

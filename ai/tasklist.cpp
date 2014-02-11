@@ -263,6 +263,9 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta )
 				 && (itemChit->GetSpatialComponent()->GetPosition2D() - thisComp.spatial->GetPosition2D()).Length() <= PICKUP_RANGE
 				 && itemChit->GetItemComponent()->NumItems() == 1 )	// doesn't have sub-items / intrinsic
 			{
+				if ( chit->GetItem()->IName() == "fruit" ) {
+					int debug=1;
+				}
 				if ( thisComp.itemComponent->CanAddToInventory() ) {
 					ItemComponent* ic = itemChit->GetItemComponent();
 					itemChit->Remove( ic );

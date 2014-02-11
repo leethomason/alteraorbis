@@ -137,6 +137,7 @@ private:
 	grinliz::Vector2F GetWanderOrigin( const ComponentSet& thisComp );
 	int GetThinkTime() const { return 500; }
 	WorkQueue* GetWorkQueue();
+	Chit* FindFruit( const grinliz::Vector2F& origin, grinliz::Vector2F* dest );
 
 	// Returns true if this action was actually taken.
 	bool ThinkWanderEatPlants( const ComponentSet& thisComp );

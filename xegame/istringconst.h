@@ -45,6 +45,7 @@ public:
 	static grinliz::IString crystal_red;
 	static grinliz::IString crystal_blue;
 	static grinliz::IString crystal_violet;
+	static grinliz::IString fruit;
 	
 	static grinliz::IString pave;
 	static grinliz::IString ice;
@@ -58,6 +59,7 @@ public:
 	static grinliz::IString market;
 	static grinliz::IString bar;
 	static grinliz::IString guardpost;
+	static grinliz::IString farm;
 
 	static grinliz::IString arachnoid;
 	static grinliz::IString mantis;

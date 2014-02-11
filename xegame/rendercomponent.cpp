@@ -391,6 +391,21 @@ void RenderComponent::AddDeco( const char* asset, int duration )
 }
 
 
+void RenderComponent::RemoveDeco( const char* asset )
+{
+	gamui::RenderAtom atom = LumosGame::CalcIconAtom( asset );
+	atom.renderState = (const void*)UIRenderer::RENDERSTATE_UI_DISABLED;
+
+	for( int i=0; i<icons.Size(); ++i ) {
+		if ( icons[i].atom.Equal( atom )) {
+			imagePool.Delete( icons[i].image );
+			icons.Remove( i );
+			--i;
+		}
+	}
+}
+
+
 void RenderComponent::ProcessIcons( int delta )
 {
 	for( int i=0; i<icons.Size(); ++i ) {

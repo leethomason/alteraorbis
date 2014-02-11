@@ -629,6 +629,16 @@ int ItemComponent::DoTick( U32 delta )
 			}
 		}
 	}
+
+	if ( (mainItem->flags & GameItem::AI_DOES_WORK) && parentChit->GetRenderComponent() ) {
+		int index = this->FindItem( IStringConst::fruit );
+		if ( index >= 0 ) {
+			parentChit->GetRenderComponent()->AddDeco( "fruit", STD_DECO );
+		}
+		else {
+			parentChit->GetRenderComponent()->RemoveDeco( "fruit" );
+		}
+	}
 	
 	return tick;
 }
@@ -770,7 +780,10 @@ void ItemComponent::AddToInventory( ItemComponent* ic )
 	UpdateActive();
 
 	if ( parentChit && parentChit->GetRenderComponent() ) {
-		parentChit->GetRenderComponent()->AddDeco( "loot", STD_DECO );
+		const char* asset = "loot";
+		if ( ic->GetItem(0)->IName() == "fruit" )
+			asset = "fruit";
+		parentChit->GetRenderComponent()->AddDeco( asset, STD_DECO );
 	}
 }
 

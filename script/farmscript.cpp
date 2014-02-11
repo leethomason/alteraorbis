@@ -10,7 +10,6 @@
 using namespace grinliz;
 
 static const int	FARM_SCRIPT_CHECK = 2000;
-static const float	GROW_RAD = 2.2f;
 // FIXME: longer time to grow fruit
 static const int	GROW_FRUIT = 5000;	// the most productive plants grow every GROW_PERIOD seconds
 // FIXME: longer time to self destruct
@@ -40,7 +39,7 @@ int FarmScript::DoTick( U32 delta )
 	if ( timer.Delta( delta ) && scriptContext->chit->GetSpatialComponent() ) {
 		Rectangle2F bounds;
 		bounds.min = bounds.max = scriptContext->chit->GetSpatialComponent()->GetPosition2D();
-		bounds.Outset( GROW_RAD );
+		bounds.Outset( FARM_GROW_RAD );
 
 		PlantFilter filter;
 		plantArr.Clear();
