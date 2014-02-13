@@ -630,16 +630,21 @@ int ItemComponent::DoTick( U32 delta )
 		}
 	}
 
-	if ( (mainItem->flags & GameItem::AI_DOES_WORK) && parentChit->GetRenderComponent() ) {
-		int index = this->FindItem( IStringConst::fruit );
-		if ( index >= 0 ) {
-			parentChit->GetRenderComponent()->AddDeco( "fruit", STD_DECO );
+	// FIXME: hack for ui. shouldn't use specific names.
+	if (    mainItem->IName() == IStringConst::humanMale
+		 || mainItem->IName() == IStringConst::humanFemale
+		 || mainItem->IName() == IStringConst::worker ) 
+	{
+		if ( parentChit->GetRenderComponent() ) {
+			int index = this->FindItem( IStringConst::fruit );
+			if ( index >= 0 ) {
+				parentChit->GetRenderComponent()->AddDeco( "fruit", STD_DECO );
+			}
+			else {
+				parentChit->GetRenderComponent()->RemoveDeco( "fruit" );
+			}
 		}
-		else {
-			parentChit->GetRenderComponent()->RemoveDeco( "fruit" );
-		}
-	}
-	
+	}	
 	return tick;
 }
 
@@ -753,6 +758,7 @@ bool ItemComponent::CanAddToInventory()
 
 void ItemComponent::AddToInventory( GameItem* item )
 {
+	GLASSERT( this->CanAddToInventory() );
 	itemArr.Push( item );
 
 	// AIs will use the "best" item.
@@ -764,12 +770,39 @@ void ItemComponent::AddToInventory( GameItem* item )
 }
 
 
+void ItemComponent::AddSubInventory( ItemComponent* ic, bool addWeapons, grinliz::IString filterItems )
+{
+	GLASSERT( ic );
+	for( int i=1; i<ic->NumItems(); ++i ) {
+		GameItem* item = ic->GetItem(i);
+		if ( item->Intrinsic() ) continue;
+		if ( !this->CanAddToInventory() ) break;
+
+		if (    (addWeapons && ( item->ToWeapon() || item->ToShield() ))
+			 || filterItems == item->IName() )
+		{
+			ic->RemoveFromInventory( i );
+			--i;
+			this->AddToInventory( item );
+		}
+	}
+
+	// AIs will use the "best" item.
+	if ( !parentChit->PlayerControlled() ) {
+		SortInventory();
+	}
+	hardpointsModified = true;
+	UpdateActive();
+}
+
 
 void ItemComponent::AddToInventory( ItemComponent* ic )
 {
 	GLASSERT( ic );
 	GLASSERT( ic->NumItems() == 1 );
-	itemArr.Push( ic->itemArr.Pop() );
+	GLASSERT( this->CanAddToInventory() );
+	GameItem* gameItem = ic->itemArr.Pop();
+	itemArr.Push( gameItem );
 	delete ic;
 
 	// AIs will use the "best" item.
@@ -781,7 +814,7 @@ void ItemComponent::AddToInventory( ItemComponent* ic )
 
 	if ( parentChit && parentChit->GetRenderComponent() ) {
 		const char* asset = "loot";
-		if ( ic->GetItem(0)->IName() == "fruit" )
+		if ( gameItem->IName() == "fruit" )
 			asset = "fruit";
 		parentChit->GetRenderComponent()->AddDeco( asset, STD_DECO );
 	}

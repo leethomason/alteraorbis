@@ -350,8 +350,9 @@ public:
 
 		GOLD_PICKUP			= (1<<23),
 		ITEM_PICKUP			= (1<<24),		// picks up items. will use if possible.
+		HAS_NEEDS			= (1<<25),		// ai should use needs
 
-		CLICK_THROUGH		= (1<<25),		// model is created with flags to ignore world clicking
+		CLICK_THROUGH		= (1<<27),		// model is created with flags to ignore world clicking
 	};
 
 	grinliz::IString		key;		// modified name, for storage. not serialized.

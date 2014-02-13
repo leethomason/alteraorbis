@@ -60,6 +60,7 @@ public:
 	static grinliz::IString bar;
 	static grinliz::IString guardpost;
 	static grinliz::IString farm;
+	static grinliz::IString distillery;
 
 	static grinliz::IString arachnoid;
 	static grinliz::IString mantis;

@@ -67,6 +67,8 @@ void CoreScript::Serialize( XStream* xs )
 		int size=0;
 		XarcGet( xs, "citizens.size", size );
 		citizens.PushArr( size );
+		if ( size ) 
+			int debug=1;
 	}
 	else {
 		XarcSet( xs, "citizens.size", citizens.Size() );

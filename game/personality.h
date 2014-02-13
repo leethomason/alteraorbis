@@ -43,6 +43,9 @@ public:
 								Grade( trait[INT_PHYS], -1 ),
 								Grade( trait[INTRO_EXTRO], -1 )); }
 	int Fighting() const	{ return Grade( trait[INT_PHYS], 1 ); }
+	int Guarding() const	{ return Sum(
+								Grade( trait[INT_PHYS], 1 ),
+								Grade( trait[PLANNED_IMPULSIVE], -1 )); }
 	int Crafting() const	{ return Sum(
 								Grade( trait[INT_PHYS], -1 ),
 								Grade( trait[PLANNED_IMPULSIVE], -1 )); }

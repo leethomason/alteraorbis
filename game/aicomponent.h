@@ -129,10 +129,14 @@ private:
 	void ThinkVisitor( const ComponentSet& thisComp );
 	void ThinkRampage( const ComponentSet& thisComp );	// process the rampage action
 	bool ThinkHungry( const ComponentSet& thisComp );
+	bool ThinkFruitCollect( const ComponentSet& thisComp );
+	bool ThinkDelivery( const ComponentSet& thisComp );
 
 	void WorkQueueToTask(  const ComponentSet& thisComp );	// turn a work item into a task
 	void FlushTaskList( const ComponentSet& thisComp, U32 delta );		// moves tasks along, mark tasks completed, do special actions
-	void FindRoutineTasks( const ComponentSet& );	// do maintenance, etc.
+
+	bool AtHomeCore();
+	bool AtFriendlyOrNeutralCore();
 
 	grinliz::Vector2F GetWanderOrigin( const ComponentSet& thisComp );
 	int GetThinkTime() const { return 500; }
@@ -142,7 +146,7 @@ private:
 	// Returns true if this action was actually taken.
 	bool ThinkWanderEatPlants( const ComponentSet& thisComp );
 	bool ThinkWanderHealAtCore( const ComponentSet& thisComp );
-	bool ThinkCriticalNeeds( const ComponentSet& thisComp );
+	bool ThinkCriticalShopping( const ComponentSet& thisComp );
 	bool ThinkNeeds( const ComponentSet& thisComp );
 	bool ThinkLoot( const ComponentSet& thisComp );
 	bool ThinkDoRampage( const ComponentSet& thisComp );	// whether this MOB should rampage

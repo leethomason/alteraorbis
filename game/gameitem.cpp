@@ -178,6 +178,7 @@ void GameItem::Serialize( XStream* xs )
 		APPEND_FLAG( flags, f, AI_DOES_WORK );
 		APPEND_FLAG( flags, f, GOLD_PICKUP );
 		APPEND_FLAG( flags, f, ITEM_PICKUP );
+		APPEND_FLAG( flags, f, HAS_NEEDS );
 		APPEND_FLAG( flags, f, CLICK_THROUGH );
 
 		xs->Saving()->Set( "flags", f.c_str() );
@@ -208,6 +209,7 @@ void GameItem::Serialize( XStream* xs )
 			READ_FLAG( flags, f, AI_DOES_WORK );
 			READ_FLAG( flags, f, GOLD_PICKUP );
 			READ_FLAG( flags, f, ITEM_PICKUP );
+			READ_FLAG( flags, f, HAS_NEEDS );
 			READ_FLAG( flags, f, CLICK_THROUGH );
 		}
 	}
@@ -269,6 +271,7 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 		READ_FLAG( flags, f, AI_DOES_WORK );
 		READ_FLAG( flags, f, GOLD_PICKUP );
 		READ_FLAG( flags, f, ITEM_PICKUP );
+		READ_FLAG( flags, f, HAS_NEEDS );
 		READ_FLAG( flags, f, CLICK_THROUGH );
 	}
 	for( const tinyxml2::XMLAttribute* attr = ele->FirstAttribute();

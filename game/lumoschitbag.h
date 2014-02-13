@@ -168,7 +168,7 @@ public:
 	};
 	Chit* FindBuilding( const grinliz::IString& name,		// particular building, or emtpy to match all
 						const grinliz::Vector2I& sector,	// sector to query
-						const grinliz::Vector2F* pos,		// used for evaluating NEAREST, etc.
+						const grinliz::Vector2F* pos,		// optional IN: used for evaluating NEAREST, etc.
 						int flags,
 						grinliz::CDynArray<Chit*>* arr,						// optional; the first N hits
 						IChitAccept* filter );				// optional; run this filter first

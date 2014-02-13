@@ -76,6 +76,7 @@ static const int	STAND_TIME_WHEN_WANDERING	= 1500;
 static const int	RAMPAGE_THRESHOLD			= 40;		// how many times a destination must be blocked before rampage
 static const int	GUARD_RANGE					= 2;
 static const int	GUARD_TIME					= 10*1000;
+static const double	NEED_CRITICAL				= 0.1;
 
 const char* AIComponent::MODE_NAMES[NUM_MODES]     = { "normal", "rampage", "rockbreak", "battle" };
 const char* AIComponent::ACTION_NAMES[NUM_ACTIONS] = { "none", "move", "melee", "shoot", "wander", "stand" };
@@ -1291,7 +1292,7 @@ bool AIComponent::ThinkWanderHealAtCore( const ComponentSet& thisComp )
 }
 
 
-bool AIComponent::ThinkCriticalNeeds( const ComponentSet& thisComp )
+bool AIComponent::ThinkCriticalShopping( const ComponentSet& thisComp )
 {
 	Vector2F pos = thisComp.spatial->GetPosition2D();
 	Vector2I pos2i = thisComp.spatial->GetPosition2DI();
@@ -1301,6 +1302,7 @@ bool AIComponent::ThinkCriticalNeeds( const ComponentSet& thisComp )
 	// If we don't have one of the big 3: gun, ring, shield check for
 	// a market to buy it, and the means to buy.
 	if (    thisComp.item->flags & GameItem::AI_USES_BUILDINGS 
+		 && AtFriendlyOrNeutralCore()
 		 && thisComp.item->wallet.gold )
 	{
 		const IMeleeWeaponItem* melee = thisComp.itemComponent->GetMeleeWeapon();
@@ -1362,17 +1364,18 @@ Vector2I AIComponent::RandomPosInRect( const grinliz::Rectangle2I& rect, bool ex
 
 bool AIComponent::ThinkGuard( const ComponentSet& thisComp )
 {
-	if ( !(thisComp.item->flags & GameItem::AI_USES_BUILDINGS )) {
-		return false;
-	}
-	if ( parentChit->PlayerControlled() ) {
+	if (    !(thisComp.item->flags & GameItem::AI_USES_BUILDINGS )
+		 || !(thisComp.item->flags & GameItem::HAS_NEEDS )
+		 || parentChit->PlayerControlled() 
+		 || !AtHomeCore() )
+	{
 		return false;
 	}
 
-	// High Will -> guarding fan
-	if ( thisComp.item->Traits().Will() < parentChit->random.Dice( 3, 6 ) ) {
+	if ( thisComp.item->GetPersonality().Guarding() == Personality::DISLIKES ) {
 		return false;
 	}
+
 	Vector2I pos2i = thisComp.spatial->GetPosition2DI();
 	Vector2I sector = ToSector( pos2i );
 	Rectangle2I bounds = InnerSectorBounds( sector );
@@ -1380,7 +1383,6 @@ bool AIComponent::ThinkGuard( const ComponentSet& thisComp )
 	CoreScript* coreScript = GetLumosChitBag()->GetCore( sector );
 
 	if ( !coreScript ) return false;
-	if ( !coreScript->IsCitizen( thisComp.chit->ID() )) return false;	// only guard when home.
 
 	ItemNameFilter filter( IStringConst::guardpost );
 	GetLumosChitBag()->FindBuilding( IString(), sector, 0, 0, &chitArr, &filter );
@@ -1410,6 +1412,37 @@ bool AIComponent::ThinkGuard( const ComponentSet& thisComp )
 	taskList.Push( Task::MoveTask( ToWorld2F( RandomPosInRect( guardBounds, true ))));
 	taskList.Push( Task::StandTask( GUARD_TIME, 0 ));
 	return true;
+}
+
+
+bool AIComponent::AtHomeCore()
+{
+	SpatialComponent* sc = parentChit->GetSpatialComponent();
+	if ( !sc ) return false;
+
+	Vector2I sector = ToSector( sc->GetPosition2DI());
+	CoreScript* coreScript = GetLumosChitBag()->GetCore( sector );
+
+	if ( !coreScript ) return false;
+	return coreScript->IsCitizen( parentChit->ID() );
+}
+
+
+bool AIComponent::AtFriendlyOrNeutralCore()
+{
+	SpatialComponent* sc = parentChit->GetSpatialComponent();
+	if ( !sc ) return false;
+
+	Vector2I sector = ToSector( sc->GetPosition2DI());
+	CoreScript* coreScript = GetLumosChitBag()->GetCore( sector );
+
+	int team0 = parentChit->PrimaryTeam();
+	int team1 = 0;
+	if ( coreScript ) {
+		team1 = coreScript->ParentChit()->PrimaryTeam();
+	}
+
+	return GetRelationship( team0, team1 ) != RELATE_ENEMY;
 }
 
 
@@ -1446,10 +1479,12 @@ Chit* AIComponent::FindFruit( const Vector2F& pos2, Vector2F* dest )
 	}
 
 	// Okay, now check the farms. Now we need to use full pathing for meaningful results.
-	Vector2F farmLoc;
-	if ( chitBag->FindBuilding( IStringConst::farm, ToSector( ToWorld2I( pos2 )), 
-		                        &farmLoc, LumosChitBag::RANDOM_NEAR, 0, 0 )) {
-
+	Chit* farmChit = chitBag->FindBuilding( IStringConst::farm, 
+											ToSector( ToWorld2I( pos2 )), 
+											&pos2,
+											LumosChitBag::RANDOM_NEAR, 0, 0 );
+	if ( farmChit ) {
+		Vector2F farmLoc = farmChit->GetSpatialComponent()->GetPosition2D();
 		chitBag->QuerySpatialHash( &chitArr, farmLoc, FARM_GROW_RAD, 0, &filter );	
 		parentChit->random.ShuffleArray( chitArr.Mem(), chitArr.Size() );
 		for( int i=0; i<chitArr.Size(); ++i ) {
@@ -1471,45 +1506,138 @@ Chit* AIComponent::FindFruit( const Vector2F& pos2, Vector2F* dest )
 }
 
 
-bool AIComponent::ThinkHungry( const ComponentSet& thisComp )
+
+bool AIComponent::ThinkFruitCollect( const ComponentSet& thisComp )
 {
-	// Some buildings provide food - that happens in ThinkNeeds.
+		// Some buildings provide food - that happens in ThinkNeeds.
 	// This is for picking up food on the group.
 
-	if ( !(thisComp.item->flags & GameItem::AI_USES_BUILDINGS )) {
+	if ( parentChit->PlayerControlled() ) {
 		return false;
 	}
 
-	IString ifruit = StringPool::Intern( "fruit" );
+	int index = thisComp.itemComponent->FindItem( IStringConst::fruit );
+	bool carrying = index >= 0;
+	if ( carrying ) return false;	// only carry one fruit, at least intentionally?
+
+	double need = 1;
+	if ( thisComp.item->flags & GameItem::HAS_NEEDS ) {
+		const ai::Needs& needs = GetNeeds();
+		need = needs.Value( Needs::FOOD );
+	}
+
+	// It is the duty of every citizen to take fruit to the distillery.
+	if ( AtHomeCore() ) {
+		if (    (thisComp.item->flags & GameItem::AI_DOES_WORK)
+			 || thisComp.item->GetPersonality().Botany() == Personality::LIKES
+			 || need < NEED_CRITICAL * 2.0 )
+		{
+			// Can we go pick something up?
+			if ( thisComp.itemComponent->CanAddToInventory() ) {
+				Vector2F fruitPos = { 0, 0 };
+				Chit* fruit = FindFruit( thisComp.spatial->GetPosition2D(), &fruitPos );
+				if ( fruit ) {
+					taskList.Push( Task::MoveTask( fruitPos, 0 ));
+					taskList.Push( Task::PickupTask( fruit->ID(), 0 ));
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+
+bool AIComponent::ThinkHungry( const ComponentSet& thisComp )
+{
+	if ( parentChit->PlayerControlled() ) {
+		return false;
+	}
+
+	int index = thisComp.itemComponent->FindItem( IStringConst::fruit );
+	bool carrying = index >= 0;
 
 	// Are we carrying fruit?? If so, eat if hungry!
-	const ai::Needs& needs = GetNeeds();
-	int index = thisComp.itemComponent->FindItem( ifruit );
-	if ( needs.Value( Needs::FOOD ) < 0.1f ) {
-		if ( index >= 0 ) {
-			GameItem* item = thisComp.itemComponent->RemoveFromInventory( index );
-			delete item;
-			this->GetNeedsMutable()->Set( Needs::FOOD, 1 );
-			return true;	// did something...?
+	if ( thisComp.item->flags & GameItem::HAS_NEEDS ) {
+		const ai::Needs& needs = GetNeeds();
+		if ( needs.Value( Needs::FOOD ) < NEED_CRITICAL ) {
+			if ( carrying ) {
+				GameItem* item = thisComp.itemComponent->RemoveFromInventory( index );
+				delete item;
+				this->GetNeedsMutable()->Set( Needs::FOOD, 1 );
+				return true;	// did something...?
+			}
+		}
+	}
+	return false;
+}
+
+
+bool AIComponent::ThinkDelivery( const ComponentSet& thisComp )
+{
+	if ( parentChit->PlayerControlled() ) {
+		return false;
+	}
+
+	if ( thisComp.item->flags & GameItem::AI_DOES_WORK ) {
+		bool needVaultRun = false;
+
+		if ( !thisComp.itemComponent->GetItem(0)->wallet.IsEmpty() ) {
+			needVaultRun = true;
+		}
+
+		if ( needVaultRun == false ) {
+			for( int i=1; i<thisComp.itemComponent->NumItems(); ++i ) {
+				const GameItem* item = thisComp.itemComponent->GetItem( i );
+				if ( item->Intrinsic() )
+					continue;
+				if ( item->ToWeapon() || item->ToShield() )
+				{
+					needVaultRun = true;
+					break;
+				}
+			}
+		}
+		if ( needVaultRun ) {
+			Vector2I sector = thisComp.spatial->GetSector();
+			Chit* vault = GetLumosChitBag()->FindBuilding(	IStringConst::vault, 
+															sector, 
+															&thisComp.spatial->GetPosition2D(), 
+															LumosChitBag::RANDOM_NEAR, 0, 0 );
+			if ( vault && vault->GetItemComponent() && vault->GetItemComponent()->CanAddToInventory() ) {
+				MapSpatialComponent* msc = GET_SUB_COMPONENT( vault, SpatialComponent, MapSpatialComponent );
+				GLASSERT( msc );
+				if ( msc ) {
+					Vector2I porch = msc->PorchPos( parentChit->ID() );
+
+					taskList.Push( Task::MoveTask( porch, 0 ));
+					taskList.Push( Task::UseBuildingTask( 0 ));
+					return true;
+				}
+			}
 		}
 	}
 
-	if ( index >= 0 ) {
-		// already carrying something.
-		return false;
-	}
-	
-	if (    thisComp.item->IName() == "worker" 
-		 || thisComp.item->GetPersonality().Botany() == Personality::LIKES ) 
+	if ( thisComp.item->flags & GameItem::AI_USES_BUILDINGS )
 	{
-		// Can we go pick something up?
-		if ( thisComp.itemComponent->CanAddToInventory() ) {
-			Vector2F fruitPos = { 0, 0 };
-			Chit* fruit = FindFruit( thisComp.spatial->GetPosition2D(), &fruitPos );
-			if ( fruit ) {
-				taskList.Push( Task::MoveTask( fruitPos, 0 ));
-				taskList.Push( Task::PickupTask( fruit->ID(), 0 ));
-				return true;
+		int index = thisComp.itemComponent->FindItem( IStringConst::fruit );
+		bool carrying = index >= 0;
+		if ( carrying ) {
+			Vector2I sector = thisComp.spatial->GetSector();
+			Chit* vault = GetLumosChitBag()->FindBuilding(	IStringConst::distillery, 
+															sector, 
+															&thisComp.spatial->GetPosition2D(), 
+															LumosChitBag::RANDOM_NEAR, 0, 0 );
+			if ( vault && vault->GetItemComponent() && vault->GetItemComponent()->CanAddToInventory() ) {
+				MapSpatialComponent* msc = GET_SUB_COMPONENT( vault, SpatialComponent, MapSpatialComponent );
+				GLASSERT( msc );
+				if ( msc ) {
+					Vector2I porch = msc->PorchPos( parentChit->ID() );
+
+					taskList.Push( Task::MoveTask( porch, 0 ));
+					taskList.Push( Task::UseBuildingTask( 0 ));
+					return true;
+				}
 			}
 		}
 	}
@@ -1519,7 +1647,10 @@ bool AIComponent::ThinkHungry( const ComponentSet& thisComp )
 
 bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 {
-	if ( !(thisComp.item->flags & GameItem::AI_USES_BUILDINGS )) {
+	if (    !(thisComp.item->flags & GameItem::AI_USES_BUILDINGS )
+		 || !(thisComp.item->flags & GameItem::HAS_NEEDS )
+		 || parentChit->PlayerControlled() )
+	{
 		return false;
 	}
 
@@ -1686,21 +1817,29 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 		ranged->GetItem()->Reload( parentChit );
 	}
 
+	// Spit up on:
+	// - things that can happen anywhere
+	// - things that can happen in friendly sectors
+	// - things that happen in home sectors
+
 	if ( ThinkWanderEatPlants( thisComp ))
 		return;
 	if ( ThinkWanderHealAtCore( thisComp ))
 		return;
 	if ( ThinkLoot( thisComp ))
 		return;
-	if ( ThinkCriticalNeeds( thisComp ))
+	if ( ThinkCriticalShopping( thisComp ))
 		return;
-	// This hanles both being hungry AND moving food around.
 	if ( ThinkHungry( thisComp )) 
 		return;
 	if ( ThinkNeeds( thisComp ))
 		return;
-	if ( ThinkGuard( thisComp ))
+	if ( ThinkDelivery( thisComp ))
 		return;
+	if ( ThinkFruitCollect( thisComp ))
+		return;
+	if ( ThinkGuard( thisComp ))
+		return;	
 	if ( ThinkDoRampage( thisComp ))
 		return;
 
@@ -2023,31 +2162,6 @@ void AIComponent::FlushTaskList( const ComponentSet& thisComp, U32 delta )
 }
 
 
-void AIComponent::FindRoutineTasks( const ComponentSet& thisComp )
-{
-	if ( thisComp.item->flags & GameItem::AI_DOES_WORK ) {
-		if ( thisComp.itemComponent->NumCarriedItems() ) {
-			// Take extra stuff to the vault.
-			Vector2I sector = thisComp.spatial->GetSector();
-			Chit* vault = GetLumosChitBag()->FindBuilding(	IStringConst::vault, 
-															sector, 
-															&thisComp.spatial->GetPosition2D(), 
-															LumosChitBag::RANDOM_NEAR, 0, 0 );
-			if ( vault && vault->GetItemComponent() && vault->GetItemComponent()->CanAddToInventory() ) {
-				MapSpatialComponent* msc = GET_SUB_COMPONENT( vault, SpatialComponent, MapSpatialComponent );
-				GLASSERT( msc );
-				if ( msc ) {
-					Vector2I porch = msc->PorchPos( parentChit->ID() );
-
-					taskList.Push( Task::MoveTask( porch, 0 ));
-					taskList.Push( Task::UseBuildingTask( 0 ));
-				}
-			}
-		}
-	}
-}
-
-
 void AIComponent::WorkQueueToTask(  const ComponentSet& thisComp )
 {
 	// Is there work to do?		
@@ -2176,7 +2290,7 @@ int AIComponent::DoTick( U32 deltaTime )
 		}
 	}
 
-	if ( (thisComp.item->flags & GameItem::AI_USES_BUILDINGS) && needsTicker.Delta( deltaTime )) {
+	if ( (thisComp.item->flags & GameItem::HAS_NEEDS) && needsTicker.Delta( deltaTime )) {
 		// FIXME: don't call away from friendly sectors.
 		needs.DoTick( needsTicker.Period(), aiMode == BATTLE_MODE );
 		if ( thisComp.chit->PlayerControlled() ) {
@@ -2190,9 +2304,6 @@ int AIComponent::DoTick( U32 deltaTime )
 		 && taskList.Empty() ) 
 	{
 		WorkQueueToTask( thisComp );
-		if ( taskList.Empty() ) {
-			FindRoutineTasks( thisComp );
-		}
 	}
 
 	if ( aiMode == NORMAL_MODE && !taskList.Empty() ) {

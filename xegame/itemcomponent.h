@@ -94,6 +94,8 @@ public:
 	void AddToInventory( GameItem* item );
 	// Add the component, and deletes it.
 	void AddToInventory( ItemComponent* ic );
+	void AddSubInventory( ItemComponent* ic, bool addWeapons, grinliz::IString filterItems );
+
 	// Removes an item from the inventory. Returns
 	// null if that item cannot be removed.
 	GameItem* RemoveFromInventory( int index );

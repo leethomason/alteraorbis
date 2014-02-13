@@ -357,32 +357,30 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 	Chit* controller		= coreScript->ParentChit();
 
 	// Workers:
-	if ( thisComp.item->flags & GameItem::AI_DOES_WORK ) {
-		if ( buildingName == IStringConst::vault ) {
-			GameItem* vaultItem = building->GetItem();
-			GLASSERT( vaultItem );
+	if ( buildingName == IStringConst::vault ) {
+		GameItem* vaultItem = building->GetItem();
+		GLASSERT( vaultItem );
+		Wallet w = vaultItem->wallet.EmptyWallet();
+		vaultItem->wallet.Add( w );
+
+		// Put everything in the vault.
+		ItemComponent* vaultIC = building->GetItemComponent();
+		vaultIC->AddSubInventory( thisComp.itemComponent, true, IString() );
+
+		// Move gold & crystal to the owner.
+		if ( controller && controller->GetItemComponent() ) {
 			Wallet w = vaultItem->wallet.EmptyWallet();
-			vaultItem->wallet.Add( w );
-
-			// Put everything in the vault.
-			ItemComponent* vaultIC = building->GetItemComponent();
-			for( int i=1; i<thisComp.itemComponent->NumItems(); ++i ) {
-				if ( vaultIC->CanAddToInventory() ) {
-					GameItem* item = thisComp.itemComponent->RemoveFromInventory(i);
-					if ( item ) {
-						vaultIC->AddToInventory( item );
-					}
-				}
-			}
-
-			// Move gold & crystal to the owner?
-			if ( controller && controller->GetItemComponent() ) {
-				Wallet w = vaultItem->wallet.EmptyWallet();
-				controller->GetItem()->wallet.Add( w );
-			}
+			controller->GetItem()->wallet.Add( w );
 		}
 		return;
 	}
+	if ( buildingName == IStringConst::distillery ) {
+		ItemComponent* ic = building->GetItemComponent();
+		GLASSERT( ic );
+		ic->AddSubInventory( thisComp.itemComponent, false, IStringConst::fruit );
+		return;
+	}
+
 	if ( thisComp.item->flags & GameItem::AI_USES_BUILDINGS ) {
 		BuildScript buildScript;
 		const BuildData* bd = buildScript.GetDataFromStructure( buildingName );

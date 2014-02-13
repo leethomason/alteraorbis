@@ -9,7 +9,7 @@
   <item name="humanFemale"
         resource="humanFemale"
         uiIcon="human"
-			  flags="GOLD_PICKUP ITEM_PICKUP AI_WANDER_HERD AI_USES_BUILDINGS"
+			  flags="GOLD_PICKUP ITEM_PICKUP AI_WANDER_HERD AI_USES_BUILDINGS HAS_NEEDS HAS_PERSONALITY"
         procedural="suit"
         mob="denizen"
         nameGen="humanFemaleNames"
@@ -27,7 +27,7 @@
   <item name="humanMale"
         resource="humanMale"
         uiIcon="human"
-        flags="GOLD_PICKUP ITEM_PICKUP AI_WANDER_HERD AI_USES_BUILDINGS"
+        flags="GOLD_PICKUP ITEM_PICKUP AI_WANDER_HERD AI_USES_BUILDINGS HAS_NEEDS HAS_PERSONALITY"
         procedural="suit"
         nameGen="humanMaleNames"
         mob="denizen"
@@ -274,7 +274,7 @@
 
   <item name="troll"
         resource="troll"
-        flags="GOLD_PICKUP ITEM_PICKUP AI_SECTOR_WANDER AI_HEAL_AT_CORE AI_USES_BUILDINGS"
+        flags="GOLD_PICKUP ITEM_PICKUP AI_SECTOR_WANDER AI_HEAL_AT_CORE AI_USES_BUILDINGS HAS_PERSONALITY"
         nameGen="monster"
         mob="normal"
         mass ="40">
