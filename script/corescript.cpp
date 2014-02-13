@@ -41,6 +41,7 @@ CoreScript::CoreScript()
 	tech = 0;
 	achievedTechLevel = 0;
 	workQueue = 0;
+	nElixir = 0;
 }
 
 
@@ -60,6 +61,7 @@ void CoreScript::Serialize( XStream* xs )
 {
 	XarcOpen( xs, ScriptName() );
 	XARC_SER( xs, tech );
+	XARC_SER( xs, nElixir );
 	XARC_SER( xs, achievedTechLevel );
 	XARC_SER( xs, defaultSpawn );
 

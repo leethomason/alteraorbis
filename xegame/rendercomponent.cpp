@@ -428,20 +428,17 @@ void RenderComponent::ProcessIcons( int delta )
 
 	const ChitContext* context = GetChitContext();
 	float len2 = ( context->engine->camera.PosWC() - pos ).LengthSquared();
+	
 	IString proper;
 	if ( parentChit->GetItem() ) {
 		proper = parentChit->GetItem()->IProperName();
 	}
 
-	if ( len2 < EL_FAR*EL_FAR && ( icons.Size() || !proper.empty() )) {
+	if ( len2 < EL_FAR*EL_FAR && ( icons.Size() || !proper.empty() || !decoText.empty() )) {
 		const Screenport& port = context->engine->GetScreenport();
 		
 		Vector2F ui = { 0, 0 };
-		if ( parentChit->GetItem() && parentChit->GetItem()->IName() == "visitor" ) {
-			int debug=1;
-		}
 		const Rectangle3F aabb = model[0]->AABB();
-		//const Rectangle3F aabb = model[0]->GetInvariantAABB( 0, 0 );
 		Vector3F topCenter = { pos.x, aabb.max.y, pos.z };
 
 		port.WorldToUI( topCenter, &ui );
@@ -459,9 +456,14 @@ void RenderComponent::ProcessIcons( int delta )
 			float dy = SIZE * 0.5f;
 
 			CStr<16> str;
-			if ( !proper.empty() ) {
+			
+			if ( !decoText.empty() ) {
+				str = decoText;
+			}
+			else if ( !proper.empty() ) {
 				str.Format( "%s %d", proper.safe_str(), parentChit->GetItem()->Traits().Level() );
 			}
+			
 			textLabel->SetText( str.safe_str() );
 			textLabel->SetVisible( true );
 			textLabel->SetCenterPos( ui.x, ui.y - dy );

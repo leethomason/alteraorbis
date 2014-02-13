@@ -10,6 +10,7 @@
 #include "corescript.h"
 #include "countdownscript.h"
 #include "farmscript.h"
+#include "distilleryscript.h"
 
 #include "../game/lumoschitbag.h"
 
@@ -43,6 +44,9 @@ ScriptComponent::ScriptComponent( const ComponentFactory* f ) : script( 0 ), fac
 	}
 	else if ( name == "FarmScript" ) {
 		script = new FarmScript();
+	}
+	else if ( name == "DistilleryScript" ) {
+		script = new DistilleryScript();
 	}
 	else {
 		GLASSERT( 0 );

@@ -1073,7 +1073,7 @@ void GameScene::DoTick( U32 delta )
 
 	float tech = coreScript->GetTech();
 	int maxTech = coreScript->MaxTech();
-	str.Format( "Tech %.2f / %d", tech, maxTech );
+	str.Format( "Tech %.2f / %d  Elixir %d", tech, maxTech, coreScript->nElixir );
 	techLabel.SetText( str.c_str() );
 
 //	int atech = coreScript->AchievedTechLevel();

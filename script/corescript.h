@@ -56,6 +56,8 @@ public:
 	int   MaxTech() const;
 	void  AddTech();
 
+	int nElixir;
+
 private:
 	WorkQueue*	workQueue;
 	int			team;			// cache so we can update if it changes

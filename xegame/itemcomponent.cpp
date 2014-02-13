@@ -645,6 +645,23 @@ int ItemComponent::DoTick( U32 delta )
 			}
 		}
 	}	
+
+	// FIXME: hacking in UI logic
+	if ( mainItem->IName() == IStringConst::distillery ) {
+		if ( parentChit->GetRenderComponent() ) {
+
+			int nFruit = 0;
+			for( int i=1; i<itemArr.Size(); ++i ) {
+				if ( itemArr[i]->IName() == IStringConst::fruit ) {
+					++nFruit;
+				}
+			}
+
+			CStr<16> str;
+			str.Format( "Fruit: %d", nFruit );
+			parentChit->GetRenderComponent()->SetDecoText( str.c_str() );
+		}
+	}
 	return tick;
 }
 

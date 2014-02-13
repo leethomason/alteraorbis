@@ -156,6 +156,7 @@
     <ClCompile Include="..\script\buildscript.cpp" />
     <ClCompile Include="..\script\corescript.cpp" />
     <ClCompile Include="..\script\countdownscript.cpp" />
+    <ClCompile Include="..\script\distilleryscript.cpp" />
     <ClCompile Include="..\script\farmscript.cpp" />
     <ClCompile Include="..\script\forgescript.cpp" />
     <ClCompile Include="..\script\itemscript.cpp" />
@@ -275,6 +276,7 @@
     <ClInclude Include="..\script\buildscript.h" />
     <ClInclude Include="..\script\corescript.h" />
     <ClInclude Include="..\script\countdownscript.h" />
+    <ClInclude Include="..\script\distilleryscript.h" />
     <ClInclude Include="..\script\farmscript.h" />
     <ClInclude Include="..\script\forgescript.h" />
     <ClInclude Include="..\script\itemscript.h" />

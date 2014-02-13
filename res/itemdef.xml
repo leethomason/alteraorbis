@@ -216,6 +216,7 @@
         size="2"
         mass="100"
         cost="80"
+        script="DistilleryScript"
         />
 
   <item name="arachnoid"
