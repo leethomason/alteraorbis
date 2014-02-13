@@ -39,6 +39,7 @@ static const int MAX_PASSABLE_PLANT_STAGE = 1;	// 0,1 passable, 2,3 are not
 static const int LEVEL_OF_NAMING	= 4;
 static const float	PICKUP_RANGE	= 1.1f;	// Make sure center-to-center works
 static const float	FARM_GROW_RAD	= 2.2f;
+static const int TECH_MAX			= 4;	// Tech must be less than this: 0-3 in int, 0-3.99 in double
 
 // General guidelines to the # of things in the world.
 static const int TYPICAL_DOMAINS	= 100;

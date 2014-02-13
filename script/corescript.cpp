@@ -27,7 +27,6 @@
 static const double TECH_ADDED_BY_VISITOR = 0.2;
 static const double TECH_DECAY_0 = 0.00005;
 static const double TECH_DECAY_1 = 0.00020;
-static const double TECH_MAX = 4;
 
 using namespace grinliz;
 
@@ -185,7 +184,7 @@ int CoreScript::DoTick( U32 delta )
 
 	bool attached = InUse();
 
-	tech -= Lerp( TECH_DECAY_0, TECH_DECAY_1, tech/TECH_MAX );
+	tech -= Lerp( TECH_DECAY_0, TECH_DECAY_1, tech/double(TECH_MAX) );
 	tech = Clamp( tech, 0.0, double(MaxTech())-0.01 );
 
 	MapSpatialComponent* ms = GET_SUB_COMPONENT( scriptContext->chit, SpatialComponent, MapSpatialComponent );
@@ -307,14 +306,14 @@ int CoreScript::MaxTech() const
 {
 	Vector2I sector = ToSector( scriptContext->chit->GetSpatialComponent()->GetPosition2DI() );
 	scriptContext->chitBag->FindBuilding( IStringConst::power, sector, 0, 0, &chitArr, 0 );
-	return Min( chitArr.Size() + 1, 4 );	// get one power for core
+	return Min( chitArr.Size() + 1, TECH_MAX );	// get one power for core
 }
 
 
 void CoreScript::AddTech()
 {
 	tech += TECH_ADDED_BY_VISITOR;
-	tech = Clamp( tech, 0.0, Min( TECH_MAX, double( MaxTech() ) - 0.01 ));
+	tech = Clamp( tech, 0.0, Min( double(TECH_MAX), double( MaxTech() ) - 0.01 ));
 
 	achievedTechLevel = Max( achievedTechLevel, (int)tech );
 

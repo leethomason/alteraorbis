@@ -372,12 +372,14 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 			Wallet w = vaultItem->wallet.EmptyWallet();
 			controller->GetItem()->wallet.Add( w );
 		}
+		building->SetTickNeeded();
 		return;
 	}
 	if ( buildingName == IStringConst::distillery ) {
 		ItemComponent* ic = building->GetItemComponent();
 		GLASSERT( ic );
 		ic->AddSubInventory( thisComp.itemComponent, false, IStringConst::fruit );
+		building->SetTickNeeded();
 		return;
 	}
 
