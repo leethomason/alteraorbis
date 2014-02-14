@@ -1696,10 +1696,15 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 		double s=0;
 		double nv=0;
 		for( int k=0; k<ai::Needs::NUM_NEEDS; ++k ) {
-			if ( bd->needs.Value(k) > 0 ) {
+			double n = bd->needs.Value(k);
+			if ( k == ai::Needs::FOOD ) {
+				if ( coreScript->nElixir == 0 ) n = 0;
+			}
+
+			if ( n > 0 ) {
 				// (how much needed) * (how much available)
 				nv += 1.0 - needs.Value(k);
-				s  += (1.0 - needs.Value(k)) * bd->needs.Value(k);	
+				s  += (1.0 - needs.Value(k)) * n;	
 			}
 		}
 

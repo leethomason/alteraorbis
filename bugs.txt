@@ -68,14 +68,14 @@ x How does Ice and magma interact? Volcanoes wipe out ice. Okay for now.
 
 	 - Food
 		- tune guarding
-	 	- food collection
-	 	- food transport
-	 	- food need 
-	 	- consume elixer
-	 	- consume raw
+	 	x food collection
+	 	x food transport
+	 	x food need 
+	 	x consume elixer
+	 	x consume raw
 	 	- morale
 	 	- effects of low morale (madness, starvation)
-    	- time scale culling
+    	- model to predict rates of food, farming, needs
 
 	- Census
 		x coolest stuff, past and present, by category
@@ -109,6 +109,7 @@ x How does Ice and magma interact? Volcanoes wipe out ice. Okay for now.
 		- influence zones for buildings
 		- team colors
 		- battle flags
+    	- time scale culling
 		- forge
 			- forge or factory?
 			- fee to forge

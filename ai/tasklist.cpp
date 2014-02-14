@@ -387,26 +387,35 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 		BuildScript buildScript;
 		const BuildData* bd = buildScript.GetDataFromStructure( buildingName );
 		GLASSERT( bd );
-		ai::Needs needs = bd->needs;
+		ai::Needs supply = bd->needs;
+
+		// Can't meet food need if no elixir. And don't eat if not hungry.
+		if ( !coreScript->nElixir || thisComp.ai->GetNeeds().Value( Needs::FOOD ) > 0.6 ) {
+			supply.Set( ai::Needs::FOOD, 0 );
+		}
 
 		if ( buildingName == IStringConst::market ) {
 			GoShopping( thisComp, building );
 		}
 		else if ( buildingName == IStringConst::factory ) {
 			bool used = UseFactory( thisComp, building, coreScript->GetTechLevel() );
-			if ( !used ) needs.SetZero();
+			if ( !used ) supply.SetZero();
 		}
 		else if ( buildingName == IStringConst::bed ) {
 			// Apply the needs as is.
 		}
 		else if ( buildingName == IStringConst::bar ) {
-			//SocialPulse( thisComp, thisComp.spatial->GetPosition2D() );
-			// FIXME: check for food
+			// Apply the needs as is.
 		}
 		else {
 			GLASSERT( 0 );
 		}
-		thisComp.ai->GetNeedsMutable()->Add( needs, 1.0 );
+		if ( supply.Value(Needs::FOOD) > 0 ) {
+			GLASSERT( supply.Value(Needs::FOOD) == 1 );	// else probably not what intended.
+			GLASSERT( coreScript->nElixir > 0 );
+			coreScript->nElixir -= 1;
+		}
+		thisComp.ai->GetNeedsMutable()->Add( supply, 1.0 );
 	}
 }
 

@@ -21,8 +21,6 @@ Needs::Needs()
 { 
 	for( int i=0; i<NUM_NEEDS; ++i ) {
 		need[i] = 1; 
-		// DEBUGGING FIXME
-		need[FOOD] = 0.2;
 	}
 }
 

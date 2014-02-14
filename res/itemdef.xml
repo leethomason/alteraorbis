@@ -197,7 +197,7 @@
 		    need.time="5.0"
         need.fun="0.2"
         need.social="0.4"
-        need.food="0.0"
+        need.food="1.0"
         />
 
   <item name="farm"
