@@ -18,16 +18,18 @@ public:
 		AMMO_BAR	= 0x02,
 		SHIELD_BAR	= 0x04,
 		LEVEL_BAR	= 0x08,
+		MORALE_BAR  = 0x10,
 
-		SOCIAL_BAR	= 0x10,
-		ENERGY_BAR	= 0x20,
-		FUN_BAR		= 0x40, 
+		FOOD_BAR	= 0x020,
+		SOCIAL_BAR	= 0x040,
+		ENERGY_BAR	= 0x080,
+		FUN_BAR		= 0x100, 
 
-		NEED_BARS	= SOCIAL_BAR | ENERGY_BAR | FUN_BAR,
+		NEED_BARS	= MORALE_BAR | FOOD_BAR | SOCIAL_BAR | ENERGY_BAR | FUN_BAR,
 		ALL_BARS	= NEED_BARS | LEVEL_BAR | SHIELD_BAR | AMMO_BAR | HP_BAR,
 
-		SHOW_NAME	= 0x80,
-		ALL			= 0xff
+		SHOW_NAME	= 0x200,
+		ALL			= 0xffff
 	};
 
 	virtual void Init( gamui::Gamui* gamui, const gamui::ButtonLook&, int flags ) = 0;
@@ -58,6 +60,7 @@ protected:
 		BAR_AMMO,
 		BAR_SHIELD,
 		BAR_LEVEL,
+		BAR_MORALE,
 		BAR_FOOD,
 		BAR_SOCIAL,
 		BAR_ENERY,

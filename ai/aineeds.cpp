@@ -22,6 +22,7 @@ Needs::Needs()
 	for( int i=0; i<NUM_NEEDS; ++i ) {
 		need[i] = 1; 
 	}
+	morale = 1;
 }
 
 
@@ -38,7 +39,24 @@ void Needs::DoTick( U32 delta, bool inBattle )
 		need[FUN] += dNeed * 10.0;
 	}
 	ClampNeeds();
+
+	double min = need[0];
+	double max = need[0];
+	for( int i=1; i<NUM_NEEDS; ++i ) {
+		min = Min( need[i], min );
+		max = Max( need[i], max );
+	}
+
+	if ( min < 0.001 ) {
+		morale -= dNeed;
+	}
+	if ( min > 0.5 ) {
+		morale += dNeed;
+	}
+
+	morale = Clamp( morale, 0.0, 1.0 );
 }
+
 
 void Needs::ClampNeeds()
 {
@@ -60,6 +78,7 @@ void Needs::Add( const Needs& other, double scale )
 void Needs::Serialize( XStream* xs )
 {
 	XarcOpen( xs, "Needs" );
+	XARC_SER( xs, morale );
 	XARC_SER_ARR( xs, need, NUM_NEEDS );
 	XarcClose( xs );
 }

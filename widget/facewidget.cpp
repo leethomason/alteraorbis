@@ -44,11 +44,12 @@ void FaceWidget::BaseInit( gamui::Gamui* gamui, const gamui::ButtonLook& look, i
 	bar[BAR_AMMO].Init(		gamui, 2, blue, grey );
 	bar[BAR_SHIELD].Init(	gamui, 2, blue, grey );
 	bar[BAR_LEVEL].Init(	gamui, 2, blue, grey );
+	bar[BAR_MORALE].Init(	gamui, 2, blue, grey );
 
 	bar[BAR_HP].SetText( "HP" );
 	bar[BAR_AMMO].SetText( "Weapon" );
 	bar[BAR_SHIELD].SetText( "Shield" );
-
+	bar[BAR_MORALE].SetText( "Morale" );
 
 	for( int i=0; i<ai::Needs::NUM_NEEDS; i++ ) {
 		GLASSERT( i < MAX_BARS );
@@ -160,6 +161,7 @@ void FaceWidget::SetMeta( ItemComponent* ic, AIComponent* ai )
 		for( int i=0; i<ai::Needs::NUM_NEEDS; ++i ) {
 			bar[i+BAR_FOOD].SetRange( (float)needs.Value(i) );
 		}
+		bar[BAR_MORALE].SetRange( (float)needs.Morale() );
 	}
 }
 
