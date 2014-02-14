@@ -37,6 +37,8 @@ public:
 
 	static const char* Name( int i );
 	double Value( int i ) const { GLASSERT( i >= 0 && i < NUM_NEEDS ); return need[i]; }
+
+	void SetMorale( double v ) { morale = v; }
 	double Morale() const { return morale; }
 
 	void Set( int i, double v ) { GLASSERT( i >= 0 && i < NUM_NEEDS ); need[i] = v; ClampNeeds(); }

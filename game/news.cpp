@@ -111,6 +111,9 @@ grinliz::IString NewsEvent::GetWhat() const
 		"Forged",
 		"Destroyed",
 		"Purchase",
+		"Starvation",
+		"Blood Rage",
+		"Vision Quest",
 
 		"",	// placeholder to mark minor events
 
@@ -208,6 +211,18 @@ void NewsEvent::Console( grinliz::GLString* str ) const
 
 	case PURCHASED:
 		str->Format( "%.2f: %s purchased at %s by %s.", age, itemName.c_str(), domain.c_str(), secondName.c_str() );
+		break;
+
+	case STARVATION:
+		str->Format( "%.2f: %s has been overcome by starvation at %s.", age, itemName.c_str(), domain.c_str() );
+		break;
+
+	case BLOOD_RAGE:
+		str->Format( "%.2f: a distraught %s is overcome by blood rage at %s.", age, itemName.c_str(), domain.c_str() );
+		break;
+
+	case VISION_QUEST:
+		str->Format( "%.2f: %s is consumed by despair at %s and leaves for a vision quest.", age, itemName.c_str(), domain.c_str() );
 		break;
 
 	default:

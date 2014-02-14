@@ -953,6 +953,9 @@ void GameScene::ProcessNewsToConsole()
 		case NewsEvent::FORGED:
 		case NewsEvent::UN_FORGED:
 		case NewsEvent::PURCHASED:
+		case NewsEvent::STARVATION:
+		case NewsEvent::BLOOD_RAGE:
+		case NewsEvent::VISION_QUEST:
 			if ( coreScript && coreScript->IsCitizen( ne.chitID )) {
 				ne.Console( &str );
 			}

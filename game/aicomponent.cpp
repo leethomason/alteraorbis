@@ -2209,6 +2209,70 @@ void AIComponent::WorkQueueToTask(  const ComponentSet& thisComp )
 }
 
 
+void AIComponent::DoMoraleZero( const ComponentSet& thisComp )
+{
+	enum {
+		STARVE,
+		BLOODRAGE,
+		VISION_QUEST,
+		NUM_OPTIONS
+	};
+
+	const Needs& needs = this->GetNeeds();
+	const Personality& personality = thisComp.item->GetPersonality();
+	double food2 = needs.Value( Needs::FOOD );
+	food2 = food2 * food2;
+
+	float options[NUM_OPTIONS] = {	float( 1.0 - food2 ),						// starve
+									personality.Fighting() ? 0.7f : 0.2f,		// bloodrage
+									personality.Spiritual() ? 0.7f : 0.2f };	// quest
+	int option = parentChit->random.Select( options, NUM_OPTIONS );
+	this->GetNeedsMutable()->SetMorale( 1 );
+
+	Vector2F pos2 = thisComp.spatial->GetPosition2D();
+	thisComp.chit->SetTickNeeded();
+
+	switch ( option ) {
+	case STARVE:
+		thisComp.item->hp = 0;
+		NewsHistory::Instance()->Add( NewsEvent( NewsEvent::STARVATION, pos2, parentChit, 0 ));
+		break;
+
+	case BLOODRAGE:
+		thisComp.item->primaryTeam = TEAM_CHAOS;
+		NewsHistory::Instance()->Add( NewsEvent( NewsEvent::BLOOD_RAGE, pos2, parentChit, 0 ));
+		break;
+
+	case VISION_QUEST:
+		{
+			PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
+			const SectorData* sd = 0;
+			Vector2I sector = { 0, 0 };
+			for( int i=0; i<16; ++i ) {
+				sector.Set( parentChit->random.Rand( NUM_SECTORS ), parentChit->random.Rand( NUM_SECTORS ));
+				sd = &GetChitContext()->worldMap->GetSector( sector );
+				if ( sd->HasCore() ) {
+					break;
+				}
+			}
+			if ( sd && pmc ) {
+				SectorPort sectorPort;
+				sectorPort.sector = sector;
+				for( int k=0; k<4; ++k ) {
+					if ( sd->ports & (1<<k)) {
+						sectorPort.port = 1<<k;
+						break;
+					}
+				}
+				this->Move( sectorPort, true );
+				NewsHistory::Instance()->Add( NewsEvent( NewsEvent::VISION_QUEST, pos2, parentChit, 0 ));
+			}
+		}
+		break;
+	};
+}
+
+
 int AIComponent::DoTick( U32 deltaTime )
 {
 	PROFILE_FUNC();
@@ -2300,6 +2364,9 @@ int AIComponent::DoTick( U32 deltaTime )
 		needs.DoTick( needsTicker.Period(), aiMode == BATTLE_MODE );
 		if ( thisComp.chit->PlayerControlled() ) {
 			thisComp.ai->GetNeedsMutable()->SetFull();
+		}
+		if ( needs.Morale() == 0 ) {
+			DoMoraleZero( thisComp );
 		}
 	}
 

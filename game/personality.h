@@ -49,6 +49,9 @@ public:
 	int Crafting() const	{ return Sum(
 								Grade( trait[INT_PHYS], -1 ),
 								Grade( trait[PLANNED_IMPULSIVE], -1 )); }
+	int Spiritual() const	{ return Sum( 
+								Grade( trait[INT_PHYS], -1 ),
+								Grade( trait[NEUROTIC_STABLE], -1 )); }
 
 private:
 	int Grade( int v, int dir ) const { 

@@ -132,6 +132,7 @@ private:
 	bool ThinkFruitCollect( const ComponentSet& thisComp );
 	bool ThinkDelivery( const ComponentSet& thisComp );
 
+	void DoMoraleZero( const ComponentSet& thisComp );
 	void WorkQueueToTask(  const ComponentSet& thisComp );	// turn a work item into a task
 	void FlushTaskList( const ComponentSet& thisComp, U32 delta );		// moves tasks along, mark tasks completed, do special actions
 

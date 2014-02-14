@@ -42,6 +42,9 @@ public:
 		UN_FORGED,					//  item		killer	
 
 		PURCHASED,					//	item		purchaser	0
+		STARVATION,					//  victim					victim
+		BLOOD_RAGE,					//  victim					victim
+		VISION_QUEST,				//	victim					victim
 
 		// Current events, but not logged:
 		START_CURRENT,
