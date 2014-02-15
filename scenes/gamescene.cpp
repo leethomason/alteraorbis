@@ -118,7 +118,8 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 		modeButton[bd.techLevel].AddSubItem( &buildButton[i] );
 	}
 
-	tabBar.Init( &gamui2D, LumosGame::CalcUIIconAtom( "tabBar", true ), false );
+	tabBar0.Init( &gamui2D, LumosGame::CalcUIIconAtom( "tabBar", true ), false );
+	tabBar1.Init( &gamui2D, LumosGame::CalcUIIconAtom( "tabBar", true ), false );
 
 	createWorkerButton.Init( &gamui2D, game->GetButtonLook(0) );
 	createWorkerButton.SetText( "WorkerBot" );
@@ -187,9 +188,10 @@ void GameScene::Resize()
 	layout.PosAbs( &allRockButton, 1, -2 );
 	layout.PosAbs( &censusButton, 3, -1 );
 	layout.PosAbs( &useBuildingButton, 1, 0 );
-	layout.PosAbs( &cameraHomeButton, 1, 0 );
-	layout.PosAbs( &prevUnit, 2, 0 );
-	layout.PosAbs( &nextUnit, 3, 0 );
+
+	layout.PosAbs( &cameraHomeButton, 0, 1 );
+	layout.PosAbs( &prevUnit, 1, 1 );
+	layout.PosAbs( &nextUnit, 2, 1 );
 
 	int level = BuildScript::TECH_UTILITY;
 	int start = 0;
@@ -200,18 +202,20 @@ void GameScene::Resize()
 			level = bd.techLevel;
 			start = i;
 		}
-		layout.PosAbs( &buildButton[i], i-start+1, 1 );
+		layout.PosAbs( &buildButton[i], i-start, 2 );
 	}
 	for( int i=0; i<NUM_BUILD_MODES; ++i ) {
-		layout.PosAbs( &modeButton[i], i+1, 0 );
+		layout.PosAbs( &modeButton[i], i, 1 );
 	}
-	tabBar.SetPos( modeButton[0].X(), modeButton[0].Y() );
-	tabBar.SetSize( modeButton[NUM_BUILD_MODES-1].X() + modeButton[NUM_BUILD_MODES-1].Width() - modeButton[0].X(), modeButton[0].Height() );
-
-	layout.PosAbs( &createWorkerButton, 1, 2 );
+	layout.PosAbs( &createWorkerButton, 0, 3 );
 	for( int i=0; i<NUM_UI_MODES; ++i ) {
-		layout.PosAbs( &uiMode[i], 0, i );
+		layout.PosAbs( &uiMode[i], i, 0 );
 	}
+
+	tabBar0.SetPos(  uiMode[0].X(), uiMode[0].Y() );
+	tabBar0.SetSize( uiMode[NUM_UI_MODES-1].X() + uiMode[NUM_UI_MODES-1].Width() - uiMode[0].X(), uiMode[0].Height() );
+	tabBar1.SetPos(  modeButton[0].X(), modeButton[0].Y() );
+	tabBar1.SetSize( modeButton[NUM_BUILD_MODES-1].X() + modeButton[NUM_BUILD_MODES-1].Width() - modeButton[0].X(), modeButton[0].Height() );
 
 	layout.PosAbs( &faceWidget, -1, 0, 1, 1 );
 	layout.PosAbs( &minimap,    -2, 0, 1, 1 );
@@ -1107,7 +1111,8 @@ void GameScene::DoTick( U32 delta )
 	for( int i=0; i<NUM_BUILD_MODES; ++i ) {
 		modeButton[i].SetVisible( uiMode[UI_BUILD].Down() );
 	}
-	tabBar.SetVisible( uiMode[UI_BUILD].Down() );
+	//tabBar0.SetVisible( uiMode[UI_BUILD].Down() );
+	tabBar1.SetVisible( uiMode[UI_BUILD].Down() );
 	createWorkerButton.SetVisible( uiMode[UI_BUILD].Down() );
 
 	str.Clear();

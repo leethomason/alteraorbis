@@ -135,7 +135,7 @@ private:
 	gamui::PushButton	useBuildingButton;
 	gamui::PushButton	cameraHomeButton;
 	gamui::PushButton	nextUnit, prevUnit;
-	gamui::Image		tabBar;
+	gamui::Image		tabBar0, tabBar1;
 	gamui::PushButton	createWorkerButton;
 	gamui::ToggleButton	uiMode[NUM_UI_MODES];
 	gamui::PushButton	allRockButton;
