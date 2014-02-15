@@ -25,7 +25,7 @@ public:
 	virtual bool Visible() const					{ return text.Visible(); }
 	virtual void SetVisible( bool vis );
 
-	void SetInfo( const GameItem* item, const GameItem* user );
+	void SetInfo( const GameItem* item, const GameItem* user, bool showPersonality );
 
 private:
 	gamui::LayoutCalculator	layout;

@@ -52,7 +52,7 @@ x How does Ice and magma interact? Volcanoes wipe out ice. Okay for now.
     	- model to predict rates of food, farming, needs
     	- art: farm
     	- art: distillery
-    	- personality display
+    	x personality display
 		- re-group build commands
 		- morale affected by tombstones
 		x prev-next unit now working correctly if out of domain

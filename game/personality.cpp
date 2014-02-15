@@ -39,6 +39,10 @@ void Personality::Roll( U32 seed, const GameTrait* t )
 		if ( t->Will() > HIGH && trait[NEUROTIC_STABLE] < LOW )
 			trait[NEUROTIC_STABLE] = random.Dice( 3,6 );
 	}
+
+	// Prevent unlikely case where all traits are tens.
+	int index = random.Rand( NUM_TRAITS );
+	if ( trait[index] == 10 ) trait[index] = 11;
 }
 
 
@@ -50,8 +54,11 @@ void Personality::Serialize( XStream* xs )
 }
 
 
-void Personality::Description( grinliz::GLString* str )
+void Personality::Description( grinliz::GLString* str ) const
 {
+	*str = "";
+	if ( !HasPersonality() ) return;
+
 	CArray< IString, NUM_TRAITS > descArr;
 
 	if ( trait[INT_PHYS] <= LOW )

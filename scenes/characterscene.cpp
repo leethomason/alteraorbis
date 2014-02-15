@@ -151,7 +151,7 @@ void CharacterScene::SetItemInfo( const GameItem* item, const GameItem* user )
 										 GameTrait::LevelToExperience( item->Traits().Level()+1 ));
 	desc.SetText( str.c_str() );
 
-	itemDescWidget.SetInfo( item, user );
+	itemDescWidget.SetInfo( item, user, nStorage==1 );
 }
 
 

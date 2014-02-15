@@ -34,6 +34,13 @@ public:
 
 	void Serialize( XStream* xs );
 
+	bool HasPersonality() const {
+		for( int i=0; i<NUM_TRAITS; ++i ) {
+			if ( trait[i] != 10 ) return true;
+		}
+		return false;
+	}
+
 	enum {
 		LIKES		= 1,
 		INDIFFERENT = 0,
@@ -54,7 +61,7 @@ public:
 								Grade( trait[INT_PHYS], -1 ),
 								Grade( trait[NEUROTIC_STABLE], -1 )); }
 
-	void Description( grinliz::GLString* str );
+	void Description( grinliz::GLString* str ) const;
 
 private:
 	int Grade( int v, int dir ) const { 

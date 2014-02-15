@@ -29,7 +29,7 @@ void ItemDescWidget::SetVisible( bool v )
 }
 
 
-void ItemDescWidget::SetInfo( const GameItem* item, const GameItem* user )
+void ItemDescWidget::SetInfo( const GameItem* item, const GameItem* user, bool showPersonality )
 {
 	textBuffer.Clear();
 	CStr<64> str;
@@ -103,6 +103,14 @@ void ItemDescWidget::SetInfo( const GameItem* item, const GameItem* user )
 	}
 
 	textBuffer += '\n';
+
+	if ( showPersonality && item->GetPersonality().HasPersonality() ) {
+		GLString pdesc;
+		item->GetPersonality().Description( &pdesc );
+		textBuffer += pdesc.c_str();
+		textBuffer += "\n\n";
+	}
+
 	MicroDBIterator it( item->historyDB );
 	for( ; !it.Done(); it.Next() ) {
 		

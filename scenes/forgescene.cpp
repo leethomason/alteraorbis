@@ -192,7 +192,7 @@ void ForgeScene::SetModel( bool randomTraits )
 						partsFlags, effectFlags, 
 						item, &crystalRequired, &techRequired, randomTraits );
 
-	itemDescWidget.SetInfo( displayItem, &humanMale );
+	itemDescWidget.SetInfo( displayItem, &humanMale, false );
 
 	ProcRenderInfo info;
 	if ( item ) {

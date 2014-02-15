@@ -84,6 +84,8 @@ DialogScene::DialogScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 	for( int i=0; i<NUM_CRYSTAL_TYPES; ++i ) {
 		itemComponent0->GetItem(0)->wallet.AddCrystal( i );
 	}
+	itemComponent0->GetItem()->GetTraitsMutable()->Roll( 10 );
+	itemComponent0->GetItem()->GetPersonalityMutable()->Roll( 20, &itemComponent0->GetItem()->Traits() );
 }
 
 DialogScene::~DialogScene()
