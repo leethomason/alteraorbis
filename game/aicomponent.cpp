@@ -2226,6 +2226,7 @@ void AIComponent::DoMoraleZero( const ComponentSet& thisComp )
 	float options[NUM_OPTIONS] = {	float( 1.0 - food2 ),						// starve
 									personality.Fighting() ? 0.7f : 0.2f,		// bloodrage
 									personality.Spiritual() ? 0.7f : 0.2f };	// quest
+
 	int option = parentChit->random.Select( options, NUM_OPTIONS );
 	this->GetNeedsMutable()->SetMorale( 1 );
 
@@ -2360,13 +2361,15 @@ int AIComponent::DoTick( U32 deltaTime )
 	}
 
 	if ( (thisComp.item->flags & GameItem::HAS_NEEDS) && needsTicker.Delta( deltaTime )) {
-		// FIXME: don't call away from friendly sectors.
-		needs.DoTick( needsTicker.Period(), aiMode == BATTLE_MODE );
-		if ( thisComp.chit->PlayerControlled() ) {
-			thisComp.ai->GetNeedsMutable()->SetFull();
-		}
-		if ( needs.Morale() == 0 ) {
-			DoMoraleZero( thisComp );
+		// Travel exists without needs - plenty of other things to go wrong.
+		if ( this->AtFriendlyOrNeutralCore() ) {
+			needs.DoTick( needsTicker.Period(), aiMode == BATTLE_MODE );
+			if ( thisComp.chit->PlayerControlled() ) {
+				thisComp.ai->GetNeedsMutable()->SetFull();
+			}
+			if ( needs.Morale() == 0 ) {
+				DoMoraleZero( thisComp );
+			}
 		}
 	}
 

@@ -134,6 +134,7 @@ private:
 	gamui::ToggleButton modeButton[NUM_BUILD_MODES];
 	gamui::PushButton	useBuildingButton;
 	gamui::PushButton	cameraHomeButton;
+	gamui::PushButton	nextUnit, prevUnit;
 	gamui::Image		tabBar;
 	gamui::PushButton	createWorkerButton;
 	gamui::ToggleButton	uiMode[NUM_UI_MODES];

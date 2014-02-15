@@ -41,6 +41,8 @@ public:
 	void AddCitizen( Chit* chit );
 	bool IsCitizen( Chit* chit ); 
 	bool IsCitizen( int id );
+	Chit*  CitizenAtIndex( int id );
+	int    FindCitizenIndex( Chit* chit ); 
 	int  NumCitizens();
 
 	bool InUse() const;

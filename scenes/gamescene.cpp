@@ -92,6 +92,14 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	cameraHomeButton.SetText( "Home" );
 	cameraHomeButton.SetVisible( false );
 
+	nextUnit.Init( &gamui2D, game->GetButtonLook( 0 ));
+	nextUnit.SetText( ">" );
+	nextUnit.SetVisible( false );
+
+	prevUnit.Init( &gamui2D, game->GetButtonLook( 0 ));
+	prevUnit.SetText( "<" );
+	prevUnit.SetVisible( false );
+
 	static const char* modeButtonText[NUM_BUILD_MODES] = {
 		"Utility", "Tech0", "Tech1", "Tech2", "Tech3"
 	};
@@ -180,6 +188,8 @@ void GameScene::Resize()
 	layout.PosAbs( &censusButton, 2, -2 );
 	layout.PosAbs( &useBuildingButton, 1, 0 );
 	layout.PosAbs( &cameraHomeButton, 1, 0 );
+	layout.PosAbs( &prevUnit, 2, 0 );
+	layout.PosAbs( &nextUnit, 3, 0 );
 
 	int level = BuildScript::TECH_UTILITY;
 	int start = 0;
@@ -687,6 +697,32 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 			}
 		}
 	}
+	else if ( item == &prevUnit || item == &nextUnit ) {
+		int bias = 1;
+		if ( item == &prevUnit ) bias = -1;
+
+		CoreScript* coreScript = sim->GetChitBag()->GetCore( sim->GetChitBag()->GetHomeSector() );
+		if ( coreScript && coreScript->NumCitizens() ) {
+			Chit* chit = sim->GetChitBag()->GetChit( chitFaceToTrack );
+			int index = coreScript->FindCitizenIndex( chit );
+
+			if ( index < 0 ) 
+				index = 0;
+			else
+				index = index+bias;
+
+			if ( index < 0 ) index += coreScript->NumCitizens();
+			if ( index >= coreScript->NumCitizens() ) index = 0;
+
+			chit = coreScript->CitizenAtIndex( index );
+			
+			CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
+			if ( cc && chit ) {
+				chitFaceToTrack = chit->ID();
+				cc->SetTrack( chitFaceToTrack );
+			}
+		}
+	}
 
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
 		if ( item == &newsButton[i] ) {
@@ -1115,6 +1151,8 @@ void GameScene::DoTick( U32 delta )
 	}
 	useBuildingButton.SetVisible( useBuildingVisible );
 	cameraHomeButton.SetVisible( uiMode[UI_VIEW].Down() );
+	nextUnit.SetVisible( uiMode[UI_VIEW].Down() );
+	prevUnit.SetVisible( uiMode[UI_VIEW].Down() );
 
 	// It's pretty tricky keeping the camera, camera component, and various
 	// modes all working together. 

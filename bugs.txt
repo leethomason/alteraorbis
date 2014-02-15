@@ -31,51 +31,24 @@ x How does Ice and magma interact? Volcanoes wipe out ice. Okay for now.
 - colors of faces (too dark)
 - scripts are pluggable now: should Bar be a plugged-in script?
 - MOBs should attack buildings
+- general extension of the effect of tech on buildings, and morale on MOBs
+- hints about what you need to build
 
 - game
-	x Denizen-2
-		x update cyclops art
-		x update temple art
-		x update arachnoid art
-		x update tombstone art
-		x update shield art. boring and hard to identify.
-		x shield glow
-		x forge / factory name update
-    	x tombstones
-    	x accomplishments
-    		x move kills, accomplishments to central tracking system?
-		x fix modes if no avatar
-		x GT: needs pick up effect for gold (single yellow glow of the avatar?)
-		x GT: needs pick up effect for kiosks or visitors (like a gold triangle or chest can float over the kiosk when the visitor spends money)
-		x GT: rez-in for structures
-		x viewing edge of world breaks all kinds of limits and ASSERTs
-		x item destruction / hpRegen
-		x is shield boost working correctly? Effects are *not* getting stripped by the shield.
-		x buildings shouldn't drop gold on de-rez
-	    x changing active weapon in invetory doesn't change rendering in-game
-		x workerBot button not working
-		x gold cheat not working when no avatar
-		x need to limit gold / crystal of MOBs
-		x accuracy changes in forge screen
-		x rezzed, de-rezzed needs different words. too hard to tell apart.
-		x names on mobs
-		x pyramids
-		x building add/remove bug
-		x guard posts
-		x workers will try to clear water
-		x auto-clear not working with ice
-		x change gold and healing icons 
-
 	 - Food
-		- tune guarding
+		x tune guarding
 	 	x food collection
 	 	x food transport
 	 	x food need 
 	 	x consume elixer
 	 	x consume raw
-	 	- morale
-	 	- effects of low morale (madness, starvation)
+	 	x morale
+	 	x effects of low morale (madness, starvation)
+	 	- select units
+	 	- test morale zero
     	- model to predict rates of food, farming, needs
+    	- art: farm
+    	- art: distillery
 
 	- Census
 		x coolest stuff, past and present, by category
@@ -276,6 +249,38 @@ V2 ideas:
 - level up grid and special skills
 
 ----------- FIXED -------------
+x Denizen-2
+	x update cyclops art
+	x update temple art
+	x update arachnoid art
+	x update tombstone art
+	x update shield art. boring and hard to identify.
+	x shield glow
+	x forge / factory name update
+	x tombstones
+	x accomplishments
+		x move kills, accomplishments to central tracking system?
+	x fix modes if no avatar
+	x GT: needs pick up effect for gold (single yellow glow of the avatar?)
+	x GT: needs pick up effect for kiosks or visitors (like a gold triangle or chest can float over the kiosk when the visitor spends money)
+	x GT: rez-in for structures
+	x viewing edge of world breaks all kinds of limits and ASSERTs
+	x item destruction / hpRegen
+	x is shield boost working correctly? Effects are *not* getting stripped by the shield.
+	x buildings shouldn't drop gold on de-rez
+    x changing active weapon in invetory doesn't change rendering in-game
+	x workerBot button not working
+	x gold cheat not working when no avatar
+	x need to limit gold / crystal of MOBs
+	x accuracy changes in forge screen
+	x rezzed, de-rezzed needs different words. too hard to tell apart.
+	x names on mobs
+	x pyramids
+	x building add/remove bug
+	x guard posts
+	x workers will try to clear water
+	x auto-clear not working with ice
+	x change gold and healing icons 
 x Melee should rotate to target (both rock and chit)
 x Hide free camera button
 x should be able to auto-clear when building 

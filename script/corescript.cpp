@@ -128,6 +128,20 @@ bool CoreScript::IsCitizen( int id )
 }
 
 
+Chit* CoreScript::CitizenAtIndex( int index )
+{
+	int id = citizens[index];
+	return scriptContext->chitBag->GetChit( id );
+}
+
+
+int CoreScript::FindCitizenIndex( Chit* chit )
+{
+	int id = chit->ID();
+	return citizens.Find( id );
+}
+
+
 int CoreScript::NumCitizens()
 {
 	int i=0;
