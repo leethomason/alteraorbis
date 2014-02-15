@@ -4,6 +4,7 @@
 #include "../grinliz/gltypes.h"
 #include "../grinliz/gldebug.h"
 #include "../grinliz/glutil.h"
+#include "../grinliz/glstringutil.h"
 
 class XStream;
 class GameTrait;
@@ -52,6 +53,8 @@ public:
 	int Spiritual() const	{ return Sum( 
 								Grade( trait[INT_PHYS], -1 ),
 								Grade( trait[NEUROTIC_STABLE], -1 )); }
+
+	void Description( grinliz::GLString* str );
 
 private:
 	int Grade( int v, int dir ) const { 

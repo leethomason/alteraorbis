@@ -44,11 +44,12 @@ x How does Ice and magma interact? Volcanoes wipe out ice. Okay for now.
 	 	x consume raw
 	 	x morale
 	 	x effects of low morale (madness, starvation)
-	 	- select units
+	 	x select units
 	 	- test morale zero
     	- model to predict rates of food, farming, needs
     	- art: farm
     	- art: distillery
+    	- personality display
 
 	- Census
 		x coolest stuff, past and present, by category
