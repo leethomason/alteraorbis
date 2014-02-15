@@ -51,7 +51,7 @@ void NewsHistory::Add( const NewsEvent& e )
 }
 
 
-const NewsEvent** NewsHistory::Find( int itemID, bool second, int* num )
+const NewsEvent** NewsHistory::Find( int itemID, bool second, int* num, NewsHistory::Data* data )
 {
 	cache.Clear();
 	for( int i=events.Size()-1; i>=0; --i ) {
@@ -69,7 +69,31 @@ const NewsEvent** NewsHistory::Find( int itemID, bool second, int* num )
 	for( int i=0; i<size/2; ++i ) {
 		Swap( &cache[i], &cache[size-i-1] );
 	}
-	*num = cache.Size();
+	if ( num ) {
+		*num = cache.Size();
+	}
+	if ( data ) {
+		for( int i=0; i<cache.Size(); ++i ) {
+			int what = cache[i]->what;
+			switch( what ) {
+			case NewsEvent::DENIZEN_CREATED:
+			case NewsEvent::GREATER_MOB_CREATED:
+			case NewsEvent::LESSER_MOB_NAMED:
+				GLASSERT( data->bornOrNamed == 0 );
+				data->bornOrNamed = cache[i]->date;
+				break;
+			case NewsEvent::DENIZEN_KILLED:
+			case NewsEvent::GREATER_MOB_KILLED:
+			case NewsEvent::LESSER_NAMED_MOB_KILLED:
+				GLASSERT( data->bornOrNamed );
+				GLASSERT( data->died == 0 );
+				data->died = cache[i]->date;
+				break;
+			default:
+				break;
+			}
+		}
+	}
 	return cache.Mem();
 }
 

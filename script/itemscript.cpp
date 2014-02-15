@@ -20,6 +20,7 @@
 #include "../tinyxml2/tinyxml2.h"
 #include "../xegame/istringconst.h"
 #include "../game/lumosmath.h"
+#include "../game/news.h"
 #include "../xarchive/glstreamer.h"
 
 using namespace tinyxml2;
@@ -280,6 +281,18 @@ void ItemHistory::AppendDesc( GLString* str )
 			str->AppendFormat( " Greater %d", greater );
 		if ( crafted )
 			str->AppendFormat( " Crafted %d", crafted );
+
+		NewsHistory::Data data;
+		NewsHistory::Instance()->Find( itemID, false, 0, &data );
+
+		if ( data.bornOrNamed ) {
+			if ( data.died ) {
+				str->AppendFormat( " (c%.2f d%.2f)", double(data.bornOrNamed)/double(AGE_IN_MSEC), double(data.died)/double(AGE_IN_MSEC));
+			}
+			else {
+				str->AppendFormat( " (c%.2f)", double(data.bornOrNamed)/double(AGE_IN_MSEC));
+			}
+		}
 	}
 }
 

@@ -185,7 +185,7 @@ void GameScene::Resize()
 		layout.PosAbs( &serialButton[i], i+1, -1 );
 	}
 	layout.PosAbs( &allRockButton, 1, -2 );
-	layout.PosAbs( &censusButton, 2, -2 );
+	layout.PosAbs( &censusButton, 3, -1 );
 	layout.PosAbs( &useBuildingButton, 1, 0 );
 	layout.PosAbs( &cameraHomeButton, 1, 0 );
 	layout.PosAbs( &prevUnit, 2, 0 );
@@ -245,7 +245,7 @@ void GameScene::Resize()
 
 	allRockButton.SetVisible( visible );
 	clearButton.SetVisible( visible );
-	censusButton.SetVisible( visible );
+	//censusButton.SetVisible( visible );
 }
 
 
@@ -704,7 +704,10 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		CoreScript* coreScript = sim->GetChitBag()->GetCore( sim->GetChitBag()->GetHomeSector() );
 		if ( coreScript && coreScript->NumCitizens() ) {
 			Chit* chit = sim->GetChitBag()->GetChit( chitFaceToTrack );
-			int index = coreScript->FindCitizenIndex( chit );
+			int index = 0;
+			if ( chit ) {
+				index = coreScript->FindCitizenIndex( chit );
+			}
 
 			if ( index < 0 ) 
 				index = 0;

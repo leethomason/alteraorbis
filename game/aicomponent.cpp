@@ -2220,11 +2220,10 @@ void AIComponent::DoMoraleZero( const ComponentSet& thisComp )
 
 	const Needs& needs = this->GetNeeds();
 	const Personality& personality = thisComp.item->GetPersonality();
-	double food2 = needs.Value( Needs::FOOD );
-	food2 = food2 * food2;
+	double food = needs.Value( Needs::FOOD );
 
-	float options[NUM_OPTIONS] = {	float( 1.0 - food2 ),						// starve
-									personality.Fighting() ? 0.7f : 0.2f,		// bloodrage
+	float options[NUM_OPTIONS] = {	food < 0.05				? 1.0f : 0.0f,		// starve
+									personality.Fighting()	? 0.7f : 0.2f,		// bloodrage
 									personality.Spiritual() ? 0.7f : 0.2f };	// quest
 
 	int option = parentChit->random.Select( options, NUM_OPTIONS );
@@ -2407,7 +2406,8 @@ int AIComponent::DoTick( U32 deltaTime )
 			DoShoot( thisComp );
 			break;
 		case STAND:
-			if ( taskList.Empty() ) {	// If there is a tasklist, it will manage standing and re-thinking.
+			if ( taskList.Empty() ) {				// If there is a tasklist, it will manage standing and re-thinking.
+				DoStand( thisComp, deltaTime );		// We aren't doing the tasklist stand, so do the component stand
 				rethink += deltaTime;
 				DoStand( thisComp, deltaTime );
 			}

@@ -137,6 +137,7 @@ Chit* CoreScript::CitizenAtIndex( int index )
 
 int CoreScript::FindCitizenIndex( Chit* chit )
 {
+	GLASSERT( chit );
 	int id = chit->ID();
 	return citizens.Find( id );
 }
