@@ -29,6 +29,7 @@ distribution.
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN		// Exclude rarely-used stuff from Windows headers
 #include <windows.h>
+#include <DbgHelp.h>
 #endif	//_WIN32
 
 #ifdef ANDROID_NDK
@@ -66,12 +67,14 @@ unsigned long idPool = 0;
 bool checking = false;
 int distribution[32] = { 0 };
 
+static const int NAME_SIZE = 32;
+
 struct MemCheckHead
 {
 	size_t size;
 	bool arrayType;
 	unsigned long id;
-	const char* name;
+	char stack[NAME_SIZE];
 	int line;
 
 	MemCheckHead* next;
@@ -149,6 +152,67 @@ void TrackFree( const void* mem )
 }
 
 
+/*
+http://stackoverflow.com/questions/5693192/win32-backtrace-from-c-code
+void PrintStack()
+{
+     unsigned int   i;
+     void         * stack[ 100 ];
+     unsigned short frames;
+     SYMBOL_INFO  * symbol;
+     HANDLE         process;
+
+     process = GetCurrentProcess();
+
+     SymInitialize( process, NULL, TRUE );
+
+     frames               = CaptureStackBackTrace( 0, 100, stack, NULL );
+     symbol               = ( SYMBOL_INFO * )calloc( sizeof( SYMBOL_INFO ) + 256 * sizeof( char ), 1 );
+     symbol->MaxNameLen   = 255;
+     symbol->SizeOfStruct = sizeof( SYMBOL_INFO );
+
+     for( i = 0; i < frames; i++ )
+     {
+         SymFromAddr( process, ( DWORD64 )( stack[ i ] ), 0, symbol );
+
+         GLOUTPUT(( "%i: %s - 0x%0X\n", frames - i - 1, symbol->Name, symbol->Address ));
+     }
+
+     free( symbol );
+}
+*/
+
+#ifdef GRINLIZ_STACKTRACE
+void GetAllocator( char* name, int n )
+{
+     void         * stack[ 100 ];
+     unsigned short frames;
+     static SYMBOL_INFO  * symbol = 0;
+     HANDLE         process;
+
+	 if ( !symbol )
+	     symbol = ( SYMBOL_INFO * )calloc( sizeof( SYMBOL_INFO ) + 256 * sizeof( char ), 1 );
+	 else
+		 memset( symbol, 0, sizeof( SYMBOL_INFO ) + 256 * sizeof( char ) );
+
+
+     process = GetCurrentProcess();
+
+     SymInitialize( process, NULL, TRUE );
+
+     frames               = CaptureStackBackTrace( 3, 1, stack, NULL );
+     symbol->MaxNameLen   = 255;
+     symbol->SizeOfStruct = sizeof( SYMBOL_INFO );
+
+     SymFromAddr( process, ( DWORD64 )( stack[ 0 ] ), 0, symbol );
+	 //GLOUTPUT(( "%s\n", symbol->Name ));
+	 if ( name && n ) {
+		 memcpy( name, symbol->Name, n );
+		 name[n-1] = 0;
+	 }
+}
+#endif
+
 void* DebugNew( size_t size, bool arrayType, const char* name, int line )
 {
 	void* mem = 0;
@@ -167,7 +231,6 @@ void* DebugNew( size_t size, bool arrayType, const char* name, int line )
 	head->size = size;
 	head->arrayType = arrayType;
 	head->id = idPool++;
-	head->name = name;
 	head->line = line;
 
 	head->magic = MEM_MAGIC0;
@@ -175,6 +238,14 @@ void* DebugNew( size_t size, bool arrayType, const char* name, int line )
 	head->prev = head->next = 0;
 
 	distribution[ logBase2(size) ] += 1;
+#ifdef GRINLIZ_STACKTRACE
+	GetAllocator( head->stack, NAME_SIZE );
+#else
+	if ( *name ) {
+		strncpy( head->stack, name, NAME_SIZE );
+		head->stack[NAME_SIZE-1] = 0;
+	}
+#endif
 
 	if ( checking )
 	{
@@ -296,7 +367,8 @@ void MemLeakCheck()
 	{
 		GLOUTPUT(( "  size=%d %s id=%d name=%s line=%d\n",
 					(int)node->size, (node->arrayType) ? "array" : "single", (int)node->id,
-					(node->name) ? node->name :  "(null)", node->line ));
+					(*node->stack) ? node->stack :  "(null)", 
+					node->line ));
 	}		  
 
 	for( unsigned long i=0; i<nMTrack; ++i ) {
