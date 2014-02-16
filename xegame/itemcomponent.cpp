@@ -638,11 +638,12 @@ int ItemComponent::DoTick( U32 delta )
 		if ( parentChit->GetRenderComponent() ) {
 			int index = this->FindItem( IStringConst::fruit );
 			if ( index >= 0 ) {
-				parentChit->GetRenderComponent()->AddDeco( "fruit", STD_DECO );
+				parentChit->GetRenderComponent()->AddDeco( "fruit", STD_DECO/2 );
 			}
-			else {
-				parentChit->GetRenderComponent()->RemoveDeco( "fruit" );
-			}
+			// don't remove - can't see fruit being eaten!
+			//else {
+			//	parentChit->GetRenderComponent()->RemoveDeco( "fruit" );
+			//}
 		}
 	}	
 
@@ -830,10 +831,12 @@ void ItemComponent::AddToInventory( ItemComponent* ic )
 	UpdateActive();
 
 	if ( parentChit && parentChit->GetRenderComponent() ) {
-		const char* asset = "loot";
-		if ( gameItem->IName() == "fruit" )
-			asset = "fruit";
-		parentChit->GetRenderComponent()->AddDeco( asset, STD_DECO );
+		if ( gameItem->IName() == "fruit" ) {
+			parentChit->GetRenderComponent()->AddDeco( "fruit", STD_DECO );	// will get refreshed if carred.
+		}
+		else {
+			parentChit->GetRenderComponent()->AddDeco( "loot", STD_DECO );
+		}
 	}
 }
 

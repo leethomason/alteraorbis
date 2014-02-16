@@ -10,10 +10,10 @@
 using namespace grinliz;
 
 static const int	FARM_SCRIPT_CHECK = 2000;
-// FIXME: longer time to grow fruit
-static const int	GROW_FRUIT = 5000;	// the most productive plants grow every GROW_PERIOD seconds
-// FIXME: longer time to self destruct
-static const int	FRUIT_SELF_DESTRUCT = 10*1000;
+// FIXME: not tuned
+static const int	GROW_FRUIT = 20*1000;	// the most productive plants grow every GROW_PERIOD seconds
+// FIXME: not tuned
+static const int	FRUIT_SELF_DESTRUCT = 60*1000;
 
 FarmScript::FarmScript() : timer( 2000 )
 {

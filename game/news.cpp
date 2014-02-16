@@ -195,6 +195,7 @@ void NewsEvent::Console( grinliz::GLString* str ) const
 
 	IString itemName   = IDToName( itemID );
 	IString secondName = IDToName( secondItemID );
+	if ( secondName.empty() ) secondName = StringPool::Intern( "[unknown]" );
 
 	float age = float( double(date) / double(AGE_IN_MSEC));
 	IString domain;

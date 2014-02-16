@@ -156,6 +156,19 @@ int CoreScript::NumCitizens()
 		else {
 			// Dead and gone.
 			citizens.SwapRemove( i );
+
+			// Also, destroy a sleeptube, so it costs something to replace, and towns can fall.
+			SpatialComponent* sc = scriptContext->chit->GetSpatialComponent();
+			GLASSERT( sc );
+			if ( sc ) {
+				Vector2F pos2 = sc->GetPosition2D();
+				Vector2I sector = ToSector( ToWorld2I( pos2 ));
+				Chit* bed = scriptContext->chitBag->FindBuilding( IStringConst::bed, sector, &pos2, LumosChitBag::RANDOM_NEAR, 0, 0 );
+				if ( bed && bed->GetItem() ) {
+					bed->GetItem()->hp = 0;
+					bed->SetTickNeeded();
+				}
+			}
 		}
 	}
 	return count;

@@ -56,8 +56,8 @@ x How does Ice and magma interact? Volcanoes wipe out ice. Okay for now.
 		x re-group build commands
 		- morale affected by tombstones
 		x prev-next unit now working correctly if out of domain
-		- how should citizens be replaced??
-		- de-rez at xxx by BUG (null)
+		x how should citizens be replaced??
+		x de-rez at xxx by BUG (null) - kind of fixed. needs cleanup.
 
 	- Census
 		x coolest stuff, past and present, by category

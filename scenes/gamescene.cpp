@@ -187,7 +187,7 @@ void GameScene::Resize()
 	}
 	layout.PosAbs( &allRockButton, 1, -2 );
 	layout.PosAbs( &censusButton, 3, -1 );
-	layout.PosAbs( &useBuildingButton, 1, 0 );
+	layout.PosAbs( &useBuildingButton, 0, 1 );
 
 	layout.PosAbs( &cameraHomeButton, 0, 1 );
 	layout.PosAbs( &prevUnit, 1, 1 );
