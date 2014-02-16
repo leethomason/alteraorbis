@@ -239,7 +239,13 @@ void* DebugNew( size_t size, bool arrayType, const char* name, int line )
 
 	distribution[ logBase2(size) ] += 1;
 #ifdef GRINLIZ_STACKTRACE
-	GetAllocator( head->stack, NAME_SIZE );
+	if ( !name ) {
+		GetAllocator( head->stack, NAME_SIZE );
+	}
+	else if ( *name ) {
+		strncpy( head->stack, name, NAME_SIZE );
+		head->stack[NAME_SIZE-1] = 0;
+	}
 #else
 	if ( *name ) {
 		strncpy( head->stack, name, NAME_SIZE );

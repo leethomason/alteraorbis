@@ -27,52 +27,52 @@ Component* ComponentFactory::Factory( const char* name, Chit* chit ) const
 {
 	GLASSERT( name && *name );
 	if ( StrEqual( name, "SpatialComponent" )) {
-		return new SpatialComponent();
+		return glnew SpatialComponent();
 	}
 	else if ( StrEqual( name, "PathMoveComponent" )) {
-		return new PathMoveComponent();
+		return glnew PathMoveComponent();
 	}
 	else if ( StrEqual( name, "ItemComponent" )) {
-		return new ItemComponent( 0 );
+		return glnew ItemComponent( 0 );
 	}
 	else if ( StrEqual( name, "DebugStateComponent" )) {
-		return new DebugStateComponent( worldMap );
+		return glnew DebugStateComponent( worldMap );
 	}
 	else if ( StrEqual( name, "DebugPathComponent" )) {
-		return new DebugPathComponent();
+		return glnew DebugPathComponent();
 	}
 	else if ( StrEqual( name, "HealthComponent" )) {
-		return new HealthComponent();
+		return glnew HealthComponent();
 	}
 	else if ( StrEqual( name, "RenderComponent" )) {
-		return new RenderComponent( 0 );
+		return glnew RenderComponent( 0 );
 	}
 	else if ( StrEqual( name, "CameraComponent" )) {
-		return new CameraComponent( &engine->camera );
+		return glnew CameraComponent( &engine->camera );
 	}
 	else if ( StrEqual( name, "ScriptComponent" )) {
-		return new ScriptComponent( this );
+		return glnew ScriptComponent( this );
 	}
 	else if ( StrEqual( name, "MapSpatialComponent" )) {
-		return new MapSpatialComponent();
+		return glnew MapSpatialComponent();
 	}
 	else if ( StrEqual( name, "AIComponent" )) {
-		return new AIComponent();
+		return glnew AIComponent();
 	}
 	else if ( StrEqual( name, "GridMoveComponent" )) {
-		return new GridMoveComponent();
+		return glnew GridMoveComponent();
 	}
 	else if ( StrEqual( name, "VisitorStateComponent" )) {
-		return new VisitorStateComponent();
+		return glnew VisitorStateComponent();
 	}
 	else if ( StrEqual( name, "TrackingMoveComponent" )) {
-		return new TrackingMoveComponent();
+		return glnew TrackingMoveComponent();
 	}
 	else if ( StrEqual( name, "PhysicsMoveComponent" )) {
-		return new PhysicsMoveComponent( true );
+		return glnew PhysicsMoveComponent( true );
 	}
 	else if ( StrEqual( name, "TowComponent" )) {
-		return new TowComponent();
+		return glnew TowComponent();
 	}
 
 	GLASSERT( 0 );
