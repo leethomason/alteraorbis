@@ -13,21 +13,23 @@ BuildData BuildScript::buildData[NUM_OPTIONS] = {
 	{	"Rotate",	"",			0, 0, 0 },
 	{	"Pave",		"pave",		0, 0, 0 },
 	{	"Ice",		"ice",		0, 0, 0 },
-	// Tech 0
+	// Visitor stuff
 	{	"News",		"kiosk.n",	1, 0, 0 },
 	{	"Media",	"kiosk.m",	1, 0, 0 },
 	{	"Commerce",	"kiosk.c",	1, 0, 0 },
 	{	"Social",	"kiosk.s",	1, 0, 0 },
-	{	"Forge",	"factory",	1, 0, 0 },
 	{	"Temple",	"power",	1, 0, 0 },
-	// Tech 1
+	// Economy
+	{	"Forge",	"factory",	2, 0, 0 },
 	{	"Vault",	"vault",	2, 0, 0 },
 	{	"SleepTube","bed",		2, 0, 0 },
 	{	"Market",	"market",	2, 0, 0 },
 	{	"Bar",		"bar",		2, 0, 0 },
-	{	"GuardPost","guardpost",2, 0, 0 },
-	{	"Farm",		"farm",		3, 0, 0 },
-	{	"Distillery","distillery",3, 0, 0 },
+	// Defense
+	{	"GuardPost","guardpost",3, 0, 0 },
+	// Industry
+	{	"Farm",		"farm",		4, 0, 0 },
+	{	"Distillery","distillery",4, 0, 0 },
 };
 
 

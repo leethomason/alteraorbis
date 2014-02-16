@@ -8,7 +8,7 @@ struct BuildData
 {
 	const char*			cName;
 	const char*			cStructure;
-	int					techLevel;
+	int					group;
 	int					cost;
 	int					size;			// 1 or 2
 	grinliz::IString	name;			// "Vault"
@@ -46,13 +46,13 @@ public:
 		DISTILLERY,
 		NUM_OPTIONS,
 
-		NUM_TECH_LEVELS = 4,
+		NUM_GROUPS = 4,
 
-		TECH_UTILITY = 0,
-		TECH0,
-		TECH1,
-		TECH2,
-		TECH3
+		GROUP_UTILITY = 0,
+		GROUP_VISITOR,
+		GROUP_ECONOMY,
+		GROUP_BATTLE,
+		GROUP_INDUSTRY
 	};
 
 	static bool IsBuild( int action ) { return action >= PAVE; }

@@ -53,7 +53,7 @@ x How does Ice and magma interact? Volcanoes wipe out ice. Okay for now.
     	- art: farm
     	- art: distillery
     	x personality display
-		- re-group build commands
+		x re-group build commands
 		- morale affected by tombstones
 		x prev-next unit now working correctly if out of domain
 		- how should citizens be replaced??

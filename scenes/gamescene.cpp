@@ -101,7 +101,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	prevUnit.SetVisible( false );
 
 	static const char* modeButtonText[NUM_BUILD_MODES] = {
-		"Utility", "Tech0", "Tech1", "Tech2", "Tech3"
+		"Utility", "Visitor", "Economy", "Defense", "Industry"
 	};
 	for( int i=0; i<NUM_BUILD_MODES; ++i ) {
 		modeButton[i].Init( &gamui2D, game->GetButtonLook(0) );
@@ -115,7 +115,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 		buildButton[i].SetText( bd.label.c_str() );
 		buildButton[0].AddToToggleGroup( &buildButton[i] );
 
-		modeButton[bd.techLevel].AddSubItem( &buildButton[i] );
+		modeButton[bd.group].AddSubItem( &buildButton[i] );
 	}
 
 	tabBar0.Init( &gamui2D, LumosGame::CalcUIIconAtom( "tabBar", true ), false );
@@ -193,13 +193,13 @@ void GameScene::Resize()
 	layout.PosAbs( &prevUnit, 1, 1 );
 	layout.PosAbs( &nextUnit, 2, 1 );
 
-	int level = BuildScript::TECH_UTILITY;
+	int level = BuildScript::GROUP_UTILITY;
 	int start = 0;
 
 	for( int i=0; i<BuildScript::NUM_OPTIONS; ++i ) {
 		const BuildData& bd = buildScript.GetData( i );
-		if ( bd.techLevel != level ) {
-			level = bd.techLevel;
+		if ( bd.group != level ) {
+			level = bd.group;
 			start = i;
 		}
 		layout.PosAbs( &buildButton[i], i-start, 2 );
