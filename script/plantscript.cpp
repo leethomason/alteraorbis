@@ -192,7 +192,7 @@ int PlantScript::DoTick( U32 delta )
 	Rectangle2I bounds = context->worldMap->Bounds();
 
 	int nStage = 4;
-	item->keyValues.Fetch( "nStage", "d", &nStage );
+	item->keyValues.Get( "nStage", &nStage );
 
 	if ( grow ) {
 		// ------ Sun -------- //
@@ -258,9 +258,9 @@ int PlantScript::DoTick( U32 delta )
 		Vector3F actual = { sunPerUnitH, water, temp };
 		Vector3F optimal = { 0.5f, 0.5f, 0.5f };
 	
-		item->keyValues.Fetch( "sun",  "f", &optimal.x );
-		item->keyValues.Fetch( "rain", "f", &optimal.y );
-		item->keyValues.Fetch( "temp", "f", &optimal.z );
+		item->keyValues.Get( "sun",  &optimal.x );
+		item->keyValues.Get( "rain", &optimal.y );
+		item->keyValues.Get( "temp", &optimal.z );
 
 		float distance = ( optimal - actual ).Length();
 

@@ -172,20 +172,18 @@ int main( int argc, const char* argv[] )
 	{
 		MicroDB microdb;
 
-		microdb.Set( "test-i", 
-			         "S", 
-					 StringPool::Intern( "valueI" ) );
-		microdb.Set( "test-d", "d", -3 );
-		microdb.Set( "3val", "Sdf", StringPool::Intern( "crazy" ), -5, 42.13f );
+		microdb.Set( "test-i", StringPool::Intern( "valueI" ) );
+		microdb.Set( "test-d", -3 );
+		microdb.Set( "3val", 42.13f );
 
 		IString s;
 		int i;
 
-		microdb.Fetch( "test-i", "S", &s );
-		printf( "Fetch: (valueI) %s\n", s.c_str() );
+		microdb.Get( "test-i", &s );
+		printf( "Get: (valueI) %s\n", s.c_str() );
 
-		microdb.Fetch( "test-d", "d", &i );
-		printf( "Fetch: (-3) %d\n", i );
+		microdb.Get( "test-d", &i );
+		printf( "Get: (-3) %d\n", i );
 
 		FILE* fp = 0;
 		fopen_s( &fp, "microdbtest.dat", "wb" );
@@ -207,11 +205,9 @@ int main( int argc, const char* argv[] )
 		MicroDB microdb;
 		microdb.Serialize( &reader, "test" );
 
-		IString s;
 		float f;
-		int i;
-		microdb.Fetch( "3val", "Sdf", &s, &i, &f );
-		printf( "Fetched: %s %d %f\n", s.c_str(), i, f );
+		microdb.Get( "3val", &f );
+		printf( "Get: %f\n", f );
 
 		fclose( fp );
 	}

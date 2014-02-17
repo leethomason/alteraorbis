@@ -256,7 +256,7 @@ void ForgeScene::ItemTapped( const gamui::UIItem* uiItem )
 			if ( chit->GetSpatialComponent() ) pos = chit->GetSpatialComponent()->GetPosition2D();
 			NewsEvent news( NewsEvent::FORGED, pos, item, forgeData->itemComponent->ParentChit() ); 
 			NewsHistory::Instance()->Add( news );
-			chit->GetItem()->keyValues.Set( "destroyMsg", "d", NewsEvent::UN_FORGED );
+			chit->GetItem()->keyValues.Set( "destroyMsg", NewsEvent::UN_FORGED );
 		}
 
 		displayItem = item;

@@ -164,7 +164,7 @@ void ForgeScript::Build(	int type,			// GUN
 	}
 
 	if ( item ) {
-		item->keyValues.Set( "features", "d", features );
+		item->keyValues.Set( "features", features );
 		item->flags &= ~GameItem::EFFECT_MASK;
 		item->flags |= effectFlags;
 	}

@@ -57,7 +57,7 @@ int FarmScript::DoTick( U32 delta )
 
 			int growth = plantItem->keyValues.Add( "fruitGrowth", add );
 			if ( growth > GROW_FRUIT ) {
-				plantItem->keyValues.Set( "fruitGrowth", "d", 0 );
+				plantItem->keyValues.Set( "fruitGrowth", 0 );
 				
 				const GameItem& def = ItemDefDB::Instance()->Get( "fruit" );
 				GameItem* gameItem = new GameItem( def );

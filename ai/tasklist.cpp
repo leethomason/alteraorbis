@@ -594,7 +594,7 @@ bool TaskList::UseFactory( const ComponentSet& thisComp, Chit* factory, int tech
 	if ( NewsHistory::Instance() ) {
 		NewsEvent news( NewsEvent::FORGED, thisComp.spatial->GetPosition2D(), item, thisComp.chit ); 
 		NewsHistory::Instance()->Add( news );
-		item->GetItem()->keyValues.Set( "destroyMsg", "d",  NewsEvent::UN_FORGED );
+		item->GetItem()->keyValues.Set( "destroyMsg", NewsEvent::UN_FORGED );
 	}
 
 	return true;

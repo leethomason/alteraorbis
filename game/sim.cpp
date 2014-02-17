@@ -262,7 +262,7 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos )
 	chit->GetSpatialComponent()->SetPosYRot( (float)pos.x+0.5f, 0, (float)pos.y+0.5f, 0 );
 
 	// Player speed boost
-	chit->GetItem()->keyValues.Set( "speed", "f", DEFAULT_MOVE_SPEED*1.5f/1.2f );
+	chit->GetItem()->keyValues.Set( "speed",  DEFAULT_MOVE_SPEED*1.5f/1.2f );
 	chit->GetItem()->hpRegen = 1.0f;
 
 	Vector2I sector = ToSector( pos );
@@ -271,7 +271,7 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos )
 	NewsHistory* history = NewsHistory::Instance();
 	if ( history ) {
 		history->Add( NewsEvent( NewsEvent::DENIZEN_CREATED, ToWorld2F(pos), chit, 0 ));
-		chit->GetItem()->keyValues.Set( "destroyMsg", "d", NewsEvent::DENIZEN_KILLED );
+		chit->GetItem()->keyValues.Set( "destroyMsg", NewsEvent::DENIZEN_KILLED );
 	}
 }
 

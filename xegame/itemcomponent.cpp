@@ -122,7 +122,7 @@ void ItemComponent::NameItem( GameItem* item )
 					NewsEvent news( NewsEvent::LESSER_MOB_NAMED, sc->GetPosition2D(), item, parentChit ); 
 					// Should not have been already added.
 					GLASSERT( item->keyValues.GetIString( "destroyMsg" ) == IString() );
-					item->keyValues.Set( "destroyMsg", "d",  NewsEvent::LESSER_NAMED_MOB_KILLED );
+					item->keyValues.Set( "destroyMsg", NewsEvent::LESSER_NAMED_MOB_KILLED );
 				}
 			}
 		}
@@ -334,7 +334,7 @@ void ItemComponent::NewsDestroy( const GameItem* item )
 	Chit* destroyer = parentChit->GetChitBag()->GetChit( lastDamageID );
 
 	int msg = 0;
-	if ( item->keyValues.GetInt( "destroyMsg", &msg ) == 0 ) {
+	if ( item->keyValues.Get( "destroyMsg", &msg ) == 0 ) {
 		history->Add( NewsEvent( msg, pos, parentChit, destroyer ));
 	}
 }
@@ -693,7 +693,7 @@ void ItemComponent::OnRemove()
 	GameItem* mainItem = itemArr[0];
 	if ( parentChit->GetLumosChitBag() ) {
 		IString mob;
-		mainItem->keyValues.Fetch( "mob", "S", &mob );
+		mainItem->keyValues.Get( "mob", &mob );
 		if ( mob == "normal" ) {
 			parentChit->GetLumosChitBag()->census.normalMOBs -= 1;
 		}
@@ -988,7 +988,7 @@ void ItemComponent::SetHardpoints()
 		{
 			IString proc = itemArr[i]->keyValues.GetIString( "procedural" );
 			int features = 0;
-			itemArr[i]->keyValues.Fetch( "features", "d", &features );
+			itemArr[i]->keyValues.Get( "features", &features );
 
 			ProcRenderInfo info;
 

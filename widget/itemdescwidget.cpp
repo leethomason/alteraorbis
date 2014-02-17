@@ -115,8 +115,8 @@ void ItemDescWidget::SetInfo( const GameItem* item, const GameItem* user, bool s
 	for( ; !it.Done(); it.Next() ) {
 		
 		const char* key = it.Key();
-		if ( it.NumSub() == 1 && it.SubType(0) == 'd' ) {
-			str.Format( "%s\t%d\n", key, it.Int(0) );
+		if ( it.Type() == MicroDB::TYPE_INT ) {
+			str.Format( "%s\t%d\n", key, it.IntValue() );
 			textBuffer += str.c_str();
 		}
 	}

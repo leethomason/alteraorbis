@@ -320,11 +320,11 @@ void GameItem::Load( const tinyxml2::XMLElement* ele )
 			}
 
 			if ( str )	
-				keyValues.Set( name.c_str(), "S", StringPool::Intern( attr->Value() ));
+				keyValues.Set( name.c_str(), StringPool::Intern( attr->Value() ));
 			else if ( integer && real )
-				keyValues.Set( name.c_str(), "f", atof( attr->Value()));
+				keyValues.Set( name.c_str(), (float)atof( attr->Value()));
 			else if ( integer )
-				keyValues.Set( name.c_str(), "d", atoi( attr->Value()));
+				keyValues.Set( name.c_str(), atoi( attr->Value()));
 			else
 				GLASSERT(0);
 		}
@@ -628,7 +628,7 @@ void GameItem::SetProperName( const grinliz::IString& n )
 bool GameItem::Significant() const
 {
 	int msg = 0;
-	if ( keyValues.GetInt( "destroyMsg", &msg ) == 0 ) {
+	if ( keyValues.Get( "destroyMsg", &msg ) == 0 ) {
 		return true;
 	}
 
@@ -685,7 +685,7 @@ IString GameItem::ITitle() const
 		for( int i=0; i<mobs.Size(); ++i ) {
 			str.Format( "Kills: %s", mobs[i].c_str() );
 			int count = 0;
-			keyValues.GetInt( str.c_str(), &count );
+			keyValues.Get( str.c_str(), &count );
 			if ( count > high ) { 
 				count = high;
 				highStr = mobs[i];

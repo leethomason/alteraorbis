@@ -188,9 +188,9 @@ Chit* LumosChitBag::NewBuilding( const Vector2I& pos, const char* name, int team
 	}
 
 	int cx=1;
-	rootItem.keyValues.GetInt( "size", &cx );
+	rootItem.keyValues.Get( "size", &cx );
 	int porch=0;
-	rootItem.keyValues.GetInt( "porch", &porch );
+	rootItem.keyValues.Get( "porch", &porch );
 
 	MapSpatialComponent* msc = new MapSpatialComponent();
 	msc->SetMapPosition( pos.x, pos.y, cx, cx );
@@ -254,7 +254,7 @@ Chit* LumosChitBag::NewMonsterChit( const Vector3F& pos, const char* name, int t
 		NewsHistory* history = NewsHistory::Instance();
 		if ( history ) {
 			history->Add( NewsEvent( NewsEvent::GREATER_MOB_CREATED, ToWorld2F(pos), chit, 0 ));
-			chit->GetItem()->keyValues.Set( "destroyMsg", "d", NewsEvent::GREATER_MOB_KILLED );
+			chit->GetItem()->keyValues.Set( "destroyMsg", NewsEvent::GREATER_MOB_KILLED );
 		}
 	}
 	chit->GetItem()->wallet.Add( w );	
@@ -306,7 +306,7 @@ Chit* LumosChitBag::NewDenizen( const grinliz::Vector2I& pos, int team )
 	NewsHistory* history = NewsHistory::Instance();
 	if ( history ) {
 		history->Add( NewsEvent( NewsEvent::DENIZEN_CREATED, ToWorld2F(pos), chit, 0 ));
-		chit->GetItem()->keyValues.Set( "destroyMsg", "d", NewsEvent::DENIZEN_KILLED );
+		chit->GetItem()->keyValues.Set( "destroyMsg", NewsEvent::DENIZEN_KILLED );
 	}
 
 	return chit;

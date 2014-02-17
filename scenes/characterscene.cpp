@@ -244,7 +244,7 @@ void CharacterScene::SetButtonText()
 			if ( !proc.empty() ) {
 				ProcRenderInfo info;
 				int features = 0;
-				down->keyValues.Fetch( "features", "d", &features );
+				down->keyValues.Get( "features", &features );
 
 				AssignProcedural(	proc.c_str(), 
 									strstr( down->Name(), "emale" )!=0, 

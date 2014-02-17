@@ -106,7 +106,7 @@ const GameItem& ItemDefDB::Get( const char* name, int intrinsic )
 	GLASSERT( arr.Size() > 0 );
 	
 	float v = 0;
-	arr[0]->keyValues.Fetch( prop, "d", value );
+	arr[0]->keyValues.Get( prop, value );
 }
 
 
@@ -230,8 +230,8 @@ void ItemHistory::Set( const GameItem* gi )
 
 	int k=0, c=0;
 
-	gi->historyDB.GetInt( "Kills", &k );
-	gi->historyDB.GetInt( "Crafted", &c );
+	gi->historyDB.Get( "Kills", &k );
+	gi->historyDB.Get( "Crafted", &c );
 
 	this->kills = k;
 	this->crafted = c;

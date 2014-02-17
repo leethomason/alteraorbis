@@ -388,7 +388,7 @@ public:
 	float CalcBoltSpeed() const {
 		static const float SPEED = 10.0f;
 		float speed = 1.0f;
-		keyValues.GetFloat( "speed", &speed );
+		keyValues.Get( "speed", &speed );
 		return SPEED * speed;
 	}
 

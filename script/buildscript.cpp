@@ -60,7 +60,7 @@ const BuildData& BuildScript::GetData( int i )
 		{
 			const GameItem& gi = ItemDefDB::Instance()->Get( buildData[i].cStructure );
 			int cost = 0;
-			gi.keyValues.GetInt( "cost", &cost );
+			gi.keyValues.Get( "cost", &cost );
 			str.Format( "%s\nAu %d", buildData[i].cName, cost );
 		}
 		buildData[i].label = StringPool::Intern( str.c_str() ) ;
@@ -68,8 +68,8 @@ const BuildData& BuildScript::GetData( int i )
 		buildData[i].size = 1;
 		if ( has ) {
 			const GameItem& gi = ItemDefDB::Instance()->Get( buildData[i].cStructure );
-			gi.keyValues.GetInt( "size", &buildData[i].size );
-			gi.keyValues.GetInt( "cost", &buildData[i].cost );
+			gi.keyValues.Get( "size", &buildData[i].size );
+			gi.keyValues.Get( "cost", &buildData[i].cost );
 
 			buildData[i].needs.SetZero();
 			
@@ -78,14 +78,14 @@ const BuildData& BuildScript::GetData( int i )
 				str.Format( "need.%s", ai::Needs::Name(k) );
 
 				float need=0;
-				gi.keyValues.GetFloat( str.c_str(), &need );
+				gi.keyValues.Get( str.c_str(), &need );
 				if ( need > 0 ) {
 					buildData[i].needs.Set( k, need );
 				}
 			}
 
 			float timeF = 1.0;
-			gi.keyValues.GetFloat( "need.time", &timeF );
+			gi.keyValues.Get( "need.time", &timeF );
 			buildData[i].standTime = int( timeF * 1000.0f );
 		}
 	}
