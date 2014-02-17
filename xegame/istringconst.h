@@ -46,6 +46,7 @@ public:
 	static grinliz::IString crystal_blue;
 	static grinliz::IString crystal_violet;
 	static grinliz::IString fruit;
+	static grinliz::IString tombstone;
 	
 	static grinliz::IString pave;
 	static grinliz::IString ice;

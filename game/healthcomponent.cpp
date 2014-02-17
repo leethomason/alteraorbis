@@ -104,6 +104,9 @@ void HealthComponent::DeltaHealth()
 						float r = parentChit->GetSpatialComponent()->GetYRotation();
 						pos.y = 0;
 						chit->GetSpatialComponent()->SetPosYRot( pos, r );
+
+						GameItem* item = chit->GetItem();
+						item->keyValues.Set( 
 					}
 				}
 			}
