@@ -416,6 +416,12 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 			coreScript->nElixir -= 1;
 		}
 		thisComp.ai->GetNeedsMutable()->Add( supply, 1.0 );
+
+		float heal = float( supply.Value( Needs::ENERGY ) + supply.Value( Needs::FOOD ));
+		heal = Clamp( heal, 0.f, 1.f );
+
+		thisComp.item->hp += thisComp.item->TotalHPF() * heal;
+		thisComp.item->hp = Min( thisComp.item->hp, thisComp.item->TotalHPF() );
 	}
 }
 

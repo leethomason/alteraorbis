@@ -1702,9 +1702,16 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 			}
 
 			if ( n > 0 ) {
+				double myNeed = needs.Value(k);
+
+				// Have energy reflect a healing need.
+				if ( k == ai::Needs::ENERGY ) {
+					myNeed = Min( myNeed, double( thisComp.item->HPFraction() ));
+				}
+
 				// (how much needed) * (how much available)
-				nv += 1.0 - needs.Value(k);
-				s  += (1.0 - needs.Value(k)) * n;	
+				nv += 1.0 - myNeed;
+				s  += (1.0 - myNeed) * n;	
 			}
 		}
 
