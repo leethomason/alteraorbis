@@ -58,7 +58,7 @@ x How does Ice and magma interact? Volcanoes wipe out ice. Okay for now.
     	- art: farm
     	- art: distillery
 		- morale affected by tombstones
-		- denizen healing
+		x denizen healing
 
 	- Census
 		x coolest stuff, past and present, by category
