@@ -33,6 +33,12 @@ public:
 	virtual int DoTick( U32 delta );
 	virtual const char* ScriptName()	{ return "DistilleryScript"; }
 
+	enum { 
+		ELIXIR_TIME = 10*1000,
+		ELIXIR_PER_FRUIT = 2
+	};
+	static int ElixirTime( int tech );
+
 private:
 	// serialized
 	CTicker		progressTick;

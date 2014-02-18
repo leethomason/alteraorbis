@@ -8,10 +8,6 @@
 
 using namespace grinliz;
 
-// Time to make elixir at tech 3:
-static const int ELIXIR_TIME		= 1000;
-static const int ELIXIR_PER_FRUIT	= 3;
-
 DistilleryScript::DistilleryScript() : progressTick( 2000 ), progress(0)
 {
 }
@@ -24,6 +20,13 @@ void DistilleryScript::Serialize( XStream* xs )
 	progressTick.Serialize( xs, "progressTick" );
 	XarcClose( xs );
 }
+
+
+int DistilleryScript::ElixirTime( int tech )
+{
+	return ELIXIR_TIME * TECH_MAX / (tech+1);
+}
+
 
 
 int DistilleryScript::DoTick( U32 delta )

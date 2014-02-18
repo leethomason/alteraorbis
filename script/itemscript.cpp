@@ -51,7 +51,7 @@ void ItemDefDB::Load( const char* path )
 			if ( mob == "greater" ) {
 				greaterMOBs.Push( item->IName() );
 			}
-			else if ( mob == "normal" ) {
+			else if ( mob == "lesser" ) {
 				lesserMOBs.Push( item->IName() );
 			}
 

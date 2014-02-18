@@ -3,6 +3,7 @@
 
 #include "../grinliz/gltypes.h"
 #include "../grinliz/gldebug.h"
+#include "../grinliz/glutil.h"
 
 class XStream;
 
@@ -39,6 +40,7 @@ public:
 	double Value( int i ) const { GLASSERT( i >= 0 && i < NUM_NEEDS ); return need[i]; }
 
 	void SetMorale( double v ) { morale = v; }
+	void AddMorale( double v ) { morale += v; morale = grinliz::Clamp( morale, 0.0, 1.0 ); }
 	double Morale() const { return morale; }
 
 	void Set( int i, double v ) { GLASSERT( i >= 0 && i < NUM_NEEDS ); need[i] = v; ClampNeeds(); }
@@ -60,6 +62,8 @@ public:
 
 	// Needs to load from XML - declared in the itemdef.xml
 	void Serialize( XStream* xs );
+
+	static double DecayTime();
 
 private:
 	void ClampNeeds();

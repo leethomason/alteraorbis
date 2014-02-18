@@ -33,6 +33,11 @@ public:
 	virtual int DoTick( U32 delta );
 	virtual const char* ScriptName() { return "FarmScript"; }
 
+	enum {
+		GROW_FRUIT = 60*1000
+	};
+	static int GrowFruit( int plantStage );
+
 private:
 	CTicker timer;
 	grinliz::CDynArray<Chit*> plantArr;

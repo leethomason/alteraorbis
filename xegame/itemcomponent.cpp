@@ -116,7 +116,7 @@ void ItemComponent::NameItem( GameItem* item )
 
 			// An item that wasn't significant is now significant.
 			// In practice, this means adding tracking for lesser mobs.
-			if ( item->keyValues.GetIString( "mob" ) == "normal" ) {
+			if ( item->keyValues.GetIString( "mob" ) == "lesser" ) {
 				SpatialComponent* sc = parentChit->GetSpatialComponent();
 				if ( sc ) {
 					NewsEvent news( NewsEvent::LESSER_MOB_NAMED, sc->GetPosition2D(), item, parentChit ); 
@@ -468,7 +468,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			// the massive loot tax off the reserve.
 			IString mob = mainItem->keyValues.GetIString( "mob" );
 			int limit = 0;
-			if ( mob == "normal" )
+			if ( mob == "lesser" )
 				limit = MAX_NORMAL_GOLD;
 			else
 				limit = MAX_GREATER_GOLD;
@@ -676,7 +676,7 @@ void ItemComponent::OnAdd( Chit* chit )
 
 	if ( parentChit->GetLumosChitBag() ) {
 		IString mob = mainItem->keyValues.GetIString( "mob" );
-		if ( mob == "normal" ) {
+		if ( mob == "lesser" ) {
 			parentChit->GetLumosChitBag()->census.normalMOBs += 1;
 		}
 		else if ( mob == "greater" ) {
@@ -694,7 +694,7 @@ void ItemComponent::OnRemove()
 	if ( parentChit->GetLumosChitBag() ) {
 		IString mob;
 		mainItem->keyValues.Get( "mob", &mob );
-		if ( mob == "normal" ) {
+		if ( mob == "lesser" ) {
 			parentChit->GetLumosChitBag()->census.normalMOBs -= 1;
 		}
 		else if ( mob == "greater" ) {

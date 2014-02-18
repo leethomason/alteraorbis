@@ -11,8 +11,6 @@ using namespace grinliz;
 
 static const int	FARM_SCRIPT_CHECK = 2000;
 // FIXME: not tuned
-static const int	GROW_FRUIT = 20*1000;	// the most productive plants grow every GROW_PERIOD seconds
-// FIXME: not tuned
 static const int	FRUIT_SELF_DESTRUCT = 60*1000;
 
 FarmScript::FarmScript() : timer( 2000 )
@@ -31,6 +29,14 @@ void FarmScript::Serialize( XStream* xs )
 void FarmScript::Init()
 {
 	timer.SetPeriod( FARM_SCRIPT_CHECK + scriptContext->chit->random.Rand(FARM_SCRIPT_CHECK/16));
+}
+
+
+int FarmScript::GrowFruit( int stage )
+{
+	int stage2   = (stage+1)*(stage+1);
+	int STAGE2 = PlantScript::NUM_STAGE*PlantScript::NUM_STAGE;
+	return GROW_FRUIT*STAGE2/stage2;
 }
 
 

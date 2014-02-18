@@ -18,6 +18,8 @@
 #include "../script/plantscript.h"
 #include "../script/corescript.h"
 #include "../script/worldgen.h"
+#include "../script/farmscript.h"
+#include "../script/distilleryscript.h"
 
 #include "../scenes/characterscene.h"
 #include "../scenes/forgescene.h"
@@ -71,6 +73,8 @@ Sim::Sim( LumosGame* g ) : minuteClock( 60*1000 ), secondClock( 1000 ), volcTime
 
 	random.SetSeedFromTime();
 	PushInstance( this );
+
+	DumpModel();
 }
 
 
@@ -86,6 +90,43 @@ Sim::~Sim()
 	delete engine;
 	delete worldMap;
 	delete itemDB;
+}
+
+
+void Sim::DumpModel()
+{
+	FILE* fp = fopen( "gamemodel.txt", "w" );
+	GLASSERT( fp );
+
+	for( int plantStage=2; plantStage<4; ++plantStage ) {
+		for( int tech=0; tech<4; ++tech ) {
+
+			double growTime   = double(FarmScript::GrowFruit( plantStage )) / 1000.0;
+			double distilTime = double( DistilleryScript::ElixirTime( tech )) / 1000.0;
+			double elixirTime = growTime + distilTime;
+			double timePerFruit = elixirTime / double(DistilleryScript::ELIXIR_PER_FRUIT);
+
+			double depleteTime = ai::Needs::DecayTime();
+
+			double idealPopulation = depleteTime / timePerFruit;
+
+			fprintf( fp, "Ideal Population per plant. PlantStage=%d (0-3) Tech=%d (0-%d)\n",
+					 plantStage,
+					 tech,
+					 TECH_MAX-1 );
+
+			fprintf( fp, "    growTime=%.1f distilTime=%.1f totalTime=%.1f\n",
+					 growTime, distilTime, elixirTime );
+			fprintf( fp, "    ELIXIR_PER_FRUIT=%d timePerFruit=%.1f\n", DistilleryScript::ELIXIR_PER_FRUIT, timePerFruit );
+			fprintf( fp, "    depleteTime=%.1f\n", depleteTime );
+
+			if ( plantStage == 3 && tech == 1 ) 
+				fprintf( fp, "idealPopulation=%.1f <------ \n\n", idealPopulation );
+			else
+				fprintf( fp, "idealPopulation=%.1f\n\n", idealPopulation );
+		}
+	}
+	fclose( fp );
 }
 
 

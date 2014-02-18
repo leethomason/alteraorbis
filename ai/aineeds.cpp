@@ -7,6 +7,9 @@ using namespace grinliz;
 
 static const double DECAY_TIME = 200.0;	// in seconds
 
+double Needs::DecayTime() { return DECAY_TIME; }
+
+
 /* static */ const char* Needs::Name( int i )
 {
 	GLASSERT( i >= 0 && i < NUM_NEEDS );

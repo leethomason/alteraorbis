@@ -51,7 +51,7 @@ private:
 	enum {
 		MOB_DENIZEN,
 		MOB_GREATER,
-		MOB_NORMAL,
+		MOB_LESSER,
 		MOB_COUNT
 	};
 
@@ -65,11 +65,7 @@ private:
 		ITEM_COUNT
 	};
 
-	ItemHistory levelActive, 
-				levelAny,
-				valueActive,
-				valueAny,
-				killsActive,
+	ItemHistory killsActive,
 				killsAny,
 				greaterKillsActive,
 				greaterKillsAny,

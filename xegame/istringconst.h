@@ -71,6 +71,10 @@ public:
 	static grinliz::IString fireCyclops;
 	static grinliz::IString shockCyclops;
 
+	static grinliz::IString lesser;
+	static grinliz::IString greater;
+	static grinliz::IString denizen;
+
 	// double underscore -> '.'
 	static grinliz::IString kiosk__n;
 	static grinliz::IString kiosk__m;

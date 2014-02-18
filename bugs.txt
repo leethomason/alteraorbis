@@ -6,16 +6,12 @@
 - fix / disable right mouse behavior
 - unify rockgen and worldgen. frustrating they are separate steps. or don't pass height to rockgen?
 - rethink spawning. spawn based on need? what's around?
-- need to "ding" on level up
 - add rez-in animation
 - show rock damage
-x How does Ice and magma interact? Volcanoes wipe out ice. Okay for now.
 - loss of gold crystal. was: make sure gold/crystal gets returned to the Reserve when the Chit is destroyed
 - GT: lightning
 - can re-pack MVP and Bone matrix in the shader to encode 3*vec4 as the transpose, then transpose in the shader
 - standing shields!
-- personality, personality display
-- AI notifies friends when attacked, notifies that being attacked, etc.
 - maps: what direction is player pointed?
 - fix porch image (alpha of the tiles, if not general improvement)
 - AIs should account for personality and skills when doing inventory sorting
@@ -23,7 +19,6 @@ x How does Ice and magma interact? Volcanoes wipe out ice. Okay for now.
 - “Focus” shouldn’t switch so easily.
 - 32bit texture support
 - see monsters when you click on them
-- remove "tech grouping" of buildings
 - Click through of disabled buttons is surprising
 - none vs. clear is wonky
 - different porch color for usable buildings
@@ -54,11 +49,11 @@ x How does Ice and magma interact? Volcanoes wipe out ice. Okay for now.
 		x prev-next unit now working correctly if out of domain
 		x how should citizens be replaced??
 		x de-rez at xxx by BUG (null) - kind of fixed. needs cleanup.
-    	- model to predict rates of food, farming, needs
+    	x model to predict rates of food, farming, needs
+		x morale affected by tombstones
+		x denizen healing
     	- art: farm
     	- art: distillery
-		- morale affected by tombstones
-		x denizen healing
 
 	- Census
 		x coolest stuff, past and present, by category
@@ -82,21 +77,21 @@ x How does Ice and magma interact? Volcanoes wipe out ice. Okay for now.
 		x rethink fiction / core control / avatar prime
 		x denizens
 		x item market
+		x guard posts
+		x tech pyramids -> power plants
+		x forge
+			x forge or factory?
+			x fee to forge
+		x citizens *don't* pick stuff up in their own domain
 		- flammability / shockability very agressive
-		- guard posts
 		- world effects morale/needs: water, tombstones, temples, etc.
 		- proper game start: location, selection of team color, icons
 		- cyclops attracted by tech?
-		- tech pyramids -> power plants
 		- turret
 		- influence zones for buildings
 		- team colors
 		- battle flags
     	- time scale culling
-		- forge
-			- forge or factory?
-			- fee to forge
-		- citizens *don't* pick stuff up in their own domain
 		- vault:
 			- item limit
 		- what to do with full vaults?
@@ -104,8 +99,9 @@ x How does Ice and magma interact? Volcanoes wipe out ice. Okay for now.
 			- dragging, rows
 			- top view?
 			x auto-clear vegetation
-		- morale
-			- madness / starvation / things going wrong
+		x morale
+			x madness / starvation / things going wrong
+		- gold & crystal market
 
 	- Adventure
 		x weapon swap button or auto-swap?
@@ -144,7 +140,7 @@ x How does Ice and magma interact? Volcanoes wipe out ice. Okay for now.
 		- teams. friend-enemy-neutral logic.
 		- monster ecology
 		x visitors
-		- inventory screen
+		x inventory screen
 	- Building
 		- domain building
     	- turrets
@@ -259,6 +255,11 @@ V2 ideas:
 - level up grid and special skills
 
 ----------- FIXED -------------
+x remove "tech grouping" of buildings
+x How does Ice and magma interact? Volcanoes wipe out ice. Okay for now.
+x need to "ding" on level up
+x personality, personality display
+x AI notifies friends when attacked, notifies that being attacked, etc.
 x Denizen-2
 	x update cyclops art
 	x update temple art

@@ -73,7 +73,7 @@ void CensusScene::ScanItem( ItemComponent* ic, const GameItem* item )
 		int slot = -1;
 		if      ( mobIStr == "denizen" ) slot = MOB_DENIZEN;
 		else if ( mobIStr == "greater" ) slot = MOB_GREATER;
-		else if ( mobIStr == "normal" )  slot = MOB_NORMAL;
+		else if ( mobIStr == "lesser" )  slot = MOB_LESSER;
 
 		if ( slot >= 0 ) {
 			if ( !mobActive[slot].item || item->Traits().Level() > mobActive[slot].item->Traits().Level() ) {
@@ -102,12 +102,6 @@ void CensusScene::ScanItem( ItemComponent* ic, const GameItem* item )
 	ItemHistory h;
 	h.Set( item );
 
-	if ( h.level > levelActive.level ) {
-		levelActive.Set( item );
-	}
-	if ( h.value > valueActive.value ) {
-		valueActive.Set( item );
-	}
 	if ( h.kills > killsActive.kills ) {
 		killsActive.Set( item );
 	}
@@ -139,8 +133,6 @@ void CensusScene::Scan()
 			}
 		}
 	}
-	levelAny = levelActive;
-	valueAny = valueActive;
 	killsAny = killsActive;
 	greaterKillsAny = greaterKillsActive;
 	craftedAny = craftedActive;
@@ -148,12 +140,6 @@ void CensusScene::Scan()
 	ItemDB* itemDB = ItemDB::Instance();
 	for( int i=0; i<itemDB->NumHistory(); ++i ) {
 		const ItemHistory& h = itemDB->HistoryByIndex(i);
-		if ( h.level > levelAny.level ) {
-			levelAny = h;
-		}
-		if ( h.value > valueAny.value ) {
-			valueAny = h;
-		}
 		if ( h.kills > killsAny.kills ) {
 			killsAny = h;
 		}
@@ -181,20 +167,16 @@ void CensusScene::Scan()
 		allWallet.crystal[3] + reserveWallet.crystal[3] );
 
 	str.AppendFormat( "MOBs:\tAu=%d Green=%d Red=%d Blue=%d Violet=%d\n", mobWallet.gold, mobWallet.crystal[0], mobWallet.crystal[1], mobWallet.crystal[2], mobWallet.crystal[3] );
-	str.append( "Level, alive:\t" );		levelActive.AppendDesc( &str );	str.append( "\n" );
-	str.append( "Level, historical:\t" );	levelAny.AppendDesc( &str );	str.append( "\n" );
-	str.append( "Value, alive:\t" );		valueActive.AppendDesc( &str ); str.append( "\n" );
-	str.append( "Value, historical:\t" );	valueAny.AppendDesc( &str );	str.append( "\n" );
 	str.append( "\n" );
 	str.append( "Kills:\n" );
-	str.append( "active\t" );				killsActive.AppendDesc( &str );	str.append( "\n" );
-	str.append( "historical\t" );			killsAny.AppendDesc( &str );	str.append( "\n" );
-	str.append( "Greater, active\t" );		greaterKillsActive.AppendDesc( &str );	str.append( "\n" );
-	str.append( "Greater, historical\t" );	greaterKillsAny.AppendDesc( &str );	str.append( "\n" );
-	str.append( "\n" );
-	str.append( "Crafted, active\t" );		craftedActive.AppendDesc( &str );str.append( "\n" );
-	str.append( "Crafted, historical\t" );	craftedAny.AppendDesc( &str );	str.append( "\n" );
-	str.append( "\n" );
+	str.append( "  Total\t" );				killsActive.AppendDesc( &str );	str.append( "\n" );
+	str.append( "\t" );						killsAny.AppendDesc( &str );	str.append( "\n" );
+	str.append( "  Greater\t" );			greaterKillsActive.AppendDesc( &str );	str.append( "\n" );
+	str.append( "\t" );						greaterKillsAny.AppendDesc( &str );	str.append( "\n" );
+	str.append( "\nCrafting:\n" );
+	str.append( "\t" );						craftedActive.AppendDesc( &str );str.append( "\n" );
+	str.append( "\t" );						craftedAny.AppendDesc( &str );	str.append( "\n" );
+	str.append( "\nNotable:\n" );
 
 	for( int i=0; i<MOB_COUNT; ++i ) {
 		static const char* NAME[MOB_COUNT] = { "Denizen", "Greater", "Lesser" };
@@ -202,7 +184,7 @@ void CensusScene::Scan()
 			ItemHistory h;
 			h.Set( mobActive[i].item );
 			
-			str.AppendFormat( "%s:\t", NAME[i] );
+			str.AppendFormat( "  %s\t", NAME[i] );
 			h.AppendDesc( &str );
 
 			Chit* chit = mobActive[i].ic->ParentChit();
@@ -225,7 +207,7 @@ void CensusScene::Scan()
 			ItemHistory h;
 			h.Set( itemActive[i].item );
 
-			str.AppendFormat( "%s:\t", NAME[i] );
+			str.AppendFormat( "%s\t", NAME[i] );
 			h.AppendDesc( &str );
 
 			const GameItem* mainItem = itemActive[i].ic->GetItem(0);

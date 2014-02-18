@@ -2286,6 +2286,7 @@ void AIComponent::EnterNewGrid( const ComponentSet& thisComp )
 {
 	if ( aiMode == NORMAL_MODE ) {
 		if ( thisComp.item->flags & GameItem::HAS_NEEDS ) {
+			RenderComponent* rc = parentChit->GetRenderComponent();
 			Vector2F center = ToWorld2F( thisComp.spatial->GetPosition2DI() );	// center of the grid.
 			CChitArray arr;
 			const ChitContext* context = this->GetChitContext();
@@ -2301,7 +2302,30 @@ void AIComponent::EnterNewGrid( const ComponentSet& thisComp )
 				Chit* chit = arr[i];
 				GameItem* item = chit->GetItem();
 				GLASSERT( item );
+				IString mob = item->keyValues.GetIString( "mob" );
+				GLASSERT( !mob.empty() );
+				int team = -1;
+				item->keyValues.Get( "team", &team );
+				GLASSERT( team >= 0 );
 
+				double boost = 0;
+				if ( mob == IStringConst::lesser )			boost = 0.05;
+				else if ( mob == IStringConst::greater )	boost = 0.20;
+				else if ( mob == IStringConst::denizen )	boost = 0.10;
+
+				int relate = GetRelationship( thisComp.chit->PrimaryTeam(), team );
+				if ( relate == RELATE_FRIEND ) {
+					GetNeedsMutable()->AddMorale( boost );
+					if ( rc ) {
+						rc->AddDeco( "happy", STD_DECO );
+					}
+				}
+				else if ( relate == RELATE_ENEMY ) {
+					GetNeedsMutable()->AddMorale( -boost );
+					if ( rc ) {
+						rc->AddDeco( "sad", STD_DECO );
+					}				
+				}
 			}
 		}
 	}
