@@ -206,6 +206,7 @@ private:
 	ai::TaskList		taskList;
 	CTicker				needsTicker;
 	ai::Needs			needs;
+	grinliz::Vector2I	lastGrid;	// the environment affects morale and needs - but only check on new grids.
 
 	static const char*	MODE_NAMES[NUM_MODES];
 	static const char*	ACTION_NAMES[NUM_ACTIONS];
@@ -215,6 +216,7 @@ private:
 	void DoMove( const ComponentSet& thisComp );
 	bool DoStand( const ComponentSet& thisComp, U32 since );	// return true if doing something
 	bool SectorHerd( const ComponentSet& thisComp );
+	void EnterNewGrid( const ComponentSet& thisComp );
 
 	grinliz::CDynArray< Chit* > chitArr;	// temporary, local
 	grinliz::CArray<int, MAX_TRACK> friendList;

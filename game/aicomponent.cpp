@@ -116,6 +116,7 @@ void AIComponent::Serialize( XStream* xs )
 	XARC_SER( xs, visitorIndex );
 	XARC_SER( xs, rampageTarget );
 	XARC_SER( xs, destinationBlocked );
+	XARC_SER( xs, lastGrid );
 	feTicker.Serialize( xs, "feTicker" );
 	needsTicker.Serialize( xs, "needsTicker" );
 	needs.Serialize( xs );
@@ -2280,6 +2281,33 @@ void AIComponent::DoMoraleZero( const ComponentSet& thisComp )
 }
 
 
+
+void AIComponent::EnterNewGrid( const ComponentSet& thisComp )
+{
+	if ( aiMode == NORMAL_MODE ) {
+		if ( thisComp.item->flags & GameItem::HAS_NEEDS ) {
+			Vector2F center = ToWorld2F( thisComp.spatial->GetPosition2DI() );	// center of the grid.
+			CChitArray arr;
+			const ChitContext* context = this->GetChitContext();
+			LumosChitBag* chitBag = this->GetLumosChitBag();
+
+			// For now, just tombstones.
+			IString names[1] = {
+				IStringConst::tombstone
+			};
+			ItemNameFilter filter( names, 3 );
+			chitBag->QuerySpatialHash( &arr, center, 1.1f, parentChit, &filter );
+			for( int i=0; i<arr.Size(); ++i ) {
+				Chit* chit = arr[i];
+				GameItem* item = chit->GetItem();
+				GLASSERT( item );
+
+			}
+		}
+	}
+}
+
+
 int AIComponent::DoTick( U32 deltaTime )
 {
 	PROFILE_FUNC();
@@ -2441,6 +2469,12 @@ int AIComponent::DoTick( U32 deltaTime )
 			currentAction = 0;
 			break;
 	}
+
+	if ( lastGrid != thisComp.spatial->GetPosition2DI() ) {
+		lastGrid = thisComp.spatial->GetPosition2DI();
+		EnterNewGrid( thisComp );
+	}
+
 	if ( debugFlag && (currentAction != oldAction) ) {
 		GLOUTPUT(( "ID=%d mode=%s action=%s\n", thisComp.chit->ID(), MODE_NAMES[aiMode], ACTION_NAMES[currentAction] ));
 	}
