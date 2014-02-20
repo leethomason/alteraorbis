@@ -11,6 +11,7 @@ IString IStringConst::shield;
 IString IStringConst::humanFemale;
 IString IStringConst::humanMale;
 IString IStringConst::worker;
+IString IStringConst::mob;
 IString IStringConst::ring;
 IString IStringConst::pistol;
 IString IStringConst::blaster;
@@ -63,6 +64,7 @@ void IStringConst::Init()
 	humanFemale = StringPool::Intern( "humanFemale", true );
 	humanMale = StringPool::Intern( "humanMale", true );
 	worker = StringPool::Intern( "worker", true );
+	mob = StringPool::Intern( "mob", true );
 	ring = StringPool::Intern( "ring", true );
 	pistol = StringPool::Intern( "pistol", true );
 	blaster = StringPool::Intern( "blaster", true );

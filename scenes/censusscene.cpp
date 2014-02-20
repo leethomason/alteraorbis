@@ -2,6 +2,7 @@
 #include "../xegame/chitbag.h"
 #include "../xegame/itemcomponent.h"
 #include "../xegame/spatialcomponent.h"
+#include "../xegame/istringconst.h"
 #include "../script/itemscript.h"
 #include "../game/lumosgame.h"
 #include "../game/reservebank.h"
@@ -85,12 +86,12 @@ void CensusScene::ScanItem( ItemComponent* ic, const GameItem* item )
 
 	IString itemIStr = item->IName();
 	int slot = -1;
-	if (      itemIStr == "pistol" ) slot = ITEM_PISTOL;
+	if (      itemIStr == "pistol" )  slot = ITEM_PISTOL;
 	else if ( itemIStr == "blaster" ) slot = ITEM_BLASTER;
-	else if ( itemIStr == "pulse" ) slot = ITEM_PULSE;
+	else if ( itemIStr == "pulse" )   slot = ITEM_PULSE;
 	else if ( itemIStr == "beamgun" ) slot = ITEM_BEAMGUN;
-	else if ( itemIStr == "ring" ) slot = ITEM_RING;
-	else if ( itemIStr == "shield" ) slot = ITEM_SHIELD;
+	else if ( itemIStr == "ring" )    slot = ITEM_RING;
+	else if ( itemIStr == "shield" )  slot = ITEM_SHIELD;
 
 	if ( slot >= 0 ) {
 		if ( !itemActive[slot].item || item->GetValue() > itemActive[slot].item->GetValue() ) {
@@ -124,11 +125,18 @@ void CensusScene::Scan()
 		nChits += arr.Size();
 
 		for ( int i=0; i<arr.Size(); ++i ) {
-			ItemComponent* ic = arr[i]->GetItemComponent();
-			if ( ic ) {
+			GameItem* item = arr[i]->GetItem();
+			if ( !item ) continue;
 
-				for( int k=0; k<ic->NumItems(); ++k ) {
-					ScanItem( ic, ic->GetItem(k));
+			if (   item->ToWeapon()
+				|| item->ToShield()
+				|| !item->keyValues.GetIString( IStringConst::mob ).empty() )
+			{
+				ItemComponent* ic = arr[i]->GetItemComponent();
+				if ( ic ) {
+					for( int k=0; k<ic->NumItems(); ++k ) {
+						ScanItem( ic, ic->GetItem(k));
+					}
 				}
 			}
 		}

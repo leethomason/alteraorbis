@@ -50,9 +50,19 @@ int GetRelationship( int t0, int t1 )
 	// t0 <= t1 to keep the logic simple.
 	if ( t0 > t1 ) Swap( &t0, &t1 );
 
-	if ( t1 == TEAM_CHAOS )   return RELATE_ENEMY;
-	if ( t0 == TEAM_NEUTRAL ) return RELATE_NEUTRAL;
-	if ( t0 == t1 ) return RELATE_FRIEND;
+	// CHAOS hates all - even each other.
+	if ( t1 == TEAM_CHAOS )   
+		return RELATE_ENEMY;
+	// Likewise, neutral is neutral even to themselves.
+	if ( t0 == TEAM_NEUTRAL )
+		return RELATE_NEUTRAL;
+	// Exceptions handled: everyone is friends with themselves.
+	if ( t0 == t1 ) 
+		return RELATE_FRIEND;
+
+	// Everyone hates RAT
+	if ( t1 == TEAM_RAT )
+		return RELATE_ENEMY;
 
 	if ( t0 == TEAM_VISITOR ) {
 		if ( t1 == TEAM_HOUSE0 )

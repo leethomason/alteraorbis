@@ -34,6 +34,7 @@ public:
 	static grinliz::IString humanFemale;
 	static grinliz::IString humanMale;
 	static grinliz::IString worker;
+	static grinliz::IString mob;
 
 	static grinliz::IString ring;
 	static grinliz::IString pistol;

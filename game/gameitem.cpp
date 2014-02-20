@@ -656,7 +656,7 @@ IString GameItem::INameAndTitle() const
 {
 	IString title = ITitle();
 	CStr<128> str;
-	str.Format( "%s %s", BestName(), ITitle().safe_str() );
+	str.Format( "%s %s", IFullName().c_str(), ITitle().safe_str() );
 	return StringPool::Intern( str.c_str() );
 }
 
@@ -667,6 +667,10 @@ IString GameItem::ITitle() const
 	// Slayer Greater
 	// Bane Lesser
 
+	// The title code is working, but doesn't generate a good title.
+	// And how does this work with multiple achievements? Almost
+	// like icons better.
+	/*
 	static const int LESSER_BANE = 100;
 	static const int GREATER_BANE = 4;
 
@@ -674,20 +678,20 @@ IString GameItem::ITitle() const
 	const grinliz::CDynArray< grinliz::IString >& lesserMOBs  = ItemDefDB::Instance()->LesserMOBs();
 	CStr<64> str;
 
-	int high = 0;
-	IString highStr;
-
 	// Check the greater
 	for( int pass=0; pass<2; ++pass ) {
+		int high = 0;
+		IString highStr;
+	
 		const grinliz::CDynArray< grinliz::IString >& mobs = (pass==0) ? greaterMOBs : lesserMOBs;
 		int bane = (pass==0) ? GREATER_BANE : LESSER_BANE;
 
 		for( int i=0; i<mobs.Size(); ++i ) {
 			str.Format( "Kills: %s", mobs[i].c_str() );
 			int count = 0;
-			keyValues.Get( str.c_str(), &count );
-			if ( count > high ) { 
-				count = high;
+			historyDB.Get( str.c_str(), &count );
+			if ( count > bane && count > high ) { 
+				high = count;
 				highStr = mobs[i];
 			}
 		}
@@ -696,6 +700,7 @@ IString GameItem::ITitle() const
 			return StringPool::Intern( str.c_str() );
 		}
 	}
+	*/
 	return IString();
 }
 

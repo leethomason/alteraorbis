@@ -35,8 +35,7 @@ class WorkQueue
 public:
 	WorkQueue();
 	~WorkQueue();
-	void InitSector( Chit* _parent, const grinliz::Vector2I& _sector ) { parentChit = _parent; sector = _sector; }
-
+	void InitSector( Chit* _parent, const grinliz::Vector2I& _sector );
 	struct QueueItem {
 		QueueItem() : action(0), assigned(0), taskID(0), model(0) { pos.Zero(); }
 

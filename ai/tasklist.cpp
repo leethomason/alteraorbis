@@ -360,7 +360,7 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 	if ( buildingName == IStringConst::vault ) {
 		GameItem* vaultItem = building->GetItem();
 		GLASSERT( vaultItem );
-		Wallet w = vaultItem->wallet.EmptyWallet();
+		Wallet w = thisComp.item->wallet.EmptyWallet();
 		vaultItem->wallet.Add( w );
 
 		// Put everything in the vault.

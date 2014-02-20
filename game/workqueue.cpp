@@ -414,7 +414,6 @@ void WorkQueue::Serialize( XStream* xs )
 
 	if ( xs->Loading() ) {
 		for( int i=0; i<queue.Size(); ++i ) {
-			AddImage( &queue[i] );
 			idPool = Max( idPool, queue[i].taskID+1 );
 		}
 	}
@@ -422,4 +421,14 @@ void WorkQueue::Serialize( XStream* xs )
 }
 
 
+void WorkQueue::InitSector( Chit* _parent, const grinliz::Vector2I& _sector )
+{ 
+	parentChit = _parent; 
+	sector = _sector; 
+	for( int i=0; i<queue.Size(); ++i ) {
+		if ( !queue[i].model ) {
+			AddImage( &queue[i] );
+		}
+	}
+}
 

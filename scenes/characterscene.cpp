@@ -271,25 +271,33 @@ void CharacterScene::SetButtonText()
 	int bought=0, sold=0;
 	CalcCost( &bought, &sold );
 
-	CStr<64> str;
-	str.Format( "Buy: %d\n"
-				"Sell: %d\n"
-				"%s: %d", bought, sold, (sold > bought) ? "Earn" : "Cost", abs(bought-sold) );
-	billOfSale.SetText( str.c_str() );
-
 	if ( data->IsMarket() ) {
+		CStr<100> str;
+		str.Format( "Buy: %d\n"
+					"Sell: %d\n"
+					"%s: %d\n", bought, sold, (sold > bought) ? "Earn" : "Cost", abs(bought-sold) );
+
 		int bought=0, sold=0;
 		CalcCost( &bought, &sold );
 		int cost = bought - sold;
 
 		if ( bought > sold ) {
 			const Wallet& wallet = data->itemComponent->GetItem()->wallet;
-			okay.SetEnabled( cost <= wallet.gold );
+			bool enoughInWallet = cost <= wallet.gold;
+			okay.SetEnabled( enoughInWallet );
+			if ( !enoughInWallet ) {
+				str.AppendFormat( "%s", "Not enough Au in wallet." );
+			}
 		}
 		else {
 			const Wallet& wallet = data->storageIC->GetItem()->wallet;
-			okay.SetEnabled( -cost <= wallet.gold );
+			bool enoughInMarket = -cost <= wallet.gold;
+			okay.SetEnabled( enoughInMarket );
+			if ( !enoughInMarket ) {
+				str.AppendFormat( "%s", "Market has insufficient Au." );
+			}
 		}
+		billOfSale.SetText( str.c_str() );
 	}
 }
 

@@ -1527,9 +1527,11 @@ bool AIComponent::ThinkFruitCollect( const ComponentSet& thisComp )
 		need = needs.Value( Needs::FOOD );
 	}
 
+	bool worker = (thisComp.item->flags & GameItem::AI_DOES_WORK) != 0;
+
 	// It is the duty of every citizen to take fruit to the distillery.
-	if ( AtHomeCore() ) {
-		if (    (thisComp.item->flags & GameItem::AI_DOES_WORK)
+	if ( AtHomeCore() || worker ) {
+		if (    worker
 			 || thisComp.item->GetPersonality().Botany() == Personality::LIKES
 			 || need < NEED_CRITICAL * 2.0 )
 		{
@@ -1580,7 +1582,10 @@ bool AIComponent::ThinkDelivery( const ComponentSet& thisComp )
 		return false;
 	}
 
-	if ( thisComp.item->flags & GameItem::AI_DOES_WORK ) {
+	bool usesBuilding = (thisComp.item->flags & GameItem::AI_USES_BUILDINGS) != 0;
+	bool worker       = (thisComp.item->flags & GameItem::AI_DOES_WORK) != 0;
+
+	if ( worker ) {
 		bool needVaultRun = false;
 
 		if ( !thisComp.itemComponent->GetItem(0)->wallet.IsEmpty() ) {
@@ -1619,7 +1624,7 @@ bool AIComponent::ThinkDelivery( const ComponentSet& thisComp )
 		}
 	}
 
-	if ( thisComp.item->flags & GameItem::AI_USES_BUILDINGS )
+	if ( worker || usesBuilding )
 	{
 		int index = thisComp.itemComponent->FindItem( IStringConst::fruit );
 		bool carrying = index >= 0;
@@ -2302,10 +2307,10 @@ void AIComponent::EnterNewGrid( const ComponentSet& thisComp )
 				Chit* chit = arr[i];
 				GameItem* item = chit->GetItem();
 				GLASSERT( item );
-				IString mob = item->keyValues.GetIString( "mob" );
+				IString mob = item->keyValues.GetIString( "tomb_mob" );
 				GLASSERT( !mob.empty() );
 				int team = -1;
-				item->keyValues.Get( "team", &team );
+				item->keyValues.Get( "tomb_team", &team );
 				GLASSERT( team >= 0 );
 
 				double boost = 0;
@@ -2314,13 +2319,13 @@ void AIComponent::EnterNewGrid( const ComponentSet& thisComp )
 				else if ( mob == IStringConst::denizen )	boost = 0.10;
 
 				int relate = GetRelationship( thisComp.chit->PrimaryTeam(), team );
-				if ( relate == RELATE_FRIEND ) {
+				if ( relate == RELATE_ENEMY ) {
 					GetNeedsMutable()->AddMorale( boost );
 					if ( rc ) {
 						rc->AddDeco( "happy", STD_DECO );
 					}
 				}
-				else if ( relate == RELATE_ENEMY ) {
+				else if ( relate == RELATE_FRIEND ) {
 					GetNeedsMutable()->AddMorale( -boost );
 					if ( rc ) {
 						rc->AddDeco( "sad", STD_DECO );
@@ -2361,9 +2366,9 @@ int AIComponent::DoTick( U32 deltaTime )
 	const ChitContext* context = GetChitContext();
 
 	// Focuesd move check
-	if ( focus == FOCUS_MOVE ) {
-		return GetThinkTime();
-	}
+//	if ( focus == FOCUS_MOVE ) {
+//		return GetThinkTime();
+//	}
 
 	// If focused, make sure we have a target.
 	if ( targetDesc.id ) {
@@ -2382,7 +2387,7 @@ int AIComponent::DoTick( U32 deltaTime )
 		}
 	}
 
-	if ( !targetDesc.id ) {
+	if ( focus == FOCUS_TARGET && !targetDesc.id ) {
 		focus = FOCUS_NONE;
 	}
 
@@ -2391,31 +2396,45 @@ int AIComponent::DoTick( U32 deltaTime )
 	}
 
 	// High level mode switch, in/out of battle?
-	if ( aiMode != BATTLE_MODE && enemyList.Size() ) {
-		aiMode = BATTLE_MODE;
-		currentAction = 0;
-		taskList.Clear();
+	if ( focus != FOCUS_MOVE ) {
+		if (    aiMode != BATTLE_MODE 
+			 && enemyList.Size() ) 
+		{
+			aiMode = BATTLE_MODE;
+			currentAction = 0;
+			taskList.Clear();
 
-		if ( debugFlag ) {
-			GLOUTPUT(( "ID=%d Mode to Battle\n", thisComp.chit->ID() ));
-		}
+			if ( debugFlag ) {
+				GLOUTPUT(( "ID=%d Mode to Battle\n", thisComp.chit->ID() ));
+			}
 
-		if ( parentChit->GetRenderComponent() ) {
-			parentChit->GetRenderComponent()->AddDeco( "attention", STD_DECO );
+			if ( parentChit->GetRenderComponent() ) {
+				parentChit->GetRenderComponent()->AddDeco( "attention", STD_DECO );
+			}
+			for( int i=0; i<friendList.Size(); ++i ) {
+				Chit* fr = GetChitBag()->GetChit( friendList[i] );
+				if ( fr && fr->GetAIComponent() ) {
+					fr->GetAIComponent()->MakeAware( enemyList.Mem(), enemyList.Size() );
+				}
+			}
 		}
-		for( int i=0; i<friendList.Size(); ++i ) {
-			Chit* fr = GetChitBag()->GetChit( friendList[i] );
-			if ( fr && fr->GetAIComponent() ) {
-				fr->GetAIComponent()->MakeAware( enemyList.Mem(), enemyList.Size() );
+		else if ( aiMode == BATTLE_MODE && targetDesc.id == 0 && enemyList.Empty() ) {
+			aiMode = NORMAL_MODE;
+			currentAction = 0;
+			if ( debugFlag ) {
+				GLOUTPUT(( "ID=%d Mode to Normal\n", thisComp.chit->ID() ));
 			}
 		}
 	}
-	else if ( aiMode == BATTLE_MODE && targetDesc.id == 0 && enemyList.Empty() ) {
-		aiMode = NORMAL_MODE;
-		currentAction = 0;
-		if ( debugFlag ) {
-			GLOUTPUT(( "ID=%d Mode to Normal\n", thisComp.chit->ID() ));
-		}
+
+	
+	if ( lastGrid != thisComp.spatial->GetPosition2DI() ) {
+		lastGrid = thisComp.spatial->GetPosition2DI();
+		EnterNewGrid( thisComp );
+	}
+
+	if  ( focus == FOCUS_MOVE ) {
+		return 0;
 	}
 
 	if ( (thisComp.item->flags & GameItem::HAS_NEEDS) && needsTicker.Delta( deltaTime )) {
@@ -2494,11 +2513,6 @@ int AIComponent::DoTick( U32 deltaTime )
 			break;
 	}
 
-	if ( lastGrid != thisComp.spatial->GetPosition2DI() ) {
-		lastGrid = thisComp.spatial->GetPosition2DI();
-		EnterNewGrid( thisComp );
-	}
-
 	if ( debugFlag && (currentAction != oldAction) ) {
 		GLOUTPUT(( "ID=%d mode=%s action=%s\n", thisComp.chit->ID(), MODE_NAMES[aiMode], ACTION_NAMES[currentAction] ));
 	}
@@ -2531,8 +2545,8 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 	switch ( msg.ID() ) {
 	case ChitMsg::PATHMOVE_DESTINATION_REACHED:
 		destinationBlocked = 0;
+		focus = 0;
 		if ( currentAction != WANDER ) {
-			focus = 0;
 			currentAction = NO_ACTION;
 			parentChit->SetTickNeeded();
 		}

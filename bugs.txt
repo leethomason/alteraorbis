@@ -54,6 +54,8 @@
 		x denizen healing
     	- art: farm
     	- art: distillery
+    	- visitors & tech: how to integrate? No pressure to upgrade.
+    	- limit beds to tech / temples
 
 	- Census
 		x coolest stuff, past and present, by category
@@ -64,6 +66,7 @@
 		x greatest warrior
 		x greatest weapons
 		x location and owner
+    	- re-do visitor likes to account for the grids they pass throug
 		- name / level / health display
 		- money checks optional
 		- greatest smith
@@ -233,6 +236,15 @@ x Troll
 
 --- Links --- 
 http://weloveiconfonts.com/ : entypo
+
+    		Currently:
+    		- farm efficiency
+    		- weapon quality
+    		Consider:
+    		- sleep tube limit
+    		- food limit
+    		- grid access
+    		- food drives population?
 
 ---------- Defer ----------
 d rings deflect bolts. too much AI change.

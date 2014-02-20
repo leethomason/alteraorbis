@@ -424,7 +424,7 @@ void RenderComponent::ProcessIcons( int delta )
 	if ( sc ) pos = sc->GetPosition();
 
 	bool inView = false;
-	static const float SIZE = 20.0f;
+	static const float SIZE = 25.0f;
 
 	const ChitContext* context = GetChitContext();
 	float len2 = ( context->engine->camera.PosWC() - pos ).LengthSquared();
