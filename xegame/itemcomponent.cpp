@@ -583,32 +583,6 @@ void ItemComponent::DoSlowTick()
 			}
 		}
 	}
-}
-
-
-int ItemComponent::DoTick( U32 delta )
-{
-	if ( hardpointsModified && parentChit->GetRenderComponent() ) {
-		SetHardpoints();
-		hardpointsModified = false;
-	}
-	const ChitContext* context = GetChitContext();
-
-	GameItem* mainItem = itemArr[0];
-	if ( slowTick.Delta( delta )) {
-		DoSlowTick();
-	}
-	int tick = VERY_LONG_TICK;
-	for( int i=0; i<itemArr.Size(); ++i ) {	
-		int t = itemArr[i]->DoTick( delta );
-		tick = Min( t, tick );
-
-		if (    ( i==0 || ItemActive(i) ) 
-			 && EmitEffect( *mainItem, delta )) 
-		{
-			tick = 0;
-		}
-	}
 
 	if ( mainItem->flags & GameItem::GOLD_PICKUP ) {
 		ComponentSet thisComp( parentChit, Chit::SPATIAL_BIT | ComponentSet::IS_ALIVE );
@@ -628,6 +602,34 @@ int ItemComponent::DoTick( U32 delta )
 					gold->Add( tc );
 				}
 			}
+		}
+	}
+
+}
+
+
+int ItemComponent::DoTick( U32 delta )
+{
+	if ( hardpointsModified && parentChit->GetRenderComponent() ) {
+		SetHardpoints();
+		hardpointsModified = false;
+	}
+	const ChitContext* context = GetChitContext();
+
+	GameItem* mainItem = itemArr[0];
+	// Slow tick is about 500-600 ms
+	if ( slowTick.Delta( delta )) {
+		DoSlowTick();
+	}
+	int tick = VERY_LONG_TICK;
+	for( int i=0; i<itemArr.Size(); ++i ) {	
+		int t = itemArr[i]->DoTick( delta );
+		tick = Min( t, tick );
+
+		if (    ( i==0 || ItemActive(i) ) 
+			 && EmitEffect( *mainItem, delta )) 
+		{
+			tick = 0;
 		}
 	}
 

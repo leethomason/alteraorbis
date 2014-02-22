@@ -46,7 +46,7 @@ public:
 	~SpaceTree();
 
 	void SetLightDir( const grinliz::Vector3F& light );
-
+	
 	Model* AllocModel( const ModelResource* );
 	void   FreeModel( Model* );
 
@@ -54,12 +54,15 @@ public:
 	void   Update( Model* );
 
 	// Returns all the models in the planes.
-	Model* Query( const grinliz::Plane* planes, int nPlanes, int requiredFlags, int excludedFlags );
+	// Limits to BOTH planes and rectangle. Only one
+	// needs to be specified.
+	Model* Query( const grinliz::Plane* planes, int nPlanes, 
+				  const grinliz::Rectangle3F* rectangle,
+				  bool includeShadow,
+				  int requiredFlags, int excludedFlags );
+
 	// Returns all the valid areas from the last query. (used by voxel engine.)
 	const grinliz::CArray<grinliz::Rectangle2I, MAX_ZONES>& Zones() const	{ return zones; }
-
-	// Returns all the models in the 2D bounds.
-	Model* QueryRect( const grinliz::Rectangle2F& rect, int required, int excluded );
 
 	// Returns the FIRST model impacted.
 	Model* QueryRay( const grinliz::Vector3F& origin, 
@@ -135,8 +138,7 @@ private:
 	}
 
 	void InitNode();
-	void QueryPlanesRec( const grinliz::Plane* planes, int nPlanes, int intersection, const Node* node, U32 positive );
-	void QueryRectRec( const grinliz::Rectangle3F& rect, const Node* node );
+	void QueryPlanesRec( const grinliz::Plane* planes, int nPlanes, const grinliz::Rectangle3F* rect, bool includeShadow, int intersection, const Node* node, U32 positive );
 
 	grinliz::Rectangle3F treeBounds;
 	Model* modelRoot;

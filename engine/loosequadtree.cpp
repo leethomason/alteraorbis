@@ -195,6 +195,7 @@ SpaceTree::Node* SpaceTree::GetNode( int depth, int x, int z )
 }
 
 
+#if 0
 Model* SpaceTree::QueryRect( const grinliz::Rectangle2F& rect, int required, int excluded )
 {
 	Rectangle3F bounds;
@@ -239,9 +240,10 @@ void SpaceTree::QueryRectRec( const grinliz::Rectangle3F& rect, const Node* node
 		}
 	}
 }
+#endif
 
 
-Model* SpaceTree::Query( const Plane* planes, int nPlanes, int required, int excluded )
+Model* SpaceTree::Query( const Plane* planes, int nPlanes, const Rectangle3F* clipRect, bool includeShadow, int required, int excluded )
 {
 	modelRoot = 0;
 	nodesVisited = 0;
@@ -258,7 +260,7 @@ Model* SpaceTree::Query( const Plane* planes, int nPlanes, int required, int exc
 	}
 #endif
 
-	QueryPlanesRec( planes, nPlanes, grinliz::INTERSECT, &nodeArr[0], 0 );
+	QueryPlanesRec( planes, nPlanes, clipRect, includeShadow, grinliz::INTERSECT, &nodeArr[0], 0 );
 	return modelRoot;
 }
 
@@ -322,7 +324,10 @@ void SpaceTree::Dump( Node* node )
 #endif
 
 
-void SpaceTree::QueryPlanesRec(	const Plane* planes, int nPlanes, int intersection, const Node* node, U32 positive )
+void SpaceTree::QueryPlanesRec(	const Plane* planes, int nPlanes, 
+								const Rectangle3F* clipRect, 
+								bool includeShadow,
+								int intersection, const Node* node, U32 positive )
 {
 	#define IS_POSITIVE( pos, i ) ( pos & (1<<i) )
 	const int allPositive = (1<<nPlanes)-1;
@@ -336,35 +341,45 @@ void SpaceTree::QueryPlanesRec(	const Plane* planes, int nPlanes, int intersecti
 	{
 		const Rectangle3F& aabb = node->aabb;
 
-		for( int i=0; i<nPlanes; ++i ) {
-			// Assume positive bit is set, check if not. Once we go POSITIVE, we don't need 
-			// to check the sub-nodes. They will still be POSITIVE. Saves about 1/2 the Plane
-			// and Sphere checks.
-			//
-			int comp = grinliz::POSITIVE;
-			if ( IS_POSITIVE( positive, i ) == 0 ) {
-				comp = ComparePlaneAABB( planes[i], aabb );
-				++planesComputed;
-			}
-
-			// If the aabb is negative of any plane, it is culled.
-			if ( comp == grinliz::NEGATIVE ) {
+		if ( clipRect ) {
+			if ( !clipRect->Intersect( aabb )) {
 				intersection = grinliz::NEGATIVE;
-				break;
 			}
-			else if ( comp == grinliz::POSITIVE ) {
-				// If the aabb intersects the plane, the result is subtle:
-				// intersecting a plane doesn't meen it is in the frustrum. 
-				// The intersection of the aabb and the plane is often 
-				// completely outside the frustum.
-
-				// If the aabb is positive of ALL the planes then we are in good shape.
-				positive |= (1<<i);
+			else if ( nPlanes == 0 && clipRect->Contains( aabb )) {
+				intersection = grinliz::POSITIVE;
 			}
 		}
-		if ( positive == allPositive ) {
-			// All positive is quick:
-			intersection = grinliz::POSITIVE;
+		if ( nPlanes && intersection == grinliz::INTERSECT ) {
+			for( int i=0; i<nPlanes; ++i ) {
+				// Assume positive bit is set, check if not. Once we go POSITIVE, we don't need 
+				// to check the sub-nodes. They will still be POSITIVE. Saves about 1/2 the Plane
+				// and Sphere checks.
+				//
+				int comp = grinliz::POSITIVE;
+				if ( IS_POSITIVE( positive, i ) == 0 ) {
+					comp = ComparePlaneAABB( planes[i], aabb );
+					++planesComputed;
+				}
+
+				// If the aabb is negative of any plane, it is culled.
+				if ( comp == grinliz::NEGATIVE ) {
+					intersection = grinliz::NEGATIVE;
+					break;
+				}
+				else if ( comp == grinliz::POSITIVE ) {
+					// If the aabb intersects the plane, the result is subtle:
+					// intersecting a plane doesn't meen it is in the frustrum. 
+					// The intersection of the aabb and the plane is often 
+					// completely outside the frustum.
+
+					// If the aabb is positive of ALL the planes then we are in good shape.
+					positive |= (1<<i);
+				}
+			}
+			if ( positive == allPositive ) {
+				// All positive is quick:
+				intersection = grinliz::POSITIVE;
+			}
 		}
 		++nodesVisited;
 	}
@@ -401,7 +416,7 @@ void SpaceTree::QueryPlanesRec(	const Plane* planes, int nPlanes, int intersecti
 				//GLOUTPUT(( "%*s[%d] Testing: 0x%x %s", node->depth, " ", node->depth, (int)m, m->GetResource()->header.name.c_str() ));
 				if ( intersection == grinliz::INTERSECT ) {
 					Rectangle3F aabb = m->AABB();
-					if ( m->CastsShadow() ) {
+					if ( includeShadow && m->CastsShadow() ) {
 						ExpandForLight( &aabb );
 					}
 					int compare = grinliz::INTERSECT;
@@ -434,7 +449,7 @@ void SpaceTree::QueryPlanesRec(	const Plane* planes, int nPlanes, int intersecti
 			// We could, in theory, early out using the number of models. But this makes the
 			// zones for the voxel system super-big, which is a big problem.
 			for( int i=0; i<4; ++i ) {
-				QueryPlanesRec( planes, nPlanes, intersection, node->child[i], positive );
+				QueryPlanesRec( planes, nPlanes, clipRect, includeShadow, intersection, node->child[i], positive );
 			}
 		}
 	}
@@ -484,14 +499,16 @@ Model* SpaceTree::QueryRay( const Vector3F& _origin,
 		// Can click outside of AABB pretty commonly, actually.
 		return 0;
 	}
-	Plane planes[6];
-	Rectangle3F rect;
-	rect.FromPair( p0, p1 );
-	Plane::CreatePlanes( rect, planes );
+	Rectangle3F worldBounds;
+	worldBounds.FromPair( p0, p1 );
+
 	Rectangle3F rayBounds;
 	rayBounds.FromPair( _origin, _origin+dir*length );
 
-	Model* modelRoot = Query( planes, 6, required, excluded );
+	Rectangle3F pathBounds = rayBounds;
+	pathBounds.DoIntersection( worldBounds );
+
+	Model* modelRoot = Query( 0, 0, &pathBounds, false, required, excluded );
 
 	// We now have a batch of models. Are any of them a hit??
 	GLASSERT( testType == TEST_HIT_AABB || testType == TEST_TRI );
@@ -504,9 +521,6 @@ Model* SpaceTree::QueryRay( const Vector3F& _origin,
 	for( Model* root=modelRoot; root; root=root->next ) {
 
 		if ( Ignore( root, ignore ) )
-			continue;
-
-		if ( !rayBounds.Intersect( root->AABB() ))
 			continue;
 
 		//GLOUTPUT(( "Consider: %s\n", root->GetResource()->header.name ));

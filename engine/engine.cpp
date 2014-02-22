@@ -282,7 +282,7 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 
 	// Get the working set of models.
 	int exclude = Model::MODEL_INVISIBLE;
-	Model* modelRoot = spaceTree->Query( planes, 6, 0, exclude );
+	Model* modelRoot = spaceTree->Query( planes, 6, 0, true, 0, exclude );
 	if ( map && (stages & STAGE_VOXEL) ) {
 #ifdef ENGINE_DETAILED_PROFILE
 		PROFILE_BLOCK( MapPrep );
