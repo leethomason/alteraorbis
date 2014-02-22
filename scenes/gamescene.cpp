@@ -108,8 +108,12 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 		modeButton[i].SetText( modeButtonText[i] );
 		modeButton[0].AddToToggleGroup( &modeButton[i] );
 	}
+	sleepTubeID = -1;
 	for( int i=0; i<BuildScript::NUM_OPTIONS; ++i ) {
 		const BuildData& bd = buildScript.GetData( i );
+		if ( bd.structure == "bed" ) {
+			sleepTubeID = i;
+		}
 
 		buildButton[i].Init( &gamui2D, game->GetButtonLook(0) );
 		buildButton[i].SetText( bd.label.c_str() );
@@ -117,6 +121,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 
 		modeButton[bd.group].AddSubItem( &buildButton[i] );
 	}
+	GLASSERT( sleepTubeID >= 0 );
 
 	tabBar0.Init( &gamui2D, LumosGame::CalcUIIconAtom( "tabBar", true ), false );
 	tabBar1.Init( &gamui2D, LumosGame::CalcUIIconAtom( "tabBar", true ), false );
@@ -1106,7 +1111,6 @@ void GameScene::DoTick( U32 delta )
 		const GameTrait& stat = playerChit->GetItem()->Traits();
 		str.Format( "Level %d XP %d/%d", stat.Level(), stat.Experience(), GameTrait::LevelToExperience( stat.Level()+1) );
 	}
-//	xpLabel.SetText( str.c_str() );
 
 	for( int i=0; i<NUM_BUILD_MODES; ++i ) {
 		modeButton[i].SetVisible( uiMode[UI_BUILD].Down() );
@@ -1123,27 +1127,33 @@ void GameScene::DoTick( U32 delta )
 	str.Format( "Tech %.2f / %d  Elixir %d", tech, maxTech, coreScript->nElixir );
 	techLabel.SetText( str.c_str() );
 
-//	int atech = coreScript->AchievedTechLevel();
-//	for( int i=1; i<NUM_BUILD_MODES; ++i ) {
-//		modeButton[i].SetEnabled( i-1 <= atech );
-//	}
-
-	CStr<32> str2;
-	// How many workers in the sector?
 	Vector2I homeSector = sim->GetChitBag()->GetHomeSector();
-	Rectangle2F b;
-	b.Set( (float)(homeSector.x*SECTOR_SIZE+1), (float)(homeSector.y*SECTOR_SIZE+1),
-			(float)((homeSector.x+1)*SECTOR_SIZE-1), (float)((homeSector.y+1)*SECTOR_SIZE-1) );
+	{
+		// Enforce the worker limit.
+		CStr<32> str2;
+		Rectangle2F b;
+		b.Set( (float)(homeSector.x*SECTOR_SIZE+1), (float)(homeSector.y*SECTOR_SIZE+1),
+				(float)((homeSector.x+1)*SECTOR_SIZE-1), (float)((homeSector.y+1)*SECTOR_SIZE-1) );
 
-	CChitArray arr;
-	ItemNameFilter workerFilter( IStringConst::worker );
+		CChitArray arr;
+		ItemNameFilter workerFilter( IStringConst::worker );
 
-	static const int MAX_BOTS = 4;
-	sim->GetChitBag()->QuerySpatialHash( &arr, b, 0, &workerFilter );
-	str2.Format( "WorkerBot\n20 %d/%d", arr.Size(), MAX_BOTS ); 
-	createWorkerButton.SetText( str2.c_str() );
-	createWorkerButton.SetEnabled( arr.Size() < MAX_BOTS );
-
+		static const int MAX_BOTS = 4;
+		sim->GetChitBag()->QuerySpatialHash( &arr, b, 0, &workerFilter );
+		str2.Format( "WorkerBot\n20 %d/%d", arr.Size(), MAX_BOTS );		// FIXME: pull price from data
+		createWorkerButton.SetText( str2.c_str() );
+		createWorkerButton.SetEnabled( arr.Size() < MAX_BOTS );
+	}
+	{
+		// Enforce the sleep tube limit.
+		CStr<32> str2;
+		int techLevel = coreScript->GetTechLevel();
+		int maxTubes  = 4 << techLevel;
+		sim->GetChitBag()->FindBuilding( IStringConst::bed, homeSector, 0, 0, &chitQuery, 0 );
+		buildButton[sleepTubeID].SetEnabled( chitQuery.Size() < maxTubes );
+		str2.Format( "SleepTube\n25 %d/%d", chitQuery.Size(), maxTubes );
+		buildButton[sleepTubeID].SetText( str2.c_str() ); 
+	}
 	consoleWidget.DoTick( delta );
 	ProcessNewsToConsole();
 

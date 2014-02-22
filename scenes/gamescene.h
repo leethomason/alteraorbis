@@ -123,6 +123,7 @@ private:
 	int					buildActive;	// which build button is active. 0 if none.
 	int					chitFaceToTrack;
 	int					currentNews;	// index of the last news item put in the console
+	int					sleepTubeID;
 
 	// Shows what is being built or removed.
 	Model*				selectionModel;

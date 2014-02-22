@@ -40,6 +40,8 @@ public:
 	static int ElixirTime( int tech );
 
 private:
+	void SetInfoText();
+
 	// serialized
 	CTicker		progressTick;
 	int			progress;

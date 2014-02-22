@@ -54,8 +54,8 @@
 		x denizen healing
     	- art: farm
     	- art: distillery
-    	- visitors & tech: how to integrate? No pressure to upgrade.
-    	- limit beds to tech / temples
+    	x visitors & tech: how to integrate? No pressure to upgrade.
+    	x limit beds to tech / temples
 
 	- Census
 		x coolest stuff, past and present, by category

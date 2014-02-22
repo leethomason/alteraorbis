@@ -3,6 +3,7 @@
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/itemcomponent.h"
 #include "../xegame/istringconst.h"
+#include "../xegame/rendercomponent.h"
 #include "../game/lumoschitbag.h"
 #include "corescript.h"
 
@@ -27,6 +28,30 @@ int DistilleryScript::ElixirTime( int tech )
 	return ELIXIR_TIME * TECH_MAX / (tech+1);
 }
 
+
+void DistilleryScript::SetInfoText()
+{
+	CStr<20> str;
+
+	ItemComponent* ic   = scriptContext->chit->GetItemComponent();
+	RenderComponent* rc = scriptContext->chit->GetRenderComponent();
+
+	if ( ic && rc ) {
+		int nFruit = 0;
+		for( int i=1; i<ic->NumItems(); ++i ) {
+			if ( ic->GetItem( i )->IName() == IStringConst::fruit ) {
+				++nFruit;
+			}
+		}
+		double fraction = double(progress) / double(ELIXIR_TIME);
+		if (nFruit == 0)
+			fraction = 0;
+
+		str.Format( "Fruit: %d [%0d%%]", nFruit, int(fraction*100.0) );
+		rc->SetDecoText( str.c_str() );
+
+	}
+}
 
 
 int DistilleryScript::DoTick( U32 delta )
@@ -58,6 +83,7 @@ int DistilleryScript::DoTick( U32 delta )
 			}
 		}
 	}
+	SetInfoText();
 	return progressTick.Next();
 }
 
