@@ -270,7 +270,7 @@ void ItemHistory::AppendDesc( GLString* str )
 	}
 	else {
 		GLASSERT( !titledName.empty() );
-		str->AppendFormat( "%s", titledName.c_str() );
+		str->AppendFormat( "[%d] %s", itemID, titledName.c_str() );
 		if ( level )
 			str->AppendFormat( " Level %d", level );
 		if ( value )

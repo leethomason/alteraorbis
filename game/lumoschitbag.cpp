@@ -37,6 +37,8 @@
 #include "../script/procedural.h"
 #include "../script/countdownscript.h"
 
+#include "../xarchive/glstreamer.h"
+
 
 //#define DEBUG_EXPLOSION
 
@@ -46,6 +48,8 @@ LumosChitBag::LumosChitBag( const ChitContext& c) : ChitBag(c), sceneID(-1), sce
 {
 	memset( mapSpatialHash, 0, sizeof(MapSpatialComponent*)*NUM_SECTORS*NUM_SECTORS);
 	memset( coreCache, 0, sizeof(Chit*)*NUM_SECTORS*NUM_SECTORS );
+
+//	homeSector.Set( 5, 5 );
 }
 
 
@@ -56,6 +60,18 @@ LumosChitBag::~LumosChitBag()
 	DeleteAll();
 	delete sceneData;
 }
+
+
+/*
+void LumosChitBag::Serialize( const ComponentFactory* factory, XStream* xs )
+{
+	super::Serialize( factory, xs );
+
+	XarcOpen( xs, "LumosChitBag" );
+	XARC_SER( xs, homeSector );
+	XarcClose( xs );
+}
+*/
 
 
 #if 0

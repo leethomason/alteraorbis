@@ -16,7 +16,7 @@
 - fix porch image (alpha of the tiles, if not general improvement)
 - AIs should account for personality and skills when doing inventory sorting
 - squisher, in streaming mode, to save files
-- “Focus” shouldn’t switch so easily.
+- target “Focus” shouldn’t switch so easily.
 - 32bit texture support
 - see monsters when you click on them
 - Click through of disabled buttons is surprising
@@ -30,32 +30,12 @@
 - hints about what you need to build
 - census of dead items not working correctly
 - bar-market-forge need to look more distinct
-
+- console: add icons to match screen
+- console: links
+- buttons for weapons changing
+- texture guns
 
 - game
-	 - Food
-		x tune guarding
-	 	x food collection
-	 	x food transport
-	 	x food need 
-	 	x consume elixer
-	 	x consume raw
-	 	x morale
-	 	x effects of low morale (madness, starvation)
-	 	x select units
-	 	x test morale zero
-    	x personality display
-		x re-group build commands
-		x prev-next unit now working correctly if out of domain
-		x how should citizens be replaced??
-		x de-rez at xxx by BUG (null) - kind of fixed. needs cleanup.
-    	x model to predict rates of food, farming, needs
-		x morale affected by tombstones
-		x denizen healing
-    	- art: farm
-    	- art: distillery
-    	x visitors & tech: how to integrate? No pressure to upgrade.
-    	x limit beds to tech / temples
 
 	- Census
 		x coolest stuff, past and present, by category
@@ -66,7 +46,7 @@
 		x greatest warrior
 		x greatest weapons
 		x location and owner
-    	- re-do visitor likes to account for the grids they pass throug
+    	- re-do visitor likes to account for the grids they pass through
 		- name / level / health display
 		- money checks optional
 		- greatest smith
@@ -233,6 +213,7 @@ x Troll
 - test def-start
 - test new-start
 - create release!
+- update wiki
 
 --- Links --- 
 http://weloveiconfonts.com/ : entypo
@@ -267,6 +248,31 @@ V2 ideas:
 - level up grid and special skills
 
 ----------- FIXED -------------
+x “when i die and click on the avatar screen moves to a new location each time i press.”
+x icons over head larger
+ x Food
+	x tune guarding
+ 	x food collection
+ 	x food transport
+ 	x food need 
+ 	x consume elixer
+ 	x consume raw
+ 	x morale
+ 	x effects of low morale (madness, starvation)
+ 	x select units
+ 	x test morale zero
+	x personality display
+	x re-group build commands
+	x prev-next unit now working correctly if out of domain
+	x how should citizens be replaced??
+	x de-rez at xxx by BUG (null) - kind of fixed. needs cleanup.
+	x model to predict rates of food, farming, needs
+	x morale affected by tombstones
+	x denizen healing
+	x art: farm
+	x art: distillery
+	x visitors & tech: how to integrate? No pressure to upgrade.
+	x limit beds to tech / temples
 x remove "tech grouping" of buildings
 x How does Ice and magma interact? Volcanoes wipe out ice. Okay for now.
 x need to "ding" on level up

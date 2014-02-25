@@ -130,7 +130,7 @@ public:
 	void  DeleteChit( Chit* );
 	Chit* GetChit( int id );
 
-	void Serialize( const ComponentFactory* factory, XStream* xs );
+	virtual void Serialize( const ComponentFactory* factory, XStream* xs );
 
 	// Bolts are a special kind of chit. Just easier
 	// and faster to treat them as a 2nd stage.

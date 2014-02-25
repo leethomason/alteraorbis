@@ -1,8 +1,8 @@
-﻿This is a very early alpha test for the game Altera.
+﻿This is an alpha test for the game Altera.
 
 More at: grinninglizard.com/altera
 
-The "Denizen" release adds basic city building.
+The "Food" release adds fruit growth, eating, and elixir distillation.
 
 
 How to Play
@@ -10,17 +10,17 @@ How to Play
 Is now on the wiki: http://alteraorbis.wikispaces.com/
 
 
-Changes (Denizen-2)
+Changes (Food)
 -------------------
 
-- Updated art. Power plants are now temples. (Thanks GT / ShroomArts)
-- Tombstones. Getting de-rezzed leaves a mark for a while.
-- Shield fixes. The shields didn't actually do anything in prior releases. Hopefully fixed now.
-- Accomplishment, news, & history tracking systems.
-- The "Census" button takes you to a work-in-progress screen of major accomplishments.
-- UI on the MOBs to notify when they take actions (talk, notice enemies, loot, etc.)
-- General bug fixes
-- Guard posts. You can now specify areas for your denizens to congregate.
+- Food cycle: plants create food (when they have farms) and process it in distilleries
+- Morale: unhappy denizens will come to bad ends
+- Tombstones: tombstones affect morale (to good or ill)
+- Improved performance 
+- In view mode, you can cycle through your denizens.
+- Re-order the UI to be (somewhat) more consistent
+- Losing a denizen will now destroy a sleep tube. Sleep tubes are limited by the tech level.
+- Denizens now heal when they eat
 
 Install
 -------

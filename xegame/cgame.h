@@ -75,11 +75,11 @@ void GameDoTick( void* handle, unsigned int timeInMSec );
 #define GAME_HK_CHEAT_CRYSTAL		   11
 #define GAME_HK_CHEAT_TECH			   12
 
-#define GAME_HK_TOGGLE_GLOW			   13
-#define GAME_HK_TOGGLE_PARTICLE		   14
-#define GAME_HK_TOGGLE_VOXEL		   15
-#define GAME_HK_TOGGLE_SHADOW		   16
-#define GAME_HK_TOGGLE_BOLT			   17
+#define GAME_HK_TOGGLE_GLOW			   20
+#define GAME_HK_TOGGLE_PARTICLE		   21
+#define GAME_HK_TOGGLE_VOXEL		   22
+#define GAME_HK_TOGGLE_SHADOW		   23
+#define GAME_HK_TOGGLE_BOLT			   24
 
 void GameHotKey( void* handle, int value );
 

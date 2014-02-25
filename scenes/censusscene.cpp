@@ -125,6 +125,7 @@ void CensusScene::Scan()
 		nChits += arr.Size();
 
 		for ( int i=0; i<arr.Size(); ++i ) {
+
 			GameItem* item = arr[i]->GetItem();
 			if ( !item ) continue;
 
@@ -141,13 +142,20 @@ void CensusScene::Scan()
 			}
 		}
 	}
-	killsAny = killsActive;
-	greaterKillsAny = greaterKillsActive;
-	craftedAny = craftedActive;
+//	killsAny = killsActive;
+//	greaterKillsAny = greaterKillsActive;
+//	craftedAny = craftedActive;
 
 	ItemDB* itemDB = ItemDB::Instance();
 	for( int i=0; i<itemDB->NumHistory(); ++i ) {
 		const ItemHistory& h = itemDB->HistoryByIndex(i);
+
+		const GameItem* hItem = itemDB->Find( h.itemID );
+		if ( hItem && hItem->hp > 0 ) {
+			// still alive.
+			continue;
+		}
+
 		if ( h.kills > killsAny.kills ) {
 			killsAny = h;
 		}

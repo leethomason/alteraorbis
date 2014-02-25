@@ -116,8 +116,8 @@
   <model assetName="market"  filename="market.ac"   origin="-6 0 -1"       shading="flat" polyRemoval="pre" />
   <model assetName="bar"     filename="bar.ac"      origin="-5 0 -1"       shading="flat" polyRemoval="pre" />
   <model filename="guardpost.ac"                                           shading="flat" polyRemoval="pre" />
-  <model filename="farm.ac"                                                shading="flat" polyRemoval="pre" />
-  <model filename="distillery.ac"                                          shading="flat" polyRemoval="pre" />
+  <model assetName="farm"       filename="solarpanel.ac"                   shading="flat" polyRemoval="pre" />
+  <model assetName="distillery" filename="distillery.ac"                   shading="flat" polyRemoval="pre" />
 
   <model filename="tombstoneDenizen.ac"                                    shading="flat" ployRemoval="pre" />
   <model filename="tombstoneLesser.ac"                                     shading="flat" ployRemoval="pre" />
