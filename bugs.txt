@@ -34,6 +34,9 @@
 - console: links
 - buttons for weapons changing
 - texture guns
+- distillery: 0 fruit should cause 0 progress
+- bars should only work at all if they have elixir
+- rebalance elixir
 
 - game
 

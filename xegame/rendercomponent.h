@@ -140,7 +140,7 @@ private:
 	};
 	grinliz::CDynArray< Icon > icons;
 	gamui::TextLabel*	textLabel;
-	grinliz::CStr< 16 > decoText;
+	grinliz::CStr< 24 > decoText;
 
 };
 

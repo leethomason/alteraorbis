@@ -31,7 +31,7 @@ int DistilleryScript::ElixirTime( int tech )
 
 void DistilleryScript::SetInfoText()
 {
-	CStr<20> str;
+	CStr<32> str;
 
 	ItemComponent* ic   = scriptContext->chit->GetItemComponent();
 	RenderComponent* rc = scriptContext->chit->GetRenderComponent();
@@ -84,7 +84,8 @@ int DistilleryScript::DoTick( U32 delta )
 		}
 	}
 	SetInfoText();
-	return progressTick.Next();
+	return 0;	// Fast update in order to keep the text above the distillery in position.
+				// FIXME: this should be build into the UI
 }
 
 

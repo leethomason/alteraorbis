@@ -455,7 +455,7 @@ void RenderComponent::ProcessIcons( int delta )
 			float width = icons.Size() * SIZE;
 			float dy = SIZE * 0.5f;
 
-			CStr<16> str;
+			CStr<24> str;
 			
 			if ( !decoText.empty() ) {
 				str = decoText;
