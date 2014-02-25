@@ -243,7 +243,7 @@ void AIComponent::GetFriendEnemyLists()
 	enemyList.Clear();
 
 	CChitArray chitArr;
-	MoBFilter mobFilter;
+	MOBFilter mobFilter;
 
 	GetChitBag()->QuerySpatialHash( &chitArr, zone, parentChit, &mobFilter );
 	for( int i=0; i<chitArr.Size(); ++i ) {
@@ -1100,6 +1100,17 @@ Vector2F AIComponent::ThinkWanderFlock( const ComponentSet& thisComp )
 }
 
 
+void AIComponent::GoSectorHerd()
+{
+	ComponentSet thisComp( parentChit, Chit::RENDER_BIT | 
+		                               Chit::SPATIAL_BIT |
+									   Chit::ITEM_BIT |
+									   ComponentSet::IS_ALIVE |
+									   ComponentSet::NOT_IN_IMPACT );
+	SectorHerd( thisComp );
+}
+
+
 bool AIComponent::SectorHerd( const ComponentSet& thisComp )
 {
 	static const int NDELTA = 8;
@@ -1732,7 +1743,7 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 		// Practicality - is available?
 		// Note that for social buildings, being crowded is good.
 		if ( needs.Value( ai::Needs::SOCIAL ) == 0 ) {
-			MoBFilter mobFilter;
+			MOBFilter mobFilter;
 			GetLumosChitBag()->QuerySpatialHash( &mobs, ToWorld2F( porch ), 0.3f, thisComp.chit, &mobFilter );
 			if ( mobs.Size() ) {
 				s *= 0.5;

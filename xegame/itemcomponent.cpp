@@ -497,7 +497,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		}
 
 		// Drop our wallet on the ground or send to the Reserve?
-		MoBFilter mobFilter;
+		MOBFilter mobFilter;
 
 		Wallet w = mainItem->wallet.EmptyWallet();
 		bool dropItems = false;

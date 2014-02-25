@@ -312,7 +312,7 @@ void TaskList::SocialPulse( const ComponentSet& thisComp, const Vector2F& origin
 	LumosChitBag* chitBag	= thisComp.chit->GetLumosChitBag();
 	CChitArray arr;
 	
-	MoBFilter mobFilter;
+	MOBFilter mobFilter;
 	ItemFlagFilter flagFilter( GameItem::AI_USES_BUILDINGS, 0 );
 	MultiFilter filter( MultiFilter::MATCH_ALL );
 	filter.filters.Push( &mobFilter );

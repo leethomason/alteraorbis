@@ -917,6 +917,26 @@ void GameScene::HandleHotKey( int mask )
 			coreScript->AddTech();
 		}
 	}
+	else if ( mask == GAME_HK_CHEAT_HERD ) {
+		Vector3F at;
+		sim->GetEngine()->CameraLookingAt( &at );
+		Vector2I sector = ToSector( ToWorld2I( at ));
+
+		CDynArray<Chit*> arr;
+		MOBFilter filter;
+		Rectangle2F bounds;
+		bounds.Set( float(sector.x*SECTOR_SIZE), float(sector.y*SECTOR_SIZE), float((sector.x+1)*SECTOR_SIZE), float((sector.y+1)*SECTOR_SIZE ));
+		sim->GetChitBag()->QuerySpatialHash( &arr, bounds, 0, &filter );
+
+		for( int i=0; i<arr.Size(); ++i ) {
+			IString mob = arr[i]->GetItem()->keyValues.GetIString( "mob" );
+			if ( mob == "lesser" || mob == "greater" ) {
+				AIComponent* ai = arr[i]->GetAIComponent();
+				ai->GoSectorHerd();
+			}
+		}
+
+	}
 	else {
 		super::HandleHotKey( mask );
 	}

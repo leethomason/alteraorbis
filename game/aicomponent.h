@@ -69,6 +69,7 @@ public:
 	void Pickup( Chit* item );
 	void Stand();
 	void Rampage( int dest );
+	void GoSectorHerd();	// forces a sector herd
 
 	void Target( Chit* chit, bool focused );
 	bool RockBreak( const grinliz::Vector2I& pos );

@@ -37,15 +37,7 @@ public:
 };
 
 
-/* Hard to define...Not Buildings,
-   but something that can be a friend or enemy.
-   MoB is used in the genereric sense, doesn't
-   actually need to be mobile.
-   There are probably some non-exclusive cases,
-   so there is no reason to assume a Building
-   is not a MoB and vice versio.
-*/
-class MoBFilter : public IChitAccept
+class MOBFilter : public IChitAccept
 {
 public:
 	virtual bool Accept( Chit* chit );

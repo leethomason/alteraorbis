@@ -803,9 +803,10 @@ bool BuildingFilter::Accept( Chit* chit )
 }
 
 
-bool MoBFilter::Accept( Chit* chit )
+bool MOBFilter::Accept( Chit* chit )
 {
-	return chit && chit->GetItem() && chit->GetAIComponent();
+	return    chit->GetItem() 
+		   && !chit->GetItem()->keyValues.GetIString( "mob" ).empty();
 }
 
 
