@@ -34,11 +34,17 @@
 - console: links
 - buttons for weapons changing
 - texture guns
-- distillery: 0 fruit should cause 0 progress
-- bars should only work at all if they have elixir
-- rebalance elixir
 
 - game
+	- Food-2
+		- add porch to farm, collect food there
+		- simplify food pickup code
+		- rebalance model
+		- rebalance game
+		- bars should only work at all if they have elixir
+		- rebalance elixir
+		- distillery: 0 fruit should cause 0 progress
+		- Temples attrack / repel monsters
 
 	- Census
 		x coolest stuff, past and present, by category
