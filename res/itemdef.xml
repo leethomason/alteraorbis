@@ -203,6 +203,7 @@
   <item name="farm"
         resource="farm"
         procedural="team"
+        porch="1"
         size="1"
         mass="50"
         cost="40"

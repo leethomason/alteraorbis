@@ -101,7 +101,8 @@ void Sim::DumpModel()
 	for( int plantStage=2; plantStage<4; ++plantStage ) {
 		for( int tech=0; tech<4; ++tech ) {
 
-			double growTime   = double(FarmScript::GrowFruit( plantStage )) / 1000.0;
+			// assume field at 50%
+			double growTime   = double(FarmScript::GrowFruitTime( plantStage, 10 )) / 1000.0;
 			double distilTime = double( DistilleryScript::ElixirTime( tech )) / 1000.0;
 			double elixirTime = growTime + distilTime;
 			double timePerFruit = elixirTime / double(DistilleryScript::ELIXIR_PER_FRUIT);

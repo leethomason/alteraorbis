@@ -35,7 +35,7 @@ public:
 
 	enum { 
 		ELIXIR_TIME = 10*1000,
-		ELIXIR_PER_FRUIT = 2
+		ELIXIR_PER_FRUIT = 3
 	};
 	static int ElixirTime( int tech );
 

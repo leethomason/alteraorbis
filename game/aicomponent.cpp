@@ -1491,25 +1491,24 @@ Chit* AIComponent::FindFruit( const Vector2F& pos2, Vector2F* dest )
 	}
 
 	// Okay, now check the farms. Now we need to use full pathing for meaningful results.
+	// Only need to check the farm porch - all fruit goes there.
 	Chit* farmChit = chitBag->FindBuilding( IStringConst::farm, 
 											ToSector( ToWorld2I( pos2 )), 
 											&pos2,
 											LumosChitBag::RANDOM_NEAR, 0, 0 );
 	if ( farmChit ) {
-		Vector2F farmLoc = farmChit->GetSpatialComponent()->GetPosition2D();
-		chitBag->QuerySpatialHash( &chitArr, farmLoc, FARM_GROW_RAD, 0, &filter );	
-		parentChit->random.ShuffleArray( chitArr.Mem(), chitArr.Size() );
-		for( int i=0; i<chitArr.Size(); ++i ) {
-			Chit* chit = chitArr[i];
-			Vector2F fruitPos = chit->GetSpatialComponent()->GetPosition2D();
-			if ( context->worldMap->CalcPath( pos2, fruitPos, 0, 0, 0 )) {
-				*dest = fruitPos;
-				return chit;
-			}
-			Vector2F fruitPosAdj = ToWorld2F( AdjacentWorldGrid( fruitPos ));
-			if ( context->worldMap->CalcPath( pos2, fruitPosAdj, 0, 0, 0 )) {
-				*dest = fruitPosAdj;
-				return chit;
+		MapSpatialComponent* farmMSC = GET_SUB_COMPONENT( farmChit, SpatialComponent, MapSpatialComponent );
+		GLASSERT( farmMSC );
+		if ( farmMSC ) {
+			Vector2F farmLoc = ToWorld2F( farmMSC->PorchPos().min );
+			chitBag->QuerySpatialHash( &chitArr, farmLoc, 0.5f, 0, &filter );
+
+			if ( chitArr.Size() ) {
+				Vector2F fruitLoc = chitArr[0]->GetSpatialComponent()->GetPosition2D();
+				if ( context->worldMap->CalcPath( pos2, fruitLoc, 0, 0, 0 )) {
+					*dest = fruitLoc;
+					return chitArr[0];
+				}
 			}
 		}
 	}

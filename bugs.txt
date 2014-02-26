@@ -37,14 +37,16 @@
 
 - game
 	- Food-2
-		- add porch to farm, collect food there
-		- simplify food pickup code
-		- rebalance model
-		- rebalance game
+		x add porch to farm, collect food there
+		x simplify food pickup code
+		- text display for farm
 		- bars should only work at all if they have elixir
-		- rebalance elixir
 		- distillery: 0 fruit should cause 0 progress
 		- Temples attrack / repel monsters
+		- MOBs get stuck on rampage
+		- good plants can catch fire/shock
+		- rebalance model
+		- rebalance game
 
 	- Census
 		x coolest stuff, past and present, by category
