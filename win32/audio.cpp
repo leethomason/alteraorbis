@@ -17,6 +17,7 @@
 #include "../libs/SDL2/include/SDL.h"
 #include <stdlib.h>
 #include "../grinliz/gldebug.h"
+#include <string.h>
 
 
 SDL_AudioSpec audioSpec;
