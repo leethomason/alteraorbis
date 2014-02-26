@@ -118,6 +118,16 @@ int main( int argc, char **argv )
 
 	GLOUTPUT_REL(( "Altera startup. version=%d\n", VERSION ));
 
+	SDL_version compiled;
+	SDL_version linked;
+
+	SDL_VERSION(&compiled);
+	SDL_GetVersion(&linked);
+
+	GLOUTPUT_REL(("SDL version compiled: %d.%d.%d\n", compiled.major, compiled.minor, compiled.patch));
+	GLOUTPUT_REL(("SDL version linked:   %d.%d.%d\n", linked.major, linked.minor, linked.patch));
+	GLASSERT((linked.major == compiled.major && linked.minor == compiled.minor));
+
 	// SDL initialization steps.
     if ( SDL_Init( SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE | SDL_INIT_TIMER | SDL_INIT_AUDIO ) < 0 )
 	{

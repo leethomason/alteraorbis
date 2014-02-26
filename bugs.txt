@@ -39,14 +39,16 @@
 	- Food-2
 		x add porch to farm, collect food there
 		x simplify food pickup code
+		- overlapping farms
 		- text display for farm
 		- bars should only work at all if they have elixir
 		- distillery: 0 fruit should cause 0 progress
 		- Temples attrack / repel monsters
-		- MOBs get stuck on rampage
+		- MOBs get stuck on rampage at ports
 		- good plants can catch fire/shock
 		- rebalance model
 		- rebalance game
+		- start game at home sector if no avatar
 
 	- Census
 		x coolest stuff, past and present, by category
