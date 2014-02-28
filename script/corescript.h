@@ -18,10 +18,20 @@
 
 #include "scriptcomponent.h"
 #include "../xegame/cticker.h"
+#include "../game/gamelimits.h"
 
 class WorldMap;
 class WorkQueue;
 class LumosChitBag;
+
+struct CoreInfo
+{
+	CoreScript* coreScript;	
+
+	// these are value for ai - so they are only updated every couple of seconds.
+	int approxTeam;
+	int approxNTemples;
+};
 
 class CoreScript : public IScript
 {
@@ -60,9 +70,24 @@ public:
 
 	int nElixir;
 
+	static const CoreInfo& GetCoreInfo(const grinliz::Vector2I& sector) { 
+		GLASSERT(sector.x >= 0 && sector.x < NUM_SECTORS);
+		GLASSERT(sector.y >= 0 && sector.y < NUM_SECTORS);
+		return coreInfoArr[sector.y*NUM_SECTORS + sector.x]; 
+	}
+
+	static CoreScript* GetCoreScript(const grinliz::Vector2I& sector) {
+		return GetCoreInfo(sector).coreScript;
+	}
+	static const CoreInfo* GetCoreInfoArr() { return coreInfoArr; }
+
 private:
+	void UpdateAI();
+
 	WorkQueue*	workQueue;
 	int			team;			// cache so we can update if it changes
+	grinliz::Vector2I sector;
+	CTicker		aiTicker;		// use to update the core info, every couple of seconds.
 	
 	// serialized
 	CTicker		spawnTick;
@@ -71,7 +96,9 @@ private:
 	grinliz::IString defaultSpawn;
 	grinliz::CDynArray< int > citizens;
 
-	mutable grinliz::CDynArray< Chit* > chitArr;	// used as a temporary, memory cached here.
+	static CoreInfo coreInfoArr[NUM_SECTORS*NUM_SECTORS];
+	static grinliz::CDynArray<Chit*> chitArr;	// local, temporary
+
 };
 
 #endif // CORESCRIPT_INCLUDED

@@ -39,16 +39,23 @@
 	- Food-2
 		x add porch to farm, collect food there
 		x simplify food pickup code
-		- overlapping farms
-		- text display for farm
-		- bars should only work at all if they have elixir
-		- distillery: 0 fruit should cause 0 progress
+		t overlapping farms
+		t text display for farm
+		t bars should only work at all if they have elixir
+		t distillery: 0 fruit should cause 0 progress
 		- Temples attrack / repel monsters
+				lesser			greater
+			0: 					repel
+			1:	attract near	repel
+			2:  attract near
+			3: 	attract near	attract
 		- MOBs get stuck on rampage at ports
-		- good plants can catch fire/shock
+		t good plants can catch fire/shock
 		- rebalance model
 		- rebalance game
 		- start game at home sector if no avatar
+		- ChitBag::HashIndex() has issues. Throwing away y value, essentially. And SIZE2 is incorrect - should be power of 2.
+		- improve wiki on plants
 
 	- Census
 		x coolest stuff, past and present, by category

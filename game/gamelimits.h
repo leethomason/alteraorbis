@@ -38,8 +38,12 @@ static const int MAX_PLANT_STAGES	= 4;
 static const int MAX_PASSABLE_PLANT_STAGE = 1;	// 0,1 passable, 2,3 are not
 static const int LEVEL_OF_NAMING	= 4;
 static const float	PICKUP_RANGE	= 1.1f;	// Make sure center-to-center works
-static const float	FARM_GROW_RAD	= 2.2f;
-static const int TECH_MAX			= 4;	// Tech must be less than this: 0-3 in int, 0-3.99 in double
+static const int FARM_GROW_RAD	= 2;	// grid squares affected by farm. total region 5x5
+static const int TECH_MAX		= 4;	// Tech must be less than this: 0-3 in int, 0-3.99 in double
+
+static const int TECH_REPELS_GREATER    = 1;
+static const int TECH_ATTRACTS_GREATER  = 3;
+static const int TECH_ATTRACTS_LESSER   = 1;
 
 // General guidelines to the # of things in the world.
 static const int TYPICAL_DOMAINS	= 100;

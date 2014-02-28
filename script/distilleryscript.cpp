@@ -57,6 +57,7 @@ void DistilleryScript::SetInfoText()
 int DistilleryScript::DoTick( U32 delta )
 {
 	int n = progressTick.Delta( delta );
+	ItemComponent* ic = scriptContext->chit->GetItemComponent();
 
 	if ( n ) { 
 		SpatialComponent* sc = scriptContext->chit->GetSpatialComponent();
@@ -69,10 +70,9 @@ int DistilleryScript::DoTick( U32 delta )
 
 		progress += dProg*n;
 
-		while ( progress >= ELIXIR_TIME ) {
+		while (progress >= ELIXIR_TIME) {
 			progress -= ELIXIR_TIME;
 
-			ItemComponent* ic = scriptContext->chit->GetItemComponent();
 			if ( ic ) {
 				int index = ic->FindItem( IStringConst::fruit );
 				if ( index >= 0 ) {
@@ -83,6 +83,12 @@ int DistilleryScript::DoTick( U32 delta )
 			}
 		}
 	}
+	
+	if (ic->FindItem(IStringConst::fruit) < 0) {
+		// No fruit, no progress.
+		progress = 0;
+	}
+
 	SetInfoText();
 	return 0;	// Fast update in order to keep the text above the distillery in position.
 				// FIXME: this should be build into the UI

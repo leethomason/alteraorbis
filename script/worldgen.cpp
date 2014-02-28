@@ -526,6 +526,7 @@ int SectorData::NearestPort( const grinliz::Vector2I& pos ) const
 Rectangle2I SectorData::GetPortLoc( int port ) const
 {
 	Rectangle2I r;
+	r.Set(0, 0, 0, 0);
 	static const int LONG  = 4;
 	static const int SHORT = 2;
 	static const int HALF  = SECTOR_SIZE/2;

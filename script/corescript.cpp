@@ -26,21 +26,27 @@
 
 static const double TECH_ADDED_BY_VISITOR = 0.2;
 static const double TECH_DECAY_0 = 0.00005;
-static const double TECH_DECAY_1 = 0.00020;
+static const double TECH_DECAY_1 = 0.00040;
 
 using namespace grinliz;
 
 #define SPAWN_MOBS
 
+CoreInfo CoreScript::coreInfoArr[NUM_SECTORS*NUM_SECTORS];
+grinliz::CDynArray<Chit*> CoreScript::chitArr;
+
+
 CoreScript::CoreScript() 
 	: spawnTick( 10*1000 ), 
 	  team( 0 ),
-	  workQueue( 0 )
+	  workQueue( 0 ),
+	  aiTicker(2000)
 {
 	tech = 0;
-	achievedTechLevel = 0;
+	achievedTechLevel = 0;	
 	workQueue = 0;
 	nElixir = 0;
+	sector.Zero();
 }
 
 
@@ -97,13 +103,23 @@ void CoreScript::OnAdd()
 		workQueue = new WorkQueue();
 	}
 	Vector2I mapPos = scriptContext->chit->GetSpatialComponent()->GetPosition2DI();
-	Vector2I sector = { mapPos.x/SECTOR_SIZE, mapPos.y/SECTOR_SIZE };
+	sector = { mapPos.x/SECTOR_SIZE, mapPos.y/SECTOR_SIZE };
 	workQueue->InitSector( scriptContext->chit, sector );
+
+	int index = sector.y*NUM_SECTORS + sector.x;
+	GLASSERT(coreInfoArr[index].coreScript == 0);
+	coreInfoArr[index].coreScript = this;
+
+	aiTicker.Randomize(scriptContext->chit->random.Rand());
 }
 
 
 void CoreScript::OnRemove()
 {
+	int index = sector.y*NUM_SECTORS + sector.x;
+	GLASSERT(coreInfoArr[index].coreScript == this);
+	coreInfoArr[index].coreScript = 0;
+
 	delete workQueue;
 	workQueue = 0;
 }
@@ -191,6 +207,29 @@ int CoreScript::PrimaryTeam() const
 }
 
 
+void CoreScript::UpdateAI()
+{
+	if (sector.IsZero()) {
+		return;
+	}
+	int index = sector.y*NUM_SECTORS + sector.x;
+	CoreInfo* info = &coreInfoArr[index];
+	GLASSERT(info->coreScript == this);
+
+	if (this->InUse()) {
+		info->approxTeam = PrimaryTeam();
+		// FIXME: rename power to temple
+		scriptContext->chitBag->FindBuilding(IStringConst::power, sector, 0, 0, &chitArr, 0);
+		info->approxNTemples = chitArr.Size();
+	}
+	else {
+		info->approxNTemples = 0;
+		info->approxTeam = 0;
+	}
+}
+
+
+
 int CoreScript::DoTick( U32 delta )
 {
 	static const int RADIUS = 4;
@@ -210,7 +249,7 @@ int CoreScript::DoTick( U32 delta )
 	bool normalPossible = scriptContext->census->normalMOBs < TYPICAL_MONSTERS;
 	bool greaterPossible = scriptContext->census->greaterMOBs < TYPICAL_GREATER;
 
-	bool attached = InUse();
+	bool inUse = InUse();
 
 	tech -= Lerp( TECH_DECAY_0, TECH_DECAY_1, tech/double(TECH_MAX) );
 	tech = Clamp( tech, 0.0, double(MaxTech())-0.01 );
@@ -221,7 +260,7 @@ int CoreScript::DoTick( U32 delta )
 	Vector2I sector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
 	int tickd = spawnTick.Delta( delta );
 
-	if ( tickd && attached ) {
+	if ( tickd && inUse ) {
 		scriptContext->chitBag->FindBuilding( IStringConst::bed, sector, 0, 0, &chitArr, 0 );
 
 		int nCitizens = this->NumCitizens();
@@ -231,7 +270,7 @@ int CoreScript::DoTick( U32 delta )
 		}
 	}
 	else if (    tickd 
-			  && !attached
+			  && !inUse
 			  && ( normalPossible || greaterPossible ))
 	{
 #ifdef SPAWN_MOBS
@@ -316,7 +355,7 @@ int CoreScript::DoTick( U32 delta )
 		}
 #endif
 	}
-	if ( !attached ) {
+	if ( !inUse ) {
 		// Clear the work queue - chit is gone that controls this.
 		workQueue->ClearJobs();
 
@@ -326,7 +365,12 @@ int CoreScript::DoTick( U32 delta )
 		scriptContext->chit->GetRenderComponent()->SetProcedural( 0, info );
 	}
 	workQueue->DoTick();
-	return attached ? 0 : spawnTick.Next();
+
+	if (aiTicker.Delta(delta)) {
+		UpdateAI();
+	}
+
+	return inUse ? 0 : spawnTick.Next();
 }
 
 

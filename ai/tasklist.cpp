@@ -389,9 +389,9 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 		GLASSERT( bd );
 		ai::Needs supply = bd->needs;
 
-		// Can't meet food need if no elixir. And don't eat if not hungry.
-		if ( !coreScript->nElixir || thisComp.ai->GetNeeds().Value( Needs::FOOD ) > 0.6 ) {
-			supply.Set( ai::Needs::FOOD, 0 );
+		// Food based buildings don't work if there is no elixir.
+		if ( supply.Value(Needs::FOOD) && coreScript->nElixir == 1 ) {
+			supply.SetZero();
 		}
 
 		if ( buildingName == IStringConst::market ) {
@@ -405,7 +405,7 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 			// Apply the needs as is.
 		}
 		else if ( buildingName == IStringConst::bar ) {
-			// Apply the needs as is.
+			// Apply the needs as is...if there is Elixir.
 		}
 		else {
 			GLASSERT( 0 );

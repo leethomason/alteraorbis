@@ -855,6 +855,7 @@ void AIComponent::Rampage( int dest )
 }
 
 
+// Function to compute "should we rampage." Rampage logic is in ThinkRampage()
 bool AIComponent::ThinkDoRampage( const ComponentSet& thisComp )
 {
 	if ( destinationBlocked < RAMPAGE_THRESHOLD ) 
@@ -906,6 +907,7 @@ void AIComponent::ThinkRampage( const ComponentSet& thisComp )
 	case WorldGrid::PORT_POS_Y:	dest = sd.GetPortLoc( SectorData::POS_Y );	break;
 	case WorldGrid::PORT_NEG_X:	dest = sd.GetPortLoc( SectorData::NEG_X );	break;
 	case WorldGrid::PORT_NEG_Y:	dest = sd.GetPortLoc( SectorData::NEG_Y );	break;
+	default: GLASSERT(0);	break;
 	}
 
 	if ( dest.Contains( pos2i )) {
@@ -1113,20 +1115,86 @@ void AIComponent::GoSectorHerd()
 
 bool AIComponent::SectorHerd( const ComponentSet& thisComp )
 {
+	/*
+		Depending on the MOB and tech level,
+		- avoid this core (easy; check fails)
+		- attract to this core (pre-scan)
+		- attract to tech in general (hmm.)
+	*/
 	static const int NDELTA = 8;
-	Vector2I delta[NDELTA] = { 
-		{-1,0}, {1,0}, {0,-1}, {0,1},
+	static const Vector2I initDelta[NDELTA] = { 
+		{-1,0},  {1,0},  {0,-1}, {0,1},
 		{-1,-1}, {1,-1}, {-1,1}, {1,1}
 	};
-	parentChit->random.ShuffleArray( delta, NDELTA );
-	Vector2F pos = thisComp.spatial->GetPosition2D();
+	CArray<Vector2I, NDELTA> delta;
+	for (int i = 0; i < NDELTA; ++i) {
+		delta.Push(initDelta[i]);
+	}
+	parentChit->random.ShuffleArray(delta.Mem(), delta.Size());
 
-	const ChitContext* context = GetChitContext();
-	SectorPort start = context->worldMap->NearestPort( pos );
+	const ChitContext* context	= GetChitContext();
+	const Vector2F pos			= thisComp.spatial->GetPosition2D();
+	const SectorPort start		= context->worldMap->NearestPort(pos);
+	IString mob					= thisComp.item->keyValues.GetIString("mob");
+	const CoreInfo* coreInfoArr = CoreScript::GetCoreInfoArr();
+	Vector2I sector				= ToSector(ToWorld2I(pos));
+	
+	Vector2I sectorTarget = { 0, 0 };
+	int score = 0;
+
+	// If a greater, look for a target.	
+	if (mob == IStringConst::greater || mob == IStringConst::lesser ) {
+		for (int j = 0; j < NUM_SECTORS; ++j) {
+			for (int i = 0; i < NUM_SECTORS; ++i) {
+				const CoreInfo& coreInfo = coreInfoArr[j*NUM_SECTORS+i];
+				if (coreInfo.coreScript == 0 || !coreInfo.coreScript->InUse())
+					continue;
+
+				int d = abs(j - sector.y) + abs(i - sector.x);
+
+				// Greater mobs scan the world. Lesser mobs scan locally.
+				if ((mob == IStringConst::greater && coreInfo.approxNTemples >= TECH_ATTRACTS_GREATER)
+					|| (mob == IStringConst::lesser && d <= 1 && (coreInfo.approxNTemples >= TECH_ATTRACTS_LESSER)))
+				{
+					if (mob == IStringConst::greater) {
+						int debug = 1;
+					}
+					if (coreInfo.coreScript
+						&& GetRelationship(thisComp.item->primaryTeam, coreInfo.approxTeam) == RELATE_ENEMY)
+					{
+						int s = 100 * coreInfo.approxNTemples / (d + 1);
+						if (s > score) {
+							score = s;
+							sectorTarget.Set(i, j);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// If there is a target, make it the first thing we aim at.
+	if (!sectorTarget.IsZero()) {
+		Vector2I d = { Sign(sectorTarget.x - sector.x), Sign(sectorTarget.y - sector.y) };
+		int i = delta.Find(d);
+		if (i >= 0) {
+			Swap(&delta[i], &delta[0]);
+		}
+	}
+
 	if ( start.IsValid() ) {
 		for( int i=0; i<NDELTA; ++i ) {
 			SectorPort dest;
 			dest.sector = start.sector + delta[i];
+
+			// Check to make sure we aren't repelled.
+			const CoreInfo& info = CoreScript::GetCoreInfo(dest.sector);
+			if (GetRelationship(info.approxTeam, thisComp.item->primaryTeam) == RELATE_ENEMY) {
+				if (mob == IStringConst::greater && info.approxNTemples <= TECH_REPELS_GREATER) {
+					continue;
+				}
+			}
+
 			const SectorData& destSD = context->worldMap->GetSector( dest.sector );
 			if ( destSD.ports ) {
 				dest.port = destSD.NearestPort( pos );
@@ -1677,6 +1745,8 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 	if ( !coreScript ) return false;
 	if ( GetTeamStatus( coreScript->ParentChit() ) == RELATE_ENEMY ) return false;
 
+	int nElixir = coreScript->nElixir;
+
 	BuildingFilter filter;
 	GetLumosChitBag()->FindBuilding( IString(), sector, 0, 0, &chitArr, &filter );
 	
@@ -1708,14 +1778,17 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 		Vector2I porch = msc->PorchPos( chit->ID() );
 		GLASSERT( !porch.IsZero() );
 
+		// A building that supplies food MUST have elixir, else it
+		// supplies nothing.
+		if (bd->needs.Value(Needs::FOOD) > 0 && nElixir == 0) {
+			continue;
+		}
+
 		// The needs match.
 		double s=0;
 		double nv=0;
 		for( int k=0; k<ai::Needs::NUM_NEEDS; ++k ) {
 			double n = bd->needs.Value(k);
-			if ( k == ai::Needs::FOOD ) {
-				if ( coreScript->nElixir == 0 ) n = 0;
-			}
 
 			if ( n > 0 ) {
 				double myNeed = needs.Value(k);
