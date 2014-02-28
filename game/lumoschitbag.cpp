@@ -36,6 +36,7 @@
 #include "../script/plantscript.h"
 #include "../script/procedural.h"
 #include "../script/countdownscript.h"
+#include "../script/corescript.h"
 
 #include "../xarchive/glstreamer.h"
 
@@ -47,7 +48,6 @@ using namespace grinliz;
 LumosChitBag::LumosChitBag( const ChitContext& c) : ChitBag(c), sceneID(-1), sceneData(0)
 {
 	memset( mapSpatialHash, 0, sizeof(MapSpatialComponent*)*NUM_SECTORS*NUM_SECTORS);
-	memset( coreCache, 0, sizeof(Chit*)*NUM_SECTORS*NUM_SECTORS );
 
 //	homeSector.Set( 5, 5 );
 }
@@ -125,6 +125,24 @@ void LumosChitBag::RemoveFromBuildingHash( MapSpatialComponent* chit, int x, int
 		}
 	}
 	GLASSERT( 0 );
+}
+
+
+Chit* LumosChitBag::FindBuildingCC(const grinliz::IString& name,		// particular building, or emtpy to match all
+									const grinliz::Vector2I& sector,	// sector to query
+									const grinliz::Vector2F* pos,		// optional IN: used for evaluating NEAREST, etc.
+									int flags,
+									CChitArray* arr,					// optional; the matches that fit
+									IChitAccept* filter)				// optional; run this filter first
+{
+	chitArr.Clear();
+	Chit* chit = FindBuilding(name, sector, pos, flags, &chitArr, filter);
+	arr->Clear();
+	for (int i = 0; i < chitArr.Size(); ++i) {
+		if (arr->HasCap())
+			arr->Push(chitArr[i]);
+	}
+	return chit;
 }
 
 
@@ -317,7 +335,7 @@ Chit* LumosChitBag::NewDenizen( const grinliz::Vector2I& pos, int team )
 	chit->GetSpatialComponent()->SetPosYRot( (float)pos.x+0.5f, 0, (float)pos.y+0.5f, 0 );
 
 	Vector2I sector = ToSector( pos );
-	GetCore( sector )->AddCitizen( chit );
+	CoreScript::GetCore( sector )->AddCitizen( chit );
 
 	NewsHistory* history = NewsHistory::Instance();
 	if ( history ) {
@@ -675,35 +693,9 @@ int LumosChitBag::MapGridUse( int x, int y )
 }
 
 
-CoreScript* LumosChitBag::GetCore( const grinliz::Vector2I& sector )
-{
-	const ChitContext* context = GetContext();	
-	const SectorData& sd = context->worldMap->GetSector( sector );
-	if ( sd.HasCore() ) {
-		int index = sector.y * NUM_SECTORS + sector.x;
-		if ( !coreCache[index] ) {
-			Vector2I pos2i = sd.core;
-			Vector2F pos2 = { (float)pos2i.x+0.5f, (float)pos2i.y+0.5f };
-
-			CChitArray array;
-			ItemNameFilter coreFilter( IStringConst::core );
-			QuerySpatialHash( &array, pos2, 0.1f, 0, &coreFilter );
-			GLASSERT( !array.Empty() );
-
-			if ( !array.Empty() ) {
-				coreCache[index] = array[0];
-			}
-		}
-		Chit* cc = coreCache[index];
-		ScriptComponent* sc = cc->GetScriptComponent();
-		GLASSERT( sc );
-		IScript* script = sc->Script();
-		GLASSERT( script );
-		CoreScript* coreScript = script->ToCoreScript();
-		GLASSERT( coreScript );
-		return coreScript;
-	}
-	return 0;
+CoreScript* LumosChitBag::GetHomeCore()	
+{ 
+	return CoreScript::GetCore(GetHomeSector()); 
 }
 
 

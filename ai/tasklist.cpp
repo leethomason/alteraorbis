@@ -113,7 +113,7 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta )
 	Vector2F taskPos2	= { (float)task->pos2i.x + 0.5f, (float)task->pos2i.y + 0.5f };
 	Vector3F taskPos3	= { taskPos2.x, 0, taskPos2.y };
 	Vector2I sector		= ToSector( pos2i );
-	CoreScript* coreScript = chitBag->GetCore( sector );
+	CoreScript* coreScript = CoreScript::GetCore(sector);
 	Chit* controller = coreScript ? coreScript->ParentChit() : 0;
 
 	// If this is a task associated with a work item, make
@@ -353,7 +353,7 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 	LumosChitBag* chitBag	= thisComp.chit->GetLumosChitBag();
 	Vector2I pos2i			= thisComp.spatial->GetPosition2DI();
 	Vector2I sector			= ToSector( pos2i );
-	CoreScript* coreScript	= chitBag->GetCore( sector );
+	CoreScript* coreScript  = CoreScript::GetCore(sector);
 	Chit* controller		= coreScript->ParentChit();
 
 	// Workers:

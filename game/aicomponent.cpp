@@ -649,7 +649,7 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 time )
 		Vector2I pos2i = thisComp.spatial->GetPosition2DI();
 		Vector2I sector = ToSector( pos2i );
 		Chit* chit = this->GetLumosChitBag()->QueryPorch( pos2i );
-		CoreScript* cs = this->GetLumosChitBag()->GetCore( sector );
+		CoreScript* cs = CoreScript::GetCore( sector );
 		
 		VisitorData* vd = &Visitors::Instance()->visitorData[visitorIndex];
 		IString kioskName = vd->CurrentKioskWant();
@@ -799,7 +799,7 @@ bool AIComponent::RockBreak( const grinliz::Vector2I& rock )
 	sector.x /= SECTOR_SIZE;
 	sector.y /= SECTOR_SIZE;
 
-	CoreScript* cs = GetLumosChitBag()->GetCore( sector );
+	CoreScript* cs = CoreScript::GetCore( sector );
 	if ( cs && cs->InUse() && (cs->PrimaryTeam() != thisComp.item->primaryTeam) ) {
 		// Core is in use. We can only blast away.
 		const WorldGrid& wg = context->worldMap->GetWorldGrid( rock.x, rock.y );
@@ -835,7 +835,7 @@ WorkQueue* AIComponent::GetWorkQueue()
 		return 0;
 
 	Vector2I sector = sc->GetSector();
-	CoreScript* coreScript	= GetChitBag()->ToLumos()->GetCore( sector );
+	CoreScript* coreScript = CoreScript::GetCore(sector);
 	if ( !coreScript )
 		return 0;
 
@@ -1460,7 +1460,7 @@ bool AIComponent::ThinkGuard( const ComponentSet& thisComp )
 	Vector2I sector = ToSector( pos2i );
 	Rectangle2I bounds = InnerSectorBounds( sector );
 
-	CoreScript* coreScript = GetLumosChitBag()->GetCore( sector );
+	CoreScript* coreScript = CoreScript::GetCore( sector );
 
 	if ( !coreScript ) return false;
 
@@ -1501,7 +1501,7 @@ bool AIComponent::AtHomeCore()
 	if ( !sc ) return false;
 
 	Vector2I sector = ToSector( sc->GetPosition2DI());
-	CoreScript* coreScript = GetLumosChitBag()->GetCore( sector );
+	CoreScript* coreScript = CoreScript::GetCore(sector);
 
 	if ( !coreScript ) return false;
 	return coreScript->IsCitizen( parentChit->ID() );
@@ -1514,7 +1514,7 @@ bool AIComponent::AtFriendlyOrNeutralCore()
 	if ( !sc ) return false;
 
 	Vector2I sector = ToSector( sc->GetPosition2DI());
-	CoreScript* coreScript = GetLumosChitBag()->GetCore( sector );
+	CoreScript* coreScript = CoreScript::GetCore( sector );
 
 	int team0 = parentChit->PrimaryTeam();
 	int team1 = 0;
@@ -1740,7 +1740,7 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 
 	Vector2I pos2i = thisComp.spatial->GetPosition2DI();
 	Vector2I sector = ToSector( pos2i );
-	CoreScript* coreScript = GetLumosChitBag()->GetCore( sector );
+	CoreScript* coreScript = CoreScript::GetCore(sector);
 
 	if ( !coreScript ) return false;
 	if ( GetTeamStatus( coreScript->ParentChit() ) == RELATE_ENEMY ) return false;
@@ -2254,7 +2254,7 @@ void AIComponent::FlushTaskList( const ComponentSet& thisComp, U32 delta )
 		Vector2I sector   = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
 
 		WorkQueue* workQueue = 0;
-		CoreScript* coreScript = GetLumosChitBag()->GetCore( sector );
+		CoreScript* coreScript = CoreScript::GetCore(sector);
 		if ( coreScript ) {
 			workQueue = coreScript->GetWorkQueue();
 		}
@@ -2267,7 +2267,7 @@ void AIComponent::WorkQueueToTask(  const ComponentSet& thisComp )
 {
 	// Is there work to do?		
 	Vector2I sector = thisComp.spatial->GetSector();
-	CoreScript* coreScript = GetChitBag()->ToLumos()->GetCore( sector );
+	CoreScript* coreScript = CoreScript::GetCore(sector);
 	const ChitContext* context = GetChitContext();
 
 	if ( coreScript ) {

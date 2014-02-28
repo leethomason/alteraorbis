@@ -246,7 +246,7 @@ void Sim::CreateCores()
 	GLOUTPUT(( "nCores=%d\n", ncores ));
 
 	Vector2I homeSector = chitBag->GetHomeSector();
-	CoreScript* homeCS = chitBag->GetCore( homeSector );
+	CoreScript* homeCS = CoreScript::GetCore( homeSector );
 	Chit* homeChit = homeCS->ParentChit();
 	homeChit->GetItem()->primaryTeam = TEAM_HOUSE0;
 }
@@ -308,7 +308,7 @@ void Sim::CreatePlayer( const grinliz::Vector2I& pos )
 	chit->GetItem()->hpRegen = 1.0f;
 
 	Vector2I sector = ToSector( pos );
-	chitBag->GetCore( sector )->AddCitizen( chit );
+	CoreScript::GetCore( sector )->AddCitizen( chit );
 
 	NewsHistory* history = NewsHistory::Instance();
 	if ( history ) {
@@ -360,7 +360,7 @@ void Sim::DoTick( U32 delta )
 				// Don't destroy opporating domains. Crazy annoying.
 				Vector2I pos = { x, y };
 				Vector2I sector = ToSector( pos );
-				CoreScript* cs = chitBag->GetCore( sector );
+				CoreScript* cs = CoreScript::GetCore( sector );
 				if ( cs && ( !cs->InUse() || age == 0 )) {
 					CreateVolcano( x, y, VOLC_RAD );
 				}
@@ -604,7 +604,7 @@ void Sim::UseBuilding()
 	if ( building && building->GetItem() ) {
 		IString name = building->GetItem()->IName();
 		ItemComponent* ic = player->GetItemComponent();
-		CoreScript* cs	= chitBag->GetCore( sector );
+		CoreScript* cs	= CoreScript::GetCore( sector );
 		Chit* core = cs->ParentChit();
 
 		// Messy:

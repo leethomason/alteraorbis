@@ -123,7 +123,7 @@ SectorPort Visitors::ChooseDestination( int index, WorldMap* map, LumosChitBag* 
 	for( int i=0; i<ATTEMPTS; ++i ) {
 		sector.Set( random.Rand( NUM_SECTORS ), random.Rand( NUM_SECTORS ));
 		const SectorData& sd = map->GetSector( sector );
-		CoreScript* cs = chitBag->GetCore( sector );
+		CoreScript* cs = CoreScript::GetCore( sector );
 		if ( sd.ports && cs && cs->InUse() ) {
 			break;
 		}

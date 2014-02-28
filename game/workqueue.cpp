@@ -302,7 +302,7 @@ bool WorkQueue::TaskCanComplete( const WorkQueue::QueueItem& item )
 
 	Wallet wallet;
 	Vector2I sector = ToSector( item.pos );
-	CoreScript* coreScript = chitBag->GetCore( sector );
+	CoreScript* coreScript = CoreScript::GetCore( sector );
 
 	Chit* controller = coreScript->ParentChit();
 	if ( controller && controller->GetItem() ) {

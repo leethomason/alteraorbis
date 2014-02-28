@@ -1,3 +1,4 @@
+
 #include <time.h>
 
 #include "gamescene.h"
@@ -521,7 +522,7 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 
 		if ( tap ) {
 			if ( uiMode[UI_BUILD].Down() ) {
-				CoreScript* coreScript = sim->GetChitBag()->GetCore( sim->GetChitBag()->GetHomeSector() );
+				CoreScript* coreScript = CoreScript::GetCore( sim->GetChitBag()->GetHomeSector() );
 				WorkQueue* wq = coreScript->GetWorkQueue();
 				GLASSERT( wq );
 				RemovableFilter removableFilter;
@@ -697,7 +698,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		sim->UseBuilding();
 	}
 	else if ( item == &cameraHomeButton ) {
-		CoreScript* coreScript = sim->GetChitBag()->GetCore( sim->GetChitBag()->GetHomeSector() );
+		CoreScript* coreScript = CoreScript::GetCore( sim->GetChitBag()->GetHomeSector() );
 		if ( coreScript ) {
 			Chit* chit = coreScript->ParentChit();
 			if ( chit && chit->GetSpatialComponent() ) {
@@ -710,7 +711,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		int bias = 1;
 		if ( item == &prevUnit ) bias = -1;
 
-		CoreScript* coreScript = sim->GetChitBag()->GetCore( sim->GetChitBag()->GetHomeSector() );
+		CoreScript* coreScript = CoreScript::GetCore( sim->GetChitBag()->GetHomeSector() );
 		if ( coreScript && coreScript->NumCitizens() ) {
 			Chit* chit = sim->GetChitBag()->GetChit( chitFaceToTrack );
 			int index = 0;
@@ -912,7 +913,7 @@ void GameScene::HandleHotKey( int mask )
 	else if ( mask == GAME_HK_CHEAT_TECH ) {
 		Chit* player = sim->GetPlayerChit();
 
-		CoreScript* coreScript = sim->GetChitBag()->GetCore( sim->GetChitBag()->GetHomeSector() );
+		CoreScript* coreScript = CoreScript::GetCore( sim->GetChitBag()->GetHomeSector() );
 		for( int i=0; i<10; ++i ) {
 			coreScript->AddTech();
 		}
@@ -1140,7 +1141,7 @@ void GameScene::DoTick( U32 delta )
 	createWorkerButton.SetVisible( uiMode[UI_BUILD].Down() );
 
 	str.Clear();
-	CoreScript* coreScript = sim->GetChitBag()->GetCore( sim->GetChitBag()->GetHomeSector() );
+	CoreScript* coreScript = CoreScript::GetCore( sim->GetChitBag()->GetHomeSector() );
 
 	float tech = coreScript->GetTech();
 	int maxTech = coreScript->MaxTech();

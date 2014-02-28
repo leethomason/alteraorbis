@@ -63,7 +63,7 @@ int DistilleryScript::DoTick( U32 delta )
 		SpatialComponent* sc = scriptContext->chit->GetSpatialComponent();
 		GLASSERT( sc );
 		Vector2I sector = ToSector( sc->GetPosition2DI() );
-		CoreScript* cs = scriptContext->chitBag->GetCore( sector );
+		CoreScript* cs = CoreScript::GetCore( sector );
 	
 		int tech = cs->GetTechLevel();
 		int dProg = (tech+1) * progressTick.Period() / TECH_MAX;

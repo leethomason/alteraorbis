@@ -33,8 +33,6 @@ using namespace grinliz;
 #define SPAWN_MOBS
 
 CoreInfo CoreScript::coreInfoArr[NUM_SECTORS*NUM_SECTORS];
-grinliz::CDynArray<Chit*> CoreScript::chitArr;
-
 
 CoreScript::CoreScript() 
 	: spawnTick( 10*1000 ), 
@@ -219,7 +217,8 @@ void CoreScript::UpdateAI()
 	if (this->InUse()) {
 		info->approxTeam = PrimaryTeam();
 		// FIXME: rename power to temple
-		scriptContext->chitBag->FindBuilding(IStringConst::power, sector, 0, 0, &chitArr, 0);
+		CChitArray chitArr;
+		scriptContext->chitBag->FindBuildingCC(IStringConst::power, sector, 0, 0, &chitArr, 0);
 		info->approxNTemples = chitArr.Size();
 	}
 	else {
@@ -261,8 +260,10 @@ int CoreScript::DoTick( U32 delta )
 	int tickd = spawnTick.Delta( delta );
 
 	if ( tickd && inUse ) {
-		scriptContext->chitBag->FindBuilding( IStringConst::bed, sector, 0, 0, &chitArr, 0 );
-
+		// FIXME: essentially caps the #citizens to the capacity of CChitArray (32)
+		// Which just happend to work out with the game design. Citizen limits: 4, 8, 16, 32
+		CChitArray chitArr;
+		scriptContext->chitBag->FindBuildingCC( IStringConst::bed, sector, 0, 0, &chitArr, 0 );
 		int nCitizens = this->NumCitizens();
 
 		if ( nCitizens < chitArr.Size() ) {
@@ -377,7 +378,8 @@ int CoreScript::DoTick( U32 delta )
 int CoreScript::MaxTech() const
 {
 	Vector2I sector = ToSector( scriptContext->chit->GetSpatialComponent()->GetPosition2DI() );
-	scriptContext->chitBag->FindBuilding( IStringConst::power, sector, 0, 0, &chitArr, 0 );
+	CChitArray chitArr;
+	scriptContext->chitBag->FindBuildingCC( IStringConst::power, sector, 0, 0, &chitArr, 0 );
 	return Min( chitArr.Size() + 1, TECH_MAX );	// get one power for core
 }
 

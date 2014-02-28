@@ -159,12 +159,21 @@ public:
 		NEAREST,
 		RANDOM_NEAR
 	};
+
 	Chit* FindBuilding( const grinliz::IString& name,		// particular building, or emtpy to match all
 						const grinliz::Vector2I& sector,	// sector to query
 						const grinliz::Vector2F* pos,		// optional IN: used for evaluating NEAREST, etc.
 						int flags,
-						grinliz::CDynArray<Chit*>* arr,						// optional; the first N hits
+						grinliz::CDynArray<Chit*>* arr,		// optional; all the matches
 						IChitAccept* filter );				// optional; run this filter first
+
+	// Same as above; takes a CChitArray
+	Chit* FindBuildingCC(const grinliz::IString& name,		// particular building, or emtpy to match all
+						const grinliz::Vector2I& sector,	// sector to query
+						const grinliz::Vector2F* pos,		// optional IN: used for evaluating NEAREST, etc.
+						int flags,
+						CChitArray* arr,					// optional; the matches that fit
+						IChitAccept* filter);				// optional; run this filter first
 
 	Chit* NewMonsterChit( const grinliz::Vector3F& pos, const char* name, int team );
 	Chit* NewGoldChit( const grinliz::Vector3F& pos, int amount );
@@ -198,8 +207,7 @@ public:
 	virtual int MapGridUse( int x, int y );
 
 	// Get the core for this sector.
-	CoreScript* GetCore( const grinliz::Vector2I& sector );
-	CoreScript* GetHomeCore()	{ return GetCore( GetHomeSector() ); }
+	CoreScript* GetHomeCore();
 	
 	// FIXME placeholder code
 	grinliz::Vector2I GetHomeSector() const {
@@ -252,10 +260,9 @@ private:
 	grinliz::CDynArray<Chit*>	chitList;
 	grinliz::CDynArray<Chit*>	findMatch;
 	grinliz::CDynArray<float>	findWeight;
+	grinliz::CDynArray<Chit*>	chitArr;	// local, temporary
 
 	MapSpatialComponent*	mapSpatialHash[NUM_SECTORS*NUM_SECTORS];
-	// Cores can't be destroyed, so we can cache them.
-	Chit*					coreCache[NUM_SECTORS*NUM_SECTORS];
 };
 
 

@@ -212,7 +212,7 @@ void MapScene::SetText()
 			CStr<64> str;
 			if ( sd.HasCore() ) {
 				const char* owner = "<none>";
-				CoreScript* cc = lumosChitBag->GetCore( sector );
+				CoreScript* cc = CoreScript::GetCore( sector );
 				if ( cc->InUse() ) {
 					owner = TeamName( cc->PrimaryTeam() ).c_str();
 				}

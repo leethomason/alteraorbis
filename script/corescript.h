@@ -76,7 +76,7 @@ public:
 		return coreInfoArr[sector.y*NUM_SECTORS + sector.x]; 
 	}
 
-	static CoreScript* GetCoreScript(const grinliz::Vector2I& sector) {
+	static CoreScript* GetCore(const grinliz::Vector2I& sector) {
 		return GetCoreInfo(sector).coreScript;
 	}
 	static const CoreInfo* GetCoreInfoArr() { return coreInfoArr; }
@@ -97,8 +97,6 @@ private:
 	grinliz::CDynArray< int > citizens;
 
 	static CoreInfo coreInfoArr[NUM_SECTORS*NUM_SECTORS];
-	static grinliz::CDynArray<Chit*> chitArr;	// local, temporary
-
 };
 
 #endif // CORESCRIPT_INCLUDED
