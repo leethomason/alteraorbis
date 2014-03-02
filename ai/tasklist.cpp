@@ -415,6 +415,9 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 			GLASSERT( coreScript->nElixir > 0 );
 			coreScript->nElixir -= 1;
 		}
+		// Social attracts, but is never applied. (That' is what the SocialPulse is for.)
+		supply.Set(Needs::SOCIAL, 0);
+
 		thisComp.ai->GetNeedsMutable()->Add( supply, 1.0 );
 
 		float heal = float( supply.Value( Needs::ENERGY ) + supply.Value( Needs::FOOD ));
@@ -428,76 +431,77 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 
 void TaskList::GoShopping(  const ComponentSet& thisComp, Chit* market )
 {
-	GameItem* ranged=0;
-	GameItem* melee=0;
-	GameItem* shield=0;
+	// Try to keep this as simple as possible.
+	// Still complex. Purchasing stuff can invalidate
+	// 'ranged', 'melee', and 'shield', so return
+	// if that happens. We can come back later.
 
-	int rangedIndex=0, meleeIndex=0, shieldIndex=0;
-
+	GameItem* ranged = 0, *melee = 0, *shield = 0;
 	Vector2I sector = ToSector( thisComp.spatial->GetPosition2DI() );
 
 	MarketAI marketAI( market );
 
-	// The inventory is kept in value sorted order.
-	// 1. Figure out the good stuff
-	// 2. Sell everything that isn't "best of". FIXME: depending on personality, some denizens should keep back-ups
-	// 3. Buy better stuff where it makes sense
+	// Should be sorted, but just in case:
+	thisComp.itemComponent->SortInventory();
+	market->GetItemComponent()->SortInventory();
 
 	for( int i=1; i<thisComp.itemComponent->NumItems(); ++i ) {
 		GameItem* gi = thisComp.itemComponent->GetItem( i );
 		if ( !gi->Intrinsic() ) {
 			if ( !ranged && (gi->flags & GameItem::RANGED_WEAPON)) {
 				ranged = gi;
-				rangedIndex = i;
 			}
 			else if ( !melee && !(gi->flags & GameItem::RANGED_WEAPON) && (gi->flags & GameItem::MELEE_WEAPON) ) {
 				melee = gi;
-				meleeIndex = i;
 			}
-			else if ( !shield && gi->hardpoint == HARDPOINT_SHIELD ) {
+			else if ( !shield && gi->ToShield() ) {
 				shield = gi;
-				shieldIndex = i;
-			}
-		}
-	}
-
-	for( int i=1; i<thisComp.itemComponent->NumItems(); ++i ) {
-		GameItem* gi = thisComp.itemComponent->GetItem( i );
-		int value = gi->GetValue();
-		if ( value && !gi->Intrinsic() && (gi != ranged) && (gi != melee) && (gi != shield) ) {
-
-			int sold = MarketAI::Transact(	gi, 
-											market->GetItemComponent(),	// buyer
-											thisComp.itemComponent,		// seller
-											true );
-			if ( sold ) {
-				--i;
 			}
 		}
 	}
 
 	// Basic, critical buys:
+	bool boughtStuff = false;
 	for( int i=0; i<3; ++i ) {
 		const GameItem* purchase = 0;
 		if ( i == 0 && !ranged ) purchase = marketAI.HasRanged( thisComp.item->wallet.gold, 1 );
-		if ( i == 1 && !shield ) purchase = marketAI.HasShield( thisComp.item->wallet.gold, 1 );
+		if ( i == 1 && !shield )
+			purchase = marketAI.HasShield( thisComp.item->wallet.gold, 1 );
 		if ( i == 2 && !melee )  purchase = marketAI.HasMelee(  thisComp.item->wallet.gold, 1 );
 		if ( purchase ) {
-			
 			MarketAI::Transact(	purchase,
 								thisComp.itemComponent,
 								market->GetItemComponent(),
 								true );
+			boughtStuff = true;
 		}
 	}
+	if (boughtStuff) return;
+
+	// Sell the extras.
+	for (int i = 1; i<thisComp.itemComponent->NumItems(); ++i) {
+		GameItem* gi = thisComp.itemComponent->GetItem(i);
+		int value = gi->GetValue();
+		if (value && !gi->Intrinsic() && (gi != ranged) && (gi != melee) && (gi != shield)) {
+			int sold = MarketAI::Transact(gi,
+				market->GetItemComponent(),	// buyer
+				thisComp.itemComponent,		// seller
+				true);
+			if (sold) {
+				--i;
+				boughtStuff = true;
+			}
+		}
+	}
+	if (boughtStuff) return;
 
 	// Upgrades! Don't set ranged, shield, etc. because we don't want a critical followed 
 	// by a non-critical. Also, personality probably should factor in to purchasing decisions.
 	for( int i=0; i<3; ++i ) {
 		const GameItem* purchase = 0;
-		if ( i == 0 && ranged ) purchase = marketAI.HasRanged( thisComp.item->wallet.gold, ranged->GetValue() * 3 / 2 );
-		if ( i == 1 && shield ) purchase = marketAI.HasShield( thisComp.item->wallet.gold, shield->GetValue() * 3 / 2 );
-		if ( i == 2 && melee )  purchase = marketAI.HasMelee(  thisComp.item->wallet.gold, melee->GetValue() * 3 / 2 );
+		if ( i == 0 && ranged ) purchase = marketAI.HasRanged( thisComp.item->wallet.gold, ranged->GetValue() * 2 );
+		if ( i == 1 && shield ) purchase = marketAI.HasShield( thisComp.item->wallet.gold, shield->GetValue() * 2 );
+		if ( i == 2 && melee )  purchase = marketAI.HasMelee(  thisComp.item->wallet.gold, melee->GetValue()  * 2 );
 		if ( purchase ) {
 			
 			MarketAI::Transact(	purchase,

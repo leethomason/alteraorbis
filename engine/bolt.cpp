@@ -176,8 +176,6 @@ void BoltRenderer::DeviceLoss()
 
 void BoltRenderer::DrawAll( const Bolt* bolts, int nBolts, Engine* engine )
 {
-	// FIXME: move more to the shader?
-
 	if ( nBolts == 0 )
 		return;
 

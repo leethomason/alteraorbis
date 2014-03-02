@@ -129,6 +129,7 @@ private:
 	void ThinkBuild( const ComponentSet& thisComp );
 	void ThinkVisitor( const ComponentSet& thisComp );
 	void ThinkRampage( const ComponentSet& thisComp );	// process the rampage action
+	bool RampageDone(const ComponentSet& thisComp);
 	bool ThinkHungry( const ComponentSet& thisComp );
 	bool ThinkFruitCollect( const ComponentSet& thisComp );
 	bool ThinkDelivery( const ComponentSet& thisComp );

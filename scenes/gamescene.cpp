@@ -680,9 +680,9 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 	else if ( item == &createWorkerButton ) {
 		CoreScript* cs = sim->GetChitBag()->GetHomeCore();
 		Chit* coreChit = cs->ParentChit();
-		if ( coreChit->GetItem()->wallet.gold >= 20 ) {
-			coreChit->GetItem()->wallet.AddGold( -20 );
-			ReserveBank::Instance()->bank.AddGold( 20 );
+		if (coreChit->GetItem()->wallet.gold >= WORKER_BOT_COST) {
+			coreChit->GetItem()->wallet.AddGold(-WORKER_BOT_COST);
+			ReserveBank::Instance()->bank.AddGold(WORKER_BOT_COST);
 			int team = coreChit->GetItem()->primaryTeam;
 			sim->GetChitBag()->NewWorkerChit( coreChit->GetSpatialComponent()->GetPosition(), team );
 		}
@@ -1012,21 +1012,28 @@ void GameScene::ProcessNewsToConsole()
 
 	for ( ;currentNews < history->NumNews(); ++currentNews ) {
 		const NewsEvent& ne = history->News( currentNews );
-		//Vector2I sector = ne.Sector();
+		Vector2I sector = ToSector(ToWorld2I(ne.pos));
 
 		str = "";
 
 		switch( ne.what ) {
 		case NewsEvent::DENIZEN_CREATED:
 		case NewsEvent::DENIZEN_KILLED:
-		case NewsEvent::FORGED:
-		case NewsEvent::UN_FORGED:
-		case NewsEvent::PURCHASED:
 		case NewsEvent::STARVATION:
 		case NewsEvent::BLOOD_RAGE:
 		case NewsEvent::VISION_QUEST:
 			if ( coreScript && coreScript->IsCitizen( ne.chitID )) {
 				ne.Console( &str );
+			}
+			break;
+
+		case NewsEvent::FORGED:
+		case NewsEvent::UN_FORGED:
+		case NewsEvent::PURCHASED:
+			if ((coreScript && coreScript->IsCitizen(ne.chitID))
+				|| sector == homeSector)
+			{
+				ne.Console(&str);
 			}
 			break;
 
@@ -1038,7 +1045,6 @@ void GameScene::ProcessNewsToConsole()
 		case NewsEvent::LESSER_MOB_NAMED:
 		case NewsEvent::LESSER_NAMED_MOB_KILLED:
 			{
-				Vector2I sector = ToSector( ToWorld2I( ne.pos ));
 				if ( sector == homeSector || sector == avatarSector ) {
 					ne.Console( &str );
 				}
@@ -1161,7 +1167,7 @@ void GameScene::DoTick( U32 delta )
 
 		static const int MAX_BOTS = 4;
 		sim->GetChitBag()->QuerySpatialHash( &arr, b, 0, &workerFilter );
-		str2.Format( "WorkerBot\n20 %d/%d", arr.Size(), MAX_BOTS );		// FIXME: pull price from data
+		str2.Format("WorkerBot\n%d %d/%d", WORKER_BOT_COST, arr.Size(), MAX_BOTS);		// FIXME: pull price from data
 		createWorkerButton.SetText( str2.c_str() );
 		createWorkerButton.SetEnabled( arr.Size() < MAX_BOTS );
 	}
@@ -1172,7 +1178,10 @@ void GameScene::DoTick( U32 delta )
 		int maxTubes  = 4 << techLevel;
 		sim->GetChitBag()->FindBuilding( IStringConst::bed, homeSector, 0, 0, &chitQuery, 0 );
 		buildButton[sleepTubeID].SetEnabled( chitQuery.Size() < maxTubes );
-		str2.Format( "SleepTube\n25 %d/%d", chitQuery.Size(), maxTubes );
+		const BuildData* data = buildScript.GetDataFromStructure(IStringConst::bed);
+		GLASSERT(data);
+
+		str2.Format( "SleepTube\n%d %d/%d", data->cost, chitQuery.Size(), maxTubes );
 		buildButton[sleepTubeID].SetText( str2.c_str() ); 
 	}
 	consoleWidget.DoTick( delta );

@@ -34,28 +34,32 @@
 - console: links
 - buttons for weapons changing
 - texture guns
+- camera: fix initial position. (more north). Fix shadow direction to complement. "Home" should set orientation.
 
 - game
 	- Food-2
 		x add porch to farm, collect food there
 		x simplify food pickup code
-		t overlapping farms
-		t text display for farm
+		x overlapping farms
+		x text display for farm
 		t bars should only work at all if they have elixir
-		t distillery: 0 fruit should cause 0 progress
-		- Temples attrack / repel monsters
+		x distillery: 0 fruit should cause 0 progress
+		x Temples attrack / repel monsters
 				lesser			greater
 			0: 					repel
 			1:	attract near	repel
 			2:  attract near
 			3: 	attract near	attract
-		- MOBs get stuck on rampage at ports
-		t good plants can catch fire/shock
+		x MOBs get stuck on rampage at ports
+		x need a move timeout?? Or no block? Avoid just makes slower??
+		x good plants can catch fire/shock
 		- rebalance model
 		- rebalance game
 		- start game at home sector if no avatar
-		- ChitBag::HashIndex() has issues. Throwing away y value, essentially. And SIZE2 is incorrect - should be power of 2.
+		x ChitBag::HashIndex() has issues. Throwing away y value, essentially. And SIZE2 is incorrect - should be power of 2.
 		- improve wiki on plants
+		x move all crystal to mobs. runs out too easily.
+		- make greaters herd more??
 
 	- Census
 		x coolest stuff, past and present, by category
@@ -66,13 +70,14 @@
 		x greatest warrior
 		x greatest weapons
 		x location and owner
+		t greater kills don't seem to work at all
     	- re-do visitor likes to account for the grids they pass through
 		- name / level / health display
 		- money checks optional
 		- greatest smith
 		- greatest monsters
 		- needs to feel interactive
-		- # kills
+		x # kills
 		- browsing of items/people
 		- redo UI layout
 
@@ -86,6 +91,8 @@
 			x forge or factory?
 			x fee to forge
 		x citizens *don't* pick stuff up in their own domain
+		- coin changer. junk item breakdown?
+		- gold & crystal market
 		- flammability / shockability very agressive
 		- world effects morale/needs: water, tombstones, temples, etc.
 		- proper game start: location, selection of team color, icons
@@ -104,7 +111,6 @@
 			x auto-clear vegetation
 		x morale
 			x madness / starvation / things going wrong
-		- gold & crystal market
 
 	- Adventure
 		x weapon swap button or auto-swap?

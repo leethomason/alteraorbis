@@ -147,7 +147,6 @@ void ItemComponent::AddCraftXP( int nCrystals )
 	mainItem->GetTraitsMutable()->AddCraftXP( nCrystals );
 	if ( mainItem->Traits().Level() > level ) {
 		// Level up!
-		// FIXME: show an icon
 		mainItem->hp = mainItem->TotalHPF();
 		NameItem( mainItem );
 		if ( parentChit->GetRenderComponent() ) {

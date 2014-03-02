@@ -466,13 +466,6 @@ Model* SpaceTree::QueryRay( const Vector3F& _origin,
 							HitTestMethod testType,
 							Vector3F* intersection ) 
 {
-	// FIXME: can optimize for 'length'
-	/* Reading through this there seem to be 2 ways to make this faster:
-		1. Can the space tree query be faster since the input is an AABB itself?
-		   There are a lot of ComparePlane calls.
-		2. [fixed] The length itself can create an AABB for testing.
-	*/
-
 	//GLOUTPUT(( "query ray\n" ));
 	modelRoot = 0;
 	nodesVisited = 0;

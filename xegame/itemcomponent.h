@@ -110,6 +110,9 @@ public:
 	// Very crude assessment of the power of this MOB.
 	float PowerRating() const;
 
+	// Normally don't call this directly, but there is some "just in case" code.
+	void SortInventory();				// AIs will use the "best" item.
+
 private:
 	// If there is a RenderComponent, bring it in sync with the inventory.
 	void SetHardpoints();
@@ -121,7 +124,6 @@ private:
 	bool ItemActive( int index )	{ return activeArr[index]; }
 	bool ItemActive( const GameItem* );	// expensive: needs a search.
 	void NameItem( GameItem* item );	// if conditions met, give the item a name.
-	void SortInventory();				// AIs will use the "best" item.
 	void NewsDestroy( const GameItem* item );	// generate destroy message
 
 	CTicker slowTick;

@@ -45,7 +45,6 @@ public:
 		t.taskID = taskID;
 		return t;
 	}
-	// FIXME: many stands don't work if you move off the healing place, building, etc.
 	// Check and use location.
 	static Task StandTask( int time, int taskID=0 ) {
 		Task t;

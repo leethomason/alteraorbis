@@ -180,7 +180,8 @@
         cost="50"
         
 		    need.time="1.5"
-        need.fun="0.3"
+        need.fun="0.4"
+        need.social="0.2"
         />
 
   <!-- comlpex needs: gives social if others there, 

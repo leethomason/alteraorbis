@@ -12,6 +12,7 @@
 
 #include "../script/procedural.h"
 #include "../script/corescript.h"
+#include "../script/itemscript.h"
 
 using namespace gamui;
 using namespace grinliz;
@@ -32,11 +33,13 @@ MapScene::MapScene( LumosGame* game, MapSceneData* data ) : Scene( game ), lumos
 	mapImage.Init( &gamui2D, mapAtom, false );
 	mapImage.SetCapturesTap( true );
 	
-	Vector2I pos2i = { worldMap->Width()/2, worldMap->Height()/2 };
+	Vector2I sector = { 0, 0 };
 	if ( player ) {
-		pos2i = player->GetSpatialComponent()->GetPosition2DI();
+		sector = ToSector(player->GetSpatialComponent()->GetPosition2DI());
 	}
-	Vector2I sector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
+	else {
+		sector = lumosChitBag->GetHomeSector();
+	}
 	if ( sector.x < MAP2_RAD )					sector.x = MAP2_RAD;
 	if ( sector.y < MAP2_RAD )					sector.y = MAP2_RAD;
 	if ( sector.x >= NUM_SECTORS - MAP2_RAD )	sector.x = NUM_SECTORS - MAP2_RAD - 1;
@@ -185,11 +188,10 @@ void MapScene::SetText()
 			lumosChitBag->QuerySpatialHash( &query, inner, 0, &mobFilter );
 
 			int low=0, med=0, high=0, greater=0;
-			float playerPower = 0;
-			int primaryTeam = 0;
+			float playerPower = 100.0f;
+			int primaryTeam = lumosChitBag->GetHomeCore()->PrimaryTeam();
 			if ( player ) {
 				playerPower = player->GetItemComponent()->PowerRating();
-				primaryTeam = player->GetItem()->primaryTeam;
 			}
 
 			for( int k=0; k<query.Size(); ++k ) {

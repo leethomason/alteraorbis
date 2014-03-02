@@ -104,31 +104,6 @@ int VolcanoScript::DoTick( U32 delta )
 			}
 		}
 		else {
-			// Distribute gold and crystal.
-			Vector2I sector = { pos.x/SECTOR_SIZE, pos.y/SECTOR_SIZE };
-			const SectorData& sd = worldMap->GetWorldInfo().GetSector( sector );
-			if ( sd.ports ) {
-				for( int i=0; i<4; ++i ) {
-					int x = r.min.x + scriptContext->chit->random.Rand( r.Width() );
-					int y = r.min.y + scriptContext->chit->random.Rand( r.Height() );
-					if (    worldMap->GetWorldGrid( x, y ).RockHeight()
-						 || worldMap->GetWorldGrid( x, y ).Pool()) 
-					{
-						int gold = ReserveBank::Instance()->WithdrawVolcanoGold();
-						Vector3F v3 = { (float)x+0.5f, 0, (float)y+0.5f };
-						scriptContext->chitBag->NewGoldChit( v3, gold );
-					}
-				}
-				if (    worldMap->GetWorldGrid( pos.x, pos.y ).RockHeight()
-					 || worldMap->GetWorldGrid( pos.x, pos.y ).Pool()) 
-				{	
-					int gold = 0;
-					int crystal = NO_CRYSTAL;
-					Vector3F v3 = { (float)pos.x+0.5f, 0, (float)pos.y+0.5f };
-					Wallet wallet = ReserveBank::Instance()->WithdrawVolcano();
-					scriptContext->chitBag->NewWalletChits( v3, wallet );
-				}
-			}
 			scriptContext->chit->QueueDelete();
 		}
 	}

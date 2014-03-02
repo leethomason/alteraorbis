@@ -80,14 +80,6 @@ Wallet ReserveBank::WithdrawMonster()
 }
 
 
-int ReserveBank::WithdrawVolcanoGold()
-{
-	int g = Min( (int)random.Rand( GOLD_PER_MONSTER), bank.gold );
-	bank.gold -= g;
-	return g;
-}
-
-
 int ReserveBank::WithdrawRandomCrystal()
 {
 	static const float score[NUM_CRYSTAL_TYPES] = { 100,50,10,1 };
@@ -99,15 +91,3 @@ int ReserveBank::WithdrawRandomCrystal()
 	}
 	return NO_CRYSTAL;
 }
-
-
-Wallet ReserveBank::WithdrawVolcano()
-{
-	Wallet w;
-	w.gold		= WithdrawVolcanoGold();
-	if ( random.Rand(3) == 0 ) {
-		w.AddCrystal( WithdrawRandomCrystal() );
-	}
-	return w;
-}
-

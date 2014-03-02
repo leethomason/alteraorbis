@@ -108,6 +108,7 @@ static const float EFFECT_RADIUS = 1.5f;
 static const float EFFECT_ACCRUED_MAX = EFFECT_DAMAGE_PER_SEC;
 
 static const float MARKET_COST_MULT = 0.8f;
+static const int   WORKER_BOT_COST = 20;
 static const int   STD_DECO = 2000;					// typical time for over-head icons to be displayed
 
 #endif // GAMELIMITS_INCLUDED

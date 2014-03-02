@@ -96,7 +96,7 @@ void ForgeScript::Build(	int type,			// GUN
 		}
 	}
 
-	static const int BONUS = 2;
+	static const int BONUS = 3;
 
 	int features = 0;
 	if ( type == ForgeScript::GUN ) {
@@ -104,20 +104,27 @@ void ForgeScript::Build(	int type,			// GUN
 		else if ( subType == PULSE )	{ typeName = "pulse";   *techRequired += 1; }
 		else if ( subType == BEAMGUN )	{ typeName = "beamgun"; *techRequired += 1; }
 
+		int nParts = 0;
 		if ( partsFlags & WeaponGen::GUN_CELL )		{ 
 			features |= WeaponGen::GUN_CELL;		
 			roll[GameTrait::ALT_CAPACITY] += BONUS*2; 
 			*techRequired += 1;
+			++nParts;
 		}
 		if ( partsFlags & WeaponGen::GUN_DRIVER )		{ 
 			features |= WeaponGen::GUN_DRIVER;	
 			roll[GameTrait::ALT_DAMAGE]   += BONUS;	
 			*techRequired += 1;
+			++nParts;
 		}
 		if ( partsFlags & WeaponGen::GUN_SCOPE )		{ 
 			features |= WeaponGen::GUN_SCOPE;		
 			roll[GameTrait::ALT_ACCURACY] += BONUS; 
 			*techRequired += 1;
+			++nParts;
+		}
+		if (nParts > 1) {
+			required->crystal[0] += (nParts - 1)*(nParts - 1);
 		}
 	}
 	else if ( type == ForgeScript::RING ) {

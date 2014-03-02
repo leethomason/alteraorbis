@@ -228,12 +228,14 @@ void ItemHistory::Set( const GameItem* gi )
 	this->level			= gi->Traits().Level();
 	this->value			= gi->GetValue();
 
-	int k=0, c=0;
+	int k=0, c=0, g=0;
 
-	gi->historyDB.Get( "Kills", &k );
-	gi->historyDB.Get( "Crafted", &c );
+	gi->historyDB.Get("Kills", &k);
+	gi->historyDB.Get("Greater", &g);
+	gi->historyDB.Get("Crafted", &c);
 
 	this->kills = k;
+	this->greater = g;
 	this->crafted = c;
 }
 

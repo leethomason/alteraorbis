@@ -119,14 +119,6 @@ class Matrix4
 		return true;
 	}
 
-	// Conventional names of rows. FIXME: this is the essential where it is all strange.
-	// These are not correct in the matrix in use.
-	//enum {
-	//	RIGHT,
-	//	UP,
-	//	OUT
-	//};
-
 	/// Return a row of the matrix
 	Vector3F Row( int i ) const	{
 		Vector3F r = { x[INDEX(i,0)], x[INDEX(i,1)], x[INDEX(i,2)] };

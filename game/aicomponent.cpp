@@ -352,6 +352,11 @@ void AIComponent::DoMove( const ComponentSet& thisComp )
 			currentAction = NO_ACTION;
 			return;
 		}
+		if (aiMode == RAMPAGE_MODE && RampageDone(thisComp)) {
+			aiMode = NORMAL_MODE;
+			currentAction = NO_ACTION;
+			return;
+		}
 		// Reloading is always a good background task.
 		IRangedWeaponItem* rangedWeapon = thisComp.itemComponent->GetRangedWeapon( 0 );
 		if ( rangedWeapon && rangedWeapon->GetItem()->CanReload() ) {
@@ -887,6 +892,29 @@ bool AIComponent::ThinkDoRampage( const ComponentSet& thisComp )
 }
 
 
+bool AIComponent::RampageDone(const ComponentSet& thisComp)
+{
+	const ChitContext* context = GetChitContext();
+	Vector2I pos2i = thisComp.spatial->GetPosition2DI();
+	const SectorData& sd = context->worldMap->GetSector(ToSector(pos2i));
+	Rectangle2I dest;
+
+	switch (rampageTarget) {
+	case WorldGrid::CORE:		dest.min = dest.max = sd.core;				break;
+	case WorldGrid::PORT_POS_X:	dest = sd.GetPortLoc(SectorData::POS_X);	break;
+	case WorldGrid::PORT_POS_Y:	dest = sd.GetPortLoc(SectorData::POS_Y);	break;
+	case WorldGrid::PORT_NEG_X:	dest = sd.GetPortLoc(SectorData::NEG_X);	break;
+	case WorldGrid::PORT_NEG_Y:	dest = sd.GetPortLoc(SectorData::NEG_Y);	break;
+	default: GLASSERT(0);	break;
+	}
+
+	if (dest.Contains(pos2i)) {
+		return true;
+	}
+	return false;
+}
+
+
 void AIComponent::ThinkRampage( const ComponentSet& thisComp )
 {
 	if ( thisComp.move->IsMoving() )
@@ -900,17 +928,7 @@ void AIComponent::ThinkRampage( const ComponentSet& thisComp )
 	const WorldGrid& wg1	= context->worldMap->GetWorldGrid( next.x, next.y );
 	const SectorData& sd	= context->worldMap->GetSector( ToSector( pos2i ));
 
-	Rectangle2I dest;
-	switch( rampageTarget ) {
-	case WorldGrid::CORE:		dest.min = dest.max = sd.core;				break;
-	case WorldGrid::PORT_POS_X:	dest = sd.GetPortLoc( SectorData::POS_X );	break;
-	case WorldGrid::PORT_POS_Y:	dest = sd.GetPortLoc( SectorData::POS_Y );	break;
-	case WorldGrid::PORT_NEG_X:	dest = sd.GetPortLoc( SectorData::NEG_X );	break;
-	case WorldGrid::PORT_NEG_Y:	dest = sd.GetPortLoc( SectorData::NEG_Y );	break;
-	default: GLASSERT(0);	break;
-	}
-
-	if ( dest.Contains( pos2i )) {
+	if ( RampageDone(thisComp)) {
 		aiMode = NORMAL_MODE;
 		currentAction = NO_ACTION;
 		return;
@@ -1090,12 +1108,9 @@ Vector2F AIComponent::ThinkWanderFlock( const ComponentSet& thisComp )
 	Vector2F heading = thisComp.spatial->GetHeading2D();
 
 	// But not too close.
-	// FIXME: why is this 2-pass? Left over code?
-	for( int pass=0; pass<2; ++pass ) {
-		for( int i=0; i<pos.Size(); ++i ) {
-			if ( (pos[i] - dest).LengthSquared() < TOO_CLOSE*TOO_CLOSE ) {
-				dest += heading * TOO_CLOSE;
-			}
+	for( int i=0; i<pos.Size(); ++i ) {
+		if ( (pos[i] - dest).LengthSquared() < TOO_CLOSE*TOO_CLOSE ) {
+			dest += heading * TOO_CLOSE;
 		}
 	}
 	return dest;
@@ -1189,7 +1204,7 @@ bool AIComponent::SectorHerd( const ComponentSet& thisComp )
 
 			// Check to make sure we aren't repelled.
 			const CoreInfo& info = CoreScript::GetCoreInfo(dest.sector);
-			if (GetRelationship(info.approxTeam, thisComp.item->primaryTeam) == RELATE_ENEMY) {
+			if (info.coreScript && GetRelationship(info.approxTeam, thisComp.item->primaryTeam) == RELATE_ENEMY) {
 				if (mob == IStringConst::greater && info.approxNTemples <= TECH_REPELS_GREATER) {
 					continue;
 				}
@@ -1761,7 +1776,6 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 	// Score the buildings as a fit for the needs.
 	// future: consider distance to building
 	// FIXME: only use sleep pods in home sector
-	// FIXME: add "wander" in this sectory. Patrolling is good.
 	// FIXME: add "adventure" - visit neighbor sector, as a need,
 	//        and a way to get back.
 
@@ -1814,13 +1828,13 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 
 		// Practicality - is available?
 		// Note that for social buildings, being crowded is good.
-		if ( needs.Value( ai::Needs::SOCIAL ) == 0 ) {
-			MOBFilter mobFilter;
-			GetLumosChitBag()->QuerySpatialHash( &mobs, ToWorld2F( porch ), 0.3f, thisComp.chit, &mobFilter );
-			if ( mobs.Size() ) {
-				s *= 0.5;
-			}
-		}
+		//if ( needs.Value( ai::Needs::SOCIAL ) == 0 ) {
+		//	MOBFilter mobFilter;
+		//	GetLumosChitBag()->QuerySpatialHash( &mobs, ToWorld2F( porch ), 0.3f, thisComp.chit, &mobFilter );
+		//	if ( mobs.Size() ) {
+		//		s *= 0.5;
+		//	}
+		//}
 
 		if ( s > 0 && s > score ) {
 			score = s;

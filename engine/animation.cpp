@@ -378,8 +378,6 @@ void AnimationResource::GetTransform(	int typeA,					// which animation to play:
 										float crossFraction,		// 0: all A, 1: all B
 										grinliz::Matrix4* output ) const	// At least EL_MAX_BONES
 {
-	// fixme: check for redundant call and return same output
-
 	bool hasFade = crossFraction > 0;
 
 	int frameA0=0, frameA1=0, frameB0=0, frameB1=0;
