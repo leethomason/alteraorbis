@@ -120,6 +120,7 @@ private:
 	void UpdateActive();
 
 	void DoSlowTick();
+	void ApplyLootLimits();
 	bool EmitEffect( const GameItem& it, U32 deltaTime );
 	bool ItemActive( int index )	{ return activeArr[index]; }
 	bool ItemActive( const GameItem* );	// expensive: needs a search.

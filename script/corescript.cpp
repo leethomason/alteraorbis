@@ -346,12 +346,6 @@ int CoreScript::DoTick( U32 delta )
 				int team = GetTeam( ispawn );
 				GLASSERT( team != TEAM_NEUTRAL );
 				Chit* mob = scriptContext->chitBag->NewMonsterChit( pf, spawn, team );
-
-//				if ( isGreater ) {
-//					NewsEvent news( NewsEvent::GREATER_MOB_CREATED, ToWorld2F( pf ), mob );
-//					NewsHistory::Instance()->Add( news );
-//					mob->GetItem()->keyValues.Set( "destroyMsg", "d", NewsEvent::GREATER_MOB_KILLED );
-//				}
 			}
 		}
 #endif
@@ -390,12 +384,28 @@ void CoreScript::AddTech()
 	tech = Clamp( tech, 0.0, Min( double(TECH_MAX), double( MaxTech() ) - 0.01 ));
 
 	achievedTechLevel = Max( achievedTechLevel, (int)tech );
+}
 
-	// Done by the visitor.
-//	RenderComponent* rc = scriptContext->chit->GetRenderComponent();
-//	if ( rc ) {
-//		rc->AddDeco( "techxfer", STD_DECO );
-//	}
+
+void CoreScript::AddTask(const grinliz::Vector2I& pos2i)
+{
+	tasks.Push(pos2i);
+}
+
+
+void CoreScript::RemoveTask(const grinliz::Vector2I& pos2i)
+{
+	int i = tasks.Find(pos2i);
+	GLASSERT(i >= 0);
+	if (i >= 0){
+		tasks.Remove(i);
+	}
+}
+
+
+bool CoreScript::HasTask(const grinliz::Vector2I& pos2i)
+{
+	return tasks.Find(pos2i) >= 0;
 }
 
 

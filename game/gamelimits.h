@@ -59,9 +59,10 @@ static const int ALL_GOLD =   TYPICAL_DENIZENS*GOLD_PER_DENIZEN
 							+ TYPICAL_BEASTMEN*GOLD_PER_BEASTMAN
 							+ TYPICAL_MONSTERS*GOLD_PER_MONSTER;
 
-static const int MAX_NORMAL_GOLD	= GOLD_PER_MONSTER * 10;
+static const int MAX_LESSER_GOLD	= GOLD_PER_MONSTER *  5;
 static const int MAX_GREATER_GOLD	= GOLD_PER_MONSTER * 40;
-static const int MAX_MOB_CRYSTAL	= 10;
+static const int MAX_LESSER_MOB_CRYSTAL = 4;
+static const int MAX_GREATER_MOB_CRYSTAL = 12;
 
 static const int ALL_CRYSTAL_GREEN  = TYPICAL_DOMAINS * 10;
 static const int ALL_CRYSTAL_RED    = TYPICAL_DOMAINS * 4;

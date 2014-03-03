@@ -107,7 +107,8 @@ class TaskList
 {
 public:
 	TaskList()	: worldMap(0), engine(0), socialTicker(2000) {}
-	~TaskList()	{}
+	~TaskList()	{ Clear();  }
+
 	void Init( WorldMap* _map, Engine* _engine ) {
 		worldMap = _map;
 		engine = _engine;
@@ -119,12 +120,13 @@ public:
 	bool Empty() const { return taskList.Empty(); }
 	
 	void Push( const Task& task );
-	void Clear()						{ taskList.Clear(); }
+	void Clear();
 
 	bool Standing() const { return !taskList.Empty() && taskList[0].action == Task::TASK_STAND; }
 
 	// WorkQueue is optional, but connects the tasks back to the queue.
 	void DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta );
+
 	grinliz::IString LastBuildingUsed() const { return lastBuildingUsed; }
 
 private:
@@ -135,6 +137,9 @@ private:
 
 	// chat, basically, between denizens
 	void SocialPulse( const ComponentSet& thisComp, const grinliz::Vector2F& origin );
+
+	// Remove the 1st task.
+	void Remove();
 
 	WorldMap*	worldMap;
 	Engine*		engine;

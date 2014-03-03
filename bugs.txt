@@ -35,6 +35,17 @@
 - buttons for weapons changing
 - texture guns
 - camera: fix initial position. (more north). Fix shadow direction to complement. "Home" should set orientation.
+- start game at home sector if no avatar
+- markets - pay out taxes over a certain limit
+- fabricator. trinkets. (see notes)
+	- medkit
+	- boost items
+	- sellable items
+- money xchange - gold to crystal and vice versa
+- should be able to browse units in character screen
+- vault needs "sell to market" button
+- building repair
+- area for farms
 
 - game
 	- Food-2
@@ -53,13 +64,11 @@
 		x MOBs get stuck on rampage at ports
 		x need a move timeout?? Or no block? Avoid just makes slower??
 		x good plants can catch fire/shock
-		- rebalance model
-		- rebalance game
-		- start game at home sector if no avatar
+		- more efficient fruit pickup
 		x ChitBag::HashIndex() has issues. Throwing away y value, essentially. And SIZE2 is incorrect - should be power of 2.
-		- improve wiki on plants
 		x move all crystal to mobs. runs out too easily.
-		- make greaters herd more??
+		x make greaters herd more??
+		- improve wiki on plants
 
 	- Census
 		x coolest stuff, past and present, by category

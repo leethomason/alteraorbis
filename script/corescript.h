@@ -70,6 +70,15 @@ public:
 
 	int nElixir;
 
+	// Testing: each task pushes a position for that task,
+	// and removes it when done/cancelled. (Some careful
+	// code there.) May be a simpler way to see if
+	// someone is assigned to a task at location. However,
+	// approximate, since nothing but the location is tracked.
+	void AddTask(const grinliz::Vector2I& pos2i);
+	void RemoveTask(const grinliz::Vector2I& pos2i);
+	bool HasTask(const grinliz::Vector2I& pos2i);
+
 	static const CoreInfo& GetCoreInfo(const grinliz::Vector2I& sector) { 
 		GLASSERT(sector.x >= 0 && sector.x < NUM_SECTORS);
 		GLASSERT(sector.y >= 0 && sector.y < NUM_SECTORS);
@@ -95,6 +104,7 @@ private:
 	int			achievedTechLevel;
 	grinliz::IString defaultSpawn;
 	grinliz::CDynArray< int > citizens;
+	grinliz::CDynArray< grinliz::Vector2I > tasks;
 
 	static CoreInfo coreInfoArr[NUM_SECTORS*NUM_SECTORS];
 };

@@ -60,12 +60,43 @@ void Task::Serialize( XStream* xs )
 }
 
 
-
 void TaskList::Push( const Task& task )
 {
 	taskList.Push( task );
+
+	Vector2I sector = ToSector(task.pos2i);
+	CoreScript* cs = CoreScript::GetCore(sector);
+	if (cs) {
+		cs->AddTask(task.pos2i);
+	}
 }
 
+
+void TaskList::Remove()
+{
+	GLASSERT(taskList.Size() > 0);
+
+	Vector2I sector = ToSector(taskList[0].pos2i);
+	CoreScript* cs = CoreScript::GetCore(sector);
+	if (cs) {
+		cs->RemoveTask(taskList[0].pos2i);
+	}
+
+	taskList.Remove(0);
+}
+
+
+void TaskList::Clear()
+{
+	for (int i = 0; i < taskList.Size(); ++i) {
+		Vector2I sector = ToSector(taskList[i].pos2i);
+		CoreScript* cs = CoreScript::GetCore(sector);
+		if (cs) {
+			cs->RemoveTask(taskList[i].pos2i);
+		}
+	}
+	taskList.Clear();
+}
 
 void TaskList::Serialize( XStream* xs )
 {
@@ -83,7 +114,7 @@ bool TaskList::DoStanding( const ComponentSet& thisComp, int time )
 	if ( Standing() ) {
 		taskList[0].timer -= time;
 		if ( taskList[0].timer <= 0 ) {
-			taskList.Remove(0);
+			Remove();
 		}
 		int n = socialTicker.Delta( time );
 		for( int i=0; i<n; ++i ) {
@@ -103,7 +134,7 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta )
 	PathMoveComponent* pmc = GET_SUB_COMPONENT( chit, MoveComponent, PathMoveComponent );
 
 	if ( !pmc || !thisComp.okay ) {
-		taskList.Clear();
+		Clear();
 		return;
 	}
 
@@ -125,17 +156,18 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta )
 		}
 		if ( !queueItem ) {
 			// This task it attached to a work item that expired.
-			taskList.Clear();
+			Clear();
 			return;
 		}
 	}
 
 	switch ( task->action ) {
 	case Task::TASK_MOVE:
+		// FIXME: should there be a restart? If move fails, just re-think?
 		if ( pmc->Stopped() ) {
 			if ( pos2i == task->pos2i ) {
 				// arrived!
-				taskList.Remove(0);
+				Remove();
 			}
 			else {
 				Vector2F dest = { (float)task->pos2i.x + 0.5f, (float)task->pos2i.y + 0.5f };
@@ -189,7 +221,7 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta )
 				if ( wg.Pave() ) {
 					worldMap->SetPave( task->pos2i.x, task->pos2i.y, 0 );
 				}
-				taskList.Remove(0);
+				Remove();
 			}
 			else if ( controller && controller->GetItem() ) {
 				BuildScript buildScript;
@@ -235,15 +267,15 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta )
 						Chit* building = chitBag->NewBuilding( task->pos2i, buildData.cStructure, chit->PrimaryTeam() );
 						building->GetItem()->wallet.AddGold( buildData.cost );
 					}
-					taskList.Remove(0);
+					Remove();
 				}
 				else {
-					taskList.Clear();
+					Clear();
 				}
 			}
 			else {
 				// Plan has gone bust:
-				taskList.Clear();
+				Clear();
 			}
 
 			// No matter if successful or not, we need to clear the work item.
@@ -273,7 +305,7 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta )
 					chitBag->DeleteChit( itemChit );
 				}
 			}
-			taskList.Remove(0);
+			Remove();
 		}
 		break;
 
@@ -291,7 +323,7 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta )
 					lastBuildingUsed = buildingName;
 				}
 			}
-			taskList.Remove(0);
+			Remove();
 		}
 		break;
 

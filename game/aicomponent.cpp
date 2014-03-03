@@ -1575,11 +1575,13 @@ Chit* AIComponent::FindFruit( const Vector2F& pos2, Vector2F* dest )
 
 	// Okay, now check the farms. Now we need to use full pathing for meaningful results.
 	// Only need to check the farm porch - all fruit goes there.
-	Chit* farmChit = chitBag->FindBuilding( IStringConst::farm, 
-											ToSector( ToWorld2I( pos2 )), 
-											&pos2,
-											LumosChitBag::RANDOM_NEAR, 0, 0 );
-	if ( farmChit ) {
+	CChitArray array;
+	chitBag->FindBuildingCC(IStringConst::farm,
+		ToSector(ToWorld2I(pos2)),
+		0, 0, &array, 0);
+
+	for (int i = 0; i < array.Size(); ++i) {
+		Chit* farmChit = array[i];
 		MapSpatialComponent* farmMSC = GET_SUB_COMPONENT( farmChit, SpatialComponent, MapSpatialComponent );
 		GLASSERT( farmMSC );
 		if ( farmMSC ) {
@@ -1603,7 +1605,7 @@ Chit* AIComponent::FindFruit( const Vector2F& pos2, Vector2F* dest )
 
 bool AIComponent::ThinkFruitCollect( const ComponentSet& thisComp )
 {
-		// Some buildings provide food - that happens in ThinkNeeds.
+	// Some buildings provide food - that happens in ThinkNeeds.
 	// This is for picking up food on the group.
 
 	if ( parentChit->PlayerControlled() ) {
@@ -1625,7 +1627,7 @@ bool AIComponent::ThinkFruitCollect( const ComponentSet& thisComp )
 	// It is the duty of every citizen to take fruit to the distillery.
 	if ( AtHomeCore() || worker ) {
 		if (    worker
-			 || thisComp.item->GetPersonality().Botany() == Personality::LIKES
+			 || thisComp.item->GetPersonality().Botany() != Personality::DISLIKES
 			 || need < NEED_CRITICAL * 2.0 )
 		{
 			// Can we go pick something up?
@@ -1633,8 +1635,17 @@ bool AIComponent::ThinkFruitCollect( const ComponentSet& thisComp )
 				Vector2F fruitPos = { 0, 0 };
 				Chit* fruit = FindFruit( thisComp.spatial->GetPosition2D(), &fruitPos );
 				if ( fruit ) {
-					taskList.Push( Task::MoveTask( fruitPos, 0 ));
-					taskList.Push( Task::PickupTask( fruit->ID(), 0 ));
+					GameItem* gi = fruit->GetItem();
+					Vector2I fruitPos2i = fruit->GetSpatialComponent()->GetPosition2DI();
+					Vector2I sector = ToSector(fruitPos2i);
+					CoreScript* cs = CoreScript::GetCore(sector);
+					if (cs && cs->HasTask(fruitPos2i)) {
+						// Do nothing; assume it is this task.
+					}
+					else {
+						taskList.Push(Task::MoveTask(fruitPos, 0));
+						taskList.Push(Task::PickupTask(fruit->ID(), 0));
+					}
 					return true;
 				}
 			}
@@ -1947,11 +1958,11 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 		return;
 	if ( ThinkHungry( thisComp )) 
 		return;
-	if ( ThinkNeeds( thisComp ))
+	if (ThinkFruitCollect(thisComp))
+		return;
+	if (ThinkNeeds(thisComp))
 		return;
 	if ( ThinkDelivery( thisComp ))
-		return;
-	if ( ThinkFruitCollect( thisComp ))
 		return;
 	if ( ThinkGuard( thisComp ))
 		return;	
