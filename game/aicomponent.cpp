@@ -1259,6 +1259,7 @@ void AIComponent::ThinkVisitor( const ComponentSet& thisComp )
 
 	Vector2I pos2i = thisComp.spatial->GetPosition2DI();
 	Vector2I sector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
+	CoreScript* coreScript = CoreScript::GetCore(sector);
 	VisitorData* vd = Visitors::Get( visitorIndex );
 	Chit* kiosk = GetChitBag()->ToLumos()->QueryPorch( pos2i );
 	IString kioskName = vd->CurrentKioskWant();
@@ -1307,11 +1308,11 @@ void AIComponent::ThinkVisitor( const ComponentSet& thisComp )
 			else {
 				MapSpatialComponent* msc = GET_SUB_COMPONENT( kiosk, SpatialComponent, MapSpatialComponent );
 				GLASSERT( msc );
+				Rectangle2I porch = msc->PorchPos();
+
 				// The porch is a rectangle; go to a particular point based on the ID()
-				Vector2I porchi = msc->PorchPos( parentChit->ID() );
-				Vector2F porch = { (float)porchi.x+0.5f, (float)porchi.y+0.5f };
-				if ( context->worldMap->CalcPath( thisComp.spatial->GetPosition2D(), porch, 0, 0 ) ) {
-					this->Move( porch, false );
+				if ( context->worldMap->CalcPath( thisComp.spatial->GetPosition2D(), ToWorld2F(porch.min), 0, 0 ) ) {
+					this->Move(ToWorld2F(porch.min), false);
 				}
 				else {
 					// Done here.
@@ -1430,11 +1431,20 @@ bool AIComponent::ThinkCriticalShopping( const ComponentSet& thisComp )
 
 				if ( goMarket ) {
 					MapSpatialComponent* msc = GET_SUB_COMPONENT( market, SpatialComponent, MapSpatialComponent );
-					Vector2I porch = msc->PorchPos( thisComp.chit->ID() );
-					taskList.Push( Task::MoveTask( porch, 0 ));
-					taskList.Push( Task::StandTask( bd->standTime ));
-					taskList.Push( Task::UseBuildingTask( 0 ));
-					return true;
+
+					Rectangle2I porch = msc->PorchPos();
+					CoreScript* cs = CoreScript::GetCore(ToSector(porch.min));
+
+					if (cs) {
+						for (Rectangle2IIterator it(porch); !it.Done(); it.Next()) {
+							if (!cs->HasTask(it.Pos())) {
+								taskList.Push(Task::MoveTask(it.Pos(), 0));
+								taskList.Push(Task::StandTask(bd->standTime));
+								taskList.Push(Task::UseBuildingTask(0));
+								return true;
+							}
+						}
+					}
 				}
 			}
 		}
@@ -1717,12 +1727,16 @@ bool AIComponent::ThinkDelivery( const ComponentSet& thisComp )
 			if ( vault && vault->GetItemComponent() && vault->GetItemComponent()->CanAddToInventory() ) {
 				MapSpatialComponent* msc = GET_SUB_COMPONENT( vault, SpatialComponent, MapSpatialComponent );
 				GLASSERT( msc );
-				if ( msc ) {
-					Vector2I porch = msc->PorchPos( parentChit->ID() );
-
-					taskList.Push( Task::MoveTask( porch, 0 ));
-					taskList.Push( Task::UseBuildingTask( 0 ));
-					return true;
+				CoreScript* coreScript = CoreScript::GetCore(ToSector(msc->MapPosition()));
+				if ( msc && coreScript ) {
+					Rectangle2I porch = msc->PorchPos();
+					for (Rectangle2IIterator it(porch); !it.Done(); it.Next()) {
+						if (!coreScript->HasTask(it.Pos())) {
+							taskList.Push(Task::MoveTask(it.Pos(), 0));
+							taskList.Push(Task::UseBuildingTask(0));
+							return true;
+						}
+					}
 				}
 			}
 		}
@@ -1741,12 +1755,16 @@ bool AIComponent::ThinkDelivery( const ComponentSet& thisComp )
 			if ( vault && vault->GetItemComponent() && vault->GetItemComponent()->CanAddToInventory() ) {
 				MapSpatialComponent* msc = GET_SUB_COMPONENT( vault, SpatialComponent, MapSpatialComponent );
 				GLASSERT( msc );
-				if ( msc ) {
-					Vector2I porch = msc->PorchPos( parentChit->ID() );
-
-					taskList.Push( Task::MoveTask( porch, 0 ));
-					taskList.Push( Task::UseBuildingTask( 0 ));
-					return true;
+				CoreScript* coreScript = CoreScript::GetCore(sector);
+				if ( msc && coreScript ) {
+					Rectangle2I porch = msc->PorchPos();
+					for (Rectangle2IIterator it(porch); !it.Done(); it.Next()) {
+						if (!coreScript->HasTask(it.Pos())) {
+							taskList.Push(Task::MoveTask(it.Pos(), 0));
+							taskList.Push(Task::UseBuildingTask(0));
+							return true;
+						}
+					}
 				}
 			}
 		}
@@ -1782,6 +1800,7 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 	double score=0;
 	double needVal=0;
 	const BuildData* bestBD = 0;
+	Vector2I bestPorch = { 0, 0 };
 	CChitArray mobs;
 
 	// Score the buildings as a fit for the needs.
@@ -1800,8 +1819,17 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 
 		MapSpatialComponent* msc = GET_SUB_COMPONENT( chit, SpatialComponent, MapSpatialComponent );
 		GLASSERT( msc );
-		Vector2I porch = msc->PorchPos( chit->ID() );
-		GLASSERT( !porch.IsZero() );
+
+		Vector2I porch = { 0, 0 };
+		Rectangle2I porchRect = msc->PorchPos();
+		for (Rectangle2IIterator it(porchRect); !it.Done(); it.Next()) {
+			if (!coreScript->HasTask(it.Pos())) {
+				porch = it.Pos();
+				break;
+			}
+		}
+		if (porch.IsZero())
+			continue;
 
 		// A building that supplies food MUST have elixir, else it
 		// supplies nothing.
@@ -1852,17 +1880,14 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 			best = i;
 			needVal = nv;
 			bestBD = bd;
+			bestPorch = porch;
 		}
 	}
 
 	if ( best >= 0 && needVal > 0.4 ) {
-		Chit* chit = chitArr[best];
-		MapSpatialComponent* msc = GET_SUB_COMPONENT( chit, SpatialComponent, MapSpatialComponent );
-		GLASSERT( msc );
-		Vector2I porch = msc->PorchPos( thisComp.chit->ID() );
-		GLASSERT( porch.x > 0 );
+		GLASSERT( bestPorch.x > 0 );
 
-		taskList.Push( Task::MoveTask( porch, 0 ));
+		taskList.Push( Task::MoveTask( bestPorch, 0 ));
 		taskList.Push( Task::StandTask( bestBD->standTime ));
 		taskList.Push( Task::UseBuildingTask( 0 ));
 		return true;

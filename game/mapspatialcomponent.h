@@ -52,8 +52,6 @@ public:
 
 	// Returns the porch, or an empty rectangle if there is none.
 	grinliz::Rectangle2I PorchPos() const;
-	// The same, but a single location for a given chitID
-	grinliz::Vector2I PorchPos( int id ) const;
 
 	// internal: used by the LumosChitBag to track buildings.
 	MapSpatialComponent* nextBuilding;

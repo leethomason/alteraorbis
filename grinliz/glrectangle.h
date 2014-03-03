@@ -309,6 +309,28 @@ private:
 };
 
 
+class Rectangle2IIterator
+{
+public:
+	Rectangle2IIterator(const Rectangle2I& r) : rect(r), point(r.min) {}
+
+	void Begin()	{ point = rect.min; }
+	bool Done()		{ return point.y > rect.max.y; }
+	void Next()		{
+		point.x++;
+		if (point.x > rect.max.x) {
+			point.y++;
+			point.x = rect.min.x;
+		}
+	}
+	const Vector2I& Pos() const { return point; }
+
+private:
+	Rectangle2I rect;
+	Vector2I point;
+};
+
+
 struct Rectangle2F : public Rectangle2< float >
 {
 	Rectangle2F() { min.Zero(); max.Zero(); }

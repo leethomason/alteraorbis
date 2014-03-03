@@ -148,31 +148,10 @@ void MapSpatialComponent::Serialize( XStream* xs )
 }
 
 
-Vector2I MapSpatialComponent::PorchPos( int id ) const
-{
-	Rectangle2I r = PorchPos();
-	Vector2I v = { 0, 0 };
-	if ( r.Width() == 0 ) {
-		return v;
-	}
-
-	v.Set(	r.min.x + (r.Width()-1)  * (id & 1),
-			r.min.y + (r.Height()-1) * (id & 1) );
-	return v;
-}
-
-
 Rectangle2I MapSpatialComponent::PorchPos() const
 {
 	Rectangle2I v;
 	v.Set( 0, 0, 0, 0 );
-	int porch = 0;
-
-	//GameItem* item = parentChit->GetItem();
-	//if ( !item ) 
-	//	return v;
-	//if ( item->keyValues.GetInt( "porch", &porch ))
-	//	return v;
 	if ( !hasPorch ) return v;
 
 	// picks up the size, so we only need to 
