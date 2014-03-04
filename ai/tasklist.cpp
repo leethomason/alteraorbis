@@ -163,16 +163,24 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta )
 
 	switch ( task->action ) {
 	case Task::TASK_MOVE:
-		// FIXME: should there be a restart? If move fails, just re-think?
-		if ( pmc->Stopped() ) {
+		if (task->timer == 0) {
+			// Need to start the move.
+			Vector2F dest = { (float)task->pos2i.x + 0.5f, (float)task->pos2i.y + 0.5f };
+			thisComp.ai->Move( dest, false );
+			task->timer = delta;
+		}
+		else if ( pmc->Stopped() ) {
 			if ( pos2i == task->pos2i ) {
 				// arrived!
 				Remove();
 			}
 			else {
-				Vector2F dest = { (float)task->pos2i.x + 0.5f, (float)task->pos2i.y + 0.5f };
-				thisComp.ai->Move( dest, false );
+				// Something went wrong.
+				Clear();
 			}
+		}
+		else {
+			task->timer += delta;	// currently not used, but useful to see if we are taking too long.
 		}
 		break;
 
@@ -295,9 +303,6 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta )
 				 && (itemChit->GetSpatialComponent()->GetPosition2D() - thisComp.spatial->GetPosition2D()).Length() <= PICKUP_RANGE
 				 && itemChit->GetItemComponent()->NumItems() == 1 )	// doesn't have sub-items / intrinsic
 			{
-				if ( chit->GetItem()->IName() == "fruit" ) {
-					int debug=1;
-				}
 				if ( thisComp.itemComponent->CanAddToInventory() ) {
 					ItemComponent* ic = itemChit->GetItemComponent();
 					itemChit->Remove( ic );

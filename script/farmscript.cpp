@@ -5,16 +5,21 @@
 #include "../xegame/rendercomponent.h"
 #include "../xegame/istringconst.h"
 
+#include "../engine/uirendering.h"
+#include "../engine/engine.h"
+
 #include "../grinliz/glrectangle.h"
 
 #include "../game/mapspatialcomponent.h"
 #include "../game/lumoschitbag.h"
 #include "../game/gameitem.h"
+#include "../game/worldmap.h"
 
 #include "../script/plantscript.h"
 #include "../script/itemscript.h"
 
 using namespace grinliz;
+using namespace gamui;
 
 static const int	FARM_SCRIPT_CHECK = 2000;
 static const int	FRUIT_SELF_DESTRUCT = 60*1000;
@@ -42,6 +47,20 @@ void FarmScript::Init()
 }
 
 
+void FarmScript::OnAdd()
+{
+	//const ChitContext* context = scriptContext->chit->GetChitContext();
+	TextureManager* tm = TextureManager::Instance();
+	const Texture* t = tm->GetTexture("farmzone");
+
+	RenderAtom atom((const void*)WorldMap::RENDERSTATE_MAP_TRANSLUCENT,
+		(const void*)t,
+		0, 0, 1, 1 );
+	baseImage.Init(&scriptContext->engine->GetMap()->overlay0, atom, true);
+	baseImage.SetSlice(true);
+}
+
+
 int FarmScript::GrowFruitTime( int stage, int nPlants )
 {
 	int stage2   = (stage+1)*(stage+1);
@@ -54,8 +73,6 @@ void FarmScript::ComputeFarmBound()
 {
 	MapSpatialComponent* msc = GET_SUB_COMPONENT(scriptContext->chit, SpatialComponent, MapSpatialComponent);
 	Vector2I pos2i = msc->MapPosition();
-	farmBounds.min = farmBounds.max = pos2i;
-	farmBounds.Outset(FARM_GROW_RAD);
 
 	// Other farms clip this if they are too close.
 	// 01234567
@@ -64,30 +81,30 @@ void FarmScript::ComputeFarmBound()
 	float rad = float(FARM_GROW_RAD)*2.f + 0.1f;
 	ItemNameFilter filter(IStringConst::farm);
 	CChitArray array;
-	scriptContext->chitBag->QuerySpatialHash(&array, ToWorld2F(pos2i), rad, 0, &filter);
+	scriptContext->chitBag->QuerySpatialHash(&array, ToWorld2F(pos2i), rad, scriptContext->chit, &filter);
 
+	// This bound needs to trim to qBounds. Sort of a tricky
+	// algorithm. Similar to the "block" algorithm. Also, what
+	// happens when the center of one farm is within the center
+	// of another? Don't want dependencies between. Tried 
+	// different approaches, ended up with a symmetric 
+	// "round down" approach.
+
+	int r = FARM_GROW_RAD;
 	for (int i = 0; i < array.Size(); ++i) {
-		// We are only affected by Chits with IDs greater than our own, so
-		// that clipping doesn't affect both chits.
 		Chit* chit = array[i];
-		if (chit->ID() > scriptContext->chit->ID()) {
-			Vector2I q2i = chit->GetSpatialComponent()->GetPosition2DI();
-			Rectangle2I qBounds;
-			qBounds.min = qBounds.max = q2i;
-			qBounds.Outset(FARM_GROW_RAD);
+		Vector2I q2i = chit->GetSpatialComponent()->GetPosition2DI();
 
-			if (farmBounds.Intersect(qBounds)) {
-				if (q2i.x > pos2i.x)
-					farmBounds.max.x = Min(farmBounds.max.x, qBounds.min.x);
-				if (q2i.x < pos2i.x)
-					farmBounds.min.x = Max(farmBounds.min.x, qBounds.max.x);
-				if (q2i.y > pos2i.y)
-					farmBounds.max.y = Min(farmBounds.max.y, qBounds.min.y);
-				if (q2i.y < pos2i.y)
-					farmBounds.min.y = Max(farmBounds.min.y, qBounds.max.y);
-			}
-		}
+		int d = Max(abs(q2i.x - pos2i.x), abs(q2i.y - pos2i.y));
+		// 5->2, 4->1 3->1 2->0
+		r = Min(r, (d - 1)/2);
 	}
+	GLASSERT(r >= 0);
+	farmBounds.min = farmBounds.max = pos2i;
+	farmBounds.Outset(r);
+
+	baseImage.SetSize(float(farmBounds.Width()), float(farmBounds.Height()));
+	baseImage.SetPos(float(farmBounds.min.x), float(farmBounds.min.y));
 }
 
 int FarmScript::DoTick( U32 delta )
@@ -148,7 +165,7 @@ int FarmScript::DoTick( U32 delta )
 	if (rc) {
 		CStr<32> str;
 		//str.Format("%d,%d-%d,%d e=%d", farmBounds.min.x, farmBounds.min.y, farmBounds.max.x, farmBounds.max.y, efficiency);
-		str.Format("A=%d %d%% [%d%%]", farmBounds.Area(), efficiency, fruitGrowth*100/GROWTH_NEEDED);
+		str.Format("Eff=%d%% [%d%%]", efficiency, fruitGrowth*100/GROWTH_NEEDED);
 		rc->SetDecoText(str.c_str());
 	}
 

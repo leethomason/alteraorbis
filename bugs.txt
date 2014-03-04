@@ -45,7 +45,7 @@
 - should be able to browse units in character screen
 - vault needs "sell to market" button
 - building repair
-- area for farms
+x area for farms
 
 - game
 	- Food-2
@@ -53,7 +53,7 @@
 		x simplify food pickup code
 		x overlapping farms
 		x text display for farm
-		t bars should only work at all if they have elixir
+		x bars should only work at all if they have elixir
 		x distillery: 0 fruit should cause 0 progress
 		x Temples attrack / repel monsters
 				lesser			greater
@@ -64,7 +64,7 @@
 		x MOBs get stuck on rampage at ports
 		x need a move timeout?? Or no block? Avoid just makes slower??
 		x good plants can catch fire/shock
-		- more efficient fruit pickup
+		x more efficient fruit pickup
 		x ChitBag::HashIndex() has issues. Throwing away y value, essentially. And SIZE2 is incorrect - should be power of 2.
 		x move all crystal to mobs. runs out too easily.
 		x make greaters herd more??

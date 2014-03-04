@@ -1254,8 +1254,9 @@ void GameScene::Draw3D( U32 deltaTime )
 
 void GameScene::DrawDebugText()
 {
-	static const int x = 200;
-	int y = (int)game->GetScreenport().UIHeight() - 160;
+	static const int x = 0;
+	//int y = (int)game->GetScreenport().UIHeight() - 160;
+	int y = 120;
 	DrawDebugTextDrawCalls( x, y, sim->GetEngine() );
 	y += 16;
 

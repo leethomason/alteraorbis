@@ -18,6 +18,7 @@
 
 #include "scriptcomponent.h"
 #include "../xegame/cticker.h"
+#include "../gamui/gamui.h"
 
 
 class FarmScript : public IScript
@@ -27,7 +28,7 @@ public:
 	virtual ~FarmScript()	{}
 
 	virtual void Init();
-	virtual void OnAdd()		{}
+	virtual void OnAdd();
 	virtual void OnRemove()		{}
 	virtual void Serialize( XStream* xs );
 	virtual int DoTick( U32 delta );
@@ -54,6 +55,8 @@ private:
 	// Not serialized:
 	grinliz::Rectangle2I farmBounds;
 	int	efficiency;
+
+	gamui::Image baseImage;
 };
 
 #endif // PLANT_SCRIPT_INCLUDED

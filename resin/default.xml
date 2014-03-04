@@ -32,6 +32,7 @@
   <!-- new, atlased home of all icons, decos, etc. -->
   <texture filename="icon.png" table="icon.xml" maxSize="512"/>
   <texture filename="uiIcon.png" table="uiIcon.xml" />
+  <texture filename="farmzone.png" />
 
   <!-- Model textures -->
   <texture filename="palette.png" />
