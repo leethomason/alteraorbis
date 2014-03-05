@@ -96,28 +96,32 @@
         porch="1"
         procedural="team"
         mass="50"
-        cost="40" />
+        cost="40"
+        zoneCreate="commercial" />
 
   <item name="kiosk.n"
         resource="kiosk.n"
         porch="1"
         procedural="team"
         mass="50"
-        cost="40" />
+        cost="40"
+        zoneCreate="commercial" />
 
   <item name="kiosk.c"
         resource="kiosk.c"
         porch="1"
         procedural="team"
         mass="50"
-        cost="40" />
+        cost="40"
+        zoneCreate="commercial" />
 
   <item name="kiosk.s"
         resource="kiosk.s"
         porch="1"
         procedural="team"
         mass="50"
-        cost="40" />
+        cost="40"
+        zoneCreate="commercial" />
 
   <item name="vault"
         resource="vault"
@@ -125,7 +129,8 @@
         procedural="team"
         size="2"
         mass="200"
-        cost="100" />
+        cost="100"
+        zoneCreate="industrial" />
 
   <!-- note that the needs has a weird syntax - it
        is part of the AI, not the GameItem, and 
@@ -138,6 +143,7 @@
         size="2"
         mass="120"
         cost="80" 
+        zoneCreate="industrial"
         
 		    need.time="2.0"
         need.fun="0.4"
@@ -149,7 +155,8 @@
         procedural="team"
         size="2"
         mass="100"
-        cost="60" />
+        cost="60"
+        zoneCreate="natural" />
 
   <item name="guardpost"
         resource="guardpost"
@@ -166,6 +173,7 @@
         size="1"
         mass="30"
         cost="25"
+        zoneConsume="natural"
         
 		    need.time="10.0"
         need.energy="1.0"
@@ -178,6 +186,8 @@
         size="2"
         mass="50"
         cost="50"
+        zoneCreate="commercial"
+        zoneConsume="commercial"
         
 		    need.time="1.5"
         need.fun="0.4"
@@ -194,6 +204,8 @@
         size="2"
         mass="50"
         cost="50"
+        zoneCreate="commercial"
+        zoneConsume="commercial"
         
 		    need.time="5.0"
         need.fun="0.2"
@@ -209,6 +221,7 @@
         mass="50"
         cost="40"
         script="FarmScript"
+        zoneCreate="industrial"
         />
   
   <item name="distillery"
@@ -219,6 +232,8 @@
         mass="100"
         cost="80"
         script="DistilleryScript"
+        zoneCreate="industrial"
+        zoneConsume="industrial"
         />
 
   <item name="arachnoid"
