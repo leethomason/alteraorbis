@@ -421,7 +421,7 @@ void ChitBag::QuerySpatialHash(	grinliz::CDynArray<Chit*>* array,
 								const Chit* ignore,
 								IChitAccept* accept )
 {
-	PROFILE_FUNC();
+	//PROFILE_FUNC();
 	GLASSERT( accept );
 	Rectangle2I r;
 	r.Set( (int)rf.min.x, (int)rf.min.y, (int)rf.max.x, (int)rf.max.y );
