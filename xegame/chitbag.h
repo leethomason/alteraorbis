@@ -209,20 +209,13 @@ public:
 private:
 
 	enum {
-		SIZE2 = 1024*64	// 16 bits
+		SIZE = 256,
+		SIZE2 = SIZE*SIZE,
+		SHIFT = 2
 	};
 
 	U32 HashIndex( U32 x, U32 y ) const {
-		//return (y*MAX_MAP_SIZE + x) & (SIZE2-1);
-		//return (x ^ (y<<6)) & (SIZE2-1);				// 16 bit variation
-		
-		//return (y*137 +x ) & (SIZE2-1);					// prime # wins the day.
-
-		// Want x coherency and y spread.
-		// Takes advantage that the world is 1024x1024
-		// HOWEVER: still doesn't address clustering most things are in the center.
-		GLASSERT(MAX_MAP_SIZE == 1024 && SIZE2 == 64 * 1024);
-		return y * 63 + x;
+		return (y >> SHIFT)*SIZE + (x >> SHIFT);
 	}
 
 	int idPool;

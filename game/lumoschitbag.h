@@ -80,18 +80,15 @@ public:
 class ItemNameFilter : public IChitAccept
 {
 public:
-	ItemNameFilter( const char* names[], int n );
-	ItemNameFilter( const grinliz::IString& name );
-	ItemNameFilter( const grinliz::IString* names, int n );
+	ItemNameFilter( const grinliz::IString& name, int type );
+	ItemNameFilter( const grinliz::IString* names, int n, int type );
 
 	virtual bool Accept( Chit* chit );
 	virtual int  Type()		{ return type; } 
-	void SetType( int t )	{ type = t; }
 
 protected:
 	ItemNameFilter();
-	const char**			cNames;
-	const grinliz::IString* iNames;
+	const grinliz::IString* names;
 	int						count;
 	int						type;
 };

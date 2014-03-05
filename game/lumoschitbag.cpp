@@ -476,7 +476,7 @@ Chit* LumosChitBag::NewGoldChit( const grinliz::Vector3F& pos, int amount )
 
 	Vector2F v2 = { pos.x, pos.z };
 
-	ItemNameFilter goldFilter( IStringConst::gold );
+	ItemNameFilter goldFilter( IStringConst::gold, IChitAccept::MOB );
 	this->QuerySpatialHash( &chitList, v2, 1.0f, 0, &goldFilter );
 	Chit* chit = 0;
 	if ( chitList.Size() ) {
@@ -715,37 +715,28 @@ bool ItemFlagFilter::Accept( Chit* chit )
 
 ItemNameFilter::ItemNameFilter()
 {
-	cNames = 0;
-	iNames = 0;
+	names = 0;
 	count  = 0;
 	type = MAP | MOB;
 }
 
 
-ItemNameFilter::ItemNameFilter( const char* arr[], int n )
-{
-	cNames = arr;
-	iNames = 0;
-	count  = n;
-	type = MAP | MOB;
-}
 
-
-ItemNameFilter::ItemNameFilter( const grinliz::IString& istring )
+ItemNameFilter::ItemNameFilter( const grinliz::IString& istring, int t )
 {
-	cNames = 0;
-	iNames = &istring;
+	names = &istring;
 	count  = 1;
-	type = MAP | MOB;
+	type = t;
+	GLASSERT(t == MAP || t == MOB || t == (MAP | MOB));
 }
 
 
-ItemNameFilter::ItemNameFilter( const grinliz::IString* arr, int n )
+ItemNameFilter::ItemNameFilter( const grinliz::IString* arr, int n, int t )
 {
-	cNames = 0;
-	iNames = arr;
+	names = arr;
 	count  = n;
-	type = MAP | MOB;
+	type = t;
+	GLASSERT(t == MAP || t == MOB || t == (MAP | MOB));
 }
 
 
@@ -753,19 +744,10 @@ bool ItemNameFilter::Accept( Chit* chit )
 {
 	const GameItem* item = chit->GetItem();
 	if ( item ) {
-		if ( cNames ) {
-			const char* key = item->Name();
-			for( int i=0; i<count; ++i ) {
-				if ( StrEqual( cNames[i], key ))
-					return true;
-			}
-		}
-		else if ( iNames ) {
-			const IString& key = item->IName();
-			for( int i=0; i<count; ++i ) {
-				if ( key == iNames[i] )
-					return true;
-			}
+		const IString& key = item->IName();
+		for( int i=0; i<count; ++i ) {
+			if ( key == names[i] )
+				return true;
 		}
 	}
 	return false;
@@ -779,8 +761,9 @@ GoldCrystalFilter::GoldCrystalFilter()
 	arr[2] = IStringConst::crystal_red;
 	arr[3] = IStringConst::crystal_blue;
 	arr[4] = IStringConst::crystal_violet;
-	iNames = arr;
+	names = arr;
 	count = 5;
+	type = MOB;
 }
 
 

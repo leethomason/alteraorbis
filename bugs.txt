@@ -1019,3 +1019,7 @@ inner tick: 25
 
 do tick ui (title, debug) 6ms
 switched over to the new Gamui callbacks, caching render buffer. now down to 850us - 1ms. Wow.
+
+AIComponent::QuerySpatialHash 10ms (spatial hash) Debug mode.
+Switch back to simple lookup: 2-3 ms (yay!!)
+

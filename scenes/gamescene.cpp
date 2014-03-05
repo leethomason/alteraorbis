@@ -858,8 +858,13 @@ void GameScene::HandleHotKey( int mask )
 	}
 	else if ( mask == GAME_HK_TOGGLE_COLORS ) {
 		static int colorSeed = 0;
-		static const char* NAMES[4] = { "kiosk.m", "kiosk.n", "kiosk.c", "kiosk.s" };
-		ItemNameFilter filter( NAMES, 4 );
+		const IString NAMES[4] = { 
+			IStringConst::kiosk__m, 
+			IStringConst::kiosk__n, 
+			IStringConst::kiosk__c, 
+			IStringConst::kiosk__s 
+		};
+		ItemNameFilter filter( NAMES, 4, IChitAccept::MAP );
 		Vector3F at;
 		sim->GetEngine()->CameraLookingAt( &at );
 		Vector2F at2 = { at.x, at.z };
@@ -1163,7 +1168,7 @@ void GameScene::DoTick( U32 delta )
 				(float)((homeSector.x+1)*SECTOR_SIZE-1), (float)((homeSector.y+1)*SECTOR_SIZE-1) );
 
 		CChitArray arr;
-		ItemNameFilter workerFilter( IStringConst::worker );
+		ItemNameFilter workerFilter( IStringConst::worker, IChitAccept::MOB );
 
 		static const int MAX_BOTS = 4;
 		sim->GetChitBag()->QuerySpatialHash( &arr, b, 0, &workerFilter );
