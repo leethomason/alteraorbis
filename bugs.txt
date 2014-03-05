@@ -69,6 +69,7 @@ x area for farms
 		x move all crystal to mobs. runs out too easily.
 		x make greaters herd more??
 		- improve wiki on plants
+		- rampage targets not matching up. different bits getting used in worldgen vs. game??
 
 	- Zoning
 		- industrial, commercial, natural-spiritual

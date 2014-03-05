@@ -567,7 +567,7 @@ bool TaskList::UseFactory( const ComponentSet& thisComp, Chit* factory, int tech
 	int itemType = 0;
 	int subType = 0;
 	int parts = 1;		// always have body.
-	int effects = GameItem::EFFECT_MASK;
+	int effects = GameItem::EFFECT_MASK & (~GameItem::EFFECT_EXPLOSIVE);	// don't manufacture explosive weapons.
 	Random& random = thisComp.chit->random;
 
 	int partsArr[]   = { WeaponGen::GUN_CELL, WeaponGen::GUN_DRIVER, WeaponGen::GUN_SCOPE };

@@ -57,7 +57,7 @@ const char* ForgeScript::ItemPart( int item, int part )
 const char* ForgeScript::Effect( int effect )
 {
 	GLASSERT( effect >= 0 && effect <NUM_EFFECTS );
-	static const char* name[NUM_EFFECTS] = { "Fire", "Shock", "Explosive" };
+	static const char* name[NUM_EFFECTS] = { "Fire", "Shock", /*"Explosive"*/ };
 	return name[effect];
 }
 
@@ -148,6 +148,10 @@ void ForgeScript::Build(	int type,			// GUN
 	}
 	else if ( type == ForgeScript::SHIELD ) {
 		typeName = "shield";
+	}
+
+	for (int i = 0; i < GameTrait::NUM_TRAITS; ++i) {
+		roll[i] = Clamp(roll[i], 1, 20);
 	}
 
 	if ( item ) {

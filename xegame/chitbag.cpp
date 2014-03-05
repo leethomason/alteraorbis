@@ -437,8 +437,6 @@ void ChitBag::QuerySpatialHash(	grinliz::CDynArray<Chit*>* array,
 			U32 i1 = r.max.x >> SHIFT;
 			U32 j1 = r.max.y >> SHIFT;
 
-			U32 ni = i1 - i0 + 1;
-
 			for (U32 j = j0; j <= j1; ++j) {
 				for (U32 i = i0; i <= i1; ++i) {
 					U32 index = j*SIZE + i;
