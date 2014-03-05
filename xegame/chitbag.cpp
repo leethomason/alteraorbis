@@ -154,7 +154,9 @@ void ChitBag::DeleteChit( Chit* chit )
 Chit* ChitBag::GetChit( int id )
 {
 	Chit* c = 0;
-	chitID.Query( id, &c );
+	if (id) {
+		chitID.Query(id, &c);
+	}
 	return c;
 }
 

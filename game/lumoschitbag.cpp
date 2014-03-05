@@ -797,8 +797,8 @@ bool BuildingFilter::Accept( Chit* chit )
 
 bool MOBFilter::Accept( Chit* chit )
 {
-	return    chit->GetItem() 
-		   && !chit->GetItem()->keyValues.GetIString( "mob" ).empty();
+	GameItem* item = chit->GetItem();
+	return item && !item->keyValues.GetIString( IStringConst::mob ).empty();
 }
 
 
