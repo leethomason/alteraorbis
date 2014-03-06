@@ -13,6 +13,9 @@
 #include "../game/gamelimits.h"
 #include "../engine/ufoutil.h"
 
+#include "../game/worldinfo.h"
+#include "../game/worldgrid.h"
+
 using namespace grinliz;
 
 static const float BASE0 = 8.f;
@@ -740,18 +743,18 @@ void WorldGen::PlaceFeature( int feature, const grinliz::Vector2I& sector, int r
 void WorldGen::CalcPath( const SectorData* s )
 {
 	Rectangle2I bounds = s->InnerBounds();
-	static const Vector2I d[4] = { {1,0}, {0,1}, {-1,0}, {0,-1} };
+	static const Vector2I DIR[4] = { {1,0}, {0,1}, {-1,0}, {0,-1} };
 
-	for( int i=0; i<5; ++i ) {
+	for (int i = 0; i<WorldGrid::NUM_DEST; ++i) {
 		Vector2I origin = s->core;
-		if ( i > 0 ) {
-			if ( s->ports & (1<<i)) {
-				origin = s->GetPortLoc( 1<<i ).Center();
-			}
-			else {
-				// no port.
-				continue;
-			}
+
+		switch (i) {
+		case WorldGrid::PS_CORE:	/* nothing. already set.*/	break;
+		case WorldGrid::PS_NEG_X:	s->GetPortLoc(SectorData::NEG_X).Center();	break;
+		case WorldGrid::PS_POS_X:	s->GetPortLoc(SectorData::POS_X).Center();	break;
+		case WorldGrid::PS_NEG_Y:	s->GetPortLoc(SectorData::NEG_Y).Center();	break;
+		case WorldGrid::PS_POS_Y:	s->GetPortLoc(SectorData::POS_Y).Center();	break;
+		default: GLASSERT(0);
 		}
 		Color( bounds, origin );
 
@@ -770,7 +773,7 @@ void WorldGen::CalcPath( const SectorData* s )
 					}
 					else {
 						for( int k=0; k<4; ++k ) {
-							Vector2I loc = v + d[k];
+							Vector2I loc = v + DIR[k];
 							if ( bounds.Contains( loc ) ) {
 								int d = color[INDEX(v)] - color[INDEX(loc)];
 								if ( d == 1 ) {

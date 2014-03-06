@@ -232,7 +232,9 @@ public:
 
 	void SetPath( int pathData )	{ path = pathData; }
 
-	enum { CORE, PORT_POS_X, PORT_POS_Y, PORT_NEG_X, PORT_NEG_Y, NUM_DEST };
+	// See SectorData for order.
+	enum { PS_CORE, PS_NEG_X, PS_POS_X, PS_NEG_Y, PS_POS_Y, NUM_DEST };
+
 	const grinliz::Vector2I& Path( int dest ) const {
 		static const grinliz::Vector2I DIR[4] = {
 			{1,0}, {0,1}, {-1,0}, {0,-1}

@@ -40,10 +40,10 @@ public:
 	void Serialize( XStream* xs );
 
 	enum { 
-		NEG_X	=1, 
-		POS_X	=2, 
-		NEG_Y	=4,		
-		POS_Y	=8 
+		NEG_X	= 1, 
+		POS_X	= 2, 
+		NEG_Y	= 4,		
+		POS_Y	= 8 
 	};
 	int							x, y;		// grid position (not sector position)
 	int							ports;		// if attached to the grid, has ports. 

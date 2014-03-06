@@ -69,6 +69,9 @@ x area for farms
 		x move all crystal to mobs. runs out too easily.
 		x make greaters herd more??
 		- improve wiki on plants
+		- rampage broken
+		- sector herd broken
+		- add zoning?
 
 	- Zoning
 		- industrial, commercial, natural-spiritual

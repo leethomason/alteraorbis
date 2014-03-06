@@ -900,11 +900,11 @@ bool AIComponent::RampageDone(const ComponentSet& thisComp)
 	Rectangle2I dest;
 
 	switch (rampageTarget) {
-	case WorldGrid::CORE:		dest.min = dest.max = sd.core;				break;
-	case WorldGrid::PORT_POS_X:	dest = sd.GetPortLoc(SectorData::POS_X);	break;
-	case WorldGrid::PORT_POS_Y:	dest = sd.GetPortLoc(SectorData::POS_Y);	break;
-	case WorldGrid::PORT_NEG_X:	dest = sd.GetPortLoc(SectorData::NEG_X);	break;
-	case WorldGrid::PORT_NEG_Y:	dest = sd.GetPortLoc(SectorData::NEG_Y);	break;
+	case WorldGrid::PS_CORE:	dest.min = dest.max = sd.core;				break;
+	case WorldGrid::PS_POS_X:	dest = sd.GetPortLoc(SectorData::POS_X);	break;
+	case WorldGrid::PS_POS_Y:	dest = sd.GetPortLoc(SectorData::POS_Y);	break;
+	case WorldGrid::PS_NEG_X:	dest = sd.GetPortLoc(SectorData::NEG_X);	break;
+	case WorldGrid::PS_NEG_Y:	dest = sd.GetPortLoc(SectorData::NEG_Y);	break;
 	default: GLASSERT(0);	break;
 	}
 
