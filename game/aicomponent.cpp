@@ -1655,8 +1655,8 @@ bool AIComponent::ThinkFruitCollect( const ComponentSet& thisComp )
 					else {
 						taskList.Push(Task::MoveTask(fruitPos, 0));
 						taskList.Push(Task::PickupTask(fruit->ID(), 0));
+						return true;
 					}
-					return true;
 				}
 			}
 		}

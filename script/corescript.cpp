@@ -30,7 +30,7 @@ static const double TECH_DECAY_1 = 0.00040;
 
 using namespace grinliz;
 
-#define SPAWN_MOBS
+//#define SPAWN_MOBS
 
 CoreInfo CoreScript::coreInfoArr[NUM_SECTORS*NUM_SECTORS];
 

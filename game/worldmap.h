@@ -126,6 +126,7 @@ public:
 		int i = INDEX(x,y);
 		return grid[i].IsLand(); 
 	}
+	int ContainsWaterfall(const grinliz::Rectangle2I& b) const;
 	
 	// Call the pather; return true if successful.
 	bool CalcPath(	const grinliz::Vector2F& start, 

@@ -899,6 +899,12 @@ void GameScene::HandleHotKey( int mask )
 			cs->ParentChit()->GetItem()->wallet.AddGold( GOLD );
 		}
 	}
+	else if (mask == GAME_HK_CHEAT_ELIXIR) {
+		CoreScript* cs = sim->GetChitBag()->GetHomeCore();
+		if (cs) {
+			cs->nElixir += 20;
+		}
+	}
 	else if ( mask == GAME_HK_CHEAT_CRYSTAL ) {
 		CoreScript* cs = sim->GetChitBag()->GetHomeCore();
 		if ( cs ) {

@@ -290,7 +290,8 @@ int main( int argc, char **argv )
 					case SDLK_a:	GameHotKey( game, GAME_HK_TOGGLE_PATHING );	break;
 					case SDLK_b:	GameHotKey( game, GAME_HK_CHEAT_GOLD );		break;
 					case SDLK_c:	GameHotKey( game, GAME_HK_TOGGLE_COLORS );	break;
-					case SDLK_d:	GameHotKey( game, GAME_HK_TOGGLE_DEBUG_TEXT );	break;
+					case SDLK_d:	GameHotKey(game, GAME_HK_TOGGLE_DEBUG_TEXT);	break;
+					case SDLK_e:	GameHotKey(game, GAME_HK_CHEAT_ELIXIR);	break;
 					case SDLK_f:	GameHotKey( game, GAME_HK_TOGGLE_FAST );	break;
 					case SDLK_i:	GameHotKey( game, GAME_HK_TOGGLE_DEBUG_UI );		break;
 					case SDLK_k:	GameHotKey( game, GAME_HK_CHEAT_CRYSTAL );	break;

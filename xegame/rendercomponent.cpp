@@ -361,6 +361,11 @@ int RenderComponent::DoTick( U32 deltaTime )
 		groundMark->SetPos( pos );
 	}
 
+	// fixme: hack. should track.
+	if (!icons.Empty()) {
+		tick = 0;
+	}
+
 	ProcessIcons( (int) deltaTime );
 	return tick;
 }
@@ -388,6 +393,7 @@ void RenderComponent::AddDeco( const char* asset, int duration )
 		icon->time = duration;
 		icon->rotation = 90.0f;
 	}
+	parentChit->SetTickNeeded();	// fixme: the whole ui problem...will be off if scrolls
 }
 
 
@@ -408,7 +414,13 @@ void RenderComponent::RemoveDeco( const char* asset )
 
 void RenderComponent::ProcessIcons( int delta )
 {
-	for( int i=0; i<icons.Size(); ++i ) {
+	// This gets bit by the "delta huge" bug, since the icon
+	// can turn on long-dormant rendering.
+	if (delta > MAX_FRAME_TIME) {
+		delta = MAX_FRAME_TIME;
+	}
+
+	for (int i = 0; i<icons.Size(); ++i) {
 		icons[i].time -= delta;
 		icons[i].rotation -= Travel( 180.0f, float(delta)/1000.0f );
 

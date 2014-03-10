@@ -25,6 +25,7 @@
 #include "../script/buildscript.h"
 #include "../script/forgescript.h"
 #include "../script/procedural.h"
+#include "../script/plantscript.h"
 
 #include "../engine/particle.h"
 
@@ -385,6 +386,142 @@ void TaskList::SocialPulse( const ComponentSet& thisComp, const Vector2F& origin
 }
 
 
+double TaskList::GetBuildingSystem(Chit* building, bool create)
+{
+	GameItem* item = building->GetItem();
+	if (item) {
+		IString istr;
+		if (create) {
+			istr = item->keyValues.GetIString(IStringConst::zoneCreate);
+		}
+		else {
+			istr = item->keyValues.GetIString(IStringConst::zoneConsume);
+		}
+		if (istr == IStringConst::industrial)
+			return 1;
+		if (istr == IStringConst::natural)
+			return -1;
+
+		// For now, only one axis: natural(-1) to industrial(1)
+		// Commercial is anywhere.
+		//		if (istr == IStringConst::commercial)
+		//			return 0.1;
+	}
+	return 0;
+}
+
+double TaskList::EvalBuilding(Chit* building)
+{
+	GameItem* item = building->GetItem();
+	GLASSERT(item);
+
+	IString consume = item->keyValues.GetIString("zoneConsume");
+	if (consume.empty()) {
+		return 1.0;	// if the building doesn't consume an environment, then always full efficiency.
+	}
+	MapSpatialComponent* msc = GET_SUB_COMPONENT(building, SpatialComponent, MapSpatialComponent);
+	GLASSERT(msc);
+	if (!msc) {
+		return 1.0;
+	}
+	Rectangle2I porch = msc->PorchPos();
+
+	static const int RAD = 4;
+
+	Rectangle2I bounds = porch;
+	bounds.Outset(RAD);
+
+	Rectangle2I mapBounds = worldMap->Bounds();
+	if (!mapBounds.Contains(bounds)) {
+		return 1.0;	// not worth dealing with edge of world
+	}
+	CChitArray arr;
+	BuildingFilter buildingFilter;
+	PlantFilter plantFilter;
+	int hasWaterfalls = worldMap->ContainsWaterfall(bounds);
+
+	int count = 0;
+	double scale = 0;
+
+	LumosChitBag* chitBag = building->GetLumosChitBag();
+	Rectangle2IEdgeIterator it(bounds);
+
+	while (!it.Done()) {
+		++count;
+		double s = 0;
+
+		Vector2I pos = { it.Pos().x >= porch.max.x ? porch.max.x : porch.min.x,
+						 it.Pos().y >= porch.max.y ? porch.max.y : porch.min.y };
+
+		LineWalk walk(pos.x, pos.y, it.Pos().x, it.Pos().y);
+		walk.Step();	// ignore where we are standing.
+
+		while (walk.CurrentStep() <= walk.NumSteps()) {	// non-intuitive iterator. See linewalk docs.
+			// - building
+			// - plant
+			// - ice
+			// - rock
+			// - waterfall
+			// - water
+			
+			// Buildings. Can be 2x2. Extend out beyond current check.
+			bool hitBuilding = false;
+			Vector2I p = walk.P();
+			chitBag->QuerySpatialHash(&arr, ToWorld2F(p), 0.8f, 0, &buildingFilter);
+			for (int i = 0; i < arr.Size(); ++i) {
+				MapSpatialComponent* buildingMSC = GET_SUB_COMPONENT(arr[i], SpatialComponent, MapSpatialComponent);
+				GLASSERT(buildingMSC);
+				if (buildingMSC->Bounds().Contains(p)) {
+					hitBuilding = true;
+					s += GetBuildingSystem(arr[i], true);
+					break;
+				}
+			}
+			if (hitBuilding) break;
+
+			chitBag->QuerySpatialHash(&arr, ToWorld2F(p), 0.1f, 0, &plantFilter);
+			if (arr.Size()) {
+				int type = 0, stage = 0;
+				PlantScript::IsPlant(arr[0], &type, &stage);
+				s -= double(stage + 1) / double(PlantScript::NUM_STAGE);
+				if (stage >= 2) break;
+			}
+
+			const WorldGrid& wg = worldMap->GetWorldGrid(p.x,p.y);
+			if (wg.RockHeight()) {
+				if (wg.RockType() == WorldGrid::ROCK) {
+					s -= 0.1;
+				}
+				break;
+			}
+			if (wg.IsWater()) {
+				s -= 1.0;	// / double(RAD);
+				break;
+			}
+
+			Rectangle2I wb;
+			wb.min = wb.max = p;
+			if ( hasWaterfalls && worldMap->ContainsWaterfall(wb)) {
+				s -= 10.0;
+				break;
+			}
+			walk.Step();
+		}
+		scale += Clamp(s, -1.0, 1.0);
+
+		// double move - don't need that much accuracy
+		it.Next();
+		it.Next();
+	}
+	GLOUTPUT(("Building %s at %d,%d eval=%.2f scale=%.2f count=%d\n",
+		building->GetItem()->Name(),
+		porch.min.x, porch.min.y,
+		scale / double(count),
+		scale, count));
+	return scale / double(count);
+}
+
+
 void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const grinliz::IString& buildingName )
 {
 	LumosChitBag* chitBag	= thisComp.chit->GetLumosChitBag();
@@ -427,7 +564,7 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 		ai::Needs supply = bd->needs;
 
 		// Food based buildings don't work if there is no elixir.
-		if ( supply.Value(Needs::FOOD) && coreScript->nElixir == 1 ) {
+		if ( supply.Value(Needs::FOOD) && coreScript->nElixir == 0 ) {
 			supply.SetZero();
 		}
 
@@ -455,9 +592,27 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 		// Social attracts, but is never applied. (That' is what the SocialPulse is for.)
 		supply.Set(Needs::SOCIAL, 0);
 
-		thisComp.ai->GetNeedsMutable()->Add( supply, 1.0 );
+		double scale = 1.0;
+		double industry = GetBuildingSystem(building, false);
+		if (industry) {
+			double score = EvalBuilding(building);
+			double dot = score * industry; 
+			scale = 0.5 + 0.5 * dot;
 
-		float heal = float( supply.Value( Needs::ENERGY ) + supply.Value( Needs::FOOD ));
+			RenderComponent* rc = building->GetRenderComponent();
+			if (rc) {
+				static const double STEP = 0.2;
+				if (scale < STEP)			rc->AddDeco("minusminus", STD_DECO);
+				else if (scale < STEP*2.0)	rc->AddDeco("minus", STD_DECO);
+				else if (scale < STEP*3.0)	rc->AddDeco("neutral", STD_DECO);
+				else if (scale < STEP*4.0)	rc->AddDeco("plus", STD_DECO);
+				else						rc->AddDeco("plusplus", STD_DECO);
+			}
+		}
+
+		thisComp.ai->GetNeedsMutable()->Add( supply, scale );
+
+		float heal = float(supply.Value(Needs::ENERGY) + supply.Value(Needs::FOOD)) * float(scale);
 		heal = Clamp( heal, 0.f, 1.f );
 
 		thisComp.item->hp += thisComp.item->TotalHPF() * heal;

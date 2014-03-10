@@ -72,6 +72,8 @@ x area for farms
 		- rampage broken
 		- sector herd broken
 		- add zoning?
+		x too much waiting on fruit pickup?
+		- MOB filter: review where should be battle filter, etc. meaning changed.
 
 	- Zoning
 		- industrial, commercial, natural-spiritual

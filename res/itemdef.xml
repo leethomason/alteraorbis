@@ -130,7 +130,8 @@
         size="2"
         mass="200"
         cost="100"
-        zoneCreate="industrial" />
+        zoneCreate="industrial"
+        zoneConsume="industrial" />
 
   <!-- note that the needs has a weird syntax - it
        is part of the AI, not the GameItem, and 
@@ -144,6 +145,7 @@
         mass="120"
         cost="80" 
         zoneCreate="industrial"
+        zoneConsume="industrial"
         
 		    need.time="2.0"
         need.fun="0.4"

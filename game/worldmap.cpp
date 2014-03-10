@@ -460,110 +460,6 @@ void WorldMap::PushQuad( int layer, int x, int y, int w, int h, CDynArray<PTVert
 }
 
 
-#if 0
-// Wow: Tessallate: land:87720,131580 water:73236,109854
-// Filtering:
-// Tessallate:      land:76504,114756 water:60944, 91416
-// Growing v/h:
-// Tessallate:		land:46448, 69672 water:39296, 58944
-// NCORES 100->60
-// Tessallate:		land:41056, 61584 water:34464, 51696
-// Still 2/3 the limit. But seems reasonably stable.
-//
-void WorldMap::Tessellate()
-{
-	CDynArray<PTVertex>*	vertex[WorldGrid::NUM_LAYERS];
-	CDynArray<U16>*			index[WorldGrid::NUM_LAYERS];
-	for( int i=0; i<WorldGrid::NUM_LAYERS; ++i ) {
-		vertex[i] = new CDynArray<PTVertex>();
-		index[i]  = new CDynArray<U16>();
-	}
-
-	BitArray<MAX_MAP_SIZE, MAX_MAP_SIZE, 1 >* setmap = new BitArray<MAX_MAP_SIZE, MAX_MAP_SIZE, 1>();
-	Rectangle2I r, r0, r1;
-
-	for( int j=0; j<height; ++j ) {
-		for( int i=0; i<width; ++i ) {
-			if ( !setmap->IsSet( i, j ) ) {
-				int x = i;	int y = j; int w = 1; int h = 1;
-				int layer = grid[INDEX(i,j)].Layer();
-
-				// Try to grow square.
-				while( x+w < width && y+h < height ) {
-					r0.Set( x+w, y, x+w, y+h );
-					r1.Set( x, y+h, x+w, y+h );
-
-					if ( Similar( r0, layer, *setmap ) && Similar( r1, layer, *setmap ) ) {
-						++w;
-						++h;
-					}
-					else {
-						break;
-					}
-				}
-				// Grow to the right.
-				while( x+w < width ) {
-					r0.Set( x+w, y, x+w, y+h-1 );
-					if ( Similar( r0, layer, *setmap ) ) {
-						++w;
-					}
-					else {
-						break;
-					}
-				}
-				// Grow down.
-				while( y+h < height ) {
-					r0.Set( x, y+h, x+w-1, y+h );
-					if ( Similar( r0, layer, *setmap ) ) {
-						++h;
-					}
-					else {
-						break;
-					}
-				}
-				r.Set( x, y, x+w-1, y+h-1 );
-				setmap->SetRect( r );
-				PushQuad( layer, x, y, w, h, vertex[layer], index[layer] ); 
-			}
-		}
-	}
-	delete setmap;
-
-	FreeVBOs();
-
-	GLOUTPUT(( "Tessallate: land:%d,%d water:%d,%d\n", vertex[WorldGrid::LAND]->Size(),  index[WorldGrid::LAND]->Size(),
-													   vertex[WorldGrid::WATER]->Size(), index[WorldGrid::WATER]->Size() ));
-	for( int i=0; i<WorldGrid::NUM_LAYERS; ++i ) {
-		vertexVBO[i] = new GPUVertexBuffer( vertex[i]->Mem(), sizeof(PTVertex)*vertex[i]->Size() );
-		indexVBO[i]  = new GPUIndexBuffer(  index[i]->Mem(), index[i]->Size() );
-		nIndex[i] = index[i]->Size();
-		delete vertex[i];
-		delete index[i];
-	}
-}
-#endif
-
-
-/*
-Vector2I WorldMap::FindEmbark()
-{
-	Random random;
-	random.SetSeedFromTime();
-
-	const SectorData* s = 0;
-	while( !s ) {
-		s = worldInfo->SectorDataMem() + random.Rand(NUM_SECTORS*NUM_SECTORS);
-		if ( !s->HasCore() ) {
-			s = 0;
-		}
-	}
-
-	Vector2I v = s->core;
-	v.x += 2;
-	v.y += 2;
-	return v;
-}
-*/
 
 void WorldMap::ProcessZone( ChitBag* cb )
 {
@@ -705,6 +601,17 @@ void WorldMap::ProcessZone( ChitBag* cb )
 			}
 		}
 	}
+}
+
+
+int WorldMap::ContainsWaterfall(const grinliz::Rectangle2I& b) const
+{
+	int n = 0;
+	for (int i = 0; i < waterfalls.Size(); ++i) {
+		if (b.Contains(waterfalls[i]))
+			++n;
+	}
+	return n;
 }
 
 

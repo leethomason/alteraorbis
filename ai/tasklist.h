@@ -101,8 +101,8 @@ public:
 };
 
 
-// A TaskList is a set of Tasks to do one thing. (Visit a Vault, for example.)
-// The WorkQueue is a list of all the TaskLists to do.
+// A TaskList is a set of Tasks to do one thing. (Use a Vault, for example.)
+// The WorkQueue is a list of all the TaskLists to do. (1. Move, 2. Stand, 3. Use Vault
 class TaskList
 {
 public:
@@ -131,6 +131,14 @@ public:
 
 private:
 	void UseBuilding( const ComponentSet& thisComp, Chit* building, const grinliz::IString& buildingName );
+
+	// Original proposal, may bring back:
+	// enum { COMMERCIAL, INDUSTRIAL, NATURAL, NUM_SYSTEMS };
+	// However, in the interest of KISS, go with natural vs. industrial system.
+	// Industrial scale: -1 natuarl, +1 industrial
+	double GetBuildingSystem(Chit* building, bool creates );
+	double EvalBuilding(Chit* building);
+
 	void GoShopping(  const ComponentSet& thisComp, Chit* market );
 	bool UseFactory(  const ComponentSet& thisComp, Chit* factory, int tech );
 	bool DoStanding( const ComponentSet& thisComp, int time );
@@ -141,10 +149,10 @@ private:
 	// Remove the 1st task.
 	void Remove();
 
-	WorldMap*	worldMap;
-	Engine*		engine;
-	grinliz::IString lastBuildingUsed;	// should probably be serialized, if this was serialized.
-	CTicker socialTicker;
+	WorldMap*			worldMap;
+	Engine*				engine;
+	grinliz::IString	lastBuildingUsed;	// should probably be serialized, if TaskList was serialized.
+	CTicker				socialTicker;
 	grinliz::CDynArray<Task> taskList;
 };
 

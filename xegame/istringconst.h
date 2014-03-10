@@ -64,6 +64,12 @@ public:
 	static grinliz::IString farm;
 	static grinliz::IString distillery;
 
+	static grinliz::IString zoneCreate;
+	static grinliz::IString zoneConsume;
+	static grinliz::IString industrial;
+	static grinliz::IString natural;
+	static grinliz::IString commercial;
+
 	static grinliz::IString arachnoid;
 	static grinliz::IString mantis;
 	static grinliz::IString redMantis;
