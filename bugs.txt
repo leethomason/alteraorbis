@@ -68,12 +68,13 @@ x area for farms
 		x ChitBag::HashIndex() has issues. Throwing away y value, essentially. And SIZE2 is incorrect - should be power of 2.
 		x move all crystal to mobs. runs out too easily.
 		x make greaters herd more??
-		- improve wiki on plants
+		x improve wiki on plants
 		- rampage broken
 		- sector herd broken
 		- add zoning?
 		x too much waiting on fruit pickup?
 		- MOB filter: review where should be battle filter, etc. meaning changed.
+		- rampage targets not matching up. different bits getting used in worldgen vs. game??
 
 	- Zoning
 		- industrial, commercial, natural-spiritual
@@ -1024,3 +1025,7 @@ inner tick: 25
 
 do tick ui (title, debug) 6ms
 switched over to the new Gamui callbacks, caching render buffer. now down to 850us - 1ms. Wow.
+
+AIComponent::QuerySpatialHash 10ms (spatial hash) Debug mode.
+Switch back to simple lookup: 2-3 ms (yay!!)
+

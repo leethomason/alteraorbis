@@ -28,7 +28,7 @@ BuildData BuildScript::buildData[NUM_OPTIONS] = {
 	// Defense
 	{	"GuardPost","guardpost",3, 0, 0 },
 	// Industry
-	{	"Farm",		"farm",		4, 0, 0 },
+	{	"Solar Farm","farm",		4, 0, 0 },
 	{	"Distillery","distillery",4, 0, 0 },
 };
 

@@ -1489,7 +1489,7 @@ bool AIComponent::ThinkGuard( const ComponentSet& thisComp )
 
 	if ( !coreScript ) return false;
 
-	ItemNameFilter filter( IStringConst::guardpost );
+	ItemNameFilter filter(IStringConst::guardpost, IChitAccept::MAP);
 	GetLumosChitBag()->FindBuilding( IString(), sector, 0, 0, &chitArr, &filter );
 
 	if ( chitArr.Empty() ) return false;
@@ -1562,9 +1562,7 @@ Chit* AIComponent::FindFruit( const Vector2F& pos2, Vector2F* dest )
 	const ChitContext* context = this->GetChitContext();
 	LumosChitBag* chitBag = this->GetLumosChitBag();
 
-	IString arr[1] = { IStringConst::fruit };
-	ItemNameFilter filter( arr, 1 );
-	filter.SetType( IChitAccept::MOB );
+	ItemNameFilter filter(IStringConst::fruit, IChitAccept::MOB);
 
 	// Check local. For local, use direct path.
 	CChitArray chitArr;
@@ -2431,10 +2429,7 @@ void AIComponent::EnterNewGrid( const ComponentSet& thisComp )
 			LumosChitBag* chitBag = this->GetLumosChitBag();
 
 			// For now, just tombstones.
-			IString names[1] = {
-				IStringConst::tombstone
-			};
-			ItemNameFilter filter( names, 3 );
+			ItemNameFilter filter(IStringConst::tombstone, IChitAccept::MOB);
 			chitBag->QuerySpatialHash( &arr, center, 1.1f, parentChit, &filter );
 			for( int i=0; i<arr.Size(); ++i ) {
 				Chit* chit = arr[i];

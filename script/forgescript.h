@@ -37,7 +37,7 @@ public:
 	enum {
 		EFFECT_FIRE,
 		EFFECT_SHOCK,
-		EFFECT_EXPLOSIVE,
+//		EFFECT_EXPLOSIVE,
 		NUM_EFFECTS
 	};
 

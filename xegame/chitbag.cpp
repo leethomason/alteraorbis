@@ -320,57 +320,6 @@ void ChitBag::HandleBolt( const Bolt& bolt, const ModelVoxel& mv )
 }
 
 
-void ChitBag::AddToSpatialHash( Chit* chit, int x, int y )
-{
-	GLASSERT( chit );
-	GLASSERT( chit->GetSpatialComponent() );
-
-	bool isMap = ( chit->GetSpatialComponent()->ToMapSpatialComponent() != 0 );
-	U32 index = HashIndex( x, y );
-	Chit** spatialHash = isMap ? mapSpatialHash : mobSpatialHash;
-
-	chit->next = spatialHash[index];
-	spatialHash[index] = chit;
-}
-
-
-void ChitBag::RemoveFromSpatialHash( Chit* chit, int x, int y )
-{
-	GLASSERT( chit );
-	GLASSERT( chit->GetSpatialComponent() );
-
-	bool isMap = ( chit->GetSpatialComponent()->ToMapSpatialComponent() != 0 );
-	U32 index = HashIndex( x, y );
-	Chit** spatialHash = isMap ? mapSpatialHash : mobSpatialHash;
-
-	Chit* prev = 0;
-	for( Chit* it=spatialHash[index]; it; prev=it, it=it->next ) {
-		if ( it == chit ) {
-			if ( prev ) {
-				prev->next = it->next;
-				it->next = 0;
-				return;
-			}
-			else {
-				spatialHash[index] = it->next;
-				it->next = 0;
-				return;
-			}
-		}
-	}
-	GLASSERT( 0 );
-}
-
-
-void ChitBag::UpdateSpatialHash( Chit* c, int x0, int y0, int x1, int y1 )
-{
-	if ( x0 != x1 || y0 != y1 ) {
-		RemoveFromSpatialHash( c, x0, y0 );
-		AddToSpatialHash( c, x1, y1 );
-	}
-}
-
-
 bool ChitHasMoveComponent::Accept( Chit* chit )
 {
 	return chit->GetMoveComponent() != 0;
@@ -416,12 +365,63 @@ int MultiFilter::Type()
 }
 
 
+void ChitBag::AddToSpatialHash(Chit* chit, int x, int y)
+{
+	GLASSERT(chit);
+	GLASSERT(chit->GetSpatialComponent());
+
+	bool isMap = (chit->GetSpatialComponent()->ToMapSpatialComponent() != 0);
+	U32 index = HashIndex(x, y);
+	Chit** spatialHash = isMap ? mapSpatialHash : mobSpatialHash;
+
+	chit->next = spatialHash[index];
+	spatialHash[index] = chit;
+}
+
+
+void ChitBag::RemoveFromSpatialHash(Chit* chit, int x, int y)
+{
+	GLASSERT(chit);
+	GLASSERT(chit->GetSpatialComponent());
+
+	bool isMap = (chit->GetSpatialComponent()->ToMapSpatialComponent() != 0);
+	U32 index = HashIndex(x, y);
+	Chit** spatialHash = isMap ? mapSpatialHash : mobSpatialHash;
+
+	Chit* prev = 0;
+	for (Chit* it = spatialHash[index]; it; prev = it, it = it->next) {
+		if (it == chit) {
+			if (prev) {
+				prev->next = it->next;
+				it->next = 0;
+				return;
+			}
+			else {
+				spatialHash[index] = it->next;
+				it->next = 0;
+				return;
+			}
+		}
+	}
+	GLASSERT(0);
+}
+
+
+void ChitBag::UpdateSpatialHash(Chit* c, int x0, int y0, int x1, int y1)
+{
+	if (x0 != x1 || y0 != y1) {
+		RemoveFromSpatialHash(c, x0, y0);
+		AddToSpatialHash(c, x1, y1);
+	}
+}
+
+
 void ChitBag::QuerySpatialHash(	grinliz::CDynArray<Chit*>* array, 
 								const grinliz::Rectangle2F& rf, 
 								const Chit* ignore,
 								IChitAccept* accept )
 {
-	//GRINLIZ_PERFTRACK;
+	//PROFILE_FUNC();
 	GLASSERT( accept );
 	Rectangle2I r;
 	r.Set( (int)rf.min.x, (int)rf.min.y, (int)rf.max.x, (int)rf.max.y );
@@ -432,14 +432,23 @@ void ChitBag::QuerySpatialHash(	grinliz::CDynArray<Chit*>* array,
 		if ( (1<<pass) & accept->Type() ) {
 			Chit** spatialHash = (pass == 0) ? mapSpatialHash : mobSpatialHash;
 
-			for( int y=r.min.y; y<=r.max.y; ++y ) {
-				for( int x=r.min.x; x<=r.max.x; ++x ) {
-					U32 index = HashIndex( x, y );
-					for( Chit* it=spatialHash[ index ]; it; it=it->next ) {
-						if ( it != ignore ) {
+			U32 i0 = r.min.x >> SHIFT;
+			U32 j0 = r.min.y >> SHIFT;
+			U32 i1 = r.max.x >> SHIFT;
+			U32 j1 = r.max.y >> SHIFT;
+
+			for (U32 j = j0; j <= j1; ++j) {
+				for (U32 i = i0; i <= i1; ++i) {
+					U32 index = j*SIZE + i;
+					//bool inside = i > i0 && i <i1 && j > j0 && j < j1; // doesn't help
+
+					for (Chit* it = spatialHash[index]; it; it = it->next) {
+						if (it != ignore) {
 							const Vector3F& pos = it->GetSpatialComponent()->GetPosition();
-							if ( rf.Contains( pos.x, pos.z ) && accept->Accept( it )) {
-								array->Push( it );
+							if (rf.Contains(pos.x, pos.z)) {
+								if (accept->Accept(it)) {
+									array->Push(it);
+								}
 							}
 						}
 					}

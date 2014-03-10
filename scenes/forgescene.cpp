@@ -186,7 +186,7 @@ void ForgeScene::SetModel( bool randomTraits )
 
 	if ( effects[ForgeScript::EFFECT_FIRE].Down() )			effectFlags |= GameItem::EFFECT_FIRE;
 	if ( effects[ForgeScript::EFFECT_SHOCK].Down() )		effectFlags |= GameItem::EFFECT_SHOCK;
-	if ( effects[ForgeScript::EFFECT_EXPLOSIVE].Down() )	effectFlags |= GameItem::EFFECT_EXPLOSIVE;
+	//if ( effects[ForgeScript::EFFECT_EXPLOSIVE].Down() )	effectFlags |= GameItem::EFFECT_EXPLOSIVE;
 
 	forgeScript.Build(	type, subType, 
 						partsFlags, effectFlags, 
