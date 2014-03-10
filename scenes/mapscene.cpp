@@ -180,7 +180,7 @@ void MapScene::SetText()
 			Vector2I sector = { sectorBounds.min.x + i, sectorBounds.min.y + j };
 			const SectorData& sd = worldMap->GetSector( sector );
 
-			MOBFilter mobFilter;
+			MOBKeyFilter mobFilter;
 			Rectangle2I innerI = sd.InnerBounds();
 			Rectangle2F inner;
 			inner.Set( float(innerI.min.x), float(innerI.min.y), float(innerI.max.x+1), float(innerI.max.y+1) );

@@ -778,14 +778,31 @@ bool BuildingFilter::Accept( Chit* chit )
 }
 
 
-bool MOBFilter::Accept( Chit* chit )
+bool MOBKeyFilter::Accept( Chit* chit )
 {
 	GameItem* item = chit->GetItem();
 	return item && !item->keyValues.GetIString( IStringConst::mob ).empty();
 }
 
 
-PlantFilter::PlantFilter( int type, int max )
+bool MOBIshFilter::Accept(Chit* chit)
+{
+	// If it can move and has a team...?
+	PathMoveComponent* pmc = GET_SUB_COMPONENT(chit, MoveComponent, PathMoveComponent);
+	if (pmc && chit->PrimaryTeam()) {
+		return true;
+	}
+	return false;
+}
+
+
+bool BattleFilter::Accept(Chit* chit)
+{
+	return chit->GetRenderComponent() != 0;
+}
+
+
+PlantFilter::PlantFilter(int type, int max)
 {
 	typeFilter = type;
 	maxStage = max;

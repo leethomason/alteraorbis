@@ -70,11 +70,11 @@ x area for farms
 		x make greaters herd more??
 		x improve wiki on plants
 		- rampage broken
+		- rampage targets not matching up. different bits getting used in worldgen vs. game??
 		- sector herd broken
-		- add zoning?
+		x add zoning?
 		x too much waiting on fruit pickup?
 		- MOB filter: review where should be battle filter, etc. meaning changed.
-		- rampage targets not matching up. different bits getting used in worldgen vs. game??
 
 	- Zoning
 		- industrial, commercial, natural-spiritual

@@ -935,7 +935,7 @@ void GameScene::HandleHotKey( int mask )
 		Vector2I sector = ToSector( ToWorld2I( at ));
 
 		CDynArray<Chit*> arr;
-		MOBFilter filter;
+		MOBKeyFilter filter;
 		Rectangle2F bounds;
 		bounds.Set( float(sector.x*SECTOR_SIZE), float(sector.y*SECTOR_SIZE), float((sector.x+1)*SECTOR_SIZE), float((sector.y+1)*SECTOR_SIZE ));
 		sim->GetChitBag()->QuerySpatialHash( &arr, bounds, 0, &filter );

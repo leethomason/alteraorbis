@@ -350,7 +350,7 @@ void TaskList::SocialPulse( const ComponentSet& thisComp, const Vector2F& origin
 	LumosChitBag* chitBag	= thisComp.chit->GetLumosChitBag();
 	CChitArray arr;
 	
-	MOBFilter mobFilter;
+	MOBKeyFilter mobFilter;
 	ItemFlagFilter flagFilter( GameItem::AI_USES_BUILDINGS, 0 );
 	MultiFilter filter( MultiFilter::MATCH_ALL );
 	filter.filters.Push( &mobFilter );
@@ -442,6 +442,10 @@ double TaskList::EvalBuilding(Chit* building)
 
 	int count = 0;
 	double scale = 0;
+	int hit = 0;
+
+	int hitB=0, hitIBuilding = 0, hitNBuilding = 0, hitWater = 0, hitPlant = 0, hitRock = 0;
+	int nRays = 0;
 
 	LumosChitBag* chitBag = building->GetLumosChitBag();
 	Rectangle2IEdgeIterator it(bounds);
@@ -473,7 +477,11 @@ double TaskList::EvalBuilding(Chit* building)
 				GLASSERT(buildingMSC);
 				if (buildingMSC->Bounds().Contains(p)) {
 					hitBuilding = true;
-					s += GetBuildingSystem(arr[i], true);
+					double thisSys = GetBuildingSystem(arr[i], true);
+					s += thisSys;
+					hitB++;
+					if (thisSys == -1) hitIBuilding++;
+					if (thisSys == 1) hitNBuilding++;
 					break;
 				}
 			}
@@ -485,6 +493,7 @@ double TaskList::EvalBuilding(Chit* building)
 				PlantScript::IsPlant(arr[0], &type, &stage);
 				s -= double(stage + 1) / double(PlantScript::NUM_STAGE);
 				if (stage >= 2) break;
+				++hitPlant;
 			}
 
 			const WorldGrid& wg = worldMap->GetWorldGrid(p.x,p.y);
@@ -492,10 +501,12 @@ double TaskList::EvalBuilding(Chit* building)
 				if (wg.RockType() == WorldGrid::ROCK) {
 					s -= 0.1;
 				}
+				++hitRock;
 				break;
 			}
 			if (wg.IsWater()) {
 				s -= 1.0;	// / double(RAD);
+				++hitWater;
 				break;
 			}
 
@@ -507,18 +518,26 @@ double TaskList::EvalBuilding(Chit* building)
 			}
 			walk.Step();
 		}
+		if (walk.CurrentStep() <= walk.NumSteps()) {
+			++nRays;
+		}
+
 		scale += Clamp(s, -1.0, 1.0);
 
 		// double move - don't need that much accuracy
 		it.Next();
 		it.Next();
 	}
-	GLOUTPUT(("Building %s at %d,%d eval=%.2f scale=%.2f count=%d\n",
+
+	double eval = scale / double(nRays);
+	GLOUTPUT(("Building %s at %d,%d eval=%.2f scale=%.2f nRays=%d count=%d\n  hit: Build=%d (I=%d N=%d) water=%d plant=%d rock=%d\n",
 		building->GetItem()->Name(),
 		porch.min.x, porch.min.y,
-		scale / double(count),
-		scale, count));
-	return scale / double(count);
+		eval,
+		scale, nRays, count,
+		hitB, hitIBuilding, hitNBuilding, hitWater, hitPlant, hitRock));
+
+	return eval;
 }
 
 
@@ -601,12 +620,11 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 
 			RenderComponent* rc = building->GetRenderComponent();
 			if (rc) {
-				static const double STEP = 0.2;
-				if (scale < STEP)			rc->AddDeco("minusminus", STD_DECO);
-				else if (scale < STEP*2.0)	rc->AddDeco("minus", STD_DECO);
-				else if (scale < STEP*3.0)	rc->AddDeco("neutral", STD_DECO);
-				else if (scale < STEP*4.0)	rc->AddDeco("plus", STD_DECO);
-				else						rc->AddDeco("plusplus", STD_DECO);
+				if		(scale < 0.3)	rc->AddDeco("minusminus", STD_DECO);
+				else if (scale < 0.4)	rc->AddDeco("minus", STD_DECO);
+				else if (scale < 0.6)	rc->AddDeco("neutral", STD_DECO);
+				else if (scale < 0.7)	rc->AddDeco("plus", STD_DECO);
+				else					rc->AddDeco("plusplus", STD_DECO);
 			}
 		}
 
@@ -722,7 +740,7 @@ bool TaskList::UseFactory( const ComponentSet& thisComp, Chit* factory, int tech
 	int itemType = 0;
 	int subType = 0;
 	int parts = 1;		// always have body.
-	int effects = GameItem::EFFECT_MASK & (~GameItem::EFFECT_EXPLOSIVE);	// don't manufacture explosive weapons.
+	int effects = GameItem::EFFECT_MASK;
 	Random& random = thisComp.chit->random;
 
 	int partsArr[]   = { WeaponGen::GUN_CELL, WeaponGen::GUN_DRIVER, WeaponGen::GUN_SCOPE };

@@ -243,7 +243,7 @@ void AIComponent::GetFriendEnemyLists()
 	enemyList.Clear();
 
 	CChitArray chitArr;
-	MOBFilter mobFilter;
+	MOBIshFilter mobFilter;
 
 	GetChitBag()->QuerySpatialHash( &chitArr, zone, parentChit, &mobFilter );
 	for( int i=0; i<chitArr.Size(); ++i ) {

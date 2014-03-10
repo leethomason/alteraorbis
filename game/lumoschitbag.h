@@ -37,11 +37,30 @@ public:
 };
 
 
-class MOBFilter : public IChitAccept
+// Literally has the MOB key: Denizen, Lesser, Greater
+class MOBKeyFilter : public IChitAccept
 {
 public:
 	virtual bool Accept( Chit* chit );
 	virtual int  Type() { return MOB; }
+};
+
+
+// Generally intended: Denizen, Lesser, Greater, Worker, Visitor, etc. etc.
+class MOBIshFilter : public IChitAccept
+{
+public:
+	virtual bool Accept(Chit* chit);
+	virtual int  Type() { return MOB; }
+};
+
+
+// Anything that can be damaged by an attack.
+class BattleFilter : public IChitAccept
+{
+public:
+	virtual bool Accept(Chit* chit);
+	virtual int  Type() { return MOB | MAP; }
 };
 
 
