@@ -541,7 +541,7 @@ Chit* Sim::CreatePlant( int x, int y, int type )
 		return 0;
 
 	const WorldGrid& wg = worldMap->GetWorldGrid( x, y );
-	if ( wg.Pave() || wg.IsPorch() ) {
+	if ( wg.Pave() || wg.Porch() ) {
 		return 0;
 	}
 

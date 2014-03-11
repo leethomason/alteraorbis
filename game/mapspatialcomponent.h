@@ -62,7 +62,7 @@ private:
 
 	int						mode;
 	bool					building;	// is this a building?
-	bool					hasPorch;	// if a building, does it have a porch?
+	int						hasPorch;	// if a building, does it have a porch?
 	grinliz::Rectangle2I	bounds;
 };
 

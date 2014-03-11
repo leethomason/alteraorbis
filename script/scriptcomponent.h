@@ -25,14 +25,14 @@ class PortalScript;
 class Engine;
 class LumosChitBag;
 class PlantScript;
+class EvalBuildingScript;
 
 struct ScriptContext
 {
-	ScriptContext() : initialized(false), lastTime(0), time(0), chit(0), census(0), chitBag(0), engine(0) {}
+	ScriptContext() : initialized(false), time(0), chit(0), census(0), chitBag(0), engine(0) {}
 
 	bool	initialized;
-	U32		lastTime;		// time at last tick
-	U32		time;			// time at this tick
+	U32		time;			// "local to script" time. set by DoTick. For absolute time, use ChitBag::AbsTime()
 	Chit*	chit;			// null at load
 	Census* census;			// valid at load
 	LumosChitBag* chitBag;
@@ -62,6 +62,7 @@ public:
 	virtual CoreScript*   ToCoreScript()	{ return 0; }
 	virtual PortalScript* ToPortalScript()	{ return 0; }
 	virtual PlantScript*  ToPlantScript()	{ return 0; }
+	virtual EvalBuildingScript* ToEvalBuildingScript() { return 0;  }
 
 protected:
 	const ScriptContext* scriptContext;

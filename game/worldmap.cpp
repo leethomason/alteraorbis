@@ -1726,10 +1726,12 @@ void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 	voxelBuffer.Clear();
 
 	// HARDCODE black magic values.
+	static const float du = 0.25;
+	static const float dv = 0.125;
 	#define BLACKMAG_X(x)	float( double(x*256 + x*32 + 16) / 1024.0)
-	#define BLACKMAG_Y(y)   float( 0.75 - double(y*256 + y*32 + 16) / 1024.0)
+	#define BLACKMAG_Y(y)   float( 0.875 - double(y*256 + y*32 + 16) / 2048.0)
 
-	static const int NUM = WorldGrid::NUM_LAYERS + (WorldGrid::NUM_PAVE-1) + 1;
+	static const int NUM = WorldGrid::NUM_LAYERS + (WorldGrid::NUM_PAVE-1) + WorldGrid::NUM_PORCH;
 	static const Vector2F UV[NUM] = {
 		{ BLACKMAG_X(1), BLACKMAG_Y(0) },	// water
 		{ BLACKMAG_X(0), BLACKMAG_Y(1) },	// grid
@@ -1739,9 +1741,13 @@ void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 		{ BLACKMAG_X(2), BLACKMAG_Y(0) },	// pave2
 		{ BLACKMAG_X(2), BLACKMAG_Y(1) },	// pave3
 		{ BLACKMAG_X(2), BLACKMAG_Y(2) },	// porch
+		{ BLACKMAG_X(0), BLACKMAG_Y(3) },	// porch ++
+		{ BLACKMAG_X(1), BLACKMAG_Y(3) },	// porch +
+		{ BLACKMAG_X(2), BLACKMAG_Y(3) },	// porch 0
+		{ BLACKMAG_X(0), BLACKMAG_Y(4) },	// porch -
+		{ BLACKMAG_X(1), BLACKMAG_Y(4) },	// porch --
 	};
-	static const float du = 0.25f;
-	static const float dv = 0.25f;	
+	static const int PORCH = 6;
 
 	const CArray<Rectangle2I, SpaceTree::MAX_ZONES>& zones = spaceTree->Zones();
 	for( int i=0; i<zones.Size(); ++i ) {
@@ -1763,8 +1769,8 @@ void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 					int layer = wg.Layer();
 					if ( layer == WorldGrid::LAND ) {
 						layer += wg.Pave();
-						if ( wg.IsPorch() ) {
-							layer = NUM-1;
+						if ( wg.Porch() ) {
+							layer = PORCH + wg.Porch();
 						}
 					}
 

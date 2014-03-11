@@ -110,8 +110,8 @@ int ScriptComponent::DoTick( U32 delta )
 		script->Init();
 		context.initialized = true;
 	}
-	int result = script->DoTick( delta );
 	context.time += delta;
+	int result = script->DoTick(delta);
 	return result;
 }
 

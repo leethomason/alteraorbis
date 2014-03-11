@@ -440,6 +440,23 @@ void GameItem::Apply( const GameItem* intrinsic )
 }
 
 
+void GameItem::GetBuildingIndustrial( bool create ) const
+{
+	IString istr;
+	if (create) {
+		istr = item->keyValues.GetIString(IStringConst::zoneCreate);
+	}
+	else {
+		istr = item->keyValues.GetIString(IStringConst::zoneConsume);
+	}
+	if (istr == IStringConst::industrial)
+		return 1;
+	if (istr == IStringConst::natural)
+		return -1;
+	return 0;
+}
+
+
 void GameItem::AbsorbDamage( bool inInventory, 
 							 DamageDesc dd, 
 							 DamageDesc* _remain, 

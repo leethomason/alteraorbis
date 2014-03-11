@@ -386,30 +386,7 @@ void TaskList::SocialPulse( const ComponentSet& thisComp, const Vector2F& origin
 }
 
 
-double TaskList::GetBuildingSystem(Chit* building, bool create)
-{
-	GameItem* item = building->GetItem();
-	if (item) {
-		IString istr;
-		if (create) {
-			istr = item->keyValues.GetIString(IStringConst::zoneCreate);
-		}
-		else {
-			istr = item->keyValues.GetIString(IStringConst::zoneConsume);
-		}
-		if (istr == IStringConst::industrial)
-			return 1;
-		if (istr == IStringConst::natural)
-			return -1;
-
-		// For now, only one axis: natural(-1) to industrial(1)
-		// Commercial is anywhere.
-		//		if (istr == IStringConst::commercial)
-		//			return 0.1;
-	}
-	return 0;
-}
-
+#if 0
 double TaskList::EvalBuilding(Chit* building)
 {
 	GameItem* item = building->GetItem();
@@ -477,7 +454,7 @@ double TaskList::EvalBuilding(Chit* building)
 				GLASSERT(buildingMSC);
 				if (buildingMSC->Bounds().Contains(p)) {
 					hitBuilding = true;
-					double thisSys = GetBuildingSystem(arr[i], true);
+					double thisSys = arr[i]->GetItem()->GetBuildingIndustrial(true);
 					s += thisSys;
 					hitB++;
 					if (thisSys == -1) hitIBuilding++;
@@ -539,6 +516,7 @@ double TaskList::EvalBuilding(Chit* building)
 
 	return eval;
 }
+#endif
 
 
 void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const grinliz::IString& buildingName )
@@ -612,12 +590,13 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 		supply.Set(Needs::SOCIAL, 0);
 
 		double scale = 1.0;
-		double industry = GetBuildingSystem(building, false);
+		double industry = building->GetItem()->GetBuildingIndustrial(false);
 		if (industry) {
 			double score = EvalBuilding(building);
 			double dot = score * industry; 
 			scale = 0.5 + 0.5 * dot;
 
+#if 0
 			RenderComponent* rc = building->GetRenderComponent();
 			if (rc) {
 				if		(scale < 0.3)	rc->AddDeco("minusminus", STD_DECO);
@@ -626,6 +605,7 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 				else if (scale < 0.7)	rc->AddDeco("plus", STD_DECO);
 				else					rc->AddDeco("plusplus", STD_DECO);
 			}
+#endif
 		}
 
 		thisComp.ai->GetNeedsMutable()->Add( supply, scale );

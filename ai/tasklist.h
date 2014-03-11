@@ -132,13 +132,6 @@ public:
 private:
 	void UseBuilding( const ComponentSet& thisComp, Chit* building, const grinliz::IString& buildingName );
 
-	// Original proposal, may bring back:
-	// enum { COMMERCIAL, INDUSTRIAL, NATURAL, NUM_SYSTEMS };
-	// However, in the interest of KISS, go with natural vs. industrial system.
-	// Industrial scale: -1 natuarl, +1 industrial
-	double GetBuildingSystem(Chit* building, bool creates );
-	double EvalBuilding(Chit* building);
-
 	void GoShopping(  const ComponentSet& thisComp, Chit* market );
 	bool UseFactory(  const ComponentSet& thisComp, Chit* factory, int tech );
 	bool DoStanding( const ComponentSet& thisComp, int time );

@@ -18,6 +18,7 @@
 #include "lumoschitbag.h"
 #include "../engine/serialize.h"
 #include "../xegame/itemcomponent.h"
+#include "../script/evalbuildingscript.h"
 
 using namespace grinliz;
 
@@ -25,7 +26,7 @@ MapSpatialComponent::MapSpatialComponent() : SpatialComponent()
 {
 	mode = GRID_IN_USE;
 	building = false;
-	hasPorch = false;
+	hasPorch = 0;
 	nextBuilding = 0;
 }
 
@@ -70,7 +71,7 @@ void MapSpatialComponent::SetBuilding( bool b, bool p )
 {
 	GLASSERT( !parentChit );
 	building = b;
-	hasPorch = p;
+	hasPorch = p ? 1 : 0;
 }
 
 
@@ -78,13 +79,29 @@ void MapSpatialComponent::SetBuilding( bool b, bool p )
 void MapSpatialComponent::UpdatePorch( const grinliz::Rectangle2I& bounds, WorldMap* worldMap, LumosChitBag* bag )
 {
 	if ( building && hasPorch ) {
+		hasPorch = 1;	// standard porch.
+		ScriptComponent* sc = parentChit->GetScriptComponent();
+		EvalBuildingScript* evalScript = sc ? sc->ToEvalBuildingScript() : 0;
+
+		if (evalScript) {
+			GameItem* item = parentChit->GetItem();
+			GLASSERT(item);
+			if (item) {
+				double consumes = item->GetBuildingIndustrial(false);
+				if (consumes) {
+					double scan = evalScript->EvalIndustrial(false);
+					hasPorch = EvalBuildingScript::Quantize(consumes, scan) + 1;
+				}
+			}
+		}
+
 		Rectangle2I b = bounds;
 		b.Outset( 1 );
 		Rectangle2IEdgeIterator it( b );
 
 		for( it.Begin(); !it.Done(); it.Next() ) {
 			Chit* porch = bag->QueryPorch( it.Pos() );
-			worldMap->SetPorch( it.Pos().x, it.Pos().y, porch != 0 );
+			worldMap->SetPorch( it.Pos().x, it.Pos().y, hasPorch );
 		}
 	}
 }
