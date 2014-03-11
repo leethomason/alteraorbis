@@ -131,11 +131,11 @@ public:
 	void SetPorch(int porch) {
 		// 0 no porch
 		// 1 porch
-		// 2 porch++
-		// 3 porch+
+		// 2 porch--
+		// 3 porch-
 		// 4 porch0
-		// 5 porch-
-		// 6 porch--
+		// 5 porch+
+		// 6 porch++
 		GLASSERT(porch >= 0 && porch < NUM_PORCH);
 		isPorch = porch;
 		GLASSERT(isPorch == porch);

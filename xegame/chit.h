@@ -152,7 +152,7 @@ public:
 
 	MoveComponent*		GetMoveComponent()		{ return moveComponent; }
 	ItemComponent*		GetItemComponent()		{ return itemComponent; }
-	ScriptComponent*	GetScriptComponent()	{ return scriptComponent; }
+	ScriptComponent*	GetScriptComponent(const char* name);
 	AIComponent*		GetAIComponent()		{ return aiComponent; }
 	HealthComponent*	GetHealthComponent()	{ return healthComponent; }
 	RenderComponent*	GetRenderComponent()	{ return renderComponent; }
@@ -202,7 +202,7 @@ private:
 	ChitBag* chitBag;
 	int		 id;
 	bool	 playerControlled;
-	grinliz::CDynArray< IChitListener* > listeners;
+	grinliz::CDynArray< IChitListener* > listeners;	// FIXME: remove this?
 
 public:
 	enum {
@@ -216,14 +216,15 @@ public:
 	};
 
 private:
-	enum { NUM_SLOTS = 9 };
+	enum { NUM_SLOTS = 10 };
 	union {
 		// Update ordering is tricky. Defined by the order of the slots;
 		struct {
 			SpatialComponent*	spatialComponent;
 			MoveComponent*		moveComponent;
 			ItemComponent*		itemComponent;
-			ScriptComponent*	scriptComponent;
+			ScriptComponent*	scriptComponent0;
+			ScriptComponent*	scriptComponent1;
 			AIComponent*		aiComponent;
 			HealthComponent*	healthComponent;
 			Component*			general0;

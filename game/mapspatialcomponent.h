@@ -55,9 +55,10 @@ public:
 
 	// internal: used by the LumosChitBag to track buildings.
 	MapSpatialComponent* nextBuilding;
+	// mostly internal: called when the porch changes.
+	void UpdatePorch();
 
 private:
-	void UpdatePorch( const grinliz::Rectangle2I& bounds, WorldMap* worldMap, LumosChitBag* bag );
 	void UpdateBlock( WorldMap* map );	// can't use the context - used after OnRemove
 
 	int						mode;

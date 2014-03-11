@@ -20,6 +20,7 @@
 #include "rendercomponent.h"
 #include "itemcomponent.h"
 #include "componentfactory.h"
+#include "../script/scriptcomponent.h"	// FIXME: should be in xegame directory
 
 #include "../grinliz/glstringutil.h"
 #include "../xarchive/glstreamer.h"
@@ -125,8 +126,11 @@ void Chit::Add( Component* c )
 		itemComponent = c->ToItemComponent();
 	}
 	else if ( c->ToScriptComponent()) {
-		GLASSERT( scriptComponent == 0 );
-		scriptComponent = c->ToScriptComponent();
+		GLASSERT( scriptComponent0 == 0 || scriptComponent1 == 0 );
+		if (scriptComponent0 == 0)
+			scriptComponent0 = c->ToScriptComponent();
+		else
+			scriptComponent1 = c->ToScriptComponent();
 	}
 	else if ( c->ToAIComponent()) {
 		GLASSERT( aiComponent == 0 );
@@ -167,6 +171,17 @@ void Chit::Remove( Component* c )
 	GLASSERT( 0 );	// not found
 }
 
+
+ScriptComponent* Chit::GetScriptComponent(const char* name)
+{
+	if (scriptComponent0 && StrEqual(scriptComponent0->Name(), name)) {
+		return scriptComponent0;
+	}
+	if (scriptComponent1 && StrEqual(scriptComponent1->Name(), name)) {
+		return scriptComponent1;
+	}
+	return 0;
+}
 
 Component* Chit::GetComponent( const char* name )
 {

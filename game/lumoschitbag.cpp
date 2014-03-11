@@ -251,6 +251,13 @@ Chit* LumosChitBag::NewBuilding( const Vector2I& pos, const char* name, int team
 		chit->GetRenderComponent()->SetProcedural( 0, info );
 	}
 
+	IString consumes = rootItem.keyValues.GetIString( IStringConst::zoneConsume );
+	if ( !consumes.empty() ) {
+		IScript* s = ScriptComponent::Factory( StringPool::Intern("EvalBuildingScript"));
+		GLASSERT(s);
+		chit->Add( new ScriptComponent(s));
+	}
+
 #if 0	// debugging
 	SectorPort sp;
 	sp.sector.Set( pos.x/SECTOR_SIZE, pos.y/SECTOR_SIZE );

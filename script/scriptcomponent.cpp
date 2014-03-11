@@ -11,6 +11,7 @@
 #include "countdownscript.h"
 #include "farmscript.h"
 #include "distilleryscript.h"
+#include "evalbuildingscript.h"
 
 #include "../game/lumoschitbag.h"
 
@@ -47,6 +48,9 @@ ScriptComponent::ScriptComponent( const ComponentFactory* f ) : script( 0 ), fac
 	}
 	else if ( name == "DistilleryScript" ) {
 		script = new DistilleryScript();
+	}
+	else if (name == "EvalBuildingScript") {
+		script = new EvalBuildingScript();
 	}
 	else {
 		GLASSERT( 0 );

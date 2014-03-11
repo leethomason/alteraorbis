@@ -1741,11 +1741,11 @@ void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 		{ BLACKMAG_X(2), BLACKMAG_Y(0) },	// pave2
 		{ BLACKMAG_X(2), BLACKMAG_Y(1) },	// pave3
 		{ BLACKMAG_X(2), BLACKMAG_Y(2) },	// porch
-		{ BLACKMAG_X(0), BLACKMAG_Y(3) },	// porch ++
-		{ BLACKMAG_X(1), BLACKMAG_Y(3) },	// porch +
-		{ BLACKMAG_X(2), BLACKMAG_Y(3) },	// porch 0
-		{ BLACKMAG_X(0), BLACKMAG_Y(4) },	// porch -
 		{ BLACKMAG_X(1), BLACKMAG_Y(4) },	// porch --
+		{ BLACKMAG_X(0), BLACKMAG_Y(4) },	// porch -
+		{ BLACKMAG_X(2), BLACKMAG_Y(3) },	// porch 0
+		{ BLACKMAG_X(1), BLACKMAG_Y(3) },	// porch +
+		{ BLACKMAG_X(0), BLACKMAG_Y(3) },	// porch ++
 	};
 	static const int PORCH = 6;
 

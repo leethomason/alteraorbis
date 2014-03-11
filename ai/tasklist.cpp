@@ -26,6 +26,7 @@
 #include "../script/forgescript.h"
 #include "../script/procedural.h"
 #include "../script/plantscript.h"
+#include "../script/evalbuildingscript.h"
 
 #include "../engine/particle.h"
 
@@ -590,24 +591,16 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 		supply.Set(Needs::SOCIAL, 0);
 
 		double scale = 1.0;
-		double industry = building->GetItem()->GetBuildingIndustrial(false);
-		if (industry) {
-			double score = EvalBuilding(building);
-			double dot = score * industry; 
+
+		ScriptComponent* sc = building->GetScriptComponent();
+		EvalBuildingScript* evalScript = sc ? sc->Script()->ToEvalBuildingScript() : 0;
+
+		if (evalScript) {
+			double industry = building->GetItem()->GetBuildingIndustrial(false);
+			double score = evalScript->EvalIndustrial(true);
+			double dot = score * industry;
 			scale = 0.5 + 0.5 * dot;
-
-#if 0
-			RenderComponent* rc = building->GetRenderComponent();
-			if (rc) {
-				if		(scale < 0.3)	rc->AddDeco("minusminus", STD_DECO);
-				else if (scale < 0.4)	rc->AddDeco("minus", STD_DECO);
-				else if (scale < 0.6)	rc->AddDeco("neutral", STD_DECO);
-				else if (scale < 0.7)	rc->AddDeco("plus", STD_DECO);
-				else					rc->AddDeco("plusplus", STD_DECO);
-			}
-#endif
 		}
-
 		thisComp.ai->GetNeedsMutable()->Add( supply, scale );
 
 		float heal = float(supply.Value(Needs::ENERGY) + supply.Value(Needs::FOOD)) * float(scale);

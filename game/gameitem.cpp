@@ -440,14 +440,14 @@ void GameItem::Apply( const GameItem* intrinsic )
 }
 
 
-void GameItem::GetBuildingIndustrial( bool create ) const
+double GameItem::GetBuildingIndustrial( bool create ) const
 {
 	IString istr;
 	if (create) {
-		istr = item->keyValues.GetIString(IStringConst::zoneCreate);
+		istr = keyValues.GetIString(IStringConst::zoneCreate);
 	}
 	else {
-		istr = item->keyValues.GetIString(IStringConst::zoneConsume);
+		istr = keyValues.GetIString(IStringConst::zoneConsume);
 	}
 	if (istr == IStringConst::industrial)
 		return 1;
