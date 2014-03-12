@@ -141,7 +141,7 @@ LineWalk::LineWalk(int x0, int y0, int x1, int y1)
 	if ( abs( dy ) > abs(dx) ) {
 		// y is major axis. delta = dx per distance y
 		axis = 1;
-		nSteps = abs(dy)-1;
+		nSteps = abs(dy);
 		if ( dy < 0 )
 			axisDir = -1;
 		delta = Fixed( dx ) / Fixed( abs(dy) );
@@ -150,7 +150,7 @@ LineWalk::LineWalk(int x0, int y0, int x1, int y1)
 	else {
 		// x is the major aris. delta = dy per distance x
 		axis = 0;
-		nSteps = abs(dx)-1;
+		nSteps = abs(dx);
 		if ( dx < 0 )
 			axisDir = -1;
 		delta = Fixed( dy ) / Fixed( abs(dx) );
@@ -164,18 +164,13 @@ LineWalk::LineWalk(int x0, int y0, int x1, int y1)
 }
 
 
-void LineWalk::Step( int n )
+void LineWalk::Step()
 {
-	GLASSERT( step+n <= nSteps+1 );
-	GLASSERT( n > 0 );
+	GLASSERT( step <= nSteps );
 
-	if ( n > 1 ) {
-		q.X(axis)  += axisDir*(n-1);
-		q.X(!axis) += delta*(n-1);
-	}
 	p = q;
 	q.X(axis)  += axisDir;
 	q.X(!axis) += delta;
 
-	step += n;
+	step++;
 }

@@ -29,9 +29,9 @@ double EvalBuildingScript::EvalIndustrial( bool debugLog )
 	Chit* building = ParentChit();
 	int count = 0;
 	double scale = 0;
-	int hit = 0;
-	int hitB = 0, hitIBuilding = 0, hitNBuilding = 0, hitWater = 0, hitPlant = 0, hitRock = 0;
-	int nRays = 0;
+
+	int hitB = 0, hitIBuilding = 0, hitNBuilding = 0, hitWater = 0, hitPlant = 0, hitRock = 0, hitWaterfall = 0;
+	int hitShrub = 0;	// doesn't terminate a ray.
 
 
 	if (lastEval == 0 || (scriptContext->chitBag->AbsTime() - lastEval) > 2000) {
@@ -74,15 +74,14 @@ double EvalBuildingScript::EvalIndustrial( bool debugLog )
 
 		while (!it.Done()) {
 			++count;
-			double s = 0;
 
 			Vector2I pos = { it.Pos().x >= porch.max.x ? porch.max.x : porch.min.x,
-				it.Pos().y >= porch.max.y ? porch.max.y : porch.min.y };
+							 it.Pos().y >= porch.max.y ? porch.max.y : porch.min.y };
 
 			LineWalk walk(pos.x, pos.y, it.Pos().x, it.Pos().y);
 			walk.Step();	// ignore where we are standing.
 
-			while (walk.CurrentStep() <= walk.NumSteps()) {	// non-intuitive iterator. See linewalk docs.
+			while ( !walk.Done() ) {	// non-intuitive iterator. See linewalk docs.
 				// - building
 				// - plant
 				// - ice
@@ -93,19 +92,23 @@ double EvalBuildingScript::EvalIndustrial( bool debugLog )
 				// Buildings. Can be 2x2. Extend out beyond current check.
 				bool hitBuilding = false;
 				Vector2I p = walk.P();
-				// FIXME: exclude self?
-				chitBag->QuerySpatialHash(&arr, ToWorld2F(p), 0.8f, building, &buildingFilter);
+				// Don't count self as a hit, but stops the ray cast.
+				// Also, use a larger radius because buildings can be 2x2
+				chitBag->QuerySpatialHash(&arr, ToWorld2F(p), 0.8f, 0, &buildingFilter);
 				for (int i = 0; i < arr.Size(); ++i) {
-					MapSpatialComponent* buildingMSC = GET_SUB_COMPONENT(arr[i], SpatialComponent, MapSpatialComponent);
-					GLASSERT(buildingMSC);
-					if (buildingMSC->Bounds().Contains(p)) {
-						hitBuilding = true;
-						double thisSys = arr[i]->GetItem()->GetBuildingIndustrial(true);
-						s += thisSys;
-						hitB++;
-						if (thisSys == -1) hitNBuilding++;
-						if (thisSys == 1) hitIBuilding++;
-						break;
+					if (arr[i] != building) {
+						MapSpatialComponent* buildingMSC = GET_SUB_COMPONENT(arr[i], SpatialComponent, MapSpatialComponent);
+						GLASSERT(buildingMSC);
+						if (buildingMSC->Bounds().Contains(p)) {
+							hitBuilding = true;
+							double thisSys = arr[i]->GetItem()->GetBuildingIndustrial(true);
+
+							hitB++;
+							if (thisSys <= -0.5) hitNBuilding++;
+							if (thisSys >= 0.5)  hitIBuilding++;
+
+							break;
+						}
 					}
 				}
 				if (hitBuilding) break;
@@ -114,21 +117,22 @@ double EvalBuildingScript::EvalIndustrial( bool debugLog )
 				if (arr.Size()) {
 					int type = 0, stage = 0;
 					PlantScript::IsPlant(arr[0], &type, &stage);
-					s -= double(stage + 1) / double(PlantScript::NUM_STAGE);
-					if (stage >= 2) break;
-					++hitPlant;
+
+					if (stage >= 2) {
+						++hitPlant;
+						break;
+					}
+					else {
+						hitShrub++;
+					}
 				}
 
 				const WorldGrid& wg = worldMap->GetWorldGrid(p.x, p.y);
 				if (wg.RockHeight()) {
-					if (wg.RockType() == WorldGrid::ROCK) {
-						s -= 0.1;
-					}
 					++hitRock;
 					break;
 				}
 				if (wg.IsWater()) {
-					s -= 1.0;	// / double(RAD);
 					++hitWater;
 					break;
 				}
@@ -136,36 +140,41 @@ double EvalBuildingScript::EvalIndustrial( bool debugLog )
 				Rectangle2I wb;
 				wb.min = wb.max = p;
 				if (hasWaterfalls && worldMap->ContainsWaterfall(wb)) {
-					s -= 10.0;
+					++hitWaterfall;
 					break;
 				}
 				walk.Step();
 			}
-			if (walk.CurrentStep() <= walk.NumSteps()) {
-				++nRays;
-			}
-
-			scale += Clamp(s, -1.0, 1.0);
-
-			// double move - don't need that much accuracy
 			it.Next();
-			//it.Next();
 		}
+
+		// Note rock/ice isn't counted either way.
+		int natural = hitNBuilding
+			+ hitWater
+			+ hitPlant
+			+ 10 * hitWaterfall
+			+ hitShrub / 4;				// small plants don't add to rRays, so divide is okay.
+		int industrial = hitIBuilding;
+		int nRays = hitNBuilding + hitWater + hitPlant + hitWaterfall + hitIBuilding;
+
 		eval = 0;
 		if (nRays) {
-			eval = scale / double(nRays);
+			// With this system, that one ray (say from a distillery to plant) can be
+			// hugely impactful. This may need tweaking:
+			if (nRays < 2)
+				nRays = 2;
+			eval = double(industrial - natural) / double(nRays);
+		}
+		if (debugLog) {
+			Vector2I pos = building->GetSpatialComponent()->GetPosition2DI();
+			GLOUTPUT(("Building %s at %d,%d eval=%.2f scale=%.2f nRays=%d count=%d\n  hit: Build=%d (I=%d N=%d) water=%d plant=%d rock=%d\n",
+				building->GetItem()->Name(),
+				pos.x, pos.y,
+				eval,
+				scale, nRays, count,
+				hitB, hitIBuilding, hitNBuilding, hitWater, hitPlant, hitRock));
 		}
 	}
-	if (debugLog) {
-		Vector2I pos = building->GetSpatialComponent()->GetPosition2DI();
-		GLOUTPUT(("Building %s at %d,%d eval=%.2f scale=%.2f nRays=%d count=%d\n  hit: Build=%d (I=%d N=%d) water=%d plant=%d rock=%d\n",
-			building->GetItem()->Name(),
-			pos.x, pos.y, 
-			eval,
-			scale, nRays, count,
-			hitB, hitIBuilding, hitNBuilding, hitWater, hitPlant, hitRock));
-	}
-
 	return eval;
 }
 

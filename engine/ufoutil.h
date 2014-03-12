@@ -199,17 +199,6 @@ inline void MultMatrix2I( const Matrix2I& x, const grinliz::Vector3I& y, grinliz
 
 /*
 	A class to walk a line between 2 integer points.
-	
-	ex#1:	A line from (0,0) to (1,1) has 0 steps.
-			P(0,0), Q(1,1)
-	ex#2:	A line from (0,0) to (2,0) has 1 steps.
-			P(0,0), Q(1,0)
-			P(1,0), Q(2,0)
-	In general:
-		while ( line.CurrentStep() <= line.NumSteps() ) {
-			...
-			line.Step(); 
-		}
 */
 class LineWalk
 {
@@ -224,10 +213,8 @@ public:
 	grinliz::Vector2I P() const { grinliz::Vector2I p = { X(), Y() }; return p; }
 	grinliz::Vector2I Q() const { grinliz::Vector2I q = { NX(), NY() }; return q; }
 
-	void Step( int n=1 );
-
-	int CurrentStep() const		{ return step; }
-	int NumSteps() const		{ return nSteps; }
+	void Step();
+	bool Done() const			{ return step > nSteps; }
 
 private:
 	int axis;		// 1 if y is major axis. 0 if x.

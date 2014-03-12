@@ -74,7 +74,7 @@ x area for farms
 		- sector herd broken
 		x add zoning?
 		x too much waiting on fruit pickup?
-		- MOB filter: review where should be battle filter, etc. meaning changed.
+		x MOB filter: review where should be battle filter, etc. meaning changed.
 
 	- Zoning
 		- industrial, commercial, natural-spiritual
