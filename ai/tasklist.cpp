@@ -318,7 +318,7 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta )
 
 	case Task::TASK_USE_BUILDING:
 		{
-			Chit* building	= chitBag->QueryPorch( pos2i );
+			Chit* building	= chitBag->QueryPorch( pos2i, 0 );
 			if ( building ) {
 				IString buildingName = building->GetItem()->IName();
 
@@ -592,9 +592,7 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 
 		double scale = 1.0;
 
-		ScriptComponent* sc = building->GetScriptComponent();
-		EvalBuildingScript* evalScript = sc ? sc->Script()->ToEvalBuildingScript() : 0;
-
+		EvalBuildingScript* evalScript = static_cast<EvalBuildingScript*>(building->GetScript("EvalBuildingScript"));
 		if (evalScript) {
 			double industry = building->GetItem()->GetBuildingIndustrial(false);
 			double score = evalScript->EvalIndustrial(true);

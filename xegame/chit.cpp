@@ -183,7 +183,20 @@ ScriptComponent* Chit::GetScriptComponent(const char* name)
 	return 0;
 }
 
-Component* Chit::GetComponent( const char* name )
+
+IScript* Chit::GetScript(const char* name)
+{
+	if (scriptComponent0 && StrEqual(scriptComponent0->Script()->ScriptName(), name)) {
+		return scriptComponent0->Script();
+	}
+	if (scriptComponent1 && StrEqual(scriptComponent1->Script()->ScriptName(), name)) {
+		return scriptComponent1->Script();
+	}
+	return 0;
+}
+
+
+Component* Chit::GetComponent(const char* name)
 {
 	for( int i=0; i<NUM_SLOTS; ++i ) {
 		if ( slot[i] && StrEqual( name, slot[i]->Name())) {

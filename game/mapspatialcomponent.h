@@ -52,11 +52,12 @@ public:
 
 	// Returns the porch, or an empty rectangle if there is none.
 	grinliz::Rectangle2I PorchPos() const;
+	int PorchType() const { return hasPorch;  }
 
 	// internal: used by the LumosChitBag to track buildings.
 	MapSpatialComponent* nextBuilding;
 	// mostly internal: called when the porch changes.
-	void UpdatePorch();
+	void UpdatePorch(bool clearPorch);
 
 private:
 	void UpdateBlock( WorldMap* map );	// can't use the context - used after OnRemove

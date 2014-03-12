@@ -598,7 +598,9 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 					Chit* chit = sim->CreatePlant( (int)plane.x+i, (int)plane.z, i );
 					if ( chit ) {
 						if ( i < 6 ) {
-							chit->GetScriptComponent()->Script()->ToPlantScript()->SetStage( 3 );
+							PlantScript* plantScript = (PlantScript*) chit->GetScript("PlantScript");
+							GLASSERT(plantScript);
+							plantScript->SetStage( 3 );
 						}
 					}
 				}
@@ -1200,7 +1202,7 @@ void GameScene::DoTick( U32 delta )
 
 	bool useBuildingVisible = false;
 	if ( uiMode[UI_AVATAR].Down() && playerChit ) {
-		Chit* building = sim->GetChitBag()->QueryPorch( playerChit->GetSpatialComponent()->GetPosition2DI() );
+		Chit* building = sim->GetChitBag()->QueryPorch( playerChit->GetSpatialComponent()->GetPosition2DI(),0 );
 		if ( building ) {
 			IString name = building->GetItem()->IName();
 			if ( name == "vault" || name == "factory" || name == "market" ) {

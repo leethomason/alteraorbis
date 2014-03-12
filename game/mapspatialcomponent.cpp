@@ -76,41 +76,42 @@ void MapSpatialComponent::SetBuilding( bool b, bool p )
 
 
 
-void MapSpatialComponent::UpdatePorch()
+void MapSpatialComponent::UpdatePorch( bool clearPorch )
 {
+	GLASSERT(this->parentChit);
 	WorldMap* worldMap = this->parentChit ? this->GetChitContext()->worldMap : 0;
 	LumosChitBag* bag  = this->parentChit ? this->GetLumosChitBag() : 0;
 
-	if (building && hasPorch) {
+	if (clearPorch) {
+		hasPorch = 0;
+	}
+	else if (building && hasPorch) {
 		hasPorch = 1;	// standard porch.
-		if (parentChit) {
-			ScriptComponent* sc = parentChit->GetScriptComponent();
-			EvalBuildingScript* evalScript = sc ? sc->Script()->ToEvalBuildingScript() : 0;
+		EvalBuildingScript* evalScript = static_cast<EvalBuildingScript*>(parentChit->GetScript("EvalBuildingScript"));
+		if (evalScript) {
+			GameItem* item = parentChit->GetItem();
+			GLASSERT(item);
+			if (item) {
+				double consumes = item->GetBuildingIndustrial(false);
+				if (consumes) {
+					double scan = evalScript->EvalIndustrial(false);
 
-			if (evalScript) {
-				GameItem* item = parentChit->GetItem();
-				GLASSERT(item);
-				if (item) {
-					double consumes = item->GetBuildingIndustrial(false);
-					if (consumes) {
-						double scan = evalScript->EvalIndustrial(false);
-
-						double dot = scan * consumes;
-						int q = int((1.0 + dot) * 2.0 + 0.5);
-						// q=0, no porch. q=1 default.
-						hasPorch = q + 2;
-					}
+					double dot = scan * consumes;
+					int q = int((1.0 + dot) * 2.0 + 0.5);
+					// q=0, no porch. q=1 default.
+					hasPorch = q + 2;
 				}
 			}
 		}
-		Rectangle2I b = bounds;
-		b.Outset( 1 );
-		Rectangle2IEdgeIterator it( b );
+	}
+	Rectangle2I b = bounds;
+	b.Outset( 1 );
+	Rectangle2IEdgeIterator it( b );
 
-		for( it.Begin(); !it.Done(); it.Next() ) {
-			Chit* porch = bag->QueryPorch( it.Pos() );
-			worldMap->SetPorch( it.Pos().x, it.Pos().y, porch == parentChit ? hasPorch : 0 );
-		}
+	for( it.Begin(); !it.Done(); it.Next() ) {
+		int type = 0;
+		Chit* porch = bag->QueryPorch( it.Pos(), &type );
+		worldMap->SetPorch( it.Pos().x, it.Pos().y, type );
 	}
 }
 
@@ -120,7 +121,7 @@ void MapSpatialComponent::SetPosRot( const grinliz::Vector3F& v, const grinliz::
 {
 	super::SetPosRot( v, quat );
 	if ( parentChit ) {
-		UpdatePorch();
+		UpdatePorch(false);
 	}
 }
 
@@ -130,7 +131,7 @@ void MapSpatialComponent::OnAdd( Chit* chit )
 	super::OnAdd( chit );
 	if ( building ) {
 		GetLumosChitBag()->AddToBuildingHash( this, bounds.min.x, bounds.min.y ); 
-		UpdatePorch();
+		UpdatePorch(false);
 	}
 
 	if ( mode == GRID_BLOCKED ) {
@@ -148,7 +149,8 @@ void MapSpatialComponent::OnRemove()
 		Vector2I pos = GetPosition2DI();
 		GetLumosChitBag()->RemoveFromBuildingHash( this, bounds.min.x, bounds.min.y ); 
 	}
-	
+	UpdatePorch(true);
+
 	// Remove so that the callback doesn't return blocking.
 	super::OnRemove();
 
@@ -157,7 +159,6 @@ void MapSpatialComponent::OnRemove()
 		// this LOC), so this will set things to the correct value.
 		UpdateBlock( context->worldMap );
 	}
-	UpdatePorch();
 }
 
 

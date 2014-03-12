@@ -44,6 +44,7 @@ class XStream;
 class LumosChitBag;
 class DamageDesc;
 class ChitMsg;
+class IScript;
 
 // Allows registering to listen to chit messages.
 // This is not serialized. Calls are synchronous. (Be careful.)
@@ -153,6 +154,7 @@ public:
 	MoveComponent*		GetMoveComponent()		{ return moveComponent; }
 	ItemComponent*		GetItemComponent()		{ return itemComponent; }
 	ScriptComponent*	GetScriptComponent(const char* name);
+	IScript*			GetScript(const char* name);
 	AIComponent*		GetAIComponent()		{ return aiComponent; }
 	HealthComponent*	GetHealthComponent()	{ return healthComponent; }
 	RenderComponent*	GetRenderComponent()	{ return renderComponent; }

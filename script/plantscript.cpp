@@ -28,11 +28,9 @@ static const int	TIME_TO_SPORE = 3 * (1000 * 60);
 {
 	GLASSERT( chit );
 	GameItem* item = chit->GetItem();
-	ScriptComponent* sc = chit->GetScriptComponent();
+	PlantScript* plantScript = static_cast<PlantScript*>(chit->GetScript("PlantScript"));
 
-	if ( item && sc && StrEqual( sc->Script()->ScriptName(), "PlantScript" )) {
-		GLASSERT( sc->Script() );
-		PlantScript* plantScript = static_cast< PlantScript* >( sc->Script() );
+	if ( item && plantScript) {
 		if ( type )
 			*type = plantScript->Type();
 		if ( stage )

@@ -653,7 +653,7 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 time )
 		// Visitors at a kiosk.
 		Vector2I pos2i = thisComp.spatial->GetPosition2DI();
 		Vector2I sector = ToSector( pos2i );
-		Chit* chit = this->GetLumosChitBag()->QueryPorch( pos2i );
+		Chit* chit = this->GetLumosChitBag()->QueryPorch( pos2i,0 );
 		CoreScript* cs = CoreScript::GetCore( sector );
 		
 		VisitorData* vd = &Visitors::Instance()->visitorData[visitorIndex];
@@ -1261,7 +1261,7 @@ void AIComponent::ThinkVisitor( const ComponentSet& thisComp )
 	Vector2I sector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
 	CoreScript* coreScript = CoreScript::GetCore(sector);
 	VisitorData* vd = Visitors::Get( visitorIndex );
-	Chit* kiosk = GetChitBag()->ToLumos()->QueryPorch( pos2i );
+	Chit* kiosk = GetChitBag()->ToLumos()->QueryPorch( pos2i, 0 );
 	IString kioskName = vd->CurrentKioskWant();
 	if ( kiosk && kiosk->GetItem()->IName() == kioskName ) {
 		// all good

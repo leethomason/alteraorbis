@@ -14,7 +14,11 @@ void EvalBuildingScript::Serialize(XStream* xs)
 {
 	XarcOpen(xs, ScriptName());
 	XarcClose(xs);
+}
 
+
+void EvalBuildingScript::OnAdd()
+{
 	// Use this opportunity to spread timers out.
 	timer.Randomize(scriptContext->chit->ID());
 }
@@ -89,7 +93,8 @@ double EvalBuildingScript::EvalIndustrial( bool debugLog )
 				// Buildings. Can be 2x2. Extend out beyond current check.
 				bool hitBuilding = false;
 				Vector2I p = walk.P();
-				chitBag->QuerySpatialHash(&arr, ToWorld2F(p), 0.8f, 0, &buildingFilter);
+				// FIXME: exclude self?
+				chitBag->QuerySpatialHash(&arr, ToWorld2F(p), 0.8f, building, &buildingFilter);
 				for (int i = 0; i < arr.Size(); ++i) {
 					MapSpatialComponent* buildingMSC = GET_SUB_COMPONENT(arr[i], SpatialComponent, MapSpatialComponent);
 					GLASSERT(buildingMSC);
@@ -98,8 +103,8 @@ double EvalBuildingScript::EvalIndustrial( bool debugLog )
 						double thisSys = arr[i]->GetItem()->GetBuildingIndustrial(true);
 						s += thisSys;
 						hitB++;
-						if (thisSys == -1) hitIBuilding++;
-						if (thisSys == 1) hitNBuilding++;
+						if (thisSys == -1) hitNBuilding++;
+						if (thisSys == 1) hitIBuilding++;
 						break;
 					}
 				}
@@ -144,9 +149,12 @@ double EvalBuildingScript::EvalIndustrial( bool debugLog )
 
 			// double move - don't need that much accuracy
 			it.Next();
-			it.Next();
+			//it.Next();
 		}
-		eval = scale / double(nRays);
+		eval = 0;
+		if (nRays) {
+			eval = scale / double(nRays);
+		}
 	}
 	if (debugLog) {
 		Vector2I pos = building->GetSpatialComponent()->GetPosition2DI();
@@ -167,7 +175,7 @@ int EvalBuildingScript::DoTick(U32 delta)
 	if (timer.Delta(delta)) {
 		MapSpatialComponent* msc = GET_SUB_COMPONENT(scriptContext->chit, SpatialComponent, MapSpatialComponent);
 		if (msc) {
-			msc->UpdatePorch();
+			msc->UpdatePorch(false);
 		}
 	}
 	return timer.Next();

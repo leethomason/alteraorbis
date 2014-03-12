@@ -600,7 +600,7 @@ void Sim::UseBuilding()
 	Vector2I pos2i = player->GetSpatialComponent()->GetPosition2DI();
 	Vector2I sector = ToSector( pos2i );
 
-	Chit* building = chitBag->QueryPorch( pos2i );
+	Chit* building = chitBag->QueryPorch( pos2i,0 );
 	if ( building && building->GetItem() ) {
 		IString name = building->GetItem()->IName();
 		ItemComponent* ic = player->GetItemComponent();
