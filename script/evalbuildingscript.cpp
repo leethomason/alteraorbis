@@ -27,8 +27,6 @@ void EvalBuildingScript::OnAdd()
 double EvalBuildingScript::EvalIndustrial( bool debugLog )
 {
 	Chit* building = ParentChit();
-	int count = 0;
-	double scale = 0;
 
 	int hitB = 0, hitIBuilding = 0, hitNBuilding = 0, hitWater = 0, hitPlant = 0, hitRock = 0, hitWaterfall = 0;
 	int hitShrub = 0;	// doesn't terminate a ray.
@@ -73,8 +71,6 @@ double EvalBuildingScript::EvalIndustrial( bool debugLog )
 		Rectangle2IEdgeIterator it(bounds);
 
 		while (!it.Done()) {
-			++count;
-
 			Vector2I pos = { it.Pos().x >= porch.max.x ? porch.max.x : porch.min.x,
 							 it.Pos().y >= porch.max.y ? porch.max.y : porch.min.y };
 
@@ -167,11 +163,11 @@ double EvalBuildingScript::EvalIndustrial( bool debugLog )
 		}
 		if (debugLog) {
 			Vector2I pos = building->GetSpatialComponent()->GetPosition2DI();
-			GLOUTPUT(("Building %s at %d,%d eval=%.2f scale=%.2f nRays=%d count=%d\n  hit: Build=%d (I=%d N=%d) water=%d plant=%d rock=%d\n",
+			GLOUTPUT(("Building %s at %d,%d eval=%.2f nRays=%d \n  hit: Build=%d (I=%d N=%d) water=%d plant=%d rock=%d\n",
 				building->GetItem()->Name(),
 				pos.x, pos.y,
 				eval,
-				scale, nRays, count,
+				nRays,
 				hitB, hitIBuilding, hitNBuilding, hitWater, hitPlant, hitRock));
 		}
 	}

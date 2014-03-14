@@ -1,10 +1,8 @@
 - "blue wall" bug. Alpha present. Not screen aligned. Noise in particles??
-- fire + shock too cheap to build
+- build explosive weapons (deferred for now)
 - GT: ui to show idle and busy workers
-- change shield to have cooldown then charge-up (rather than cooldown then reset)
 - redo AI utility to be based on a set of curves
 - fix / disable right mouse behavior
-- unify rockgen and worldgen. frustrating they are separate steps. or don't pass height to rockgen?
 - rethink spawning. spawn based on need? what's around?
 - add rez-in animation
 - show rock damage
@@ -14,7 +12,6 @@
 - standing shields!
 - maps: what direction is player pointed?
 - fix porch image (alpha of the tiles, if not general improvement)
-- AIs should account for personality and skills when doing inventory sorting
 - squisher, in streaming mode, to save files
 - target “Focus” shouldn’t switch so easily.
 - 32bit texture support
@@ -45,7 +42,22 @@
 - should be able to browse units in character screen
 - vault needs "sell to market" button
 - building repair
-x area for farms
+- system for gamui to track models
+- make sure UI shows shield boost BattleMechanics::ComputeShieldBoost()
+- add target portrait
+- review all atlases for texture mem usage
+- particles aren't additive correctly
+- credits scene
+- remove normalization in shader
+x print uniform count for shaders
+- animation aware hit testing
+- bounds need to be adjusted to account for animation
+- record perf max/min. surprisingly hard.
+- memory pool everything in the chit/component system
+- analyze/optimize what causes component update: DoTick(), etc. Likely many DoTicks() getting called that aren't needed. (especially rendering...)
+- add rez effect for item switch?
+- animation generation
+- peaks news
 
 - game
 	- Food-2
@@ -69,15 +81,16 @@ x area for farms
 		x move all crystal to mobs. runs out too easily.
 		x make greaters herd more??
 		x improve wiki on plants
-		- rampage broken
-		- rampage targets not matching up. different bits getting used in worldgen vs. game??
-		- sector herd broken
+		x sector herd broken (fix: adjusted rethink behavior. introduced by making sectorHerd !focused?)
 		x add zoning?
 		x too much waiting on fruit pickup?
 		x MOB filter: review where should be battle filter, etc. meaning changed.
+		x rampage broken
+		x rampage targets not matching up. different bits getting used in worldgen vs. game??
+		- Au and Crystal loss or tracking
 
-	- Zoning
-		- industrial, commercial, natural-spiritual
+	x Zoning
+		x industrial, commercial, natural-spiritual
 
 	- Census
 		x coolest stuff, past and present, by category
@@ -114,9 +127,9 @@ x area for farms
 		- flammability / shockability very agressive
 		- world effects morale/needs: water, tombstones, temples, etc.
 		- proper game start: location, selection of team color, icons
-		- cyclops attracted by tech?
+		x cyclops attracted by tech?
 		- turret
-		- influence zones for buildings
+		x influence zones for buildings
 		- team colors
 		- battle flags
     	- time scale culling
@@ -141,12 +154,12 @@ x area for farms
 			- space bar to pause
 			- tab to toggle weapons
 			- pause button
-		- shield: 
-			- xp from getting hit
-			- bugs in damage calc
-			- slow reload
-			- effects do something
-		- drop cash or return to vault
+		x shield: 
+			x xp from getting hit
+			x bugs in damage calc
+			x slow reload
+			x effects do something
+		x drop cash or return to vault
 		- balance battles
 		- history events
 		- item history
@@ -196,25 +209,6 @@ x area for farms
 		- battle results
 
 	x serialization
-
-- render-through for player behind objects
-- add target portrait
-- review all atlases for texture mem usage
-- particles aren't additive correctly
-d put metadata in model (authoring  time)
-- credits scene
-- remove normalization in shader
-- print uniform count for shaders
-- animation aware hit testing
-- bounds need to be adjusted to account for animation
-- record perf max/min. surprisingly hard.
-- memory pool everything in the chit/component system
-- analyze/optimize what causes component update: DoTick(), etc. Likely many DoTicks() getting called that aren't needed. (especially rendering...)
-- add rez effect for item switch?
-- animation generation
-- volcanos: taper at the end
-- zoom way out
-- peaks news
 
 ** Art **
 
@@ -272,6 +266,13 @@ http://weloveiconfonts.com/ : entypo
     		- food drives population?
 
 ---------- Defer ----------
+d volcanos: taper at the end
+d zoom way out
+d put metadata in model (authoring  time)
+d render-through for player behind objects
+d change shield to have cooldown then charge-up (rather than cooldown then reset)
+d unify rockgen and worldgen. frustrating they are separate steps. or don't pass height to rockgen?
+d AIs should account for personality and skills when doing inventory sorting
 d rings deflect bolts. too much AI change.
 d switch to ImageMagick for texture scaling
 - animation sync is generally flakey - lock to vsync? Not aware of any way to solve this.
@@ -292,6 +293,8 @@ V2 ideas:
 - level up grid and special skills
 
 ----------- FIXED -------------
+x fire + shock too cheap to build. 
+x area for farms
 x “when i die and click on the avatar screen moves to a new location each time i press.”
 x icons over head larger
  x Food

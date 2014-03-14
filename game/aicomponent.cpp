@@ -555,7 +555,12 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 		Vector2F heading = ToWorld2F( targetDesc.mapPos ) - pos2;
 		heading.Normalize();
 
-		if ( pmc ) pmc->QueueDest( pos2, &heading );
+		float angle = RotationXZDegrees(heading.x, heading.y);
+		// This seems like a good idea...BUT the PMC sends back destination
+		// reached messages. Which is a good thing, but causes the logic
+		// to reset. Go for the expedient solution: insta-turn for melee.
+		//if ( pmc ) pmc->QueueDest( pos2, &heading );
+		thisComp.spatial->SetYRotation(angle);
 	}
 	else {
 		// Move to target.
@@ -737,6 +742,7 @@ bool AIComponent::Move( const SectorPort& sp, bool focused )
 			pmc->QueueDest( dest2, 0, &sp );
 			currentAction = MOVE;
 			focus = focused ? FOCUS_MOVE : 0;
+			rethink = 0;
 			return true;
 		}
 	}
@@ -752,6 +758,7 @@ void AIComponent::Stand()
 			pmc->Stop();
 		}
 		currentAction = STAND;
+		rethink = 0;
 	}
 }
 
@@ -770,6 +777,7 @@ void AIComponent::Move( const grinliz::Vector2F& dest, bool focused, const Vecto
 		pmc->QueueDest( dest, normal );
 		currentAction = MOVE;
 		focus = focused ? FOCUS_MOVE : 0;
+		rethink = 0;
 	}
 }
 
@@ -851,9 +859,17 @@ WorkQueue* AIComponent::GetWorkQueue()
 
 void AIComponent::Rampage( int dest ) 
 { 
-	rampageTarget = dest; 
+	rampageTarget = dest;
+
+	ComponentSet thisComp(parentChit, Chit::RENDER_BIT |
+		Chit::SPATIAL_BIT |
+		Chit::ITEM_BIT |
+		ComponentSet::IS_ALIVE |
+		ComponentSet::NOT_IN_IMPACT);
+	GLASSERT(thisComp.okay && !RampageDone(thisComp));
+
 	aiMode = RAMPAGE_MODE; 
-	currentAction = NO_ACTION; 
+	currentAction = NO_ACTION;
 
 	NewsEvent news( NewsEvent::RAMPAGE, parentChit->GetSpatialComponent()->GetPosition2D(), parentChit );
 	NewsHistory::Instance()->Add( news );	
@@ -877,14 +893,20 @@ bool AIComponent::ThinkDoRampage( const ComponentSet& thisComp )
 	destinationBlocked = 0;
 	const ChitContext* context = GetChitContext();
 	const SectorData& sd = context->worldMap->GetSector( ToSector( thisComp.spatial->GetPosition2DI() ));
+	Vector2I pos2i = thisComp.spatial->GetPosition2DI();
 
 	CArray< int, 5 > targetArr;
-	targetArr.Push( 0 );	// always core.
+
+	if (pos2i != sd.core) {
+		targetArr.Push(0);	// always core.
+	}
 	for( int i=0; i<4; ++i ) {
-		if ( sd.ports & (1<<i)) {
+		int port = 1 << i;
+		if ((sd.ports & port) && !sd.GetPortLoc(port).Contains(pos2i)) {
 			targetArr.Push( i+1 );	// push the port, if it has it.
 		}
 	}
+	GLASSERT(targetArr.Size());
 
 	parentChit->random.ShuffleArray( targetArr.Mem(), targetArr.Size() );
 	this->Rampage( targetArr[0] );
@@ -2568,7 +2590,7 @@ int AIComponent::DoTick( U32 deltaTime )
 	if ( (thisComp.item->flags & GameItem::HAS_NEEDS) && needsTicker.Delta( deltaTime )) {
 		// Travel exists without needs - plenty of other things to go wrong.
 		if ( this->AtFriendlyOrNeutralCore() ) {
-			needs.DoTick( needsTicker.Period(), aiMode == BATTLE_MODE );
+			needs.DoTick( needsTicker.Period(), aiMode == BATTLE_MODE, &thisComp.item->GetPersonality() );
 			if ( thisComp.chit->PlayerControlled() ) {
 				thisComp.ai->GetNeedsMutable()->SetFull();
 			}
@@ -2603,7 +2625,6 @@ int AIComponent::DoTick( U32 deltaTime )
 
 		case MOVE:		
 			DoMove( thisComp );
-			rethink += deltaTime;
 			break;
 		case MELEE:		
 			DoMelee( thisComp );	
@@ -2615,7 +2636,6 @@ int AIComponent::DoTick( U32 deltaTime )
 			if ( taskList.Empty() ) {				// If there is a tasklist, it will manage standing and re-thinking.
 				DoStand( thisComp, deltaTime );		// We aren't doing the tasklist stand, so do the component stand
 				rethink += deltaTime;
-				DoStand( thisComp, deltaTime );
 			}
 			break;
 

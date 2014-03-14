@@ -1,4 +1,5 @@
 #include "aineeds.h"
+#include "../game/personality.h"
 #include "../grinliz/glutil.h"
 #include "../xarchive/glstreamer.h"
 
@@ -30,17 +31,37 @@ Needs::Needs()
 
 
 
-void Needs::DoTick( U32 delta, bool inBattle )
+void Needs::DoTick( U32 delta, bool inBattle, const Personality* personality )
 {
 	double dNeed = double(delta) * 0.001 / DECAY_TIME;
 
-	for( int i=0; i<NUM_NEEDS; ++i ) {
-		need[i] -= dNeed;
+	if (!personality) {
+		for (int i = 0; i < NUM_NEEDS; ++i) {
+			need[i] -= dNeed;
+		}
+		if (inBattle) {
+			need[FUN] += dNeed * 10.0;
+		}
+	}
+	else {
+		need[FOOD] -= dNeed;
+		if (personality->Introvert())
+			need[SOCIAL] -= dNeed * 0.5;
+		else if (personality->Extrovert())
+			need[SOCIAL] -= dNeed * 2.0;
+		else
+			need[SOCIAL] -= dNeed;
+		need[ENERGY] -= dNeed;
+		need[FUN] -= dNeed;
+
+		if (inBattle) {
+			if (personality->Fighting() == Personality::LIKES)
+				need[FUN] += dNeed * 10.0;
+			else if (personality->Fighting() == Personality::INDIFFERENT)
+				need[FUN] += dNeed * 2.0;
+		}
 	}
 
-	if ( inBattle ) {
-		need[FUN] += dNeed * 10.0;
-	}
 	ClampNeeds();
 
 	double min = need[0];

@@ -269,6 +269,12 @@ class GameItem :	private IMeleeWeaponItem,
 					private IRangedWeaponItem,
 					private IShield
 {
+private:
+	// ------ description ------
+	grinliz::IString		name;		// name of the item
+	grinliz::IString		properName;	// the proper name, if the item has one "John"
+	grinliz::IString		resource;	// resource used to  render the item
+
 public:
 	GameItem()								{ CopyFrom(0); Track();			}
 	GameItem( const GameItem& rhs )			{ CopyFrom( &rhs ); Track();	}
@@ -496,11 +502,6 @@ private:
 	void Track() const;
 	void UnTrack() const;
 	void UpdateTrack() const;
-
-	// ------ description ------
-	grinliz::IString		name;		// name of the item
-	grinliz::IString		properName;	// the proper name, if the item has one "John"
-	grinliz::IString		resource;	// resource used to  render the item
 
 	mutable int	id;						// unique id for this item. not assigned until needed, hence mutable
 	mutable grinliz::IString fullName;	// not serialized, but cached

@@ -61,6 +61,9 @@ public:
 								Grade( trait[INT_PHYS], -1 ),
 								Grade( trait[NEUROTIC_STABLE], -1 )); }
 
+	bool Introvert() const	{ return trait[INTRO_EXTRO] <= LOW; }
+	bool Extrovert() const	{ return trait[INTRO_EXTRO] >= HIGH; }
+
 	void Description( grinliz::GLString* str ) const;
 
 private:

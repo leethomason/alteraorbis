@@ -6,6 +6,7 @@
 #include "../grinliz/glutil.h"
 
 class XStream;
+class Personality;
 
 namespace ai {
 
@@ -58,7 +59,7 @@ public:
 	}
 
 	// Intended to be pretty long - every second or so.
-	void DoTick( U32 delta, bool inBattle );
+	void DoTick( U32 delta, bool inBattle, const Personality* );
 
 	// Needs to load from XML - declared in the itemdef.xml
 	void Serialize( XStream* xs );

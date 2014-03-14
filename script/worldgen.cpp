@@ -748,12 +748,19 @@ void WorldGen::CalcPath( const SectorData* s )
 	for (int i = 0; i<WorldGrid::NUM_DEST; ++i) {
 		Vector2I origin = s->core;
 
+		if (i>0) {
+			int port = (1 << (i - 1));
+			if (!(s->ports & port)) {
+				continue;
+			}
+		}
+
 		switch (i) {
 		case WorldGrid::PS_CORE:	/* nothing. already set.*/	break;
-		case WorldGrid::PS_NEG_X:	s->GetPortLoc(SectorData::NEG_X).Center();	break;
-		case WorldGrid::PS_POS_X:	s->GetPortLoc(SectorData::POS_X).Center();	break;
-		case WorldGrid::PS_NEG_Y:	s->GetPortLoc(SectorData::NEG_Y).Center();	break;
-		case WorldGrid::PS_POS_Y:	s->GetPortLoc(SectorData::POS_Y).Center();	break;
+		case WorldGrid::PS_NEG_X:	origin = s->GetPortLoc(SectorData::NEG_X).Center();	break;
+		case WorldGrid::PS_POS_X:	origin = s->GetPortLoc(SectorData::POS_X).Center();	break;
+		case WorldGrid::PS_NEG_Y:	origin = s->GetPortLoc(SectorData::NEG_Y).Center();	break;
+		case WorldGrid::PS_POS_Y:	origin = s->GetPortLoc(SectorData::POS_Y).Center();	break;
 		default: GLASSERT(0);
 		}
 		Color( bounds, origin );

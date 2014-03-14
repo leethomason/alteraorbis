@@ -178,37 +178,40 @@ void ItemComponent::AddBattleXP( bool isMelee, int killshotLevel, const GameItem
 		}
 	}
 
-	GameItem* weapon = 0;
+	GameItem* weapon[2] = { 0, 0 };	// weapon, shield
 	if ( isMelee ) {
 		IMeleeWeaponItem*  melee  = GetMeleeWeapon();
 		if ( melee ) 
-			weapon = melee->GetItem();
+			weapon[0] = melee->GetItem();
 	}
 	else {
 		IRangedWeaponItem* ranged = GetRangedWeapon( 0 );
 		if ( ranged )
-			weapon = ranged->GetItem();
+			weapon[0] = ranged->GetItem();
 	}
-	if ( weapon ) {
-		// instrinsic parts don't level up...that is just
-		// really an extension of the main item.
-		if (( weapon->flags & GameItem::INTRINSIC) == 0 ) {
-			weapon->GetTraitsMutable()->AddBattleXP( killshotLevel );
-			NameItem( weapon );
+	weapon[1] = this->GetShield() ? this->GetShield()->GetItem() : 0;
+
+	for (int i = 0; i < 2; ++i) {
+		if (weapon[i]) {
+			// instrinsic parts don't level up...that is just
+			// really an extension of the main item.
+			if ((weapon[i]->flags & GameItem::INTRINSIC) == 0) {
+				weapon[i]->GetTraitsMutable()->AddBattleXP(killshotLevel);
+				NameItem(weapon[i]);
+			}
 		}
 	}
 
-
 	if ( killshotLevel ) {
-		// Credit the main item and weapon.
+		// Credit the main item and weapon. (But not the shield.)
 		mainItem->historyDB.Increment( "Kills" );
 		if ( isGreater )
 			mainItem->historyDB.Increment( "Greater" );
 
-		if ( weapon ) {
-			weapon->historyDB.Increment( "Kills" );
+		if ( weapon[0] ) {
+			weapon[0]->historyDB.Increment( "Kills" );
 			if ( isGreater )
-				weapon->historyDB.Increment( "Greater" );
+				weapon[0]->historyDB.Increment( "Greater" );
 		}
 
 		if ( loser ) {
@@ -217,8 +220,8 @@ void ItemComponent::AddBattleXP( bool isMelee, int killshotLevel, const GameItem
 
 			mainItem->historyDB.Increment( str.c_str() );
 
-			if ( weapon ) {
-				weapon->historyDB.Increment( str.c_str() );
+			if ( weapon[0] ) {
+				weapon[0]->historyDB.Increment( str.c_str() );
 			}
 		}
 	}
