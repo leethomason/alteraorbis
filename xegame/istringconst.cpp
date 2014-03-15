@@ -50,6 +50,7 @@ IString IStringConst::troll;
 IString IStringConst::cyclops;
 IString IStringConst::fireCyclops;
 IString IStringConst::shockCyclops;
+IString IStringConst::dummyTarget;
 IString IStringConst::lesser;
 IString IStringConst::greater;
 IString IStringConst::denizen;
@@ -108,6 +109,7 @@ void IStringConst::Init()
 	cyclops = StringPool::Intern( "cyclops", true );
 	fireCyclops = StringPool::Intern( "fireCyclops", true );
 	shockCyclops = StringPool::Intern( "shockCyclops", true );
+	dummyTarget = StringPool::Intern( "dummyTarget", true );
 	lesser = StringPool::Intern( "lesser", true );
 	greater = StringPool::Intern( "greater", true );
 	denizen = StringPool::Intern( "denizen", true );

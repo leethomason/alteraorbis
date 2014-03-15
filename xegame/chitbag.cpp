@@ -425,6 +425,10 @@ void ChitBag::QuerySpatialHash(	grinliz::CDynArray<Chit*>* array,
 	GLASSERT( accept );
 	Rectangle2I r;
 	r.Set( (int)rf.min.x, (int)rf.min.y, (int)rf.max.x, (int)rf.max.y );
+	Rectangle2I bounds;
+	bounds.Set(0, 0, MAX_MAP_SIZE - 1, MAX_MAP_SIZE - 1);
+	r.DoIntersection(bounds);
+
 	array->Clear();
 
 	for( int pass=0; pass<2; ++pass ) {

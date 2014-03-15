@@ -77,6 +77,7 @@ public:
 	static grinliz::IString cyclops;
 	static grinliz::IString fireCyclops;
 	static grinliz::IString shockCyclops;
+	static grinliz::IString dummyTarget;
 
 	static grinliz::IString lesser;
 	static grinliz::IString greater;

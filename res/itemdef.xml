@@ -362,8 +362,8 @@
     </intrinsics>
   </item>
 
-  <item name="dummytarget"
-        resource="dummytarget"
+  <item name="dummyTarget"
+        resource="dummyTarget"
         mass="30"
         />
 

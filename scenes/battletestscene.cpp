@@ -337,7 +337,7 @@ Chit* BattleTestScene::CreateChit( const Vector2I& p, int type, int loadout, int
 {
 	const char* itemName = "";
 	switch ( type ) {
-	case DUMMY:			itemName = "dummytarget";		break;
+	case DUMMY:			itemName = "dummyTarget";		break;
 	case HUMAN:			itemName = "humanFemale";		break;
 	case ARACHNOID:		itemName = "arachnoid";			break;
 	case MANTIS:		itemName = "mantis";			break;

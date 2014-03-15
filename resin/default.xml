@@ -220,7 +220,7 @@
     <meta name="target" pos="0 0.71 0" />
   </model>
 
-  <model filename="dummytarget.ac" shading="flat" polyRemoval="pre">
+  <model assetName="dummyTarget" filename="dummytarget.ac" shading="flat" polyRemoval="pre">
     <meta name="target" pos="0 0.5 0" />
   </model>
 
