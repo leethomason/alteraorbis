@@ -100,6 +100,7 @@ void MapSpatialComponent::UpdatePorch( bool clearPorch )
 					int q = int((1.0 + dot) * 2.0 + 0.5);
 					// q=0, no porch. q=1 default.
 					hasPorch = q + 2;
+					GLASSERT(hasPorch > 1 && hasPorch < WorldGrid::NUM_PORCH);
 				}
 			}
 		}

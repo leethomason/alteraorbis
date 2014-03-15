@@ -585,6 +585,7 @@ private:
 			buckets = new Bucket[nBuckets];
 
 			nItems = 0;
+			nDeleted = 0;
 			for( int i=0; i<values.Size(); ++i ) {
 				Add( values[i].key, values[i].value );
 			}

@@ -161,6 +161,8 @@ double EvalBuildingScript::EvalIndustrial( bool debugLog )
 				nRays = 2;
 			eval = double(industrial - natural) / double(nRays);
 		}
+		eval = Clamp(eval, -1.0, 1.0);
+
 		if (debugLog) {
 			Vector2I pos = building->GetSpatialComponent()->GetPosition2DI();
 			GLOUTPUT(("Building %s at %d,%d eval=%.2f nRays=%d \n  hit: Build=%d (I=%d N=%d) water=%d plant=%d rock=%d\n",
