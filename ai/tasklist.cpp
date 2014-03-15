@@ -273,9 +273,8 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta )
 						// Move the build cost to the building. The gold is held there until the
 						// building is destroyed
 						GameItem* controllerItem = controller->GetItem();
-						controllerItem->wallet.gold -= buildData.cost; 
 						Chit* building = chitBag->NewBuilding( task->pos2i, buildData.cStructure, chit->PrimaryTeam() );
-						building->GetItem()->wallet.AddGold( buildData.cost );
+						Transfer(&building->GetItem()->wallet, &controllerItem->wallet, buildData.cost);
 					}
 					Remove();
 				}
@@ -532,8 +531,7 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 	if ( buildingName == IStringConst::vault ) {
 		GameItem* vaultItem = building->GetItem();
 		GLASSERT( vaultItem );
-		Wallet w = thisComp.item->wallet.EmptyWallet();
-		vaultItem->wallet.Add( w );
+		Transfer(&vaultItem->wallet, &thisComp.item->wallet, thisComp.item->wallet);
 
 		// Put everything in the vault.
 		ItemComponent* vaultIC = building->GetItemComponent();
@@ -541,8 +539,7 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 
 		// Move gold & crystal to the owner.
 		if ( controller && controller->GetItemComponent() ) {
-			Wallet w = vaultItem->wallet.EmptyWallet();
-			controller->GetItem()->wallet.Add( w );
+			Transfer(&controller->GetItem()->wallet, &vaultItem->wallet, vaultItem->wallet);
 		}
 		building->SetTickNeeded();
 		return;
@@ -759,7 +756,6 @@ bool TaskList::UseFactory( const ComponentSet& thisComp, Chit* factory, int tech
 		forge.Build( itemType, subType, parts, effects, item, &wallet, &techRequired, true );
 
 		if ( wallet <= thisComp.item->wallet && techRequired <= tech ) {
-			thisComp.item->wallet.Remove( wallet );
 			break;
 		}
 
@@ -772,6 +768,7 @@ bool TaskList::UseFactory( const ComponentSet& thisComp, Chit* factory, int tech
 			parts &= ~(partsArr[cp++]);
 		}
 	}
+	Transfer(&item->wallet, &thisComp.item->wallet, wallet);
 	thisComp.itemComponent->AddToInventory( item );
 	thisComp.itemComponent->AddCraftXP( wallet.NumCrystals() );
 	thisComp.item->historyDB.Increment( "Crafted" );

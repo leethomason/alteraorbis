@@ -74,8 +74,7 @@ const GameItem* MarketAI::HasShield( int au, int minValue )	{ return Has( 0, HAR
 						GameItem* gi = seller->RemoveFromInventory( i );
 						GLASSERT( gi );
 						buyer->AddToInventory( gi );
-						buyer->GetItem()->wallet.AddGold( -cost );
-						seller->GetItem()->wallet.AddGold( cost );
+						Transfer(&seller->GetItem()->wallet, &buyer->GetItem()->wallet, cost);
 
 						Vector2F pos    = { 0, 0 };
 						Vector2I sector = { 0, 0 };

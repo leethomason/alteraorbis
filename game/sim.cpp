@@ -265,56 +265,33 @@ void Sim::CreatePlayer()
 
 void Sim::CreatePlayer( const grinliz::Vector2I& pos )
 {
-	bool female = true;
-	const char* assetName = "humanFemale";
-	if ( random.Bit() ) {
-		female = false;
-		assetName = "humanMale";
-	}
-
-	Chit* chit = chitBag->NewChit();
+	Chit* chit = chitBag->NewDenizen(pos, TEAM_HOUSE0);
 	chit->SetPlayerControlled( true );
 	playerID = chit->ID();
 	chitBag->GetCamera( engine )->SetTrack( playerID );
 
-	chit->Add( new SpatialComponent());
-	chit->Add( new RenderComponent( assetName ));
-	chit->Add( new PathMoveComponent());
+	GameItem* items[3] = { 0, 0, 0 };
+	items[0] = chitBag->AddItem( "shield", chit, engine, 0, 0 );
+	items[1] = chitBag->AddItem( "blaster", chit, engine, 0, 0 );
+	items[2] = chitBag->AddItem( "ring", chit, engine, 0, 0 );
 
-	chitBag->AddItem( assetName, chit, engine, TEAM_HOUSE0, 0 );
-	chitBag->AddItem( "shield", chit, engine, 0, 0 );
-	chitBag->AddItem( "blaster", chit, engine, 0, 0 );
-	chitBag->AddItem( "ring", chit, engine, 0, 0 );
-	chit->GetItem()->wallet.AddGold( ReserveBank::Instance()->WithdrawDenizen() );
-	chit->GetItem()->GetTraitsMutable()->Roll( playerID );
-	chit->GetItem()->GetPersonalityMutable()->Roll( playerID+37*51, &chit->GetItem()->Traits() );
-
-	IString nameGen = chit->GetItem()->keyValues.GetIString( "nameGen" );
-	if ( !nameGen.empty() ) {
-		chit->GetItem()->SetProperName( StringPool::Intern( 
-			lumosGame->GenName( nameGen.c_str(), 
-								chit->ID(),
-								4, 8 )));
+	// Doesn't work, since QCore doesn't have a chitID.
+	// Bigger FIXME issue than thought. Probably should
+	// add dieties as actual (indestructable) chits.
+	/*
+	if (NewsHistory::Instance()) {
+		NewsEvent news(NewsEvent::FORGED, pos, shield, chit);
+		NewsHistory::Instance()->Add(news);
+		shield->keyValues.Set("destroyMsg", NewsEvent::UN_FORGED);
 	}
-	AIComponent* ai = new AIComponent();
-	ai->EnableDebug( true );
-	chit->Add( ai );
+	*/
 
-	chit->Add( new HealthComponent());
+	chit->GetAIComponent()->EnableDebug( true );
 	chit->GetSpatialComponent()->SetPosYRot( (float)pos.x+0.5f, 0, (float)pos.y+0.5f, 0 );
 
 	// Player speed boost
 	chit->GetItem()->keyValues.Set( "speed",  DEFAULT_MOVE_SPEED*1.5f/1.2f );
 	chit->GetItem()->hpRegen = 1.0f;
-
-	Vector2I sector = ToSector( pos );
-	CoreScript::GetCore( sector )->AddCitizen( chit );
-
-	NewsHistory* history = NewsHistory::Instance();
-	if ( history ) {
-		history->Add( NewsEvent( NewsEvent::DENIZEN_CREATED, ToWorld2F(pos), chit, 0 ));
-		chit->GetItem()->keyValues.Set( "destroyMsg", NewsEvent::DENIZEN_KILLED );
-	}
 }
 
 

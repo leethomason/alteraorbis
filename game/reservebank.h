@@ -37,9 +37,6 @@ public:
 	int WithdrawDenizen();
 	Wallet WithdrawMonster();
 
-	//int WithdrawVolcanoGold();
-	//Wallet WithdrawVolcano();
-
 	// Withdraws 1 or 0 crystals. type is returned.
 	int WithdrawRandomCrystal();
 	static ReserveBank* Instance() { return instance; }

@@ -1,5 +1,6 @@
 #include "aineeds.h"
 #include "../game/personality.h"
+#include "../game/lumosmath.h"
 #include "../grinliz/glutil.h"
 #include "../xarchive/glstreamer.h"
 
@@ -44,15 +45,10 @@ void Needs::DoTick( U32 delta, bool inBattle, const Personality* personality )
 		}
 	}
 	else {
-		need[FOOD] -= dNeed;
-		if (personality->Introvert())
-			need[SOCIAL] -= dNeed * 0.5;
-		else if (personality->Extrovert())
-			need[SOCIAL] -= dNeed * 2.0;
-		else
-			need[SOCIAL] -= dNeed;
+		need[FOOD]   -= dNeed;
+		need[SOCIAL] -= dNeed * Dice3D6ToMult(personality->IntroExtro());	// social decays faster for extroverts
 		need[ENERGY] -= dNeed;
-		need[FUN] -= dNeed;
+		need[FUN]	 -= dNeed;
 
 		if (inBattle) {
 			if (personality->Fighting() == Personality::LIKES)

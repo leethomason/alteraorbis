@@ -64,7 +64,6 @@ void CensusScene::ItemTapped( const gamui::UIItem* item )
 
 void CensusScene::ScanItem( ItemComponent* ic, const GameItem* item )
 {
-	allWallet.Add( item->wallet );
 	if ( item->Intrinsic() ) return;
 
 	IString mobIStr = item->keyValues.GetIString( "mob" );
@@ -125,19 +124,20 @@ void CensusScene::Scan()
 		nChits += arr.Size();
 
 		for ( int i=0; i<arr.Size(); ++i ) {
+			ItemComponent* ic = arr[i]->GetItemComponent();
+			if (!ic) continue;
 
-			GameItem* item = arr[i]->GetItem();
-			if ( !item ) continue;
+			for (int j = 0; j < ic->NumItems(); ++j) {
+				GameItem* item = ic->GetItem(j);
+				if (!item) continue;
 
-			if (   item->ToWeapon()
-				|| item->ToShield()
-				|| !item->keyValues.GetIString( IStringConst::mob ).empty() )
-			{
-				ItemComponent* ic = arr[i]->GetItemComponent();
-				if ( ic ) {
-					for( int k=0; k<ic->NumItems(); ++k ) {
-						ScanItem( ic, ic->GetItem(k));
-					}
+				allWallet.Add(item->wallet);
+
+				if (item->ToWeapon()
+					|| item->ToShield()
+					|| !item->keyValues.GetIString(IStringConst::mob).empty())
+				{
+					ScanItem(ic, item);
 				}
 			}
 		}

@@ -91,5 +91,25 @@ struct Wallet
 	int crystal[NUM_CRYSTAL_TYPES];
 };
 
+
+inline void Transfer(Wallet* to, Wallet* from, int gold) {
+	GLASSERT(from->gold >= gold);
+	from->gold -= gold;
+	to->gold += gold;
+}
+
+inline void Transfer(Wallet* to, Wallet* from, const Wallet& w)
+{
+	GLASSERT(from->gold >= w.gold);
+	from->gold -= w.gold;
+	to->gold += w.gold;
+
+	for (int i = 0; i < NUM_CRYSTAL_TYPES; ++i) {
+		GLASSERT(from->crystal[i] >= w.crystal[i]);
+		from->crystal[i] -= w.crystal[i];
+		to->crystal[i] += w.crystal[i];
+	}
+}
+
 #endif
 
