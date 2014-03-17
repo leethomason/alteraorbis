@@ -457,8 +457,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			 && gold->GetItem()				// it has an item component
 			 && mainItem->hp > 0 )			// this item is alive
 		{
-			mainItem->wallet.Add( gold->GetItem()->wallet );
-			gold->GetItem()->wallet.EmptyWallet();
+			Transfer(&mainItem->wallet, &gold->GetItem()->wallet, gold->GetItem()->wallet);
 
 			// Need to delete the gold, else it will track to us again!
 			gold->QueueDelete();
