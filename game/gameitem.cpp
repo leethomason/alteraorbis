@@ -69,6 +69,16 @@ void Cooldown::Serialize( XStream* xs, const char* name )
 }
 
 int GameItem::idPool = 0;
+bool GameItem::trackWallet = true;
+
+GameItem::~GameItem()
+{ 
+	if (trackWallet) {
+		GLASSERT(wallet.IsEmpty());
+	}
+	UnTrack(); 
+}
+
 
 // Group all the copy/init in one place!
 void GameItem::CopyFrom( const GameItem* rhs ) {

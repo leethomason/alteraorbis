@@ -55,11 +55,13 @@ ChitBag::~ChitBag()
 
 void ChitBag::DeleteAll()
 {
+	GameItem::trackWallet = false;
 	chitID.RemoveAll();
 	while ( !blocks.Empty() ) {
 		Chit* block = blocks.Pop();
 		delete [] block;
 	}
+	GameItem::trackWallet = true;
 	bolts.Clear();
 }
 

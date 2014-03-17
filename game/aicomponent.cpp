@@ -2515,11 +2515,6 @@ int AIComponent::DoTick( U32 deltaTime )
 	ChitBag* chitBag = this->GetChitBag();
 	const ChitContext* context = GetChitContext();
 
-	// Focuesd move check
-//	if ( focus == FOCUS_MOVE ) {
-//		return GetThinkTime();
-//	}
-
 	// If focused, make sure we have a target.
 	if ( targetDesc.id ) {
 		Chit* chit = chitBag->GetChit( targetDesc.id );
@@ -2663,6 +2658,12 @@ int AIComponent::DoTick( U32 deltaTime )
 
 	if ( debugFlag && (currentAction != oldAction) ) {
 		GLOUTPUT(( "ID=%d mode=%s action=%s\n", thisComp.chit->ID(), MODE_NAMES[aiMode], ACTION_NAMES[currentAction] ));
+	}
+
+	// Without this rethink ticker melee fighters run past
+	// each other and all kinds of other silliness.
+	if (aiMode == BATTLE_MODE) {
+		rethink += deltaTime;
 	}
 	return (currentAction != NO_ACTION) ? GetThinkTime() : 0;
 }

@@ -148,6 +148,7 @@ Game::~Game()
 	PROFILE_DESTROY();
 
 	GLOUTPUT_REL(( "Game destructor complete.\n" ));
+	GameItem::trackWallet = true;
 }
 
 

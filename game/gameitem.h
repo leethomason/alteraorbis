@@ -279,7 +279,9 @@ public:
 	GameItem()								{ CopyFrom(0); Track();			}
 	GameItem( const GameItem& rhs )			{ CopyFrom( &rhs ); Track();	}
 	void operator=( const GameItem& rhs )	{ int savedID = id; CopyFrom( &rhs ); id = savedID; UpdateTrack();	}
-	virtual ~GameItem()						{ UnTrack(); }
+
+	static bool trackWallet;
+	virtual ~GameItem();
 
 	virtual GameItem* GetItem() { return this; }
 	virtual const GameItem* GetItem() const { return this; }

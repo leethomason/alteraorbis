@@ -89,7 +89,7 @@ x print uniform count for shaders
 		x rampage targets not matching up. different bits getting used in worldgen vs. game??
 		x Au and Crystal loss or tracking
 		- money still disappearing...
-		- battle "walk past"
+		x battle "walk past"
 
 	x Zoning
 		x industrial, commercial, natural-spiritual
