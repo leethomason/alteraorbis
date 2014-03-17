@@ -100,14 +100,17 @@ inline void Transfer(Wallet* to, Wallet* from, int gold) {
 
 inline void Transfer(Wallet* to, Wallet* from, const Wallet& w)
 {
+	// The amount to transfer is commonly the 'from' wallet.
+	// So operate on 'to' before 'from'
 	GLASSERT(from->gold >= w.gold);
-	from->gold -= w.gold;
+	GLASSERT(to != &w);
 	to->gold += w.gold;
+	from->gold -= w.gold;
 
 	for (int i = 0; i < NUM_CRYSTAL_TYPES; ++i) {
 		GLASSERT(from->crystal[i] >= w.crystal[i]);
-		from->crystal[i] -= w.crystal[i];
 		to->crystal[i] += w.crystal[i];
+		from->crystal[i] -= w.crystal[i];
 	}
 }
 
