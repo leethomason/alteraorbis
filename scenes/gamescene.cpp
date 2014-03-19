@@ -593,7 +593,7 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 #endif
 			}
 			else if ( tapMod == GAME_TAP_MOD_SHIFT ) {
-				
+#if 0
 				for( int i=0; i<NUM_PLANT_TYPES; ++i ) {
 					Chit* chit = sim->CreatePlant( (int)plane.x+i, (int)plane.z, i );
 					if ( chit ) {
@@ -604,12 +604,13 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 						}
 					}
 				}
-
-#if 0	// monsters
+#endif
+#if 1	// monsters
 				Vector3F p = plane;
 				p.y = 0;
 				for( int i=0; i<5; ++i ) {
-					sim->GetChitBag()->NewMonsterChit( plane, "mantis", TEAM_GREEN_MANTIS );
+					sim->GetChitBag()->NewMonsterChit(plane, "redMantis", TEAM_RED_MANTIS);
+					//sim->GetChitBag()->NewMonsterChit(plane, "mantis", TEAM_GREEN_MANTIS);
 					p.x += 1.0f;
 				}
 #endif

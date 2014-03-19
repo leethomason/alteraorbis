@@ -73,7 +73,9 @@ ItemComponent::~ItemComponent()
 void ItemComponent::DebugStr( grinliz::GLString* str )
 {
 	const GameItem* item = itemArr[0];
-	str->AppendFormat( "[Item] %s hp=%.1f/%d lvl=%d", item->Name(), item->hp, item->TotalHP(), item->Traits().Level() );
+	str->AppendFormat( "[Item] %s hp=%.1f/%d lvl=%d tm=%d ", 
+		item->Name(), item->hp, item->TotalHP(), item->Traits().Level(),
+		item->primaryTeam );
 }
 
 

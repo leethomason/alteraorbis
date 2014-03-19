@@ -276,6 +276,22 @@ void AIComponent::GetFriendEnemyLists()
 			}
 		}
 	}
+
+	// If the enemy list is empty of MOBs, look for buildings.
+	if (enemyList.Empty()) {
+		BuildingFilter buildingFilter;
+		GetChitBag()->QuerySpatialHash(&chitArr, zone, parentChit, &buildingFilter);
+		for (int i = 0; i < chitArr.Size(); ++i) {
+			int status = GetTeamStatus(chitArr[i]);
+			if (status == RELATE_ENEMY) {
+				if (enemyList.HasCap()
+					&& (context->worldMap->HasStraightPath(center, chitArr[i]->GetSpatialComponent()->GetPosition2D())))
+				{
+					enemyList.Push(chitArr[i]->ID());
+				}
+			}
+		}
+	}
 }
 
 
