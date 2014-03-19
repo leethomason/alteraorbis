@@ -3,6 +3,7 @@
 #include "../game/news.h"
 #include "../grinliz/glstringutil.h"
 #include "../script/battlemechanics.h"
+#include "../xegame/chitbag.h"
 
 using namespace gamui;
 using namespace grinliz;
@@ -29,7 +30,7 @@ void ItemDescWidget::SetVisible( bool v )
 }
 
 
-void ItemDescWidget::SetInfo( const GameItem* item, const GameItem* user, bool showPersonality )
+void ItemDescWidget::SetInfo( const GameItem* item, const GameItem* user, bool showPersonality, ChitBag* chitBag )
 {
 	textBuffer.Clear();
 	CStr<64> str;
@@ -122,14 +123,16 @@ void ItemDescWidget::SetInfo( const GameItem* item, const GameItem* user, bool s
 	}
 
 	textBuffer += '\n';
-	NewsHistory* history = NewsHistory::Instance();
-	if ( history ) {
+
+	NewsHistory* history = chitBag ? chitBag->GetNewsHistory() : 0;
+
+	if ( history && chitBag ) {
 		GLString s;
 
 		int num=0;
 		const NewsEvent** events = history->Find( item->ID(), true, &num, 0 );
 		for( int i=0; i<num; ++i ) {
-			events[i]->Console( &s );
+			events[i]->Console( &s, chitBag );
 			if ( !s.empty() ) {
 				textBuffer += s.c_str();
 				textBuffer += '\n';

@@ -6,6 +6,7 @@
 #include "../xegame/rendercomponent.h"
 #include "../game/lumoschitbag.h"
 #include "corescript.h"
+#include "evalbuildingscript.h"
 
 using namespace grinliz;
 
@@ -64,11 +65,16 @@ int DistilleryScript::DoTick( U32 delta )
 		GLASSERT( sc );
 		Vector2I sector = ToSector( sc->GetPosition2DI() );
 		CoreScript* cs = CoreScript::GetCore( sector );
+		EvalBuildingScript* evalScript = (EvalBuildingScript*) scriptContext->chit->GetScript("EvalBuildingScript");
 	
 		int tech = cs->GetTechLevel();
 		int dProg = (tech+1) * progressTick.Period() / TECH_MAX;
+		double p = double(dProg*n);
+		if (evalScript) {
+			p *= 0.5 + 0.5*evalScript->EvalIndustrial(false);
+		}
 
-		progress += dProg*n;
+		progress += int(p);
 
 		while (progress >= ELIXIR_TIME) {
 			progress -= ELIXIR_TIME;

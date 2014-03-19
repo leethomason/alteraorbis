@@ -169,6 +169,7 @@ void CensusScene::Scan()
 
 	ReserveBank* reserve = ReserveBank::Instance();
 	const Wallet& reserveWallet = reserve->bank;
+	NewsHistory* history = chitBag->GetNewsHistory();
 
 	GLString str;
 	str.Format( "Chits: %d\n", nChits );
@@ -185,13 +186,13 @@ void CensusScene::Scan()
 	str.AppendFormat( "MOBs:\tAu=%d Green=%d Red=%d Blue=%d Violet=%d\n", mobWallet.gold, mobWallet.crystal[0], mobWallet.crystal[1], mobWallet.crystal[2], mobWallet.crystal[3] );
 	str.append( "\n" );
 	str.append( "Kills:\n" );
-	str.append( "  Total\t" );				killsActive.AppendDesc( &str );	str.append( "\n" );
-	str.append( "\t" );						killsAny.AppendDesc( &str );	str.append( "\n" );
-	str.append( "  Greater\t" );			greaterKillsActive.AppendDesc( &str );	str.append( "\n" );
-	str.append( "\t" );						greaterKillsAny.AppendDesc( &str );	str.append( "\n" );
+	str.append( "  Total\t" );				killsActive.AppendDesc( &str, history );	str.append( "\n" );
+	str.append( "\t" );						killsAny.AppendDesc( &str, history );	str.append( "\n" );
+	str.append( "  Greater\t" );			greaterKillsActive.AppendDesc( &str, history );	str.append( "\n" );
+	str.append( "\t" );						greaterKillsAny.AppendDesc( &str, history );	str.append( "\n" );
 	str.append( "\nCrafting:\n" );
-	str.append( "\t" );						craftedActive.AppendDesc( &str );str.append( "\n" );
-	str.append( "\t" );						craftedAny.AppendDesc( &str );	str.append( "\n" );
+	str.append( "\t" );						craftedActive.AppendDesc( &str, history );str.append( "\n" );
+	str.append( "\t" );						craftedAny.AppendDesc( &str, history );	str.append( "\n" );
 	str.append( "\nNotable:\n" );
 
 	for( int i=0; i<MOB_COUNT; ++i ) {
@@ -201,7 +202,7 @@ void CensusScene::Scan()
 			h.Set( mobActive[i].item );
 			
 			str.AppendFormat( "  %s\t", NAME[i] );
-			h.AppendDesc( &str );
+			h.AppendDesc( &str, history );
 
 			Chit* chit = mobActive[i].ic->ParentChit();
 			SpatialComponent* sc = chit->GetSpatialComponent();
@@ -224,7 +225,7 @@ void CensusScene::Scan()
 			h.Set( itemActive[i].item );
 
 			str.AppendFormat( "%s\t", NAME[i] );
-			h.AppendDesc( &str );
+			h.AppendDesc( &str, history );
 
 			const GameItem* mainItem = itemActive[i].ic->GetItem(0);
 			IString mob = mainItem->keyValues.GetIString( "mob" );

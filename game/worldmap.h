@@ -39,6 +39,7 @@ class Model;
 class ChitBag;
 class SectorData;
 class DamageDesc;
+class NewsHistory;
 
 /*
 	Remembering Y is up and we are in the xz plane:
@@ -77,6 +78,7 @@ public:
 
 	// Call to turn on rock rendering and make map aware of "InUse"
 	void AttachEngine( Engine* engine, IMapGridUse* iMapInUse  );
+	void AttachHistory(NewsHistory* h) { newsHistory = h; }
 
 	// Test initiliazation:
 	void InitCircle();
@@ -330,6 +332,7 @@ private:
 	Engine*						engine;
 	IMapGridUse*				iMapGridUse;
 	int							slowTick;
+	NewsHistory*				newsHistory;
 
 	WorldInfo*					worldInfo;
 	grinliz::Rectangle2I		debugRegionOverlay;

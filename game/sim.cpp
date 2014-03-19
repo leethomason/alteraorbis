@@ -66,8 +66,8 @@ Sim::Sim( LumosGame* g ) : minuteClock( 60*1000 ), secondClock( 1000 ), volcTime
 	context.Set( engine, worldMap, g );
 	chitBag = new LumosChitBag( context );
 
-	newsHistory = new NewsHistory( chitBag );
 	worldMap->AttachEngine( engine, chitBag );
+	worldMap->AttachHistory(chitBag->GetNewsHistory());
 	playerID = 0;
 	currentVisitor = 0;
 
@@ -85,7 +85,7 @@ Sim::~Sim()
 	delete weather;
 	delete reserveBank;
 	worldMap->AttachEngine( 0, 0 );
-	delete newsHistory;
+	worldMap->AttachHistory(0);
 	delete chitBag;
 	delete engine;
 	delete worldMap;
@@ -159,7 +159,6 @@ void Sim::Load( const char* mapDAT, const char* gameDAT )
 			secondClock.Serialize( &reader, "secondClock" );
 			volcTimer.Serialize( &reader, "volcTimer" );
 			itemDB->Serialize( &reader );
-			newsHistory->Serialize( &reader );
 			reserveBank->Serialize( &reader );
 			visitors->Serialize( &reader );
 			engine->camera.Serialize( &reader );
@@ -200,7 +199,6 @@ void Sim::Save( const char* mapDAT, const char* gameDAT )
 			secondClock.Serialize( &writer, "secondClock" );
 			volcTimer.Serialize( &writer, "volcTimer" );
 			itemDB->Serialize( &writer );
-			newsHistory->Serialize( &writer );
 			reserveBank->Serialize( &writer );
 			visitors->Serialize( &writer );
 			engine->camera.Serialize( &writer );
@@ -309,7 +307,6 @@ Texture* Sim::GetMiniMapTexture()
 
 void Sim::DoTick( U32 delta )
 {
-	NewsHistory::Instance()->DoTick( delta );
 	worldMap->DoTick( delta, chitBag );
 
 	chitBag->DoTick( delta );
@@ -324,7 +321,7 @@ void Sim::DoTick( U32 delta )
 	static const int NUM_VOLC = MAX_MAP_SIZE*MAX_MAP_SIZE / (VOLC_DIAM*VOLC_DIAM);
 	int MSEC_TO_VOLC = AGE_IN_MSEC / NUM_VOLC;
 
-	int age = NewsHistory::Instance()->AgeI();
+	int age = chitBag->GetNewsHistory()->AgeI();
 
 	// NOT Age of Fire:
 	volcTimer.SetPeriod( (age > 1 ? MSEC_TO_VOLC*4 : MSEC_TO_VOLC) + random.Rand(1000) );

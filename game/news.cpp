@@ -12,13 +12,11 @@ NewsHistory* StackedSingleton< NewsHistory >::instance = 0;
 
 NewsHistory::NewsHistory( ChitBag* _chitBag ) : date(0), chitBag(_chitBag)
 {
-	PushInstance( this );
 }
 
 
 NewsHistory::~NewsHistory()
 {
-	PopInstance( this );
 }
 
 
@@ -39,7 +37,7 @@ void NewsHistory::Serialize( XStream* xs )
 void NewsHistory::Add( const NewsEvent& e )
 {
 	NewsEvent event = e;
-	event.date = date;
+	event.date = date ? date : 1;	// don't write 0 date. confuses later logic.
 
 	if ( event.what < NewsEvent::START_CURRENT ) {
 		events.Push( event );
@@ -175,7 +173,7 @@ grinliz::IString NewsEvent::IDToName( int id ) const
 }
 
 
-void NewsEvent::Console( grinliz::GLString* str ) const
+void NewsEvent::Console( grinliz::GLString* str, ChitBag* chitBag ) const
 {
 	*str = "";
 	IString wstr = GetWhat();
@@ -186,11 +184,8 @@ void NewsEvent::Console( grinliz::GLString* str ) const
 	//GLASSERT( itemID != secondItemID );
 
 	Chit* chit = 0;
-	if ( NewsHistory::Instance()) {
-		ChitBag* chitBag = NewsHistory::Instance()->GetChitBag();
-		if ( chitBag ) {
-			chit = chitBag->GetChit( chitID );
-		}
+	if ( chitBag ) {
+		chit = chitBag->GetChit( chitID );
 	}
 
 	IString itemName   = IDToName( itemID );

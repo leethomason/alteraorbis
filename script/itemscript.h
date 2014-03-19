@@ -23,6 +23,7 @@
 #include "../game/gameitem.h"
 #include "../xegame/stackedsingleton.h"
 
+class NewsHistory;
 
 class ItemDefDB : public StackedSingleton< ItemDefDB >
 {
@@ -76,7 +77,7 @@ struct ItemHistory
 
 	void Set( const GameItem* );
 	void Serialize( XStream* xs );
-	void AppendDesc( grinliz::GLString* str );
+	void AppendDesc( grinliz::GLString* str, NewsHistory* history );
 };
 
 /*

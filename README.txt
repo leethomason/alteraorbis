@@ -2,7 +2,7 @@
 
 More at: grinninglizard.com/altera
 
-The "Food" release adds fruit growth, eating, and elixir distillation.
+The "Zoning" release improves farming and buildings are now affected by their environment.
 
 
 How to Play
@@ -10,22 +10,27 @@ How to Play
 Is now on the wiki: http://alteraorbis.wikispaces.com/
 
 
-Changes (Food)
+Changes (Zoning)
 -------------------
 
-- Food cycle: plants create food (when they have farms) and process it in distilleries
-- Morale: unhappy denizens will come to bad ends
-- Tombstones: tombstones affect morale (to good or ill)
-- Improved performance 
-- In view mode, you can cycle through your denizens.
-- Re-order the UI to be (somewhat) more consistent
-- Losing a denizen will now destroy a sleep tube. Sleep tubes are limited by the tech level.
-- Denizens now heal when they eat
+- Food is now created at the Solar Farm, which considers a 5x5 area for its productivity.
+- The efficiency of buildings is now significantly affected by their zoning efficiency.
+  The porch of the building shows the efficiency from -- (red) to neutral to ++ (green).
+  See the wiki for the types of buildings and zones.
+- Bars don't work at all, for any need, without Elixir
+- The more temples you build, the greater your tech level, building efficiency, and better
+  weapons. But also the greater the monsters that will be attracted to your domain.
+- The efficiency and orderliness of tasks and building use is greatly improved.
+- Some tuning done so that one powerful monster doesn't collect all the money and crystal
+  in the world.
+- Many other bug fixes.
+- Some modest performance fixes.
 
 Install
 -------
 
-Unzip (to desktop, or downloads directory) and run the game .exe. It may require the microsoft redistributables. (Although if you installed Xenowar, these are already installed.) http://www.microsoft.com/en-us/download/details.aspx?id=5555
+Unzip (to desktop, or downloads directory) and run the game .exe. It may require the microsoft redistributables.
+Note that the 2013 redistibutables are now required: http://www.microsoft.com/en-us/download/details.aspx?id=40784
 
 
 Important Notes

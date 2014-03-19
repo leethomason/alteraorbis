@@ -42,11 +42,15 @@ ChitBag::ChitBag( const ChitContext& c )
 	memRoot = 0;
 	activeCamera = 0;
 	chitContext = c;
+	newsHistory = new NewsHistory(this);
 }
 
 
 ChitBag::~ChitBag()
 {
+	delete newsHistory;
+	newsHistory = 0;
+
 	DeleteAll();
 	RenderComponent::textLabelPool.FreePool();
 	RenderComponent::imagePool.FreePool();
@@ -70,6 +74,7 @@ void ChitBag::Serialize( const ComponentFactory* factory, XStream* xs )
 {
 	XarcOpen( xs, "ChitBag" );
 	XARC_SER( xs, activeCamera );
+	newsHistory->Serialize(xs);
 
 	if ( xs->Saving() ) {
 		XarcOpen( xs, "Chits" );
@@ -165,6 +170,14 @@ Chit* ChitBag::GetChit( int id )
 
 void ChitBag::QueueDelete( Chit* chit )
 {
+#ifdef DEBUG
+	ItemComponent* ic = chit->GetItemComponent();
+	if (ic) {
+		for (int i = 0; i < ic->NumItems(); ++i) {
+			GLASSERT(ic->GetItem(i)->wallet.IsEmpty());
+		}
+	}
+#endif
 	deleteList.Push( chit->ID() );
 }
 
@@ -238,6 +251,8 @@ void ChitBag::DoTick( U32 delta )
 	PROFILE_FUNC();
 	bagTime += delta;
 	nTicked = 0;
+
+	newsHistory->DoTick(delta);
 
 	// Events.
 	// Ticks.

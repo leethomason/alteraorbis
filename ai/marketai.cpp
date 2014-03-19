@@ -4,6 +4,7 @@
 #include "../game/news.h"
 #include "../xegame/itemcomponent.h"
 #include "../xegame/spatialcomponent.h"
+#include "../xegame/chitbag.h"
 
 using namespace grinliz;
 
@@ -89,10 +90,8 @@ const GameItem* MarketAI::HasShield( int au, int minValue )	{ return Has( 0, HAR
 							cost,
 							sector.x, sector.y ));
 
-						NewsHistory* history = NewsHistory::Instance();
-						if ( history ) {
-							history->Add( NewsEvent( NewsEvent::PURCHASED, pos, gi, buyer->ParentChit() ));
-						}
+						NewsHistory* history = seller->ParentChit()->GetChitBag()->GetNewsHistory();
+						history->Add( NewsEvent( NewsEvent::PURCHASED, pos, gi, buyer->ParentChit() ));
 					}
 					return cost;
 				}

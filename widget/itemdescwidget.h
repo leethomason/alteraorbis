@@ -6,6 +6,7 @@
 #include "../grinliz/glstringutil.h"
 
 class GameItem;
+class ChitBag;
 
 class ItemDescWidget : public gamui::IWidget
 {
@@ -25,7 +26,7 @@ public:
 	virtual bool Visible() const					{ return text.Visible(); }
 	virtual void SetVisible( bool vis );
 
-	void SetInfo( const GameItem* item, const GameItem* user, bool showPersonality );
+	void SetInfo( const GameItem* item, const GameItem* user, bool showPersonality, ChitBag* chitBag );
 
 private:
 	gamui::LayoutCalculator	layout;

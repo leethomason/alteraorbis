@@ -63,7 +63,7 @@ public:
 												|| what == LESSER_MOB_NAMED
 												|| what == FORGED; }
 	grinliz::IString	GetWhat() const;
-	void				Console( grinliz::GLString* str ) const;
+	void				Console( grinliz::GLString* str, ChitBag* ) const;
 	grinliz::Vector2I	Sector() const { return ToSector( ToWorld2I( pos )); }
 	grinliz::IString	IDToName( int id ) const;
 
@@ -85,10 +85,7 @@ public:
 };
 
 
-// "scoped singleton": created and destroyed by a main game/scene scope, 
-// but there can only be one active. (Could implement a stack, in the future.)
-// Created and destroyed by the Simulation
-class NewsHistory : public StackedSingleton< NewsHistory >
+class NewsHistory
 {
 public:
 	NewsHistory( ChitBag* chitBag );
@@ -120,8 +117,6 @@ public:
 		U32 died;
 	};
 	const NewsEvent** Find( int itemID, bool includeSecond, int* num, Data* data );
-
-	ChitBag* GetChitBag() const { return chitBag; }
 
 private:
 

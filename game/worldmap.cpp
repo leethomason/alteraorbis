@@ -74,6 +74,7 @@ WorldMap::WorldMap( int width, int height ) : Map( width, height )
 
 	voxelVertexVBO = 0;
 	gridVertexVBO = 0;
+	newsHistory = 0;
 }
 
 
@@ -574,21 +575,25 @@ void WorldMap::ProcessZone( ChitBag* cb )
 							if ( poolGrids.Size() >= 10 && border == 0 && water <= waterMax ) {
 								GLOUTPUT(( "pool found. zone=%d,%d area=%d waterFall=%d\n", zx, zy, poolGrids.Size(), water ));
 								
-								NewsEvent poolNews( NewsEvent::POOL, ToWorld2F( poolGrids[0] ));
-								NewsHistory::Instance()->Add( poolNews );
+								if ( newsHistory) {
 
-								for( int i=0; i<poolGrids.Size(); ++i ) {
-									int idx = INDEX( poolGrids[i] );
-									grid[idx].SetPool( true );
+									NewsEvent poolNews( NewsEvent::POOL, ToWorld2F( poolGrids[0] ));
 
-									for( int k=0; k<4; ++k ) {
-										Vector2I v = poolGrids[i] + next[k];
-										GLASSERT( zbounds.Contains( v ));
-										if ( grid[INDEX(v)].IsWater() ) {
-											waterfalls.Push( poolGrids[i] );
+									newsHistory->Add( poolNews );
 
-											NewsEvent we( NewsEvent::WATERFALL, ToWorld2F( poolGrids[i] ));
-											NewsHistory::Instance()->Add( we );
+									for (int i = 0; i < poolGrids.Size(); ++i) {
+										int idx = INDEX(poolGrids[i]);
+										grid[idx].SetPool(true);
+
+										for (int k = 0; k < 4; ++k) {
+											Vector2I v = poolGrids[i] + next[k];
+											GLASSERT(zbounds.Contains(v));
+											if (grid[INDEX(v)].IsWater()) {
+												waterfalls.Push(poolGrids[i]);
+
+												NewsEvent we(NewsEvent::WATERFALL, ToWorld2F(poolGrids[i]));
+												newsHistory->Add(we);
+											}
 										}
 									}
 								}

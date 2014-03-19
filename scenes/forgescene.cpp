@@ -6,6 +6,7 @@
 #include "../xegame/itemcomponent.h"
 #include "../xegame/chit.h"
 #include "../xegame/spatialcomponent.h"
+#include "../xegame/chitbag.h"
 
 #include "../engine/engine.h"
 
@@ -192,7 +193,8 @@ void ForgeScene::SetModel( bool randomTraits )
 						partsFlags, effectFlags, 
 						item, &crystalRequired, &techRequired, randomTraits );
 
-	itemDescWidget.SetInfo( displayItem, &humanMale, false );
+	ChitBag* chitBag = forgeData->itemComponent->ParentChit()->GetChitBag();	// eek. hacky.
+	itemDescWidget.SetInfo( displayItem, &humanMale, false, chitBag );
 
 	ProcRenderInfo info;
 	if ( item ) {
@@ -251,11 +253,12 @@ void ForgeScene::ItemTapped( const gamui::UIItem* uiItem )
 		item->wallet.Add( crystalRequired );	// becomes part of the item, and will be returned to Reserve when item is destroyed.
 
 		Chit* chit = forgeData->itemComponent->ParentChit();
-		if ( chit && NewsHistory::Instance() ) {
+		NewsHistory* history = chit->GetChitBag()->GetNewsHistory();	// eek. hacky.
+		if (chit && history) {
 			Vector2F pos = { 0, 0 };
 			if ( chit->GetSpatialComponent() ) pos = chit->GetSpatialComponent()->GetPosition2D();
 			NewsEvent news( NewsEvent::FORGED, pos, item, forgeData->itemComponent->ParentChit() ); 
-			NewsHistory::Instance()->Add( news );
+			history->Add( news );
 			chit->GetItem()->keyValues.Set( "destroyMsg", NewsEvent::UN_FORGED );
 		}
 

@@ -779,11 +779,10 @@ bool TaskList::UseFactory( const ComponentSet& thisComp, Chit* factory, int tech
 		item->BestName(),
 		sector.x, sector.y ));
 
-	if ( NewsHistory::Instance() ) {
-		NewsEvent news( NewsEvent::FORGED, thisComp.spatial->GetPosition2D(), item, thisComp.chit ); 
-		NewsHistory::Instance()->Add( news );
-		item->GetItem()->keyValues.Set( "destroyMsg", NewsEvent::UN_FORGED );
-	}
+	NewsHistory* history = thisComp.chit->GetChitBag()->GetNewsHistory();
+	NewsEvent news( NewsEvent::FORGED, thisComp.spatial->GetPosition2D(), item, thisComp.chit ); 
+	history->Add( news );
+	item->GetItem()->keyValues.Set( "destroyMsg", NewsEvent::UN_FORGED );
 
 	return true;
 }

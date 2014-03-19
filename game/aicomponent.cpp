@@ -872,7 +872,7 @@ void AIComponent::Rampage( int dest )
 	currentAction = NO_ACTION;
 
 	NewsEvent news( NewsEvent::RAMPAGE, parentChit->GetSpatialComponent()->GetPosition2D(), parentChit );
-	NewsHistory::Instance()->Add( news );	
+	GetChitBag()->GetNewsHistory()->Add( news );	
 }
 
 
@@ -1244,7 +1244,7 @@ bool AIComponent::SectorHerd( const ComponentSet& thisComp )
 				// Trolls herd *all the time*
 				if ( thisComp.item->IName() != "troll" ) {
 					NewsEvent news( NewsEvent::SECTOR_HERD, pos, parentChit );
-					NewsHistory::Instance()->Add( news );
+					GetChitBag()->GetNewsHistory()->Add( news );
 				}
 
 				ChitMsg msg( ChitMsg::CHIT_SECTOR_HERD, 0, &dest );
@@ -2401,12 +2401,12 @@ void AIComponent::DoMoraleZero( const ComponentSet& thisComp )
 	switch ( option ) {
 	case STARVE:
 		thisComp.item->hp = 0;
-		NewsHistory::Instance()->Add( NewsEvent( NewsEvent::STARVATION, pos2, parentChit, 0 ));
+		GetChitBag()->GetNewsHistory()->Add(NewsEvent(NewsEvent::STARVATION, pos2, parentChit, 0));
 		break;
 
 	case BLOODRAGE:
 		thisComp.item->primaryTeam = TEAM_CHAOS;
-		NewsHistory::Instance()->Add( NewsEvent( NewsEvent::BLOOD_RAGE, pos2, parentChit, 0 ));
+		GetChitBag()->GetNewsHistory()->Add(NewsEvent(NewsEvent::BLOOD_RAGE, pos2, parentChit, 0));
 		break;
 
 	case VISION_QUEST:
@@ -2431,7 +2431,7 @@ void AIComponent::DoMoraleZero( const ComponentSet& thisComp )
 					}
 				}
 				this->Move( sectorPort, true );
-				NewsHistory::Instance()->Add( NewsEvent( NewsEvent::VISION_QUEST, pos2, parentChit, 0 ));
+				GetChitBag()->GetNewsHistory()->Add(NewsEvent(NewsEvent::VISION_QUEST, pos2, parentChit, 0));
 			}
 		}
 		break;

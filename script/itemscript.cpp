@@ -265,7 +265,7 @@ void ItemHistory::Serialize( XStream* xs )
 }
 
 
-void ItemHistory::AppendDesc( GLString* str )
+void ItemHistory::AppendDesc( GLString* str, NewsHistory* history )
 {
 	if ( !itemID ) {
 		str->append( "(none)" );
@@ -274,25 +274,27 @@ void ItemHistory::AppendDesc( GLString* str )
 		GLASSERT( !titledName.empty() );
 		str->AppendFormat( "[%d] %s", itemID, titledName.c_str() );
 		if ( level )
-			str->AppendFormat( " Level %d", level );
+			str->AppendFormat( " Level=%d", level );
 		if ( value )
-			str->AppendFormat( " Value %d", value );
+			str->AppendFormat( " Value=%d", value );
 		if ( kills )
-			str->AppendFormat( " Kills %d", kills );
+			str->AppendFormat( " Kills=%d", kills );
 		if ( greater ) 
-			str->AppendFormat( " Greater %d", greater );
+			str->AppendFormat( " Greater=%d", greater );
 		if ( crafted )
-			str->AppendFormat( " Crafted %d", crafted );
+			str->AppendFormat( " Crafted=%d", crafted );
 
-		NewsHistory::Data data;
-		NewsHistory::Instance()->Find( itemID, false, 0, &data );
+		if (history) {
+			NewsHistory::Data data;
+			history->Find(itemID, false, 0, &data);
 
-		if ( data.bornOrNamed ) {
-			if ( data.died ) {
-				str->AppendFormat( " (c%.2f d%.2f)", double(data.bornOrNamed)/double(AGE_IN_MSEC), double(data.died)/double(AGE_IN_MSEC));
-			}
-			else {
-				str->AppendFormat( " (c%.2f)", double(data.bornOrNamed)/double(AGE_IN_MSEC));
+			if (data.bornOrNamed) {
+				if (data.died) {
+					str->AppendFormat(" (c%.2f d%.2f)", double(data.bornOrNamed) / double(AGE_IN_MSEC), double(data.died) / double(AGE_IN_MSEC));
+				}
+				else {
+					str->AppendFormat(" (c%.2f)", double(data.bornOrNamed) / double(AGE_IN_MSEC));
+				}
 			}
 		}
 	}

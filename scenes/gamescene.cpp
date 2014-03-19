@@ -742,7 +742,8 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
 		if ( item == &newsButton[i] ) {
 			if ( FreeCameraMode() ) {
-				NewsHistory* history = NewsHistory::Instance();
+				
+				NewsHistory* history = sim->GetChitBag()->GetNewsHistory();
 				const grinliz::CArray< NewsEvent, NewsHistory::MAX_CURRENT >& current = history->CurrentNews();
 
 				int index = current.Size() - 1 - i;
@@ -1008,7 +1009,7 @@ void GameScene::SetPickupButtons()
 
 void GameScene::ProcessNewsToConsole()
 {
-	NewsHistory* history = NewsHistory::Instance();
+	NewsHistory* history = sim->GetChitBag()->GetNewsHistory();
 	currentNews = Max( currentNews, history->NumNews() - 40 );
 	GLString str;
 	LumosChitBag* chitBag = sim->GetChitBag();
@@ -1036,7 +1037,7 @@ void GameScene::ProcessNewsToConsole()
 		case NewsEvent::BLOOD_RAGE:
 		case NewsEvent::VISION_QUEST:
 			if ( coreScript && coreScript->IsCitizen( ne.chitID )) {
-				ne.Console( &str );
+				ne.Console( &str, chitBag );
 			}
 			break;
 
@@ -1046,24 +1047,23 @@ void GameScene::ProcessNewsToConsole()
 			if ((coreScript && coreScript->IsCitizen(ne.chitID))
 				|| sector == homeSector)
 			{
-				ne.Console(&str);
+				ne.Console(&str, chitBag);
 			}
 			break;
 
 		case NewsEvent::GREATER_MOB_CREATED:
 		case NewsEvent::GREATER_MOB_KILLED:
-			ne.Console( &str );
+			ne.Console( &str, chitBag );
 			break;
 
 		case NewsEvent::LESSER_MOB_NAMED:
 		case NewsEvent::LESSER_NAMED_MOB_KILLED:
 			{
 				if ( sector == homeSector || sector == avatarSector ) {
-					ne.Console( &str );
+					ne.Console( &str, chitBag );
 				}
 			}
 			break;
-
 
 		default:
 			break;
@@ -1092,7 +1092,7 @@ void GameScene::DoTick( U32 delta )
 	SetPickupButtons();
 
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
-		NewsHistory* history = NewsHistory::Instance();
+		NewsHistory* history = sim->GetChitBag()->GetNewsHistory();
 		const grinliz::CArray< NewsEvent, NewsHistory::MAX_CURRENT >& current = history->CurrentNews();
 
 		int index = current.Size() - 1 - i;
@@ -1117,7 +1117,7 @@ void GameScene::DoTick( U32 delta )
 	const SectorData& sd = sim->GetWorldMap()->GetWorldInfo().GetSector( viewingSector );
 
 	CStr<64> str;
-	str.Format( "Date %.2f\n%s", NewsHistory::Instance()->AgeF(), sd.name.c_str() );
+	str.Format( "Date %.2f\n%s", sim->GetChitBag()->GetNewsHistory()->AgeF(), sd.name.c_str() );
 	dateLabel.SetText( str.c_str() );
 
 	// Set the states: VIEW, BUILD, AVATAR. Avatar is 

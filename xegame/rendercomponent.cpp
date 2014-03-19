@@ -57,7 +57,8 @@ RenderComponent::~RenderComponent()
 	for( int i=0; i<NUM_MODELS; ++i ) {
 		GLASSERT( model[i] == 0 );
 	}
-	GLASSERT( groundMark == 0 );
+	GLASSERT(groundMark == 0);
+	GLASSERT(icons.Empty());	// should have been handled in OnRemove(). 
 }
 
 
@@ -373,6 +374,7 @@ int RenderComponent::DoTick( U32 deltaTime )
 
 void RenderComponent::AddDeco( const char* asset, int duration )
 {
+	GLASSERT(parentChit);
 	gamui::RenderAtom atom = LumosGame::CalcIconAtom( asset );
 	atom.renderState = (const void*)UIRenderer::RENDERSTATE_UI_DISABLED;
 

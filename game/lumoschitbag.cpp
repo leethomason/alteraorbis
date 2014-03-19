@@ -292,11 +292,9 @@ Chit* LumosChitBag::NewMonsterChit( const Vector3F& pos, const char* name, int t
 		// can return NUM_CRYSTAL_TYPES, if out, which is fine.
 		w.AddCrystal( ReserveBank::Instance()->WithdrawRandomCrystal() );;
 		
-		NewsHistory* history = NewsHistory::Instance();
-		if ( history ) {
-			history->Add( NewsEvent( NewsEvent::GREATER_MOB_CREATED, ToWorld2F(pos), chit, 0 ));
-			chit->GetItem()->keyValues.Set( "destroyMsg", NewsEvent::GREATER_MOB_KILLED );
-		}
+		NewsHistory* history = GetNewsHistory();
+		history->Add( NewsEvent( NewsEvent::GREATER_MOB_CREATED, ToWorld2F(pos), chit, 0 ));
+		chit->GetItem()->keyValues.Set( "destroyMsg", NewsEvent::GREATER_MOB_KILLED );
 	}
 	chit->GetItem()->wallet.Add( w );	
 	return chit;
@@ -344,11 +342,9 @@ Chit* LumosChitBag::NewDenizen( const grinliz::Vector2I& pos, int team )
 	Vector2I sector = ToSector( pos );
 	CoreScript::GetCore( sector )->AddCitizen( chit );
 
-	NewsHistory* history = NewsHistory::Instance();
-	if ( history ) {
-		history->Add( NewsEvent( NewsEvent::DENIZEN_CREATED, ToWorld2F(pos), chit, 0 ));
-		chit->GetItem()->keyValues.Set( "destroyMsg", NewsEvent::DENIZEN_KILLED );
-	}
+	NewsHistory* history = GetNewsHistory();
+	history->Add( NewsEvent( NewsEvent::DENIZEN_CREATED, ToWorld2F(pos), chit, 0 ));
+	chit->GetItem()->keyValues.Set( "destroyMsg", NewsEvent::DENIZEN_KILLED );
 
 	return chit;
 }

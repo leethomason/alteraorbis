@@ -202,6 +202,8 @@ public:
 	virtual LumosChitBag* ToLumos() { return 0; }
 	const ChitContext* GetContext() const { return &chitContext; }
 
+	NewsHistory* GetNewsHistory() { return newsHistory;  }
+
 	// Slow iteration: (for census)
 	int NumBlocks() const;
 	void GetBlockPtrs( int block, grinliz::CDynArray<Chit*>* arr ) const;
@@ -223,6 +225,7 @@ private:
 	int nTicked;
 	int activeCamera;
 	ChitContext chitContext;
+	NewsHistory* newsHistory;
 
 	struct CompID { 
 		int chitID;

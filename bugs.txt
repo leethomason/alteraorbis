@@ -58,6 +58,8 @@ x print uniform count for shaders
 - add rez effect for item switch?
 - animation generation
 - peaks news
+- openMP - particle system, elsewhere
+- re-do glow
 
 - game
 	- Food-2
@@ -88,8 +90,9 @@ x print uniform count for shaders
 		x rampage broken
 		x rampage targets not matching up. different bits getting used in worldgen vs. game??
 		x Au and Crystal loss or tracking
-		- money still disappearing...
+		x money still disappearing...
 		x battle "walk past"
+		x news tracking of denizens strange. died without being born...
 
 	x Zoning
 		x industrial, commercial, natural-spiritual

@@ -56,8 +56,9 @@ TitleScene::TitleScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 	}
 
 	note.Init( &gamui2D );
-	note.SetText( "Thanks for playing this alpha of Altera! This alpha improves "
-				  "the farming model and adjusts gameplay. "
+	note.SetText( "Thanks for playing this alpha of Altera! This alpha adds "
+				  "zoning, so that buildings are affected by the environment. Also, "
+				  "the farming model has been adjusted. "
 				  "Please see the README.txt for information and a link to the game wiki." );
 }
 

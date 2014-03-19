@@ -327,8 +327,9 @@ void ItemComponent::UpdateActive()
 
 void ItemComponent::NewsDestroy( const GameItem* item )
 {
-	NewsHistory* history = NewsHistory::Instance();
-	if ( !history ) return;
+	NewsHistory* history = this->GetChitBag()->GetNewsHistory();
+	GLASSERT(history);
+
 	Vector2F pos = { 0, 0 };
 	if ( parentChit->GetSpatialComponent() ) {
 		pos = parentChit->GetSpatialComponent()->GetPosition2D();

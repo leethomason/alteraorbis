@@ -37,7 +37,7 @@ void VolcanoScript::Init()
 		context->worldMap->SetMagma( (int)pos.x, (int)pos.y, true );
 
 		NewsEvent event( NewsEvent::VOLCANO, pos );
-		NewsHistory::Instance()->Add( event );
+		scriptContext->chitBag->GetNewsHistory()->Add( event );
 	}
 }
 

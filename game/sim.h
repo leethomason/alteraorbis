@@ -84,7 +84,6 @@ private:
 	ReserveBank*	reserveBank;
 	LumosChitBag*	chitBag;
 	Visitors*		visitors;
-	NewsHistory*	newsHistory;
 	ItemDB*			itemDB;
 
 	grinliz::Random	random;
