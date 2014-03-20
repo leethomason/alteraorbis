@@ -38,8 +38,8 @@
 using namespace grinliz;
 using namespace gamui;
 
-LumosGame::LumosGame(  int width, int height, int rotation, const char* savepath ) 
-	: Game( width, height, rotation, 600, savepath )
+LumosGame::LumosGame(  int width, int height, int rotation ) 
+	: Game( width, height, rotation, 600 )
 {
 	InitButtonLooks();
 
@@ -241,10 +241,16 @@ void LumosGame::PositionStd( gamui::PushButton* okay, gamui::PushButton* cancel 
 
 void LumosGame::CopyFile( const char* src, const char* target )
 {
-	FILE* fp = FOpen( GAME_APP_DIR, src, "rb" );
+	GLString srcPath;
+	GetSystemPath(GAME_APP_DIR, src, &srcPath);
+
+	GLString targetPath;
+	GetSystemPath(GAME_SAVE_DIR, target, &targetPath);
+
+	FILE* fp = fopen(srcPath.c_str(), "rb");
 	GLASSERT( fp );
 	if ( fp ) {
-		FILE* tp = FOpen( GAME_SAVE_DIR, target, "wb" );
+		FILE* tp = fopen( targetPath.c_str(), "wb" );
 		GLASSERT( tp );
 
 		if ( fp && tp ) {
@@ -258,9 +264,9 @@ void LumosGame::CopyFile( const char* src, const char* target )
 
 			fwrite( buf.Mem(), 1, size, tp );
 
-			FClose( tp );
+			fclose( tp );
 		}
-		FClose( fp );
+		fclose( fp );
 	}
 }
 

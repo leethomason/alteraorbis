@@ -162,27 +162,30 @@ void WorldMap::VoxelHit( const Vector3I& v, const DamageDesc& dd )
 }
 
 
-void WorldMap::SavePNG( const char* path )
+void WorldMap::SavePNG( const char* filename )
 {
 	Color4U8* pixels = new Color4U8[width*height];
 
 	for( int i=0; i<width*height; ++i ) {
 		pixels[i] = grid[i].ToColor();
 	}
-	lodepng_encode32_file( path, (const unsigned char*)pixels, width, height );
+	GLString path;
+	GetSystemPath(GAME_SAVE_DIR, filename, &path);
+	lodepng_encode32_file( path.c_str(), (const unsigned char*)pixels, width, height );
 
 	delete [] pixels;
 }
 
 
-void WorldMap::Save( const char* pathToDAT )
+void WorldMap::Save( const char* filename )
 {
 	// Debug or laptap, about 4.5MClock
 	// smaller window size: 3.8MClock
 	// btype == 0 about the same.
 	// None of this matters; may need to add an ultra-simple fast encoder.
-
-	FILE* fp = FOpen( GAME_SAVE_DIR, pathToDAT, "wb" );
+	GLString path;
+	GetSystemPath(GAME_SAVE_DIR, filename, &path);
+	FILE* fp = fopen( path.c_str(), "wb" );
 	GLASSERT( fp );
 	if ( fp ) {
 
@@ -203,14 +206,16 @@ void WorldMap::Save( const char* pathToDAT )
 		squisher.StreamEncode( grid, sizeof(WorldGrid)*width*height, fp );
 		squisher.StreamEncode( 0, 0, fp );
 
-		FClose( fp );
+		fclose( fp );
 	}
 }
 
 
-void WorldMap::Load( const char* pathToDAT )
+void WorldMap::Load( const char* filename )
 {
-	FILE* fp = FOpen( GAME_SAVE_DIR, pathToDAT, "rb" );
+	GLString path;
+	GetSystemPath(GAME_SAVE_DIR, filename, &path);
+	FILE* fp = fopen(path.c_str(), "rb");
 	GLASSERT( fp );
 	if ( fp ) {
 		StreamReader reader( fp );
@@ -228,7 +233,7 @@ void WorldMap::Load( const char* pathToDAT )
 		Squisher squisher;
 		squisher.StreamDecode( grid, sizeof(WorldGrid)*width*height, fp );
 
-		FClose( fp );
+		fclose( fp );
 		
 		usingSectors = true;
 		// Set up the rocks.

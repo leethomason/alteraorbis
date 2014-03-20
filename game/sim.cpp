@@ -95,7 +95,9 @@ Sim::~Sim()
 
 void Sim::DumpModel()
 {
-	FILE* fp = FOpen( GAME_SAVE_DIR, "gamemodel.txt", "w" );
+	GLString path;
+	GetSystemPath(GAME_SAVE_DIR,"gamemodel.txt", &path);
+	FILE* fp = fopen( path.c_str(), "w" );
 	GLASSERT( fp );
 
 	for( int plantStage=2; plantStage<4; ++plantStage ) {
@@ -127,7 +129,7 @@ void Sim::DumpModel()
 				fprintf( fp, "idealPopulation=%.1f\n\n", idealPopulation );
 		}
 	}
-	FClose( fp );
+	fclose( fp );
 }
 
 
@@ -146,7 +148,10 @@ void Sim::Load( const char* mapDAT, const char* gameDAT )
 		//QuickProfile qp( "Sim::Load" );
 		ComponentFactory factory( this, &chitBag->census, engine, worldMap, chitBag, weather, lumosGame );
 
-		FILE* fp = FOpen( GAME_SAVE_DIR, gameDAT, "rb" );
+		GLString path;
+		GetSystemPath(GAME_SAVE_DIR, gameDAT, &path);
+
+		FILE* fp = fopen(path.c_str(), "rb");
 		GLASSERT( fp );
 		if ( fp ) {
 			StreamReader reader( fp );
@@ -166,7 +171,7 @@ void Sim::Load( const char* mapDAT, const char* gameDAT )
 
 			XarcClose( &reader );
 
-			FClose( fp );
+			fclose( fp );
 		}
 	}
 	if ( chitBag->GetChit( playerID )) {
@@ -188,7 +193,9 @@ void Sim::Save( const char* mapDAT, const char* gameDAT )
 
 		ComponentFactory factory( this, &chitBag->census, engine, worldMap, chitBag, weather, lumosGame );
 
-		FILE* fp = FOpen( GAME_SAVE_DIR, gameDAT, "wb" );
+		GLString path;
+		GetSystemPath(GAME_SAVE_DIR, gameDAT, &path);
+		FILE* fp = fopen(path.c_str(), "wb");
 		if ( fp ) {
 			StreamWriter writer( fp );
 			XarcOpen( &writer, "Sim" );
@@ -205,7 +212,7 @@ void Sim::Save( const char* mapDAT, const char* gameDAT )
 			chitBag->Serialize( &factory, &writer );
 
 			XarcClose( &writer );
-			FClose( fp );
+			fclose( fp );
 		}
 	}
 }

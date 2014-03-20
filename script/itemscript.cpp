@@ -172,7 +172,9 @@ void ItemDefDB::DumpWeaponStats()
 {
 	GameItem humanMale = this->Get( "humanMale" );
 
-	FILE* fp = FOpen( GAME_SAVE_DIR, "weapons.txt", "w" );
+	GLString path;
+	GetSystemPath(GAME_SAVE_DIR, "weapons.txt", &path);
+	FILE* fp = fopen( path.c_str(), "w" );
 	GLASSERT( fp );
 
 	fprintf( fp, "%-25s %-5s %-5s %-5s %-5s\n", "Name", "Dam", "DPS", "C-DPS", "EffR" );
@@ -218,7 +220,7 @@ void ItemDefDB::DumpWeaponStats()
 			}
 		}
 	}
-	FClose( fp );
+	fclose( fp );
 }
 
 

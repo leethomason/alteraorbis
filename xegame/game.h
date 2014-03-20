@@ -58,7 +58,7 @@ enum SavePathMode {
 class Game : public ITextureCreator 
 {
 public:
-	Game( int width, int height, int rotation, int uiHeight, const char* savepath );
+	Game( int width, int height, int rotation, int uiHeight );
 	virtual ~Game();
 
 	virtual LumosGame* ToLumosGame() { return 0; }
@@ -209,7 +209,6 @@ private:
 
 	int rotTestStart;
 	int rotTestCount;
-	grinliz::GLString savePath;
 
 	gamui::RenderAtom renderAtoms[ATOM_COUNT];
 };

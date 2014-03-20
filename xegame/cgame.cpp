@@ -51,11 +51,11 @@ bool CheckThread::active = false;
 static char* modDatabases[ GAME_MAX_MOD_DATABASES ] = { 0 };
 
 
-void* NewGame( int width, int height, int rotation, const char* path )
+void* NewGame( int width, int height, int rotation )
 {
 	CheckThread check;
 
-	LumosGame* game = new LumosGame( width, height, rotation, path );
+	LumosGame* game = new LumosGame( width, height, rotation );
 	GLOUTPUT(( "NewGame.\n" ));
 
 	return game;
@@ -238,7 +238,7 @@ void PlayWAVSound( int offset, int nBytes )
 
 static char prefPath[256] = { 0 };
 
-FILE* FOpen(int root, const char* rel, const char* mode)
+void GetSystemPath(int root, const char* filename, grinliz::GLString* out)
 {
 	grinliz::GLString path;
 
@@ -281,16 +281,7 @@ FILE* FOpen(int root, const char* rel, const char* mode)
 			SDL_free(p);
 #endif
 		}
-		path.append(prefPath);
+		out->append(prefPath);
 	}
-	path.append(rel);
-	FILE* fp = fopen(path.c_str(), mode);
-	return fp;
-}
-
-
-void FClose(FILE* handle)
-{
-	GLASSERT(handle);
-	fclose(handle);
+	out->append(filename);
 }

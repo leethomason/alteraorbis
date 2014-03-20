@@ -34,7 +34,7 @@ public:
 		PALETTE_NORM, PALETTE_BRIGHT, PALETTE_DARK
 	};
 
-	LumosGame(  int width, int height, int rotation, const char* savepath );
+	LumosGame(  int width, int height, int rotation );
 	virtual ~LumosGame();
 
 	virtual LumosGame* ToLumosGame() { return this; }

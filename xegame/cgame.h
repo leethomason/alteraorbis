@@ -20,10 +20,8 @@
 extern "C" {
 #endif
 
-#include <stdio.h>
-
 // --- Platform to Core --- //
-void* NewGame( int width, int height, int rotation, const char* savePath );
+void* NewGame( int width, int height, int rotation );
 void DeleteGame( void* handle );	// does not save! use GameSave if needed.
 
 void GameDeviceLoss( void* handle );
@@ -100,8 +98,16 @@ enum {
 	GAME_APP_DIR,
 	GAME_SAVE_DIR,
 };
-FILE* FOpen(int root, const char* path, const char* mode );
-void FClose(FILE* handle);
+
+namespace grinliz {
+	class GLString;
+};
+
+// Get a system path. The directory will be created, if
+// needed, but the path is a standard fopen(). And
+// hopefully fopen() is portable enough. I'm sure I'll
+// revisit this for the 50th time.
+void GetSystemPath(int root, const char* filename, grinliz::GLString* out);
 
 
 // ----------------------------------------------------------------

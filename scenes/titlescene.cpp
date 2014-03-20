@@ -147,9 +147,9 @@ void TitleScene::ItemTapped( const gamui::UIItem* item )
 		game->PushScene( LumosGame::SCENE_WORLDGEN, 0 );
 	}
 	else if ( item == &gameScene[DEFAULT_WORLD] ) {
-		const char* datPath = game->GamePath( "game_def", 0, "dat" );
-		const char* mapPath = game->GamePath( "map_def", 0, "dat" );
-		const char* pngPath = game->GamePath( "map_def", 0, "png" );
+		const char* datPath = game->GamePath( "save/game_def", 0, "dat" );
+		const char* mapPath = game->GamePath( "save/map_def", 0, "dat" );
+		const char* pngPath = game->GamePath( "save/map_def", 0, "png" );
 
 		const char* targetDatPath = game->GamePath( "game", 0, "dat" );
 		const char* targetMapPath = game->GamePath( "map", 0, "dat" );

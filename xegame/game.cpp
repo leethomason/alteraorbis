@@ -50,7 +50,7 @@ extern long memNewCount;
 
 const Game::Palette* Game::mainPalette = 0;
 
-Game::Game( int width, int height, int rotation, int uiHeight, const char* path ) :
+Game::Game( int width, int height, int rotation, int uiHeight ) :
 	screenport( width, height, uiHeight ),
 	markFrameTime( 0 ),
 	frameCountsSinceMark( 0 ),
@@ -65,16 +65,6 @@ Game::Game( int width, int height, int rotation, int uiHeight, const char* path 
 {
 	IStringConst::Init();
 
-	savePath = path;
-	char c = savePath[savePath.size()-1];
-	if ( c != '\\' && c != '/' ) {	
-#ifdef WIN32
-		savePath += "\\";
-#else
-		savePath += "/";
-#endif
-	}	
-	
 	scenePopQueued = false;
 	currentFrame = 0;
 	surface.Set( Surface::RGBA16, 256, 256 );
@@ -203,7 +193,10 @@ bool Game::HasFile( const char* path ) const
 {
 	bool result = false;
 
-	FILE* fp = fopen( path, "rb" );
+	GLString fullpath;
+	GetSystemPath(GAME_SAVE_DIR, path, &fullpath);
+
+	FILE* fp = fopen( fullpath.c_str(), "rb" );
 	if ( fp ) {
 		fseek( fp, 0, SEEK_END );
 		long d = ftell( fp );
@@ -218,7 +211,10 @@ bool Game::HasFile( const char* path ) const
 
 void Game::DeleteFile( const char* path )
 {
-	FILE* fp = fopen( path, "w" );
+	GLString fullpath;
+	GetSystemPath(GAME_SAVE_DIR, path, &fullpath);
+
+	FILE* fp = fopen(fullpath.c_str(), "w");
 	if ( fp ) {
 		fclose( fp );
 	}
@@ -391,8 +387,7 @@ RenderAtom Game::CreateRenderAtom( int uiRendering, const char* assetName, float
 const char* Game::GamePath( const char* type, int slot, const char* extension ) const
 {	
 	CStr<256> str;
-	str = savePath.c_str();
-	str += "./save/";
+	//str = "save/";
 	str += type;
 
 	if ( slot > 0 ) {

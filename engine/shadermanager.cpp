@@ -121,7 +121,10 @@ void ShaderManager::LoadProgram( const char* name, GLString* str )
 {
 	CStr<256> path;
 	path.Format( "res/%s", name );
-	FILE* fp = FOpen( GAME_APP_DIR, path.c_str(), "r" );
+	GLString fullPath;
+	GetSystemPath(GAME_APP_DIR, path.c_str(), &fullPath);
+
+	FILE* fp = fopen( fullPath.c_str(), "r" );
 	GLASSERT( fp );
 
 	static const int SIZE = 100;
@@ -130,7 +133,7 @@ void ShaderManager::LoadProgram( const char* name, GLString* str )
 	while( (count = fread( buf, 1, SIZE, fp )) > 0 ) {
 		str->append( buf, count );
 	}
-	FClose( fp );
+	fclose( fp );
 }
 
 
@@ -414,7 +417,7 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 	if ( GLEW_ARB_get_program_binary ) {
 		CStr<200> path;
 		path.Format( "./cache/shader_%s_%d.shader", hashStr.c_str(), flags );
-		FILE* fp = fopen( path.c_str(), "rb" );
+		FILE* fp = FOpen( path.c_str(), "rb" );
 		if ( fp ) {
 			// In the cache!
 			fseek( fp, 0, SEEK_END );
@@ -490,7 +493,7 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 		_mkdir( "./cache" );
 		CStr<200> path;
 		path.Format( "./cache/shader_%s_%d.shader", hashStr.c_str(), flags );
-		FILE* fp = fopen( path.c_str(), "wb" );
+		FILE* fp = FOpen( path.c_str(), "wb" );
 		if ( fp ) {
 			int len;
 			U32 format=0;

@@ -116,7 +116,11 @@ int main( int argc, char **argv )
 	MemStartCheck();
 	{ char* test = new char[16]; delete [] test; }
 
-	SetReleaseLog(FOpen(GAME_SAVE_DIR, "release_log.txt", "w"));
+	{
+		grinliz::GLString releasePath;
+		GetSystemPath(GAME_SAVE_DIR, "release_log.txt", &releasePath);
+		SetReleaseLog(fopen(releasePath.c_str(), "w"));
+	}
 	GLOUTPUT_REL(( "Altera startup. version=%d\n", VERSION ));
 
 	SDL_version compiled;
@@ -203,7 +207,7 @@ int main( int argc, char **argv )
 	int zoomX = 0;
 	int zoomY = 0;
 
-	void* game = NewGame( screenWidth, screenHeight, rotation, ".\\" );
+	void* game = NewGame( screenWidth, screenHeight, rotation );
 	
 #ifndef TEST_FULLSPEED
 #ifndef USE_LOOP
@@ -505,7 +509,7 @@ int main( int argc, char **argv )
 #if SEND_CRASH_LOGS
 	// Empty the file - quit went just fine.
 	{
-		FILE* fp = fopen( "UFO_Running.txt", "w" );
+		FILE* fp = FOpen( "UFO_Running.txt", "w" );
 		if ( fp )
 			fclose( fp );
 	}
@@ -624,9 +628,11 @@ void ScreenCapture( const char* baseFilename, bool appendCount, bool trim, bool 
 		for( index = 0; index<100; ++index )
 		{
 			grinliz::SNPrintf( buf, 256, "%s%02d.png", baseFilename, index );
-			FILE* fp = FOpen( GAME_SAVE_DIR, buf, "rb" );
+			grinliz::GLString path;
+			GetSystemPath(GAME_SAVE_DIR, buf, &path);
+			FILE* fp = fopen(path.c_str(), "rb" );
 			if ( fp )
-				FClose( fp );
+				fclose( fp );
 			else
 				break;
 		}

@@ -89,7 +89,10 @@ void SettingsManager::SetAudioOn( bool _value )
 
 void SettingsManager::Save()
 {
-	FILE* fp = FOpen( GAME_SAVE_DIR, "settings.xml", "w" );
+	GLString path;
+	GetSystemPath(GAME_SAVE_DIR, "settings.xml", &path);
+
+	FILE* fp = fopen( path.c_str(), "w" );
 	if ( fp ) {
 		XMLPrinter printer( fp );
 

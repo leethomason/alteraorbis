@@ -90,8 +90,8 @@ public:
 	void MapInit( const U8* land, const U16* path );
 
 	void SavePNG( const char* path );
-	void Save( const char* pathToData );
-	void Load( const char* pathtoData );
+	void Save( const char* filename );
+	void Load( const char* filename );
 
 	// Set the rock to h.
 	//		h= 1 to 3 rock
