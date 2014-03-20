@@ -20,6 +20,7 @@
 extern "C" {
 #endif
 
+#include <stdio.h>
 
 // --- Platform to Core --- //
 void* NewGame( int width, int height, int rotation, const char* savePath );
@@ -95,13 +96,21 @@ void PlatformPathToResource( char* buffer, int bufferLen, int* offset, int* leng
 const char* PlatformName();
 //void PlayWAVSound( int offset, int nBytes );
 
+enum {
+	GAME_APP_DIR,
+	GAME_SAVE_DIR,
+};
+FILE* FOpen(int root, const char* path, const char* mode );
+void FClose(FILE* handle);
+
+
 // ----------------------------------------------------------------
 // Debugging and adjustment
-enum {
-	GAME_CAMERA_TILT,
-	GAME_CAMERA_YROTATE,
-	GAME_CAMERA_ZOOM
-};
+//enum {
+//	GAME_CAMERA_TILT,
+//	GAME_CAMERA_YROTATE,
+//	GAME_CAMERA_ZOOM
+//};
 //void GameCameraGet( void* handle, int param, float* value );
 //void GameMoveCamera( void* handle, float dx, float dy, float dz );
 	

@@ -22,6 +22,7 @@
 #include "../game/lumosmath.h"
 #include "../game/news.h"
 #include "../xarchive/glstreamer.h"
+#include "../xegame/cgame.h"
 
 using namespace tinyxml2;
 using namespace grinliz;
@@ -171,7 +172,7 @@ void ItemDefDB::DumpWeaponStats()
 {
 	GameItem humanMale = this->Get( "humanMale" );
 
-	FILE* fp = fopen( "weapons.txt", "w" );
+	FILE* fp = FOpen( GAME_SAVE_DIR, "weapons.txt", "w" );
 	GLASSERT( fp );
 
 	fprintf( fp, "%-25s %-5s %-5s %-5s %-5s\n", "Name", "Dam", "DPS", "C-DPS", "EffR" );
@@ -217,7 +218,7 @@ void ItemDefDB::DumpWeaponStats()
 			}
 		}
 	}
-	fclose( fp );
+	FClose( fp );
 }
 
 

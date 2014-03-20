@@ -16,7 +16,7 @@
 #include "settings.h"
 #include "../tinyxml2/tinyxml2.h"
 #include "../engine/serialize.h"
-
+#include "../xegame/cgame.h"
 
 using namespace grinliz;
 using namespace tinyxml2;
@@ -89,7 +89,7 @@ void SettingsManager::SetAudioOn( bool _value )
 
 void SettingsManager::Save()
 {
-	FILE* fp = fopen( path.c_str(), "w" );
+	FILE* fp = FOpen( GAME_SAVE_DIR, "settings.xml", "w" );
 	if ( fp ) {
 		XMLPrinter printer( fp );
 

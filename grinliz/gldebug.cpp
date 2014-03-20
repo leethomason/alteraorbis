@@ -476,6 +476,13 @@ void logprintf( const char* format, ... )
 
 FILE* relFP = 0;
 
+void SetReleaseLog(FILE* fp)
+{
+	GLASSERT(!relFP);
+	relFP = fp;
+}
+
+
 void relprintf( const char* format, ... )
 {
     va_list     va;

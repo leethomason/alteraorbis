@@ -241,10 +241,10 @@ void LumosGame::PositionStd( gamui::PushButton* okay, gamui::PushButton* cancel 
 
 void LumosGame::CopyFile( const char* src, const char* target )
 {
-	FILE* fp = fopen( src, "rb" );
+	FILE* fp = FOpen( GAME_APP_DIR, src, "rb" );
 	GLASSERT( fp );
 	if ( fp ) {
-		FILE* tp = fopen( target, "wb" );
+		FILE* tp = FOpen( GAME_SAVE_DIR, target, "wb" );
 		GLASSERT( tp );
 
 		if ( fp && tp ) {
@@ -258,9 +258,9 @@ void LumosGame::CopyFile( const char* src, const char* target )
 
 			fwrite( buf.Mem(), 1, size, tp );
 
-			fclose( tp );
+			FClose( tp );
 		}
-		fclose( fp );
+		FClose( fp );
 	}
 }
 

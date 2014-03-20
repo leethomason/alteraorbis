@@ -19,6 +19,7 @@
 #include "../grinliz/glperformance.h"
 #include "../grinliz/glrandom.h"
 #include <direct.h>
+#include "../xegame/cgame.h"
 
 #define DEBUG_OUTPUT
 
@@ -119,8 +120,8 @@ ShaderManager::~ShaderManager()
 void ShaderManager::LoadProgram( const char* name, GLString* str ) 
 {
 	CStr<256> path;
-	path.Format( "./res/%s", name );
-	FILE* fp = fopen( path.c_str(), "r" );
+	path.Format( "res/%s", name );
+	FILE* fp = FOpen( GAME_APP_DIR, path.c_str(), "r" );
 	GLASSERT( fp );
 
 	static const int SIZE = 100;
@@ -129,7 +130,7 @@ void ShaderManager::LoadProgram( const char* name, GLString* str )
 	while( (count = fread( buf, 1, SIZE, fp )) > 0 ) {
 		str->append( buf, count );
 	}
-	fclose( fp );
+	FClose( fp );
 }
 
 

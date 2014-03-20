@@ -19,6 +19,8 @@
 
 
 #if defined( UFO_WIN32_SDL )
+#include "../libs/SDL2/include/SDL_filesystem.h"
+#include <Shlobj.h>
 static const char* winResourcePath = "./res/lumos.db";
 #endif
 
@@ -233,3 +235,62 @@ void PlayWAVSound( int offset, int nBytes )
 #endif
 }
 */
+
+static char prefPath[256] = { 0 };
+
+FILE* FOpen(int root, const char* rel, const char* mode)
+{
+	grinliz::GLString path;
+
+	if (root == GAME_SAVE_DIR) {
+		if (!prefPath[0]) {
+#ifdef _WIN32
+			PWSTR pwstr = 0;
+			PWSTR append = L"\\AlteraOrbis";
+			WCHAR buffer[500];
+
+			SHGetKnownFolderPath(FOLDERID_Documents, 0, NULL, &pwstr);
+			PWSTR p = pwstr;
+			WCHAR* q = buffer;
+			while (*p) {
+				*q++ = *p++;
+			}
+			p = append;
+			while( *p ) {
+				*q++ = *p++;
+			}
+			*q = 0;
+			CreateDirectory(buffer, NULL);
+
+			// FIXME: should be UTF-8
+			char* target = prefPath;
+			p = buffer;
+			while( *p ) {
+				*target = (char)*p;
+				target++; p++;
+			}
+			*target = '\\';
+			target++;
+			*target = 0;
+
+			CoTaskMemFree(static_cast<void*>(pwstr));
+#else
+			char* p = SDL_GetPrefPath("GrinningLizard", "AlteraOrbis");
+			GLASSERT(p);
+			grinliz::StrNCpy(prefPath, p, 256);
+			SDL_free(p);
+#endif
+		}
+		path.append(prefPath);
+	}
+	path.append(rel);
+	FILE* fp = fopen(path.c_str(), mode);
+	return fp;
+}
+
+
+void FClose(FILE* handle)
+{
+	GLASSERT(handle);
+	fclose(handle);
+}

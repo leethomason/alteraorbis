@@ -116,6 +116,7 @@ int main( int argc, char **argv )
 	MemStartCheck();
 	{ char* test = new char[16]; delete [] test; }
 
+	SetReleaseLog(FOpen(GAME_SAVE_DIR, "release_log.txt", "w"));
 	GLOUTPUT_REL(( "Altera startup. version=%d\n", VERSION ));
 
 	SDL_version compiled;
@@ -623,12 +624,9 @@ void ScreenCapture( const char* baseFilename, bool appendCount, bool trim, bool 
 		for( index = 0; index<100; ++index )
 		{
 			grinliz::SNPrintf( buf, 256, "%s%02d.png", baseFilename, index );
-	#pragma warning ( push )
-	#pragma warning ( disable : 4996 )	// fopen is unsafe. For video games that seems extreme.
-			FILE* fp = fopen( buf, "rb" );
-	#pragma warning ( pop )
+			FILE* fp = FOpen( GAME_SAVE_DIR, buf, "rb" );
 			if ( fp )
-				fclose( fp );
+				FClose( fp );
 			else
 				break;
 		}

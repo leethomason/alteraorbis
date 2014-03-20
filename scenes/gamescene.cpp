@@ -610,8 +610,8 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 				p.y = 0;
 				for( int i=0; i<5; ++i ) {
 					//sim->GetChitBag()->NewMonsterChit(plane, "redMantis", TEAM_RED_MANTIS);
-					sim->GetChitBag()->NewMonsterChit(plane, "mantis", TEAM_GREEN_MANTIS);
-					p.x += 1.0f;
+					sim->GetChitBag()->NewMonsterChit(p, "mantis", TEAM_GREEN_MANTIS);
+					p.x += 0.5f;
 				}
 #endif
 			}

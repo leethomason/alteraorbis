@@ -33,8 +33,11 @@ distribution.
 #endif
 
 #include <stdlib.h>
+#include <stdio.h>
 
 extern bool gDebugging;	// global debugging flag
+
+void SetReleaseLog(FILE* fp);
 
 void relprintf( const char* format, ... );
 #if defined(DEBUG)

@@ -182,7 +182,7 @@ void WorldMap::Save( const char* pathToDAT )
 	// btype == 0 about the same.
 	// None of this matters; may need to add an ultra-simple fast encoder.
 
-	FILE* fp = fopen( pathToDAT, "wb" );
+	FILE* fp = FOpen( GAME_SAVE_DIR, pathToDAT, "wb" );
 	GLASSERT( fp );
 	if ( fp ) {
 
@@ -203,14 +203,14 @@ void WorldMap::Save( const char* pathToDAT )
 		squisher.StreamEncode( grid, sizeof(WorldGrid)*width*height, fp );
 		squisher.StreamEncode( 0, 0, fp );
 
-		fclose( fp );
+		FClose( fp );
 	}
 }
 
 
 void WorldMap::Load( const char* pathToDAT )
 {
-	FILE* fp = fopen( pathToDAT, "rb" );
+	FILE* fp = FOpen( GAME_SAVE_DIR, pathToDAT, "rb" );
 	GLASSERT( fp );
 	if ( fp ) {
 		StreamReader reader( fp );
@@ -228,7 +228,7 @@ void WorldMap::Load( const char* pathToDAT )
 		Squisher squisher;
 		squisher.StreamDecode( grid, sizeof(WorldGrid)*width*height, fp );
 
-		fclose( fp );
+		FClose( fp );
 		
 		usingSectors = true;
 		// Set up the rocks.
