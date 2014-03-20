@@ -220,6 +220,23 @@ void AIComponent::MakeAware( const int* enemyIDs, int n )
 }
 
 
+Vector3F AIComponent::EnemyPos(Chit* chit)
+{
+	SpatialComponent* sc = chit->GetSpatialComponent();
+	GLASSERT(sc);
+	MapSpatialComponent* msc = sc->ToMapSpatialComponent();
+	if (msc) {
+		Rectangle2I porch = msc->PorchPos();
+		if (porch.Area()) {
+			return ToWorld3F(porch.Center());
+		}
+		GLASSERT(0);	// don't support attaching buildings without porches...this may work fine.
+						// But need to check we aren't pathing to a Block, so that the path always fails.
+	}
+	return sc->GetPosition();
+}
+
+
 void AIComponent::GetFriendEnemyLists()
 {
 	SpatialComponent* sc = parentChit->GetSpatialComponent();
@@ -279,15 +296,26 @@ void AIComponent::GetFriendEnemyLists()
 
 	// If the enemy list is empty of MOBs, look for buildings.
 	if (enemyList.Empty()) {
+		// This is a little subtle: what's the path to a building?
+		// The building doesn't work until there is a path from the porch
+		// to the core, so we'll use that metric.
 		BuildingFilter buildingFilter;
 		GetChitBag()->QuerySpatialHash(&chitArr, zone, parentChit, &buildingFilter);
 		for (int i = 0; i < chitArr.Size(); ++i) {
-			int status = GetTeamStatus(chitArr[i]);
+			Chit* building = chitArr[i];
+			int status = GetTeamStatus(building);
 			if (status == RELATE_ENEMY) {
-				if (enemyList.HasCap()
-					&& (context->worldMap->HasStraightPath(center, chitArr[i]->GetSpatialComponent()->GetPosition2D())))
-				{
-					enemyList.Push(chitArr[i]->ID());
+				// Note that buildings are behind walls and such, so we can't use HasStraightPath()
+				if (enemyList.HasCap()) {
+					if (!(building->GetItem()->flags & GameItem::INDESTRUCTABLE)) {
+						MapSpatialComponent* msc = GET_SUB_COMPONENT(building, SpatialComponent, MapSpatialComponent);
+						Rectangle2I porch = msc->PorchPos();
+						if (porch.Area()) {
+							if (context->worldMap->CalcPath(center, ToWorld2F(porch.min), 0, 0, false)) {
+								enemyList.Push(chitArr[i]->ID());
+							}
+						}
+					}
 				}
 			}
 		}
@@ -561,7 +589,12 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 		Vector2F heading = target.spatial->GetPosition2D() - pos2;
 		heading.Normalize();
 
-		if ( pmc ) pmc->QueueDest( pos2, &heading );
+		float angle = RotationXZDegrees(heading.x, heading.y);
+		// This seems like a good idea...BUT the PMC sends back destination
+		// reached messages. Which is a good thing, but causes the logic
+		// to reset. Go for the expedient solution: insta-turn for melee.
+		//if ( pmc ) pmc->QueueDest( pos2, &heading );
+		thisComp.spatial->SetYRotation(angle);
 	}
 	else if ( !targetDesc.id && BattleMechanics::InMeleeZone( context->engine, parentChit, targetDesc.mapPos )) {
 		GLASSERT( parentChit->GetRenderComponent()->AnimationReady() );
@@ -582,8 +615,8 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 		// Move to target.
 		if ( pmc ) {
 			Vector2F targetPos = { 0, 0 };
-			if ( targetDesc.id )
-				targetPos = target.spatial->GetPosition2D();
+			if (targetDesc.id)
+				targetPos = ToWorld2F(EnemyPos(target.chit));
 			else 
 				targetPos.Set( (float)targetDesc.mapPos.x + 0.5f, (float)targetDesc.mapPos.y + 0.5f );
 
@@ -2143,10 +2176,13 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 		}
 	}
 
+	BuildingFilter buildingFilter;
+
 	for( int k=0; k<enemyList.Size(); ++k ) {
 		const ChitContext* context = GetChitContext();
 		ComponentSet enemy( GetChitBag()->GetChit(enemyList[k]), Chit::SPATIAL_BIT | Chit::ITEM_BIT | ComponentSet::IS_ALIVE );
 		if ( !enemy.okay ) {
+			enemyList[k] = 0;
 			continue;
 		}
 		if ( context->worldMap->UsingSectors() ) {
@@ -2157,7 +2193,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 			}
 		}
 
-		const Vector3F	enemyPos		= enemy.spatial->GetPosition();
+		const Vector3F	enemyPos		= EnemyPos(enemy.chit);
 		const Vector2F	enemyPos2		= { enemyPos.x, enemyPos.z };
 		float			range			= (enemyPos - pos).Length();
 		Vector3F		toEnemy			= (enemyPos - pos);

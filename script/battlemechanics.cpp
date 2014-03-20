@@ -22,6 +22,7 @@
 #include "../game/worldmap.h"
 #include "../game/lumoschitbag.h"
 #include "../game/team.h"
+#include "../game/mapspatialcomponent.h"
 
 #include "../xegame/chitbag.h"
 #include "../xegame/chit.h"
@@ -68,6 +69,19 @@ bool BattleMechanics::InMeleeZone(	Engine* engine,
 
 	if ( !srcComp.okay || !targetComp.okay )
 		return false;
+
+	// Buildings are a special challenge.
+	MapSpatialComponent* msc = targetComp.spatial->ToMapSpatialComponent();
+	if (msc) {
+		Rectangle2I bounds = msc->Bounds();
+		Rectangle2F aabb;
+		aabb.Set(float(bounds.min.x), float(bounds.min.y),
+			     float(bounds.max.x + 1), float(bounds.max.y + 1));
+		Vector2F nearest = { 0, 0 };
+		const float range = PointAABBDistance(srcComp.spatial->GetPosition2D(), aabb, &nearest);
+
+		return range < MELEE_RANGE;
+	}
 
 	// Check range up front and early out.
 	const float range = ( targetComp.spatial->GetPosition2D() - srcComp.spatial->GetPosition2D() ).Length();
