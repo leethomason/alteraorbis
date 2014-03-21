@@ -63,6 +63,23 @@ x print uniform count for shaders
 - melee is way too powerful and wide effect
 
 - game
+	- Beta1
+		x installer
+		x buildings as targets
+		x file versioning, so new installs don't blow up.
+		- continue - load - save fix
+		- work out build - install def file - installer sequence
+		- sound engine
+		- sounds
+		- core destruction / recreation / zone end
+		- game frame:
+			- startup
+			- achievements
+			- domain end
+		- tablet vs. mouse control
+		- better control for building
+		- animation cleanup
+
 	- Food-2
 		x add porch to farm, collect food there
 		x simplify food pickup code
@@ -244,7 +261,9 @@ x Troll
 - more natural skin tones
 
 ** Releasing **
+FIXME
 - set version
+- set/check file version
 - update README.txt
 - update title screen text
 - build release/debug
@@ -253,6 +272,7 @@ x Troll
 	- let the game run until 3rd age+
 	- place player
 	- use writedefsave.bat to create files
+- build installer
 - test
 - test def-start
 - test new-start

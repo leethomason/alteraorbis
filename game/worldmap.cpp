@@ -189,7 +189,7 @@ void WorldMap::Save( const char* filename )
 	GLASSERT( fp );
 	if ( fp ) {
 
-		StreamWriter writer(fp);
+		StreamWriter writer(fp, CURRENT_FILE_VERSION);
 
 		XarcOpen( &writer, "Map" );
 		XARC_SER( &writer, width );

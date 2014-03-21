@@ -280,7 +280,22 @@ void GameScene::Load()
 	const char* datPath  = lumosGame->GamePath( "map", 0, "dat" );
 	const char* gamePath = lumosGame->GamePath( "game", 0, "dat" );
 
-	if ( lumosGame->HasFile( gamePath )) {
+	int version = -1;
+	// Get the version.
+	GLString path;
+	GetSystemPath(GAME_SAVE_DIR, gamePath, &path);
+	FILE* fp = fopen(path.c_str(), "rb");
+	if (fp) {
+		StreamReader reader(fp);
+		version = reader.Version();
+		fclose(fp);
+		GLOUTPUT(("Current binary version=%d file version=%d\n", CURRENT_FILE_VERSION, version));
+	}
+	else {
+		GLOUTPUT(("No game file.\n"));
+	}
+
+	if (version == CURRENT_FILE_VERSION) {
 		sim->Load( datPath, gamePath );
 	}
 	else {

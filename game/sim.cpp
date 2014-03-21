@@ -197,7 +197,7 @@ void Sim::Save( const char* mapDAT, const char* gameDAT )
 		GetSystemPath(GAME_SAVE_DIR, gameDAT, &path);
 		FILE* fp = fopen(path.c_str(), "wb");
 		if ( fp ) {
-			StreamWriter writer( fp );
+			StreamWriter writer(fp, CURRENT_FILE_VERSION);
 			XarcOpen( &writer, "Sim" );
 			XARC_SER( &writer, playerID );
 			XARC_SER( &writer, GameItem::idPool );

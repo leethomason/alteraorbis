@@ -126,7 +126,7 @@ int main( int argc, const char* argv[] )
 			FILE* fp = 0;
 			fopen_s( &fp, "test.dat", "wb" );
 
-			StreamWriter writer( fp );
+			StreamWriter writer( fp, 100 );
 			writer.OpenElement( "root" );
 			KeyAttributes( &writer );
 			Map( &writer );
@@ -187,7 +187,7 @@ int main( int argc, const char* argv[] )
 
 		FILE* fp = 0;
 		fopen_s( &fp, "microdbtest.dat", "wb" );
-		StreamWriter writer( fp );
+		StreamWriter writer( fp, 100 );
 		microdb.Serialize( &writer, "test" );
 		fclose( fp ); 
 	}

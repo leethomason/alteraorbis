@@ -23,7 +23,7 @@ XStream::~XStream()
 }
 
 
-StreamWriter::StreamWriter( FILE* p_fp ) 
+StreamWriter::StreamWriter( FILE* p_fp, int version ) 
 	:	XStream(), 
 		fp( p_fp ), 
 		depth( 0 ),
@@ -33,7 +33,6 @@ StreamWriter::StreamWriter( FILE* p_fp )
 		nNumber( 0 )
 {
 	// Write the header:
-	int version = 1;
 	idPool = 0;
 	WriteInt( version );
 }

@@ -18,6 +18,7 @@
 
 #include "../xegame/xegamelimits.h"
 
+static const int CURRENT_FILE_VERSION = 2;
 static const int MAX_MOVE_PATH = MAX_MAP_SIZE/2;	// repath if we need to
 
 // 4 miles/hour = 6000m/hr = 1.6m/s = 0.8grid/s

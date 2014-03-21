@@ -68,7 +68,7 @@ protected:
 
 class StreamWriter : public XStream {
 public:
-	StreamWriter( FILE* p_fp );
+	StreamWriter( FILE* p_fp, int version );
 	~StreamWriter();
 
 	virtual StreamWriter* Saving() { return this; }

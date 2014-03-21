@@ -245,9 +245,16 @@ void GetSystemPath(int root, const char* filename, grinliz::GLString* out)
 	if (root == GAME_SAVE_DIR) {
 		if (!prefPath[0]) {
 #ifdef _WIN32
+			// The SDL path has a couple of problems on Windows.
+			//	1. It doesn't work. The code doesn't actually create the
+			//	   directory even though it returns without an error.
+			//	   I haven't run the code through a debugger to see why.
+			//  2. It creates it in AppData/Roaming. While that makes 
+			//	   some sense - it is a standard - it's also a hidden
+			//	   directory which is awkward and weird.
 			PWSTR pwstr = 0;
 			PWSTR append = L"\\AlteraOrbis";
-			WCHAR buffer[500];
+			WCHAR buffer[256];
 
 			SHGetKnownFolderPath(FOLDERID_Documents, 0, NULL, &pwstr);
 			PWSTR p = pwstr;
