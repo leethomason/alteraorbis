@@ -1,3 +1,6 @@
+- glGetError() is getting compiled into release
+- batching troubles - still lots of small batches going in
+
 - "blue wall" bug. Alpha present. Not screen aligned. Noise in particles??
 - build explosive weapons (deferred for now)
 - GT: ui to show idle and busy workers
