@@ -45,6 +45,7 @@ Section "AlteraOrbis (required)"
   
   ; Put file there
   File /r Altera\*.*
+  File vcredist_x86_2013.exe
   
   ; Write the installation path into the registry
   WriteRegStr HKLM SOFTWARE\NSIS_AlteraOrbis "Install_Dir" "$INSTDIR"
@@ -55,6 +56,8 @@ Section "AlteraOrbis (required)"
   WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\AlteraOrbis" "NoModify" 1
   WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\AlteraOrbis" "NoRepair" 1
   WriteUninstaller "uninstall.exe"
+
+   ExecWait "$INSTDIR\vcredist_x86_2013.exe"
   
 SectionEnd
 
@@ -84,6 +87,7 @@ Section "Uninstall"
   Delete $INSTDIR\Altera.exe
   Delete $INSTDIR\README.txt
   Delete $INSTDIR\SDL2.dll
+  Delete vcredist_x86_2013.exe
   Delete $INSTDIR\uninstall.exe
 
   ; Remove shortcuts, if any
