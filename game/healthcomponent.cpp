@@ -40,7 +40,7 @@ using namespace grinliz;
 void HealthComponent::Serialize( XStream* xs )
 {
 	this->BeginSerialize( xs, Name() );
-	XARC_SER( xs, destroyed );
+	XARC_SER_DEF( xs, destroyed, 0 );
 	this->EndSerialize( xs );
 }
 

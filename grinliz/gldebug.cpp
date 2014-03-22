@@ -42,8 +42,11 @@ distribution.
 #include <time.h>
 #include "glstringutil.h"
 
+#ifdef DEBUG
 bool gDebugging = true;
-
+#else
+bool gDebugging = false;
+#endif
 #ifdef DEBUG
 
 #if defined(_MSC_VER)

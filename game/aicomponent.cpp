@@ -107,15 +107,15 @@ void AIComponent::Serialize( XStream* xs )
 	this->BeginSerialize( xs, Name() );
 	XARC_SER( xs, aiMode );
 	XARC_SER( xs, currentAction );
-	XARC_SER( xs, targetDesc.id );
+	XARC_SER_DEF( xs, targetDesc.id, 0 );
 	XARC_SER( xs, targetDesc.mapPos );
-	XARC_SER( xs, focus );
-	XARC_SER( xs, wanderTime );
+	XARC_SER_DEF( xs, focus, 0 );
+	XARC_SER_DEF( xs, wanderTime, 0 );
 	XARC_SER( xs, rethink );
-	XARC_SER( xs, fullSectorAware );
-	XARC_SER( xs, visitorIndex );
-	XARC_SER( xs, rampageTarget );
-	XARC_SER( xs, destinationBlocked );
+	XARC_SER_DEF( xs, fullSectorAware, false );
+	XARC_SER_DEF( xs, visitorIndex, -1 );
+	XARC_SER_DEF( xs, rampageTarget, 0 );
+	XARC_SER_DEF( xs, destinationBlocked, 0 );
 	XARC_SER( xs, lastGrid );
 	feTicker.Serialize( xs, "feTicker" );
 	needsTicker.Serialize( xs, "needsTicker" );
@@ -2561,7 +2561,7 @@ int AIComponent::DoTick( U32 deltaTime )
 		return 0;
 	}
 
-	wanderTime += deltaTime;
+//	wanderTime += deltaTime;
 	int oldAction = currentAction;
 
 	ChitBag* chitBag = this->GetChitBag();

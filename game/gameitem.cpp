@@ -54,6 +54,7 @@ void GameTrait::Serialize( XStream* xs )
 void GameTrait::Roll( U32 seed )
 {
 	Random random( seed );
+	random.Rand();
 	for( int i=0; i<NUM_TRAITS; ++i ) {
 		trait[i] = random.Dice( 3, 6 );
 	}
@@ -64,8 +65,8 @@ void GameTrait::Roll( U32 seed )
 void Cooldown::Serialize( XStream* xs, const char* name )
 {
 	XarcOpen( xs, name );
-	XARC_SER( xs, threshold );
-	XARC_SER( xs, time );
+	XARC_SER_DEF( xs, threshold, 1000 );
+	XARC_SER_DEF( xs, time, 1000 );
 	XarcClose( xs );
 }
 

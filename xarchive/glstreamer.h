@@ -8,6 +8,7 @@
 #include "../grinliz/gltypes.h"
 #include "../grinliz/glcontainer.h"
 #include "../grinliz/glstringutil.h"
+#include "../grinliz/glutil.h"
 
 // adaptors
 #include "../grinliz/glrectangle.h"
@@ -95,6 +96,11 @@ public:
 	void SetArr( const char* key, const grinliz::IString* value, int n );
 
 private:
+	int  NumBytesFollow(int value) {
+		int nBits = grinliz::LogBase2(value) + 1;
+		int nBytes = (nBits + 3) / 8;
+		return nBytes;
+	}
 	void WriteInt( int value );
 	void WriteString( const char* str );
 	void WriteFloat( float value );

@@ -97,8 +97,18 @@ void Needs::Add( const Needs& other, double scale )
 
 void Needs::Serialize( XStream* xs )
 {
+	bool allOne = (morale == 1);
+	for (int i = 0; i < NUM_NEEDS; ++i) {
+		if (need[i] != 1) {
+			allOne = false;
+			break;
+		}
+	}
+
 	XarcOpen( xs, "Needs" );
-	XARC_SER( xs, morale );
-	XARC_SER_ARR( xs, need, NUM_NEEDS );
+	if (xs->Loading() || (xs->Saving() && !allOne)) {
+		XARC_SER(xs, morale);
+		XARC_SER_ARR(xs, need, NUM_NEEDS);
+	}
 	XarcClose( xs );
 }

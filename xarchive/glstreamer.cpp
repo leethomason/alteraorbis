@@ -63,8 +63,7 @@ void StreamWriter::WriteInt( int value )
 		value *= -1;
 	}
 
-	int nBits = LogBase2(value)+1;
-	int nBytes = (nBits+3)/8;
+	int nBytes = NumBytesFollow(value);
 	lead |= nBytes << 4;
 
 	lead |= value & 0xf;
@@ -171,40 +170,53 @@ const char* StreamReader::ReadString()
 
 void StreamWriter::WriteReal(double value, bool isDouble)
 {
-	// Went down the road of pullin apart floating point numbers,
+	// Went down the road of pulling apart floating point numbers,
 	// and re-encoding as float8, float16, etc.
 	// Fun to do. But tricky code. Going with the hacky approach for now.
 	if (value == 0) {
 		nNumber += 1;
 		fputc(ENC_0, fp);
+		return;
 	}
-	else if (value == 1) {
+	if (value == 1) {
 		nNumber += 1;
 		fputc(ENC_1, fp);
+		return;
 	}
-	else if (value == int(value)) {
-		nNumber += 1;
-		fputc(ENC_INT, fp);
-		WriteInt(int(value));
+
+	int realBytes = (isDouble && (value != float(value))) ? 8 : 4;
+
+	if (value == int(value)) {
+		int nBytes = NumBytesFollow(abs(int(value))) + 1;
+		if (nBytes < realBytes) {
+			nNumber += 1;
+			fputc(ENC_INT, fp);
+			WriteInt(int(value));
+			return;
+		}
 	}
-	else if (value*2.0f == int(value * 2)) {
+	if (value*2.0f == int(value * 2)) {
 		// The 0.5 case is very common (in altera.) Do
 		// a special check for that.
-		nNumber += 1;
-		fputc(ENC_INT2, fp);
-		WriteInt(int(value * 2));
+		int nBytes = NumBytesFollow(abs(int(value * 2))) + 1;
+		if (nBytes < realBytes) {
+			nNumber += 1;
+			fputc(ENC_INT2, fp);
+			WriteInt(int(value * 2));
+			return;
+		}
 	}
-	else if ( !isDouble || (float(value) == value)) {
+	if ( realBytes == 4 ) {
 		fputc(ENC_FLOAT, fp);
 		nNumber += 1 + sizeof(float);
 		float f = float(value);
 		fwrite(&f, sizeof(float), 1, fp);
+		return;
 	}
-	else {
-		fputc(ENC_DOUBLE, fp);
-		nNumber += 1 + sizeof(double);
-		fwrite(&value, sizeof(double), 1, fp);
-	}
+
+	fputc(ENC_DOUBLE, fp);
+	nNumber += 1 + sizeof(double);
+	fwrite(&value, sizeof(double), 1, fp);
 }
 
 void StreamWriter::WriteFloat( float value )
@@ -240,6 +252,7 @@ double StreamReader::ReadReal()
 		fread(&v, sizeof(v), 1, fp);
 		return v;
 	}
+	// ENC_DOUBLE
 	double v = 0;
 	fread(&v, sizeof(v), 1, fp);
 	return v;

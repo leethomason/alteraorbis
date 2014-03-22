@@ -179,7 +179,7 @@ public:
 	bool HasTraits() const {
 		if (exp) return true;
 		for (int i = 0; i < NUM_TRAITS; ++i) {
-			if (trait[i]) return true;
+			if (trait[i] != 10) return true;
 		}
 		return false;
 	}
@@ -256,8 +256,17 @@ public:
 		}
 		return false;
 	}
-	bool Tick( int delta ) { time += delta; 
-		if ( time >= threshold && (time-delta) < threshold ) return true;
+	bool Tick( int delta ) { 
+		if (time > threshold) {
+			time = threshold;	// error recovery
+		}
+		else if (time < threshold) {
+			time += delta;
+			if (time >= threshold) {
+				time = threshold;
+				return true;
+			}
+		}
 		return false;
 	}
 	void Serialize( XStream* xs, const char* name );

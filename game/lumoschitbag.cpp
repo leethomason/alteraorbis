@@ -297,6 +297,7 @@ Chit* LumosChitBag::NewMonsterChit( const Vector3F& pos, const char* name, int t
 		chit->GetItem()->keyValues.Set( "destroyMsg", NewsEvent::GREATER_MOB_KILLED );
 	}
 	chit->GetItem()->wallet.Add( w );	
+	chit->GetItem()->GetTraitsMutable()->Roll(chit->ID());
 	return chit;
 }
 
