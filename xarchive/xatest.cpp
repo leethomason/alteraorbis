@@ -71,13 +71,13 @@ void Map( XStream* xs )
 
 	if ( xs->Saving() ) {
 		int vInt[] = { -20, 20 };
-		float vFloat[] = { -20.2f, 20.2f };
-		double vDouble[] = { -20.4, 20.4 };
+		float vFloat[] = { -20.2f, 20.2f, 0.5f, 1.5f, -0.5f, 1.5f, 10.0f, -20.0f };
+		double vDouble[] = { -20.4, 20.4, 20.125 };
 		const char* meta[] = { "foo", "bar" };
 
 		xs->Saving()->SetArr( "size-i", vInt, 2);
-		xs->Saving()->SetArr( "size-f", vFloat, 2);
-		xs->Saving()->SetArr( "size-d", vDouble, 2);
+		xs->Saving()->SetArr( "size-f", vFloat, 8);
+		xs->Saving()->SetArr( "size-d", vDouble, 3);
 		xs->Saving()->SetArr( "meta", meta, 2 );
 	}
 

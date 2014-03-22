@@ -518,12 +518,13 @@ void Game::DoTick( U32 _currentTime )
 	#endif
 #if 1
 	UFOText* ufoText = UFOText::Instance();
-	ufoText->Draw(	0,  Y, "#%d %5.1ffps %4.1fK/f %3ddc/f quads=%.1fK/f", 
+	ufoText->Draw(	0,  Y, "#%d %5.1ffps %4.1fK/f %3ddc/f quads=%.1fK/f fver=%d", 
 					VERSION, 
 					framesPerSecond, 
 					(float)device->TrianglesDrawn()/1000.0f,
 					device->DrawCalls(),
-					(float)device->QuadsDrawn()/1000.0f );
+					(float)device->QuadsDrawn()/1000.0f,
+					CURRENT_FILE_VERSION );
 	if ( debugText ) {
 		sceneStack.Top()->scene->DrawDebugText();
 	}

@@ -1,5 +1,7 @@
 #include "glstreamer.h"
 
+#define ENCODE_FLOATS
+
 using namespace grinliz;
 
 
@@ -167,33 +169,115 @@ const char* StreamReader::ReadString()
 }
 
 
+void StreamWriter::WriteReal(double value, bool isDouble)
+{
+	// Went down the road of pullin apart floating point numbers,
+	// and re-encoding as float8, float16, etc.
+	// Fun to do. But tricky code. Going with the hacky approach for now.
+	if (value == 0) {
+		nNumber += 1;
+		fputc(ENC_0, fp);
+	}
+	else if (value == 1) {
+		nNumber += 1;
+		fputc(ENC_1, fp);
+	}
+	else if (value == int(value)) {
+		nNumber += 1;
+		fputc(ENC_INT, fp);
+		WriteInt(int(value));
+	}
+	else if (value*2.0f == int(value * 2)) {
+		// The 0.5 case is very common (in altera.) Do
+		// a special check for that.
+		nNumber += 1;
+		fputc(ENC_INT2, fp);
+		WriteInt(int(value * 2));
+	}
+	else if ( !isDouble || (float(value) == value)) {
+		fputc(ENC_FLOAT, fp);
+		nNumber += 1 + sizeof(float);
+		float f = float(value);
+		fwrite(&f, sizeof(float), 1, fp);
+	}
+	else {
+		fputc(ENC_DOUBLE, fp);
+		nNumber += 1 + sizeof(double);
+		fwrite(&value, sizeof(double), 1, fp);
+	}
+}
+
 void StreamWriter::WriteFloat( float value )
 {
+#ifdef ENCODE_FLOATS
+	WriteReal(value, false);
+#else
 	nNumber += sizeof(value);
 	fwrite( &value, sizeof(value), 1, fp );
+#endif
+}
+
+
+double StreamReader::ReadReal()
+{
+	int enc = fgetc(fp);
+	if (enc == ENC_0) {
+		return 0;
+	}
+	else if (enc == ENC_1) {
+		return 1;
+	}
+	else if (enc == ENC_INT) {
+		int v = ReadInt();
+		return float(v);
+	}
+	else if (enc == ENC_INT2) {
+		int v = ReadInt();
+		return float(v)*0.5f;
+	}
+	else if (enc == ENC_FLOAT) {
+		float v = 0;
+		fread(&v, sizeof(v), 1, fp);
+		return v;
+	}
+	double v = 0;
+	fread(&v, sizeof(v), 1, fp);
+	return v;
 }
 
 
 float StreamReader::ReadFloat()
 {
+#ifdef ENCODE_FLOATS
+	return (float)ReadReal();
+#else
 	float v = 0;
 	fread( &v, sizeof(v), 1, fp );
 	return v;
+#endif
 }
 
 
 void StreamWriter::WriteDouble( double value )
 {
+#ifdef ENCODE_FLOATS
+	WriteReal(value, true);
+#else
 	nNumber += sizeof(value);
 	fwrite( &value, sizeof(value), 1, fp );
+#endif
 }
 
 
 double StreamReader::ReadDouble()
 {
+#ifdef ENCODE_FLOATS
+	return ReadReal();
+#else
 	double v=0;
 	fread( &v, sizeof(v), 1, fp );
 	return v;
+#endif
 }
 
 

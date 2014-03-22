@@ -43,9 +43,10 @@ using namespace tinyxml2;
 void GameTrait::Serialize( XStream* xs )
 {
 	XarcOpen( xs, "traits" );
-	XARC_SER_ARR( xs, trait, NUM_TRAITS );
-	XARC_SER( xs, exp );
-
+	if (xs->Loading() || (xs->Saving() && HasTraits())) {
+		XARC_SER_ARR(xs, trait, NUM_TRAITS);
+		XARC_SER(xs, exp);
+	}
 	XarcClose( xs );
 }
 
@@ -147,7 +148,7 @@ void GameItem::Serialize( XStream* xs )
 	XarcOpen( xs, "GameItem" );
 
 	XARC_SER( xs, name );
-	XARC_SER( xs, properName );
+	XARC_SER_DEF( xs, properName, IString() );
 	XARC_SER( xs, resource );
 	XARC_SER( xs, id );
 	XARC_SER( xs, mass );
@@ -161,7 +162,7 @@ void GameItem::Serialize( XStream* xs )
 	XARC_SER_DEF( xs, accruedFire, 0 );
 	XARC_SER_DEF( xs, accruedShock, 0 );
 
-	XARC_SER( xs, hardpoint );
+	XARC_SER_DEF( xs, hardpoint, 0 );
 	XARC_SER( xs, hp );
 
 	if ( xs->Saving() ) {

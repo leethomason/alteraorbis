@@ -53,13 +53,19 @@ public:
 	//		name: string
 	//		count: int
 	//		values[count] of type
-	enum {
-	};
-
 	virtual StreamWriter* Saving() { return 0; }
 	virtual StreamReader* Loading() { return 0; }
 
 protected:
+	enum {
+		ENC_0 = ATTRIB_END+1,
+		ENC_1,
+		ENC_INT,
+		ENC_INT2,
+		ENC_FLOAT,
+		ENC_DOUBLE,
+	};
+
 	grinliz::HashTable< int, const char* >							indexToStr;
 	// The string is not interned on lookup. Need the CompCharPtr
 	grinliz::HashTable< const char*, int, grinliz::CompCharPtr >	strToIndex;
@@ -93,6 +99,7 @@ private:
 	void WriteString( const char* str );
 	void WriteFloat( float value );
 	void WriteDouble( double value );
+	void WriteReal(double value, bool isDouble);
 
 	FILE* fp;
 	int idPool;
@@ -148,6 +155,7 @@ private:
 	double ReadDouble();
 	const char* ReadString();
 	int PeekByte();
+	double ReadReal();
 
 	grinliz::CDynArray< char > strBuf;
 	grinliz::CDynArray< int > intData;

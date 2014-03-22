@@ -57,8 +57,12 @@ Section "AlteraOrbis (required)"
   WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\AlteraOrbis" "NoRepair" 1
   WriteUninstaller "uninstall.exe"
 
-   ExecWait "$INSTDIR\vcredist_x86_2013.exe"
-  
+;   ExecWait "$INSTDIR\vcredist_x86_2013.exe"
+  MessageBox MB_YESNO "Install Microsoft 2013 Redistributables (required if not installed)?" /SD IDYES IDNO endRedist
+    ExecWait "$INSTDIR\vcredist_x86_2013.exe"
+    Goto endRedist
+  endRedist:
+
 SectionEnd
 
 ; Optional section (can be disabled by the user)

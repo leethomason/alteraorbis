@@ -176,6 +176,14 @@ public:
 			ALT_ACCURACY	= DEX,
 		};
 
+	bool HasTraits() const {
+		if (exp) return true;
+		for (int i = 0; i < NUM_TRAITS; ++i) {
+			if (trait[i]) return true;
+		}
+		return false;
+	}
+
 private:
 	float NormalLeveledSkill( int value ) const {
 		return Dice3D6ToMult( value + this->Level() );

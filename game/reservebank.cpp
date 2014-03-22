@@ -19,11 +19,13 @@ bool Wallet::IsEmpty() const {
 void Wallet::Serialize( XStream* xs )
 {
 	XarcOpen( xs, "Wallet" );
-	XARC_SER( xs, gold );
-	XARC_SER( xs, crystal[CRYSTAL_GREEN] );
-	XARC_SER( xs, crystal[CRYSTAL_RED] );
-	XARC_SER( xs, crystal[CRYSTAL_BLUE] );
-	XARC_SER( xs, crystal[CRYSTAL_VIOLET] );
+	if (xs->Loading() || (xs->Saving() && !this->IsEmpty())) {
+		XARC_SER(xs, gold);
+		XARC_SER(xs, crystal[CRYSTAL_GREEN]);
+		XARC_SER(xs, crystal[CRYSTAL_RED]);
+		XARC_SER(xs, crystal[CRYSTAL_BLUE]);
+		XARC_SER(xs, crystal[CRYSTAL_VIOLET]);
+	}
 	XarcClose( xs );
 }
 
