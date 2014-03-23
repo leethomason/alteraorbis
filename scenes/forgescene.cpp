@@ -212,7 +212,7 @@ void ForgeScene::SetModel( bool randomTraits )
 
 		model->SetTextureXForm( info.te.uvXForm.x, info.te.uvXForm.y, info.te.uvXForm.z, info.te.uvXForm.w );
 		model->SetTextureClip( info.te.clip.x, info.te.clip.y, info.te.clip.z, info.te.clip.w );
-		model->SetColorMap( true, info.color );
+		model->SetColorMap( info.color );
 		model->SetBoneFilter( info.filterName, info.filter );
 	}
 	CStr<64> str;

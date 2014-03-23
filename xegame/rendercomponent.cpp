@@ -283,7 +283,7 @@ void RenderComponent::SetProcedural( int metaData, const ProcRenderInfo& info )
 	Model* m = model[metaData];
 	if ( m ) {
 		m->SetTextureXForm( info.te.uvXForm );
-		m->SetColorMap( true, info.color );
+		m->SetColorMap( info.color );
 		m->SetBoneFilter( info.filterName, info.filter );
 		return;
 	}

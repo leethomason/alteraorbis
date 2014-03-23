@@ -28,7 +28,8 @@
 class Model;
 struct ModelAtom;
 class Texture;
-struct ModelAux;
+struct ModelAuxBone;
+struct ModelAuxTex;
 
 /* 
 	A simple grouping queue. States are ordered (see CompareState) in prioritizing:
@@ -50,7 +51,8 @@ public:
 				const grinliz::Vector4F& color,
 				const grinliz::Vector4F& filter,
 				const grinliz::Vector4F& control,
-				const ModelAux* aux  );
+				const ModelAuxBone* auxBone,
+				const ModelAuxTex* auxTex);
 
 
 	/* If a shader is passed it, it will override the shader set by the Add. */
@@ -69,7 +71,8 @@ private:
 		grinliz::Vector4F		color;			// per instance data (vec4)
 		grinliz::Vector4F		boneFilter;		// per instance filter
 		grinliz::Vector4F		control;		// per instance data 
-		const ModelAux*			aux;
+		const ModelAuxBone*		auxBone;
+		const ModelAuxTex*		auxTex;
 
 		bool IsInstance( const Item* item ) {
 			return    state == item->state 

@@ -256,7 +256,7 @@ void CharacterScene::SetButtonText()
 									features,
 									&info );
 				model->SetTextureXForm( info.te.uvXForm );
-				model->SetColorMap( true, info.color );
+				model->SetColorMap( info.color );
 				model->SetBoneFilter( info.filterName, info.filter );
 			}
 		}

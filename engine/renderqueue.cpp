@@ -52,13 +52,14 @@ bool RenderQueue::CompareItem::Less( const Item* s0, const Item* s1 )
 }
 
 
-void RenderQueue::Add(	Model* model, 
-						const ModelAtom* atom, 
-						const GPUState& state, 
+void RenderQueue::Add(	Model* model,
+						const ModelAtom* atom,
+						const GPUState& state,
 						const Vector4F& color,
 						const Vector4F& filter,
 						const Vector4F& control,
-						const ModelAux* aux )
+						const ModelAuxBone* auxBone,
+						const ModelAuxTex* auxTex)
 {
 	GLASSERT( model );
 	GLASSERT( atom );
@@ -70,7 +71,8 @@ void RenderQueue::Add(	Model* model,
 	item->color = color;
 	item->boneFilter = filter;
 	item->control = control;
-	item->aux = aux;
+	item->auxBone = auxBone;
+	item->auxTex = auxTex;
 
 	GLASSERT( itemPool.Size() < 10*1000 );	// sanity, infinite loop detection
 }
@@ -161,13 +163,15 @@ void RenderQueue::Submit(	int modelRequired,
 					instanceBoneFilter[index] = item->boneFilter;
 					instanceControlParam[index] = item->control;
 
-					if ( item->aux ) {
-						for( int i=0; i<EL_MAX_BONES; ++i ) {
-							instanceBone[index*EL_MAX_BONES+i]	= item->aux->boneMats[i];
+					if (item->auxBone) {
+						for (int i = 0; i < EL_MAX_BONES; ++i) {
+							instanceBone[index*EL_MAX_BONES + i] = item->auxBone->boneMats[i];
 						}
-						instanceTexture0XForm[index]	= item->aux->texture0XForm;
-						instanceTexture0Clip[index]		= item->aux->texture0Clip;
-						instanceTexture0ColorMap[index] = item->aux->texture0ColorMap;
+					}
+					if (item->auxTex) {
+						instanceTexture0XForm[index]	= item->auxTex->texture0XForm;
+						instanceTexture0Clip[index]		= item->auxTex->texture0Clip;
+						instanceTexture0ColorMap[index] = item->auxTex->texture0ColorMap;
 					}
 				}
 				GPUDevice::Instance()->Draw( *state, stream, data, 0, atom->nIndex, delta );

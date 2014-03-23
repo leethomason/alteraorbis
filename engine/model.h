@@ -166,11 +166,20 @@ public:
 };
 
 
-struct ModelAux {
-	ModelAux() {
+struct ModelAuxBone {
+	ModelAuxBone() {
 		for( int i=0; i<EL_MAX_BONES; ++i ) {
 			animToModelMap[i] = 0;
 		}
+	}
+
+	int					animToModelMap[EL_MAX_BONES];
+	grinliz::Matrix4	boneMats[EL_MAX_BONES];
+};
+
+
+struct ModelAuxTex {
+	ModelAuxTex() {
 		texture0XForm.Zero();
 		texture0Clip.Zero();
 	}
@@ -178,9 +187,8 @@ struct ModelAux {
 	grinliz::Vector4F	texture0XForm;
 	grinliz::Vector4F	texture0Clip;
 	grinliz::Matrix4	texture0ColorMap;
-	int					animToModelMap[EL_MAX_BONES];
-	grinliz::Matrix4	boneMats[EL_MAX_BONES];
 };
+
 
 
 class ModelResourceManager
@@ -200,7 +208,8 @@ public:
 		return modelResArr.Mem();
 	}
 
-	grinliz::MemoryPoolT< ModelAux > modelAuxPool;
+	grinliz::MemoryPoolT< ModelAuxBone > modelAuxBonePool;
+	grinliz::MemoryPoolT< ModelAuxTex > modelAuxTexPool;
 
 private:
 	enum { 
@@ -339,13 +348,11 @@ public:
 	}
 
 	void SetTextureClip( float x0=0, float y0=0, float x1=1, float y1=1 );
-	void SetColorMap(	bool enable, 
-						const grinliz::Vector4F& red, 
+	void SetColorMap(	const grinliz::Vector4F& red, 
 						const grinliz::Vector4F& green, 
 						const grinliz::Vector4F& blue,
 						float alpha );	// 0: use passed in channels, 1: use sampler
-	void SetColorMap(	bool enable, 
-						const grinliz::Color4F& red, 
+	void SetColorMap(	const grinliz::Color4F& red, 
 						const grinliz::Color4F& green, 
 						const grinliz::Color4F& blue,
 						float alpha )	// 0: use passed in channels, 1: use sampler
@@ -353,9 +360,9 @@ public:
 		grinliz::Vector4F r = { red.r, red.g, red.b, red.a };
 		grinliz::Vector4F g = { green.r, green.g, green.b, green.a };
 		grinliz::Vector4F b = { blue.r, blue.g, blue.b, blue.a };
-		SetColorMap( enable, r, g, b, alpha );
+		SetColorMap( r, g, b, alpha );
 	}
-	void SetColorMap( bool enable, const grinliz::Matrix4& mat );
+	void SetColorMap( const grinliz::Matrix4& mat );
 
 	// 1.0 is normal color
 	void SetFadeFX( float v )						{ control.x = v; }
@@ -450,7 +457,8 @@ private:
 	grinliz::Vector4F	color;
 	grinliz::Vector4F	boneFilter;
 	grinliz::Vector4F	control;
-	ModelAux* aux;
+	ModelAuxBone* auxBone;
+	ModelAuxTex*  auxTex;
 
 
 	mutable bool xformValid;
