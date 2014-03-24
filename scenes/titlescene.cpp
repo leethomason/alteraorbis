@@ -42,7 +42,8 @@ TitleScene::TitleScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 													"Nav", "Nav2", 
 													"Battle", 
 													"Animation", 
-													"Asset\nPreview" };
+													"Asset\nPreview",
+													"Sound" };
 
 	for( int i=0; i<NUM_TESTS; ++i ) {
 		testScene[i].Init( &gamui2D, lumosGame->GetButtonLook( LumosGame::BUTTON_LOOK_STD ) );
@@ -81,7 +82,7 @@ void TitleScene::Resize()
 
 	static const bool VIS[NUM_TESTS] = {
 		true, true, false, true, false, false,
-		true, true, true
+		true, true, true, true
 	};
 	bool visible = game->GetDebugUI();
 
@@ -142,6 +143,9 @@ void TitleScene::ItemTapped( const gamui::UIItem* item )
 	}
 	else if ( item == &testScene[TEST_ASSETPREVIEW] ) {
 		game->PushScene( LumosGame::SCENE_LIVEPREVIEW, new LivePreviewSceneData( false ) );
+	}
+	else if (item == &testScene[TEST_SOUND]) {
+		game->PushScene(LumosGame::SCENE_SOUND, 0);
 	}
 	else if ( item == &gameScene[GENERATE_WORLD] ) {
 		game->PushScene( LumosGame::SCENE_WORLDGEN, 0 );

@@ -34,6 +34,7 @@
 #include "../scenes/mapscene.h"
 #include "../scenes/forgescene.h"
 #include "../scenes/censusscene.h"
+#include "../scenes/soundscene.h"
 
 using namespace grinliz;
 using namespace gamui;
@@ -101,6 +102,7 @@ Scene* LumosGame::CreateScene( int id, SceneData* data )
 	case SCENE_MAP:			scene = new MapScene( this, (MapSceneData*)data );							break;
 	case SCENE_FORGE:		scene = new ForgeScene( this, (ForgeSceneData*)data );						break;
 	case SCENE_CENSUS:		scene = new CensusScene( this, (CensusSceneData*)data );					break;
+	case SCENE_SOUND:		scene = new SoundScene(this);				break;
 
 	default:
 		GLASSERT( 0 );
