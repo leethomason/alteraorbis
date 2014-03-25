@@ -45,6 +45,7 @@ class Unit;
 class Research;
 class ItemDefDB;
 class LumosGame;
+class XenoAudio;
 
 enum SavePathMode {
 	SAVEPATH_READ,
@@ -187,6 +188,7 @@ private:
 	ModelLoader* modelLoader;
 	gamedb::Reader* database0;		// the basic, complete database
 	ItemDefDB*		itemDefDB;		// the definitions of items
+	XenoAudio*		xenoAudio;
 
 	struct SceneNode {
 		Scene*			scene;

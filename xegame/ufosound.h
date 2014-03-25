@@ -13,6 +13,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#if 0
 #ifndef UFO_SOUND_INCLUDED
 #define UFO_SOUND_INCLUDED
 
@@ -44,3 +45,4 @@ private:
 
 
 #endif // UFO_SOUND_INCLUDED
+#endif

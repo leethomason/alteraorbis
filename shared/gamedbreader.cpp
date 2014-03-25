@@ -199,7 +199,7 @@ bool Reader::Init( int id, const char* filename, int _offset )
 		return false;
 	}
 
-	offset = _offset;
+	offset = _offset;	
 	fseek( fp, 0, SEEK_END );
 	int dbSize = (int)ftell( fp ) - (int)offset;
 	fseek( fp, offset, SEEK_SET );
@@ -590,7 +590,7 @@ int	Item::GetDataSize( const char* name ) const
 }
 
 
-void Item::GetDataInfo( int i, int* offset, int* size, bool* compressed ) const
+void Item::GetDataInfo( int i, int* p_offset, int* size, bool* compressed ) const
 {
 	GLASSERT( IsDataType( AttributeType( i )));
 	const AttribStruct* attrib = AttributePtr( i );
@@ -603,7 +603,7 @@ void Item::GetDataInfo( int i, int* offset, int* size, bool* compressed ) const
 	GLASSERT( attrib->dataID >= 0 && attrib->dataID < header->nData );
 	const DataDescStruct& dataDesc = dataDescPtr[attrib->dataID];
 
-	*offset = dataDesc.offset;
+	*p_offset = context->OffsetFromStart()+ dataDesc.offset;
 	*size = dataDesc.size;
 	*compressed = ( dataDesc.size != dataDesc.compressedSize );
 }

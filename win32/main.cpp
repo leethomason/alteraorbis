@@ -32,7 +32,7 @@
 #include "../shared/lodepng.h"
 
 #include "../version.h"
-#include "audio.h"
+#include "../audio/audio.h"
 #include "wglew.h"
 
 // For error logging.
@@ -192,8 +192,6 @@ int main( int argc, char **argv )
 	const unsigned char* version  = glGetString( GL_VERSION );
 
 	GLOUTPUT_REL(( "OpenGL vendor: '%s'  Renderer: '%s'  Version: '%s'\n", vendor, renderer, version ));
-
-	Audio_Init();
 
 	bool done = false;
 	bool zooming = false;
@@ -434,12 +432,6 @@ int main( int argc, char **argv )
 				*/
 				GameDoTick( game, SDL_GetTicks() );
 				SDL_GL_SwapWindow( screen );
-
-				int databaseID=0, size=0, offset=0;
-				// FIXME: account for databaseID when looking up sound.
-				while ( GamePopSound( game, &databaseID, &offset, &size ) ) {
-					Audio_PlayWav( "./res/uforesource.db", offset, size );
-				}
 			};
 
 			default:
@@ -480,15 +472,6 @@ int main( int argc, char **argv )
 			PROFILE_BLOCK( Swap );
 			SDL_GL_SwapWindow( screen );
 		}
-
-#ifdef USE_LOOP
-		int databaseID=0, size=0, offset=0;
-		// FIXME: account for databaseID when looking up sound.
-		while ( GamePopSound( game, &databaseID, &offset, &size ) ) {
-			Audio_PlayWav( "./res/uforesource.db", offset, size );
-		}
-#endif
-
 	}
 #else
 	}
@@ -498,7 +481,6 @@ int main( int argc, char **argv )
 	// FIXME: turn save on exit back on.
 	//GameSave( game );
 	DeleteGame( game );
-	Audio_Close();
 
 	for( int i=0; i<nModDB; ++i ) {
 		delete databases[i];

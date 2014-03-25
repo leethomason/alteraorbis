@@ -31,6 +31,7 @@
 #include "../Shiny/include/Shiny.h"
 #include "../grinliz/glstringutil.h"
 
+#include "../audio/xenoaudio.h"
 #include "../tinyxml2/tinyxml2.h"
 #include "../version.h"
 
@@ -76,11 +77,12 @@ Game::Game( int width, int height, int rotation, int uiHeight ) :
 	PlatformPathToResource( buffer, 260, &offset, &length );
 	database0 = new gamedb::Reader();
 	database0->Init( 0, buffer, offset );
+	xenoAudio = new XenoAudio(database0, buffer);
+	xenoAudio->SetAudio(true);
 
 	GLOUTPUT(( "Game::Init Database initialized.\n" ));
 
 	GLOUTPUT_REL(( "Game::Init stage 10\n" ));
-	SoundManager::Create( database0 );
 	TextureManager::Create( database0 );
 	ImageManager::Create( database0 );
 	ModelResourceManager::Create();
@@ -124,7 +126,7 @@ Game::~Game()
 
 	TextureManager::Instance()->TextureCreatorInvalid( this );
 	UFOText::Destroy();
-	SoundManager::Destroy();
+	//SoundManager::Destroy();
 	AnimationResourceManager::Destroy();
 	ModelResourceManager::Destroy();
 	ImageManager::Destroy();
@@ -133,6 +135,7 @@ Game::~Game()
 	delete ShaderManager::Instance();	// handles device loss - should be near the end.
 	delete GPUDevice::Instance();
 	delete itemDefDB;
+	delete xenoAudio;
 	delete database0;
 	delete StringPool::Instance();
 	PROFILE_DESTROY();
@@ -576,7 +579,8 @@ void Game::DoTick( U32 _currentTime )
 
 bool Game::PopSound( int* database, int* offset, int* size )
 {
-	return SoundManager::Instance()->PopSound( database, offset, size );
+	//return SoundManager::Instance()->PopSound( database, offset, size );
+	return false;
 }
 
 

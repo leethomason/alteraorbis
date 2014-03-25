@@ -1,5 +1,6 @@
 #include "soundscene.h"
 #include "../game/lumosgame.h"
+#include "../audio/xenoaudio.h"
 
 using namespace gamui;
 using namespace grinliz;
@@ -31,6 +32,9 @@ void SoundScene::ItemTapped(const gamui::UIItem* item)
 {
 	if (item == &okay) {
 		game->PopScene();
+	}
+	else if (item == &basicTest) {
+		XenoAudio::Instance()->Play("testLaser");
 	}
 }
 

@@ -288,6 +288,7 @@
   <model filename="shield.ac"                                   origin="0 0 0"      shadowCaster="true" />
 
   <data filename="sound/testLaser.wav"  assetName="testLaser" compress="false" />
+  <data filename="sound/test.txt" assetName="testText" compress="false" />
 
   <font assetName="font" filename="font_0.png" noMip="true">
     <info face="Tahoma" size="28" bold="0" italic="0" charset="" unicode="1" stretchH="100" smooth="1" aa="1" padding="2,2,2,2" spacing="1,1" outline="0"/>

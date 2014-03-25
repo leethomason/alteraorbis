@@ -41,6 +41,9 @@
     <Filter Include="Source Files\ai">
       <UniqueIdentifier>{1c28f925-78d6-4a1a-9c12-f5fd220f81fc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\audio">
+      <UniqueIdentifier>{7bc9cbe0-218e-49ec-b90a-8de29af37f0c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\engine\camera.cpp">
@@ -111,9 +114,6 @@
     </ClCompile>
     <ClCompile Include="..\game\lumosgame.cpp">
       <Filter>Source Files\game</Filter>
-    </ClCompile>
-    <ClCompile Include="..\win32\audio.cpp">
-      <Filter>Source Files\win32</Filter>
     </ClCompile>
     <ClCompile Include="..\win32\framebuffer.cpp">
       <Filter>Source Files\win32</Filter>
@@ -370,6 +370,9 @@
     <ClCompile Include="..\scenes\soundscene.cpp">
       <Filter>Source Files\scenes</Filter>
     </ClCompile>
+    <ClCompile Include="..\audio\xenoaudio.cpp">
+      <Filter>Source Files\audio</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\camera.h">
@@ -446,9 +449,6 @@
     </ClInclude>
     <ClInclude Include="..\game\lumosgame.h">
       <Filter>Source Files\game</Filter>
-    </ClInclude>
-    <ClInclude Include="..\win32\audio.h">
-      <Filter>Source Files\win32</Filter>
     </ClInclude>
     <ClInclude Include="..\win32\framebuffer.h">
       <Filter>Source Files\win32</Filter>
@@ -743,6 +743,9 @@
     </ClInclude>
     <ClInclude Include="..\scenes\soundscene.h">
       <Filter>Source Files\scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\audio\xenoaudio.h">
+      <Filter>Source Files\audio</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
