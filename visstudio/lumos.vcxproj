@@ -194,7 +194,6 @@
     <ClCompile Include="..\xegame\scene.cpp" />
     <ClCompile Include="..\xegame\spatialcomponent.cpp" />
     <ClCompile Include="..\xegame\testmap.cpp" />
-    <ClCompile Include="..\xegame\ufosound.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\ai\aineeds.h" />
@@ -318,7 +317,6 @@
     <ClInclude Include="..\xegame\spatialcomponent.h" />
     <ClInclude Include="..\xegame\stackedsingleton.h" />
     <ClInclude Include="..\xegame\testmap.h" />
-    <ClInclude Include="..\xegame\ufosound.h" />
     <ClInclude Include="..\xegame\xegamelimits.h" />
     <ClInclude Include="..\xegame\xeitem.h" />
   </ItemGroup>

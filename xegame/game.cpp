@@ -35,7 +35,6 @@
 #include "../tinyxml2/tinyxml2.h"
 #include "../version.h"
 
-#include "ufosound.h"
 #include "istringconst.h"
 
 #include "../script/itemscript.h"

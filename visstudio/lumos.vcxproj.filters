@@ -106,9 +106,6 @@
     <ClCompile Include="..\xegame\scene.cpp">
       <Filter>Source Files\xegame</Filter>
     </ClCompile>
-    <ClCompile Include="..\xegame\ufosound.cpp">
-      <Filter>Source Files\xegame</Filter>
-    </ClCompile>
     <ClCompile Include="..\gamui\gamui.cpp">
       <Filter>Source Files\gamui</Filter>
     </ClCompile>
@@ -439,9 +436,6 @@
       <Filter>Source Files\xegame</Filter>
     </ClInclude>
     <ClInclude Include="..\xegame\scene.h">
-      <Filter>Source Files\xegame</Filter>
-    </ClInclude>
-    <ClInclude Include="..\xegame\ufosound.h">
       <Filter>Source Files\xegame</Filter>
     </ClInclude>
     <ClInclude Include="..\gamui\gamui.h">

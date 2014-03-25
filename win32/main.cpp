@@ -32,7 +32,6 @@
 #include "../shared/lodepng.h"
 
 #include "../version.h"
-#include "../audio/audio.h"
 #include "wglew.h"
 
 // For error logging.
