@@ -3,7 +3,6 @@
 #include "../libs/SDL2/include/SDL_mixer.h"
 #include "../libs/SDL2/include/SDL.h"
 
-
 using namespace grinliz;
 
 XenoAudio* XenoAudio::instance = 0;
@@ -106,7 +105,10 @@ void XenoAudio::SetListener(const grinliz::Vector3F& pos, const grinliz::Vector3
 {
 	listenerPos = pos;
 	listenerDir = dir;
-	listenerDir.Normalize();
+	if (listenerDir.Length())
+		listenerDir.Normalize();
+	else
+		listenerDir.Set(1, 0, 0);
 	for (int i = 0; i < CHANNELS; ++i) {
 		SetChannelPos(i);
 	}
@@ -132,13 +134,12 @@ void XenoAudio::SetChannelPos(int i)
 		d = Clamp(d, 0, 255);
 
 		delta.Normalize();
-		float dotFront = DotProduct(delta, listenerDir);
 
 		static const Vector3F UP = { 0, 1, 0 };
-		Vector3F right;
-		CrossProduct(UP, listenerDir, &right);
+		Vector3F listenerRight = CrossProduct(listenerDir, UP);
 
-		float dotRight = DotProduct(delta, right);
+		float dotFront = DotProduct(delta, listenerDir);
+		float dotRight = DotProduct(delta, listenerRight);
 
 		// 0 is north, 90 is east, etc. WTF.
 		float rad = atan2(dotRight, dotFront);

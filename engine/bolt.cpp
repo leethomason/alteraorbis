@@ -23,6 +23,7 @@
 #include "../game/gameitem.h"
 #include "../xarchive/glstreamer.h"
 #include "../script/worldgen.h"
+#include "../audio/xenoaudio.h"
 
 using namespace grinliz;
 
@@ -68,6 +69,7 @@ void Bolt::TickAll( grinliz::CDynArray<Bolt>* bolts, U32 delta, Engine* engine, 
 		Vector3F travel = b.dir * distance;
 		Vector3F normal = { 0, 1, 0 };
 		ModelVoxel mv;
+		bool wasImpact = b.impact;
 
 		if ( !b.impact ) {
 			// Check if we hit something in the world.
@@ -133,6 +135,12 @@ void Bolt::TickAll( grinliz::CDynArray<Bolt>* bolts, U32 delta, Engine* engine, 
 		}
 		else {
 			++i;
+		}
+
+		if (!wasImpact && b.impact) {
+			if (XenoAudio::Instance()) {
+				XenoAudio::Instance()->Play("boltimpactWAV", &b.head);
+			}
 		}
 	}
 }

@@ -42,6 +42,16 @@ void SoundScene::DoTick(U32 delta)
 
 void SoundScene::ItemTapped(const gamui::UIItem* item)
 {
+	/* remember the coordinate system - how many times
+	   has this bitten me?
+	
+		+----- x
+		|
+		|
+		z
+		(y up)
+	*/
+
 	if (item == &okay) {
 		game->PopScene();
 	}
@@ -50,22 +60,22 @@ void SoundScene::ItemTapped(const gamui::UIItem* item)
 	}
 	else if (item == &test[LEFT_TEST]) {
 		Vector3F pos = { -10, 0, 0 };
-		facing.Set(0, 0, 1);
+		facing.Set(0, 0, -1);
 		XenoAudio::Instance()->Play("testLaser", &pos);
 	}
 	else if (item == &test[RIGHT_TEST]) {
 		Vector3F pos = { 10, 0, 0 };
-		facing.Set(0, 0, 1);
+		facing.Set(0, 0, -1);
 		XenoAudio::Instance()->Play("testLaser", &pos);
 	}
 	else if (item == &test[ROT_LEFT_TEST]) {
-		Vector3F pos = { -7, 0, 7 };
-		facing.Set(1, 0, 1);
+		Vector3F pos = { -7, 0, -7 };
+		facing.Set(1, 0, -1);
 		XenoAudio::Instance()->Play("testLaser", &pos);
 	}
 	else if (item == &test[ROT_RIGHT_TEST]) {
-		Vector3F pos = { 7, 0, -7 };
-		facing.Set(1, 0, 1);
+		Vector3F pos = { 7, 0, 7 };
+		facing.Set(1, 0, -1);
 		XenoAudio::Instance()->Play("testLaser", &pos);
 	}
 }

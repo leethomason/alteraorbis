@@ -20,6 +20,8 @@
 #include "../grinliz/glgeometry.h"
 #include "../Shiny/include/Shiny.h"
 
+#include "../audio/xenoaudio.h"
+
 #include "gpustatemanager.h"
 #include "shadermanager.h"
 #include "engine.h"
@@ -258,6 +260,15 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 
 	// -------- Camera & Frustum -------- //
 	screenport->SetView( camera.ViewMatrix() );	// Draw the camera
+
+	if (XenoAudio::Instance()) {
+		Vector3F lookingAt = { 0, 0, 0 };
+		this->CameraLookingAt(&lookingAt);
+		const Vector3F* camDir = camera.EyeDir3();
+		Vector3F dir = camDir[0];
+		dir.y = 0;
+		XenoAudio::Instance()->SetListener(lookingAt, dir);
+	}
 
 #ifdef DEBUG
 	{
