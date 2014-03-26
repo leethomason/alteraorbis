@@ -28,6 +28,8 @@
 #include "../engine/engine.h"
 #include "../engine/particle.h"
 
+#include "../audio/xenoaudio.h"
+
 #include "../script/procedural.h"
 #include "../script/countdownscript.h"
 #include "../script/itemscript.h"
@@ -84,6 +86,13 @@ void HealthComponent::DeltaHealth()
 
 			const GameItem* item = parentChit->GetItem();
 			if ( item && parentChit->GetSpatialComponent() ) {
+
+				// Audio.
+				if (XenoAudio::Instance()) {
+					XenoAudio::Instance()->Play("derezWAV", &parentChit->GetSpatialComponent()->GetPosition());
+				}
+
+				// Tombstone
 				IString mob = item->keyValues.GetIString( "mob" );
 				if ( !mob.empty() ) {
 					const char* asset = 0;

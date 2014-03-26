@@ -56,27 +56,27 @@ void SoundScene::ItemTapped(const gamui::UIItem* item)
 		game->PopScene();
 	}
 	else if (item == &test[BASIC_TEST]) {
-		XenoAudio::Instance()->Play("testLaser", 0);
+		XenoAudio::Instance()->Play("blasterWAV", 0);
 	}
 	else if (item == &test[LEFT_TEST]) {
 		Vector3F pos = { -10, 0, 0 };
 		facing.Set(0, 0, -1);
-		XenoAudio::Instance()->Play("testLaser", &pos);
+		XenoAudio::Instance()->Play("blasterWAV", &pos);
 	}
 	else if (item == &test[RIGHT_TEST]) {
 		Vector3F pos = { 10, 0, 0 };
 		facing.Set(0, 0, -1);
-		XenoAudio::Instance()->Play("testLaser", &pos);
+		XenoAudio::Instance()->Play("blasterWAV", &pos);
 	}
 	else if (item == &test[ROT_LEFT_TEST]) {
 		Vector3F pos = { -7, 0, -7 };
 		facing.Set(1, 0, -1);
-		XenoAudio::Instance()->Play("testLaser", &pos);
+		XenoAudio::Instance()->Play("blasterWAV", &pos);
 	}
 	else if (item == &test[ROT_RIGHT_TEST]) {
 		Vector3F pos = { 7, 0, 7 };
 		facing.Set(1, 0, -1);
-		XenoAudio::Instance()->Play("testLaser", &pos);
+		XenoAudio::Instance()->Play("blasterWAV", &pos);
 	}
 }
 

@@ -287,9 +287,6 @@
   <model filename="weapons.ac"          modelName="ring"        origin="0.20 0 0"   shadowCaster="true" bones="true" />
   <model filename="shield.ac"                                   origin="0 0 0"      shadowCaster="true" />
 
-  <data filename="sound/testLaser.wav"  assetName="testLaser" compress="false" />
-  <data filename="sound/test.txt" assetName="testText" compress="false" />
-
   <data assetName="pistolWAV"       filename="sound/pistol.wav" compress="false" />
   <data assetName="blasterWAV"      filename="sound/blaster.wav" compress="false" />
   <data assetName="pulseWAV"        filename="sound/pulse.wav" compress="false" />

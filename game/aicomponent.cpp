@@ -596,11 +596,12 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 		heading.Normalize();
 
 		float angle = RotationXZDegrees(heading.x, heading.y);
-		// This seems like a good idea...BUT the PMC sends back destination
+		// The PMC seems like a good idea...BUT the PMC sends back destination
 		// reached messages. Which is a good thing, but causes the logic
 		// to reset. Go for the expedient solution: insta-turn for melee.
 		//if ( pmc ) pmc->QueueDest( pos2, &heading );
 		thisComp.spatial->SetYRotation(angle);
+		pmc->Stop();
 	}
 	else if ( !targetDesc.id && BattleMechanics::InMeleeZone( context->engine, parentChit, targetDesc.mapPos )) {
 		GLASSERT( parentChit->GetRenderComponent()->AnimationReady() );
@@ -615,11 +616,12 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 		heading.Normalize();
 
 		float angle = RotationXZDegrees(heading.x, heading.y);
-		// This seems like a good idea...BUT the PMC sends back destination
+		// The PMC seems like a good idea...BUT the PMC sends back destination
 		// reached messages. Which is a good thing, but causes the logic
 		// to reset. Go for the expedient solution: insta-turn for melee.
 		//if ( pmc ) pmc->QueueDest( pos2, &heading );
 		thisComp.spatial->SetYRotation(angle);
+		pmc->Stop();
 	}
 	else {
 		// Move to target.

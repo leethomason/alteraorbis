@@ -57,6 +57,16 @@ void XenoAudio::Play(const char* _sound, const Vector3F* pos)
 {
 	if (!audioOn) return;
 
+	// The listener will get updated at the end of the frame,
+	// so this isn't quite correct. But hopefully good enough
+	// to prevent saturating the game with sounds all
+	// over the world.
+	if (   pos 
+		&& (*pos - listenerPos).LengthSquared() > (MAX_DISTANCE*MAX_DISTANCE*1.5f)) 
+	{
+		return;
+	}
+
 	IString iSound = StringPool::Intern(_sound);
 	const char* sound = iSound.c_str();
 
