@@ -25,12 +25,12 @@
 #include "../engine/renderqueue.h"
 #include "../engine/shadermanager.h"
 #include "../engine/animation.h"
+#include "../engine/settings.h"
 
 #include "../grinliz/glmatrix.h"
 #include "../grinliz/glutil.h"
 #include "../Shiny/include/Shiny.h"
 #include "../grinliz/glstringutil.h"
-
 #include "../tinyxml2/tinyxml2.h"
 #include "../version.h"
 
@@ -86,6 +86,10 @@ Game::Game( int width, int height, int rotation, int uiHeight ) :
 	ModelResourceManager::Create();
 	AnimationResourceManager::Create();
 
+	GLString settingsPath;
+	GetSystemPath(GAME_SAVE_DIR, "settings.xml", &settingsPath );
+	SettingsManager::Create(settingsPath.c_str());
+
 	LoadTextures();
 	modelLoader = new ModelLoader();
 	LoadModels();
@@ -125,6 +129,7 @@ Game::~Game()
 	TextureManager::Instance()->TextureCreatorInvalid( this );
 	UFOText::Destroy();
 	SoundManager::Destroy();
+	SettingsManager::Destroy();
 	AnimationResourceManager::Destroy();
 	ModelResourceManager::Destroy();
 	ImageManager::Destroy();

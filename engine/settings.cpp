@@ -43,12 +43,9 @@ SettingsManager::SettingsManager( const char* savepath )
 	instance = this;
 
 	path = savepath;
-	path += "settings.xml";
 
 	// Set defaults.
 	audioOn = 1;
-	nWalkingMaps = 1;
-
 }
 
 
@@ -56,24 +53,20 @@ void SettingsManager::Load()
 {
 	// Parse actuals.
 	XMLDocument doc;
-	if ( doc.LoadFile( path.c_str() ) ) {
-		XMLElement* root = doc.RootElement();
+	doc.LoadFile(path.c_str());
+	if ( !doc.Error() ) {
+		const XMLElement* root = doc.RootElement();
 		if ( root ) {
 			ReadAttributes( root );
 		}
 	}
-	nWalkingMaps = grinliz::Clamp( nWalkingMaps, 1, 2 );
-}
-
-
-void SettingsManager::SetNumWalkingMaps( int maps )
-{
-	maps = grinliz::Clamp( maps, 1, 2 );
-	if ( maps != nWalkingMaps ) {
-		nWalkingMaps = maps;
-		Save();
+	else {
+		const char* str0 = doc.GetErrorStr1();
+		const char* str1 = doc.GetErrorStr2();
+		GLOUTPUT(("XML error: %s  %s\n"));
 	}
 }
+
 
 
 void SettingsManager::SetAudioOn( bool _value )
@@ -108,13 +101,10 @@ void SettingsManager::ReadAttributes( const XMLElement* root )
 {
 	// Actuals:
 	root->QueryIntAttribute( "audioOn", &audioOn );
-	root->QueryIntAttribute( "nWalkingMaps", &nWalkingMaps );
-	nWalkingMaps = grinliz::Clamp( nWalkingMaps, 1, 2 );
 }
 
 
 void SettingsManager::WriteAttributes( XMLPrinter* printer )
 {
 	printer->PushAttribute( "audioOn", audioOn );
-	printer->PushAttribute( "nWalkingMaps", nWalkingMaps );
 }

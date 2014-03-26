@@ -33,12 +33,8 @@ public:
 	static void Create( const char* savepath );
 	static void Destroy();
 
-	bool GetAudioOn() const				{ return audioOn != 0; }
+	bool AudioOn() const				{ return audioOn != 0; }
 	void SetAudioOn( bool value );
-
-	// read-write
-	void SetNumWalkingMaps(int nMaps );
-	int  GetNumWalkingMaps() const		{ return nWalkingMaps; }
 
 protected:
 	SettingsManager( const char* path );
@@ -54,7 +50,6 @@ private:
 	static SettingsManager* instance;
 
 	int audioOn;
-	int nWalkingMaps;
 	grinliz::GLString path;
 };
 

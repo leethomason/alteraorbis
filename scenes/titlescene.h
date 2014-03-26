@@ -37,6 +37,8 @@ public:
 	virtual void ItemTapped( const gamui::UIItem* item );
 
 private:
+	void SetAudioButton();
+
 	LumosGame*		lumosGame;
 	gamui::Image	background;
 
@@ -59,9 +61,10 @@ private:
 		CONTINUE,
 		NUM_GAME
 	};
-	gamui::PushButton	testScene[NUM_TESTS];
-	gamui::PushButton	gameScene[NUM_GAME];
-	gamui::TextLabel	note;
+	gamui::PushButton		testScene[NUM_TESTS];
+	gamui::PushButton		gameScene[NUM_GAME];
+	gamui::ToggleButton		audioButton;
+	gamui::TextLabel		note;
 };
 
 #endif // TITLESCENE_INCLUDED

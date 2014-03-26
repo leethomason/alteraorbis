@@ -43,7 +43,7 @@ void SoundManager::QueueSound( const char* name )
 		return;
 
 	SettingsManager* settings = SettingsManager::Instance();
-	if ( !settings->GetAudioOn() )
+	if ( !settings->AudioOn() )
 		return;
 
 	if ( nSounds < MAX_QUEUE ) {

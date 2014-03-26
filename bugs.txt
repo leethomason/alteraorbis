@@ -72,8 +72,10 @@ x print uniform count for shaders
 		x file versioning, so new installs don't blow up.
 		- continue - load - save fix
 		- work out build - install def file - installer sequence
-		- sound engine
-		- sounds
+		x sound engine
+		x sounds
+		- settings file
+		- audio on/off button
 		- core destruction / recreation / zone end
 		- game frame:
 			- startup

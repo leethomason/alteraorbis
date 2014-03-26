@@ -90,6 +90,10 @@ DialogScene::DialogScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 
 DialogScene::~DialogScene()
 {
+	itemComponent0->GetItem()->wallet.EmptyWallet();
+	itemComponent1->GetItem()->wallet.EmptyWallet();
+	marketComponent->GetItem()->wallet.EmptyWallet();
+
 	delete itemComponent0;
 	delete itemComponent1;
 	delete marketComponent;

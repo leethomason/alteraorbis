@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with TexturePacker http://texturepacker.com-->
-<!-- $TexturePacker:SmartUpdate:350cebb2ed7a36afcc05d000d90df84f$ -->
+<!-- $TexturePacker:SmartUpdate:56b90553762992a8ce1256158b7dc33c$ -->
 <!--Format:
 n  => name of the sprite
 x  => sprite x pos in texture
@@ -15,6 +15,8 @@ r => 'y' only set if sprite is rotated
 -->
 <TextureAtlas imagePath="uiIcon.png" width="512" height="1024">
     <sprite n="au" x="264" y="544" w="128" h="128"/>
+    <sprite n="audioOff" x="334" y="680" w="54" h="49"/>
+    <sprite n="audioOn" x="264" y="680" w="62" h="54"/>
     <sprite n="beamgun" x="400" y="648" w="64" h="64"/>
     <sprite n="blaster" x="400" y="576" w="64" h="64"/>
     <sprite n="buttonDown" x="0" y="528" w="256" h="256"/>

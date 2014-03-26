@@ -20,6 +20,7 @@
 
 #include "../engine/uirendering.h"
 #include "../engine/texture.h"
+#include "../engine/settings.h"
 
 #include "../game/lumosgame.h"
 #include "../game/layout.h"
@@ -60,6 +61,15 @@ TitleScene::TitleScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 				  "zoning, so that buildings are affected by the environment. Also, "
 				  "the farming model has been adjusted. "
 				  "Please see the README.txt for information and a link to the game wiki." );
+
+	audioButton.Init(&gamui2D, lumosGame->GetButtonLook(LumosGame::BUTTON_LOOK_STD));
+	if (SettingsManager::Instance()->AudioOn()) {
+		audioButton.SetDown();
+	}
+	else {
+		audioButton.SetUp();
+	}
+	SetAudioButton();
 }
 
 
@@ -111,6 +121,19 @@ void TitleScene::Resize()
 
 	layout.PosAbs( &note, 0, 1 );
 	note.SetBounds( port.UIWidth() / 2, 0 );
+
+	layout.PosAbs(&audioButton, -1, 3);
+}
+
+
+void TitleScene::SetAudioButton()
+{
+	if (SettingsManager::Instance()->AudioOn()) {
+		audioButton.SetDeco(lumosGame->CalcUIIconAtom("audioOn", true), lumosGame->CalcUIIconAtom("audioOn", false));
+	}
+	else {
+		audioButton.SetDeco(lumosGame->CalcUIIconAtom("audioOff", true), lumosGame->CalcUIIconAtom("audioOff", false));
+	}
 }
 
 
@@ -163,6 +186,10 @@ void TitleScene::ItemTapped( const gamui::UIItem* item )
 	}
 	else if ( item == &gameScene[CONTINUE] ) {
 		game->PushScene( LumosGame::SCENE_GAME, 0 );
+	}
+	else if (item == &audioButton) {
+		SettingsManager::Instance()->SetAudioOn(audioButton.Down());
+		SetAudioButton();
 	}
 }
 

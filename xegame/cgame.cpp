@@ -218,24 +218,6 @@ int GamePopSound( void* handle, int* database, int* offset, int* size )
 	return (result) ? 1 : 0;
 }
 
-
-/*
-void PlayWAVSound( int offset, int nBytes )
-{
-	//GLOUTPUT(( "Wav sound called.\n" ));
-#if defined( UFO_WIN32_SDL )
-	extern void Audio_PlayWav( const char* path, int offset, int size );
-
-	Audio_PlayWav( winResourcePath, offset, nBytes );
-
-#elif defined (ANDROID_NDK)
-	// do nothing for now.
-#else
-#	error UNDEFINED
-#endif
-}
-*/
-
 static char prefPath[256] = { 0 };
 
 void GetSystemPath(int root, const char* filename, grinliz::GLString* out)
