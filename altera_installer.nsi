@@ -87,7 +87,7 @@ Section "Uninstall"
   Delete $INSTDIR\Altera.exe
   Delete $INSTDIR\README.txt
   Delete $INSTDIR\SDL2.dll
-  Delete vcredist_x86_2013.exe
+  Delete $INSTDIR\vcredist_x86_2013.exe
   Delete $INSTDIR\uninstall.exe
 
   ; Remove shortcuts, if any

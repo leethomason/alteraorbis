@@ -29,8 +29,9 @@ Changes (Zoning)
 Install
 -------
 
-Unzip (to desktop, or downloads directory) and run the game .exe. It may require the microsoft redistributables.
-Note that the 2013 redistibutables are now required: http://www.microsoft.com/en-us/download/details.aspx?id=40784
+Run the installer; it will install the game into your Program Files (x86) and save 
+files into the Documents directory. The redistributables will be installed as 
+well. (If in doubt, re-install of the redistributables is harmless.)
 
 
 Important Notes

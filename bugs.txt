@@ -264,7 +264,6 @@ x Troll
 - more natural skin tones
 
 ** Releasing **
-FIXME
 - set version
 - set/check file version
 - update README.txt
