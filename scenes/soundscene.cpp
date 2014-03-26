@@ -10,8 +10,12 @@ SoundScene::SoundScene(LumosGame* game) : Scene(game)
 	lumosGame = game;
 	game->InitStd(&gamui2D, &okay, 0);
 
-	basicTest.Init(&gamui2D, lumosGame->GetButtonLook(0));
-	basicTest.SetText("Basic");
+	for (int i = 0; i < NUM_TESTS; ++i) {
+		test[i].Init(&gamui2D, lumosGame->GetButtonLook(0));
+		const char* NAME[NUM_TESTS] = { "Basic", "Left", "Right", "RotLeft", "RotRight" };
+		test[i].SetText(NAME[i]);
+	}
+	facing.Set(0,0,1);
 }
 
 
@@ -24,7 +28,15 @@ void SoundScene::Resize()
 {
 	lumosGame->PositionStd(&okay, 0);
 	LayoutCalculator layout = lumosGame->DefaultLayout();
-	layout.PosAbs(&basicTest, 0, 0);
+	for (int i = 0; i < NUM_TESTS; ++i) {
+		layout.PosAbs(&test[i], i, 0);
+	}
+}
+
+
+void SoundScene::DoTick(U32 delta)
+{
+	XenoAudio::Instance()->SetListener(V3F_ZERO, facing);
 }
 
 
@@ -33,8 +45,28 @@ void SoundScene::ItemTapped(const gamui::UIItem* item)
 	if (item == &okay) {
 		game->PopScene();
 	}
-	else if (item == &basicTest) {
-		XenoAudio::Instance()->Play("testLaser");
+	else if (item == &test[BASIC_TEST]) {
+		XenoAudio::Instance()->Play("testLaser", 0);
+	}
+	else if (item == &test[LEFT_TEST]) {
+		Vector3F pos = { -10, 0, 0 };
+		facing.Set(0, 0, 1);
+		XenoAudio::Instance()->Play("testLaser", &pos);
+	}
+	else if (item == &test[RIGHT_TEST]) {
+		Vector3F pos = { 10, 0, 0 };
+		facing.Set(0, 0, 1);
+		XenoAudio::Instance()->Play("testLaser", &pos);
+	}
+	else if (item == &test[ROT_LEFT_TEST]) {
+		Vector3F pos = { -7, 0, 7 };
+		facing.Set(1, 0, 1);
+		XenoAudio::Instance()->Play("testLaser", &pos);
+	}
+	else if (item == &test[ROT_RIGHT_TEST]) {
+		Vector3F pos = { 7, 0, -7 };
+		facing.Set(1, 0, 1);
+		XenoAudio::Instance()->Play("testLaser", &pos);
 	}
 }
 

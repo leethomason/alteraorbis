@@ -290,6 +290,21 @@
   <data filename="sound/testLaser.wav"  assetName="testLaser" compress="false" />
   <data filename="sound/test.txt" assetName="testText" compress="false" />
 
+  <data assetName="pistolWAV"       filename="sound/pistol.wav" compress="false" />
+  <data assetName="blasterWAV"      filename="sound/blaster.wav" compress="false" />
+  <data assetName="pulseWAV"        filename="sound/pulse.wav" compress="false" />
+  <data assetName="beamgunWAV"      filename="sound/beamgun.wav" compress="false" />
+
+  <data assetName="firebigWAV"      filename="sound/firebig.wav"  compress="false" />
+  <data assetName="firesmallWAV"    filename="sound/firesmall.wav"  compress="false" />
+  <data assetName="shockWAV"        filename="sound/shock.wav"  compress="false" />
+  <data assetName="explosionWAV"    filename="sound/explosion.wav"  compress="false" />
+  <data assetName="meleeWAV"        filename="sound/melee.wav" compress="false" />
+  <data assetName="ringWAV"         filename="sound/ring.wav" compress="false" />
+  <data assetName="rezWAV"          filename="sound/rez.wav" compress="false" /> 
+  <data assetName="derezWAV"        filename="sound/derez.wav" compress="false" />
+ 
+
   <font assetName="font" filename="font_0.png" noMip="true">
     <info face="Tahoma" size="28" bold="0" italic="0" charset="" unicode="1" stretchH="100" smooth="1" aa="1" padding="2,2,2,2" spacing="1,1" outline="0"/>
     <common lineHeight="28" base="23" scaleW="256" scaleH="128" pages="1" packed="0" alphaChnl="0" redChnl="3" greenChnl="3" blueChnl="3"/>

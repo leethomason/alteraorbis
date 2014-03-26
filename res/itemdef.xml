@@ -19,6 +19,7 @@
       <item name="hand"
             flags="MELEE_WEAPON INTRINSIC"
             hardpoint="trigger"
+            soundImpact="meleeWAV"
             meleeDamageMult="0.5">
       </item>
     </intrinsics>
@@ -36,6 +37,7 @@
       <item name="hand"
             flags="MELEE_WEAPON INTRINSIC"
             hardpoint="trigger"
+            soundImpact="meleeWAV"
             meleeDamageMult="0.5">
       </item>
     </intrinsics>
@@ -49,11 +51,12 @@
       <item name="claw"
             flags="MELEE_WEAPON INTRINSIC"
             hardpoint="trigger"
-            meleeDamage="2"
+            meleeDamage="1"
             cooldown="500"
             reload="1000"
             clipCap="10"
-            speed ="1.5"/>
+            speed ="1.5"
+            soundImpact="meleeWAV" />
     </intrinsics>
   </item>
 
@@ -242,7 +245,8 @@
       <item name="stinger"
             flags="MELEE_WEAPON INTRINSIC"
             hardpoint="trigger"
-            meleeDamage="2.0">
+            meleeDamage="2.0"
+            soundImpact="meleeWAV">
       </item>
     </intrinsics>
   </item>
@@ -257,7 +261,8 @@
       <item name="pincer"
             flags="MELEE_WEAPON INTRINSIC"
             hardpoint="trigger"
-            meleeDamage="1.6">
+            meleeDamage="1.6"
+            soundImpact="meleeWAV">
       </item>
     </intrinsics>
   </item>
@@ -272,7 +277,8 @@
       <item name="pincer"
             flags="MELEE_WEAPON INTRINSIC"
             hardpoint="trigger"
-            meleeDamage="1.6">
+            meleeDamage="1.6"
+            soundImpact="meleeWAV">
       </item>
       <item name="beam"
             flags="RANGED_WEAPON INTRINSIC EFFECT_FIRE"
@@ -281,7 +287,8 @@
             reload="2000"
             clipCap="1"
             speed ="1.0"
-            rangedDamage="10">
+            rangedDamage="10"
+            sound="firesmalWAV">
         </item>
     </intrinsics>
   </item>
@@ -296,7 +303,8 @@
       <item name="hand"
             flags="MELEE_WEAPON INTRINSIC"
             hardpoint="trigger"
-            meleeDamageMult="0.6">
+            meleeDamageMult="0.6"
+            soundImpact="meleeWAV">
       </item>
     </intrinsics>
   </item>
@@ -311,7 +319,8 @@
     <intrinsics>
       <item name="claw"
             flags="MELEE_WEAPON INTRINSIC"
-            hardpoint="trigger">
+            hardpoint="trigger"
+            soundImpact="meleeWAV">
       </item>
     </intrinsics>
   </item>
@@ -325,7 +334,8 @@
     <intrinsics>
       <item name="claw"
             flags="MELEE_WEAPON INTRINSIC EFFECT_FIRE"
-            hardpoint="trigger">
+            hardpoint="trigger"
+            soundImpact="meleeWAV">
       </item>
       <item name="breath"
             flags="RANGED_WEAPON INTRINSIC EFFECT_FIRE EFFECT_EXPLOSIVE RENDER_TRAIL"
@@ -334,7 +344,8 @@
             reload="3000"
             clipCap="4"
             speed ="0.6"
-            rangedDamage="30">
+            rangedDamage="30"
+            sound="firebigWAV">
       </item>
     </intrinsics>
   </item>
@@ -348,7 +359,8 @@
     <intrinsics>
       <item name="claw"
             flags="MELEE_WEAPON INTRINSIC EFFECT_SHOCK"
-            hardpoint="trigger">
+            hardpoint="trigger"
+            soundImpact="meleeWAV">
       </item>
       <item name="breath"
             flags="RANGED_WEAPON INTRINSIC EFFECT_SHOCK"
@@ -357,7 +369,8 @@
             reload="2000"
             clipCap="10"
             speed ="1.2"
-            rangedDamage="50">
+            rangedDamage="50"
+            sound="shockWAV">
       </item>
     </intrinsics>
   </item>
@@ -377,6 +390,7 @@
         meleeDamage="1.4"
         shieldBoost="1.0"
         hpRegen="1.0"
+        sound="ringWAV"
         >
   </item>
   
@@ -395,6 +409,7 @@
         procedural="gun"
         nameGen="vikingMale"
         hpRegen="1.0"
+        sound="pistolWAV"
         >
   </item>
 
@@ -413,6 +428,7 @@
         procedural="gun"
         nameGen="vikingMale"
         hpRegen="1.0"
+        sound="blasterWAV"
         >
   </item>
 
@@ -431,6 +447,7 @@
         procedural="gun"
         nameGen="vikingMale"
         hpRegen="1.0"
+        sound="pulseWAV"
         >
   </item>
 
@@ -449,6 +466,7 @@
         procedural="gun"
         nameGen="vikingMale"
         hpRegen="1.0"
+        sound="beamgunWAV"
         >
   </item>
 

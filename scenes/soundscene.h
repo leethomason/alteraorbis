@@ -34,12 +34,23 @@ public:
 		ProcessTap(action, screen, world);
 	}
 	virtual void ItemTapped(const gamui::UIItem* item);
+	virtual void DoTick(U32 delta);
 
 private:
+	enum {
+		BASIC_TEST,
+		LEFT_TEST,
+		RIGHT_TEST,
+		ROT_LEFT_TEST,
+		ROT_RIGHT_TEST,
+		NUM_TESTS
+	};
+
 	gamui::PushButton okay;
-	gamui::PushButton basicTest;
+	gamui::PushButton test[NUM_TESTS];
 
 	LumosGame* lumosGame;
+	grinliz::Vector3F facing;
 };
 
 #endif // LUMOS_SOUND_SCENE_INCLUDED
