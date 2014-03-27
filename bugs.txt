@@ -71,7 +71,7 @@ x print uniform count for shaders
 		x buildings as targets
 		x file versioning, so new installs don't blow up.
 		- continue - load - save fix
-		- work out build - install def file - installer sequence
+		x work out build - install def file - installer sequence
 		x sound engine
 		x sounds
 			x cleaner ring sound
