@@ -176,6 +176,7 @@
     <ClCompile Include="..\widget\facewidget.cpp" />
     <ClCompile Include="..\widget\itemdescwidget.cpp" />
     <ClCompile Include="..\widget\moneywidget.cpp" />
+    <ClCompile Include="..\widget\startwidget.cpp" />
     <ClCompile Include="..\win32\framebuffer.cpp" />
     <ClCompile Include="..\win32\glew.c" />
     <ClCompile Include="..\win32\main.cpp" />
@@ -298,6 +299,7 @@
     <ClInclude Include="..\widget\facewidget.h" />
     <ClInclude Include="..\widget\itemdescwidget.h" />
     <ClInclude Include="..\widget\moneywidget.h" />
+    <ClInclude Include="..\widget\startwidget.h" />
     <ClInclude Include="..\win32\framebuffer.h" />
     <ClInclude Include="..\win32\glew.h" />
     <ClInclude Include="..\win32\wglew.h" />

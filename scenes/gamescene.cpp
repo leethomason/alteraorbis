@@ -169,6 +169,9 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	moneyWidget.Init( &gamui2D );
 	consoleWidget.Init( &gamui2D );
 
+	LayoutCalculator layout = static_cast<LumosGame*>(game)->DefaultLayout();
+	startGameWidget.Init(&gamui2D, game->GetButtonLook(0), layout);
+
 	uiMode[UI_AVATAR].SetDown();
 }
 
@@ -242,6 +245,8 @@ void GameScene::Resize()
 	for( int i=0; i<NUM_PICKUP_BUTTONS; ++i ) {
 		layout.PosAbs( &pickupButton[i], 0, i+3 );
 	}
+
+	layout.PosAbs(&startGameWidget, 1, 1, 4, 4);
 
 	// ------ CHANGE LAYOUT ------- //
 	layout.SetSize( faceWidget.Width(), 20.0f );

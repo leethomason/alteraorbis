@@ -370,6 +370,9 @@
     <ClCompile Include="..\audio\xenoaudio.cpp">
       <Filter>Source Files\audio</Filter>
     </ClCompile>
+    <ClCompile Include="..\widget\startwidget.cpp">
+      <Filter>Source Files\widget</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\camera.h">
@@ -740,6 +743,9 @@
     </ClInclude>
     <ClInclude Include="..\audio\xenoaudio.h">
       <Filter>Source Files\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\widget\startwidget.h">
+      <Filter>Source Files\widget</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

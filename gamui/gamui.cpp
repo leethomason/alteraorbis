@@ -476,10 +476,8 @@ void Image::SetAtom( const RenderAtom& atom )
 
 void Image::SetSlice( bool enable )
 {
-	if ( enable != m_slice ) { // || w != m_sliceWidth || h != m_sliceHeight ) {
+	if ( enable != m_slice ) { 
 		m_slice = enable;
-		//m_sliceWidth = w;
-		//m_sliceHeight = h;
 		Modify();
 	}
 }
@@ -637,7 +635,9 @@ void Image::Queue( CDynArray< uint16_t > *indexBuf, CDynArray< Gamui::Vertex > *
 	}
 
 	// Dislike magic numbers, but also dislike having to track atom sizes.
-	float sliceSize = 0.75f * Min( m_width, m_height );
+	//float sliceSize = 0.75f * Min( m_width, m_height );
+	// FIXME: need to set a default size in the Gamui object
+	float sliceSize = 30;
 
 	if (    !m_slice
 		 || ( m_width <= sliceSize && m_height <= sliceSize ) )

@@ -22,6 +22,7 @@
 #include "../widget/moneywidget.h"
 #include "../widget/facewidget.h"
 #include "../widget/consolewidget.h"
+#include "../widget/startwidget.h"
 
 #include "../script/buildscript.h"
 
@@ -150,6 +151,7 @@ private:
 	gamui::TextLabel	techLabel;
 	MoneyWidget			moneyWidget;
 	ConsoleWidget		consoleWidget;
+	StartGameWidget		startGameWidget;
 
 	gamui::PushButton	pickupButton[NUM_PICKUP_BUTTONS];
 

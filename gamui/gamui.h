@@ -885,7 +885,7 @@ private:
 class LayoutCalculator
 {
 public:
-	LayoutCalculator( float screenWidth, float screenHeight );
+	LayoutCalculator( float screenWidth=1000, float screenHeight=1000 );
 	~LayoutCalculator();
 
 	float Width() const									{ return width; }
