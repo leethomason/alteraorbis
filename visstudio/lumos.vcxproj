@@ -60,8 +60,8 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Dbghelp.lib;sdl2main.lib;sdl2.lib; opengl32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\src\alteraorbis\libs\SDL2\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL2_mixer.lib;Dbghelp.lib;sdl2main.lib;sdl2.lib; opengl32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>c:\src\alteraorbis\libs\SDL2_mixer\lib\x86;C:\src\alteraorbis\libs\SDL2\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -82,14 +82,15 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>sdl2main.lib;sdl2.lib;opengl32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\src\alteraorbis\libs\SDL2\lib\x86</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL2_mixer.lib;sdl2main.lib;sdl2.lib;opengl32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>c:\src\alteraorbis\libs\SDL2_mixer\lib\x86;C:\src\alteraorbis\libs\SDL2\lib\x86;</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\ai\aineeds.cpp" />
     <ClCompile Include="..\ai\marketai.cpp" />
     <ClCompile Include="..\ai\tasklist.cpp" />
+    <ClCompile Include="..\audio\xenoaudio.cpp" />
     <ClCompile Include="..\engine\animation.cpp" />
     <ClCompile Include="..\engine\bolt.cpp" />
     <ClCompile Include="..\engine\camera.cpp" />
@@ -153,6 +154,7 @@
     <ClCompile Include="..\scenes\navtestscene.cpp" />
     <ClCompile Include="..\scenes\particlescene.cpp" />
     <ClCompile Include="..\scenes\rendertestscene.cpp" />
+    <ClCompile Include="..\scenes\soundscene.cpp" />
     <ClCompile Include="..\scenes\worldgenscene.cpp" />
     <ClCompile Include="..\script\battlemechanics.cpp" />
     <ClCompile Include="..\script\buildscript.cpp" />
@@ -174,7 +176,6 @@
     <ClCompile Include="..\widget\facewidget.cpp" />
     <ClCompile Include="..\widget\itemdescwidget.cpp" />
     <ClCompile Include="..\widget\moneywidget.cpp" />
-    <ClCompile Include="..\win32\audio.cpp" />
     <ClCompile Include="..\win32\framebuffer.cpp" />
     <ClCompile Include="..\win32\glew.c" />
     <ClCompile Include="..\win32\main.cpp" />
@@ -193,12 +194,12 @@
     <ClCompile Include="..\xegame\scene.cpp" />
     <ClCompile Include="..\xegame\spatialcomponent.cpp" />
     <ClCompile Include="..\xegame\testmap.cpp" />
-    <ClCompile Include="..\xegame\ufosound.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\ai\aineeds.h" />
     <ClInclude Include="..\ai\marketai.h" />
     <ClInclude Include="..\ai\tasklist.h" />
+    <ClInclude Include="..\audio\xenoaudio.h" />
     <ClInclude Include="..\engine\animation.h" />
     <ClInclude Include="..\engine\bolt.h" />
     <ClInclude Include="..\engine\camera.h" />
@@ -273,6 +274,7 @@
     <ClInclude Include="..\scenes\navtestscene.h" />
     <ClInclude Include="..\scenes\particlescene.h" />
     <ClInclude Include="..\scenes\rendertestscene.h" />
+    <ClInclude Include="..\scenes\soundscene.h" />
     <ClInclude Include="..\scenes\titlescene.h" />
     <ClInclude Include="..\scenes\worldgenscene.h" />
     <ClInclude Include="..\script\battlemechanics.h" />
@@ -296,7 +298,6 @@
     <ClInclude Include="..\widget\facewidget.h" />
     <ClInclude Include="..\widget\itemdescwidget.h" />
     <ClInclude Include="..\widget\moneywidget.h" />
-    <ClInclude Include="..\win32\audio.h" />
     <ClInclude Include="..\win32\framebuffer.h" />
     <ClInclude Include="..\win32\glew.h" />
     <ClInclude Include="..\win32\wglew.h" />
@@ -316,7 +317,6 @@
     <ClInclude Include="..\xegame\spatialcomponent.h" />
     <ClInclude Include="..\xegame\stackedsingleton.h" />
     <ClInclude Include="..\xegame\testmap.h" />
-    <ClInclude Include="..\xegame\ufosound.h" />
     <ClInclude Include="..\xegame\xegamelimits.h" />
     <ClInclude Include="..\xegame\xeitem.h" />
   </ItemGroup>

@@ -55,12 +55,14 @@ public:
 		SCENE_MAP,
 		SCENE_FORGE,
 		SCENE_CENSUS,
+		SCENE_SOUND,
 	};
 
 	virtual Scene* CreateScene( int id, SceneData* data );
 	virtual void CreateTexture( Texture* t );
 
 	void CopyFile( const char* src, const char* target );
+	virtual void Save();
 
 	enum {
 		DECO_OKAY = 15,

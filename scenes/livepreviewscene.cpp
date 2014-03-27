@@ -139,7 +139,7 @@ void LivePreviewScene::GenerateFaces( int mainRow )
 
 		model[i]->SetTextureXForm( info.te.uvXForm.x, info.te.uvXForm.y, info.te.uvXForm.z, info.te.uvXForm.w );
 		model[i]->SetTextureClip( info.te.clip.x, info.te.clip.y, info.te.clip.z, info.te.clip.w );
-		model[i]->SetColorMap( true, info.color );
+		model[i]->SetColorMap( info.color );
 	}
 }
 
@@ -202,7 +202,7 @@ void LivePreviewScene::GenerateRingOrGun( int mainRow, bool gun )
 			model[i]->SetPos( 3.0f, y, x );
 		}
 		model[i]->SetTextureXForm( info.te.uvXForm );
-		model[i]->SetColorMap( true, info.color );
+		model[i]->SetColorMap( info.color );
 		model[i]->SetBoneFilter( info.filterName, info.filter );
 	}
 }

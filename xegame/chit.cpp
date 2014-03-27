@@ -87,7 +87,7 @@ void Chit::Serialize( const ComponentFactory* factory, XStream* xs )
 	XarcOpen( xs, "Chit" );
 	XARC_SER( xs, id );
 	XARC_SER( xs, timeSince );
-	XARC_SER( xs, playerControlled );
+	XARC_SER_DEF( xs, playerControlled, false );
 
 	if ( xs->Saving() ) {
 		for( int i=0; i<NUM_SLOTS; ++i ) {

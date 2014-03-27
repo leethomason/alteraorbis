@@ -31,10 +31,11 @@
 #include "../grinliz/glutil.h"
 #include "../Shiny/include/Shiny.h"
 #include "../grinliz/glstringutil.h"
+
+#include "../audio/xenoaudio.h"
 #include "../tinyxml2/tinyxml2.h"
 #include "../version.h"
 
-#include "ufosound.h"
 #include "istringconst.h"
 
 #include "../script/itemscript.h"
@@ -76,11 +77,12 @@ Game::Game( int width, int height, int rotation, int uiHeight ) :
 	PlatformPathToResource( buffer, 260, &offset, &length );
 	database0 = new gamedb::Reader();
 	database0->Init( 0, buffer, offset );
+	xenoAudio = new XenoAudio(database0, buffer);
+	xenoAudio->SetAudio(true);
 
 	GLOUTPUT(( "Game::Init Database initialized.\n" ));
 
 	GLOUTPUT_REL(( "Game::Init stage 10\n" ));
-	SoundManager::Create( database0 );
 	TextureManager::Create( database0 );
 	ImageManager::Create( database0 );
 	ModelResourceManager::Create();
@@ -128,7 +130,6 @@ Game::~Game()
 
 	TextureManager::Instance()->TextureCreatorInvalid( this );
 	UFOText::Destroy();
-	SoundManager::Destroy();
 	SettingsManager::Destroy();
 	AnimationResourceManager::Destroy();
 	ModelResourceManager::Destroy();
@@ -138,6 +139,7 @@ Game::~Game()
 	delete ShaderManager::Instance();	// handles device loss - should be near the end.
 	delete GPUDevice::Instance();
 	delete itemDefDB;
+	delete xenoAudio;
 	delete database0;
 	delete StringPool::Instance();
 	PROFILE_DESTROY();
@@ -523,12 +525,13 @@ void Game::DoTick( U32 _currentTime )
 	#endif
 #if 1
 	UFOText* ufoText = UFOText::Instance();
-	ufoText->Draw(	0,  Y, "#%d %5.1ffps %4.1fK/f %3ddc/f quads=%.1fK/f", 
+	ufoText->Draw(	0,  Y, "#%d %5.1ffps %4.1fK/f %3ddc/f quads=%.1fK/f fver=%d", 
 					VERSION, 
 					framesPerSecond, 
 					(float)device->TrianglesDrawn()/1000.0f,
 					device->DrawCalls(),
-					(float)device->QuadsDrawn()/1000.0f );
+					(float)device->QuadsDrawn()/1000.0f,
+					CURRENT_FILE_VERSION );
 	if ( debugText ) {
 		sceneStack.Top()->scene->DrawDebugText();
 	}
@@ -574,13 +577,6 @@ void Game::DoTick( U32 _currentTime )
 	++currentFrame;
 
 	PushPopScene();
-}
-
-
-
-bool Game::PopSound( int* database, int* offset, int* size )
-{
-	return SoundManager::Instance()->PopSound( database, offset, size );
 }
 
 

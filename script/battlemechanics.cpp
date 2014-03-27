@@ -39,6 +39,8 @@
 #include "../engine/camera.h"
 #include "../engine/particle.h"
 
+#include "../audio/xenoaudio.h"
+
 using namespace grinliz;
 
 static const float SHOOTER_MOVE_MULT = 0.5f;
@@ -150,6 +152,7 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* 
 	info.isExplosion = false;
 	info.originOfImpact = src->GetSpatialComponent()->GetPosition();
 	BattleFilter filter;
+	bool impact = false;
 
 	// Check for chit impacts.
 	for( int i=0; i<hashQuery.Size(); ++i ) {
@@ -175,6 +178,7 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* 
 						target->ID(), targetComp.item->Name() ));
 
 				target->SendMessage( ChitMsg( ChitMsg::CHIT_DAMAGE, 0, &info ), 0 );
+				impact = true;
 			}
 		}
 	}
@@ -193,8 +197,17 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* 
 				if ( wg.RockHeight() ) {
 					Vector3I voxel = { x, 0, y };
 					wm->VoxelHit( voxel, dd );
+					impact = true;
 				}
 			}
+		}
+	}
+
+	if (impact && XenoAudio::Instance()) {
+		IString impactSound = weapon->GetItem()->keyValues.GetIString("impactSound");
+		if (!impactSound.empty()) {
+			Vector3F pos3 = src->GetSpatialComponent()->GetPosition();
+			XenoAudio::Instance()->Play(impactSound.c_str(), &pos3 );
 		}
 	}
 }
@@ -285,6 +298,11 @@ void BattleMechanics::Shoot( ChitBag* bag, Chit* src, const grinliz::Vector3F& _
 	Vector3F p0;
 	GLASSERT( src->GetRenderComponent() );
 	src->GetRenderComponent()->CalcTrigger( &p0, 0 );
+
+	IString sound = weaponItem->keyValues.GetIString(IStringConst::sound);
+	if (!sound.empty() && XenoAudio::Instance()) {
+		XenoAudio::Instance()->Play(sound.c_str(), &p0);
+	}
 
 	// Explosives shoot at feet.
 	if ( weaponItem->flags & GameItem::EFFECT_EXPLOSIVE ) {

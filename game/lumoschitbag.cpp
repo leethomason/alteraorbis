@@ -29,6 +29,8 @@
 #include "../engine/loosequadtree.h"
 #include "../engine/particle.h"
 
+#include "../audio/xenoaudio.h"
+
 #include "../script/battlemechanics.h"
 #include "../script/itemscript.h"
 #include "../script/scriptcomponent.h"
@@ -267,6 +269,10 @@ Chit* LumosChitBag::NewBuilding( const Vector2I& pos, const char* name, int team
 
 	context->engine->particleSystem->EmitPD( "constructiondone", ToWorld3F( pos ), V3F_UP, 0 );
 
+	if (XenoAudio::Instance()) {
+		XenoAudio::Instance()->Play("rezWAV", &ToWorld3F(pos));
+	}
+
 	return chit;
 }
 
@@ -297,6 +303,11 @@ Chit* LumosChitBag::NewMonsterChit( const Vector3F& pos, const char* name, int t
 		chit->GetItem()->keyValues.Set( "destroyMsg", NewsEvent::GREATER_MOB_KILLED );
 	}
 	chit->GetItem()->wallet.Add( w );	
+	chit->GetItem()->GetTraitsMutable()->Roll(chit->ID());
+
+	if (XenoAudio::Instance()) {
+		XenoAudio::Instance()->Play("rezWAV", &pos);
+	}
 	return chit;
 }
 
@@ -346,6 +357,10 @@ Chit* LumosChitBag::NewDenizen( const grinliz::Vector2I& pos, int team )
 	history->Add( NewsEvent( NewsEvent::DENIZEN_CREATED, ToWorld2F(pos), chit, 0 ));
 	chit->GetItem()->keyValues.Set( "destroyMsg", NewsEvent::DENIZEN_KILLED );
 
+	if (XenoAudio::Instance()) {
+		XenoAudio::Instance()->Play("rezWAV", &ToWorld3F(pos));
+	}
+
 	return chit;
 }
 
@@ -364,6 +379,10 @@ Chit* LumosChitBag::NewWorkerChit( const Vector3F& pos, int team )
 	AddItem( rootItem.Name(), chit, context->engine, team, 0 );
 	chit->Add( new HealthComponent());
 	chit->Add( new DebugStateComponent( context->worldMap ));
+
+	if (XenoAudio::Instance()) {
+		XenoAudio::Instance()->Play("rezWAV", &pos);
+	}
 	return chit;
 }
 
@@ -634,6 +653,10 @@ void LumosChitBag::HandleBolt( const Bolt& bolt, const ModelVoxel& mv )
 
 		DamageDesc dd( bolt.damage, bolt.effect );
 		BattleMechanics::GenerateExplosionMsgs( dd, origin, bolt.chitID, context->engine, this );
+
+		if (XenoAudio::Instance()) {
+			XenoAudio::Instance()->Play("explosionWAV", &origin);
+		}
 
 		if ( mv.VoxelHit() ) {
 			context->worldMap->VoxelHit( mv.voxel, dd );

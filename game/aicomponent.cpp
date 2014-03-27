@@ -42,6 +42,8 @@
 #include "../engine/engine.h"
 #include "../engine/particle.h"
 
+#include "../audio/xenoaudio.h"
+
 #include "../xegame/chitbag.h"
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/rendercomponent.h"
@@ -107,15 +109,15 @@ void AIComponent::Serialize( XStream* xs )
 	this->BeginSerialize( xs, Name() );
 	XARC_SER( xs, aiMode );
 	XARC_SER( xs, currentAction );
-	XARC_SER( xs, targetDesc.id );
+	XARC_SER_DEF( xs, targetDesc.id, 0 );
 	XARC_SER( xs, targetDesc.mapPos );
-	XARC_SER( xs, focus );
-	XARC_SER( xs, wanderTime );
+	XARC_SER_DEF( xs, focus, 0 );
+	XARC_SER_DEF( xs, wanderTime, 0 );
 	XARC_SER( xs, rethink );
-	XARC_SER( xs, fullSectorAware );
-	XARC_SER( xs, visitorIndex );
-	XARC_SER( xs, rampageTarget );
-	XARC_SER( xs, destinationBlocked );
+	XARC_SER_DEF( xs, fullSectorAware, false );
+	XARC_SER_DEF( xs, visitorIndex, -1 );
+	XARC_SER_DEF( xs, rampageTarget, 0 );
+	XARC_SER_DEF( xs, destinationBlocked, 0 );
 	XARC_SER( xs, lastGrid );
 	feTicker.Serialize( xs, "feTicker" );
 	needsTicker.Serialize( xs, "needsTicker" );
@@ -584,32 +586,42 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 	if ( targetDesc.id && BattleMechanics::InMeleeZone( context->engine, parentChit, target.chit )) {
 		GLASSERT( parentChit->GetRenderComponent()->AnimationReady() );
 		parentChit->GetRenderComponent()->PlayAnimation( ANIM_MELEE );
+		IString sound = item->keyValues.GetIString("sound");
+		if (!sound.empty() && XenoAudio::Instance()) {
+			XenoAudio::Instance()->Play(sound.c_str(), &thisComp.spatial->GetPosition());
+		}
 
 		Vector2F pos2 = thisComp.spatial->GetPosition2D();
 		Vector2F heading = target.spatial->GetPosition2D() - pos2;
 		heading.Normalize();
 
 		float angle = RotationXZDegrees(heading.x, heading.y);
-		// This seems like a good idea...BUT the PMC sends back destination
+		// The PMC seems like a good idea...BUT the PMC sends back destination
 		// reached messages. Which is a good thing, but causes the logic
 		// to reset. Go for the expedient solution: insta-turn for melee.
 		//if ( pmc ) pmc->QueueDest( pos2, &heading );
 		thisComp.spatial->SetYRotation(angle);
+		pmc->Stop();
 	}
 	else if ( !targetDesc.id && BattleMechanics::InMeleeZone( context->engine, parentChit, targetDesc.mapPos )) {
 		GLASSERT( parentChit->GetRenderComponent()->AnimationReady() );
 		parentChit->GetRenderComponent()->PlayAnimation( ANIM_MELEE );
+		IString sound = item->keyValues.GetIString("sound");
+		if (!sound.empty() && XenoAudio::Instance()) {
+			XenoAudio::Instance()->Play(sound.c_str(), &thisComp.spatial->GetPosition());
+		}
 
 		Vector2F pos2 = thisComp.spatial->GetPosition2D();
 		Vector2F heading = ToWorld2F( targetDesc.mapPos ) - pos2;
 		heading.Normalize();
 
 		float angle = RotationXZDegrees(heading.x, heading.y);
-		// This seems like a good idea...BUT the PMC sends back destination
+		// The PMC seems like a good idea...BUT the PMC sends back destination
 		// reached messages. Which is a good thing, but causes the logic
 		// to reset. Go for the expedient solution: insta-turn for melee.
 		//if ( pmc ) pmc->QueueDest( pos2, &heading );
 		thisComp.spatial->SetYRotation(angle);
+		pmc->Stop();
 	}
 	else {
 		// Move to target.
@@ -2561,7 +2573,7 @@ int AIComponent::DoTick( U32 deltaTime )
 		return 0;
 	}
 
-	wanderTime += deltaTime;
+//	wanderTime += deltaTime;
 	int oldAction = currentAction;
 
 	ChitBag* chitBag = this->GetChitBag();

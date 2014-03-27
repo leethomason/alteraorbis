@@ -49,7 +49,11 @@ void Personality::Roll( U32 seed, const GameTrait* t )
 void Personality::Serialize( XStream* xs )
 {
 	XarcOpen( xs, "Personality" );
-	XARC_SER_ARR( xs, trait, NUM_TRAITS );
+
+	// Only write if non-default.
+	if ( xs->Loading() || (xs->Saving() && HasPersonality())) {
+		XARC_SER_ARR(xs, trait, NUM_TRAITS);
+	}
 	XarcClose( xs );
 }
 

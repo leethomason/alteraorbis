@@ -62,7 +62,7 @@ ScriptComponent::ScriptComponent( const ComponentFactory* f ) : script( 0 ), fac
 void ScriptComponent::Serialize( XStream* xs )
 {
 	this->BeginSerialize( xs, Name() );
-	XARC_SER( xs, context.initialized );
+	XARC_SER_DEF( xs, context.initialized, true );
 	XARC_SER( xs, context.time );
 
 	if ( xs->Saving() ) {

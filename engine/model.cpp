@@ -219,7 +219,8 @@ void Model::Init( const ModelResource* resource, SpaceTree* tree )
 {
 	this->resource = resource; 
 	this->tree = tree;
-	this->aux = 0;
+	this->auxBone = 0;
+	this->auxTex = 0;
 
 	color.Set(1,1,1,1);
 	boneFilter.Set(0,0,0,0);
@@ -227,8 +228,8 @@ void Model::Init( const ModelResource* resource, SpaceTree* tree )
 
 	animationResource = AnimationResourceManager::Instance()->GetResource( resource->header.animation.c_str() );
 	if ( animationResource ) {	// Match the IDs.
-		if ( !aux ) {
-			aux = ModelResourceManager::Instance()->modelAuxPool.New();
+		if ( !auxBone ) {
+			auxBone = ModelResourceManager::Instance()->modelAuxBonePool.New();
 		}
 		int type = 0;
 		// Find a sequence.
@@ -240,10 +241,10 @@ void Model::Init( const ModelResource* resource, SpaceTree* tree )
 		}
 
 		for( int i=0; i<EL_MAX_BONES; ++i ) {
-			aux->animToModelMap[i] = -1;
+			auxBone->animToModelMap[i] = -1;
 			const IString& str = animationResource->GetBoneData(type).bone[i].name;
 			if ( !str.empty() ) {
-				aux->animToModelMap[i] = this->GetBoneIndex( str );
+				auxBone->animToModelMap[i] = this->GetBoneIndex(str);
 			}
 		}
 	}
@@ -283,8 +284,10 @@ void Model::Init( const ModelResource* resource, SpaceTree* tree )
 
 void Model::Free()
 {
-	ModelResourceManager::Instance()->modelAuxPool.Delete( aux );
-	aux = 0;
+	ModelResourceManager::Instance()->modelAuxBonePool.Delete(auxBone);
+	ModelResourceManager::Instance()->modelAuxTexPool.Delete(auxTex);
+	auxBone = 0;
+	auxTex = 0;
 }
 
 
@@ -311,62 +314,56 @@ void Model::Serialize( XStream* xs, SpaceTree* tree )
 	XARC_SER( xs, boneFilter );
 	XARC_SER_DEF( xs, control, ONE );
 
+	bool hasAuxBone = auxBone != 0;
+	bool hasAuxTex = auxTex != 0;
+	XARC_SER_DEF(xs, hasAuxBone, false);
+	XARC_SER_DEF(xs, hasAuxTex, false);
+
 	if ( xs->Saving() ) {
 		StreamWriter* save = xs->Saving();
 		XarcSet( xs, "resource", resource->header.name );
 		if ( animationResource ) {
 			save->Set( "animationResource", animationResource->ResourceName() );
 		}
-		if ( aux ) {
-			save->OpenElement( "aux" );
-			XARC_SER( xs, aux->texture0XForm );
-			XARC_SER( xs, aux->texture0Clip );
-			XARC_SER( xs, aux->texture0ColorMap );
-			XARC_SER_ARR( xs, aux->animToModelMap, EL_MAX_BONES );
-			GLASSERT( EL_MAX_BONES == 16 );	// just to fix the code below
-			// This is done because of the compression that
-			// the serializer can do on identity matrices.
-			XARC_SER( xs, aux->boneMats[0] );
-			XARC_SER( xs, aux->boneMats[1] );
-			XARC_SER( xs, aux->boneMats[2] );
-			XARC_SER( xs, aux->boneMats[3] );
-			XARC_SER( xs, aux->boneMats[4] );
-			XARC_SER( xs, aux->boneMats[5] );
-			XARC_SER( xs, aux->boneMats[6] );
-			XARC_SER( xs, aux->boneMats[7] );
-			XARC_SER( xs, aux->boneMats[8] );
-			XARC_SER( xs, aux->boneMats[9] );
-			XARC_SER( xs, aux->boneMats[10] );
-			XARC_SER( xs, aux->boneMats[11] );
-			XARC_SER( xs, aux->boneMats[12] );
-			XARC_SER( xs, aux->boneMats[13] );
-			XARC_SER( xs, aux->boneMats[14] );
-			XARC_SER( xs, aux->boneMats[15] );
+		if ( auxBone ) {
+			save->OpenElement( "auxBone" );
+			XARC_SER_ARR(xs, auxBone->animToModelMap, EL_MAX_BONES);
+			XARC_SER_ARR(xs, auxBone->boneMats[0].x, EL_MAX_BONES * 16);
+			save->CloseElement();
+		}
+		if (auxTex) {
+			save->OpenElement("auxTex");
+			XARC_SER(xs, auxTex->texture0XForm);
+			XARC_SER(xs, auxTex->texture0Clip);
+			XARC_SER(xs, auxTex->texture0ColorMap);
 			save->CloseElement();
 		}
 	}
 	else {
 		StreamReader* load = xs->Loading();
 		IString name;
-		XarcGet( xs, "resource", name );
-		resource = ModelResourceManager::Instance()->GetModelResource( name.c_str() );
-		
-		const StreamReader::Attribute* attr = load->Get( "animationResource" );
-		if ( attr ) {
-			const char* name = load->Value( attr, 0 );
-			animationResource = AnimationResourceManager::Instance()->GetResource( name );
-			GLASSERT( animationResource );
+		XarcGet(xs, "resource", name);
+		resource = ModelResourceManager::Instance()->GetModelResource(name.c_str());
+
+		const StreamReader::Attribute* attr = load->Get("animationResource");
+		if (attr) {
+			const char* name = load->Value(attr, 0);
+			animationResource = AnimationResourceManager::Instance()->GetResource(name);
+			GLASSERT(animationResource);
 		}
-		if ( load->HasChild() ) {
+		if (hasAuxBone) {
 			load->OpenElement();	// aux
-			if ( !aux ) {
-				aux = ModelResourceManager::Instance()->modelAuxPool.New();
-			}
-			XARC_SER( xs, aux->texture0XForm );
-			XARC_SER( xs, aux->texture0Clip );
-			XARC_SER( xs, aux->texture0ColorMap );
-			XARC_SER_ARR( xs, aux->animToModelMap, EL_MAX_BONES );
-			XARC_SER_ARR( xs, aux->boneMats[0].x, EL_MAX_BONES*16 );
+			if (!auxBone ) auxBone = ModelResourceManager::Instance()->modelAuxBonePool.New();
+			XARC_SER_ARR(xs, auxBone->animToModelMap, EL_MAX_BONES);
+			XARC_SER_ARR(xs, auxBone->boneMats[0].x, EL_MAX_BONES * 16);
+			load->CloseElement();
+		}
+		if (hasAuxTex) {
+			load->OpenElement();
+			if (!auxTex) auxTex = ModelResourceManager::Instance()->modelAuxTexPool.New();
+			XARC_SER(xs, auxTex->texture0XForm);
+			XARC_SER(xs, auxTex->texture0Clip);
+			XARC_SER(xs, auxTex->texture0ColorMap);
 			load->CloseElement();
 		}
 	}
@@ -448,10 +445,8 @@ void Model::SetTextureXForm( float a, float d, float tx, float ty )
 {
 	if ( a != 1 || d != 1 || tx != 0 || ty != 0 ) {
 		SetFlag( MODEL_TEXTURE0_XFORM );
-		if ( !aux ) {
-			aux = ModelResourceManager::Instance()->modelAuxPool.New();
-		}
-		aux->texture0XForm.Set( a, d, tx, ty );
+		if ( !auxTex ) auxTex = ModelResourceManager::Instance()->modelAuxTexPool.New();
+		auxTex->texture0XForm.Set( a, d, tx, ty );
 	}
 	else {
 		ClearFlag( MODEL_TEXTURE0_XFORM );
@@ -463,10 +458,8 @@ void Model::SetTextureClip( float x0, float y0, float x1, float y1 )
 {
 	if ( x0 != 0 || y0 != 0 || x1 != 1 || y1 != 1 ) {
 		SetFlag( MODEL_TEXTURE0_CLIP );
-		if ( !aux ) {
-			aux = ModelResourceManager::Instance()->modelAuxPool.New();
-		}
-		aux->texture0Clip.Set( x0, y0, x1, y1 );
+		if (!auxTex) auxTex = ModelResourceManager::Instance()->modelAuxTexPool.New();
+		auxTex->texture0Clip.Set(x0, y0, x1, y1);
 	}
 	else {
 		ClearFlag( MODEL_TEXTURE0_CLIP );
@@ -474,14 +467,12 @@ void Model::SetTextureClip( float x0, float y0, float x1, float y1 )
 }
 
 
-void Model::SetColorMap( bool enable, const grinliz::Matrix4& mat )
+void Model::SetColorMap( const grinliz::Matrix4& mat )
 {
-	if ( enable ) {
+	if ( !mat.IsIdentity() ) {
 		SetFlag( MODEL_TEXTURE0_COLORMAP );
-		if ( !aux ) {
-			aux = ModelResourceManager::Instance()->modelAuxPool.New();
-		}
-		aux->texture0ColorMap = mat;
+		if (!auxTex) auxTex = ModelResourceManager::Instance()->modelAuxTexPool.New();
+		auxTex->texture0ColorMap = mat;
 	}
 	else {
 		ClearFlag( MODEL_TEXTURE0_COLORMAP );
@@ -489,17 +480,18 @@ void Model::SetColorMap( bool enable, const grinliz::Matrix4& mat )
 }
 
 
-void Model::SetColorMap( bool enable, const Vector4F& red, const Vector4F& green, const Vector4F& blue, float alpha )
+void Model::SetColorMap( const Vector4F& red, const Vector4F& green, const Vector4F& blue, float alpha )
 {
-	if ( enable ) {
+	Matrix4 m;
+	m.SetCol(0, red);
+	m.SetCol(1, green);
+	m.SetCol(2, blue);
+	m.m44 = alpha;
+
+	if ( !m.IsIdentity() ) {
 		SetFlag( MODEL_TEXTURE0_COLORMAP );
-		if ( !aux ) {
-			aux = ModelResourceManager::Instance()->modelAuxPool.New();
-		}
-		aux->texture0ColorMap.SetCol( 0, red );
-		aux->texture0ColorMap.SetCol( 1, green );
-		aux->texture0ColorMap.SetCol( 2, blue );
-		aux->texture0ColorMap.m44 = alpha;
+		if ( !auxTex ) auxTex = ModelResourceManager::Instance()->modelAuxTexPool.New();
+		auxTex->texture0ColorMap = m;
 	}
 	else {
 		ClearFlag( MODEL_TEXTURE0_COLORMAP );
@@ -603,7 +595,7 @@ void Model::CalcHitAABB( Rectangle3F* aabb ) const
 void Model::CalcAnimation()
 {
 	GLASSERT( HasAnimation() );
-	GLASSERT( aux );
+	GLASSERT( auxBone );
 
 	Matrix4 animMats[EL_MAX_BONES];
 	bool cached = false;
@@ -631,8 +623,8 @@ void Model::CalcAnimation()
 		// The animationResource returns boneMats in armature order.
 		// They need to be submitted in Model order.
 		for( int i=0; i<EL_MAX_BONES; ++i ) {
-			if ( aux->animToModelMap[i] >= 0 ) {
-				aux->boneMats[aux->animToModelMap[i]] = animMats[i];
+			if ( auxBone->animToModelMap[i] >= 0 ) {
+				auxBone->boneMats[auxBone->animToModelMap[i]] = animMats[i];
 			}
 		}
 	}
@@ -660,7 +652,7 @@ void Model::CalcMetaData( int id, grinliz::Matrix4* meta )
 		r.SetAxisAngle( data->axis, data->rotation );
 		t.SetTranslation( data->pos );
 
-		*meta = xform * aux->boneMats[index] * t * r;						
+		*meta = xform * auxBone->boneMats[index] * t * r;						
 	}
 }
 
@@ -769,22 +761,23 @@ void Model::Queue( RenderQueue* queue, EngineShaders* engineShaders, int require
 			GPUState state;
 			engineShaders->GetState( base, mod, &state );
 
-			const ModelAux* modelAux = 0;
+			const ModelAuxBone* modelAuxBone = 0;
+			const ModelAuxTex*  modelAuxTex = 0;
 
 			if ( HasAnimation() ) {
-				if ( !aux ) {
-					aux = ModelResourceManager::Instance()->modelAuxPool.New();
-				}
+				GLASSERT(auxBone);
+				if (!auxBone) auxBone = ModelResourceManager::Instance()->modelAuxBonePool.New();
 				CalcAnimation(); 
-				modelAux = aux;
+				modelAuxBone = auxBone;
 			}
 			if (     (flags & MODEL_TEXTURE0_XFORM)
 				  || (flags & MODEL_TEXTURE0_CLIP)
 				  || (flags & MODEL_TEXTURE0_COLORMAP)
 				  || (flags & MODEL_TEXTURE0_XFORM) )
 			{
-				GLASSERT( aux );
-				modelAux = aux;
+				GLASSERT(auxTex);
+				if (!auxTex) auxTex = ModelResourceManager::Instance()->modelAuxTexPool.New();
+				modelAuxTex = auxTex;
 			}
 			queue->Add( this,									// reference back
 						&resource->atom[i],						// model atom to render
@@ -792,7 +785,8 @@ void Model::Queue( RenderQueue* queue, EngineShaders* engineShaders, int require
 						color,
 						boneFilter,
 						control,								// parameter to the shader #2
-						modelAux );
+						modelAuxBone,
+						modelAuxTex );
 		}
 	}
 }
@@ -948,7 +942,9 @@ const ModelResource* ModelResourceManager::GetModelResource( const char* name, b
 
 ModelResourceManager* ModelResourceManager::instance = 0;
 
-ModelResourceManager::ModelResourceManager() : modelAuxPool( "modelAuxPool" )
+ModelResourceManager::ModelResourceManager() : 
+	modelAuxBonePool( "modelAuxBonePool" ),
+	modelAuxTexPool("modelAuxTexPool")
 {
 }
 	

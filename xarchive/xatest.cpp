@@ -71,13 +71,13 @@ void Map( XStream* xs )
 
 	if ( xs->Saving() ) {
 		int vInt[] = { -20, 20 };
-		float vFloat[] = { -20.2f, 20.2f };
-		double vDouble[] = { -20.4, 20.4 };
+		float vFloat[] = { -20.2f, 20.2f, 0.5f, 1.5f, -0.5f, 1.5f, 10.0f, -20.0f };
+		double vDouble[] = { -20.4, 20.4, 20.125 };
 		const char* meta[] = { "foo", "bar" };
 
 		xs->Saving()->SetArr( "size-i", vInt, 2);
-		xs->Saving()->SetArr( "size-f", vFloat, 2);
-		xs->Saving()->SetArr( "size-d", vDouble, 2);
+		xs->Saving()->SetArr( "size-f", vFloat, 8);
+		xs->Saving()->SetArr( "size-d", vDouble, 3);
 		xs->Saving()->SetArr( "meta", meta, 2 );
 	}
 
@@ -116,6 +116,49 @@ void KeyAttributes( XStream* xs )
 }
 
 
+void FloatEncoding(XStream* xs) 
+{
+	float oneF = 1;
+	float zeroF = 0;
+	float point5F = 1023.0f + 0.5f;
+	float intF = 1023;
+	float valueF = 1.23456f;
+
+	double oneD = 1;
+	double zeroD = 0;
+	double point5D = 1023.0 + 0.5;
+	double intD = 1023;
+	double valueD = 1.23456;
+
+	XarcOpen(xs, "FloatEncoding");
+	XARC_SER(xs, oneF);
+	XARC_SER(xs, zeroF);
+	XARC_SER(xs, point5F);
+	XARC_SER(xs, intF);
+	XARC_SER(xs, valueF);
+
+	XARC_SER(xs, oneD);
+	XARC_SER(xs, zeroD);
+	XARC_SER(xs, point5D);
+	XARC_SER(xs, intD);
+	XARC_SER(xs, valueD);
+	XarcClose(xs);
+
+	GLASSERT(oneF == 1.0f);
+	GLASSERT(zeroF == 0.0f);
+	GLASSERT(point5F = 1023.5f);
+	GLASSERT(intF == 1023);
+	GLASSERT(valueF == 1.23456f);
+
+	GLASSERT(oneD == 1.0);
+	GLASSERT(zeroD == 0.0);
+	GLASSERT(point5D = 1023.5);
+	GLASSERT(intD == 1023);
+	GLASSERT(valueD == 1.23456);
+}
+
+
+
 int main( int argc, const char* argv[] ) 
 {
 	printf( "Xarchive test.\n" );
@@ -132,6 +175,7 @@ int main( int argc, const char* argv[] )
 			Map( &writer );
 			MetaData( &writer );
 			Limits( &writer );
+			FloatEncoding(&writer);
 			writer.CloseElement();
 
 			fclose( fp );
@@ -145,6 +189,7 @@ int main( int argc, const char* argv[] )
 			Map( &reader );
 			MetaData( &reader );
 			Limits( &reader );
+			FloatEncoding(&reader);
 			reader.CloseElement();
 	
 			fclose( fp );

@@ -30,6 +30,7 @@ public:
 	static grinliz::IString althand;
 	static grinliz::IString head;
 	static grinliz::IString shield;
+	static grinliz::IString sound;
 
 	static grinliz::IString humanFemale;
 	static grinliz::IString humanMale;

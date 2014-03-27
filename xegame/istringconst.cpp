@@ -8,6 +8,7 @@ IString IStringConst::target;
 IString IStringConst::althand;
 IString IStringConst::head;
 IString IStringConst::shield;
+IString IStringConst::sound;
 IString IStringConst::humanFemale;
 IString IStringConst::humanMale;
 IString IStringConst::worker;
@@ -67,6 +68,7 @@ void IStringConst::Init()
 	althand = StringPool::Intern( "althand", true );
 	head = StringPool::Intern( "head", true );
 	shield = StringPool::Intern( "shield", true );
+	sound = StringPool::Intern( "sound", true );
 	humanFemale = StringPool::Intern( "humanFemale", true );
 	humanMale = StringPool::Intern( "humanMale", true );
 	worker = StringPool::Intern( "worker", true );
