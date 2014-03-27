@@ -88,30 +88,23 @@ void TitleScene::Resize()
 		background.SetSize( port.UIHeight()*2.0f, port.UIHeight() );
 	}
 	background.SetCenterPos( port.UIWidth()*0.5f, port.UIHeight()*0.5f );
-//	background.SetSize( port.UIWidth(), port.UIHeight() );
 
-	static const bool VIS[NUM_TESTS] = {
-		true, true, false, true, false, false,
-		true, true, true, true
-	};
 	bool visible = game->GetDebugUI();
-
 	LayoutCalculator layout = lumosGame->DefaultLayout();
 	int c = 0;
 	for( int i=0; i<NUM_TESTS; ++i ) {
-		bool v = visible || VIS[i];
-		testScene[i].SetVisible( v );
-		if ( v ) {
-			int y = c / TESTS_PER_ROW;
-			int x = c - y*TESTS_PER_ROW;
-			layout.PosAbs( &testScene[i], x, y );
-			++c;
-		}
+		testScene[i].SetVisible( visible );
+
+		int y = c / TESTS_PER_ROW;
+		int x = c - y*TESTS_PER_ROW;
+		layout.PosAbs( &testScene[i], x, y );
+		++c;
 	}
 	layout.SetSize( LAYOUT_SIZE_X, LAYOUT_SIZE_Y );
-	for( int i=0; i<NUM_GAME; ++i ) {
-		layout.PosAbs( &gameScene[i], i, -1 );
-	}
+
+	layout.PosAbs(&gameScene[GENERATE_WORLD], -2, -1);
+	layout.PosAbs(&gameScene[DEFAULT_WORLD], -1, -1);
+	layout.PosAbs(&gameScene[CONTINUE], 0, -1, 2, 1);
 
 	gameScene[CONTINUE].SetEnabled( false );
 	const char* datPath = game->GamePath( "game", 0, "dat" );
@@ -121,9 +114,10 @@ void TitleScene::Resize()
 	}
 
 	layout.PosAbs( &note, 0, 1 );
+	note.SetVisible(!visible);
 	note.SetBounds( port.UIWidth() / 2, 0 );
 
-	layout.PosAbs(&audioButton, -1, 3);
+	layout.PosAbs(&audioButton, -1, 0);
 }
 
 

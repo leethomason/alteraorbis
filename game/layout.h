@@ -16,9 +16,18 @@
 #ifndef LAYOUT_ALTERA_INCLUDED
 #define LAYOUT_ALTERA_INCLUDED
 
+#if 0
+// TABLET sizes. Need tuning.
 static const float LAYOUT_SQUARE = 50.0f;
 static const float LAYOUT_SIZE_X = 80.0f;
 static const float LAYOUT_SIZE_Y = 50.0f;
 static const float TEXT_HEIGHT   = 18.0f;
+#else
+// Laptop/Desktop
+static const float LAYOUT_SQUARE = 40.0f;
+static const float LAYOUT_SIZE_X = 72.0f;
+static const float LAYOUT_SIZE_Y = 40.0f;
+static const float TEXT_HEIGHT   = 16.0f;
+#endif
 
 #endif // LAYOUT_ALTERA_INCLUDED
