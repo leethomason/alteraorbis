@@ -62,6 +62,7 @@ public:
 	virtual void CreateTexture( Texture* t );
 
 	void CopyFile( const char* src, const char* target );
+	virtual void Save();
 
 	enum {
 		DECO_OKAY = 15,

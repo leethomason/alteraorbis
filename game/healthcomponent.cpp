@@ -89,7 +89,11 @@ void HealthComponent::DeltaHealth()
 
 				// Audio.
 				if (XenoAudio::Instance()) {
-					XenoAudio::Instance()->Play("derezWAV", &parentChit->GetSpatialComponent()->GetPosition());
+					MOBIshFilter mobIsh;
+					BuildingFilter bulding;
+					if (mobIsh.Accept(parentChit) || bulding.Accept(parentChit)) {
+						XenoAudio::Instance()->Play("derezWAV", &parentChit->GetSpatialComponent()->GetPosition());
+					}
 				}
 
 				// Tombstone

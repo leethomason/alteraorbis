@@ -57,8 +57,9 @@ public:
 
 	virtual void SceneResult( int sceneID, int result, const SceneData* data );
 
-private:
 	void Save();
+
+private:
 	void Load();
 	void SetBars( Chit* chit );
 	void DoDestTapped( const grinliz::Vector2F& grid );
@@ -74,9 +75,6 @@ private:
 	void ProcessNewsToConsole();
 
 	enum {
-		SAVE,
-		LOAD,
-		NUM_SERIAL_BUTTONS,
 		NUM_PICKUP_BUTTONS = 8,
 		
 		NUM_NEWS_BUTTONS = 12,
@@ -130,7 +128,7 @@ private:
 	BuildScript			buildScript;
 
 	gamui::PushButton	okay;
-	gamui::PushButton	serialButton[NUM_SERIAL_BUTTONS];
+	gamui::PushButton	saveButton, loadButton;
 	gamui::ToggleButton	buildButton[BuildScript::NUM_OPTIONS];
 	gamui::ToggleButton modeButton[NUM_BUILD_MODES];
 	gamui::PushButton	useBuildingButton;

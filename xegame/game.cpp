@@ -575,14 +575,6 @@ void Game::DoTick( U32 _currentTime )
 }
 
 
-
-bool Game::PopSound( int* database, int* offset, int* size )
-{
-	//return SoundManager::Instance()->PopSound( database, offset, size );
-	return false;
-}
-
-
 void Game::MouseMove( int x, int y )
 {
 	Vector2F window = { (float)x, (float)y };

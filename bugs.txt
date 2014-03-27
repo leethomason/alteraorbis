@@ -73,8 +73,8 @@ x print uniform count for shaders
 		- continue - load - save fix
 		- work out build - install def file - installer sequence
 		x sound engine
-		- sounds
-			- cleaner ring sound
+		x sounds
+			x cleaner ring sound
 		- core destruction / recreation / zone end
 		- game frame:
 			- startup

@@ -93,6 +93,8 @@ public:
 	U32 CurrentTime() const	{ return currentTime; }
 	U32 DeltaTime() const	{ return currentTime-previousTime; }
 
+	virtual void Save() = 0;
+
 	bool GetDebugUI() const				{ return debugUI; }
 	bool GetDebugText() const			{ return debugText; }
 	bool GetPerfText() const			{ return perfText; }
@@ -101,8 +103,6 @@ public:
 	const char* GamePath( const char* type, int slot, const char* extension ) const;
 	bool HasFile( const char* file ) const;
 	void DeleteFile( const char* file );
-
-	bool PopSound( int* database, int* offset, int* size );
 
 	const gamedb::Reader* GetDatabase()	{ return database0; }
 	const Screenport& GetScreenport() const { return screenport; }
@@ -156,7 +156,6 @@ public:
 protected:
 	void PushPopScene();
 
-private:
 	static const Palette* mainPalette;
 
 	// Color palettes

@@ -62,7 +62,7 @@ void XenoAudio::Play(const char* _sound, const Vector3F* pos)
 	// to prevent saturating the game with sounds all
 	// over the world.
 	if (   pos 
-		&& (*pos - listenerPos).LengthSquared() > (MAX_DISTANCE*MAX_DISTANCE*1.5f)) 
+		&& (*pos - listenerPos).LengthSquared() > (MAX_DISTANCE*MAX_DISTANCE)) 
 	{
 		return;
 	}

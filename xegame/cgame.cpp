@@ -95,8 +95,7 @@ void GameSave( void* handle ) {
 
 	GLOUTPUT(( "GameSave. handle=%x\n", handle ));
 	Game* game = (Game*)handle;
-	// FIXME
-//	game->SaveGame( 0 );
+	game->Save();
 }
 
 
@@ -206,16 +205,6 @@ void GameAddDatabase( const char* path )
 			break;
 		}
 	}
-}
-
-
-int GamePopSound( void* handle, int* database, int* offset, int* size )
-{
-	CheckThread check;
-
-	Game* game = (Game*)handle;
-	bool result = game->PopSound( database, offset, size );	
-	return (result) ? 1 : 0;
 }
 
 

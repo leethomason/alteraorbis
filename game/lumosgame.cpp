@@ -328,3 +328,13 @@ void LumosGame::ItemToButton( const GameItem* item, gamui::Button* button, float
 	button->SetDeco( atom, atomD );
 }
 
+
+void LumosGame::Save()
+{
+	for (SceneNode* node = sceneStack.BeginTop(); node; node = sceneStack.Next()) {
+		if (node->sceneID == SCENE_GAME) {
+			((GameScene*)(node->scene))->Save();
+			break;
+		}
+	}
+}

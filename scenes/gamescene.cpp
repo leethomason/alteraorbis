@@ -79,13 +79,13 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	playerMark.Init( &gamui2D, atom, true );
 	playerMark.SetSize( MARK_SIZE, MARK_SIZE );
 
-	static const char* serialText[NUM_SERIAL_BUTTONS] = { "Save", "Load" }; 
-	for( int i=0; i<NUM_SERIAL_BUTTONS; ++i ) {
-		serialButton[i].Init( &gamui2D, game->GetButtonLook(0) );
-		serialButton[i].SetText( serialText[i] );
-	}
+	saveButton.Init( &gamui2D, game->GetButtonLook(0) );
+	saveButton.SetText( "Save" );
 
-	useBuildingButton.Init( &gamui2D, game->GetButtonLook(0) );
+	loadButton.Init(&gamui2D, game->GetButtonLook(0));
+	loadButton.SetText("Load");
+
+	useBuildingButton.Init(&gamui2D, game->GetButtonLook(0));
 	useBuildingButton.SetText( "Use" );
 	useBuildingButton.SetVisible( false );
 
@@ -185,14 +185,15 @@ GameScene::~GameScene()
 void GameScene::Resize()
 {
 	const Screenport& port = lumosGame->GetScreenport();
-	lumosGame->PositionStd( &okay, 0 );
 	
 	LayoutCalculator layout = static_cast<LumosGame*>(game)->DefaultLayout();
-	for( int i=0; i<NUM_SERIAL_BUTTONS; ++i ) {
-		layout.PosAbs( &serialButton[i], i+1, -1 );
-	}
-	layout.PosAbs( &allRockButton, 1, -2 );
-	layout.PosAbs( &censusButton, 3, -1 );
+
+	layout.PosAbs(&censusButton, 0, -1);
+	layout.PosAbs(&saveButton, 1, -1);
+	layout.PosAbs(&loadButton, 2, -1);
+	layout.PosAbs(&allRockButton, 3, -1);
+	layout.PosAbs(&okay, 4, -1);
+
 	layout.PosAbs( &useBuildingButton, 0, 1 );
 
 	layout.PosAbs( &cameraHomeButton, 0, 1 );
@@ -253,7 +254,10 @@ void GameScene::Resize()
 	}
 	clearButton.SetPos( newsButton[0].X() - clearButton.Width(), newsButton[0].Y() );
 
-	allRockButton.SetVisible( visible );
+	allRockButton.SetVisible(visible);
+	saveButton.SetVisible(visible);
+	loadButton.SetVisible(visible);
+	okay.SetVisible(visible);
 	clearButton.SetVisible( visible );
 	//censusButton.SetVisible( visible );
 }
@@ -681,10 +685,10 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 			game->PushScene( LumosGame::SCENE_MAP, data );
 		}
 	}
-	else if ( item == &serialButton[SAVE] ) {
+	else if ( item == &saveButton ) {
 		Save();
 	}
-	else if ( item == &serialButton[LOAD] ) {
+	else if ( item == &loadButton ) {
 		delete sim;
 		sim = new Sim( lumosGame );
 		Load();
