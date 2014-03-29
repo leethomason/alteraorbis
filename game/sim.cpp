@@ -142,7 +142,7 @@ void Sim::Load( const char* mapDAT, const char* gameDAT )
 		// Fresh start
 		CreateRockInOutland();
 		CreateCores();
-		CreatePlayer();
+		//CreatePlayer();
 	}
 	else {
 		//QuickProfile qp( "Sim::Load" );
@@ -250,13 +250,13 @@ void Sim::CreateCores()
 	hot->SetDefaultSpawn( StringPool::Intern( "arachnoid" ));	// easy starting point for greater spawns
 	GLOUTPUT(( "nCores=%d\n", ncores ));
 
-	Vector2I homeSector = chitBag->GetHomeSector();
-	CoreScript* homeCS = CoreScript::GetCore( homeSector );
-	Chit* homeChit = homeCS->ParentChit();
-	homeChit->GetItem()->primaryTeam = TEAM_HOUSE0;
+//	Vector2I homeSector = chitBag->GetHomeSector();
+//	CoreScript* homeCS = CoreScript::GetCore( homeSector );
+//	Chit* homeChit = homeCS->ParentChit();
+//	homeChit->GetItem()->primaryTeam = TEAM_HOUSE0;
 }
 
-
+/*
 void Sim::CreatePlayer()
 {
 	//Vector2I v = worldMap->FindEmbark();
@@ -266,9 +266,9 @@ void Sim::CreatePlayer()
 					sector.y*SECTOR_SIZE + SECTOR_SIZE/2 + 4 };
 	CreatePlayer( v );
 }
+*/
 
-
-void Sim::CreatePlayer( const grinliz::Vector2I& pos )
+void Sim::CreateAvatar( const grinliz::Vector2I& pos )
 {
 	Chit* chit = chitBag->NewDenizen(pos, TEAM_HOUSE0);
 	chit->SetPlayerControlled( true );

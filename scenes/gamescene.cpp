@@ -43,6 +43,7 @@ static const float MARK_SIZE = 6.0f*DEBUG_SCALE;
 
 #define USE_MOUSE_MOVE_SELECTION
 
+
 GameScene::GameScene( LumosGame* game ) : Scene( game )
 {
 	fastMode = false;
@@ -246,7 +247,7 @@ void GameScene::Resize()
 		layout.PosAbs( &pickupButton[i], 0, i+3 );
 	}
 
-	layout.PosAbs(&startGameWidget, 1, 1, 4, 4);
+	layout.PosAbs(&startGameWidget, 1, 1, 5, 5);
 
 	// ------ CHANGE LAYOUT ------- //
 	layout.SetSize( faceWidget.Width(), 20.0f );
@@ -264,7 +265,8 @@ void GameScene::Resize()
 	loadButton.SetVisible(visible);
 	okay.SetVisible(visible);
 	clearButton.SetVisible( visible );
-	//censusButton.SetVisible( visible );
+
+	startGameWidget.SetVisible(false);
 }
 
 
@@ -529,7 +531,9 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 	}
 	SetSelectionModel( view );
 
-	if ( !uiHasTap ) {
+	CoreScript* coreScript = CoreScript::GetCore(sim->GetChitBag()->GetHomeSector());
+
+	if (!uiHasTap) {
 		Vector3F atModel = { 0, 0, 0 };
 		Vector3F plane   = { 0, 0, 0 };
 		ModelVoxel mv = ModelAtMouse( view, sim->GetEngine(), TEST_HIT_AABB, 0, MODEL_CLICK_THROUGH, 0, &plane );
@@ -545,8 +549,7 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 		bool tap = Process3DTap( action, view, world, sim->GetEngine() );
 
 		if ( tap ) {
-			if ( uiMode[UI_BUILD].Down() ) {
-				CoreScript* coreScript = CoreScript::GetCore( sim->GetChitBag()->GetHomeSector() );
+			if ( uiMode[UI_BUILD].Down() && coreScript ) {
 				WorkQueue* wq = coreScript->GetWorkQueue();
 				GLASSERT( wq );
 				RemovableFilter removableFilter;
@@ -608,9 +611,9 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 			}
 			else if ( tapMod == GAME_TAP_MOD_CTRL ) {
 
-				Vector2I v = { (int)plane.x, (int)plane.z };
-				sim->CreatePlayer( v );
-				chitFaceToTrack = sim->GetPlayerChit() ? sim->GetPlayerChit()->ID() : 0;
+				//Vector2I v = { (int)plane.x, (int)plane.z };
+				//sim->CreatePlayer( v );
+				//chitFaceToTrack = sim->GetPlayerChit() ? sim->GetPlayerChit()->ID() : 0;
 #if 0
 				sim->CreateVolcano( (int)at.x, (int)at.z, 6 );
 				sim->CreatePlant( (int)at.x, (int)at.z, -1 );
@@ -953,8 +956,10 @@ void GameScene::HandleHotKey( int mask )
 		Chit* player = sim->GetPlayerChit();
 
 		CoreScript* coreScript = CoreScript::GetCore( sim->GetChitBag()->GetHomeSector() );
-		for( int i=0; i<10; ++i ) {
-			coreScript->AddTech();
+		if (coreScript) {
+			for (int i = 0; i < 10; ++i) {
+				coreScript->AddTech();
+			}
 		}
 	}
 	else if ( mask == GAME_HK_CHEAT_HERD ) {
@@ -1145,10 +1150,12 @@ void GameScene::DoTick( U32 delta )
 	str.Format( "Date %.2f\n%s", sim->GetChitBag()->GetNewsHistory()->AgeF(), sd.name.c_str() );
 	dateLabel.SetText( str.c_str() );
 
+	CoreScript* coreScript = CoreScript::GetCore(sim->GetChitBag()->GetHomeSector());
+
 	// Set the states: VIEW, BUILD, AVATAR. Avatar is 
 	// disabled if there isn't one...
 	Chit* playerChit = sim->GetPlayerChit();
-	if ( !playerChit ) {
+	if ( !playerChit && !coreScript ) {
 		if ( uiMode[UI_AVATAR].Down() ) {
 			uiMode[UI_VIEW].SetDown();
 		}
@@ -1157,6 +1164,8 @@ void GameScene::DoTick( U32 delta )
 	if ( uiMode[UI_AVATAR].Down() ) {
 		chitFaceToTrack = playerChit ? playerChit->ID() : 0;
 	}
+	uiMode[UI_BUILD].SetEnabled(coreScript != 0);
+
 
 	Chit* track = sim->GetChitBag()->GetChit( chitFaceToTrack );
 	faceWidget.SetFace( &uiRenderer, track ? track->GetItem() : 0 );
@@ -1185,12 +1194,28 @@ void GameScene::DoTick( U32 delta )
 	createWorkerButton.SetVisible( uiMode[UI_BUILD].Down() );
 
 	str.Clear();
-	CoreScript* coreScript = CoreScript::GetCore( sim->GetChitBag()->GetHomeSector() );
 
-	float tech = coreScript->GetTech();
-	int maxTech = coreScript->MaxTech();
-	str.Format( "Tech %.2f / %d  Elixir %d", tech, maxTech, coreScript->nElixir );
-	techLabel.SetText( str.c_str() );
+	if (coreScript) {
+		float tech = coreScript->GetTech();
+		int maxTech = coreScript->MaxTech();
+		str.Format("Tech %.2f / %d  Elixir %d", tech, maxTech, coreScript->nElixir);
+		techLabel.SetText(str.c_str());
+	}
+	/*
+		Modes:
+
+		Startup: !domain && !endWidget.Visible
+				 if (!startWidget.Visible )
+					create startup data
+					make data
+				 creates domain.
+				 goes !Visible
+		Play:	 has domain.
+				 at end creates EndGameData
+				 go endWidget.Visible
+		End:	 endWidget.Visible
+				 goes !Visible when done
+	*/
 
 	Vector2I homeSector = sim->GetChitBag()->GetHomeSector();
 	{
@@ -1209,7 +1234,7 @@ void GameScene::DoTick( U32 delta )
 		createWorkerButton.SetText( str2.c_str() );
 		createWorkerButton.SetEnabled( arr.Size() < MAX_BOTS );
 	}
-	{
+	if (coreScript) {
 		// Enforce the sleep tube limit.
 		CStr<32> str2;
 		int techLevel = coreScript->GetTechLevel();

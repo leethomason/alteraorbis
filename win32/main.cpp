@@ -475,8 +475,7 @@ int main( int argc, char **argv )
 	SDL_RemoveTimer( timerID );
 #endif
 
-	// FIXME: turn save on exit back on.
-	//GameSave( game );
+	GameSave( game );
 	DeleteGame( game );
 
 	for( int i=0; i<nModDB; ++i ) {

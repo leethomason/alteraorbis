@@ -67,8 +67,7 @@ public:
 	// type=-1 will scan for natural plant choice
 	Chit* CreatePlant( int x, int y, int type );
 	
-	void CreatePlayer();
-	void CreatePlayer( const grinliz::Vector2I& pos );
+	void CreateAvatar( const grinliz::Vector2I& pos );
 	void UseBuilding();	// the player wants to use a building
 
 private:

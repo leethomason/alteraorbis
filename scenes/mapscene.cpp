@@ -40,6 +40,10 @@ MapScene::MapScene( LumosGame* game, MapSceneData* data ) : Scene( game ), lumos
 	else {
 		sector = lumosChitBag->GetHomeSector();
 	}
+	if (sector.IsZero()) {
+		sector.Set(NUM_SECTORS / 2, NUM_SECTORS / 2);
+	}
+
 	if ( sector.x < MAP2_RAD )					sector.x = MAP2_RAD;
 	if ( sector.y < MAP2_RAD )					sector.y = MAP2_RAD;
 	if ( sector.x >= NUM_SECTORS - MAP2_RAD )	sector.x = NUM_SECTORS - MAP2_RAD - 1;

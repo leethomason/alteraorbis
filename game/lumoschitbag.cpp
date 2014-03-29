@@ -50,8 +50,7 @@ using namespace grinliz;
 LumosChitBag::LumosChitBag( const ChitContext& c) : ChitBag(c), sceneID(-1), sceneData(0)
 {
 	memset( mapSpatialHash, 0, sizeof(MapSpatialComponent*)*NUM_SECTORS*NUM_SECTORS);
-
-//	homeSector.Set( 5, 5 );
+	homeSector.Zero();
 }
 
 
@@ -64,7 +63,6 @@ LumosChitBag::~LumosChitBag()
 }
 
 
-/*
 void LumosChitBag::Serialize( const ComponentFactory* factory, XStream* xs )
 {
 	super::Serialize( factory, xs );
@@ -73,7 +71,6 @@ void LumosChitBag::Serialize( const ComponentFactory* factory, XStream* xs )
 	XARC_SER( xs, homeSector );
 	XarcClose( xs );
 }
-*/
 
 
 #if 0

@@ -165,7 +165,7 @@ public:
 	virtual ~LumosChitBag();
 
 	virtual LumosChitBag* ToLumos() { return this; }
-	//virtual void Serialize( const ComponentFactory* factory, XStream* xs );
+	virtual void Serialize( const ComponentFactory* factory, XStream* xs );
 
 	// Buildings can't move - no update.
 	void AddToBuildingHash( MapSpatialComponent* chit, int x, int y );
@@ -225,15 +225,13 @@ public:
 	// Get the core for this sector.
 	CoreScript* GetHomeCore();
 	
-	// FIXME placeholder code
 	grinliz::Vector2I GetHomeSector() const {
-		grinliz::Vector2I homeSector = { 5, 5 };
 		return homeSector;
 	}
-	// FIXME placehonder
-//	void SetHomeSector( const grinliz::Vector2I& home ) {
-//		homeSector = home;
-//	}
+
+	void SetHomeSector( const grinliz::Vector2I& home ) {
+		homeSector = home;
+	}
 
 	Census census;
 
@@ -270,7 +268,7 @@ private:
 	int							sceneID;
 	SceneData*					sceneData;
 	grinliz::Random				random;	// use the chit version, if possible, generally want to avoid high level random
-	//grinliz::Vector2I			homeSector;
+	grinliz::Vector2I			homeSector;
 
 	grinliz::CDynArray<Chit*>	inUseArr;
 	grinliz::CDynArray<Chit*>	chitList;

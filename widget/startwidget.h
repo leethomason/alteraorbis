@@ -8,6 +8,8 @@ class StartGameWidget : public gamui::IWidget
 public:
 	StartGameWidget();
 	void Init(gamui::Gamui* gamui, const gamui::ButtonLook& look, const gamui::LayoutCalculator& calculator );
+	//void InitColors(const )	// decided to wait on colors: not hard to do, but need to track both
+								// 'team' and 'teamColors' in NewBuilding
 
 	~StartGameWidget();
 
@@ -26,10 +28,11 @@ private:
 
 	gamui::LayoutCalculator calculator;
 	gamui::Image		background;
-	gamui::TextLabel	topLabel, bodyLabel;
-	gamui::Image		primaryColor, secondaryColor;
-	gamui::PushButton	nextColor;
+	gamui::TextLabel	topLabel, bodyLabel, countLabel;
+	//gamui::Image		primaryColor, secondaryColor;
+	//gamui::PushButton	prevColor, nextColor;
 	gamui::PushButton	prevDomain, nextDomain;
+	gamui::PushButton	okay;
 };
 
 
