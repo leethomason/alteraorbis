@@ -192,6 +192,14 @@ public:
 				const RenderAtom& textDisabled,
 				IGamuiText* iText );
 
+	void StartDialog(const char* name);
+	void EndDialog();
+	unsigned CurrentDialogID() const { return m_currentDialog; }
+
+	void PushDialog(const char* name);
+	void PopDialog();
+	bool DialogDisplayed(const char* name) { return m_dialogStack.Find(Hash(name)) >= 0; }
+
 	// normally not called by user code.
 	void Add( UIItem* item );
 	// normally not called by user code.
@@ -226,31 +234,6 @@ public:
 	*/
 	void GetDragPair( const UIItem** start, const UIItem** end )		{ *start = m_dragStart; *end = m_dragEnd; }
 
-	/** Utility function to layout a grid of items.
-		@param item			An array of item pointers to arrange.
-		@param nItem		Number of items in the array
-		@param cx			Number of columns.
-		@param cy			Number of rows.
-		@param originX		Upper left of the layout.
-		@param originY		Upper left of the layout.
-		@param tableWidth	Width of the entire table (items will be positioned to stay within this size.)
-		@param tableHeight	Height of the entire table (items will be positioned to stay within this size.)
-	*/
-	static void Layout(	UIItem** item, int nItem,
-						int cx, int cy,
-						float originX, float originY,
-						float tableWidth, float tableHeight );
-
-	static void Layout( UIItem** item, int nItem,
-						int columns,
-						float originX, float originY );
-
-
-	void LayoutTextBlock(	const char* text,
-							TextLabel* textLabels, int nTextLabels,
-							float originX, float originY,
-							float width );
-
 	void			SetFocusLook( const RenderAtom& atom, float zRotation );
 	void			AddToFocusGroup( const UIItem* item, int id );
 	void			SetFocus( const UIItem* item );
@@ -261,6 +244,15 @@ public:
 
 private:
 	static int SortItems( const void* a, const void* b );
+	unsigned Hash(const char* p)
+	{
+		unsigned h = 2166136261U;
+		for (; *p; ++p) {
+			h ^= *p;
+			h *= 16777619;
+		}
+		return h;
+	}
 
 	UIItem*							m_itemTapped;
 	RenderAtom						m_textAtomEnabled;
@@ -278,6 +270,7 @@ private:
 	float			m_relativeY;
 	int				m_focus;
 	Image*			m_focusImage;
+	int				m_currentDialog;
 
 	struct State {
 		uint16_t	vertexStart;
@@ -293,6 +286,7 @@ private:
 		int				group;
 	};
 
+	grinliz::CDynArray< unsigned >			m_dialogStack;
 	grinliz::CDynArray< FocusItem >			m_focusItems;
 	grinliz::CDynArray< State >				m_stateBuffer;
 	grinliz::CDynArray< uint16_t >			m_indexBuffer;
@@ -396,6 +390,9 @@ public:
 		}
 	}
 
+	void SetDialogID(unsigned id)				{ m_dialogID = id; }
+	unsigned DialogID() const					{ return m_dialogID; }
+
 	void SetRotationX( float degrees )			{ if ( m_rotationX != degrees ) { m_rotationX = degrees; Modify(); } }
 	void SetRotationY( float degrees )			{ if ( m_rotationY != degrees ) { m_rotationY = degrees; Modify(); } }
 	void SetRotationZ( float degrees )			{ if ( m_rotationZ != degrees ) { m_rotationZ = degrees; Modify(); } }
@@ -434,6 +431,7 @@ private:
 	float	m_rotationX;
 	float	m_rotationY;
 	float	m_rotationZ;
+	unsigned m_dialogID;
 
 protected:
 	template <class T> T Min( T a, T b ) const		{ return a<b ? a : b; }

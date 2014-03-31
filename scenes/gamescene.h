@@ -74,6 +74,7 @@ private:
 	bool FreeCameraMode();
 	bool CoreMode();		// currently controlling the core (build or view)
 	void ProcessNewsToConsole();
+	void CheckGameStage();
 
 	enum {
 		NUM_PICKUP_BUTTONS = 8,

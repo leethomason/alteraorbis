@@ -98,6 +98,7 @@ UIItem::UIItem( int p_level )
 	  m_rotationX( 0 ),
 	  m_rotationY( 0 ),
 	  m_rotationZ( 0 ),
+	  m_dialogID(0),
 	  m_gamui( 0 ),
 	  m_enabled( true ),
 	  m_superItem( 0 )
@@ -174,6 +175,7 @@ TextLabel::~TextLabel()
 void TextLabel::Init( Gamui* gamui )
 {
 	m_gamui = gamui;
+	SetDialogID(gamui->CurrentDialogID());
 	m_gamui->Add( this );
 }
 
@@ -435,7 +437,8 @@ void Image::Init( Gamui* gamui, const RenderAtom& atom, bool foreground )
 	m_height = DEFAULT_SIZE;
 
 	m_gamui = gamui;
-	gamui->Add( this );
+	SetDialogID(gamui->CurrentDialogID());
+	gamui->Add(this);
 	this->SetForeground( foreground );
 }
 
@@ -521,7 +524,8 @@ void TiledImageBase::Init( Gamui* gamui )
 	m_height = DEFAULT_SIZE;
 
 	m_gamui = gamui;
-	gamui->Add( this );
+	SetDialogID(gamui->CurrentDialogID());
+	gamui->Add(this);
 }
 
 
@@ -727,6 +731,7 @@ void Button::Init(	Gamui* gamui,
 	m_textDY = 0;
 	m_decoDX = 0;
 	m_decoDY = 0;	
+	SetDialogID(gamui->CurrentDialogID());
 
 	m_face.Init( gamui, atomUpEnabled, true );
 	m_face.SetSlice( true );
@@ -1092,7 +1097,8 @@ void DigitalBar::Init(	Gamui* gamui,
 						const RenderAtom& atom1 )
 {
 	m_gamui = gamui;
-	m_gamui->Add( this );
+	SetDialogID(gamui->CurrentDialogID());
+	m_gamui->Add(this);
 
 	GAMUIASSERT( nTicks <= MAX_TICKS );
 	m_nTicks = nTicks;
@@ -1240,7 +1246,8 @@ Gamui::Gamui()
 		m_relativeX( 0 ),
 		m_relativeY( 0 ),
 		m_focus( -1 ),
-		m_focusImage( 0 )
+		m_focusImage( 0 ),
+		m_currentDialog(0)
 {
 }
 
@@ -1255,7 +1262,8 @@ Gamui::Gamui(	IGamuiRenderer* renderer,
 		m_modified( true ),
 		m_textHeight( 16 ),
 		m_focus( -1 ),
-		m_focusImage( 0 )
+		m_focusImage( 0 ),
+		m_currentDialog(0)
 {
 	Init( renderer, textEnabled, textDisabled, iText );
 }
@@ -1324,6 +1332,7 @@ void Gamui::TapDown( float x, float y )
 
 		if (	item->CanHandleTap()    
 			 && item->Enabled() 
+			 && (m_dialogStack.Empty() || m_dialogStack[m_dialogStack.Size() - 1] == item->DialogID())
 			 && item->Visible()
 			 && x >= item->X() && x < item->X()+item->Width()
 			 && y >= item->Y() && y < item->Y()+item->Height() )
@@ -1356,6 +1365,7 @@ const UIItem* Gamui::TapUp( float x, float y )
 
 		if (    item->CanHandleTap()
 			 &&	item->Enabled() 
+			 && (m_dialogStack.Empty() || m_dialogStack[m_dialogStack.Size() - 1] == item->DialogID())
 			 && item->Visible()
 			 && x >= item->X() && x < item->X()+item->Width()
 			 && y >= item->Y() && y < item->Y()+item->Height() )
@@ -1461,6 +1471,13 @@ void Gamui::Render()
 			if ( !needsToRender || !item->Visible() || !atom || !atom->textureHandle )
 				continue;
 
+			// Dialog boxes must be pushed to show up:
+			if (item->DialogID()) {
+				if (m_dialogStack.Find(item->DialogID()) < 0) {
+					continue;
+				}
+			}
+
 			// Do we need a new state?
 			if (    !state
 				 || atom->renderState   != state->renderState
@@ -1516,69 +1533,6 @@ void Gamui::Render()
 }
 
 
-void Gamui::Layout( UIItem** item, int nItems,
-					int cx, int cy,
-					float originX, float originY,
-					float tableWidth, float tableHeight )
-{
-	float itemWidth = 0, itemHeight = 0;
-	if ( nItems == 0 )
-		return;
-
-	for( int i=0; i<cx && i<nItems; ++i )
-		itemWidth += item[i]->Width();
-	for( int i=0; i<cy && (i*cx)<nItems; ++i )
-		itemHeight += item[i*cx]->Height();
-
-	float xSpacing = 0;
-	if ( cx > 1 ) { 
-		xSpacing = ( tableWidth - itemWidth ) / (float)(cx-1);
-	}
-	float ySpacing = 0;
-	if ( cy > 1 ) {
-		ySpacing = ( tableHeight - itemHeight ) / (float)(cy-1);
-	}
-
-	int c = 0;
-
-	float y = originY;
-	for( int j=0; j<cy && c<nItems; ++j ) {
-		float x=originX;
-		for( int i=0; i<cx && c<nItems; ++i ) {
-
-			item[c]->SetPos( x, y );
-			x += item[c]->Width();
-			x += xSpacing;
-			++c;
-		}
-		y += item[c-1]->Height();
-		y += ySpacing;
-	}
-}
-
-
-void Gamui::Layout( UIItem** item, int nItems,
-					int columns,
-					float originX, float originY )
-{
-	int c = 0;
-	float x = originX;
-	float y = originY;
-
-	for( int i=0; i<nItems; ++i ) {
-		item[i]->SetPos( x, y );
-		x += item[i]->Width();
-
-		++c;
-		if ( c >= columns ) {
-			c = 0;
-			x = originX;
-			y += item[i]->Height();
-		}
-	}
-}
-
-
 const char* SkipSpace( const char* p ) {
 	while( p && *p && *p == ' ' ) {
 		++p;
@@ -1594,6 +1548,7 @@ const char* EndOfWord( const char* p ) {
 }
 
 
+#if 0
 void Gamui::LayoutTextBlock(	const char* text,
 								TextLabel* textLabels, int nText,
 								float originX, float originY,
@@ -1650,6 +1605,7 @@ void Gamui::LayoutTextBlock(	const char* text,
 		++i;
 	}
 }
+#endif
 
 
 void Gamui::AddToFocusGroup( const UIItem* item, int id )
@@ -1744,6 +1700,33 @@ void Gamui::MoveFocus( float x, float y )
 	if ( bestIndex >= 0 ) {
 		SetFocus( m_focusItems[bestIndex].item );
 	}
+}
+
+
+void Gamui::StartDialog(const char* name)
+{
+	GAMUIASSERT(!m_currentDialog);
+	m_currentDialog = Hash(name);
+}
+
+
+void Gamui::EndDialog()
+{
+	GAMUIASSERT(m_currentDialog);
+	m_currentDialog = 0;
+}
+
+
+void Gamui::PushDialog(const char* name)
+{
+	GAMUIASSERT(name && *name);
+	m_dialogStack.Push(Hash(name));
+}
+
+
+void Gamui::PopDialog()
+{
+	m_dialogStack.Pop();
 }
 
 

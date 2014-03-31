@@ -18,6 +18,7 @@ void StartGameWidget::Init(Gamui* gamui, const ButtonLook& look, const LayoutCal
 {
 	calculator = calc;
 
+	gamui->StartDialog("StartGameWidget");
 	background.Init(gamui, LumosGame::CalcUIIconAtom("background0"), false);
 	background.SetSize(200, 200);
 	background.SetSlice(true);
@@ -49,6 +50,7 @@ void StartGameWidget::Init(Gamui* gamui, const ButtonLook& look, const LayoutCal
 	okay.SetDeco(LumosGame::CalcUIIconAtom("okay", true), LumosGame::CalcUIIconAtom("okay", false));
 
 	textHeight = gamui->GetTextHeight();
+	gamui->EndDialog();
 }
 
 

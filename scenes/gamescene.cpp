@@ -247,7 +247,7 @@ void GameScene::Resize()
 		layout.PosAbs( &pickupButton[i], 0, i+3 );
 	}
 
-	layout.PosAbs(&startGameWidget, 1, 1, 5, 5);
+	layout.PosAbs(&startGameWidget, 2, 2, 5, 5);
 
 	// ------ CHANGE LAYOUT ------- //
 	layout.SetSize( faceWidget.Width(), 20.0f );
@@ -266,7 +266,6 @@ void GameScene::Resize()
 	okay.SetVisible(visible);
 	clearButton.SetVisible( visible );
 
-	startGameWidget.SetVisible(false);
 }
 
 
@@ -1201,21 +1200,8 @@ void GameScene::DoTick( U32 delta )
 		str.Format("Tech %.2f / %d  Elixir %d", tech, maxTech, coreScript->nElixir);
 		techLabel.SetText(str.c_str());
 	}
-	/*
-		Modes:
 
-		Startup: !domain && !endWidget.Visible
-				 if (!startWidget.Visible )
-					create startup data
-					make data
-				 creates domain.
-				 goes !Visible
-		Play:	 has domain.
-				 at end creates EndGameData
-				 go endWidget.Visible
-		End:	 endWidget.Visible
-				 goes !Visible when done
-	*/
+	CheckGameStage();
 
 	Vector2I homeSector = sim->GetChitBag()->GetHomeSector();
 	{
@@ -1285,6 +1271,31 @@ void GameScene::DoTick( U32 delta )
 		if ( sim->GetChitBag()->PopScene( &id, &data )) {
 			game->PushScene( id, data );
 		}
+	}
+}
+
+
+/*
+	Startup: !domain && !endWidget.Visible
+			 if (!startWidget.Visible )
+				create startup data
+				make data
+			creates domain.
+			goes !Visible
+	Play:	has domain.
+			at end creates EndGameData
+			go endWidget.Visible
+	End:	endWidget.Visible
+			goes !Visible when done
+*/
+void GameScene::CheckGameStage()
+{
+	CoreScript* cs = sim->GetChitBag()->GetHomeCore();
+	bool endVisible = false;
+	bool startVisible = gamui2D.DialogDisplayed("StartGameWidget");
+
+	if (!cs && !startVisible && !endVisible) {
+		gamui2D.PushDialog("StartGameWidget");
 	}
 }
 
