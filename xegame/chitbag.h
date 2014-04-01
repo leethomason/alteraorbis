@@ -208,7 +208,25 @@ public:
 	int NumBlocks() const;
 	void GetBlockPtrs( int block, grinliz::CDynArray<Chit*>* arr ) const;
 
+	// VERY wide broadcast - be cautious of performance.
+	// WARNING: not serialized.
+	void AddListener(IChitListener* handler) {
+		GLASSERT(listeners.Find(handler) < 0);
+		listeners.Push(handler);
+	}
+	void RemoveListener(IChitListener* handler) {
+		int i = listeners.Find(handler);
+		GLASSERT(i >= 0);
+		if (i >= 0) listeners.SwapRemove(i);
+	}
+	void SendMessage(Chit* chit, const ChitMsg& msg) {
+		for (int i = 0; i < listeners.Size(); ++i) {
+			listeners[i]->OnChitMsg(chit, msg);
+		}
+	}
+
 private:
+	grinliz::CDynArray< IChitListener* > listeners;
 
 	enum {
 		SIZE = 256,

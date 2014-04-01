@@ -65,6 +65,7 @@ Sim::Sim( LumosGame* g ) : minuteClock( 60*1000 ), secondClock( 1000 ), volcTime
 	ChitContext context;
 	context.Set( engine, worldMap, g );
 	chitBag = new LumosChitBag( context );
+	chitBag->AddListener(this);
 
 	worldMap->AttachEngine( engine, chitBag );
 	worldMap->AttachHistory(chitBag->GetNewsHistory());
@@ -87,6 +88,7 @@ Sim::~Sim()
 	delete reserveBank;
 	worldMap->AttachEngine( 0, 0 );
 	worldMap->AttachHistory(0);
+	chitBag->RemoveListener(this);
 	delete chitBag;
 	delete engine;
 	delete worldMap;
@@ -246,12 +248,15 @@ void Sim::CreateCores()
 
 void Sim::OnChitMsg(Chit* chit, const ChitMsg& msg)
 {
-	if (msg.ID() == ChitMsg::CHIT_DESTROYED_END) {
-		if (chit->GetItem() && chit->GetItem()->IName() == "core") {
-			coreCreateList.Push(ToSector(chit->GetSpatialComponent()->GetPosition2DI()));
+	if (msg.ID() == ChitMsg::CHIT_DESTROYED_START) {
+		if (chit->GetScript("CoreScript")) {
+			Vector2I pos2i = chit->GetSpatialComponent()->GetPosition2DI();
+			Vector2I sector = ToSector(pos2i);
+			coreCreateList.Push(sector);
 		}
 	}
 }
+
 
 CoreScript* Sim::CreateCore( const Vector2I& sector, int team)
 {
@@ -297,7 +302,6 @@ CoreScript* Sim::CreateCore( const Vector2I& sector, int team)
 		ms->SetMode(GRID_IN_USE);
 		CoreScript* cs = new CoreScript();
 		chit->Add(new ScriptComponent(cs));
-		chit->AddListener(this);
 
 		if (team != TEAM_NEUTRAL) {
 			cs->ParentChit()->GetItem()->primaryTeam = team;
@@ -361,9 +365,18 @@ void Sim::DoTick( U32 delta )
 	worldMap->DoTick( delta, chitBag );
 
 	chitBag->DoTick( delta );
-	while (!coreCreateList.Empty()) {
-		Vector2I sector = coreCreateList.Pop();
-		CreateCore(sector, TEAM_NEUTRAL);
+
+	// From the CHIT_DESTROYED_START we have a list of
+	// Cores that will be going away...check them here,
+	// so that we replace as soon as possible.
+	for (int i = 0; i < coreCreateList.Size(); ++i ) {
+		Vector2I sector = coreCreateList[i];
+		CoreScript* sc = CoreScript::GetCore(sector);
+		if (!sc) {
+			CreateCore(sector, TEAM_NEUTRAL);
+			coreCreateList.SwapRemove(i);
+			--i;
+		}
 	}
 
 	int minuteTick = minuteClock.Delta( delta );
@@ -452,7 +465,9 @@ void Sim::DoTick( U32 delta )
 		else {
 			avatarTimer -= delta;
 			if (avatarTimer <= 0) {
-				CreateAvatar(cs->ParentChit()->GetSpatialComponent()->GetPosition2DI());
+				if (chitBag->GetHomeCore()) {
+					CreateAvatar(cs->ParentChit()->GetSpatialComponent()->GetPosition2DI());
+				}
 				avatarTimer = 0;
 			}
 		}

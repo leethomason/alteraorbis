@@ -54,7 +54,6 @@ int HealthComponent::DoTick( U32 delta )
 		destroyed += delta;
 		GLASSERT( parentChit );
 		if ( destroyed >= COUNTDOWN ) {
-
 			parentChit->SendMessage( ChitMsg( ChitMsg::CHIT_DESTROYED_END ), this );
 			GetChitBag()->QueueDelete( parentChit );
 		}

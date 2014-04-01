@@ -50,7 +50,6 @@ void Chit::Init( int _id, ChitBag* _chitBag )
 	timeToTick = 0;
 	timeSince = 0;
 	playerControlled = false;
-	listeners.Clear();
 }
 
 
@@ -267,9 +266,15 @@ void Chit::SendMessage( const ChitMsg& msg, Component* exclude )
 			//GLOUTPUT(( "return\n" ));
 		}
 	}
-	// Listeners
-	for( int i=0; i<listeners.Size(); ++i ) {
-		listeners[i]->OnChitMsg( this, msg );
+
+	switch (msg.ID()) {
+	case ChitMsg::CHIT_DESTROYED_START:
+	case ChitMsg::CHIT_DESTROYED_END:
+		GetChitBag()->SendMessage(this, msg);
+		break;
+
+	default:
+		break;
 	}
 }
 

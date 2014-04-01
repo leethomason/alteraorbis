@@ -151,7 +151,6 @@ void NavTest2Scene::CreateChit( const Vector2I& p )
 
 	chit->GetSpatialComponent()->SetPosition( (float)p.x+0.5f, 0, (float)p.y+0.5f );
 	OnChitMsg( chit, ChitMsg(ChitMsg::PATHMOVE_DESTINATION_REACHED) );
-	chit->AddListener( this );
 	++nChits;
 }
 

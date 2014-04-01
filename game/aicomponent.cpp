@@ -235,7 +235,7 @@ Vector3F AIComponent::EnemyPos(Chit* chit)
 		else if (msc->Mode() == GRID_IN_USE) {
 			return ToWorld3F(msc->Bounds().min);
 		}
-		GLASSERT(0);	// don't support attaching buildings without porches...this may work fine.
+		return V3F_ZERO;	// don't support attaching buildings without porches...this may work fine.
 						// But need to check we aren't pathing to a Block, so that the path always fails.
 	}
 	return sc->GetPosition();
@@ -313,15 +313,9 @@ void AIComponent::GetFriendEnemyLists()
 				// Note that buildings are behind walls and such, so we can't use HasStraightPath()
 				if (enemyList.HasCap()) {
 					if (!(building->GetItem()->flags & GameItem::INDESTRUCTABLE)) {
-						MapSpatialComponent* msc = GET_SUB_COMPONENT(building, SpatialComponent, MapSpatialComponent);
-						Rectangle2I porch = msc->PorchPos();
-						if (!porch.min.IsZero()) {
-							if (context->worldMap->CalcPath(center, ToWorld2F(porch.min), 0, 0, false)) {
-								enemyList.Push(chitArr[i]->ID());
-							}
-						}
-						else if (msc->Mode() == GRID_IN_USE) {
-							if (context->worldMap->CalcPath(center, ToWorld2F(msc->Bounds().min), 0, 0, false)) {
+						Vector3F walkPos = EnemyPos(building);
+						if ( walkPos != V3F_ZERO ) {
+							if (context->worldMap->CalcPath(center, ToWorld2F(walkPos), 0, 0, false)) {
 								enemyList.Push(chitArr[i]->ID());
 							}
 						}
@@ -589,10 +583,6 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 	}
 	GameItem* item = weapon->GetItem();
 	PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
-
-	if (target.chit && target.chit->GetItem() && target.chit->GetItem()->IName() == "core") {
-		int debug = 1;
-	}
 
 	// Are we close enough to hit? Then swing. Else move to target.
 	if ( targetDesc.id && BattleMechanics::InMeleeZone( context->engine, parentChit, target.chit )) {

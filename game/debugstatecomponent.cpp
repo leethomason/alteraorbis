@@ -140,14 +140,6 @@ int DebugStateComponent::DoTick( U32 delta )
 
 void DebugStateComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {
-	if ( msg.ID() == ChitMsg::SPATIAL_CHANGED ) {
-		Vector2F pos = chit->GetSpatialComponent()->GetPosition2D() + OFFSET;
-		healthBar.SetPos( pos.x, pos.y );
-		shieldBar.SetPos( pos.x, pos.y + SIZE_Y*1.5f );
-		ammoBar.SetPos(   pos.x, pos.y + SIZE_Y*3.0f );
-	}
-	else {
-		super::OnChitMsg( chit, msg );
-	}
+	super::OnChitMsg( chit, msg );
 }
 

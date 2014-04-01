@@ -147,7 +147,7 @@ private:
 	int GetThinkTime() const { return 500; }
 	WorkQueue* GetWorkQueue();
 	Chit* FindFruit( const grinliz::Vector2F& origin, grinliz::Vector2F* dest );
-	grinliz::Vector3F EnemyPos(Chit* chit);	// find the correct position, if building, if mob, etc.
+	grinliz::Vector3F EnemyPos(Chit* chit);	// find the correct position, if building, if mob, etc. Will return Zero if not available (happens with buildings)
 
 	// Returns true if this action was actually taken.
 	bool ThinkWanderEatPlants( const ComponentSet& thisComp );

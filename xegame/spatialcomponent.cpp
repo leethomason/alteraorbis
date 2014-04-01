@@ -58,7 +58,6 @@ void SpatialComponent::SetPosRot( const Vector3F& v, const Quaternion& _q )
 		rotation = q;
 
 		if ( parentChit ) {
-			parentChit->SendMessage( ChitMsg( ChitMsg::SPATIAL_CHANGED ), this );
 			parentChit->SetTickNeeded();
 		}
 	}

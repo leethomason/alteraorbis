@@ -30,7 +30,7 @@ static const double TECH_DECAY_1 = 0.00040;
 
 using namespace grinliz;
 
-#define SPAWN_MOBS
+//#define SPAWN_MOBS
 
 CoreInfo CoreScript::coreInfoArr[NUM_SECTORS*NUM_SECTORS];
 
@@ -100,7 +100,7 @@ void CoreScript::OnAdd()
 		workQueue = new WorkQueue();
 	}
 	Vector2I mapPos = scriptContext->chit->GetSpatialComponent()->GetPosition2DI();
-	sector = { mapPos.x/SECTOR_SIZE, mapPos.y/SECTOR_SIZE };
+	sector = ToSector(mapPos);
 	workQueue->InitSector( scriptContext->chit, sector );
 
 	int index = sector.y*NUM_SECTORS + sector.x;
@@ -215,7 +215,6 @@ void CoreScript::UpdateAI()
 
 	if (this->InUse()) {
 		info->approxTeam = PrimaryTeam();
-		// FIXME: rename power to temple
 		CChitArray chitArr;
 		scriptContext->chitBag->FindBuildingCC(IStringConst::power, sector, 0, 0, &chitArr, 0);
 		info->approxNTemples = chitArr.Size();

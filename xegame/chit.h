@@ -73,24 +73,23 @@ class ChitMsg
 {
 public:
 	enum {
-		// ---- Chit --- //
-		CHIT_DESTROYED_START,	// sender: health. *starts* the countdown sequence.
-		CHIT_DESTROYED_TICK,	// dataF = fraction
-		CHIT_DESTROYED_END,		// sender: health. ends the sequence, next step is the chit delete
-		CHIT_DAMAGE,			// sender: chitBag, ptr=&ChitDamageInfo
+		// ---- Chit --- //		   Broadcast?
+		CHIT_DESTROYED_START,	//	Yes		sender: health. *starts* the countdown sequence.
+								//			After this components start going away - the best msg to listen for if 
+								//			GetItem() still needs to work.
+		CHIT_DESTROYED_TICK,	//			dataF = fraction
+		CHIT_DESTROYED_END,		//	Yes		sender: health. ends the sequence, next step is the chit delete
+		CHIT_DAMAGE,			//			sender: chitBag, ptr=&ChitDamageInfo
 		CHIT_HEAL,				//					dataF = hitpoints
-		CHIT_SECTOR_HERD,		// AI message: a lead unit is telling other units to herd to a different sector.
+		CHIT_SECTOR_HERD,		//			AI message: a lead unit is telling other units to herd to a different sector.
 								//					ptr = &SectorPort
-		CHIT_TRACKING_ARRIVED,	// A tracking component arrived at its target.
+		CHIT_TRACKING_ARRIVED,	//			A tracking component arrived at its target.
 								//					ptr = Chit* that arrived
 		// ---- Component ---- //
 		PATHMOVE_DESTINATION_REACHED,
 		PATHMOVE_DESTINATION_BLOCKED,
 
-		HEALTH_CHANGED,
-		
 		// XE
-		SPATIAL_CHANGED,		// the position or rotation has changed, sender: spatial
 		RENDER_IMPACT,			// impact metadata event has occured, sender: render component
 		WORKQUEUE_UPDATE,
 	};
@@ -175,16 +174,6 @@ public:
 	// Synchronous
 	void SendMessage( const ChitMsg& message, Component* exclude=0 );			// useful to not call ourselves. 
 
-	void AddListener( IChitListener* handler ) {
-		GLASSERT( listeners.Find( handler ) < 0 );
-		listeners.Push( handler );
-	}
-	void RemoveListener( IChitListener* handler ) {
-		int i = listeners.Find( handler );
-		GLASSERT( i >= 0 );
-		if ( i >= 0 ) listeners.SwapRemove( i );
-	}
-	
 	void DebugStr( grinliz::GLString* str );
 
 	void SetPlayerControlled( bool player ) { playerControlled = player; }
@@ -204,7 +193,7 @@ private:
 	ChitBag* chitBag;
 	int		 id;
 	bool	 playerControlled;
-	grinliz::CDynArray< IChitListener* > listeners;
+	//grinliz::CDynArray< IChitListener* > listeners; doesn't work; can't be serialized
 
 public:
 	enum {
