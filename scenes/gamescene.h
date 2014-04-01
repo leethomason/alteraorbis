@@ -18,11 +18,13 @@
 
 #include "../xegame/scene.h"
 #include "../xegame/chitevent.h"
+#include "../xegame/chit.h"
 
 #include "../widget/moneywidget.h"
 #include "../widget/facewidget.h"
 #include "../widget/consolewidget.h"
 #include "../widget/startwidget.h"
+#include "../widget/endwidget.h"
 
 #include "../script/buildscript.h"
 
@@ -35,7 +37,8 @@ class Chit;
 class GameItem;
 
 
-class GameScene : public Scene
+class GameScene : public Scene,
+				  public IChitListener
 {
 	typedef Scene super;
 public:
@@ -60,6 +63,7 @@ public:
 	virtual void DialogResult(const char* dialogName, void* data);
 
 	void Save();
+	virtual void OnChitMsg(Chit* chit, const ChitMsg& msg);
 
 private:
 	void Load();
@@ -75,7 +79,7 @@ private:
 	bool FreeCameraMode();
 	bool CoreMode();		// currently controlling the core (build or view)
 	void ProcessNewsToConsole();
-	void CheckGameStage();
+	void CheckGameStage(U32 delta);
 	void ForceHerd(const grinliz::Vector2I& sector);
 
 	enum {
@@ -117,6 +121,7 @@ private:
 	int			simTimer;		// used to count sim ticks/second
 	int			simCount;
 	float		simPS;
+	int			endTimer;
 
 	int					targetChit;
 	int					possibleChit;
@@ -155,6 +160,7 @@ private:
 	MoneyWidget			moneyWidget;
 	ConsoleWidget		consoleWidget;
 	StartGameWidget		startGameWidget;
+	EndGameWidget		endGameWidget;
 
 	gamui::PushButton	pickupButton[NUM_PICKUP_BUTTONS];
 

@@ -57,6 +57,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	buildActive = 0;
 	chitFaceToTrack = 0;
 	currentNews = 0;
+	endTimer = 0;
 	voxelInfoID.Zero();
 	lumosGame = game;
 	game->InitStd( &gamui2D, &okay, 0 );
@@ -165,6 +166,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 
 	LayoutCalculator layout = static_cast<LumosGame*>(game)->DefaultLayout();
 	startGameWidget.Init(&gamui2D, game->GetButtonLook(0), layout);
+	endGameWidget.Init(&gamui2D, game->GetButtonLook(0), layout);
 
 	Vector3F delta = { 14.0f, 14.0f, 14.0f };
 	Vector3F target = { (float)sim->GetWorldMap()->Width() *0.5f, 0.0f, (float)sim->GetWorldMap()->Height() * 0.5f };
@@ -177,6 +179,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 		target = sim->GetChitBag()->GetHomeCore()->ParentChit()->GetSpatialComponent()->GetPosition();
 	}
 	sim->GetEngine()->CameraLookAt(target + delta, target);
+	sim->GetChitBag()->AddListener(this);
 }
 
 
@@ -251,6 +254,7 @@ void GameScene::Resize()
 	}
 
 	layout.PosAbs(&startGameWidget, 2, 2, 5, 5);
+	layout.PosAbs(&endGameWidget, 2, 2, 5, 5);
 
 	// ------ CHANGE LAYOUT ------- //
 	layout.SetSize( faceWidget.Width(), 20.0f );
@@ -673,6 +677,9 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 
 	if (gamui2D.DialogDisplayed(startGameWidget.Name())) {
 		startGameWidget.ItemTapped(item);
+	}
+	else if (gamui2D.DialogDisplayed(endGameWidget.Name())) {
+		endGameWidget.ItemTapped(item);
 	}
 	else if ( item == &okay ) {
 		game->PopScene();
@@ -1210,7 +1217,7 @@ void GameScene::DoTick( U32 delta )
 		techLabel.SetText(str.c_str());
 	}
 
-	CheckGameStage();
+	CheckGameStage(delta);
 
 	Vector2I homeSector = sim->GetChitBag()->GetHomeSector();
 	{
@@ -1284,6 +1291,19 @@ void GameScene::DoTick( U32 delta )
 }
 
 
+
+void GameScene::OnChitMsg(Chit* chit, const ChitMsg& msg)
+{
+	if (msg.ID() == ChitMsg::CHIT_DESTROYED_START) {
+		if (chit->GetScript("CoreScript")) {
+			if (chit->PrimaryTeam() == TEAM_HOUSE0) {
+				endGameWidget.SetData(this);
+				endTimer = 5000;
+			}
+		}
+	}
+}
+
 /*
 	Startup: !domain && !endWidget.Visible
 			 if (!startWidget.Visible )
@@ -1297,13 +1317,20 @@ void GameScene::DoTick( U32 delta )
 	End:	endWidget.Visible
 			goes !Visible when done
 */
-void GameScene::CheckGameStage()
+void GameScene::CheckGameStage(U32 delta)
 {
 	CoreScript* cs = sim->GetChitBag()->GetHomeCore();
-	bool endVisible = false;
+	bool endVisible   = endTimer || gamui2D.DialogDisplayed(endGameWidget.Name());
 	bool startVisible = gamui2D.DialogDisplayed(startGameWidget.Name());
 
-	if (!cs && !startVisible && !endVisible) {
+	if (endTimer) {
+		endTimer -= delta;
+		if (endTimer <= 0) {
+			gamui2D.PushDialog(endGameWidget.Name());
+			endTimer = 0;
+		}
+	}
+	else if (!cs && !startVisible && !endVisible) {
 
 		// Try to find a suitable starting location.
 		Rectangle2I b;

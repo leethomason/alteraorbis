@@ -373,6 +373,9 @@
     <ClCompile Include="..\widget\startwidget.cpp">
       <Filter>Source Files\widget</Filter>
     </ClCompile>
+    <ClCompile Include="..\widget\endwidget.cpp">
+      <Filter>Source Files\widget</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\camera.h">
@@ -745,6 +748,9 @@
       <Filter>Source Files\audio</Filter>
     </ClInclude>
     <ClInclude Include="..\widget\startwidget.h">
+      <Filter>Source Files\widget</Filter>
+    </ClInclude>
+    <ClInclude Include="..\widget\endwidget.h">
       <Filter>Source Files\widget</Filter>
     </ClInclude>
   </ItemGroup>

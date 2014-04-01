@@ -145,7 +145,6 @@ void Sim::Load( const char* mapDAT, const char* gameDAT )
 		// Fresh start
 		CreateRockInOutland();
 		CreateCores();
-		//CreatePlayer();
 	}
 	else {
 		//QuickProfile qp( "Sim::Load" );
@@ -253,6 +252,11 @@ void Sim::OnChitMsg(Chit* chit, const ChitMsg& msg)
 			Vector2I pos2i = chit->GetSpatialComponent()->GetPosition2DI();
 			Vector2I sector = ToSector(pos2i);
 			coreCreateList.Push(sector);
+
+			if (chit->PrimaryTeam() == TEAM_HOUSE0) {
+				Vector2I zero = { 0, 0 };
+				chitBag->SetHomeSector(zero);
+			}
 		}
 	}
 }
@@ -275,17 +279,11 @@ CoreScript* Sim::CreateCore( const Vector2I& sector, int team)
 			queryArr[i]->GetAIComponent()->CoreDeleting();
 		}
 
-		if (core->PrimaryTeam() == TEAM_HOUSE0) {
-			Vector2I zero = { 0, 0 };
-			chitBag->SetHomeSector(zero);
-		}
-
 		//chitBag->QueueDelete(core);
 		// QueueDelete is safer, but all kinds of asserts fire (correctly)
 		// if 2 cores are in the same place. This may cause an issue
 		// if CreateCore is called during the DoTick()
 		chitBag->DeleteChit(core);
-
 	}
 
 	ItemDefDB* itemDefDB = ItemDefDB::Instance();
