@@ -95,17 +95,17 @@ typedef Color4<U8> Color4U8;
 
 /// Color type conversion.
 inline void Convert( const Color4F& c0, Color3U8* c1 ) {
-	c1->r = (U8)LRintf( c0.r * 255.0f );
-	c1->g = (U8)LRintf( c0.g * 255.0f );
-	c1->b = (U8)LRintf( c0.b * 255.0f );
+	c1->r = (U8)LRint( c0.r * 255.0f );
+	c1->g = (U8)LRint( c0.g * 255.0f );
+	c1->b = (U8)LRint( c0.b * 255.0f );
 }
 
 inline Color4U8 Convert_4F_4U8( const Color4F& c0 ) {
 	Color4U8 c1;
-	c1.r = (U8)LRintf( c0.r * 255.0f );
-	c1.g = (U8)LRintf( c0.g * 255.0f );
-	c1.b = (U8)LRintf( c0.b * 255.0f );
-	c1.a = (U8)LRintf( c0.a * 255.0f );
+	c1.r = (U8)LRint( c0.r * 255.0f );
+	c1.g = (U8)LRint( c0.g * 255.0f );
+	c1.b = (U8)LRint( c0.b * 255.0f );
+	c1.a = (U8)LRint( c0.a * 255.0f );
 	return c1;
 }
 
@@ -173,7 +173,7 @@ inline Color4U8 Convert_RGB16_4U8( U16 c ) {
 /// Interpolate between 2 colors. 'val' can range from 0 to 1.
 inline void InterpolateColor( const Color3U8& c0, const Color3U8& c1, float val, Color3U8* out ) {
 	GLASSERT( val >= 0.0f && val <= 1.0f );
-	int ival = LRintf( val * 255.0f );
+	int ival = LRint( val * 255.0f );
 	GLASSERT( ival >= 0 && ival < 256 );
 	out->r = (U8) Interpolate( 0, (int)c0.r, 255, (int)c1.r, ival );
 	out->g = (U8) Interpolate( 0, (int)c0.g, 255, (int)c1.g, ival );

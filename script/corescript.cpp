@@ -92,7 +92,6 @@ void CoreScript::Serialize( XStream* xs )
 
 void CoreScript::OnAdd()
 {
-	// Cores are indestructable. They don't get removed.
 	GLASSERT( scriptContext->chit->GetSpatialComponent() );
 	GLASSERT( scriptContext->chitBag );
 	GLASSERT( scriptContext->engine->GetMap() );

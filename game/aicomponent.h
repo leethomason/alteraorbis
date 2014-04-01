@@ -87,6 +87,8 @@ public:
 	const ai::Needs& GetNeeds() const		{ return needs; }
 	ai::Needs* GetNeedsMutable()			{ return &needs; }
 
+	void CoreDeleting()						{ taskList.Clear(); }
+
 	// Top level AI modes. Higher level goals.
 	// Translated to immediate goals: MOVE, SHOOT, MELEE
 	enum {

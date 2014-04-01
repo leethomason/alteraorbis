@@ -668,7 +668,10 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 {
 	Vector2F dest = { 0, 0 };
 
-	if ( item == &okay ) {
+	if (gamui2D.DialogDisplayed(startGameWidget.Name())) {
+		startGameWidget.ItemTapped(item);
+	}
+	else if ( item == &okay ) {
 		game->PopScene();
 	}
 	else if ( item == &minimap ) {
@@ -965,24 +968,27 @@ void GameScene::HandleHotKey( int mask )
 		Vector3F at;
 		sim->GetEngine()->CameraLookingAt( &at );
 		Vector2I sector = ToSector( ToWorld2I( at ));
-
-		CDynArray<Chit*> arr;
-		MOBKeyFilter filter;
-		Rectangle2F bounds;
-		bounds.Set( float(sector.x*SECTOR_SIZE), float(sector.y*SECTOR_SIZE), float((sector.x+1)*SECTOR_SIZE), float((sector.y+1)*SECTOR_SIZE ));
-		sim->GetChitBag()->QuerySpatialHash( &arr, bounds, 0, &filter );
-
-		for( int i=0; i<arr.Size(); ++i ) {
-			IString mob = arr[i]->GetItem()->keyValues.GetIString( "mob" );
-			if ( mob == "lesser" || mob == "greater" ) {
-				AIComponent* ai = arr[i]->GetAIComponent();
-				ai->GoSectorHerd();
-			}
-		}
-
+		ForceHerd(sector);
 	}
 	else {
 		super::HandleHotKey( mask );
+	}
+}
+
+
+void GameScene::ForceHerd(const grinliz::Vector2I& sector)
+{
+	CDynArray<Chit*> arr;
+	MOBKeyFilter filter;
+	Rectangle2F bounds = ToWorld(InnerSectorBounds(sector));
+	sim->GetChitBag()->QuerySpatialHash(&arr, bounds, 0, &filter);
+
+	for (int i = 0; i<arr.Size(); ++i) {
+		IString mob = arr[i]->GetItem()->keyValues.GetIString("mob");
+		if (mob == "lesser" || mob == "greater") {
+			AIComponent* ai = arr[i]->GetAIComponent();
+			ai->GoSectorHerd();
+		}
 	}
 }
 
@@ -1292,11 +1298,53 @@ void GameScene::CheckGameStage()
 {
 	CoreScript* cs = sim->GetChitBag()->GetHomeCore();
 	bool endVisible = false;
-	bool startVisible = gamui2D.DialogDisplayed("StartGameWidget");
+	bool startVisible = gamui2D.DialogDisplayed(startGameWidget.Name());
 
 	if (!cs && !startVisible && !endVisible) {
-		gamui2D.PushDialog("StartGameWidget");
+
+		// Try to find a suitable starting location.
+		Rectangle2I b;
+		Random random(sim->GetChitBag()->AbsTime());
+		random.Rand();
+		b.min.y = b.min.x = (NUM_SECTORS / 2) - NUM_SECTORS / 4;
+		b.max.y = b.max.x = (NUM_SECTORS / 2) + NUM_SECTORS / 4;
+		b.min.x += random.Rand(2);
+		b.min.y += random.Rand(2);
+		b.max.x -= random.Rand(2);
+		b.max.y -= random.Rand(2);
+
+		CArray<const SectorData*, NUM_SECTORS * 4> arr;
+		for (Rectangle2IEdgeIterator it(b); !it.Done(); it.Next()) {
+			const SectorData* sd = &sim->GetWorldMap()->GetSector(it.Pos());
+			if (sd->HasCore()) {
+				CoreScript* cs = CoreScript::GetCore(ToSector(sd->x, sd->y));
+				GLASSERT(cs);
+				if (cs->PrimaryTeam() == TEAM_NEUTRAL) {
+					arr.Push(sd);
+				}
+			}
+		}
+		if (arr.Size()) {
+			random.ShuffleArray(arr.Mem(), arr.Size());
+			startGameWidget.SetSectorData(arr.Mem(), arr.Size(), sim->GetEngine(), sim->GetChitBag(), this);
+			gamui2D.PushDialog(startGameWidget.Name());
+		}
 	}
+}
+
+
+void GameScene::DialogResult(const char* name, void* data)
+{
+	if (StrEqual(name, startGameWidget.Name())) {
+		GLOUTPUT(("Selected scene.\n"));
+
+		const SectorData* sd = (const SectorData*)data;
+		//CoreScript* cs = CoreScript::GetCore(ToSector(sd->x, sd->y));
+		//cs->ParentChit()->GetItem()->primaryTeam = TEAM_HOUSE0;
+		sim->CreateCore(ToSector(sd->x, sd->y), TEAM_HOUSE0);
+		ForceHerd(ToSector(sd->x, sd->y));
+	}
+	gamui2D.PopDialog();
 }
 
 

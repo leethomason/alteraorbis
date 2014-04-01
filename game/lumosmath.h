@@ -31,6 +31,13 @@ inline grinliz::Vector2I ToWorld2I( const grinliz::Vector3F& pos3 ) {
 	return pos2i;
 }
 
+inline grinliz::Rectangle2F ToWorld(const grinliz::Rectangle2I& ri)
+{
+	grinliz::Rectangle2F r;
+	r.Set(float(ri.min.x), float(ri.min.y), float(ri.max.x + 1), float(ri.max.y + 1));
+	return r;
+}
+
 inline grinliz::Vector2I AdjacentWorldGrid( const grinliz::Vector2F& pos2 ) {
 	grinliz::Vector2I v = ToWorld2I( pos2 );
 

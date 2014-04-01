@@ -81,6 +81,8 @@ public:
 	virtual void Resize()										{}
 
 	virtual void SceneResult( int sceneID, int result, const SceneData* data )			{}
+	virtual void DialogResult(const char* dialogName, void* data)						{}
+
 	virtual void ChildActivated( int childID, Scene* childScene, SceneData* data )		{}
 	Game* GetGame() { return game; }
 

@@ -52,7 +52,8 @@ public:
 
 	enum {
 		NUM_STAGE = 4,
-		MAX_HEIGHT = NUM_STAGE
+		MAX_HEIGHT = NUM_STAGE,
+		SHORT_PLANTS_START = 6
 	};
 
 private:

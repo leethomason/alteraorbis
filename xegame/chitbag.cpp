@@ -298,6 +298,8 @@ void ChitBag::DoTick( U32 delta )
 	// put in a priority system.
 	Chit* camera = GetChit( activeCamera );
 	if ( camera ) {
+		camera->timeToTick = 0;
+		camera->timeSince = delta;
 		camera->DoTick();
 	}
 

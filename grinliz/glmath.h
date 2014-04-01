@@ -79,7 +79,7 @@ inline bool Equal( double x, double y, double epsilon )
 
 inline bool EqualInt( float a, float epsilon = EPSILON )
 {
-	return Equal( (float)LRintf(a), a, epsilon );
+	return Equal( (float)LRint(a), a, epsilon );
 }
 
 /** The shortest path between 2 angles. (AngleBetween)

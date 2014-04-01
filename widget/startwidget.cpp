@@ -1,18 +1,56 @@
 #include "startwidget.h"
 #include "../game/lumosgame.h"
+#include "../game/worldinfo.h"
+#include "../game/weather.h"
+#include "../game/lumosmath.h"
+#include "../game/lumoschitbag.h"
+
+#include "../engine/engine.h"
+
+#include "../xegame/cameracomponent.h"
+#include "../xegame/chitbag.h"
+#include "../xegame/scene.h"
+
+#include "../script/plantscript.h"
 
 using namespace gamui;
+using namespace grinliz;
 
 static const float GUTTER = 5.0f;
 
 StartGameWidget::StartGameWidget()
 {
+	currentSector = 0;
+	engine = 0;
+	chitBag = 0;
+	iScene = 0;
 }
 
 
 StartGameWidget::~StartGameWidget()
 {
 }
+
+
+void StartGameWidget::SetSectorData(const SectorData** sdArr, int n, Engine* e, ChitBag* cb, Scene* scene)
+{
+	n = Min(n, sectors.Capacity());
+	sectors.Clear();
+	for (int i = 0; i < n; ++i) {
+		sectors.Push(sdArr[i]);
+	}
+	engine = e;
+	chitBag = cb;
+	iScene = scene;
+
+	currentSector = 0;
+	SetBodyText();
+	const SectorData* sd = sectors[currentSector];
+	Vector2I pos2i = { sd->x + SECTOR_SIZE / 2, sd->y + SECTOR_SIZE / 2 };
+	Vector3F pos = ToWorld3F(pos2i);
+	engine->CameraLookAt(pos.x, pos.z);
+}
+
 
 void StartGameWidget::Init(Gamui* gamui, const ButtonLook& look, const LayoutCalculator& calc)
 {
@@ -27,7 +65,6 @@ void StartGameWidget::Init(Gamui* gamui, const ButtonLook& look, const LayoutCal
 	bodyLabel.Init(gamui);
 	countLabel.Init(gamui);
 	topLabel.SetText("MotherCore has granted you access to a neutral domain core. Choose wisely.");
-	bodyLabel.SetText("Foo-45\nTemperature: warm Humidty: low\n38% Land 62% water 19% Flora nPorts");
 	countLabel.SetText("1/1");
 
 	/*
@@ -51,6 +88,59 @@ void StartGameWidget::Init(Gamui* gamui, const ButtonLook& look, const LayoutCal
 
 	textHeight = gamui->GetTextHeight();
 	gamui->EndDialog();
+}
+
+
+void StartGameWidget::SetBodyText()
+{
+	if (sectors.Empty()) return;
+
+	const SectorData* sd = sectors[currentSector];
+	Weather* weather = Weather::Instance();
+	Vector2I pos = { sd->x + SECTOR_SIZE / 2, sd->y + SECTOR_SIZE / 2 };
+	Vector2F pos2 = ToWorld2F(pos);
+	GLASSERT(weather);
+	const float AREA = float(SECTOR_SIZE*SECTOR_SIZE);
+	int nPorts = 0;
+	for (int i = 0; i < 4; ++i) {
+		if ((1 << i) & sd->ports) {
+			nPorts++;
+		}
+	}
+
+	Rectangle2I bi = sd->InnerBounds();
+	Rectangle2F b = ToWorld(bi);
+	PlantFilter plantFilter;
+	chitBag->QuerySpatialHash(&queryArr, b, 0, &plantFilter);
+
+	int bioFlora = 0;
+	int flowers = 0;
+	for (int i = 0; i < queryArr.Size(); ++i) {
+		int type = 0;
+		int stage = 0;
+		PlantScript::IsPlant(queryArr[i], &type, &stage);
+		if (type >= PlantScript::SHORT_PLANTS_START)
+			++flowers;
+		else
+			++bioFlora;
+	}
+
+	CStr<400> str;
+	str.Format("%s\nTemperature=%d%%  Rain=%d%%  Land=%d%%  Water=%d%%  nPorts=%d\n"
+		"bioFlora=%d%%  flowers=%d%%",
+		sd->name.c_str(),
+		LRint(weather->Temperature(pos2.x, pos2.y) * 100.0f),
+		LRint(weather->RainFraction(pos2.x, pos2.y) * 100.0f),
+		LRint(100.0f*float(sd->area) / AREA),
+		LRint(100.0f*float(AREA - sd->area) / AREA),
+		nPorts,
+		LRint(100.0f*float(bioFlora) / AREA),
+		LRint(100.0f*float(flowers) / AREA));
+
+	bodyLabel.SetText(str.c_str());
+
+	str.Format("%d/%d", currentSector, sectors.Size());
+	countLabel.SetText(str.c_str());
 }
 
 
@@ -99,4 +189,38 @@ void StartGameWidget::SetVisible(bool vis)
 	prevDomain.SetVisible(vis);
 	nextDomain.SetVisible(vis);
 	okay.SetVisible(vis);
+}
+
+
+void StartGameWidget::ItemTapped(const gamui::UIItem* item)
+{
+	bool changeDomain = false;
+	if (item == &prevDomain) {
+		currentSector--;
+		changeDomain = true;
+	}
+	else if (item == &nextDomain) {
+		currentSector++;
+		changeDomain = true;
+	}
+	else if (item == &okay) {
+		if (iScene) {
+			iScene->DialogResult(Name(), (void*)sectors[currentSector]);
+		}
+	}
+
+	if (changeDomain) {
+		currentSector += sectors.Capacity();
+		currentSector = currentSector % sectors.Capacity();
+		SetBodyText();
+
+		const SectorData* sd = sectors[currentSector];
+		Vector2I pos2i = { sd->x + SECTOR_SIZE / 2, sd->y + SECTOR_SIZE / 2 };
+		Vector3F pos = ToWorld3F(pos2i);
+		//pos.y = 10.0f;	// FIXME...and fix camera handling
+	
+		engine->CameraLookAt(pos.x, pos.z);
+		//CameraComponent* cc = chitBag->GetCamera(engine);
+		//cc->SetPanTo(pos);
+	}
 }

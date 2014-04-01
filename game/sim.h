@@ -37,6 +37,7 @@ class Weather;
 class ReserveBank;
 class NewsHistory;
 class ItemDB;
+class CoreScript;
 
 class Sim : public StackedSingleton<Sim>
 {
@@ -67,6 +68,9 @@ public:
 	// type=-1 will scan for natural plant choice
 	Chit* CreatePlant( int x, int y, int type );
 	
+	// If this sector has a core, create it.
+	// Will delete and replace an existing core.
+	CoreScript* CreateCore(const grinliz::Vector2I& sector, int team);
 	void CreateAvatar( const grinliz::Vector2I& pos );
 	void UseBuilding();	// the player wants to use a building
 

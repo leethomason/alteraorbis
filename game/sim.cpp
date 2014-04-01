@@ -220,26 +220,14 @@ void Sim::Save( const char* mapDAT, const char* gameDAT )
 
 void Sim::CreateCores()
 {
-	ItemDefDB* itemDefDB = ItemDefDB::Instance();
-	const GameItem& coreItem = itemDefDB->Get( "core" );
-
-	const SectorData* sectorDataArr = worldMap->GetSectorData();
-
 	int ncores = 0;
 	CoreScript* cold = 0;
 	CoreScript* hot  = 0;
 
-	for( int i=0; i<NUM_SECTORS*NUM_SECTORS; ++i ) {
-		const SectorData& sd = sectorDataArr[i];
-		if ( sd.HasCore() ) {
-			Chit* chit = chitBag->NewBuilding( sd.core, "core", 0 );
-
-			// 'in use' instead of blocking.
-			MapSpatialComponent* ms = GET_SUB_COMPONENT( chit, SpatialComponent, MapSpatialComponent );
-			GLASSERT( ms );
-			ms->SetMode( GRID_IN_USE ); 
-			CoreScript* cs = new CoreScript();
-			chit->Add( new ScriptComponent( cs ));
+	for (int j = 0; j < NUM_SECTORS; ++j) {
+		for (int i = 0; i < NUM_SECTORS; ++i) {
+			Vector2I sector = { i, j };
+			CoreScript* cs = CreateCore(sector, TEAM_NEUTRAL);
 
 			if ( !cold ) cold = cs;	// first
 			hot = cs;	// last
@@ -249,24 +237,60 @@ void Sim::CreateCores()
 	cold->SetDefaultSpawn( StringPool::Intern( "arachnoid" ));	// easy starting point for greater spawns
 	hot->SetDefaultSpawn( StringPool::Intern( "arachnoid" ));	// easy starting point for greater spawns
 	GLOUTPUT(( "nCores=%d\n", ncores ));
-
-//	Vector2I homeSector = chitBag->GetHomeSector();
-//	CoreScript* homeCS = CoreScript::GetCore( homeSector );
-//	Chit* homeChit = homeCS->ParentChit();
-//	homeChit->GetItem()->primaryTeam = TEAM_HOUSE0;
 }
 
-/*
-void Sim::CreatePlayer()
+
+CoreScript* Sim::CreateCore( const Vector2I& sector, int team)
 {
-	//Vector2I v = worldMap->FindEmbark();
+	// Destroy the existing core.
+	// Create a new core, attached to the player.
+	CoreScript* cs = CoreScript::GetCore(sector);
+	if (cs) {
+		Chit* core = cs->ParentChit();
+		GLASSERT(core);
 
-	Vector2I sector = chitBag->GetHomeSector();
-	Vector2I v = {	sector.x*SECTOR_SIZE + SECTOR_SIZE/2 + 4,
-					sector.y*SECTOR_SIZE + SECTOR_SIZE/2 + 4 };
-	CreatePlayer( v );
+		// Tell all the AIs the core is going away.
+		ChitHasAIComponent filter;
+		Rectangle2F b = ToWorld(InnerSectorBounds(sector));
+		chitBag->QuerySpatialHash(&queryArr, b, 0, &filter);
+		for (int i = 0; i < queryArr.Size(); ++i) {
+			queryArr[i]->GetAIComponent()->CoreDeleting();
+		}
+
+		//chitBag->QueueDelete(core);
+		// QueueDelete is safer, but all kinds of asserts fire (correctly)
+		// if 2 cores are in the same place. This may cause an issue
+		// if CreateCore is called during the DoTick()
+		chitBag->DeleteChit(core);
+	}
+
+	ItemDefDB* itemDefDB = ItemDefDB::Instance();
+	const GameItem& coreItem = itemDefDB->Get("core");
+
+	const SectorData* sectorDataArr = worldMap->GetSectorData();
+	const SectorData& sd = sectorDataArr[sector.y*NUM_SECTORS+sector.x];
+	if (sd.HasCore()) {
+		Chit* chit = chitBag->NewBuilding(sd.core, "core", 0);
+
+		// 'in use' instead of blocking.
+		MapSpatialComponent* ms = GET_SUB_COMPONENT(chit, SpatialComponent, MapSpatialComponent);
+		GLASSERT(ms);
+		ms->SetMode(GRID_IN_USE);
+		CoreScript* cs = new CoreScript();
+		chit->Add(new ScriptComponent(cs));
+
+		if (team != TEAM_NEUTRAL) {
+			cs->ParentChit()->GetItem()->primaryTeam = team;
+			if (team == TEAM_HOUSE0) {
+				chitBag->SetHomeSector(sector);
+			}
+		}
+
+		return cs;
+	}
+	return 0;
 }
-*/
+
 
 void Sim::CreateAvatar( const grinliz::Vector2I& pos )
 {

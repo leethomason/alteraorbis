@@ -204,7 +204,7 @@ inline long LRint( double val)
 
 
 /// fast float to long conversion, with rounding.
-inline long LRintf( float val)
+inline long LRint( float val)
 {
 	#if defined (__GNUC__)
 		return lrintf( val );
@@ -218,6 +218,9 @@ inline long LRintf( float val)
 		return (long)( val + 0.5f );
 	#endif
 }
+
+
+inline long LRintf(float val) { return LRint(val); }
 
 
 #if 0

@@ -57,6 +57,7 @@ public:
 	virtual void DrawDebugText();
 
 	virtual void SceneResult( int sceneID, int result, const SceneData* data );
+	virtual void DialogResult(const char* dialogName, void* data);
 
 	void Save();
 
@@ -75,6 +76,7 @@ private:
 	bool CoreMode();		// currently controlling the core (build or view)
 	void ProcessNewsToConsole();
 	void CheckGameStage();
+	void ForceHerd(const grinliz::Vector2I& sector);
 
 	enum {
 		NUM_PICKUP_BUTTONS = 8,
