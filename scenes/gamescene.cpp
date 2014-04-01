@@ -63,13 +63,6 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	sim = new Sim( lumosGame );
 
 	Load();
-
-	Vector3F delta = { 14.0f, 14.0f, 14.0f };
-	Vector3F target = { (float)sim->GetWorldMap()->Width() *0.5f, 0.0f, (float)sim->GetWorldMap()->Height() * 0.5f };
-	if ( sim->GetPlayerChit() ) {
-		target = sim->GetPlayerChit()->GetSpatialComponent()->GetPosition();
-	}
-	sim->GetEngine()->CameraLookAt( target + delta, target );
 	
 	RenderAtom atom;
 	minimap.Init( &gamui2D, atom, false );
@@ -173,7 +166,17 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	LayoutCalculator layout = static_cast<LumosGame*>(game)->DefaultLayout();
 	startGameWidget.Init(&gamui2D, game->GetButtonLook(0), layout);
 
-	uiMode[UI_AVATAR].SetDown();
+	Vector3F delta = { 14.0f, 14.0f, 14.0f };
+	Vector3F target = { (float)sim->GetWorldMap()->Width() *0.5f, 0.0f, (float)sim->GetWorldMap()->Height() * 0.5f };
+	uiMode[UI_VIEW].SetDown();
+	if (sim->GetPlayerChit()) {
+		target = sim->GetPlayerChit()->GetSpatialComponent()->GetPosition();
+		uiMode[UI_AVATAR].SetDown();
+	}
+	else if (sim->GetChitBag()->GetHomeCore()) {
+		target = sim->GetChitBag()->GetHomeCore()->ParentChit()->GetSpatialComponent()->GetPosition();
+	}
+	sim->GetEngine()->CameraLookAt(target + delta, target);
 }
 
 
@@ -1261,7 +1264,7 @@ void GameScene::DoTick( U32 delta )
 	// modes all working together. 
 	// - If we aren't in FreeCam mode, we should be looking at the player.
 
-	if ( !FreeCameraMode() ) {
+	if ( !FreeCameraMode() && uiMode[UI_AVATAR].Down() ) {
 		if ( playerChit ) {
 			CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
 			cc->SetTrack( playerChit->ID() );

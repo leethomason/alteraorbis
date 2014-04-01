@@ -25,6 +25,7 @@
 #include "gamelimits.h"
 #include "visitor.h"
 #include "../xegame/cticker.h"
+#include "../xegame/chit.h"
 #include "../xegame/stackedsingleton.h"
 
 class Engine;
@@ -33,13 +34,14 @@ class LumosGame;
 class LumosChitBag;
 class Texture;
 class Chit;
+class ChitMsg;
 class Weather;
 class ReserveBank;
 class NewsHistory;
 class ItemDB;
 class CoreScript;
 
-class Sim : public StackedSingleton<Sim>
+class Sim : public IChitListener, public StackedSingleton<Sim>
 {
 public:
 	Sim( LumosGame* game );
@@ -74,6 +76,10 @@ public:
 	void CreateAvatar( const grinliz::Vector2I& pos );
 	void UseBuilding();	// the player wants to use a building
 
+	// IChitListener.
+	// Listens for cores to be destroyed and re-creates.
+	virtual void OnChitMsg(Chit* chit, const ChitMsg& msg);
+
 private:
 	void CreateCores();
 	void CreateRockInOutland();
@@ -91,12 +97,14 @@ private:
 
 	grinliz::Random	random;
 	int playerID;
+	int avatarTimer;
 	CTicker minuteClock, 
 			secondClock, 
 			volcTimer;
 	int currentVisitor;
 
-	grinliz::CDynArray< Chit* >	queryArr;	// local; cached at object.
+	grinliz::CDynArray< Chit* >	queryArr;					// local; cached at object.
+	grinliz::CDynArray< grinliz::Vector2I > coreCreateList;	// list of cores that were deleted, need to be re-created after DoTick
 };
 
 

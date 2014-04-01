@@ -69,6 +69,7 @@ Sim::Sim( LumosGame* g ) : minuteClock( 60*1000 ), secondClock( 1000 ), volcTime
 	worldMap->AttachEngine( engine, chitBag );
 	worldMap->AttachHistory(chitBag->GetNewsHistory());
 	playerID = 0;
+	avatarTimer = 0;
 	currentVisitor = 0;
 
 	random.SetSeedFromTime();
@@ -158,7 +159,8 @@ void Sim::Load( const char* mapDAT, const char* gameDAT )
 			XarcOpen( &reader, "Sim" );
 
 			XARC_SER( &reader, playerID );
-			XARC_SER( &reader, GameItem::idPool );
+			XARC_SER(&reader, avatarTimer);
+			XARC_SER(&reader, GameItem::idPool);
 
 			minuteClock.Serialize( &reader, "minuteClock" );
 			secondClock.Serialize( &reader, "secondClock" );
@@ -179,7 +181,6 @@ void Sim::Load( const char* mapDAT, const char* gameDAT )
 		// Mark as player controlled so it reacts as expected to player input.
 		// This is the primary avatar, and has some special rules.
 		player->SetPlayerControlled( true );
-		//player->GetRenderComponent()->AddDeco( "horn", 100*1000 );
 	}
 }
 
@@ -200,7 +201,8 @@ void Sim::Save( const char* mapDAT, const char* gameDAT )
 			StreamWriter writer(fp, CURRENT_FILE_VERSION);
 			XarcOpen( &writer, "Sim" );
 			XARC_SER( &writer, playerID );
-			XARC_SER( &writer, GameItem::idPool );
+			XARC_SER(&writer, avatarTimer);
+			XARC_SER(&writer, GameItem::idPool);
 
 			minuteClock.Serialize( &writer, "minuteClock" );
 			secondClock.Serialize( &writer, "secondClock" );
@@ -229,9 +231,11 @@ void Sim::CreateCores()
 			Vector2I sector = { i, j };
 			CoreScript* cs = CreateCore(sector, TEAM_NEUTRAL);
 
-			if ( !cold ) cold = cs;	// first
-			hot = cs;	// last
-			++ncores;
+			if (cs) {
+				if (!cold) cold = cs;	// first
+				hot = cs;	// last
+				++ncores;
+			}
 		}
 	}
 	cold->SetDefaultSpawn( StringPool::Intern( "arachnoid" ));	// easy starting point for greater spawns
@@ -239,6 +243,15 @@ void Sim::CreateCores()
 	GLOUTPUT(( "nCores=%d\n", ncores ));
 }
 
+
+void Sim::OnChitMsg(Chit* chit, const ChitMsg& msg)
+{
+	if (msg.ID() == ChitMsg::CHIT_DESTROYED_END) {
+		if (chit->GetItem() && chit->GetItem()->IName() == "core") {
+			coreCreateList.Push(ToSector(chit->GetSpatialComponent()->GetPosition2DI()));
+		}
+	}
+}
 
 CoreScript* Sim::CreateCore( const Vector2I& sector, int team)
 {
@@ -257,11 +270,17 @@ CoreScript* Sim::CreateCore( const Vector2I& sector, int team)
 			queryArr[i]->GetAIComponent()->CoreDeleting();
 		}
 
+		if (core->PrimaryTeam() == TEAM_HOUSE0) {
+			Vector2I zero = { 0, 0 };
+			chitBag->SetHomeSector(zero);
+		}
+
 		//chitBag->QueueDelete(core);
 		// QueueDelete is safer, but all kinds of asserts fire (correctly)
 		// if 2 cores are in the same place. This may cause an issue
 		// if CreateCore is called during the DoTick()
 		chitBag->DeleteChit(core);
+
 	}
 
 	ItemDefDB* itemDefDB = ItemDefDB::Instance();
@@ -278,6 +297,7 @@ CoreScript* Sim::CreateCore( const Vector2I& sector, int team)
 		ms->SetMode(GRID_IN_USE);
 		CoreScript* cs = new CoreScript();
 		chit->Add(new ScriptComponent(cs));
+		chit->AddListener(this);
 
 		if (team != TEAM_NEUTRAL) {
 			cs->ParentChit()->GetItem()->primaryTeam = team;
@@ -341,6 +361,10 @@ void Sim::DoTick( U32 delta )
 	worldMap->DoTick( delta, chitBag );
 
 	chitBag->DoTick( delta );
+	while (!coreCreateList.Empty()) {
+		Vector2I sector = coreCreateList.Pop();
+		CreateCore(sector, TEAM_NEUTRAL);
+	}
 
 	int minuteTick = minuteClock.Delta( delta );
 	int secondTick = secondClock.Delta( delta );
@@ -416,6 +440,20 @@ void Sim::DoTick( U32 delta )
 			if ( !lumosGame->IsScenePushed() && !chitBag->IsScenePushed() ) {
 				Wallet w = item->wallet.EmptyWallet();
 				cs->ParentChit()->GetItem()->wallet.Add( w );
+			}
+		}
+	}
+
+	if (cs && !player) {
+		// There should be an avatar...
+		if (avatarTimer == 0) {
+			avatarTimer = 10 * 1000;
+		}
+		else {
+			avatarTimer -= delta;
+			if (avatarTimer <= 0) {
+				CreateAvatar(cs->ParentChit()->GetSpatialComponent()->GetPosition2DI());
+				avatarTimer = 0;
 			}
 		}
 	}

@@ -173,7 +173,7 @@ public:
 	// Send a message to the listeners, and every component
 	// in the chit (which don't need to be listeners.)
 	// Synchronous
-	void SendMessage(	const ChitMsg& message, Component* exclude=0 );			// useful to not call ourselves. 
+	void SendMessage( const ChitMsg& message, Component* exclude=0 );			// useful to not call ourselves. 
 
 	void AddListener( IChitListener* handler ) {
 		GLASSERT( listeners.Find( handler ) < 0 );
@@ -204,7 +204,7 @@ private:
 	ChitBag* chitBag;
 	int		 id;
 	bool	 playerControlled;
-	grinliz::CDynArray< IChitListener* > listeners;	// FIXME: remove this?
+	grinliz::CDynArray< IChitListener* > listeners;
 
 public:
 	enum {

@@ -122,6 +122,13 @@
         mass="50"
         cost="40" />
 
+  <item name="core"
+        resource="core"
+        procedural="team"
+        flags="CLICK_THROUGH"
+        mass="300"
+        />
+
   <item name="vault"
         resource="vault"
         porch="1"
@@ -132,7 +139,7 @@
         zoneCreate="industrial"
         zoneConsume="industrial" />
 
-  <!-- note that the needs has a weird syntax - it
+  <!-- note that the 'needs' has a weird syntax - it
        is part of the AI, not the GameItem, and 
        so there isn't an obvious way to serialize it. -->
   <!-- needs require crystals to use -->
@@ -488,12 +495,6 @@
         resource="tree"
         flags="FLAMMABLE"
         mass ="400"
-        />
-
-  <item name="core"
-        resource="core"
-        procedural="team"
-        flags="INDESTRUCTABLE CLICK_THROUGH"
         />
 
   <!-- The plant items describe the plants at the smallest height. Scaled from there,

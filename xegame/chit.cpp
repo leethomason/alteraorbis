@@ -39,7 +39,6 @@ void Chit::Init( int _id, ChitBag* _chitBag )
 	GLASSERT( chitBag == 0 );
 	GLASSERT( id == 0 );
 	GLASSERT( next == 0 );
-//	GLASSERT( listeners.Empty() );
 
 	id = _id;
 	chitBag = _chitBag;
@@ -50,6 +49,8 @@ void Chit::Init( int _id, ChitBag* _chitBag )
 	random.SetSeed( _id );
 	timeToTick = 0;
 	timeSince = 0;
+	playerControlled = false;
+	listeners.Clear();
 }
 
 
