@@ -21,6 +21,11 @@ using namespace grinliz;
 
 */
 
+struct ItemHistoryScore
+{
+	static bool Less(const ItemHistory& a, const ItemHistory& b) { return a.score < b.score; }
+};
+
 CensusScene::CensusScene( LumosGame* game, CensusSceneData* d ) : Scene( game ), lumosGame( game ), chitBag(d->chitBag)
 {
 	lumosGame->InitStd( &gamui2D, &okay, 0 );
@@ -60,6 +65,7 @@ void CensusScene::ItemTapped( const gamui::UIItem* item )
 		lumosGame->PopScene();
 	}
 }
+
 
 
 void CensusScene::ScanItem( ItemComponent* ic, const GameItem* item )
@@ -111,6 +117,16 @@ void CensusScene::ScanItem( ItemComponent* ic, const GameItem* item )
 	if ( h.crafted > craftedActive.crafted ) {
 		craftedActive.Set( item );
 	}
+	if (h.score) {
+		if (domains.HasCap()) {
+			domains.Push(h);
+			Sort<ItemHistory, ItemHistoryScore>(domains.Mem(), domains.Size());
+		}
+		else if (h.score > domains[0].score) {
+			domains[0] = h;
+			Sort<ItemHistory, ItemHistoryScore>(domains.Mem(), domains.Size());
+		}
+	}
 }
 
 
@@ -133,18 +149,17 @@ void CensusScene::Scan()
 
 				allWallet.Add(item->wallet);
 
-				if (item->ToWeapon()
-					|| item->ToShield()
-					|| !item->keyValues.GetIString(IStringConst::mob).empty())
-				{
+				// Optimization: causes bugs if forget to update, and does it help??
+//				if (   item->ToWeapon()
+//					|| item->ToShield()
+//					|| !item->keyValues.GetIString(IStringConst::mob).empty()
+//					|| item->IName() == IStringConst::core )
+//				{
 					ScanItem(ic, item);
-				}
+//				}
 			}
 		}
 	}
-//	killsAny = killsActive;
-//	greaterKillsAny = greaterKillsActive;
-//	craftedAny = craftedActive;
 
 	ItemDB* itemDB = ItemDB::Instance();
 	for( int i=0; i<itemDB->NumHistory(); ++i ) {
@@ -164,6 +179,16 @@ void CensusScene::Scan()
 		}
 		if ( h.crafted > craftedAny.crafted ) {
 			craftedAny = h;
+		}
+		if (h.score) {
+			if (domains.HasCap()) {
+				domains.Push(h);
+				Sort<ItemHistory, ItemHistoryScore>(domains.Mem(), domains.Size());
+			}
+			else if (h.score > domains[0].score) {
+				domains[0] = h;
+				Sort<ItemHistory, ItemHistoryScore>(domains.Mem(), domains.Size());
+			}
 		}
 	}
 
@@ -193,6 +218,10 @@ void CensusScene::Scan()
 	str.append( "\nCrafting:\n" );
 	str.append( "\t" );						craftedActive.AppendDesc( &str, history );str.append( "\n" );
 	str.append( "\t" );						craftedAny.AppendDesc( &str, history );	str.append( "\n" );
+	str.append("\nDomains:\n");
+	for (int i = 0; i < domains.Size(); ++i) {
+		str.append("\t");					domains[i].AppendDesc(&str, history); str.append("\n");
+	}
 	str.append( "\nNotable:\n" );
 
 	for( int i=0; i<MOB_COUNT; ++i ) {

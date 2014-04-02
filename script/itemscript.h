@@ -62,7 +62,7 @@ private:
 // Needs to be small - lots of these to save.
 struct ItemHistory
 {
-	ItemHistory() : itemID(0), level(0), value(0), kills(0), greater(0), crafted(0) {}
+	ItemHistory() : itemID(0), level(0), value(0), kills(0), greater(0), crafted(0), score(0) {}
 
 	bool operator<(const ItemHistory& rhs) const { return this->itemID < rhs.itemID; }
 	bool operator==(const ItemHistory& rhs) const { return this->itemID == rhs.itemID; }
@@ -74,6 +74,7 @@ struct ItemHistory
 	U16					kills;
 	U16					greater;
 	U16					crafted;
+	U16					score;
 
 	void Set( const GameItem* );
 	void Serialize( XStream* xs );

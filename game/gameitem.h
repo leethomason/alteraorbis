@@ -507,6 +507,9 @@ public:
 	GameTrait* GetTraitsMutable()				{ value = -1; return &traits; }
 	const Personality& GetPersonality() const	{ return personality; }
 	Personality* GetPersonalityMutable()		{ return &personality; }
+	
+	// Generally should be automatic.
+	void UpdateHistory() const					{ UpdateTrack(); }
 
 private:
 	void CopyFrom( const GameItem* rhs );

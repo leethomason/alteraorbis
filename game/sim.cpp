@@ -253,6 +253,10 @@ void Sim::OnChitMsg(Chit* chit, const ChitMsg& msg)
 			Vector2I sector = ToSector(pos2i);
 			coreCreateList.Push(sector);
 
+			if (chit->PrimaryTeam() != TEAM_NEUTRAL) {
+				NewsEvent news(NewsEvent::DOMAIN_DESTROYED, ToWorld2F(pos2i), chit);
+				chitBag->GetNewsHistory()->Add(news);
+			}
 			if (chit->PrimaryTeam() == TEAM_HOUSE0) {
 				Vector2I zero = { 0, 0 };
 				chitBag->SetHomeSector(zero);
@@ -300,9 +304,12 @@ CoreScript* Sim::CreateCore( const Vector2I& sector, int team)
 		ms->SetMode(GRID_IN_USE);
 		CoreScript* cs = new CoreScript();
 		chit->Add(new ScriptComponent(cs));
+		chit->GetItem()->SetProperName(sd.name);
 
 		if (team != TEAM_NEUTRAL) {
 			cs->ParentChit()->GetItem()->primaryTeam = team;
+			NewsEvent news(NewsEvent::DOMAIN_CREATED, ToWorld2F(sd.core), chit);
+			chitBag->GetNewsHistory()->Add(news);
 			if (team == TEAM_HOUSE0) {
 				chitBag->SetHomeSector(sector);
 			}
@@ -422,13 +429,6 @@ void Sim::DoTick( U32 delta )
 		if ( visitorData[currentVisitor].id == 0 ) {
 			Chit* chit = chitBag->NewVisitor( currentVisitor );
 			visitorData[currentVisitor].id = chit->ID();
-
-#if 0
-			NewsEvent news( NewsEvent::PONY, chit->GetSpatialComponent()->GetPosition2D(), 
-							StringPool::Intern( "Visitor" ), chit->ID() );
-			chitBag->AddNews( news );
-			chit->GetAIComponent()->EnableDebug( true );
-#endif
 		}
 
 		currentVisitor++;

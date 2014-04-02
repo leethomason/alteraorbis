@@ -69,7 +69,7 @@ public:
 	void Pickup( Chit* item );
 	void Stand();
 	void Rampage( int dest );
-	void GoSectorHerd();	// forces a sector herd
+	void GoSectorHerd(bool focus);	// forces a sector herd
 
 	void Target( Chit* chit, bool focused );
 	bool RockBreak( const grinliz::Vector2I& pos );
@@ -220,7 +220,7 @@ private:
 	void DoShoot( const ComponentSet& thisComp );
 	void DoMove( const ComponentSet& thisComp );
 	bool DoStand( const ComponentSet& thisComp, U32 since );	// return true if doing something
-	bool SectorHerd( const ComponentSet& thisComp );
+	bool SectorHerd( const ComponentSet& thisComp, bool focus );
 	void EnterNewGrid( const ComponentSet& thisComp );
 
 	grinliz::CDynArray< Chit* > chitArr;	// temporary, local

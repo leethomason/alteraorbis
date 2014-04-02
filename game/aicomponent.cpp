@@ -603,7 +603,7 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 		// to reset. Go for the expedient solution: insta-turn for melee.
 		//if ( pmc ) pmc->QueueDest( pos2, &heading );
 		thisComp.spatial->SetYRotation(angle);
-		pmc->Stop();
+		if (pmc) pmc->Stop();
 	}
 	else if ( !targetDesc.id && BattleMechanics::InMeleeZone( context->engine, parentChit, targetDesc.mapPos )) {
 		GLASSERT( parentChit->GetRenderComponent()->AnimationReady() );
@@ -623,7 +623,7 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 		// to reset. Go for the expedient solution: insta-turn for melee.
 		//if ( pmc ) pmc->QueueDest( pos2, &heading );
 		thisComp.spatial->SetYRotation(angle);
-		pmc->Stop();
+		if ( pmc ) pmc->Stop();
 	}
 	else {
 		// Move to target.
@@ -1202,18 +1202,18 @@ Vector2F AIComponent::ThinkWanderFlock( const ComponentSet& thisComp )
 }
 
 
-void AIComponent::GoSectorHerd()
+void AIComponent::GoSectorHerd(bool focus)
 {
 	ComponentSet thisComp( parentChit, Chit::RENDER_BIT | 
 		                               Chit::SPATIAL_BIT |
 									   Chit::ITEM_BIT |
 									   ComponentSet::IS_ALIVE |
 									   ComponentSet::NOT_IN_IMPACT );
-	SectorHerd( thisComp );
+	SectorHerd( thisComp, focus );
 }
 
 
-bool AIComponent::SectorHerd( const ComponentSet& thisComp )
+bool AIComponent::SectorHerd( const ComponentSet& thisComp, bool focus )
 {
 	/*
 		Depending on the MOB and tech level,
@@ -1310,7 +1310,7 @@ bool AIComponent::SectorHerd( const ComponentSet& thisComp )
 					GetChitBag()->GetNewsHistory()->Add( news );
 				}
 
-				ChitMsg msg( ChitMsg::CHIT_SECTOR_HERD, 0, &dest );
+				ChitMsg msg( ChitMsg::CHIT_SECTOR_HERD, focus ? 1:0, &dest );
 				for( int i=0; i<friendList.Size(); ++i ) {
 					Chit* c = GetChitBag()->GetChit( friendList[i] );
 					if ( c ) {
@@ -2098,7 +2098,7 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 
 		if ( sectorHerd || sectorWander ) 
 		{
-			if ( SectorHerd( thisComp ) )
+			if ( SectorHerd( thisComp, false ) )
 				return;
 		}
 		else if ( wanderFlags == 0 || r == 0 ) {
@@ -2800,7 +2800,7 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		{
 			// Read our destination port information:
 			const SectorPort* sectorPort = (const SectorPort*) msg.Ptr();
-			this->Move( *sectorPort, false );
+			this->Move( *sectorPort, msg.Data() ? true : false );
 		}
 		break;
 

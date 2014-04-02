@@ -444,8 +444,11 @@ void RenderComponent::ProcessIcons( int delta )
 	float len2 = ( context->engine->camera.PosWC() - pos ).LengthSquared();
 	
 	IString proper;
-	if ( parentChit->GetItem() ) {
-		proper = parentChit->GetItem()->IProperName();
+	GameItem* gameItem = parentChit->GetItem();
+	if ( gameItem ) {
+		if (gameItem->IName() != "core") {
+			proper = gameItem->IProperName();
+		}
 	}
 
 	if ( len2 < EL_FAR*EL_FAR && ( icons.Size() || !proper.empty() || !decoText.empty() )) {

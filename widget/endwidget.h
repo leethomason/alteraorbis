@@ -2,12 +2,14 @@
 #define END_GAME_WIDGET
 
 #include "../gamui/gamui.h"
+#include "../script/corescript.h"
 
 class SectorData;
 class Engine;
 class ChitBag;
 class Chit;
 class Scene;
+class NewsHistory;
 
 class EndGameWidget : public gamui::IWidget
 {
@@ -31,7 +33,7 @@ public:
 
 	void ItemTapped(const gamui::UIItem* item);
 
-	void SetData(Scene* callback );
+	void SetData(NewsHistory* history, Scene* callback, grinliz::IString name, int itemID, const CoreAchievement& achieve);
 
 private:
 	void SetBodyText();
@@ -40,6 +42,11 @@ private:
 	Engine*				engine;
 	ChitBag*			chitBag;
 	Scene*				iScene;
+	NewsHistory*		history;
+	int					itemID;
+
+	CoreAchievement		achievement;
+	grinliz::IString	coreName;
 
 	gamui::LayoutCalculator calculator;
 	gamui::Image		background;

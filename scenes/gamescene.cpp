@@ -997,7 +997,7 @@ void GameScene::ForceHerd(const grinliz::Vector2I& sector)
 		IString mob = arr[i]->GetItem()->keyValues.GetIString("mob");
 		if (mob == "lesser" || mob == "greater") {
 			AIComponent* ai = arr[i]->GetAIComponent();
-			ai->GoSectorHerd();
+			ai->GoSectorHerd(true);
 		}
 	}
 }
@@ -1098,6 +1098,8 @@ void GameScene::ProcessNewsToConsole()
 
 		case NewsEvent::GREATER_MOB_CREATED:
 		case NewsEvent::GREATER_MOB_KILLED:
+		case NewsEvent::DOMAIN_CREATED:
+		case NewsEvent::DOMAIN_DESTROYED:
 			ne.Console( &str, chitBag );
 			break;
 
@@ -1297,8 +1299,15 @@ void GameScene::OnChitMsg(Chit* chit, const ChitMsg& msg)
 	if (msg.ID() == ChitMsg::CHIT_DESTROYED_START) {
 		if (chit->GetScript("CoreScript")) {
 			if (chit->PrimaryTeam() == TEAM_HOUSE0) {
-				endGameWidget.SetData(this);
-				endTimer = 5000;
+				CoreScript* cs = (CoreScript*) chit->GetScript("CoreScript");
+				GLASSERT(cs);
+				Vector2I sector = ToSector(cs->ParentChit()->GetSpatialComponent()->GetPosition2DI());
+				const SectorData& sd = sim->GetWorldMap()->GetSector(sector);
+				endGameWidget.SetData(	chit->GetChitBag()->GetNewsHistory(),
+										this, 
+										sd.name, chit->GetItem()->ID(), 
+										cs->GetAchievement());
+				endTimer = 8*1000;
 			}
 		}
 	}
@@ -1334,8 +1343,9 @@ void GameScene::CheckGameStage(U32 delta)
 
 		// Try to find a suitable starting location.
 		Rectangle2I b;
-		Random random(sim->GetChitBag()->AbsTime());
-		random.Rand();
+		Random random;
+		random.SetSeedFromTime();
+
 		b.min.y = b.min.x = (NUM_SECTORS / 2) - NUM_SECTORS / 4;
 		b.max.y = b.max.x = (NUM_SECTORS / 2) + NUM_SECTORS / 4;
 		b.min.x += random.Rand(2);

@@ -231,15 +231,17 @@ void ItemHistory::Set( const GameItem* gi )
 	this->level			= gi->Traits().Level();
 	this->value			= gi->GetValue();
 
-	int k=0, c=0, g=0;
+	int k = 0, c = 0, g = 0, s = 0;
 
 	gi->historyDB.Get("Kills", &k);
 	gi->historyDB.Get("Greater", &g);
 	gi->historyDB.Get("Crafted", &c);
+	gi->keyValues.Get("score", &s);
 
 	this->kills = k;
 	this->greater = g;
 	this->crafted = c;
+	this->score = s;
 }
 
 void ItemHistory::Serialize( XStream* xs )
@@ -249,6 +251,7 @@ void ItemHistory::Serialize( XStream* xs )
 	int aKills = kills;
 	int aCrafted = crafted;
 	int aGreater = greater;
+	int aScore = score;
 
 	XarcOpen( xs, "ItemHistory" );
 	XARC_SER( xs, itemID );
@@ -257,7 +260,8 @@ void ItemHistory::Serialize( XStream* xs )
 	XARC_SER( xs, aValue );
 	XARC_SER( xs, aKills );
 	XARC_SER( xs, aGreater );
-	XARC_SER( xs, aCrafted );
+	XARC_SER(xs, aCrafted);
+	XARC_SER(xs, aScore);
 	XarcClose( xs );
 
 	level = aLevel;
@@ -265,6 +269,7 @@ void ItemHistory::Serialize( XStream* xs )
 	kills = aKills;
 	greater = aGreater;
 	crafted = aCrafted;
+	score = aScore;
 }
 
 
@@ -286,6 +291,8 @@ void ItemHistory::AppendDesc( GLString* str, NewsHistory* history )
 			str->AppendFormat( " Greater=%d", greater );
 		if ( crafted )
 			str->AppendFormat( " Crafted=%d", crafted );
+		if (score)
+			str->AppendFormat(" Score=%d", score);
 
 		if (history) {
 			NewsHistory::Data data;

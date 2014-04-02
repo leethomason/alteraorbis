@@ -37,6 +37,8 @@ public:
 		GREATER_MOB_KILLED,			//  killed		killer		killed
 		LESSER_MOB_NAMED,			//	created
 		LESSER_NAMED_MOB_KILLED,	//	killed		killer		killed
+		DOMAIN_CREATED,				//  domain					domain
+		DOMAIN_DESTROYED,			//  domain		killer		domain	
 
 		FORGED,						//	item		maker		maker		
 		UN_FORGED,					//  item		killer	

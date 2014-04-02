@@ -76,14 +76,16 @@ x print uniform count for shaders
 		x sounds
 		x settings file
 		x audio on/off button
-		- core destruction / recreation / zone end
-		- game frame:
-			- startup
-			- achievements
-			- domain end
-		- tablet vs. mouse control
+		x core destruction / recreation / zone end
+		x game frame:
+			x startup
+			x achievements
+			x domain end
+		d tablet vs. mouse control
 		- better control for building
 		- animation cleanup
+		- gldebug on/off. 'settings' and 'debug' sections
+		x domains on census
 
 	- Food-2
 		x add porch to farm, collect food there

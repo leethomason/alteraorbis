@@ -33,6 +33,19 @@ struct CoreInfo
 	int approxNTemples;
 };
 
+
+struct CoreAchievement
+{
+	void Clear() { techLevel = 0; gold = 0; population = 0; civTechScore = 0; }
+	void Serialize(XStream* xs);
+
+	int			techLevel;
+	int			gold;
+	int			population;
+	int			civTechScore;
+};
+
+
 class CoreScript : public IScript
 {
 public:
@@ -62,7 +75,8 @@ public:
 	void SetDefaultSpawn( grinliz::IString s ) { defaultSpawn = s; }
 
 	int GetTechLevel() const		{ return (int)GetTech(); }
-	int AchievedTechLevel() const	{ return achievedTechLevel; }
+	int AchievedTechLevel() const	{ return achievement.techLevel; }
+	const CoreAchievement& GetAchievement() const { return achievement; }
 
 	float GetTech() const			{ return float(tech); }
 	int   MaxTech() const;
@@ -92,16 +106,20 @@ public:
 
 private:
 	void UpdateAI();
+	void UpdateScore(int n);
 
 	WorkQueue*	workQueue;
 	int			team;			// cache so we can update if it changes
 	grinliz::Vector2I sector;
+
 	CTicker		aiTicker;		// use to update the core info, every couple of seconds.
+	CTicker		scoreTicker;
+	CoreAchievement	achievement;
 	
 	// serialized
 	CTicker		spawnTick;
 	double		tech;
-	int			achievedTechLevel;
+
 	grinliz::IString defaultSpawn;
 	grinliz::CDynArray< int > citizens;
 	grinliz::CDynArray< grinliz::Vector2I > tasks;

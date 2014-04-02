@@ -66,11 +66,12 @@ private:
 	};
 
 	ItemHistory killsActive,
-				killsAny,
-				greaterKillsActive,
-				greaterKillsAny,
-				craftedActive,
-				craftedAny;
+		killsAny,
+		greaterKillsActive,
+		greaterKillsAny,
+		craftedActive,
+		craftedAny;
+	grinliz::CArray<ItemHistory, 4> domains;
 
 	struct Info {
 		const GameItem*			item;

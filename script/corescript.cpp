@@ -30,18 +30,29 @@ static const double TECH_DECAY_1 = 0.00040;
 
 using namespace grinliz;
 
-//#define SPAWN_MOBS
+#define SPAWN_MOBS
 
 CoreInfo CoreScript::coreInfoArr[NUM_SECTORS*NUM_SECTORS];
+
+void CoreAchievement::Serialize(XStream* xs)
+{
+	XarcOpen(xs, "CoreAchievement");
+	XARC_SER(xs, techLevel);
+	XARC_SER(xs, gold);
+	XARC_SER(xs, population);
+	XARC_SER(xs, civTechScore);
+	XarcClose(xs);
+}
 
 CoreScript::CoreScript() 
 	: spawnTick( 10*1000 ), 
 	  team( 0 ),
 	  workQueue( 0 ),
-	  aiTicker(2000)
+	  aiTicker(2000),
+	  scoreTicker(10*1000)
 {
 	tech = 0;
-	achievedTechLevel = 0;	
+	achievement.Clear();
 	workQueue = 0;
 	nElixir = 0;
 	sector.Zero();
@@ -65,7 +76,7 @@ void CoreScript::Serialize( XStream* xs )
 	XarcOpen( xs, ScriptName() );
 	XARC_SER( xs, tech );
 	XARC_SER( xs, nElixir );
-	XARC_SER( xs, achievedTechLevel );
+
 	XARC_SER( xs, defaultSpawn );
 
 	if ( xs->Loading() ) {
@@ -81,6 +92,8 @@ void CoreScript::Serialize( XStream* xs )
 	XARC_SER_ARR( xs, citizens.Mem(), citizens.Size() );
 
 	spawnTick.Serialize( xs, "spawn" );
+	scoreTicker.Serialize(xs, "score");
+	achievement.Serialize(xs);
 
 	if ( !workQueue ) { 
 		workQueue = new WorkQueue();
@@ -363,7 +376,36 @@ int CoreScript::DoTick( U32 delta )
 		UpdateAI();
 	}
 
-	return inUse ? 0 : spawnTick.Next();
+	int nScoreTicks = scoreTicker.Delta(delta);
+	if (inUse) {
+		UpdateScore(nScoreTicks);
+	}
+
+	return Min(spawnTick.Next(), aiTicker.Next(), scoreTicker.Next());
+}
+
+
+void CoreScript::UpdateScore(int n)
+{
+	int dTime = n * scoreTicker.Period() / 1000;
+	if (n) {
+		double score = double(citizens.Size()) * sqrt(1.0 + tech);
+		score = score * double(n) * double(scoreTicker.Period() / (10.0*1000.0));
+		achievement.civTechScore += Min(1, (int)LRint(score));
+		// Push this to the GameItem, so it can be recorded in the history + census.
+		GameItem* gi = ParentChit()->GetItem();
+		if (gi) {
+			// Score is a 16 bit quantity...
+			int s = achievement.civTechScore;
+			if (s > 65535) s = 65535;
+			gi->keyValues.Set("score", s);
+			gi->UpdateHistory();
+		}
+	}
+	if (ParentChit()->GetItem()) {
+		achievement.gold = Max(achievement.gold, ParentChit()->GetItem()->wallet.gold);
+		achievement.population = Max(achievement.population, citizens.Size());
+	}
 }
 
 
@@ -381,7 +423,7 @@ void CoreScript::AddTech()
 	tech += TECH_ADDED_BY_VISITOR;
 	tech = Clamp( tech, 0.0, Min( double(TECH_MAX), double( MaxTech() ) - 0.01 ));
 
-	achievedTechLevel = Max( achievedTechLevel, (int)tech );
+	achievement.techLevel = Max(achievement.techLevel, (int)tech);
 }
 
 
@@ -394,7 +436,8 @@ void CoreScript::AddTask(const grinliz::Vector2I& pos2i)
 void CoreScript::RemoveTask(const grinliz::Vector2I& pos2i)
 {
 	int i = tasks.Find(pos2i);
-	GLASSERT(i >= 0);
+	//	GLASSERT(i >= 0); with core deletion, this can be tricky...
+	// FIXME: should be a safe check. Check with core deletion.
 	if (i >= 0){
 		tasks.Remove(i);
 	}

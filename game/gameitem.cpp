@@ -660,6 +660,9 @@ bool GameItem::Significant() const
 	if ( keyValues.Get( "destroyMsg", &msg ) == 0 ) {
 		return true;
 	}
+	if (primaryTeam && name == IStringConst::core) {
+		return true;
+	}
 
 	return false;
 }
