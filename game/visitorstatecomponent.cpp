@@ -104,6 +104,16 @@ int VisitorStateComponent::DoTick( U32 delta )
 			}
 		}
 	}
+
+	if (parentChit->GetSpatialComponent()) {
+		Vector2F pos2 = parentChit->GetSpatialComponent()->GetPosition2D() + OFFSET;
+		for (int i = 0; i < VisitorData::NUM_VISITS; ++i) {
+			wants[i].SetPos(pos2.x + (float)i*0.25f, pos2.y);
+			wants[i].SetSize(SIZE, SIZE);
+		}
+		bar.SetPos(pos2.x, pos2.y + 1.0f - SIZE);
+		bar.SetSize(1.0f, SIZE);
+	}
 	return VERY_LONG_TICK;
 }
 

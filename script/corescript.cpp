@@ -387,7 +387,6 @@ int CoreScript::DoTick( U32 delta )
 
 void CoreScript::UpdateScore(int n)
 {
-	int dTime = n * scoreTicker.Period() / 1000;
 	if (n) {
 		double score = double(citizens.Size()) * sqrt(1.0 + tech);
 		score = score * double(n) * double(scoreTicker.Period() / (10.0*1000.0));

@@ -104,7 +104,6 @@ private:
 	enum {
 		UI_BUILD,
 		UI_VIEW,
-		//UI_AVATAR,
 		NUM_UI_MODES
 	};
 
@@ -152,7 +151,6 @@ private:
 	gamui::PushButton	allRockButton;
 	gamui::PushButton	censusButton;
 	gamui::PushButton	newsButton[NUM_NEWS_BUTTONS];
-//	gamui::PushButton	clearButton;
 	gamui::Image		minimap;
 	gamui::Image		playerMark;
 

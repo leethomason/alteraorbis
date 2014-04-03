@@ -646,8 +646,11 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 	}
 	SetSelectionModel( view );
 
-	if (action == GAME_TAP_DOWN && !uiHasTap) {
-		Tap3D(view, world);
+	if (!uiHasTap) {
+
+		if (action == GAME_TAP_UP) {
+			Tap3D(view, world);
+		}
 	}
 }
 
