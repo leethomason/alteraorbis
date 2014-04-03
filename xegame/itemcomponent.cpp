@@ -491,9 +491,10 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			dropItems = true;
 			if ( !w.IsEmpty() ) {
 				parentChit->GetLumosChitBag()->NewWalletChits( pos, w );
+				w.EmptyWallet();
 			}
 		}
-		else {
+		if (!w.IsEmpty()) {
 			if ( ReserveBank::Instance() ) {	// null in battle mode
 				ReserveBank::Instance()->bank.Add( w );
 			}

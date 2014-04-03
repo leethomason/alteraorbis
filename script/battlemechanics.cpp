@@ -52,16 +52,6 @@ static const float MELEE_DOT_PRODUCT = 0.7f;
 /*static*/ Random BattleMechanics::random;
 
 
-/*static*/ int BattleMechanics::PrimaryTeam( Chit* src )
-{
-	int primaryTeam = -1;
-	if ( src->GetItemComponent() ) {
-		primaryTeam = src->GetItemComponent()->GetItem()->primaryTeam;
-	}
-	return primaryTeam;
-}
-
-
 bool BattleMechanics::InMeleeZone(	Engine* engine,
 									Chit* src,
 									Chit* target )
@@ -119,7 +109,7 @@ bool BattleMechanics::InMeleeZone(	Engine* engine,
 }
 
 
-void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* weapon )
+bool BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* weapon )
 {
 	GLASSERT( engine && src && weapon );
 	ChitBag* chitBag = src->GetChitBag();
@@ -127,8 +117,6 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* 
 
 	U32 absTime = chitBag->AbsTime();
 	
-	int primaryTeam = PrimaryTeam( src );
-
 	// Get origin and direction of melee attack,
 	// then send messages to everyone hit. Everything
 	// with a spatial component is tracked by the 
@@ -137,7 +125,7 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* 
 	Vector2F srcPos = src->GetSpatialComponent()->GetPosition2D();
 	Rectangle2F b;
 	b.min = srcPos; b.max = srcPos;
-	b.Outset( MELEE_RANGE + MAX_BASE_RADIUS );
+	b.Outset( MELEE_RANGE + MAX_BASE_RADIUS + 0.8f );
 
 	CChitArray hashQuery;
 	ChitAcceptAll accept;
@@ -159,8 +147,10 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* 
 		Chit* target = hashQuery[i];
 
 		// Melee damage is chaos. Don't hit your own friends.
+		// Arguably, shouldn't hit neutrals either. But that
+		// keeps a rampage from going through ruins.
 		if ( filter.Accept( target ) ) {
-			if ( GetRelationship( src, target ) != RELATE_ENEMY ) {
+			if ( GetRelationship( src, target ) == RELATE_FRIEND ) {
 				continue;
 			}
 		}
@@ -210,6 +200,7 @@ void BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* 
 			XenoAudio::Instance()->Play(impactSound.c_str(), &pos3 );
 		}
 	}
+	return impact;
 }
 
 

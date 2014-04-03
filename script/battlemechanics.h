@@ -33,7 +33,8 @@ class BattleMechanics
 {
 public:
 	// Melee --------------------- //
-	void MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* weapon );
+	// Returns true if something hit.
+	bool MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* weapon );
 
 	// Returns true the melee attack can/does succeed. Note that any animation
 	// is pure decoration, melee success is just based on relative positions.
@@ -91,8 +92,6 @@ public:
 										int originID, 
 										Engine* engine,
 										ChitBag* chitBag );
-
-	static int PrimaryTeam( Chit* src );
 
 private:
 	static grinliz::Vector3F FuzzyAim( const grinliz::Vector3F& origin, const grinliz::Vector3F& target, float radiusAt1 );

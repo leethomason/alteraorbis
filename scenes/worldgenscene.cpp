@@ -240,7 +240,7 @@ void WorldGenScene::DoTick( U32 delta )
 				Random random;
 				random.SetSeedFromTime();
 
-				rockGen->DoThreshold( random.Rand(), 0.55f, RockGen::NOISE_HEIGHT );
+				rockGen->DoThreshold( random.Rand(), 0.35f, RockGen::NOISE_HEIGHT );
 				for( int y=0; y<WorldGen::SIZE; ++y ) {
 					BlendLine( y );
 				}

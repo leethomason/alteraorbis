@@ -29,8 +29,8 @@ enum {
 	TEAM_RED_MANTIS,
 	TEAM_TROLL,
 
-	TEAM_HOUSE0,
-
+	TEAM_HOUSE0,	// always the player team
+	
 	TEAM_CHAOS
 };
 

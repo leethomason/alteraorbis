@@ -285,7 +285,6 @@ void RenderComponent::SetProcedural( int metaData, const ProcRenderInfo& info )
 		m->SetTextureXForm( info.te.uvXForm );
 		m->SetColorMap( info.color );
 		m->SetBoneFilter( info.filterName, info.filter );
-		return;
 	}
 }
 

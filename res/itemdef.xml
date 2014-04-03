@@ -129,6 +129,12 @@
         mass="300"
         />
 
+  <item name="ruins"
+        resource="ruins1.0"
+        flags="CLICK_THROUGH"
+        mass="100"
+        />
+
   <item name="vault"
         resource="vault"
         porch="1"

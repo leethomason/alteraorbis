@@ -219,6 +219,11 @@ Chit* LumosChitBag::NewBuilding( const Vector2I& pos, const char* name, int team
 		str.Format( "pyramid%d", random.Rand(3) );
 		rootItem.SetResource( str.c_str() );
 	}
+	if (rootItem.IResourceName() == "ruins1.0") {
+		CStr<32> str;
+		str.Format("ruins1.%d", random.Rand(2));
+		rootItem.SetResource(str.c_str());
+	}
 
 	int cx=1;
 	rootItem.keyValues.Get( "size", &cx );

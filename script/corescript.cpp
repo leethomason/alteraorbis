@@ -30,7 +30,7 @@ static const double TECH_DECAY_1 = 0.00040;
 
 using namespace grinliz;
 
-#define SPAWN_MOBS
+//#define SPAWN_MOBS
 
 CoreInfo CoreScript::coreInfoArr[NUM_SECTORS*NUM_SECTORS];
 
@@ -45,7 +45,7 @@ void CoreAchievement::Serialize(XStream* xs)
 }
 
 CoreScript::CoreScript() 
-	: spawnTick( 10*1000 ), 
+	: spawnTick( 20*1000 ), 
 	  team( 0 ),
 	  workQueue( 0 ),
 	  aiTicker(2000),

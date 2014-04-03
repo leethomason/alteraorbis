@@ -915,8 +915,14 @@ WorkQueue* AIComponent::GetWorkQueue()
 	if ( !coreScript )
 		return 0;
 
-	WorkQueue* workQueue = coreScript->GetWorkQueue();
-	return workQueue;
+	// Again, bitten: workers aren't citizens. Grr.
+	if ((parentChit->GetItem()->flags & GameItem::AI_DOES_WORK)
+		|| coreScript->IsCitizen(parentChit->ID()))
+	{
+		WorkQueue* workQueue = coreScript->GetWorkQueue();
+		return workQueue;
+	}
+	return 0;
 }
 
 
@@ -2389,12 +2395,8 @@ void AIComponent::FlushTaskList( const ComponentSet& thisComp, U32 delta )
 		Vector2I pos2i    = thisComp.spatial->GetPosition2DI();
 		Vector2I sector   = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
 
-		WorkQueue* workQueue = 0;
-		CoreScript* coreScript = CoreScript::GetCore(sector);
-		if ( coreScript ) {
-			workQueue = coreScript->GetWorkQueue();
-		}
-		taskList.DoTasks( parentChit, workQueue, delta );
+		WorkQueue* workQueue = GetWorkQueue();
+		taskList.DoTasks(parentChit, workQueue, delta);	
 	}
 }
 
@@ -2407,7 +2409,8 @@ void AIComponent::WorkQueueToTask(  const ComponentSet& thisComp )
 	const ChitContext* context = GetChitContext();
 
 	if ( coreScript ) {
-		WorkQueue* workQueue = coreScript->GetWorkQueue();
+		WorkQueue* workQueue = GetWorkQueue();
+		if (!workQueue) return;
 
 		// Get the current job, or find a new one.
 		const WorkQueue::QueueItem* item = workQueue->GetJob( parentChit->ID() );
@@ -2584,7 +2587,7 @@ int AIComponent::DoTick( U32 deltaTime )
 	// If focused, make sure we have a target.
 	if ( targetDesc.id ) {
 		Chit* chit = chitBag->GetChit( targetDesc.id );
-		if ( !chit ) {
+		if ( !chit || (GetRelationship( chit, parentChit) == RELATE_FRIEND) ) {
 			targetDesc.Clear();
 			currentAction = 0;
 		}

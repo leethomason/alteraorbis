@@ -112,6 +112,16 @@ const SectorData* WorldMap::GetSectorData() const
 }
 
 
+void WorldMap::SetSectorName(const grinliz::Vector2I& sector, const grinliz::IString& name)
+{
+	SectorData* data = worldInfo->SectorDataMemMutable();
+	GLASSERT(sector.x >= 0 && sector.x < NUM_SECTORS);
+	GLASSERT(sector.y >= 0 && sector.y < NUM_SECTORS);
+	GLASSERT(!name.empty());
+	data[sector.y*NUM_SECTORS + sector.x].name = name;
+}
+
+
 const SectorData& WorldMap::GetSector( int x, int y ) const
 {
 	Vector2I sector = { x / SECTOR_SIZE, y/SECTOR_SIZE };

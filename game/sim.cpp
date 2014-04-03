@@ -20,6 +20,7 @@
 #include "../script/worldgen.h"
 #include "../script/farmscript.h"
 #include "../script/distilleryscript.h"
+#include "../script/procedural.h"
 
 #include "../scenes/characterscene.h"
 #include "../scenes/forgescene.h"
@@ -256,10 +257,60 @@ void Sim::OnChitMsg(Chit* chit, const ChitMsg& msg)
 			if (chit->PrimaryTeam() != TEAM_NEUTRAL) {
 				NewsEvent news(NewsEvent::DOMAIN_DESTROYED, ToWorld2F(pos2i), chit);
 				chitBag->GetNewsHistory()->Add(news);
+
+				// All the buildings become neutral. Some become ruins...
+				BuildingFilter filter;
+				Rectangle2F bounds = ToWorld(InnerSectorBounds(sector));
+				chitBag->QuerySpatialHash(&queryArr, bounds, chit, &filter);
+				for (int i = 0; i < queryArr.Size(); ++i) {
+					int c = random.Rand(2);
+					switch (c) {
+					case 0:
+						{
+							// Go neutral.
+							GameItem* item = queryArr[i]->GetItem();
+							if (!item || !queryArr[i]->GetRenderComponent()) continue;
+							item->primaryTeam = TEAM_NEUTRAL;
+
+							// FIXME: the current procedural rendering should
+							// probably be "pulled" by the render component,
+							// if that doesn't create a performance issue.
+							// This code shouldn't theoretically exist:
+							IString proc = item->keyValues.GetIString("procedural");
+							if (!proc.empty()) {
+								TeamGen gen;
+								ProcRenderInfo info;
+								gen.Assign(TEAM_NEUTRAL, &info);
+								queryArr[i]->GetRenderComponent()->SetProcedural(0, info);
+							}
+						}
+						break;
+
+					default:
+						{
+							// To ruins.
+							MapSpatialComponent* msc = GET_SUB_COMPONENT(queryArr[i], SpatialComponent, MapSpatialComponent);
+							GLASSERT(msc);
+							Vector2I pos = msc->Bounds().min;
+							pos.x += random.Rand(msc->Bounds().Width());
+							pos.y += random.Rand(msc->Bounds().Height());
+							Chit* c = chitBag->NewBuilding(pos, "ruins", TEAM_NEUTRAL);
+							c->GetSpatialComponent()->SetYRotation(90.0f * float(random.Rand(4)));
+
+							queryArr[i]->DeRez();
+						}
+						break;
+					}
+				}
 			}
 			if (chit->PrimaryTeam() == TEAM_HOUSE0) {
 				Vector2I zero = { 0, 0 };
 				chitBag->SetHomeSector(zero);
+				if (playerID) {
+					Chit* player = GetPlayerChit();
+					if (player) player->SetPlayerControlled(false);
+				}
+				playerID = 0;	// FIXME: flag in 2 places...
 			}
 		}
 	}
@@ -304,6 +355,15 @@ CoreScript* Sim::CreateCore( const Vector2I& sector, int team)
 		ms->SetMode(GRID_IN_USE);
 		CoreScript* cs = new CoreScript();
 		chit->Add(new ScriptComponent(cs));
+
+#if 0
+		would be cool to get working. A few problems: need to append the numeric id: Venma-5b.
+		and the name is copied around and the old names seem to hold on.
+		// Generate a new name and set it.
+		IString name = StringPool::Intern( lumosGame->GenName("sector", random.Rand(), 4, 7));
+		chit->GetItem()->SetProperName(name);
+		worldMap->SetSectorName(sector, name);
+#endif
 		chit->GetItem()->SetProperName(sd.name);
 
 		if (team != TEAM_NEUTRAL) {

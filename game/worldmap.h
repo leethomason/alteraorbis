@@ -214,6 +214,7 @@ public:
 	const SectorData* GetSectorData() const;
 	const SectorData& GetSector( int mapx, int mapy ) const;
 	const SectorData& GetSector( const grinliz::Vector2I& sector ) const;
+	void SetSectorName(const grinliz::Vector2I& sector, const grinliz::IString& name);
 
 	// Find random land on the largest continent
 	grinliz::Color4U8 Pixel( int x, int y )	{ 

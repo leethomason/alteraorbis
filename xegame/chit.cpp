@@ -295,6 +295,19 @@ void Chit::QueueDelete()
 }
 
 
+bool Chit::DeRez()
+{
+	GameItem* item = GetItem();
+	if (item) {
+		if ((item->flags & GameItem::INDESTRUCTABLE) == 0) {
+			item->hp = 0;
+			SetTickNeeded();
+			return true;
+		}
+	}
+	return false;
+}
+
 void Chit::DebugStr( GLString* str )
 {
 	str->Format( "Chit=%x ", this );

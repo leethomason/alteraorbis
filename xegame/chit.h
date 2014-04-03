@@ -168,6 +168,7 @@ public:
 	GameItem* GetItem();
 	const GameItem* GetItem() const	{ return const_cast<const GameItem*>(const_cast<Chit*>(this)->GetItem()); }
 	void QueueDelete();
+	bool DeRez();	// deletes, but goes through de-rez sequence, checks for indestructible, etc. Returns success.
 
 	// Send a message to the listeners, and every component
 	// in the chit (which don't need to be listeners.)
