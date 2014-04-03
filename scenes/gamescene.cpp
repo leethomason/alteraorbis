@@ -517,6 +517,11 @@ void GameScene::TapModel( Chit* target )
 }
 
 
+void GameScene::Pan(int action, const grinliz::Vector2F& view, const grinliz::Ray& world)
+{
+	Process3DTap(action, view, world, sim->GetEngine());
+}
+
 
 void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::Ray& world )
 {
@@ -524,7 +529,7 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 	Engine* engine = sim->GetEngine();
 	WorldMap* map = sim->GetWorldMap();
 
-	enable3DDragging = FreeCameraMode();
+	//enable3DDragging = FreeCameraMode();
 	
 	buildActive = 0;
 	if ( uiMode[UI_BUILD].Down() ) {
@@ -552,7 +557,7 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 		Vector2I plane2i = { (int)plane.x, (int)plane.z };
 		const BuildData& buildData = buildScript.GetData( buildActive );
 
-		bool tap = Process3DTap( action, view, world, sim->GetEngine() );
+		bool tap = false; // Process3DTap(action, view, world, sim->GetEngine());
 
 		if ( tap ) {
 			if ( uiMode[UI_BUILD].Down() && coreScript ) {

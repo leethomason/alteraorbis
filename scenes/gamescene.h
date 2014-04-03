@@ -52,7 +52,8 @@ public:
 	void Rotate( float degrees );
 
 	virtual void Tap( int action, const grinliz::Vector2F& screen, const grinliz::Ray& world );
-	virtual void ItemTapped( const gamui::UIItem* item );
+	void Pan(int action, const grinliz::Vector2F& view, const grinliz::Ray& world);
+	virtual void ItemTapped(const gamui::UIItem* item);
 	virtual void HandleHotKey( int mask );
 	virtual void MouseMove( const grinliz::Vector2F& view, const grinliz::Ray& world );
 

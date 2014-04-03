@@ -71,6 +71,7 @@ public:
 	void Tap( int action, int x, int y, int mod );
 	void Zoom( int style, float distance );
 	void Rotate( float degreesFromStart );
+	void Pan(int action, float x, float y);
 	void CancelInput();
 
 	virtual Scene* CreateScene( int id, SceneData* data ) = 0;

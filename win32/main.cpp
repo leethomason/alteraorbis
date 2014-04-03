@@ -197,6 +197,7 @@ int main( int argc, char **argv )
 	float yRotation = 45.0f;
 	grinliz::Vector2I mouseDown = { 0, 0 };
 	grinliz::Vector2I prevMouseDown = { 0, 0 };
+	grinliz::Vector2I rightMouseDown = { -1, -1 };
 	U32 prevMouseDownTime = 0;
 
 	int zoomX = 0;
@@ -330,20 +331,26 @@ int main( int argc, char **argv )
 				TransformXY( event.button.x, event.button.y, &x, &y );
 				GLOUTPUT(( "Mouse down %d %d\n", x, y ));
 
-				mouseDown.Set( event.button.x, event.button.y );
-
 				int mod=0;
 				if ( modKeys & ( KMOD_LSHIFT | KMOD_RSHIFT ))    mod = GAME_TAP_MOD_SHIFT;
 				else if ( modKeys & ( KMOD_LCTRL | KMOD_RCTRL )) mod = GAME_TAP_MOD_CTRL;
 
-				if ( event.button.button == 1 ) {
-					GameTap( game, GAME_TAP_DOWN, x, y, mod );
+				if (event.button.button == SDL_BUTTON_LEFT) {
+					mouseDown.Set(event.button.x, event.button.y);
+					GameTap(game, GAME_TAP_DOWN, x, y, mod);
 				}
-				else if ( event.button.button == 3 ) {
+				else if (event.button.button == SDL_BUTTON_RIGHT) {
 					GameTap( game, GAME_TAP_CANCEL, x, y, mod );
-					zooming = true;
-					//GameCameraRotate( game, GAME_ROTATE_START, 0.0f );
-					SDL_GetRelativeMouseState( &zoomX, &zoomY );
+					rightMouseDown.Set(-1, -1);
+					if (mod == 0) {
+						rightMouseDown.Set(event.button.x, event.button.y);
+						GameCameraPan(game, GAME_PAN_START, float(x), float(y));
+					}
+					else if (mod == GAME_TAP_MOD_CTRL) {
+						zooming = true;
+						//GameCameraRotate( game, GAME_ROTATE_START, 0.0f );
+						SDL_GetRelativeMouseState(&zoomX, &zoomY);
+					}
 				}
 			}
 			break;
@@ -355,6 +362,10 @@ int main( int argc, char **argv )
 
 				if ( event.button.button == 3 ) {
 					zooming = false;
+					if (rightMouseDown.x >= 0 && rightMouseDown.y >= 0) {
+						GameCameraPan(game, GAME_PAN_END, float(x), float(y));
+						rightMouseDown.Set(-1, -1);
+					}
 				}
 				if ( event.button.button == 1 ) {
 					int mod = 0;
@@ -379,13 +390,16 @@ int main( int argc, char **argv )
 				if ( state & SDL_BUTTON(1) ) {
 					GameTap( game, GAME_TAP_MOVE, x, y, mod );
 				}
+				else if (rightMouseDown.x >= 0 && rightMouseDown.y >= 0) {
+					GameCameraPan(game, GAME_PAN_END, float(x), float(y));
+				}
 				else if ( zooming && (state & SDL_BUTTON(3)) ) {
 					float deltaZoom = 0.01f * (float)zoomY;
-					GameZoom( game, GAME_ZOOM_DISTANCE, deltaZoom );
-					GameCameraRotate( game, (float)(zoomX)*0.5f );
+					GameZoom(game, GAME_ZOOM_DISTANCE, deltaZoom);
+					GameCameraRotate(game, (float)(zoomX)*0.5f);
 				}
 				else if ( ( ( state & SDL_BUTTON(1) ) == 0 ) ) {
-					GameTap( game, GAME_TAP_MOVE_UP, x, y, mod );
+					GameTap(game, GAME_MOVE_WHILE_UP, x, y, mod);
 				}
 			}
 			break;

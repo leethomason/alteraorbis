@@ -40,16 +40,9 @@ void GameSave( void* handle );
 #define GAME_TAP_MOVE		1
 #define GAME_TAP_UP			2
 #define GAME_TAP_CANCEL		3
-#define GAME_TAP_MOVE_UP	4	// debugging; not on tablets, obviously
+#define GAME_MOVE_WHILE_UP	4	// not on tablets, obviously
 #define GAME_TAP_MOD_SHIFT	5	// debugging
 #define GAME_TAP_MOD_CTRL	6	// debugging
-
-#define GAME_TAP_MASK		0x00ff
-#define GAME_TAP_PANNING	0x0100
-#define GAME_TAP_DOWN_PANNING		(GAME_TAP_DOWN | GAME_TAP_PANNING)
-#define GAME_TAP_MOVE_PANNING		(GAME_TAP_MOVE | GAME_TAP_PANNING)
-#define GAME_TAP_UP_PANNING			(GAME_TAP_UP | GAME_TAP_PANNING)
-#define GAME_TAP_CANCEL_PANNING		(GAME_TAP_CANCEL | GAME_TAP_PANNING)
 
 void GameTap( void* handle, int action, int x, int y, int mod );
 
@@ -57,8 +50,13 @@ void GameTap( void* handle, int action, int x, int y, int mod );
 #define GAME_ZOOM_PINCH		1
 void GameZoom( void* handle, int style, float zoom );
 
+#define GAME_PAN_START		7
+#define GAME_PAN_MOVE		8
+#define GAME_PAN_END		9
+void GameCameraPan(void* handle, int action, float x, float y);
+
 // Relative rotation, in degrees.
-void GameCameraRotate( void* handle, float degrees );
+void GameCameraRotate(void* handle, float degrees);
 void GameDoTick( void* handle, unsigned int timeInMSec );
 
 #define GAME_HK_TOGGLE_UI				1

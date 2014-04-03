@@ -37,7 +37,6 @@ Scene::Scene( Game* _game )
 	RenderAtom nullAtom;
 	dragImage.Init( &gamui2D, nullAtom, true );
 	threeDTapDown = false;
-	enable3DDragging = true;
 }
 
 
@@ -116,14 +115,14 @@ ModelVoxel Scene::ModelAtMouse( const grinliz::Vector2F& view,
 }
 
 
-bool Scene::Process3DTap( int action, const grinliz::Vector2F& view, const grinliz::Ray& world, Engine* engine )
+bool Scene::Process3DTap(int action, const grinliz::Vector2F& view, const grinliz::Ray& world, Engine* engine)
 {
 	Ray ray;
 	bool result = false;
 		
 	switch( action )
 	{
-		case GAME_TAP_DOWN:
+	case GAME_PAN_START:
 		{
 			game->GetScreenport().ViewProjectionInverse3D( &dragData3D.mvpi );
 			engine->RayFromViewToYPlane( view, dragData3D.mvpi, &ray, &dragData3D.start3D );
@@ -134,8 +133,8 @@ bool Scene::Process3DTap( int action, const grinliz::Vector2F& view, const grinl
 			break;
 		}
 
-		case GAME_TAP_MOVE:
-		case GAME_TAP_UP:
+	case GAME_PAN_MOVE:
+	case GAME_PAN_END:
 		{
 			// Not sure how this happens. Why is the check for down needed??
 			if( threeDTapDown ) {
@@ -155,10 +154,7 @@ bool Scene::Process3DTap( int action, const grinliz::Vector2F& view, const grinl
 					if ( vDelta.Length() < 10.f )
 						result = true;
 				}
-
-				if ( enable3DDragging ) {
-					engine->camera.SetPosWC( dragData3D.startCameraWC - delta );
-				}
+				engine->camera.SetPosWC(dragData3D.startCameraWC - delta);
 			}
 			break;
 		}

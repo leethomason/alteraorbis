@@ -1,4 +1,3 @@
-- glGetError() is getting compiled into release
 - batching troubles - still lots of small batches going in
 
 - "blue wall" bug. Alpha present. Not screen aligned. Noise in particles??
@@ -82,18 +81,19 @@ x print uniform count for shaders
 			x achievements
 			x domain end
 		d tablet vs. mouse control
+		x domains on census
+		x confirm target & can do damage to target
+		x ai of denizens post fall
+		x avatar still under control when domain is destroyed
 		- ruins and collapse
 		- better control for building
 			- rethink controls???
 		- animation cleanup
 		- gldebug on/off. 'settings' and 'debug' sections
-		x domains on census
 		- core attack warning
-		x confirm target & can do damage to target
-		x ai of denizens post fall
 		- fast / threaded save
-		x avatar still under control when domain is destroyed
 		- neutral buildings shouldn't have a porch
+		- glGetError() is getting compiled into release
 
 	- Food-2
 		x add porch to farm, collect food there

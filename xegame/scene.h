@@ -69,11 +69,15 @@ public:
 
 	// UI
 	virtual void Tap(	int action, 
-						const grinliz::Vector2F& screen,
+						const grinliz::Vector2F& view,
 						const grinliz::Ray& world )				{}
 	virtual void Zoom( int style, float normal )				{}
 	virtual void Rotate( float degrees )						{}
 	virtual void CancelInput()									{}
+	virtual void Pan(int action,
+		const grinliz::Vector2F& view,
+		const grinliz::Ray& world)								{}
+
 	// Only with mouse/kbd input.
 	virtual void MouseMove( const grinliz::Vector2F& view, const grinliz::Ray& world )	{}
 
@@ -97,6 +101,7 @@ public:
 	bool ProcessTap( int action, const grinliz::Vector2F& view, const grinliz::Ray& world );
 	// Call to handle 3D events. Returns true if an actual tap (on the y=0 plane) occurs.
 	bool Process3DTap( int action, const grinliz::Vector2F& view, const grinliz::Ray& world, Engine* engine );
+
 	ModelVoxel ModelAtMouse( const grinliz::Vector2F& view, 
 							 Engine* engine,
 							 HitTestMethod method = TEST_TRI,
@@ -125,7 +130,6 @@ protected:
 	gamui::Image	dragImage;
 	bool			dragStarted;
 	bool			threeDTapDown;
-	bool			enable3DDragging;
 
 	DragData		dragData3D;
 };

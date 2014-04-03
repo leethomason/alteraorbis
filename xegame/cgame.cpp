@@ -127,7 +127,16 @@ void GameCameraRotate( void* handle, float degrees )
 }
 
 
-void GameTap( void* handle, int action, int x, int y, int mod )
+void GameCameraPan(void* handle, int action, float x, float y)
+{
+	CheckThread check;
+
+	Game* game = (Game*)handle;
+	game->Pan(action, x, y);
+}
+
+
+void GameTap(void* handle, int action, int x, int y, int mod)
 {
 	CheckThread check;
 

@@ -596,7 +596,7 @@ void Game::MouseMove( int x, int y )
 void Game::Tap( int action, int wx, int wy, int mod )
 {
 	tapMod = mod;
-	if ( action == GAME_TAP_MOVE_UP ) {
+	if (action == GAME_MOVE_WHILE_UP) {
 		MouseMove( wx, wy );
 		return;
 	}
@@ -630,6 +630,20 @@ void Game::Zoom( int style, float distance )
 void Game::Rotate( float degrees )
 {
 	sceneStack.Top()->scene->Rotate( -degrees );
+}
+
+
+void Game::Pan(int action, float wx, float wy)
+{
+	//GLOUTPUT(("Pan: action=%d x=%.1f y=%.1f\n", action, x, y));
+	Vector2F window = { wx, wy };
+	Vector2F view;
+	screenport.WindowToView(window, &view);
+
+	grinliz::Ray world;
+	screenport.ViewToWorld(view, 0, &world);
+
+	sceneStack.Top()->scene->Pan(action, view, world);
 }
 
 
