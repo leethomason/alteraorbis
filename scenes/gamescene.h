@@ -67,6 +67,7 @@ public:
 	virtual void OnChitMsg(Chit* chit, const ChitMsg& msg);
 
 private:
+	void Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& world);
 	void Load();
 	void SetBars( Chit* chit );
 	void DoDestTapped( const grinliz::Vector2F& grid );
@@ -82,6 +83,7 @@ private:
 	void ProcessNewsToConsole();
 	void CheckGameStage(U32 delta);
 	void ForceHerd(const grinliz::Vector2I& sector);
+	bool AvatarSelected();
 
 	enum {
 		NUM_PICKUP_BUTTONS = 8,
@@ -102,7 +104,7 @@ private:
 	enum {
 		UI_BUILD,
 		UI_VIEW,
-		UI_AVATAR,
+		//UI_AVATAR,
 		NUM_UI_MODES
 	};
 
@@ -129,7 +131,7 @@ private:
 	int					infoID;
 	grinliz::Vector2I	voxelInfoID;
 	int					buildActive;	// which build button is active. 0 if none.
-	int					chitFaceToTrack;
+	int					chitTracking;
 	int					currentNews;	// index of the last news item put in the console
 	int					sleepTubeID;
 
@@ -143,7 +145,7 @@ private:
 	gamui::ToggleButton modeButton[NUM_BUILD_MODES];
 	gamui::PushButton	useBuildingButton;
 	gamui::PushButton	cameraHomeButton;
-	gamui::PushButton	nextUnit, prevUnit;
+	gamui::PushButton	nextUnit, avatarUnit, prevUnit;
 	gamui::Image		tabBar0, tabBar1;
 	gamui::PushButton	createWorkerButton;
 	gamui::ToggleButton	uiMode[NUM_UI_MODES];

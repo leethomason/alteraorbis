@@ -41,9 +41,6 @@ static const float DEBUG_SCALE = 1.0f;
 static const float MINI_MAP_SIZE = 150.0f*DEBUG_SCALE;
 static const float MARK_SIZE = 6.0f*DEBUG_SCALE;
 
-#define USE_MOUSE_MOVE_SELECTION
-
-
 GameScene::GameScene( LumosGame* game ) : Scene( game )
 {
 	fastMode = false;
@@ -55,7 +52,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	infoID = 0;
 	selectionModel = 0;
 	buildActive = 0;
-	chitFaceToTrack = 0;
+	chitTracking = 0;
 	currentNews = 0;
 	endTimer = 0;
 	voxelInfoID.Zero();
@@ -96,6 +93,10 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	prevUnit.SetText( "<" );
 	prevUnit.SetVisible( false );
 
+	avatarUnit.Init(&gamui2D, game->GetButtonLook(0));
+	avatarUnit.SetText("Avatar");
+	avatarUnit.SetVisible(false);
+
 	static const char* modeButtonText[NUM_BUILD_MODES] = {
 		"Utility", "Visitor", "Economy", "Defense", "Industry"
 	};
@@ -126,7 +127,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	createWorkerButton.SetText( "WorkerBot" );
 
 	for( int i=0; i<NUM_UI_MODES; ++i ) {
-		static const char* TEXT[NUM_UI_MODES] = { "Build", "View", "Avatar" };
+		static const char* TEXT[NUM_UI_MODES] = { "Build", "View" };
 		uiMode[i].Init( &gamui2D, game->GetButtonLook(0));
 		uiMode[i].SetText( TEXT[i] );
 		uiMode[0].AddToToggleGroup( &uiMode[i] );
@@ -149,7 +150,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	faceWidget.Init( &gamui2D, game->GetButtonLook(0), FaceWidget::ALL );
 	faceWidget.SetSize( 100, 100 );
 
-	chitFaceToTrack = sim->GetPlayerChit() ? sim->GetPlayerChit()->ID() : 0;
+	chitTracking = sim->GetPlayerChit() ? sim->GetPlayerChit()->ID() : 0;
 
 	for( int i=0; i<NUM_PICKUP_BUTTONS; ++i ) {
 		pickupButton[i].Init( &gamui2D, game->GetButtonLook(0) );
@@ -173,7 +174,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	uiMode[UI_VIEW].SetDown();
 	if (sim->GetPlayerChit()) {
 		target = sim->GetPlayerChit()->GetSpatialComponent()->GetPosition();
-		uiMode[UI_AVATAR].SetDown();
+//		uiMode[UI_AVATAR].SetDown();
 	}
 	else if (sim->GetChitBag()->GetHomeCore()) {
 		target = sim->GetChitBag()->GetHomeCore()->ParentChit()->GetSpatialComponent()->GetPosition();
@@ -208,7 +209,8 @@ void GameScene::Resize()
 
 	layout.PosAbs( &cameraHomeButton, 0, 1 );
 	layout.PosAbs( &prevUnit, 1, 1 );
-	layout.PosAbs( &nextUnit, 2, 1 );
+	layout.PosAbs(&avatarUnit, 2, 1);
+	layout.PosAbs(&nextUnit, 3, 1);
 
 	int level = BuildScript::GROUP_UTILITY;
 	int start = 0;
@@ -318,7 +320,7 @@ void GameScene::Load()
 	else {
 		sim->Load( datPath, 0 );
 	}
-	chitFaceToTrack = sim->GetPlayerChit() ? sim->GetPlayerChit()->ID() : 0;
+	chitTracking = sim->GetPlayerChit() ? sim->GetPlayerChit()->ID() : 0;
 }
 
 
@@ -495,12 +497,12 @@ void GameScene::TapModel( Chit* target )
 		const GameItem* item = target->GetItem();
 		bool denizen = strstr( item->ResourceName(), "human" ) != 0;
 		if (denizen) {
-			chitFaceToTrack = target->ID();
+			chitTracking = target->ID();
 			setTarget = "possibleTarget";
 
 			CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
 			if ( cc ) {
-				cc->SetTrack( chitFaceToTrack );
+				cc->SetTrack( chitTracking );
 			}
 		}
 	}
@@ -523,14 +525,114 @@ void GameScene::Pan(int action, const grinliz::Vector2F& view, const grinliz::Ra
 }
 
 
+void GameScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& world)
+{
+	Engine* engine = sim->GetEngine();
+	WorldMap* map = sim->GetWorldMap();
+
+	CoreScript* coreScript = CoreScript::GetCore(sim->GetChitBag()->GetHomeSector());
+
+	Vector3F atModel = { 0, 0, 0 };
+	Vector3F plane = { 0, 0, 0 };
+	ModelVoxel mv = ModelAtMouse(view, sim->GetEngine(), TEST_HIT_AABB, 0, MODEL_CLICK_THROUGH, 0, &plane);
+	if (plane.x > 0 && plane.z > 0 && plane.x < float(map->Width()) && plane.z < float(map->Width())) {
+		// okay
+	}
+	else {
+		return;	// outside of world. don't do testing.
+	}
+	Vector2I plane2i = { (int)plane.x, (int)plane.z };
+	const BuildData& buildData = buildScript.GetData(buildActive);
+
+	if (uiMode[UI_BUILD].Down() && coreScript) {
+		WorkQueue* wq = coreScript->GetWorkQueue();
+		GLASSERT(wq);
+		RemovableFilter removableFilter;
+
+		if (buildActive == BuildScript::CLEAR) {
+			wq->AddAction(plane2i, BuildScript::CLEAR);
+			return;
+		}
+		else if (buildActive == BuildScript::NONE) {
+			wq->Remove(plane2i);
+		}
+		else if (buildActive == BuildScript::ROTATE) {
+			if (mv.ModelHit()) {
+				MapSpatialComponent* msc = GET_SUB_COMPONENT(mv.model->userData, SpatialComponent, MapSpatialComponent);
+				if (msc) {
+					float r = msc->GetYRotation();
+					r += 90.0f;
+					r = NormalizeAngleDegrees(r);
+					msc->SetYRotation(r);
+				}
+			}
+		}
+		else {
+			wq->AddAction(plane2i, buildActive);
+		}
+	}
+
+	if (mv.VoxelHit()) {
+		if (AvatarSelected()) {
+			// clicked on a rock. Melt away!
+			Chit* player = sim->GetPlayerChit();
+			if (player && player->GetAIComponent()) {
+				player->GetAIComponent()->RockBreak(mv.Voxel2());
+				return;
+			}
+		}
+	}
+
+	if (AvatarSelected()) {
+		Chit* playerChit = sim->GetPlayerChit();
+		if (mv.model) {
+			TapModel(mv.model->userData);
+		}
+		else if (playerChit) {
+			Vector2F dest = { plane.x, plane.z };
+			DoDestTapped(dest);
+		}
+		else if (FreeCameraMode()) {
+			sim->GetEngine()->CameraLookAt(plane.x, plane.z);
+		}
+	}
+#if 0
+				//Vector2I v = { (int)plane.x, (int)plane.z };
+				//sim->CreatePlayer( v );
+				//chitTracking = sim->GetPlayerChit() ? sim->GetPlayerChit()->ID() : 0;
+				sim->CreateVolcano((int)at.x, (int)at.z, 6);
+				sim->CreatePlant((int)at.x, (int)at.z, -1);
+			}
+			else if (tapMod == GAME_TAP_MOD_SHIFT) {
+				for (int i = 0; i<NUM_PLANT_TYPES; ++i) {
+					Chit* chit = sim->CreatePlant((int)plane.x + i, (int)plane.z, i);
+					if (chit) {
+						if (i < 6) {
+							PlantScript* plantScript = (PlantScript*)chit->GetScript("PlantScript");
+							GLASSERT(plantScript);
+							plantScript->SetStage(3);
+						}
+					}
+				}
+				Vector3F p = plane;
+				p.y = 0;
+				for (int i = 0; i<5; ++i) {
+					//sim->GetChitBag()->NewMonsterChit(plane, "redMantis", TEAM_RED_MANTIS);
+					sim->GetChitBag()->NewMonsterChit(p, "mantis", TEAM_GREEN_MANTIS);
+					p.x += 0.5f;
+				}
+			}
+		}
+	}
+#endif
+}
+
 void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::Ray& world )
 {
 	bool uiHasTap = ProcessTap( action, view, world );
 	Engine* engine = sim->GetEngine();
 	WorldMap* map = sim->GetWorldMap();
 
-	//enable3DDragging = FreeCameraMode();
-	
 	buildActive = 0;
 	if ( uiMode[UI_BUILD].Down() ) {
 		for( int i=1; i<BuildScript::NUM_OPTIONS; ++i ) {
@@ -542,118 +644,8 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 	}
 	SetSelectionModel( view );
 
-	CoreScript* coreScript = CoreScript::GetCore(sim->GetChitBag()->GetHomeSector());
-
-	if (!uiHasTap) {
-		Vector3F atModel = { 0, 0, 0 };
-		Vector3F plane   = { 0, 0, 0 };
-		ModelVoxel mv = ModelAtMouse( view, sim->GetEngine(), TEST_HIT_AABB, 0, MODEL_CLICK_THROUGH, 0, &plane );
-		if ( plane.x > 0 && plane.z > 0 && plane.x < float(map->Width()) && plane.z < float(map->Width()) ) {
-			// okay
-		}
-		else {
-			return;	// outside of world. don't do testing.
-		}
-		Vector2I plane2i = { (int)plane.x, (int)plane.z };
-		const BuildData& buildData = buildScript.GetData( buildActive );
-
-		bool tap = false; // Process3DTap(action, view, world, sim->GetEngine());
-
-		if ( tap ) {
-			if ( uiMode[UI_BUILD].Down() && coreScript ) {
-				WorkQueue* wq = coreScript->GetWorkQueue();
-				GLASSERT( wq );
-				RemovableFilter removableFilter;
-
-				if ( buildActive == BuildScript::CLEAR ) {
-#ifdef USE_MOUSE_MOVE_SELECTION
-					wq->AddAction( plane2i, BuildScript::CLEAR );
-					return;
-#endif
-				}
-				else if ( buildActive == BuildScript::NONE ) {
-#ifdef USE_MOUSE_MOVE_SELECTION
-					wq->Remove( plane2i );
-#endif
-				}
-				else if ( buildActive == BuildScript::ROTATE ) {
-					if ( mv.ModelHit() ) {
-						MapSpatialComponent* msc = GET_SUB_COMPONENT( mv.model->userData, SpatialComponent, MapSpatialComponent );
-						if ( msc ) {
-							float r = msc->GetYRotation();
-							r += 90.0f;
-							r = NormalizeAngleDegrees( r );
-							msc->SetYRotation( r );
-						}
-					}
-				}
-#ifdef USE_MOUSE_MOVE_SELECTION
-				else {
-#endif
-					wq->AddAction( plane2i, buildActive );
-				}
-			}
-			
-			if ( mv.VoxelHit() ) {
-				if ( uiMode[UI_AVATAR].Down()) {
-					// clicked on a rock. Melt away!
-					Chit* player = sim->GetPlayerChit();
-					if ( player && player->GetAIComponent() ) {
-						player->GetAIComponent()->RockBreak( mv.Voxel2() );
-						return;
-					}
-				}
-			}
-
-			int tapMod = lumosGame->GetTapMod();
-
-			if ( tapMod == 0 ) {
-				Chit* playerChit = sim->GetPlayerChit();
-				if ( mv.model ) {
-					TapModel( mv.model->userData );
-				}
-				else if ( playerChit ) {
-					Vector2F dest = { plane.x, plane.z };
-					DoDestTapped( dest );
-				}
-				else if ( FreeCameraMode() ) {
-					sim->GetEngine()->CameraLookAt( plane.x, plane.z );
-				}
-			}
-			else if ( tapMod == GAME_TAP_MOD_CTRL ) {
-
-				//Vector2I v = { (int)plane.x, (int)plane.z };
-				//sim->CreatePlayer( v );
-				//chitFaceToTrack = sim->GetPlayerChit() ? sim->GetPlayerChit()->ID() : 0;
-#if 0
-				sim->CreateVolcano( (int)at.x, (int)at.z, 6 );
-				sim->CreatePlant( (int)at.x, (int)at.z, -1 );
-#endif
-			}
-			else if ( tapMod == GAME_TAP_MOD_SHIFT ) {
-#if 0
-				for( int i=0; i<NUM_PLANT_TYPES; ++i ) {
-					Chit* chit = sim->CreatePlant( (int)plane.x+i, (int)plane.z, i );
-					if ( chit ) {
-						if ( i < 6 ) {
-							PlantScript* plantScript = (PlantScript*) chit->GetScript("PlantScript");
-							GLASSERT(plantScript);
-							plantScript->SetStage( 3 );
-						}
-					}
-				}
-#endif
-#if 1	// monsters
-				Vector3F p = plane;
-				p.y = 0;
-				for( int i=0; i<5; ++i ) {
-					//sim->GetChitBag()->NewMonsterChit(plane, "redMantis", TEAM_RED_MANTIS);
-					sim->GetChitBag()->NewMonsterChit(p, "mantis", TEAM_GREEN_MANTIS);
-					p.x += 0.5f;
-				}
-#endif
-			}
-		}
+	if (action == GAME_TAP_DOWN && !uiHasTap) {
+		Tap3D(view, world);
 	}
 }
 
@@ -662,6 +654,18 @@ bool GameScene::CoreMode()
 {
 	return uiMode[UI_BUILD].Down() || uiMode[UI_VIEW].Down(); 
 }
+
+
+bool GameScene::AvatarSelected()
+{
+	bool button = uiMode[UI_VIEW].Down();
+	Chit* playerChit = sim->GetPlayerChit();
+	if (button && playerChit && playerChit->ID() == chitTracking) {
+		return true;
+	}
+	return false;
+}
+
 
 bool GameScene::FreeCameraMode()
 {
@@ -735,7 +739,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		}
 	}
 	else if ( item == faceWidget.GetButton() ) {
-		Chit* chit = sim->GetChitBag()->GetChit( chitFaceToTrack );
+		Chit* chit = sim->GetChitBag()->GetChit(chitTracking);
 		if ( chit && chit->GetItemComponent() ) {			
 			game->PushScene( LumosGame::SCENE_CHARACTER, 
 							 new CharacterSceneData( chit->GetItemComponent(), 0, 0 ));
@@ -760,7 +764,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 
 		CoreScript* coreScript = CoreScript::GetCore( sim->GetChitBag()->GetHomeSector() );
 		if ( coreScript && coreScript->NumCitizens() ) {
-			Chit* chit = sim->GetChitBag()->GetChit( chitFaceToTrack );
+			Chit* chit = sim->GetChitBag()->GetChit(chitTracking);
 			int index = 0;
 			if ( chit ) {
 				index = coreScript->FindCitizenIndex( chit );
@@ -778,8 +782,8 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 			
 			CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
 			if ( cc && chit ) {
-				chitFaceToTrack = chit->ID();
-				cc->SetTrack( chitFaceToTrack );
+				chitTracking = chit->ID();
+				cc->SetTrack( chitTracking );
 			}
 		}
 	}
@@ -814,7 +818,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 			}
 		}
 	}
-	if ( item == &uiMode[UI_BUILD] || item == &uiMode[UI_VIEW] || item == &uiMode[UI_AVATAR] ) {
+	if ( item == &uiMode[UI_BUILD] || item == &uiMode[UI_VIEW] ) {
 		// Set it to track nothing; if it needs to track something, that will
 		// be set by future mouse actions or DoTick
 		CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
@@ -845,34 +849,34 @@ void GameScene::DoDestTapped( const Vector2F& _dest )
 {
 	Vector2F dest = _dest;
 
-	if ( !FreeCameraMode() ) {
-		Chit* chit = sim->GetPlayerChit();
-		if ( chit ) {
-			AIComponent* ai = chit->GetAIComponent();
-			if ( ai ) {
-				Vector2F pos = chit->GetSpatialComponent()->GetPosition2D();
-				// Is this grid travel or normal travel?
-				Vector2I currentSector = SectorData::SectorID( pos.x, pos.y );
-				Vector2I destSector    = SectorData::SectorID( dest.x, dest.y );
-				SectorPort sectorPort;
+	Chit* chit = sim->GetPlayerChit();
+	if ( AvatarSelected() && chit ) {
+		AIComponent* ai = chit->GetAIComponent();
+		if ( ai ) {
+			Vector2F pos = chit->GetSpatialComponent()->GetPosition2D();
+			// Is this grid travel or normal travel?
+			Vector2I currentSector = SectorData::SectorID( pos.x, pos.y );
+			Vector2I destSector    = SectorData::SectorID( dest.x, dest.y );
+			SectorPort sectorPort;
 
-				if ( currentSector != destSector )
-				{
-					// Find the nearest port. (Somewhat arbitrary.)
-					sectorPort.sector = destSector;
-					sectorPort.port   = sim->GetWorldMap()->GetSector( sectorPort.sector ).NearestPort( pos );
-				}
-				if ( sectorPort.IsValid() ) {
-					ai->Move( sectorPort, true );
-				}
-				else if ( currentSector == destSector ) {
-					ai->Move( dest, true );
-				}
+			if ( currentSector != destSector )
+			{
+				// Find the nearest port. (Somewhat arbitrary.)
+				sectorPort.sector = destSector;
+				sectorPort.port   = sim->GetWorldMap()->GetSector( sectorPort.sector ).NearestPort( pos );
+			}
+			if ( sectorPort.IsValid() ) {
+				ai->Move( sectorPort, true );
+			}
+			else if ( currentSector == destSector ) {
+				ai->Move( dest, true );
 			}
 		}
-		else {
-			sim->GetEngine()->CameraLookAt( dest.x, dest.y );
-		}
+	}
+	else {
+		sim->GetEngine()->CameraLookAt( dest.x, dest.y );
+	}
+#if 0
 	}
 	else {
 		CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
@@ -881,6 +885,7 @@ void GameScene::DoDestTapped( const Vector2F& _dest )
 		}		
 		sim->GetEngine()->CameraLookAt( dest.x, dest.y );
 	}
+#endif
 }
 
 
@@ -1011,7 +1016,7 @@ void GameScene::ForceHerd(const grinliz::Vector2I& sector)
 void GameScene::SetPickupButtons()
 {
 	Chit* player = sim->GetPlayerChit();
-	if ( player && uiMode[UI_AVATAR].Down() ) {
+	if ( AvatarSelected() ) {
 		bool canAdd = player && player->GetItemComponent() && player->GetItemComponent()->CanAddToInventory();
 		// Query items on the ground in a radius of the player.
 		LootFilter lootFilter;
@@ -1178,18 +1183,18 @@ void GameScene::DoTick( U32 delta )
 	// disabled if there isn't one...
 	Chit* playerChit = sim->GetPlayerChit();
 	if ( !playerChit && !coreScript ) {
-		if ( uiMode[UI_AVATAR].Down() ) {
+//		if ( uiMode[UI_AVATAR].Down() ) {
 			uiMode[UI_VIEW].SetDown();
-		}
+//		}
 	}
-	uiMode[UI_AVATAR].SetEnabled( playerChit != 0 );
-	if ( uiMode[UI_AVATAR].Down() ) {
-		chitFaceToTrack = playerChit ? playerChit->ID() : 0;
-	}
+//	uiMode[UI_AVATAR].SetEnabled( playerChit != 0 );
+//	if ( uiMode[UI_AVATAR].Down() ) {
+		chitTracking = playerChit ? playerChit->ID() : 0;
+//	}
 	uiMode[UI_BUILD].SetEnabled(coreScript != 0);
 
 
-	Chit* track = sim->GetChitBag()->GetChit( chitFaceToTrack );
+	Chit* track = sim->GetChitBag()->GetChit( chitTracking );
 	faceWidget.SetFace( &uiRenderer, track ? track->GetItem() : 0 );
 	SetBars( track );
 	
@@ -1260,7 +1265,7 @@ void GameScene::DoTick( U32 delta )
 	ProcessNewsToConsole();
 
 	bool useBuildingVisible = false;
-	if ( uiMode[UI_AVATAR].Down() && playerChit ) {
+	if ( AvatarSelected() ) {
 		Chit* building = sim->GetChitBag()->QueryPorch( playerChit->GetSpatialComponent()->GetPosition2DI(),0 );
 		if ( building ) {
 			IString name = building->GetItem()->IName();
@@ -1272,18 +1277,19 @@ void GameScene::DoTick( U32 delta )
 	useBuildingButton.SetVisible( useBuildingVisible );
 	cameraHomeButton.SetVisible( uiMode[UI_VIEW].Down() );
 	nextUnit.SetVisible( uiMode[UI_VIEW].Down() );
-	prevUnit.SetVisible( uiMode[UI_VIEW].Down() );
+	prevUnit.SetVisible(uiMode[UI_VIEW].Down());
+	avatarUnit.SetVisible(uiMode[UI_VIEW].Down());
 
 	// It's pretty tricky keeping the camera, camera component, and various
 	// modes all working together. 
 	// - If we aren't in FreeCam mode, we should be looking at the player.
 
-	if ( !FreeCameraMode() && uiMode[UI_AVATAR].Down() ) {
-		if ( playerChit ) {
-			CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
-			cc->SetTrack( playerChit->ID() );
-		}
-	}
+//	if ( !FreeCameraMode() && uiMode[UI_AVATAR].Down() ) {
+//		if ( playerChit ) {
+//			CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
+//			cc->SetTrack( playerChit->ID() );
+//		}
+//	}
 	sim->GetEngine()->RestrictCamera( 0 );
 
 	// The game will open scenes - say the CharacterScene for the
