@@ -152,7 +152,7 @@ private:
 	gamui::PushButton	allRockButton;
 	gamui::PushButton	censusButton;
 	gamui::PushButton	newsButton[NUM_NEWS_BUTTONS];
-	gamui::PushButton	clearButton;
+//	gamui::PushButton	clearButton;
 	gamui::Image		minimap;
 	gamui::Image		playerMark;
 

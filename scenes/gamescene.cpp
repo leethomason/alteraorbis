@@ -143,9 +143,9 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 		newsButton[i].SetSize( NEWS_BUTTON_WIDTH, NEWS_BUTTON_HEIGHT );
 		newsButton[i].SetText( "news" );
 	}
-	clearButton.Init( &gamui2D, game->GetButtonLook(0) );
-	clearButton.SetSize( NEWS_BUTTON_WIDTH, NEWS_BUTTON_HEIGHT );
-	clearButton.SetText( "Clear" );
+//	clearButton.Init( &gamui2D, game->GetButtonLook(0) );
+//	clearButton.SetSize( NEWS_BUTTON_WIDTH, NEWS_BUTTON_HEIGHT );
+//	clearButton.SetText( "Clear" );
 
 	faceWidget.Init( &gamui2D, game->GetButtonLook(0), FaceWidget::ALL );
 	faceWidget.SetSize( 100, 100 );
@@ -267,13 +267,13 @@ void GameScene::Resize()
 		layout.PosAbs( &newsButton[i], -1, -NUM_NEWS_BUTTONS+i );
 		newsButton[i].SetVisible( visible );
 	}
-	clearButton.SetPos( newsButton[0].X() - clearButton.Width(), newsButton[0].Y() );
+//	clearButton.SetPos( newsButton[0].X() - clearButton.Width(), newsButton[0].Y() );
 
 	allRockButton.SetVisible(visible);
 	saveButton.SetVisible(visible);
 	loadButton.SetVisible(visible);
 	okay.SetVisible(visible);
-	clearButton.SetVisible( visible );
+//	clearButton.SetVisible( visible );
 
 }
 
@@ -498,12 +498,10 @@ void GameScene::TapModel( Chit* target )
 		bool denizen = strstr( item->ResourceName(), "human" ) != 0;
 		if (denizen) {
 			chitTracking = target->ID();
-			setTarget = "possibleTarget";
+			//setTarget = "possibleTarget";
 
 			CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
-			if ( cc ) {
-				cc->SetTrack( chitTracking );
-			}
+			cc->SetTrack( chitTracking );
 		}
 	}
 
@@ -522,6 +520,8 @@ void GameScene::TapModel( Chit* target )
 void GameScene::Pan(int action, const grinliz::Vector2F& view, const grinliz::Ray& world)
 {
 	Process3DTap(action, view, world, sim->GetEngine());
+	CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
+	cc->SetTrack(0);
 }
 
 
@@ -638,6 +638,8 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 		for( int i=1; i<BuildScript::NUM_OPTIONS; ++i ) {
 			if ( buildButton[i].Down() ) {
 				buildActive = i;
+				CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
+				cc->SetTrack(0);
 				break;
 			}
 		}
@@ -755,15 +757,21 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 			if ( chit && chit->GetSpatialComponent() ) {
 				Vector3F lookAt = chit->GetSpatialComponent()->GetPosition();
 				sim->GetEngine()->CameraLookAt( lookAt.x, lookAt.z );
+				CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
+				cc->SetTrack(0);
 			}
 		}
 	}
-	else if ( item == &prevUnit || item == &nextUnit ) {
-		int bias = 1;
+	else if ( item == &prevUnit || item == &nextUnit || item == &avatarUnit ) {
+		int bias = 0;
 		if ( item == &prevUnit ) bias = -1;
+		if (item == &nextUnit) bias = 1;
 
 		CoreScript* coreScript = CoreScript::GetCore( sim->GetChitBag()->GetHomeSector() );
 		if ( coreScript && coreScript->NumCitizens() ) {
+			if (item == &avatarUnit) {
+				chitTracking = sim->GetPlayerChit() ? sim->GetPlayerChit()->ID() : 0;
+			}
 			Chit* chit = sim->GetChitBag()->GetChit(chitTracking);
 			int index = 0;
 			if ( chit ) {
@@ -810,6 +818,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 			}
 		}
 	}
+#if 0
 	if ( item == &clearButton ) {
 		if ( FreeCameraMode() ) {
 			CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
@@ -818,6 +827,8 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 			}
 		}
 	}
+#endif
+#if 0
 	if ( item == &uiMode[UI_BUILD] || item == &uiMode[UI_VIEW] ) {
 		// Set it to track nothing; if it needs to track something, that will
 		// be set by future mouse actions or DoTick
@@ -826,7 +837,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 			cc->SetTrack( 0 );
 		}
 	}
-
+#endif
 	for( int i=0; i<NUM_PICKUP_BUTTONS; ++i ) {
 		if ( item == &pickupButton[i] ) {
 			Chit* playerChit = sim->GetPlayerChit();
