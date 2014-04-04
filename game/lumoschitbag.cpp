@@ -219,11 +219,6 @@ Chit* LumosChitBag::NewBuilding( const Vector2I& pos, const char* name, int team
 		str.Format( "pyramid%d", random.Rand(3) );
 		rootItem.SetResource( str.c_str() );
 	}
-	if (rootItem.IResourceName() == "ruins1.0") {
-		CStr<32> str;
-		str.Format("ruins1.%d", random.Rand(2));
-		rootItem.SetResource(str.c_str());
-	}
 
 	int cx=1;
 	rootItem.keyValues.Get( "size", &cx );
@@ -279,7 +274,51 @@ Chit* LumosChitBag::NewBuilding( const Vector2I& pos, const char* name, int team
 }
 
 
-Chit* LumosChitBag::NewMonsterChit( const Vector3F& pos, const char* name, int team )
+Chit* LumosChitBag::NewLawnOrnament(const Vector2I& pos, const char* name, int team)
+{
+	const ChitContext* context = GetContext();
+	Chit* chit = NewChit();
+
+	GameItem rootItem = ItemDefDB::Instance()->Get(name);
+
+	// Hack...how to do this better??
+	if (rootItem.IResourceName() == "ruins1.0") {
+		CStr<32> str;
+		str.Format("ruins1.%d", random.Rand(2));
+		rootItem.SetResource(str.c_str());
+	}
+
+	int cx = 1;
+	rootItem.keyValues.Get("size", &cx);
+
+	MapSpatialComponent* msc = new MapSpatialComponent();
+	msc->SetMapPosition(pos.x, pos.y, cx, cx);
+	msc->SetMode(GRID_BLOCKED);
+
+	chit->Add(msc);
+	chit->Add(new RenderComponent(rootItem.ResourceName()));
+	chit->Add(new HealthComponent());
+	AddItem(name, chit, context->engine, team, 0);
+
+	IString proc = rootItem.keyValues.GetIString("procedural");
+	if (!proc.empty()) {
+		TeamGen gen;
+		ProcRenderInfo info;
+		gen.Assign(team, &info);
+		chit->GetRenderComponent()->SetProcedural(0, info);
+	}
+
+	context->engine->particleSystem->EmitPD("constructiondone", ToWorld3F(pos), V3F_UP, 0);
+
+	if (XenoAudio::Instance()) {
+		XenoAudio::Instance()->Play("rezWAV", &ToWorld3F(pos));
+	}
+
+	return chit;
+}
+
+
+Chit* LumosChitBag::NewMonsterChit(const Vector3F& pos, const char* name, int team)
 {
 	const ChitContext* context = GetContext();
 	Chit* chit = NewChit();

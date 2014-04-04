@@ -38,6 +38,7 @@ distribution.
 extern bool gDebugging;	// global debugging flag
 
 void SetReleaseLog(FILE* fp);
+void SetCheckGLError(bool error);
 
 void relprintf( const char* format, ... );
 #if defined(DEBUG)

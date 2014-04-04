@@ -270,19 +270,10 @@ void Sim::OnChitMsg(Chit* chit, const ChitMsg& msg)
 							// Go neutral.
 							GameItem* item = queryArr[i]->GetItem();
 							if (!item || !queryArr[i]->GetRenderComponent()) continue;
-							item->primaryTeam = TEAM_NEUTRAL;
-
-							// FIXME: the current procedural rendering should
-							// probably be "pulled" by the render component,
-							// if that doesn't create a performance issue.
-							// This code shouldn't theoretically exist:
-							IString proc = item->keyValues.GetIString("procedural");
-							if (!proc.empty()) {
-								TeamGen gen;
-								ProcRenderInfo info;
-								gen.Assign(TEAM_NEUTRAL, &info);
-								queryArr[i]->GetRenderComponent()->SetProcedural(0, info);
-							}
+							Vector2I pos = queryArr[i]->GetSpatialComponent()->GetPosition2DI();
+							float yrot = queryArr[i]->GetSpatialComponent()->GetYRotation();
+							Chit* c = chitBag->NewLawnOrnament(pos, item->Name(), TEAM_NEUTRAL);
+							c->GetSpatialComponent()->SetYRotation(yrot);
 						}
 						break;
 
@@ -294,7 +285,7 @@ void Sim::OnChitMsg(Chit* chit, const ChitMsg& msg)
 							Vector2I pos = msc->Bounds().min;
 							pos.x += random.Rand(msc->Bounds().Width());
 							pos.y += random.Rand(msc->Bounds().Height());
-							Chit* c = chitBag->NewBuilding(pos, "ruins", TEAM_NEUTRAL);
+							Chit* c = chitBag->NewLawnOrnament(pos, "ruins", TEAM_NEUTRAL);
 							c->GetSpatialComponent()->SetYRotation(90.0f * float(random.Rand(4)));
 
 							queryArr[i]->DeRez();

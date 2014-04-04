@@ -86,16 +86,16 @@ x print uniform count for shaders
 		x ai of denizens post fall
 		x avatar still under control when domain is destroyed
 		x ruins and collapse
-		- better control for building
-			- rethink controls???
-		- animation cleanup
-		- gldebug on/off. 'settings' and 'debug' sections
+		x better control for building
+			x rethink controls???
+		x animation cleanup
+		x neutral buildings shouldn't have a porch
+		x ruins need to be ruins - not dead buildings
+		x gldebug on/off. 'settings' and 'debug' sections
+		x glGetError() is getting compiled into release
 		- core attack warning
 		- fast / threaded save
-		- neutral buildings shouldn't have a porch
-		- glGetError() is getting compiled into release
 		- mini-map tap behavior
-		- ruins need to be ruins - not dead buildings
 
 	- Food-2
 		x add porch to farm, collect food there

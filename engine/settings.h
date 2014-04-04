@@ -35,6 +35,7 @@ public:
 
 	bool AudioOn() const				{ return audioOn != 0; }
 	void SetAudioOn( bool value );
+	bool DebugGLCalls() const			{ return debugGLCalls; }
 
 protected:
 	SettingsManager( const char* path );
@@ -44,12 +45,12 @@ protected:
 	void Save();
 
 	virtual void ReadAttributes( const tinyxml2::XMLElement* element );
-	virtual void WriteAttributes( tinyxml2::XMLPrinter* fp );
 
 private:
 	static SettingsManager* instance;
 
-	int audioOn;
+	bool audioOn;
+	bool debugGLCalls;
 	grinliz::GLString path;
 };
 

@@ -28,6 +28,8 @@ void SettingsManager::Create( const char* savepath )
 	GLASSERT( instance == 0 );
 	instance = new SettingsManager( savepath );
 	instance->Load();
+	SetCheckGLError(instance->DebugGLCalls());
+	GLOUTPUT_REL(("Checking GL Errors=%s\n", instance->DebugGLCalls() ? "true" : "false"));
 }
 
 
@@ -45,7 +47,8 @@ SettingsManager::SettingsManager( const char* savepath )
 	path = savepath;
 
 	// Set defaults.
-	audioOn = 1;
+	audioOn = true;
+	debugGLCalls = false;
 }
 
 
@@ -69,10 +72,8 @@ void SettingsManager::Load()
 
 
 
-void SettingsManager::SetAudioOn( bool _value )
+void SettingsManager::SetAudioOn( bool value )
 {
-	int value = _value ? 1 : 0;
-
 	if ( audioOn != value ) {
 		audioOn = value;
 		Save();
@@ -88,9 +89,17 @@ void SettingsManager::Save()
 	FILE* fp = fopen( path.c_str(), "w" );
 	if ( fp ) {
 		XMLPrinter printer( fp );
-
+	
 		printer.OpenElement( "Settings" );
-		WriteAttributes( &printer );
+		
+		printer.OpenElement("Game");
+		printer.PushAttribute("audioOn", audioOn);
+		printer.CloseElement();
+
+		printer.OpenElement("Debug");
+		printer.PushAttribute("debugGLCalls", debugGLCalls);
+		printer.CloseElement();
+
 		printer.CloseElement();
 		fclose( fp );
 	}
@@ -100,11 +109,14 @@ void SettingsManager::Save()
 void SettingsManager::ReadAttributes( const XMLElement* root )
 {
 	// Actuals:
-	root->QueryIntAttribute( "audioOn", &audioOn );
-}
-
-
-void SettingsManager::WriteAttributes( XMLPrinter* printer )
-{
-	printer->PushAttribute( "audioOn", audioOn );
+	if (root) {
+		const XMLElement* gameElement = root->FirstChildElement("Game");
+		if (gameElement) {
+			gameElement->QueryAttribute("audioOn", &audioOn);
+		}
+		const XMLElement* debugElement = root->FirstChildElement("Debug");
+		if (debugElement) {
+			debugElement->QueryAttribute("debugGLCalls", &debugGLCalls);
+		}
+	}
 }

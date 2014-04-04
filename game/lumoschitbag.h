@@ -196,6 +196,7 @@ public:
 	Chit* NewCrystalChit( const grinliz::Vector3F& pos, int crystal, bool fuzzPos );
 	Chit* NewWorkerChit( const grinliz::Vector3F& pos, int team );
 	Chit* NewBuilding( const grinliz::Vector2I& pos, const char* name, int team );
+	Chit* NewLawnOrnament(const grinliz::Vector2I& pos, const char* name, int team);
 	Chit* NewVisitor( int visitorIndex );
 	Chit* NewDenizen( const grinliz::Vector2I& pos, int team );
 
