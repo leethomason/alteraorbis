@@ -1299,6 +1299,9 @@ void Gamui::Add( UIItem* item )
 
 void Gamui::Remove( UIItem* item )
 {
+	if (m_itemTapped == item) {
+		m_itemTapped = 0;
+	}
 	int index = m_itemArr.Find( item );
 	GAMUIASSERT( index >= 0 );
 	if ( index >= 0 ) {
@@ -1332,7 +1335,7 @@ void Gamui::TapDown( float x, float y )
 
 		if (	item->CanHandleTap()    
 			 && item->Enabled() 
-			 && (m_dialogStack.Empty() || m_dialogStack[m_dialogStack.Size() - 1] == item->DialogID())
+			 && ((item->DialogID() == 0) || (!m_dialogStack.Empty() && m_dialogStack[m_dialogStack.Size() - 1] == item->DialogID()))
 			 && item->Visible()
 			 && x >= item->X() && x < item->X()+item->Width()
 			 && y >= item->Y() && y < item->Y()+item->Height() )
@@ -1365,7 +1368,7 @@ const UIItem* Gamui::TapUp( float x, float y )
 
 		if (    item->CanHandleTap()
 			 &&	item->Enabled() 
-			 && (m_dialogStack.Empty() || m_dialogStack[m_dialogStack.Size() - 1] == item->DialogID())
+			 && ((item->DialogID() == 0) || (!m_dialogStack.Empty() && m_dialogStack[m_dialogStack.Size() - 1] == item->DialogID()))
 			 && item->Visible()
 			 && x >= item->X() && x < item->X()+item->Width()
 			 && y >= item->Y() && y < item->Y()+item->Height() )

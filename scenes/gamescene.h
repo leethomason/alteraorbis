@@ -84,6 +84,8 @@ private:
 	void CheckGameStage(U32 delta);
 	void ForceHerd(const grinliz::Vector2I& sector);
 	bool AvatarSelected();
+	bool DragAtom(gamui::RenderAtom* atom);
+	void BuildAction(const grinliz::Vector2I& pos2i);
 
 	enum {
 		NUM_PICKUP_BUTTONS = 8,

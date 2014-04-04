@@ -1097,6 +1097,8 @@ int grinliz::IntersectRayAAPlane(	const Vector3F& point, const Vector3F& dir,
 									float* t )
 {
 	GLASSERT( planeType >= 0 && planeType <= 2 );
+	float dummyT = 0;
+	if (!t) t = &dummyT;
 
 	// Abstract out the plane, to avoid 'if' and 
 	// code duplication.

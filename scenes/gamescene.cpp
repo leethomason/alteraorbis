@@ -540,34 +540,7 @@ void GameScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& world)
 	}
 	Vector2I plane2i = { (int)plane.x, (int)plane.z };
 	const BuildData& buildData = buildScript.GetData(buildActive);
-
-	if (uiMode[UI_BUILD].Down() && coreScript) {
-		WorkQueue* wq = coreScript->GetWorkQueue();
-		GLASSERT(wq);
-		RemovableFilter removableFilter;
-
-		if (buildActive == BuildScript::CLEAR) {
-			wq->AddAction(plane2i, BuildScript::CLEAR);
-			return;
-		}
-		else if (buildActive == BuildScript::NONE) {
-			wq->Remove(plane2i);
-		}
-		else if (buildActive == BuildScript::ROTATE) {
-			if (mv.ModelHit()) {
-				MapSpatialComponent* msc = GET_SUB_COMPONENT(mv.model->userData, SpatialComponent, MapSpatialComponent);
-				if (msc) {
-					float r = msc->GetYRotation();
-					r += 90.0f;
-					r = NormalizeAngleDegrees(r);
-					msc->SetYRotation(r);
-				}
-			}
-		}
-		else {
-			wq->AddAction(plane2i, buildActive);
-		}
-	}
+	BuildAction(plane2i);
 
 	if (mv.VoxelHit()) {
 		if (AvatarSelected()) {
@@ -624,11 +597,60 @@ void GameScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& world)
 #endif
 }
 
+bool GameScene::DragAtom(gamui::RenderAtom* atom)
+{
+	if (uiMode[UI_BUILD].Down() && buildActive <= BuildScript::ICE && buildActive != BuildScript::ROTATE) {
+		if (buildActive != BuildScript::CLEAR)
+			*atom = lumosGame->CalcIconAtom("build");
+		else
+			*atom = lumosGame->CalcIconAtom("delete");
+		return true;
+	}
+	return false;
+}
+
+
+void GameScene::BuildAction(const Vector2I& pos2i)
+{
+	CoreScript* coreScript = CoreScript::GetCore(sim->GetChitBag()->GetHomeSector());
+	if (uiMode[UI_BUILD].Down() && coreScript) {
+		WorkQueue* wq = coreScript->GetWorkQueue();
+		GLASSERT(wq);
+		RemovableFilter removableFilter;
+
+		if (buildActive == BuildScript::CLEAR) {
+			wq->AddAction(pos2i, BuildScript::CLEAR);
+			return;
+		}
+		else if (buildActive == BuildScript::NONE) {
+			wq->Remove(pos2i);
+		}
+		else if (buildActive == BuildScript::ROTATE) {
+			Chit* chit = sim->GetChitBag()->QueryBuilding(pos2i);
+			if (chit) {
+				MapSpatialComponent* msc = GET_SUB_COMPONENT(chit, SpatialComponent, MapSpatialComponent);
+				if (msc && msc->Building()) {
+					float r = msc->GetYRotation();
+					r += 90.0f;
+					r = NormalizeAngleDegrees(r);
+					msc->SetYRotation(r);
+				}
+			}
+		}
+		else {
+			wq->AddAction(pos2i, buildActive);
+		}
+	}
+}
+
+
 void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::Ray& world )
 {
 	bool uiHasTap = ProcessTap( action, view, world );
 	Engine* engine = sim->GetEngine();
 	WorldMap* map = sim->GetWorldMap();
+	Vector3F at = { 0, 0, 0 };
+	IntersectRayAAPlane(world.origin, world.direction, 1, 0, &at, 0);
 
 	buildActive = 0;
 	if ( uiMode[UI_BUILD].Down() ) {
@@ -643,27 +665,22 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 	}
 	SetSelectionModel( view );
 
+	RenderAtom atom;
 	if (!uiHasTap) {
 		if (action == GAME_TAP_DOWN) {
 			mapDragStart.Zero();
-			if (uiMode[UI_BUILD].Down()) {
-				Vector3F plane = { 0, 0, 0 };
-				ModelAtMouse(view, sim->GetEngine(), TEST_HIT_AABB, 0, MODEL_CLICK_THROUGH, 0, &plane);
-				mapDragStart.Set(plane.x, plane.z);
+			if (DragAtom(&atom)) {
+				mapDragStart.Set(at.x, at.z);
 			}
 		}
 		if (action == GAME_TAP_MOVE) {
 			if (!mapDragStart.IsZero()) {
-				Vector3F plane = { 0, 0, 0 };
-				ModelAtMouse(view, sim->GetEngine(), TEST_HIT_AABB, 0, MODEL_CLICK_THROUGH, 0, &plane);
-				Vector2F end = { plane.x, plane.z };
+				Vector2F end = { at.x, at.z };
 				int count = 0;
 				if ((end - mapDragStart).LengthSquared() > 0.25f) {
-					Vector2I si = ToWorld2I(mapDragStart);
-					Vector2I ei = ToWorld2I(end);
 					Rectangle2I r;
-					r.FromPair(si.x, si.y, ei.x, ei.y);
-					RenderAtom atom = lumosGame->CalcIconAtom("build");
+					r.FromPair(ToWorld2I(mapDragStart), ToWorld2I(end));
+					DragAtom(&atom);
 
 					for (Rectangle2IIterator it(r); !it.Done() && count < NUM_BUILD_MARKS; it.Next(), count++) {
 						buildMark[count].SetPos((float)it.Pos().x, (float)it.Pos().y);
@@ -681,6 +698,18 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 
 		if (action == GAME_TAP_UP) {
 			Tap3D(view, world);
+			if (!mapDragStart.IsZero()) {
+				Vector2F end = { at.x, at.z };
+				if ((end - mapDragStart).LengthSquared() > 0.25f) {
+					Rectangle2I r;
+					r.FromPair(ToWorld2I(mapDragStart), ToWorld2I(end));
+					DragAtom(&atom);
+
+					for (Rectangle2IIterator it(r); !it.Done(); it.Next()) {
+						BuildAction(it.Pos());
+					}
+				}
+			}
 		}
 	}
 	if (uiHasTap || action == GAME_TAP_UP) {

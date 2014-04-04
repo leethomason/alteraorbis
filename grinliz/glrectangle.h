@@ -68,6 +68,18 @@ struct Rectangle2
 		max.y = grinliz::Max( y0, y1 );
 	}
 
+	/** Creates the rectangle from 2 points, which can be
+	in any relationship to each other.
+	*/
+	void FromPair(const Vector2<T>& v0, const Vector2<T>& v1)
+	{
+		min.x = grinliz::Min(v0.x, v1.x);
+		max.x = grinliz::Max(v0.x, v1.x);
+		min.y = grinliz::Min(v0.y, v1.y);
+		max.y = grinliz::Max(v0.y, v1.y);
+	}
+
+
 	/// Return true if the rectangles intersect.
 	bool Intersect( const Rectangle2<T>& rect ) const
 	{

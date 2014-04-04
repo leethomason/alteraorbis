@@ -95,6 +95,7 @@ x print uniform count for shaders
 		- neutral buildings shouldn't have a porch
 		- glGetError() is getting compiled into release
 		- mini-map tap behavior
+		- ruins need to be ruins - not dead buildings
 
 	- Food-2
 		x add porch to farm, collect food there
