@@ -85,7 +85,7 @@ x print uniform count for shaders
 		x confirm target & can do damage to target
 		x ai of denizens post fall
 		x avatar still under control when domain is destroyed
-		- ruins and collapse
+		x ruins and collapse
 		- better control for building
 			- rethink controls???
 		- animation cleanup
@@ -94,6 +94,7 @@ x print uniform count for shaders
 		- fast / threaded save
 		- neutral buildings shouldn't have a porch
 		- glGetError() is getting compiled into release
+		- mini-map tap behavior
 
 	- Food-2
 		x add porch to farm, collect food there

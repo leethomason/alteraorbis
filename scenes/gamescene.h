@@ -90,7 +90,8 @@ private:
 		
 		NUM_NEWS_BUTTONS = 12,
 		NEWS_BUTTON_WIDTH  = 60,
-		NEWS_BUTTON_HEIGHT = 25
+		NEWS_BUTTON_HEIGHT = 25,
+		NUM_BUILD_MARKS = 100
 	};
 	enum {
 		BUILD_XFORM,
@@ -133,6 +134,7 @@ private:
 	int					chitTracking;
 	int					currentNews;	// index of the last news item put in the console
 	int					sleepTubeID;
+	grinliz::Vector2F	mapDragStart;
 
 	// Shows what is being built or removed.
 	Model*				selectionModel;
@@ -153,6 +155,7 @@ private:
 	gamui::PushButton	newsButton[NUM_NEWS_BUTTONS];
 	gamui::Image		minimap;
 	gamui::Image		playerMark;
+	gamui::Image		buildMark[NUM_BUILD_MARKS];	// used for click&drag building
 
 	FacePushWidget		faceWidget;
 

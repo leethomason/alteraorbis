@@ -143,10 +143,6 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 		newsButton[i].SetSize( NEWS_BUTTON_WIDTH, NEWS_BUTTON_HEIGHT );
 		newsButton[i].SetText( "news" );
 	}
-//	clearButton.Init( &gamui2D, game->GetButtonLook(0) );
-//	clearButton.SetSize( NEWS_BUTTON_WIDTH, NEWS_BUTTON_HEIGHT );
-//	clearButton.SetText( "Clear" );
-
 	faceWidget.Init( &gamui2D, game->GetButtonLook(0), FaceWidget::ALL );
 	faceWidget.SetSize( 100, 100 );
 
@@ -174,13 +170,17 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	uiMode[UI_VIEW].SetDown();
 	if (sim->GetPlayerChit()) {
 		target = sim->GetPlayerChit()->GetSpatialComponent()->GetPosition();
-//		uiMode[UI_AVATAR].SetDown();
 	}
 	else if (sim->GetChitBag()->GetHomeCore()) {
 		target = sim->GetChitBag()->GetHomeCore()->ParentChit()->GetSpatialComponent()->GetPosition();
 	}
 	sim->GetEngine()->CameraLookAt(target + delta, target);
 	sim->GetChitBag()->AddListener(this);
+
+	for (int i = 0; i < NUM_BUILD_MARKS; ++i) {
+		buildMark[i].Init(&sim->GetWorldMap()->overlay1, grey, false);
+		buildMark[i].SetVisible(false);
+	}
 }
 
 
@@ -267,14 +267,11 @@ void GameScene::Resize()
 		layout.PosAbs( &newsButton[i], -1, -NUM_NEWS_BUTTONS+i );
 		newsButton[i].SetVisible( visible );
 	}
-//	clearButton.SetPos( newsButton[0].X() - clearButton.Width(), newsButton[0].Y() );
 
 	allRockButton.SetVisible(visible);
 	saveButton.SetVisible(visible);
 	loadButton.SetVisible(visible);
 	okay.SetVisible(visible);
-//	clearButton.SetVisible( visible );
-
 }
 
 
@@ -647,10 +644,50 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 	SetSelectionModel( view );
 
 	if (!uiHasTap) {
+		if (action == GAME_TAP_DOWN) {
+			mapDragStart.Zero();
+			if (uiMode[UI_BUILD].Down()) {
+				Vector3F plane = { 0, 0, 0 };
+				ModelAtMouse(view, sim->GetEngine(), TEST_HIT_AABB, 0, MODEL_CLICK_THROUGH, 0, &plane);
+				mapDragStart.Set(plane.x, plane.z);
+			}
+		}
+		if (action == GAME_TAP_MOVE) {
+			if (!mapDragStart.IsZero()) {
+				Vector3F plane = { 0, 0, 0 };
+				ModelAtMouse(view, sim->GetEngine(), TEST_HIT_AABB, 0, MODEL_CLICK_THROUGH, 0, &plane);
+				Vector2F end = { plane.x, plane.z };
+				int count = 0;
+				if ((end - mapDragStart).LengthSquared() > 0.25f) {
+					Vector2I si = ToWorld2I(mapDragStart);
+					Vector2I ei = ToWorld2I(end);
+					Rectangle2I r;
+					r.FromPair(si.x, si.y, ei.x, ei.y);
+					RenderAtom atom = lumosGame->CalcIconAtom("build");
+
+					for (Rectangle2IIterator it(r); !it.Done() && count < NUM_BUILD_MARKS; it.Next(), count++) {
+						buildMark[count].SetPos((float)it.Pos().x, (float)it.Pos().y);
+						buildMark[count].SetSize(1.0f, 1.0f);
+						buildMark[count].SetVisible(true);
+						buildMark[count].SetAtom(atom);
+					}
+				}
+				while (count < NUM_BUILD_MARKS) {
+					buildMark[count].SetVisible(false);
+					++count;
+				}
+			}
+		}
 
 		if (action == GAME_TAP_UP) {
 			Tap3D(view, world);
 		}
+	}
+	if (uiHasTap || action == GAME_TAP_UP) {
+		for (int i = 0; i < NUM_BUILD_MARKS; ++i) {
+			buildMark[i].SetVisible(false);
+		}
+		mapDragStart.Zero();
 	}
 }
 
