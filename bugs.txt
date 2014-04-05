@@ -96,6 +96,7 @@ x print uniform count for shaders
 		- core attack warning
 		- fast / threaded save
 		- mini-map tap behavior
+		- check path to core to use building
 
 	- Food-2
 		x add porch to farm, collect food there

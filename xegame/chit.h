@@ -79,7 +79,7 @@ public:
 								//			GetItem() still needs to work.
 		CHIT_DESTROYED_TICK,	//			dataF = fraction
 		CHIT_DESTROYED_END,		//	Yes		sender: health. ends the sequence, next step is the chit delete
-		CHIT_DAMAGE,			//			sender: chitBag, ptr=&ChitDamageInfo
+		CHIT_DAMAGE,			//	Yes		sender: chitBag, ptr=&ChitDamageInfo
 		CHIT_HEAL,				//					dataF = hitpoints
 		CHIT_SECTOR_HERD,		//			AI message: a lead unit is telling other units to herd to a different sector.
 								//					ptr = &SectorPort

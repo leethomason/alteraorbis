@@ -1402,6 +1402,9 @@ void GameScene::OnChitMsg(Chit* chit, const ChitMsg& msg)
 			}
 		}
 	}
+	else if (msg.ID() == ChitMsg::CHIT_DAMAGE && chit->PrimaryTeam() == TEAM_HOUS0 && chit->GetScript("CoreScript")) {
+		// Core hit.
+	}
 }
 
 /*
