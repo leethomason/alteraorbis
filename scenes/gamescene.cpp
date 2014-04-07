@@ -55,6 +55,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	chitTracking = 0;
 	currentNews = 0;
 	endTimer = 0;
+	coreWarningTimer = 0;
 	voxelInfoID.Zero();
 	lumosGame = game;
 	game->InitStd( &gamui2D, &okay, 0 );
@@ -181,6 +182,8 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 		buildMark[i].Init(&sim->GetWorldMap()->overlay1, grey, false);
 		buildMark[i].SetVisible(false);
 	}
+
+	coreWarning.Init(&gamui2D, LumosGame::CalcUIIconAtom("warning"), false);
 }
 
 
@@ -230,6 +233,9 @@ void GameScene::Resize()
 	for( int i=0; i<NUM_UI_MODES; ++i ) {
 		layout.PosAbs( &uiMode[i], i, 0 );
 	}
+	layout.PosAbs(&coreWarning, NUM_UI_MODES, 0);
+	coreWarning.SetSize(coreWarning.Height(), coreWarning.Height());
+	coreWarning.SetVisible(false);
 
 	tabBar0.SetPos(  uiMode[0].X(), uiMode[0].Y() );
 	tabBar0.SetSize( uiMode[NUM_UI_MODES-1].X() + uiMode[NUM_UI_MODES-1].Width() - uiMode[0].X(), uiMode[0].Height() );
@@ -1263,14 +1269,9 @@ void GameScene::DoTick( U32 delta )
 	// disabled if there isn't one...
 	Chit* playerChit = sim->GetPlayerChit();
 	if ( !playerChit && !coreScript ) {
-//		if ( uiMode[UI_AVATAR].Down() ) {
-			uiMode[UI_VIEW].SetDown();
-//		}
+		uiMode[UI_VIEW].SetDown();
 	}
-//	uiMode[UI_AVATAR].SetEnabled( playerChit != 0 );
-//	if ( uiMode[UI_AVATAR].Down() ) {
-		chitTracking = playerChit ? playerChit->ID() : 0;
-//	}
+	chitTracking = playerChit ? playerChit->ID() : 0;
 	uiMode[UI_BUILD].SetEnabled(coreScript != 0);
 
 
@@ -1360,16 +1361,6 @@ void GameScene::DoTick( U32 delta )
 	prevUnit.SetVisible(uiMode[UI_VIEW].Down());
 	avatarUnit.SetVisible(uiMode[UI_VIEW].Down());
 
-	// It's pretty tricky keeping the camera, camera component, and various
-	// modes all working together. 
-	// - If we aren't in FreeCam mode, we should be looking at the player.
-
-//	if ( !FreeCameraMode() && uiMode[UI_AVATAR].Down() ) {
-//		if ( playerChit ) {
-//			CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
-//			cc->SetTrack( playerChit->ID() );
-//		}
-//	}
 	sim->GetEngine()->RestrictCamera( 0 );
 
 	// The game will open scenes - say the CharacterScene for the
@@ -1381,6 +1372,9 @@ void GameScene::DoTick( U32 delta )
 			game->PushScene( id, data );
 		}
 	}
+
+	coreWarning.SetVisible(coreWarningTimer > 0);
+	coreWarningTimer -= delta;
 }
 
 
@@ -1402,8 +1396,8 @@ void GameScene::OnChitMsg(Chit* chit, const ChitMsg& msg)
 			}
 		}
 	}
-	else if (msg.ID() == ChitMsg::CHIT_DAMAGE && chit->PrimaryTeam() == TEAM_HOUS0 && chit->GetScript("CoreScript")) {
-		// Core hit.
+	else if (msg.ID() == ChitMsg::CHIT_DAMAGE && chit->PrimaryTeam() == TEAM_HOUSE0 && chit->GetScript("CoreScript")) {
+		coreWarningTimer = 6000;
 	}
 }
 
