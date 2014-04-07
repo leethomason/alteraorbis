@@ -143,7 +143,12 @@ void XenoAudio::SetChannelPos(int i)
 		int d = LRintf(df*255.0f);
 		d = Clamp(d, 0, 255);
 
-		delta.Normalize();
+		if (delta.LengthSquared() > 0.001f) {
+			delta.Normalize();
+		}
+		else {
+			delta.Set(0, 0, -1);
+		}
 
 		static const Vector3F UP = { 0, 1, 0 };
 		Vector3F listenerRight = CrossProduct(listenerDir, UP);

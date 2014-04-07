@@ -208,7 +208,7 @@ void GameScene::Resize()
 	layout.PosAbs(&allRockButton, 3, -1);
 	layout.PosAbs(&okay, 4, -1);
 
-	layout.PosAbs( &useBuildingButton, 0, 1 );
+	layout.PosAbs( &useBuildingButton, 0, 2 );
 
 	layout.PosAbs( &cameraHomeButton, 0, 1 );
 	layout.PosAbs( &prevUnit, 1, 1 );
@@ -839,7 +839,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 	}
 	else if ( item == &prevUnit || item == &nextUnit || item == &avatarUnit ) {
 		int bias = 0;
-		if ( item == &prevUnit ) bias = -1;
+		if (item == &prevUnit) bias = -1;
 		if (item == &nextUnit) bias = 1;
 
 		CoreScript* coreScript = CoreScript::GetCore( sim->GetChitBag()->GetHomeSector() );
@@ -962,16 +962,6 @@ void GameScene::DoDestTapped( const Vector2F& _dest )
 	else {
 		sim->GetEngine()->CameraLookAt( dest.x, dest.y );
 	}
-#if 0
-	}
-	else {
-		CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
-		if ( cc ) {
-			cc->SetTrack( 0 );
-		}		
-		sim->GetEngine()->CameraLookAt( dest.x, dest.y );
-	}
-#endif
 }
 
 
@@ -981,19 +971,31 @@ void GameScene::HandleHotKey( int mask )
 	if ( mask == GAME_HK_TOGGLE_FAST ) {
 		fastMode = !fastMode;
 	}
-	else if ( mask == GAME_HK_SPACE ) {
+	else if (mask == GAME_HK_SPACE) {
 		Chit* playerChit = sim->GetPlayerChit();
-		if ( playerChit ) {
+
 #if 0
+		if ( playerChit ) {
 			ItemComponent* ic = playerChit->GetItemComponent();
 			if ( ic ) {
 				ic->SwapWeapons();
 			}
-#else
+		}
+#endif
+#if 0
+		if ( playerChit ) {
 			AIComponent* ai = playerChit->GetAIComponent();
 			ai->Rampage( 0 );
-#endif
 		}
+#endif
+		Vector3F at = V3F_ZERO;
+		sim->GetEngine()->CameraLookingAt(&at);
+		for (int i = 0; i<5; ++i) {
+			//sim->GetChitBag()->NewMonsterChit(plane, "redMantis", TEAM_RED_MANTIS);
+			sim->GetChitBag()->NewMonsterChit(at, "mantis", TEAM_GREEN_MANTIS);
+			at.x += 0.5f;
+		}
+
 	}
 	else if ( mask == GAME_HK_TOGGLE_COLORS ) {
 		static int colorSeed = 0;
@@ -1271,7 +1273,7 @@ void GameScene::DoTick( U32 delta )
 	if ( !playerChit && !coreScript ) {
 		uiMode[UI_VIEW].SetDown();
 	}
-	chitTracking = playerChit ? playerChit->ID() : 0;
+	//chitTracking = playerChit ? playerChit->ID() : 0;
 	uiMode[UI_BUILD].SetEnabled(coreScript != 0);
 
 

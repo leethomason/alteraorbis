@@ -93,10 +93,13 @@ x print uniform count for shaders
 		x ruins need to be ruins - not dead buildings
 		x gldebug on/off. 'settings' and 'debug' sections
 		x glGetError() is getting compiled into release
-		- core attack warning
+		x core attack warning
 		- fast / threaded save
 		- mini-map tap behavior
 		- check path to core to use building
+		- sync denizens movement to ground speed
+		- new opening screen?
+		- keys: end/home are weird. zoom too slow
 
 	- Food-2
 		x add porch to farm, collect food there

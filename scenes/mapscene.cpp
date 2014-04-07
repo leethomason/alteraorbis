@@ -193,7 +193,7 @@ void MapScene::SetText()
 
 			int low=0, med=0, high=0, greater=0;
 			float playerPower = 100.0f;
-			int primaryTeam = lumosChitBag->GetHomeCore()->PrimaryTeam();
+			int primaryTeam = TEAM_HOUSE0;
 			if ( player ) {
 				playerPower = player->GetItemComponent()->PowerRating();
 			}
