@@ -33,6 +33,36 @@ distribution.
 
 
 namespace grinliz {
+		
+// Surprisingly tricky and troublesome function.
+template< class T, int COMP >
+inline void Normalize(T* v)
+{
+	T len2 = 0;
+	for (int i = 0; i < COMP; ++i) {
+		len2 += v[i] * v[i];
+	}
+	if (len2 == 0) {
+		// Set x to 1, the rest to zero.
+		v[0] = 1;
+		for (int i = 1; i < COMP; ++i)
+			v[i] = 0;
+	}
+	else {
+		T lenInv = static_cast<T>(1) / sqrt(len2);
+		for (int i = 0; i<COMP; ++i)
+			v[i] *= lenInv;
+
+#ifdef DEBUG
+		// Did this work?
+		T lenCheck2 = 0;
+		for (int i = 0; i<COMP; ++i) {
+			lenCheck2 += v[i] * v[i];
+		}
+		GLASSERT(lenCheck2 > static_cast<T>(.99) && lenCheck2 < static_cast<T>(1.01));
+#endif
+	}
+}
 
 template< class T >
 struct Vector2
@@ -126,20 +156,9 @@ struct Vector2
 		return grinliz::Length( a.x-b.x, a.y-b.y );
 	}
 
-	void Normalize()	
-	{ 
-		T len = grinliz::Length( x, y );
-		if ( len == 0 ) {
-			Set( 1, 0 );
-		}
-		else {
-			T lenInv = static_cast<T>(1) / len;
-			x *= lenInv; y *= lenInv;
-			#ifdef DEBUG
-			float len = x*x + y*y;
-			GLASSERT( len > .9999f && len < 1.0001f );
-			#endif
-		}
+	void Normalize()
+	{
+		grinliz::Normalize<T, COMPONENTS>(&x);
 	}
 
 	void RotatePos90()
@@ -305,21 +324,8 @@ struct Vector3
 	}
 
 	void Normalize()	
-	{ 
-		T len = grinliz::Length( x,y,z );
-		if ( len == 0 ) {
-			Set(  1, 0, 0 );
-		}
-		else {
-			T lenInv = static_cast<T>(1) / len;
-			x *= lenInv; 
-			y *= lenInv;
-			z *= lenInv;
-		}
-		#ifdef DEBUG
-		len = x*x + y*y + z*z;
-		GLASSERT( len > (T)(.9999) && len < (T)(1.0001) );
-		#endif
+	{
+		grinliz::Normalize<T, COMPONENTS>(&x);
 	}
 
 	T Length() const		{ return grinliz::Length( x, y, z ); };
@@ -456,21 +462,7 @@ struct Vector4
 
 	void Normalize()	
 	{ 
-		T len = grinliz::Length( x, y, z, w );
-		if ( len == 0 ) {
-			Set( 1, 0, 0, 0 );
-		}
-		else {
-			T lenInv = static_cast<T>(1) / len;
-			x *= lenInv; 
-			y *= lenInv;
-			z *= lenInv;
-			w *= lenInv;
-		}
-		#ifdef DEBUG
-		len = x*x + y*y + z*z + w*w;
-		GLASSERT( len > (T)(.9999) && len < (T)(1.0001) );
-		#endif
+		grinliz::Normalize<T, COMPONENTS>(&x);
 	}
 
 	T Length() const { return grinliz::Length( x, y, z, w ); };

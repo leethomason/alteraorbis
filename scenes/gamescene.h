@@ -50,6 +50,7 @@ public:
 	virtual void Resize();
 	void Zoom( int style, float delta );
 	void Rotate( float degrees );
+	void MoveCamera(float dx, float dy);
 
 	virtual void Tap( int action, const grinliz::Vector2F& screen, const grinliz::Ray& world );
 	void Pan(int action, const grinliz::Vector2F& view, const grinliz::Ray& world);

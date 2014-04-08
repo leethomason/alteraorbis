@@ -41,12 +41,12 @@
 //#define TEST_ROTATION
 //#define TEST_FULLSPEED
 //#define SEND_CRASH_LOGS
-#define USE_LOOP
 
 #define TIME_BETWEEN_FRAMES	1000/33
 
-static const float KEY_ZOOM_SPEED		= 0.02f;
-static const float KEY_ROTATE_SPEED		= 2.0f;
+static const float KEY_ZOOM_SPEED		= 0.04f;
+static const float KEY_ROTATE_SPEED		= 4.0f;
+static const float KEY_MOVE_SPEED		= 0.4f;
 
 #if 0
 // 4:3 test
@@ -93,19 +93,6 @@ void TransformXY( int x0, int y0, int* x1, int* y1 )
 		GLASSERT( 0 );
 	}
 }
-
-
-#ifndef USE_LOOP
-Uint32 TimerCallback(Uint32 interval, void *param)
-{
-	SDL_Event user;
-	memset( &user, 0, sizeof(user ) );
-	user.type = SDL_USEREVENT;
-
-	SDL_PushEvent( &user );
-	return interval;
-}
-#endif
 
 
 int main( int argc, char **argv )
@@ -205,274 +192,217 @@ int main( int argc, char **argv )
 
 	void* game = NewGame( screenWidth, screenHeight, rotation );
 	
-#ifndef TEST_FULLSPEED
-#ifndef USE_LOOP
-	SDL_TimerID timerID = SDL_AddTimer( TIME_BETWEEN_FRAMES, TimerCallback, 0 );
-#endif
-#endif
-
 	int modKeys = SDL_GetModState();
-#ifdef USE_LOOP
 	U32 tickTimer = 0;
-#endif
 
 	// ---- Main Loop --- //
-#if defined(TEST_FULLSPEED) || defined(USE_LOOP)
 	while ( !done ) {
-		while ( SDL_PollEvent( &event ) )
-#else
-	while ( !done && SDL_WaitEvent( &event ) )
-	{
-		// The user event shouldn't be duplicated...if there are 2, pull out the dupe.
-		if ( event.type == SDL_USEREVENT ) {
-			SDL_Event e;
-			while( true ) {
-				int n = SDL_PeepEvents( &e, 1, SDL_PEEKEVENT, SDL_ALLEVENTS );		
-				if ( n == 1 && e.type == SDL_USEREVENT ) {
-					SDL_PeepEvents( &e, 1, SDL_GETEVENT, SDL_ALLEVENTS );
-				}
-				else {
-					break;
-				}
-			}
-		}
-#endif
+		while (SDL_PollEvent(&event)) {
 
-		switch( event.type )
-		{
+			switch (event.type)
+			{
 			case SDL_WINDOWEVENT:
-				if ( event.window.event == SDL_WINDOWEVENT_RESIZED ) {
-					screenWidth  = event.window.data1;
+				if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
+					screenWidth = event.window.data1;
 					screenHeight = event.window.data2;
-					GameDeviceLoss( game );
-					GameResize( game, screenWidth, screenHeight, rotation );
+					GameDeviceLoss(game);
+					GameResize(game, screenWidth, screenHeight, rotation);
 				}
 				break;
 
 			case SDL_KEYUP:
-				switch ( event.key.keysym.sym )
+				switch (event.key.keysym.sym)
 				{
-					case SDLK_LCTRL:	modKeys = modKeys & (~KMOD_LCTRL );		break;
-					case SDLK_RCTRL:	modKeys = modKeys & (~KMOD_RCTRL );		break;
-					case SDLK_LSHIFT:	modKeys = modKeys & (~KMOD_LSHIFT );	break;
-					case SDLK_RSHIFT:	modKeys = modKeys & (~KMOD_RSHIFT );	break;
-					default:
-						break;
+				case SDLK_LCTRL:	modKeys = modKeys & (~KMOD_LCTRL);		break;
+				case SDLK_RCTRL:	modKeys = modKeys & (~KMOD_RCTRL);		break;
+				case SDLK_LSHIFT:	modKeys = modKeys & (~KMOD_LSHIFT);	break;
+				case SDLK_RSHIFT:	modKeys = modKeys & (~KMOD_RSHIFT);	break;
+				default:
+					break;
 				}
 				break;
 			case SDL_KEYDOWN:
-			{
-				switch ( event.key.keysym.sym )
 				{
+					switch (event.key.keysym.sym)
+					{
 					case SDLK_LCTRL:	modKeys = modKeys | KMOD_LCTRL;		break;
 					case SDLK_RCTRL:	modKeys = modKeys | KMOD_RCTRL;		break;
 					case SDLK_LSHIFT:	modKeys = modKeys | KMOD_LSHIFT;	break;
 					case SDLK_RSHIFT:	modKeys = modKeys | KMOD_RSHIFT;	break;
 
 					case SDLK_ESCAPE:
-						{
-#ifdef DEBUG
-							// only escape out in debug mode
-							// if ( !handled ) 
-							done = true;
-#endif
-						}
+					{
+	#ifdef DEBUG
+						// only escape out in debug mode
+						// if ( !handled ) 
+						done = true;
+	#endif
+					}
 						break;
 
 					case SDLK_F4:
-						{
-							int sdlMod = SDL_GetModState();
-							if ( sdlMod & ( KMOD_RALT | KMOD_LALT ) )
-								done = true;
-						}
+					{
+						int sdlMod = SDL_GetModState();
+						if (sdlMod & (KMOD_RALT | KMOD_LALT))
+							done = true;
+					}
 						break;
 
-					case SDLK_SPACE:GameHotKey( game, GAME_HK_SPACE );			break;
-					case SDLK_a:	GameHotKey( game, GAME_HK_TOGGLE_PATHING );	break;
-					case SDLK_b:	GameHotKey( game, GAME_HK_CHEAT_GOLD );		break;
-					case SDLK_c:	GameHotKey( game, GAME_HK_TOGGLE_COLORS );	break;
+					case SDLK_SPACE:GameHotKey(game, GAME_HK_SPACE);			break;
+					case SDLK_a:	GameHotKey(game, GAME_HK_TOGGLE_PATHING);	break;
+					case SDLK_b:	GameHotKey(game, GAME_HK_CHEAT_GOLD);		break;
+					case SDLK_c:	GameHotKey(game, GAME_HK_TOGGLE_COLORS);	break;
 					case SDLK_d:	GameHotKey(game, GAME_HK_TOGGLE_DEBUG_TEXT);	break;
 					case SDLK_e:	GameHotKey(game, GAME_HK_CHEAT_ELIXIR);	break;
-					case SDLK_f:	GameHotKey( game, GAME_HK_TOGGLE_FAST );	break;
-					case SDLK_i:	GameHotKey( game, GAME_HK_TOGGLE_DEBUG_UI );		break;
-					case SDLK_k:	GameHotKey( game, GAME_HK_CHEAT_CRYSTAL );	break;
-					case SDLK_m:	GameHotKey( game, GAME_HK_MAP );			break;
-					case SDLK_p:	GameHotKey( game, GAME_HK_TOGGLE_PERF );	break;
-					case SDLK_q:	GameHotKey( game, GAME_HK_CHEAT_HERD );	break;
-					case SDLK_t:	GameHotKey( game, GAME_HK_CHEAT_TECH );		break;
-					case SDLK_u:	GameHotKey( game, GAME_HK_TOGGLE_UI );		break;
+					case SDLK_f:	GameHotKey(game, GAME_HK_TOGGLE_FAST);	break;
+					case SDLK_i:	GameHotKey(game, GAME_HK_TOGGLE_DEBUG_UI);		break;
+					case SDLK_k:	GameHotKey(game, GAME_HK_CHEAT_CRYSTAL);	break;
+					case SDLK_m:	GameHotKey(game, GAME_HK_MAP);			break;
+					case SDLK_p:	GameHotKey(game, GAME_HK_TOGGLE_PERF);	break;
+					case SDLK_q:	GameHotKey(game, GAME_HK_CHEAT_HERD);	break;
+					case SDLK_t:	GameHotKey(game, GAME_HK_CHEAT_TECH);		break;
+					case SDLK_u:	GameHotKey(game, GAME_HK_TOGGLE_UI);		break;
 
-					case SDLK_1:	GameHotKey( game, GAME_HK_TOGGLE_GLOW );	break;
-					case SDLK_2:	GameHotKey( game, GAME_HK_TOGGLE_PARTICLE );	break;
-					case SDLK_3:	GameHotKey( game, GAME_HK_TOGGLE_VOXEL );	break;
-					case SDLK_4:	GameHotKey( game, GAME_HK_TOGGLE_SHADOW );	break;
-					case SDLK_5:	GameHotKey( game, GAME_HK_TOGGLE_BOLT );	break;
+					case SDLK_1:	GameHotKey(game, GAME_HK_TOGGLE_GLOW);	break;
+					case SDLK_2:	GameHotKey(game, GAME_HK_TOGGLE_PARTICLE);	break;
+					case SDLK_3:	GameHotKey(game, GAME_HK_TOGGLE_VOXEL);	break;
+					case SDLK_4:	GameHotKey(game, GAME_HK_TOGGLE_SHADOW);	break;
+					case SDLK_5:	GameHotKey(game, GAME_HK_TOGGLE_BOLT);	break;
 
 					case SDLK_s:
-						GameDoTick( game, SDL_GetTicks() );
-						SDL_GL_SwapWindow( screen );
-						ScreenCapture( "cap", true, false, false, 0 );
+						GameDoTick(game, SDL_GetTicks());
+						SDL_GL_SwapWindow(screen);
+						ScreenCapture("cap", true, false, false, 0);
 						break;
 
 					default:
 						break;
+					}
 				}
-/*					GLOUTPUT(( "fov=%.1f rot=%.1f h=%.1f\n", 
-							game->engine.fov, 
-							game->engine.camera.Tilt(), 
-							game->engine.camera.PosWC().y ));
-*/
-			}
-			break;
+				break;
 
 			case SDL_MOUSEBUTTONDOWN:
-			{
-				int x, y;
-				TransformXY( event.button.x, event.button.y, &x, &y );
-				GLOUTPUT(( "Mouse down %d %d\n", x, y ));
+				{
+					int x, y;
+					TransformXY(event.button.x, event.button.y, &x, &y);
+					GLOUTPUT(("Mouse down %d %d\n", x, y));
 
-				int mod=0;
-				if ( modKeys & ( KMOD_LSHIFT | KMOD_RSHIFT ))    mod = GAME_TAP_MOD_SHIFT;
-				else if ( modKeys & ( KMOD_LCTRL | KMOD_RCTRL )) mod = GAME_TAP_MOD_CTRL;
+					int mod = 0;
+					if (modKeys & (KMOD_LSHIFT | KMOD_RSHIFT))    mod = GAME_TAP_MOD_SHIFT;
+					else if (modKeys & (KMOD_LCTRL | KMOD_RCTRL)) mod = GAME_TAP_MOD_CTRL;
 
-				if (event.button.button == SDL_BUTTON_LEFT) {
-					mouseDown.Set(event.button.x, event.button.y);
-					GameTap(game, GAME_TAP_DOWN, x, y, mod);
-				}
-				else if (event.button.button == SDL_BUTTON_RIGHT) {
-					GameTap( game, GAME_TAP_CANCEL, x, y, mod );
-					rightMouseDown.Set(-1, -1);
-					if (mod == 0) {
-						rightMouseDown.Set(event.button.x, event.button.y);
-						GameCameraPan(game, GAME_PAN_START, float(x), float(y));
+					if (event.button.button == SDL_BUTTON_LEFT) {
+						mouseDown.Set(event.button.x, event.button.y);
+						GameTap(game, GAME_TAP_DOWN, x, y, mod);
 					}
-					else if (mod == GAME_TAP_MOD_CTRL) {
-						zooming = true;
-						//GameCameraRotate( game, GAME_ROTATE_START, 0.0f );
-						SDL_GetRelativeMouseState(&zoomX, &zoomY);
+					else if (event.button.button == SDL_BUTTON_RIGHT) {
+						GameTap(game, GAME_TAP_CANCEL, x, y, mod);
+						rightMouseDown.Set(-1, -1);
+						if (mod == 0) {
+							rightMouseDown.Set(event.button.x, event.button.y);
+							GameCameraPan(game, GAME_PAN_START, float(x), float(y));
+						}
+						else if (mod == GAME_TAP_MOD_CTRL) {
+							zooming = true;
+							//GameCameraRotate( game, GAME_ROTATE_START, 0.0f );
+							SDL_GetRelativeMouseState(&zoomX, &zoomY);
+						}
 					}
 				}
-			}
-			break;
+				break;
 
 			case SDL_MOUSEBUTTONUP:
-			{
-				int x, y;
-				TransformXY( event.button.x, event.button.y, &x, &y );
+				{
+					int x, y;
+					TransformXY(event.button.x, event.button.y, &x, &y);
 
-				if ( event.button.button == 3 ) {
-					zooming = false;
-					if (rightMouseDown.x >= 0 && rightMouseDown.y >= 0) {
-						GameCameraPan(game, GAME_PAN_END, float(x), float(y));
-						rightMouseDown.Set(-1, -1);
+					if (event.button.button == 3) {
+						zooming = false;
+						if (rightMouseDown.x >= 0 && rightMouseDown.y >= 0) {
+							GameCameraPan(game, GAME_PAN_END, float(x), float(y));
+							rightMouseDown.Set(-1, -1);
+						}
+					}
+					if (event.button.button == 1) {
+						int mod = 0;
+						if (modKeys & (KMOD_LSHIFT | KMOD_RSHIFT))    mod = GAME_TAP_MOD_SHIFT;
+						else if (modKeys & (KMOD_LCTRL | KMOD_RCTRL)) mod = GAME_TAP_MOD_CTRL;
+						GameTap(game, GAME_TAP_UP, x, y, mod);
 					}
 				}
-				if ( event.button.button == 1 ) {
-					int mod = 0;
-					if ( modKeys & ( KMOD_LSHIFT | KMOD_RSHIFT ))    mod = GAME_TAP_MOD_SHIFT;
-					else if ( modKeys & ( KMOD_LCTRL | KMOD_RCTRL )) mod = GAME_TAP_MOD_CTRL;
-					GameTap( game, GAME_TAP_UP, x, y, mod );
-				}
-			}
-			break;
+				break;
 
 			case SDL_MOUSEMOTION:
-			{
-				SDL_GetRelativeMouseState( &zoomX, &zoomY );
-				int state = SDL_GetMouseState(NULL, NULL);
-				int x, y;
-				TransformXY( event.button.x, event.button.y, &x, &y );
+				{
+					SDL_GetRelativeMouseState(&zoomX, &zoomY);
+					int state = SDL_GetMouseState(NULL, NULL);
+					int x, y;
+					TransformXY(event.button.x, event.button.y, &x, &y);
 
-				int mod = 0;
-				if ( modKeys & ( KMOD_LSHIFT | KMOD_RSHIFT ))    mod = GAME_TAP_MOD_SHIFT;
-				else if ( modKeys & ( KMOD_LCTRL | KMOD_RCTRL )) mod = GAME_TAP_MOD_CTRL;
+					int mod = 0;
+					if (modKeys & (KMOD_LSHIFT | KMOD_RSHIFT))    mod = GAME_TAP_MOD_SHIFT;
+					else if (modKeys & (KMOD_LCTRL | KMOD_RCTRL)) mod = GAME_TAP_MOD_CTRL;
 
-				if ( state & SDL_BUTTON(1) ) {
-					GameTap( game, GAME_TAP_MOVE, x, y, mod );
+					if (state & SDL_BUTTON(1)) {
+						GameTap(game, GAME_TAP_MOVE, x, y, mod);
+					}
+					else if (rightMouseDown.x >= 0 && rightMouseDown.y >= 0) {
+						GameCameraPan(game, GAME_PAN_END, float(x), float(y));
+					}
+					else if (zooming && (state & SDL_BUTTON(3))) {
+						float deltaZoom = 0.01f * (float)zoomY;
+						GameZoom(game, GAME_ZOOM_DISTANCE, deltaZoom);
+						GameCameraRotate(game, (float)(zoomX)*0.5f);
+					}
+					else if (((state & SDL_BUTTON(1)) == 0)) {
+						GameTap(game, GAME_MOVE_WHILE_UP, x, y, mod);
+					}
 				}
-				else if (rightMouseDown.x >= 0 && rightMouseDown.y >= 0) {
-					GameCameraPan(game, GAME_PAN_END, float(x), float(y));
-				}
-				else if ( zooming && (state & SDL_BUTTON(3)) ) {
-					float deltaZoom = 0.01f * (float)zoomY;
-					GameZoom(game, GAME_ZOOM_DISTANCE, deltaZoom);
-					GameCameraRotate(game, (float)(zoomX)*0.5f);
-				}
-				else if ( ( ( state & SDL_BUTTON(1) ) == 0 ) ) {
-					GameTap(game, GAME_MOVE_WHILE_UP, x, y, mod);
-				}
-			}
-			break;
+				break;
 
 			case SDL_QUIT:
-			{
-				done = true;
-			}
-			break;
-
-			case SDL_USEREVENT:
-			{
-				glEnable( GL_DEPTH_TEST );
-				glDepthFunc( GL_LEQUAL );
-
-				const U8* keys =  SDL_GetKeyboardState( 0 );
-				if ( keys[SDL_SCANCODE_PAGEDOWN] ) {
-					GameZoom( game, GAME_ZOOM_DISTANCE, KEY_ZOOM_SPEED );
+				{
+					done = true;
 				}
-				if ( keys[SDL_SCANCODE_PAGEUP] ) {
-					GameZoom( game, GAME_ZOOM_DISTANCE, -KEY_ZOOM_SPEED );
-				}
-				if ( keys[SDL_SCANCODE_HOME] ) {
-					GameCameraRotate( game, -KEY_ROTATE_SPEED );
-				}
-				if ( keys[SDL_SCANCODE_END] ) {
-					GameCameraRotate( game, KEY_ROTATE_SPEED );
-				}
-
-				// This only works fullscreen (not just full window) which
-				// isn't supported yet.
-				/*
-				int x, y;
-				int buttons = SDL_GetMouseState( &x, &y );
-				if ( buttons == 0 ) {
-					if ( x <= 0 )
-						GameCameraRotate( game, -KEY_ROTATE_SPEED );
-					else if ( x >= surface->w-1 )
-						GameCameraRotate( game, -KEY_ROTATE_SPEED );
-				}
-				*/
-				GameDoTick( game, SDL_GetTicks() );
-				SDL_GL_SwapWindow( screen );
-			};
+				break;
 
 			default:
 				break;
+			}
 		}
-#if defined(TEST_FULLSPEED) || defined(USE_LOOP)
-
-#ifdef USE_LOOP
 		U32 delta = SDL_GetTicks() - tickTimer;
 		if ( delta < TIME_BETWEEN_FRAMES ) {
-			SDL_Delay(0);
+			SDL_Delay(1);
 			continue;
 		}
 		tickTimer = SDL_GetTicks();
-#endif
 		glEnable( GL_DEPTH_TEST );
 		glDepthFunc( GL_LEQUAL );
 
-		const U8* keys =  SDL_GetKeyboardState( 0 );
-		if ( keys[SDL_SCANCODE_PAGEDOWN] ) {
-			GameZoom( game, GAME_ZOOM_DISTANCE, KEY_ZOOM_SPEED );
+		const U8* keys = SDL_GetKeyboardState(0);
+		if (keys[SDL_SCANCODE_DOWN]) {
+			if (modKeys & KMOD_CTRL)
+				GameZoom(game, GAME_ZOOM_DISTANCE, KEY_ZOOM_SPEED);
+			else
+				GameCameraMove(game, 0, -KEY_MOVE_SPEED);
 		}
-		if ( keys[SDL_SCANCODE_PAGEUP] ) {
-			GameZoom( game, GAME_ZOOM_DISTANCE, -KEY_ZOOM_SPEED );
+		if (keys[SDL_SCANCODE_UP]) {
+			if (modKeys & KMOD_CTRL)
+				GameZoom(game, GAME_ZOOM_DISTANCE, -KEY_ZOOM_SPEED);
+			else
+				GameCameraMove(game, 0, KEY_MOVE_SPEED);
 		}
-		if ( keys[SDL_SCANCODE_HOME] ) {
-			GameCameraRotate( game, -KEY_ROTATE_SPEED );
+		if (keys[SDL_SCANCODE_LEFT]) {
+			if (modKeys & KMOD_CTRL)
+				GameCameraRotate(game, KEY_ROTATE_SPEED);
+			else
+				GameCameraMove(game, -KEY_MOVE_SPEED, 0);
 		}
-		if ( keys[SDL_SCANCODE_END] ) {
-			GameCameraRotate( game, KEY_ROTATE_SPEED );
+		if (keys[SDL_SCANCODE_RIGHT]) {
+			if (modKeys & KMOD_CTRL)
+				GameCameraRotate(game, -KEY_ROTATE_SPEED);
+			else
+				GameCameraMove(game, KEY_MOVE_SPEED, 0);
 		}
 
 		{
@@ -484,10 +414,6 @@ int main( int argc, char **argv )
 			SDL_GL_SwapWindow( screen );
 		}
 	}
-#else
-	}
-	SDL_RemoveTimer( timerID );
-#endif
 
 	GameSave( game );
 	DeleteGame( game );

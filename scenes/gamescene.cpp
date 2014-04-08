@@ -534,6 +534,28 @@ void GameScene::Pan(int action, const grinliz::Vector2F& view, const grinliz::Ra
 }
 
 
+void GameScene::MoveCamera(float dx, float dy)
+{
+	Camera& camera = sim->GetEngine()->camera;
+	const Vector3F* dir = camera.EyeDir3();
+
+	Vector3F right = dir[2];
+	Vector3F forward = dir[0];
+	right.y = 0;
+	forward.y = 0;
+	right.Normalize();
+	forward.Normalize();
+
+	Vector3F pos = camera.PosWC();
+	pos = pos + dx*right + dy*forward;
+
+	camera.SetPosWC(pos);
+
+	CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
+	cc->SetTrack(0);
+}
+
+
 void GameScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& world)
 {
 	Engine* engine = sim->GetEngine();

@@ -57,6 +57,8 @@ void GameCameraPan(void* handle, int action, float x, float y);
 
 // Relative rotation, in degrees.
 void GameCameraRotate(void* handle, float degrees);
+void GameCameraMove(void* handle, float dx, float dy);
+
 void GameDoTick( void* handle, unsigned int timeInMSec );
 
 #define GAME_HK_TOGGLE_UI				1
@@ -90,7 +92,6 @@ int GamePopSound( void* handle, int* databaseID, int* offset, int* size );	// re
 // --- Core to platform --- //
 void PlatformPathToResource( char* buffer, int bufferLen, int* offset, int* length );
 const char* PlatformName();
-//void PlayWAVSound( int offset, int nBytes );
 
 enum {
 	GAME_APP_DIR,
@@ -107,17 +108,6 @@ namespace grinliz {
 // revisit this for the 50th time.
 void GetSystemPath(int root, const char* filename, grinliz::GLString* out);
 
-
-// ----------------------------------------------------------------
-// Debugging and adjustment
-//enum {
-//	GAME_CAMERA_TILT,
-//	GAME_CAMERA_YROTATE,
-//	GAME_CAMERA_ZOOM
-//};
-//void GameCameraGet( void* handle, int param, float* value );
-//void GameMoveCamera( void* handle, float dx, float dy, float dz );
-	
 #ifdef __cplusplus
 }
 #endif

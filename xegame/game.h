@@ -72,6 +72,7 @@ public:
 	void Zoom( int style, float distance );
 	void Rotate( float degreesFromStart );
 	void Pan(int action, float x, float y);
+	void MoveCamera(float dx, float dy);
 	void CancelInput();
 
 	virtual Scene* CreateScene( int id, SceneData* data ) = 0;

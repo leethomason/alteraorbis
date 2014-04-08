@@ -136,6 +136,14 @@ void GameCameraPan(void* handle, int action, float x, float y)
 }
 
 
+void GameCameraMove(void* handle, float dx, float dy)
+{
+	CheckThread check;
+	Game* game = (Game*)handle;
+	game->MoveCamera(dx, dy);
+}
+
+
 void GameTap(void* handle, int action, int x, int y, int mod)
 {
 	CheckThread check;

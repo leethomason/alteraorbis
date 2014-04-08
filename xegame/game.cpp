@@ -647,6 +647,12 @@ void Game::Pan(int action, float wx, float wy)
 }
 
 
+void Game::MoveCamera(float dx, float dy)
+{
+	sceneStack.Top()->scene->MoveCamera(dx, dy);
+}
+
+
 void Game::CancelInput()
 {
 	isDragging = false;
