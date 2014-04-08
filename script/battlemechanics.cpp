@@ -123,6 +123,9 @@ bool BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* 
 	// chitBag, so it's a very handy query.
 
 	Vector2F srcPos = src->GetSpatialComponent()->GetPosition2D();
+	Vector2F srcHeading = src->GetSpatialComponent()->GetHeading2D();
+	srcHeading.Normalize();
+
 	Rectangle2F b;
 	b.min = srcPos; b.max = srcPos;
 	b.Outset( MELEE_RANGE + MAX_BASE_RADIUS + 0.8f );
@@ -133,6 +136,7 @@ bool BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* 
 
 	DamageDesc dd;
 	CalcMeleeDamage( src->GetItem(), weapon, &dd );
+	float damage = dd.damage;
 	ChitDamageInfo info( dd );
 	info.originID = src->ID();
 	info.awardXP  = true;
@@ -157,16 +161,22 @@ bool BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* 
 
 		if ( InMeleeZone( engine, src, target )) {
 			HealthComponent* targetHealth = target->GetHealthComponent();
-			ComponentSet targetComp( target, Chit::ITEM_BIT | ComponentSet::IS_ALIVE );
+			ComponentSet targetComp( target, Chit::ITEM_BIT | Chit::SPATIAL_BIT | ComponentSet::IS_ALIVE );
 
 			if ( targetHealth && targetComp.okay ) {
 				target->SetTickNeeded();	// Fire up tick to handle health effects over time
+
+				Vector2F toTarget = targetComp.spatial->GetPosition2D() - srcPos;
+				toTarget.Normalize();
+				float dot = DotProduct(toTarget, srcHeading);
+				float scale = 0.5f + 0.5f*dot;
 
 				GLLOG(( "Chit %3d '%s' using '%s' hit %3d '%s'\n", 
 						src->ID(), src->GetItemComponent()->GetItem()->Name(),
 						weapon->GetItem()->Name(),
 						target->ID(), targetComp.item->Name() ));
 
+				dd.damage = damage*scale;	// the info holds a reference - non obvious
 				target->SendMessage( ChitMsg( ChitMsg::CHIT_DAMAGE, 0, &info ), 0 );
 				impact = true;
 			}
@@ -185,6 +195,12 @@ bool BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* 
 			if ( InMeleeZone( engine, src, mapPos )) {
 				const WorldGrid& wg = wm->GetWorldGrid( x, y );
 				if ( wg.RockHeight() ) {
+					Vector2F toTarget = ToWorld2F(mapPos) - srcPos;
+					toTarget.Normalize();
+					float dot = DotProduct(toTarget, srcHeading);
+					float scale = 0.5f + 0.5f*dot;
+					dd.damage = damage * scale;
+
 					Vector3I voxel = { x, 0, y };
 					wm->VoxelHit( voxel, dd );
 					impact = true;

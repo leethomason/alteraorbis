@@ -1,10 +1,11 @@
 - batching troubles - still lots of small batches going in
 
 - "blue wall" bug. Alpha present. Not screen aligned. Noise in particles??
-- build explosive weapons (deferred for now)
+- resize and colors are wrong bug
+x build explosive weapons (deferred for now)
 - GT: ui to show idle and busy workers
 - redo AI utility to be based on a set of curves
-- fix / disable right mouse behavior
+x fix / disable right mouse behavior
 - rethink spawning. spawn based on need? what's around?
 - add rez-in animation
 - show rock damage
@@ -20,21 +21,21 @@
 - see monsters when you click on them
 - Click through of disabled buttons is surprising
 - none vs. clear is wonky
-- different porch color for usable buildings
+d different porch color for usable buildings
 - colors of buildings (not enough)
 - colors of faces (too dark)
 - scripts are pluggable now: should Bar be a plugged-in script?
 - MOBs should attack buildings
 - general extension of the effect of tech on buildings, and morale on MOBs
 - hints about what you need to build
-- census of dead items not working correctly
+x census of dead items not working correctly
 - bar-market-forge need to look more distinct
 - console: add icons to match screen
 - console: links
 - buttons for weapons changing
 - texture guns
 - camera: fix initial position. (more north). Fix shadow direction to complement. "Home" should set orientation.
-- start game at home sector if no avatar
+x start game at home sector if no avatar
 - markets - pay out taxes over a certain limit
 - fabricator. trinkets. (see notes)
 	- medkit
@@ -94,12 +95,12 @@ x print uniform count for shaders
 		x gldebug on/off. 'settings' and 'debug' sections
 		x glGetError() is getting compiled into release
 		x core attack warning
+		x mini-map tap behavior
+		x check path to core to use building
 		- fast / threaded save
-		- mini-map tap behavior
-		- check path to core to use building
 		- sync denizens movement to ground speed
 		- new opening screen?
-		- keys: end/home are weird. zoom too slow
+		- keys: end/home are weird. zoom too slow. use arrow keys for move, zoom, & scrolling
 
 	- Food-2
 		x add porch to farm, collect food there

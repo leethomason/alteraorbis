@@ -595,6 +595,10 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 			double score = evalScript->EvalIndustrial(true);
 			double dot = score * industry;
 			scale = 0.5 + 0.5 * dot;
+
+			if (!evalScript->Reachable()) {
+				scale = 0;
+			}
 		}
 		thisComp.ai->GetNeedsMutable()->Add( supply, scale );
 

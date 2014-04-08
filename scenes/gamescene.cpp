@@ -68,6 +68,9 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	minimap.SetSize( MINI_MAP_SIZE, MINI_MAP_SIZE );
 	minimap.SetCapturesTap( true );
 
+	atlasButton.Init(&gamui2D, game->GetButtonLook(0));
+	atlasButton.SetText("Atlas");
+
 	atom = lumosGame->CalcPaletteAtom( PAL_TANGERINE*2, PAL_ZERO );
 	playerMark.Init( &gamui2D, atom, true );
 	playerMark.SetSize( MARK_SIZE, MARK_SIZE );
@@ -245,6 +248,9 @@ void GameScene::Resize()
 	layout.PosAbs( &faceWidget, -1, 0, 1, 1 );
 	layout.PosAbs( &minimap,    -2, 0, 1, 1 );
 	minimap.SetSize( minimap.Width(), minimap.Width() );	// make square
+	layout.PosAbs(&atlasButton, -2, 2);	// actuall to set size and x-value
+	atlasButton.SetPos(atlasButton.X(), minimap.Y() + minimap.Height());
+
 	faceWidget.SetSize( faceWidget.Width(), faceWidget.Width() );
 
 	layout.PosAbs( &dateLabel,   -3, 0 );
@@ -770,26 +776,25 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 	else if ( item == &okay ) {
 		game->PopScene();
 	}
-	else if ( item == &minimap ) {
-		float x=0, y=0;
-		gamui2D.GetRelativeTap( &x, &y );
-		GLOUTPUT(( "minimap tapped nx=%.1f ny=%.1f\n", x, y ));
+	else if (item == &minimap) {
+		float x = 0, y = 0;
+		gamui2D.GetRelativeTap(&x, &y);
+		GLOUTPUT(("minimap tapped nx=%.1f ny=%.1f\n", x, y));
 
 		Engine* engine = sim->GetEngine();
 
-		if ( FreeCameraMode() ) {
-			dest.x = x*(float)engine->GetMap()->Width();
-			dest.y = y*(float)engine->GetMap()->Height();
-		}
-		else {
-			Vector2I sector;
-			sector.x = int( x * float(NUM_SECTORS));
-			sector.y = int( y * float(NUM_SECTORS));
+		dest.x = x*(float)engine->GetMap()->Width();
+		dest.y = y*(float)engine->GetMap()->Height();
+	}
+	else if (item == &atlasButton) {
+		MapSceneData* data = new MapSceneData( sim->GetChitBag(), sim->GetWorldMap(), sim->GetPlayerChit() );
+		Vector3F at;
+		sim->GetEngine()->CameraLookingAt(&at);
+		at.x = Clamp(at.x, 0.0f, sim->GetWorldMap()->Width() - 1.0f);
+		at.z = Clamp(at.z, 0.0f, sim->GetWorldMap()->Height() - 1.0f);
 
-			MapSceneData* data = new MapSceneData( sim->GetChitBag(), sim->GetWorldMap(), sim->GetPlayerChit() );
-			data->destSector = sector;
-			game->PushScene( LumosGame::SCENE_MAP, data );
-		}
+		data->destSector = ToSector(ToWorld2I(at));
+		game->PushScene( LumosGame::SCENE_MAP, data );
 	}
 	else if ( item == &saveButton ) {
 		Save();

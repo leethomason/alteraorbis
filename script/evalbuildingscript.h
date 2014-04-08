@@ -29,7 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 class EvalBuildingScript : public IScript
 {
 public:
-	EvalBuildingScript() : lastEval(0), eval(0), timer(2000) {}
+	EvalBuildingScript() : lastEval(0), eval(0), reachable(true), timer(2000) {}
 	virtual ~EvalBuildingScript()	{}
 
 	virtual void Init()			{}
@@ -40,12 +40,14 @@ public:
 	virtual const char* ScriptName()	{ return "EvalBuildingScript"; }
 
 	virtual EvalBuildingScript* ToEvalBuildingScript() { return this; }
-	double EvalBuildingScript::EvalIndustrial(bool debugLog);
+	double EvalIndustrial(bool debugLog);
+	bool Reachable() const { return reachable; }
 
 private:
 	CTicker timer;
 	U32		lastEval;
 	double	eval;
+	bool    reachable;
 };
 
 #endif // EvalBuilding_SCRIPT_INCLUDED

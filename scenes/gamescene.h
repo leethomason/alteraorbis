@@ -160,6 +160,7 @@ private:
 	gamui::Image		playerMark;
 	gamui::Image		buildMark[NUM_BUILD_MARKS];	// used for click&drag building
 	gamui::Image		coreWarning;
+	gamui::PushButton	atlasButton;
 
 	FacePushWidget		faceWidget;
 

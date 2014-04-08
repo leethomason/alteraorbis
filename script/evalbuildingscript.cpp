@@ -4,6 +4,7 @@
 #include "../game/gameitem.h"
 #include "../game/mapspatialcomponent.h"
 #include "../game/worldmap.h"
+#include "../game/worldinfo.h"
 #include "../grinliz/glstringutil.h"
 #include "../xegame/istringconst.h"
 #include "../xegame/spatialcomponent.h"
@@ -37,6 +38,7 @@ double EvalBuildingScript::EvalIndustrial( bool debugLog )
 
 		GameItem* item = building->GetItem();
 		GLASSERT(item);
+		reachable = true;
 
 		IString consume = item->keyValues.GetIString("zoneConsume");
 		if (consume.empty()) {
@@ -54,6 +56,12 @@ double EvalBuildingScript::EvalIndustrial( bool debugLog )
 		static const int RAD = 4;
 
 		Rectangle2I bounds = porch;
+		if (porch.min.x == 0) {	// shouldn't happen, but be sure.
+			GLASSERT(0);
+			eval = 0;
+			return eval;	
+		}
+
 		bounds.Outset(RAD);
 
 		WorldMap* worldMap = scriptContext->chitBag->GetContext()->worldMap;
@@ -62,6 +70,11 @@ double EvalBuildingScript::EvalIndustrial( bool debugLog )
 			eval = 0;
 			return eval;	// not worth dealing with edge of world
 		}
+
+		// Check if we can go from the core to the porch.
+		const SectorData& sd = worldMap->GetSector(ToSector(porch.min));
+		reachable = worldMap->CalcPath(ToWorld2F(sd.core), ToWorld2F(porch.min), 0, 0, false);
+
 		CChitArray arr;
 		BuildingFilter buildingFilter;
 		PlantFilter plantFilter;

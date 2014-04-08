@@ -112,6 +112,12 @@ void MapSpatialComponent::UpdatePorch( bool clearPorch )
 	for( it.Begin(); !it.Done(); it.Next() ) {
 		int type = 0;
 		Chit* porch = bag->QueryPorch( it.Pos(), &type );
+		if (porch && porch->GetScript("EvalBuildingScript")) {
+			EvalBuildingScript* ebs = (EvalBuildingScript*)porch->GetScript("EvalBuildingScript");
+			if (!ebs->Reachable()) {
+				type = WorldGrid::PORCH_UNREACHABLE;
+			}
+		}
 		worldMap->SetPorch( it.Pos().x, it.Pos().y, type );
 	}
 }

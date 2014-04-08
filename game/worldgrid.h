@@ -110,7 +110,8 @@ public:
 		LAND,
 		NUM_LAYERS,
 		NUM_PAVE = 4,	// including 0, which is "no pavement"
-		NUM_PORCH = 7,	// 0: no porch, 1: basic porch, ++,+,0,-,--
+		NUM_PORCH = 8,	// 0: no porch, 1: basic porch, --,-,0,+,++,unreachable
+		PORCH_UNREACHABLE = 7
 	};
 	int Layer() const			{ 
 		int layer = WATER;

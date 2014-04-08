@@ -1766,6 +1766,7 @@ void WorldMap::PrepGrid( const SpaceTree* spaceTree )
 		{ BLACKMAG_X(2), BLACKMAG_Y(3) },	// porch 0
 		{ BLACKMAG_X(1), BLACKMAG_Y(3) },	// porch +
 		{ BLACKMAG_X(0), BLACKMAG_Y(3) },	// porch ++
+		{ BLACKMAG_X(2), BLACKMAG_Y(4) },	// disconnected
 	};
 	static const int PORCH = 6;
 
