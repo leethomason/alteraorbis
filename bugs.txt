@@ -97,10 +97,10 @@ x print uniform count for shaders
 		x core attack warning
 		x mini-map tap behavior
 		x check path to core to use building
+		x keys: end/home are weird. zoom too slow. use arrow keys for move, zoom, & scrolling
 		- fast / threaded save
 		- sync denizens movement to ground speed
 		- new opening screen?
-		- keys: end/home are weird. zoom too slow. use arrow keys for move, zoom, & scrolling
 
 	- Food-2
 		x add porch to farm, collect food there
