@@ -109,6 +109,13 @@ AnimationScene::AnimationScene( LumosGame* game ) : Scene( game )
 		}
 	}
 
+	const ModelResource* plateRes = ModelResourceManager::Instance()->GetModelResource("unitPlateCentered");
+	for (int i = 0; i < NUM_PLATES; ++i) {
+		plate[i] = engine->AllocModel(plateRes);
+		plate[i]->SetPos(0, 0, float(i));
+		plate[i]->SetFlag(Model::MODEL_INVISIBLE);
+	}
+
 	triggerModel = 0;
 	LoadModel();
 
@@ -123,6 +130,9 @@ AnimationScene::~AnimationScene()
 	for( int i=0; i<NUM_MODELS; ++i ) {
 		engine->FreeModel( model[i] );
 	}
+	for (int i = 0; i < NUM_PLATES; ++i) {
+		engine->FreeModel(plate[i]);
+	}
 	if ( triggerModel ) {
 		engine->FreeModel( triggerModel );
 	}
@@ -133,7 +143,6 @@ AnimationScene::~AnimationScene()
 void AnimationScene::Resize()
 {
 	LumosGame* lumosGame = static_cast<LumosGame*>( game );
-	//const Screenport& port = game->GetScreenport();
 	lumosGame->PositionStd( &okay, 0 );
 
 	LayoutCalculator layout = lumosGame->DefaultLayout();

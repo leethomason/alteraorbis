@@ -1,11 +1,8 @@
 - batching troubles - still lots of small batches going in
-
 - "blue wall" bug. Alpha present. Not screen aligned. Noise in particles??
 - resize and colors are wrong bug
-x build explosive weapons (deferred for now)
 - GT: ui to show idle and busy workers
 - redo AI utility to be based on a set of curves
-x fix / disable right mouse behavior
 - rethink spawning. spawn based on need? what's around?
 - add rez-in animation
 - show rock damage
@@ -21,21 +18,18 @@ x fix / disable right mouse behavior
 - see monsters when you click on them
 - Click through of disabled buttons is surprising
 - none vs. clear is wonky
-d different porch color for usable buildings
 - colors of buildings (not enough)
 - colors of faces (too dark)
 - scripts are pluggable now: should Bar be a plugged-in script?
 - MOBs should attack buildings
 - general extension of the effect of tech on buildings, and morale on MOBs
 - hints about what you need to build
-x census of dead items not working correctly
 - bar-market-forge need to look more distinct
 - console: add icons to match screen
 - console: links
 - buttons for weapons changing
 - texture guns
 - camera: fix initial position. (more north). Fix shadow direction to complement. "Home" should set orientation.
-x start game at home sector if no avatar
 - markets - pay out taxes over a certain limit
 - fabricator. trinkets. (see notes)
 	- medkit
@@ -52,7 +46,6 @@ x start game at home sector if no avatar
 - particles aren't additive correctly
 - credits scene
 - remove normalization in shader
-x print uniform count for shaders
 - animation aware hit testing
 - bounds need to be adjusted to account for animation
 - record perf max/min. surprisingly hard.
@@ -98,44 +91,12 @@ x print uniform count for shaders
 		x mini-map tap behavior
 		x check path to core to use building
 		x keys: end/home are weird. zoom too slow. use arrow keys for move, zoom, & scrolling
-		- fast / threaded save
 		- sync denizens movement to ground speed
+
+	- Beta2
+		- fast / threaded save
 		- new opening screen?
-
-	- Food-2
-		x add porch to farm, collect food there
-		x simplify food pickup code
-		x overlapping farms
-		x text display for farm
-		x bars should only work at all if they have elixir
-		x distillery: 0 fruit should cause 0 progress
-		x Temples attrack / repel monsters
-				lesser			greater
-			0: 					repel
-			1:	attract near	repel
-			2:  attract near
-			3: 	attract near	attract
-		x MOBs get stuck on rampage at ports
-		x need a move timeout?? Or no block? Avoid just makes slower??
-		x good plants can catch fire/shock
-		x more efficient fruit pickup
-		x ChitBag::HashIndex() has issues. Throwing away y value, essentially. And SIZE2 is incorrect - should be power of 2.
-		x move all crystal to mobs. runs out too easily.
-		x make greaters herd more??
-		x improve wiki on plants
-		x sector herd broken (fix: adjusted rethink behavior. introduced by making sectorHerd !focused?)
-		x add zoning?
-		x too much waiting on fruit pickup?
-		x MOB filter: review where should be battle filter, etc. meaning changed.
-		x rampage broken
-		x rampage targets not matching up. different bits getting used in worldgen vs. game??
-		x Au and Crystal loss or tracking
-		x money still disappearing...
-		x battle "walk past"
-		x news tracking of denizens strange. died without being born...
-
-	x Zoning
-		x industrial, commercial, natural-spiritual
+		- abandon to tactical AI
 
 	- Census
 		x coolest stuff, past and present, by category
@@ -303,16 +264,17 @@ x Troll
 --- Links --- 
 http://weloveiconfonts.com/ : entypo
 
-    		Currently:
-    		- farm efficiency
-    		- weapon quality
-    		Consider:
-    		- sleep tube limit
-    		- food limit
-    		- grid access
-    		- food drives population?
+Currently:
+- farm efficiency
+- weapon quality
+Consider:
+- sleep tube limit
+- food limit
+- grid access
+- food drives population?
 
 ---------- Defer ----------
+d different porch color for usable buildings
 d volcanos: taper at the end
 d zoom way out
 d put metadata in model (authoring  time)
@@ -340,6 +302,46 @@ V2 ideas:
 - level up grid and special skills
 
 ----------- FIXED -------------
+x print uniform count for shaders
+x census of dead items not working correctly
+x start game at home sector if no avatar
+x fix / disable right mouse behavior
+x build explosive weapons (deferred for now)
+x Food-2
+	x add porch to farm, collect food there
+	x simplify food pickup code
+	x overlapping farms
+	x text display for farm
+	x bars should only work at all if they have elixir
+	x distillery: 0 fruit should cause 0 progress
+	x Temples attrack / repel monsters
+			lesser			greater
+		0: 					repel
+		1:	attract near	repel
+		2:  attract near
+		3: 	attract near	attract
+	x MOBs get stuck on rampage at ports
+	x need a move timeout?? Or no block? Avoid just makes slower??
+	x good plants can catch fire/shock
+	x more efficient fruit pickup
+	x ChitBag::HashIndex() has issues. Throwing away y value, essentially. And SIZE2 is incorrect - should be power of 2.
+	x move all crystal to mobs. runs out too easily.
+	x make greaters herd more??
+	x improve wiki on plants
+	x sector herd broken (fix: adjusted rethink behavior. introduced by making sectorHerd !focused?)
+	x add zoning?
+	x too much waiting on fruit pickup?
+	x MOB filter: review where should be battle filter, etc. meaning changed.
+	x rampage broken
+	x rampage targets not matching up. different bits getting used in worldgen vs. game??
+	x Au and Crystal loss or tracking
+	x money still disappearing...
+	x battle "walk past"
+	x news tracking of denizens strange. died without being born...
+
+x Zoning
+	x industrial, commercial, natural-spiritual
+
 x fire + shock too cheap to build. 
 x area for farms
 x “when i die and click on the avatar screen moves to a new location each time i press.”
@@ -1079,3 +1081,7 @@ switched over to the new Gamui callbacks, caching render buffer. now down to 850
 AIComponent::QuerySpatialHash 10ms (spatial hash) Debug mode.
 Switch back to simple lookup: 2-3 ms (yay!!)
 
+Frame Time: 0.041667 (slow)
+	        0.030 (fast)
+	        0.035 (fast)
+	        0.038

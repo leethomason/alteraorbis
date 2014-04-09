@@ -457,6 +457,11 @@ void BattleTestScene::Rotate( float degrees )
 }
 
 
+void BattleTestScene::MoveCamera(float dx, float dy)
+{
+	MoveImpl(dx, dy, engine);
+}
+
 void BattleTestScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::Ray& world )				
 {
 	bool uiHasTap = ProcessTap( action, view, world );

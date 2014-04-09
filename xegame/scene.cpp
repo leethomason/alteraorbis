@@ -175,6 +175,25 @@ void Scene::DrawDebugTextDrawCalls( int x, int y, Engine* engine )
 }
 
 
+void Scene::MoveImpl(float dx, float dy, Engine* engine)
+{
+	Camera& camera = engine->camera;
+	const Vector3F* dir = camera.EyeDir3();
+
+	Vector3F right = dir[2];
+	Vector3F forward = dir[0];
+	right.y = 0;
+	forward.y = 0;
+	right.Normalize();
+	forward.Normalize();
+
+	Vector3F pos = camera.PosWC();
+	pos = pos + dx*right + dy*forward;
+
+	camera.SetPosWC(pos);
+}
+
+
 void Scene::HandleHotKey( int value )
 {
 	Engine* engine = Engine::Instance();	// can be null

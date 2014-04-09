@@ -74,9 +74,7 @@ public:
 	virtual void Zoom( int style, float normal )				{}
 	virtual void Rotate( float degrees )						{}
 	virtual void CancelInput()									{}
-	virtual void Pan(int action,
-		const grinliz::Vector2F& view,
-		const grinliz::Ray& world)								{}
+	virtual void Pan(int action, const grinliz::Vector2F& view, const grinliz::Ray& world)	{}
 	virtual void MoveCamera(float dx, float dy)					{}
 
 	// Only with mouse/kbd input.
@@ -124,6 +122,7 @@ protected:
 
 	// Utility function for standard output:
 	void DrawDebugTextDrawCalls( int x, int y, Engine* engine );
+	void MoveImpl(float dx, float dy, Engine* engine);
 
 	Game*			game;
 	UIRenderer		uiRenderer;

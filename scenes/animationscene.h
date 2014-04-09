@@ -53,10 +53,11 @@ private:
 	void UpdateModelInfo();
 
 	Engine* engine;
-	enum { NUM_MODELS = 3 };
+	enum { NUM_MODELS = 3, NUM_PLATES = 3 };
 
 	grinliz::CDynArray< const ModelResource* > resourceArr;
-	Model* model[ NUM_MODELS ];
+	Model* model[NUM_MODELS];
+	Model* plate[NUM_PLATES];
 	Model* triggerModel;
 
 	int currentModel;

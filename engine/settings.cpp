@@ -49,6 +49,7 @@ SettingsManager::SettingsManager( const char* savepath )
 	// Set defaults.
 	audioOn = true;
 	debugGLCalls = false;
+	debugUI = false;
 }
 
 
@@ -98,6 +99,7 @@ void SettingsManager::Save()
 
 		printer.OpenElement("Debug");
 		printer.PushAttribute("debugGLCalls", debugGLCalls);
+		printer.PushAttribute("debugUI", debugUI);
 		printer.CloseElement();
 
 		printer.CloseElement();
@@ -117,6 +119,7 @@ void SettingsManager::ReadAttributes( const XMLElement* root )
 		const XMLElement* debugElement = root->FirstChildElement("Debug");
 		if (debugElement) {
 			debugElement->QueryAttribute("debugGLCalls", &debugGLCalls);
+			debugElement->QueryAttribute("debugUI", &debugUI);
 		}
 	}
 }

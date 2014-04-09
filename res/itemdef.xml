@@ -9,12 +9,12 @@
   <item name="humanFemale"
         resource="humanFemale"
         uiIcon="human"
-			  flags="GOLD_PICKUP ITEM_PICKUP AI_WANDER_HERD AI_USES_BUILDINGS HAS_NEEDS HAS_PERSONALITY"
+		flags="GOLD_PICKUP ITEM_PICKUP AI_WANDER_HERD AI_USES_BUILDINGS HAS_NEEDS HAS_PERSONALITY"
         procedural="suit"
         mob="denizen"
         nameGen="humanFemaleNames"
         cooldown="1500"
-			  mass ="60">
+	    mass ="55">
     <intrinsics>
       <item name="hand"
             flags="MELEE_WEAPON INTRINSIC"

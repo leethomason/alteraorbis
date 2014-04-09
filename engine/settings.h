@@ -36,6 +36,7 @@ public:
 	bool AudioOn() const				{ return audioOn != 0; }
 	void SetAudioOn( bool value );
 	bool DebugGLCalls() const			{ return debugGLCalls; }
+	bool DebugUI() const				{ return debugUI;  }
 
 protected:
 	SettingsManager( const char* path );
@@ -51,6 +52,7 @@ private:
 
 	bool audioOn;
 	bool debugGLCalls;
+	bool debugUI;
 	grinliz::GLString path;
 };
 

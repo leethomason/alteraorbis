@@ -91,6 +91,7 @@ Game::Game( int width, int height, int rotation, int uiHeight ) :
 	GLString settingsPath;
 	GetSystemPath(GAME_SAVE_DIR, "settings.xml", &settingsPath );
 	SettingsManager::Create(settingsPath.c_str());
+	debugUI = SettingsManager::Instance()->DebugUI();
 
 	LoadTextures();
 	modelLoader = new ModelLoader();

@@ -131,9 +131,6 @@ int main( int argc, char **argv )
 	SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 8);
 	SDL_GL_SetAttribute( SDL_GL_ALPHA_SIZE, 8);
 	SDL_GL_SetAttribute( SDL_GL_STENCIL_SIZE, 8);
-	//SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-	//SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 1);
-	//SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
 	if ( multisample ) {
 		SDL_GL_SetAttribute( SDL_GL_MULTISAMPLEBUFFERS, 1 );
@@ -231,21 +228,21 @@ int main( int argc, char **argv )
 					case SDLK_RSHIFT:	modKeys = modKeys | KMOD_RSHIFT;	break;
 
 					case SDLK_ESCAPE:
-					{
-	#ifdef DEBUG
-						// only escape out in debug mode
-						// if ( !handled ) 
-						done = true;
-	#endif
-					}
+						{
+		#ifdef DEBUG
+							// only escape out in debug mode
+							// if ( !handled ) 
+							done = true;
+		#endif
+						}
 						break;
 
 					case SDLK_F4:
-					{
-						int sdlMod = SDL_GetModState();
-						if (sdlMod & (KMOD_RALT | KMOD_LALT))
-							done = true;
-					}
+						{
+							int sdlMod = SDL_GetModState();
+							if (sdlMod & (KMOD_RALT | KMOD_LALT))
+								done = true;
+						}
 						break;
 
 					case SDLK_SPACE:GameHotKey(game, GAME_HK_SPACE);			break;

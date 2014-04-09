@@ -136,9 +136,10 @@
 
   <texture filename="human2_male/suit0.png" assetName="suit0" whiteMap="true" emissive="true" colorMap="true" />
   <model filename="human2.ac" modelName="humanMale" animation="humanMale2Animation" origin="0 0 0" shading="flat" polyRemoval="pre" >
-    <meta name="trigger" pos="-0.18 0.42 0" rot="1 0 0 -90" boneName="arm.lower.right" />
+    <meta name="trigger" pos="-0.17 0.40 0" rot="1 0 0 -90" boneName="arm.lower.right" />
     <meta name="target"  pos="0 0.72 0"/>
     <meta name="shield"  pos="0 0.71 -0.06" rot="1 0 0 80" boneName="torso" />
+    <!--<meta name="rfoot"   pos="-0.08 0 0" boneName="leg.lower.right" />-->
   </model>
 
   <animation filename="human2_female/human2_female_.bvh" assetName="humanFemale2Animation">
