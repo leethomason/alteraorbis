@@ -108,6 +108,7 @@ namespace gamedb
 	};
 	struct HeaderStruct	
 	{
+		HeaderStruct() : offsetToItems(0), offsetToDataDesc(0), offsetToData(0), nString(0), nData(0) {}
 		U32 offsetToItems;
 		U32 offsetToDataDesc;
 		U32 offsetToData;		// also how much of the file to read

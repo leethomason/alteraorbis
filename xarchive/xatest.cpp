@@ -260,21 +260,23 @@ int main( int argc, const char* argv[] )
 		{
 			FILE* fp = 0;
 			fopen_s( &fp, "squishtest.dat", "wb" );
-			Squisher squisher;
-			static const char* test0 = "Hello world. This is compressed data.";
-			static const char* test1 = "This is a 2nd line of comrpessed data, and concludes the test.";
+			if (fp) {
+				Squisher squisher;
+				static const char* test0 = "Hello world. This is compressed data.";
+				static const char* test1 = "This is a 2nd line of comrpessed data, and concludes the test.";
 
-			int len = strlen(test0)+1;
-			squisher.StreamEncode( &len, 4, fp );
-			squisher.StreamEncode( test0, strlen(test0)+1, fp );
-			len = strlen(test1)+1;
-			squisher.StreamEncode( &len, 4, fp );
-			squisher.StreamEncode( test1, strlen(test1)+1, fp );
-			squisher.StreamEncode( 0, 0, fp );
+				int len = strlen(test0) + 1;
+				squisher.StreamEncode(&len, 4, fp);
+				squisher.StreamEncode(test0, strlen(test0) + 1, fp);
+				len = strlen(test1) + 1;
+				squisher.StreamEncode(&len, 4, fp);
+				squisher.StreamEncode(test1, strlen(test1) + 1, fp);
+				squisher.StreamEncode(0, 0, fp);
 
-			printf( "Encode: Unc=%d Comp=%d\n", squisher.encodedU, squisher.encodedC );
+				printf("Encode: Unc=%d Comp=%d\n", squisher.encodedU, squisher.encodedC);
 
-			fclose( fp );
+				fclose(fp);
+			}
 		}
 		{
 			FILE* fp = 0;

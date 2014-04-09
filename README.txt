@@ -1,30 +1,37 @@
-﻿This is an alpha test for the game Altera.
+﻿This is an alpha-of-the-beta for the game Altera Orbis.
 
 More at: grinninglizard.com/altera
 
-The "Zoning" release improves farming and buildings are now affected by their environment.
-
+This implements the basics of the domain vs. the world gameplay.
 
 How to Play
 -----------
 Is now on the wiki: http://alteraorbis.wikispaces.com/
 
+New Controls
+------------
 
-Changes (Zoning)
+Left-click moves the avatar, selects things, builds.
+Left-click & drag builds lots of pavement or ice at once, or clears an area.
+
+Right-click & drag moves the camera.
+Ctrl-Right-click & drag rotates and zooms the camera.
+
+The arrow keys move the camera.
+Ctrl-Arrow keys rotates and zooms.
+
+Changes (Alpha-Beta)
 -------------------
 
-- Food is now created at the Solar Farm, which considers a 5x5 area for its productivity.
-- The efficiency of buildings is now significantly affected by their zoning efficiency.
-  The porch of the building shows the efficiency from -- (red) to neutral to ++ (green).
-  See the wiki for the types of buildings and zones.
-- Bars don't work at all, for any need, without Elixir
-- The more temples you build, the greater your tech level, building efficiency, and better
-  weapons. But also the greater the monsters that will be attracted to your domain.
-- The efficiency and orderliness of tasks and building use is greatly improved.
-- Some tuning done so that one powerful monster doesn't collect all the money and crystal
-  in the world.
-- Many other bug fixes.
-- Some modest performance fixes.
+- Buildings and your core are now attacked my MOBs
+- Sounds (although the actual sounds still need work)
+- Domain start, end, and score UI
+- Domains are remembered for the Census
+- New controls
+- Some animation improvement
+- settings.xml file for controlling debug and game settings
+- Buildings no longer function if they can't path to the Core
+- Performance improvement
 
 Install
 -------
@@ -37,9 +44,9 @@ well. (If in doubt, re-install of the redistributables is harmless.)
 Important Notes
 ---------------
 
-1. There is NO save game compatibility. Be sure to delete old games.
-2. If your avatar gets killed, ctrl-click will create a new one. (You can create a bunch if you wish).
-3. The game is intended to run on a tablet (Windows tablets only at this point) and generally will. Good touch support for building / removing isn't in place yet.
+1. There is NO save game compatibility. Old games will be automatically ignored.
+2. The game is intended to run on a tablet (Windows tablets only at this point) but touch controls aren't implemented yet. Although
+   the new control scheme is intended to make touch as seamless as possible.
 
 Filing a Bug
 ------------

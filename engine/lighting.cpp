@@ -122,10 +122,10 @@ void Lighting::Load( const tinyxml2::XMLElement* ele )
 	}
 	warm = cool = midLight;
 
-	if ( modeEle->FirstChildElement( "warm" ) ) {
+	if ( modeEle && modeEle->FirstChildElement( "warm" ) ) {
 		LoadDAS( modeEle->FirstChildElement( "warm" ), &warm );
 	}
-	if ( modeEle->FirstChildElement( "cool" ) ) {
+	if ( modeEle && modeEle->FirstChildElement( "cool" ) ) {
 		LoadDAS( modeEle->FirstChildElement( "cool" ), &cool );
 	}
 

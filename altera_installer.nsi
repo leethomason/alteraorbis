@@ -91,6 +91,7 @@ Section "Uninstall"
   Delete $INSTDIR\Altera.exe
   Delete $INSTDIR\README.txt
   Delete $INSTDIR\SDL2.dll
+  Delete $INSTDIR\SDL2_mixer.dll
   Delete $INSTDIR\vcredist_x86_2013.exe
   Delete $INSTDIR\uninstall.exe
 
