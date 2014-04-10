@@ -25,7 +25,6 @@
 
 #include "../grinliz/glvector.h"
 #include "../grinliz/glstringutil.h"
-//#include "../grinliz/glperformance.h"
 #include "../xarchive/glstreamer.h"
 
 #include <float.h>
@@ -247,6 +246,7 @@ void Model::Init( const ModelResource* resource, SpaceTree* tree )
 				auxBone->animToModelMap[i] = this->GetBoneIndex(str);
 			}
 		}
+		this->SetAnimationRate(resource->header.animationSpeed);
 	}
 
 	debugScale = 1.0f;

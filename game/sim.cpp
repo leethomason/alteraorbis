@@ -399,7 +399,9 @@ void Sim::CreateAvatar( const grinliz::Vector2I& pos )
 	chit->GetSpatialComponent()->SetPosYRot( (float)pos.x+0.5f, 0, (float)pos.y+0.5f, 0 );
 
 	// Player speed boost
-	chit->GetItem()->keyValues.Set( "speed", DEFAULT_MOVE_SPEED*1.5f/1.2f );
+	float boost = 1.5f / 1.2f;
+	chit->GetItem()->keyValues.Set( "speed", DEFAULT_MOVE_SPEED*boost );
+	chit->GetRenderComponent()->SetAnimationRate(boost);
 	chit->GetItem()->hpRegen = 1.0f;
 }
 

@@ -39,6 +39,7 @@ void ModelHeader::Load( const gamedb::Item* item )
 	if ( header->HasAttribute( "animation" ) ) {
 		animation = StringPool::Intern( header->GetString( "animation" ), true );
 	}
+	animationSpeed = header->GetFloat("animationSpeed");
 
 	bounds.Zero();
 	DBRead( header, "bounds", bounds );

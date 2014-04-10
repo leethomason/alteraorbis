@@ -16,6 +16,7 @@
 #include "animationscene.h"
 
 #include "../game/lumosgame.h"
+#include "../game/lumosmath.h"
 
 #include "../engine/engine.h"
 #include "../engine/model.h"
@@ -78,6 +79,13 @@ AnimationScene::AnimationScene( LumosGame* game ) : Scene( game )
 	instance.Init( &gamui2D, game->GetButtonLook( LumosGame::BUTTON_LOOK_STD ));
 	instance.SetText( "3x" );
 
+	speedDown.Init(&gamui2D, game->GetButtonLook(0));
+	speedDown.SetText("<");
+	speedUp.Init(&gamui2D, game->GetButtonLook(0));
+	speedUp.SetText(">");
+	speedLabel.Init(&gamui2D);
+	speedLabel.SetText("Def");
+
 	static const char* triggerLabels[NUM_TRIGGERS] = {
 		"particle", "gun", "ring"
 	};
@@ -109,11 +117,11 @@ AnimationScene::AnimationScene( LumosGame* game ) : Scene( game )
 		}
 	}
 
-	const ModelResource* plateRes = ModelResourceManager::Instance()->GetModelResource("unitPlateCentered");
+	const ModelResource* plateRes = ModelResourceManager::Instance()->GetModelResource("timingPlate");
 	for (int i = 0; i < NUM_PLATES; ++i) {
 		plate[i] = engine->AllocModel(plateRes);
-		plate[i]->SetPos(0, 0, float(i));
-		plate[i]->SetFlag(Model::MODEL_INVISIBLE);
+		plate[i]->SetPos(1, 0, float(i));
+//		plate[i]->SetFlag(Model::MODEL_INVISIBLE);
 	}
 
 	triggerModel = 0;
@@ -163,6 +171,10 @@ void AnimationScene::Resize()
 	layout.PosAbs( &modelLeft,	0, -3 );
 	layout.PosAbs( &modelName,	1, -3 );
 	layout.PosAbs( &modelRight,	3, -3 );
+
+	layout.PosAbs(&speedDown, 4, -1);
+	layout.PosAbs(&speedLabel, 5, -1);
+	layout.PosAbs(&speedUp, 6, -1);
 }
 
 
@@ -192,6 +204,10 @@ void AnimationScene::LoadModel()
 	SetModelVis();
 	model[1]->SetAnimationRate( 0.8f );
 	model[2]->SetAnimationRate( 1.2f );
+
+	CStr<16> str;
+	str.Format("%.2f", model[0]->GetResource()->header.animationSpeed);
+	speedLabel.SetText(str.c_str());
 }
 
 
@@ -319,6 +335,14 @@ void AnimationScene::ItemTapped( const gamui::UIItem* item )
 		if ( currentModel < 0 ) currentModel = resourceArr.Size()-1;
 		currentAnim = 0;
 	}
+	else if (item == &speedDown || item == &speedUp) {
+		float bias = item == &speedDown ? -0.1f : 0.1f;
+		float rate = model[0]->GetAnimationRate() + bias;
+		model[0]->SetAnimationRate(rate);
+		CStr<16> str;
+		str.Format("%.2f", rate);
+		speedLabel.SetText(str.c_str());
+	}
 
 	UpdateModelInfo();
 	UpdateAnimationInfo();
@@ -339,6 +363,20 @@ void AnimationScene::DoTick( U32 deltaTime )
 			model[i]->DeltaAnimation( deltaTime, (i==0) ? &metaDataEvent : 0, 0 );
 			model[i]->EmitParticles( engine->particleSystem, engine->camera.EyeDir3(), deltaTime );
 		}
+	}
+
+	float plateZ = plate[0]->Pos().z;
+	plateZ -= Travel(DEFAULT_MOVE_SPEED, deltaTime);
+	if (plateZ < -3) plateZ += 1.0f;
+
+	for (int i = 0; i < NUM_PLATES; ++i) {
+		Vector3F v = plate[i]->Pos();
+		v.z = plateZ + float(i);
+		plate[i]->SetPos(v);
+		if (model[0]->GetAnimation() == ANIM_WALK || model[0]->GetAnimation() == ANIM_GUN_WALK)
+			plate[i]->ClearFlag(Model::MODEL_INVISIBLE);
+		else
+			plate[i]->SetFlag(Model::MODEL_INVISIBLE);
 	}
 
 	if ( model[0]->HasAnimation() && model[0]->GetResource()->GetMetaData( HARDPOINT_TRIGGER )) {

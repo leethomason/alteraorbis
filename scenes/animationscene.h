@@ -53,7 +53,7 @@ private:
 	void UpdateModelInfo();
 
 	Engine* engine;
-	enum { NUM_MODELS = 3, NUM_PLATES = 3 };
+	enum { NUM_MODELS = 3, NUM_PLATES = 7 };
 
 	grinliz::CDynArray< const ModelResource* > resourceArr;
 	Model* model[NUM_MODELS];
@@ -67,7 +67,9 @@ private:
 	gamui::PushButton okay;
 	gamui::PushButton boneLeft, boneRight;
 	gamui::PushButton modelLeft, modelRight;
+	gamui::PushButton speedDown, speedUp;
 	gamui::ToggleButton animSelect[ANIM_COUNT];
+	gamui::TextLabel speedLabel;
 
 	gamui::ToggleButton ortho;
 	gamui::ToggleButton zeroFrame;

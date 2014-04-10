@@ -100,5 +100,14 @@ inline float Dice3D6ToMult( int dice ) {
 }
 
 
+inline float Travel(float rate, U32 msecTime) {
+	return rate * ((float)msecTime) * 0.001f;
+}
+
+
+inline float Travel(float rate, float secTime) {
+	return rate * secTime;
+}
+
 #endif // LUMOS_MATH_INCLUDED
 

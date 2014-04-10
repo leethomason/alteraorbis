@@ -198,6 +198,14 @@ int RenderComponent::CalcAnimation() const
 }
 
 
+void RenderComponent::SetAnimationRate(float boost)
+{
+	float rate = model[0]->GetResource()->header.animationSpeed;
+	model[0]->SetAnimationRate(rate * boost);
+
+}
+
+
 int RenderComponent::CurrentAnimation() const
 {
 	return model[0]->GetAnimation();

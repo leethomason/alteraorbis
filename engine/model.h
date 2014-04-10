@@ -107,6 +107,7 @@ struct ModelHeader
 
 	grinliz::IString		name;
 	grinliz::IString		animation;			// the name of the animation, if exists, for this model.
+	float					animationSpeed;
 	U16						nTotalVertices;		// in all atoms
 	U16						nTotalIndices;
 	U16						flags;
@@ -308,6 +309,7 @@ public:
 	void SetAnimationTime( U32 time );
 
 	void SetAnimationRate( float rate )						{ animationRate = rate; }
+	float GetAnimationRate() const							{ return animationRate; }
 	bool HasAnimation() const								{ return animationResource && (currentAnim.id>=0); }
 
 	// WARNING: not really supported. Just for debug rendering. May break:

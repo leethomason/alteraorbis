@@ -51,6 +51,7 @@
   <texture assetName="voxel" filename="voxelalt.png" filename2="voxelalt_em.png" emissive="true" width="256" height="64"/>
   <texture assetName="voxmap" filename="voxmap.png" filename2="voxmap_em.png" emissive="true" />
   <texture filename="flags.png" />
+  <texture filename="calibration.png" />
 
   <!-- note this makes textures and materials the same thing, to have the emissive
        behavior defined like this. That's okay for now.
@@ -88,6 +89,7 @@
   <model filename="teststructures.ac" modelName="testStruct1"  origin="2.5 0 0.5"  shading="flat" polyRemoval="pre" />
   <model filename="teststructures.ac" modelName="testStruct2"  origin="5.0 0 1.0"  shading="flat" polyRemoval="pre" />
   <model filename="unitPlateCentered.ac" shading="flat" />
+  <model filename="timingPlate.ac" shading="flat" />
   <model filename="unitPlateHumanMaleFace.ac" shading="flat" />
   <model filename="unitPlateHumanFemaleFace.ac" shading="flat" />
   <model filename="unitPlateArrow.ac" shading="flat" />
@@ -135,11 +137,10 @@
   </animation>
 
   <texture filename="human2_male/suit0.png" assetName="suit0" whiteMap="true" emissive="true" colorMap="true" />
-  <model filename="human2.ac" modelName="humanMale" animation="humanMale2Animation" origin="0 0 0" shading="flat" polyRemoval="pre" >
+  <model filename="human2.ac" modelName="humanMale" animation="humanMale2Animation" origin="0 0 0" shading="flat" polyRemoval="pre" animationSpeed="1.25" >
     <meta name="trigger" pos="-0.17 0.40 0" rot="1 0 0 -90" boneName="arm.lower.right" />
     <meta name="target"  pos="0 0.72 0"/>
     <meta name="shield"  pos="0 0.71 -0.06" rot="1 0 0 80" boneName="torso" />
-    <!--<meta name="rfoot"   pos="-0.08 0 0" boneName="leg.lower.right" />-->
   </model>
 
   <animation filename="human2_female/human2_female_.bvh" assetName="humanFemale2Animation">
@@ -147,7 +148,7 @@
   </animation>
 
   <texture filename="human2_female/femsuit0.png" assetName="femsuit0" whiteMap="true" emissive="true" colorMap="true" />
-  <model filename="human2.ac" modelName="humanFemale" animation="humanFemale2Animation" origin="1 0 0" shading="flat" polyRemoval="pre" >
+  <model filename="human2.ac" modelName="humanFemale" animation="humanFemale2Animation" origin="1 0 0" shading="flat" polyRemoval="pre" animationSpeed="1.25" >
     <meta name="trigger" pos="0.86 0.40 0" rot="1 0 0 -90" boneName="arm.lower.right" />
     <meta name="target"  pos="1 0.72 0"/>
     <meta name="shield"  pos="1 0.71 -0.06" rot="1 0 0 80" boneName="torso" />

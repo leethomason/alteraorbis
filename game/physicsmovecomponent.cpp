@@ -2,6 +2,7 @@
 #include "worldmap.h"
 #include "gamelimits.h"
 #include "pathmovecomponent.h"
+#include "lumosmath.h"
 
 #include "../engine/serialize.h"
 
@@ -189,7 +190,7 @@ int TrackingMoveComponent::DoTick( U32 deltaTime )
 	float len = delta.Length();
 	// This component gets added to non-moving components, so the first
 	// tick time can be really big.
-	float travel = this->Travel( TRACK_SPEED, Min( deltaTime, MAX_FRAME_TIME ));
+	float travel = Travel( TRACK_SPEED, Min( deltaTime, MAX_FRAME_TIME ));
 
 	if ( travel >= len ) {
 		parentChit->GetSpatialComponent()->SetPosition( targetPos );

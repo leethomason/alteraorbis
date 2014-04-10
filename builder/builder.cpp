@@ -123,6 +123,7 @@ void ModelHeader::Set(	const IString& name, int nAtoms, int nTotalVertices, int 
 	this->nTotalVertices = nTotalVertices;
 	this->nTotalIndices = nTotalIndices;
 	this->bounds = bounds;
+	this->animationSpeed = 1.0f;
 	memset( metaData, 0, sizeof(ModelMetaData)*EL_NUM_METADATA );
 	memset( effectData, 0, sizeof(ModelParticleEffect)*EL_MAX_MODEL_EFFECTS );
 }
@@ -138,6 +139,7 @@ void ModelHeader::Save( gamedb::WItem* parent )
 	if ( !animation.empty() ) {
 		node->SetString( "animation", animation.c_str() );
 	}
+	node->SetFloat("animationSpeed", this->animationSpeed);
 
 	DBSet( node, "bounds", bounds ); 
 	gamedb::WItem* metaNode = node->FetchChild( "metaData" );
@@ -621,6 +623,7 @@ void ProcessModel( XMLElement* model )
 	if ( grinliz::StrEqual( model->Attribute( "shadowCaster" ), "false" ) ) {
 		header.flags |= ModelHeader::RESOURCE_NO_SHADOW;
 	}
+	model->QueryFloatAttribute("animationSpeed", &header.animationSpeed);
 
 	for(	const XMLElement* metaEle = model->FirstChildElement( "meta" );
 			metaEle;

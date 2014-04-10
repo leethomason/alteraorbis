@@ -90,6 +90,9 @@ public:
 	// Walk, stand, etc. are played automatically.
 	bool	PlayAnimation( int type );
 	int		CurrentAnimation() const;
+	// sets the animation speed relative to the value
+	// in the ModelHeader
+	void	SetAnimationRate(float relativeToHeader);	
 
 	// --- Hardpoint control -- //
 	// A render component has one primary, animated model. Additional
