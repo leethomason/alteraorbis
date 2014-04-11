@@ -1862,6 +1862,39 @@ bool AIComponent::ThinkDelivery( const ComponentSet& thisComp )
 }
 
 
+bool AIComponent::ThinkRepair(const ComponentSet& thisComp)
+{
+	if (parentChit->PlayerControlled()) {
+		return false;
+	}
+
+	bool worker = (thisComp.item->flags & GameItem::AI_DOES_WORK) != 0;
+
+	if (worker) {
+		BuildingRepairFilter filter;
+		Vector2I sector = thisComp.spatial->GetSector();
+
+		Chit* building = GetLumosChitBag()->FindBuilding(IString(),
+			sector,
+			&thisComp.spatial->GetPosition2D(),
+			LumosChitBag::RANDOM_NEAR, 0, &filter);
+		if (building) {
+			MapSpatialComponent* msc = building->GetSpatialComponent()->ToMapSpatialComponent();
+			GLASSERT(msc);
+			if (msc) {
+				if (msc->HasPorch()) {
+
+				}
+				else {
+
+				}
+			}
+		}
+	}
+	return false;
+}
+
+
 bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 {
 	if (    !(thisComp.item->flags & GameItem::AI_USES_BUILDINGS )
@@ -2057,11 +2090,6 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 		ranged->GetItem()->Reload( parentChit );
 	}
 
-	// Spit up on:
-	// - things that can happen anywhere
-	// - things that can happen in friendly sectors
-	// - things that happen in home sectors
-
 	if ( ThinkWanderEatPlants( thisComp ))
 		return;
 	if ( ThinkWanderHealAtCore( thisComp ))
@@ -2078,6 +2106,10 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 		return;
 	if ( ThinkDelivery( thisComp ))
 		return;
+	/*
+	if (ThinkRepair(thisComp))
+		return;
+	*/
 	if ( ThinkGuard( thisComp ))
 		return;	
 	if ( ThinkDoRampage( thisComp ))

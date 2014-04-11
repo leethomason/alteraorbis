@@ -852,7 +852,21 @@ bool BuildingFilter::Accept( Chit* chit )
 }
 
 
-bool MOBKeyFilter::Accept( Chit* chit )
+bool BuildingRepairFilter::Accept(Chit* chit)
+{
+	// Assumed to be MapSpatial with "building" flagged on.
+	MapSpatialComponent* msc = GET_SUB_COMPONENT(chit, SpatialComponent, MapSpatialComponent);
+	if (msc && msc->Building()) {
+		GameItem* item = chit->GetItem();
+		if (item && item->HPFraction() < 0.9f) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
+bool MOBKeyFilter::Accept(Chit* chit)
 {
 	GameItem* item = chit->GetItem();
 	return item && !item->keyValues.GetIString( IStringConst::mob ).empty();

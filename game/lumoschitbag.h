@@ -37,6 +37,14 @@ public:
 };
 
 
+class BuildingRepairFilter : public IChitAccept
+{
+public:
+	virtual bool Accept(Chit* chit);
+	virtual int  Type() { return MAP; }
+};
+
+
 // Literally has the MOB key: Denizen, Lesser, Greater
 class MOBKeyFilter : public IChitAccept
 {

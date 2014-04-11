@@ -128,13 +128,14 @@ private:
 	void ThinkWander( const ComponentSet& thisComp );
 	void ThinkBattle( const ComponentSet& thisComp );
 	void ThinkRockBreak( const ComponentSet& thisComp );
-	void ThinkBuild( const ComponentSet& thisComp );
 	void ThinkVisitor( const ComponentSet& thisComp );
 	void ThinkRampage( const ComponentSet& thisComp );	// process the rampage action
 	bool RampageDone(const ComponentSet& thisComp);
 	bool ThinkHungry( const ComponentSet& thisComp );
 	bool ThinkFruitCollect( const ComponentSet& thisComp );
 	bool ThinkDelivery( const ComponentSet& thisComp );
+	bool ThinkRepair(const ComponentSet& thisComp);
+
 
 	void DoMoraleZero( const ComponentSet& thisComp );
 	void WorkQueueToTask(  const ComponentSet& thisComp );	// turn a work item into a task

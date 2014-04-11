@@ -554,8 +554,11 @@ void Model::DeltaAnimation( U32 _time, int *metaData, bool *done )
 	if ( !HasAnimation() )
 		return;
 
-	if ( animationRate != 1.0f ) {
-		_time = (U32)((float)_time*animationRate);
+	// This is questionable: should it apply to other animations?
+	if (currentAnim.id == ANIM_WALK || currentAnim.id == ANIM_GUN_WALK) {
+		if (animationRate != 1) {
+			_time = (U32)((float)_time*animationRate);
+		}
 	}
 
 	if ( metaData ) {

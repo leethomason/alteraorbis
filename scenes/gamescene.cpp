@@ -790,9 +790,14 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		GLOUTPUT(("minimap tapped nx=%.1f ny=%.1f\n", x, y));
 
 		Engine* engine = sim->GetEngine();
+		x *= float(engine->GetMap()->Width());
+		y *= float(engine->GetMap()->Height());
+		CameraComponent* cc = sim->GetChitBag()->GetCamera(engine);
+		cc->SetTrack(0);
+		engine->CameraLookAt(x, y);
 
-		dest.x = x*(float)engine->GetMap()->Width();
-		dest.y = y*(float)engine->GetMap()->Height();
+		//dest.x = x*(float)engine->GetMap()->Width();
+		//dest.y = y*(float)engine->GetMap()->Height();
 	}
 	else if (item == &atlasButton) {
 		MapSceneData* data = new MapSceneData( sim->GetChitBag(), sim->GetWorldMap(), sim->GetPlayerChit() );

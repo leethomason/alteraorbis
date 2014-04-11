@@ -59,41 +59,8 @@
 - melee is way too powerful and wide effect
 
 - game
-	- Beta1
-		x installer
-		x buildings as targets
-		x file versioning, so new installs don't blow up.
-		x continue - load - save fix
-		x work out build - install def file - installer sequence
-		x sound engine
-		x sounds
-		x settings file
-		x audio on/off button
-		x core destruction / recreation / zone end
-		x game frame:
-			x startup
-			x achievements
-			x domain end
-		d tablet vs. mouse control
-		x domains on census
-		x confirm target & can do damage to target
-		x ai of denizens post fall
-		x avatar still under control when domain is destroyed
-		x ruins and collapse
-		x better control for building
-			x rethink controls???
-		x animation cleanup
-		x neutral buildings shouldn't have a porch
-		x ruins need to be ruins - not dead buildings
-		x gldebug on/off. 'settings' and 'debug' sections
-		x glGetError() is getting compiled into release
-		x core attack warning
-		x mini-map tap behavior
-		x check path to core to use building
-		x keys: end/home are weird. zoom too slow. use arrow keys for move, zoom, & scrolling
-		- sync denizens movement to ground speed
-
 	- Beta2
+		- repair
 		- fast / threaded save
 		- new opening screen?
 		- abandon to tactical AI
@@ -302,6 +269,40 @@ V2 ideas:
 - level up grid and special skills
 
 ----------- FIXED -------------
+x Beta1
+	x installer
+	x buildings as targets
+	x file versioning, so new installs don't blow up.
+	x continue - load - save fix
+	x work out build - install def file - installer sequence
+	x sound engine
+	x sounds
+	x settings file
+	x audio on/off button
+	x core destruction / recreation / zone end
+	x game frame:
+		x startup
+		x achievements
+		x domain end
+	d tablet vs. mouse control
+	x domains on census
+	x confirm target & can do damage to target
+	x ai of denizens post fall
+	x avatar still under control when domain is destroyed
+	x ruins and collapse
+	x better control for building
+		x rethink controls???
+	x animation cleanup
+	x neutral buildings shouldn't have a porch
+	x ruins need to be ruins - not dead buildings
+	x gldebug on/off. 'settings' and 'debug' sections
+	x glGetError() is getting compiled into release
+	x core attack warning
+	x mini-map tap behavior
+	x check path to core to use building
+	x keys: end/home are weird. zoom too slow. use arrow keys for move, zoom, & scrolling
+	x sync denizens movement to ground speed
+
 x print uniform count for shaders
 x census of dead items not working correctly
 x start game at home sector if no avatar

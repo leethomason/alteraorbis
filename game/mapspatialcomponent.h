@@ -52,6 +52,7 @@ public:
 
 	// Returns the porch, or an empty rectangle if there is none.
 	grinliz::Rectangle2I PorchPos() const;
+	bool HasPorch() const { return hasPorch > 0; }
 	int PorchType() const { return hasPorch;  }
 
 	// internal: used by the LumosChitBag to track buildings.
