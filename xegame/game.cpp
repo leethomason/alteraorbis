@@ -74,7 +74,7 @@ Game::Game( int width, int height, int rotation, int uiHeight ) :
 	char buffer[260];
 	int offset;
 	int length;
-	PlatformPathToResource( buffer, 260, &offset, &length );
+	PathToDatabase(buffer, 260, &offset, &length);
 	database0 = new gamedb::Reader();
 	database0->Init( 0, buffer, offset );
 	xenoAudio = new XenoAudio(database0, buffer);

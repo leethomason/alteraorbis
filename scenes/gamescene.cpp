@@ -1008,12 +1008,25 @@ void GameScene::HandleHotKey( int mask )
 #endif
 		Vector3F at = V3F_ZERO;
 		sim->GetEngine()->CameraLookingAt(&at);
+#if 1
 		for (int i = 0; i<5; ++i) {
 			//sim->GetChitBag()->NewMonsterChit(plane, "redMantis", TEAM_RED_MANTIS);
 			sim->GetChitBag()->NewMonsterChit(at, "mantis", TEAM_GREEN_MANTIS);
 			at.x += 0.5f;
 		}
-
+#endif
+#if 0
+		for (int i = 0; i < NUM_PLANT_TYPES; ++i) {
+			Chit* chit = sim->CreatePlant((int)at.x + i, (int)at.z, i);
+			if (chit) {
+				if (i < 6) {
+					PlantScript* plantScript = (PlantScript*)chit->GetScript("PlantScript");
+					GLASSERT(plantScript);
+					plantScript->SetStage(3);
+				}
+			}
+		}
+#endif
 	}
 	else if ( mask == GAME_HK_TOGGLE_COLORS ) {
 		static int colorSeed = 0;
@@ -1462,7 +1475,7 @@ void GameScene::CheckGameStage(U32 delta)
 		b.max.y -= random.Rand(2);
 
 		CArray<const SectorData*, NUM_SECTORS * 4> arr;
-		for (Rectangle2IEdgeIterator it(b); !it.Done(); it.Next()) {
+		for (Rectangle2IEdgeIterator it(b); !it.Done() && arr.HasCap(); it.Next()) {
 			const SectorData* sd = &sim->GetWorldMap()->GetSector(it.Pos());
 			if (sd->HasCore()) {
 				CoreScript* cs = CoreScript::GetCore(ToSector(sd->x, sd->y));

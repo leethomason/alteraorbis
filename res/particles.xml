@@ -237,6 +237,15 @@
     <colorFuzz red="0.1" green="0.1" blue="0.1" alpha="0.1" />
   </particle>
 
+  <particle name="repair" size="0.05" count="15" config="hemi"
+            time="continuous"
+            velocity="0.4" velocityFuzz="0.2" posFuzz="0.1"
+            texMin="3" texMax="3">
+    <color palx="1" paly="2"  alpha="0.5"/>
+    <colorVelocity red="0" green="0.2" blue="0" alpha="-0.2"/>
+    <colorFuzz red="0.1" green="0.1" blue="0.1" alpha="0.1" />
+  </particle>
+
   <particle name="splash" size="0.01" config="ray"
             sizeVelocity="0.5"
             velocity="0" texMin="6" texMax="6"

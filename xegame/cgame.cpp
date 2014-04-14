@@ -172,7 +172,7 @@ void GameHotKey( void* handle, int mask )
 
 
 
-void PlatformPathToResource( char* buffer, int bufferLen, int* offset, int* length )
+void PathToDatabase(char* buffer, int bufferLen, int* offset, int* length)
 {
 #if defined( UFO_IPHONE )
 	CFStringRef nameRef = CFStringCreateWithCString( 0, name, kCFStringEncodingWindowsLatin1 );

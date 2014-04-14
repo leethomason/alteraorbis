@@ -267,13 +267,14 @@ void Sim::OnChitMsg(Chit* chit, const ChitMsg& msg)
 					switch (c) {
 					case 0:
 						{
-							// Go neutral.
+							// Make an ornamental copy.
 							GameItem* item = queryArr[i]->GetItem();
-							if (!item || !queryArr[i]->GetRenderComponent()) continue;
-							Vector2I pos = queryArr[i]->GetSpatialComponent()->GetPosition2DI();
-							float yrot = queryArr[i]->GetSpatialComponent()->GetYRotation();
-							Chit* c = chitBag->NewLawnOrnament(pos, item->Name(), TEAM_NEUTRAL);
-							c->GetSpatialComponent()->SetYRotation(yrot);
+							if (item && queryArr[i]->GetRenderComponent()) {
+								Vector2I pos = queryArr[i]->GetSpatialComponent()->GetPosition2DI();
+								float yrot = queryArr[i]->GetSpatialComponent()->GetYRotation();
+								Chit* c = chitBag->NewLawnOrnament(pos, item->Name(), TEAM_NEUTRAL);
+								c->GetSpatialComponent()->SetYRotation(yrot);
+							}
 						}
 						break;
 
@@ -287,11 +288,10 @@ void Sim::OnChitMsg(Chit* chit, const ChitMsg& msg)
 							pos.y += random.Rand(msc->Bounds().Height());
 							Chit* c = chitBag->NewLawnOrnament(pos, "ruins", TEAM_NEUTRAL);
 							c->GetSpatialComponent()->SetYRotation(90.0f * float(random.Rand(4)));
-
-							queryArr[i]->DeRez();
 						}
 						break;
 					}
+					queryArr[i]->DeRez();
 				}
 			}
 			if (chit->PrimaryTeam() == TEAM_HOUSE0) {

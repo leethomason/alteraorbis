@@ -79,6 +79,8 @@ static const int	RAMPAGE_THRESHOLD			= 40;		// how many times a destination must
 static const int	GUARD_RANGE					= 2;
 static const int	GUARD_TIME					= 10*1000;
 static const double	NEED_CRITICAL				= 0.1;
+static const int	BUILD_TIME					= 1000;
+static const int	REPAIR_TIME					= 4000;
 
 const char* AIComponent::MODE_NAMES[NUM_MODES]     = { "normal", "rampage", "rockbreak", "battle" };
 const char* AIComponent::ACTION_NAMES[NUM_ACTIONS] = { "none", "move", "melee", "shoot", "wander", "stand" };
@@ -131,7 +133,7 @@ void AIComponent::OnAdd( Chit* chit )
 	super::OnAdd( chit );
 	feTicker.SetPeriod( 750 + (chit->ID() & 128) );
 	const ChitContext* context = GetChitContext();
-	taskList.Init( context->worldMap, context->engine );
+	taskList.Init( context->worldMap, context->engine, GetChitBag() );
 }
 
 
@@ -950,6 +952,8 @@ bool AIComponent::ThinkDoRampage( const ComponentSet& thisComp )
 {
 	if ( destinationBlocked < RAMPAGE_THRESHOLD ) 
 		return false;
+	if (thisComp.item->flags & GameItem::AI_DOES_WORK)
+		return false;	// workers don't rampage. it's just annoying.
 
 	// Need a melee weapon to rampage. Ranged is never used.
 	IMeleeWeaponItem* melee = thisComp.itemComponent->GetMeleeWeapon();
@@ -1878,15 +1882,32 @@ bool AIComponent::ThinkRepair(const ComponentSet& thisComp)
 			sector,
 			&thisComp.spatial->GetPosition2D(),
 			LumosChitBag::RANDOM_NEAR, 0, &filter);
+
 		if (building) {
 			MapSpatialComponent* msc = building->GetSpatialComponent()->ToMapSpatialComponent();
 			GLASSERT(msc);
+			Rectangle2I repair;
+			repair.Set(0, 0, 0, 0);
 			if (msc) {
 				if (msc->HasPorch()) {
-
+					repair = msc->PorchPos();
 				}
 				else {
+					repair = msc->Bounds();
+					repair.Outset(1);
+				}
+			}
+			CoreScript* coreScript = CoreScript::GetCore(ToSector(msc->MapPosition()));
+			WorldMap* worldMap = GetChitContext()->worldMap;
+			Vector2F pos2 = thisComp.spatial->GetPosition2D();
 
+			for (Rectangle2IIterator it(repair); !it.Done(); it.Next()) {
+				if (!coreScript->HasTask(it.Pos()) 
+					&& worldMap->CalcPath( pos2, ToWorld2F(it.Pos()), 0, 0, false)) {
+					taskList.Push(Task::MoveTask(it.Pos(), 0));
+					taskList.Push(Task::StandTask(REPAIR_TIME, 0));
+					taskList.Push(Task::RepairTask(building->ID()));
+					return true;
 				}
 			}
 		}
@@ -2106,10 +2127,8 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 		return;
 	if ( ThinkDelivery( thisComp ))
 		return;
-	/*
 	if (ThinkRepair(thisComp))
 		return;
-	*/
 	if ( ThinkGuard( thisComp ))
 		return;	
 	if ( ThinkDoRampage( thisComp ))
@@ -2644,6 +2663,7 @@ int AIComponent::DoTick( U32 deltaTime )
 	// High level mode switch, in/out of battle?
 	if ( focus != FOCUS_MOVE ) {
 		if (    aiMode != BATTLE_MODE 
+			 && (thisComp.item->IName() != IStringConst::worker)	// keeps workers from charging into battle
 			 && enemyList.Size() ) 
 		{
 			aiMode = BATTLE_MODE;

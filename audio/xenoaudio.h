@@ -47,7 +47,7 @@ private:
 	};
 
 	const gamedb::Reader* database;
-	SDL_RWops* fp;
+	SDL_RWops* dataFP;
 	bool audioOn;
 	grinliz::Vector3F listenerPos;
 	grinliz::Vector3F listenerDir;

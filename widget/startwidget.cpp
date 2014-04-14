@@ -139,7 +139,7 @@ void StartGameWidget::SetBodyText()
 
 	bodyLabel.SetText(str.c_str());
 
-	str.Format("%d/%d", currentSector, sectors.Size());
+	str.Format("%d/%d", currentSector+1, sectors.Size());
 	countLabel.SetText(str.c_str());
 }
 

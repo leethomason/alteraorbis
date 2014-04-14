@@ -202,7 +202,31 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta )
 					Vector3F pos = thisComp.spatial->GetPosition();
 					engine->particleSystem->EmitPD( "useBuilding", pos, V3F_UP, 30 );	// FIXME: standard delta constant					
 				}
+				else if (action == Task::TASK_REPAIR_BUILDING) {
+					Vector3F pos = thisComp.spatial->GetPosition();
+					engine->particleSystem->EmitPD("repair", pos, V3F_UP, 30);	// FIXME: standard delta constant					
+				}
 			}
+		}
+		break;
+
+	case Task::TASK_REPAIR_BUILDING:
+		{
+			Chit* building = chitBag->GetChit(task->data);
+			if (building) {
+				MapSpatialComponent* msc = building->GetSpatialComponent()->ToMapSpatialComponent();
+				if (msc) {
+					Rectangle2I b = msc->Bounds();
+					b.Outset(1);
+					if (b.Contains(pos2i)) {
+						ComponentSet comp(building, ComponentSet::IS_ALIVE | Chit::ITEM_BIT);
+						if (comp.okay) {
+							comp.item->hp = comp.item->TotalHPF();
+						}
+					}
+				}
+			}
+			Remove();
 		}
 		break;
 
@@ -223,9 +247,7 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta )
 				else {
 					Chit* found = chitBag->QueryRemovable( task->pos2i, false );
 					if ( found ) {
-						GLASSERT( found->GetItem() );
-						found->GetItem()->hp = 0;
-						found->SetTickNeeded();
+						found->DeRez();
 					}
 				}
 				if ( wg.Pave() ) {

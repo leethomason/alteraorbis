@@ -10,6 +10,7 @@ class WorkQueue;
 class WorldMap;
 class Engine;
 struct ComponentSet;
+class ChitBag;
 
 namespace ai {
 
@@ -26,7 +27,8 @@ public:
 		TASK_STAND,
 		TASK_BUILD,		// any BuildScript action
 		TASK_PICKUP,
-		TASK_USE_BUILDING
+		TASK_USE_BUILDING,
+		TASK_REPAIR_BUILDING
 	};
 
 	Task() { Clear(); }
@@ -70,6 +72,14 @@ public:
 		return t;
 	}
 
+	static Task RepairTask(int buildingID, int taskID = 0) {
+		Task t;
+		t.action = TASK_REPAIR_BUILDING;
+		t.data = buildingID;
+		t.taskID = taskID;
+		return t;
+	}
+
 	static Task RemoveTask( const grinliz::Vector2I& pos2i, int taskID=0 );
 
 	static Task BuildTask( const grinliz::Vector2I& pos2i, int buildScriptID, int taskID=0 ) {
@@ -106,12 +116,13 @@ public:
 class TaskList
 {
 public:
-	TaskList()	: worldMap(0), engine(0), socialTicker(2000) {}
+	TaskList()	: worldMap(0), engine(0), chitBag(0), socialTicker(2000) {}
 	~TaskList()	{ Clear();  }
 
-	void Init( WorldMap* _map, Engine* _engine ) {
+	void Init( WorldMap* _map, Engine* _engine, ChitBag* _cb ) {
 		worldMap = _map;
 		engine = _engine;
+		chitBag = _cb;
 	}
 
 	void Serialize( XStream* xs );
@@ -144,6 +155,7 @@ private:
 
 	WorldMap*			worldMap;
 	Engine*				engine;
+	ChitBag*			chitBag;
 	grinliz::IString	lastBuildingUsed;	// should probably be serialized, if TaskList was serialized.
 	CTicker				socialTicker;
 	grinliz::CDynArray<Task> taskList;

@@ -473,7 +473,11 @@ Chit* LumosChitBag::QueryRemovable( const grinliz::Vector2I& pos2i, bool ignoreP
 		filter = &buildingFilter;
 	}
 
-	QuerySpatialHash( &array, pos2, 0.1f, 0, filter );
+	Chit* core = 0;
+	CoreScript* cs = CoreScript::GetCore(ToSector(pos2i));
+	if (cs) core = cs->ParentChit();
+
+	QuerySpatialHash(&array, pos2, 0.1f, core, filter);
 
 	Chit* found = 0;
 	// First pass: plants & 1x1 buildings.
@@ -485,6 +489,8 @@ Chit* LumosChitBag::QueryRemovable( const grinliz::Vector2I& pos2i, bool ignoreP
 	if ( !found ) {
 		found = QueryBuilding( pos2i );
 	}
+
+	if (found == core) found = 0;
 	return found;
 }
 

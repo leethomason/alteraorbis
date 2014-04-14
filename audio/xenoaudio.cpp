@@ -1,4 +1,5 @@
 #include "xenoaudio.h"
+#include "../xegame/cgame.h"
 #include "../grinliz/glgeometry.h"
 #include "../libs/SDL2/include/SDL_mixer.h"
 #include "../libs/SDL2/include/SDL.h"
@@ -16,8 +17,8 @@ XenoAudio::XenoAudio(const gamedb::Reader* db, const char* pathToDB)
 	database = db;
 
 //	Mix_Init(0);	// just need wav.
-	fp = SDL_RWFromFile(pathToDB, "rb");
-	GLASSERT(fp);
+	dataFP = SDL_RWFromFile(pathToDB, "rb");
+	GLASSERT(dataFP);
 	sounds.PushArr(CHANNELS);
 	listenerPos.Zero();
 	listenerDir.Set(1, 0, 0);
@@ -34,7 +35,7 @@ XenoAudio::~XenoAudio()
 	}
 	GLASSERT(instance == this);
 	instance = 0;
-	SDL_RWclose(fp);
+	SDL_RWclose(dataFP);
 }
 
 
@@ -76,15 +77,31 @@ void XenoAudio::Play(const char* _sound, const Vector3F* pos)
 	if (!chunk) {
 		const gamedb::Item* data = database->Root()->Child("data");
 		const gamedb::Item* item = data->Child(sound);
-		GLASSERT(item);
-		if (item) {
+		SDL_RWops* fp = 0;
+		bool needClose = false;
+
+		// Search external path first.
+		GLString path;
+		GLString inPath = sound;
+		inPath.append(".wav");
+		GetSystemPath(GAME_APP_DIR, inPath.c_str(), &path);
+
+		fp = SDL_RWFromFile(path.c_str(), "rb");
+		if (fp) {
+			needClose = true;
+		}
+
+		// Now check the database
+		if (!fp) {
 			int offset = 0, size = 0;
 			bool compressed = false;
 
 			item->GetDataInfo("binary", &offset, &size, &compressed);
 			GLASSERT(compressed == false);
+			fp = dataFP;
 			SDL_RWseek(fp, offset, RW_SEEK_SET);
-
+		}
+		if (fp) {
 			U8* buf = 0;
 			U32 len = 0;
 			chunk = Mix_LoadWAV_RW(fp, false);
@@ -93,6 +110,9 @@ void XenoAudio::Play(const char* _sound, const Vector3F* pos)
 			}
 			else {
 				chunks.Add(sound, chunk);
+			}
+			if (needClose) {
+				SDL_RWclose(fp);
 			}
 		}
 	}

@@ -110,7 +110,6 @@ void HealthComponent::DeltaHealth()
 						chit->Add( new SpatialComponent() );
 						chit->Add( new RenderComponent( asset ));
 						chit->Add( new ScriptComponent( new CountDownScript( 30*1000 )));
-						chit->Add( new HealthComponent());
 
 						Vector3F pos = parentChit->GetSpatialComponent()->GetPosition();
 						float r = parentChit->GetSpatialComponent()->GetYRotation();

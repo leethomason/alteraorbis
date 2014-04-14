@@ -50,7 +50,7 @@ private:
 	gamui::PushButton	prevDomain, nextDomain;
 	gamui::PushButton	okay;
 
-	grinliz::CArray<const SectorData*, 4> sectors;
+	grinliz::CArray<const SectorData*, 8> sectors;
 	grinliz::CDynArray<Chit*> queryArr;
 };
 

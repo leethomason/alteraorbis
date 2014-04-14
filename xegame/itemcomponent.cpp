@@ -599,6 +599,21 @@ int ItemComponent::DoTick( U32 delta )
 	const ChitContext* context = GetChitContext();
 
 	GameItem* mainItem = itemArr[0];
+
+#ifdef DEBUG
+	{
+		HealthComponent* hc = parentChit->GetHealthComponent();
+		if (mainItem->flags & GameItem::INDESTRUCTABLE) {
+			if (mainItem->IName() != "tombstone") {
+				GLASSERT(!hc);
+			}
+		}
+		else {
+			GLASSERT(hc);
+		}
+	}
+#endif
+
 	// Slow tick is about 500-600 ms
 	if ( slowTick.Delta( delta )) {
 		DoSlowTick();
