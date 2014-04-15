@@ -60,9 +60,9 @@
 
 - game
 	- Beta1 fixes
-		x sound checks external path first
-		- sound button doesn't work
-		- sounds to 'res' directory
+		t sound checks external path first
+		t sound button doesn't work
+		x sounds to 'res' directory
 
 	- Beta2
 		- repair

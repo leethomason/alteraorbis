@@ -1478,9 +1478,10 @@ void GameScene::CheckGameStage(U32 delta)
 		for (Rectangle2IEdgeIterator it(b); !it.Done() && arr.HasCap(); it.Next()) {
 			const SectorData* sd = &sim->GetWorldMap()->GetSector(it.Pos());
 			if (sd->HasCore()) {
-				CoreScript* cs = CoreScript::GetCore(ToSector(sd->x, sd->y));
+				Vector2I sector = ToSector(sd->x, sd->y);
+				CoreScript* cs = CoreScript::GetCore(sector);
 				GLASSERT(cs);
-				if (cs->PrimaryTeam() == TEAM_NEUTRAL) {
+				if (cs && cs->PrimaryTeam() == TEAM_NEUTRAL) {
 					arr.Push(sd);
 				}
 			}

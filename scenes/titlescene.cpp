@@ -27,6 +27,8 @@
 
 #include "../script/battlemechanics.h"
 
+#include "../audio/xenoaudio.h"
+
 using namespace gamui;
 using namespace grinliz;
 
@@ -133,6 +135,7 @@ void TitleScene::SetAudioButton()
 
 void TitleScene::ItemTapped( const gamui::UIItem* item )
 {
+	XenoAudio::Instance()->SetAudio(SettingsManager::Instance()->AudioOn());
 	if ( item == &testScene[TEST_DIALOG] ) {
 		game->PushScene( LumosGame::SCENE_DIALOG, 0 );
 	}

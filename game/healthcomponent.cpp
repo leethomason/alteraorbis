@@ -42,18 +42,22 @@ using namespace grinliz;
 void HealthComponent::Serialize( XStream* xs )
 {
 	this->BeginSerialize( xs, Name() );
-	XARC_SER_DEF( xs, destroyed, 0 );
+	//XARC_SER_DEF( xs, destroyed, 0 );
 	this->EndSerialize( xs );
 }
 
 
-int HealthComponent::DoTick( U32 delta )
+float HealthComponent::DestroyedFraction() const 
+{ 
+	return (float)parentChit->Destroyed() / (float)COUNTDOWN; 
+}
+
+int HealthComponent::DoTick(U32 delta)
 {
 	DeltaHealth();
-	if ( destroyed ) {
-		destroyed += delta;
-		GLASSERT( parentChit );
-		if ( destroyed >= COUNTDOWN ) {
+	if ( parentChit->Destroyed() ) {
+		parentChit->SetDestroyed(this, parentChit->Destroyed() + delta);
+		if ( parentChit->Destroyed() >= COUNTDOWN ) {
 			parentChit->SendMessage( ChitMsg( ChitMsg::CHIT_DESTROYED_END ), this );
 			GetChitBag()->QueueDelete( parentChit );
 		}
@@ -63,13 +67,13 @@ int HealthComponent::DoTick( U32 delta )
 			parentChit->SendMessage( msg );
 		}
 	}
-	return destroyed ? 0 : VERY_LONG_TICK;
+	return parentChit->Destroyed() ? 0 : VERY_LONG_TICK;
 }
 
 
 void HealthComponent::DeltaHealth()
 {
-	if ( destroyed )
+	if ( parentChit->Destroyed() )
 		return;
 	const ChitContext* context = GetChitContext();
 
@@ -81,7 +85,7 @@ void HealthComponent::DeltaHealth()
 		if ( item->hp == 0 ) {
 			parentChit->SendMessage( ChitMsg( ChitMsg::CHIT_DESTROYED_START), this );
 			GLLOG(( "Chit %3d destroyed.\n", parentChit->ID() ));
-			destroyed = 1;
+			parentChit->SetDestroyed(this, 1);
 
 			const GameItem* item = parentChit->GetItem();
 			if ( item && parentChit->GetSpatialComponent() ) {
@@ -131,7 +135,7 @@ void HealthComponent::DeltaHealth()
 void HealthComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {
 	if ( chit == parentChit && msg.ID() == ChitMsg::RENDER_IMPACT ) {
-		if ( !destroyed ) {
+		if ( !parentChit->Destroyed()) {
 			RenderComponent* render = parentChit->GetRenderComponent();
 			GLASSERT( render );	// it is a message from the render component, after all.
 			ItemComponent* inventory = parentChit->GetItemComponent();
@@ -147,7 +151,7 @@ void HealthComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			render->CalcTrigger( &pos, 0 );
 
 			const ChitContext* context = GetChitContext();
-			battleMechanics.MeleeAttack( context->engine, parentChit, item );
+			BattleMechanics::MeleeAttack( context->engine, parentChit, item );
 			context->engine->particleSystem->EmitPD( "meleeImpact", pos, V3F_UP, 0 );
 		}
 	}

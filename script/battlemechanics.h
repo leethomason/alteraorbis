@@ -34,7 +34,7 @@ class BattleMechanics
 public:
 	// Melee --------------------- //
 	// Returns true if something hit.
-	bool MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* weapon );
+	static bool MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* weapon );
 
 	// Returns true the melee attack can/does succeed. Note that any animation
 	// is pure decoration, melee success is just based on relative positions.

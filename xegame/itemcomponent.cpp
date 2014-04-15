@@ -458,17 +458,16 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		GoldCrystalFilter filter;
 		if (    filter.Accept( gold )		// it really is gold/crystal
 			 && gold->GetItem()				// it has an item component
-			 && mainItem->hp > 0 )			// this item is alive
+			 && !parentChit->Destroyed() )	// this item is alive
 		{
 			Transfer(&mainItem->wallet, &gold->GetItem()->wallet, gold->GetItem()->wallet);
 
 			// Need to delete the gold, else it will track to us again!
-			gold->QueueDelete();
+			gold->DeRez();
 
 			if ( parentChit->GetRenderComponent() ) {
 				parentChit->GetRenderComponent()->AddDeco( "loot", STD_DECO );
 			}
-
 		}
 	}
 	else if ( msg.ID() >= ChitMsg::CHIT_DESTROYED_START && msg.ID() <= ChitMsg::CHIT_DESTROYED_END ) 
@@ -602,11 +601,11 @@ int ItemComponent::DoTick( U32 delta )
 
 #ifdef DEBUG
 	{
+		// FIXME: argument for moving health component functionality
+		// into the item component.
 		HealthComponent* hc = parentChit->GetHealthComponent();
 		if (mainItem->flags & GameItem::INDESTRUCTABLE) {
-			if (mainItem->IName() != "tombstone") {
-				GLASSERT(!hc);
-			}
+			GLASSERT(!hc);
 		}
 		else {
 			GLASSERT(hc);

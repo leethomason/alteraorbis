@@ -31,7 +31,7 @@ private:
 	typedef Component super;
 
 public:
-	HealthComponent() : destroyed(0)	{}
+	HealthComponent()	{}
 	virtual ~HealthComponent()	{}
 
 	virtual const char* Name() const { return "HealthComponent"; }
@@ -42,14 +42,14 @@ public:
 	virtual void DebugStr( grinliz::GLString* str )		{ str->AppendFormat( "[Health] " ); }
 	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
 	virtual int DoTick( U32 delta );
-	float DestroyedFraction() const { return (float)destroyed/(float)COUNTDOWN; }
+	float DestroyedFraction() const;
 
 private:
 	enum { COUNTDOWN = 800 };
 	void DeltaHealth();
 
-	U32 destroyed;
-	BattleMechanics battleMechanics;
+	//U32 destroyed;
+	//BattleMechanics battleMechanics;
 };
 
 

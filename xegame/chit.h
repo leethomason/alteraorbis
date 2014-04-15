@@ -190,6 +190,20 @@ public:
 	int timeToTick;		// time until next tick needed: set by DoTick() call
 	int timeSince;		// time since the last tick
 
+	// ---------- Data Binding --------- //
+	// For components: there is a lot
+	// of cross-component chatter to get to
+	// shared data. Experimenting with moving
+	// it here. This is shared among the 
+	// components, but private to the world.
+	U32 Destroyed() const	{ return destroyed; }
+	void SetDestroyed(const HealthComponent*, U32 v) { destroyed = v;  }
+
+
+
+private:
+	U32 destroyed;
+
 private:
 	ChitBag* chitBag;
 	int		 id;
