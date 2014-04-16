@@ -71,8 +71,6 @@ const ModelResource* RenderComponent::MainResource() const
 
 void RenderComponent::Serialize( XStream* xs )
 {
-	// FIXME serialize deco
-
 	// Can't get context: order is Serialize() then Add()
 	Engine* engine = Engine::Instance();
 

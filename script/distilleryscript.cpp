@@ -96,8 +96,7 @@ int DistilleryScript::DoTick( U32 delta )
 	}
 
 	SetInfoText();
-	return 0;	// Fast update in order to keep the text above the distillery in position.
-				// FIXME: this should be build into the UI
+	return progressTick.Next();
 }
 
 

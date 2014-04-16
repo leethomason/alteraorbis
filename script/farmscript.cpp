@@ -169,5 +169,5 @@ int FarmScript::DoTick( U32 delta )
 		rc->SetDecoText(str.c_str());
 	}
 
-	return 0; // fixme: for ui tracking. should be timer.Next();
+	return timer.Next();
 }

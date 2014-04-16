@@ -38,8 +38,8 @@
 - money xchange - gold to crystal and vice versa
 - should be able to browse units in character screen
 - vault needs "sell to market" button
-- building repair
-- system for gamui to track models
+x building repair
+x system for gamui to track models
 - make sure UI shows shield boost BattleMechanics::ComputeShieldBoost()
 - add target portrait
 - review all atlases for texture mem usage
