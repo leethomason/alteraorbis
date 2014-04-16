@@ -44,6 +44,7 @@ public:
 
 private:
 	void SetAudioButton();
+	void DeleteEngine();
 
 	LumosGame*		lumosGame;
 	gamui::Image	background;

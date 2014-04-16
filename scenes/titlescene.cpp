@@ -129,11 +129,21 @@ TitleScene::TitleScene(LumosGame* game) : Scene(game), lumosGame(game), screenpo
 
 TitleScene::~TitleScene()
 {
+	DeleteEngine();
+}
+
+
+void TitleScene::DeleteEngine()
+{
 	for (int i = 0; i < NUM_MODELS; ++i) {
 		engine->FreeModel(model[i]);
+		model[i] = 0;
 	}
 	delete engine;
 	delete testMap;
+
+	engine = 0;
+	testMap = 0;
 }
 
 
@@ -142,11 +152,13 @@ void TitleScene::Resize()
 	const Screenport& port = game->GetScreenport();
 
 	// Dowside of a local Engine: need to resize it.
-	engine->GetScreenportMutable()->Resize(port.PhysicalWidth(), port.PhysicalHeight());
-	for (int i = 0; i < NUM_MODELS; ++i) {
-		model[i]->SetFlag(Model::MODEL_INVISIBLE);
+	if (engine) {
+		engine->GetScreenportMutable()->Resize(port.PhysicalWidth(), port.PhysicalHeight());
+		for (int i = 0; i < NUM_MODELS; ++i) {
+			if (model[i])
+				model[i]->SetFlag(Model::MODEL_INVISIBLE);
+		}
 	}
-
 	background.SetPos( 0, 0 );
 	background.SetVisible(false);
 
@@ -260,6 +272,13 @@ void TitleScene::ItemTapped( const gamui::UIItem* item )
 		SettingsManager::Instance()->SetAudioOn(audioButton.Down());
 		SetAudioButton();
 	}
+
+	// If any scene gets pushed, throw away the engine resources.
+	// Don't want to have an useless engine sitting around at
+	// the top of the scene stack.
+	if (game->IsScenePushed()) {
+		DeleteEngine();
+	}
 }
 
 void TitleScene::HandleHotKey(int key)
@@ -267,7 +286,7 @@ void TitleScene::HandleHotKey(int key)
 	if (key == GAME_HK_SPACE) {
 		seed++;
 		GLOUTPUT(("Seed=%d\n", seed));
-		{
+		if (model[HUMAN_FEMALE]) {
 			HumanGen gen(true, seed, TEAM_HOUSE0, false);
 			ProcRenderInfo info;
 			gen.AssignSuit(&info);
@@ -295,10 +314,12 @@ void TitleScene::Draw3D(U32 deltaTime)
 void TitleScene::DoTick(U32 delta)
 {
 	if (ticker.Delta(delta)) {
-		for (int i = 0; i < NUM_MODELS; ++i) {
-			if (model[i]->Flags() & Model::MODEL_INVISIBLE) {
-				model[i]->ClearFlag(Model::MODEL_INVISIBLE);
-				break;
+		if (model[0]) {
+			for (int i = 0; i < NUM_MODELS; ++i) {
+				if (model[i]->Flags() & Model::MODEL_INVISIBLE) {
+					model[i]->ClearFlag(Model::MODEL_INVISIBLE);
+					break;
+				}
 			}
 		}
 	}
