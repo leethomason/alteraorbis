@@ -25,8 +25,8 @@
 #include "../script/itemscript.h"
 
 static const double TECH_ADDED_BY_VISITOR = 0.2;
-static const double TECH_DECAY_0 = 0.00005;
-static const double TECH_DECAY_1 = 0.00040;
+static const double TECH_DECAY_0 = 0.0001;
+static const double TECH_DECAY_1 = 0.0008;
 
 using namespace grinliz;
 

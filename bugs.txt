@@ -63,6 +63,8 @@ x system for gamui to track models
 		t sound checks external path first
 		t sound button doesn't work
 		x sounds to 'res' directory
+		- guard posts need to look around and notify AIs
+		- is destroying beds just annoying? slow respawn?
 
 	- Beta2
 		- repair

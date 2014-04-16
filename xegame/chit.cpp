@@ -43,6 +43,7 @@ void Chit::Init( int _id, ChitBag* _chitBag )
 
 	id = _id;
 	chitBag = _chitBag;
+	destroyed = 0;
 
 	for( int i=0; i<NUM_SLOTS; ++i ) {
 		slot[i] = 0;
