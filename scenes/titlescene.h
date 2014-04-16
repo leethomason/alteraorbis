@@ -19,6 +19,7 @@
 #include "../xegame/scene.h"
 #include "../gamui/gamui.h"
 #include "../engine/screenport.h"
+#include "../xegame/cticker.h"
 
 class LumosGame;
 class TestMap;
@@ -39,6 +40,7 @@ public:
 	virtual void ItemTapped( const gamui::UIItem* item );
 	virtual void Draw3D(U32 deltaTime);
 	virtual void HandleHotKey(int value);
+	virtual void DoTick(U32 delta);
 
 private:
 	void SetAudioButton();
@@ -62,6 +64,7 @@ private:
 	TestMap*			testMap;
 	Model* model[NUM_MODELS];
 	int					seed;
+	CTicker				ticker;
 
 	enum { 
 		TEST_DIALOG,

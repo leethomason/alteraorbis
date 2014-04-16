@@ -37,7 +37,7 @@
 using namespace gamui;
 using namespace grinliz;
 
-TitleScene::TitleScene(LumosGame* game) : Scene(game), lumosGame(game), screenport(game->GetScreenport())
+TitleScene::TitleScene(LumosGame* game) : Scene(game), lumosGame(game), screenport(game->GetScreenport()), ticker(200)
 {
 	LayoutCalculator layout = lumosGame->DefaultLayout();
 
@@ -79,8 +79,8 @@ TitleScene::TitleScene(LumosGame* game) : Scene(game), lumosGame(game), screenpo
 	SetAudioButton();
 
 	testMap = new TestMap(64,62);
-	// FIXME: correct color
-	Color3F c = { 0.2f, 0.2f, 0.2f };
+	const Game::Palette* palette = game->GetPalette();
+	Color3F c = palette->Get3F(0, 6);
 	testMap->SetColor(c);
 
 	engine = new Engine(&screenport, game->GetDatabase(), testMap);
@@ -89,18 +89,19 @@ TitleScene::TitleScene(LumosGame* game) : Scene(game), lumosGame(game), screenpo
 	engine->lighting.direction.Set(0.3f, 1, 1);
 	engine->lighting.direction.Normalize();
 
-	model[TROLL] = engine->AllocModel("troll");
-	model[MANTIS] = engine->AllocModel("mantis");
-	model[HUMAN_MALE] = engine->AllocModel("humanMale");
+	model[TROLL]		= engine->AllocModel("troll");
+	model[MANTIS]		= engine->AllocModel("mantis");
+	model[HUMAN_MALE]	= engine->AllocModel("humanMale");
 	model[HUMAN_FEMALE] = engine->AllocModel("humanFemale");
-	model[RED_MANTIS] = engine->AllocModel("redmantis");
-	model[CYCLOPS] = engine->AllocModel("cyclops");
+	model[RED_MANTIS]	= engine->AllocModel("redmantis");
+	model[CYCLOPS]		= engine->AllocModel("cyclops");
 
 	static const float STEP = 0.4f;
 	for (int i = 0; i < NUM_MODELS; ++i) {
 		model[i]->SetPos(30.5f + float(i)*STEP, 
 						 0, 
 						 i < HUMAN_MALE ? 40.5f + float(i) : 42.5f - float(i-HUMAN_MALE));
+		model[i]->SetFlag(Model::MODEL_INVISIBLE);
 	}
 
 	float x = Mean(model[HUMAN_FEMALE]->Pos().x, model[HUMAN_MALE]->Pos().x);
@@ -142,7 +143,9 @@ void TitleScene::Resize()
 
 	// Dowside of a local Engine: need to resize it.
 	engine->GetScreenportMutable()->Resize(port.PhysicalWidth(), port.PhysicalHeight());
-
+	for (int i = 0; i < NUM_MODELS; ++i) {
+		model[i]->SetFlag(Model::MODEL_INVISIBLE);
+	}
 
 	background.SetPos( 0, 0 );
 	background.SetVisible(false);
@@ -289,3 +292,14 @@ void TitleScene::Draw3D(U32 deltaTime)
 }
 
 
+void TitleScene::DoTick(U32 delta)
+{
+	if (ticker.Delta(delta)) {
+		for (int i = 0; i < NUM_MODELS; ++i) {
+			if (model[i]->Flags() & Model::MODEL_INVISIBLE) {
+				model[i]->ClearFlag(Model::MODEL_INVISIBLE);
+				break;
+			}
+		}
+	}
+}
