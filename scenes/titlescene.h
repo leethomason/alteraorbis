@@ -21,10 +21,11 @@
 #include "../engine/screenport.h"
 
 class LumosGame;
-
+class TestMap;
 
 class TitleScene : public Scene
 {
+	typedef Scene super;
 public:
 	TitleScene( LumosGame* game );
 	virtual ~TitleScene();
@@ -37,6 +38,7 @@ public:
 	}
 	virtual void ItemTapped( const gamui::UIItem* item );
 	virtual void Draw3D(U32 deltaTime);
+	virtual void HandleHotKey(int value);
 
 private:
 	void SetAudioButton();
@@ -44,10 +46,22 @@ private:
 	LumosGame*		lumosGame;
 	gamui::Image	background;
 
+	enum {
+		MANTIS,
+		TROLL,
+		HUMAN_FEMALE,
+		HUMAN_MALE,
+		RED_MANTIS,
+		CYCLOPS,
+		NUM_MODELS
+	};
+
 	// FIXME: custom engine+screenport is a PITA and weird. Hard to fix though.
 	Screenport			screenport;
 	Engine*				engine;
-	Model* model;
+	TestMap*			testMap;
+	Model* model[NUM_MODELS];
+	int					seed;
 
 	enum { 
 		TEST_DIALOG,

@@ -23,6 +23,8 @@
 #include "../engine/settings.h"
 #include "../engine/engine.h"
 
+#include "../xegame/testmap.h"
+
 #include "../game/lumosgame.h"
 #include "../game/layout.h"
 #include "../game/team.h"
@@ -76,32 +78,61 @@ TitleScene::TitleScene(LumosGame* game) : Scene(game), lumosGame(game), screenpo
 	}
 	SetAudioButton();
 
-	engine = new Engine(&screenport, game->GetDatabase(), 0);
+	testMap = new TestMap(64,62);
+	// FIXME: correct color
+	Color3F c = { 0.2f, 0.2f, 0.2f };
+	testMap->SetColor(c);
+
+	engine = new Engine(&screenport, game->GetDatabase(), testMap);
 	engine->LoadConfigFiles("./res/particles.xml", "./res/lighting.xml");
 
-	model = engine->AllocModel("humanFemale");
+	engine->lighting.direction.Set(0.3f, 1, 1);
+	engine->lighting.direction.Normalize();
 
-	static const Vector3F CAM    = { 2.5, 0.3, 6.0 };
-	static const Vector3F TARGET = { 2.5f, 0, 2.5f };
-	Vector3F camTarget = TARGET;
-	camTarget.y = 0.7f;
+	model[TROLL] = engine->AllocModel("troll");
+	model[MANTIS] = engine->AllocModel("mantis");
+	model[HUMAN_MALE] = engine->AllocModel("humanMale");
+	model[HUMAN_FEMALE] = engine->AllocModel("humanFemale");
+	model[RED_MANTIS] = engine->AllocModel("redmantis");
+	model[CYCLOPS] = engine->AllocModel("cyclops");
 
-	model->SetPos(TARGET);
-	engine->CameraLookAt(CAM, camTarget);
+	static const float STEP = 0.4f;
+	for (int i = 0; i < NUM_MODELS; ++i) {
+		model[i]->SetPos(30.5f + float(i)*STEP, 
+						 0, 
+						 i < HUMAN_MALE ? 40.5f + float(i) : 42.5f - float(i-HUMAN_MALE));
+	}
 
-	HumanGen gen(true, 0, TEAM_HOUSE0, false);
-	ProcRenderInfo info;
-	gen.AssignSuit(&info);
-	model->SetTextureXForm(info.te.uvXForm);
-	model->SetColorMap(info.color);
-	model->SetBoneFilter(info.filterName, info.filter);
+	float x = Mean(model[HUMAN_FEMALE]->Pos().x, model[HUMAN_MALE]->Pos().x);
+	const Vector3F CAM    = { x, 0.5,  47.0 };
+	const Vector3F TARGET = { x, 0.7f, 42.5f };
+	seed = 0;
+
+	engine->CameraLookAt(CAM, TARGET);
+	{
+		HumanGen gen(true, 99, TEAM_HOUSE0, false);
+		ProcRenderInfo info;
+		gen.AssignSuit(&info);
+		model[HUMAN_FEMALE]->SetTextureXForm(info.te.uvXForm);
+		model[HUMAN_FEMALE]->SetColorMap(info.color);
+	}
+	{
+		HumanGen gen(false, 1, TEAM_HOUSE0, false);
+		ProcRenderInfo info;
+		gen.AssignSuit(&info);
+		model[HUMAN_MALE]->SetTextureXForm(info.te.uvXForm);
+		model[HUMAN_MALE]->SetColorMap(info.color);
+	}
 }
 
 
 TitleScene::~TitleScene()
 {
-	engine->FreeModel(model);
+	for (int i = 0; i < NUM_MODELS; ++i) {
+		engine->FreeModel(model[i]);
+	}
 	delete engine;
+	delete testMap;
 }
 
 
@@ -225,6 +256,24 @@ void TitleScene::ItemTapped( const gamui::UIItem* item )
 	else if (item == &audioButton) {
 		SettingsManager::Instance()->SetAudioOn(audioButton.Down());
 		SetAudioButton();
+	}
+}
+
+void TitleScene::HandleHotKey(int key)
+{
+	if (key == GAME_HK_SPACE) {
+		seed++;
+		GLOUTPUT(("Seed=%d\n", seed));
+		{
+			HumanGen gen(true, seed, TEAM_HOUSE0, false);
+			ProcRenderInfo info;
+			gen.AssignSuit(&info);
+			model[HUMAN_FEMALE]->SetTextureXForm(info.te.uvXForm);
+			model[HUMAN_FEMALE]->SetColorMap(info.color);
+		}
+	}
+	else {
+		super::HandleHotKey(key);
 	}
 }
 
