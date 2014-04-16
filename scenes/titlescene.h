@@ -18,6 +18,7 @@
 
 #include "../xegame/scene.h"
 #include "../gamui/gamui.h"
+#include "../engine/screenport.h"
 
 class LumosGame;
 
@@ -26,7 +27,7 @@ class TitleScene : public Scene
 {
 public:
 	TitleScene( LumosGame* game );
-	virtual ~TitleScene() {}
+	virtual ~TitleScene();
 
 	virtual void Resize();
 
@@ -35,12 +36,18 @@ public:
 		ProcessTap( action, screen, world );
 	}
 	virtual void ItemTapped( const gamui::UIItem* item );
+	virtual void Draw3D(U32 deltaTime);
 
 private:
 	void SetAudioButton();
 
 	LumosGame*		lumosGame;
 	gamui::Image	background;
+
+	// FIXME: custom engine+screenport is a PITA and weird. Hard to fix though.
+	Screenport			screenport;
+	Engine*				engine;
+	Model* model;
 
 	enum { 
 		TEST_DIALOG,

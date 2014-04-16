@@ -21,18 +21,21 @@
 #include "../engine/uirendering.h"
 #include "../engine/texture.h"
 #include "../engine/settings.h"
+#include "../engine/engine.h"
 
 #include "../game/lumosgame.h"
 #include "../game/layout.h"
+#include "../game/team.h"
 
 #include "../script/battlemechanics.h"
+#include "../script/procedural.h"
 
 #include "../audio/xenoaudio.h"
 
 using namespace gamui;
 using namespace grinliz;
 
-TitleScene::TitleScene( LumosGame* game ) : Scene( game ), lumosGame( game ) 
+TitleScene::TitleScene(LumosGame* game) : Scene(game), lumosGame(game), screenport(game->GetScreenport())
 {
 	LayoutCalculator layout = lumosGame->DefaultLayout();
 
@@ -72,6 +75,33 @@ TitleScene::TitleScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 		audioButton.SetUp();
 	}
 	SetAudioButton();
+
+	engine = new Engine(&screenport, game->GetDatabase(), 0);
+	engine->LoadConfigFiles("./res/particles.xml", "./res/lighting.xml");
+
+	model = engine->AllocModel("humanFemale");
+
+	static const Vector3F CAM    = { 2.5, 0.3, 6.0 };
+	static const Vector3F TARGET = { 2.5f, 0, 2.5f };
+	Vector3F camTarget = TARGET;
+	camTarget.y = 0.7f;
+
+	model->SetPos(TARGET);
+	engine->CameraLookAt(CAM, camTarget);
+
+	HumanGen gen(true, 0, TEAM_HOUSE0, false);
+	ProcRenderInfo info;
+	gen.AssignSuit(&info);
+	model->SetTextureXForm(info.te.uvXForm);
+	model->SetColorMap(info.color);
+	model->SetBoneFilter(info.filterName, info.filter);
+}
+
+
+TitleScene::~TitleScene()
+{
+	engine->FreeModel(model);
+	delete engine;
 }
 
 
@@ -79,7 +109,12 @@ void TitleScene::Resize()
 {
 	const Screenport& port = game->GetScreenport();
 
+	// Dowside of a local Engine: need to resize it.
+	engine->GetScreenportMutable()->Resize(port.PhysicalWidth(), port.PhysicalHeight());
+
+
 	background.SetPos( 0, 0 );
+	background.SetVisible(false);
 
 	float aspect = port.UIAspectRatio();
 	if ( aspect >= 0.5f ) {
@@ -193,5 +228,15 @@ void TitleScene::ItemTapped( const gamui::UIItem* item )
 	}
 }
 
+
+void TitleScene::Draw3D(U32 deltaTime)
+{
+	if (!engine) return;
+
+	// we use our own screenport
+	screenport.SetPerspective();
+	engine->Draw(deltaTime, 0, 0);
+	screenport.SetUI();
+}
 
 
