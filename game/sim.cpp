@@ -561,9 +561,44 @@ void Sim::DoWeatherEffects( U32 delta )
 }
 
 
+void Sim::UpdateUIElements(const Model* models[], int n)
+{	
+	for (int i = 0; i < n; ++i) {
+		Chit* chit = models[i]->userData;
+		if (chit) {
+			// Remove it from the uiChits so that we can tell what is no longer used.
+			int index = uiChits.Find(chit->ID());
+			uiChits.SwapRemove(index);	// safe to -1
+
+			RenderComponent* rc = chit->GetRenderComponent();
+			if (rc) {
+				rc->PositionIcons(true);
+			}
+		}
+	}
+	// Everything remaining in the uiChits is no longer in use:
+	for (int i = 0; i < uiChits.Size(); ++i) {
+		Chit* chit = chitBag->GetChit(uiChits[i]);
+		if (chit && chit->GetRenderComponent()) {
+			chit->GetRenderComponent()->PositionIcons(false);	// now off-screen
+		}
+	}
+
+	// Now move the current list to the UI chits for the next frame:
+	// (And remember to use IDs - the Chits can be deleted at any time.)
+	uiChits.Clear();
+	for (int i = 0; i < n; ++i) {
+		Chit* chit = models[i]->userData;
+		if (chit) {
+			uiChits.Push(chit->ID());
+		}
+	}
+}
+
+
 void Sim::Draw3D( U32 deltaTime )
 {
-	engine->Draw( deltaTime, chitBag->BoltMem(), chitBag->NumBolts() );
+	engine->Draw( deltaTime, chitBag->BoltMem(), chitBag->NumBolts(), this );
 	
 #if 0
 	// Debug port locations.

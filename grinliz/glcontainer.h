@@ -247,6 +247,10 @@ public:
 	}
 
 	void SwapRemove( int i ) {
+		if (i < 0) {
+			GLASSERT(i == -1);
+			return;
+		}
 		GLASSERT( i<(int)size );
 		GLASSERT( size > 0 );
 		

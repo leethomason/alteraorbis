@@ -24,9 +24,12 @@
 
 #include "gamelimits.h"
 #include "visitor.h"
+
 #include "../xegame/cticker.h"
 #include "../xegame/chit.h"
 #include "../xegame/stackedsingleton.h"
+
+#include "../engine/engine.h"
 
 class Engine;
 class WorldMap;
@@ -41,7 +44,7 @@ class NewsHistory;
 class ItemDB;
 class CoreScript;
 
-class Sim : public IChitListener, public StackedSingleton<Sim>
+class Sim : public IChitListener, public StackedSingleton<Sim>, public IUITracker
 {
 public:
 	Sim( LumosGame* game );
@@ -80,6 +83,9 @@ public:
 	// Listens for cores to be destroyed and re-creates.
 	virtual void OnChitMsg(Chit* chit, const ChitMsg& msg);
 
+	// IUITracker
+	void UpdateUIElements(const Model* model[], int nModels);
+
 private:
 	void CreateCores();
 	void CreateRockInOutland();
@@ -105,6 +111,7 @@ private:
 
 	grinliz::CDynArray< Chit* >	queryArr;					// local; cached at object.
 	grinliz::CDynArray< grinliz::Vector2I > coreCreateList;	// list of cores that were deleted, need to be re-created after DoTick
+	grinliz::CDynArray< int > uiChits;						// chits that have displayed UI elements
 };
 
 

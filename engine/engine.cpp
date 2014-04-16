@@ -61,6 +61,7 @@ Engine::Engine( Screenport* port, const gamedb::Reader* database, Map* m )
 {
 	map = m;
 	temperature = 0;
+	frame = 0;
 	if ( map ) 
 		spaceTree = new SpaceTree( -0.1f, 3.1f, Max( m->Width(), m->Height() ) );
 	else
@@ -252,14 +253,15 @@ void Engine::QueueSet(	EngineShaders* engineShaders, Model* root,
 }
 
 
-void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
+void Engine::Draw(U32 deltaTime, const Bolt* bolts, int nBolts, IUITracker* tracker)
 {
 	PROFILE_FUNC();
-	for( int i=0; i<NUM_MODEL_DRAW_CALLS; ++i )
+	++frame;
+	for (int i = 0; i < NUM_MODEL_DRAW_CALLS; ++i)
 		modelDrawCalls[i] = 0;
 
 	// -------- Camera & Frustum -------- //
-	screenport->SetView( camera.ViewMatrix() );	// Draw the camera
+	screenport->SetView(camera.ViewMatrix());	// Draw the camera
 
 	if (XenoAudio::Instance()) {
 		Vector3F lookingAt = { 0, 0, 0 };
@@ -273,27 +275,36 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 #ifdef DEBUG
 	{
 		Vector3F at;
-		CameraLookingAt( &at );
+		CameraLookingAt(&at);
 		//GLOUTPUT(( "View set. Camera at (%.1f,%.1f,%.1f) looking at (%.1f,%.1f,%.1f)\n",
 		//	camera.PosWC().x, camera.PosWC().y, camera.PosWC().z,
 		//	at.x, at.y, at.z ));
-		if ( map ) {
+		if (map) {
 			Rectangle2I b = map->Bounds();
-			b.Outset( 20 );
-			if ( !b.Contains( (int)at.x, (int)at.z ) ) {
-				GLASSERT( 0 );	// looking at nothing.
+			b.Outset(20);
+			if (!b.Contains((int)at.x, (int)at.z)) {
+				GLASSERT(0);	// looking at nothing.
 			}
 		}
 	}
 #endif
-				
+
 	// Compute the frustum planes and query the tree.
 	Plane planes[6];
-	CalcFrustumPlanes( planes );
+	CalcFrustumPlanes(planes);
 
 	// Get the working set of models.
 	int exclude = Model::MODEL_INVISIBLE;
-	Model* modelRoot = spaceTree->Query( planes, 6, 0, true, 0, exclude );
+	Model* modelRoot = spaceTree->Query(planes, 6, 0, true, 0, exclude);
+
+	// Track the UI relevant ones:
+	trackedModels.Clear();
+	for( Model* m=modelRoot; m; m=m->next ) {
+		if (m->Flags() & Model::MODEL_UI_TRACK) {
+			trackedModels.Push(m);
+		}
+	}
+
 	if ( map && (stages & STAGE_VOXEL) ) {
 #ifdef ENGINE_DETAILED_PROFILE
 		PROFILE_BLOCK( MapPrep );
@@ -510,6 +521,10 @@ void Engine::Draw( U32 deltaTime, const Bolt* bolts, int nBolts )
 	}
 
 	// Overlay elements
+	if (tracker) {
+		tracker->UpdateUIElements(trackedModels.Mem(), trackedModels.Size());
+	}
+
 	screenport->SetUI();
 	overlay.Render();
 	screenport->SetPerspective();

@@ -115,10 +115,13 @@ public:
 	void AddDeco( const char* name, int duration );
 	void RemoveDeco( const char* name );
 	// if null/empty, uses the proper name if it exists.
-	void SetDecoText( const char* text )	{ decoText = text; }
+	void SetDecoText(const char* text);
 
 	static grinliz::MemoryPoolT< gamui::TextLabel > textLabelPool;
 	static grinliz::MemoryPoolT< gamui::Image > imagePool;
+
+	// Rendering callback. For positioning UI icons only.
+	void PositionIcons(bool inUse);
 
 private:
 	int CalcAnimation() const;

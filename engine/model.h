@@ -261,6 +261,7 @@ public:
 		MODEL_TEXTURE0_XFORM		= (1<<5),
 		MODEL_TEXTURE0_CLIP			= (1<<6),
 		MODEL_TEXTURE0_COLORMAP		= (1<<7),
+		MODEL_UI_TRACK				= (1<<8),
 
 		MODEL_USER					= (1<<16)		// reserved for user code.
 	};

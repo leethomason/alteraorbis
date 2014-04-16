@@ -57,6 +57,12 @@ void DebugLine(	const grinliz::Vector3F& tail,
 
 void DrawDebugLines( U32 delta );
 
+class IUITracker
+{
+public:
+	virtual void UpdateUIElements(const Model* model[], int nModels) = 0;
+};
+
 /*
 	Standard state:
 	Z-Write		enabled
@@ -93,7 +99,7 @@ public:
 	ParticleSystem*	particleSystem;
 
 	// Send everything to the GPU
-	void Draw( U32 deltaTime, const Bolt* bolts=0, int nBolts=0 );
+	void Draw( U32 deltaTime, const Bolt* bolts=0, int nBolts=0, IUITracker* tracker=0 );
 
 	enum {
 		GLOW_BLACK,
@@ -215,6 +221,7 @@ private:
 	int		initZoomDistance;
 	int		stages;
 	float	temperature;
+	int		frame;
 	
 	Map*			map;
 	SpaceTree*		spaceTree;
@@ -223,6 +230,7 @@ private:
 
 	RenderTarget* renderTarget[RT_COUNT];
 
+	grinliz::CDynArray<const Model*> trackedModels;
 	UIRenderer uiRenderer;
 };
 

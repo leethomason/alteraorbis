@@ -219,7 +219,7 @@ void MapScene::SetText()
 			if ( sd.HasCore() ) {
 				const char* owner = "<none>";
 				CoreScript* cc = CoreScript::GetCore( sector );
-				if ( cc->InUse() ) {
+				if ( cc && cc->InUse() ) {
 					owner = TeamName( cc->PrimaryTeam() ).c_str();
 				}
 				str.Format( "%s\n%s\n%d-%d-%d G%d", sd.name, owner, low, med, high, greater );

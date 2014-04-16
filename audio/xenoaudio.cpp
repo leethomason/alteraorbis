@@ -147,6 +147,7 @@ void XenoAudio::SetListener(const grinliz::Vector3F& pos, const grinliz::Vector3
 
 void XenoAudio::SetChannelPos(int i)
 {
+	if (!audioOn) return;
 #ifdef DEBUG
 	if (Mix_Playing(i)) {
 		int debug = 1;

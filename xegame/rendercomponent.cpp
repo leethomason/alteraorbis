@@ -402,7 +402,13 @@ void RenderComponent::AddDeco( const char* asset, int duration )
 		icon->time = duration;
 		icon->rotation = 90.0f;
 	}
-	parentChit->SetTickNeeded();	// fixme: the whole ui problem...will be off if scrolls
+	model[0]->SetFlag(Model::MODEL_UI_TRACK);
+}
+
+void RenderComponent::SetDecoText(const char* text)	
+{ 
+	decoText = text; 
+	model[0]->SetFlag(Model::MODEL_UI_TRACK);
 }
 
 
@@ -416,6 +422,74 @@ void RenderComponent::RemoveDeco( const char* asset )
 			imagePool.Delete( icons[i].image );
 			icons.Remove( i );
 			--i;
+		}
+	}
+}
+
+
+/*
+	This is a callback *during* rendering.
+	Only for positioning UI elements.
+*/
+void RenderComponent::PositionIcons(bool inUse)
+{
+	static const float SIZE = 25.0f;
+	const ChitContext* context = this->GetChitContext();
+
+	if (inUse) {
+		const Screenport& port = context->engine->GetScreenport();
+
+		Vector2F ui = { 0, 0 };
+		const Rectangle3F aabb = model[0]->AABB();
+		const Vector3F pos = model[0]->Pos();
+		Vector3F topCenter = { pos.x, aabb.max.y, pos.z };
+
+		port.WorldToUI(topCenter, &ui);
+		Rectangle2F uiBounds;
+		uiBounds.Set(0, 0, port.UIWidth(), port.UIHeight());
+		uiBounds.Outset(port.UIHeight() * 0.25f);
+
+		if (uiBounds.Contains(ui)) {
+			if (!textLabel) {
+				textLabel = textLabelPool.New();
+				textLabel->Init(&context->engine->overlay);
+			}
+			float width = icons.Size() * SIZE;
+			float dy = SIZE * 0.5f;
+
+			textLabel->SetText(decoText.safe_str());
+			textLabel->SetVisible(true);
+			textLabel->SetCenterPos(ui.x, ui.y - dy);
+
+			if (!decoText.empty()) {
+				dy += SIZE;
+			}
+
+			for (int i = 0; i<icons.Size(); ++i) {
+				if (!icons[i].image) {
+					icons[i].image = imagePool.New();
+					icons[i].image->Init(&context->engine->overlay, icons[i].atom, false);
+				}
+				icons[i].image->SetSize(SIZE, SIZE);
+				icons[i].image->SetCenterPos(ui.x - width*0.5f + (float)(i)*SIZE + SIZE*0.5f,
+					ui.y - dy);
+				icons[i].image->SetVisible(true);
+
+				if (icons[i].rotation >= 0) {
+					icons[i].image->SetRotationY(icons[i].rotation);
+				}
+				else {
+					icons[i].image->SetRotationY(0);
+				}
+			}
+		}
+	}
+	else {
+		textLabelPool.Delete(textLabel);
+		textLabel = 0;
+		for (int i = 0; i<icons.Size(); ++i) {
+			imagePool.Delete(icons[i].image);
+			icons[i].image = 0;
 		}
 	}
 }
@@ -444,84 +518,20 @@ void RenderComponent::ProcessIcons( int delta )
 	Vector3F pos = { 0, 0, 0 };
 	if ( sc ) pos = sc->GetPosition();
 
-	bool inView = false;
-	static const float SIZE = 25.0f;
-
 	const ChitContext* context = GetChitContext();
 	float len2 = ( context->engine->camera.PosWC() - pos ).LengthSquared();
 	
-	IString proper;
+	// HACK
+	// should be somewhere else
 	GameItem* gameItem = parentChit->GetItem();
-	if ( gameItem ) {
-		if (gameItem->IName() != "core") {
-			proper = gameItem->IProperName();
-		}
-	}
-
-	if ( len2 < EL_FAR*EL_FAR && ( icons.Size() || !proper.empty() || !decoText.empty() )) {
-		const Screenport& port = context->engine->GetScreenport();
-		
-		Vector2F ui = { 0, 0 };
-		const Rectangle3F aabb = model[0]->AABB();
-		Vector3F topCenter = { pos.x, aabb.max.y, pos.z };
-
-		port.WorldToUI( topCenter, &ui );
-		Rectangle2F uiBounds;
-		uiBounds.Set( 0, 0, port.UIWidth(), port.UIHeight() );
-		uiBounds.Outset( port.UIHeight() * 0.25f );
-
-		if ( uiBounds.Contains( ui )) {
-			if ( !textLabel ) {
-				textLabel = textLabelPool.New();
-				textLabel->Init(  &context->engine->overlay );
-			}
-			inView = true;
-			float width = icons.Size() * SIZE;
-			float dy = SIZE * 0.5f;
-
+	if (gameItem && gameItem->keyValues.GetIString("mob") != IString()) {
+		decoText.Clear();
+		IString proper;
+		proper = gameItem->IProperName();
+		if (!proper.empty()) {
 			CStr<24> str;
-			
-			if ( !decoText.empty() ) {
-				str = decoText;
-			}
-			else if ( !proper.empty() ) {
-				str.Format( "%s %d", proper.safe_str(), parentChit->GetItem()->Traits().Level() );
-			}
-			
-			textLabel->SetText( str.safe_str() );
-			textLabel->SetVisible( true );
-			textLabel->SetCenterPos( ui.x, ui.y - dy );
-			
-			if ( !proper.empty() ) {
-				dy += SIZE;
-			}
-
-			for( int i=0; i<icons.Size(); ++i ) {
-				if ( !icons[i].image ) {
-					icons[i].image = imagePool.New();
-					icons[i].image->Init( &context->engine->overlay, icons[i].atom, false );
-				}
-				icons[i].image->SetSize( SIZE, SIZE );
-				icons[i].image->SetCenterPos( ui.x - width*0.5f + (float)(i)*SIZE + SIZE*0.5f, 
-											  ui.y - dy );
-				icons[i].image->SetVisible( true );
-
-				if ( icons[i].rotation >= 0 ) {
-					icons[i].image->SetRotationY( icons[i].rotation );
-				}
-				else {
-					icons[i].image->SetRotationY( 0 );
-				}
-			}
-		}
-	}
-
-	if ( !inView ) {
-		textLabelPool.Delete( textLabel );
-		textLabel = 0;
-		for( int i=0; i<icons.Size(); ++i ) {
-			imagePool.Delete( icons[i].image );
-			icons[i].image = 0;
+			str.Format("%s %d", proper.safe_str(), parentChit->GetItem()->Traits().Level());
+			SetDecoText(str.c_str());
 		}
 	}
 }
