@@ -58,8 +58,22 @@ public:
 class MOBIshFilter : public IChitAccept
 {
 public:
+	MOBIshFilter() : relateTo(0), relationship(0) {}
+	// If set, will check for a relationship.
+
 	virtual bool Accept(Chit* chit);
 	virtual int  Type() { return MOB; }
+
+	void CheckRelationship(Chit* compareTo, int status) {
+		relateTo = compareTo;
+		relationship = status;
+	}
+
+private:
+	bool RelateAccept( Chit* chit) const;
+
+	Chit* relateTo;
+	int relationship;
 };
 
 

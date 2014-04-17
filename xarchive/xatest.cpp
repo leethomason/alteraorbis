@@ -245,16 +245,18 @@ int main( int argc, const char* argv[] )
 	}
 	{
 		FILE* fp = 0;
-		fopen_s( &fp, "microdbtest.dat", "rb" );
-		StreamReader reader( fp );
-		MicroDB microdb;
-		microdb.Serialize( &reader, "test" );
+		fopen_s(&fp, "microdbtest.dat", "rb");
+		if (fp) {
+			StreamReader reader(fp);
+			MicroDB microdb;
+			microdb.Serialize(&reader, "test");
 
-		float f;
-		microdb.Get( "3val", &f );
-		printf( "Get: %f\n", f );
+			float f;
+			microdb.Get("3val", &f);
+			printf("Get: %f\n", f);
 
-		fclose( fp );
+			fclose(fp);
+		}
 	}
 	{
 		{

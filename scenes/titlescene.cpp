@@ -21,22 +21,27 @@
 #include "../engine/uirendering.h"
 #include "../engine/texture.h"
 #include "../engine/settings.h"
+#include "../engine/engine.h"
+
+#include "../xegame/testmap.h"
 
 #include "../game/lumosgame.h"
 #include "../game/layout.h"
+#include "../game/team.h"
 
 #include "../script/battlemechanics.h"
+#include "../script/procedural.h"
 
 #include "../audio/xenoaudio.h"
 
 using namespace gamui;
 using namespace grinliz;
 
-TitleScene::TitleScene( LumosGame* game ) : Scene( game ), lumosGame( game ) 
+TitleScene::TitleScene(LumosGame* game) : Scene(game), lumosGame(game), screenport(game->GetScreenport()), ticker(200)
 {
 	LayoutCalculator layout = lumosGame->DefaultLayout();
 
-	RenderAtom batom = game->CreateRenderAtom( UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, "title" );
+	RenderAtom batom = game->CreateRenderAtom( UIRenderer::RENDERSTATE_UI_NORMAL, "title" );
 	background.Init( &gamui2D, batom, false );
 
 	static const char* testSceneName[NUM_TESTS] = { "Dialog", 
@@ -72,6 +77,89 @@ TitleScene::TitleScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 		audioButton.SetUp();
 	}
 	SetAudioButton();
+
+	testMap = new TestMap(64,62);
+	const Game::Palette* palette = game->GetPalette();
+	Color3F c = palette->Get3F(0, 6);
+	testMap->SetColor(c);
+
+	engine = new Engine(&screenport, game->GetDatabase(), testMap);
+	engine->LoadConfigFiles("./res/particles.xml", "./res/lighting.xml");
+
+	engine->lighting.direction.Set(0.3f, 1, 1);
+	engine->lighting.direction.Normalize();
+
+	model[TROLL]		= engine->AllocModel("troll");
+	model[MANTIS]		= engine->AllocModel("mantis");
+	model[HUMAN_MALE]	= engine->AllocModel("humanMale");
+	model[HUMAN_FEMALE] = engine->AllocModel("humanFemale");
+	model[RED_MANTIS]	= engine->AllocModel("redmantis");
+	model[CYCLOPS]		= engine->AllocModel("cyclops");
+
+	Vector3F forward = { 0, 0, 1 };
+	Vector3F across = { 0.4f, 0, 0 };
+
+	static const float STEP = 0.4f;
+	for (int i = 0; i < NUM_MODELS; ++i) {
+		Vector3F v = { 30.5f, 0, 39.5f };
+		v = v + float(i) * across;
+		if (i < HUMAN_MALE)		v = v + float(i)*forward;
+		if (i >= HUMAN_MALE)	v = v + float(HUMAN_MALE-1)*forward - float(i - HUMAN_MALE)*forward;
+		model[i]->SetPos(v);
+
+//		model[i]->SetPos(30.5f + float(i)*STEP, 
+//						 0, 
+//						 i < HUMAN_MALE ? 40.5f + float(i) : 42.5f - float(i-HUMAN_MALE));
+		model[i]->SetFlag(Model::MODEL_INVISIBLE);
+	}
+
+	float x = Mean(model[HUMAN_FEMALE]->Pos().x, model[HUMAN_MALE]->Pos().x);
+	const Vector3F CAM    = { x, 0.5,  47.0 };
+	const Vector3F TARGET = { x, 0.7f, 42.5f };
+	seed = 0;
+
+	engine->CameraLookAt(CAM, TARGET);
+	{
+		HumanGen gen(true, 99, TEAM_HOUSE0, false);
+		ProcRenderInfo info;
+		gen.AssignSuit(&info);
+		model[HUMAN_FEMALE]->SetTextureXForm(info.te.uvXForm);
+		model[HUMAN_FEMALE]->SetColorMap(info.color);
+	}
+	{
+		HumanGen gen(false, 1, TEAM_HOUSE0, false);
+		ProcRenderInfo info;
+		gen.AssignSuit(&info);
+		model[HUMAN_MALE]->SetTextureXForm(info.te.uvXForm);
+		model[HUMAN_MALE]->SetColorMap(info.color);
+	}
+}
+
+
+TitleScene::~TitleScene()
+{
+	DeleteEngine();
+}
+
+
+Color4F TitleScene::ClearColor()
+{
+	const Game::Palette* palette = game->GetPalette();
+	return palette->Get4F(0, 5);
+}
+
+
+void TitleScene::DeleteEngine()
+{
+	for (int i = 0; i < NUM_MODELS; ++i) {
+		engine->FreeModel(model[i]);
+		model[i] = 0;
+	}
+	delete engine;
+	delete testMap;
+
+	engine = 0;
+	testMap = 0;
 }
 
 
@@ -79,7 +167,16 @@ void TitleScene::Resize()
 {
 	const Screenport& port = game->GetScreenport();
 
+	// Dowside of a local Engine: need to resize it.
+	if (engine) {
+		engine->GetScreenportMutable()->Resize(port.PhysicalWidth(), port.PhysicalHeight());
+		for (int i = 0; i < NUM_MODELS; ++i) {
+			if (model[i])
+				model[i]->SetFlag(Model::MODEL_INVISIBLE);
+		}
+	}
 	background.SetPos( 0, 0 );
+	//background.SetVisible(false);
 
 	float aspect = port.UIAspectRatio();
 	if ( aspect >= 0.5f ) {
@@ -191,7 +288,55 @@ void TitleScene::ItemTapped( const gamui::UIItem* item )
 		SettingsManager::Instance()->SetAudioOn(audioButton.Down());
 		SetAudioButton();
 	}
+
+	// If any scene gets pushed, throw away the engine resources.
+	// Don't want to have an useless engine sitting around at
+	// the top of the scene stack.
+	if (game->IsScenePushed()) {
+		DeleteEngine();
+	}
+}
+
+void TitleScene::HandleHotKey(int key)
+{
+	if (key == GAME_HK_SPACE) {
+		seed++;
+		GLOUTPUT(("Seed=%d\n", seed));
+		if (model[HUMAN_FEMALE]) {
+			HumanGen gen(true, seed, TEAM_HOUSE0, false);
+			ProcRenderInfo info;
+			gen.AssignSuit(&info);
+			model[HUMAN_FEMALE]->SetTextureXForm(info.te.uvXForm);
+			model[HUMAN_FEMALE]->SetColorMap(info.color);
+		}
+	}
+	else {
+		super::HandleHotKey(key);
+	}
 }
 
 
+void TitleScene::Draw3D(U32 deltaTime)
+{
+	if (!engine) return;
 
+	// we use our own screenport
+	screenport.SetPerspective();
+	engine->Draw(deltaTime, 0, 0);
+	screenport.SetUI();
+}
+
+
+void TitleScene::DoTick(U32 delta)
+{
+	if (ticker.Delta(delta)) {
+		if (model[0]) {
+			for (int i = 0; i < NUM_MODELS; ++i) {
+				if (model[i]->Flags() & Model::MODEL_INVISIBLE) {
+					model[i]->ClearFlag(Model::MODEL_INVISIBLE);
+					break;
+				}
+			}
+		}
+	}
+}

@@ -72,6 +72,8 @@ int FarmScript::GrowFruitTime( int stage, int nPlants )
 void FarmScript::ComputeFarmBound()
 {
 	MapSpatialComponent* msc = GET_SUB_COMPONENT(scriptContext->chit, SpatialComponent, MapSpatialComponent);
+	GLASSERT(msc);
+	if (!msc) return;
 	Vector2I pos2i = msc->MapPosition();
 
 	// Other farms clip this if they are too close.
@@ -111,6 +113,7 @@ int FarmScript::DoTick( U32 delta )
 {
 	int n = timer.Delta( delta );
 	MapSpatialComponent* msc = GET_SUB_COMPONENT( scriptContext->chit, SpatialComponent, MapSpatialComponent );
+	if (!msc) return VERY_LONG_TICK;	// static analysis
 
 	while ( n && msc ) {
 		--n;

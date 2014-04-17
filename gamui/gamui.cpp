@@ -977,8 +977,9 @@ void ToggleButton::RemoveFromToggleGroup()
 void ToggleButton::AddToToggleGroup( ToggleButton* button )
 {
 	// Used to assert, but easy mistake and sometimes useful to not have to check.
-	if ( button == this )
+	if ( !button || button == this )
 		return;
+
 	GAMUIASSERT( this->m_next && button->m_next );
 	if ( this->m_next && button->m_next ) {
 

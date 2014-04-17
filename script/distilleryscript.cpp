@@ -90,7 +90,7 @@ int DistilleryScript::DoTick( U32 delta )
 		}
 	}
 	
-	if (ic->FindItem(IStringConst::fruit) < 0) {
+	if (ic && ic->FindItem(IStringConst::fruit) < 0) {
 		// No fruit, no progress.
 		progress = 0;
 	}

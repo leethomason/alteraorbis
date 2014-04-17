@@ -352,12 +352,15 @@ int RenderComponent::DoTick( U32 deltaTime )
 
 
 	// Position the attachments relative to the parent.
-	const ModelHeader& header =  model[0]->GetResource()->header;
-	for( int i=1; i<NUM_MODELS; ++i ) {
-		if ( model[i] ) {
-			Matrix4 xform;
-			model[0]->CalcMetaData( i, &xform );
-			model[i]->SetTransform( xform );
+	GLASSERT(model[0]);
+	if (model[0]) {
+		const ModelHeader& header = model[0]->GetResource()->header;
+		for (int i = 1; i < NUM_MODELS; ++i) {
+			if (model[i]) {
+				Matrix4 xform;
+				model[0]->CalcMetaData(i, &xform);
+				model[i]->SetTransform(xform);
+			}
 		}
 	}
 

@@ -12,6 +12,7 @@
 #include "farmscript.h"
 #include "distilleryscript.h"
 #include "evalbuildingscript.h"
+#include "guardscript.h"
 
 #include "../game/lumoschitbag.h"
 
@@ -51,6 +52,9 @@ ScriptComponent::ScriptComponent( const ComponentFactory* f ) : script( 0 ), fac
 	}
 	else if (name == "EvalBuildingScript") {
 		script = new EvalBuildingScript();
+	}
+	else if (name == "GuardScript") {
+		script = new GuardScript();
 	}
 	else {
 		GLASSERT( 0 );

@@ -879,17 +879,24 @@ bool MOBKeyFilter::Accept(Chit* chit)
 }
 
 
+bool MOBIshFilter::RelateAccept( Chit* chit ) const
+{
+	if (!relateTo) return true;	// not doing the check.
+	return GetRelationship(chit, relateTo) == relationship;
+}
+
+
 bool MOBIshFilter::Accept(Chit* chit)
 {
 	// If it can move and has a team...?
 	// Mostly a good metric. Doesn't account for dummy targets.
 	PathMoveComponent* pmc = GET_SUB_COMPONENT(chit, MoveComponent, PathMoveComponent);
 	if (pmc && chit->PrimaryTeam()) {
-		return true;
+		return RelateAccept(chit);
 	}
 	GameItem* item = chit->GetItem();
 	if (item && item->IName() == IStringConst::dummyTarget) {
-		return true;
+		return RelateAccept(chit);
 	}
 	return false;
 }

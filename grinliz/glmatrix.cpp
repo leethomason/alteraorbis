@@ -277,7 +277,10 @@ bool Matrix4::IsRotation() const
 void Matrix4::Transpose( Matrix4* transpose ) const
 {
 	GLASSERT( transpose != this );
-  for (int r = 0; r < 4; ++r) {
+	GLASSERT(transpose);
+	if (!transpose) return;
+
+	for (int r = 0; r < 4; ++r) {
         for (int c = 0; c < 4; ++c) {
 			transpose->x[INDEX(c,r)] = x[INDEX(r,c)];
         }

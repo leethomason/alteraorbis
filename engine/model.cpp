@@ -623,11 +623,14 @@ void Model::CalcAnimation()
 	}
 
 	if ( !cached ) {
-		// The animationResource returns boneMats in armature order.
-		// They need to be submitted in Model order.
-		for( int i=0; i<EL_MAX_BONES; ++i ) {
-			if ( auxBone->animToModelMap[i] >= 0 ) {
-				auxBone->boneMats[auxBone->animToModelMap[i]] = animMats[i];
+		GLASSERT(auxBone);
+		if (auxBone) {
+			// The animationResource returns boneMats in armature order.
+			// They need to be submitted in Model order.
+			for (int i = 0; i < EL_MAX_BONES; ++i) {
+				if (auxBone->animToModelMap[i] >= 0) {
+					auxBone->boneMats[auxBone->animToModelMap[i]] = animMats[i];
+				}
 			}
 		}
 	}

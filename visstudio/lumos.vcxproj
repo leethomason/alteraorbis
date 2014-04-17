@@ -164,6 +164,7 @@
     <ClCompile Include="..\script\evalbuildingscript.cpp" />
     <ClCompile Include="..\script\farmscript.cpp" />
     <ClCompile Include="..\script\forgescript.cpp" />
+    <ClCompile Include="..\script\guardscript.cpp" />
     <ClCompile Include="..\script\itemscript.cpp" />
     <ClCompile Include="..\script\plantscript.cpp" />
     <ClCompile Include="..\script\procedural.cpp" />
@@ -287,6 +288,7 @@
     <ClInclude Include="..\script\evalbuildingscript.h" />
     <ClInclude Include="..\script\farmscript.h" />
     <ClInclude Include="..\script\forgescript.h" />
+    <ClInclude Include="..\script\guardscript.h" />
     <ClInclude Include="..\script\itemscript.h" />
     <ClInclude Include="..\script\plantscript.h" />
     <ClInclude Include="..\script\procedural.h" />

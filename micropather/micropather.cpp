@@ -914,6 +914,9 @@ int MicroPather::Solve( void* startNode, void* endNode, MP_VECTOR< void* >* path
 					continue;
 				}
 				PathNode* child = nodeCostVec[i].node;
+				MPASSERT(child);
+				if (!child) continue;	// should never happen; here for static analysis.
+
 				float newCost = node->costFromStart + nodeCostVec[i].cost;
 
 				PathNode* inOpen   = child->inOpen ? child : 0;

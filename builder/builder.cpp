@@ -345,6 +345,7 @@ void ProcessMarkov( XMLElement* data )
 
 	if ( !read ) {
 		ExitError( "Markov", pathName.c_str(), assetName.c_str(), "Could not load file." );
+		return;	// for static analysis
 	}
 
 	MarkovBuilder builder;
@@ -750,6 +751,7 @@ void ProcessTexture( XMLElement* texture )
 		const XMLElement* atlasEle = doc.FirstChildElement( "TextureAtlas" );
 		if ( !atlasEle ) {
 			ExitError( "ProcessTexture", tableName, 0, "Failed to load texture table." );
+			return;	// make static analysis happy
 		}
 		float width = 1;
 		float height = 1;
@@ -907,6 +909,7 @@ void ProcessPalette( XMLElement* pal )
 	SDL_Surface* surface = LoadImage( pathName.c_str() );
 	if ( !surface ) {
 		ExitError( "Palette", pathName.c_str(), assetName.c_str(), "Could not load asset." );
+		return;	// for static analysis
 	}
 	printf( "Palette[data] asset=%s cx=%d cy=%d sx=%f sy=%f\n",
 		    assetName.c_str(), dx, dy, sx, sy );
@@ -964,6 +967,7 @@ void ProcessFont( XMLElement* font )
 			char buf[90];
 			SNPrintf( buf, 90, "XML Element %s not found.", tag );
 			ExitError( "Font", pathName.c_str(), assetName.c_str(), buf );
+			return;
 		}
 		
 		gamedb::WItem* tagItem = witem->FetchChild( tag );
@@ -979,6 +983,7 @@ void ProcessFont( XMLElement* font )
 	const XMLElement* charsElement = font->FirstChildElement( "chars" );
 	if ( !charsElement ) {
 		ExitError( "Font", pathName.c_str(), assetName.c_str(), "Font contains no 'chars' XML Element." );
+		return;
 	}
 
 	gamedb::WItem* charsItem = witem->FetchChild( "chars" );

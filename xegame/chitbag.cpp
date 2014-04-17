@@ -328,7 +328,7 @@ void ChitBag::DoTick( U32 delta )
 
 	while ( !zombieDeleteList.Empty() ) {
 		Component* c = zombieDeleteList.Pop();
-		GLASSERT( c->ParentChit() == 0 );
+		GLASSERT( c && c->ParentChit() == 0 );
 		delete c;
 	}
 }

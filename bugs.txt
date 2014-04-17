@@ -65,6 +65,10 @@ x system for gamui to track models
 		x sounds to 'res' directory
 		- guard posts need to look around and notify AIs
 		- is destroying beds just annoying? slow respawn?
+		- need title graphic
+		t denizen death does NOT remove sleep tube? (slow respawn?)
+		t guard posts check and inform
+		t workers teleport if stuck
 
 	- Beta2
 		- repair

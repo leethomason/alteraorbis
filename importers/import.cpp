@@ -43,6 +43,7 @@ void ProcessAC3D( ACObject* ob, ModelBuilder* builder, const Matrix4& parent, co
 	builder->PushObjectName( ob->name );
 
 	Vertex vertex[16];
+	memset(vertex, 0, sizeof(Vertex)* 16);
 
 	for( int i = 0; i < ob->num_surf; ++i )
 	{

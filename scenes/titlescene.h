@@ -18,15 +18,18 @@
 
 #include "../xegame/scene.h"
 #include "../gamui/gamui.h"
+#include "../engine/screenport.h"
+#include "../xegame/cticker.h"
 
 class LumosGame;
-
+class TestMap;
 
 class TitleScene : public Scene
 {
+	typedef Scene super;
 public:
 	TitleScene( LumosGame* game );
-	virtual ~TitleScene() {}
+	virtual ~TitleScene();
 
 	virtual void Resize();
 
@@ -35,12 +38,35 @@ public:
 		ProcessTap( action, screen, world );
 	}
 	virtual void ItemTapped( const gamui::UIItem* item );
+	virtual void Draw3D(U32 deltaTime);
+	virtual void HandleHotKey(int value);
+	virtual void DoTick(U32 delta);
+	virtual grinliz::Color4F ClearColor();
 
 private:
 	void SetAudioButton();
+	void DeleteEngine();
 
 	LumosGame*		lumosGame;
 	gamui::Image	background;
+
+	enum {
+		MANTIS,
+		TROLL,
+		HUMAN_FEMALE,
+		HUMAN_MALE,
+		RED_MANTIS,
+		CYCLOPS,
+		NUM_MODELS
+	};
+
+	// FIXME: custom engine+screenport is a PITA and weird. Hard to fix though.
+	Screenport			screenport;
+	Engine*				engine;
+	TestMap*			testMap;
+	Model* model[NUM_MODELS];
+	int					seed;
+	CTicker				ticker;
 
 	enum { 
 		TEST_DIALOG,

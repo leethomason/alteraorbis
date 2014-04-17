@@ -257,8 +257,7 @@ void AIComponent::GetFriendEnemyLists()
 	const ChitContext* context = GetChitContext();
 	if ( context->worldMap->UsingSectors() ) {
 		Rectangle2I ri = SectorData::InnerSectorBounds( center.x, center.y );
-		Rectangle2F rf;
-		rf.Set( (float)ri.min.x, (float)ri.min.y, (float)ri.max.x, (float)ri.max.y );
+		Rectangle2F rf = ToWorld(ri);
 
 		zone.DoIntersection( rf );
 	}
@@ -659,8 +658,12 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 bool AIComponent::DoStand( const ComponentSet& thisComp, U32 time )
 {
 	const GameItem* item	= parentChit->GetItem();
-	int itemFlags			= item ? item->flags : 0;
-	float totalHP			= item ? item->TotalHPF() : 0;
+	if (!item) {
+		return false;	// defensive - code analysis.
+	}
+
+	int itemFlags			= item->flags;
+	float totalHP			= item->TotalHPF();
 	int tick = 400;
 	const ChitContext* context = GetChitContext();
 
@@ -952,8 +955,7 @@ bool AIComponent::ThinkDoRampage( const ComponentSet& thisComp )
 {
 	if ( destinationBlocked < RAMPAGE_THRESHOLD ) 
 		return false;
-	if (thisComp.item->flags & GameItem::AI_DOES_WORK)
-		return false;	// workers don't rampage. it's just annoying.
+	const ChitContext* context = GetChitContext();
 
 	// Need a melee weapon to rampage. Ranged is never used.
 	IMeleeWeaponItem* melee = thisComp.itemComponent->GetMeleeWeapon();
@@ -961,10 +963,25 @@ bool AIComponent::ThinkDoRampage( const ComponentSet& thisComp )
 	if ( !melee && ( !reserve || !reserve->ToMeleeWeapon() ))
 		return false;
 
+	// Workers teleport. Rampaging was annoying.
+	if (thisComp.item->flags & GameItem::AI_DOES_WORK) {
+		Vector2I pos2i = thisComp.spatial->GetPosition2DI();
+		CoreScript* cs = CoreScript::GetCore(ToSector(pos2i));
+		if (cs) {
+			Vector2I csPos2i = cs->ParentChit()->GetSpatialComponent()->GetPosition2DI();
+			if (csPos2i != pos2i) {
+				context->engine->particleSystem->EmitPD("teleport", ToWorld3F(pos2i), V3F_UP, 0);
+				context->engine->particleSystem->EmitPD("teleport", ToWorld3F(csPos2i), V3F_UP, 0);
+				thisComp.spatial->SetPosition(ToWorld3F(csPos2i));
+			}
+		}
+		// Done weather we can teleport or not.
+		return true;
+	}
+
 	// Go for a rampage: remember, if the path is clear,
 	// it's essentially just a random walk.
 	destinationBlocked = 0;
-	const ChitContext* context = GetChitContext();
 	const SectorData& sd = context->worldMap->GetSector( ToSector( thisComp.spatial->GetPosition2DI() ));
 	Vector2I pos2i = thisComp.spatial->GetPosition2DI();
 
@@ -1526,17 +1543,18 @@ bool AIComponent::ThinkCriticalShopping( const ComponentSet& thisComp )
 
 				if ( goMarket ) {
 					MapSpatialComponent* msc = GET_SUB_COMPONENT( market, SpatialComponent, MapSpatialComponent );
+					if (msc) {
+						Rectangle2I porch = msc->PorchPos();
+						CoreScript* cs = CoreScript::GetCore(ToSector(porch.min));
 
-					Rectangle2I porch = msc->PorchPos();
-					CoreScript* cs = CoreScript::GetCore(ToSector(porch.min));
-
-					if (cs) {
-						for (Rectangle2IIterator it(porch); !it.Done(); it.Next()) {
-							if (!cs->HasTask(it.Pos())) {
-								taskList.Push(Task::MoveTask(it.Pos(), 0));
-								taskList.Push(Task::StandTask(bd->standTime));
-								taskList.Push(Task::UseBuildingTask(0));
-								return true;
+						if (cs) {
+							for (Rectangle2IIterator it(porch); !it.Done(); it.Next()) {
+								if (!cs->HasTask(it.Pos())) {
+									taskList.Push(Task::MoveTask(it.Pos(), 0));
+									taskList.Push(Task::StandTask(bd->standTime));
+									taskList.Push(Task::UseBuildingTask(0));
+									return true;
+								}
 							}
 						}
 					}
@@ -2384,26 +2402,35 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 
 		case OPTION_MOVE_TO_RANGE:
 		{
-			targetDesc.Set( target[OPTION_MOVE_TO_RANGE]->ID() );
-			GLASSERT( targetDesc.HasTarget() );
-			this->Move( moveToRange, false );
+			GLASSERT(target[OPTION_MOVE_TO_RANGE]);
+			if (target[OPTION_MOVE_TO_RANGE]) {
+				targetDesc.Set(target[OPTION_MOVE_TO_RANGE]->ID());
+				GLASSERT(targetDesc.HasTarget());
+				this->Move(moveToRange, false);
+			}
 		}
 		break;
 
 		case OPTION_MELEE:
 		{
-			currentAction = MELEE;
-			targetDesc.Set( target[OPTION_MELEE]->ID() );
-			GLASSERT( targetDesc.HasTarget() );
+			GLASSERT(target[OPTION_MELEE]);
+			if (target[OPTION_MELEE]) {
+				currentAction = MELEE;
+				targetDesc.Set(target[OPTION_MELEE]->ID());
+				GLASSERT(targetDesc.HasTarget());
+			}
 		}
 		break;
 		
 		case OPTION_SHOOT:
 		{
-			pmc->Stop();
-			currentAction = SHOOT;
-			targetDesc.Set( target[OPTION_SHOOT]->ID() );
-			GLASSERT( targetDesc.HasTarget() );
+			GLASSERT(target[OPTION_SHOOT]);
+			if (target[OPTION_SHOOT]) {
+				pmc->Stop();
+				currentAction = SHOOT;
+				targetDesc.Set(target[OPTION_SHOOT]->ID());
+				GLASSERT(targetDesc.HasTarget());
+			}
 		}
 		break;
 

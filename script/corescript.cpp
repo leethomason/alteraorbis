@@ -183,6 +183,9 @@ int CoreScript::NumCitizens()
 			// Dead and gone.
 			citizens.SwapRemove( i );
 
+#if 0
+			// This is annoying: seeing if cranking down the spawn rate and not
+			// destroying the sleep tube achieves success.
 			// Also, destroy a sleeptube, so it costs something to replace, and towns can fall.
 			SpatialComponent* sc = scriptContext->chit->GetSpatialComponent();
 			GLASSERT( sc );
@@ -195,6 +198,7 @@ int CoreScript::NumCitizens()
 					bed->SetTickNeeded();
 				}
 			}
+#endif
 		}
 	}
 	return count;

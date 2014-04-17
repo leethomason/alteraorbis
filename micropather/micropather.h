@@ -250,6 +250,8 @@ namespace micropather
 		{
 			MPASSERT( totalCost == FLT_MAX );
 			for( PathNode* it = next; it != this; it=it->next ) {
+				MPASSERT(it);
+				if (!it) continue;	// static code analysis
 				MPASSERT( it->prev == this || it->totalCost >= it->prev->totalCost );
 				MPASSERT( it->totalCost <= it->next->totalCost );
 			}

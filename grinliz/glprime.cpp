@@ -1231,6 +1231,7 @@ unsigned GlPrime( unsigned close, int relationship )
 		while ( gPrime[count] ) 
 			++count;
 	}
+	if (count == 0) return 3;	// at least it is prime.
 
 	unsigned low = 0;
 	unsigned high = count - 1;

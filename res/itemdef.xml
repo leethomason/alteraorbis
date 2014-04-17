@@ -178,6 +178,7 @@
         size="1"
         mass="80"
         cost="30"
+        script="GuardScript"
         />
 
   <item name="bed"
