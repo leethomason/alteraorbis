@@ -65,9 +65,9 @@ TitleScene::TitleScene(LumosGame* game) : Scene(game), lumosGame(game), screenpo
 	}
 
 	note.Init( &gamui2D );
-	note.SetText( "Thanks for playing this alpha-of-the-beta of Altera! The domain "
-				  "vs. world part of the game is in place. "
-				  "Please see the README.txt for information and a link to the game wiki." );
+	//note.SetText( "Thanks for playing this alpha-of-the-beta of Altera! The domain "
+	//			  "vs. world part of the game is in place. "
+	//			  "Please see the README.txt for information and a link to the game wiki." );
 
 	audioButton.Init(&gamui2D, lumosGame->GetButtonLook(LumosGame::BUTTON_LOOK_STD));
 	if (SettingsManager::Instance()->AudioOn()) {
