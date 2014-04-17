@@ -57,18 +57,34 @@ x system for gamui to track models
 - openMP - particle system, elsewhere
 - re-do glow
 - melee is way too powerful and wide effect
+- option to flip right mouse behavior - pan/zoom by default. ctrl reverse.
 
 - game
 	- Beta1 fixes
 		t sound checks external path first
 		t sound button doesn't work
 		x sounds to 'res' directory
-		- guard posts need to look around and notify AIs
-		- is destroying beds just annoying? slow respawn?
-		- need title graphic
+		x guard posts need to look around and notify AIs
+		x is destroying beds just annoying? slow respawn?
+		x need title graphic
 		t denizen death does NOT remove sleep tube? (slow respawn?)
 		t guard posts check and inform
 		t workers teleport if stuck
+		- note that installer installs-over
+		- should not be a continue button on new over-install
+		- auto-select avatar. left click should always move avatar.
+		- hook up ADSW
+		- left click in view always moves avatar
+		- on core death:
+			- should not have tracked avatar
+			- big “Your Core is Destroyed” message
+		- auto-clear not working as well as it should
+		- none -> cancel order, remove?
+		- re-order ui buttons
+		- closer to RTS controls
+			- mode shouldn’t change until changing bottom row
+			- RTS: click build then do…
+		- no monsters until first temple is built - cut back on wandering monsters
 
 	- Beta2
 		- repair
