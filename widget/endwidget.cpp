@@ -65,7 +65,7 @@ void EndGameWidget::Init(Gamui* gamui, const ButtonLook& look, const LayoutCalcu
 
 void EndGameWidget::SetBodyText()
 {
-	CStr<400> str;
+	CStr<400> str = "--CORE DESTROYED--\n";
 
 	if		(achievement.civTechScore > 10 * 1000)		str.Format("The mighty empire");
 	else if (achievement.civTechScore > 5 * 1000)		str.Format("The empire");

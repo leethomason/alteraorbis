@@ -1269,7 +1269,7 @@ bool AIComponent::SectorHerd( const ComponentSet& thisComp, bool focus )
 	Vector2I sectorTarget = { 0, 0 };
 	int score = 0;
 
-	// If a greater, look for a target.	
+	// Implement logic to avoid or be attracted to cores.
 	if (mob == IStringConst::greater || mob == IStringConst::lesser ) {
 		for (int j = 0; j < NUM_SECTORS; ++j) {
 			for (int i = 0; i < NUM_SECTORS; ++i) {
@@ -1283,9 +1283,6 @@ bool AIComponent::SectorHerd( const ComponentSet& thisComp, bool focus )
 				if ((mob == IStringConst::greater && coreInfo.approxNTemples >= TECH_ATTRACTS_GREATER)
 					|| (mob == IStringConst::lesser && d <= 1 && (coreInfo.approxNTemples >= TECH_ATTRACTS_LESSER)))
 				{
-					if (mob == IStringConst::greater) {
-						int debug = 1;
-					}
 					if (coreInfo.coreScript
 						&& GetRelationship(thisComp.item->primaryTeam, coreInfo.approxTeam) == RELATE_ENEMY)
 					{
@@ -1319,6 +1316,12 @@ bool AIComponent::SectorHerd( const ComponentSet& thisComp, bool focus )
 			if (info.coreScript && GetRelationship(info.approxTeam, thisComp.item->primaryTeam) == RELATE_ENEMY) {
 				if (mob == IStringConst::greater && info.approxNTemples <= TECH_REPELS_GREATER) {
 					continue;
+				}
+				if (mob == IStringConst::lesser && info.approxNTemples == 0) {
+					// Might repel lessers if no temple at all is build.
+					if (parentChit->random.Rand(4)) {	// 3 in 4 chance of getting repelled. This needs tuning.
+						continue;
+					}
 				}
 			}
 

@@ -1457,6 +1457,9 @@ void GameScene::CheckGameStage(U32 delta)
 			random.ShuffleArray(arr.Mem(), arr.Size());
 			startGameWidget.SetSectorData(arr.Mem(), arr.Size(), sim->GetEngine(), sim->GetChitBag(), this);
 			gamui2D.PushDialog(startGameWidget.Name());
+
+			CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
+			cc->SetTrack(0);
 		}
 	}
 }

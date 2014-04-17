@@ -75,16 +75,16 @@ x system for gamui to track models
 		t auto-select avatar. left click should always move avatar.
 		t hook up ADSW
 		x left click in view always moves avatar
-		- on core death:
-			- should not have tracked avatar
-			- big “Your Core is Destroyed” message
+		t on core death:
+			t should not have tracked avatar
+			t big “Your Core is Destroyed” message
 		- auto-clear not working as well as it should
 		- none -> cancel order, remove?
 		- re-order ui buttons
 		- closer to RTS controls
 			- mode shouldn’t change until changing bottom row
 			- RTS: click build then do…
-		- no monsters until first temple is built - cut back on wandering monsters
+		t no monsters until first temple is built - cut back on wandering monsters
 		- 32 bit texture support
 		- new walkthrough tutorial
 
