@@ -263,5 +263,12 @@
 
   </particle>
 
+  <particle name="teleport" sizeX="0.05" sizeY="0.20" count="15" config="ray" 
+            velocity="1.2" velocityFuzz="0.2" posFuzz="0.3"
+            texMin="3" texMax="3">
+    <color palx="1" paly="4" alpha="1"/>
+    <colorVelocity red="0" green="0.8" blue="0" alpha="-0.9"/>
+    <colorFuzz red="0.2" green="0.2" blue="0.2" alpha="0" />
+  </particle>
 
 </particles>

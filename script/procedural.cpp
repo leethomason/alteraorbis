@@ -328,7 +328,7 @@ void WeaponGen::AssignShield( ProcRenderInfo* info )
 	random.Rand();
 
 	Color4F c[3];
-	Vector4F v[3];
+	Vector4F v[3] = { V4F_ZERO, V4F_ZERO, V4F_ZERO };
 	GetColors( random.Rand(), effectFlags, c ); 
 
 	for( int i=0; i<3; ++i ) {

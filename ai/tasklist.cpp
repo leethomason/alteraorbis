@@ -651,7 +651,7 @@ void TaskList::GoShopping(  const ComponentSet& thisComp, Chit* market )
 
 	for( int i=1; i<thisComp.itemComponent->NumItems(); ++i ) {
 		GameItem* gi = thisComp.itemComponent->GetItem( i );
-		if ( !gi->Intrinsic() ) {
+		if ( gi && !gi->Intrinsic() ) {
 			if ( !ranged && (gi->flags & GameItem::RANGED_WEAPON)) {
 				ranged = gi;
 			}

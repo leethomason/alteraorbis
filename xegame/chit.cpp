@@ -381,7 +381,7 @@ ComponentSet::ComponentSet( Chit* _chit, int bits )
 			render = chit->GetRenderComponent();
 			if ( !render ) ++error;
 
-			if ( bits & NOT_IN_IMPACT ) {
+			if ( render &&(bits & NOT_IN_IMPACT )) {
 				if ( render->MainModel() ) {
 					int type = render->CurrentAnimation();
 					if ( type == ANIM_IMPACT )

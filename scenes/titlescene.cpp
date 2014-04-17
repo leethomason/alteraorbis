@@ -41,7 +41,7 @@ TitleScene::TitleScene(LumosGame* game) : Scene(game), lumosGame(game), screenpo
 {
 	LayoutCalculator layout = lumosGame->DefaultLayout();
 
-	RenderAtom batom = game->CreateRenderAtom( UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE, "title" );
+	RenderAtom batom = game->CreateRenderAtom( UIRenderer::RENDERSTATE_UI_NORMAL, "title" );
 	background.Init( &gamui2D, batom, false );
 
 	static const char* testSceneName[NUM_TESTS] = { "Dialog", 
@@ -96,11 +96,20 @@ TitleScene::TitleScene(LumosGame* game) : Scene(game), lumosGame(game), screenpo
 	model[RED_MANTIS]	= engine->AllocModel("redmantis");
 	model[CYCLOPS]		= engine->AllocModel("cyclops");
 
+	Vector3F forward = { 0, 0, 1 };
+	Vector3F across = { 0.4f, 0, 0 };
+
 	static const float STEP = 0.4f;
 	for (int i = 0; i < NUM_MODELS; ++i) {
-		model[i]->SetPos(30.5f + float(i)*STEP, 
-						 0, 
-						 i < HUMAN_MALE ? 40.5f + float(i) : 42.5f - float(i-HUMAN_MALE));
+		Vector3F v = { 30.5f, 0, 39.5f };
+		v = v + float(i) * across;
+		if (i < HUMAN_MALE)		v = v + float(i)*forward;
+		if (i >= HUMAN_MALE)	v = v + float(HUMAN_MALE-1)*forward - float(i - HUMAN_MALE)*forward;
+		model[i]->SetPos(v);
+
+//		model[i]->SetPos(30.5f + float(i)*STEP, 
+//						 0, 
+//						 i < HUMAN_MALE ? 40.5f + float(i) : 42.5f - float(i-HUMAN_MALE));
 		model[i]->SetFlag(Model::MODEL_INVISIBLE);
 	}
 
@@ -133,6 +142,13 @@ TitleScene::~TitleScene()
 }
 
 
+Color4F TitleScene::ClearColor()
+{
+	const Game::Palette* palette = game->GetPalette();
+	return palette->Get4F(0, 5);
+}
+
+
 void TitleScene::DeleteEngine()
 {
 	for (int i = 0; i < NUM_MODELS; ++i) {
@@ -160,7 +176,7 @@ void TitleScene::Resize()
 		}
 	}
 	background.SetPos( 0, 0 );
-	background.SetVisible(false);
+	//background.SetVisible(false);
 
 	float aspect = port.UIAspectRatio();
 	if ( aspect >= 0.5f ) {

@@ -155,6 +155,8 @@ struct Plane
 	/// Create 6 planes from a rectangle.
 	static void CreatePlanes( const Rectangle3F&, Plane* planes );
 
+	Plane() { n.Zero(); d = 0; }
+
 	Vector3F	n;	///< normal
 	float		d;	///< offset
 

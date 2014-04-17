@@ -63,6 +63,10 @@ x system for gamui to track models
 		t sound checks external path first
 		t sound button doesn't work
 		x sounds to 'res' directory
+		- need title graphic
+		t denizen death does NOT remove sleep tube? (slow respawn?)
+		t guard posts check and inform
+		t workers teleport if stuck
 
 	- Beta2
 		- repair

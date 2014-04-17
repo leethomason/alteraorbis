@@ -177,6 +177,7 @@ void GLString::ensureSize( unsigned s )
 	unsigned ensure = s+1;
 	if ( m_allocated < ensure ) {
 		unsigned newAllocated = ensure * 3/2 + 16;
+		if (newAllocated < 16) newAllocated = 16;	// should be impossible, but make static analysis happy
 		char* newBuf = new char[newAllocated];
 
 		if ( m_size )

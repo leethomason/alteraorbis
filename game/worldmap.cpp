@@ -1685,7 +1685,11 @@ void WorldMap::CreateTexture( Texture* t )
 		for( int y=0; y<t->Height(); ++y ) {
 			for( int x=0; x<t->Width(); ++x ) {
 				const WorldGrid& wg = grid[INDEX(x*dx,y*dy)];
-				data[y*t->Width()+x] = c[wg.Layer()];
+				int index = y * t->Width() + x;
+				GLASSERT(index < size);
+				if (index < size) {
+					data[index] = c[wg.Layer()];
+				}
 			}
 		}
 
