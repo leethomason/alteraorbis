@@ -210,24 +210,27 @@ int main( int argc, char **argv )
 			case SDL_KEYUP:
 				switch (event.key.keysym.sym)
 				{
-				case SDLK_LCTRL:	modKeys = modKeys & (~KMOD_LCTRL);		break;
-				case SDLK_RCTRL:	modKeys = modKeys & (~KMOD_RCTRL);		break;
-				case SDLK_LSHIFT:	modKeys = modKeys & (~KMOD_LSHIFT);	break;
-				case SDLK_RSHIFT:	modKeys = modKeys & (~KMOD_RSHIFT);	break;
+				case SDL_SCANCODE_LCTRL:	modKeys = modKeys & (~KMOD_LCTRL);		break;
+				case SDL_SCANCODE_RCTRL:	modKeys = modKeys & (~KMOD_RCTRL);		break;
+				case SDL_SCANCODE_LSHIFT:	modKeys = modKeys & (~KMOD_LSHIFT);	break;
+				case SDL_SCANCODE_RSHIFT:	modKeys = modKeys & (~KMOD_RSHIFT);	break;
 				default:
 					break;
 				}
 				break;
 			case SDL_KEYDOWN:
 				{
-					switch (event.key.keysym.sym)
+					// sym or scancode? I used a dvorak keyboard, so appreciate
+					// every day the difference. However, AWSD support is the 
+					// primary thing so scancode is hopefully the better choice.
+					switch (event.key.keysym.scancode)
 					{
-					case SDLK_LCTRL:	modKeys = modKeys | KMOD_LCTRL;		break;
-					case SDLK_RCTRL:	modKeys = modKeys | KMOD_RCTRL;		break;
-					case SDLK_LSHIFT:	modKeys = modKeys | KMOD_LSHIFT;	break;
-					case SDLK_RSHIFT:	modKeys = modKeys | KMOD_RSHIFT;	break;
+					case SDL_SCANCODE_LCTRL:	modKeys = modKeys | KMOD_LCTRL;		break;
+					case SDL_SCANCODE_RCTRL:	modKeys = modKeys | KMOD_RCTRL;		break;
+					case SDL_SCANCODE_LSHIFT:	modKeys = modKeys | KMOD_LSHIFT;	break;
+					case SDL_SCANCODE_RSHIFT:	modKeys = modKeys | KMOD_RSHIFT;	break;
 
-					case SDLK_ESCAPE:
+					case SDL_SCANCODE_ESCAPE:
 						{
 		#ifdef DEBUG
 							// only escape out in debug mode
@@ -237,7 +240,7 @@ int main( int argc, char **argv )
 						}
 						break;
 
-					case SDLK_F4:
+					case SDL_SCANCODE_F4:
 						{
 							int sdlMod = SDL_GetModState();
 							if (sdlMod & (KMOD_RALT | KMOD_LALT))
@@ -245,28 +248,34 @@ int main( int argc, char **argv )
 						}
 						break;
 
-					case SDLK_SPACE:GameHotKey(game, GAME_HK_SPACE);			break;
-					case SDLK_a:	GameHotKey(game, GAME_HK_TOGGLE_PATHING);	break;
-					case SDLK_b:	GameHotKey(game, GAME_HK_CHEAT_GOLD);		break;
-					case SDLK_c:	GameHotKey(game, GAME_HK_TOGGLE_COLORS);	break;
-					case SDLK_d:	GameHotKey(game, GAME_HK_TOGGLE_DEBUG_TEXT);	break;
-					case SDLK_e:	GameHotKey(game, GAME_HK_CHEAT_ELIXIR);	break;
-					case SDLK_f:	GameHotKey(game, GAME_HK_TOGGLE_FAST);	break;
-					case SDLK_i:	GameHotKey(game, GAME_HK_TOGGLE_DEBUG_UI);		break;
-					case SDLK_k:	GameHotKey(game, GAME_HK_CHEAT_CRYSTAL);	break;
-					case SDLK_m:	GameHotKey(game, GAME_HK_MAP);			break;
-					case SDLK_p:	GameHotKey(game, GAME_HK_TOGGLE_PERF);	break;
-					case SDLK_q:	GameHotKey(game, GAME_HK_CHEAT_HERD);	break;
-					case SDLK_t:	GameHotKey(game, GAME_HK_CHEAT_TECH);		break;
-					case SDLK_u:	GameHotKey(game, GAME_HK_TOGGLE_UI);		break;
+					case SDL_SCANCODE_SPACE:GameHotKey(game, GAME_HK_SPACE);			break;
+					case SDL_SCANCODE_F1:	GameHotKey(game, GAME_HK_TOGGLE_DEBUG_TEXT);	break;
+					case SDL_SCANCODE_F2:	GameHotKey(game, GAME_HK_TOGGLE_DEBUG_UI);		break;
+					// F3: screenshot
 
-					case SDLK_1:	GameHotKey(game, GAME_HK_TOGGLE_GLOW);	break;
-					case SDLK_2:	GameHotKey(game, GAME_HK_TOGGLE_PARTICLE);	break;
-					case SDLK_3:	GameHotKey(game, GAME_HK_TOGGLE_VOXEL);	break;
-					case SDLK_4:	GameHotKey(game, GAME_HK_TOGGLE_SHADOW);	break;
-					case SDLK_5:	GameHotKey(game, GAME_HK_TOGGLE_BOLT);	break;
+					//case SDLK_a: reserved
+					case SDL_SCANCODE_B:	GameHotKey(game, GAME_HK_CHEAT_GOLD);		break;
+					case SDL_SCANCODE_C:	GameHotKey(game, GAME_HK_TOGGLE_COLORS);	break;
+					//case SDLK_d: reserved
+					case SDL_SCANCODE_E:	GameHotKey(game, GAME_HK_CHEAT_ELIXIR);	break;
+					case SDL_SCANCODE_F:	GameHotKey(game, GAME_HK_TOGGLE_FAST);	break;
+					case SDL_SCANCODE_H:	GameHotKey(game, GAME_HK_TOGGLE_PATHING);	break;
+					case SDL_SCANCODE_K:	GameHotKey(game, GAME_HK_CHEAT_CRYSTAL);	break;
+					case SDL_SCANCODE_M:	GameHotKey(game, GAME_HK_MAP);			break;
+					case SDL_SCANCODE_P:	GameHotKey(game, GAME_HK_TOGGLE_PERF);	break;
+					case SDL_SCANCODE_Q:	GameHotKey(game, GAME_HK_CHEAT_HERD);	break;
+					//case SDLK_s: reserved
+					case SDL_SCANCODE_T:	GameHotKey(game, GAME_HK_CHEAT_TECH);		break;
+					case SDL_SCANCODE_U:	GameHotKey(game, GAME_HK_TOGGLE_UI);		break;
+					//case SDLK_w: reserved
 
-					case SDLK_s:
+					case SDL_SCANCODE_1:	GameHotKey(game, GAME_HK_TOGGLE_GLOW);	break;
+					case SDL_SCANCODE_2:	GameHotKey(game, GAME_HK_TOGGLE_PARTICLE);	break;
+					case SDL_SCANCODE_3:	GameHotKey(game, GAME_HK_TOGGLE_VOXEL);	break;
+					case SDL_SCANCODE_4:	GameHotKey(game, GAME_HK_TOGGLE_SHADOW);	break;
+					case SDL_SCANCODE_5:	GameHotKey(game, GAME_HK_TOGGLE_BOLT);	break;
+
+					case SDL_SCANCODE_F3:
 						GameDoTick(game, SDL_GetTicks());
 						SDL_GL_SwapWindow(screen);
 						ScreenCapture("cap", true, false, false, 0);
@@ -377,25 +386,25 @@ int main( int argc, char **argv )
 		glDepthFunc( GL_LEQUAL );
 
 		const U8* keys = SDL_GetKeyboardState(0);
-		if (keys[SDL_SCANCODE_DOWN]) {
+		if (keys[SDL_SCANCODE_DOWN] || keys[SDL_SCANCODE_S] ) {
 			if (modKeys & KMOD_CTRL)
 				GameZoom(game, GAME_ZOOM_DISTANCE, KEY_ZOOM_SPEED);
 			else
 				GameCameraMove(game, 0, -KEY_MOVE_SPEED);
 		}
-		if (keys[SDL_SCANCODE_UP]) {
+		if (keys[SDL_SCANCODE_UP] || keys[SDL_SCANCODE_W]) {
 			if (modKeys & KMOD_CTRL)
 				GameZoom(game, GAME_ZOOM_DISTANCE, -KEY_ZOOM_SPEED);
 			else
 				GameCameraMove(game, 0, KEY_MOVE_SPEED);
 		}
-		if (keys[SDL_SCANCODE_LEFT]) {
+		if (keys[SDL_SCANCODE_LEFT] || keys[SDL_SCANCODE_A]) {
 			if (modKeys & KMOD_CTRL)
 				GameCameraRotate(game, KEY_ROTATE_SPEED);
 			else
 				GameCameraMove(game, -KEY_MOVE_SPEED, 0);
 		}
-		if (keys[SDL_SCANCODE_RIGHT]) {
+		if (keys[SDL_SCANCODE_RIGHT] || keys[SDL_SCANCODE_D]) {
 			if (modKeys & KMOD_CTRL)
 				GameCameraRotate(game, -KEY_ROTATE_SPEED);
 			else

@@ -573,48 +573,12 @@ void GameScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& world)
 		}
 	}
 
-	if (AvatarSelected()) {
-		Chit* playerChit = sim->GetPlayerChit();
-		if (mv.model) {
-			TapModel(mv.model->userData);
-		}
-		else if (playerChit) {
-			Vector2F dest = { plane.x, plane.z };
-			DoDestTapped(dest);
-		}
-		else if (FreeCameraMode()) {
-			sim->GetEngine()->CameraLookAt(plane.x, plane.z);
-		}
+//	if (AvatarSelected()) {
+	Chit* playerChit = sim->GetPlayerChit();
+	if (playerChit) {
+		Vector2F dest = { plane.x, plane.z };
+		DoDestTapped(dest);
 	}
-#if 0
-				//Vector2I v = { (int)plane.x, (int)plane.z };
-				//sim->CreatePlayer( v );
-				//chitTracking = sim->GetPlayerChit() ? sim->GetPlayerChit()->ID() : 0;
-				sim->CreateVolcano((int)at.x, (int)at.z, 6);
-				sim->CreatePlant((int)at.x, (int)at.z, -1);
-			}
-			else if (tapMod == GAME_TAP_MOD_SHIFT) {
-				for (int i = 0; i<NUM_PLANT_TYPES; ++i) {
-					Chit* chit = sim->CreatePlant((int)plane.x + i, (int)plane.z, i);
-					if (chit) {
-						if (i < 6) {
-							PlantScript* plantScript = (PlantScript*)chit->GetScript("PlantScript");
-							GLASSERT(plantScript);
-							plantScript->SetStage(3);
-						}
-					}
-				}
-				Vector3F p = plane;
-				p.y = 0;
-				for (int i = 0; i<5; ++i) {
-					//sim->GetChitBag()->NewMonsterChit(plane, "redMantis", TEAM_RED_MANTIS);
-					sim->GetChitBag()->NewMonsterChit(p, "mantis", TEAM_GREEN_MANTIS);
-					p.x += 0.5f;
-				}
-			}
-		}
-	}
-#endif
 }
 
 bool GameScene::DragAtom(gamui::RenderAtom* atom)
@@ -717,8 +681,10 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 		}
 
 		if (action == GAME_TAP_UP) {
-			Tap3D(view, world);
-			if (!mapDragStart.IsZero()) {
+			if (mapDragStart.IsZero()) {
+				Tap3D(view, world);
+			}
+			else {
 				Vector2F end = { at.x, at.z };
 				if ((end - mapDragStart).LengthSquared() > 0.25f) {
 					Rectangle2I r;
@@ -954,7 +920,8 @@ void GameScene::DoDestTapped( const Vector2F& _dest )
 	Vector2F dest = _dest;
 
 	Chit* chit = sim->GetPlayerChit();
-	if ( AvatarSelected() && chit ) {
+	//if (AvatarSelected() && chit) {
+	if (chit) {
 		AIComponent* ai = chit->GetAIComponent();
 		if ( ai ) {
 			Vector2F pos = chit->GetSpatialComponent()->GetPosition2D();
@@ -977,9 +944,9 @@ void GameScene::DoDestTapped( const Vector2F& _dest )
 			}
 		}
 	}
-	else {
-		sim->GetEngine()->CameraLookAt( dest.x, dest.y );
-	}
+//	else {
+//		sim->GetEngine()->CameraLookAt( dest.x, dest.y );
+//	}
 }
 
 

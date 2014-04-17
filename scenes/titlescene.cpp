@@ -24,6 +24,7 @@
 #include "../engine/engine.h"
 
 #include "../xegame/testmap.h"
+#include "../xarchive/glstreamer.h"
 
 #include "../game/lumosgame.h"
 #include "../game/layout.h"
@@ -207,8 +208,16 @@ void TitleScene::Resize()
 	gameScene[CONTINUE].SetEnabled( false );
 	const char* datPath = game->GamePath( "game", 0, "dat" );
 	const char* mapPath = game->GamePath( "map",  0, "dat" );
-	if ( game->HasFile( mapPath )) {
-		gameScene[CONTINUE].SetEnabled( true );
+
+	GLString fullpath;
+	GetSystemPath(GAME_SAVE_DIR, mapPath, &fullpath);
+	FILE* fp = fopen(fullpath.c_str(), "rb");
+	if (fp) {
+		StreamReader reader(fp);
+		if (reader.Version() == CURRENT_FILE_VERSION) {
+			gameScene[CONTINUE].SetEnabled(true);
+		}
+		fclose(fp);
 	}
 
 	layout.PosAbs( &note, 0, 1 );

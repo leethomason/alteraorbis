@@ -70,11 +70,11 @@ x system for gamui to track models
 		t denizen death does NOT remove sleep tube? (slow respawn?)
 		t guard posts check and inform
 		t workers teleport if stuck
-		- note that installer installs-over
-		- should not be a continue button on new over-install
-		- auto-select avatar. left click should always move avatar.
-		- hook up ADSW
-		- left click in view always moves avatar
+		- (web page) note that installer installs-over
+		t should not be a continue button on new over-install (check map version!)
+		t auto-select avatar. left click should always move avatar.
+		t hook up ADSW
+		x left click in view always moves avatar
 		- on core death:
 			- should not have tracked avatar
 			- big “Your Core is Destroyed” message
@@ -85,6 +85,8 @@ x system for gamui to track models
 			- mode shouldn’t change until changing bottom row
 			- RTS: click build then do…
 		- no monsters until first temple is built - cut back on wandering monsters
+		- 32 bit texture support
+		- new walkthrough tutorial
 
 	- Beta2
 		- repair
