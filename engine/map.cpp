@@ -55,7 +55,7 @@ Map::Map( int w, int h )
 	overlay1.Init( this, nullAtom, nullAtom, 0 );
 
 	TextureManager* texman = TextureManager::Instance();
-	texman->CreateTexture( "miniMap", 512, 512, Surface::RGB16, Texture::PARAM_NONE, this );
+	texman->CreateTexture( "miniMap", 512, 512, TEX_RGB16, Texture::PARAM_NONE, this );
 }
 
 

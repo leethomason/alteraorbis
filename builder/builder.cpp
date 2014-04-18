@@ -1071,7 +1071,7 @@ int main( int argc, char* argv[] )
 		string testInput = inputDirectory + "Lenna.png";
 		SDL_Surface* surface = LoadImage( testInput.c_str() );
 		BTexture btexture;
-		btexture.Create( surface->w, surface->h, BTexture::RGB16 );
+		btexture.Create( surface->w, surface->h, TEX_RGB16 );
 		btexture.ToBuffer();
 
 		if ( surface ) {

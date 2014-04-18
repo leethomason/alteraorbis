@@ -24,6 +24,7 @@
 #include "../grinliz/glstringutil.h"
 
 #include "../engine/ufoutil.h"
+#include "../engine/texturetype.h"
 #include "../shared/gamedbreader.h"
 
 #include "enginelimits.h"
@@ -39,13 +40,6 @@
 class Surface
 {
 public:
-	// WARNING: duplicated in Texture
-	enum  {			// channels	bytes
-		RGBA16,		// 4444		2
-		RGB16,		// 565		2
-		ALPHA,		// 8		1
-	};
-
 	static U16 CalcRGB16( grinliz::Color4U8 rgba )
 	{
 		U32 c =   ((rgba.r>>3) << 11)
@@ -113,11 +107,11 @@ public:
 	int			Height() const			{ return h; }
 	U8*			Pixels()				{ return pixels; }
 	const U8*	Pixels() const			{ return pixels; }
-	int			BytesPerPixel() const	{ return (format==ALPHA) ? 1 : 2; }
+	int			BytesPerPixel() const	{ return TextureBytesPerPixel(format); }
 	int			BytesInImage() const	{ GLASSERT( w*h*BytesPerPixel() <= allocated ); return w*h*BytesPerPixel(); }
 	int			Pitch() const			{ return w*BytesPerPixel(); }
-	bool		Alpha() const			{ return (format!=RGB16) ? true : false; }
-	int			Format() const			{ return format; }
+	bool		Alpha() const			{ return TextureHasAlpha(format); }
+	TextureType	Format() const			{ return format; }
 
 	// Surfaces are flipped (as are images) for OpenGL. This "unflips" back to map==pixel coordinates.
 	U16	GetImg16( int x, int y ) const	{ 
@@ -154,9 +148,9 @@ public:
 		grinliz::Color4U8 c = { 0, 0, 0, 0 };
 
 		switch ( format ) {
-		case RGBA16:	c = CalcRGBA16( GetTex16( x, y ));	break;
-		case RGB16:		c = CalcRGB16( GetTex16( x, y ));	break;
-		case ALPHA:		c.a = pixels[y*w+x];				break;
+		case TEX_RGBA16:	c = CalcRGBA16( GetTex16( x, y ));	break;
+		case TEX_RGB16:		c = CalcRGB16( GetTex16( x, y ));	break;
+		case TEX_ALPHA:		c.a = pixels[y*w+x];				break;
 		default:		GLASSERT( 0 );
 		}
 		return c;
@@ -167,16 +161,16 @@ public:
 		GLASSERT( y >=0 && y < Height() );
 
 		switch ( format ) {
-		case RGBA16:	SetTex16( x, y, CalcRGBA16( c ) );	break;
-		case RGB16:		SetTex16( x, y, CalcRGB16( c ) );	break;
-		case ALPHA:		pixels[y*w+x] = c.a;				break;
+		case TEX_RGBA16:	SetTex16( x, y, CalcRGBA16( c ) );	break;
+		case TEX_RGB16:		SetTex16( x, y, CalcRGB16( c ) );	break;
+		case TEX_ALPHA:		pixels[y*w+x] = c.a;				break;
 		default:		GLASSERT( 0 );
 		}
 	}
 
 
 	// Set the format and allocate memory.
-	void Set( int format, int w, int h );
+	void Set( TextureType format, int w, int h );
 
 	void Clear( int c );
 	void BlitImg(	const grinliz::Vector2I& target, 
@@ -188,7 +182,7 @@ public:
 					const Matrix2I& xformTargetToSrc );
 	void ScaleByHalf();
 
-	static int QueryFormat( const char* formatString );
+	static TextureType QueryFormat( const char* formatString );
 
 	void Load( const gamedb::Item* );
 
@@ -200,7 +194,7 @@ private:
 	Surface( const Surface& );
 	void operator=( const Surface& );
 
-	int format;
+	TextureType format;
 	int w;
 	int h;
 	int allocated;

@@ -20,6 +20,7 @@
 #include "../grinliz/glstringutil.h"
 #include "../shared/gamedbwriter.h"
 #include "../libs/SDL2/include/SDL.h"
+#include "../engine/texturetype.h"
 #include <vector>
 
 class BTexture
@@ -43,13 +44,10 @@ public:
 	bool ToBuffer();	// dither, flip, process, etc. to memory buffer
 	gamedb::WItem* InsertTextureToDB( gamedb::WItem* parent );
 	// ---- normal functions follow.
-	void Create( int w, int h, int format );
+	void Create( int w, int h, TextureType format );
 
 	int TextureMem() const {
-		if ( format == RGB16 || format == RGBA16 ) return (surface->w * surface->h * 2);
-		if ( format == ALPHA )  return (surface->w * surface->h);
-		GLASSERT( 0 );
-		return 0;
+		return surface->w * surface->h * TextureBytesPerPixel(format);
 	}
 	int PixelSize() const { return surface->w * surface->h; }
 
@@ -77,12 +75,7 @@ public:
 
 	static bool logToPNG;
 
-	enum {
-		RGBA16,		// 4444		2
-		RGB16,		// 565		2
-		ALPHA,		// 8		1
-	};
-	int format;
+	TextureType format;
 
 	SDL_Surface* surface;
 	U16* pixelBuffer16;	// RGBA16, RGB16

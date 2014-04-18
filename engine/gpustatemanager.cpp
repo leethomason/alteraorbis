@@ -349,7 +349,7 @@ void GPUDevice::Weld( const GPUState& state, const GPUStream& stream, const GPUS
 	int flags = 0;
 	// State Flags
 	flags |= (data.texture0 ) ? ShaderManager::TEXTURE0 : 0;
-	flags |= (data.texture0 && (data.texture0->Format() == Texture::ALPHA )) ? ShaderManager::TEXTURE0_ALPHA_ONLY : 0;
+	flags |= (data.texture0 && (data.texture0->Format() == TEX_ALPHA )) ? ShaderManager::TEXTURE0_ALPHA_ONLY : 0;
 
 	flags |= state.HasLighting();
 

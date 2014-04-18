@@ -227,6 +227,7 @@
     <ClInclude Include="..\engine\surface.h" />
     <ClInclude Include="..\engine\text.h" />
     <ClInclude Include="..\engine\texture.h" />
+    <ClInclude Include="..\engine\texturetype.h" />
     <ClInclude Include="..\engine\ufoutil.h" />
     <ClInclude Include="..\engine\uirendering.h" />
     <ClInclude Include="..\engine\vertex.h" />

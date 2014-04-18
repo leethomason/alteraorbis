@@ -112,7 +112,7 @@ Texture* TextureManager::GetTexture( const char* name, bool reload )
 			int w = item->GetInt( "width" );
 			int h = item->GetInt( "height" );
 			const char* fstr = item->GetString( "format" );
-			int format = Surface::QueryFormat( fstr );
+			TextureType format = Surface::QueryFormat( fstr );
 			int flags = Texture::PARAM_NONE;
 
 			if ( item->GetBool( "noMip" )) {
@@ -154,7 +154,7 @@ void TextureManager::TextureCreatorInvalid( ITextureCreator* creator )
 }
 
 
-Texture* TextureManager::CreateTexture( const char* name, int w, int h, int format, int flags, ITextureCreator* creator )
+Texture* TextureManager::CreateTexture( const char* name, int w, int h, TextureType format, int flags, ITextureCreator* creator )
 {
 	GLASSERT( w > 1 );	// some drivers don't like size=1 textures
 	GLASSERT( h > 1 );
@@ -196,7 +196,7 @@ void TextureManager::ContextShift()
 }
 
 
-void Texture::Set( const char* p_name, int p_w, int p_h, int p_format, int p_flags )
+void Texture::Set(const char* p_name, int p_w, int p_h, TextureType p_format, int p_flags)
 {
 	name = p_name;
 	w = p_w;
@@ -247,17 +247,17 @@ void TextureManager::CalcOpenGL( int format, int* glFormat, int* glType )
 	*glType = GL_UNSIGNED_BYTE;
 
 	switch( format ) {
-		case Texture::RGBA16:
+		case TEX_RGBA16:
 			*glFormat = GL_RGBA;
 			*glType = GL_UNSIGNED_SHORT_4_4_4_4;
 			break;
 
-		case Texture::RGB16:
+		case TEX_RGB16:
 			*glFormat = GL_RGB;
 			*glType = GL_UNSIGNED_SHORT_5_6_5;
 			break;
 
-		case Texture::ALPHA:
+		case TEX_ALPHA:
 			*glFormat = GL_ALPHA;
 			*glType = GL_UNSIGNED_BYTE;
 			break;

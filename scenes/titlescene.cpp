@@ -107,12 +107,12 @@ TitleScene::TitleScene(LumosGame* game) : Scene(game), lumosGame(game), screenpo
 		if (i < HUMAN_MALE)		v = v + float(i)*forward;
 		if (i >= HUMAN_MALE)	v = v + float(HUMAN_MALE-1)*forward - float(i - HUMAN_MALE)*forward;
 		model[i]->SetPos(v);
-
-//		model[i]->SetPos(30.5f + float(i)*STEP, 
-//						 0, 
-//						 i < HUMAN_MALE ? 40.5f + float(i) : 42.5f - float(i-HUMAN_MALE));
 		model[i]->SetFlag(Model::MODEL_INVISIBLE);
 	}
+
+	static const float ANGLE = 10.0f;
+	model[HUMAN_FEMALE]->SetYRotation(ANGLE);
+	model[HUMAN_MALE]->SetYRotation(-ANGLE);
 
 	float x = Mean(model[HUMAN_FEMALE]->Pos().x, model[HUMAN_MALE]->Pos().x);
 	const Vector3F CAM    = { x, 0.5,  47.0 };

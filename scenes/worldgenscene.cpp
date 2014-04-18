@@ -18,7 +18,7 @@ WorldGenScene::WorldGenScene( LumosGame* game ) : Scene( game )
 	pix16 = 0;
 
 	TextureManager* texman = TextureManager::Instance();
-	texman->CreateTexture( "worldGenPreview", MAX_MAP_SIZE, MAX_MAP_SIZE, Surface::RGB16, Texture::PARAM_NONE, this );
+	texman->CreateTexture( "worldGenPreview", MAX_MAP_SIZE, MAX_MAP_SIZE, TEX_RGB16, Texture::PARAM_NONE, this );
 
 	worldGen = new WorldGen();
 	worldGen->LoadFeatures( "./res/features.png" );

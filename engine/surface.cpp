@@ -22,7 +22,7 @@
 
 using namespace grinliz;
 
-Surface::Surface() : format( -1 ), w( 0 ), h( 0 ), allocated( 0 ), pixels( 0 )
+Surface::Surface() : format( TEX_RGB16 ), w( 0 ), h( 0 ), allocated( 0 ), pixels( 0 )
 {
 }
 
@@ -38,7 +38,7 @@ void Surface::SetName( const char* n )
 }
 
 
-void Surface::Set( int f, int w, int h ) 
+void Surface::Set( TextureType f, int w, int h ) 
 {
 	this->format = f;
 	this->w = w;
@@ -102,19 +102,19 @@ void Surface::BlitImg(	const grinliz::Rectangle2I& target,
 }
 
 
-/*static*/ int Surface::QueryFormat( const char* formatString )
+/*static*/ TextureType Surface::QueryFormat( const char* formatString )
 {
 	if ( grinliz::StrEqual( "RGBA16", formatString ) ) {
-		return RGBA16;
+		return TEX_RGBA16;
 	}
 	else if ( grinliz::StrEqual( "RGB16", formatString ) ) {
-		return RGB16;
+		return TEX_RGB16;
 	}
 	else if ( grinliz::StrEqual( "ALPHA", formatString ) ) {
-		return ALPHA;
+		return TEX_ALPHA;
 	}
 	GLASSERT( 0 );
-	return -1;
+	return TEX_RGB16;
 }
 
 

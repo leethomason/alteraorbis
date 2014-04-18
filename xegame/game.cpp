@@ -68,7 +68,7 @@ Game::Game( int width, int height, int rotation, int uiHeight ) :
 
 	scenePopQueued = false;
 	currentFrame = 0;
-	surface.Set( Surface::RGBA16, 256, 256 );
+	surface.Set( TEX_RGBA16, 256, 256 );
 
 	// Load the database.
 	char buffer[260];
@@ -153,7 +153,7 @@ Game::~Game()
 void Game::LoadTextures()
 {
 	TextureManager* texman = TextureManager::Instance();
-	texman->CreateTexture( "white", 2, 2, Surface::RGB16, Texture::PARAM_NONE, this );
+	texman->CreateTexture( "white", 2, 2, TEX_RGB16, Texture::PARAM_NONE, this );
 }
 
 
@@ -161,7 +161,7 @@ void Game::CreateTexture( Texture* t )
 {
 	if ( StrEqual( t->Name(), "white" ) ) {
 		U16 pixels[4] = { 0xffff, 0xffff, 0xffff, 0xffff };
-		GLASSERT( t->Format() == Surface::RGB16 );
+		GLASSERT( t->Format() == TEX_RGB16 );
 		t->Upload( pixels, 8 );
 	}
 	else {

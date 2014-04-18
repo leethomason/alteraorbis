@@ -48,7 +48,7 @@ RenderTarget::RenderTarget( int width, int height, bool depthBuffer )
 
 	texture.w = width;
 	texture.h = height;
-	texture.format = Texture::RGB16;
+	texture.format = TEX_RGB16;
 	texture.flags = Texture::PARAM_LINEAR;
 	texture.creator = 0;
 	texture.item = 0;

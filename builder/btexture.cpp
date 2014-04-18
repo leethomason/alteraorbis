@@ -49,7 +49,7 @@ BTexture::BTexture()
 	  targetMax( 0 ),
 	  atlasX( 0 ),
 	  atlasY( 0 ),
-	  format( RGBA16 ),
+	  format( TEX_RGBA16 ),
 	  surface( 0 ),
 	  pixelBuffer16( 0 ),
 	  pixelBuffer8( 0 )
@@ -143,21 +143,21 @@ bool BTexture::Load()
 		 || surface->format->BitsPerPixel == 32 )	
 	{
 		if ( surface->format->Amask )
-			format = RGBA16;
+			format = TEX_RGBA16;
 		else 
-			format = RGB16;
+			format = TEX_RGB16;
 	}
 	else if ( surface->format->BitsPerPixel == 8 ) {
-		format = ALPHA;
+		format = TEX_ALPHA;
 	}
 	else {
 		GLASSERT( 0 );
 	}
 
-	if ( emissive && format != RGBA16 ) {
+	if ( emissive && format != TEX_RGBA16 ) {
 		ExitError( "Texture", pathName.c_str(), assetName.c_str(), "Emmisive only supported on RGBA." );
 	}
-	if ( format == RGBA16 && blackAlpha0 ) {
+	if (format == TEX_RGBA16 && blackAlpha0) {
 		for( int y=0; y<surface->h; ++y ) {
 			for( int x=0; x<surface->w; ++x ) {
 				Color4U8 rgbC = GetPixel( surface, x, y );
@@ -180,7 +180,7 @@ bool BTexture::Load()
 }
 
 
-void BTexture::Create( int w, int h, int format )
+void BTexture::Create( int w, int h, TextureType format )
 {
 	this->targetWidth = w;
 	this->targetHeight = h;
@@ -203,7 +203,7 @@ void BTexture::WhiteMap()
 {
 	// Create a new surface for the target.
 	SDL_Surface* target = SDL_CreateRGBSurface( 0, surface->w, surface->h, 32, 0xff000000, 0x00ff0000, 0x0000ff00, 0x000000ff );
-	format = RGBA16;
+	format = TEX_RGBA16;
 
 	for( int y=0; y<surface->h; ++y ) {
 		for( int x=0; x<surface->w; ++x ) {
