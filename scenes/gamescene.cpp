@@ -1151,7 +1151,7 @@ void GameScene::ProcessNewsToConsole()
 		case NewsEvent::BLOOD_RAGE:
 		case NewsEvent::VISION_QUEST:
 			if ( coreScript && coreScript->IsCitizen( ne.chitID )) {
-				ne.Console( &str, chitBag );
+				ne.Console( &str, chitBag, 0 );
 			}
 			break;
 
@@ -1161,7 +1161,7 @@ void GameScene::ProcessNewsToConsole()
 			if ((coreScript && coreScript->IsCitizen(ne.chitID))
 				|| sector == homeSector)
 			{
-				ne.Console(&str, chitBag);
+				ne.Console(&str, chitBag, 0);
 			}
 			break;
 
@@ -1169,14 +1169,14 @@ void GameScene::ProcessNewsToConsole()
 		case NewsEvent::GREATER_MOB_KILLED:
 		case NewsEvent::DOMAIN_CREATED:
 		case NewsEvent::DOMAIN_DESTROYED:
-			ne.Console( &str, chitBag );
+			ne.Console( &str, chitBag, 0 );
 			break;
 
 		case NewsEvent::LESSER_MOB_NAMED:
 		case NewsEvent::LESSER_NAMED_MOB_KILLED:
 			{
 				if ( sector == homeSector || sector == avatarSector ) {
-					ne.Console( &str, chitBag );
+					ne.Console( &str, chitBag, 0 );
 				}
 			}
 			break;

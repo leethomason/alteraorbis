@@ -65,9 +65,9 @@ public:
 												|| what == LESSER_MOB_NAMED
 												|| what == FORGED; }
 	grinliz::IString	GetWhat() const;
-	void				Console( grinliz::GLString* str, ChitBag* ) const;
+	void				Console( grinliz::GLString* str, ChitBag*, int shortNameForThisID ) const;
 	grinliz::Vector2I	Sector() const { return ToSector( ToWorld2I( pos )); }
-	grinliz::IString	IDToName( int id ) const;
+	grinliz::IString	IDToName( int id, bool shortName ) const;
 
 	int					what;	
 	grinliz::Vector2F	pos;			// where it happened

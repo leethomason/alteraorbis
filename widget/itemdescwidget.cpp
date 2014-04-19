@@ -132,7 +132,7 @@ void ItemDescWidget::SetInfo( const GameItem* item, const GameItem* user, bool s
 		int num=0;
 		const NewsEvent** events = history->Find( item->ID(), true, &num, 0 );
 		for( int i=0; i<num; ++i ) {
-			events[i]->Console( &s, chitBag );
+			events[i]->Console( &s, chitBag, item->ID() );
 			if ( !s.empty() ) {
 				textBuffer += s.c_str();
 				textBuffer += '\n';

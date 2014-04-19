@@ -86,6 +86,7 @@ x system for gamui to track models
 			x RTS: click build then do…
 			x rotate should use the selector
 		t no monsters until first temple is built - cut back on wandering monsters
+		t multi-build in forge
 		- 32 bit texture support
 		- new walkthrough tutorial
 		- auto-clear not working as well as it should

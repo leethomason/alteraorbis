@@ -154,7 +154,7 @@ grinliz::IString NewsEvent::GetWhat() const
 }
 
 
-grinliz::IString NewsEvent::IDToName( int id ) const
+grinliz::IString NewsEvent::IDToName( int id, bool shortName ) const
 {
 	if ( id == 0 ) return IString();
 
@@ -165,7 +165,15 @@ grinliz::IString NewsEvent::IDToName( int id ) const
 
 	const GameItem* item = ItemDB::Instance()->Find( id );
 	if ( item ) {
-		name = item->IFullName();
+		if (shortName) {
+			if (!item->IProperName().empty())
+				name = item->IProperName();
+			else
+				name = item->IName();
+		}
+		else {
+			name = item->IFullName();
+		}
 	}
 	else {
 		const ItemHistory* history = ItemDB::Instance()->History( id );
@@ -177,7 +185,7 @@ grinliz::IString NewsEvent::IDToName( int id ) const
 }
 
 
-void NewsEvent::Console( grinliz::GLString* str, ChitBag* chitBag ) const
+void NewsEvent::Console( grinliz::GLString* str, ChitBag* chitBag, int shortNameID ) const
 {
 	*str = "";
 	IString wstr = GetWhat();
@@ -192,8 +200,8 @@ void NewsEvent::Console( grinliz::GLString* str, ChitBag* chitBag ) const
 		chit = chitBag->GetChit( chitID );
 	}
 
-	IString itemName   = IDToName( itemID );
-	IString secondName = IDToName( secondItemID );
+	IString itemName   = IDToName( itemID, itemID == shortNameID );
+	IString secondName = IDToName( secondItemID, secondItemID == shortNameID );
 	if ( secondName.empty() ) secondName = StringPool::Intern( "[unknown]" );
 
 	float age = float( double(date) / double(AGE_IN_MSEC));

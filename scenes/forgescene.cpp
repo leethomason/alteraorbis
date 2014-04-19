@@ -31,7 +31,6 @@ ForgeScene::ForgeScene( LumosGame* game, ForgeSceneData* data )
 	random.SetSeed( item->ID() );
 	random.Rand();
 	random.Rand();
-	displayItem = item;
 
 	screenport.SetNearFar( NEAR, FAR );
 	engine = new Engine( &screenport, lumosGame->GetDatabase(), 0 );
@@ -55,6 +54,7 @@ ForgeScene::ForgeScene( LumosGame* game, ForgeSceneData* data )
 	requiredLabel.Init( &gamui2D );
 	techAvailLabel.Init( &gamui2D );
 	techRequiredLabel.Init( &gamui2D );
+	log.Init(&gamui2D);
 
 	for( int i=0; i<ForgeScript::NUM_ITEM_TYPES; ++i ) {
 		itemType[i].Init( &gamui2D, game->GetButtonLook(0));
@@ -143,6 +143,8 @@ void ForgeScene::Resize()
 	layout.PosAbs( &itemDescWidget, -4, 0 );
 
 	layout.PosAbs( &buildButton, 0, ForgeScript::NUM_ITEM_TYPES+5, 2, 2 );
+	layout.PosAbs(&log, -4, ForgeScript::NUM_ITEM_TYPES + 5);
+	log.SetBounds(layout.Width() * 4, 1000);
 }
 
 
@@ -194,7 +196,7 @@ void ForgeScene::SetModel( bool randomTraits )
 						item, &crystalRequired, &techRequired, randomTraits );
 
 	ChitBag* chitBag = forgeData->itemComponent->ParentChit() ? forgeData->itemComponent->ParentChit()->GetChitBag() : 0;	// eek. hacky.
-	itemDescWidget.SetInfo( displayItem, &humanMale, false, chitBag );
+	itemDescWidget.SetInfo( item, &humanMale, false, chitBag );
 
 	ProcRenderInfo info;
 	if ( item ) {
@@ -208,7 +210,7 @@ void ForgeScene::SetModel( bool randomTraits )
 		q.FromAxisAngle( AXIS, type == ForgeScript::SHIELD ? -90.0f : 0.0f );
 		model->SetRotation( q );
 
-		AssignProcedural( item->ResourceName(), false, displayItem->ID(), 0, false, effectFlags, partsFlags, &info );
+		AssignProcedural( item->ResourceName(), false, item->ID(), 0, false, effectFlags, partsFlags, &info );
 
 		model->SetTextureXForm( info.te.uvXForm.x, info.te.uvXForm.y, info.te.uvXForm.z, info.te.uvXForm.w );
 		model->SetTextureClip( info.te.clip.x, info.te.clip.y, info.te.clip.z, info.te.clip.w );
@@ -220,7 +222,8 @@ void ForgeScene::SetModel( bool randomTraits )
 	techRequiredLabel.SetText( str.c_str() );
 	crystalRequiredWidget.Set( crystalRequired );
 	
-	if (    item 
+	if (   item 
+		&& forgeData->itemComponent->CanAddToInventory()
 		&& crystalRequired <= forgeData->itemComponent->GetItem()->wallet
 		&& techRequired <= forgeData->tech ) 
 	{ 
@@ -253,7 +256,7 @@ void ForgeScene::ItemTapped( const gamui::UIItem* uiItem )
 		item->wallet.Add( crystalRequired );	// becomes part of the item, and will be returned to Reserve when item is destroyed.
 
 		Chit* chit = forgeData->itemComponent->ParentChit();
-		NewsHistory* history = chit->GetChitBag()->GetNewsHistory();	// eek. hacky.
+		NewsHistory* history = (chit && chit->GetChitBag()) ? chit->GetChitBag()->GetNewsHistory() :0;	// eek. hacky.
 		if (chit && history) {
 			Vector2F pos = { 0, 0 };
 			if ( chit->GetSpatialComponent() ) pos = chit->GetSpatialComponent()->GetPosition2D();
@@ -262,29 +265,20 @@ void ForgeScene::ItemTapped( const gamui::UIItem* uiItem )
 			chit->GetItem()->keyValues.Set( "destroyMsg", NewsEvent::UN_FORGED );
 		}
 
-		displayItem = item;
-		item = 0;
-		crystalAvailWidget.Set( forgeData->itemComponent->GetItem(0)->wallet );
-		crystalRequiredWidget.SetVisible( false );
-
-		// Disable everything.
-		for( int i=0; i<ForgeScript::NUM_ITEM_TYPES; ++i ) {
-			itemType[i].SetEnabled(false);		
-		}
-		for( int i=0; i<ForgeScript::NUM_GUN_TYPES; ++i ) {
-			gunType[i].SetEnabled( false );
-		}
-		for( int i=1; i<NUM_GUN_PARTS; ++i ) {
-			gunParts[i].SetEnabled( false );
-		}
-		for( int i=1; i<NUM_RING_PARTS; ++i ) {
-			ringParts[i].SetEnabled( false );
-		}
-		for( int i=0; i<ForgeScript::NUM_EFFECTS; ++i ) {
-			effects[i].SetEnabled( false );
-		}
+		logText.AppendFormat("%s forged! Value=%d.\n", item->Name(), item->GetValue());
+		log.SetText(logText.c_str());
+		random.Rand();
+		item = new GameItem();
 	}
-	SetModel( true );
+	crystalAvailWidget.Set(forgeData->itemComponent->GetItem(0)->wallet);
+	SetModel(true);
+}
+
+
+grinliz::Color4F ForgeScene::ClearColor()
+{
+	Color4F c = game->GetPalette()->Get4F(0, 5);
+	return c;
 }
 
 

@@ -40,6 +40,7 @@ public:
 	virtual void ItemTapped( const gamui::UIItem* item );
 
 	virtual void Draw3D( U32 delatTime );
+	virtual grinliz::Color4F ClearColor();
 
 private:
 	enum {
@@ -64,7 +65,6 @@ private:
 	Engine*				engine;
 	Screenport			screenport;
 	Model*				model;
-	const GameItem*		displayItem;
 	grinliz::Random		random;
 	gamui::PushButton	okay;
 
@@ -72,6 +72,7 @@ private:
 	int					techRequired;
 	Wallet				crystalRequired;
 	GameItem*			item;
+	grinliz::GLString	logText;
 
 	ForgeScript			forgeScript;
 
@@ -83,6 +84,7 @@ private:
 	gamui::TextLabel	requiredLabel,  techRequiredLabel;
 	gamui::TextLabel	availableLabel, techAvailLabel;
 	gamui::PushButton	buildButton;
+	gamui::TextLabel	log;
 	MoneyWidget			crystalRequiredWidget;
 	MoneyWidget			crystalAvailWidget;
 	ItemDescWidget		itemDescWidget;
