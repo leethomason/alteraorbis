@@ -96,28 +96,33 @@ TitleScene::TitleScene(LumosGame* game) : Scene(game), lumosGame(game), screenpo
 	model[HUMAN_FEMALE] = engine->AllocModel("humanFemale");
 	model[RED_MANTIS]	= engine->AllocModel("redmantis");
 	model[CYCLOPS]		= engine->AllocModel("cyclops");
+	//temple				= engine->AllocModel("pyramid0");
 
 	Vector3F forward = { 0, 0, 1 };
 	Vector3F across = { 0.4f, 0, 0 };
 
 	static const float STEP = 0.4f;
+	static const float ANGLE = 5.f;
 	for (int i = 0; i < NUM_MODELS; ++i) {
 		Vector3F v = { 30.5f, 0, 39.5f };
 		v = v + float(i) * across;
-		if (i < HUMAN_MALE)		v = v + float(i)*forward;
-		if (i >= HUMAN_MALE)	v = v + float(HUMAN_MALE-1)*forward - float(i - HUMAN_MALE)*forward;
+		if (i < HUMAN_MALE)	{
+			v = v + float(i)*forward;
+			model[i]->SetYRotation(ANGLE);
+		}
+		if (i >= HUMAN_MALE) {
+			v = v + float(HUMAN_MALE - 1)*forward - float(i - HUMAN_MALE)*forward;
+			model[i]->SetYRotation(-ANGLE);
+		}
 		model[i]->SetPos(v);
 		model[i]->SetFlag(Model::MODEL_INVISIBLE);
 	}
-
-	static const float ANGLE = 10.0f;
-	model[HUMAN_FEMALE]->SetYRotation(ANGLE);
-	model[HUMAN_MALE]->SetYRotation(-ANGLE);
 
 	float x = Mean(model[HUMAN_FEMALE]->Pos().x, model[HUMAN_MALE]->Pos().x);
 	const Vector3F CAM    = { x, 0.5,  47.0 };
 	const Vector3F TARGET = { x, 0.7f, 42.5f };
 	seed = 0;
+	//temple->SetPos(x, 0, 38);
 
 	engine->CameraLookAt(CAM, TARGET);
 	{
@@ -156,6 +161,7 @@ void TitleScene::DeleteEngine()
 		engine->FreeModel(model[i]);
 		model[i] = 0;
 	}
+//	engine->FreeModel(temple);
 	delete engine;
 	delete testMap;
 

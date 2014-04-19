@@ -58,6 +58,7 @@ x system for gamui to track models
 - re-do glow
 - melee is way too powerful and wide effect
 - option to flip right mouse behavior - pan/zoom by default. ctrl reverse.
+- proper names for markets, bars,
 
 - game
 	- Beta1 fixes
@@ -67,32 +68,33 @@ x system for gamui to track models
 		x guard posts need to look around and notify AIs
 		x is destroying beds just annoying? slow respawn?
 		x need title graphic
-		t denizen death does NOT remove sleep tube? (slow respawn?)
-		t guard posts check and inform
-		t workers teleport if stuck
-		- (web page) note that installer installs-over
+		x denizen death does NOT remove sleep tube? (slow respawn?)
+		x guard posts check and inform
+		x workers teleport if stuck
 		t should not be a continue button on new over-install (check map version!)
-		t auto-select avatar. left click should always move avatar.
-		t hook up ADSW
+		x auto-select avatar. left click should always move avatar.
+		x hook up ADSW
 		x left click in view always moves avatar
-		t on core death:
-			t should not have tracked avatar
-			t big “Your Core is Destroyed” message
-		- auto-clear not working as well as it should
-		- none -> cancel order, remove?
-		- none should have selection 
-		- re-order ui buttons
-		- closer to RTS controls
-			- mode shouldn’t change until changing bottom row
-			- RTS: click build then do…
+		x on core death:
+			x should not have tracked avatar
+			x big “Your Core is Destroyed” message
+		x none -> cancel order, remove?
+		x none should have selection 
+		d re-order ui buttons
+		x closer to RTS controls
+			x mode shouldn’t change until changing bottom row
+			x RTS: click build then do…
+			x rotate should use the selector
 		t no monsters until first temple is built - cut back on wandering monsters
 		- 32 bit texture support
 		- new walkthrough tutorial
+		- auto-clear not working as well as it should
+		- (web page) note that installer installs-over
 
 	- Beta2
-		- repair
+		x repair
 		- fast / threaded save
-		- new opening screen?
+		x new opening screen?
 		- abandon to tactical AI
 
 	- Census

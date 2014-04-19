@@ -270,8 +270,7 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta )
 					PlantFilter plantFilter;
 					chitBag->QuerySpatialHash( &plants, clearBounds, 0, &plantFilter );
 					for( int k=0; k<plants.Size(); ++k ) {
-						plants[k]->GetItem()->hp = 0;
-						plants[k]->SetTickNeeded();
+						plants[k]->DeRez();
 						// Some hackery: we can't build until the plant isn't there,
 						// but the component won't get deleted until later. Remove
 						// the MapSpatialComponent to detatch it from map.
@@ -616,7 +615,7 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 			double industry = building->GetItem()->GetBuildingIndustrial(false);
 			double score = evalScript->EvalIndustrial(true);
 			double dot = score * industry;
-			scale = 0.5 + 0.5 * dot;
+			scale = 0.55 + 0.45 * dot;
 
 			if (!evalScript->Reachable()) {
 				scale = 0;

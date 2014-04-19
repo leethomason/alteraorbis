@@ -117,12 +117,13 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 		}
 
 		buildButton[i].Init( &gamui2D, game->GetButtonLook(0) );
-		buildButton[i].SetText( bd.label.c_str() );
+		buildButton[i].SetText( bd.label.safe_str() );
 		buildButton[0].AddToToggleGroup( &buildButton[i] );
 
 		modeButton[bd.group].AddSubItem( &buildButton[i] );
 	}
 	GLASSERT( sleepTubeID >= 0 );
+	buildButton[0].SetText("UNUSED");
 
 	tabBar0.Init( &gamui2D, LumosGame::CalcUIIconAtom( "tabBar", true ), false );
 	tabBar1.Init( &gamui2D, LumosGame::CalcUIIconAtom( "tabBar", true ), false );
@@ -221,15 +222,21 @@ void GameScene::Resize()
 	int level = BuildScript::GROUP_UTILITY;
 	int start = 0;
 
-	for( int i=0; i<BuildScript::NUM_OPTIONS; ++i ) {
+	for( int i=1; i<BuildScript::NUM_OPTIONS; ++i ) {
 		const BuildData& bd = buildScript.GetData( i );
 		if ( bd.group != level ) {
 			level = bd.group;
 			start = i;
 		}
-		layout.PosAbs( &buildButton[i], i-start, 2 );
+		if (bd.group == 0)
+			layout.PosAbs(&buildButton[i], i - start - 1, 2);
+		else
+			layout.PosAbs(&buildButton[i], i - start, 2);
 	}
-	for( int i=0; i<NUM_BUILD_MODES; ++i ) {
+//	buildButton[0].SetVisible(false);	// the "none" button. Not working - perhaps bug in sub-selection.
+	buildButton[0].SetPos(-100, -100);
+
+	for (int i = 0; i<NUM_BUILD_MODES; ++i) {
 		layout.PosAbs( &modeButton[i], i, 1 );
 	}
 	layout.PosAbs( &createWorkerButton, 0, 3 );
@@ -378,11 +385,8 @@ void GameScene::SetSelectionModel( const grinliz::Vector2F& view )
 	int height = 1;
 	const char* name = "";
 	if ( buildActive ) {
-		if ( buildActive == BuildScript::ROTATE ) {
-			// nothing.
-		}
-		else if (    buildActive == BuildScript::CLEAR 
-			      || buildActive == BuildScript::PAVE ) 
+		if (    buildActive == BuildScript::CLEAR 
+			      || buildActive == BuildScript::CANCEL ) 
 		{
 			const WorldGrid& wg = sim->GetWorldMap()->GetWorldGrid( pos2i.x, pos2i.y );
 			switch ( wg.Height() ) {
@@ -502,7 +506,7 @@ void GameScene::TapModel( Chit* target )
 		ai->Target( target, true );
 		setTarget = "target";
 	}
-	else if ( ai && FreeCameraMode() && ai->GetTeamStatus( target ) == RELATE_FRIEND ) {
+	else if ( ai && ai->GetTeamStatus( target ) == RELATE_FRIEND ) {
 		const GameItem* item = target->GetItem();
 		bool denizen = strstr( item->ResourceName(), "human" ) != 0;
 		if (denizen) {
@@ -575,7 +579,7 @@ void GameScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& world)
 
 //	if (AvatarSelected()) {
 	Chit* playerChit = sim->GetPlayerChit();
-	if (playerChit) {
+	if (playerChit && !buildActive) {
 		Vector2F dest = { plane.x, plane.z };
 		DoDestTapped(dest);
 	}
@@ -583,11 +587,11 @@ void GameScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& world)
 
 bool GameScene::DragAtom(gamui::RenderAtom* atom)
 {
-	if (uiMode[UI_BUILD].Down() && buildActive <= BuildScript::ICE && buildActive != BuildScript::ROTATE) {
-		if (buildActive != BuildScript::CLEAR)
-			*atom = lumosGame->CalcIconAtom("build");
-		else
+	if (buildActive && buildActive <= BuildScript::ICE && buildActive != BuildScript::ROTATE) {
+		if (buildActive == BuildScript::CLEAR || buildActive == BuildScript::CANCEL)
 			*atom = lumosGame->CalcIconAtom("delete");
+		else
+			*atom = lumosGame->CalcIconAtom("build");
 		return true;
 	}
 	return false;
@@ -597,7 +601,7 @@ bool GameScene::DragAtom(gamui::RenderAtom* atom)
 void GameScene::BuildAction(const Vector2I& pos2i)
 {
 	CoreScript* coreScript = CoreScript::GetCore(sim->GetChitBag()->GetHomeSector());
-	if (uiMode[UI_BUILD].Down() && coreScript) {
+	if (coreScript && buildActive) {
 		WorkQueue* wq = coreScript->GetWorkQueue();
 		GLASSERT(wq);
 		RemovableFilter removableFilter;
@@ -606,7 +610,7 @@ void GameScene::BuildAction(const Vector2I& pos2i)
 			wq->AddAction(pos2i, BuildScript::CLEAR);
 			return;
 		}
-		else if (buildActive == BuildScript::NONE) {
+		else if (buildActive == BuildScript::CANCEL) {
 			wq->Remove(pos2i);
 		}
 		else if (buildActive == BuildScript::ROTATE) {
@@ -630,24 +634,12 @@ void GameScene::BuildAction(const Vector2I& pos2i)
 
 void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::Ray& world )
 {
-	bool uiHasTap = ProcessTap( action, view, world );
+	tapView = view;	// justs a temporary to pass through to ItemTapped()
+	bool uiHasTap = ProcessTap(action, view, world);
 	Engine* engine = sim->GetEngine();
 	WorldMap* map = sim->GetWorldMap();
 	Vector3F at = { 0, 0, 0 };
 	IntersectRayAAPlane(world.origin, world.direction, 1, 0, &at, 0);
-
-	buildActive = 0;
-	if ( uiMode[UI_BUILD].Down() ) {
-		for( int i=1; i<BuildScript::NUM_OPTIONS; ++i ) {
-			if ( buildButton[i].Down() ) {
-				buildActive = i;
-				CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
-				cc->SetTrack(0);
-				break;
-			}
-		}
-	}
-	SetSelectionModel( view );
 
 	RenderAtom atom;
 	if (!uiHasTap) {
@@ -686,7 +678,7 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 			}
 			else {
 				Vector2F end = { at.x, at.z };
-				if ((end - mapDragStart).LengthSquared() > 0.25f) {
+				//if ((end - mapDragStart).LengthSquared() > 0.25f) {
 					Rectangle2I r;
 					r.FromPair(ToWorld2I(mapDragStart), ToWorld2I(end));
 					DragAtom(&atom);
@@ -694,22 +686,17 @@ void GameScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::R
 					for (Rectangle2IIterator it(r); !it.Done(); it.Next()) {
 						BuildAction(it.Pos());
 					}
-				}
+				//}
 			}
 		}
 	}
+	// Clear out drag indicator, if not dragging.
 	if (uiHasTap || action == GAME_TAP_UP) {
 		for (int i = 0; i < NUM_BUILD_MARKS; ++i) {
 			buildMark[i].SetVisible(false);
 		}
 		mapDragStart.Zero();
 	}
-}
-
-
-bool GameScene::CoreMode()
-{
-	return uiMode[UI_BUILD].Down() || uiMode[UI_VIEW].Down(); 
 }
 
 
@@ -720,19 +707,6 @@ bool GameScene::AvatarSelected()
 	if (button && playerChit && playerChit->ID() == chitTracking) {
 		return true;
 	}
-	return false;
-}
-
-
-bool GameScene::FreeCameraMode()
-{
-	//bool button = freeCameraButton.Down();
-	bool button      = uiMode[UI_VIEW].Down();
-	Chit* playerChit = sim->GetPlayerChit();
-	bool coreMode    = CoreMode();
-	
-	if ( button || coreMode || (!playerChit) )
-		return true;
 	return false;
 }
 
@@ -761,9 +735,6 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		CameraComponent* cc = sim->GetChitBag()->GetCamera(engine);
 		cc->SetTrack(0);
 		engine->CameraLookAt(x, y);
-
-		//dest.x = x*(float)engine->GetMap()->Width();
-		//dest.y = y*(float)engine->GetMap()->Height();
 	}
 	else if (item == &atlasButton) {
 		MapSceneData* data = new MapSceneData( sim->GetChitBag(), sim->GetWorldMap(), sim->GetPlayerChit() );
@@ -855,24 +826,35 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		}
 	}
 
-	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
-		if ( item == &newsButton[i] ) {
-			if ( FreeCameraMode() ) {
-				
-				NewsHistory* history = sim->GetChitBag()->GetNewsHistory();
-				const grinliz::CArray< NewsEvent, NewsHistory::MAX_CURRENT >& current = history->CurrentNews();
+	// Only hitting the bottom row (actual action) buttons triggers
+	// the build. Up until that time, the selection icon doesn't 
+	// turn on.
+	buildActive = 0;
+	for (int i = 1; i<BuildScript::NUM_OPTIONS; ++i) {
+		if (&buildButton[i] == item) {
+			buildActive = i;
+			CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
+			cc->SetTrack(0);
+			break;
+		}
+	}
+	SetSelectionModel(tapView);
 
-				int index = current.Size() - 1 - i;
-				if ( index >= 0 ) {
-					const NewsEvent& ne = current[index];
-					CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
-					if ( cc && ne.chitID ) {
-						cc->SetTrack( ne.chitID );
-					}
-					else {
-						sim->GetEngine()->CameraLookAt( ne.pos.x, ne.pos.y );
-						if ( cc ) cc->SetTrack( 0 );
-					}
+	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
+		if (item == &newsButton[i]) {
+			NewsHistory* history = sim->GetChitBag()->GetNewsHistory();
+			const grinliz::CArray< NewsEvent, NewsHistory::MAX_CURRENT >& current = history->CurrentNews();
+
+			int index = current.Size() - 1 - i;
+			if (index >= 0) {
+				const NewsEvent& ne = current[index];
+				CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
+				if (cc && ne.chitID) {
+					cc->SetTrack(ne.chitID);
+				}
+				else {
+					sim->GetEngine()->CameraLookAt(ne.pos.x, ne.pos.y);
+					if (cc) cc->SetTrack(0);
 				}
 			}
 		}
@@ -887,16 +869,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		}
 	}
 #endif
-#if 0
-	if ( item == &uiMode[UI_BUILD] || item == &uiMode[UI_VIEW] ) {
-		// Set it to track nothing; if it needs to track something, that will
-		// be set by future mouse actions or DoTick
-		CameraComponent* cc = sim->GetChitBag()->GetCamera( sim->GetEngine() );
-		if ( cc ) {
-			cc->SetTrack( 0 );
-		}
-	}
-#endif
+
 	for( int i=0; i<NUM_PICKUP_BUTTONS; ++i ) {
 		if ( item == &pickupButton[i] ) {
 			Chit* playerChit = sim->GetPlayerChit();
@@ -1297,7 +1270,6 @@ void GameScene::DoTick( U32 delta )
 	for( int i=0; i<NUM_BUILD_MODES; ++i ) {
 		modeButton[i].SetVisible( uiMode[UI_BUILD].Down() );
 	}
-	//tabBar0.SetVisible( uiMode[UI_BUILD].Down() );
 	tabBar1.SetVisible( uiMode[UI_BUILD].Down() );
 	createWorkerButton.SetVisible( uiMode[UI_BUILD].Down() );
 

@@ -33,7 +33,7 @@ CharacterScene::CharacterScene( LumosGame* game, CharacterSceneData* csd ) : Sce
 	game->InitStd( &gamui2D, &okay, &cancel );
 	dropButton.Init( &gamui2D, lumosGame->GetButtonLook(0));
 	dropButton.SetText( "Drop" );
-	dropButton.SetVisible( !data->IsMarket() );
+	dropButton.SetVisible( data->IsCharacter() );
 
 	reset.Init( &gamui2D, lumosGame->GetButtonLook(0));
 	reset.SetText( "Reset" );
@@ -45,7 +45,7 @@ CharacterScene::CharacterScene( LumosGame* game, CharacterSceneData* csd ) : Sce
 	faceWidget.Init( &gamui2D, lumosGame->GetButtonLook(0), 0 );
 	faceWidget.SetFace( &uiRenderer, data->itemComponent->GetItem(0) );
 
-	desc.Init( &gamui2D );
+	desc.Init(&gamui2D);
 	
 	for( int j=0; j<nStorage; ++j ) {
 		for( int i=0; i<NUM_ITEM_BUTTONS; ++i ) {
@@ -97,8 +97,8 @@ void CharacterScene::Resize()
 
 	LayoutCalculator layout = lumosGame->DefaultLayout();
 
-	layout.PosAbs( &faceWidget, 0, 0 );
-	faceWidget.SetSize( faceWidget.Width(), faceWidget.Height()*2.0f );
+	layout.PosAbs( &faceWidget, 0, 1 );
+	faceWidget.SetSize( faceWidget.Width(), faceWidget.Width() );
 	
 	for( int j=0; j<nStorage; ++j ) {
 		int col=0;
@@ -108,7 +108,7 @@ void CharacterScene::Resize()
 			if ( j==0 )
 				layout.PosAbs( &itemButton[j][i], col+1, row+1 );
 			else
-				layout.PosAbs( &itemButton[j][i], -3+col, row+1 );
+				layout.PosAbs( &itemButton[j][i], -4+col, row+1 );
 			++col;
 			if ( col == 3 ) {
 				++row;
@@ -117,24 +117,36 @@ void CharacterScene::Resize()
 		}
 	}
 	layout.PosAbs( &moneyWidget[0], 1, 0, false );
-	layout.PosAbs( &moneyWidget[1], -3, 0, false );
+	layout.PosAbs( &moneyWidget[1], -4, 0, false );
 	layout.PosAbs( &dropButton, 1, 7 );
-	layout.PosAbs( &billOfSale, 1, 7 );	
+	layout.PosAbs( &billOfSale, 1, 6 );	
 	layout.PosAbs( &reset, -1, -2 );
 
-	layout.PosAbs( &desc, -4, 0 );
-	desc.SetBounds( layout.Width() * 4.0f, 0 );
-
-	float y = desc.Y() + desc.Height();
-	if ( !data->IsCharacter() ) {
-		desc.SetPos( port.UIWidth()*0.5f - layout.Width()*0.5f, desc.Y() );
-		y = dropButton.Y();
+	if (data->IsCharacter()) {
+		layout.PosAbs(&desc, -4, 0);
+		layout.PosAbs(&itemDescWidget, -4, 1);
 	}
+	else if (data->IsMarket()) {
+		layout.PosAbs(&desc, -4, 6);
+		layout.PosAbs(&itemDescWidget, -4, 7);
+	}
+	else {
+		// Vault
+		layout.PosAbs(&desc, -4, 0);
+		layout.PosAbs(&itemDescWidget, -4, 6);
+	}
+	float width = layout.Width() * 4;
+	desc.SetBounds(width, 0);
 
-	float x = desc.X();
+	itemDescWidget.SetLayout(layout);
+	itemDescWidget.SetPos(itemDescWidget.X(), itemDescWidget.Y());	// bug in the desc widgets
+}
 
-	itemDescWidget.SetLayout( layout );
-	itemDescWidget.SetPos( x, y );
+
+grinliz::Color4F CharacterScene::ClearColor()
+{
+	Color4F c = game->GetPalette()->Get4F(0, 5);
+	return c;
 }
 
 
@@ -151,7 +163,7 @@ void CharacterScene::SetItemInfo( const GameItem* item, const GameItem* user )
 										 GameTrait::LevelToExperience( item->Traits().Level()+1 ));
 	desc.SetText( str.c_str() );
 
-	ChitBag* chitBag = data->itemComponent->ParentChit()->GetChitBag();
+	ChitBag* chitBag = data->itemComponent->ParentChit() ? data->itemComponent->ParentChit()->GetChitBag() : 0;
 	itemDescWidget.SetInfo( item, user, nStorage==1, chitBag );
 }
 
@@ -234,11 +246,28 @@ void CharacterScene::SetButtonText()
 		if ( !model ) {
 			model = engine->AllocModel( down->ResourceName() );
 			model->SetPos( 0,0,0 );
+			if (down->GetItem()->IName() == "shield") {
+				Quaternion q;
+				Matrix4 m;
+				m.ConcatRotation(90.0f, 0);
+				//m.ConcatRotation(90.0f, 1);
+				q.FromRotationMatrix(m);
+				model->SetRotation(q);
+			}
+			else if (down->GetItem()->keyValues.GetIString("mob") == IString()) {
+				model->SetYRotation(90.0f);
+			}
+			else {
+				model->SetYRotation(0);
+			}
 
 			Rectangle3F aabb = model->AABB();
 			float size = Max( aabb.SizeX(), Max( aabb.SizeY(), aabb.SizeZ() ));
-			float d = 1.5f + size;
-			engine->camera.SetPosWC( d, d, d );
+			float d = 2.0f + size;
+			float y = aabb.SizeY() * 0.7f;
+			engine->camera.SetPosWC( 0, y, d );
+			Vector3F lookAt = aabb.Center();
+			lookAt.y = y;
 			engine->CameraLookAt( engine->camera.PosWC(), aabb.Center() );
 
 			IString proc = down->keyValues.GetIString( "procedural" );

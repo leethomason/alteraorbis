@@ -7,8 +7,9 @@ using namespace grinliz;
 
 /* static */
 BuildData BuildScript::buildData[NUM_OPTIONS] = {
+	{ "", "", 0, 0, 0 },
 	// Utility
-	{	"None",		"",			0, 0, 0 },
+	{	"Cancel",	"",			0, 0, 0 },
 	{	"Clear",	"",			0, 0, 0 },
 	{	"Rotate",	"",			0, 0, 0 },
 	{	"Pave",		"pave",		0, 0, 0 },

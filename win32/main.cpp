@@ -48,7 +48,7 @@ static const float KEY_ZOOM_SPEED		= 0.04f;
 static const float KEY_ROTATE_SPEED		= 4.0f;
 static const float KEY_MOVE_SPEED		= 0.4f;
 
-#if 0
+#if 1
 // 4:3 test
 static const int SCREEN_WIDTH  = 800;
 static const int SCREEN_HEIGHT = 600;
@@ -208,7 +208,7 @@ int main( int argc, char **argv )
 				break;
 
 			case SDL_KEYUP:
-				switch (event.key.keysym.sym)
+				switch (event.key.keysym.scancode)
 				{
 				case SDL_SCANCODE_LCTRL:	modKeys = modKeys & (~KMOD_LCTRL);		break;
 				case SDL_SCANCODE_RCTRL:	modKeys = modKeys & (~KMOD_RCTRL);		break;

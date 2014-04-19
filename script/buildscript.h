@@ -26,7 +26,8 @@ public:
 	BuildScript()	{}
 
 	enum {
-		NONE,
+		NONE_ACTIVE=0,
+		CANCEL,
 		CLEAR,
 		ROTATE,
 		PAVE,

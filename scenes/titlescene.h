@@ -65,6 +65,7 @@ private:
 	Engine*				engine;
 	TestMap*			testMap;
 	Model* model[NUM_MODELS];
+	//Model* temple;
 	int					seed;
 	CTicker				ticker;
 

@@ -61,12 +61,14 @@ DialogScene::DialogScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 	const GameItem& blaster	= db->Get( "blaster" );
 	const GameItem& pistol	= db->Get( "pistol" );
 	const GameItem& ring	= db->Get( "ring" );
-	const GameItem& market	= db->Get( "market" );
+	const GameItem& market  = db->Get("market");
+	const GameItem& shield  = db->Get("shield");
 
 	itemComponent0 = new ItemComponent( new GameItem( human ));
 	itemComponent0->AddToInventory( new GameItem( blaster ));
 	itemComponent0->AddToInventory( new GameItem( pistol ));
-	itemComponent0->AddToInventory( new GameItem( ring ));
+	itemComponent0->AddToInventory(new GameItem(shield));
+	itemComponent0->AddToInventory(new GameItem(ring));
 
 	itemComponent1 = new ItemComponent( new GameItem( troll ));
 	itemComponent1->AddToInventory( new GameItem( blaster ));
@@ -86,6 +88,7 @@ DialogScene::DialogScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 	}
 	itemComponent0->GetItem()->GetTraitsMutable()->Roll( 10 );
 	itemComponent0->GetItem()->GetPersonalityMutable()->Roll( 20, &itemComponent0->GetItem()->Traits() );
+	itemComponent0->GetItem()->SetProperName("Worvaka");
 }
 
 DialogScene::~DialogScene()

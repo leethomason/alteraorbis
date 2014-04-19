@@ -79,8 +79,6 @@ private:
 	void SetSelectionModel( const grinliz::Vector2F& view );
 
 	void SetPickupButtons();
-	bool FreeCameraMode();
-	bool CoreMode();		// currently controlling the core (build or view)
 	void ProcessNewsToConsole();
 	void CheckGameStage(U32 delta);
 	void ForceHerd(const grinliz::Vector2I& sector);
@@ -139,6 +137,7 @@ private:
 	int					sleepTubeID;
 	int					coreWarningTimer;
 	grinliz::Vector2F	mapDragStart;
+	grinliz::Vector2F	tapView;
 
 	// Shows what is being built or removed.
 	Model*				selectionModel;

@@ -92,7 +92,7 @@ ForgeScene::ForgeScene( LumosGame* game, ForgeSceneData* data )
 	crystalAvailWidget.Set( forgeData->itemComponent->GetItem(0)->wallet );
 
 	buildButton.Init( &gamui2D, game->GetButtonLook(0));
-	buildButton.SetText( "Build" );
+	buildButton.SetText( "Forge" );
 
 	SetModel( true );
 }
@@ -142,7 +142,7 @@ void ForgeScene::Resize()
 	itemDescWidget.SetLayout( layout );
 	layout.PosAbs( &itemDescWidget, -4, 0 );
 
-	layout.PosAbs( &buildButton, -2, ForgeScript::NUM_ITEM_TYPES+1, 2, 2 );
+	layout.PosAbs( &buildButton, 0, ForgeScript::NUM_ITEM_TYPES+5, 2, 2 );
 }
 
 
@@ -193,7 +193,7 @@ void ForgeScene::SetModel( bool randomTraits )
 						partsFlags, effectFlags, 
 						item, &crystalRequired, &techRequired, randomTraits );
 
-	ChitBag* chitBag = forgeData->itemComponent->ParentChit()->GetChitBag();	// eek. hacky.
+	ChitBag* chitBag = forgeData->itemComponent->ParentChit() ? forgeData->itemComponent->ParentChit()->GetChitBag() : 0;	// eek. hacky.
 	itemDescWidget.SetInfo( displayItem, &humanMale, false, chitBag );
 
 	ProcRenderInfo info;
