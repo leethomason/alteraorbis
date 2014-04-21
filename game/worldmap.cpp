@@ -2022,20 +2022,20 @@ void WorldMap::Draw3D(  const grinliz::Color3F& colorMult, StencilMode mode, boo
 		for( int i=0; i<debugPathVector.Size()-1; ++i ) {
 			Vector3F tail = { debugPathVector[i].x, 0.2f, debugPathVector[i].y };
 			Vector3F head = { debugPathVector[i+1].x, 0.2f, debugPathVector[i+1].y };
-			device->DrawArrow( debug, tail, head, false );
+			device->DrawArrow( debug, tail, head, 0.2f );
 		}
 	}
 	{
 		// Debugging coordinate system:
 		Vector3F origin = { 0, 0.1f, 0 };
-		Vector3F xaxis = { 5, 0, 0 };
+		Vector3F xaxis = { 5, 0.1f, 0 };
 		Vector3F zaxis = { 0, 0.1f, 5 };
 
 		FlatShader debug;
 		debug.SetColor( 1, 0, 0, 1 );
-		device->DrawArrow( debug, origin, xaxis, false );
+		device->DrawArrow( debug, origin, xaxis, 0.3f );
 		debug.SetColor( 0, 0, 1, 1 );
-		device->DrawArrow( debug, origin, zaxis, false );
+		device->DrawArrow( debug, origin, zaxis, 0.3f );
 	}
 }
 

@@ -52,7 +52,6 @@ NavTest2Scene::NavTest2Scene( LumosGame* game, const NavTest2SceneData* _data ) 
 	debugRay.direction.Zero();
 	debugRay.origin.Zero();
 
-	nChits = 0;
 	creationTick = 0;
 	game->InitStd( &gamui2D, &okay, 0 );
 	engine = 0;
@@ -150,8 +149,7 @@ void NavTest2Scene::CreateChit( const Vector2I& p )
 #endif
 
 	chit->GetSpatialComponent()->SetPosition( (float)p.x+0.5f, 0, (float)p.y+0.5f );
-	OnChitMsg( chit, ChitMsg(ChitMsg::PATHMOVE_DESTINATION_REACHED) );
-	++nChits;
+	chits.Push(chit->ID());
 }
 
 
@@ -166,7 +164,7 @@ void NavTest2Scene::DrawDebugText()
 	ufoText->Draw( 0, 16, "PathCache mem%%=%d hit%%=%d walkers=%d [%d %d %d %d %d]", 
 		(int)(cacheData.memoryFraction * 100.0f),
 		(int)(cacheData.hitFraction * 100.f),
-		nChits,
+		chits.Size(),
 		SpaceTree::nModelsAtDepth[0], 
 		SpaceTree::nModelsAtDepth[1], 
 		SpaceTree::nModelsAtDepth[2], 
@@ -189,14 +187,24 @@ void NavTest2Scene::DrawDebugText()
 }
 
 
-void NavTest2Scene::OnChitMsg( Chit* chit, const ChitMsg& msg )
+void NavTest2Scene::DoCheck()
 {
-	if ( msg.ID() == ChitMsg::PATHMOVE_DESTINATION_REACHED || msg.ID() == ChitMsg::PATHMOVE_DESTINATION_BLOCKED ) {
-		// Reached or blocked, move to next thing:
-		const Vector2I& dest = waypoints[random.Rand(waypoints.Size())];
-		Vector2F d = { (float)dest.x+0.5f, (float)dest.y+0.5f };
-		//GLOUTPUT(( "OnChitMsg %x dest=%.1f,%.1f\n", chit, d.x, d.y ));
-		GET_SUB_COMPONENT( chit, MoveComponent, PathMoveComponent )->QueueDest(d); 
+	for (int i = 0; i < chits.Size(); ++i) {
+		Chit* chit = chitBag->GetChit(chits[i]);
+		if (chit) {
+			PathMoveComponent* pmc = GET_SUB_COMPONENT(chit, MoveComponent, PathMoveComponent);
+			if (pmc && pmc->Stopped()) {
+				// Reached or blocked, move to next thing:
+				const Vector2I& dest = waypoints[random.Rand(waypoints.Size())];
+				Vector2F d = { (float)dest.x + 0.5f, (float)dest.y + 0.5f };
+				//GLOUTPUT(( "OnChitMsg %x dest=%.1f,%.1f\n", chit, d.x, d.y ));
+				pmc->QueueDest(d);
+			}
+		}
+		else {
+			chits.SwapRemove(i);
+			--i;
+		}
 	}
 }
 
@@ -216,6 +224,18 @@ void NavTest2Scene::Rotate( float degrees )
 }
 
 
+void NavTest2Scene::MoveCamera(float dx, float dy)
+{
+	MoveImpl(dx, dy, engine);
+}
+
+
+void NavTest2Scene::Pan(int action, const grinliz::Vector2F& view, const grinliz::Ray& world)
+{
+	Process3DTap(action, view, world, engine);
+}
+
+
 void NavTest2Scene::Tap( int action, const grinliz::Vector2F& view, const grinliz::Ray& world )				
 {
 	bool uiHasTap = ProcessTap( action, view, world );
@@ -224,10 +244,6 @@ void NavTest2Scene::Tap( int action, const grinliz::Vector2F& view, const grinli
 		// Check mini-map
 		grinliz::Vector2F ui;
 		game->GetScreenport().ViewToUI( view, &ui );
-	}
-
-	if ( !uiHasTap ) {
-		int tap = Process3DTap( action, view, world, engine );
 	}
 }
 
@@ -252,8 +268,9 @@ void NavTest2Scene::DoTick( U32 deltaTime )
 {
 	chitBag->DoTick( deltaTime );
 	++creationTick;
+	DoCheck();
 	
-	if ( creationTick >= 5 && nChits < data->nChits ) {
+	if ( creationTick >= 5 && chits.Size() < data->nChits ) {
 		for( int i=0; i<data->nPerCreation; ++i ) {
 			CreateChit( waypoints[random.Rand(waypoints.Size()) ] );
 		}

@@ -1,5 +1,5 @@
 - batching troubles - still lots of small batches going in
-- "blue wall" bug. Alpha present. Not screen aligned. Noise in particles??
+x "blue wall" bug. Alpha present. Not screen aligned. Noise in particles??
 - resize and colors are wrong bug
 - GT: ui to show idle and busy workers
 - redo AI utility to be based on a set of curves
@@ -89,23 +89,28 @@ x system for gamui to track models
 		x multi-build in forge
 		x targeting reticule not working
 		x no glow on pulse
-		- tuning
-			- farm production (high??)
-			- monster arrival. greater herd more often?
-			- time to use bar (low??)
-			- double tech decay
-			- weapon sorting not quite correct
-
-		- 32 bit texture support
-		- new walkthrough tutorial
-		- auto-clear not working as well as it should
-		- (web page) note that installer installs-over
+		- stuck battle bug
 
 	- Beta2
 		x repair
 		- fast / threaded save
 		x new opening screen?
 		- abandon to tactical AI
+		- clean up history code. remove named lesser tracking.
+		- tuning
+			- farm production (high??)
+			- monster arrival. greater herd more often?
+			- time to use bar (low??)
+			- double tech decay
+			- weapon sorting not quite correct
+		- 32 bit texture support
+		- new walkthrough tutorial
+		- auto-clear not working as well as it should
+		- (web page) note that installer installs-over
+		- restore 'create world' button.
+			- pre-gen plants
+			- pre-gen volcanoes (50%?)
+			- run world sim 5 minutes?
 
 	- Census
 		x coolest stuff, past and present, by category

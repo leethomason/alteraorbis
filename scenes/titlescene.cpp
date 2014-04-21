@@ -210,6 +210,7 @@ void TitleScene::Resize()
 	layout.PosAbs(&gameScene[GENERATE_WORLD], -2, -1);
 	layout.PosAbs(&gameScene[DEFAULT_WORLD], -1, -1);
 	layout.PosAbs(&gameScene[CONTINUE], 0, -1, 2, 1);
+	gameScene[GENERATE_WORLD].SetVisible(false);
 
 	gameScene[CONTINUE].SetEnabled( false );
 	const char* datPath = game->GamePath( "game", 0, "dat" );

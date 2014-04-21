@@ -134,6 +134,18 @@ void NavTestScene::Zoom( int style, float delta )
 }
 
 
+void NavTestScene::MoveCamera(float dx, float dy)
+{
+	MoveImpl(dx, dy, engine);
+}
+
+
+void NavTestScene::Pan(int action, const grinliz::Vector2F& view, const grinliz::Ray& world)
+{
+	Process3DTap(action, view, world, engine);
+}
+
+
 void NavTestScene::Rotate( float degrees ) 
 {
 	engine->camera.Orbit( degrees );
@@ -155,40 +167,37 @@ int NavTestScene::MapGridUse( int x, int y )
 void NavTestScene::Tap( int action, const grinliz::Vector2F& view, const grinliz::Ray& world )				
 {
 	bool uiHasTap = ProcessTap( action, view, world );
-	if ( !uiHasTap ) {
-		int tap = Process3DTap( action, view, world, engine );
-		if ( tap ) {
-			Vector3F oldMark = tapMark;
+	if ( !uiHasTap && action == GAME_TAP_UP) {
+		Vector3F oldMark = tapMark;
 
-			Matrix4 mvpi;
-			Ray ray;
-			game->GetScreenport().ViewProjectionInverse3D( &mvpi );
-			engine->RayFromViewToYPlane( view, mvpi, &ray, &tapMark );
-			tapMark.y += 0.1f;
+		Matrix4 mvpi;
+		Ray ray;
+		game->GetScreenport().ViewProjectionInverse3D( &mvpi );
+		engine->RayFromViewToYPlane( view, mvpi, &ray, &tapMark );
+		tapMark.y += 0.1f;
 
-			char buf[40];
-			SNPrintf( buf, 40, "xz = %.1f,%.1f nSubZ=%d", tapMark.x, tapMark.z, -1 ); //map->NumRegions() );
-			textLabel.SetText( buf );
+		char buf[40];
+		SNPrintf( buf, 40, "xz = %.1f,%.1f nSubZ=%d", tapMark.x, tapMark.z, -1 ); //map->NumRegions() );
+		textLabel.SetText( buf );
 
-			if ( toggleBlock.Down() ) {
-				Vector2I d = { (int)tapMark.x, (int)tapMark.z };
-				if ( blocks.IsSet( d.x, d.y ) )
-					blocks.Clear( d.x, d.y );
-				else
-					blocks.Set( d.x, d.y );
-				map->UpdateBlock( d.x, d.y );
-			}
-			else {
-				// Move to the marked location.
-				Vector2F d = { tapMark.x, tapMark.z };
-				PathMoveComponent* pmc = static_cast<PathMoveComponent*>( chit[0]->GetComponent( "PathMoveComponent" ) );
-				GLASSERT( pmc );
-				pmc->QueueDest( d );
-			}
+		if ( toggleBlock.Down() ) {
+			Vector2I d = { (int)tapMark.x, (int)tapMark.z };
+			if ( blocks.IsSet( d.x, d.y ) )
+				blocks.Clear( d.x, d.y );
+			else
+				blocks.Set( d.x, d.y );
+			map->UpdateBlock( d.x, d.y );
+		}
+		else {
+			// Move to the marked location.
+			Vector2F d = { tapMark.x, tapMark.z };
+			PathMoveComponent* pmc = static_cast<PathMoveComponent*>( chit[0]->GetComponent( "PathMoveComponent" ) );
+			GLASSERT( pmc );
+			pmc->QueueDest( d );
+		}
 
-			if ( showAdjacent.Down() ) {
-				map->ShowAdjacentRegions( tapMark.x, tapMark.z );
-			}
+		if ( showAdjacent.Down() ) {
+			map->ShowAdjacentRegions( tapMark.x, tapMark.z );
 		}
 	}
 }

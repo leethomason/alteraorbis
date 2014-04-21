@@ -607,7 +607,7 @@ void GPUDevice::DrawQuad( const GPUState& state, Texture* texture, const grinliz
 	DrawQuads( state, stream, data, 1 );
 	++currentQuadBuf;
 	if ( currentQuadBuf == NUM_QUAD_BUFFERS ) {
-//		GLASSERT( 0 ); // we are re-using VBOs and possibly stalling GPU
+//		GLASSERT( 0 ); // we are re-using VBOs and possibly stalling GPU.
 		currentQuadBuf = 0;
 	}
 }
@@ -627,7 +627,7 @@ void GPUDevice::DrawLine( const GPUState& state, const grinliz::Vector3F p0, con
 	DrawPrimitive( GL_LINES, state, stream, data, 2 );
 	++currentQuadBuf;
 	if ( currentQuadBuf == NUM_QUAD_BUFFERS ) {
-		GLASSERT( 0 ); // we are re-using VBOs and possibly stalling GPU
+		//GLASSERT( 0 ); // we are re-using VBOs and possibly stalling GPU
 		currentQuadBuf = 0;
 	}
 }
@@ -642,19 +642,20 @@ void GPUDevice::DrawArrow( const GPUState& state, const grinliz::Vector3F p0, co
 		normal.Normalize();
 		normal = normal * width;
 
-		PTVertex pos[3] = { 
+		PTVertex v[3] = { 
 			{ p0-normal, { 0, 0 } },
 			{ p1, { 1, 1 } },
 			{ p0+normal, { 1, 0 } },
 		};
-		GPUStream stream( pos[0] );
+		quadBuffer[currentQuadBuf]->Upload(v, 3 * sizeof(PTVertex), 0);
+		GPUStream stream(v[0]);
 		GPUStreamData data;
 		data.vertexBuffer = quadBuffer[currentQuadBuf]->ID();
 
 		DrawPrimitive( GL_TRIANGLES, state, stream, data, 3 );
 		++currentQuadBuf;
 		if ( currentQuadBuf == NUM_QUAD_BUFFERS ) {
-			GLASSERT( 0 ); // we are re-using VBOs and possibly stalling GPU
+			//GLASSERT( 0 ); // we are re-using VBOs and possibly stalling GPU
 			currentQuadBuf = 0;
 		}
 	}

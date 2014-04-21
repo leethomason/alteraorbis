@@ -35,7 +35,7 @@ public:
 };
 
 
-class NavTest2Scene : public Scene,  public IChitListener
+class NavTest2Scene : public Scene
 {
 public:
 	NavTest2Scene( LumosGame* game, const NavTest2SceneData* );
@@ -46,17 +46,19 @@ public:
 	virtual void Resize();
 	void Zoom( int style, float delta );
 	void Rotate( float degrees );
+	void Pan(int action, const grinliz::Vector2F& view, const grinliz::Ray& world);
+	void MoveCamera(float dx, float dy);
 
 	virtual void Tap( int action, const grinliz::Vector2F& screen, const grinliz::Ray& world );
 	virtual void ItemTapped( const gamui::UIItem* item );
 	virtual void Draw3D( U32 deltaTime );
 	virtual void DrawDebugText();
-	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
 	virtual void MouseMove( const grinliz::Vector2F& view, const grinliz::Ray& world ) { debugRay = world; }
 
 private:
 	void LoadMap();
 	void CreateChit( const grinliz::Vector2I& p );
+	void DoCheck();
 
 	gamui::PushButton okay;
 	gamui::ToggleButton regionButton;
@@ -67,9 +69,9 @@ private:
 
 	grinliz::Random random;
 	grinliz::CDynArray<grinliz::Vector2I> waypoints;
+	grinliz::CDynArray<int> chits;
 	grinliz::Ray debugRay;
 	
-	int nChits;
 	int creationTick;
 
 	LumosChitBag* chitBag;

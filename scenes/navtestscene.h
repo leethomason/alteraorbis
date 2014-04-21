@@ -38,6 +38,8 @@ public:
 	virtual void Resize();
 	void Zoom( int style, float delta );
 	void Rotate( float degrees );
+	void Pan(int action, const grinliz::Vector2F& view, const grinliz::Ray& world);
+	void MoveCamera(float dx, float dy);
 
 	virtual void Tap( int action, const grinliz::Vector2F& screen, const grinliz::Ray& world );
 	virtual void ItemTapped( const gamui::UIItem* item );
