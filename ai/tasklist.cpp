@@ -733,11 +733,16 @@ bool TaskList::UseFactory( const ComponentSet& thisComp, Chit* factory, int tech
 	int itemType = 0;
 	int subType = 0;
 	int parts = 1;		// always have body.
-	int effects = GameItem::EFFECT_MASK;
 	Random& random = thisComp.chit->random;
 
 	int partsArr[]   = { WeaponGen::GUN_CELL, WeaponGen::GUN_DRIVER, WeaponGen::GUN_SCOPE };
-	int effectsArr[] = { GameItem::EFFECT_FIRE, GameItem::EFFECT_SHOCK, GameItem::EFFECT_EXPLOSIVE };
+	int effectsArr[] = { GameItem::EFFECT_FIRE, GameItem::EFFECT_SHOCK };	// don't allow explosive to be manufactured, yet: , GameItem::EFFECT_EXPLOSIVE
+
+	// Get the inital to "everything"
+	int effects = 0;
+	for (int i = 0; i < GL_C_ARRAY_SIZE(effectsArr); ++i) {
+		effects |= effectsArr[i];
+	}
 
 	if ( !ranged )		itemType = ForgeScript::GUN;
 	else if ( !shield ) itemType = ForgeScript::SHIELD;
@@ -763,8 +768,8 @@ bool TaskList::UseFactory( const ComponentSet& thisComp, Chit* factory, int tech
 		}
 	}
 
-	random.ShuffleArray( partsArr, GL_C_ARRAY_SIZE( partsArr ));
-	random.ShuffleArray( effectsArr, GL_C_ARRAY_SIZE( partsArr ));
+	random.ShuffleArray(partsArr, GL_C_ARRAY_SIZE(partsArr));
+	random.ShuffleArray(effectsArr, GL_C_ARRAY_SIZE(effectsArr));
 
 	ForgeScript forge( thisComp.itemComponent, tech );
 	GameItem* item = new GameItem();
@@ -774,8 +779,10 @@ bool TaskList::UseFactory( const ComponentSet& thisComp, Chit* factory, int tech
 	Wallet wallet;
 
 	// Given we have a crystal, we should always be able to build something.
-	// Remove sub-parts and effects until we succeed
-	while( true ) {
+	// Remove sub-parts and effects until we succeed. As the forge 
+	// changes, this is no longer a hard rule.
+	int maxIt = 10;
+	while( maxIt ) {
 		wallet.EmptyWallet();
 		int techRequired = 0;
 		forge.Build( itemType, subType, parts, effects, item, &wallet, &techRequired, true );
@@ -784,15 +791,32 @@ bool TaskList::UseFactory( const ComponentSet& thisComp, Chit* factory, int tech
 			break;
 		}
 
-		if ( wallet > thisComp.item->wallet ) {
-			GLASSERT( ce < 3 );
+		bool didSomething = false;
+		if (wallet > thisComp.item->wallet && ce < GL_C_ARRAY_SIZE(effectsArr)) {
 			effects &= ~(effectsArr[ce++]);
+			didSomething = true;
 		}
-		if ( techRequired > tech ) {
-			GLASSERT( cp < 3 );
+		if (techRequired > tech && cp < GL_C_ARRAY_SIZE(partsArr)) {
 			parts &= ~(partsArr[cp++]);
+			didSomething = true;
 		}
+
+		// The equations between cost are more complex; the
+		// model above doesn't capture all the combos any more.
+		// Make sure something changes every loop.
+		if (!didSomething) {
+			if (ce < GL_C_ARRAY_SIZE(effectsArr)) {
+				effects &= ~(effectsArr[ce++]);
+			}
+			if (cp < GL_C_ARRAY_SIZE(partsArr)) {
+				parts &= ~(partsArr[cp++]);
+			}
+		}
+		--maxIt;
 	}
+	GLASSERT(maxIt);	// should have seen success...
+	if (!maxIt) return false;
+
 	Transfer(&item->wallet, &thisComp.item->wallet, wallet);
 	thisComp.itemComponent->AddToInventory( item );
 	thisComp.itemComponent->AddCraftXP( wallet.NumCrystals() );

@@ -63,7 +63,7 @@ x system for gamui to track models
 - game
 	- Beta1 fixes
 		t sound checks external path first
-		t sound button doesn't work
+		x sound button doesn't work
 		x sounds to 'res' directory
 		x guard posts need to look around and notify AIs
 		x is destroying beds just annoying? slow respawn?
@@ -85,8 +85,17 @@ x system for gamui to track models
 			x mode shouldn’t change until changing bottom row
 			x RTS: click build then do…
 			x rotate should use the selector
-		t no monsters until first temple is built - cut back on wandering monsters
-		t multi-build in forge
+		x no monsters until first temple is built - cut back on wandering monsters
+		x multi-build in forge
+		x targeting reticule not working
+		x no glow on pulse
+		- tuning
+			- farm production (high??)
+			- monster arrival. greater herd more often?
+			- time to use bar (low??)
+			- double tech decay
+			- weapon sorting not quite correct
+
 		- 32 bit texture support
 		- new walkthrough tutorial
 		- auto-clear not working as well as it should
@@ -254,11 +263,11 @@ x Troll
 	- let the game run until 3rd age+
 	- place player
 	- use writedefsave.bat to create files
+- run buildrelease.bat
 - build installer
 - test
 - test def-start
 - test new-start
-- create release!
 - update wiki
 
 --- Links --- 

@@ -45,7 +45,8 @@ private:
 		NOMINAL_STAGE	= 3,
 		// Tricky to get right.
 		// 60: 4 good farms can sustain 4 denizens. Puts a little too much pressure on farming. Ideal(2,0) = 4.1
-		FRUIT_TIME		= 40*1000,		// Ideal(2,0) = 5.4 possibly not enough...
+		// 40: shouldn't have made so much of a difference...but way easy. But also later game & higher tech.
+		FRUIT_TIME		= 50*1000,		// Ideal(2,0) = 5.4 possibly not enough...
 		GROWTH_NEEDED	= NUM_PLANTS * (NOMINAL_STAGE+1)*(NOMINAL_STAGE+1) * FRUIT_TIME
 	};
 

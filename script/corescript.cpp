@@ -26,7 +26,7 @@
 
 static const double TECH_ADDED_BY_VISITOR = 0.2;
 static const double TECH_DECAY_0 = 0.0001;
-static const double TECH_DECAY_1 = 0.0008;
+static const double TECH_DECAY_1 = 0.0016;
 
 using namespace grinliz;
 
@@ -281,7 +281,7 @@ int CoreScript::DoTick( U32 delta )
 		scriptContext->chitBag->FindBuildingCC( IStringConst::bed, sector, 0, 0, &chitArr, 0 );
 		int nCitizens = this->NumCitizens();
 
-		if ( nCitizens < chitArr.Size() ) {
+		if ( nCitizens < chitArr.Size() && nCitizens < 32 ) {
 			Chit* chit = scriptContext->chitBag->NewDenizen( pos2i, team );
 		}
 	}

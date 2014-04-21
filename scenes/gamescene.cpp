@@ -386,7 +386,7 @@ void GameScene::SetSelectionModel( const grinliz::Vector2F& view )
 	const char* name = "";
 	if ( buildActive ) {
 		if (    buildActive == BuildScript::CLEAR 
-			      || buildActive == BuildScript::CANCEL ) 
+			 || buildActive == BuildScript::CANCEL ) 
 		{
 			const WorldGrid& wg = sim->GetWorldMap()->GetWorldGrid( pos2i.x, pos2i.y );
 			switch ( wg.Height() ) {
@@ -577,11 +577,15 @@ void GameScene::Tap3D(const grinliz::Vector2F& view, const grinliz::Ray& world)
 		}
 	}
 
-//	if (AvatarSelected()) {
 	Chit* playerChit = sim->GetPlayerChit();
 	if (playerChit && !buildActive) {
-		Vector2F dest = { plane.x, plane.z };
-		DoDestTapped(dest);
+		if (mv.model) {
+			TapModel(mv.model->userData);
+		}
+		else {
+			Vector2F dest = { plane.x, plane.z };
+			DoDestTapped(dest);
+		}
 	}
 }
 
@@ -839,6 +843,19 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		}
 	}
 	SetSelectionModel(tapView);
+
+	// If a mode switches, set the buttons up so there isn't a down
+	// button with nothing being built.
+	bool setBuildUp = false;
+	for (int i = 0; i < NUM_BUILD_MODES; ++i) {
+		if (item == &modeButton[i]) setBuildUp = true;
+	}
+	if (item == &uiMode[UI_BUILD]) setBuildUp = true;
+	if (setBuildUp) {
+		for (int i = 0; i < BuildScript::NUM_OPTIONS; ++i) {
+			buildButton[i].SetUp();
+		}
+	}
 
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
 		if (item == &newsButton[i]) {
