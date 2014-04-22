@@ -117,6 +117,8 @@ void ItemComponent::NameItem( GameItem* item )
 											4, 10 )));
 			}
 
+			/*
+			This happens so rarely it isn't worth the bugs.
 			// An item that wasn't significant is now significant.
 			// In practice, this means adding tracking for lesser mobs.
 			if ( item->keyValues.GetIString( "mob" ) == "lesser" ) {
@@ -128,6 +130,7 @@ void ItemComponent::NameItem( GameItem* item )
 					item->keyValues.Set( "destroyMsg", NewsEvent::LESSER_NAMED_MOB_KILLED );
 				}
 			}
+			*/
 		}
 	}
 }

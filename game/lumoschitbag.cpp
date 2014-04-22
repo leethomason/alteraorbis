@@ -1027,3 +1027,18 @@ bool LumosChitBag::PopScene( int* id, SceneData** data )
 	return false;
 }
 
+
+void LumosChitBag::AddSummoning(const grinliz::Vector2I& sector, int reason)
+{
+	summoningArr.Push(sector);
+}
+
+
+grinliz::Vector2I LumosChitBag::PopSummoning(int reason)
+{
+	Vector2I v = { 0, 0 };
+	if (summoningArr.Size()) {
+		v = summoningArr.Pop();
+	}
+	return v;
+}

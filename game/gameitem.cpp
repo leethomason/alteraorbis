@@ -23,6 +23,7 @@
 
 #include "../xegame/chit.h"
 #include "../xegame/istringconst.h"
+#include "../xegame/rendercomponent.h"
 
 #include "../script/battlemechanics.h"
 #include "../script/itemscript.h"
@@ -378,6 +379,10 @@ bool GameItem::Reload( Chit* parentChit ) {
 		reload.Use();
 		if ( parentChit ) {
 			parentChit->SetTickNeeded();
+			RenderComponent* rc = parentChit->GetRenderComponent();
+			if (rc) {
+				rc->AddDeco("reload", STD_DECO);
+			}
 		}
 		return true;
 	}
@@ -612,7 +617,8 @@ int GameItem::ID() const {
 
 void GameItem::Track() const
 {
-	// use the 'id', not ID() so we don't allocate:
+	// id will be !0 if actually in use.
+	// and calling ID() will allocate one.
 	if ( id == 0 ) return;
 
 	ItemDB* db = ItemDB::Instance();
@@ -636,8 +642,9 @@ void GameItem::UpdateTrack() const
 
 void GameItem::UnTrack() const
 {
-	// use the 'id', not ID() so we don't allocate:
-	if ( id == 0 ) return;
+	// id will be !0 if actually in use.
+	// and calling ID() will allocate one.
+	if (id == 0) return;
 
 	ItemDB* db = ItemDB::Instance();
 	if ( db ) {

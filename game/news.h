@@ -35,8 +35,8 @@ public:
 		DENIZEN_KILLED,				//  killed		killer		killed
 		GREATER_MOB_CREATED,		//  created					created		
 		GREATER_MOB_KILLED,			//  killed		killer		killed
-		LESSER_MOB_NAMED,			//	created
-		LESSER_NAMED_MOB_KILLED,	//	killed		killer		killed
+		D_LESSER_MOB_NAMED,			//	created
+		D_LESSER_NAMED_MOB_KILLED,	//	killed		killer		killed
 		DOMAIN_CREATED,				//  domain					domain
 		DOMAIN_DESTROYED,			//  domain		killer		domain	
 
@@ -57,12 +57,14 @@ public:
 		POOL,
 		WATERFALL,
 
+		GREATER_SUMMON_TECH,		// mob
+
 		NUM_WHAT
 	};
 
 	bool				Origin() const { return    what == DENIZEN_CREATED
 												|| what == GREATER_MOB_CREATED
-												|| what == LESSER_MOB_NAMED
+												|| what == D_LESSER_MOB_NAMED
 												|| what == FORGED; }
 	grinliz::IString	GetWhat() const;
 	void				Console( grinliz::GLString* str, ChitBag*, int shortNameForThisID ) const;

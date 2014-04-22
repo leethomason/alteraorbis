@@ -130,14 +130,13 @@ private:
 	void ThinkRockBreak( const ComponentSet& thisComp );
 	void ThinkVisitor( const ComponentSet& thisComp );
 	void ThinkRampage( const ComponentSet& thisComp );	// process the rampage action
-	bool RampageDone(const ComponentSet& thisComp);
 	bool ThinkHungry( const ComponentSet& thisComp );
 	bool ThinkFruitCollect( const ComponentSet& thisComp );
 	bool ThinkDelivery( const ComponentSet& thisComp );
 	bool ThinkRepair(const ComponentSet& thisComp);
 
-
-	void DoMoraleZero( const ComponentSet& thisComp );
+	bool RampageDone(const ComponentSet& thisComp);
+	void DoMoraleZero(const ComponentSet& thisComp);
 	void WorkQueueToTask(  const ComponentSet& thisComp );	// turn a work item into a task
 	void FlushTaskList( const ComponentSet& thisComp, U32 delta );		// moves tasks along, mark tasks completed, do special actions
 
@@ -221,7 +220,8 @@ private:
 	void DoShoot( const ComponentSet& thisComp );
 	void DoMove( const ComponentSet& thisComp );
 	bool DoStand( const ComponentSet& thisComp, U32 since );	// return true if doing something
-	bool SectorHerd( const ComponentSet& thisComp, bool focus );
+	bool SectorHerd( const ComponentSet& thisComp, bool focus );	// "upper" function: look for dest, etc.
+	bool DoSectorHerd(const ComponentSet& thisComp, bool focus, const SectorPort& sectorPort);	// lower function: go
 	void EnterNewGrid( const ComponentSet& thisComp );
 
 	grinliz::CDynArray< Chit* > chitArr;	// temporary, local

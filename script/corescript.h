@@ -29,8 +29,8 @@ struct CoreInfo
 	CoreScript* coreScript;	
 
 	// these are value for ai - so they are only updated every couple of seconds.
-	int approxTeam;
-	int approxNTemples;
+	//int approxTeam;
+	//int approxMaxTech;	// 1-4
 };
 
 
@@ -119,6 +119,7 @@ private:
 	// serialized
 	CTicker		spawnTick;
 	double		tech;
+	int			summonGreater;
 
 	grinliz::IString defaultSpawn;
 	grinliz::CDynArray< int > citizens;

@@ -24,9 +24,20 @@
 #include "../script/procedural.h"
 #include "../script/itemscript.h"
 
+/*
+	See also SectorHerd() for where this gets implemented.
+	Temples attrack / repel monsters
+
+	MAX_TECH	Less			Greater
+	1: 			repel some		repel
+	2: 							repel
+	3:			attract near
+	4:			attract near	attract
+*/
 static const double TECH_ADDED_BY_VISITOR = 0.2;
 static const double TECH_DECAY_0 = 0.0001;
 static const double TECH_DECAY_1 = 0.0016;
+static const int SUMMON_GREATER_TIME = 10 * 60 * 1000;
 
 using namespace grinliz;
 
@@ -49,7 +60,8 @@ CoreScript::CoreScript()
 	  team( 0 ),
 	  workQueue( 0 ),
 	  aiTicker(2000),
-	  scoreTicker(10*1000)
+	  scoreTicker(10*1000),
+	  summonGreater(0)
 {
 	tech = 0;
 	achievement.Clear();
@@ -76,6 +88,7 @@ void CoreScript::Serialize( XStream* xs )
 	XarcOpen( xs, ScriptName() );
 	XARC_SER( xs, tech );
 	XARC_SER( xs, nElixir );
+	XARC_SER(xs, summonGreater);
 
 	XARC_SER( xs, defaultSpawn );
 
@@ -230,6 +243,7 @@ void CoreScript::UpdateAI()
 	CoreInfo* info = &coreInfoArr[index];
 	GLASSERT(info->coreScript == this);
 
+	/*
 	if (this->InUse()) {
 		info->approxTeam = PrimaryTeam();
 		CChitArray chitArr;
@@ -240,6 +254,7 @@ void CoreScript::UpdateAI()
 		info->approxNTemples = 0;
 		info->approxTeam = 0;
 	}
+	*/
 }
 
 
@@ -266,7 +281,8 @@ int CoreScript::DoTick( U32 delta )
 	bool inUse = InUse();
 
 	tech -= Lerp( TECH_DECAY_0, TECH_DECAY_1, tech/double(TECH_MAX) );
-	tech = Clamp( tech, 0.0, double(MaxTech())-0.01 );
+	int maxTech = MaxTech();
+	tech = Clamp( tech, 0.0, double(maxTech)-0.01 );
 
 	MapSpatialComponent* ms = GET_SUB_COMPONENT( scriptContext->chit, SpatialComponent, MapSpatialComponent );
 	GLASSERT( ms );
@@ -283,6 +299,18 @@ int CoreScript::DoTick( U32 delta )
 
 		if ( nCitizens < chitArr.Size() && nCitizens < 32 ) {
 			Chit* chit = scriptContext->chitBag->NewDenizen( pos2i, team );
+		}
+
+		if (maxTech >= TECH_ATTRACTS_GREATER) {
+			summonGreater += spawnTick.Period();
+			if (summonGreater > SUMMON_GREATER_TIME) {
+				// Find a greater and bring 'em in!
+				// This feels a little artificial, and 
+				// may need to get revisited as the game
+				// grows.
+				scriptContext->chitBag->AddSummoning(sector, LumosChitBag::SUMMON_TECH);
+				summonGreater = 0;
+			}
 		}
 	}
 	else if (    tickd 

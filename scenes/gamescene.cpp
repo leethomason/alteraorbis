@@ -1186,16 +1186,8 @@ void GameScene::ProcessNewsToConsole()
 		case NewsEvent::GREATER_MOB_KILLED:
 		case NewsEvent::DOMAIN_CREATED:
 		case NewsEvent::DOMAIN_DESTROYED:
+		case NewsEvent::GREATER_SUMMON_TECH:
 			ne.Console( &str, chitBag, 0 );
-			break;
-
-		case NewsEvent::LESSER_MOB_NAMED:
-		case NewsEvent::LESSER_NAMED_MOB_KILLED:
-			{
-				if ( sector == homeSector || sector == avatarSector ) {
-					ne.Console( &str, chitBag, 0 );
-				}
-			}
 			break;
 
 		default:

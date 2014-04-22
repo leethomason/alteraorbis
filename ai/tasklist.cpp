@@ -222,6 +222,10 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta )
 						ComponentSet comp(building, ComponentSet::IS_ALIVE | Chit::ITEM_BIT);
 						if (comp.okay) {
 							comp.item->hp = comp.item->TotalHPF();
+							RenderComponent* rc = building->GetRenderComponent();
+							if (rc) {
+								rc->AddDeco("repair", STD_DECO);
+							}
 						}
 					}
 				}

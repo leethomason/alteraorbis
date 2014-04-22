@@ -76,14 +76,14 @@ const NewsEvent** NewsHistory::Find( int itemID, bool second, int* num, NewsHist
 			switch( what ) {
 			case NewsEvent::DENIZEN_CREATED:
 			case NewsEvent::GREATER_MOB_CREATED:
-			case NewsEvent::LESSER_MOB_NAMED:
+			case NewsEvent::D_LESSER_MOB_NAMED:
 			case NewsEvent::DOMAIN_CREATED:
 				GLASSERT( data->bornOrNamed == 0 );
 				data->bornOrNamed = cache[i]->date;
 				break;
 			case NewsEvent::DENIZEN_KILLED:
 			case NewsEvent::GREATER_MOB_KILLED:
-			case NewsEvent::LESSER_NAMED_MOB_KILLED:
+			case NewsEvent::D_LESSER_NAMED_MOB_KILLED:
 			case NewsEvent::DOMAIN_DESTROYED:
 				GLASSERT( data->bornOrNamed );
 				GLASSERT( data->died == 0 );
@@ -148,6 +148,7 @@ grinliz::IString NewsEvent::GetWhat() const
 		"Volcano",
 		"Pool",
 		"Waterfall",
+		"Greater Summoned"
 	};
 	GLASSERT( GL_C_ARRAY_SIZE( NAME ) == NUM_WHAT );
 	return grinliz::StringPool::Intern( NAME[what], true );
@@ -229,11 +230,11 @@ void NewsEvent::Console( grinliz::GLString* str, ChitBag* chitBag, int shortName
 		break;
 
 	case GREATER_MOB_KILLED:
-	case LESSER_NAMED_MOB_KILLED:
+	case D_LESSER_NAMED_MOB_KILLED:
 		str->Format( "%.2f: %s de-rez at %s by %s.", age, itemName.c_str(), domain.c_str(), secondName.c_str() ); 
 		break;
 
-	case LESSER_MOB_NAMED:
+	case D_LESSER_MOB_NAMED:
 		str->Format( "%.2f: %s has earned a name at %s.", age, itemName.c_str(), domain.c_str() );
 		break;
 
@@ -263,6 +264,10 @@ void NewsEvent::Console( grinliz::GLString* str, ChitBag* chitBag, int shortName
 
 	case VISION_QUEST:
 		str->Format( "%.2f: %s is consumed by despair at %s and leaves for a vision quest.", age, itemName.c_str(), domain.c_str() );
+		break;
+
+	case GREATER_SUMMON_TECH:
+		str->Format("%.2f: %s is called to %s by the allure of Tech.", age, itemName.c_str(), domain.c_str());
 		break;
 
 	default:

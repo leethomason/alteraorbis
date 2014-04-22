@@ -374,6 +374,15 @@ public:
 		mem[size++] = t;
 	}
 
+	void Insert(int index, const T& t) {
+		GLASSERT(size < CAPACITY);
+		for (int i = size; i > index; --i) {
+			mem[i] = mem[i - 1];
+		}
+		mem[index] = t;
+		++size;
+	}
+
 	// Returns space to uninitialized objects.
 	T* PushArr( int n ) {
 		GLASSERT( size+n <= CAPACITY );

@@ -1240,117 +1240,114 @@ void AIComponent::GoSectorHerd(bool focus)
 }
 
 
-bool AIComponent::SectorHerd( const ComponentSet& thisComp, bool focus )
+bool AIComponent::SectorHerd(const ComponentSet& thisComp, bool focus)
 {
 	/*
 		Depending on the MOB and tech level,
-		- avoid this core (easy; check fails)
-		- attract to this core (pre-scan)
-		- attract to tech in general (hmm.)
-	*/
+		avoid or be attracted to core
+		locations. Big travel in is implemented
+		be the CoreScript
+
+		The current rules are in corescript.cpp
+		*/
 	static const int NDELTA = 8;
-	static const Vector2I initDelta[NDELTA] = { 
-		{-1,0},  {1,0},  {0,-1}, {0,1},
-		{-1,-1}, {1,-1}, {-1,1}, {1,1}
+	static const Vector2I initDelta[NDELTA] = {
+		{ -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 },
+		{ -1, -1 }, { 1, -1 }, { -1, 1 }, { 1, 1 }
 	};
-	CArray<Vector2I, NDELTA> delta;
+	CArray<Vector2I, NDELTA> delta, rinit;
 	for (int i = 0; i < NDELTA; ++i) {
-		delta.Push(initDelta[i]);
+		rinit.Push(initDelta[i]);
 	}
-	parentChit->random.ShuffleArray(delta.Mem(), delta.Size());
+	parentChit->random.ShuffleArray(rinit.Mem(), rinit.Size());
 
-	const ChitContext* context	= GetChitContext();
-	const Vector2F pos			= thisComp.spatial->GetPosition2D();
-	const SectorPort start		= context->worldMap->NearestPort(pos);
-	IString mob					= thisComp.item->keyValues.GetIString("mob");
+	const ChitContext* context = GetChitContext();
+	const Vector2F pos = thisComp.spatial->GetPosition2D();
+	const SectorPort start = context->worldMap->NearestPort(pos);
+	IString mob = thisComp.item->keyValues.GetIString("mob");
 	const CoreInfo* coreInfoArr = CoreScript::GetCoreInfoArr();
-	Vector2I sector				= ToSector(ToWorld2I(pos));
-	
-	Vector2I sectorTarget = { 0, 0 };
-	int score = 0;
+	Vector2I sector = ToSector(ToWorld2I(pos));
 
-	// Implement logic to avoid or be attracted to cores.
-	if (mob == IStringConst::greater || mob == IStringConst::lesser ) {
-		for (int j = 0; j < NUM_SECTORS; ++j) {
-			for (int i = 0; i < NUM_SECTORS; ++i) {
-				const CoreInfo& coreInfo = coreInfoArr[j*NUM_SECTORS+i];
-				if (coreInfo.coreScript == 0 || !coreInfo.coreScript->InUse())
-					continue;
+	// First pass: filter on attract / repel choices.
+	for (int i = 0; i < rinit.Size(); ++i) {
+		Vector2I destSector = start.sector + rinit[i];
 
-				int d = abs(j - sector.y) + abs(i - sector.x);
+		if (InRange(destSector.x, 0, NUM_SECTORS - 1) && InRange(destSector.y, 0, NUM_SECTORS - 1)) {
+			CoreScript* cs = CoreScript::GetCore(destSector);
 
-				// Greater mobs scan the world. Lesser mobs scan locally.
-				if ((mob == IStringConst::greater && coreInfo.approxNTemples >= TECH_ATTRACTS_GREATER)
-					|| (mob == IStringConst::lesser && d <= 1 && (coreInfo.approxNTemples >= TECH_ATTRACTS_LESSER)))
-				{
-					if (coreInfo.coreScript
-						&& GetRelationship(thisComp.item->primaryTeam, coreInfo.approxTeam) == RELATE_ENEMY)
-					{
-						int s = 100 * coreInfo.approxNTemples / (d + 1);
-						if (s > score) {
-							score = s;
-							sectorTarget.Set(i, j);
+			// Check repelled / attracted.
+			if (cs) {
+				int relate = GetRelationship(cs->PrimaryTeam(), thisComp.item->primaryTeam);
+				int tech = cs->MaxTech();
+
+				// For enemies, apply rules to make the gameplay smoother.
+				if (relate == RELATE_ENEMY) {
+					if (mob == IStringConst::lesser) {
+						if (tech <= TECH_REPELS_LESSER) {
+							if (parentChit->random.Rand(3))
+								delta.Push(rinit[i]);
 						}
+						else if (tech >= TECH_ATTRACTS_LESSER) delta.Insert(0, rinit[i]);
+						else delta.Push(rinit[i]);
 					}
+					else if (mob == IStringConst::greater) {
+						if (tech >= TECH_ATTRACTS_GREATER) delta.Insert(0, rinit[i]);
+						else if (tech > TECH_REPELS_GREATER) delta.Push(rinit[i]);
+						// else push nothing
+					}
+					else {
+						delta.Push(rinit[i]);
+					}
+				}
+				else {
+					delta.Push(rinit[i]);
 				}
 			}
 		}
 	}
 
-	// If there is a target, make it the first thing we aim at.
-	if (!sectorTarget.IsZero()) {
-		Vector2I d = { Sign(sectorTarget.x - sector.x), Sign(sectorTarget.y - sector.y) };
-		int i = delta.Find(d);
-		if (i >= 0) {
-			Swap(&delta[i], &delta[0]);
-		}
-	}
-
-	if ( start.IsValid() ) {
-		for( int i=0; i<NDELTA; ++i ) {
+	// 2nd pass: look for 1st match
+	if (start.IsValid()) {
+		for (int i = 0; i < delta.Size(); ++i) {
 			SectorPort dest;
 			dest.sector = start.sector + delta[i];
-
-			// Check to make sure we aren't repelled.
-			const CoreInfo& info = CoreScript::GetCoreInfo(dest.sector);
-			if (info.coreScript && GetRelationship(info.approxTeam, thisComp.item->primaryTeam) == RELATE_ENEMY) {
-				if (mob == IStringConst::greater && info.approxNTemples <= TECH_REPELS_GREATER) {
-					continue;
-				}
-				if (mob == IStringConst::lesser && info.approxNTemples == 0) {
-					// Might repel lessers if no temple at all is build.
-					if (parentChit->random.Rand(4)) {	// 3 in 4 chance of getting repelled. This needs tuning.
-						continue;
-					}
-				}
-			}
-
-			const SectorData& destSD = context->worldMap->GetSector( dest.sector );
-			if ( destSD.ports ) {
-				dest.port = destSD.NearestPort( pos );
-
-				RenderComponent* rc = parentChit->GetRenderComponent();
-				if ( rc ) {
-					rc->AddDeco( "horn", 10*1000 );
-				}
-
-				// Trolls herd *all the time*
-				if ( thisComp.item->IName() != "troll" ) {
-					NewsEvent news( NewsEvent::SECTOR_HERD, pos, parentChit );
-					GetChitBag()->GetNewsHistory()->Add( news );
-				}
-
-				ChitMsg msg( ChitMsg::CHIT_SECTOR_HERD, focus ? 1:0, &dest );
-				for( int i=0; i<friendList.Size(); ++i ) {
-					Chit* c = GetChitBag()->GetChit( friendList[i] );
-					if ( c ) {
-						c->SendMessage( msg );
-					}
-				}
-				parentChit->SendMessage( msg );
+			const SectorData& destSD = context->worldMap->GetSector(dest.sector);
+			dest.port = destSD.NearestPort(pos);
+			if (DoSectorHerd(thisComp, focus, dest)) {
 				return true;
 			}
 		}
+	}
+	return false;
+}
+
+
+bool AIComponent::DoSectorHerd(const ComponentSet& thisComp, bool focus, const SectorPort& dest)
+{
+	if (dest.IsValid()) {
+		const ChitContext* context = GetChitContext();
+		GLASSERT(dest.port);
+
+		RenderComponent* rc = parentChit->GetRenderComponent();
+		if ( rc ) {
+			rc->AddDeco( "horn", 10*1000 );
+		}
+
+		// Trolls herd *all the time*
+		if ( thisComp.item->IName() != "troll" ) {
+			NewsEvent news( NewsEvent::SECTOR_HERD, thisComp.spatial->GetPosition2D(), parentChit );
+			GetChitBag()->GetNewsHistory()->Add( news );
+		}
+
+		ChitMsg msg( ChitMsg::CHIT_SECTOR_HERD, focus ? 1:0, &dest );
+		for( int i=0; i<friendList.Size(); ++i ) {
+			Chit* c = GetChitBag()->GetChit( friendList[i] );
+			if ( c ) {
+				c->SendMessage( msg );
+			}
+		}
+		parentChit->SendMessage( msg );
+		return true;
 	}
 	return false;
 }
@@ -2126,6 +2123,7 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 	int wanderFlags			= itemFlags & GameItem::AI_WANDER_MASK;
 	Vector2F pos2 = thisComp.spatial->GetPosition2D();
 	Vector2I pos2i = { (int)pos2.x, (int)pos2.y };
+	const ChitContext* context = GetChitContext();
 
 	IRangedWeaponItem* ranged = thisComp.itemComponent->GetRangedWeapon( 0 );
 	if ( ranged && ranged->GetItem()->CanReload() ) {
@@ -2164,6 +2162,18 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 		PathMoveComponent* pmc = GET_SUB_COMPONENT( parentChit, MoveComponent, PathMoveComponent );
 		int r = parentChit->random.Rand(4);
 
+		if (thisComp.item->keyValues.GetIString(IStringConst::mob) == IStringConst::greater) {
+			Vector2I techSector = GetLumosChitBag()->PopSummoning(LumosChitBag::SUMMON_TECH);
+			if (!techSector.IsZero()) {
+				Vector2I target = { techSector.x*SECTOR_SIZE + SECTOR_SIZE / 2, techSector.y*SECTOR_SIZE + SECTOR_SIZE / 2 };
+				SectorPort port = context->worldMap->NearestPort(ToWorld2F(target));
+				DoSectorHerd(thisComp, true, port);
+
+				GetChitBag()->GetNewsHistory()->Add(NewsEvent(NewsEvent::GREATER_SUMMON_TECH, ToWorld2F(target), parentChit, 0));
+			}
+		}
+
+		// FIXME: the greater logic doesn't even seem to get used.
 		bool sectorHerd =		pmc 
 							 && itemFlags & GameItem::AI_SECTOR_HERD
  							 && ( friendList.Size() >= (MAX_TRACK*3/4) || pmc->ForceCount() > FORCE_COUNT_STUCK)
@@ -2692,8 +2702,13 @@ int AIComponent::DoTick( U32 deltaTime )
 
 	// High level mode switch, in/out of battle?
 	if ( focus != FOCUS_MOVE ) {
+		CoreScript* cs = CoreScript::GetCore(thisComp.spatial->GetSector());
+		// Workers only go to battle if the population is low. (Cuts down on continuous worked destruction.)
+		bool goesToBattle = (thisComp.item->IName() != IStringConst::worker)
+			|| (cs && cs->NumCitizens() <= 4);
+
 		if (    aiMode != BATTLE_MODE 
-			 && (thisComp.item->IName() != IStringConst::worker)	// keeps workers from charging into battle
+			 && goesToBattle
 			 && enemyList.Size() ) 
 		{
 			aiMode = BATTLE_MODE;

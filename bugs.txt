@@ -90,6 +90,14 @@ x system for gamui to track models
 		x targeting reticule not working
 		x no glow on pulse
 		- stuck battle bug
+		- notify of sector herd to domain
+		- avatar portrait selected when it appears
+		- attack warning: core attack, domain attack
+		- walk target for the avatar
+		t repair icon
+		t reload icon
+		- uitracking in battle scene
+		t greater attacks big domains
 
 	- Beta2
 		x repair
@@ -111,6 +119,7 @@ x system for gamui to track models
 			- pre-gen plants
 			- pre-gen volcanoes (50%?)
 			- run world sim 5 minutes?
+
 
 	- Census
 		x coolest stuff, past and present, by category
