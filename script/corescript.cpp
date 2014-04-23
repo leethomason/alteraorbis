@@ -366,7 +366,7 @@ int CoreScript::DoTick( U32 delta )
 			static const float rat = 0.25f;
 			const char* spawn	   = 0;
 
-			if ( outland > 4 && defaultSpawn == "arachnoid" ) {
+			if ( outland > 4 && defaultSpawn == IStringConst::arachnoid ) {
 				greater *= 4.f;	// special spots for greaters to spawn.
 			}
 

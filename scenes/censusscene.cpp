@@ -77,9 +77,9 @@ void CensusScene::ScanItem( ItemComponent* ic, const GameItem* item )
 		mobWallet.Add( item->wallet );
 
 		int slot = -1;
-		if      ( mobIStr == "denizen" ) slot = MOB_DENIZEN;
-		else if ( mobIStr == "greater" ) slot = MOB_GREATER;
-		else if ( mobIStr == "lesser" )  slot = MOB_LESSER;
+		if      ( mobIStr == ISC::denizen ) slot = MOB_DENIZEN;
+		else if ( mobIStr == ISC::greater ) slot = MOB_GREATER;
+		else if ( mobIStr == ISC::lesser )  slot = MOB_LESSER;
 
 		if ( slot >= 0 ) {
 			if ( !mobActive[slot].item || item->Traits().Level() > mobActive[slot].item->Traits().Level() ) {
@@ -91,12 +91,12 @@ void CensusScene::ScanItem( ItemComponent* ic, const GameItem* item )
 
 	IString itemIStr = item->IName();
 	int slot = -1;
-	if (      itemIStr == "pistol" )  slot = ITEM_PISTOL;
-	else if ( itemIStr == "blaster" ) slot = ITEM_BLASTER;
-	else if ( itemIStr == "pulse" )   slot = ITEM_PULSE;
-	else if ( itemIStr == "beamgun" ) slot = ITEM_BEAMGUN;
-	else if ( itemIStr == "ring" )    slot = ITEM_RING;
-	else if ( itemIStr == "shield" )  slot = ITEM_SHIELD;
+	if (      itemIStr == ISC::pistol )  slot = ITEM_PISTOL;
+	else if ( itemIStr == ISC::blaster ) slot = ITEM_BLASTER;
+	else if ( itemIStr == ISC::pulse )   slot = ITEM_PULSE;
+	else if ( itemIStr == ISC::beamgun ) slot = ITEM_BEAMGUN;
+	else if ( itemIStr == ISC::ring )    slot = ITEM_RING;
+	else if ( itemIStr == ISC::shield )  slot = ITEM_SHIELD;
 
 	if ( slot >= 0 ) {
 		if ( !itemActive[slot].item || item->GetValue() > itemActive[slot].item->GetValue() ) {

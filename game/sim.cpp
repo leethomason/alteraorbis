@@ -348,14 +348,6 @@ CoreScript* Sim::CreateCore( const Vector2I& sector, int team)
 		CoreScript* cs = new CoreScript();
 		chit->Add(new ScriptComponent(cs));
 
-#if 0
-		would be cool to get working. A few problems: need to append the numeric id: Venma-5b.
-		and the name is copied around and the old names seem to hold on.
-		// Generate a new name and set it.
-		IString name = StringPool::Intern( lumosGame->GenName("sector", random.Rand(), 4, 7));
-		chit->GetItem()->SetProperName(name);
-		worldMap->SetSectorName(sector, name);
-#endif
 		chit->GetItem()->SetProperName(sd.name);
 
 		if (team != TEAM_NEUTRAL) {

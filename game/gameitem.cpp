@@ -664,7 +664,7 @@ void GameItem::SetProperName( const grinliz::IString& n )
 bool GameItem::Significant() const
 {
 	int msg = 0;
-	if ( keyValues.Get( "destroyMsg", &msg ) == 0 ) {
+	if ( keyValues.Get( ISC::destroyMsg, &msg ) == 0 ) {
 		return true;
 	}
 	if (primaryTeam && name == IStringConst::core) {

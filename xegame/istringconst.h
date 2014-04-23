@@ -31,6 +31,7 @@ public:
 	static grinliz::IString head;
 	static grinliz::IString shield;
 	static grinliz::IString sound;
+	static grinliz::IString speed;
 
 	static grinliz::IString humanFemale;
 	static grinliz::IString humanMale;
@@ -49,7 +50,8 @@ public:
 	static grinliz::IString crystal_violet;
 	static grinliz::IString fruit;
 	static grinliz::IString tombstone;
-	
+	static grinliz::IString shieldBoost;
+
 	static grinliz::IString pave;
 	static grinliz::IString ice;
 	static grinliz::IString core;
@@ -84,11 +86,30 @@ public:
 	static grinliz::IString greater;
 	static grinliz::IString denizen;
 
+	static grinliz::IString destroyMsg;
+	static grinliz::IString features;
+	static grinliz::IString nStage;
+	static grinliz::IString sun;
+	static grinliz::IString rain;
+	static grinliz::IString temp;
+
+	static grinliz::IString Kills;
+	static grinliz::IString Greater;
+	static grinliz::IString Crafted;
+	static grinliz::IString score;
+	static grinliz::IString cost;
+	static grinliz::IString size;
+	static grinliz::IString accuracy;
+	static grinliz::IString porch;
+	static grinliz::IString nameGen;
+
 	// double underscore -> '.'
 	static grinliz::IString kiosk__n;
 	static grinliz::IString kiosk__m;
 	static grinliz::IString kiosk__c;
 	static grinliz::IString kiosk__s;
 };
+
+typedef IStringConst ISC;
 
 #endif // ISTRING_CONST_INCLUDED

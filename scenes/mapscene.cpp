@@ -204,7 +204,7 @@ void MapScene::SetText()
 
 					float power = query[k]->GetItemComponent()->PowerRating();
 
-					if ( item->keyValues.GetIString( "mob" ) == "greater" )
+					if ( item->keyValues.GetIString( ISC::mob ) == ISC::greater )
 						++greater;
 					else if ( power < playerPower * 0.5f ) 
 						++low;

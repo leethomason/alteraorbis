@@ -1334,7 +1334,7 @@ bool AIComponent::DoSectorHerd(const ComponentSet& thisComp, bool focus, const S
 		}
 
 		// Trolls herd *all the time*
-		if ( thisComp.item->IName() != "troll" ) {
+		if ( thisComp.item->IName() != ISC::troll ) {
 			NewsEvent news( NewsEvent::SECTOR_HERD, thisComp.spatial->GetPosition2D(), parentChit );
 			GetChitBag()->GetNewsHistory()->Add( news );
 		}

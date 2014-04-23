@@ -246,7 +246,7 @@ void CharacterScene::SetButtonText()
 		if ( !model ) {
 			model = engine->AllocModel( down->ResourceName() );
 			model->SetPos( 0,0,0 );
-			if (down->GetItem()->IName() == "shield") {
+			if (down->GetItem()->IName() == ISC::shield) {
 				Quaternion q;
 				Matrix4 m;
 				m.ConcatRotation(90.0f, 0);
@@ -254,7 +254,7 @@ void CharacterScene::SetButtonText()
 				q.FromRotationMatrix(m);
 				model->SetRotation(q);
 			}
-			else if (down->GetItem()->keyValues.GetIString("mob") == IString()) {
+			else if (down->GetItem()->keyValues.GetIString(ISC::mob) == IString()) {
 				model->SetYRotation(90.0f);
 			}
 			else {
@@ -274,7 +274,7 @@ void CharacterScene::SetButtonText()
 			if ( !proc.empty() ) {
 				ProcRenderInfo info;
 				int features = 0;
-				down->keyValues.Get( "features", &features );
+				down->keyValues.Get( ISC::features, &features );
 
 				AssignProcedural(	proc.c_str(), 
 									strstr( down->Name(), "emale" )!=0, 

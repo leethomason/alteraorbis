@@ -92,7 +92,7 @@ float GameMoveComponent::Speed() const
 {
 	float speed = DEFAULT_MOVE_SPEED;
 	if ( parentChit->GetItem() ) {
-		parentChit->GetItem()->keyValues.Get( "speed", &speed );
+		parentChit->GetItem()->keyValues.Get( ISC::speed, &speed );
 	}
 	return speed;
 }

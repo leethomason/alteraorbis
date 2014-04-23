@@ -10,7 +10,7 @@ using namespace grinliz;
 
 MarketAI::MarketAI( Chit* c ) : chit(c)
 {
-	GLASSERT( chit && chit->GetItem() && chit->GetItem()->IName() == "market" );
+	GLASSERT( chit && chit->GetItem() && chit->GetItem()->IName() == ISC::market );
 	ic = chit->GetItemComponent();
 	GLASSERT( ic );
 }

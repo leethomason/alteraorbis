@@ -3,11 +3,12 @@ The Fiery
 The Shocking
 The Glowing
 The Dark
-Moonlit
 The Gobbish
 Digital
 The Analog
 Electric
+The Blazing
+The De-Rezzed
 
 1
 Ring
@@ -18,4 +19,4 @@ Dragon
 Cyclops
 Arachnoid
 Mantis
-
+Grid

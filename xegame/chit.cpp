@@ -297,6 +297,9 @@ GameItem* Chit::GetItem()
 
 void Chit::QueueDelete()
 {
+	if (GetItem() && GameItem::trackWallet) {
+		GLASSERT(GetItem()->wallet.IsEmpty());
+	}
 	this->GetChitBag()->QueueDelete( this );
 }
 

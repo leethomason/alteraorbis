@@ -33,6 +33,8 @@
 
 #include "personality.h"
 
+#include "../xegame/istringconst.h"
+
 class DamageDesc;
 class XStream;
 
@@ -413,7 +415,7 @@ public:
 	float CalcBoltSpeed() const {
 		static const float SPEED = 10.0f;
 		float speed = 1.0f;
-		keyValues.Get( "speed", &speed );
+		keyValues.Get( ISC::speed, &speed );
 		return SPEED * speed;
 	}
 

@@ -221,9 +221,9 @@ Chit* LumosChitBag::NewBuilding(const Vector2I& pos, const char* name, int team)
 	}
 
 	int cx = 1;
-	rootItem.keyValues.Get("size", &cx);
+	rootItem.keyValues.Get(ISC::size, &cx);
 	int porch = 0;
-	rootItem.keyValues.Get("porch", &porch);
+	rootItem.keyValues.Get(ISC::porch, &porch);
 
 	MapSpatialComponent* msc = new MapSpatialComponent();
 	msc->SetMapPosition(pos.x, pos.y, cx, cx);
@@ -296,7 +296,7 @@ Chit* LumosChitBag::NewLawnOrnament(const Vector2I& pos, const char* name, int t
 	}
 
 	int cx = 1;
-	rootItem.keyValues.Get("size", &cx);
+	rootItem.keyValues.Get(ISC::size, &cx);
 
 	MapSpatialComponent* msc = new MapSpatialComponent();
 	msc->SetMapPosition(pos.x, pos.y, cx, cx);
@@ -342,7 +342,7 @@ Chit* LumosChitBag::NewMonsterChit(const Vector3F& pos, const char* name, int te
 	chit->Add( new HealthComponent());
 
 	Wallet w = ReserveBank::Instance()->WithdrawMonster();
-	if ( chit->GetItem()->keyValues.GetIString( "mob" ) == "greater" ) {
+	if ( chit->GetItem()->keyValues.GetIString( ISC::mob ) == ISC::greater ) {
 		// can return NUM_CRYSTAL_TYPES, if out, which is fine.
 		w.AddCrystal( ReserveBank::Instance()->WithdrawRandomCrystal() );;
 		

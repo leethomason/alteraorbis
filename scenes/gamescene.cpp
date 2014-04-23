@@ -113,7 +113,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	sleepTubeID = -1;
 	for( int i=0; i<BuildScript::NUM_OPTIONS; ++i ) {
 		const BuildData& bd = buildScript.GetData( i );
-		if ( bd.structure == "bed" ) {
+		if ( bd.structure == ISC::bed ) {
 			sleepTubeID = i;
 		}
 
@@ -1098,8 +1098,8 @@ void GameScene::ForceHerd(const grinliz::Vector2I& sector)
 	sim->GetChitBag()->QuerySpatialHash(&arr, bounds, 0, &filter);
 
 	for (int i = 0; i<arr.Size(); ++i) {
-		IString mob = arr[i]->GetItem()->keyValues.GetIString("mob");
-		if (mob == "lesser" || mob == "greater") {
+		IString mob = arr[i]->GetItem()->keyValues.GetIString(ISC::mob);
+		if (mob == ISC::lesser || mob == ISC::greater) {
 			AIComponent* ai = arr[i]->GetAIComponent();
 			ai->GoSectorHerd(true);
 		}
@@ -1352,7 +1352,7 @@ void GameScene::DoTick( U32 delta )
 		Chit* building = sim->GetChitBag()->QueryPorch( playerChit->GetSpatialComponent()->GetPosition2DI(),0 );
 		if ( building ) {
 			IString name = building->GetItem()->IName();
-			if ( name == "vault" || name == "factory" || name == "market" ) {
+			if ( name == ISC::vault || name == ISC::factory || name == ISC::market ) {
 				useBuildingVisible = true;
 			}
 		}

@@ -48,11 +48,11 @@ void ItemDefDB::Load( const char* path )
 			map.Add( item->key.c_str(), item );
 			topNames.Push( item->IName() );
 
-			IString mob = item->keyValues.GetIString( "mob" );
-			if ( mob == "greater" ) {
+			IString mob = item->keyValues.GetIString( IStringConst::mob );
+			if ( mob == IStringConst::greater ) {
 				greaterMOBs.Push( item->IName() );
 			}
-			else if ( mob == "lesser" ) {
+			else if ( mob == IStringConst::lesser ) {
 				lesserMOBs.Push( item->IName() );
 			}
 
@@ -233,10 +233,10 @@ void ItemHistory::Set( const GameItem* gi )
 
 	int k = 0, c = 0, g = 0, s = 0;
 
-	gi->historyDB.Get("Kills", &k);
-	gi->historyDB.Get("Greater", &g);
-	gi->historyDB.Get("Crafted", &c);
-	gi->keyValues.Get("score", &s);
+	gi->historyDB.Get(ISC::Kills, &k);
+	gi->historyDB.Get(ISC::Greater, &g);
+	gi->historyDB.Get(ISC::Crafted, &c);
+	gi->keyValues.Get(ISC::score, &s);
 
 	this->kills = k;
 	this->greater = g;

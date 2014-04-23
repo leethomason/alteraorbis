@@ -61,7 +61,7 @@ const BuildData& BuildScript::GetData( int i )
 		{
 			const GameItem& gi = ItemDefDB::Instance()->Get( buildData[i].cStructure );
 			int cost = 0;
-			gi.keyValues.Get( "cost", &cost );
+			gi.keyValues.Get( ISC::cost, &cost );
 			str.Format( "%s\nAu %d", buildData[i].cName, cost );
 		}
 		buildData[i].label = StringPool::Intern( str.c_str() ) ;
@@ -69,8 +69,8 @@ const BuildData& BuildScript::GetData( int i )
 		buildData[i].size = 1;
 		if ( has ) {
 			const GameItem& gi = ItemDefDB::Instance()->Get( buildData[i].cStructure );
-			gi.keyValues.Get( "size", &buildData[i].size );
-			gi.keyValues.Get( "cost", &buildData[i].cost );
+			gi.keyValues.Get( ISC::size, &buildData[i].size );
+			gi.keyValues.Get( ISC::cost, &buildData[i].cost );
 
 			buildData[i].needs.SetZero();
 			

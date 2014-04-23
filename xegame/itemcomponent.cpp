@@ -172,7 +172,7 @@ void ItemComponent::AddBattleXP( bool isMelee, int killshotLevel, const GameItem
 	int level = mainItem->Traits().Level();
 	mainItem->GetTraitsMutable()->AddBattleXP( killshotLevel );
 
-	bool isGreater = (loser->keyValues.GetIString( "mob" ) == "greater");
+	bool isGreater = (loser->keyValues.GetIString( IStringConst::mob ) == IStringConst::greater);
 
 	if ( mainItem->Traits().Level() > level ) {
 		// Level up!
@@ -343,7 +343,7 @@ void ItemComponent::NewsDestroy( const GameItem* item )
 	Chit* destroyer = parentChit->GetChitBag()->GetChit( lastDamageID );
 
 	int msg = 0;
-	if ( item->keyValues.Get( "destroyMsg", &msg ) == 0 ) {
+	if ( item->keyValues.Get( ISC::destroyMsg, &msg ) == 0 ) {
 		history->Add( NewsEvent( msg, pos, parentChit, destroyer ));
 	}
 }
@@ -673,10 +673,10 @@ void ItemComponent::OnAdd( Chit* chit )
 
 	if ( parentChit->GetLumosChitBag() ) {
 		IString mob = mainItem->keyValues.GetIString( "mob" );
-		if ( mob == "lesser" ) {
+		if ( mob == IStringConst::lesser ) {
 			parentChit->GetLumosChitBag()->census.normalMOBs += 1;
 		}
-		else if ( mob == "greater" ) {
+		else if ( mob == IStringConst::greater ) {
 			parentChit->GetLumosChitBag()->census.greaterMOBs += 1;
 		}
 	}
@@ -690,11 +690,11 @@ void ItemComponent::OnRemove()
 	GameItem* mainItem = itemArr[0];
 	if ( parentChit->GetLumosChitBag() ) {
 		IString mob;
-		mainItem->keyValues.Get( "mob", &mob );
-		if ( mob == "lesser" ) {
+		mainItem->keyValues.Get( ISC::mob, &mob );
+		if ( mob == IStringConst::lesser ) {
 			parentChit->GetLumosChitBag()->census.normalMOBs -= 1;
 		}
-		else if ( mob == "greater" ) {
+		else if ( mob == IStringConst::greater ) {
 			parentChit->GetLumosChitBag()->census.greaterMOBs -= 1;
 		}
 	}
@@ -828,7 +828,7 @@ void ItemComponent::AddToInventory( ItemComponent* ic )
 	UpdateActive();
 
 	if ( parentChit && parentChit->GetRenderComponent() ) {
-		if ( gameItem->IName() == "fruit" ) {
+		if ( gameItem->IName() == IStringConst::fruit ) {
 			parentChit->GetRenderComponent()->AddDeco( "fruit", STD_DECO );	// will get refreshed if carred.
 		}
 		else {
@@ -985,7 +985,7 @@ void ItemComponent::SetHardpoints()
 		{
 			IString proc = itemArr[i]->keyValues.GetIString( "procedural" );
 			int features = 0;
-			itemArr[i]->keyValues.Get( "features", &features );
+			itemArr[i]->keyValues.Get( ISC::features, &features );
 
 			ProcRenderInfo info;
 
@@ -1009,11 +1009,11 @@ void ItemComponent::ApplyLootLimits()
 	int limit = 0;
 	int cLimit = 0;
 
-	if (mob == "greater") {
+	if (mob == IStringConst::greater) {
 		limit = MAX_GREATER_GOLD;
 		cLimit = MAX_GREATER_MOB_CRYSTAL;
 	}
-	else if (mob == "lesser") {
+	else if (mob == IStringConst::lesser) {
 		limit = MAX_LESSER_GOLD;
 		cLimit = MAX_LESSER_MOB_CRYSTAL;
 	}

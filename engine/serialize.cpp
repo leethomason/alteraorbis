@@ -51,7 +51,6 @@ void ModelHeader::Load( const gamedb::Item* item )
 			const gamedb::Item* dataItem = metaItem->ChildAt( i );
 			int id = (int) atof( dataItem->Name() );
 
-			//metaData[i].name = StringPool::Intern( dataItem->Name(), true );
 			metaData[id].pos.x = dataItem->GetFloat( "x" );
 			metaData[id].pos.y = dataItem->GetFloat( "y" );
 			metaData[id].pos.z = dataItem->GetFloat( "z" );

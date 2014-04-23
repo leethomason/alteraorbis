@@ -103,9 +103,9 @@ void HealthComponent::DeltaHealth()
 				IString mob = item->keyValues.GetIString( "mob" );
 				if ( !mob.empty() ) {
 					const char* asset = 0;
-					if ( mob == "lesser" ) asset = "tombstoneLesser";
-					else if ( mob == "greater" ) asset = "tombstoneGreater";
-					else if ( mob == "denizen" ) asset = "tombstoneDenizen";
+					if ( mob == ISC::lesser ) asset = "tombstoneLesser";
+					else if ( mob == ISC::greater ) asset = "tombstoneGreater";
+					else if ( mob == ISC::denizen ) asset = "tombstoneDenizen";
 
 					if ( asset ) {
 						Chit* chit = GetLumosChitBag()->NewChit();
