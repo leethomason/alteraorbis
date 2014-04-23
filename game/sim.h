@@ -57,8 +57,6 @@ public:
 	void Load( const char* mapDAT, const char* gameDAT );
 	void Save( const char* mapDAT, const char* gameDAT );
 
-	void Draw( U32 delta );
-
 	Texture*		GetMiniMapTexture();
 	Chit*			GetPlayerChit();
 
