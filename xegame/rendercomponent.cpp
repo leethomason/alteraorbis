@@ -525,13 +525,17 @@ void RenderComponent::ProcessIcons( int delta )
 	// HACK
 	// should be somewhere else
 	GameItem* gameItem = parentChit->GetItem();
-	if (gameItem && gameItem->keyValues.GetIString("mob") != IString()) {
+	if (gameItem && (gameItem->keyValues.GetIString("mob") != IString() || gameItem->IName() == "bar")) {
 		decoText.Clear();
 		IString proper;
 		proper = gameItem->IProperName();
 		if (!proper.empty()) {
 			CStr<24> str;
-			str.Format("%s %d", proper.safe_str(), parentChit->GetItem()->Traits().Level());
+			if (gameItem->keyValues.GetIString("mob") != IString())
+				str.Format("%s %d", proper.safe_str(), parentChit->GetItem()->Traits().Level());
+			else
+				str.Format("%s", proper.safe_str());
+
 			SetDecoText(str.c_str());
 		}
 	}

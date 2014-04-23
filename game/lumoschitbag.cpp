@@ -206,55 +206,62 @@ Chit* LumosChitBag::FindBuilding(	const grinliz::IString&  name,
 }
 
 
-Chit* LumosChitBag::NewBuilding( const Vector2I& pos, const char* name, int team )
+Chit* LumosChitBag::NewBuilding(const Vector2I& pos, const char* name, int team)
 {
 	const ChitContext* context = GetContext();
 	Chit* chit = NewChit();
 
-	GameItem rootItem = ItemDefDB::Instance()->Get( name );
+	GameItem rootItem = ItemDefDB::Instance()->Get(name);
 
 	// Hack...how to do this better??
-	if ( rootItem.IResourceName() == "pyramid0" ) {
+	if (rootItem.IResourceName() == "pyramid0") {
 		CStr<32> str;
-		str.Format( "pyramid%d", random.Rand(3) );
-		rootItem.SetResource( str.c_str() );
+		str.Format("pyramid%d", random.Rand(3));
+		rootItem.SetResource(str.c_str());
 	}
 
-	int cx=1;
-	rootItem.keyValues.Get( "size", &cx );
-	int porch=0;
-	rootItem.keyValues.Get( "porch", &porch );
+	int cx = 1;
+	rootItem.keyValues.Get("size", &cx);
+	int porch = 0;
+	rootItem.keyValues.Get("porch", &porch);
 
 	MapSpatialComponent* msc = new MapSpatialComponent();
-	msc->SetMapPosition( pos.x, pos.y, cx, cx );
-	msc->SetMode( GRID_BLOCKED );
-	msc->SetBuilding( true, porch != 0 );
-	
-	chit->Add( msc );
-	chit->Add( new RenderComponent( rootItem.ResourceName() ));
-	chit->Add( new HealthComponent());
-	AddItem( name, chit, context->engine, team, 0 );
-	
-	IString script = rootItem.keyValues.GetIString( "script" );
-	if ( !script.empty() ) {
-		IScript* s = ScriptComponent::Factory( script );
-		GLASSERT( s );
-		chit->Add( new ScriptComponent( s ));
+	msc->SetMapPosition(pos.x, pos.y, cx, cx);
+	msc->SetMode(GRID_BLOCKED);
+	msc->SetBuilding(true, porch != 0);
+
+	chit->Add(msc);
+	chit->Add(new RenderComponent(rootItem.ResourceName()));
+	chit->Add(new HealthComponent());
+	AddItem(name, chit, context->engine, team, 0);
+
+	IString script = rootItem.keyValues.GetIString("script");
+	if (!script.empty()) {
+		IScript* s = ScriptComponent::Factory(script);
+		GLASSERT(s);
+		chit->Add(new ScriptComponent(s));
 	}
 
-	IString proc = rootItem.keyValues.GetIString( "procedural" );
-	if ( !proc.empty() ) {
+	IString proc = rootItem.keyValues.GetIString("procedural");
+	if (!proc.empty()) {
 		TeamGen gen;
 		ProcRenderInfo info;
-		gen.Assign( team, &info );
-		chit->GetRenderComponent()->SetProcedural( 0, info );
+		gen.Assign(team, &info);
+		chit->GetRenderComponent()->SetProcedural(0, info);
 	}
 
-	IString consumes = rootItem.keyValues.GetIString( IStringConst::zoneConsume );
-	if ( !consumes.empty() ) {
-		IScript* s = ScriptComponent::Factory( StringPool::Intern("EvalBuildingScript"));
+	IString consumes = rootItem.keyValues.GetIString(IStringConst::zoneConsume);
+	if (!consumes.empty()) {
+		IScript* s = ScriptComponent::Factory(StringPool::Intern("EvalBuildingScript"));
 		GLASSERT(s);
-		chit->Add( new ScriptComponent(s));
+		chit->Add(new ScriptComponent(s));
+	}
+
+	IString nameGen = rootItem.keyValues.GetIString( "nameGen");
+	if ( !nameGen.empty() ) {
+		LumosGame* game = GetContext()->game;
+		const char* p = game->GenName( nameGen.c_str(), chit->random.Rand(), 0, 0 );
+		chit->GetItem()->SetProperName( p );
 	}
 
 #if 0	// debugging

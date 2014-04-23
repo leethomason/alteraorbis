@@ -282,15 +282,41 @@ const char* LumosGame::GenName( const char* dataset, int seed, int min, int max 
 	GLASSERT( item );
 	if ( !item ) return 0;
 
-	int size=0;
-	const void* data = this->GetDatabase()->AccessData( item, "triplets", &size );
-	MarkovGenerator gen( (const char*)data, size, seed );
+	nameBuffer = "";
 
-	int len = max+1;
-	int error = 100;
-	while ( error-- ) {
-		if ( gen.Name( &nameBuffer, max ) && (int)nameBuffer.size() >= min ) {
-			return nameBuffer.c_str();
+	const gamedb::Item* word = item->Child("words0");
+	if (word) {
+		// The 3-word form.
+		Random random(seed);
+
+		for (int i = 0; i < 3; ++i) {
+			static const char* CHILD[] = { "words0", "words1", "words2" };
+			word = item->Child(CHILD[i]);
+			if (word && word->NumAttributes()) {
+				// attribute name and value are the same.
+				const char *attr = word->AttributeName(random.Rand(word->NumAttributes()));
+				if (i) {
+					nameBuffer.AppendFormat(" %s", attr);
+				}
+				else {
+					nameBuffer = attr;
+				}
+			}
+		}
+		return nameBuffer.c_str();
+	}
+	else {
+		// The triplet (letter) form.
+		int size = 0;
+		const void* data = this->GetDatabase()->AccessData(item, "triplets", &size);
+		MarkovGenerator gen((const char*)data, size, seed);
+
+		int len = max + 1;
+		int error = 100;
+		while (error--) {
+			if (gen.Name(&nameBuffer, max) && (int)nameBuffer.size() >= min) {
+				return nameBuffer.c_str();
+			}
 		}
 	}
 	return 0;
