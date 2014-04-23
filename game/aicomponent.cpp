@@ -2680,6 +2680,15 @@ int AIComponent::DoTick( U32 deltaTime )
 				currentAction = 0;
 			}
 		}
+
+		// If we still have a targetDesc.id after the above checks, make
+		// sure it is in the enemy list!
+		if (enemyList.Find(targetDesc.id) < 0) {
+			if (enemyList.HasCap())
+				enemyList.Push(targetDesc.id);
+			else
+				enemyList[0] = targetDesc.id;
+		}
 	}
 
 	if ( focus == FOCUS_TARGET && !targetDesc.id ) {
