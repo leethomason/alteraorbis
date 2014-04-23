@@ -183,7 +183,6 @@ void TitleScene::Resize()
 		}
 	}
 	background.SetPos( 0, 0 );
-	//background.SetVisible(false);
 
 	float aspect = port.UIAspectRatio();
 	if ( aspect >= 0.5f ) {
@@ -210,7 +209,7 @@ void TitleScene::Resize()
 	layout.PosAbs(&gameScene[GENERATE_WORLD], -2, -1);
 	layout.PosAbs(&gameScene[DEFAULT_WORLD], -1, -1);
 	layout.PosAbs(&gameScene[CONTINUE], 0, -1, 2, 1);
-	gameScene[GENERATE_WORLD].SetVisible(false);
+	gameScene[GENERATE_WORLD].SetVisible(visible);
 
 	gameScene[CONTINUE].SetEnabled( false );
 	const char* datPath = game->GamePath( "game", 0, "dat" );

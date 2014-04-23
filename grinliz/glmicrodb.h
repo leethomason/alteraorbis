@@ -81,10 +81,10 @@ private:
 
 	struct Entry {
 		void Serialize( XStream* xs );
-		const char* key;		// IString ptr. (no constructor)
-		int			type;
+		grinliz::IString	key;
+		int					type;
+		grinliz::IString	value;		// special: _FLOAT_, _INT_
 		union {
-			const char*	str;
 			float		floatVal;
 			int			intVal;
 		};
@@ -105,11 +105,11 @@ public:
 		bool Done() const				{ return index >= db.dataArr.Size(); }
 		void Next()						{ ++index; }
 
-		const char* Key() const         { GLASSERT( !Done() ); return db.dataArr[index].key; }
+		const char* Key() const         { GLASSERT( !Done() ); return db.dataArr[index].key.c_str(); }
 		int			Type() const		{ GLASSERT( !Done() ); return db.dataArr[index].type; }
 		int			IntValue() const	{ GLASSERT( !Done() ); GLASSERT( db.dataArr[index].type == MicroDB::TYPE_INT ); return db.dataArr[index].intVal; }
 		float		FloatValue() const	{ GLASSERT( !Done() ); GLASSERT( db.dataArr[index].type == MicroDB::TYPE_FLOAT ); return db.dataArr[index].floatVal; }
-		const char* StrValue() const	{ GLASSERT( !Done() ); GLASSERT( db.dataArr[index].type == MicroDB::TYPE_ISTRING ); return db.dataArr[index].str; }
+		const char* StrValue() const	{ GLASSERT( !Done() ); GLASSERT( db.dataArr[index].type == MicroDB::TYPE_ISTRING ); return db.dataArr[index].value.c_str(); }
 
 private:
         const MicroDB&	db;

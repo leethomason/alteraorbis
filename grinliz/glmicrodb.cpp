@@ -23,7 +23,7 @@ MicroDB::Entry* MicroDB::FindOrCreate( const IString& key )
 		}
 	}
 	Entry* e = dataArr.PushArr( 1 );
-	e->key = key.c_str();	// use the interned address
+	e->key = key;
 	return e;
 }
 
@@ -72,7 +72,7 @@ void MicroDB::Set( const IString& key, const IString& value )
 {
 	Entry* e = FindOrCreate( key );
 	e->type = TYPE_ISTRING;
-	e->str = value.c_str();
+	e->value= value;
 }
 
 
@@ -122,7 +122,7 @@ int MicroDB::Get( const IString& key, IString* value ) const
 	const Entry* e = Find( key );
 	if ( !e ) return KEY_NOT_FOUND;
 	if ( e->type != TYPE_ISTRING ) return WRONG_FORMAT;
-	*value = StringPool::Intern( e->str );
+	*value = e->value;
 	return 0;
 }
 
@@ -164,23 +164,15 @@ void MicroDB::Entry::Serialize( XStream* xs )
 {
 	XarcOpen( xs, "Entry" );
 
-	IString ikey = StringPool::Intern( key );
-	XARC_SER( xs, ikey );
-	key = ikey.c_str();
-
+	XARC_SER( xs, key );
 	XARC_SER( xs, type );
+	XARC_SER(xs, value);
 	if ( type == TYPE_INT ) {
 		XARC_SER( xs, intVal );
 	}
 	else if ( type == TYPE_FLOAT ) {
 		XARC_SER( xs, floatVal );
 	}
-	else if ( type == TYPE_ISTRING ) {
-		IString ival = StringPool::Intern( str );
-		XARC_SER( xs, ival );
-		str = ival.c_str();
-	}
-
 	XarcClose( xs );
 }
 
