@@ -21,6 +21,7 @@
 #include "../script/farmscript.h"
 #include "../script/distilleryscript.h"
 #include "../script/procedural.h"
+#include "../script/guardscript.h"
 
 #include "../scenes/characterscene.h"
 #include "../scenes/forgescene.h"
@@ -364,6 +365,8 @@ CoreScript* Sim::CreateCore( const Vector2I& sector, int team)
 			if (team == TEAM_HOUSE0) {
 				chitBag->SetHomeSector(sector);
 			}
+			// Make the dwellers defend the core.
+			chit->Add(new ScriptComponent(new GuardScript()));
 		}
 
 		return cs;

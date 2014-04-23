@@ -10,7 +10,6 @@ Arkanis
 Antevius
 Auril
 Alteria
-Bajic
 Bestine
 Bespin
 Bormea
@@ -56,7 +55,6 @@ Mantell
 Quence
 Ravnek
 Revnar
-Rishi
 Sennex
 Sessenna
 Subterrel

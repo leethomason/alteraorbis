@@ -56,6 +56,7 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	currentNews = 0;
 	endTimer = 0;
 	coreWarningTimer = 0;
+	domainWarningTimer = 0;
 	voxelInfoID.Zero();
 	lumosGame = game;
 	game->InitStd( &gamui2D, &okay, 0 );
@@ -187,7 +188,13 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 		buildMark[i].SetVisible(false);
 	}
 
-	coreWarning.Init(&gamui2D, LumosGame::CalcUIIconAtom("warning"), false);
+	coreWarningIcon.Init(&gamui2D, LumosGame::CalcUIIconAtom("warning"), false);
+	coreWarningLabel.Init(&gamui2D);
+	domainWarningIcon.Init(&gamui2D, LumosGame::CalcUIIconAtom("yellowwarning"), false);
+	domainWarningLabel.Init(&gamui2D);
+
+	coreWarningLabel.SetText("WARNING: Core under attack.");
+	domainWarningLabel.SetText("WARNING: Domain under attack.");
 }
 
 
@@ -243,9 +250,19 @@ void GameScene::Resize()
 	for( int i=0; i<NUM_UI_MODES; ++i ) {
 		layout.PosAbs( &uiMode[i], i, 0 );
 	}
-	layout.PosAbs(&coreWarning, NUM_UI_MODES, 0);
-	coreWarning.SetSize(coreWarning.Height(), coreWarning.Height());
-	coreWarning.SetVisible(false);
+	layout.PosAbs(&coreWarningIcon, 1, 4);
+	layout.PosAbs(&coreWarningLabel, 1, 4);
+
+	layout.PosAbs(&domainWarningIcon, 1, 5);
+	layout.PosAbs(&domainWarningLabel, 1, 5);
+
+	coreWarningIcon.SetSize(coreWarningIcon.Height(), coreWarningIcon.Height());
+	domainWarningIcon.SetSize(domainWarningIcon.Height(), domainWarningIcon.Height());
+
+	coreWarningIcon.SetVisible(false);
+	domainWarningIcon.SetVisible(false);
+	coreWarningLabel.SetVisible(false);
+	domainWarningLabel.SetVisible(false);
 
 	tabBar0.SetPos(  uiMode[0].X(), uiMode[0].Y() );
 	tabBar0.SetSize( uiMode[NUM_UI_MODES-1].X() + uiMode[NUM_UI_MODES-1].Width() - uiMode[0].X(), uiMode[0].Height() );
@@ -848,13 +865,14 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 	// button with nothing being built.
 	bool setBuildUp = false;
 	for (int i = 0; i < NUM_BUILD_MODES; ++i) {
-		if (item == &modeButton[i]) setBuildUp = true;
+		if (item == &modeButton[i]) 
+			setBuildUp = true;
 	}
-	if (item == &uiMode[UI_BUILD]) setBuildUp = true;
+	if (item == &uiMode[UI_BUILD]) {
+		setBuildUp = true;
+	}
 	if (setBuildUp) {
-		for (int i = 0; i < BuildScript::NUM_OPTIONS; ++i) {
-			buildButton[i].SetUp();
-		}
+		buildButton[0].SetDown();
 	}
 
 	for( int i=0; i<NUM_NEWS_BUTTONS; ++i ) {
@@ -1258,6 +1276,9 @@ void GameScene::DoTick( U32 delta )
 
 
 	Chit* track = sim->GetChitBag()->GetChit( chitTracking );
+	if (!track && sim->GetPlayerChit()) {
+		track = sim->GetPlayerChit();
+	}
 	faceWidget.SetFace( &uiRenderer, track ? track->GetItem() : 0 );
 	SetBars( track );
 	
@@ -1354,8 +1375,13 @@ void GameScene::DoTick( U32 delta )
 		}
 	}
 
-	coreWarning.SetVisible(coreWarningTimer > 0);
+	coreWarningLabel.SetVisible(coreWarningTimer > 0);
+	coreWarningIcon.SetVisible(coreWarningTimer > 0);
 	coreWarningTimer -= delta;
+
+	domainWarningLabel.SetVisible(domainWarningTimer > 0);
+	domainWarningIcon.SetVisible(domainWarningTimer > 0);
+	domainWarningTimer -= delta;
 }
 
 
@@ -1377,8 +1403,14 @@ void GameScene::OnChitMsg(Chit* chit, const ChitMsg& msg)
 			}
 		}
 	}
-	else if (msg.ID() == ChitMsg::CHIT_DAMAGE && chit->PrimaryTeam() == TEAM_HOUSE0 && chit->GetScript("CoreScript")) {
-		coreWarningTimer = 6000;
+	else if (msg.ID() == ChitMsg::CHIT_DAMAGE && chit->PrimaryTeam() == TEAM_HOUSE0 ) {
+		BuildingFilter filter;
+		if (filter.Accept(chit)) {
+			if (chit->GetScript("CoreScript"))
+				coreWarningTimer = 6000;
+			else
+				domainWarningTimer = 6000;
+		}
 	}
 }
 
@@ -1428,7 +1460,7 @@ void GameScene::CheckGameStage(U32 delta)
 			if (sd->HasCore()) {
 				Vector2I sector = ToSector(sd->x, sd->y);
 				CoreScript* cs = CoreScript::GetCore(sector);
-				GLASSERT(cs);
+				//GLASSERT(cs);
 				if (cs && cs->PrimaryTeam() == TEAM_NEUTRAL) {
 					arr.Push(sd);
 				}

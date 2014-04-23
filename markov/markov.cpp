@@ -80,6 +80,61 @@ MarkovGenerator::MarkovGenerator( const char* data, int nBytes, int seed )
 }
 
 
+// Easy to create names that go nowhere.
+// Try to check for them.
+void MarkovGenerator::Analyze()
+{
+	int* options = new int[256 * 256];
+	memset(options, 0, 256 * 256 *sizeof(int));
+
+	char a = ' ';
+	char b = ' ';
+	GLOUTPUT(("\n"));
+	for (int i = 0; i < nTriplets; ++i) {
+		if (arr[i].value[0] == 0 ) {
+			a = arr[i].value[1];
+			b = arr[i].value[2];
+			int opt = 0;
+			AnalyzeRec(a, b, &opt);
+			options[(unsigned char)b * 256 + (unsigned char)a] += opt;
+		}
+	}
+	int over50 = 0;
+	for (int b = 0; b < 256; ++b) {
+		for (int a = 0; a < 256; ++a) {
+			int i = b * 256 + a;
+			if (options[i]) {
+				if (options[i] <= 50) {
+					GLOUTPUT(("%c%c -> %d\n", a ? a : ' ', b ? b : ' ', options[i]));
+				}
+				else {
+					over50++;
+				}
+			}
+		}
+	}
+	GLOUTPUT(("Plus %d pairs over 50.\n", over50));
+	delete[] options;
+}
+
+
+void MarkovGenerator::AnalyzeRec(char a, char b, int* options)
+{
+	int start = 0;
+	int count = 0;
+	FindPair(a, b, &start, &count);
+	if (count == 0)
+		return;
+	*options += count;
+	if (*options > 100)
+		return;
+
+	for (int i = start; i < start + count; ++i) {
+		AnalyzeRec(b, arr[i].value[2], options);
+	}
+}
+
+
 bool MarkovGenerator::Name( GLString* name, int maxLen )
 {
 	*name = "";

@@ -69,12 +69,13 @@ public:
 	// local copy - good to be aware.
 	MarkovGenerator( const char* data, int nBytes, int seed );
 	bool Name( grinliz::GLString* name, int maxLen );
+	void Analyze();
 
 private:
 	void FindPair( char a, char b, int* start, int* count );
+	void AnalyzeRec(char a, char b, int* options);
 
 	grinliz::Random random;
-	//grinliz::CDynArray< MarkovBuilder::Triplet > sortedArr;
 	const MarkovBuilder::Triplet* arr;
 	int nTriplets;
 };

@@ -135,7 +135,7 @@ private:
 	int					chitTracking;
 	int					currentNews;	// index of the last news item put in the console
 	int					sleepTubeID;
-	int					coreWarningTimer;
+	int					coreWarningTimer, domainWarningTimer;
 	grinliz::Vector2F	mapDragStart;
 	grinliz::Vector2F	tapView;
 
@@ -159,7 +159,10 @@ private:
 	gamui::Image		minimap;
 	gamui::Image		playerMark;
 	gamui::Image		buildMark[NUM_BUILD_MARKS];	// used for click&drag building
-	gamui::Image		coreWarning;
+	gamui::Image		coreWarningIcon;
+	gamui::TextLabel	coreWarningLabel;
+	gamui::Image		domainWarningIcon;
+	gamui::TextLabel	domainWarningLabel;
 	gamui::PushButton	atlasButton;
 
 	FacePushWidget		faceWidget;

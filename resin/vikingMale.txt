@@ -5,12 +5,10 @@ Armod
 Arngrim
 Asmund
 Beiti                        
-Bild                         
 Bjarkmar 
 Borgar
 Drott
-Eddval                    
-Egil                         
+Eddval                    \   
 Einar                       
 Eirik                        
 Eyolf
@@ -27,7 +25,6 @@ Gautrek
 Geirmund               
 Geirrod
 Geirthjof
-Gjuki                       
 Glammad                
 Gothorm
 Granmar

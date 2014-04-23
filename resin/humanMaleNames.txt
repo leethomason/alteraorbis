@@ -1,10 +1,12 @@
 Adam
 Adama
+Adath
+Admun
 Alpha
 Alkalla
 Alteran
-Atta
 Axon
+Axter
 Cillin
 Cypher
 Cyrrus
@@ -32,9 +34,11 @@ Polzon
 Proton
 Selas
 Sigma
-Storm
+Silic
 Strident
 Xallic
 Xerces
 Xerek
 Xycon
+Xyvak
+

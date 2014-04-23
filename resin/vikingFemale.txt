@@ -1,13 +1,11 @@
 Aesa
 Alfhild                    
 Arnora                 
-Aslaug                   
 Bekkhild 
 Bera        
 Bestla
 Bodvild                  
 Dagmaer                
-Eyfura
 Fjotra                      
 Freydis                   
 Hallfrid                   
@@ -31,5 +29,4 @@ Saereid
 Sigrid
 Silksif                     
 Sinrjod                   
-Sylgja                     
 Vaetild

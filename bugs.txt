@@ -58,7 +58,8 @@ x system for gamui to track models
 - re-do glow
 - melee is way too powerful and wide effect
 - option to flip right mouse behavior - pan/zoom by default. ctrl reverse.
-- proper names for markets, bars,
+- proper names for bars
+- uitracking in battle scene
 
 - game
 	- Beta1 fixes
@@ -89,15 +90,14 @@ x system for gamui to track models
 		x multi-build in forge
 		x targeting reticule not working
 		x no glow on pulse
-		- stuck battle bug
-		- notify of sector herd to domain
-		- avatar portrait selected when it appears
-		- attack warning: core attack, domain attack
-		- walk target for the avatar
+		t notify of sector herd to domain
+		x avatar portrait selected when it appears
+		x attack warning: core attack, domain attack
 		t repair icon
 		t reload icon
-		- uitracking in battle scene
 		t greater attacks big domains
+		- stuck battle bug
+		- walk target for the avatar
 
 	- Beta2
 		x repair

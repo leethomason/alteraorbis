@@ -475,11 +475,21 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 	}
 	else if ( msg.ID() >= ChitMsg::CHIT_DESTROYED_START && msg.ID() <= ChitMsg::CHIT_DESTROYED_END ) 
 	{
+		/* A significant GameItem will automatically set it's history in the ItemHistory
+		   database when it changes. (Some changes to the item need to be set in the
+		   history as well.) The ItemHistory stores what the item is/was not a series of
+		   events.
+
+		   The NewsHistory is the series of events, including the creation and destruction
+		   of the item. All the dates get inferredd from that.
+		*/
 		if ( msg.ID() == ChitMsg::CHIT_DESTROYED_START ) {
 			NewsDestroy( mainItem );
 		}
 
 		// Drop our wallet on the ground or send to the Reserve?
+		// MOBs drop items, as does anything with sub-items
+		// or carrying crystal.
 		MOBIshFilter mobFilter;
 
 		Wallet w = mainItem->wallet.EmptyWallet();
@@ -489,7 +499,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			pos = parentChit->GetSpatialComponent()->GetPosition();
 		}
 
-		if ( mobFilter.Accept( parentChit )) {
+		if ( mobFilter.Accept( parentChit ) || mainItem->wallet.NumCrystals() || this->NumCarriedItems() ) {
 			dropItems = true;
 			if ( !w.IsEmpty() ) {
 				parentChit->GetLumosChitBag()->NewWalletChits( pos, w );
@@ -514,6 +524,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			else {
 				ReserveBank::Instance()->bank.Add( item->wallet.EmptyWallet() );
 				NewsDestroy( item );
+				delete item;
 			}
 		}
 	}
