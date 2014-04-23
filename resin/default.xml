@@ -24,6 +24,7 @@
   <markov filename="vikingMale.txt" assetName="vikingMale" />
   <markov filename="vikingFemale.txt" assetName="vikingFemale" />
   <markov filename="monster.txt" assetName="monster" />
+  <markov-word filename="barNames.txt" assetName="barNames" />
   
   <!-- Icon and UI -->
   <texture filename="title.png" />

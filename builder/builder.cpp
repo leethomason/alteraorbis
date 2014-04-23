@@ -332,7 +332,55 @@ void ProcessTree( XMLElement* data )
 }
 
 
-void ProcessMarkov( XMLElement* data ) 
+void ProcessMarkov(XMLElement* data)
+{
+	GLString assetName, pathName;
+	ParseNames(data, &assetName, &pathName, 0);
+
+	// copy the entire file.
+#pragma warning ( push )
+#pragma warning ( disable : 4996 )	// fopen is unsafe. For video games that seems extreme.
+	FILE* read = fopen(pathName.c_str(), "r");
+#pragma warning (pop)
+
+	if (!read) {
+		ExitError("Markov", pathName.c_str(), assetName.c_str(), "Could not load file.");
+		return;	// for static analysis
+	}
+
+	MarkovBuilder builder;
+
+	char buffer[256];
+	while (fgets(buffer, 256, read)) {
+		// Filter out comments.
+		const char* p = buffer;
+		while (*p && isspace(*p)) {
+			++p;
+		}
+		if (*p == '#')
+			continue;
+
+		GLString str = buffer;
+		CDynArray< StrToken > tokens;
+		StrTokenize(str, &tokens);
+
+		for (int i = 0; i<tokens.Size(); ++i) {
+			builder.Push(tokens[i].str);
+		}
+	}
+	builder.Process();
+
+	gamedb::WItem* witem = writer->Root()->FetchChild("markovName")->FetchChild(assetName.c_str());
+	witem->SetData("triplets", builder.Data(), builder.NumBytes(), false);	// prefer fast access to size
+
+	printf("markovName '%s' memory=%dk\n", assetName.c_str(), builder.NumBytes() / 1024);
+	totalDataMem += builder.NumBytes();
+
+	fclose(read);
+}
+
+
+void ProcessMarkovWord( XMLElement* data ) 
 {
 	GLString assetName, pathName;
 	ParseNames( data, &assetName, &pathName, 0 );
@@ -348,9 +396,18 @@ void ProcessMarkov( XMLElement* data )
 		return;	// for static analysis
 	}
 
-	MarkovBuilder builder;
-
 	char buffer[256];
+	int section = 0;
+	static const int MAX_SECTIONS = 3;
+	CDynArray<char> words[MAX_SECTIONS];
+
+	gamedb::WItem* witem = writer->Root()->FetchChild("markovName")->FetchChild(assetName.c_str());
+	gamedb::WItem* child[MAX_SECTIONS] = { 0, 0, 0 };
+	GLASSERT(MAX_SECTIONS == 3);
+	child[0] = witem->FetchChild("words0");
+	child[1] = witem->FetchChild("words1");
+	child[2] = witem->FetchChild("words2");
+
 	while( fgets( buffer, 256, read )) {
 		// Filter out comments.
 		const char* p = buffer;
@@ -359,22 +416,22 @@ void ProcessMarkov( XMLElement* data )
 		}
 		if ( *p == '#' )
 			continue;
+		if (!*p)
+			continue;
 
-		GLString str = buffer;
-		CDynArray< StrToken > tokens;		
-		StrTokenize( str, &tokens );
-
-		for( int i=0; i<tokens.Size(); ++i ) {
-			builder.Push( tokens[i].str );
+		if (isdigit(*p)) {
+			section = *p - '0';
+			if (section < 0 || section > MAX_SECTIONS) {
+				ExitError("MarkovWord", pathName.c_str(), assetName.c_str(), "Invalid section #.");
+			}
+		}
+		else {
+			char* q = (char*)strchr(p, '\n');
+			if (q)
+				*q = 0;
+			child[section]->SetString(p, p);
 		}
 	}
-	builder.Process();
-
-	gamedb::WItem* witem = writer->Root()->FetchChild( "markovName" )->FetchChild( assetName.c_str() );
-	witem->SetData( "triplets", builder.Data(), builder.NumBytes(), false );	// prefer fast access to size
-
-	printf( "markovName '%s' memory=%dk\n", assetName.c_str(), builder.NumBytes()/1024 );
-	totalDataMem += builder.NumBytes();
 
 	fclose( read );
 }
@@ -1159,6 +1216,9 @@ int main( int argc, char* argv[] )
 		}
 		else if ( StrEqual( child->Value(), "markov" )) {
 			ProcessMarkov( child );
+		}
+		else if (StrEqual(child->Value(), "markov-word")) {
+			ProcessMarkovWord(child);
 		}
 		else {
 			printf( "Unrecognized element: %s\n", child->Value() );

@@ -203,7 +203,7 @@
         cost="50"
         zoneConsume="natural"
         
-		    need.time="1.5"
+	    need.time="1.5"
         need.fun="0.4"
         need.social="0.2"
         />
@@ -219,8 +219,9 @@
         mass="50"
         cost="50"
         zoneConsume="natural"
+        nameGen="barNames"
         
-		    need.time="5.0"
+	    need.time="5.0"
         need.fun="0.2"
         need.social="0.4"
         need.food="1.0"
