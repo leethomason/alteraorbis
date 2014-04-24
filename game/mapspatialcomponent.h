@@ -43,7 +43,7 @@ public:
 	// -- end before OnAdd warning --
 
 	grinliz::Vector2I MapPosition() const	{ return bounds.min; }
-	grinliz::Rectangle2I Bounds() const		{ return bounds; }
+	virtual grinliz::Rectangle2I Bounds() const		{ return bounds; }
 	virtual void SetPosRot( const grinliz::Vector3F& v, const grinliz::Quaternion& quat );
 
 	void SetMode( int mode );	// GRID_IN_USE or GRID_BLOCKED

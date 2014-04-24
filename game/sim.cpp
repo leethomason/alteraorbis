@@ -267,33 +267,14 @@ void Sim::OnChitMsg(Chit* chit, const ChitMsg& msg)
 				Rectangle2F bounds = ToWorld(InnerSectorBounds(sector));
 				chitBag->QuerySpatialHash(&queryArr, bounds, chit, &filter);
 				for (int i = 0; i < queryArr.Size(); ++i) {
-					int c = random.Rand(2);
-					switch (c) {
-					case 0:
-						{
-							// Make an ornamental copy.
-							GameItem* item = queryArr[i]->GetItem();
-							if (item && queryArr[i]->GetRenderComponent()) {
-								Vector2I pos = queryArr[i]->GetSpatialComponent()->GetPosition2DI();
-								float yrot = queryArr[i]->GetSpatialComponent()->GetYRotation();
-								Chit* c = chitBag->NewLawnOrnament(pos, item->Name(), TEAM_NEUTRAL);
-								c->GetSpatialComponent()->SetYRotation(yrot);
-							}
-						}
-						break;
 
-					default:
-						{
-							// To ruins.
-							MapSpatialComponent* msc = GET_SUB_COMPONENT(queryArr[i], SpatialComponent, MapSpatialComponent);
-							GLASSERT(msc);
-							Vector2I pos = msc->Bounds().min;
-							pos.x += random.Rand(msc->Bounds().Width());
-							pos.y += random.Rand(msc->Bounds().Height());
-							Chit* c = chitBag->NewLawnOrnament(pos, "ruins", TEAM_NEUTRAL);
-							c->GetSpatialComponent()->SetYRotation(90.0f * float(random.Rand(4)));
-						}
-						break;
+					// Make an ornamental copy.
+					GameItem* item = queryArr[i]->GetItem();
+					if (item && queryArr[i]->GetRenderComponent()) {
+						Vector2I pos = queryArr[i]->GetSpatialComponent()->Bounds().min;
+						float yrot = queryArr[i]->GetSpatialComponent()->GetYRotation();
+						Chit* c = chitBag->NewLawnOrnament(pos, item->Name(), TEAM_NEUTRAL);
+						c->GetSpatialComponent()->SetYRotation(yrot);
 					}
 					queryArr[i]->DeRez();
 				}

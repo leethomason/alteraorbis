@@ -742,11 +742,8 @@ void WorldMap::SetRock( int x, int y, int h, bool magma, int rockType )
 		}
 	}
 	else {
-		// Essentially bail if the mapgrid is in use.
-		if ( iMapGridUse ) {
-			if ( iMapGridUse->MapGridUse( x, y )) {
-				h = 0;
-			}
+		if ( iMapGridUse && iMapGridUse->MapGridUse( x, y )) {
+			h = 0;
 		}
 	}
 	WorldGrid wg = was;

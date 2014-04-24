@@ -473,31 +473,28 @@ Chit* LumosChitBag::QueryRemovable( const grinliz::Vector2I& pos2i, bool ignoreP
 
 	CChitArray		array;
 	RemovableFilter removableFilter;
-	BuildingFilter  buildingFilter;
-
-	IChitAccept* filter = &removableFilter;
-	if ( ignorePlants ) {
-		filter = &buildingFilter;
-	}
 
 	Chit* core = 0;
 	CoreScript* cs = CoreScript::GetCore(ToSector(pos2i));
 	if (cs) core = cs->ParentChit();
 
-	QuerySpatialHash(&array, pos2, 0.1f, core, filter);
+	// Big enough to snag buildings:
+	QuerySpatialHash(&array, pos2, 0.8f, core, &removableFilter);
 
 	Chit* found = 0;
+	PlantFilter plantFilter;
+
 	// First pass: plants & 1x1 buildings.
 	for( int i=0; i<array.Size(); ++i ) {
-		found = array[i];
-		break;
+		// We are casting a wide net to get buildings.
+		if (array[i]->GetSpatialComponent()->Bounds().Contains(pos2i)) {
+			if (ignorePlants && plantFilter.Accept(array[i])) {
+				continue;
+			}
+			found = array[i];
+			break;
+		}
 	}
-	// Check for 2x2 buildings.
-	if ( !found ) {
-		found = QueryBuilding( pos2i );
-	}
-
-	if (found == core) found = 0;
 	return found;
 }
 
@@ -559,6 +556,10 @@ Chit* LumosChitBag::NewGoldChit( const grinliz::Vector3F& pos, int amount )
 	this->QuerySpatialHash( &chitList, v2, 1.0f, 0, &goldFilter );
 	Chit* chit = 0;
 
+	// Evil bug this: adding gold to a wallet just before
+	// deletion. I'm a little concerned where else
+	// this could be a problem. Would be nice to make
+	// deletion immediate.
 	for (int i = 0; i < chitList.Size(); ++i) {
 		if (chitList[i] && !IsQueuedForDelete(chitList[i])) {
 			chit = chitList[i];
@@ -947,7 +948,12 @@ bool PlantFilter::Accept( Chit* chit )
 
 bool RemovableFilter::Accept( Chit* chit )
 {
-	return buildingFilter.Accept( chit ) || plantFilter.Accept( chit );
+	MapSpatialComponent* msc = GET_SUB_COMPONENT(chit, SpatialComponent, MapSpatialComponent);
+	if (msc) {
+		GameItem* item = chit->GetItem();
+		return (item && !(item->flags & GameItem::INDESTRUCTABLE));
+	}
+	return false;
 }
 
 

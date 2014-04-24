@@ -86,6 +86,8 @@ int VolcanoScript::DoTick( U32 delta )
 			for (Rectangle2IIterator it(r); !it.Done(); it.Next()) {
 				worldMap->SetMagma(it.Pos().x, it.Pos().y, false);
 			}
+			worldMap->SetMagma(pos2i.x, pos2i.y, false);
+			scriptContext->chit->QueueDelete();
 		}
 		else {
 			// Inner off.
@@ -109,10 +111,6 @@ int VolcanoScript::DoTick( U32 delta )
 		}
 	}
 	
-	if (rad > MAX_RAD) {
-		scriptContext->chit->QueueDelete();
-		return 0;
-	}
 	return spreadTicker.Next();
 }
 

@@ -76,6 +76,8 @@ public:
 	grinliz::Vector2F GetHeading2D() const;
 	grinliz::Vector2I GetSector() const				{ grinliz::Vector2I s = { (int)position.x/SECTOR_SIZE, (int)position.z/SECTOR_SIZE }; return s; }
 
+	virtual grinliz::Rectangle2I Bounds() const		{ grinliz::Rectangle2I b; b.min = b.max = GetPosition2DI(); return b; }
+
 protected:
 	grinliz::Vector3F	position;
 	grinliz::Quaternion	rotation;

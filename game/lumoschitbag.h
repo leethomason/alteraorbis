@@ -105,11 +105,7 @@ class RemovableFilter : public IChitAccept
 {
 public:
 	virtual bool Accept( Chit* chit );
-	virtual int  Type() { return buildingFilter.Type() | plantFilter.Type(); }	
-
-private:
-	BuildingFilter buildingFilter;
-	PlantFilter    plantFilter;
+	virtual int  Type() { return MAP; }
 };
 
 

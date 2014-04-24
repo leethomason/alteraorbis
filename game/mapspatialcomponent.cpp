@@ -85,7 +85,22 @@ void MapSpatialComponent::UpdatePorch( bool clearPorch )
 	if (clearPorch) {
 		hasPorch = 0;
 	}
-	else if (building && hasPorch) {
+
+	Rectangle2I b = Bounds();
+	b.Outset(1);
+	for (Rectangle2IEdgeIterator it(b); !it.Done(); it.Next()) {
+		int type = 0;
+		Chit* porch = bag->QueryPorch(it.Pos(), &type);
+		if (porch && porch->GetScript("EvalBuildingScript")) {
+			EvalBuildingScript* ebs = (EvalBuildingScript*)porch->GetScript("EvalBuildingScript");
+			if (!ebs->Reachable()) {
+				type = WorldGrid::PORCH_UNREACHABLE;
+			}
+		}
+		worldMap->SetPorch(it.Pos().x, it.Pos().y, type);
+	}
+
+	if (building && hasPorch) {
 		hasPorch = 1;	// standard porch.
 		EvalBuildingScript* evalScript = static_cast<EvalBuildingScript*>(parentChit->GetScript("EvalBuildingScript"));
 		if (evalScript) {
@@ -104,21 +119,6 @@ void MapSpatialComponent::UpdatePorch( bool clearPorch )
 				}
 			}
 		}
-	}
-	Rectangle2I b = bounds;
-	b.Outset( 1 );
-	Rectangle2IEdgeIterator it( b );
-
-	for( it.Begin(); !it.Done(); it.Next() ) {
-		int type = 0;
-		Chit* porch = bag->QueryPorch( it.Pos(), &type );
-		if (porch && porch->GetScript("EvalBuildingScript")) {
-			EvalBuildingScript* ebs = (EvalBuildingScript*)porch->GetScript("EvalBuildingScript");
-			if (!ebs->Reachable()) {
-				type = WorldGrid::PORCH_UNREACHABLE;
-			}
-		}
-		worldMap->SetPorch( it.Pos().x, it.Pos().y, type );
 	}
 }
 
