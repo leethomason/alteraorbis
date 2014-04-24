@@ -267,6 +267,7 @@ void AIComponent::GetFriendEnemyLists()
 
 	CChitArray chitArr;
 	MOBIshFilter mobFilter;
+	BuildingFilter buildingFilter;
 
 	GetChitBag()->QuerySpatialHash( &chitArr, zone, parentChit, &mobFilter );
 	for( int i=0; i<chitArr.Size(); ++i ) {
@@ -288,6 +289,12 @@ void AIComponent::GetFriendEnemyLists()
 	// Add the currentTarget back in, if we lost it. But only if
 	// it hasn't gone too far away.
 	Chit* currentTargetChit = GetChitBag()->GetChit( targetDesc.id );
+	if (currentTargetChit && enemyList.Size() && buildingFilter.Accept(currentTargetChit)) {
+		// We have enemies that aren't buildings, and the target 
+		// is a building. Clear and go after non-buildings.
+		currentTargetChit = 0;
+		targetDesc.Clear();
+	}
 	if ( currentTargetChit && currentTargetChit->GetSpatialComponent() ) {
 		Vector2F targetCenter = currentTargetChit->GetSpatialComponent()->GetPosition2D();
 		if (    (targetCenter - center).LengthSquared() < LOOSE_AWARENESS*LOOSE_AWARENESS		// close enough OR
@@ -305,7 +312,6 @@ void AIComponent::GetFriendEnemyLists()
 		// This is a little subtle: what's the path to a building?
 		// The building doesn't work until there is a path from the porch
 		// to the core, so we'll use that metric.
-		BuildingFilter buildingFilter;
 		GetChitBag()->QuerySpatialHash(&chitArr, zone, parentChit, &buildingFilter);
 		for (int i = 0; i < chitArr.Size(); ++i) {
 			Chit* building = chitArr[i];

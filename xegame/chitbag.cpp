@@ -70,55 +70,56 @@ void ChitBag::DeleteAll()
 }
 
 
-void ChitBag::Serialize( const ComponentFactory* factory, XStream* xs )
+void ChitBag::Serialize(const ComponentFactory* factory, XStream* xs)
 {
-	XarcOpen( xs, "ChitBag" );
-	XARC_SER( xs, activeCamera );
+	XarcOpen(xs, "ChitBag");
+	XARC_SER(xs, activeCamera);
+	XARC_SER(xs, bagTime);
 	newsHistory->Serialize(xs);
 
-	if ( xs->Saving() ) {
-		XarcOpen( xs, "Chits" );
-		for( int i=0; i<chitID.NumValues(); ++i ) {
-			Chit* chit = chitID.GetValue( i );
-			XarcOpen( xs, "id" );
-			xs->Saving()->Set( "id", chit->ID() );
-			XarcClose( xs );
-			chit->Serialize( factory, xs  );
+	if (xs->Saving()) {
+		XarcOpen(xs, "Chits");
+		for (int i = 0; i < chitID.NumValues(); ++i) {
+			Chit* chit = chitID.GetValue(i);
+			XarcOpen(xs, "id");
+			xs->Saving()->Set("id", chit->ID());
+			XarcClose(xs);
+			chit->Serialize(factory, xs);
 		}
-		XarcClose( xs );
+		XarcClose(xs);
 
-		XarcOpen( xs, "Bolts" );
-		for( int i=0; i<bolts.Size(); ++i ) {
-			bolts[i].Serialize( xs );
+		XarcOpen(xs, "Bolts");
+		for (int i = 0; i < bolts.Size(); ++i) {
+			bolts[i].Serialize(xs);
 		}
-		XarcClose( xs );
+		XarcClose(xs);
 	}
 	else {
 		idPool = 0;
 
-		XarcOpen( xs, "Chits" );
-		while( xs->Loading()->HasChild() ) {
+		XarcOpen(xs, "Chits");
+		while (xs->Loading()->HasChild()) {
 
 			int id = 0;
-			XarcOpen( xs, "id" );
-			XARC_SER_KEY( xs, "id", id );	
-			XarcClose( xs );
-			idPool = Max( id, idPool );
+			XarcOpen(xs, "id");
+			XARC_SER_KEY(xs, "id", id);
+			XarcClose(xs);
+			idPool = Max(id, idPool);
 
 			//GLOUTPUT(( "loading chit id=%d\n", id ));
-			Chit* c = this->NewChit( id );
-			c->Serialize( factory, xs );
+			Chit* c = this->NewChit(id);
+			c->Serialize(factory, xs);
 		}
-		XarcClose( xs );
+		XarcClose(xs);
 
-		XarcOpen( xs, "Bolts" );
-		while( xs->Loading()->HasChild() ) {
-			Bolt* b = bolts.PushArr( 1 );
-			b->Serialize( xs );			
+		XarcOpen(xs, "Bolts");
+		while (xs->Loading()->HasChild()) {
+			Bolt* b = bolts.PushArr(1);
+			b->Serialize(xs);
 		}
-		XarcClose( xs );
+		XarcClose(xs);
 	}
-	XarcClose( xs );
+	XarcClose(xs);
 }
 
 
