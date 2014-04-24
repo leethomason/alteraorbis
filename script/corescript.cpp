@@ -14,6 +14,7 @@
 #include "../game/team.h"
 #include "../game/lumosmath.h"
 #include "../game/gameitem.h"
+#include "../game/sim.h"
 
 #include "../xegame/chit.h"
 #include "../xegame/spatialcomponent.h"
@@ -318,77 +319,79 @@ int CoreScript::DoTick( U32 delta )
 			  && ( normalPossible || greaterPossible ))
 	{
 #ifdef SPAWN_MOBS
-		// spawn stuff.
+		if (scriptContext->chitBag->GetSim() && scriptContext->chitBag->GetSim()->SpawnEnabled()) {
+			// spawn stuff.
 
-		// 0->NUM_SECTORS
-		int outland = abs( sector.x - NUM_SECTORS/2 ) + abs( sector.y - NUM_SECTORS/2 );
-		GLASSERT( NUM_SECTORS == 16 );	// else tweak constants 
-		outland += Random::Hash8( sector.x + sector.y*256 ) % 4;
-		outland = Clamp( outland, 0, NUM_SECTORS-1 );
+			// 0->NUM_SECTORS
+			int outland = abs(sector.x - NUM_SECTORS / 2) + abs(sector.y - NUM_SECTORS / 2);
+			GLASSERT(NUM_SECTORS == 16);	// else tweak constants 
+			outland += Random::Hash8(sector.x + sector.y * 256) % 4;
+			outland = Clamp(outland, 0, NUM_SECTORS - 1);
 
-		Rectangle2F r;
-		r.Set( (float)pos2i.x, (float)(pos2i.y), (float)(pos2i.x+1), (float)(pos2i.y+1) );
-		CChitArray arr;
-		ChitHasAIComponent hasAIComponent;
-		scriptContext->chitBag->QuerySpatialHash( &arr, r, 0, &hasAIComponent );
-		if ( arr.Size() < 2 ) {
-			Vector3F pf = { (float)pos2i.x+0.5f, 0, (float)pos2i.y+0.5f };
+			Rectangle2F r;
+			r.Set((float)pos2i.x, (float)(pos2i.y), (float)(pos2i.x + 1), (float)(pos2i.y + 1));
+			CChitArray arr;
+			ChitHasAIComponent hasAIComponent;
+			scriptContext->chitBag->QuerySpatialHash(&arr, r, 0, &hasAIComponent);
+			if (arr.Size() < 2) {
+				Vector3F pf = { (float)pos2i.x + 0.5f, 0, (float)pos2i.y + 0.5f };
 
-			if ( defaultSpawn.empty() ) {
-				/*
-					What to spawn?
-					A core has its "typical spawn": mantis, redManis, arachnoid.
-					And an occasional greater spawn: cyclops variants, dragon
-					All cores scan spawn arachnoids.
-				*/
-				static const char* SPAWN[NUM_SECTORS] = {
-					"arachnoid",
-					"arachnoid",
-					"arachnoid",
-					"arachnoid",
-					"mantis",
-					"mantis",
-					"mantis",
-					"redMantis",
-					"mantis",
-					"troll",
-					"mantis",
-					"redMantis",
-					"mantis",
-					"redMantis",
-					"troll",
-					"redMantis"
-				};
-				defaultSpawn = StringPool::Intern( SPAWN[outland] );
-			}
+				if (defaultSpawn.empty()) {
+					/*
+						What to spawn?
+						A core has its "typical spawn": mantis, redManis, arachnoid.
+						And an occasional greater spawn: cyclops variants, dragon
+						All cores scan spawn arachnoids.
+						*/
+					static const char* SPAWN[NUM_SECTORS] = {
+						"arachnoid",
+						"arachnoid",
+						"arachnoid",
+						"arachnoid",
+						"mantis",
+						"mantis",
+						"mantis",
+						"redMantis",
+						"mantis",
+						"troll",
+						"mantis",
+						"redMantis",
+						"mantis",
+						"redMantis",
+						"troll",
+						"redMantis"
+					};
+					defaultSpawn = StringPool::Intern(SPAWN[outland]);
+				}
 
-			float greater    = (float)(outland*outland) / (float)(80*256);
-			static const float rat = 0.25f;
-			const char* spawn	   = 0;
+				float greater = (float)(outland*outland) / (float)(80 * 256);
+				static const float rat = 0.25f;
+				const char* spawn = 0;
 
-			if ( outland > 4 && defaultSpawn == IStringConst::arachnoid ) {
-				greater *= 4.f;	// special spots for greaters to spawn.
-			}
+				if (outland > 4 && defaultSpawn == IStringConst::arachnoid) {
+					greater *= 4.f;	// special spots for greaters to spawn.
+				}
 
-			float roll = scriptContext->chit->random.Uniform();
-			bool isGreater = false;
+				float roll = scriptContext->chit->random.Uniform();
+				bool isGreater = false;
 
-			if ( greaterPossible && roll < greater ) {
-				const grinliz::CDynArray< grinliz::IString >& greater = ItemDefDB::Instance()->GreaterMOBs();
-				spawn = greater[ scriptContext->chit->random.Rand( greater.Size() ) ].c_str();
-				isGreater = true;
-			}
-			if (!spawn && normalPossible && (roll < rat) ) {
-				spawn = "arachnoid";
-			}
-			if ( !spawn && normalPossible ) {
-				spawn = defaultSpawn.c_str();
-			}
-			if ( spawn ) {
-				IString ispawn = StringPool::Intern( spawn, true );
-				int team = GetTeam( ispawn );
-				GLASSERT( team != TEAM_NEUTRAL );
-				Chit* mob = scriptContext->chitBag->NewMonsterChit( pf, spawn, team );
+				if (greaterPossible && roll < greater) {
+					const grinliz::CDynArray< grinliz::IString >& greater = ItemDefDB::Instance()->GreaterMOBs();
+					spawn = greater[scriptContext->chit->random.Rand(greater.Size())].c_str();
+					isGreater = true;
+				}
+				if (!spawn && normalPossible && (roll < rat)) {
+					spawn = "arachnoid";
+				}
+				if (!spawn && normalPossible) {
+					spawn = defaultSpawn.c_str();
+				}
+				if (spawn) {
+					IString ispawn = StringPool::Intern(spawn, true);
+					int team = GetTeam(ispawn);
+					GLASSERT(team != TEAM_NEUTRAL);
+					Chit* mob = scriptContext->chitBag->NewMonsterChit(pf, spawn, team);
+				}
 			}
 		}
 #endif

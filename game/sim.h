@@ -44,7 +44,7 @@ class NewsHistory;
 class ItemDB;
 class CoreScript;
 
-class Sim : public IChitListener, public StackedSingleton<Sim>, public IUITracker
+class Sim : public IChitListener, public IUITracker
 {
 public:
 	Sim( LumosGame* game );
@@ -64,6 +64,13 @@ public:
 	Engine*			GetEngine()		{ return engine; }
 	LumosChitBag*	GetChitBag()	{ return chitBag; }
 	WorldMap*		GetWorldMap()	{ return worldMap; }
+
+	int    AgeI() const;
+	double AgeD() const;
+	float  AgeF() const;
+
+	bool SpawnEnabled() const			{ return spawnEnabled; }
+	void EnableSpawn(bool enable)		{ spawnEnabled = enable;  }
 
 	// Set all rock to the nominal values
 	void SetAllRock();
@@ -106,6 +113,7 @@ private:
 			secondClock, 
 			volcTimer;
 	int currentVisitor;
+	bool spawnEnabled;
 
 	grinliz::CDynArray< Chit* >	queryArr;					// local; cached at object.
 	grinliz::CDynArray< grinliz::Vector2I > coreCreateList;	// list of cores that were deleted, need to be re-created after DoTick

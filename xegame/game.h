@@ -92,9 +92,6 @@ public:
 	enum { MAX_SCENES = 1000 };
 	bool IsScenePushed() const		{ return sceneQueued.sceneID != MAX_SCENES; }
 
-	U32 CurrentTime() const	{ return currentTime; }
-	U32 DeltaTime() const	{ return currentTime-previousTime; }
-
 	virtual void Save() = 0;
 
 	bool GetDebugUI() const				{ return debugUI; }

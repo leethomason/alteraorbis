@@ -1260,7 +1260,7 @@ void GameScene::DoTick( U32 delta )
 	const SectorData& sd = sim->GetWorldMap()->GetWorldInfo().GetSector( viewingSector );
 
 	CStr<64> str;
-	str.Format( "Date %.2f\n%s", sim->GetChitBag()->GetNewsHistory()->AgeF(), sd.name.c_str() );
+	str.Format( "Date %.2f\n%s", sim->AgeF(), sd.name.c_str() );
 	dateLabel.SetText( str.c_str() );
 
 	CoreScript* coreScript = CoreScript::GetCore(sim->GetChitBag()->GetHomeSector());
@@ -1441,7 +1441,6 @@ void GameScene::CheckGameStage(U32 delta)
 		}
 	}
 	else if (!cs && !startVisible && !endVisible) {
-
 		// Try to find a suitable starting location.
 		Rectangle2I b;
 		Random random;
@@ -1449,26 +1448,34 @@ void GameScene::CheckGameStage(U32 delta)
 
 		b.min.y = b.min.x = (NUM_SECTORS / 2) - NUM_SECTORS / 4;
 		b.max.y = b.max.x = (NUM_SECTORS / 2) + NUM_SECTORS / 4;
-		b.min.x += random.Rand(2);
-		b.min.y += random.Rand(2);
-		b.max.x -= random.Rand(2);
-		b.max.y -= random.Rand(2);
 
-		CArray<const SectorData*, NUM_SECTORS * 4> arr;
+		CArray<SectorInfo, NUM_SECTORS * NUM_SECTORS> arr;
 		for (Rectangle2IEdgeIterator it(b); !it.Done() && arr.HasCap(); it.Next()) {
 			const SectorData* sd = &sim->GetWorldMap()->GetSector(it.Pos());
-			if (sd->HasCore()) {
+			if (sd->HasCore() && arr.HasCap()) {
 				Vector2I sector = ToSector(sd->x, sd->y);
 				CoreScript* cs = CoreScript::GetCore(sector);
-				//GLASSERT(cs);
 				if (cs && cs->PrimaryTeam() == TEAM_NEUTRAL) {
-					arr.Push(sd);
+					Rectangle2I bi = sd->InnerBounds();
+					Rectangle2F b = ToWorld(bi);
+					PlantFilter plantFilter(-1, 2, 3);
+					sim->GetChitBag()->QuerySpatialHash(&chitQuery, b, 0, &plantFilter);
+
+					SectorInfo* si = arr.PushArr(1);
+					si->sectorData = sd;
+					si->bioFlora = chitQuery.Size();
 				}
 			}
 		}
 		if (arr.Size()) {
-			random.ShuffleArray(arr.Mem(), arr.Size());
-			startGameWidget.SetSectorData(arr.Mem(), arr.Size(), sim->GetEngine(), sim->GetChitBag(), this);
+			Sort<SectorInfo, grinliz::CompValue>(arr.Mem(), arr.Size());
+			// FIXME all needlessly complicated
+			CArray<const SectorData*, 16> sdarr;
+			for (int i = 0; i < arr.Size() && sdarr.HasCap(); ++i) {
+				sdarr.Push(arr[i].sectorData);
+			}
+
+			startGameWidget.SetSectorData(sdarr.Mem(), sdarr.Size(), sim->GetEngine(), sim->GetChitBag(), this);
 			gamui2D.PushDialog(startGameWidget.Name());
 
 			CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());

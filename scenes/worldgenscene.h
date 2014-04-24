@@ -25,6 +25,7 @@
 
 class LumosGame;
 class WorldMap;
+class Sim;
 
 class WorldGenScene : public Scene, public ITextureCreator
 {
@@ -48,6 +49,7 @@ private:
 		NUM_ZONES = NZONE*NZONE
 	};
 
+	void SetMapBright(bool bright);
 	void BlendLine( int y );
 
 	WorldGen*	worldGen;
@@ -59,18 +61,25 @@ private:
 		void Clear() { mode=NOT_STARTED; y=0; }
 		enum {
 			NOT_STARTED,
+			GEN_NOTES,
 			WORLDGEN,
 			ROCKGEN_START,
 			ROCKGEN,
+			SIM_START,
+			SIM_TICK,
+			SIM_DONE,
 			DONE
 		};
 		int mode;
 		int y;
 	};
 	GenState genState;
-	gamui::PushButton	okay, cancel, tryAgain;
+	Sim* sim;
+	grinliz::GLString	simStr;
+	gamui::PushButton	okay, cancel;
 	gamui::Image		worldImage;
 	gamui::TextLabel	label;
+	gamui::TextLabel	worldText;
 };
 
 #endif // WORLDGEN_SCENE_INCLUDED

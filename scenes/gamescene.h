@@ -109,6 +109,15 @@ private:
 		NUM_UI_MODES
 	};
 
+	struct SectorInfo
+	{
+		const SectorData* sectorData;
+		int bioFlora;
+
+		// sort descending
+		bool operator<(const SectorInfo& rhs) const { return this->bioFlora > rhs.bioFlora; }
+	};
+
 	struct PickupData {
 		int		chitID;
 		float	distance;	// pather distance

@@ -47,7 +47,7 @@
 
 using namespace grinliz;
 
-LumosChitBag::LumosChitBag( const ChitContext& c) : ChitBag(c), sceneID(-1), sceneData(0)
+LumosChitBag::LumosChitBag(const ChitContext& c, Sim* s) : ChitBag(c), sceneID(-1), sceneData(0), sim(s)
 {
 	memset( mapSpatialHash, 0, sizeof(MapSpatialComponent*)*NUM_SECTORS*NUM_SECTORS);
 	homeSector.Zero();
@@ -915,9 +915,10 @@ bool BattleFilter::Accept(Chit* chit)
 }
 
 
-PlantFilter::PlantFilter(int type, int max)
+PlantFilter::PlantFilter(int type, int min, int max)
 {
 	typeFilter = type;
+	minStage = min;
 	maxStage = max;
 }
 
@@ -932,7 +933,7 @@ bool PlantFilter::Accept( Chit* chit )
 			okay = false;
 		}
 	}
-	if ( okay && stage > maxStage ) {
+	if ( stage < minStage || stage > maxStage ) {
 		okay = false;
 	}
 	return okay;

@@ -59,7 +59,7 @@ TitleScene::TitleScene(LumosGame* game) : Scene(game), lumosGame(game), screenpo
 		testScene[i].SetText( testSceneName[i] );
 	}
 
-	static const char* gameSceneName[NUM_GAME] = { "Generate\nNew", "Load\nEstablished", "Continue" };
+	static const char* gameSceneName[NUM_GAME] = { "Generate\nNew", /*"Load\nEstablished",*/ "Continue" };
 	for( int i=0; i<NUM_GAME; ++i ) {
 		gameScene[i].Init( &gamui2D, lumosGame->GetButtonLook( LumosGame::BUTTON_LOOK_STD ) );
 		gameScene[i].SetText( gameSceneName[i] );
@@ -206,10 +206,9 @@ void TitleScene::Resize()
 	}
 	layout.SetSize( LAYOUT_SIZE_X, LAYOUT_SIZE_Y );
 
-	layout.PosAbs(&gameScene[GENERATE_WORLD], -2, -1);
-	layout.PosAbs(&gameScene[DEFAULT_WORLD], -1, -1);
+	layout.PosAbs(&gameScene[GENERATE_WORLD], -1, -1);
+	//layout.PosAbs(&gameScene[DEFAULT_WORLD], -1, -1);
 	layout.PosAbs(&gameScene[CONTINUE], 0, -1, 2, 1);
-	gameScene[GENERATE_WORLD].SetVisible(visible);
 
 	gameScene[CONTINUE].SetEnabled( false );
 	const char* datPath = game->GamePath( "game", 0, "dat" );
@@ -281,6 +280,7 @@ void TitleScene::ItemTapped( const gamui::UIItem* item )
 	else if ( item == &gameScene[GENERATE_WORLD] ) {
 		game->PushScene( LumosGame::SCENE_WORLDGEN, 0 );
 	}
+	/*
 	else if ( item == &gameScene[DEFAULT_WORLD] ) {
 		const char* datPath = game->GamePath( "save/game_def", 0, "dat" );
 		const char* mapPath = game->GamePath( "save/map_def", 0, "dat" );
@@ -296,6 +296,7 @@ void TitleScene::ItemTapped( const gamui::UIItem* item )
 
 		game->PushScene( LumosGame::SCENE_GAME, 0 );
 	}
+	*/
 	else if ( item == &gameScene[CONTINUE] ) {
 		game->PushScene( LumosGame::SCENE_GAME, 0 );
 	}

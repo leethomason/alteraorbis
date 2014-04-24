@@ -164,8 +164,13 @@ int PlantScript::DoTick( U32 delta )
 	age += delta;
 	ageAtStage += delta;
 
-	int grow = growTimer.Delta( delta );
-	int spore = sporeTimer.Delta( delta );
+	int mult = 1;
+	if (scriptContext->chitBag->GetSim()->AgeF() < 1) {
+		// Double growth and spore during the Age of Fire
+		mult = 2;
+	}
+	int grow = growTimer.Delta( delta*mult );
+	int spore = sporeTimer.Delta( delta*mult );
 	int tick = Min( growTimer.Next(), sporeTimer.Next() );
 
 	if ( !grow && !spore ) {
@@ -266,7 +271,7 @@ int PlantScript::DoTick( U32 delta )
 		const float DIE  = 0.4f;
 
 		float toughness = item->Traits().Toughness();
-		float seconds = float( TIME_TO_GROW ) / 1000.0f;
+		float seconds = float(mult) * float( TIME_TO_GROW ) / 1000.0f;
 
 		if ( distance < GROW * toughness ) {
 
@@ -318,7 +323,9 @@ int PlantScript::DoTick( U32 delta )
 		// Remember that create plant will favor creating
 		// existing plants, so we don't need to specify
 		// what to create.
-		Sim::Instance()->CreatePlant( pos.x+dx, pos.y+dy, -1 );
+		Sim* sim = scriptContext->chitBag->GetSim();
+		GLASSERT(sim);
+		sim->CreatePlant( pos.x+dx, pos.y+dy, -1 );
 	}
 
 	scriptContext->chit->GetRenderComponent()->SetSaturation( item->HPFraction() );

@@ -1,18 +1,27 @@
 #include "worldgenscene.h"
+
 #include "../xegame/xegamelimits.h"
-#include "../game/lumosgame.h"
+
 #include "../engine/surface.h"
+
+#include "../game/lumosgame.h"
+#include "../game/lumoschitbag.h"
 #include "../game/worldinfo.h"
 #include "../game/worldmap.h"
+#include "../game/sim.h"
+
 #include "../script/rockgen.h"
 #include <time.h>
 
 using namespace grinliz;
 using namespace gamui;
 
+// FIXME clock() assumes milliseconds
+
 WorldGenScene::WorldGenScene( LumosGame* game ) : Scene( game )
 {
 	game->InitStd( &gamui2D, &okay, &cancel );
+	sim = 0;
 
 	worldMap = new WorldMap( WorldGen::SIZE, WorldGen::SIZE );
 	pix16 = 0;
@@ -30,10 +39,10 @@ WorldGenScene::WorldGenScene( LumosGame* game ) : Scene( game )
 	worldImage.Init( &gamui2D, atom, false );
 	worldImage.SetSize( 400, 400 );
 
-	label.Init( &gamui2D );
-	tryAgain.Init( &gamui2D, game->GetButtonLook(0) );
-	tryAgain.SetText( "Re-try" );
+	worldText.Init(&gamui2D);
+	worldText.SetBounds(400, 400);
 
+	label.Init( &gamui2D );
 	genState.Clear();
 }
 
@@ -45,6 +54,7 @@ WorldGenScene::~WorldGenScene()
 	delete [] pix16;
 	delete worldGen;
 	delete rockGen;
+	delete sim;
 }
 
 
@@ -57,31 +67,29 @@ void WorldGenScene::Resize()
 	worldImage.SetSize( size, size );
 	worldImage.SetPos( port.UIWidth()*0.5f - size*0.5f, 10.0f );
 
+	worldText.SetPos(worldImage.X(), worldImage.Y());
+	worldText.SetBounds(size, size);
+
 	label.SetPos( worldImage.X(), worldImage.Y() + worldImage.Height() + 16.f );
 
 	LayoutCalculator layout = static_cast<LumosGame*>(game)->DefaultLayout();
-	layout.PosAbs( &tryAgain, 1, -1 );
 }
 
 
 void WorldGenScene::ItemTapped( const gamui::UIItem* item )
 {
 	if ( item == &okay ) {
-		const char* gameXML = game->GamePath( "game", 0, "dat" );
-		const char* mapPNG  = game->GamePath( "map", 0, "png" );
-		const char* mapDAT  = game->GamePath( "map", 0, "dat" );
-
-		game->DeleteFile( gameXML );
-		game->DeleteFile( mapDAT );
-		worldMap->Save( mapDAT );
-		worldMap->SavePNG( mapPNG );
-		game->PopScene();
+		if (genState.mode == GenState::GEN_NOTES) {
+			genState.mode = GenState::WORLDGEN;
+			okay.SetEnabled(false);
+			cancel.SetEnabled(false);
+		}
+		else {
+			game->PopScene();
+		}
 	}
 	else if ( item == &cancel ) {
 		game->PopScene();
-	}
-	else if ( item == &tryAgain ) {
-		genState.Clear();
 	}
 }
 
@@ -136,131 +144,220 @@ void WorldGenScene::BlendLine( int y )
 }
 
 
+void WorldGenScene::SetMapBright(bool b)
+{
+	RenderAtom atom((const void*)(b ? UIRenderer::RENDERSTATE_UI_NORMAL_OPAQUE : UIRenderer::RENDERSTATE_UI_DISABLED), 
+		TextureManager::Instance()->GetTexture("worldGenPreview"),
+		0, 1, 1, 0);	// y-flip: image to texture coordinate conversion
+	worldImage.SetAtom(atom);
+}
+
 void WorldGenScene::DoTick( U32 delta )
 {
 	bool sendTexture = false;
 
-	switch ( genState.mode ) {
+	switch (genState.mode) {
 	case GenState::NOT_STARTED:
-		{
-			okay.SetEnabled( false );
-			tryAgain.SetEnabled( false );
+	{
+		Random random;
+		random.SetSeedFromTime();
+		U32 seed0 = random.Rand();
+		U32 seed1 = delta ^ random.Rand();
 
-			Random random;
-			random.SetSeedFromTime();
-			U32 seed0 = random.Rand();
-			U32 seed1 = delta ^ random.Rand();
-
-			worldGen->StartLandAndWater( seed0, seed1 );
-			genState.y = 0;
-			genState.mode = GenState::WORLDGEN;
-		}
+		worldGen->StartLandAndWater(seed0, seed1);
+		genState.y = 0;
+		genState.mode = GenState::GEN_NOTES;
+	}
 		break;
+
+	case GenState::GEN_NOTES:
+	{
+		SetMapBright(false);
+		okay.SetEnabled(true);
+		cancel.SetEnabled(true);
+
+		worldText.SetText("Welcome to world generation!\n\n"
+			"This process will take a few minutes (grab some water "
+			"or coffee) while the world is generated. This will delete any game in progress. Once generated, "
+			"the world persists and you can play a game, with time passing and domains rising and falling, for "
+			"as long as you wish.\n\n"
+			"World generation plays the 1st Age: The Age of Fire, from date 0.00 to 1.00.\n\n"
+			"Altera's world is shaped by 2 opposing forces: volcanos creating land, and rampaging monsters "
+			"destroying land. There are few monsters during the Age of Fire, so at the end of world generation "
+			"rock will dominate the landscape. Over time, the forces of motion and rock will balance.\n\n"
+			"Tap okay to 'generate' or world or 'cancel' to return to title.");
+	}
+		break;
+
 	case GenState::WORLDGEN:
-		{
-			clock_t start = clock();
-			while( ( genState.y < WorldGen::SIZE) && (clock() - start < 30) ) {
-				for( int i=0; i<16; ++i ) {
-					worldGen->DoLandAndWater( genState.y++ );
-				}
+	{
+		worldText.SetText("");
+		clock_t start = clock();
+		while ((genState.y < WorldGen::SIZE) && (clock() - start < 30)) {
+			for (int i = 0; i < 16; ++i) {
+				worldGen->DoLandAndWater(genState.y++);
 			}
-			CStr<16> str;
-			str.Format( "Land: %d%%", (int)(100.0f*(float)genState.y/(float)WorldGen::SIZE) );
-			label.SetText( str.c_str() );
-			GLString name;
-
-			if ( genState.y == WorldGen::SIZE ) {
-				bool okay = worldGen->EndLandAndWater( 0.4f );
-				if ( okay ) {
-					worldGen->WriteMarker();
-					SectorData* sectorData = worldMap->GetWorldInfoMutable()->SectorDataMemMutable();
-					Random random;
-					random.SetSeedFromTime();;
-
-					worldGen->CutRoads( random.Rand(), sectorData );
-					worldGen->ProcessSectors( random.Rand(), sectorData );
-
-					GLString name;
-					GLString postfix;
-
-					for( int j=0; j<NUM_SECTORS; ++j ) {
-						for( int i=0; i<NUM_SECTORS; ++i ) {
-							name = "sector";
-							// Keep the names a little short, so that they don't overflow UI.
-							const char* n = static_cast<LumosGame*>(game)->GenName( "sector", random.Rand(), 4, 7 );
-							GLASSERT( n );
-							if ( n ) {
-								name = n;
-							}
-							GLASSERT( NUM_SECTORS == 16 );	// else the printing below won't be correct.
-							postfix = "";
-							postfix.Format( "-%x%x", i, j );
-							name += postfix;
-							sectorData[j*NUM_SECTORS+i].name = StringPool::Intern( name.c_str() );
-						}
-					}
-
-					sendTexture = true;
-					genState.mode = GenState::ROCKGEN_START;
-				}
-				else {
-					genState.y = 0;
-					genState.mode = GenState::WORLDGEN;
-				}
-			}	
 		}
+		CStr<16> str;
+		str.Format("Land: %d%%", (int)(100.0f*(float)genState.y / (float)WorldGen::SIZE));
+		label.SetText(str.c_str());
+		GLString name;
+
+		if (genState.y == WorldGen::SIZE) {
+			SetMapBright(true);
+			bool okay = worldGen->EndLandAndWater(0.4f);
+			if (okay) {
+				worldGen->WriteMarker();
+				SectorData* sectorData = worldMap->GetWorldInfoMutable()->SectorDataMemMutable();
+				Random random;
+				random.SetSeedFromTime();;
+
+				worldGen->CutRoads(random.Rand(), sectorData);
+				worldGen->ProcessSectors(random.Rand(), sectorData);
+
+				GLString name;
+				GLString postfix;
+
+				for (int j = 0; j < NUM_SECTORS; ++j) {
+					for (int i = 0; i < NUM_SECTORS; ++i) {
+						name = "sector";
+						// Keep the names a little short, so that they don't overflow UI.
+						const char* n = static_cast<LumosGame*>(game)->GenName("sector", random.Rand(), 4, 7);
+						GLASSERT(n);
+						if (n) {
+							name = n;
+						}
+						GLASSERT(NUM_SECTORS == 16);	// else the printing below won't be correct.
+						postfix = "";
+						postfix.Format("-%x%x", i, j);
+						name += postfix;
+						sectorData[j*NUM_SECTORS + i].name = StringPool::Intern(name.c_str());
+					}
+				}
+
+				sendTexture = true;
+				genState.mode = GenState::ROCKGEN_START;
+			}
+			else {
+				genState.y = 0;
+				genState.mode = GenState::WORLDGEN;
+			}
+		}
+	}
 		break;
 
 	case GenState::ROCKGEN_START:
-		{
-			Random random;
-			random.SetSeedFromTime();
-			rockGen->StartCalc( random.Rand() );
-			genState.y = 0;
-			genState.mode = GenState::ROCKGEN;
-		}
+	{
+		Random random;
+		random.SetSeedFromTime();
+		rockGen->StartCalc(random.Rand());
+		genState.y = 0;
+		genState.mode = GenState::ROCKGEN;
+	}
 		break;
 
 	case GenState::ROCKGEN:
-		{
-			clock_t start = clock();
-			while( ( genState.y < WorldGen::SIZE) && (clock() - start < 30) ) {
-				for( int i=0; i<16; ++i ) {
-					rockGen->DoCalc( genState.y );
-					genState.y++;
-				}
-			}
-			CStr<16> str;
-			str.Format( "Rock: %d%%", (int)(100.0f*(float)genState.y/(float)WorldGen::SIZE) );
-			label.SetText( str.c_str() );
-
-			if ( genState.y == WorldGen::SIZE ) {
-				rockGen->EndCalc();
-
-				Random random;
-				random.SetSeedFromTime();
-
-				rockGen->DoThreshold( random.Rand(), 0.35f, RockGen::NOISE_HEIGHT );
-				for( int y=0; y<WorldGen::SIZE; ++y ) {
-					BlendLine( y );
-				}
-				sendTexture = true;
-				genState.Clear();
-				genState.mode = GenState::DONE;
-				label.SetText( "Done" );
+	{
+		clock_t start = clock();
+		while ((genState.y < WorldGen::SIZE) && (clock() - start < 30)) {
+			for (int i = 0; i < 16; ++i) {
+				rockGen->DoCalc(genState.y);
+				genState.y++;
 			}
 		}
+		CStr<16> str;
+		str.Format("Rock: %d%%", (int)(100.0f*(float)genState.y / (float)WorldGen::SIZE));
+		label.SetText(str.c_str());
+
+		if (genState.y == WorldGen::SIZE) {
+			rockGen->EndCalc();
+
+			Random random;
+			random.SetSeedFromTime();
+
+			rockGen->DoThreshold(random.Rand(), 0.35f, RockGen::NOISE_HEIGHT);
+			for (int y = 0; y < WorldGen::SIZE; ++y) {
+				BlendLine(y);
+			}
+			sendTexture = true;
+			genState.Clear();
+			genState.mode = GenState::SIM_START;
+			label.SetText("100%");
+		}
+	}
+		break;
+
+	case GenState::SIM_START:
+	{
+		SetMapBright(false);
+		LumosGame* game = this->GetGame()->ToLumosGame();
+		sim = new Sim(game);
+		const char* datPath = game->GamePath("map", 0, "dat");
+		sim->Load(datPath, 0);
+
+		sim->EnableSpawn(false);
+		genState.mode = GenState::SIM_TICK;
+	}
+		break;
+
+	case GenState::SIM_TICK:
+	{
+		clock_t start = clock();
+		while (clock() - start < 100) {
+			for (int i = 0; i < 10; ++i) {
+				sim->DoTick(100);
+			}
+		}
+		float age = sim->AgeF();
+		int typeCount[NUM_PLANT_TYPES];
+		for (int i = 0; i<NUM_PLANT_TYPES; ++i) {
+			typeCount[i] = 0;
+			for (int j = 0; j<MAX_PLANT_STAGES; ++j) {
+				typeCount[i] += sim->GetChitBag()->census.plants[i][j];
+			}
+		}
+
+		simStr.Format("SIM:\nAge=%.2f\n\nOrbstalk=%d\nTree=%d\nFern=%d\nCrystalGrass=%d\nBamboo=%d\nShroom=%d\nSunBloom=%d\nMoonBloom=%d\nMOBs=%d",
+					  age, 
+					  typeCount[0], typeCount[1], typeCount[2], typeCount[3], typeCount[4], typeCount[5], typeCount[6], typeCount[7],
+					  sim->GetChitBag()->census.normalMOBs );
+		worldText.SetText(simStr.c_str());
+
+		if (age > 0.96f) {
+			sim->EnableSpawn(true);
+		}
+
+		if (age > 1) {
+			genState.mode = GenState::SIM_DONE;
+		}
+	}
+		break;
+
+	case GenState::SIM_DONE:
+	{
+		const char* datPath = game->GamePath("map", 0, "dat");
+		const char* gamePath = game->GamePath("game", 0, "dat");
+		const char* mapPNG = game->GamePath("map", 0, "png");
+		const char* mapDAT = game->GamePath("map", 0, "dat");
+
+		worldMap->Save(mapDAT);
+		worldMap->SavePNG(mapPNG);
+		sim->Save(datPath, gamePath);
+
+		genState.mode = GenState::DONE;
+		simStr.AppendFormat("\n\nDONE!");
+		worldText.SetText(simStr.c_str());
+	}
 		break;
 
 	case GenState::DONE:
-		{
-			okay.SetEnabled( true );
-			tryAgain.SetEnabled( true );
-		}
+	{
+		okay.SetEnabled(true);
+	}
 		break;
 
 	default:
-		GLASSERT( 0 );
+		GLASSERT(0);
 		break;
 	}
 

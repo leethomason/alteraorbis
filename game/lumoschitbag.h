@@ -28,6 +28,7 @@ class CoreScript;
 class LumosGame;
 class MapSpatialComponent;
 class SceneData;
+class Sim;
 
 class BuildingFilter : public IChitAccept
 {
@@ -89,12 +90,13 @@ public:
 class PlantFilter : public IChitAccept
 {
 public:
-	PlantFilter( int type=-1, int maxStage=3 );
+	PlantFilter( int type=-1, int minStage=0, int maxStage=3 );
 	virtual bool Accept( Chit* chit );
 	virtual int  Type() { return MAP; }
 
 private:
 	int typeFilter;
+	int minStage;
 	int maxStage;
 };
 
@@ -183,11 +185,13 @@ private:
 	typedef ChitBag super;
 
 public:
-	LumosChitBag( const ChitContext& );
+	LumosChitBag( const ChitContext&, Sim* );
 	virtual ~LumosChitBag();
 
 	virtual LumosChitBag* ToLumos() { return this; }
 	virtual void Serialize( const ComponentFactory* factory, XStream* xs );
+	// Can be null - not required
+	Sim* GetSim() const { return sim; }
 
 	// Buildings can't move - no update.
 	void AddToBuildingHash( MapSpatialComponent* chit, int x, int y );
@@ -292,6 +296,7 @@ private:
 	SceneData*					sceneData;
 	grinliz::Random				random;	// use the chit version, if possible, generally want to avoid high level random
 	grinliz::Vector2I			homeSector;
+	Sim*						sim;	// if part of a simulation. can be null.
 
 	grinliz::CDynArray<Chit*>	inUseArr;
 	grinliz::CDynArray<Chit*>	chitList;

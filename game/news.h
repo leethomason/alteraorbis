@@ -101,11 +101,6 @@ public:
 	void DoTick( U32 delta );
 	void Serialize( XStream* xs );
 
-	// Time
-	int    AgeI() const { return date / AGE_IN_MSEC; }
-	double AgeD() const { return double(date) / double(AGE_IN_MSEC); }
-	float  AgeF() const { return float(AgeD()); }
-
 	// Returns on important events
 	int NumNews() const { return events.Size(); }
 	const NewsEvent& News( int i ) { GLASSERT( i >= 0 && i < events.Size() ); return events[i]; }
@@ -123,6 +118,10 @@ public:
 	const NewsEvent** Find( int itemID, bool includeSecond, int* num, Data* data );
 
 private:
+	// Time
+	int    AgeI() const { return date / AGE_IN_MSEC; }
+	double AgeD() const { return double(date) / double(AGE_IN_MSEC); }
+	float  AgeF() const { return float(AgeD()); }
 
 	U32 date;
 	ChitBag* chitBag;

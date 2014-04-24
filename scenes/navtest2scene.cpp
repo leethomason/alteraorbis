@@ -63,7 +63,7 @@ NavTest2Scene::NavTest2Scene( LumosGame* game, const NavTest2SceneData* _data ) 
 
 	ChitContext context;
 	context.Set( engine, map, 0 );
-	chitBag = new LumosChitBag( context );
+	chitBag = new LumosChitBag( context, 0 );
 	map->AttachEngine( 0, chitBag );	// connect up the pather, but we do the render.
 
 	LoadMap();

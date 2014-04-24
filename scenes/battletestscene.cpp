@@ -218,7 +218,7 @@ void BattleTestScene::LoadMap()
 
 	ChitContext context;
 	context.Set( engine, map, game->ToLumosGame() );
-	chitBag = new LumosChitBag( context );
+	chitBag = new LumosChitBag( context, 0 );
 
 	grinliz::CDynArray<Vector2I> blocks, features, wp;
 	map->InitPNG( "./res/testarena32.png", &blocks, &wp, &features );

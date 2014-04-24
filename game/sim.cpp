@@ -52,6 +52,7 @@ Sim* StackedSingleton<Sim>::instance			= 0;
 Sim::Sim( LumosGame* g ) : minuteClock( 60*1000 ), secondClock( 1000 ), volcTimer( 10*1000 )
 {
 	lumosGame = g;
+	spawnEnabled = true;
 	Screenport* port = lumosGame->GetScreenportMutable();
 	const gamedb::Reader* database = lumosGame->GetDatabase();
 
@@ -66,7 +67,7 @@ Sim::Sim( LumosGame* g ) : minuteClock( 60*1000 ), secondClock( 1000 ), volcTime
 
 	ChitContext context;
 	context.Set( engine, worldMap, g );
-	chitBag = new LumosChitBag( context );
+	chitBag = new LumosChitBag( context, this );
 	chitBag->AddListener(this);
 
 	worldMap->AttachEngine( engine, chitBag );
@@ -76,7 +77,6 @@ Sim::Sim( LumosGame* g ) : minuteClock( 60*1000 ), secondClock( 1000 ), volcTime
 	currentVisitor = 0;
 
 	random.SetSeedFromTime();
-	PushInstance( this );
 
 	DumpModel();
 }
@@ -84,7 +84,6 @@ Sim::Sim( LumosGame* g ) : minuteClock( 60*1000 ), secondClock( 1000 ), volcTime
 
 Sim::~Sim()
 {
-	PopInstance( this );
 	delete visitors;
 	delete weather;
 	delete reserveBank;
@@ -97,6 +96,10 @@ Sim::~Sim()
 	delete itemDB;
 }
 
+
+int    Sim::AgeI() const { return chitBag->AbsTime() / AGE_IN_MSEC; }
+double Sim::AgeD() const { return double(chitBag->AbsTime()) / double(AGE_IN_MSEC); }
+float  Sim::AgeF() const { return float(AgeD()); }
 
 void Sim::DumpModel()
 {
@@ -442,7 +445,7 @@ void Sim::DoTick( U32 delta )
 	static const int NUM_VOLC = MAX_MAP_SIZE*MAX_MAP_SIZE / (VOLC_DIAM*VOLC_DIAM);
 	int MSEC_TO_VOLC = AGE_IN_MSEC / NUM_VOLC;
 
-	int age = chitBag->GetNewsHistory()->AgeI();
+	int age = AgeI();
 
 	// NOT Age of Fire:
 	volcTimer.SetPeriod( (age > 1 ? MSEC_TO_VOLC*4 : MSEC_TO_VOLC) + random.Rand(1000) );
@@ -474,11 +477,12 @@ void Sim::DoTick( U32 delta )
 			}
 		}
 
-		if ( visitorData[currentVisitor].id == 0 ) {
-			Chit* chit = chitBag->NewVisitor( currentVisitor );
-			visitorData[currentVisitor].id = chit->ID();
+		if (this->SpawnEnabled()) {
+			if (visitorData[currentVisitor].id == 0) {
+				Chit* chit = chitBag->NewVisitor(currentVisitor);
+				visitorData[currentVisitor].id = chit->ID();
+			}
 		}
-
 		currentVisitor++;
 		if ( currentVisitor == Visitors::NUM_VISITORS ) {
 			currentVisitor = 0;

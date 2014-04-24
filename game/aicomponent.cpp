@@ -677,7 +677,7 @@ bool AIComponent::DoStand( const ComponentSet& thisComp, U32 time )
 			Vector2F pos = thisComp.spatial->GetPosition2D();
 			// Note that currently only support eating stage 0-1 plants.
 			CChitArray plants;
-			PlantFilter plantFilter( -1, MAX_PASSABLE_PLANT_STAGE );
+			PlantFilter plantFilter( -1, 0, MAX_PASSABLE_PLANT_STAGE );
 
 			parentChit->GetChitBag()->QuerySpatialHash( &plants, pos, 0.4f, 0, &plantFilter );
 			if ( !plants.Empty() ) {
@@ -1205,7 +1205,7 @@ Vector2F AIComponent::ThinkWanderFlock( const ComponentSet& thisComp )
 	r.Outset( PLANT_AWARE );
 
 	CChitArray plants;
-	PlantFilter plantFilter( -1, MAX_PASSABLE_PLANT_STAGE );
+	PlantFilter plantFilter( -1, 0, MAX_PASSABLE_PLANT_STAGE );
 	parentChit->GetChitBag()->QuerySpatialHash( &plants, r, 0, &plantFilter );
 	for( int i=0; i<plants.Size() && i<NPLANTS; ++i ) {
 		pos.Push( plants[i]->GetSpatialComponent()->GetPosition2D() );
@@ -1454,7 +1454,7 @@ bool AIComponent::ThinkWanderEatPlants( const ComponentSet& thisComp )
 		// Note that currently only support eating stage 0-1 plants.
 		CChitArray plants;
 	
-		PlantFilter plantFilter( -1, MAX_PASSABLE_PLANT_STAGE );
+		PlantFilter plantFilter( -1, 0, MAX_PASSABLE_PLANT_STAGE );
 		parentChit->GetChitBag()->QuerySpatialHash( &plants, thisComp.spatial->GetPosition2D(), PLANT_AWARE, 0, &plantFilter );
 
 		Vector2F plantPos =  { 0, 0 };
