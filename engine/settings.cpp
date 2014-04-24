@@ -50,6 +50,7 @@ SettingsManager::SettingsManager( const char* savepath )
 	audioOn = true;
 	debugGLCalls = false;
 	debugUI = false;
+	spawnDate = 0.90f;
 }
 
 
@@ -115,6 +116,7 @@ void SettingsManager::ReadAttributes( const XMLElement* root )
 		const XMLElement* gameElement = root->FirstChildElement("Game");
 		if (gameElement) {
 			gameElement->QueryAttribute("audioOn", &audioOn);
+			gameElement->QueryAttribute("spawnDate", &spawnDate);
 		}
 		const XMLElement* debugElement = root->FirstChildElement("Debug");
 		if (debugElement) {

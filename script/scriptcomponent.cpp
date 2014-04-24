@@ -33,7 +33,7 @@ ScriptComponent::ScriptComponent( const ComponentFactory* f ) : script( 0 ), fac
 {
 	IScript* script = 0;
 	if ( name == "VolcanoScript" ) {
-		script = new VolcanoScript( 0 );
+		script = new VolcanoScript();
 	}
 	else if ( name == "PlantScript" ) {
 		script = new PlantScript( 0 );

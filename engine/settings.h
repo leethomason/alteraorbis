@@ -37,6 +37,7 @@ public:
 	void SetAudioOn( bool value );
 	bool DebugGLCalls() const			{ return debugGLCalls; }
 	bool DebugUI() const				{ return debugUI;  }
+	float SpawnDate() const				{ return spawnDate; }
 
 protected:
 	SettingsManager( const char* path );
@@ -53,6 +54,7 @@ private:
 	bool audioOn;
 	bool debugGLCalls;
 	bool debugUI;
+	float spawnDate;	// would like to be 0.20, but in interest of performance, 0.90 is used. On a debug 0.98 may be correct.
 	grinliz::GLString path;
 };
 

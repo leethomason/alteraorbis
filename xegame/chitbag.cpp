@@ -183,6 +183,12 @@ void ChitBag::QueueDelete( Chit* chit )
 }
 
 
+bool ChitBag::IsQueuedForDelete(Chit* chit)
+{
+	return deleteList.Find(chit->ID()) >= 0;
+}
+
+
 void ChitBag::QueueRemoveAndDeleteComponent( Component* comp )
 {
 	CompID* c = compDeleteList.PushArr(1);

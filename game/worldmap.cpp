@@ -720,6 +720,7 @@ void WorldMap::SetRock( int x, int y, int h, bool magma, int rockType )
 	}
 
 	if ( h == -1 ) {
+		// Set to default.
 		if (    ( iMapGridUse && !iMapGridUse->MapGridUse( x, y ))
 			 || ( !iMapGridUse ) )
 		{
@@ -730,6 +731,11 @@ void WorldMap::SetRock( int x, int y, int h, bool magma, int rockType )
 		}
 	}
 	else if ( h == -2 ) {
+		// Loading!
+		if (was.Magma()) {
+			GLASSERT(magmaGrids.Find(vec) < 0);
+			magmaGrids.Push(vec);
+		}
 		h     = grid[index].RockHeight();
 		if ( iMapGridUse ) {
 			GLASSERT( iMapGridUse->MapGridUse( x, y ) == 0 );
@@ -739,8 +745,7 @@ void WorldMap::SetRock( int x, int y, int h, bool magma, int rockType )
 		// Essentially bail if the mapgrid is in use.
 		if ( iMapGridUse ) {
 			if ( iMapGridUse->MapGridUse( x, y )) {
-				GLASSERT( was.RockHeight() == 0 );
-				return;
+				h = 0;
 			}
 		}
 	}
@@ -757,18 +762,18 @@ void WorldMap::SetRock( int x, int y, int h, bool magma, int rockType )
 	if ( was.IsPassable() != wg.IsPassable() ) {
 		ResetPather( x, y );
 	}
+	if (was.Magma() != wg.Magma()) {
 
-	if ( was.Magma() != wg.Magma() ) {
-		if ( was.Magma() ) {
-			// Magma going away.
-			int i = magmaGrids.Find( vec );
-			if ( i >= 0 ) {
-				magmaGrids.Remove( i );
-			}
+		if (wg.Magma()) {
+			GLASSERT(magmaGrids.Find(vec) < 0);
+			magmaGrids.Push(vec);
 		}
 		else {
-			// Magma adding.
-			magmaGrids.Push( vec );
+			int i = magmaGrids.Find(vec);
+			GLASSERT(i >= 0);
+			if (i >= 0) {
+				magmaGrids.SwapRemove(i);
+			}
 		}
 	}
 }
@@ -1892,7 +1897,7 @@ void WorldMap::PrepVoxels( const SpaceTree* spaceTree )
 		voxelVertexVBO = new GPUVertexBuffer( 0, sizeof(Vertex)*MAX_VOXEL_QUADS*4 );
 	}
 	voxelBuffer.Clear();
-	
+
 	const CArray<Rectangle2I, SpaceTree::MAX_ZONES>& zones = spaceTree->Zones();
 	for( int i=0; i<zones.Size(); ++i ) {
 		Rectangle2I b = zones[i];
@@ -1933,6 +1938,7 @@ void WorldMap::PrepVoxels( const SpaceTree* spaceTree )
 					// Draw all walls:
 					wall[0] = wall[1] = wall[2] = wall[3] = 0;
 					PushVoxel( id, (float)x, (float)y, h, wall ); 
+					Vector2I v = { x, y };
 				}
 				else if ( wg.RockHeight() ) {
 					id = (wg.RockType() == WorldGrid::ROCK) ? ROCK : ICE;

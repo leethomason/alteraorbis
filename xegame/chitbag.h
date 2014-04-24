@@ -150,6 +150,7 @@ public:
 	void QueueDelete( Chit* chit );
 	void QueueRemoveAndDeleteComponent( Component* comp );
 	void DeferredDelete( Component* comp );
+	bool IsQueuedForDelete(Chit* chit);
 
 	// passes ownership
 	void QueueEvent( const ChitEvent& event )			{ events.Push( event ); }

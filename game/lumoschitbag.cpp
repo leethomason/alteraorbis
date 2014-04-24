@@ -558,9 +558,14 @@ Chit* LumosChitBag::NewGoldChit( const grinliz::Vector3F& pos, int amount )
 	ItemNameFilter goldFilter( IStringConst::gold, IChitAccept::MOB );
 	this->QuerySpatialHash( &chitList, v2, 1.0f, 0, &goldFilter );
 	Chit* chit = 0;
-	if ( chitList.Size() ) {
-		chit = chitList[0];
+
+	for (int i = 0; i < chitList.Size(); ++i) {
+		if (chitList[i] && !IsQueuedForDelete(chitList[i])) {
+			chit = chitList[i];
+			break;
+		}
 	}
+
 	if ( !chit ) {
 		chit = this->NewChit();
 		chit->Add( new SpatialComponent());

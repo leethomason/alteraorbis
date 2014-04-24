@@ -301,7 +301,7 @@ public:
 	Rectangle2IEdgeIterator( const Rectangle2I& r ) : bounds(r), point(r.min), dx(1), dy(0) {}
 
 	void Begin()	{ dx = 1; dy = 0; point = bounds.min; }
-	bool Done()		{ return dy == -1 && point == bounds.min; }
+	bool Done()		{ return bounds.Height() <= 1 || bounds.Width() <= 1 || (dy == -1 && point == bounds.min); }
 	void Next()		{ 
 		point.x += dx; point.y += dy; 
 		if ( !bounds.Contains( point )) {

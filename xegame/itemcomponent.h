@@ -127,8 +127,6 @@ private:
 	void NameItem( GameItem* item );	// if conditions met, give the item a name.
 	void NewsDestroy( const GameItem* item );	// generate destroy message
 
-	CTicker slowTick;
-
 	// Not serialized:
 	bool				hardpointsModified;
 	int					lastDamageID;			// the last thing that hit us.
@@ -136,6 +134,7 @@ private:
 	IMeleeWeaponItem*	melee;		// may be 0, active, or neither
 	IWeaponItem*		reserve;	// remember: always held
 	IShield*			shield;
+	CTicker				slowTick;
 
 	// The first item in this array is what this *is*. The following items are what is being carried.
 	//

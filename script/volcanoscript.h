@@ -17,6 +17,7 @@
 #define VOLCANO_SCRIPT_INCLUDED
 
 #include "scriptcomponent.h"
+#include "../xegame/cticker.h"
 #include "../grinliz/glvector.h"
 
 class WorldMap;
@@ -24,7 +25,7 @@ class WorldMap;
 class VolcanoScript : public IScript
 {
 public:
-	VolcanoScript( int maxSize );
+	VolcanoScript();
 	virtual ~VolcanoScript()			{}
 
 	virtual void Init();
@@ -35,9 +36,14 @@ public:
 	virtual int DoTick( U32 delta );
 	virtual const char* ScriptName() { return "VolcanoScript"; }
 
+	enum {
+		MAX_RAD = 6
+	};
+
 private:
+	CTicker		spreadTicker;
+	int			rad;
 	int			size;
-	int			maxSize;
 };
 
 

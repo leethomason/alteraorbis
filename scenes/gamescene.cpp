@@ -1469,6 +1469,9 @@ void GameScene::CheckGameStage(U32 delta)
 		}
 		if (arr.Size()) {
 			Sort<SectorInfo, grinliz::CompValue>(arr.Mem(), arr.Size());
+			// Randomize the first 16 - it isn't all about bioflora
+			random.ShuffleArray(arr.Mem(), Min(arr.Size(), 16));
+
 			// FIXME all needlessly complicated
 			CArray<const SectorData*, 16> sdarr;
 			for (int i = 0; i < arr.Size() && sdarr.HasCap(); ++i) {

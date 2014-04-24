@@ -556,6 +556,7 @@ void ItemComponent::OnChitEvent( const ChitEvent& event )
 
 			ChitMsg msg( ChitMsg::CHIT_DAMAGE, 0, &info );
 			parentChit->SendMessage( msg );
+			parentChit->SetTickNeeded();
 		}
 	}
 }

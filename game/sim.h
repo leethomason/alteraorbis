@@ -74,7 +74,7 @@ public:
 
 	// Set all rock to the nominal values
 	void SetAllRock();
-	void CreateVolcano( int x, int y, int size );
+	void CreateVolcano( int x, int y );
 	// type=-1 will scan for natural plant choice
 	Chit* CreatePlant( int x, int y, int type );
 	

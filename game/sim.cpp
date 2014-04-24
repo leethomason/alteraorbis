@@ -440,7 +440,7 @@ void Sim::DoTick( U32 delta )
 	int volcano    = volcTimer.Delta( delta );
 
 	// Age of Fire. Needs lots of volcanoes to seed the world.
-	static const int VOLC_RAD = 9;
+	static const int VOLC_RAD = VolcanoScript::MAX_RAD;
 	static const int VOLC_DIAM = VOLC_RAD*2+1;
 	static const int NUM_VOLC = MAX_MAP_SIZE*MAX_MAP_SIZE / (VOLC_DIAM*VOLC_DIAM);
 	int MSEC_TO_VOLC = AGE_IN_MSEC / NUM_VOLC;
@@ -460,7 +460,7 @@ void Sim::DoTick( U32 delta )
 				Vector2I sector = ToSector( pos );
 				CoreScript* cs = CoreScript::GetCore( sector );
 				if ( cs && ( !cs->InUse() || age == 0 )) {
-					CreateVolcano( x, y, VOLC_RAD );
+					CreateVolcano( x, y );
 				}
 				break;
 			}
@@ -645,7 +645,7 @@ void Sim::SetAllRock()
 }
 
 
-void Sim::CreateVolcano( int x, int y, int size )
+void Sim::CreateVolcano( int x, int y )
 {
 	const SectorData& sd = worldMap->GetSector( x, y );
 	if ( sd.ports == 0 ) {
@@ -655,7 +655,7 @@ void Sim::CreateVolcano( int x, int y, int size )
 
 	Chit* chit = chitBag->NewChit();
 	chit->Add( new SpatialComponent() );
-	chit->Add( new ScriptComponent( new VolcanoScript( size )));
+	chit->Add( new ScriptComponent( new VolcanoScript()));
 
 	chit->GetSpatialComponent()->SetPosition( (float)x+0.5f, 0.0f, (float)y+0.5f );
 }

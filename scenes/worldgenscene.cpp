@@ -3,6 +3,7 @@
 #include "../xegame/xegamelimits.h"
 
 #include "../engine/surface.h"
+#include "../engine/settings.h"
 
 #include "../game/lumosgame.h"
 #include "../game/lumoschitbag.h"
@@ -185,7 +186,7 @@ void WorldGenScene::DoTick( U32 delta )
 			"Altera's world is shaped by 2 opposing forces: volcanos creating land, and rampaging monsters "
 			"destroying land. There are few monsters during the Age of Fire, so at the end of world generation "
 			"rock will dominate the landscape. Over time, the forces of motion and rock will balance.\n\n"
-			"Tap okay to 'generate' or world or 'cancel' to return to title.");
+			"Tap 'okay' to generate or world or 'cancel' to return to title.");
 	}
 		break;
 
@@ -323,7 +324,7 @@ void WorldGenScene::DoTick( U32 delta )
 					  sim->GetChitBag()->census.normalMOBs );
 		worldText.SetText(simStr.c_str());
 
-		if (age > 0.96f) {
+		if (age > SettingsManager::Instance()->SpawnDate()) {
 			sim->EnableSpawn(true);
 		}
 

@@ -18,10 +18,10 @@ using namespace tinyxml2;
 
 static const U32 SPREAD_RATE = 4000;
 
-VolcanoScript::VolcanoScript( int p_size )
+VolcanoScript::VolcanoScript() : spreadTicker(SPREAD_RATE)
 {
-	maxSize = p_size;
 	size = 0;
+	rad = 0;
 }
 
 
@@ -33,7 +33,6 @@ void VolcanoScript::Init()
 	GLASSERT( sc );
 	if ( sc ) {
 		Vector2F pos = sc->GetPosition2D();
-		//GLOUTPUT(( "VolcanoScript::Init. pos=%d,%d\n", (int)pos.x, (int)pos.y ));
 		context->worldMap->SetMagma( (int)pos.x, (int)pos.y, true );
 
 		NewsEvent event( NewsEvent::VOLCANO, pos );
@@ -46,7 +45,8 @@ void VolcanoScript::Serialize( XStream* xs )
 {
 	XarcOpen( xs, "VolcanoScript" );
 	XARC_SER( xs, size );
-	XARC_SER( xs, maxSize );
+	XARC_SER(xs, rad);
+	spreadTicker.Serialize(xs, "SpreadTicker");
 	XarcClose( xs );
 }
 
@@ -57,59 +57,63 @@ int VolcanoScript::DoTick( U32 delta )
 	SpatialComponent* sc = scriptContext->chit->GetSpatialComponent();
 	WorldMap* worldMap = context->worldMap;
 
-	Vector2I pos = { 0,  0 };
+	Vector2I pos2i = { 0,  0 };
 	GLASSERT( sc );
 	if ( sc ) {
-		Vector2F posF = sc->GetPosition2D();
-		pos.Set( (int)posF.x, (int)posF.y );
+		pos2i = sc->GetPosition2DI();
 	}
 	else {
 		scriptContext->chit->QueueDelete();
 	}
 
-	Rectangle2I b = worldMap->Bounds();
-	int rad = scriptContext->time / SPREAD_RATE;
-	if ( rad > size ) {
+	int n = spreadTicker.Delta(delta);
+	for (int i = 0; i<n; ++i) {
+		Rectangle2I b = worldMap->Bounds();
+		++rad;
+
 		// Cool (and set) the inner rectangle, make the new rectangle magma.
 		// The origin stays magma until we're done.
-		size = Min( rad-1, maxSize );
+		size = Min( rad, (int)MAX_RAD );
 		
 		Rectangle2I r;
-		r.min = r.max = pos;
+		r.min = r.max = pos2i;
 		r.Outset( size );
 
-		for( int y=r.min.y; y<=r.max.y; ++y ) {
-			for( int x=r.min.x; x<=r.max.x; ++x ) {
-				if ( b.Contains( x, y ) ) {
-					worldMap->SetMagma( x, y, false );
-					const WorldGrid& g = worldMap->GetWorldGrid( x, y );
-					// Does lots of error checking. Can set without checks:
-					worldMap->SetRock( x, y, g.NominalRockHeight(), false, 0 );
-				}
-			}
-		}
+		r.DoIntersection(b);
 
-		size = rad;
-
-		if ( rad < maxSize ) {
-			worldMap->SetMagma( pos.x, pos.y, true );
-			for( int y=r.min.y; y<=r.max.y; ++y ) {
-				for( int x=r.min.x; x<=r.max.x; ++x ) {
-					if ( b.Contains( x, y )) {
-						if ( y == r.min.y || y == r.max.y || x == r.min.x || x == r.max.x ) {
-							worldMap->SetMagma( x, y, true );
-						}
-					}
-				}
+		if (rad > MAX_RAD) {
+			// Everything off.
+			for (Rectangle2IIterator it(r); !it.Done(); it.Next()) {
+				worldMap->SetMagma(it.Pos().x, it.Pos().y, false);
 			}
 		}
 		else {
-			scriptContext->chit->QueueDelete();
+			// Inner off.
+			// Center on.
+			// Edge on.
+
+			// Inner off.
+			Rectangle2I rSmall = r;
+			r.Outset(-1);
+			for (Rectangle2IIterator it(rSmall); !it.Done(); it.Next()) {
+				worldMap->SetMagma(it.Pos().x, it.Pos().y, false);
+			}
+
+			// Center on.
+			worldMap->SetRock(pos2i.x, pos2i.y, -1, true, 0);
+
+			// Edge on.
+			for (Rectangle2IEdgeIterator it(r); !it.Done(); it.Next()) {
+				worldMap->SetRock(it.Pos().x, it.Pos().y, -1, true, 0);
+			}
 		}
 	}
-	// Only need to be called back as often as it spreads,
-	// but give a little more resolution for loading, etc.
-	return SPREAD_RATE / 2 + scriptContext->chit->random.Rand( SPREAD_RATE / 4 );
+	
+	if (rad > MAX_RAD) {
+		scriptContext->chit->QueueDelete();
+		return 0;
+	}
+	return spreadTicker.Next();
 }
 
 

@@ -1,5 +1,5 @@
+- volcanos get left behind
 - batching troubles - still lots of small batches going in
-x "blue wall" bug. Alpha present. Not screen aligned. Noise in particles??
 - resize and colors are wrong bug
 - GT: ui to show idle and busy workers
 - redo AI utility to be based on a set of curves
@@ -17,11 +17,9 @@ x "blue wall" bug. Alpha present. Not screen aligned. Noise in particles??
 - 32bit texture support
 - see monsters when you click on them
 - Click through of disabled buttons is surprising
-x none vs. clear is wonky
 - colors of buildings (not enough)
 - colors of faces (too dark)
 - scripts are pluggable now: should Bar be a plugged-in script?
-x MOBs should attack buildings
 - general extension of the effect of tech on buildings, and morale on MOBs
 - hints about what you need to build
 - bar-market-forge need to look more distinct
@@ -58,7 +56,6 @@ x system for gamui to track models
 - re-do glow
 - melee is way too powerful and wide effect
 - option to flip right mouse behavior - pan/zoom by default. ctrl reverse.
-x proper names for bars
 - uitracking in battle scene
 
 - game
@@ -327,6 +324,10 @@ V2 ideas:
 - level up grid and special skills
 
 ----------- FIXED -------------
+x proper names for bars
+x MOBs should attack buildings
+x "blue wall" bug. Alpha present. Not screen aligned. Noise in particles??
+x none vs. clear is wonky
 x Beta1
 	x installer
 	x buildings as targets
