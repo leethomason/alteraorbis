@@ -28,12 +28,9 @@ VolcanoScript::VolcanoScript() : spreadTicker(SPREAD_RATE)
 void VolcanoScript::Init()
 {
 	SpatialComponent* sc = scriptContext->chit->GetSpatialComponent();
-	const ChitContext* context = scriptContext->chitBag->GetContext();
-
 	GLASSERT( sc );
 	if ( sc ) {
 		Vector2F pos = sc->GetPosition2D();
-		context->worldMap->SetMagma( (int)pos.x, (int)pos.y, true );
 
 		NewsEvent event( NewsEvent::VOLCANO, pos );
 		scriptContext->chitBag->GetNewsHistory()->Add( event );
@@ -115,3 +112,36 @@ int VolcanoScript::DoTick( U32 delta )
 }
 
 
+void VolcanoScript::OnAdd()
+{
+
+}
+
+
+void VolcanoScript::OnRemove()
+{
+	// spatial component already deleted. *sigh*
+	/*
+	// Defensive programming. Volcanoes are leaving
+	// magma all around the world. The next step
+	// is to track each volcano, not let them overlap,
+	// and check against the magma.
+	const ChitContext* context = scriptContext->chitBag->GetContext();
+	SpatialComponent* sc = scriptContext->chit->GetSpatialComponent();
+	WorldMap* worldMap = context->worldMap;
+
+	Vector2I pos2i = sc->GetPosition2DI();
+
+	Rectangle2I r;
+	r.min = r.max = pos2i;
+	r.Outset(MAX_RAD);
+
+	Rectangle2I b = worldMap->Bounds();
+	r.DoIntersection(b);
+
+	// Everything off.
+	for (Rectangle2IIterator it(r); !it.Done(); it.Next()) {
+		worldMap->SetMagma(it.Pos().x, it.Pos().y, false);
+	}
+	*/
+}

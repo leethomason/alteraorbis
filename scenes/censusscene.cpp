@@ -23,7 +23,8 @@ using namespace grinliz;
 
 struct ItemHistoryScore
 {
-	static bool Less(const ItemHistory& a, const ItemHistory& b) { return a.score < b.score; }
+	// sort descending
+	static bool Less(const ItemHistory& a, const ItemHistory& b) { return a.score > b.score; }
 };
 
 CensusScene::CensusScene( LumosGame* game, CensusSceneData* d ) : Scene( game ), lumosGame( game ), chitBag(d->chitBag)

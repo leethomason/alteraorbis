@@ -47,6 +47,7 @@ public:
 		STARVATION,					//  victim					victim
 		BLOOD_RAGE,					//  victim					victim
 		VISION_QUEST,				//	victim					victim
+		GREATER_SUMMON_TECH,		//  mob
 
 		// Current events, but not logged:
 		START_CURRENT,
@@ -56,8 +57,6 @@ public:
 		VOLCANO,
 		POOL,
 		WATERFALL,
-
-		GREATER_SUMMON_TECH,		// mob
 
 		NUM_WHAT
 	};

@@ -140,6 +140,7 @@ grinliz::IString NewsEvent::GetWhat() const
 		"Starvation",
 		"Blood Rage",
 		"Vision Quest",
+		"Greater Summoned",
 
 		"",	// placeholder to mark minor events
 
@@ -147,8 +148,7 @@ grinliz::IString NewsEvent::GetWhat() const
 		"Rampage",
 		"Volcano",
 		"Pool",
-		"Waterfall",
-		"Greater Summoned"
+		"Waterfall"
 	};
 	GLASSERT( GL_C_ARRAY_SIZE( NAME ) == NUM_WHAT );
 	return grinliz::StringPool::Intern( NAME[what], true );
@@ -267,7 +267,7 @@ void NewsEvent::Console( grinliz::GLString* str, ChitBag* chitBag, int shortName
 		break;
 
 	case GREATER_SUMMON_TECH:
-		str->Format("%.2f: %s is called to %s by the allure of Tech.", age, itemName.c_str(), domain.c_str());
+		str->Format("%.2f: %s is called to %s by the siren song of Tech.", age, itemName.c_str(), domain.c_str());
 		break;
 
 	default:

@@ -2171,11 +2171,15 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 		if (thisComp.item->keyValues.GetIString(IStringConst::mob) == IStringConst::greater) {
 			Vector2I techSector = GetLumosChitBag()->PopSummoning(LumosChitBag::SUMMON_TECH);
 			if (!techSector.IsZero()) {
-				Vector2I target = { techSector.x*SECTOR_SIZE + SECTOR_SIZE / 2, techSector.y*SECTOR_SIZE + SECTOR_SIZE / 2 };
-				SectorPort port = context->worldMap->NearestPort(ToWorld2F(target));
-				DoSectorHerd(thisComp, true, port);
+				SectorPort dest;
+				dest.sector = techSector;
+				const SectorData& destSD = context->worldMap->GetSector(dest.sector);
+				dest.port = destSD.NearestPort(pos2);
+				DoSectorHerd(thisComp, true, dest);
 
+				Vector2I target = { techSector.x*SECTOR_SIZE + SECTOR_SIZE / 2, techSector.y*SECTOR_SIZE + SECTOR_SIZE / 2 };
 				GetChitBag()->GetNewsHistory()->Add(NewsEvent(NewsEvent::GREATER_SUMMON_TECH, ToWorld2F(target), parentChit, 0));
+				return;
 			}
 		}
 

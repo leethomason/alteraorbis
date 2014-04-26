@@ -1498,6 +1498,17 @@ void GameScene::DialogResult(const char* name, void* data)
 		//cs->ParentChit()->GetItem()->primaryTeam = TEAM_HOUSE0;
 		sim->CreateCore(ToSector(sd->x, sd->y), TEAM_HOUSE0);
 		ForceHerd(ToSector(sd->x, sd->y));
+
+		ReserveBank* bank = ReserveBank::Instance();
+		if (bank) {
+			CoreScript* cs = CoreScript::GetCore(ToSector(sd->x, sd->y));
+			GLASSERT(cs);
+			Chit* parent = cs->ParentChit();
+			GLASSERT(parent);
+			GameItem* item = parent->GetItem();
+			GLASSERT(item);
+			Transfer(&item->wallet, &bank->bank, 250);
+		}
 	}
 	gamui2D.PopDialog();
 }

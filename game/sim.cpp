@@ -382,6 +382,11 @@ void Sim::CreateAvatar( const grinliz::Vector2I& pos )
 	chit->GetItem()->keyValues.Set( "speed", DEFAULT_MOVE_SPEED*boost );
 	chit->GetRenderComponent()->SetAnimationRate(boost);
 	chit->GetItem()->hpRegen = 1.0f;
+
+	// For an avatar, we don't get money, since all the Au goes to the core anyway.
+	if (ReserveBank::Instance()) {
+		Transfer(&ReserveBank::Instance()->bank, &chit->GetItem()->wallet, chit->GetItem()->wallet);
+	}
 }
 
 

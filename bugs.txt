@@ -95,6 +95,8 @@ x system for gamui to track models
 		t greater attacks big domains
 		x stuck battle bug
 		- walk target for the avatar
+		x core now starts with money, not avatar
+		x volcano improvements
 
 	- Beta2
 		x repair

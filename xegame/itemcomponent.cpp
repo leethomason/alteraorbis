@@ -565,6 +565,12 @@ void ItemComponent::OnChitEvent( const ChitEvent& event )
 void ItemComponent::DoSlowTick()
 {
 	GameItem* mainItem = itemArr[0];
+
+	if (mainItem->flags & GameItem::INDESTRUCTABLE) {
+		mainItem->accruedFire = 0;
+		mainItem->accruedShock = 0;
+	}
+
 	// Look around for fire or shock spread.
 	if ( mainItem->accruedFire > 0 || mainItem->accruedShock > 0 ) {
 		SpatialComponent* sc = parentChit->GetSpatialComponent();
