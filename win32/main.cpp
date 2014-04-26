@@ -105,7 +105,7 @@ int main( int argc, char **argv )
 		GetSystemPath(GAME_SAVE_DIR, "release_log.txt", &releasePath);
 		SetReleaseLog(fopen(releasePath.c_str(), "w"));
 	}
-	GLOUTPUT_REL(( "Altera startup. version=%d\n", VERSION ));
+	GLOUTPUT_REL(( "Altera startup. version'%s'\n", VERSION ));
 
 	SDL_version compiled;
 	SDL_version linked;

@@ -526,7 +526,7 @@ void Game::DoTick( U32 _currentTime )
 	#endif
 #if 1
 	UFOText* ufoText = UFOText::Instance();
-	ufoText->Draw(	0,  Y, "#%d %5.1ffps %4.1fK/f %3ddc/f quads=%.1fK/f fver=%d", 
+	ufoText->Draw(	0,  Y, "%s %5.1ffps %4.1fK/f %3ddc/f quads=%.1fK/f fver=%d", 
 					VERSION, 
 					framesPerSecond, 
 					(float)device->TrianglesDrawn()/1000.0f,

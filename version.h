@@ -1,1 +1,1 @@
-const int VERSION=140420; 
+#define VERSION "Beta 1" 

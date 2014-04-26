@@ -1,14 +1,31 @@
-﻿This is an alpha-of-the-beta for the game Altera Orbis.
+﻿Altera Orbis 
+Beta 1
 
-More at: grinninglizard.com/altera
+grinninglizard.com/altera
 
-This implements the basics of the domain vs. the world gameplay.
+
+About
+-----
+Altera is a simulation of an alternate world; a world inside
+the computer. You play as a Domain Core trying to grow and
+survive in an ever changing digital world.
+
+Altera Orbis started as Syndicate reimagined to be a a 
+Dungeon-Keeperish / Dwarf Fortressy sort of game set in a 
+Star Wars-ian & Tron-esqe world. It keeps changing and 
+developing.
+
+Altera Orbis is in Beta, and will be until it's ready;
+thanks for playing and checking the game out. Feedback
+on the forums is appreciated!
+
 
 How to Play
 -----------
-Is now on the wiki: http://alteraorbis.wikispaces.com/
+http://alteraorbis.wikispaces.com/
 
-New Controls
+
+Controls
 ------------
 
 Left-click moves the avatar, selects things, builds.
@@ -17,36 +34,26 @@ Left-click & drag builds lots of pavement or ice at once, or clears an area.
 Right-click & drag moves the camera.
 Ctrl-Right-click & drag rotates and zooms the camera.
 
-The arrow keys move the camera.
-Ctrl-Arrow keys rotates and zooms.
+The arrow keys or WASD moves the camera.
+Ctrl-Arrow keys or ctrl-WASD rotates and zooms.
 
-Changes (Alpha-Beta)
--------------------
-
-- Buildings and your core are now attacked my MOBs
-- Sounds (although the actual sounds still need work)
-- Domain start, end, and score UI
-- Domains are remembered for the Census
-- New controls
-- Some animation improvement
-- settings.xml file for controlling debug and game settings
-- Buildings no longer function if they can't path to the Core
-- Performance improvement
 
 Install
 -------
 
 Run the installer; it will install the game into your Program Files (x86) and save 
 files into the Documents directory. The redistributables will be installed as 
-well. (If in doubt, re-install of the redistributables is harmless.)
+well. (If in doubt, re-install of the redistributables is harmless.) You can 
+safely install over old game installations.
 
 
 Important Notes
 ---------------
 
-1. There is NO save game compatibility. Old games will be automatically ignored.
+1. There is rarely save game compatibility. Old games will be automatically ignored.
 2. The game is intended to run on a tablet (Windows tablets only at this point) but touch controls aren't implemented yet. Although
    the new control scheme is intended to make touch as seamless as possible.
+
 
 Filing a Bug
 ------------
@@ -70,32 +77,10 @@ The rendering features can be toggled with the number keys. If you a rendering b
 Known Issues:
 ------------
 
-"BLUE WALL" rendering bug: a giant block of color blocks half the screen. If you see it, please toggle the rendering features (above) to see if anything fixes it.
-
 The current bug lists that I'm personally tracking:
 https://code.google.com/p/alteraorbis/source/browse/bugs.txt
 
 And reported issues:
 https://code.google.com/p/alteraorbis/issues/list
 
-
-Test Scenes
------------
-
-The are a variety of test scenes, in different states. The important one for this release;
-
-* Asset Preview *
-Shows the face, ring, and gun art as they will appear in the game.
-
-* Particle *
-The particle scene is both preview and a particle editor. Check out res/particles.xml
-if you are interested in editing.
-
-Other scenes:
-* render: rendering tests, glow, atlasing
-* battle: battle test scene. the main work-in-progress is to get this fulling implemented
-* animation: animation preview utility
-* dialog: screen to test the game menus
-
-http://grinninglizard.com/altera/
 

@@ -1092,7 +1092,7 @@ void ProcessFont( XMLElement* font )
 
 int main( int argc, char* argv[] )
 {
-	printf( "UFO Builder. version=%d argc=%d argv[1]=%s\n", VERSION, argc, argv[1] );
+	printf( "UFO Builder. version='%s' argc=%d argv[1]=%s\n", VERSION, argc, argv[1] );
 	if ( argc < 3 ) {
 		printf( "Usage: ufobuilder ./path/xmlFile.xml ./outPath/filename.db <options>\n" );
 		printf( "options:\n" );

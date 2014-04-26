@@ -272,15 +272,9 @@ x Troll
 - update title screen text
 - build release/debug
 - build assets
-- def save:
-	- let the game run until 3rd age+
-	- place player
-	- use writedefsave.bat to create files
 - run buildrelease.bat
 - build installer
 - test
-- test def-start
-- test new-start
 - update wiki
 
 --- Links --- 

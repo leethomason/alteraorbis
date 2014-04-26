@@ -232,7 +232,6 @@ void WorldMap::Load( const char* filename )
 		
 		XarcOpen( &reader, "Map" );
 
-		//XARC_SER(&writer, CURRENT_FILE_VERSION);
 		XARC_SER(&reader, width);
 		XARC_SER( &reader, height );
 		Init( width, height );

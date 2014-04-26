@@ -87,7 +87,6 @@ Section "Uninstall"
   ; Remove files and uninstaller
   RMDir /r $INSTDIR\cache
   RMDir /r $INSTDIR\res
-  RMDir /r $INSTDIR\save
   Delete $INSTDIR\Altera.exe
   Delete $INSTDIR\README.txt
   Delete $INSTDIR\SDL2.dll
