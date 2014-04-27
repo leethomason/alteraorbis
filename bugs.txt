@@ -60,7 +60,6 @@ x system for gamui to track models
 
 - game
 	- Beta1 fixes
-		t sound checks external path first
 		x sound button doesn't work
 		x sounds to 'res' directory
 		x guard posts need to look around and notify AIs
@@ -69,7 +68,7 @@ x system for gamui to track models
 		x denizen death does NOT remove sleep tube? (slow respawn?)
 		x guard posts check and inform
 		x workers teleport if stuck
-		t should not be a continue button on new over-install (check map version!)
+		x should not be a continue button on new over-install (check map version!)
 		x auto-select avatar. left click should always move avatar.
 		x hook up ADSW
 		x left click in view always moves avatar
@@ -87,18 +86,23 @@ x system for gamui to track models
 		x multi-build in forge
 		x targeting reticule not working
 		x no glow on pulse
-		t notify of sector herd to domain
+		x notify of sector herd to domain
 		x avatar portrait selected when it appears
 		x attack warning: core attack, domain attack
 		x repair icon
 		x reload icon
-		t greater attacks big domains
+		x greater attacks big domains
 		x stuck battle bug
-		- walk target for the avatar
 		x core now starts with money, not avatar
 		x volcano improvements
 
+	- Beta 1a
+		x screenshot save dir fix
+		- auto rebuild
+		t sound checks external path first
+
 	- Beta2
+		- walk target for the avatar
 		x repair
 		- fast / threaded save
 		x new opening screen?

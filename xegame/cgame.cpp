@@ -230,6 +230,7 @@ static char prefPath[256] = { 0 };
 void GetSystemPath(int root, const char* filename, grinliz::GLString* out)
 {
 	grinliz::GLString path;
+	*out = "";
 
 	if (root == GAME_SAVE_DIR) {
 		if (!prefPath[0]) {

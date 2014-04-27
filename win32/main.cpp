@@ -73,7 +73,7 @@ const int rotation = 1;
 const int rotation = 0;
 #endif
 
-void ScreenCapture( const char* baseFilename, bool appendCount, bool trim, bool makeTransparent, grinliz::Rectangle2I* size );
+void ScreenCapture();
 void PostCurrentGame();
 
 void TransformXY( int x0, int y0, int* x1, int* y1 )
@@ -278,7 +278,7 @@ int main( int argc, char **argv )
 					case SDL_SCANCODE_F3:
 						GameDoTick(game, SDL_GetTicks());
 						SDL_GL_SwapWindow(screen);
-						ScreenCapture("cap", true, false, false, 0);
+						ScreenCapture();
 						break;
 
 					default:
@@ -466,7 +466,7 @@ bool RectangleIsBlack( const grinliz::Rectangle2I& r, int edge, SDL_Surface* sur
 }
 
 
-void ScreenCapture( const char* baseFilename, bool appendCount, bool trim, bool makeTransparent, grinliz::Rectangle2I* size )
+void ScreenCapture()
 {
 	int viewPort[4];
 	glGetIntegerv(GL_VIEWPORT, viewPort);
@@ -503,70 +503,25 @@ void ScreenCapture( const char* baseFilename, bool appendCount, bool trim, bool 
 
 	grinliz::Rectangle2I r;
 	r.Set( 0, 0, width-1, height-1 );
-	if ( trim ) {
-
-		while ( r.min.x < r.max.x && RectangleIsBlack( r, 0, surface )) {
-			++r.min.x;
-		}
-		while ( r.min.x < r.max.x && RectangleIsBlack( r, 1, surface )) {
-			--r.max.x;
-		}
-		while ( r.min.y < r.max.y && RectangleIsBlack( r, 2, surface )) {
-			++r.min.y;
-		}
-		while ( r.min.y < r.max.y && RectangleIsBlack( r, 3, surface )) {
-			--r.max.y;
-		}
-		SDL_Surface* newSurface = SDL_CreateRGBSurface( 0, r.Width(), r.Height(), 32, 0xff, 0xff<<8, 0xff<<16, 0xff<<24 );
-
-		// Stupid BLT semantics consider dst alpha.
-		memset( newSurface->pixels, 255, newSurface->pitch*r.Height() );
-		SDL_Rect srcRect = { r.min.x, r.min.y, r.Width(), r.Height() };
-		SDL_Rect dstRect = { 0, 0, r.Width(), r.Height() };
-		SDL_BlitSurface( surface, &srcRect, newSurface, &dstRect ); 
-
-		SDL_FreeSurface( surface );
-		surface = newSurface;
-		width = r.Width();
-		height = r.Height();
-	}
-	if ( size ) {
-		*size = r;
-	}
 	if ( width == 0 || height == 0 ) {
 		return;
 	}
 
-	if ( makeTransparent ) {
-		// And now, set all the alphas to opaque:
-		for( i=0; i<width*height; ++i ) {
-			if (( *( (U32*)surface->pixels + i ) & 0x00ffffff ) == 0 ) {
-				*( (U32*)surface->pixels + i ) = 0;
-			}
-		}
-	}
-
 	int index = 0;
-	char buf[ 256 ];
-	if ( appendCount ) {
-		for( index = 0; index<100; ++index )
-		{
-			grinliz::SNPrintf( buf, 256, "%s%02d.png", baseFilename, index );
-			grinliz::GLString path;
-			GetSystemPath(GAME_SAVE_DIR, buf, &path);
-			FILE* fp = fopen(path.c_str(), "rb" );
-			if ( fp )
-				fclose( fp );
-			else
-				break;
-		}
-	}
-	else {
-		grinliz::SNPrintf( buf, 256, "%s.png", baseFilename );
+	grinliz::GLString path;
+	for (index = 0; index<100; ++index)
+	{
+		char buf[32];
+		grinliz::SNPrintf(buf, 32, "cap%02d.png", index);
+		GetSystemPath(GAME_SAVE_DIR, buf, &path);
+		FILE* fp = fopen(path.c_str(), "rb" );
+		if ( fp )
+			fclose( fp );
+		else
+			break;
 	}
 	if ( index < 100 ) {
-//		SDL_SaveBMP( surface, buf );
-		lodepng_encode32_file( buf, (const unsigned char*)surface->pixels, width, height );
+		lodepng_encode32_file( path.c_str(), (const unsigned char*)surface->pixels, width, height );
 	}
 	SDL_FreeSurface(surface); 
 }
