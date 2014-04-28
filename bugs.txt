@@ -1,15 +1,15 @@
-- volcanos get left behind
+? volcanos get left behind
 - batching troubles - still lots of small batches going in
-- resize and colors are wrong bug
+? resize and colors are wrong bug
 - GT: ui to show idle and busy workers
 - redo AI utility to be based on a set of curves
 - rethink spawning. spawn based on need? what's around?
 - add rez-in animation
 - show rock damage
-- loss of gold crystal. was: make sure gold/crystal gets returned to the Reserve when the Chit is destroyed
+x loss of gold crystal. was: make sure gold/crystal gets returned to the Reserve when the Chit is destroyed
 - GT: lightning
 - can re-pack MVP and Bone matrix in the shader to encode 3*vec4 as the transpose, then transpose in the shader
-- standing shields!
+d standing shields!
 - maps: what direction is player pointed?
 - fix porch image (alpha of the tiles, if not general improvement)
 - squisher, in streaming mode, to save files
@@ -21,7 +21,6 @@
 - colors of faces (too dark)
 - scripts are pluggable now: should Bar be a plugged-in script?
 - general extension of the effect of tech on buildings, and morale on MOBs
-- hints about what you need to build
 - bar-market-forge need to look more distinct
 - console: add icons to match screen
 - console: links
@@ -59,49 +58,15 @@ x system for gamui to track models
 - uitracking in battle scene
 
 - game
-	- Beta1 fixes
-		x sound button doesn't work
-		x sounds to 'res' directory
-		x guard posts need to look around and notify AIs
-		x is destroying beds just annoying? slow respawn?
-		x need title graphic
-		x denizen death does NOT remove sleep tube? (slow respawn?)
-		x guard posts check and inform
-		x workers teleport if stuck
-		x should not be a continue button on new over-install (check map version!)
-		x auto-select avatar. left click should always move avatar.
-		x hook up ADSW
-		x left click in view always moves avatar
-		x on core death:
-			x should not have tracked avatar
-			x big “Your Core is Destroyed” message
-		x none -> cancel order, remove?
-		x none should have selection 
-		d re-order ui buttons
-		x closer to RTS controls
-			x mode shouldn’t change until changing bottom row
-			x RTS: click build then do…
-			x rotate should use the selector
-		x no monsters until first temple is built - cut back on wandering monsters
-		x multi-build in forge
-		x targeting reticule not working
-		x no glow on pulse
-		x notify of sector herd to domain
-		x avatar portrait selected when it appears
-		x attack warning: core attack, domain attack
-		x repair icon
-		x reload icon
-		x greater attacks big domains
-		x stuck battle bug
-		x core now starts with money, not avatar
-		x volcano improvements
 
 	- Beta 1a
 		x screenshot save dir fix
+		x clean up the chit delete loop
 		- auto rebuild
 		t sound checks external path first
 
 	- Beta2
+		- hints about what you need to build
 		- walk target for the avatar
 		x repair
 		- fast / threaded save
@@ -122,7 +87,6 @@ x system for gamui to track models
 			- pre-gen plants
 			- pre-gen volcanoes (50%?)
 			- run world sim 5 minutes?
-
 
 	- Census
 		x coolest stuff, past and present, by category
@@ -324,6 +288,42 @@ V2 ideas:
 - level up grid and special skills
 
 ----------- FIXED -------------
+x Beta1 fixes
+	x sound button doesn't work
+	x sounds to 'res' directory
+	x guard posts need to look around and notify AIs
+	x is destroying beds just annoying? slow respawn?
+	x need title graphic
+	x denizen death does NOT remove sleep tube? (slow respawn?)
+	x guard posts check and inform
+	x workers teleport if stuck
+	x should not be a continue button on new over-install (check map version!)
+	x auto-select avatar. left click should always move avatar.
+	x hook up ADSW
+	x left click in view always moves avatar
+	x on core death:
+		x should not have tracked avatar
+		x big “Your Core is Destroyed” message
+	x none -> cancel order, remove?
+	x none should have selection 
+	d re-order ui buttons
+	x closer to RTS controls
+		x mode shouldn’t change until changing bottom row
+		x RTS: click build then do…
+		x rotate should use the selector
+	x no monsters until first temple is built - cut back on wandering monsters
+	x multi-build in forge
+	x targeting reticule not working
+	x no glow on pulse
+	x notify of sector herd to domain
+	x avatar portrait selected when it appears
+	x attack warning: core attack, domain attack
+	x repair icon
+	x reload icon
+	x greater attacks big domains
+	x stuck battle bug
+	x core now starts with money, not avatar
+	x volcano improvements
 x proper names for bars
 x MOBs should attack buildings
 x "blue wall" bug. Alpha present. Not screen aligned. Noise in particles??

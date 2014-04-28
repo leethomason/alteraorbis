@@ -253,6 +253,30 @@ void ChitBag::GetBlockPtrs( int b, grinliz::CDynArray<Chit*>* arr ) const
 }
 
 
+void ChitBag::ProcessDeleteList()
+{
+	while (!deleteList.Empty()) {
+		int id = deleteList.Pop();
+		Chit* chit = this->GetChit(id);
+		if (chit) {
+			DeleteChit(chit);
+		}
+	}
+
+	while (!compDeleteList.Empty()) {
+		CompID compID = compDeleteList.Pop();
+		Chit* chit = this->GetChit(compID.chitID);
+		if (chit) {
+			Component* c = chit->GetComponent(compID.compID);
+			if (c) {
+				chit->Remove(c);
+				delete c;
+			}
+		}
+	}
+}
+
+
 void ChitBag::DoTick( U32 delta )
 {
 	PROFILE_FUNC();
@@ -292,6 +316,11 @@ void ChitBag::DoTick( U32 delta )
 					c->DoTick();
 					GLASSERT( c->timeToTick >= 0 );
 				}
+				// Clear out anything deleted by calling
+				// the components. Can't clear out
+				// while handling the components - could
+				// delete something being Ticked
+				ProcessDeleteList();
 			}
 		}
 	}
@@ -310,28 +339,8 @@ void ChitBag::DoTick( U32 delta )
 		camera->DoTick();
 	}
 
-	for( int i=0; i<deleteList.Size(); ++i ) {
-		Chit* chit = 0;
-		chitID.Query( deleteList[i], &chit );
-		if ( chit ) {
-			DeleteChit( chit );
-		}
-	}
-	deleteList.Clear();
-
-
-	for( int i=0; i<compDeleteList.Size(); ++i ) {
-		Chit* chit = 0;
-		chitID.Query( compDeleteList[i].chitID, &chit );
-		if ( chit ) {
-			Component* c = chit->GetComponent( compDeleteList[i].compID );
-			if ( c ) {
-				chit->Remove( c );
-				delete c;
-			}
-		}
-	}
-	compDeleteList.Clear();
+	// Final flush, just to be sure.
+	ProcessDeleteList();
 
 	while ( !zombieDeleteList.Empty() ) {
 		Component* c = zombieDeleteList.Pop();
