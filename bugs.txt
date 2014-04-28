@@ -64,6 +64,7 @@ x system for gamui to track models
 		x clean up the chit delete loop
 		- auto rebuild
 		t sound checks external path first
+		- GameItem update not quite correct
 
 	- Beta2
 		- hints about what you need to build
@@ -80,13 +81,13 @@ x system for gamui to track models
 			- double tech decay
 			- weapon sorting not quite correct
 		- 32 bit texture support
-		- new walkthrough tutorial
+		x new walkthrough tutorial
 		- auto-clear not working as well as it should
-		- (web page) note that installer installs-over
-		- restore 'create world' button.
-			- pre-gen plants
-			- pre-gen volcanoes (50%?)
-			- run world sim 5 minutes?
+		x (web page) note that installer installs-over
+		x restore 'create world' button.
+			x pre-gen plants
+			x pre-gen volcanoes (50%?)
+			x run world sim 5 minutes?
 
 	- Census
 		x coolest stuff, past and present, by category

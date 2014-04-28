@@ -120,6 +120,7 @@ private:
 	CTicker		spawnTick;
 	double		tech;
 	int			summonGreater;
+	bool		autoRebuild;
 
 	grinliz::IString defaultSpawn;
 	grinliz::CDynArray< int > citizens;

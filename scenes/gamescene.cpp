@@ -132,6 +132,10 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	createWorkerButton.Init( &gamui2D, game->GetButtonLook(0) );
 	createWorkerButton.SetText( "WorkerBot" );
 
+	autoRebuild.Init(&gamui2D, game->GetButtonLook(0));
+	autoRebuild.SetText("Auto\nRebuild");
+	autoRebuild.SetVisible(false);
+
 	for( int i=0; i<NUM_UI_MODES; ++i ) {
 		static const char* TEXT[NUM_UI_MODES] = { "Build", "View" };
 		uiMode[i].Init( &gamui2D, game->GetButtonLook(0));
@@ -246,7 +250,8 @@ void GameScene::Resize()
 	for (int i = 0; i<NUM_BUILD_MODES; ++i) {
 		layout.PosAbs( &modeButton[i], i, 1 );
 	}
-	layout.PosAbs( &createWorkerButton, 0, 3 );
+	layout.PosAbs(&createWorkerButton, 0, 3);
+	layout.PosAbs(&autoRebuild, 1, 3);
 	for( int i=0; i<NUM_UI_MODES; ++i ) {
 		layout.PosAbs( &uiMode[i], i, 0 );
 	}
@@ -1302,6 +1307,7 @@ void GameScene::DoTick( U32 delta )
 	}
 	tabBar1.SetVisible( uiMode[UI_BUILD].Down() );
 	createWorkerButton.SetVisible( uiMode[UI_BUILD].Down() );
+	//autoRebuild.SetVisible(uiMode[UI_BUILD].Down());
 
 	str.Clear();
 

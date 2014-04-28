@@ -173,6 +173,7 @@ private:
 	gamui::Image		domainWarningIcon;
 	gamui::TextLabel	domainWarningLabel;
 	gamui::PushButton	atlasButton;
+	gamui::ToggleButton	autoRebuild;
 
 	FacePushWidget		faceWidget;
 
