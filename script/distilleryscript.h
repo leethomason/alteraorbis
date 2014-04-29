@@ -19,19 +19,17 @@
 #include "scriptcomponent.h"
 #include "../xegame/cticker.h"
 
-class DistilleryScript : public IScript
+class DistilleryScript : public Component
 {
+	typedef Component super;
 public:
 	DistilleryScript();
 	virtual ~DistilleryScript()	{}
 
-	virtual void Init()					{}
-	virtual void OnAdd()				{}
-	virtual void OnRemove()				{}
 	virtual void Serialize( XStream* xs );
 
 	virtual int DoTick( U32 delta );
-	virtual const char* ScriptName()	{ return "DistilleryScript"; }
+	virtual const char* Name() const	{ return "DistilleryScript"; }
 
 	enum { 
 		ELIXIR_TIME = 10*1000,

@@ -28,7 +28,7 @@ static const int	TIME_TO_SPORE = 3 * (1000 * 60);
 {
 	GLASSERT( chit );
 	GameItem* item = chit->GetItem();
-	PlantScript* plantScript = static_cast<PlantScript*>(chit->GetScript("PlantScript"));
+	PlantScript* plantScript = static_cast<PlantScript*>(chit->GetComponent("PlantScript"));
 
 	if ( item && plantScript) {
 		if ( type )
@@ -61,53 +61,66 @@ void PlantScript::SetRenderComponent()
 	int t = -1;
 	int s = -1;
 
-	GLASSERT( scriptContext->chit );
-	if ( scriptContext->chit->GetRenderComponent() ) {
-		const ModelResource* res = scriptContext->chit->GetRenderComponent()->MainResource();
+	if ( parentChit->GetRenderComponent() ) {
+		const ModelResource* res = parentChit->GetRenderComponent()->MainResource();
 		if ( res && res->header.name == str.c_str() ) {
 			// No change!
 			return;
 		}
 	}
 
-	if ( scriptContext->chit->GetRenderComponent() ) {
-		RenderComponent* rc = scriptContext->chit->GetRenderComponent();
+	if ( parentChit->GetRenderComponent() ) {
+		RenderComponent* rc = parentChit->GetRenderComponent();
 		const char* name = rc->MainResource()->Name();
 		GLASSERT( strlen( name ) == 8 );
 		t = name[5] - '0';
 		s = name[7] - '0';
 
-		scriptContext->chit->Remove( rc );
+		parentChit->Remove( rc );
 		delete rc;
 	}
 
-	const ChitContext* context = scriptContext->chitBag->GetContext();
-	if ( !scriptContext->chit->GetRenderComponent() ) {
+	if ( !parentChit->GetRenderComponent() ) {
 		RenderComponent* rc = new RenderComponent( str.c_str() );
 		rc->SetSerialize( false );
-		scriptContext->chit->Add( rc );
+		parentChit->Add( rc );
 	}
 
 	if ( t >= 0 ) {
 		GLASSERT( s >= 0 );
-		scriptContext->census->plants[t][s]			-= 1;
-		scriptContext->census->plants[type][stage]	+= 1;
+		Context()->chitBag->census.plants[t][s]		-= 1;
+		Context()->chitBag->census.plants[type][stage] += 1;
 	}
 
-	GameItem* item = scriptContext->chit->GetItem();
-	scriptContext->chit->GetRenderComponent()->SetSaturation( item->HPFraction() );
+	GameItem* item = parentChit->GetItem();
+	parentChit->GetRenderComponent()->SetSaturation( item->HPFraction() );
 }
 
 
-void PlantScript::OnAdd()
+void PlantScript::OnAdd(Chit* chit, bool initialize)
 {
-	scriptContext->census->plants[type][stage] += 1;
+	super::OnAdd(chit, initialize);
+	Context()->chitBag->census.plants[type][stage] += 1;
+
+	if (!parentChit->GetItem()) {
+		const GameItem* resource = GetResource();
+		parentChit->Add(new ItemComponent(*resource));
+		parentChit->GetItem()->GetTraitsMutable()->Roll(parentChit->random.Rand());
+	}
+	SetRenderComponent();
+
+	if (initialize) {
+		parentChit->GetSpatialComponent()->SetYRotation((float)parentChit->random.Rand(360));
+		growTimer.Randomize(parentChit->random.Rand());
+		sporeTimer.Randomize(parentChit->random.Rand());
+	}
 }
 
 
 void PlantScript::OnRemove()
 {
-	scriptContext->census->plants[type][stage] -= 1;
+	Context()->chitBag->census.plants[type][stage] -= 1;
+	super::OnRemove();
 }
 
 
@@ -123,32 +136,16 @@ const GameItem* PlantScript::GetResource()
 }
 
 
-void PlantScript::Init()
-{
-	const GameItem* resource = GetResource();
-	const ChitContext* context = scriptContext->chitBag->GetContext();
-	scriptContext->chit->Add( new ItemComponent( *resource ));
-	scriptContext->chit->GetItem()->GetTraitsMutable()->Roll( scriptContext->chit->random.Rand() );
-	SetRenderComponent();
-
-	scriptContext->chit->GetSpatialComponent()->SetYRotation( (float)scriptContext->chit->random.Rand( 360 ));
-
-	// Add some fuzz to the timers.
-	growTimer.SetPeriod(  TIME_TO_GROW + scriptContext->chit->random.Rand( TIME_TO_GROW/10 ));
-	sporeTimer.SetPeriod( TIME_TO_SPORE + scriptContext->chit->random.Rand( TIME_TO_SPORE/10 ));
-}
-
-
 void PlantScript::Serialize(  XStream* xs )
 {
-	XarcOpen( xs, ScriptName() );
+	BeginSerialize(xs, Name());
 	XARC_SER( xs, type );
 	XARC_SER( xs, stage );
 	XARC_SER( xs, age );
 	XARC_SER( xs, ageAtStage );
 	growTimer.Serialize( xs, "growTimer" );
 	sporeTimer.Serialize( xs, "sporeTimer" );
-	XarcClose( xs );
+	EndSerialize(xs);
 }
 
 
@@ -165,7 +162,7 @@ int PlantScript::DoTick( U32 delta )
 	ageAtStage += delta;
 
 	int mult = 1;
-	if (scriptContext->chitBag->GetSim()->AgeF() < 1) {
+	if (Context()->chitBag->GetSim()->AgeF() < 1) {
 		// Double growth and spore during the Age of Fire
 		mult = 2;
 	}
@@ -174,25 +171,24 @@ int PlantScript::DoTick( U32 delta )
 	int tick = Min( growTimer.Next(), sporeTimer.Next() );
 
 	if ( !grow && !spore ) {
-		if ( scriptContext->chit->GetRenderComponent() && scriptContext->chit->GetItem() ) {
-			scriptContext->chit->GetRenderComponent()->SetSaturation( scriptContext->chit->GetItem()->HPFraction() );
+		if ( parentChit->GetRenderComponent() && parentChit->GetItem() ) {
+			parentChit->GetRenderComponent()->SetSaturation( parentChit->GetItem()->HPFraction() );
 		}
 		return tick;
 	}
 
-	MapSpatialComponent* sc = GET_SUB_COMPONENT( scriptContext->chit, SpatialComponent, MapSpatialComponent );
+	MapSpatialComponent* sc = GET_SUB_COMPONENT( parentChit, SpatialComponent, MapSpatialComponent );
 	GLASSERT( sc );
 	if ( !sc ) return tick;
 
-	GameItem* item = scriptContext->chit->GetItem();
+	GameItem* item = parentChit->GetItem();
 	GLASSERT( item );
 	if ( !item ) return tick;
 
 	Vector2I pos = sc->MapPosition();
 	Vector2F pos2f = sc->GetPosition2D();
-	const ChitContext* context = scriptContext->chitBag->GetContext();
 	Weather* weather = Weather::Instance();
-	Rectangle2I bounds = context->worldMap->Bounds();
+	Rectangle2I bounds = Context()->worldMap->Bounds();
 
 	int nStage = 4;
 	item->keyValues.Get( ISC::nStage, &nStage );
@@ -201,7 +197,7 @@ int PlantScript::DoTick( U32 delta )
 		// ------ Sun -------- //
 		const float		h				= (float)(stage+1);
 		const float		rainFraction	= weather->RainFraction( pos2f.x, pos2f.y );
-		const Vector3F& light			= context->engine->lighting.direction;
+		const Vector3F& light			= Context()->engine->lighting.direction;
 		const float		norm			= Max( fabs( light.x ), fabs( light.z ));
 		lightTap.x = LRintf( light.x / norm );
 		lightTap.y = LRintf( light.z / norm );
@@ -212,7 +208,7 @@ int PlantScript::DoTick( U32 delta )
 		if ( bounds.Contains( tap )) {
 			// Check for model or rock. If looking at a model, take 1/2 the
 			// height of the first thing we find.
-			const WorldGrid& wg = context->worldMap->GetWorldGrid( tap.x, tap.y );
+			const WorldGrid& wg = Context()->worldMap->GetWorldGrid( tap.x, tap.y );
 			if ( wg.RockHeight() > 0 ) {
 				sunHeight = Min( sunHeight, (float)wg.RockHeight() * 0.5f );
 			}
@@ -220,7 +216,7 @@ int PlantScript::DoTick( U32 delta )
 				CChitArray query;
 				ChitAcceptAll all;
 				// This is a 1x1 query - will sometimes ignore big buildings, which is a minor bug.
-				scriptContext->chit->GetChitBag()->QuerySpatialHash( &query, ToWorld2F(pos), 0.5f, scriptContext->chit, &all );
+				Context()->chitBag->QuerySpatialHash( &query, ToWorld2F(pos), 0.5f, parentChit, &all );
 				for( int i=0; i<query.Size(); ++i ) {
 					RenderComponent* rc = query[i]->GetRenderComponent();
 					if ( rc ) {
@@ -242,7 +238,7 @@ int PlantScript::DoTick( U32 delta )
 		for( int i=0; i<GL_C_ARRAY_SIZE( check ); ++i ) {
 			tap = pos + check[i];
 			if ( bounds.Contains( tap )) {
-				const WorldGrid& wg = context->worldMap->GetWorldGrid( tap.x, tap.y );
+				const WorldGrid& wg = Context()->worldMap->GetWorldGrid( tap.x, tap.y );
 				// Water or rock runoff increase water.
 				if ( wg.RockHeight() ) {
 					water += 0.25f * rainFraction;
@@ -278,7 +274,7 @@ int PlantScript::DoTick( U32 delta )
 			// Heal.
 			ChitMsg healMsg( ChitMsg::CHIT_HEAL );
 			healMsg.dataF = HP_PER_SECOND*seconds*item->Traits().NormalLeveledTrait( GameTrait::STR );
-			scriptContext->chit->SendMessage( healMsg );
+			parentChit->SendMessage( healMsg );
 
 			// Grow
 			if (    item->HPFraction() > 0.9f 
@@ -302,33 +298,33 @@ int PlantScript::DoTick( U32 delta )
 			DamageDesc dd( HP_PER_SECOND * seconds, 0 );
 
 			ChitDamageInfo info( dd );
-			info.originID = scriptContext->chit->ID();
+			info.originID = parentChit->ID();
 			info.awardXP  = false;
 			info.isMelee  = true;
 			info.isExplosion = false;
 			info.originOfImpact.Zero();
 
 			ChitMsg damage( ChitMsg::CHIT_DAMAGE, 0, &info );
-			scriptContext->chit->SendMessage( damage );
+			parentChit->SendMessage( damage );
 		}
 	}
 	// Spore (more likely if bigger plant)
 	if (    spore 
-		 && ( int(scriptContext->chit->random.Rand(nStage)) <= stage )) 
+		 && ( int(parentChit->random.Rand(nStage)) <= stage )) 
 	{
 		// Number range reflects wind direction.
-		int dx = -1 + scriptContext->chit->random.Rand(4);	// [-1,2]
-		int dy = -1 + scriptContext->chit->random.Rand(3);	// [-1,1]
+		int dx = -1 + parentChit->random.Rand(4);	// [-1,2]
+		int dy = -1 + parentChit->random.Rand(3);	// [-1,1]
 
 		// Remember that create plant will favor creating
 		// existing plants, so we don't need to specify
 		// what to create.
-		Sim* sim = scriptContext->chitBag->GetSim();
+		Sim* sim = Context()->chitBag->GetSim();
 		GLASSERT(sim);
 		sim->CreatePlant( pos.x+dx, pos.y+dy, -1 );
 	}
 
-	scriptContext->chit->GetRenderComponent()->SetSaturation( item->HPFraction() );
+	parentChit->GetRenderComponent()->SetSaturation( item->HPFraction() );
 
 	return tick;
 }
@@ -337,7 +333,7 @@ int PlantScript::DoTick( U32 delta )
 void PlantScript::SetStage( int s )
 {
 	stage = s;
-	MapSpatialComponent* msc = GET_SUB_COMPONENT( scriptContext->chit, SpatialComponent, MapSpatialComponent );
+	MapSpatialComponent* msc = GET_SUB_COMPONENT( parentChit, SpatialComponent, MapSpatialComponent );
 	GLASSERT( msc );
 	msc->SetMode( stage < 2 ? GRID_IN_USE : GRID_BLOCKED );
 }

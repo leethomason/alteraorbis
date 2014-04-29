@@ -41,7 +41,7 @@ public:
 	virtual const char* Name() const { return "CameraComponent"; }
 	virtual CameraComponent* ToCameraComponent() { return this; }
 
-	virtual void OnAdd( Chit* );
+	virtual void OnAdd( Chit*, bool init );
 	virtual void OnRemove();
 
 	virtual void Serialize( XStream* xs );

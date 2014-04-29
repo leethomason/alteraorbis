@@ -26,7 +26,7 @@ void GameMoveComponent::ApplyBlocks( Vector2F* pos, bool* forceApplied )
 	float rotation = 0;
 	float radius = render->RadiusOfBase();
 
-	const ChitContext* context = GetChitContext();
+	const ChitContext* context = Context();
 
 	WorldMap::BlockResult result = context->worldMap->ApplyBlockEffect( *pos, radius, &newPos );
 	if ( forceApplied ) *forceApplied = ( result == WorldMap::FORCE_APPLIED );

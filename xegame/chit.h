@@ -31,9 +31,9 @@ class SpatialComponent;
 class RenderComponent;
 class MoveComponent;
 class ItemComponent;
-class ScriptComponent;
 class AIComponent;
 class HealthComponent;
+struct ChitContext;
 
 class ChitBag;
 class Chit;
@@ -135,10 +135,10 @@ public:
 	void Init( int id, ChitBag* chitBag );
 	void Free();
 
-	void Serialize( const ComponentFactory* factory, XStream* xs );
+	void Serialize(XStream* xs);
 
 	int ID() const { return id; }
-	void Add( Component* );
+	void Add( Component*, bool loading=false );
 	void Remove( Component* );
 
 	void SetTickNeeded()		{ timeToTick = 0; }
@@ -152,8 +152,6 @@ public:
 
 	MoveComponent*		GetMoveComponent()		{ return moveComponent; }
 	ItemComponent*		GetItemComponent()		{ return itemComponent; }
-	ScriptComponent*	GetScriptComponent(const char* name);
-	IScript*			GetScript(const char* name);
 	AIComponent*		GetAIComponent()		{ return aiComponent; }
 	HealthComponent*	GetHealthComponent()	{ return healthComponent; }
 	RenderComponent*	GetRenderComponent()	{ return renderComponent; }
@@ -161,9 +159,7 @@ public:
 	Component* GetComponent( int id );
 	Component* GetComponent( const char* name );
 
-	ChitBag* GetChitBag()						{ return chitBag; }
-	virtual LumosChitBag* GetLumosChitBag();
-
+	const ChitContext* Context() const;
 	// Returns the item if this has the ItemComponent.
 	GameItem* GetItem();
 	const GameItem* GetItem() const	{ return const_cast<const GameItem*>(const_cast<Chit*>(this)->GetItem()); }
@@ -199,14 +195,12 @@ public:
 	U32 Destroyed() const	{ return destroyed; }
 	void SetDestroyed(const HealthComponent*, U32 v) { destroyed = v;  }
 
-
-
 private:
-	U32 destroyed;
-
-private:
+	U32		destroyed;
 	ChitBag* chitBag;
 	int		 id;
+
+private:
 	bool	 playerControlled;
 	//grinliz::CDynArray< IChitListener* > listeners; doesn't work; can't be serialized
 
@@ -215,7 +209,6 @@ public:
 		SPATIAL_BIT		= (1<<0),
 		MOVE_BIT		= (1<<1),
 		ITEM_BIT		= (1<<2),
-		SCRIPT_BIT		= (1<<3),
 		AI_BIT			= (1<<4),
 		HEALTH_BIT		= (1<<5),
 		RENDER_BIT		= (1<<6)
@@ -229,12 +222,12 @@ private:
 			SpatialComponent*	spatialComponent;
 			MoveComponent*		moveComponent;
 			ItemComponent*		itemComponent;
-			ScriptComponent*	scriptComponent0;
-			ScriptComponent*	scriptComponent1;
 			AIComponent*		aiComponent;
 			HealthComponent*	healthComponent;
 			Component*			general0;
 			Component*			general1;
+			Component*			general2;
+			Component*			general3;
 			RenderComponent*	renderComponent;		// should be last
 		};
 		Component*			slot[NUM_SLOTS];

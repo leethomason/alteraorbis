@@ -15,7 +15,7 @@
 
 #include "cameracomponent.h"
 #include "chit.h"
-#include "chitbag.h"
+#include "../game/lumoschitbag.h"
 #include "spatialcomponent.h"
 #include "../game/gridmovecomponent.h"
 #include "../engine/camera.h"
@@ -24,9 +24,9 @@
 using namespace grinliz;
 
 
-void CameraComponent::OnAdd( Chit* c )
+void CameraComponent::OnAdd( Chit* c, bool init )
 {
-	super::OnAdd( c );
+	super::OnAdd(c, init);
 }
 
 
@@ -78,7 +78,7 @@ void CameraComponent::SetTrack( int targetID )
 
 int CameraComponent::DoTick( U32 delta ) 
 {
-	if ( GetChitBag()->GetCameraChitID() != parentChit->ID() ) {
+	if ( Context()->chitBag->GetCameraChitID() != parentChit->ID() ) {
 		parentChit->QueueDelete();
 		return VERY_LONG_TICK;
 	}
@@ -105,7 +105,7 @@ int CameraComponent::DoTick( U32 delta )
 
 	case TRACK:
 		{
-			Chit* chit = this->GetChitBag()->GetChit( targetChitID );
+			Chit* chit = Context()->chitBag->GetChit( targetChitID );
 			if ( chit && chit->GetSpatialComponent() ) {
 				
 				Vector3F pos = chit->GetSpatialComponent()->GetPosition();

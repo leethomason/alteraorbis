@@ -21,18 +21,18 @@
 #include "../gamui/gamui.h"
 
 
-class FarmScript : public IScript
+class FarmScript : public Component
 {
+	typedef Component super;
 public:
 	FarmScript();
 	virtual ~FarmScript()	{}
 
-	virtual void Init();
-	virtual void OnAdd();
+	virtual void OnAdd(Chit* chit, bool init);
 	virtual void OnRemove()		{}
 	virtual void Serialize( XStream* xs );
 	virtual int DoTick( U32 delta );
-	virtual const char* ScriptName() { return "FarmScript"; }
+	virtual const char* Name() const { return "FarmScript"; }
 
 	static int GrowFruitTime( int plantStage, int nPlants );
 

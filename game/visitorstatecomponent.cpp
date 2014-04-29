@@ -32,11 +32,11 @@ void VisitorStateComponent::Serialize( XStream* xs )
 }
 
 
-void VisitorStateComponent::OnAdd( Chit* chit )
+void VisitorStateComponent::OnAdd( Chit* chit, bool init )
 {
-	super::OnAdd( chit );
+	super::OnAdd( chit, init );
 
-	const ChitContext* context = GetChitContext();
+	const ChitContext* context = Context();
 	needsInit = true;
 
 	for( int i=0; i<VisitorData::NUM_VISITS; ++i ) {
@@ -59,7 +59,7 @@ void VisitorStateComponent::OnAdd( Chit* chit )
 
 void VisitorStateComponent::OnRemove()
 {
-	const ChitContext* context = GetChitContext();
+	const ChitContext* context = Context();
 	for( int i=0; i<VisitorData::NUM_VISITS; ++i ) {
 		context->worldMap->overlay0.Remove( &wants[i] );
 	}

@@ -67,6 +67,10 @@ x system for gamui to track models
 		- GameItem update not quite correct
 
 	- Beta2
+		- component infrastructure
+			- remove IScript and ScriptComponent
+			- linked list for components; unlimited general comps
+			- remove spatial component
 		- hints about what you need to build
 		- walk target for the avatar
 		x repair

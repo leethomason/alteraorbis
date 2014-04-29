@@ -1395,13 +1395,13 @@ void GameScene::DoTick( U32 delta )
 void GameScene::OnChitMsg(Chit* chit, const ChitMsg& msg)
 {
 	if (msg.ID() == ChitMsg::CHIT_DESTROYED_START) {
-		if (chit->GetScript("CoreScript")) {
+		if (chit->GetComponent("CoreScript")) {
 			if (chit->PrimaryTeam() == TEAM_HOUSE0) {
-				CoreScript* cs = (CoreScript*) chit->GetScript("CoreScript");
+				CoreScript* cs = (CoreScript*) chit->GetComponent("CoreScript");
 				GLASSERT(cs);
 				Vector2I sector = ToSector(cs->ParentChit()->GetSpatialComponent()->GetPosition2DI());
 				const SectorData& sd = sim->GetWorldMap()->GetSector(sector);
-				endGameWidget.SetData(	chit->GetChitBag()->GetNewsHistory(),
+				endGameWidget.SetData(	chit->Context()->chitBag->GetNewsHistory(),
 										this, 
 										sd.name, chit->GetItem()->ID(), 
 										cs->GetAchievement());
@@ -1412,7 +1412,7 @@ void GameScene::OnChitMsg(Chit* chit, const ChitMsg& msg)
 	else if (msg.ID() == ChitMsg::CHIT_DAMAGE && chit->PrimaryTeam() == TEAM_HOUSE0 ) {
 		BuildingFilter filter;
 		if (filter.Accept(chit)) {
-			if (chit->GetScript("CoreScript"))
+			if (chit->GetComponent("CoreScript"))
 				coreWarningTimer = 6000;
 			else
 				domainWarningTimer = 6000;

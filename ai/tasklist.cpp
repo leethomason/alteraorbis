@@ -140,7 +140,7 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta )
 		return;
 	}
 
-	LumosChitBag* chitBag = chit->GetLumosChitBag();
+	LumosChitBag* chitBag = chit->Context()->chitBag;
 	Task* task			= &taskList[0];
 	Vector2I pos2i		= thisComp.spatial->GetPosition2DI();
 	Vector2F taskPos2	= { (float)task->pos2i.x + 0.5f, (float)task->pos2i.y + 0.5f };
@@ -372,7 +372,7 @@ void TaskList::SocialPulse( const ComponentSet& thisComp, const Vector2F& origin
 		return;
 	}
 
-	LumosChitBag* chitBag	= thisComp.chit->GetLumosChitBag();
+	LumosChitBag* chitBag	= thisComp.chit->Context()->chitBag;
 	CChitArray arr;
 	
 	MOBKeyFilter mobFilter;
@@ -449,7 +449,7 @@ double TaskList::EvalBuilding(Chit* building)
 	int hitB=0, hitIBuilding = 0, hitNBuilding = 0, hitWater = 0, hitPlant = 0, hitRock = 0;
 	int nRays = 0;
 
-	LumosChitBag* chitBag = building->GetLumosChitBag();
+	LumosChitBag* chitBag = building->Context()->chitBag;
 	Rectangle2IEdgeIterator it(bounds);
 
 	while (!it.Done()) {
@@ -546,7 +546,7 @@ double TaskList::EvalBuilding(Chit* building)
 
 void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const grinliz::IString& buildingName )
 {
-	LumosChitBag* chitBag	= thisComp.chit->GetLumosChitBag();
+	LumosChitBag* chitBag	= thisComp.chit->Context()->chitBag;
 	Vector2I pos2i			= thisComp.spatial->GetPosition2DI();
 	Vector2I sector			= ToSector( pos2i );
 	CoreScript* coreScript  = CoreScript::GetCore(sector);
@@ -614,7 +614,7 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 
 		double scale = 1.0;
 
-		EvalBuildingScript* evalScript = static_cast<EvalBuildingScript*>(building->GetScript("EvalBuildingScript"));
+		EvalBuildingScript* evalScript = static_cast<EvalBuildingScript*>(building->GetComponent("EvalBuildingScript"));
 		if (evalScript) {
 			double industry = building->GetItem()->GetBuildingIndustrial(false);
 			double score = evalScript->EvalIndustrial(true);
@@ -832,7 +832,7 @@ bool TaskList::UseFactory( const ComponentSet& thisComp, Chit* factory, int tech
 		item->BestName(),
 		sector.x, sector.y ));
 
-	NewsHistory* history = thisComp.chit->GetChitBag()->GetNewsHistory();
+	NewsHistory* history = thisComp.chit->Context()->chitBag->GetNewsHistory();
 	NewsEvent news( NewsEvent::FORGED, thisComp.spatial->GetPosition2D(), item, thisComp.chit ); 
 	history->Add( news );
 	item->GetItem()->keyValues.Set( "destroyMsg", NewsEvent::UN_FORGED );

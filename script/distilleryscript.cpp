@@ -17,10 +17,10 @@ DistilleryScript::DistilleryScript() : progressTick( 2000 ), progress(0)
 
 void DistilleryScript::Serialize( XStream* xs )
 {
-	XarcOpen( xs, ScriptName() );
+	BeginSerialize(xs, Name());
 	XARC_SER( xs, progress );
 	progressTick.Serialize( xs, "progressTick" );
-	XarcClose( xs );
+	EndSerialize(xs);
 }
 
 
@@ -34,8 +34,8 @@ void DistilleryScript::SetInfoText()
 {
 	CStr<32> str;
 
-	ItemComponent* ic   = scriptContext->chit->GetItemComponent();
-	RenderComponent* rc = scriptContext->chit->GetRenderComponent();
+	ItemComponent* ic   = parentChit->GetItemComponent();
+	RenderComponent* rc = parentChit->GetRenderComponent();
 
 	if ( ic && rc ) {
 		int nFruit = 0;
@@ -58,14 +58,14 @@ void DistilleryScript::SetInfoText()
 int DistilleryScript::DoTick( U32 delta )
 {
 	int n = progressTick.Delta( delta );
-	ItemComponent* ic = scriptContext->chit->GetItemComponent();
+	ItemComponent* ic = parentChit->GetItemComponent();
 
 	if ( n ) { 
-		SpatialComponent* sc = scriptContext->chit->GetSpatialComponent();
+		SpatialComponent* sc = parentChit->GetSpatialComponent();
 		GLASSERT( sc );
 		Vector2I sector = ToSector( sc->GetPosition2DI() );
 		CoreScript* cs = CoreScript::GetCore( sector );
-		EvalBuildingScript* evalScript = (EvalBuildingScript*) scriptContext->chit->GetScript("EvalBuildingScript");
+		EvalBuildingScript* evalScript = (EvalBuildingScript*) parentChit->GetComponent("EvalBuildingScript");
 	
 		int tech = cs->GetTechLevel();
 		int dProg = (tech+1) * progressTick.Period() / TECH_MAX;

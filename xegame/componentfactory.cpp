@@ -15,15 +15,25 @@
 #include "../game/towcomponent.h"
 
 #include "../script/scriptcomponent.h"
+#include "../script/volcanoscript.h"
+#include "../script/plantscript.h"
+#include "../script/corescript.h"
+#include "../script/countdownscript.h"
+#include "../script/farmscript.h"
+#include "../script/distilleryscript.h"
+#include "../script/evalbuildingscript.h"
+#include "../script/guardscript.h"
+
 
 #include "componentfactory.h"
 
 #include "../grinliz/glstringutil.h"
 #include "../engine/engine.h"
+#include "../xegame/chitbag.h"
 
 using namespace grinliz;
 
-Component* ComponentFactory::Factory( const char* name, Chit* chit ) const
+Component* ComponentFactory::Factory( const char* name, const ChitContext* context )
 {
 	GLASSERT( name && *name );
 	if ( StrEqual( name, "SpatialComponent" )) {
@@ -36,7 +46,7 @@ Component* ComponentFactory::Factory( const char* name, Chit* chit ) const
 		return glnew ItemComponent( 0 );
 	}
 	else if ( StrEqual( name, "DebugStateComponent" )) {
-		return glnew DebugStateComponent( worldMap );
+		return glnew DebugStateComponent( context->worldMap );
 	}
 	else if ( StrEqual( name, "DebugPathComponent" )) {
 		return glnew DebugPathComponent();
@@ -48,10 +58,7 @@ Component* ComponentFactory::Factory( const char* name, Chit* chit ) const
 		return glnew RenderComponent( 0 );
 	}
 	else if ( StrEqual( name, "CameraComponent" )) {
-		return glnew CameraComponent( &engine->camera );
-	}
-	else if ( StrEqual( name, "ScriptComponent" )) {
-		return glnew ScriptComponent( this );
+		return glnew CameraComponent( &context->engine->camera );
 	}
 	else if ( StrEqual( name, "MapSpatialComponent" )) {
 		return glnew MapSpatialComponent();
@@ -73,6 +80,30 @@ Component* ComponentFactory::Factory( const char* name, Chit* chit ) const
 	}
 	else if ( StrEqual( name, "TowComponent" )) {
 		return glnew TowComponent();
+	}
+	if (name == "VolcanoScript") {
+		return glnew VolcanoScript();
+	}
+	else if (name == "PlantScript") {
+		return glnew PlantScript(0);
+	}
+	else if (name == "CoreScript") {
+		return glnew CoreScript();
+	}
+	else if (name == "CountDownScript") {
+		return glnew CountDownScript(1000);
+	}
+	else if (name == "FarmScript") {
+		return glnew FarmScript();
+	}
+	else if (name == "DistilleryScript") {
+		return glnew DistilleryScript();
+	}
+	else if (name == "EvalBuildingScript") {
+		return glnew EvalBuildingScript();
+	}
+	else if (name == "GuardScript") {
+		return glnew GuardScript();
 	}
 
 	GLASSERT( 0 );

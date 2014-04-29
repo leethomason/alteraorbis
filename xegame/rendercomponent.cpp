@@ -74,7 +74,7 @@ void RenderComponent::Serialize( XStream* xs )
 	// Can't get context: order is Serialize() then Add()
 	Engine* engine = Engine::Instance();
 
-	//const ChitContext* context = this->GetChitContext();
+	//const ChitContext* context = this->Context();
 	BeginSerialize( xs, "RenderComponent" );
 
 	XarcOpen( xs, "models" );
@@ -103,10 +103,10 @@ void RenderComponent::Serialize( XStream* xs )
 }
 
 
-void RenderComponent::OnAdd( Chit* chit )
+void RenderComponent::OnAdd( Chit* chit, bool init )
 {
-	Component::OnAdd( chit );
-	const ChitContext* context = GetChitContext();
+	Component::OnAdd( chit, init );
+	const ChitContext* context = Context();
 
 	if ( !model[0] ) {
 		model[0] = context->engine->AllocModel( mainAsset.c_str() );
@@ -123,7 +123,7 @@ void RenderComponent::OnAdd( Chit* chit )
 
 void RenderComponent::OnRemove()
 {
-	const ChitContext* context = GetChitContext();
+	const ChitContext* context = Context();
 	Component::OnRemove();
 	for( int i=0; i<NUM_MODELS; ++i ) {
 		if ( model[i] ) {
@@ -249,7 +249,7 @@ bool RenderComponent::Attach( int metaData, const char* asset )
 		return true;
 	}
 
-	const ChitContext* context = GetChitContext();
+	const ChitContext* context = Context();
 	if ( model[metaData] ) {
 		context->engine->FreeModel( model[metaData] );
 	}
@@ -299,7 +299,7 @@ void RenderComponent::Detach( int metaData )
 {
 	GLASSERT( metaData > 0 && metaData < EL_NUM_METADATA );
 	if ( model[metaData] ) {
-		const ChitContext* context = GetChitContext();
+		const ChitContext* context = Context();
 		context->engine->FreeModel( model[metaData] );
 	}
 	model[metaData] = 0;
@@ -340,7 +340,7 @@ int RenderComponent::DoTick( U32 deltaTime )
 		}
 	}
 
-	const ChitContext* context = GetChitContext();
+	const ChitContext* context = Context();
 
 	// Some models are particle emitters; handle those here:
 	for( int i=0; i<NUM_MODELS; ++i ) {
@@ -396,7 +396,7 @@ void RenderComponent::AddDeco( const char* asset, int duration )
 	}
 
 	if ( !found ) {
-		const ChitContext* context = GetChitContext();
+		const ChitContext* context = Context();
 		Icon* icon = icons.PushArr(1);
 		icon->atom = atom;
 		icon->image = 0;
@@ -435,7 +435,7 @@ void RenderComponent::RemoveDeco( const char* asset )
 void RenderComponent::PositionIcons(bool inUse)
 {
 	static const float SIZE = 25.0f;
-	const ChitContext* context = this->GetChitContext();
+	const ChitContext* context = this->Context();
 
 	if (inUse) {
 		const Screenport& port = context->engine->GetScreenport();
@@ -519,7 +519,7 @@ void RenderComponent::ProcessIcons( int delta )
 	Vector3F pos = { 0, 0, 0 };
 	if ( sc ) pos = sc->GetPosition();
 
-	const ChitContext* context = GetChitContext();
+	const ChitContext* context = Context();
 	float len2 = ( context->engine->camera.PosWC() - pos ).LengthSquared();
 	
 	// HACK
@@ -545,7 +545,7 @@ void RenderComponent::ProcessIcons( int delta )
 
 void RenderComponent::SetGroundMark( const char* asset )
 {
-	const ChitContext* context = GetChitContext();
+	const ChitContext* context = Context();
 	if ( groundMark ) {
 		context->engine->FreeModel( groundMark );
 		groundMark = 0;
@@ -688,7 +688,7 @@ void RenderComponent::DebugStr( GLString* str )
 
 void RenderComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {
-	const ChitContext* context = GetChitContext();
+	const ChitContext* context = Context();
 	if ( msg.ID() == ChitMsg::CHIT_DESTROYED_START ) {
 		// Don't self delete.
 

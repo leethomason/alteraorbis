@@ -53,9 +53,9 @@ void PathMoveComponent::Serialize( XStream* item )
 }
 
 
-void PathMoveComponent::OnAdd( Chit* chit )
+void PathMoveComponent::OnAdd( Chit* chit, bool init )
 {
-	super::OnAdd( chit );
+	super::OnAdd( chit, init );
 	blockForceApplied = false;
 	avoidForceApplied = false;
 	forceCount = 0;
@@ -168,7 +168,7 @@ void PathMoveComponent::ComputeDest()
 	if ( !thisComp.okay )
 		return;
 	
-	const ChitContext* context = GetChitContext();
+	const ChitContext* context = Context();
 
 	const Vector2F& posVec = thisComp.spatial->GetPosition2D();
 	bool sameSector = true;
@@ -234,7 +234,7 @@ void PathMoveComponent::SetPosRot( const grinliz::Vector2F& _pos, const grinliz:
 	SpatialComponent* spatial = parentChit->GetSpatialComponent();
 	GLASSERT( spatial );
 
-	const ChitContext* context = GetChitContext();
+	const ChitContext* context = Context();
 
 	Rectangle2F b;
 	b.Set( 0, 0, (float)context->worldMap->Width(), (float)context->worldMap->Height() );
@@ -368,7 +368,7 @@ void PathMoveComponent::AvoidOthers( U32 delta, grinliz::Vector2F* pos2, grinliz
 
 	ChitHasMoveComponent hasMoveComponentFilter;
 	CChitArray chitArr;
-	GetChitBag()->QuerySpatialHash( &chitArr, bounds, parentChit, &hasMoveComponentFilter );
+	Context()->chitBag->QuerySpatialHash( &chitArr, bounds, parentChit, &hasMoveComponentFilter );
 
 	/* Push in a normal direction and slow down, but don't accelerate. */
 
@@ -429,7 +429,7 @@ int PathMoveComponent::DoTick( U32 delta )
 	PROFILE_FUNC();
 
 	int id = parentChit->ID();
-	const ChitContext* context = GetChitContext();
+	const ChitContext* context = Context();
 
 	if ( NeedComputeDest() ) {
 		pathPos = 0;			// clear the old path.

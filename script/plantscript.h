@@ -27,19 +27,19 @@ class GameItem;
 class Chit;
 class Sim;
 
-class PlantScript : public IScript
+class PlantScript : public Component
 {
+	typedef Component super;
 public:
 	PlantScript( int type );
 	virtual ~PlantScript()	{}
 
-	virtual void Init();
 	virtual void Serialize( XStream* xs );
-	virtual void OnAdd();
+	virtual void OnAdd(Chit* parent, bool initialize);
 	virtual void OnRemove();
 
 	virtual int DoTick( U32 delta );
-	virtual const char* ScriptName() { return "PlantScript"; }
+	virtual const char* Name() const { return "PlantScript"; }
 
 	// Plant specific:
 	static GameItem* IsPlant( Chit* chit, int* type, int* stage );

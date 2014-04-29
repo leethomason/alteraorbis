@@ -51,7 +51,7 @@ public:
 
 	virtual void Serialize( XStream* );
 
-	virtual void OnAdd( Chit* chit );
+	virtual void OnAdd( Chit* chit, bool init );
 	virtual void OnRemove();
 	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
 

@@ -79,15 +79,10 @@ CoreScript::~CoreScript()
 }
 
 
-void CoreScript::Init()
-{
-	spawnTick.Randomize( scriptContext->chit->ID() );
-}
-
 
 void CoreScript::Serialize(XStream* xs)
 {
-	XarcOpen(xs, ScriptName());
+	BeginSerialize(xs, Name());
 	XARC_SER(xs, tech);
 	XARC_SER(xs, nElixir);
 	XARC_SER(xs, summonGreater);
@@ -115,28 +110,28 @@ void CoreScript::Serialize(XStream* xs)
 		workQueue = new WorkQueue();
 	}
 	workQueue->Serialize(xs);
-	XarcClose(xs);
+	EndSerialize(xs);
 }
 
 
-void CoreScript::OnAdd()
+void CoreScript::OnAdd(Chit* chit, bool init)
 {
-	GLASSERT( scriptContext->chit->GetSpatialComponent() );
-	GLASSERT( scriptContext->chitBag );
-	GLASSERT( scriptContext->engine->GetMap() );
-
+	super::OnAdd(chit, init);
+	if (init) {
+		spawnTick.Randomize(parentChit->ID());
+	}
 	if ( !workQueue ) {
 		workQueue = new WorkQueue();
 	}
-	Vector2I mapPos = scriptContext->chit->GetSpatialComponent()->GetPosition2DI();
+	Vector2I mapPos = parentChit->GetSpatialComponent()->GetPosition2DI();
 	sector = ToSector(mapPos);
-	workQueue->InitSector( scriptContext->chit, sector );
+	workQueue->InitSector( parentChit, sector );
 
 	int index = sector.y*NUM_SECTORS + sector.x;
 	GLASSERT(coreInfoArr[index].coreScript == 0);
 	coreInfoArr[index].coreScript = this;
 
-	aiTicker.Randomize(scriptContext->chit->random.Rand());
+	aiTicker.Randomize(parentChit->random.Rand());
 }
 
 
@@ -173,7 +168,7 @@ bool CoreScript::IsCitizen( int id )
 Chit* CoreScript::CitizenAtIndex( int index )
 {
 	int id = citizens[index];
-	return scriptContext->chitBag->GetChit( id );
+	return Context()->chitBag->GetChit( id );
 }
 
 
@@ -191,7 +186,7 @@ int CoreScript::NumCitizens()
 	int count=0;
 	while ( i < citizens.Size() ) {
 		int id = citizens[i];
-		if ( scriptContext->chitBag->GetChit( id ) ) {
+		if ( Context()->chitBag->GetChit( id ) ) {
 			++count;
 			++i;
 		}
@@ -203,7 +198,7 @@ int CoreScript::NumCitizens()
 			// This is annoying: seeing if cranking down the spawn rate and not
 			// destroying the sleep tube achieves success.
 			// Also, destroy a sleeptube, so it costs something to replace, and towns can fall.
-			SpatialComponent* sc = scriptContext->chit->GetSpatialComponent();
+			SpatialComponent* sc = parentChit->GetSpatialComponent();
 			GLASSERT( sc );
 			if ( sc ) {
 				Vector2F pos2 = sc->GetPosition2D();
@@ -229,7 +224,7 @@ bool CoreScript::InUse() const
 
 int CoreScript::PrimaryTeam() const
 {
-	const GameItem* item = scriptContext->chit->GetItem();
+	const GameItem* item = parentChit->GetItem();
 	if ( item ) {
 		return item->primaryTeam;
 	}
@@ -267,19 +262,19 @@ int CoreScript::DoTick( U32 delta )
 	static const int RADIUS = 4;
 
 	int primaryTeam = 0;
-	if ( scriptContext->chit->GetItem() ) {
-		primaryTeam = scriptContext->chit->GetItem()->primaryTeam;
+	if ( parentChit->GetItem() ) {
+		primaryTeam = parentChit->GetItem()->primaryTeam;
 	}
 	if ( primaryTeam != team ) {
 		team = primaryTeam;
 		TeamGen gen;
 		ProcRenderInfo info;
 		gen.Assign( team, &info );
-		scriptContext->chit->GetRenderComponent()->SetProcedural( 0, info );
+		parentChit->GetRenderComponent()->SetProcedural( 0, info );
 	}
 
-	bool normalPossible = scriptContext->census->normalMOBs < TYPICAL_MONSTERS;
-	bool greaterPossible = scriptContext->census->greaterMOBs < TYPICAL_GREATER;
+	bool normalPossible = Context()->chitBag->census.normalMOBs < TYPICAL_MONSTERS;
+	bool greaterPossible = Context()->chitBag->census.greaterMOBs < TYPICAL_GREATER;
 
 	bool inUse = InUse();
 
@@ -287,7 +282,7 @@ int CoreScript::DoTick( U32 delta )
 	int maxTech = MaxTech();
 	tech = Clamp( tech, 0.0, double(maxTech)-0.01 );
 
-	MapSpatialComponent* ms = GET_SUB_COMPONENT( scriptContext->chit, SpatialComponent, MapSpatialComponent );
+	MapSpatialComponent* ms = GET_SUB_COMPONENT( parentChit, SpatialComponent, MapSpatialComponent );
 	GLASSERT( ms );
 	Vector2I pos2i = ms->MapPosition();
 	Vector2I sector = { pos2i.x/SECTOR_SIZE, pos2i.y/SECTOR_SIZE };
@@ -297,11 +292,11 @@ int CoreScript::DoTick( U32 delta )
 		// FIXME: essentially caps the #citizens to the capacity of CChitArray (32)
 		// Which just happend to work out with the game design. Citizen limits: 4, 8, 16, 32
 		CChitArray chitArr;
-		scriptContext->chitBag->FindBuildingCC( IStringConst::bed, sector, 0, 0, &chitArr, 0 );
+		Context()->chitBag->FindBuildingCC( IStringConst::bed, sector, 0, 0, &chitArr, 0 );
 		int nCitizens = this->NumCitizens();
 
 		if ( nCitizens < chitArr.Size() && nCitizens < 32 ) {
-			Chit* chit = scriptContext->chitBag->NewDenizen( pos2i, team );
+			Chit* chit = Context()->chitBag->NewDenizen( pos2i, team );
 		}
 
 		if (maxTech >= TECH_ATTRACTS_GREATER) {
@@ -311,7 +306,7 @@ int CoreScript::DoTick( U32 delta )
 				// This feels a little artificial, and 
 				// may need to get revisited as the game
 				// grows.
-				scriptContext->chitBag->AddSummoning(sector, LumosChitBag::SUMMON_TECH);
+				Context()->chitBag->AddSummoning(sector, LumosChitBag::SUMMON_TECH);
 				summonGreater = 0;
 			}
 		}
@@ -321,7 +316,7 @@ int CoreScript::DoTick( U32 delta )
 			  && ( normalPossible || greaterPossible ))
 	{
 #ifdef SPAWN_MOBS
-		if (scriptContext->chitBag->GetSim() && scriptContext->chitBag->GetSim()->SpawnEnabled()) {
+		if (Context()->chitBag->GetSim() && Context()->chitBag->GetSim()->SpawnEnabled()) {
 			// spawn stuff.
 
 			// 0->NUM_SECTORS
@@ -334,7 +329,7 @@ int CoreScript::DoTick( U32 delta )
 			r.Set((float)pos2i.x, (float)(pos2i.y), (float)(pos2i.x + 1), (float)(pos2i.y + 1));
 			CChitArray arr;
 			ChitHasAIComponent hasAIComponent;
-			scriptContext->chitBag->QuerySpatialHash(&arr, r, 0, &hasAIComponent);
+			Context()->chitBag->QuerySpatialHash(&arr, r, 0, &hasAIComponent);
 			if (arr.Size() < 2) {
 				Vector3F pf = { (float)pos2i.x + 0.5f, 0, (float)pos2i.y + 0.5f };
 
@@ -374,12 +369,12 @@ int CoreScript::DoTick( U32 delta )
 					greater *= 4.f;	// special spots for greaters to spawn.
 				}
 
-				float roll = scriptContext->chit->random.Uniform();
+				float roll = parentChit->random.Uniform();
 				bool isGreater = false;
 
 				if (greaterPossible && roll < greater) {
 					const grinliz::CDynArray< grinliz::IString >& greater = ItemDefDB::Instance()->GreaterMOBs();
-					spawn = greater[scriptContext->chit->random.Rand(greater.Size())].c_str();
+					spawn = greater[parentChit->random.Rand(greater.Size())].c_str();
 					isGreater = true;
 				}
 				if (!spawn && normalPossible && (roll < rat)) {
@@ -392,7 +387,7 @@ int CoreScript::DoTick( U32 delta )
 					IString ispawn = StringPool::Intern(spawn, true);
 					int team = GetTeam(ispawn);
 					GLASSERT(team != TEAM_NEUTRAL);
-					Chit* mob = scriptContext->chitBag->NewMonsterChit(pf, spawn, team);
+					Chit* mob = Context()->chitBag->NewMonsterChit(pf, spawn, team);
 				}
 			}
 		}
@@ -405,7 +400,7 @@ int CoreScript::DoTick( U32 delta )
 		TeamGen gen;
 		ProcRenderInfo info;
 		gen.Assign( 0, &info );
-		scriptContext->chit->GetRenderComponent()->SetProcedural( 0, info );
+		parentChit->GetRenderComponent()->SetProcedural( 0, info );
 	}
 	workQueue->DoTick();
 
@@ -445,11 +440,11 @@ void CoreScript::UpdateScore(int n)
 }
 
 
-int CoreScript::MaxTech() const
+int CoreScript::MaxTech()
 {
-	Vector2I sector = ToSector( scriptContext->chit->GetSpatialComponent()->GetPosition2DI() );
+	Vector2I sector = ToSector( parentChit->GetSpatialComponent()->GetPosition2DI() );
 	CChitArray chitArr;
-	scriptContext->chitBag->FindBuildingCC( IStringConst::power, sector, 0, 0, &chitArr, 0 );
+	Context()->chitBag->FindBuildingCC( IStringConst::power, sector, 0, 0, &chitArr, 0 );
 	return Min( chitArr.Size() + 1, TECH_MAX );	// get one power for core
 }
 

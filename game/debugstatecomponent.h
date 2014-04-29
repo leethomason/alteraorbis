@@ -35,7 +35,7 @@ public:
 
 	virtual void Serialize( XStream* xs );
 
-	virtual void OnAdd( Chit* chit );
+	virtual void OnAdd( Chit* chit, bool init );
 	virtual void OnRemove();
 	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
 	virtual int DoTick( U32 delta );

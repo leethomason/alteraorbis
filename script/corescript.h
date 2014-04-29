@@ -23,6 +23,7 @@
 class WorldMap;
 class WorkQueue;
 class LumosChitBag;
+class CoreScript;
 
 struct CoreInfo
 {
@@ -46,19 +47,19 @@ struct CoreAchievement
 };
 
 
-class CoreScript : public IScript
+class CoreScript : public Component
 {
+	typedef Component super;
 public:
 	CoreScript();
 	virtual ~CoreScript();
 
-	virtual void Init();
 	virtual void Serialize( XStream* xs );
-	virtual void OnAdd();
+	virtual void OnAdd(Chit* chit, bool init);
 	virtual void OnRemove();
 
 	virtual int DoTick( U32 delta );
-	virtual const char* ScriptName()	{ return "CoreScript"; }
+	virtual const char* Name() const	{ return "CoreScript"; }
 	virtual CoreScript* ToCoreScript()	{ return this; }
 
 	void AddCitizen( Chit* chit );
@@ -79,7 +80,7 @@ public:
 	const CoreAchievement& GetAchievement() const { return achievement; }
 
 	float GetTech() const			{ return float(tech); }
-	int   MaxTech() const;
+	int   MaxTech();
 	void  AddTech();
 
 	int nElixir;

@@ -20,18 +20,15 @@
 #include "../xegame/cticker.h"
 
 
-class CountDownScript : public IScript
+class CountDownScript : public Component
 {
 public:
 	CountDownScript( int time ) : timer( time ) {}
 	virtual ~CountDownScript()	{}
 
-	virtual void Init()			{}
-	virtual void OnAdd()		{}
-	virtual void OnRemove()		{}
 	virtual void Serialize( XStream* xs );
 	virtual int DoTick( U32 delta );
-	virtual const char* ScriptName() { return "CountDownScript"; }
+	virtual const char* Name() const { return "CountDownScript"; }
 
 private:
 	CTicker timer;

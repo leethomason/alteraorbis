@@ -42,7 +42,7 @@ public:
 
 	virtual void DebugStr( grinliz::GLString* str );
 	virtual void OnChitMsg( Chit* chit, const ChitMsg& msg );
-	virtual void OnAdd( Chit* chit );
+	virtual void OnAdd( Chit* chit, bool init );
 	virtual void OnRemove();
 
 	virtual void Serialize( XStream* xs );

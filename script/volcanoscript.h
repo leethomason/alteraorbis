@@ -16,25 +16,26 @@
 #ifndef VOLCANO_SCRIPT_INCLUDED
 #define VOLCANO_SCRIPT_INCLUDED
 
-#include "scriptcomponent.h"
+#include "../xegame/component.h"
 #include "../xegame/cticker.h"
 #include "../grinliz/glvector.h"
 
 class WorldMap;
 
-class VolcanoScript : public IScript
+class VolcanoScript : public Component
 {
+	typedef Component super;
+
 public:
 	VolcanoScript();
 	virtual ~VolcanoScript()			{}
 
-	virtual void Init();
 	virtual void Serialize( XStream* xs );
-	virtual void OnAdd();
+	virtual void OnAdd(Chit* chit, bool init);
 	virtual void OnRemove();
 
 	virtual int DoTick( U32 delta );
-	virtual const char* ScriptName() { return "VolcanoScript"; }
+	virtual const char* Name() const { return "VolcanoScript"; }
 
 	enum {
 		MAX_RAD = 6

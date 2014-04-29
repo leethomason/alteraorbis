@@ -70,7 +70,7 @@ void ChitBag::DeleteAll()
 }
 
 
-void ChitBag::Serialize(const ComponentFactory* factory, XStream* xs)
+void ChitBag::Serialize(XStream* xs)
 {
 	XarcOpen(xs, "ChitBag");
 	XARC_SER(xs, activeCamera);
@@ -84,7 +84,7 @@ void ChitBag::Serialize(const ComponentFactory* factory, XStream* xs)
 			XarcOpen(xs, "id");
 			xs->Saving()->Set("id", chit->ID());
 			XarcClose(xs);
-			chit->Serialize(factory, xs);
+			chit->Serialize(xs);
 		}
 		XarcClose(xs);
 
@@ -108,7 +108,7 @@ void ChitBag::Serialize(const ComponentFactory* factory, XStream* xs)
 
 			//GLOUTPUT(( "loading chit id=%d\n", id ));
 			Chit* c = this->NewChit(id);
-			c->Serialize(factory, xs);
+			c->Serialize(xs);
 		}
 		XarcClose(xs);
 

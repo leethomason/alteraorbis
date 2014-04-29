@@ -58,9 +58,9 @@ void DebugStateComponent::Serialize( XStream* xs )
 }
 
 
-void DebugStateComponent::OnAdd( Chit* chit )
+void DebugStateComponent::OnAdd( Chit* chit, bool init )
 {
-	super::OnAdd( chit );
+	super::OnAdd( chit, init );
 	map->overlay0.Add( &healthBar );
 
 	healthBar.SetSize( SIZE_X, SIZE_Y );

@@ -26,18 +26,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // that the spatial component will be going away for
 // performance reasons and I'm hesitant to add code there.
 
-class EvalBuildingScript : public IScript
+class EvalBuildingScript : public Component
 {
+	typedef Component super;
 public:
 	EvalBuildingScript() : lastEval(0), eval(0), reachable(true), timer(2000) {}
 	virtual ~EvalBuildingScript()	{}
 
-	virtual void Init()			{}
-	virtual void OnAdd();
+	virtual void OnAdd(Chit* chit, bool init);
 	virtual void OnRemove()		{}
 	virtual void Serialize(XStream* xs);
 	virtual int DoTick(U32 delta);
-	virtual const char* ScriptName()	{ return "EvalBuildingScript"; }
+	virtual const char* Name() const	{ return "EvalBuildingScript"; }
 
 	virtual EvalBuildingScript* ToEvalBuildingScript() { return this; }
 	double EvalIndustrial(bool debugLog);

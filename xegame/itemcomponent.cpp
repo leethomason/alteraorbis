@@ -105,7 +105,7 @@ void ItemComponent::Serialize( XStream* xs )
 void ItemComponent::NameItem( GameItem* item )
 {
 	bool shouldHaveName = item->Traits().Level() >= LEVEL_OF_NAMING;
-	const ChitContext* context = this->GetChitContext();
+	const ChitContext* context = this->Context();
 
 	if ( shouldHaveName ) {
 		if ( item->IProperName().empty() ) {
@@ -332,7 +332,7 @@ void ItemComponent::UpdateActive()
 
 void ItemComponent::NewsDestroy( const GameItem* item )
 {
-	NewsHistory* history = this->GetChitBag()->GetNewsHistory();
+	NewsHistory* history = Context()->chitBag->GetNewsHistory();
 	GLASSERT(history);
 
 	Vector2F pos = { 0, 0 };
@@ -340,7 +340,7 @@ void ItemComponent::NewsDestroy( const GameItem* item )
 		pos = parentChit->GetSpatialComponent()->GetPosition2D();
 	}
 
-	Chit* destroyer = parentChit->GetChitBag()->GetChit( lastDamageID );
+	Chit* destroyer = Context()->chitBag->GetChit( lastDamageID );
 
 	int msg = 0;
 	if ( item->keyValues.Get( ISC::destroyMsg, &msg ) == 0 ) {
@@ -351,7 +351,7 @@ void ItemComponent::NewsDestroy( const GameItem* item )
 
 void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {
-	const ChitContext* context = GetChitContext();
+	const ChitContext* context = Context();
 	GameItem* mainItem = itemArr[0];
 	GLASSERT( !mainItem->IName().empty() );
 
@@ -391,7 +391,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 					if ( pathMove ) {
 						physics = new PhysicsMoveComponent( true );
 						parentChit->Remove( pathMove );
-						GetChitBag()->DeferredDelete( pathMove );
+						Context()->chitBag->DeferredDelete( pathMove );
 						parentChit->Add( physics );
 					}
 					static const float FORCE = 4.0f;
@@ -432,7 +432,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 
 		// report XP back to what hit us.
 		int originID = info->originID;
-		Chit* origin = GetChitBag()->GetChit( originID );
+		Chit* origin = Context()->chitBag->GetChit( originID );
 		if ( origin && origin->GetItemComponent() ) {
 			bool killshot = mainItem->hp == 0 && !(mainItem->flags & GameItem::INDESTRUCTABLE);
 			origin->GetItemComponent()->AddBattleXP( info->isMelee, 
@@ -502,7 +502,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		if ( mobFilter.Accept( parentChit ) || mainItem->wallet.NumCrystals() || this->NumCarriedItems() ) {
 			dropItems = true;
 			if ( !w.IsEmpty() ) {
-				parentChit->GetLumosChitBag()->NewWalletChits( pos, w );
+				Context()->chitBag->NewWalletChits( pos, w );
 				w.EmptyWallet();
 			}
 		}
@@ -519,7 +519,7 @@ void ItemComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			GameItem* item = itemArr.Pop();
 			GLASSERT( !item->IName().empty() );
 			if ( dropItems ) {
-				parentChit->GetLumosChitBag()->NewItemChit( pos, item, true, true, 0 );
+				Context()->chitBag->NewItemChit( pos, item, true, true, 0 );
 			}
 			else {
 				ReserveBank::Instance()->bank.Add( item->wallet.EmptyWallet() );
@@ -577,11 +577,11 @@ void ItemComponent::DoSlowTick()
 		if ( sc ) {
 			if ( mainItem->accruedFire ) {
 				ChitEvent event = ChitEvent::EffectEvent( sc->GetPosition2D(), EFFECT_RADIUS, GameItem::EFFECT_FIRE, mainItem->accruedFire );
-				GetChitBag()->QueueEvent( event );
+				Context()->chitBag->QueueEvent( event );
 			}
 			if ( mainItem->accruedShock ) {
 				ChitEvent event = ChitEvent::EffectEvent( sc->GetPosition2D(), EFFECT_RADIUS, GameItem::EFFECT_SHOCK, mainItem->accruedShock );
-				GetChitBag()->QueueEvent( event );
+				Context()->chitBag->QueueEvent( event );
 			}
 		}
 	}
@@ -593,7 +593,7 @@ void ItemComponent::DoSlowTick()
 
 			Vector2F pos = parentChit->GetSpatialComponent()->GetPosition2D();
 			GoldCrystalFilter goldCrystalFilter;
-			GetChitBag()->QuerySpatialHash( &arr, pos, PICKUP_RANGE, 0, &goldCrystalFilter );
+			Context()->chitBag->QuerySpatialHash( &arr, pos, PICKUP_RANGE, 0, &goldCrystalFilter );
 			for( int i=0; i<arr.Size(); ++i ) {
 				Chit* gold = arr[i];
 				GLASSERT( parentChit != gold );
@@ -616,7 +616,7 @@ int ItemComponent::DoTick( U32 delta )
 		SetHardpoints();
 		hardpointsModified = false;
 	}
-	const ChitContext* context = GetChitContext();
+	const ChitContext* context = Context();
 
 	GameItem* mainItem = itemArr[0];
 
@@ -671,20 +671,20 @@ int ItemComponent::DoTick( U32 delta )
 }
 
 
-void ItemComponent::OnAdd( Chit* chit )
+void ItemComponent::OnAdd( Chit* chit, bool init )
 {
 	GameItem* mainItem = itemArr[0];
 	GLASSERT( itemArr.Size() >= 1 );	// the one true item
-	super::OnAdd( chit );
+	super::OnAdd( chit, init );
 	hardpointsModified = true;
 
-	if ( parentChit->GetLumosChitBag() ) {
+	if ( Context()->chitBag ) {
 		IString mob = mainItem->keyValues.GetIString( "mob" );
 		if ( mob == IStringConst::lesser ) {
-			parentChit->GetLumosChitBag()->census.normalMOBs += 1;
+			Context()->chitBag->census.normalMOBs += 1;
 		}
 		else if ( mob == IStringConst::greater ) {
-			parentChit->GetLumosChitBag()->census.greaterMOBs += 1;
+			Context()->chitBag->census.greaterMOBs += 1;
 		}
 	}
 	slowTick.SetPeriod( 500 + (chit->ID() & 128));
@@ -695,14 +695,14 @@ void ItemComponent::OnAdd( Chit* chit )
 void ItemComponent::OnRemove() 
 {
 	GameItem* mainItem = itemArr[0];
-	if ( parentChit->GetLumosChitBag() ) {
+	if ( Context()->chitBag ) {
 		IString mob;
 		mainItem->keyValues.Get( ISC::mob, &mob );
 		if ( mob == IStringConst::lesser ) {
-			parentChit->GetLumosChitBag()->census.normalMOBs -= 1;
+			Context()->chitBag->census.normalMOBs -= 1;
 		}
 		else if ( mob == IStringConst::greater ) {
-			parentChit->GetLumosChitBag()->census.greaterMOBs -= 1;
+			Context()->chitBag->census.greaterMOBs -= 1;
 		}
 	}
 	super::OnRemove();
@@ -711,7 +711,7 @@ void ItemComponent::OnRemove()
 
 bool ItemComponent::EmitEffect( const GameItem& it, U32 delta )
 {
-	const ChitContext* context = GetChitContext();
+	const ChitContext* context = Context();
 	ParticleSystem* ps = context->engine->particleSystem;
 	bool emitted = false;
 
@@ -873,7 +873,7 @@ void ItemComponent::Drop( const GameItem* item )
 		if ( itemArr[i]->Intrinsic() )
 			continue;
 		if ( itemArr[i] == item ) {
-			parentChit->GetLumosChitBag()->NewItemChit( parentChit->GetSpatialComponent()->GetPosition(), 
+			Context()->chitBag->NewItemChit(parentChit->GetSpatialComponent()->GetPosition(),
 														itemArr[i], true, true, 0 );
 			itemArr.Remove(i);
 			UpdateActive();

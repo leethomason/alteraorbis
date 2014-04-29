@@ -102,11 +102,12 @@ class LumosGame;
 
 struct ChitContext
 {
-	ChitContext() : engine(0), worldMap(0), game(0) {}
-	void Set( Engine* e, WorldMap* wm, LumosGame* g ) {
+	ChitContext() : engine(0), worldMap(0), game(0), chitBag(0) {}
+	void Set( Engine* e, WorldMap* wm, LumosGame* g) {
 		this->engine = e;
 		this->worldMap = wm;
 		this->game = g;
+		//this->chitBag = cb;	// set when added
 	}
 
 	// cross-engine
@@ -115,6 +116,7 @@ struct ChitContext
 	// game specific
 	WorldMap*	worldMap;
 	LumosGame*	game;
+	LumosChitBag* chitBag;
 };
 
 
@@ -130,7 +132,7 @@ public:
 	void  DeleteChit( Chit* );
 	Chit* GetChit( int id );
 
-	virtual void Serialize( const ComponentFactory* factory, XStream* xs );
+	virtual void Serialize( XStream* xs );
 
 	// Bolts are a special kind of chit. Just easier
 	// and faster to treat them as a 2nd stage.
@@ -201,7 +203,7 @@ public:
 	int GetCameraChitID() const { return activeCamera; }
 
 	virtual LumosChitBag* ToLumos() { return 0; }
-	const ChitContext* GetContext() const { return &chitContext; }
+	const ChitContext* Context() const { return &chitContext; }
 
 	NewsHistory* GetNewsHistory() { return newsHistory;  }
 
@@ -226,6 +228,9 @@ public:
 		}
 	}
 
+protected:
+	ChitContext chitContext;
+
 private:
 	void ProcessDeleteList();
 
@@ -245,7 +250,6 @@ private:
 	U32 bagTime;
 	int nTicked;
 	int activeCamera;
-	ChitContext chitContext;
 	NewsHistory* newsHistory;
 
 	struct CompID { 

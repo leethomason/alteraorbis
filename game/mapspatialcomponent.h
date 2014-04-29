@@ -33,7 +33,7 @@ public:
 	virtual const char* Name() const { return "MapSpatialComponent"; }
 	virtual MapSpatialComponent*	ToMapSpatialComponent()			{ return this; }
 
-	virtual void OnAdd( Chit* chit );
+	virtual void OnAdd( Chit* chit, bool init );
 	virtual void OnRemove();
 	virtual void Serialize( XStream* xs );
 

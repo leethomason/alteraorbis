@@ -21,15 +21,18 @@ GuardScript::GuardScript() : timer(1000)
 
 void GuardScript::Serialize(XStream* xs)
 {
-	XarcOpen(xs, ScriptName());
+	BeginSerialize(xs, Name());
 	timer.Serialize(xs, "timer");
-	XarcClose(xs);
+	EndSerialize(xs);
 }
 
 
-void GuardScript::OnAdd()
+void GuardScript::OnAdd(Chit* chit, bool init)
 {
-	timer.Randomize(scriptContext->chit->random.Rand());
+	super::OnAdd(chit, init);
+	if (init) {
+		timer.Randomize(parentChit->random.Rand());
+	}
 }
 
 
@@ -37,7 +40,7 @@ int GuardScript::DoTick(U32 delta)
 {
 	if (timer.Delta(delta)) {
 		// Check for enemies.
-		Vector2I pos2i = scriptContext->chit->GetSpatialComponent()->GetPosition2DI();
+		Vector2I pos2i = parentChit->GetSpatialComponent()->GetPosition2DI();
 		Vector2I sector = ToSector(pos2i);
 		Rectangle2I innerSector = InnerSectorBounds(sector);
 
@@ -52,8 +55,8 @@ int GuardScript::DoTick(U32 delta)
 		MOBIshFilter enemyFilter;
 		CArray<int, 8> enemyID;
 
-		enemyFilter.CheckRelationship(scriptContext->chit, RELATE_ENEMY);
-		scriptContext->chitBag->QuerySpatialHash(&enemyArr, rf, 0, &enemyFilter);
+		enemyFilter.CheckRelationship(parentChit, RELATE_ENEMY);
+		Context()->chitBag->QuerySpatialHash(&enemyArr, rf, 0, &enemyFilter);
 		for (int i = 0; i < enemyArr.Size() && enemyID.HasCap(); ++i) {
 			// convert to IDs for MakeAware()
 			enemyID.Push(enemyArr[i]->ID());
@@ -67,9 +70,9 @@ int GuardScript::DoTick(U32 delta)
 
 			CChitArray friendArr;
 			MOBIshFilter friendFilter;
-			friendFilter.CheckRelationship(scriptContext->chit, RELATE_FRIEND);
+			friendFilter.CheckRelationship(parentChit, RELATE_FRIEND);
 
-			scriptContext->chitBag->QuerySpatialHash(&friendArr, rf, 0, &friendFilter);
+			Context()->chitBag->QuerySpatialHash(&friendArr, rf, 0, &friendFilter);
 			for (int i = 0; i < friendArr.Size(); ++i) {
 				AIComponent* ai = friendArr[i]->GetAIComponent();
 				if (ai) {

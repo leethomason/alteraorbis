@@ -39,10 +39,10 @@ DebugPathComponent::~DebugPathComponent()
 }
 
 
-void DebugPathComponent::OnAdd( Chit* chit )
+void DebugPathComponent::OnAdd( Chit* chit, bool init )
 {
-	super::OnAdd( chit );
-	const ChitContext* context = GetChitContext();
+	super::OnAdd( chit, init );
+	const ChitContext* context = Context();
 	model = context->engine->AllocModel( resource );
 	model->SetFlag( Model::MODEL_NO_SHADOW );
 }
@@ -51,7 +51,7 @@ void DebugPathComponent::OnAdd( Chit* chit )
 void DebugPathComponent::OnRemove()
 {
 	// Get the context before remove - still valid but parent chit goes away.
-	const ChitContext* context = GetChitContext();
+	const ChitContext* context = Context();
 
 	super::OnRemove();
 	if ( model ) {

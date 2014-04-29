@@ -34,21 +34,21 @@ FarmScript::FarmScript() : timer( 2000 )
 
 void FarmScript::Serialize( XStream* xs )
 {
-	XarcOpen( xs, ScriptName() );
+	BeginSerialize(xs, Name());
 	XARC_SER( xs, fruitGrowth );
 	timer.Serialize( xs, "timer" );
-	XarcClose( xs );
+	EndSerialize(xs);
 }
 
 
-void FarmScript::Init()
-{
-	timer.SetPeriod( FARM_SCRIPT_CHECK + scriptContext->chit->random.Rand(FARM_SCRIPT_CHECK/16));
-}
 
 
-void FarmScript::OnAdd()
+void FarmScript::OnAdd(Chit* chit, bool init)
 {
+	super::OnAdd(chit, init);
+	if (init) {
+		timer.Randomize(parentChit->random.Rand());
+	}
 	//const ChitContext* context = scriptContext->chit->GetChitContext();
 	TextureManager* tm = TextureManager::Instance();
 	const Texture* t = tm->GetTexture("farmzone");
@@ -56,7 +56,7 @@ void FarmScript::OnAdd()
 	RenderAtom atom((const void*)WorldMap::RENDERSTATE_MAP_TRANSLUCENT,
 		(const void*)t,
 		0, 0, 1, 1 );
-	baseImage.Init(&scriptContext->engine->GetMap()->overlay0, atom, true);
+	baseImage.Init(&Context()->engine->GetMap()->overlay0, atom, true);
 	baseImage.SetSlice(true);
 }
 
@@ -71,7 +71,7 @@ int FarmScript::GrowFruitTime( int stage, int nPlants )
 
 void FarmScript::ComputeFarmBound()
 {
-	MapSpatialComponent* msc = GET_SUB_COMPONENT(scriptContext->chit, SpatialComponent, MapSpatialComponent);
+	MapSpatialComponent* msc = GET_SUB_COMPONENT(parentChit, SpatialComponent, MapSpatialComponent);
 	GLASSERT(msc);
 	if (!msc) return;
 	Vector2I pos2i = msc->MapPosition();
@@ -83,7 +83,7 @@ void FarmScript::ComputeFarmBound()
 	float rad = float(FARM_GROW_RAD)*2.f + 0.1f;
 	ItemNameFilter filter(IStringConst::farm, IChitAccept::MAP);
 	CChitArray array;
-	scriptContext->chitBag->QuerySpatialHash(&array, ToWorld2F(pos2i), rad, scriptContext->chit, &filter);
+	Context()->chitBag->QuerySpatialHash(&array, ToWorld2F(pos2i), rad, parentChit, &filter);
 
 	// This bound needs to trim to qBounds. Sort of a tricky
 	// algorithm. Similar to the "block" algorithm. Also, what
@@ -112,7 +112,7 @@ void FarmScript::ComputeFarmBound()
 int FarmScript::DoTick( U32 delta )
 {
 	int n = timer.Delta( delta );
-	MapSpatialComponent* msc = GET_SUB_COMPONENT( scriptContext->chit, SpatialComponent, MapSpatialComponent );
+	MapSpatialComponent* msc = GET_SUB_COMPONENT(parentChit, SpatialComponent, MapSpatialComponent);
 	if (!msc) return VERY_LONG_TICK;	// static analysis
 
 	while ( n && msc ) {
@@ -126,7 +126,7 @@ int FarmScript::DoTick( U32 delta )
 		PlantFilter filter;
 		CChitArray plantArr;
 		GLASSERT(plantArr.Capacity() >= FARM_GROW_RAD*FARM_GROW_RAD - 1);
-		scriptContext->chitBag->QuerySpatialHash( &plantArr, bounds, 0, &filter );
+		Context()->chitBag->QuerySpatialHash( &plantArr, bounds, 0, &filter );
 		
 		int growth = 0;
 
@@ -157,14 +157,14 @@ int FarmScript::DoTick( U32 delta )
 
 		const GameItem& def = ItemDefDB::Instance()->Get( "fruit" );
 		GameItem* gameItem = new GameItem( def );
-		scriptContext->chitBag->NewItemChit( ToWorld3F( r.min ),
+		Context()->chitBag->NewItemChit( ToWorld3F( r.min ),
 											 gameItem,
 											 true,
 											 true,
 											 FRUIT_SELF_DESTRUCT );
 	}
 
-	RenderComponent* rc = scriptContext->chit->GetRenderComponent();
+	RenderComponent* rc = parentChit->GetRenderComponent();
 	if (rc) {
 		CStr<32> str;
 		//str.Format("%d,%d-%d,%d e=%d", farmBounds.min.x, farmBounds.min.y, farmBounds.max.x, farmBounds.max.y, efficiency);

@@ -153,8 +153,6 @@ void Sim::Load( const char* mapDAT, const char* gameDAT )
 	}
 	else {
 		//QuickProfile qp( "Sim::Load" );
-		ComponentFactory factory( this, &chitBag->census, engine, worldMap, chitBag, weather, lumosGame );
-
 		GLString path;
 		GetSystemPath(GAME_SAVE_DIR, gameDAT, &path);
 
@@ -175,7 +173,7 @@ void Sim::Load( const char* mapDAT, const char* gameDAT )
 			reserveBank->Serialize( &reader );
 			visitors->Serialize( &reader );
 			engine->camera.Serialize( &reader );
-			chitBag->Serialize( &factory, &reader );
+			chitBag->Serialize( &reader );
 
 			XarcClose( &reader );
 
@@ -198,8 +196,6 @@ void Sim::Save( const char* mapDAT, const char* gameDAT )
 	{
 		QuickProfile qp( "Sim::SaveXarc" );
 
-		ComponentFactory factory( this, &chitBag->census, engine, worldMap, chitBag, weather, lumosGame );
-
 		GLString path;
 		GetSystemPath(GAME_SAVE_DIR, gameDAT, &path);
 		FILE* fp = fopen(path.c_str(), "wb");
@@ -217,7 +213,7 @@ void Sim::Save( const char* mapDAT, const char* gameDAT )
 			reserveBank->Serialize( &writer );
 			visitors->Serialize( &writer );
 			engine->camera.Serialize( &writer );
-			chitBag->Serialize( &factory, &writer );
+			chitBag->Serialize( &writer );
 
 			XarcClose( &writer );
 			fclose( fp );
@@ -253,7 +249,7 @@ void Sim::CreateCores()
 void Sim::OnChitMsg(Chit* chit, const ChitMsg& msg)
 {
 	if (msg.ID() == ChitMsg::CHIT_DESTROYED_START) {
-		if (chit->GetScript("CoreScript")) {
+		if (chit->GetComponent("CoreScript")) {
 			Vector2I pos2i = chit->GetSpatialComponent()->GetPosition2DI();
 			Vector2I sector = ToSector(pos2i);
 			coreCreateList.Push(sector);
@@ -330,7 +326,7 @@ CoreScript* Sim::CreateCore( const Vector2I& sector, int team)
 		GLASSERT(ms);
 		ms->SetMode(GRID_IN_USE);
 		CoreScript* cs = new CoreScript();
-		chit->Add(new ScriptComponent(cs));
+		chit->Add(cs);
 
 		chit->GetItem()->SetProperName(sd.name);
 
@@ -342,7 +338,7 @@ CoreScript* Sim::CreateCore( const Vector2I& sector, int team)
 				chitBag->SetHomeSector(sector);
 			}
 			// Make the dwellers defend the core.
-			chit->Add(new ScriptComponent(new GuardScript()));
+			chit->Add(new GuardScript());
 		}
 
 		return cs;
@@ -641,7 +637,7 @@ void Sim::CreateVolcano( int x, int y )
 
 	Chit* chit = chitBag->NewChit();
 	chit->Add( new SpatialComponent() );
-	chit->Add( new ScriptComponent( new VolcanoScript()));
+	chit->Add( new VolcanoScript());
 
 	chit->GetSpatialComponent()->SetPosition( (float)x+0.5f, 0.0f, (float)y+0.5f );
 }
@@ -714,7 +710,7 @@ Chit* Sim::CreatePlant( int x, int y, int type )
 		chit->Add( ms );
 
 		chit->Add( new HealthComponent() );
-		chit->Add( new ScriptComponent( new PlantScript( type )));
+		chit->Add( new PlantScript( type ));
 		return chit;
 	}
 	return 0;

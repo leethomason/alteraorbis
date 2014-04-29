@@ -18,6 +18,8 @@
 
 #include "../xegame/component.h"
 
+#if 0
+
 class ComponentFactory;
 class Census;
 class CoreScript;
@@ -100,5 +102,5 @@ private:
 	IScript* script;
 	const ComponentFactory* factory;
 };
-
+#endif
 #endif // VOLCANO_COMPONENT_INCLUDED

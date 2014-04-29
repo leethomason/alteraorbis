@@ -2,11 +2,11 @@
 #include "../game/lumosgame.h"
 #include "../game/gameitem.h"
 #include "../game/news.h"
+#include "../game/lumoschitbag.h"
 
 #include "../xegame/itemcomponent.h"
 #include "../xegame/chit.h"
 #include "../xegame/spatialcomponent.h"
-#include "../xegame/chitbag.h"
 
 #include "../engine/engine.h"
 
@@ -195,7 +195,11 @@ void ForgeScene::SetModel( bool randomTraits )
 						partsFlags, effectFlags, 
 						item, &crystalRequired, &techRequired, randomTraits );
 
-	ChitBag* chitBag = forgeData->itemComponent->ParentChit() ? forgeData->itemComponent->ParentChit()->GetChitBag() : 0;	// eek. hacky.
+	Chit* parentChit = forgeData->itemComponent->ParentChit();;
+	LumosChitBag* chitBag = 0;
+	if (parentChit) {
+		chitBag = parentChit->Context()->chitBag;
+	}
 	itemDescWidget.SetInfo( item, &humanMale, false, chitBag );
 
 	ProcRenderInfo info;
@@ -256,7 +260,7 @@ void ForgeScene::ItemTapped( const gamui::UIItem* uiItem )
 		item->wallet.Add( crystalRequired );	// becomes part of the item, and will be returned to Reserve when item is destroyed.
 
 		Chit* chit = forgeData->itemComponent->ParentChit();
-		NewsHistory* history = (chit && chit->GetChitBag()) ? chit->GetChitBag()->GetNewsHistory() :0;	// eek. hacky.
+		NewsHistory* history = (chit && chit->Context()->chitBag) ? chit->Context()->chitBag->GetNewsHistory() :0;	// eek. hacky.
 		if (chit && history) {
 			Vector2F pos = { 0, 0 };
 			if ( chit->GetSpatialComponent() ) pos = chit->GetSpatialComponent()->GetPosition2D();

@@ -59,7 +59,7 @@ int HealthComponent::DoTick(U32 delta)
 		parentChit->SetDestroyed(this, parentChit->Destroyed() + delta);
 		if ( parentChit->Destroyed() >= COUNTDOWN ) {
 			parentChit->SendMessage( ChitMsg( ChitMsg::CHIT_DESTROYED_END ), this );
-			GetChitBag()->QueueDelete( parentChit );
+			Context()->chitBag->QueueDelete( parentChit );
 		}
 		else {
 			ChitMsg msg( ChitMsg::CHIT_DESTROYED_TICK );
@@ -75,7 +75,7 @@ void HealthComponent::DeltaHealth()
 {
 	if ( parentChit->Destroyed() )
 		return;
-	const ChitContext* context = GetChitContext();
+	const ChitContext* context = Context();
 
 	GameItem* item = 0;
 	if ( parentChit->GetItemComponent() ) {
@@ -108,12 +108,12 @@ void HealthComponent::DeltaHealth()
 					else if ( mob == ISC::denizen ) asset = "tombstoneDenizen";
 
 					if ( asset ) {
-						Chit* chit = GetLumosChitBag()->NewChit();
+						Chit* chit = Context()->chitBag->NewChit();
 
-						GetLumosChitBag()->AddItem( "tombstone", chit, context->engine, 0, 0, asset );
+						Context()->chitBag->AddItem( "tombstone", chit, context->engine, 0, 0, asset );
 						chit->Add( new SpatialComponent() );
 						chit->Add( new RenderComponent( asset ));
-						chit->Add( new ScriptComponent( new CountDownScript( 30*1000 )));
+						chit->Add( new CountDownScript( 30*1000 ));
 
 						Vector3F pos = parentChit->GetSpatialComponent()->GetPosition();
 						float r = parentChit->GetSpatialComponent()->GetYRotation();
@@ -150,7 +150,7 @@ void HealthComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 			Vector3F pos;
 			render->CalcTrigger( &pos, 0 );
 
-			const ChitContext* context = GetChitContext();
+			const ChitContext* context = Context();
 			BattleMechanics::MeleeAttack( context->engine, parentChit, item );
 			context->engine->particleSystem->EmitPD( "meleeImpact", pos, V3F_UP, 0 );
 		}

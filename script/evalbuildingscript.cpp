@@ -13,15 +13,18 @@ using namespace grinliz;
 
 void EvalBuildingScript::Serialize(XStream* xs)
 {
-	XarcOpen(xs, ScriptName());
-	XarcClose(xs);
+	BeginSerialize(xs, Name());
+	EndSerialize(xs);
 }
 
 
-void EvalBuildingScript::OnAdd()
+void EvalBuildingScript::OnAdd(Chit* chit, bool init)
 {
-	// Use this opportunity to spread timers out.
-	timer.Randomize(scriptContext->chit->ID());
+	super::OnAdd(chit, init);
+	if (init) {
+		// Use this opportunity to spread timers out.
+		timer.Randomize(parentChit->ID());
+	}
 }
 
 
@@ -33,8 +36,8 @@ double EvalBuildingScript::EvalIndustrial( bool debugLog )
 	int hitShrub = 0;	// doesn't terminate a ray.
 
 
-	if (lastEval == 0 || (scriptContext->chitBag->AbsTime() - lastEval) > 2000) {
-		lastEval = scriptContext->chitBag->AbsTime();
+	if (lastEval == 0 || (Context()->chitBag->AbsTime() - lastEval) > 2000) {
+		lastEval = Context()->chitBag->AbsTime();
 
 		GameItem* item = building->GetItem();
 		GLASSERT(item);
@@ -64,7 +67,7 @@ double EvalBuildingScript::EvalIndustrial( bool debugLog )
 
 		bounds.Outset(RAD);
 
-		WorldMap* worldMap = scriptContext->chitBag->GetContext()->worldMap;
+		WorldMap* worldMap = Context()->worldMap;
 		Rectangle2I mapBounds = worldMap->Bounds();
 		if (!mapBounds.Contains(bounds)) {
 			eval = 0;
@@ -80,7 +83,7 @@ double EvalBuildingScript::EvalIndustrial( bool debugLog )
 		PlantFilter plantFilter;
 		int hasWaterfalls = worldMap->ContainsWaterfall(bounds);
 
-		LumosChitBag* chitBag = building->GetLumosChitBag();
+		LumosChitBag* chitBag = Context()->chitBag;
 		Rectangle2IEdgeIterator it(bounds);
 
 		while (!it.Done()) {
@@ -193,7 +196,7 @@ double EvalBuildingScript::EvalIndustrial( bool debugLog )
 int EvalBuildingScript::DoTick(U32 delta)
 {
 	if (timer.Delta(delta)) {
-		MapSpatialComponent* msc = GET_SUB_COMPONENT(scriptContext->chit, SpatialComponent, MapSpatialComponent);
+		MapSpatialComponent* msc = GET_SUB_COMPONENT(parentChit, SpatialComponent, MapSpatialComponent);
 		if (msc) {
 			msc->UpdatePorch(false);
 		}

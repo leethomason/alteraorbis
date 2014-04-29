@@ -112,7 +112,7 @@ bool BattleMechanics::InMeleeZone(	Engine* engine,
 bool BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* weapon )
 {
 	GLASSERT( engine && src && weapon );
-	ChitBag* chitBag = src->GetChitBag();
+	ChitBag* chitBag = src->Context()->chitBag;
 	GLASSERT( chitBag );
 
 	U32 absTime = chitBag->AbsTime();

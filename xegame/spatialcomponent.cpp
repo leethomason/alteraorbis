@@ -21,6 +21,7 @@
 
 #include "../engine/engine.h"
 #include "../grinliz/glmatrix.h"
+#include "../game/lumoschitbag.h"
 
 using namespace grinliz;
 
@@ -48,18 +49,14 @@ void SpatialComponent::SetPosRot( const Vector3F& v, const Quaternion& _q )
 		int oldY = (int)position.z;
 		int newX = (int)v.x;
 		int newY = (int)v.z;
-		if ( parentChit ) {
-			parentChit->GetChitBag()->UpdateSpatialHash( parentChit, oldX, oldY, newX, newY );
-		}
+		Context()->chitBag->UpdateSpatialHash( parentChit, oldX, oldY, newX, newY );
 	}
 	
 	if ( posChange || rotChange ) {
 		position = v;
 		rotation = q;
 
-		if ( parentChit ) {
-			parentChit->SetTickNeeded();
-		}
+		parentChit->SetTickNeeded();
 	}
 }
 
@@ -117,17 +114,17 @@ void SpatialComponent::Serialize( XStream* xs )
 
 
 
-void SpatialComponent::OnAdd( Chit* chit )
+void SpatialComponent::OnAdd( Chit* chit, bool init )
 {
-	Component::OnAdd( chit );
+	Component::OnAdd( chit, init );
 	GLASSERT( chit == parentChit );
-	parentChit->GetChitBag()->AddToSpatialHash( chit, (int)position.x, (int)position.z );
+	Context()->chitBag->AddToSpatialHash( chit, (int)position.x, (int)position.z );
 }
 
 
 void SpatialComponent::OnRemove()
 {
-	parentChit->GetChitBag()->RemoveFromSpatialHash( parentChit, (int)position.x, (int)position.z );
+	Context()->chitBag->RemoveFromSpatialHash( parentChit, (int)position.x, (int)position.z );
 	Component::OnRemove();
 }
 

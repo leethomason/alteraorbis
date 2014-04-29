@@ -8,7 +8,7 @@
 
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/chit.h"
-#include "../xegame/chitbag.h"
+#include "../game/lumoschitbag.h"
 
 using namespace grinliz;
 
@@ -37,9 +37,9 @@ void PhysicsMoveComponent::Serialize( XStream* xs )
 }
 
 
-void PhysicsMoveComponent::OnAdd( Chit* chit )
+void PhysicsMoveComponent::OnAdd( Chit* chit, bool init )
 {
-	super::OnAdd( chit );
+	super::OnAdd( chit, init );
 }
 
 
@@ -150,7 +150,7 @@ void TrackingMoveComponent::CalcVelocity( grinliz::Vector3F* v )
 {
 	v->Zero();
 
-	Chit* chit = GetChitBag()->GetChit( target );
+	Chit* chit = Context()->chitBag->GetChit( target );
 	if ( !chit || !chit->GetSpatialComponent() || !parentChit->GetSpatialComponent() ) 
 		return;
 
@@ -165,8 +165,8 @@ void TrackingMoveComponent::CalcVelocity( grinliz::Vector3F* v )
 
 bool TrackingMoveComponent::IsMoving()
 {
-	Chit* chit = GetChitBag()->GetChit( target );
-	if ( !chit || !chit->GetSpatialComponent() || !parentChit->GetSpatialComponent() ) 
+	Chit* chit = Context()->chitBag->GetChit(target);
+	if (!chit || !chit->GetSpatialComponent() || !parentChit->GetSpatialComponent())
 		return false;
 
 	Vector3F targetPos = chit->GetSpatialComponent()->GetPosition();
@@ -177,9 +177,9 @@ bool TrackingMoveComponent::IsMoving()
 
 int TrackingMoveComponent::DoTick( U32 deltaTime )
 {
-	Chit* chit = GetChitBag()->GetChit( target );
-	if ( !chit || !chit->GetSpatialComponent() || !parentChit->GetSpatialComponent() ) {
-		GetChitBag()->QueueRemoveAndDeleteComponent( this );
+	Chit* chit = Context()->chitBag->GetChit(target);
+	if (!chit || !chit->GetSpatialComponent() || !parentChit->GetSpatialComponent()) {
+		Context()->chitBag->QueueRemoveAndDeleteComponent( this );
 		return VERY_LONG_TICK;
 	}
 
@@ -196,7 +196,7 @@ int TrackingMoveComponent::DoTick( U32 deltaTime )
 		parentChit->GetSpatialComponent()->SetPosition( targetPos );
 		ChitMsg msg( ChitMsg::CHIT_TRACKING_ARRIVED, 0, parentChit );
 		chit->SendMessage( msg );
-		GetChitBag()->QueueRemoveAndDeleteComponent( this );
+		Context()->chitBag->QueueRemoveAndDeleteComponent( this );
 	}
 	else {
 		delta.Normalize();

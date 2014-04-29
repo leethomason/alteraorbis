@@ -10,9 +10,9 @@ static const float TOW_SPEED		= DEFAULT_MOVE_SPEED * 3.0f;
 static const float TOW_ROTATION		= ROTATION_SPEED * 2.0f;
 static const float TOW_DISTANCE		= 0.5f;
 
-void TowComponent::OnAdd( Chit* chit )
+void TowComponent::OnAdd( Chit* chit, bool init )
 {
-	super::OnAdd( chit );
+	super::OnAdd( chit, init );
 }
 
 
@@ -47,8 +47,8 @@ int TowComponent::DoTick( U32 delta )
 		return VERY_LONG_TICK;
 	}
 
-	const ChitContext* context = this->GetChitContext();
-	LumosChitBag* chitBag = this->GetLumosChitBag();
+	const ChitContext* context = this->Context();
+	LumosChitBag* chitBag = context->chitBag;
 	Chit* tow = chitBag->GetChit( towingID );
 	if ( !tow ) {
 		towingID = 0;

@@ -14,7 +14,7 @@
 */
 
 #include "chit.h"
-#include "chitbag.h"
+#include "../game/lumoschitbag.h"
 #include "component.h"
 #include "spatialcomponent.h"
 #include "rendercomponent.h"
@@ -77,14 +77,8 @@ void Chit::Free()
 }
 
 
-LumosChitBag* Chit::GetLumosChitBag()
-{
-	return chitBag->ToLumos();
-}
+void Chit::Serialize(XStream* xs)
 
-
-
-void Chit::Serialize( const ComponentFactory* factory, XStream* xs )
 {
 	XarcOpen( xs, "Chit" );
 	XARC_SER( xs, id );
@@ -106,9 +100,9 @@ void Chit::Serialize( const ComponentFactory* factory, XStream* xs )
 	else {
 		while ( xs->Loading()->HasChild() ) {
 			const char* n = xs->Loading()->OpenElement();
-			Component* component = factory->Factory( n, this ); 
+			Component* component = ComponentFactory::Factory(n, Context());
 			component->Serialize( xs );
-			this->Add( component );
+			this->Add( component, true );
 			xs->Loading()->CloseElement();
 		}
 	}
@@ -116,7 +110,7 @@ void Chit::Serialize( const ComponentFactory* factory, XStream* xs )
 }
 
 
-void Chit::Add( Component* c )
+void Chit::Add( Component* c, bool loading )
 {
 	if ( c->ToSpatialComponent()) {
 		GLASSERT( spatialComponent == 0 );
@@ -129,13 +123,6 @@ void Chit::Add( Component* c )
 	else if ( c->ToItemComponent()) {
 		GLASSERT( itemComponent == 0 );
 		itemComponent = c->ToItemComponent();
-	}
-	else if ( c->ToScriptComponent()) {
-		GLASSERT( scriptComponent0 == 0 || scriptComponent1 == 0 );
-		if (scriptComponent0 == 0)
-			scriptComponent0 = c->ToScriptComponent();
-		else
-			scriptComponent1 = c->ToScriptComponent();
 	}
 	else if ( c->ToAIComponent()) {
 		GLASSERT( aiComponent == 0 );
@@ -158,7 +145,7 @@ void Chit::Add( Component* c )
 	else {
 		GLASSERT( 0 );
 	}
-	c->OnAdd( this );
+	c->OnAdd( this, !loading );
 	timeToTick = 0;
 }
 
@@ -174,30 +161,6 @@ void Chit::Remove( Component* c )
 		}
 	}
 	GLASSERT( 0 );	// not found
-}
-
-
-ScriptComponent* Chit::GetScriptComponent(const char* name)
-{
-	if (scriptComponent0 && StrEqual(scriptComponent0->Name(), name)) {
-		return scriptComponent0;
-	}
-	if (scriptComponent1 && StrEqual(scriptComponent1->Name(), name)) {
-		return scriptComponent1;
-	}
-	return 0;
-}
-
-
-IScript* Chit::GetScript(const char* name)
-{
-	if (scriptComponent0 && StrEqual(scriptComponent0->Script()->ScriptName(), name)) {
-		return scriptComponent0->Script();
-	}
-	if (scriptComponent1 && StrEqual(scriptComponent1->Script()->ScriptName(), name)) {
-		return scriptComponent1->Script();
-	}
-	return 0;
 }
 
 
@@ -276,7 +239,7 @@ void Chit::SendMessage( const ChitMsg& msg, Component* exclude )
 	case ChitMsg::CHIT_DESTROYED_START:
 	case ChitMsg::CHIT_DESTROYED_END:
 	case ChitMsg::CHIT_DAMAGE:
-		GetChitBag()->SendMessage(this, msg);
+		Context()->chitBag->SendMessage(this, msg);
 		break;
 
 	default:
@@ -300,7 +263,7 @@ void Chit::QueueDelete()
 	if (GetItem() && GameItem::trackWallet) {
 		GLASSERT(GetItem()->wallet.IsEmpty());
 	}
-	this->GetChitBag()->QueueDelete( this );
+	Context()->chitBag->QueueDelete( this );
 }
 
 
@@ -341,6 +304,12 @@ int Chit::PrimaryTeam() const
 	return 0;
 }
 
+
+const ChitContext* Chit::Context() const
+{
+	GLASSERT(chitBag);
+	return chitBag->Context();
+}
 
 
 ComponentSet::ComponentSet( Chit* _chit, int bits )

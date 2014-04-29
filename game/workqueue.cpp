@@ -30,7 +30,7 @@ WorkQueue::WorkQueue()
 WorkQueue::~WorkQueue()
 {
 	GLASSERT( parentChit );
-	Engine* engine = parentChit->GetChitBag()->GetContext()->engine;
+	Engine* engine = parentChit->Context()->engine;
 
 	for( int i=0; i<queue.Size(); ++i ) {
 		Model* m = queue[i].model;
@@ -66,7 +66,7 @@ void WorkQueue::AddImage( QueueItem* item )
 	int size = buildData.size;
 
 	GLASSERT( parentChit );
-	const ChitContext* context = parentChit->GetChitBag()->GetContext();
+	const ChitContext* context = parentChit->Context();
 	Engine* engine = context->engine;
 	WorldMap* worldMap = context->worldMap;
 
@@ -123,7 +123,7 @@ void WorkQueue::AddImage( QueueItem* item )
 void WorkQueue::RemoveImage( QueueItem* item )
 {
 	GLASSERT( parentChit );
-	const ChitContext* context = parentChit->GetChitBag()->GetContext();
+	const ChitContext* context = parentChit->Context();
 	Engine* engine = context->engine;
 
 	if ( item->model ) {
@@ -175,7 +175,7 @@ void WorkQueue::AddAction( const grinliz::Vector2I& pos2i, int action )
 void WorkQueue::SendNotification( const grinliz::Vector2I& pos2i )
 {
 	GLASSERT( parentChit );
-	LumosChitBag* chitBag = parentChit->GetLumosChitBag();
+	LumosChitBag* chitBag = parentChit->Context()->chitBag;
 
 	Vector2F pos2 = { (float)pos2i.x+0.5f, (float)pos2i.y+0.5f };
 	// Notify near.
@@ -243,7 +243,7 @@ const WorkQueue::QueueItem* WorkQueue::GetJob( int id )
 const WorkQueue::QueueItem* WorkQueue::Find( const grinliz::Vector2I& chitPos )
 {
 	GLASSERT( parentChit );
-	const ChitContext* context = parentChit->GetChitBag()->GetContext();
+	const ChitContext* context = parentChit->Context();
 	//Engine* engine = context->engine;
 	WorldMap* worldMap = context->worldMap;
 
@@ -295,8 +295,8 @@ void WorkQueue::RemoveItem( int index )
 bool WorkQueue::TaskCanComplete( const WorkQueue::QueueItem& item )
 {
 	GLASSERT( parentChit );
-	LumosChitBag* chitBag = parentChit->GetLumosChitBag();
-	const ChitContext* context = parentChit->GetChitBag()->GetContext();
+	LumosChitBag* chitBag = parentChit->Context()->chitBag;
+	const ChitContext* context = parentChit->Context();
 	WorldMap* worldMap = context->worldMap;
 
 
@@ -377,7 +377,7 @@ bool WorkQueue::TaskCanComplete( const WorkQueue::QueueItem& item )
 void WorkQueue::DoTick()
 {
 	GLASSERT( parentChit );
-	LumosChitBag* chitBag = parentChit->GetLumosChitBag();
+	LumosChitBag* chitBag = parentChit->Context()->chitBag;
 
 	for( int i=0; i<queue.Size(); ++i ) {
 

@@ -44,9 +44,9 @@ void GridMoveComponent::Serialize( XStream* xs )
 }
 
 
-void GridMoveComponent::OnAdd( Chit* chit )
+void GridMoveComponent::OnAdd( Chit* chit, bool init )
 {
-	super::OnAdd( chit );
+	super::OnAdd( chit, init );
 }
 
 
@@ -88,7 +88,7 @@ void GridMoveComponent::SetDest( const SectorPort& sp )
 
 int GridMoveComponent::DoTick( U32 delta )
 {
-	const ChitContext* context = this->GetChitContext();
+	const ChitContext* context = Context();
 	if ( state == DONE ) {
 		parentChit->Swap( this, new PathMoveComponent());
 		return VERY_LONG_TICK;

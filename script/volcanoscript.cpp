@@ -25,34 +25,20 @@ VolcanoScript::VolcanoScript() : spreadTicker(SPREAD_RATE)
 }
 
 
-void VolcanoScript::Init()
-{
-	SpatialComponent* sc = scriptContext->chit->GetSpatialComponent();
-	GLASSERT( sc );
-	if ( sc ) {
-		Vector2F pos = sc->GetPosition2D();
-
-		NewsEvent event( NewsEvent::VOLCANO, pos );
-		scriptContext->chitBag->GetNewsHistory()->Add( event );
-	}
-}
-
-
 void VolcanoScript::Serialize( XStream* xs )
 {
-	XarcOpen( xs, "VolcanoScript" );
+	BeginSerialize(xs, Name());
 	XARC_SER( xs, size );
 	XARC_SER(xs, rad);
 	spreadTicker.Serialize(xs, "SpreadTicker");
-	XarcClose( xs );
+	EndSerialize(xs);
 }
 
 
 int VolcanoScript::DoTick( U32 delta )
 {
-	const ChitContext* context = scriptContext->chitBag->GetContext();
-	SpatialComponent* sc = scriptContext->chit->GetSpatialComponent();
-	WorldMap* worldMap = context->worldMap;
+	SpatialComponent* sc = parentChit->GetSpatialComponent();
+	WorldMap* worldMap = Context()->worldMap;
 
 	Vector2I pos2i = { 0,  0 };
 	GLASSERT( sc );
@@ -60,7 +46,7 @@ int VolcanoScript::DoTick( U32 delta )
 		pos2i = sc->GetPosition2DI();
 	}
 	else {
-		scriptContext->chit->QueueDelete();
+		parentChit->QueueDelete();
 	}
 
 	int n = spreadTicker.Delta(delta);
@@ -84,7 +70,7 @@ int VolcanoScript::DoTick( U32 delta )
 				worldMap->SetMagma(it.Pos().x, it.Pos().y, false);
 			}
 			worldMap->SetMagma(pos2i.x, pos2i.y, false);
-			scriptContext->chit->QueueDelete();
+			parentChit->QueueDelete();
 		}
 		else {
 			// Inner off.
@@ -112,9 +98,19 @@ int VolcanoScript::DoTick( U32 delta )
 }
 
 
-void VolcanoScript::OnAdd()
+void VolcanoScript::OnAdd(Chit* chit, bool init)
 {
+	super::OnAdd(chit, init);
+	if (init) {
+		SpatialComponent* sc = parentChit->GetSpatialComponent();
+		GLASSERT(sc);
+		if (sc) {
+			Vector2F pos = sc->GetPosition2D();
 
+			NewsEvent event(NewsEvent::VOLCANO, pos);
+			Context()->chitBag->GetNewsHistory()->Add(event);
+		}
+	}
 }
 
 

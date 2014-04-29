@@ -61,7 +61,7 @@ void MapSpatialComponent::SetMode( int newMode )
 	// This code gets run on OnAdd() as well.
 	if ( parentChit ) {
 		if ( parentChit ) {
-			UpdateBlock( GetChitContext()->worldMap );
+			UpdateBlock( Context()->worldMap );
 		}
 	}
 }
@@ -79,8 +79,8 @@ void MapSpatialComponent::SetBuilding( bool b, bool p )
 void MapSpatialComponent::UpdatePorch( bool clearPorch )
 {
 	GLASSERT(this->parentChit);
-	WorldMap* worldMap = this->parentChit ? this->GetChitContext()->worldMap : 0;
-	LumosChitBag* bag  = this->parentChit ? this->GetLumosChitBag() : 0;
+	WorldMap* worldMap = Context()->worldMap;
+	LumosChitBag* bag = Context()->chitBag;
 
 	if (clearPorch) {
 		hasPorch = 0;
@@ -91,8 +91,8 @@ void MapSpatialComponent::UpdatePorch( bool clearPorch )
 	for (Rectangle2IEdgeIterator it(b); !it.Done(); it.Next()) {
 		int type = 0;
 		Chit* porch = bag->QueryPorch(it.Pos(), &type);
-		if (porch && porch->GetScript("EvalBuildingScript")) {
-			EvalBuildingScript* ebs = (EvalBuildingScript*)porch->GetScript("EvalBuildingScript");
+		if (porch && porch->GetComponent("EvalBuildingScript")) {
+			EvalBuildingScript* ebs = (EvalBuildingScript*)porch->GetComponent("EvalBuildingScript");
 			if (!ebs->Reachable()) {
 				type = WorldGrid::PORCH_UNREACHABLE;
 			}
@@ -102,7 +102,7 @@ void MapSpatialComponent::UpdatePorch( bool clearPorch )
 
 	if (building && hasPorch) {
 		hasPorch = 1;	// standard porch.
-		EvalBuildingScript* evalScript = static_cast<EvalBuildingScript*>(parentChit->GetScript("EvalBuildingScript"));
+		EvalBuildingScript* evalScript = static_cast<EvalBuildingScript*>(parentChit->GetComponent("EvalBuildingScript"));
 		if (evalScript) {
 			GameItem* item = parentChit->GetItem();
 			GLASSERT(item);
@@ -133,28 +133,28 @@ void MapSpatialComponent::SetPosRot( const grinliz::Vector3F& v, const grinliz::
 }
 
 
-void MapSpatialComponent::OnAdd( Chit* chit )
+void MapSpatialComponent::OnAdd( Chit* chit, bool init )
 {
-	super::OnAdd( chit );
+	super::OnAdd( chit, init );
 	if ( building ) {
-		GetLumosChitBag()->AddToBuildingHash( this, bounds.min.x, bounds.min.y ); 
+		Context()->chitBag->AddToBuildingHash( this, bounds.min.x, bounds.min.y ); 
 		UpdatePorch(false);
 	}
 
 	if ( mode == GRID_BLOCKED ) {
-		UpdateBlock( GetChitContext()->worldMap );
+		UpdateBlock( Context()->worldMap );
 	}
 }
 
 
 void MapSpatialComponent::OnRemove()
 {
-	const ChitContext* context = GetChitContext();
-	LumosChitBag* chitBag = GetLumosChitBag();
+	const ChitContext* context = Context();
+	LumosChitBag* chitBag = context->chitBag;
 	
 	if ( building ) {
 		Vector2I pos = GetPosition2DI();
-		GetLumosChitBag()->RemoveFromBuildingHash( this, bounds.min.x, bounds.min.y ); 
+		chitBag->RemoveFromBuildingHash( this, bounds.min.x, bounds.min.y ); 
 	}
 	UpdatePorch(true);
 

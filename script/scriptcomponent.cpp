@@ -1,3 +1,4 @@
+#if 0
 #include "../engine/serialize.h"
 
 #include "../xegame/componentfactory.h"
@@ -123,3 +124,4 @@ int ScriptComponent::DoTick( U32 delta )
 	return result;
 }
 
+#endif

@@ -23,6 +23,7 @@
 #include "../xegame/itemcomponent.h"
 #include "../xegame/spatialcomponent.h"
 #include "../xegame/istringconst.h"
+#include "../xegame/componentfactory.h"
 
 #include "../engine/model.h"
 #include "../engine/engine.h"
@@ -51,6 +52,7 @@ LumosChitBag::LumosChitBag(const ChitContext& c, Sim* s) : ChitBag(c), sceneID(-
 {
 	memset( mapSpatialHash, 0, sizeof(MapSpatialComponent*)*NUM_SECTORS*NUM_SECTORS);
 	homeSector.Zero();
+	chitContext.chitBag = this;
 }
 
 
@@ -63,9 +65,9 @@ LumosChitBag::~LumosChitBag()
 }
 
 
-void LumosChitBag::Serialize( const ComponentFactory* factory, XStream* xs )
+void LumosChitBag::Serialize( XStream* xs )
 {
-	super::Serialize( factory, xs );
+	super::Serialize( xs );
 
 	XarcOpen( xs, "LumosChitBag" );
 	XARC_SER( xs, homeSector );
@@ -208,7 +210,7 @@ Chit* LumosChitBag::FindBuilding(	const grinliz::IString&  name,
 
 Chit* LumosChitBag::NewBuilding(const Vector2I& pos, const char* name, int team)
 {
-	const ChitContext* context = GetContext();
+	const ChitContext* context = Context();
 	Chit* chit = NewChit();
 
 	GameItem rootItem = ItemDefDB::Instance()->Get(name);
@@ -237,9 +239,9 @@ Chit* LumosChitBag::NewBuilding(const Vector2I& pos, const char* name, int team)
 
 	IString script = rootItem.keyValues.GetIString("script");
 	if (!script.empty()) {
-		IScript* s = ScriptComponent::Factory(script);
+		Component* s = ComponentFactory::Factory(script.c_str(), &chitContext);
 		GLASSERT(s);
-		chit->Add(new ScriptComponent(s));
+		chit->Add(s);
 	}
 
 	IString proc = rootItem.keyValues.GetIString("procedural");
@@ -252,14 +254,14 @@ Chit* LumosChitBag::NewBuilding(const Vector2I& pos, const char* name, int team)
 
 	IString consumes = rootItem.keyValues.GetIString(IStringConst::zoneConsume);
 	if (!consumes.empty()) {
-		IScript* s = ScriptComponent::Factory(StringPool::Intern("EvalBuildingScript"));
+		Component* s = ComponentFactory::Factory("EvalBuildingScript", &chitContext);
 		GLASSERT(s);
-		chit->Add(new ScriptComponent(s));
+		chit->Add(s);
 	}
 
 	IString nameGen = rootItem.keyValues.GetIString( "nameGen");
 	if ( !nameGen.empty() ) {
-		LumosGame* game = GetContext()->game;
+		LumosGame* game = Context()->game;
 		const char* p = game->GenName( nameGen.c_str(), chit->random.Rand(), 0, 0 );
 		chit->GetItem()->SetProperName( p );
 	}
@@ -283,7 +285,7 @@ Chit* LumosChitBag::NewBuilding(const Vector2I& pos, const char* name, int team)
 
 Chit* LumosChitBag::NewLawnOrnament(const Vector2I& pos, const char* name, int team)
 {
-	const ChitContext* context = GetContext();
+	const ChitContext* context = Context();
 	Chit* chit = NewChit();
 
 	GameItem rootItem = ItemDefDB::Instance()->Get(name);
@@ -327,7 +329,7 @@ Chit* LumosChitBag::NewLawnOrnament(const Vector2I& pos, const char* name, int t
 
 Chit* LumosChitBag::NewMonsterChit(const Vector3F& pos, const char* name, int team)
 {
-	const ChitContext* context = GetContext();
+	const ChitContext* context = Context();
 	Chit* chit = NewChit();
 
 	chit->Add( new SpatialComponent());
@@ -362,7 +364,7 @@ Chit* LumosChitBag::NewMonsterChit(const Vector3F& pos, const char* name, int te
 
 Chit* LumosChitBag::NewDenizen( const grinliz::Vector2I& pos, int team )
 {
-	const ChitContext* context = GetContext();
+	const ChitContext* context = Context();
 	bool female = true;
 	const char* assetName = "humanFemale";
 	if ( random.Bit() ) {
@@ -383,7 +385,7 @@ Chit* LumosChitBag::NewDenizen( const grinliz::Vector2I& pos, int team )
 
 	IString nameGen = chit->GetItem()->keyValues.GetIString( "nameGen" );
 	if ( !nameGen.empty() ) {
-		LumosGame* game = chit->GetChitBag()->GetContext()->game;
+		LumosGame* game = chit->Context()->game;
 		if ( game ) {
 			chit->GetItem()->SetProperName( StringPool::Intern( 
 				game->GenName(	nameGen.c_str(), 
@@ -415,7 +417,7 @@ Chit* LumosChitBag::NewDenizen( const grinliz::Vector2I& pos, int team )
 
 Chit* LumosChitBag::NewWorkerChit( const Vector3F& pos, int team )
 {
-	const ChitContext* context = GetContext();
+	const ChitContext* context = Context();
 	Chit* chit = NewChit();
 	const GameItem& rootItem = ItemDefDB::Instance()->Get( "worker" );
 
@@ -437,7 +439,7 @@ Chit* LumosChitBag::NewWorkerChit( const Vector3F& pos, int team )
 
 Chit* LumosChitBag::NewVisitor( int visitorIndex )
 {
-	const ChitContext* context = GetContext();
+	const ChitContext* context = Context();
 	Chit* chit = NewChit();
 	const GameItem& rootItem = ItemDefDB::Instance()->Get( "visitor" );
 
@@ -548,7 +550,7 @@ Chit* LumosChitBag::NewGoldChit( const grinliz::Vector3F& pos, int amount )
 {
 	if ( !amount )
 		return 0;
-	const ChitContext* context = GetContext();
+	const ChitContext* context = Context();
 
 	Vector2F v2 = { pos.x, pos.z };
 
@@ -596,7 +598,7 @@ Chit* LumosChitBag::NewCrystalChit( const grinliz::Vector3F& pos, int crystal, b
 	case CRYSTAL_VIOLET:	name="crystal_violet";	break;
 	}
 
-	const ChitContext* context = GetContext();
+	const ChitContext* context = Context();
 
 	Chit* chit = this->NewChit();
 	chit->Add( new SpatialComponent());
@@ -652,7 +654,7 @@ Chit* LumosChitBag::NewItemChit( const grinliz::Vector3F& _pos, GameItem* orphan
 	chit->Add( new HealthComponent());
 
 	if ( selfDestructTimer ) {
-		chit->Add( new ScriptComponent( new CountDownScript( selfDestructTimer )));
+		chit->Add( new CountDownScript( selfDestructTimer ));
 	}
 	return chit;
 }
@@ -660,7 +662,7 @@ Chit* LumosChitBag::NewItemChit( const grinliz::Vector3F& _pos, GameItem* orphan
 
 void LumosChitBag::HandleBolt( const Bolt& bolt, const ModelVoxel& mv )
 {
-	const ChitContext* context = GetContext();
+	const ChitContext* context = Context();
 	Chit* chitShooter = GetChit( bolt.chitID );	// may be null
 	int shooterTeam = -1;
 	if ( chitShooter && chitShooter->GetItemComponent() ) {

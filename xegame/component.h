@@ -50,8 +50,8 @@ public:
 
 	int ID() const { return id; }
 
-	virtual void OnAdd( Chit* chit )	{	parentChit = chit; }
-	virtual void OnRemove()				{	parentChit = 0;    }
+	virtual void OnAdd( Chit* chit, bool initialize )	{	parentChit = chit; }
+	virtual void OnRemove()								{	parentChit = 0;    }
 	virtual void Serialize( XStream* xs ) = 0;
 
 	virtual const char* Name() const = 0;
@@ -83,11 +83,10 @@ protected:
 	void BeginSerialize( XStream* xs, const char* name );
 	void EndSerialize( XStream* sx );
 
-	ChitBag*			GetChitBag();
-	LumosChitBag*		GetLumosChitBag();
-	const ChitContext*	GetChitContext();
-
+	const ChitContext*	Context();
 	Chit* parentChit;
+
+private:
 	int id;
 	bool willSerialize;
 

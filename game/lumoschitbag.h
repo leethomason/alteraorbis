@@ -185,7 +185,7 @@ public:
 	virtual ~LumosChitBag();
 
 	virtual LumosChitBag* ToLumos() { return this; }
-	virtual void Serialize( const ComponentFactory* factory, XStream* xs );
+	virtual void Serialize( XStream* xs );
 	// Can be null - not required
 	Sim* GetSim() const { return sim; }
 

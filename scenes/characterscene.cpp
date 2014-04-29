@@ -163,7 +163,7 @@ void CharacterScene::SetItemInfo( const GameItem* item, const GameItem* user )
 										 GameTrait::LevelToExperience( item->Traits().Level()+1 ));
 	desc.SetText( str.c_str() );
 
-	ChitBag* chitBag = data->itemComponent->ParentChit() ? data->itemComponent->ParentChit()->GetChitBag() : 0;
+	ChitBag* chitBag = data->itemComponent->ParentChit() ? data->itemComponent->ParentChit()->Context()->chitBag : 0;
 	itemDescWidget.SetInfo( item, user, nStorage==1, chitBag );
 }
 

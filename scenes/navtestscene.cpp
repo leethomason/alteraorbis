@@ -78,6 +78,7 @@ NavTestScene::NavTestScene( LumosGame* game ) : Scene( game )
 	map->AttachEngine( engine, this );
 
 	ChitContext context;
+
 	context.Set( engine, map, 0 );
 	chitBag = new ChitBag( context );
 

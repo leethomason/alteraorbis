@@ -15,7 +15,7 @@
 
 #include "component.h"
 #include "chit.h"
-#include "chitbag.h"
+#include "../game/lumoschitbag.h"
 #include "../grinliz/glstringutil.h"
 
 using namespace grinliz;
@@ -25,35 +25,18 @@ int Component::idPool = 1;
 Chit* Component::GetChit( int id )
 {
 	if ( parentChit ) {
-		return parentChit->GetChitBag()->GetChit( id );
+		GLASSERT(Context()->chitBag);
+		return Context()->chitBag->GetChit( id );
 	}
 	return 0;
 }
 
 
-ChitBag* Component::GetChitBag()
+const ChitContext* Component::Context()
 {
-	if ( parentChit ) {
-		return parentChit->GetChitBag();
-	}
-	return 0;
-}
-
-
-LumosChitBag* Component::GetLumosChitBag()
-{
-	ChitBag* cb = GetChitBag();
-	GLASSERT( cb );
-	if ( cb ) return cb->ToLumos();
-	return 0;
-}
-
-
-const ChitContext* Component::GetChitContext()
-{
-	ChitBag* cb = GetChitBag();
-	GLASSERT( cb );
-	return cb->GetContext();
+	Chit* parent = ParentChit();
+	GLASSERT(parent);
+	return parent->Context();
 }
 
 
@@ -72,7 +55,7 @@ void Component::EndSerialize( XStream* xs )
 void Component::OnChitMsg( Chit* chit, const ChitMsg& msg )
 {
 	if ( msg.ID() == ChitMsg::CHIT_DESTROYED_START ) {
-		parentChit->GetChitBag()->QueueRemoveAndDeleteComponent( this );
+		Context()->chitBag->QueueRemoveAndDeleteComponent( this );
 	}
 }
 

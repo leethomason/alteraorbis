@@ -5,16 +5,16 @@
 
 void CountDownScript::Serialize( XStream* xs )
 {
-	XarcOpen( xs, ScriptName() );
+	BeginSerialize(xs, Name());
 	timer.Serialize( xs, "timer" );
-	XarcClose( xs );
+	EndSerialize(xs);
 }
 
 
 int CountDownScript::DoTick( U32 delta )
 {
 	if ( timer.Delta( delta ) ) {
-		scriptContext->chit->DeRez();
+		parentChit->DeRez();
 	}
 	return timer.Next();
 }
