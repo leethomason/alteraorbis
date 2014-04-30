@@ -174,6 +174,8 @@ private:
 	gamui::TextLabel	domainWarningLabel;
 	gamui::PushButton	atlasButton;
 	gamui::ToggleButton	autoRebuild;
+	gamui::TextLabel	buildDescription;
+	gamui::PushButton	swapWeapons;
 
 	FacePushWidget		faceWidget;
 
