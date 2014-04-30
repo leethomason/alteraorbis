@@ -136,14 +136,15 @@ void Chit::Add( Component* c, bool loading )
 		GLASSERT( renderComponent == 0 );
 		renderComponent = c->ToRenderComponent();
 	}
-	else if ( !general0 ) {
-		general0 = c;
-	}
-	else if ( !general1 ) {
-		general1 = c;
-	}
 	else {
-		GLASSERT( 0 );
+		int i = 0;
+		for ( ; i < NUM_GENERAL; ++i) {
+			if (!general[i]) {
+				general[i] = c;
+				break;
+			}
+		}
+		GLASSERT(i < NUM_GENERAL);
 	}
 	c->OnAdd( this, !loading );
 	timeToTick = 0;

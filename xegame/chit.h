@@ -199,9 +199,8 @@ private:
 	U32		destroyed;
 	ChitBag* chitBag;
 	int		 id;
-
-private:
 	bool	 playerControlled;
+
 	//grinliz::CDynArray< IChitListener* > listeners; doesn't work; can't be serialized
 
 public:
@@ -215,7 +214,8 @@ public:
 	};
 
 private:
-	enum { NUM_SLOTS = 10 };
+	enum { NUM_SLOTS = 10, 
+		   NUM_GENERAL = 4 };
 	union {
 		// Update ordering is tricky. Defined by the order of the slots;
 		struct {
@@ -224,10 +224,7 @@ private:
 			ItemComponent*		itemComponent;
 			AIComponent*		aiComponent;
 			HealthComponent*	healthComponent;
-			Component*			general0;
-			Component*			general1;
-			Component*			general2;
-			Component*			general3;
+			Component*			general[NUM_GENERAL];	// tried to make this a linked list - hard to win, in terms of complexity and memory
 			RenderComponent*	renderComponent;		// should be last
 		};
 		Component*			slot[NUM_SLOTS];

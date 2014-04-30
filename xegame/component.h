@@ -43,7 +43,7 @@ struct ChitContext;
 class Component
 {
 public:
-	Component() : parentChit( 0 ), id( idPool++ ), willSerialize(true)	{}
+	Component() : next(0), parentChit( 0 ), id( idPool++ ), willSerialize(true)	{}
 	virtual ~Component()			{
 		GLASSERT( parentChit == 0 );	// if this fires, this is being deleted without being Removed()
 	}
@@ -78,6 +78,9 @@ public:
 	virtual ScriptComponent*	ToScriptComponent()			{ return 0; }
 	virtual AIComponent*		ToAIComponent()				{ return 0; }
 	virtual HealthComponent*	ToHealthComponent()			{ return 0; }
+
+	// "private" - used by the Chit to manage a linked list of its components.
+	Component* next;
 
 protected:
 	void BeginSerialize( XStream* xs, const char* name );
