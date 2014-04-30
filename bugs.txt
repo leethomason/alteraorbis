@@ -100,6 +100,12 @@ x system for gamui to track models
 		x screenshot save dir fix
 		- auto rebuild
 		t sound checks external path first
+    - portrait clicking sometimes doesn't work
+    - avatar doesn't always target as expected
+    - plants look repetetive
+    - text description of build options
+    - move warning down
+    - need a credits screen
 
 	- Beta2
 		- walk target for the avatar
