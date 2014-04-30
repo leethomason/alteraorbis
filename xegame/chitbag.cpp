@@ -54,6 +54,7 @@ ChitBag::~ChitBag()
 	DeleteAll();
 	RenderComponent::textLabelPool.FreePool();
 	RenderComponent::imagePool.FreePool();
+	RenderComponent::hudPool.FreePool();
 }
 
 

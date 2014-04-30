@@ -38,6 +38,7 @@ using namespace tinyxml2;
 
 grinliz::MemoryPoolT< gamui::TextLabel > RenderComponent::textLabelPool( "textLabelPool" );
 grinliz::MemoryPoolT< gamui::Image >	 RenderComponent::imagePool( "imagePool" );
+grinliz::MemoryPoolT< RenderComponent::HUD > RenderComponent::hudPool("hudPool");
 
 RenderComponent::RenderComponent( const char* asset ) 
 {
@@ -46,7 +47,7 @@ RenderComponent::RenderComponent( const char* asset )
 	}
 	radiusOfBase = 0;
 	groundMark = 0;
-	textLabel = 0;
+	hud = 0;
 
 	mainAsset = StringPool::Intern( asset );
 }
@@ -58,7 +59,7 @@ RenderComponent::~RenderComponent()
 		GLASSERT( model[i] == 0 );
 	}
 	GLASSERT(groundMark == 0);
-	GLASSERT(icons.Empty());	// should have been handled in OnRemove(). 
+	GLASSERT(hud == 0);			// should have been handled in OnRemove(). 
 }
 
 
@@ -135,12 +136,16 @@ void RenderComponent::OnRemove()
 		context->engine->FreeModel( groundMark );
 		groundMark = 0;
 	}
-	for( int i=0; i<icons.Size(); ++i ) {
-		imagePool.Delete( icons[i].image );
+
+	if (hud) {
+		for (int i = 0; i < hud->icons.Size(); ++i) {
+			imagePool.Delete(hud->icons[i].image);
+		}
+		hud->icons.Clear();
+		textLabelPool.Delete(hud->textLabel);
+		hudPool.Delete( hud );
+		hud = 0;
 	}
-	icons.Clear();
-	textLabelPool.Delete( textLabel );
-	textLabel = 0;
 }
 
 
@@ -370,11 +375,6 @@ int RenderComponent::DoTick( U32 deltaTime )
 		groundMark->SetPos( pos );
 	}
 
-	// fixme: hack. should track.
-	if (!icons.Empty()) {
-		tick = 0;
-	}
-
 	ProcessIcons( (int) deltaTime );
 	return tick;
 }
@@ -386,18 +386,22 @@ void RenderComponent::AddDeco( const char* asset, int duration )
 	gamui::RenderAtom atom = LumosGame::CalcIconAtom( asset );
 	atom.renderState = (const void*)UIRenderer::RENDERSTATE_UI_DISABLED;
 
+	if (!hud) {
+		hud = hudPool.New();
+	}
+
 	bool found = false;
 	// Check for existing; up the time.
-	for( int i=0; i<icons.Size(); ++i ) {
-		if ( icons[i].atom.Equal( atom )) {
-			icons[i].time = Max( icons[i].time, duration );
+	for( int i=0; i<hud->icons.Size(); ++i ) {
+		if ( hud->icons[i].atom.Equal( atom )) {
+			hud->icons[i].time = Max(hud->icons[i].time, duration);
 			found = true;
 		}
 	}
 
 	if ( !found ) {
 		const ChitContext* context = Context();
-		Icon* icon = icons.PushArr(1);
+		HUD::Icon* icon = hud->icons.PushArr(1);
 		icon->atom = atom;
 		icon->image = 0;
 		icon->time = duration;
@@ -408,23 +412,12 @@ void RenderComponent::AddDeco( const char* asset, int duration )
 
 void RenderComponent::SetDecoText(const char* text)	
 { 
-	decoText = text; 
-	model[0]->SetFlag(Model::MODEL_UI_TRACK);
-}
-
-
-void RenderComponent::RemoveDeco( const char* asset )
-{
-	gamui::RenderAtom atom = LumosGame::CalcIconAtom( asset );
-	atom.renderState = (const void*)UIRenderer::RENDERSTATE_UI_DISABLED;
-
-	for( int i=0; i<icons.Size(); ++i ) {
-		if ( icons[i].atom.Equal( atom )) {
-			imagePool.Delete( icons[i].image );
-			icons.Remove( i );
-			--i;
-		}
+	if (!hud) {
+		hud = hudPool.New();
 	}
+
+	hud->decoText = text;
+	model[0]->SetFlag(Model::MODEL_UI_TRACK);
 }
 
 
@@ -434,6 +427,8 @@ void RenderComponent::RemoveDeco( const char* asset )
 */
 void RenderComponent::PositionIcons(bool inUse)
 {
+	if (!hud) return;
+
 	static const float SIZE = 25.0f;
 	const ChitContext* context = this->Context();
 
@@ -451,46 +446,46 @@ void RenderComponent::PositionIcons(bool inUse)
 		uiBounds.Outset(port.UIHeight() * 0.25f);
 
 		if (uiBounds.Contains(ui)) {
-			if (!textLabel) {
-				textLabel = textLabelPool.New();
-				textLabel->Init(&context->engine->overlay);
+			if (!hud->textLabel) {
+				hud->textLabel = textLabelPool.New();
+				hud->textLabel->Init(&context->engine->overlay);
 			}
-			float width = icons.Size() * SIZE;
+			float width = hud->icons.Size() * SIZE;
 			float dy = SIZE * 0.5f;
 
-			textLabel->SetText(decoText.safe_str());
-			textLabel->SetVisible(true);
-			textLabel->SetCenterPos(ui.x, ui.y - dy);
+			hud->textLabel->SetText(hud->decoText.safe_str());
+			hud->textLabel->SetVisible(true);
+			hud->textLabel->SetCenterPos(ui.x, ui.y - dy);
 
-			if (!decoText.empty()) {
+			if (!hud->decoText.empty()) {
 				dy += SIZE;
 			}
 
-			for (int i = 0; i<icons.Size(); ++i) {
-				if (!icons[i].image) {
-					icons[i].image = imagePool.New();
-					icons[i].image->Init(&context->engine->overlay, icons[i].atom, false);
+			for (int i = 0; i<hud->icons.Size(); ++i) {
+				if (!hud->icons[i].image) {
+					hud->icons[i].image = imagePool.New();
+					hud->icons[i].image->Init(&context->engine->overlay, hud->icons[i].atom, false);
 				}
-				icons[i].image->SetSize(SIZE, SIZE);
-				icons[i].image->SetCenterPos(ui.x - width*0.5f + (float)(i)*SIZE + SIZE*0.5f,
+				hud->icons[i].image->SetSize(SIZE, SIZE);
+				hud->icons[i].image->SetCenterPos(ui.x - width*0.5f + (float)(i)*SIZE + SIZE*0.5f,
 					ui.y - dy);
-				icons[i].image->SetVisible(true);
+				hud->icons[i].image->SetVisible(true);
 
-				if (icons[i].rotation >= 0) {
-					icons[i].image->SetRotationY(icons[i].rotation);
+				if (hud->icons[i].rotation >= 0) {
+					hud->icons[i].image->SetRotationY(hud->icons[i].rotation);
 				}
 				else {
-					icons[i].image->SetRotationY(0);
+					hud->icons[i].image->SetRotationY(0);
 				}
 			}
 		}
 	}
 	else {
-		textLabelPool.Delete(textLabel);
-		textLabel = 0;
-		for (int i = 0; i<icons.Size(); ++i) {
-			imagePool.Delete(icons[i].image);
-			icons[i].image = 0;
+		textLabelPool.Delete(hud->textLabel);
+		hud->textLabel = 0;
+		for (int i = 0; i<hud->icons.Size(); ++i) {
+			imagePool.Delete(hud->icons[i].image);
+			hud->icons[i].image = 0;
 		}
 	}
 }
@@ -504,29 +499,23 @@ void RenderComponent::ProcessIcons( int delta )
 		delta = MAX_FRAME_TIME;
 	}
 
-	for (int i = 0; i<icons.Size(); ++i) {
-		icons[i].time -= delta;
-		icons[i].rotation -= Travel( 180.0f, float(delta)/1000.0f );
+	if (hud) {
+		for (int i = 0; i < hud->icons.Size(); ++i) {
+			hud->icons[i].time -= delta;
+			hud->icons[i].rotation -= Travel(180.0f, float(delta) / 1000.0f);
 
-		if ( icons[i].time < 0 ) {
-			imagePool.Delete( icons[i].image );
-			icons.Remove( i );
-			--i;
+			if (hud->icons[i].time < 0) {
+				imagePool.Delete(hud->icons[i].image);
+				hud->icons.Remove(i);
+				--i;
+			}
 		}
 	}
 
-	SpatialComponent* sc = parentChit->GetSpatialComponent();
-	Vector3F pos = { 0, 0, 0 };
-	if ( sc ) pos = sc->GetPosition();
-
-	const ChitContext* context = Context();
-	float len2 = ( context->engine->camera.PosWC() - pos ).LengthSquared();
-	
 	// HACK
 	// should be somewhere else
 	GameItem* gameItem = parentChit->GetItem();
 	if (gameItem && gameItem->keyValues.GetIString(ISC::nameGen) != IString()) {
-		decoText.Clear();
 		IString proper;
 		proper = gameItem->IProperName();
 		if (!proper.empty()) {

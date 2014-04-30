@@ -113,12 +113,8 @@ public:
 	// --- Decoration --- //
 	void SetGroundMark( const char* asset );
 	void AddDeco( const char* name, int duration );
-	void RemoveDeco( const char* name );
 	// if null/empty, uses the proper name if it exists.
 	void SetDecoText(const char* text);
-
-	static grinliz::MemoryPoolT< gamui::TextLabel > textLabelPool;
-	static grinliz::MemoryPoolT< gamui::Image > imagePool;
 
 	// Rendering callback. For positioning UI icons only.
 	void PositionIcons(bool inUse);
@@ -134,20 +130,28 @@ private:
 	Model*					model[ NUM_MODELS ];
 	Model*					groundMark;
 
-	// This all needs to get pulled into a "floating readout" class
-	class Icon {
-	public:
-		Icon() : image(0), time(0) {}
+	struct HUD {
+		struct Icon {
+			Icon() : image(0), time(0) {}
 
-		gamui::Image*	image;
-		int				time;
-		float			rotation;
-		gamui::RenderAtom atom;
+			gamui::Image*	image;
+			int				time;
+			float			rotation;
+			gamui::RenderAtom atom;
+		};
+
+		HUD() : textLabel(0)	{}
+
+		grinliz::CDynArray< Icon > icons;
+		gamui::TextLabel*	textLabel;
+		grinliz::CStr< 24 > decoText;
 	};
-	grinliz::CDynArray< Icon > icons;
-	gamui::TextLabel*	textLabel;
-	grinliz::CStr< 24 > decoText;
+	HUD* hud;
 
+public:
+	static grinliz::MemoryPoolT< gamui::TextLabel > textLabelPool;
+	static grinliz::MemoryPoolT< gamui::Image > imagePool;
+	static grinliz::MemoryPoolT< RenderComponent::HUD > hudPool;
 };
 
 #endif // RENDER_COMPONENT_INCLUDED
