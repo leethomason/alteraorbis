@@ -116,6 +116,7 @@ void VolcanoScript::OnAdd(Chit* chit, bool init)
 
 void VolcanoScript::OnRemove()
 {
+	super::OnRemove();
 	// spatial component already deleted. *sigh*
 	/*
 	// Defensive programming. Volcanoes are leaving

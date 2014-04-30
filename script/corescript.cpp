@@ -143,6 +143,7 @@ void CoreScript::OnRemove()
 
 	delete workQueue;
 	workQueue = 0;
+	super::OnRemove();
 }
 
 

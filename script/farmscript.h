@@ -29,7 +29,6 @@ public:
 	virtual ~FarmScript()	{}
 
 	virtual void OnAdd(Chit* chit, bool init);
-	virtual void OnRemove()		{}
 	virtual void Serialize( XStream* xs );
 	virtual int DoTick( U32 delta );
 	virtual const char* Name() const { return "FarmScript"; }

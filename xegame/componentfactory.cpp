@@ -33,55 +33,57 @@
 
 using namespace grinliz;
 
-Component* ComponentFactory::Factory( const char* name, const ChitContext* context )
+Component* ComponentFactory::Factory( const char* _name, const ChitContext* context )
 {
-	GLASSERT( name && *name );
-	if ( StrEqual( name, "SpatialComponent" )) {
+	GLASSERT( _name && *_name );
+	IString name = StringPool::Intern(_name);
+
+	if ( name == "SpatialComponent" ) {
 		return glnew SpatialComponent();
 	}
-	else if ( StrEqual( name, "PathMoveComponent" )) {
+	else if ( name == "PathMoveComponent" ) {
 		return glnew PathMoveComponent();
 	}
-	else if ( StrEqual( name, "ItemComponent" )) {
+	else if ( name == "ItemComponent" ) {
 		return glnew ItemComponent( 0 );
 	}
-	else if ( StrEqual( name, "DebugStateComponent" )) {
+	else if ( name == "DebugStateComponent" ) {
 		return glnew DebugStateComponent( context->worldMap );
 	}
-	else if ( StrEqual( name, "DebugPathComponent" )) {
+	else if ( name == "DebugPathComponent" ) {
 		return glnew DebugPathComponent();
 	}
-	else if ( StrEqual( name, "HealthComponent" )) {
+	else if ( name == "HealthComponent" ) {
 		return glnew HealthComponent();
 	}
-	else if ( StrEqual( name, "RenderComponent" )) {
+	else if ( name == "RenderComponent" ) {
 		return glnew RenderComponent( 0 );
 	}
-	else if ( StrEqual( name, "CameraComponent" )) {
+	else if ( name == "CameraComponent" ) {
 		return glnew CameraComponent( &context->engine->camera );
 	}
-	else if ( StrEqual( name, "MapSpatialComponent" )) {
+	else if ( name == "MapSpatialComponent" ) {
 		return glnew MapSpatialComponent();
 	}
-	else if ( StrEqual( name, "AIComponent" )) {
+	else if ( name == "AIComponent" ) {
 		return glnew AIComponent();
 	}
-	else if ( StrEqual( name, "GridMoveComponent" )) {
+	else if ( name == "GridMoveComponent" ) {
 		return glnew GridMoveComponent();
 	}
-	else if ( StrEqual( name, "VisitorStateComponent" )) {
+	else if ( name == "VisitorStateComponent" ) {
 		return glnew VisitorStateComponent();
 	}
-	else if ( StrEqual( name, "TrackingMoveComponent" )) {
+	else if ( name == "TrackingMoveComponent" ) {
 		return glnew TrackingMoveComponent();
 	}
-	else if ( StrEqual( name, "PhysicsMoveComponent" )) {
+	else if ( name == "PhysicsMoveComponent" ) {
 		return glnew PhysicsMoveComponent( true );
 	}
-	else if ( StrEqual( name, "TowComponent" )) {
+	else if ( name == "TowComponent" ) {
 		return glnew TowComponent();
 	}
-	if (name == "VolcanoScript") {
+	if ( name == "VolcanoScript") {
 		return glnew VolcanoScript();
 	}
 	else if (name == "PlantScript") {

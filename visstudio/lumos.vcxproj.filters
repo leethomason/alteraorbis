@@ -247,9 +247,6 @@
     <ClCompile Include="..\game\pathmovecomponent.cpp">
       <Filter>Source Files\components</Filter>
     </ClCompile>
-    <ClCompile Include="..\script\scriptcomponent.cpp">
-      <Filter>Source Files\components</Filter>
-    </ClCompile>
     <ClCompile Include="..\script\volcanoscript.cpp">
       <Filter>Source Files\script</Filter>
     </ClCompile>
@@ -598,9 +595,6 @@
       <Filter>Source Files\components</Filter>
     </ClInclude>
     <ClInclude Include="..\game\pathmovecomponent.h">
-      <Filter>Source Files\components</Filter>
-    </ClInclude>
-    <ClInclude Include="..\script\scriptcomponent.h">
       <Filter>Source Files\components</Filter>
     </ClInclude>
     <ClInclude Include="..\script\volcanoscript.h">

@@ -49,14 +49,19 @@ void SpatialComponent::SetPosRot( const Vector3F& v, const Quaternion& _q )
 		int oldY = (int)position.z;
 		int newX = (int)v.x;
 		int newY = (int)v.z;
-		Context()->chitBag->UpdateSpatialHash( parentChit, oldX, oldY, newX, newY );
+		if (parentChit) {
+			// Sometimes called before addad to Chit
+			Context()->chitBag->UpdateSpatialHash(parentChit, oldX, oldY, newX, newY);
+		}
 	}
 	
 	if ( posChange || rotChange ) {
 		position = v;
 		rotation = q;
 
-		parentChit->SetTickNeeded();
+		if (parentChit) {
+			parentChit->SetTickNeeded();
+		}
 	}
 }
 
@@ -104,14 +109,13 @@ Vector2F SpatialComponent::GetHeading2D() const
 
 void SpatialComponent::Serialize( XStream* xs )
 {
-	BeginSerialize( xs, "SpatialComponent" );
+	BeginSerialize( xs, Name() );
 	XARC_SER( xs, position );
 
 	static const Quaternion DEFQUAT; 
 	XARC_SER_DEF( xs, rotation, DEFQUAT );
 	EndSerialize( xs );
 }
-
 
 
 void SpatialComponent::OnAdd( Chit* chit, bool init )
