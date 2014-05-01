@@ -9,28 +9,28 @@ using namespace grinliz;
 BuildData BuildScript::buildData[NUM_OPTIONS] = {
 	{ "", "", 0, 0, 0 },
 	// Utility
-	{	"Cancel",	"",			0, 0, 0 },
-	{	"Clear",	"",			0, 0, 0 },
-	{	"Rotate",	"",			0, 0, 0 },
-	{	"Pave",		"pave",		0, 0, 0 },
-	{	"Ice",		"ice",		0, 0, 0 },
+	{	"Cancel",	"",			0, "Cancels build orders in place." },
+	{	"Clear",	"",			0, "Clear rock, plants, and buildings." },
+	{	"Rotate",	"",			0, "Rotate a building and position its porch." },
+	{	"Pave",		"pave",		0, "Create path paving that blocks plant growth." },
+	{	"Ice",		"ice",		0, "Build synthetic rock." },
 	// Visitor stuff
-	{	"News",		"kiosk.n",	1, 0, 0 },
-	{	"Media",	"kiosk.m",	1, 0, 0 },
-	{	"Commerce",	"kiosk.c",	1, 0, 0 },
-	{	"Social",	"kiosk.s",	1, 0, 0 },
-	{	"Temple",	"power",	1, 0, 0 },
+	{	"News",		"kiosk.n",	1, "Attracts Visitors searching for news." },
+	{	"Media",	"kiosk.m",	1, "Attracts Visitors searching for media." },
+	{	"Commerce",	"kiosk.c",	1, "Attracts Visitors searching for commerce." },
+	{	"Social",	"kiosk.s",	1, "Attracts Visitors searching for social." },
+	{	"Temple",	"power",	1, "Increases Tech cap, increases population cap, attracts monsters." },
 	// Economy
-	{	"Forge",	"factory",	2, 0, 0 },
-	{	"Vault",	"vault",	2, 0, 0 },
-	{	"SleepTube","bed",		2, 0, 0 },
-	{	"Market",	"market",	2, 0, 0 },
-	{	"Bar",		"bar",		2, 0, 0 },
+	{	"Forge",	"factory",	2, "Allows Denizens and Avatar to make weapons and shields." },
+	{	"Vault",	"vault",	2, "Stores items for the Core and Avatar." },
+	{	"SleepTube","bed",		2, "Increases population." },
+	{	"Market",	"market",	2, "Allows Denizens and Avatar to buy and sell weapons and shields." },
+	{	"Bar",		"bar",		2, "Distributes elixir." },
 	// Defense
-	{	"GuardPost","guardpost",3, 0, 0 },
+	{	"GuardPost","guardpost",3, "Gathering point for guards. Summons denizens of monster approach." },
 	// Industry
-	{	"Solar Farm","farm",		4, 0, 0 },
-	{	"Distillery","distillery",4, 0, 0 },
+	{	"Solar Farm","farm",	4, "Harvests fruit from plants." },
+	{	"Distillery","distillery",4, "Converts fruit to elixir." },
 };
 
 

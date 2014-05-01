@@ -2328,7 +2328,7 @@ void AIComponent::ThinkBattle( const ComponentSet& thisComp )
 		if ( enemyList[k] == targetDesc.id ) {
 			q *= 2;
 			if ( focus == FOCUS_TARGET ) {
-				q *= 2;
+				q *= 20;	// have trouble with "target wander"...so make this big multiplier.
 			}
 		}
 

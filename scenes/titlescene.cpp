@@ -79,6 +79,9 @@ TitleScene::TitleScene(LumosGame* game) : Scene(game), lumosGame(game), screenpo
 	}
 	SetAudioButton();
 
+	creditsButton.Init(&gamui2D, lumosGame->GetButtonLook(0));
+	creditsButton.SetText("Credits");
+
 	testMap = new TestMap(64,62);
 	const Game::Palette* palette = game->GetPalette();
 	Color3F c = palette->Get3F(0, 6);
@@ -230,6 +233,7 @@ void TitleScene::Resize()
 	note.SetBounds( port.UIWidth() / 2, 0 );
 
 	layout.PosAbs(&audioButton, -1, 0);
+	layout.PosAbs(&creditsButton, -2, 0);
 }
 
 
@@ -303,6 +307,9 @@ void TitleScene::ItemTapped( const gamui::UIItem* item )
 	else if (item == &audioButton) {
 		SettingsManager::Instance()->SetAudioOn(audioButton.Down());
 		SetAudioButton();
+	}
+	else if (item == &creditsButton) {
+		game->PushScene(LumosGame::SCENE_CREDITS, 0);
 	}
 
 	// If any scene gets pushed, throw away the engine resources.

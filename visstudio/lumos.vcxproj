@@ -145,6 +145,7 @@
     <ClCompile Include="..\scenes\battletestscene.cpp" />
     <ClCompile Include="..\scenes\censusscene.cpp" />
     <ClCompile Include="..\scenes\characterscene.cpp" />
+    <ClCompile Include="..\scenes\creditsscene.cpp" />
     <ClCompile Include="..\scenes\dialogscene.cpp" />
     <ClCompile Include="..\scenes\forgescene.cpp" />
     <ClCompile Include="..\scenes\gamescene.cpp" />
@@ -268,6 +269,7 @@
     <ClInclude Include="..\scenes\battletestscene.h" />
     <ClInclude Include="..\scenes\censusscene.h" />
     <ClInclude Include="..\scenes\characterscene.h" />
+    <ClInclude Include="..\scenes\creditsscene.h" />
     <ClInclude Include="..\scenes\dialogscene.h" />
     <ClInclude Include="..\scenes\forgescene.h" />
     <ClInclude Include="..\scenes\gamescene.h" />

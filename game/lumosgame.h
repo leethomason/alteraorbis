@@ -56,6 +56,7 @@ public:
 		SCENE_FORGE,
 		SCENE_CENSUS,
 		SCENE_SOUND,
+		SCENE_CREDITS
 	};
 
 	virtual Scene* CreateScene( int id, SceneData* data );

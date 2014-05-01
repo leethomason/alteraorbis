@@ -92,6 +92,7 @@ private:
 	gamui::PushButton		testScene[NUM_TESTS];
 	gamui::PushButton		gameScene[NUM_GAME];
 	gamui::ToggleButton		audioButton;
+	gamui::PushButton		creditsButton;
 	gamui::TextLabel		note;
 };
 
