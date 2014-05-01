@@ -58,10 +58,16 @@ void Personality::Serialize( XStream* xs )
 }
 
 
+int Personality::Hash4(int shift) const
+{
+	U32 value = Random::Hash(trait, NUM_TRAITS*sizeof(trait[0]));
+	return (value >> shift) & 0x03;
+}
+
 void Personality::Description( grinliz::GLString* str ) const
 {
 	*str = "";
-	if ( !HasPersonality() ) return;
+	if ( !HasPersonality() ) return	;
 
 	CArray< IString, NUM_TRAITS > descArr;
 

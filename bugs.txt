@@ -68,7 +68,7 @@ x system for gamui to track models
 	    x text description of build options
 	    x move warning down
 	    - need a credits screen
-		- GameItem update not quite correct
+		x GameItem update not quite correct
 	    - plants look repetetive
 
 	- Beta2
