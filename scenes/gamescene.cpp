@@ -294,7 +294,7 @@ void GameScene::Resize()
 	layout.PosAbs( &moneyWidget, 5, -1 );
 	techLabel.SetPos( moneyWidget.X() + moneyWidget.Width() + layout.SpacingX(),
 					  moneyWidget.Y() );
-	layout.PosAbs(&swapWeapons, -1, 6);
+	layout.PosAbs(&swapWeapons, -1, 5);
 
 	static int CONSOLE_HEIGHT = 2;	// in layout...
 	layout.PosAbs( &consoleWidget, 1, -1 - CONSOLE_HEIGHT );
@@ -1312,7 +1312,7 @@ void GameScene::DoTick( U32 delta )
 	
 	// This doesn't really work. The AI will swap weapons
 	// at will, so it's more frustrating than useful.
-	// swapWeapons.SetVisible(track && track == playerChit);
+	swapWeapons.SetVisible(track && track == playerChit);
 	
 	str.Clear();
 

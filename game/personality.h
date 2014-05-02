@@ -48,24 +48,24 @@ public:
 	};
 
 	int Botany() const		{
-		return Hash4(0) == 0
-			|| Sum(Grade(trait[INT_PHYS], -1), Grade(trait[INTRO_EXTRO], -1));
+		if (Hash4(0) == 0) return LIKES;
+		return Sum(Grade(trait[INT_PHYS], -1), Grade(trait[INTRO_EXTRO], -1));
 	}
 	int Fighting() const	{
-		return Hash4(2) == 0
-			|| Grade(trait[INT_PHYS], 1);
+		if (Hash4(2) == 0) return LIKES;
+		return Grade(trait[INT_PHYS], 1);
 	}
 	int Guarding() const	{
-		return Hash4(4) == 0
-			|| Sum(Grade(trait[INT_PHYS], 1), Grade(trait[PLANNED_IMPULSIVE], -1));
+		if (Hash4(4) == 0) return LIKES;
+		return Sum(Grade(trait[INT_PHYS], 1), Grade(trait[PLANNED_IMPULSIVE], -1));
 	}
 	int Crafting() const	{
-		return Hash4(6) == 0
-			|| Sum(Grade(trait[INT_PHYS], -1), Grade(trait[PLANNED_IMPULSIVE], -1));
+		if (Hash4(6) == 0) return LIKES;
+		return Sum(Grade(trait[INT_PHYS], -1), Grade(trait[PLANNED_IMPULSIVE], -1));
 	}
 	int Spiritual() const	{
-		return Hash4(8) == 0
-			|| Sum(Grade(trait[INT_PHYS], -1), Grade(trait[NEUROTIC_STABLE], -1));
+		if (Hash4(8) == 0) return LIKES;
+		return Sum(Grade(trait[INT_PHYS], -1), Grade(trait[NEUROTIC_STABLE], -1));
 	}
 
 	int IntroExtro() const	{ return trait[INTRO_EXTRO]; }

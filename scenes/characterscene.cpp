@@ -63,6 +63,22 @@ CharacterScene::CharacterScene( LumosGame* game, CharacterSceneData* csd ) : Sce
 	moneyWidget[1].Init( &gamui2D );
 	moneyWidget[1].SetVisible( false );
 
+	helpText.Init(&gamui2D);
+	if (data->IsCharacter()) {
+		helpText.SetText("Character inventory is on the left. You can order items by dragging. The gun, "
+			"ring, and shield you want the character to use should be on the top row.");
+	}
+	else if (data->IsMarket()) {
+		helpText.SetText("Character inventory is on the left. Market items are on the right. Dragging items from "
+			"one inventory to the other will purchase or sell the item. Prices under the items show both the sell/buy "
+			"price and the (actual value).");
+	}
+	else if (data->IsVault()) {
+		helpText.SetText("Avatar inventory is on the left. Vault contents are on the right. You can drag "
+			"items between locations.");
+	}
+
+
 	moneyWidget[0].Set( data->itemComponent->GetItem(0)->wallet );
 	if ( data->IsMarket() ) {
 		moneyWidget[1].SetVisible( true );
@@ -121,6 +137,8 @@ void CharacterScene::Resize()
 	layout.PosAbs( &dropButton, 1, 7 );
 	layout.PosAbs( &billOfSale, 1, 6 );	
 	layout.PosAbs( &reset, -1, -2 );
+	layout.PosAbs(&helpText, 1, -3);
+	helpText.SetBounds(cancel.X() - (okay.X() + okay.Width() - layout.GutterX()), 0);
 
 	if (data->IsCharacter()) {
 		layout.PosAbs(&desc, -4, 0);

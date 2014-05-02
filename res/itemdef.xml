@@ -149,6 +149,7 @@
        is part of the AI, not the GameItem, and 
        so there isn't an obvious way to serialize it. -->
   <!-- needs require crystals to use -->
+  <!-- need was: 0.4. Seems a little under-used. -->
   <item name="factory"
         resource="factory"
         porch="1"
@@ -159,8 +160,8 @@
         zoneCreate="industrial"
         zoneConsume="industrial"
         
-		    need.time="2.0"
-        need.fun="0.4"
+		need.time="2.0"
+        need.fun="0.5"
         />
 
   <item name="power"
@@ -190,7 +191,7 @@
         cost="25"
         zoneConsume="natural"
         
-		    need.time="10.0"
+	    need.time="10.0"
         need.energy="1.0"
         />
 

@@ -50,7 +50,7 @@ DialogScene::DialogScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 	}
 
 	for( int i=0; i<NUM_SCENES; ++i ) {
-		static const char* name[NUM_SCENES] = { "character", "vault", "forge", "market" };
+		static const char* name[NUM_SCENES] = { "character", "vault", "market", "forge" };
 		sceneButtons[i].Init( &gamui2D, lumosGame->GetButtonLook(0));
 		sceneButtons[i].SetText( name[i] );
 	}

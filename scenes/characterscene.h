@@ -97,6 +97,7 @@ private:
 	FaceToggleWidget	faceWidget;
 	ItemDescWidget		itemDescWidget;
 	gamui::TextLabel	billOfSale;
+	gamui::TextLabel	helpText;
 
 	grinliz::CDynArray< const GameItem* > boughtList, soldList;
 
