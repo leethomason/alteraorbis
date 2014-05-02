@@ -56,6 +56,7 @@ private:
 		   CHARACTER	= 0,
 		   VAULT,
 		   MARKET,
+		   EXCHANGE,
 		   FORGE,
 		   NUM_SCENES
 	};

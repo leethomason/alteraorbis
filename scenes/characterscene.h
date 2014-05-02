@@ -35,18 +35,26 @@ class GameItem;
 class CharacterSceneData : public SceneData
 {
 public:
-	CharacterSceneData( ItemComponent* ic,			// character
-						ItemComponent* ic2,			// vault, market
-						bool market )				// apply markup, costs
-		: SceneData(), itemComponent(ic), storageIC(ic2), isMarket(market) { GLASSERT(ic); }
+	enum {
+		CHARACTER,
+		VAULT,
+		MARKET,
+		EXCHANGE
+	};
+
+	CharacterSceneData( ItemComponent* ic,		// character
+						ItemComponent* ic2,		// vault, market, exchange
+						int _type )				// apply markup, costs
+		: SceneData(), itemComponent(ic), storageIC(ic2), type(_type) { GLASSERT(ic); }
 
 	ItemComponent*	itemComponent;
 	ItemComponent*	storageIC;			// vault, chest, storage, etc.				
-	bool			isMarket;			// for markets
+	int				type;
 
-	bool IsCharacter() const	{ return storageIC == 0; }
-	bool IsVault() const		{ return storageIC && !isMarket; }
-	bool IsMarket() const		{ return isMarket; }
+	bool IsCharacter() const	{ return type == CHARACTER; }
+	bool IsVault() const		{ return type == VAULT; }
+	bool IsMarket() const		{ return type == MARKET; }
+	bool IsExchange() const		{ return type == EXCHANGE;  }
 };
 
 
@@ -72,9 +80,11 @@ public:
 
 private:
 	void SetButtonText();
-	void SetItemInfo( const GameItem* item, const GameItem* user );
+	void SetExchangeButtonText();
+	void SetItemInfo(const GameItem* item, const GameItem* user);
 	void CalcCost( int* bought, int* sold );
 	void ResetInventory();
+	void CalcCrystalValue();
 
 	enum { 
 		NUM_ITEM_BUTTONS = INVERTORY_SLOTS,
@@ -98,6 +108,8 @@ private:
 	ItemDescWidget		itemDescWidget;
 	gamui::TextLabel	billOfSale;
 	gamui::TextLabel	helpText;
+	gamui::PushButton	crystalButton[2][NUM_CRYSTAL_TYPES];
+	int					crystalValue[NUM_CRYSTAL_TYPES];
 
 	grinliz::CDynArray< const GameItem* > boughtList, soldList;
 

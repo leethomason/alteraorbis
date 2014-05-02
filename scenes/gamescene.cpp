@@ -812,7 +812,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		}
 		if ( chit && chit->GetItemComponent() ) {			
 			game->PushScene( LumosGame::SCENE_CHARACTER, 
-							 new CharacterSceneData( chit->GetItemComponent(), 0, 0 ));
+							 new CharacterSceneData( chit->GetItemComponent(), 0, CharacterSceneData::CHARACTER ));
 		}
 	}
 	else if (item == &swapWeapons) {

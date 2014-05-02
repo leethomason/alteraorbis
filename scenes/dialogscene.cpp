@@ -50,7 +50,7 @@ DialogScene::DialogScene( LumosGame* game ) : Scene( game ), lumosGame( game )
 	}
 
 	for( int i=0; i<NUM_SCENES; ++i ) {
-		static const char* name[NUM_SCENES] = { "character", "vault", "market", "forge" };
+		static const char* name[NUM_SCENES] = { "character", "vault", "market", "exchange", "forge" };
 		sceneButtons[i].Init( &gamui2D, lumosGame->GetButtonLook(0));
 		sceneButtons[i].SetText( name[i] );
 	}
@@ -135,13 +135,16 @@ void DialogScene::ItemTapped( const gamui::UIItem* item )
 		game->PopScene();
 	}
 	else if ( item == &sceneButtons[CHARACTER] ) {
-		game->PushScene( LumosGame::SCENE_CHARACTER, new CharacterSceneData( itemComponent0, 0, 0 ));
+		game->PushScene( LumosGame::SCENE_CHARACTER, new CharacterSceneData( itemComponent0, 0, CharacterSceneData::CHARACTER ));
 	}
 	else if ( item == &sceneButtons[VAULT] ) {
-		game->PushScene( LumosGame::SCENE_CHARACTER, new CharacterSceneData( itemComponent0, itemComponent1, 0 ));
+		game->PushScene( LumosGame::SCENE_CHARACTER, new CharacterSceneData( itemComponent0, itemComponent1, CharacterSceneData::VAULT ));
 	}
 	else if ( item == &sceneButtons[MARKET] ) {
-		game->PushScene( LumosGame::SCENE_CHARACTER, new CharacterSceneData( itemComponent0, marketComponent, true ));
+		game->PushScene( LumosGame::SCENE_CHARACTER, new CharacterSceneData( itemComponent0, marketComponent, CharacterSceneData::MARKET ));
+	}
+	else if (item == &sceneButtons[EXCHANGE]) {
+		game->PushScene(LumosGame::SCENE_CHARACTER, new CharacterSceneData(itemComponent0, marketComponent, CharacterSceneData::EXCHANGE));
 	}
 	else if ( item == &sceneButtons[FORGE] ) {
 		ForgeSceneData* data = new ForgeSceneData();

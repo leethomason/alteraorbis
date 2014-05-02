@@ -642,7 +642,9 @@ bool TaskList::UseFactory( const ComponentSet& thisComp, Chit* factory, int tech
 	random.ShuffleArray(partsArr, GL_C_ARRAY_SIZE(partsArr));
 	random.ShuffleArray(effectsArr, GL_C_ARRAY_SIZE(effectsArr));
 
-	ForgeScript forge( thisComp.itemComponent, tech );
+	int seed = thisComp.chit->ID() ^ thisComp.item->Traits().Experience();
+	int level = thisComp.item->Traits().Level();
+	ForgeScript forge( seed, level, tech );
 	GameItem* item = new GameItem();
 
 	int cp = 0;
