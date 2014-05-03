@@ -98,10 +98,10 @@ x system for gamui to track models
 
 	- Beta 1a
 		x screenshot save dir fix
-		- auto rebuild
 		t sound checks external path first
 
 	- Beta2
+		- auto rebuild
 		- walk target for the avatar
 		x repair
 		- fast / threaded save
