@@ -149,18 +149,19 @@
        is part of the AI, not the GameItem, and 
        so there isn't an obvious way to serialize it. -->
   <!-- needs require crystals to use -->
+  <!-- need was: 0.4. Seems a little under-used. -->
   <item name="factory"
         resource="factory"
         porch="1"
         procedural="team"
         size="2"
-        mass="120"
+        mass="150"
         cost="80" 
         zoneCreate="industrial"
         zoneConsume="industrial"
         
-		    need.time="2.0"
-        need.fun="0.4"
+		need.time="2.0"
+        need.fun="0.5"
         />
 
   <item name="power"
@@ -168,7 +169,7 @@
         porch="0"
         procedural="team"
         size="2"
-        mass="100"
+        mass="150"
         cost="60"
         zoneCreate="natural" />
 
@@ -176,7 +177,7 @@
         resource="guardpost"
         procedural="team"
         size="1"
-        mass="80"
+        mass="100"
         cost="30"
         script="GuardScript"
         />
@@ -186,11 +187,11 @@
         porch="1"
         procedural="team"
         size="1"
-        mass="30"
+        mass="100"
         cost="25"
         zoneConsume="natural"
         
-		    need.time="10.0"
+	    need.time="10.0"
         need.energy="1.0"
         />
 
@@ -199,13 +200,25 @@
         porch="1"
         procedural="team"
         size="2"
-        mass="50"
+        mass="150"
         cost="50"
         zoneConsume="natural"
         
 	    need.time="1.5"
         need.fun="0.4"
         need.social="0.2"
+        />
+
+    <item   name="exchange"
+            resource="exchange"
+            porch="1"
+            procedural="team"
+            size="1"
+            mass="100"
+            cost="80"
+
+            need.time="1.5"
+            need.fun="0.4"
         />
 
   <!-- comlpex needs: gives social if others there, 
@@ -216,7 +229,7 @@
         porch="1"
         procedural="team"
         size="2"
-        mass="50"
+        mass="150"
         cost="50"
         zoneConsume="natural"
         nameGen="barNames"
@@ -232,7 +245,7 @@
         procedural="team"
         porch="1"
         size="1"
-        mass="50"
+        mass="80"
         cost="40"
         script="FarmScript"
         zoneCreate="industrial"
@@ -243,7 +256,7 @@
         porch="1"
         procedural="team"
         size="2"
-        mass="100"
+        mass="200"
         cost="80"
         script="DistilleryScript"
         zoneCreate="industrial"

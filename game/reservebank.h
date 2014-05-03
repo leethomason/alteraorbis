@@ -36,6 +36,7 @@ public:
 
 	int WithdrawDenizen();
 	Wallet WithdrawMonster();
+	const int* CrystalValue();
 
 	// Withdraws 1 or 0 crystals. type is returned.
 	int WithdrawRandomCrystal();
@@ -44,6 +45,7 @@ public:
 private:
 	static ReserveBank* instance;
 	grinliz::Random random;
+	int crystalValue[NUM_CRYSTAL_TYPES];
 };
 
 #endif // RESERVE_BANK_INCLUDED

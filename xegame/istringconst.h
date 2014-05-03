@@ -66,6 +66,7 @@ public:
 	static grinliz::IString guardpost;
 	static grinliz::IString farm;
 	static grinliz::IString distillery;
+	static grinliz::IString exchange;
 
 	static grinliz::IString zoneCreate;
 	static grinliz::IString zoneConsume;

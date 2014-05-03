@@ -82,7 +82,8 @@ void XenoAudio::Play(const char* _sound, const Vector3F* pos)
 
 		// Search external path first.
 		GLString path;
-		GLString inPath = sound;
+		GLString inPath = "res/";
+		inPath.append(sound);
 		inPath.append(".wav");
 		GetSystemPath(GAME_APP_DIR, inPath.c_str(), &path);
 

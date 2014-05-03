@@ -62,7 +62,8 @@ CoreScript::CoreScript()
 	  workQueue( 0 ),
 	  aiTicker(2000),
 	  scoreTicker(10*1000),
-	  summonGreater(0)
+	  summonGreater(0),
+	  autoRebuild(false)
 {
 	tech = 0;
 	achievement.Clear();
@@ -84,36 +85,37 @@ void CoreScript::Init()
 }
 
 
-void CoreScript::Serialize( XStream* xs )
+void CoreScript::Serialize(XStream* xs)
 {
-	XarcOpen( xs, ScriptName() );
-	XARC_SER( xs, tech );
-	XARC_SER( xs, nElixir );
+	XarcOpen(xs, ScriptName());
+	XARC_SER(xs, tech);
+	XARC_SER(xs, nElixir);
 	XARC_SER(xs, summonGreater);
+	XARC_SER(xs, autoRebuild);
 
-	XARC_SER( xs, defaultSpawn );
+	XARC_SER(xs, defaultSpawn);
 
-	if ( xs->Loading() ) {
-		int size=0;
-		XarcGet( xs, "citizens.size", size );
-		citizens.PushArr( size );
-		if ( size ) 
-			int debug=1;
+	if (xs->Loading()) {
+		int size = 0;
+		XarcGet(xs, "citizens.size", size);
+		citizens.PushArr(size);
+		if (size)
+			int debug = 1;
 	}
 	else {
-		XarcSet( xs, "citizens.size", citizens.Size() );
+		XarcSet(xs, "citizens.size", citizens.Size());
 	}
-	XARC_SER_ARR( xs, citizens.Mem(), citizens.Size() );
+	XARC_SER_ARR(xs, citizens.Mem(), citizens.Size());
 
-	spawnTick.Serialize( xs, "spawn" );
+	spawnTick.Serialize(xs, "spawn");
 	scoreTicker.Serialize(xs, "score");
 	achievement.Serialize(xs);
 
-	if ( !workQueue ) { 
+	if (!workQueue) {
 		workQueue = new WorkQueue();
 	}
-	workQueue->Serialize( xs );
-	XarcClose( xs );
+	workQueue->Serialize(xs);
+	XarcClose(xs);
 }
 
 

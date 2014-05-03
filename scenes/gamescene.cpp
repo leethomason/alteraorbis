@@ -132,6 +132,12 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 	createWorkerButton.Init( &gamui2D, game->GetButtonLook(0) );
 	createWorkerButton.SetText( "WorkerBot" );
 
+	autoRebuild.Init(&gamui2D, game->GetButtonLook(0));
+	autoRebuild.SetText("Auto\nRebuild");
+	autoRebuild.SetVisible(false);
+
+	buildDescription.Init(&gamui2D);
+
 	for( int i=0; i<NUM_UI_MODES; ++i ) {
 		static const char* TEXT[NUM_UI_MODES] = { "Build", "View" };
 		uiMode[i].Init( &gamui2D, game->GetButtonLook(0));
@@ -149,6 +155,9 @@ GameScene::GameScene( LumosGame* game ) : Scene( game )
 		newsButton[i].SetSize( NEWS_BUTTON_WIDTH, NEWS_BUTTON_HEIGHT );
 		newsButton[i].SetText( "news" );
 	}
+	swapWeapons.Init(&gamui2D, game->GetButtonLook(0));
+	swapWeapons.SetText("Swap\nWeapons");
+
 	faceWidget.Init( &gamui2D, game->GetButtonLook(0), FaceWidget::ALL );
 	faceWidget.SetSize( 100, 100 );
 
@@ -246,15 +255,19 @@ void GameScene::Resize()
 	for (int i = 0; i<NUM_BUILD_MODES; ++i) {
 		layout.PosAbs( &modeButton[i], i, 1 );
 	}
-	layout.PosAbs( &createWorkerButton, 0, 3 );
+	layout.PosAbs(&createWorkerButton, 0, 3);
+	layout.PosAbs(&autoRebuild, 1, 3);
 	for( int i=0; i<NUM_UI_MODES; ++i ) {
 		layout.PosAbs( &uiMode[i], i, 0 );
 	}
-	layout.PosAbs(&coreWarningIcon, 1, 4);
-	layout.PosAbs(&coreWarningLabel, 1, 4);
 
-	layout.PosAbs(&domainWarningIcon, 1, 5);
-	layout.PosAbs(&domainWarningLabel, 1, 5);
+	layout.PosAbs(&buildDescription, 0, 4);
+
+	layout.PosAbs(&coreWarningIcon, 1, 6);
+	layout.PosAbs(&coreWarningLabel, 1, 6);
+
+	layout.PosAbs(&domainWarningIcon, 1, 7);
+	layout.PosAbs(&domainWarningLabel, 1, 7);
 
 	coreWarningIcon.SetSize(coreWarningIcon.Height(), coreWarningIcon.Height());
 	domainWarningIcon.SetSize(domainWarningIcon.Height(), domainWarningIcon.Height());
@@ -281,6 +294,7 @@ void GameScene::Resize()
 	layout.PosAbs( &moneyWidget, 5, -1 );
 	techLabel.SetPos( moneyWidget.X() + moneyWidget.Width() + layout.SpacingX(),
 					  moneyWidget.Y() );
+	layout.PosAbs(&swapWeapons, -1, 5);
 
 	static int CONSOLE_HEIGHT = 2;	// in layout...
 	layout.PosAbs( &consoleWidget, 1, -1 - CONSOLE_HEIGHT );
@@ -793,9 +807,18 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 	}
 	else if ( item == faceWidget.GetButton() ) {
 		Chit* chit = sim->GetChitBag()->GetChit(chitTracking);
+		if (!chit) {
+			chit = sim->GetPlayerChit();
+		}
 		if ( chit && chit->GetItemComponent() ) {			
 			game->PushScene( LumosGame::SCENE_CHARACTER, 
-							 new CharacterSceneData( chit->GetItemComponent(), 0, 0 ));
+							 new CharacterSceneData( chit->GetItemComponent(), 0, CharacterSceneData::CHARACTER ));
+		}
+	}
+	else if (item == &swapWeapons) {
+		Chit* player = sim->GetPlayerChit();
+		if (player && player->GetItemComponent()) {
+			player->GetItemComponent()->SwapWeapons();
 		}
 	}
 	else if ( item == &useBuildingButton ) {
@@ -851,11 +874,17 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 	// the build. Up until that time, the selection icon doesn't 
 	// turn on.
 	buildActive = 0;
+	buildDescription.SetText("");
 	for (int i = 1; i<BuildScript::NUM_OPTIONS; ++i) {
 		if (&buildButton[i] == item) {
 			buildActive = i;
 			CameraComponent* cc = sim->GetChitBag()->GetCamera(sim->GetEngine());
 			cc->SetTrack(0);
+
+			BuildScript buildScript;
+			const BuildData& bd = buildScript.GetData(i);
+			buildDescription.SetText(bd.desc ? bd.desc : "");
+
 			break;
 		}
 	}
@@ -1274,13 +1303,16 @@ void GameScene::DoTick( U32 delta )
 	//chitTracking = playerChit ? playerChit->ID() : 0;
 	uiMode[UI_BUILD].SetEnabled(coreScript != 0);
 
-
 	Chit* track = sim->GetChitBag()->GetChit( chitTracking );
 	if (!track && sim->GetPlayerChit()) {
 		track = sim->GetPlayerChit();
 	}
 	faceWidget.SetFace( &uiRenderer, track ? track->GetItem() : 0 );
 	SetBars( track );
+	
+	// This doesn't really work. The AI will swap weapons
+	// at will, so it's more frustrating than useful.
+	swapWeapons.SetVisible(track && track == playerChit);
 	
 	str.Clear();
 
@@ -1302,6 +1334,7 @@ void GameScene::DoTick( U32 delta )
 	}
 	tabBar1.SetVisible( uiMode[UI_BUILD].Down() );
 	createWorkerButton.SetVisible( uiMode[UI_BUILD].Down() );
+	//autoRebuild.SetVisible(uiMode[UI_BUILD].Down());
 
 	str.Clear();
 
@@ -1352,7 +1385,7 @@ void GameScene::DoTick( U32 delta )
 		Chit* building = sim->GetChitBag()->QueryPorch( playerChit->GetSpatialComponent()->GetPosition2DI(),0 );
 		if ( building ) {
 			IString name = building->GetItem()->IName();
-			if ( name == ISC::vault || name == ISC::factory || name == ISC::market ) {
+			if ( name == ISC::vault || name == ISC::factory || name == ISC::market || name == ISC::exchange ) {
 				useBuildingVisible = true;
 			}
 		}

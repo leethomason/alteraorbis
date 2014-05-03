@@ -10,7 +10,8 @@ class GameItem;
 class ForgeScript
 {
 public:
-	ForgeScript( ItemComponent* forgeUser, int techLevel );
+	// seed should be stable: GetItem()->ID() ^ forgeUser->GetItem()->Traits().Experience()
+	ForgeScript( int seed, int userLevel, int techLevel );
 
 	enum {
 		RING,
@@ -56,7 +57,8 @@ public:
 				bool randomTraits );			
 
 private:
-	ItemComponent* forgeUser;
+	int seed;
+	int userLevel;
 	int techLevel;
 };
 

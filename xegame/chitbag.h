@@ -227,6 +227,8 @@ public:
 	}
 
 private:
+	void ProcessDeleteList();
+
 	grinliz::CDynArray< IChitListener* > listeners;
 
 	enum {

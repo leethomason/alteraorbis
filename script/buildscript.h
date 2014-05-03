@@ -9,6 +9,8 @@ struct BuildData
 	const char*			cName;
 	const char*			cStructure;
 	int					group;
+	const char*			desc;
+
 	int					cost;
 	int					size;			// 1 or 2
 	grinliz::IString	name;			// "Vault"
@@ -45,6 +47,7 @@ public:
 		GUARDPOST,
 		FARM,
 		DISTILLERY,
+		EXCHANGE,
 		NUM_OPTIONS,
 
 		NUM_GROUPS = 4,

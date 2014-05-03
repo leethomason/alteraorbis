@@ -403,6 +403,7 @@ int Random::Select( const float* scores, int nItems )
 }
 
 
+#if 0
 U32 Random::WeightedDice( U32 nDice, U32 sides, int weight )
 {
 	int n = (int)nDice + abs(weight);
@@ -436,4 +437,4 @@ U32 Random::WeightedDice( U32 nDice, U32 sides, int weight )
 	GLASSERT( sum >= int(nDice) && sum <= int(nDice*sides) );
 	return sum;
 }
-
+#endif

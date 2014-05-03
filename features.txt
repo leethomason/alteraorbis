@@ -3,27 +3,29 @@ Features
 
 AI
 A rich world where you aren’t the only domain. Bring strategy to the Visitors. Places to go, people to see.
-- gob-men. neutral relationships. diplomacy.
+- gob-men. neutral relationships. diplomacy. war.
 - mantis-men
 - other denizen domains
 
 Adventuring and Parties
+Your denizens shouldn't just sit around in their home domain.
 - denizens visit other domains (and return…)
-- adventure parties to implement:
+- Implement squads, adventuring parties, and groups in a reasonably uniform way.
   - raids
   - adventuring
   - defense teams
 
 Stories
-Basic stories that drive the world: the one ring, rise of the Old Bugs, etc
+Basic stories that drive the world: the one ring, rise of the Old Bugs, etc.
+Scripted story engine, tracking stories in play.
 - Story gen
 - deities
 - oracle
 
 Environment
-Richer visual environment and biomes.
+Richer visual environment and biomes. Improve the world's physical diversity.
 - day / night cycle
-- colored land
+- colored land, sand, ice, snow
 - rock weathering
 - improve water formation
 - water physics
@@ -32,12 +34,18 @@ Richer visual environment and biomes.
 
 Engine
 - better glow
+- performance
 
 Domain
 - More buildings for needs
-- Buf fabricator
+- chip fabricator
 - Turrets
 - money changer
+
+Physics
+- water flow
+- better flying / bouncing
+- crystals disperse
 
 Gameplay
 - 3rd person view

@@ -47,19 +47,26 @@ public:
 		DISLIKES	= -1
 	};
 
-	int Botany() const		{ return Sum( 
-								Grade( trait[INT_PHYS], -1 ),
-								Grade( trait[INTRO_EXTRO], -1 )); }
-	int Fighting() const	{ return Grade( trait[INT_PHYS], 1 ); }
-	int Guarding() const	{ return Sum(
-								Grade( trait[INT_PHYS], 1 ),
-								Grade( trait[PLANNED_IMPULSIVE], -1 )); }
-	int Crafting() const	{ return Sum(
-								Grade( trait[INT_PHYS], -1 ),
-								Grade( trait[PLANNED_IMPULSIVE], -1 )); }
-	int Spiritual() const	{ return Sum( 
-								Grade( trait[INT_PHYS], -1 ),
-								Grade( trait[NEUROTIC_STABLE], -1 )); }
+	int Botany() const		{
+		if (Hash4(0) == 0) return LIKES;
+		return Sum(Grade(trait[INT_PHYS], -1), Grade(trait[INTRO_EXTRO], -1));
+	}
+	int Fighting() const	{
+		if (Hash4(2) == 0) return LIKES;
+		return Grade(trait[INT_PHYS], 1);
+	}
+	int Guarding() const	{
+		if (Hash4(4) == 0) return LIKES;
+		return Sum(Grade(trait[INT_PHYS], 1), Grade(trait[PLANNED_IMPULSIVE], -1));
+	}
+	int Crafting() const	{
+		if (Hash4(6) == 0) return LIKES;
+		return Sum(Grade(trait[INT_PHYS], -1), Grade(trait[PLANNED_IMPULSIVE], -1));
+	}
+	int Spiritual() const	{
+		if (Hash4(8) == 0) return LIKES;
+		return Sum(Grade(trait[INT_PHYS], -1), Grade(trait[NEUROTIC_STABLE], -1));
+	}
 
 	int IntroExtro() const	{ return trait[INTRO_EXTRO]; }
 	bool Introvert() const	{ return trait[INTRO_EXTRO] <= LOW; }
@@ -68,6 +75,7 @@ public:
 	void Description( grinliz::GLString* str ) const;
 
 private:
+	int Hash4(int shift) const;
 	int Grade( int v, int dir ) const { 
 		if ( v >= HIGH ) return LIKES * dir;
 		if ( v <= LOW )  return DISLIKES * dir;

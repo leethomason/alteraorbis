@@ -639,10 +639,12 @@ int ItemComponent::DoTick( U32 delta )
 		DoSlowTick();
 	}
 	int tick = VERY_LONG_TICK;
+
 	for( int i=0; i<itemArr.Size(); ++i ) {	
 		int t = itemArr[i]->DoTick( delta );
 		tick = Min( t, tick );
 
+		// This accounts for accruedFire or accruedShock turning on the timer.
 		if (    ( i==0 || ItemActive(i) ) 
 			 && EmitEffect( *mainItem, delta )) 
 		{
