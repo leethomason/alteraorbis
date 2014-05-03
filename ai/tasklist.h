@@ -143,7 +143,8 @@ public:
 private:
 	void UseBuilding( const ComponentSet& thisComp, Chit* building, const grinliz::IString& buildingName );
 
-	void GoShopping(  const ComponentSet& thisComp, Chit* market );
+	void GoShopping(const ComponentSet& thisComp, Chit* market);
+	void GoExchange(const ComponentSet& thisComp, Chit* market);
 	bool UseFactory(  const ComponentSet& thisComp, Chit* factory, int tech );
 	bool DoStanding( const ComponentSet& thisComp, int time );
 

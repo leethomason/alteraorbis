@@ -261,7 +261,7 @@ void GameScene::Resize()
 		layout.PosAbs( &uiMode[i], i, 0 );
 	}
 
-	layout.PosAbs(&buildDescription, 0, 5);
+	layout.PosAbs(&buildDescription, 0, 4);
 
 	layout.PosAbs(&coreWarningIcon, 1, 6);
 	layout.PosAbs(&coreWarningLabel, 1, 6);
@@ -1385,7 +1385,7 @@ void GameScene::DoTick( U32 delta )
 		Chit* building = sim->GetChitBag()->QueryPorch( playerChit->GetSpatialComponent()->GetPosition2DI(),0 );
 		if ( building ) {
 			IString name = building->GetItem()->IName();
-			if ( name == ISC::vault || name == ISC::factory || name == ISC::market ) {
+			if ( name == ISC::vault || name == ISC::factory || name == ISC::market || name == ISC::exchange ) {
 				useBuildingVisible = true;
 			}
 		}

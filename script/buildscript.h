@@ -47,6 +47,7 @@ public:
 		GUARDPOST,
 		FARM,
 		DISTILLERY,
+		EXCHANGE,
 		NUM_OPTIONS,
 
 		NUM_GROUPS = 4,

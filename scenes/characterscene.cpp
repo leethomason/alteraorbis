@@ -14,6 +14,8 @@
 #include "../script/corescript.h"
 #include "../script/forgescript.h"
 
+#include "../game/reservebank.h"
+
 using namespace gamui;
 using namespace grinliz;
 
@@ -86,8 +88,8 @@ CharacterScene::CharacterScene( LumosGame* game, CharacterSceneData* csd ) : Sce
 			"items between locations.");
 	}
 	else if (data->IsExchange()) {
-		helpText.SetText("Avater Au and crystal is on the left. The exchange is on the right. Tap to buy or sell. "
-			"The exchance does not take a cut; you may trade freely.");
+		helpText.SetText("Avatar Au and crystal is on the left. The exchange is on the right. Tap to buy or sell. "
+			"The exchance is operater by the Reserve Bank and does not take a cut; you may trade freely.");
 	}
 
 
@@ -444,7 +446,30 @@ void CharacterScene::ResetInventory()
 }
 
 
-void CharacterScene::ItemTapped( const gamui::UIItem* item )
+void CharacterScene::Activate()
+{
+	if (data->IsExchange() && ReserveBank::Instance()) {
+		// The exchange works with the ReserveBank, else it
+		// would be running out of money, and have a fixed
+		// limit to the crystal/Au transaction.
+		int d = 1000 - data->storageIC->GetItem()->wallet.gold;
+		d = Min(d, ReserveBank::Instance()->bank.gold);
+		Transfer(&data->storageIC->GetItem()->wallet, &ReserveBank::Instance()->bank, d);
+		moneyWidget[1].Set(data->storageIC->GetItem()->wallet);
+	}
+}
+
+
+void CharacterScene::DeActivate()
+{
+	if (data->IsExchange() && ReserveBank::Instance()) {
+		// Move all the gold to the reserve
+		Transfer(&ReserveBank::Instance()->bank, &data->storageIC->GetItem()->wallet, data->storageIC->GetItem()->wallet.gold);
+	}
+}
+
+
+void CharacterScene::ItemTapped(const gamui::UIItem* item)
 {
 	if ( item == &okay ) {
 		if ( data->IsMarket() ) {

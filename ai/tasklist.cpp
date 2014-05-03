@@ -11,6 +11,7 @@
 #include "../game/lumosgame.h"
 #include "../game/team.h"
 #include "../game/mapspatialcomponent.h"
+#include "../game/reservebank.h"
 
 #include "../xegame/chit.h"
 #include "../xegame/spatialcomponent.h"
@@ -458,6 +459,9 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 		if ( buildingName == IStringConst::market ) {
 			GoShopping( thisComp, building );
 		}
+		else if (buildingName == IStringConst::exchange) {
+			GoExchange(thisComp, building);
+		}
 		else if ( buildingName == IStringConst::factory ) {
 			bool used = UseFactory( thisComp, building, coreScript->GetTechLevel() );
 			if ( !used ) supply.SetZero();
@@ -503,7 +507,59 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 }
 
 
-void TaskList::GoShopping(  const ComponentSet& thisComp, Chit* market )
+void TaskList::GoExchange(const ComponentSet& thisComp, Chit* exchange)
+{
+	const Personality& personality = thisComp.item->GetPersonality();
+	const int* crystalValue = ReserveBank::Instance()->CrystalValue();
+
+	if (personality.Crafting() == Personality::DISLIKES) {
+		// Sell all the crystal
+		for (int type = 0; type < NUM_CRYSTAL_TYPES; ++type) {
+			int n = thisComp.item->wallet.crystal[type];
+			if (n) {
+				// Gold from bank.
+				Wallet c;
+				c.crystal[type] = n;
+
+				if (CanTransfer(&thisComp.item->wallet, &ReserveBank::Instance()->bank, n*crystalValue[type])) {
+					Transfer(&thisComp.item->wallet, &ReserveBank::Instance()->bank, n*crystalValue[type]);
+					Transfer(&ReserveBank::Instance()->bank, &thisComp.item->wallet, c);
+				}
+			}
+		}
+	}
+	else {
+		int willSpend = thisComp.item->wallet.gold / 5;
+		if (personality.Crafting() == Personality::LIKES) {
+			willSpend = thisComp.item->wallet.gold / 2;
+		}
+
+		for (int type = 0; type < NUM_CRYSTAL_TYPES; ++type) {
+			int nWant = NUM_CRYSTAL_TYPES - type - thisComp.item->wallet.crystal[type];
+	
+			while (nWant) {
+				int cost = crystalValue[type];
+				if (cost < willSpend) {
+					Wallet c;
+					c.crystal[type] = 1;
+
+					if (CanTransfer(&thisComp.item->wallet, &exchange->GetItem()->wallet, c)) {
+						Transfer(&ReserveBank::Instance()->bank, &thisComp.item->wallet, cost);
+						Transfer(&thisComp.item->wallet, &exchange->GetItem()->wallet, c);
+						--nWant;
+						willSpend -= cost;
+					}
+					else {
+						nWant = 0;
+					}
+				}
+			}
+		}
+	}
+}
+
+
+void TaskList::GoShopping(const ComponentSet& thisComp, Chit* market)
 {
 	// Try to keep this as simple as possible.
 	// Still complex. Purchasing stuff can invalidate

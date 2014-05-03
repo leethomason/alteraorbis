@@ -114,5 +114,24 @@ inline void Transfer(Wallet* to, Wallet* from, const Wallet& w)
 	}
 }
 
+inline bool CanTransfer(const Wallet* to, const Wallet* from, int gold) {
+	return(from->gold >= gold);
+}
+
+inline bool CanTransfer(const Wallet* to, const Wallet* from, const Wallet& w)
+{
+	// The amount to transfer is commonly the 'from' wallet.
+	// So operate on 'to' before 'from'
+	if (from->gold >= w.gold) {
+		for (int i = 0; i < NUM_CRYSTAL_TYPES; ++i) {
+			if (from->crystal[i] < w.crystal[i]) {
+				return false;
+			}
+		}
+		return true;
+	}
+	return false;
+}
+
 #endif
 

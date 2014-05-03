@@ -67,9 +67,13 @@ x system for gamui to track models
 	    x avatar doesn't always target as expected
 	    x text description of build options
 	    x move warning down
-	    - need a credits screen
 		x GameItem update not quite correct
+	    - need a credits screen
 	    - plants look repetetive
+	    - test exchange
+	    - new sounds
+	    - factory only fun if you build something...check that.
+	    - debug trace of the likes?
 
 	- Beta2
 		- auto rebuild

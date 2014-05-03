@@ -751,6 +751,10 @@ void Sim::UseBuilding()
 				chitBag->PushScene( LumosGame::SCENE_CHARACTER, 
 					new CharacterSceneData( ic, building->GetItemComponent(), CharacterSceneData::MARKET ));
 			}
+			else if (name == IStringConst::exchange) {
+				chitBag->PushScene(LumosGame::SCENE_CHARACTER,
+					new CharacterSceneData(ic, building->GetItemComponent(), CharacterSceneData::EXCHANGE));
+			}
 			else if ( name == IStringConst::factory ) {
 				ForgeSceneData* data = new ForgeSceneData();
 				data->tech = cs->GetTechLevel();

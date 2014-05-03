@@ -122,6 +122,7 @@
   <model filename="guardpost.ac"                                           shading="flat" polyRemoval="pre" />
   <model assetName="farm"       filename="solarpanel.ac"                   shading="flat" polyRemoval="pre" />
   <model assetName="distillery" filename="distillery.ac"                   shading="flat" polyRemoval="pre" />
+  <model assetName="exchange" filename="exchange.ac"                       shading="flat" polyRemoval="pre" />
 
   <model filename="tombstoneDenizen.ac"                                    shading="flat" polyRemoval="pre" />
   <model filename="tombstoneLesser.ac"                                     shading="flat" polyRemoval="pre" />
