@@ -336,6 +336,9 @@ void BattleTestScene::GoScene()
 	for( int i=0; i<rightCount; ++i ) {
 		CreateChit( waypoints[rightLoc][i], rightMoB, rightWeapon, RIGHT_TEAM, rightLevel );
 	}
+
+	random.ShuffleArray(waypoints[LEFT].Mem(), waypoints[LEFT].Size());
+	random.ShuffleArray(waypoints[RIGHT].Mem(), waypoints[RIGHT].Size());
 }
 
 		

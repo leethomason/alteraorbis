@@ -46,7 +46,8 @@ void XenoAudio::SetAudio(bool on)
 	}
 	audioOn = on;
 	if (audioOn) {
-		int error = Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, 2, 2048);
+//		int error = Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, 2, 2048);
+		int error = Mix_OpenAudio(44000, MIX_DEFAULT_FORMAT, 2, 2048);
 		GLASSERT(error == 0);
 	}
 	else {
