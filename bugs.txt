@@ -70,11 +70,11 @@ x system for gamui to track models
 		x GameItem update not quite correct
 	    - need a credits screen
 	    - plants look repetetive
-	    - test exchange
+	    t test exchange
 	    - new sounds
 	    - factory only fun if you build something...check that.
 	    - debug trace of the likes?
-		- model for exchange
+		x model for exchange
 
 	- Beta2
 		- auto rebuild

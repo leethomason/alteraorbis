@@ -4,7 +4,7 @@ OBJECT world
 kids 14
 OBJECT poly
 name "box"
-loc -5.94019 0.166198 -0.505273
+loc -0.45303 0.166198 -0.00559199
 texture "structure.png"
 crease 45.000000
 numvert 8
@@ -62,7 +62,7 @@ refs 4
 kids 0
 OBJECT poly
 name "box"
-loc -5.94019 0.421648 -0.505273
+loc -0.45303 0.421648 -0.00559199
 texture "structure.png"
 crease 45.000000
 numvert 8
@@ -120,7 +120,7 @@ refs 4
 kids 0
 OBJECT poly
 name "box"
-loc -5.94019 0.668189 -0.505273
+loc -0.45303 0.668189 -0.00559199
 texture "structure.png"
 crease 45.000000
 numvert 8
@@ -178,7 +178,7 @@ refs 4
 kids 0
 OBJECT poly
 name "box"
-loc -5.84394 0.963102 -0.504032
+loc -0.35678 0.963102 -0.00435102
 texture "structure.png"
 crease 45.000000
 numvert 8
@@ -236,7 +236,7 @@ refs 4
 kids 0
 OBJECT poly
 name "box"
-loc -5.49311 0.857428 -0.504778
+loc -0.00594997 0.857428 -0.00509703
 texture "structure.png"
 crease 45.000000
 numvert 8
@@ -294,7 +294,7 @@ refs 4
 kids 0
 OBJECT poly
 name "box"
-loc -5.84401 0.511265 -0.504704
+loc -0.35685 0.511265 -0.005023
 texture "palette.png"
 crease 45.000000
 numvert 8
@@ -352,7 +352,7 @@ refs 4
 kids 0
 OBJECT poly
 name "box"
-loc -5.05265 0.171006 -0.502419
+loc 0.43451 0.171006 -0.002738
 texture "structure.png"
 crease 45.000000
 numvert 8
@@ -410,7 +410,7 @@ refs 4
 kids 0
 OBJECT poly
 name "box"
-loc -5.05265 0.426456 -0.502419
+loc 0.43451 0.426456 -0.002738
 texture "structure.png"
 crease 45.000000
 numvert 8
@@ -468,7 +468,7 @@ refs 4
 kids 0
 OBJECT poly
 name "box"
-loc -5.05265 0.672997 -0.502419
+loc 0.43451 0.672997 -0.002738
 texture "structure.png"
 crease 45.000000
 numvert 8
@@ -526,7 +526,7 @@ refs 4
 kids 0
 OBJECT poly
 name "box"
-loc -5.14167 0.958294 -0.501171
+loc 0.34549 0.958294 -0.00149
 texture "structure.png"
 crease 45.000000
 numvert 8
@@ -584,7 +584,7 @@ refs 4
 kids 0
 OBJECT poly
 name "box"
-loc -5.48953 0.465973 -0.507283
+loc -0.00236988 0.465973 -0.00760198
 texture "structure.png"
 crease 45.000000
 numvert 8
@@ -642,7 +642,7 @@ refs 4
 kids 0
 OBJECT poly
 name "box"
-loc -5.49517 0.0598362 -0.501946
+loc -0.00800991 0.0598362 -0.00226498
 texture "palette.png"
 crease 45.000000
 numvert 8
@@ -700,7 +700,7 @@ refs 4
 kids 0
 OBJECT poly
 name "box"
-loc -5.14641 0.511265 -0.501847
+loc 0.34075 0.511265 -0.00216603
 texture "palette.png"
 crease 45.000000
 numvert 8
@@ -758,7 +758,7 @@ refs 4
 kids 0
 OBJECT poly
 name "sphere"
-loc -6.00781 1.37947 0.156732
+loc -0.52065 1.37947 0.656413
 texture "structure.png"
 crease 45.000000
 numvert 61

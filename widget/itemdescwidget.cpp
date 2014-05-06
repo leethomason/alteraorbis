@@ -105,41 +105,42 @@ void ItemDescWidget::SetInfo( const GameItem* item, const GameItem* user, bool s
 
 	textBuffer += '\n';
 
-	if ( showPersonality && item->GetPersonality().HasPersonality() ) {
-		GLString pdesc;
-		item->GetPersonality().Description( &pdesc );
-		textBuffer += pdesc.c_str();
-		textBuffer += "\n\n";
-	}
-
-	MicroDBIterator it( item->historyDB );
-	for( ; !it.Done(); it.Next() ) {
-		
-		const char* key = it.Key();
-		if ( it.Type() == MicroDB::TYPE_INT ) {
-			str.Format( "%s\t%d\n", key, it.IntValue() );
-			textBuffer += str.c_str();
+	if (!shortForm) {
+		if (showPersonality && item->GetPersonality().HasPersonality()) {
+			GLString pdesc;
+			item->GetPersonality().Description(&pdesc);
+			textBuffer += pdesc.c_str();
+			textBuffer += "\n\n";
 		}
-	}
 
-	textBuffer += '\n';
+		MicroDBIterator it(item->historyDB);
+		for (; !it.Done(); it.Next()) {
 
-	NewsHistory* history = chitBag ? chitBag->GetNewsHistory() : 0;
+			const char* key = it.Key();
+			if (it.Type() == MicroDB::TYPE_INT) {
+				str.Format("%s\t%d\n", key, it.IntValue());
+				textBuffer += str.c_str();
+			}
+		}
 
-	if ( history && chitBag ) {
-		GLString s;
+		textBuffer += '\n';
 
-		int num=0;
-		const NewsEvent** events = history->Find( item->ID(), true, &num, 0 );
-		for( int i=0; i<num; ++i ) {
-			events[i]->Console( &s, chitBag, item->ID() );
-			if ( !s.empty() ) {
-				textBuffer += s.c_str();
-				textBuffer += '\n';
+		NewsHistory* history = chitBag ? chitBag->GetNewsHistory() : 0;
+
+		if (history && chitBag) {
+			GLString s;
+
+			int num = 0;
+			const NewsEvent** events = history->Find(item->ID(), true, &num, 0);
+			for (int i = 0; i < num; ++i) {
+				events[i]->Console(&s, chitBag, item->ID());
+				if (!s.empty()) {
+					textBuffer += s.c_str();
+					textBuffer += '\n';
+				}
 			}
 		}
 	}
-
 	text.SetText( textBuffer.c_str() );
 }
 

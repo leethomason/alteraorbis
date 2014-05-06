@@ -82,16 +82,18 @@ CharacterScene::CharacterScene( LumosGame* game, CharacterSceneData* csd ) : Sce
 		helpText.SetText("Character inventory is on the left. Market items are on the right. Dragging items from "
 			"one inventory to the other will purchase or sell the item. Prices under the items show both the sell/buy "
 			"price and the (actual value).");
+		itemDescWidget.SetShortForm(true);
 	}
 	else if (data->IsVault()) {
 		helpText.SetText("Avatar inventory is on the left. Vault contents are on the right. You can drag "
 			"items between locations.");
+		itemDescWidget.SetShortForm(true);
 	}
 	else if (data->IsExchange()) {
 		helpText.SetText("Avatar Au and crystal is on the left. The exchange is on the right. Tap to buy or sell. "
 			"The exchance is operater by the Reserve Bank and does not take a cut; you may trade freely.");
+		itemDescWidget.SetShortForm(true);
 	}
-
 
 	moneyWidget[0].Set( data->itemComponent->GetItem(0)->wallet );
 	if ( data->IsMarket() || data->IsExchange() ) {
@@ -154,6 +156,7 @@ void CharacterScene::Resize()
 	layout.PosAbs( &reset, -1, -2 );
 	layout.PosAbs(&helpText, 1, -3);
 	helpText.SetBounds(cancel.X() - (okay.X() + okay.Width() - layout.GutterX()), 0);
+	//helpText.SetBounds(moneyWidget[1].X() - (okay.X() + okay.Width() - layout.GutterX()), 0);
 
 	for (int i = 0; i < NUM_CRYSTAL_TYPES; ++i) {
 		layout.PosAbs(&crystalButton[0][i], 1, 1 + i);
@@ -481,6 +484,7 @@ void CharacterScene::ItemTapped(const gamui::UIItem* item)
 			data->storageIC->GetItem(0)->wallet.AddGold( cost );
 		}
 		lumosGame->PopScene();
+		billOfSale.SetVisible(false);	// so errant warning can't be seen.
 	}
 	if ( item == &cancel ) {
 		ResetInventory();
