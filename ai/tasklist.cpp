@@ -622,19 +622,19 @@ void TaskList::GoShopping(const ComponentSet& thisComp, Chit* market)
 	if (boughtStuff) return;
 
 	// Sell the extras.
-	for (int i = 1; i<thisComp.itemComponent->NumItems(); ++i) {
-		GameItem* gi = thisComp.itemComponent->GetItem(i);
+	int itemToSell = 0;
+	while ((itemToSell = thisComp.itemComponent->ItemToSell()) != 0) {
+		GameItem* gi = thisComp.itemComponent->GetItem(itemToSell);
 		int value = gi->GetValue();
-		if (value && !gi->Intrinsic() && (gi != ranged) && (gi != melee) && (gi != shield)) {
-			int sold = MarketAI::Transact(gi,
-				market->GetItemComponent(),	// buyer
-				thisComp.itemComponent,		// seller
-				true);
-			if (sold) {
-				--i;
-				boughtStuff = true;
-			}
-		}
+		int sold = MarketAI::Transact(gi,
+			market->GetItemComponent(),	// buyer
+			thisComp.itemComponent,		// seller
+			true);
+
+		if (sold)
+			boughtStuff = true;
+		else
+			break;
 	}
 	if (boughtStuff) return;
 

@@ -741,7 +741,8 @@ public:
 	{
 		int val0 = v0->GetValue();
 		int val1 = v1->GetValue();
-		return val0 < val1;
+		// sort descending: (should really add a flag for this.)
+		return val0 > val1;
 	}
 };
 
@@ -770,6 +771,29 @@ int ItemComponent::NumCarriedItems() const
 			++count;
 	}
 	return count;
+}
+
+
+int ItemComponent::ItemToSell() const
+{
+	// returns 0 or the cheapest item that can be sold
+	int index = 0;
+	int val = INT_MAX;
+
+	for (int i = 1; i < itemArr.Size(); ++i) {
+		GameItem* item = itemArr[i];
+		if (!item->Intrinsic() && item->GetValue()) {
+			if (!ItemActive(i) 
+				&& (!reserve || item != reserve->GetItem()))
+			{
+				if (item->GetValue() < val) {
+					index = i;
+					val = item->GetValue();
+				}
+			}
+		}
+	}
+	return index;
 }
 
 

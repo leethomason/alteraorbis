@@ -1972,9 +1972,17 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 
 #define LOG_NEEDS
 
-#ifdef LOG_NEEDS
-	GLOUTPUT(("Denizen %d eval:\n", thisComp.chit->ID()));
-#endif
+	bool logNeeds = thisComp.item->IProperName() == "Tria";
+	if (logNeeds) {
+		GLOUTPUT(("Denizen %d eval:\n", thisComp.chit->ID()));
+	}
+
+	int sellIndex = thisComp.itemComponent->ItemToSell();
+	int sellValue = 0;
+	if (sellIndex) {
+		sellValue = thisComp.itemComponent->GetItem(sellIndex)->GetValue();
+		GLASSERT(sellValue);
+	}
 
 	// Score the buildings as a fit for the needs.
 	// future: consider distance to building
@@ -2042,6 +2050,14 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 			}
 		}
 
+		// If we have something to sell, extra interest in markets that can buy.
+		if (item->IName() == ISC::market
+			&& sellIndex
+			&& item->wallet.gold >= sellValue)
+		{
+			s *= 2.0;	// sell sell sell!
+		}
+
 		// Another tweak: eating when not hungry depletes elixir.
 		if (bd->needs.Value(Needs::FOOD) > 0 && needs.Value(Needs::FOOD) > 0.5) {
 			s *= 0.1;
@@ -2062,9 +2078,9 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 		//	}
 		//}
 
-#ifdef LOG_NEEDS
-		GLOUTPUT(("  %.2f %s\n", s, item->Name()));
-#endif
+		if (logNeeds) {
+			GLOUTPUT(("  %.2f %s\n", s, item->Name()));
+		}
 		if ( s > 0 && s > score ) {
 			score = s;
 			best = i;

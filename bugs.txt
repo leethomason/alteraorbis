@@ -56,6 +56,7 @@ x system for gamui to track models
 - melee is way too powerful and wide effect
 - option to flip right mouse behavior - pan/zoom by default. ctrl reverse.
 - uitracking in battle scene
+- destroy date of avatar doesn't seem to be getting entered in the Census/History
 
 - game
 
@@ -72,8 +73,8 @@ x system for gamui to track models
 	    - plants look repetetive
 	    t test exchange
 	    - new sounds
-	    - factory only fun if you build something...check that.
-	    - debug trace of the likes?
+	    x factory only fun if you build something...check that.
+	    x debug trace of the likes?
 		x model for exchange
 
 	- Beta2
