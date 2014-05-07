@@ -32,24 +32,23 @@ d standing shields!
 	- medkit
 	- boost items
 	- sellable items
-- money xchange - gold to crystal and vice versa
+x money xchange - gold to crystal and vice versa
 - should be able to browse units in character screen
-- vault needs "sell to market" button
+d vault needs "sell to market" button
 x building repair
 x system for gamui to track models
 - make sure UI shows shield boost BattleMechanics::ComputeShieldBoost()
 - add target portrait
 - review all atlases for texture mem usage
-- particles aren't additive correctly
-- credits scene
+d particles aren't additive correctly
 - remove normalization in shader
 - animation aware hit testing
 - bounds need to be adjusted to account for animation
 - record perf max/min. surprisingly hard.
 - memory pool everything in the chit/component system
 - analyze/optimize what causes component update: DoTick(), etc. Likely many DoTicks() getting called that aren't needed. (especially rendering...)
-- add rez effect for item switch?
-- animation generation
+d add rez effect for item switch?
+d animation generation
 - peaks news
 - openMP - particle system, elsewhere
 - re-do glow
@@ -57,6 +56,8 @@ x system for gamui to track models
 - option to flip right mouse behavior - pan/zoom by default. ctrl reverse.
 - uitracking in battle scene
 - destroy date of avatar doesn't seem to be getting entered in the Census/History
+- weather should affect fire/shock
+- shock -> plasma??
 
 - game
 
@@ -91,7 +92,7 @@ x system for gamui to track models
 			- monster arrival. greater herd more often?
 			- time to use bar (low??)
 			- double tech decay
-			- weapon sorting not quite correct
+			x weapon sorting not quite correct
 		- 32 bit texture support
 		x new walkthrough tutorial
 		- auto-clear not working as well as it should
@@ -131,8 +132,8 @@ x system for gamui to track models
 			x forge or factory?
 			x fee to forge
 		x citizens *don't* pick stuff up in their own domain
-		- coin changer. junk item breakdown?
-		- gold & crystal market
+		x coin changer. junk item breakdown?
+		x gold & crystal market
 		- flammability / shockability very agressive
 		- world effects morale/needs: water, tombstones, temples, etc.
 		- proper game start: location, selection of team color, icons
@@ -174,13 +175,13 @@ x system for gamui to track models
 		- item history
 			- created 
 			x kills
-			- winning names
+			x winning names
 		- real health bars & check visibility
 	    - exploring
 	      - xp for exploring!!
 	      - "domain theme" when you arrive
-	    - player creation screen
-	    - ruins
+	    x player creation screen
+	    x ruins
 
 	- Fauna 2
 		- external constant file
@@ -191,7 +192,7 @@ x system for gamui to track models
 		x visitors
 		x inventory screen
 	- Building
-		- domain building
+		x domain building
     	- turrets
     		- turret art
     		- building takes crystal
@@ -202,9 +203,9 @@ x system for gamui to track models
 
 - combat test scene	
 	x connect item to procedural rendering of melee weapon
-	- weapon types
-	- animation speed isn't correct
-	- gunrun to walk not synchronized correctly
+	x weapon types
+	x animation speed isn't correct
+	d gunrun to walk not synchronized correctly
 	- revisit accuracy comuptation. what scales with distance? area? volume? radius?
 	- melee attack goes back to reference position between hits
 

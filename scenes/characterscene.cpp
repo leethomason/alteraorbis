@@ -156,6 +156,10 @@ void CharacterScene::Resize()
 	layout.PosAbs( &reset, -1, -2 );
 	layout.PosAbs(&helpText, 1, -3);
 	helpText.SetBounds(cancel.X() - (okay.X() + okay.Width() - layout.GutterX()), 0);
+	if (data->IsCharacter()) {
+		// Need space for the history text
+		helpText.SetBounds(port.UIWidth()*0.5f - (okay.X() + okay.Width()), 0);
+	}
 	//helpText.SetBounds(moneyWidget[1].X() - (okay.X() + okay.Width() - layout.GutterX()), 0);
 
 	for (int i = 0; i < NUM_CRYSTAL_TYPES; ++i) {

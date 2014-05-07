@@ -102,9 +102,13 @@ void ItemComponent::Serialize( XStream* xs )
 }
 
 
-void ItemComponent::NameItem( GameItem* item )
+void ItemComponent::NameItem(GameItem* item)
 {
 	bool shouldHaveName = item->Traits().Level() >= LEVEL_OF_NAMING;
+	if (item->GetValue() >= VALUE_OF_NAMING) {
+		shouldHaveName = true;
+	}
+
 	const ChitContext* context = this->GetChitContext();
 
 	if ( shouldHaveName ) {
@@ -741,7 +745,7 @@ public:
 	{
 		int val0 = v0->GetValue();
 		int val1 = v1->GetValue();
-		// sort descending: (should really add a flag for this.)
+		// sort descending: (FIXME: should really add a flag for this, in the Sort)
 		return val0 > val1;
 	}
 };

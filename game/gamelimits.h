@@ -38,6 +38,7 @@ static const int NUM_PLANT_TYPES	= 8;
 static const int MAX_PLANT_STAGES	= 4;
 static const int MAX_PASSABLE_PLANT_STAGE = 1;	// 0,1 passable, 2,3 are not
 static const int LEVEL_OF_NAMING	= 4;
+static const int VALUE_OF_NAMING	= 100;
 static const float	PICKUP_RANGE	= 1.1f;	// Make sure center-to-center works
 static const int FARM_GROW_RAD	= 2;	// grid squares affected by farm. total region 5x5
 static const int TECH_MAX		= 4;	// Tech must be less than this: 0-3 in int, 0-3.99 in double
