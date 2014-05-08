@@ -160,7 +160,6 @@ void CharacterScene::Resize()
 		// Need space for the history text
 		helpText.SetBounds(port.UIWidth()*0.5f - (okay.X() + okay.Width()), 0);
 	}
-	//helpText.SetBounds(moneyWidget[1].X() - (okay.X() + okay.Width() - layout.GutterX()), 0);
 
 	for (int i = 0; i < NUM_CRYSTAL_TYPES; ++i) {
 		layout.PosAbs(&crystalButton[0][i], 1, 1 + i);

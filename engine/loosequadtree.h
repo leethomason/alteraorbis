@@ -20,10 +20,6 @@
 #include "model.h"
 #include "../grinliz/glmemorypool.h"
 
-struct ModelCache
-{
-	ModelCache* next;
-};
 
 /*
 	A tree for culling models. Used to be
@@ -34,7 +30,6 @@ struct ModelCache
 */
 class SpaceTree
 {
-
 public:
 	enum {
 		DEPTH = 6,
@@ -160,11 +155,6 @@ private:
 	Node* GetNode( int depth, int x, int z ); 
 	Node nodeArr[NUM_NODES];
 	grinliz::CArray<grinliz::Rectangle2I, MAX_ZONES> zones;
-
-public:
-	// hacky debugging info
-	static int nModelsAtDepth[DEPTH];
-
 };
 
 #endif // LOOSEQUADTREE_INCLUDED

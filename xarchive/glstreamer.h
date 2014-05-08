@@ -107,7 +107,14 @@ private:
 	void WriteDouble( double value );
 	void WriteReal(double value, bool isDouble);
 
-	FILE* fp;
+	void WriteBuffer(const void* data, int size) {
+		U8* p = buffer.PushArr(size);
+		memcpy(p, data, size);
+	}
+	void Flush();
+	grinliz::CDynArray<U8> buffer;
+
+	FILE* file;
 	int idPool;
 	int depth;
 
