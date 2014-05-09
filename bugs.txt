@@ -77,6 +77,7 @@ d animation generation
 	    x factory only fun if you build something...check that.
 	    x debug trace of the likes?
 		x model for exchange
+		- make sure "quick gen" hacks are cleaned up for WorldGen
 
 	- Beta2
 		- auto rebuild

@@ -290,6 +290,15 @@ void WorldGenScene::DoTick( U32 delta )
 
 	case GenState::SIM_START:
 	{
+		// Nasty bug: the sim will do a load.
+		// Be sure to save the map *before* 
+		// the sim->Load() else the sim
+		// runs on the old map.
+		const char* mapPNG = game->GamePath("map", 0, "png");
+		const char* mapDAT = game->GamePath("map", 0, "dat");
+		worldMap->Save(mapDAT);
+		worldMap->SavePNG(mapPNG);
+
 		SetMapBright(false);
 		LumosGame* game = this->GetGame()->ToLumosGame();
 		sim = new Sim(game);
@@ -338,11 +347,7 @@ void WorldGenScene::DoTick( U32 delta )
 	{
 		const char* datPath = game->GamePath("map", 0, "dat");
 		const char* gamePath = game->GamePath("game", 0, "dat");
-		const char* mapPNG = game->GamePath("map", 0, "png");
-		const char* mapDAT = game->GamePath("map", 0, "dat");
 
-		worldMap->Save(mapDAT);
-		worldMap->SavePNG(mapPNG);
 		sim->Save(datPath, gamePath);
 
 		genState.mode = GenState::DONE;
