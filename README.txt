@@ -20,6 +20,17 @@ thanks for playing and checking the game out. Feedback
 on the forums is appreciated!
 
 
+Changes in 1a
+-------------
+- 2 (!!) crash on start-up bugs fixed
+- internal stability fixes
+- portrait fix
+- targeting fix
+- help text
+- ui tweaks
+- added Exchange to convert between Au and Crystal
+- tweaked Denizen AI, Forge, and Exchange to be self sustaining 
+
 How to Play
 -----------
 http://alteraorbis.wikispaces.com/
