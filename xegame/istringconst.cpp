@@ -41,6 +41,7 @@ IString IStringConst::bar;
 IString IStringConst::guardpost;
 IString IStringConst::farm;
 IString IStringConst::distillery;
+IString IStringConst::exchange;
 IString IStringConst::zoneCreate;
 IString IStringConst::zoneConsume;
 IString IStringConst::industrial;
@@ -118,6 +119,7 @@ void IStringConst::Init()
 	guardpost = StringPool::Intern( "guardpost", true );
 	farm = StringPool::Intern( "farm", true );
 	distillery = StringPool::Intern( "distillery", true );
+	exchange = StringPool::Intern( "exchange", true );
 	zoneCreate = StringPool::Intern( "zoneCreate", true );
 	zoneConsume = StringPool::Intern( "zoneConsume", true );
 	industrial = StringPool::Intern( "industrial", true );

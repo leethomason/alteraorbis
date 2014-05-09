@@ -11,9 +11,10 @@
 using namespace grinliz;
 
 
-ForgeScript::ForgeScript( ItemComponent* forgeUser, int techLevel )
+ForgeScript::ForgeScript( int seed, int userLevel, int techLevel )
 {
-	this->forgeUser = forgeUser;
+	this->seed = seed;
+	this->userLevel = userLevel;
 	this->techLevel = techLevel;
 }
 
@@ -78,8 +79,7 @@ void ForgeScript::Build(	int type,			// GUN
 	// Random, but can't leave forge and come back
 	// to get different numbers.
 	Random random;
-	random.SetSeed(   forgeUser->GetItem()->ID() 
-		            ^ forgeUser->GetItem()->Traits().Experience() 
+	random.SetSeed(   seed
 					^ (type) );	// do NOT include parts - should not change on parts changing
 								// not changing on sub-type either
 
@@ -87,16 +87,16 @@ void ForgeScript::Build(	int type,			// GUN
 
 	int roll[GameTrait::NUM_TRAITS] = { 10, 10, 10, 10, 10 };
 	if ( doRandom ) {
-		int level = forgeUser->GetItem(0)->Traits().Level();
-		static const int COMPETENCE = 4;
-
 		for( int i=0; i<GameTrait::NUM_TRAITS; ++i ) {
-			int weight = -1 + (level + random.Rand(COMPETENCE)) / COMPETENCE;
-			roll[i] = random.WeightedDice( 3, 6, weight );
+			roll[i] = random.Dice(3, 6);
 		}
 	}
+	static const int COMPETENCE = 4;
+	for (int i = 0; i < GameTrait::NUM_TRAITS; ++i) {
+		roll[i] = Clamp(roll[i] - COMPETENCE + userLevel, 3, 18);
+	}
 
-	static const int BONUS = 3;
+	static const int BONUS = 2;
 
 	int features = 0;
 	if ( type == ForgeScript::GUN ) {

@@ -16,7 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef EvalBuilding_SCRIPT_INCLUDED
 #define EvalBuilding_SCRIPT_INCLUDED
 
-#include "scriptcomponent.h"
+#include "../xegame/component.h"
 #include "../xegame/cticker.h"
 
 // FIXME: this is a strange class; it should

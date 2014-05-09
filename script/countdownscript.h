@@ -16,8 +16,8 @@
 #ifndef COUNTDOWN_SCRIPT_INCLUDED
 #define COUNTDOWN_SCRIPT_INCLUDED
 
-#include "scriptcomponent.h"
 #include "../xegame/cticker.h"
+#include "../xegame/component.h"
 
 
 class CountDownScript : public Component

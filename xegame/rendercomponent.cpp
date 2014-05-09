@@ -376,6 +376,10 @@ int RenderComponent::DoTick( U32 deltaTime )
 	}
 
 	ProcessIcons( (int) deltaTime );
+	if (hud && hud->icons.Size()) {
+		// need to animate the icons...but not a lot.
+		tick = Min(tick, 100);
+	}
 	return tick;
 }
 

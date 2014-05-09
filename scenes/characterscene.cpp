@@ -12,6 +12,9 @@
 #include "../script/battlemechanics.h"
 #include "../script/itemscript.h"
 #include "../script/corescript.h"
+#include "../script/forgescript.h"
+
+#include "../game/reservebank.h"
 
 using namespace gamui;
 using namespace grinliz;
@@ -59,15 +62,45 @@ CharacterScene::CharacterScene( LumosGame* game, CharacterSceneData* csd ) : Sce
 	}
 	itemDescWidget.Init( &gamui2D );
 
+	for (int j = 0; j < 2; ++j) {
+		for (int i = 0; i < NUM_CRYSTAL_TYPES; ++i) {
+			crystalButton[j][i].Init(&gamui2D, game->GetButtonLook(0));
+			crystalButton[j][i].SetVisible(false);
+		}
+	}
+
 	moneyWidget[0].Init( &gamui2D );
 	moneyWidget[1].Init( &gamui2D );
 	moneyWidget[1].SetVisible( false );
 
+	helpText.Init(&gamui2D);
+	if (data->IsCharacter()) {
+		helpText.SetText("Character inventory is on the left. You can order items by dragging. The gun, "
+			"ring, and shield you want the character to use should be on the top row.");
+	}
+	else if (data->IsMarket()) {
+		helpText.SetText("Character inventory is on the left. Market items are on the right. Dragging items from "
+			"one inventory to the other will purchase or sell the item. Prices under the items show both the sell/buy "
+			"price and the (actual value).");
+		itemDescWidget.SetShortForm(true);
+	}
+	else if (data->IsVault()) {
+		helpText.SetText("Avatar inventory is on the left. Vault contents are on the right. You can drag "
+			"items between locations.");
+		itemDescWidget.SetShortForm(true);
+	}
+	else if (data->IsExchange()) {
+		helpText.SetText("Avatar Au and crystal is on the left. The exchange is on the right. Tap to buy or sell. "
+			"The exchance is operater by the Reserve Bank and does not take a cut; you may trade freely.");
+		itemDescWidget.SetShortForm(true);
+	}
+
 	moneyWidget[0].Set( data->itemComponent->GetItem(0)->wallet );
-	if ( data->IsMarket() ) {
+	if ( data->IsMarket() || data->IsExchange() ) {
 		moneyWidget[1].SetVisible( true );
 		moneyWidget[1].Set( data->storageIC->GetItem(0)->wallet );
 	}
+	CalcCrystalValue();
 
 	engine->lighting.direction.Set( 0, 1, 1 );
 	engine->lighting.direction.Normalize();
@@ -121,6 +154,18 @@ void CharacterScene::Resize()
 	layout.PosAbs( &dropButton, 1, 7 );
 	layout.PosAbs( &billOfSale, 1, 6 );	
 	layout.PosAbs( &reset, -1, -2 );
+	layout.PosAbs(&helpText, 1, -3);
+	helpText.SetBounds(cancel.X() - (okay.X() + okay.Width() - layout.GutterX()), 0);
+	if (data->IsCharacter()) {
+		// Need space for the history text
+		helpText.SetBounds(port.UIWidth()*0.5f - (okay.X() + okay.Width()), 0);
+	}
+
+	for (int i = 0; i < NUM_CRYSTAL_TYPES; ++i) {
+		layout.PosAbs(&crystalButton[0][i], 1, 1 + i);
+		layout.PosAbs(&crystalButton[1][i], -4, 1 + i);
+	}
+	cancel.SetVisible(!data->IsExchange());
 
 	if (data->IsCharacter()) {
 		layout.PosAbs(&desc, -4, 0);
@@ -130,16 +175,36 @@ void CharacterScene::Resize()
 		layout.PosAbs(&desc, -4, 6);
 		layout.PosAbs(&itemDescWidget, -4, 7);
 	}
-	else {
+	else if (data->IsVault()) {
 		// Vault
 		layout.PosAbs(&desc, -4, 0);
 		layout.PosAbs(&itemDescWidget, -4, 6);
+	}
+	else if (data->IsExchange()) {
+		desc.SetVisible(false);
+		itemDescWidget.SetVisible(false);
 	}
 	float width = layout.Width() * 4;
 	desc.SetBounds(width, 0);
 
 	itemDescWidget.SetLayout(layout);
 	itemDescWidget.SetPos(itemDescWidget.X(), itemDescWidget.Y());	// bug in the desc widgets
+}
+
+
+void CharacterScene::CalcCrystalValue()
+{
+	ForgeScript script(0, 2, 0);
+	GameItem* item = new GameItem();
+	Wallet wallet;
+	int tech = 0;
+	script.Build(ForgeScript::GUN, ForgeScript::BLASTER, 0, 0, item, &wallet, &tech, false);
+	crystalValue[0] = int(item->GetValue()+1.0f);
+	delete item;
+
+	crystalValue[CRYSTAL_RED]		= crystalValue[0] * ALL_CRYSTAL_GREEN / ALL_CRYSTAL_RED;
+	crystalValue[CRYSTAL_BLUE]		= crystalValue[0] * ALL_CRYSTAL_GREEN / ALL_CRYSTAL_BLUE;
+	crystalValue[CRYSTAL_VIOLET]	= crystalValue[0] * ALL_CRYSTAL_GREEN / ALL_CRYSTAL_VIOLET;
 }
 
 
@@ -168,8 +233,35 @@ void CharacterScene::SetItemInfo( const GameItem* item, const GameItem* user )
 }
 
 
+void CharacterScene::SetExchangeButtonText()
+{
+	for (int j = 0; j < 2; ++j) {
+		for (int i = 0; i < NUM_ITEM_BUTTONS; ++i) {
+			itemButton[j][i].SetVisible(false);
+		}
+	}
+	for (int j = 0; j < 2; ++j) {
+		static const char* NAMES[NUM_CRYSTAL_TYPES] = { "Green", "Red", "Blue", "Violet" };
+		static const char* RES[NUM_CRYSTAL_TYPES] = { "crystalGreen", "crystalRed", "crystalBlue", "crystalViolet" };
+		for (int i = 0; i < NUM_CRYSTAL_TYPES; ++i) {
+			RenderAtom atom = LumosGame::CalcUIIconAtom(RES[i], true);
+			crystalButton[j][i].SetVisible(true);
+
+			CStr<32> str;
+			str.Format("%s\n%d", NAMES[i], crystalValue[i]);
+			crystalButton[j][i].SetText(str.c_str());
+			crystalButton[j][i].SetDeco(atom, atom);
+		}
+	}
+}
+
+
 void CharacterScene::SetButtonText()
 {
+	if (data->IsExchange()) {
+		SetExchangeButtonText();
+		return;
+	}
 	const GameItem* down = 0;
 
 	RenderAtom nullAtom;
@@ -360,7 +452,30 @@ void CharacterScene::ResetInventory()
 }
 
 
-void CharacterScene::ItemTapped( const gamui::UIItem* item )
+void CharacterScene::Activate()
+{
+	if (data->IsExchange() && ReserveBank::Instance()) {
+		// The exchange works with the ReserveBank, else it
+		// would be running out of money, and have a fixed
+		// limit to the crystal/Au transaction.
+		int d = 1000 - data->storageIC->GetItem()->wallet.gold;
+		d = Min(d, ReserveBank::Instance()->bank.gold);
+		Transfer(&data->storageIC->GetItem()->wallet, &ReserveBank::Instance()->bank, d);
+		moneyWidget[1].Set(data->storageIC->GetItem()->wallet);
+	}
+}
+
+
+void CharacterScene::DeActivate()
+{
+	if (data->IsExchange() && ReserveBank::Instance()) {
+		// Move all the gold to the reserve
+		Transfer(&ReserveBank::Instance()->bank, &data->storageIC->GetItem()->wallet, data->storageIC->GetItem()->wallet.gold);
+	}
+}
+
+
+void CharacterScene::ItemTapped(const gamui::UIItem* item)
 {
 	if ( item == &okay ) {
 		if ( data->IsMarket() ) {
@@ -372,6 +487,7 @@ void CharacterScene::ItemTapped( const gamui::UIItem* item )
 			data->storageIC->GetItem(0)->wallet.AddGold( cost );
 		}
 		lumosGame->PopScene();
+		billOfSale.SetVisible(false);	// so errant warning can't be seen.
 	}
 	if ( item == &cancel ) {
 		ResetInventory();
@@ -380,6 +496,37 @@ void CharacterScene::ItemTapped( const gamui::UIItem* item )
 	if ( item == &reset ) {
 		ResetInventory();
 	}
+
+	for (int origin = 0; origin < 2; ++origin) {
+		for (int crystal = 0; crystal < NUM_CRYSTAL_TYPES; ++crystal) {
+			if (item == &crystalButton[origin][crystal]) {
+				Wallet transferCrystal;
+				transferCrystal.crystal[crystal] = 1;
+				Wallet transferGold;
+				transferGold.gold = crystalValue[crystal];
+
+				Wallet* avatarWallet = &data->itemComponent->GetItem()->wallet;
+				Wallet* exchangeWallet = &data->storageIC->GetItem()->wallet;
+
+				if (origin == 0) {
+					if (transferCrystal <= *avatarWallet && transferGold <= *exchangeWallet) {
+						Transfer(exchangeWallet, avatarWallet, transferCrystal);
+						Transfer(avatarWallet, exchangeWallet, transferGold);
+					}
+				}
+				else {
+					if (transferCrystal <= *exchangeWallet && transferGold <= *avatarWallet) {
+						Transfer(avatarWallet, exchangeWallet, transferCrystal);
+						Transfer(exchangeWallet, avatarWallet, transferGold);
+					}
+				}
+				moneyWidget[0].Set(data->itemComponent->GetItem()->wallet);
+				moneyWidget[1].Set(data->storageIC->GetItem()->wallet);
+				break;
+			}
+		}
+	}
+
 	SetButtonText();
 }
 

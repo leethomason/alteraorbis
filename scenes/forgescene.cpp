@@ -24,7 +24,9 @@ ForgeScene::ForgeScene( LumosGame* game, ForgeSceneData* data )
 	:	Scene( game ), 
 		lumosGame( game ), 
 		screenport( game->GetScreenport()),
-		forgeScript( data->itemComponent, data->tech )
+		forgeScript(data->itemComponent->GetItem()->ID() ^ data->itemComponent->GetItem()->Traits().Experience(),
+					data->itemComponent->GetItem()->Traits().Level(),
+					data->tech )
 {
 	forgeData = data;
 	item = new GameItem();

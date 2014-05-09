@@ -13,7 +13,6 @@
 #include "../xegame/istringconst.h"
 
 #include "../script/itemscript.h"
-#include "../script/scriptcomponent.h"
 #include "../script/volcanoscript.h"
 #include "../script/plantscript.h"
 #include "../script/corescript.h"
@@ -741,11 +740,15 @@ void Sim::UseBuilding()
 		if ( cs && ic ) {
 			if ( name == IStringConst::vault ) {
 				chitBag->PushScene( LumosGame::SCENE_CHARACTER, 
-					new CharacterSceneData( ic, building->GetItemComponent(), 0 ));
+					new CharacterSceneData( ic, building->GetItemComponent(), CharacterSceneData::VAULT ));
 			}
 			else if ( name == IStringConst::market ) {
 				chitBag->PushScene( LumosGame::SCENE_CHARACTER, 
-					new CharacterSceneData( ic, building->GetItemComponent(), true ));
+					new CharacterSceneData( ic, building->GetItemComponent(), CharacterSceneData::MARKET ));
+			}
+			else if (name == IStringConst::exchange) {
+				chitBag->PushScene(LumosGame::SCENE_CHARACTER,
+					new CharacterSceneData(ic, building->GetItemComponent(), CharacterSceneData::EXCHANGE));
 			}
 			else if ( name == IStringConst::factory ) {
 				ForgeSceneData* data = new ForgeSceneData();

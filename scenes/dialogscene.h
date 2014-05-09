@@ -55,8 +55,9 @@ private:
 		   NUM_SUB		= 2,
 		   CHARACTER	= 0,
 		   VAULT,
-		   FORGE,
 		   MARKET,
+		   EXCHANGE,
+		   FORGE,
 		   NUM_SCENES
 	};
 	gamui::ToggleButton toggles[NUM_TOGGLES];

@@ -16,8 +16,8 @@
 #ifndef DISTILLERY_SCRIPT_INCLUDED
 #define DISTILLERY_SCRIPT_INCLUDED
 
-#include "scriptcomponent.h"
 #include "../xegame/cticker.h"
+#include "../xegame/component.h"
 
 class DistilleryScript : public Component
 {

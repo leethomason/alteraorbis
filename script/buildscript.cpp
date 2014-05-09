@@ -21,23 +21,25 @@ BuildData BuildScript::buildData[NUM_OPTIONS] = {
 	{	"Social",	"kiosk.s",	1, "Attracts Visitors searching for social." },
 	{	"Temple",	"power",	1, "Increases Tech cap, increases population cap, attracts monsters." },
 	// Economy
-	{	"Forge",	"factory",	2, "Allows Denizens and Avatar to make weapons and shields." },
 	{	"Vault",	"vault",	2, "Stores items for the Core and Avatar." },
 	{	"SleepTube","bed",		2, "Increases population." },
 	{	"Market",	"market",	2, "Allows Denizens and Avatar to buy and sell weapons and shields." },
 	{	"Bar",		"bar",		2, "Distributes elixir." },
 	// Defense
-	{	"GuardPost","guardpost",3, "Gathering point for guards. Summons denizens of monster approach." },
+	{	"GuardPost","guardpost",3, "Gathering point for guards. Summons denizens if monster approach." },
 	// Industry
 	{	"Solar Farm","farm",	4, "Harvests fruit from plants." },
 	{	"Distillery","distillery",4, "Converts fruit to elixir." },
+	{	"Forge",	"factory",	4, "Allows Denizens and Avatar to make weapons and shields." },
+	{	"Exchange", "exchange", 4, "Allows Denizens and Avatar convert between Au and Crystal." },
 };
 
 
-const BuildData* BuildScript::GetDataFromStructure( const grinliz::IString& structure )
+const BuildData* BuildScript::GetDataFromStructure( const grinliz::IString& structure, int *id )
 {
 	for( int i=0; i<NUM_OPTIONS; ++i ) {
 		if ( structure == buildData[i].cStructure ) {
+			if (id) *id = i;
 			return &GetData( i );
 		}
 	}

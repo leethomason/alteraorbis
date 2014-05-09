@@ -234,6 +234,9 @@ private:
 	static Component* swapIn;
 };
 
+// Utility (not quite sure where this should live)
+bool InSameSector(Chit* a, Chit* b);
+
 
 struct ComponentSet
 {

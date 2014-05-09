@@ -34,6 +34,8 @@
 #include "../scenes/mapscene.h"
 #include "../scenes/censusscene.h"
 
+#include "../ai/rebuildai.h"
+
 using namespace grinliz;
 using namespace gamui;
 
@@ -261,7 +263,7 @@ void GameScene::Resize()
 		layout.PosAbs( &uiMode[i], i, 0 );
 	}
 
-	layout.PosAbs(&buildDescription, 0, 5);
+	layout.PosAbs(&buildDescription, 0, 4);
 
 	layout.PosAbs(&coreWarningIcon, 1, 6);
 	layout.PosAbs(&coreWarningLabel, 1, 6);
@@ -294,7 +296,7 @@ void GameScene::Resize()
 	layout.PosAbs( &moneyWidget, 5, -1 );
 	techLabel.SetPos( moneyWidget.X() + moneyWidget.Width() + layout.SpacingX(),
 					  moneyWidget.Y() );
-	layout.PosAbs(&swapWeapons, -1, 6);
+	layout.PosAbs(&swapWeapons, -1, 5);
 
 	static int CONSOLE_HEIGHT = 2;	// in layout...
 	layout.PosAbs( &consoleWidget, 1, -1 - CONSOLE_HEIGHT );
@@ -797,12 +799,28 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 	}
 	else if ( item == &createWorkerButton ) {
 		CoreScript* cs = sim->GetChitBag()->GetHomeCore();
-		Chit* coreChit = cs->ParentChit();
-		if (coreChit->GetItem()->wallet.gold >= WORKER_BOT_COST) {
-			coreChit->GetItem()->wallet.AddGold(-WORKER_BOT_COST);
-			ReserveBank::Instance()->bank.AddGold(WORKER_BOT_COST);
-			int team = coreChit->GetItem()->primaryTeam;
-			sim->GetChitBag()->NewWorkerChit( coreChit->GetSpatialComponent()->GetPosition(), team );
+		if (cs) {
+			Chit* coreChit = cs->ParentChit();
+			if (coreChit->GetItem()->wallet.gold >= WORKER_BOT_COST) {
+				Transfer(&ReserveBank::Instance()->bank, &coreChit->GetItem()->wallet, WORKER_BOT_COST);
+				int team = coreChit->GetItem()->primaryTeam;
+				sim->GetChitBag()->NewWorkerChit(coreChit->GetSpatialComponent()->GetPosition(), team);
+			}
+		}
+	}
+	else if (item == &autoRebuild) {
+		CoreScript* cs = sim->GetChitBag()->GetHomeCore();
+		if (cs) {
+			Chit* coreChit = cs->ParentChit();
+			Component* rebuild = coreChit->GetComponent("RebuildAIComponent");
+
+			if (autoRebuild.Down() && !rebuild) {
+				coreChit->Add(new RebuildAIComponent());
+			}
+			else if (!autoRebuild.Down() && rebuild) {
+				coreChit->Remove(rebuild);
+				delete rebuild;
+			}
 		}
 	}
 	else if ( item == faceWidget.GetButton() ) {
@@ -812,7 +830,7 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 		}
 		if ( chit && chit->GetItemComponent() ) {			
 			game->PushScene( LumosGame::SCENE_CHARACTER, 
-							 new CharacterSceneData( chit->GetItemComponent(), 0, 0 ));
+							 new CharacterSceneData( chit->GetItemComponent(), 0, CharacterSceneData::CHARACTER ));
 		}
 	}
 	else if (item == &swapWeapons) {
@@ -1312,7 +1330,7 @@ void GameScene::DoTick( U32 delta )
 	
 	// This doesn't really work. The AI will swap weapons
 	// at will, so it's more frustrating than useful.
-	// swapWeapons.SetVisible(track && track == playerChit);
+	swapWeapons.SetVisible(track && track == playerChit);
 	
 	str.Clear();
 
@@ -1334,7 +1352,7 @@ void GameScene::DoTick( U32 delta )
 	}
 	tabBar1.SetVisible( uiMode[UI_BUILD].Down() );
 	createWorkerButton.SetVisible( uiMode[UI_BUILD].Down() );
-	//autoRebuild.SetVisible(uiMode[UI_BUILD].Down());
+	autoRebuild.SetVisible(uiMode[UI_BUILD].Down());
 
 	str.Clear();
 
@@ -1351,15 +1369,13 @@ void GameScene::DoTick( U32 delta )
 	{
 		// Enforce the worker limit.
 		CStr<32> str2;
-		Rectangle2F b;
-		b.Set( (float)(homeSector.x*SECTOR_SIZE+1), (float)(homeSector.y*SECTOR_SIZE+1),
-				(float)((homeSector.x+1)*SECTOR_SIZE-1), (float)((homeSector.y+1)*SECTOR_SIZE-1) );
-
-		CChitArray arr;
-		ItemNameFilter workerFilter( IStringConst::worker, IChitAccept::MOB );
-
 		static const int MAX_BOTS = 4;
+
+		Rectangle2F b = ToWorld( InnerSectorBounds(homeSector));
+		CChitArray arr;
+		ItemNameFilter workerFilter(IStringConst::worker, IChitAccept::MOB);
 		sim->GetChitBag()->QuerySpatialHash( &arr, b, 0, &workerFilter );
+
 		str2.Format("WorkerBot\n%d %d/%d", WORKER_BOT_COST, arr.Size(), MAX_BOTS);		// FIXME: pull price from data
 		createWorkerButton.SetText( str2.c_str() );
 		createWorkerButton.SetEnabled( arr.Size() < MAX_BOTS );
@@ -1371,11 +1387,20 @@ void GameScene::DoTick( U32 delta )
 		int maxTubes  = 4 << techLevel;
 		sim->GetChitBag()->FindBuilding( IStringConst::bed, homeSector, 0, 0, &chitQuery, 0 );
 		buildButton[sleepTubeID].SetEnabled( chitQuery.Size() < maxTubes );
-		const BuildData* data = buildScript.GetDataFromStructure(IStringConst::bed);
+		const BuildData* data = buildScript.GetDataFromStructure(IStringConst::bed, 0);
 		GLASSERT(data);
 
 		str2.Format( "SleepTube\n%d %d/%d", data->cost, chitQuery.Size(), maxTubes );
 		buildButton[sleepTubeID].SetText( str2.c_str() ); 
+	}
+	autoRebuild.SetEnabled(coreScript != 0);
+	if (coreScript) {
+		// auto rebuild
+		Component* rebuild = coreScript->ParentChit()->GetComponent("RebuildAIComponent");
+		if (rebuild)
+			autoRebuild.SetDown();
+		else
+			autoRebuild.SetUp();
 	}
 	consoleWidget.DoTick( delta );
 	ProcessNewsToConsole();
@@ -1385,7 +1410,7 @@ void GameScene::DoTick( U32 delta )
 		Chit* building = sim->GetChitBag()->QueryPorch( playerChit->GetSpatialComponent()->GetPosition2DI(),0 );
 		if ( building ) {
 			IString name = building->GetItem()->IName();
-			if ( name == ISC::vault || name == ISC::factory || name == ISC::market ) {
+			if ( name == ISC::vault || name == ISC::factory || name == ISC::market || name == ISC::exchange ) {
 				useBuildingVisible = true;
 			}
 		}

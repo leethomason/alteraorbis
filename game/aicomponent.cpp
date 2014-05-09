@@ -1536,7 +1536,7 @@ bool AIComponent::ThinkCriticalShopping( const ComponentSet& thisComp )
 				bool goMarket = false;
 				MarketAI marketAI( market );
 				BuildScript buildScript;
-				const BuildData* bd = buildScript.GetDataFromStructure( IStringConst::market );
+				const BuildData* bd = buildScript.GetDataFromStructure( IStringConst::market, 0 );
 				GLASSERT( bd );
 
 				if ( !ranged && marketAI.HasRanged( thisComp.item->wallet.gold )) {
@@ -1972,6 +1972,20 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 	Vector2I bestPorch = { 0, 0 };
 	CChitArray mobs;
 
+#define LOG_NEEDS
+
+	bool logNeeds = thisComp.item->IProperName() == "Tria";
+	if (logNeeds) {
+		GLOUTPUT(("Denizen %d eval:\n", thisComp.chit->ID()));
+	}
+
+	int sellIndex = thisComp.itemComponent->ItemToSell();
+	int sellValue = 0;
+	if (sellIndex) {
+		sellValue = thisComp.itemComponent->GetItem(sellIndex)->GetValue();
+		GLASSERT(sellValue);
+	}
+
 	// Score the buildings as a fit for the needs.
 	// future: consider distance to building
 	// FIXME: only use sleep pods in home sector
@@ -1982,7 +1996,7 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 		Chit* chit = chitArr[i];
 		const GameItem* item = chit->GetItem();
 		GLASSERT( item );
-		const BuildData* bd = buildScript.GetDataFromStructure( item->IName() );
+		const BuildData* bd = buildScript.GetDataFromStructure( item->IName(), 0 );
 		if ( !bd || bd->needs.IsZero() ) 
 			continue;
 
@@ -2029,9 +2043,31 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 		// Small wiggle to use different markets, sleep tubes, etc.
 		s += 0.05 * double(Random::Hash8( chit->ID() ^ thisComp.chit->ID())) / 255.0;
 
+		// A little more push to drive for weapon creation.
+		// The factory fun is set high, but only works if
+		// there is crystal.
+		if (item->IName() == ISC::factory) {
+			if (!thisComp.item->wallet.crystal[CRYSTAL_GREEN]) {
+				s *= 0.1;
+			}
+		}
+
+		// If we have something to sell, extra interest in markets that can buy.
+		if (item->IName() == ISC::market
+			&& sellIndex
+			&& item->wallet.gold >= sellValue)
+		{
+			s *= 2.0;	// sell sell sell!
+		}
+
+		// Another tweak: eating when not hungry depletes elixir.
+		if (bd->needs.Value(Needs::FOOD) > 0 && needs.Value(Needs::FOOD) > 0.5) {
+			s *= 0.1;
+		}
+
 		// Variation - is this the last building visited?
 		if ( item->IName() == taskList.LastBuildingUsed() ) {
-			s *= 0.5;
+			s *= 0.2;
 		}
 
 		// Practicality - is available?
@@ -2044,6 +2080,9 @@ bool AIComponent::ThinkNeeds( const ComponentSet& thisComp )
 		//	}
 		//}
 
+		if (logNeeds) {
+			GLOUTPUT(("  %.2f %s\n", s, item->Name()));
+		}
 		if ( s > 0 && s > score ) {
 			score = s;
 			best = i;
@@ -2150,9 +2189,9 @@ void AIComponent::ThinkWander( const ComponentSet& thisComp )
 		return;
 	if (ThinkFruitCollect(thisComp))
 		return;
-	if (ThinkNeeds(thisComp))
-		return;
 	if ( ThinkDelivery( thisComp ))
+		return;
+	if (ThinkNeeds(thisComp))
 		return;
 	if (ThinkRepair(thisComp))
 		return;
@@ -2537,7 +2576,7 @@ void AIComponent::WorkQueueToTask(  const ComponentSet& thisComp )
 			else if ( BuildScript::IsBuild( item->action )) {
 				taskList.Push( Task::MoveTask( item->pos, item->taskID ));
 				taskList.Push( Task::StandTask( 1000, item->taskID ));
-				taskList.Push( Task::BuildTask( item->pos, item->action, item->taskID ));
+				taskList.Push( Task::BuildTask( item->pos, item->action, LRint(item->rotation), item->taskID ));
 			}
 			else {
 				GLASSERT( 0 );

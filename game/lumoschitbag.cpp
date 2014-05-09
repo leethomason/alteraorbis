@@ -34,7 +34,6 @@
 
 #include "../script/battlemechanics.h"
 #include "../script/itemscript.h"
-#include "../script/scriptcomponent.h"
 #include "../script/corescript.h"
 #include "../script/plantscript.h"
 #include "../script/procedural.h"
@@ -226,6 +225,8 @@ Chit* LumosChitBag::NewBuilding(const Vector2I& pos, const char* name, int team)
 	rootItem.keyValues.Get(ISC::size, &cx);
 	int porch = 0;
 	rootItem.keyValues.Get(ISC::porch, &porch);
+
+	GLASSERT(context->worldMap->IsPassable(pos.x, pos.y));
 
 	MapSpatialComponent* msc = new MapSpatialComponent();
 	msc->SetMapPosition(pos.x, pos.y, cx, cx);

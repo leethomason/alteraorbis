@@ -244,32 +244,27 @@ void GetSystemPath(int root, const char* filename, grinliz::GLString* out)
 			//	   directory which is awkward and weird.
 			PWSTR pwstr = 0;
 			PWSTR append = L"\\AlteraOrbis";
-			WCHAR buffer[256];
+			WCHAR buffer[MAX_PATH];
 
 			SHGetKnownFolderPath(FOLDERID_Documents, 0, NULL, &pwstr);
 			PWSTR p = pwstr;
 			WCHAR* q = buffer;
-			while (*p) {
+			while (*p && q < (buffer+MAX_PATH-1)) {
 				*q++ = *p++;
 			}
 			p = append;
-			while( *p ) {
+			while (*p && q < (buffer + MAX_PATH - 1)) {
 				*q++ = *p++;
 			}
 			*q = 0;
 			CreateDirectory(buffer, NULL);
 
-			// FIXME: should be UTF-8
-			char* target = prefPath;
-			p = buffer;
-			while( *p ) {
-				*target = (char)*p;
-				target++; p++;
+			int n = WideCharToMultiByte(CP_UTF8, 0, buffer, -1, prefPath, 256, 0, 0);
+			prefPath[255] = 0;
+			if (n && n < 255) {
+				prefPath[n-1] = '\\';
+				prefPath[n] = 0;
 			}
-			*target = '\\';
-			target++;
-			*target = 0;
-
 			CoTaskMemFree(static_cast<void*>(pwstr));
 #else
 			char* p = SDL_GetPrefPath("GrinningLizard", "AlteraOrbis");

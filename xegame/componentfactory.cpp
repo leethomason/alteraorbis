@@ -14,7 +14,6 @@
 #include "../game/physicsmovecomponent.h"
 #include "../game/towcomponent.h"
 
-#include "../script/scriptcomponent.h"
 #include "../script/volcanoscript.h"
 #include "../script/plantscript.h"
 #include "../script/corescript.h"
@@ -24,6 +23,7 @@
 #include "../script/evalbuildingscript.h"
 #include "../script/guardscript.h"
 
+#include "../ai/rebuildai.h"
 
 #include "componentfactory.h"
 
@@ -107,6 +107,10 @@ Component* ComponentFactory::Factory( const char* _name, const ChitContext* cont
 	else if (name == "GuardScript") {
 		return glnew GuardScript();
 	}
+	else if (name == "RebuildAIComponent") {
+		return glnew RebuildAIComponent();
+	}
+
 
 	GLASSERT( 0 );
 	GLOUTPUT_REL(( "%s", name ));

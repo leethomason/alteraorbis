@@ -13,27 +13,38 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef Guard_SCRIPT_INCLUDED
-#define Guard_SCRIPT_INCLUDED
+#ifndef REBUILDAI_COMPONENT_INCLUDED
+#define REBUILDAI_COMPONENT_INCLUDED
 
 #include "../xegame/component.h"
+#include "../xegame/chitbag.h"
 #include "../xegame/cticker.h"
 
-
-class GuardScript : public Component
+class RebuildAIComponent : public Component, public IChitListener
 {
 	typedef Component super;
-public:
-	GuardScript();
-	virtual ~GuardScript()		{}
 
-	virtual void OnAdd(Chit* chit, bool init);
+public:
+	RebuildAIComponent();
+	~RebuildAIComponent();
+
+	virtual void OnAdd(Chit* chit, bool initialize);
+	virtual void OnRemove();
 	virtual void Serialize(XStream* xs);
+
+	virtual const char* Name() const { return "RebuildAIComponent"; }
+	virtual void OnChitMsg(Chit* chit, const ChitMsg& msg);
 	virtual int DoTick(U32 delta);
-	virtual const char* Name() const { return "GuardScript"; }
 
 private:
-	CTicker timer;
+	struct WorkItem {
+		grinliz::IString structure;
+		grinliz::Vector2I pos;
+		int rot;
+	};
+	grinliz::CDynArray<WorkItem> workItems;
+	CTicker ticker;
 };
 
-#endif // Guard_SCRIPT_INCLUDED
+#endif // REBUILDAI_COMPONENT_INCLUDED
+

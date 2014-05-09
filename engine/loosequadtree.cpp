@@ -31,8 +31,6 @@ static const int MODEL_BLOCK = 10*1000;
 	Unit tree has less compution and fewer models, slightly less balanced. 
 */
 
-int SpaceTree::nModelsAtDepth[DEPTH] = { 0 };
-
 SpaceTree::SpaceTree( float yMin, float yMax, int _size ) 
 	:	modelPool( "SpaceTreeModelPool", sizeof( Item ), MODEL_BLOCK*sizeof( Item ), false )
 {
@@ -41,7 +39,6 @@ SpaceTree::SpaceTree( float yMin, float yMax, int _size )
 	treeBounds.Set( 0, yMin, 0, (float)size, yMax, (float)size );
 	lightXPerY = 0;
 	lightZPerY = 0;
-
 	InitNode();
 }
 
@@ -280,13 +277,11 @@ void SpaceTree::Node::Add( Item* item )
 
 	for( Node* it=this; it; it=it->parent )
 		it->nModels++;
-	SpaceTree::nModelsAtDepth[item->node->depth] += 1;
 }
 
 
 void SpaceTree::Node::Remove( Item* item ) 
 {
-	SpaceTree::nModelsAtDepth[item->node->depth] -= 1;
 	if ( root == item )
 		root = item->next;
 	if ( item->prev )

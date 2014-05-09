@@ -18,7 +18,7 @@
 
 #include "../xegame/xegamelimits.h"
 
-static const int CURRENT_FILE_VERSION = 6;
+static const int CURRENT_FILE_VERSION = 7;
 static const int MAX_MOVE_PATH = MAX_MAP_SIZE/2;	// repath if we need to
 
 // 4 miles/hour = 6000m/hr = 1.6m/s = 0.8grid/s
@@ -38,6 +38,7 @@ static const int NUM_PLANT_TYPES	= 8;
 static const int MAX_PLANT_STAGES	= 4;
 static const int MAX_PASSABLE_PLANT_STAGE = 1;	// 0,1 passable, 2,3 are not
 static const int LEVEL_OF_NAMING	= 4;
+static const int VALUE_OF_NAMING	= 100;
 static const float	PICKUP_RANGE	= 1.1f;	// Make sure center-to-center works
 static const int FARM_GROW_RAD	= 2;	// grid squares affected by farm. total region 5x5
 static const int TECH_MAX		= 4;	// Tech must be less than this: 0-3 in int, 0-3.99 in double
@@ -115,6 +116,5 @@ static const float EFFECT_ACCRUED_MAX = EFFECT_DAMAGE_PER_SEC;
 
 static const float MARKET_COST_MULT = 0.8f;
 static const int   WORKER_BOT_COST = 20;
-static const int   STD_DECO = 2000;					// typical time for over-head icons to be displayed
 
 #endif // GAMELIMITS_INCLUDED

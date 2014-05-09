@@ -20,7 +20,7 @@
 #include "rendercomponent.h"
 #include "itemcomponent.h"
 #include "componentfactory.h"
-#include "../script/scriptcomponent.h"	// FIXME: should be in xegame directory
+//#include "../script/scriptcomponent.h"	// FIXME: should be in xegame directory
 
 #include "../grinliz/glstringutil.h"
 #include "../xarchive/glstreamer.h"
@@ -384,3 +384,12 @@ void ComponentSet::Zero()
 }
 
 
+bool InSameSector(Chit* a, Chit* b)
+{
+	SpatialComponent* sca = a->GetSpatialComponent();
+	SpatialComponent* scb = b->GetSpatialComponent();
+	if (sca && scb) {
+		return sca->GetSector() == scb->GetSector();
+	}
+	return false;
+}

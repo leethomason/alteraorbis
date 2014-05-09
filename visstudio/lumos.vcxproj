@@ -89,6 +89,7 @@
   <ItemGroup>
     <ClCompile Include="..\ai\aineeds.cpp" />
     <ClCompile Include="..\ai\marketai.cpp" />
+    <ClCompile Include="..\ai\rebuildai.cpp" />
     <ClCompile Include="..\ai\tasklist.cpp" />
     <ClCompile Include="..\audio\xenoaudio.cpp" />
     <ClCompile Include="..\engine\animation.cpp" />
@@ -201,6 +202,7 @@
   <ItemGroup>
     <ClInclude Include="..\ai\aineeds.h" />
     <ClInclude Include="..\ai\marketai.h" />
+    <ClInclude Include="..\ai\rebuildai.h" />
     <ClInclude Include="..\ai\tasklist.h" />
     <ClInclude Include="..\audio\xenoaudio.h" />
     <ClInclude Include="..\engine\animation.h" />

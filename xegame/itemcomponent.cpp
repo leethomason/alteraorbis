@@ -32,7 +32,6 @@
 
 #include "../script/procedural.h"
 #include "../script/itemscript.h"
-#include "../script/scriptcomponent.h"
 
 #include "../xegame/rendercomponent.h"
 #include "../xegame/spatialcomponent.h"
@@ -102,9 +101,12 @@ void ItemComponent::Serialize( XStream* xs )
 }
 
 
-void ItemComponent::NameItem( GameItem* item )
+void ItemComponent::NameItem(GameItem* item)
 {
 	bool shouldHaveName = item->Traits().Level() >= LEVEL_OF_NAMING;
+	if (item->GetValue() >= VALUE_OF_NAMING) {
+		shouldHaveName = true;
+	}
 	const ChitContext* context = this->Context();
 
 	if ( shouldHaveName ) {
@@ -639,10 +641,12 @@ int ItemComponent::DoTick( U32 delta )
 		DoSlowTick();
 	}
 	int tick = VERY_LONG_TICK;
+
 	for( int i=0; i<itemArr.Size(); ++i ) {	
 		int t = itemArr[i]->DoTick( delta );
 		tick = Min( t, tick );
 
+		// This accounts for accruedFire or accruedShock turning on the timer.
 		if (    ( i==0 || ItemActive(i) ) 
 			 && EmitEffect( *mainItem, delta )) 
 		{
@@ -739,7 +743,8 @@ public:
 	{
 		int val0 = v0->GetValue();
 		int val1 = v1->GetValue();
-		return val0 < val1;
+		// sort descending: (FIXME: should really add a flag for this, in the Sort)
+		return val0 > val1;
 	}
 };
 
@@ -768,6 +773,29 @@ int ItemComponent::NumCarriedItems() const
 			++count;
 	}
 	return count;
+}
+
+
+int ItemComponent::ItemToSell() const
+{
+	// returns 0 or the cheapest item that can be sold
+	int index = 0;
+	int val = INT_MAX;
+
+	for (int i = 1; i < itemArr.Size(); ++i) {
+		GameItem* item = itemArr[i];
+		if (!item->Intrinsic() && item->GetValue()) {
+			if (!ItemActive(i) 
+				&& (!reserve || item != reserve->GetItem()))
+			{
+				if (item->GetValue() < val) {
+					index = i;
+					val = item->GetValue();
+				}
+			}
+		}
+	}
+	return index;
 }
 
 

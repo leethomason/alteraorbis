@@ -16,8 +16,8 @@
 #ifndef PLANT_SCRIPT_INCLUDED
 #define PLANT_SCRIPT_INCLUDED
 
-#include "scriptcomponent.h"
 #include "../grinliz/glrandom.h"
+#include "../xegame/component.h"
 #include "../xegame/cticker.h"
 
 class WorldMap;

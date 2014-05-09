@@ -16,9 +16,9 @@
 #ifndef CORESCRIPT_INCLUDED
 #define CORESCRIPT_INCLUDED
 
-#include "scriptcomponent.h"
 #include "../xegame/cticker.h"
 #include "../game/gamelimits.h"
+#include "../xegame/component.h"
 
 class WorldMap;
 class WorkQueue;

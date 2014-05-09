@@ -89,6 +89,7 @@ public:
 
 	bool CanAddToInventory();
 	int  NumCarriedItems() const;
+	int ItemToSell() const;	// returns 0 or the cheapest item that can be sold
 
 	// adds to the inventory; takes ownership of pointer
 	void AddToInventory( GameItem* item );
@@ -122,7 +123,7 @@ private:
 	void DoSlowTick();
 	void ApplyLootLimits();
 	bool EmitEffect( const GameItem& it, U32 deltaTime );
-	bool ItemActive( int index )	{ return activeArr[index]; }
+	bool ItemActive( int index ) const	{ return activeArr[index]; }
 	bool ItemActive( const GameItem* );	// expensive: needs a search.
 	void NameItem( GameItem* item );	// if conditions met, give the item a name.
 	void NewsDestroy( const GameItem* item );	// generate destroy message

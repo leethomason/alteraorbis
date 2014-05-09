@@ -145,7 +145,7 @@ void WorkQueue::Remove( const grinliz::Vector2I& pos )
 }
 
 
-void WorkQueue::AddAction( const grinliz::Vector2I& pos2i, int action )
+void WorkQueue::AddAction( const grinliz::Vector2I& pos2i, int action, float rotation )
 {
 	if ( ToSector( pos2i ) == sector ) {
 		// okay!
@@ -158,6 +158,7 @@ void WorkQueue::AddAction( const grinliz::Vector2I& pos2i, int action )
 	QueueItem item;
 	item.action = action;
 	item.pos = pos2i;
+	item.rotation = rotation;
 	item.taskID = ++idPool;
 
 	if ( !TaskCanComplete( item )) {

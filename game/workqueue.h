@@ -37,7 +37,7 @@ public:
 	~WorkQueue();
 	void InitSector( Chit* _parent, const grinliz::Vector2I& _sector );
 	struct QueueItem {
-		QueueItem() : action(0), assigned(0), taskID(0), model(0) { pos.Zero(); }
+		QueueItem() : action(0), assigned(0), taskID(0), model(0), rotation(0) { pos.Zero(); }
 
 		void Serialize( XStream* xs );
 
@@ -46,10 +46,11 @@ public:
 		int					assigned;	// id of worker assigned this task.			
 		int					taskID;		// id # of this task
 		Model*				model;		// model used to show map work location
+		float				rotation;
 	};
 
 	void Serialize( XStream* xs );
-	void AddAction( const grinliz::Vector2I& pos, int action );	// add an action to do
+	void AddAction( const grinliz::Vector2I& pos, int action, float rotation=0 );	// add an action to do
 	void Remove( const grinliz::Vector2I& pos );
 	
 	const QueueItem*	Find( const grinliz::Vector2I& chitPos );	// find something to do. don't hold pointer!

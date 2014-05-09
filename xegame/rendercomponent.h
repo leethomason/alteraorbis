@@ -112,7 +112,7 @@ public:
 
 	// --- Decoration --- //
 	void SetGroundMark( const char* asset );
-	void AddDeco( const char* name, int duration );
+	void AddDeco( const char* name, int duration=STD_DECO );
 	// if null/empty, uses the proper name if it exists.
 	void SetDecoText(const char* text);
 

@@ -11,6 +11,7 @@
 #include "../game/lumosgame.h"
 #include "../game/team.h"
 #include "../game/mapspatialcomponent.h"
+#include "../game/reservebank.h"
 
 #include "../xegame/chit.h"
 #include "../xegame/spatialcomponent.h"
@@ -35,7 +36,7 @@ using namespace ai;
 
 Task Task::RemoveTask( const grinliz::Vector2I& pos2i, int taskID )
 {
-	return Task::BuildTask( pos2i, BuildScript::CLEAR, taskID );
+	return Task::BuildTask( pos2i, BuildScript::CLEAR, 0, taskID );
 }
 
 
@@ -300,6 +301,8 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta )
 						GameItem* controllerItem = controller->GetItem();
 						Chit* building = chitBag->NewBuilding( task->pos2i, buildData.cStructure, chit->PrimaryTeam() );
 						Transfer(&building->GetItem()->wallet, &controllerItem->wallet, buildData.cost);
+						// 'data' property used to transfer in the rotation.
+						building->GetSpatialComponent()->SetYRotation(float(task->data));
 					}
 					Remove();
 				}
@@ -401,7 +404,8 @@ void TaskList::SocialPulse( const ComponentSet& thisComp, const Vector2F& origin
 	}
 
 	// Okay, passed checks. Give social happiness.
-	double social = double( arr.Size() ) * 0.05;
+//	double social = double(arr.Size()) * 0.05;	// too low - spend avatar time trying to make people happy
+	double social = double(arr.Size()) * 0.10;
 	for( int i=0; i<arr.Size(); ++i ) {
 		arr[i]->GetAIComponent()->GetNeedsMutable()->Add( ai::Needs::SOCIAL, social );
 		if ( thisComp.chit->GetRenderComponent() ) {
@@ -409,139 +413,6 @@ void TaskList::SocialPulse( const ComponentSet& thisComp, const Vector2F& origin
 		}
 	}
 }
-
-
-#if 0
-double TaskList::EvalBuilding(Chit* building)
-{
-	GameItem* item = building->GetItem();
-	GLASSERT(item);
-
-	IString consume = item->keyValues.GetIString("zoneConsume");
-	if (consume.empty()) {
-		return 1.0;	// if the building doesn't consume an environment, then always full efficiency.
-	}
-	MapSpatialComponent* msc = GET_SUB_COMPONENT(building, SpatialComponent, MapSpatialComponent);
-	GLASSERT(msc);
-	if (!msc) {
-		return 1.0;
-	}
-	Rectangle2I porch = msc->PorchPos();
-
-	static const int RAD = 4;
-
-	Rectangle2I bounds = porch;
-	bounds.Outset(RAD);
-
-	Rectangle2I mapBounds = worldMap->Bounds();
-	if (!mapBounds.Contains(bounds)) {
-		return 1.0;	// not worth dealing with edge of world
-	}
-	CChitArray arr;
-	BuildingFilter buildingFilter;
-	PlantFilter plantFilter;
-	int hasWaterfalls = worldMap->ContainsWaterfall(bounds);
-
-	int count = 0;
-	double scale = 0;
-	int hit = 0;
-
-	int hitB=0, hitIBuilding = 0, hitNBuilding = 0, hitWater = 0, hitPlant = 0, hitRock = 0;
-	int nRays = 0;
-
-	LumosChitBag* chitBag = building->Context()->chitBag;
-	Rectangle2IEdgeIterator it(bounds);
-
-	while (!it.Done()) {
-		++count;
-		double s = 0;
-
-		Vector2I pos = { it.Pos().x >= porch.max.x ? porch.max.x : porch.min.x,
-						 it.Pos().y >= porch.max.y ? porch.max.y : porch.min.y };
-
-		LineWalk walk(pos.x, pos.y, it.Pos().x, it.Pos().y);
-		walk.Step();	// ignore where we are standing.
-
-		while (walk.CurrentStep() <= walk.NumSteps()) {	// non-intuitive iterator. See linewalk docs.
-			// - building
-			// - plant
-			// - ice
-			// - rock
-			// - waterfall
-			// - water
-			
-			// Buildings. Can be 2x2. Extend out beyond current check.
-			bool hitBuilding = false;
-			Vector2I p = walk.P();
-			chitBag->QuerySpatialHash(&arr, ToWorld2F(p), 0.8f, 0, &buildingFilter);
-			for (int i = 0; i < arr.Size(); ++i) {
-				MapSpatialComponent* buildingMSC = GET_SUB_COMPONENT(arr[i], SpatialComponent, MapSpatialComponent);
-				GLASSERT(buildingMSC);
-				if (buildingMSC->Bounds().Contains(p)) {
-					hitBuilding = true;
-					double thisSys = arr[i]->GetItem()->GetBuildingIndustrial(true);
-					s += thisSys;
-					hitB++;
-					if (thisSys == -1) hitIBuilding++;
-					if (thisSys == 1) hitNBuilding++;
-					break;
-				}
-			}
-			if (hitBuilding) break;
-
-			chitBag->QuerySpatialHash(&arr, ToWorld2F(p), 0.1f, 0, &plantFilter);
-			if (arr.Size()) {
-				int type = 0, stage = 0;
-				PlantScript::IsPlant(arr[0], &type, &stage);
-				s -= double(stage + 1) / double(PlantScript::NUM_STAGE);
-				if (stage >= 2) break;
-				++hitPlant;
-			}
-
-			const WorldGrid& wg = worldMap->GetWorldGrid(p.x,p.y);
-			if (wg.RockHeight()) {
-				if (wg.RockType() == WorldGrid::ROCK) {
-					s -= 0.1;
-				}
-				++hitRock;
-				break;
-			}
-			if (wg.IsWater()) {
-				s -= 1.0;	// / double(RAD);
-				++hitWater;
-				break;
-			}
-
-			Rectangle2I wb;
-			wb.min = wb.max = p;
-			if ( hasWaterfalls && worldMap->ContainsWaterfall(wb)) {
-				s -= 10.0;
-				break;
-			}
-			walk.Step();
-		}
-		if (walk.CurrentStep() <= walk.NumSteps()) {
-			++nRays;
-		}
-
-		scale += Clamp(s, -1.0, 1.0);
-
-		// double move - don't need that much accuracy
-		it.Next();
-		it.Next();
-	}
-
-	double eval = scale / double(nRays);
-	GLOUTPUT(("Building %s at %d,%d eval=%.2f scale=%.2f nRays=%d count=%d\n  hit: Build=%d (I=%d N=%d) water=%d plant=%d rock=%d\n",
-		building->GetItem()->Name(),
-		porch.min.x, porch.min.y,
-		eval,
-		scale, nRays, count,
-		hitB, hitIBuilding, hitNBuilding, hitWater, hitPlant, hitRock));
-
-	return eval;
-}
-#endif
 
 
 void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const grinliz::IString& buildingName )
@@ -579,7 +450,7 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 
 	if ( thisComp.item->flags & GameItem::AI_USES_BUILDINGS ) {
 		BuildScript buildScript;
-		const BuildData* bd = buildScript.GetDataFromStructure( buildingName );
+		const BuildData* bd = buildScript.GetDataFromStructure( buildingName, 0 );
 		GLASSERT( bd );
 		ai::Needs supply = bd->needs;
 
@@ -590,6 +461,9 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 
 		if ( buildingName == IStringConst::market ) {
 			GoShopping( thisComp, building );
+		}
+		else if (buildingName == IStringConst::exchange) {
+			GoExchange(thisComp, building);
 		}
 		else if ( buildingName == IStringConst::factory ) {
 			bool used = UseFactory( thisComp, building, coreScript->GetTechLevel() );
@@ -609,7 +483,7 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 			GLASSERT( coreScript->nElixir > 0 );
 			coreScript->nElixir -= 1;
 		}
-		// Social attracts, but is never applied. (That' is what the SocialPulse is for.)
+		// Social attracts, but is never applied. (That is what the SocialPulse is for.)
 		supply.Set(Needs::SOCIAL, 0);
 
 		double scale = 1.0;
@@ -636,7 +510,71 @@ void TaskList::UseBuilding( const ComponentSet& thisComp, Chit* building, const 
 }
 
 
-void TaskList::GoShopping(  const ComponentSet& thisComp, Chit* market )
+void TaskList::GoExchange(const ComponentSet& thisComp, Chit* exchange)
+{
+	const Personality& personality = thisComp.item->GetPersonality();
+	const int* crystalValue = ReserveBank::Instance()->CrystalValue();
+	bool usedExchange = false;
+
+	if (personality.Crafting() == Personality::DISLIKES) {
+		// Sell all the crystal
+		for (int type = 0; type < NUM_CRYSTAL_TYPES; ++type) {
+			int n = thisComp.item->wallet.crystal[type];
+			if (n) {
+				// Gold from bank.
+				Wallet c;
+				c.crystal[type] = n;
+
+				if (CanTransfer(&thisComp.item->wallet, &ReserveBank::Instance()->bank, n*crystalValue[type])) {
+					Transfer(&thisComp.item->wallet, &ReserveBank::Instance()->bank, n*crystalValue[type]);
+					Transfer(&ReserveBank::Instance()->bank, &thisComp.item->wallet, c);
+					usedExchange = true;
+				}
+			}
+		}
+	}
+	else {
+		int willSpend = thisComp.item->wallet.gold / 5;
+		if (personality.Crafting() == Personality::LIKES) {
+			willSpend = thisComp.item->wallet.gold / 2;
+		}
+
+		for (int type = 0; type < NUM_CRYSTAL_TYPES; ++type) {
+			int nWant = NUM_CRYSTAL_TYPES - type - thisComp.item->wallet.crystal[type];
+	
+			while (nWant) {
+				int cost = crystalValue[type];
+				if (cost < willSpend) {
+					Wallet c;
+					c.crystal[type] = 1;
+
+					if (CanTransfer(&thisComp.item->wallet, &exchange->GetItem()->wallet, c)) {
+						Transfer(&ReserveBank::Instance()->bank, &thisComp.item->wallet, cost);
+						Transfer(&thisComp.item->wallet, &exchange->GetItem()->wallet, c);
+						--nWant;
+						willSpend -= cost;
+						usedExchange = true;
+					}
+					else {
+						break;
+					}
+				}
+				else {
+					break;
+				}
+			}
+		}
+	}
+	if (usedExchange) {
+		RenderComponent* rc = thisComp.chit->GetRenderComponent();
+		if (rc) {
+			rc->AddDeco("loot");
+		}
+	}
+}
+
+
+void TaskList::GoShopping(const ComponentSet& thisComp, Chit* market)
 {
 	// Try to keep this as simple as possible.
 	// Still complex. Purchasing stuff can invalidate
@@ -686,19 +624,19 @@ void TaskList::GoShopping(  const ComponentSet& thisComp, Chit* market )
 	if (boughtStuff) return;
 
 	// Sell the extras.
-	for (int i = 1; i<thisComp.itemComponent->NumItems(); ++i) {
-		GameItem* gi = thisComp.itemComponent->GetItem(i);
+	int itemToSell = 0;
+	while ((itemToSell = thisComp.itemComponent->ItemToSell()) != 0) {
+		GameItem* gi = thisComp.itemComponent->GetItem(itemToSell);
 		int value = gi->GetValue();
-		if (value && !gi->Intrinsic() && (gi != ranged) && (gi != melee) && (gi != shield)) {
-			int sold = MarketAI::Transact(gi,
-				market->GetItemComponent(),	// buyer
-				thisComp.itemComponent,		// seller
-				true);
-			if (sold) {
-				--i;
-				boughtStuff = true;
-			}
-		}
+		int sold = MarketAI::Transact(gi,
+			market->GetItemComponent(),	// buyer
+			thisComp.itemComponent,		// seller
+			true);
+
+		if (sold)
+			boughtStuff = true;
+		else
+			break;
 	}
 	if (boughtStuff) return;
 
@@ -775,7 +713,9 @@ bool TaskList::UseFactory( const ComponentSet& thisComp, Chit* factory, int tech
 	random.ShuffleArray(partsArr, GL_C_ARRAY_SIZE(partsArr));
 	random.ShuffleArray(effectsArr, GL_C_ARRAY_SIZE(effectsArr));
 
-	ForgeScript forge( thisComp.itemComponent, tech );
+	int seed = thisComp.chit->ID() ^ thisComp.item->Traits().Experience();
+	int level = thisComp.item->Traits().Level();
+	ForgeScript forge( seed, level, tech );
 	GameItem* item = new GameItem();
 
 	int cp = 0;

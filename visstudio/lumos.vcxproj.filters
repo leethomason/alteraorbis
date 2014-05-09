@@ -379,6 +379,9 @@
     <ClCompile Include="..\scenes\creditsscene.cpp">
       <Filter>Source Files\scenes</Filter>
     </ClCompile>
+    <ClCompile Include="..\ai\rebuildai.cpp">
+      <Filter>Source Files\ai</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\engine\camera.h">
@@ -761,6 +764,9 @@
     </ClInclude>
     <ClInclude Include="..\scenes\creditsscene.h">
       <Filter>Source Files\scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ai\rebuildai.h">
+      <Filter>Source Files\ai</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

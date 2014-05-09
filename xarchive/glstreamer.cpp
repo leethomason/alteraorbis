@@ -27,7 +27,7 @@ XStream::~XStream()
 
 StreamWriter::StreamWriter( FILE* p_fp, int version ) 
 	:	XStream(), 
-		fp( p_fp ), 
+		file( p_fp ), 
 		depth( 0 ),
 		nCompInt( 0 ),
 		nInt( 0 ),
@@ -37,11 +37,14 @@ StreamWriter::StreamWriter( FILE* p_fp, int version )
 	// Write the header:
 	idPool = 0;
 	WriteInt( version );
+	Flush();
 }
 
 
 StreamWriter::~StreamWriter()
 {
+	//Code may have already closed stream. Flush is in CloseElement()
+	//Flush();
 	GLOUTPUT(( "StreamWriter Bytes. nCompInt=%d (nInt=%d) nStr=%d nNumber=%d\n",
 		       nCompInt, nInt, nStr, nNumber ));
 	GLOUTPUT(( "             KB.    nCompInt=%d (nInt=%d) nStr=%d nNumber=%d\n",
@@ -67,11 +70,13 @@ void StreamWriter::WriteInt( int value )
 	lead |= nBytes << 4;
 
 	lead |= value & 0xf;
-	fputc( lead, fp );
+	//fputc( lead, fp );
+	buffer.Push(lead);
 	value >>= 4;
 
 	for( int i=0; i<nBytes; ++i ) {
-		fputc( value & 0xff, fp );
+		//fputc( value & 0xff, fp );
+		buffer.Push(value & 0xff);
 		value >>= 8;
 	}
 
@@ -130,7 +135,9 @@ void StreamWriter::WriteString( const char* str )
 		WriteInt( -idPool );
 		int len = strlen( str );
 		WriteInt( len );
-		fwrite( str, len, 1, fp );
+		//fwrite( str, len, 1, fp );
+		WriteBuffer(str, len);
+
 		nStr += len + 1;
 
 		IString istr = StringPool::Intern( str );
@@ -175,12 +182,14 @@ void StreamWriter::WriteReal(double value, bool isDouble)
 	// Fun to do. But tricky code. Going with the hacky approach for now.
 	if (value == 0) {
 		nNumber += 1;
-		fputc(ENC_0, fp);
+		//fputc(ENC_0, fp);
+		buffer.Push(ENC_0);
 		return;
 	}
 	if (value == 1) {
 		nNumber += 1;
-		fputc(ENC_1, fp);
+		//fputc(ENC_1, fp);
+		buffer.Push(ENC_1);
 		return;
 	}
 
@@ -190,7 +199,8 @@ void StreamWriter::WriteReal(double value, bool isDouble)
 		int nBytes = NumBytesFollow(abs(int(value))) + 1;
 		if (nBytes < realBytes) {
 			nNumber += 1;
-			fputc(ENC_INT, fp);
+			//fputc(ENC_INT, fp);
+			buffer.Push(ENC_INT);
 			WriteInt(int(value));
 			return;
 		}
@@ -201,22 +211,27 @@ void StreamWriter::WriteReal(double value, bool isDouble)
 		int nBytes = NumBytesFollow(abs(int(value * 2))) + 1;
 		if (nBytes < realBytes) {
 			nNumber += 1;
-			fputc(ENC_INT2, fp);
+			//fputc(ENC_INT2, fp);
+			buffer.Push(ENC_INT2);
 			WriteInt(int(value * 2));
 			return;
 		}
 	}
 	if ( realBytes == 4 ) {
-		fputc(ENC_FLOAT, fp);
+		//fputc(ENC_FLOAT, fp);
+		buffer.Push(ENC_FLOAT);
 		nNumber += 1 + sizeof(float);
 		float f = float(value);
-		fwrite(&f, sizeof(float), 1, fp);
+		//fwrite(&f, sizeof(float), 1, fp);
+		WriteBuffer(&f, sizeof(float));
 		return;
 	}
 
-	fputc(ENC_DOUBLE, fp);
+	//fputc(ENC_DOUBLE, fp);
+	buffer.Push(ENC_DOUBLE);
 	nNumber += 1 + sizeof(double);
-	fwrite(&value, sizeof(double), 1, fp);
+	//fwrite(&value, sizeof(double), 1, fp);
+	WriteBuffer(&value, sizeof(double));
 }
 
 void StreamWriter::WriteFloat( float value )
@@ -294,6 +309,15 @@ double StreamReader::ReadDouble()
 }
 
 
+void StreamWriter::Flush()
+{
+	if (buffer.Size()) {
+		fwrite(buffer.Mem(), buffer.Size(), 1, file);
+		buffer.Clear();
+	}
+}
+
+
 void StreamWriter::OpenElement( const char* str ) 
 {
 	++depth;
@@ -307,6 +331,10 @@ void StreamWriter::CloseElement()
 	GLASSERT( depth > 0 );
 	--depth;
 	WriteInt( END_ELEMENT );
+
+	if (depth == 0 || buffer.Size() > 32*1000) {
+		Flush();
+	}
 }
 
 

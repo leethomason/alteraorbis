@@ -16,9 +16,9 @@
 #ifndef Farm_SCRIPT_INCLUDED
 #define Farm_SCRIPT_INCLUDED
 
-#include "scriptcomponent.h"
 #include "../xegame/cticker.h"
 #include "../gamui/gamui.h"
+#include "../xegame/component.h"
 
 
 class FarmScript : public Component

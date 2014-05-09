@@ -1,6 +1,8 @@
 #include "reservebank.h"
 #include "../xarchive/glstreamer.h"
 #include "../grinliz/glstringutil.h"
+#include "../script/forgescript.h"
+#include "../game/gameitem.h"
 
 using namespace grinliz;
 
@@ -34,6 +36,9 @@ ReserveBank::ReserveBank()
 {
 	GLASSERT( instance == 0 );
 	instance = this;
+	for (int i = 0; i < NUM_CRYSTAL_TYPES; ++i) {
+		crystalValue[i] = 0;
+	}
 
 	// All the gold in the world.
 	bank.gold = ALL_GOLD;
@@ -92,4 +97,22 @@ int ReserveBank::WithdrawRandomCrystal()
 		return type;
 	}
 	return NO_CRYSTAL;
+}
+
+
+const int* ReserveBank::CrystalValue()
+{
+	if (crystalValue[0] == 0) {
+		ForgeScript script(0, 2, 0);
+		GameItem item;
+		Wallet wallet;
+		int tech = 0;
+		script.Build(ForgeScript::GUN, ForgeScript::BLASTER, 0, 0, &item, &wallet, &tech, false);
+		crystalValue[0] = int(item.GetValue() + 1.0f);
+
+		crystalValue[CRYSTAL_RED] = crystalValue[0] * ALL_CRYSTAL_GREEN / ALL_CRYSTAL_RED;
+		crystalValue[CRYSTAL_BLUE] = crystalValue[0] * ALL_CRYSTAL_GREEN / ALL_CRYSTAL_BLUE;
+		crystalValue[CRYSTAL_VIOLET] = crystalValue[0] * ALL_CRYSTAL_GREEN / ALL_CRYSTAL_VIOLET;
+	}
+	return crystalValue;
 }

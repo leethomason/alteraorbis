@@ -47,6 +47,7 @@ public:
 		GUARDPOST,
 		FARM,
 		DISTILLERY,
+		EXCHANGE,
 		NUM_OPTIONS,
 
 		NUM_GROUPS = 4,
@@ -62,7 +63,7 @@ public:
 	static bool IsClear( int action ) { return action == CLEAR; }
 
 	const BuildData& GetData( int i );
-	const BuildData* GetDataFromStructure( const grinliz::IString& structure );
+	const BuildData* GetDataFromStructure( const grinliz::IString& structure, int* id );
 
 private:
 	static BuildData buildData[NUM_OPTIONS];

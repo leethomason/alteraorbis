@@ -161,15 +161,10 @@ void NavTest2Scene::DrawDebugText()
 	Vector2I sector = { 0, 0 };
 	map->PatherCacheHitMiss( sector, &cacheData );
 
-	ufoText->Draw( 0, 16, "PathCache mem%%=%d hit%%=%d walkers=%d [%d %d %d %d %d]", 
+	ufoText->Draw( 0, 16, "PathCache mem%%=%d hit%%=%d walkers=%d", 
 		(int)(cacheData.memoryFraction * 100.0f),
 		(int)(cacheData.hitFraction * 100.f),
-		chits.Size(),
-		SpaceTree::nModelsAtDepth[0], 
-		SpaceTree::nModelsAtDepth[1], 
-		SpaceTree::nModelsAtDepth[2], 
-		SpaceTree::nModelsAtDepth[3], 
-		SpaceTree::nModelsAtDepth[4] );	
+		chits.Size() );	
 
 	if ( debugRay.direction.x ) {
 		Model* root = engine->IntersectModel( debugRay.origin, debugRay.direction, FLT_MAX, TEST_TRI, 0, 0, 0, 0 );

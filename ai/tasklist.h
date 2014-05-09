@@ -82,12 +82,13 @@ public:
 
 	static Task RemoveTask( const grinliz::Vector2I& pos2i, int taskID=0 );
 
-	static Task BuildTask( const grinliz::Vector2I& pos2i, int buildScriptID, int taskID=0 ) {
+	static Task BuildTask( const grinliz::Vector2I& pos2i, int buildScriptID, int rotation, int taskID=0 ) {
 		Task t;
 		t.action = TASK_BUILD;
 		t.pos2i = pos2i;
 		t.buildScriptID = buildScriptID;
 		t.taskID = taskID;
+		t.data = rotation;
 		return t;
 	}
 
@@ -143,7 +144,8 @@ public:
 private:
 	void UseBuilding( const ComponentSet& thisComp, Chit* building, const grinliz::IString& buildingName );
 
-	void GoShopping(  const ComponentSet& thisComp, Chit* market );
+	void GoShopping(const ComponentSet& thisComp, Chit* market);
+	void GoExchange(const ComponentSet& thisComp, Chit* market);
 	bool UseFactory(  const ComponentSet& thisComp, Chit* factory, int tech );
 	bool DoStanding( const ComponentSet& thisComp, int time );
 
