@@ -68,12 +68,11 @@ void WorldGenScene::Resize()
 	worldImage.SetSize( size, size );
 	worldImage.SetPos( port.UIWidth()*0.5f - size*0.5f, 10.0f );
 
-	worldText.SetPos(worldImage.X(), worldImage.Y());
-	worldText.SetBounds(size, size);
-
-	label.SetPos( worldImage.X(), worldImage.Y() + worldImage.Height() + 16.f );
-
 	LayoutCalculator layout = static_cast<LumosGame*>(game)->DefaultLayout();
+	label.SetPos(worldImage.X(), worldImage.Y() + worldImage.Height() + 16.f);
+
+	worldText.SetPos(worldImage.X() + layout.GutterX(), worldImage.Y() + layout.GutterY());
+	worldText.SetBounds(size - layout.GutterX()*2.0f, size - layout.GutterY()*2.0);
 }
 
 
