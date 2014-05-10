@@ -68,12 +68,11 @@ void WorldGenScene::Resize()
 	worldImage.SetSize( size, size );
 	worldImage.SetPos( port.UIWidth()*0.5f - size*0.5f, 10.0f );
 
-	worldText.SetPos(worldImage.X(), worldImage.Y());
-	worldText.SetBounds(size, size);
-
-	label.SetPos( worldImage.X(), worldImage.Y() + worldImage.Height() + 16.f );
-
 	LayoutCalculator layout = static_cast<LumosGame*>(game)->DefaultLayout();
+	label.SetPos(worldImage.X(), worldImage.Y() + worldImage.Height() + 16.f);
+
+	worldText.SetPos(worldImage.X() + layout.GutterX(), worldImage.Y() + layout.GutterY());
+	worldText.SetBounds(size - layout.GutterX()*2.0f, size - layout.GutterY()*2.0);
 }
 
 
@@ -290,6 +289,15 @@ void WorldGenScene::DoTick( U32 delta )
 
 	case GenState::SIM_START:
 	{
+		// Nasty bug: the sim will do a load.
+		// Be sure to save the map *before* 
+		// the sim->Load() else the sim
+		// runs on the old map.
+		const char* mapPNG = game->GamePath("map", 0, "png");
+		const char* mapDAT = game->GamePath("map", 0, "dat");
+		worldMap->Save(mapDAT);
+		worldMap->SavePNG(mapPNG);
+
 		SetMapBright(false);
 		LumosGame* game = this->GetGame()->ToLumosGame();
 		sim = new Sim(game);
@@ -339,11 +347,7 @@ void WorldGenScene::DoTick( U32 delta )
 	{
 		const char* datPath = game->GamePath("map", 0, "dat");
 		const char* gamePath = game->GamePath("game", 0, "dat");
-		const char* mapPNG = game->GamePath("map", 0, "png");
-		const char* mapDAT = game->GamePath("map", 0, "dat");
 
-		worldMap->Save(mapDAT);
-		worldMap->SavePNG(mapPNG);
 		sim->Save(datPath, gamePath);
 
 		genState.mode = GenState::DONE;
