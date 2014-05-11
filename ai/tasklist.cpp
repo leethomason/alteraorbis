@@ -152,6 +152,7 @@ void TaskList::DoTasks( Chit* chit, WorkQueue* workQueue, U32 delta )
 
 	// If this is a task associated with a work item, make
 	// sure that work item still exists.
+
 	if ( task->taskID ) {
 		const WorkQueue::QueueItem* queueItem = 0;
 		if ( workQueue ) {

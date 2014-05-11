@@ -50,20 +50,20 @@ void RebuildAIComponent::Serialize(XStream* xs)
 
 void RebuildAIComponent::OnChitMsg(Chit* chit, const ChitMsg& msg)
 {
-	if (msg.ID() == ChitMsg::CHIT_DESTROYED_START && (chit != ParentChit())) {
-		if (chit->PrimaryTeam() == this->ParentChit()->PrimaryTeam()) {
-			BuildingFilter buildingFilter;
-			if (buildingFilter.Accept(chit) 
-				&& InSameSector(chit, ParentChit())
-				&& chit->GetItem() )
-			{
-				GameItem* gi = chit->GetItem();
-				WorkItem* wi = workItems.PushArr(1);
-				wi->structure = gi->IName();
-				wi->pos = chit->GetSpatialComponent()->Bounds().min;
-				wi->rot = LRint(chit->GetSpatialComponent()->GetYRotation());
-				GLOUTPUT(("Structure %s at %d,%d r=%d to rebuild queue.\n", wi->structure.safe_str(), wi->pos.x, wi->pos.y, int(wi->rot)));
-			}
+	if (   msg.ID() == ChitMsg::CHIT_DESTROYED_START 
+		&& (chit != ParentChit())
+		&& InSameSector(chit, ParentChit())
+		&& chit->PrimaryTeam() == this->ParentChit()->PrimaryTeam())
+	{
+		BuildingFilter buildingFilter;
+		if (buildingFilter.Accept(chit))
+		{
+			GameItem* gi = chit->GetItem();
+			WorkItem* wi = workItems.PushArr(1);
+			wi->structure = gi->IName();
+			wi->pos = chit->GetSpatialComponent()->Bounds().min;
+			wi->rot = LRint(chit->GetSpatialComponent()->GetYRotation());
+			GLOUTPUT(("Structure %s at %d,%d r=%d to rebuild queue.\n", wi->structure.safe_str(), wi->pos.x, wi->pos.y, int(wi->rot)));
 		}
 	}
 	super::OnChitMsg(chit, msg);
@@ -79,7 +79,7 @@ int RebuildAIComponent::DoTick(U32 delta)
 	Vector2I sector = spatial->GetSector();
 	CoreScript* cs = CoreScript::GetCore(sector);
 
-	if (ticker.Delta(delta) && mainItem && spatial && cs && workItems.Size()) {
+	if (ticker.Delta(delta) && mainItem && spatial && cs) {
 
 		// Create workers, if needed.
 		Rectangle2F b = ToWorld(InnerSectorBounds(sector));
@@ -94,14 +94,16 @@ int RebuildAIComponent::DoTick(U32 delta)
 		}
 
 		// Pull a task off the queue and send a worker out.
-		WorkQueue* workQueue = cs->GetWorkQueue();
-		if (workQueue) {
-			WorkItem wi = workItems.Pop();
-			BuildScript buildScript;
-			int id = 0;
-			buildScript.GetDataFromStructure(wi.structure, &id);
-			workQueue->AddAction(wi.pos, id, float(wi.rot));
-			GLOUTPUT(("Structure %s at %d,%d r=%d POP to work queue.\n", wi.structure.safe_str(), wi.pos.x, wi.pos.y, int(wi.rot)));
+		if (workItems.Size()) {
+			WorkQueue* workQueue = cs->GetWorkQueue();
+			if (workQueue) {
+				WorkItem wi = workItems.Pop();
+				BuildScript buildScript;
+				int id = 0;
+				buildScript.GetDataFromStructure(wi.structure, &id);
+				workQueue->AddAction(wi.pos, id, float(wi.rot));
+				GLOUTPUT(("Structure %s at %d,%d r=%d POP to work queue.\n", wi.structure.safe_str(), wi.pos.x, wi.pos.y, int(wi.rot)));
+			}
 		}
 	}
 	return ticker.Next();

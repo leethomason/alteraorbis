@@ -72,7 +72,7 @@ void WorldGenScene::Resize()
 	label.SetPos(worldImage.X(), worldImage.Y() + worldImage.Height() + 16.f);
 
 	worldText.SetPos(worldImage.X() + layout.GutterX(), worldImage.Y() + layout.GutterY());
-	worldText.SetBounds(size - layout.GutterX()*2.0f, size - layout.GutterY()*2.0);
+	worldText.SetBounds(size - layout.GutterX()*2.0f, size - layout.GutterY()*2.0f);
 }
 
 
