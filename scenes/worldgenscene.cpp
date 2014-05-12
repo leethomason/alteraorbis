@@ -12,6 +12,7 @@
 #include "../game/sim.h"
 
 #include "../script/rockgen.h"
+#include "../audio/xenoaudio.h"
 #include <time.h>
 
 using namespace grinliz;
@@ -74,6 +75,12 @@ void WorldGenScene::Resize()
 	label.SetPos( worldImage.X(), worldImage.Y() + worldImage.Height() + 16.f );
 
 	LayoutCalculator layout = static_cast<LumosGame*>(game)->DefaultLayout();
+}
+
+
+void WorldGenScene::DeActivate()
+{
+	XenoAudio::Instance()->SetAudio(SettingsManager::Instance()->AudioOn());
 }
 
 
@@ -192,6 +199,8 @@ void WorldGenScene::DoTick( U32 delta )
 
 	case GenState::WORLDGEN:
 	{
+		// Don't want to hear crazy sound during world-gen:
+		XenoAudio::Instance()->SetAudio(false);	// turned back on/off on scene de-activate. 
 		worldText.SetText("");
 		clock_t start = clock();
 		while ((genState.y < WorldGen::SIZE) && (clock() - start < 30)) {
@@ -353,6 +362,7 @@ void WorldGenScene::DoTick( U32 delta )
 
 	case GenState::DONE:
 	{
+		XenoAudio::Instance()->SetAudio(SettingsManager::Instance()->AudioOn());
 		okay.SetEnabled(true);
 	}
 		break;
