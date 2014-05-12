@@ -150,6 +150,7 @@
        so there isn't an obvious way to serialize it. -->
   <!-- needs require crystals to use -->
   <!-- need was: 0.4. Seems a little under-used. -->
+  <!-- kick the fun up quite high, but add a check in the AI for crystal -->
   <item name="factory"
         resource="factory"
         porch="1"
@@ -161,7 +162,7 @@
         zoneConsume="industrial"
         
 		need.time="2.0"
-        need.fun="0.5"
+        need.fun="0.8"
         />
 
   <item name="power"

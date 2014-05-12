@@ -402,7 +402,8 @@ void TaskList::SocialPulse( const ComponentSet& thisComp, const Vector2F& origin
 	}
 
 	// Okay, passed checks. Give social happiness.
-	double social = double( arr.Size() ) * 0.05;
+//	double social = double(arr.Size()) * 0.05;	// too low - spend avatar time trying to make people happy
+	double social = double(arr.Size()) * 0.10;
 	for( int i=0; i<arr.Size(); ++i ) {
 		arr[i]->GetAIComponent()->GetNeedsMutable()->Add( ai::Needs::SOCIAL, social );
 		if ( thisComp.chit->GetRenderComponent() ) {
@@ -511,6 +512,7 @@ void TaskList::GoExchange(const ComponentSet& thisComp, Chit* exchange)
 {
 	const Personality& personality = thisComp.item->GetPersonality();
 	const int* crystalValue = ReserveBank::Instance()->CrystalValue();
+	bool usedExchange = false;
 
 	if (personality.Crafting() == Personality::DISLIKES) {
 		// Sell all the crystal
@@ -524,6 +526,7 @@ void TaskList::GoExchange(const ComponentSet& thisComp, Chit* exchange)
 				if (CanTransfer(&thisComp.item->wallet, &ReserveBank::Instance()->bank, n*crystalValue[type])) {
 					Transfer(&thisComp.item->wallet, &ReserveBank::Instance()->bank, n*crystalValue[type]);
 					Transfer(&ReserveBank::Instance()->bank, &thisComp.item->wallet, c);
+					usedExchange = true;
 				}
 			}
 		}
@@ -548,12 +551,22 @@ void TaskList::GoExchange(const ComponentSet& thisComp, Chit* exchange)
 						Transfer(&thisComp.item->wallet, &exchange->GetItem()->wallet, c);
 						--nWant;
 						willSpend -= cost;
+						usedExchange = true;
 					}
 					else {
-						nWant = 0;
+						break;
 					}
 				}
+				else {
+					break;
+				}
 			}
+		}
+	}
+	if (usedExchange) {
+		RenderComponent* rc = thisComp.chit->GetRenderComponent();
+		if (rc) {
+			rc->AddDeco("loot");
 		}
 	}
 }
@@ -609,19 +622,19 @@ void TaskList::GoShopping(const ComponentSet& thisComp, Chit* market)
 	if (boughtStuff) return;
 
 	// Sell the extras.
-	for (int i = 1; i<thisComp.itemComponent->NumItems(); ++i) {
-		GameItem* gi = thisComp.itemComponent->GetItem(i);
+	int itemToSell = 0;
+	while ((itemToSell = thisComp.itemComponent->ItemToSell()) != 0) {
+		GameItem* gi = thisComp.itemComponent->GetItem(itemToSell);
 		int value = gi->GetValue();
-		if (value && !gi->Intrinsic() && (gi != ranged) && (gi != melee) && (gi != shield)) {
-			int sold = MarketAI::Transact(gi,
-				market->GetItemComponent(),	// buyer
-				thisComp.itemComponent,		// seller
-				true);
-			if (sold) {
-				--i;
-				boughtStuff = true;
-			}
-		}
+		int sold = MarketAI::Transact(gi,
+			market->GetItemComponent(),	// buyer
+			thisComp.itemComponent,		// seller
+			true);
+
+		if (sold)
+			boughtStuff = true;
+		else
+			break;
 	}
 	if (boughtStuff) return;
 

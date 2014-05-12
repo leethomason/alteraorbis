@@ -588,7 +588,7 @@ void WorldMap::ProcessZone( ChitBag* cb )
 
 							int waterMax = poolGrids.Size() / 10;
 							if ( poolGrids.Size() >= 10 && border == 0 && water <= waterMax ) {
-								GLOUTPUT(( "pool found. zone=%d,%d area=%d waterFall=%d\n", zx, zy, poolGrids.Size(), water ));
+								//GLOUTPUT(( "pool found. zone=%d,%d area=%d waterFall=%d\n", zx, zy, poolGrids.Size(), water ));
 								
 								if ( newsHistory) {
 

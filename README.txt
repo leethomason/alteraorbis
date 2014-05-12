@@ -25,6 +25,19 @@ How to Play
 http://alteraorbis.wikispaces.com/
 
 
+FAQ
+---
+Why do denizens just stand there or get stuck?
+
+	Make sure you don't have a porth that isn't accessible. They may be 
+	trying to get to a facility and can't.
+
+Why is everyone carrying fruit?
+
+	You don't have a distillery, or the distillery can't keep up
+	with production. Build another distillery.
+
+
 Controls
 ------------
 

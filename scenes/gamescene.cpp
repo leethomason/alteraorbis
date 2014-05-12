@@ -797,12 +797,14 @@ void GameScene::ItemTapped( const gamui::UIItem* item )
 	}
 	else if ( item == &createWorkerButton ) {
 		CoreScript* cs = sim->GetChitBag()->GetHomeCore();
-		Chit* coreChit = cs->ParentChit();
-		if (coreChit->GetItem()->wallet.gold >= WORKER_BOT_COST) {
-			coreChit->GetItem()->wallet.AddGold(-WORKER_BOT_COST);
-			ReserveBank::Instance()->bank.AddGold(WORKER_BOT_COST);
-			int team = coreChit->GetItem()->primaryTeam;
-			sim->GetChitBag()->NewWorkerChit( coreChit->GetSpatialComponent()->GetPosition(), team );
+		if (cs) {
+			Chit* coreChit = cs->ParentChit();
+			if (coreChit->GetItem()->wallet.gold >= WORKER_BOT_COST) {
+				coreChit->GetItem()->wallet.AddGold(-WORKER_BOT_COST);
+				ReserveBank::Instance()->bank.AddGold(WORKER_BOT_COST);
+				int team = coreChit->GetItem()->primaryTeam;
+				sim->GetChitBag()->NewWorkerChit(coreChit->GetSpatialComponent()->GetPosition(), team);
+			}
 		}
 	}
 	else if ( item == faceWidget.GetButton() ) {

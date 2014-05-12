@@ -11,7 +11,7 @@ class ChitBag;
 class ItemDescWidget : public gamui::IWidget
 {
 public:
-	ItemDescWidget() : layout( 1000, 1000 )			{}
+	ItemDescWidget() : layout(1000, 1000), shortForm(false)		{}
 	void Init( gamui::Gamui* gamui );
 
 	virtual float X() const							{ return text.X(); }
@@ -27,8 +27,10 @@ public:
 	virtual void SetVisible( bool vis );
 
 	void SetInfo( const GameItem* item, const GameItem* user, bool showPersonality, ChitBag* chitBag );
+	void SetShortForm(bool s) { shortForm = s; }
 
 private:
+	bool shortForm;
 	gamui::LayoutCalculator	layout;
 	gamui::TextLabel		text;
 	grinliz::CStr< 4096 >	textBuffer;

@@ -102,9 +102,13 @@ void ItemComponent::Serialize( XStream* xs )
 }
 
 
-void ItemComponent::NameItem( GameItem* item )
+void ItemComponent::NameItem(GameItem* item)
 {
 	bool shouldHaveName = item->Traits().Level() >= LEVEL_OF_NAMING;
+	if (item->GetValue() >= VALUE_OF_NAMING) {
+		shouldHaveName = true;
+	}
+
 	const ChitContext* context = this->GetChitContext();
 
 	if ( shouldHaveName ) {
@@ -741,7 +745,8 @@ public:
 	{
 		int val0 = v0->GetValue();
 		int val1 = v1->GetValue();
-		return val0 < val1;
+		// sort descending: (FIXME: should really add a flag for this, in the Sort)
+		return val0 > val1;
 	}
 };
 
@@ -770,6 +775,29 @@ int ItemComponent::NumCarriedItems() const
 			++count;
 	}
 	return count;
+}
+
+
+int ItemComponent::ItemToSell() const
+{
+	// returns 0 or the cheapest item that can be sold
+	int index = 0;
+	int val = INT_MAX;
+
+	for (int i = 1; i < itemArr.Size(); ++i) {
+		GameItem* item = itemArr[i];
+		if (!item->Intrinsic() && item->GetValue()) {
+			if (!ItemActive(i) 
+				&& (!reserve || item != reserve->GetItem()))
+			{
+				if (item->GetValue() < val) {
+					index = i;
+					val = item->GetValue();
+				}
+			}
+		}
+	}
+	return index;
 }
 
 
