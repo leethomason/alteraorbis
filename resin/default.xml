@@ -298,7 +298,15 @@
   <data assetName="pulseWAV"        filename="sound/pulse.wav" compress="false" />
   <data assetName="beamgunWAV"      filename="sound/beamgun.wav" compress="false" />
 
-  <data assetName="firebigWAV"      filename="sound/firebig.wav"  compress="false" />
+  <!-- sound variations are identified by:
+       nameWAV (the base)
+       nameWAV2
+       nameWAV3
+       nameWAV4
+  -->
+  <data assetName="firebigWAV"      filename="sound/BigFire_1_22k.wav"  compress="false" />
+  <data assetName="firebigWAV2"     filename="sound/BigFire_2_22k.wav"  compress="false" />
+  <data assetName="firebigWAV3"     filename="sound/BigFire_3_22k.wav"  compress="false" />
   <data assetName="firesmallWAV"    filename="sound/firesmall.wav"  compress="false" />
   <data assetName="shockWAV"        filename="sound/shock.wav"  compress="false" />
   <data assetName="explosionWAV"    filename="sound/explosion.wav"  compress="false" />

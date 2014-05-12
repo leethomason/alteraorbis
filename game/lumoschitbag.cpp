@@ -274,7 +274,7 @@ Chit* LumosChitBag::NewBuilding(const Vector2I& pos, const char* name, int team)
 	context->engine->particleSystem->EmitPD( "constructiondone", ToWorld3F( pos ), V3F_UP, 0 );
 
 	if (XenoAudio::Instance()) {
-		XenoAudio::Instance()->Play("rezWAV", &ToWorld3F(pos));
+		XenoAudio::Instance()->PlayVariation(ISC::rezWAV, random.Rand(), &ToWorld3F(pos));
 	}
 
 	return chit;
@@ -318,7 +318,7 @@ Chit* LumosChitBag::NewLawnOrnament(const Vector2I& pos, const char* name, int t
 	context->engine->particleSystem->EmitPD("constructiondone", ToWorld3F(pos), V3F_UP, 0);
 
 	if (XenoAudio::Instance()) {
-		XenoAudio::Instance()->Play("rezWAV", &ToWorld3F(pos));
+		XenoAudio::Instance()->PlayVariation(ISC::rezWAV, random.Rand(), &ToWorld3F(pos));
 	}
 
 	return chit;
@@ -354,7 +354,7 @@ Chit* LumosChitBag::NewMonsterChit(const Vector3F& pos, const char* name, int te
 	chit->GetItem()->GetTraitsMutable()->Roll(chit->ID());
 
 	if (XenoAudio::Instance()) {
-		XenoAudio::Instance()->Play("rezWAV", &pos);
+		XenoAudio::Instance()->PlayVariation(ISC::rezWAV, random.Rand(), &pos);
 	}
 	return chit;
 }
@@ -406,7 +406,7 @@ Chit* LumosChitBag::NewDenizen( const grinliz::Vector2I& pos, int team )
 	chit->GetItem()->keyValues.Set( "destroyMsg", NewsEvent::DENIZEN_KILLED );
 
 	if (XenoAudio::Instance()) {
-		XenoAudio::Instance()->Play("rezWAV", &ToWorld3F(pos));
+		XenoAudio::Instance()->PlayVariation(ISC::rezWAV, random.Rand(), &ToWorld3F(pos));
 	}
 
 	return chit;
@@ -429,7 +429,7 @@ Chit* LumosChitBag::NewWorkerChit( const Vector3F& pos, int team )
 	chit->Add( new DebugStateComponent( context->worldMap ));
 
 	if (XenoAudio::Instance()) {
-		XenoAudio::Instance()->Play("rezWAV", &pos);
+		XenoAudio::Instance()->PlayVariation(ISC::rezWAV, random.Rand(), &pos);
 	}
 	return chit;
 }
@@ -715,7 +715,7 @@ void LumosChitBag::HandleBolt( const Bolt& bolt, const ModelVoxel& mv )
 		BattleMechanics::GenerateExplosionMsgs( dd, origin, bolt.chitID, context->engine, this );
 
 		if (XenoAudio::Instance()) {
-			XenoAudio::Instance()->Play("explosionWAV", &origin);
+			XenoAudio::Instance()->PlayVariation(ISC::explosionWAV, random.Rand(), &origin);
 		}
 
 		if ( mv.VoxelHit() ) {

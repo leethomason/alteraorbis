@@ -213,7 +213,7 @@ bool BattleMechanics::MeleeAttack( Engine* engine, Chit* src, IMeleeWeaponItem* 
 		IString impactSound = weapon->GetItem()->keyValues.GetIString("impactSound");
 		if (!impactSound.empty()) {
 			Vector3F pos3 = src->GetSpatialComponent()->GetPosition();
-			XenoAudio::Instance()->Play(impactSound.c_str(), &pos3 );
+			XenoAudio::Instance()->PlayVariation(impactSound, src->random.Rand(), &pos3 );
 		}
 	}
 	return impact;
@@ -306,9 +306,9 @@ void BattleMechanics::Shoot( ChitBag* bag, Chit* src, const grinliz::Vector3F& _
 	GLASSERT( src->GetRenderComponent() );
 	src->GetRenderComponent()->CalcTrigger( &p0, 0 );
 
-	IString sound = weaponItem->keyValues.GetIString(IStringConst::sound);
+	IString sound  = weaponItem->keyValues.GetIString(IStringConst::sound);
 	if (!sound.empty() && XenoAudio::Instance()) {
-		XenoAudio::Instance()->Play(sound.c_str(), &p0);
+		XenoAudio::Instance()->PlayVariation(sound, item->ID(), &p0);
 	}
 
 	// Explosives shoot at feet.
