@@ -349,7 +349,7 @@
       <item name="claw"
             flags="MELEE_WEAPON INTRINSIC"
             hardpoint="trigger"
-            impactSound="meleeWAV">
+            impactSound="meleeBigWAV">
       </item>
     </intrinsics>
   </item>
@@ -364,7 +364,7 @@
       <item name="claw"
             flags="MELEE_WEAPON INTRINSIC EFFECT_FIRE"
             hardpoint="trigger"
-            impactSound="meleeWAV">
+            impactSound="meleeBigWAV">
       </item>
       <item name="breath"
             flags="RANGED_WEAPON INTRINSIC EFFECT_FIRE EFFECT_EXPLOSIVE RENDER_TRAIL"
@@ -389,7 +389,7 @@
       <item name="claw"
             flags="MELEE_WEAPON INTRINSIC EFFECT_SHOCK"
             hardpoint="trigger"
-            impactSound="meleeWAV">
+            impactSound="meleeBigWAV">
       </item>
       <item name="breath"
             flags="RANGED_WEAPON INTRINSIC EFFECT_SHOCK"
@@ -413,7 +413,7 @@
         resource="ring"
         uiIcon="ring"
         flags="MELEE_WEAPON CLICK_THROUGH"
-		    procedural="ring"
+		procedural="ring"
         nameGen="vikingFemale"
         hardpoint="trigger"
         meleeDamage="1.4"
@@ -531,7 +531,7 @@
         flags="FLAMMABLE IMMUNE_SHOCK CLICK_THROUGH"
         mass ="5"
         sun="0.6"
-        rain="0.4"
+        rain="0.3"
         temperature="0.8"
         />
 

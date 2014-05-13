@@ -17,8 +17,8 @@ XenoAudio::XenoAudio(const gamedb::Reader* db, const char* pathToDB)
 	database = db;
 
 //	Mix_Init(0);	// just need wav.
-	dataFP = SDL_RWFromFile(pathToDB, "rb");
-	GLASSERT(dataFP);
+//	dataFP = SDL_RWFromFile(pathToDB, "rb");
+//	GLASSERT(dataFP);
 	sounds.PushArr(CHANNELS);
 	listenerPos.Zero();
 	listenerDir.Set(1, 0, 0);
@@ -35,7 +35,7 @@ XenoAudio::~XenoAudio()
 	}
 	GLASSERT(instance == this);
 	instance = 0;
-	SDL_RWclose(dataFP);
+//	SDL_RWclose(dataFP);
 }
 
 
@@ -46,8 +46,8 @@ void XenoAudio::SetAudio(bool on)
 	}
 	audioOn = on;
 	if (audioOn) {
-//		int error = Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, 2, 2048);
-		int error = Mix_OpenAudio(44000, MIX_DEFAULT_FORMAT, 2, 2048);
+//		int error = Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, 2, 2048);	// default, but laggy
+		int error = Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, 2, 1024);
 		GLASSERT(error == 0);
 	}
 	else {
@@ -93,13 +93,11 @@ void XenoAudio::Play(const IString& iSound, const Vector3F* pos)
 #endif
 		// Now check the database
 		if (!fp) {
-			int offset = 0, size = 0;
-			bool compressed = false;
-
-			item->GetDataInfo("binary", &offset, &size, &compressed);
-			GLASSERT(compressed == false);
-			fp = dataFP;
-			SDL_RWseek(fp, offset, RW_SEEK_SET);
+			int size = 0;
+			const void* mem = database->AccessData(item, "binary", &size);
+			GLASSERT(mem);
+			fp = SDL_RWFromConstMem(mem, size);
+			needClose = true;
 		}
 		if (fp) {
 			U8* buf = 0;
@@ -209,6 +207,7 @@ void XenoAudio::PlayVariation(const grinliz::IString& base, int seed, const grin
 			else
 				sv.variation[i-1] = base;
 		}
+		variations.Add(base, sv);
 	}
 	SoundVariation sv;
 	bool okay = variations.Query(base, &sv);

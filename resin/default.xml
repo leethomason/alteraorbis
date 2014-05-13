@@ -293,28 +293,50 @@
   <model filename="weapons.ac"          modelName="ring"        origin="0.20 0 0"   shadowCaster="true" bones="true" />
   <model filename="shield.ac"                                   origin="0 0 0"      shadowCaster="true" />
 
-  <data assetName="pistolWAV"       filename="sound/pistol.wav" compress="false" />
-  <data assetName="blasterWAV"      filename="sound/blaster.wav" compress="false" />
-  <data assetName="pulseWAV"        filename="sound/pulse.wav" compress="false" />
-  <data assetName="beamgunWAV"      filename="sound/beamgun.wav" compress="false" />
-
   <!-- sound variations are identified by:
        nameWAV (the base)
        nameWAV2
        nameWAV3
        nameWAV4
   -->
-  <data assetName="firebigWAV"      filename="sound/BigFire_1_22k.wav"  compress="false" />
-  <data assetName="firebigWAV2"     filename="sound/BigFire_2_22k.wav"  compress="false" />
-  <data assetName="firebigWAV3"     filename="sound/BigFire_3_22k.wav"  compress="false" />
-  <data assetName="firesmallWAV"    filename="sound/firesmall.wav"  compress="false" />
-  <data assetName="shockWAV"        filename="sound/shock.wav"  compress="false" />
+  <data assetName="firebigWAV"      filename="sound/BigFire_1_22k.wav"  />
+  <data assetName="firebigWAV2"     filename="sound/BigFire_2_22k.wav"  />
+  <data assetName="firebigWAV3"     filename="sound/BigFire_3_22k.wav"  />
+  <data assetName="firesmallWAV"    filename="sound/SmallFire_1_22k.wav"  />
+  <data assetName="firesmallWAV2"   filename="sound/SmallFire_2_22k.wav"  />
+  <data assetName="firesmallWAV3"   filename="sound/SmallFire_3_22k.wav"  />
+  <data assetName="shockWAV"        filename="sound/Shockv2_1_22k.wav"  />
+  <data assetName="shockWAV2"       filename="sound/Shockv2_2_22k.wav"  />
+  <data assetName="shockWAV3"       filename="sound/Shockv2_3_22k.wav"  />
+  <data assetName="meleeWAV"        filename="sound/SmallImpact_1_22k.wav" />
+  <data assetName="meleeWAV2"       filename="sound/SmallImpact_2_22k.wav" />
+  <data assetName="meleeWAV3"       filename="sound/SmallImpact_3_22k.wav" />
+  <data assetName="meleeBigWAV"     filename="sound/BigImpact_1_22k.wav" />
+  <data assetName="meleeBigWAV2"    filename="sound/BigImpact_2_22k.wav" />
+  <data assetName="meleeBigWAV3"    filename="sound/BigImpact_3_22k.wav" />
+  <data assetName="ringWAV"         filename="sound/Ring_1_22k.wav" />
+  <data assetName="ringWAV2"        filename="sound/Ring_2_22k.wav" />
+  <data assetName="ringWAV3"        filename="sound/Ring_3_22k.wav" />
+  <data assetName="boltimpactWAV"   filename="sound/RangedLaserImpact_1_22k.wav" />
+  <data assetName="boltimpactWAV2"  filename="sound/RangedLaserImpact_2_22k.wav" />
+  <data assetName="boltimpactWAV3"  filename="sound/RangedLaserImpact_3_22k.wav" />
+  <data assetName="pistolWAV"       filename="sound/Pistol_1_22k.wav" />
+  <data assetName="pistolWAV2"      filename="sound/Pistol_2_22k.wav" />
+  <data assetName="pistolWAV3"      filename="sound/Pistol_3_22k.wav" />
+  <data assetName="blasterWAV"      filename="sound/Blaster_1_22k.wav" />
+  <data assetName="blasterWAV2"     filename="sound/Blaster_2_22k.wav" />
+  <data assetName="blasterWAV3"     filename="sound/Blaster_3_22k.wav" />
+  <data assetName="pulseWAV"        filename="sound/Pulse_1_22k.wav" />
+  <data assetName="pulseWAV2"       filename="sound/Pulse_2_22k.wav" />
+  <data assetName="pulseWAV3"       filename="sound/Pulse_3_22k.wav" />
+  <data assetName="beamgunWAV"      filename="sound/Beamgun_1_22k.wav" />
+  <data assetName="beamgunWAV2"     filename="sound/Beamgun_2_22k.wav" />
+  <data assetName="beamgunWAV3"     filename="sound/Beamgun_3_22k.wav" />
+
   <data assetName="explosionWAV"    filename="sound/explosion.wav"  compress="false" />
-  <data assetName="meleeWAV"        filename="sound/melee.wav" compress="false" />
-  <data assetName="ringWAV"         filename="sound/ring.wav" compress="false" />
   <data assetName="rezWAV"          filename="sound/rez.wav" compress="false" /> 
   <data assetName="derezWAV"        filename="sound/derez.wav" compress="false" />
-  <data assetName="boltimpactWAV"   filename="sound/boltimpact.wav" compress="false" />
+
 
   <font assetName="font" filename="font_0.png" noMip="true">
     <info face="Tahoma" size="28" bold="0" italic="0" charset="" unicode="1" stretchH="100" smooth="1" aa="1" padding="2,2,2,2" spacing="1,1" outline="0"/>

@@ -30,6 +30,7 @@ IString IStringConst::shieldBoost;
 IString IStringConst::rezWAV;
 IString IStringConst::derezWAV;
 IString IStringConst::explosionWAV;
+IString IStringConst::boltimpactWAV;
 IString IStringConst::pave;
 IString IStringConst::ice;
 IString IStringConst::core;
@@ -111,6 +112,7 @@ void IStringConst::Init()
 	rezWAV = StringPool::Intern( "rezWAV", true );
 	derezWAV = StringPool::Intern( "derezWAV", true );
 	explosionWAV = StringPool::Intern( "explosionWAV", true );
+	boltimpactWAV = StringPool::Intern( "boltimpactWAV", true );
 	pave = StringPool::Intern( "pave", true );
 	ice = StringPool::Intern( "ice", true );
 	core = StringPool::Intern( "core", true );

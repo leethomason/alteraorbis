@@ -64,27 +64,30 @@ d animation generation
 	- Beta 1a
 		x screenshot save dir fix
 		x clean up the chit delete loop
-		t sound checks external path first
+		x sound checks external path first
 	    x portrait clicking sometimes doesn't work
 	    x avatar doesn't always target as expected
 	    x text description of build options
 	    x move warning down
 		x GameItem update not quite correct
-	    - need a credits screen
-	    - plants look repetetive
-	    t test exchange
-	    - new sounds
+	    x test exchange
 	    x factory only fun if you build something...check that.
 	    x debug trace of the likes?
 		x model for exchange
+
+	- Beta 1b
+	    x need a credits screen
+	    - new sounds
 		- make sure "quick gen" hacks are cleaned up for WorldGen
+		- fix code so that it doesn't need uncompressed sound
 
 	- Beta2
 		- auto rebuild
+	    - plants look repetetive
 		- hints about what you need to build
 		- walk target for the avatar
 		x repair
-		- fast / threaded save
+		x fast / threaded save
 		x new opening screen?
 		- abandon to tactical AI
 		- clean up history code. remove named lesser tracking.
