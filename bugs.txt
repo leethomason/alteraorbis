@@ -77,6 +77,7 @@ d animation generation
 	    x factory only fun if you build something...check that.
 	    x debug trace of the likes?
 		x model for exchange
+      -exchange should be industrial
 
 	- Beta2
 		- auto rebuild
