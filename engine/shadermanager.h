@@ -58,10 +58,8 @@ public:
 
 		// Colors and Lighting
 		COLORS				= (1<<6),		// Per-vertex colors.
-		LIGHTING_DIFFUSE	= (1<<7),		// Diffuse lighting. Requires per vertex normals, 
+		LIGHTING			= (1<<7),		// Lighting. Requires per vertex normals, 
 											// light direction, ambient color, and diffuse color.
-		LIGHTING_HEMI		= (1<<8),		// Hemisperical lighting. Like diffuse, but uses a 
-											// different light model.
 
 		// Color features.
 		PREMULT				= (1<<9),		// convert to pre-multiplied in the fragment shader
@@ -90,7 +88,6 @@ public:
 	// Warning: must match declaration in shader
 	enum {
 		A_TEXTURE0,		// 2 comp
-		A_TEXTURE1,		// 2 comp
 		A_POS,			// 3 comp
 		A_NORMAL,		// 2 comp
 		A_COLOR,		// 3 comp
@@ -120,7 +117,6 @@ public:
 		U_BONEXFORM,
 
 		U_TEXTURE0,
-		U_TEXTURE1,
 
 		MAX_UNIFORM
 	};

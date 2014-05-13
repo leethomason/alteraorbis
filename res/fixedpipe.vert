@@ -30,45 +30,36 @@ uniform vec4		u_controlParamArr[MAX_INSTANCE];
 
 uniform vec4 u_colorMult;			// Overall Color, if specified.
 
-// IN: attributes
-attribute 		vec3 a_pos;				// vertex position
+// IN: ins
+in 		vec3 a_pos;				// vertex position
 #if COLORS == 1
-	attribute 	vec4 a_color;			// vertex color
+	in 	vec4 a_color;			// vertex color
 #endif
 #if TEXTURE0 == 1
-	attribute 	vec2 a_uv0;
-#endif
-#if TEXTURE1 == 1
-	attribute 	vec2 a_uv1;
+	in 	vec2 a_uv0;
 #endif
 #if BONE_XFORM == 1 || BONE_FILTER == 1
-	attribute 	float a_boneID;
+	in 	float a_boneID;
 #endif
-#if LIGHTING_DIFFUSE > 0
-	attribute 	vec3 a_normal;		// vertex normal
+#if LIGHTING == 1
+	in 	vec3 a_normal;		// vertex normal
 #endif 
 
 #if TEXTURE0 == 1
-	varying vec2 v_uv0;
+	out vec2 v_uv0;
 	#if TEXTURE0_CLIP == 1
-		varying vec4 v_texture0Clip;
+		out vec4 v_texture0Clip;
 	#endif
 	#if TEXTURE0_COLORMAP == 1
-		varying mat4 v_colorMap;
+		out mat4 v_colorMap;
 	#endif
 #endif
 
-#if TEXTURE1 == 1
-	varying vec2 v_uv1;
+#if BONE_XFORM == 1
+	uniform mat4 u_boneXForm[EL_MAX_BONES*MAX_INSTANCE];
 #endif
 
-#if BONE_XFORM == 1 || BONE_FILTER == 1
-	#if BONE_XFORM == 1
-		uniform mat4 u_boneXForm[EL_MAX_BONES*MAX_INSTANCE];
-	#endif
-#endif
-
-#if LIGHTING_DIFFUSE > 0
+#if LIGHTING == 1
 	uniform mat4 u_normalMatrix;	// normal transformation
 	uniform vec3 u_lightDir;		// light direction, eye space (x,y,z,0)
 	uniform vec4 u_ambient;			// ambient light. ambient+diffuse = 1
@@ -76,10 +67,10 @@ attribute 		vec3 a_pos;				// vertex position
 #endif
 
 #if SATURATION
-	varying float v_saturation;
+	out float v_saturation;
 #endif
 
-varying vec4 v_color;
+out vec4 v_color;
 
 void main() {
 
@@ -125,9 +116,6 @@ void main() {
 			v_colorMap = colorMap;
 		#endif
 	#endif
-	#if TEXTURE1 == 1
-		v_uv1 = a_uv1;
-	#endif
 
 	mat4 xform = mat4( 1.0 );	
 	#if BONE_XFORM == 1
@@ -140,23 +128,22 @@ void main() {
 		vec4 pos = (u_mvpMatrix * u_mMatrix[gl_InstanceID]) * xform * vec4( a_pos.x, a_pos.y, a_pos.z, 1.0 );
 	#endif
 	
-	#if LIGHTING_DIFFUSE  > 0
+	#if LIGHTING == 1
 		vec3 normal = normalize( (( u_normalMatrix * u_mMatrix[gl_InstanceID]) * xform * vec4( a_normal.x, a_normal.y, a_normal.z, 0 ) ).xyz );
 
-		#if LIGHTING_DIFFUSE == 1
+		#if 0
 			// Lambert lighting with ambient term.
 			// fixme: not clear we need to normalize
 			float nDotL = max( dot( normal, u_lightDir ), 0.0 );
 			vec4 light = u_ambient + u_diffuse * nDotL;
-		#elif LIGHTING_DIFFUSE == 2
-			// Hemispherical lighting. The 'u_diffuse' is used for the main light,
-			// and 'u_ambient' for the key light, just so as not to introduce new variables.
-			// fixme: not clear we need to normalize
-			float nDotL = dot( normal, u_lightDir );
-			vec4 light = mix( u_ambient, u_diffuse, (nDotL + 1.0)*0.5 );
-		#else	
-			#error light not defined
 		#endif
+
+		// Hemispherical lighting. The 'u_diffuse' is used for the main light,
+		// and 'u_ambient' for the key light, just so as not to introduce new variables.
+		// fixme: not clear we need to normalize
+		float nDotL = dot( normal, u_lightDir );
+		vec4 light = mix( u_ambient, u_diffuse, (nDotL + 1.0)*0.5 );
+
 		// Fade at edges: light * max(normal.z,0) since the normal is in eye coordinates.
 		// Just gives weird lighting here in low poly world. Sort of dramatic - worth considering
 		// as an "outline" effect.

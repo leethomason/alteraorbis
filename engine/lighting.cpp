@@ -31,7 +31,6 @@ Lighting::Lighting()
 
 	direction.Set( 2.0f, 3.0f, 1.0f );
 	direction.Normalize();
-	hemispheric = false;
 	glow.Set( 1, 1, 1 );
 }
 
@@ -53,20 +52,20 @@ void Lighting::CalcLight( const Vector3F& normal, float shadowAmount, Color3F* l
 	Color4F ambient, diffuse, shadow;
 	Query( &diffuse, &ambient, &shadow, temp, 0 );
 
-	if ( hemispheric ) {
-		float nDotL = DotProduct( normal, direction );
-		for( int i=0; i<3; ++i ) {
-			light->X(i)  = Lerp( ambient.X(i), diffuse.X(i), (nDotL+1.f)*0.5f );
-			shadowResult->X(i) = Lerp( shadow.X(i), light->X(i), 1.f-shadowAmount ); 
-		}
+	float nDotL = DotProduct( normal, direction );
+	for( int i=0; i<3; ++i ) {
+		light->X(i)  = Lerp( ambient.X(i), diffuse.X(i), (nDotL+1.f)*0.5f );
+		shadowResult->X(i) = Lerp( shadow.X(i), light->X(i), 1.f-shadowAmount ); 
 	}
-	else {
-		float nDotL = Max( 0.0f, DotProduct( normal, direction ) );
+
+#if 0
+	float nDotL = Max( 0.0f, DotProduct( normal, direction ) );
 		for( int i=0; i<3; ++i ) {
 			light->X(i)  = ambient.X(i) + diffuse.X(i)*nDotL;
 			shadowResult->X(i) = Lerp( shadow.X(i), light->X(i), 1.f-shadowAmount ); 
 		}
 	}
+#endif
 }
 
 
@@ -109,12 +108,7 @@ void Lighting::Query(	grinliz::Color4F* diffuse,
 
 void Lighting::Load( const tinyxml2::XMLElement* ele )
 {
-	hemispheric = false;
-	if ( ele->Attribute( "mode", "hemi" ) ) {
-		hemispheric = true;
-	}
-
-	const tinyxml2::XMLElement* modeEle = ele->FirstChildElement( hemispheric ? "hemispherical" : "lambert" );
+	const tinyxml2::XMLElement* modeEle = ele->FirstChildElement( "hemispherical" );
 	const tinyxml2::XMLElement* child = 0;
 
 	if ( modeEle ) {

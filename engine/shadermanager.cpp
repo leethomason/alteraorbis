@@ -30,7 +30,6 @@ ShaderManager* ShaderManager::instance = 0;
 static const char* gAttributeName[ShaderManager::MAX_ATTRIBUTE] =
 {
 	"a_uv0",
-	"a_uv1",
 	"a_pos",
 	"a_normal",
 	"a_color",
@@ -59,7 +58,6 @@ static const char* gUniformName[ShaderManager::MAX_UNIFORM] =
 
 	// Samplers:
 	"texture0",
-	"texture1"
 };
 
 
@@ -333,8 +331,7 @@ int  ShaderManager::CalcMaxInstances( int flags, int* uniforms )
 	if ( flags & TEXTURE0_COLORMAP )	predictedUniformInst += 4;
 	if ( flags & BONE_FILTER )			predictedUniformInst += 1;
 	if ( flags & BONE_XFORM )			predictedUniformInst += 4 * EL_MAX_BONES;
-	if ( flags & LIGHTING_DIFFUSE )		predictedUniform += 7;	// normal matrix & lights
-	if ( flags & LIGHTING_HEMI )		predictedUniform += 7;	// normal matrix & lights
+	if ( flags & LIGHTING )				predictedUniform += 7;	// normal matrix & lights
 
 	// GL specifies at least 256 v4 uniforms.
 	// Theoretically, some of those get used by the compiler for constants. (?) Although
@@ -382,7 +379,6 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 	AppendFlag( &header, "TEXTURE0_XFORM",		flags & TEXTURE0_XFORM );
 	AppendFlag( &header, "TEXTURE0_CLIP",		flags & TEXTURE0_CLIP );
 	AppendFlag( &header, "TEXTURE0_COLORMAP",	flags & TEXTURE0_COLORMAP );
-	AppendFlag( &header, "TEXTURE1",			0 );
 	AppendFlag( &header, "COLORS",				flags & COLORS );
 	AppendFlag( &header, "PREMULT",				flags & PREMULT );
 	AppendFlag( &header, "EMISSIVE",			flags & EMISSIVE );
@@ -391,13 +387,7 @@ ShaderManager::Shader* ShaderManager::CreateProgram( int flags )
 	AppendFlag( &header, "BONE_FILTER",			flags & BONE_FILTER );
 	AppendFlag( &header, "SATURATION",			flags & SATURATION );
 	AppendFlag( &header, "BONE_XFORM",			flags & BONE_XFORM );
-
-	if ( flags & LIGHTING_DIFFUSE )
-		AppendFlag( &header, "LIGHTING_DIFFUSE", 1, 1 );
-	else if ( flags & LIGHTING_HEMI )
-		AppendFlag( &header, "LIGHTING_DIFFUSE", 1, 2 );
-	else 
-		AppendFlag( &header, "LIGHTING_DIFFUSE", 0, 0 );
+	AppendFlag( &header, "LIGHTING",			flags & LIGHTING);
 
 	AppendConst( &header, "EL_MAX_BONES",	 EL_MAX_BONES );
 

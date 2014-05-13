@@ -36,7 +36,6 @@ public:
 	Light cool;
 
 	grinliz::Vector3F	direction;		// normal vector
-	bool hemispheric;
 	grinliz::Color3F	glow;			// additive glow multiplier
 
 	// Direction from world TO sun. (y is positive). If null, sets the default.
