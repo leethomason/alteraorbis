@@ -597,9 +597,9 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 	if ( targetDesc.id && BattleMechanics::InMeleeZone( context->engine, parentChit, target.chit )) {
 		GLASSERT( parentChit->GetRenderComponent()->AnimationReady() );
 		parentChit->GetRenderComponent()->PlayAnimation( ANIM_MELEE );
-		IString sound = item->keyValues.GetIString("sound");
+		IString sound = item->keyValues.GetIString(ISC::sound);
 		if (!sound.empty() && XenoAudio::Instance()) {
-			XenoAudio::Instance()->Play(sound.c_str(), &thisComp.spatial->GetPosition());
+			XenoAudio::Instance()->PlayVariation(sound, item->ID(), &thisComp.spatial->GetPosition());
 		}
 
 		Vector2F pos2 = thisComp.spatial->GetPosition2D();
@@ -617,9 +617,9 @@ void AIComponent::DoMelee( const ComponentSet& thisComp )
 	else if ( !targetDesc.id && BattleMechanics::InMeleeZone( context->engine, parentChit, targetDesc.mapPos )) {
 		GLASSERT( parentChit->GetRenderComponent()->AnimationReady() );
 		parentChit->GetRenderComponent()->PlayAnimation( ANIM_MELEE );
-		IString sound = item->keyValues.GetIString("sound");
+		IString sound = item->keyValues.GetIString(ISC::sound);
 		if (!sound.empty() && XenoAudio::Instance()) {
-			XenoAudio::Instance()->Play(sound.c_str(), &thisComp.spatial->GetPosition());
+			XenoAudio::Instance()->PlayVariation(sound, item->ID(), &thisComp.spatial->GetPosition());
 		}
 
 		Vector2F pos2 = thisComp.spatial->GetPosition2D();

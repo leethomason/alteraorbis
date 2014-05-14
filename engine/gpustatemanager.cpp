@@ -316,7 +316,7 @@ int GPUDevice::Upload( const GPUState& state, const GPUStream& stream, const GPU
 	}
 
 	// lighting 
-	if ( flags & (ShaderManager::LIGHTING_DIFFUSE | ShaderManager::LIGHTING_HEMI) ) {
+	if ( flags & ShaderManager::LIGHTING ) {
 
 		Vector4F dirEye = ViewMatrix() * directionWC;
 		GLASSERT( Equal( dirEye.Length(), 1.f, 0.01f ));
@@ -770,7 +770,7 @@ const grinliz::Matrix4& GPUDevice::ViewMatrix()
 
 int GPUState::HasLighting() const
 {
-	return shaderFlags & ( ShaderManager::LIGHTING_DIFFUSE | ShaderManager::LIGHTING_HEMI );
+	return shaderFlags & ShaderManager::LIGHTING;
 }
 
 

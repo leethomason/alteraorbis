@@ -324,7 +324,7 @@ void Engine::Draw(U32 deltaTime, const Bolt* bolts, int nBolts, IUITracker* trac
 
 	EngineShaders engineShaders;
 	{
-		int flag = lighting.hemispheric ? ShaderManager::LIGHTING_HEMI : ShaderManager::LIGHTING_DIFFUSE;
+		int flag = ShaderManager::LIGHTING;
 		LightShader light( flag );
 		LightShader em( flag );
 		em.SetShaderFlag( ShaderManager::EMISSIVE );

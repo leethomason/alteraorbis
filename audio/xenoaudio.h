@@ -28,7 +28,8 @@ public:
 
 	static XenoAudio* Instance()	{ GLASSERT(instance); return instance; }
 
-	void Play(const char* sound, const grinliz::Vector3F* pos);
+	void PlayVariation(const grinliz::IString& sound, int seed, const grinliz::Vector3F* pos);
+	void Play(const grinliz::IString& sound, const grinliz::Vector3F* pos);
 	void SetListener(const grinliz::Vector3F& pos, const grinliz::Vector3F& dir);
 
 private:
@@ -36,7 +37,7 @@ private:
 	void SetChannelPos(int i);
 
 	enum {
-		CHANNELS = 8		// if this is changed, the default # of channels needs to be set in Mix
+		CHANNELS = 16
 	};
 
 	struct Sound {
@@ -47,13 +48,20 @@ private:
 	};
 
 	const gamedb::Reader* database;
-	SDL_RWops* dataFP;
 	bool audioOn;
 	grinliz::Vector3F listenerPos;
 	grinliz::Vector3F listenerDir;
+	grinliz::GLString glString;		// don't want to re-allocate.
 
-	// IStrings! the char* is unique
-	grinliz::HashTable< const char*, Mix_Chunk* > chunks;
+	struct SoundVariation
+	{
+//		grinliz::IString name;
+		enum { NUM_VARIATIONS = 4 };
+		grinliz::IString variation[NUM_VARIATIONS];
+	};
+
+	grinliz::HashTable< grinliz::IString, Mix_Chunk*, grinliz::CompValueIString > chunks;
+	grinliz::HashTable< grinliz::IString, SoundVariation, grinliz::CompValueIString > variations;
 	grinliz::CArray< Sound, CHANNELS > sounds;
 };
 

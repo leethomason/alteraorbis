@@ -17,8 +17,8 @@ XenoAudio::XenoAudio(const gamedb::Reader* db, const char* pathToDB)
 	database = db;
 
 //	Mix_Init(0);	// just need wav.
-	dataFP = SDL_RWFromFile(pathToDB, "rb");
-	GLASSERT(dataFP);
+//	dataFP = SDL_RWFromFile(pathToDB, "rb");
+//	GLASSERT(dataFP);
 	sounds.PushArr(CHANNELS);
 	listenerPos.Zero();
 	listenerDir.Set(1, 0, 0);
@@ -35,7 +35,7 @@ XenoAudio::~XenoAudio()
 	}
 	GLASSERT(instance == this);
 	instance = 0;
-	SDL_RWclose(dataFP);
+//	SDL_RWclose(dataFP);
 }
 
 
@@ -46,16 +46,18 @@ void XenoAudio::SetAudio(bool on)
 	}
 	audioOn = on;
 	if (audioOn) {
-//		int error = Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, 2, 2048);
-		int error = Mix_OpenAudio(44000, MIX_DEFAULT_FORMAT, 2, 2048);
+//		int error = Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, 2, 2048);	// default, but laggy
+		int error = Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, 2, 1024);
 		GLASSERT(error == 0);
+		int channels = Mix_AllocateChannels(CHANNELS);
+		GLASSERT(channels == CHANNELS);
 	}
 	else {
 		Mix_CloseAudio();
 	}
 }
 
-void XenoAudio::Play(const char* _sound, const Vector3F* pos)
+void XenoAudio::Play(const IString& iSound, const Vector3F* pos)
 {
 	if (!audioOn) return;
 
@@ -69,22 +71,20 @@ void XenoAudio::Play(const char* _sound, const Vector3F* pos)
 		return;
 	}
 
-	IString iSound = StringPool::Intern(_sound);
-	const char* sound = iSound.c_str();
-
 	Mix_Chunk* chunk = 0;
-	chunks.Query(sound, &chunk);
+	chunks.Query(iSound, &chunk);
 
 	if (!chunk) {
 		const gamedb::Item* data = database->Root()->Child("data");
-		const gamedb::Item* item = data->Child(sound);
+		const gamedb::Item* item = data->Child(iSound.c_str());
 		SDL_RWops* fp = 0;
 		bool needClose = false;
 
+#if 0
 		// Search external path first.
 		GLString path;
 		GLString inPath = "res/";
-		inPath.append(sound);
+		inPath.append(iSound.c_str());
 		inPath.append(".wav");
 		GetSystemPath(GAME_APP_DIR, inPath.c_str(), &path);
 
@@ -92,16 +92,14 @@ void XenoAudio::Play(const char* _sound, const Vector3F* pos)
 		if (fp) {
 			needClose = true;
 		}
-
+#endif
 		// Now check the database
 		if (!fp) {
-			int offset = 0, size = 0;
-			bool compressed = false;
-
-			item->GetDataInfo("binary", &offset, &size, &compressed);
-			GLASSERT(compressed == false);
-			fp = dataFP;
-			SDL_RWseek(fp, offset, RW_SEEK_SET);
+			int size = 0;
+			const void* mem = database->AccessData(item, "binary", &size);
+			GLASSERT(mem);
+			fp = SDL_RWFromConstMem(mem, size);
+			needClose = true;
 		}
 		if (fp) {
 			U8* buf = 0;
@@ -111,7 +109,7 @@ void XenoAudio::Play(const char* _sound, const Vector3F* pos)
 				GLOUTPUT(("Audio error: %s\n", Mix_GetError()));
 			}
 			else {
-				chunks.Add(sound, chunk);
+				chunks.Add(iSound, chunk);
 			}
 			if (needClose) {
 				SDL_RWclose(fp);
@@ -187,5 +185,36 @@ void XenoAudio::SetChannelPos(int i)
 
 		int result = Mix_SetPosition(i, degi, d);
 		GLASSERT(result != 0);
+	}
+}
+
+
+void XenoAudio::PlayVariation(const grinliz::IString& base, int seed, const grinliz::Vector3F* pos)
+{
+	if (!variations.Query(base, 0)) {
+		const gamedb::Item* data = database->Root()->Child("data");
+		const gamedb::Item* item = 0;
+
+		SoundVariation sv;
+		sv.variation[0] = base;
+
+		// Go look for variations.
+		// Always create 4 variations, even if 
+		// some (all) are copies of the base.
+		for (int i = 2; i < 5; ++i) {
+			glString.Format("%s%d", base.safe_str(), i);
+			item = data->Child(glString.c_str());
+			if (item)
+				sv.variation[i-1] = StringPool::Intern(glString.c_str());
+			else
+				sv.variation[i-1] = base;
+		}
+		variations.Add(base, sv);
+	}
+	SoundVariation sv;
+	bool okay = variations.Query(base, &sv);
+	GLASSERT(okay);
+	if (okay) {
+		Play(sv.variation[seed & 3], pos);
 	}
 }

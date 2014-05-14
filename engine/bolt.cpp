@@ -137,13 +137,11 @@ void Bolt::TickAll( grinliz::CDynArray<Bolt>* bolts, U32 delta, Engine* engine, 
 			++i;
 		}
 
-		/* not sure I like this sound...
 		if (!wasImpact && b.impact) {
 			if (XenoAudio::Instance()) {
-				XenoAudio::Instance()->Play("boltimpactWAV", &b.head);
+				XenoAudio::Instance()->PlayVariation(ISC::boltimpactWAV, i, &b.head);
 			}
 		}
-		*/
 	}
 }
 

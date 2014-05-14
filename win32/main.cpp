@@ -132,6 +132,16 @@ int main( int argc, char **argv )
 	SDL_GL_SetAttribute( SDL_GL_ALPHA_SIZE, 8);
 	SDL_GL_SetAttribute( SDL_GL_STENCIL_SIZE, 8);
 
+#if 0	// I was hoping to get to Angle on intel - may still be able to. But
+		// as is this gets HW mode, which crashes in a function that should
+		// be supported. The Intel drivers are so terrible. As of this writing,
+		// you can't specify the DX version of ES:
+		//		http://forums.libsdl.org/viewtopic.php?t=9770&highlight=angle+opengl
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);	// driver supports 2 and 3. Both crash.
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+#endif
+
 	if ( multisample ) {
 		SDL_GL_SetAttribute( SDL_GL_MULTISAMPLEBUFFERS, 1 );
 		SDL_GL_SetAttribute( SDL_GL_MULTISAMPLESAMPLES, multisample );

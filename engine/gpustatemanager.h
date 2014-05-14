@@ -105,7 +105,6 @@ struct GPUStream {
 	int nPos;		
 	int posOffset;
 	int texture0Offset;
-	int texture1Offset;
 	int nNormal;
 	int normalOffset;
 	int nColor;
@@ -117,7 +116,6 @@ struct GPUStream {
 	GPUStream() :  stride( 0 ),
 				nPos( 0 ), posOffset( 0 ), 
 				texture0Offset( 0 ),
-				texture1Offset( 0 ), 
 				nNormal( 0 ), normalOffset( 0 ),
 				nColor( 0 ), colorOffset( 0 ), boneOffset( 0 ) {}
 

@@ -52,31 +52,33 @@ void SoundScene::ItemTapped(const gamui::UIItem* item)
 		(y up)
 	*/
 
+	IString blaster = StringPool::Intern("blasterWAV");
+
 	if (item == &okay) {
 		game->PopScene();
 	}
 	else if (item == &test[BASIC_TEST]) {
-		XenoAudio::Instance()->Play("blasterWAV", 0);
+		XenoAudio::Instance()->Play(blaster, 0);
 	}
 	else if (item == &test[LEFT_TEST]) {
 		Vector3F pos = { -10, 0, 0 };
 		facing.Set(0, 0, -1);
-		XenoAudio::Instance()->Play("blasterWAV", &pos);
+		XenoAudio::Instance()->Play(blaster, &pos);
 	}
 	else if (item == &test[RIGHT_TEST]) {
 		Vector3F pos = { 10, 0, 0 };
 		facing.Set(0, 0, -1);
-		XenoAudio::Instance()->Play("blasterWAV", &pos);
+		XenoAudio::Instance()->Play(blaster, &pos);
 	}
 	else if (item == &test[ROT_LEFT_TEST]) {
 		Vector3F pos = { -7, 0, -7 };
 		facing.Set(1, 0, -1);
-		XenoAudio::Instance()->Play("blasterWAV", &pos);
+		XenoAudio::Instance()->Play(blaster, &pos);
 	}
 	else if (item == &test[ROT_RIGHT_TEST]) {
 		Vector3F pos = { 7, 0, 7 };
 		facing.Set(1, 0, -1);
-		XenoAudio::Instance()->Play("blasterWAV", &pos);
+		XenoAudio::Instance()->Play(blaster, &pos);
 	}
 }
 

@@ -42,6 +42,7 @@ public:
 	virtual void DoTick( U32 step );
 
 	void CreateTexture( Texture* t );
+	virtual void DeActivate();
 
 private:
 	enum { 

@@ -52,6 +52,12 @@ public:
 	static grinliz::IString tombstone;
 	static grinliz::IString shieldBoost;
 
+	static grinliz::IString rezWAV;
+	static grinliz::IString derezWAV;
+	static grinliz::IString explosionWAV;
+	static grinliz::IString boltimpactWAV;
+	static grinliz::IString buttonWAV;
+
 	static grinliz::IString pave;
 	static grinliz::IString ice;
 	static grinliz::IString core;

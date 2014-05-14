@@ -3,28 +3,26 @@
 
 #if TEXTURE0 == 1
 	uniform sampler2D texture0;
-	varying vec2 v_uv0;
+	in vec2 v_uv0;
 	#if TEXTURE0_CLIP
-		varying vec4 v_texture0Clip;
+		in vec4 v_texture0Clip;
 	#endif
 	#if TEXTURE0_COLORMAP == 1
-		varying mat4 v_colorMap;
+		in mat4 v_colorMap;
 	#endif
 #endif
-#if TEXTURE1 == 1
-	uniform sampler2D texture1;
-	varying vec2 v_uv1;
-#endif
 
-varying vec4 v_color;
+in vec4 v_color;
 
 #if SATURATION
-	varying float v_saturation;
+	in float v_saturation;
 #endif
+
+out vec4 color;
 
 void main() 
 {
-	vec4 color = v_color;
+	color = v_color;
 	#if TEXTURE0 == 1
 		vec4 sample = texture( texture0, v_uv0 );
 
@@ -59,13 +57,6 @@ void main()
 			color *= sample;
 		#endif
 	#endif
-	#if TEXTURE1 == 1
-		#if TEXTURE1_ALPHA_ONLY == 1
-			color.a *= texture( texture1, v_uv1).a;
-		#else
-			color *= texture( texture1, v_uv1 );
-		#endif
-	#endif
 	#if PREMULT == 1
 		color = vec4( color.r*color.a, color.g*color.a, color.b*color.a, color.a );
 	#endif
@@ -74,6 +65,5 @@ void main()
 		vec4 gray = vec4( g, g, g, color.a );
 		color = mix( gray, color, v_saturation );
 	#endif
-	gl_FragColor = color;
 }
 

@@ -12,6 +12,7 @@
 #include "../game/sim.h"
 
 #include "../script/rockgen.h"
+#include "../audio/xenoaudio.h"
 #include <time.h>
 
 using namespace grinliz;
@@ -73,6 +74,12 @@ void WorldGenScene::Resize()
 
 	worldText.SetPos(worldImage.X() + layout.GutterX(), worldImage.Y() + layout.GutterY());
 	worldText.SetBounds(size - layout.GutterX()*2.0f, size - layout.GutterY()*2.0f);
+}
+
+
+void WorldGenScene::DeActivate()
+{
+	XenoAudio::Instance()->SetAudio(SettingsManager::Instance()->AudioOn());
 }
 
 
@@ -191,6 +198,8 @@ void WorldGenScene::DoTick( U32 delta )
 
 	case GenState::WORLDGEN:
 	{
+		// Don't want to hear crazy sound during world-gen:
+		XenoAudio::Instance()->SetAudio(false);	// turned back on/off on scene de-activate. 
 		worldText.SetText("");
 		clock_t start = clock();
 		while ((genState.y < WorldGen::SIZE) && (clock() - start < 30)) {
@@ -336,8 +345,9 @@ void WorldGenScene::DoTick( U32 delta )
 			sim->EnableSpawn(true);
 		}
 
-		if (age > 0.2f) {
-		//if (age > 1) {
+		// Have to wait until the first age so that
+		// volcanoes don't eat your domain.
+		if (age > 1) {
 			genState.mode = GenState::SIM_DONE;
 		}
 	}
@@ -358,6 +368,7 @@ void WorldGenScene::DoTick( U32 delta )
 
 	case GenState::DONE:
 	{
+		XenoAudio::Instance()->SetAudio(SettingsManager::Instance()->AudioOn());
 		okay.SetEnabled(true);
 	}
 		break;

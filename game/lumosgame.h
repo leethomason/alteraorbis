@@ -76,6 +76,7 @@ public:
 	static gamui::RenderAtom CalcUIIconAtom( const char* name, bool enabled=true );
 
 	const char* GenName( const char* dataset, int seed, int minLen, int maxLen );
+	grinliz::IString SoundName(const grinliz::IString& name, int seed);
 
 	enum {
 		BUTTON_LOOK_STD,
@@ -98,6 +99,7 @@ public:
 protected:
 
 private:
+
 	void InitButtonLooks();
 	grinliz::GLString nameBuffer;
 

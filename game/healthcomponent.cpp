@@ -95,7 +95,7 @@ void HealthComponent::DeltaHealth()
 					MOBIshFilter mobIsh;
 					BuildingFilter bulding;
 					if (mobIsh.Accept(parentChit) || bulding.Accept(parentChit)) {
-						XenoAudio::Instance()->Play("derezWAV", &parentChit->GetSpatialComponent()->GetPosition());
+						XenoAudio::Instance()->PlayVariation(ISC::derezWAV, parentChit->random.Rand(), &parentChit->GetSpatialComponent()->GetPosition());
 					}
 				}
 

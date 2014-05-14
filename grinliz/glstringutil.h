@@ -299,6 +299,26 @@ private:
 };
 
 
+class CompValueIString {
+public:
+	// Hash table:
+	template <class T>
+	static U32 Hash(T& _p) {
+		const char* p = _p.safe_str();
+		U32 hash = 2166136261UL;
+		for (; *p; ++p) {
+			hash ^= *p;
+			hash *= 16777619;
+		}
+		return hash;
+	}
+	template <class T>
+	static bool Equal(const T& v0, const T& v1)	{ return v0 == v1; }
+	template <class T>
+	static bool Less(const T& v0, const T& v1)	{ return v0 < v1; }
+};
+
+
 class StringPool
 {
 public:
