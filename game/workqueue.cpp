@@ -23,7 +23,7 @@ WorkQueue::WorkQueue()
 {
 	parentChit = 0;
 	sector.Zero();
-	idPool = 0;
+//	idPool = 0;
 }
 
 
@@ -62,7 +62,7 @@ void WorkQueue::AddImage( QueueItem* item )
 	const char* name = 0;
 	Vector3F pos = { 0, 0, 0 };
 	BuildScript buildScript;
-	const BuildData& buildData = buildScript.GetData( item->action );
+	const BuildData& buildData = buildScript.GetData(item->buildScriptID);
 	int size = buildData.size;
 
 	GLASSERT( parentChit );
@@ -70,7 +70,7 @@ void WorkQueue::AddImage( QueueItem* item )
 	Engine* engine = context->engine;
 	WorldMap* worldMap = context->worldMap;
 
-	if ( item->action == BuildScript::CLEAR ) {
+	if (item->buildScriptID == BuildScript::CLEAR) {
 		const WorldGrid& wg = worldMap->GetWorldGrid( item->pos.x, item->pos.y );
 		if ( wg.Height() ) {
 			// Clearing ice or plant
@@ -145,24 +145,24 @@ void WorkQueue::Remove( const grinliz::Vector2I& pos )
 }
 
 
-void WorkQueue::AddAction( const grinliz::Vector2I& pos2i, int action, float rotation )
+bool WorkQueue::AddAction(const grinliz::Vector2I& pos2i, int buildScriptID, float rotation)
 {
 	if ( ToSector( pos2i ) == sector ) {
 		// okay!
 	}
 	else {
 		// wrong sector.
-		return;
+		return false;
 	}
 
 	QueueItem item;
-	item.action = action;
+	item.buildScriptID = buildScriptID;
 	item.pos = pos2i;
 	item.rotation = rotation;
-	item.taskID = ++idPool;
+	//item.taskID = ++idPool;
 
 	if ( !TaskCanComplete( item )) {
-		return;
+		return false;
 	}
 
 	// Clear out existing.
@@ -170,6 +170,7 @@ void WorkQueue::AddAction( const grinliz::Vector2I& pos2i, int action, float rot
 	AddImage( &item );
 	queue.Push( item );
 	SendNotification( pos2i );
+	return true;
 }
 
 
@@ -199,6 +200,7 @@ void WorkQueue::Assign( int id, const WorkQueue::QueueItem* item )
 }
 
 
+/*
 void WorkQueue::ReleaseJob( int chitID )
 {
 	for( int i=0; i<queue.Size(); ++i ) {
@@ -207,7 +209,7 @@ void WorkQueue::ReleaseJob( int chitID )
 		}
 	}
 }
-
+*/
 
 void WorkQueue::ClearJobs()
 {
@@ -216,7 +218,7 @@ void WorkQueue::ClearJobs()
 	}
 }
 
-
+/*
 const WorkQueue::QueueItem* WorkQueue::GetJobByTaskID( int taskID )
 {
 	for( int i=0; i<queue.Size(); ++i ) {
@@ -227,7 +229,7 @@ const WorkQueue::QueueItem* WorkQueue::GetJobByTaskID( int taskID )
 	}
 	return 0;
 }
-
+*/
 
 const WorkQueue::QueueItem* WorkQueue::GetJob( int id )
 {
@@ -258,7 +260,7 @@ const WorkQueue::QueueItem* WorkQueue::Find( const grinliz::Vector2I& chitPos )
 			float cost = 0;
 			Vector2F end = { (float)queue[i].pos.x+0.5f, (float)queue[i].pos.y+0.5f };
 
-			if ( queue[i].action == BuildScript::CLEAR ) {
+			if (queue[i].buildScriptID == BuildScript::CLEAR) {
 				Vector2F bestEnd = { 0, 0 };
 
 				if ( worldMap->CalcPathBeside( start, end, &bestEnd, &cost )) {
@@ -313,7 +315,7 @@ bool WorkQueue::TaskCanComplete( const WorkQueue::QueueItem& item )
 	return WorkQueue::TaskCanComplete(	worldMap, 
 										chitBag, 
 										item.pos, 
-										item.action,
+										item.buildScriptID,
 										wallet );
 }
 
@@ -399,10 +401,10 @@ void WorkQueue::DoTick()
 void WorkQueue::QueueItem::Serialize( XStream* xs )
 {
 	XarcOpen( xs, "QueueItem" );
-	XARC_SER( xs, action );
+	XARC_SER(xs, buildScriptID);
 	XARC_SER( xs, pos );
 	XARC_SER( xs, assigned );
-	XARC_SER( xs, taskID );
+//	XARC_SER( xs, taskID );
 	XarcClose( xs );
 }
 
@@ -413,11 +415,11 @@ void WorkQueue::Serialize( XStream* xs )
 	XARC_SER( xs, sector );
 	XARC_SER_CARRAY( xs, queue );
 
-	if ( xs->Loading() ) {
-		for( int i=0; i<queue.Size(); ++i ) {
-			idPool = Max( idPool, queue[i].taskID+1 );
-		}
-	}
+//	if ( xs->Loading() ) {
+//		for( int i=0; i<queue.Size(); ++i ) {
+//			idPool = Max( idPool, queue[i].taskID+1 );
+//		}
+//	}
 	XarcClose( xs );
 }
 

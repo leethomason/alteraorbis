@@ -2563,7 +2563,7 @@ void AIComponent::WorkQueueToTask(  const ComponentSet& thisComp )
 			}
 		}
 		if ( item ) {
-			if ( BuildScript::IsClear( item->action )) {
+			if (BuildScript::IsClear(item->buildScriptID)) {
 				Vector2F dest = { (float)item->pos.x + 0.5f, (float)item->pos.y + 0.5f };
 				Vector2F end;
 				float cost = 0;
@@ -2573,10 +2573,10 @@ void AIComponent::WorkQueueToTask(  const ComponentSet& thisComp )
 					taskList.Push( Task::RemoveTask( item->pos, item->taskID ));
 				}
 			}
-			else if ( BuildScript::IsBuild( item->action )) {
+			else if (BuildScript::IsBuild(item->buildScriptID)) {
 				taskList.Push( Task::MoveTask( item->pos, item->taskID ));
 				taskList.Push( Task::StandTask( 1000, item->taskID ));
-				taskList.Push( Task::BuildTask( item->pos, item->action, LRint(item->rotation), item->taskID ));
+				taskList.Push(Task::BuildTask(item->pos, item->buildScriptID, LRint(item->rotation), item->taskID));
 			}
 			else {
 				GLASSERT( 0 );
@@ -2934,18 +2934,11 @@ void AIComponent::OnChitMsg( Chit* chit, const ChitMsg& msg )
 		currentAction = NO_ACTION;
 		parentChit->SetTickNeeded();
 
-		if ( aiMode == RAMPAGE_MODE ) {
-			// Never expect move troubles in rampage mode.
+		// Generally not what we expected.
+		// Do a re-think.
+		// Never expect move troubles in rampage mode.
+		if (aiMode != BATTLE_MODE) {
 			aiMode = NORMAL_MODE;
-		}
-
-		{
-			WorkQueue* workQueue = GetWorkQueue();
-			if ( workQueue && workQueue->GetJob( parentChit->ID() )) {
-				workQueue->ReleaseJob( parentChit->ID() );
-				// total re-think.
-				aiMode = NORMAL_MODE;
-			}
 		}
 		taskList.Clear();
 		{
